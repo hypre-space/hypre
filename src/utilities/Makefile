@@ -11,9 +11,11 @@ CDEFS = ${TIMERDEFS}
 C_COMPILE_FLAGS =\
    -I..\
    -I$(srcdir)/..\
+   -I$(srcdir)/../struct_mv\
    -I$(srcdir)\
    ${CINCLUDES}\
    ${CDEFS}
+
 CXX_COMPILE_FLAGS = ${C_COMPILE_FLAGS}
 
 HEADERS =\
@@ -39,15 +41,11 @@ FILES =\
  fortran_matrix.c\
  hypre_ap.c\
  hypre_complex.c\
- hypre_cuda_utils.c\
  hypre_error.c\
- hypre_general.c\
  hypre_hopscotch_hash.c\
- hypre_memory.c\
  hypre_merge_sort.c\
  hypre_mpi_comm_f2c.c\
  hypre_nvtx.c\
- hypre_omp_device.c\
  hypre_prefix_sum.c\
  hypre_printf.c\
  hypre_qsort.c\
@@ -58,7 +56,15 @@ FILES =\
  timer.c\
  timing.c
 
-OBJS = ${FILES:.c=.o}
+CUFILES=\
+ hypre_cuda_utils.c\
+ hypre_general.c\
+ hypre_memory.c\
+ hypre_omp_device.c
+
+COBJS = ${FILES:.c=.o}
+CUOBJS = ${CUFILES:.c=.obj}
+OBJS = ${COBJS} ${CUOBJS}
 
 SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
@@ -69,6 +75,7 @@ SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 all: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_utilities.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_utilities.hpp $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/hypre_hopscotch_hash.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/fortran*.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
@@ -80,7 +87,7 @@ install: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o libHYPRE*
+	rm -f *.o* libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean

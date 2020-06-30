@@ -5,14 +5,15 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#include "_hypre_sstruct_ls.h" 
+#include "_hypre_sstruct_ls.h"
+#include "_hypre_struct_mv.hpp"
 #include "fac.h"
 
 /*--------------------------------------------------------------------------
  * hypre_AMR_RAP:  Forms the coarse operators for all amr levels.
  * Given an amr composite matrix, the coarse grid operator is produced.
- * Nesting of amr levels is not assumed. Communication of chunks of the 
- * coarse grid operator is performed. 
+ * Nesting of amr levels is not assumed. Communication of chunks of the
+ * coarse grid operator is performed.
  *
  * Note: The sstruct_grid of A and fac_A are the same. These are kept the
  * same so that the row ranks are the same. However, the generated
@@ -161,7 +162,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
          cgrid= hypre_SStructPGridSGrid(c_pgrid, var1);
 
          owninfo[part][var1]= hypre_SStructOwnInfo(fgrid, cgrid, cboxman, fboxman,
-                                                   rfactors[part]); 
+                                                   rfactors[part]);
       }
    }
 
@@ -181,7 +182,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
          stencils= hypre_SStructGraphStencil(graph, part, var1);
          stencil_size= hypre_SStructStencilSize(stencils);
          stencil_vars= hypre_SStructStencilVars(stencils);
- 
+
          if (part == (nparts-1)) /* copy all fine data */
          {
             pmatrix    = hypre_SStructMatrixPMatrix(A, part);
@@ -189,9 +190,9 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
             hypre_ForBoxI(i, grid_boxes)
             {
                grid_box= hypre_BoxArrayBox(grid_boxes, i);
-               hypre_BoxGetSize(grid_box, loop_size); 
+               hypre_BoxGetSize(grid_box, loop_size);
                hypre_CopyIndex(hypre_BoxIMin(grid_box), ilower);
-      
+
                for (j = 0; j< stencil_size; j++)
                {
                   var2       = stencil_vars[j];
@@ -212,7 +213,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                                                                             stencil_shape);
 
 #define DEVICE_VAR is_device_ptr(fac_smatrix_vals,smatrix_vals)
-                  hypre_BoxLoop2Begin(ndim, loop_size, 
+                  hypre_BoxLoop2Begin(ndim, loop_size,
                                       smatrix_dbox, ilower, stride, iA,
                                       fac_smatrix_dbox, ilower, stride, iAc);
                   {
@@ -237,16 +238,16 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
          stencils= hypre_SStructGraphStencil(graph, part-1, var1);
          stencil_size= hypre_SStructStencilSize(stencils);
          stencil_vars= hypre_SStructStencilVars(stencils);
-      
+
          hypre_ForBoxArrayI(i, own_composite_cboxes)
          {
             own_composite_cbox= hypre_BoxArrayArrayBoxArray(own_composite_cboxes, i);
             hypre_ForBoxI(j, own_composite_cbox)
             {
                grid_box= hypre_BoxArrayBox(own_composite_cbox, j);
-               hypre_BoxGetSize(grid_box, loop_size); 
+               hypre_BoxGetSize(grid_box, loop_size);
                hypre_CopyIndex(hypre_BoxIMin(grid_box), ilower);
-      
+
                for (k = 0; k< stencil_size; k++)
                {
                   var2       = stencil_vars[k];
@@ -267,7 +268,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                                                                             stencil_shape);
 
 #define DEVICE_VAR is_device_ptr(fac_smatrix_vals,smatrix_vals)
-                  hypre_BoxLoop2Begin(ndim, loop_size, 
+                  hypre_BoxLoop2Begin(ndim, loop_size,
                                       smatrix_dbox, ilower, stride, iA,
                                       fac_smatrix_dbox, ilower, stride, iAc);
                   {
@@ -284,9 +285,9 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
    }     /* for (part= (nparts-1); part> 0; part--) */
 
    /*--------------------------------------------------------------------------
-    * All possible data has been copied into fac_A- i.e., the original amr 
+    * All possible data has been copied into fac_A- i.e., the original amr
     * composite operator. Now we need to coarsen away the fboxes and the
-    * interface connections. 
+    * interface connections.
     *
     * Algo.:
     *   Loop from the finest amr_level to amr_level 1
@@ -302,10 +303,10 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
    for (part= (nparts-1); part>= 1; part--)
    {
       hypre_AMR_CFCoarsen(A, fac_A, rfactors[part], part);
-    
+
       /*-----------------------------------------------------------------------
        *  Create the temp SStruct_PMatrix for coarsening away the level= part
-       *  boxes. 
+       *  boxes.
        *-----------------------------------------------------------------------*/
       f_pgrid= hypre_SStructGridPGrid(fac_grid, part);
       c_pgrid= hypre_SStructGridPGrid(fac_grid, part-1);
@@ -313,7 +314,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
 
       hypre_SStructPGridCreate(hypre_SStructGridComm(f_pgrid),
                                ndim, &temp_pgrid);
-      
+
       /*coarsen the fboxes.*/
       for (i= 0; i< hypre_BoxArraySize(grid_boxes); i++)
       {
@@ -383,7 +384,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                   fac_smatrix= hypre_SStructPMatrixSMatrix(fac_pmatrix, var1, var2);
 
                   /*---------------------------------------------------------------
-                   * note: the cbox number of the temp_grid is the same as the 
+                   * note: the cbox number of the temp_grid is the same as the
                    * fbox number, whereas the cbox numbers of the fac_grid is in
                    * own_cboxnums- i.e., numbers i & cbox, respectively.
                    *---------------------------------------------------------------*/
@@ -393,7 +394,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                      hypre_BoxArrayBox(hypre_StructMatrixDataSpace(fac_smatrix), cbox);
 
                   hypre_CopyIndex(hypre_SStructStencilEntry(stencils, k), stencil_shape);
-                  smatrix_vals= 
+                  smatrix_vals=
                      hypre_StructMatrixExtractPointerByIndex(smatrix,
                                                              i,
                                                              stencil_shape);
@@ -401,7 +402,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                      hypre_StructMatrixExtractPointerByIndex(fac_smatrix,
                                                              cbox,
                                                              stencil_shape);
-      
+
 #define DEVICE_VAR is_device_ptr(fac_smatrix_vals,smatrix_vals)
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       smatrix_dbox, ilower, stride, iA,
@@ -422,8 +423,8 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
       hypre_TFree(owninfo[part], HYPRE_MEMORY_HOST);
 
       /*-----------------------------------------------------------------------
-       * Communication of off-process coarse data. A communication pkg is 
-       * needed. Thus, compute the communication info- sendboxes, recvboxes, 
+       * Communication of off-process coarse data. A communication pkg is
+       * needed. Thus, compute the communication info- sendboxes, recvboxes,
        * etc.
        *-----------------------------------------------------------------------*/
       for (var1= 0; var1< nvars; var1++)
@@ -462,12 +463,12 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
 
             hypre_CommPkgDestroy(amrA_comm_pkg);
          }
-            
+
          hypre_SStructSendInfoDataDestroy(sendinfo);
          hypre_SStructRecvInfoDataDestroy(recvinfo);
 
       }  /* for (var1= 0; var1< nvars; var1++) */
-          
+
       hypre_SStructPGridDestroy(temp_pgrid);
       hypre_SStructPMatrixDestroy(temp_pmatrix);
 

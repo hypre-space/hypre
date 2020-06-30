@@ -59,19 +59,14 @@ FILES =\
  HYPRE_sstruct_split.c\
  HYPRE_sstruct_sys_pfmg.c\
  fac.c\
- fac_amr_rap.c\
- fac_amr_fcoarsen.c\
  fac_amr_zero_data.c\
  fac_cf_coarsen.c\
  fac_cfstencil_box.c\
  fac_CFInterfaceExtents.c\
  fac_interp2.c\
  fac_relax.c\
- fac_restrict2.c\
- fac_setup2.c\
  fac_solve3.c\
  fac_zero_cdata.c\
- fac_zero_stencilcoef.c\
  hypre_bsearch.c\
  krylov.c\
  krylov_sstruct.c\
@@ -87,7 +82,6 @@ FILES =\
  hypre_MaxwellSolve.c\
  hypre_MaxwellSolve2.c\
  nd1_amge_interpolation.c\
- node_relax.c\
  sstruct_amr_intercommunication.c\
  sstruct_owninfo.c\
  sstruct_recvinfo.c\
@@ -102,7 +96,17 @@ FILES =\
  sys_semi_interp.c\
  sys_semi_restrict.c
 
-OBJS = ${FILES:.c=.o}
+CUFILES =\
+ fac_amr_fcoarsen.c\
+ fac_amr_rap.c\
+ fac_restrict2.c\
+ fac_setup2.c\
+ fac_zero_stencilcoef.c\
+ node_relax.c\
+
+COBJS = ${FILES:.c=.o}
+CUOBJS = ${CUFILES:.c=.obj}
+OBJS = ${COBJS} ${CUOBJS}
 
 SONAME = libHYPRE_sstruct_ls-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
@@ -121,7 +125,7 @@ install: libHYPRE_sstruct_ls${HYPRE_LIB_SUFFIX}
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o libHYPRE*
+	rm -f *.o* libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean

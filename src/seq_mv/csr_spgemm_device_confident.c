@@ -377,7 +377,7 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
    // number of active warps
    HYPRE_Int num_act_warps = min(bDim.z * gDim.x, m);
 
-   char hash_type = hypre_handle()->spgemm_hash_type;
+   char hash_type = hypre_HandleSpgemmHashType(hypre_handle());
 
    /* ---------------------------------------------------------------------------
     * build hash table

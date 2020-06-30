@@ -32,7 +32,7 @@ struct double_linked_list
 };
 
 typedef struct double_linked_list hypre_ListElement;
-typedef hypre_ListElement *hypre_LinkList;  
+typedef hypre_ListElement *hypre_LinkList;
 
 #ifdef __cplusplus
 }

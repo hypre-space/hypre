@@ -408,6 +408,7 @@ HYPRE_Int hypre_IJMatrixSetValuesOMPParCSR ( hypre_IJMatrix *matrix , HYPRE_Int 
 HYPRE_Int hypre_IJMatrixAddToValuesOMPParCSR ( hypre_IJMatrix *matrix , HYPRE_Int nrows , HYPRE_Int *ncols , const HYPRE_BigInt *rows , const HYPRE_Int *row_indexes , const HYPRE_BigInt *cols , const HYPRE_Complex *values );
 HYPRE_Int hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix);
 HYPRE_Int hypre_IJMatrixInitializeParCSR_v2(hypre_IJMatrix *matrix, HYPRE_MemoryLocation memory_location);
+HYPRE_Int hypre_IJMatrixSetConstantValuesParCSRDevice( hypre_IJMatrix *matrix, HYPRE_Complex value );
 
 /* IJMatrix_petsc.c */
 HYPRE_Int hypre_IJMatrixSetLocalSizePETSc ( hypre_IJMatrix *matrix , HYPRE_Int local_m , HYPRE_Int local_n );

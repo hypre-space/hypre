@@ -168,7 +168,8 @@ void hypre_union2(HYPRE_Int n1, HYPRE_BigInt *arr1, HYPRE_Int n2, HYPRE_BigInt *
 #endif
 
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
-typedef struct {
+typedef struct
+{
   HYPRE_Int volatile timestamp;
   omp_lock_t         lock;
 } hypre_HopscotchSegment;
@@ -193,7 +194,7 @@ typedef struct
 #endif
    HYPRE_Int *volatile              key;
    hypre_uint *volatile             hopInfo;
-   HYPRE_Int *volatile	            hash;
+   HYPRE_Int *volatile              hash;
 } hypre_UnorderedIntSet;
 
 typedef struct
@@ -232,22 +233,22 @@ typedef struct
  */
 typedef struct
 {
-	HYPRE_Int  volatile              segmentMask;
-	HYPRE_Int  volatile              bucketMask;
+   HYPRE_Int  volatile              segmentMask;
+   HYPRE_Int  volatile              bucketMask;
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
-	hypre_HopscotchSegment*	volatile segments;
+   hypre_HopscotchSegment* volatile segments;
 #endif
-	hypre_HopscotchBucket* volatile	 table;
+   hypre_HopscotchBucket* volatile table;
 } hypre_UnorderedIntMap;
 
 typedef struct
 {
-	HYPRE_Int  volatile              segmentMask;
-	HYPRE_Int  volatile              bucketMask;
+   HYPRE_Int  volatile segmentMask;
+   HYPRE_Int  volatile bucketMask;
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
-	hypre_HopscotchSegment*	volatile segments;
+   hypre_HopscotchSegment* volatile segments;
 #endif
-	hypre_BigHopscotchBucket* volatile	 table;
+   hypre_BigHopscotchBucket* volatile table;
 } hypre_UnorderedBigIntMap;
 
 /**
@@ -263,63 +264,16 @@ void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len, H
 void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPRE_BigInt **out, hypre_UnorderedBigIntMap *inverse_map);
 #endif
 
-
-/* hypre_cuda_utils.c */
-#if defined(HYPRE_USING_CUDA)
-#ifdef __cplusplus
-extern "C++" {
-#endif
-dim3 hypre_GetDefaultCUDABlockDimension();
-
-dim3 hypre_GetDefaultCUDAGridDimension( HYPRE_Int n, const char *granularity, dim3 bDim );
-
-template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt);
-
-template <typename T1, typename T2, typename T3, typename T4> HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals1, T4 *vals2, HYPRE_Int opt);
-
-template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in,  T2 *keys2_in,  T3 *vals_in, T1 *keys1_out, T2 *keys2_out, T3 *vals_out);
-
-template <typename T>
-HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
-
-template <typename T>
-HYPRE_Int hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v);
-
-#ifdef __cplusplus
-}
-#endif
-
-HYPRE_Int hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia, HYPRE_Int *d_offd_ia, HYPRE_Int *d_rownnz);
-
-HYPRE_Int hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job, HYPRE_Int has_offd, HYPRE_Int first_col, HYPRE_Int *d_col_map_offd_A, HYPRE_Int *d_diag_i, HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a, HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j, HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab);
-
-HYPRE_Int hypreDevice_IntegerReduceSum(HYPRE_Int m, HYPRE_Int *d_i);
-
-HYPRE_Int hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
-
-HYPRE_Int hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
-
-HYPRE_Int* hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr);
-
-HYPRE_Int hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_ind);
-
-HYPRE_Int* hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind);
-
-HYPRE_Int hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind, HYPRE_Int *d_row_ptr);
-
-HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y, char *work);
-
-HYPRE_Int hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y);
-
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
+HYPRE_Int hypre_SyncCudaDevice(hypre_Handle *hypre_handle);
 HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex *y);
-
-HYPRE_Int hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size);
-
-void hypre_CudaCompileFlagCheck();
-
+HYPRE_Int hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y);
+HYPRE_Int hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v);
 #endif
 
 /* hypre_nvtx.c */
 void hypre_NvtxPushRangeColor(const char *name, HYPRE_Int cid);
 void hypre_NvtxPushRange(const char *name);
 void hypre_NvtxPopRange();
+

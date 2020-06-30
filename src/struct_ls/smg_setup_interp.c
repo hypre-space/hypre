@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
+#include "_hypre_struct_mv.hpp"
 #include "smg.h"
 
 /*--------------------------------------------------------------------------
@@ -22,9 +23,9 @@ hypre_SMGCreateInterpOp( hypre_StructMatrix *A,
    hypre_Index          *stencil_shape;
    HYPRE_Int             stencil_size;
    HYPRE_Int             stencil_dim;
-                       
+
    HYPRE_Int             num_ghost[] = {1, 1, 1, 1, 1, 1};
-                       
+
    HYPRE_Int             i;
 
    /* set up stencil */
@@ -45,7 +46,7 @@ hypre_SMGCreateInterpOp( hypre_StructMatrix *A,
    hypre_StructMatrixSetNumGhost(PT, num_ghost);
 
    hypre_StructStencilDestroy(stencil);
- 
+
    return PT;
 }
 
@@ -97,13 +98,13 @@ hypre_SMGSetupInterpOp( void               *relax_data,
    HYPRE_Int             compute_pkg_stencil_dim = 1;
    hypre_ComputePkg     *compute_pkg;
    hypre_ComputeInfo    *compute_info;
- 
+
    hypre_CommHandle     *comm_handle;
-                     
+
    hypre_BoxArrayArray  *compute_box_aa;
    hypre_BoxArray       *compute_box_a;
    hypre_Box            *compute_box;
-                     
+
    hypre_Box            *PT_data_box;
    hypre_Box            *x_data_box;
    HYPRE_Real           *PTp;
@@ -113,10 +114,10 @@ hypre_SMGSetupInterpOp( void               *relax_data,
    hypre_Index           start;
    hypre_Index           startc;
    hypre_Index           stridec;
-                      
+
    HYPRE_Int             si, sj, d;
    HYPRE_Int             compute_i, i, j;
-                        
+
    /*--------------------------------------------------------
     * Initialize some things
     *--------------------------------------------------------*/
@@ -124,7 +125,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
    hypre_SetIndex3(stridec, 1, 1, 1);
 
    fgrid = hypre_StructMatrixGrid(A);
-   
+
    A_stencil = hypre_StructMatrixStencil(A);
    A_stencil_shape = hypre_StructStencilShape(A_stencil);
    A_stencil_size  = hypre_StructStencilSize(A_stencil);
@@ -186,7 +187,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
       hypre_StructMatrixDestroy(A_mask);
 
       /*-----------------------------------------------------
-       * Set up compute package for communication of 
+       * Set up compute package for communication of
        * coefficients from fine to coarse across processor
        * boundaries.
        *-----------------------------------------------------*/
@@ -232,7 +233,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
                hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
             PT_data_box =
                hypre_BoxArrayBox(hypre_StructMatrixDataSpace(PT), i);
- 
+
             xp  = hypre_StructVectorBoxData(x, i);
             PTp = hypre_StructMatrixBoxData(PT, i, si);
 

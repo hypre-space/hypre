@@ -8,6 +8,8 @@
 #ifndef CSR_SPGEMM_DEVICE_H
 #define CSR_SPGEMM_DEVICE_H
 
+#include "_hypre_utilities.hpp"
+
 #if defined(HYPRE_USING_CUDA)
 
 #define COHEN_USE_SHMEM 0

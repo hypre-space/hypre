@@ -13,7 +13,8 @@
  *
  ******************************************************************************/
 
-#include "_hypre_sstruct_ls.h" 
+#include "_hypre_sstruct_ls.h"
+#include "_hypre_struct_mv.hpp"
 #include "fac.h"
 
 #define MapStencilRank(stencil, rank)           \
@@ -59,7 +60,7 @@
 
 /*--------------------------------------------------------------------------
  * hypre_AMR_FCoarsen: Coarsen the fbox and f/c connections. Forms the
- * coarse operator by averaging neighboring connections in the refinement 
+ * coarse operator by averaging neighboring connections in the refinement
  * patch.
  *--------------------------------------------------------------------------*/
 
@@ -68,7 +69,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                     hypre_SStructMatrix  *   fac_A,
                     hypre_SStructPMatrix *   A_crse,
                     hypre_Index              refine_factors,
-                    HYPRE_Int                level ) 
+                    HYPRE_Int                level )
 
 {
    hypre_Box               fine_box;
@@ -96,7 +97,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
    HYPRE_Int               part_crse= level-1;
    HYPRE_Int               part_fine= level;
- 
+
    hypre_StructMatrix     *crse_smatrix;
    HYPRE_Real             *crse_ptr;
    HYPRE_Real            **crse_ptrs;
@@ -151,7 +152,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    HYPRE_Real             *vals, *vals2;
 
    HYPRE_Int               i, j, k, l, m, n, ll, kk, jj;
-   HYPRE_Int               nvars, var1, var2, var2_start; 
+   HYPRE_Int               nvars, var1, var2, var2_start;
    HYPRE_Int               iA_shift_z, iA_shift_zy, iA_shift_zyx;
 
    hypre_Index             lindex;
@@ -204,9 +205,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    hypre_BoxInit(&intersect_box, ndim);
    hypre_BoxInit(&loop_box, ndim);
    hypre_BoxInit(&coarse_cell_box, ndim);
- 
+
    /*--------------------------------------------------------------------------
-    * Task: Coarsen the fbox and f/c connections to form the coarse grid 
+    * Task: Coarsen the fbox and f/c connections to form the coarse grid
     * operator inside the fgrid.
     *--------------------------------------------------------------------------*/
 
@@ -243,10 +244,10 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
    /*--------------------------------------------------------------------------
     *  Determine the coarsened fine grid- fgrid_crse_extents.
-    *  These are between fpart= level and cpart= (level-1). The 
+    *  These are between fpart= level and cpart= (level-1). The
     *  fgrid_crse_extents will be indexed by cboxes- the boxarray of coarsened
     *  fboxes FULLY in a given cbox.
-    *  
+    *
     *  Also, determine the interior and boundary boxes of each fbox. Having
     *  these will allow us to determine the f/c interface nodes without
     *  extensive checking. These are also indexed by the cboxes.
@@ -273,18 +274,18 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    for (var1= 0; var1< nvars; var1++)
    {
       cgrid= hypre_SStructPGridSGrid(hypre_SStructPMatrixPGrid(A_crse), var1);
-      cgrid_boxes= hypre_StructGridBoxes(cgrid); 
-      fgrid_crse_extents[var1]= hypre_TAlloc(hypre_BoxArray *,  
+      cgrid_boxes= hypre_StructGridBoxes(cgrid);
+      fgrid_crse_extents[var1]= hypre_TAlloc(hypre_BoxArray *,
                                              hypre_BoxArraySize(cgrid_boxes), HYPRE_MEMORY_HOST);
-      fbox_interior[var1]= hypre_TAlloc(hypre_BoxArray *, 
+      fbox_interior[var1]= hypre_TAlloc(hypre_BoxArray *,
                                         hypre_BoxArraySize(cgrid_boxes), HYPRE_MEMORY_HOST);
-      fbox_bdy[var1]     = hypre_TAlloc(hypre_BoxArrayArray *, 
+      fbox_bdy[var1]     = hypre_TAlloc(hypre_BoxArrayArray *,
                                         hypre_BoxArraySize(cgrid_boxes), HYPRE_MEMORY_HOST);
       interior_fboxi[var1]= hypre_TAlloc(HYPRE_Int *,  hypre_BoxArraySize(cgrid_boxes), HYPRE_MEMORY_HOST);
       bdy_fboxi[var1]     = hypre_TAlloc(HYPRE_Int *,  hypre_BoxArraySize(cgrid_boxes), HYPRE_MEMORY_HOST);
 
       fgrid= hypre_SStructPGridSGrid(hypre_SStructPMatrixPGrid(A_pmatrix), var1);
-      fgrid_boxes= hypre_StructGridBoxes(fgrid); 
+      fgrid_boxes= hypre_StructGridBoxes(fgrid);
 
       cboxi_fboxes[var1]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(fgrid_boxes), HYPRE_MEMORY_HOST);
       cboxi_fcnt[var1]  = hypre_CTAlloc(HYPRE_Int  ,  hypre_BoxArraySize(fgrid_boxes), HYPRE_MEMORY_HOST);
@@ -320,7 +321,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                }
             }
 
-            hypre_StructMapFineToCoarse(fstart, index_temp, 
+            hypre_StructMapFineToCoarse(fstart, index_temp,
                                         refine_factors, hypre_BoxIMin(&fine_box));
             hypre_StructMapFineToCoarse(hypre_BoxIMax(fgrid_box), index_temp,
                                         refine_factors, hypre_BoxIMax(&fine_box));
@@ -348,7 +349,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
              * record which sides will be adjusted- fstart adjustments will
              * decrease the box size, whereas fend adjustments will increase the
              * box size. Since we fstart decreases the box size, we cannot
-             * have an f/c interface at an adjusted fstart end. fend may 
+             * have an f/c interface at an adjusted fstart end. fend may
              * correspond to an f/c interface whether it has been adjusted or not.
              *--------------------------------------------------------------------*/
             hypre_SetIndex3(index1, 1, 1, 1);
@@ -360,7 +361,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   fstart[i]+= refine_factors[i] - j;
                   index1[i] = 0;
                }
-               
+
                j= fend[i]%refine_factors[i];
                if (refine_factors[i]-1 - j)
                {
@@ -378,13 +379,13 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                           hypre_BoxArrayBox(fgrid_crse_extents[var1][ci], fi));
 
             /*--------------------------------------------------------------------
-             * adjust the fine intersect_box so that we get the interior and 
+             * adjust the fine intersect_box so that we get the interior and
              * boundaries separately.
              *--------------------------------------------------------------------*/
             hypre_StructMapCoarseToFine(hypre_BoxIMin(&intersect_box), index_temp,
                                         refine_factors, hypre_BoxIMin(&fine_box));
 
-            /* the following index2 shift for ndim<3 is no problem since 
+            /* the following index2 shift for ndim<3 is no problem since
                refine_factors[j]= 1 for j>=ndim. */
             hypre_SetIndex3(index2, refine_factors[0]-1, refine_factors[1]-1,
                             refine_factors[2]-1);
@@ -426,7 +427,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
             }
          }
 
-         hypre_StructMapFineToCoarse(fstart, index_temp, 
+         hypre_StructMapFineToCoarse(fstart, index_temp,
                                      refine_factors, hypre_BoxIMin(&fine_box));
          hypre_StructMapFineToCoarse(hypre_BoxIMax(fgrid_box), index_temp,
                                      refine_factors, hypre_BoxIMax(&fine_box));
@@ -453,7 +454,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    }     /* for (var1= 0; var1< nvars; var1++) */
 
    /*--------------------------------------------------------------------------
-    *  STEP 1: 
+    *  STEP 1:
     *        COMPUTE THE COARSE LEVEL OPERATOR INSIDE OF A REFINED BOX.
     *
     *  We assume that the coarse and fine grid variables are of the same type.
@@ -461,16 +462,16 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
     *  Coarse stencils in the refinement patches are obtained by averaging the
     *  fine grid coefficients. Since we are assuming cell-centred discretization,
     *  we apply a weighted averaging of ONLY the fine grid coefficients along
-    *  interfaces of adjacent agglomerated coarse cells. 
+    *  interfaces of adjacent agglomerated coarse cells.
     *
     *  Since the stencil pattern is assumed arbitrary, we must determine the
     *  stencil pattern of each var1-var2 struct_matrix to get the correct
-    *  contributing stencil coefficients, averaging weights, etc. 
+    *  contributing stencil coefficients, averaging weights, etc.
     *--------------------------------------------------------------------------*/
-   
+
    /*--------------------------------------------------------------------------
     *  Agglomerated coarse cell info. These are needed in defining the looping
-    *  extents for averaging- i.e., we loop over extents determined by the 
+    *  extents for averaging- i.e., we loop over extents determined by the
     *  size of the agglomerated coarse cell.
     *  Note that the agglomerated coarse cell is constructed correctly for
     *  any dimensions (1, 2, or 3).
@@ -478,7 +479,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    hypre_ClearIndex(index_temp);
    hypre_CopyIndex(index_temp, hypre_BoxIMin(&coarse_cell_box));
    hypre_SetIndex3(index_temp, refine_factors[0]-1, refine_factors[1]-1,
-                   refine_factors[2]-1 );           
+                   refine_factors[2]-1 );
    hypre_CopyIndex(index_temp, hypre_BoxIMax(&coarse_cell_box));
 
    volume_coarse_cell_box= hypre_BoxVolume(&coarse_cell_box);
@@ -525,7 +526,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
              * when the stencil shape of the current non-null stencil has a
              * different stencil shape from that of the latest non-null stencil.
              *
-             * But when  stencil_marker== false, we must check to see if we 
+             * But when  stencil_marker== false, we must check to see if we
              * need new stencil contributions cnts, weights, etc. Thus, find
              * the latest non-null stencil for comparison.
              *-----------------------------------------------------------------*/
@@ -580,7 +581,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                                      stencil_shape_i[2]-stencil_last_shape_i[2]);
 
                      AbsStencilShape(index_temp, abs_stencil_shape);
-                     if (abs_stencil_shape)    
+                     if (abs_stencil_shape)
                      {
                         found= trueV;
                         stencil_marker= trueV;
@@ -628,7 +629,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
              *
              *  for stencil of max. size 27.
              *
-             *  stencil_contrib_cnt[i]=  no. of fine stencils averaged to 
+             *  stencil_contrib_cnt[i]=  no. of fine stencils averaged to
              *                           form stencil entry i.
              *  stencil_contrib_i[i]  =  rank of fine stencils contributing
              *                           to form stencil entry i.
@@ -654,7 +655,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                for (i= 0; i< max_stencil_size; i++)
                {
-                  rank_stencils[i]= -1;  
+                  rank_stencils[i]= -1;
                   if (i < stencil_size)
                   {
                      stencil_ranks[i]= -1;
@@ -666,7 +667,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                 *  fine grid looping extents for averaging of the fine coefficients;
                 *  and the number of fine grid values to be averaged.
                 *  Note that the shift_boxes are constructed correctly for any
-                *  dimensions. For j>=ndim, 
+                *  dimensions. For j>=ndim,
                 *  hypre_BoxIMin(shift_box[i])[j]=hypre_BoxIMax(shift_box[i])[j]= 0.
                 *-----------------------------------------------------------------*/
                for (i= 0; i< stencil_size; i++)
@@ -682,18 +683,18 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                                   (refine_factors[0]-1)*stencil_shape_i[0],
                                   (refine_factors[1]-1)*stencil_shape_i[1],
                                   (refine_factors[2]-1)*stencil_shape_i[2]);
-                  
+
                   hypre_AddIndexes(hypre_BoxIMin(shift_box[i]),
                                    hypre_BoxIMax(&coarse_cell_box), 3,
                                    hypre_BoxIMax(shift_box[i]));
 
                   hypre_IntersectBoxes(&coarse_cell_box, shift_box[i], shift_box[i]);
-                 
+
                   volume_shift_box[i]= hypre_BoxVolume(shift_box[i]);
                }
 
                /*-----------------------------------------------------------------
-                *  Derive the contribution info. 
+                *  Derive the contribution info.
                 *  The above rank table is used to determine the direction indices.
                 *  Weight construction procedure valid for any dimensions.
                 *-----------------------------------------------------------------*/
@@ -726,9 +727,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                /* fill up the east contribution stencil indices */
                if (stencil_i != -1)
                {
-                  stencil_contrib_i[stencil_i]= 
+                  stencil_contrib_i[stencil_i]=
                      hypre_TAlloc(HYPRE_Int,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
-                  weight_contrib_i[stencil_i] = 
+                  weight_contrib_i[stencil_i] =
                      hypre_TAlloc(HYPRE_Real,  stencil_contrib_cnt[stencil_i], HYPRE_MEMORY_HOST);
                   sum= 0.0;
                   k= 0;
@@ -749,9 +750,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                                         abs_stencil_shape );
                         weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                         sum+= weights[abs_stencil_shape];
-                     }    
+                     }
                   }
-    
+
                   if (ndim > 2)
                   {
                      for (j= 1; j<= 2; j++)
@@ -777,7 +778,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      weight_contrib_i[stencil_i][i]/= sum;
                   }
                }
-                 
+
 
                /* west */
                stencil_i= rank_stencils[2];
@@ -852,7 +853,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         }
                      }
                   }
-           
+
                   for (i= 0; i< k ; i++)
                   {
                      weight_contrib_i[stencil_i][i]/= sum;
@@ -1054,7 +1055,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      }
                   }
                }
- 
+
                /*-----------------------------------------------------------------
                 *  Additional directions for 3-dim case
                 *-----------------------------------------------------------------*/
@@ -1067,13 +1068,13 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_contrib_cnt[stencil_i]++;
                      for (i=1; i<= 8; i++)
                      {
-                        if (rank_stencils[9+i] != -1)  
+                        if (rank_stencils[9+i] != -1)
                            stencil_contrib_cnt[stencil_i]++;
                      }
                      max_contribut_size= hypre_max( max_contribut_size,
                                                     stencil_contrib_cnt[stencil_i] );
                   }
-            
+
                   if (stencil_i != -1)
                   {
                      stencil_contrib_i[stencil_i]=
@@ -1107,7 +1108,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         weight_contrib_i[stencil_i][i]/= sum;
                      }
                   }
-                    
+
                   /* sides: bottom */
                   stencil_i= rank_stencils[18];
                   if (stencil_i != -1)
@@ -1115,7 +1116,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_contrib_cnt[stencil_i]++;
                      for (i=1; i<= 8; i++)
                      {
-                        if (rank_stencils[18+i] != -1)  
+                        if (rank_stencils[18+i] != -1)
                            stencil_contrib_cnt[stencil_i]++;
                      }
                      max_contribut_size= hypre_max( max_contribut_size,
@@ -1155,7 +1156,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         weight_contrib_i[stencil_i][i]/= sum;
                      }
                   }
-                  
+
                   /* edges: cne */
                   stencil_i= rank_stencils[4];
                   if (stencil_i != -1)
@@ -1187,7 +1188,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                      for (j=1; j<= 2; j++)
                      {
-                        if (rank_stencils[j*9+4] != -1)  
+                        if (rank_stencils[j*9+4] != -1)
                         {
                            stencil_contrib_i[stencil_i][k]= rank_stencils[j*9+4];
 
@@ -1235,7 +1236,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                      for (j=1; j<= 2; j++)
                      {
-                        if (rank_stencils[j*9+7] != -1)  
+                        if (rank_stencils[j*9+7] != -1)
                         {
                            stencil_contrib_i[stencil_i][k]= rank_stencils[j*9+7];
 
@@ -1283,7 +1284,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                      for (j=1; j<= 2; j++)
                      {
-                        if (rank_stencils[j*9+5] != -1)  
+                        if (rank_stencils[j*9+5] != -1)
                         {
                            stencil_contrib_i[stencil_i][k]= rank_stencils[j*9+5];
 
@@ -1331,7 +1332,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                      for (j=1; j<= 2; j++)
                      {
-                        if (rank_stencils[j*9+8] != -1) 
+                        if (rank_stencils[j*9+8] != -1)
                         {
                            stencil_contrib_i[stencil_i][k]= rank_stencils[j*9+8];
 
@@ -1355,7 +1356,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_contrib_cnt[stencil_i]++;
                      for (i=3; i<= 6; i+=3)
                      {
-                        if (rank_stencils[10+i] != -1)  
+                        if (rank_stencils[10+i] != -1)
                            stencil_contrib_cnt[stencil_i]++;
                      }
                      max_contribut_size= hypre_max( max_contribut_size,
@@ -1379,7 +1380,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                      for (i=3; i<= 6; i+=3)
                      {
-                        if (rank_stencils[10+i] != -1)  
+                        if (rank_stencils[10+i] != -1)
                         {
                            stencil_contrib_i[stencil_i][k]= rank_stencils[10+i];
 
@@ -1403,7 +1404,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_contrib_cnt[stencil_i]++;
                      for (i=3; i<= 6; i+=3)
                      {
-                        if (rank_stencils[11+i] != -1)  
+                        if (rank_stencils[11+i] != -1)
                            stencil_contrib_cnt[stencil_i]++;
                      }
                      max_contribut_size= hypre_max( max_contribut_size,
@@ -1427,7 +1428,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                      for (i=3; i<= 6; i+=3)
                      {
-                        if (rank_stencils[11+i] != -1)  
+                        if (rank_stencils[11+i] != -1)
                         {
                            stencil_contrib_i[stencil_i][k]= rank_stencils[11+i];
 
@@ -1451,7 +1452,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_contrib_cnt[stencil_i]++;
                      for (i=13; i<= 14; i++)
                      {
-                        if (rank_stencils[i] != -1)  
+                        if (rank_stencils[i] != -1)
                            stencil_contrib_cnt[stencil_i]++;
                      }
                      max_contribut_size= hypre_max( max_contribut_size,
@@ -1475,7 +1476,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                      for (i=13; i<= 14; i++)
                      {
-                        if (rank_stencils[i] != -1)  
+                        if (rank_stencils[i] != -1)
                         {
                            stencil_contrib_i[stencil_i][k]= rank_stencils[i];
 
@@ -1485,7 +1486,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                            sum+= weights[abs_stencil_shape];
                         }
                      }
- 
+
                      for (i= 0; i< k ; i++)
                      {
                         weight_contrib_i[stencil_i][i]/= sum;
@@ -1499,7 +1500,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_contrib_cnt[stencil_i]++;
                      for (i=16; i<= 17; i++)
                      {
-                        if (rank_stencils[i] != -1)  
+                        if (rank_stencils[i] != -1)
                            stencil_contrib_cnt[stencil_i]++;
                      }
                      max_contribut_size= hypre_max( max_contribut_size,
@@ -1523,7 +1524,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                      for (i=16; i<= 17; i++)
                      {
-                        if (rank_stencils[i] != -1)  
+                        if (rank_stencils[i] != -1)
                         {
                            stencil_contrib_i[stencil_i][k]= rank_stencils[i];
 
@@ -1547,7 +1548,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_contrib_cnt[stencil_i]++;
                      for (i=3; i<= 6; i+=3)
                      {
-                        if (rank_stencils[19+i] != -1)  
+                        if (rank_stencils[19+i] != -1)
                            stencil_contrib_cnt[stencil_i]++;
                      }
                      max_contribut_size= hypre_max( max_contribut_size,
@@ -1571,7 +1572,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                      for (i=3; i<= 6; i+=3)
                      {
-                        if (rank_stencils[19+i] != -1)  
+                        if (rank_stencils[19+i] != -1)
                         {
                            stencil_contrib_i[stencil_i][k]= rank_stencils[19+i];
 
@@ -1595,7 +1596,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_contrib_cnt[stencil_i]++;
                      for (i=3; i<= 6; i+=3)
                      {
-                        if (rank_stencils[20+i] != -1)  
+                        if (rank_stencils[20+i] != -1)
                            stencil_contrib_cnt[stencil_i]++;
                      }
                      max_contribut_size= hypre_max( max_contribut_size,
@@ -1619,7 +1620,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                      for (i=3; i<= 6; i+=3)
                      {
-                        if (rank_stencils[20+i] != -1)  
+                        if (rank_stencils[20+i] != -1)
                         {
                            stencil_contrib_i[stencil_i][k]= rank_stencils[20+i];
 
@@ -1643,7 +1644,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_contrib_cnt[stencil_i]++;
                      for (i=22; i<= 23; i++)
                      {
-                        if (rank_stencils[i] != -1)  
+                        if (rank_stencils[i] != -1)
                            stencil_contrib_cnt[stencil_i]++;
                      }
                      max_contribut_size= hypre_max( max_contribut_size,
@@ -1667,7 +1668,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                      for (i=22; i<= 23; i++)
                      {
-                        if (rank_stencils[i] != -1)  
+                        if (rank_stencils[i] != -1)
                         {
                            stencil_contrib_i[stencil_i][k]= rank_stencils[i];
 
@@ -1691,7 +1692,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_contrib_cnt[stencil_i]++;
                      for (i=25; i<= 26; i++)
                      {
-                        if (rank_stencils[i] != -1)  
+                        if (rank_stencils[i] != -1)
                            stencil_contrib_cnt[stencil_i]++;
                      }
                      max_contribut_size= hypre_max( max_contribut_size,
@@ -1715,7 +1716,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                      for (i=25; i<= 26; i++)
                      {
-                        if (rank_stencils[i] != -1)  
+                        if (rank_stencils[i] != -1)
                         {
                            stencil_contrib_i[stencil_i][k]= rank_stencils[i];
 
@@ -1760,10 +1761,10 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         }
                      }
                   }
- 
+
                }       /* if ndim > 2 */
                /*-----------------------------------------------------------------
-                *  Allocate for the temporary vector used in computing the 
+                *  Allocate for the temporary vector used in computing the
                 *  averages.
                 *-----------------------------------------------------------------*/
                vals= hypre_CTAlloc(HYPRE_Real,  max_contribut_size, HYPRE_MEMORY_HOST);
@@ -1797,7 +1798,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                                             ci);
                /*------------------------------------------------------------------
                 * grab the correct coarse grid pointers. These are the parent base
-                * grids. 
+                * grids.
                 *------------------------------------------------------------------*/
                for (i= 0; i< stencil_size; i++)
                {
@@ -1816,18 +1817,18 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                    * grab the fine grid ptrs & create the offsets for the fine
                    * grid ptrs.
                    *--------------------------------------------------------------*/
-                  A_dbox= hypre_BoxArrayBox(hypre_StructMatrixDataSpace(smatrix_var), 
+                  A_dbox= hypre_BoxArrayBox(hypre_StructMatrixDataSpace(smatrix_var),
                                             interior_fboxi_ci[fi]);
                   for (i= 0; i< stencil_size; i++)
                   {
                      hypre_CopyIndex(hypre_StructStencilElement(stencils, i),
                                      stencil_shape_i);
-                     a_ptrs[i]= 
-                        hypre_StructMatrixExtractPointerByIndex(smatrix_var, 
-                                                                interior_fboxi_ci[fi], 
+                     a_ptrs[i]=
+                        hypre_StructMatrixExtractPointerByIndex(smatrix_var,
+                                                                interior_fboxi_ci[fi],
                                                                 stencil_shape_i);
                   }
-                 
+
                   /*---------------------------------------------------------------
                    *  Compute the offsets for pointing to the correct data.
                    *  Note that for 1-d, OffsetA[j][i]= 0. Therefore, this ptr
@@ -1855,15 +1856,15 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                   /* coarsen the interior patch box*/
                   hypre_ClearIndex(index_temp);
-                  hypre_StructMapFineToCoarse(fstart, index_temp, stridef, 
+                  hypre_StructMapFineToCoarse(fstart, index_temp, stridef,
                                               hypre_BoxIMin(&fine_box));
-                  hypre_StructMapFineToCoarse(fend, index_temp, stridef, 
+                  hypre_StructMapFineToCoarse(fend, index_temp, stridef,
                                               hypre_BoxIMax(&fine_box));
 
                   hypre_CopyIndex(hypre_BoxIMin(&fine_box), cstart);
 
                   /*----------------------------------------------------------------
-                   * Loop over interior grid box. 
+                   * Loop over interior grid box.
                    *----------------------------------------------------------------*/
 
                   hypre_BoxGetSize(&fine_box, loop_size);
@@ -1883,8 +1884,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         if (rank)
                         {
                            /*--------------------------------------------------------
-                            *  Loop over refinement agglomeration extents making up a 
-                            *  a coarse cell. 
+                            *  Loop over refinement agglomeration extents making up a
+                            *  a coarse cell.
                             *--------------------------------------------------------*/
                            hypre_CopyIndex(hypre_BoxIMin(shift_box[i]), index1);
                            hypre_CopyIndex(hypre_BoxIMax(shift_box[i]), index2);
@@ -1895,7 +1896,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                            }
 
                            /*--------------------------------------------------------
-                            * For 1-d, index1[l]= index2[l]= 0, l>=1. So 
+                            * For 1-d, index1[l]= index2[l]= 0, l>=1. So
                             *    iA_shift_zyx= j,
                             * which is correct. Similarly, 2-d is correct.
                             *--------------------------------------------------------*/
@@ -1962,8 +1963,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                      /*---------------------------------------------------------------
                       * coarse centre coefficient- when away from the fine-coarse
-                      * interface, the centre coefficient is the sum of the 
-                      * off-diagonal components. 
+                      * interface, the centre coefficient is the sum of the
+                      * off-diagonal components.
                       *---------------------------------------------------------------*/
                      sum /= scaling;
                      for (m= 0; m< stencil_size; m++)
@@ -1993,18 +1994,18 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                       * grab the fine grid ptrs & create the offsets for the fine
                       * grid ptrs.
                       *-----------------------------------------------------------*/
-                     A_dbox= hypre_BoxArrayBox(hypre_StructMatrixDataSpace(smatrix_var), 
+                     A_dbox= hypre_BoxArrayBox(hypre_StructMatrixDataSpace(smatrix_var),
                                                bdy_fboxi_ci[arrayi]);
                      for (i= 0; i< stencil_size; i++)
                      {
                         hypre_CopyIndex(hypre_StructStencilElement(stencils, i),
                                         stencil_shape_i);
-                        a_ptrs[i]= 
+                        a_ptrs[i]=
                            hypre_StructMatrixExtractPointerByIndex(smatrix_var,
                                                                    bdy_fboxi_ci[arrayi],
                                                                    stencil_shape_i);
                      }
-                
+
                      /*--------------------------------------------------------------
                       *  Compute the offsets for pointing to the correct data.
                       *--------------------------------------------------------------*/
@@ -2059,7 +2060,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                            if (rank)
                            {
                               /*-----------------------------------------------------
-                               * Loop over refinement agglomeration extents making up 
+                               * Loop over refinement agglomeration extents making up
                                * a coarse cell.
                                *-----------------------------------------------------*/
                               hypre_CopyIndex(hypre_BoxIMin(shift_box[i]), index1);
@@ -2115,7 +2116,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         hypre_CopyIndex(hypre_BoxIMax(&coarse_cell_box), index2);
 
                         temp3= hypre_CTAlloc(HYPRE_Real,  volume_coarse_cell_box, HYPRE_MEMORY_HOST);
-                    
+
                         /*---------------------------------------------------------------
                          *  iA_shift_zyx is computed correctly for 1 & 2-d. Also,
                          *  ll= 0 for 2-d, and ll= kk= 0 for 1-d. Correct ptrs.
@@ -2141,7 +2142,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         }
 
                         /*------------------------------------------------------------
-                         * extract all unstructured connections. Note that we extract 
+                         * extract all unstructured connections. Note that we extract
                          * from sstruct_matrix A, which already has been assembled.
                          *------------------------------------------------------------*/
                         if (nUventries > 0)
@@ -2334,7 +2335,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
       }       /* end var2 */
    }          /* end var1 */
 
-   if (stencil_contrib_cnt) 
+   if (stencil_contrib_cnt)
       hypre_TFree(stencil_contrib_cnt, HYPRE_MEMORY_HOST);
    if (stencil_ranks)
       hypre_TFree(stencil_ranks, HYPRE_MEMORY_HOST);
@@ -2441,10 +2442,10 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
     *  EXCEPTION: A NODE CAN CONTAIN ONLY UNSTRUCTURED CONNECTIONS
     *  BETWEEN ONLY TWO AMR LEVELS- I.E., WE CANNOT HAVE A NODE THAT
     *  IS ON THE INTERFACE OF MORE THAN TWO AMR LEVELS. CHANGES TO
-    *  HANDLE THIS LATTER CASE WILL INVOLVE THE SEARCH FOR f/c 
+    *  HANDLE THIS LATTER CASE WILL INVOLVE THE SEARCH FOR f/c
     *  CONNECTIONS.
     *-----------------------------------------------------------------*/
-   if (nUventries > 0) 
+   if (nUventries > 0)
    {
       nvars    =  hypre_SStructPMatrixNVars(A_pmatrix);
 
@@ -2480,9 +2481,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
          box_starts= hypre_CTAlloc(HYPRE_Int,  hypre_BoxArraySize(fgrid_boxes), HYPRE_MEMORY_HOST);
          box_ends  = hypre_CTAlloc(HYPRE_Int,  hypre_BoxArraySize(fgrid_boxes), HYPRE_MEMORY_HOST);
-         hypre_SStructGraphFindSGridEndpts(graph, part_fine, var1, myid, 
+         hypre_SStructGraphFindSGridEndpts(graph, part_fine, var1, myid,
                                            0, box_starts);
-         hypre_SStructGraphFindSGridEndpts(graph, part_fine, var1, myid, 
+         hypre_SStructGraphFindSGridEndpts(graph, part_fine, var1, myid,
                                            1, box_ends);
 
          /*-----------------------------------------------------------------
@@ -2520,16 +2521,16 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
          for (fi= 0; fi< box_array_size; fi++)
          {
             i= hypre_LowerBinarySearch(iUventries, box_starts[fi], nUventries);
-            if (i >= 0) 
+            if (i >= 0)
             {
                j= hypre_UpperBinarySearch(iUventries, box_ends[fi], nUventries);
                box_graph_indices[fi]= hypre_TAlloc(HYPRE_Int,  j-i+1, HYPRE_MEMORY_HOST);
 
                for (k= 0; k< (j-i+1); k++)
                {
-                  Uventry= hypre_SStructGraphUVEntry(graph, 
+                  Uventry= hypre_SStructGraphUVEntry(graph,
                                                      iUventries[i+k]);
-                    
+
                   for (m= 0; m< hypre_SStructUVEntryNUEntries(Uventry); m++)
                   {
                      if (hypre_SStructUVEntryToPart(Uventry, m) == part_crse)
@@ -2587,7 +2588,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
             Uv_cindex       = hypre_TAlloc(hypre_Index,  box_graph_cnts[fi], HYPRE_MEMORY_HOST);
 
             /*-------------------------------------------------------------
-             * determine the parent box of this fgrid_box. 
+             * determine the parent box of this fgrid_box.
              *-------------------------------------------------------------*/
             hypre_ClearIndex(index_temp);
             for (i= 0; i < box_graph_cnts[fi]; i++)
@@ -2598,7 +2599,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                 * Coarsen the fine grid interface nodes and then get their
                 * ranks. The correct coarse grid is needed to determine the
                 * correct data_box.
-                * Save the rank of the coarsened index & the parent box id. 
+                * Save the rank of the coarsened index & the parent box id.
                 *-------------------------------------------------------------*/
                hypre_CopyIndex(hypre_SStructUVEntryIndex(Uventry), index);
                hypre_StructMapFineToCoarse(index, index_temp, stridef, Uv_cindex[i]);
@@ -3014,7 +3015,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                    *                          2   corners in 2-d; or the centre plane
                    *                              in 3-d, or e,w,n,s of the bottom
                    *                              or top plane in 3-d
-                   *                          1   e,w in 1-d; or e,w,n,s in 2-d; 
+                   *                          1   e,w in 1-d; or e,w,n,s in 2-d;
                    *                              or the centre plane in 3-d,
                    *                              or c of the bottom or top plane
                    *                              in 3-d
@@ -3123,7 +3124,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                               case 24:   /* bottom plane s */
 
-                                 temp1[0]= 25; 
+                                 temp1[0]= 25;
                                  temp1[1]= 26;
                                  break;
                            }
@@ -3462,9 +3463,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
             hypre_ForBoxI(fi, fbox_bdy_ci_fi)
             {
                fgrid_box= hypre_BoxArrayBox(fbox_bdy_ci_fi, fi);
-               hypre_StructMapFineToCoarse(hypre_BoxIMin(fgrid_box), index_temp, 
+               hypre_StructMapFineToCoarse(hypre_BoxIMin(fgrid_box), index_temp,
                                            stridef, hypre_BoxIMin(&fine_box));
-               hypre_StructMapFineToCoarse(hypre_BoxIMax(fgrid_box), index_temp, 
+               hypre_StructMapFineToCoarse(hypre_BoxIMax(fgrid_box), index_temp,
                                            stridef, hypre_BoxIMax(&fine_box));
 
                hypre_CopyIndex(hypre_BoxIMin(&fine_box), cstart);
@@ -3494,7 +3495,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
       hypre_TFree(rank_stencils, HYPRE_MEMORY_HOST);
 
    }  /* for (var1= 0; var1< nvars; var1++) */
- 
+
    for (var1= 0; var1< nvars; var1++)
    {
       cgrid= hypre_SStructPGridSGrid(hypre_SStructPMatrixPGrid(A_crse), var1);

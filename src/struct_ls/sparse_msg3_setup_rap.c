@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
+#include "_hypre_struct_mv.hpp"
 
 /*--------------------------------------------------------------------------
  * Macro to "change coordinates".  This routine is written as though
@@ -20,12 +21,12 @@
    cdir = (cdir + 1) % 3;                                       \
    hypre_IndexD(out_index, cdir) = hypre_IndexD(in_index, 1);   \
    cdir = (cdir + 1) % 3;
- 
+
 /*--------------------------------------------------------------------------
- * hypre_SparseMSG3CreateRAPOp 
+ * hypre_SparseMSG3CreateRAPOp
  *    Sets up new coarse grid operator stucture.
  *--------------------------------------------------------------------------*/
- 
+
 hypre_StructMatrix *
 hypre_SparseMSG3CreateRAPOp( hypre_StructMatrix *R,
                              hypre_StructMatrix *A,
@@ -49,10 +50,10 @@ hypre_SparseMSG3CreateRAPOp( hypre_StructMatrix *R,
    HYPRE_Int              stencil_rank;
 
    RAP_stencil_dim = 3;
- 
+
    A_stencil = hypre_StructMatrixStencil(A);
    A_stencil_size = hypre_StructStencilSize(A_stencil);
- 
+
    /*-----------------------------------------------------------------------
     * Define RAP_stencil
     *-----------------------------------------------------------------------*/
@@ -157,7 +158,7 @@ hypre_SparseMSG3CreateRAPOp( hypre_StructMatrix *R,
  * Routines to build RAP. These routines are fairly general
  *  1) No assumptions about symmetry of A
  *  2) No assumption that R = transpose(P)
- *  3) 7, 19 or 27-point fine grid A 
+ *  3) 7, 19 or 27-point fine grid A
  *
  * I am, however, assuming that the c-to-c interpolation is the identity.
  *
@@ -220,12 +221,12 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
    HYPRE_Real           *rap_bc, *rap_bw, *rap_be, *rap_bs, *rap_bn;
    HYPRE_Real           *rap_csw, *rap_cse;
    HYPRE_Real           *rap_bsw, *rap_bse, *rap_bnw, *rap_bne;
-                        
-   HYPRE_Int             zOffsetA; 
-   HYPRE_Int             xOffsetP; 
-   HYPRE_Int             yOffsetP; 
-   HYPRE_Int             zOffsetP; 
-                        
+
+   HYPRE_Int             zOffsetA;
+   HYPRE_Int             xOffsetP;
+   HYPRE_Int             yOffsetP;
+   HYPRE_Int             zOffsetP;
+
    HYPRE_Int             ierr = 0;
 
    fine_stencil = hypre_StructMatrixStencil(A);
@@ -262,8 +263,8 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
 
       /*-----------------------------------------------------------------
        * Extract pointers for interpolation operator:
-       * pa is pointer for weight for f-point above c-point 
-       * pb is pointer for weight for f-point below c-point 
+       * pa is pointer for weight for f-point above c-point
+       * pb is pointer for weight for f-point below c-point
        *-----------------------------------------------------------------*/
 
       hypre_SetIndex3(index_temp,0,0,-1);
@@ -274,11 +275,11 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
       MapIndex(index_temp, cdir, index);
       pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
          hypre_BoxOffsetDistance(P_dbox, index);
- 
+
       /*-----------------------------------------------------------------
        * Extract pointers for restriction operator:
-       * ra is pointer for weight for f-point above c-point 
-       * rb is pointer for weight for f-point below c-point 
+       * ra is pointer for weight for f-point above c-point
+       * rb is pointer for weight for f-point below c-point
        *-----------------------------------------------------------------*/
 
       hypre_SetIndex3(index_temp,0,0,-1);
@@ -289,10 +290,10 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
       MapIndex(index_temp, cdir, index);
       rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
          hypre_BoxOffsetDistance(R_dbox, index);
- 
+
       /*-----------------------------------------------------------------
        * Extract pointers for 7-point fine grid operator:
-       * 
+       *
        * a_cc is pointer for center coefficient
        * a_cw is pointer for west coefficient in same plane
        * a_ce is pointer for east coefficient in same plane
@@ -389,7 +390,7 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
          MapIndex(index_temp, cdir, index);
          a_cne = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
       }
-  
+
       /*-----------------------------------------------------------------
        * Extract additional pointers for 27-point fine grid operator:
        *
@@ -434,7 +435,7 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
        * Extract pointers for 19-point coarse grid operator:
        *
        * We build only the lower triangular part (plus diagonal).
-       * 
+       *
        * rap_cc is pointer for center coefficient (etc.)
        *-----------------------------------------------------------------*/
 
@@ -473,7 +474,7 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
       hypre_SetIndex3(index_temp,-1,-1,0);
       MapIndex(index_temp, cdir, index);
       rap_csw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
-         
+
       hypre_SetIndex3(index_temp,1,-1,0);
       MapIndex(index_temp, cdir, index);
       rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
@@ -481,7 +482,7 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
       /*-----------------------------------------------------------------
        * Extract additional pointers for 27-point coarse grid operator:
        *
-       * A 27-point coarse grid operator is produced when the fine grid 
+       * A 27-point coarse grid operator is produced when the fine grid
        * stencil is 19 or 27 point.
        *
        * We build only the lower triangular part.
@@ -513,19 +514,19 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
        *
        * In the BoxLoop below I assume iA and iP refer to data associated
        * with the point which we are building the stencil for. The below
-       * Offsets are used in refering to data associated with other points. 
+       * Offsets are used in refering to data associated with other points.
        *-----------------------------------------------------------------*/
 
       hypre_SetIndex3(index_temp,0,0,1);
       MapIndex(index_temp, cdir, index);
-      zOffsetA = hypre_BoxOffsetDistance(A_dbox,index); 
-      zOffsetP = hypre_BoxOffsetDistance(P_dbox,index); 
+      zOffsetA = hypre_BoxOffsetDistance(A_dbox,index);
+      zOffsetP = hypre_BoxOffsetDistance(P_dbox,index);
       hypre_SetIndex3(index_temp,0,1,0);
       MapIndex(index_temp, cdir, index);
-      yOffsetP = hypre_BoxOffsetDistance(P_dbox,index); 
+      yOffsetP = hypre_BoxOffsetDistance(P_dbox,index);
       hypre_SetIndex3(index_temp,1,0,0);
       MapIndex(index_temp, cdir, index);
-      xOffsetP = hypre_BoxOffsetDistance(P_dbox,index); 
+      xOffsetP = hypre_BoxOffsetDistance(P_dbox,index);
 
       /*--------------------------------------------------------------------
        * Switch statement to direct control to apropriate BoxLoop depending
@@ -553,7 +554,7 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
                                 RAP_dbox, cstart, stridec, iAc);
-            {           
+            {
                HYPRE_Int iAm1 = iA - zOffsetA;
                HYPRE_Int iAp1 = iA + zOffsetA;
 
@@ -562,23 +563,23 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
 
                iP1 = iP - zOffsetP - xOffsetP;
                rap_bw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1];
- 
-               iP1 = iP - zOffsetP; 
+
+               iP1 = iP - zOffsetP;
                rap_bc[iAc] =          a_bc[iA]   * pa[iP1]
                   +          rb[iR] * a_cc[iAm1] * pa[iP1]
                   +          rb[iR] * a_bc[iAm1];
- 
+
                iP1 = iP - zOffsetP + xOffsetP;
                rap_be[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1];
- 
+
                iP1 = iP - zOffsetP + yOffsetP;
                rap_bn[iAc] = rb[iR] * a_cn[iAm1] * pa[iP1];
- 
+
                iP1 = iP - yOffsetP;
                rap_cs[iAc] =          a_cs[iA]
                   +          rb[iR] * a_cs[iAm1] * pb[iP1]
                   +          ra[iR] * a_cs[iAp1] * pa[iP1];
- 
+
                iP1 = iP - xOffsetP;
                rap_cw[iAc] =          a_cw[iA]
                   +          rb[iR] * a_cw[iAm1] * pb[iP1]
@@ -587,7 +588,7 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
                rap_csw[iAc] = 0.0;
 
                rap_cse[iAc] = 0.0;
- 
+
                rap_cc[iAc] =          a_cc[iA]
                   +          rb[iR] * a_cc[iAm1] * pb[iP]
                   +          ra[iR] * a_cc[iAp1] * pa[iP]
@@ -640,17 +641,17 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
                rap_bw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1]
                   +          rb[iR] * a_bw[iAm1]
                   +                   a_bw[iA]   * pa[iP1];
- 
-               iP1 = iP - zOffsetP; 
+
+               iP1 = iP - zOffsetP;
                rap_bc[iAc] =          a_bc[iA] * pa[iP1]
                   +          rb[iR] * a_cc[iAm1] * pa[iP1]
                   +          rb[iR] * a_bc[iAm1];
- 
+
                iP1 = iP - zOffsetP + xOffsetP;
                rap_be[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1]
                   +          rb[iR] * a_be[iAm1]
                   +                   a_be[iA]   * pa[iP1];
- 
+
                iP1 = iP - zOffsetP + yOffsetP - xOffsetP;
                rap_bnw[iAc] = rb[iR] * a_cnw[iAm1] * pa[iP1];
 
@@ -658,7 +659,7 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
                rap_bn[iAc] = rb[iR] * a_cn[iAm1] * pa[iP1]
                   +          rb[iR] * a_bn[iAm1]
                   +                   a_bn[iA]   * pa[iP1];
- 
+
                iP1 = iP - zOffsetP + yOffsetP + xOffsetP;
                rap_bne[iAc] = rb[iR] * a_cne[iAm1] * pa[iP1];
 
@@ -675,7 +676,7 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
                   +                   a_as[iA]   * pa[iP1]
                   +          rb[iR] * a_as[iAm1]
                   +          ra[iR] * a_bs[iAp1];
- 
+
                iP1 = iP - yOffsetP + xOffsetP;
                rap_cse[iAc] =          a_cse[iA]
                   +          rb[iR] * a_cse[iAm1] * pb[iP1]
@@ -689,7 +690,7 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
                   +                   a_aw[iA]   * pa[iP1]
                   +          rb[iR] * a_aw[iAm1]
                   +          ra[iR] * a_bw[iAp1];
- 
+
                rap_cc[iAc] =          a_cc[iA]
                   +          rb[iR] * a_cc[iAm1] * pb[iP]
                   +          ra[iR] * a_cc[iAp1] * pa[iP]
@@ -746,17 +747,17 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
                rap_bw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1]
                   +          rb[iR] * a_bw[iAm1]
                   +                   a_bw[iA]   * pa[iP1];
- 
-               iP1 = iP - zOffsetP; 
+
+               iP1 = iP - zOffsetP;
                rap_bc[iAc] =          a_bc[iA]   * pa[iP1]
                   +          rb[iR] * a_cc[iAm1] * pa[iP1]
                   +          rb[iR] * a_bc[iAm1];
- 
+
                iP1 = iP - zOffsetP + xOffsetP;
                rap_be[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1]
                   +          rb[iR] * a_be[iAm1]
                   +                   a_be[iA]   * pa[iP1];
- 
+
                iP1 = iP - zOffsetP + yOffsetP - xOffsetP;
                rap_bnw[iAc] = rb[iR] * a_cnw[iAm1] * pa[iP1]
                   +           rb[iR] * a_bnw[iAm1]
@@ -766,7 +767,7 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
                rap_bn[iAc] = rb[iR] * a_cn[iAm1] * pa[iP1]
                   +          rb[iR] * a_bn[iAm1]
                   +                   a_bn[iA]   * pa[iP1];
- 
+
                iP1 = iP - zOffsetP + yOffsetP + xOffsetP;
                rap_bne[iAc] = rb[iR] * a_cne[iAm1] * pa[iP1]
                   +           rb[iR] * a_bne[iAm1]
@@ -789,7 +790,7 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
                   +                   a_as[iA]   * pa[iP1]
                   +          rb[iR] * a_as[iAm1]
                   +          ra[iR] * a_bs[iAp1];
- 
+
                iP1 = iP - yOffsetP + xOffsetP;
                rap_cse[iAc] =          a_cse[iA]
                   +          rb[iR] * a_cse[iAm1] * pb[iP1]
@@ -807,7 +808,7 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
                   +                   a_aw[iA]   * pa[iP1]
                   +          rb[iR] * a_aw[iAm1]
                   +          ra[iR] * a_bw[iAp1];
- 
+
                rap_cc[iAc] =          a_cc[iA]
                   +          rb[iR] * a_cc[iAm1] * pb[iP]
                   +          ra[iR] * a_cc[iAp1] * pa[iP]
@@ -882,12 +883,12 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
    HYPRE_Real           *rap_ac, *rap_aw, *rap_ae, *rap_as, *rap_an;
    HYPRE_Real           *rap_cnw, *rap_cne;
    HYPRE_Real           *rap_asw, *rap_ase, *rap_anw, *rap_ane;
-                 
+
    HYPRE_Int             zOffsetA;
    HYPRE_Int             xOffsetP;
    HYPRE_Int             yOffsetP;
    HYPRE_Int             zOffsetP;
-                 
+
    HYPRE_Int             ierr = 0;
 
    fine_stencil = hypre_StructMatrixStencil(A);
@@ -924,8 +925,8 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
 
       /*-----------------------------------------------------------------
        * Extract pointers for interpolation operator:
-       * pa is pointer for weight for f-point above c-point 
-       * pb is pointer for weight for f-point below c-point 
+       * pa is pointer for weight for f-point above c-point
+       * pb is pointer for weight for f-point below c-point
        *-----------------------------------------------------------------*/
 
       hypre_SetIndex3(index_temp,0,0,-1);
@@ -936,11 +937,11 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
       MapIndex(index_temp, cdir, index);
       pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
          hypre_BoxOffsetDistance(P_dbox, index);
- 
+
       /*-----------------------------------------------------------------
        * Extract pointers for restriction operator:
-       * ra is pointer for weight for f-point above c-point 
-       * rb is pointer for weight for f-point below c-point 
+       * ra is pointer for weight for f-point above c-point
+       * rb is pointer for weight for f-point below c-point
        *-----------------------------------------------------------------*/
 
       hypre_SetIndex3(index_temp,0,0,-1);
@@ -951,10 +952,10 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
       MapIndex(index_temp, cdir, index);
       rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
          hypre_BoxOffsetDistance(R_dbox, index);
- 
+
       /*-----------------------------------------------------------------
        * Extract pointers for 7-point fine grid operator:
-       * 
+       *
        * a_cc is pointer for center coefficient
        * a_cw is pointer for west coefficient in same plane
        * a_ce is pointer for east coefficient in same plane
@@ -1047,7 +1048,7 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
          MapIndex(index_temp, cdir, index);
          a_cne = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
       }
-  
+
       /*-----------------------------------------------------------------
        * Extract additional pointers for 27-point fine grid operator:
        *
@@ -1093,7 +1094,7 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
        * Extract pointers for 19-point coarse grid operator:
        *
        * We build only the upper triangular part (excluding diagonal).
-       * 
+       *
        * rap_ce is pointer for east coefficient in same plane (etc.)
        *-----------------------------------------------------------------*/
 
@@ -1128,7 +1129,7 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
       hypre_SetIndex3(index_temp,-1,1,0);
       MapIndex(index_temp, cdir, index);
       rap_cnw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
-         
+
       hypre_SetIndex3(index_temp,1,1,0);
       MapIndex(index_temp, cdir, index);
       rap_cne = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
@@ -1136,7 +1137,7 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
       /*-----------------------------------------------------------------
        * Extract additional pointers for 27-point coarse grid operator:
        *
-       * A 27-point coarse grid operator is produced when the fine grid 
+       * A 27-point coarse grid operator is produced when the fine grid
        * stencil is 19 or 27 point.
        *
        * We build only the upper triangular part.
@@ -1168,19 +1169,19 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
        *
        * In the BoxLoop below I assume iA and iP refer to data associated
        * with the point which we are building the stencil for. The below
-       * Offsets are used in refering to data associated with other points. 
+       * Offsets are used in refering to data associated with other points.
        *-----------------------------------------------------------------*/
 
       hypre_SetIndex3(index_temp,0,0,1);
       MapIndex(index_temp, cdir, index);
-      zOffsetA = hypre_BoxOffsetDistance(A_dbox,index); 
-      zOffsetP = hypre_BoxOffsetDistance(P_dbox,index); 
+      zOffsetA = hypre_BoxOffsetDistance(A_dbox,index);
+      zOffsetP = hypre_BoxOffsetDistance(P_dbox,index);
       hypre_SetIndex3(index_temp,0,1,0);
       MapIndex(index_temp, cdir, index);
-      yOffsetP = hypre_BoxOffsetDistance(P_dbox,index); 
+      yOffsetP = hypre_BoxOffsetDistance(P_dbox,index);
       hypre_SetIndex3(index_temp,1,0,0);
       MapIndex(index_temp, cdir, index);
-      xOffsetP = hypre_BoxOffsetDistance(P_dbox,index); 
+      xOffsetP = hypre_BoxOffsetDistance(P_dbox,index);
 
       /*-----------------------------------------------------------------
        * Switch statement to direct control to apropriate BoxLoop depending
@@ -1216,30 +1217,30 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
 
                iP1 = iP + zOffsetP + xOffsetP;
                rap_ae[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1];
- 
-               iP1 = iP + zOffsetP; 
+
+               iP1 = iP + zOffsetP;
                rap_ac[iAc] =          a_ac[iA]   * pb[iP1]
                   +          ra[iR] * a_cc[iAp1] * pb[iP1]
                   +          ra[iR] * a_ac[iAp1];
- 
+
                iP1 = iP + zOffsetP - xOffsetP;
                rap_aw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1];
- 
+
                iP1 = iP + zOffsetP - yOffsetP;
                rap_as[iAc] = ra[iR] * a_cs[iAp1] * pb[iP1];
- 
+
                iP1 = iP + yOffsetP;
                rap_cn[iAc] =          a_cn[iA]
                   +          rb[iR] * a_cn[iAm1] * pb[iP1]
                   +          ra[iR] * a_cn[iAp1] * pa[iP1];
- 
+
                iP1 = iP + xOffsetP;
                rap_ce[iAc] =          a_ce[iA]
                   +          rb[iR] * a_ce[iAm1] * pb[iP1]
                   +          ra[iR] * a_ce[iAp1] * pa[iP1];
 
                rap_cnw[iAc] = 0.0;
- 
+
                rap_cne[iAc] = 0.0;
             }
             hypre_BoxLoop4End(iP, iR, iA, iAc);
@@ -1286,16 +1287,16 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
                   +          ra[iR] * a_ae[iAp1]
                   +                   a_ae[iA]   * pb[iP1];
 
-               iP1 = iP + zOffsetP; 
+               iP1 = iP + zOffsetP;
                rap_ac[iAc] =          a_ac[iA]   * pb[iP1]
                   +          ra[iR] * a_cc[iAp1] * pb[iP1]
                   +          ra[iR] * a_ac[iAp1];
- 
+
                iP1 = iP + zOffsetP - xOffsetP;
                rap_aw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1]
                   +          ra[iR] * a_aw[iAp1]
                   +                   a_aw[iA]   * pb[iP1];
- 
+
                iP1 = iP + zOffsetP - yOffsetP + xOffsetP;
                rap_ase[iAc] = ra[iR] * a_cse[iAp1] * pb[iP1];
 
@@ -1303,7 +1304,7 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
                rap_as[iAc] = ra[iR] * a_cs[iAp1] * pb[iP1]
                   +          ra[iR] * a_as[iAp1]
                   +                   a_as[iA]   * pb[iP1];
- 
+
                iP1 = iP + zOffsetP - yOffsetP - xOffsetP;
                rap_asw[iAc] = ra[iR] * a_csw[iAp1] * pb[iP1];
 
@@ -1320,7 +1321,7 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
                   +                   a_an[iA]   * pa[iP1]
                   +          rb[iR] * a_an[iAm1]
                   +          ra[iR] * a_bn[iAp1];
- 
+
                iP1 = iP + yOffsetP - xOffsetP;
                rap_cnw[iAc] =         a_cnw[iA]
                   +          rb[iR] * a_cnw[iAm1] * pb[iP1]
@@ -1384,16 +1385,16 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
                   +          ra[iR] * a_ae[iAp1]
                   +                   a_ae[iA]   * pb[iP1];
 
-               iP1 = iP + zOffsetP; 
+               iP1 = iP + zOffsetP;
                rap_ac[iAc] =          a_ac[iA]   * pb[iP1]
                   +          ra[iR] * a_cc[iAp1] * pb[iP1]
                   +          ra[iR] * a_ac[iAp1];
- 
+
                iP1 = iP + zOffsetP - xOffsetP;
                rap_aw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1]
                   +          ra[iR] * a_aw[iAp1]
                   +                   a_aw[iA]   * pb[iP1];
- 
+
                iP1 = iP + zOffsetP - yOffsetP + xOffsetP;
                rap_ase[iAc] = ra[iR] * a_cse[iAp1] * pb[iP1]
                   +           ra[iR] * a_ase[iAp1]
@@ -1403,7 +1404,7 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
                rap_as[iAc] = ra[iR] * a_cs[iAp1] * pb[iP1]
                   +          ra[iR] * a_as[iAp1]
                   +                   a_as[iA]   * pb[iP1];
- 
+
                iP1 = iP + zOffsetP - yOffsetP - xOffsetP;
                rap_asw[iAc] = ra[iR] * a_csw[iAp1] * pb[iP1]
                   +           ra[iR] * a_asw[iAp1]
@@ -1427,7 +1428,7 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
                   +                   a_an[iA]   * pa[iP1]
                   +          rb[iR] * a_an[iAm1]
                   +          ra[iR] * a_bn[iAp1];
- 
+
                iP1 = iP + yOffsetP - xOffsetP;
                rap_cnw[iAc] =         a_cnw[iA]
                   +          rb[iR] * a_cnw[iAm1] * pb[iP1]

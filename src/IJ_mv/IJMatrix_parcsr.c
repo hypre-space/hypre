@@ -1121,45 +1121,50 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix       *matrix,
  *
  *****************************************************************************/
 
+void
+hypre_IJMatrixSetConstantValuesParCSRHost( hypre_IJMatrix *matrix,
+                                           HYPRE_Complex   value )
+{
+   hypre_ParCSRMatrix *par_matrix = (hypre_ParCSRMatrix *) hypre_IJMatrixObject( matrix );
+   hypre_CSRMatrix    *diag       = hypre_ParCSRMatrixDiag(par_matrix);
+   hypre_CSRMatrix    *offd       = hypre_ParCSRMatrixOffd(par_matrix);
+   HYPRE_Complex      *diag_data  = hypre_CSRMatrixData(diag);
+   HYPRE_Complex      *offd_data  = hypre_CSRMatrixData(offd);
+   HYPRE_Int           nnz_diag   = hypre_CSRMatrixNumNonzeros(diag);
+   HYPRE_Int           nnz_offd   = hypre_CSRMatrixNumNonzeros(offd);
+   HYPRE_Int           ii;
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(ii) HYPRE_SMP_SCHEDULE
+#endif
+   for (ii = 0; ii < nnz_diag; ii++)
+   {
+      diag_data[ii] = value;
+   }
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(ii) HYPRE_SMP_SCHEDULE
+#endif
+   for (ii = 0; ii < nnz_offd; ii++)
+   {
+      offd_data[ii] = value;
+   }
+}
+
 HYPRE_Int
 hypre_IJMatrixSetConstantValuesParCSR( hypre_IJMatrix *matrix,
                                        HYPRE_Complex   value )
 {
    if (hypre_IJMatrixAssembleFlag(matrix))  /* matrix already assembled*/
    {
-      hypre_ParCSRMatrix *par_matrix = (hypre_ParCSRMatrix *) hypre_IJMatrixObject( matrix );
-      hypre_CSRMatrix    *diag       = hypre_ParCSRMatrixDiag(par_matrix);
-      hypre_CSRMatrix    *offd       = hypre_ParCSRMatrixOffd(par_matrix);
-      HYPRE_Complex      *diag_data  = hypre_CSRMatrixData(diag);
-      HYPRE_Complex      *offd_data  = hypre_CSRMatrixData(offd);
-      HYPRE_Int           nnz_diag   = hypre_CSRMatrixNumNonzeros(diag);
-      HYPRE_Int           nnz_offd   = hypre_CSRMatrixNumNonzeros(offd);
-
 #if defined(HYPRE_USING_CUDA)
       if (hypre_GetExecPolicy1(hypre_IJMatrixMemoryLocation(matrix)) == HYPRE_EXEC_DEVICE)
       {
-         HYPRE_THRUST_CALL( fill_n, diag_data, nnz_diag, value );
-         HYPRE_THRUST_CALL( fill_n, offd_data, nnz_offd, value );
+         hypre_IJMatrixSetConstantValuesParCSRDevice(matrix, value);
       }
       else
 #endif
       {
-         HYPRE_Int ii;
-
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii) HYPRE_SMP_SCHEDULE
-#endif
-         for (ii = 0; ii < nnz_diag; ii++)
-         {
-            diag_data[ii] = value;
-         }
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii) HYPRE_SMP_SCHEDULE
-#endif
-         for (ii = 0; ii < nnz_offd; ii++)
-         {
-            offd_data[ii] = value;
-         }
+         hypre_IJMatrixSetConstantValuesParCSRHost(matrix, value);
       }
    }
    else

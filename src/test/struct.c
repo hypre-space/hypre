@@ -20,6 +20,7 @@
 
 /* RDF: Why is this include here? */
 #include "_hypre_struct_mv.h"
+#include "_hypre_struct_mv.hpp"
 
 #ifdef HYPRE_DEBUG
 /*#include <cegdb.h>*/

@@ -6,11 +6,9 @@
  ******************************************************************************/
 
 #include "_hypre_utilities.h"
+#include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_CUDA)
-
-/* for struct solvers */
-HYPRE_Int hypre_exec_policy = HYPRE_MEMORY_DEVICE;
 
 __global__ void
 hypreCUDAKernel_CompileFlagSafetyCheck(HYPRE_Int cuda_arch_actual)
@@ -267,6 +265,14 @@ HYPRE_Int
 hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 {
    HYPRE_THRUST_CALL(exclusive_scan, d_i, d_i + n, d_i);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v)
+{
+   HYPRE_THRUST_CALL( fill_n, d_x, n, v);
 
    return hypre_error_flag;
 }
@@ -743,4 +749,234 @@ hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in,  T2 *keys2_in,  T3 *vals
 template HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N, HYPRE_Int *keys1_in, HYPRE_Int *keys2_in, HYPRE_Complex *vals_in, HYPRE_Int *keys1_out, HYPRE_Int *keys2_out, HYPRE_Complex *vals_out);
 
 #endif // #if defined(HYPRE_USING_CUDA)
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+
+cudaStream_t
+hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i)
+{
+   cudaStream_t stream = 0;
+#if defined(HYPRE_USING_CUDA_STREAMS)
+   if (i >= HYPRE_MAX_NUM_STREAMS)
+   {
+      /* return the default stream, i.e., the NULL stream */
+      /*
+      hypre_printf("CUDA stream %d exceeds the max number %d\n",
+                   i, HYPRE_MAX_NUM_STREAMS);
+      */
+      return NULL;
+   }
+
+   if (data->cuda_streams[i])
+   {
+      return data->cuda_streams[i];
+   }
+
+   //HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream,cudaStreamNonBlocking));
+   HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream, cudaStreamDefault));
+
+   data->cuda_streams[i] = stream;
+#endif
+
+   return stream;
+}
+
+cudaStream_t
+hypre_CudaDataCudaComputeStream(hypre_CudaData *data)
+{
+   return hypre_CudaDataCudaStream(data,
+                                   hypre_CudaDataCudaComputeStreamNum(data));
+}
+
+#if defined(HYPRE_USING_CURAND)
+curandGenerator_t
+hypre_CudaDataCurandGenerator(hypre_CudaData *data)
+{
+   if (data->curand_generator)
+   {
+      return data->curand_generator;
+   }
+
+   curandGenerator_t gen;
+   HYPRE_CURAND_CALL( curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT) );
+   HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, 1234ULL) );
+   HYPRE_CURAND_CALL( curandSetStream(gen, hypre_CudaDataCudaComputeStream(data)) );
+
+   data->curand_generator = gen;
+
+   return gen;
+}
+#endif
+
+#if defined(HYPRE_USING_CUBLAS)
+cublasHandle_t
+hypre_CudaDataCublasHandle(hypre_CudaData *data)
+{
+   if (data->cublas_handle)
+   {
+      return data->cublas_handle;
+   }
+
+   cublasHandle_t handle;
+   HYPRE_CUBLAS_CALL( cublasCreate(&handle) );
+
+   HYPRE_CUBLAS_CALL( cublasSetStream(handle, hypre_CudaDataCudaComputeStream(data)) );
+
+   data->cublas_handle = handle;
+
+   return handle;
+}
+#endif
+
+#if defined(HYPRE_USING_CUSPARSE)
+cusparseHandle_t
+hypre_CudaDataCusparseHandle(hypre_CudaData *data)
+{
+   if (data->cusparse_handle)
+   {
+      return data->cusparse_handle;
+   }
+
+   cusparseHandle_t handle;
+   HYPRE_CUSPARSE_CALL( cusparseCreate(&handle) );
+
+   HYPRE_CUSPARSE_CALL( cusparseSetStream(handle, hypre_CudaDataCudaComputeStream(data)) );
+
+   data->cusparse_handle = handle;
+
+   return handle;
+}
+
+cusparseMatDescr_t
+hypre_CudaDataCusparseMatDescr(hypre_CudaData *data)
+{
+   if (data->cusparse_mat_descr)
+   {
+      return data->cusparse_mat_descr;
+   }
+
+   cusparseMatDescr_t mat_descr;
+   HYPRE_CUSPARSE_CALL( cusparseCreateMatDescr(&mat_descr) );
+   HYPRE_CUSPARSE_CALL( cusparseSetMatType(mat_descr, CUSPARSE_MATRIX_TYPE_GENERAL) );
+   HYPRE_CUSPARSE_CALL( cusparseSetMatIndexBase(mat_descr, CUSPARSE_INDEX_BASE_ZERO) );
+
+   data->cusparse_mat_descr = mat_descr;
+
+   return mat_descr;
+}
+#endif
+
+hypre_CudaData*
+hypre_CudaDataCreate()
+{
+   hypre_CudaData *data = hypre_CTAlloc(hypre_CudaData, 1, HYPRE_MEMORY_HOST);
+
+   hypre_CudaDataCudaDevice(data)            = 0;
+   hypre_CudaDataCudaComputeStreamNum(data)  = 0;
+#if defined(HYPRE_USING_UNIFIED_MEMORY)
+   hypre_CudaDataCudaComputeStreamSync(data) = 1;
+#else
+   hypre_CudaDataCudaComputeStreamSync(data) = 0;
+#endif
+
+   /* SpGeMM */
+#ifdef HYPRE_USING_CUSPARSE
+   hypre_CudaDataSpgemmUseCusparse(data) = 1;
+#else
+   hypre_CudaDataSpgemmUseCusparse(data) = 0;
+#endif
+   hypre_CudaDataSpgemmNumPasses(data) = 3;
+   /* 1: naive overestimate, 2: naive underestimate, 3: Cohen's algorithm */
+   hypre_CudaDataSpgemmRownnzEstimateMethod(data) = 3;
+   hypre_CudaDataSpgemmRownnzEstimateNsamples(data) = 32;
+   hypre_CudaDataSpgemmRownnzEstimateMultFactor(data) = 1.5;
+   hypre_CudaDataSpgemmHashType(data) = 'L';
+
+   /* cub */
+#ifdef HYPRE_USING_CUB_ALLOCATOR
+   hypre_CudaDataCubBinGrowth(data)      = 8u;
+   hypre_CudaDataCubMinBin(data)         = 1u;
+   hypre_CudaDataCubMaxBin(data)         = (hypre_uint) -1;
+   hypre_CudaDataCubMaxCachedBytes(data) = (size_t) -1;
+   hypre_CudaDataCubDevAllocator(data)   = NULL;
+   hypre_CudaDataCubUvmAllocator(data)   = NULL;
+#endif
+
+   return data;
+}
+
+void
+hypre_CudaDataDestroy(hypre_CudaData* data)
+{
+   hypre_TFree(hypre_CudaDataCudaReduceBuffer(data),     HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_CudaDataStructCommRecvBuffer(data), HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_CudaDataStructCommSendBuffer(data), HYPRE_MEMORY_DEVICE);
+
+#if defined(HYPRE_USING_CURAND)
+   if (data->curand_generator)
+   {
+      HYPRE_CURAND_CALL( curandDestroyGenerator(data->curand_generator) );
+   }
+#endif
+
+#if defined(HYPRE_USING_CUBLAS)
+   if (data->cublas_handle)
+   {
+      HYPRE_CUBLAS_CALL( cublasDestroy(data->cublas_handle) );
+   }
+#endif
+
+#if defined(HYPRE_USING_CUSPARSE)
+   if (data->cusparse_handle)
+   {
+      HYPRE_CUSPARSE_CALL( cusparseDestroy(data->cusparse_handle) );
+   }
+
+   if (data->cusparse_mat_descr)
+   {
+      HYPRE_CUSPARSE_CALL( cusparseDestroyMatDescr(data->cusparse_mat_descr) );
+   }
+#endif
+
+   for (HYPRE_Int i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
+   {
+      if (data->cuda_streams[i])
+      {
+         HYPRE_CUDA_CALL( cudaStreamDestroy(data->cuda_streams[i]) );
+      }
+   }
+
+#ifdef HYPRE_USING_CUB_ALLOCATOR
+   hypre_CudaDataCubCachingAllocatorDestroy(data);
+#endif
+
+   hypre_TFree(data, HYPRE_MEMORY_HOST);
+}
+
+/* synchronize the Hypre compute stream */
+HYPRE_Int
+hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle)
+{
+   hypre_CudaData *data = hypre_HandleCudaData(hypre_handle);
+#if defined(HYPRE_USING_CUDA)
+   if ( hypre_CudaDataCudaComputeStreamSync(data) )
+   {
+      HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_CudaDataCudaComputeStream(data)) );
+   }
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#endif
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_SyncCudaDevice(hypre_Handle *hypre_handle)
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#endif
+   return hypre_error_flag;
+}
+
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 

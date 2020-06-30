@@ -44,20 +44,24 @@ FILES =\
  HYPRE_struct_stencil.c\
  HYPRE_struct_vector.c\
  project.c\
+ struct_grid.c\
+ struct_io.c\
+ struct_matrix_mask.c\
+ struct_stencil.c
+
+CUFILES =\
  struct_axpy.c\
  struct_communication.c\
  struct_copy.c\
- struct_grid.c\
  struct_innerprod.c\
- struct_io.c\
  struct_matrix.c\
- struct_matrix_mask.c\
  struct_matvec.c\
  struct_scale.c\
- struct_stencil.c\
  struct_vector.c
 
-OBJS = ${FILES:.c=.o}
+COBJS = ${FILES:.c=.o}
+CUOBJS = ${CUFILES:.c=.obj}
+OBJS = ${COBJS} ${CUOBJS}
 
 SONAME = libHYPRE_struct_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
@@ -68,6 +72,7 @@ SONAME = libHYPRE_struct_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 all: libHYPRE_struct_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_struct_mv.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_struct_mv.hpp $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_struct_mv${HYPRE_LIB_SUFFIX}
@@ -76,7 +81,7 @@ install: libHYPRE_struct_mv${HYPRE_LIB_SUFFIX}
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o libHYPRE*
+	rm -f *.o* libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean

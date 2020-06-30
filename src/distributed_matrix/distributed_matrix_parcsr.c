@@ -101,7 +101,9 @@ hypre_DistributedMatrixGetRowParCSR( hypre_DistributedMatrix *matrix,
    ierr = HYPRE_ParCSRMatrixGetRow( Parcsr_matrix, row, size, col_ind, values);
 
    // RL: if HYPRE_ParCSRMatrixGetRow was on device, need the next line to guarantee it's done
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_SyncCudaComputeStream(hypre_handle());
+#endif
 
    return(ierr);
 }

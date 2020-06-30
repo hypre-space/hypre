@@ -60,7 +60,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 
    HYPRE_Real            b_dot_b = 0, r_dot_r, eps = 0;
    HYPRE_Real            e_dot_e = 0.0, x_dot_x = 1.0;
-                    
+
    HYPRE_Int             i, l;
    HYPRE_Int             constant_coefficient;
 
@@ -231,7 +231,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             /* restrict residual */
             hypre_SemiRestrict(restrict_data_l[l], RT_l[l], r_l[l], b_l[l+1]);
 #if DEBUG
-	    hypre_printf("Level %d: b_l = %.30e\n",l+1, hypre_StructInnerProd(b_l[l+1], b_l[l+1]));
+            hypre_printf("Level %d: b_l = %.30e\n",l+1, hypre_StructInnerProd(b_l[l+1], b_l[l+1]));
             hypre_sprintf(filename, "zout_xdown.%02d", l);
             hypre_StructVectorPrint(filename, x_l[l], 0);
             hypre_sprintf(filename, "zout_rdown.%02d", l);
@@ -257,7 +257,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 #if DEBUG
          hypre_sprintf(filename, "zout_xbottom.%02d", l);
          hypre_StructVectorPrint(filename, x_l[l], 0);
-	 hypre_printf("Level %d: x_l = %.30e\n",l, hypre_StructInnerProd(x_l[l], x_l[l]));
+         hypre_printf("Level %d: x_l = %.30e\n",l, hypre_StructInnerProd(x_l[l], x_l[l]));
 #endif
          /*--------------------------------------------------
           * Up cycle
@@ -283,7 +283,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             hypre_StructVectorPrint(filename, e_l[l], 0);
             hypre_sprintf(filename, "zout_xup.%02d", l);
             hypre_StructVectorPrint(filename, x_l[l], 0);
-	    hypre_printf("Level %d: x_l = %.15e\n",l, hypre_StructInnerProd(x_l[l], x_l[l]));
+            hypre_printf("Level %d: x_l = %.15e\n",l, hypre_StructInnerProd(x_l[l], x_l[l]));
 #endif
             if (active_l[l])
             {
@@ -308,7 +308,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          hypre_SemiInterp(interp_data_l[0], P_l[0], x_l[1], e_l[0]);
          hypre_StructAxpy(1.0, e_l[0], x_l[0]);
 #if DEBUG
-	 hypre_printf("Level 0: x_l = %.15e\n", hypre_StructInnerProd(x_l[0], x_l[0]));
+         hypre_printf("Level 0: x_l = %.15e\n", hypre_StructInnerProd(x_l[0], x_l[0]));
          hypre_sprintf(filename, "zout_eup.%02d", 0);
          hypre_StructVectorPrint(filename, e_l[0], 0);
          hypre_sprintf(filename, "zout_xup.%02d", 0);

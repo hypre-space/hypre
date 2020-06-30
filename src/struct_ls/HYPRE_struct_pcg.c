@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
+#include "_hypre_struct_mv.hpp"
 
 /*==========================================================================*/
 
@@ -36,7 +37,7 @@ HYPRE_StructPCGCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 
 /*==========================================================================*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructPCGDestroy( HYPRE_StructSolver solver )
 {
    return( hypre_PCGDestroy( (void *) solver ) );
@@ -44,7 +45,7 @@ HYPRE_StructPCGDestroy( HYPRE_StructSolver solver )
 
 /*==========================================================================*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructPCGSetup( HYPRE_StructSolver solver,
                       HYPRE_StructMatrix A,
                       HYPRE_StructVector b,
@@ -58,7 +59,7 @@ HYPRE_StructPCGSetup( HYPRE_StructSolver solver,
 
 /*==========================================================================*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructPCGSolve( HYPRE_StructSolver solver,
                       HYPRE_StructMatrix A,
                       HYPRE_StructVector b,
@@ -167,7 +168,7 @@ HYPRE_StructPCGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
 
 /*==========================================================================*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructDiagScaleSetup( HYPRE_StructSolver solver,
                             HYPRE_StructMatrix A,
                             HYPRE_StructVector y,
@@ -178,7 +179,7 @@ HYPRE_StructDiagScaleSetup( HYPRE_StructSolver solver,
 
 /*==========================================================================*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructDiagScale( HYPRE_StructSolver solver,
                        HYPRE_StructMatrix HA,
                        HYPRE_StructVector Hy,
@@ -194,16 +195,16 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
    hypre_Box            *A_data_box;
    hypre_Box            *y_data_box;
    hypre_Box            *x_data_box;
-                     
+
    HYPRE_Real           *Ap;
    HYPRE_Real           *yp;
    HYPRE_Real           *xp;
-                     
+
    hypre_Index           index;
    hypre_IndexRef        start;
    hypre_Index           stride;
    hypre_Index           loop_size;
-                     
+
    HYPRE_Int             i;
 
    /* x = D^{-1} y */

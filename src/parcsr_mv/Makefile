@@ -44,14 +44,16 @@ FILES =\
  par_csr_bool_matrix.c\
  par_csr_communication.c\
  par_csr_matop.c\
- par_csr_matop_device.c\
  par_csr_matrix.c\
  par_csr_matop_marked.c\
- par_csr_matvec.c\
  par_csr_triplemat.c\
- par_csr_triplemat_device.c\
  par_vector.c\
  par_make_system.c
+
+CUFILES =\
+ par_csr_matvec.c\
+ par_csr_matop_device.c\
+ par_csr_triplemat_device.c
 
 EXTRA_FILES =\
  parchord_to_parcsr.c
@@ -66,7 +68,10 @@ DRIVER_FILES =\
  driver_matvec.c\
  driver_multivec.c
 
-OBJS = ${FILES:.c=.o}
+COBJS = ${FILES:.c=.o}
+CUOBJS = ${CUFILES:.c=.obj}
+OBJS = ${COBJS} ${CUOBJS}
+
 DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 
 SONAME = libHYPRE_parcsr_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
@@ -80,29 +85,29 @@ all: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/_hypre_parcsr_mv.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
-driver: driver.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX} 
+driver: driver.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
-	${CC} -o driver driver.o ${LFLAGS} 
+	${CC} -o driver driver.o ${LFLAGS}
 
 driver_matvec: driver_matvec.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
-	${CC} -o driver_matvec driver_matvec.o ${LFLAGS} 
+	${CC} -o driver_matvec driver_matvec.o ${LFLAGS}
 
 driver_matmul: driver_matmul.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
-	${CC} -o driver_matmul driver_matmul.o ${LFLAGS} 
+	${CC} -o driver_matmul driver_matmul.o ${LFLAGS}
 
 driver_boolmatmul: driver_boolmatmul.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
-	${CC} -o driver_boolmatmul driver_boolmatmul.o ${LFLAGS} 
+	${CC} -o driver_boolmatmul driver_boolmatmul.o ${LFLAGS}
 
 driver_aat: driver_aat.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
-	${CC} -o driver_aat driver_aat.o ${LFLAGS} 
+	${CC} -o driver_aat driver_aat.o ${LFLAGS}
 
 driver_boolaat: driver_boolaat.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
-	${CC} -o driver_boolaat driver_boolaat.o ${LFLAGS} 
+	${CC} -o driver_boolaat driver_boolaat.o ${LFLAGS}
 
 install: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
@@ -110,7 +115,7 @@ install: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o libHYPRE*
+	rm -f *.o* libHYPRE*
 	rm -f driver driver_matvec driver_matmul
 	rm -rf pchdir tca.map *inslog*
 
