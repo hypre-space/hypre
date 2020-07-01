@@ -1165,12 +1165,12 @@ char hypre__levelname[16];
 #define HYPRE_ANNOTATE_ITER_END(id)        CALI_MARK_ITERATION_END(id)
 #define HYPRE_ANNOTATE_MGLEVEL_BEGIN(lvl)\
 {\
-   hypre_sprintf(hypre__levelname, "MG level %d", level);\
+   hypre_sprintf(hypre__levelname, "MG level %d", lvl);\
    CALI_MARK_BEGIN(hypre__levelname);\
 }
 #define HYPRE_ANNOTATE_MGLEVEL_END(lvl)\
 {\
-   hypre_sprintf(hypre__levelname, "MG level %d", level);\
+   hypre_sprintf(hypre__levelname, "MG level %d", lvl);\
    CALI_MARK_END(hypre__levelname);\
 }
 
@@ -1545,4 +1545,3 @@ void hypre_NvtxPopRange();
 #endif
 
 #endif
-

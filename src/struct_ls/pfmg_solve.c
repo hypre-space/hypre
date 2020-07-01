@@ -137,6 +137,8 @@ hypre_PFMGSolve( void               *pfmg_vdata,
        * Down cycle
        *--------------------------------------------------*/
 
+      HYPRE_ANNOTATE_MGLEVEL_BEGIN(0);
+
       if (constant_coefficient)
       {
          hypre_StructVectorClearAllValues(r_l[0]);
@@ -195,8 +197,13 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          hypre_sprintf(filename, "zout_b.%02d", 1);
          hypre_StructVectorPrint(filename, b_l[1], 0);
 #endif
+
+         HYPRE_ANNOTATE_MGLEVEL_END(0);
+
          for (l = 1; l <= (num_levels - 2); l++)
          {
+            HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
+
 #if defined(HYPRE_USING_CUDA)
             if (hypre_StructGridDataLocation(hypre_StructVectorGrid(r_l[l])) == HYPRE_MEMORY_HOST)
             {
@@ -239,11 +246,14 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             hypre_sprintf(filename, "zout_b.%02d", l+1);
             hypre_StructVectorPrint(filename, b_l[l+1], 0);
 #endif
+
+            HYPRE_ANNOTATE_MGLEVEL_END(l);
          }
 
          /*--------------------------------------------------
           * Bottom
           *--------------------------------------------------*/
+         HYPRE_ANNOTATE_MGLEVEL_BEGIN(num_levels - 1);
 
          if (active_l[l])
          {
@@ -259,6 +269,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          hypre_StructVectorPrint(filename, x_l[l], 0);
          hypre_printf("Level %d: x_l = %.30e\n",l, hypre_StructInnerProd(x_l[l], x_l[l]));
 #endif
+
          /*--------------------------------------------------
           * Up cycle
           *--------------------------------------------------*/
@@ -278,6 +289,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             /* interpolate error and correct (x = x + Pe_c) */
             hypre_SemiInterp(interp_data_l[l], P_l[l], x_l[l+1], e_l[l]);
             hypre_StructAxpy(1.0, e_l[l], x_l[l]);
+            HYPRE_ANNOTATE_MGLEVEL_END(l + 1);
 #if DEBUG
             hypre_sprintf(filename, "zout_eup.%02d", l);
             hypre_StructVectorPrint(filename, e_l[l], 0);
@@ -285,6 +297,8 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             hypre_StructVectorPrint(filename, x_l[l], 0);
             hypre_printf("Level %d: x_l = %.15e\n",l, hypre_StructInnerProd(x_l[l], x_l[l]));
 #endif
+            HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
+
             if (active_l[l])
             {
                /* post-relaxation */
@@ -307,6 +321,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          /* interpolate error and correct on fine grid (x = x + Pe_c) */
          hypre_SemiInterp(interp_data_l[0], P_l[0], x_l[1], e_l[0]);
          hypre_StructAxpy(1.0, e_l[0], x_l[0]);
+         HYPRE_ANNOTATE_MGLEVEL_END(1);
 #if DEBUG
          hypre_printf("Level 0: x_l = %.15e\n", hypre_StructInnerProd(x_l[0], x_l[0]));
          hypre_sprintf(filename, "zout_eup.%02d", 0);
@@ -332,12 +347,15 @@ hypre_PFMGSolve( void               *pfmg_vdata,
       }
 
       /* fine grid post-relaxation */
+      HYPRE_ANNOTATE_MGLEVEL_BEGIN(0);
+
       hypre_PFMGRelaxSetPostRelax(relax_data_l[0]);
       hypre_PFMGRelaxSetMaxIter(relax_data_l[0], num_post_relax);
       hypre_PFMGRelaxSetZeroGuess(relax_data_l[0], 0);
       hypre_PFMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
-
       (pfmg_data -> num_iterations) = (i + 1);
+
+      HYPRE_ANNOTATE_MGLEVEL_END(0);
    }
 
    hypre_EndTiming(pfmg_data -> time_index);
