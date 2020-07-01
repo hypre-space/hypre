@@ -425,6 +425,7 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
     * Main loop of cycling
     *--------------------------------------------------------------------*/
 
+   HYPRE_ANNOTATE_MGLEVEL_BEGIN(level);
    while (Not_Finished)
    {
       num_sweep = num_grid_sweeps[cycle_param];
@@ -486,6 +487,7 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
          {
             hypre_TFree(lev_counter, HYPRE_MEMORY_HOST);
             hypre_TFree(num_coeffs, HYPRE_MEMORY_HOST);
+            HYPRE_ANNOTATE_MGLEVEL_END(level);
             HYPRE_ANNOTATE_FUNC_END;
 
             return(Solve_err_flag);
@@ -526,10 +528,14 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
          hypre_ParCSRMatrixMatvecT(alpha,P_array[fine_grid],Vtemp,
                           beta,F_array[coarse_grid]);
 
+         HYPRE_ANNOTATE_MGLEVEL_END(level);
+
          ++level;
          lev_counter[level] = hypre_max(lev_counter[level],cycle_type);
          cycle_param = 1;
          if (level == num_levels-1) cycle_param = 3;
+
+         HYPRE_ANNOTATE_MGLEVEL_BEGIN(level);
       }
 
       else if (level != 0)
@@ -550,15 +556,21 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
          hypre_ParCSRMatrixMatvec(alpha, R_array[fine_grid], U_array[coarse_grid],
                          beta, U_array[fine_grid]);
 
+         HYPRE_ANNOTATE_MGLEVEL_END(level);
+
          --level;
          cycle_param = 2;
          if (level == 0) cycle_param = 0;
+
+         HYPRE_ANNOTATE_MGLEVEL_BEGIN(level);
       }
       else
       {
          Not_Finished = 0;
       }
    }
+
+   HYPRE_ANNOTATE_MGLEVEL_END(level);
 
    hypre_ParAMGDataCycleOpCount(amg_data) = cycle_op_count;
    hypre_TFree(lev_counter, HYPRE_MEMORY_HOST);
