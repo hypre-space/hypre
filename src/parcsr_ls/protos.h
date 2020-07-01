@@ -1516,14 +1516,6 @@ HYPRE_Int hypre_AMGDDCompGridSetupRealDofMarker( hypre_AMGDDCompGrid **compGrid,
 HYPRE_Int hypre_AMGDDCompGridResize( hypre_AMGDDCompGrid *compGrid, HYPRE_Int new_size, HYPRE_Int need_coarse_info );
 HYPRE_Int hypre_AMGDDCompGridSetupLocalIndices( hypre_AMGDDCompGrid **compGrid, HYPRE_Int *num_added_nodes, HYPRE_Int ****recv_map, HYPRE_Int num_recv_procs, HYPRE_Int **A_tmp_info, HYPRE_Int start_level, HYPRE_Int num_levels );
 HYPRE_Int hypre_AMGDDCompGridSetupLocalIndicesP( hypre_ParAMGData *amg_data, hypre_AMGDDCompGrid **compGrid, HYPRE_Int start_level, HYPRE_Int num_levels );
-HYPRE_Int hypre_AMGDDCompGridDebugPrint( hypre_AMGDDCompGrid *compGrid, const char* filename );
-HYPRE_Int hypre_AMGDDCompGridDumpSorted( hypre_AMGDDCompGrid *compGrid, const char* filename);
-HYPRE_Int hypre_AMGDDCompGridGlobalIndicesDump( hypre_AMGDDCompGrid *compGrid, const char* filename);
-HYPRE_Int hypre_AMGDDCompGridRealDofMarkerDump( hypre_AMGDDCompGrid *compGrid, const char* filename);
-HYPRE_Int hypre_AMGDDCompGridCoarseGlobalIndicesDump( hypre_AMGDDCompGrid *compGrid, const char* filename);
-HYPRE_Int hypre_AMGDDCompGridCoarseResidualMarkerDump( hypre_AMGDDCompGrid *compGrid, const char* filename);
-HYPRE_Int hypre_AMGDDCompGridMatlabAMatrixDump( hypre_AMGDDCompGrid *compGrid, const char* filename);
-HYPRE_Int hypre_AMGDDCompGridMatlabPMatrixDump( hypre_AMGDDCompGrid *compGrid, const char* filename);
 hypre_AMGDDCommPkg *hypre_AMGDDCommPkgCreate(HYPRE_Int num_levels);
 HYPRE_Int hypre_AMGDDCommPkgDestroy( hypre_AMGDDCommPkg *compGridCommPkg );
 HYPRE_Int hypre_AMGDDCommPkgFinalize(hypre_ParAMGData* amg_data, hypre_AMGDDCommPkg *compGridCommPkg, hypre_AMGDDCompGrid **compGrid);

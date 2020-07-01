@@ -375,7 +375,6 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataPArray(amg_data) = NULL;
    hypre_ParAMGDataRArray(amg_data) = NULL;
    hypre_ParAMGDataCFMarkerArray(amg_data) = NULL;
-   hypre_ParAMGDataLocalNumCPoints(amg_data) = NULL;
    hypre_ParAMGDataVtemp(amg_data)  = NULL;
    hypre_ParAMGDataRtemp(amg_data)  = NULL;
    hypre_ParAMGDataPtemp(amg_data)  = NULL;
@@ -662,9 +661,6 @@ hypre_BoomerAMGDestroy( void *data )
    hypre_TFree(hypre_ParAMGDataPBlockArray(amg_data), HYPRE_MEMORY_HOST);
    hypre_TFree(hypre_ParAMGDataPArray(amg_data), HYPRE_MEMORY_HOST);
    hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data), HYPRE_MEMORY_HOST);
-   if (hypre_ParAMGDataLocalNumCPoints(amg_data))
-      hypre_TFree(hypre_ParAMGDataLocalNumCPoints(amg_data), HYPRE_MEMORY_HOST);
-
 
    if (hypre_ParAMGDataRtemp(amg_data))
       hypre_ParVectorDestroy(hypre_ParAMGDataRtemp(amg_data));

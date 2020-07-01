@@ -490,68 +490,6 @@ hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix,
    return ierr;
 }
 
-HYPRE_Int
-hypre_CSRMatrixPrintCustom( hypre_CSRMatrix *matrix,
-                      char            *file_name, HYPRE_Int num_rows )
-{
-   FILE    *fp;
-
-   HYPRE_Complex *matrix_data;
-   HYPRE_Int     *matrix_i;
-   HYPRE_Int     *matrix_j;
-   // HYPRE_Int      num_rows;
-   
-   HYPRE_Int      file_base = 0;
-   
-   HYPRE_Int      j;
-
-   HYPRE_Int      ierr = 0;
-
-   /*----------------------------------------------------------
-    * Print the matrix data
-    *----------------------------------------------------------*/
-
-   matrix_data = hypre_CSRMatrixData(matrix);
-   matrix_i    = hypre_CSRMatrixI(matrix);
-   matrix_j    = hypre_CSRMatrixJ(matrix);
-   // num_rows    = hypre_CSRMatrixNumRows(matrix);
-
-   fp = fopen(file_name, "w");
-
-   hypre_fprintf(fp, "%d\n", num_rows);
-
-   for (j = 0; j <= num_rows; j++)
-   {
-      hypre_fprintf(fp, "%d\n", matrix_i[j] + file_base);
-   }
-
-   for (j = 0; j < matrix_i[num_rows]; j++)
-   {
-      hypre_fprintf(fp, "%d\n", matrix_j[j] + file_base);
-   }
-
-   if (matrix_data)
-   {
-      for (j = 0; j < matrix_i[num_rows]; j++)
-      {
-#ifdef HYPRE_COMPLEX
-         hypre_fprintf(fp, "%.14e , %.14e\n",
-                       hypre_creal(matrix_data[j]), hypre_cimag(matrix_data[j]));
-#else
-         hypre_fprintf(fp, "%.14e\n", matrix_data[j]);
-#endif
-      }
-   }
-   else
-   {
-      hypre_fprintf(fp, "Warning: No matrix data!\n");
-   }
-
-   fclose(fp);
-
-   return ierr;
-}
-
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixPrintCOO: print a CSRMatrix in coordinate format
