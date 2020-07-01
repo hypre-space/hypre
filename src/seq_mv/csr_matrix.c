@@ -185,7 +185,7 @@ hypre_CSRMatrixResize( hypre_CSRMatrix *matrix, HYPRE_Int new_num_rows, HYPRE_In
       if (!hypre_CSRMatrixI(matrix))
          hypre_CSRMatrixI(matrix) = hypre_CTAlloc(HYPRE_Int, new_num_rows + 1, memory_location);
       else
-         hypre_CSRMatrixI(matrix) = hypre_TReAlloc_v2(hypre_CSRMatrixI(matrix), HYPRE_Int, old_num_rows, HYPRE_Int, new_num_rows + 1, memory_location);
+         hypre_CSRMatrixI(matrix) = hypre_TReAlloc_v2(hypre_CSRMatrixI(matrix), HYPRE_Int, old_num_rows + 1, HYPRE_Int, new_num_rows + 1, memory_location);
    }
 
    return 0;
