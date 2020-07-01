@@ -396,14 +396,14 @@ hypre_PCGSolve( void *pcg_vdata,
    else    /* bi_prod==0.0: the rhs vector b is zero */
    {
       /* Set x equal to zero and return */
-      // (*(pcg_functions->CopyVector))(b, x);
+      (*(pcg_functions->CopyVector))(b, x);
       if (logging>0 || print_level>0)
       {
-         // norms[0]     = 0.0;
-         // rel_norms[i] = 0.0;
+         norms[0]     = 0.0;
+         rel_norms[i] = 0.0;
       }
 
-      // return hypre_error_flag;
+      return hypre_error_flag;
       /* In this case, for the original parcsr pcg, the code would take special
          action to force iterations even though the exact value was known. */
    };
@@ -451,11 +451,7 @@ hypre_PCGSolve( void *pcg_vdata,
       else
          i_prod_0 = gamma;
 
-      if ( logging>0 || print_level>0 )
-      {
-        norms[0] = sqrt(i_prod_0);
-        rel_norms[0] = sqrt(-(*(pcg_functions->InnerProd))(r,x));
-      }
+      if ( logging>0 || print_level>0 ) norms[0] = sqrt(i_prod_0);
    }
    if ( print_level > 1 && my_id==0 )
    {
@@ -515,7 +511,7 @@ hypre_PCGSolve( void *pcg_vdata,
 
       gamma_old = gamma;
 
-    /* x = x + alpha*p */
+      /* x = x + alpha*p */
       (*(pcg_functions->Axpy))(alpha, p, x);
 
       /* r = r - alpha*s */
@@ -592,8 +588,7 @@ hypre_PCGSolve( void *pcg_vdata,
       if ( logging>0 || print_level>0 )
       {
          norms[i]     = sqrt(i_prod);
-         // rel_norms[i] = bi_prod ? sqrt(i_prod/bi_prod) : 0;
-         rel_norms[i] = sqrt(-(*(pcg_functions->InnerProd))(r,x));
+         rel_norms[i] = bi_prod ? sqrt(i_prod/bi_prod) : 0;
       }
       if ( print_level > 1 && my_id==0 )
       {
