@@ -110,16 +110,12 @@ typedef struct
    hypre_Vector       **l1_norms;
 
    /* composide grid data for AMG-DD */
-   HYPRE_Int                 amgdd_start_level;
    HYPRE_Int                 amgdd_fac_num_cycles;
    HYPRE_Int                 amgdd_fac_cycle_type;
    HYPRE_Int                 amgdd_fac_relax_type;
-   HYPRE_Int                 amgdd_fac_use_pcg;
    HYPRE_Int                 amgdd_fac_num_relax;
    HYPRE_Int                 amgdd_padding;
-   HYPRE_Int                 amgdd_variable_padding;
    HYPRE_Int                 amgdd_num_ghost_layers;
-   HYPRE_Int                 amgdd_use_rd;
    hypre_AMGDDCompGrid       **amgdd_comp_grid;
    hypre_AMGDDCommPkg        *amgdd_comm_pkg;
    HYPRE_Int       (*amgddUserFACRelaxation)( hypre_AMGDDCompGrid*, hypre_AMGDDCompGridMatrix*, hypre_AMGDDCompGridVector*, hypre_AMGDDCompGridVector* );
@@ -400,16 +396,12 @@ typedef struct
 #define hypre_ParAMGDataChebyCoefs(amg_data) ((amg_data)->cheby_coefs)
 
 /* AMG-DD composite grid data and parameters */
-#define hypre_ParAMGDataAMGDDStartLevel(amg_data) ((amg_data)->amgdd_start_level)
 #define hypre_ParAMGDataAMGDDFACNumCycles(amg_data) ((amg_data)->amgdd_fac_num_cycles)
 #define hypre_ParAMGDataAMGDDFACCycleType(amg_data) ((amg_data)->amgdd_fac_cycle_type)
 #define hypre_ParAMGDataAMGDDFACRelaxType(amg_data) ((amg_data)->amgdd_fac_relax_type)
-#define hypre_ParAMGDataAMGDDFACUsePCG(amg_data) ((amg_data)->amgdd_fac_use_pcg)
 #define hypre_ParAMGDataAMGDDFACNumRelax(amg_data) ((amg_data)->amgdd_fac_num_relax)
 #define hypre_ParAMGDataAMGDDPadding(amg_data) ((amg_data)->amgdd_padding)
-#define hypre_ParAMGDataAMGDDVariablePadding(amg_data) ((amg_data)->amgdd_variable_padding)
 #define hypre_ParAMGDataAMGDDNumGhostLayers(amg_data) ((amg_data)->amgdd_num_ghost_layers)
-#define hypre_ParAMGDataAMGDDUseRD(amg_data) ((amg_data)->amgdd_use_rd)
 #define hypre_ParAMGDataAMGDDCompGrid(amg_data) ((amg_data)->amgdd_comp_grid)
 #define hypre_ParAMGDataAMGDDCommPkg(amg_data) ((amg_data)->amgdd_comm_pkg)
 #define hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) ((amg_data)->amgddUserFACRelaxation)

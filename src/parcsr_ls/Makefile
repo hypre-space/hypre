@@ -87,8 +87,6 @@ FILES =\
  par_amgdd_setup.c\
  par_amgdd_solve.c\
  par_amgdd_fac_cycle.c\
- par_amgdd_pcg.c\
- par_amgdd_test.c\
  par_amg_setup.c\
  par_amg_solve.c\
  par_amg_solveT.c\
@@ -156,7 +154,6 @@ CUFILES =\
  par_interp_trunc_device.c\
  par_lr_interp_device.c\
  par_strength_device.c\
- par_amgdd_device.c\
  par_amgdd_fac_cycle_device.c
 
 COBJS = ${FILES:.c=.o}

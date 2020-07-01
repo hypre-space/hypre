@@ -443,10 +443,6 @@ HYPRE_Int HYPRE_BoomerAMGSetFPoints( HYPRE_Solver solver, HYPRE_Int num_fpt, HYP
 
 HYPRE_Int HYPRE_BoomerAMGDDSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x );
 HYPRE_Int HYPRE_BoomerAMGDDSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x );
-HYPRE_Int HYPRE_BoomerAMGSetAMGDDStartLevel ( HYPRE_Solver solver , HYPRE_Int start_level );
-HYPRE_Int HYPRE_BoomerAMGGetAMGDDStartLevel ( HYPRE_Solver solver , HYPRE_Int *start_level );
-HYPRE_Int HYPRE_BoomerAMGSetAMGDDUseRD ( HYPRE_Solver solver , HYPRE_Int use_rd );
-HYPRE_Int HYPRE_BoomerAMGGetAMGDDUseRD ( HYPRE_Solver solver , HYPRE_Int *use_rd );
 HYPRE_Int HYPRE_BoomerAMGSetAMGDDFACNumCycles ( HYPRE_Solver solver , HYPRE_Int fac_num_cycles );
 HYPRE_Int HYPRE_BoomerAMGGetAMGDDFACNumCycles ( HYPRE_Solver solver , HYPRE_Int *fac_num_cycles );
 HYPRE_Int HYPRE_BoomerAMGSetAMGDDFACCycleType ( HYPRE_Solver solver , HYPRE_Int fac_cycle_type );
@@ -457,8 +453,6 @@ HYPRE_Int HYPRE_BoomerAMGSetAMGDDFACRelaxType ( HYPRE_Solver solver , HYPRE_Int 
 HYPRE_Int HYPRE_BoomerAMGGetAMGDDFACRelaxType ( HYPRE_Solver solver , HYPRE_Int *fac_relax_type );
 HYPRE_Int HYPRE_BoomerAMGSetAMGDDPadding ( HYPRE_Solver solver , HYPRE_Int padding );
 HYPRE_Int HYPRE_BoomerAMGGetAMGDDPadding ( HYPRE_Solver solver , HYPRE_Int *padding );
-HYPRE_Int HYPRE_BoomerAMGSetAMGDDVariablePadding ( HYPRE_Solver solver , HYPRE_Int variable_padding );
-HYPRE_Int HYPRE_BoomerAMGGetAMGDDVariablePadding ( HYPRE_Solver solver , HYPRE_Int *variable_padding );
 HYPRE_Int HYPRE_BoomerAMGSetAMGDDNumGhostLayers ( HYPRE_Solver solver , HYPRE_Int num_ghost_layers );
 HYPRE_Int HYPRE_BoomerAMGGetAMGDDNumGhostLayers ( HYPRE_Solver solver , HYPRE_Int *num_ghost_layers );
 
@@ -943,10 +937,6 @@ HYPRE_Int hypre_BoomerAMGSetCPoints( void *data, HYPRE_Int cpt_coarse_level, HYP
 HYPRE_Int hypre_BoomerAMGSetFPoints( void *data, HYPRE_Int isolated, HYPRE_Int num_points, HYPRE_BigInt *indices );
 
 HYPRE_Int hypre_BoomerAMGDDSetAMGDDUserFACRelaxation(HYPRE_Solver amg_solver, HYPRE_Int (*userFACRelaxation)( hypre_AMGDDCompGrid*, hypre_AMGDDCompGridMatrix*, hypre_AMGDDCompGridVector*, hypre_AMGDDCompGridVector* ));
-HYPRE_Int hypre_BoomerAMGSetAMGDDStartLevel ( void *data , HYPRE_Int start_level );
-HYPRE_Int hypre_BoomerAMGGetAMGDDStartLevel ( void *data , HYPRE_Int *start_level );
-HYPRE_Int hypre_BoomerAMGSetAMGDDUseRD ( void *data , HYPRE_Int use_rd );
-HYPRE_Int hypre_BoomerAMGGetAMGDDUseRD ( void *data , HYPRE_Int *use_rd );
 HYPRE_Int hypre_BoomerAMGSetAMGDDFACNumCycles ( void *data , HYPRE_Int fac_num_cycles );
 HYPRE_Int hypre_BoomerAMGGetAMGDDFACNumCycles ( void *data , HYPRE_Int *fac_num_cycles );
 HYPRE_Int hypre_BoomerAMGSetAMGDDFACCycleType ( void *data , HYPRE_Int fac_cycle_type );
@@ -957,8 +947,6 @@ HYPRE_Int hypre_BoomerAMGSetAMGDDFACRelaxType ( void *data , HYPRE_Int fac_relax
 HYPRE_Int hypre_BoomerAMGGetAMGDDFACRelaxType ( void *data , HYPRE_Int *fac_relax_type );
 HYPRE_Int hypre_BoomerAMGSetAMGDDPadding ( void *data , HYPRE_Int padding );
 HYPRE_Int hypre_BoomerAMGGetAMGDDPadding ( void *data , HYPRE_Int *padding );
-HYPRE_Int hypre_BoomerAMGSetAMGDDVariablePadding ( void *data , HYPRE_Int variable_padding );
-HYPRE_Int hypre_BoomerAMGGetAMGDDVariablePadding ( void *data , HYPRE_Int *variable_padding );
 HYPRE_Int hypre_BoomerAMGSetAMGDDNumGhostLayers ( void *data , HYPRE_Int num_ghost_layers );
 HYPRE_Int hypre_BoomerAMGGetAMGDDNumGhostLayers ( void *data , HYPRE_Int *num_ghost_layers );
 
@@ -1485,77 +1473,20 @@ HYPRE_Int hypre_ILUGetFinalRelativeResidualNorm( void *ilu_vdata, HYPRE_Real *re
 HYPRE_Int hypre_BoomerAMGDDSolve( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *b,hypre_ParVector *x );
 HYPRE_Int hypre_BoomerAMGDD_Cycle( void *amg_vdata );
 HYPRE_Int hypre_BoomerAMGDDResidualCommunication( void *amg_vdata );
-HYPRE_Int hypre_BoomerAMGDDTimeResidualCommunication( void *amg_vdata, HYPRE_Int time_level );
-HYPRE_Int hypre_BoomerAMGRDSolutionCommunication( void *amg_vdata );
 
 /* par_amgdd_setup.c */
-HYPRE_Int hypre_BoomerAMGDDSetup(  void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *b, hypre_ParVector *x, HYPRE_Int *timers, HYPRE_Int use_barriers, HYPRE_Int *communication_cost, HYPRE_Int verify_amgdd );
-
-/* par_amgdd_test.c */
-HYPRE_Int hypre_BoomerAMGDDTestSolve( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u);
-HYPRE_Int TestCompGrids1(hypre_AMGDDCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int *padding, HYPRE_Int num_ghost_layers, HYPRE_Int current_level, HYPRE_Int check_ghost_info);
-HYPRE_Int TestCompGrids2(hypre_ParAMGData *amg_data);
-HYPRE_Int CheckCompGridCommPkg(hypre_AMGDDCommPkg *compGridCommPkg);
+HYPRE_Int hypre_BoomerAMGDDSetup(  void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *b, hypre_ParVector *x );
 
 /* par_amgdd_fac_cycle.c */
 HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata, HYPRE_Int first_iteration );
-HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle_timed( void *amg_vdata, HYPRE_Int time_part );
 HYPRE_Int hypre_BoomerAMGDD_FAC_Jacobi( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDCompGridMatrix *A, hypre_AMGDDCompGridVector *f, hypre_AMGDDCompGridVector *u );
 HYPRE_Int hypre_BoomerAMGDD_FAC_GaussSeidel( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDCompGridMatrix *A, hypre_AMGDDCompGridVector *f, hypre_AMGDDCompGridVector *u );
-HYPRE_Int hypre_BoomerAMGDD_FAC_Cheby( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDCompGridMatrix *A, hypre_AMGDDCompGridVector *f, hypre_AMGDDCompGridVector *u );
 HYPRE_Int hypre_BoomerAMGDD_FAC_CFL1Jacobi( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDCompGridMatrix *A, hypre_AMGDDCompGridVector *f, hypre_AMGDDCompGridVector *u );
 HYPRE_Int hypre_BoomerAMGDD_FAC_OrderedGaussSeidel( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDCompGridMatrix *A, hypre_AMGDDCompGridVector *f, hypre_AMGDDCompGridVector *u );
-HYPRE_Int hypre_BoomerAMGDD_FAC_PCG( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDCompGridMatrix *A, hypre_AMGDDCompGridVector *f, hypre_AMGDDCompGridVector *u );
 
 /* par_amgdd_fac_cycles_device.c */
 HYPRE_Int hypre_BoomerAMGDD_FAC_Jacobi_device( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDCompGridMatrix *A, hypre_AMGDDCompGridVector *f, hypre_AMGDDCompGridVector *u );
 HYPRE_Int FAC_CFL1Jacobi_device( hypre_AMGDDCompGrid *compGrid, HYPRE_Int relax_set );
-
-/* par_amgdd_pcg.c */
-HYPRE_Int hypre_ParAMGDDPCGCreate( HYPRE_Solver *solver );
-HYPRE_Int hypre_ParAMGDDPCGDestroy( HYPRE_Solver solver );
-HYPRE_Int hypre_ParAMGDDPCGSetup( HYPRE_Solver solver,
-                      hypre_AMGDDCompGridMatrix *A,
-                      hypre_AMGDDCompGridVector *b,
-                      hypre_AMGDDCompGridVector *x      );
-HYPRE_Int hypre_ParAMGDDPCGSolve( HYPRE_Solver solver,
-                      hypre_AMGDDCompGridMatrix *A,
-                      hypre_AMGDDCompGridVector *b,
-                      hypre_AMGDDCompGridVector *x      );
-void * hypre_ParAMGDDKrylovCAlloc( HYPRE_Int count,
-                       HYPRE_Int elt_size );
-HYPRE_Int hypre_ParAMGDDKrylovFree( void *ptr );
-void * hypre_ParAMGDDKrylovCreateVector( void *vvector );
-HYPRE_Int hypre_ParAMGDDKrylovDestroyVector( void *vvector );
-void * hypre_ParAMGDDKrylovMatvecCreate( void   *A,
-                             void   *x );
-HYPRE_Int hypre_ParAMGDDKrylovMatvec( void   *matvec_data,
-                       HYPRE_Complex  alpha,
-                       void   *A,
-                       void   *x,
-                       HYPRE_Complex  beta,
-                       void   *y           );
-HYPRE_Int hypre_ParAMGDDKrylovMatvecDestroy( void *matvec_data );
-HYPRE_Real hypre_ParAMGDDKrylovInnerProd( void *x, 
-                          void *y );
-HYPRE_Int hypre_ParAMGDDKrylovCopyVector( void *x, 
-                           void *y );
-HYPRE_Int hypre_ParAMGDDKrylovClearVector( void *x );
-HYPRE_Int hypre_ParAMGDDKrylovScaleVector( HYPRE_Complex  alpha,
-                            void   *x     );
-HYPRE_Int hypre_ParAMGDDKrylovAxpy( HYPRE_Complex alpha,
-                     void   *x,
-                     void   *y );
-HYPRE_Int hypre_ParAMGDDKrylovCommInfo( void   *A, HYPRE_Int *my_id, HYPRE_Int *num_procs);
-HYPRE_Int hypre_ParAMGDDKrylovIdentitySetup( void *vdata,
-                              void *A,
-                              void *b,
-                              void *x     );
-HYPRE_Int hypre_ParAMGDDKrylovIdentity( void *vdata,
-                         void *A,
-                         void *b,
-                         void *x     );
-
 
 /* par_amgdd_comp_grid.c */
 hypre_AMGDDCompGridMatrix* hypre_AMGDDCompGridMatrixCreate();
@@ -1580,7 +1511,7 @@ HYPRE_Int hypre_AMGDDCompGridDestroy( hypre_AMGDDCompGrid *compGrid );
 HYPRE_Int hypre_AMGDDCompGridInitialize( hypre_ParAMGData *amg_data, HYPRE_Int padding, HYPRE_Int level );
 HYPRE_Int hypre_AMGDDCompGridSetupRelax( hypre_ParAMGData *amg_data );
 HYPRE_Int hypre_BoomerAMGDDSetFACRelax(HYPRE_Solver amg_solver, HYPRE_Int (*userFACRelaxation)( hypre_AMGDDCompGrid*, hypre_AMGDDCompGridMatrix*, hypre_AMGDDCompGridVector*, hypre_AMGDDCompGridVector* ));
-HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGData *amg_data, hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int start_level, HYPRE_Int num_levels, HYPRE_Int use_rd, HYPRE_Int debug );
+HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGData *amg_data, hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int num_levels );
 HYPRE_Int hypre_AMGDDCompGridSetupRealDofMarker( hypre_AMGDDCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int num_ghost_layers );
 HYPRE_Int hypre_AMGDDCompGridResize( hypre_AMGDDCompGrid *compGrid, HYPRE_Int new_size, HYPRE_Int need_coarse_info );
 HYPRE_Int hypre_AMGDDCompGridSetupLocalIndices( hypre_AMGDDCompGrid **compGrid, HYPRE_Int *num_added_nodes, HYPRE_Int ****recv_map, HYPRE_Int num_recv_procs, HYPRE_Int **A_tmp_info, HYPRE_Int start_level, HYPRE_Int num_levels );

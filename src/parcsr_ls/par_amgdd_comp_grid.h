@@ -17,7 +17,7 @@ typedef struct
    // Info needed for subsequent psi_c residual communication
 	HYPRE_Int 			num_levels; // levels in the amg hierarchy
 	HYPRE_Int 			*num_send_procs; // number of send procs to communicate with
-   HYPRE_Int           *num_recv_procs; // number of recv procs to communicate with
+   HYPRE_Int         *num_recv_procs; // number of recv procs to communicate with
 
    HYPRE_Int         **send_procs; // list of send procs
    HYPRE_Int         **recv_procs; // list of recv procs
@@ -26,7 +26,7 @@ typedef struct
 	HYPRE_Int 			**recv_buffer_size; // size of recv buffer on each level for each proc
 
 	HYPRE_Int 			***num_send_nodes; // number of nodes to send on each composite level
-   HYPRE_Int           ***num_recv_nodes; // number of nodes to recv on each composite level
+   HYPRE_Int         ***num_recv_nodes; // number of nodes to recv on each composite level
 	HYPRE_Int 			****send_flag; // flags which nodes to send after composite grid is built
 	HYPRE_Int 			****recv_map; // mapping from recv buffer to appropriate local indices on each comp grid
 
@@ -136,8 +136,6 @@ typedef struct
    hypre_AMGDDCompGridMatrix *P;
    hypre_AMGDDCompGridMatrix *R;
 
-   HYPRE_Solver pcg_solver;
-
    hypre_AMGDDCompGridVector     *u;
    hypre_AMGDDCompGridVector     *f;
    hypre_AMGDDCompGridVector     *t;
@@ -188,8 +186,6 @@ typedef struct
 #define hypre_AMGDDCompGridA(compGrid)               ((compGrid) -> A)
 #define hypre_AMGDDCompGridP(compGrid)               ((compGrid) -> P)
 #define hypre_AMGDDCompGridR(compGrid)               ((compGrid) -> R)
-
-#define hypre_AMGDDCompGridPCGSolver(compGrid)       ((compGrid) -> pcg_solver)
 
 #define hypre_AMGDDCompGridU(compGrid)           ((compGrid) -> u)
 #define hypre_AMGDDCompGridF(compGrid)           ((compGrid) -> f)

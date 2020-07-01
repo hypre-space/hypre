@@ -10,25 +10,6 @@
 
 #if defined(HYPRE_USING_CUDA)
 
-/* struct componentwise_multiply_functor */
-/* { */
-
-/*    __host__ __device__ */
-/*    float operator()(const HYPRE_Complex& x, const HYPRE_Complex& y) const { */ 
-/*       return x * y; */
-/*    } */
-/* }; */
-
-/* void thrust_componentwise_multiply(HYPRE_Complex *x, HYPRE_Complex *y, HYPRE_Int size) */
-/* { */
-/*     // y <- x * y */
-/*     thrust::transform(thrust::device, x, x + size, y, y, componentwise_multiply_functor()); */
-/* } */
-
-
-
-
-
 __global__
 void VecScaleKernel(HYPRE_Complex *__restrict__ u, const HYPRE_Complex *__restrict__ v, const HYPRE_Complex * __restrict__ l1_norm, hypre_int num_rows)
 {

@@ -347,16 +347,12 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataRtilde(amg_data) = NULL;
    hypre_ParAMGDataDinv(amg_data) = NULL;
 
-   hypre_ParAMGDataAMGDDStartLevel(amg_data) = 0; 
    hypre_ParAMGDataAMGDDFACNumCycles(amg_data) = 2;
    hypre_ParAMGDataAMGDDFACCycleType(amg_data) = 1;
    hypre_ParAMGDataAMGDDFACRelaxType(amg_data) = 3;
-   hypre_ParAMGDataAMGDDFACUsePCG(amg_data) = 0;
    hypre_ParAMGDataAMGDDFACNumRelax(amg_data) = 1;
    hypre_ParAMGDataAMGDDPadding(amg_data) = 1;
-   hypre_ParAMGDataAMGDDVariablePadding(amg_data) = 0;
    hypre_ParAMGDataAMGDDNumGhostLayers(amg_data) = 1;
-   hypre_ParAMGDataAMGDDUseRD(amg_data) = 0;
    hypre_ParAMGDataAMGDDCompGrid(amg_data) = NULL;
    hypre_ParAMGDataAMGDDCommPkg(amg_data) = NULL;
    hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) = hypre_BoomerAMGDD_FAC_CFL1Jacobi;
@@ -817,7 +813,7 @@ hypre_BoomerAMGDestroy( void *data )
    /* destroy amgdd composite grids and commpkg */
    if (hypre_ParAMGDataAMGDDCompGrid(amg_data))
    {
-      for (i = hypre_ParAMGDataAMGDDStartLevel(amg_data); i < num_levels; i++)
+      for (i = 0; i < num_levels; i++)
       {
          hypre_AMGDDCompGridDestroy(hypre_ParAMGDataAMGDDCompGrid(amg_data)[i]);
       }
@@ -1681,74 +1677,6 @@ hypre_BoomerAMGGetMaxIter( void     *data,
 }
 
 HYPRE_Int
-hypre_BoomerAMGSetAMGDDUseRD( void     *data,
-                        HYPRE_Int       use_rd )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
- 
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   } 
-
-   hypre_ParAMGDataAMGDDUseRD(amg_data) = use_rd;
-
-   return hypre_error_flag;
-} 
-
-HYPRE_Int
-hypre_BoomerAMGGetAMGDDUseRD( void     *data,
-                        HYPRE_Int *     use_rd )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
- 
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   } 
-
-   *use_rd = hypre_ParAMGDataAMGDDUseRD(amg_data);
-
-   return hypre_error_flag;
-} 
-
-HYPRE_Int
-hypre_BoomerAMGSetAMGDDStartLevel( void     *data,
-                        HYPRE_Int       start_level )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
- 
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   } 
-
-   hypre_ParAMGDataAMGDDStartLevel(amg_data) = start_level;
-
-   return hypre_error_flag;
-} 
-
-HYPRE_Int
-hypre_BoomerAMGGetAMGDDStartLevel( void     *data,
-                        HYPRE_Int *     start_level )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
- 
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   } 
-
-   *start_level = hypre_ParAMGDataAMGDDStartLevel(amg_data);
-
-   return hypre_error_flag;
-} 
-
-HYPRE_Int
 hypre_BoomerAMGSetAMGDDFACNumRelax( void     *data,
                         HYPRE_Int       amgdd_fac_num_relax )
 {
@@ -1914,40 +1842,6 @@ hypre_BoomerAMGGetAMGDDPadding( void     *data,
    } 
 
    *padding = hypre_ParAMGDataAMGDDPadding(amg_data);
-
-   return hypre_error_flag;
-} 
-
-HYPRE_Int
-hypre_BoomerAMGSetAMGDDVariablePadding( void     *data,
-                        HYPRE_Int       variable_padding )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
- 
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   } 
-
-   hypre_ParAMGDataAMGDDVariablePadding(amg_data) = variable_padding;
-
-   return hypre_error_flag;
-} 
-
-HYPRE_Int
-hypre_BoomerAMGGetAMGDDVariablePadding( void     *data,
-                        HYPRE_Int *     variable_padding )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
- 
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   } 
-
-   *variable_padding = hypre_ParAMGDataAMGDDVariablePadding(amg_data);
 
    return hypre_error_flag;
 } 

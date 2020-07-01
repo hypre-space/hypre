@@ -455,42 +455,6 @@ HYPRE_BoomerAMGGetMaxIter( HYPRE_Solver solver,
 }
 
 /*-------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetAMGDDStartLevel
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_BoomerAMGSetAMGDDStartLevel( HYPRE_Solver solver,
-                           HYPRE_Int          start_level  )
-{
-   return( hypre_BoomerAMGSetAMGDDStartLevel( (void *) solver, start_level ) );
-}
-
-HYPRE_Int
-HYPRE_BoomerAMGGetAMGDDStartLevel( HYPRE_Solver solver,
-                           HYPRE_Int        * start_level  )
-{
-   return( hypre_BoomerAMGGetAMGDDStartLevel( (void *) solver, start_level ) );
-}
-
-/*-------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetAMGDDUseRD
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_BoomerAMGSetAMGDDUseRD( HYPRE_Solver solver,
-                           HYPRE_Int          use_rd  )
-{
-   return( hypre_BoomerAMGSetAMGDDUseRD( (void *) solver, use_rd ) );
-}
-
-HYPRE_Int
-HYPRE_BoomerAMGGetAMGDDUseRD( HYPRE_Solver solver,
-                           HYPRE_Int        * use_rd  )
-{
-   return( hypre_BoomerAMGGetAMGDDUseRD( (void *) solver, use_rd ) );
-}
-
-/*-------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetAMGDDFACNumRelax
  *--------------------------------------------------------------------------*/
 
@@ -578,24 +542,6 @@ HYPRE_BoomerAMGGetAMGDDPadding( HYPRE_Solver solver,
                            HYPRE_Int        * padding  )
 {
    return( hypre_BoomerAMGGetAMGDDPadding( (void *) solver, padding ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetAMGDDVariablePadding
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_BoomerAMGSetAMGDDVariablePadding( HYPRE_Solver solver,
-                           HYPRE_Int          variable_padding  )
-{
-   return( hypre_BoomerAMGSetAMGDDVariablePadding( (void *) solver, variable_padding ) );
-}
-
-HYPRE_Int
-HYPRE_BoomerAMGGetAMGDDVariablePadding( HYPRE_Solver solver,
-                           HYPRE_Int        * variable_padding  )
-{
-   return( hypre_BoomerAMGGetAMGDDVariablePadding( (void *) solver, variable_padding ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -2093,8 +2039,7 @@ HYPRE_BoomerAMGDDSetup( HYPRE_Solver solver,
    return ( hypre_BoomerAMGDDSetup( (void *) solver, 
                                  (hypre_ParCSRMatrix *) A,
                                  (hypre_ParVector *) b,
-                                 (hypre_ParVector *) x,
-                                  NULL, 0, NULL, 0 ) );
+                                 (hypre_ParVector *) x ) );
 }
 
 /*--------------------------------------------------------------------------
