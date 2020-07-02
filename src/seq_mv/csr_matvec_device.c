@@ -85,11 +85,15 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
       int y_size_override = 0;
       int x_size_override = 0;
       if((trans?A->num_cols:A->num_rows) != y->size) {
-         hypre_printf("WARNING: A matrix-vector product with mismatching dimensions is attempted (likely y incorrect) | %i x %i T:%i , %i \n", A->num_rows, A->num_cols, trans, y->size);
+#ifdef HYPRE_DEBUG
+         hypre_printf("WARNING: A matrix-vector product with mismatching dimensions is attempted (likely y incorrect) | %i x %i T:%i , %i [%s : %i] \n", A->num_rows, A->num_cols, trans, y->size, __FILE__, __LINE__);
+#endif
          y_size_override = trans?A->num_cols:A->num_rows;
       }
       if((trans?A->num_rows:A->num_cols) != x->size) {
-         hypre_printf("WARNING: A matrix-vector product with mismatching dimensions is attempted (likely x incorrect) | %i x %i T:%i , %i \n", A->num_rows, A->num_cols, trans, x->size);
+#ifdef HYPRE_DEBUG
+         hypre_printf("WARNING: A matrix-vector product with mismatching dimensions is attempted (likely x incorrect) | %i x %i T:%i , %i [%s : %i] \n", A->num_rows, A->num_cols, trans, x->size, __FILE__, __LINE__);
+#endif
          x_size_override = trans?A->num_rows:A->num_cols;
       }
       cusparseDnVecDescr_t vecX = hypre_VecToCuda(x, offset, x_size_override);
