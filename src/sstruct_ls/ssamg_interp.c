@@ -289,7 +289,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                                    A_dbox, Astart, Astride, Ai,
                                    P_dbox, Pstart, Pstride, Pi);
 #ifdef HYPRE_USING_OPENMP
-#praga omp parallel for private(HYPRE_BOX_PRIVATE,Ai,Pi,si,center,Ap,Astenc) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,Pi,si,center,Ap,Astenc) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop2For(Ai, Pi)
                {

@@ -84,6 +84,8 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
 
    hypre_IndexRef           dom_stride;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /* Make sure that the transpose coefficients are stored in A (note that the
     * resizing will provide no option to restore A to its previous state) */
    if (matvec_data -> transpose)
@@ -142,6 +144,8 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
    (matvec_data -> compute_pkg) = compute_pkg;
    (matvec_data -> data_space)  = data_space;
 
+   HYPRE_ANNOTATE_FUNC_END;
+
    return hypre_error_flag;
 }
 
@@ -189,7 +193,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                            HYPRE_Complex       beta,
                            hypre_StructVector *y )
 {
-	hypre_StructMatvecData  *matvec_data = (hypre_StructMatvecData  *)matvec_vdata;
+   hypre_StructMatvecData  *matvec_data = (hypre_StructMatvecData  *)matvec_vdata;
 
    hypre_ComputePkg        *compute_pkg;
    hypre_CommHandle        *comm_handle;
@@ -230,6 +234,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    /*-----------------------------------------------------------------------
     * Initialize some things
     *-----------------------------------------------------------------------*/
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
 #if 0
    /* RDF: Should not need this if the boundaries were cleared initially */
@@ -292,6 +297,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
          }
          hypre_BoxLoop1End(yi);
       }
+      HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
    }
@@ -519,6 +525,8 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
    /* This restores the original grid and data layout */
    hypre_StructVectorRestore(x);
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

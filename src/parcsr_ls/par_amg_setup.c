@@ -12,7 +12,7 @@
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
-#include "par_csr_block_matrix.h"	
+#include "par_csr_block_matrix.h"
 
 #define DEBUG 0
 #define PRINT_CF 0
@@ -33,7 +33,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                       hypre_ParVector    *f,
                       hypre_ParVector    *u         )
 {
-   MPI_Comm 	      comm = hypre_ParCSRMatrixComm(A); 
+   MPI_Comm 	      comm = hypre_ParCSRMatrixComm(A);
    hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
 
    /* Data Structure variables */
@@ -47,8 +47,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParVector     *Ztemp = NULL;
    hypre_ParCSRMatrix **P_array;
    hypre_ParVector    *Residual_array;
-   HYPRE_Int                **CF_marker_array;   
-   HYPRE_Int                **dof_func_array;   
+   HYPRE_Int                **CF_marker_array;
+   HYPRE_Int                **dof_func_array;
    HYPRE_Int                 *dof_func;
    HYPRE_Int                 *col_offd_S_to_A;
    HYPRE_Int                 *col_offd_SN_to_AN;
@@ -63,7 +63,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Real           S_commpkg_switch;
    HYPRE_Real  		CR_rate;
    HYPRE_Int       relax_order;
-   HYPRE_Int      max_levels; 
+   HYPRE_Int      max_levels;
    HYPRE_Int      amg_logging;
    HYPRE_Int      amg_print_level;
    HYPRE_Int      debug_flag;
@@ -74,7 +74,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int      agg_P12_max_elmts;
    HYPRE_Int      IS_type;
    HYPRE_Int      num_CR_relax_steps;
-   HYPRE_Int      CR_use_CG; 
+   HYPRE_Int      CR_use_CG;
    HYPRE_Int      cgc_its; /* BM Aug 25, 2006 */
    HYPRE_Int      mult_additive = hypre_ParAMGDataMultAdditive(amg_data);
    HYPRE_Int      additive = hypre_ParAMGDataAdditive(amg_data);
@@ -85,7 +85,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Real      add_rlx_wt = hypre_ParAMGDataAddRelaxWt(amg_data);
 
    hypre_ParCSRBlockMatrix **A_block_array, **P_block_array;
- 
+
    /* Local variables */
    HYPRE_Int                 *CF_marker;
    HYPRE_Int                 *CFN_marker;
@@ -127,7 +127,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int       num_paths = hypre_ParAMGDataNumPaths(amg_data);
    HYPRE_Int       agg_num_levels = hypre_ParAMGDataAggNumLevels(amg_data);
    HYPRE_Int       agg_interp_type = hypre_ParAMGDataAggInterpType(amg_data);
-   HYPRE_Int       sep_weight = hypre_ParAMGDataSepWeight(amg_data); 
+   HYPRE_Int       sep_weight = hypre_ParAMGDataSepWeight(amg_data);
    HYPRE_Int	    *coarse_dof_func = NULL;
    HYPRE_Int	    *coarse_pnts_global;
    HYPRE_Int	    *coarse_pnts_global1;
@@ -170,9 +170,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    /* parameters for non-Galerkin stuff */
    HYPRE_Int nongalerk_num_tol = hypre_ParAMGDataNonGalerkNumTol (amg_data);
-   HYPRE_Real *nongalerk_tol = hypre_ParAMGDataNonGalerkTol (amg_data); 
-   HYPRE_Real nongalerk_tol_l = 0.0; 
-   HYPRE_Real *nongal_tol_array = hypre_ParAMGDataNonGalTolArray (amg_data); 
+   HYPRE_Real *nongalerk_tol = hypre_ParAMGDataNonGalerkTol (amg_data);
+   HYPRE_Real nongalerk_tol_l = 0.0;
+   HYPRE_Real *nongal_tol_array = hypre_ParAMGDataNonGalTolArray (amg_data);
 
    hypre_ParCSRBlockMatrix *A_H_block;
 
@@ -187,7 +187,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    /*hypre_CSRMatrix *A_new;*/
 
-   hypre_MPI_Comm_size(comm, &num_procs);   
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
 
    num_threads = hypre_NumThreads();
@@ -230,7 +232,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParAMGDataNumVariables(amg_data) = hypre_ParCSRMatrixNumRows(A);
 
    if (num_procs == 1) seq_threshold = 0;
-   if (setup_type == 0) return hypre_error_flag;
+   if (setup_type == 0)
+   {
+      HYPRE_ANNOTATE_FUNC_END;
+      return hypre_error_flag;
+   }
 
    S = NULL;
 
@@ -240,11 +246,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    dof_func_array = hypre_ParAMGDataDofFuncArray(amg_data);
    local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
 
- 
+
    A_block_array = hypre_ParAMGDataABlockArray(amg_data);
    P_block_array = hypre_ParAMGDataPBlockArray(amg_data);
 
-   grid_relax_type[3] = hypre_ParAMGDataUserCoarseRelaxType(amg_data); 
+   grid_relax_type[3] = hypre_ParAMGDataUserCoarseRelaxType(amg_data);
 
    /* change in definition of standard and multipass interpolation, by
       eliminating interp_type 9 and 5 and setting sep_weight instead
@@ -272,10 +278,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    }
 
    /* Verify that settings are correct for solving systmes */
-   /* If the user has specified either a block interpolation or a block relaxation then 
-      we need to make sure the other has been choosen as well  - so we can be 
+   /* If the user has specified either a block interpolation or a block relaxation then
+      we need to make sure the other has been choosen as well  - so we can be
       in "block mode" - storing only block matrices on the coarse levels*/
-   /* Furthermore, if we are using systems and nodal = 0, then 
+   /* Furthermore, if we are using systems and nodal = 0, then
       we will change nodal to 1 */
    /* probably should disable stuff like smooth num levels at some point */
 
@@ -288,36 +294,36 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          hypre_ParAMGDataInterpType(amg_data) = 20;
          interp_type = hypre_ParAMGDataInterpType(amg_data) ;
       }
-      
+
       for (i=1; i < 3; i++)
       {
          if (grid_relax_type[i] < 20)
          {
             grid_relax_type[i] = 23;
          }
-         
+
       }
       if (grid_relax_type[3] < 20) grid_relax_type[3] = 29;  /* GE */
- 
+
       block_mode = 1;
    }
 
    if (interp_type >= 20 || interp_type == 11 || interp_type == 10 ) /* block interp choosen */
    {
-      if (!(nodal)) 
+      if (!(nodal))
       {
          hypre_ParAMGDataNodal(amg_data) = 1;
          nodal = hypre_ParAMGDataNodal(amg_data);
       }
       for (i=0; i < 3; i++)
       {
-         if (grid_relax_type[i] < 20)      
+         if (grid_relax_type[i] < 20)
             grid_relax_type[i] = 23;
       }
-             
+
       if (grid_relax_type[3] < 20) grid_relax_type[3] = 29; /* GE */
 
-      block_mode = 1;      
+      block_mode = 1;
 
    }
 
@@ -343,7 +349,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParCSRBlockMatrixDestroy(A_block_array[j]);
             A_block_array[j] = NULL;
          }
-        
+
 
 
          if (dof_func_array[j])
@@ -405,47 +411,47 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          hypre_ParVectorDestroy(hypre_ParAMGDataZtemp(amg_data));
          hypre_ParAMGDataZtemp(amg_data) = NULL;
       }
-   
+
       if (hypre_ParAMGDataACoarse(amg_data))
       {
          hypre_ParCSRMatrixDestroy(hypre_ParAMGDataACoarse(amg_data));
          hypre_ParAMGDataACoarse(amg_data) = NULL;
       }
-   
+
       if (hypre_ParAMGDataUCoarse(amg_data))
       {
          hypre_ParVectorDestroy(hypre_ParAMGDataUCoarse(amg_data));
          hypre_ParAMGDataUCoarse(amg_data) = NULL;
       }
-   
+
       if (hypre_ParAMGDataFCoarse(amg_data))
       {
          hypre_ParVectorDestroy(hypre_ParAMGDataFCoarse(amg_data));
          hypre_ParAMGDataFCoarse(amg_data) = NULL;
       }
-   
-      if (hypre_ParAMGDataAMat(amg_data)) 
+
+      if (hypre_ParAMGDataAMat(amg_data))
       {
 	 hypre_TFree(hypre_ParAMGDataAMat(amg_data));
 	 hypre_ParAMGDataAMat(amg_data) = NULL;
       }
-      if (hypre_ParAMGDataBVec(amg_data)) 
+      if (hypre_ParAMGDataBVec(amg_data))
       {
 	 hypre_TFree(hypre_ParAMGDataBVec(amg_data));
 	 hypre_ParAMGDataBVec(amg_data) = NULL;
       }
-      if (hypre_ParAMGDataCommInfo(amg_data)) 
+      if (hypre_ParAMGDataCommInfo(amg_data))
       {
 	 hypre_TFree(hypre_ParAMGDataCommInfo(amg_data));
 	 hypre_ParAMGDataCommInfo(amg_data) = NULL;
       }
-   
+
       if (new_comm != hypre_MPI_COMM_NULL)
       {
          hypre_MPI_Comm_free (&new_comm);
          hypre_ParAMGDataNewComm(amg_data) = hypre_MPI_COMM_NULL;
       }
-  
+
       if (amg)
       {
          hypre_BoomerAMGDestroy (amg);
@@ -477,7 +483,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          {
             for (i=0; i < smooth_num_levels; i++)
             {
-               if (smoother[i]) 
+               if (smoother[i])
                {
 		  HYPRE_ParCSRPilutDestroy(smoother[i]);
                   smoother[i] = NULL;
@@ -488,7 +494,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          {
             for (i=0; i < smooth_num_levels; i++)
             {
-               if (smoother[i]) 
+               if (smoother[i])
                {
                   HYPRE_ParCSRParaSailsDestroy(smoother[i]);
                   smoother[i] = NULL;
@@ -499,7 +505,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          {
             for (i=0; i < smooth_num_levels; i++)
             {
-               if (smoother[i]) 
+               if (smoother[i])
                {
                   HYPRE_EuclidDestroy(smoother[i]);
                   smoother[i] = NULL;
@@ -510,7 +516,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          {
             for (i=0; i < smooth_num_levels; i++)
             {
-               if (smoother[i]) 
+               if (smoother[i])
                {
                   HYPRE_SchwarzDestroy(smoother[i]);
                   smoother[i] = NULL;
@@ -566,8 +572,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    }
 
    A_array[0] = A;
-                                                                             
-                                                                             
+
+
    /* interp vectors setup */
    if (interp_vec_variant == 1)
    {
@@ -581,7 +587,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       hypre_ParAMGInterpVectorsArray(amg_data)= interp_vectors_array;
    }
 
-   
+
 
    if (block_mode)
    {
@@ -590,7 +596,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       hypre_ParCSRBlockMatrixSetNumNonzeros(A_block_array[0]);
       hypre_ParCSRBlockMatrixSetDNumNonzeros(A_block_array[0]);
    }
-   
+
 
    dof_func_array[0] = dof_func;
    hypre_ParAMGDataCFMarkerArray(amg_data) = CF_marker_array;
@@ -618,7 +624,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParVectorSetPartitioningOwner(Vtemp,0);
    hypre_ParAMGDataVtemp(amg_data) = Vtemp;
 
-   if ((smooth_num_levels > 0 && smooth_type > 9) 
+   if ((smooth_num_levels > 0 && smooth_type > 9)
 		|| relax_weight[0] < 0 || omega[0] < 0 ||
                 hypre_ParAMGDataSchwarzRlxWeight(amg_data) < 0)
    {
@@ -635,7 +641,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       hypre_ParVectorSetPartitioningOwner(Rtemp,0);
       hypre_ParAMGDataRtemp(amg_data) = Rtemp;
    }
-  
+
    /* See if we need the Ztemp vector */
    if ((smooth_num_levels > 0 && smooth_type > 6)
 		 || relax_weight[0] < 0 || omega[0] < 0 ||
@@ -657,7 +663,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
        hypre_ParVectorInitialize(Ztemp);
        hypre_ParVectorSetPartitioningOwner(Ztemp,0);
        hypre_ParAMGDataZtemp(amg_data) = Ztemp;
-      
+
    }
    else if (num_threads > 1)
    {
@@ -678,7 +684,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
       }
    }
-   
+
 
 
    F_array = hypre_ParAMGDataFArray(amg_data);
@@ -718,7 +724,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    not_finished_coarsening = 1;
    level = 0;
-  
+
    strong_threshold = hypre_ParAMGDataStrongThreshold(amg_data);
    CR_strong_th = hypre_ParAMGDataCRStrongTh(amg_data);
    max_row_sum = hypre_ParAMGDataMaxRowSum(amg_data);
@@ -754,16 +760,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       {
          fine_size =    hypre_ParCSRBlockMatrixGlobalNumRows(A_block_array[level]);
       }
-      else 
+      else
       {
          fine_size = hypre_ParCSRMatrixGlobalNumRows(A_array[level]);
       }
-      
+
 
 
 
       if (level > 0)
-      {   
+      {
 
          if (block_mode)
          {
@@ -773,8 +779,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                               hypre_ParCSRBlockMatrixRowStarts(A_block_array[level]),
                                               hypre_ParCSRBlockMatrixBlockSize(A_block_array[level]));
             hypre_ParVectorInitialize(F_array[level]);
-            
-            U_array[level] =  
+
+            U_array[level] =
                hypre_ParVectorCreateFromBlock(hypre_ParCSRBlockMatrixComm(A_block_array[level]),
                                               hypre_ParCSRMatrixGlobalNumRows(A_block_array[level]),
                                               hypre_ParCSRBlockMatrixRowStarts(A_block_array[level]),
@@ -782,7 +788,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
             hypre_ParVectorInitialize(U_array[level]);
          }
-         else 
+         else
          {
             F_array[level] =
                hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[level]),
@@ -790,7 +796,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                      hypre_ParCSRMatrixRowStarts(A_array[level]));
             hypre_ParVectorInitialize(F_array[level]);
             hypre_ParVectorSetPartitioningOwner(F_array[level],0);
-            
+
             U_array[level] =
                hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[level]),
                                      hypre_ParCSRMatrixGlobalNumRows(A_array[level]),
@@ -798,14 +804,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParVectorInitialize(U_array[level]);
             hypre_ParVectorSetPartitioningOwner(U_array[level],0);
          }
-         
+
       }
 
       /*-------------------------------------------------------------
        * Select coarse-grid points on 'level' : returns CF_marker
-       * for the level.  Returns strength matrix, S  
+       * for the level.  Returns strength matrix, S
        *--------------------------------------------------------------*/
-     
+
       if (debug_flag==1) wall_time = time_getWallclockSeconds();
       if (debug_flag==3)
       {
@@ -833,12 +839,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             local_num_vars =
                hypre_CSRBlockMatrixNumRows(hypre_ParCSRBlockMatrixDiag(A_block_array[level]));
          }
-         else 
+         else
          {
             local_num_vars =
                hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level]));
          }
-	 if (hypre_ParAMGDataGSMG(amg_data) || 
+	 if (hypre_ParAMGDataGSMG(amg_data) ||
              hypre_ParAMGDataInterpType(amg_data) == 1)
          {
 	    hypre_BoomerAMGCreateSmoothVecs(amg_data, A_array[level],
@@ -847,12 +853,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
 
 
-         /**** Get the Strength Matrix ****/        
+         /**** Get the Strength Matrix ****/
 
          if (hypre_ParAMGDataGSMG(amg_data) == 0)
 	 {
-	    if (nodal) /* if we are solving systems and 
-                          not using the unknown approach then we need to 
+	    if (nodal) /* if we are solving systems and
+                          not using the unknown approach then we need to
                           convert A to a nodal matrix - values that represent the
                           blocks  - before getting the strength matrix*/
 	    {
@@ -867,18 +873,18 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                               dof_func_array[level], hypre_abs(nodal), nodal_diag, &AN);
                }
 
-               /* dof array not needed for creating S because we pass in that 
+               /* dof array not needed for creating S because we pass in that
                   the number of functions is 1 */
                /* creat s two different ways - depending on if any entries in AN are negative: */
 
-               /* first: positive and negative entries */  
-               if (nodal == 3 || nodal == 6 || nodal_diag > 0)  
+               /* first: positive and negative entries */
+               if (nodal == 3 || nodal == 6 || nodal_diag > 0)
                   hypre_BoomerAMGCreateS(AN, strong_threshold, max_row_sum,
                                    1, NULL,&SN);
                else /* all entries are positive */
 		  hypre_BoomerAMGCreateSabs(AN, strong_threshold, max_row_sum,
                                    1, NULL,&SN);
-            
+
 
                col_offd_S_to_A = NULL;
 	       col_offd_SN_to_AN = NULL;
@@ -887,8 +893,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	    }
 	    else /* standard AMG or unknown approach */
 	    {
-	       hypre_BoomerAMGCreateS(A_array[level], 
-				   strong_threshold, max_row_sum, 
+	       hypre_BoomerAMGCreateS(A_array[level],
+				   strong_threshold, max_row_sum,
 				   num_functions, dof_func_array[level],&S);
 	       col_offd_S_to_A = NULL;
 	       if (strong_threshold > S_commpkg_switch)
@@ -899,15 +905,15 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	 else
 	 {
 	    hypre_BoomerAMGCreateSmoothDirs(amg_data, A_array[level],
-	       SmoothVecs, strong_threshold, 
+	       SmoothVecs, strong_threshold,
                num_functions, dof_func_array[level], &S);
 	 }
 
 
-         /**** Do the appropriate coarsening ****/ 
+         /**** Do the appropriate coarsening ****/
 
          if (nodal == 0) /* no nodal coarsening */
-         { 
+         {
            if (coarsen_type == 6)
                hypre_BoomerAMGCoarsenFalgout(S, A_array[level], measure_type,
                                              debug_flag, &CF_marker);
@@ -973,9 +979,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                else if (coarsen_type == 7)
                   hypre_BoomerAMGCoarsen(S2, S2, 2, debug_flag, &CFN_marker);
                else if (coarsen_type)
-                  hypre_BoomerAMGCoarsenRuge(S2, S2, measure_type, coarsen_type, 
+                  hypre_BoomerAMGCoarsenRuge(S2, S2, measure_type, coarsen_type,
 				debug_flag, &CFN_marker);
-               else 
+               else
                   hypre_BoomerAMGCoarsen(S2, S2, 0, debug_flag, &CFN_marker);
                hypre_ParCSRMatrixDestroy(S2);
            }
@@ -1055,9 +1061,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                else if (coarsen_type == 7)
                   hypre_BoomerAMGCoarsen(S2, S2, 2, debug_flag, &CF2_marker);
                else if (coarsen_type)
-                  hypre_BoomerAMGCoarsenRuge(S2, S2, measure_type, coarsen_type, 
+                  hypre_BoomerAMGCoarsenRuge(S2, S2, measure_type, coarsen_type,
 				debug_flag, &CF2_marker);
-               else 
+               else
                   hypre_BoomerAMGCoarsen(S2, S2, 0, debug_flag, &CF2_marker);
                hypre_ParCSRMatrixDestroy(S2);
                S2 = NULL;
@@ -1067,12 +1073,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
               col_offd_S_to_A = NULL;
               /* hypre_BoomerAMGCreateScalarCFS(A_array[level],
               			SN, CFN_marker, col_offd_SN_to_AN,
-                                num_functions, nodal, 0, NULL, &CF_marker, 
+                                num_functions, nodal, 0, NULL, &CF_marker,
                                 &col_offd_S_to_A, &S); */
-              
+
               hypre_BoomerAMGCreateScalarCFS(
               			SN, CFN_marker, col_offd_SN_to_AN,
-                                num_functions, nodal, 0, NULL, &CF_marker, 
+                                num_functions, nodal, 0, NULL, &CF_marker,
                                 &col_offd_S_to_A, &S);
               if (col_offd_SN_to_AN == NULL)
               	col_offd_S_to_A = NULL;
@@ -1085,7 +1091,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
            }
          }
    /*****xxxxxxxxxxxxx changes for min_coarse_size */
-         /* here we will determine the coarse grid size to be able to determine if it is not smaller 
+         /* here we will determine the coarse grid size to be able to determine if it is not smaller
 	    than requested minimal size */
          if (level >= agg_num_levels)
          {
@@ -1118,7 +1124,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	     {
 	        grid_relax_type[3] = grid_relax_type[0];
 	        num_grid_sweeps[3] = 1;
-	        if (grid_relax_points) grid_relax_points[3][0] = 0; 
+	        if (grid_relax_points) grid_relax_points[3][0] = 0;
 	     }
 	     if (S) hypre_ParCSRMatrixDestroy(S);
 	     if (SN) hypre_ParCSRMatrixDestroy(SN);
@@ -1134,7 +1140,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                 hypre_ParVectorDestroy(U_array[level]);
              }
              coarse_size = fine_size;
-             break; 
+             break;
           }
 
           if (coarse_size < min_coarse_size)
@@ -1150,7 +1156,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                hypre_ParVectorDestroy(U_array[level]);
             }
             coarse_size = fine_size;
-            break; 
+            break;
           }
          }
 
@@ -1160,23 +1166,23 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             if (nodal == 0)
             {
 	       if (agg_interp_type == 1)
-          	  hypre_BoomerAMGBuildExtPIInterp(A_array[level], 
-		        CF_marker, S, coarse_pnts_global1, 
-			num_functions, dof_func_array[level], debug_flag, 
+          	  hypre_BoomerAMGBuildExtPIInterp(A_array[level],
+		        CF_marker, S, coarse_pnts_global1,
+			num_functions, dof_func_array[level], debug_flag,
 			agg_P12_trunc_factor, agg_P12_max_elmts, col_offd_S_to_A, &P1);
 	       else if (agg_interp_type == 2)
-                  hypre_BoomerAMGBuildStdInterp(A_array[level], 
-		        CF_marker, S, coarse_pnts_global1, 
-			num_functions, dof_func_array[level], debug_flag, 
+                  hypre_BoomerAMGBuildStdInterp(A_array[level],
+		        CF_marker, S, coarse_pnts_global1,
+			num_functions, dof_func_array[level], debug_flag,
 			agg_P12_trunc_factor, agg_P12_max_elmts, 0, col_offd_S_to_A, &P1);
 	       else if (agg_interp_type == 3)
-                  hypre_BoomerAMGBuildExtInterp(A_array[level], 
-		        CF_marker, S, coarse_pnts_global1, 
-			num_functions, dof_func_array[level], debug_flag, 
+                  hypre_BoomerAMGBuildExtInterp(A_array[level],
+		        CF_marker, S, coarse_pnts_global1,
+			num_functions, dof_func_array[level], debug_flag,
 			agg_P12_trunc_factor, agg_P12_max_elmts, col_offd_S_to_A, &P1);
                if (agg_interp_type == 4)
                {
-                  hypre_BoomerAMGCorrectCFMarker (CF_marker, local_num_vars, 
+                  hypre_BoomerAMGCorrectCFMarker (CF_marker, local_num_vars,
 			CFN_marker);
                   hypre_TFree(coarse_pnts_global1);
                   /*hypre_TFree(coarse_dof_func);
@@ -1184,16 +1190,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_TFree(CFN_marker);
                   hypre_BoomerAMGCoarseParms(comm, local_num_vars,
                         num_functions, dof_func_array[level], CF_marker,
-                        &coarse_dof_func,&coarse_pnts_global); 
-                  hypre_BoomerAMGBuildMultipass(A_array[level], 
-			CF_marker, S, coarse_pnts_global, 
-			num_functions, dof_func_array[level], debug_flag, 
-			agg_trunc_factor, agg_P_max_elmts, sep_weight, 
+                        &coarse_dof_func,&coarse_pnts_global);
+                  hypre_BoomerAMGBuildMultipass(A_array[level],
+			CF_marker, S, coarse_pnts_global,
+			num_functions, dof_func_array[level], debug_flag,
+			agg_trunc_factor, agg_P_max_elmts, sep_weight,
 			col_offd_S_to_A, &P);
                }
                else
                {
-                  hypre_BoomerAMGCorrectCFMarker2 (CF_marker, local_num_vars, 
+                  hypre_BoomerAMGCorrectCFMarker2 (CF_marker, local_num_vars,
 			CFN_marker);
                   hypre_TFree(CFN_marker);
                   /*hypre_TFree(coarse_dof_func);
@@ -1205,26 +1211,26 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                      dof_func_array[level+1] = coarse_dof_func;*/
 	          hypre_TFree(col_offd_S_to_A);
                   if (agg_interp_type == 1)
-		     hypre_BoomerAMGBuildPartialExtPIInterp(A_array[level], 
-		       	CF_marker, S, coarse_pnts_global, 
-			coarse_pnts_global1, num_functions, 
-			dof_func_array[level], debug_flag, agg_P12_trunc_factor, 
+		     hypre_BoomerAMGBuildPartialExtPIInterp(A_array[level],
+		       	CF_marker, S, coarse_pnts_global,
+			coarse_pnts_global1, num_functions,
+			dof_func_array[level], debug_flag, agg_P12_trunc_factor,
 			agg_P12_max_elmts, col_offd_S_to_A, &P2);
                   else if (agg_interp_type == 2)
-		     hypre_BoomerAMGBuildPartialStdInterp(A_array[level], 
-		       	CF_marker, S, coarse_pnts_global, 
-			coarse_pnts_global1, num_functions, 
-			dof_func_array[level], debug_flag, agg_P12_trunc_factor, 
+		     hypre_BoomerAMGBuildPartialStdInterp(A_array[level],
+		       	CF_marker, S, coarse_pnts_global,
+			coarse_pnts_global1, num_functions,
+			dof_func_array[level], debug_flag, agg_P12_trunc_factor,
 			agg_P12_max_elmts, sep_weight, col_offd_S_to_A, &P2);
                   else if (agg_interp_type == 3)
-		     hypre_BoomerAMGBuildPartialExtInterp(A_array[level], 
-		       	CF_marker, S, coarse_pnts_global, 
-			coarse_pnts_global1, num_functions, 
-			dof_func_array[level], debug_flag, agg_P12_trunc_factor, 
+		     hypre_BoomerAMGBuildPartialExtInterp(A_array[level],
+		       	CF_marker, S, coarse_pnts_global,
+			coarse_pnts_global1, num_functions,
+			dof_func_array[level], debug_flag, agg_P12_trunc_factor,
 			agg_P12_max_elmts, col_offd_S_to_A, &P2);
                   P = hypre_ParMatmul(P1,P2);
-                  hypre_BoomerAMGInterpTruncation(P, agg_trunc_factor, 
-			agg_P_max_elmts);          
+                  hypre_BoomerAMGInterpTruncation(P, agg_trunc_factor,
+			agg_P_max_elmts);
 	          hypre_MatvecCommPkgCreate(P);
                   hypre_ParCSRMatrixDestroy(P1);
                   hypre_ParCSRMatrixOwnsColStarts(P2) = 0;
@@ -1236,17 +1242,17 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             {
                if (agg_interp_type == 4)
                {
-		  hypre_BoomerAMGCorrectCFMarker (CFN_marker, 
+		  hypre_BoomerAMGCorrectCFMarker (CFN_marker,
 			local_num_vars/num_functions, CF2_marker);
 		  hypre_TFree (CF2_marker);
                   hypre_TFree(coarse_pnts_global1);
                   col_offd_S_to_A = NULL;
-/*                  hypre_BoomerAMGCreateScalarCFS(A_array[level],SN, CFN_marker, 
-			col_offd_SN_to_AN, num_functions, nodal, 0, NULL, 
+/*                  hypre_BoomerAMGCreateScalarCFS(A_array[level],SN, CFN_marker,
+			col_offd_SN_to_AN, num_functions, nodal, 0, NULL,
 			&CF_marker, &col_offd_S_to_A, &S); */
 
-                  hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker, 
-			col_offd_SN_to_AN, num_functions, nodal, 0, NULL, 
+                  hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker,
+			col_offd_SN_to_AN, num_functions, nodal, 0, NULL,
 			&CF_marker, &col_offd_S_to_A, &S);
                   if (col_offd_SN_to_AN == NULL)
               	     col_offd_S_to_A = NULL;
@@ -1254,22 +1260,22 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_BoomerAMGCoarseParms(comm, local_num_vars,
                         num_functions, dof_func_array[level], CF_marker,
                         &coarse_dof_func,&coarse_pnts_global);
-                  hypre_BoomerAMGBuildMultipass(A_array[level], 
-			CF_marker, S, coarse_pnts_global, 
-			num_functions, dof_func_array[level], debug_flag, 
-			agg_trunc_factor, agg_P_max_elmts, sep_weight, 
+                  hypre_BoomerAMGBuildMultipass(A_array[level],
+			CF_marker, S, coarse_pnts_global,
+			num_functions, dof_func_array[level], debug_flag,
+			agg_trunc_factor, agg_P_max_elmts, sep_weight,
 			col_offd_S_to_A, &P);
                }
 	       else
 	       {
                   col_offd_S_to_A = NULL;
-/*                  hypre_BoomerAMGCreateScalarCFS(A_array[level],SN, CFN_marker, 
-			col_offd_SN_to_AN, num_functions, nodal, 0, NULL, 
+/*                  hypre_BoomerAMGCreateScalarCFS(A_array[level],SN, CFN_marker,
+			col_offd_SN_to_AN, num_functions, nodal, 0, NULL,
 			&CF_marker, &col_offd_S_to_A, &S);*/
-                  hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker, 
-			col_offd_SN_to_AN, num_functions, nodal, 0, NULL, 
+                  hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker,
+			col_offd_SN_to_AN, num_functions, nodal, 0, NULL,
                                  &CF_marker, &col_offd_S_to_A, &S);
-#ifdef HYPRE_NO_GLOBAL_PARTITION 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
                   for (i=0; i < 2; i++)
 		      coarse_pnts_global1[i] *= num_functions;
 #else
@@ -1279,21 +1285,21 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   if (col_offd_SN_to_AN == NULL)
               	     col_offd_S_to_A = NULL;
 	          if (agg_interp_type == 1)
-          	     hypre_BoomerAMGBuildExtPIInterp(A_array[level], 
-		        CF_marker, S, coarse_pnts_global1, 
-			num_functions, dof_func_array[level], debug_flag, 
+          	     hypre_BoomerAMGBuildExtPIInterp(A_array[level],
+		        CF_marker, S, coarse_pnts_global1,
+			num_functions, dof_func_array[level], debug_flag,
 			agg_P12_trunc_factor, agg_P12_max_elmts, col_offd_S_to_A, &P1);
 	          else if (agg_interp_type == 2)
-                     hypre_BoomerAMGBuildStdInterp(A_array[level], 
-		        CF_marker, S, coarse_pnts_global1, 
-			num_functions, dof_func_array[level], debug_flag, 
+                     hypre_BoomerAMGBuildStdInterp(A_array[level],
+		        CF_marker, S, coarse_pnts_global1,
+			num_functions, dof_func_array[level], debug_flag,
 			agg_P12_trunc_factor, agg_P12_max_elmts, 0, col_offd_S_to_A, &P1);
 	          else if (agg_interp_type == 3)
-                     hypre_BoomerAMGBuildExtInterp(A_array[level], 
-		        CF_marker, S, coarse_pnts_global1, 
-			num_functions, dof_func_array[level], debug_flag, 
+                     hypre_BoomerAMGBuildExtInterp(A_array[level],
+		        CF_marker, S, coarse_pnts_global1,
+			num_functions, dof_func_array[level], debug_flag,
 			agg_P12_trunc_factor, agg_P12_max_elmts, col_offd_S_to_A, &P1);
-		  hypre_BoomerAMGCorrectCFMarker2 (CFN_marker, 
+		  hypre_BoomerAMGCorrectCFMarker2 (CFN_marker,
 			local_num_vars/num_functions, CF2_marker);
                   hypre_TFree(CF2_marker);
                   hypre_TFree(CF_marker);
@@ -1302,11 +1308,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   CF_marker = NULL;
                   CF2_marker = NULL;
                   hypre_ParCSRMatrixDestroy(S);
-                  /* hypre_BoomerAMGCreateScalarCFS(A_array[level],SN, CFN_marker, 
-			col_offd_SN_to_AN, num_functions, nodal, 0, NULL, 
+                  /* hypre_BoomerAMGCreateScalarCFS(A_array[level],SN, CFN_marker,
+			col_offd_SN_to_AN, num_functions, nodal, 0, NULL,
 			&CF_marker, &col_offd_S_to_A, &S); */
-                  hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker, 
-			col_offd_SN_to_AN, num_functions, nodal, 0, NULL, 
+                  hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker,
+			col_offd_SN_to_AN, num_functions, nodal, 0, NULL,
 			&CF_marker, &col_offd_S_to_A, &S);
 
                   if (col_offd_SN_to_AN == NULL)
@@ -1318,26 +1324,26 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   /*if (num_functions > 1 && nodal > -1 && (!block_mode) )
                      dof_func_array[level+1] = coarse_dof_func;*/
                   if (agg_interp_type == 1)
-		     hypre_BoomerAMGBuildPartialExtPIInterp(A_array[level], 
-		       	CF_marker, S, coarse_pnts_global, 
-			coarse_pnts_global1, num_functions, 
-			dof_func_array[level], debug_flag, agg_P12_trunc_factor, 
+		     hypre_BoomerAMGBuildPartialExtPIInterp(A_array[level],
+		       	CF_marker, S, coarse_pnts_global,
+			coarse_pnts_global1, num_functions,
+			dof_func_array[level], debug_flag, agg_P12_trunc_factor,
 			agg_P12_max_elmts, col_offd_S_to_A, &P2);
                   else if (agg_interp_type == 2)
-		     hypre_BoomerAMGBuildPartialStdInterp(A_array[level], 
-		       	CF_marker, S, coarse_pnts_global, 
-			coarse_pnts_global1, num_functions, 
-			dof_func_array[level], debug_flag, agg_P12_trunc_factor, 
+		     hypre_BoomerAMGBuildPartialStdInterp(A_array[level],
+		       	CF_marker, S, coarse_pnts_global,
+			coarse_pnts_global1, num_functions,
+			dof_func_array[level], debug_flag, agg_P12_trunc_factor,
 			agg_P12_max_elmts, sep_weight, col_offd_S_to_A, &P2);
                   else if (agg_interp_type == 3)
-		     hypre_BoomerAMGBuildPartialExtInterp(A_array[level], 
-		       	CF_marker, S, coarse_pnts_global, 
-			coarse_pnts_global1, num_functions, 
-			dof_func_array[level], debug_flag, agg_P12_trunc_factor, 
+		     hypre_BoomerAMGBuildPartialExtInterp(A_array[level],
+		       	CF_marker, S, coarse_pnts_global,
+			coarse_pnts_global1, num_functions,
+			dof_func_array[level], debug_flag, agg_P12_trunc_factor,
 			agg_P12_max_elmts, col_offd_S_to_A, &P2);
                   P = hypre_ParMatmul(P1,P2);
-                  hypre_BoomerAMGInterpTruncation(P, agg_trunc_factor, 
-			agg_P_max_elmts);          
+                  hypre_BoomerAMGInterpTruncation(P, agg_trunc_factor,
+			agg_P_max_elmts);
 	          hypre_MatvecCommPkgCreate(P);
                   hypre_ParCSRMatrixDestroy(P1);
                   hypre_ParCSRMatrixOwnsColStarts(P2) = 0;
@@ -1359,7 +1365,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          else /* no aggressive coarsening */
          {
             /**** Get the coarse parameters ****/
-/* xxxxxxxxxxxxxxxxxxxxxxxxx change for min_coarse_size 
+/* xxxxxxxxxxxxxxxxxxxxxxxxx change for min_coarse_size
             if (block_mode )
             {
                hypre_BoomerAMGCoarseParms(comm,
@@ -1378,22 +1384,22 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #else
             coarse_size = coarse_pnts_global[num_procs];
 #endif
- xxxxxxxxxxxxxxxxxxxxxxxxx change for min_coarse_size */ 
+ xxxxxxxxxxxxxxxxxxxxxxxxx change for min_coarse_size */
          if (debug_flag==1)
          {
             wall_time = time_getWallclockSeconds() - wall_time;
             hypre_printf("Proc = %d    Level = %d    Coarsen Time = %f\n",
-                       my_id,level, wall_time); 
+                       my_id,level, wall_time);
 	    fflush(NULL);
          }
 
 
             if (debug_flag==1) wall_time = time_getWallclockSeconds();
 
-            if (interp_type == 4) 
+            if (interp_type == 4)
             {
-               hypre_BoomerAMGBuildMultipass(A_array[level], CF_marker, 
-                                             S, coarse_pnts_global, num_functions, dof_func_array[level], 
+               hypre_BoomerAMGBuildMultipass(A_array[level], CF_marker,
+                                             S, coarse_pnts_global, num_functions, dof_func_array[level],
                                              debug_flag, trunc_factor, P_max_elmts, sep_weight, col_offd_S_to_A, &P);
 	       hypre_TFree(col_offd_S_to_A);
             }
@@ -1402,65 +1408,65 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                hypre_BoomerAMGNormalizeVecs(
                   hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level])),
                   hypre_ParAMGDataNumSamples(amg_data), SmoothVecs);
-               
+
                hypre_BoomerAMGBuildInterpLS(NULL, CF_marker, S,
-                                            coarse_pnts_global, num_functions, dof_func_array[level], 
-                                            debug_flag, trunc_factor, 
+                                            coarse_pnts_global, num_functions, dof_func_array[level],
+                                            debug_flag, trunc_factor,
                                             hypre_ParAMGDataNumSamples(amg_data), SmoothVecs, &P);
             }
             else if (interp_type == 2)
             {
-               hypre_BoomerAMGBuildInterpHE(A_array[level], CF_marker, 
-                                            S, coarse_pnts_global, num_functions, dof_func_array[level], 
+               hypre_BoomerAMGBuildInterpHE(A_array[level], CF_marker,
+                                            S, coarse_pnts_global, num_functions, dof_func_array[level],
                                             debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
 	       hypre_TFree(col_offd_S_to_A);
             }
             else if (interp_type == 3)
             {
-               hypre_BoomerAMGBuildDirInterp(A_array[level], CF_marker, 
-                                             S, coarse_pnts_global, num_functions, dof_func_array[level], 
+               hypre_BoomerAMGBuildDirInterp(A_array[level], CF_marker,
+                                             S, coarse_pnts_global, num_functions, dof_func_array[level],
                                              debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
 	       hypre_TFree(col_offd_S_to_A);
             }
             else if (interp_type == 6) /*Extended+i classical interpolation */
             {
-               hypre_BoomerAMGBuildExtPIInterp(A_array[level], CF_marker, 
-                                               S, coarse_pnts_global, num_functions, dof_func_array[level], 
+               hypre_BoomerAMGBuildExtPIInterp(A_array[level], CF_marker,
+                                               S, coarse_pnts_global, num_functions, dof_func_array[level],
                                                debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
                hypre_TFree(col_offd_S_to_A);
             }
             else if (interp_type == 14) /*Extended classical interpolation */
             {
-               hypre_BoomerAMGBuildExtInterp(A_array[level], CF_marker, 
-                                             S, coarse_pnts_global, num_functions, dof_func_array[level], 
+               hypre_BoomerAMGBuildExtInterp(A_array[level], CF_marker,
+                                             S, coarse_pnts_global, num_functions, dof_func_array[level],
                                              debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
                hypre_TFree(col_offd_S_to_A);
             }
             else if (interp_type == 7) /*Extended+i (if no common C) interpolation */
             {
-               hypre_BoomerAMGBuildExtPICCInterp(A_array[level], CF_marker, 
-                                                 S, coarse_pnts_global, num_functions, dof_func_array[level], 
+               hypre_BoomerAMGBuildExtPICCInterp(A_array[level], CF_marker,
+                                                 S, coarse_pnts_global, num_functions, dof_func_array[level],
                                                  debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
                hypre_TFree(col_offd_S_to_A);
             }
             else if (interp_type == 12) /*FF interpolation */
             {
-               hypre_BoomerAMGBuildFFInterp(A_array[level], CF_marker, 
-                                            S, coarse_pnts_global, num_functions, dof_func_array[level], 
+               hypre_BoomerAMGBuildFFInterp(A_array[level], CF_marker,
+                                            S, coarse_pnts_global, num_functions, dof_func_array[level],
                                             debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
                hypre_TFree(col_offd_S_to_A);
             }
             else if (interp_type == 13) /*FF1 interpolation */
             {
-               hypre_BoomerAMGBuildFF1Interp(A_array[level], CF_marker, 
-                                             S, coarse_pnts_global, num_functions, dof_func_array[level], 
+               hypre_BoomerAMGBuildFF1Interp(A_array[level], CF_marker,
+                                             S, coarse_pnts_global, num_functions, dof_func_array[level],
                                              debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
                hypre_TFree(col_offd_S_to_A);
            }
            else if (interp_type == 8) /*Standard interpolation */
            {
-              hypre_BoomerAMGBuildStdInterp(A_array[level], CF_marker, 
-                                            S, coarse_pnts_global, num_functions, dof_func_array[level], 
+              hypre_BoomerAMGBuildStdInterp(A_array[level], CF_marker,
+                                            S, coarse_pnts_global, num_functions, dof_func_array[level],
                                             debug_flag, trunc_factor, P_max_elmts, sep_weight, col_offd_S_to_A, &P);
 	      hypre_TFree(col_offd_S_to_A);
            }
@@ -1476,11 +1482,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                     A_block_array[level] =  hypre_ParCSRBlockMatrixConvertFromParCSRMatrix(
                        A_array[level], num_functions);
                  }
-                 
+
                  /* note that the current CF_marker is nodal */
                  if (interp_type == 11)
                  {
-                    hypre_BoomerAMGBuildBlockInterpDiag( A_block_array[level], CF_marker, 
+                    hypre_BoomerAMGBuildBlockInterpDiag( A_block_array[level], CF_marker,
                                                          SN,
                                                          coarse_pnts_global, 1,
                                                          NULL,
@@ -1488,12 +1494,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                          trunc_factor, P_max_elmts,1,
                                                          col_offd_S_to_A,
                                                          &P_block_array[level]);
-                    
+
 
                  }
                  else if (interp_type == 22)
                  {
-                    hypre_BoomerAMGBuildBlockInterpRV( A_block_array[level], CF_marker, 
+                    hypre_BoomerAMGBuildBlockInterpRV( A_block_array[level], CF_marker,
                                                        SN,
                                                        coarse_pnts_global, 1,
                                                        NULL,
@@ -1504,7 +1510,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                  }
                  else if (interp_type == 23)
                  {
-                    hypre_BoomerAMGBuildBlockInterpRV( A_block_array[level], CF_marker, 
+                    hypre_BoomerAMGBuildBlockInterpRV( A_block_array[level], CF_marker,
                                                        SN,
                                                        coarse_pnts_global, 1,
                                                        NULL,
@@ -1515,7 +1521,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                  }
                  else if (interp_type == 20)
                  {
-                    hypre_BoomerAMGBuildBlockInterp( A_block_array[level], CF_marker, 
+                    hypre_BoomerAMGBuildBlockInterp( A_block_array[level], CF_marker,
                                                      SN,
                                                      coarse_pnts_global, 1,
                                                      NULL,
@@ -1523,11 +1529,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                      trunc_factor, P_max_elmts, 0,
                                                      col_offd_S_to_A,
                                                      &P_block_array[level]);
-                    
+
                  }
                  else if (interp_type == 21)
                  {
-                    hypre_BoomerAMGBuildBlockInterpDiag( A_block_array[level], CF_marker, 
+                    hypre_BoomerAMGBuildBlockInterpDiag( A_block_array[level], CF_marker,
                                                          SN,
                                                          coarse_pnts_global, 1,
                                                          NULL,
@@ -1538,7 +1544,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                  }
                  else if (interp_type == 24)
                  {
-                    hypre_BoomerAMGBuildBlockDirInterp( A_block_array[level], CF_marker, 
+                    hypre_BoomerAMGBuildBlockDirInterp( A_block_array[level], CF_marker,
                                                         SN,
                                                         coarse_pnts_global, 1,
                                                         NULL,
@@ -1550,8 +1556,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
                  else /* interp_type ==10 */
                  {
-                    
-                    hypre_BoomerAMGBuildBlockInterp( A_block_array[level], CF_marker, 
+
+                    hypre_BoomerAMGBuildBlockInterp( A_block_array[level], CF_marker,
                                                      SN,
                                                      coarse_pnts_global, 1,
                                                      NULL,
@@ -1559,19 +1565,19 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                      trunc_factor, P_max_elmts, 1,
                                                      col_offd_S_to_A,
                                                      &P_block_array[level]);
-                    
+
                  }
-            
-#ifdef HYPRE_NO_GLOBAL_PARTITION 
-                 /* we need to set the global number of cols in P, as this was 
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+                 /* we need to set the global number of cols in P, as this was
                     not done in the interp
-                    (which calls the matrix create) since we didn't 
+                    (which calls the matrix create) since we didn't
                     have the global partition */
                  /*  this has to be done before converting from block to non-block*/
                  hypre_ParCSRBlockMatrixGlobalNumCols(P_block_array[level]) = coarse_size;
 #endif
-                 
-                 /* if we don't do nodal relaxation, we need a CF_array that is 
+
+                 /* if we don't do nodal relaxation, we need a CF_array that is
                     not nodal - right now we don't allow this to happen though*/
                  /*
                    if (grid_relax_type[0] < 20  )
@@ -1579,96 +1585,96 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                    hypre_BoomerAMGCreateScalarCF(CFN_marker, num_functions,
                    hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(AN)),
                    &dof_func1, &CF_marker);
-               
+
                    dof_func_array[level+1] = dof_func1;
                    hypre_TFree (CFN_marker);
                    CF_marker_array[level] = CF_marker;
                    }
                  */
-                 
+
                  /* clean up other things */
                  hypre_ParCSRMatrixDestroy(AN);
                  hypre_ParCSRMatrixDestroy(SN);
-                 
+
               }
               else /* not block mode - use default interp (interp_type = 0) */
               {
                  if (nodal > -1) /* non-systems, or systems with unknown approach interpolation*/
                  {
                     /* if systems, do we want to use an interp. that uses the full strength matrix?*/
-                    
-                    if ( (num_functions > 1) && (interp_type == 19 || interp_type == 18 || interp_type == 17 || interp_type == 16))   
+
+                    if ( (num_functions > 1) && (interp_type == 19 || interp_type == 18 || interp_type == 17 || interp_type == 16))
                     {
                        /* so create a second strength matrix and build interp with with num_functions = 1 */
-                       hypre_BoomerAMGCreateS(A_array[level], 
-                                              strong_threshold, max_row_sum, 
+                       hypre_BoomerAMGCreateS(A_array[level],
+                                              strong_threshold, max_row_sum,
                                               1, dof_func_array[level],&S2);
                        col_offd_S_to_A = NULL;
-                       switch (interp_type) 
+                       switch (interp_type)
                        {
-                          
+
                           case 19:
                              dbg_flg = debug_flag;
                              if (amg_print_level) dbg_flg = -debug_flag;
-                             hypre_BoomerAMGBuildInterp(A_array[level], CF_marker, 
-                                                        S2, coarse_pnts_global, 1, 
-                                                        dof_func_array[level], 
+                             hypre_BoomerAMGBuildInterp(A_array[level], CF_marker,
+                                                        S2, coarse_pnts_global, 1,
+                                                        dof_func_array[level],
                                                         dbg_flg, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
                              break;
-                             
+
                           case 18:
-                             hypre_BoomerAMGBuildStdInterp(A_array[level], CF_marker, 
-                                                           S2, coarse_pnts_global, 1, dof_func_array[level], 
+                             hypre_BoomerAMGBuildStdInterp(A_array[level], CF_marker,
+                                                           S2, coarse_pnts_global, 1, dof_func_array[level],
                                                            debug_flag, trunc_factor, P_max_elmts, 0, col_offd_S_to_A, &P);
-                             
+
                              break;
-                             
+
                           case 17:
-                             hypre_BoomerAMGBuildExtPIInterp(A_array[level], CF_marker, 
-                                                             S2, coarse_pnts_global, 1, dof_func_array[level], 
+                             hypre_BoomerAMGBuildExtPIInterp(A_array[level], CF_marker,
+                                                             S2, coarse_pnts_global, 1, dof_func_array[level],
                                                              debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
                              break;
                           case 16:
                              dbg_flg = debug_flag;
                              if (amg_print_level) dbg_flg = -debug_flag;
-                             hypre_BoomerAMGBuildInterpModUnk(A_array[level], CF_marker, 
-                                                              S2, coarse_pnts_global, num_functions, dof_func_array[level], 
+                             hypre_BoomerAMGBuildInterpModUnk(A_array[level], CF_marker,
+                                                              S2, coarse_pnts_global, num_functions, dof_func_array[level],
                                                               dbg_flg, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
                              break;
-                             
+
                        }
-                  
+
 
                        hypre_ParCSRMatrixDestroy(S2);
-             
+
                     }
                     else /* one function only or unknown-based interpolation- */
                     {
                        dbg_flg = debug_flag;
                        if (amg_print_level) dbg_flg = -debug_flag;
-                       
-                       hypre_BoomerAMGBuildInterp(A_array[level], CF_marker, 
-                                                  S, coarse_pnts_global, num_functions, 
-                                                  dof_func_array[level], 
+
+                       hypre_BoomerAMGBuildInterp(A_array[level], CF_marker,
+                                                  S, coarse_pnts_global, num_functions,
+                                                  dof_func_array[level],
                                                   dbg_flg, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
-                       
-                       
+
+
                     }
-               
+
                     hypre_TFree(col_offd_S_to_A);
                  }
-              } 
+              }
            }
            else
            {
               hypre_BoomerAMGBuildInterpGSMG(NULL, CF_marker, S,
-                                             coarse_pnts_global, num_functions, dof_func_array[level], 
+                                             coarse_pnts_global, num_functions, dof_func_array[level],
                                              debug_flag, trunc_factor, &P);
-              
-              
+
+
            }
-            
-            
+
+
          } /* end of no aggressive coarsening */
 
          /*dof_func_array[level+1] = NULL;
@@ -1678,14 +1684,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
          /* store the CF array */
          CF_marker_array[level] = CF_marker;
-         
+
 
          dof_func_array[level+1] = NULL;
          if (num_functions > 1 && nodal > -1 && (!block_mode) )
 	    dof_func_array[level+1] = coarse_dof_func;
 
-         
-      
+
+
       } /* end of if max_levels > 1 */
 
       /* if no coarse-grid, stop coarsening, and set the
@@ -1702,7 +1708,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	 {
 	    grid_relax_type[3] = grid_relax_type[0];
 	    num_grid_sweeps[3] = 1;
-	    if (grid_relax_points) grid_relax_points[3][0] = 0; 
+	    if (grid_relax_points) grid_relax_points[3][0] = 0;
 	 }
 	 if (S)
             hypre_ParCSRMatrixDestroy(S);
@@ -1717,7 +1723,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParVectorDestroy(U_array[level]);
          }
 
-         break; 
+         break;
       }
       if (level < agg_num_levels && coarse_size < min_coarse_size)
       {
@@ -1733,11 +1739,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
          coarse_size = fine_size;
 
-         break; 
-      } 
+         break;
+      }
 
       /*-------------------------------------------------------------
-       * Build prolongation matrix, P, and place in P_array[level] 
+       * Build prolongation matrix, P, and place in P_array[level]
        *--------------------------------------------------------------*/
 
       if (interp_refine > 0 )
@@ -1746,8 +1752,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_BoomerAMGRefineInterp(A_array[level],
                                         &P,
                                         coarse_pnts_global,
-                                        &num_functions, 
-                                        dof_func_array[level], 
+                                        &num_functions,
+                                        dof_func_array[level],
                                         CF_marker_array[level], level);
       }
 
@@ -1764,16 +1770,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          {
 
             /* coarsen the smooth vecs */
-            hypre_BoomerAMGCoarsenInterpVectors( P, 
+            hypre_BoomerAMGCoarsenInterpVectors( P,
                                                  num_interp_vectors,
                                                  interp_vectors_array[level],
-                                                 CF_marker_array[level], 
-                                                 &interp_vectors_array[level+1], 
+                                                 CF_marker_array[level],
+                                                 &interp_vectors_array[level+1],
                                                  0, num_functions);
-            
+
          }
          /* do  GM 2 and LN (3) at all levels and GM 1 only on first level */
-         if (( interp_vec_variant > 1  && level >= interp_vec_first_level) || 
+         if (( interp_vec_variant > 1  && level >= interp_vec_first_level) ||
              (interp_vec_variant == 1 && interp_vec_first_level == level))
 
          {
@@ -1788,74 +1794,74 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                &P,
                                                num_interp_vectors,
                                                interp_vectors_array[level],
-                                               &num_functions, 
-                                               dof_func_array[level], 
+                                               &num_functions,
+                                               dof_func_array[level],
                                                &dof_func_array[level+1],
-                                               interp_vec_variant, level, 
-                                               abs_q_trunc, 
-                                               expandp_weights, 
+                                               interp_vec_variant, level,
+                                               abs_q_trunc,
+                                               expandp_weights,
                                                q_max,
                                                CF_marker_array[level], interp_vec_first_level);
             }
             else /* LN */
             {
                hypre_BoomerAMG_LNExpandInterp( A_array[level],
-                                               &P, 
+                                               &P,
                                                coarse_pnts_global,
-                                               &num_functions, 
-                                               dof_func_array[level], 
+                                               &num_functions,
+                                               dof_func_array[level],
                                                &dof_func_array[level+1],
                                                CF_marker_array[level],
                                                level,
-                                               expandp_weights, 
+                                               expandp_weights,
                                                num_interp_vectors,
                                                interp_vectors_array[level],
-                                               abs_q_trunc, 
+                                               abs_q_trunc,
                                                q_max,
                                                interp_vec_first_level);
             }
-            
+
             if (level == interp_vec_first_level)
             {
                /* check to see if we made A bigger - this can happen
                 * in 3D with certain coarsenings   - if so, need to fix vtemp*/
-               
-               HYPRE_Int local_sz = hypre_ParVectorActualLocalSize(Vtemp);  
+
+               HYPRE_Int local_sz = hypre_ParVectorActualLocalSize(Vtemp);
                HYPRE_Int local_P_sz = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(P));
                if (local_sz < local_P_sz)
                {
                   hypre_Vector* Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
-                  hypre_TFree(hypre_VectorData(Vtemp_local)); 
-                  hypre_VectorSize(Vtemp_local) = local_P_sz; 
+                  hypre_TFree(hypre_VectorData(Vtemp_local));
+                  hypre_VectorSize(Vtemp_local) = local_P_sz;
                   hypre_VectorData(Vtemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz);
                   if (Ztemp)
                   {
                      hypre_Vector* Ztemp_local = hypre_ParVectorLocalVector(Ztemp);
-                     hypre_TFree(hypre_VectorData(Ztemp_local)); 
-                     hypre_VectorSize(Ztemp_local) = local_P_sz; 
+                     hypre_TFree(hypre_VectorData(Ztemp_local));
+                     hypre_VectorSize(Ztemp_local) = local_P_sz;
                      hypre_VectorData(Ztemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz);
                   }
                   if (Ptemp)
                   {
                      hypre_Vector* Ptemp_local = hypre_ParVectorLocalVector(Ptemp);
-                     hypre_TFree(hypre_VectorData(Ptemp_local)); 
-                     hypre_VectorSize(Ptemp_local) = local_P_sz; 
+                     hypre_TFree(hypre_VectorData(Ptemp_local));
+                     hypre_VectorSize(Ptemp_local) = local_P_sz;
                      hypre_VectorData(Ptemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz);
                   }
                   if (Rtemp)
                   {
                      hypre_Vector* Rtemp_local = hypre_ParVectorLocalVector(Rtemp);
-                     hypre_TFree(hypre_VectorData(Rtemp_local)); 
-                     hypre_VectorSize(Rtemp_local) = local_P_sz; 
+                     hypre_TFree(hypre_VectorData(Rtemp_local));
+                     hypre_VectorSize(Rtemp_local) = local_P_sz;
                      hypre_VectorData(Rtemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz);
                   }
-               } 
+               }
                /*if (hypre_ParCSRMatrixGlobalNumRows(A_array[0]) < hypre_ParCSRMatrixGlobalNumCols(P))
                {
-                  
+
                   hypre_ParVectorDestroy(Vtemp);
                   Vtemp = NULL;
-                  
+
                   Vtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(P),
                                                 hypre_ParCSRMatrixGlobalNumCols(P),
                                                 hypre_ParCSRMatrixColStarts(P));
@@ -1869,20 +1875,20 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             if (interp_vec_variant > 1 && level < max_levels)
             {
                HYPRE_Int expand_level = 0;
-               
+
                if (level == interp_vec_first_level)
                   expand_level = 1;
-               
-               hypre_BoomerAMGCoarsenInterpVectors( P, 
+
+               hypre_BoomerAMGCoarsenInterpVectors( P,
                                                     num_interp_vectors,
                                                     interp_vectors_array[level],
-                                                    CF_marker_array[level], 
-                                                    &interp_vectors_array[level+1], 
+                                                    CF_marker_array[level],
+                                                    &interp_vectors_array[level+1],
                                                     expand_level, num_functions);
             }
          } /* end apply variant */
       }/* end interp_vec_variant > 0 */
-      
+
       for (i=0; i < post_interp_type; i++)
          /* Improve on P with Jacobi interpolation */
          hypre_BoomerAMGJacobiInterp( A_array[level], &P, S,
@@ -1912,9 +1918,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
             else
             {
-               if (num_threads == 1) 
+               if (num_threads == 1)
 		  hypre_ParCSRComputeL1Norms(A_array[level], 1, NULL, &d_diag);
-               else 
+               else
                   hypre_ParCSRComputeL1NormsThreads(A_array[level], 1, num_threads, NULL, &d_diag);
             }
             hypre_ParCSRMatrixAminvDB(P,Q,d_diag,&P_array[level]);
@@ -1922,11 +1928,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParCSRMatrixRowStarts(A_H) = hypre_ParCSRMatrixColStarts(A_H);
             hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
             hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
-            hypre_ParCSRMatrixOwnsColStarts(P) = 0; 
-            if (num_procs > 1) hypre_MatvecCommPkgCreate(A_H); 
+            hypre_ParCSRMatrixOwnsColStarts(P) = 0;
+            if (num_procs > 1) hypre_MatvecCommPkgCreate(A_H);
             /*hypre_ParCSRMatrixDestroy(P); */
-            hypre_TFree(d_diag); 
-	    /*hypre_BoomerAMGBuildCoarseOperator(P, A_array[level] , P, &A_H); 
+            hypre_TFree(d_diag);
+	    /*hypre_BoomerAMGBuildCoarseOperator(P, A_array[level] , P, &A_H);
             hypre_ParCSRMatrix *C = NULL;
             HYPRE_Int *num_grid_sweeps
                         = hypre_ParAMGDataNumGridSweeps(amg_data);
@@ -1952,15 +1958,15 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             {
             /* Build Non-Galerkin Coarse Grid */
                hypre_BoomerAMGBuildNonGalerkinCoarseOperator(&A_H, Q,
-                    0.333*strong_threshold, max_row_sum, num_functions, 
-                    dof_func_array[level+1], S_commpkg_switch, CF_marker_array[level], 
+                    0.333*strong_threshold, max_row_sum, num_functions,
+                    dof_func_array[level+1], S_commpkg_switch, CF_marker_array[level],
                     /* nongalerk_tol, sym_collapse, lump_percent, beta );*/
                       nongalerk_tol_l,      1,            0.5,    1.0 );
-            
+
                hypre_ParCSRMatrixColStarts(P_array[level]) = hypre_ParCSRMatrixRowStarts(A_H);
                if (!hypre_ParCSRMatrixCommPkg(A_H))
                    hypre_MatvecCommPkgCreate(A_H);
-			
+
             }
             hypre_ParCSRMatrixDestroy(Q);
 
@@ -1975,9 +1981,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParCSRMatrixDestroy(P);
          }
          else
-            P_array[level] = P; 
+            P_array[level] = P;
       }
-     
+
       if (S) hypre_ParCSRMatrixDestroy(S);
       S = NULL;
 
@@ -2004,7 +2010,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          hypre_ParCSRBlockMatrixRAP(P_block_array[level],
                                     A_block_array[level],
                                     P_block_array[level], &A_H_block);
-         
+
          hypre_ParCSRBlockMatrixSetNumNonzeros(A_H_block);
          hypre_ParCSRBlockMatrixSetDNumNonzeros(A_H_block);
          A_block_array[level+1] = A_H_block;
@@ -2028,17 +2034,17 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
             hypre_ParCSRMatrixOwnsColStarts(P_array[level]) = 0;
             if (num_procs > 1) hypre_MatvecCommPkgCreate(A_H);
-            
+
             /* Build Non-Galerkin Coarse Grid */
             hypre_BoomerAMGBuildNonGalerkinCoarseOperator(&A_H, Q,
-                    0.333*strong_threshold, max_row_sum, num_functions, 
-                    dof_func_array[level+1], S_commpkg_switch, CF_marker_array[level], 
+                    0.333*strong_threshold, max_row_sum, num_functions,
+                    dof_func_array[level+1], S_commpkg_switch, CF_marker_array[level],
                     /* nongalerk_tol, sym_collapse, lump_percent, beta );*/
                       nongalerk_tol_l,      1,            0.5,    1.0 );
-            
+
             if (!hypre_ParCSRMatrixCommPkg(A_H))
                 hypre_MatvecCommPkgCreate(A_H);
-            
+
             /* Delete AP */
             hypre_ParCSRMatrixDestroy(Q);
          }
@@ -2055,15 +2061,15 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             /* Delete AP */
             hypre_ParCSRMatrixDestroy(Q);
          }
-         else 
+         else
          {
             /* Compute standard Galerkin coarse-grid product */
-            hypre_BoomerAMGBuildCoarseOperatorKT(P_array[level], A_array[level] , 
+            hypre_BoomerAMGBuildCoarseOperatorKT(P_array[level], A_array[level] ,
                                         P_array[level], keepTranspose, &A_H);
          }
 
       }
- 
+
       if (debug_flag==1)
       {
          wall_time = time_getWallclockSeconds() - wall_time;
@@ -2080,11 +2086,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          hypre_ParCSRMatrixSetDNumNonzeros(A_H);
          A_array[level] = A_H;
       }
-      
+
       size = ((HYPRE_Real) fine_size )*.75;
       if (coarsen_type > 0 && coarse_size >= (HYPRE_Int) size)
       {
-	coarsen_type = 0;      
+	coarsen_type = 0;
       }
 
 
@@ -2095,7 +2101,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             not_finished_coarsening = 0;
          }
       }
-   } 
+   }
 
    /* redundant coarse grid solve */
    if (  (seq_threshold >= coarse_threshold) && (coarse_size > coarse_threshold) && (level != max_levels-1))
@@ -2125,16 +2131,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                            hypre_ParCSRBlockMatrixRowStarts(A_block_array[level]),
                                            hypre_ParCSRBlockMatrixBlockSize(A_block_array[level]));
          hypre_ParVectorInitialize(F_array[level]);
-         
-         U_array[level] =  
+
+         U_array[level] =
             hypre_ParVectorCreateFromBlock(hypre_ParCSRBlockMatrixComm(A_block_array[level]),
                                            hypre_ParCSRMatrixGlobalNumRows(A_block_array[level]),
                                            hypre_ParCSRBlockMatrixRowStarts(A_block_array[level]),
                                            hypre_ParCSRBlockMatrixBlockSize(A_block_array[level]));
-         
+
          hypre_ParVectorInitialize(U_array[level]);
       }
-      else 
+      else
       {
          F_array[level] =
             hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[level]),
@@ -2142,16 +2148,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                   hypre_ParCSRMatrixRowStarts(A_array[level]));
          hypre_ParVectorInitialize(F_array[level]);
          hypre_ParVectorSetPartitioningOwner(F_array[level],0);
-         
+
          U_array[level] =
             hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[level]),
                                   hypre_ParCSRMatrixGlobalNumRows(A_array[level]),
                                   hypre_ParCSRMatrixRowStarts(A_array[level]));
          hypre_ParVectorInitialize(U_array[level]);
          hypre_ParVectorSetPartitioningOwner(U_array[level],0);
-      }   
+      }
    }
-   
+
    /*-----------------------------------------------------------------------
     * enter all the stuff created, A[level], P[level], CF_marker[level],
     * for levels 1 through coarsest, into amg_data data structure
@@ -2162,12 +2168,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    if (hypre_ParAMGDataSmoothNumLevels(amg_data) > num_levels-1)
       hypre_ParAMGDataSmoothNumLevels(amg_data) = num_levels;
    smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data);
-   
+
    /*-----------------------------------------------------------------------
     * Setup of special smoothers when needed
     *-----------------------------------------------------------------------*/
 
-   if (addlvl > -1 || 
+   if (addlvl > -1 ||
 	grid_relax_type[1] == 8 || grid_relax_type[2] == 8 || grid_relax_type[3] == 8 ||
 	grid_relax_type[1] == 13 || grid_relax_type[2] == 13 || grid_relax_type[3] == 13 ||
 	grid_relax_type[1] == 14 || grid_relax_type[2] == 14 || grid_relax_type[3] == 14 ||
@@ -2196,16 +2202,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    {
       if (num_threads == 1)
       {
-         if (j < num_levels-1 && (grid_relax_type[1] == 8 || grid_relax_type[1] == 13 || 
+         if (j < num_levels-1 && (grid_relax_type[1] == 8 || grid_relax_type[1] == 13 ||
 		grid_relax_type[1] == 14 || grid_relax_type[2] == 8 || grid_relax_type[2] == 13 ||
-		grid_relax_type[2] == 14)) 
+		grid_relax_type[2] == 14))
          {
             if (relax_order)
                hypre_ParCSRComputeL1Norms(A_array[j], 4, CF_marker_array[j], &l1_norms[j]);
             else
                hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, &l1_norms[j]);
          }
-         else if ((grid_relax_type[3] == 8 || grid_relax_type[3] == 13 || grid_relax_type[3] == 14) 
+         else if ((grid_relax_type[3] == 8 || grid_relax_type[3] == 13 || grid_relax_type[3] == 14)
 		&& j == num_levels-1)
          {
             hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, &l1_norms[j]);
@@ -2224,16 +2230,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       else
       {
-         if (j < num_levels-1 && (grid_relax_type[1] == 8 || grid_relax_type[1] == 13 || 
+         if (j < num_levels-1 && (grid_relax_type[1] == 8 || grid_relax_type[1] == 13 ||
 		grid_relax_type[1] == 14 || grid_relax_type[2] == 8 || grid_relax_type[2] == 13 ||
-		grid_relax_type[2] == 14)) 
+		grid_relax_type[2] == 14))
          {
             if (relax_order)
                hypre_ParCSRComputeL1NormsThreads(A_array[j], 4, num_threads, CF_marker_array[j] , &l1_norms[j]);
             else
                hypre_ParCSRComputeL1NormsThreads(A_array[j], 4, num_threads, NULL, &l1_norms[j]);
          }
-         else if ((grid_relax_type[3] == 8 || grid_relax_type[3] == 13 || grid_relax_type[3] == 14) 
+         else if ((grid_relax_type[3] == 8 || grid_relax_type[3] == 13 || grid_relax_type[3] == 14)
 		&& j == num_levels-1)
          {
             hypre_ParCSRComputeL1NormsThreads(A_array[j], 4, num_threads, NULL, &l1_norms[j]);
@@ -2273,22 +2279,22 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
      else if (grid_relax_type[1] == 15 || (grid_relax_type[3] == 15 && j == (num_levels-1))  )
      {
-        
+
         HYPRE_ParCSRPCGCreate(comm, &smoother[j]);
         /*HYPRE_ParCSRPCGSetup(smoother[j],
                              (HYPRE_ParCSRMatrix) A_array[j],
                              (HYPRE_ParVector) F_array[j],
                              (HYPRE_ParVector) U_array[j]);*/
-        
+
         HYPRE_PCGSetTol(smoother[j], 1e-12); /* make small */
         HYPRE_PCGSetTwoNorm(smoother[j], 1); /* use 2-norm*/
-        
-        HYPRE_ParCSRPCGSetup(smoother[j], 
-                             (HYPRE_ParCSRMatrix) A_array[j], 
-                             (HYPRE_ParVector) F_array[j], 
+
+        HYPRE_ParCSRPCGSetup(smoother[j],
+                             (HYPRE_ParCSRMatrix) A_array[j],
+                             (HYPRE_ParVector) F_array[j],
                              (HYPRE_ParVector) U_array[j]);
-        
-        
+
+
      }
      if (relax_weight[j] == 0.0)
      {
@@ -2300,9 +2306,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
      }
      if ((smooth_type == 6 || smooth_type == 16) && smooth_num_levels > j)
      {
-        
+
         schwarz_relax_wt = hypre_ParAMGDataSchwarzRlxWeight(amg_data);
-        
+
         HYPRE_SchwarzCreate(&smoother[j]);
         HYPRE_SchwarzSetNumFunctions(smoother[j],num_functions);
         HYPRE_SchwarzSetVariant(smoother[j],
@@ -2330,7 +2336,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
            {
               local_size = hypre_CSRMatrixNumRows
                  (hypre_ParCSRMatrixDiag(A_array[j]));
-              hypre_SchwarzReScale(smoother[j], local_size, 
+              hypre_SchwarzReScale(smoother[j], local_size,
                                    schwarz_relax_wt);
            }
            schwarz_relax_wt = 1;
@@ -2340,16 +2346,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
      {
         HYPRE_EuclidCreate(comm, &smoother[j]);
         if (euclidfile)
-           HYPRE_EuclidSetParamsFromFile(smoother[j],euclidfile); 
-        HYPRE_EuclidSetLevel(smoother[j],eu_level); 
+           HYPRE_EuclidSetParamsFromFile(smoother[j],euclidfile);
+        HYPRE_EuclidSetLevel(smoother[j],eu_level);
         if (eu_bj)
-           HYPRE_EuclidSetBJ(smoother[j],eu_bj); 
+           HYPRE_EuclidSetBJ(smoother[j],eu_bj);
         if (eu_sparse_A)
-           HYPRE_EuclidSetSparseA(smoother[j],eu_sparse_A); 
+           HYPRE_EuclidSetSparseA(smoother[j],eu_sparse_A);
         HYPRE_EuclidSetup(smoother[j],
                           (HYPRE_ParCSRMatrix) A_array[j],
                           (HYPRE_ParVector) F_array[j],
-                          (HYPRE_ParVector) U_array[j]); 
+                          (HYPRE_ParVector) U_array[j]);
      }
      else if ((smooth_type == 8 || smooth_type == 18) && smooth_num_levels > j)
      {
@@ -2372,8 +2378,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
         HYPRE_ParCSRPilutSetDropTolerance(smoother[j],drop_tol);
         HYPRE_ParCSRPilutSetFactorRowSize(smoother[j],max_nz_per_row);
      }
-     else if ((j < num_levels-1) || ((j == num_levels-1) && (grid_relax_type[3]!= 9 && 
-	grid_relax_type[3] != 99 && grid_relax_type[3] != 19 && grid_relax_type[3] != 98) 
+     else if ((j < num_levels-1) || ((j == num_levels-1) && (grid_relax_type[3]!= 9 &&
+	grid_relax_type[3] != 99 && grid_relax_type[3] != 19 && grid_relax_type[3] != 98)
 	&& coarse_size > 9))
      {
         if (relax_weight[j] < 0 )
@@ -2393,7 +2399,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    if ( amg_logging > 1 ) {
 
-      Residual_array= 
+      Residual_array=
 	hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
                               hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
                               hypre_ParCSRMatrixRowStarts(A_array[0]) );
@@ -2406,7 +2412,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    if (simple > -1 && simple < num_levels)
          hypre_CreateDinv(amg_data);
-   else if ((mult_additive > -1 && mult_additive < num_levels) || 
+   else if ((mult_additive > -1 && mult_additive < num_levels) ||
 		(additive > -1 && additive < num_levels))
          hypre_CreateLambda(amg_data);
 
@@ -2428,13 +2434,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
      char filename[256];
      HYPRE_Int coorddim = hypre_ParAMGDataCoordDim (amg_data);
      float *coordinates = hypre_ParAMGDataCoordinates (amg_data);
-                                                                                
+
      if (!coordinates) coorddim=0;
-                                                                                
+
 
      if (block_mode)
         local_size = hypre_CSRMatrixNumRows(hypre_ParCSRBlockMatrixDiag(A_block_array[0]));
-     else      
+     else
         local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
 
      CF = hypre_CTAlloc(HYPRE_Int, local_size);
@@ -2450,7 +2456,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
            local_size = hypre_CSRMatrixNumRows(hypre_ParCSRBlockMatrixDiag(A_block_array[level]));
         else
            local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level]));
-      
+
 
       for (i = 0, j = 0; i < local_size; i++)
       {
@@ -2498,11 +2504,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          hypre_ParCSRMatrixPrintIJ(temp_A, 0, 0, filename);
          hypre_ParCSRMatrixDestroy(temp_A);
       }
-      
+
    }
    else
    {
-      
+
       for (level = 0; level < num_levels; level++)
       {
          hypre_sprintf(filename, "BoomerAMG.out.A.%02d.ij", level);
@@ -2578,5 +2584,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 }
 #endif
 
+   HYPRE_ANNOTATE_FUNC_END;
+
    return(hypre_error_flag);
-}  
+}

@@ -13,7 +13,7 @@
 
 include ../config/Makefile.config
 
-CINCLUDES = ${MPIINCLUDE}
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
 CDEFS = -DHYPRE_TIMING -DHYPRE_FORTRAN
 CXXDEFS = -DNOFEI -DHYPRE_TIMING -DMPICH_SKIP_MPICXX
 
@@ -38,7 +38,7 @@ F77_COMPILE_FLAGS = \
  -I${HYPRE_BUILD_DIR}/include\
  ${CINCLUDES}
 
-MPILIBFLAGS = ${MPILIBDIRS} ${MPILIBS} ${MPIFLAGS} 
+MPILIBFLAGS = ${MPILIBDIRS} ${MPILIBS} ${MPIFLAGS}
 LAPACKLIBFLAGS = ${LAPACKLIBDIRS} ${LAPACKLIBS}
 BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
 LIBFLAGS = ${LDFLAGS} ${LIBS}
@@ -264,7 +264,7 @@ fparcsr_mv: fparcsr_mv.f
 	@echo  "Building" $@ "... "
 	${LINK_FC} -c $@  ${FFLAGS}
 
-fsstruct_ls: fsstruct_ls.f 
+fsstruct_ls: fsstruct_ls.f
 	@echo  "Building" $@ "... "
 	${LINK_FC} -c $@  ${FFLAGS}
 
@@ -279,4 +279,3 @@ fstruct_ls: fstruct_ls.f
 fstruct_mv: fstruct_mv.f
 	@echo  "Building" $@ "... "
 	${LINK_FC} -c $@  ${FFLAGS}
-

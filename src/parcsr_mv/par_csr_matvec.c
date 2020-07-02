@@ -35,9 +35,9 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_CSRMatrix   *diag   = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix   *offd   = hypre_ParCSRMatrixOffd(A);
-   hypre_Vector      *x_local  = hypre_ParVectorLocalVector(x);   
-   hypre_Vector      *b_local  = hypre_ParVectorLocalVector(b);   
-   hypre_Vector      *y_local  = hypre_ParVectorLocalVector(y);   
+   hypre_Vector      *x_local  = hypre_ParVectorLocalVector(x);
+   hypre_Vector      *b_local  = hypre_ParVectorLocalVector(b);
+   hypre_Vector      *y_local  = hypre_ParVectorLocalVector(y);
    HYPRE_Int          num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
    HYPRE_Int          num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
 
@@ -62,11 +62,11 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
     *  ierr = 12 if the length of Y doesn't equal the number of rows
     *  of A, and ierr = 13 if both are true.
     *
-    *  Because temporary vectors are often used in ParMatvec, none of 
+    *  Because temporary vectors are often used in ParMatvec, none of
     *  these conditions terminates processing, and the ierr flag
     *  is informational only.
     *--------------------------------------------------------------------*/
- 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_assert( idxstride>0 );
 
    if (num_cols != x_size)
@@ -96,7 +96,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    if (!comm_pkg)
    {
       hypre_MatvecCommPkgCreate(A);
-      comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
+      comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
 
 #ifdef HYPRE_PROFILE
@@ -165,7 +165,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
          {
             start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
             for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
-               x_buf_data[jv][index++] 
+               x_buf_data[jv][index++]
                   = x_local_data[
                      jv*vecstride +
                      idxstride*hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j) ];
@@ -210,7 +210,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
 #endif
-   
+
    if (use_persistent_comm)
    {
 #ifdef HYPRE_USING_PERSISTENT_COMM
@@ -231,7 +231,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
 #endif
 
-   if (num_cols_offd) hypre_CSRMatrixMatvec( alpha, offd, x_tmp, 1.0, y_local);    
+   if (num_cols_offd) hypre_CSRMatrixMatvec( alpha, offd, x_tmp, 1.0, y_local);
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
@@ -244,10 +244,12 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       for ( jv=0; jv<num_vectors; ++jv ) hypre_TFree(x_buf_data[jv]);
       hypre_TFree(x_buf_data);
    }
-  
+
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
 #endif
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return ierr;
 }
@@ -302,14 +304,14 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  MatvecT returns ierr = 1 if
     *  length of X doesn't equal the number of rows of A,
-    *  ierr = 2 if the length of Y doesn't equal the number of 
+    *  ierr = 2 if the length of Y doesn't equal the number of
     *  columns of A, and ierr = 3 if both are true.
     *
-    *  Because temporary vectors are often used in MatvecT, none of 
+    *  Because temporary vectors are often used in MatvecT, none of
     *  these conditions terminates processing, and the ierr flag
     *  is informational only.
     *--------------------------------------------------------------------*/
- 
+
    if (num_rows != x_size)
       ierr = 1;
 
@@ -337,7 +339,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    if (!comm_pkg)
    {
       hypre_MatvecCommPkgCreate(A);
-      comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
+      comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
 
 #ifdef HYPRE_PROFILE
@@ -489,7 +491,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
                   += y_buf_data[jv][index++];
          }
       }
-        
+
    hypre_SeqVectorDestroy(y_tmp);
    y_tmp = NULL;
    if (!use_persistent_comm)

@@ -2520,8 +2520,8 @@ main( hypre_int argc,
    solver_id = 39;
    print_system = 0;
    rhs_value = 1.0;
-   sol_type = -1;
-   sol0_type = 0;
+   sol_type = 1;
+   sol0_type = 1;
    skip = 0;
    n_pre  = 1;
    n_post = 1;
@@ -5922,7 +5922,10 @@ main( hypre_int argc,
       HYPRE_SStructVectorAssemble(r);
       hypre_SStructCopy(b, r);
       hypre_SStructMatvec(-1.0, A, x, 1.0, r);
-      HYPRE_SStructVectorPrint("sstruct.out.r", r, 0);
+      if (print_system)
+      {
+         HYPRE_SStructVectorPrint("sstruct.out.r", r, 0);
+      }
 
       hypre_SStructInnerProd(b, b, &rhs_norm);
       rhs_norm = sqrt(rhs_norm);

@@ -66,7 +66,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 
    HYPRE_Real            b_dot_b = 0, r_dot_r, eps = 0;
    HYPRE_Real            e_dot_e, x_dot_x;
-                    
+
    HYPRE_Int             i, l;
    HYPRE_Int             constant_coefficient;
 
@@ -77,6 +77,8 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    /*-----------------------------------------------------
     * Initialize some things and deal with special cases
     *-----------------------------------------------------*/
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    hypre_BeginTiming(pfmg_data -> time_index);
 
@@ -101,6 +103,8 @@ hypre_PFMGSolve( void               *pfmg_vdata,
       }
 
       hypre_EndTiming(pfmg_data -> time_index);
+      HYPRE_ANNOTATE_FUNC_END;
+
       return hypre_error_flag;
    }
 
@@ -122,6 +126,8 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          }
 
          hypre_EndTiming(pfmg_data -> time_index);
+         HYPRE_ANNOTATE_FUNC_END;
+
          return hypre_error_flag;
       }
    }
@@ -136,6 +142,8 @@ hypre_PFMGSolve( void               *pfmg_vdata,
       /*--------------------------------------------------
        * Down cycle
        *--------------------------------------------------*/
+
+      HYPRE_ANNOTATE_MGLEVEL_BEGIN(0);
 
       if (constant_coefficient)
       {
@@ -195,8 +203,12 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          hypre_sprintf(filename, "pfmg_b.%02d.%02d", i, 1);
          hypre_StructVectorPrint(filename, b_l[1], 0);
 #endif
+         HYPRE_ANNOTATE_MGLEVEL_END(0);
+
          for (l = 1; l <= (num_levels - 2); l++)
          {
+            HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
+
             if (constant_coefficient)
             {
                hypre_StructVectorClearAllValues(r_l[l]);
@@ -232,11 +244,13 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             hypre_sprintf(filename, "pfmg_b.%02d.%02d", i, l+1);
             hypre_StructVectorPrint(filename, b_l[l+1], 0);
 #endif
+            HYPRE_ANNOTATE_MGLEVEL_END(l);
          }
 
          /*--------------------------------------------------
           * Bottom
           *--------------------------------------------------*/
+         HYPRE_ANNOTATE_MGLEVEL_BEGIN(num_levels - 1);
 
          if (active_l[l])
          {
@@ -266,12 +280,15 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             /* interpolate error and correct (x = x + Pe_c) */
             hypre_StructMatvecCompute(interp_data_l[l], 1.0, P_l[l], x_l[l+1], 0.0, e_l[l]);
             hypre_StructAxpy(1.0, e_l[l], x_l[l]);
+            HYPRE_ANNOTATE_MGLEVEL_END(l + 1);
 #if DEBUG
             hypre_sprintf(filename, "pfmg_eup.%02d.%02d", i, l);
             hypre_StructVectorPrint(filename, e_l[l], 0);
             hypre_sprintf(filename, "pfmg_xup.%02d.%02d", i, l);
             hypre_StructVectorPrint(filename, x_l[l], 0);
 #endif
+            HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
+
             if (active_l[l])
             {
                /* post-relaxation */
@@ -290,6 +307,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          /* interpolate error and correct on fine grid (x = x + Pe_c) */
          hypre_StructMatvecCompute(interp_data_l[0], 1.0, P_l[0], x_l[1], 0.0, e_l[0]);
          hypre_StructAxpy(1.0, e_l[0], x_l[0]);
+         HYPRE_ANNOTATE_MGLEVEL_END(1);
 #if DEBUG
          hypre_sprintf(filename, "pfmg_eup.%02d.%02d", i, 0);
          hypre_StructVectorPrint(filename, e_l[0], 0);
@@ -314,18 +332,20 @@ hypre_PFMGSolve( void               *pfmg_vdata,
       }
 
       /* fine grid post-relaxation */
+      HYPRE_ANNOTATE_MGLEVEL_BEGIN(0);
+
       hypre_PFMGRelaxSetPostRelax(relax_data_l[0]);
       hypre_PFMGRelaxSetMaxIter(relax_data_l[0], num_post_relax);
       hypre_PFMGRelaxSetZeroGuess(relax_data_l[0], 0);
       hypre_PFMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
-
       (pfmg_data -> num_iterations) = (i + 1);
+
+      HYPRE_ANNOTATE_MGLEVEL_END(0);
    }
 
    hypre_EndTiming(pfmg_data -> time_index);
-
    hypre_PFMGPrintLogging(pfmg_data);
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
-

@@ -72,6 +72,8 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    HYPRE_Int              nparts_A;
    HYPRE_Int              num_levels;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /*-----------------------------------------------------
     * Initialize some data.
     *-----------------------------------------------------*/
@@ -318,6 +320,8 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    hypre_TFree(ones_l);
    hypre_TFree(Pones_l);
 #endif
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

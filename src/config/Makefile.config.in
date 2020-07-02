@@ -45,9 +45,9 @@ HYPRE_LIB_SUFFIX = @HYPRE_LIBSUFFIX@
 .SUFFIXES: .o .f .c .C .cxx .cc
 
 .f.o:
-	$(FC) $(FFLAGS) -c $< 
+	$(FC) $(FFLAGS) -c $<
 .c.o:
-	$(CC) $(CFLAGS) -c $< 
+	$(CC) $(CFLAGS) -c $<
 .C.o:
 	$(CXX) $(CXXFLAGS) -c $<
 .cxx.o:
@@ -64,11 +64,11 @@ CFLAGS    = @CFLAGS@ @DEFS@ $(C_COMPILE_FLAGS)
 CXX       = @CXX@
 CXXFLAGS  = @CXXFLAGS@ @DEFS@ $(CXX_COMPILE_FLAGS)
 
-LINK_FC  = @LINK_FC@
+LINK_FC   = @LINK_FC@
 LINK_CC   = @LINK_CC@
 LINK_CXX  = @LINK_CXX@
 
-BUILD_FC_SHARED    = @BUILD_FC_SHARED@
+BUILD_FC_SHARED     = @BUILD_FC_SHARED@
 BUILD_CC_SHARED     = @BUILD_CC_SHARED@
 BUILD_CXX_SHARED    = @BUILD_CXX_SHARED@
 SHARED_COMPILE_FLAG = @SHARED_COMPILE_FLAG@
@@ -84,12 +84,13 @@ BUILD_JAVA = @BUILD_JAVA@
 AR     = @AR@
 RANLIB = @RANLIB@
 
-LDFLAGS = @LDFLAGS@
-LIBS    = @LIBS@
-FLIBS   = @FLIBS@
+LDFLAGS  = @LDFLAGS@
+LIBS     = @LIBS@ @CALIPER_LIBS@
+FLIBS    = @FLIBS@
+INCLUDES = @CALIPER_INCLUDE@
 
 ##################################################################
-##  LAPACK Library Flags 
+##  LAPACK Library Flags
 ##################################################################
 HYPRE_LAPACK_SRC_DIR = @HYPRE_LAPACK_SRC_DIR@
 HYPRE_LAPACK_FILES   = @HYPRE_LAPACK_FILES@
@@ -97,12 +98,18 @@ LAPACKLIBS           = @LAPACKLIBS@
 LAPACKLIBDIRS        = @LAPACKLIBDIRS@
 
 ##################################################################
-##  BLAS Library Flags 
+##  BLAS Library Flags
 ##################################################################
 HYPRE_BLAS_SRC_DIR = @HYPRE_BLAS_SRC_DIR@
 HYPRE_BLAS_FILES   = @HYPRE_BLAS_FILES@
 BLASLIBS           = @BLASLIBS@
 BLASLIBDIRS        = @BLASLIBDIRS@
+
+##################################################################
+##  Caliper options
+##################################################################
+CALIPER_INCLUDE = @CALIPER_INCLUDE@
+CALIPER_LIBS    = @CALIPER_LIBS@
 
 ##################################################################
 ##  MPI options

@@ -62,6 +62,8 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
    char                   filename[255];
 #endif
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /*-----------------------------------------------------
     * Initialize some things and deal with special cases
     *-----------------------------------------------------*/
@@ -88,8 +90,9 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       {
          hypre_SStructVectorSetConstantValues(x_l[0], 0.0);
       }
-
       hypre_EndTiming(*time_index);
+      HYPRE_ANNOTATE_FUNC_END;
+
       return hypre_error_flag;
    }
 
@@ -111,6 +114,8 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          }
 
          hypre_EndTiming(*time_index);
+         HYPRE_ANNOTATE_FUNC_END;
+
          return hypre_error_flag;
       }
    }
@@ -130,6 +135,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       /*--------------------------------------------------
        * Down cycle
        *--------------------------------------------------*/
+      HYPRE_ANNOTATE_MGLEVEL_BEGIN(0);
 
       /* compute fine grid residual (b - Ax) */
       hypre_SStructCopy(b_l[0], r_l[0]);
@@ -207,8 +213,12 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             HYPRE_SStructVectorPrint(filename, b_l[1], 0);
          }
 #endif
+         HYPRE_ANNOTATE_MGLEVEL_END(0);
+
          for (l = 1; l <= (num_levels - 2); l++)
          {
+            HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
+
             //if (active_l[l])
             if (l > 0) // True always
             {
@@ -244,11 +254,13 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
                HYPRE_SStructVectorPrint(filename, b_l[l+1], 0);
             }
 #endif
+            HYPRE_ANNOTATE_MGLEVEL_END(l);
          }
 
          /*--------------------------------------------------
           * Bottom
           *--------------------------------------------------*/
+         HYPRE_ANNOTATE_MGLEVEL_BEGIN(num_levels - 1);
 
          //if (active_l[l])
          if (l > 0) // True always
@@ -279,6 +291,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             hypre_SStructMatvecCompute(interp_data_l[l], 1.0,
                                        P_l[l], x_l[l+1], 0.0, e_l[l]);
             hypre_SStructAxpy(1.0, e_l[l], x_l[l]);
+            HYPRE_ANNOTATE_MGLEVEL_END(l + 1);
 #if DEBUG
             if (print_level > 0 && !(i%print_level))
             {
@@ -288,6 +301,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
                 HYPRE_SStructVectorPrint(filename, x_l[l], 0);
             }
 #endif
+            HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
             //if (active_l[l])
             if (l > 0) // True always
             {
@@ -303,6 +317,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          hypre_SStructMatvecCompute(interp_data_l[0], 1.0,
                                     P_l[0], x_l[1], 0.0, e_l[0]);
          hypre_SStructAxpy(1.0, e_l[0], x_l[0]);
+         HYPRE_ANNOTATE_MGLEVEL_END(1);
 #if DEBUG
          if (print_level > 0 && !(i%print_level))
          {
@@ -325,6 +340,8 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       }
 
       /* fine grid post-relaxation */
+      HYPRE_ANNOTATE_MGLEVEL_BEGIN(0);
+
       hypre_SSAMGRelaxSetPostRelax(relax_data_l[0]);
       hypre_SSAMGRelaxSetMaxIter(relax_data_l[0], num_post_relax);
       hypre_SSAMGRelaxSetZeroGuess(relax_data_l[0], 0);
@@ -339,6 +356,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
 #endif
 
       *num_iterations = i + 1;
+      HYPRE_ANNOTATE_MGLEVEL_END(0);
    }
 
    /*-----------------------------------------------------
@@ -349,8 +367,8 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
    /* hypre_SStructVectorDestroy(x_l[0]); */
 
    hypre_EndTiming(*time_index);
-
    hypre_SSAMGPrintLogging(ssamg_data);
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

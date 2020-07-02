@@ -127,8 +127,7 @@ hypre_SStructPMatvecCompute( void                 *pmatvec_vdata,
    hypre_StructMatrix         *sA;
    hypre_StructVector         *sx;
    hypre_StructVector         *sy;
-
-   HYPRE_Int                  vi, vj;
+   HYPRE_Int                   vi, vj;
 
    for (vi = 0; vi < nvars; vi++)
    {
@@ -282,6 +281,8 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
    hypre_SStructPVector     *px;
    HYPRE_Int                 part;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    nparts = hypre_SStructMatrixNParts(A);
    pmatvec_data = hypre_TAlloc(void *, nparts);
    for (part = 0; part < nparts; part++)
@@ -295,6 +296,8 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
    }
    (matvec_data -> nparts)       = nparts;
    (matvec_data -> pmatvec_data) = pmatvec_data;
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -329,10 +332,14 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
    HYPRE_Int                 x_object_type= hypre_SStructVectorObjectType(x);
    HYPRE_Int                 A_object_type= hypre_SStructMatrixObjectType(A);
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    if (x_object_type != A_object_type)
    {
       hypre_error_in_arg(2);
       hypre_error_in_arg(3);
+
+      HYPRE_ANNOTATE_FUNC_END;
       return hypre_error_flag;
    }
 
@@ -393,6 +400,8 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
 
       parx = NULL;
    }
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
