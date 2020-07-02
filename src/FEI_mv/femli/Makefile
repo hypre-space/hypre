@@ -37,7 +37,7 @@ C_COMPILE_FLAGS =\
  -DMLI_SUPERLU\
  ${MLI_INCLUDES}\
  ${CINCLUDES}
- 
+
 CXX_COMPILE_FLAGS =\
  -DMLI_SUPERLU -DMPICH_SKIP_MPICXX\
  ${MLI_INCLUDES}\
@@ -158,6 +158,6 @@ libHYPRE_mli.a: ${OBJS}
 libHYPRE_mli.so: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -s ${SONAME} $@
+	ln -sf ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

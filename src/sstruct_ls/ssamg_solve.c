@@ -104,6 +104,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       eps = tol*tol;
 
       /* if rhs is zero, return a zero solution */
+#if 0
       if (!(b_dot_b > 0.0))
       {
          hypre_SStructVectorSetConstantValues(x_l[0], 0.0);
@@ -118,6 +119,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
 
          return hypre_error_flag;
       }
+#endif
    }
 
    /*-----------------------------------------------------

@@ -14,7 +14,7 @@
 include ../config/Makefile.config
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
- 
+
 C_COMPILE_FLAGS = \
  -I..\
  -I$(srcdir)\
@@ -137,6 +137,6 @@ libHYPRE_struct_ls.a: ${OBJS}
 libHYPRE_struct_ls.so: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -s ${SONAME} $@
+	ln -sf ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

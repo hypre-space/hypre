@@ -149,6 +149,6 @@ libHYPRE_sstruct_ls.a: ${OBJS}
 libHYPRE_sstruct_ls.so: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -s ${SONAME} $@
+	ln -sf ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

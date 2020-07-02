@@ -82,29 +82,29 @@ all: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/_hypre_parcsr_mv.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
-driver: driver.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX} 
+driver: driver.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
-	${CC} -o driver driver.o ${LFLAGS} 
+	${CC} -o driver driver.o ${LFLAGS}
 
 driver_matvec: driver_matvec.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
-	${CC} -o driver_matvec driver_matvec.o ${LFLAGS} 
+	${CC} -o driver_matvec driver_matvec.o ${LFLAGS}
 
 driver_matmul: driver_matmul.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
-	${CC} -o driver_matmul driver_matmul.o ${LFLAGS} 
+	${CC} -o driver_matmul driver_matmul.o ${LFLAGS}
 
 driver_boolmatmul: driver_boolmatmul.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
-	${CC} -o driver_boolmatmul driver_boolmatmul.o ${LFLAGS} 
+	${CC} -o driver_boolmatmul driver_boolmatmul.o ${LFLAGS}
 
 driver_aat: driver_aat.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
-	${CC} -o driver_aat driver_aat.o ${LFLAGS} 
+	${CC} -o driver_aat driver_aat.o ${LFLAGS}
 
 driver_boolaat: driver_boolaat.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
-	${CC} -o driver_boolaat driver_boolaat.o ${LFLAGS} 
+	${CC} -o driver_boolaat driver_boolaat.o ${LFLAGS}
 
 install: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
@@ -130,7 +130,7 @@ libHYPRE_parcsr_mv.a: ${OBJS}
 libHYPRE_parcsr_mv.so: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -s ${SONAME} $@
+	ln -sf ${SONAME} $@
 
 ${OBJS}: ${HEADERS}
 
