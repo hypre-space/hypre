@@ -1091,7 +1091,7 @@ hypre_StructGridPrintVTK( const char       *filename,
       hypre_fprintf(fp, "\t\t<PPoints>\n");
       hypre_fprintf(fp, "\t\t\t<PDataArray type=\"Int32\" NumberOfComponents=\"3\" format=\"ascii\"/>\n");
       hypre_fprintf(fp, "\t\t</PPoints>\n");
-      for(int i = 0; i < num_procs; i++)
+      for(i = 0; i < num_procs; i++)
       {
          hypre_fprintf(fp, "\t\t<Piece Source=\"%s.vtu.%05d\"/>\n", filename, i);
       }

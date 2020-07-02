@@ -87,6 +87,6 @@ libHYPRE_IJ_mv.a: ${OBJS}
 libHYPRE_IJ_mv.so: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -s ${SONAME} $@
+	ln -sf ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

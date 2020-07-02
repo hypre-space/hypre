@@ -386,6 +386,7 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    HYPRE_Int       *my_diag_array;
    HYPRE_Int       *my_offd_array;
    HYPRE_Int        max_num_threads;
+   HYPRE_Int        i, j, cnt;
 
    HYPRE_Complex    zero = 0.0;
 
@@ -557,7 +558,6 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
     hypre_UnorderedIntMap col_map_offd_C_inverse;
     hypre_sort_and_create_inverse_map(col_map_offd_C, num_cols_offd_C, &col_map_offd_C, &col_map_offd_C_inverse);
 
-    HYPRE_Int i, j;
 #pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
     for (i = 0; i < num_cols_offd_A; i++)
        for (j=B_ext_offd_i[i]; j < B_ext_offd_i[i+1]; j++)
@@ -573,7 +573,6 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 
      if (num_cols_offd_B)
      {
-         HYPRE_Int i;
          map_B_to_C = hypre_CTAlloc(HYPRE_Int,num_cols_offd_B);
 
 #pragma omp parallel private(i)
@@ -770,7 +769,6 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 
      if (num_cols_offd_B)
      {
-         HYPRE_Int i, cnt;
          map_B_to_C = hypre_CTAlloc(HYPRE_Int,num_cols_offd_B);
 
          cnt = 0;
@@ -1000,11 +998,11 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 #endif
    row_starts_C = hypre_TAlloc(HYPRE_Int, starts_size);
    col_starts_C = hypre_TAlloc(HYPRE_Int, starts_size);
-   for (HYPRE_Int i = 0; i < starts_size; i++)
+   for (i = 0; i < starts_size; i++)
    {
       row_starts_C[i] = row_starts_A[i];
    }
-   for (HYPRE_Int i = 0; i < starts_size; i++)
+   for (i = 0; i < starts_size; i++)
    {
       col_starts_C[i] = col_starts_B[i];
    }
