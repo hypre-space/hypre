@@ -715,7 +715,7 @@ hypre_MGRCycle( void               *mgr_vdata,
             //convergence_factor_frelax = hypre_ParVectorInnerProd(Vtemp, Vtemp)/convergence_factor_frelax;
             //hypre_printf("F-relaxation V-cycle convergence factor: %5f\n", convergence_factor_frelax);
          }
-         else if (Frelax_method[level] == 99)
+         else if (Frelax_method[level] == 2)
          {
             hypre_ParVectorSetConstantValues(F_fine_array[coarse_grid], 0.0);
             hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, 1.0, F_array[fine_grid], 0.0, &(F_fine_array[coarse_grid]));

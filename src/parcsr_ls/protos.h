@@ -1288,11 +1288,11 @@ HYPRE_Int hypre_blockRelax_solve(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypr
 HYPRE_Int hypre_blockRelax_setup(hypre_ParCSRMatrix *A,HYPRE_Int blk_size, HYPRE_Int reserved_coarse_size, HYPRE_Real **diaginvptr);
 HYPRE_Int hypre_blockRelax(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int blk_size, HYPRE_Int reserved_coarse_size, HYPRE_Int method, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp);
 
-HYPRE_Int hypre_MGRBuildAff( MPI_Comm comm, HYPRE_Int local_num_variables, HYPRE_Int num_functions,
-HYPRE_Int *dof_func, HYPRE_Int *CF_marker, HYPRE_Int **coarse_dof_func_ptr, HYPRE_BigInt **coarse_pnts_global_ptr,
-hypre_ParCSRMatrix *A, HYPRE_Int debug_flag, hypre_ParCSRMatrix **P_f_ptr, hypre_ParCSRMatrix **A_ff_ptr );
+//HYPRE_Int hypre_MGRBuildAffRAP( MPI_Comm comm, HYPRE_Int local_num_variables, HYPRE_Int num_functions,
+//HYPRE_Int *dof_func, HYPRE_Int *CF_marker, HYPRE_Int **coarse_dof_func_ptr, HYPRE_BigInt **coarse_pnts_global_ptr,
+//hypre_ParCSRMatrix *A, HYPRE_Int debug_flag, hypre_ParCSRMatrix **P_f_ptr, hypre_ParCSRMatrix **A_ff_ptr );
 HYPRE_Int hypre_MGRGetSubBlock( hypre_ParCSRMatrix *A, HYPRE_Int *row_cf_marker, HYPRE_Int *col_cf_marker, HYPRE_Int debug_flag, hypre_ParCSRMatrix **A_ff_ptr );
-HYPRE_Int hypre_MGRBuildAffNew( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, HYPRE_Int debug_flag, hypre_ParCSRMatrix **A_ff_ptr );
+HYPRE_Int hypre_MGRBuildAff( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, HYPRE_Int debug_flag, hypre_ParCSRMatrix **A_ff_ptr );
 HYPRE_Int hypre_MGRApproximateInverse(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **A_inv);
 HYPRE_Int hypre_MGRAddVectorP ( HYPRE_Int  *CF_marker, HYPRE_Int point_type, HYPRE_Real a, hypre_ParVector *fromVector, HYPRE_Real b, hypre_ParVector **toVector );
 HYPRE_Int hypre_MGRAddVectorR ( HYPRE_Int  *CF_marker, HYPRE_Int point_type, HYPRE_Real a, hypre_ParVector *fromVector, HYPRE_Real b, hypre_ParVector **toVector );

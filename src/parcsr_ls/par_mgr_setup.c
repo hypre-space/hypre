@@ -870,11 +870,23 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
     }
 
-    if (Frelax_method[lev] == 99) // full AMG
+    if (Frelax_method[lev] == 2) // full AMG
     {
-      if (!use_default_fsolver) // user provided AMG solver
+      // user provided AMG solver
+      // only support AMG at the first level
+      // TODO: input check to avoid crashing
+      if (lev == 0 && use_default_fsolver == 0)
       {
-        A_ff_ptr = ((hypre_ParAMGData*)aff_solver[lev])->A_array[0];
+        if (((hypre_ParAMGData*)aff_solver[0])->A_array[0] == NULL)
+        {
+          if (my_id == 0)
+          {
+            printf("Error!!! F-relaxation solver has not been setup.\n");
+            hypre_error(1);
+            return hypre_error_flag;
+          }
+        }
+        A_ff_ptr = ((hypre_ParAMGData*)aff_solver[0])->A_array[0];
 
         F_fine_array[lev+1] =
         hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
@@ -893,7 +905,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
       else // construct default AMG solver
       {
-        hypre_MGRBuildAffNew(A_array[lev], CF_marker_array[lev], debug_flag, &A_ff_ptr);
+        hypre_MGRBuildAff(A_array[lev], CF_marker_array[lev], debug_flag, &A_ff_ptr);
 
         F_fine_array[lev+1] =
         hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
