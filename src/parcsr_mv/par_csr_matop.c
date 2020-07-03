@@ -810,12 +810,14 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
         map_B_to_C = hypre_CTAlloc(HYPRE_Int,num_cols_offd_B);
 
         cnt = 0;
-        for (i=0; i < num_cols_offd_C; i++)
+        for (i = 0; i < num_cols_offd_C; i++)
+        {
            if (col_map_offd_C[i] == col_map_offd_B[cnt])
            {
               map_B_to_C[cnt++] = i;
               if (cnt == num_cols_offd_B) break;
            }
+        }
      }
 
 #endif /* !HYPRE_CONCURRENT_HOPSCOTCH */
