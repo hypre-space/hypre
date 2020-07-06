@@ -11,7 +11,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
@@ -30,7 +30,7 @@ hypre_F90_IFACE(hypre_structpcgcreate, HYPRE_STRUCTPCGCREATE)
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_structpcgdestroy, HYPRE_STRUCTPCGDESTROY)
    ( hypre_F90_Obj *solver,
      hypre_F90_Int *ierr   )
@@ -43,7 +43,7 @@ hypre_F90_IFACE(hypre_structpcgdestroy, HYPRE_STRUCTPCGDESTROY)
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_structpcgsetup, HYPRE_STRUCTPCGSETUP)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -62,7 +62,7 @@ hypre_F90_IFACE(hypre_structpcgsetup, HYPRE_STRUCTPCGSETUP)
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_structpcgsolve, HYPRE_STRUCTPCGSOLVE)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -168,6 +168,7 @@ hypre_F90_IFACE(hypre_structpcgsetprecond, HYPRE_STRUCTPCGSETPRECOND)
     * The precond_id flags mean :
     * 0 - setup a smg preconditioner
     * 1 - setup a pfmg preconditioner
+    * 2 - setup a sparseMSG preconditioner
     * 7 - setup a jacobi preconditioner
     * 8 - setup a ds preconditioner
     * 9 - dont setup a preconditioner
@@ -189,6 +190,15 @@ hypre_F90_IFACE(hypre_structpcgsetprecond, HYPRE_STRUCTPCGSETPRECOND)
               hypre_F90_PassObj (HYPRE_StructSolver, solver),
               HYPRE_StructPFMGSolve,
               HYPRE_StructPFMGSetup,
+              hypre_F90_PassObj (HYPRE_StructSolver, precond_solver)) );
+   }
+   else if (*precond_id == 2)
+   {
+      *ierr = (hypre_F90_Int)
+         ( HYPRE_StructPCGSetPrecond(
+              hypre_F90_PassObj (HYPRE_StructSolver, solver),
+              HYPRE_StructSparseMSGSolve,
+              HYPRE_StructSparseMSGSetup,
               hypre_F90_PassObj (HYPRE_StructSolver, precond_solver)) );
    }
    else if (*precond_id == 7)
@@ -282,7 +292,7 @@ hypre_F90_IFACE(hypre_structpcggetfinalrelative, HYPRE_STRUCTPCGGETFINALRELATIVE
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_structdiagscalesetup, HYPRE_STRUCTDIAGSCALESETUP)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -301,7 +311,7 @@ hypre_F90_IFACE(hypre_structdiagscalesetup, HYPRE_STRUCTDIAGSCALESETUP)
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_structdiagscale, HYPRE_STRUCTDIAGSCALE)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *HA,
@@ -316,7 +326,7 @@ hypre_F90_IFACE(hypre_structdiagscale, HYPRE_STRUCTDIAGSCALE)
            hypre_F90_PassObj (HYPRE_StructVector, Hy),
            hypre_F90_PassObj (HYPRE_StructVector, Hx)     ) );
 }
-    
+
 #ifdef __cplusplus
 }
 #endif
