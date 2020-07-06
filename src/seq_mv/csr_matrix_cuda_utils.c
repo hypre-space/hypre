@@ -1,6 +1,10 @@
 #include "csr_matrix_cuda_utils.h"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_CUSPARSE)
+
+#ifndef false
+#define false 0
+#endif
 
 #if (CUDART_VERSION >= 8000)
 //Oldest online documentation currently available, so I cannot confirm the
@@ -186,6 +190,38 @@ cusparseSpMatDescr_t hypre_CSRMatRawToCuda(HYPRE_Int n, HYPRE_Int m, HYPRE_Int n
    cusparseSpMatDescr_t matA;
    HYPRE_CUSPARSE_CALL(cusparseCreateCsr(&matA, n, m, nnz, i, j, data, index_type, index_type, index_base, data_type));
    return matA;
+}
+
+
+/*
+ * @brief A near drop-in replacement for cusparseDcsrmv. It is much better to
+ * use  hypre_CSRMatrixMatvecDevice if possible, which has much more error checking.
+ * @warning Use hypre_CSRMatrixMatvecDevice instead
+ */
+void hypre_cusparse_csrmv(cusparseHandle_t handle, cusparseOperation_t oper,HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnz, HYPRE_Complex* alpha,
+      HYPRE_Complex* d_a, HYPRE_Int* d_i, HYPRE_Int* d_j, HYPRE_Complex* d_x, HYPRE_Complex* beta,
+      HYPRE_Complex* d_y) {
+
+      const cusparseSpMVAlg_t alg = CUSPARSE_CSRMV_ALG2;
+      hypre_assert(oper == CUSPARSE_OPERATION_NON_TRANSPOSE);
+      const cudaDataType data_type = hypre_getCudaDataTypeComplex();
+      cusparseDnVecDescr_t vecX;
+      cusparseDnVecDescr_t vecY;
+      HYPRE_CUSPARSE_CALL(cusparseCreateDnVec(&vecX, n, d_x, data_type));
+      HYPRE_CUSPARSE_CALL(cusparseCreateDnVec(&vecY, m, d_y, data_type));
+      const cusparseIndexType_t index_type = hypre_getCusparseIndexTypeInt();
+      const cusparseIndexBase_t index_base = CUSPARSE_INDEX_BASE_ZERO;
+      cusparseSpMatDescr_t matA;
+      HYPRE_CUSPARSE_CALL(cusparseCreateCsr(&matA, m, n, nnz, d_i, d_j, d_a, index_type, index_type, index_base, data_type));
+      void* dBuffer = NULL;
+      size_t bufferSize;
+      HYPRE_CUSPARSE_CALL(cusparseSpMV_bufferSize(handle, oper, alpha, matA, vecX, beta, vecY, data_type, alg, &bufferSize));
+      dBuffer = hypre_TAlloc(char, bufferSize, HYPRE_MEMORY_DEVICE);
+      HYPRE_CUSPARSE_CALL(cusparseSpMV(handle, oper, alpha, matA, vecX, beta, vecY, data_type, alg, dBuffer));
+      HYPRE_CUSPARSE_CALL(cusparseDestroySpMat(matA));
+      HYPRE_CUSPARSE_CALL(cusparseDestroyDnVec(vecX));
+      HYPRE_CUSPARSE_CALL(cusparseDestroyDnVec(vecY));
+      hypre_TFree(dBuffer, HYPRE_MEMORY_DEVICE);
 }
 
 #endif

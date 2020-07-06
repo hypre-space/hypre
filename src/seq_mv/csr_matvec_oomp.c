@@ -13,6 +13,9 @@
 
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
+#ifdef HYPRE_USING_CUSPARSE
+#include "csr_matrix_cuda_utils.h"
+#endif
 
 #if defined(HYPRE_USING_DEVICE_OPENMP)
 
@@ -85,16 +88,42 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Int        trans,
       HYPRE_Int     *csc_j = hypre_TAlloc(HYPRE_Int,     A->num_nonzeros, HYPRE_MEMORY_DEVICE);
       HYPRE_Int     *csc_i = hypre_TAlloc(HYPRE_Int,     A->num_cols+1,   HYPRE_MEMORY_DEVICE);
 
+#if (CUDART_VERSION < 10010)
       HYPRE_CUSPARSE_CALL( cusparseDcsr2csc(handle, A->num_rows, A->num_cols, A->num_nonzeros,
                            A->data, A->i, A->j, csc_a, csc_j, csc_i,
                            CUSPARSE_ACTION_NUMERIC, CUSPARSE_INDEX_BASE_ZERO) );
+#else
+      size_t bufferSize = 0;
+      size_t *buffer;
+      HYPRE_CUSPARSE_CALL( cusparseCsr2cscEx2_bufferSize(handle, A->num_rows, A->num_cols, A->num_nonzeros,
+                           A->data, A->i, A->j, csc_a, csc_j, csc_i,
+                           CUDA_R_64F,CUSPARSE_ACTION_NUMERIC, CUSPARSE_INDEX_BASE_ZERO,
+                           CUSPARSE_CSR2CSC_ALG1, &bufferSize));
+      buffer = (size_t*) hypre_TAlloc(char,     bufferSize,    HYPRE_MEMORY_DEVICE);
+
+      HYPRE_CUSPARSE_CALL( cusparseCsr2cscEx2(handle, A->num_rows, A->num_cols, A->num_nonzeros,
+                           A->data, A->i, A->j, csc_a, csc_j, csc_i,
+                           CUDA_R_64F,CUSPARSE_ACTION_NUMERIC, CUSPARSE_INDEX_BASE_ZERO,
+                           CUSPARSE_CSR2CSC_ALG1, buffer));
+
+      hypre_TFree(buffer, HYPRE_MEMORY_DEVICE);
+
+#endif
 
 #ifdef HYPRE_USING_CUSPARSE
+#if (CUDART_VERSION < 10010)
       HYPRE_CUSPARSE_CALL( cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
                            A->num_cols, A->num_rows, A->num_nonzeros,
                            &alpha, descr,
                            csc_a, csc_i, csc_j,
                            x->data, &beta, y->data) );
+#else
+      hypre_cusparse_csrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                           A_ncols, A_nrows, A_nnz,
+                           &alpha,
+                           csc_a, csc_i, csc_j,
+                           x->data, &beta, y->data);
+#endif
 #else
 #pragma omp target teams distribute parallel for private(i) is_device_ptr(csc_a, csc_i, csc_j, y_data, x_data)
       for (i = 0; i < A_ncols; i++)
@@ -116,11 +145,19 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Int        trans,
    else
    {
 #ifdef HYPRE_USING_CUSPARSE
+#if (CUDART_VERSION < 10010)
       HYPRE_CUSPARSE_CALL( cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
                            A_nrows, A_ncols, A_nnz,
                            &alpha, descr,
                            A_data, A_i, A_j,
                            x_data, &beta, y_data) );
+#else
+      hypre_cusparse_csrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                           A_nrows, A_ncols, A_nnz,
+                           &alpha,
+                           A_data, A_i, A_j,
+                           x_data, &beta, y_data);
+#endif
 #else
 #pragma omp target teams distribute parallel for private(i) is_device_ptr(A_data, A_i, A_j, y_data, x_data)
       for (i = 0; i < A_num_rows; i++)
