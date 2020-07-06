@@ -35,7 +35,6 @@
       integer             bx, by, bz
       double precision    cx, cy, cz
       integer             n_pre, n_post
-      integer             jump
       integer             slvr_id
       integer             prec_id
 
@@ -130,7 +129,6 @@
       n_post = 1
 
       slvr_id = 1
-      jump = 1
 
       istart(1) = -3
       istart(2) = -3
@@ -521,23 +519,6 @@
 !           call HYPRE_StructPFMGSetDxyz(precond, dxyz, ierr)
             call HYPRE_StructPFMGSetLogging(precond, zero, ierr)
 
-         elseif (slvr_id .eq. 12) then
-!           use sparseMSG as preconditioner
-            prec_id = 2
-
-            call HYPRE_StructSparseMSGCreate(MPI_COMM_WORLD, precond,
-     & ierr)
-            call HYPRE_StructSparseMSGSetMaxIter(precond, prec_iter,
-     & ierr)
-            call HYPRE_StructSparseMSGSetTol(precond, prec_tol, ierr)
-            call HYPRE_StructSparseMSGSetJump(precond, jump, ierr)
-            call HYPRE_StructSparseMSGSetRelaxTy(precond, one, ierr)
-            call HYPRE_StructSparseMSGSetNumPreR(precond, n_pre,
-     & ierr)
-            call HYPRE_StructSparseMSGSetNumPost(precond, n_post,
-     & ierr)
-            call HYPRE_StructSparseMSGSetLogging(precond, zero, ierr)
-
          elseif (slvr_id .eq. 17) then
 !           use 2-step jacobi as preconditioner
             prec_id = 7
@@ -555,6 +536,13 @@
          elseif (slvr_id .eq. 19) then
 !           use no preconditioner
             prec_id = 9
+
+         else
+!           Invalid preconditioner
+            if (myid .eq. 0) then
+               write(*,*) 'Invalid preconditioner!'
+            endif
+            call MPI_ABORT(MPI_COMM_WORLD, -2, ierr)
          endif
 
          call HYPRE_StructPCGSetPrecond(solver, prec_id, precond,
@@ -607,23 +595,6 @@
 !           call HYPRE_StructPFMGSetDxyz(precond, dxyz, ierr)
             call HYPRE_StructPFMGSetLogging(precond, zero, ierr)
 
-         elseif (slvr_id .eq. 22) then
-!           use SparseMSG as preconditioner
-            prec_id = 2
-
-            call HYPRE_StructSparseMSGCreate(MPI_COMM_WORLD, precond,
-     & ierr)
-            call HYPRE_StructSparseMSGSetMaxIter(precond, prec_iter,
-     & ierr)
-            call HYPRE_StructSparseMSGSetTol(precond, prec_tol, ierr)
-            call HYPRE_StructSparseMSGSetJump(precond, jump, ierr)
-            call HYPRE_StructSparseMSGSetRelaxTy(precond, one, ierr)
-            call HYPRE_StructSparseMSGSetNumPreR(precond, n_pre,
-     & ierr)
-            call HYPRE_StructSparseMSGSetNumPost(precond, n_post,
-     & ierr)
-            call HYPRE_StructSparseMSGSetLogging(precond, zero, ierr)
-
          elseif (slvr_id .eq. 27) then
 !           use 2-step jacobi as preconditioner
             prec_id = 7
@@ -642,6 +613,12 @@
 !           use no preconditioner
             prec_id = 9
 
+         else
+!           Invalid preconditioner
+            if (myid .eq. 0) then
+               write(*,*) 'Invalid preconditioner!'
+            endif
+            call MPI_ABORT(MPI_COMM_WORLD, -2, ierr)
          endif
 
          call HYPRE_StructHybridSetPrecond(solver, prec_id, precond,
@@ -692,24 +669,6 @@
 !           call HYPRE_StructPFMGSetDxyz(precond, dxyz, ierr)
             call HYPRE_StructPFMGSetLogging(precond, zero, ierr)
 
-         elseif (slvr_id .eq. 35) then
-!           use SparseMSG as preconditioner
-            prec_id = 5
-
-            call HYPRE_StructSparseMSGCreate(MPI_COMM_WORLD, precond,
-     & ierr)
-            call HYPRE_StructSparseMSGSetMaxIter(precond, prec_iter,
-     & ierr)
-            call HYPRE_StructSparseMSGSetTol(precond, prec_tol, ierr)
-            call HYPRE_StructSparseMSGSetJump(precond, jump, ierr)
-            call HYPRE_StructSparseMSGSetRelaxTy(precond, one, ierr)
-            call HYPRE_StructSparseMSGSetNumPreR(precond, n_pre,
-     & ierr)
-            call HYPRE_StructSparseMSGSetNumPost(precond, n_post,
-     & ierr)
-            call HYPRE_StructSparseMSGSetLogging(precond, zero, ierr)
-            prec_id = 2
-
          elseif (slvr_id .eq. 36) then
 !           use 2-step jacobi as preconditioner
             prec_id   = 6
@@ -729,6 +688,12 @@
 !           use no preconditioner
             prec_id = 9
 
+         else
+!           Invalid preconditioner
+            if (myid .eq. 0) then
+               write(*,*) 'Invalid preconditioner!'
+            endif
+            call MPI_ABORT(MPI_COMM_WORLD, -2, ierr)
          endif
 
          call HYPRE_StructGMResSetPrecond(solver, prec_id, precond,
@@ -778,23 +743,6 @@
 !           call HYPRE_StructPFMGSetDxyz(precond, dxyz, ierr)
             call HYPRE_StructPFMGSetLogging(precond, zero, ierr)
 
-         elseif (slvr_id .eq. 42) then
-!           use SparseMSG as preconditioner
-            prec_id = 2
-
-            call HYPRE_StructSparseMSGCreate(MPI_COMM_WORLD, precond,
-     & ierr)
-            call HYPRE_StructSparseMSGSetMaxIter(precond, prec_iter,
-     & ierr)
-            call HYPRE_StructSparseMSGSetTol(precond, prec_tol, ierr)
-            call HYPRE_StructSparseMSGSetJump(precond, jump, ierr)
-            call HYPRE_StructSparseMSGSetRelaxTy(precond, one, ierr)
-            call HYPRE_StructSparseMSGSetNumPreR(precond, n_pre,
-     & ierr)
-            call HYPRE_StructSparseMSGSetNumPost(precond, n_post,
-     & ierr)
-            call HYPRE_StructSparseMSGSetLogging(precond, zero, ierr)
-
          elseif (slvr_id .eq. 47) then
 !           use 2-step jacobi as preconditioner
             prec_id   = 7
@@ -813,6 +761,12 @@
 !           use no preconditioner
             prec_id = 9
 
+         else
+!           Invalid preconditioner
+            if (myid .eq. 0) then
+               write(*,*) 'Invalid preconditioner!'
+            endif
+            call MPI_ABORT(MPI_COMM_WORLD, -2, ierr)
          endif
 
          call HYPRE_StructBiCGStabSetPrecond(solver, prec_id, precond,
@@ -863,24 +817,6 @@
 !           call HYPRE_StructPFMGSetDxyz(precond, dxyz, ierr)
             call HYPRE_StructPFMGSetLogging(precond, zero, ierr)
 
-         elseif (slvr_id .eq. 55) then
-!           use SparseMSG as preconditioner
-            prec_id = 5
-
-            call HYPRE_StructSparseMSGCreate(MPI_COMM_WORLD, precond,
-     & ierr)
-            call HYPRE_StructSparseMSGSetMaxIter(precond, prec_iter,
-     & ierr)
-            call HYPRE_StructSparseMSGSetTol(precond, prec_tol, ierr)
-            call HYPRE_StructSparseMSGSetJump(precond, jump, ierr)
-            call HYPRE_StructSparseMSGSetRelaxTy(precond, one, ierr)
-            call HYPRE_StructSparseMSGSetNumPreR(precond, n_pre,
-     & ierr)
-            call HYPRE_StructSparseMSGSetNumPost(precond, n_post,
-     & ierr)
-            call HYPRE_StructSparseMSGSetLogging(precond, zero, ierr)
-            prec_id = 2
-
          elseif (slvr_id .eq. 56) then
 !           use 2-step jacobi as preconditioner
             prec_id   = 6
@@ -900,6 +836,12 @@
 !           use no preconditioner
             prec_id = 9
 
+         else
+!           Invalid preconditioner
+            if (myid .eq. 0) then
+               write(*,*) 'Invalid preconditioner!'
+            endif
+            call MPI_ABORT(MPI_COMM_WORLD, -2, ierr)
          endif
 
          call HYPRE_StructLGMResSetPrecond(solver, prec_id, precond,
@@ -950,24 +892,6 @@
 !           call HYPRE_StructPFMGSetDxyz(precond, dxyz, ierr)
             call HYPRE_StructPFMGSetLogging(precond, zero, ierr)
 
-         elseif (slvr_id .eq. 65) then
-!           use SparseMSG as preconditioner
-            prec_id = 5
-
-            call HYPRE_StructSparseMSGCreate(MPI_COMM_WORLD, precond,
-     & ierr)
-            call HYPRE_StructSparseMSGSetMaxIter(precond, prec_iter,
-     & ierr)
-            call HYPRE_StructSparseMSGSetTol(precond, prec_tol, ierr)
-            call HYPRE_StructSparseMSGSetJump(precond, jump, ierr)
-            call HYPRE_StructSparseMSGSetRelaxTy(precond, one, ierr)
-            call HYPRE_StructSparseMSGSetNumPreR(precond, n_pre,
-     & ierr)
-            call HYPRE_StructSparseMSGSetNumPost(precond, n_post,
-     & ierr)
-            call HYPRE_StructSparseMSGSetLogging(precond, zero, ierr)
-            prec_id = 2
-
          elseif (slvr_id .eq. 66) then
 !           use 2-step jacobi as preconditioner
             prec_id   = 6
@@ -987,6 +911,12 @@
 !           use no preconditioner
             prec_id = 9
 
+         else
+!           Invalid preconditioner
+            if (myid .eq. 0) then
+               write(*,*) 'Invalid preconditioner!'
+            endif
+            call MPI_ABORT(MPI_COMM_WORLD, -2, ierr)
          endif
 
          call HYPRE_StructFGMResSetPrecond(solver, prec_id, precond,
@@ -1002,9 +932,8 @@
       else
          if (myid .eq. 0) then
             write(*,*) 'Invalid solver!'
-            call MPI_FINALIZE(ierr)
-            stop
          endif
+         call MPI_ABORT(MPI_COMM_WORLD, -1, ierr)
       endif
 
       if (prec_id .eq. 0) then
@@ -1012,9 +941,6 @@
 
       elseif (prec_id .eq. 1) then
          call HYPRE_StructPFMGDestroy(precond, ierr)
-
-      elseif (prec_id .eq. 2) then
-         call HYPRE_StructSparseMSGDestroy(precond, ierr)
 
       elseif (prec_id .eq. 7) then
          call HYPRE_StructJacobiDestroy(precond, ierr)
