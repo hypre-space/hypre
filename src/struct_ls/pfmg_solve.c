@@ -71,9 +71,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    /*-----------------------------------------------------
     * Initialize some things and deal with special cases
     *-----------------------------------------------------*/
-
    HYPRE_ANNOTATE_FUNC_BEGIN;
-
    hypre_BeginTiming(pfmg_data -> time_index);
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
@@ -197,7 +195,6 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          hypre_sprintf(filename, "zout_b.%02d", 1);
          hypre_StructVectorPrint(filename, b_l[1], 0);
 #endif
-
          HYPRE_ANNOTATE_MGLEVEL_END(0);
 
          for (l = 1; l <= (num_levels - 2); l++)
@@ -329,6 +326,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          hypre_sprintf(filename, "zout_xup.%02d", 0);
          hypre_StructVectorPrint(filename, x_l[0], 0);
 #endif
+         HYPRE_ANNOTATE_MGLEVEL_BEGIN(0);
       }
 
       /* part of convergence check */
@@ -345,9 +343,6 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             x_dot_x = 1.0;
          }
       }
-
-      /* fine grid post-relaxation */
-      HYPRE_ANNOTATE_MGLEVEL_BEGIN(0);
 
       hypre_PFMGRelaxSetPostRelax(relax_data_l[0]);
       hypre_PFMGRelaxSetMaxIter(relax_data_l[0], num_post_relax);
