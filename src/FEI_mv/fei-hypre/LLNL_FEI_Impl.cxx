@@ -13,22 +13,21 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <math.h>
 #include "LLNL_FEI_Impl.h"
 
 /*-------------------------------------------------------------------------
- local defines 
+ local defines
  -------------------------------------------------------------------------*/
 
 #define SOLVERLOCK 1024
 
 /**************************************************************************
- LLNL_FEI_Impl is the top level finite element interface.  
+ LLNL_FEI_Impl is the top level finite element interface.
  **************************************************************************/
 
 /**************************************************************************
- Constructor 
+ Constructor
  -------------------------------------------------------------------------*/
 LLNL_FEI_Impl::LLNL_FEI_Impl( MPI_Comm comm )
 {
@@ -41,7 +40,7 @@ LLNL_FEI_Impl::LLNL_FEI_Impl( MPI_Comm comm )
 }
 
 /**************************************************************************
- destructor 
+ destructor
  -------------------------------------------------------------------------*/
 LLNL_FEI_Impl::~LLNL_FEI_Impl()
 {
@@ -51,7 +50,7 @@ LLNL_FEI_Impl::~LLNL_FEI_Impl()
 }
 
 /**************************************************************************
- parameter function 
+ parameter function
  -------------------------------------------------------------------------*/
 int LLNL_FEI_Impl::parameters(int numParams, char **paramString)
 {
@@ -79,10 +78,10 @@ int LLNL_FEI_Impl::parameters(int numParams, char **paramString)
       }
    }
    FLAG_SolverLib_ |= SOLVERLOCK;
-   if ( (FLAG_SolverLib_ - SOLVERLOCK) > 0 ) 
+   if ( (FLAG_SolverLib_ - SOLVERLOCK) > 0 )
    {
       if ( lscPtr_ != NULL ) delete lscPtr_;
-      if ( solverPtr_ != NULL ) 
+      if ( solverPtr_ != NULL )
       {
          delete solverPtr_;
          solverPtr_ = NULL;
@@ -94,10 +93,10 @@ int LLNL_FEI_Impl::parameters(int numParams, char **paramString)
       solver = HYPRE;
       lscPtr_ = new LLNL_FEI_LSCore(solver);
    }
-   else 
+   else
    {
       if ( solverPtr_ != NULL ) delete solverPtr_;
-      if ( lscPtr_ != NULL ) 
+      if ( lscPtr_ != NULL )
       {
          delete lscPtr_;
          lscPtr_ = NULL;
@@ -105,19 +104,19 @@ int LLNL_FEI_Impl::parameters(int numParams, char **paramString)
       solverPtr_ = new LLNL_FEI_Solver(mpiComm_);
    }
    feiPtr_->parameters(numParams,paramString);
-   if (solverPtr_ != NULL) solverPtr_->parameters(numParams,paramString); 
-   if (lscPtr_    != NULL) lscPtr_->parameters(numParams,paramString); 
+   if (solverPtr_ != NULL) solverPtr_->parameters(numParams,paramString);
+   if (lscPtr_    != NULL) lscPtr_->parameters(numParams,paramString);
    return 0;
 }
 
 /**************************************************************************
- solve 
+ solve
  -------------------------------------------------------------------------*/
 int LLNL_FEI_Impl::solve(int *status)
 {
    double *rhsVector, *solnVector;
 
-   if ((FLAG_SolverLib_ & SOLVERLOCK) != 0) FLAG_SolverLib_ -= SOLVERLOCK; 
+   if ((FLAG_SolverLib_ & SOLVERLOCK) != 0) FLAG_SolverLib_ -= SOLVERLOCK;
    feiPtr_->getRHSVector(&rhsVector);
    feiPtr_->getSolnVector(&solnVector);
    feiPtr_->getMatrix(&matPtr_);
@@ -143,7 +142,7 @@ int LLNL_FEI_Impl::solve(int *status)
       offsets = matPtr_->getEqnOffsets();
       lscPtr_->setGlobalOffsets(localNRows, NULL, offsets, NULL);
       maxRowSize = 0;
-      for ( i = 0; i < localNRows; i++ ) 
+      for ( i = 0; i < localNRows; i++ )
       {
          rowSize = diagIA[i+1] - diagIA[i];
          if (offdIA != NULL ) rowSize += offdIA[i+1] - offdIA[i];
@@ -154,25 +153,25 @@ int LLNL_FEI_Impl::solve(int *status)
          colInds = new int[maxRowSize];
          colVals = new double[maxRowSize];
       }
-      for ( i = 0; i < localNRows; i++ ) 
+      for ( i = 0; i < localNRows; i++ )
       {
          rowSize = 0;
-         for ( j = diagIA[i]; j < diagIA[i+1]; j++ ) 
+         for ( j = diagIA[i]; j < diagIA[i+1]; j++ )
          {
-            colInds[rowSize] = diagJA[j] + offsets[mypid]; 
-            colVals[rowSize++] = diagAA[j]; 
+            colInds[rowSize] = diagJA[j] + offsets[mypid];
+            colVals[rowSize++] = diagAA[j];
          }
          if ( offdIA != NULL )
          {
-            for ( j = offdIA[i]; j < offdIA[i+1]; j++ ) 
+            for ( j = offdIA[i]; j < offdIA[i+1]; j++ )
             {
-               colInds[rowSize] = colMap[offdJA[j]-localNRows]; 
-               colVals[rowSize++] = offdAA[j]; 
+               colInds[rowSize] = colMap[offdJA[j]-localNRows];
+               colVals[rowSize++] = offdAA[j];
             }
          }
          rowInd = offsets[mypid] + i;
-         lscPtr_->putIntoSystemMatrix(one, &rowInd, rowSize, 
-                      (const int *) colInds, (const double* const*) &colVals); 
+         lscPtr_->putIntoSystemMatrix(one, &rowInd, rowSize,
+                      (const int *) colInds, (const double* const*) &colVals);
       }
       if ( maxRowSize > 0 )
       {
@@ -183,7 +182,7 @@ int LLNL_FEI_Impl::solve(int *status)
       for ( i = 0; i < localNRows; i++ ) indices[i] = i + offsets[mypid];
       lscPtr_->putIntoRHSVector(localNRows, (const double *) rhsVector,
                                 (const int *) indices);
-      lscPtr_->putInitialGuess((const int *) indices, 
+      lscPtr_->putInitialGuess((const int *) indices,
                                (const double *) solnVector, localNRows);
       lscPtr_->matrixLoadComplete();
       // Charles : this status check not in application code?
@@ -196,9 +195,9 @@ int LLNL_FEI_Impl::solve(int *status)
 }
 
 /**************************************************************************
- residual norm calculation 
+ residual norm calculation
  -------------------------------------------------------------------------*/
-int LLNL_FEI_Impl::residualNorm(int whichNorm, int numFields, int *fieldIDs, 
+int LLNL_FEI_Impl::residualNorm(int whichNorm, int numFields, int *fieldIDs,
                               double *norms )
 {
    (void) numFields;

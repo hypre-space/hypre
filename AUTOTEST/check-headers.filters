@@ -1,0 +1,6 @@
+mpicc
+mpif77
+include/fortran_matrix.h
+include/multivector.h
+include/interpreter.h
+include/temp_multivector.h

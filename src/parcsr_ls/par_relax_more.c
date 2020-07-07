@@ -987,18 +987,17 @@ L20:
   u += w D^{-1}(f - A u), where D_ii = ||A(i,:)||_1
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
-                                  hypre_ParVector    *f,
-                                  HYPRE_Int                *cf_marker,
-                                  HYPRE_Int                 relax_points,
-                                  HYPRE_Real          relax_weight,
-                                  HYPRE_Real         *l1_norms,
-                                  hypre_ParVector    *u,
-                                  hypre_ParVector    *Vtemp )
+HYPRE_Int  
+hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
+                             hypre_ParVector    *f,
+                             HYPRE_Int          *cf_marker,
+                             HYPRE_Int           relax_points,
+                             HYPRE_Real          relax_weight,
+                             HYPRE_Real         *l1_norms,
+                             hypre_ParVector    *u,
+                             hypre_ParVector    *Vtemp )
 
 {
-
-
     MPI_Comm	   comm = hypre_ParCSRMatrixComm(A);
     hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
     HYPRE_Real     *A_diag_data  = hypre_CSRMatrixData(A_diag);
@@ -1112,7 +1111,7 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
                 ii = A_offd_j[jj];
                 res -= A_offd_data[jj] * Vext_data[ii];
              }
-             u_data[i] += (relax_weight*res)/l1_norms[i];
+             u_data[i] += (relax_weight*res) / l1_norms[i];
           }
        }
     }
@@ -1147,7 +1146,7 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
                 ii = A_offd_j[jj];
                 res -= A_offd_data[jj] * Vext_data[ii];
              }
-             u_data[i] += (relax_weight * res)/l1_norms[i];
+             u_data[i] += (relax_weight * res) / l1_norms[i];
           }
        }
     }
@@ -1158,7 +1157,5 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
     }
 
     return 0;
-
 }
-
 

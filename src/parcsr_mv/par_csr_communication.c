@@ -217,6 +217,7 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job, hypre_ParCSRCommPkg *comm
    return ( comm_handle );
 }
 
+
 hypre_ParCSRPersistentCommHandle*
 hypre_ParCSRCommPkgGetPersistentCommHandle( HYPRE_Int job, hypre_ParCSRCommPkg *comm_pkg )
 {
@@ -240,7 +241,7 @@ hypre_ParCSRPersistentCommHandleDestroy( hypre_ParCSRPersistentCommHandle *comm_
 }
 
 void hypre_ParCSRPersistentCommHandleStart( hypre_ParCSRPersistentCommHandle *comm_handle,
-                                            HYPRE_Int                         send_memory_location,
+                                            HYPRE_MemoryLocation              send_memory_location,
                                             void                             *send_data )
 {
    hypre_ParCSRCommHandleSendData(comm_handle) = send_data;
@@ -266,7 +267,7 @@ void hypre_ParCSRPersistentCommHandleStart( hypre_ParCSRPersistentCommHandle *co
 }
 
 void hypre_ParCSRPersistentCommHandleWait( hypre_ParCSRPersistentCommHandle *comm_handle,
-                                           HYPRE_Int                         recv_memory_location,
+                                           HYPRE_MemoryLocation              recv_memory_location,
                                            void                             *recv_data )
 {
    hypre_ParCSRCommHandleRecvData(comm_handle) = recv_data;
@@ -306,9 +307,9 @@ hypre_ParCSRCommHandleCreate ( HYPRE_Int            job,
 hypre_ParCSRCommHandle*
 hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
                                   hypre_ParCSRCommPkg *comm_pkg,
-                                  HYPRE_Int            send_memory_location,
+                                  HYPRE_MemoryLocation send_memory_location,
                                   void                *send_data_in,
-                                  HYPRE_Int            recv_memory_location,
+                                  HYPRE_MemoryLocation recv_memory_location,
                                   void                *recv_data_in )
 {
    HYPRE_Int                  num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
@@ -384,9 +385,11 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
          break;
    }
 
-   /* send from actually device memory */
-   if ( hypre_GetActualMemLocation(send_memory_location) == HYPRE_MEMORY_DEVICE )
+   hypre_MemoryLocation act_send_memory_location = hypre_GetActualMemLocation(send_memory_location);
+
+   if ( act_send_memory_location == hypre_MEMORY_DEVICE || act_send_memory_location == hypre_MEMORY_UNIFIED )
    {
+      //send_data = _hypre_TAlloc(char, num_send_bytes, hypre_MEMORY_HOST_PINNED);
       send_data = hypre_TAlloc(char, num_send_bytes, HYPRE_MEMORY_HOST);
       hypre_TMemcpy(send_data, send_data_in, char, num_send_bytes, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
@@ -395,9 +398,11 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
       send_data = send_data_in;
    }
 
-   /* receive from actually device memory */
-   if ( hypre_GetActualMemLocation(recv_memory_location) == HYPRE_MEMORY_DEVICE )
+   hypre_MemoryLocation act_recv_memory_location = hypre_GetActualMemLocation(recv_memory_location);
+
+   if ( act_recv_memory_location == hypre_MEMORY_DEVICE || act_recv_memory_location == hypre_MEMORY_UNIFIED )
    {
+      //recv_data = hypre_TAlloc(char, num_recv_bytes, hypre_MEMORY_HOST_PINNED);
       recv_data = hypre_TAlloc(char, num_recv_bytes, HYPRE_MEMORY_HOST);
    }
    else
@@ -407,6 +412,8 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
 #else /* #ifndef HYPRE_WITH_GPU_AWARE_MPI */
    send_data = send_data_in;
    recv_data = recv_data_in;
+   // TODO RL
+   HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle())) );
 #endif
 
    num_requests = num_sends + num_recvs;
@@ -591,12 +598,15 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
    }
 
 #ifndef HYPRE_WITH_GPU_AWARE_MPI
-   if ( hypre_GetActualMemLocation(hypre_ParCSRCommHandleSendMemoryLocation(comm_handle)) == HYPRE_MEMORY_DEVICE )
+   hypre_MemoryLocation act_send_memory_location = hypre_GetActualMemLocation(hypre_ParCSRCommHandleSendMemoryLocation(comm_handle));
+   if ( act_send_memory_location == hypre_MEMORY_DEVICE || act_send_memory_location == hypre_MEMORY_UNIFIED )
    {
+      //hypre_HostPinnedFree(hypre_ParCSRCommHandleSendDataBuffer(comm_handle));
       hypre_TFree(hypre_ParCSRCommHandleSendDataBuffer(comm_handle), HYPRE_MEMORY_HOST);
    }
 
-   if ( hypre_GetActualMemLocation(hypre_ParCSRCommHandleRecvMemoryLocation(comm_handle)) == HYPRE_MEMORY_DEVICE )
+   hypre_MemoryLocation act_recv_memory_location = hypre_GetActualMemLocation(hypre_ParCSRCommHandleRecvMemoryLocation(comm_handle));
+   if ( act_recv_memory_location == hypre_MEMORY_DEVICE || act_recv_memory_location == hypre_MEMORY_UNIFIED )
    {
       hypre_TMemcpy( hypre_ParCSRCommHandleRecvData(comm_handle),
                      hypre_ParCSRCommHandleRecvDataBuffer(comm_handle),
@@ -605,6 +615,7 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
                      HYPRE_MEMORY_DEVICE,
                      HYPRE_MEMORY_HOST );
 
+      //hypre_HostPinnedFree(hypre_ParCSRCommHandleRecvDataBuffer(comm_handle));
       hypre_TFree(hypre_ParCSRCommHandleRecvDataBuffer(comm_handle), HYPRE_MEMORY_HOST);
    }
 #endif
@@ -904,10 +915,11 @@ hypre_MatvecCommPkgCreate ( hypre_ParCSRMatrix *A )
    HYPRE_Int  num_cols_offd   = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    HYPRE_BigInt  global_num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
-   /* Create the assumed partition */
+   /* Create the assumed partition and should own it */
    if  (hypre_ParCSRMatrixAssumedPartition(A) == NULL)
    {
       hypre_ParCSRMatrixCreateAssumedPartition(A);
+      hypre_ParCSRMatrixOwnsAssumedPartition(A) = 1;
    }
    hypre_IJAssumedPart *apart = hypre_ParCSRMatrixAssumedPartition(A);
 #else
@@ -917,7 +929,7 @@ hypre_MatvecCommPkgCreate ( hypre_ParCSRMatrix *A )
    /*-----------------------------------------------------------
     * setup commpkg
     *----------------------------------------------------------*/
-   hypre_ParCSRCommPkg *comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1,HYPRE_MEMORY_HOST);
+   hypre_ParCSRCommPkg *comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
    hypre_ParCSRMatrixCommPkg(A) = comm_pkg;
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    hypre_ParCSRCommPkgCreateApart ( comm, col_map_offd, first_col_diag,
@@ -967,8 +979,11 @@ hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg )
       hypre_TFree(hypre_ParCSRCommPkgRecvMPITypes(comm_pkg), HYPRE_MEMORY_HOST); */
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_MEMORY)
-   hypre_TFree(hypre_ParCSRCommPkgTmpData(comm_pkg), HYPRE_MEMORY_DEVICE);
-   hypre_TFree(hypre_ParCSRCommPkgBufData(comm_pkg), HYPRE_MEMORY_DEVICE);
+   //hypre_TFree(hypre_ParCSRCommPkgTmpData(comm_pkg),   HYPRE_MEMORY_DEVICE);
+   //hypre_TFree(hypre_ParCSRCommPkgBufData(comm_pkg),   HYPRE_MEMORY_DEVICE);
+   _hypre_TFree(hypre_ParCSRCommPkgTmpData(comm_pkg), hypre_MEMORY_DEVICE);
+   _hypre_TFree(hypre_ParCSRCommPkgBufData(comm_pkg), hypre_MEMORY_DEVICE);
+   hypre_TFree(hypre_ParCSRCommPkgWorkSpace(comm_pkg), HYPRE_MEMORY_DEVICE);
 #endif
 
    hypre_TFree(comm_pkg, HYPRE_MEMORY_HOST);
@@ -979,9 +994,8 @@ hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg )
 /* AHB 11/06 : alternate to the extend function below - creates a
  * second comm pkg based on indices - this makes it easier to use the
  * global partition
- * RL: reanmed and moved it here
- * RL: changed the interface
- * */
+ * RL: renamed and moved it here
+ */
 HYPRE_Int
 hypre_ParCSRFindExtendCommPkg(MPI_Comm              comm,
                               HYPRE_BigInt          global_num,
@@ -1065,3 +1079,4 @@ hypre_BuildCSRJDataType( HYPRE_Int num_nonzeros,
 
    return hypre_error_flag;
 }
+

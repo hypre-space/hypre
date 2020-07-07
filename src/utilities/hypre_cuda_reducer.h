@@ -211,14 +211,13 @@ struct ReduceSum
       __thread_sum = 0.0;
       nblocks = -1;
 
-      if (hypre_handle->cuda_reduce_buffer == NULL)
+      if (hypre_HandleCudaReduceBuffer(hypre_handle()) == NULL)
       {
          /* allocate for the max size for reducing double6 type */
-         hypre_handle->cuda_reduce_buffer =
-            hypre_TAlloc(HYPRE_double6, 1024, HYPRE_MEMORY_DEVICE);
+         hypre_HandleCudaReduceBuffer(hypre_handle()) = hypre_TAlloc(HYPRE_double6, 1024, HYPRE_MEMORY_DEVICE);
       }
 
-      d_buf = (T*) hypre_handle->cuda_reduce_buffer;
+      d_buf = (T*) hypre_HandleCudaReduceBuffer(hypre_handle());
    }
 
    /* copy constructor */
@@ -253,8 +252,9 @@ struct ReduceSum
    {
       T val;
       /* 2nd reduction with only *one* block */
-      assert(nblocks >= 0 && nblocks <= 1024);
-      OneBlockReduceKernel<<<1, 1024>>>(d_buf, nblocks);
+      hypre_assert(nblocks >= 0 && nblocks <= 1024);
+      const dim3 gDim(1), bDim(1024);
+      HYPRE_CUDA_LAUNCH( OneBlockReduceKernel, gDim, bDim, d_buf, nblocks );
       hypre_TMemcpy(&val, d_buf, T, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
       val += init;
 

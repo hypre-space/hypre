@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - *
            Perform SpMM with Row Nnz Estimation
@@ -197,7 +192,7 @@ csr_spmm_attempt(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
    __shared__ volatile char s_failed[NUM_WARPS_PER_BLOCK];
    volatile char *warp_s_failed = s_failed + warp_id;
 
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
    assert(blockDim.z              == NUM_WARPS_PER_BLOCK);
    assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
    assert(NUM_WARPS_PER_BLOCK <= HYPRE_WARP_SIZE);
@@ -255,7 +250,7 @@ csr_spmm_attempt(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
                                                           ghash_size, jg + istart_g, ag + istart_g,
                                                           failed, warp_s_failed);
 
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
       if (attempt == 2)
       {
          assert(failed == 0);
@@ -363,7 +358,7 @@ copy_from_hash_into_C(HYPRE_Int  M,   HYPRE_Int *js,  HYPRE_Complex *as,
    /* lane id inside the warp */
    volatile const HYPRE_Int lane_id = get_lane_id();
 
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
    assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 #endif
 
@@ -382,7 +377,7 @@ copy_from_hash_into_C(HYPRE_Int  M,   HYPRE_Int *js,  HYPRE_Complex *as,
       }
 
       HYPRE_Int istart_c  = __shfl_sync(HYPRE_WARP_FULL_MASK, kc, 0);
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
       HYPRE_Int iend_c    = __shfl_sync(HYPRE_WARP_FULL_MASK, kc, 1);
 #endif
       HYPRE_Int istart_g1 = __shfl_sync(HYPRE_WARP_FULL_MASK, kg1, 0);
@@ -393,29 +388,29 @@ copy_from_hash_into_C(HYPRE_Int  M,   HYPRE_Int *js,  HYPRE_Complex *as,
       HYPRE_Int g1_size = iend_g1 - istart_g1;
       HYPRE_Int g2_size = iend_g2 - istart_g2;
 
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
       HYPRE_Int j;
 #endif
 
       if (g2_size == 0)
       {
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
          j =
 #endif
-            copy_from_hash_into_C_row<NUM_WARPS_PER_BLOCK, SHMEM_HASH_SIZE>
-            (lane_id, js + i * SHMEM_HASH_SIZE, as + i * SHMEM_HASH_SIZE, g1_size, jg1 + istart_g1,
-             ag1 + istart_g1, jc + istart_c, ac + istart_c);
+         copy_from_hash_into_C_row<NUM_WARPS_PER_BLOCK, SHMEM_HASH_SIZE>
+         (lane_id, js + i * SHMEM_HASH_SIZE, as + i * SHMEM_HASH_SIZE, g1_size, jg1 + istart_g1,
+         ag1 + istart_g1, jc + istart_c, ac + istart_c);
       }
       else
       {
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
          j =
 #endif
-            copy_from_hash_into_C_row<NUM_WARPS_PER_BLOCK, SHMEM_HASH_SIZE>
-            (lane_id, js + i * SHMEM_HASH_SIZE, as + i * SHMEM_HASH_SIZE, g2_size, jg2 + istart_g2,
-             ag2 + istart_g2, jc + istart_c, ac + istart_c);
+         copy_from_hash_into_C_row<NUM_WARPS_PER_BLOCK, SHMEM_HASH_SIZE>
+         (lane_id, js + i * SHMEM_HASH_SIZE, as + i * SHMEM_HASH_SIZE, g2_size, jg2 + istart_g2,
+         ag2 + istart_g2, jc + istart_c, ac + istart_c);
       }
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
       assert(istart_c + j == iend_c);
 #endif
    }
@@ -441,9 +436,9 @@ hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    hypre_assert(bDim.x * bDim.y == HYPRE_WARP_SIZE);
 
    // for cases where one WARP works on a row
-   HYPRE_Int gDim  = (m + bDim.z - 1) / bDim.z;
+   dim3 gDim( (m + bDim.z - 1) / bDim.z );
 
-   char hash_type = hypre_handle->spgemm_hash_type;
+   char hash_type = hypre_HandleSpgemmHashType(hypre_handle());
 
    /* ---------------------------------------------------------------------------
     * build hash table
@@ -465,21 +460,21 @@ hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
     * ---------------------------------------------------------------------------*/
    if (hash_type == 'L')
    {
-      csr_spmm_attempt<num_warps_per_block, shmem_hash_size, 1, 'L'> <<<gDim, bDim>>>
-         (m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash_i, d_ghash_j, d_ghash_a,
-          d_ic + 1, d_ghash2_i + 1);
+      HYPRE_CUDA_LAUNCH( (csr_spmm_attempt<num_warps_per_block, shmem_hash_size, 1, 'L'>), gDim, bDim,
+                         m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash_i, d_ghash_j, d_ghash_a,
+                         d_ic + 1, d_ghash2_i + 1 );
    }
    else if (hash_type == 'Q')
    {
-      csr_spmm_attempt<num_warps_per_block, shmem_hash_size, 1, 'Q'> <<<gDim, bDim>>>
-         (m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash_i, d_ghash_j, d_ghash_a,
-          d_ic + 1, d_ghash2_i + 1);
+      HYPRE_CUDA_LAUNCH( (csr_spmm_attempt<num_warps_per_block, shmem_hash_size, 1, 'Q'>), gDim, bDim,
+                         m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash_i, d_ghash_j, d_ghash_a,
+                         d_ic + 1, d_ghash2_i + 1);
    }
    else if (hash_type == 'D')
    {
-      csr_spmm_attempt<num_warps_per_block, shmem_hash_size, 1, 'D'> <<<gDim, bDim>>>
-         (m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash_i, d_ghash_j, d_ghash_a,
-          d_ic + 1, d_ghash2_i + 1);
+      HYPRE_CUDA_LAUNCH( (csr_spmm_attempt<num_warps_per_block, shmem_hash_size, 1, 'D'>), gDim, bDim,
+                         m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash_i, d_ghash_j, d_ghash_a,
+                         d_ic + 1, d_ghash2_i + 1 );
    }
    else
    {
@@ -502,21 +497,21 @@ hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    {
       if (hash_type == 'L')
       {
-         csr_spmm_attempt<num_warps_per_block, shmem_hash_size, 2, 'L'> <<<gDim, bDim>>>
-            (m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash2_i, d_ghash2_j, d_ghash2_a,
-             d_ic + 1, NULL);
+         HYPRE_CUDA_LAUNCH( (csr_spmm_attempt<num_warps_per_block, shmem_hash_size, 2, 'L'>), gDim, bDim,
+                            m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash2_i, d_ghash2_j, d_ghash2_a,
+                            d_ic + 1, NULL );
       }
       else if (hash_type == 'Q')
       {
-         csr_spmm_attempt<num_warps_per_block, shmem_hash_size, 2, 'Q'> <<<gDim, bDim>>>
-            (m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash2_i, d_ghash2_j, d_ghash2_a,
-             d_ic + 1, NULL);
+         HYPRE_CUDA_LAUNCH( (csr_spmm_attempt<num_warps_per_block, shmem_hash_size, 2, 'Q'>), gDim, bDim,
+                            m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash2_i, d_ghash2_j, d_ghash2_a,
+                            d_ic + 1, NULL);
       }
       else if (hash_type == 'D')
       {
-         csr_spmm_attempt<num_warps_per_block, shmem_hash_size, 2, 'D'> <<<gDim, bDim>>>
-            (m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash2_i, d_ghash2_j, d_ghash2_a,
-             d_ic + 1, NULL);
+         HYPRE_CUDA_LAUNCH( (csr_spmm_attempt<num_warps_per_block, shmem_hash_size, 2, 'D'>), gDim, bDim,
+                            m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash2_i, d_ghash2_j, d_ghash2_a,
+                            d_ic + 1, NULL);
       }
       else
       {
@@ -529,9 +524,9 @@ hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    HYPRE_Complex *d_c;
    csr_spmm_create_ija(m, d_ic, &d_jc, &d_c, &nnzC_gpu);
 
-   copy_from_hash_into_C<num_warps_per_block, shmem_hash_size> <<<gDim, bDim>>>
-      (m, d_js, d_as, d_ghash_i, d_ghash_j, d_ghash_a, d_ghash2_i, d_ghash2_j, d_ghash2_a,
-       d_ic, d_jc, d_c);
+   HYPRE_CUDA_LAUNCH( (copy_from_hash_into_C<num_warps_per_block, shmem_hash_size>), gDim, bDim,
+                      m, d_js, d_as, d_ghash_i, d_ghash_j, d_ghash_a, d_ghash2_i, d_ghash2_j, d_ghash2_a,
+                      d_ic, d_jc, d_c);
 
    hypre_TFree(d_ghash_i,  HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_ghash_j,  HYPRE_MEMORY_DEVICE);

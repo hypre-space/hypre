@@ -1,16 +1,12 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "seq_mv.h"
+#include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_CUDA)
 
@@ -52,7 +48,7 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    /* expansion: A's row idx */
    //d_it = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
    d_it = d_pm + nnzA;
-   hypreDevice_CsrRowPtrsToIndices_v2(m, d_ia, d_it);
+   hypreDevice_CsrRowPtrsToIndices_v2(m, nnzA, d_ia, d_it);
 
    /* a copy of col idx of A */
    //d_jt = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
@@ -60,18 +56,18 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    hypre_TMemcpy(d_jt, d_ja, HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
    /* sort: by col */
-   thrust::sequence(thrust::device, d_pm, d_pm + nnzA);
-   thrust::stable_sort_by_key(thrust::device, d_jt, d_jt + nnzA, d_pm);
-   thrust::gather(thrust::device, d_pm, d_pm + nnzA, d_it, d_jc);
+   HYPRE_THRUST_CALL(sequence, d_pm, d_pm + nnzA);
+   HYPRE_THRUST_CALL(stable_sort_by_key, d_jt, d_jt + nnzA, d_pm);
+   HYPRE_THRUST_CALL(gather, d_pm, d_pm + nnzA, d_it, d_jc);
    if (want_data)
    {
-      thrust::gather(thrust::device, d_pm, d_pm + nnzA, d_aa, d_ac);
+      HYPRE_THRUST_CALL(gather, d_pm, d_pm + nnzA, d_aa, d_ac);
    }
 
    /* convert into ic: row idx --> row ptrs */
    d_ic = hypreDevice_CsrRowIndicesToPtrs(n, nnzA, d_jt);
 
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
    HYPRE_Int nnzC;
    hypre_TMemcpy(&nnzC, &d_ic[n], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    hypre_assert(nnzC == nnzA);

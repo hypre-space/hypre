@@ -4,6 +4,20 @@ Sphinx links:
 http://www.sphinx-doc.org/en/stable/
 http://www.sphinx-doc.org/en/stable/examples.html
 
+https://alabaster.readthedocs.io/en/latest/index.html      # Alibaster theme
+
+https://docutils.sourceforge.io/rst.html                   # reStructuredText reference
+
+
+Doxygen links:
+
+http://www.doxygen.nl/manual/index.html
+
+
+Breathe links:
+
+https://breathe.readthedocs.io/en/latest/index.html
+
 
 Build commands:
 

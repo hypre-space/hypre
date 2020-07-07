@@ -20,9 +20,10 @@
 
 /* RDF: Why is this include here? */
 #include "_hypre_struct_mv.h"
+#include "_hypre_struct_mv.hpp"
 
 #ifdef HYPRE_DEBUG
-#include <cegdb.h>
+/*#include <cegdb.h>*/
 #endif
 
 /* begin lobpcg */
@@ -31,11 +32,7 @@
 
 #include <time.h>
 
-#include "fortran_matrix.h"
 #include "HYPRE_lobpcg.h"
-#include "interpreter.h"
-#include "multivector.h"
-#include "HYPRE_MatvecFunctions.h"
 
 /* end lobpcg */
 
@@ -77,6 +74,7 @@ main( hypre_int argc,
    HYPRE_Real          conx, cony, conz;
    HYPRE_Int           solver_id;
    HYPRE_Int           solver_type;
+   HYPRE_Int           recompute_res;
 
    /*HYPRE_Real          dxyz[3];*/
 
@@ -187,10 +185,10 @@ main( hypre_int argc,
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
    /* Initialize Hypre */
-   HYPRE_Init(argc, argv);
+   HYPRE_Init();
 
 #ifdef HYPRE_DEBUG
-   cegdb(&argc, &argv, myid);
+   /*cegdb(&argc, &argv, myid);*/
 #endif
 
    /*-----------------------------------------------------------
@@ -231,6 +229,7 @@ main( hypre_int argc,
 
    solver_id = 0;
    solver_type = 1;
+   recompute_res = 0;   /* What should be the default here? */
 
    istart[0] = -3;
    istart[1] = -3;
@@ -399,6 +398,11 @@ main( hypre_int argc,
       {
          arg_index++;
          solver_type = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-recompute") == 0 )
+      {
+         arg_index++;
+         recompute_res = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-cf") == 0 )
       {
@@ -578,6 +582,7 @@ main( hypre_int argc,
       hypre_printf("  -solver_type <ID>   : solver type for Hybrid\n");
       hypre_printf("                        1 - PCG (default)\n");
       hypre_printf("                        2 - GMRES\n");
+      hypre_printf("  -recompute <bool>   : Recompute residual in PCG?\n");
       hypre_printf("  -cf <cf>            : convergence factor for Hybrid\n");
       hypre_printf("\n");
 
@@ -2201,6 +2206,7 @@ main( hypre_int argc,
          HYPRE_StructHybridSetPrintLevel(solver, 1);
          HYPRE_StructHybridSetLogging(solver, 1);
          HYPRE_StructHybridSetSolverType(solver, solver_type);
+         HYPRE_StructHybridSetRecomputeResidual(solver, recompute_res);
 
          if (solver_id == 20)
          {

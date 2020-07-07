@@ -16,7 +16,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <assert.h>
 
 #include "_hypre_parcsr_mv.h"
 
@@ -93,7 +92,7 @@ void hypre_ParChordMatrix_RowStarts(
       hypre_assert( (*row_starts)[my_id] == (*row_starts)[my_id-1] + (HYPRE_BigInt)lastlens[0] );
    hypre_TFree( request , HYPRE_MEMORY_HOST);
    hypre_TFree( status , HYPRE_MEMORY_HOST);
-      
+
    /* Get the upper bound for all the rows */
    hypre_MPI_Bcast( lens, 2, HYPRE_MPI_INT, num_procs-1, comm );
    (*row_starts)[num_procs] = (*row_starts)[num_procs-1] + (HYPRE_Int)lens[0];
@@ -240,8 +239,8 @@ hypre_ParChordMatrixToParCSRMatrix(
       hypre_TFree(a_i, HYPRE_MEMORY_HOST);
       hypre_CSRMatrixData(local_A) = NULL;
       hypre_CSRMatrixI(local_A) = NULL;
-      hypre_CSRMatrixJ(local_A) = NULL; 
-   }      
+      hypre_CSRMatrixJ(local_A) = NULL;
+   }
    hypre_CSRMatrixDestroy(local_A);
    hypre_TFree(local_num_rows, HYPRE_MEMORY_HOST);
 /*   hypre_TFree(csr_matrix_datatypes);*/
@@ -435,7 +434,7 @@ hypre_ParCSRMatrixToParChordMatrix(
 
    /* offd block: */
 
-   /* >>> offd_cols_me duplicates rdofs */
+   /* offd_cols_me duplicates rdofs */
    offd_cols_me = hypre_NumbersNewNode();
    for ( row=0; row<hypre_CSRMatrixNumRows(offd); ++row ) {
       for ( i=hypre_CSRMatrixI(offd)[row]; i<hypre_CSRMatrixI(offd)[row+1]; ++i ) {
@@ -496,7 +495,7 @@ hypre_ParCSRMatrixToParChordMatrix(
          j_local = hypre_CSRMatrixJ(offd)[i];
          j_global =  col_map_offd[j_local];
          hypre_NumbersEnter( rdofs, j_local );
-         
+
          /* TO DO: find faster ways to do the two processor lookups below.*/
          /* Find a processor p (local index q) from the inprocessor list,
             which owns the column(rdof) whichis the same as this processor's
@@ -532,7 +531,7 @@ hypre_ParCSRMatrixToParChordMatrix(
                   inproc[i] = q;
                   break;
                }
-            }  
+            }
          }
          hypre_assert( inproc[i]>=0 );
 
@@ -633,7 +632,7 @@ hypre_ParCSRMatrixToParChordMatrix(
    hypre_ParChordMatrixNumRdofs(Ac) = num_rdofs;
    hypre_ParChordMatrixNumRdofsToprocessor(Ac) = num_rdofs_toprocessor;
    hypre_ParChordMatrixRdofToprocessor(Ac) = rdof_toprocessor;
-      
+
 
 /* >>> to set...
 

@@ -38,6 +38,11 @@ shift
 
 # Organizing the tests from "fast" to "slow"
 
+# Check license header info
+#( cd $src_dir; make distclean )
+./test.sh check-license.sh $src_dir/..
+mv -f check-license.??? $output_dir
+
 # Check for 'int', 'double', and 'MPI_'
 ./test.sh check-int.sh $src_dir
 mv -f check-int.??? $output_dir
@@ -45,6 +50,8 @@ mv -f check-int.??? $output_dir
 mv -f check-double.??? $output_dir
 ./test.sh check-mpi.sh $src_dir
 mv -f check-mpi.??? $output_dir
+./test.sh check-headers.sh $src_dir
+mv -f check-headers.??? $output_dir
 
 # Basic build and run tests
 mo="-j test"
@@ -128,6 +135,10 @@ co="--enable-debug CC=mpiCC"
 co="--enable-bigint --enable-debug"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: -bigint
 ./renametest.sh basic $output_dir/basic--enable-bigint
+
+co="--enable-mixedint --enable-debug"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic--enable-mixedint
 
 co="--enable-debug --with-print-errors"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind

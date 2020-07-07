@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - *
                 Row size estimations
@@ -70,7 +65,7 @@ void csr_spmm_rownnz_naive(HYPRE_Int M, /*HYPRE_Int K,*/ HYPRE_Int N, HYPRE_Int 
    /* lane id inside the warp */
    volatile const HYPRE_Int lane_id = get_lane_id();
 
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
    assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 #endif
 
@@ -117,7 +112,7 @@ void expdistfromuniform(HYPRE_Int n, float *x)
    const HYPRE_Int global_thread_id  = blockIdx.x * get_block_size() + get_thread_id();
    const HYPRE_Int total_num_threads = gridDim.x  * get_block_size();
 
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
    assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 #endif
 
@@ -143,7 +138,7 @@ void cohen_rowest_kernel(HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T
    volatile HYPRE_Int  *warp_s_col = s_col + warp_id * SHMEM_SIZE_PER_WARP;
 #endif
 
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
    assert(blockDim.z              == NUM_WARPS_PER_BLOCK);
    assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
    assert(sizeof(T) == sizeof(float));
@@ -210,7 +205,7 @@ void cohen_rowest_kernel(HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T
                HYPRE_Int colk = __shfl_sync(HYPRE_WARP_FULL_MASK, col, k);
                if (colk == -1)
                {
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
                   assert(j + HYPRE_WARP_SIZE >= iend);
 #endif
                   break;
@@ -282,8 +277,7 @@ template <typename T, HYPRE_Int BDIMX, HYPRE_Int BDIMY, HYPRE_Int NUM_WARPS_PER_
 void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_low, HYPRE_Int *d_upp, HYPRE_Int *d_rc, HYPRE_Int nsamples, T mult_factor, T *work)
 {
    dim3 bDim(BDIMX, BDIMY, NUM_WARPS_PER_BLOCK);
-   assert(bDim.x * bDim.y == HYPRE_WARP_SIZE);
-   HYPRE_Int gDim;
+   hypre_assert(bDim.x * bDim.y == HYPRE_WARP_SIZE);
 
    T *d_V1, *d_V2, *d_V3;
 
@@ -292,27 +286,28 @@ void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_i
    //d_V1 = hypre_TAlloc(T, nsamples*N, HYPRE_MEMORY_DEVICE);
    //d_V2 = hypre_TAlloc(T, nsamples*K, HYPRE_MEMORY_DEVICE);
 
-   curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle);
+   curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle());
    //CURAND_CALL(curandSetGeneratorOrdering(gen, CURAND_ORDERING_PSEUDO_SEEDED));
    /* random V1: uniform --> exp */
    HYPRE_CURAND_CALL(curandGenerateUniform(gen, d_V1, nsamples * N));
    //  CURAND_CALL(curandGenerateUniformDouble(gen, d_V1, nsamples * N));
-   gDim = (nsamples * N + bDim.z * HYPRE_WARP_SIZE - 1) / (bDim.z * HYPRE_WARP_SIZE);
-   expdistfromuniform<<<gDim, bDim>>>(nsamples * N, d_V1);
+   dim3 gDim( (nsamples * N + bDim.z * HYPRE_WARP_SIZE - 1) / (bDim.z * HYPRE_WARP_SIZE) );
+
+   HYPRE_CUDA_LAUNCH( expdistfromuniform, gDim, bDim, nsamples * N, d_V1 );
 
    /* step-1: layer 3-2 */
-   gDim = (K + bDim.z - 1) / bDim.z;
-   cohen_rowest_kernel<T, NUM_WARPS_PER_BLOCK, SHMEM_SIZE_PER_WARP, 2> <<<gDim, bDim>>>
-      (K, d_ib, d_jb, d_V1, d_V2, NULL, nsamples, NULL, NULL, -1.0);
+   gDim.x = (K + bDim.z - 1) / bDim.z;
+   HYPRE_CUDA_LAUNCH( (cohen_rowest_kernel<T, NUM_WARPS_PER_BLOCK, SHMEM_SIZE_PER_WARP, 2>), gDim, bDim,
+                      K, d_ib, d_jb, d_V1, d_V2, NULL, nsamples, NULL, NULL, -1.0);
 
    //hypre_TFree(d_V1, HYPRE_MEMORY_DEVICE);
 
    /* step-2: layer 2-1 */
    d_V3 = (T*) d_rc;
 
-   gDim = (M + bDim.z - 1) / bDim.z;
-   cohen_rowest_kernel<T, NUM_WARPS_PER_BLOCK, SHMEM_SIZE_PER_WARP, 1> <<<gDim, bDim>>>
-      (M, d_ia, d_ja, d_V2, d_V3, d_rc, nsamples, d_low, d_upp, mult_factor);
+   gDim.x = (M + bDim.z - 1) / bDim.z;
+   HYPRE_CUDA_LAUNCH( (cohen_rowest_kernel<T, NUM_WARPS_PER_BLOCK, SHMEM_SIZE_PER_WARP, 1>), gDim, bDim,
+                      M, d_ia, d_ja, d_V2, d_V3, d_rc, nsamples, d_low, d_upp, mult_factor);
 
    /* done */
    //hypre_TFree(d_V2, HYPRE_MEMORY_DEVICE);
@@ -334,25 +329,25 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
 
    /* CUDA kernel configurations */
    dim3 bDim(BDIMX, BDIMY, num_warps_per_block);
-   assert(bDim.x * bDim.y == HYPRE_WARP_SIZE);
+   hypre_assert(bDim.x * bDim.y == HYPRE_WARP_SIZE);
    // for cases where one WARP works on a row
-   HYPRE_Int gDim = (m + bDim.z - 1) / bDim.z;
+   dim3 gDim( (m + bDim.z - 1) / bDim.z );
 
-   HYPRE_Int   row_est_mtd    = hypre_handle->spgemm_rownnz_estimate_method;
-   HYPRE_Int   cohen_nsamples = hypre_handle->spgemm_rownnz_estimate_nsamples;
-   float cohen_mult           = hypre_handle->spgemm_rownnz_estimate_mult_factor;
+   HYPRE_Int   row_est_mtd    = hypre_HandleSpgemmRownnzEstimateMethod(hypre_handle());
+   HYPRE_Int   cohen_nsamples = hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle());
+   float cohen_mult           = hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle());
 
    if (row_est_mtd == 1)
    {
       /* naive overestimate */
-      csr_spmm_rownnz_naive<'U', num_warps_per_block> <<<gDim, bDim>>>
-         (m, /*k,*/ n, d_ia, d_ja, d_ib, d_jb, NULL, d_rc);
+      HYPRE_CUDA_LAUNCH( (csr_spmm_rownnz_naive<'U', num_warps_per_block>), gDim, bDim,
+                         m, /*k,*/ n, d_ia, d_ja, d_ib, d_jb, NULL, d_rc );
    }
    else if (row_est_mtd == 2)
    {
       /* naive underestimate */
-      csr_spmm_rownnz_naive<'L', num_warps_per_block> <<<gDim, bDim>>>
-         (m, /*k,*/ n, d_ia, d_ja, d_ib, d_jb, d_rc, NULL);
+      HYPRE_CUDA_LAUNCH( (csr_spmm_rownnz_naive<'L', num_warps_per_block>), gDim, bDim,
+                         m, /*k,*/ n, d_ia, d_ja, d_ib, d_jb, d_rc, NULL );
    }
    else if (row_est_mtd == 3)
    {
@@ -368,8 +363,8 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
       HYPRE_Int *d_low = d_low_upp;
       HYPRE_Int *d_upp = d_low_upp + m;
 
-      csr_spmm_rownnz_naive<'B', num_warps_per_block> <<<gDim, bDim>>>
-         (m, /*k,*/ n, d_ia, d_ja, d_ib, d_jb, d_low, d_upp);
+      HYPRE_CUDA_LAUNCH( (csr_spmm_rownnz_naive<'B', num_warps_per_block>), gDim, bDim,
+                         m, /*k,*/ n, d_ia, d_ja, d_ib, d_jb, d_low, d_upp );
 
       /* Cohen's algorithm, stochastic approach */
       csr_spmm_rownnz_cohen<float, BDIMX, BDIMY, num_warps_per_block, shmem_size_per_warp>

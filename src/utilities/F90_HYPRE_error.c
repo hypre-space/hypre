@@ -11,7 +11,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-	
+
 void
 hypre_F90_IFACE(hypre_geterror, HYPRE_GETERROR)
    (hypre_F90_Int *result)
@@ -55,4 +55,4 @@ hypre_F90_IFACE(hypre_clearerror, HYPRE_CLEARERROR)
 
 #ifdef __cplusplus
 }
-#endif	
+#endif

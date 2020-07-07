@@ -6,70 +6,57 @@
  ******************************************************************************/
 
 #include "_hypre_utilities.h"
+#include "_hypre_utilities.hpp"
 
+/*
 #if defined(HYPRE_USING_KOKKOS)
 #include <Kokkos_Core.hpp>
 #endif
+*/
 
-hypre_Handle *hypre_handle = NULL;
+/* global variable _hypre_handle:
+ * Outside this file, do NOT access it directly,
+ * but use hypre_handle() instead (see hypre_handle.h) */
+hypre_Handle *_hypre_handle = NULL;
+
+/* accessor to the global ``_hypre_handle'' */
+hypre_Handle*
+hypre_handle()
+{
+   if (!_hypre_handle)
+   {
+      _hypre_handle = hypre_HandleCreate();
+   }
+
+   return _hypre_handle;
+}
 
 hypre_Handle*
 hypre_HandleCreate()
 {
-   hypre_Handle *handle = hypre_CTAlloc(hypre_Handle, 1, HYPRE_MEMORY_HOST);
+   hypre_Handle *hypre_handle_ = hypre_CTAlloc(hypre_Handle, 1, HYPRE_MEMORY_HOST);
 
-   /* set default options */
+   hypre_HandleMemoryLocation(hypre_handle_) = HYPRE_MEMORY_DEVICE;
+
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   hypre_HandleCudaDevice(handle)                   = 0;
-   hypre_HandleCudaComputeStreamNum(handle)         = 0;
-   hypre_HandleCudaPrefetchStreamNum(handle)        = 1;
-   hypre_HandleCudaComputeStreamSyncDefault(handle) = 1;
-   handle->spgemm_use_cusparse                      = 0; // TODO: accessor func #ifdef
-   handle->spgemm_num_passes                        = 3;
-   /* 1: naive overestimate, 2: naive underestimate, 3: Cohen's algorithm */
-   handle->spgemm_rownnz_estimate_method            = 3;
-   handle->spgemm_rownnz_estimate_nsamples          = 32;
-   handle->spgemm_rownnz_estimate_mult_factor       = 1.5;
-   handle->spgemm_hash_type                         = 'L';
-
-   hypre_HandleCudaComputeStreamSync(handle).clear();
-   hypre_HandleCudaComputeStreamSyncPush( handle,
-         hypre_HandleCudaComputeStreamSyncDefault(handle) );
+   hypre_HandleDefaultExecPolicy(hypre_handle_) = HYPRE_EXEC_HOST;
+   hypre_HandleStructExecPolicy(hypre_handle_) = HYPRE_EXEC_DEVICE;
+   hypre_HandleCudaData(hypre_handle_) = hypre_CudaDataCreate();
 #endif
 
-   return handle;
+   return hypre_handle_;
 }
 
 HYPRE_Int
 hypre_HandleDestroy(hypre_Handle *hypre_handle_)
 {
+   if (!hypre_handle_)
+   {
+      return hypre_error_flag;
+   }
+
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_Int i;
-
-   hypre_TFree(hypre_handle_->cuda_reduce_buffer, HYPRE_MEMORY_DEVICE);
-
-   if (hypre_handle_->curand_gen)
-   {
-      HYPRE_CURAND_CALL( curandDestroyGenerator(hypre_handle_->curand_gen) );
-   }
-
-   if (hypre_handle_->cusparse_handle)
-   {
-      HYPRE_CUSPARSE_CALL( cusparseDestroy(hypre_handle_->cusparse_handle) );
-   }
-
-   if (hypre_handle_->cusparse_mat_descr)
-   {
-      HYPRE_CUSPARSE_CALL( cusparseDestroyMatDescr(hypre_handle_->cusparse_mat_descr) );
-   }
-
-   for (i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
-   {
-      if (hypre_handle_->cuda_streams[i])
-      {
-         HYPRE_CUDA_CALL( cudaStreamDestroy(hypre_handle_->cuda_streams[i]) );
-      }
-   }
+   hypre_CudaDataDestroy(hypre_HandleCudaData(hypre_handle_));
 #endif
 
    hypre_TFree(hypre_handle_, HYPRE_MEMORY_HOST);
@@ -120,8 +107,10 @@ hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_)
 
    hypre_HandleCudaDevice(hypre_handle_) = device_id;
 
+   /*
    hypre_printf("Proc [global %d/%d, local %d/%d] can see %d GPUs and is running on %d\n",
                  myid, nproc, myNodeid, NodeSize, nDevices, device_id);
+   */
 
    return hypre_error_flag;
 }
@@ -135,28 +124,42 @@ hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_)
  *****************************************************************************/
 
 HYPRE_Int
-HYPRE_Init( hypre_int argc, char *argv[] )
+HYPRE_Init()
 {
-#if defined(HYPRE_USING_KOKKOS)
+   if (!_hypre_handle)
+   {
+      _hypre_handle = hypre_HandleCreate();
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+
+   HYPRE_CUDA_CALL( cudaGetLastError() );
+
+   hypre_SetDevice(-1, _hypre_handle);
+
+   /* To include the cost of creating streams/cudahandles in HYPRE_Init */
+   /* If not here, will be done at the first use */
+   hypre_HandleCudaComputeStream(_hypre_handle);
+   //hypre_HandleCudaPrefetchStream(_hypre_handle);
+#endif
+
+#if defined(HYPRE_USING_CUBLAS)
+   hypre_HandleCublasHandle(_hypre_handle);
+#endif
+
+#if defined(HYPRE_USING_CUSPARSE)
+   hypre_HandleCusparseHandle(_hypre_handle);
+   hypre_HandleCusparseMatDescr(_hypre_handle);
+#endif
+
+#if defined(HYPRE_USING_CURAND)
+   hypre_HandleCurandGenerator(_hypre_handle);
+#endif
+
    /*
-   Kokkos::InitArguments args;
-   args.num_threads = 10;
-   Kokkos::initialize (args);
-   */
+#if defined(HYPRE_USING_KOKKOS)
    Kokkos::initialize (argc, argv);
 #endif
-
-   hypre_handle = hypre_HandleCreate();
-
-#if defined(HYPRE_USING_DEVICE_OPENMP) || defined(HYPRE_USING_CUDA)
-   hypre_SetDevice(-1, hypre_handle);
-#endif
-
-   /* if not done in Hypre_Init, will be done in the first use */
-   /*
-   hypre_HandleCudaComputeStream(hypre_handle);
-   hypre_HandleCusparseHandle(hypre_handle);
-   hypre_HandleCusparseMatDescr(hypre_handle);
    */
 
    /* Check if cuda arch flags in compiling match the device */
@@ -168,6 +171,21 @@ HYPRE_Init( hypre_int argc, char *argv[] )
    HYPRE_OMPOffloadOn();
 #endif
 
+#ifdef HYPRE_USING_CUB_ALLOCATOR
+   /* Keep this check here at the end of HYPRE_Init()
+    * Make sure that CUB Allocator has not been setup in HYPRE_Init,
+    * otherwise users are not able to set the parameters of CUB
+    * Note: hypre_HandleCubCachingDeviceAllocator and
+    *       hypre_HandleCubCachingManagedAllocator
+    *       are not used, since allocation would happen therein,
+    *       which is not wanted here */
+   if ( hypre_HandleCubDevAllocator(_hypre_handle) ||
+        hypre_HandleCubUvmAllocator(_hypre_handle) )
+   {
+      hypre_printf("ERROR: CUB Allocators have been setup ... \n");
+   }
+#endif
+
    return hypre_error_flag;
 }
 
@@ -177,21 +195,16 @@ HYPRE_Init( hypre_int argc, char *argv[] )
  *
  *****************************************************************************/
 
-/* declared in "struct_communication.c" */
-extern HYPRE_Complex *global_recv_buffer, *global_send_buffer;
-extern HYPRE_Int      global_recv_size, global_send_size;
-
 HYPRE_Int
 HYPRE_Finalize()
 {
-   hypre_HandleDestroy(hypre_handle);
+   hypre_HandleDestroy(_hypre_handle);
 
+   /*
 #if defined(HYPRE_USING_KOKKOS)
    Kokkos::finalize ();
 #endif
-
-   hypre_TFree(global_send_buffer, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(global_recv_buffer, HYPRE_MEMORY_DEVICE);
+   */
 
    //if (cudaSuccess == cudaPeekAtLastError() ) hypre_printf("OK...\n");
 

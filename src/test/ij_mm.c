@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /*--------------------------------------------------------------------------
  * Test driver for unstructured matrix interface (IJ_matrix interface).
@@ -91,7 +86,7 @@ main( hypre_int argc,
    HYPRE_ParCSRMatrix parcsr_AH_2 = NULL;
    HYPRE_ParCSRMatrix parcsr_error = NULL;
 
-   HYPRE_Int      *CF_marker;
+   HYPRE_Int         *CF_marker = NULL;
 
    HYPRE_Int       errcode;
    HYPRE_Int       num_procs, myid;
@@ -140,7 +135,7 @@ main( hypre_int argc,
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
    /* Initialize Hypre */
-   HYPRE_Init(argc, argv);
+   HYPRE_Init();
 
    //hypre_SetNumThreads(20);
    hypre_printf("CPU #OMP THREADS %d\n", hypre_NumThreads());
@@ -2253,4 +2248,3 @@ BuildParCoordinates( HYPRE_Int                  argc,
    *coord_ptr = coordinates;
    return (0);
 }
-

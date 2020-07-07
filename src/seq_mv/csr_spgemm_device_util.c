@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "seq_mv.h"
 #include "csr_spgemm_device.h"
@@ -22,8 +17,7 @@ void csr_spmm_create_ija(HYPRE_Int m, HYPRE_Int *d_i, HYPRE_Int **d_j, HYPRE_Com
 {
    cudaMemset(d_i, 0, sizeof(HYPRE_Int));
    /* make ghash pointers by prefix scan */
-   thrust::device_ptr<HYPRE_Int> d_i_ptr = thrust::device_pointer_cast(d_i);
-   thrust::inclusive_scan(d_i_ptr, d_i_ptr + m + 1, d_i_ptr);
+   HYPRE_THRUST_CALL(inclusive_scan, d_i, d_i + m + 1, d_i);
    /* total size */
    cudaMemcpy(nnz, d_i + m, sizeof(HYPRE_Int), cudaMemcpyDeviceToHost);
    if (d_j)
@@ -42,9 +36,7 @@ void csr_spmm_create_ija(HYPRE_Int m, HYPRE_Int *d_c, HYPRE_Int **d_i, HYPRE_Int
    *d_i = hypre_TAlloc(HYPRE_Int, m+1, HYPRE_MEMORY_DEVICE);
    cudaMemset(*d_i, 0, sizeof(HYPRE_Int));
    /* make ghash pointers by prefix scan */
-   thrust::device_ptr<HYPRE_Int> d_c_ptr = thrust::device_pointer_cast(d_c);
-   thrust::device_ptr<HYPRE_Int> d_i_ptr = thrust::device_pointer_cast(*d_i);
-   thrust::inclusive_scan(d_c_ptr, d_c_ptr + m, d_i_ptr + 1);
+   HYPRE_THRUST_CALL(inclusive_scan, d_c, d_c + m, *d_i + 1);
    /* total size */
    cudaMemcpy(nnz, (*d_i) + m, sizeof(HYPRE_Int), cudaMemcpyDeviceToHost);
    if (d_j)
@@ -60,7 +52,7 @@ void csr_spmm_create_ija(HYPRE_Int m, HYPRE_Int *d_c, HYPRE_Int **d_i, HYPRE_Int
 __global__
 void csr_spmm_get_ghash_size(HYPRE_Int n, HYPRE_Int *rc, HYPRE_Int *rf, HYPRE_Int *rg, HYPRE_Int SHMEM_HASH_SIZE)
 {
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
    assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 #endif
 
@@ -77,7 +69,7 @@ void csr_spmm_get_ghash_size(HYPRE_Int n, HYPRE_Int *rc, HYPRE_Int *rf, HYPRE_In
 __global__
 void csr_spmm_get_ghash_size(HYPRE_Int n, HYPRE_Int num_ghash, HYPRE_Int *rc, HYPRE_Int *rf, HYPRE_Int *rg, HYPRE_Int SHMEM_HASH_SIZE)
 {
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
    assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 #endif
 
@@ -103,20 +95,20 @@ csr_spmm_create_hash_table(HYPRE_Int m, HYPRE_Int *d_rc, HYPRE_Int *d_rf, HYPRE_
    const HYPRE_Int BDIMY               =   8;
 
    dim3 bDim(BDIMX, BDIMY, num_warps_per_block);
-   HYPRE_Int gDim = (m + bDim.z * HYPRE_WARP_SIZE - 1) / (bDim.z * HYPRE_WARP_SIZE);
+   dim3 gDim( (m + bDim.z * HYPRE_WARP_SIZE - 1) / (bDim.z * HYPRE_WARP_SIZE) );
 
-   assert(num_ghash <= m);
+   hypre_assert(num_ghash <= m);
 
    *d_ghash_i = hypre_TAlloc(HYPRE_Int, num_ghash + 1, HYPRE_MEMORY_DEVICE);
 
    if (num_ghash == m)
    {
-      csr_spmm_get_ghash_size<<<gDim, bDim>>>(m, d_rc, d_rf, (*d_ghash_i) + 1, SHMEM_HASH_SIZE);
+      HYPRE_CUDA_LAUNCH( csr_spmm_get_ghash_size, gDim, bDim, m, d_rc, d_rf, (*d_ghash_i) + 1, SHMEM_HASH_SIZE );
    }
    else
    {
       cudaMemset(*d_ghash_i, 0, (num_ghash + 1) * sizeof(HYPRE_Int));
-      csr_spmm_get_ghash_size<<<gDim, bDim>>>(m, num_ghash, d_rc, d_rf, (*d_ghash_i) + 1, SHMEM_HASH_SIZE);
+      HYPRE_CUDA_LAUNCH( csr_spmm_get_ghash_size, gDim, bDim, m, num_ghash, d_rc, d_rf, (*d_ghash_i) + 1, SHMEM_HASH_SIZE );
    }
 
    csr_spmm_create_ija(num_ghash, *d_ghash_i, d_ghash_j, d_ghash_a, ghash_size);

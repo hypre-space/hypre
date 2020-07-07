@@ -14,7 +14,7 @@
 #include "HYPRE_krylov.h"
 #include "_hypre_sstruct_mv.h"
 #include "_hypre_sstruct_ls.h"
- 
+
 #define DEBUG 0
 
 #if DEBUG
@@ -95,7 +95,7 @@ typedef struct
    Index                  fac_prefinement;
 
 } ProblemPartData;
- 
+
 typedef struct
 {
    HYPRE_Int              ndim;
@@ -113,11 +113,11 @@ typedef struct
    HYPRE_Int             *pools;   /* array of size nparts */
 
 } ProblemData;
- 
+
 /*--------------------------------------------------------------------------
  * Compute new box based on variable type
  *--------------------------------------------------------------------------*/
-                                                                                                                                                    
+
 HYPRE_Int
 GetVariableBox( Index  cell_ilower,
                 Index  cell_iupper,
@@ -126,14 +126,14 @@ GetVariableBox( Index  cell_ilower,
                 Index  var_iupper )
 {
    HYPRE_Int ierr = 0;
-                                                                                                                                                    
+
    var_ilower[0] = cell_ilower[0];
    var_ilower[1] = cell_ilower[1];
    var_ilower[2] = cell_ilower[2];
    var_iupper[0] = cell_iupper[0];
    var_iupper[1] = cell_iupper[1];
    var_iupper[2] = cell_iupper[2];
-                                                                                                                                                    
+
    switch(vartype)
    {
       case HYPRE_SSTRUCT_VARIABLE_CELL:
@@ -163,7 +163,7 @@ GetVariableBox( Index  cell_ilower,
       case HYPRE_SSTRUCT_VARIABLE_UNDEFINED:
       break;
    }
-                                                                                                                                                    
+
    return ierr;
 }
 
@@ -287,7 +287,7 @@ ReadData( char         *filename,
    /*-----------------------------------------------------------
     * Read data file from process 0, then broadcast
     *-----------------------------------------------------------*/
- 
+
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
    if (myid == 0)
@@ -335,7 +335,7 @@ ReadData( char         *filename,
    while (sdata_line < (sdata + sdata_size))
    {
       sdata_ptr = sdata_line;
-      
+
       if ( ( hypre_sscanf(sdata_ptr, "%s", key) > 0 ) && ( sdata_ptr[0] != '#' ) )
       {
          sdata_ptr += strcspn(sdata_ptr, " \t\n");
@@ -615,7 +615,7 @@ ReadData( char         *filename,
             pdata.matrix_nentries++;
             data.pdata[part] = pdata;
          }
-       
+
          else if ( strcmp(key, "FacParts:") == 0 )
          {
             part = strtol(sdata_ptr, &sdata_ptr, 10);
@@ -650,7 +650,7 @@ ReadData( char         *filename,
 
    hypre_TFree(sdata, HYPRE_MEMORY_HOST);
 
-   *data_ptr = data; 
+   *data_ptr = data;
    return 0;
 }
 
@@ -973,11 +973,11 @@ DistributeData( ProblemData   global_data,
          m[2] = block[part][2];
          if ( (m[0] * m[1] * m[2]) > 1)
          {
-            pdata.ilowers = hypre_TReAlloc(pdata.ilowers,  ProblemIndex, 
+            pdata.ilowers = hypre_TReAlloc(pdata.ilowers,  ProblemIndex,
                                            m[0]*m[1]*m[2]*pdata.nboxes, HYPRE_MEMORY_HOST);
-            pdata.iuppers = hypre_TReAlloc(pdata.iuppers,  ProblemIndex, 
+            pdata.iuppers = hypre_TReAlloc(pdata.iuppers,  ProblemIndex,
                                            m[0]*m[1]*m[2]*pdata.nboxes, HYPRE_MEMORY_HOST);
-            pdata.boxsizes = hypre_TReAlloc(pdata.boxsizes,  HYPRE_Int, 
+            pdata.boxsizes = hypre_TReAlloc(pdata.boxsizes,  HYPRE_Int,
                                             m[0]*m[1]*m[2]*pdata.nboxes, HYPRE_MEMORY_HOST);
             for (box = 0; box < pdata.nboxes; box++)
             {
@@ -1135,7 +1135,7 @@ DistributeData( ProblemData   global_data,
 
    hypre_TFree(pool_procs, HYPRE_MEMORY_HOST);
 
-   *data_ptr = data; 
+   *data_ptr = data;
    return 0;
 }
 
@@ -1236,7 +1236,7 @@ DestroyData( ProblemData   data )
 /*--------------------------------------------------------------------------
  * Test driver for semi-structured matrix interface
  *--------------------------------------------------------------------------*/
- 
+
 hypre_int
 main( hypre_int argc,
       char *argv[] )
@@ -1252,7 +1252,7 @@ main( hypre_int argc,
    Index                *block;
    HYPRE_Int                   solver_id;
    HYPRE_Int                   print_system;
-                        
+
    HYPRE_SStructGrid     grid;
    HYPRE_SStructStencil *stencils;
    HYPRE_SStructGraph    graph;
@@ -1278,15 +1278,15 @@ main( hypre_int argc,
 
    HYPRE_Int                   num_iterations;
    HYPRE_Real            final_res_norm;
-                         
+
    HYPRE_Int                   num_procs, myid;
    HYPRE_Int                   time_index;
-                         
+
    HYPRE_Int                   n_pre, n_post;
 
    HYPRE_Int                   arg_index, part, box, var, entry, s, i, j, k;
 
-                        
+
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -1296,6 +1296,8 @@ main( hypre_int argc,
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+
+   HYPRE_Init();
 
    /*-----------------------------------------------------------
     * Read input file
@@ -1699,7 +1701,7 @@ main( hypre_int argc,
                           prefinements[part]);
        hypre_FacZeroFCSten(hypre_SStructMatrixPMatrix(A, part),
                           grid,
-                          part); 
+                          part);
        hypre_ZeroAMRMatrixData(A, part-1, prefinements[part]); */
 
       HYPRE_SStructFACZeroCFSten(A, grid, part, prefinements[part]);
@@ -1708,7 +1710,7 @@ main( hypre_int argc,
                                  part);
       HYPRE_SStructFACZeroAMRMatrixData(A, part-1, prefinements[part]);
    }
-                          
+
    HYPRE_SStructMatrixAssemble(A);
 
    if ( ((solver_id >= 20) && (solver_id <= 30)) ||
@@ -1770,7 +1772,7 @@ main( hypre_int argc,
       {
          for (box = 0; box < pdata.nboxes; box++)
          {
- 
+
             GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], var,
                            ilower, iupper);
             HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper,
@@ -1798,7 +1800,7 @@ main( hypre_int argc,
                box_values= hypre_TAlloc(HYPRE_Real,  data.max_boxsize, HYPRE_MEMORY_HOST);
                GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], var,
                               ilower, iupper);
-               HYPRE_StructVectorGetBoxValues(sx, ilower, iupper, box_values); 
+               HYPRE_StructVectorGetBoxValues(sx, ilower, iupper, box_values);
                HYPRE_SStructVectorSetBoxValues(b_amg, part, ilower, iupper,
                                                var, values);
                hypre_TFree(box_values, HYPRE_MEMORY_HOST);
@@ -1861,7 +1863,7 @@ main( hypre_int argc,
                box_values= hypre_TAlloc(HYPRE_Real,  data.max_boxsize, HYPRE_MEMORY_HOST);
                GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], var,
                               ilower, iupper);
-               HYPRE_StructVectorGetBoxValues(sx, ilower, iupper, box_values); 
+               HYPRE_StructVectorGetBoxValues(sx, ilower, iupper, box_values);
                HYPRE_SStructVectorSetBoxValues(x_amg, part, ilower, iupper,
                                                var, values);
                hypre_TFree(box_values, HYPRE_MEMORY_HOST);
@@ -1872,7 +1874,7 @@ main( hypre_int argc,
       HYPRE_SStructVectorAssemble(x_amg);
       HYPRE_SStructVectorGetObject(x_amg, (void **) &par_x);
    }
- 
+
 
    hypre_EndTiming(time_index);
    hypre_PrintTiming("SStruct Interface", hypre_MPI_COMM_WORLD);
@@ -1887,7 +1889,7 @@ main( hypre_int argc,
    {
       FILE *file;
       char  filename[255];
-                       
+
       /* result is 1's on the interior of the grid */
       hypre_SStructMatvec(1.0, A, b, 0.0, x);
       HYPRE_SStructVectorPrint("sstruct.out.matvec", x, 0);
@@ -2003,7 +2005,7 @@ main( hypre_int argc,
       HYPRE_SStructFACSetCoarseSolverType(solver, 2);
       HYPRE_SStructFACSetLogging(solver, 1);
       HYPRE_SStructFACSetup2(solver, A, b, x);
-      
+
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
@@ -2246,6 +2248,8 @@ main( hypre_int argc,
    hypre_TFree(refine, HYPRE_MEMORY_HOST);
    hypre_TFree(distribute, HYPRE_MEMORY_HOST);
    hypre_TFree(block, HYPRE_MEMORY_HOST);
+
+   HYPRE_Finalize();
 
    /* Finalize MPI */
    hypre_MPI_Finalize();

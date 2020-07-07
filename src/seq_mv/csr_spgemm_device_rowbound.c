@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "seq_mv.h"
 #include "csr_spgemm_device.h"
@@ -156,7 +151,7 @@ void csr_spmm_symbolic(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
 
    char failed = 0;
 
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
    assert(blockDim.z              == NUM_WARPS_PER_BLOCK);
    assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
    assert(NUM_WARPS_PER_BLOCK <= HYPRE_WARP_SIZE);
@@ -210,7 +205,7 @@ void csr_spmm_symbolic(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
                                                SHMEM_HASH_SIZE, warp_s_HashKeys,
                                                ghash_size, jg + istart_g, failed);
 
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
       if (ATTEMPT == 2)
       {
          assert(failed == 0);
@@ -233,7 +228,7 @@ void csr_spmm_symbolic(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
          {
             rf[i] = failed > 0;
          }
-#if DEBUG_MODE
+#ifdef HYPRE_DEBUG
          else
          {
             rf[i] = failed > 0;
@@ -259,14 +254,14 @@ void gpu_csr_spmm_rownnz_attempt(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
 
    /* CUDA kernel configurations */
    dim3 bDim(BDIMX, BDIMY, num_warps_per_block);
-   assert(bDim.x * bDim.y == HYPRE_WARP_SIZE);
+   hypre_assert(bDim.x * bDim.y == HYPRE_WARP_SIZE);
    // for cases where one WARP works on a row
    HYPRE_Int num_warps = min(m, HYPRE_MAX_NUM_WARPS);
-   HYPRE_Int gDim = (num_warps + bDim.z - 1) / bDim.z;
+   dim3 gDim( (num_warps + bDim.z - 1) / bDim.z );
    // number of active warps
-   HYPRE_Int num_act_warps = min(bDim.z * gDim, m);
+   HYPRE_Int num_act_warps = min(bDim.z * gDim.x, m);
 
-   char hash_type = hypre_handle->spgemm_hash_type;
+   char hash_type = hypre_HandleSpgemmHashType(hypre_handle());
 
    /* ---------------------------------------------------------------------------
     * build hash table (no values)
@@ -289,18 +284,18 @@ void gpu_csr_spmm_rownnz_attempt(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
     * ---------------------------------------------------------------------------*/
    if (hash_type == 'L')
    {
-      csr_spmm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'L'> <<<gDim, bDim>>>
-         (m, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf);
+      HYPRE_CUDA_LAUNCH( (csr_spmm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'L'>), gDim, bDim,
+                         m, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
    }
    else if (hash_type == 'Q')
    {
-      csr_spmm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'Q'> <<<gDim, bDim>>>
-         (m, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf);
+      HYPRE_CUDA_LAUNCH( (csr_spmm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'Q'>), gDim, bDim,
+                         m, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
    }
    else if (hash_type == 'D')
    {
-      csr_spmm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'D'> <<<gDim, bDim>>>
-         (m, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf);
+      HYPRE_CUDA_LAUNCH( (csr_spmm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'D'>), gDim, bDim,
+                         m, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
    }
    else
    {
@@ -348,8 +343,8 @@ hypreDevice_CSRSpGemmRownnz(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    {
       gpu_csr_spmm_rownnz_attempt<2> (m, k, n, d_ia, d_ja, d_ib, d_jb, d_rc, d_rf);
 
-#if DEBUG_MODE
-      assert(hypreDevice_IntegerReduceSum(m, d_rf) == 0);
+#ifdef HYPRE_DEBUG
+      hypre_assert(hypreDevice_IntegerReduceSum(m, d_rf) == 0);
 #endif
    }
 

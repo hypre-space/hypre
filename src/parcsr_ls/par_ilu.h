@@ -1,17 +1,14 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef hypre_ParILU_DATA_HEADER
 #define hypre_ParILU_DATA_HEADER
+
+#include "_hypre_utilities.hpp"
 
 /*--------------------------------------------------------------------------
  * hypre_ParILUData
@@ -123,6 +120,8 @@ typedef struct hypre_ParILUData_struct
    HYPRE_Real           sp_tol;
    
    HYPRE_Int            test_opt;
+   /* local reordering */
+   HYPRE_Int 			   reordering_type;
    
 } hypre_ParILUData;
 
@@ -195,6 +194,7 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataSchurPrecond(ilu_data)                 ((ilu_data) -> schur_precond)
 #define hypre_ParILUDataRhs(ilu_data)                          ((ilu_data) -> rhs)
 #define hypre_ParILUDataX(ilu_data)                            ((ilu_data) -> x)
+#define hypre_ParILUDataReorderingType(ilu_data)                            ((ilu_data) -> reordering_type)
 /* Schur System */
 #define hypre_ParILUDataSchurGMRESKDim(ilu_data)               ((ilu_data) -> ss_kDim)
 #define hypre_ParILUDataSchurNSHMaxNumIter(ilu_data)           ((ilu_data) -> ss_kDim)

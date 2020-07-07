@@ -1,23 +1,16 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
  *****************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
+#include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_CUDA)
 __global__ void
@@ -231,7 +224,7 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
    }
    else
    {
-      curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle);
+      curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle());
 
       HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, 2747 + my_id) );
 
@@ -246,7 +239,7 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
    }
 
    thrust::plus<HYPRE_Real> op;
-   thrust::transform(thrust::device, measure_array, measure_array + num_rows_diag,
+   HYPRE_THRUST_CALL(transform, measure_array, measure_array + num_rows_diag,
                      urand, measure_array, op);
 
    hypre_TFree(urand, HYPRE_MEMORY_DEVICE);

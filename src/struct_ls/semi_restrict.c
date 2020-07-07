@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
+#include "_hypre_struct_mv.hpp"
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -33,7 +34,7 @@ hypre_SemiRestrictCreate( )
    restrict_data = hypre_CTAlloc(hypre_SemiRestrictData,  1, HYPRE_MEMORY_HOST);
 
    (restrict_data -> time_index)  = hypre_InitializeTiming("SemiRestrict");
-   
+
    return (void *) restrict_data;
 }
 
@@ -108,27 +109,27 @@ hypre_SemiRestrict( void               *restrict_vdata,
    HYPRE_Int              *cgrid_ids;
 
    hypre_CommHandle       *comm_handle;
-                       
+
    hypre_BoxArrayArray    *compute_box_aa;
    hypre_BoxArray         *compute_box_a;
    hypre_Box              *compute_box;
-                       
+
    hypre_Box              *R_dbox;
    hypre_Box              *r_dbox;
    hypre_Box              *rc_dbox;
-                       
+
    HYPRE_Int               Ri;
    HYPRE_Int               constant_coefficient;
 
    HYPRE_Real             *Rp0, *Rp1;
    HYPRE_Real             *rp;
    HYPRE_Real             *rcp;
-                       
+
    hypre_Index             loop_size;
    hypre_IndexRef          start;
    hypre_Index             startc;
    hypre_Index             stridec;
-                       
+
    hypre_StructStencil    *stencil;
    hypre_Index            *stencil_shape;
 
@@ -166,8 +167,8 @@ hypre_SemiRestrict( void               *restrict_vdata,
    cgrid_ids = hypre_StructGridIDs(cgrid);
 
 #if defined(HYPRE_USING_CUDA)
-   HYPRE_Int data_location_f = hypre_StructGridDataLocation(fgrid);
-   HYPRE_Int data_location_c = hypre_StructGridDataLocation(cgrid);
+   HYPRE_MemoryLocation data_location_f = hypre_StructGridDataLocation(fgrid);
+   HYPRE_MemoryLocation data_location_c = hypre_StructGridDataLocation(cgrid);
 
    if (data_location_f != data_location_c)
    {
@@ -258,11 +259,11 @@ hypre_SemiRestrict( void               *restrict_vdata,
 
             if ( constant_coefficient )
             {
-	       HYPRE_Complex Rp0val,Rp1val;
+               HYPRE_Complex Rp0val,Rp1val;
                Ri = hypre_CCBoxIndexRank( R_dbox, startc );
 
-	       Rp0val = Rp0[Ri+Rp0_offset];
-	       Rp1val = Rp1[Ri];
+               Rp0val = Rp0[Ri+Rp0_offset];
+               Rp1val = Rp1[Ri];
 #define DEVICE_VAR is_device_ptr(rcp,rp)
                hypre_BoxLoop2Begin(hypre_StructMatrixNDim(R), loop_size,
                                    r_dbox,  start,  stride,  ri,

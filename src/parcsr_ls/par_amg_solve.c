@@ -124,9 +124,10 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
     *    Write the solver parameters
     *-----------------------------------------------------------------------*/
 
-
    if (my_id == 0 && amg_print_level > 1)
+   {
       hypre_BoomerAMGWriteSolverParams(amg_data);
+   }
 
    /*-----------------------------------------------------------------------
     *    Initialize the solver error flag and assorted bookkeeping variables
@@ -175,7 +176,11 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
       /* Since it is does not diminish performance, attempt to return an error flag
          and notify users when they supply bad input. */
-      if (resid_nrm != 0.) ieee_check = resid_nrm/resid_nrm; /* INF -> NaN conversion */
+      if (resid_nrm != 0.)
+      {
+         ieee_check = resid_nrm/resid_nrm; /* INF -> NaN conversion */
+      }
+
       if (ieee_check != ieee_check)
       {
          /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
@@ -238,12 +243,17 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    {
       hypre_ParAMGDataCycleOpCount(amg_data) = 0;
       /* Op count only needed for one cycle */
-      if ((additive < 0 || additive >= num_levels)
-            && (mult_additive < 0 || mult_additive >= num_levels)
-            && (simple < 0 || simple >= num_levels) )
+      if ( (additive      < 0 || additive      >= num_levels) &&
+           (mult_additive < 0 || mult_additive >= num_levels) &&
+           (simple        < 0 || simple        >= num_levels) )
+      {
          hypre_BoomerAMGCycle(amg_data, F_array, U_array);
+      }
       else
+      {
          hypre_BoomerAMGAdditiveCycle(amg_data);
+      }
+
       /*---------------------------------------------------------------
        *    Compute  fine-grid residual and residual norm
        *----------------------------------------------------------------*/
@@ -252,11 +262,13 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       {
          old_resid = resid_nrm;
 
-         if ( amg_logging > 1 ) {
+         if ( amg_logging > 1 )
+         {
             hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Residual );
             resid_nrm = sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
          }
-         else {
+         else
+         {
             hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Vtemp);
             resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
          }

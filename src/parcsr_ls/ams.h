@@ -75,7 +75,7 @@ typedef struct
    /* Smoothing options for A */
    HYPRE_Int A_relax_type;
    HYPRE_Int A_relax_times;
-   HYPRE_Real *A_l1_norms;
+   hypre_Vector *A_l1_norms;
    HYPRE_Real A_relax_weight;
    HYPRE_Real A_omega;
    HYPRE_Real A_max_eig_est;

@@ -78,13 +78,13 @@ FILES =\
  HYPRE_ams.c\
  HYPRE_ads.c\
  HYPRE_ame.c\
+ par_2s_interp.c\
  par_amg.c\
  par_amg_setup.c\
  par_amg_solve.c\
  par_amg_solveT.c\
  par_cg_relax_wt.c\
  par_coarsen.c\
- par_coarsen_device.c\
  par_cgc_coarsen.c\
  par_cheby.c\
  par_coarse_parms.c\
@@ -93,12 +93,13 @@ FILES =\
  par_cycle.c\
  par_add_cycle.c\
  par_difconv.c\
+ par_gauss_elim.c\
  par_gsmg.c\
  par_indepset.c\
- par_indepset_device.c\
  par_interp.c\
- par_interp_device.c\
  par_jacobi_interp.c\
+ par_krylov_func.c\
+ par_mod_lr_interp.c\
  par_multi_interp.c\
  par_laplace.c\
  par_laplace_27pt.c\
@@ -107,9 +108,6 @@ FILES =\
  par_mgr.c\
  par_mgr_setup.c\
  par_mgr_solve.c\
- par_ilu.c\
- par_ilu_setup.c \
- par_ilu_solve.c \
  par_nongalerkin.c\
  par_nodal_systems.c\
  par_rap.c\
@@ -122,23 +120,34 @@ FILES =\
  par_schwarz.c\
  par_stats.c\
  par_strength.c\
- par_strength_device.c\
  par_sv_interp.c\
  par_sv_interp_ln.c\
  par_vardifconv.c\
  par_vardifconv_rs.c\
  partial.c\
- pcg_par.c\
  schwarz.c\
  block_tridiag.c\
- ams.c\
  ads.c\
  ame.c\
  par_restr.c\
  par_lr_restr.c\
  superlu.c
 
-OBJS = ${FILES:.c=.o}
+CUFILES =\
+ ams.c\
+ par_ilu.c\
+ par_ilu_setup.c \
+ par_ilu_solve.c \
+ par_coarsen_device.c\
+ par_indepset_device.c\
+ par_interp_device.c\
+ par_interp_trunc_device.c\
+ par_lr_interp_device.c\
+ par_strength_device.c
+
+COBJS = ${FILES:.c=.o}
+CUOBJS = ${CUFILES:.c=.obj}
+OBJS = ${COBJS} ${CUOBJS}
 
 SONAME = libHYPRE_parcsr_ls-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
@@ -157,7 +166,7 @@ install: libHYPRE_parcsr_ls${HYPRE_LIB_SUFFIX}
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o libHYPRE*
+	rm -f *.o* libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean

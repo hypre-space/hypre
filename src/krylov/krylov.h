@@ -395,7 +395,7 @@ extern "C" {
 
   typedef struct
   {
-    void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location );
+    void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_MemoryLocation location );
     HYPRE_Int    (*Free)          ( void *ptr );
     HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
         HYPRE_Int   *num_procs );
@@ -478,7 +478,7 @@ extern "C" {
 
     hypre_GMRESFunctions *
       hypre_GMRESFunctionsCreate(
-          void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location ),
+          void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_MemoryLocation location ),
           HYPRE_Int    (*Free)          ( void *ptr ),
           HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
             HYPRE_Int   *num_procs ),
@@ -556,7 +556,7 @@ extern "C" {
 
   typedef struct
   {
-    void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location );
+    void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_MemoryLocation location );
     HYPRE_Int    (*Free)          ( void *ptr );
     HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
         HYPRE_Int   *num_procs );
@@ -643,7 +643,7 @@ extern "C" {
 
     hypre_COGMRESFunctions *
       hypre_COGMRESFunctionsCreate(
-          void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location ),
+          void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_MemoryLocation location ),
           HYPRE_Int    (*Free)          ( void *ptr ),
           HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
             HYPRE_Int   *num_procs ),
@@ -725,7 +725,7 @@ extern "C" {
 
   typedef struct
   {
-    void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location );
+    void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_MemoryLocation location );
     HYPRE_Int    (*Free)          ( void *ptr );
     HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
         HYPRE_Int   *num_procs );
@@ -812,7 +812,7 @@ extern "C" {
 
     hypre_LGMRESFunctions *
       hypre_LGMRESFunctionsCreate(
-          void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location),
+          void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_MemoryLocation location),
           HYPRE_Int    (*Free)          ( void *ptr ),
           HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
             HYPRE_Int   *num_procs ),
@@ -886,7 +886,7 @@ extern "C" {
 
   typedef struct
   {
-    void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location );
+    void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_MemoryLocation location );
     HYPRE_Int    (*Free)          ( void *ptr );
     HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
         HYPRE_Int   *num_procs );
@@ -969,7 +969,7 @@ extern "C" {
 
     hypre_FlexGMRESFunctions *
       hypre_FlexGMRESFunctionsCreate(
-          void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location ),
+          void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_MemoryLocation location ),
           HYPRE_Int    (*Free)          ( void *ptr ),
           HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
             HYPRE_Int   *num_procs ),
@@ -1046,7 +1046,7 @@ extern "C" {
 
   typedef struct
   {
-    void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location );
+    void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_MemoryLocation location );
     HYPRE_Int    (*Free)          ( void *ptr );
     HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
         HYPRE_Int   *num_procs );
@@ -1163,7 +1163,7 @@ extern "C" {
 
     hypre_PCGFunctions *
       hypre_PCGFunctionsCreate(
-          void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location ),
+          void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_MemoryLocation location ),
           HYPRE_Int    (*Free)          ( void *ptr ),
           HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
             HYPRE_Int   *num_procs ),

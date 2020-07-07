@@ -12,6 +12,7 @@
  *****************************************************************************/
 
 #include "seq_mv.h"
+#include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_DEVICE_OPENMP)
 
@@ -43,18 +44,18 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Int        trans,
    HYPRE_Int i;
 
 #ifdef HYPRE_USING_CUSPARSE
-   cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle);
-   cusparseMatDescr_t descr = hypre_HandleCusparseMatDescr(hypre_handle);
+   cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
+   cusparseMatDescr_t descr = hypre_HandleCusparseMatDescr(hypre_handle());
 #endif
 
-   hypre_CSRMatrixPrefetch(A, HYPRE_MEMORY_DEVICE);
-   hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
-   hypre_SeqVectorPrefetch(b, HYPRE_MEMORY_DEVICE);
+   //hypre_CSRMatrixPrefetch(A, HYPRE_MEMORY_DEVICE);
+   //hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
+   //hypre_SeqVectorPrefetch(b, HYPRE_MEMORY_DEVICE);
 
-   if (b != y)
-   {
-      hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
-   }
+   //if (b != y)
+   //{
+   //   hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
+   //}
 
    if (b != y)
    {

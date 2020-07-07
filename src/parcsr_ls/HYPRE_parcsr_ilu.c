@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
 
@@ -32,7 +27,7 @@ HYPRE_ILUCreate( HYPRE_Solver *solver )
  * HYPRE_ILUDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ILUDestroy( HYPRE_Solver solver )
 {
    return( hypre_ILUDestroy( (void *) solver ) );
@@ -42,7 +37,7 @@ HYPRE_ILUDestroy( HYPRE_Solver solver )
  * HYPRE_ILUSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ILUSetup( HYPRE_Solver solver,
                          HYPRE_ParCSRMatrix A,
                          HYPRE_ParVector b,
@@ -58,7 +53,7 @@ HYPRE_ILUSetup( HYPRE_Solver solver,
  * HYPRE_ILUSolve
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ILUSolve( HYPRE_Solver solver,
                          HYPRE_ParCSRMatrix A,
                          HYPRE_ParVector b,
@@ -181,4 +176,12 @@ HYPRE_Int
 HYPRE_ILUGetFinalRelativeResidualNorm(  HYPRE_Solver solver, HYPRE_Real *res_norm )
 {
    return hypre_ILUGetFinalRelativeResidualNorm(solver, res_norm);
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetLocalReordering
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_ILUSetLocalReordering(  HYPRE_Solver solver, HYPRE_Int ordering_type )
+{
+   return hypre_ILUSetLocalReordering(solver, ordering_type);
 }

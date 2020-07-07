@@ -33,23 +33,23 @@
 typedef struct
 {
 MPI_Comm hypre_MPI_communicator;
-HYPRE_Int mype, npes;
+HYPRE_Int _mype, _npes;
 HYPRE_Real _secpertick;
-HYPRE_Int Mfactor;
-HYPRE_Int *jr, *jw, lastjr, *lr, lastlr;	/* Work space */
-HYPRE_Real *w;				/* Work space */
-HYPRE_Int firstrow, lastrow;			/* Matrix distribution parameters */
-timer SerTmr, ParTmr;
-HYPRE_Int nrows, lnrows, ndone, ntogo, nleft; /* Various values used throught out */
-HYPRE_Int maxnz;
-HYPRE_Int *map;			        /* Map used for marking rows in the set */
+HYPRE_Int _Mfactor;
+HYPRE_Int *_jr, *_jw, _lastjr, *_lr, _lastlr;	/* Work space */
+HYPRE_Real *_w;				/* Work space */
+HYPRE_Int _firstrow, _lastrow;			/* Matrix distribution parameters */
+timer _SerTmr, _ParTmr;
+HYPRE_Int _nrows, _lnrows, _ndone, _ntogo, _nleft; /* Various values used throught out */
+HYPRE_Int _maxnz;
+HYPRE_Int *_map;			        /* Map used for marking rows in the set */
 
-HYPRE_Int *vrowdist;
+HYPRE_Int *_vrowdist;
 
 /* Buffers for point to point communication */
-HYPRE_Int pilu_recv[MAX_NPES];
-HYPRE_Int pilu_send[MAX_NPES];
-HYPRE_Int lu_recv[MAX_NPES];
+HYPRE_Int _pilu_recv[MAX_NPES];
+HYPRE_Int _pilu_send[MAX_NPES];
+HYPRE_Int _lu_recv[MAX_NPES];
 
 #ifdef HYPRE_TIMING
   /* factorization */
@@ -78,31 +78,31 @@ HYPRE_Int Ul_timer;
 
 /* DEFINES for global variables */
 #define pilut_comm (globals->hypre_MPI_communicator)
-#define mype (globals->mype)
-#define npes (globals->npes)
-#define _secpertick (globals->_secpertick)
-#define Mfactor (globals->Mfactor)
-#define jr (globals->jr)
-#define jw (globals->jw)
-#define lastjr (globals->lastjr)
-#define lr (globals->lr)
-#define lastlr (globals->lastlr)
-#define w (globals->w)
-#define firstrow (globals->firstrow)
-#define lastrow (globals->lastrow)
-#define SerTmr (globals->SerTmr)
-#define ParTmr (globals->ParTmr)
-#define nrows (globals->nrows)
-#define lnrows (globals->lnrows)
-#define ndone (globals->ndone)
-#define ntogo (globals->ntogo)
-#define nleft (globals->nleft)
-#define global_maxnz (globals->maxnz)
-#define pilut_map (globals->map)
-#define vrowdist (globals->vrowdist)
-#define pilu_recv (globals->pilu_recv)
-#define pilu_send (globals->pilu_send)
-#define lu_recv (globals->lu_recv)
+#define mype (globals->_mype)
+#define npes (globals->_npes)
+#define secpertick (globals->_secpertick)
+#define Mfactor (globals->_Mfactor)
+#define jr (globals->_jr)
+#define jw (globals->_jw)
+#define lastjr (globals->_lastjr)
+#define lr (globals->_lr)
+#define lastlr (globals->_lastlr)
+#define w (globals->_w)
+#define firstrow (globals->_firstrow)
+#define lastrow (globals->_lastrow)
+#define SerTmr (globals->_SerTmr)
+#define ParTmr (globals->_ParTmr)
+#define nrows (globals->_nrows)
+#define lnrows (globals->_lnrows)
+#define ndone (globals->_ndone)
+#define ntogo (globals->_ntogo)
+#define nleft (globals->_nleft)
+#define global_maxnz (globals->_maxnz)
+#define pilut_map (globals->_map)
+#define vrowdist (globals->_vrowdist)
+#define pilu_recv (globals->_pilu_recv)
+#define pilu_send (globals->_pilu_send)
+#define lu_recv (globals->_lu_recv)
 
 
 #include "./const.h"

@@ -86,7 +86,7 @@ hypre_F90_IFACE(hypre_parvectorsize, HYPRE_PARVECTORSIZE)
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParCSRMultiVectorPrint
+ * HYPRE_ParCSRMultiVectorPrint
  *--------------------------------------------------------------------------*/
 
 void
@@ -96,13 +96,13 @@ hypre_F90_IFACE(hypre_parcsrmultivectorprint, HYPRE_PARCSRMULTIVECTORPRINT)
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
-      ( hypre_ParCSRMultiVectorPrint(
+      ( HYPRE_ParCSRMultiVectorPrint(
            (void *)       x, 
            (char *) file));
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParCSRMultiVectorRead
+ * HYPRE_ParCSRMultiVectorRead
  *--------------------------------------------------------------------------*/
 
 void
@@ -114,7 +114,7 @@ hypre_F90_IFACE(hypre_parcsrmultivectorread, HYPRE_PARCSRMULTIVECTORREAD)
 {
    *ierr = 0;
 
-   hypre_ParCSRMultiVectorRead(
+   HYPRE_ParCSRMultiVectorRead(
       hypre_F90_PassComm (comm),
       (void *)       ii,
       (char *) file );

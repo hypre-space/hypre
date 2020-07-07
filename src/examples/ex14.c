@@ -75,8 +75,10 @@
                    finite element problem in the SStruct interface.
 */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <math.h>
-#include "_hypre_utilities.h"
 #include "HYPRE_sstruct_mv.h"
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE.h"
@@ -85,7 +87,9 @@
 #define M_PI 3.14159265358979
 #endif
 
+#ifdef HYPRE_EXVIS
 #include "vis.c"
+#endif
 
 /*
    This routine computes the bilinear finite element stiffness matrix and
@@ -161,6 +165,9 @@ int main (int argc, char *argv[])
    MPI_Init(&argc, &argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+
+   /* Initialize HYPRE */
+   HYPRE_Init();
 
    /* Set default parameters */
    n = 10;
@@ -583,6 +590,7 @@ int main (int argc, char *argv[])
       /* Save the solution for GLVis visualization, see vis/glvis-ex13.sh */
       if (vis)
       {
+#ifdef HYPRE_EXVIS
          FILE *file;
          char filename[255];
 
@@ -623,6 +631,7 @@ int main (int argc, char *argv[])
 
          /* additional visualization data */
          GLVis_PrintData("vis/ex14.data", myid, num_procs);
+#endif
       }
 
       if (myid == 0)
@@ -640,6 +649,9 @@ int main (int argc, char *argv[])
    HYPRE_SStructMatrixDestroy(A);
    HYPRE_SStructVectorDestroy(b);
    HYPRE_SStructVectorDestroy(x);
+
+   /* Finalize HYPRE */
+   HYPRE_Finalize();
 
    /* Finalize MPI */
    MPI_Finalize();
