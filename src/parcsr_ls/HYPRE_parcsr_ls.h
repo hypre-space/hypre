@@ -3630,7 +3630,7 @@ HYPRE_Int HYPRE_MGRSetFSolver(HYPRE_Solver          solver,
                              HYPRE_PtrToParSolverFcn  fine_grid_solver_setup,
                              HYPRE_Solver          fsolver );
 
-HYPRE_Int HYPRE_MGRBuildAffNew(HYPRE_ParCSRMatrix A,
+HYPRE_Int HYPRE_MGRBuildAff(HYPRE_ParCSRMatrix A,
                                HYPRE_Int *CF_marker,
                                HYPRE_Int debug_flag,
                                HYPRE_ParCSRMatrix *A_ff);
