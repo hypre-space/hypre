@@ -33,7 +33,7 @@ hypre_SSAMGCreate( hypre_MPI_Comm comm )
    (ssamg_data -> zero_guess)       = 0;
    (ssamg_data -> max_levels)       = 0;
    (ssamg_data -> relax_type)       = 0;
-   (ssamg_data -> relax_weight)     = 0.0;
+   (ssamg_data -> usr_relax_weight) = 0.0;
    (ssamg_data -> num_pre_relax)    = 1;
    (ssamg_data -> num_post_relax)   = 1;
    (ssamg_data -> logging)          = 0;
@@ -76,6 +76,7 @@ hypre_SSAMGDestroy( void *ssamg_vdata )
          HYPRE_SStructMatrixDestroy(ssamg_data -> A_l[0]);
          HYPRE_SStructGridDestroy(ssamg_data -> grid_l[0]);
          hypre_TFree(ssamg_data -> cdir_l[0]);
+         hypre_TFree(ssamg_data -> relax_weights[0]);
          for (l = 1; l < num_levels; l++)
          {
             hypre_SSAMGRelaxDestroy(ssamg_data -> relax_data_l[l]);
@@ -90,6 +91,7 @@ hypre_SSAMGDestroy( void *ssamg_vdata )
             hypre_SStructMatvecDestroy(ssamg_data -> restrict_data_l[l-1]);
             hypre_SStructMatvecDestroy(ssamg_data -> interp_data_l[l-1]);
             hypre_TFree(ssamg_data -> cdir_l[l]);
+            hypre_TFree(ssamg_data -> relax_weights[l]);
          }
 
          hypre_TFree(ssamg_data -> b_l);
@@ -100,6 +102,7 @@ hypre_SSAMGDestroy( void *ssamg_vdata )
          hypre_TFree(ssamg_data -> RT_l);
          hypre_TFree(ssamg_data -> grid_l);
          hypre_TFree(ssamg_data -> cdir_l);
+         hypre_TFree(ssamg_data -> relax_weights);
          hypre_TFree(ssamg_data -> relax_data_l);
          hypre_TFree(ssamg_data -> matvec_data_l);
          hypre_TFree(ssamg_data -> restrict_data_l);
@@ -237,11 +240,11 @@ hypre_SSAMGSetRelaxType( void       *ssamg_vdata,
 
 HYPRE_Int
 hypre_SSAMGSetRelaxWeight( void        *ssamg_vdata,
-                           HYPRE_Real   relax_weight)
+                           HYPRE_Real   usr_relax_weight)
 {
    hypre_SSAMGData *ssamg_data = (hypre_SSAMGData *) ssamg_vdata;
 
-   hypre_SSAMGDataRelaxWeight(ssamg_data) = relax_weight;
+   hypre_SSAMGDataUsrRelaxWeight(ssamg_data) = usr_relax_weight;
 
    return hypre_error_flag;
 }
@@ -358,16 +361,12 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
    HYPRE_Int           num_pos_relax = hypre_SSAMGDataNumPosRelax(ssamg_data);
    HYPRE_Int          *nparts        = hypre_SSAMGDataNParts(ssamg_data);
    HYPRE_Int         **cdir_l        = hypre_SSAMGDataCdir(ssamg_data);
-   hypre_SStructGrid **grid_l        = hypre_SSAMGDataGridl(ssamg_data);
-   void              **relax_data_l  = (ssamg_data -> relax_data_l);
+   HYPRE_Real        **relax_weights = hypre_SSAMGDataRelaxWeights(ssamg_data);
 
-   HYPRE_Int          *pids;
-
-   HYPRE_Int           myid, i, l, p, part;
+   HYPRE_Int           myid, i, l, part;
    HYPRE_Int           chunk, chunk_size, chunk_last;
    HYPRE_Int           nparts_per_line = 8;
    HYPRE_Int           ndigits;
-   HYPRE_Real          relax_weight;
 
    hypre_MPI_Comm_rank(comm, &myid);
 
@@ -423,20 +422,10 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
             hypre_printf("\n");
             for (l = 0; l < num_levels; l++)
             {
-               pids = hypre_SStructGridPartIDs(grid_l[l]);
                hypre_printf("%3d  ", l);
                for (part = chunk; part < chunk_last; part++)
                {
-                  p = hypre_BinarySearch(pids, part, nparts[l]);
-                  if (p > -1)
-                  {
-                     hypre_SSAMGRelaxGetRelaxWeight(relax_data_l[l], p, &relax_weight);
-                  }
-                  else
-                  {
-                     relax_weight = 0.0;
-                  }
-                  hypre_printf("%6.2f ", relax_weight);
+                  hypre_printf("%6.2f ", relax_weights[l][part]);
                }
                hypre_printf("\n");
             }
@@ -462,8 +451,8 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       {
          hypre_printf("Unknown - %d\n", relax_type);
       }
-      hypre_printf("Number of pre-relaxation sweeps: %d\n", num_pre_relax);
-      hypre_printf("Number of pos-relaxation sweeps: %d\n", num_pos_relax);
+      hypre_printf("Number of pre-sweeps: %d\n", num_pre_relax);
+      hypre_printf("Number of pos-sweeps: %d\n", num_pos_relax);
       hypre_printf("Number of levels: %d\n", num_levels);
 
       hypre_printf("\n\n");

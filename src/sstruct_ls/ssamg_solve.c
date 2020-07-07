@@ -329,6 +329,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             HYPRE_SStructVectorPrint(filename, x_l[0], 0);
          }
 #endif
+         HYPRE_ANNOTATE_MGLEVEL_BEGIN(0);
       }
 
       /* part of convergence check */
@@ -340,9 +341,6 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             hypre_SStructInnerProd(x_l[0], x_l[0], &x_dot_x);
          }
       }
-
-      /* fine grid post-relaxation */
-      HYPRE_ANNOTATE_MGLEVEL_BEGIN(0);
 
       hypre_SSAMGRelaxSetPostRelax(relax_data_l[0]);
       hypre_SSAMGRelaxSetMaxIter(relax_data_l[0], num_post_relax);

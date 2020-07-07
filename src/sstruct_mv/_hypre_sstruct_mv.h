@@ -84,11 +84,6 @@ typedef struct
    /* GEC0902 additions for ghost expansion of boxes */
    // TODO: deprecate ghlocal_size
    HYPRE_Int               ghlocal_size;     /* Number of vars including ghosts */
-
-   HYPRE_Int               dom_ghlocal_size; /* Number of unknowns in the domain grid
-                                                including ghosts */
-   HYPRE_Int               ran_ghlocal_size; /* Number of unknowns in the range grid
-                                                including ghosts */
    HYPRE_Int               cell_sgrid_done;  /* =1 implies cell grid already assembled */
 
    /* Geometrical data */

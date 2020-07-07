@@ -298,7 +298,7 @@ hypre_SSAMGRelaxSetPostRelax( void  *ssamg_relax_vdata )
 
 HYPRE_Int
 hypre_SSAMGRelaxSetTol( void       *ssamg_relax_vdata,
-                        HYPRE_Real  tol)
+                        HYPRE_Real  tol               )
 {
    hypre_SSAMGRelaxData  *ssamg_relax_data = (hypre_SSAMGRelaxData *) ssamg_relax_vdata;
    void                 **relax_data       = (ssamg_relax_data -> relax_data);
@@ -318,16 +318,25 @@ hypre_SSAMGRelaxSetTol( void       *ssamg_relax_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SSAMGRelaxSetWeight( void       *ssamg_relax_vdata,
-                           HYPRE_Real *weight)
+hypre_SSAMGRelaxSetWeights( void       *ssamg_relax_vdata,
+                            HYPRE_Int  *pids,
+                            HYPRE_Real *relax_weights     )
 {
    hypre_SSAMGRelaxData  *ssamg_relax_data = (hypre_SSAMGRelaxData *) ssamg_relax_vdata;
-   HYPRE_Int              part, nparts;
+   HYPRE_Int              p, part, nparts;
 
    nparts = (ssamg_relax_data -> nparts);
    for (part = 0; part < nparts; part++)
    {
-      (ssamg_relax_data -> relax_weight[part]) = weight[part];
+      p = hypre_BinarySearch(pids, part, nparts);
+      if (p > -1)
+      {
+         (ssamg_relax_data -> relax_weight[part]) = relax_weights[p];
+      }
+      else
+      {
+         (ssamg_relax_data -> relax_weight[part]) = 0.0;
+      }
    }
 
    return hypre_error_flag;
@@ -446,7 +455,7 @@ hypre_SSAMGRelaxSetType( void      *ssamg_relax_vdata,
 
 HYPRE_Int
 hypre_SSAMGRelaxSetTempVec( void                *ssamg_relax_vdata,
-                            hypre_SStructVector *t)
+                            hypre_SStructVector *t                 )
 {
    hypre_SSAMGRelaxData   *ssamg_relax_data = (hypre_SSAMGRelaxData *) ssamg_relax_vdata;
    void                  **relax_data       = (ssamg_relax_data -> relax_data);
@@ -460,21 +469,6 @@ hypre_SSAMGRelaxSetTempVec( void                *ssamg_relax_vdata,
       pt = hypre_SStructVectorPVector(t, part);
       hypre_NodeRelaxSetTempVec(relax_data[part], pt);
    }
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int hypre_SSAMGRelaxGetRelaxWeight( void       *ssamg_relax_vdata,
-                                          HYPRE_Int   part,
-                                          HYPRE_Real *weight )
-{
-   hypre_SSAMGRelaxData *ssamg_relax_data = (hypre_SSAMGRelaxData *) ssamg_relax_vdata;
-   HYPRE_Real           *relax_weight     = (ssamg_relax_data -> relax_weight);
-
-   *weight = relax_weight[part];
 
    return hypre_error_flag;
 }
