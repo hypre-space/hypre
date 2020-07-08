@@ -70,7 +70,11 @@ void Euclid_dhCreate(Euclid_dh *ctxOUT)
   strcpy(ctx->krylovMethod, "bicgstab");
   ctx->maxIts = 200;
   ctx->rtol = 1e-5;
+#ifdef HYPRE_SINGLE
+  ctx->atol = 1.0e-16;
+#else
   ctx->atol = 1.0e-50;
+#endif
   ctx->its = 0;
   ctx->itsTotal = 0;
   ctx->setupCount = 0;
