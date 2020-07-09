@@ -439,6 +439,8 @@ HYPRE_Int hypreDevice_CSRSpTrans(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE
 
 HYPRE_Int hypreDevice_CSRSpGemm(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int nnza, HYPRE_Int nnzb, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out, HYPRE_Int *nnzC);
 
+HYPRE_Int hypreDevice_CSRSpGemmm(HYPRE_Int m, HYPRE_Int k, HYPRE_Int r, HYPRE_Int n, HYPRE_Int nnza, HYPRE_Int nnzb, HYPRE_Int nnzc, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int *d_ic, HYPRE_Int *d_jc, HYPRE_Complex *d_c, HYPRE_Int **d_id_out, HYPRE_Int **d_jd_out, HYPRE_Complex **d_d_out, HYPRE_Int *nnzD);
+
 HYPRE_Int hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateMethod( HYPRE_Int value );
 
 HYPRE_Int hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateNSamples( HYPRE_Int value );

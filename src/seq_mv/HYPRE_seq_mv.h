@@ -136,6 +136,16 @@ typedef enum HYPRE_TimerID
 
 extern HYPRE_Real hypre_profile_times[HYPRE_TIMER_ID_COUNT];
 
+#if defined(HYPRE_USING_CUDA)
+HYPRE_Int
+hypreDevice_CSRSpGemmmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, 
+    HYPRE_Int r, HYPRE_Int n,
+    HYPRE_Int *d_ia, HYPRE_Int *d_ja, 
+    HYPRE_Int *d_ib, HYPRE_Int *d_jb, 
+    HYPRE_Int *d_ic, HYPRE_Int *d_jc, 
+    HYPRE_Int *d_rc);
+#endif
+
 #ifdef __cplusplus
 }
 

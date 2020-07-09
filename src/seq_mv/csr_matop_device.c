@@ -118,12 +118,67 @@ hypre_CSRMatrixTripleMultiplyDevice ( hypre_CSRMatrix *A,
                                       hypre_CSRMatrix *B,
                                       hypre_CSRMatrix *C )
 {
-   hypre_CSRMatrix *BC  = hypre_CSRMatrixMultiplyDevice(B, C);
-   hypre_CSRMatrix *ABC = hypre_CSRMatrixMultiplyDevice(A, BC);
+   HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
+   HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
+   HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
+   HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int         nnz_A    = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Complex    *B_data   = hypre_CSRMatrixData(B);
+   HYPRE_Int        *B_i      = hypre_CSRMatrixI(B);
+   HYPRE_Int        *B_j      = hypre_CSRMatrixJ(B);
+   HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
+   HYPRE_Int         ncols_B  = hypre_CSRMatrixNumCols(B);
+   HYPRE_Int         nnz_B    = hypre_CSRMatrixNumNonzeros(B);
+   HYPRE_Complex    *C_data   = hypre_CSRMatrixData(C);
+   HYPRE_Int        *C_i      = hypre_CSRMatrixI(C);
+   HYPRE_Int        *C_j      = hypre_CSRMatrixJ(C);
+   HYPRE_Int         nrows_C  = hypre_CSRMatrixNumRows(C);
+   HYPRE_Int         ncols_C  = hypre_CSRMatrixNumCols(C);
+   HYPRE_Int         nnz_C    = hypre_CSRMatrixNumNonzeros(C);
+   HYPRE_Complex    *D_data;
+   HYPRE_Int        *D_i;
+   HYPRE_Int        *D_j;
+   HYPRE_Int         nnzD;
+   hypre_CSRMatrix  *D;
 
-   hypre_CSRMatrixDestroy(BC);
+   /* HYPRE_Int         allsquare = 0; */
 
-   return ABC;
+   if (ncols_A != nrows_B)
+   {
+      hypre_printf("Warning! incompatible matrix dimensions!\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! incompatible matrix dimensions!\n");
+
+      return NULL;
+   }
+
+   if (ncols_B != nrows_C)
+   {
+      hypre_printf("Warning! incompatible matrix dimensions!\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! incompatible matrix dimensions!\n");
+
+      return NULL;
+   }
+
+   /*
+   if (nrows_A == ncols_B)
+   {
+      allsquare = 1;
+   }
+   */
+
+   hypreDevice_CSRSpGemmm(nrows_A, ncols_A, ncols_B, ncols_C, nnz_A, nnz_B, nnz_C, A_i, A_j, A_data, B_i, B_j, B_data,
+                         C_i, C_j, C_data, &D_i, &D_j, &D_data, &nnzD);
+
+   D = hypre_CSRMatrixCreate(nrows_A, ncols_C, nnzD);
+   hypre_CSRMatrixI(D) = D_i;
+   hypre_CSRMatrixJ(D) = D_j;
+   hypre_CSRMatrixData(D) = D_data;
+   hypre_CSRMatrixMemoryLocation(D) = HYPRE_MEMORY_DEVICE;
+
+   hypre_SyncCudaComputeStream(hypre_handle());
+
+   return D;
 }
 
 /* split CSR matrix B_ext (extended rows of parcsr B) into diag part and offd part
