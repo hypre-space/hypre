@@ -204,7 +204,9 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    hypre_SStructMatvecCreate(&matvec_data_l[l]);
    hypre_SStructMatvecSetup(matvec_data_l[l], A_l[l], x_l[l]);
    {
-      HYPRE_Int             max_work, relax_max_iter;
+      HYPRE_Int             max_work;
+      HYPRE_Int             coarse_max_iter;
+      HYPRE_Int             glb_coarse_max_iter;
       hypre_Box             bbox;
       hypre_SStructPGrid   *pgrid;
       hypre_StructGrid     *sgrid;
@@ -223,13 +225,15 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
 
          cmaxsize = hypre_max(cmaxsize, hypre_BoxMaxSize(&bbox));
       }
-      relax_max_iter = hypre_min(max_work, cmaxsize);
+      coarse_max_iter = hypre_min(max_work, cmaxsize);
+      hypre_MPI_Allreduce(&coarse_max_iter, &glb_coarse_max_iter, 1,
+                          HYPRE_MPI_INT, hypre_MPI_MAX, comm);
 
       hypre_SSAMGRelaxCreate(comm, nparts[l], &relax_data_l[l]);
       hypre_SSAMGRelaxSetTol(relax_data_l[l], 0.0);
       hypre_SSAMGRelaxSetWeights(relax_data_l[l], pids, relax_weights[l]);
       hypre_SSAMGRelaxSetType(relax_data_l[l], 0);
-      hypre_SSAMGRelaxSetMaxIter(relax_data_l[l], relax_max_iter);
+      hypre_SSAMGRelaxSetMaxIter(relax_data_l[l], glb_coarse_max_iter);
       hypre_SSAMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
       hypre_SSAMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
    }
