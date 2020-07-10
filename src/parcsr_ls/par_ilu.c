@@ -100,7 +100,7 @@ hypre_ILUCreate()
    (ilu_data -> reordering_type) = 1;
 
    /* see hypre_ILUSetType for more default values */
-   (ilu_data -> test_opt)              = 1;
+   (ilu_data -> test_opt)              = 0;
    
    return (void *)                     ilu_data;
 }
@@ -274,7 +274,7 @@ hypre_ILUDestroy( void *data )
       hypre_TFree((ilu_data -> l1_norms), HYPRE_MEMORY_HOST);
       (ilu_data -> l1_norms) = NULL;
    }
-  
+
    /* u_end */
    if(hypre_ParILUDataUEnd(ilu_data))
    {
@@ -302,7 +302,7 @@ hypre_ILUDestroy( void *data )
    {
       hypre_ParCSRMatrixDestroy((ilu_data -> matS));
       (ilu_data -> matS) = NULL;
-   }   
+   }
    if(ilu_data -> schur_solver)
    {
       switch(ilu_data -> ilu_type){
@@ -314,9 +314,9 @@ hypre_ILUDestroy( void *data )
          break;
       default:
          break;
-        }
-     (ilu_data -> schur_solver) = NULL;
-   } 
+      }
+      (ilu_data -> schur_solver) = NULL;
+   }
    if(ilu_data -> schur_precond)
    {
       switch(ilu_data -> ilu_type){
@@ -334,7 +334,7 @@ hypre_ILUDestroy( void *data )
          break;
         }
       (ilu_data -> schur_precond) = NULL;
-   } 
+   }
    /* CF marker array */
    if((ilu_data -> CF_marker_array))
    {
@@ -845,45 +845,48 @@ hypre_ILUWriteSolverParams(void *ilu_vdata)
             }
 #endif
          break;
-      case 11: 
-            hypre_printf("ILU-GMRES with ILUT \n");
-            hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
-            hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
-            hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+      case 11:
+         hypre_printf("ILU-GMRES with ILUT \n");
+         hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
+         hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
+         hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
-      case 20: 
-            hypre_printf("Newton–Schulz–Hotelling with ILU(%d) \n", (ilu_data -> lfil));
-            hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+      case 20:
+         hypre_printf("Newton-Schulz-Hotelling with ILU(%d) \n", (ilu_data -> lfil));
+         hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
-      case 21: 
-            hypre_printf("Newton–Schulz–Hotelling with ILUT \n");
-            hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
-            hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
-            hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
-         break; 
+      case 21:
+         hypre_printf("Newton-Schulz-Hotelling with ILUT \n");
+         hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
+         hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
+         hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+         break;
       case 30:
-            hypre_printf("RAS with ILU(%d) \n", (ilu_data -> lfil));
-            hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+         hypre_printf("RAS with ILU(%d) \n", (ilu_data -> lfil));
+         hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
-      case 31: 
-            hypre_printf("RAS with ILUT \n");
-            hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
-            hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
-            hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+      case 31:
+         hypre_printf("RAS with ILUT \n");
+         hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
+         hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
+         hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
       case 40:
-            hypre_printf("ddPQ-ILU-GMRES with ILU(%d) \n", (ilu_data -> lfil));
-            hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+         hypre_printf("ddPQ-ILU-GMRES with ILU(%d) \n", (ilu_data -> lfil));
+         hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
-      case 41: 
-            hypre_printf("ddPQ-ILU-GMRES with ILUT \n");
-            hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
-            hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
-            hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+      case 41:
+         hypre_printf("ddPQ-ILU-GMRES with ILUT \n");
+         hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
+         hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
+         hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
-      default: 
-            hypre_printf("Unknown type \n");
+      case 50:
+         hypre_printf("RAP-Modified-ILU with ILU(%d) \n", (ilu_data -> lfil));
+         hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
+      default: hypre_printf("Unknown type \n");
+               break;
    }
 
    hypre_printf("\n ILU Solver Parameters: \n");
@@ -1336,11 +1339,11 @@ hypre_ILUGetPermddPQPre(HYPRE_Int n, HYPRE_Int nLU, HYPRE_Int *A_diag_i, HYPRE_I
 
    HYPRE_Int   *jcol, *jnnz;
    HYPRE_Real  *weight;
-   
+
    weight      = hypre_TAlloc(HYPRE_Real, nLU + 1, HYPRE_MEMORY_HOST);
    jcol        = hypre_TAlloc(HYPRE_Int, nLU + 1, HYPRE_MEMORY_HOST);
    jnnz        = hypre_TAlloc(HYPRE_Int, nLU + 1, HYPRE_MEMORY_HOST);
-   
+
    max_value   = -1.0;
    /* first need to build gtol */
    for( ii = 0 ; ii < nLU ; ii ++)
@@ -1516,7 +1519,7 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io
          hypre_ILULocalRCM( hypre_ParCSRMatrixDiag(A), 0, nLU, &pperm, &qperm, 0);
          break;
    }
-   
+
    *nB = nLU;
    *io_pperm = pperm;
    *io_qperm = qperm;
@@ -1636,7 +1639,7 @@ hypre_ILUGetLocalPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU, H
    HYPRE_Int            n = hypre_ParCSRMatrixNumRows(A);
    HYPRE_Int            i;
    HYPRE_Int            *temp_perm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
-   
+
    /* set perm array */
    for( i = 0 ; i < n ; i ++ )
    {
@@ -2035,7 +2038,7 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
     */
    //   hypre_ParcsrGetExternalRows( A, m, A_offd_colmap, &A_ext, NULL );
    A_ext = hypre_ParCSRMatrixExtractBExt(A, A, 1);
-   
+
    A_ext_i              = hypre_CSRMatrixI(A_ext);
    //This should be HYPRE_BigInt since this is global index, use big_j in csr */
    A_ext_j = hypre_CSRMatrixBigJ(A_ext);
@@ -2865,34 +2868,36 @@ hypre_ParILUCusparseSchurGMRESMatvec( void   *matvec_data,
     *         |IS_3^{-1}E_31 IS_3^{-1}E_32       O      |
     * store in xtemp
     */
-   
-   if(isDoublePrecision)
+   if( A_diag_n > 0 )
    {
-      /* L solve - Forward solve */
-      HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
-                                                A_diag_n, A_diag_nnz, (double *) &one, matL_des,
-                                                (double *) A_diag_data, A_diag_i, A_diag_j, matSL_info, 
-                                                (double *) xtemp_data, (double *) ytemp_data, ilu_solve_policy, ilu_solve_buffer));
-      
-      /* U solve - Backward substitution */
-      HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
-                                                A_diag_n, A_diag_nnz, (double *) &one, matU_des,
-                                                (double *) A_diag_data, A_diag_i, A_diag_j, matSU_info, 
-                                                (double *) ytemp_data, (double *) xtemp_data, ilu_solve_policy, ilu_solve_buffer));
-   }
-   else if(isSinglePrecision)
-   {
-      /* L solve - Forward solve */
-      HYPRE_CUSPARSE_CALL(cusparseScsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
-                                                A_diag_n, A_diag_nnz, (float *) &one, matL_des,
-                                                (float *) A_diag_data, A_diag_i, A_diag_j, matSL_info, 
-                                                (float *) xtemp_data, (float *) ytemp_data, ilu_solve_policy, ilu_solve_buffer));
-      
-      /* U solve - Backward substitution */
-      HYPRE_CUSPARSE_CALL(cusparseScsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
-                                                A_diag_n, A_diag_nnz, (float *) &one, matU_des,
-                                                (float *) A_diag_data, A_diag_i, A_diag_j, matSU_info, 
-                                                (float *) ytemp_data, (float *) xtemp_data, ilu_solve_policy, ilu_solve_buffer));
+      if(isDoublePrecision)
+      {
+         /* L solve - Forward solve */
+         HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                                                   A_diag_n, A_diag_nnz, (double *) &one, matL_des,
+                                                   (double *) A_diag_data, A_diag_i, A_diag_j, matSL_info, 
+                                                   (double *) xtemp_data, (double *) ytemp_data, ilu_solve_policy, ilu_solve_buffer));
+         
+         /* U solve - Backward substitution */
+         HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                                                   A_diag_n, A_diag_nnz, (double *) &one, matU_des,
+                                                   (double *) A_diag_data, A_diag_i, A_diag_j, matSU_info, 
+                                                   (double *) ytemp_data, (double *) xtemp_data, ilu_solve_policy, ilu_solve_buffer));
+      }
+      else if(isSinglePrecision)
+      {
+         /* L solve - Forward solve */
+         HYPRE_CUSPARSE_CALL(cusparseScsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                                                   A_diag_n, A_diag_nnz, (float *) &one, matL_des,
+                                                   (float *) A_diag_data, A_diag_i, A_diag_j, matSL_info, 
+                                                   (float *) xtemp_data, (float *) ytemp_data, ilu_solve_policy, ilu_solve_buffer));
+         
+         /* U solve - Backward substitution */
+         HYPRE_CUSPARSE_CALL(cusparseScsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                                                   A_diag_n, A_diag_nnz, (float *) &one, matU_des,
+                                                   (float *) A_diag_data, A_diag_i, A_diag_j, matSU_info, 
+                                                   (float *) ytemp_data, (float *) xtemp_data, ilu_solve_policy, ilu_solve_buffer));
+      }
    }
    
    /* now add the original x onto it */
@@ -2978,34 +2983,36 @@ hypre_ParILURAPSchurGMRESSolve( void               *ilu_vdata,
    //HYPRE_Real zero = 0.0;
    HYPRE_Real one = 1.0;
    //HYPRE_Real mone = -1.0;
-   
-   if(isDoublePrecision)
+
+   if(m > 0)
    {
-      /* L solve */
-      HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
-                                                m, SLU_nnz, (double *) &one, matL_des,
-                                                (double *) SLU_data, SLU_i, SLU_j, matSL_info, 
-                                                (double *) f_data, (double *) rhs_data, ilu_solve_policy, ilu_solve_buffer));
-      /* U solve */
-      HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
-                                                m, SLU_nnz, (double *) &one, matU_des,
-                                                (double *) SLU_data, SLU_i, SLU_j, matSU_info, 
-                                                (double *) rhs_data, (double *) u_data, ilu_solve_policy, ilu_solve_buffer));
+      if(isDoublePrecision)
+      {
+         /* L solve */
+         HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                                                   m, SLU_nnz, (double *) &one, matL_des,
+                                                   (double *) SLU_data, SLU_i, SLU_j, matSL_info, 
+                                                   (double *) f_data, (double *) rhs_data, ilu_solve_policy, ilu_solve_buffer));
+         /* U solve */
+         HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                                                   m, SLU_nnz, (double *) &one, matU_des,
+                                                   (double *) SLU_data, SLU_i, SLU_j, matSU_info, 
+                                                   (double *) rhs_data, (double *) u_data, ilu_solve_policy, ilu_solve_buffer));
+      }
+      else if(isSinglePrecision)
+      {
+         /* L solve */
+         HYPRE_CUSPARSE_CALL(cusparseScsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                                                   m, SLU_nnz, (float *) &one, matL_des,
+                                                   (float *) SLU_data, SLU_i, SLU_j, matSL_info, 
+                                                   (float *) f_data, (float *) rhs_data, ilu_solve_policy, ilu_solve_buffer));
+         /* U solve */
+         HYPRE_CUSPARSE_CALL(cusparseScsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                                                   m, SLU_nnz, (float *) &one, matU_des,
+                                                   (float *) SLU_data, SLU_i, SLU_j, matSU_info, 
+                                                   (float *) rhs_data, (float *) u_data, ilu_solve_policy, ilu_solve_buffer));
+      }
    }
-   else if(isSinglePrecision)
-   {
-      /* L solve */
-      HYPRE_CUSPARSE_CALL(cusparseScsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
-                                                m, SLU_nnz, (float *) &one, matL_des,
-                                                (float *) SLU_data, SLU_i, SLU_j, matSL_info, 
-                                                (float *) f_data, (float *) rhs_data, ilu_solve_policy, ilu_solve_buffer));
-      /* U solve */
-      HYPRE_CUSPARSE_CALL(cusparseScsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
-                                                m, SLU_nnz, (float *) &one, matU_des,
-                                                (float *) SLU_data, SLU_i, SLU_j, matSU_info, 
-                                                (float *) rhs_data, (float *) u_data, ilu_solve_policy, ilu_solve_buffer));
-   }
-   
    
    return hypre_error_flag;
 }
@@ -3418,22 +3425,26 @@ hypre_ParILURAPSchurGMRESMatvec( void   *matvec_data,
          /* first step, compute P*x put in y */
          /* -L^{-1}Fx */
          hypre_CSRMatrixMatvec(mone, iLF, x_local, zero, xtemp_upper);
+
          /* -U{-1}L^{-1}Fx */
-         if(isDoublePrecision)
+         if(nLU > 0)
          {
-            /* U solve */
-            HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
-                                                      nLU, BLU_nnz, (double *) &one, matU_des,
-                                                      (double *) BLU_data, BLU_i, BLU_j, matBU_info, 
-                                                      (double *) xtemp_data, (double *) ytemp_data, ilu_solve_policy, ilu_solve_buffer));
-         }
-         else if(isSinglePrecision)
-         {
-            /* U solve */
-            HYPRE_CUSPARSE_CALL(cusparseScsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
-                                                      nLU, BLU_nnz, (float *) &one, matU_des,
-                                                      (float *) BLU_data, BLU_i, BLU_j, matBU_info, 
-                                                      (float *) xtemp_data, (float *) ytemp_data, ilu_solve_policy, ilu_solve_buffer));
+            if(isDoublePrecision)
+            {
+               /* U solve */
+               HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                                                         nLU, BLU_nnz, (double *) &one, matU_des,
+                                                         (double *) BLU_data, BLU_i, BLU_j, matBU_info, 
+                                                         (double *) xtemp_data, (double *) ytemp_data, ilu_solve_policy, ilu_solve_buffer));
+            }
+            else if(isSinglePrecision)
+            {
+               /* U solve */
+               HYPRE_CUSPARSE_CALL(cusparseScsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                                                         nLU, BLU_nnz, (float *) &one, matU_des,
+                                                         (float *) BLU_data, BLU_i, BLU_j, matBU_info, 
+                                                         (float *) xtemp_data, (float *) ytemp_data, ilu_solve_policy, ilu_solve_buffer));
+            }
          }
          /* now copy data to y_lower */
          hypre_TMemcpy( ytemp_data + nLU, x_data, HYPRE_Real, m, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
@@ -3446,21 +3457,24 @@ hypre_ParILURAPSchurGMRESMatvec( void   *matvec_data,
          hypre_TMemcpy( ytemp_data+nLU, xtemp_data + nLU, HYPRE_Real, m, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
          
          /* solve L^{-1} */
-         if(isDoublePrecision)
+         if(nLU > 0)
          {
-            /* L solve */
-            HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
-                                                      nLU, BLU_nnz, (double *) &one, matL_des,
-                                                      (double *) BLU_data, BLU_i, BLU_j, matBL_info, 
-                                                      (double *) xtemp_data, (double *) ytemp_data, ilu_solve_policy, ilu_solve_buffer));
-         }
-         else if(isSinglePrecision)
-         {
-            /* L solve */
-            HYPRE_CUSPARSE_CALL(cusparseScsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
-                                                      nLU, BLU_nnz, (float *) &one, matL_des,
-                                                      (float *) BLU_data, BLU_i, BLU_j, matBL_info, 
-                                                      (float *) xtemp_data, (float *) ytemp_data, ilu_solve_policy, ilu_solve_buffer));
+            if(isDoublePrecision)
+            {
+               /* L solve */
+               HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                                                         nLU, BLU_nnz, (double *) &one, matL_des,
+                                                         (double *) BLU_data, BLU_i, BLU_j, matBL_info, 
+                                                         (double *) xtemp_data, (double *) ytemp_data, ilu_solve_policy, ilu_solve_buffer));
+            }
+            else if(isSinglePrecision)
+            {
+               /* L solve */
+               HYPRE_CUSPARSE_CALL(cusparseScsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, 
+                                                         nLU, BLU_nnz, (float *) &one, matL_des,
+                                                         (float *) BLU_data, BLU_i, BLU_j, matBL_info, 
+                                                         (float *) xtemp_data, (float *) ytemp_data, ilu_solve_policy, ilu_solve_buffer));
+            }
          }
          /* -EU^{-1}L^{-1} */
          hypre_CSRMatrixMatvec(mone * alpha, EiU, ytemp_upper, beta, y_local);
@@ -3758,548 +3772,6 @@ hypre_ParILURAPSchurGMRESMatvecDestroyH( void *matvec_data )
 
 #endif
 
-/*--------------------------------------------------------------------------
- * hypre_ParILUCSRRCM
- *--------------------------------------------------------------------------*/
-
-/* This function computes the RCM ordering of a sub matrix of 
- * sparse matrix B = A(perm,perm)
- * For nonsymmetrix problem, is the RCM ordering of B + B'
- * A: The input CSR matrix
- * start:      the start position of the submatrix in B
- * end:        the end position of the submatrix in B ( exclude end, [start,end) )
- * permp:      pointer to the row permutation array such that B = A(perm, perm)
- *             point to NULL if you want to work directly on A
- *             on return, permp will point to the new permutation where
- *             in [start, end) the matrix will reordered
- * qpermp:     pointer to the col permutation array such that B = A(perm, perm)
- *             point to NULL or equal to permp if you want symmetric order
- *             on return, qpermp will point to the new permutation where
- *             in [start, end) the matrix will reordered
- * sym:        set to nonzero to work on A only, otherwise A + A'
- *             WARNING: if you are use non-symmetric reordering, that is,
- *             different row and col reordering, the result A might be non-symmetrix.
- *             be careful if you are using non-symmetric reordering
- */
-HYPRE_Int
-hypre_ParILUCSRRCM( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end, 
-                     HYPRE_Int **permp, HYPRE_Int **qpermp, HYPRE_Int sym)
-{
-   HYPRE_Int               i, j, row, col, r1, r2;
-   
-   HYPRE_Int               num_nodes      = end - start;
-   HYPRE_Int               n              = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int               ncol           = hypre_CSRMatrixNumCols(A);
-   HYPRE_Int               *A_i           = hypre_CSRMatrixI(A);
-   HYPRE_Int               *A_j           = hypre_CSRMatrixJ(A);
-   hypre_CSRMatrix         *GT            = NULL;
-   hypre_CSRMatrix         *GGT           = NULL;
-   //HYPRE_Int               *AAT_i         = NULL;
-   //HYPRE_Int               *AAT_j         = NULL;
-   HYPRE_Int               A_nnz          = hypre_CSRMatrixNumNonzeros(A);
-   hypre_CSRMatrix         *G             = NULL;
-   HYPRE_Int               *G_i           = NULL;
-   HYPRE_Int               *G_j           = NULL;
-   HYPRE_Real              *G_data           = NULL;
-   HYPRE_Int               *G_perm        = NULL;
-   HYPRE_Int               G_nnz;
-   HYPRE_Int               G_capacity;
-   HYPRE_Int               *perm_temp     = NULL;
-   HYPRE_Int               *perm          = *permp;
-   HYPRE_Int               *qperm         = *qpermp;
-   HYPRE_Int               *rqperm        = NULL;
-   
-   /* 1: Preprosessing 
-    * Check error in input, set some parameters
-    */
-   if(num_nodes <= 0)
-   {
-      /* don't do this if we are too small */
-      return hypre_error_flag;
-   }
-   if(n!=ncol || end > n || start < 0)
-   {
-      /* don't do this if the input has error */
-      printf("Error input, abort RCM\n");
-      return hypre_error_flag;
-   }
-   if(!perm)
-   {
-      /* create permutation array if we don't have one yet */
-      perm = hypre_TAlloc( HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
-      for(i = 0 ; i < n ; i ++)
-      {
-         perm[i] = i;
-      }
-   }
-   if(!qperm)
-   {
-      /* symmetric reordering, just point it to row reordering */
-      qperm = perm;
-   }
-   rqperm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
-   for(i = 0 ; i < n ; i ++)
-   {
-      rqperm[qperm[i]] = i;
-   }
-   /* 2: Build Graph
-    * Build Graph for RCM ordering
-    */
-   G = hypre_CSRMatrixCreate(num_nodes, num_nodes, 0);
-   hypre_CSRMatrixInitialize(G);
-   hypre_CSRMatrixSetDataOwner(G, 1);
-   G_i = hypre_CSRMatrixI(G);
-   if(sym)
-   {
-      /* Directly use A */
-      G_nnz = 0;
-      G_capacity = hypre_max(A_nnz * n * n / num_nodes / num_nodes - num_nodes, 1);
-      G_j = hypre_TAlloc(HYPRE_Int, G_capacity, HYPRE_MEMORY_DEVICE);
-      for(i = 0 ; i < num_nodes ; i ++)
-      {
-         G_i[i] = G_nnz;
-         row = perm[i + start];
-         r1 = A_i[row];
-         r2 = A_i[row+1];
-         for(j = r1 ; j < r2 ; j ++)
-         {
-            col = rqperm[A_j[j]];
-            if(col != row && col >= start && col < end)
-            {
-               /* this is an entry in G */
-               G_j[G_nnz++] = col - start;
-               if(G_nnz >= G_capacity)
-               {
-                  HYPRE_Int tmp;
-                  tmp = G_capacity;
-                  G_capacity = G_capacity * EXPAND_FACT + 1;         
-                  G_j = hypre_TReAlloc_v2(G_j, HYPRE_Int, tmp, HYPRE_Int, G_capacity, HYPRE_MEMORY_DEVICE);
-               }
-            }
-         }
-      }
-      G_i[num_nodes] = G_nnz;
-      if(G_nnz == 0)
-      {
-         //G has only diagonal, no need to do any kind of RCM
-         hypre_TFree(G_j, HYPRE_MEMORY_DEVICE);
-         hypre_TFree(rqperm, HYPRE_MEMORY_HOST);
-         *permp   = perm;
-         *qpermp  = qperm;
-         hypre_CSRMatrixDestroy(G);
-         return hypre_error_flag;
-      }
-      hypre_CSRMatrixJ(G) = G_j;
-      hypre_CSRMatrixNumNonzeros(G) = G_nnz;
-   }
-   else
-   {
-      /* Use A + A' */
-      G_nnz = 0;
-      G_capacity = hypre_max(A_nnz * n * n / num_nodes / num_nodes - num_nodes, 1);
-      G_j = hypre_TAlloc(HYPRE_Int, G_capacity, HYPRE_MEMORY_DEVICE);
-      for(i = 0 ; i < num_nodes ; i ++)
-      {
-         G_i[i] = G_nnz;
-         row = perm[i + start];
-         r1 = A_i[row];
-         r2 = A_i[row+1];
-         for(j = r1 ; j < r2 ; j ++)
-         {
-            col = rqperm[A_j[j]];
-            if(col != row && col >= start && col < end)
-            {
-               /* this is an entry in G */
-               G_j[G_nnz++] = col - start;
-               if(G_nnz >= G_capacity)
-               {
-                  HYPRE_Int tmp;
-                  tmp = G_capacity;
-                  G_capacity = G_capacity * EXPAND_FACT + 1;         
-                  G_j = hypre_TReAlloc_v2(G_j, HYPRE_Int, tmp, HYPRE_Int, G_capacity, HYPRE_MEMORY_DEVICE);
-               }
-            }
-         }
-      }
-      G_i[num_nodes] = G_nnz;
-      if(G_nnz == 0)
-      {
-         //G has only diagonal, no need to do any kind of RCM
-         hypre_TFree(G_j, HYPRE_MEMORY_DEVICE);
-         hypre_TFree(rqperm, HYPRE_MEMORY_HOST);
-         *permp   = perm;
-         *qpermp  = qperm;
-         hypre_CSRMatrixDestroy(G);
-         return hypre_error_flag;
-      }
-      hypre_CSRMatrixJ(G) = G_j;
-      G_data = hypre_CTAlloc(HYPRE_Real, G_nnz, HYPRE_MEMORY_DEVICE);
-      hypre_CSRMatrixData(G) = G_data;
-      hypre_CSRMatrixNumNonzeros(G) = G_nnz;
-      
-      /* now sum G with G' */
-      hypre_CSRMatrixTranspose(G, &GT, 1);
-      GGT = hypre_CSRMatrixAdd(G, GT);
-      hypre_CSRMatrixDestroy(G);
-      hypre_CSRMatrixDestroy(GT);
-      G = GGT;
-      GGT = NULL;
-   }
-   
-   /* 3: Build Graph
-    * Build RCM
-    */
-   /* no need to be shared, but perm should be shared */
-   G_perm = hypre_TAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_HOST);
-   hypre_ParILUCSRRCMOrder( G, G_perm);
-   
-   /* 4: Post processing
-    * Free, set value, return
-    */
-    
-   /* update to new index */
-   perm_temp = hypre_TAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_HOST);
-   for( i = 0 ; i < num_nodes ; i ++)
-   {
-      perm_temp[i] = perm[i + start];
-   } 
-   for( i = 0 ; i < num_nodes ; i ++)
-   {
-      perm[i+start] = perm_temp[G_perm[i]];
-   } 
-   if(perm != qperm)
-   {
-      for( i = 0 ; i < num_nodes ; i ++)
-      {
-         perm_temp[i] = qperm[i + start];
-      } 
-      for( i = 0 ; i < num_nodes ; i ++)
-      {
-         qperm[i+start] = perm_temp[G_perm[i]];
-      } 
-   }
-   *permp   = perm;
-   *qpermp  = qperm;
-   hypre_CSRMatrixDestroy(G);
-   
-   hypre_TFree(G_perm, HYPRE_MEMORY_HOST);
-   hypre_TFree(perm_temp, HYPRE_MEMORY_HOST);
-   hypre_TFree(rqperm, HYPRE_MEMORY_HOST);
-   
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_ParILUCSRRCMMindegree
- *--------------------------------------------------------------------------*/
- 
-/* This function find the unvisited node with the minimum degree
- */
-HYPRE_Int
-hypre_ParILUCSRRCMMindegree(HYPRE_Int n, HYPRE_Int *degree, HYPRE_Int *marker, HYPRE_Int *rootp)
-{
-   HYPRE_Int i;
-   HYPRE_Int min_degree = n+1;
-   HYPRE_Int root = 0;
-   for(i = 0 ; i < n ; i ++)
-   {
-      if(marker[i] < 0)
-      {
-         if(degree[i] < min_degree)
-         {
-            root = i;
-            min_degree = degree[i];
-         }
-      }
-   }
-   *rootp = root;
-   return 0;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_ParILUCSRRCMOrder
- *--------------------------------------------------------------------------*/
-
-/* This function actually does the RCM ordering of a symmetrix csr matrix (entire)
- * A: the csr matrix, A_data is not needed
- * perm: the permutation array, space should be allocated outside
- */
-HYPRE_Int
-hypre_ParILUCSRRCMOrder( hypre_CSRMatrix *A, HYPRE_Int *perm)
-{
-   HYPRE_Int      i, root;
-   HYPRE_Int      *degree     = NULL;
-   HYPRE_Int      *marker     = NULL;
-   HYPRE_Int      *A_i        = hypre_CSRMatrixI(A);
-   HYPRE_Int      n           = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int      current_num;
-   /* get the degree for each node */
-   degree = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
-   marker = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
-   for(i = 0 ; i < n ; i ++)
-   {
-      degree[i] = A_i[i+1] - A_i[i];
-      marker[i] = -1;
-   }
-   
-   /* start RCM loop */
-   current_num = 0;
-   while(current_num < n)
-   {
-      hypre_ParILUCSRRCMMindegree( n, degree, marker, &root);
-      /* This is a new connect component */
-      hypre_ParILUCSRRCMFindPPNode(A, &root, marker);
-         
-      /* Numbering of this component */
-      hypre_ParILUCSRRCMNumbering(A, root, marker, perm, &current_num);
-   }
-   
-   /* free */
-   hypre_TFree(degree, HYPRE_MEMORY_HOST);
-   hypre_TFree(marker, HYPRE_MEMORY_HOST);
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_ParILUCSRRCMFindPPNode
- *--------------------------------------------------------------------------*/
-
-/* This function find a pseudo-peripheral node start from root
- * A: the csr matrix, A_data is not needed
- * rootp: pointer to the root, on return will be a end of the pseudo-peripheral
- * marker: the marker array for unvisited node
- */
-HYPRE_Int
-hypre_ParILUCSRRCMFindPPNode( hypre_CSRMatrix *A, HYPRE_Int *rootp, HYPRE_Int *marker)
-{
-   HYPRE_Int      i, r1, r2, row, min_degree, lev_degree, nlev, newnlev;
-   
-   HYPRE_Int      root           = *rootp;
-   HYPRE_Int      n              = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int      *A_i           = hypre_CSRMatrixI(A);
-   /* at most n levels */
-   HYPRE_Int      *level_i       = hypre_TAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_HOST);
-   HYPRE_Int      *level_j       = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
-   
-   /* build initial level structure from root */
-   hypre_ParILUCSRRCMBuildLevel( A, root, marker, level_i, level_j, &newnlev);
-   
-   nlev  = newnlev - 1;
-   while(nlev < newnlev)
-   {
-      nlev = newnlev;
-      r1 =  level_i[nlev-1];
-      r2 =  level_i[nlev];
-      min_degree = n;
-      for(i = r1 ; i < r2 ; i ++)
-      {
-         /* select the last level, pick min-degree node */
-         row = level_j[i];
-         lev_degree = A_i[row+1] - A_i[row];
-         if(min_degree > lev_degree)
-         {
-            min_degree = lev_degree;
-            root = row;
-         }
-      }
-      hypre_ParILUCSRRCMBuildLevel( A, root, marker, level_i, level_j, &newnlev);
-   }
-   
-   *rootp = root;
-   /* free */
-   hypre_TFree(level_i, HYPRE_MEMORY_HOST);
-   hypre_TFree(level_j, HYPRE_MEMORY_HOST);
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_ParILUCSRRCMFindPPNode
- *--------------------------------------------------------------------------*/
-
-/* This function build level structure start from root
- * A: the csr matrix, A_data is not needed
- * root: pointer to the root
- * marker: the marker array for unvisited node
- * level_i: points to the start/end of position on level_j, similar to CSR Matrix
- * level_j: store node number on each level
- * nlevp: return the number of level on this level structure
- */
-HYPRE_Int
-hypre_ParILUCSRRCMBuildLevel(hypre_CSRMatrix *A, HYPRE_Int root, HYPRE_Int *marker,
-                              HYPRE_Int *level_i, HYPRE_Int *level_j, HYPRE_Int *nlevp)
-{
-   HYPRE_Int      i, j, l1, l2, l_current, r1, r2, rowi, rowj, nlev;
-   HYPRE_Int      *A_i = hypre_CSRMatrixI(A);
-   HYPRE_Int      *A_j = hypre_CSRMatrixJ(A);
-   
-   /* set first level first */
-   level_i[0] = 0;
-   level_j[0] = root;
-   marker[root] = 0;
-   nlev = 1;
-   l1 = 0;
-   l2 = 1;
-   l_current = l2;
-   
-   //explore nbhds of all nodes in current level
-   while(l2 > l1)
-   {
-      level_i[nlev++] = l2;
-      /* loop through last level */
-      for(i = l1 ; i < l2 ; i ++)
-      {
-         /* the node to explore */
-         rowi = level_j[i];
-         r1 = A_i[rowi];
-         r2 = A_i[rowi + 1];
-         for(j = r1 ; j < r2 ; j ++)
-         {
-            rowj = A_j[j];
-            if( marker[rowj] < 0 )
-            {
-               /* Aha, an unmarked row */
-               marker[rowj] = 0;
-               level_j[l_current++] = rowj;
-            }
-         }
-      }
-      l1 = l2;
-      l2 = l_current;
-   }
-   /* after this we always have a "ghost" last level */
-   nlev --;
-   
-   /* reset marker */
-   for(i = 0 ; i < l2 ; i ++)
-   {
-      marker[level_j[i]] = -1;
-   }
-   
-   *nlevp = nlev;
-   
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_ParILUCSRRCMNumbering
- *--------------------------------------------------------------------------*/
-
-/* This function generate numbering for a connect component
- * A: the csr matrix, A_data is not needed
- * root: pointer to the root
- * marker: the marker array for unvisited node
- * perm: permutation array
- * current_nump: number of nodes already have a perm value
- */
-
-HYPRE_Int
-hypre_ParILUCSRRCMNumbering(hypre_CSRMatrix *A, HYPRE_Int root, HYPRE_Int *marker, HYPRE_Int *perm, HYPRE_Int *current_nump)
-{
-    HYPRE_Int        i, j, l1, l2, r1, r2, rowi, rowj, row_start, row_end;
-    HYPRE_Int        *A_i        = hypre_CSRMatrixI(A);
-    HYPRE_Int        *A_j        = hypre_CSRMatrixJ(A);
-    HYPRE_Int        current_num = *current_nump;
-    
-    
-    marker[root]        = 0;
-    l1                  = current_num;
-    perm[current_num++] = root;
-    l2                  = current_num;
-    
-    while(l2 > l1)
-    {
-       /* loop through all nodes is current level */
-       for(i = l1 ; i < l2 ; i ++)
-       {
-          rowi = perm[i];
-          r1 = A_i[rowi];
-          r2 = A_i[rowi+1];
-          row_start = current_num;
-          for(j = r1 ; j < r2 ; j ++)
-          {
-             rowj = A_j[j];
-             if(marker[rowj] < 0)
-             {
-                /* save the degree in marker and add it to perm */
-                marker[rowj] = A_i[rowj+1] - A_i[rowj];
-                perm[current_num++] = rowj;
-             }
-          }
-          row_end = current_num;
-          hypre_ParILUCSRRCMQsort(perm, row_start, row_end-1, marker);
-       }
-       l1 = l2;
-       l2 = current_num;
-    }
-    
-    //reverse
-    hypre_ParILUCSRRCMReverse(perm, *current_nump, current_num-1);
-    *current_nump = current_num;
-    return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_ParILUCSRRCMQsort
- *--------------------------------------------------------------------------*/
-
-/* This qsort is very specified, not worth to put into utilities
- * Sort a part of array perm based on degree value (ascend)
- * That is, if degree[perm[i]] < degree[perm[j]], we should have i < j
- * perm: the perm array
- * start: start in perm
- * end: end in perm
- * degree: degree array
- */
-
-HYPRE_Int
-hypre_ParILUCSRRCMQsort(HYPRE_Int *perm, HYPRE_Int start, HYPRE_Int end, HYPRE_Int *degree)
-{
-    
-    HYPRE_Int i, mid;
-    if(start >= end)
-    {
-        return hypre_error_flag;
-    }
-    
-    hypre_swap(perm, start, (start + end) / 2);
-    mid = start;
-    //loop to split
-    for(i = start + 1 ; i <= end ; i ++)
-    {
-        if(degree[perm[i]] < degree[perm[start]])
-        {
-            hypre_swap(perm, ++mid, i);
-        }
-    }
-    hypre_swap(perm, start, mid);
-    hypre_ParILUCSRRCMQsort(perm, mid+1, end, degree);
-    hypre_ParILUCSRRCMQsort(perm, start, mid-1, degree);
-    return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_ParILUCSRRCMReverse
- *--------------------------------------------------------------------------*/
-
-/* Last step in RCM, reverse it
- * perm: perm array
- * srart: start position
- * end: end position
- */
-
-HYPRE_Int 
-hypre_ParILUCSRRCMReverse(HYPRE_Int *perm, HYPRE_Int start, HYPRE_Int end)
-{
-    HYPRE_Int     i, j;
-    HYPRE_Int     mid = (start + end + 1) / 2;
-    
-    for(i = start, j = end ; i < mid ; i ++, j--)
-    {
-        hypre_swap(perm, i, j);
-    }
-    return hypre_error_flag;
-}
-
 /* NSH create and solve and help functions */
 
 /* Create */
@@ -4309,7 +3781,7 @@ hypre_NSHCreate()
    hypre_ParNSHData  *nsh_data;
 
    nsh_data = hypre_CTAlloc(hypre_ParNSHData,  1, HYPRE_MEMORY_HOST);
-   
+
    /* general data */
    hypre_ParNSHDataMatA(nsh_data)                  = NULL;
    hypre_ParNSHDataMatM(nsh_data)                  = NULL;
@@ -4324,7 +3796,7 @@ hypre_NSHCreate()
    hypre_ParNSHDataLogging(nsh_data)               = 2;
    hypre_ParNSHDataPrintLevel(nsh_data)            = 2;
    hypre_ParNSHDataMaxIter(nsh_data)               = 5;
-   
+
    hypre_ParNSHDataOperatorComplexity(nsh_data)    = 0.0;
    hypre_ParNSHDataDroptol(nsh_data)               = hypre_TAlloc(HYPRE_Real,2,HYPRE_MEMORY_HOST);
    hypre_ParNSHDataOwnDroptolData(nsh_data)        = 1;
@@ -4332,18 +3804,18 @@ hypre_NSHCreate()
    hypre_ParNSHDataDroptol(nsh_data)[1]            = 1.0e-02;/* droptol for NSH */
    hypre_ParNSHDataUTemp(nsh_data)                 = NULL;
    hypre_ParNSHDataFTemp(nsh_data)                 = NULL;
-   
+
    /* MR data */
    hypre_ParNSHDataMRMaxIter(nsh_data)             = 2;
    hypre_ParNSHDataMRTol(nsh_data)                 = 1e-09;
    hypre_ParNSHDataMRMaxRowNnz(nsh_data)           = 800;
    hypre_ParNSHDataMRColVersion(nsh_data)          = 0;
-   
+
    /* NSH data */
    hypre_ParNSHDataNSHMaxIter(nsh_data)            = 2;
    hypre_ParNSHDataNSHTol(nsh_data)                = 1e-09;
    hypre_ParNSHDataNSHMaxRowNnz(nsh_data)          = 1000;
-   
+
    return (void *) nsh_data;
 }
 
@@ -4352,29 +3824,29 @@ HYPRE_Int
 hypre_NSHDestroy( void *data )
 {
    hypre_ParNSHData * nsh_data = (hypre_ParNSHData*) data;
-   
-   /* residual */ 
+
+   /* residual */
    if(hypre_ParNSHDataResidual(nsh_data))
    {
       hypre_ParVectorDestroy( hypre_ParNSHDataResidual(nsh_data) );
       hypre_ParNSHDataResidual(nsh_data) = NULL;
    }
-   
+
    /* residual norms */
    if(hypre_ParNSHDataRelResNorms(nsh_data))
    {
       hypre_TFree( hypre_ParNSHDataRelResNorms(nsh_data), HYPRE_MEMORY_HOST );
       hypre_ParNSHDataRelResNorms(nsh_data) = NULL;
    }
-   
+
    /* l1 norms */
    if(hypre_ParNSHDataL1Norms(nsh_data))
    {
       hypre_TFree( hypre_ParNSHDataL1Norms(nsh_data), HYPRE_MEMORY_HOST );
       hypre_ParNSHDataL1Norms(nsh_data) = NULL;
    }
-   
-   /* temp arrays */ 
+
+   /* temp arrays */
    if(hypre_ParNSHDataUTemp(nsh_data))
    {
       hypre_ParVectorDestroy( hypre_ParNSHDataUTemp(nsh_data) );
@@ -4385,14 +3857,14 @@ hypre_NSHDestroy( void *data )
       hypre_ParVectorDestroy( hypre_ParNSHDataFTemp(nsh_data) );
       hypre_ParNSHDataFTemp(nsh_data) = NULL;
    }
-   
+
    /* approx inverse matrix */
    if(hypre_ParNSHDataMatM(nsh_data))
    {
       hypre_ParCSRMatrixDestroy( hypre_ParNSHDataMatM(nsh_data) );
       hypre_ParNSHDataMatM(nsh_data) = NULL;
    }
-   
+
    /* droptol array */
   if(hypre_ParNSHDataOwnDroptolData(nsh_data))
   {
@@ -4411,7 +3883,7 @@ hypre_NSHDestroy( void *data )
 HYPRE_Int
 hypre_NSHWriteSolverParams(void *nsh_vdata)
 {
-   hypre_ParNSHData  *nsh_data = (hypre_ParNSHData*) nsh_vdata;      
+   hypre_ParNSHData  *nsh_data = (hypre_ParNSHData*) nsh_vdata;
    hypre_printf("Newton–Schulz–Hotelling Setup parameters: \n");
    hypre_printf("NSH max iterations = %d \n", hypre_ParNSHDataNSHMaxIter(nsh_data));
    hypre_printf("NSH drop tolerance = %e \n", hypre_ParNSHDataDroptol(nsh_data)[1]);
@@ -4420,10 +3892,10 @@ hypre_NSHWriteSolverParams(void *nsh_vdata)
    hypre_printf("MR drop tolerance = %e \n", hypre_ParNSHDataDroptol(nsh_data)[0]);
    hypre_printf("MR max nnz per row = %d \n", hypre_ParNSHDataMRMaxRowNnz(nsh_data));
    hypre_printf("Operator Complexity (Fill factor) = %f \n", hypre_ParNSHDataOperatorComplexity(nsh_data));
-   hypre_printf("\n Newton–Schulz–Hotelling Solver Parameters: \n");  
+   hypre_printf("\n Newton–Schulz–Hotelling Solver Parameters: \n");
    hypre_printf("Max number of iterations: %d\n", hypre_ParNSHDataMaxIter(nsh_data));
    hypre_printf("Stopping tolerance: %e\n", hypre_ParNSHDataTol(nsh_data));
-   
+
    return hypre_error_flag;
 }
 
@@ -4786,7 +4258,7 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
 
    idx = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_DEVICE);
    data = hypre_TAlloc(HYPRE_Real, m, HYPRE_MEMORY_DEVICE);
-   
+
    /* start of main loop */
    new_i[0] = 0;
    for(i = 0 ; i < n ; i ++)
@@ -4884,7 +4356,6 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
          }
          hypre_TMemcpy( new_j + ctrA, idx,HYPRE_Int, drop_len, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
          hypre_TMemcpy( new_data + ctrA, data,HYPRE_Real, drop_len, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-         
          ctrA += drop_len;
          new_i[i+1] = ctrA;
       }
@@ -4895,7 +4366,6 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
       hypre_TFree(A_i, HYPRE_MEMORY_DEVICE);
       hypre_TFree(A_j, HYPRE_MEMORY_DEVICE);
       hypre_TFree(A_data, HYPRE_MEMORY_DEVICE);
-      
    }
 
    hypre_CSRMatrixI(A) = new_i;
@@ -4903,10 +4373,10 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
    hypre_CSRMatrixData(A) = new_data;
    hypre_CSRMatrixNumNonzeros(A) = ctrA;
    hypre_CSRMatrixOwnsData(A) = 1;
-   
+
    hypre_TFree(idx, HYPRE_MEMORY_DEVICE);
    hypre_TFree(data, HYPRE_MEMORY_DEVICE);
-   
+
    return hypre_error_flag;
 }
 
@@ -4964,7 +4434,6 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMat
 
    /* create initial guess and matrix I */
    matM = hypre_CSRMatrixCreate(n,n,n);
-   
    M_i = hypre_TAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_DEVICE);
    M_j = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
    M_data = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_DEVICE);
@@ -4973,7 +4442,7 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMat
    I_i = hypre_TAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_DEVICE);
    I_j = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
    I_data = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_DEVICE);
-   
+
    /* now loop to create initial guess */
    M_i[0] = 0;
    I_i[0] = 0;
@@ -5125,7 +4594,6 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
                             HYPRE_Int mr_max_iter, HYPRE_Int nsh_max_iter, HYPRE_Int mr_col_version,
                             HYPRE_Int print_level)
 {
-printf("S\n");
    HYPRE_Int               i;
 
    /* data slots for matrices */
@@ -5148,9 +4616,9 @@ printf("S\n");
 
    /* setup */
    hypre_MPI_Comm_rank(comm, &myid);
-   
+
    M_offd_i = hypre_TAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_DEVICE);
-   
+
    if(mr_col_version)
    {
       hypre_printf("Column version is not yet support, switch to global version\n");
@@ -5265,4 +4733,3 @@ printf("S\n");
 
    return hypre_error_flag;
 }
-

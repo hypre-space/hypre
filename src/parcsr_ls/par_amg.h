@@ -133,7 +133,13 @@ typedef struct
    HYPRE_Real           pi_drop_tol;
    HYPRE_Real           eu_sparse_A;
    char                *euclidfile;
-
+   HYPRE_Int            ilu_lfil;
+   HYPRE_Int		      ilu_type;
+   HYPRE_Int		      ilu_max_row_nnz;
+   HYPRE_Int		      ilu_max_iter;
+   HYPRE_Real		      ilu_droptol;
+   HYPRE_Int            ilu_reordering_type;
+   
    HYPRE_Real          *max_eig_est;
    HYPRE_Real          *min_eig_est;
    HYPRE_Int            cheby_eig_est;
@@ -366,6 +372,12 @@ typedef struct
 #define hypre_ParAMGDataEuLevel(amg_data) ((amg_data)->eu_level)
 #define hypre_ParAMGDataEuSparseA(amg_data) ((amg_data)->eu_sparse_A)
 #define hypre_ParAMGDataEuBJ(amg_data) ((amg_data)->eu_bj)
+#define hypre_ParAMGDataILUType(amg_data) ((amg_data)->ilu_type)
+#define hypre_ParAMGDataILULevel(amg_data) ((amg_data)->ilu_lfil)
+#define hypre_ParAMGDataILUMaxRowNnz(amg_data) ((amg_data)->ilu_max_row_nnz)
+#define hypre_ParAMGDataILUDroptol(amg_data) ((amg_data)->ilu_droptol)
+#define hypre_ParAMGDataILUMaxIter(amg_data) ((amg_data)->ilu_max_iter)
+#define hypre_ParAMGDataILULocalReordering(amg_data) ((amg_data)->ilu_reordering_type)
 
 #define hypre_ParAMGDataMaxEigEst(amg_data) ((amg_data)->max_eig_est)
 #define hypre_ParAMGDataMinEigEst(amg_data) ((amg_data)->min_eig_est)

@@ -272,28 +272,6 @@ hypre_ParCSRMatrixInitialize( hypre_ParCSRMatrix *matrix )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParCSRMatrixBigInitialize
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int 
-hypre_ParCSRMatrixBigInitialize( hypre_ParCSRMatrix *matrix )
-{
-   if (!matrix)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   hypre_CSRMatrixInitialize(hypre_ParCSRMatrixDiag(matrix));
-   hypre_CSRMatrixBigInitialize(hypre_ParCSRMatrixOffd(matrix));
-   hypre_ParCSRMatrixColMapOffd(matrix) = 
-      hypre_CTAlloc(HYPRE_BigInt, hypre_CSRMatrixNumCols(
-                       hypre_ParCSRMatrixOffd(matrix)), HYPRE_MEMORY_HOST);
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixClone
  * Creates and returns a new copy S of the argument A
  * The following variables are not copied because they will be constructed
@@ -2675,7 +2653,6 @@ hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A,
    return hypre_error_flag;
 }
 
-
 /* Perform dual truncation of ParCSR matrix.
  * This code is adapted from original BoomerAMGInterpTruncate()
  * A: parCSR matrix to be modified
@@ -3278,3 +3255,4 @@ hypre_ParCSRMatrixTruncate(hypre_ParCSRMatrix *A,
 
    return ierr;
 }
+

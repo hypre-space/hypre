@@ -768,3 +768,4 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    return(Solve_err_flag);
 }
+

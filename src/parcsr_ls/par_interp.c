@@ -439,8 +439,11 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
      int_buf_data[index++]
      = fine_to_coarse[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
      }
+
      comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, fine_to_coarse_offd);
+
      hypre_ParCSRCommHandleDestroy(comm_handle);
+
      if (debug_flag==4)
      {
      wall_time = time_getWallclockSeconds() - wall_time;
@@ -1442,9 +1445,12 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
      int_buf_data[index++]
      = fine_to_coarse[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
      }
+
      comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data,
      fine_to_coarse_offd);
+
      hypre_ParCSRCommHandleDestroy(comm_handle);
+
      if (debug_flag==4)
      {
      wall_time = time_getWallclockSeconds() - wall_time;
@@ -2296,9 +2302,12 @@ hypre_BoomerAMGBuildDirInterpHost( hypre_ParCSRMatrix   *A,
      int_buf_data[index++]
      = fine_to_coarse[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
      }
+
      comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data,
      fine_to_coarse_offd);
+
      hypre_ParCSRCommHandleDestroy(comm_handle);
+
      if (debug_flag==4)
      {
      wall_time = time_getWallclockSeconds() - wall_time;
@@ -3147,9 +3156,12 @@ hypre_BoomerAMGBuildInterpModUnk( hypre_ParCSRMatrix   *A,
      int_buf_data[index++]
      = fine_to_coarse[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
      }
+
      comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data,
      fine_to_coarse_offd);
+
      hypre_ParCSRCommHandleDestroy(comm_handle);
+
      if (debug_flag==4)
      {
      wall_time = time_getWallclockSeconds() - wall_time;
@@ -3357,7 +3369,9 @@ for (i = 0; i < n_fine; i++) fine_to_coarse[i] -= my_first_cpt;*/
                 * Case 2: neighbor i1 is an F-point and strongly influences i,
                 * distribute a_{i,i1} to C-points that strongly infuence i.
                 * Note: currently no distribution to the diagonal in this case.
+
                 HERE, we only want to distribut to points of the SAME function type
+
                 *--------------------------------------------------------------*/
 
                else if (P_marker[i1] == strong_f_marker)
@@ -3492,7 +3506,9 @@ for (i = 0; i < n_fine; i++) fine_to_coarse[i] -= my_first_cpt;*/
                    * Case 2: neighbor i1 is an F-point and strongly influences i,
                    * distribute a_{i,i1} to C-points that strongly infuence i.
                    * Note: currently no distribution to the diagonal in this case.
+
                    AGAIN, we only want to distribut to points of the SAME function type
+
                    *-----------------------------------------------------------*/
 
                   else if (P_marker_offd[i1] == strong_f_marker)
@@ -4381,3 +4397,4 @@ hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A,
 
    return hypre_error_flag;
 }
+

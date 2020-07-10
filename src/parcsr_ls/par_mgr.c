@@ -889,7 +889,10 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
 
   hypre_MPI_Comm_size(comm, &num_procs);
   hypre_MPI_Comm_rank(comm,&my_id);
-  num_threads = hypre_NumThreads();
+  //num_threads = hypre_NumThreads();
+  // Temporary fix, disable threading
+  // TODO: enable threading
+  num_threads = 1;
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
   //my_first_cpt = num_cpts_global[0];
@@ -1117,8 +1120,10 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
          big_buf_data[index++]
             = fine_to_coarse[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)]+ my_first_cpt;
    }
+
    comm_handle = hypre_ParCSRCommHandleCreate( 21, comm_pkg, big_buf_data,
                                     fine_to_coarse_offd);
+
    hypre_ParCSRCommHandleDestroy(comm_handle);
 */
    if (debug_flag==4)
@@ -1458,7 +1463,10 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
-   num_threads = hypre_NumThreads();
+  //num_threads = hypre_NumThreads();
+  // Temporary fix, disable threading
+  // TODO: enable threading
+  num_threads = 1;
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    //my_first_cpt = num_cpts_global[0];
@@ -1691,8 +1699,10 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
          int_buf_data[index++]
             = fine_to_coarse[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
    }
+
    comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data,
                                     fine_to_coarse_offd);
+
    hypre_ParCSRCommHandleDestroy(comm_handle);
 */
    if (debug_flag==4)
@@ -2124,8 +2134,9 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
   HYPRE_Int             *A_h_correction_offd_i = hypre_CSRMatrixI(A_h_correction_offd);
   HYPRE_Int             *A_h_correction_offd_j = hypre_CSRMatrixJ(A_h_correction_offd);
 
-  if (Pmax > 0)
-  {
+  // Allow for maximum dropping with Pmax = 0
+  //if (Pmax > 0)
+  //{
     if (ordering == 0) // interleaved ordering
     {
       HYPRE_Int *A_h_correction_diag_i_new = hypre_CTAlloc(HYPRE_Int, n_local_cpoints+1, HYPRE_MEMORY_HOST);
@@ -2225,7 +2236,7 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
       hypre_printf("Error!! Block ordering is not supported at the moment\n");
       exit(-1);
     }
-  }
+  //}
   //hypre_MGRParCSRMatrixTruncate(A_h_correction, max_elmts);
   //wall_time = time_getWallclockSeconds() - wall_time;
   //hypre_printf("Filter A_h_correction time: %1.5f\n", wall_time);
@@ -2900,11 +2911,14 @@ hypre_MGRBuildInterpApproximateInverse(hypre_ParCSRMatrix   *A,
   if (num_procs > 1)
   {
     if (debug_flag==4) wall_time = time_getWallclockSeconds();
+
     fine_to_coarse_offd = hypre_CTAlloc(HYPRE_Int, num_cols_minus_Wp_offd, HYPRE_MEMORY_HOST);
+
     for (i = 0; i < n_fine; i++)
     {
       fine_to_coarse[i] += my_first_cpt;
     }
+
     comm_pkg = hypre_ParCSRMatrixCommPkg(minus_Wp);
     if (!comm_pkg)
     {
@@ -2912,6 +2926,7 @@ hypre_MGRBuildInterpApproximateInverse(hypre_ParCSRMatrix   *A,
       comm_pkg = hypre_ParCSRMatrixCommPkg(minus_Wp);
     }
     num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+
     index = 0;
     for (i = 0; i < num_sends; i++)
     {
@@ -2920,9 +2935,12 @@ hypre_MGRBuildInterpApproximateInverse(hypre_ParCSRMatrix   *A,
         int_buf_data[index++]
           = fine_to_coarse[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
     }
+
     comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data,
                           fine_to_coarse_offd);
+
     hypre_ParCSRCommHandleDestroy(comm_handle);
+
     if (debug_flag==4)
     {
       wall_time = time_getWallclockSeconds() - wall_time;
@@ -2930,13 +2948,16 @@ hypre_MGRBuildInterpApproximateInverse(hypre_ParCSRMatrix   *A,
              my_id, wall_time);
       fflush(NULL);
     }
+
     if (debug_flag==4) wall_time = time_getWallclockSeconds();
+
 #if 0
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
 #endif
     for (i = 0; i < n_fine; i++) fine_to_coarse[i] -= my_first_cpt;
+
   }
   */
 
@@ -3022,6 +3043,7 @@ hypre_MGRBuildInterpApproximateInverse(hypre_ParCSRMatrix   *A,
 
   /*
   num_cols_P_offd = 0;
+
   if (P_offd_size)
   {
     P_marker = hypre_CTAlloc(HYPRE_Int, num_cols_minus_Wp_offd, HYPRE_MEMORY_HOST);
@@ -3042,6 +3064,7 @@ hypre_MGRBuildInterpApproximateInverse(hypre_ParCSRMatrix   *A,
         P_marker[index] = 1;
       }
     }
+
     col_map_offd_P = hypre_CTAlloc(HYPRE_Int, num_cols_P_offd, HYPRE_MEMORY_HOST);
     index = 0;
     for (i=0; i < num_cols_P_offd; i++)
@@ -3049,6 +3072,7 @@ hypre_MGRBuildInterpApproximateInverse(hypre_ParCSRMatrix   *A,
       while (P_marker[index]==0) index++;
       col_map_offd_P[i] = index++;
     }
+
 #if 0
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
@@ -4670,7 +4694,10 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
 
   hypre_MPI_Comm_size(comm, &num_procs);
   hypre_MPI_Comm_rank(comm,&my_id);
-  num_threads = hypre_NumThreads();
+  //num_threads = hypre_NumThreads();
+  // Temporary fix, disable threading
+  // TODO: enable threading
+  num_threads = 1;
 
   /* get the number of coarse rows */
   hypre_BoomerAMGCoarseParms(comm, local_numrows, 1, NULL, row_cf_marker, &coarse_dof_func_ptr, &num_row_cpts_global);
@@ -5064,7 +5091,7 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
 
 /* Build A_FF matrix from A given a CF_marker array */
 HYPRE_Int
-hypre_MGRBuildAffNew( hypre_ParCSRMatrix   *A,
+hypre_MGRBuildAff( hypre_ParCSRMatrix   *A,
            HYPRE_Int            *CF_marker,
            HYPRE_Int             debug_flag,
            hypre_ParCSRMatrix  **A_ff_ptr )
@@ -5156,8 +5183,9 @@ hypre_MGRAddVectorR ( HYPRE_Int  *CF_marker,
   return 0;
 }
 
+/*
 HYPRE_Int
-hypre_MGRBuildAff( MPI_Comm comm, HYPRE_Int local_num_variables, HYPRE_Int num_functions,
+hypre_MGRBuildAffRAP( MPI_Comm comm, HYPRE_Int local_num_variables, HYPRE_Int num_functions,
   HYPRE_Int *dof_func, HYPRE_Int *CF_marker, HYPRE_Int **coarse_dof_func_ptr, HYPRE_BigInt **coarse_pnts_global_ptr,
   hypre_ParCSRMatrix *A, HYPRE_Int debug_flag, hypre_ParCSRMatrix **P_f_ptr, hypre_ParCSRMatrix **A_ff_ptr )
 {
@@ -5174,6 +5202,7 @@ hypre_MGRBuildAff( MPI_Comm comm, HYPRE_Int local_num_variables, HYPRE_Int num_f
   hypre_TFree(CF_marker_copy, HYPRE_MEMORY_HOST);
   return 0;
 }
+*/
 
 /* Get pointer to coarse grid matrix for MGR solver */
 HYPRE_Int

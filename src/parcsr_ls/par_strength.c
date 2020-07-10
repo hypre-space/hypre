@@ -20,6 +20,7 @@
 /*==========================================================================*/
 /**
   Generates strength matrix
+
   Notes:
   \begin{itemize}
   \item The underlying matrix storage scheme is a hypre_ParCSR matrix.
@@ -41,6 +42,7 @@
   A\_i and A\_j arrays, and would need only define the S\_data array.
   There are several pros and cons to discuss.
   \end{itemize}
+
   Terminology:
   \begin{itemize}
   \item Ruge's terminology: A point is "strongly connected to" $j$, or
@@ -56,9 +58,12 @@
   \item $j$ "influences" $i$ with "strength" $s_ij$
   \end{itemize}
   \end{itemize}
+
   {\bf Input files:}
   _hypre_parcsr_ls.h
+
   @return Error code.
+
   @param A [IN]
   coefficient matrix
   @param strength_threshold [IN]
@@ -67,6 +72,7 @@
   parameter used to modify definition of strength for diagonal dominant matrices
   @param S_ptr [OUT]
   strength matrix
+
   @see */
 /*--------------------------------------------------------------------------*/
 
@@ -565,6 +571,7 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
    general form to build S for specific nodes of the 'global' matrix
    (for example, F points or A_FF part), given the entire matrix.
    These nodes have the SMRK tag.
+
    Could possibly be merged with BoomerAMGCreateS() to yield a
    more general function.
  */
@@ -1138,6 +1145,7 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix   *A,
 /*==========================================================================*/
 /**
   Generates strength matrix
+
   Notes:
   \begin{itemize}
   \item The underlying matrix storage scheme is a hypre_ParCSR matrix.
@@ -1159,6 +1167,7 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix   *A,
   A\_i and A\_j arrays, and would need only define the S\_data array.
   There are several pros and cons to discuss.
   \end{itemize}
+
   Terminology:
   \begin{itemize}
   \item Ruge's terminology: A point is "strongly connected to" $j$, or
@@ -1174,9 +1183,12 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix   *A,
   \item $j$ "influences" $i$ with "strength" $s_ij$
   \end{itemize}
   \end{itemize}
+
   {\bf Input files:}
   _hypre_parcsr_ls.h
+
   @return Error code.
+
   @param A [IN]
   coefficient matrix
   @param strength_threshold [IN]
@@ -1185,6 +1197,7 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix   *A,
   parameter used to modify definition of strength for diagonal dominant matrices
   @param S_ptr [OUT]
   strength matrix
+
   @see */
 /*--------------------------------------------------------------------------*/
 

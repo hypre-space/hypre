@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
+#include "protos.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGCreate
@@ -1231,7 +1232,7 @@ HYPRE_Int
 HYPRE_BoomerAMGSetILUType( HYPRE_Solver  solver,
                         HYPRE_Int	      ilu_type)
 {
-   return( hypre_BoomerAMGSetILUTyoe( (void *) solver, ilu_type ) );
+   return( hypre_BoomerAMGSetILUType( (void *) solver, ilu_type ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -1276,6 +1277,17 @@ HYPRE_BoomerAMGSetILUDroptol( HYPRE_Solver  solver,
                         HYPRE_Real	      ilu_droptol)
 {
    return( hypre_BoomerAMGSetILUDroptol( (void *) solver, ilu_droptol ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetILULocalReordering
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetILULocalReordering( HYPRE_Solver  solver,
+                        HYPRE_Int	      ilu_reordering_type)
+{
+   return( hypre_BoomerAMGSetILULocalReordering( (void *) solver, ilu_reordering_type ) );
 }
 
 /*--------------------------------------------------------------------------
