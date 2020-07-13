@@ -842,6 +842,8 @@ char hypre__levelname[32];
 #ifndef hypre_ERROR_HEADER
 #define hypre_ERROR_HEADER
 
+#include <assert.h>
+
 /*--------------------------------------------------------------------------
  * Global variable used in hypre error checking
  *--------------------------------------------------------------------------*/
@@ -860,9 +862,17 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 #ifdef NDEBUG
 #define hypre_assert(EX)
 #else
-#define hypre_assert(EX) if (!(EX)) {hypre_fprintf(stderr,"hypre_assert failed: %s\n", #EX); hypre_error(1);}
+#define hypre_assert(EX) \
+do\
+{\
+   if (!(EX))\
+   {\
+      hypre_fprintf(stderr, "[%s, %d] hypre_assert failed: %s\n", __FILE__, __LINE__, #EX);\
+      hypre_error(1);\
+      assert(EX);\
+   }\
+} while (0)
 #endif
-
 #endif
 
 /*--------------------------------------------------------------------------

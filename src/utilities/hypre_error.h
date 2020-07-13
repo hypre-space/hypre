@@ -33,7 +33,15 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 #ifdef NDEBUG
 #define hypre_assert(EX)
 #else
-#define hypre_assert(EX) if (!(EX)) {hypre_fprintf(stderr,"hypre_assert failed: %s\n", #EX); hypre_error(1);}
+#define hypre_assert(EX) \
+do\
+{\
+   if (!(EX))\
+   {\
+      hypre_fprintf(stderr, "[%s, %d] hypre_assert failed: %s\n", __FILE__, __LINE__, #EX);\
+      hypre_error(1);\
+      assert(EX);\
+   }\
+} while (0)
 #endif
-
 #endif
