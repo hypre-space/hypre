@@ -1100,7 +1100,7 @@ HYPRE_SStructMatrixPrint( const char          *filename,
 
    for (part = 0; part < nparts; part++)
    {
-      hypre_sprintf(new_filename, "%s.%02d", filename, part);
+      hypre_sprintf(new_filename, "%s.p%02d", filename, part);
       hypre_SStructPMatrixPrint(new_filename,
                                 hypre_SStructMatrixPMatrix(matrix, part),
                                 all);

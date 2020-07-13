@@ -446,7 +446,7 @@ HYPRE_SStructGridSetNeighborPart( HYPRE_SStructGrid  grid,
          hypre_IndexD(ilower_mapped, dd) = hypre_IndexD(nbor_iupper, dd);
       }
    }
-   for (d = ndim; d < ndim; d++)
+   for (d = ndim; d < HYPRE_MAXDIM; d++)
    {
       hypre_IndexD(coord, d) = d;
       hypre_IndexD(dir, d) = 1;

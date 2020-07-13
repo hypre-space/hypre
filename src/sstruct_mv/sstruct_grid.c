@@ -85,7 +85,7 @@ hypre_SStructPGridCreate( MPI_Comm             comm,
 {
    hypre_SStructPGrid  *pgrid;
    hypre_StructGrid    *sgrid;
-   HYPRE_Int            t;
+   HYPRE_Int            t, d;
 
    pgrid = hypre_TAlloc(hypre_SStructPGrid, 1);
 
@@ -110,11 +110,14 @@ hypre_SStructPGridCreate( MPI_Comm             comm,
    hypre_SStructPGridLocalSize(pgrid)  = 0;
    hypre_SStructPGridGlobalSize(pgrid) = 0;
 
-   /* GEC0902 ghost addition to the grid    */
-   hypre_SStructPGridGhlocalSize(pgrid)   = 0;
-
-
+   /* GEC0902 ghost addition to the grid */
+   hypre_SStructPGridGhlocalSize(pgrid) = 0;
    hypre_SetIndex(hypre_SStructPGridPeriodic(pgrid), 0);
+   hypre_SetIndex(hypre_SStructPGridCoordsStride(pgrid), 1);
+   for (d = 0; d < HYPRE_MAXDIM; d++)
+   {
+      hypre_SStructPGridCoordsOrigin(pgrid)[d] = 0.0;
+   }
 
    *pgrid_ptr = pgrid;
 
@@ -471,7 +474,7 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
    HYPRE_Int                  part, var, b, local_ct;
 
    hypre_Box                 *ghostbox, *box;
-   HYPRE_Int                 * num_ghost;
+   HYPRE_Int                 *num_ghost;
    HYPRE_Int                  ghoffsets[2];
    HYPRE_Int                  ghlocal_size  = hypre_SStructGridGhlocalSize(grid);
 
