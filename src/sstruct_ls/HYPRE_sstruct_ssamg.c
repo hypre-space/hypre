@@ -164,6 +164,16 @@ HYPRE_SStructSSAMGSetNumPostRelax( HYPRE_SStructSolver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructSSAMGSetNumCoarseRelax( HYPRE_SStructSolver solver,
+                                     HYPRE_Int           num_coarse_relax )
+{
+   return( hypre_SSAMGSetNumCoarseRelax( (void *) solver, num_coarse_relax ) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructSSAMGSetDxyz( HYPRE_SStructSolver  solver,
                            HYPRE_Int            nparts,
                            HYPRE_Real         **dxyz   )

@@ -35,6 +35,7 @@ typedef struct hypre_SSAMGData_struct
    HYPRE_Int               num_levels;       /* number of levels of the multigrid hierarchy */
    HYPRE_Int               num_pre_relax;    /* number of pre relaxation sweeps */
    HYPRE_Int               num_post_relax;   /* number of post relaxation sweeps */
+   HYPRE_Int               num_coarse_relax; /* number of coarse relaxation sweeps */
    HYPRE_Int               relax_type;       /* relaxation type flag */
    HYPRE_Real              usr_relax_weight; /* user relax weight */
    HYPRE_Real            **relax_weights;    /* (nlevels x nparts) array of relax weights */
@@ -89,6 +90,7 @@ typedef struct hypre_SSAMGData_struct
 #define hypre_SSAMGDataRelaxWeights(ssamg_data)   ((ssamg_data) -> relax_weights)
 #define hypre_SSAMGDataNumPreRelax(ssamg_data)    ((ssamg_data) -> num_pre_relax)
 #define hypre_SSAMGDataNumPosRelax(ssamg_data)    ((ssamg_data) -> num_post_relax)
+#define hypre_SSAMGDataNumCoarseRelax(ssamg_data) ((ssamg_data) -> num_coarse_relax)
 #define hypre_SSAMGDataTimeIndex(ssamg_data)      ((ssamg_data) -> time_index)
 #define hypre_SSAMGDataPrintLevel(ssamg_data)     ((ssamg_data) -> print_level)
 #define hypre_SSAMGDataLogging(ssamg_data)        ((ssamg_data) -> logging)

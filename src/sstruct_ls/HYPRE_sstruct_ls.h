@@ -374,6 +374,13 @@ HYPRE_SStructSSAMGSetNumPostRelax(HYPRE_SStructSolver solver,
                                   HYPRE_Int           num_post_relax);
 
 /**
+ * (Optional) Set number of relaxation sweeps in the coarse grid.
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGSetNumCoarseRelax(HYPRE_SStructSolver solver,
+                                    HYPRE_Int           num_coarse_relax);
+
+/**
  * (Optional) Skip relaxation on certain grids for isotropic problems.  This can
  * greatly improve efficiency by eliminating unnecessary relaxations when the
  * underlying problem is isotropic.

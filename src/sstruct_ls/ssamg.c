@@ -36,6 +36,7 @@ hypre_SSAMGCreate( hypre_MPI_Comm comm )
    (ssamg_data -> usr_relax_weight) = 0.0;
    (ssamg_data -> num_pre_relax)    = 1;
    (ssamg_data -> num_post_relax)   = 1;
+   (ssamg_data -> num_coarse_relax) = -1;
    (ssamg_data -> logging)          = 0;
    (ssamg_data -> print_level)      = 0;
 
@@ -281,6 +282,20 @@ hypre_SSAMGSetNumPosRelax( void       *ssamg_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SSAMGSetNumCoarseRelax( void       *ssamg_vdata,
+                              HYPRE_Int   num_coarse_relax)
+{
+   hypre_SSAMGData *ssamg_data = (hypre_SSAMGData *) ssamg_vdata;
+
+   hypre_SSAMGDataNumCoarseRelax(ssamg_data) = num_coarse_relax;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SSAMGSetPrintLevel( void       *ssamg_vdata,
                           HYPRE_Int   print_level)
 {
@@ -359,6 +374,7 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
    HYPRE_Int           relax_type    = hypre_SSAMGDataRelaxType(ssamg_data);
    HYPRE_Int           num_pre_relax = hypre_SSAMGDataNumPreRelax(ssamg_data);
    HYPRE_Int           num_pos_relax = hypre_SSAMGDataNumPosRelax(ssamg_data);
+   HYPRE_Int           num_crelax    = hypre_SSAMGDataNumCoarseRelax(ssamg_data);
    HYPRE_Int          *nparts        = hypre_SSAMGDataNParts(ssamg_data);
    HYPRE_Int         **cdir_l        = hypre_SSAMGDataCdir(ssamg_data);
    HYPRE_Real        **relax_weights = hypre_SSAMGDataRelaxWeights(ssamg_data);
@@ -453,6 +469,7 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       }
       hypre_printf("Number of pre-sweeps: %d\n", num_pre_relax);
       hypre_printf("Number of pos-sweeps: %d\n", num_pos_relax);
+      hypre_printf("Number of coarse-sweeps: %d\n", num_crelax);
       hypre_printf("Number of levels: %d\n", num_levels);
 
       hypre_printf("\n\n");
