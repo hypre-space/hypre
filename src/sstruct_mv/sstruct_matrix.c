@@ -743,7 +743,7 @@ hypre_SStructPMatrixPrint( const char           *filename,
          smatrix = hypre_SStructPMatrixSMatrix(pmatrix, vi, vj);
          if (smatrix != NULL)
          {
-            hypre_sprintf(new_filename, "%s.%02d.%02d", filename, vi, vj);
+            hypre_sprintf(new_filename, "%s.v%1d%1d", filename, vi, vj);
             hypre_StructMatrixPrint(new_filename, smatrix, all);
          }
       }
@@ -762,21 +762,21 @@ hypre_SStructPMatrixPrint( const char           *filename,
 HYPRE_Int
 hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
 {
-   HYPRE_Int               ndim        = hypre_SStructMatrixNDim(matrix);
-   HYPRE_IJMatrix          ijmatrix    = hypre_SStructMatrixIJMatrix(matrix);
-   HYPRE_Int               matrix_type = hypre_SStructMatrixObjectType(matrix);
-   hypre_SStructGraph     *graph       = hypre_SStructMatrixGraph(matrix);
-   hypre_SStructStencil ***stencils    = hypre_SStructGraphStencils(graph);
-   HYPRE_Int               nUventries  = hypre_SStructGraphNUVEntries(graph);
-   HYPRE_Int              *iUventries  = hypre_SStructGraphIUVEntries(graph);
-   hypre_SStructUVEntry  **Uventries   = hypre_SStructGraphUVEntries(graph);
+   HYPRE_Int               ndim          = hypre_SStructMatrixNDim(matrix);
+   HYPRE_IJMatrix          ijmatrix      = hypre_SStructMatrixIJMatrix(matrix);
+   HYPRE_Int               matrix_type   = hypre_SStructMatrixObjectType(matrix);
+   hypre_SStructGraph     *graph         = hypre_SStructMatrixGraph(matrix);
+   hypre_SStructStencil ***stencils      = hypre_SStructGraphStencils(graph);
+   HYPRE_Int               nUventries    = hypre_SStructGraphNUVEntries(graph);
+   HYPRE_Int              *iUventries    = hypre_SStructGraphIUVEntries(graph);
+   hypre_SStructUVEntry  **Uventries     = hypre_SStructGraphUVEntries(graph);
+   HYPRE_Int              *active_pids   = hypre_SStructGraphActivePartIDs(graph);
+   HYPRE_Int               active_nparts = hypre_SStructGraphActiveNParts(graph);
 
-   hypre_SStructGrid      *ran_grid    = hypre_SStructGraphRanGrid(graph);
-   hypre_SStructGrid      *dom_grid    = hypre_SStructGraphDomGrid(graph);
-   HYPRE_Int              *ran_pids    = hypre_SStructGridPartIDs(ran_grid);
-   HYPRE_Int               ran_nparts  = hypre_SStructGridNParts(ran_grid);
-   HYPRE_Int               dom_nparts  = hypre_SStructGridNParts(dom_grid);
-   HYPRE_Int             **nvneighbors = hypre_SStructGridNVNeighbors(ran_grid);
+   hypre_SStructGrid      *ran_grid      = hypre_SStructGraphRanGrid(graph);
+   HYPRE_Int              *ran_pids      = hypre_SStructGridPartIDs(ran_grid);
+   HYPRE_Int               ran_nparts    = hypre_SStructGridNParts(ran_grid);
+   HYPRE_Int             **nvneighbors   = hypre_SStructGridNVNeighbors(ran_grid);
 
    hypre_SStructPGrid     *pgrid;
    hypre_StructGrid       *sgrid;
@@ -792,7 +792,6 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    HYPRE_Int               nrows, rowstart, nnzs;
    HYPRE_Int               part, ran_part, var, entry, b, m, mi;
    HYPRE_Int              *row_sizes;
-   HYPRE_Int              *active_pids;
    HYPRE_Int               max_size;
 
    HYPRE_IJMatrixSetObjectType(ijmatrix, HYPRE_PARCSR);
@@ -807,16 +806,6 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
       nrows = hypre_SStructGridLocalSize(ran_grid);
    }
 
-   /* Set pointer to active part identifiers */
-   if (ran_nparts > dom_nparts)
-   {
-      active_pids = hypre_SStructGridPartIDs(dom_grid);
-   }
-   else
-   {
-      active_pids = hypre_SStructGridPartIDs(ran_grid);
-   }
-
    /* set row sizes */
    max_size  = m = 0;
    ghost_box = hypre_BoxCreate(ndim);
@@ -824,7 +813,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    hypre_SetIndex(stride, 1);
    for (ran_part = 0; ran_part < ran_nparts; ran_part++)
    {
-      part  = hypre_BinarySearch(active_pids, ran_pids[ran_part], ran_nparts);
+      part  = hypre_BinarySearch(active_pids, ran_pids[ran_part], active_nparts);
       pgrid = hypre_SStructGridPGrid(ran_grid, ran_part);
       nvars = hypre_SStructPGridNVars(pgrid);
 

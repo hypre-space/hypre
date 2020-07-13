@@ -565,7 +565,7 @@ hypre_SStructPVectorPrint( const char           *filename,
 
    for (var = 0; var < nvars; var++)
    {
-      hypre_sprintf(new_filename, "%s.%02d", filename, var);
+      hypre_sprintf(new_filename, "%s.v%02d", filename, var);
       hypre_StructVectorPrint(new_filename,
                               hypre_SStructPVectorSVector(pvector, var),
                               all);
