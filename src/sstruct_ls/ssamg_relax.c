@@ -323,20 +323,12 @@ hypre_SSAMGRelaxSetWeights( void       *ssamg_relax_vdata,
                             HYPRE_Real *relax_weights     )
 {
    hypre_SSAMGRelaxData  *ssamg_relax_data = (hypre_SSAMGRelaxData *) ssamg_relax_vdata;
-   HYPRE_Int              p, part, nparts;
+   HYPRE_Int              part, nparts;
 
    nparts = (ssamg_relax_data -> nparts);
    for (part = 0; part < nparts; part++)
    {
-      p = hypre_BinarySearch(pids, part, nparts);
-      if (p > -1)
-      {
-         (ssamg_relax_data -> relax_weight[part]) = relax_weights[p];
-      }
-      else
-      {
-         (ssamg_relax_data -> relax_weight[part]) = 0.0;
-      }
+      (ssamg_relax_data -> relax_weight[part]) = relax_weights[pids[part]];
    }
 
    return hypre_error_flag;
