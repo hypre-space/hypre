@@ -152,12 +152,12 @@ typedef struct
    HYPRE_Real           eu_sparse_A;
    char                *euclidfile;
    HYPRE_Int            ilu_lfil;
-   HYPRE_Int            ilu_type;
+   HYPRE_Int		      ilu_type;
    HYPRE_Int		      ilu_max_row_nnz;
    HYPRE_Int		      ilu_max_iter;
-   HYPRE_Int            ilu_reordering_type;
    HYPRE_Real		      ilu_droptol;
-
+   HYPRE_Int            ilu_reordering_type;
+   
    HYPRE_Real          *max_eig_est;
    HYPRE_Real          *min_eig_est;
    HYPRE_Int            cheby_eig_est;
@@ -523,7 +523,6 @@ typedef struct
 #endif
 
 #endif
-
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -900,6 +899,12 @@ HYPRE_Int HYPRE_BoomerAMGSetEuclidFile ( HYPRE_Solver solver , char *euclidfile 
 HYPRE_Int HYPRE_BoomerAMGSetEuLevel ( HYPRE_Solver solver , HYPRE_Int eu_level );
 HYPRE_Int HYPRE_BoomerAMGSetEuSparseA ( HYPRE_Solver solver , HYPRE_Real eu_sparse_A );
 HYPRE_Int HYPRE_BoomerAMGSetEuBJ ( HYPRE_Solver solver , HYPRE_Int eu_bj );
+HYPRE_Int HYPRE_BoomerAMGSetILUType( HYPRE_Solver solver, HYPRE_Int ilu_type);
+HYPRE_Int HYPRE_BoomerAMGSetILULevel( HYPRE_Solver solver, HYPRE_Int ilu_lfil);
+HYPRE_Int HYPRE_BoomerAMGSetILUMaxRowNnz( HYPRE_Solver  solver, HYPRE_Int ilu_max_row_nnz);
+HYPRE_Int HYPRE_BoomerAMGSetILUMaxIter( HYPRE_Solver solver, HYPRE_Int ilu_max_iter);
+HYPRE_Int HYPRE_BoomerAMGSetILUDroptol( HYPRE_Solver solver, HYPRE_Real ilu_droptol);
+HYPRE_Int HYPRE_BoomerAMGSetILULocalReordering( HYPRE_Solver solver, HYPRE_Int ilu_reordering_type);
 HYPRE_Int HYPRE_BoomerAMGSetNumFunctions ( HYPRE_Solver solver , HYPRE_Int num_functions );
 HYPRE_Int HYPRE_BoomerAMGGetNumFunctions ( HYPRE_Solver solver , HYPRE_Int *num_functions );
 HYPRE_Int HYPRE_BoomerAMGSetNodal ( HYPRE_Solver solver , HYPRE_Int nodal );
@@ -1416,6 +1421,12 @@ HYPRE_Int hypre_BoomerAMGSetEuclidFile ( void *data , char *euclidfile );
 HYPRE_Int hypre_BoomerAMGSetEuLevel ( void *data , HYPRE_Int eu_level );
 HYPRE_Int hypre_BoomerAMGSetEuSparseA ( void *data , HYPRE_Real eu_sparse_A );
 HYPRE_Int hypre_BoomerAMGSetEuBJ ( void *data , HYPRE_Int eu_bj );
+HYPRE_Int hypre_BoomerAMGSetILUType( void *data, HYPRE_Int ilu_type);
+HYPRE_Int hypre_BoomerAMGSetILULevel( void *data, HYPRE_Int ilu_lfil);
+HYPRE_Int hypre_BoomerAMGSetILUDroptol( void *data, HYPRE_Real ilu_droptol);
+HYPRE_Int hypre_BoomerAMGSetILUMaxIter( void *data, HYPRE_Int ilu_max_iter);
+HYPRE_Int hypre_BoomerAMGSetILUMaxRowNnz( void *data, HYPRE_Int ilu_max_row_nnz);
+HYPRE_Int hypre_BoomerAMGSetILULocalReordering( void *data, HYPRE_Int ilu_reordering_type);
 HYPRE_Int hypre_BoomerAMGSetChebyOrder ( void *data , HYPRE_Int order );
 HYPRE_Int hypre_BoomerAMGSetChebyFraction ( void *data , HYPRE_Real ratio );
 HYPRE_Int hypre_BoomerAMGSetChebyEigEst ( void *data , HYPRE_Int eig_est );
@@ -1909,9 +1920,10 @@ HYPRE_Int hypre_ILUGetLocalPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_I
 HYPRE_Int hypre_ILUWriteSolverParams(void *ilu_vdata);
 HYPRE_Int hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_Int **E_i, HYPRE_Int **E_j, HYPRE_Real **E_data);
 HYPRE_Int hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYPRE_Int nLU, HYPRE_Int nI, hypre_ParCSRMatrix **Lptr, HYPRE_Real** Dptr, hypre_ParCSRMatrix **Uptr, hypre_ParCSRMatrix **Sptr, HYPRE_Int **u_end);
-HYPRE_Int hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int *qperm, HYPRE_Int nLU, HYPRE_Int nI, hypre_ParCSRMatrix **Lptr, HYPRE_Real** Dptr, hypre_ParCSRMatrix **Uptr, hypre_ParCSRMatrix **Sptr, HYPRE_Int **u_end);
+HYPRE_Int hypre_ILUSetupMILU0(hypre_ParCSRMatrix *A, HYPRE_Int *permp, HYPRE_Int *qpermp, HYPRE_Int nLU, HYPRE_Int nI, hypre_ParCSRMatrix **Lptr, HYPRE_Real** Dptr, hypre_ParCSRMatrix **Uptr, hypre_ParCSRMatrix **Sptr, HYPRE_Int **u_end, HYPRE_Int modified);
+HYPRE_Int hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *permp, HYPRE_Int *qpermp, HYPRE_Int nLU, HYPRE_Int nI, hypre_ParCSRMatrix **Lptr, HYPRE_Real** Dptr, hypre_ParCSRMatrix **Uptr, hypre_ParCSRMatrix **Sptr, HYPRE_Int **u_end);
 HYPRE_Int hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int *rperm, HYPRE_Int *iw, HYPRE_Int nLU, HYPRE_Int *L_diag_i, HYPRE_Int *U_diag_i, HYPRE_Int *S_diag_i, HYPRE_Int **L_diag_j, HYPRE_Int **U_diag_j, HYPRE_Int **S_diag_j, HYPRE_Int **u_end);
-HYPRE_Int hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol, HYPRE_Int *perm, HYPRE_Int *qperm, HYPRE_Int nLU, HYPRE_Int nI, hypre_ParCSRMatrix **Lptr, HYPRE_Real** Dptr, hypre_ParCSRMatrix **Uptr, hypre_ParCSRMatrix **Sptr, HYPRE_Int **u_end);
+HYPRE_Int hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol, HYPRE_Int *permp, HYPRE_Int *qpermp, HYPRE_Int nLU, HYPRE_Int nI, hypre_ParCSRMatrix **Lptr, HYPRE_Real** Dptr, hypre_ParCSRMatrix **Uptr, hypre_ParCSRMatrix **Sptr, HYPRE_Int **u_end);
 HYPRE_Int hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU, hypre_ParCSRMatrix **Lptr, HYPRE_Real** Dptr, hypre_ParCSRMatrix **Uptr);
 HYPRE_Int hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Int *E_i, HYPRE_Int *E_j, HYPRE_Int ext, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int *rperm, HYPRE_Int *iw, HYPRE_Int nLU, HYPRE_Int *L_diag_i, HYPRE_Int *U_diag_i, HYPRE_Int **L_diag_j, HYPRE_Int **U_diag_j);
 HYPRE_Int hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int nLU, hypre_ParCSRMatrix **Lptr, HYPRE_Real** Dptr, hypre_ParCSRMatrix **Uptr);
@@ -1922,6 +1934,14 @@ HYPRE_Int hypre_ILUSolveSchurNSH(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypr
 HYPRE_Int hypre_ILUSolveLURAS(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int *perm, hypre_ParCSRMatrix *L, HYPRE_Real* D, hypre_ParCSRMatrix *U, hypre_ParVector *ftemp, hypre_ParVector *utemp, HYPRE_Real *fext, HYPRE_Real *uext);
 HYPRE_Int hypre_ILUSetSchurNSHDropThreshold( void *ilu_vdata, HYPRE_Real threshold);
 HYPRE_Int hypre_ILUSetSchurNSHDropThresholdArray( void *ilu_vdata, HYPRE_Real *threshold);
+HYPRE_Int hypre_ILUSetupRAPILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n, HYPRE_Int nLU, hypre_ParCSRMatrix **Lptr, HYPRE_Real **Dptr, hypre_ParCSRMatrix **Uptr, hypre_ParCSRMatrix **mLptr, HYPRE_Real **mDptr, hypre_ParCSRMatrix **mUptr, HYPRE_Int **u_end);
+HYPRE_Int hypre_ILUSolveRAPGMRESHOST(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int *perm, HYPRE_Int nLU, hypre_ParCSRMatrix *L, HYPRE_Real *D, hypre_ParCSRMatrix *U, hypre_ParCSRMatrix *mL, HYPRE_Real *mD, hypre_ParCSRMatrix *mU, hypre_ParVector *ftemp, hypre_ParVector *utemp,hypre_ParVector *xtemp, hypre_ParVector *ytemp, HYPRE_Solver schur_solver, HYPRE_Solver schur_precond, hypre_ParVector *rhs, hypre_ParVector *x, HYPRE_Int *u_end);
+HYPRE_Int hypre_ParILURAPSchurGMRESSolveH( void *ilu_vdata, void *ilu_vdata2, hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int hypre_ParILURAPSchurGMRESDummySetupH(void *a, void *b, void *c, void *d);
+HYPRE_Int hypre_ParILURAPSchurGMRESCommInfoH( void *ilu_vdata, HYPRE_Int *my_id, HYPRE_Int *num_procs);
+void *hypre_ParILURAPSchurGMRESMatvecCreateH(void *ilu_vdata, void *x);
+HYPRE_Int hypre_ParILURAPSchurGMRESMatvecH(void *matvec_data, HYPRE_Complex alpha, void *ilu_vdata, void *x, HYPRE_Complex beta, void *y);
+HYPRE_Int hypre_ParILURAPSchurGMRESMatvecDestroyH(void *matvec_data );
 HYPRE_Int hypre_ILULocalRCM( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end, HYPRE_Int **permp, HYPRE_Int **qpermp, HYPRE_Int sym);
 HYPRE_Int hypre_ILULocalRCMNumbering(hypre_CSRMatrix *A, HYPRE_Int root, HYPRE_Int *marker, HYPRE_Int *perm, HYPRE_Int *current_nump);
 HYPRE_Int hypre_ILULocalRCMFindPPNode( hypre_CSRMatrix *A, HYPRE_Int *rootp, HYPRE_Int *marker);

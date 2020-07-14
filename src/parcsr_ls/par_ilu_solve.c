@@ -14,7 +14,6 @@
  *
  *****************************************************************************/
 #include "_hypre_parcsr_ls.h"
-#include "protos.h"
 #include "par_ilu.h"
 
 #include "_hypre_utilities.hpp"
