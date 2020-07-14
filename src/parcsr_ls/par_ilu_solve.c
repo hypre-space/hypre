@@ -250,36 +250,22 @@ hypre_ILUSolve( void               *ilu_vdata,
       switch(ilu_type){
          case 0: case 1:
 #ifdef HYPRE_USING_CUDA
-            if(ilu_type == 0 && hypre_ParILUDataLfil(ilu_data) == 0)
-            {
-               /* Apply GPU-accelerated LU solve */
-               hypre_ILUSolveCusparseLU(matA, matL_des, matU_des, matBL_info, matBU_info, matBLU_d, ilu_solve_policy, 
-                                       ilu_solve_buffer, F_array, U_array, perm, n, Utemp, Ftemp);//BJ-cusparse
-            }
-            else
-            {
-#endif
-               hypre_ILUSolveLU(matA, F_array, U_array, perm, n, matL, matD, matU, Utemp, Ftemp); //BJ
-#ifdef HYPRE_USING_CUDA
-            }
+            /* Apply GPU-accelerated LU solve */
+            hypre_ILUSolveCusparseLU(matA, matL_des, matU_des, matBL_info, matBU_info, matBLU_d, ilu_solve_policy, 
+                                    ilu_solve_buffer, F_array, U_array, perm, n, Utemp, Ftemp);//BJ-cusparse
+#else
+            hypre_ILUSolveLU(matA, F_array, U_array, perm, n, matL, matD, matU, Utemp, Ftemp); //BJ
 #endif
             break;
          case 10: case 11:
 #ifdef HYPRE_USING_CUDA
-            if(ilu_type == 10 && hypre_ParILUDataLfil(ilu_data) == 0)
-            {
-               /* Apply GPU-accelerated LU solve */
-               hypre_ILUSolveCusparseSchurGMRES(matA, F_array, U_array, perm, nLU, matS, Utemp, Ftemp, schur_solver, schur_precond, rhs, x, u_end,
-                                             matL_des, matU_des, matBL_info, matBU_info, matSL_info, matSU_info,
-                                             matBLU_d, matE_d, matF_d, ilu_solve_policy, ilu_solve_buffer);//GMRES-cusparse
-            }
-            else
-            {
-#endif
-               hypre_ILUSolveSchurGMRES(matA, F_array, U_array, perm, perm, nLU, matL, matD, matU, matS, 
-                              Utemp, Ftemp, schur_solver, schur_precond, rhs, x, u_end); //GMRES
-#ifdef HYPRE_USING_CUDA
-            }
+            /* Apply GPU-accelerated LU solve */
+            hypre_ILUSolveCusparseSchurGMRES(matA, F_array, U_array, perm, nLU, matS, Utemp, Ftemp, schur_solver, schur_precond, rhs, x, u_end,
+                                          matL_des, matU_des, matBL_info, matBU_info, matSL_info, matSU_info,
+                                          matBLU_d, matE_d, matF_d, ilu_solve_policy, ilu_solve_buffer);//GMRES-cusparse
+#else
+            hypre_ILUSolveSchurGMRES(matA, F_array, U_array, perm, perm, nLU, matL, matD, matU, matS, 
+                           Utemp, Ftemp, schur_solver, schur_precond, rhs, x, u_end); //GMRES
 #endif
             break;
          case 20: case 21:

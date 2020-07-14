@@ -322,7 +322,7 @@ hypre_ILUDestroy( void *data )
       switch(ilu_data -> ilu_type){
       case 10: case 11: case 40: case 41: //case 50:
 #ifdef HYPRE_USING_CUDA
-         if(ilu_data -> ilu_type != 10 || ilu_data -> lfil != 0)
+         if(ilu_data -> ilu_type != 0 && ilu_data -> ilu_type != 1 && ilu_data -> ilu_type != 10 && ilu_data -> ilu_type != 11)
          {
 #endif
             HYPRE_ILUDestroy(ilu_data -> schur_precond); //ILU as precond for Schur
