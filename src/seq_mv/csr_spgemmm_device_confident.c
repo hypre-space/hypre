@@ -62,7 +62,7 @@ hash_insert_numer(HYPRE_Int               HashSize,      /* capacity of the hash
    return -1;
 }
 
-template <HYPRE_Int FAILED_SYMBL, char HashType>
+template <HYPRE_Int FAILED_SYMBL, HYPRE_Int BDIMY2_BITS, char HashType>
 static __device__ __forceinline__
 HYPRE_Int
 csr_spmmm_compute_row_numer(HYPRE_Int  rowi,
@@ -75,26 +75,41 @@ csr_spmmm_compute_row_numer(HYPRE_Int  rowi,
 {
    /* load the start and end position of row i of A */
    HYPRE_Int i;
-   if (lane_id < 2)
-   {
-      i = read_only_load(ia + rowi + lane_id);
-   }
-   const HYPRE_Int istart = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 0);
-   const HYPRE_Int iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 1);
+   // if (lane_id < 2)
+   // {
+   //    i = read_only_load(ia + rowi + lane_id);
+   // }
+   //const HYPRE_Int istart = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 0);
+   //const HYPRE_Int iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 1);
+   const HYPRE_Int istart = read_only_load(ia + rowi);
+   const HYPRE_Int iend = read_only_load(ia + rowi+1);
+
+   const HYPRE_Int blockDimy2 = 1 << BDIMY2_BITS;
+   const HYPRE_Int blockDimy1 = blockDim.y >> BDIMY2_BITS;
+   const HYPRE_Int threadIdxy2 = (threadIdx.y  & (blockDimy2 - 1));
+   const HYPRE_Int threadIdxy1 = threadIdx.y >> BDIMY2_BITS;
+   // printf("BDim: (%i, (%i, %i), %i), id: (%i, (%i, %i), %i)\n",
+   //       blockDim.x, blockDimy1, blockDimy2, blockDim.z,
+   //       threadIdx.x, threadIdxy1, threadIdxy2, threadIdx.z);
 
    HYPRE_Int num_new_insert = 0;
 
    /* load column idx and values of row i of A */
-   for (i = istart; i < iend; i += blockDim.y)
+   for (i = istart; i < iend; i += blockDimy2)
    {
+      if(threadIdxy2 + i < iend) {
+
       HYPRE_Int     colA = -1;
       HYPRE_Complex valA = 0.0;
 
-      if (threadIdx.x == 0 && i + threadIdx.y < iend)
-      {
-         colA = read_only_load(ja + i + threadIdx.y);
-         valA = read_only_load(aa + i + threadIdx.y);
-      }
+      colA = read_only_load(ja+i + threadIdxy2);
+      valA = read_only_load(aa+i + threadIdxy2);
+ 
+      // if (threadIdx.x == 0 && i + threadIdx.y < iend)
+      // {
+      //    colA = read_only_load(ja + i + threadIdx.y);
+      //    valA = read_only_load(aa + i + threadIdx.y);
+      // }
 
 #if 0
       //const HYPRE_Int ymask = get_mask<4>(lane_id);
@@ -104,49 +119,59 @@ csr_spmmm_compute_row_numer(HYPRE_Int  rowi,
 #endif
 
       /* threads in the same ygroup work on one row together */
-      const HYPRE_Int     rowB = __shfl_sync(HYPRE_WARP_FULL_MASK, colA, 0, blockDim.x);
-      const HYPRE_Complex mult = __shfl_sync(HYPRE_WARP_FULL_MASK, valA, 0, blockDim.x);
+      // const HYPRE_Int     rowB = __shfl_sync(HYPRE_WARP_FULL_MASK, colA, 0, blockDim.x);
+      // const HYPRE_Complex mult = __shfl_sync(HYPRE_WARP_FULL_MASK, valA, 0, blockDim.x);
       /* open this row of B, collectively */
-      HYPRE_Int tmp = -1;
-      if (rowB != -1 && threadIdx.x < 2)
-      {
-         tmp = read_only_load(ib+rowB+threadIdx.x);
-      }
-      const HYPRE_Int rowB_start = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 0, blockDim.x);
-      const HYPRE_Int rowB_end   = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 1, blockDim.x);
+      // HYPRE_Int tmp = -1;
+      // if (rowB != -1 && threadIdx.x < 2)
+      // {
+      //    tmp = read_only_load(ib+rowB+threadIdx.x);
+      // }
+      // const HYPRE_Int rowB_start = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 0, blockDim.x);
+      // const HYPRE_Int rowB_end   = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 1, blockDim.x);
+      const HYPRE_Int rowB       = colA;
+      const HYPRE_Complex mult       = valA;
 
-      for (HYPRE_Int k = rowB_start; k < rowB_end; k += blockDim.x)
+      const HYPRE_Int rowB_start = read_only_load(ib+rowB);
+      const HYPRE_Int rowB_end = read_only_load(ib+rowB+1);
+
+      for (HYPRE_Int k = rowB_start; k < rowB_end; k += blockDimy1)
       {
-         if (k + threadIdx.x < rowB_end)
+         if (k + threadIdxy1 < rowB_end)
          {
 
-            const HYPRE_Int colB = read_only_load(jb + k + threadIdx.x);
-            const HYPRE_Complex valB = read_only_load(ab + k + threadIdx.x);
+            const HYPRE_Int colB = read_only_load(jb + k + threadIdxy1);
+            const HYPRE_Complex valB = read_only_load(ab + k + threadIdxy1);
 
             const HYPRE_Int rowC = colB;
 
             const HYPRE_Int rowC_start = read_only_load(ic+rowC);
             const HYPRE_Int rowC_end   = read_only_load(ic+rowC+1);
 
-            for (HYPRE_Int l = rowC_start; l < rowC_end; l++) 
+            for (HYPRE_Int l = rowC_start; l < rowC_end; l+= blockDim.x) 
             {
-               const HYPRE_Complex valC = read_only_load(ac + l);
-               const HYPRE_Int     l_idx = read_only_load(jc + l);
-               const HYPRE_Complex l_val = valC * mult * valB;
-
-               /* first try to insert into shared memory hash table */
-               HYPRE_Int pos = hash_insert_numer<HashType, FAILED_SYMBL>
-                  (s_HashSize, s_HashKeys, s_HashVals, l_idx, l_val, num_new_insert);
-               if (-1 == pos)
+               if (l + threadIdx.x < rowC_end)
                {
-                  pos = hash_insert_numer<HashType, FAILED_SYMBL>
+                  //printf("(%i, %i, %i)\n", rowi, rowB, rowC);
+                  const HYPRE_Complex valC = read_only_load(ac + l + threadIdx.x);
+                  const HYPRE_Int     l_idx = read_only_load(jc + l + threadIdx.x);
+                  const HYPRE_Complex l_val = valC * mult * valB;
+
+                  /* first try to insert into shared memory hash table */
+                  HYPRE_Int pos = hash_insert_numer<HashType, FAILED_SYMBL>
+                     (s_HashSize, s_HashKeys, s_HashVals, l_idx, l_val, num_new_insert);
+                  if (-1 == pos)
+                  {
+                     pos = hash_insert_numer<HashType, FAILED_SYMBL>
                         (g_HashSize, g_HashKeys, g_HashVals, l_idx, l_val, num_new_insert);
-               }
+                  }
 #ifdef HYPRE_DEBUG
-            assert(pos != -1);
+                  assert(pos != -1);
 #endif
+               }
             }
          }
+      }
       }
    }
 
@@ -205,7 +230,7 @@ copy_from_hash_into_C_row(         HYPRE_Int      lane_id,
    return j;
 }
 
-template <HYPRE_Int NUM_WARPS_PER_BLOCK, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int FAILED_SYMBL, char HashType>
+template <HYPRE_Int NUM_WARPS_PER_BLOCK, HYPRE_Int BDIMY2_BITS, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int FAILED_SYMBL, char HashType>
 __global__
 void
 csr_spmmm_numeric(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
@@ -268,7 +293,7 @@ csr_spmmm_numeric(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
       __syncwarp();
 
       /* work with two hash tables. jsum is the (exact) nnz for row i */
-      jsum = csr_spmmm_compute_row_numer<FAILED_SYMBL, HashType>(i, lane_id, ia, ja, aa, ib, jb, ab, ic, jc, ac,
+      jsum = csr_spmmm_compute_row_numer<FAILED_SYMBL, BDIMY2_BITS, HashType>(i, lane_id, ia, ja, aa, ib, jb, ab, ic, jc, ac,
                                                                 SHMEM_HASH_SIZE, warp_s_HashKeys,
                                                                 warp_s_HashVals,
                                                                 ghash_size, jg + istart_g, ag + istart_g);
@@ -378,10 +403,13 @@ hypreDevice_CSRSpGemmmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k, 
    hypre_profile_times[HYPRE_TIMER_ID_SPMM_NUMERIC] -= hypre_MPI_Wtime();
 #endif
 
-   const HYPRE_Int num_warps_per_block =  20;
-   const HYPRE_Int shmem_hash_size     = 128;
-   const HYPRE_Int BDIMX               =   2;
-   const HYPRE_Int BDIMY               =  16;
+   const HYPRE_Int num_warps_per_block =               20;
+   const HYPRE_Int shmem_hash_size     =              128;
+   const HYPRE_Int BDIMX               =                2;
+   const HYPRE_Int BDIMY1              =                4;
+   const HYPRE_Int BDIMY2_BITS         =                2;
+   const HYPRE_Int BDIMY2              = 1 << BDIMY2_BITS;
+   const HYPRE_Int BDIMY               =  BDIMY1 * BDIMY2;
 
    /* CUDA kernel configurations */
    dim3 bDim(BDIMX, BDIMY, num_warps_per_block);
@@ -429,19 +457,19 @@ hypreDevice_CSRSpGemmmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k, 
    {
       if (hash_type == 'L')
       {
-         HYPRE_CUDA_LAUNCH( (csr_spmmm_numeric<num_warps_per_block, shmem_hash_size, 0, 'L'>), gDim, bDim,
+         HYPRE_CUDA_LAUNCH( (csr_spmmm_numeric<num_warps_per_block, BDIMY2_BITS, shmem_hash_size, 0, 'L'>), gDim, bDim,
                             m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_id, d_jd, d_d, d_id_new + 1,
                             d_ghash_i, d_ghash_j, d_ghash_a );
       }
       else if (hash_type == 'Q')
       {
-         HYPRE_CUDA_LAUNCH( (csr_spmmm_numeric<num_warps_per_block, shmem_hash_size, 0, 'Q'>), gDim, bDim,
+         HYPRE_CUDA_LAUNCH( (csr_spmmm_numeric<num_warps_per_block, BDIMY2_BITS, shmem_hash_size, 0, 'Q'>), gDim, bDim,
                             m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_id, d_jd, d_d, d_id_new + 1,
                             d_ghash_i, d_ghash_j, d_ghash_a );
       }
       else if (hash_type == 'D')
       {
-         HYPRE_CUDA_LAUNCH( (csr_spmmm_numeric<num_warps_per_block, shmem_hash_size, 0, 'D'>), gDim, bDim,
+         HYPRE_CUDA_LAUNCH( (csr_spmmm_numeric<num_warps_per_block, BDIMY2_BITS, shmem_hash_size, 0, 'D'>), gDim, bDim,
                             m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_id, d_jd, d_d, d_id_new + 1,
                             d_ghash_i, d_ghash_j, d_ghash_a );
       }
@@ -450,19 +478,19 @@ hypreDevice_CSRSpGemmmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k, 
    {
       if (hash_type == 'L')
       {
-         HYPRE_CUDA_LAUNCH( (csr_spmmm_numeric<num_warps_per_block, shmem_hash_size, 1, 'L'>), gDim, bDim,
+         HYPRE_CUDA_LAUNCH( (csr_spmmm_numeric<num_warps_per_block, BDIMY2_BITS, shmem_hash_size, 1, 'L'>), gDim, bDim,
                             m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_id, d_jd, d_d, d_id_new + 1,
                             d_ghash_i, d_ghash_j, d_ghash_a );
       }
       else if (hash_type == 'Q')
       {
-         HYPRE_CUDA_LAUNCH( (csr_spmmm_numeric<num_warps_per_block, shmem_hash_size, 1, 'Q'>), gDim, bDim,
+         HYPRE_CUDA_LAUNCH( (csr_spmmm_numeric<num_warps_per_block, BDIMY2_BITS, shmem_hash_size, 1, 'Q'>), gDim, bDim,
                             m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_id, d_jd, d_d, d_id_new + 1,
                             d_ghash_i, d_ghash_j, d_ghash_a );
       }
       else if (hash_type == 'D')
       {
-         HYPRE_CUDA_LAUNCH( (csr_spmmm_numeric<num_warps_per_block, shmem_hash_size, 1, 'D'>), gDim, bDim,
+         HYPRE_CUDA_LAUNCH( (csr_spmmm_numeric<num_warps_per_block, BDIMY2_BITS, shmem_hash_size, 1, 'D'>), gDim, bDim,
                             m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_id, d_jd, d_d, d_id_new + 1,
                             d_ghash_i, d_ghash_j, d_ghash_a );
       }
