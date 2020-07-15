@@ -105,6 +105,7 @@ cusparseSpMatDescr_t hypre_CSRMatToCuda(const hypre_CSRMatrix *A, HYPRE_Int offs
    const cusparseIndexBase_t index_base = CUSPARSE_INDEX_BASE_ZERO;
 
    cusparseSpMatDescr_t matA;
+   assert((A->num_rows-offset != 0) && (A->num_cols != 0) && (A->num_nonzeros != 0));
    HYPRE_CUSPARSE_CALL(cusparseCreateCsr(&matA, A->num_rows-offset, A->num_cols, A->num_nonzeros, A->i+offset, A->j, A->data, index_type, index_type, index_base, data_type));
    return matA;
 }

@@ -75,7 +75,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
 #error CUDART_VERSION Undefined!
 #elif (CUDART_VERSION >= 10010)
    //Cusparse does not seem to handle the case when a vector has size 0
-   if((A->num_cols == 0) || (A->num_rows - offset == 0))
+   if((A->num_cols == 0) || (A->num_rows - offset == 0 || (A->num_nonzeros == 0)))
    {
    }
    else
