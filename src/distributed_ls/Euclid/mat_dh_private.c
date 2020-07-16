@@ -25,7 +25,7 @@ static HYPRE_Int isTriangular(HYPRE_Int m, HYPRE_Int *rp, HYPRE_Int *cval);
 /* Instantiates Aout; allocates storage for rp, cval, and aval arrays;
    uses rowLengths[] and rowToBlock[] data to fill in rp[].
 */
-static void mat_par_read_allocate_private(Mat_dh *Aout, HYPRE_Int n, 
+static void mat_par_read_allocate_private(Mat_dh *Aout, HYPRE_Int n,
                                     HYPRE_Int *rowLengths, HYPRE_Int *rowToBlock);
 
 /* Currently, divides (partitions)matrix by contiguous sections of rows.
@@ -34,14 +34,14 @@ static void mat_par_read_allocate_private(Mat_dh *Aout, HYPRE_Int n,
 void mat_partition_private(Mat_dh A, HYPRE_Int blocks, HYPRE_Int *o2n_row, HYPRE_Int *rowToBlock);
 
 
-static void convert_triples_to_scr_private(HYPRE_Int m, HYPRE_Int nz, 
-                                           HYPRE_Int *I, HYPRE_Int *J, HYPRE_Real *A, 
+static void convert_triples_to_scr_private(HYPRE_Int m, HYPRE_Int nz,
+                                           HYPRE_Int *I, HYPRE_Int *J, HYPRE_Real *A,
                                            HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval);
 
 #if 0
 #undef __FUNC__
 #define __FUNC__ "mat_dh_print_graph_private"
-void mat_dh_print_graph_private(HYPRE_Int m, HYPRE_Int beg_row, HYPRE_Int *rp, HYPRE_Int *cval, 
+void mat_dh_print_graph_private(HYPRE_Int m, HYPRE_Int beg_row, HYPRE_Int *rp, HYPRE_Int *cval,
                     HYPRE_Real *aval, HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, FILE* fp)
 {
   START_FUNC_DH
@@ -55,7 +55,7 @@ void mat_dh_print_graph_private(HYPRE_Int m, HYPRE_Int beg_row, HYPRE_Int *rp, H
     create_nat_ordering_private(m, &n2o); CHECK_V_ERROR;
     create_nat_ordering_private(m, &o2n); CHECK_V_ERROR;
   }
- 
+
   if (hash == NULL) {
     private_hash = true;
     Hash_i_dhCreate(&hash, -1); CHECK_V_ERROR;
@@ -70,9 +70,9 @@ void mat_dh_print_graph_private(HYPRE_Int m, HYPRE_Int beg_row, HYPRE_Int *rp, H
 
         /* nonlocal column: get permutation from hash table */
         tmp = Hash_i_dhLookup(hash, col); CHECK_V_ERROR;
-        if (tmp == -1) { 
+        if (tmp == -1) {
           hypre_sprintf(msgBuf_dh, "beg_row= %i  m= %i; nonlocal column= %i not in hash table",
-                                beg_row, m, col); 
+                                beg_row, m, col);
           SET_V_ERROR(msgBuf_dh);
         } else {
           col = tmp;
@@ -81,7 +81,7 @@ void mat_dh_print_graph_private(HYPRE_Int m, HYPRE_Int beg_row, HYPRE_Int *rp, H
         col = o2n[col];
       }
 
-      if (aval == NULL) { 
+      if (aval == NULL) {
         val = _MATLAB_ZERO_;
       } else {
         val = aval[j];
@@ -107,7 +107,7 @@ void mat_dh_print_graph_private(HYPRE_Int m, HYPRE_Int beg_row, HYPRE_Int *rp, H
 /* currently only for unpermuted */
 #undef __FUNC__
 #define __FUNC__ "mat_dh_print_graph_private"
-void mat_dh_print_graph_private(HYPRE_Int m, HYPRE_Int beg_row, HYPRE_Int *rp, HYPRE_Int *cval, 
+void mat_dh_print_graph_private(HYPRE_Int m, HYPRE_Int beg_row, HYPRE_Int *rp, HYPRE_Int *cval,
                     HYPRE_Real *aval, HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, FILE* fp)
 {
   START_FUNC_DH
@@ -123,7 +123,7 @@ void mat_dh_print_graph_private(HYPRE_Int m, HYPRE_Int beg_row, HYPRE_Int *rp, H
     create_nat_ordering_private(m, &n2o); CHECK_V_ERROR;
     create_nat_ordering_private(m, &o2n); CHECK_V_ERROR;
   }
- 
+
   if (hash == NULL) {
     private_hash = true;
     Hash_i_dhCreate(&hash, -1); CHECK_V_ERROR;
@@ -138,21 +138,21 @@ void mat_dh_print_graph_private(HYPRE_Int m, HYPRE_Int beg_row, HYPRE_Int *rp, H
       /* local column */
       if (col >= beg_row || col < beg_row+m) {
         col = o2n[col];
-      } 
+      }
 
       /* nonlocal column: get permutation from hash table */
       else {
         HYPRE_Int tmp = col;
 
         tmp = Hash_i_dhLookup(hash, col); CHECK_V_ERROR;
-        if (tmp == -1) { 
+        if (tmp == -1) {
           hypre_sprintf(msgBuf_dh, "beg_row= %i  m= %i; nonlocal column= %i not in hash table",
-                                beg_row, m, col); 
+                                beg_row, m, col);
           SET_V_ERROR(msgBuf_dh);
         } else {
           col = tmp;
         }
-      } 
+      }
 
       work[col] = 1;
     }
@@ -247,7 +247,7 @@ void mat_dh_print_csr_private(HYPRE_Int m, HYPRE_Int *rp, HYPRE_Int *cval, HYPRE
 /* only implemented for a single cpu! */
 #undef __FUNC__
 #define __FUNC__ "mat_dh_read_csr_private"
-void mat_dh_read_csr_private(HYPRE_Int *mOUT, HYPRE_Int **rpOUT, HYPRE_Int **cvalOUT, 
+void mat_dh_read_csr_private(HYPRE_Int *mOUT, HYPRE_Int **rpOUT, HYPRE_Int **cvalOUT,
                                             HYPRE_Real **avalOUT, FILE* fp)
 {
   START_FUNC_DH
@@ -302,7 +302,7 @@ void mat_dh_read_csr_private(HYPRE_Int *mOUT, HYPRE_Int **rpOUT, HYPRE_Int **cva
 
 #undef __FUNC__
 #define __FUNC__ "mat_dh_read_triples_private"
-void mat_dh_read_triples_private(HYPRE_Int ignore, HYPRE_Int *mOUT, HYPRE_Int **rpOUT, 
+void mat_dh_read_triples_private(HYPRE_Int ignore, HYPRE_Int *mOUT, HYPRE_Int **rpOUT,
                                    HYPRE_Int **cvalOUT, HYPRE_Real **avalOUT, FILE* fp)
 {
   START_FUNC_DH
@@ -318,16 +318,18 @@ void mat_dh_read_triples_private(HYPRE_Int ignore, HYPRE_Int *mOUT, HYPRE_Int **
     hypre_printf("mat_dh_read_triples_private:: ignoring following header lines:\n");
     hypre_printf("--------------------------------------------------------------\n");
     for (i=0; i<ignore; ++i) {
-      fgets(junk, MAX_JUNK, fp);
-      hypre_printf("%s", junk);
+      if (fgets(junk, MAX_JUNK, fp) != NULL) {
+        hypre_printf("%s", junk);
+      }
     }
     hypre_printf("--------------------------------------------------------------\n");
     if (fgetpos(fp, &fpos)) SET_V_ERROR("fgetpos failed!");
     hypre_printf("\nmat_dh_read_triples_private::1st two non-ignored lines:\n");
     hypre_printf("--------------------------------------------------------------\n");
     for (i=0; i<2; ++i) {
-      fgets(junk, MAX_JUNK, fp);
-      hypre_printf("%s", junk);
+      if (fgets(junk, MAX_JUNK, fp) != NULL) {
+        hypre_printf("%s", junk);
+      }
     }
     hypre_printf("--------------------------------------------------------------\n");
     if (fsetpos(fp, &fpos)) SET_V_ERROR("fsetpos failed!");
@@ -356,7 +358,10 @@ if (feof(fp)) hypre_printf("trouble!");
   /* reset file, and skip over header again */
   rewind(fp);
   for (i=0; i<ignore; ++i) {
-    fgets(junk, MAX_JUNK, fp);
+    if (fgets(junk, MAX_JUNK, fp) == NULL) {
+       hypre_sprintf(msgBuf_dh, "Error reading file");
+       SET_V_ERROR(msgBuf_dh);
+    }
   }
 
   /* error check for squareness */
@@ -418,7 +423,7 @@ if (feof(fp)) hypre_printf("trouble!");
 
 #undef __FUNC__
 #define __FUNC__ "convert_triples_to_scr_private"
-void convert_triples_to_scr_private(HYPRE_Int m, HYPRE_Int nz, HYPRE_Int *I, HYPRE_Int *J, HYPRE_Real *A, 
+void convert_triples_to_scr_private(HYPRE_Int m, HYPRE_Int nz, HYPRE_Int *I, HYPRE_Int *J, HYPRE_Real *A,
                                       HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval)
 {
   START_FUNC_DH
@@ -476,29 +481,29 @@ void readMat(Mat_dh *Aout, char *ft, char *fn, HYPRE_Int ignore)
   bool fixDiags;
   *Aout = NULL;
 
-  makeStructurallySymmetric = 
+  makeStructurallySymmetric =
       Parser_dhHasSwitch(parser_dh, "-makeSymmetric");
-  fixDiags = 
+  fixDiags =
       Parser_dhHasSwitch(parser_dh, "-fixDiags");
 
   if (fn == NULL) {
     SET_V_ERROR("passed NULL filename; can't open for reading!");
   }
 
-  if (!strcmp(ft, "csr")) 
+  if (!strcmp(ft, "csr"))
   {
     Mat_dhReadCSR(Aout, fn); CHECK_V_ERROR;
-  } 
+  }
 
-  else if (!strcmp(ft, "trip")) 
+  else if (!strcmp(ft, "trip"))
   {
     Mat_dhReadTriples(Aout, ignore, fn); CHECK_V_ERROR;
-  } 
+  }
 
   else if (!strcmp(ft, "ebin"))
   {
     Mat_dhReadBIN(Aout, fn); CHECK_V_ERROR;
-  } 
+  }
 
 #ifdef PETSC_MODE
   else if (!strcmp(ft, "petsc")) {
@@ -516,15 +521,15 @@ void readMat(Mat_dh *Aout, char *ft, char *fn, HYPRE_Int ignore)
     if (ierr) { SET_V_ERROR("convertPetscToEuclidMat failed!"); }
     ierr = MatDestroy(Apetsc);
     if (ierr) { SET_V_ERROR("MatDestroy failed! [PETSc lib]"); }
-  } 
-#else 
+  }
+#else
   else if (!strcmp(ft, "petsc")) {
     hypre_sprintf(msgBuf_dh, "must recompile Euclid using petsc mode!");
     SET_V_ERROR(msgBuf_dh);
   }
 #endif
 
-  else 
+  else
   {
     hypre_sprintf(msgBuf_dh, "unknown filetype: -ftin %s", ft);
     SET_V_ERROR(msgBuf_dh);
@@ -573,7 +578,7 @@ void fix_diags_private(Mat_dh A)
 
   if (insertDiags) {
     insert_missing_diags_private(A); CHECK_V_ERROR;
-    rp = A->rp; 
+    rp = A->rp;
     cval = A->cval;
     aval = A->aval;
   }
@@ -626,7 +631,7 @@ void insert_missing_diags_private(Mat_dh A)
     }
     rp[i+1] = idx;
   }
-  
+
   FREE_DH(RP); CHECK_V_ERROR;
   FREE_DH(CVAL); CHECK_V_ERROR;
   FREE_DH(AVAL); CHECK_V_ERROR;
@@ -644,15 +649,15 @@ void readVec(Vec_dh *bout, char *ft, char *fn, HYPRE_Int ignore)
     SET_V_ERROR("passed NULL filename; can't open for reading!");
   }
 
-  if (!strcmp(ft, "csr")  ||  !strcmp(ft, "trip")) 
+  if (!strcmp(ft, "csr")  ||  !strcmp(ft, "trip"))
   {
     Vec_dhRead(bout, ignore, fn); CHECK_V_ERROR;
-  } 
+  }
 
   else if (!strcmp(ft, "ebin"))
   {
     Vec_dhReadBIN(bout, fn); CHECK_V_ERROR;
-  } 
+  }
 
 #ifdef PETSC_MODE
   else if (!strcmp(ft, "petsc")) {
@@ -670,7 +675,7 @@ void readVec(Vec_dh *bout, char *ft, char *fn, HYPRE_Int ignore)
     if (ierr) { SET_V_ERROR("convertPetscToEuclidVec failed!"); }
     ierr = VecDestroy(bb);
     if (ierr) { SET_V_ERROR("VecDestroy failed! [PETSc lib]"); }
-  } 
+  }
 #else
   else if (!strcmp(ft, "petsc")) {
     hypre_sprintf(msgBuf_dh, "must recompile Euclid using petsc mode!");
@@ -678,12 +683,12 @@ void readVec(Vec_dh *bout, char *ft, char *fn, HYPRE_Int ignore)
   }
 #endif
 
-  else 
+  else
   {
     hypre_sprintf(msgBuf_dh, "unknown filetype: -ftin %s", ft);
     SET_V_ERROR(msgBuf_dh);
   }
-  
+
   END_FUNC_DH
 }
 
@@ -697,29 +702,29 @@ void writeMat(Mat_dh Ain, char *ft, char *fn)
     SET_V_ERROR("passed NULL filename; can't open for writing!");
   }
 
-  if (!strcmp(ft, "csr")) 
+  if (!strcmp(ft, "csr"))
   {
     Mat_dhPrintCSR(Ain, NULL, fn); CHECK_V_ERROR;
-  } 
+  }
 
-  else if (!strcmp(ft, "trip")) 
+  else if (!strcmp(ft, "trip"))
   {
     Mat_dhPrintTriples(Ain, NULL, fn); CHECK_V_ERROR;
-  } 
+  }
 
   else if (!strcmp(ft, "ebin"))
   {
     Mat_dhPrintBIN(Ain, NULL, fn); CHECK_V_ERROR;
-  } 
+  }
 
 #ifdef PETSC_MODE
-  else if (!strcmp(ft, "petsc")) 
+  else if (!strcmp(ft, "petsc"))
   {
     Viewer_DH viewer;
     Mat Apetsc;
     HYPRE_Int ierr;
 
-    ierr = buildPetscMat(Ain->m, Ain->n, Ain->beg_row, 
+    ierr = buildPetscMat(Ain->m, Ain->n, Ain->beg_row,
                          Ain->rp, Ain->cval, Ain->aval, &Apetsc);
     if (ierr) { SET_V_ERROR("buildPetscMat failed!"); }
 
@@ -741,7 +746,7 @@ void writeMat(Mat_dh Ain, char *ft, char *fn)
   }
 #endif
 
-  else 
+  else
   {
     hypre_sprintf(msgBuf_dh, "unknown filetype: -ftout %s", ft);
     SET_V_ERROR(msgBuf_dh);
@@ -759,18 +764,18 @@ void writeVec(Vec_dh bin, char *ft, char *fn)
     SET_V_ERROR("passed NULL filename; can't open for writing!");
   }
 
-  if (!strcmp(ft, "csr")  ||  !strcmp(ft, "trip")) 
+  if (!strcmp(ft, "csr")  ||  !strcmp(ft, "trip"))
   {
     Vec_dhPrint(bin, NULL, fn); CHECK_V_ERROR;
-  } 
+  }
 
   else if (!strcmp(ft, "ebin"))
   {
     Vec_dhPrintBIN(bin, NULL, fn); CHECK_V_ERROR;
-  } 
+  }
 
 #ifdef PETSC_MODE
-  else if (!strcmp(ft, "petsc")) 
+  else if (!strcmp(ft, "petsc"))
   {
     Viewer_DH viewer;
     HYPRE_Int ierr;
@@ -786,7 +791,7 @@ void writeVec(Vec_dh bin, char *ft, char *fn)
     if (ierr) { SET_V_ERROR("ViewerDestroy failed! [PETSc lib]"); }
     ierr = VecDestroy(bb);
     if (ierr) { SET_V_ERROR("VecDestroy failed! [PETSc lib]"); }
-  } 
+  }
 #else
   else if (!strcmp(ft, "petsc")) {
     hypre_sprintf(msgBuf_dh, "must recompile Euclid using petsc mode!");
@@ -794,7 +799,7 @@ void writeVec(Vec_dh bin, char *ft, char *fn)
   }
 #endif
 
-  else 
+  else
   {
     hypre_sprintf(msgBuf_dh, "unknown filetype: -ftout %s", ft);
     SET_V_ERROR(msgBuf_dh);
@@ -838,14 +843,14 @@ HYPRE_Int isTriangular(HYPRE_Int m, HYPRE_Int *rp, HYPRE_Int *cval)
 /*-----------------------------------------------------------------------------------*/
 
 static void mat_dh_transpose_reuse_private_private(
-                              bool allocateMem, HYPRE_Int m, 
+                              bool allocateMem, HYPRE_Int m,
                               HYPRE_Int *rpIN, HYPRE_Int *cvalIN, HYPRE_Real *avalIN,
                               HYPRE_Int **rpOUT, HYPRE_Int **cvalOUT, HYPRE_Real **avalOUT);
 
 
 #undef __FUNC__
 #define __FUNC__ "mat_dh_transpose_reuse_private"
-void mat_dh_transpose_reuse_private(HYPRE_Int m, 
+void mat_dh_transpose_reuse_private(HYPRE_Int m,
                               HYPRE_Int *rpIN, HYPRE_Int *cvalIN, HYPRE_Real *avalIN,
                               HYPRE_Int *rpOUT, HYPRE_Int *cvalOUT, HYPRE_Real *avalOUT)
 {
@@ -863,14 +868,14 @@ void mat_dh_transpose_private(HYPRE_Int m, HYPRE_Int *RP, HYPRE_Int **rpOUT,
                               HYPRE_Real *AVAL, HYPRE_Real **avalOUT)
 {
   START_FUNC_DH
-  mat_dh_transpose_reuse_private_private(true, m, RP, CVAL, AVAL, 
+  mat_dh_transpose_reuse_private_private(true, m, RP, CVAL, AVAL,
                                        rpOUT, cvalOUT, avalOUT); CHECK_V_ERROR;
   END_FUNC_DH
 }
 
 #undef __FUNC__
 #define __FUNC__ "mat_dh_transpose_private_private"
-void mat_dh_transpose_reuse_private_private(bool allocateMem, HYPRE_Int m, 
+void mat_dh_transpose_reuse_private_private(bool allocateMem, HYPRE_Int m,
                               HYPRE_Int *RP, HYPRE_Int *CVAL, HYPRE_Real *AVAL,
                               HYPRE_Int **rpOUT, HYPRE_Int **cvalOUT, HYPRE_Real **avalOUT)
 {
@@ -959,7 +964,7 @@ HYPRE_Int mat_find_owner(HYPRE_Int *beg_rows, HYPRE_Int *end_rows, HYPRE_Int ind
 #define AVAL_TAG 2
 #define CVAL_TAG 3
 void partition_and_distribute_private(Mat_dh A, Mat_dh *Bout);
-void partition_and_distribute_metis_private(Mat_dh A, Mat_dh *Bout); 
+void partition_and_distribute_metis_private(Mat_dh A, Mat_dh *Bout);
 
 #undef __FUNC__
 #define __FUNC__ "readMat_par"
@@ -989,7 +994,7 @@ void readMat_par(Mat_dh *Aout, char *fileType, char *fileName, HYPRE_Int ignore)
     Mat_dhDestroy(A); CHECK_V_ERROR;
   }
 
- 
+
   if (Parser_dhHasSwitch(parser_dh, "-printMAT")) {
     char xname[] = "A", *name = xname;
     Parser_dhReadString(parser_dh, "-printMat", &name);
@@ -1045,7 +1050,7 @@ void partition_and_distribute_metis_private(Mat_dh A, Mat_dh *Bout)
     /* partition and permute matrix */
     Mat_dhPartition(A, np_dh, &beg_row, &row_count, &n2o_col, &o2n_row); ERRCHKA;
     Mat_dhPermute(A, n2o_col, &C); ERRCHKA;
- 
+
     /* form rowToBlock array */
     for (i=0; i<np_dh; ++i) {
       for (j=beg_row[i]; j<beg_row[i]+row_count[i]; ++j) {
@@ -1079,7 +1084,7 @@ void partition_and_distribute_metis_private(Mat_dh A, Mat_dh *Bout)
       hypre_MPI_Isend(cval+rp[i], count, HYPRE_MPI_INT, owner, CVAL_TAG, comm_dh, send_req+2*i);
       hypre_MPI_Isend(aval+rp[i], count, hypre_MPI_REAL, owner, AVAL_TAG, comm_dh, send_req+2*i+1);
     }
-  } 
+  }
 
   /* all processors receive their local rows */
   { HYPRE_Int *cval = B->cval;
@@ -1152,7 +1157,7 @@ void partition_and_distribute_private(Mat_dh A, Mat_dh *Bout)
   /* broadcast number of nonzeros in each row to all processors */
   rowLengths = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   if (myid_dh == 0) {
-    HYPRE_Int *tmp = A->rp; 
+    HYPRE_Int *tmp = A->rp;
     for (i=0; i<m; ++i) {
       rowLengths[i] = tmp[i+1] - tmp[i];
     }
@@ -1192,7 +1197,7 @@ void partition_and_distribute_private(Mat_dh A, Mat_dh *Bout)
       hypre_MPI_Isend(cval+rp[i], count, HYPRE_MPI_INT, owner, CVAL_TAG, comm_dh, send_req+2*i);
       hypre_MPI_Isend(aval+rp[i], count, hypre_MPI_REAL, owner, AVAL_TAG, comm_dh, send_req+2*i+1);
     }
-  } 
+  }
 
   /* all processors receive their local rows */
   { HYPRE_Int *cval = B->cval;
@@ -1309,9 +1314,9 @@ void mat_partition_private(Mat_dh A, HYPRE_Int blocks, HYPRE_Int *o2n_row, HYPRE
   for (i=0; i<blocks-1; ++i) {
     for (j=0; j<rpb; ++j) {
       rowToBlock[idx++] = i;
-    }  
+    }
   }
- 
+
   /* now deal with the last block in the partition */
   i = blocks - 1;
   while (idx < n) rowToBlock[idx++] = i;
@@ -1429,7 +1434,7 @@ void make_symmetric_private(HYPRE_Int m, HYPRE_Int **rpIN, HYPRE_Int **cvalIN, H
     FREE_DH(work); CHECK_V_ERROR;
     FREE_DH(rowCounts); CHECK_V_ERROR;
     goto END_OF_FUNCTION;
-  } 
+  }
 
   /*---------------------------------------------------------
    * otherwise, finish symmetrizing
@@ -1437,7 +1442,7 @@ void make_symmetric_private(HYPRE_Int m, HYPRE_Int **rpIN, HYPRE_Int **cvalIN, H
     else {
     hypre_printf("original nz= %i\n", rp[m]);
     hypre_printf("zeros added= %i\n", transCount);
-    hypre_printf("ratio of added zeros to nonzeros = %0.2f (assumes all original entries were nonzero!)\n", 
+    hypre_printf("ratio of added zeros to nonzeros = %0.2f (assumes all original entries were nonzero!)\n",
                  (HYPRE_Real)transCount/(HYPRE_Real)(nzCount) );
   }
 
@@ -1530,7 +1535,7 @@ void profileMat(Mat_dh A)
         HYPRE_Int col = A->cval[j];
 
         /* row has an explicit diagonal element */
-        if (col == i) {          
+        if (col == i) {
           HYPRE_Real val = A->aval[j];
           flag = false;
           if (val == 0.0) ++z_diag;
@@ -1569,9 +1574,9 @@ void profileMat(Mat_dh A)
     hypre_printf("YY  strict upper triangular nonzeros: %i\n", unz);
     hypre_printf("YY  strict lower triangular nonzeros: %i\n", lnz);
   }
- 
-   
-  
+
+
+
 
   Mat_dhTranspose(A, &B); CHECK_V_ERROR;
 

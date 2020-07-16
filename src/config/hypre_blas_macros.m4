@@ -297,7 +297,7 @@ dnl **************************************************************
        else
           hypre_fmangle_blas=4
        fi
-       AC_DEFINE_UNQUOTED(HYPRE_FMANGLE_BLAS, [$hypre_fmangle_blas], [BLAS mangling])
+       AC_DEFINE_UNQUOTED(HYPRE_FMANGLE_BLAS, [$hypre_fmangle_blas], [Define as in HYPRE_FMANGLE to set the BLAS name mangling scheme])
     fi 
 dnl **************************************************************
 dnl Restore LIBS and LDFLAGS
