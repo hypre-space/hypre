@@ -84,7 +84,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
 
-   amg_print_level    = hypre_ParAMGDataPrintLevel(amg_data);
+   amg_print_level  = hypre_ParAMGDataPrintLevel(amg_data);
    amg_logging      = hypre_ParAMGDataLogging(amg_data);
    if ( amg_logging > 1 )
       Residual = hypre_ParAMGDataResidual(amg_data);
