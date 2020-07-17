@@ -47,7 +47,7 @@ void rownnz_naive_rowi_triple(HYPRE_Int rowi, HYPRE_Int lane_id,
       {
          HYPRE_Int colA = read_only_load(ja + i + lane_id);
          HYPRE_Int rowB_nnz_min, rowB_nnz_max;
-         rownnz_naive_rowi<type>(rowi, lane_id, ib, jb, ic, rowB_nnz_min, rowB_nnz_max);
+         rownnz_naive_rowi<type>(colA, lane_id, ib, jb, ic, rowB_nnz_min, rowB_nnz_max);
          // printf("Row %i min: %i, max: %i \n", rowi, rowB_nnz_min, rowB_nnz_max);
          if (type == 'U' || type == 'B')
          {
