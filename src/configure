@@ -738,6 +738,7 @@ infodir
 docdir
 oldincludedir
 includedir
+runstatedir
 localstatedir
 sharedstatedir
 sysconfdir
@@ -887,6 +888,7 @@ datadir='${datarootdir}'
 sysconfdir='${prefix}/etc'
 sharedstatedir='${prefix}/com'
 localstatedir='${prefix}/var'
+runstatedir='${localstatedir}/run'
 includedir='${prefix}/include'
 oldincludedir='/usr/include'
 docdir='${datarootdir}/doc/${PACKAGE_TARNAME}'
@@ -1139,6 +1141,15 @@ do
   | -silent | --silent | --silen | --sile | --sil)
     silent=yes ;;
 
+  -runstatedir | --runstatedir | --runstatedi | --runstated \
+  | --runstate | --runstat | --runsta | --runst | --runs \
+  | --run | --ru | --r)
+    ac_prev=runstatedir ;;
+  -runstatedir=* | --runstatedir=* | --runstatedi=* | --runstated=* \
+  | --runstate=* | --runstat=* | --runsta=* | --runst=* | --runs=* \
+  | --run=* | --ru=* | --r=*)
+    runstatedir=$ac_optarg ;;
+
   -sbindir | --sbindir | --sbindi | --sbind | --sbin | --sbi | --sb)
     ac_prev=sbindir ;;
   -sbindir=* | --sbindir=* | --sbindi=* | --sbind=* | --sbin=* \
@@ -1276,7 +1287,7 @@ fi
 for ac_var in	exec_prefix prefix bindir sbindir libexecdir datarootdir \
 		datadir sysconfdir sharedstatedir localstatedir includedir \
 		oldincludedir docdir infodir htmldir dvidir pdfdir psdir \
-		libdir localedir mandir
+		libdir localedir mandir runstatedir
 do
   eval ac_val=\$$ac_var
   # Remove trailing slashes.
@@ -1429,6 +1440,7 @@ Fine tuning of the installation directories:
   --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
   --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
   --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
+  --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
   --libdir=DIR            object code libraries [EPREFIX/lib]
   --includedir=DIR        C header files [PREFIX/include]
   --oldincludedir=DIR     C header files for non-gcc [/usr/include]
@@ -1575,7 +1587,7 @@ Optional Packages:
                           name mangling to use when calling hypre from
                           Fortran. It can be set to: "no-underscores",
                           "one-underscore", "two-underscores",
-                          "caps-no-underscores, and "one-before-after".
+                          "caps-no-underscores", and "one-before-after".
   --with-fmangle-blas=FMANGLE
                           Name mangling for BLAS. See --with-fmangle.
   --with-fmangle-lapack=FMANGLE
@@ -2793,7 +2805,8 @@ fi
 
 if test "$hypre_using_mixedint" = "yes"
 then
-   $as_echo "#define HYPRE_MIXEDINT 1" >>confdefs.h
+
+$as_echo "#define HYPRE_MIXEDINT 1" >>confdefs.h
 
 fi
 
@@ -2812,7 +2825,8 @@ fi
 
 if test "$hypre_using_bigint" = "yes"
 then
-   $as_echo "#define HYPRE_BIGINT 1" >>confdefs.h
+
+$as_echo "#define HYPRE_BIGINT 1" >>confdefs.h
 
 fi
 
@@ -2831,7 +2845,8 @@ fi
 
 if test "$hypre_using_single" = "yes"
 then
-   $as_echo "#define HYPRE_SINGLE 1" >>confdefs.h
+
+$as_echo "#define HYPRE_SINGLE 1" >>confdefs.h
 
 fi
 
@@ -2850,7 +2865,8 @@ fi
 
 if test "$hypre_using_longdouble" = "yes"
 then
-   $as_echo "#define HYPRE_LONG_DOUBLE 1" >>confdefs.h
+
+$as_echo "#define HYPRE_LONG_DOUBLE 1" >>confdefs.h
 
 fi
 
@@ -2869,7 +2885,8 @@ fi
 
 if test "$hypre_using_complex" = "yes"
 then
-   $as_echo "#define HYPRE_COMPLEX 1" >>confdefs.h
+
+$as_echo "#define HYPRE_COMPLEX 1" >>confdefs.h
 
 fi
 
@@ -2901,7 +2918,8 @@ fi
 
 if test "$hypre_using_persistent" = "yes"
 then
-   $as_echo "#define HYPRE_USING_PERSISTENT_COMM 1" >>confdefs.h
+
+$as_echo "#define HYPRE_USING_PERSISTENT_COMM 1" >>confdefs.h
 
 fi
 
@@ -2919,7 +2937,8 @@ fi
 
 if test "$hypre_using_hopscotch" = "yes"
 then
-   $as_echo "#define HYPRE_HOPSCOTCH 1" >>confdefs.h
+
+$as_echo "#define HYPRE_HOPSCOTCH 1" >>confdefs.h
 
 fi
 
@@ -7240,20 +7259,23 @@ fi
 $as_echo "$hypre_cv_func_MPI_Comm_f2c_macro" >&6; }
    if test $ac_cv_func_MPI_Comm_f2c = yes \
       || test $hypre_cv_func_MPI_Comm_f2c_macro = yes; then
-     $as_echo "#define HYPRE_HAVE_MPI_COMM_F2C 1" >>confdefs.h
+
+$as_echo "#define HYPRE_HAVE_MPI_COMM_F2C 1" >>confdefs.h
 
    fi
 fi
 
 if test "$hypre_using_global_partition" = "no"
 then
-      $as_echo "#define HYPRE_NO_GLOBAL_PARTITION 1" >>confdefs.h
+
+$as_echo "#define HYPRE_NO_GLOBAL_PARTITION 1" >>confdefs.h
 
 fi
 
 if test "$hypre_using_node_aware_mpi" = "yes"
 then
-   $as_echo "#define HYPRE_USING_NODE_AWARE_MPI 1" >>confdefs.h
+
+$as_echo "#define HYPRE_USING_NODE_AWARE_MPI 1" >>confdefs.h
 
 fi
 
@@ -8742,23 +8764,28 @@ $as_echo "$HYPRE_ARCH" >&6; }
    fi
    case $HYPRE_ARCH in
       alpha)
-         $as_echo "#define HYPRE_ALPHA 1" >>confdefs.h
+
+$as_echo "#define HYPRE_ALPHA 1" >>confdefs.h
 
          ;;
       sun* | solaris*)
-         $as_echo "#define HYPRE_SOLARIS 1" >>confdefs.h
+
+$as_echo "#define HYPRE_SOLARIS 1" >>confdefs.h
 
          ;;
       hp* | HP*)
-         $as_echo "#define HYPRE_HPPA 1" >>confdefs.h
+
+$as_echo "#define HYPRE_HPPA 1" >>confdefs.h
 
          ;;
       rs6000 | RS6000 | *bgl* | *BGL* | ppc64*)
-         $as_echo "#define HYPRE_RS6000 1" >>confdefs.h
+
+$as_echo "#define HYPRE_RS6000 1" >>confdefs.h
 
          ;;
       IRIX64)
-         $as_echo "#define HYPRE_IRIX64 1" >>confdefs.h
+
+$as_echo "#define HYPRE_IRIX64 1" >>confdefs.h
 
          ;;
       Linux | linux | LINUX)
@@ -8767,16 +8794,19 @@ $as_echo "$HYPRE_ARCH" >&6; }
             systemtype=`grep ^SYS_TYPE /etc/home.config | cut -d" " -f2`
             case $systemtype in
                chaos*)
-                  $as_echo "#define HYPRE_LINUX_CHAOS 1" >>confdefs.h
+
+$as_echo "#define HYPRE_LINUX_CHAOS 1" >>confdefs.h
 
                   ;;
                *)
-                  $as_echo "#define HYPRE_LINUX 1" >>confdefs.h
+
+$as_echo "#define HYPRE_LINUX 1" >>confdefs.h
 
                   ;;
             esac
          else
-            $as_echo "#define HYPRE_LINUX 1" >>confdefs.h
+
+$as_echo "#define HYPRE_LINUX 1" >>confdefs.h
 
          fi
          ;;

@@ -24,16 +24,6 @@
  * files are included.
  *-----------------------------------------------------------------------*/
 
-#if defined(HYPRE_MODE)
-#include "HYPRE_parcsr_mv.h"
-#include "HYPRE_config.h"
-#include "HYPRE_distributed_matrix_mv.h"
-#include "_hypre_utilities.h"
-
-#elif defined(PETSC_MODE)
-#include "petsc_config.h"
-#endif
-
 #if ( !defined(FAKE_MPI) && defined(USING_MPI) && \
       !defined(HYPRE_MODE) && !defined(PETSC_MODE) )
 #include <mpi.h>

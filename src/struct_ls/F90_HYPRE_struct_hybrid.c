@@ -11,7 +11,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 /*--------------------------------------------------------------------------
  * HYPRE_StructHybridCreate
  *--------------------------------------------------------------------------*/
@@ -205,7 +205,7 @@ hypre_F90_IFACE(hypre_structhybridsetrelchange, HYPRE_STRUCTHYBRIDSETRELCHANGE)
      hypre_F90_Int *rel_change,
      hypre_F90_Int *ierr       )
 {
-   *ierr = (hypre_F90_Int) 
+   *ierr = (hypre_F90_Int)
       ( HYPRE_StructHybridSetRelChange(
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
            hypre_F90_PassInt (rel_change)  ) );
@@ -259,6 +259,8 @@ hypre_F90_IFACE(hypre_structhybridsetprecond, HYPRE_STRUCTHYBRIDSETPRECOND)
     * The precond_id flags mean :
     * 0 - setup a smg preconditioner
     * 1 - setup a pfmg preconditioner
+    * 7 - setup a jacobi preconditioner
+    * 8 - setup a ds preconditioner
     *------------------------------------------------------------*/
 
    if (*precond_id == 0)
@@ -277,6 +279,24 @@ hypre_F90_IFACE(hypre_structhybridsetprecond, HYPRE_STRUCTHYBRIDSETPRECOND)
               hypre_F90_PassObj (HYPRE_StructSolver, solver),
               HYPRE_StructPFMGSolve,
               HYPRE_StructPFMGSetup,
+              hypre_F90_PassObj (HYPRE_StructSolver, precond_solver)) );
+   }
+   else if (*precond_id == 7)
+   {
+      *ierr = (hypre_F90_Int)
+         ( HYPRE_StructHybridSetPrecond(
+              hypre_F90_PassObj (HYPRE_StructSolver, solver),
+              HYPRE_StructJacobiSolve,
+              HYPRE_StructJacobiSetup,
+              hypre_F90_PassObj (HYPRE_StructSolver, precond_solver)) );
+   }
+   else if (*precond_id == 8)
+   {
+      *ierr = (hypre_F90_Int)
+         ( HYPRE_StructHybridSetPrecond(
+              hypre_F90_PassObj (HYPRE_StructSolver, solver),
+              HYPRE_StructDiagScale,
+              HYPRE_StructDiagScaleSetup,
               hypre_F90_PassObj (HYPRE_StructSolver, precond_solver)) );
    }
    else
@@ -379,7 +399,7 @@ hypre_F90_IFACE(hypre_structhybridgetfinalrelat, HYPRE_STRUCTHYBRIDGETFINALRELAT
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
            hypre_F90_PassRealRef (norm)    ) );
 }
-    
+
 #ifdef __cplusplus
 }
 #endif

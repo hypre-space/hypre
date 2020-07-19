@@ -643,13 +643,9 @@ hypre_MGRCycle( void               *mgr_vdata,
             HYPRE_Real convergence_factor_cg;
             hypre_BoomerAMGGetRelResidualNorm(cg_solver, &convergence_factor_cg);
             (mgr_data -> cg_convergence_factor) = convergence_factor_cg;
-            if (my_id == 0 && convergence_factor_cg > 1.0)
+            if ((mgr_data -> print_level) > 1 && my_id == 0 && convergence_factor_cg > 1.0)
             {
                hypre_printf("Warning!!! Coarse grid solve diverges. Factor = %1.2e\n", convergence_factor_cg);
-            }
-            if ((mgr_data -> print_level) > 1 && my_id == 0)
-            {
-               hypre_printf("Coarse grid V-cycle convergence factor: %5f\n", convergence_factor_cg);
             }
          }
          wall_time = time_getWallclockSeconds() - wall_time;
@@ -730,7 +726,7 @@ hypre_MGRCycle( void               *mgr_vdata,
             //convergence_factor_frelax = hypre_ParVectorInnerProd(Vtemp, Vtemp)/convergence_factor_frelax;
             //hypre_printf("F-relaxation V-cycle convergence factor: %5f\n", convergence_factor_frelax);
          }
-         else if (Frelax_method[level] == 99)
+         else if (Frelax_method[level] == 2)
          {
             hypre_ParVectorSetConstantValues(F_fine_array[coarse_grid], 0.0);
             hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, 1.0, F_array[fine_grid], 0.0, &(F_fine_array[coarse_grid]));
