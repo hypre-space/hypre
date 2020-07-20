@@ -114,7 +114,7 @@ hypre_MGRSetup( void               *mgr_vdata,
   HYPRE_Real wall_time;
 
   /* ----- begin -----*/
-
+  HYPRE_ANNOTATE_FUNC_BEGIN;
 //  num_threads = hypre_NumThreads();
 
   block_size = (mgr_data -> block_size);
@@ -176,6 +176,7 @@ hypre_MGRSetup( void               *mgr_vdata,
     /* setup coarse grid solver */
     coarse_grid_solver_setup((mgr_data -> coarse_grid_solver), A, f, u);
     (mgr_data -> num_coarse_levels) = 0;
+    HYPRE_ANNOTATE_FUNC_END;
 
     return hypre_error_flag;
   }
@@ -1202,6 +1203,8 @@ hypre_MGRSetup( void               *mgr_vdata,
     hypre_TFree(level_coarse_size, HYPRE_MEMORY_HOST);
     level_coarse_size = NULL;
   }
+
+  HYPRE_ANNOTATE_FUNC_END;
 
   return hypre_error_flag;
 }

@@ -142,7 +142,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    char                  filename[255];
 #endif
 
-   HYPRE_ANNOTATION_BEGIN("PFMG.setup");
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /*-----------------------------------------------------
     * Set up coarse grids
@@ -747,7 +747,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    hypre_StructMatrixPrint(filename, A_l[l], 0);
 #endif
 
-   HYPRE_ANNOTATION_END("PFMG.setup");
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -2210,4 +2210,3 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
 
    return zero_diag;
 }
-
