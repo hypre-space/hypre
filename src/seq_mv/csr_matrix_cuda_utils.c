@@ -180,8 +180,7 @@ cusparseSpMatDescr_t hypre_CSRMatRawToCuda(HYPRE_Int n, HYPRE_Int m, HYPRE_Int n
       HYPRE_Int *i, HYPRE_Int *j, HYPRE_Complex *data)
 {
 
-   HYPRE_Int isDoublePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double);
-   hypre_assert(isDoublePrecision);
+   hypre_assert(sizeof(HYPRE_Complex) == sizeof(hypre_double) && "is not double precision");
 
    const cudaDataType data_type = hypre_getCudaDataTypeComplex();
    const cusparseIndexType_t index_type = hypre_getCusparseIndexTypeInt();
