@@ -165,6 +165,20 @@ hypre_found_cuda=no
 hypre_using_node_aware_mpi=no
 hypre_using_memory_tracker=no
 
+
+dnl *********************************************************************
+dnl * Initialize hypre-HIP variables
+dnl *********************************************************************
+hypre_user_chose_hip=no
+hypre_using_hip=no
+hypre_using_rocsparse=no
+hypre_using_rocblas=no
+hypre_using_rocrand=no
+
+hypre_found_hip=no
+
+
+
 dnl *********************************************************************
 dnl * Initialize flag-check variables
 dnl *********************************************************************
