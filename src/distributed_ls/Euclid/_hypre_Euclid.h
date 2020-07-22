@@ -393,7 +393,7 @@ you need to write EUCLID_GET_ROW() functions: see src/getRow.c
 #include "fake_mpi.h"
 #endif
 
-#if defined(USING_OPENMP) && !defined(HYPRE_MODE)
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_MODE)
 #include <omp.h>
 #endif
 

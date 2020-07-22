@@ -48,7 +48,7 @@
 #include "fake_mpi.h"
 #endif
 
-#if defined(USING_OPENMP) && !defined(HYPRE_MODE)
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_MODE)
 #include <omp.h>
 #endif
 
