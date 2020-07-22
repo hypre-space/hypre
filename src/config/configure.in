@@ -440,6 +440,42 @@ AS_HELP_STRING([--enable-curand],
 [hypre_using_curand=yes]
 )
 
+
+
+AC_ARG_ENABLE(rocsparse,
+AS_HELP_STRING([--enable-rocsparse],
+               [Use rocSPARSE (default is YES).]),
+[case "${enableval}" in
+    yes) hypre_using_rocsparse=yes ;;
+    no)  hypre_using_rocsparse=no ;;
+    *)   hypre_using_rocsparse=yes ;;
+ esac],
+[hypre_using_rocsparse=yes]
+)
+
+AC_ARG_ENABLE(rocblas,
+AS_HELP_STRING([--enable-rocblas],
+               [Use rocBLAS (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_rocblas=yes ;;
+    no)  hypre_using_rocblas=no ;;
+    *)   hypre_using_rocblas=no ;;
+ esac],
+[hypre_using_rocblas=no]
+)
+
+AC_ARG_ENABLE(rocrand,
+AS_HELP_STRING([--enable-rocrand],
+               [Use rocRAND (default is YES).]),
+[case "${enableval}" in
+    yes) hypre_using_rocrand=yes ;;
+    no)  hypre_using_rocrand=no ;;
+    *)   hypre_using_rocrand=yes ;;
+ esac],
+[hypre_using_rocrand=yes]
+)
+
+
 AC_ARG_ENABLE(gpu-aware-mpi,
 AS_HELP_STRING([--enable-gpu-aware-mpi],
                [Use GPU memory aware MPI]),
@@ -1060,6 +1096,21 @@ AS_HELP_STRING([--with-cuda],
  esac],
 [hypre_using_cuda=no]
 )
+
+
+dnl ***** HIP
+AC_ARG_WITH(hip,
+AS_HELP_STRING([--with-hip],
+               [Use HIP for AMD GPUs. (default is NO).]),
+[case "$withval" in
+    yes) hypre_user_chose_hip=yes
+         hypre_using_hip=yes ;;
+    no)  hypre_using_hip=no ;;
+    *)   hypre_using_hip=no ;;
+ esac],
+[hypre_using_hip=no]
+)
+
 
 dnl ***** RAJA
 
