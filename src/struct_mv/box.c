@@ -754,26 +754,6 @@ hypre_BoxArrayDestroy( hypre_BoxArray *box_array )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoxArrayVolume( hypre_BoxArray *box_array )
-{
-   HYPRE_Int    box_array_volume;
-   hypre_Box   *box;
-   HYPRE_Int    i;
-
-   box_array_volume = 0;
-   hypre_ForBoxI(i, box_array)
-   {
-      box = hypre_BoxArrayBox(box_array, i);
-      box_array_volume += hypre_BoxVolume(box);
-   }
-
-   return box_array_volume;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_BoxArraySetSize( hypre_BoxArray  *box_array,
                        HYPRE_Int        size      )
 {
@@ -812,11 +792,15 @@ hypre_BoxArray *
 hypre_BoxArrayClone( hypre_BoxArray *box_array )
 {
    hypre_BoxArray  *new_box_array;
-
+   HYPRE_Int        size;
+   HYPRE_Int        ndim;
    HYPRE_Int        i;
 
-   new_box_array = hypre_BoxArrayCreate(
-      hypre_BoxArraySize(box_array), hypre_BoxArrayNDim(box_array));
+   hypre_assert(box_array != NULL);
+
+   ndim = hypre_BoxArrayNDim(box_array);
+   size = hypre_BoxArraySize(box_array);
+   new_box_array = hypre_BoxArrayCreate(size, ndim);
    hypre_ForBoxI(i, box_array)
    {
       hypre_CopyBox(hypre_BoxArrayBox(box_array, i),
@@ -872,8 +856,8 @@ hypre_DeleteBox( hypre_BoxArray *box_array,
 
 HYPRE_Int
 hypre_DeleteMultipleBoxes( hypre_BoxArray *box_array,
-                           HYPRE_Int*  indices,
-                           HYPRE_Int num )
+                           HYPRE_Int      *indices,
+                           HYPRE_Int       num )
 {
    HYPRE_Int  i, j, start, array_size;
 
