@@ -211,18 +211,19 @@ hypreDevice_CSRSpGemmmRownnzEstimate(HYPRE_Int m, HYPRE_Int k,
       char *work_mem_saved = work_mem;
 
       //HYPRE_Int *d_low_upp = hypre_TAlloc(HYPRE_Int, 2 * m, HYPRE_MEMORY_DEVICE);
-      HYPRE_Int *d_low_upp = (HYPRE_Int *) work_mem;
+      //HYPRE_Int *d_low_upp = (HYPRE_Int *) work_mem;
       work_mem += 2*m*sizeof(HYPRE_Int);
 
-      HYPRE_Int *d_low = d_low_upp;
-      HYPRE_Int *d_upp = d_low_upp + m;
+      /* Avoid doing the naive bounds, as the current method does not work well */
+      // HYPRE_Int *d_low = d_low_upp;
+      // HYPRE_Int *d_upp = d_low_upp + m;
 
-      HYPRE_CUDA_LAUNCH( (csr_spmmm_rownnz_naive<'B', num_warps_per_block>), gDim, bDim,
-                         m, /*k,*/ n, d_ia, d_ja, d_ib, d_jb, d_ic, d_jc, d_low, d_upp );
+      // HYPRE_CUDA_LAUNCH( (csr_spmmm_rownnz_naive<'B', num_warps_per_block>), gDim, bDim,
+      //                    m, /*k,*/ n, d_ia, d_ja, d_ib, d_jb, d_ic, d_jc, d_low, d_upp );
 
       /* Cohen's algorithm, stochastic approach */
       csr_spmmm_rownnz_cohen<float, BDIMX, BDIMY, num_warps_per_block, shmem_size_per_warp>
-         (m, k, r, n, d_ia, d_ja, d_ib, d_jb, d_ic, d_jc, d_low, d_upp, d_rc, cohen_nsamples, cohen_mult, (float *)work_mem);
+         (m, k, r, n, d_ia, d_ja, d_ib, d_jb, d_ic, d_jc, NULL, NULL, d_rc, cohen_nsamples, cohen_mult, (float *)work_mem);
 
       //hypre_TFree(d_low_upp, HYPRE_MEMORY_DEVICE);
       hypre_TFree(work_mem_saved, HYPRE_MEMORY_DEVICE);
