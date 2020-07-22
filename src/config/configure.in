@@ -1835,6 +1835,26 @@ then
   fi
 fi dnl hypre_using_um
 
+dnl *********************************************************************
+dnl * Check for HIP header
+dnl *********************************************************************
+
+dnl If the user has requested to use HIP, we first check the environment
+dnl for ROCM_PATH to point at the ROCm installation. If that is not found,
+dnl then we default to `/opt/rocm`.
+dnl
+dnl TODO: Add an ARG_WITH for rocm so the user can control the ROCm path
+dnl       through the configure line
+AS_IF([ test x"$hypre_using_hip" == x"yes" ],
+      [ AS_IF([ test -n "$ROCM_PATH"],
+              [ HYPRE_ROCM_PREFIX=$ROCM_PATH ],
+              [ HYPRE_ROCM_PREFIX=/opt/rocm ])
+
+        AC_SUBST(HYPRE_ROCM_PREFIX)
+        AC_CHECK_HEADERS( ["${HYPRE_ROCM_PREFIX}/include/hip/hip_common.h"],
+                          [hypre_found_hip=yes],
+                          [AC_MSG_ERROR([unable to find ${HYPRE_ROCM_PREFIX}/include/hip/hip_common.h ... Ensure ROCm is installed and set ROCM_PATH environment variable to ROCm installation path.])] )],
+      [])
 
 
 
