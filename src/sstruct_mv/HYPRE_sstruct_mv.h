@@ -594,8 +594,7 @@ typedef struct hypre_SStructGraph_struct *HYPRE_SStructGraph;
  **/
 HYPRE_Int
 HYPRE_SStructGraphCreate(MPI_Comm             comm,
-                         HYPRE_SStructGrid    dom_grid,
-                         HYPRE_SStructGrid    ran_grid,
+                         HYPRE_SStructGrid    grid,
                          HYPRE_SStructGraph  *graph);
 
 /**

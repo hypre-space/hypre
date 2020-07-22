@@ -328,9 +328,9 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
    hypre_ParVector          *parx;
    hypre_ParVector          *pary;
 
-   HYPRE_Int                 part;
    HYPRE_Int                 x_object_type= hypre_SStructVectorObjectType(x);
    HYPRE_Int                 A_object_type= hypre_SStructMatrixObjectType(A);
+   HYPRE_Int                 part;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -345,10 +345,11 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
 
    if ( (x_object_type == HYPRE_SSTRUCT) || (x_object_type == HYPRE_STRUCT) )
    {
-     /* do S-matrix computations */
+      /* do S-matrix computations */
       for (part = 0; part < nparts; part++)
       {
          pdata = pmatvec_data[part];
+
          pA = hypre_SStructMatrixPMatrix(A, part);
          px = hypre_SStructVectorPVector(x, part);
          py = hypre_SStructVectorPVector(y, part);

@@ -11,7 +11,7 @@
  ***********************************************************************EHEADER*/
 
 /* HYPRE_sstruct_graph.c */
-HYPRE_Int HYPRE_SStructGraphCreate ( MPI_Comm comm , HYPRE_SStructGrid dom_grid , HYPRE_SStructGrid ran_grid , HYPRE_SStructGraph *graph_ptr );
+HYPRE_Int HYPRE_SStructGraphCreate ( MPI_Comm comm , HYPRE_SStructGrid grid , HYPRE_SStructGraph *graph_ptr );
 HYPRE_Int HYPRE_SStructGraphDestroy ( HYPRE_SStructGraph graph );
 HYPRE_Int HYPRE_SStructGraphSetDomainGrid ( HYPRE_SStructGraph graph , HYPRE_SStructGrid domain_grid );
 HYPRE_Int HYPRE_SStructGraphSetStencil ( HYPRE_SStructGraph graph , HYPRE_Int part , HYPRE_Int var , HYPRE_SStructStencil stencil );
@@ -142,7 +142,7 @@ HYPRE_Int hypre_SStructCellGridBoxNumMap ( hypre_SStructGrid *grid , HYPRE_Int p
 HYPRE_Int hypre_SStructCellBoxToVarBox ( hypre_Box *box , hypre_Index offset , hypre_Index varoffset , HYPRE_Int *valid );
 HYPRE_Int hypre_SStructGridIntersect ( hypre_SStructGrid *grid , HYPRE_Int part , HYPRE_Int var , hypre_Box *box , HYPRE_Int action , hypre_BoxManEntry ***entries_ptr , HYPRE_Int *nentries_ptr );
 HYPRE_Int hypre_SStructGridPrintGLVis ( hypre_SStructGrid *grid, const char *meshprefix, HYPRE_Real *trans, HYPRE_Real *origin );
-HYPRE_Int hypre_SStructGridCoarsen ( hypre_SStructGrid *fgrid, hypre_IndexRef origin, hypre_Index *strides, hypre_Index *periodic, HYPRE_Int prune, hypre_SStructGrid **cgrid_ptr );
+HYPRE_Int hypre_SStructGridCoarsen ( hypre_SStructGrid *fgrid, hypre_IndexRef origin, hypre_Index *strides, hypre_Index *periodic, hypre_SStructGrid **cgrid_ptr );
 
 /* sstruct_innerprod.c */
 HYPRE_Int hypre_SStructPInnerProd ( hypre_SStructPVector *px , hypre_SStructPVector *py , HYPRE_Real *presult_ptr );
@@ -216,7 +216,7 @@ HYPRE_Int hypre_SStructPVectorSetRandomValues ( hypre_SStructPVector *pvector, H
 HYPRE_Int hypre_SStructPVectorPrint ( const char *filename , hypre_SStructPVector *pvector , HYPRE_Int all );
 HYPRE_Int hypre_SStructVectorRef ( hypre_SStructVector *vector , hypre_SStructVector **vector_ref );
 HYPRE_Int hypre_SStructVectorSetConstantValues ( hypre_SStructVector *vector , HYPRE_Complex value );
-HYPRE_Int hypre_SStructPVectorSetRandomValues ( hypre_SStructVector *vector, HYPRE_Int seed );
+HYPRE_Int hypre_SStructVectorSetRandomValues ( hypre_SStructVector *vector, HYPRE_Int seed );
 HYPRE_Int hypre_SStructVectorConvert ( hypre_SStructVector *vector , hypre_ParVector **parvector_ptr );
 HYPRE_Int hypre_SStructVectorParConvert ( hypre_SStructVector *vector , hypre_ParVector **parvector_ptr );
 HYPRE_Int hypre_SStructVectorRestore ( hypre_SStructVector *vector , hypre_ParVector *parvector );

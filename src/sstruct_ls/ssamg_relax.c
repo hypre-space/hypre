@@ -319,7 +319,6 @@ hypre_SSAMGRelaxSetTol( void       *ssamg_relax_vdata,
 
 HYPRE_Int
 hypre_SSAMGRelaxSetWeights( void       *ssamg_relax_vdata,
-                            HYPRE_Int  *pids,
                             HYPRE_Real *relax_weights     )
 {
    hypre_SSAMGRelaxData  *ssamg_relax_data = (hypre_SSAMGRelaxData *) ssamg_relax_vdata;
@@ -328,7 +327,7 @@ hypre_SSAMGRelaxSetWeights( void       *ssamg_relax_vdata,
    nparts = (ssamg_relax_data -> nparts);
    for (part = 0; part < nparts; part++)
    {
-      (ssamg_relax_data -> relax_weight[part]) = relax_weights[pids[part]];
+      (ssamg_relax_data -> relax_weight[part]) = relax_weights[part];
    }
 
    return hypre_error_flag;

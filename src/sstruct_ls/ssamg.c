@@ -41,7 +41,7 @@ hypre_SSAMGCreate( hypre_MPI_Comm comm )
    (ssamg_data -> print_level)      = 0;
 
    /* initialize */
-   (ssamg_data -> nparts)           = NULL;
+   (ssamg_data -> nparts)           = -1;
    (ssamg_data -> num_levels)       = -1;
 
    return (void *) ssamg_data;
@@ -54,7 +54,7 @@ HYPRE_Int
 hypre_SSAMGDestroy( void *ssamg_vdata )
 {
    hypre_SSAMGData   *ssamg_data = (hypre_SSAMGData *) ssamg_vdata;
-   HYPRE_Int         *nparts     = hypre_SSAMGDataNParts(ssamg_data);
+   HYPRE_Int          nparts     = hypre_SSAMGDataNParts(ssamg_data);
    HYPRE_Int          num_levels = hypre_SSAMGDataNumLevels(ssamg_data);
    HYPRE_Int          logging    = hypre_SSAMGDataLogging(ssamg_data);
    HYPRE_Int          l, p;
@@ -113,15 +113,11 @@ hypre_SSAMGDestroy( void *ssamg_vdata )
          ssamg_data -> r_l = NULL;
       }
 
-      if (nparts != NULL)
+      for (p = 0; p < nparts; p++)
       {
-         for (p = 0; p < nparts[0]; p++)
-         {
-            hypre_TFree(ssamg_data -> dxyz[p]);
-         }
-         hypre_TFree(ssamg_data -> dxyz);
+         hypre_TFree(ssamg_data -> dxyz[p]);
       }
-      hypre_TFree(ssamg_data -> nparts);
+      hypre_TFree(ssamg_data -> dxyz);
 
       hypre_FinalizeTiming(ssamg_data -> time_index);
       hypre_TFree(ssamg_data);
@@ -375,7 +371,7 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
    HYPRE_Int           num_pre_relax = hypre_SSAMGDataNumPreRelax(ssamg_data);
    HYPRE_Int           num_pos_relax = hypre_SSAMGDataNumPosRelax(ssamg_data);
    HYPRE_Int           num_crelax    = hypre_SSAMGDataNumCoarseRelax(ssamg_data);
-   HYPRE_Int          *nparts        = hypre_SSAMGDataNParts(ssamg_data);
+   HYPRE_Int           nparts        = hypre_SSAMGDataNParts(ssamg_data);
    HYPRE_Int         **cdir_l        = hypre_SSAMGDataCdir(ssamg_data);
    HYPRE_Real        **relax_weights = hypre_SSAMGDataRelaxWeights(ssamg_data);
 
@@ -392,12 +388,12 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
 
       /* Print coarsening direction */
       hypre_printf("Coarsening direction:\n\n");
-      chunk_size = hypre_min(nparts[0], nparts_per_line);
-      for (chunk = 0; chunk < nparts[0]; chunk += chunk_size)
+      chunk_size = hypre_min(nparts, nparts_per_line);
+      for (chunk = 0; chunk < nparts; chunk += chunk_size)
       {
          ndigits = 4;
          hypre_printf("lev   ");
-         chunk_last = hypre_min(chunk + chunk_size, nparts[0]);
+         chunk_last = hypre_min(chunk + chunk_size, nparts);
          for (part = chunk; part < chunk_last; part++)
          {
             hypre_printf("pt. %d  ", part);
@@ -422,12 +418,12 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       if (relax_type > 0)
       {
          hypre_printf("Relaxation factors:\n\n");
-         chunk_size = hypre_min(nparts[0], nparts_per_line);
-         for (chunk = 0; chunk < nparts[0]; chunk += chunk_size)
+         chunk_size = hypre_min(nparts, nparts_per_line);
+         for (chunk = 0; chunk < nparts; chunk += chunk_size)
          {
             ndigits = 4;
             hypre_printf("lev   ");
-            chunk_last = hypre_min(chunk + chunk_size, nparts[0]);
+            chunk_last = hypre_min(chunk + chunk_size, nparts);
             for (part = chunk; part < chunk_last; part++)
             {
                hypre_printf("pt. %d  ", part);

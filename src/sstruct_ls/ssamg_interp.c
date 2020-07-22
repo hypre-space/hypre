@@ -24,13 +24,11 @@ hypre_SSAMGCreateInterpOp( hypre_SStructMatrix  *A,
                            hypre_SStructGrid    *dom_grid,
                            HYPRE_Int            *cdir_p)
 {
-   MPI_Comm                 comm = hypre_SStructMatrixComm(A);
-   HYPRE_Int                ndim = hypre_SStructMatrixNDim(A);
-
-   hypre_SStructGraph      *graph_A    = hypre_SStructMatrixGraph(A);
-   hypre_SStructGrid       *ran_grid   = hypre_SStructGraphGrid(graph_A);
-   HYPRE_Int                dom_nparts = hypre_SStructGridNParts(dom_grid);
-   HYPRE_Int               *dom_pids   = hypre_SStructGridPartIDs(dom_grid);
+   MPI_Comm                 comm   = hypre_SStructMatrixComm(A);
+   HYPRE_Int                ndim   = hypre_SStructMatrixNDim(A);
+   hypre_SStructGraph      *graph  = hypre_SStructMatrixGraph(A);
+   hypre_SStructGrid       *grid   = hypre_SStructGraphGrid(graph);
+   HYPRE_Int                nparts = hypre_SStructGridNParts(grid);
 
    hypre_SStructMatrix     *P;
    hypre_SStructPMatrix    *pmatrix;
@@ -38,14 +36,13 @@ hypre_SSAMGCreateInterpOp( hypre_SStructMatrix  *A,
    hypre_SStructGraph      *graph_P;
    hypre_SStructStencil  ***stencils_P;
    hypre_StructStencil     *stencil;
-   HYPRE_Int               *pmaps;
 
    HYPRE_Int                centries[3] = {0, 1, 2};
    HYPRE_Int               *num_centries;
    HYPRE_Int                stencil_size_A;
    HYPRE_Int                stencil_size_P;
    hypre_Index            **st_shape;
-   hypre_Index             *dom_strides;
+   hypre_Index             *strides;
 
    HYPRE_Int                cdir;
    HYPRE_Int                part, nvars;
@@ -54,72 +51,98 @@ hypre_SSAMGCreateInterpOp( hypre_SStructMatrix  *A,
    /*-------------------------------------------------------
     * Allocate data
     *-------------------------------------------------------*/
-   st_shape     = hypre_CTAlloc(hypre_Index *, dom_nparts);
-   dom_strides  = hypre_CTAlloc(hypre_Index, dom_nparts);
-   num_centries = hypre_CTAlloc(HYPRE_Int, dom_nparts);
+   st_shape     = hypre_CTAlloc(hypre_Index *, nparts);
+   strides      = hypre_CTAlloc(hypre_Index, nparts);
+   num_centries = hypre_CTAlloc(HYPRE_Int, nparts);
 
    /*-------------------------------------------------------
     * Create SStructGraph data structure for P
     *-------------------------------------------------------*/
-   HYPRE_SStructGraphCreate(comm, dom_grid, ran_grid, &graph_P);
-   stencils_P = hypre_SStructGraphStencils(graph_P);
-   pmaps = hypre_SStructGraphActivePMaps(graph_P);
+   HYPRE_SStructGraphCreate(comm, grid, &graph_P);
 
-   for (part = 0; part < dom_nparts; part++)
+   /* Set domain grid. This is needed in order to SStructUMatrixSetBoxValues be
+      able to compute the correct column indices in case of rectangular matrices */
+   HYPRE_SStructGraphSetDomainGrid(graph_P, dom_grid);
+
+   /* Set stencil entries */
+   stencils_P = hypre_SStructGraphStencils(graph_P);
+   for (part = 0; part < nparts; part++)
    {
-      cdir    = cdir_p[dom_pids[part]];
-      pmatrix = hypre_SStructMatrixPMatrix(A, pmaps[part]);
+      cdir    = cdir_p[part];
+      pmatrix = hypre_SStructMatrixPMatrix(A, part);
       nvars   = hypre_SStructPMatrixNVars(pmatrix);
 
-      /* Coarsening in direction cdir by a factor of 2 */
-      hypre_SetIndex(dom_strides[part], 1);
-      hypre_IndexD(dom_strides[part], cdir) = 2;
+      hypre_printf("Part %d - cdir: %d\n", part, cdir);
 
-      stencil_size_P     = 3;
-      st_shape[part]     = hypre_CTAlloc(hypre_Index, stencil_size_P);
-      num_centries[part] = stencil_size_P;
-      for (vi = 0; vi < nvars; vi++)
+      hypre_SetIndex(strides[part], 1);
+      if (cdir > -1)
       {
-         smatrix = hypre_SStructPMatrixSMatrix(pmatrix, vi, vi);
-         stencil = hypre_StructMatrixStencil(smatrix);
-         stencil_size_A = hypre_StructStencilSize(stencil);
+         /* Coarsening in direction cdir by a factor of 2 */
+         hypre_IndexD(strides[part], cdir) = 2;
 
-         /* Set up the stencil for P(cpart, vi, vi) */
-         for (i = 0; i < stencil_size_P; i++)
+         stencil_size_P     = 3;
+         st_shape[part]     = hypre_CTAlloc(hypre_Index, stencil_size_P);
+         num_centries[part] = stencil_size_P;
+         for (vi = 0; vi < nvars; vi++)
          {
-            hypre_SetIndex(st_shape[part][i], 0);
-         }
-         hypre_IndexD(st_shape[part][1], cdir) = -1;
-         hypre_IndexD(st_shape[part][2], cdir) =  1;
+            smatrix = hypre_SStructPMatrixSMatrix(pmatrix, vi, vi);
+            stencil = hypre_StructMatrixStencil(smatrix);
+            stencil_size_A = hypre_StructStencilSize(stencil);
 
-         /* Create stencil for P(part, vi) */
-         HYPRE_SStructStencilCreate(ndim, stencil_size_P, &stencils_P[part][vi]);
-         for (s = 0; s < stencil_size_P; s++)
-         {
-            HYPRE_SStructStencilSetEntry(stencils_P[part][vi], s, st_shape[part][s], vi);
-         }
-
-         /* Figure out which entries to make constant (ncentries) */
-         for (i = 0; i < stencil_size_A; i++)
-         {
-            /* Check for entries in A in direction cdir that are variable */
-            if (hypre_IndexD(hypre_StructStencilOffset(stencil, i), cdir) != 0)
+            /* Set up the stencil for P(part, vi, vi) */
+            for (i = 0; i < stencil_size_P; i++)
             {
-               if (!hypre_StructMatrixConstEntry(smatrix, i))
+               hypre_SetIndex(st_shape[part][i], 0);
+            }
+            hypre_IndexD(st_shape[part][1], cdir) = -1;
+            hypre_IndexD(st_shape[part][2], cdir) =  1;
+
+            /* Create stencil for P(part, vi) */
+            HYPRE_SStructStencilCreate(ndim, stencil_size_P, &stencils_P[part][vi]);
+            for (s = 0; s < stencil_size_P; s++)
+            {
+               HYPRE_SStructStencilSetEntry(stencils_P[part][vi], s, st_shape[part][s], vi);
+            }
+
+            /* Figure out which entries to make constant (ncentries) */
+            for (i = 0; i < stencil_size_A; i++)
+            {
+               /* Check for entries in A in direction cdir that are variable */
+               if (hypre_IndexD(hypre_StructStencilOffset(stencil, i), cdir) != 0)
                {
-                  num_centries[part] = 1; /* Make only the diagonal of P constant */
-                  break;
+                  if (!hypre_StructMatrixConstEntry(smatrix, i))
+                  {
+                     num_centries[part] = 1; /* Make only the diagonal of P constant */
+                     break;
+                  }
                }
             }
+         }
+      }
+      else
+      {
+         /* This part is not coarsened */
+         hypre_IndexD(strides[part], 0) = 2;
+         stencil_size_P     = 1;
+         st_shape[part]     = hypre_CTAlloc(hypre_Index, 1);
+         num_centries[part] = stencil_size_P;
+         for (vi = 0; vi < nvars; vi++)
+         {
+            /* Set up the stencil for P(part, vi, vi) */
+            hypre_SetIndex(st_shape[part][0], 0);
+
+            /* Create stencil for P(part, vi) */
+            HYPRE_SStructStencilCreate(ndim, stencil_size_P, &stencils_P[part][vi]);
+            HYPRE_SStructStencilSetEntry(stencils_P[part][vi], 0, st_shape[part][0], vi);
          }
       }
    }
 
    HYPRE_SStructGraphAssemble(graph_P);
    HYPRE_SStructMatrixCreate(comm, graph_P, &P);
-   for (part = 0; part < dom_nparts; part++)
+   for (part = 0; part < nparts; part++)
    {
-      HYPRE_SStructMatrixSetDomainStride(P, part, dom_strides[part]);
+      HYPRE_SStructMatrixSetDomainStride(P, part, strides[part]);
       HYPRE_SStructMatrixSetConstantEntries(P, part, -1, -1, num_centries[part], centries);
    }
    HYPRE_SStructMatrixInitialize(P);
@@ -127,9 +150,9 @@ hypre_SSAMGCreateInterpOp( hypre_SStructMatrix  *A,
 
    /* Free memory */
    HYPRE_SStructGraphDestroy(graph_P);
-   hypre_TFree(dom_strides);
+   hypre_TFree(strides);
    hypre_TFree(num_centries);
-   for (part = 0; part < dom_nparts; part++)
+   for (part = 0; part < nparts; part++)
    {
       hypre_TFree(st_shape[part]);
    }
@@ -148,11 +171,8 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 {
    HYPRE_Int                ndim       = hypre_SStructMatrixNDim(P);
    hypre_SStructGraph      *graph      = hypre_SStructMatrixGraph(P);
-   hypre_SStructGrid       *dom_grid   = hypre_SStructGraphDomGrid(graph);
-   hypre_SStructGrid       *ran_grid   = hypre_SStructGraphRanGrid(graph);
-   HYPRE_Int               *pmaps      = hypre_SStructGraphActivePMaps(graph);
-   HYPRE_Int               *dom_pids   = hypre_SStructGridPartIDs(dom_grid);
-   HYPRE_Int                dom_nparts = hypre_SStructGridNParts(dom_grid);
+   hypre_SStructGrid       *grid       = hypre_SStructGraphGrid(graph);
+   HYPRE_Int                nparts     = hypre_SStructGridNParts(grid);
 
    hypre_SStructPMatrix    *A_p, *P_p;
    hypre_StructMatrix      *A_s, *P_s;
@@ -184,12 +204,12 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
    /*-------------------------------------------------------
     * Set prolongation coefficients for each part
     *-------------------------------------------------------*/
-   for (part = 0; part < dom_nparts; part++)
+   for (part = 0; part < nparts; part++)
    {
-      cdir  = cdir_p[dom_pids[part]];
-      A_p   = hypre_SStructMatrixPMatrix(A, pmaps[part]);
+      cdir  = cdir_p[part];
+      A_p   = hypre_SStructMatrixPMatrix(A, part);
       P_p   = hypre_SStructMatrixPMatrix(P, part);
-      pgrid = hypre_SStructGridPGrid(ran_grid, pmaps[part]);
+      pgrid = hypre_SStructGridPGrid(grid, part);
       nvars = hypre_SStructPMatrixNVars(P_p);
 
       for (vi = 0; vi < nvars; vi++)

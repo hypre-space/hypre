@@ -721,7 +721,7 @@ HYPRE_Int hypre_SSAMGRelaxSetup ( void *ssamg_relax_vdata, hypre_SStructMatrix *
 HYPRE_Int hypre_SSAMGRelaxSetPreRelax ( void  *ssamg_relax_vdata );
 HYPRE_Int hypre_SSAMGRelaxSetPostRelax ( void  *ssamg_relax_vdata );
 HYPRE_Int hypre_SSAMGRelaxSetTol ( void *ssamg_relax_vdata, HYPRE_Real tol );
-HYPRE_Int hypre_SSAMGRelaxSetWeights ( void *ssamg_relax_vdata, HYPRE_Int *pids, HYPRE_Real *relax_weights );
+HYPRE_Int hypre_SSAMGRelaxSetWeights ( void *ssamg_relax_vdata, HYPRE_Real *relax_weights );
 HYPRE_Int hypre_SSAMGRelaxSetMaxIter ( void *ssamg_relax_vdata, HYPRE_Int max_iter );
 HYPRE_Int hypre_SSAMGRelaxSetZeroGuess ( void *ssamg_relax_vdata, HYPRE_Int zero_guess );
 HYPRE_Int hypre_SSAMGRelaxSetType ( void *ssamg_relax_vdata, HYPRE_Int relax_type );

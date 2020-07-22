@@ -147,7 +147,6 @@ typedef struct hypre_SStructGrid_struct
    MPI_Comm                   comm;
    HYPRE_Int                  ndim;
    HYPRE_Int                  nparts;
-   HYPRE_Int                 *part_ids; /* Unique IDs for parts */
 
    /* s-variable info */
    hypre_SStructPGrid       **pgrids;
@@ -195,8 +194,6 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructGridComm(grid)           ((grid) -> comm)
 #define hypre_SStructGridNDim(grid)           ((grid) -> ndim)
 #define hypre_SStructGridNParts(grid)         ((grid) -> nparts)
-#define hypre_SStructGridPartIDs(grid)        ((grid) -> part_ids)
-#define hypre_SStructGridPartID(grid, part)   ((grid) -> part_ids[part])
 #define hypre_SStructGridPGrids(grid)         ((grid) -> pgrids)
 #define hypre_SStructGridPGrid(grid, part)    ((grid) -> pgrids[part])
 #define hypre_SStructGridNNeighbors(grid)     ((grid) -> nneighbors)
@@ -441,16 +438,10 @@ typedef struct hypre_SStructGraph_struct
 {
    MPI_Comm                comm;
    HYPRE_Int               ndim;
-   hypre_SStructGrid      *grid;     /* pointer to base grid */
-   hypre_SStructGrid      *ran_grid; /* range grid */
+   HYPRE_Int               nparts;   /* number of parts */
+   hypre_SStructGrid      *grid;     /* base grid */
    hypre_SStructGrid      *dom_grid; /* domain grid */
    hypre_SStructStencil ***stencils; /* each (part, var) has a stencil */
-
-   /* Active parts data */
-   HYPRE_Int               active_nparts; /* number of active parts */
-   HYPRE_Int              *active_pids;   /* array of active part identifiers */
-   HYPRE_Int              *active_pmaps;  /* indices of active parts */
-   HYPRE_Int              *active_nvars;  /* array of active variables */
 
    /* Info for fem-based user input */
    HYPRE_Int              *fem_nsparse;
@@ -484,7 +475,6 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructGraphComm(graph)           ((graph) -> comm)
 #define hypre_SStructGraphNDim(graph)           ((graph) -> ndim)
 #define hypre_SStructGraphGrid(graph)           ((graph) -> grid)
-#define hypre_SStructGraphRanGrid(graph)        ((graph) -> ran_grid)
 #define hypre_SStructGraphDomGrid(graph)        ((graph) -> dom_grid)
 #define hypre_SStructGraphPGrids(graph) \
    hypre_SStructGridPGrids(hypre_SStructGraphGrid(graph))
@@ -492,10 +482,7 @@ typedef struct hypre_SStructGraph_struct
    hypre_SStructGridPGrid(hypre_SStructGraphGrid(graph), p)
 #define hypre_SStructGraphStencils(graph)       ((graph) -> stencils)
 #define hypre_SStructGraphStencil(graph, p, v)  ((graph) -> stencils[p][v])
-#define hypre_SStructGraphActiveNParts(graph)   ((graph) -> active_nparts)
-#define hypre_SStructGraphActivePartIDs(graph)  ((graph) -> active_pids)
-#define hypre_SStructGraphActivePMaps(graph)    ((graph) -> active_pmaps)
-#define hypre_SStructGraphActiveNVars(graph)    ((graph) -> active_nvars)
+#define hypre_SStructGraphNParts(graph)         ((graph) -> nparts)
 
 #define hypre_SStructGraphFEMNSparse(graph)     ((graph) -> fem_nsparse)
 #define hypre_SStructGraphFEMSparseI(graph)     ((graph) -> fem_sparse_i)
@@ -855,7 +842,7 @@ typedef struct hypre_SStructVector_struct
  ***********************************************************************EHEADER*/
 
 /* HYPRE_sstruct_graph.c */
-HYPRE_Int HYPRE_SStructGraphCreate ( MPI_Comm comm , HYPRE_SStructGrid dom_grid , HYPRE_SStructGrid ran_grid , HYPRE_SStructGraph *graph_ptr );
+HYPRE_Int HYPRE_SStructGraphCreate ( MPI_Comm comm , HYPRE_SStructGrid grid , HYPRE_SStructGraph *graph_ptr );
 HYPRE_Int HYPRE_SStructGraphDestroy ( HYPRE_SStructGraph graph );
 HYPRE_Int HYPRE_SStructGraphSetDomainGrid ( HYPRE_SStructGraph graph , HYPRE_SStructGrid domain_grid );
 HYPRE_Int HYPRE_SStructGraphSetStencil ( HYPRE_SStructGraph graph , HYPRE_Int part , HYPRE_Int var , HYPRE_SStructStencil stencil );
@@ -986,7 +973,7 @@ HYPRE_Int hypre_SStructCellGridBoxNumMap ( hypre_SStructGrid *grid , HYPRE_Int p
 HYPRE_Int hypre_SStructCellBoxToVarBox ( hypre_Box *box , hypre_Index offset , hypre_Index varoffset , HYPRE_Int *valid );
 HYPRE_Int hypre_SStructGridIntersect ( hypre_SStructGrid *grid , HYPRE_Int part , HYPRE_Int var , hypre_Box *box , HYPRE_Int action , hypre_BoxManEntry ***entries_ptr , HYPRE_Int *nentries_ptr );
 HYPRE_Int hypre_SStructGridPrintGLVis ( hypre_SStructGrid *grid, const char *meshprefix, HYPRE_Real *trans, HYPRE_Real *origin );
-HYPRE_Int hypre_SStructGridCoarsen ( hypre_SStructGrid *fgrid, hypre_IndexRef origin, hypre_Index *strides, hypre_Index *periodic, HYPRE_Int prune, hypre_SStructGrid **cgrid_ptr );
+HYPRE_Int hypre_SStructGridCoarsen ( hypre_SStructGrid *fgrid, hypre_IndexRef origin, hypre_Index *strides, hypre_Index *periodic, hypre_SStructGrid **cgrid_ptr );
 
 /* sstruct_innerprod.c */
 HYPRE_Int hypre_SStructPInnerProd ( hypre_SStructPVector *px , hypre_SStructPVector *py , HYPRE_Real *presult_ptr );

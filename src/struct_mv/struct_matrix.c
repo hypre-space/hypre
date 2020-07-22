@@ -1141,24 +1141,25 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
    hypre_StructMatrixGlobalSize(matrix) =
       hypre_StructGridGlobalSize(grid) * stencil_size;
 
-   // Compute number of variables including ghosts (only num_ghost)
-   ghost_box = hypre_BoxCreate(ndim);
-   dom_ghsize = 0; ran_ghsize = 0;
+   /* Compute number of variables including ghosts (only num_ghost) */
+   ghost_box  = hypre_BoxCreate(ndim);
+   dom_ghsize = ran_ghsize = 0;
    hypre_ForBoxI(i, grid_boxes)
    {
-      box = hypre_BoxArrayBox(grid_boxes, i);
-
-      if (hypre_BoxVolume(box))
+      /* Domain grid (columns) */
+      hypre_CopyBox(hypre_BoxArrayBox(grid_boxes, i), ghost_box);
+      hypre_CoarsenBox(ghost_box, NULL, dom_stride);
+      if (hypre_BoxVolume(ghost_box))
       {
-         /* Domain grid (columns) */
-         hypre_CopyBox(box, ghost_box);
-         hypre_CoarsenBox(ghost_box, NULL, dom_stride);
          hypre_BoxGrowByArray(ghost_box, num_ghost);
          dom_ghsize += hypre_BoxVolume(ghost_box);
+      }
 
-         /* Range grid (rows) */
-         hypre_CopyBox(box, ghost_box);
-         hypre_CoarsenBox(ghost_box, NULL, ran_stride);
+      /* Range grid (columns) */
+      hypre_CopyBox(hypre_BoxArrayBox(grid_boxes, i), ghost_box);
+      hypre_CoarsenBox(ghost_box, NULL, ran_stride);
+      if (hypre_BoxVolume(ghost_box))
+      {
          hypre_BoxGrowByArray(ghost_box, num_ghost);
          ran_ghsize += hypre_BoxVolume(ghost_box);
       }

@@ -24,14 +24,13 @@
 typedef struct hypre_SSAMGData_struct
 {
    hypre_MPI_Comm          comm;
-   HYPRE_Int              *nparts; /* number of active parts per level */
+   HYPRE_Int               nparts;
 
    HYPRE_Real              tol;
    HYPRE_Int               max_iter;
    HYPRE_Int               max_levels; /* max_level <= 0 means no limit */
    HYPRE_Int               rel_change;
    HYPRE_Int               zero_guess;
-
    HYPRE_Int               num_levels;       /* number of levels of the multigrid hierarchy */
    HYPRE_Int               num_pre_relax;    /* number of pre relaxation sweeps */
    HYPRE_Int               num_post_relax;   /* number of post relaxation sweeps */

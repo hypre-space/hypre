@@ -18,22 +18,13 @@
 
 #include "_hypre_sstruct_mv.h"
 
-/*--------------------------------------------------------------------------
- * NOTE:
- *       1) This function assumes that the domain grid is a coarsening of
- *          the range grid.
- *--------------------------------------------------------------------------*/
-
 HYPRE_Int
 HYPRE_SStructGraphCreate( MPI_Comm             comm,
-                          HYPRE_SStructGrid    dom_grid,
-                          HYPRE_SStructGrid    ran_grid,
+                          HYPRE_SStructGrid    grid,
                           HYPRE_SStructGraph  *graph_ptr )
 {
    hypre_SStructGraph     *graph;
-   HYPRE_Int               dom_nparts = hypre_SStructGridNParts(dom_grid);
-   HYPRE_Int               ran_nparts = hypre_SStructGridNParts(ran_grid);
-   HYPRE_Int              *ran_pids   = hypre_SStructGridPartIDs(ran_grid);
+   HYPRE_Int               nparts = hypre_SStructGridNParts(grid);
 
    hypre_SStructStencil ***stencils;
    hypre_SStructPGrid     *pgrid;
@@ -42,51 +33,25 @@ HYPRE_SStructGraphCreate( MPI_Comm             comm,
    HYPRE_Int             **fem_sparse_j;
    HYPRE_Int             **fem_entries;
 
-   HYPRE_Int               active_nparts;
-   HYPRE_Int              *active_nvars;
-   HYPRE_Int              *active_pids;
-   HYPRE_Int              *active_pmaps;
-
    HYPRE_Int               part, var, nvars;
-   HYPRE_Int               active_part;
 
    graph = hypre_TAlloc(hypre_SStructGraph, 1);
 
    hypre_SStructGraphComm(graph) = comm;
-   hypre_SStructGraphNDim(graph) = hypre_SStructGridNDim(ran_grid);
-   hypre_SStructGridRef(dom_grid, &hypre_SStructGraphDomGrid(graph));
-   hypre_SStructGridRef(ran_grid, &hypre_SStructGraphRanGrid(graph));
-   hypre_SStructGridRef(ran_grid, &hypre_SStructGraphGrid(graph));
-   if (ran_nparts > dom_nparts)
-   {
-      active_nparts = dom_nparts;
-      active_pids   = hypre_SStructGridPartIDs(dom_grid);
-   }
-   else
-   {
-      active_nparts = ran_nparts;
-      active_pids   = hypre_SStructGridPartIDs(ran_grid);
-   }
-   hypre_SStructGraphActiveNParts(graph)  = active_nparts;
-   hypre_SStructGraphActivePartIDs(graph) = active_pids;
+   hypre_SStructGraphNDim(graph) = hypre_SStructGridNDim(grid);
+   hypre_SStructGridRef(grid, &hypre_SStructGraphGrid(graph));
+   hypre_SStructGridRef(grid, &hypre_SStructGraphDomGrid(graph));
+   hypre_SStructGraphNParts(graph)  = nparts;
 
-   stencils     = hypre_TAlloc(hypre_SStructStencil **, active_nparts);
-   active_nvars = hypre_TAlloc(HYPRE_Int,   active_nparts);
-   active_pmaps = hypre_TAlloc(HYPRE_Int,   active_nparts);
-   fem_nsparse  = hypre_TAlloc(HYPRE_Int,   active_nparts);
-   fem_sparse_i = hypre_TAlloc(HYPRE_Int *, active_nparts);
-   fem_sparse_j = hypre_TAlloc(HYPRE_Int *, active_nparts);
-   fem_entries  = hypre_TAlloc(HYPRE_Int *, active_nparts);
-   for (part = 0; part < active_nparts; part++)
+   stencils     = hypre_TAlloc(hypre_SStructStencil **, nparts);
+   fem_nsparse  = hypre_TAlloc(HYPRE_Int,   nparts);
+   fem_sparse_i = hypre_TAlloc(HYPRE_Int *, nparts);
+   fem_sparse_j = hypre_TAlloc(HYPRE_Int *, nparts);
+   fem_entries  = hypre_TAlloc(HYPRE_Int *, nparts);
+   for (part = 0; part < nparts; part++)
    {
-      /* Find index of active part */
-      active_part = hypre_BinarySearch(ran_pids, active_pids[part], ran_nparts);
-      active_pmaps[part] = active_part;
-
-      /* Set number of active variables */
-      pgrid = hypre_SStructGraphPGrid(graph, active_part);
+      pgrid = hypre_SStructGraphPGrid(graph, part);
       nvars = hypre_SStructPGridNVars(pgrid);
-      active_nvars[part] = nvars;
 
       /* Allocate/Initialize pointers */
       stencils[part]     = hypre_TAlloc(hypre_SStructStencil *, nvars);
@@ -100,8 +65,6 @@ HYPRE_SStructGraphCreate( MPI_Comm             comm,
       }
    }
    hypre_SStructGraphStencils(graph)    = stencils;
-   hypre_SStructGraphActiveNVars(graph) = active_nvars;
-   hypre_SStructGraphActivePMaps(graph) = active_pmaps;
    hypre_SStructGraphFEMNSparse(graph)  = fem_nsparse;
    hypre_SStructGraphFEMSparseJ(graph)  = fem_sparse_i;
    hypre_SStructGraphFEMSparseI(graph)  = fem_sparse_j;
@@ -133,8 +96,8 @@ HYPRE_Int
 HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
 {
    HYPRE_Int               nparts;
-   HYPRE_Int              *nvars;
-   HYPRE_Int              *pmaps;
+   HYPRE_Int               nvars;
+   hypre_SStructPGrid     *pgrid;
    hypre_SStructStencil ***stencils;
    HYPRE_Int              *fem_nsparse;
    HYPRE_Int             **fem_sparse_i;
@@ -152,11 +115,7 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
       hypre_SStructGraphRefCount(graph) --;
       if (hypre_SStructGraphRefCount(graph) == 0)
       {
-         /* Active part data */
-         nparts = hypre_SStructGraphActiveNParts(graph);
-         pmaps  = hypre_SStructGraphActivePMaps(graph);
-         nvars  = hypre_SStructGraphActiveNVars(graph);
-         hypre_SStructGraphActivePartIDs(graph) = NULL;
+         nparts = hypre_SStructGraphNParts(graph);
 
          /* FEM data */
          fem_nsparse  = hypre_SStructGraphFEMNSparse(graph);
@@ -175,7 +134,10 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
 
          for (part = 0; part < nparts; part++)
          {
-            for (var = 0; var < nvars[part]; var++)
+            pgrid = hypre_SStructGraphPGrid(graph, part);
+            nvars = hypre_SStructPGridNVars(pgrid);
+
+            for (var = 0; var < nvars; var++)
             {
                HYPRE_SStructStencilDestroy(stencils[part][var]);
             }
@@ -186,10 +148,7 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
             hypre_TFree(Uveoffsets[part]);
          }
          HYPRE_SStructGridDestroy(hypre_SStructGraphGrid(graph));
-         HYPRE_SStructGridDestroy(hypre_SStructGraphRanGrid(graph));
          HYPRE_SStructGridDestroy(hypre_SStructGraphDomGrid(graph));
-         hypre_TFree(pmaps);
-         hypre_TFree(nvars);
          hypre_TFree(stencils);
          hypre_TFree(fem_nsparse);
          hypre_TFree(fem_sparse_i);
@@ -365,8 +324,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    HYPRE_Int                 ndim        = hypre_SStructGraphNDim(graph);
    hypre_SStructGrid        *grid        = hypre_SStructGraphGrid(graph);
    hypre_SStructGrid        *dom_grid    = hypre_SStructGraphDomGrid(graph);
-   HYPRE_Int                 nparts      = hypre_SStructGraphActiveNParts(graph);
-   HYPRE_Int                *pmaps       = hypre_SStructGraphActivePMaps(graph);
+   HYPRE_Int                 nparts      = hypre_SStructGraphNParts(graph);
    hypre_SStructStencil   ***stencils    = hypre_SStructGraphStencils(graph);
    HYPRE_Int                 nUventries;
    HYPRE_Int                *iUventries;
@@ -451,7 +409,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
 
       for (part = 0; part < nparts; part++)
       {
-         pgrid = hypre_SStructGridPGrid(grid, pmaps[part]);
+         pgrid = hypre_SStructGridPGrid(grid, part);
          nvars = hypre_SStructPGridNVars(pgrid);
 
          new_managers[part] = hypre_TAlloc(hypre_BoxManager *, nvars);
@@ -530,7 +488,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          manager and then assemble and delete the old manager. */
       for (part = 0; part < nparts; part++)
       {
-         pgrid = hypre_SStructGridPGrid(grid, pmaps[part]);
+         pgrid = hypre_SStructGridPGrid(grid, part);
          nvars = hypre_SStructPGridNVars(pgrid);
 
          for (var = 0; var < nvars; var++)
@@ -622,7 +580,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    Uveoffsets = hypre_TAlloc(HYPRE_Int *, nparts);
    for (part = 0; part < nparts; part++)
    {
-      pgrid = hypre_SStructGridPGrid(grid, pmaps[part]);
+      pgrid = hypre_SStructGridPGrid(grid, part);
       nvars = hypre_SStructPGridNVars(pgrid);
 
       Uveoffsets[part] = hypre_TAlloc(HYPRE_Int, nvars);
@@ -748,7 +706,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          hypre_Index **stencil_offsets;
          HYPRE_Int   **stencil_vars;
 
-         pgrid = hypre_SStructGridPGrid(grid, pmaps[part]);
+         pgrid = hypre_SStructGridPGrid(grid, part);
          nvars = hypre_SStructPGridNVars(pgrid);
 
          /* build default full sparsity pattern if nothing set by user */

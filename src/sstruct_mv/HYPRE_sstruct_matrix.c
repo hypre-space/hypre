@@ -28,7 +28,7 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
 {
    hypre_SStructGrid      *grid     = hypre_SStructGraphGrid(graph);
    hypre_SStructStencil ***stencils = hypre_SStructGraphStencils(graph);
-   HYPRE_Int               nparts   = hypre_SStructGraphActiveNParts(graph);
+   HYPRE_Int               nparts   = hypre_SStructGraphNParts(graph);
 
    hypre_SStructMatrix    *matrix;
    hypre_SStructPMatrix  **pmatrices;
@@ -48,7 +48,7 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
 
    HYPRE_SStructVariable   vitype, vjtype;
    HYPRE_Int               part, vi, vj, i;
-   HYPRE_Int               size;
+   HYPRE_Int               size, usize;
 
    matrix = hypre_TAlloc(hypre_SStructMatrix, 1);
 
@@ -121,6 +121,7 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
          hypre_SetIndex(ran_stride[part], 1);
       }
    }
+   usize = size + hypre_SStructGraphUEMaxSize(graph);
 
    for (part = 0; part < nparts; part++)
    {
@@ -136,22 +137,13 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
       }
    }
 
-   /* GEC0902 move the IJ creation to the initialization phase
-    * ilower = hypre_SStructGridGhstartRank(grid);
-    * iupper = ilower + hypre_SStructGridGhlocalSize(grid) - 1;
-    * HYPRE_IJMatrixCreate(comm, ilower, iupper, ilower, iupper,
-    *                    &hypre_SStructMatrixIJMatrix(matrix)); */
-
-   hypre_SStructMatrixIJMatrix(matrix)     = NULL;
-   hypre_SStructMatrixParCSRMatrix(matrix) = NULL;
-
-   hypre_SStructMatrixSEntries(matrix) = hypre_TAlloc(HYPRE_Int, size);
-   size += hypre_SStructGraphUEMaxSize(graph);
-   hypre_SStructMatrixUEntries(matrix) = hypre_TAlloc(HYPRE_Int, size);
-   hypre_SStructMatrixEntriesSize(matrix)  = size;
-   hypre_SStructMatrixTmpColCoords(matrix) = NULL;
-   hypre_SStructMatrixTmpCoeffs(matrix)    = NULL;
-
+   hypre_SStructMatrixIJMatrix(matrix)       = NULL;
+   hypre_SStructMatrixParCSRMatrix(matrix)   = NULL;
+   hypre_SStructMatrixSEntries(matrix)       = hypre_TAlloc(HYPRE_Int, size);
+   hypre_SStructMatrixUEntries(matrix)       = hypre_TAlloc(HYPRE_Int, usize);
+   hypre_SStructMatrixEntriesSize(matrix)    = usize;
+   hypre_SStructMatrixTmpColCoords(matrix)   = NULL;
+   hypre_SStructMatrixTmpCoeffs(matrix)      = NULL;
    hypre_SStructMatrixNSSymmetric(matrix)    = 0;
    hypre_SStructMatrixGlobalSize(matrix)     = 0;
    hypre_SStructMatrixRefCount(matrix)       = 1;
@@ -257,12 +249,8 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
    HYPRE_Int               matrix_type  = hypre_SStructMatrixObjectType(matrix);
    hypre_Index            *dom_stride   = hypre_SStructMatrixDomainStride(matrix);
    hypre_Index            *ran_stride   = hypre_SStructMatrixRangeStride(matrix);
-
    hypre_SStructGraph     *graph        = hypre_SStructMatrixGraph(matrix);
-   HYPRE_Int              *pmaps        = hypre_SStructGraphActivePMaps(graph);
    hypre_SStructStencil ***stencils     = hypre_SStructGraphStencils(graph);
-   hypre_SStructGrid      *dom_grid     = hypre_SStructGraphDomGrid(graph);
-   hypre_SStructGrid      *ran_grid     = hypre_SStructGraphRanGrid(graph);
    hypre_SStructGrid      *grid         = hypre_SStructGraphGrid(graph);
 
    HYPRE_Int              *split;
@@ -281,15 +269,15 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
    HYPRE_Int               part, var, i, vi, vj;
 
    hypre_BoxArray         *boxes;
-   hypre_Box              *box, *ghost_box;
+   hypre_Box              *box;
    HYPRE_Int              *num_ghost;
-   HYPRE_Int               ran_volume, dom_volume;
+   HYPRE_Int               nrows, ncols;
    HYPRE_Int               ilower, iupper, jlower, jupper;
 
    /* S-matrix */
    for (part = 0; part < nparts; part++)
    {
-      pgrid = hypre_SStructGridPGrid(grid, pmaps[part]);
+      pgrid = hypre_SStructGridPGrid(grid, part);
       nvars = hypre_SStructPGridNVars(pgrid);
       pstencils = hypre_TAlloc(hypre_SStructStencil *, nvars);
 
@@ -347,88 +335,75 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
     *  the right dimension (HYPRE_PARCSR without ghosts) */
 
    // TODO: Move this to assemble?
-   ilower = 0; iupper = 0;
-   jlower = 0; jupper = 0;
-   dom_volume = 0; ran_volume = 0;
+   ilower = iupper = 0;
+   jlower = jupper = 0;
+   nrows  = ncols  = 0;
+   box = hypre_BoxCreate(ndim);
    if (matrix_type == HYPRE_PARCSR)
    {
-      nparts = hypre_SStructGridNParts(dom_grid);
       for (part = 0; part < nparts; part++)
       {
-         pgrid = hypre_SStructGridPGrid(dom_grid, part);
+         pgrid = hypre_SStructGridPGrid(grid, part);
          nvars = hypre_SStructPGridNVars(pgrid);
          for (var = 0; var < nvars; var++)
          {
-            sgrid = hypre_SStructPGridSGrid(pgrid, var);
-            boxes = hypre_StructGridBoxes(sgrid);
-            dom_volume += hypre_BoxArrayVolume(boxes);
-         }
-      }
+            sgrid  = hypre_SStructPGridSGrid(pgrid, var);
+            boxes  = hypre_StructGridBoxes(sgrid);
+            hypre_ForBoxI(i, boxes)
+            {
+               /* Range grid (rows) */
+               hypre_CopyBox(hypre_BoxArrayBox(boxes, i), box);
+               hypre_CoarsenBox(box, NULL, ran_stride[part]);
+               nrows += hypre_BoxVolume(box);
 
-      nparts = hypre_SStructGridNParts(ran_grid);
-      for (part = 0; part < nparts; part++)
-      {
-         pgrid = hypre_SStructGridPGrid(ran_grid, part);
-         nvars = hypre_SStructPGridNVars(pgrid);
-         for (var = 0; var < nvars; var++)
-         {
-            sgrid = hypre_SStructPGridSGrid(pgrid, var);
-            boxes = hypre_StructGridBoxes(sgrid);
-            ran_volume += hypre_BoxArrayVolume(boxes);
+               /* Domain grid (cols) */
+               hypre_CopyBox(hypre_BoxArrayBox(boxes, i), box);
+               hypre_CoarsenBox(box, NULL, dom_stride[part]);
+               ncols += hypre_BoxVolume(box);
+            }
          }
       }
    }
    else /* matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT */
    {
-      ghost_box = hypre_BoxCreate(ndim);
-      nparts = hypre_SStructGridNParts(dom_grid);
       for (part = 0; part < nparts; part++)
       {
-         pgrid = hypre_SStructGridPGrid(dom_grid, part);
+         pgrid = hypre_SStructGridPGrid(grid, part);
          nvars = hypre_SStructPGridNVars(pgrid);
          for (var = 0; var < nvars; var++)
          {
-            sgrid = hypre_SStructPGridSGrid(pgrid, var);
-            boxes = hypre_StructGridBoxes(sgrid);
+            sgrid     = hypre_SStructPGridSGrid(pgrid, var);
+            boxes     = hypre_StructGridBoxes(sgrid);
             num_ghost = hypre_StructGridNumGhost(sgrid);
-
             hypre_ForBoxI(i, boxes)
             {
-               box = hypre_BoxArrayBox(boxes, i);
-               hypre_CopyBox(box, ghost_box);
-               hypre_BoxGrowByArray(ghost_box, num_ghost);
-               dom_volume += hypre_BoxVolume(ghost_box);
+               /* Range grid (rows) */
+               hypre_CopyBox(hypre_BoxArrayBox(boxes, i), box);
+               hypre_CoarsenBox(box, NULL, ran_stride[part]);
+               if (hypre_BoxVolume(box))
+               {
+                  hypre_BoxGrowByArray(box, num_ghost);
+                  nrows += hypre_BoxVolume(box);
+               }
+
+               /* Domain grid (columns) */
+               hypre_CopyBox(hypre_BoxArrayBox(boxes, i), box);
+               hypre_CoarsenBox(box, NULL, dom_stride[part]);
+               if (hypre_BoxVolume(box))
+               {
+                  hypre_BoxGrowByArray(box, num_ghost);
+                  ncols += hypre_BoxVolume(box);
+               }
             }
          }
       }
-
-      nparts = hypre_SStructGridNParts(ran_grid);
-      for (part = 0; part < nparts; part++)
-      {
-         pgrid = hypre_SStructGridPGrid(ran_grid, part);
-         nvars = hypre_SStructPGridNVars(pgrid);
-         for (var = 0; var < nvars; var++)
-         {
-            sgrid = hypre_SStructPGridSGrid(pgrid, var);
-            boxes = hypre_StructGridBoxes(sgrid);
-            num_ghost = hypre_StructGridNumGhost(sgrid);
-
-            hypre_ForBoxI(i, boxes)
-            {
-               box = hypre_BoxArrayBox(boxes, i);
-               hypre_CopyBox(box, ghost_box);
-               hypre_BoxGrowByArray(ghost_box, num_ghost);
-               ran_volume += hypre_BoxVolume(ghost_box);
-            }
-         }
-      }
-      hypre_BoxDestroy(ghost_box);
    }
-   hypre_MPI_Scan(&ran_volume, &iupper, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
-   hypre_MPI_Scan(&dom_volume, &jupper, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+   hypre_BoxDestroy(box);
+   hypre_MPI_Scan(&nrows, &iupper, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+   hypre_MPI_Scan(&ncols, &jupper, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
 
-   ilower = iupper - ran_volume;
-   jlower = jupper - dom_volume;
+   ilower = iupper - nrows;
+   jlower = jupper - ncols;
    iupper--; jupper--;
    HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper,
                         &hypre_SStructMatrixIJMatrix(matrix));
@@ -437,8 +412,8 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
    /* Set start rank and local size of variables, including ghosts, relative
       to the domain and range grids */
    /* TODO: We don't need to save this info in the SStructMatrix data structure */
-   hypre_SStructMatrixDomGhlocalSize(matrix) = dom_volume;
-   hypre_SStructMatrixRanGhlocalSize(matrix) = ran_volume;
+   hypre_SStructMatrixDomGhlocalSize(matrix) = ncols;
+   hypre_SStructMatrixRanGhlocalSize(matrix) = nrows;
    hypre_SStructMatrixDomGhstartRank(matrix) = jlower;
    hypre_SStructMatrixRanGhstartRank(matrix) = ilower;
 
@@ -634,11 +609,11 @@ HYPRE_SStructMatrixGetBoxValues( HYPRE_SStructMatrix  matrix,
 HYPRE_Int
 HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
 {
-   HYPRE_Int               ndim           = hypre_SStructMatrixNDim(matrix);
-   hypre_SStructGraph     *graph          = hypre_SStructMatrixGraph(matrix);
-   HYPRE_Int               nparts         = hypre_SStructMatrixNParts(matrix);
-   hypre_SStructPMatrix  **pmatrices      = hypre_SStructMatrixPMatrices(matrix);
-   hypre_SStructGrid      *grid           = hypre_SStructGraphGrid(graph);
+   HYPRE_Int               ndim            = hypre_SStructMatrixNDim(matrix);
+   hypre_SStructGraph     *graph           = hypre_SStructMatrixGraph(matrix);
+   HYPRE_Int               nparts          = hypre_SStructMatrixNParts(matrix);
+   hypre_SStructPMatrix  **pmatrices       = hypre_SStructMatrixPMatrices(matrix);
+   hypre_SStructGrid      *grid            = hypre_SStructGraphGrid(graph);
    hypre_SStructCommInfo **vnbor_comm_info = hypre_SStructGridVNborCommInfo(grid);
    HYPRE_Int               vnbor_ncomms    = hypre_SStructGridVNborNComms(grid);
 
@@ -652,7 +627,6 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
    HYPRE_Complex         **send_data, **recv_data;
    hypre_CommHandle       *comm_handle;
    HYPRE_Int               ci, num_comm_pkgs;
-
 
    /*------------------------------------------------------
     * NOTE: Inter-part couplings were taken care of earlier.
@@ -900,7 +874,7 @@ HYPRE_SStructMatrixSetSymmetric( HYPRE_SStructMatrix matrix,
 {
    HYPRE_Int          ***msymmetric = hypre_SStructMatrixSymmetric(matrix);
    hypre_SStructGraph   *graph      = hypre_SStructMatrixGraph(matrix);
-   HYPRE_Int            *nvars      = hypre_SStructGraphActiveNVars(graph);
+   hypre_SStructPGrid   *pgrid      = hypre_SStructGraphPGrid(graph, part);
 
    HYPRE_Int             pstart = part;
    HYPRE_Int             psize  = 1;
@@ -921,12 +895,12 @@ HYPRE_SStructMatrixSetSymmetric( HYPRE_SStructMatrix matrix,
       if (var == -1)
       {
          vstart = 0;
-         vsize  = nvars[p];
+         vsize  = hypre_SStructPGridNVars(pgrid);
       }
       if (to_var == -1)
       {
          tstart = 0;
-         tsize  = nvars[p];
+         tsize  = hypre_SStructPGridNVars(pgrid);
       }
 
       for (v = vstart; v < (vstart + vsize); v++)
@@ -955,7 +929,7 @@ HYPRE_SStructMatrixSetConstantEntries( HYPRE_SStructMatrix matrix,
    HYPRE_Int            ***mnum_centries = hypre_SStructMatrixNumCEntries(matrix);
    HYPRE_Int           ****mcentries     = hypre_SStructMatrixCEntries(matrix);
    hypre_SStructGraph     *graph         = hypre_SStructMatrixGraph(matrix);
-   HYPRE_Int              *nvars         = hypre_SStructGraphActiveNVars(graph);
+   hypre_SStructPGrid     *pgrid         = hypre_SStructGraphPGrid(graph, part);
 
    HYPRE_Int               pstart = part;
    HYPRE_Int               psize  = 1;
@@ -976,12 +950,12 @@ HYPRE_SStructMatrixSetConstantEntries( HYPRE_SStructMatrix matrix,
       if (var == -1)
       {
          vstart = 0;
-         vsize  = nvars[p];
+         vsize  = hypre_SStructPGridNVars(pgrid);
       }
       if (to_var == -1)
       {
          tstart = 0;
-         tsize  = nvars[p];
+         tsize  = hypre_SStructPGridNVars(pgrid);
       }
 
       for (v = vstart; v < (vstart + vsize); v++)
@@ -1060,7 +1034,7 @@ HYPRE_Int
 HYPRE_SStructMatrixGetObject( HYPRE_SStructMatrix   matrix,
                               void                **object )
 {
-   HYPRE_Int             type     = hypre_SStructMatrixObjectType(matrix);
+   HYPRE_Int             type = hypre_SStructMatrixObjectType(matrix);
    hypre_SStructPMatrix *pmatrix;
    hypre_StructMatrix   *smatrix;
    HYPRE_Int             part, var;
@@ -1076,11 +1050,10 @@ HYPRE_SStructMatrixGetObject( HYPRE_SStructMatrix   matrix,
    else if (type == HYPRE_STRUCT)
    {
       /* only one part & one variable */
-      part = 0;
-      var = 0;
+      part = var = 0;
       pmatrix = hypre_SStructMatrixPMatrix(matrix, part);
       smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, var);
-     *object = smatrix;
+     *object  = smatrix;
    }
 
    return hypre_error_flag;
