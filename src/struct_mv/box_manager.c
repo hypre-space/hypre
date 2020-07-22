@@ -568,14 +568,13 @@ hypre_BoxManIncSize ( hypre_BoxManager *manager,
 
    /* my ids temporary structure (destroyed in assemble) */
    {
-      HYPRE_Int *my_ids = hypre_BoxManMyIds(manager);
-      hypre_BoxManEntry  **my_entries = hypre_BoxManMyEntries(manager);
+      HYPRE_Int          *my_ids     = hypre_BoxManMyIds(manager);
+      hypre_BoxManEntry **my_entries = hypre_BoxManMyEntries(manager);
 
       my_ids = hypre_TReAlloc(my_ids, HYPRE_Int, max_nentries);
-
       my_entries = hypre_TReAlloc(my_entries, hypre_BoxManEntry *, max_nentries);
 
-      hypre_BoxManMyIds(manager) = my_ids;
+      hypre_BoxManMyIds(manager)     = my_ids;
       hypre_BoxManMyEntries(manager) = my_entries;
    }
 
@@ -589,35 +588,28 @@ hypre_BoxManIncSize ( hypre_BoxManager *manager,
 HYPRE_Int
 hypre_BoxManDestroy( hypre_BoxManager *manager )
 {
-   HYPRE_Int ndim = hypre_BoxManNDim(manager);
-   HYPRE_Int d;
+   HYPRE_Int d, ndim;
 
    if (manager)
    {
+      ndim = hypre_BoxManNDim(manager);
+
       for (d = 0; d < ndim; d++)
       {
          hypre_TFree(hypre_BoxManIndexesD(manager, d));
       }
 
       hypre_TFree(hypre_BoxManEntries(manager));
-
-      hypre_Free((char *)hypre_BoxManInfoObjects(manager));
-
+      hypre_TFree(hypre_BoxManInfoObjects(manager));
       hypre_TFree(hypre_BoxManIndexTable(manager));
-
       hypre_TFree(hypre_BoxManIdsSort(manager));
       hypre_TFree(hypre_BoxManProcsSort(manager));
       hypre_TFree(hypre_BoxManProcsSortOffsets(manager));
-
       hypre_BoxArrayDestroy(hypre_BoxManGatherRegions(manager));
-
       hypre_TFree(hypre_BoxManMyIds(manager));
       hypre_TFree(hypre_BoxManMyEntries(manager));
-
       hypre_StructAssumedPartitionDestroy(hypre_BoxManAssumedPartition(manager));
-
       hypre_BoxDestroy(hypre_BoxManBoundingBox(manager));
-
       hypre_TFree(manager);
    }
 
