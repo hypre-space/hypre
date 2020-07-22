@@ -362,6 +362,7 @@ HYPRE_Int hypre_MPI_Type_commit( hypre_MPI_Datatype *datatype );
 HYPRE_Int hypre_MPI_Type_free( hypre_MPI_Datatype *datatype );
 HYPRE_Int hypre_MPI_Op_free( hypre_MPI_Op *op );
 HYPRE_Int hypre_MPI_Op_create( hypre_MPI_User_function *function , hypre_int commute , hypre_MPI_Op *op );
+HYPRE_Int hypre_MPI_CheckCommMatrix( hypre_MPI_Comm comm , HYPRE_Int num_recvs , HYPRE_Int *recvs , HYPRE_Int num_sends , HYPRE_Int *sends );
 
 #ifdef __cplusplus
 }
