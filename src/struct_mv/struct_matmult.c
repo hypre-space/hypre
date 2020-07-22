@@ -61,7 +61,7 @@
  *   Mdstride = stride 1
  *   cdstride = loop_stride / cstride (= stride 1)
  *   fdstride = loop_stride / fstride
- *   
+ *
  * Here are some examples:
  *
  *   fstride = 2, cstride = 6
@@ -335,19 +335,18 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
    const_values  = hypre_TAlloc(HYPRE_Complex, size);
    a = hypre_TAlloc(struct a_struct, na);
 
+   comm_stencils = hypre_TAlloc(hypre_CommStencil *, nmatrices+1);
+   for (m = 0; m < nmatrices+1; m++)
+   {
+      comm_stencils[m] = hypre_CommStencilCreate(ndim);
+   }
+
    na = 0;
    nconst = 0;
    need_mask = 0;
    if (hypre_StructGridNumBoxes(grid) > 0)
    {
-      comm_stencils = hypre_TAlloc(hypre_CommStencil *, nmatrices+1);
-      for (m = 0; m < nmatrices+1; m++)
-      {
-         comm_stencils[m] = hypre_CommStencilCreate(ndim);
-      }
-
       i = 0;
-
       for (e = 0; e < size; e++)  /* Loop over each stencil coefficient in st_M */
       {
          const_entry = 1;
@@ -456,27 +455,6 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
    /* Free up some stuff */
    hypre_TFree(const_entries);
    hypre_TFree(const_values);
-
-   /* If all constant coefficients, return */
-   if (na == 0)
-   {
-      /* Free up some stuff */
-      hypre_StMatrixDestroy(st_M);
-      hypre_TFree(matrices);
-      hypre_TFree(terms);
-      hypre_TFree(a);
-      if (hypre_StructGridNumBoxes(grid) > 0)
-      {
-         for (m = 0; m < nmatrices+1; m++)
-         {
-            hypre_CommStencilDestroy(comm_stencils[m]);
-         }
-         hypre_TFree(comm_stencils);
-      }
-
-      HYPRE_StructMatrixAssemble(M);
-      return hypre_error_flag;
-   }
 
    /* Set variable values in M */
 
@@ -793,7 +771,7 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
    hypre_MapToCoarseIndex(fdstride, NULL, fstride, ndim);
    hypre_CopyToIndex(loop_stride, ndim, cdstride);
    hypre_MapToCoarseIndex(cdstride, NULL, cstride, ndim); /* Should be cdstride = 1 */
-      
+
    b = 0;
    for (Mj = 0; Mj < hypre_StructMatrixRanNBoxes(M); Mj++)
    {
