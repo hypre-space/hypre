@@ -2023,6 +2023,76 @@ then
 fi
 
 dnl *********************************************************************
+dnl * Set HIP options
+dnl *********************************************************************
+AS_IF([test x"$hypre_user_chose_hip" == x"yes"],
+      [
+        AC_DEFINE(HYPRE_USING_GPU, 1, [Define to 1 if executing on GPU device])
+        AC_DEFINE(HYPRE_USING_HIP, 1, [HIP being used])
+
+        dnl hipcc is just a perl script that wraps things like detection
+        dnl of the AMD GPU and the actual invocation of the clang compiler
+        dnl from ROCm that supports HIP and all the command line foo needed
+        dnl by the compiler. You can force hipcc to emit what it actually does
+        dnl by setting HIPCC_VERBOSE=7 in your environment.
+        AC_CHECK_PROGS(HIPCC, hipcc)
+
+        dnl (Ab)Using CUCC when compiling HIP
+        dnl At this time, we need the linker to be hipcc in order to link
+        dnl in device code.
+        CUCC=${HIPCC}
+        LINK_CC=${HIPCC}
+        LINK_CXX=${HIPCC}
+
+        dnl At least -O2, but the user can override with CFLAGS/CXXFLAGS on the configure line.
+        dnl The "-x hip" is necessary to override the detection of .c files which clang
+        dnl interprets as C and therefore invokes the C compiler rather than the HIP part
+        dnl of clang.
+        HIPCXXFLAGS="-O2 -x hip -Wall"
+
+        AS_IF([test x"$hypre_using_debug" == x"yes"],
+              [HIPCXXFLAGS="-g -ggdb ${HIPCXXFLAGS}"])
+
+        dnl (Ab)Use CUFLAGS to capture HIP compilation flags
+        dnl Put CXXFLAGS at the end so the user can override the optimization level.
+        CUFLAGS="${HIPCPPFLAGS} ${HIPCXXFLAGS} ${CXXFLAGS}"
+
+        dnl rocThrust depends on rocPrim so we need both for Thrust on AMD GPUs.
+        dnl These are header-only so no linking needed.
+        HYPRE_HIP_INCL="-I${HYPRE_ROCM_PREFIX}/rocthrust/include"
+        HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocprim/include"
+
+        dnl HIP library
+        HYPRE_HIP_LIBS="-L${HYPRE_ROCM_PREFIX}/lib -lamdhip64"
+
+        dnl rocSPARSE, for things like dcsrmv on AMD GPUs
+        AS_IF([test x"$hypre_using_rocsparse" == x"yes"],
+              [AC_DEFINE(HYPRE_USING_ROCSPARSE, 1, [rocSPARSE being used])
+	       HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lrocsparse"
+               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocsparse/include"
+               ])
+
+        dnl Note rocSPARSE requires rocBLAS, so this is only controlling
+        dnl whether HYPRE explicitly uses rocBLAS in other places or not.
+        dnl So we don't need to add any extra libs or anything.
+        AS_IF([test x"$hypre_using_rocblas" == x"yes"],
+              [AC_DEFINE(HYPRE_USING_ROCBLAS, 1, [rocBLAS being used])
+              HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocblas/include"
+              ])
+
+        dnl rocRAND: random number generation on AMD GPUs
+        AS_IF([test x"$hypre_using_rocrand" == x"yes"],
+              [AC_DEFINE(HYPRE_USING_ROCRAND, 1, [rocRAND being used])
+               HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lrocrand"
+               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocrand/include"
+               ])
+
+      ]) dnl AS_IF([test x"$hypre_user_chose_hip" == x"yes"]
+
+
+
+
+dnl *********************************************************************
 dnl * Set unified memory options
 dnl *********************************************************************
 if test "$hypre_using_um" != "yes"
@@ -2329,6 +2399,12 @@ dnl *********************************************************************
 AC_SUBST(CUFLAGS)
 AC_SUBST(HYPRE_CUDA_INCLUDE)
 AC_SUBST(HYPRE_CUDA_LIBS)
+
+dnl *********************************************************************
+dnl * HIP stuff
+dnl *********************************************************************
+AC_SUBST(HYPRE_HIP_INCL)
+AC_SUBST(HYPRE_HIP_LIBS)
 
 dnl *********************************************************************
 dnl * Caliper instrumentation
