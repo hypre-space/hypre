@@ -1810,20 +1810,33 @@ then
 fi
 
 
-if [test "$hypre_using_cuda" = "yes" || test "$hypre_using_device_openmp" = "yes" || test "$hypre_using_um" = "yes"]
+if [ test "x$hypre_using_um" = "xyes"]
 then
-   AC_CHECK_HEADERS(["${CUDA_HOME}/include/cuda.h"], [hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_HOME}])
+  if [test "$hypre_using_cuda" = "yes" || test "$hypre_using_device_openmp" = "yes"]
+  then
+     AC_CHECK_HEADERS(["${CUDA_HOME}/include/cuda.h"], [hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_HOME}])
 
-   if test "x$hypre_found_cuda" != "xyes"
-   then
-      AC_CHECK_HEADERS(["${CUDA_PATH}/include/cuda.h"], [hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_PATH}])
-   fi
+     if test "x$hypre_found_cuda" != "xyes"
+     then
+        AC_CHECK_HEADERS(["${CUDA_PATH}/include/cuda.h"], [hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_PATH}])
+     fi
 
-   if test "x$hypre_found_cuda" != "xyes"
-   then
-      AC_MSG_ERROR([unable to find cuda.h ... Ensure that CUDA_HOME or CUDA_PATH is set])
-   fi
-fi
+     if test "x$hypre_found_cuda" != "xyes"
+     then
+        AC_MSG_ERROR([unable to find cuda.h ... Ensure that CUDA_HOME or CUDA_PATH is set])
+     fi
+  dnl if not using cuda, make sure we're using hip
+  dnl if not error. if we are, HIP will be checked below.
+  else
+    if [test "x$hypre_using_hip" != "xyes"]
+    then
+       AC_MSG_ERROR([Asked for unified memory, but not using CUDA, HIP, or device OpenMP!])
+    fi
+  fi
+fi dnl hypre_using_um
+
+
+
 
 dnl *********************************************************************
 dnl * Set raja options
@@ -2003,6 +2016,14 @@ then
       AC_MSG_NOTICE([Use --enable-unified-memory to compile with unified memory.])
       AC_MSG_NOTICE([***********************************************************])
    fi
+   if test "$hypre_user_chose_hip" = "yes"
+   then
+      AC_MSG_NOTICE([***********************************************************])
+      AC_MSG_NOTICE([Configuring with --with-hip=yes without unified memory.])
+      AC_MSG_NOTICE([It only works for struct interface.])
+      AC_MSG_NOTICE([Use --enable-unified-memory to compile with unified memory.])
+      AC_MSG_NOTICE([***********************************************************])
+   fi
    if test "$hypre_using_device_openmp" = "yes"
    then
       AC_MSG_NOTICE([***********************************************************])
@@ -2138,7 +2159,7 @@ if test "x$hypre_using_um" = "xyes"
 then
    AC_DEFINE([HYPRE_USING_UNIFIED_MEMORY],1,[Define to 1 if using unified memory])
 else
-   if [test "x$hypre_user_chose_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes"]
+   if [test "x$hypre_user_chose_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes" || test "x$hypre_user_chose_hip" = "xyes"]
    then
       AC_DEFINE([HYPRE_USING_DEVICE_MEMORY],1,[Define to 1 if using device memory without UM])
    else
