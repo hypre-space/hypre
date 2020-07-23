@@ -872,8 +872,10 @@ __inline__ __host__ __device__
 T blockReduceSum(T val)
 {
 #ifdef __CUDA_ARCH__
-   //static __shared__ T shared[32]; // Shared mem for 32 partial sums
-   __shared__ T shared[32];        // Shared mem for 32 partial sums
+   //static __shared__ T shared[HYPRE_WARP_SIZE]; // Shared mem for HYPRE_WARP_SIZE partial sums
+
+   __shared__ T shared[HYPRE_WARP_SIZE];        // Shared mem for HYPRE_WARP_SIZE partial sums
+
    //HYPRE_Int lane = threadIdx.x % warpSize;
    //HYPRE_Int wid  = threadIdx.x / warpSize;
    HYPRE_Int lane = threadIdx.x & (warpSize - 1);
@@ -1848,4 +1850,3 @@ struct hypre_cub_CachingDeviceAllocator
 
 
 #endif
-
