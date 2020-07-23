@@ -377,7 +377,8 @@ hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_
 
 struct hypre_empty_row_functor
 {
-   /* typedef bool result_type; */
+   // This is needed for clang
+   typedef bool result_type;
 
    __device__
    bool operator()(const thrust::tuple<HYPRE_Int, HYPRE_Int>& t) const
