@@ -1309,9 +1309,13 @@ hypre_MPI_CheckCommMatrix( hypre_MPI_Comm   comm,
                            HYPRE_Int       *sends )
 {
    HYPRE_Int    nprocs, myid;
-   HYPRE_Int   *displs;
-   HYPRE_Int   *num_recvs_proc, *num_sends_proc;
-   HYPRE_Int   *global_recvs, *global_sends;
+
+   HYPRE_Int   *displs         = NULL;
+   HYPRE_Int   *num_recvs_proc = NULL;
+   HYPRE_Int   *num_sends_proc = NULL;
+   HYPRE_Int   *global_recvs   = NULL;
+   HYPRE_Int   *global_sends   = NULL;
+
    HYPRE_Int    global_num_recvs;
    HYPRE_Int    global_num_sends;
    HYPRE_Int    from_proc, to_proc;

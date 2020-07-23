@@ -948,7 +948,6 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
    HYPRE_Int            *symm_entries;
    HYPRE_Int             domain_is_coarse;
    hypre_BoxArray       *data_space;
-   hypre_Box            *box;
    hypre_Box            *ghost_box;
    HYPRE_Int            *sym_ghost;
    HYPRE_Int             dom_ghsize, ran_ghsize;
