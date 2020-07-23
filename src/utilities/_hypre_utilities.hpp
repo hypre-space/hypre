@@ -422,7 +422,7 @@ T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum)
    for (hypre_int d = 2; d <=HYPRE_WARP_SIZE; d <<= 1)
    {
       T t = __shfl_up_sync(HYPRE_WARP_FULL_MASK, in, d >> 1);
-      if ( (lane_id & (d - 1)) == d - 1 )
+      if ( (lane_id & (d - 1)) == (d - 1) )
       {
          in += t;
       }
@@ -440,7 +440,7 @@ T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum)
    {
       T t = __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
 
-      if ( (lane_id & (d - 1)) == d - 1)
+      if ( (lane_id & (d - 1)) == (d - 1))
       {
         if ( (lane_id & ((d << 1) - 1)) == ((d << 1) - 1) )
          {
