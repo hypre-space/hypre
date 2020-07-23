@@ -351,7 +351,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
       {
          box = hypre_BoxArrayBox(fboxes, i);
          hypre_CoarsenBox(box, origin, stride);
-         hypre_CopyBox(box, hypre_BoxArrayBox(cboxes, count));
+         hypre_CopyBox(box, hypre_BoxArrayBox(cboxes, i));
          cids[i] = fids[i];
       }
    }
