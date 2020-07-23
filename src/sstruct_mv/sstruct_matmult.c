@@ -194,7 +194,7 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
 #endif
 
       /* Note: Cannot free parcsr_uMold here since it holds col_starts info of parcsr[0]. Free uMold */
-      if (m > 1)
+      if (m != (nmatrices - 2))
       {
          hypre_ParCSRMatrixDestroy(parcsr_uMold);
       }
@@ -301,7 +301,6 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    hypre_IJMatrixTranslator(ij_M) = NULL;
    hypre_IJMatrixAssembleFlag(ij_M) = 1;
    hypre_IJMatrixSetObject(ij_M, parcsr_uM);
-   HYPRE_IJMatrixGetObject(ij_M, (void **) &hypre_SStructMatrixParCSRMatrix(M));
    HYPRE_SStructMatrixAssemble(M);
 
    /*-------------------------------------------------------

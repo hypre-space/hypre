@@ -54,20 +54,17 @@ HYPRE_Int
 hypre_SSAMGDestroy( void *ssamg_vdata )
 {
    hypre_SSAMGData   *ssamg_data = (hypre_SSAMGData *) ssamg_vdata;
-   HYPRE_Int          nparts     = hypre_SSAMGDataNParts(ssamg_data);
-   HYPRE_Int          num_levels = hypre_SSAMGDataNumLevels(ssamg_data);
-   HYPRE_Int          logging    = hypre_SSAMGDataLogging(ssamg_data);
    HYPRE_Int          l, p;
 
    if (ssamg_data)
    {
-      if (logging > 0)
+      if (hypre_SSAMGDataLogging(ssamg_data) > 0)
       {
          hypre_TFree(ssamg_data -> norms);
          hypre_TFree(ssamg_data -> rel_norms);
       }
 
-      if (num_levels > -1)
+      if (hypre_SSAMGDataNumLevels(ssamg_data) > -1)
       {
          hypre_SSAMGRelaxDestroy(ssamg_data -> relax_data_l[0]);
          hypre_SStructMatvecDestroy(ssamg_data -> matvec_data_l[0]);
@@ -78,7 +75,7 @@ hypre_SSAMGDestroy( void *ssamg_vdata )
          HYPRE_SStructGridDestroy(ssamg_data -> grid_l[0]);
          hypre_TFree(ssamg_data -> cdir_l[0]);
          hypre_TFree(ssamg_data -> relax_weights[0]);
-         for (l = 1; l < num_levels; l++)
+         for (l = 1; l < hypre_SSAMGDataNumLevels(ssamg_data); l++)
          {
             hypre_SSAMGRelaxDestroy(ssamg_data -> relax_data_l[l]);
             hypre_SStructMatvecDestroy(ssamg_data -> matvec_data_l[l]);
@@ -113,7 +110,7 @@ hypre_SSAMGDestroy( void *ssamg_vdata )
          ssamg_data -> r_l = NULL;
       }
 
-      for (p = 0; p < nparts; p++)
+      for (p = 0; p < hypre_SSAMGDataNParts(ssamg_data); p++)
       {
          hypre_TFree(ssamg_data -> dxyz[p]);
       }
