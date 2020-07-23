@@ -525,6 +525,18 @@ void __syncwarp()
 
 #endif // #if defined(HYPRE_USING_HIP) || (CUDA_VERSION < 9000)
 
+
+// __any was technically deprecated in CUDA 7 so we don't bother
+// with this overload for CUDA, just for HIP.
+#if defined(HYPRE_USING_HIP)
+static __device__ __forceinline__
+int __any_sync(unsigned mask, int predicate)
+{
+  return __any(predicate);
+}
+#endif
+
+
 template <typename T>
 static __device__ __forceinline__
 T read_only_load( const T *ptr )
