@@ -75,24 +75,24 @@ csr_spmmm_compute_row_numer(HYPRE_Int  rowi,
 {
    /* load the start and end position of row i of A */
    HYPRE_Int i;
-   // if (lane_id < 2)
-   // {
-   //    i = read_only_load(ia + rowi + lane_id);
-   // }
-   //const HYPRE_Int istart = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 0);
-   //const HYPRE_Int iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 1);
-   const HYPRE_Int istart = read_only_load(ia + rowi);
-   const HYPRE_Int iend = read_only_load(ia + rowi+1);
+   if (lane_id < 2)
+   {
+      i = read_only_load(ia + rowi + lane_id);
+   }
+   
+   const HYPRE_Int istart = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 0);
+   const HYPRE_Int iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 1);
+
+   const HYPRE_Int istart2 = read_only_load(ia + rowi);
+   const HYPRE_Int iend2 = read_only_load(ia + rowi+1);
 
    const HYPRE_Int blockDimy2 = 1 << BDIMY2_BITS;
    const HYPRE_Int blockDimy1 = blockDim.y >> BDIMY2_BITS;
-   const HYPRE_Int threadIdxy2 = (threadIdx.y  & (blockDimy2 - 1));
-   const HYPRE_Int threadIdxy1 = threadIdx.y >> BDIMY2_BITS;
-   // printf("BDim: (%i, (%i, %i), %i), id: (%i, (%i, %i), %i)\n",
-   //       blockDim.x, blockDimy1, blockDimy2, blockDim.z,
-   //       threadIdx.x, threadIdxy1, threadIdxy2, threadIdx.z);
+   const HYPRE_Int threadIdxy1 = (threadIdx.y  & (blockDimy2 - 1));
+   const HYPRE_Int threadIdxy2 = threadIdx.y >> BDIMY2_BITS;
 
    HYPRE_Int num_new_insert = 0;
+
 
    /* load column idx and values of row i of A */
    for (i = istart; i < iend; i += blockDimy2)
@@ -102,14 +102,11 @@ csr_spmmm_compute_row_numer(HYPRE_Int  rowi,
       HYPRE_Int     colA = -1;
       HYPRE_Complex valA = 0.0;
 
-      colA = read_only_load(ja+i + threadIdxy2);
-      valA = read_only_load(aa+i + threadIdxy2);
- 
-      // if (threadIdx.x == 0 && i + threadIdx.y < iend)
-      // {
-      //    colA = read_only_load(ja + i + threadIdx.y);
-      //    valA = read_only_load(aa + i + threadIdx.y);
-      // }
+      if ((threadIdx.x == 0) && (threadIdxy1 == 0) && (i + threadIdxy2 < iend))
+         {
+         colA = read_only_load(ja + i + threadIdxy2);
+         valA = read_only_load(aa + i + threadIdxy2);
+      }
 
 #if 0
       //const HYPRE_Int ymask = get_mask<4>(lane_id);
@@ -118,35 +115,44 @@ csr_spmmm_compute_row_numer(HYPRE_Int  rowi,
       //for (HYPRE_Int j = 0; j < num_valid_rows; j++)
 #endif
 
-      /* threads in the same ygroup work on one row together */
-      // const HYPRE_Int     rowB = __shfl_sync(HYPRE_WARP_FULL_MASK, colA, 0, blockDim.x);
-      // const HYPRE_Complex mult = __shfl_sync(HYPRE_WARP_FULL_MASK, valA, 0, blockDim.x);
-      /* open this row of B, collectively */
-      // HYPRE_Int tmp = -1;
-      // if (rowB != -1 && threadIdx.x < 2)
-      // {
-      //    tmp = read_only_load(ib+rowB+threadIdx.x);
-      // }
-      // const HYPRE_Int rowB_start = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 0, blockDim.x);
-      // const HYPRE_Int rowB_end   = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 1, blockDim.x);
-      const HYPRE_Int rowB       = colA;
-      const HYPRE_Complex mult       = valA;
+      /* threads in the same zgroup work on one row together */
+      const HYPRE_Int     rowB = __shfl_sync(HYPRE_WARP_FULL_MASK, colA, 0, blockDim.x * blockDimy1);
+      const HYPRE_Complex mult = __shfl_sync(HYPRE_WARP_FULL_MASK, valA, 0, blockDim.x * blockDimy1);
 
-      const HYPRE_Int rowB_start = read_only_load(ib+rowB);
-      const HYPRE_Int rowB_end = read_only_load(ib+rowB+1);
+      /* open this row of B, collectively */
+      HYPRE_Int tmp = -1;
+      if (rowB != -1 && threadIdx.x < 2 && threadIdxy1 == 0)
+      {
+         tmp = read_only_load(ib+rowB+threadIdx.x);
+      }
+
+      const HYPRE_Int rowB_start = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 0, blockDim.x * blockDimy1);
+      const HYPRE_Int rowB_end   = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 1, blockDim.x * blockDimy1);
+
 
       for (HYPRE_Int k = rowB_start; k < rowB_end; k += blockDimy1)
       {
          if (k + threadIdxy1 < rowB_end)
          {
 
-            const HYPRE_Int colB = read_only_load(jb + k + threadIdxy1);
-            const HYPRE_Complex valB = read_only_load(ab + k + threadIdxy1);
+            HYPRE_Int     colB = -1;
+            HYPRE_Complex valB = 0.0;
 
-            const HYPRE_Int rowC = colB;
+            if (threadIdx.x == 0 &&  k + threadIdxy1 < rowB_end)
+            {
+               colB = read_only_load(jb + k + threadIdxy1);
+               valB = read_only_load(ab + k + threadIdxy1);
+            }
 
-            const HYPRE_Int rowC_start = read_only_load(ic+rowC);
-            const HYPRE_Int rowC_end   = read_only_load(ic+rowC+1);
+            const HYPRE_Int     rowC = __shfl_sync(HYPRE_WARP_FULL_MASK, colB, 0, blockDim.x);
+            valB = __shfl_sync(HYPRE_WARP_FULL_MASK, valB, 0, blockDim.x);
+
+            if (rowC != -1 && threadIdx.x < 2)
+            {
+               tmp = read_only_load(ic+rowC+threadIdx.x);
+            }
+            const HYPRE_Int rowC_start = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 0, blockDim.x);
+            const HYPRE_Int rowC_end   = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 1, blockDim.x);
 
             for (HYPRE_Int l = rowC_start; l < rowC_end; l+= blockDim.x) 
             {
