@@ -82,6 +82,7 @@ hypre_ILUSolve( void               *ilu_vdata,
    hypre_ParVector      *x             = hypre_ParILUDataX(ilu_data);
 
    /* begin */
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    if(logging > 1)
    {
@@ -161,6 +162,8 @@ hypre_ILUSolve( void               *ilu_vdata,
             hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
          }
          hypre_error(HYPRE_ERROR_GENERIC);
+         HYPRE_ANNOTATE_FUNC_END;
+
          return hypre_error_flag;
       }
 
@@ -179,6 +182,8 @@ hypre_ILUSolve( void               *ilu_vdata,
             rel_resnorm = 0.0;
             (ilu_data -> final_rel_residual_norm) = rel_resnorm;
          }
+         HYPRE_ANNOTATE_FUNC_END;
+
          return hypre_error_flag;
       }
    }
@@ -314,6 +319,9 @@ hypre_ILUSolve( void               *ilu_vdata,
          hypre_printf("                operator = %f\n",operat_cmplxty);
       }
    }
+
+   HYPRE_ANNOTATE_FUNC_END;
+
    return hypre_error_flag;
 }
 

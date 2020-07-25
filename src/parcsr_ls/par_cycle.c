@@ -15,10 +15,6 @@
 #include "par_amg.h"
 #include "../parcsr_block_mv/par_csr_block_matrix.h"
 
-#ifdef HYPRE_USING_CALIPER
-#include <caliper/cali.h>
-#endif
-
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGCycle
  *--------------------------------------------------------------------------*/
@@ -110,10 +106,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Real   *S_vec;
 #endif
 
-#ifdef HYPRE_USING_CALIPER
-   cali_id_t iter_attr =
-     cali_create_attribute("hypre.par_cycle.level", CALI_TYPE_INT, CALI_ATTR_DEFAULT);
-#endif
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /* Acquire data and allocate storage */
    A_array           = hypre_ParAMGDataAArray(amg_data);
@@ -175,7 +168,6 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
       {
          num_coeffs[j] = hypre_ParCSRBlockMatrixNumNonzeros(A_block_array[j]);
       }
-
    }
    else
    {
@@ -255,10 +247,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
     * Main loop of cycling
     *--------------------------------------------------------------------*/
 
-#ifdef HYPRE_USING_CALIPER
-   cali_set_int(iter_attr, level);
-#endif
-
+   HYPRE_ANNOTATE_MGLEVEL_BEGIN(level);
    while (Not_Finished)
    {
       if (num_levels > 1)
@@ -603,6 +592,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
                if (Solve_err_flag != 0)
                {
+                  HYPRE_ANNOTATE_MGLEVEL_END(level);
+                  HYPRE_ANNOTATE_FUNC_END;
+
                   return(Solve_err_flag);
                }
             }
@@ -691,6 +683,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
             }
          }
 
+         HYPRE_ANNOTATE_MGLEVEL_END(level);
+
          ++level;
          lev_counter[level] = hypre_max(lev_counter[level], cycle_type);
          cycle_param = 1;
@@ -698,9 +692,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          {
             cycle_param = 3;
          }
-#ifdef HYPRE_USING_CALIPER
-         cali_set_int(iter_attr, level);  /* set the level for caliper here */
-#endif
+
+         HYPRE_ANNOTATE_MGLEVEL_BEGIN(level);
       }
       else if (level != 0)
       {
@@ -728,19 +721,17 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
             /* printf("Proc %d: level %d, n %d, Interpolation done\n", my_id, level, local_size); */
          }
 
-         --level;
+         HYPRE_ANNOTATE_MGLEVEL_END(level);
 
+         --level;
+         cycle_param = 2;
          if (fcycle && fcycle_lev == level)
          {
             lev_counter[level] = hypre_max(lev_counter[level], 1);
             fcycle_lev --;
          }
 
-         cycle_param = 2;
-
-#ifdef HYPRE_USING_CALIPER
-         cali_set_int(iter_attr, level);  /* set the level for caliper here */
-#endif
+         HYPRE_ANNOTATE_MGLEVEL_BEGIN(level);
       }
       else
       {
@@ -748,9 +739,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
       }
    } /* main loop: while (Not_Finished) */
 
-#ifdef HYPRE_USING_CALIPER
-   cali_end(iter_attr);  /* unset "iter" */
-#endif
+   HYPRE_ANNOTATE_MGLEVEL_END(level);
 
    hypre_ParAMGDataCycleOpCount(amg_data) = cycle_op_count;
 
@@ -766,6 +755,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
       }
    }
 
+   HYPRE_ANNOTATE_FUNC_END;
+
    return(Solve_err_flag);
 }
-

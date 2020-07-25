@@ -80,11 +80,11 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    hypre_ParVector  *Vtemp;
    hypre_ParVector  *Residual;
 
-   HYPRE_ANNOTATION_BEGIN("BoomerAMG.solve");
+   HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
 
-   amg_print_level    = hypre_ParAMGDataPrintLevel(amg_data);
+   amg_print_level  = hypre_ParAMGDataPrintLevel(amg_data);
    amg_logging      = hypre_ParAMGDataLogging(amg_data);
    if ( amg_logging > 1 )
       Residual = hypre_ParAMGDataResidual(amg_data);
@@ -196,7 +196,8 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
             hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
          }
          hypre_error(HYPRE_ERROR_GENERIC);
-         HYPRE_ANNOTATION_END("BoomerAMG.solve");
+         HYPRE_ANNOTATE_FUNC_END;
+
          return hypre_error_flag;
       }
 
@@ -392,8 +393,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       hypre_TFree(num_coeffs, HYPRE_MEMORY_HOST);
       hypre_TFree(num_variables, HYPRE_MEMORY_HOST);
    }
-   HYPRE_ANNOTATION_END("BoomerAMG.solve");
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
-

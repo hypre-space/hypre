@@ -75,6 +75,7 @@ hypre_MGRSolve( void               *mgr_vdata,
 
    HYPRE_Int    i;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
    if(logging > 1)
    {
       residual = (mgr_data -> residual);
@@ -90,6 +91,8 @@ hypre_MGRSolve( void               *mgr_vdata,
       HYPRE_BoomerAMGGetFinalRelativeResidualNorm(cg_solver, &rel_resnorm);
       (mgr_data -> num_iterations) = iter;
       (mgr_data -> final_rel_residual_norm) = rel_resnorm;
+      HYPRE_ANNOTATE_FUNC_END;
+
       return hypre_error_flag;
    }
 
@@ -166,6 +169,8 @@ hypre_MGRSolve( void               *mgr_vdata,
             hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
          }
          hypre_error(HYPRE_ERROR_GENERIC);
+         HYPRE_ANNOTATE_FUNC_END;
+
          return hypre_error_flag;
       }
 
@@ -184,6 +189,8 @@ hypre_MGRSolve( void               *mgr_vdata,
             rel_resnorm = 0.0;
             (mgr_data -> final_rel_residual_norm) = rel_resnorm;
          }
+         HYPRE_ANNOTATE_FUNC_END;
+
          return hypre_error_flag;
       }
    }
@@ -345,6 +352,7 @@ hypre_MGRSolve( void               *mgr_vdata,
          //         hypre_printf("                   cycle = %f\n\n\n\n",cycle_cmplxty);
       }
    }
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -383,6 +391,8 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
    hypre_ParVector *Aux_U = NULL;
 
    HYPRE_Real alpha, beta;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    F_array[0] = f;
    U_array[0] = u;
@@ -550,6 +560,7 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
          Not_Finished = 0;
       }
    }
+   HYPRE_ANNOTATE_FUNC_END;
 
    return Solve_err_flag;
 }
@@ -607,7 +618,7 @@ hypre_MGRCycle( void               *mgr_vdata,
    HYPRE_Real     wall_time;
 
    /* Initialize */
-
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    comm = hypre_ParCSRMatrixComm(A_array[0]);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -670,8 +681,8 @@ hypre_MGRCycle( void               *mgr_vdata,
                for(i=0; i<nsweeps; i++)
                {
                   hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
-                        relax_points, relax_weight, 
-                        relax_l1_norms[fine_grid] ? hypre_VectorData(relax_l1_norms[fine_grid]) : NULL, 
+                        relax_points, relax_weight,
+                        relax_l1_norms[fine_grid] ? hypre_VectorData(relax_l1_norms[fine_grid]) : NULL,
                         U_array[fine_grid], Vtemp);
                }
             }
@@ -681,8 +692,8 @@ hypre_MGRCycle( void               *mgr_vdata,
                {
                   hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
                         relax_type, relax_points, relax_weight,
-                        omega, 
-                        relax_l1_norms[fine_grid] ? hypre_VectorData(relax_l1_norms[fine_grid]) : NULL, 
+                        omega,
+                        relax_l1_norms[fine_grid] ? hypre_VectorData(relax_l1_norms[fine_grid]) : NULL,
                         U_array[fine_grid], Vtemp, Ztemp);
                }
             }
@@ -793,7 +804,10 @@ hypre_MGRCycle( void               *mgr_vdata,
             */
 
          if (Solve_err_flag != 0)
+         {
+            HYPRE_ANNOTATE_FUNC_END;
             return(Solve_err_flag);
+         }
 
          --level;
       } // end interpolate
@@ -802,5 +816,7 @@ hypre_MGRCycle( void               *mgr_vdata,
          Not_Finished = 0;
       }
    }
+   HYPRE_ANNOTATE_FUNC_END;
+
    return Solve_err_flag;
 }

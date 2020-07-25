@@ -11,7 +11,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
@@ -30,7 +30,7 @@ hypre_F90_IFACE(hypre_structpcgcreate, HYPRE_STRUCTPCGCREATE)
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_structpcgdestroy, HYPRE_STRUCTPCGDESTROY)
    ( hypre_F90_Obj *solver,
      hypre_F90_Int *ierr   )
@@ -43,7 +43,7 @@ hypre_F90_IFACE(hypre_structpcgdestroy, HYPRE_STRUCTPCGDESTROY)
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_structpcgsetup, HYPRE_STRUCTPCGSETUP)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -62,7 +62,7 @@ hypre_F90_IFACE(hypre_structpcgsetup, HYPRE_STRUCTPCGSETUP)
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_structpcgsolve, HYPRE_STRUCTPCGSOLVE)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -282,7 +282,7 @@ hypre_F90_IFACE(hypre_structpcggetfinalrelative, HYPRE_STRUCTPCGGETFINALRELATIVE
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_structdiagscalesetup, HYPRE_STRUCTDIAGSCALESETUP)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *A,
@@ -301,7 +301,7 @@ hypre_F90_IFACE(hypre_structdiagscalesetup, HYPRE_STRUCTDIAGSCALESETUP)
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_structdiagscale, HYPRE_STRUCTDIAGSCALE)
    ( hypre_F90_Obj *solver,
      hypre_F90_Obj *HA,
@@ -316,7 +316,7 @@ hypre_F90_IFACE(hypre_structdiagscale, HYPRE_STRUCTDIAGSCALE)
            hypre_F90_PassObj (HYPRE_StructVector, Hy),
            hypre_F90_PassObj (HYPRE_StructVector, Hx)     ) );
 }
-    
+
 #ifdef __cplusplus
 }
 #endif
