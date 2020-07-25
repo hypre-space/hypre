@@ -1888,12 +1888,11 @@ then
    then
       SHARED_SET_SONAME="-Xlinker=-soname,"
       SHARED_OPTIONS="-Xlinker=-z,defs"
-      SHARED_COMPILE_FLAG="-Xcompiler \"-fPIC\""
    else
       SHARED_SET_SONAME="-Wl,-soname,"
       SHARED_OPTIONS="-Wl,-z,defs"
-      SHARED_COMPILE_FLAG="-fPIC"
    fi
+   SHARED_COMPILE_FLAG="-fPIC"
    case $hypre_platform in
       AIX* | aix* | Aix*) SHARED_COMPILE_FLAG="-qmkshrobj"
                           SHARED_BUILD_FLAG="-G"
@@ -1911,7 +1910,7 @@ dnl                          LINK_F77="${F77} -brtl"
    FFLAGS="${FFLAGS} ${SHARED_COMPILE_FLAG}"
    CFLAGS="${CFLAGS} ${SHARED_COMPILE_FLAG}"
    CXXFLAGS="${CXXFLAGS} ${SHARED_COMPILE_FLAG}"
-   CUFLAGS="${CUFLAGS} ${SHARED_COMPILE_FLAG}"
+   CUFLAGS="${CUFLAGS} -Xcompiler \"${SHARED_COMPILE_FLAG}\""
 dnl   BUILD_F77_SHARED="${F77} ${SHARED_BUILD_FLAG}"
    BUILD_FC_SHARED="${FC} ${SHARED_BUILD_FLAG}"
    if test "$hypre_using_fei" = "yes"
