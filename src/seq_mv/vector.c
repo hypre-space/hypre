@@ -448,6 +448,11 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
    HYPRE_Int      size   = hypre_VectorSize(y);
    HYPRE_Int      ierr = 0;
 
+   if (alpha == 1.0)
+   {
+      return ierr;
+   }
+
    size *= hypre_VectorNumVectors(y);
 
    //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
