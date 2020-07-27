@@ -75,6 +75,8 @@ distclean: clean
 # Rules
 ##################################################################
 
+# NOTE: Some of the FILES symbols below can be empty, so they are listed on an
+# AR line with at least one nonempty symbol
 libHYPRE.a: ${FILES_HYPRE}
 	@echo  "Building libHYPRE ... "
 	rm -f $@
