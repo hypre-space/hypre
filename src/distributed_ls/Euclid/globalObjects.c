@@ -7,7 +7,7 @@
 
 #include "_hypre_Euclid.h"
 
-/* Contains definitions of globally scoped  objects; 
+/* Contains definitions of globally scoped  objects;
  * Also, functions for error handling and message logging.
  */
 
@@ -25,17 +25,14 @@ Parser_dh   parser_dh = NULL;   /* for setting/getting runtime options */
 TimeLog_dh  tlog_dh = NULL;     /* internal timing  functionality */
 Mem_dh      mem_dh = NULL;      /* memory management */
 FILE        *logFile = NULL;
-#if defined(HYPRE_USING_RAJA) || defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_CUDA)
-#else
 char        msgBuf_dh[MSG_BUF_SIZE_DH]; /* for internal use */
-#endif
 HYPRE_Int         np_dh = 1;     /* number of processors and subdomains */
 HYPRE_Int         myid_dh = 0;   /* rank of this processor (and subdomain) */
 MPI_Comm    comm_dh = 0;
 
 
   /* Each processor (may) open a logfile.
-   * The bools are switches for controlling the amount of informational 
+   * The bools are switches for controlling the amount of informational
    * output, and where it gets written to.  Function logging is only enabled
    * when compiled with the debugging (-g) option.
    */
@@ -52,7 +49,7 @@ HYPRE_Int  ref_counter = 0;
 
 
 /*-------------------------------------------------------------------------
- * End of global definitions. 
+ * End of global definitions.
  * Error and info functions follow.
  *-------------------------------------------------------------------------*/
 
@@ -75,7 +72,7 @@ void  openLogfile_dh(HYPRE_Int argc, char *argv[])
   /* this doesn't really belong here, but it's gotta go someplace! */
 /*  strcpy(errMsg, "error msg was never set -- ??"); */
 
-  if (logFile != NULL) return; 
+  if (logFile != NULL) return;
 
   /* set default logging filename */
   hypre_sprintf(buf, "logFile");
@@ -84,7 +81,7 @@ void  openLogfile_dh(HYPRE_Int argc, char *argv[])
   if (argc && argv != NULL) {
     HYPRE_Int j;
     for (j=1; j<argc; ++j) {
-      if (strcmp(argv[j],"-logFile") == 0) { 
+      if (strcmp(argv[j],"-logFile") == 0) {
         if (j+1 < argc) {
           hypre_sprintf(buf, "%s", argv[j+1]);
           break;
@@ -102,7 +99,7 @@ void  openLogfile_dh(HYPRE_Int argc, char *argv[])
     if ((logFile = fopen(buf, "w")) == NULL ) {
       hypre_fprintf(stderr, "can't open >%s< for writing; continuing anyway\n", buf);
     }
-  } 
+  }
 }
 
 void  closeLogfile_dh()
@@ -118,12 +115,12 @@ void  closeLogfile_dh()
 void  setInfo_dh(const char *msg,const char *function,const char *file, HYPRE_Int line)
 {
   if (logInfoToFile && logFile != NULL) {
-    hypre_fprintf(logFile, "INFO: %s;\n       function= %s  file=%s  line=%i\n", 
+    hypre_fprintf(logFile, "INFO: %s;\n       function= %s  file=%s  line=%i\n",
                                           msg, function, file, line);
     fflush(logFile);
   }
   if (logInfoToStderr) {
-    hypre_fprintf(stderr, "INFO: %s;\n       function= %s  file=%s  line=%i\n", 
+    hypre_fprintf(stderr, "INFO: %s;\n       function= %s  file=%s  line=%i\n",
                                           msg, function, file, line);
   }
 }
@@ -135,7 +132,7 @@ void  setInfo_dh(const char *msg,const char *function,const char *file, HYPRE_In
 void dh_StartFunc(const char *function,const char *file, HYPRE_Int line, HYPRE_Int priority)
 {
   if (priority == 1) {
-    hypre_sprintf(calling_stack[calling_stack_count], 
+    hypre_sprintf(calling_stack[calling_stack_count],
           "[%i]   %s  file= %s  line= %i", myid_dh, function, file, line);
     /* priority_private[calling_stack_count] = priority; */
     ++calling_stack_count;
@@ -170,12 +167,12 @@ void  setError_dh(const char *msg,const char *function,const char *file, HYPRE_I
 {
   errFlag_dh = true;
   if (! strcmp(msg, "")) {
-    hypre_sprintf(errMsg_private[errCount_private], 
-        "[%i] called from: %s  file= %s  line= %i", 
+    hypre_sprintf(errMsg_private[errCount_private],
+        "[%i] called from: %s  file= %s  line= %i",
                                         myid_dh, function, file, line);
   } else {
-    hypre_sprintf(errMsg_private[errCount_private], 
-        "[%i] ERROR: %s\n       %s  file= %s  line= %i\n", 
+    hypre_sprintf(errMsg_private[errCount_private],
+        "[%i] ERROR: %s\n       %s  file= %s  line= %i\n",
                                            myid_dh, msg, function, file, line);
   }
   ++errCount_private;
@@ -234,26 +231,26 @@ void Error_dhStartFunc(char *function, char *file, HYPRE_Int line)
   /* get rid of string null-terminator from last
    * call (if any) to Error_dhStartFunc()
   */
-  spaces[INDENT_DH*nesting] = ' ';  
+  spaces[INDENT_DH*nesting] = ' ';
 
   /* add null-terminator, so the correct number of spaces will be printed */
-  ++nesting; 
+  ++nesting;
   if (nesting > MAX_ERROR_SPACES-1) nesting = MAX_ERROR_SPACES-1;
   spaces[INDENT_DH*nesting] = '\0';
 
   if (logFuncsToStderr) {
-    hypre_fprintf(stderr, "%s(%i) %s  [file= %s  line= %i]\n", 
+    hypre_fprintf(stderr, "%s(%i) %s  [file= %s  line= %i]\n",
                             spaces, nesting, function, file, line);
   }
   if (logFuncsToFile && logFile != NULL) {
-    hypre_fprintf(logFile, "%s(%i) %s  [file= %s  line= %i]\n", 
+    hypre_fprintf(logFile, "%s(%i) %s  [file= %s  line= %i]\n",
                             spaces, nesting, function, file, line);
     fflush(logFile);
   }
 }
 
 void Error_dhEndFunc(char *function)
-{ 
+{
   nesting -= 1;
   if (nesting < 0) nesting = 0;
   spaces[INDENT_DH*nesting] = '\0';
@@ -279,7 +276,7 @@ void EuclidInitialize(HYPRE_Int argc, char *argv[], char *help)
   if (! EuclidIsActive) {
     hypre_MPI_Comm_size(comm_dh, &np_dh);
     hypre_MPI_Comm_rank(comm_dh, &myid_dh);
-    openLogfile_dh(argc, argv); 
+    openLogfile_dh(argc, argv);
     if (mem_dh == NULL) { Mem_dhCreate(&mem_dh); CHECK_V_ERROR; }
     if (tlog_dh == NULL) { TimeLog_dhCreate(&tlog_dh); CHECK_V_ERROR; }
     if (parser_dh == NULL) { Parser_dhCreate(&parser_dh); CHECK_V_ERROR; }
@@ -291,7 +288,7 @@ void EuclidInitialize(HYPRE_Int argc, char *argv[], char *help)
       if (myid_dh == 0) hypre_printf("%s\n\n", help);
       EUCLID_EXIT;
     }
-    if (Parser_dhHasSwitch(parser_dh, "-logFuncsToFile")) { 
+    if (Parser_dhHasSwitch(parser_dh, "-logFuncsToFile")) {
       logFuncsToFile = true;
     }
     if (Parser_dhHasSwitch(parser_dh, "-logFuncsToStderr")) {

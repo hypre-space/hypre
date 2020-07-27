@@ -138,6 +138,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Int            recv_size;
 
    /* ----- begin -----*/
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    //num_threads = hypre_NumThreads();
 
@@ -659,6 +660,8 @@ hypre_ILUSetup( void               *ilu_vdata,
             if (schur_precond_gotten != (schur_precond))
             {
                hypre_printf("Schur complement got bad precond\n");
+               HYPRE_ANNOTATE_FUNC_END;
+
                return(-1);
             }
             
@@ -1207,6 +1210,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    }
    rel_res_norms = hypre_CTAlloc(HYPRE_Real, (ilu_data -> max_iter), HYPRE_MEMORY_HOST);
    (ilu_data -> rel_res_norms) = rel_res_norms;
+   HYPRE_ANNOTATE_FUNC_END;
    
    return hypre_error_flag;
 }
