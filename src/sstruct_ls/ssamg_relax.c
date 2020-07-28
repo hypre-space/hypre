@@ -12,6 +12,8 @@
 
 #include "_hypre_sstruct_ls.h"
 
+#define MAX_DEPTH 10
+
 typedef struct hypre_SSAMGRelaxData_struct
 {
    MPI_Comm                comm;
@@ -837,7 +839,7 @@ hypre_SSAMGRelax( void                *relax_vdata,
     * Do zero_guess iteration
     *----------------------------------------------------------*/
 
-   CALI_MARK_BEGIN("Zero guess");
+   HYPRE_ANNOTATE_REGION_BEGIN("Zero guess");
    iter = 0;
    if (zero_guess)
    {
@@ -969,7 +971,7 @@ hypre_SSAMGRelax( void                *relax_vdata,
 
       iter++;
    } /* if (zero_guess) */
-   CALI_MARK_END("Zero guess");
+   HYPRE_ANNOTATE_REGION_END("Zero guess");
 
    /*----------------------------------------------------------
     * Do regular iterations
@@ -980,7 +982,7 @@ hypre_SSAMGRelax( void                *relax_vdata,
       for (part = 0; part < nparts; part++)
       {
          hypre_sprintf(region_name, "Residual part %d", part);
-         CALI_MARK_BEGIN(region_name);
+         HYPRE_ANNOTATE_REGION_BEGIN(region_name);
 
          pA = hypre_SStructMatrixPMatrix(A, part);
          px = hypre_SStructVectorPVector(x, part);
@@ -1080,6 +1082,55 @@ hypre_SSAMGRelax( void                *relax_vdata,
                               stencil_size  = hypre_StructStencilSize(stencil);
                               stencil_diag  = hypre_StructStencilDiagEntry(stencil);
 
+#if 1
+                              HYPRE_Real  *App[MAX_DEPTH];
+                              HYPRE_Int    xoff[MAX_DEPTH];
+                              HYPRE_Int    si, sk, ssi[MAX_DEPTH], depth, k, dh;
+
+                              xp[vj] = hypre_StructVectorBoxData(sx, i);
+
+                              /* unroll up to depth MAX_DEPTH */
+                              for (si = 0; si < stencil_size; si += MAX_DEPTH)
+                              {
+                                 depth = hypre_min(MAX_DEPTH, (stencil_size - si));
+
+                                 for (k = 0, sk = si; k < depth; sk++)
+                                 {
+                                    if (sk == stencil_diag)
+                                    {
+                                       depth--;
+                                    }
+                                    else
+                                    {
+                                       ssi[k] = sk;
+                                       k++;
+                                    }
+                                 }
+
+                                 for (dh = 0; dh < depth; dh++)
+                                 {
+                                    App[dh]  = hypre_StructMatrixBoxData(sA, i, ssi[dh]);
+                                    xoff[dh] = hypre_BoxOffsetDistance(x_data_box,
+                                                                       stencil_shape[ssi[dh]]);
+                                 }
+
+                                 hypre_BoxLoop3Begin(ndim, loop_size,
+                                                     A_data_box, start, stride, Ai,
+                                                     x_data_box, start, stride, xi,
+                                                     t_data_box, start, stride, ti);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
+#endif
+                                 hypre_BoxLoop3For(Ai, xi, ti)
+                                 {
+                                    for (dh = 0; dh < depth; dh++)
+                                    {
+                                       tp[vi][ti] -= App[dh][Ai] * xp[vj][xi + xoff[dh]];
+                                    }
+                                 }
+                                 hypre_BoxLoop3End(Ai, xi, ti);
+                              }
+#else
                               for (si = 0; si < stencil_size; si++)
                               {
                                  if (si != stencil_diag)
@@ -1102,13 +1153,8 @@ hypre_SSAMGRelax( void                *relax_vdata,
                                     }
                                     hypre_BoxLoop3End(Ai, xi, ti);
                                  }
-#if 0
-                                 else
-                                 {
-                                    Ap[vi][vj] = hypre_StructMatrixBoxData(sA,i,stencil_diag);
-                                 } /* if (si != stencil_diag) */
-#endif
                               } /* loop on stencil entries */
+#endif
                            } /* if (sA != NULL) */
                         } /* loop on j-vars */
                      } /* loop on i-vars */
@@ -1116,7 +1162,7 @@ hypre_SSAMGRelax( void                *relax_vdata,
                } /* hypre_ForBoxArrayI */
             } /* loop on compute_i */
          } /* loop on sets */
-         CALI_MARK_END(region_name);
+         HYPRE_ANNOTATE_REGION_END(region_name);
       } /* loop on parts */
 
       /* Compute unstructured component: t = t - U*x */
@@ -1130,7 +1176,7 @@ hypre_SSAMGRelax( void                *relax_vdata,
       for (part = 0; part < nparts; part++)
       {
          hypre_sprintf(region_name, "Diag scale part %d", part);
-         CALI_MARK_BEGIN(region_name);
+         HYPRE_ANNOTATE_REGION_BEGIN(region_name);
 
          pA = hypre_SStructMatrixPMatrix(A, part);
          px = hypre_SStructVectorPVector(x, part);
@@ -1193,7 +1239,7 @@ hypre_SSAMGRelax( void                *relax_vdata,
             } /* hypre_ForBoxI(i, compute_box_a) */
          } /* loop on vars */
 
-         CALI_MARK_END(region_name);
+         HYPRE_ANNOTATE_REGION_END(region_name);
       } /* loop on parts */
    } /* loop on iterations */
 
