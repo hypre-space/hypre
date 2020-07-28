@@ -47,6 +47,12 @@ hypre_SStructScale( HYPRE_Complex        alpha,
    HYPRE_Int part;
    HYPRE_Int y_object_type= hypre_SStructVectorObjectType(y);
 
+   /* If alpha is 1.0, y does not change */
+   if (hypre_abs(1.0 - alpha) < HYPRE_REAL_EPSILON)
+   {
+      return hypre_error_flag;
+   }
+
    if (y_object_type == HYPRE_SSTRUCT)
    {
       for (part = 0; part < nparts; part++)
@@ -58,7 +64,7 @@ hypre_SStructScale( HYPRE_Complex        alpha,
    else if (y_object_type == HYPRE_PARCSR)
    {
       hypre_ParVector  *y_par;
-  
+
       hypre_SStructVectorConvert(y, &y_par);
       hypre_ParVectorScale(alpha, y_par);
    }

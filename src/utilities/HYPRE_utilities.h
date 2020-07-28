@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-/* 
+/*
  * Before a version of HYPRE goes out the door, increment the version
  * number and check in this file (for CVS to substitute the Date).
  */
@@ -46,22 +46,27 @@ extern "C" {
 #ifdef HYPRE_BIGINT
 typedef long long int HYPRE_Int;
 #define HYPRE_MPI_INT MPI_LONG_LONG_INT
-#else 
+#else
 typedef int HYPRE_Int;
 #define HYPRE_MPI_INT MPI_INT
 #endif
 
 /*--------------------------------------------------------------------------
- * Complex stuff
+ * Real and Complex types
  *--------------------------------------------------------------------------*/
+#include <float.h>
 
 typedef double HYPRE_Real;
+#define HYPRE_REAL_MAX DBL_MAX
+#define HYPRE_REAL_MIN DBL_MIN
+#define HYPRE_REAL_EPSILON DBL_EPSILON
+#define HYPRE_REAL_MIN_EXP DBL_MIN_EXP
 #define HYPRE_MPI_REAL MPI_DOUBLE
 
 #ifdef HYPRE_COMPLEX
 typedef double _Complex HYPRE_Complex;
 #define HYPRE_MPI_COMPLEX MPI_C_DOUBLE_COMPLEX  /* or MPI_LONG_DOUBLE ? */
-#else 
+#else
 typedef HYPRE_Real HYPRE_Complex;
 #define HYPRE_MPI_COMPLEX HYPRE_MPI_REAL
 #endif

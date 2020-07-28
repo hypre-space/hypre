@@ -481,6 +481,11 @@ hypre_BoxGetStrideSize( hypre_Box   *box,
       hypre_IndexD(size, d) = s;
    }
 
+   for (d = ndim; d < HYPRE_MAXDIM; d++)
+   {
+      hypre_IndexD(size, d) = 0;
+   }
+
    return hypre_error_flag;
 }
 

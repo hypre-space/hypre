@@ -19,6 +19,7 @@
 #include "_hypre_struct_mv.h"
 
 /* this currently cannot be greater than 7 */
+/* TODO: This is not needed anymore */
 #ifdef MAX_DEPTH
 #undef MAX_DEPTH
 #endif
