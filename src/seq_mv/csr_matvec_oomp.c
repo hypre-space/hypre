@@ -80,7 +80,12 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Int        trans,
       hypre_printf("WARNING:: Offset is not zero in hypre_CSRMatrixMatvecDevice :: \n");
    }
 
-   hypre_assert(offset == 0);
+   hypre_assert(offset == 0 && "OFFSET MUST BE ZERO");
+
+   if(A_nnz == 0 || A_ncols == 0 || A_nrows == 0)
+   {
+      return hypre_error_flag;
+   }
 
    if (trans)
    {

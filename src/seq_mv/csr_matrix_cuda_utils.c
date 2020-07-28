@@ -109,7 +109,7 @@ cusparseSpMatDescr_t hypre_CSRMatToCuda(const hypre_CSRMatrix *A, HYPRE_Int offs
    const cusparseIndexBase_t index_base = CUSPARSE_INDEX_BASE_ZERO;
 
    cusparseSpMatDescr_t matA;
-   assert((A->num_rows-offset != 0) && (A->num_cols != 0) && (A->num_nonzeros != 0));
+   assert((A->num_rows-offset != 0) && (A->num_cols != 0) && (A->num_nonzeros != 0) && "Matrix has no nonzeros");
    HYPRE_CUSPARSE_CALL(cusparseCreateCsr(&matA, A->num_rows-offset, A->num_cols, A->num_nonzeros, A->i+offset, A->j, A->data, index_type, index_type, index_base, data_type));
    return matA;
 }
@@ -206,7 +206,7 @@ void hypre_cusparse_csrmv(cusparseHandle_t handle, cusparseOperation_t oper,HYPR
       HYPRE_Complex* d_y) {
 
       const cusparseSpMVAlg_t alg = CUSPARSE_CSRMV_ALG2;
-      hypre_assert(oper == CUSPARSE_OPERATION_NON_TRANSPOSE);
+      hypre_assert(oper == CUSPARSE_OPERATION_NON_TRANSPOSE && "UNSUPPORTED OPERATION" );
       const cudaDataType data_type = hypre_getCudaDataTypeComplex();
       cusparseDnVecDescr_t vecX;
       cusparseDnVecDescr_t vecY;
