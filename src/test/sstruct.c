@@ -1198,8 +1198,8 @@ DistributeData( ProblemData   global_data,
       pool = data.pools[part] + 1;
       np = distribute[part][0] * distribute[part][1] * distribute[part][2];
       pool_procs[pool] = hypre_max(pool_procs[pool], np);
-
    }
+
    pool_procs[0] = 0;
    for (pool = 1; pool < (data.npools + 1); pool++)
    {
@@ -1209,9 +1209,9 @@ DistributeData( ProblemData   global_data,
    /* check number of processes */
    if (pool_procs[data.npools] != num_procs)
    {
-	   hypre_printf("%d,  %d \n",pool_procs[data.npools],num_procs);
+      hypre_printf("%d,  %d \n", pool_procs[data.npools], num_procs);
       hypre_printf("Error: Invalid number of processes or process topology \n");
-      exit(1);
+      return -1;
    }
 
    /* modify part data */
@@ -1222,10 +1222,11 @@ DistributeData( ProblemData   global_data,
       np  = distribute[part][0] * distribute[part][1] * distribute[part][2];
       pid = myid - pool_procs[pool];
 
-      if ( (pid < 0) || (pid >= np) )
+      if ((pid < 0) || (pid >= np))
       {
          /* none of this part data lives on this process */
          pdata.nboxes = 0;
+
 #if 1 /* set this to 0 to make all of the SetSharedPart calls */
          pdata.glue_nboxes = 0;
 #endif
@@ -1815,7 +1816,7 @@ DistributeData( ProblemData   global_data,
          pdata.periodic[0] *= refine[part][0]*block[part][0]*distribute[part][0];
          pdata.periodic[1] *= refine[part][1]*block[part][1]*distribute[part][1];
          pdata.periodic[2] *= refine[part][2]*block[part][2]*distribute[part][2];
-      }
+      } /* if ((pid < 0) || (pid >= np)) */
 
       if (pdata.nboxes == 0)
       {
@@ -1915,8 +1916,8 @@ DistributeData( ProblemData   global_data,
    }
 
    hypre_TFree(pool_procs);
-
    *data_ptr = data;
+
    return 0;
 }
 
@@ -1944,6 +1945,7 @@ DestroyData( ProblemData   data )
       if (pdata.nvars > 0)
       {
          hypre_TFree(pdata.vartypes);
+         hypre_TFree(pdata.stencil_num);
       }
 
       if (pdata.add_nvars > 0)
@@ -1965,11 +1967,6 @@ DestroyData( ProblemData   data )
          hypre_TFree(pdata.glue_index_maps);
          hypre_TFree(pdata.glue_index_dirs);
          hypre_TFree(pdata.glue_primaries);
-      }
-
-      if (pdata.nvars > 0)
-      {
-         hypre_TFree(pdata.stencil_num);
       }
 
       if (pdata.graph_nboxes > 0)
@@ -2386,6 +2383,7 @@ main( hypre_int argc,
    HYPRE_Int	         aug_dim;
 
    /* Misc */
+   HYPRE_Int             ierr;
    HYPRE_Int             vis;
    HYPRE_Int             seed;
 
@@ -2444,7 +2442,6 @@ main( hypre_int argc,
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
    hypre_InitMemoryDebug(myid);
-   feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 
    /*-----------------------------------------------------------
     * Read input file
@@ -2470,6 +2467,7 @@ main( hypre_int argc,
       }
    }
 
+   nparts = 0;
    if (read_data_flag)
    {
       ReadData(infile, &global_data);
@@ -2803,9 +2801,12 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Distribute data
     *-----------------------------------------------------------*/
-
-   DistributeData(global_data, pooldist, refine, distribute, block,
-                  num_procs, myid, &data);
+   ierr = DistributeData(global_data, pooldist, refine, distribute,
+                         block, num_procs, myid, &data);
+   if (ierr != 0)
+   {
+      hypre_MPI_Abort(hypre_MPI_COMM_WORLD, ierr);
+   }
 
    /*-----------------------------------------------------------
     * Check a few things
@@ -2947,7 +2948,7 @@ main( hypre_int argc,
     * Set up the graph
     *-----------------------------------------------------------*/
 
-   HYPRE_SStructGraphCreate(hypre_MPI_COMM_WORLD, grid, grid, &graph);
+   HYPRE_SStructGraphCreate(hypre_MPI_COMM_WORLD, grid, &graph);
    HYPRE_SStructGraphSetObjectType(graph, object_type);
 
    for (part = 0; part < data.nparts; part++)
@@ -3357,6 +3358,8 @@ main( hypre_int argc,
    }
 
    HYPRE_SStructVectorAssemble(b);
+   HYPRE_SStructInnerProd(b, b, &rhs_norm);
+   rhs_norm = sqrt(rhs_norm);
 
    /*-----------------------------------------------------------
     * Create solution vector
@@ -3515,7 +3518,7 @@ main( hypre_int argc,
 
       /* Set up the gradient graph */
 
-      HYPRE_SStructGraphCreate(hypre_MPI_COMM_WORLD, grid, grid, &G_graph);
+      HYPRE_SStructGraphCreate(hypre_MPI_COMM_WORLD, grid, &G_graph);
       HYPRE_SStructGraphSetDomainGrid(G_graph, G_grid);
       HYPRE_SStructGraphSetObjectType(G_graph, HYPRE_PARCSR);
       for (part = 0; part < data.nparts; part++)
@@ -5862,13 +5865,32 @@ main( hypre_int argc,
    HYPRE_SStructVectorGather(x);
 
    /*-----------------------------------------------------------
+    * Compute real residual
+    *-----------------------------------------------------------*/
+
+   HYPRE_SStructVectorCreate(hypre_MPI_COMM_WORLD, grid, &r);
+   HYPRE_SStructVectorSetObjectType(r, object_type);
+   HYPRE_SStructVectorInitialize(r);
+   HYPRE_SStructVectorAssemble(r);
+   HYPRE_SStructVectorCopy(b, r);
+   HYPRE_SStructMatrixMatvec(-1.0, A, x, 1.0, r);
+
+   HYPRE_SStructInnerProd(r, r, &real_res_norm);
+   real_res_norm = sqrt(real_res_norm);
+
+   if (rhs_norm > 0)
+   {
+      real_res_norm = real_res_norm/rhs_norm;
+   }
+
+   /*-----------------------------------------------------------
     * Print the solution and other info
     *-----------------------------------------------------------*/
 
    if (print_system)
    {
       HYPRE_SStructVectorPrint("sstruct.out.x", x, 0);
-
+      HYPRE_SStructVectorPrint("sstruct.out.r", r, 0);
 #if 0
       FILE *file;
       char  filename[255];
@@ -5913,32 +5935,6 @@ main( hypre_int argc,
 
    if (myid == 0 /* begin lobpcg */ && !lobpcgFlag /* end lobpcg */)
    {
-      HYPRE_SStructVectorCreate(hypre_MPI_COMM_WORLD, grid, &r);
-      if ( object_type != HYPRE_SSTRUCT )
-      {
-         HYPRE_SStructVectorSetObjectType(r, object_type);
-      }
-      HYPRE_SStructVectorInitialize(r);
-      HYPRE_SStructVectorAssemble(r);
-      hypre_SStructCopy(b, r);
-      hypre_SStructMatvec(-1.0, A, x, 1.0, r);
-      if (print_system)
-      {
-         HYPRE_SStructVectorPrint("sstruct.out.r", r, 0);
-      }
-
-      hypre_SStructInnerProd(b, b, &rhs_norm);
-      rhs_norm = sqrt(rhs_norm);
-
-      hypre_SStructInnerProd(r, r, &real_res_norm);
-      HYPRE_SStructVectorDestroy(r);
-      real_res_norm = sqrt(real_res_norm);
-
-      if (rhs_norm > 0)
-      {
-         real_res_norm = real_res_norm/rhs_norm;
-      }
-
       hypre_printf("\n");
       hypre_printf("Iterations = %d\n", num_iterations);
       hypre_printf("RHS Norm = %e\n", rhs_norm);
@@ -5949,9 +5945,9 @@ main( hypre_int argc,
 
    if (vis)
    {
-      HYPRE_SStructGridPrintGLVis(grid, "sstruct.mesh", NULL, NULL);
-      HYPRE_SStructVectorPrintGLVis(b, "sstruct.rhs");
-      HYPRE_SStructVectorPrintGLVis(x, "sstruct.sol");
+      HYPRE_SStructGridPrintGLVis(grid, "sstruct.msh", NULL, NULL);
+      HYPRE_SStructVectorPrintGLVis(b,  "sstruct.rhs");
+      HYPRE_SStructVectorPrintGLVis(x,  "sstruct.sol");
    }
 
    /*-----------------------------------------------------------
@@ -5968,6 +5964,7 @@ main( hypre_int argc,
    HYPRE_SStructMatrixDestroy(A);
    HYPRE_SStructVectorDestroy(b);
    HYPRE_SStructVectorDestroy(x);
+   HYPRE_SStructVectorDestroy(r);
    if (gradient_matrix)
    {
       for (s = 0; s < data.ndim; s++)
