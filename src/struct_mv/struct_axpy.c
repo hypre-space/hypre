@@ -29,23 +29,24 @@ hypre_StructAxpy( HYPRE_Complex       alpha,
 {
    hypre_Box        *x_data_box;
    hypre_Box        *y_data_box;
-                 
+
    HYPRE_Int         xi;
    HYPRE_Int         yi;
-                    
+
    HYPRE_Complex    *xp;
    HYPRE_Complex    *yp;
-                    
+
    hypre_BoxArray   *boxes;
    hypre_Box        *box;
    hypre_Index       loop_size;
    hypre_IndexRef    start;
    hypre_Index       unit_stride;
-                    
+
    HYPRE_Int         i;
 
-   hypre_SetIndex(unit_stride, 1);
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
+   hypre_SetIndex(unit_stride, 1);
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
    hypre_ForBoxI(i, boxes)
    {
@@ -72,6 +73,8 @@ hypre_StructAxpy( HYPRE_Complex       alpha,
       }
       hypre_BoxLoop2End(xi, yi);
    }
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
