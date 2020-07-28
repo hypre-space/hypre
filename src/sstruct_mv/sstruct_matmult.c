@@ -136,7 +136,7 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uMold);
    ij_sA[t] = hypre_SStructMatrixToUMatrix(ssmatrices[t]);
    HYPRE_IJMatrixGetObject(ij_sA[t], (void **) &parcsr_sMold);
-#ifdef DEBUG_MATMULT
+#if DEBUG_MATMULT
    char matname[64];
 
    hypre_ParCSRMatrixPrintIJ(parcsr_uMold, 0, 0, "parcsr_uP");
@@ -154,7 +154,7 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
          ij_sA[t] = hypre_SStructMatrixToUMatrix(ssmatrices[t]);
       }
       HYPRE_IJMatrixGetObject(ij_sA[t], (void **) &parcsr_sA);
-#ifdef DEBUG_MATMULT
+#if DEBUG_MATMULT
       hypre_sprintf(matname, "parcsr_sA_%d", m);
       hypre_ParCSRMatrixPrintIJ(parcsr_sA, 0, 0, matname);
 #endif
@@ -168,7 +168,7 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
       {
          parcsr[0] = hypre_ParMatmul(parcsr_sA, parcsr_uMold);
       }
-#ifdef DEBUG_MATMULT
+#if DEBUG_MATMULT
       hypre_sprintf(matname, "parcsr_0a_%d", m);
       hypre_ParCSRMatrixPrintIJ(parcsr[0], 0, 0, matname);
 #endif
@@ -176,7 +176,7 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
       /* Compute uA_n*uMold */
       ijmatrix = hypre_SStructMatrixIJMatrix(ssmatrices[t]);
       HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uA);
-#ifdef DEBUG_MATMULT
+#if DEBUG_MATMULT
       hypre_sprintf(matname, "parcsr_uA_%d", m);
       hypre_ParCSRMatrixPrintIJ(parcsr_uA, 0, 0, matname);
 #endif
@@ -188,12 +188,11 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
       {
          parcsr[1] = hypre_ParMatmul(parcsr_uA, parcsr_uMold);
       }
-#ifdef DEBUG_MATMULT
+#if DEBUG_MATMULT
       hypre_sprintf(matname, "parcsr_1_%d", m);
       hypre_ParCSRMatrixPrintIJ(parcsr[1], 0, 0, matname);
 #endif
 
-      /* Note: Cannot free parcsr_uMold here since it holds col_starts info of parcsr[0]. Free uMold */
       if (m != (nmatrices - 2))
       {
          hypre_ParCSRMatrixDestroy(parcsr_uMold);
@@ -201,7 +200,7 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
 
       /* Compute (sA_n*uMold + uA_n*uMold) */
       hypre_ParcsrAdd(1.0, parcsr[0], 1.0, parcsr[1], &parcsr[2]);
-#ifdef DEBUG_MATMULT
+#if DEBUG_MATMULT
       hypre_sprintf(matname, "parcsr_2_%d", m);
       hypre_ParCSRMatrixPrintIJ(parcsr[2], 0, 0, matname);
 #endif
@@ -219,14 +218,14 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
       {
          parcsr[0] = hypre_ParMatmul(parcsr_uA, parcsr_sMold);
       }
-#ifdef DEBUG_MATMULT
+#if DEBUG_MATMULT
       hypre_sprintf(matname, "parcsr_0b_%d", m);
       hypre_ParCSRMatrixPrintIJ(parcsr[0], 0, 0, matname);
 #endif
 
       /* Compute (uA_n*sMold + sA_n*uMold + uA_n*uMold) */
       hypre_ParcsrAdd(1.0, parcsr[0], 1.0, parcsr[2], &parcsr_uM);
-#ifdef DEBUG_MATMULT
+#if DEBUG_MATMULT
       hypre_sprintf(matname, "parcsr_uM_%d", m);
       hypre_ParCSRMatrixPrintIJ(parcsr_uM, 0, 0, matname);
 #endif
@@ -244,7 +243,7 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
       {
          parcsr_sM = hypre_ParMatmul(parcsr_sA, parcsr_sMold);
       }
-#ifdef DEBUG_MATMULT
+#if DEBUG_MATMULT
       hypre_sprintf(matname, "parcsr_sM_%d", m);
       hypre_ParCSRMatrixPrintIJ(parcsr_sM, 0, 0, matname);
 #endif

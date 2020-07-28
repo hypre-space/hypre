@@ -30,13 +30,11 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
    HYPRE_Real             tol             =  hypre_SSAMGDataTol(ssamg_data);
    HYPRE_Int              max_iter        =  hypre_SSAMGDataMaxIter(ssamg_data);
    HYPRE_Int              logging         =  hypre_SSAMGDataLogging(ssamg_data);
-   HYPRE_Int              print_level     =  hypre_SSAMGDataPrintLevel(ssamg_data);
    HYPRE_Int              rel_change      =  hypre_SSAMGDataRelChange(ssamg_data);
    HYPRE_Int              zero_guess      =  hypre_SSAMGDataZeroGuess(ssamg_data);
    HYPRE_Int              num_pre_relax   =  hypre_SSAMGDataNumPreRelax(ssamg_data);
    HYPRE_Int              num_post_relax  =  hypre_SSAMGDataNumPosRelax(ssamg_data);
    HYPRE_Int              num_levels      =  hypre_SSAMGDataNumLevels(ssamg_data);
-   HYPRE_Int             *num_iterations  = &hypre_SSAMGDataNumIterations(ssamg_data);
    HYPRE_Real            *norms           =  hypre_SSAMGDataNorms(ssamg_data);
    HYPRE_Real            *rel_norms       =  hypre_SSAMGDataRelNorms(ssamg_data);
 
@@ -54,11 +52,12 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
    void                 **interp_data_l   = (ssamg_data -> interp_data_l);
 
    /* Local Variables */
-   HYPRE_Real            b_dot_b, r_dot_r, eps = 0;
-   HYPRE_Real            e_dot_e = 0, x_dot_x = 1;
-   HYPRE_Int             i, l;
+   HYPRE_Real             b_dot_b, r_dot_r, eps = 0;
+   HYPRE_Real             e_dot_e = 0, x_dot_x = 1;
+   HYPRE_Int              i, l;
 
 #if DEBUG
+   HYPRE_Int              print_level     = hypre_SSAMGDataPrintLevel(ssamg_data);
    char                   filename[255];
 #endif
 
@@ -68,7 +67,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
     * Initialize some things and deal with special cases
     *-----------------------------------------------------*/
 
-   hypre_BeginTiming(*time_index);
+   hypre_BeginTiming(ssamg_data -> time_index);
 
    /*-----------------------------------------------------
     * Refs to A,x,b (the SStructMatrix & SStructVectors)
@@ -80,7 +79,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
    hypre_SStructVectorRef(b, &b_l[0]);
    hypre_SStructVectorRef(x, &x_l[0]);
 
-   *num_iterations = 0;
+   (ssamg_data -> num_iterations) = 0;
 
    /* if max_iter is zero, return */
    if (max_iter == 0)
@@ -90,7 +89,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       {
          hypre_SStructVectorSetConstantValues(x_l[0], 0.0);
       }
-      hypre_EndTiming(*time_index);
+      hypre_EndTiming(ssamg_data -> time_index);
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
@@ -114,7 +113,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             rel_norms[0] = 0.0;
          }
 
-         hypre_EndTiming(*time_index);
+         hypre_EndTiming(ssamg_data -> time_index);
          HYPRE_ANNOTATE_FUNC_END;
 
          return hypre_error_flag;
@@ -155,7 +154,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       hypre_SSAMGRelaxSetPreRelax(relax_data_l[0]);
       hypre_SSAMGRelaxSetMaxIter(relax_data_l[0], num_pre_relax);
       hypre_SSAMGRelaxSetZeroGuess(relax_data_l[0], zero_guess);
-      hypre_SSAMGRelax(relax_data_l[0], matvec_data_l[0], A_l[0], b_l[0], x_l[0]);
+      hypre_SSAMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
       zero_guess = 0;
 
 #if DEBUG
@@ -228,7 +227,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
                hypre_SSAMGRelaxSetPreRelax(relax_data_l[l]);
                hypre_SSAMGRelaxSetMaxIter(relax_data_l[l], num_pre_relax);
                hypre_SSAMGRelaxSetZeroGuess(relax_data_l[l], 1);
-               hypre_SSAMGRelax(relax_data_l[l], matvec_data_l[l], A_l[l], b_l[l], x_l[l]);
+               hypre_SSAMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 
                /* compute residual (b - Ax) */
                hypre_SStructCopy(b_l[l], r_l[l]);
@@ -268,7 +267,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          if (l > 0) // True always
          {
             hypre_SSAMGRelaxSetZeroGuess(relax_data_l[l], 1);
-            hypre_SSAMGRelax(relax_data_l[l], matvec_data_l[l], A_l[l], b_l[l], x_l[l]);
+            hypre_SSAMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
          }
          else
          {
@@ -311,7 +310,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
                hypre_SSAMGRelaxSetPostRelax(relax_data_l[l]);
                hypre_SSAMGRelaxSetMaxIter(relax_data_l[l], num_post_relax);
                hypre_SSAMGRelaxSetZeroGuess(relax_data_l[l], 0);
-               hypre_SSAMGRelax(relax_data_l[l], matvec_data_l[l], A_l[l], b_l[l], x_l[l]);
+               hypre_SSAMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
             }
          }
 
@@ -345,7 +344,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       hypre_SSAMGRelaxSetPostRelax(relax_data_l[0]);
       hypre_SSAMGRelaxSetMaxIter(relax_data_l[0], num_post_relax);
       hypre_SSAMGRelaxSetZeroGuess(relax_data_l[0], 0);
-      hypre_SSAMGRelax(relax_data_l[0], matvec_data_l[0], A_l[0], b_l[0], x_l[0]);
+      hypre_SSAMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
 
 #if DEBUG
       if (print_level > 0 && !(i%print_level))
@@ -355,7 +354,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       }
 #endif
 
-      *num_iterations = i + 1;
+      (ssamg_data -> num_iterations) = i + 1;
       HYPRE_ANNOTATE_MGLEVEL_END(0);
    }
 
@@ -366,7 +365,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
    /* hypre_SStructVectorDestroy(b_l[0]); */
    /* hypre_SStructVectorDestroy(x_l[0]); */
 
-   hypre_EndTiming(*time_index);
+   hypre_EndTiming(ssamg_data -> time_index);
    hypre_SSAMGPrintLogging(ssamg_data);
    HYPRE_ANNOTATE_FUNC_END;
 
