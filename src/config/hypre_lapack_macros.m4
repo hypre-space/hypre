@@ -272,7 +272,7 @@ dnl **************************************************************
        else
           hypre_fmangle_lapack=4
        fi
-       AC_DEFINE_UNQUOTED(HYPRE_FMANGLE_LAPACK, [$hypre_fmangle_lapack], [LAPACK mangling])
+       AC_DEFINE_UNQUOTED(HYPRE_FMANGLE_LAPACK, [$hypre_fmangle_lapack], [Define as in HYPRE_FMANGLE to set the LAPACK name mangling scheme])
     fi                    
 
 dnl **************************************************************

@@ -1,95 +1,113 @@
-/******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
- * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
- *
- * SPDX-License-Identifier: (Apache-2.0 OR MIT)
- ******************************************************************************/
-
 /* config/HYPRE_config.h.in.  Generated from configure.in by autoheader.  */
 
-/* Release name */
-#undef HYPRE_RELEASE_NAME
+/* Define to dummy `main' function (if any) required to link to the Fortran
+   libraries. */
+#undef FC_DUMMY_MAIN
 
-/* Version number */
-#undef HYPRE_RELEASE_VERSION
+/* Define if F77 and FC dummy `main' functions are identical. */
+#undef FC_DUMMY_MAIN_EQ_F77
 
-/* Date of release */
-#undef HYPRE_RELEASE_DATE
+/* Define to a macro mangling the given C identifier (in lower and upper
+   case), which must not contain underscores, for linking with Fortran. */
+#undef FC_FUNC
 
-/* Time of release */
-#undef HYPRE_RELEASE_TIME
+/* As FC_FUNC, but for C identifiers containing underscores. */
+#undef FC_FUNC_
 
-/* Bug reports */
-#undef HYPRE_RELEASE_BUGS
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
 
-/* Define to 1 for Solaris. */
-#undef HYPRE_SOLARIS
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
 
-/* Define to 1 for Linux on platforms running any version of CHAOS */
-#undef HYPRE_LINUX_CHAOS
+/* Define to 1 if using MLI */
+#undef HAVE_MLI
 
-/* Define to 1 for Linux platforms */
-#undef HYPRE_LINUX
+/* Define to 1 if you have the `MPI_Comm_f2c' function. */
+#undef HAVE_MPI_COMM_F2C
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define to 1 if using SuperLU */
+#undef HAVE_SUPERLU
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
 
 /* Define to 1 for Alpha platforms */
 #undef HYPRE_ALPHA
 
-/* Define to 1 for RS6000 platforms */
-#undef HYPRE_RS6000
-
-/* Define to 1 for IRIX64 platforms */
-#undef HYPRE_IRIX64
-
-/* Define to 1 if using long long int for HYPRE_BigInt */
-#undef HYPRE_MIXEDINT
-
 /* Define to 1 if using long long int for HYPRE_Int and HYPRE_BigInt */
 #undef HYPRE_BIGINT
-
-/* Define to 1 if using single precision values for HYPRE_Real */
-#undef HYPRE_SINGLE
-
-/* Define to 1 if using quad precision values for HYPRE_Real */
-#undef HYPRE_LONG_DOUBLE
 
 /* Define to 1 if using complex values */
 #undef HYPRE_COMPLEX
 
-/* Define to be the max dimension size (must be at least 3) */
-#undef HYPRE_MAXDIM
+/* Define to 1 if in debug mode */
+#undef HYPRE_DEBUG
 
-/* Define to 1 if using persistent communication */
-#undef HYPRE_USING_PERSISTENT_COMM
+/* Define to 1 if using OpenMP on device [target alloc version] */
+#undef HYPRE_DEVICE_OPENMP_ALLOC
 
-/* Define to 1 if hopscotch hashing */
-#undef HYPRE_HOPSCOTCH
+/* Define to 1 if strictly checking OpenMP offload directives */
+#undef HYPRE_DEVICE_OPENMP_CHECK
+
+/* Define as follows to set the Fortran name mangling scheme: 0 = unspecified;
+   1 = no underscores; 2 = one underscore; 3 = two underscores; 4 = caps, no
+   underscores; 5 = one underscore before and after */
+#undef HYPRE_FMANGLE
+
+/* BLAS mangling */
+#undef HYPRE_FMANGLE_BLAS
+
+/* LAPACK mangling */
+#undef HYPRE_FMANGLE_LAPACK
 
 /* Define to 1 if an MPI library is found */
 #undef HYPRE_HAVE_MPI
 
-/* Define to 1 if Node Aware MPI library is used */
-#undef HYPRE_USING_NODE_AWARE_MPI
-
 /* Define to 1 if the routine MPI_Comm_f2c is found */
 #undef HYPRE_HAVE_MPI_COMM_F2C
 
-/* Disable MPI, enable serial codes */
-#undef HYPRE_SEQUENTIAL
+/* Define to 1 if hopscotch hashing */
+#undef HYPRE_HOPSCOTCH
 
-/* Using HYPRE timing routines */
-#undef HYPRE_TIMING
+/* Define to 1 for HP platforms */
+#undef HYPRE_HPPA
 
-/* Using dxml for BLAS */
-#undef HYPRE_USING_DXML
+/* Define to 1 for IRIX64 platforms */
+#undef HYPRE_IRIX64
 
-/* Using essl for BLAS */
-#undef HYPRE_USING_ESSL
+/* Define to 1 for Linux platform */
+#undef HYPRE_LINUX
 
-/* Using internal Hypre routines */
-#undef HYPRE_USING_HYPRE_BLAS
+/* Define to 1 for Linux on platforms running any version of CHAOS */
+#undef HYPRE_LINUX_CHAOS
 
-/* Using internal Hypre routines */
-#undef HYPRE_USING_HYPRE_LAPACK
+/* Define to 1 if using quad precision values for HYPRE_Real */
+#undef HYPRE_LONG_DOUBLE
+
+/* Define to be the max dimension size (must be at least 3) */
+#undef HYPRE_MAXDIM
+
+/* Define to 1 if using long long int for HYPRE_BigInt */
+#undef HYPRE_MIXEDINT
 
 /* No global partitioning being used */
 #undef HYPRE_NO_GLOBAL_PARTITION
@@ -97,107 +115,122 @@
 /* Print HYPRE errors */
 #undef HYPRE_PRINT_ERRORS
 
-/* Enable OpenMP support */
-#undef HYPRE_USING_OPENMP
+/* Bug reports */
+#undef HYPRE_RELEASE_BUGS
 
-/*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * MEMORY
- *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+/* Date of release */
+#undef HYPRE_RELEASE_DATE
 
-/* Define to 1 if using host memory only */
-#undef HYPRE_USING_HOST_MEMORY
+/* Release name */
+#undef HYPRE_RELEASE_NAME
 
-/* Define to 1 if using device memory without UM */
-#undef HYPRE_USING_DEVICE_MEMORY
+/* Time of release */
+#undef HYPRE_RELEASE_TIME
 
-/* Define to 1 if using unified memory */
-#undef HYPRE_USING_UNIFIED_MEMORY
+/* Version number */
+#undef HYPRE_RELEASE_VERSION
 
-/*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * EXECUTION
- *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-/* Define to 1 if executing on device with CUDA */
-#undef HYPRE_USING_CUDA
+/* Define to 1 for RS6000 platforms */
+#undef HYPRE_RS6000
 
-/* Define to 1 if executing on device with OpenMP  */
-#undef HYPRE_USING_DEVICE_OPENMP
+/* Disable MPI, enable serial codes. */
+#undef HYPRE_SEQUENTIAL
 
-/* Define to 1 if using OpenMP on device [target alloc version] */
-#undef HYPRE_DEVICE_OPENMP_ALLOC
+/* Define to 1 if using single precision values for HYPRE_Real */
+#undef HYPRE_SINGLE
 
-/* Define to 1 if using OpenMP on device [target mapped version] */
-#undef HYPRE_DEVICE_OPENMP_MAPPED
+/* Define to 1 for Solaris. */
+#undef HYPRE_SOLARIS
 
-/* Define to 1 if strictly checking OpenMP offload directives */
-#undef HYPRE_DEVICE_OPENMP_CHECK
-
-/* Define to 1 if executing on host/device with RAJA */
-#undef HYPRE_USING_RAJA
-
-/* Define to 1 if executing on host/device with KOKKOS */
-#undef HYPRE_USING_KOKKOS
-
-/* Define to 1 if using NVIDIA Tools Extension (NVTX) */
-#undef HYPRE_USING_NVTX
-
-/* Define to 1 if using cuSPARSE */
-#undef HYPRE_USING_CUSPARSE
-
-/* Define to 1 if using CUB */
-#undef HYPRE_USING_CUB_ALLOCATOR
-
-/* Define to 1 if using cuBLAS */
-#undef HYPRE_USING_CUBLAS
-
-/* Define to 1 if using cuRAND */
-#undef HYPRE_USING_CURAND
-
-/* Define to 1 if using GPU aware MPI */
-#undef HYPRE_WITH_GPU_AWARE_MPI
-
-/* Define to 1 if using CUDA streams */
-#undef HYPRE_USING_CUDA_STREAMS
-
-/* Define as follows to set the Fortran name mangling scheme:
- * 0 = unspecified
- * 1 = no underscores
- * 2 = one underscore
- * 3 = two underscores
- * 4 = caps, no underscores
- * 5 = one underscore before and after */
-#undef HYPRE_FMANGLE
-
-/* Define as in HYPRE_FMANGLE to set the BLAS name mangling scheme */
-#undef HYPRE_FMANGLE_BLAS
-
-/* Define as in HYPRE_FMANGLE to set the LAPACK name mangling scheme */
-#undef HYPRE_FMANGLE_LAPACK
-
-/* Define to a macro mangling the given C identifier (in lower and upper
- * case), which must not contain underscores, for linking with Fortran. */
-#undef FC_FUNC
-
-/* As HYPRE_FC_FUNC, but for C identifiers containing underscores. */
-#undef FC_FUNC_
+/* Using HYPRE timing routines */
+#undef HYPRE_TIMING
 
 /* Define to 1 if Caliper instrumentation is enabled */
 #undef HYPRE_USING_CALIPER
 
-/* Define to 1 if using SuperLU */
-#undef HAVE_SUPERLU
+/* Define to 1 if using cuBLAS */
+#undef HYPRE_USING_CUBLAS
+
+/* Define to 1 if using CUB */
+#undef HYPRE_USING_CUB_ALLOCATOR
+
+/* Define to 1 if executing on device with CUDA */
+#undef HYPRE_USING_CUDA
+
+/* Define to 1 if using CUDA streams */
+#undef HYPRE_USING_CUDA_STREAMS
+
+/* Define to 1 if using cuRAND */
+#undef HYPRE_USING_CURAND
+
+/* Define to 1 if using cuSPARSE */
+#undef HYPRE_USING_CUSPARSE
+
+/* Define to 1 if using device memory without UM */
+#undef HYPRE_USING_DEVICE_MEMORY
+
+/* Define to 1 if executing on device with OpenMP */
+#undef HYPRE_USING_DEVICE_OPENMP
 
 /* Define to 1 if using DSuperLU */
 #undef HYPRE_USING_DSUPERLU
 
-/* Define to 1 if using MLI */
-#undef HAVE_MLI
+/* Using dxml for Blas */
+#undef HYPRE_USING_DXML
 
-/* Define to 1 if in debug mode */
-#undef HYPRE_DEBUG
+/* Using ESSL for Lapack */
+#undef HYPRE_USING_ESSL
 
-/* if not in debug mode, define NDEBUG */
-#ifndef HYPRE_DEBUG
-#ifndef NDEBUG
-#define NDEBUG
-#endif
-#endif
+/* Define to 1 if using host memory only */
+#undef HYPRE_USING_HOST_MEMORY
+
+/* Using internal HYPRE routines */
+#undef HYPRE_USING_HYPRE_BLAS
+
+/* Using internal HYPRE routines */
+#undef HYPRE_USING_HYPRE_LAPACK
+
+/* Define to 1 if executing on host/device with KOKKOS */
+#undef HYPRE_USING_KOKKOS
+
+/* Define to 1 if Node Aware MPI library is used */
+#undef HYPRE_USING_NODE_AWARE_MPI
+
+/* NVTX being used */
+#undef HYPRE_USING_NVTX
+
+/* Enable OpenMP support */
+#undef HYPRE_USING_OPENMP
+
+/* Define to 1 if using persistent communication */
+#undef HYPRE_USING_PERSISTENT_COMM
+
+/* Define to 1 if executing on host/device with RAJA */
+#undef HYPRE_USING_RAJA
+
+/* Define to 1 if using unified memory */
+#undef HYPRE_USING_UNIFIED_MEMORY
+
+/* Define to 1 if using GPU aware MPI */
+#undef HYPRE_WITH_GPU_AWARE_MPI
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS

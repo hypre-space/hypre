@@ -313,7 +313,12 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
    file = fopen(filename, "r");
    hypre_assert(file != NULL);
 
-   fgets(line, 100, file);
+   if (fgets(line, 100, file) == NULL)
+   {
+      hypre_fprintf(stderr, "Error reading file.\n");
+      PARASAILS_EXIT;
+   }
+
 #ifdef EMSOLVE
    ret = hypre_sscanf(line, "%*d %d %*d %*d", &num_rows);
    for (row=0; row<num_rows; row++)
@@ -348,8 +353,12 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
 
    /* Now read our own part */
    rewind(file);
+   if (fgets(line, 100, file) == NULL)
+   {
+      hypre_fprintf(stderr, "Error reading file.\n");
+      PARASAILS_EXIT;
+   }
 
-   fgets(line, 100, file);
 #ifdef EMSOLVE
    ret = hypre_sscanf(line, "%*d %d %*d %*d", &num_rows);
    for (row=0; row<num_rows; row++)
@@ -530,7 +539,11 @@ void RhsRead(HYPRE_Real *rhs, Matrix *mat, char *filename)
    file = fopen(filename, "r");
    hypre_assert(file != NULL);
 
-   fgets(line, 100, file);
+   if (fgets(line, 100, file) == NULL)
+   {
+      hypre_fprintf(stderr, "Error reading file.\n");
+      PARASAILS_EXIT;
+   }
    converted = hypre_sscanf(line, "%d %d", &num_rows, &dummy);
    hypre_assert(num_rows == mat->end_rows[npes-1]);
 

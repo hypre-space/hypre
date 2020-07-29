@@ -135,12 +135,12 @@ HYPRE_MGRSetFSolver(HYPRE_Solver          solver,
                      (void *) fsolver ) );
 }
 
-HYPRE_Int HYPRE_MGRBuildAffNew(HYPRE_ParCSRMatrix A,
+HYPRE_Int HYPRE_MGRBuildAff(HYPRE_ParCSRMatrix A,
                                HYPRE_Int *CF_marker,
                                HYPRE_Int debug_flag,
                                HYPRE_ParCSRMatrix *A_ff)
 {
-   return (hypre_MGRBuildAffNew(A, CF_marker, debug_flag, A_ff));
+   return (hypre_MGRBuildAff(A, CF_marker, debug_flag, A_ff));
 }
 
 /*--------------------------------------------------------------------------

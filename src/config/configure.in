@@ -225,7 +225,7 @@ AS_HELP_STRING([--enable-mixedint],
 )
 if test "$hypre_using_mixedint" = "yes"
 then
-   AC_DEFINE(HYPRE_MIXEDINT, 1)
+   AC_DEFINE(HYPRE_MIXEDINT, 1, [Define to 1 if using long long int for HYPRE_BigInt])
 fi
 
 AC_ARG_ENABLE(bigint,
@@ -241,7 +241,7 @@ AS_HELP_STRING([--enable-bigint],
 )
 if test "$hypre_using_bigint" = "yes"
 then
-   AC_DEFINE(HYPRE_BIGINT, 1)
+   AC_DEFINE(HYPRE_BIGINT, 1, [Define to 1 if using long long int for HYPRE_Int and HYPRE_BigInt])
 fi
 
 AC_ARG_ENABLE(single,
@@ -257,7 +257,7 @@ AS_HELP_STRING([--enable-single],
 )
 if test "$hypre_using_single" = "yes"
 then
-   AC_DEFINE(HYPRE_SINGLE, 1)
+   AC_DEFINE(HYPRE_SINGLE, 1, [Define to 1 if using single precision values for HYPRE_Real])
 fi
 
 AC_ARG_ENABLE(longdouble,
@@ -273,7 +273,7 @@ AS_HELP_STRING([--enable-longdouble],
 )
 if test "$hypre_using_longdouble" = "yes"
 then
-   AC_DEFINE(HYPRE_LONG_DOUBLE, 1)
+   AC_DEFINE(HYPRE_LONG_DOUBLE, 1, [Define to 1 if using quad precision values for HYPRE_Real])
 fi
 
 AC_ARG_ENABLE(complex,
@@ -289,7 +289,7 @@ AS_HELP_STRING([--enable-complex],
 )
 if test "$hypre_using_complex" = "yes"
 then
-   AC_DEFINE(HYPRE_COMPLEX, 1)
+   AC_DEFINE(HYPRE_COMPLEX, 1, [Define to 1 if using complex values])
 fi
 
 AC_ARG_ENABLE(maxdim,
@@ -299,7 +299,7 @@ AS_HELP_STRING([--enable-maxdim=MAXDIM],
 [hypre_maxdim=${enableval}],
 [hypre_maxdim=3]
 )
-AC_DEFINE_UNQUOTED(HYPRE_MAXDIM, [$hypre_maxdim], [Max dimension])
+AC_DEFINE_UNQUOTED(HYPRE_MAXDIM, [$hypre_maxdim], [Define to be the max dimension size (must be at least 3)])
 
 AC_ARG_ENABLE(persistent,
 AS_HELP_STRING([--enable-persistent],
@@ -313,7 +313,7 @@ AS_HELP_STRING([--enable-persistent],
 )
 if test "$hypre_using_persistent" = "yes"
 then
-   AC_DEFINE(HYPRE_USING_PERSISTENT_COMM, 1)
+   AC_DEFINE(HYPRE_USING_PERSISTENT_COMM, 1, [Define to 1 if using persistent communication])
 fi
 
 AC_ARG_ENABLE(hopscotch,
@@ -329,7 +329,7 @@ AS_HELP_STRING([--enable-hopscotch],
 )
 if test "$hypre_using_hopscotch" = "yes"
 then
-   AC_DEFINE(HYPRE_HOPSCOTCH, 1)
+   AC_DEFINE(HYPRE_HOPSCOTCH, 1, [Define to 1 if hopscotch hashing])
 fi
 
 dnl * The --with-no-global-partition option is retained here for
@@ -844,11 +844,19 @@ AS_HELP_STRING([--with-fmangle=FMANGLE],
                [FMANGLE contains a string indicating the type of name mangling
                 to use when calling hypre from Fortran.  It can be set to:
                 "no-underscores", "one-underscore", "two-underscores",
-                "caps-no-underscores, and "one-before-after".]),
+                "caps-no-underscores", and "one-before-after".]),
 [hypre_fmangle=0; AC_HYPRE_SET_FMANGLE],
 [hypre_fmangle=0]
 )
-AC_DEFINE_UNQUOTED(HYPRE_FMANGLE, [$hypre_fmangle], [Fortran mangling])
+AC_DEFINE_UNQUOTED(HYPRE_FMANGLE, 
+		   [$hypre_fmangle],
+[Define as follows to set the Fortran name mangling scheme:
+ 0 = unspecified;
+ 1 = no underscores;
+ 2 = one underscore;
+ 3 = two underscores;
+ 4 = caps, no underscores;
+ 5 = one underscore before and after])
 
 dnl * Define a generic macro to set hypre_fmangle_blaslapack based on withval
 AC_DEFUN([AC_HYPRE_SET_FMANGLE_BLAS],
@@ -944,7 +952,7 @@ AS_HELP_STRING([--with-superlu],
 )
 
 AS_IF([test "x$with_superlu" = "xyes"],
-      [AC_DEFINE(HAVE_SUPERLU, 1, [Have external SuperLU library.])],
+      [AC_DEFINE(HAVE_SUPERLU, 1, [Define to 1 if using SuperLU])],
       [])
 
 AC_ARG_WITH(superlu-include,
@@ -976,7 +984,7 @@ AS_HELP_STRING([--with-dsuperlu],
 )
 
 AS_IF([test "x$with_dsuperlu" = "xyes"],
-      [AC_DEFINE(HYPRE_USING_DSUPERLU, 1, [Have external DSuperLU library.])],
+      [AC_DEFINE(HYPRE_USING_DSUPERLU, 1, [Define to 1 if using DSuperLU])],
       [])
 
 AC_ARG_WITH(dsuperlu-include,
@@ -1166,7 +1174,7 @@ AS_HELP_STRING([--with-caliper],
                [hypre_using_caliper=no])
 
 AS_IF([test "x$with_caliper" = "xyes"],
-      [AC_DEFINE(HYPRE_USING_CALIPER, 1, [Using Caliper instrumentation])],
+      [AC_DEFINE(HYPRE_USING_CALIPER, 1, [Define to 1 if Caliper instrumentation is enabled])],
       [])
 
 AC_ARG_WITH(caliper-include,
@@ -1335,7 +1343,7 @@ else
        hypre_cv_func_MPI_Comm_f2c_macro=no)])
    if test $ac_cv_func_MPI_Comm_f2c = yes \
       || test $hypre_cv_func_MPI_Comm_f2c_macro = yes; then
-     AC_DEFINE(HYPRE_HAVE_MPI_COMM_F2C)
+     AC_DEFINE(HYPRE_HAVE_MPI_COMM_F2C,1,[Define to 1 if the routine MPI_Comm_f2c is found])
    fi
 fi
 
@@ -1345,13 +1353,13 @@ if test "$hypre_using_global_partition" = "no"
 then
 dnl   if test "$hypre_using_mpi" != "no"
 dnl   then
-      AC_DEFINE(HYPRE_NO_GLOBAL_PARTITION, 1)
+      AC_DEFINE(HYPRE_NO_GLOBAL_PARTITION, 1, [No global partitioning being used])
 dnl   fi
 fi
 
 if test "$hypre_using_node_aware_mpi" = "yes"
 then
-   AC_DEFINE(HYPRE_USING_NODE_AWARE_MPI, 1)
+   AC_DEFINE(HYPRE_USING_NODE_AWARE_MPI, 1, [Define to 1 if Node Aware MPI library is used])
 fi
 
 dnl *********************************************************************
@@ -1461,7 +1469,7 @@ then
       then
          HYPRE_FEI_SUBDIRS="femli $HYPRE_FEI_SUBDIRS"
          HYPRE_FEI_FEMLI_FILES="$HYPRE_SRCDIR/FEI_mv/femli/*.o"
-         AC_DEFINE(HAVE_MLI, 1, [Using MLI.])
+         AC_DEFINE(HAVE_MLI, 1, [Define to 1 if using MLI])
       fi
    fi
    AC_CHECK_LIB(stdc++, __gxx_personality_v0, LIBS="$LIBS -lstdc++")
@@ -1494,7 +1502,7 @@ dnl *********************************************************************
 if test "$hypre_using_debug" = "yes"
 then
    AC_HYPRE_DEBUG_FLAGS
-   AC_DEFINE([HYPRE_DEBUG], 1, [HYPRE in debug mode])
+   AC_DEFINE([HYPRE_DEBUG], 1, [Define to 1 if in debug mode])
 else
    AC_HYPRE_OPTIMIZATION_FLAGS
 fi
@@ -1662,7 +1670,7 @@ dnl *********************************************************************
 if test "x$hypre_user_chose_raja" = "xyes"
 then
    RAJA_LIBS=" $HYPRE_RAJA_LIB_DIR $HYPRE_RAJA_LIB "
-   AC_DEFINE(HYPRE_USING_RAJA, 1, [RAJA being used])
+   AC_DEFINE(HYPRE_USING_RAJA, 1, [Define to 1 if executing on host/device with RAJA])
 
    if test "$hypre_using_cuda" != "yes"
    then
@@ -1684,7 +1692,7 @@ dnl *********************************************************************
 if test "x$hypre_user_chose_kokkos" = "xyes"
 then
    KOKKOS_LIBS="$HYPRE_KOKKOS_LIB_DIR $HYPRE_KOKKOS_LIB"
-   AC_DEFINE(HYPRE_USING_KOKKOS, 1, [KOKKOS being used])
+   AC_DEFINE(HYPRE_USING_KOKKOS, 1, [Define to 1 if executing on host/device with KOKKOS])
 
    if test "$hypre_using_cuda" != "yes"
    then
@@ -1705,33 +1713,33 @@ dnl * Set cuda options
 dnl *********************************************************************
 if test "$hypre_user_chose_cuda" = "yes"
 then
-   AC_DEFINE(HYPRE_USING_CUDA, 1, [CUDA being used])
+   AC_DEFINE(HYPRE_USING_CUDA, 1, [Define to 1 if executing on device with CUDA])
 
-   AC_DEFINE(HYPRE_USING_CUSPARSE, 1, [cuSPARSE being used])
+   AC_DEFINE(HYPRE_USING_CUSPARSE, 1, [Define to 1 if using cuSPARSE])
 
    if test "$hypre_using_nvtx" = "yes"
    then
-      AC_DEFINE(HYPRE_USING_NVTX, 1, [NVTX being used])
+      AC_DEFINE(HYPRE_USING_NVTX, 1, [Define to 1 if using NVIDIA Tools Extension (NVTX)])
    fi
 
    if test "$hypre_using_cusparse" = "yes"
    then
-      AC_DEFINE(HYPRE_USING_CUSPARSE, 1, [CUSPARSE being used])
+      AC_DEFINE(HYPRE_USING_CUSPARSE, 1, [Define to 1 if using cuSPARSE])
    fi
 
    if test "$hypre_using_cub" = "yes"
    then
-      AC_DEFINE(HYPRE_USING_CUB_ALLOCATOR, 1, [CUB allocator being used])
+      AC_DEFINE(HYPRE_USING_CUB_ALLOCATOR, 1, [Define to 1 if using CUB])
    fi
 
    if test "$hypre_using_cublas" = "yes"
    then
-      AC_DEFINE(HYPRE_USING_CUBLAS, 1, [CUBLAS being used])
+      AC_DEFINE(HYPRE_USING_CUBLAS, 1, [Define to 1 if using cuBLAS])
    fi
 
    if test "$hypre_using_curand" = "yes"
    then
-      AC_DEFINE(HYPRE_USING_CURAND, 1, [CURAND being used])
+      AC_DEFINE(HYPRE_USING_CURAND, 1, [Define to 1 if using cuRAND])
    fi
 
    dnl let CC/CXX and LINK be CUCC and let host compiler be CXX
@@ -1825,16 +1833,16 @@ dnl * Set Device OpenMP options
 dnl *********************************************************************
 if test "$hypre_using_device_openmp" = "yes"
 then
-   AC_DEFINE(HYPRE_USING_CUSPARSE, 1, [cuSPARSE being used])
+   AC_DEFINE(HYPRE_USING_CUSPARSE, 1, [Define to 1 if using cuSPARSE])
 
    if test "$hypre_using_nvtx" = "yes"
    then
       AC_DEFINE(HYPRE_USING_NVTX, 1, [NVTX being used])
    fi
-   AC_DEFINE(HYPRE_USING_DEVICE_OPENMP, 1, [Enable OpenMP (>=4.5) device directives])
-   AC_DEFINE(HYPRE_DEVICE_OPENMP_ALLOC, 1, [Enable device OpenMP target alloc version])
+   AC_DEFINE(HYPRE_USING_DEVICE_OPENMP, 1, [Define to 1 if executing on device with OpenMP])
+   AC_DEFINE(HYPRE_DEVICE_OPENMP_ALLOC, 1, [Define to 1 if using OpenMP on device [target alloc version]])
 
-   dnl AC_DEFINE(HYPRE_DEVICE_OPENMP_MAPPED, 1, [Enable device OpenMP target mapped version])
+   dnl AC_DEFINE(HYPRE_DEVICE_OPENMP_MAPPED, 1, [Define to 1 if using OpenMP on device [target mapped version]])
 
    dnl AC_CHECK_PROGS(CUCC, nvcc)
 
@@ -1852,7 +1860,7 @@ then
    fi
    if test "$hypre_using_debug" = "yes"
    then
-      AC_DEFINE(HYPRE_DEVICE_OPENMP_CHECK, 1, [Strictly checking OpenMP offload directives])
+      AC_DEFINE(HYPRE_DEVICE_OPENMP_CHECK, 1, [Define to 1 if strictly checking OpenMP offload directives])
    fi
 
    HYPRE_CUDA_INCL="-I${HYPRE_CUDA_PATH}/include"
@@ -1921,7 +1929,7 @@ fi
 
 if test "x$hypre_using_cuda_streams" = "xyes"
 then
-   AC_DEFINE([HYPRE_USING_CUDA_STREAMS],1,[HYPRE WITH CUDA STREAMS])
+   AC_DEFINE([HYPRE_USING_CUDA_STREAMS],1,[Define to 1 if using CUDA streams])
 fi
 
 dnl *********************************************************************
@@ -1929,19 +1937,19 @@ dnl * Set memory env
 dnl *********************************************************************
 if test "x$hypre_using_um" = "xyes"
 then
-   AC_DEFINE([HYPRE_USING_UNIFIED_MEMORY],1,[HYPRE WITH UNIFIED MEMORY])
+   AC_DEFINE([HYPRE_USING_UNIFIED_MEMORY],1,[Define to 1 if using unified memory])
 else
    if [test "x$hypre_user_chose_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes"]
    then
-      AC_DEFINE([HYPRE_USING_DEVICE_MEMORY],1,[HYPRE WITH DEVICE MEMORY])
+      AC_DEFINE([HYPRE_USING_DEVICE_MEMORY],1,[Define to 1 if using device memory without UM])
    else
-      AC_DEFINE([HYPRE_USING_HOST_MEMORY],1,[HYPRE WITH HOST MEMORY])
+      AC_DEFINE([HYPRE_USING_HOST_MEMORY],1,[Define to 1 if using host memory only])
    fi
 fi
 
 if test "$hypre_gpu_mpi" = "yes"
 then
-   AC_DEFINE([HYPRE_WITH_GPU_AWARE_MPI],1,[HYPRE WITH GPU AWARE MPI])
+   AC_DEFINE([HYPRE_WITH_GPU_AWARE_MPI],1,[Define to 1 if using GPU aware MPI])
 fi
 
 dnl *********************************************************************
@@ -2107,4 +2115,4 @@ dnl * Define the files to be configured and made
 dnl *********************************************************************
 AC_CONFIG_FILES([config/Makefile.config])
 
-AC_OUTPUT
+AC_OUTPUT()
