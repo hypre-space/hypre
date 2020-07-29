@@ -203,28 +203,29 @@ cusparseSpMatDescr_t hypre_CSRMatRawToCuda(HYPRE_Int n, HYPRE_Int m, HYPRE_Int n
  */
 void hypre_cusparse_csrmv(cusparseHandle_t handle, cusparseOperation_t oper,HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnz, HYPRE_Complex* alpha,
       HYPRE_Complex* d_a, HYPRE_Int* d_i, HYPRE_Int* d_j, HYPRE_Complex* d_x, HYPRE_Complex* beta,
-      HYPRE_Complex* d_y) {
+      HYPRE_Complex* d_y)
+{
 
-      const cusparseSpMVAlg_t alg = CUSPARSE_CSRMV_ALG2;
-      hypre_assert(oper == CUSPARSE_OPERATION_NON_TRANSPOSE && "UNSUPPORTED OPERATION" );
-      const cudaDataType data_type = hypre_getCudaDataTypeComplex();
-      cusparseDnVecDescr_t vecX;
-      cusparseDnVecDescr_t vecY;
-      HYPRE_CUSPARSE_CALL(cusparseCreateDnVec(&vecX, n, d_x, data_type));
-      HYPRE_CUSPARSE_CALL(cusparseCreateDnVec(&vecY, m, d_y, data_type));
-      const cusparseIndexType_t index_type = hypre_getCusparseIndexTypeInt();
-      const cusparseIndexBase_t index_base = CUSPARSE_INDEX_BASE_ZERO;
-      cusparseSpMatDescr_t matA;
-      HYPRE_CUSPARSE_CALL(cusparseCreateCsr(&matA, m, n, nnz, d_i, d_j, d_a, index_type, index_type, index_base, data_type));
-      void* dBuffer = NULL;
-      size_t bufferSize;
-      HYPRE_CUSPARSE_CALL(cusparseSpMV_bufferSize(handle, oper, alpha, matA, vecX, beta, vecY, data_type, alg, &bufferSize));
-      dBuffer = hypre_TAlloc(char, bufferSize, HYPRE_MEMORY_DEVICE);
-      HYPRE_CUSPARSE_CALL(cusparseSpMV(handle, oper, alpha, matA, vecX, beta, vecY, data_type, alg, dBuffer));
-      HYPRE_CUSPARSE_CALL(cusparseDestroySpMat(matA));
-      HYPRE_CUSPARSE_CALL(cusparseDestroyDnVec(vecX));
-      HYPRE_CUSPARSE_CALL(cusparseDestroyDnVec(vecY));
-      hypre_TFree(dBuffer, HYPRE_MEMORY_DEVICE);
+   const cusparseSpMVAlg_t alg = CUSPARSE_CSRMV_ALG2;
+   hypre_assert(oper == CUSPARSE_OPERATION_NON_TRANSPOSE && "UNSUPPORTED OPERATION" );
+   const cudaDataType data_type = hypre_getCudaDataTypeComplex();
+   cusparseDnVecDescr_t vecX;
+   cusparseDnVecDescr_t vecY;
+   HYPRE_CUSPARSE_CALL(cusparseCreateDnVec(&vecX, n, d_x, data_type));
+   HYPRE_CUSPARSE_CALL(cusparseCreateDnVec(&vecY, m, d_y, data_type));
+   const cusparseIndexType_t index_type = hypre_getCusparseIndexTypeInt();
+   const cusparseIndexBase_t index_base = CUSPARSE_INDEX_BASE_ZERO;
+   cusparseSpMatDescr_t matA;
+   HYPRE_CUSPARSE_CALL(cusparseCreateCsr(&matA, m, n, nnz, d_i, d_j, d_a, index_type, index_type, index_base, data_type));
+   void* dBuffer = NULL;
+   size_t bufferSize;
+   HYPRE_CUSPARSE_CALL(cusparseSpMV_bufferSize(handle, oper, alpha, matA, vecX, beta, vecY, data_type, alg, &bufferSize));
+   dBuffer = hypre_TAlloc(char, bufferSize, HYPRE_MEMORY_DEVICE);
+   HYPRE_CUSPARSE_CALL(cusparseSpMV(handle, oper, alpha, matA, vecX, beta, vecY, data_type, alg, dBuffer));
+   HYPRE_CUSPARSE_CALL(cusparseDestroySpMat(matA));
+   HYPRE_CUSPARSE_CALL(cusparseDestroyDnVec(vecX));
+   HYPRE_CUSPARSE_CALL(cusparseDestroyDnVec(vecY));
+   hypre_TFree(dBuffer, HYPRE_MEMORY_DEVICE);
 }
 
 #endif
