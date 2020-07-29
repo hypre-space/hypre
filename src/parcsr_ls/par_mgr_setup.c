@@ -114,7 +114,7 @@ hypre_MGRSetup( void               *mgr_vdata,
   HYPRE_Real wall_time;
 
   /* ----- begin -----*/
-
+  HYPRE_ANNOTATE_FUNC_BEGIN;
 //  num_threads = hypre_NumThreads();
 
   block_size = (mgr_data -> block_size);
@@ -176,6 +176,7 @@ hypre_MGRSetup( void               *mgr_vdata,
     /* setup coarse grid solver */
     coarse_grid_solver_setup((mgr_data -> coarse_grid_solver), A, f, u);
     (mgr_data -> num_coarse_levels) = 0;
+    HYPRE_ANNOTATE_FUNC_END;
 
     return hypre_error_flag;
   }
@@ -440,6 +441,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       HYPRE_ILUSetType(mgr_data -> global_smoother, 0);
       HYPRE_ILUSetLevelOfFill(mgr_data -> global_smoother, 0);
       HYPRE_ILUSetMaxIter(mgr_data -> global_smoother, global_smooth_iters);
+      HYPRE_ILUSetTol(mgr_data -> global_smoother, 0.0);
       HYPRE_ILUSetup(mgr_data -> global_smoother, A, f, u);
     }
   }
@@ -856,8 +858,8 @@ hypre_MGRSetup( void               *mgr_vdata,
       /* Compute RAP for next level */
       if (use_non_galerkin_cg[lev] != 0)
       {
-        //HYPRE_Int keep_stencil = (set_c_points_method == 1 ? 0 : 1);
-        hypre_MGRComputeNonGalerkinCoarseGrid(A_array[lev], P, RT, 2/*hypre_max(block_size - lev - 1, 1)*/,
+        HYPRE_Int block_num_f_points = (lev == 0 ? block_size : block_num_coarse_indexes[lev-1]) - block_num_coarse_indexes[lev];
+        hypre_MGRComputeNonGalerkinCoarseGrid(A_array[lev], P, RT, block_num_f_points,
           /* ordering */0, /* method */ 0, max_elmts, /* keep_stencil */ 0, CF_marker_array[lev], &RAP_ptr);
         hypre_ParCSRMatrixOwnsColStarts(RAP_ptr) = 0;
         hypre_ParCSRMatrixOwnsColStarts(P_array[lev]) = 0;
@@ -869,11 +871,23 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
     }
 
-    if (Frelax_method[lev] == 99) // full AMG
+    if (Frelax_method[lev] == 2) // full AMG
     {
-      if (!use_default_fsolver) // user provided AMG solver
+      // user provided AMG solver
+      // only support AMG at the first level
+      // TODO: input check to avoid crashing
+      if (lev == 0 && use_default_fsolver == 0)
       {
-        A_ff_ptr = ((hypre_ParAMGData*)aff_solver[lev])->A_array[0];
+        if (((hypre_ParAMGData*)aff_solver[0])->A_array[0] == NULL)
+        {
+          if (my_id == 0)
+          {
+            printf("Error!!! F-relaxation solver has not been setup.\n");
+            hypre_error(1);
+            return hypre_error_flag;
+          }
+        }
+        A_ff_ptr = ((hypre_ParAMGData*)aff_solver[0])->A_array[0];
 
         F_fine_array[lev+1] =
         hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
@@ -892,7 +906,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
       else // construct default AMG solver
       {
-        hypre_MGRBuildAffNew(A_array[lev], CF_marker_array[lev], debug_flag, &A_ff_ptr);
+        hypre_MGRBuildAff(A_array[lev], CF_marker_array[lev], debug_flag, &A_ff_ptr);
 
         F_fine_array[lev+1] =
         hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
@@ -911,6 +925,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
         aff_solver[lev] = (HYPRE_Solver*) hypre_BoomerAMGCreate();
         hypre_BoomerAMGSetMaxIter(aff_solver[lev], 1);
+        hypre_BoomerAMGSetTol(aff_solver[lev], 0.0);
         hypre_BoomerAMGSetRelaxOrder(aff_solver[lev], 1);
         //hypre_BoomerAMGSetAggNumLevels(aff_solver[lev], 1);
         hypre_BoomerAMGSetNumSweeps(aff_solver[lev], 3);
@@ -1050,6 +1065,7 @@ hypre_MGRSetup( void               *mgr_vdata,
     /* create and set default solver parameters here */
     default_cg_solver = (HYPRE_Solver) hypre_BoomerAMGCreate();
     hypre_BoomerAMGSetMaxIter ( default_cg_solver, 1 );
+    hypre_BoomerAMGSetTol ( default_cg_solver, 0.0 );
     hypre_BoomerAMGSetRelaxOrder( default_cg_solver, 1);
     hypre_BoomerAMGSetPrintLevel(default_cg_solver, print_level);
     /* set setup and solve functions */
@@ -1187,6 +1203,8 @@ hypre_MGRSetup( void               *mgr_vdata,
     hypre_TFree(level_coarse_size, HYPRE_MEMORY_HOST);
     level_coarse_size = NULL;
   }
+
+  HYPRE_ANNOTATE_FUNC_END;
 
   return hypre_error_flag;
 }

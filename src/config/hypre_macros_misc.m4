@@ -54,7 +54,7 @@ if test x = x"$MPILIBS"; then
   $2
   :
 else
-  AC_DEFINE(HYPRE_HAVE_MPI,1,[Found the MPI library.])
+  AC_DEFINE(HYPRE_HAVE_MPI,1,[Define to 1 if an MPI library is found])
   $1
   :
 fi
@@ -415,19 +415,19 @@ dnl *
 dnl *    define type of architecture
    case $HYPRE_ARCH in
       alpha)
-         AC_DEFINE(HYPRE_ALPHA)
+         AC_DEFINE(HYPRE_ALPHA,1,[Define to 1 for Alpha platforms])
          ;;
       sun* | solaris*)
-         AC_DEFINE(HYPRE_SOLARIS)
+         AC_DEFINE(HYPRE_SOLARIS,1,[Define to 1 for Solaris.])
          ;;
       hp* | HP*)
-         AC_DEFINE(HYPRE_HPPA)
+         AC_DEFINE(HYPRE_HPPA,1,[Define to 1 for HP platforms])
          ;;
       rs6000 | RS6000 | *bgl* | *BGL* | ppc64*)
-         AC_DEFINE(HYPRE_RS6000)
+         AC_DEFINE(HYPRE_RS6000,1,[Define to 1 for RS6000 platforms])
          ;;
       IRIX64)
-         AC_DEFINE(HYPRE_IRIX64)
+         AC_DEFINE(HYPRE_IRIX64,1,[Define to 1 for IRIX64 platforms])
          ;;
       Linux | linux | LINUX)
          if test -r /etc/home.config
@@ -435,14 +435,14 @@ dnl *    define type of architecture
             systemtype=`grep ^SYS_TYPE /etc/home.config | cut -d" " -f2`
             case $systemtype in
                chaos*)
-                  AC_DEFINE(HYPRE_LINUX_CHAOS)
+                  AC_DEFINE(HYPRE_LINUX_CHAOS,1,[Define to 1 for Linux on platforms running any version of CHAOS])
                   ;;
                *)
-                  AC_DEFINE(HYPRE_LINUX)
+                  AC_DEFINE(HYPRE_LINUX,1,[Define to 1 for Linux platform])
                   ;;
             esac
          else
-            AC_DEFINE(HYPRE_LINUX)
+            AC_DEFINE(HYPRE_LINUX,1,[Define to 1 for Linux platform])
          fi
          ;;
    esac

@@ -271,7 +271,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    CR_use_CG = hypre_ParAMGDataCRUseCG(amg_data);
    cgc_its = hypre_ParAMGDataCGCIts(amg_data);
 
-   relax_order         = hypre_ParAMGDataRelaxOrder(amg_data);
+   relax_order = hypre_ParAMGDataRelaxOrder(amg_data);
 
    hypre_ParCSRMatrixSetNumNonzeros(A);
    hypre_ParCSRMatrixSetDNumNonzeros(A);
@@ -297,7 +297,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    grid_relax_type[3] = hypre_ParAMGDataUserCoarseRelaxType(amg_data);
 
-   HYPRE_ANNOTATION_BEGIN("BoomerAMG.setup");
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /* change in definition of standard and multipass interpolation, by
       eliminating interp_type 9 and 5 and setting sep_weight instead
@@ -847,6 +847,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    not_finished_coarsening = 1;
    level = 0;
+   HYPRE_ANNOTATE_MGLEVEL_BEGIN(level);
 
    strong_threshold = hypre_ParAMGDataStrongThreshold(amg_data);
    coarsen_cut_factor = hypre_ParAMGDataCoarsenCutFactor(amg_data);
@@ -1952,21 +1953,21 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             else if (interp_type == 16) /*Extended classical MM interpolation */
             {
                hypre_BoomerAMGBuildModExtInterp(A_array[level], CF_marker,
-                                             S, coarse_pnts_global, 
+                                             S, coarse_pnts_global,
                                              debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
                hypre_TFree(col_offd_S_to_A, HYPRE_MEMORY_HOST);
             }
             else if (interp_type == 17) /*Extended+i MM interpolation */
             {
                hypre_BoomerAMGBuildModExtPIInterp(A_array[level], CF_marker,
-                                             S, coarse_pnts_global, 
+                                             S, coarse_pnts_global,
                                              debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
                hypre_TFree(col_offd_S_to_A, HYPRE_MEMORY_HOST);
             }
             else if (interp_type == 18) /*Extended+e MM interpolation */
             {
                hypre_BoomerAMGBuildModNewExtPIInterp(A_array[level], CF_marker,
-                                             S, coarse_pnts_global, 
+                                             S, coarse_pnts_global,
                                              debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
                hypre_TFree(col_offd_S_to_A, HYPRE_MEMORY_HOST);
             }
@@ -2798,7 +2799,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          fflush(NULL);
       }
 
+      HYPRE_ANNOTATE_MGLEVEL_END(level);
       ++level;
+      HYPRE_ANNOTATE_MGLEVEL_BEGIN(level);
 
       if (!block_mode)
       {
@@ -2825,7 +2828,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          coarsen_type = 0;
       }
 
-
       {
          HYPRE_Int max_thresh = hypre_max(coarse_threshold, seq_threshold);
 #ifdef HYPRE_USING_DSUPERLU
@@ -2833,26 +2835,32 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #endif
          if ( (level == max_levels-1) || (coarse_size <= (HYPRE_BigInt) max_thresh) )
          {
+            HYPRE_ANNOTATE_MGLEVEL_END(level);
             not_finished_coarsening = 0;
          }
       }
    }  /* end of coarsening loop: while (not_finished_coarsening) */
 
    /* redundant coarse grid solve */
-   if (  (seq_threshold >= coarse_threshold) && (coarse_size > (HYPRE_BigInt)coarse_threshold) && (level != max_levels-1))
+   if ((seq_threshold >= coarse_threshold) &&
+       (coarse_size > (HYPRE_BigInt) coarse_threshold) &&
+       (level != max_levels-1))
    {
-      hypre_seqAMGSetup( amg_data, level, coarse_threshold);
-
+      hypre_seqAMGSetup(amg_data, level, coarse_threshold);
    }
 #ifdef HYPRE_USING_DSUPERLU
-   else if (  ((dslu_threshold >= coarse_threshold) && (coarse_size > (HYPRE_BigInt)coarse_threshold) && (level != max_levels-1)))
+   else if ((dslu_threshold >= coarse_threshold) &&
+            (coarse_size > (HYPRE_BigInt)coarse_threshold) &&
+            (level != max_levels-1))
    {
       HYPRE_Solver dslu_solver;
       hypre_SLUDistSetup(&dslu_solver, A_array[level], amg_print_level);
       hypre_ParAMGDataDSLUSolver(amg_data) = dslu_solver;
    }
 #endif
-   else if (grid_relax_type[3] == 9 || grid_relax_type[3] == 99 || grid_relax_type[3] == 199)  /*use of Gaussian elimination on coarsest level */
+   else if (grid_relax_type[3] == 9  ||
+            grid_relax_type[3] == 99 ||
+            grid_relax_type[3] == 199 ) /*use of Gaussian elimination on coarsest level */
    {
       if (coarse_size <= coarse_threshold)
       {
@@ -2937,7 +2945,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    }
 
    /* Chebyshev */
-   if (grid_relax_type[0] == 16 ||grid_relax_type[1] == 16 || grid_relax_type[2] == 16 || grid_relax_type[3] == 16)
+   if (grid_relax_type[0] == 16 || grid_relax_type[1] == 16 ||
+       grid_relax_type[2] == 16 || grid_relax_type[3] == 16)
    {
       max_eig_est = hypre_CTAlloc(HYPRE_Real, num_levels, HYPRE_MEMORY_HOST);
       min_eig_est = hypre_CTAlloc(HYPRE_Real, num_levels, HYPRE_MEMORY_HOST);
@@ -2950,7 +2959,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    }
 
    /* CG */
-   if (grid_relax_type[0] == 15 ||grid_relax_type[1] == 15 ||  grid_relax_type[2] == 15 || grid_relax_type[3] == 15)
+   if (grid_relax_type[0] == 15 || grid_relax_type[1] == 15 ||
+       grid_relax_type[2] == 15 || grid_relax_type[3] == 15)
    {
       smoother = hypre_CTAlloc(HYPRE_Solver, num_levels, HYPRE_MEMORY_HOST);
       hypre_ParAMGDataSmoother(amg_data) = smoother;
@@ -2965,8 +2975,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    {
       HYPRE_Real *l1_norm_data = NULL;
 
-      if (j < num_levels-1 && (grid_relax_type[1] == 8 || grid_relax_type[1] == 13 || grid_relax_type[1] == 14 ||
-                               grid_relax_type[2] == 8 || grid_relax_type[2] == 13 || grid_relax_type[2] == 14))
+      if (j < num_levels-1 &&
+          (grid_relax_type[1] == 8 || grid_relax_type[1] == 13 || grid_relax_type[1] == 14 ||
+           grid_relax_type[2] == 8 || grid_relax_type[2] == 13 || grid_relax_type[2] == 14))
       {
          if (relax_order)
          {
@@ -2977,12 +2988,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, &l1_norm_data);
          }
       }
-      else if ((grid_relax_type[3] == 8 || grid_relax_type[3] == 13 || grid_relax_type[3] == 14) && j == num_levels-1)
+      else if (j == num_levels-1 &&
+               (grid_relax_type[3] == 8 || grid_relax_type[3] == 13 || grid_relax_type[3] == 14))
       {
          hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, &l1_norm_data);
       }
 
-      if ((grid_relax_type[1] == 18 || grid_relax_type[2] == 18)  && j < num_levels-1)
+      if (j < num_levels-1 && (grid_relax_type[1] == 18 || grid_relax_type[2] == 18))
       {
          if (relax_order)
          {
@@ -2993,7 +3005,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norm_data);
          }
       }
-      else if (grid_relax_type[3] == 18 && j == num_levels-1)
+      else if (j == num_levels-1 && grid_relax_type[3] == 18)
       {
          hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norm_data);
       }
@@ -3457,7 +3469,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 }
 #endif
 
-   HYPRE_ANNOTATION_END("BoomerAMG.setup");
+   HYPRE_ANNOTATE_FUNC_END;
 
    return(hypre_error_flag);
 }

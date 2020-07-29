@@ -75,6 +75,7 @@ hypre_MGRSolve( void               *mgr_vdata,
 
    HYPRE_Int    i;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
    if(logging > 1)
    {
       residual = (mgr_data -> residual);
@@ -90,6 +91,8 @@ hypre_MGRSolve( void               *mgr_vdata,
       HYPRE_BoomerAMGGetFinalRelativeResidualNorm(cg_solver, &rel_resnorm);
       (mgr_data -> num_iterations) = iter;
       (mgr_data -> final_rel_residual_norm) = rel_resnorm;
+      HYPRE_ANNOTATE_FUNC_END;
+
       return hypre_error_flag;
    }
 
@@ -166,6 +169,8 @@ hypre_MGRSolve( void               *mgr_vdata,
             hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
          }
          hypre_error(HYPRE_ERROR_GENERIC);
+         HYPRE_ANNOTATE_FUNC_END;
+
          return hypre_error_flag;
       }
 
@@ -184,6 +189,8 @@ hypre_MGRSolve( void               *mgr_vdata,
             rel_resnorm = 0.0;
             (mgr_data -> final_rel_residual_norm) = rel_resnorm;
          }
+         HYPRE_ANNOTATE_FUNC_END;
+
          return hypre_error_flag;
       }
    }
@@ -345,6 +352,7 @@ hypre_MGRSolve( void               *mgr_vdata,
          //         hypre_printf("                   cycle = %f\n\n\n\n",cycle_cmplxty);
       }
    }
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -383,6 +391,8 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
    hypre_ParVector *Aux_U = NULL;
 
    HYPRE_Real alpha, beta;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    F_array[0] = f;
    U_array[0] = u;
@@ -550,6 +560,7 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
          Not_Finished = 0;
       }
    }
+   HYPRE_ANNOTATE_FUNC_END;
 
    return Solve_err_flag;
 }
@@ -607,7 +618,7 @@ hypre_MGRCycle( void               *mgr_vdata,
    HYPRE_Real     wall_time;
 
    /* Initialize */
-
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    comm = hypre_ParCSRMatrixComm(A_array[0]);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -632,13 +643,9 @@ hypre_MGRCycle( void               *mgr_vdata,
             HYPRE_Real convergence_factor_cg;
             hypre_BoomerAMGGetRelResidualNorm(cg_solver, &convergence_factor_cg);
             (mgr_data -> cg_convergence_factor) = convergence_factor_cg;
-            if (my_id == 0 && convergence_factor_cg > 1.0)
+            if ((mgr_data -> print_level) > 1 && my_id == 0 && convergence_factor_cg > 1.0)
             {
                hypre_printf("Warning!!! Coarse grid solve diverges. Factor = %1.2e\n", convergence_factor_cg);
-            }
-            if ((mgr_data -> print_level) > 1 && my_id == 0)
-            {
-               hypre_printf("Coarse grid V-cycle convergence factor: %5f\n", convergence_factor_cg);
             }
          }
          wall_time = time_getWallclockSeconds() - wall_time;
@@ -674,8 +681,8 @@ hypre_MGRCycle( void               *mgr_vdata,
                for(i=0; i<nsweeps; i++)
                {
                   hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
-                        relax_points, relax_weight, 
-                        relax_l1_norms[fine_grid] ? hypre_VectorData(relax_l1_norms[fine_grid]) : NULL, 
+                        relax_points, relax_weight,
+                        relax_l1_norms[fine_grid] ? hypre_VectorData(relax_l1_norms[fine_grid]) : NULL,
                         U_array[fine_grid], Vtemp);
                }
             }
@@ -685,8 +692,8 @@ hypre_MGRCycle( void               *mgr_vdata,
                {
                   hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
                         relax_type, relax_points, relax_weight,
-                        omega, 
-                        relax_l1_norms[fine_grid] ? hypre_VectorData(relax_l1_norms[fine_grid]) : NULL, 
+                        omega,
+                        relax_l1_norms[fine_grid] ? hypre_VectorData(relax_l1_norms[fine_grid]) : NULL,
                         U_array[fine_grid], Vtemp, Ztemp);
                }
             }
@@ -719,7 +726,7 @@ hypre_MGRCycle( void               *mgr_vdata,
             //convergence_factor_frelax = hypre_ParVectorInnerProd(Vtemp, Vtemp)/convergence_factor_frelax;
             //hypre_printf("F-relaxation V-cycle convergence factor: %5f\n", convergence_factor_frelax);
          }
-         else if (Frelax_method[level] == 99)
+         else if (Frelax_method[level] == 2)
          {
             hypre_ParVectorSetConstantValues(F_fine_array[coarse_grid], 0.0);
             hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, 1.0, F_array[fine_grid], 0.0, &(F_fine_array[coarse_grid]));
@@ -797,7 +804,10 @@ hypre_MGRCycle( void               *mgr_vdata,
             */
 
          if (Solve_err_flag != 0)
+         {
+            HYPRE_ANNOTATE_FUNC_END;
             return(Solve_err_flag);
+         }
 
          --level;
       } // end interpolate
@@ -806,5 +816,7 @@ hypre_MGRCycle( void               *mgr_vdata,
          Not_Finished = 0;
       }
    }
+   HYPRE_ANNOTATE_FUNC_END;
+
    return Solve_err_flag;
 }
