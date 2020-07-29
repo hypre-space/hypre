@@ -8,7 +8,9 @@
 #ifndef hypre_ParILU_DATA_HEADER
 #define hypre_ParILU_DATA_HEADER
 
-#include "_hypre_utilities.hpp"
+#ifdef HYPRE_USING_CUDA
+#include "cusparse.h"
+#endif
 
 /*--------------------------------------------------------------------------
  * hypre_ParILUData

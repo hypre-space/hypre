@@ -134,10 +134,10 @@ typedef struct
    HYPRE_Real           eu_sparse_A;
    char                *euclidfile;
    HYPRE_Int            ilu_lfil;
-   HYPRE_Int		      ilu_type;
-   HYPRE_Int		      ilu_max_row_nnz;
-   HYPRE_Int		      ilu_max_iter;
-   HYPRE_Real		      ilu_droptol;
+   HYPRE_Int            ilu_type;
+   HYPRE_Int            ilu_max_row_nnz;
+   HYPRE_Int            ilu_max_iter;
+   HYPRE_Real           ilu_droptol;
    HYPRE_Int            ilu_reordering_type;
    
    HYPRE_Real          *max_eig_est;
