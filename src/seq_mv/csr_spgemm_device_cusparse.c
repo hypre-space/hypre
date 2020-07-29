@@ -18,7 +18,7 @@
 
 
 /*
- * @brief Uses Cusparse to calculate a sparse-matrix x sparse-matrix product in CSRS format. Supports Cusparse generic API (10.x+)
+ * @brief Uses Cusparse to calculate a sparse-matrix x sparse-matrix product in CSRS format. Supports Cusparse generic API (11+)
  *
  * @param[in] m Number of rows of A,C
  * @param[in] k Number of columns of B,C
