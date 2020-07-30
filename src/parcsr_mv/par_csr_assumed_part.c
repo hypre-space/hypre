@@ -307,9 +307,9 @@ hypre_LocateAssummedPartition(MPI_Comm comm, HYPRE_BigInt row_start, HYPRE_BigIn
 
 hypre_IJAssumedPart*
 hypre_AssumedPartitionCreate(MPI_Comm comm,
-                             HYPRE_Int global_num,
-                             HYPRE_Int start,
-                             HYPRE_Int end)
+                             HYPRE_BigInt global_num,
+                             HYPRE_BigInt start,
+                             HYPRE_BigInt end)
 {
    hypre_IJAssumedPart *apart;
    HYPRE_Int myid;
