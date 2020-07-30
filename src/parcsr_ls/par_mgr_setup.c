@@ -110,7 +110,7 @@ hypre_MGRSetup( void               *mgr_vdata,
   hypre_ParCSRMatrix *A_ff_inv = (mgr_data -> A_ff_inv);
 
   HYPRE_Int use_air = 0;
-
+  HYPRE_Int compress_coarse_grid = (mgr_data -> compress_coarse_grid);
   HYPRE_Real wall_time;
 
   /* ----- begin -----*/
@@ -871,6 +871,12 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
     }
 
+    // compress the coarse grid
+    if (compress_coarse_grid)
+    {
+      hypre_ParCSRMatrixTruncate(RAP_ptr, 1e-14, 0, 0, 0);
+    }
+
     if (Frelax_method[lev] == 2) // full AMG
     {
       // user provided AMG solver
@@ -1059,12 +1065,21 @@ hypre_MGRSetup( void               *mgr_vdata,
   /* default is BoomerAMG */
   if(use_default_cgrid_solver)
   {
-    if (my_id == 0 && print_level > 0)
+/*
+#ifdef HYPRE_USING_DSUPERLU
+    if (my_id == 0 & print_level > 0) 
+     hypre_printf("No coarse grid solver provided. Using direct solver with SUPER_LU ... \n");
+
+    hypre_SLUDistSetup(&default_cg_solver, RAP_ptr, print_level);
+    (mgr_data -> coarse_grid_solver) = default_cg_solver;
+#else
+*/
+    if (my_id == 0 && print_level > 0) 
       hypre_printf("No coarse grid solver provided. Using default AMG solver ... \n");
 
     /* create and set default solver parameters here */
     default_cg_solver = (HYPRE_Solver) hypre_BoomerAMGCreate();
-    hypre_BoomerAMGSetMaxIter ( default_cg_solver, 1 );
+    hypre_BoomerAMGSetMaxIter ( default_cg_solver, 1 ); 
     hypre_BoomerAMGSetTol ( default_cg_solver, 0.0 );
     hypre_BoomerAMGSetRelaxOrder( default_cg_solver, 1);
     hypre_BoomerAMGSetPrintLevel(default_cg_solver, print_level);
@@ -1074,6 +1089,7 @@ hypre_MGRSetup( void               *mgr_vdata,
     (mgr_data -> coarse_grid_solver_setup) =   coarse_grid_solver_setup;
     (mgr_data -> coarse_grid_solver_solve) =   coarse_grid_solver_solve;
     (mgr_data -> coarse_grid_solver) = default_cg_solver;
+//#endif
   }
   // keep reserved coarse indexes to coarsest grid
   if(reserved_coarse_size > 0 && lvl_to_keep_cpoints == 0)
@@ -1088,7 +1104,16 @@ hypre_MGRSetup( void               *mgr_vdata,
 
   /* setup coarse grid solver */
   wall_time = time_getWallclockSeconds();
+/*
+#ifdef HYPRE_USING_DSUPERLU
+  if (!use_default_cgrid_solver)
+  {
+    coarse_grid_solver_setup((mgr_data -> coarse_grid_solver), RAP_ptr, F_array[num_c_levels], U_array[num_c_levels]);
+  }
+#else
+*/
   coarse_grid_solver_setup((mgr_data -> coarse_grid_solver), RAP_ptr, F_array[num_c_levels], U_array[num_c_levels]);
+//#endif
   //hypre_ParCSRMatrixPrintIJ(RAP_ptr,1,1,"RAP");
   wall_time = time_getWallclockSeconds() - wall_time;
   //hypre_printf("Proc = %d   Coarse grid setup: %f\n", my_id, wall_time);

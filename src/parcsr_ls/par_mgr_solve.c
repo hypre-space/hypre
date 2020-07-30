@@ -615,6 +615,8 @@ hypre_MGRCycle( void               *mgr_vdata,
    HYPRE_Int      use_air = 0;
    HYPRE_Int      my_id;
 
+   HYPRE_Int      use_default_cg_solver = (mgr_data -> use_default_cgrid_solver);
+
    HYPRE_Real     wall_time;
 
    /* Initialize */
@@ -637,6 +639,18 @@ hypre_MGRCycle( void               *mgr_vdata,
          /* call coarse grid solver here */
          /* default is BoomerAMG */
          wall_time = time_getWallclockSeconds();
+/*
+#ifdef HYPRE_USING_DSUPERLU
+         if (use_default_cg_solver)
+         {
+            hypre_SLUDistSolve(cg_solver, F_array[level], U_array[level]);
+         }
+         else
+         {
+            coarse_grid_solver_solve(cg_solver, RAP, F_array[level], U_array[level]);
+         }
+#else
+*/
          coarse_grid_solver_solve(cg_solver, RAP, F_array[level], U_array[level]);
          if (use_default_cgrid_solver)
          {
@@ -648,6 +662,7 @@ hypre_MGRCycle( void               *mgr_vdata,
                hypre_printf("Warning!!! Coarse grid solve diverges. Factor = %1.2e\n", convergence_factor_cg);
             }
          }
+//#endif
          wall_time = time_getWallclockSeconds() - wall_time;
          //if (my_id == 0) hypre_printf("Coarse grid solve: %f\n", wall_time);
 

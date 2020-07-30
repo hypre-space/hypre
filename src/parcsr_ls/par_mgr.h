@@ -7,8 +7,7 @@
 
 #ifndef hypre_ParMGR_DATA_HEADER
 #define hypre_ParMGR_DATA_HEADER
-/*--------------------------------------------------------------------------
- * hypre_ParMGRData
+/*-------------------------------------------------------------------------- * hypre_ParMGRData
  *--------------------------------------------------------------------------*/
 typedef struct
 {
@@ -114,6 +113,7 @@ typedef struct
   HYPRE_Int   max_local_lvls;
 
   HYPRE_Int   print_coarse_system;
+  HYPRE_Int   compress_coarse_grid;
 
   /* how to set C points */
   HYPRE_Int   set_c_points_method;

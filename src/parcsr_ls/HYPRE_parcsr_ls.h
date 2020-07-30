@@ -3364,6 +3364,43 @@ HYPRE_Int HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
  * @{
  **/
 
+#ifdef HYPRE_USING_DSUPERLU
+/**
+ * Create a MGR direct solver object
+ **/
+HYPRE_Int HYPRE_MGRDirectSolverCreate( HYPRE_Solver *solver );
+
+/**
+ * Destroy a MGR direct solver object
+ **/
+HYPRE_Int HYPRE_MGRDirectSolverDestroy( HYPRE_Solver solver );
+
+/**
+ * Setup the MGR direct solver using DSUPERLU
+ * @param solver [IN] object to be set up.
+ * @param A [IN] ParCSR matrix used to construct the solver/preconditioner.
+ * @param b right-hand-side of the linear system to be solved (Ignored by this function).
+ * @param x approximate solution of the linear system to be solved (Ignored by this function).
+ **/
+HYPRE_Int HYPRE_MGRDirectSolverSetup( HYPRE_Solver solver,
+                         HYPRE_ParCSRMatrix A,
+                         HYPRE_ParVector b,
+                         HYPRE_ParVector x      );
+
+ /**
+ * Solve the system using DSUPERLU.
+ *
+ * @param solver [IN] solver or preconditioner object to be applied.
+ * @param A [IN] ParCSR matrix, matrix of the linear system to be solved (Ignored by this function).
+ * @param b [IN] right hand side of the linear system to be solved
+ * @param x [OUT] approximated solution of the linear system to be solved
+ **/
+HYPRE_Int HYPRE_MGRDirectSolverSolve( HYPRE_Solver solver,
+                         HYPRE_ParCSRMatrix A,
+                         HYPRE_ParVector b,
+                         HYPRE_ParVector x      );
+#endif
+
 /**
  * Create a solver object
  **/
@@ -3661,6 +3698,18 @@ HYPRE_Int HYPRE_MGRSetCoarseSolver(HYPRE_Solver          solver,
 HYPRE_Int
 HYPRE_MGRSetPrintLevel( HYPRE_Solver solver,
                         HYPRE_Int print_level );
+
+/**
+ * (Optional) Set the option to compress the coarse grid at each level
+ *
+ *    - 0 : no compression
+ *    - 1 : compress the coarse grid by removing entries with tol less than 1e-14.
+ *    TODO: add an option for tolerance as well.
+ **/
+HYPRE_Int
+HYPRE_MGRSetCompressCoarseGrid( HYPRE_Solver solver,
+                        HYPRE_Int flag );
+
 
 /**
  * (Optional) Requests logging of solver diagnostics.

@@ -126,8 +126,8 @@ main( hypre_int argc,
   HYPRE_Int          time_index;
   MPI_Comm            comm = hypre_MPI_COMM_WORLD;
   HYPRE_Int M, N;
-  HYPRE_Int first_local_row, last_local_row, local_num_rows;
-  HYPRE_Int first_local_col, last_local_col, local_num_cols;
+  HYPRE_BigInt first_local_row, last_local_row, local_num_rows;
+  HYPRE_BigInt first_local_col, last_local_col, local_num_cols;
   HYPRE_Int variant, overlap, domain_type;
   HYPRE_Real schwarz_rlx_weight;
   HYPRE_Real *values, val;
@@ -236,7 +236,7 @@ main( hypre_int argc,
   HYPRE_Int mgr_num_relax_sweeps = 1;
   HYPRE_Int mgr_num_interp_sweeps = 0;
   HYPRE_Int mgr_gsmooth_type = 16;
-  HYPRE_Int mgr_num_gsmooth_sweeps = 1;
+  HYPRE_Int mgr_num_gsmooth_sweeps = 0;
   HYPRE_Int mgr_restrict_type = 0;
   HYPRE_Int mgr_num_restrict_sweeps = 0;   
   HYPRE_Int mgr_interp_type = 2;
@@ -260,67 +260,38 @@ main( hypre_int argc,
   HYPRE_Int *lv1 = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
   HYPRE_Int *lv2 = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
   HYPRE_Int *lv3 = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
-  HYPRE_Int *lv4 = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
-  HYPRE_Int *lv5 = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
-  lv1[0] = 0;
-  lv1[1] = 1;
-  lv1[2] = 2;
-  //lv1[3] = 6;
-  //lv1[4] = 6;
-  lv2[0] = 0;
-  lv2[1] = 1;
-  //lv2[2] = 2;
-  //lv2[3] = 4;
-  //lv2[4] = 6;
-  lv3[0] = 0;
-  //lv3[1] = 1;
-  //lv3[2] = 4;
-  //lv3[3] = 4;
-  //lv4[0] = 0;
-  //lv4[1] = 4;
-  //lv4[2] = 4;
-  //lv5[0] = 0;
-  //lv5[1] = 4;
-  /*
   lv1[0] = 0;
   lv1[1] = 1;
   lv1[2] = 3;
   lv1[3] = 4;
-  lv2[0] = 1;
+  lv1[4] = 5;
+  lv1[5] = 6;
+  lv2[0] = 0;
   lv2[1] = 3;
-  lv2[2] = 4; 
-  lv3[0] = 1;
+  lv2[2] = 4;
+  lv2[3] = 5;
+  lv2[4] = 6;
+  lv3[0] = 3;
   lv3[1] = 4;
-  lv4[0] = 1;
-  */
+  lv3[2] = 5;
+  lv3[3] = 6;
   mgr_cindexes[0] = lv1;
   mgr_cindexes[1] = lv2;
   mgr_cindexes[2] = lv3;
-  mgr_cindexes[3] = lv4;
-  //mgr_cindexes[4] = lv5;
+
   mgr_num_cindexes = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
-  mgr_num_cindexes[0] = 4;
-  mgr_num_cindexes[1] = 3;
-  mgr_num_cindexes[2] = 2;
-  mgr_num_cindexes[3] = 1;
-  //mgr_num_cindexes[4] = 1;
+  mgr_num_cindexes[0] = 6;
+  mgr_num_cindexes[1] = 5;
+  mgr_num_cindexes[2] = 4;
 
   mgr_idx_array = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
-  //mgr_idx_array[0] = 0;
-  //mgr_idx_array[1] = 55539;
-  //mgr_idx_array[2] = 71923;
-  //mgr_idx_array[1] = 52800;
 
   HYPRE_Int *mgr_level_frelax_method = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
   mgr_level_frelax_method[0] = 0;
   mgr_level_frelax_method[1] = 0;
-  mgr_level_frelax_method[2] = 0;
-  mgr_level_frelax_method[3] = 0;
-  //mgr_level_frelax_method[4] = 0;
+  mgr_level_frelax_method[2] = 2;
 
   mgr_frelax_num_functions = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
-  //mgr_frelax_num_functions[0] = 0;
-  //mgr_frelax_num_functions[1] = 2;
 
   char* indexList = NULL;
   /* end mgr options */
@@ -611,20 +582,10 @@ main( hypre_int argc,
     HYPRE_FlexGMRESSetLogging(pcg_solver, 1);
     HYPRE_FlexGMRESSetPrintLevel(pcg_solver, 2);
 
+    /*
     ierr = HYPRE_ILUCreate(&aux_precond);
     HYPRE_ILUSetType(aux_precond, 30);
     HYPRE_ILUSetLevelOfFill(aux_precond, 0);
-
-    /*
-    HYPRE_BoomerAMGCreate(&aux_precond); 
-    //HYPRE_BoomerAMGSetCoarsenType(aux_precond, 3);
-    HYPRE_BoomerAMGSetPrintLevel(aux_precond, 0);
-    HYPRE_BoomerAMGSetRelaxOrder(aux_precond, 1);
-    HYPRE_BoomerAMGSetMaxIter(aux_precond, 1);
-    HYPRE_BoomerAMGSetNumSweeps(aux_precond, 1);
-    HYPRE_BoomerAMGSetNumFunctions(aux_precond, 3);
-    HYPRE_BoomerAMGSetAggNumLevels(aux_precond, 1);
-    */
 
     HYPRE_ParCSRGMRESCreate(hypre_MPI_COMM_WORLD, &aux_solver);
     HYPRE_GMRESSetMaxIter(aux_solver, 1);
@@ -635,7 +596,15 @@ main( hypre_int argc,
                 (HYPRE_PtrToSolverFcn)HYPRE_ILUSetup,
                  aux_precond);
 
-    /*
+    HYPRE_BoomerAMGCreate(&aux_precond); 
+    //HYPRE_BoomerAMGSetCoarsenType(aux_precond, 3);
+    HYPRE_BoomerAMGSetPrintLevel(aux_precond, 0);
+    HYPRE_BoomerAMGSetRelaxOrder(aux_precond, 1);
+    HYPRE_BoomerAMGSetMaxIter(aux_precond, 1);
+    HYPRE_BoomerAMGSetNumSweeps(aux_precond, 1);
+    HYPRE_BoomerAMGSetNumFunctions(aux_precond, 3);
+    HYPRE_BoomerAMGSetAggNumLevels(aux_precond, 1);
+
     HYPRE_BoomerAMGCreate(&aux_precond);
     HYPRE_BoomerAMGSetRelaxOrder(aux_precond, 1);
     HYPRE_BoomerAMGSetMaxIter(aux_precond, 1);
@@ -760,16 +729,18 @@ main( hypre_int argc,
     */
 
     /* set the MGR coarse solver. Comment out to use default CG solver in MGR */
-    HYPRE_MGRSetCoarseSolver( pcg_precond, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, amg_solver);
+    //HYPRE_MGRSetCoarseSolver( pcg_precond, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, amg_solver);
     //HYPRE_MGRSetCoarseSolver( pcg_precond, (HYPRE_PtrToParSolverFcn)HYPRE_GMRESSolve, (HYPRE_PtrToParSolverFcn)HYPRE_GMRESSetup, aux_solver); 
     //HYPRE_MGRSetCoarseSolver( pcg_precond, (HYPRE_PtrToParSolverFcn)HYPRE_ILUSolve, (HYPRE_PtrToParSolverFcn)HYPRE_ILUSetup, aux_precond); 
+#ifdef HYPRE_USING_DSUPERLU
+    HYPRE_MGRDirectSolverCreate(&aux_solver);
+    HYPRE_MGRSetCoarseSolver( pcg_precond, (HYPRE_PtrToParSolverFcn)HYPRE_MGRDirectSolverSolve, (HYPRE_PtrToParSolverFcn)HYPRE_MGRDirectSolverSetup, aux_solver); 
+#endif
 
     // set fine grid solver
     //HYPRE_MGRSetFSolver(pcg_precond, (HYPRE_PtrToParSolverFcn)HYPRE_BoomerAMGSolve, (HYPRE_PtrToParSolverFcn)HYPRE_BoomerAMGSetup, aux_precond);
   
     /* setup MGR-PCG solver */
-    HYPRE_FlexGMRESSetMaxIter(pcg_solver, mg_max_iter);
-    //HYPRE_FlexGMRESSetPrecondGetFunction(pcg_solver, (HYPRE_PtrToSolverFcn) HYPRE_MGRGetCoarseGridConvergenceFactor);
     HYPRE_FlexGMRESSetPrecond(pcg_solver,
         (HYPRE_PtrToSolverFcn) HYPRE_MGRSolve,
         (HYPRE_PtrToSolverFcn) HYPRE_MGRSetup,
@@ -876,7 +847,7 @@ main( hypre_int argc,
         CF_marker[i] = 1;
       }
     }
-    HYPRE_MGRBuildAffNew(parcsr_A, CF_marker, 0, &A_ff);
+    HYPRE_MGRBuildAff(parcsr_A, CF_marker, 0, &A_ff);
     hypre_TFree(CF_marker, HYPRE_MEMORY_HOST);
     //time_index = hypre_InitializeTiming("Compute A_ff_inv");
     //hypre_BeginTiming(time_index);
@@ -1362,6 +1333,68 @@ main( hypre_int argc,
 
   else if (solver_id == 99)
   {
+    ierr = HYPRE_ILUCreate(&aux_precond);
+    HYPRE_ILUSetType(aux_precond, 30);
+    HYPRE_ILUSetLevelOfFill(aux_precond, 0);
+    HYPRE_ILUSetMaxIter(aux_precond, 1);
+
+    HYPRE_ParCSRGMRESCreate(hypre_MPI_COMM_WORLD, &pcg_solver);
+    HYPRE_GMRESSetKDim(pcg_solver, k_dim);
+    HYPRE_GMRESSetMaxIter(pcg_solver, mg_max_iter);
+    HYPRE_GMRESSetTol(pcg_solver, tol);
+    HYPRE_GMRESSetAbsoluteTol(pcg_solver, atol);
+    HYPRE_GMRESSetLogging(pcg_solver, 1);
+    HYPRE_GMRESSetPrintLevel(pcg_solver, 2);
+
+    HYPRE_GMRESSetPrecond(pcg_solver,
+        (HYPRE_PtrToSolverFcn) HYPRE_ILUSolve,
+        (HYPRE_PtrToSolverFcn) HYPRE_ILUSetup,
+                      aux_precond);
+
+
+    HYPRE_GMRESGetPrecond(pcg_solver, &pcg_precond_gotten);
+    if (pcg_precond_gotten != aux_precond)
+    {
+      hypre_printf("HYPRE_GMRESGetPrecond got bad precond\n");
+      return(-1);
+    }
+    else
+      if (myid == 0)
+        hypre_printf("HYPRE_GMRESGetPrecond got good precond\n");
+
+
+    HYPRE_GMRESSetup
+      (pcg_solver, (HYPRE_Matrix)parcsr_M, (HYPRE_Vector)b, (HYPRE_Vector)x);
+
+    hypre_EndTiming(time_index);
+    hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+    hypre_FinalizeTiming(time_index);
+    hypre_ClearTiming();
+
+    time_index = hypre_InitializeTiming("GMRES Solve");
+    hypre_BeginTiming(time_index);
+
+    hypre_ParVectorSetConstantValues(x, 0.0);
+    HYPRE_GMRESSolve
+      (pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
+
+    hypre_EndTiming(time_index);
+    hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+    hypre_FinalizeTiming(time_index);
+    hypre_ClearTiming();
+
+    if (print_system)
+    {
+      hypre_ParVectorPrintIJ((HYPRE_Vector)x, 1, "x.out");
+    }
+
+    HYPRE_GMRESGetNumIterations(pcg_solver, &num_iterations);
+    HYPRE_GMRESGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+
+    // free memory for flex GMRES
+    HYPRE_ParCSRGMRESDestroy(pcg_solver);
+
+    /*
     HYPRE_ParCSRMatrix A_h;
     HYPRE_Int nloc = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(parcsr_A));
     HYPRE_Int *CF_marker = hypre_CTAlloc(HYPRE_Int, nloc, HYPRE_MEMORY_HOST);
@@ -1380,7 +1413,6 @@ main( hypre_int argc,
     hypre_MGRComputeNonGalerkinCoarseGrid(parcsr_A, CF_marker, &A_h);
     hypre_ParCSRMatrixPrintIJ(A_h,1,1,"new_coarse_grid");
 
-    /*
     // test adding two matrices with different sparsity patterns
     hypre_ParcsrAdd(1.0, parcsr_A, 1.0, parcsr_M, &parcsr_C);
     hypre_ParCSRMatrixPrintIJ(parcsr_C,0,0,"MatrixSum");
