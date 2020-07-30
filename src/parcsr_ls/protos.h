@@ -1472,13 +1472,17 @@ HYPRE_Int hypre_ILUGetFinalRelativeResidualNorm( void *ilu_vdata, HYPRE_Real *re
 /* par_amgdd_solve.c */
 HYPRE_Int hypre_BoomerAMGDDSolve( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *b,hypre_ParVector *x );
 HYPRE_Int hypre_BoomerAMGDD_Cycle( void *amg_vdata );
-HYPRE_Int hypre_BoomerAMGDDResidualCommunication( void *amg_vdata );
+HYPRE_Int hypre_BoomerAMGDD_ResidualCommunication( void *amg_vdata );
+HYPRE_Int hypre_BoomerAMGDD_AddSolution( void *amg_vdata );
+HYPRE_Int hypre_BoomerAMGDD_ZeroInitialGuess( void *amg_vdata );
+HYPRE_Complex* hypre_BoomerAMGDD_PackResidualBuffer( hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int current_level, HYPRE_Int proc );
+HYPRE_Int hypre_BoomerAMGDD_UnpackResidualBuffer( HYPRE_Complex *buffer, hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int current_level, HYPRE_Int proc );
 
 /* par_amgdd_setup.c */
 HYPRE_Int hypre_BoomerAMGDDSetup(  void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *b, hypre_ParVector *x );
 
 /* par_amgdd_fac_cycle.c */
-HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata, HYPRE_Int first_iteration );
+HYPRE_Int hypre_BoomerAMGDD_FAC( void *amg_vdata, HYPRE_Int first_iteration );
 HYPRE_Int hypre_BoomerAMGDD_FAC_Jacobi( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDCompGridMatrix *A, hypre_AMGDDCompGridVector *f, hypre_AMGDDCompGridVector *u );
 HYPRE_Int hypre_BoomerAMGDD_FAC_GaussSeidel( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDCompGridMatrix *A, hypre_AMGDDCompGridVector *f, hypre_AMGDDCompGridVector *u );
 HYPRE_Int hypre_BoomerAMGDD_FAC_CFL1Jacobi( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDCompGridMatrix *A, hypre_AMGDDCompGridVector *f, hypre_AMGDDCompGridVector *u );
@@ -1486,7 +1490,7 @@ HYPRE_Int hypre_BoomerAMGDD_FAC_OrderedGaussSeidel( hypre_AMGDDCompGrid *compGri
 
 /* par_amgdd_fac_cycles_device.c */
 HYPRE_Int hypre_BoomerAMGDD_FAC_Jacobi_device( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDCompGridMatrix *A, hypre_AMGDDCompGridVector *f, hypre_AMGDDCompGridVector *u );
-HYPRE_Int FAC_CFL1Jacobi_device( hypre_AMGDDCompGrid *compGrid, HYPRE_Int relax_set );
+HYPRE_Int hypre_BoomerAMGDD_FAC_CFL1Jacobi_device( hypre_AMGDDCompGrid *compGrid, HYPRE_Int relax_set );
 
 /* par_amgdd_comp_grid.c */
 hypre_AMGDDCompGridMatrix* hypre_AMGDDCompGridMatrixCreate();
@@ -1519,3 +1523,13 @@ HYPRE_Int hypre_AMGDDCompGridSetupLocalIndicesP( hypre_ParAMGData *amg_data, hyp
 hypre_AMGDDCommPkg *hypre_AMGDDCommPkgCreate(HYPRE_Int num_levels);
 HYPRE_Int hypre_AMGDDCommPkgDestroy( hypre_AMGDDCommPkg *compGridCommPkg );
 HYPRE_Int hypre_AMGDDCommPkgFinalize(hypre_ParAMGData* amg_data, hypre_AMGDDCommPkg *compGridCommPkg, hypre_AMGDDCompGrid **compGrid);
+
+/* par_amgdd_helpers.c */
+HYPRE_Int hypre_BoomerAMGDD_SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int *padding, HYPRE_Int num_ghost_layers);
+HYPRE_Int hypre_BoomerAMGDD_UnpackRecvBuffer( HYPRE_Int *recv_buffer, hypre_AMGDDCompGrid **compGrid, hypre_ParCSRCommPkg *commPkg, HYPRE_Int **A_tmp_info, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes, HYPRE_Int ****recv_map, HYPRE_Int ****recv_redundant_marker, HYPRE_Int ***num_recv_nodes, HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int *nodes_added_on_level, HYPRE_Int buffer_number);
+HYPRE_Int* hypre_BoomerAMGDD_PackSendBuffer(hypre_ParAMGData *amg_data, hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int *buffer_size, HYPRE_Int *send_flag_buffer_size, HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes, HYPRE_Int proc, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int *padding, HYPRE_Int num_ghost_layers);
+HYPRE_Int hypre_BoomerAMGDD_PackRecvMapSendBuffer(HYPRE_Int *recv_map_send_buffer, HYPRE_Int **recv_redundant_marker, HYPRE_Int *num_recv_nodes, HYPRE_Int *recv_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels, hypre_AMGDDCompGrid **compGrid); 
+HYPRE_Int hypre_BoomerAMGDD_UnpackSendFlagBuffer(hypre_AMGDDCompGrid **compGrid, HYPRE_Int *send_flag_buffer, HYPRE_Int **send_flag, HYPRE_Int *num_send_nodes, HYPRE_Int *send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels);
+HYPRE_Int hypre_BoomerAMGDD_CommunicateRemainingMatrixInfo(hypre_ParAMGData* amg_data, hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGridCommPkg);
+HYPRE_Int hypre_BoomerAMGDD_FixUpRecvMaps(hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int ****recv_redundant_marker, HYPRE_Int start_level, HYPRE_Int num_levels);
+

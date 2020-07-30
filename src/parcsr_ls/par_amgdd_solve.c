@@ -7,20 +7,6 @@
 
 #include "_hypre_parcsr_ls.h"
 
-HYPRE_Int
-AddSolution( void *amg_vdata );
-
-HYPRE_Int
-ZeroInitialGuess( void *amg_vdata );
-
-HYPRE_Int
-ZeroCompositeRHS( void *amg_vdata );
-
-HYPRE_Complex*
-PackResidualBuffer( hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int current_level, HYPRE_Int proc );
-
-HYPRE_Int
-UnpackResidualBuffer( HYPRE_Complex *buffer, hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int current_level, HYPRE_Int proc );
 
 HYPRE_Int 
 hypre_BoomerAMGDDSolve( void *amg_vdata,
@@ -57,7 +43,8 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
    hypre_AMGDDCompGrid *compGrid = hypre_ParAMGDataAMGDDCompGrid(amg_data)[0];
    if (A != hypre_ParAMGDataAArray(amg_data)[0])
    {
-      hypre_printf("Warning: calling BoomerAMGDD solve with different matrix than what was used for initial setup. Non-owned parts of fine-grid matrix and fine-grid communication patterns may be incorrect.\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"WARNING: calling hypre_BoomerAMGDDSolve with different matrix than what was used for initial setup. "
+            "Non-owned parts of fine-grid matrix and fine-grid communication patterns may be incorrect.\n");
       hypre_AMGDDCompGridMatrixOwnedDiag(hypre_AMGDDCompGridA(compGrid)) = hypre_ParCSRMatrixDiag(A);
       hypre_AMGDDCompGridMatrixOwnedOffd(hypre_AMGDDCompGridA(compGrid)) = hypre_ParCSRMatrixOffd(A);
    }
@@ -157,10 +144,10 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
    HYPRE_Int fac_num_cycles = hypre_ParAMGDataAMGDDFACNumCycles(amg_data);
 
    // do residual communication
-   hypre_BoomerAMGDDResidualCommunication( amg_vdata );
+   hypre_BoomerAMGDD_ResidualCommunication( amg_vdata );
 
 	// Set zero initial guess for all comp grids on all levels
-	ZeroInitialGuess( amg_vdata );
+	hypre_BoomerAMGDD_ZeroInitialGuess( amg_vdata );
 
    // Setup convergence tolerance info
    HYPRE_Real resid_nrm = 1.;
@@ -179,18 +166,18 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
    for (i = 0; i < fac_num_cycles; i++)
    {
       // Do FAC cycle
-      hypre_BoomerAMGDD_FAC_Cycle( amg_vdata, first_iteration );
+      hypre_BoomerAMGDD_FAC( amg_vdata, first_iteration );
       first_iteration = 0;
    }
    
 	// Update fine grid solution
-   AddSolution( amg_vdata );
+   hypre_BoomerAMGDD_AddSolution( amg_vdata );
 
 	return 0;
 }
 
 HYPRE_Int
-AddSolution( void *amg_vdata )
+hypre_BoomerAMGDD_AddSolution( void *amg_vdata )
 {
 	hypre_ParAMGData	*amg_data = (hypre_ParAMGData*) amg_vdata;
    HYPRE_Int amgdd_start_level = 0;
@@ -202,7 +189,7 @@ AddSolution( void *amg_vdata )
 }
 
 HYPRE_Int
-ZeroInitialGuess( void *amg_vdata )
+hypre_BoomerAMGDD_ZeroInitialGuess( void *amg_vdata )
 {
    HYPRE_Int level;
 	hypre_ParAMGData	*amg_data = (hypre_ParAMGData*) amg_vdata;
@@ -222,7 +209,7 @@ ZeroInitialGuess( void *amg_vdata )
 }
 
 HYPRE_Int 
-hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
+hypre_BoomerAMGDD_ResidualCommunication( void *amg_vdata )
 {
    HYPRE_Int   myid, num_procs;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -296,7 +283,6 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
             for (i = 0; i < num_recvs; i++)
             {
                HYPRE_Int recv_buffer_size = hypre_AMGDDCommPkgRecvBufferSize(compGridCommPkg)[level][i];
-               if (!recv_buffer_size) printf("Posted recv for empty buffer\n");
                recv_buffers[i] = hypre_CTAlloc(HYPRE_Complex, recv_buffer_size, HYPRE_MEMORY_HOST);
                hypre_MPI_Irecv(recv_buffers[i], recv_buffer_size, HYPRE_MPI_COMPLEX, hypre_AMGDDCommPkgRecvProcs(compGridCommPkg)[level][i], 3, comm, &requests[request_counter++]);
             }
@@ -304,8 +290,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
             for (i = 0; i < num_sends; i++)
             {
                HYPRE_Int send_buffer_size = hypre_AMGDDCommPkgSendBufferSize(compGridCommPkg)[level][i];
-               if (!send_buffer_size) printf("Posted send for empty buffer\n");
-               send_buffers[i] = PackResidualBuffer(compGrid, compGridCommPkg, level, i);
+               send_buffers[i] = hypre_BoomerAMGDD_PackResidualBuffer(compGrid, compGridCommPkg, level, i);
                hypre_MPI_Isend(send_buffers[i], send_buffer_size, HYPRE_MPI_COMPLEX, hypre_AMGDDCommPkgSendProcs(compGridCommPkg)[level][i], 3, comm, &requests[request_counter++]);
             }
 
@@ -320,7 +305,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
             // Unpack recv buffers
             for (i = 0; i < num_recvs; i++)
             {
-               UnpackResidualBuffer(recv_buffers[i], compGrid, compGridCommPkg, level, i);
+               hypre_BoomerAMGDD_UnpackResidualBuffer(recv_buffers[i], compGrid, compGridCommPkg, level, i);
             }
 
             // clean up memory for this level
@@ -334,7 +319,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
 }
 
 HYPRE_Complex*
-PackResidualBuffer( hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int current_level, HYPRE_Int proc )
+hypre_BoomerAMGDD_PackResidualBuffer( hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int current_level, HYPRE_Int proc )
 {
    HYPRE_Int level,i;
 
@@ -363,7 +348,7 @@ PackResidualBuffer( hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGrid
 }
 
 HYPRE_Int
-UnpackResidualBuffer( HYPRE_Complex *buffer, hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int current_level, HYPRE_Int proc )
+hypre_BoomerAMGDD_UnpackResidualBuffer( HYPRE_Complex *buffer, hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int current_level, HYPRE_Int proc )
 {
    HYPRE_Int level,i;
 

@@ -20,7 +20,7 @@ set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
 
 project (hypre
   VERSION ${HYPRE_VERSION}
-  LANGUAGES C CXX)
+  LANGUAGES C)
 
 if (${hypre_SOURCE_DIR} STREQUAL ${hypre_BINARY_DIR})
   message(FATAL_ERROR "In-place build not allowed! Please use a separate build directory. See the Users Manual or INSTALL file for details.")

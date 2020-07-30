@@ -7,7 +7,6 @@
 
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.h"
-#include "par_amgdd_helpers.cxx"
 
 /*****************************************************************************
  *
@@ -108,7 +107,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    // On each level, setup the compGridCommPkg so that it has communication info for distance (eta + numGhostLayers)
    for (level = amgdd_start_level; level < num_levels; level++)
    {
-      SetupNearestProcessorNeighbors(hypre_ParAMGDataAArray(amg_data)[level], compGridCommPkg, level, padding, num_ghost_layers);
+      hypre_BoomerAMGDD_SetupNearestProcessorNeighbors(hypre_ParAMGDataAArray(amg_data)[level], compGridCommPkg, level, padding, num_ghost_layers);
    }
 
    /////////////////////////////////////////////////////////////////
@@ -148,7 +147,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
          for (i = 0; i < num_send_procs; i++)
          {
-            send_buffer[i] = PackSendBuffer(amg_data, compGrid, compGridCommPkg, &(send_buffer_size[level][i]), 
+            send_buffer[i] = hypre_BoomerAMGDD_PackSendBuffer(amg_data, compGrid, compGridCommPkg, &(send_buffer_size[level][i]), 
                                              &(send_flag_buffer_size[i]), send_flag, num_send_nodes, i, level, num_levels, padding, 
                                              num_ghost_layers);
          }
@@ -207,7 +206,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             recv_redundant_marker[level][i] = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
             num_recv_nodes[level][i] = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
 
-            UnpackRecvBuffer(recv_buffer[i], compGrid, hypre_ParCSRMatrixCommPkg( hypre_ParAMGDataAArray(amg_data)[level] ),
+            hypre_BoomerAMGDD_UnpackRecvBuffer(recv_buffer[i], compGrid, hypre_ParCSRMatrixCommPkg( hypre_ParAMGDataAArray(amg_data)[level] ),
                A_tmp_info,
                compGridCommPkg,
                send_flag, num_send_nodes, 
@@ -215,7 +214,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
                &(recv_map_send_buffer_size[i]), level, num_levels, nodes_added_on_level, i);
             
             recv_map_send_buffer[i] = hypre_CTAlloc(HYPRE_Int, recv_map_send_buffer_size[i], HYPRE_MEMORY_HOST);
-            PackRecvMapSendBuffer(recv_map_send_buffer[i], recv_redundant_marker[level][i], num_recv_nodes[level][i], &(recv_buffer_size[level][i]), level, num_levels, compGrid);
+            hypre_BoomerAMGDD_PackRecvMapSendBuffer(recv_map_send_buffer[i], recv_redundant_marker[level][i], num_recv_nodes[level][i], &(recv_buffer_size[level][i]), level, num_levels, compGrid);
          }
 
          //////////// Setup local indices for the composite grid ////////////
@@ -246,7 +245,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          // unpack and setup the send flag arrays
          for (i = 0; i < num_send_procs; i++)
          {
-            UnpackSendFlagBuffer(compGrid, send_flag_buffer[i], send_flag[level][i], num_send_nodes[level][i], &(send_buffer_size[level][i]), level, num_levels);
+            hypre_BoomerAMGDD_UnpackSendFlagBuffer(compGrid, send_flag_buffer[i], send_flag[level][i], num_send_nodes[level][i], &(send_buffer_size[level][i]), level, num_levels);
          }
 
          // clean up memory for this level
@@ -275,10 +274,10 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
    /////////////////////////////////////////////////////////////////
 
-   FixUpRecvMaps(compGrid, compGridCommPkg, recv_redundant_marker, amgdd_start_level, num_levels);
+   hypre_BoomerAMGDD_FixUpRecvMaps(compGrid, compGridCommPkg, recv_redundant_marker, amgdd_start_level, num_levels);
    
    // Communicate data for A and all info for P
-   CommunicateRemainingMatrixInfo(amg_data, compGrid, compGridCommPkg);
+   hypre_BoomerAMGDD_CommunicateRemainingMatrixInfo(amg_data, compGrid, compGridCommPkg);
 
    // Setup the local indices for P
    hypre_AMGDDCompGridSetupLocalIndicesP(amg_data, compGrid, amgdd_start_level, num_levels);

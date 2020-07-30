@@ -10,46 +10,6 @@
 
 #if defined(HYPRE_USING_CUDA)
 
-__global__
-void VecScaleKernel(HYPRE_Complex *__restrict__ u, const HYPRE_Complex *__restrict__ v, const HYPRE_Complex * __restrict__ l1_norm, hypre_int num_rows)
-{
-   HYPRE_Int i = blockIdx.x * blockDim.x + threadIdx.x;
-   if (i<num_rows)
-   {
-      u[i]+=v[i]/l1_norm[i];
-   }
-}
-
-void VecScale(HYPRE_Complex *u, HYPRE_Complex *v, HYPRE_Complex *l1_norm, hypre_int num_rows)
-{
-   const HYPRE_Int tpb=64;
-   HYPRE_Int num_blocks=num_rows/tpb+1;
-   hypre_MemPrefetch(l1_norm, sizeof(HYPRE_Complex)*num_rows, HYPRE_MEMORY_DEVICE);
-   VecScaleKernel<<<num_blocks,tpb,0,hypre_HandleCudaComputeStream(hypre_handle())>>>(u,v,l1_norm,num_rows);
-   hypre_SyncCudaComputeStream(hypre_handle());
-}
-
-__global__
-void VecScaleMaskedKernel(HYPRE_Complex *__restrict__ u, const HYPRE_Complex *__restrict__ v, const HYPRE_Complex * __restrict__ l1_norm, const HYPRE_Int *mask, hypre_int mask_size)
-{
-   HYPRE_Int i = blockIdx.x * blockDim.x + threadIdx.x;
-   if (i<mask_size)
-   {
-      u[mask[i]]+=v[mask[i]]/l1_norm[mask[i]];
-   }
-}
-
-void VecScaleMasked(HYPRE_Complex *u, HYPRE_Complex *v, HYPRE_Complex *l1_norm, HYPRE_Int *mask, hypre_int mask_size)
-{
-   const HYPRE_Int tpb=64;
-   HYPRE_Int num_blocks=mask_size/tpb+1;
-   hypre_MemPrefetch(l1_norm, sizeof(HYPRE_Complex)*mask_size, HYPRE_MEMORY_DEVICE);
-   VecScaleMaskedKernel<<<num_blocks,tpb,0,hypre_HandleCudaComputeStream(hypre_handle())>>>(u,v,l1_norm,mask,mask_size);
-   hypre_SyncCudaComputeStream(hypre_handle());
-}
-
-
-
 HYPRE_Int
 hypre_BoomerAMGDD_FAC_Jacobi_device( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDCompGridMatrix *A, hypre_AMGDDCompGridVector *f, hypre_AMGDDCompGridVector *u )
 {
@@ -92,20 +52,20 @@ hypre_BoomerAMGDD_FAC_Jacobi_device( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDC
 
    hypre_AMGDDCompGridMatvec(-relax_weight, A, u, relax_weight, hypre_AMGDDCompGridTemp2(compGrid));
 
-   VecScale(hypre_VectorData(hypre_AMGDDCompGridVectorOwned(u)),
-            hypre_VectorData(hypre_AMGDDCompGridVectorOwned(hypre_AMGDDCompGridTemp2(compGrid))),
-            hypre_AMGDDCompGridL1Norms(compGrid),
-            hypre_AMGDDCompGridNumOwnedNodes(compGrid));
-   VecScale(hypre_VectorData(hypre_AMGDDCompGridVectorNonOwned(u)),
-            hypre_VectorData(hypre_AMGDDCompGridVectorNonOwned(hypre_AMGDDCompGridTemp2(compGrid))),
-            &(hypre_AMGDDCompGridL1Norms(compGrid)[ hypre_AMGDDCompGridNumOwnedNodes(compGrid) ]),
-            hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid));
+   hypreDevice_IVAXPY(hypre_AMGDDCompGridNumOwnedNodes(compGrid), 
+         hypre_AMGDDCompGridL1Norms(compGrid), 
+         hypre_VectorData(hypre_AMGDDCompGridVectorOwned(hypre_AMGDDCompGridTemp2(compGrid))), 
+         hypre_VectorData(hypre_AMGDDCompGridVectorOwned(u)));
+   hypreDevice_IVAXPY(hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid), 
+         &(hypre_AMGDDCompGridL1Norms(compGrid)[ hypre_AMGDDCompGridNumOwnedNodes(compGrid) ]),
+         hypre_VectorData(hypre_AMGDDCompGridVectorNonOwned(hypre_AMGDDCompGridTemp2(compGrid))), 
+         hypre_VectorData(hypre_AMGDDCompGridVectorNonOwned(u)));
 
    return 0;
 }
 
 HYPRE_Int
-FAC_CFL1Jacobi_device( hypre_AMGDDCompGrid *compGrid, HYPRE_Int relax_set )
+hypre_BoomerAMGDD_FAC_CFL1Jacobi_device( hypre_AMGDDCompGrid *compGrid, HYPRE_Int relax_set )
 {
    HYPRE_Real relax_weight = hypre_AMGDDCompGridRelaxWeight(compGrid);
 
@@ -147,185 +107,67 @@ FAC_CFL1Jacobi_device( hypre_AMGDDCompGrid *compGrid, HYPRE_Int relax_set )
    {
       hypre_CSRMatrix *mat = hypre_AMGDDCompGridMatrixOwnedDiag(hypre_AMGDDCompGridA(compGrid));
       beta = relax_weight;
-      cusparseDbsrxmv(handle,
-                CUSPARSE_DIRECTION_ROW,
-                CUSPARSE_OPERATION_NON_TRANSPOSE,
-                hypre_AMGDDCompGridNumOwnedCPoints(compGrid),
-                hypre_CSRMatrixNumRows(mat),
-                hypre_CSRMatrixNumCols(mat),
-                hypre_CSRMatrixNumNonzeros(mat),
-                &alpha,
-                descr,
-                hypre_CSRMatrixData(mat),
-                hypre_AMGDDCompGridOwnedCMask(compGrid),
-                hypre_CSRMatrixI(mat),
-                &(hypre_CSRMatrixI(mat)[1]),
-                hypre_CSRMatrixJ(mat),
-                1,
-                owned_u,
-                &beta,
-                owned_tmp);
+      hypre_CSRMatrixMatvecMaskedDevice(0, alpha, mat, owned_u, beta, owned_tmp, owned_tmp, 
+            hypre_AMGDDCompGridOwnedCMask(compGrid), hypre_AMGDDCompGridNumOwnedCPoints(compGrid), 0);
 
       mat = hypre_AMGDDCompGridMatrixOwnedOffd(hypre_AMGDDCompGridA(compGrid));
       beta = 1.0;
-      cusparseDbsrxmv(handle,
-                CUSPARSE_DIRECTION_ROW,
-                CUSPARSE_OPERATION_NON_TRANSPOSE,
-                hypre_AMGDDCompGridNumOwnedCPoints(compGrid),
-                hypre_CSRMatrixNumRows(mat),
-                hypre_CSRMatrixNumCols(mat),
-                hypre_CSRMatrixNumNonzeros(mat),
-                &alpha,
-                descr,
-                hypre_CSRMatrixData(mat),
-                hypre_AMGDDCompGridOwnedCMask(compGrid),
-                hypre_CSRMatrixI(mat),
-                &(hypre_CSRMatrixI(mat)[1]),
-                hypre_CSRMatrixJ(mat),
-                1,
-                nonowned_u,
-                &beta,
-                owned_tmp);
+      hypre_CSRMatrixMatvecMaskedDevice(0, alpha, mat, nonowned_u, beta, owned_tmp, owned_tmp, 
+            hypre_AMGDDCompGridOwnedCMask(compGrid), hypre_AMGDDCompGridNumOwnedCPoints(compGrid), 0);
 
       mat = hypre_AMGDDCompGridMatrixNonOwnedDiag(hypre_AMGDDCompGridA(compGrid));
       beta = relax_weight;
-      cusparseDbsrxmv(handle,
-                CUSPARSE_DIRECTION_ROW,
-                CUSPARSE_OPERATION_NON_TRANSPOSE,
-                hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid),
-                hypre_CSRMatrixNumRows(mat),
-                hypre_CSRMatrixNumCols(mat),
-                hypre_CSRMatrixNumNonzeros(mat),
-                &alpha,
-                descr,
-                hypre_CSRMatrixData(mat),
-                hypre_AMGDDCompGridNonOwnedCMask(compGrid),
-                hypre_CSRMatrixI(mat),
-                &(hypre_CSRMatrixI(mat)[1]),
-                hypre_CSRMatrixJ(mat),
-                1,
-                nonowned_u,
-                &beta,
-                nonowned_tmp);
+      hypre_CSRMatrixMatvecMaskedDevice(0, alpha, mat, nonowned_u, beta, nonowned_tmp, nonowned_tmp, 
+            hypre_AMGDDCompGridNonOwnedCMask(compGrid), hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid), 0);
 
       mat = hypre_AMGDDCompGridMatrixNonOwnedOffd(hypre_AMGDDCompGridA(compGrid));
       beta = 1.0;
-      cusparseDbsrxmv(handle,
-                CUSPARSE_DIRECTION_ROW,
-                CUSPARSE_OPERATION_NON_TRANSPOSE,
-                hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid),
-                hypre_CSRMatrixNumRows(mat),
-                hypre_CSRMatrixNumCols(mat),
-                hypre_CSRMatrixNumNonzeros(mat),
-                &alpha,
-                descr,
-                hypre_CSRMatrixData(mat),
-                hypre_AMGDDCompGridNonOwnedCMask(compGrid),
-                hypre_CSRMatrixI(mat),
-                &(hypre_CSRMatrixI(mat)[1]),
-                hypre_CSRMatrixJ(mat),
-                1,
-                owned_u,
-                &beta,
-                nonowned_tmp);
+      hypre_CSRMatrixMatvecMaskedDevice(0, alpha, mat, owned_u, beta, nonowned_tmp, nonowned_tmp, 
+            hypre_AMGDDCompGridNonOwnedCMask(compGrid), hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid), 0);
 
-      cudaDeviceSynchronize();
-
-      VecScaleMasked(owned_u,owned_tmp,hypre_AMGDDCompGridL1Norms(compGrid),hypre_AMGDDCompGridOwnedCMask(compGrid),hypre_AMGDDCompGridNumOwnedCPoints(compGrid));
-      VecScaleMasked(nonowned_u,nonowned_tmp,&(hypre_AMGDDCompGridL1Norms(compGrid)[hypre_AMGDDCompGridNumOwnedNodes(compGrid)]),hypre_AMGDDCompGridNonOwnedCMask(compGrid),hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid));
-      
+      hypreDevice_MaskedIVAXPY(hypre_AMGDDCompGridNumOwnedCPoints(compGrid), 
+            hypre_AMGDDCompGridL1Norms(compGrid), 
+            owned_tmp, 
+            owned_u,
+            hypre_AMGDDCompGridOwnedCMask(compGrid));
+      hypreDevice_MaskedIVAXPY(hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid), 
+            &(hypre_AMGDDCompGridL1Norms(compGrid)[ hypre_AMGDDCompGridNumOwnedNodes(compGrid) ]),
+            nonowned_tmp, 
+            nononwed_u,
+            hypre_AMGDDCompGridNonOwnedCMask(compGrid));
    }
    else
    {
       hypre_CSRMatrix *mat = hypre_AMGDDCompGridMatrixOwnedDiag(hypre_AMGDDCompGridA(compGrid));
       beta = relax_weight;
-      cusparseDbsrxmv(handle,
-                CUSPARSE_DIRECTION_ROW,
-                CUSPARSE_OPERATION_NON_TRANSPOSE,
-                hypre_AMGDDCompGridNumOwnedNodes(compGrid) - hypre_AMGDDCompGridNumOwnedCPoints(compGrid),
-                hypre_CSRMatrixNumRows(mat),
-                hypre_CSRMatrixNumCols(mat),
-                hypre_CSRMatrixNumNonzeros(mat),
-                &alpha,
-                descr,
-                hypre_CSRMatrixData(mat),
-                hypre_AMGDDCompGridOwnedFMask(compGrid),
-                hypre_CSRMatrixI(mat),
-                &(hypre_CSRMatrixI(mat)[1]),
-                hypre_CSRMatrixJ(mat),
-                1,
-                owned_u,
-                &beta,
-                owned_tmp);
+      hypre_CSRMatrixMatvecMaskedDevice(0, alpha, mat, owned_u, beta, owned_tmp, owned_tmp, 
+            hypre_AMGDDCompGridOwnedFMask(compGrid), hypre_AMGDDCompGridNumOwnedNodes(compGrid) - hypre_AMGDDCompGridNumOwnedCPoints(compGrid), 0);
 
       mat = hypre_AMGDDCompGridMatrixOwnedOffd(hypre_AMGDDCompGridA(compGrid));
       beta = 1.0;
-      cusparseDbsrxmv(handle,
-                CUSPARSE_DIRECTION_ROW,
-                CUSPARSE_OPERATION_NON_TRANSPOSE,
-                hypre_AMGDDCompGridNumOwnedNodes(compGrid) - hypre_AMGDDCompGridNumOwnedCPoints(compGrid),
-                hypre_CSRMatrixNumRows(mat),
-                hypre_CSRMatrixNumCols(mat),
-                hypre_CSRMatrixNumNonzeros(mat),
-                &alpha,
-                descr,
-                hypre_CSRMatrixData(mat),
-                hypre_AMGDDCompGridOwnedFMask(compGrid),
-                hypre_CSRMatrixI(mat),
-                &(hypre_CSRMatrixI(mat)[1]),
-                hypre_CSRMatrixJ(mat),
-                1,
-                nonowned_u,
-                &beta,
-                owned_tmp);
+      hypre_CSRMatrixMatvecMaskedDevice(0, alpha, mat, nonowned_u, beta, owned_tmp, owned_tmp, 
+            hypre_AMGDDCompGridOwnedFMask(compGrid), hypre_AMGDDCompGridNumOwnedNodes(compGrid) - hypre_AMGDDCompGridNumOwnedCPoints(compGrid), 0);
 
       mat = hypre_AMGDDCompGridMatrixNonOwnedDiag(hypre_AMGDDCompGridA(compGrid));
       beta = relax_weight;
-      cusparseDbsrxmv(handle,
-                CUSPARSE_DIRECTION_ROW,
-                CUSPARSE_OPERATION_NON_TRANSPOSE,
-                hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid) - hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid),
-                hypre_CSRMatrixNumRows(mat),
-                hypre_CSRMatrixNumCols(mat),
-                hypre_CSRMatrixNumNonzeros(mat),
-                &alpha,
-                descr,
-                hypre_CSRMatrixData(mat),
-                hypre_AMGDDCompGridNonOwnedFMask(compGrid),
-                hypre_CSRMatrixI(mat),
-                &(hypre_CSRMatrixI(mat)[1]),
-                hypre_CSRMatrixJ(mat),
-                1,
-                nonowned_u,
-                &beta,
-                nonowned_tmp);
+      hypre_CSRMatrixMatvecMaskedDevice(0, alpha, mat, nonowned_u, beta, nonowned_tmp, nonowned_tmp, 
+            hypre_AMGDDCompGridNonOwnedFMask(compGrid), hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid) - hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid), 0);
 
       mat = hypre_AMGDDCompGridMatrixNonOwnedOffd(hypre_AMGDDCompGridA(compGrid));
       beta = 1.0;
-      cusparseDbsrxmv(handle,
-                CUSPARSE_DIRECTION_ROW,
-                CUSPARSE_OPERATION_NON_TRANSPOSE,
-                hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid) - hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid),
-                hypre_CSRMatrixNumRows(mat),
-                hypre_CSRMatrixNumCols(mat),
-                hypre_CSRMatrixNumNonzeros(mat),
-                &alpha,
-                descr,
-                hypre_CSRMatrixData(mat),
-                hypre_AMGDDCompGridNonOwnedFMask(compGrid),
-                hypre_CSRMatrixI(mat),
-                &(hypre_CSRMatrixI(mat)[1]),
-                hypre_CSRMatrixJ(mat),
-                1,
-                owned_u,
-                &beta,
-                nonowned_tmp);
+      hypre_CSRMatrixMatvecMaskedDevice(0, alpha, mat, owned_u, beta, nonowned_tmp, nonowned_tmp, 
+            hypre_AMGDDCompGridNonOwnedFMask(compGrid), hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid) - hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid), 0);
 
-      cudaDeviceSynchronize();
-
-      VecScaleMasked(owned_u,owned_tmp,hypre_AMGDDCompGridL1Norms(compGrid),hypre_AMGDDCompGridOwnedFMask(compGrid),hypre_AMGDDCompGridNumOwnedNodes(compGrid) - hypre_AMGDDCompGridNumOwnedCPoints(compGrid));
-      VecScaleMasked(nonowned_u,nonowned_tmp,&(hypre_AMGDDCompGridL1Norms(compGrid)[hypre_AMGDDCompGridNumOwnedNodes(compGrid)]),hypre_AMGDDCompGridNonOwnedFMask(compGrid),hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid) - hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid));
-      
+      hypreDevice_MaskedIVAXPY(hypre_AMGDDCompGridNumOwnedNodes(compGrid) - hypre_AMGDDCompGridNumOwnedCPoints(compGrid), 
+            hypre_AMGDDCompGridL1Norms(compGrid), 
+            owned_tmp, 
+            owned_u,
+            hypre_AMGDDCompGridOwnedFMask(compGrid));
+      hypreDevice_MaskedIVAXPY(hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid) - hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid), 
+            &(hypre_AMGDDCompGridL1Norms(compGrid)[ hypre_AMGDDCompGridNumOwnedNodes(compGrid) ]),
+            nonowned_tmp, 
+            nononwed_u,
+            hypre_AMGDDCompGridNonOwnedFMask(compGrid));
    }
 
    return 0;

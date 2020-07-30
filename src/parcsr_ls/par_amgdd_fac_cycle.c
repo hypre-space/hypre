@@ -8,25 +8,25 @@
 #include "_hypre_parcsr_ls.h"
 
 HYPRE_Int
-FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPRE_Int first_iteration);
+hypre_BoomerAMGDD_FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPRE_Int first_iteration);
 
 HYPRE_Int 
-FAC_FCycle(void *amg_vdata, HYPRE_Int first_iteration);
+hypre_BoomerAMGDD_FAC_FCycle(void *amg_vdata, HYPRE_Int first_iteration);
 
 HYPRE_Int
-FAC_Interpolate( hypre_AMGDDCompGrid *compGrid_f, hypre_AMGDDCompGrid *compGrid_c );
+hypre_BoomerAMGDD_FAC_Interpolate( hypre_AMGDDCompGrid *compGrid_f, hypre_AMGDDCompGrid *compGrid_c );
 
 HYPRE_Int
-FAC_Restrict( hypre_AMGDDCompGrid *compGrid_f, hypre_AMGDDCompGrid *compGrid_c, HYPRE_Int first_iteration );
+hypre_BoomerAMGDD_FAC_Restrict( hypre_AMGDDCompGrid *compGrid_f, hypre_AMGDDCompGrid *compGrid_c, HYPRE_Int first_iteration );
 
 HYPRE_Int
-FAC_Relax(hypre_ParAMGData *amg_data, hypre_AMGDDCompGrid *compGrid, HYPRE_Int cycle_param);
+hypre_BoomerAMGDD_FAC_Relax(hypre_ParAMGData *amg_data, hypre_AMGDDCompGrid *compGrid, HYPRE_Int cycle_param);
 
 HYPRE_Int
-FAC_CFL1Jacobi( hypre_AMGDDCompGrid *compGrid, HYPRE_Int relax_set );
+hypre_BoomerAMGDD_FAC_CFL1Jacobi_cpu( hypre_AMGDDCompGrid *compGrid, HYPRE_Int relax_set );
 
 HYPRE_Int
-hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata, HYPRE_Int first_iteration )
+hypre_BoomerAMGDD_FAC( void *amg_vdata, HYPRE_Int first_iteration )
 {
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -34,17 +34,19 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata, HYPRE_Int first_iteration )
    hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
    HYPRE_Int cycle_type = hypre_ParAMGDataAMGDDFACCycleType(amg_data);
 
-   if (cycle_type == 1 || cycle_type == 2) FAC_Cycle(amg_vdata, 0, cycle_type, first_iteration);
-   else if (cycle_type == 3) FAC_FCycle(amg_vdata, first_iteration);
+   if (cycle_type == 1 || cycle_type == 2) hypre_BoomerAMGDD_FAC_Cycle(amg_vdata, 0, cycle_type, first_iteration);
+   else if (cycle_type == 3) hypre_BoomerAMGDD_FAC_FCycle(amg_vdata, first_iteration);
    else
    {
-      if (myid == 0) hypre_printf("Error: unknown cycle type\n");
+      if (myid == 0) hypre_error_w_msg(HYPRE_ERROR_GENERIC,"WARNING: unknown AMG-DD FAC cycle type. Defaulting to 1 (V-cycle).\n");
+      hypre_ParAMGDataAMGDDFACCycleType(amg_data) = 1;
+      hypre_BoomerAMGDD_FAC_Cycle(amg_vdata, 0, 1, first_iteration);
    }
 
    return 0;
 }
 
-HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPRE_Int first_iteration)
+HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPRE_Int first_iteration)
 {
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -61,36 +63,36 @@ HYPRE_Int FAC_Cycle(void *amg_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPR
    hypre_AMGDDCompGrid          **compGrid = hypre_ParAMGDataAMGDDCompGrid(amg_data);
 
    // Relax on the real nodes
-   FAC_Relax(amg_data, compGrid[level], 1);
+   hypre_BoomerAMGDD_FAC_Relax(amg_data, compGrid[level], 1);
 
    // Restrict the residual at all fine points (real and ghost) and set residual at coarse points not under the fine grid
    if (num_levels > 1)
    {
-      FAC_Restrict( compGrid[level], compGrid[level+1], first_iteration );
+      hypre_BoomerAMGDD_FAC_Restrict( compGrid[level], compGrid[level+1], first_iteration );
       hypre_AMGDDCompGridVectorSetConstantValues( hypre_AMGDDCompGridS(compGrid[level]), 0.0 );
       hypre_AMGDDCompGridVectorSetConstantValues( hypre_AMGDDCompGridT(compGrid[level]), 0.0 );
 
       //  Either solve on the coarse level or recurse
       if (level+1 == num_levels-1)
       {
-         FAC_Relax(amg_data, compGrid[num_levels-1], 3);
+         hypre_BoomerAMGDD_FAC_Relax(amg_data, compGrid[num_levels-1], 3);
       }
       else for (i = 0; i < cycle_type; i++)
       {
-         FAC_Cycle(amg_vdata, level+1, cycle_type, first_iteration);
+         hypre_BoomerAMGDD_FAC_Cycle(amg_vdata, level+1, cycle_type, first_iteration);
          first_iteration = 0;
       }
 
       // Interpolate up and relax
-      FAC_Interpolate( compGrid[level], compGrid[level+1] );
+      hypre_BoomerAMGDD_FAC_Interpolate( compGrid[level], compGrid[level+1] );
    }
 
-   FAC_Relax(amg_data, compGrid[level], 2);
+   hypre_BoomerAMGDD_FAC_Relax(amg_data, compGrid[level], 2);
 
    return 0;
 }
 
-HYPRE_Int FAC_FCycle(void *amg_vdata, HYPRE_Int first_iteration)
+HYPRE_Int hypre_BoomerAMGDD_FAC_FCycle(void *amg_vdata, HYPRE_Int first_iteration)
 {
    HYPRE_Int   myid, num_procs;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -112,37 +114,37 @@ HYPRE_Int FAC_FCycle(void *amg_vdata, HYPRE_Int first_iteration)
    {
       for (level = 0; level < num_levels - 1; level++)
       {
-         FAC_Restrict( compGrid[level], compGrid[level+1], 0 );
+         hypre_BoomerAMGDD_FAC_Restrict( compGrid[level], compGrid[level+1], 0 );
          hypre_AMGDDCompGridVectorSetConstantValues( hypre_AMGDDCompGridS(compGrid[level]), 0.0 );
          hypre_AMGDDCompGridVectorSetConstantValues( hypre_AMGDDCompGridT(compGrid[level]), 0.0 );
       }
    }
 
    //  ... solve on coarsest level ...
-   FAC_Relax(amg_data, compGrid[num_levels-1], 3);
+   hypre_BoomerAMGDD_FAC_Relax(amg_data, compGrid[num_levels-1], 3);
 
    // ... and work back up to the finest
    for (level = num_levels - 2; level > -1; level--)
    {
       // Interpolate up and relax
-      FAC_Interpolate( compGrid[level], compGrid[level+1] );
+      hypre_BoomerAMGDD_FAC_Interpolate( compGrid[level], compGrid[level+1] );
 
       // V-cycle
-      FAC_Cycle( amg_vdata, level, 1, 0 );
+      hypre_BoomerAMGDD_FAC_Cycle( amg_vdata, level, 1, 0 );
    }
 
    return 0;
 }
 
 HYPRE_Int
-FAC_Interpolate( hypre_AMGDDCompGrid *compGrid_f, hypre_AMGDDCompGrid *compGrid_c )
+hypre_BoomerAMGDD_FAC_Interpolate( hypre_AMGDDCompGrid *compGrid_f, hypre_AMGDDCompGrid *compGrid_c )
 {
    hypre_AMGDDCompGridMatvec(1.0, hypre_AMGDDCompGridP(compGrid_f), hypre_AMGDDCompGridU(compGrid_c), 1.0, hypre_AMGDDCompGridU(compGrid_f));
    return 0;
 }
 
 HYPRE_Int
-FAC_Restrict( hypre_AMGDDCompGrid *compGrid_f, hypre_AMGDDCompGrid *compGrid_c, HYPRE_Int first_iteration )
+hypre_BoomerAMGDD_FAC_Restrict( hypre_AMGDDCompGrid *compGrid_f, hypre_AMGDDCompGrid *compGrid_c, HYPRE_Int first_iteration )
 {
    // Recalculate residual on coarse grid
    if (!first_iteration) hypre_AMGDDCompGridMatvec(-1.0, hypre_AMGDDCompGridA(compGrid_c), hypre_AMGDDCompGridU(compGrid_c), 1.0, hypre_AMGDDCompGridF(compGrid_c));
@@ -171,7 +173,7 @@ FAC_Restrict( hypre_AMGDDCompGrid *compGrid_f, hypre_AMGDDCompGrid *compGrid_c, 
 }
 
 HYPRE_Int
-FAC_Relax(hypre_ParAMGData *amg_data, hypre_AMGDDCompGrid *compGrid, HYPRE_Int cycle_param)
+hypre_BoomerAMGDD_FAC_Relax(hypre_ParAMGData *amg_data, hypre_AMGDDCompGrid *compGrid, HYPRE_Int cycle_param)
 {
     HYPRE_Int *numRelax = hypre_ParAMGDataNumGridSweeps(amg_data);
     hypre_AMGDDCompGridCycleParam(compGrid) = cycle_param;
@@ -285,7 +287,7 @@ hypre_BoomerAMGDD_FAC_GaussSeidel( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDCom
          u_owned_data[i] -= hypre_CSRMatrixData(owned_offd)[j] * u_nonowned_data[ hypre_CSRMatrixJ(owned_offd)[j] ];
       }
       // Divide by diagonal
-      if (diagonal == 0.0) printf("Tried to divide by zero diagonal in Gauss-Seidel!\n");
+      if (diagonal == 0.0) hypre_error_w_msg(HYPRE_ERROR_GENERIC,"WARNING: Divide by zero diagonal in hypre_BoomerAMGDD_FAC_GaussSeidel().\n");
       u_owned_data[i] /= diagonal;
    }
 
@@ -308,7 +310,7 @@ hypre_BoomerAMGDD_FAC_GaussSeidel( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDCom
          u_nonowned_data[i] -= hypre_CSRMatrixData(nonowned_offd)[j] * u_owned_data[ hypre_CSRMatrixJ(nonowned_offd)[j] ];
       }
       // Divide by diagonal
-      if (diagonal == 0.0) printf("Tried to divide by zero diagonal in Gauss-Seidel!\n");
+      if (diagonal == 0.0) hypre_error_w_msg(HYPRE_ERROR_GENERIC,"WARNING: Divide by zero diagonal in hypre_BoomerAMGDD_FAC_GaussSeidel().\n");
       u_nonowned_data[i] /= diagonal;
    }
 
@@ -362,7 +364,7 @@ HYPRE_Int hypre_BoomerAMGDD_FAC_OrderedGaussSeidel( hypre_AMGDDCompGrid *compGri
          u_nonowned_data[i] -= hypre_CSRMatrixData(nonowned_offd)[j] * u_owned_data[ hypre_CSRMatrixJ(nonowned_offd)[j] ];
       }
       // Divide by diagonal
-      if (diagonal == 0.0) printf("Tried to divide by zero diagonal in Gauss-Seidel!\n");
+      if (diagonal == 0.0) hypre_error_w_msg(HYPRE_ERROR_GENERIC,"WARNING: Divide by zero diagonal in hypre_BoomerAMGDD_FAC_OrderedGaussSeidel().\n");
       u_nonowned_data[i] /= diagonal;
    }
 
@@ -387,7 +389,7 @@ HYPRE_Int hypre_BoomerAMGDD_FAC_OrderedGaussSeidel( hypre_AMGDDCompGrid *compGri
          u_owned_data[i] -= hypre_CSRMatrixData(owned_offd)[j] * u_nonowned_data[ hypre_CSRMatrixJ(owned_offd)[j] ];
       }
       // Divide by diagonal
-      if (diagonal == 0.0) printf("Tried to divide by zero diagonal in Gauss-Seidel!\n");
+      if (diagonal == 0.0) hypre_error_w_msg(HYPRE_ERROR_GENERIC,"WARNING: Divide by zero diagonal in hypre_BoomerAMGDD_FAC_OrderedGaussSeidel().\n");
       u_owned_data[i] /= diagonal;
    }
 
@@ -404,27 +406,27 @@ hypre_BoomerAMGDD_FAC_CFL1Jacobi( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDComp
 #if defined(HYPRE_USING_CUDA)
    if (cycle_param == 1)
    {
-      FAC_CFL1Jacobi_device(compGrid, 1); 
-      FAC_CFL1Jacobi_device(compGrid, 0);
+      hypre_BoomerAMGDD_FAC_CFL1Jacobi_device(compGrid, 1); 
+      hypre_BoomerAMGDD_FAC_CFL1Jacobi_device(compGrid, 0);
    }
    else if (cycle_param == 2)
    {
-      FAC_CFL1Jacobi_device(compGrid, 0);
-      FAC_CFL1Jacobi_device(compGrid, 1);
+      hypre_BoomerAMGDD_FAC_CFL1Jacobi_device(compGrid, 0);
+      hypre_BoomerAMGDD_FAC_CFL1Jacobi_device(compGrid, 1);
    }
-   else FAC_CFL1Jacobi_device(compGrid, 0);
+   else hypre_BoomerAMGDD_FAC_CFL1Jacobi_device(compGrid, 0);
 #else
    if (cycle_param == 1)
    {
-      FAC_CFL1Jacobi(compGrid, 1); 
-      FAC_CFL1Jacobi(compGrid, 0);
+      hypre_BoomerAMGDD_FAC_CFL1Jacobi_cpu(compGrid, 1); 
+      hypre_BoomerAMGDD_FAC_CFL1Jacobi_cpu(compGrid, 0);
    }
    else if (cycle_param == 2)
    {
-      FAC_CFL1Jacobi(compGrid, 0);
-      FAC_CFL1Jacobi(compGrid, 1);
+      hypre_BoomerAMGDD_FAC_CFL1Jacobi_cpu(compGrid, 0);
+      hypre_BoomerAMGDD_FAC_CFL1Jacobi_cpu(compGrid, 1);
    }
-   else FAC_CFL1Jacobi(compGrid, 0);
+   else hypre_BoomerAMGDD_FAC_CFL1Jacobi_cpu(compGrid, 0);
 #endif
 
    return 0;
@@ -432,7 +434,7 @@ hypre_BoomerAMGDD_FAC_CFL1Jacobi( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDComp
 
 
 HYPRE_Int
-FAC_CFL1Jacobi( hypre_AMGDDCompGrid *compGrid, HYPRE_Int relax_set )
+hypre_BoomerAMGDD_FAC_CFL1Jacobi_cpu( hypre_AMGDDCompGrid *compGrid, HYPRE_Int relax_set )
 {
    HYPRE_Int            i, j;
 

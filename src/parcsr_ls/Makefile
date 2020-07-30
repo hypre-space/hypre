@@ -28,8 +28,6 @@ C_COMPILE_FLAGS =\
  $(DSUPERLU_INCLUDE)\
  ${CINCLUDES}
 
-CXX_COMPILE_FLAGS = ${C_COMPILE_FLAGS}
-
 HEADERS =\
  HYPRE_parcsr_ls.h\
  _hypre_parcsr_ls.h\
@@ -87,6 +85,7 @@ FILES =\
  par_amgdd_setup.c\
  par_amgdd_solve.c\
  par_amgdd_fac_cycle.c\
+ par_amgdd_helpers.c\
  par_amg_setup.c\
  par_amg_solve.c\
  par_amg_solveT.c\
@@ -143,9 +142,6 @@ FILES =\
  par_lr_restr.c\
  superlu.c
 
-FILESCXX = \
-par_amgdd_helpers.cxx
-
 CUFILES =\
  ams.c\
  par_coarsen_device.c\
@@ -157,9 +153,8 @@ CUFILES =\
  par_amgdd_fac_cycle_device.c
 
 COBJS = ${FILES:.c=.o}
-OBJSCXX = ${FILESCXX:.cxx=.o}
 CUOBJS = ${CUFILES:.c=.obj}
-OBJS = ${COBJS} ${OBJSCXX} ${CUOBJS}
+OBJS = ${COBJS} ${CUOBJS}
 
 SONAME = libHYPRE_parcsr_ls-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
