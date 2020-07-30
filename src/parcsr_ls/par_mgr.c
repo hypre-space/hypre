@@ -189,11 +189,7 @@ hypre_MGRDestroy( void *data )
   {
     if((mgr_data -> coarse_grid_solver))
     {    
-//#ifdef HYPRE_USING_DSUPERLU
-//      hypre_SLUDistDestroy( (mgr_data -> coarse_grid_solver) );
-//#else
       hypre_BoomerAMGDestroy( (mgr_data -> coarse_grid_solver) );
-//#endif
     }   
     (mgr_data -> coarse_grid_solver) = NULL;
   }
@@ -5436,7 +5432,7 @@ hypre_MGRDirectSolverSetup( void                *solver,
    set_default_options_dist(&(dslu_data->dslu_options));
 
    dslu_data->dslu_options.Fact = DOFACT;
-   //dslu_data->dslu_options.PrintStat = NO;
+   dslu_data->dslu_options.PrintStat = NO;
    /*dslu_data->dslu_options.IterRefine = SLU_DOUBLE;
    dslu_data->dslu_options.ColPerm = MMD_AT_PLUS_A;
    dslu_data->dslu_options.DiagPivotThresh = 1.0;
