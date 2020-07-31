@@ -24,6 +24,10 @@
 #error CUDART_VERSION Undefined!
 #endif
 
+#ifndef HYPRE_CHECK_VECTOR_SIZES
+#define HYPRE_CHECK_VECTOR_SIZES 0
+#endif
+
 
 HYPRE_Int
 hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
@@ -86,14 +90,14 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
       int x_size_override = 0;
       if((trans?A->num_cols:A->num_rows) != y->size)
       {
-#ifdef HYPRE_DEBUG
+#if defined(HYPRE_DEBUG) && HYPRE_MV_CHECK_VECTOR_SIZES
          hypre_printf("WARNING: A matrix-vector product with mismatching dimensions is attempted (likely y incorrect) | %i x %i T:%i , %i [%s : %i] \n", A->num_rows, A->num_cols, trans, y->size, __FILE__, __LINE__);
 #endif
          y_size_override = trans?A->num_cols:A->num_rows;
       }
       if((trans?A->num_rows:A->num_cols) != x->size)
       {
-#ifdef HYPRE_DEBUG
+#if defined(HYPRE_DEBUG) && HYPRE_MV_CHECK_VECTOR_SIZES
          hypre_printf("WARNING: A matrix-vector product with mismatching dimensions is attempted (likely x incorrect) | %i x %i T:%i , %i [%s : %i] \n", A->num_rows, A->num_cols, trans, x->size, __FILE__, __LINE__);
 #endif
          x_size_override = trans?A->num_rows:A->num_cols;
