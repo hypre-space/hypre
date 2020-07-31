@@ -8496,8 +8496,7 @@ done
 
    CUFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
 
-   CFLAGS=${CXXFLAGS}
-   LDFLAGS="-ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -Xcompiler \"${LDFLAGS}\""
+      LDFLAGS="-ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -Xcompiler \"${LDFLAGS}\""
    HYPRE_CUDA_INCL="-I${HYPRE_CUDA_PATH}/include"
    HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcudart"
    if test "$hypre_using_nvtx" = "yes"
