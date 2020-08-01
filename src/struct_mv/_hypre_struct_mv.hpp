@@ -696,8 +696,10 @@ struct ColumnSums
 }
 */
 
-#define hypre_newBoxLoopGetIndex(index)\
-  index[0] = hypre_IndexD(local_idx, 0); index[1] = hypre_IndexD(local_idx, 1); index[2] = hypre_IndexD(local_idx, 2);
+#define hypre_BoxLoopGetIndex(index)     \
+  index[0] = hypre_IndexD(local_idx, 0); \
+  index[1] = hypre_IndexD(local_idx, 1); \
+  index[2] = hypre_IndexD(local_idx, 2);
 
 #define hypre_BoxLoopBlock()       0
 #define hypre_BoxLoop0Begin      hypre_newBoxLoop0Begin
@@ -766,8 +768,6 @@ typedef struct hypre_Boxloop_struct
   hypre_CheckErrorDevice(cudaDeviceSynchronize());                                                                          \
 }
 #endif
-
-/* #define hypre_reduce_policy  cuda_reduce<BLOCKSIZE> */
 
 #ifdef __cplusplus
 extern "C++" {
@@ -1066,8 +1066,10 @@ else                                                            \
    hypre_fence();       \
 }
 
-#define hypre_newBoxLoopGetIndex(index)                                                                                \
-  index[0] = hypre_IndexD(local_idx, 0); index[1] = hypre_IndexD(local_idx, 1); index[2] = hypre_IndexD(local_idx, 2);
+#define hypre_BoxLoopGetIndex(index)     \
+  index[0] = hypre_IndexD(local_idx, 0); \
+  index[1] = hypre_IndexD(local_idx, 1); \
+  index[2] = hypre_IndexD(local_idx, 2);
 
 #define hypre_BoxLoopBlock()       0
 

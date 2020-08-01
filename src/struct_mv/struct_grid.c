@@ -325,7 +325,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
       hypre_SerialBoxLoop0Begin(ndim, loop_size);
       {
          pshift = pshifts[p];
-         hypre_BoxLoopGetIndex(pshift);
+         zypre_BoxLoopGetIndex(pshift);
          hypre_AddIndexes(pshift, hypre_BoxIMin(box), ndim, pshift);
          notcenter = 0;
          for (d = 0; d < ndim; d++)
@@ -872,7 +872,7 @@ hypre_StructGridGetMaxBoxSize(hypre_StructGrid *grid)
       box_size = hypre_BoxVolume(box);
       if (box_size > max_box_size)
       {
-	 max_box_size = box_size;
+         max_box_size = box_size;
       }
    }
    return max_box_size;

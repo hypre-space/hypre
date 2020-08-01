@@ -1084,7 +1084,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                hypre_BoxGetSize(int_box, loop_size);
                /*FIXME: Currently works only for the default boxloop (see GetIndex below) */
                zypre_BoxLoop2Begin(ndim, loop_size,
-                                   box,  start, stride, mi,
+                                   box,       start, stride, mi,
                                    value_box, start, stride, vi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
@@ -1094,7 +1094,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                   hypre_Index index;
                   HYPRE_Int   d, ci;
 
-                  hypre_BoxLoopGetIndex(index); /* FIXME (see comment above) */
+                  zypre_BoxLoopGetIndex(index); /* FIXME (see comment above) */
 
                   ci = mi*nentries + ncols[mi];
                   rows[mi] = row_base;
@@ -1108,6 +1108,8 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                   ncols[mi]++;
                }
                zypre_BoxLoop2End(mi, vi);
+printf("here\n");
+exit(0);
 
             } /* end loop through boxman to entries */
 
@@ -1161,7 +1163,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
       hypre_BoxGetSize(set_box, loop_size);
       hypre_SerialBoxLoop0Begin(ndim, loop_size);
       {
-         hypre_BoxLoopGetIndex(index);
+         zypre_BoxLoopGetIndex(index);
          hypre_AddIndexes(index, hypre_BoxIMin(set_box), ndim, index);
          hypre_SStructUMatrixSetValues(matrix, part, index, var,
                                        nentries, entries, values, action);

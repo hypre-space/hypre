@@ -246,7 +246,8 @@ typedef struct hypre_Boxloop_struct
   }                                                                           \
 }
 
-#define hypre_newBoxLoopGetIndex zypre_BoxLoopGetIndex
+#define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
+
 #define hypre_BoxLoopBlock       zypre_BoxLoopBlock
 #define hypre_BoxLoop0Begin      zypre_newBoxLoop0Begin
 #define hypre_BoxLoop0End        zypre_newBoxLoop0End

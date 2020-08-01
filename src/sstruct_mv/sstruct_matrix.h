@@ -62,6 +62,8 @@ typedef struct hypre_SStructMatrix_struct
    HYPRE_Int               entries_size;
    HYPRE_Int              *Sentries;
    HYPRE_Int              *Uentries;
+
+   HYPRE_BigInt           *tmp_row_coords;
    HYPRE_BigInt           *tmp_col_coords;
    HYPRE_Complex          *tmp_coeffs;
 
@@ -93,6 +95,7 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructMatrixEntriesSize(mat)    ((mat) -> entries_size)
 #define hypre_SStructMatrixSEntries(mat)       ((mat) -> Sentries)
 #define hypre_SStructMatrixUEntries(mat)       ((mat) -> Uentries)
+#define hypre_SStructMatrixTmpRowCoords(mat)   ((mat) -> tmp_row_coords)
 #define hypre_SStructMatrixTmpColCoords(mat)   ((mat) -> tmp_col_coords)
 #define hypre_SStructMatrixTmpCoeffs(mat)      ((mat) -> tmp_coeffs)
 #define hypre_SStructMatrixNSSymmetric(mat)    ((mat) -> ns_symmetric)

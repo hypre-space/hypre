@@ -23,7 +23,6 @@
 #else
 #define hypre_BoxLoopSetOneBlock zypre_BoxLoopSetOneBlock
 #endif
-#define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
 
 /*--------------------------------------------------------------------------
  * hypre_Index:

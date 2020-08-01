@@ -540,7 +540,7 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
    for (idx = 0; idx < hypre__size; idx++) \
    {
 
-#define hypre_newBoxLoopGetIndex(index) \
+#define hypre_BoxLoopGetIndex(index) \
   index[0] = hypre__id_0; \
   index[1] = hypre__id_1; \
   index[2] = hypre__id_2;

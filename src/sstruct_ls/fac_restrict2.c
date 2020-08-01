@@ -732,7 +732,7 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
              * restricted coarse grid values in an agglomerate; i.e.,
              * piecewise constant restriction.
              *-----------------------------------------------------------------*/
-            hypre_BoxLoopGetIndex(lindex);
+            zypre_BoxLoopGetIndex(lindex);
             imax= hypre_min( (fbox_size[0]-lindex[0]*stride[0]), rfactors[0] );
             jmax= hypre_min( (fbox_size[1]-lindex[1]*stride[1]), rfactors[1] );
             kmax= hypre_min( (fbox_size[2]-lindex[2]*stride[2]), rfactors[2] );

@@ -40,7 +40,6 @@ extern "C" {
 #else
 #define hypre_BoxLoopSetOneBlock zypre_BoxLoopSetOneBlock
 #endif
-#define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
 
 /*--------------------------------------------------------------------------
  * hypre_Index:
@@ -2446,7 +2445,7 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
    for (idx = 0; idx < hypre__size; idx++) \
    {
 
-#define hypre_newBoxLoopGetIndex(index) \
+#define hypre_BoxLoopGetIndex(index) \
   index[0] = hypre__id_0; \
   index[1] = hypre__id_1; \
   index[2] = hypre__id_2;
@@ -2719,7 +2718,8 @@ typedef struct hypre_Boxloop_struct
   }                                                                           \
 }
 
-#define hypre_newBoxLoopGetIndex zypre_BoxLoopGetIndex
+#define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
+
 #define hypre_BoxLoopBlock       zypre_BoxLoopBlock
 #define hypre_BoxLoop0Begin      zypre_newBoxLoop0Begin
 #define hypre_BoxLoop0End        zypre_newBoxLoop0End
