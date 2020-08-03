@@ -135,7 +135,6 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    /* Compute interpolation, restriction and coarse grids */
    for (l = 0; l < (num_levels - 1); l++)
    {
-      hypre_printf("Level %d/%d\n", l, (num_levels - 1));
       // Build prolongation matrix
       P_l[l]  = hypre_SSAMGCreateInterpOp(A_l[l], grid_l[l+1], cdir_l[l]);
       //HYPRE_SStructMatrixSetTranspose(P_l[l], 1);

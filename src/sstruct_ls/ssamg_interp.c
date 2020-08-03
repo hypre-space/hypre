@@ -72,8 +72,6 @@ hypre_SSAMGCreateInterpOp( hypre_SStructMatrix  *A,
       pmatrix = hypre_SStructMatrixPMatrix(A, part);
       nvars   = hypre_SStructPMatrixNVars(pmatrix);
 
-      hypre_printf("Part %d - cdir: %d\n", part, cdir);
-
       hypre_SetIndex(strides[part], 1);
       if (cdir > -1)
       {
