@@ -740,6 +740,7 @@ hypre_CSRMatrix *hypre_ParCSRMatrixExtractAExt ( hypre_ParCSRMatrix *A , HYPRE_I
 
 /* par_csr_assumed_part.c */
 HYPRE_Int hypre_LocateAssummedPartition ( MPI_Comm comm , HYPRE_BigInt row_start , HYPRE_BigInt row_end , HYPRE_BigInt global_first_row , HYPRE_BigInt global_num_rows , hypre_IJAssumedPart *part , HYPRE_Int myid );
+hypre_IJAssumedPart *hypre_AssumedPartitionCreate ( MPI_Comm comm , HYPRE_BigInt global_num , HYPRE_BigInt start , HYPRE_BigInt end );
 HYPRE_Int hypre_ParCSRMatrixCreateAssumedPartition ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_AssumedPartitionDestroy ( hypre_IJAssumedPart *apart );
 HYPRE_Int hypre_GetAssumedPartitionProcFromRow ( MPI_Comm comm , HYPRE_BigInt row , HYPRE_BigInt global_first_row , HYPRE_BigInt global_num_rows , HYPRE_Int *proc_id );

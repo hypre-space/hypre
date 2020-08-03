@@ -658,7 +658,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice( hypre_ParCSRMatrix  *A,
    {
       nC_global = cpts_starts[1];
    }
-   hypre_MPI_Bcast(&nC_global, 1, HYPRE_MPI_INT, num_procs-1, comm);
+   hypre_MPI_Bcast(&nC_global, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
    nC_local = (HYPRE_Int) (cpts_starts[1] - cpts_starts[0]);
    fpts_starts = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
    fpts_starts[0] = row_starts[0] - cpts_starts[0];
