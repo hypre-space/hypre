@@ -21,7 +21,7 @@
 #if defined(HYPRE_USING_DEVICE_OPENMP)
 
 #if (CUDART_VERSION >= 11000)
-#error "Currently (2020-07-31) Hypre's Device OpenMP with Cuda 11 has not been Quality Controlled. If you try to use it, please let us know if it does or doesn't work for you."
+//#error "Currently (2020-07-31) Hypre's Device OpenMP with Cuda 11 has not been Quality Controlled. If you try to use it, please let us know if it does or doesn't work for you."
 #endif
 
 /*--------------------------------------------------------------------------
@@ -103,16 +103,17 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Int        trans,
                            A->data, A->i, A->j, csc_a, csc_j, csc_i,
                            CUSPARSE_ACTION_NUMERIC, CUSPARSE_INDEX_BASE_ZERO) );
 #else
+
       size_t bufferSize = 0;
       size_t *buffer;
       HYPRE_CUSPARSE_CALL( cusparseCsr2cscEx2_bufferSize(handle, A->num_rows, A->num_cols, A->num_nonzeros,
-                           A->data, A->i, A->j, csc_a, csc_j, csc_i,
+                           A->data, A->i, A->j, csc_a, csc_i, csc_j,
                            CUDA_R_64F,CUSPARSE_ACTION_NUMERIC, CUSPARSE_INDEX_BASE_ZERO,
                            CUSPARSE_CSR2CSC_ALG1, &bufferSize));
       buffer = (size_t*) hypre_TAlloc(char,     bufferSize,    HYPRE_MEMORY_DEVICE);
 
       HYPRE_CUSPARSE_CALL( cusparseCsr2cscEx2(handle, A->num_rows, A->num_cols, A->num_nonzeros,
-                           A->data, A->i, A->j, csc_a, csc_j, csc_i,
+                           A->data, A->i, A->j, csc_a, csc_i, csc_j,
                            CUDA_R_64F,CUSPARSE_ACTION_NUMERIC, CUSPARSE_INDEX_BASE_ZERO,
                            CUSPARSE_CSR2CSC_ALG1, buffer));
 
