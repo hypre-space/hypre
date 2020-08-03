@@ -443,8 +443,6 @@ HYPRE_Int hypre_PointRelaxSetPointset ( void *relax_vdata , HYPRE_Int pointset ,
 HYPRE_Int hypre_PointRelaxSetPointsetRank ( void *relax_vdata , HYPRE_Int pointset , HYPRE_Int pointset_rank );
 HYPRE_Int hypre_PointRelaxSetTempVec ( void *relax_vdata , hypre_StructVector *t );
 HYPRE_Int hypre_PointRelaxGetFinalRelativeResidualNorm ( void *relax_vdata , HYPRE_Real *norm );
-HYPRE_Int hypre_relax_wtx ( void *relax_vdata , HYPRE_Int pointset , hypre_StructVector *t , hypre_StructVector *x );
-HYPRE_Int hypre_relax_copy ( void *relax_vdata , HYPRE_Int pointset , hypre_StructVector *t , hypre_StructVector *x );
 
 /* red_black_constantcoef_gs.c */
 HYPRE_Int hypre_RedBlackConstantCoefGS ( void *relax_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
