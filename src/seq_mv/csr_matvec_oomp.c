@@ -17,7 +17,12 @@
 #include "csr_matrix_cuda_utils.h"
 #endif
 
+
 #if defined(HYPRE_USING_DEVICE_OPENMP)
+
+#if (CUDART_VERSION >= 11000)
+#error "Currently (2020-07-31) Hypre's Device OpenMP with Cuda 11 has not been Quality Controlled. If you try to use it, please let us know if it does or doesn't work for you."
+#endif
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMatvec
