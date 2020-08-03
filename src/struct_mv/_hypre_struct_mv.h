@@ -2711,6 +2711,9 @@ typedef struct hypre_Boxloop_struct
 #define hypre_LoopBegin(size,idx)                                             \
 {                                                                             \
    HYPRE_Int idx;                                                             \
+#ifdef HYPRE_USING_OPENMP                                                     \
+#pragma omp parallel for private(idx) HYPRE_SMP_SCHEDULE                      \
+#endif                                                                        \
    for (idx = 0;idx < size;idx ++)                                            \
    {
 

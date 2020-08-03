@@ -1207,7 +1207,7 @@ DistributeData( ProblemData   global_data,
    /* check number of processes */
    if (pool_procs[data.npools] != num_procs)
    {
-	   hypre_printf("%d,  %d \n",pool_procs[data.npools],num_procs);
+      hypre_printf("%d,  %d \n",pool_procs[data.npools],num_procs);
       hypre_printf("Error: Invalid number of processes or process topology \n");
       exit(1);
    }
@@ -2355,7 +2355,7 @@ main( hypre_int argc,
 
    Index                 ilower, iupper;
    Index                 index, to_index;
-   HYPRE_Real           *values;
+   HYPRE_Real           *values, *d_values;
 
    HYPRE_Int             num_iterations;
    HYPRE_Real            final_res_norm;
@@ -2433,7 +2433,7 @@ main( hypre_int argc,
    HYPRE_Init();
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   //hypre_HandleDefaultExecPolicy(hypre_handle()) = HYPRE_EXEC_DEVICE;
+   hypre_HandleDefaultExecPolicy(hypre_handle()) = HYPRE_EXEC_DEVICE;
    //hypre_HandleSpgemmUseCusparse(hypre_handle()) = 1;
 #endif
 
@@ -2690,23 +2690,27 @@ main( hypre_int argc,
          }
       }
       else if ( strcmp(argv[arg_index], "-old_default") == 0 )
-      {		 /* uses old BoomerAMG defaults */
+      {
+         /* uses old BoomerAMG defaults */
          arg_index++;
          old_default = 1;
       }
       /* begin lobpcg */
       else if ( strcmp(argv[arg_index], "-lobpcg") == 0 )
-      {					 /* use lobpcg */
+      {
+         /* use lobpcg */
          arg_index++;
          lobpcgFlag = 1;
       }
       else if ( strcmp(argv[arg_index], "-orthchk") == 0 )
-      {			/* lobpcg: check orthonormality */
+      {
+         /* lobpcg: check orthonormality */
          arg_index++;
-	 checkOrtho = 1;
+         checkOrtho = 1;
       }
       else if ( strcmp(argv[arg_index], "-verb") == 0 )
-      {			  /* lobpcg: verbosity level */
+      {
+         /* lobpcg: verbosity level */
          arg_index++;
          verbosity = atoi(argv[arg_index++]);
       }
@@ -2716,32 +2720,39 @@ main( hypre_int argc,
          blockSize = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-seed") == 0 )
-      {		           /* lobpcg: seed for srand */
+      {
+         /* lobpcg: seed for srand */
          arg_index++;
          lobpcgSeed = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-itr") == 0 )
-      {		     /* lobpcg: max # of iterations */
+      {
+         /* lobpcg: max # of iterations */
          arg_index++;
          maxIterations = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-pcgitr") == 0 )
-      {		   /* lobpcg: max inner pcg iterations */
+      {
+         /* lobpcg: max inner pcg iterations */
          arg_index++;
          pcgIterations = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-pcgtol") == 0 )
-      {	     /* lobpcg: inner pcg iterations tolerance */
+      {
+         /* lobpcg: inner pcg iterations tolerance */
          arg_index++;
          pcgTol = atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-pcgmode") == 0 )
-      {		 /* lobpcg: initial guess for inner pcg */
-         arg_index++;	      /* 0: zero, otherwise rhs */
+      {
+         /* lobpcg: initial guess for inner pcg */
+         arg_index++;
+         /* 0: zero, otherwise rhs */
          pcgMode = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-vout") == 0 )
-      {			      /* lobpcg: print level */
+      {
+         /* lobpcg: print level */
          arg_index++;
          printLevel = atoi(argv[arg_index++]);
       }
@@ -2992,7 +3003,8 @@ main( hypre_int argc,
     * Set up the matrix
     *-----------------------------------------------------------*/
 
-   values = hypre_TAlloc(HYPRE_Real, hypre_max(data.max_boxsize, data.fem_nsparse), HYPRE_MEMORY_DEVICE);
+   values = hypre_TAlloc(HYPRE_Real, hypre_max(data.max_boxsize, data.fem_nsparse), HYPRE_MEMORY_HOST);
+   d_values = hypre_TAlloc(HYPRE_Real, hypre_max(data.max_boxsize, data.fem_nsparse), HYPRE_MEMORY_DEVICE);
 
    HYPRE_SStructMatrixCreate(hypre_MPI_COMM_WORLD, graph, &A);
 
@@ -3029,12 +3041,15 @@ main( hypre_int argc,
                {
                   values[j] = data.stencil_values[s][i];
                }
+
+               hypre_TMemcpy(d_values, values, HYPRE_Real, pdata.max_boxsize, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
                for (box = 0; box < pdata.nboxes; box++)
                {
                   GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
                                  pdata.vartypes[var], ilower, iupper);
                   HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
-                                                  var, 1, &i, values);
+                                                  var, 1, &i, d_values);
                }
             }
          }
@@ -3126,22 +3141,25 @@ main( hypre_int argc,
       pdata = data.pdata[part];
       for (box = 0; box < pdata.matset_nboxes; box++)
       {
-         size= 1;
+         size = 1;
          for (j = 0; j < 3; j++)
          {
-            size*= (pdata.matset_iuppers[box][j] -
-                    pdata.matset_ilowers[box][j] + 1);
+            size *= (pdata.matset_iuppers[box][j] -
+                     pdata.matset_ilowers[box][j] + 1);
          }
          for (j = 0; j < size; j++)
          {
             values[j] = pdata.matset_values[box];
          }
+
+         hypre_TMemcpy(d_values, values, HYPRE_Real, size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
          HYPRE_SStructMatrixSetBoxValues(A, part,
                                          pdata.matset_ilowers[box],
                                          pdata.matset_iuppers[box],
                                          pdata.matset_vars[box],
                                          1, &pdata.matset_entries[box],
-                                         values);
+                                         d_values);
       }
    }
 
@@ -3154,8 +3172,8 @@ main( hypre_int argc,
          size = 1;
          for (j = 0; j < 3; j++)
          {
-            size*= (pdata.matadd_iuppers[box][j] -
-                    pdata.matadd_ilowers[box][j] + 1);
+            size *= (pdata.matadd_iuppers[box][j] -
+                     pdata.matadd_ilowers[box][j] + 1);
          }
 
          for (entry = 0; entry < pdata.matadd_nentries[box]; entry++)
@@ -3251,6 +3269,9 @@ main( hypre_int argc,
          values[j] = 1.0;
       }
    }
+
+   hypre_TMemcpy(d_values, values, HYPRE_Real, data.max_boxsize, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
    for (part = 0; part < data.nparts; part++)
    {
       pdata = data.pdata[part];
@@ -3261,7 +3282,7 @@ main( hypre_int argc,
             GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
                            pdata.vartypes[var], ilower, iupper);
             HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper,
-                                            var, values);
+                                            var, d_values);
          }
       }
    }
@@ -3390,6 +3411,9 @@ main( hypre_int argc,
    hypre_PrintTiming("SStruct Interface", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
+
+printf("here!!!\n");
+exit(0);
 
    /*-----------------------------------------------------------
     * Get the objects out
@@ -3648,7 +3672,8 @@ main( hypre_int argc,
    }
 #endif
 
-   hypre_TFree(values, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(values, HYPRE_MEMORY_HOST);
+   hypre_TFree(d_values, HYPRE_MEMORY_DEVICE);
 
    /*-----------------------------------------------------------
     * Solve the system using SysPFMG or Split
@@ -3877,7 +3902,7 @@ main( hypre_int argc,
          HYPRE_PCGSetPrintLevel( (HYPRE_Solver) solver, 0 );
 
          if ((solver_id == 10) || (solver_id == 11))
-	 {
+         {
             /* use Split solver as preconditioner */
             HYPRE_SStructSplitCreate(hypre_MPI_COMM_WORLD, &precond);
             HYPRE_SStructSplitSetMaxIter(precond, 1);
@@ -3885,20 +3910,20 @@ main( hypre_int argc,
             HYPRE_SStructSplitSetZeroGuess(precond);
             if (solver_id == 10)
             {
-	       HYPRE_SStructSplitSetStructSolver(precond, HYPRE_SMG);
+               HYPRE_SStructSplitSetStructSolver(precond, HYPRE_SMG);
             }
             else if (solver_id == 11)
             {
-	       HYPRE_SStructSplitSetStructSolver(precond, HYPRE_PFMG);
+               HYPRE_SStructSplitSetStructSolver(precond, HYPRE_PFMG);
             }
             HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
                                  (HYPRE_PtrToSolverFcn) HYPRE_SStructSplitSolve,
                                  (HYPRE_PtrToSolverFcn) HYPRE_SStructSplitSetup,
                                  (HYPRE_Solver) precond);
-	 }
+         }
 
          else if (solver_id == 13)
-	 {
+         {
             /* use SysPFMG solver as preconditioner */
             HYPRE_SStructSysPFMGCreate(hypre_MPI_COMM_WORLD, &precond);
             HYPRE_SStructSysPFMGSetMaxIter(precond, 1);
@@ -3915,21 +3940,21 @@ main( hypre_int argc,
                                  (HYPRE_PtrToSolverFcn) HYPRE_SStructSysPFMGSetup,
                                  (HYPRE_Solver) precond);
 
-	 }
+         }
          else if (solver_id == 18)
-	 {
+         {
             /* use diagonal scaling as preconditioner */
             precond = NULL;
             HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
                                  (HYPRE_PtrToSolverFcn) HYPRE_SStructDiagScale,
                                  (HYPRE_PtrToSolverFcn) HYPRE_SStructDiagScaleSetup,
                                  (HYPRE_Solver) precond);
-	 }
+         }
          else if (solver_id != NO_SOLVER )
-	 {
+         {
             if ( verbosity )
                hypre_printf("Solver ID not recognized - running inner PCG iterations without preconditioner\n\n");
-	 }
+         }
 
 
          hypre_EndTiming(time_index);
@@ -4035,13 +4060,13 @@ main( hypre_int argc,
          HYPRE_SStructPCGDestroy(solver);
 
          if ((solver_id == 10) || (solver_id == 11))
-	 {
+         {
             HYPRE_SStructSplitDestroy(precond);
-	 }
+         }
          else if (solver_id == 13)
-	 {
+         {
             HYPRE_SStructSysPFMGDestroy(precond);
-	 }
+         }
 
          HYPRE_LOBPCGDestroy((HYPRE_Solver)lobpcg_solver);
          mv_MultiVectorDestroy( eigenvectors );
@@ -4059,7 +4084,7 @@ main( hypre_int argc,
          HYPRE_LOBPCGSetPrintLevel( (HYPRE_Solver) solver, verbosity );
 
          if ((solver_id == 10) || (solver_id == 11))
-	 {
+         {
             /* use Split solver as preconditioner */
             HYPRE_SStructSplitCreate(hypre_MPI_COMM_WORLD, &precond);
             HYPRE_SStructSplitSetMaxIter(precond, 1);
@@ -4067,20 +4092,20 @@ main( hypre_int argc,
             HYPRE_SStructSplitSetZeroGuess(precond);
             if (solver_id == 10)
             {
-	       HYPRE_SStructSplitSetStructSolver(precond, HYPRE_SMG);
+               HYPRE_SStructSplitSetStructSolver(precond, HYPRE_SMG);
             }
             else if (solver_id == 11)
             {
-	       HYPRE_SStructSplitSetStructSolver(precond, HYPRE_PFMG);
+               HYPRE_SStructSplitSetStructSolver(precond, HYPRE_PFMG);
             }
             HYPRE_LOBPCGSetPrecond( (HYPRE_Solver) solver,
                                     (HYPRE_PtrToSolverFcn) HYPRE_SStructSplitSolve,
                                     (HYPRE_PtrToSolverFcn) HYPRE_SStructSplitSetup,
                                     (HYPRE_Solver) precond);
-	 }
+         }
 
          else if (solver_id == 13)
-	 {
+         {
             /* use SysPFMG solver as preconditioner */
             HYPRE_SStructSysPFMGCreate(hypre_MPI_COMM_WORLD, &precond);
             HYPRE_SStructSysPFMGSetMaxIter(precond, 1);
@@ -4097,21 +4122,21 @@ main( hypre_int argc,
                                     (HYPRE_PtrToSolverFcn) HYPRE_SStructSysPFMGSetup,
                                     (HYPRE_Solver) precond);
 
-	 }
+         }
          else if (solver_id == 18)
-	 {
+         {
             /* use diagonal scaling as preconditioner */
             precond = NULL;
             HYPRE_LOBPCGSetPrecond( (HYPRE_Solver) solver,
                                     (HYPRE_PtrToSolverFcn) HYPRE_SStructDiagScale,
                                     (HYPRE_PtrToSolverFcn) HYPRE_SStructDiagScaleSetup,
                                     (HYPRE_Solver) precond);
-	 }
+         }
          else if (solver_id != NO_SOLVER )
-	 {
+         {
             if ( verbosity )
                hypre_printf("Solver ID not recognized - running LOBPCG without preconditioner\n\n");
-	 }
+         }
 
          HYPRE_LOBPCGSetup( (HYPRE_Solver) solver, (HYPRE_Matrix) A,
                             (HYPRE_Vector) b, (HYPRE_Vector) x);
@@ -4205,13 +4230,13 @@ main( hypre_int argc,
          HYPRE_LOBPCGDestroy((HYPRE_Solver)solver);
 
          if ((solver_id == 10) || (solver_id == 11))
-	 {
+         {
             HYPRE_SStructSplitDestroy(precond);
-	 }
+         }
          else if (solver_id == 13)
-	 {
+         {
             HYPRE_SStructSysPFMGDestroy(precond);
-	 }
+         }
 
          mv_MultiVectorDestroy( eigenvectors );
          free( eigenvalues );
@@ -4609,8 +4634,8 @@ main( hypre_int argc,
       {
          /* use ParaSails as preconditioner */
          HYPRE_ParCSRParaSailsCreate(hypre_MPI_COMM_WORLD, &par_precond );
-	 HYPRE_ParCSRParaSailsSetParams(par_precond, 0.1, 1);
-	 HYPRE_ParCSRParaSailsSetSym(par_precond, 0);
+         HYPRE_ParCSRParaSailsSetParams(par_precond, 0.1, 1);
+         HYPRE_ParCSRParaSailsSetSym(par_precond, 0);
          HYPRE_BiCGSTABSetPrecond( par_solver,
                                    (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSolve,
                                    (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSetup,

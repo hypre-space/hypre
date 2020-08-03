@@ -308,7 +308,7 @@ hypre_Free_core(void *ptr, hypre_MemoryLocation location)
       return;
    }
 
-#ifdef HYPRE_DEBUG
+#if 0 //#ifdef HYPRE_DEBUG
    hypre_MemoryLocation tmp;
    hypre_GetPointerLocation(ptr, &tmp);
    /* do not use hypre_assert, which has alloc and free;
