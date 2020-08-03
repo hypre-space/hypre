@@ -108,18 +108,58 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
       size_t bufferSize;
 
       const cusparseSpMVAlg_t alg = CUSPARSE_CSRMV_ALG2;
-      const cusparseOperation_t oper = trans?CUSPARSE_OPERATION_TRANSPOSE:CUSPARSE_OPERATION_NON_TRANSPOSE;
+      const cusparseOperation_t oper = CUSPARSE_OPERATION_NON_TRANSPOSE;
       const cudaDataType data_type = hypre_getCudaDataTypeComplex();
 
-      //Initial tests indicate that handling the transpose using the oper parameter does not result in degradation
-      //Thus it is not handled explicitly currently
+      //We handle the transpose explicitly to ensure the same output each run
+      //and for potential performance improvement
       if(trans)
       {
+
+         HYPRE_Complex *csc_a = hypre_TAlloc(HYPRE_Complex, A->num_nonzeros, HYPRE_MEMORY_DEVICE);
+         HYPRE_Int     *csc_j = hypre_TAlloc(HYPRE_Int,     A->num_nonzeros, HYPRE_MEMORY_DEVICE);
+         HYPRE_Int     *csc_i = hypre_TAlloc(HYPRE_Int,     A->num_cols+1,   HYPRE_MEMORY_DEVICE);
+
+         size_t bufferSize = 0;
+         size_t *buffer;
+         HYPRE_CUSPARSE_CALL( cusparseCsr2cscEx2_bufferSize(handle, A->num_rows, A->num_cols, A->num_nonzeros,
+                              A->data, A->i, A->j, csc_a, csc_i, csc_j,
+                              CUDA_R_64F,CUSPARSE_ACTION_NUMERIC, CUSPARSE_INDEX_BASE_ZERO,
+                              CUSPARSE_CSR2CSC_ALG1, &bufferSize));
+         buffer = (size_t*) hypre_TAlloc(char,     bufferSize,    HYPRE_MEMORY_DEVICE);
+
+         HYPRE_CUSPARSE_CALL( cusparseCsr2cscEx2(handle, A->num_rows, A->num_cols, A->num_nonzeros,
+                              A->data, A->i, A->j, csc_a, csc_i, csc_j,
+                              CUDA_R_64F,CUSPARSE_ACTION_NUMERIC, CUSPARSE_INDEX_BASE_ZERO,
+                              CUSPARSE_CSR2CSC_ALG1, buffer));
+
+         hypre_TFree(buffer, HYPRE_MEMORY_DEVICE);
+
+         cusparseSpMatDescr_t matAT;
+
+         const cudaDataType data_type = hypre_getCudaDataTypeComplex();
+         const cusparseIndexType_t index_type = hypre_getCusparseIndexTypeInt();
+         const cusparseIndexBase_t index_base = CUSPARSE_INDEX_BASE_ZERO;
+
+         HYPRE_CUSPARSE_CALL(cusparseCreateCsr(&matAT, A->num_cols, A->num_rows, A->num_nonzeros, csc_i, csc_j, csc_a, index_type, index_type, index_base, data_type));
+
+
+         HYPRE_CUSPARSE_CALL(cusparseSpMV_bufferSize(handle, oper, &alpha, matAT, vecX, &beta, vecY, data_type, alg, &bufferSize));
+         dBuffer = hypre_TAlloc(char, bufferSize, HYPRE_MEMORY_DEVICE);
+         HYPRE_CUSPARSE_CALL(cusparseSpMV(handle, oper, &alpha, matAT, vecX, &beta, vecY, data_type, alg, dBuffer));
+
+         HYPRE_CUDA_CALL(cudaFree(csc_a));
+         HYPRE_CUDA_CALL(cudaFree(csc_j));
+         HYPRE_CUDA_CALL(cudaFree(csc_i));
+         HYPRE_CUSPARSE_CALL(cusparseDestroySpMat(matAT));
+      }
+      else
+      {
+         HYPRE_CUSPARSE_CALL(cusparseSpMV_bufferSize(handle, oper, &alpha, matA, vecX, &beta, vecY, data_type, alg, &bufferSize));
+         dBuffer = hypre_TAlloc(char, bufferSize, HYPRE_MEMORY_DEVICE);
+         HYPRE_CUSPARSE_CALL(cusparseSpMV(handle, oper, &alpha, matA, vecX, &beta, vecY, data_type, alg, dBuffer));
       }
 
-      HYPRE_CUSPARSE_CALL(cusparseSpMV_bufferSize(handle, oper, &alpha, matA, vecX, &beta, vecY, data_type, alg, &bufferSize));
-      dBuffer = hypre_TAlloc(char, bufferSize, HYPRE_MEMORY_DEVICE);
-      HYPRE_CUSPARSE_CALL(cusparseSpMV(handle, oper, &alpha, matA, vecX, &beta, vecY, data_type, alg, dBuffer));
 
       HYPRE_CUSPARSE_CALL(cusparseDestroySpMat(matA));
       HYPRE_CUSPARSE_CALL(cusparseDestroyDnVec(vecX));
