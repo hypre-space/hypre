@@ -41,7 +41,7 @@ eo=""
 roij="-ij -ams -rt -mpibind -rtol 1e-3 -atol 1e-3"
 ross="-struct -sstruct -rt -mpibind -rtol 1e-6 -atol 1e-6"
 rost="-struct -rt -mpibind -rtol 1e-8 -atol 1e-8"
-rocuda="-cuda_ray -rt -mpibind"
+rocuda="-cuda_ray -rt -mpibind rtol 1e-3 -atol 1e-3"
 
 # The xlC Compiler, as default on Ray, does not fully support C++14, which results in deprecation warnings from thrust, cub, so we ignore them in tests
 
