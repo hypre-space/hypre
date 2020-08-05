@@ -107,13 +107,13 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
 
    /* Do work estimation */
    HYPRE_CUSPARSE_CALL(cusparseSpGEMM_workEstimation(cusparsehandle, opA, opB, &alpha, matA, matB, &beta,  matC, computeType, CUSPARSE_SPGEMM_DEFAULT, spgemmDesc, &bufferSize1, NULL));
-   HYPRE_CUDA_CALL(cudaMalloc(&dBuffer1, bufferSize1));
+   dBuffer1  = hypre_TAlloc(char, bufferSize1, HYPRE_MEMORY_DEVICE);
    HYPRE_CUSPARSE_CALL(cusparseSpGEMM_workEstimation(cusparsehandle, opA, opB, &alpha, matA, matB, &beta,  matC, computeType, CUSPARSE_SPGEMM_DEFAULT, spgemmDesc, &bufferSize1, dBuffer1));
 
 
    /* Do computation */
    HYPRE_CUSPARSE_CALL(cusparseSpGEMM_compute(cusparsehandle, opA, opB, &alpha, matA, matB, &beta,  matC, computeType, CUSPARSE_SPGEMM_DEFAULT, spgemmDesc, &bufferSize2, NULL));
-   HYPRE_CUDA_CALL(cudaMalloc(&dBuffer2, bufferSize2));
+   dBuffer2  = hypre_TAlloc(char, bufferSize2, HYPRE_MEMORY_DEVICE);
    HYPRE_CUSPARSE_CALL(cusparseSpGEMM_compute(cusparsehandle, opA, opB, &alpha, matA, matB, &beta,  matC, computeType, CUSPARSE_SPGEMM_DEFAULT, spgemmDesc, &bufferSize2, dBuffer2));
 
 
@@ -144,8 +144,8 @@ spgemmDesc));
    HYPRE_CUSPARSE_CALL(cusparseDestroySpMat(matC));
    HYPRE_CUSPARSE_CALL(cusparseDestroy(cusparsehandle));
 
-   HYPRE_CUDA_CALL(cudaFree(dBuffer1));
-   HYPRE_CUDA_CALL(cudaFree(dBuffer2));
+   hypre_TFree(dBuffer1, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(dBuffer2, HYPRE_MEMORY_DEVICE);
 
    /* Assign the output */
    *nnzC_out = nnzC;
