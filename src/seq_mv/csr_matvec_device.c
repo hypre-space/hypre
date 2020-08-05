@@ -148,9 +148,9 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
          dBuffer = hypre_TAlloc(char, bufferSize, HYPRE_MEMORY_DEVICE);
          HYPRE_CUSPARSE_CALL(cusparseSpMV(handle, oper, &alpha, matAT, vecX, &beta, vecY, data_type, alg, dBuffer));
 
-         HYPRE_CUDA_CALL(cudaFree(csc_a));
-         HYPRE_CUDA_CALL(cudaFree(csc_j));
-         HYPRE_CUDA_CALL(cudaFree(csc_i));
+         hypre_TFree(csc_a, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(csc_i, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(csc_j, HYPRE_MEMORY_DEVICE);
          HYPRE_CUSPARSE_CALL(cusparseDestroySpMat(matAT));
       }
       else
@@ -164,7 +164,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
       HYPRE_CUSPARSE_CALL(cusparseDestroySpMat(matA));
       HYPRE_CUSPARSE_CALL(cusparseDestroyDnVec(vecX));
       HYPRE_CUSPARSE_CALL(cusparseDestroyDnVec(vecY));
-      HYPRE_CUDA_CALL(cudaFree(dBuffer));
+      hypre_TFree(dBuffer, HYPRE_MEMORY_DEVICE);
    }
 #else
    cusparseMatDescr_t descr = hypre_HandleCusparseMatDescr(hypre_handle());
