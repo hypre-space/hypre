@@ -60,7 +60,7 @@ hypre_GetDefaultCUDAGridDimension( HYPRE_Int n,
    {
       HYPRE_Int num_warps_per_block = num_threads_per_block >> 5;
 
-      hypre_assert(num_warps_per_block * 32 == num_threads_per_block);
+      hypre_assert(num_warps_per_block * HYPRE_WARP_SIZE == num_threads_per_block);
 
       num_blocks = (n + num_warps_per_block - 1) / num_warps_per_block;
    }
@@ -377,7 +377,8 @@ hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_
 
 struct hypre_empty_row_functor
 {
-   /* typedef bool result_type; */
+   // This is needed for clang
+   typedef bool result_type;
 
    __device__
    bool operator()(const thrust::tuple<HYPRE_Int, HYPRE_Int>& t) const
