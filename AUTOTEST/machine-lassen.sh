@@ -43,17 +43,17 @@ eo=""
 roij="-ij -ams -rt -mpibind -rtol 1e-3 -atol 1e-3"
 ross="-struct -sstruct -rt -mpibind -rtol 1e-6 -atol 1e-6"
 rost="-struct -rt -mpibind -rtol 1e-8 -atol 1e-8"
-rocuda="-cuda_lassen -rt -mpibind"
+rocuda="-cuda_lassen -rt -mpibind -rtol 1e-3 -atol 1e-3"
 
 # CUDA with UM
-co="--with-cuda --enable-unified-memory --enable-persistent --enable-cub --enable-debug --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029 -DTHRUST_IGNORE_DEPRECATED_CPP11 -DCUB_IGNORE_DEPRECATED_CPP11\\' HYPRE_CUDA_SM=70"
+co="--with-cuda --enable-unified-memory --enable-persistent --enable-cub --enable-debug --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029 -DTHRUST_IGNORE_DEPRECATED_CPP11 -DCUB_IGNORE_DEPRECATED_CPP11 -DTHRUST_IGNORE_DEPRECATED_CPP_DIALECT -DCUB_IGNORE_DEPRECATED_CPP_DIALECT\\' HYPRE_CUDA_SM=70"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
 ./renametest.sh basic $output_dir/basic-cuda-um-ij
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ross
 ./renametest.sh basic $output_dir/basic-cuda-um-struct-sstruct
 
 # CUDA with UM [shared library]
-co="--with-cuda --enable-unified-memory --with-openmp --enable-hopscotch --enable-shared --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029 -DTHRUST_IGNORE_DEPRECATED_CPP11 -DCUB_IGNORE_DEPRECATED_CPP11\\' HYPRE_CUDA_SM=70"
+co="--with-cuda --enable-unified-memory --with-openmp --enable-hopscotch --enable-shared --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029 -DTHRUST_IGNORE_DEPRECATED_CPP11 -DCUB_IGNORE_DEPRECATED_CPP11 -DTHRUST_IGNORE_DEPRECATED_CPP_DIALECT -DCUB_IGNORE_DEPRECATED_CPP_DIALECT\\' HYPRE_CUDA_SM=70"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $rocuda
 ./renametest.sh basic $output_dir/basic-cuda-um-shared
 #./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
@@ -62,14 +62,14 @@ co="--with-cuda --enable-unified-memory --with-openmp --enable-hopscotch --enabl
 #./renametest.sh basic $output_dir/basic-cuda-um-shared-struct-sstruct
 
 # OMP 4.5 with UM
-co="--with-device-openmp --enable-unified-memory --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029 _DTHRUST_IGNORE_DEPRECATED_CPP11 -DCUB_IGNORE_DEPRECATED_CPP11\\' HYPRE_CUDA_SM=70"
+co="--with-device-openmp --enable-unified-memory --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029 _DTHRUST_IGNORE_DEPRECATED_CPP11 -DCUB_IGNORE_DEPRECATED_CPP11 -DTHRUST_IGNORE_DEPRECATED_CPP_DIALECT -DCUB_IGNORE_DEPRECATED_CPP_DIALECT\\' HYPRE_CUDA_SM=70"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
 ./renametest.sh basic $output_dir/basic-deviceomp-um-ij
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ross
 ./renametest.sh basic $output_dir/basic-deviceomp-um-struct-sstruct
 
 # OMP 4.5 with UM [shared library, no run]
-co="--with-device-openmp --enable-unified-memory --enable-shared --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029:1500-030:1501-308\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029:1500-030:1501-308 -DTHRUST_IGNORE_DEPRECATED_CPP11 -DCUB_IGNORE_DEPRECATED_CPP11\\' HYPRE_CUDA_SM=70"
+co="--with-device-openmp --enable-unified-memory --enable-shared --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029:1500-030:1501-308\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029:1500-030:1501-308 -DTHRUST_IGNORE_DEPRECATED_CPP11 -DCUB_IGNORE_DEPRECATED_CPP11 -DTHRUST_IGNORE_DEPRECATED_CPP_DIALECT -DCUB_IGNORE_DEPRECATED_CPP_DIALECT\\' HYPRE_CUDA_SM=70"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-deviceomp-um-shared
 #./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
@@ -90,7 +90,7 @@ co="--with-device-openmp --enable-unified-memory --enable-shared --with-extra-CF
 #./renametest.sh basic $output_dir/basic-cuda-nonum-struct
 
 # OMP4.5 w.o UM, only struct [in debug mode]
-co="--with-device-openmp --enable-debug --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029 -DTHRUST_IGNORE_DEPRECATED_CPP11 -DCUB_IGNORE_DEPRECATED_CPP11\\' HYPRE_CUDA_SM=70"
+co="--with-device-openmp --enable-debug --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029 -DTHRUST_IGNORE_DEPRECATED_CPP11 -DCUB_IGNORE_DEPRECATED_CPP11 -DTHRUST_IGNORE_DEPRECATED_CPP_DIALECT -DCUB_IGNORE_DEPRECATED_CPP_DIALECT\\' HYPRE_CUDA_SM=70"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $rost
 ./renametest.sh basic $output_dir/basic-deviceomp-nonum-debug-struct
 
