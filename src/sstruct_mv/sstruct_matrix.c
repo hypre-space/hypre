@@ -824,6 +824,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    HYPRE_Int                i, entry;
    HYPRE_BigInt             Uverank;
    HYPRE_Int                matrix_type = hypre_SStructMatrixObjectType(matrix);
+   HYPRE_Complex           *h_values;
 
    hypre_SStructGridFindBoxManEntry(grid, part, index, var, &boxman_entry);
 
@@ -848,6 +849,16 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
 
    col_coords = hypre_SStructMatrixTmpColCoords(matrix);
    coeffs     = hypre_SStructMatrixTmpCoeffs(matrix);
+
+   if ( hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST )
+   {
+      h_values = hypre_TAlloc(HYPRE_Complex, nentries, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(h_values, values, HYPRE_Complex, nentries, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   }
+   else
+   {
+      h_values = values;
+   }
 
    ncoeffs = 0;
    for (i = 0; i < nentries; i++)
@@ -875,7 +886,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
             hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, to_index,
                                                   &col_coords[ncoeffs],matrix_type);
 
-            coeffs[ncoeffs] = values[i];
+            coeffs[ncoeffs] = h_values[i];
             ncoeffs++;
          }
       }
@@ -889,7 +900,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
          {
             Uventry = hypre_SStructGraphUVEntry(graph, Uverank);
             col_coords[ncoeffs] = hypre_SStructUVEntryToRank(Uventry, entry);
-            coeffs[ncoeffs] = values[i];
+            coeffs[ncoeffs] = h_values[i];
             ncoeffs++;
          }
       }
@@ -945,6 +956,11 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
          HYPRE_IJMatrixGetValues(ijmatrix, 1, &ncoeffs, &row_coord,
                                  col_coords, values);
       }
+   }
+
+   if (h_values != values)
+   {
+      hypre_TFree(h_values, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;
@@ -1486,6 +1502,7 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
    hypre_BoxManEntry      **frentries, **toentries;
    hypre_SStructBoxManInfo *frinfo, *toinfo;
    HYPRE_Complex           *tvalues = NULL;
+   HYPRE_Int                tvalues_size = 0;
    HYPRE_Int                nfrentries, ntoentries, frpart, topart;
    HYPRE_Int                entry, sentry, ei, fri, toi;
 
@@ -1569,7 +1586,9 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                hypre_IntersectBoxes(ibox0, frbox, ibox1);
                if (hypre_BoxVolume(ibox1))
                {
-                  tvalues = hypre_TReAlloc(tvalues, HYPRE_Complex, hypre_BoxVolume(ibox1), HYPRE_MEMORY_DEVICE);
+                  HYPRE_Int tvalues_new_size = hypre_BoxVolume(ibox1);
+                  tvalues = hypre_TReAlloc_v2(tvalues, HYPRE_Complex, tvalues_size, HYPRE_Complex, tvalues_new_size, HYPRE_MEMORY_DEVICE);
+                  tvalues_size = tvalues_new_size;
 
                   if (action >= 0)
                   {

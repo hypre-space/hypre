@@ -37,7 +37,7 @@ hypre_MaxwellTVCreate( MPI_Comm  comm )
    maxwell_rfactor= hypre_TAlloc(hypre_Index,  1, HYPRE_MEMORY_HOST);
    hypre_SetIndex3(maxwell_rfactor[0], 2, 2, 2);
    (maxwell_data -> rfactor)= maxwell_rfactor;
-                                         
+
 
    return (void *) maxwell_data;
 }
@@ -77,16 +77,16 @@ hypre_MaxwellTVDestroy( void *maxwell_vdata )
 
             /* Cannot destroy Aee_l[0] since it points to the user
                Aee_in. */
-             if (l) 
+             if (l)
              {
                 hypre_ParCSRMatrixDestroy(maxwell_data-> Aee_l[l]);
                 hypre_ParVectorDestroy(maxwell_data-> be_l[l]);
                 hypre_ParVectorDestroy(maxwell_data-> xe_l[l]);
              }
 
-             if (l < (maxwell_data-> edge_numlevels)-1) 
+             if (l < (maxwell_data-> edge_numlevels)-1)
              {
-                HYPRE_IJMatrixDestroy( 
+                HYPRE_IJMatrixDestroy(
                             (HYPRE_IJMatrix)  (maxwell_data-> Pe_l[l]));
              }
 
@@ -105,7 +105,7 @@ hypre_MaxwellTVDestroy( void *maxwell_vdata )
          hypre_TFree(maxwell_data-> eCF_marker_l, HYPRE_MEMORY_HOST);
          hypre_TFree(maxwell_data-> erelax_weight, HYPRE_MEMORY_HOST);
          hypre_TFree(maxwell_data-> eomega, HYPRE_MEMORY_HOST);
-         
+
          hypre_TFree(maxwell_data-> BdryRanks_l, HYPRE_MEMORY_HOST);
          hypre_TFree(maxwell_data-> BdryRanksCnts_l, HYPRE_MEMORY_HOST);
       }
@@ -174,9 +174,9 @@ hypre_MaxwellSetRfactors(void         *maxwell_vdata,
    hypre_MaxwellData *maxwell_data   = (hypre_MaxwellData *)maxwell_vdata;
    hypre_Index       *maxwell_rfactor=(maxwell_data -> rfactor);
    HYPRE_Int          ierr       = 0;
-                                                                                                              
+
    hypre_CopyIndex(rfactor, maxwell_rfactor[0]);
-                                                                                                              
+
    return ierr;
 }
 
@@ -189,12 +189,12 @@ hypre_MaxwellSetGrad(void               *maxwell_vdata,
 {
    hypre_MaxwellData *maxwell_data= (hypre_MaxwellData *)maxwell_vdata;
    HYPRE_Int          ierr       = 0;
-                                                                                                              
+
    (maxwell_data -> Tgrad)=  T;
-                                                                                                              
+
    return ierr;
 }
-                                                                                                              
+
 /*--------------------------------------------------------------------------
  * hypre_MaxwellSetConstantCoef
  *--------------------------------------------------------------------------*/
@@ -204,7 +204,7 @@ hypre_MaxwellSetConstantCoef( void   *maxwell_vdata,
 {
    hypre_MaxwellData *maxwell_data= (hypre_MaxwellData *)maxwell_vdata;
    HYPRE_Int          ierr        = 0;
-                                                                                                                            
+
   (maxwell_data -> constant_coef) = constant_coef;
 
    return ierr;
@@ -219,7 +219,7 @@ hypre_MaxwellSetTol( void   *maxwell_vdata,
 {
    hypre_MaxwellData *maxwell_data= (hypre_MaxwellData *)maxwell_vdata;
    HYPRE_Int          ierr        = 0;
-                                                                                                                            
+
   (maxwell_data -> tol) = tol;
 
    return ierr;
@@ -239,7 +239,7 @@ hypre_MaxwellSetMaxIter( void *maxwell_vdata,
 
    return ierr;
 }
-                                                                                                                            
+
 /*--------------------------------------------------------------------------
  * hypre_MaxwellSetRelChange
  *--------------------------------------------------------------------------*/
@@ -249,16 +249,16 @@ hypre_MaxwellSetRelChange( void *maxwell_vdata,
 {
    hypre_MaxwellData *maxwell_data = (hypre_MaxwellData *)maxwell_vdata;
    HYPRE_Int          ierr = 0;
-                                                                                                                            
+
   (maxwell_data -> rel_change) = rel_change;
 
    return ierr;
 }
-                                                                                                                            
+
 /*--------------------------------------------------------------------------
  * hypre_MaxwellNumPreRelax
  *--------------------------------------------------------------------------*/
-                                                                                                                            
+
 HYPRE_Int
 hypre_MaxwellSetNumPreRelax( void *maxwell_vdata,
                              HYPRE_Int   num_pre_relax )
@@ -270,7 +270,7 @@ hypre_MaxwellSetNumPreRelax( void *maxwell_vdata,
 
    return ierr;
 }
-                                                                                                                            
+
 /*--------------------------------------------------------------------------
  * hypre_MaxwellSetNumPostRelax
  *--------------------------------------------------------------------------*/
@@ -280,7 +280,7 @@ hypre_MaxwellSetNumPostRelax( void *maxwell_vdata,
 {
    hypre_MaxwellData *maxwell_data= (hypre_MaxwellData *)maxwell_vdata;
    HYPRE_Int          ierr = 0;
-                                                                                                                            
+
   (maxwell_data -> num_post_relax)= num_post_relax;
 
    return ierr;
@@ -295,7 +295,7 @@ hypre_MaxwellGetNumIterations( void *maxwell_vdata,
 {
    hypre_MaxwellData *maxwell_data= (hypre_MaxwellData *)maxwell_vdata;
    HYPRE_Int          ierr = 0;
-                                                                                                                            
+
   *num_iterations = (maxwell_data -> num_iterations);
 
    return ierr;
@@ -310,12 +310,12 @@ hypre_MaxwellSetPrintLevel( void *maxwell_vdata,
 {
    hypre_MaxwellData *maxwell_data = (hypre_MaxwellData *)maxwell_vdata;
    HYPRE_Int          ierr = 0;
-                                                                                                             
+
    (maxwell_data -> print_level) = print_level;
-                                                                                                             
+
    return ierr;
 }
-                                                                                                             
+
 /*--------------------------------------------------------------------------
  * hypre_MaxwellSetLogging
  *--------------------------------------------------------------------------*/
@@ -325,12 +325,12 @@ hypre_MaxwellSetLogging( void *maxwell_vdata,
 {
    hypre_MaxwellData *maxwell_data = (hypre_MaxwellData *)maxwell_vdata;
    HYPRE_Int          ierr = 0;
-                                                                                                                       
+
    (maxwell_data -> logging) = logging;
-                                                                                                                       
+
    return ierr;
 }
-                                                                                                                       
+
 /*--------------------------------------------------------------------------
  * hypre_MaxwellPrintLogging
  *--------------------------------------------------------------------------*/
@@ -346,7 +346,7 @@ hypre_MaxwellPrintLogging( void *maxwell_vdata,
    HYPRE_Int          print_level   = (maxwell_data -> print_level);
    HYPRE_Real        *norms         = (maxwell_data -> norms);
    HYPRE_Real        *rel_norms     = (maxwell_data -> rel_norms);
-                                                                                                                            
+
    if (myid == 0)
    {
      if (print_level > 0 )
@@ -370,7 +370,7 @@ hypre_MaxwellGetFinalRelativeResidualNorm( void   *maxwell_vdata,
                                            HYPRE_Real *relative_residual_norm )
 {
    hypre_MaxwellData *maxwell_data = (hypre_MaxwellData *)maxwell_vdata;
-                                                                                                                            
+
    HYPRE_Int          max_iter        = (maxwell_data -> max_iter);
    HYPRE_Int          num_iterations  = (maxwell_data -> num_iterations);
    HYPRE_Int          logging         = (maxwell_data -> logging);

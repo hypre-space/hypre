@@ -2708,7 +2708,7 @@ typedef struct hypre_Boxloop_struct
          {
 
 
-#define hypre_LoopBegin(size,idx)                                             \
+#define hypre_LoopBegin(size, idx)                                            \
 {                                                                             \
    HYPRE_Int idx;                                                             \
 #ifdef HYPRE_USING_OPENMP                                                     \
