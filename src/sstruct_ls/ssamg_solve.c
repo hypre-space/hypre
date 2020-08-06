@@ -138,11 +138,11 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
        *--------------------------------------------------*/
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(0);
 
+#if DEBUG
       /* compute fine grid residual (b - Ax) */
       hypre_SStructCopy(b_l[0], r_l[0]);
       hypre_SStructMatvecCompute(matvec_data_l[0], -1.0,
                                  A_l[0], x_l[0], 1.0, r_l[0]);
-#if DEBUG
       if (print_level > 0 && !(i%print_level))
       {
          hypre_sprintf(filename, "ssamg_rpre.i%02d.l%02d", i, 0);
