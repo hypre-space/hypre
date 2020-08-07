@@ -87,8 +87,9 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Int        trans,
 
    hypre_assert(offset == 0 && "OFFSET MUST BE ZERO");
 
-   if(A_nnz == 0 || A_ncols == 0 || A_nrows == 0)
+   if(A_nnz == 0)
    {
+      hypre_SeqVectorScale(beta, y);
       return hypre_error_flag;
    }
 
