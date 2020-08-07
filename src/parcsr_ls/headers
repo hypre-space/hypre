@@ -31,8 +31,9 @@ typedef struct { HYPRE_Int prev; HYPRE_Int next; } Link;
 
 @
 
-cat par_amgdd_comp_grid.h >> $INTERNAL_HEADER
 cat par_amg.h >> $INTERNAL_HEADER
+cat par_amgdd_comp_grid.h >> $INTERNAL_HEADER
+cat par_amgdd.h >> $INTERNAL_HEADER
 cat protos.h  >> $INTERNAL_HEADER
 
 #===========================================================================

@@ -103,6 +103,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Real    **ds = hypre_ParAMGDataChebyDS(amg_data);
    HYPRE_Real    **coefs = hypre_ParAMGDataChebyCoefs(amg_data);
    HYPRE_Int       seq_cg = 0;
+   HYPRE_Int       partial_cycle_coarsest_level;
+   HYPRE_Int       partial_cycle_control;
    MPI_Comm        comm;
 
 #if 0
@@ -146,6 +148,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    /* smooth_option       = hypre_ParAMGDataSmoothOption(amg_data); */
    /* RL */
    restri_type = hypre_ParAMGDataRestriction(amg_data);
+
+   partial_cycle_coarsest_level = hypre_ParAMGDataPartialCycleCoarsestLevel(amg_data);
+   partial_cycle_control = hypre_ParAMGDataPartialCycleControl(amg_data);
 
    /*max_eig_est = hypre_ParAMGDataMaxEigEst(amg_data);
    min_eig_est = hypre_ParAMGDataMinEigEst(amg_data);
@@ -250,6 +255,23 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
       }
    }
 
+   /* Override level control and cycle param in the case of a partial cycle */
+   if (partial_cycle_coarsest_level >= 0)
+   {
+      if (partial_cycle_control == 0)
+      {
+         level = 0;
+         cycle_param = 1;
+      }
+      else
+      {
+         level = partial_cycle_coarsest_level;
+         if (level == num_levels-1) cycle_param = 3;
+         else cycle_param = 2;
+         for (k = 0; k < num_levels; ++k)
+            lev_counter[k] = 0;
+      }
+   }
 
    /*---------------------------------------------------------------------
     * Main loop of cycling
@@ -697,6 +719,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          if (level == num_levels-1)
          {
             cycle_param = 3;
+         }
+         if (partial_cycle_coarsest_level >= 0 && level == partial_cycle_coarsest_level + 1)
+         {
+            Not_Finished = 0;
          }
 #ifdef HYPRE_USING_CALIPER
          cali_set_int(iter_attr, level);  /* set the level for caliper here */

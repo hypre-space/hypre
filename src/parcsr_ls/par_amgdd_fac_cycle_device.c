@@ -11,10 +11,16 @@
 #if defined(HYPRE_USING_CUDA)
 
 HYPRE_Int
-hypre_BoomerAMGDD_FAC_Jacobi_device( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDCompGridMatrix *A, hypre_AMGDDCompGridVector *f, hypre_AMGDDCompGridVector *u )
+hypre_BoomerAMGDD_FAC_Jacobi_device( void *amgdd_vdata, HYPRE_Int level )
 {
    HYPRE_Int i,j; 
-   HYPRE_Real relax_weight = hypre_AMGDDCompGridRelaxWeight(compGrid);
+
+   hypre_ParAMGDDData *amgdd_data = (hypre_ParAMGDDData*) amgdd_vdata;
+   hypre_AMGDDCompGrid *compGrid = hypre_ParAMGDDDataCompGrid(amgdd_data)[level];
+   hypre_AMGDDCompGridMatrix *A = hypre_AMGDDCompGridA(compGrid);
+   hypre_AMGDDCompGridVector *f = hypre_AMGDDCompGridF(compGrid);
+   hypre_AMGDDCompGridVector *u = hypre_AMGDDCompGridU(compGrid);
+   HYPRE_Real relax_weight = hypre_ParAMGDDDataFACRelaxWeight(amgdd_data);
 
    // Calculate l1_norms if necessary (right now, I'm just using this vector for the diagonal of A and doing straight ahead Jacobi)
    if (!hypre_AMGDDCompGridL1Norms(compGrid))
@@ -65,30 +71,12 @@ hypre_BoomerAMGDD_FAC_Jacobi_device( hypre_AMGDDCompGrid *compGrid, hypre_AMGDDC
 }
 
 HYPRE_Int
-hypre_BoomerAMGDD_FAC_CFL1Jacobi_device( hypre_AMGDDCompGrid *compGrid, HYPRE_Int relax_set )
+hypre_BoomerAMGDD_FAC_CFL1Jacobi_device( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int relax_set )
 {
-   HYPRE_Real relax_weight = hypre_AMGDDCompGridRelaxWeight(compGrid);
+   hypre_ParAMGDDData *amgdd_data = (hypre_ParAMGDDData*) amgdd_vdata;
+   hypre_AMGDDCompGrid *compGrid = hypre_ParAMGDDDataCompGrid(amgdd_data)[level];
+   HYPRE_Real relax_weight = hypre_ParAMGDDDataFACRelaxWeight(amgdd_data);
 
-   // Get cusparse handle and setup bsr matrix
-   static cusparseHandle_t handle;
-   static cusparseMatDescr_t descr;
-   static HYPRE_Int FirstCall=1;
-
-   if (FirstCall)
-   {
-      handle = hypre_HandleCusparseHandle(hypre_handle());
-
-      cusparseStatus_t status= cusparseCreateMatDescr(&descr);
-      if (status != CUSPARSE_STATUS_SUCCESS) {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR:: Matrix descriptor initialization failed\n");
-         return hypre_error_flag;
-      }
-
-      cusparseSetMatType(descr,CUSPARSE_MATRIX_TYPE_GENERAL);
-      cusparseSetMatIndexBase(descr,CUSPARSE_INDEX_BASE_ZERO);
-
-      FirstCall=0;
-   }
    if (!hypre_AMGDDCompGridTemp2(compGrid))
    {
       hypre_AMGDDCompGridTemp2(compGrid) = hypre_AMGDDCompGridVectorCreate();

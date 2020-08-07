@@ -80,6 +80,9 @@ typedef struct
    HYPRE_Real    *omega;
    HYPRE_Int      converge_type;
    HYPRE_Real     tol;
+   HYPRE_Int      partial_cycle_coarsest_level;
+   HYPRE_Int      partial_cycle_control;
+
 
    /* problem data */
    hypre_ParCSRMatrix  *A;
@@ -105,17 +108,6 @@ typedef struct
    HYPRE_Int          **point_dof_map_array;
    HYPRE_Int            num_levels;
    hypre_Vector       **l1_norms;
-
-   /* composide grid data for AMG-DD */
-   HYPRE_Int                 amgdd_fac_num_cycles;
-   HYPRE_Int                 amgdd_fac_cycle_type;
-   HYPRE_Int                 amgdd_fac_relax_type;
-   HYPRE_Int                 amgdd_fac_num_relax;
-   HYPRE_Int                 amgdd_padding;
-   HYPRE_Int                 amgdd_num_ghost_layers;
-   hypre_AMGDDCompGrid       **amgdd_comp_grid;
-   hypre_AMGDDCommPkg        *amgdd_comm_pkg;
-   HYPRE_Int       (*amgddUserFACRelaxation)( hypre_AMGDDCompGrid*, hypre_AMGDDCompGridMatrix*, hypre_AMGDDCompGridVector*, hypre_AMGDDCompGridVector* );
 
    /* Block data */
    hypre_ParCSRBlockMatrix **A_block_array;
@@ -319,6 +311,8 @@ typedef struct
 #define hypre_ParAMGDataCycleType(amg_data) ((amg_data)->cycle_type)
 #define hypre_ParAMGDataConvergeType(amg_data) ((amg_data)->converge_type)
 #define hypre_ParAMGDataTol(amg_data) ((amg_data)->tol)
+#define hypre_ParAMGDataPartialCycleCoarsestLevel(amg_data) ((amg_data)->partial_cycle_coarsest_level)
+#define hypre_ParAMGDataPartialCycleControl(amg_data) ((amg_data)->partial_cycle_control)
 #define hypre_ParAMGDataNumGridSweeps(amg_data) ((amg_data)->num_grid_sweeps)
 #define hypre_ParAMGDataUserCoarseRelaxType(amg_data) ((amg_data)->user_coarse_relax_type)
 #define hypre_ParAMGDataUserRelaxType(amg_data) ((amg_data)->user_relax_type)
@@ -387,17 +381,6 @@ typedef struct
 #define hypre_ParAMGDataChebyScale(amg_data) ((amg_data)->cheby_scale)
 #define hypre_ParAMGDataChebyDS(amg_data) ((amg_data)->cheby_ds)
 #define hypre_ParAMGDataChebyCoefs(amg_data) ((amg_data)->cheby_coefs)
-
-/* AMG-DD composite grid data and parameters */
-#define hypre_ParAMGDataAMGDDFACNumCycles(amg_data) ((amg_data)->amgdd_fac_num_cycles)
-#define hypre_ParAMGDataAMGDDFACCycleType(amg_data) ((amg_data)->amgdd_fac_cycle_type)
-#define hypre_ParAMGDataAMGDDFACRelaxType(amg_data) ((amg_data)->amgdd_fac_relax_type)
-#define hypre_ParAMGDataAMGDDFACNumRelax(amg_data) ((amg_data)->amgdd_fac_num_relax)
-#define hypre_ParAMGDataAMGDDPadding(amg_data) ((amg_data)->amgdd_padding)
-#define hypre_ParAMGDataAMGDDNumGhostLayers(amg_data) ((amg_data)->amgdd_num_ghost_layers)
-#define hypre_ParAMGDataAMGDDCompGrid(amg_data) ((amg_data)->amgdd_comp_grid)
-#define hypre_ParAMGDataAMGDDCommPkg(amg_data) ((amg_data)->amgdd_comm_pkg)
-#define hypre_ParAMGDataAMGDDUserFACRelaxation(amg_data) ((amg_data)->amgddUserFACRelaxation)
 
 /* block */
 #define hypre_ParAMGDataABlockArray(amg_data) ((amg_data)->A_block_array)

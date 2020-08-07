@@ -19,7 +19,7 @@
  *****************************************************************************/
 
 HYPRE_Int
-hypre_BoomerAMGDDSetup( void *amg_vdata, 
+hypre_BoomerAMGDDSetup( void *amgdd_vdata, 
                         hypre_ParCSRMatrix *A, 
                         hypre_ParVector *b, 
                         hypre_ParVector *x) 
@@ -31,11 +31,12 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    char filename[256];
 
    MPI_Comm 	      comm;
-   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
+   hypre_ParAMGDDData *amgdd_data = (hypre_ParAMGDDData*) amgdd_vdata;
+   hypre_ParAMGData   *amg_data = hypre_ParAMGDDDataAMG(amgdd_data);
 
    // If the underlying AMG data structure has not yet been set up, call BoomerAMGSetup()
    if (!hypre_ParAMGDataAArray(amg_data))
-      hypre_BoomerAMGSetup(amg_vdata, A, b, x);
+      hypre_BoomerAMGSetup( (void*) amg_data, A, b, x);
 
    // Declare some frequently used variables
    HYPRE_Int      level,i,j;
@@ -58,14 +59,14 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
    // get info from amg about how to setup amgdd
    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
-   HYPRE_Int amgdd_start_level = 0;
+   HYPRE_Int amgdd_start_level = hypre_ParAMGDDDataStartLevel(amgdd_data);
    if (amgdd_start_level >= num_levels) amgdd_start_level = num_levels-1;
-   HYPRE_Int pad = hypre_ParAMGDataAMGDDPadding(amg_data);
-   HYPRE_Int num_ghost_layers = hypre_ParAMGDataAMGDDNumGhostLayers(amg_data);
+   HYPRE_Int pad = hypre_ParAMGDDDataPadding(amgdd_data);
+   HYPRE_Int num_ghost_layers = hypre_ParAMGDDDataNumGhostLayers(amgdd_data);
 
    // Allocate pointer for the composite grids
    hypre_AMGDDCompGrid **compGrid = hypre_CTAlloc(hypre_AMGDDCompGrid*, num_levels, HYPRE_MEMORY_HOST);
-   hypre_ParAMGDataAMGDDCompGrid(amg_data) = compGrid;
+   hypre_ParAMGDDDataCompGrid(amgdd_data) = compGrid;
 
    // In the 1 processor case, just need to initialize the comp grids
    if (num_procs == 1)
@@ -73,10 +74,10 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       for (level = amgdd_start_level; level < num_levels; level++)
       {
          compGrid[level] = hypre_AMGDDCompGridCreate();
-         hypre_AMGDDCompGridInitialize( amg_data, 0, level);
+         hypre_AMGDDCompGridInitialize( amgdd_data, 0, level);
       }
-      hypre_AMGDDCompGridFinalize(amg_data, compGrid, NULL, num_levels);
-      hypre_AMGDDCompGridSetupRelax(amg_data);
+      hypre_AMGDDCompGridFinalize(amgdd_data);
+      hypre_AMGDDCompGridSetupRelax(amgdd_data);
       return 0;
    }
 
@@ -88,12 +89,12 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    for (level = amgdd_start_level; level < num_levels; level++)
    {
       compGrid[level] = hypre_AMGDDCompGridCreate();
-      hypre_AMGDDCompGridInitialize( amg_data, padding[level], level );
+      hypre_AMGDDCompGridInitialize( amgdd_data, padding[level], level );
    }
 
    // Create the compGridCommPkg and grab a few frequently used variables
    hypre_AMGDDCommPkg *compGridCommPkg = hypre_AMGDDCommPkgCreate(num_levels);
-   hypre_ParAMGDataAMGDDCommPkg(amg_data) = compGridCommPkg;
+   hypre_ParAMGDDDataCommPkg(amgdd_data) = compGridCommPkg;
 
    send_buffer_size = hypre_AMGDDCommPkgSendBufferSize(compGridCommPkg);
    recv_buffer_size = hypre_AMGDDCommPkgRecvBufferSize(compGridCommPkg);
@@ -147,9 +148,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
          for (i = 0; i < num_send_procs; i++)
          {
-            send_buffer[i] = hypre_BoomerAMGDD_PackSendBuffer(amg_data, compGrid, compGridCommPkg, &(send_buffer_size[level][i]), 
-                                             &(send_flag_buffer_size[i]), send_flag, num_send_nodes, i, level, num_levels, padding, 
-                                             num_ghost_layers);
+            send_buffer[i] = hypre_BoomerAMGDD_PackSendBuffer(amgdd_data, i, level, padding, &(send_flag_buffer_size[i]));
          }
 
          //////////// Communicate buffer sizes ////////////
@@ -206,15 +205,10 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             recv_redundant_marker[level][i] = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
             num_recv_nodes[level][i] = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
 
-            hypre_BoomerAMGDD_UnpackRecvBuffer(recv_buffer[i], compGrid, hypre_ParCSRMatrixCommPkg( hypre_ParAMGDataAArray(amg_data)[level] ),
-               A_tmp_info,
-               compGridCommPkg,
-               send_flag, num_send_nodes, 
-               recv_map, recv_redundant_marker, num_recv_nodes, 
-               &(recv_map_send_buffer_size[i]), level, num_levels, nodes_added_on_level, i);
+            hypre_BoomerAMGDD_UnpackRecvBuffer(recv_buffer[i], amgdd_data, A_tmp_info, recv_redundant_marker, &(recv_map_send_buffer_size[i]), nodes_added_on_level, level, i);
             
             recv_map_send_buffer[i] = hypre_CTAlloc(HYPRE_Int, recv_map_send_buffer_size[i], HYPRE_MEMORY_HOST);
-            hypre_BoomerAMGDD_PackRecvMapSendBuffer(recv_map_send_buffer[i], recv_redundant_marker[level][i], num_recv_nodes[level][i], &(recv_buffer_size[level][i]), level, num_levels, compGrid);
+            hypre_BoomerAMGDD_PackRecvMapSendBuffer(recv_map_send_buffer[i], recv_redundant_marker[level][i], num_recv_nodes[level][i], &(recv_buffer_size[level][i]), level, num_levels);
          }
 
          //////////// Setup local indices for the composite grid ////////////
@@ -277,18 +271,19 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    hypre_BoomerAMGDD_FixUpRecvMaps(compGrid, compGridCommPkg, recv_redundant_marker, amgdd_start_level, num_levels);
    
    // Communicate data for A and all info for P
-   hypre_BoomerAMGDD_CommunicateRemainingMatrixInfo(amg_data, compGrid, compGridCommPkg);
+   hypre_BoomerAMGDD_CommunicateRemainingMatrixInfo(amgdd_data);
 
    // Setup the local indices for P
-   hypre_AMGDDCompGridSetupLocalIndicesP(amg_data, compGrid, amgdd_start_level, num_levels);
+   hypre_AMGDDCompGridSetupLocalIndicesP(amgdd_data);
 
    // Finalize the comp grid structures
-   hypre_AMGDDCompGridFinalize(amg_data, compGrid, compGridCommPkg, num_levels);
+   hypre_AMGDDCompGridFinalize(amgdd_data);
 
    // Setup extra info for specific relaxation methods
-   hypre_AMGDDCompGridSetupRelax(amg_data);
+   hypre_AMGDDCompGridSetupRelax(amgdd_data);
 
    // Cleanup memory
+   hypre_TFree(padding, HYPRE_MEMORY_HOST);
    hypre_TFree(nodes_added_on_level, HYPRE_MEMORY_HOST);
    for (i = 0; i < hypre_AMGDDCommPkgNumLevels(compGridCommPkg); i++)
    {

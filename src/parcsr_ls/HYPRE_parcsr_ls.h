@@ -118,45 +118,6 @@ HYPRE_Int HYPRE_BoomerAMGSolve(HYPRE_Solver       solver,
                                HYPRE_ParVector    x);
 
 /**
- * Create a solver object.
- **/
-HYPRE_Int HYPRE_BoomerAMGDDCreate(HYPRE_Solver *solver);
-
-/**
- * Destroy a solver object.
- **/
-HYPRE_Int HYPRE_BoomerAMGDDDestroy(HYPRE_Solver solver);
-
-/**
- * Set up the BoomerAMGDD solver or preconditioner.
- * If used as a preconditioner, this function should be passed
- * to the iterative solver \e SetPrecond function.
- *
- * @param solver [IN] object to be set up.
- * @param A [IN] ParCSR matrix used to construct the solver/preconditioner.
- * @param b Ignored by this function.
- * @param x Ignored by this function.
- **/
-HYPRE_Int HYPRE_BoomerAMGDDSetup(HYPRE_Solver       solver,
-                               HYPRE_ParCSRMatrix A,
-                               HYPRE_ParVector    b,
-                               HYPRE_ParVector    x);
-
-/**
- * Solve the system or apply AMG-DD as a preconditioner.
- * If used as a preconditioner, this function should be passed
- * to the iterative solver \e SetPrecond function.
- *
- * @param solver [IN] solver or preconditioner object to be applied.
- * @param A [IN] ParCSR matrix, matrix of the linear system to be solved
- * @param b [IN] right hand side of the linear system to be solved
- * @param x [OUT] approximated solution of the linear system to be solved
- **/
-HYPRE_Int HYPRE_BoomerAMGDDSolve(HYPRE_Solver       solver,
-                               HYPRE_ParCSRMatrix A,
-                               HYPRE_ParVector    b,
-                               HYPRE_ParVector    x);
-/**
  * Solve the transpose system \f$A^T x = b\f$ or apply AMG as a preconditioner
  * to the transpose system . Note that this function should only be used
  * when preconditioning CGNR with BoomerAMG. It can only be used with
@@ -1307,57 +1268,120 @@ HYPRE_Int HYPRE_BoomerAMGSetIsolatedFPoints(HYPRE_Solver  solver,
 HYPRE_Int HYPRE_BoomerAMGSetSabs (HYPRE_Solver solver,
                                   HYPRE_Int Sabs );
 
+/**@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name ParCSR BoomerAMGDD Solver and Preconditioner
+ *
+ * Communication reducing solver and preconditioner built on top of algebraic multigrid
+ *
+ * @{
+ **/
+
+/**
+ * Create a solver object.
+ **/
+HYPRE_Int HYPRE_BoomerAMGDDCreate(HYPRE_Solver *solver);
+
+/**
+ * Destroy a solver object.
+ **/
+HYPRE_Int HYPRE_BoomerAMGDDDestroy(HYPRE_Solver solver);
+
+/**
+ * Set up the BoomerAMGDD solver or preconditioner.
+ * If used as a preconditioner, this function should be passed
+ * to the iterative solver \e SetPrecond function.
+ *
+ * @param solver [IN] object to be set up.
+ * @param A [IN] ParCSR matrix used to construct the solver/preconditioner.
+ * @param b Ignored by this function.
+ * @param x Ignored by this function.
+ **/
+HYPRE_Int HYPRE_BoomerAMGDDSetup(HYPRE_Solver       solver,
+                               HYPRE_ParCSRMatrix A,
+                               HYPRE_ParVector    b,
+                               HYPRE_ParVector    x);
+
+/**
+ * Solve the system or apply AMG-DD as a preconditioner.
+ * If used as a preconditioner, this function should be passed
+ * to the iterative solver \e SetPrecond function.
+ *
+ * @param solver [IN] solver or preconditioner object to be applied.
+ * @param A [IN] ParCSR matrix, matrix of the linear system to be solved
+ * @param b [IN] right hand side of the linear system to be solved
+ * @param x [OUT] approximated solution of the linear system to be solved
+ **/
+HYPRE_Int HYPRE_BoomerAMGDDSolve(HYPRE_Solver       solver,
+                               HYPRE_ParCSRMatrix A,
+                               HYPRE_ParVector    b,
+                               HYPRE_ParVector    x);
+
 /**
  * (Optional) Set the number of pre- and post-relaxations per level for
  * AMG-DD inner FAC cycles. Default is 1.
  **/
-
 HYPRE_Int
-HYPRE_BoomerAMGSetAMGDDFACNumRelax( HYPRE_Solver solver,
+HYPRE_BoomerAMGDDSetFACNumRelax( HYPRE_Solver solver,
                            HYPRE_Int          amgdd_fac_num_relax  );
 
 /**
  * (Optional) Set the number of inner FAC cycles per AMG-DD iteration.
  * Default is 2.
  **/
-
 HYPRE_Int
-HYPRE_BoomerAMGSetAMGDDFACNumCycles( HYPRE_Solver solver,
+HYPRE_BoomerAMGDDSetFACNumCycles( HYPRE_Solver solver,
                            HYPRE_Int          amgdd_fac_num_cycles  );
 
 /**
  * (Optional) Set the cycle type for the AMG-DD inner FAC cycles.
  * 1 (default) = V-cycle, 2 = W-cycle, 3 = F-cycle
  **/
-
 HYPRE_Int
-HYPRE_BoomerAMGSetAMGDDFACCycleType( HYPRE_Solver solver,
+HYPRE_BoomerAMGDDSetFACCycleType( HYPRE_Solver solver,
                            HYPRE_Int          amgdd_fac_cycle_type  );
 
 /**
  * (Optional) Set the relaxation type for the AMG-DD inner FAC cycles.
  * 0 = Jacobi, 1 = Gauss-Seidel, 2 = ordered Gauss-Seidel, 3 (default) = C/F L1-scaled Jacobi
  **/
-
 HYPRE_Int
-HYPRE_BoomerAMGSetAMGDDFACRelaxType( HYPRE_Solver solver,
+HYPRE_BoomerAMGDDSetFACRelaxType( HYPRE_Solver solver,
                            HYPRE_Int          amgdd_fac_relax_type  );
+
+/**
+ * (Optional) Set the relaxation weight for the AMG-DD inner FAC cycles. Default is 1.0.
+ **/
+HYPRE_Int
+HYPRE_BoomerAMGDDSetFACRelaxWeight( HYPRE_Solver solver,
+                           HYPRE_Real          amgdd_fac_relax_weight  );
 
 /**
  * (Optional) Set the AMG-DD padding. Default is 1.
  **/
-
 HYPRE_Int
-HYPRE_BoomerAMGSetAMGDDPadding( HYPRE_Solver solver,
+HYPRE_BoomerAMGDDSetPadding( HYPRE_Solver solver,
                            HYPRE_Int          padding  );
 
 /**
  * (Optional) Set the AMG-DD number of ghost layers. Default is 1.
  **/
-
 HYPRE_Int
-HYPRE_BoomerAMGSetAMGDDNumGhostLayers( HYPRE_Solver solver,
+HYPRE_BoomerAMGDDSetNumGhostLayers( HYPRE_Solver solver,
                            HYPRE_Int          num_ghost_layers  );
+
+/**
+ * (Optional) Pass a custom user-defined function as a relaxation method for the AMG-DD FAC cycles. 
+ * Function should have the following form, where amgdd_solver is of type hypre_ParAMGDDData* and level is the level on which to relax:
+ * HYPRE_Int userFACRelaxation( HYPRE_Solver amgdd_solver, HYPRE_Int level )
+ **/
+HYPRE_Int
+HYPRE_BoomerAMGDDSetUserFACRelaxation( HYPRE_Solver solver,
+                           HYPRE_Int (*userFACRelaxation)( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param ) ); 
 
 /**@}*/
 

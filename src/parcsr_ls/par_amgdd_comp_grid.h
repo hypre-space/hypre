@@ -110,7 +110,6 @@ typedef struct
 
 typedef struct
 {
-   void             *amg_data;
    HYPRE_Int        level;
    HYPRE_MemoryLocation  memory_location;   /* memory location of matrices/vectors */
 
@@ -145,14 +144,12 @@ typedef struct
    hypre_AMGDDCompGridVector     *temp2;
    hypre_AMGDDCompGridVector     *temp3;
 
-   HYPRE_Int        cycle_param;
-   HYPRE_Real       relax_weight;
    HYPRE_Real       *l1_norms;
    HYPRE_Int        *cf_marker_array;
-   int              *owned_c_mask;
-   int              *owned_f_mask;
-   int              *nonowned_c_mask;
-   int              *nonowned_f_mask;
+   HYPRE_Int        *owned_c_mask;
+   HYPRE_Int        *owned_f_mask;
+   HYPRE_Int        *nonowned_c_mask;
+   HYPRE_Int        *nonowned_f_mask;
    HYPRE_Int        *owned_relax_ordering;
    HYPRE_Int        *nonowned_relax_ordering;
 
@@ -162,7 +159,6 @@ typedef struct
  * Accessor functions for the Comp Grid structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_AMGDDCompGridAMGData(compGrid)               ((compGrid) -> amg_data)
 #define hypre_AMGDDCompGridLevel(compGrid)               ((compGrid) -> level)
 #define hypre_AMGDDCompGridMemoryLocation(compGrid)               ((compGrid) -> memory_location)
 #define hypre_AMGDDCompGridFirstGlobalIndex(compGrid)               ((compGrid) -> first_global_index)
@@ -196,8 +192,6 @@ typedef struct
 #define hypre_AMGDDCompGridTemp2(compGrid)        ((compGrid) -> temp2)
 #define hypre_AMGDDCompGridTemp3(compGrid)        ((compGrid) -> temp3)
 
-#define hypre_AMGDDCompGridCycleParam(compGrid)         ((compGrid) -> cycle_param)
-#define hypre_AMGDDCompGridRelaxWeight(compGrid)         ((compGrid) -> relax_weight)
 #define hypre_AMGDDCompGridL1Norms(compGrid)         ((compGrid) -> l1_norms)
 #define hypre_AMGDDCompGridCFMarkerArray(compGrid)         ((compGrid) -> cf_marker_array)
 #define hypre_AMGDDCompGridOwnedCMask(compGrid)         ((compGrid) -> owned_c_mask)
