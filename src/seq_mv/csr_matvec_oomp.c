@@ -100,7 +100,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Int        trans,
       HYPRE_Int     *csc_j = hypre_TAlloc(HYPRE_Int,     A->num_nonzeros, HYPRE_MEMORY_DEVICE);
       HYPRE_Int     *csc_i = hypre_TAlloc(HYPRE_Int,     A->num_cols+1,   HYPRE_MEMORY_DEVICE);
 
-#if (CUDART_VERSION >= 11000)
+#if (CUDART_VERSION <= 11000)
       HYPRE_CUSPARSE_CALL( cusparseDcsr2csc(handle, A->num_rows, A->num_cols, A->num_nonzeros,
                            A->data, A->i, A->j, csc_a, csc_j, csc_i,
                            CUSPARSE_ACTION_NUMERIC, CUSPARSE_INDEX_BASE_ZERO) );
@@ -124,7 +124,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Int        trans,
 #endif
 
 #ifdef HYPRE_USING_CUSPARSE
-#if (CUDART_VERSION >= 11000)
+#if (CUDART_VERSION <= 11000)
       HYPRE_CUSPARSE_CALL( cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
                            A->num_cols, A->num_rows, A->num_nonzeros,
                            &alpha, descr,
@@ -158,7 +158,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Int        trans,
    else
    {
 #ifdef HYPRE_USING_CUSPARSE
-#if (CUDART_VERSION >= 11000)
+#if (CUDART_VERSION <= 11000)
       HYPRE_CUSPARSE_CALL( cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
                            A_nrows, A_ncols, A_nnz,
                            &alpha, descr,
