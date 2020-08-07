@@ -21,7 +21,8 @@
 #if defined(HYPRE_USING_DEVICE_OPENMP)
 
 #if (CUDART_VERSION >= 11000)
-//#error "Currently (2020-07-31) Hypre's Device OpenMP with Cuda 11 has not been Quality Controlled. If you try to use it, please let us know if it does or doesn't work for you."
+#error "Currently (2020-08-07) Hypre's Device OpenMP with Cuda 11 has not been Quality Controlled. If you try to use it, please let us know if it does or doesn't work for you."
+//Note: There seems to be a bug that exhibits itself on lassen related to mpibind. I have been unable to determine exactly what causes it. --Luke
 #endif
 
 /*--------------------------------------------------------------------------
@@ -87,8 +88,9 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Int        trans,
 
    hypre_assert(offset == 0 && "OFFSET MUST BE ZERO");
 
-   if(A_nnz == 0 || A_ncols == 0 || A_nrows == 0)
+   if(A_nnz == 0)
    {
+      hypre_SeqVectorScale(beta, y);
       return hypre_error_flag;
    }
 
@@ -98,7 +100,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Int        trans,
       HYPRE_Int     *csc_j = hypre_TAlloc(HYPRE_Int,     A->num_nonzeros, HYPRE_MEMORY_DEVICE);
       HYPRE_Int     *csc_i = hypre_TAlloc(HYPRE_Int,     A->num_cols+1,   HYPRE_MEMORY_DEVICE);
 
-#if (CUDART_VERSION < 10010)
+#if (CUDART_VERSION >= 11000)
       HYPRE_CUSPARSE_CALL( cusparseDcsr2csc(handle, A->num_rows, A->num_cols, A->num_nonzeros,
                            A->data, A->i, A->j, csc_a, csc_j, csc_i,
                            CUSPARSE_ACTION_NUMERIC, CUSPARSE_INDEX_BASE_ZERO) );
@@ -122,7 +124,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Int        trans,
 #endif
 
 #ifdef HYPRE_USING_CUSPARSE
-#if (CUDART_VERSION < 10010)
+#if (CUDART_VERSION >= 11000)
       HYPRE_CUSPARSE_CALL( cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
                            A->num_cols, A->num_rows, A->num_nonzeros,
                            &alpha, descr,
@@ -156,7 +158,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Int        trans,
    else
    {
 #ifdef HYPRE_USING_CUSPARSE
-#if (CUDART_VERSION < 10010)
+#if (CUDART_VERSION >= 11000)
       HYPRE_CUSPARSE_CALL( cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
                            A_nrows, A_ncols, A_nnz,
                            &alpha, descr,
