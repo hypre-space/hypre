@@ -48,7 +48,7 @@ hypre_SStructScale( HYPRE_Complex        alpha,
    HYPRE_Int y_object_type= hypre_SStructVectorObjectType(y);
 
    /* If alpha is 1.0, y does not change */
-   if (hypre_abs(1.0 - alpha) < HYPRE_REAL_EPSILON)
+   if (alpha == 1.0)
    {
       return hypre_error_flag;
    }

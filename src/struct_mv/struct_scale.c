@@ -27,20 +27,25 @@ hypre_StructScale( HYPRE_Complex       alpha,
                    hypre_StructVector *y     )
 {
    hypre_Box       *y_data_box;
-                   
+
    HYPRE_Int        yi;
    HYPRE_Complex   *yp;
-                   
+
    hypre_BoxArray  *boxes;
    hypre_Box       *box;
    hypre_Index      loop_size;
    hypre_IndexRef   start;
    hypre_Index      unit_stride;
-                   
+
    HYPRE_Int        i;
 
-   hypre_SetIndex(unit_stride, 1);
+   /* If alpha is 1.0, y does not change */
+   if (alpha == 1.0)
+   {
+      return hypre_error_flag;
+   }
 
+   hypre_SetIndex(unit_stride, 1);
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
    hypre_ForBoxI(i, boxes)
    {
