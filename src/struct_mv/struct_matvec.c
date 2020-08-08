@@ -32,6 +32,8 @@ typedef struct
    hypre_ComputePkg    *compute_pkg;
    hypre_BoxArray      *data_space;
    HYPRE_Int            transpose;
+
+   HYPRE_Int            skip_diag;
    HYPRE_Int            nentries;
    HYPRE_Int           *stentries;
 } hypre_StructMatvecData;
@@ -89,14 +91,19 @@ hypre_StructMatvecSetTranspose( void *matvec_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatvecSetStEntries( void      *matvec_vdata,
-                                HYPRE_Int  nentries,
-                                HYPRE_Int *stentries )
+hypre_StructMatvecSetSkipDiag( void     *matvec_vdata,
+                               HYPRE_Int skip_diag )
 {
    hypre_StructMatvecData  *matvec_data = matvec_vdata;
 
-   (matvec_data -> nentries)  = nentries;
-   (matvec_data -> stentries) = stentries;
+   if (skip_diag != 0)
+   {
+      (matvec_data -> skip_diag) = 1;
+   }
+   else
+   {
+      (matvec_data -> skip_diag) = 0;
+   }
 
    return hypre_error_flag;
 }
@@ -118,7 +125,9 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
    hypre_BoxArray          *data_space;
    HYPRE_Int               *num_ghost;
    hypre_IndexRef           dom_stride;
-   HYPRE_Int                i, stencil_size;
+   HYPRE_Int                stencil_diag;
+   HYPRE_Int                stencil_size;
+   HYPRE_Int                i;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -172,16 +181,20 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
    hypre_StructVectorRestore(x);
 
    /* Set active stencil entries if it hasn't been done yet */
-   if (!(matvec_data -> stentries))
+   stencil_size = hypre_StructStencilSize(stencil);
+   stencil_diag = hypre_StructStencilDiagEntry(stencil);
+   (matvec_data -> stentries) = hypre_TAlloc(HYPRE_Int, stencil_size);
+   for (i = 0; i < stencil_size; i++)
    {
-      stencil_size = hypre_StructStencilSize(stencil);
-      (matvec_data -> stentries) = hypre_TAlloc(HYPRE_Int, stencil_size);
-      for (i = 0; i < stencil_size; i++)
-      {
-         (matvec_data -> stentries[i]) = i;
-      }
-      (matvec_data -> nentries) = stencil_size;
+      (matvec_data -> stentries[i]) = i;
    }
+
+   /* Move diagonal entry to first position */
+   (matvec_data -> stentries[stencil_diag]) = (matvec_data -> stentries[0]);
+   (matvec_data -> stentries[0]) = stencil_diag;
+
+   /* Set number of stencil entries used in StructMatvecCompute*/
+   (matvec_data -> nentries) = stencil_size;
 
    /*----------------------------------------------------------
     * Set up the matvec data structure
@@ -276,6 +289,9 @@ hypre_StructMatvecRectglCompute( void               *matvec_vdata,
    hypre_ComputePkg        *compute_pkg;
    hypre_CommHandle        *comm_handle;
    HYPRE_Int                transpose;
+   HYPRE_Int                skip_diag;
+   HYPRE_Int                nentries;
+   HYPRE_Int               *stentries;
    HYPRE_Int                ndim;
 
    hypre_BoxArray          *data_space;
@@ -288,7 +304,7 @@ hypre_StructMatvecRectglCompute( void               *matvec_vdata,
    hypre_IndexRef           start;
 
    HYPRE_Complex            temp;
-   HYPRE_Int                compute_i, i, j, si;
+   HYPRE_Int                compute_i, i, j, si, ssi;
 
    hypre_Box               *A_data_box, *x_data_box, *y_data_box;
    HYPRE_Complex           *Ap, *xp, *yp;
@@ -298,7 +314,6 @@ hypre_StructMatvecRectglCompute( void               *matvec_vdata,
 
    hypre_StructStencil     *stencil;
    hypre_Index             *stencil_shape;
-   HYPRE_Int                stencil_size;
 
    hypre_StructGrid        *grid;
    HYPRE_Int 		    ran_nboxes;
@@ -322,6 +337,9 @@ hypre_StructMatvecRectglCompute( void               *matvec_vdata,
 
    compute_pkg = (matvec_data -> compute_pkg);
    transpose   = (matvec_data -> transpose);
+   skip_diag   = (matvec_data -> skip_diag);
+   nentries    = (matvec_data -> nentries);
+   stentries   = (matvec_data -> stentries);
 
    ndim = hypre_StructMatrixNDim(A);
 
@@ -347,6 +365,7 @@ hypre_StructMatvecRectglCompute( void               *matvec_vdata,
 
    compute_box = hypre_BoxCreate(ndim);
    hypre_SetIndex(ustride, 1);
+   hypre_assert(skip_diag == 0 || skip_diag == 1);
 
    /*-----------------------------------------------------------------------
     * Do (alpha == 0.0) computation
@@ -397,8 +416,6 @@ hypre_StructMatvecRectglCompute( void               *matvec_vdata,
 
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);
-   stencil_size  = hypre_StructStencilSize(stencil);
-
    for (compute_i = 0; compute_i < 2; compute_i++)
    {
       switch(compute_i)
@@ -502,7 +519,7 @@ hypre_StructMatvecRectglCompute( void               *matvec_vdata,
          hypre_ForBoxI(j, compute_box_a)
          {
             /* TODO (later, for optimization): Unroll these loops */
-            for (si = 0; si < stencil_size; si++)
+            for (si = skip_diag; si < nentries; si++)
             {
                /* If the domain grid is coarse, the compute box will change
                 * based on the stencil entry.  Otherwise, the next code block
@@ -511,10 +528,11 @@ hypre_StructMatvecRectglCompute( void               *matvec_vdata,
                 * Note that the Adstart and xdstart values are set in different
                 * places depending on the value of transpose. */
 
-               if ((si == 0) || dom_is_coarse)
+               ssi = stentries[si];
+               if ((si == skip_diag) || dom_is_coarse)
                {
                   hypre_CopyBox(hypre_BoxArrayBox(compute_box_a, j), compute_box);
-                  hypre_StructMatrixGetStencilSpace(A, si, transpose, origin, stride);
+                  hypre_StructMatrixGetStencilSpace(A, ssi, transpose, origin, stride);
                   hypre_ProjectBox(compute_box, origin, stride);
                   start = hypre_BoxIMin(compute_box);
 
@@ -532,19 +550,19 @@ hypre_StructMatvecRectglCompute( void               *matvec_vdata,
 
                if (transpose)
                {
-                  hypre_SubtractIndexes(start, stencil_shape[si], ndim, Adstart);
+                  hypre_SubtractIndexes(start, stencil_shape[ssi], ndim, Adstart);
                   hypre_StructMatrixMapDataIndex(A, Adstart);
-                  hypre_SubtractIndexes(start, stencil_shape[si], ndim, xdstart);
+                  hypre_SubtractIndexes(start, stencil_shape[ssi], ndim, xdstart);
                   hypre_StructVectorMapDataIndex(x, xdstart);
                }
                else /* Set Adstart above and xdstart here */
                {
-                  hypre_AddIndexes(start, stencil_shape[si], ndim, xdstart);
+                  hypre_AddIndexes(start, stencil_shape[ssi], ndim, xdstart);
                   hypre_StructVectorMapDataIndex(x, xdstart);
                }
 
-               Ap = hypre_StructMatrixBoxData(A, Ab, si);
-               if (hypre_StructMatrixConstEntry(A, si))
+               Ap = hypre_StructMatrixBoxData(A, Ab, ssi);
+               if (hypre_StructMatrixConstEntry(A, ssi))
                {
                   /* Constant coefficient case */
                   hypre_BoxLoop2Begin(ndim, loop_size,
@@ -626,6 +644,7 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
    hypre_ComputePkg        *compute_pkg = (matvec_data -> compute_pkg);
    hypre_BoxArray          *data_space  = (matvec_data -> data_space);
    HYPRE_Int                transpose   = (matvec_data -> transpose);
+   HYPRE_Int                skip_diag   = (matvec_data -> skip_diag);
    HYPRE_Int                nentries    = (matvec_data -> nentries);
    HYPRE_Int               *stentries   = (matvec_data -> stentries);
    HYPRE_Int                ndim        = hypre_StructMatrixNDim(A);
@@ -644,12 +663,9 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
    HYPRE_Complex           *Ap0,  *Ap1,  *Ap2;
    HYPRE_Complex           *Ap3,  *Ap4,  *Ap5;
    HYPRE_Complex           *Ap6,  *Ap7,  *Ap8;
-   HYPRE_Complex           *Ap9;
-
    HYPRE_Int                xoff0,  xoff1,  xoff2;
    HYPRE_Int                xoff3,  xoff4,  xoff5;
    HYPRE_Int                xoff6,  xoff7,  xoff8;
-   HYPRE_Int                xoff9;
 
    hypre_Box               *A_data_box, *x_data_box, *y_data_box;
    HYPRE_Int                k, si, csi[UNROLL_MAXDEPTH], vsi[UNROLL_MAXDEPTH];
@@ -676,7 +692,7 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
 
    if (transpose)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Transpose operation not implemeted!");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Transpose operation not implemented!");
       return hypre_error_flag;
    }
 
@@ -754,7 +770,7 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
 
 #ifdef UNROLL_STENCIL_LOOPS
             /* unroll up to depth UNROLL_MAXDEPTH */
-            for (si = 0; si < nentries; si += UNROLL_MAXDEPTH)
+            for (si = skip_diag; si < nentries; si += UNROLL_MAXDEPTH)
             {
                depth = hypre_min(UNROLL_MAXDEPTH, (stencil_size - si));
 
