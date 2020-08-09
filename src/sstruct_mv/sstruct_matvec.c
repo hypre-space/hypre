@@ -44,6 +44,7 @@ hypre_SStructPMatvecCreate( void **pmatvec_vdata_ptr )
    hypre_SStructPMatvecData *pmatvec_data;
 
    pmatvec_data = hypre_CTAlloc(hypre_SStructPMatvecData, 1);
+   (pmatvec_data -> nvars)     = 0;
    (pmatvec_data -> transpose) = 0;
 
    *pmatvec_vdata_ptr = (void *) pmatvec_data;
@@ -54,6 +55,7 @@ hypre_SStructPMatvecCreate( void **pmatvec_vdata_ptr )
 /*--------------------------------------------------------------------------
  * hypre_SStructPMatvecSetTranspose
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SStructPMatvecSetTranspose( void      *pmatvec_vdata,
                                   HYPRE_Int  transpose )
@@ -61,6 +63,61 @@ hypre_SStructPMatvecSetTranspose( void      *pmatvec_vdata,
    hypre_SStructPMatvecData  *pmatvec_data = (hypre_SStructPMatvecData *) pmatvec_vdata;
 
    (pmatvec_data -> transpose) = transpose;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructPMatvecSetSkipDiag
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatvecSetSkipDiag( void      *pmatvec_vdata,
+                                 HYPRE_Int  skip_diag )
+{
+   hypre_SStructPMatvecData *pmatvec_data = (hypre_SStructPMatvecData *) pmatvec_vdata;
+   HYPRE_Int                 nvars        = (pmatvec_data -> nvars);
+   HYPRE_Int                 var;
+
+   for (var = 0; var < nvars; var++)
+   {
+      hypre_StructMatvecSetSkipDiag(pmatvec_data -> smatvec_data[var][var],
+                                    skip_diag);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructPMatvecDestroy
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatvecDestroy( void *pmatvec_vdata )
+{
+   hypre_SStructPMatvecData   *pmatvec_data = (hypre_SStructPMatvecData   *)pmatvec_vdata;
+   HYPRE_Int                   nvars;
+   void                     ***smatvec_data;
+   HYPRE_Int                   vi, vj;
+
+   if (pmatvec_data)
+   {
+      nvars        = (pmatvec_data -> nvars);
+      smatvec_data = (pmatvec_data -> smatvec_data);
+      for (vi = 0; vi < nvars; vi++)
+      {
+         for (vj = 0; vj < nvars; vj++)
+         {
+            if (smatvec_data[vi][vj] != NULL)
+            {
+               hypre_StructMatvecDestroy(smatvec_data[vi][vj]);
+            }
+         }
+         hypre_TFree(smatvec_data[vi]);
+      }
+      hypre_TFree(smatvec_data);
+      hypre_TFree(pmatvec_data);
+   }
 
    return hypre_error_flag;
 }
@@ -163,34 +220,30 @@ hypre_SStructPMatvecCompute( void                 *pmatvec_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPMatvecDestroy
+ * hypre_SStructPMatvecDiagScale
+ *
+ * y = alpha*inv(A_D)*x + beta*y
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructPMatvecDestroy( void *pmatvec_vdata )
+hypre_SStructPMatvecDiagScale( HYPRE_Complex         alpha,
+                               hypre_SStructPMatrix *A,
+                               hypre_SStructPVector *x,
+                               HYPRE_Complex         beta,
+                               hypre_SStructPVector *y )
 {
-   hypre_SStructPMatvecData   *pmatvec_data = (hypre_SStructPMatvecData   *)pmatvec_vdata;
-   HYPRE_Int                   nvars;
-   void                     ***smatvec_data;
-   HYPRE_Int                   vi, vj;
+   hypre_StructMatrix  *sA;
+   hypre_StructVector  *sx, *sy;
+   HYPRE_Int            vi, nvars;
 
-   if (pmatvec_data)
+   nvars = hypre_SStructPMatrixNVars(A);
+   for (vi = 0; vi < nvars; vi++)
    {
-      nvars        = (pmatvec_data -> nvars);
-      smatvec_data = (pmatvec_data -> smatvec_data);
-      for (vi = 0; vi < nvars; vi++)
-      {
-         for (vj = 0; vj < nvars; vj++)
-         {
-            if (smatvec_data[vi][vj] != NULL)
-            {
-               hypre_StructMatvecDestroy(smatvec_data[vi][vj]);
-            }
-         }
-         hypre_TFree(smatvec_data[vi]);
-      }
-      hypre_TFree(smatvec_data);
-      hypre_TFree(pmatvec_data);
+      sA = hypre_SStructPMatrixSMatrix(A, vi, vi);
+      sx = hypre_SStructPVectorSVector(x, vi);
+      sy = hypre_SStructPVectorSVector(y, vi);
+
+      hypre_StructMatvecDiagScale(alpha, sA, sx, beta, sy);
    }
 
    return hypre_error_flag;
@@ -230,7 +283,6 @@ typedef struct hypre_SStructMatvecData_struct
    HYPRE_Int    nparts;
    HYPRE_Int    transpose;
    void       **pmatvec_data;
-
 } hypre_SStructMatvecData;
 
 /*--------------------------------------------------------------------------
@@ -243,6 +295,7 @@ hypre_SStructMatvecCreate( void **matvec_vdata_ptr )
    hypre_SStructMatvecData *matvec_data;
 
    matvec_data = hypre_CTAlloc(hypre_SStructMatvecData, 1);
+   (matvec_data -> nparts)    = 0;
    (matvec_data -> transpose) = 0;
 
    *matvec_vdata_ptr = (void *) matvec_data;
@@ -260,6 +313,26 @@ hypre_SStructMatvecSetTranspose( void      *matvec_vdata,
    hypre_SStructMatvecData  *matvec_data = (hypre_SStructMatvecData *) matvec_vdata;
 
    (matvec_data -> transpose) = transpose;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructMatvecSetSkipDiag
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_SStructMatvecSetSkipDiag( void      *matvec_vdata,
+                                HYPRE_Int  skip_diag )
+{
+   hypre_SStructMatvecData  *matvec_data = (hypre_SStructMatvecData *) matvec_vdata;
+   HYPRE_Int                 nparts      = (matvec_data -> nparts);
+   HYPRE_Int                 part;
+
+   for (part = 0; part < nparts; part++)
+   {
+      hypre_SStructPMatvecSetSkipDiag(matvec_data -> pmatvec_data[part],
+                                      skip_diag);
+   }
 
    return hypre_error_flag;
 }
@@ -402,6 +475,94 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
       parx = NULL;
    }
 
+   HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructMatvecDiagScale
+ *
+ * y = alpha*inv(A_D)*x + beta*y
+ *
+ * TODO: Add UMatrix contribution to inv(A_D)
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_SStructMatvecDiagScale( HYPRE_Complex       *alpha,
+                              hypre_SStructMatrix *A,
+                              hypre_SStructVector *x,
+                              HYPRE_Complex       *beta,
+                              hypre_SStructVector *y )
+{
+   HYPRE_Int                 nparts = hypre_SStructMatrixNParts(A);
+
+   hypre_SStructPMatrix     *pA;
+   hypre_SStructPVector     *px, *py;
+
+   hypre_ParCSRMatrix       *parcsrA = hypre_SStructMatrixParCSRMatrix(A);
+   hypre_ParVector          *parx;
+   hypre_ParVector          *pary;
+
+   HYPRE_Int                 A_object_type= hypre_SStructMatrixObjectType(A);
+   HYPRE_Int                 x_object_type= hypre_SStructVectorObjectType(x);
+   HYPRE_Int                 y_object_type= hypre_SStructVectorObjectType(y);
+   HYPRE_Int                 part;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   /* Safety checks */
+   if (x_object_type != A_object_type)
+   {
+      hypre_error_in_arg(1);
+      hypre_error_in_arg(2);
+
+      HYPRE_ANNOTATE_FUNC_END;
+      return hypre_error_flag;
+   }
+   if (x_object_type != y_object_type)
+   {
+      hypre_error_in_arg(2);
+      hypre_error_in_arg(4);
+
+      HYPRE_ANNOTATE_FUNC_END;
+      return hypre_error_flag;
+   }
+
+   if (x_object_type == HYPRE_SSTRUCT || x_object_type == HYPRE_STRUCT)
+   {
+      for (part = 0; part < nparts; part++)
+      {
+         pA = hypre_SStructMatrixPMatrix(A, part);
+         px = hypre_SStructVectorPVector(x, part);
+         py = hypre_SStructVectorPVector(y, part);
+
+         if (beta == NULL)
+         {
+            hypre_SStructPMatvecDiagScale(alpha[part], pA, px, 0.0, py);
+         }
+         else
+         {
+            hypre_SStructPMatvecDiagScale(alpha[part], pA, px, beta[part], py);
+         }
+      } /* loop on parts */
+   }
+   else  /* x_object_type == HYPRE_PARCSR */
+   {
+      hypre_SStructVectorConvert(x, &parx);
+      hypre_SStructVectorConvert(y, &pary);
+
+      if (beta == NULL)
+      {
+         hypre_ParCSRMatrixMatvecDiagScale(alpha[0], parcsrA, parx, 0.0, pary);
+      }
+      else
+      {
+         hypre_ParCSRMatrixMatvecDiagScale(alpha[0], parcsrA, parx, beta[0], pary);
+      }
+
+      hypre_SStructVectorRestore(x, parx);
+      hypre_SStructVectorRestore(y, pary);
+   }
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
