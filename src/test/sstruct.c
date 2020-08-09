@@ -2171,6 +2171,7 @@ PrintUsage( char *progname,
       hypre_printf("                        28 - PCG with diagonal scaling\n");
       hypre_printf("                        30 - GMRES with SMG split precond\n");
       hypre_printf("                        31 - GMRES with PFMG split precond\n");
+      hypre_printf("                        33 - GMRES with SysPFMG precond\n");
       hypre_printf("                        34 - GMRES with SSAMG precond\n");
       hypre_printf("                        38 - GMRES with diagonal scaling\n");
       hypre_printf("                        39 - GMRES\n");
@@ -2179,6 +2180,8 @@ PrintUsage( char *progname,
       hypre_printf("                        42 - GMRES with ParaSails precond\n");
       hypre_printf("                        50 - BiCGSTAB with SMG split precond\n");
       hypre_printf("                        51 - BiCGSTAB with PFMG split precond\n");
+      hypre_printf("                        53 - BiCGSTAB with SysPFMG precond\n");
+      hypre_printf("                        54 - BiCGSTAB with SSAMG precond\n");
       hypre_printf("                        58 - BiCGSTAB with diagonal scaling\n");
       hypre_printf("                        59 - BiCGSTAB\n");
       hypre_printf("                        60 - BiCGSTAB with BoomerAMG precond\n");
@@ -2186,6 +2189,8 @@ PrintUsage( char *progname,
       hypre_printf("                        62 - BiCGSTAB with ParaSails precond\n");
       hypre_printf("                        70 - Flexible GMRES with SMG split precond\n");
       hypre_printf("                        71 - Flexible GMRES with PFMG split precond\n");
+      hypre_printf("                        73 - Flexible GMRES with SysPFMG precond\n");
+      hypre_printf("                        74 - Flexible GMRES with SSAMG precond\n");
       hypre_printf("                        78 - Flexible GMRES with diagonal scaling\n");
       hypre_printf("                        80 - Flexible GMRES with BoomerAMG precond\n");
       hypre_printf("                        90 - LGMRES with BoomerAMG precond\n");
@@ -3895,7 +3900,6 @@ main( hypre_int argc,
                               (HYPRE_PtrToSolverFcn) HYPRE_SStructSplitSetup,
                               (HYPRE_Solver) precond);
       }
-
       else if (solver_id == 13)
       {
          /* use SysPFMG solver as preconditioner */
@@ -3912,14 +3916,13 @@ main( hypre_int argc,
          HYPRE_SStructSysPFMGSetNumPreRelax(precond, n_pre);
          HYPRE_SStructSysPFMGSetNumPostRelax(precond, n_post);
          HYPRE_SStructSysPFMGSetSkipRelax(precond, skip);
-         /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
+         /*HYPRE_SStructSysPFMGSetDxyz(precond, dxyz);*/
          HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
                               (HYPRE_PtrToSolverFcn) HYPRE_SStructSysPFMGSolve,
                               (HYPRE_PtrToSolverFcn) HYPRE_SStructSysPFMGSetup,
                               (HYPRE_Solver) precond);
 
       }
-
       else if (solver_id == 14)
       {
          /* use SSAMG solver as preconditioner */
@@ -3927,7 +3930,7 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetMaxIter(precond, 1);
          HYPRE_SStructSSAMGSetMaxLevels(precond, maxLevels);
          HYPRE_SStructSSAMGSetTol(precond, 0.0);
-         HYPRE_StructSMGSetZeroGuess(struct_precond);
+         HYPRE_SStructSSAMGSetZeroGuess(precond);
          HYPRE_SStructSSAMGSetRelaxType(precond, relax);
          if (usr_jacobi_weight)
          {
@@ -3943,7 +3946,6 @@ main( hypre_int argc,
                               (HYPRE_PtrToSolverFcn) HYPRE_SStructSSAMGSetup,
                               (HYPRE_Solver) precond);
       }
-
       else if (solver_id == 18)
       {
          /* use diagonal scaling as preconditioner */
@@ -3985,6 +3987,10 @@ main( hypre_int argc,
       {
          HYPRE_SStructSysPFMGDestroy(precond);
       }
+      else if (solver_id == 14)
+      {
+         HYPRE_SStructSSAMGDestroy(precond);
+      }
    }
 
    /* begin lobpcg */
@@ -3994,7 +4000,7 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
 
    if ( lobpcgFlag && ( solver_id < 10 || solver_id >= 20 ) && verbosity )
-      hypre_printf("\nLOBPCG works with solvers 10, 11, 13 and 18 only\n");
+      hypre_printf("\nLOBPCG works with solvers 10, 11, 13, 14 and 18 only\n");
 
    if ( lobpcgFlag && (solver_id >= 10) && (solver_id < 20) ) {
 
@@ -4006,8 +4012,8 @@ main( hypre_int argc,
       if (myid != 0)
          verbosity = 0;
 
-      if ( pcgIterations > 0 ) {
-
+      if ( pcgIterations > 0 )
+      {
          time_index = hypre_InitializeTiming("PCG Setup");
          hypre_BeginTiming(time_index);
 
@@ -4038,7 +4044,6 @@ main( hypre_int argc,
                                  (HYPRE_PtrToSolverFcn) HYPRE_SStructSplitSetup,
                                  (HYPRE_Solver) precond);
 	 }
-
          else if (solver_id == 13)
 	 {
             /* use SysPFMG solver as preconditioner */
@@ -4051,13 +4056,35 @@ main( hypre_int argc,
             HYPRE_SStructSysPFMGSetNumPreRelax(precond, n_pre);
             HYPRE_SStructSysPFMGSetNumPostRelax(precond, n_post);
             HYPRE_SStructSysPFMGSetSkipRelax(precond, skip);
-            /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
+            /*HYPRE_SStructSysPFMGSetDxyz(precond, dxyz);*/
             HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
                                  (HYPRE_PtrToSolverFcn) HYPRE_SStructSysPFMGSolve,
                                  (HYPRE_PtrToSolverFcn) HYPRE_SStructSysPFMGSetup,
                                  (HYPRE_Solver) precond);
-
 	 }
+         else if (solver_id == 14)
+         {
+            /* use SSAMG solver as preconditioner */
+            HYPRE_SStructSSAMGCreate(hypre_MPI_COMM_WORLD, &precond);
+            HYPRE_SStructSSAMGSetMaxIter(precond, 1);
+            HYPRE_SStructSSAMGSetMaxLevels(precond, maxLevels);
+            HYPRE_SStructSSAMGSetTol(precond, 0.0);
+            HYPRE_SStructSSAMGSetZeroGuess(precond);
+            HYPRE_SStructSSAMGSetRelaxType(precond, relax);
+            if (usr_jacobi_weight)
+            {
+               HYPRE_SStructSSAMGSetRelaxWeight(precond, jacobi_weight);
+            }
+            HYPRE_SStructSSAMGSetNumPreRelax(precond, n_pre);
+            HYPRE_SStructSSAMGSetNumPostRelax(precond, n_post);
+            HYPRE_SStructSSAMGSetPrintLevel(precond, 1);
+            HYPRE_SStructSSAMGSetLogging(precond, 1);
+
+            HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
+                                 (HYPRE_PtrToSolverFcn) HYPRE_SStructSSAMGSolve,
+                                 (HYPRE_PtrToSolverFcn) HYPRE_SStructSSAMGSetup,
+                                 (HYPRE_Solver) precond);
+         }
          else if (solver_id == 18)
 	 {
             /* use diagonal scaling as preconditioner */
@@ -4184,14 +4211,17 @@ main( hypre_int argc,
 	 {
             HYPRE_SStructSysPFMGDestroy(precond);
 	 }
+         else if (solver_id == 14)
+	 {
+            HYPRE_SStructSSAMGDestroy(precond);
+	 }
 
          HYPRE_LOBPCGDestroy((HYPRE_Solver)lobpcg_solver);
          mv_MultiVectorDestroy( eigenvectors );
          free( eigenvalues );
-
       }
-      else {
-
+      else
+      {
          time_index = hypre_InitializeTiming("LOBPCG Setup");
          hypre_BeginTiming(time_index);
 
@@ -4220,7 +4250,6 @@ main( hypre_int argc,
                                     (HYPRE_PtrToSolverFcn) HYPRE_SStructSplitSetup,
                                     (HYPRE_Solver) precond);
 	 }
-
          else if (solver_id == 13)
 	 {
             /* use SysPFMG solver as preconditioner */
@@ -4233,13 +4262,35 @@ main( hypre_int argc,
             HYPRE_SStructSysPFMGSetNumPreRelax(precond, n_pre);
             HYPRE_SStructSysPFMGSetNumPostRelax(precond, n_post);
             HYPRE_SStructSysPFMGSetSkipRelax(precond, skip);
-            /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
+            /*HYPRE_SStructSysPFMGSetDxyz(precond, dxyz);*/
             HYPRE_LOBPCGSetPrecond( (HYPRE_Solver) solver,
                                     (HYPRE_PtrToSolverFcn) HYPRE_SStructSysPFMGSolve,
                                     (HYPRE_PtrToSolverFcn) HYPRE_SStructSysPFMGSetup,
                                     (HYPRE_Solver) precond);
-
 	 }
+         else if (solver_id == 14)
+         {
+            /* use SSAMG solver as preconditioner */
+            HYPRE_SStructSSAMGCreate(hypre_MPI_COMM_WORLD, &precond);
+            HYPRE_SStructSSAMGSetMaxIter(precond, 1);
+            HYPRE_SStructSSAMGSetMaxLevels(precond, maxLevels);
+            HYPRE_SStructSSAMGSetTol(precond, 0.0);
+            HYPRE_SStructSSAMGSetZeroGuess(precond);
+            HYPRE_SStructSSAMGSetRelaxType(precond, relax);
+            if (usr_jacobi_weight)
+            {
+               HYPRE_SStructSSAMGSetRelaxWeight(precond, jacobi_weight);
+            }
+            HYPRE_SStructSSAMGSetNumPreRelax(precond, n_pre);
+            HYPRE_SStructSSAMGSetNumPostRelax(precond, n_post);
+            HYPRE_SStructSSAMGSetPrintLevel(precond, 1);
+            HYPRE_SStructSSAMGSetLogging(precond, 1);
+
+            HYPRE_LOBPCGSetPrecond( (HYPRE_Solver) solver,
+                                    (HYPRE_PtrToSolverFcn) HYPRE_SStructSSAMGSolve,
+                                    (HYPRE_PtrToSolverFcn) HYPRE_SStructSSAMGSetup,
+                                    (HYPRE_Solver) precond);
+         }
          else if (solver_id == 18)
 	 {
             /* use diagonal scaling as preconditioner */
@@ -4353,6 +4404,10 @@ main( hypre_int argc,
          else if (solver_id == 13)
 	 {
             HYPRE_SStructSysPFMGDestroy(precond);
+	 }
+         else if (solver_id == 14)
+	 {
+            HYPRE_SStructSSAMGDestroy(precond);
 	 }
 
          mv_MultiVectorDestroy( eigenvectors );
@@ -4516,7 +4571,24 @@ main( hypre_int argc,
                                 (HYPRE_PtrToSolverFcn) HYPRE_SStructSplitSetup,
                                 (HYPRE_Solver) precond );
       }
-
+      else if (solver_id == 33)
+      {
+         /* use SysPFMG solver as preconditioner */
+         HYPRE_SStructSysPFMGCreate(hypre_MPI_COMM_WORLD, &precond);
+         HYPRE_SStructSysPFMGSetMaxIter(precond, 1);
+         HYPRE_SStructSysPFMGSetTol(precond, 0.0);
+         HYPRE_SStructSysPFMGSetZeroGuess(precond);
+         /* weighted Jacobi = 1; red-black GS = 2 */
+         HYPRE_SStructSysPFMGSetRelaxType(precond, 1);
+         HYPRE_SStructSysPFMGSetNumPreRelax(precond, n_pre);
+         HYPRE_SStructSysPFMGSetNumPostRelax(precond, n_post);
+         HYPRE_SStructSysPFMGSetSkipRelax(precond, skip);
+         /*HYPRE_SStructSysPFMGSetDxyz(precond, dxyz);*/
+         HYPRE_GMRESSetPrecond( (HYPRE_Solver) solver,
+                                (HYPRE_PtrToSolverFcn) HYPRE_SStructSysPFMGSolve,
+                                (HYPRE_PtrToSolverFcn) HYPRE_SStructSysPFMGSetup,
+                                (HYPRE_Solver) precond);
+      }
       else if (solver_id == 34)
       {
          /* use SSAMG solver as preconditioner */
@@ -4524,6 +4596,7 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetMaxIter(precond, 1);
          HYPRE_SStructSSAMGSetMaxLevels(precond, maxLevels);
          HYPRE_SStructSSAMGSetTol(precond, 0.0);
+         HYPRE_SStructSSAMGSetZeroGuess(precond);
          HYPRE_SStructSSAMGSetRelaxType(precond, relax);
          if (usr_jacobi_weight)
          {
@@ -4539,7 +4612,6 @@ main( hypre_int argc,
                                 (HYPRE_PtrToSolverFcn) HYPRE_SStructSSAMGSetup,
                                 (HYPRE_Solver) precond);
       }
-
       else if (solver_id == 38)
       {
          /* use diagonal scaling as preconditioner */
@@ -4576,6 +4648,14 @@ main( hypre_int argc,
       if ((solver_id == 30) || (solver_id == 31))
       {
          HYPRE_SStructSplitDestroy(precond);
+      }
+      else if (solver_id == 33)
+      {
+         HYPRE_SStructSysPFMGDestroy(precond);
+      }
+      else if (solver_id == 34)
+      {
+         HYPRE_SStructSSAMGDestroy(precond);
       }
    }
 
@@ -4704,7 +4784,47 @@ main( hypre_int argc,
                                    (HYPRE_PtrToSolverFcn) HYPRE_SStructSplitSetup,
                                    (HYPRE_Solver) precond );
       }
+      else if (solver_id == 53)
+      {
+         /* use SysPFMG solver as preconditioner */
+         HYPRE_SStructSysPFMGCreate(hypre_MPI_COMM_WORLD, &precond);
+         HYPRE_SStructSysPFMGSetMaxIter(precond, 1);
+         HYPRE_SStructSysPFMGSetTol(precond, 0.0);
+         HYPRE_SStructSysPFMGSetZeroGuess(precond);
+         /* weighted Jacobi = 1; red-black GS = 2 */
+         HYPRE_SStructSysPFMGSetRelaxType(precond, 1);
+         HYPRE_SStructSysPFMGSetNumPreRelax(precond, n_pre);
+         HYPRE_SStructSysPFMGSetNumPostRelax(precond, n_post);
+         HYPRE_SStructSysPFMGSetSkipRelax(precond, skip);
+         /*HYPRE_SStructSysPFMGSetDxyz(precond, dxyz);*/
+         HYPRE_BiCGSTABSetPrecond( (HYPRE_Solver) solver,
+                                   (HYPRE_PtrToSolverFcn) HYPRE_SStructSysPFMGSolve,
+                                   (HYPRE_PtrToSolverFcn) HYPRE_SStructSysPFMGSetup,
+                                   (HYPRE_Solver) precond);
+      }
+      else if (solver_id == 54)
+      {
+         /* use SSAMG solver as preconditioner */
+         HYPRE_SStructSSAMGCreate(hypre_MPI_COMM_WORLD, &precond);
+         HYPRE_SStructSSAMGSetMaxIter(precond, 1);
+         HYPRE_SStructSSAMGSetMaxLevels(precond, maxLevels);
+         HYPRE_SStructSSAMGSetTol(precond, 0.0);
+         HYPRE_SStructSSAMGSetZeroGuess(precond);
+         HYPRE_SStructSSAMGSetRelaxType(precond, relax);
+         if (usr_jacobi_weight)
+         {
+            HYPRE_SStructSSAMGSetRelaxWeight(precond, jacobi_weight);
+         }
+         HYPRE_SStructSSAMGSetNumPreRelax(precond, n_pre);
+         HYPRE_SStructSSAMGSetNumPostRelax(precond, n_post);
+         HYPRE_SStructSSAMGSetPrintLevel(precond, 1);
+         HYPRE_SStructSSAMGSetLogging(precond, 1);
 
+         HYPRE_BiCGSTABSetPrecond( (HYPRE_Solver) solver,
+                                   (HYPRE_PtrToSolverFcn) HYPRE_SStructSSAMGSolve,
+                                   (HYPRE_PtrToSolverFcn) HYPRE_SStructSSAMGSetup,
+                                   (HYPRE_Solver) precond);
+      }
       else if (solver_id == 58)
       {
          /* use diagonal scaling as preconditioner */
@@ -4741,6 +4861,14 @@ main( hypre_int argc,
       if ((solver_id == 50) || (solver_id == 51))
       {
          HYPRE_SStructSplitDestroy(precond);
+      }
+      else if (solver_id == 53)
+      {
+         HYPRE_SStructSysPFMGDestroy(precond);
+      }
+      else if (solver_id == 54)
+      {
+         HYPRE_SStructSSAMGDestroy(precond);
       }
    }
 
@@ -4784,7 +4912,6 @@ main( hypre_int argc,
                                   (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
                                   par_precond);
       }
-
       else if (solver_id == 62)
       {
          /* use ParaSails as preconditioner */
@@ -4870,7 +4997,47 @@ main( hypre_int argc,
                                     (HYPRE_PtrToSolverFcn) HYPRE_SStructSplitSetup,
                                     (HYPRE_Solver) precond );
       }
+      else if (solver_id == 73)
+      {
+         /* use SysPFMG solver as preconditioner */
+         HYPRE_SStructSysPFMGCreate(hypre_MPI_COMM_WORLD, &precond);
+         HYPRE_SStructSysPFMGSetMaxIter(precond, 1);
+         HYPRE_SStructSysPFMGSetTol(precond, 0.0);
+         HYPRE_SStructSysPFMGSetZeroGuess(precond);
+         /* weighted Jacobi = 1; red-black GS = 2 */
+         HYPRE_SStructSysPFMGSetRelaxType(precond, 1);
+         HYPRE_SStructSysPFMGSetNumPreRelax(precond, n_pre);
+         HYPRE_SStructSysPFMGSetNumPostRelax(precond, n_post);
+         HYPRE_SStructSysPFMGSetSkipRelax(precond, skip);
+         /*HYPRE_SStructSysPFMGSetDxyz(precond, dxyz);*/
+         HYPRE_FlexGMRESSetPrecond( (HYPRE_Solver) solver,
+                                    (HYPRE_PtrToSolverFcn) HYPRE_SStructSysPFMGSolve,
+                                    (HYPRE_PtrToSolverFcn) HYPRE_SStructSysPFMGSetup,
+                                    (HYPRE_Solver) precond);
+      }
+      else if (solver_id == 74)
+      {
+         /* use SSAMG solver as preconditioner */
+         HYPRE_SStructSSAMGCreate(hypre_MPI_COMM_WORLD, &precond);
+         HYPRE_SStructSSAMGSetMaxIter(precond, 1);
+         HYPRE_SStructSSAMGSetMaxLevels(precond, maxLevels);
+         HYPRE_SStructSSAMGSetTol(precond, 0.0);
+         HYPRE_SStructSSAMGSetZeroGuess(precond);
+         HYPRE_SStructSSAMGSetRelaxType(precond, relax);
+         if (usr_jacobi_weight)
+         {
+            HYPRE_SStructSSAMGSetRelaxWeight(precond, jacobi_weight);
+         }
+         HYPRE_SStructSSAMGSetNumPreRelax(precond, n_pre);
+         HYPRE_SStructSSAMGSetNumPostRelax(precond, n_post);
+         HYPRE_SStructSSAMGSetPrintLevel(precond, 1);
+         HYPRE_SStructSSAMGSetLogging(precond, 1);
 
+         HYPRE_FlexGMRESSetPrecond( (HYPRE_Solver) solver,
+                                    (HYPRE_PtrToSolverFcn) HYPRE_SStructSSAMGSolve,
+                                    (HYPRE_PtrToSolverFcn) HYPRE_SStructSSAMGSetup,
+                                    (HYPRE_Solver) precond);
+      }
       else if (solver_id == 78)
       {
          /* use diagonal scaling as preconditioner */
@@ -4907,6 +5074,14 @@ main( hypre_int argc,
       if ((solver_id == 70) || (solver_id == 71))
       {
          HYPRE_SStructSplitDestroy(precond);
+      }
+      else if (solver_id == 73)
+      {
+         HYPRE_SStructSysPFMGDestroy(precond);
+      }
+      else if (solver_id == 74)
+      {
+         HYPRE_SStructSSAMGDestroy(precond);
       }
    }
 
