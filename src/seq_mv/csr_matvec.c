@@ -78,11 +78,11 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
     *  ierr = 2 if the length of Y doesn't equal the number of rows
     *  of A, and ierr = 3 if both are true.
     *
-    *  Because temporary vectors are often used in Matvec, none of 
+    *  Because temporary vectors are often used in Matvec, none of
     *  these conditions terminates processing, and the ierr flag
     *  is informational only.
     *--------------------------------------------------------------------*/
- 
+
    hypre_assert( num_vectors == hypre_VectorNumVectors(y) );
    hypre_assert( num_vectors == hypre_VectorNumVectors(b) );
 
@@ -123,9 +123,9 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
    /*-----------------------------------------------------------------------
     * y = (beta/alpha)*y
     *-----------------------------------------------------------------------*/
-   
+
    temp = beta / alpha;
-   
+
 /* use rownnz pointer to do the A*x multiplication  when num_rownnz is smaller than num_rows */
 
    if (num_rownnz < xpar*(num_rows) || num_vectors > 1)
@@ -133,7 +133,7 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
       /*-----------------------------------------------------------------------
        * y = (beta/alpha)*y
        *-----------------------------------------------------------------------*/
-     
+
       if (temp != 1.0)
       {
          if (temp == 0.0)
@@ -191,7 +191,7 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
                for ( j=0; j<num_vectors; ++j )
                {
                   tempx = 0;
-                  for (jj = A_i[m]; jj < A_i[m+1]; jj++) 
+                  for (jj = A_i[m]; jj < A_i[m+1]; jj++)
                      tempx +=  A_data[jj] * x_data[ j*vecstride_x + A_j[jj]*idxstride_x ];
                   y_data[ j*vecstride_y + m*idxstride_y] += tempx;
                }
@@ -455,7 +455,7 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
 
    HYPRE_Complex    *y_data_expand;
    HYPRE_Int         my_thread_num = 0, offset = 0;
-   
+
    HYPRE_Int         i, j, jv, jj;
    HYPRE_Int         num_threads;
 
@@ -466,16 +466,16 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  MatvecT returns ierr = 1 if
     *  length of X doesn't equal the number of rows of A,
-    *  ierr = 2 if the length of Y doesn't equal the number of 
+    *  ierr = 2 if the length of Y doesn't equal the number of
     *  columns of A, and ierr = 3 if both are true.
     *
-    *  Because temporary vectors are often used in MatvecT, none of 
+    *  Because temporary vectors are often used in MatvecT, none of
     *  these conditions terminates processing, and the ierr flag
     *  is informational only.
     *--------------------------------------------------------------------*/
 
    hypre_assert( num_vectors == hypre_VectorNumVectors(y) );
- 
+
    if (num_rows != x_size)
       ierr = 1;
 
@@ -510,7 +510,7 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
     *-----------------------------------------------------------------------*/
 
    temp = beta / alpha;
-   
+
    if (temp != 1.0)
    {
       if (temp == 0.0)
@@ -545,7 +545,7 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel private(i,jj,j,my_thread_num,offset)
 #endif
-         {                                      
+         {
             my_thread_num = hypre_GetThreadNum();
             offset =  y_size*my_thread_num;
 #ifdef HYPRE_USING_OPENMP
@@ -560,7 +560,7 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
                }
             }
 
-            /* implied barrier (for threads)*/           
+            /* implied barrier (for threads)*/
 #ifdef HYPRE_USING_OPENMP
 #pragma omp for HYPRE_SMP_SCHEDULE
 #endif
@@ -569,7 +569,7 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
                for (j = 0; j < num_threads; j++)
                {
                   y_data[i] += y_data_expand[j*y_size + i];
-                  
+
                }
             }
 
@@ -595,7 +595,7 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
       hypre_TFree(y_data_expand);
 
    }
-   else 
+   else
    {
       for (i = 0; i < num_rows; i++)
       {
@@ -764,4 +764,186 @@ hypre_CSRMatrixMatvec_FF( HYPRE_Complex    alpha,
    }
 
    return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixMatvecDiagScale
+ *
+ * y = alpha*inv(A_D)*x + beta*y
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_CSRMatrixMatvecDiagScale( HYPRE_Complex     alpha,
+                                hypre_CSRMatrix  *A,
+                                hypre_Vector     *x,
+                                HYPRE_Complex     beta,
+                                hypre_Vector     *y )
+{
+   HYPRE_Int          num_rows    = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int          num_cols    = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int          x_size      = hypre_VectorSize(x);
+   HYPRE_Int          y_size      = hypre_VectorSize(y);
+   HYPRE_Int          num_vectors = hypre_VectorNumVectors(x);
+   HYPRE_Int          x_idxstride = hypre_VectorIndexStride(x);
+   HYPRE_Int          x_vecstride = hypre_VectorVectorStride(x);
+   HYPRE_Int          y_idxstride = hypre_VectorIndexStride(y);
+   HYPRE_Int          y_vecstride = hypre_VectorVectorStride(y);
+   HYPRE_Complex     *x_data      = hypre_VectorData(x);
+   HYPRE_Complex     *y_data      = hypre_VectorData(y);
+   HYPRE_Complex     *A_data      = hypre_CSRMatrixData(A);
+   HYPRE_Int         *A_i         = hypre_CSRMatrixI(A);
+
+   HYPRE_Int          i, j, k0, k1;
+
+   /* Safety checks */
+   if (num_vectors != hypre_VectorNumVectors(y))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "multivec x and y do not match");
+      return hypre_error_flag;
+   }
+
+   if (num_rows != y_size)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "A and y do not match");
+      return hypre_error_flag;
+   }
+
+   if (num_cols != x_size)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "A and x do not match");
+      return hypre_error_flag;
+   }
+
+   if (num_rows != num_cols)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "A is not square");
+      return hypre_error_flag;
+   }
+
+   /* y = alpha*inv(A_D)*x + beta*y */
+   if (beta == 0.0)
+   {
+      if (alpha == 1.0)
+      {
+         if (num_vectors == 1)
+         {
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+            for (i = 0; i < num_rows; i++)
+            {
+               y_data[i] = x_data[i] / A_data[A_i[i]];
+            }
+         }
+         else
+         {
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,j,k0,k1) HYPRE_SMP_SCHEDULE
+#endif
+            for (i = 0; i < num_rows; i++)
+            {
+               k0 = i*y_idxstride;
+               k1 = i*x_idxstride;
+               for (j = 0; j < num_vectors; ++j)
+               {
+                  y_data[j*y_vecstride + k0] = x_data[j*x_vecstride + k1] /
+                                               A_data[A_i[i]];
+               }
+            }
+         }
+      }
+      else
+      {
+         if (num_vectors == 1)
+         {
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+            for (i = 0; i < num_rows; i++)
+            {
+               y_data[i] = alpha * x_data[i] / A_data[A_i[i]];
+            }
+         }
+         else
+         {
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,j,k0,k1) HYPRE_SMP_SCHEDULE
+#endif
+            for (i = 0; i < num_rows; i++)
+            {
+               k0 = i*y_idxstride;
+               k1 = i*x_idxstride;
+               for (j = 0; j < num_vectors; ++j)
+               {
+                  y_data[j*y_vecstride + k0] = alpha * x_data[j*x_vecstride + k1] /
+                                               A_data[A_i[i]];
+               }
+            }
+         }
+      } /* if (alpha == 1.0) */
+   }
+   else
+   {
+      if (alpha == 1.0)
+      {
+         if (num_vectors == 1)
+         {
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+            for (i = 0; i < num_rows; i++)
+            {
+               y_data[i] = x_data[i] / A_data[A_i[i]] + beta * y_data[i];
+            }
+         }
+         else
+         {
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,j,k0,k1) HYPRE_SMP_SCHEDULE
+#endif
+            for (i = 0; i < num_rows; i++)
+            {
+               k0 = i*y_idxstride;
+               k1 = i*x_idxstride;
+               for (j = 0; j < num_vectors; ++j)
+               {
+                  y_data[j*y_vecstride + k0] = beta * y_data[j*y_vecstride + k0] +
+                                               x_data[j*x_vecstride + k1] /
+                                               A_data[A_i[i]];
+               }
+            }
+         }
+      }
+      else
+      {
+         if (num_vectors == 1)
+         {
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+            for (i = 0; i < num_rows; i++)
+            {
+               y_data[i] = alpha * x_data[i] / A_data[A_i[i]] + beta * y_data[i];
+            }
+         }
+         else
+         {
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,j,k0,k1) HYPRE_SMP_SCHEDULE
+#endif
+            for (i = 0; i < num_rows; i++)
+            {
+               k0 = i*y_idxstride;
+               k1 = i*x_idxstride;
+               for (j = 0; j < num_vectors; ++j)
+               {
+                  y_data[j*y_vecstride + k0] =  beta * y_data[j*y_vecstride + k0] +
+                                               alpha * x_data[j*x_vecstride + k1] /
+                                               A_data[A_i[i]];
+               }
+            }
+         }
+      } /* if (alpha == 1.0) */
+   } /* if (beta == 0.0) */
+
+   return hypre_error_flag;
 }
