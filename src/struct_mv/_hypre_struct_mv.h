@@ -2444,11 +2444,12 @@ hypre_StructMatrix *hypre_StructMatrixCreateMask ( hypre_StructMatrix *matrix , 
 /* struct_matvec.c */
 void *hypre_StructMatvecCreate ( void );
 HYPRE_Int hypre_StructMatvecSetTranspose ( void *matvec_vdata , HYPRE_Int transpose );
-HYPRE_Int hypre_StructMatvecSetSkipDiag ( void *matvec_vdata, HYPRE_Int skip_diag );
+HYPRE_Int hypre_StructMatvecSetSkipDiag ( void *matvec_vdata , HYPRE_Int skip_diag );
 HYPRE_Int hypre_StructMatvecSetup ( void *matvec_vdata , hypre_StructMatrix *A , hypre_StructVector *x );
 HYPRE_Int hypre_StructMatvecCompute ( void *matvec_vdata , HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );
-HYPRE_Int hypre_StructMatvecRectglCompute( void *matvec_vdata, HYPRE_Complex alpha, hypre_StructMatrix *A, hypre_StructVector *x, HYPRE_Complex beta, hypre_StructVector *y );
-HYPRE_Int hypre_StructMatvecSquareCompute( void *matvec_vdata, HYPRE_Complex alpha, hypre_StructMatrix *A, hypre_StructVector *x, HYPRE_Complex beta, hypre_StructVector *y );
+HYPRE_Int hypre_StructMatvecRectglCompute ( void *matvec_vdata , HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );
+HYPRE_Int hypre_StructMatvecSquareCompute ( void *matvec_vdata , HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );
+HYPRE_Int hypre_StructMatvecDiagScale ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector  *y );
 HYPRE_Int hypre_StructMatvecDestroy ( void *matvec_vdata );
 HYPRE_Int hypre_StructMatvec ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );
 HYPRE_Int hypre_StructMatvecT ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );

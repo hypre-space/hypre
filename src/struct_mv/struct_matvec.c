@@ -659,7 +659,7 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
    HYPRE_Complex            temp;
    HYPRE_Int                compute_i, i, j;
 
-   HYPRE_Complex           *Ap,   *xp,   *yp;
+   HYPRE_Complex           *xp,   *yp;
    HYPRE_Complex           *Ap0,  *Ap1,  *Ap2;
    HYPRE_Complex           *Ap3,  *Ap4,  *Ap5;
    HYPRE_Complex           *Ap6,  *Ap7,  *Ap8;
@@ -1279,6 +1279,190 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
    }
 
    HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_StructMatvecDiagScale
+ *
+ * y = alpha*inv(A_D)*x + beta*y
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_StructMatvecDiagScale( HYPRE_Complex        alpha,
+                             hypre_StructMatrix  *A,
+                             hypre_StructVector  *x,
+                             HYPRE_Complex        beta,
+                             hypre_StructVector  *y )
+{
+   HYPRE_Int          ndim = hypre_StructMatrixNDim(A);
+
+   hypre_BoxArray    *boxes;
+   hypre_Box         *box;
+   hypre_Box         *A_data_box;
+   hypre_Box         *x_data_box;
+   hypre_Box         *y_data_box;
+
+   HYPRE_Complex     *Ap, *xp, *yp;
+   HYPRE_Int          Ai, xi, yi;
+   hypre_Index        ustride, loop_size;
+   hypre_IndexRef     start;
+
+   HYPRE_Int          diag, i;
+
+   hypre_SetIndex(ustride, 1);
+
+   diag  = hypre_StructStencilDiagEntry(hypre_StructMatrixStencil(A));
+   boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
+   hypre_ForBoxI(i, boxes)
+   {
+      box = hypre_BoxArrayBox(boxes, i);
+
+      A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+      x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+      y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
+
+      Ap = hypre_StructMatrixBoxData(A, i, diag);
+      xp = hypre_StructVectorBoxData(x, i);
+      yp = hypre_StructVectorBoxData(y, i);
+
+      start = hypre_BoxIMin(box);
+      hypre_BoxGetSize(box, loop_size);
+      if (beta == 0.0)
+      {
+         if (alpha == 1.0)
+         {
+            if (hypre_StructMatrixConstEntry(A, diag))
+            {
+               hypre_BoxLoop2Begin(ndim, loop_size,
+                                   x_data_box, start, ustride, xi,
+                                   y_data_box, start, ustride, yi);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
+#endif
+               hypre_BoxLoop2For(xi, yi)
+               {
+                  yp[yi] = xp[yi] / Ap[0];
+               }
+               hypre_BoxLoop2End(xi, yi);
+            }
+            else
+            {
+               hypre_BoxLoop3Begin(ndim, loop_size,
+                                   A_data_box, start, ustride, Ai,
+                                   x_data_box, start, ustride, xi,
+                                   y_data_box, start, ustride, yi);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#endif
+               hypre_BoxLoop3For(Ai, xi, yi)
+               {
+                  yp[yi] = xp[yi] / Ap[Ai];
+               }
+               hypre_BoxLoop3End(Ai, xi, yi);
+            } /* if constant coefficient*/
+         }
+         else
+         {
+            if (hypre_StructMatrixConstEntry(A, diag))
+            {
+               hypre_BoxLoop2Begin(ndim, loop_size,
+                                   x_data_box, start, ustride, xi,
+                                   y_data_box, start, ustride, yi);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
+#endif
+               hypre_BoxLoop2For(xi, yi)
+               {
+                  yp[yi] = alpha * xp[yi] / Ap[0];
+               }
+               hypre_BoxLoop2End(xi, yi);
+            }
+            else
+            {
+               hypre_BoxLoop3Begin(ndim, loop_size,
+                                   A_data_box, start, ustride, Ai,
+                                   x_data_box, start, ustride, xi,
+                                   y_data_box, start, ustride, yi);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#endif
+               hypre_BoxLoop3For(Ai, xi, yi)
+               {
+                  yp[yi] = alpha * xp[yi] / Ap[Ai];
+               }
+               hypre_BoxLoop3End(Ai, xi, yi);
+            } /* if constant coefficient*/
+         } /* if (alpha == 1.0) */
+      }
+      else
+      {
+         if (alpha == 1.0)
+         {
+            if (hypre_StructMatrixConstEntry(A, diag))
+            {
+               hypre_BoxLoop2Begin(ndim, loop_size,
+                                   x_data_box, start, ustride, xi,
+                                   y_data_box, start, ustride, yi);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
+#endif
+               hypre_BoxLoop2For(xi, yi)
+               {
+                  yp[yi] = xp[yi] / Ap[0] + beta * yp[yi];
+               }
+               hypre_BoxLoop2End(xi, yi);
+            }
+            else
+            {
+               hypre_BoxLoop3Begin(ndim, loop_size,
+                                   A_data_box, start, ustride, Ai,
+                                   x_data_box, start, ustride, xi,
+                                   y_data_box, start, ustride, yi);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#endif
+               hypre_BoxLoop3For(Ai, xi, yi)
+               {
+                  yp[yi] = xp[yi] / Ap[Ai] + beta * yp[yi];
+               }
+               hypre_BoxLoop3End(Ai, xi, yi);
+            } /* if constant coefficient*/
+         }
+         else
+         {
+            if (hypre_StructMatrixConstEntry(A, diag))
+            {
+               hypre_BoxLoop2Begin(ndim, loop_size,
+                                   x_data_box, start, ustride, xi,
+                                   y_data_box, start, ustride, yi);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
+#endif
+               hypre_BoxLoop2For(xi, yi)
+               {
+                  yp[yi] = alpha * xp[yi] / Ap[0] + beta * yp[yi];
+               }
+               hypre_BoxLoop2End(xi, yi);
+            }
+            else
+            {
+               hypre_BoxLoop3Begin(ndim, loop_size,
+                                   A_data_box, start, ustride, Ai,
+                                   x_data_box, start, ustride, xi,
+                                   y_data_box, start, ustride, yi);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#endif
+               hypre_BoxLoop3For(Ai, xi, yi)
+               {
+                  yp[yi] = alpha * xp[yi] / Ap[Ai] + beta * yp[yi];
+               }
+               hypre_BoxLoop3End(Ai, xi, yi);
+            } /* if constant coefficient*/
+         } /* if (alpha == 1.0) */
+      } /* if (beta == 0.0) */
+   } /* loop on grid boxes */
 
    return hypre_error_flag;
 }
