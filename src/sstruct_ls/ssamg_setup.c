@@ -195,6 +195,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       hypre_SSAMGRelaxSetWeights(relax_data_l[l], relax_weights[l]);
       hypre_SSAMGRelaxSetType(relax_data_l[l], relax_type);
       hypre_SSAMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
+      hypre_SSAMGRelaxSetMatvecData(relax_data_l[l], matvec_data_l[l]);
       hypre_SSAMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
    }
 

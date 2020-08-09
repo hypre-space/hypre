@@ -24,6 +24,7 @@ typedef struct hypre_SSAMGRelaxData_struct
    HYPRE_Int               zero_guess;
    HYPRE_Real              tol;
    HYPRE_Real             *weights; /* nparts array */
+   HYPRE_Real             *mweights; /* nparts array */
 
    hypre_SStructMatrix    *A;
    hypre_SStructVector    *b;
@@ -57,6 +58,9 @@ typedef struct hypre_SSAMGRelaxData_struct
    /* log info (always logged) */
    HYPRE_Int               num_iterations;
    HYPRE_Int               time_index;
+
+   /* Matvec data structure */
+   void                   *matvec_vdata;
 
 } hypre_SSAMGRelaxData;
 
@@ -154,6 +158,7 @@ hypre_SSAMGRelaxDestroy( void *relax_vdata )
          hypre_TFree((relax_data -> Ap)[vi]);
       }
       hypre_TFree(relax_data -> Ap);
+      hypre_TFree(relax_data -> mweights);
       hypre_FinalizeTiming(relax_data -> time_index);
       hypre_TFree(relax_data);
    }
@@ -213,6 +218,20 @@ hypre_SSAMGRelaxSetWeights( void        *relax_vdata,
    hypre_SSAMGRelaxData *relax_data = (hypre_SSAMGRelaxData *) relax_vdata;
 
    (relax_data -> weights) = weights;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGRelaxSetMatvecData( void  *relax_vdata,
+                               void  *matvec_vdata )
+{
+   hypre_SSAMGRelaxData *relax_data = (hypre_SSAMGRelaxData *) relax_vdata;
+
+   (relax_data -> matvec_vdata) = matvec_vdata;
 
    return hypre_error_flag;
 }
@@ -435,6 +454,7 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
    HYPRE_Int              *nodeset_sizes   = (relax_data -> nodeset_sizes);
    hypre_Index            *nodeset_strides = (relax_data -> nodeset_strides);
    hypre_Index           **nodeset_indices = (relax_data -> nodeset_indices);
+   HYPRE_Real             *weights         = (relax_data -> weights);
    HYPRE_Int               ndim            = hypre_SStructMatrixNDim(A);
    HYPRE_Int               nparts          = hypre_SStructMatrixNParts(A);
 
@@ -458,6 +478,7 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
    HYPRE_Real           ***Ap;
    HYPRE_Real             *x_loc;
    HYPRE_Real            **A_loc;
+   HYPRE_Real             *mweights;
 
    hypre_StructStencil    *sstencil;
    hypre_Index            *sstencil_shape;
@@ -497,6 +518,16 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
       HYPRE_SStructVectorAssemble(t);
       (relax_data -> t) = t;
    }
+
+   /*----------------------------------------------------------
+    * Set mweights = (1 - weights)
+    *----------------------------------------------------------*/
+   mweights = hypre_TAlloc(HYPRE_Real, nparts);
+   for (part = 0; part < nparts; part++)
+   {
+      mweights[part] = 1.0 - weights[part];
+   }
+   (relax_data -> mweights) = mweights;
 
    /*----------------------------------------------------------
     * Allocate storage used to invert local diagonal blocks
@@ -739,9 +770,6 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * TODO:
- *       1) Do we really need nodesets?
- *       2) Can we reduce communication?
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -749,6 +777,33 @@ hypre_SSAMGRelax( void                *relax_vdata,
                   hypre_SStructMatrix *A,
                   hypre_SStructVector *b,
                   hypre_SStructVector *x )
+{
+   hypre_SSAMGRelaxData *relax_data   = (hypre_SSAMGRelaxData *) relax_vdata;
+   HYPRE_Int             num_nodesets = (relax_data -> num_nodesets);
+
+   if (num_nodesets == 1)
+   {
+      hypre_SSAMGRelaxMV(relax_vdata, A, b, x);
+   }
+   else
+   {
+      hypre_SSAMGRelaxGeneric(relax_vdata, A, b, x);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * TODO:
+ *       1) Do we really need nodesets?
+ *       2) Can we reduce communication?
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGRelaxGeneric( void                *relax_vdata,
+                         hypre_SStructMatrix *A,
+                         hypre_SStructVector *b,
+                         hypre_SStructVector *x )
 {
    hypre_SSAMGRelaxData    *relax_data        = (hypre_SSAMGRelaxData *) relax_vdata;
    HYPRE_Int                max_iter          = (relax_data -> max_iter);
@@ -1162,69 +1217,23 @@ hypre_SSAMGRelax( void                *relax_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SSAMGRelaxUnrolled( void                *relax_vdata,
-                          hypre_SStructMatrix *A,
-                          hypre_SStructVector *b,
-                          hypre_SStructVector *x )
+hypre_SSAMGRelaxMV( void                *relax_vdata,
+                    hypre_SStructMatrix *A,
+                    hypre_SStructVector *b,
+                    hypre_SStructVector *x )
 {
    hypre_SSAMGRelaxData    *relax_data        = (hypre_SSAMGRelaxData *) relax_vdata;
    HYPRE_Int                max_iter          = (relax_data -> max_iter);
    HYPRE_Int                zero_guess        = (relax_data -> zero_guess);
    HYPRE_Real              *weights           = (relax_data -> weights);
+   HYPRE_Real              *mweights          = (relax_data -> mweights);
    HYPRE_Int                num_nodesets      = (relax_data -> num_nodesets);
-   HYPRE_Int               *nodeset_ranks     = (relax_data -> nodeset_ranks);
-   hypre_Index             *nodeset_strides   = (relax_data -> nodeset_strides);
-   hypre_ComputePkg      ***compute_pkgs      = (relax_data -> compute_pkgs);
-   hypre_ComputePkg     ****svec_compute_pkgs = (relax_data -> svec_compute_pkgs);
-   hypre_CommHandle      ***comm_handle       = (relax_data -> comm_handle);
-   hypre_SStructVector     *t      = (relax_data -> t);
-   HYPRE_Int                ndim   = hypre_SStructMatrixNDim(A);
-   HYPRE_Int                nparts = hypre_SStructMatrixNParts(A);
+   void                    *matvec_vdata      = (relax_data -> matvec_vdata);
+   hypre_SStructVector     *t                 = (relax_data -> t);
 
-   hypre_ParCSRMatrix      *uA = hypre_SStructMatrixParCSRMatrix(A);
-   hypre_StructMatrix      *sA;
-   hypre_SStructPMatrix    *pA;
-   hypre_SStructPVector    *px, *pb, *pt;
-   hypre_StructVector      *sx, *sb, *st;
-   hypre_ParVector         *ux, *ut;
-
-   HYPRE_Real              *Ap;
-   HYPRE_Real              *bp;
-   HYPRE_Real              *xp;
-   HYPRE_Real              *tp;
-
-   hypre_StructStencil     *stencil;
-   HYPRE_Int                stencil_diag;
-   HYPRE_Int                stencil_size;
-   hypre_Index             *stencil_shape;
-
-   hypre_ComputePkg        *compute_pkg;
-   hypre_ComputePkg        *svec_compute_pkg;
-   hypre_BoxArrayArray     *compute_box_aa;
-   hypre_BoxArray          *compute_box_a;
-   hypre_Box               *compute_box;
-   hypre_Box               *A_data_box;
-   hypre_Box               *b_data_box;
-   hypre_Box               *x_data_box;
-   hypre_Box               *t_data_box;
-
-   HYPRE_Int                Ai, bi, xi, ti;
-   HYPRE_Real              *Ap0, *Ap1, *Ap2;
-   HYPRE_Real              *Ap3, *Ap4, *Ap5;
-   HYPRE_Real              *Ap6, *Ap7, *Ap8, *Ap9;
-   HYPRE_Int                xoff0, xoff1, xoff2;
-   HYPRE_Int                xoff3, xoff4, xoff5;
-   HYPRE_Int                xoff6, xoff7, xoff8, xoff9;
-   HYPRE_Int                si, sk, ssi[MAX_DEPTH], depth, k;
-
-   hypre_IndexRef           stride;
-   hypre_IndexRef           start;
-   hypre_Index              loop_size;
-
-   HYPRE_Int                iter;
-   HYPRE_Int                part, nvars, set, nodeset;
-   HYPRE_Int                offset;
-   HYPRE_Int                compute_i, i, j, vi, vj;
+   HYPRE_Int                iter = 0;
+   HYPRE_Complex            one  = 1.0;
+   HYPRE_Complex            mone = -1.0;
 
    /*----------------------------------------------------------
     * Initialize some things and deal with special cases
@@ -1232,15 +1241,7 @@ hypre_SSAMGRelaxUnrolled( void                *relax_vdata,
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_BeginTiming(relax_data -> time_index);
 
-   HYPRE_SStructMatrixDestroy(relax_data -> A);
-   HYPRE_SStructVectorDestroy(relax_data -> b);
-   HYPRE_SStructVectorDestroy(relax_data -> x);
-   hypre_SStructMatrixRef(A, &(relax_data -> A));
-   hypre_SStructVectorRef(x, &(relax_data -> x));
-   hypre_SStructVectorRef(b, &(relax_data -> b));
-
    (relax_data -> num_iterations) = 0;
-
    /* if max_iter is zero, return */
    if (max_iter == 0)
    {
@@ -1256,565 +1257,39 @@ hypre_SSAMGRelaxUnrolled( void                *relax_vdata,
       return hypre_error_flag;
    }
 
+   if (num_nodesets > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "num_nodesets > 1 not supported!");
+      hypre_EndTiming(relax_data -> time_index);
+      HYPRE_ANNOTATE_FUNC_END;
+
+      return hypre_error_flag;
+   }
+
    /*----------------------------------------------------------
     * Do zero_guess iteration
     *----------------------------------------------------------*/
-
-   iter = 0;
    if (zero_guess)
    {
-      if (num_nodesets > 1)
-      {
-         hypre_SStructVectorSetConstantValues(x, 0.0);
-      }
-
-      for (part = 0; part < nparts; part++)
-      {
-         pA    = hypre_SStructMatrixPMatrix(A, part);
-         px    = hypre_SStructVectorPVector(x, part);
-         pb    = hypre_SStructVectorPVector(b, part);
-         nvars = hypre_SStructPMatrixNVars(pA);
-
-         for (set = 0; set < num_nodesets; set++)
-         {
-            nodeset     = nodeset_ranks[set];
-            stride      = nodeset_strides[nodeset];
-            compute_pkg = compute_pkgs[part][nodeset];
-
-            for (compute_i = 0; compute_i < 2; compute_i++)
-            {
-               if (compute_i)
-               {
-                  compute_box_aa = hypre_ComputePkgDeptBoxes(compute_pkg);
-               }
-               else
-               {
-                  compute_box_aa = hypre_ComputePkgIndtBoxes(compute_pkg);
-               }
-
-               hypre_ForBoxArrayI(i, compute_box_aa)
-               {
-                  compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
-                  for (vi = 0; vi < nvars; vi++)
-                  {
-                     sA = hypre_SStructPMatrixSMatrix(pA, vi, vi);
-                     sb = hypre_SStructPVectorSVector(pb, vi);
-                     sx = hypre_SStructPVectorSVector(px, vi);
-
-                     A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(sA), i);
-                     b_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(sb), i);
-                     x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(sx), i);
-
-                     // Implement hypre_StructMatrixDiagData ?
-                     stencil = hypre_StructMatrixStencil(sA);
-                     stencil_diag = hypre_StructStencilDiagEntry(stencil);
-                     Ap = hypre_StructMatrixBoxData(sA, i, stencil_diag);
-
-                     bp = hypre_StructVectorBoxData(sb, i);
-                     xp = hypre_StructVectorBoxData(sx, i);
-
-                     hypre_ForBoxI(j, compute_box_a)
-                     {
-                        compute_box = hypre_BoxArrayBox(compute_box_a, j);
-
-                        start = hypre_BoxIMin(compute_box);
-                        hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-
-                        if (weights[part] != 1.0)
-                        {
-                           hypre_BoxLoop3Begin(ndim, loop_size,
-                                               A_data_box, start, stride, Ai,
-                                               x_data_box, start, stride, xi,
-                                               b_data_box, start, stride, bi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,bi) HYPRE_SMP_SCHEDULE
-#endif
-                           hypre_BoxLoop3For(Ai, xi, bi)
-                           {
-                              xp[xi] = weights[part] * bp[bi] / Ap[Ai];
-                           }
-                           hypre_BoxLoop3End(Ai, xi, bi);
-                        }
-                        else
-                        {
-                           hypre_BoxLoop3Begin(ndim, loop_size,
-                                               A_data_box, start, stride, Ai,
-                                               x_data_box, start, stride, xi,
-                                               b_data_box, start, stride, bi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,bi) HYPRE_SMP_SCHEDULE
-#endif
-                           hypre_BoxLoop3For(Ai, xi, bi)
-                           {
-                              xp[xi] = bp[bi] / Ap[Ai];
-                           }
-                           hypre_BoxLoop3End(Ai, xi, bi);
-                        }
-                     } /* hypre_ForBoxI */
-                  } /* loop on vars */
-               } /* hypre_ForBoxArrayI */
-            } /* loop on compute_i */
-         } /* loop on sets */
-      } /* loop on parts */
-
+      /* x = w*inv(D)*b */
+      hypre_SStructMatvecDiagScale(weights, A, b, NULL, x);
       iter++;
-   } /* if (zero_guess) */
+   }
 
    /*----------------------------------------------------------
     * Do regular iterations
     *----------------------------------------------------------*/
    for (; iter < max_iter; iter++)
    {
-      for (part = 0; part < nparts; part++)
-      {
-         HYPRE_ANNOTATE_REGION_BEGIN("Residual part", part);
+      /* t = b - (L + U)*x */
+      hypre_SStructCopy(b, t);
+      hypre_SStructMatvecSetSkipDiag(matvec_vdata, 1);
+      hypre_SStructMatvecCompute(matvec_vdata, mone, A, x, one, t);
+      hypre_SStructMatvecSetSkipDiag(matvec_vdata, 0);
 
-         pA = hypre_SStructMatrixPMatrix(A, part);
-         px = hypre_SStructVectorPVector(x, part);
-         pb = hypre_SStructVectorPVector(b, part);
-         pt = hypre_SStructVectorPVector(t, part);
-         nvars = hypre_SStructPMatrixNVars(pA);
-
-         for (set = 0; set < num_nodesets; set++)
-         {
-            nodeset = nodeset_ranks[set];
-            stride  = nodeset_strides[nodeset];
-            compute_pkg = compute_pkgs[part][nodeset];
-
-            for (compute_i = 0; compute_i < 2; compute_i++)
-            {
-               switch(compute_i)
-               {
-                  case 0:
-                  {
-                     for (vi = 0; vi < nvars; vi++)
-                     {
-                        sx = hypre_SStructPVectorSVector(px, vi);
-                        xp = hypre_StructVectorData(sx);
-                        svec_compute_pkg = svec_compute_pkgs[part][nodeset][vi];
-                        hypre_InitializeIndtComputations(svec_compute_pkg,
-                                                         xp, &comm_handle[part][vi]);
-                     }
-                     compute_box_aa = hypre_ComputePkgIndtBoxes(compute_pkg);
-                  }
-                  break;
-
-                  case 1:
-                  {
-                     for (vi = 0; vi < nvars; vi++)
-                     {
-                        hypre_FinalizeIndtComputations(comm_handle[part][vi]);
-                     }
-                     compute_box_aa = hypre_ComputePkgDeptBoxes(compute_pkg);
-                  }
-                  break;
-               }
-
-               hypre_ForBoxArrayI(i, compute_box_aa)
-               {
-                  compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
-
-                  sA = hypre_SStructPMatrixSMatrix(pA, 0, 0);
-                  sb = hypre_SStructPVectorSVector(pb, 0);
-                  sx = hypre_SStructPVectorSVector(px, 0);
-                  st = hypre_SStructPVectorSVector(pt, 0);
-
-                  A_data_box =  hypre_BoxArrayBox(hypre_StructMatrixDataSpace(sA), i);
-                  b_data_box =  hypre_BoxArrayBox(hypre_StructVectorDataSpace(sb), i);
-                  x_data_box =  hypre_BoxArrayBox(hypre_StructVectorDataSpace(sx), i);
-                  t_data_box =  hypre_BoxArrayBox(hypre_StructVectorDataSpace(st), i);
-
-                  hypre_ForBoxI(j, compute_box_a)
-                  {
-                     compute_box = hypre_BoxArrayBox(compute_box_a, j);
-                     start  = hypre_BoxIMin(compute_box);
-                     hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-
-                     for (vi = 0; vi < nvars; vi++)
-                     {
-                        sb = hypre_SStructPVectorSVector(pb, vi);
-                        st = hypre_SStructPVectorSVector(pt, vi);
-
-                        bp = hypre_StructVectorBoxData(sb, i);
-                        tp = hypre_StructVectorBoxData(st, i);
-
-                        /* Copy rhs into temp vector */
-                        hypre_BoxLoop2Begin(ndim, loop_size,
-                                            b_data_box, start, stride, bi,
-                                            t_data_box, start, stride, ti);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,bi,ti) HYPRE_SMP_SCHEDULE
-#endif
-                        hypre_BoxLoop2For(bi, ti)
-                        {
-                           tp[ti] = bp[bi];
-                        }
-                        hypre_BoxLoop2End(bi, ti);
-
-                        for (vj = 0; vj < nvars; vj++)
-                        {
-                           sA = hypre_SStructPMatrixSMatrix(pA, vi, vj);
-                           if (sA != NULL)
-                           {
-                              sx = hypre_SStructPVectorSVector(px, vj);
-                              xp = hypre_StructVectorBoxData(sx, i);
-
-                              stencil = hypre_StructMatrixStencil(sA);
-                              stencil_shape = hypre_StructStencilShape(stencil);
-                              stencil_size  = hypre_StructStencilSize(stencil);
-                              stencil_diag  = hypre_StructStencilDiagEntry(stencil);
-
-                              /* unroll up to depth MAX_DEPTH */
-                              for (si = 0; si < stencil_size; si += MAX_DEPTH)
-                              {
-                                 depth = hypre_min(MAX_DEPTH, (stencil_size - si));
-
-                                 for (k = 0, sk = si; k < depth; sk++)
-                                 {
-                                    if (sk == stencil_diag && vi == vj)
-                                    {
-                                       depth--;
-                                    }
-                                    else
-                                    {
-                                       ssi[k] = sk;
-                                       k++;
-                                    }
-                                 }
-
-                                 switch (depth)
-                                 {
-                                    case 10:
-                                       Ap9 = hypre_StructMatrixBoxData(sA, i, ssi[9]);
-                                       xoff9 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[9]]);
-
-                                    case 9:
-                                       Ap8 = hypre_StructMatrixBoxData(sA, i, ssi[8]);
-                                       xoff8 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[8]]);
-
-                                    case 8:
-                                       Ap7 = hypre_StructMatrixBoxData(sA, i, ssi[7]);
-                                       xoff7 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[7]]);
-
-                                    case 7:
-                                       Ap6 = hypre_StructMatrixBoxData(sA, i, ssi[6]);
-                                       xoff6 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[6]]);
-
-                                    case 6:
-                                       Ap5 = hypre_StructMatrixBoxData(sA, i, ssi[5]);
-                                       xoff5 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[5]]);
-
-                                    case 5:
-                                       Ap4 = hypre_StructMatrixBoxData(sA, i, ssi[4]);
-                                       xoff4 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[4]]);
-
-                                    case 4:
-                                       Ap3 = hypre_StructMatrixBoxData(sA, i, ssi[3]);
-                                       xoff3 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[3]]);
-
-                                    case 3:
-                                       Ap2 = hypre_StructMatrixBoxData(sA, i, ssi[2]);
-                                       xoff2 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[2]]);
-
-                                    case 2:
-                                       Ap1 = hypre_StructMatrixBoxData(sA, i, ssi[1]);
-                                       xoff1 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[1]]);
-
-                                    case 1:
-                                       Ap0 = hypre_StructMatrixBoxData(sA, i, ssi[0]);
-                                       xoff0 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[0]]);
-
-                                    case 0:
-                                       break;
-                                 }
-
-                                 switch (depth)
-                                 {
-                                    case 10:
-                                       hypre_BoxLoop3Begin(ndim, loop_size,
-                                                           A_data_box, start, stride, Ai,
-                                                           x_data_box, start, stride, xi,
-                                                           t_data_box, start, stride, ti);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
-#endif
-                                       hypre_BoxLoop3For(Ai, xi, ti)
-                                       {
-                                          tp[ti] -= Ap0[Ai] * xp[xi + xoff0] +
-                                                    Ap1[Ai] * xp[xi + xoff1] +
-                                                    Ap2[Ai] * xp[xi + xoff2] +
-                                                    Ap3[Ai] * xp[xi + xoff3] +
-                                                    Ap4[Ai] * xp[xi + xoff4] +
-                                                    Ap5[Ai] * xp[xi + xoff5] +
-                                                    Ap6[Ai] * xp[xi + xoff6] +
-                                                    Ap7[Ai] * xp[xi + xoff7] +
-                                                    Ap8[Ai] * xp[xi + xoff8] +
-                                                    Ap9[Ai] * xp[xi + xoff9];
-                                       }
-                                       hypre_BoxLoop3End(Ai, xi, ti);
-                                       break;
-
-                                    case 9:
-                                       hypre_BoxLoop3Begin(ndim, loop_size,
-                                                           A_data_box, start, stride, Ai,
-                                                           x_data_box, start, stride, xi,
-                                                           t_data_box, start, stride, ti);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
-#endif
-                                       hypre_BoxLoop3For(Ai, xi, ti)
-                                       {
-                                          tp[ti] -= Ap0[Ai] * xp[xi + xoff0] +
-                                                    Ap1[Ai] * xp[xi + xoff1] +
-                                                    Ap2[Ai] * xp[xi + xoff2] +
-                                                    Ap3[Ai] * xp[xi + xoff3] +
-                                                    Ap4[Ai] * xp[xi + xoff4] +
-                                                    Ap5[Ai] * xp[xi + xoff5] +
-                                                    Ap6[Ai] * xp[xi + xoff6] +
-                                                    Ap7[Ai] * xp[xi + xoff7] +
-                                                    Ap8[Ai] * xp[xi + xoff8];
-                                       }
-                                       hypre_BoxLoop3End(Ai, xi, ti);
-                                       break;
-
-                                    case 8:
-                                       hypre_BoxLoop3Begin(ndim, loop_size,
-                                                           A_data_box, start, stride, Ai,
-                                                           x_data_box, start, stride, xi,
-                                                           t_data_box, start, stride, ti);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
-#endif
-                                       hypre_BoxLoop3For(Ai, xi, ti)
-                                       {
-                                          tp[ti] -= Ap0[Ai] * xp[xi + xoff0] +
-                                                    Ap1[Ai] * xp[xi + xoff1] +
-                                                    Ap2[Ai] * xp[xi + xoff2] +
-                                                    Ap3[Ai] * xp[xi + xoff3] +
-                                                    Ap4[Ai] * xp[xi + xoff4] +
-                                                    Ap5[Ai] * xp[xi + xoff5] +
-                                                    Ap6[Ai] * xp[xi + xoff6] +
-                                                    Ap7[Ai] * xp[xi + xoff7];
-                                       }
-                                       hypre_BoxLoop3End(Ai, xi, ti);
-                                       break;
-
-                                    case 7:
-                                       hypre_BoxLoop3Begin(ndim, loop_size,
-                                                           A_data_box, start, stride, Ai,
-                                                           x_data_box, start, stride, xi,
-                                                           t_data_box, start, stride, ti);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
-#endif
-                                       hypre_BoxLoop3For(Ai, xi, ti)
-                                       {
-                                          tp[ti] -= Ap0[Ai] * xp[xi + xoff0] +
-                                                    Ap1[Ai] * xp[xi + xoff1] +
-                                                    Ap2[Ai] * xp[xi + xoff2] +
-                                                    Ap3[Ai] * xp[xi + xoff3] +
-                                                    Ap4[Ai] * xp[xi + xoff4] +
-                                                    Ap5[Ai] * xp[xi + xoff5] +
-                                                    Ap6[Ai] * xp[xi + xoff6];
-                                       }
-                                       hypre_BoxLoop3End(Ai, xi, ti);
-                                       break;
-
-                                    case 6:
-                                       hypre_BoxLoop3Begin(ndim, loop_size,
-                                                           A_data_box, start, stride, Ai,
-                                                           x_data_box, start, stride, xi,
-                                                           t_data_box, start, stride, ti);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
-#endif
-                                       hypre_BoxLoop3For(Ai, xi, ti)
-                                       {
-                                          tp[ti] -= Ap0[Ai] * xp[xi + xoff0] +
-                                                    Ap1[Ai] * xp[xi + xoff1] +
-                                                    Ap2[Ai] * xp[xi + xoff2] +
-                                                    Ap3[Ai] * xp[xi + xoff3] +
-                                                    Ap4[Ai] * xp[xi + xoff4] +
-                                                    Ap5[Ai] * xp[xi + xoff5];
-                                       }
-                                       hypre_BoxLoop3End(Ai, xi, ti);
-                                       break;
-
-                                    case 5:
-                                       hypre_BoxLoop3Begin(ndim, loop_size,
-                                                           A_data_box, start, stride, Ai,
-                                                           x_data_box, start, stride, xi,
-                                                           t_data_box, start, stride, ti);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
-#endif
-                                       hypre_BoxLoop3For(Ai, xi, ti)
-                                       {
-                                          tp[ti] -= Ap0[Ai] * xp[xi + xoff0] +
-                                                    Ap1[Ai] * xp[xi + xoff1] +
-                                                    Ap2[Ai] * xp[xi + xoff2] +
-                                                    Ap3[Ai] * xp[xi + xoff3] +
-                                                    Ap4[Ai] * xp[xi + xoff4];
-                                       }
-                                       hypre_BoxLoop3End(Ai, xi, ti);
-                                       break;
-
-                                    case 4:
-                                       hypre_BoxLoop3Begin(ndim, loop_size,
-                                                           A_data_box, start, stride, Ai,
-                                                           x_data_box, start, stride, xi,
-                                                           t_data_box, start, stride, ti);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
-#endif
-                                       hypre_BoxLoop3For(Ai, xi, ti)
-                                       {
-                                          tp[ti] -= Ap0[Ai] * xp[xi + xoff0] +
-                                                    Ap1[Ai] * xp[xi + xoff1] +
-                                                    Ap2[Ai] * xp[xi + xoff2] +
-                                                    Ap3[Ai] * xp[xi + xoff3];
-                                       }
-                                       hypre_BoxLoop3End(Ai, xi, ti);
-                                       break;
-
-                                    case 3:
-                                       hypre_BoxLoop3Begin(ndim, loop_size,
-                                                           A_data_box, start, stride, Ai,
-                                                           x_data_box, start, stride, xi,
-                                                           t_data_box, start, stride, ti);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
-#endif
-                                       hypre_BoxLoop3For(Ai, xi, ti)
-                                       {
-                                          tp[ti] -= Ap0[Ai] * xp[xi + xoff0] +
-                                                    Ap1[Ai] * xp[xi + xoff1] +
-                                                    Ap2[Ai] * xp[xi + xoff2];
-                                       }
-                                       hypre_BoxLoop3End(Ai, xi, ti);
-                                       break;
-
-                                    case 2:
-                                       hypre_BoxLoop3Begin(ndim, loop_size,
-                                                           A_data_box, start, stride, Ai,
-                                                           x_data_box, start, stride, xi,
-                                                           t_data_box, start, stride, ti);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
-#endif
-                                       hypre_BoxLoop3For(Ai, xi, ti)
-                                       {
-                                          tp[ti] -= Ap0[Ai] * xp[xi + xoff0] +
-                                                    Ap1[Ai] * xp[xi + xoff1];
-                                       }
-                                       hypre_BoxLoop3End(Ai, xi, ti);
-                                       break;
-
-                                    case 1:
-                                       hypre_BoxLoop3Begin(ndim, loop_size,
-                                                           A_data_box, start, stride, Ai,
-                                                           x_data_box, start, stride, xi,
-                                                           t_data_box, start, stride, ti);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
-#endif
-                                       hypre_BoxLoop3For(Ai, xi, ti)
-                                       {
-                                          tp[ti] -= Ap0[Ai] * xp[xi + xoff0];
-                                       }
-                                       hypre_BoxLoop3End(Ai, xi, ti);
-                                       break;
-
-                                    case 0:
-                                       break;
-                                 }
-                              }
-                           } /* if (sA != NULL) */
-                        } /* loop on j-vars */
-                     } /* loop on i-vars */
-                  } /* hypre_ForBoxI */
-               } /* hypre_ForBoxArrayI */
-            } /* loop on compute_i */
-         } /* loop on sets */
-         HYPRE_ANNOTATE_REGION_END("Residual part", part);
-      } /* loop on parts */
-
-      /* Compute unstructured component: t = t - U*x */
-      hypre_SStructVectorConvert(x, &ux);
-      hypre_SStructVectorConvert(t, &ut);
-      hypre_ParCSRMatrixMatvec(-1.0, uA, ux, 1.0, ut);
-      hypre_SStructVectorRestore(x, NULL);
-      hypre_SStructVectorRestore(t, ut);
-
-      /* Apply diagonal scaling */
-      for (part = 0; part < nparts; part++)
-      {
-         HYPRE_ANNOTATE_REGION_BEGIN("Diag scale part", part);
-
-         pA = hypre_SStructMatrixPMatrix(A, part);
-         px = hypre_SStructVectorPVector(x, part);
-         pt = hypre_SStructVectorPVector(t, part);
-         nvars = hypre_SStructPMatrixNVars(pA);
-         for (vi = 0; vi < nvars; vi++)
-         {
-            sA = hypre_SStructPMatrixSMatrix(pA, vi, vi);
-            sx = hypre_SStructPVectorSVector(px, vi);
-            st = hypre_SStructPVectorSVector(pt, vi);
-
-            stencil       = hypre_StructMatrixStencil(sA);
-            stencil_diag  = hypre_StructStencilDiagEntry(stencil);
-            compute_box_a = hypre_StructGridBoxes(hypre_StructMatrixGrid(sA));
-            hypre_ForBoxI(i, compute_box_a)
-            {
-               compute_box = hypre_BoxArrayBox(compute_box_a, i);
-               start  = hypre_BoxIMin(compute_box);
-               hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-
-               A_data_box =  hypre_BoxArrayBox(hypre_StructMatrixDataSpace(sA), i);
-               x_data_box =  hypre_BoxArrayBox(hypre_StructVectorDataSpace(sx), i);
-               t_data_box =  hypre_BoxArrayBox(hypre_StructVectorDataSpace(st), i);
-
-               Ap = hypre_StructMatrixBoxData(sA, i, stencil_diag);
-               xp = hypre_StructVectorBoxData(sx, i);
-               tp = hypre_StructVectorBoxData(st, i);
-
-               if (weights[part] != 1.0)
-               {
-                  hypre_BoxLoop3Begin(ndim, loop_size,
-                                      A_data_box, start, stride, Ai,
-                                      x_data_box, start, stride, xi,
-                                      t_data_box, start, stride, ti);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop3For(Ai, xi, ti)
-                  {
-                     xp[xi] = (1.0 - weights[part]) * xp[xi] +
-                               weights[part] * tp[ti] / Ap[Ai];
-                  }
-                  hypre_BoxLoop3End(Ai, xi, ti);
-               }
-               else
-               {
-                  hypre_BoxLoop3Begin(ndim, loop_size,
-                                      A_data_box, start, stride, Ai,
-                                      x_data_box, start, stride, xi,
-                                      t_data_box, start, stride, ti);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop3For(Ai, xi, ti)
-                  {
-                     xp[xi] = tp[ti] / Ap[Ai];
-                  }
-                  hypre_BoxLoop3End(Ai, xi, ti);
-               } /* if (weights[part] != 1.0) */
-            } /* hypre_ForBoxI(i, compute_box_a) */
-         } /* loop on vars */
-
-         HYPRE_ANNOTATE_REGION_END("Diag scale part", part);
-      } /* loop on parts */
-   } /* loop on iterations */
+      /* x = (1 - w)*x + w*inv(D)*t */
+      hypre_SStructMatvecDiagScale(weights, A, t, mweights, x);
+   }
 
    (relax_data -> num_iterations) = iter;
    hypre_EndTiming(relax_data -> time_index);
