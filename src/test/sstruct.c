@@ -3927,6 +3927,7 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetMaxIter(precond, 1);
          HYPRE_SStructSSAMGSetMaxLevels(precond, maxLevels);
          HYPRE_SStructSSAMGSetTol(precond, 0.0);
+         HYPRE_StructSMGSetZeroGuess(struct_precond);
          HYPRE_SStructSSAMGSetRelaxType(precond, relax);
          if (usr_jacobi_weight)
          {
