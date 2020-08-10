@@ -760,6 +760,7 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
           A_data_box =  hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
           x_data_box =  hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
           y_data_box =  hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
+          xp = hypre_StructVectorBoxData(x, i);
           yp = hypre_StructVectorBoxData(y, i);
 
           hypre_ForBoxArrayI(j, compute_box_a)
