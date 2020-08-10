@@ -373,28 +373,28 @@ hypre_double atomicAdd(hypre_double* address, hypre_double val)
 
 template <typename T>
 static __device__ __forceinline__
-T __shfl_sync(unsigned mask, T val, hypre_int src_line, hypre_int width=32)
+T __shfl_sync(unsigned mask, T val, hypre_int src_line, hypre_int width=HYPRE_WARP_SIZE)
 {
    return __shfl(val, src_line, width);
 }
 
 template <typename T>
 static __device__ __forceinline__
-T __shfl_down_sync(unsigned mask, T val, unsigned delta, hypre_int width=32)
+T __shfl_down_sync(unsigned mask, T val, unsigned delta, hypre_int width=HYPRE_WARP_SIZE)
 {
    return __shfl_down(val, delta, width);
 }
 
 template <typename T>
 static __device__ __forceinline__
-T __shfl_xor_sync(unsigned mask, T val, unsigned lanemask, hypre_int width=32)
+T __shfl_xor_sync(unsigned mask, T val, unsigned lanemask, hypre_int width=HYPRE_WARP_SIZE)
 {
    return __shfl_xor(val, lanemask, width);
 }
 
 template <typename T>
 static __device__ __forceinline__
-T __shfl_up_sync(unsigned mask, T val, unsigned delta, hypre_int width=32)
+T __shfl_up_sync(unsigned mask, T val, unsigned delta, hypre_int width=HYPRE_WARP_SIZE)
 {
    return __shfl_up(val, delta, width);
 }
@@ -419,30 +419,30 @@ static __device__ __forceinline__
 T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum)
 {
 #pragma unroll
-   for (hypre_int d = 2; d <= 32; d <<= 1)
+   for (hypre_int d = 2; d <=HYPRE_WARP_SIZE; d <<= 1)
    {
       T t = __shfl_up_sync(HYPRE_WARP_FULL_MASK, in, d >> 1);
-      if ( (lane_id & (d - 1)) == d - 1 )
+      if ( (lane_id & (d - 1)) == (d - 1) )
       {
          in += t;
       }
    }
 
-   all_sum = __shfl_sync(HYPRE_WARP_FULL_MASK, in, 31);
+   all_sum = __shfl_sync(HYPRE_WARP_FULL_MASK, in, HYPRE_WARP_SIZE-1);
 
-   if (lane_id == 31)
+   if (lane_id == HYPRE_WARP_SIZE-1)
    {
       in = 0;
    }
 
 #pragma unroll
-   for (hypre_int d = 16; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
    {
       T t = __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
 
-      if ( (lane_id & (d - 1)) == d - 1)
+      if ( (lane_id & (d - 1)) == (d - 1))
       {
-         if ( (lane_id & (d << 1 - 1)) == (d << 1 - 1) )
+        if ( (lane_id & ((d << 1) - 1)) == ((d << 1) - 1) )
          {
             in += t;
          }
@@ -460,7 +460,7 @@ static __device__ __forceinline__
 T warp_reduce_sum(T in)
 {
 #pragma unroll
-  for (hypre_int d = 16; d > 0; d >>= 1)
+  for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
   {
     in += __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d);
   }
@@ -472,7 +472,7 @@ static __device__ __forceinline__
 T warp_allreduce_sum(T in)
 {
 #pragma unroll
-  for (hypre_int d = 16; d > 0; d >>= 1)
+  for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
   {
     in += __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
   }
@@ -484,7 +484,7 @@ static __device__ __forceinline__
 T warp_reduce_max(T in)
 {
 #pragma unroll
-  for (hypre_int d = 16; d > 0; d >>= 1)
+  for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
   {
     in = max(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
   }
@@ -496,7 +496,7 @@ static __device__ __forceinline__
 T warp_allreduce_max(T in)
 {
 #pragma unroll
-  for (hypre_int d = 16; d > 0; d >>= 1)
+  for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
   {
     in = max(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
   }
@@ -508,7 +508,7 @@ static __device__ __forceinline__
 T warp_reduce_min(T in)
 {
 #pragma unroll
-  for (hypre_int d = 16; d > 0; d >>= 1)
+  for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
   {
     in = min(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
   }
@@ -520,7 +520,7 @@ static __device__ __forceinline__
 T warp_allreduce_min(T in)
 {
 #pragma unroll
-  for (hypre_int d = 16; d > 0; d >>= 1)
+  for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
   {
     in = min(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
   }
@@ -872,8 +872,10 @@ __inline__ __host__ __device__
 T blockReduceSum(T val)
 {
 #ifdef __CUDA_ARCH__
-   //static __shared__ T shared[32]; // Shared mem for 32 partial sums
-   __shared__ T shared[32];        // Shared mem for 32 partial sums
+   //static __shared__ T shared[HYPRE_WARP_SIZE]; // Shared mem for HYPRE_WARP_SIZE partial sums
+
+   __shared__ T shared[HYPRE_WARP_SIZE];        // Shared mem for HYPRE_WARP_SIZE partial sums
+
    //HYPRE_Int lane = threadIdx.x % warpSize;
    //HYPRE_Int wid  = threadIdx.x / warpSize;
    HYPRE_Int lane = threadIdx.x & (warpSize - 1);
@@ -1848,4 +1850,3 @@ struct hypre_cub_CachingDeviceAllocator
 
 
 #endif
-
