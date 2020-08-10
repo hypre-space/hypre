@@ -116,7 +116,7 @@ hypre_MGRCreate()
   (mgr_data -> lvl_to_keep_cpoints) = 0;
   (mgr_data -> cg_convergence_factor) = 0.0;
 
-  (mgr_data -> compress_coarse_grid) = 0;
+  (mgr_data -> truncate_coarse_grid_threshold) = 0.0;
 
   return (void *) mgr_data;
 }
@@ -188,9 +188,9 @@ hypre_MGRDestroy( void *data )
   if((mgr_data -> use_default_cgrid_solver))
   {
     if((mgr_data -> coarse_grid_solver))
-    {    
+    {
       hypre_BoomerAMGDestroy( (mgr_data -> coarse_grid_solver) );
-    }   
+    }
     (mgr_data -> coarse_grid_solver) = NULL;
   }
   /* l1_norms */
@@ -4508,16 +4508,14 @@ hypre_MGRSetNumInterpSweeps( void *mgr_vdata, HYPRE_Int nsweeps )
   return hypre_error_flag;
 }
 
-/* Set the flag for compress the coarse grid at each
+/* Set the threshold to truncate the coarse grid at each
  * level of reduction
- * 0: no compression
- * 1: remove entries of the coarse grid using tol 1e-14
 */
 HYPRE_Int
-hypre_MGRSetCompressCoarseGrid( void *mgr_vdata, HYPRE_Int flag)
+hypre_MGRSetTruncateCoarseGridThreshold( void *mgr_vdata, HYPRE_Real threshold)
 {
   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
-  (mgr_data -> compress_coarse_grid) = flag;
+  (mgr_data -> truncate_coarse_grid_threshold) = threshold;
   return hypre_error_flag;
 }
 
@@ -5357,7 +5355,7 @@ hypre_MGRDirectSolverCreate()
 }
 
 HYPRE_Int
-hypre_MGRDirectSolverSetup( void                *solver, 
+hypre_MGRDirectSolverSetup( void                *solver,
                             hypre_ParCSRMatrix  *A,
                             hypre_ParVector     *f,
                             hypre_ParVector     *u )
