@@ -415,14 +415,14 @@ HYPRE_Int HYPRE_BoomerAMGSetNodalDiag(HYPRE_Solver solver,
  * (Optional) Defines which parallel interpolation operator is used.
  * There are the following options for \e interp_type:
  *
- *    - 0  : classical modified interpolation 
- *    - 1  : LS interpolation (for use with GSMG) 
+ *    - 0  : classical modified interpolation
+ *    - 1  : LS interpolation (for use with GSMG)
  *    - 2  : classical modified interpolation for hyperbolic PDEs
  *    - 3  : direct interpolation (with separation of weights) (also for GPU use)
  *    - 4  : multipass interpolation
  *    - 5  : multipass interpolation (with separation of weights)
  *    - 6  : extended+i interpolation (also for GPU use)
- *    - 7  : extended+i (if no common C neighbor) interpolation 
+ *    - 7  : extended+i (if no common C neighbor) interpolation
  *    - 8  : standard interpolation
  *    - 9  : standard interpolation (with separation of weights)
  *    - 10 : classical block interpolation (for use with nodal systems version only)
@@ -1145,7 +1145,7 @@ HYPRE_Int HYPRE_BoomerAMGInitGridRelaxation(HYPRE_Int    **num_grid_sweeps_ptr,
 
 /**
  * (Optional) If rap2 not equal 0, the triple matrix product RAP is
- * replaced by two matrix products. 
+ * replaced by two matrix products.
  * (Required for triple matrix product generation on GPUs)
  **/
 HYPRE_Int HYPRE_BoomerAMGSetRAP2(HYPRE_Solver solver,
@@ -1208,8 +1208,8 @@ HYPRE_Int HYPRE_BoomerAMGGetGridHierarchy(HYPRE_Solver solver,
  *
  * Usage:
  *  Set slu_threshold >= max_coarse_size (from HYPRE_BoomerAMGSetMaxCoarseSize(...))
- *  to turn on use of superLU for the coarse grid solve. SuperLU is used if the 
- *  coarse grid size > max_coarse_size and the grid level is < (max_num_levels - 1) 
+ *  to turn on use of superLU for the coarse grid solve. SuperLU is used if the
+ *  coarse grid size > max_coarse_size and the grid level is < (max_num_levels - 1)
  *  (set with HYPRE_BoomerAMGSetMaxLevels(...)).
  **/
 
@@ -1382,16 +1382,16 @@ HYPRE_BoomerAMGDDSetNumGhostLayers( HYPRE_Solver solver,
                            HYPRE_Int          num_ghost_layers  );
 
 /**
- * (Optional) Pass a custom user-defined function as a relaxation method for the AMG-DD FAC cycles. 
+ * (Optional) Pass a custom user-defined function as a relaxation method for the AMG-DD FAC cycles.
  * Function should have the following form, where amgdd_solver is of type hypre_ParAMGDDData* and level is the level on which to relax:
  * HYPRE_Int userFACRelaxation( HYPRE_Solver amgdd_solver, HYPRE_Int level )
  **/
 HYPRE_Int
 HYPRE_BoomerAMGDDSetUserFACRelaxation( HYPRE_Solver solver,
-                           HYPRE_Int (*userFACRelaxation)( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param ) ); 
+                           HYPRE_Int (*userFACRelaxation)( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param ) );
 
 /**
- * (Optional) Get the underlying AMG hierarchy as a HYPRE_Solver object. 
+ * (Optional) Get the underlying AMG hierarchy as a HYPRE_Solver object.
  **/
 HYPRE_Int
 HYPRE_BoomerAMGDDGetAMG( HYPRE_Solver solver,

@@ -80,10 +80,10 @@ HYPRE_Int hypre_AMGDDCompGridMatrixSetupRealMatvec(hypre_AMGDDCompGridMatrix *A)
 {
    HYPRE_Int i,j;
 
-   hypre_CSRMatrix *A_real_real = hypre_AMGDDCompGridMatrixRealReal(A); 
+   hypre_CSRMatrix *A_real_real = hypre_AMGDDCompGridMatrixRealReal(A);
    hypre_CSRMatrixInitialize(A_real_real);
-   
-   hypre_CSRMatrix *A_real_ghost = hypre_AMGDDCompGridMatrixRealGhost(A); 
+
+   hypre_CSRMatrix *A_real_ghost = hypre_AMGDDCompGridMatrixRealGhost(A);
    hypre_CSRMatrixInitialize(A_real_ghost);
 
    hypre_CSRMatrix *A_diag = hypre_AMGDDCompGridMatrixNonOwnedDiag(A);
@@ -105,7 +105,7 @@ HYPRE_Int hypre_AMGDDCompGridMatrixSetupRealMatvec(hypre_AMGDDCompGridMatrix *A)
              hypre_CSRMatrixData(A_real_real)[A_real_real_nnz] = hypre_CSRMatrixData(A_diag)[j];
              A_real_real_nnz++;
          }
-         else 
+         else
          {
              hypre_CSRMatrixJ(A_real_ghost)[A_real_ghost_nnz] = col_ind;
              hypre_CSRMatrixData(A_real_ghost)[A_real_ghost_nnz] = hypre_CSRMatrixData(A_diag)[j];
@@ -134,7 +134,7 @@ HYPRE_Int hypre_AMGDDCompGridMatvec( HYPRE_Complex alpha, hypre_AMGDDCompGridMat
    hypre_Vector *y_nonowned = hypre_AMGDDCompGridVectorNonOwned(y);
 
    hypre_CSRMatrixMatvec(alpha, owned_diag, x_owned, beta, y_owned);
-   if (owned_offd) 
+   if (owned_offd)
        hypre_CSRMatrixMatvec(alpha, owned_offd, x_nonowned, 1.0, y_owned);
    if (nonowned_diag)
        hypre_CSRMatrixMatvec(alpha, nonowned_diag, x_nonowned, beta, y_nonowned);
@@ -163,7 +163,7 @@ HYPRE_Int hypre_AMGDDCompGridRealMatvec( HYPRE_Complex alpha, hypre_AMGDDCompGri
    hypre_Vector *y_nonowned = hypre_AMGDDCompGridVectorNonOwned(y);
 
    hypre_CSRMatrixMatvec(alpha, owned_diag, x_owned, beta, y_owned);
-   if (owned_offd) 
+   if (owned_offd)
        hypre_CSRMatrixMatvec(alpha, owned_offd, x_nonowned, 1.0, y_owned);
    if (nonowned_diag)
        hypre_CSRMatrixMatvec(alpha, nonowned_diag, x_nonowned, beta, y_nonowned);
@@ -331,7 +331,7 @@ HYPRE_Int hypre_AMGDDCompGridVectorRealCopy(hypre_AMGDDCompGridVector *x, hypre_
       hypre_SeqVectorCopy(hypre_AMGDDCompGridVectorOwned(x), hypre_AMGDDCompGridVectorOwned(y));
    if (hypre_AMGDDCompGridVectorNonOwned(x) && hypre_AMGDDCompGridVectorNonOwned(y))
       hypre_SeqVectorCopy(hypre_AMGDDCompGridVectorNonOwned(x), hypre_AMGDDCompGridVectorNonOwned(y));
-    
+
    hypre_VectorSize(hypre_AMGDDCompGridVectorNonOwned(x)) = orig_x_size;
    hypre_VectorSize(hypre_AMGDDCompGridVectorNonOwned(y)) = orig_y_size;
 
@@ -390,43 +390,43 @@ hypre_AMGDDCompGrid *hypre_AMGDDCompGridCreate ()
 
 HYPRE_Int hypre_AMGDDCompGridDestroy ( hypre_AMGDDCompGrid *compGrid )
 {
-   if (hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid)) 
+   if (hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid))
       hypre_TFree(hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
-   if (hypre_AMGDDCompGridNonOwnedCoarseIndices(compGrid)) 
+   if (hypre_AMGDDCompGridNonOwnedCoarseIndices(compGrid))
       hypre_TFree(hypre_AMGDDCompGridNonOwnedCoarseIndices(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
-   if (hypre_AMGDDCompGridNonOwnedRealMarker(compGrid)) 
+   if (hypre_AMGDDCompGridNonOwnedRealMarker(compGrid))
       hypre_TFree(hypre_AMGDDCompGridNonOwnedRealMarker(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
-   if (hypre_AMGDDCompGridNonOwnedSort(compGrid)) 
+   if (hypre_AMGDDCompGridNonOwnedSort(compGrid))
       hypre_TFree(hypre_AMGDDCompGridNonOwnedSort(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
-   if (hypre_AMGDDCompGridNonOwnedInvSort(compGrid)) 
+   if (hypre_AMGDDCompGridNonOwnedInvSort(compGrid))
       hypre_TFree(hypre_AMGDDCompGridNonOwnedInvSort(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
-   if (hypre_AMGDDCompGridNonOwnedDiagMissingColIndices(compGrid)) 
+   if (hypre_AMGDDCompGridNonOwnedDiagMissingColIndices(compGrid))
       hypre_TFree(hypre_AMGDDCompGridNonOwnedDiagMissingColIndices(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
    if (hypre_AMGDDCompGridOwnedCoarseIndices(compGrid))
       hypre_TFree(hypre_AMGDDCompGridOwnedCoarseIndices(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
 
-   if (hypre_AMGDDCompGridA(compGrid)) 
+   if (hypre_AMGDDCompGridA(compGrid))
       hypre_AMGDDCompGridMatrixDestroy(hypre_AMGDDCompGridA(compGrid));
-   if (hypre_AMGDDCompGridP(compGrid)) 
+   if (hypre_AMGDDCompGridP(compGrid))
       hypre_AMGDDCompGridMatrixDestroy(hypre_AMGDDCompGridP(compGrid));
-   if (hypre_AMGDDCompGridR(compGrid)) 
+   if (hypre_AMGDDCompGridR(compGrid))
       hypre_AMGDDCompGridMatrixDestroy(hypre_AMGDDCompGridR(compGrid));
 
-   if (hypre_AMGDDCompGridU(compGrid)) 
+   if (hypre_AMGDDCompGridU(compGrid))
       hypre_AMGDDCompGridVectorDestroy(hypre_AMGDDCompGridU(compGrid));
-   if (hypre_AMGDDCompGridF(compGrid)) 
+   if (hypre_AMGDDCompGridF(compGrid))
       hypre_AMGDDCompGridVectorDestroy(hypre_AMGDDCompGridF(compGrid));
-   if (hypre_AMGDDCompGridT(compGrid)) 
+   if (hypre_AMGDDCompGridT(compGrid))
       hypre_AMGDDCompGridVectorDestroy(hypre_AMGDDCompGridT(compGrid));
-   if (hypre_AMGDDCompGridS(compGrid)) 
+   if (hypre_AMGDDCompGridS(compGrid))
       hypre_AMGDDCompGridVectorDestroy(hypre_AMGDDCompGridS(compGrid));
-   if (hypre_AMGDDCompGridQ(compGrid)) 
+   if (hypre_AMGDDCompGridQ(compGrid))
       hypre_AMGDDCompGridVectorDestroy(hypre_AMGDDCompGridQ(compGrid));
-   if (hypre_AMGDDCompGridTemp(compGrid)) 
+   if (hypre_AMGDDCompGridTemp(compGrid))
       hypre_AMGDDCompGridVectorDestroy(hypre_AMGDDCompGridTemp(compGrid));
-   if (hypre_AMGDDCompGridTemp2(compGrid)) 
+   if (hypre_AMGDDCompGridTemp2(compGrid))
       hypre_AMGDDCompGridVectorDestroy(hypre_AMGDDCompGridTemp2(compGrid));
-   if (hypre_AMGDDCompGridTemp3(compGrid)) 
+   if (hypre_AMGDDCompGridTemp3(compGrid))
       hypre_AMGDDCompGridVectorDestroy(hypre_AMGDDCompGridTemp3(compGrid));
 
    if (hypre_AMGDDCompGridL1Norms(compGrid))
@@ -446,8 +446,8 @@ HYPRE_Int hypre_AMGDDCompGridDestroy ( hypre_AMGDDCompGrid *compGrid )
    if (hypre_AMGDDCompGridNonOwnedRelaxOrdering(compGrid))
       hypre_TFree(hypre_AMGDDCompGridNonOwnedRelaxOrdering(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
 
-   hypre_TFree(compGrid, HYPRE_MEMORY_HOST);   
-   
+   hypre_TFree(compGrid, HYPRE_MEMORY_HOST);
+
 
    return 0;
 }
@@ -492,7 +492,7 @@ HYPRE_Int hypre_AMGDDCompGridInitialize( hypre_ParAMGDDData *amgdd_data, HYPRE_I
    hypre_AMGDDCompGridA(compGrid) = A;
    hypre_AMGDDCompGridNonOwnedDiagMissingColIndices(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned_diag_nnz, hypre_AMGDDCompGridMemoryLocation(compGrid));
 
-   // Setup CompGridMatrix P and R if appropriate 
+   // Setup CompGridMatrix P and R if appropriate
    if (level != hypre_ParAMGDataNumLevels(amg_data) - 1)
    {
       hypre_AMGDDCompGridMatrix *P = hypre_AMGDDCompGridMatrixCreate();
@@ -503,7 +503,7 @@ HYPRE_Int hypre_AMGDDCompGridInitialize( hypre_ParAMGDDData *amgdd_data, HYPRE_I
       hypre_CSRMatrixI(hypre_AMGDDCompGridMatrixOwnedOffd(P)) = hypre_CSRMatrixI(P_offd_original);
       hypre_CSRMatrixData(hypre_AMGDDCompGridMatrixOwnedOffd(P)) = hypre_CSRMatrixData(P_offd_original);
       hypre_CSRMatrixJ(hypre_AMGDDCompGridMatrixOwnedOffd(P)) = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumNonzeros(P_offd_original), hypre_AMGDDCompGridMemoryLocation(compGrid));
-      
+
       // Initialize P owned offd col ind to their global indices
       for (i = 0; i < hypre_CSRMatrixNumNonzeros(hypre_AMGDDCompGridMatrixOwnedOffd(P)); i++)
       {
@@ -513,7 +513,7 @@ HYPRE_Int hypre_AMGDDCompGridInitialize( hypre_ParAMGDDData *amgdd_data, HYPRE_I
       hypre_AMGDDCompGridMatrixOwnsOwnedMatrices(P) = 0;
       hypre_AMGDDCompGridMatrixOwnsOffdColIndices(P) = 1;
       hypre_AMGDDCompGridP(compGrid) = P;
-   
+
       if (hypre_ParAMGDataRestriction(amg_data))
       {
          hypre_AMGDDCompGridMatrix *R = hypre_AMGDDCompGridMatrixCreate();
@@ -524,7 +524,7 @@ HYPRE_Int hypre_AMGDDCompGridInitialize( hypre_ParAMGDDData *amgdd_data, HYPRE_I
          hypre_CSRMatrixI(hypre_AMGDDCompGridMatrixOwnedOffd(R)) = hypre_CSRMatrixI(R_offd_original);
          hypre_CSRMatrixData(hypre_AMGDDCompGridMatrixOwnedOffd(R)) = hypre_CSRMatrixData(R_offd_original);
          hypre_CSRMatrixJ(hypre_AMGDDCompGridMatrixOwnedOffd(R)) = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumNonzeros(R_offd_original), hypre_AMGDDCompGridMemoryLocation(compGrid));
-         
+
          // Initialize R owned offd col ind to their global indices
          for (i = 0; i < hypre_CSRMatrixNumNonzeros(hypre_AMGDDCompGridMatrixOwnedOffd(R)); i++)
          {
@@ -567,13 +567,13 @@ HYPRE_Int hypre_AMGDDCompGridInitialize( hypre_ParAMGDDData *amgdd_data, HYPRE_I
             {
                hypre_AMGDDCompGridOwnedCoarseIndices(compGrid)[i] = coarseIndexCounter++;
             }
-            else 
+            else
             {
                hypre_AMGDDCompGridOwnedCoarseIndices(compGrid)[i] = -1;
             }
          }
       }
-      else 
+      else
       {
          for (i = 0; i < hypre_AMGDDCompGridNumOwnedNodes(compGrid); i++)
          {
@@ -588,18 +588,18 @@ HYPRE_Int hypre_AMGDDCompGridInitialize( hypre_ParAMGDDData *amgdd_data, HYPRE_I
 HYPRE_Int hypre_AMGDDCompGridSetupRelax( hypre_ParAMGDDData *amgdd_data )
 {
    HYPRE_Int level, i, j;
-   
+
    HYPRE_Int      myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
    hypre_ParAMGData *amg_data = hypre_ParAMGDDDataAMG(amgdd_data);
 
    // Default to CFL1 Jacobi
-   hypre_ParAMGDDDataUserFACRelaxation(amgdd_data) = hypre_BoomerAMGDD_FAC_CFL1Jacobi; 
+   hypre_ParAMGDDDataUserFACRelaxation(amgdd_data) = hypre_BoomerAMGDD_FAC_CFL1Jacobi;
    if (hypre_ParAMGDDDataFACRelaxType(amgdd_data) == 0) hypre_ParAMGDDDataUserFACRelaxation(amgdd_data) = hypre_BoomerAMGDD_FAC_Jacobi;
    else if (hypre_ParAMGDDDataFACRelaxType(amgdd_data) == 1) hypre_ParAMGDDDataUserFACRelaxation(amgdd_data) = hypre_BoomerAMGDD_FAC_GaussSeidel;
-   else if (hypre_ParAMGDDDataFACRelaxType(amgdd_data) == 2) hypre_ParAMGDDDataUserFACRelaxation(amgdd_data) = hypre_BoomerAMGDD_FAC_OrderedGaussSeidel; 
-   else if (hypre_ParAMGDDDataFACRelaxType(amgdd_data) == 3) hypre_ParAMGDDDataUserFACRelaxation(amgdd_data) = hypre_BoomerAMGDD_FAC_CFL1Jacobi; 
+   else if (hypre_ParAMGDDDataFACRelaxType(amgdd_data) == 2) hypre_ParAMGDDDataUserFACRelaxation(amgdd_data) = hypre_BoomerAMGDD_FAC_OrderedGaussSeidel;
+   else if (hypre_ParAMGDDDataFACRelaxType(amgdd_data) == 3) hypre_ParAMGDDDataUserFACRelaxation(amgdd_data) = hypre_BoomerAMGDD_FAC_CFL1Jacobi;
    else hypre_error_w_msg(HYPRE_ERROR_GENERIC,"WARNING: unknown AMGDD FAC relaxation type. Defaulting to CFL1 Jacobi.\n");
 
    if (hypre_ParAMGDDDataFACRelaxType(amgdd_data) == 3)
@@ -618,14 +618,14 @@ HYPRE_Int hypre_AMGDDCompGridSetupRelax( hypre_ParAMGDDData *amgdd_data )
             HYPRE_Int cf_diag = hypre_AMGDDCompGridCFMarkerArray(compGrid)[i];
             for (j = hypre_CSRMatrixI(diag)[i]; j < hypre_CSRMatrixI(diag)[i+1]; j++)
             {
-               if (hypre_AMGDDCompGridCFMarkerArray(compGrid)[ hypre_CSRMatrixJ(diag)[j] ] == cf_diag) 
+               if (hypre_AMGDDCompGridCFMarkerArray(compGrid)[ hypre_CSRMatrixJ(diag)[j] ] == cf_diag)
                {
                   hypre_AMGDDCompGridL1Norms(compGrid)[i] += fabs(hypre_CSRMatrixData(diag)[j]);
                }
             }
             for (j = hypre_CSRMatrixI(offd)[i]; j < hypre_CSRMatrixI(offd)[i+1]; j++)
             {
-               if (hypre_AMGDDCompGridCFMarkerArray(compGrid)[ hypre_CSRMatrixJ(offd)[j] + hypre_AMGDDCompGridNumOwnedNodes(compGrid) ] == cf_diag) 
+               if (hypre_AMGDDCompGridCFMarkerArray(compGrid)[ hypre_CSRMatrixJ(offd)[j] + hypre_AMGDDCompGridNumOwnedNodes(compGrid) ] == cf_diag)
                {
                   hypre_AMGDDCompGridL1Norms(compGrid)[i] += fabs(hypre_CSRMatrixData(offd)[j]);
                }
@@ -638,14 +638,14 @@ HYPRE_Int hypre_AMGDDCompGridSetupRelax( hypre_ParAMGDDData *amgdd_data )
             HYPRE_Int cf_diag = hypre_AMGDDCompGridCFMarkerArray(compGrid)[i + hypre_AMGDDCompGridNumOwnedNodes(compGrid)];
             for (j = hypre_CSRMatrixI(diag)[i]; j < hypre_CSRMatrixI(diag)[i+1]; j++)
             {
-               if (hypre_AMGDDCompGridCFMarkerArray(compGrid)[ hypre_CSRMatrixJ(diag)[j] + hypre_AMGDDCompGridNumOwnedNodes(compGrid) ] == cf_diag) 
+               if (hypre_AMGDDCompGridCFMarkerArray(compGrid)[ hypre_CSRMatrixJ(diag)[j] + hypre_AMGDDCompGridNumOwnedNodes(compGrid) ] == cf_diag)
                {
                   hypre_AMGDDCompGridL1Norms(compGrid)[i + hypre_AMGDDCompGridNumOwnedNodes(compGrid)] += fabs(hypre_CSRMatrixData(diag)[j]);
                }
             }
             for (j = hypre_CSRMatrixI(offd)[i]; j < hypre_CSRMatrixI(offd)[i+1]; j++)
             {
-               if (hypre_AMGDDCompGridCFMarkerArray(compGrid)[ hypre_CSRMatrixJ(offd)[j]] == cf_diag) 
+               if (hypre_AMGDDCompGridCFMarkerArray(compGrid)[ hypre_CSRMatrixJ(offd)[j]] == cf_diag)
                {
                   hypre_AMGDDCompGridL1Norms(compGrid)[i + hypre_AMGDDCompGridNumOwnedNodes(compGrid)] += fabs(hypre_CSRMatrixData(offd)[j]);
                }
@@ -814,7 +814,7 @@ HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGDDData *amgdd_data )
       HYPRE_Int *new_A_offd_rowPtr = hypre_CTAlloc(HYPRE_Int, num_nonowned+1, hypre_AMGDDCompGridMemoryLocation(compGrid[level]));
       HYPRE_Int *new_A_offd_colInd = hypre_CTAlloc(HYPRE_Int, A_offd_nnz, hypre_AMGDDCompGridMemoryLocation(compGrid[level]));
       HYPRE_Complex *new_A_offd_data = hypre_CTAlloc(HYPRE_Complex, A_offd_nnz, hypre_AMGDDCompGridMemoryLocation(compGrid[level]));
-      
+
       HYPRE_Int A_real_real_nnz = 0;
       HYPRE_Int A_real_ghost_nnz = 0;
 
@@ -833,7 +833,7 @@ HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGDDData *amgdd_data )
 
       hypre_CSRMatrix *R_diag;
       hypre_CSRMatrix *R_offd;
-      
+
       HYPRE_Int R_diag_nnz;
       HYPRE_Int *new_R_diag_rowPtr;
       HYPRE_Int *new_R_diag_colInd;
@@ -900,7 +900,7 @@ HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGDDData *amgdd_data )
                   {
                       A_real_real_nnz++;
                   }
-                  else 
+                  else
                   {
                       A_real_ghost_nnz++;
                   }
@@ -1070,7 +1070,7 @@ HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGDDData *amgdd_data )
          {
             hypre_CSRMatrixJ(P_diag)[i] = new_indices[ hypre_CSRMatrixJ(P_diag)[i] ];
          }
-         // Also fix up owned offd col indices 
+         // Also fix up owned offd col indices
          for (i = 0; i < hypre_CSRMatrixI(P_offd)[ hypre_AMGDDCompGridNumOwnedNodes(compGrid[level-1]) ]; i++)
          {
             hypre_CSRMatrixJ(P_offd)[i] = new_indices[ hypre_CSRMatrixJ(P_offd)[i] ];
@@ -1086,7 +1086,7 @@ HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGDDData *amgdd_data )
          {
             if (hypre_CSRMatrixJ(R_diag)[i] >= 0) hypre_CSRMatrixJ(R_diag)[i] = new_indices[ hypre_CSRMatrixJ(R_diag)[i] ];
          }
-         // Also fix up owned offd col indices 
+         // Also fix up owned offd col indices
          for (i = 0; i < hypre_CSRMatrixI(R_offd)[ hypre_AMGDDCompGridNumOwnedNodes(compGrid[level+1]) ]; i++)
          {
             if (hypre_CSRMatrixJ(R_offd)[i] >= 0) hypre_CSRMatrixJ(R_offd)[i] = new_indices[ hypre_CSRMatrixJ(R_offd)[i] ];
@@ -1192,7 +1192,7 @@ HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGDDData *amgdd_data )
 
       hypre_AMGDDCompGridTemp(compGrid[level]) = hypre_AMGDDCompGridVectorCreate();
       hypre_AMGDDCompGridVectorInitialize(hypre_AMGDDCompGridTemp(compGrid[level]), num_owned, num_nonowned, num_nonowned_real_nodes);
-      
+
       if (level < num_levels)
       {
          hypre_AMGDDCompGridS(compGrid[level]) = hypre_AMGDDCompGridVectorCreate();
@@ -1244,15 +1244,15 @@ HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGDDData *amgdd_data )
          // !!! TODO: if BoomerAMG explicitly stores R = P^T, use those matrices in
          hypre_AMGDDCompGridR(compGrid[level]) = hypre_AMGDDCompGridMatrixCreate();
          hypre_AMGDDCompGridMatrixOwnsOwnedMatrices(hypre_AMGDDCompGridR(compGrid[level])) = 1;
-         hypre_CSRMatrixTranspose(hypre_AMGDDCompGridMatrixOwnedDiag(hypre_AMGDDCompGridP(compGrid[level])), 
+         hypre_CSRMatrixTranspose(hypre_AMGDDCompGridMatrixOwnedDiag(hypre_AMGDDCompGridP(compGrid[level])),
                                   &hypre_AMGDDCompGridMatrixOwnedDiag(hypre_AMGDDCompGridR(compGrid[level])), 1);
-         if (hypre_AMGDDCompGridNumNonOwnedNodes(compGrid[level])) 
-             hypre_CSRMatrixTranspose(hypre_AMGDDCompGridMatrixNonOwnedOffd(hypre_AMGDDCompGridP(compGrid[level])), 
+         if (hypre_AMGDDCompGridNumNonOwnedNodes(compGrid[level]))
+             hypre_CSRMatrixTranspose(hypre_AMGDDCompGridMatrixNonOwnedOffd(hypre_AMGDDCompGridP(compGrid[level])),
                                   &hypre_AMGDDCompGridMatrixOwnedOffd(hypre_AMGDDCompGridR(compGrid[level])), 1);
-         hypre_CSRMatrixTranspose(hypre_AMGDDCompGridMatrixOwnedOffd(hypre_AMGDDCompGridP(compGrid[level])), 
+         hypre_CSRMatrixTranspose(hypre_AMGDDCompGridMatrixOwnedOffd(hypre_AMGDDCompGridP(compGrid[level])),
                                   &hypre_AMGDDCompGridMatrixNonOwnedOffd(hypre_AMGDDCompGridR(compGrid[level])), 1);
-         if (hypre_AMGDDCompGridNumNonOwnedNodes(compGrid[level])) 
-             hypre_CSRMatrixTranspose(hypre_AMGDDCompGridMatrixNonOwnedDiag(hypre_AMGDDCompGridP(compGrid[level])), 
+         if (hypre_AMGDDCompGridNumNonOwnedNodes(compGrid[level]))
+             hypre_CSRMatrixTranspose(hypre_AMGDDCompGridMatrixNonOwnedDiag(hypre_AMGDDCompGridP(compGrid[level])),
                                   &hypre_AMGDDCompGridMatrixNonOwnedDiag(hypre_AMGDDCompGridR(compGrid[level])), 1);
       }
    }
@@ -1411,7 +1411,7 @@ HYPRE_Int hypre_AMGDDCompGridSetupLocalIndices( hypre_AMGDDCompGrid **compGrid, 
             }
          }
 
-         // Update row pointers 
+         // Update row pointers
          hypre_CSRMatrixI(nonowned_offd)[ row ] = offd_rowptr;
          hypre_CSRMatrixI(nonowned_diag)[ row ] = diag_rowptr;
          row++;
@@ -1447,11 +1447,11 @@ HYPRE_Int hypre_AMGDDCompGridSetupLocalIndices( hypre_AMGDDCompGrid **compGrid, 
             hypre_CSRMatrixJ(nonowned_diag)[ j ] = local_index;
          }
       }
-     
+
       // if we are not on the coarsest level
       if (level != num_levels-1)
       {
-         // loop over indices of non-owned nodes on this level 
+         // loop over indices of non-owned nodes on this level
          // No guarantee that previous ghost dofs converted to real dofs have coarse local indices setup...
          // Thus we go over all non-owned dofs here instead of just the added ones, but we only setup coarse local index where necessary.
          // NOTE: can't use nodes_added_on_level here either because real overwritten by ghost doesn't count as added node (so you can miss setting these up)
@@ -1670,7 +1670,7 @@ HYPRE_Int hypre_AMGDDCommPkgDestroy( hypre_AMGDDCommPkg *amgddCommPkg )
    {
       hypre_TFree( hypre_AMGDDCommPkgNumRecvProcs(amgddCommPkg), HYPRE_MEMORY_HOST );
    }
-   
+
    hypre_TFree(amgddCommPkg, HYPRE_MEMORY_HOST);
 
    return 0;

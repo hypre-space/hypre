@@ -11,7 +11,7 @@
 /*****************************************************************************
  *
  * Routine for setting up the composite grids in AMG-DD
- 
+
  *****************************************************************************/
 
 /*****************************************************************************
@@ -19,10 +19,10 @@
  *****************************************************************************/
 
 HYPRE_Int
-hypre_BoomerAMGDDSetup( void *amgdd_vdata, 
-                        hypre_ParCSRMatrix *A, 
-                        hypre_ParVector *b, 
-                        hypre_ParVector *x) 
+hypre_BoomerAMGDDSetup( void *amgdd_vdata,
+                        hypre_ParCSRMatrix *A,
+                        hypre_ParVector *b,
+                        hypre_ParVector *x)
 {
 
    HYPRE_Int   myid, num_procs;
@@ -84,7 +84,7 @@ hypre_BoomerAMGDDSetup( void *amgdd_vdata,
    // Get the padding on each level
    HYPRE_Int *padding = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
    for (level = amgdd_start_level; level < num_levels; level++) padding[level] = pad;
- 
+
    // Initialize composite grid structures
    for (level = amgdd_start_level; level < num_levels; level++)
    {
@@ -206,7 +206,7 @@ hypre_BoomerAMGDDSetup( void *amgdd_vdata,
             num_recv_nodes[level][i] = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
 
             hypre_BoomerAMGDD_UnpackRecvBuffer(recv_buffer[i], amgdd_data, A_tmp_info, recv_redundant_marker, &(recv_map_send_buffer_size[i]), nodes_added_on_level, level, i);
-            
+
             recv_map_send_buffer[i] = hypre_CTAlloc(HYPRE_Int, recv_map_send_buffer_size[i], HYPRE_MEMORY_HOST);
             hypre_BoomerAMGDD_PackRecvMapSendBuffer(recv_map_send_buffer[i], recv_redundant_marker[level][i], num_recv_nodes[level][i], &(recv_buffer_size[level][i]), level, num_levels);
          }
@@ -269,7 +269,7 @@ hypre_BoomerAMGDDSetup( void *amgdd_vdata,
    /////////////////////////////////////////////////////////////////
 
    hypre_BoomerAMGDD_FixUpRecvMaps(compGrid, compGridCommPkg, recv_redundant_marker, amgdd_start_level, num_levels);
-   
+
    // Communicate data for A and all info for P
    hypre_BoomerAMGDD_CommunicateRemainingMatrixInfo(amgdd_data);
 

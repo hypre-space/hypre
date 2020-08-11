@@ -10,7 +10,7 @@
 HYPRE_Int
 hypre_BoomerAMGDD_FAC_Cycle(void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPRE_Int first_iteration);
 
-HYPRE_Int 
+HYPRE_Int
 hypre_BoomerAMGDD_FAC_FCycle(void *amgdd_vdata, HYPRE_Int first_iteration);
 
 HYPRE_Int
@@ -108,7 +108,7 @@ HYPRE_Int hypre_BoomerAMGDD_FAC_FCycle(void *amgdd_vdata, HYPRE_Int first_iterat
    // Get the composite grid
    hypre_AMGDDCompGrid          **compGrid = hypre_ParAMGDDDataCompGrid(amgdd_data);
 
-   // ... work down to coarsest ... 
+   // ... work down to coarsest ...
    if (!first_iteration)
    {
       for (level = hypre_ParAMGDDDataStartLevel(amgdd_data); level < num_levels - 1; level++)
@@ -148,10 +148,10 @@ hypre_BoomerAMGDD_FAC_Restrict( hypre_AMGDDCompGrid *compGrid_f, hypre_AMGDDComp
    // Recalculate residual on coarse grid
    if (!first_iteration) hypre_AMGDDCompGridMatvec(-1.0, hypre_AMGDDCompGridA(compGrid_c), hypre_AMGDDCompGridU(compGrid_c), 1.0, hypre_AMGDDCompGridF(compGrid_c));
 
-   // Get update: s_l <- A_lt_l + s_l 
+   // Get update: s_l <- A_lt_l + s_l
    hypre_AMGDDCompGridMatvec(1.0, hypre_AMGDDCompGridA(compGrid_f), hypre_AMGDDCompGridT(compGrid_f), 1.0, hypre_AMGDDCompGridS(compGrid_f));
 
-   // If we need to preserve the updates on the next level 
+   // If we need to preserve the updates on the next level
    if (hypre_AMGDDCompGridS(compGrid_c))
    {
       hypre_AMGDDCompGridMatvec(1.0, hypre_AMGDDCompGridR(compGrid_f), hypre_AMGDDCompGridS(compGrid_f), 0.0, hypre_AMGDDCompGridS(compGrid_c));
@@ -190,15 +190,15 @@ hypre_BoomerAMGDD_FAC_Relax( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle
     {
        (*hypre_ParAMGDDDataUserFACRelaxation(amgdd_data))( amgdd_vdata, level, cycle_param );
     }
-   
+
    if (hypre_AMGDDCompGridT(compGrid) || hypre_AMGDDCompGridQ(compGrid))
    {
       hypre_AMGDDCompGridVectorAxpy(1.0, hypre_AMGDDCompGridU(compGrid), hypre_AMGDDCompGridTemp(compGrid));
-      if (hypre_AMGDDCompGridT(compGrid)) 
+      if (hypre_AMGDDCompGridT(compGrid))
       {
          hypre_AMGDDCompGridVectorAxpy(1.0, hypre_AMGDDCompGridTemp(compGrid), hypre_AMGDDCompGridT(compGrid));
       }
-      if (hypre_AMGDDCompGridQ(compGrid)) 
+      if (hypre_AMGDDCompGridQ(compGrid))
       {
          hypre_AMGDDCompGridVectorAxpy(1.0, hypre_AMGDDCompGridTemp(compGrid), hypre_AMGDDCompGridQ(compGrid));
       }
@@ -214,7 +214,7 @@ hypre_BoomerAMGDD_FAC_Jacobi( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycl
    return hypre_BoomerAMGDD_FAC_Jacobi_device(amgdd_vdata, level);
 #endif
 
-   HYPRE_Int i,j; 
+   HYPRE_Int i,j;
 
    hypre_ParAMGDDData *amgdd_data = (hypre_ParAMGDDData*) amgdd_vdata;
    hypre_AMGDDCompGrid *compGrid = hypre_ParAMGDDDataCompGrid(amgdd_data)[level];
@@ -349,12 +349,12 @@ HYPRE_Int hypre_BoomerAMGDD_FAC_OrderedGaussSeidel( void *amgdd_vdata, HYPRE_Int
    hypre_AMGDDCompGridVector *f = hypre_AMGDDCompGridF(compGrid);
    hypre_AMGDDCompGridVector *u = hypre_AMGDDCompGridU(compGrid);
 
-   if (!hypre_AMGDDCompGridOwnedRelaxOrdering(compGrid)) 
+   if (!hypre_AMGDDCompGridOwnedRelaxOrdering(compGrid))
    {
       hypre_AMGDDCompGridOwnedRelaxOrdering(compGrid) = hypre_CTAlloc(HYPRE_Int, hypre_AMGDDCompGridNumOwnedNodes(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
       hypre_topo_sort(hypre_CSRMatrixI(hypre_AMGDDCompGridMatrixOwnedDiag(hypre_AMGDDCompGridA(compGrid))), hypre_CSRMatrixJ(hypre_AMGDDCompGridMatrixOwnedDiag(hypre_AMGDDCompGridA(compGrid))), hypre_CSRMatrixData(hypre_AMGDDCompGridMatrixOwnedDiag(hypre_AMGDDCompGridA(compGrid))), hypre_AMGDDCompGridOwnedRelaxOrdering(compGrid), hypre_AMGDDCompGridNumOwnedNodes(compGrid));
    }
-   if (!hypre_AMGDDCompGridNonOwnedRelaxOrdering(compGrid)) 
+   if (!hypre_AMGDDCompGridNonOwnedRelaxOrdering(compGrid))
    {
       hypre_AMGDDCompGridNonOwnedRelaxOrdering(compGrid) = hypre_CTAlloc(HYPRE_Int, hypre_AMGDDCompGridNumNonOwnedNodes(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
       hypre_topo_sort(hypre_CSRMatrixI(hypre_AMGDDCompGridMatrixNonOwnedDiag(hypre_AMGDDCompGridA(compGrid))), hypre_CSRMatrixJ(hypre_AMGDDCompGridMatrixNonOwnedDiag(hypre_AMGDDCompGridA(compGrid))), hypre_CSRMatrixData(hypre_AMGDDCompGridMatrixNonOwnedDiag(hypre_AMGDDCompGridA(compGrid))), hypre_AMGDDCompGridNonOwnedRelaxOrdering(compGrid), hypre_AMGDDCompGridNumNonOwnedNodes(compGrid));
@@ -433,7 +433,7 @@ hypre_BoomerAMGDD_FAC_CFL1Jacobi( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int 
 #if defined(HYPRE_USING_CUDA)
    if (cycle_param == 1)
    {
-      hypre_BoomerAMGDD_FAC_CFL1Jacobi_device(amgdd_vdata, level, 1); 
+      hypre_BoomerAMGDD_FAC_CFL1Jacobi_device(amgdd_vdata, level, 1);
       hypre_BoomerAMGDD_FAC_CFL1Jacobi_device(amgdd_vdata, level, 0);
    }
    else if (cycle_param == 2)
@@ -445,7 +445,7 @@ hypre_BoomerAMGDD_FAC_CFL1Jacobi( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int 
 #else
    if (cycle_param == 1)
    {
-      hypre_BoomerAMGDD_FAC_CFL1Jacobi_cpu(amgdd_vdata, level, 1); 
+      hypre_BoomerAMGDD_FAC_CFL1Jacobi_cpu(amgdd_vdata, level, 1);
       hypre_BoomerAMGDD_FAC_CFL1Jacobi_cpu(amgdd_vdata, level, 0);
    }
    else if (cycle_param == 2)
