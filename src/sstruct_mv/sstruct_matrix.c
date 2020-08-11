@@ -267,7 +267,7 @@ hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
    {
       num_ghost[2*d] = num_ghost[2*d+1] = 1;
    }
-   for (d = ndim; d < ndim; d++)
+   for (d = ndim; d < HYPRE_MAXDIM; d++)
    {
       num_ghost[2*d] = num_ghost[2*d+1] = 0;
    }
@@ -1726,12 +1726,13 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
 hypre_IJMatrix *
 hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
 {
-   HYPRE_IJMatrix           ij_A;
+   MPI_Comm                 comm     = hypre_SStructMatrixComm(matrix);
    HYPRE_Int                ndim     = hypre_SStructMatrixNDim(matrix);
    HYPRE_Int                nparts   = hypre_SStructMatrixNParts(matrix);
    HYPRE_Int               *Sentries = hypre_SStructMatrixSEntries(matrix);
-   MPI_Comm                 comm     = hypre_SStructMatrixComm(matrix);
+   HYPRE_IJMatrix           ij_A     = hypre_SStructMatrixIJMatrix(matrix);
 
+   HYPRE_IJMatrix           ij_Ahat;
    hypre_SStructPMatrix    *pmatrix;
    hypre_StructMatrix      *smatrix;
    hypre_StructStencil     *sstencil;
@@ -1745,18 +1746,14 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
    hypre_IndexRef           start;
    hypre_IndexRef           ilower, iupper;
 
-   HYPRE_Int                i, m, mi, nrows, ncols, nnzs, max_size;
-   HYPRE_Int                istart, iend, jstart, jend;
+   HYPRE_Int                i, m, mi, nrows, nnzs, max_size;
+   HYPRE_Int                sizes[4];
    HYPRE_Int                part, var, nvars, entry;
    HYPRE_Complex           *values;
 
    /* Set beggining/end of rows and columns that belong to this process */
-   nrows  = hypre_SStructMatrixRanGhlocalSize(matrix);
-   ncols  = hypre_SStructMatrixDomGhlocalSize(matrix);
-   istart = hypre_SStructMatrixRanGhstartRank(matrix);
-   jstart = hypre_SStructMatrixDomGhstartRank(matrix);
-   iend   = istart + nrows - 1;
-   jend   = jstart + ncols - 1;
+   HYPRE_IJMatrixGetLocalRange(ij_A, &sizes[0], &sizes[1], &sizes[2], &sizes[3]);
+   nrows = sizes[1] - sizes[0] + 1;
 
    /* Set row sizes */
    max_size = m = 0;
@@ -1807,17 +1804,17 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
       } /* Loop over vars */
    } /* Loop over parts */
 
-   /* Create and initialize ij_A */
-   HYPRE_IJMatrixCreate(comm, istart, iend, jstart, jend, &ij_A);
-   HYPRE_IJMatrixSetObjectType(ij_A, HYPRE_PARCSR);
-   HYPRE_IJMatrixSetRowSizes(ij_A, (const HYPRE_Int *) row_sizes);
-   HYPRE_IJMatrixInitialize(ij_A);
+   /* Create and initialize ij_Ahat */
+   HYPRE_IJMatrixCreate(comm, sizes[0], sizes[1], sizes[2], sizes[3], &ij_Ahat);
+   HYPRE_IJMatrixSetObjectType(ij_Ahat, HYPRE_PARCSR);
+   HYPRE_IJMatrixSetRowSizes(ij_Ahat, (const HYPRE_Int *) row_sizes);
+   HYPRE_IJMatrixInitialize(ij_Ahat);
 
    /* Free/Allocate memory */
    hypre_TFree(row_sizes);
    values = hypre_CTAlloc(HYPRE_Complex, nrows*max_size);
 
-   /* Set entries of ij_A */
+   /* Set entries of ij_Ahat */
    for (part = 0; part < nparts; part++)
    {
       pmatrix = hypre_SStructMatrixPMatrix(matrix, part);
@@ -1851,19 +1848,19 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
             hypre_SStructPMatrixSetBoxValues(pmatrix, ilower, iupper, var,
                                              nSentries, Sentries, values, -1);
 
-            /* SET values to ij_A */
+            /* SET values to ij_Ahat */
             hypre_SStructUMatrixSetBoxValuesHelper(matrix, part, ilower, iupper,
                                                    var, nSentries, Sentries,
-                                                   values, 0, ij_A);
+                                                   values, 0, ij_Ahat);
          } /* Loop over boxes */
       } /* Loop over vars */
    } /* Loop over parts */
 
    /* Assemble ij_A */
-   HYPRE_IJMatrixAssemble(ij_A);
+   HYPRE_IJMatrixAssemble(ij_Ahat);
 
    /* Free memory */
    hypre_TFree(values);
 
-   return (hypre_IJMatrix *) ij_A;
+   return (hypre_IJMatrix *) ij_Ahat;
 }
