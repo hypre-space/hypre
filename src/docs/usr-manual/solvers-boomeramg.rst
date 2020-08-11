@@ -113,8 +113,8 @@ A good overview of parallel smoothers and their properties can be found in
 [BFKY2011]_. Various of the described relaxation techniques are available:
 
 * weighted Jacobi relaxation,
-* a hybrid Gauss-Seidel / Jacobi relaxation scheme, 
-* a symmetric hybrid Gauss-Seidel / Jacobi relaxation scheme, 
+* a hybrid Gauss-Seidel / Jacobi relaxation scheme,
+* a symmetric hybrid Gauss-Seidel / Jacobi relaxation scheme,
 * l1-Gauss-Seidel or Jacobi,
 * Chebyshev smoothers,
 * hybrid block and Schwarz smoothers [Yang2004]_,
@@ -136,7 +136,7 @@ symmetric Gauss-Seidel.
 
 AMG for systems of PDEs
 ------------------------------------------------------------------------------
- 
+
 If the users wants to solve systems of PDEs and can provide information on which
 variables belong to which function, BoomerAMG's systems AMG version can also be
 used. Functions that enable the user to access the systems AMG version are
@@ -162,6 +162,24 @@ BoomerAMG also provides an additive V(1,1)-cycle as well as a mult-additive
 V(1,1)-cycle and a simplified versioni [VaYa2014]_. The additive variants can
 only be used with weighted Jacobi or l1-Jacobi smoothing.
 
+GPU-supported Options
+------------------------------------------------------------------------------
+In general, CUDA unified memory is required for running BoomerAMG solvers on GPUs,
+so hypre should be configured with ``--enable-unified-memory``.
+``HYPRE_Init()`` must be called and precede all the other hypre functions, and 
+``HYPRE_Finalize()`` must be called before exiting.
+To enable the execution of  AMG setup  on GPUs, one needs to explicitly specify the execution policy
+by
+
+.. code-block:: bash
+
+ hypre_HandleDefaultExecPolicy(hypre_handle()) = HYPRE_EXEC_DEVICE
+
+The currently available  GPU-supported BoomerAMG options include:
+
+* Coarsening: PMIS. No aggressive coarsening is supported,
+* Interpolation: direct interpolation, extended interpolation and extended+i interpolation,
+* Smoother: weighted Jacobi relaxation and l1-Jacobi.
 
 Miscellaneous
 ------------------------------------------------------------------------------

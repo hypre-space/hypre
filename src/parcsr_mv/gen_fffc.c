@@ -162,12 +162,14 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
 
       if (my_thread_num == 0)
       {
+         HYPRE_BigInt big_Fpts;
          n_Fpts = fpt_array[num_threads];
+         big_Fpts = n_Fpts;
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-         fpts_starts = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-         hypre_MPI_Scan(&n_Fpts, fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
-         fpts_starts[0] = fpts_starts[1] - n_Fpts;
+         fpts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+         hypre_MPI_Scan(&big_Fpts, fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         fpts_starts[0] = fpts_starts[1] - big_Fpts;
          if (my_id == num_procs - 1)
          {
             total_global_fpts = fpts_starts[1];
@@ -177,7 +179,7 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
          hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
 #else
          fpts_starts = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
-         hypre_MPI_Allgather(&n_Fpts, 1, HYPRE_MPI_BIG_INT, &fpts_starts[1], 1, HYPRE_MPI_BIG_INT, comm);
+         hypre_MPI_Allgather(&big_Fpts, 1, HYPRE_MPI_BIG_INT, &fpts_starts[1], 1, HYPRE_MPI_BIG_INT, comm);
          fpts_starts[0] = 0;
          for (i = 2; i < num_procs+1; i++)
          {
@@ -656,16 +658,19 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix *A,
 
       if (my_thread_num == 0)
       {
+         HYPRE_BigInt big_Fpts, big_new_Fpts;
          n_Fpts = fpt_array[num_threads];
          n_new_Fpts = new_fpt_array[num_threads];
+         big_Fpts = n_Fpts;
+         big_new_Fpts = n_new_Fpts;
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-         fpts_starts = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-         new_fpts_starts = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-         hypre_MPI_Scan(&n_Fpts, fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
-         hypre_MPI_Scan(&n_new_Fpts, new_fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
-         fpts_starts[0] = fpts_starts[1] - n_Fpts;
-         new_fpts_starts[0] = new_fpts_starts[1] - n_new_Fpts;
+         fpts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+         new_fpts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+         hypre_MPI_Scan(&big_Fpts, fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         hypre_MPI_Scan(&big_new_Fpts, new_fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         fpts_starts[0] = fpts_starts[1] - big_Fpts;
+         new_fpts_starts[0] = new_fpts_starts[1] - big_new_Fpts;
          if (my_id == num_procs - 1)
          {
             total_global_new_fpts = new_fpts_starts[1];
@@ -677,9 +682,9 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix *A,
          hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
 #else
          fpts_starts = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
-         new_fpts_starts = hypre_TAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
-         hypre_MPI_Allgather(&n_Fpts, 1, HYPRE_MPI_BIG_INT, &fpts_starts[1], 1, HYPRE_MPI_BIG_INT, comm);
-         hypre_MPI_Allgather(&n_new_Fpts, 1, HYPRE_MPI_BIG_INT, &new_fpts_starts[1], 1, HYPRE_MPI_BIG_INT, comm);
+         new_fpts_starts = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
+         hypre_MPI_Allgather(&big_Fpts, 1, HYPRE_MPI_BIG_INT, &fpts_starts[1], 1, HYPRE_MPI_BIG_INT, comm);
+         hypre_MPI_Allgather(&big_new_Fpts, 1, HYPRE_MPI_BIG_INT, &new_fpts_starts[1], 1, HYPRE_MPI_BIG_INT, comm);
          fpts_starts[0] = 0;
          new_fpts_starts[0] = 0;
          for (i = 2; i < num_procs+1; i++)
@@ -1205,16 +1210,19 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
 
       if (my_thread_num == 0)
       {
+         HYPRE_BigInt big_Fpts, big_new_Fpts;
          n_Fpts = fpt_array[num_threads];
          n_new_Fpts = new_fpt_array[num_threads];
+         big_Fpts = n_Fpts;
+         big_new_Fpts = n_new_Fpts;
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-         fpts_starts = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-         new_fpts_starts = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-         hypre_MPI_Scan(&n_Fpts, fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
-         hypre_MPI_Scan(&n_new_Fpts, new_fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
-         fpts_starts[0] = fpts_starts[1] - n_Fpts;
-         new_fpts_starts[0] = new_fpts_starts[1] - n_new_Fpts;
+         fpts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+         new_fpts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+         hypre_MPI_Scan(&big_Fpts, fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         hypre_MPI_Scan(&big_new_Fpts, new_fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         fpts_starts[0] = fpts_starts[1] - big_Fpts;
+         new_fpts_starts[0] = new_fpts_starts[1] - big_new_Fpts;
          if (my_id == num_procs - 1)
          {
             total_global_new_fpts = new_fpts_starts[1];
@@ -1226,9 +1234,9 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
          hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
 #else
          fpts_starts = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
-         new_fpts_starts = hypre_TAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
-         hypre_MPI_Allgather(&n_Fpts, 1, HYPRE_MPI_BIG_INT, &fpts_starts[1], 1, HYPRE_MPI_BIG_INT, comm);
-         hypre_MPI_Allgather(&n_new_Fpts, 1, HYPRE_MPI_BIG_INT, &new_fpts_starts[1], 1, HYPRE_MPI_BIG_INT, comm);
+         new_fpts_starts = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
+         hypre_MPI_Allgather(&big_Fpts, 1, HYPRE_MPI_BIG_INT, &fpts_starts[1], 1, HYPRE_MPI_BIG_INT, comm);
+         hypre_MPI_Allgather(&big_new_Fpts, 1, HYPRE_MPI_BIG_INT, &new_fpts_starts[1], 1, HYPRE_MPI_BIG_INT, comm);
          fpts_starts[0] = 0;
          new_fpts_starts[0] = 0;
          for (i = 2; i < num_procs+1; i++)

@@ -240,7 +240,7 @@ hypre_BoomerAMGCreate()
 
    nongalerkin_tol = 0.0;
 
-   HYPRE_ANNOTATION_BEGIN("BoomerAMG.create");
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /*-----------------------------------------------------------------------
     * Create the hypre_ParAMGData structure and return
@@ -459,7 +459,7 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataDSLUSolver(amg_data) = NULL;
 #endif
 
-   HYPRE_ANNOTATION_END("BoomerAMG.create");
+   HYPRE_ANNOTATE_FUNC_END;
 
    return (void *) amg_data;
 }
@@ -480,7 +480,7 @@ hypre_BoomerAMGDestroy( void *data )
    HYPRE_Int i;
    HYPRE_Int *grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
 
-   HYPRE_ANNOTATION_BEGIN("BoomerAMG.destroy");
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
 #ifdef HYPRE_USING_DSUPERLU
 //   if (hypre_ParAMGDataDSLUThreshold(amg_data) > 0)
@@ -705,7 +705,7 @@ hypre_BoomerAMGDestroy( void *data )
             HYPRE_ParCSRParaSailsDestroy(smoother[i]);
          }
       }
-      else if (hypre_ParAMGDataSmoothType(amg_data) == 9 || hypre_ParAMGDataSmoothType(amg_data) == 19 ) 
+      else if (hypre_ParAMGDataSmoothType(amg_data) == 9 || hypre_ParAMGDataSmoothType(amg_data) == 19 )
       {
          for (i=0; i < smooth_num_levels; i++)
          {
@@ -800,7 +800,7 @@ hypre_BoomerAMGDestroy( void *data )
 
    hypre_TFree(amg_data, HYPRE_MEMORY_HOST);
 
-   HYPRE_ANNOTATION_END("BoomerAMG.destroy");
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -2877,7 +2877,7 @@ hypre_BoomerAMGSetPlotFileName( void       *data,
    return hypre_error_flag;
 }
 /* Get the coarse grid hierarchy. Assumes cgrid is preallocated to the size of the local matrix.
- * Adapted from par_amg_setup.c, and simplified by ignoring printing in block mode. 
+ * Adapted from par_amg_setup.c, and simplified by ignoring printing in block mode.
  * We do a memcpy on the final grid hierarchy to avoid modifying user allocated data.
 */
 HYPRE_Int
@@ -2887,8 +2887,8 @@ hypre_BoomerAMGGetGridHierarchy( void       *data,
    HYPRE_Int *ibuff = NULL;
    HYPRE_Int *wbuff, *cbuff, *tmp;
    HYPRE_Int local_size, lev_size, i, j, level, num_levels, block_mode;
-   HYPRE_Int          **CF_marker_array;   
-   
+   HYPRE_Int          **CF_marker_array;
+
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
    if (!amg_data)
    {
@@ -2900,27 +2900,27 @@ hypre_BoomerAMGGetGridHierarchy( void       *data,
       hypre_error_in_arg(2);
       return hypre_error_flag;
    }
-   
+
    block_mode = hypre_ParAMGDataBlockMode(amg_data);
-   
+
    if( block_mode)
    {
-      hypre_ParCSRBlockMatrix **A_block_array;  
-      A_block_array = hypre_ParAMGDataABlockArray(amg_data);   
+      hypre_ParCSRBlockMatrix **A_block_array;
+      A_block_array = hypre_ParAMGDataABlockArray(amg_data);
       if(A_block_array == NULL)
       {
          hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Invalid AMG data. AMG setup has not been called!!\n");
-         return hypre_error_flag;   
+         return hypre_error_flag;
       }
 
       CF_marker_array = hypre_ParAMGDataCFMarkerArray(amg_data);
 
       // get local size and allocate some memory
-      local_size = hypre_CSRMatrixNumRows(hypre_ParCSRBlockMatrixDiag(A_block_array[0]));   
+      local_size = hypre_CSRMatrixNumRows(hypre_ParCSRBlockMatrixDiag(A_block_array[0]));
       ibuff  = hypre_CTAlloc(HYPRE_Int, (2 * local_size), HYPRE_MEMORY_HOST);
       wbuff  = ibuff;
       cbuff  = ibuff + local_size;
-   
+
       num_levels = hypre_ParAMGDataNumLevels(amg_data);
       for (level = (num_levels - 2); level >= 0; level--)
       {
@@ -2930,7 +2930,7 @@ hypre_BoomerAMGGetGridHierarchy( void       *data,
          cbuff = tmp;
 
          lev_size = hypre_CSRMatrixNumRows(hypre_ParCSRBlockMatrixDiag(A_block_array[level]));
-      
+
          for (i = 0, j = 0; i < lev_size; i++)
          {
             /* if a C-point */
@@ -2941,25 +2941,25 @@ hypre_BoomerAMGGetGridHierarchy( void       *data,
                j++;
             }
          }
-      }      
+      }
    }
    else
    {
-      hypre_ParCSRMatrix **A_array;  
-      A_array = hypre_ParAMGDataAArray(amg_data);   
+      hypre_ParCSRMatrix **A_array;
+      A_array = hypre_ParAMGDataAArray(amg_data);
       if(A_array == NULL)
       {
          hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Invalid AMG data. AMG setup has not been called!!\n");
-         return hypre_error_flag;   
+         return hypre_error_flag;
       }
 
       CF_marker_array = hypre_ParAMGDataCFMarkerArray(amg_data);
 
       // get local size and allocate some memory
-      local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[0]));   
+      local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[0]));
       wbuff  = hypre_CTAlloc(HYPRE_Int, (2 * local_size), HYPRE_MEMORY_HOST);
       cbuff  = wbuff + local_size;
-   
+
       num_levels = hypre_ParAMGDataNumLevels(amg_data);
       for (level = (num_levels - 2); level >= 0; level--)
       {
@@ -2969,7 +2969,7 @@ hypre_BoomerAMGGetGridHierarchy( void       *data,
          cbuff = tmp;
 
          lev_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level]));
-      
+
          for (i = 0, j = 0; i < lev_size; i++)
          {
             /* if a C-point */
@@ -2980,15 +2980,15 @@ hypre_BoomerAMGGetGridHierarchy( void       *data,
                j++;
             }
          }
-      }          
+      }
    }
    // copy hierarchy into user provided array
    hypre_TMemcpy(cgrid, cbuff, HYPRE_Int, local_size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
    // free memory
-   hypre_TFree(ibuff, HYPRE_MEMORY_HOST);  
-        
+   hypre_TFree(ibuff, HYPRE_MEMORY_HOST);
+
    return hypre_error_flag;
-}                              
+}
 
 /* BM Oct 17, 2006 */
 HYPRE_Int

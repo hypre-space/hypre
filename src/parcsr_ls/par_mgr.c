@@ -889,7 +889,10 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
 
   hypre_MPI_Comm_size(comm, &num_procs);
   hypre_MPI_Comm_rank(comm,&my_id);
-  num_threads = hypre_NumThreads();
+  //num_threads = hypre_NumThreads();
+  // Temporary fix, disable threading
+  // TODO: enable threading
+  num_threads = 1;
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
   //my_first_cpt = num_cpts_global[0];
@@ -1460,7 +1463,10 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
-   num_threads = hypre_NumThreads();
+  //num_threads = hypre_NumThreads();
+  // Temporary fix, disable threading
+  // TODO: enable threading
+  num_threads = 1;
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    //my_first_cpt = num_cpts_global[0];
@@ -2128,8 +2134,9 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
   HYPRE_Int             *A_h_correction_offd_i = hypre_CSRMatrixI(A_h_correction_offd);
   HYPRE_Int             *A_h_correction_offd_j = hypre_CSRMatrixJ(A_h_correction_offd);
 
-  if (Pmax > 0)
-  {
+  // Allow for maximum dropping with Pmax = 0
+  //if (Pmax > 0)
+  //{
     if (ordering == 0) // interleaved ordering
     {
       HYPRE_Int *A_h_correction_diag_i_new = hypre_CTAlloc(HYPRE_Int, n_local_cpoints+1, HYPRE_MEMORY_HOST);
@@ -2229,7 +2236,7 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
       hypre_printf("Error!! Block ordering is not supported at the moment\n");
       exit(-1);
     }
-  }
+  //}
   //hypre_MGRParCSRMatrixTruncate(A_h_correction, max_elmts);
   //wall_time = time_getWallclockSeconds() - wall_time;
   //hypre_printf("Filter A_h_correction time: %1.5f\n", wall_time);
@@ -4687,7 +4694,10 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
 
   hypre_MPI_Comm_size(comm, &num_procs);
   hypre_MPI_Comm_rank(comm,&my_id);
-  num_threads = hypre_NumThreads();
+  //num_threads = hypre_NumThreads();
+  // Temporary fix, disable threading
+  // TODO: enable threading
+  num_threads = 1;
 
   /* get the number of coarse rows */
   hypre_BoomerAMGCoarseParms(comm, local_numrows, 1, NULL, row_cf_marker, &coarse_dof_func_ptr, &num_row_cpts_global);
@@ -5081,7 +5091,7 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
 
 /* Build A_FF matrix from A given a CF_marker array */
 HYPRE_Int
-hypre_MGRBuildAffNew( hypre_ParCSRMatrix   *A,
+hypre_MGRBuildAff( hypre_ParCSRMatrix   *A,
            HYPRE_Int            *CF_marker,
            HYPRE_Int             debug_flag,
            hypre_ParCSRMatrix  **A_ff_ptr )
@@ -5173,8 +5183,9 @@ hypre_MGRAddVectorR ( HYPRE_Int  *CF_marker,
   return 0;
 }
 
+/*
 HYPRE_Int
-hypre_MGRBuildAff( MPI_Comm comm, HYPRE_Int local_num_variables, HYPRE_Int num_functions,
+hypre_MGRBuildAffRAP( MPI_Comm comm, HYPRE_Int local_num_variables, HYPRE_Int num_functions,
   HYPRE_Int *dof_func, HYPRE_Int *CF_marker, HYPRE_Int **coarse_dof_func_ptr, HYPRE_BigInt **coarse_pnts_global_ptr,
   hypre_ParCSRMatrix *A, HYPRE_Int debug_flag, hypre_ParCSRMatrix **P_f_ptr, hypre_ParCSRMatrix **A_ff_ptr )
 {
@@ -5191,6 +5202,7 @@ hypre_MGRBuildAff( MPI_Comm comm, HYPRE_Int local_num_variables, HYPRE_Int num_f
   hypre_TFree(CF_marker_copy, HYPRE_MEMORY_HOST);
   return 0;
 }
+*/
 
 /* Get pointer to coarse grid matrix for MGR solver */
 HYPRE_Int
