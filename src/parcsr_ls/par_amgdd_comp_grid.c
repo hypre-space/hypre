@@ -1175,8 +1175,6 @@ HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGDDData *amgdd_data )
          hypre_CSRMatrixNumCols(hypre_AMGDDCompGridMatrixOwnedOffd(hypre_AMGDDCompGridR(compGrid[level-1]))) = hypre_AMGDDCompGridNumNonOwnedNodes(compGrid[level-1]);
       }
 
-      hypre_TFree(new_indices, hypre_AMGDDCompGridMemoryLocation(compGrid[level]));
-
       // Setup comp grid vectors
       hypre_AMGDDCompGridU(compGrid[level]) = hypre_AMGDDCompGridVectorCreate();
       hypre_AMGDDCompGridVectorOwned(hypre_AMGDDCompGridU(compGrid[level])) = hypre_ParVectorLocalVector( hypre_ParAMGDataUArray(amg_data)[level] );
@@ -1235,6 +1233,7 @@ HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGDDData *amgdd_data )
          hypre_TFree(hypre_AMGDDCompGridNonOwnedInvSort(compGrid[level]), hypre_AMGDDCompGridMemoryLocation(compGrid[level]));
          hypre_AMGDDCompGridNonOwnedInvSort(compGrid[level]) = NULL;
       }
+      hypre_TFree(new_indices, hypre_AMGDDCompGridMemoryLocation(compGrid[level]));
    }
 
    // Setup R = P^T if R not specified

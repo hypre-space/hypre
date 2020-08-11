@@ -144,6 +144,7 @@ main( hypre_int argc,
    HYPRE_ParVector     x0_save = NULL;
 
    HYPRE_Solver        amg_solver;
+   HYPRE_Solver        amgdd_solver;
    HYPRE_Solver        pcg_solver;
    HYPRE_Solver        pcg_precond=NULL, pcg_precond_gotten;
 
@@ -401,6 +402,15 @@ main( hypre_int argc,
 
    HYPRE_Int air = 0;
    HYPRE_Int **grid_relax_points = NULL;
+
+   /* amg-dd options */
+   HYPRE_Int amgdd_start_level = 0;
+   HYPRE_Int amgdd_padding = 1;
+   HYPRE_Int amgdd_fac_num_relax = 1;
+   HYPRE_Int amgdd_num_comp_cycles = 2;
+   HYPRE_Int amgdd_fac_relax_type = 3;
+   HYPRE_Int amgdd_fac_cycle_type = 1;
+   HYPRE_Int amgdd_num_ghost_layers = 1;
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int spgemm_use_cusparse = 1;
@@ -1164,7 +1174,8 @@ main( hypre_int argc,
        || solver_id == 9 || solver_id == 13 || solver_id == 14
        || solver_id == 15 || solver_id == 20 || solver_id == 51 || solver_id == 61
        || solver_id == 16
-       || solver_id == 70 || solver_id == 71 || solver_id == 72)
+       || solver_id == 70 || solver_id == 71 || solver_id == 72
+       || solver_id == 90 || solver_id == 91)
    {
       strong_threshold = 0.25;
       strong_thresholdR = 0.25;
@@ -1651,6 +1662,41 @@ main( hypre_int argc,
          arg_index++;
          air = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-amgdd_start_level") == 0 )
+      {
+         arg_index++;
+         amgdd_start_level = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-amgdd_padding") == 0 )
+      {
+         arg_index++;
+         amgdd_padding = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-amgdd_fac_num_relax") == 0 )
+      {
+         arg_index++;
+         amgdd_fac_num_relax = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-amgdd_num_comp_cycles") == 0 )
+      {
+         arg_index++;
+         amgdd_num_comp_cycles = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-amgdd_fac_relax_type") == 0 )
+      {
+         arg_index++;
+         amgdd_fac_relax_type = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-amgdd_fac_cycle_type") == 0 )
+      {
+         arg_index++;
+         amgdd_fac_cycle_type = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-amgdd_num_ghost_layers") == 0 )
+      {
+         arg_index++;
+         amgdd_num_ghost_layers = atoi(argv[arg_index++]);
+      }
       else
       {
          arg_index++;
@@ -1788,6 +1834,7 @@ main( hypre_int argc,
          hypre_printf("       74=MGR-COGMRES  \n");
          hypre_printf("       80=ILU      81=ILU-GMRES  \n");
          hypre_printf("       82=ILU-FlexGMRES  \n");
+         hypre_printf("       90=AMG-DD          91=AMG-DD-GMRES  \n");
          hypre_printf("\n");
          hypre_printf("  -cljp                 : CLJP coarsening \n");
          hypre_printf("  -cljp1                : CLJP coarsening, fixed random \n");
@@ -2045,6 +2092,22 @@ main( hypre_int argc,
          hypre_printf("  -ilu_schur_max_iter   <val>      : set max. num of iteration for GMRES/NSH Schur = val \n");
          hypre_printf("  -ilu_nsh_droptol   <val>         : set drop tolerance threshold for NSH = val \n");
          /* end ILU options */
+         /* hypre AMG-DD options */
+         hypre_printf("  -amgdd_start_level   <val>       : set AMG-DD start level = val\n");
+         hypre_printf("  -amgdd_padding   <val>           : set AMG-DD padding = val\n");
+         hypre_printf("  -amgdd_num_ghost_layers   <val>  : set AMG-DD number of ghost layers = val\n");
+         hypre_printf("  -amgdd_fac_num_relax   <val>     : set AMG-DD FAC cycle number of pre/post-relaxations = val\n");
+         hypre_printf("  -amgdd_num_comp_cycles   <val>   : set AMG-DD number of inner FAC cycles = val\n");
+         hypre_printf("  -amgdd_fac_relax_type   <val>    : set AMG-DD FAC relaxation type = val\n");
+         hypre_printf("       0=Weighted Jacobi  \n");
+         hypre_printf("       1=Gauss-Seidel  \n");
+         hypre_printf("       2=Ordered Gauss-Seidel  \n");
+         hypre_printf("       3=CFL1 Jacobi  \n");
+         hypre_printf("  -amgdd_fac_cycle_type   <val>    : set AMG-DD FAC cycle type = val\n");
+         hypre_printf("       1=V-cycle  \n");
+         hypre_printf("       2=W-cycle  \n");
+         hypre_printf("       3=F-cycle  \n");
+         /* end AMG-DD options */
       }
 
       goto final;
@@ -3526,6 +3589,291 @@ main( hypre_int argc,
       //cudaProfilerStop();
 
       HYPRE_BoomerAMGDestroy(amg_solver);
+   }
+
+   /*-----------------------------------------------------------
+    * Solve the system using AMG-DD
+    *-----------------------------------------------------------*/
+
+   if (solver_id == 90)
+   {
+      if (myid == 0) hypre_printf("Solver:  AMG-DD\n");
+      time_index = hypre_InitializeTiming("BoomerAMGDD Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_BoomerAMGDDCreate(&amgdd_solver);
+      HYPRE_BoomerAMGDDGetAMG(amgdd_solver, &amg_solver);
+
+      // AMG-DD options
+      HYPRE_BoomerAMGDDSetStartLevel(amgdd_solver, amgdd_start_level);
+      HYPRE_BoomerAMGDDSetPadding(amgdd_solver, amgdd_padding);
+      HYPRE_BoomerAMGDDSetFACNumRelax(amgdd_solver, amgdd_fac_num_relax);
+      HYPRE_BoomerAMGDDSetFACNumCycles(amgdd_solver, amgdd_num_comp_cycles);
+      HYPRE_BoomerAMGDDSetFACRelaxType(amgdd_solver, amgdd_fac_relax_type);
+      HYPRE_BoomerAMGDDSetFACCycleType(amgdd_solver, amgdd_fac_cycle_type);
+      HYPRE_BoomerAMGDDSetNumGhostLayers(amgdd_solver, amgdd_num_ghost_layers);
+
+      if (air)
+      {
+         /* RL: specify restriction */
+         hypre_assert(restri_type >= 0);
+         HYPRE_BoomerAMGSetRestriction(amg_solver, restri_type); /* 0: P^T, 1: AIR, 2: AIR-2 */
+         HYPRE_BoomerAMGSetGridRelaxPoints(amg_solver, grid_relax_points);
+         HYPRE_BoomerAMGSetStrongThresholdR(amg_solver, strong_thresholdR);
+      }
+
+      /* RL */
+      HYPRE_BoomerAMGSetADropTol(amg_solver, A_drop_tol);
+      HYPRE_BoomerAMGSetADropType(amg_solver, A_drop_type);
+      /* BM Aug 25, 2006 */
+      HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
+      HYPRE_BoomerAMGSetInterpType(amg_solver, interp_type);
+      HYPRE_BoomerAMGSetRestriction(amg_solver, restri_type); /* 0: P^T, 1: AIR, 2: AIR-2 */
+      HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
+      HYPRE_BoomerAMGSetNumSamples(amg_solver, gsmg_samples);
+      HYPRE_BoomerAMGSetCoarsenType(amg_solver, coarsen_type);
+      HYPRE_BoomerAMGSetCoarsenCutFactor(amg_solver, coarsen_cut_factor);
+      HYPRE_BoomerAMGSetCPoints(amg_solver, max_levels, num_cpt, cpt_index);
+      HYPRE_BoomerAMGSetFPoints(amg_solver, num_fpt, fpt_index);
+      HYPRE_BoomerAMGSetIsolatedFPoints(amg_solver, num_isolated_fpt, isolated_fpt_index);
+      HYPRE_BoomerAMGSetMeasureType(amg_solver, measure_type);
+      HYPRE_BoomerAMGSetConvergeType(amg_solver, converge_type);
+      HYPRE_BoomerAMGSetTol(amg_solver, tol);
+      HYPRE_BoomerAMGSetStrongThreshold(amg_solver, strong_threshold);
+      HYPRE_BoomerAMGSetSeqThreshold(amg_solver, seq_threshold);
+      HYPRE_BoomerAMGSetRedundant(amg_solver, redundant);
+      HYPRE_BoomerAMGSetMaxCoarseSize(amg_solver, coarse_threshold);
+      HYPRE_BoomerAMGSetMinCoarseSize(amg_solver, min_coarse_size);
+      HYPRE_BoomerAMGSetTruncFactor(amg_solver, trunc_factor);
+      HYPRE_BoomerAMGSetPMaxElmts(amg_solver, P_max_elmts);
+      HYPRE_BoomerAMGSetJacobiTruncThreshold(amg_solver, jacobi_trunc_threshold);
+      HYPRE_BoomerAMGSetSCommPkgSwitch(amg_solver, S_commpkg_switch);
+      /* note: log is written to standard output, not to file */
+      HYPRE_BoomerAMGSetPrintLevel(amg_solver, 3);
+      //HYPRE_BoomerAMGSetLogging(amg_solver, 2);
+      HYPRE_BoomerAMGSetPrintFileName(amg_solver, "driver.out.log");
+      HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
+      HYPRE_BoomerAMGSetFCycle(amg_solver, fcycle);
+      HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
+      HYPRE_BoomerAMGSetISType(amg_solver, IS_type);
+      HYPRE_BoomerAMGSetNumCRRelaxSteps(amg_solver, num_CR_relax_steps);
+      HYPRE_BoomerAMGSetCRRate(amg_solver, CR_rate);
+      HYPRE_BoomerAMGSetCRStrongTh(amg_solver, CR_strong_th);
+      HYPRE_BoomerAMGSetCRUseCG(amg_solver, CR_use_CG);
+      if (relax_type > -1) HYPRE_BoomerAMGSetRelaxType(amg_solver, relax_type);
+      if (relax_down > -1)
+         HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_down, 1);
+      if (relax_up > -1)
+         HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_up, 2);
+      if (relax_coarse > -1)
+         HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_coarse, 3);
+      HYPRE_BoomerAMGSetAddRelaxType(amg_solver, add_relax_type);
+      HYPRE_BoomerAMGSetAddRelaxWt(amg_solver, add_relax_wt);
+      HYPRE_BoomerAMGSetChebyOrder(amg_solver, cheby_order);
+      HYPRE_BoomerAMGSetChebyFraction(amg_solver, cheby_fraction);
+      HYPRE_BoomerAMGSetChebyEigEst(amg_solver, cheby_eig_est);
+      HYPRE_BoomerAMGSetChebyVariant(amg_solver, cheby_variant);
+      HYPRE_BoomerAMGSetChebyScale(amg_solver, cheby_scale);
+      HYPRE_BoomerAMGSetRelaxOrder(amg_solver, relax_order);
+      HYPRE_BoomerAMGSetRelaxWt(amg_solver, relax_wt);
+      HYPRE_BoomerAMGSetOuterWt(amg_solver, outer_wt);
+      HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
+      if (level_w > -1)
+         HYPRE_BoomerAMGSetLevelRelaxWt(amg_solver, relax_wt_level, level_w);
+      if (level_ow > -1)
+         HYPRE_BoomerAMGSetLevelOuterWt(amg_solver, outer_wt_level, level_ow);
+      HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
+      HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
+      HYPRE_BoomerAMGSetSmoothNumLevels(amg_solver, smooth_num_levels);
+      HYPRE_BoomerAMGSetMaxRowSum(amg_solver, max_row_sum);
+      HYPRE_BoomerAMGSetDebugFlag(amg_solver, debug_flag);
+      HYPRE_BoomerAMGSetVariant(amg_solver, variant);
+      HYPRE_BoomerAMGSetOverlap(amg_solver, overlap);
+      HYPRE_BoomerAMGSetDomainType(amg_solver, domain_type);
+      HYPRE_BoomerAMGSetSchwarzUseNonSymm(amg_solver, use_nonsymm_schwarz);
+
+      HYPRE_BoomerAMGSetSchwarzRlxWeight(amg_solver, schwarz_rlx_weight);
+      if (eu_level < 0) eu_level = 0;
+      HYPRE_BoomerAMGSetEuLevel(amg_solver, eu_level);
+      HYPRE_BoomerAMGSetEuBJ(amg_solver, eu_bj);
+      HYPRE_BoomerAMGSetEuSparseA(amg_solver, eu_sparse_A);
+      HYPRE_BoomerAMGSetNumFunctions(amg_solver, num_functions);
+      HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
+      HYPRE_BoomerAMGSetAggInterpType(amg_solver, agg_interp_type);
+      HYPRE_BoomerAMGSetAggTruncFactor(amg_solver, agg_trunc_factor);
+      HYPRE_BoomerAMGSetAggP12TruncFactor(amg_solver, agg_P12_trunc_factor);
+      HYPRE_BoomerAMGSetAggPMaxElmts(amg_solver, agg_P_max_elmts);
+      HYPRE_BoomerAMGSetAggP12MaxElmts(amg_solver, agg_P12_max_elmts);
+      HYPRE_BoomerAMGSetNumPaths(amg_solver, num_paths);
+      HYPRE_BoomerAMGSetNodal(amg_solver, nodal);
+      HYPRE_BoomerAMGSetNodalDiag(amg_solver, nodal_diag);
+      HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_coarse, 3);
+      if (ns_down > -1)
+      {
+         HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_down,   1);
+      }
+      if (ns_up > -1)
+      {
+         HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_up,     2);
+      }
+      if (num_functions > 1)
+         HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
+      HYPRE_BoomerAMGSetAdditive(amg_solver, additive);
+      HYPRE_BoomerAMGSetMultAdditive(amg_solver, mult_add);
+      HYPRE_BoomerAMGSetSimple(amg_solver, simple);
+      HYPRE_BoomerAMGSetAddLastLvl(amg_solver, add_last_lvl);
+      HYPRE_BoomerAMGSetMultAddPMaxElmts(amg_solver, add_P_max_elmts);
+      HYPRE_BoomerAMGSetMultAddTruncFactor(amg_solver, add_trunc_factor);
+
+      HYPRE_BoomerAMGSetMaxIter(amg_solver, mg_max_iter);
+      HYPRE_BoomerAMGSetRAP2(amg_solver, rap2);
+      HYPRE_BoomerAMGSetModuleRAP2(amg_solver, mod_rap2);
+      HYPRE_BoomerAMGSetKeepTranspose(amg_solver, keepTranspose);
+#ifdef HYPRE_USING_DSUPERLU
+      HYPRE_BoomerAMGSetDSLUThreshold(amg_solver, dslu_threshold);
+#endif
+      /*HYPRE_BoomerAMGSetNonGalerkTol(amg_solver, nongalerk_num_tol, nongalerk_tol);*/
+      if (nongalerk_tol)
+      {
+         HYPRE_BoomerAMGSetNonGalerkinTol(amg_solver, nongalerk_tol[nongalerk_num_tol-1]);
+         for (i=0; i < nongalerk_num_tol-1; i++)
+            HYPRE_BoomerAMGSetLevelNonGalerkinTol(amg_solver, nongalerk_tol[i], i);
+      }
+      if (build_rbm)
+      {
+         HYPRE_BoomerAMGSetInterpVectors(amg_solver, num_interp_vecs, interp_vecs);
+         HYPRE_BoomerAMGSetInterpVecVariant(amg_solver, interp_vec_variant);
+         HYPRE_BoomerAMGSetInterpVecQMax(amg_solver, Q_max);
+         HYPRE_BoomerAMGSetInterpVecAbsQTrunc(amg_solver, Q_trunc);
+      }
+
+      /* BM Oct 23, 2006 */
+      if (plot_grids) {
+         HYPRE_BoomerAMGSetPlotGrids (amg_solver, 1);
+         HYPRE_BoomerAMGSetPlotFileName (amg_solver, plot_file_name);
+         HYPRE_BoomerAMGSetCoordDim (amg_solver, coord_dim);
+         HYPRE_BoomerAMGSetCoordinates (amg_solver, coordinates);
+      }
+
+      //cudaProfilerStart();
+
+#if defined(HYPRE_USING_NVTX)
+      hypre_NvtxPushRange("AMGDD-Setup-1");
+#endif
+      HYPRE_BoomerAMGDDSetup(amgdd_solver, parcsr_A, b, x);
+
+#if defined(HYPRE_USING_NVTX)
+      hypre_NvtxPopRange();
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+      cudaDeviceSynchronize();
+#endif
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("BoomerAMGDD Solve");
+      hypre_BeginTiming(time_index);
+
+#if defined(HYPRE_USING_NVTX)
+      hypre_NvtxPushRange("AMGDD-Solve-1");
+#endif
+
+      //cudaProfilerStart();
+
+      HYPRE_BoomerAMGDDSolve(amgdd_solver, parcsr_A, b, x);
+
+      //cudaProfilerStop();
+
+#if defined(HYPRE_USING_NVTX)
+      hypre_NvtxPopRange();
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+      cudaDeviceSynchronize();
+#endif
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_BoomerAMGGetNumIterations(amg_solver, &num_iterations);
+      HYPRE_BoomerAMGGetFinalRelativeResidualNorm(amg_solver, &final_res_norm);
+
+      if (myid == 0)
+      {
+         hypre_printf("\n");
+         hypre_printf("BoomerAMGDD Iterations = %d\n", num_iterations);
+         hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         hypre_printf("\n");
+      }
+
+#if SECOND_TIME
+      /* run a second time to check for memory leaks */
+      HYPRE_ParVectorSetRandomValues(x, 775);
+
+      HYPRE_Real tt, maxtt = 0.0, tset = 0.0, tsol = 0.0;
+
+      tt = hypre_MPI_Wtime();
+
+#if defined(HYPRE_USING_NVTX)
+      hypre_NvtxPushRange("AMGDD-Setup-2");
+#endif
+
+      HYPRE_BoomerAMGDDSetup(amgdd_solver, parcsr_A, b, x);
+
+#if defined(HYPRE_USING_NVTX)
+      hypre_NvtxPopRange();
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+      cudaDeviceSynchronize();
+#endif
+
+      tt = hypre_MPI_Wtime() - tt;
+
+      hypre_MPI_Reduce(&tt, &maxtt, 1, hypre_MPI_REAL, hypre_MPI_MAX, 0, hypre_MPI_COMM_WORLD);
+
+      if (myid == 0)
+      {
+         tset = maxtt;
+      }
+
+      tt = hypre_MPI_Wtime();
+
+#if defined(HYPRE_USING_NVTX)
+      hypre_NvtxPushRange("AMGDD-Solve-2");
+#endif
+
+      HYPRE_BoomerAMGDDSolve(amgdd_solver, parcsr_A, b, x);
+
+#if defined(HYPRE_USING_NVTX)
+      hypre_NvtxPopRange();
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+      cudaDeviceSynchronize();
+#endif
+
+      tt = hypre_MPI_Wtime() - tt;
+
+      hypre_MPI_Reduce(&tt, &maxtt, 1, hypre_MPI_REAL, hypre_MPI_MAX, 0, hypre_MPI_COMM_WORLD);
+
+      if (myid == 0)
+      {
+         tsol = maxtt;
+         hypre_printf("AMG-DD Setup time %.2f (s)\n", tset);
+         hypre_printf("AMG-DD Solve time %.2f (s)\n", tsol);
+      }
+#endif // SECOND_TIME
+
+      //cudaProfilerStop();
+
+      HYPRE_BoomerAMGDDDestroy(amgdd_solver);
    }
 
    /*-----------------------------------------------------------
@@ -5257,6 +5605,152 @@ main( hypre_int argc,
          HYPRE_GMRESSetPrecond(pcg_solver,
                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
+                               pcg_precond);
+      }
+      if (solver_id == 91)
+      {
+         /* use BoomerAMG as preconditioner */
+         if (myid == 0) hypre_printf("Solver: AMG-DD-GMRES\n");
+
+         HYPRE_BoomerAMGDDCreate(&pcg_precond);
+         HYPRE_BoomerAMGDDGetAMG(pcg_precond, &amg_solver);
+
+         // AMG-DD options
+         HYPRE_BoomerAMGDDSetStartLevel(pcg_precond, amgdd_start_level);
+         HYPRE_BoomerAMGDDSetPadding(pcg_precond, amgdd_padding);
+         HYPRE_BoomerAMGDDSetFACNumRelax(pcg_precond, amgdd_fac_num_relax);
+         HYPRE_BoomerAMGDDSetFACNumCycles(pcg_precond, amgdd_num_comp_cycles);
+         HYPRE_BoomerAMGDDSetFACRelaxType(pcg_precond, amgdd_fac_relax_type);
+         HYPRE_BoomerAMGDDSetFACCycleType(pcg_precond, amgdd_fac_cycle_type);
+         HYPRE_BoomerAMGDDSetNumGhostLayers(pcg_precond, amgdd_num_ghost_layers);
+
+         if (air)
+         {
+            /* RL: specify restriction */
+            hypre_assert(restri_type >= 0);
+            HYPRE_BoomerAMGSetRestriction(amg_solver, restri_type); /* 0: P^T, 1: AIR, 2: AIR-2 */
+            HYPRE_BoomerAMGSetGridRelaxPoints(amg_solver, grid_relax_points);
+            HYPRE_BoomerAMGSetStrongThresholdR(amg_solver, strong_thresholdR);
+         }
+
+         HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
+         HYPRE_BoomerAMGSetInterpType(amg_solver, interp_type);
+         HYPRE_BoomerAMGSetRestriction(amg_solver, restri_type); /* 0: P^T, 1: AIR, 2: AIR-2 */
+         HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
+         HYPRE_BoomerAMGSetNumSamples(amg_solver, gsmg_samples);
+         HYPRE_BoomerAMGSetTol(amg_solver, pc_tol);
+         HYPRE_BoomerAMGSetCoarsenType(amg_solver, coarsen_type);
+         HYPRE_BoomerAMGSetCoarsenCutFactor(amg_solver, coarsen_cut_factor);
+         HYPRE_BoomerAMGSetCPoints(amg_solver, max_levels, num_cpt, cpt_index);
+         HYPRE_BoomerAMGSetFPoints(amg_solver, num_fpt, fpt_index);
+         HYPRE_BoomerAMGSetIsolatedFPoints(amg_solver, num_isolated_fpt, isolated_fpt_index);
+         HYPRE_BoomerAMGSetMeasureType(amg_solver, measure_type);
+         HYPRE_BoomerAMGSetStrongThreshold(amg_solver, strong_threshold);
+         HYPRE_BoomerAMGSetSeqThreshold(amg_solver, seq_threshold);
+         HYPRE_BoomerAMGSetRedundant(amg_solver, redundant);
+         HYPRE_BoomerAMGSetMaxCoarseSize(amg_solver, coarse_threshold);
+         HYPRE_BoomerAMGSetMinCoarseSize(amg_solver, min_coarse_size);
+         HYPRE_BoomerAMGSetTruncFactor(amg_solver, trunc_factor);
+         HYPRE_BoomerAMGSetPMaxElmts(amg_solver, P_max_elmts);
+         HYPRE_BoomerAMGSetJacobiTruncThreshold(amg_solver, jacobi_trunc_threshold);
+         HYPRE_BoomerAMGSetSCommPkgSwitch(amg_solver, S_commpkg_switch);
+         HYPRE_BoomerAMGSetPrintLevel(amg_solver, poutdat);
+         HYPRE_BoomerAMGSetPrintFileName(amg_solver, "driver.out.log");
+         HYPRE_BoomerAMGSetMaxIter(amg_solver, 1);
+         HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
+         HYPRE_BoomerAMGSetFCycle(amg_solver, fcycle);
+         HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
+         HYPRE_BoomerAMGSetISType(amg_solver, IS_type);
+         HYPRE_BoomerAMGSetNumCRRelaxSteps(amg_solver, num_CR_relax_steps);
+         HYPRE_BoomerAMGSetCRRate(amg_solver, CR_rate);
+         HYPRE_BoomerAMGSetCRStrongTh(amg_solver, CR_strong_th);
+         HYPRE_BoomerAMGSetCRUseCG(amg_solver, CR_use_CG);
+         if (relax_type > -1) HYPRE_BoomerAMGSetRelaxType(amg_solver, relax_type);
+         if (relax_down > -1)
+            HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_down, 1);
+         if (relax_up > -1)
+            HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_up, 2);
+         if (relax_coarse > -1)
+            HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_coarse, 3);
+         HYPRE_BoomerAMGSetAddRelaxType(amg_solver, add_relax_type);
+         HYPRE_BoomerAMGSetAddRelaxWt(amg_solver, add_relax_wt);
+         HYPRE_BoomerAMGSetChebyOrder(amg_solver, cheby_order);
+         HYPRE_BoomerAMGSetChebyFraction(amg_solver, cheby_fraction);
+         HYPRE_BoomerAMGSetChebyEigEst(amg_solver, cheby_eig_est);
+         HYPRE_BoomerAMGSetChebyVariant(amg_solver, cheby_variant);
+         HYPRE_BoomerAMGSetChebyScale(amg_solver, cheby_scale);
+         HYPRE_BoomerAMGSetRelaxOrder(amg_solver, relax_order);
+         HYPRE_BoomerAMGSetRelaxWt(amg_solver, relax_wt);
+         HYPRE_BoomerAMGSetOuterWt(amg_solver, outer_wt);
+         if (level_w > -1)
+            HYPRE_BoomerAMGSetLevelRelaxWt(amg_solver, relax_wt_level,level_w);
+         if (level_ow > -1)
+            HYPRE_BoomerAMGSetLevelOuterWt(amg_solver,outer_wt_level,level_ow);
+         HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
+         HYPRE_BoomerAMGSetSmoothNumLevels(amg_solver, smooth_num_levels);
+         HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
+         HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
+         HYPRE_BoomerAMGSetMaxRowSum(amg_solver, max_row_sum);
+         HYPRE_BoomerAMGSetDebugFlag(amg_solver, debug_flag);
+         HYPRE_BoomerAMGSetNumFunctions(amg_solver, num_functions);
+         HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
+         HYPRE_BoomerAMGSetAggInterpType(amg_solver, agg_interp_type);
+         HYPRE_BoomerAMGSetAggTruncFactor(amg_solver, agg_trunc_factor);
+         HYPRE_BoomerAMGSetAggP12TruncFactor(amg_solver, agg_P12_trunc_factor);
+         HYPRE_BoomerAMGSetAggPMaxElmts(amg_solver, agg_P_max_elmts);
+         HYPRE_BoomerAMGSetAggP12MaxElmts(amg_solver, agg_P12_max_elmts);
+         HYPRE_BoomerAMGSetNumPaths(amg_solver, num_paths);
+         HYPRE_BoomerAMGSetNodal(amg_solver, nodal);
+         HYPRE_BoomerAMGSetNodalDiag(amg_solver, nodal_diag);
+         HYPRE_BoomerAMGSetVariant(amg_solver, variant);
+         HYPRE_BoomerAMGSetOverlap(amg_solver, overlap);
+         HYPRE_BoomerAMGSetDomainType(amg_solver, domain_type);
+         HYPRE_BoomerAMGSetSchwarzUseNonSymm(amg_solver, use_nonsymm_schwarz);
+         HYPRE_BoomerAMGSetSchwarzRlxWeight(amg_solver, schwarz_rlx_weight);
+         if (eu_level < 0) eu_level = 0;
+         HYPRE_BoomerAMGSetEuLevel(amg_solver, eu_level);
+         HYPRE_BoomerAMGSetEuBJ(amg_solver, eu_bj);
+         HYPRE_BoomerAMGSetEuSparseA(amg_solver, eu_sparse_A);
+         HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_coarse, 3);
+         if (ns_down > -1)
+         {
+            HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_down,   1);
+         }
+         if (ns_up > -1)
+         {
+            HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_up,     2);
+         }
+         if (num_functions > 1)
+            HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
+         HYPRE_BoomerAMGSetAdditive(amg_solver, additive);
+         HYPRE_BoomerAMGSetMultAdditive(amg_solver, mult_add);
+         HYPRE_BoomerAMGSetSimple(amg_solver, simple);
+         HYPRE_BoomerAMGSetAddLastLvl(amg_solver, add_last_lvl);
+         HYPRE_BoomerAMGSetMultAddPMaxElmts(amg_solver, add_P_max_elmts);
+         HYPRE_BoomerAMGSetMultAddTruncFactor(amg_solver, add_trunc_factor);
+         HYPRE_BoomerAMGSetRAP2(amg_solver, rap2);
+         HYPRE_BoomerAMGSetModuleRAP2(amg_solver, mod_rap2);
+         HYPRE_BoomerAMGSetKeepTranspose(amg_solver, keepTranspose);
+#ifdef HYPRE_USING_DSUPERLU
+         HYPRE_BoomerAMGSetDSLUThreshold(amg_solver, dslu_threshold);
+#endif
+         if (nongalerk_tol)
+         {
+            HYPRE_BoomerAMGSetNonGalerkinTol(amg_solver, nongalerk_tol[nongalerk_num_tol-1]);
+            for (i=0; i < nongalerk_num_tol-1; i++)
+               HYPRE_BoomerAMGSetLevelNonGalerkinTol(amg_solver, nongalerk_tol[i], i);
+         }
+         if (build_rbm)
+         {
+            HYPRE_BoomerAMGSetInterpVectors(amg_solver, 1, interp_vecs);
+            HYPRE_BoomerAMGSetInterpVecVariant(amg_solver, interp_vec_variant);
+            HYPRE_BoomerAMGSetInterpVecQMax(amg_solver, Q_max);
+            HYPRE_BoomerAMGSetInterpVecAbsQTrunc(amg_solver, Q_trunc);
+         }
+         HYPRE_GMRESSetMaxIter(pcg_solver, mg_max_iter);
+         HYPRE_GMRESSetPrecond(pcg_solver,
+                               (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGDDSolve,
+                               (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGDDSetup,
                                pcg_precond);
       }
       else if (solver_id == 4)

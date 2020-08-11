@@ -1361,6 +1361,13 @@ HYPRE_BoomerAMGDDSetFACRelaxWeight( HYPRE_Solver solver,
                            HYPRE_Real          amgdd_fac_relax_weight  );
 
 /**
+ * (Optional) Set the AMG-DD start level. Default is 0.
+ **/
+HYPRE_Int
+HYPRE_BoomerAMGDDSetStartLevel( HYPRE_Solver solver,
+                           HYPRE_Int          start_level  );
+
+/**
  * (Optional) Set the AMG-DD padding. Default is 1.
  **/
 HYPRE_Int
@@ -1382,6 +1389,13 @@ HYPRE_BoomerAMGDDSetNumGhostLayers( HYPRE_Solver solver,
 HYPRE_Int
 HYPRE_BoomerAMGDDSetUserFACRelaxation( HYPRE_Solver solver,
                            HYPRE_Int (*userFACRelaxation)( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param ) ); 
+
+/**
+ * (Optional) Get the underlying AMG hierarchy as a HYPRE_Solver object. 
+ **/
+HYPRE_Int
+HYPRE_BoomerAMGDDGetAMG( HYPRE_Solver solver,
+                           HYPRE_Solver        * amg_solver );
 
 /**@}*/
 

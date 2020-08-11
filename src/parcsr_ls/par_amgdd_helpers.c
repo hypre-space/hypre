@@ -1390,7 +1390,7 @@ HYPRE_Int hypre_BoomerAMGDD_MarkCoarse(HYPRE_Int *list,
            HYPRE_Int list_size,
            HYPRE_Int dist,
            HYPRE_Int use_sort,
-           HYPRE_Int *nodes_to_add, HYPRE_Int print_debug)
+           HYPRE_Int *nodes_to_add)
 {
    HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
@@ -1653,7 +1653,7 @@ HYPRE_Int hypre_BoomerAMGDD_RemoveRedundancy(hypre_ParAMGData* amg_data,
 }
 
 HYPRE_Int
-hypre_BoomerAMGDD_RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_AMGDDCompGrid *compGrid, HYPRE_Int *add_flag, HYPRE_Int use_sort, HYPRE_Int print_debug)
+hypre_BoomerAMGDD_RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_AMGDDCompGrid *compGrid, HYPRE_Int *add_flag, HYPRE_Int use_sort)
 {
    HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -1704,7 +1704,7 @@ hypre_BoomerAMGDD_RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypr
          {
             add_flag[sort_index] = m;
             // Recursively call to find distance m-1 neighbors of index
-            if (m-1 > 0) error_code = hypre_BoomerAMGDD_RecursivelyBuildPsiComposite(index, m-1, compGrid, add_flag, use_sort, print_debug);
+            if (m-1 > 0) error_code = hypre_BoomerAMGDD_RecursivelyBuildPsiComposite(index, m-1, compGrid, add_flag, use_sort);
          }
       }
       else
@@ -1737,7 +1737,7 @@ hypre_BoomerAMGDD_RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypr
          {
             add_flag[sort_index] = m;
             // Recursively call to find distance m-1 neighbors of index
-            if (m-1 > 0) error_code = hypre_BoomerAMGDD_RecursivelyBuildPsiComposite(index, m-1, compGrid, add_flag, use_sort, print_debug);
+            if (m-1 > 0) error_code = hypre_BoomerAMGDD_RecursivelyBuildPsiComposite(index, m-1, compGrid, add_flag, use_sort);
          }
       }
       else
@@ -1787,10 +1787,6 @@ hypre_BoomerAMGDD_PackSendBuffer(hypre_ParAMGDDData *amgdd_data, HYPRE_Int proc,
    send_buffer_size[current_level][proc] += 2;
    if (current_level != num_levels-1) send_buffer_size[current_level][proc] += 3*num_send_nodes[current_level][proc][current_level];
    else send_buffer_size[current_level][proc] += 2*num_send_nodes[current_level][proc][current_level];
-   
-   HYPRE_Int print_debug = 0;
-   if (myid == 5 && current_level == 2 && hypre_AMGDDCommPkgSendProcs(compGridCommPkg)[current_level][proc] == 10)
-      print_debug = 1;
 
    for (i = 0; i < num_send_nodes[current_level][proc][current_level]; i++)
    {
@@ -1821,7 +1817,7 @@ hypre_BoomerAMGDD_PackSendBuffer(hypre_ParAMGDDData *amgdd_data, HYPRE_Int proc,
            num_send_nodes[current_level][proc][current_level],
            padding[current_level+1] + num_ghost_layers + 1,
            1,
-           &nodes_to_add, print_debug);
+           &nodes_to_add);
    }
 
    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1848,7 +1844,7 @@ hypre_BoomerAMGDD_PackSendBuffer(hypre_ParAMGDDData *amgdd_data, HYPRE_Int proc,
             else add_flag_index = hypre_AMGDDCompGridNonOwnedSort(compGrid[level])[i - hypre_AMGDDCompGridNumOwnedNodes(compGrid[level])] + hypre_AMGDDCompGridNumOwnedNodes(compGrid[level]);
 
             if (add_flag[level][add_flag_index] == padding[level] + num_ghost_layers + 1)
-               hypre_BoomerAMGDD_RecursivelyBuildPsiComposite(i, padding[level] + num_ghost_layers, compGrid[level], add_flag[level], 1, 0);
+               hypre_BoomerAMGDD_RecursivelyBuildPsiComposite(i, padding[level] + num_ghost_layers, compGrid[level], add_flag[level], 1);
          }
          
          send_flag[current_level][proc][level] = hypre_BoomerAMGDD_AddFlagToSendFlag(compGrid[level],
@@ -1879,7 +1875,7 @@ hypre_BoomerAMGDD_PackSendBuffer(hypre_ParAMGDDData *amgdd_data, HYPRE_Int proc,
               num_send_nodes[current_level][proc][level],
               padding[level+1] + num_ghost_layers + 1,
               1,
-              &nodes_to_add, 0);
+              &nodes_to_add);
          }
 
          // Count up the buffer sizes and adjust the add_flag 
