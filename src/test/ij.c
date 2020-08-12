@@ -3604,7 +3604,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGDDCreate(&amgdd_solver);
       HYPRE_BoomerAMGDDGetAMG(amgdd_solver, &amg_solver);
 
-      // AMG-DD options
+      /* AMG-DD options */
       HYPRE_BoomerAMGDDSetStartLevel(amgdd_solver, amgdd_start_level);
       HYPRE_BoomerAMGDDSetPadding(amgdd_solver, amgdd_padding);
       HYPRE_BoomerAMGDDSetFACNumRelax(amgdd_solver, amgdd_fac_num_relax);
@@ -5615,7 +5615,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGDDCreate(&pcg_precond);
          HYPRE_BoomerAMGDDGetAMG(pcg_precond, &amg_solver);
 
-         // AMG-DD options
+         /* AMG-DD options */
          HYPRE_BoomerAMGDDSetStartLevel(pcg_precond, amgdd_start_level);
          HYPRE_BoomerAMGDDSetPadding(pcg_precond, amgdd_padding);
          HYPRE_BoomerAMGDDSetFACNumRelax(pcg_precond, amgdd_fac_num_relax);

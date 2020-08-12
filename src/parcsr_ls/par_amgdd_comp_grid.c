@@ -595,12 +595,16 @@ HYPRE_Int hypre_AMGDDCompGridSetupRelax( hypre_ParAMGDDData *amgdd_data )
    hypre_ParAMGData *amg_data = hypre_ParAMGDDDataAMG(amgdd_data);
 
    // Default to CFL1 Jacobi
-   hypre_ParAMGDDDataUserFACRelaxation(amgdd_data) = hypre_BoomerAMGDD_FAC_CFL1Jacobi;
    if (hypre_ParAMGDDDataFACRelaxType(amgdd_data) == 0) hypre_ParAMGDDDataUserFACRelaxation(amgdd_data) = hypre_BoomerAMGDD_FAC_Jacobi;
    else if (hypre_ParAMGDDDataFACRelaxType(amgdd_data) == 1) hypre_ParAMGDDDataUserFACRelaxation(amgdd_data) = hypre_BoomerAMGDD_FAC_GaussSeidel;
    else if (hypre_ParAMGDDDataFACRelaxType(amgdd_data) == 2) hypre_ParAMGDDDataUserFACRelaxation(amgdd_data) = hypre_BoomerAMGDD_FAC_OrderedGaussSeidel;
    else if (hypre_ParAMGDDDataFACRelaxType(amgdd_data) == 3) hypre_ParAMGDDDataUserFACRelaxation(amgdd_data) = hypre_BoomerAMGDD_FAC_CFL1Jacobi;
-   else hypre_error_w_msg(HYPRE_ERROR_GENERIC,"WARNING: unknown AMGDD FAC relaxation type. Defaulting to CFL1 Jacobi.\n");
+   else
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"WARNING: unknown AMGDD FAC relaxation type. Defaulting to CFL1 Jacobi.\n");
+      hypre_ParAMGDDDataUserFACRelaxation(amgdd_data) = hypre_BoomerAMGDD_FAC_CFL1Jacobi;
+      hypre_ParAMGDDDataFACRelaxType(amgdd_data) = 3;
+   }
 
    if (hypre_ParAMGDDDataFACRelaxType(amgdd_data) == 3)
    {
