@@ -590,6 +590,11 @@ void hypre_merge_sort( HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int 
 
 /*--------------------------------------------------------------------------
  * hypre_sort_and_create_inverse_map
+ *
+ * Sort array "in" with length len and put result in array "out"
+ *   "in" will be deallocated unless in == *out
+ *   inverse_map is an inverse hash table s.t.
+ *      inverse_map[i] = j iff (*out)[j] = i
  *--------------------------------------------------------------------------*/
 
 void hypre_sort_and_create_inverse_map(HYPRE_Int *in, HYPRE_Int len, HYPRE_Int **out,
