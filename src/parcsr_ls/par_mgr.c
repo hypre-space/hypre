@@ -15,9 +15,9 @@
 #include "par_amg.h"
 #include "par_mgr.h"
 
-#ifdef HYPRE_USING_DSUPERLU
-#include "superlu.c"
-#endif
+//#ifdef HYPRE_USING_DSUPERLU
+//#include "superlu.c"
+//#endif
 
 /* Create */
 void *
