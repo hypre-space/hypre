@@ -184,6 +184,10 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
+#if defined(HYPRE_USING_KOKKOS)
+   Kokkos::initialize (argc, argv);
+#endif
+
    /* Initialize Hypre */
    HYPRE_Init();
 
@@ -2885,6 +2889,10 @@ main( hypre_int argc,
 
    /* Finalize Hypre */
    HYPRE_Finalize();
+
+#if defined(HYPRE_USING_KOKKOS)
+   Kokkos::finalize ();
+#endif
 
    /* Finalize MPI */
    hypre_MPI_Finalize();
