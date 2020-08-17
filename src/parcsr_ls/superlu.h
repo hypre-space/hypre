@@ -7,6 +7,8 @@
  
 #ifndef hypre_DSLU_DATA_HEADER
 #define hypre_DSLU_DATA_HEADER
+
+#include "superlu_ddefs.h"
 /*--------------------------------------------------------------------------
  * hypre_DSLUData
  *--------------------------------------------------------------------------*/
