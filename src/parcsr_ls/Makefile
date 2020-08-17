@@ -134,7 +134,7 @@ FILES =\
  ame.c\
  par_restr.c\
  par_lr_restr.c\
- superlu.c
+ dsuperlu.c
 
 CUFILES =\
  ams.c\

@@ -113,7 +113,7 @@ set(SRCS
 )
 
 if (HYPRE_USING_DSUPERLU)
-  list(APPEND SRCS superlu.c)
+  list(APPEND SRCS dsuperlu.c)
 endif()  
 
 target_sources(HYPRE
