@@ -9,7 +9,7 @@
 #include <math.h>
 
 #ifdef HYPRE_USING_DSUPERLU
-#include "superlu.h"
+#include "dsuperlu.h"
 
 #include <math.h>
 #include "superlu_ddefs.h"

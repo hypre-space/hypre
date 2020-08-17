@@ -16,7 +16,7 @@
 #include "par_mgr.h"
 
 #ifdef HYPRE_USING_DSUPERLU
-#include "superlu.h"
+#include "dsuperlu.h"
 #endif
 
 /* Create */
