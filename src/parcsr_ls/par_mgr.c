@@ -12,6 +12,7 @@
  *****************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
+#include "superlu.h"
 #include "par_amg.h"
 #include "par_mgr.h"
 
