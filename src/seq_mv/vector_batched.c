@@ -1185,8 +1185,8 @@ HYPRE_Int hypre_SeqVectorMassDotpTwo( hypre_Vector *x, hypre_Vector *y,
    {
       for (j = 0; j < k; j++)
       {
-         res_x = result_x[j];
-         res_y = result_y[j];
+	 res_x = 0; //result_x[j];
+	 res_y = 0; //result_y[j];
          jstart = j*size;
 #if defined(HYPRE_USING_OPENMP)
 #pragma omp parallel for private(i) reduction(+:res_x,res_y) HYPRE_SMP_SCHEDULE

@@ -396,6 +396,17 @@ hypreCUDAKernel_ScatterAdd(HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYPRE_Rea
    }
 }
 
+__global__ void swapKernel(HYPRE_Int* x,HYPRE_Real *y) {
+  if (x[0]>x[1]) {
+    HYPRE_Int temp1 = x[0];
+    x[0] = x[1];
+    x[1] = temp1;
+    HYPRE_Real temp2 = y[0];
+    y[0] = y[1];
+    y[1] = temp2;
+  }
+}
+
 /* Generalized x[map[i]] += y[i] where the same index may appear more
  * than once in map
  * Note: content in y will be destroyed */
@@ -422,10 +433,12 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
       reduced_map = hypre_TAlloc(HYPRE_Int,  ny, HYPRE_MEMORY_DEVICE);
       reduced_y   = hypre_TAlloc(HYPRE_Real, ny, HYPRE_MEMORY_DEVICE);
    }
-
    hypre_TMemcpy(map2, map, HYPRE_Int, ny, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-   HYPRE_THRUST_CALL(sort_by_key, map2, map2+ny, y);
+   if (ny==2)
+     swapKernel<<<1,1>>>(map2,y);
+   else if (ny>2)
+     HYPRE_THRUST_CALL(sort_by_key, map2, map2+ny, y);
 
    thrust::pair<HYPRE_Int*, HYPRE_Real*> new_end =
       HYPRE_THRUST_CALL(reduce_by_key, map2, map2+ny, y, reduced_map, reduced_y);
@@ -965,6 +978,45 @@ hypre_SyncCudaDevice(hypre_Handle *hypre_handle)
    HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
 #endif
    return hypre_error_flag;
+}
+
+
+hypre_CudaSpTriMatrixData*
+hypre_CudaSpTriMatrixDataCreate()
+{
+   hypre_CudaSpTriMatrixData *matrix_data = hypre_CTAlloc(hypre_CudaSpTriMatrixData, 1, HYPRE_MEMORY_HOST);
+
+   cusparseMatDescr_t mat_descr;
+   HYPRE_CUSPARSE_CALL( cusparseCreateMatDescr(&mat_descr) );
+   hypre_CudaSpTriMatrixDataMatDescr(matrix_data) = mat_descr;   
+
+   csrsv2Info_t solve_info;
+   HYPRE_CUSPARSE_CALL( cusparseCreateCsrsv2Info(&solve_info) );
+   hypre_CudaSpTriMatrixDataSolveInfo(matrix_data) = solve_info;
+
+   hypre_CudaSpTriMatrixDataWorkBuffer(matrix_data) =NULL;
+   return matrix_data;
+}
+
+void
+hypre_CudaSpTriMatrixDataDestroy(hypre_CudaSpTriMatrixData* matrix_data, HYPRE_MemoryLocation memory_location)
+{
+   if (hypre_CudaSpTriMatrixDataMatDescr(matrix_data) ) {
+      HYPRE_CUSPARSE_CALL( cusparseDestroyMatDescr(hypre_CudaSpTriMatrixDataMatDescr(matrix_data) ) );
+      hypre_CudaSpTriMatrixDataMatDescr(matrix_data) = NULL;
+   }
+
+   if ( hypre_CudaSpTriMatrixDataSolveInfo(matrix_data) ) {
+      HYPRE_CUSPARSE_CALL( cusparseDestroyCsrsv2Info( hypre_CudaSpTriMatrixDataSolveInfo(matrix_data) ) );
+      hypre_CudaSpTriMatrixDataSolveInfo(matrix_data) = NULL;
+   }
+
+   if ( hypre_CudaSpTriMatrixDataWorkBuffer(matrix_data) ) {
+      hypre_TFree(hypre_CudaSpTriMatrixDataWorkBuffer(matrix_data), memory_location);
+      hypre_CudaSpTriMatrixDataWorkBuffer(matrix_data) = NULL;
+   }
+
+   hypre_TFree(matrix_data, HYPRE_MEMORY_HOST);
 }
 
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)

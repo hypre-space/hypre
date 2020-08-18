@@ -49,6 +49,7 @@ CUFILES =\
  csr_spgemm_device_rowest.c\
  csr_spgemm_device_util.c\
  csr_sptrans_device.c\
+ csr_mat_sptri_algs.c\
  vector.c
 
 COBJS = ${FILES:.c=.o}

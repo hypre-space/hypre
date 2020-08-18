@@ -44,6 +44,17 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
    hypre_CSRMatrixOwnsData(matrix)  = 1;
    hypre_CSRMatrixNumRownnz(matrix) = num_rows;
 
+#if defined(HYPRE_USING_CUDA)
+   hypre_CSRMatrixLower(matrix)                  = NULL;
+   hypre_CSRMatrixCusparseDataLower(matrix)      = NULL;
+   hypre_CSRMatrixUpper(matrix)                  = NULL;
+   hypre_CSRMatrixCusparseDataUpper(matrix)      = NULL;
+   hypre_CSRMatrixDiagonal(matrix)               = NULL;
+   hypre_CSRMatrixWorkVector(matrix)             = NULL;
+   hypre_CSRMatrixWorkVector2(matrix)            = NULL;
+   hypre_CSRMatrixRebuildTriMats(matrix)         = 1;
+   hypre_CSRMatrixRebuildTriSolves(matrix)       = 1;
+#endif
    return matrix;
 }
 
@@ -69,6 +80,12 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
          hypre_TFree(hypre_CSRMatrixJ(matrix),    memory_location);
          hypre_TFree(hypre_CSRMatrixBigJ(matrix), memory_location);
       }
+
+#if defined(HYPRE_USING_CUDA)
+      /* call the methods in csr_mat_sptrisolve_device */
+      hypre_CSRMatrixDestroyTriMats(matrix);
+      hypre_CSRMatrixDestroyTriMatsSolveDataDevice(matrix);
+#endif
 
       hypre_TFree(matrix, HYPRE_MEMORY_HOST);
    }

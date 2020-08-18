@@ -230,6 +230,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #endif
 #endif
 
+#if defined(HYPRE_USING_CUDA)
+   /* any time we call setup, we need to reset the flags to rebuild the L/D/U matrices if used */
+   hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrixRebuildTriMats(diag) = 1;
+   hypre_CSRMatrixRebuildTriSolves(diag) = 1;
+#endif
+
    /*hypre_CSRMatrix *A_new;*/
 
    hypre_MPI_Comm_size(comm, &num_procs);

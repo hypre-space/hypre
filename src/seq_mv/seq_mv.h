@@ -63,6 +63,20 @@ typedef struct
    /* memory location of arrays i, j, data */
    HYPRE_MemoryLocation      memory_location;
 
+
+#if defined(HYPRE_USING_CUDA)
+   /* Data structures for sparse triangular solves */
+   void * L; // For now this is opaque. If used, it will be allocated/cast to a hypre_CSRMatrix
+   void * L_cusparse_data; // For now this is opaque. If used, it will be allocated/cast to a hypre_CudaSpTriMatrixData
+   void * U; // For now this is opaque. If used, it will be allocated/cast to a hypre_CSRMatrix
+   void * U_cusparse_data; // For now this is opaque. If used, it will be allocated/cast to a hypre_CudaSpTriMatrixData
+   HYPRE_Complex  *D; // separate out the diagonal
+   HYPRE_Complex  *work_vector;
+   HYPRE_Complex  *work_vector2;
+   HYPRE_Int rebuildTriMats; // Every time amg setup is called, this flag is set to 1. After D, L and U are built, the flag is set to 0
+   HYPRE_Int rebuildTriSolves; // Every time amg setup is called, this flag is set to 1. After Solve Data for L and/or U are built, the flag is set to 0
+#endif
+
 } hypre_CSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -80,6 +94,19 @@ typedef struct
 #define hypre_CSRMatrixNumRownnz(matrix)      ((matrix) -> num_rownnz)
 #define hypre_CSRMatrixOwnsData(matrix)       ((matrix) -> owns_data)
 #define hypre_CSRMatrixMemoryLocation(matrix) ((matrix) -> memory_location)
+
+#if defined(HYPRE_USING_CUDA)
+/* Accessors for sparse triangular solve */
+#define hypre_CSRMatrixLower(matrix)                ((matrix) -> L)
+#define hypre_CSRMatrixCusparseDataLower(matrix)    ((matrix) -> L_cusparse_data)
+#define hypre_CSRMatrixUpper(matrix)                ((matrix) -> U)
+#define hypre_CSRMatrixCusparseDataUpper(matrix)    ((matrix) -> U_cusparse_data)
+#define hypre_CSRMatrixDiagonal(matrix)             ((matrix) -> D)
+#define hypre_CSRMatrixWorkVector(matrix)           ((matrix) -> work_vector)
+#define hypre_CSRMatrixWorkVector2(matrix)          ((matrix) -> work_vector2)
+#define hypre_CSRMatrixRebuildTriMats(matrix)       ((matrix) -> rebuildTriMats)
+#define hypre_CSRMatrixRebuildTriSolves(matrix)     ((matrix) -> rebuildTriSolves)
+#endif
 
 HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBegin( hypre_CSRMatrix *A );
 HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionEnd( hypre_CSRMatrix *A );
@@ -348,6 +375,16 @@ HYPRE_Int HYPRE_CSRMatrixInitialize ( HYPRE_CSRMatrix matrix );
 HYPRE_CSRMatrix HYPRE_CSRMatrixRead ( char *file_name );
 void HYPRE_CSRMatrixPrint ( HYPRE_CSRMatrix matrix , char *file_name );
 HYPRE_Int HYPRE_CSRMatrixGetNumRows ( HYPRE_CSRMatrix matrix , HYPRE_Int *num_rows );
+
+/* csr_mat_sptrisolve_device.c */
+#if defined(HYPRE_USING_CUDA)
+HYPRE_Int hypre_CSRMatrixPrintMemoryUsage ( char * FILENAME, char * FUNCTIONNAME, HYPRE_Int LINENUMBER );
+HYPRE_Int hypre_CSRMatrixDestroyTriMatsSolveDataDevice ( hypre_CSRMatrix *matrix );
+HYPRE_Int hypre_CSRMatrixDestroyTriMats ( hypre_CSRMatrix *matrix );
+HYPRE_Int hypre_CSRMatrixGaussSeidelDevice (  HYPRE_Real     *Vext_data, hypre_Vector   *f, hypre_Vector   *u, hypre_CSRMatrix *diag, hypre_CSRMatrix *offd );
+HYPRE_Int hypre_CSRMatrixSymmetricGaussSeidelDevice (  HYPRE_Real     *Vext_data, hypre_Vector   *f, hypre_Vector   *u, hypre_CSRMatrix *diag, hypre_CSRMatrix *offd );
+HYPRE_Int hypre_CSRMatrixTwoStageGaussSeidelDevice (  hypre_Vector   *r, hypre_Vector   *u, hypre_CSRMatrix *diag, hypre_CSRMatrix *offd, HYPRE_Real omega, HYPRE_Int choice);
+#endif
 
 /* HYPRE_mapped_matrix.c */
 HYPRE_MappedMatrix HYPRE_MappedMatrixCreate ( void );
