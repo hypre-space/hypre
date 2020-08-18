@@ -205,7 +205,7 @@ hypre_BoomerAMGCreate()
    ilu_max_row_nnz = 20;
    ilu_max_iter = 1;
    ilu_droptol = 0.0001;
-   ilu_reordering_type = 0;
+   ilu_reordering_type = 1;
 
    /* solve params */
    min_iter  = 0;

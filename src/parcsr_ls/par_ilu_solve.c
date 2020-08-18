@@ -2419,8 +2419,6 @@ hypre_NSHSolveInverse(hypre_ParCSRMatrix *A, hypre_ParVector *f,
    /* r = f-Au */
    hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A, u, beta, f, ftemp);
    /* e = Mr */
-//hypre_ParCSRMatrixDiag(M) = hypre_ParCSRMatrixDiag(A);
-//hypre_ParCSRMatrixOffd(M) = hypre_ParCSRMatrixOffd(A);
    hypre_ParCSRMatrixMatvec(1.0, M, ftemp, 0.0, utemp);
    /* u = u + e */
    hypre_ParVectorAxpy(beta, utemp, u);

@@ -156,5 +156,5 @@ mpirun -np 2  ./ij -solver 82 -ilu_type 21 -ilu_droptol 1.0e-2 -ilu_max_row_nnz 
 mpirun -np 2  ./ij -solver 82 -ilu_type 40 -ilu_lfil 0 -ilu_schur_max_iter 5 > solvers.out.321
 mpirun -np 2  ./ij -solver 82 -ilu_type 41 -ilu_droptol 1.0e-2 -ilu_max_row_nnz 1000 -ilu_schur_max_iter 5  > solvers.out.322
 ## ILU smoother for AMG
-mpirun -np 2  ./ij -solver 0 -smtype 5  -smlv 1 > solvers.out.323
-mpirun -np 2  ./ij -solver 0 -smtype 15 -smlv 1 > solvers.out.324
+mpirun -np 2  ./ij -solver 0 -smtype 5  -smlv 1 -ilu_type 30 > solvers.out.323
+mpirun -np 2  ./ij -solver 0 -smtype 15 -smlv 1 -ilu_type 30 > solvers.out.324

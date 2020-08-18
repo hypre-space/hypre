@@ -706,7 +706,7 @@ HYPRE_Int
 hypre_ILUSetSchurNSHDropThreshold( void *ilu_vdata, HYPRE_Real threshold)
 {
    hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
-   if(hypre_ParILUDataSchurNSHOwnDroptolData(ilu_data))
+   if(hypre_ParILUDataSchurNSHOwnDroptolData(ilu_data) || !hypre_ParILUDataSchurNSHDroptol(ilu_data))
    {
       hypre_ParILUDataSchurNSHDroptol(ilu_data)          = hypre_TAlloc(HYPRE_Real, 2, HYPRE_MEMORY_HOST);
       hypre_ParILUDataSchurNSHOwnDroptolData(ilu_data)   = 1;
