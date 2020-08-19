@@ -72,6 +72,7 @@ typedef struct
 
   HYPRE_Int     use_default_cgrid_solver;
   HYPRE_Int     use_default_fsolver;
+//  HYPRE_Int     fsolver_type;
   HYPRE_Real    omega;
 
   /* temp vectors for solve phase */
@@ -108,11 +109,12 @@ typedef struct
   /* V-cycle F relaxation method */
   hypre_ParAMGData    **FrelaxVcycleData;
   hypre_ParVector   *VcycleRelaxVtemp;
-  hypre_ParVector   *VcycleRelaxZtemp;  
+  hypre_ParVector   *VcycleRelaxZtemp;
 
   HYPRE_Int   max_local_lvls;
 
   HYPRE_Int   print_coarse_system;
+  HYPRE_Real  truncate_coarse_grid_threshold;
 
   /* how to set C points */
   HYPRE_Int   set_c_points_method;

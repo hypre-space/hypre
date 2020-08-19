@@ -40,12 +40,16 @@ FILES =\
  IJ_assumed_part.c\
  IJMatrix.c\
  IJMatrix_parcsr.c\
- IJMatrix_parcsr_device.c\
  IJVector.c\
- IJVector_parcsr.c\
+ IJVector_parcsr.c
+
+CUFILES =\
+ IJMatrix_parcsr_device.c\
  IJVector_parcsr_device.c
 
-OBJS = ${FILES:.c=.o}
+COBJS = ${FILES:.c=.o}
+CUOBJS = ${CUFILES:.c=.obj}
+OBJS = ${COBJS} ${CUOBJS}
 
 SONAME = libHYPRE_IJ_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
@@ -64,7 +68,7 @@ install: libHYPRE_IJ_mv${HYPRE_LIB_SUFFIX}
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o libHYPRE*
+	rm -f *.o* libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean

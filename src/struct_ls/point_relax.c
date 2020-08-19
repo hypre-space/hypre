@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
+#include "_hypre_struct_mv.hpp"
 
 /* this currently cannot be greater than 7 */
 #ifdef MAX_DEPTH
@@ -19,20 +20,20 @@
 typedef struct
 {
    MPI_Comm                comm;
-                       
+
    HYPRE_Real              tol;       /* tolerance, set =0 for no convergence testing */
    HYPRE_Real              rresnorm;  /* relative residual norm, computed only if tol>0.0 */
    HYPRE_Int               max_iter;
    HYPRE_Int               rel_change;         /* not yet used */
    HYPRE_Int               zero_guess;
    HYPRE_Real              weight;
-                         
+
    HYPRE_Int               num_pointsets;
    HYPRE_Int              *pointset_sizes;
    HYPRE_Int              *pointset_ranks;
    hypre_Index            *pointset_strides;
    hypre_Index           **pointset_indices;
-                       
+
    hypre_StructMatrix     *A;
    hypre_StructVector     *b;
    hypre_StructVector     *x;
@@ -154,10 +155,10 @@ hypre_PointRelaxSetup( void               *relax_vdata,
    hypre_Index            diag_index;
    hypre_IndexRef         stride;
    hypre_IndexRef         index;
-                       
+
    hypre_StructGrid      *grid;
    hypre_StructStencil   *stencil;
-                       
+
    hypre_BoxArrayArray   *orig_indt_boxes;
    hypre_BoxArrayArray   *orig_dept_boxes;
    hypre_BoxArrayArray   *box_aa;
@@ -173,7 +174,7 @@ hypre_PointRelaxSetup( void               *relax_vdata,
    HYPRE_Int              frac;
 
    HYPRE_Int              i, j, k, p, m, compute_i;
-                       
+
    /*----------------------------------------------------------
     * Set up the temp vector
     *----------------------------------------------------------*/
@@ -243,10 +244,10 @@ hypre_PointRelaxSetup( void               *relax_vdata,
                {
                   box = hypre_BoxArrayBox(box_a, j);
                   new_box = hypre_BoxArrayBox(new_box_a, k);
-                  
+
                   hypre_CopyBox(box, new_box);
                   hypre_ProjectBox(new_box, index, stride);
-                  
+
                   k++;
                }
             }
@@ -327,16 +328,16 @@ hypre_PointRelax( void               *relax_vdata,
 
    hypre_ComputePkg      *compute_pkg;
    hypre_CommHandle      *comm_handle;
-                        
+
    hypre_BoxArrayArray   *compute_box_aa;
    hypre_BoxArray        *compute_box_a;
    hypre_Box             *compute_box;
-                        
+
    hypre_Box             *A_data_box;
    hypre_Box             *b_data_box;
    hypre_Box             *x_data_box;
    hypre_Box             *t_data_box;
-                        
+
    HYPRE_Real            *Ap;
    HYPRE_Real            AAp0;
    HYPRE_Real            *bp;
@@ -345,11 +346,11 @@ hypre_PointRelax( void               *relax_vdata,
    void                  *matvec_data = NULL;
 
    HYPRE_Int              Ai;
-                        
+
    hypre_IndexRef         stride;
    hypre_IndexRef         start;
    hypre_Index            loop_size;
-                        
+
    HYPRE_Int              constant_coefficient;
 
    HYPRE_Int              iter, p, compute_i, i, j;
@@ -442,7 +443,7 @@ hypre_PointRelax( void               *relax_vdata,
                hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), i);
             x_data_box =
                hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-             
+
             Ap = hypre_StructMatrixBoxData(A, i, diag_rank);
             bp = hypre_StructVectorBoxData(b, i);
             xp = hypre_StructVectorBoxData(x, i);
@@ -487,12 +488,12 @@ hypre_PointRelax( void               *relax_vdata,
             }
          }
       }
-      
+
       if (weight != 1.0)
       {
          hypre_StructScale(weight, x);
       }
-      
+
       p    = (p + 1) % num_pointsets;
       iter = iter + (p == 0);
 
@@ -692,7 +693,7 @@ hypre_PointRelax_core0( void               *relax_vdata,
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
    HYPRE_Int              stencil_size;
-                        
+
    HYPRE_Int              diag_rank        = (relax_data -> diag_rank);
    hypre_IndexRef         start;
    hypre_Index            loop_size;
@@ -732,7 +733,7 @@ hypre_PointRelax_core0( void               *relax_vdata,
             k++;
          }
       }
-                           
+
       switch(depth)
       {
          case 7:
@@ -940,7 +941,7 @@ hypre_PointRelax_core12( void               *relax_vdata,
    HYPRE_Real            AAp5;
    HYPRE_Real            AAp6;
    HYPRE_Real            AApd;
-                        
+
    HYPRE_Int              xoff0;
    HYPRE_Int              xoff1;
    HYPRE_Int              xoff2;
@@ -952,7 +953,7 @@ hypre_PointRelax_core12( void               *relax_vdata,
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
    HYPRE_Int              stencil_size;
-                        
+
    HYPRE_Int              diag_rank        = (relax_data -> diag_rank);
    hypre_IndexRef         start;
    hypre_Index            loop_size;
@@ -999,7 +1000,7 @@ hypre_PointRelax_core12( void               *relax_vdata,
       }
       hypre_BoxLoop2End(bi, ti);
    }
-#undef DEVICE_VAR 
+#undef DEVICE_VAR
 
    /* unroll up to depth MAX_DEPTH */
    for (si = 0; si < stencil_size; si += MAX_DEPTH)
@@ -1018,7 +1019,7 @@ hypre_PointRelax_core12( void               *relax_vdata,
             k++;
          }
       }
-                           
+
       switch(depth)
       {
          case 7:
@@ -1087,7 +1088,7 @@ hypre_PointRelax_core12( void               *relax_vdata,
             }
             hypre_BoxLoop2End(xi, ti);
             break;
-                      
+
          case 6:
             AAp0 = Ap0[Ai]*AApd;
             AAp1 = Ap1[Ai]*AApd;
@@ -1109,7 +1110,7 @@ hypre_PointRelax_core12( void               *relax_vdata,
             }
             hypre_BoxLoop2End(xi, ti);
             break;
-                      
+
          case 5:
             AAp0 = Ap0[Ai]*AApd;
             AAp1 = Ap1[Ai]*AApd;
@@ -1129,7 +1130,7 @@ hypre_PointRelax_core12( void               *relax_vdata,
             }
             hypre_BoxLoop2End(xi, ti);
             break;
-                      
+
          case 4:
             AAp0 = Ap0[Ai]*AApd;
             AAp1 = Ap1[Ai]*AApd;
@@ -1147,7 +1148,7 @@ hypre_PointRelax_core12( void               *relax_vdata,
             }
             hypre_BoxLoop2End(xi, ti);
             break;
-                      
+
          case 3:
             AAp0 = Ap0[Ai]*AApd;
             AAp1 = Ap1[Ai]*AApd;
@@ -1163,7 +1164,7 @@ hypre_PointRelax_core12( void               *relax_vdata,
             }
             hypre_BoxLoop2End(xi, ti);
             break;
-                      
+
          case 2:
             AAp0 = Ap0[Ai]*AApd;
             AAp1 = Ap1[Ai]*AApd;
@@ -1177,7 +1178,7 @@ hypre_PointRelax_core12( void               *relax_vdata,
             }
             hypre_BoxLoop2End(xi, ti);
             break;
-                      
+
          case 1:
             AAp0 = Ap0[Ai]*AApd;
             hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
@@ -1336,7 +1337,7 @@ hypre_PointRelaxSetNumPointsets( void *relax_vdata,
    (relax_data -> pointset_sizes)   = hypre_TAlloc(HYPRE_Int,  num_pointsets, HYPRE_MEMORY_HOST);
    (relax_data -> pointset_ranks)   = hypre_TAlloc(HYPRE_Int,  num_pointsets, HYPRE_MEMORY_HOST);
    (relax_data -> pointset_strides) = hypre_TAlloc(hypre_Index,  num_pointsets, HYPRE_MEMORY_HOST);
-   (relax_data -> pointset_indices) = hypre_TAlloc(hypre_Index *, 
+   (relax_data -> pointset_indices) = hypre_TAlloc(hypre_Index *,
                                                    num_pointsets, HYPRE_MEMORY_HOST);
    for (i = 0; i < num_pointsets; i++)
    {

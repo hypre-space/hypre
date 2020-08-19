@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
+#include "_hypre_struct_mv.hpp"
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -50,11 +51,11 @@ hypre_SemiInterpSetup( void               *interp_vdata,
                        hypre_Index         findex,
                        hypre_Index         stride       )
 {
-	hypre_SemiInterpData   *interp_data = (hypre_SemiInterpData   *)interp_vdata;
+   hypre_SemiInterpData   *interp_data = (hypre_SemiInterpData   *)interp_vdata;
 
    hypre_StructGrid       *grid;
    hypre_StructStencil    *stencil;
-                       
+
    hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
 
@@ -110,27 +111,27 @@ hypre_SemiInterp( void               *interp_vdata,
    HYPRE_Int              *cgrid_ids;
 
    hypre_CommHandle       *comm_handle;
-                       
+
    hypre_BoxArrayArray    *compute_box_aa;
    hypre_BoxArray         *compute_box_a;
    hypre_Box              *compute_box;
-                       
+
    hypre_Box              *P_dbox;
    hypre_Box              *xc_dbox;
    hypre_Box              *e_dbox;
-                       
+
    HYPRE_Int               Pi;
    HYPRE_Int               constant_coefficient;
-                         
+
    HYPRE_Real             *Pp0, *Pp1;
    HYPRE_Real             *xcp;
    HYPRE_Real             *ep;
-                       
+
    hypre_Index             loop_size;
    hypre_Index             start;
    hypre_Index             startc;
    hypre_Index             stridec;
-                       
+
    hypre_StructStencil    *stencil;
    hypre_Index            *stencil_shape;
 
@@ -171,9 +172,9 @@ hypre_SemiInterp( void               *interp_vdata,
    cgrid_ids = hypre_StructGridIDs(cgrid);
 
 #if defined(HYPRE_USING_CUDA)
-   HYPRE_Int data_location_f = hypre_StructGridDataLocation(fgrid);
-   HYPRE_Int data_location_c = hypre_StructGridDataLocation(cgrid);
-   
+   HYPRE_MemoryLocation data_location_f = hypre_StructGridDataLocation(fgrid);
+   HYPRE_MemoryLocation data_location_c = hypre_StructGridDataLocation(cgrid);
+
    if (data_location_f != data_location_c)
    {
       xc_tmp = hypre_StructVectorCreate(hypre_MPI_COMM_WORLD, cgrid);
@@ -290,10 +291,10 @@ hypre_SemiInterp( void               *interp_vdata,
 
             if ( constant_coefficient )
             {
-	       HYPRE_Complex Pp0val,Pp1val;
+               HYPRE_Complex Pp0val,Pp1val;
                Pi = hypre_CCBoxIndexRank( P_dbox, startc );
-	       Pp0val = Pp0[Pi];
-	       Pp1val = Pp1[Pi+Pp1_offset];
+               Pp0val = Pp0[Pi];
+               Pp1val = Pp1[Pi+Pp1_offset];
 
 #define DEVICE_VAR is_device_ptr(ep)
                hypre_BoxLoop1Begin(hypre_StructMatrixNDim(P), loop_size,

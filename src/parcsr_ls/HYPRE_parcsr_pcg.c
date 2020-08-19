@@ -251,32 +251,7 @@ HYPRE_ParCSRDiagScale( HYPRE_Solver solver,
                        HYPRE_ParVector Hy,
                        HYPRE_ParVector Hx      )
 {
-   hypre_ParCSRMatrix *A = (hypre_ParCSRMatrix *) HA;
-   hypre_ParVector    *y = (hypre_ParVector *) Hy;
-   hypre_ParVector    *x = (hypre_ParVector *) Hx;
-   HYPRE_Real *x_data = hypre_VectorData(hypre_ParVectorLocalVector(x));
-   HYPRE_Real *y_data = hypre_VectorData(hypre_ParVectorLocalVector(y));
-   HYPRE_Real *A_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A));
-   HYPRE_Int *A_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A));
-   HYPRE_Int local_size = hypre_VectorSize(hypre_ParVectorLocalVector(x));
-   HYPRE_Int ierr = 0;
-#if defined(HYPRE_USING_CUDA)
-   hypreDevice_DiagScaleVector(local_size, A_i, A_data, y_data, x_data);
-   //hypre_SyncCudaComputeStream(hypre_handle());
-#else /* #if defined(HYPRE_USING_CUDA) */
-   HYPRE_Int i;
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-#pragma omp target teams distribute parallel for private(i) is_device_ptr(x_data,y_data,A_data,A_i)
-#elif defined(HYPRE_USING_OPENMP)
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-   for (i = 0; i < local_size; i++)
-   {
-      x_data[i] = y_data[i]/A_data[A_i[i]];
-   }
-#endif /* #if defined(HYPRE_USING_CUDA) */
-
-   return ierr;
+   return hypre_ParCSRDiagScale(HA, Hy, Hx);
 }
 
 /*--------------------------------------------------------------------------

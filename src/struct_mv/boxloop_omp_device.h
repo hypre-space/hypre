@@ -52,8 +52,6 @@
 #define hypre_BoxLoop3For(i1, i2, i3)
 #define hypre_BoxLoop4For(i1, i2, i3, i4)
 */
-#define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
-#define hypre_BoxLoopSetOneBlock() ;
 #define hypre_BoxLoopBlock()       0
 
 #define hypre_BoxLoop0Begin  zypre_omp4_dist_BoxLoop0Begin

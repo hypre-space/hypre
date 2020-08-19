@@ -27,14 +27,18 @@
 */
 
 #include <stdio.h>
+#include <string.h>
 
 /* Struct linear solvers header */
 #include "HYPRE_struct_ls.h"
 
+#ifdef HYPRE_EXVIS
 #include "vis.c"
+#endif
 
 #if defined(HYPRE_USING_CUDA)
-#define Malloc(type, count) ( {void *ptr = NULL; cudaMallocManaged(&ptr, count*sizeof(type)); (type *) ptr;} )
+#include <cuda_runtime.h>
+#define Malloc(type, count) ( {void *ptr = NULL; cudaMallocManaged(&ptr, count*sizeof(type), cudaMemAttachGlobal); (type *) ptr;} )
 #define Free(ptr) ( cudaFree(ptr), ptr = NULL )
 #else
 #define Malloc(type, count) ( (type *) malloc(count*sizeof(type)) )
@@ -343,9 +347,11 @@ int main (int argc, char *argv[])
    /* Save the solution for GLVis visualization, see vis/glvis-ex1.sh */
    if (vis)
    {
+#ifdef HYPRE_EXVIS
       GLVis_PrintStructGrid(grid, "vis/ex1.mesh", myid, NULL, NULL);
       GLVis_PrintStructVector(x, "vis/ex1.sol", myid);
       GLVis_PrintData("vis/ex1.data", myid, num_procs);
+#endif
    }
 
    /* Free memory */

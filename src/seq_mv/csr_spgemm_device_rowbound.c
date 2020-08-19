@@ -261,7 +261,7 @@ void gpu_csr_spmm_rownnz_attempt(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    // number of active warps
    HYPRE_Int num_act_warps = min(bDim.z * gDim.x, m);
 
-   char hash_type = hypre_handle()->spgemm_hash_type;
+   char hash_type = hypre_HandleSpgemmHashType(hypre_handle());
 
    /* ---------------------------------------------------------------------------
     * build hash table (no values)

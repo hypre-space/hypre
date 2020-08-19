@@ -15,13 +15,14 @@
 #define hypre_GENERAL_HEADER
 
 /* This allows us to consistently avoid 'int' throughout hypre */
-typedef int               hypre_int;
-typedef long int          hypre_longint;
-typedef unsigned int      hypre_uint;
-typedef unsigned long int hypre_ulongint;
+typedef int                    hypre_int;
+typedef long int               hypre_longint;
+typedef unsigned int           hypre_uint;
+typedef unsigned long int      hypre_ulongint;
+typedef unsigned long long int hypre_ulonglongint;
 
 /* This allows us to consistently avoid 'double' throughout hypre */
-typedef double            hypre_double;
+typedef double                 hypre_double;
 
 /*--------------------------------------------------------------------------
  * Define various functions

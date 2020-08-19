@@ -39,7 +39,7 @@ extern size_t hypre__target_dtoh_bytes;
 #endif
 
 /* OMP 4.5 offloading macro */
-#define hypre_omp45_offload(devnum, hptr, datatype, offset, count, type1, type2) \
+#define hypre_omp_device_offload(devnum, hptr, datatype, offset, count, type1, type2) \
 {\
    /* devnum: device number \
     * hptr: host poiter \
@@ -107,11 +107,6 @@ HYPRE_Int HYPRE_OMPPtrIsMapped(void *p, HYPRE_Int device_num);
 HYPRE_Int HYPRE_OMPOffloadOn();
 HYPRE_Int HYPRE_OMPOffloadOff();
 HYPRE_Int HYPRE_OMPOffloadStatPrint();
-
-#define HYPRE_MIN_GPU_SIZE (131072)
-
-#define hypre_SetDeviceOn() HYPRE_OMPOffloadOn()
-#define hypre_SetDeviceOff() HYPRE_OMPOffloadOff()
 
 #endif /* HYPRE_USING_DEVICE_OPENMP */
 #endif /* HYPRE_OMP_DEVICE_H */

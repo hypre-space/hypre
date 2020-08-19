@@ -114,15 +114,11 @@ hypre_ParCSRCommPkgCopySendMapElmtsToDevice(hypre_ParCSRCommPkg *comm_pkg)
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    if (hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) == NULL)
    {
-      HYPRE_Int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) =
-         hypre_TAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
-                      HYPRE_MEMORY_DEVICE);
+         hypre_TAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, hypre_ParCSRCommPkgNumSends(comm_pkg)), HYPRE_MEMORY_DEVICE);
 
-      hypre_TMemcpy(hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
-                    hypre_ParCSRCommPkgSendMapElmts(comm_pkg),
-                    HYPRE_Int,
-                    hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+      hypre_TMemcpy(hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg), hypre_ParCSRCommPkgSendMapElmts(comm_pkg),
+                    HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, hypre_ParCSRCommPkgNumSends(comm_pkg)),
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
    }
 #endif

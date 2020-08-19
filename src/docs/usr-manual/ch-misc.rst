@@ -38,7 +38,7 @@ simplest method is to configure, compile and install the libraries in
 ``./hypre/lib`` and ``./hypre/include`` directories, which is accomplished by:
 
 .. code-block:: bash
-   
+
    ./configure
    make
 
@@ -90,14 +90,14 @@ options and variable settings to meet their needs.
 Some of the commonly used options include:
 
 .. code-block:: none
-   
-   --enable-debug                 Sets compiler flags to generate information 
+
+   --enable-debug                 Sets compiler flags to generate information
                                   needed for debugging.
    --enable-shared                Build shared libraries.
-                                  NOTE: in order to use the resulting shared 
+                                  NOTE: in order to use the resulting shared
                                         libraries the user MUST have the path to
-                                        the libraries defined in the environment 
-                                        variable LD_LIBRARY_PATH. 
+                                        the libraries defined in the environment
+                                        variable LD_LIBRARY_PATH.
    --with-print-errors            Print HYPRE errors
    --with-openmp                  Use OpenMP. This may affect which compiler is
                                   chosen.
@@ -113,7 +113,7 @@ and LAPACK libraries, which can be combined with any other option.  This is done
 as follows (currently, both libraries must be configured as external together):
 
 .. code-block:: bash
-   
+
    ./configure  --with-blas-lib="blas-lib-name" \
                 --with-blas-lib-dirs="path-to-blas-lib" \
                 --with-lapack-lib="lapack-lib-name" \
@@ -132,14 +132,14 @@ libraries occurs.  Make has several options that are called targets.  These
 include:
 
 .. code-block:: none
-   
+
    help         prints the details of each target
 
    all          default target in all directories
                 compile the entire library
                 does NOT rebuild documentation
 
-   clean        deletes all files from the current directory that are 
+   clean        deletes all files from the current directory that are
                    created by building the library
 
    distclean    deletes all files from the current directory that are created
@@ -160,6 +160,60 @@ include:
                 builds the test drivers; linking to the temporary locations to
                    simulate how application codes will link to HYPRE
 
+GPU build
+------------------------------------------------------------------------------
+
+Hypre can support GPUs with CUDA and OpenMP (:math:`{\ge}` 4.5). The related ``configure`` options are
+
+.. code-block:: none
+
+  --with-cuda             Use CUDA. Require cuda-8.0 or higher (default is
+                          NO).
+
+  --with-device-openmp    Use OpenMP 4.5 Device Directives. This may affect
+                          which compiler is chosen.
+
+The related environment variables
+
+.. code-block:: none
+
+   HYPRE_CUDA_SM          (default 60)
+
+   CUDA_HOME              the CUDA home directory
+
+need to be set properly.
+
+When configured with ``--with-cuda`` or ``--with-device-openmp``, the memory allocated on the GPUs, by default, is the GPU device memory, which is not accessible from the CPUs.
+Hypre's Struct solvers can work fine with only  device memory,
+whereas BoomerAMG and the SStruct solvers require  unified (CUDA managed) memory, for which
+the following option should be added
+
+.. code-block:: none
+
+  --enable-unified-memory Use unified memory for allocating the memory
+                          (default is NO).
+
+Hypre's Struct solvers can also choose RAJA and Kokkos as the backend.
+The ``configure`` options are
+
+.. code-block:: none
+
+  --with-raja             Use RAJA. Require RAJA package to be compiled
+                          properly (default is NO).
+
+  --with-kokkos           Use Kokkos. Require kokkos package to be compiled
+                          properly(default is NO).
+
+To run on the GPUs with RAJA and Kokkos, the options ``--with-cuda`` and ``--with-device-openmp`` are also needed,
+and the RAJA and Kokkos libraries should be built with CUDA or OpenMP 4.5 correspondingly.
+
+The other GPU related options include:
+
+* ``--enable-nvtx``: enable NVTX annotations for CUDA profilers
+* ``--enable-cub`` : enable the caching GPU memory allocator in hypre
+* ``--enable-cusparse`` : choose cuSPARSE for GPU sparse kernels
+* ``--enable-cublas`` : choose cuBLAS for GPU dense kernels
+* ``--enable-curand`` : generating random numbers on GPUs
 
 Testing the Library
 ==============================================================================
@@ -241,7 +295,7 @@ obtained from ``HYPRE_GetErrorArg()``.  To get a character string with a
 description of all errors in a given error flag, use
 
 .. code-block:: c
-   
+
    HYPRE_DescribeError(int hypre_ierr, char *descr);
 
 The global error flag can be cleared manually by calling
@@ -349,7 +403,7 @@ example, an integer array of length ``N`` may be declared in fortran as either
 of the following:
 
 .. code-block:: fortran
-   
+
    integer  array(N)
    integer  array(0:N-1)
 
@@ -358,12 +412,12 @@ usually corresponds to the length of a pointer.  However, there may be some
 machines where this is not the case.  On such machines, the Fortran type for a
 hypre object should be an ``integer`` of the appropriate length.
 
-This simple example illustrates the above information: 
+This simple example illustrates the above information:
 
 C prototype:
 
 .. code-block:: c
-   
+
    int HYPRE_IJMatrixSetValues(HYPRE_IJMatrix  matrix,
                                int  nrows, int  *ncols,
                                const int *rows, const int  *cols,

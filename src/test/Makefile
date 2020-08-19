@@ -64,6 +64,7 @@ LFLAGS =\
 
 HYPRE_DRIVERS =\
  ij.c\
+ ij_assembly.c\
  sstruct.c\
  struct.c\
  ams_driver.c\
@@ -104,7 +105,7 @@ all++: ${HYPRE_DRIVER_CXX_EXECS}
 install:
 
 clean:
-	rm -f *.o
+	rm -f *.o*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
@@ -130,63 +131,69 @@ distclean: clean
 # Rules
 ##################################################################
 
+ifeq ($(CUCC), )
+   OBJ_SUFFIX=o
+else
+   OBJ_SUFFIX=obj
+endif
+
 # C
 
-ij: ij.o
+ij: ij.${OBJ_SUFFIX}
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_CC} -o $@ $< ${LFLAGS}
 
-ij_assembly: ij_assembly.o
+ij_assembly: ij_assembly.${OBJ_SUFFIX}
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_CC} -o $@ $< ${LFLAGS}
 
-sstruct: sstruct.o
+sstruct: sstruct.${OBJ_SUFFIX}
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_CC} -o $@ $< ${LFLAGS}
 
-struct: struct.o
+struct: struct.${OBJ_SUFFIX}
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_CC} -o $@ $< ${LFLAGS}
 
 ams_driver: ams_driver.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_CC} -o $@ $< ${LFLAGS}
 
-maxwell_unscaled: maxwell_unscaled.o
+maxwell_unscaled: maxwell_unscaled.${OBJ_SUFFIX}
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_CC} -o $@ $< ${LFLAGS}
 
-struct_migrate: struct_migrate.o
+struct_migrate: struct_migrate.${OBJ_SUFFIX}
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_CC} -o $@ $< ${LFLAGS}
 
-sstruct_fac: sstruct_fac.o
+sstruct_fac: sstruct_fac.${OBJ_SUFFIX}
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_CC} -o $@ $< ${LFLAGS}
 
 ij_mv: ij_mv.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_CC} -o $@ $< ${LFLAGS}
 
-ij_device: ij_device.o
+ij_device: ij_device.${OBJ_SUFFIX}
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_CC} -o $@ $< ${LFLAGS}
 
-ij_mm: ij_mm.o
+ij_mm: ij_mm.${OBJ_SUFFIX}
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_CC} -o $@ $< ${LFLAGS}
 
-zboxloop: zboxloop.o
+zboxloop: zboxloop.${OBJ_SUFFIX}
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_CC} -o $@ $< ${LFLAGS}
 
 struct_newboxloop: struct_newboxloop.o $(KOKKOS_LINK_DEPENDS)
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_CC} -o $@ $< ${LFLAGS}
 
 test_mgr: test_mgr.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_CC} -o $@ $< ${LFLAGS}
 
 # RDF: Keep these for now
 

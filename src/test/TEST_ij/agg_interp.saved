@@ -106,3 +106,15 @@ Final Relative Residual Norm = 4.855699e-09
 Iterations = 16
 Final Relative Residual Norm = 3.500645e-09
 
+# Output file: agg_interp.out.19
+
+
+Iterations = 10
+Final Relative Residual Norm = 2.874370e-09
+
+# Output file: agg_interp.out.20
+
+
+Iterations = 11
+Final Relative Residual Norm = 1.654514e-09
+

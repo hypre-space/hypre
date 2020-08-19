@@ -415,14 +415,14 @@ HYPRE_Int HYPRE_BoomerAMGSetNodalDiag(HYPRE_Solver solver,
  * (Optional) Defines which parallel interpolation operator is used.
  * There are the following options for \e interp_type:
  *
- *    - 0  : classical modified interpolation 
- *    - 1  : LS interpolation (for use with GSMG) 
+ *    - 0  : classical modified interpolation
+ *    - 1  : LS interpolation (for use with GSMG)
  *    - 2  : classical modified interpolation for hyperbolic PDEs
  *    - 3  : direct interpolation (with separation of weights) (also for GPU use)
  *    - 4  : multipass interpolation
  *    - 5  : multipass interpolation (with separation of weights)
  *    - 6  : extended+i interpolation (also for GPU use)
- *    - 7  : extended+i (if no common C neighbor) interpolation 
+ *    - 7  : extended+i (if no common C neighbor) interpolation
  *    - 8  : standard interpolation
  *    - 9  : standard interpolation (with separation of weights)
  *    - 10 : classical block interpolation (for use with nodal systems version only)
@@ -434,6 +434,7 @@ HYPRE_Int HYPRE_BoomerAMGSetNodalDiag(HYPRE_Solver solver,
  *    - 15 : interpolation with adaptive weights (GPU use only)
  *    - 16 : extended interpolation in matrix-matrix form
  *    - 17 : extended+i interpolation in matrix-matrix form
+ *    - 18 : extended+e interpolation in matrix-matrix form
  *
  * The default is ext+i interpolation (interp_type 6) trunctated to at most 4
  * elements per row. (see HYPRE_BoomerAMGSetPMaxElmts).
@@ -474,6 +475,7 @@ HYPRE_Int HYPRE_BoomerAMGSetSepWeight(HYPRE_Solver solver,
  *    - 4 : multipass interpolation
  *    - 5 : 2-stage extended interpolation in matrix-matrix form
  *    - 6 : 2-stage extended+i interpolation in matrix-matrix form
+ *    - 7 : 2-stage extended+e interpolation in matrix-matrix form
  **/
 HYPRE_Int HYPRE_BoomerAMGSetAggInterpType(HYPRE_Solver solver,
                                           HYPRE_Int    agg_interp_type);
@@ -1143,7 +1145,7 @@ HYPRE_Int HYPRE_BoomerAMGInitGridRelaxation(HYPRE_Int    **num_grid_sweeps_ptr,
 
 /**
  * (Optional) If rap2 not equal 0, the triple matrix product RAP is
- * replaced by two matrix products. 
+ * replaced by two matrix products.
  * (Required for triple matrix product generation on GPUs)
  **/
 HYPRE_Int HYPRE_BoomerAMGSetRAP2(HYPRE_Solver solver,
@@ -1206,8 +1208,8 @@ HYPRE_Int HYPRE_BoomerAMGGetGridHierarchy(HYPRE_Solver solver,
  *
  * Usage:
  *  Set slu_threshold >= max_coarse_size (from HYPRE_BoomerAMGSetMaxCoarseSize(...))
- *  to turn on use of superLU for the coarse grid solve. SuperLU is used if the 
- *  coarse grid size > max_coarse_size and the grid level is < (max_num_levels - 1) 
+ *  to turn on use of superLU for the coarse grid solve. SuperLU is used if the
+ *  coarse grid size > max_coarse_size and the grid level is < (max_num_levels - 1)
  *  (set with HYPRE_BoomerAMGSetMaxLevels(...)).
  **/
 
@@ -3362,6 +3364,43 @@ HYPRE_Int HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
  * @{
  **/
 
+#ifdef HYPRE_USING_DSUPERLU
+/**
+ * Create a MGR direct solver object
+ **/
+HYPRE_Int HYPRE_MGRDirectSolverCreate( HYPRE_Solver *solver );
+
+/**
+ * Destroy a MGR direct solver object
+ **/
+HYPRE_Int HYPRE_MGRDirectSolverDestroy( HYPRE_Solver solver );
+
+/**
+ * Setup the MGR direct solver using DSUPERLU
+ * @param solver [IN] object to be set up.
+ * @param A [IN] ParCSR matrix used to construct the solver/preconditioner.
+ * @param b right-hand-side of the linear system to be solved (Ignored by this function).
+ * @param x approximate solution of the linear system to be solved (Ignored by this function).
+ **/
+HYPRE_Int HYPRE_MGRDirectSolverSetup( HYPRE_Solver solver,
+                         HYPRE_ParCSRMatrix A,
+                         HYPRE_ParVector b,
+                         HYPRE_ParVector x      );
+
+ /**
+ * Solve the system using DSUPERLU.
+ *
+ * @param solver [IN] solver or preconditioner object to be applied.
+ * @param A [IN] ParCSR matrix, matrix of the linear system to be solved (Ignored by this function).
+ * @param b [IN] right hand side of the linear system to be solved
+ * @param x [OUT] approximated solution of the linear system to be solved
+ **/
+HYPRE_Int HYPRE_MGRDirectSolverSolve( HYPRE_Solver solver,
+                         HYPRE_ParCSRMatrix A,
+                         HYPRE_ParVector b,
+                         HYPRE_ParVector x      );
+#endif
+
 /**
  * Create a solver object
  **/
@@ -3628,7 +3667,7 @@ HYPRE_Int HYPRE_MGRSetFSolver(HYPRE_Solver          solver,
                              HYPRE_PtrToParSolverFcn  fine_grid_solver_setup,
                              HYPRE_Solver          fsolver );
 
-HYPRE_Int HYPRE_MGRBuildAffNew(HYPRE_ParCSRMatrix A,
+HYPRE_Int HYPRE_MGRBuildAff(HYPRE_ParCSRMatrix A,
                                HYPRE_Int *CF_marker,
                                HYPRE_Int debug_flag,
                                HYPRE_ParCSRMatrix *A_ff);
@@ -3659,6 +3698,17 @@ HYPRE_Int HYPRE_MGRSetCoarseSolver(HYPRE_Solver          solver,
 HYPRE_Int
 HYPRE_MGRSetPrintLevel( HYPRE_Solver solver,
                         HYPRE_Int print_level );
+
+/**
+ * (Optional) Set the threshold to compress the coarse grid at each level
+ * Use threshold = 0.0 if no truncation is applied. Otherwise, set the threshold
+ * value for dropping entries for the coarse grid.
+ * The default is 0.0.
+ **/
+HYPRE_Int
+HYPRE_MGRSetTruncateCoarseGridThreshold( HYPRE_Solver solver,
+                        HYPRE_Real threshold);
+
 
 /**
  * (Optional) Requests logging of solver diagnostics.

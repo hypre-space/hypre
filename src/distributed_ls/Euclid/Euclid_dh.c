@@ -21,8 +21,8 @@
 
 static void get_runtime_params_private(Euclid_dh ctx);
 static void invert_diagonals_private(Euclid_dh ctx);
-static void compute_rho_private(Euclid_dh ctx); 
-static void factor_private(Euclid_dh ctx); 
+static void compute_rho_private(Euclid_dh ctx);
+static void factor_private(Euclid_dh ctx);
 /* static void discard_indices_private(Euclid_dh ctx); */
 static void reduce_timings_private(Euclid_dh ctx);
 
@@ -70,7 +70,7 @@ void Euclid_dhCreate(Euclid_dh *ctxOUT)
   strcpy(ctx->krylovMethod, "bicgstab");
   ctx->maxIts = 200;
   ctx->rtol = 1e-5;
-  ctx->atol = _ATOL_;
+  ctx->atol = HYPRE_REAL_MIN;
   ctx->its = 0;
   ctx->itsTotal = 0;
   ctx->setupCount = 0;
@@ -112,7 +112,7 @@ void Euclid_dhDestroy(Euclid_dh ctx)
   if (ctx->work2 != NULL) { FREE_DH(ctx->work2); CHECK_V_ERROR; }
   if (ctx->slist != NULL) { SortedList_dhDestroy(ctx->slist); CHECK_V_ERROR; }
   if (ctx->extRows != NULL) { ExternalRows_dhDestroy(ctx->extRows); CHECK_V_ERROR; }
-  FREE_DH(ctx); CHECK_V_ERROR; 
+  FREE_DH(ctx); CHECK_V_ERROR;
 
   --ref_counter;
   END_FUNC_DH
@@ -166,7 +166,7 @@ void Euclid_dhSetup(Euclid_dh ctx)
   }
 
   EuclidGetDimensions(ctx->A, &beg_row, &m, &n); CHECK_V_ERROR;
-  
+
   ctx->m = m;
   ctx->n = n;
 
@@ -218,7 +218,7 @@ void Euclid_dhSetup(Euclid_dh ctx)
   }
   if (! strcmp(ctx->algo_par, "bj")) bj = false;
 
-  /*--------------------------------------------------------- 
+  /*---------------------------------------------------------
    * allocate and initialize storage for row-scaling
    * (ctx->isScaled is set in get_runtime_params_private(); )
    *---------------------------------------------------------*/
@@ -227,13 +227,13 @@ void Euclid_dhSetup(Euclid_dh ctx)
   }
   { HYPRE_Int i; for (i=0; i<m; ++i) ctx->scale[i] = 1.0; }
 
-  /*------------------------------------------------------------------ 
+  /*------------------------------------------------------------------
    * allocate work vectors; used in factorization and triangular solves;
    *------------------------------------------------------------------*/
-  if ( ctx->work == NULL) { 
+  if ( ctx->work == NULL) {
     ctx->work = (REAL_DH*)MALLOC_DH(m*sizeof(REAL_DH)); CHECK_V_ERROR;
   }
-  if ( ctx->work2 == NULL) { 
+  if ( ctx->work2 == NULL) {
     ctx->work2 = (REAL_DH*)MALLOC_DH(m*sizeof(REAL_DH)); CHECK_V_ERROR;
   }
 
@@ -241,40 +241,40 @@ void Euclid_dhSetup(Euclid_dh ctx)
    * perform the incomplete factorization (this should be, at least
    * for higher level ILUK, the most time-intensive portion of setup)
    *-----------------------------------------------------------------*/
-  t1 = hypre_MPI_Wtime();    
+  t1 = hypre_MPI_Wtime();
   factor_private(ctx); CHECK_V_ERROR;
   ctx->timing[FACTOR_T] += (hypre_MPI_Wtime() - t1);
 
-  /*-------------------------------------------------------------- 
+  /*--------------------------------------------------------------
    * invert diagonals, for faster triangular solves
    *--------------------------------------------------------------*/
   if (strcmp(ctx->algo_par, "none")) {
-    invert_diagonals_private(ctx); CHECK_V_ERROR; 
+    invert_diagonals_private(ctx); CHECK_V_ERROR;
   }
 
-  /*-------------------------------------------------------------- 
+  /*--------------------------------------------------------------
    * compute rho_final: global ratio of nzF/nzA
-   * also, if -sparseA > 0,  compute ratio of nzA 
+   * also, if -sparseA > 0,  compute ratio of nzA
    * used in factorization
    *--------------------------------------------------------------*/
   /* for some reason compute_rho_private() was expensive, so now it's
      an option, unless there's only one mpi task.
    */
   if (Parser_dhHasSwitch(parser_dh, "-computeRho") || np_dh == 1) {
-   if (strcmp(ctx->algo_par, "none")) { 
+   if (strcmp(ctx->algo_par, "none")) {
      t1 = hypre_MPI_Wtime();
-     compute_rho_private(ctx); CHECK_V_ERROR;  
+     compute_rho_private(ctx); CHECK_V_ERROR;
      ctx->timing[COMPUTE_RHO_T] += (hypre_MPI_Wtime() - t1);
    }
  }
 
-  /*-------------------------------------------------------------- 
+  /*--------------------------------------------------------------
    * if using PILU, set up persistent comms and global-to-local
    * number scheme, for efficient triangular solves.
    * (Thanks to Edmond Chow for these algorithmic ideas.)
    *--------------------------------------------------------------*/
 
-  if (! strcmp(ctx->algo_par, "pilu")  &&  np_dh > 1) { 
+  if (! strcmp(ctx->algo_par, "pilu")  &&  np_dh > 1) {
     t1 = hypre_MPI_Wtime();
     Factor_dhSolveSetup(ctx->F, ctx->sg); CHECK_V_ERROR;
     ctx->timing[SOLVE_SETUP_T] += (hypre_MPI_Wtime() - t1);
@@ -286,7 +286,7 @@ END_OF_FUNCTION: ;
    * internal timing
    *-------------------------------------------------------*/
   ctx->timing[SETUP_T] += (hypre_MPI_Wtime() - ctx->timing[SOLVE_START_T]);
-  ctx->setupCount += 1;  
+  ctx->setupCount += 1;
 
   ctx->isSetup = true;
 
@@ -302,7 +302,7 @@ void get_runtime_params_private(Euclid_dh ctx)
   char *tmp;
 
   /* params for use of internal solvers */
-  Parser_dhReadInt(parser_dh,    "-maxIts",&(ctx->maxIts)); 
+  Parser_dhReadInt(parser_dh,    "-maxIts",&(ctx->maxIts));
   Parser_dhReadDouble(parser_dh, "-rtol", &(ctx->rtol));
   Parser_dhReadDouble(parser_dh, "-atol", &(ctx->atol));
 
@@ -318,7 +318,7 @@ void get_runtime_params_private(Euclid_dh ctx)
 
 
   /* factorization parameters */
-  Parser_dhReadDouble(parser_dh, "-rho", &(ctx->rho_init)); 
+  Parser_dhReadDouble(parser_dh, "-rho", &(ctx->rho_init));
                                   /* inital storage allocation for factor */
   Parser_dhReadInt(parser_dh, "-level", &ctx->level);
   Parser_dhReadInt(parser_dh, "-pc_ilu_levels", &ctx->level);
@@ -332,21 +332,21 @@ void get_runtime_params_private(Euclid_dh ctx)
   /* make sure both algo_par and algo_ilu are set to "none,"
      if at least one is.
   */
-  if (! strcmp(ctx->algo_par, "none")) { 
+  if (! strcmp(ctx->algo_par, "none")) {
     strcpy(ctx->algo_ilu, "none");
   }
-  else if (! strcmp(ctx->algo_ilu, "none")) { 
+  else if (! strcmp(ctx->algo_ilu, "none")) {
     strcpy(ctx->algo_par, "none");
   }
 
 
-  Parser_dhReadDouble(parser_dh, "-sparseA",&(ctx->sparseTolA));  
+  Parser_dhReadDouble(parser_dh, "-sparseA",&(ctx->sparseTolA));
                                         /* sparsify A before factoring */
-  Parser_dhReadDouble(parser_dh, "-sparseF",&(ctx->sparseTolF));  
+  Parser_dhReadDouble(parser_dh, "-sparseF",&(ctx->sparseTolF));
                                         /* sparsify after factoring */
-  Parser_dhReadDouble(parser_dh, "-pivotMin", &(ctx->pivotMin));    
+  Parser_dhReadDouble(parser_dh, "-pivotMin", &(ctx->pivotMin));
                                         /* adjust pivots if smaller than this */
-  Parser_dhReadDouble(parser_dh, "-pivotFix", &(ctx->pivotFix));    
+  Parser_dhReadDouble(parser_dh, "-pivotFix", &(ctx->pivotFix));
                                         /* how to adjust pivots */
 
   /* set row scaling for mandatory cases */
@@ -380,7 +380,7 @@ void invert_diagonals_private(Euclid_dh ctx)
   } else {
     HYPRE_Int i, m = ctx->F->m;
     for (i=0; i<m; ++i) {
-        aval[diag[i]] = 1.0/aval[diag[i]]; 
+        aval[diag[i]] = 1.0/aval[diag[i]];
     }
   }
   END_FUNC_DH
@@ -432,7 +432,7 @@ void compute_rho_private(Euclid_dh ctx)
 
 #undef __FUNC__
 #define __FUNC__ "factor_private"
-void factor_private(Euclid_dh ctx) 
+void factor_private(Euclid_dh ctx)
 {
   START_FUNC_DH
   /*-------------------------------------------------------------
@@ -480,8 +480,8 @@ void factor_private(Euclid_dh ctx)
       else  {
         iluk_seq_block(ctx); CHECK_V_ERROR;
         /* note: iluk_seq_block() performs block jacobi iluk if ctx->algo_par == bj.  */
-      } 
-    } 
+      }
+    }
 
     /* ILUT factorization */
     else if (! strcmp(ctx->algo_ilu, "ilut")) {
@@ -492,7 +492,7 @@ void factor_private(Euclid_dh ctx)
 
     /* all other factorization methods */
     else {
-        hypre_sprintf(msgBuf_dh, "factorization method: %s is not implemented", 
+        hypre_sprintf(msgBuf_dh, "factorization method: %s is not implemented",
                                                                 ctx->algo_ilu);
         SET_V_ERROR(msgBuf_dh);
     }
@@ -527,13 +527,13 @@ void factor_private(Euclid_dh ctx)
 /*
 if (Parser_dhHasSwitch(parser_dh, "-test")) {
        hypre_printf("[%i] Euclid_dh :: TESTING ilu_seq\n", myid_dh);
-       iluk_seq(ctx); CHECK_V_ERROR; 
+       iluk_seq(ctx); CHECK_V_ERROR;
 } else {
-       iluk_mpi_pilu(ctx); CHECK_V_ERROR; 
+       iluk_mpi_pilu(ctx); CHECK_V_ERROR;
 }
 */
 
-       iluk_seq(ctx); CHECK_V_ERROR; 
+       iluk_seq(ctx); CHECK_V_ERROR;
 
       /* get external rows from lower ordered neighbors in the
          subdomain graph; these rows are needed for factoring
@@ -565,11 +565,11 @@ if (Parser_dhHasSwitch(parser_dh, "-test")) {
       ctx->slist = NULL;
       ExternalRows_dhDestroy(ctx->extRows); CHECK_V_ERROR;
       ctx->extRows = NULL;
-    } 
+    }
 
     /* all other factorization methods */
     else {
-        hypre_sprintf(msgBuf_dh, "factorization method: %s is not implemented", 
+        hypre_sprintf(msgBuf_dh, "factorization method: %s is not implemented",
                                                                 ctx->algo_ilu);
         SET_V_ERROR(msgBuf_dh);
     }
@@ -615,7 +615,7 @@ void discard_indices_private(Euclid_dh ctx)
         }
 
         if (flag) {
-          cval[j] = -1; 
+          cval[j] = -1;
           ++count;
         }
       }
@@ -632,11 +632,11 @@ void discard_indices_private(Euclid_dh ctx)
     for (j=start_of_row; j<rp[i+1]; ++j) {
       HYPRE_Int    col = cval[j];
       HYPRE_Real val = aval[j];
-      if (col != -1) { 
+      if (col != -1) {
         cval[idx] = col;
         aval[idx] = val;
         ++idx;
-      } 
+      }
     }
     start_of_row = rp[i+1];
     rp[i+1] = idx;
@@ -717,8 +717,8 @@ void Euclid_dhPrintStats(Euclid_dh ctx, FILE *fp)
   fprintf_dh(fp, "      factorization:          %0.2f\n", timing[FACTOR_T]);
   fprintf_dh(fp, "      solve setup:            %0.2f\n", timing[SOLVE_SETUP_T]);
   fprintf_dh(fp, "      rho:                    %0.2f\n", ctx->timing[COMPUTE_RHO_T]);
-  fprintf_dh(fp, "      misc (should be small): %0.2f\n", 
-                timing[SETUP_T] - 
+  fprintf_dh(fp, "      misc (should be small): %0.2f\n",
+                timing[SETUP_T] -
                (timing[SUB_GRAPH_T]+timing[FACTOR_T]+
                 timing[SOLVE_SETUP_T]+timing[COMPUTE_RHO_T]));
 
@@ -822,12 +822,12 @@ void Euclid_dhPrintStatsShort(Euclid_dh ctx, HYPRE_Real setup, HYPRE_Real solve,
   /* special: for scalability studies */
   fprintf_dh(fp, "\n%6s %6s %6s %6s %6s %6s WW\n", "method",  "level", "subGph", "factor", "solveS", "perIt");
   fprintf_dh(fp, "------  -----  -----  -----  -----  -----  WW\n");
-  fprintf_dh(fp, "%6s %6i %6.2f %6.2f %6.2f %6.4f  WWW\n", 
+  fprintf_dh(fp, "%6s %6i %6.2f %6.2f %6.2f %6.4f  WWW\n",
                ctx->algo_par,
                ctx->level,
-               timing[SUB_GRAPH_T], 
-               timing[FACTOR_T], 
-               timing[SOLVE_SETUP_T], 
+               timing[SUB_GRAPH_T],
+               timing[FACTOR_T],
+               timing[SOLVE_SETUP_T],
                apply_per_it);
 #endif
   END_FUNC_DH
@@ -940,8 +940,8 @@ void Euclid_dhPrintHypreReport(Euclid_dh ctx, FILE *fp)
   fprintf_dh(fp, "      factorization:          %0.2f\n", timing[FACTOR_T]);
   fprintf_dh(fp, "      solve setup:            %0.2f\n", timing[SOLVE_SETUP_T]);
   fprintf_dh(fp, "      rho:                    %0.2f\n", ctx->timing[COMPUTE_RHO_T]);
-  fprintf_dh(fp, "      misc (should be small): %0.2f\n", 
-                timing[SETUP_T] - 
+  fprintf_dh(fp, "      misc (should be small): %0.2f\n",
+                timing[SETUP_T] -
                (timing[SUB_GRAPH_T]+timing[FACTOR_T]+
                 timing[SOLVE_SETUP_T]+timing[COMPUTE_RHO_T]));
 
@@ -962,7 +962,7 @@ void Euclid_dhPrintHypreReport(Euclid_dh ctx, FILE *fp)
 void Euclid_dhPrintTestData(Euclid_dh ctx, FILE *fp)
 {
   START_FUNC_DH
-  /* Print data that should remain that will hopefully 
+  /* Print data that should remain that will hopefully
      remain the same for any platform.
      Possibly "tri solves" may change . . .
   */

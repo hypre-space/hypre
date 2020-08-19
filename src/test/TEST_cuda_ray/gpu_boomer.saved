@@ -1,0 +1,111 @@
+# Output file: gpu_boomer.out.1
+     Complexity:    grid = 1.386318
+                operator = 2.317868
+                memory = 2.741269
+
+Iterations = 56
+Final Relative Residual Norm = 8.508319e-09
+
+# Output file: gpu_boomer.out.2
+     Complexity:    grid = 1.386764
+                operator = 2.315610
+                memory = 2.739421
+
+Iterations = 47
+Final Relative Residual Norm = 7.443756e-09
+
+# Output file: gpu_boomer.out.3
+     Complexity:    grid = 1.233970
+                operator = 1.239504
+                memory = 1.468498
+
+Iterations = 94
+Final Relative Residual Norm = 9.463641e-09
+
+# Output file: gpu_boomer.out.4
+     Complexity:    grid = 1.363922
+                operator = 2.853255
+                memory = 3.479417
+
+Iterations = 20
+Final Relative Residual Norm = 6.686114e-09
+
+# Output file: gpu_boomer.out.5
+     Complexity:    grid = 1.091826
+                operator = 1.219666
+                memory = 1.372779
+
+Iterations = 18
+Final Relative Residual Norm = 6.945768e-09
+
+# Output file: gpu_boomer.out.6
+     Complexity:    grid = 1.233952
+                operator = 1.239494
+                memory = 1.468523
+
+Iterations = 88
+Final Relative Residual Norm = 8.805761e-09
+
+# Output file: gpu_boomer.out.7
+     Complexity:    grid = 1.386319
+                operator = 2.317869
+                memory = 2.741273
+
+Iterations = 56
+Final Relative Residual Norm = 7.529893e-09
+
+# Output file: gpu_boomer.out.8
+     Complexity:    grid = 1.386764
+                operator = 2.315610
+                memory = 2.739421
+
+Iterations = 47
+Final Relative Residual Norm = 7.443752e-09
+
+# Output file: gpu_boomer.out.9
+     Complexity:    grid = 1.233958
+                operator = 1.239476
+                memory = 1.468463
+
+Iterations = 94
+Final Relative Residual Norm = 7.813333e-09
+
+# Output file: gpu_boomer.out.10
+     Complexity:    grid = 1.363922
+                operator = 2.853255
+                memory = 3.479417
+
+Iterations = 20
+Final Relative Residual Norm = 6.686114e-09
+
+# Output file: gpu_boomer.out.11
+     Complexity:    grid = 1.091826
+                operator = 1.219666
+                memory = 1.372779
+
+Iterations = 18
+Final Relative Residual Norm = 6.945768e-09
+
+# Output file: gpu_boomer.out.12
+     Complexity:    grid = 1.233954
+                operator = 1.239496
+                memory = 1.468525
+
+Iterations = 89
+Final Relative Residual Norm = 8.673390e-09
+
+# Output file: gpu_boomer.out.13
+     Complexity:    grid = 1.353535
+                operator = 2.780820
+                memory = 3.404831
+
+Iterations = 21
+Final Relative Residual Norm = 3.960884e-09
+
+# Output file: gpu_boomer.out.14
+     Complexity:    grid = 1.363161
+                operator = 2.857143
+                memory = 3.482500
+
+Iterations = 22
+Final Relative Residual Norm = 3.966029e-09

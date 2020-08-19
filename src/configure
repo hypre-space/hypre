@@ -684,7 +684,6 @@ LINK_FC
 FFLAGS
 HOSTNAME
 HYPRE_ARCH
-CUCC
 EGREP
 GREP
 CPP
@@ -702,6 +701,7 @@ LDFLAGS
 CFLAGS
 RANLIB
 SET_MAKE
+CUCC
 FC
 CXX
 CC
@@ -738,6 +738,7 @@ infodir
 docdir
 oldincludedir
 includedir
+runstatedir
 localstatedir
 sharedstatedir
 sysconfdir
@@ -887,6 +888,7 @@ datadir='${datarootdir}'
 sysconfdir='${prefix}/etc'
 sharedstatedir='${prefix}/com'
 localstatedir='${prefix}/var'
+runstatedir='${localstatedir}/run'
 includedir='${prefix}/include'
 oldincludedir='/usr/include'
 docdir='${datarootdir}/doc/${PACKAGE_TARNAME}'
@@ -1139,6 +1141,15 @@ do
   | -silent | --silent | --silen | --sile | --sil)
     silent=yes ;;
 
+  -runstatedir | --runstatedir | --runstatedi | --runstated \
+  | --runstate | --runstat | --runsta | --runst | --runs \
+  | --run | --ru | --r)
+    ac_prev=runstatedir ;;
+  -runstatedir=* | --runstatedir=* | --runstatedi=* | --runstated=* \
+  | --runstate=* | --runstat=* | --runsta=* | --runst=* | --runs=* \
+  | --run=* | --ru=* | --r=*)
+    runstatedir=$ac_optarg ;;
+
   -sbindir | --sbindir | --sbindi | --sbind | --sbin | --sbi | --sb)
     ac_prev=sbindir ;;
   -sbindir=* | --sbindir=* | --sbindi=* | --sbind=* | --sbin=* \
@@ -1276,7 +1287,7 @@ fi
 for ac_var in	exec_prefix prefix bindir sbindir libexecdir datarootdir \
 		datadir sysconfdir sharedstatedir localstatedir includedir \
 		oldincludedir docdir infodir htmldir dvidir pdfdir psdir \
-		libdir localedir mandir
+		libdir localedir mandir runstatedir
 do
   eval ac_val=\$$ac_var
   # Remove trailing slashes.
@@ -1429,6 +1440,7 @@ Fine tuning of the installation directories:
   --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
   --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
   --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
+  --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
   --libdir=DIR            object code libraries [EPREFIX/lib]
   --includedir=DIR        C header files [PREFIX/include]
   --oldincludedir=DIR     C header files for non-gcc [/usr/include]
@@ -1575,7 +1587,7 @@ Optional Packages:
                           name mangling to use when calling hypre from
                           Fortran. It can be set to: "no-underscores",
                           "one-underscore", "two-underscores",
-                          "caps-no-underscores, and "one-before-after".
+                          "caps-no-underscores", and "one-before-after".
   --with-fmangle-blas=FMANGLE
                           Name mangling for BLAS. See --with-fmangle.
   --with-fmangle-lapack=FMANGLE
@@ -2793,7 +2805,8 @@ fi
 
 if test "$hypre_using_mixedint" = "yes"
 then
-   $as_echo "#define HYPRE_MIXEDINT 1" >>confdefs.h
+
+$as_echo "#define HYPRE_MIXEDINT 1" >>confdefs.h
 
 fi
 
@@ -2812,7 +2825,8 @@ fi
 
 if test "$hypre_using_bigint" = "yes"
 then
-   $as_echo "#define HYPRE_BIGINT 1" >>confdefs.h
+
+$as_echo "#define HYPRE_BIGINT 1" >>confdefs.h
 
 fi
 
@@ -2831,7 +2845,8 @@ fi
 
 if test "$hypre_using_single" = "yes"
 then
-   $as_echo "#define HYPRE_SINGLE 1" >>confdefs.h
+
+$as_echo "#define HYPRE_SINGLE 1" >>confdefs.h
 
 fi
 
@@ -2850,7 +2865,8 @@ fi
 
 if test "$hypre_using_longdouble" = "yes"
 then
-   $as_echo "#define HYPRE_LONG_DOUBLE 1" >>confdefs.h
+
+$as_echo "#define HYPRE_LONG_DOUBLE 1" >>confdefs.h
 
 fi
 
@@ -2869,7 +2885,8 @@ fi
 
 if test "$hypre_using_complex" = "yes"
 then
-   $as_echo "#define HYPRE_COMPLEX 1" >>confdefs.h
+
+$as_echo "#define HYPRE_COMPLEX 1" >>confdefs.h
 
 fi
 
@@ -2901,7 +2918,8 @@ fi
 
 if test "$hypre_using_persistent" = "yes"
 then
-   $as_echo "#define HYPRE_USING_PERSISTENT_COMM 1" >>confdefs.h
+
+$as_echo "#define HYPRE_USING_PERSISTENT_COMM 1" >>confdefs.h
 
 fi
 
@@ -2919,7 +2937,8 @@ fi
 
 if test "$hypre_using_hopscotch" = "yes"
 then
-   $as_echo "#define HYPRE_HOPSCOTCH 1" >>confdefs.h
+
+$as_echo "#define HYPRE_HOPSCOTCH 1" >>confdefs.h
 
 fi
 
@@ -3953,11 +3972,11 @@ do
 set dummy $ac_prog; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_CC+:} false; then :
+if ${ac_cv_prog_CUCC+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  if test -n "$CC"; then
-  ac_cv_prog_CC="$CC" # Let the user override the test.
+  if test -n "$CUCC"; then
+  ac_cv_prog_CUCC="$CUCC" # Let the user override the test.
 else
 as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
 for as_dir in $PATH
@@ -3966,7 +3985,7 @@ do
   test -z "$as_dir" && as_dir=.
     for ac_exec_ext in '' $ac_executable_extensions; do
   if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CC="$ac_prog"
+    ac_cv_prog_CUCC="$ac_prog"
     $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -3976,17 +3995,17 @@ IFS=$as_save_IFS
 
 fi
 fi
-CC=$ac_cv_prog_CC
-if test -n "$CC"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CC" >&5
-$as_echo "$CC" >&6; }
+CUCC=$ac_cv_prog_CUCC
+if test -n "$CUCC"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CUCC" >&5
+$as_echo "$CUCC" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
 
 
-  test -n "$CC" && break
+  test -n "$CUCC" && break
 done
 
       fi
@@ -4088,11 +4107,11 @@ do
 set dummy $ac_prog; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_CC+:} false; then :
+if ${ac_cv_prog_CUCC+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  if test -n "$CC"; then
-  ac_cv_prog_CC="$CC" # Let the user override the test.
+  if test -n "$CUCC"; then
+  ac_cv_prog_CUCC="$CUCC" # Let the user override the test.
 else
 as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
 for as_dir in $PATH
@@ -4101,7 +4120,7 @@ do
   test -z "$as_dir" && as_dir=.
     for ac_exec_ext in '' $ac_executable_extensions; do
   if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CC="$ac_prog"
+    ac_cv_prog_CUCC="$ac_prog"
     $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -4111,17 +4130,17 @@ IFS=$as_save_IFS
 
 fi
 fi
-CC=$ac_cv_prog_CC
-if test -n "$CC"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CC" >&5
-$as_echo "$CC" >&6; }
+CUCC=$ac_cv_prog_CUCC
+if test -n "$CUCC"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CUCC" >&5
+$as_echo "$CUCC" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
 
 
-  test -n "$CC" && break
+  test -n "$CUCC" && break
 done
 
       fi
@@ -4234,11 +4253,11 @@ do
 set dummy $ac_prog; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_CXX+:} false; then :
+if ${ac_cv_prog_CUCC+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  if test -n "$CXX"; then
-  ac_cv_prog_CXX="$CXX" # Let the user override the test.
+  if test -n "$CUCC"; then
+  ac_cv_prog_CUCC="$CUCC" # Let the user override the test.
 else
 as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
 for as_dir in $PATH
@@ -4247,7 +4266,7 @@ do
   test -z "$as_dir" && as_dir=.
     for ac_exec_ext in '' $ac_executable_extensions; do
   if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CXX="$ac_prog"
+    ac_cv_prog_CUCC="$ac_prog"
     $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -4257,17 +4276,17 @@ IFS=$as_save_IFS
 
 fi
 fi
-CXX=$ac_cv_prog_CXX
-if test -n "$CXX"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CXX" >&5
-$as_echo "$CXX" >&6; }
+CUCC=$ac_cv_prog_CUCC
+if test -n "$CUCC"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CUCC" >&5
+$as_echo "$CUCC" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
 
 
-  test -n "$CXX" && break
+  test -n "$CUCC" && break
 done
 
       fi
@@ -4369,11 +4388,11 @@ do
 set dummy $ac_prog; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_CXX+:} false; then :
+if ${ac_cv_prog_CUCC+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  if test -n "$CXX"; then
-  ac_cv_prog_CXX="$CXX" # Let the user override the test.
+  if test -n "$CUCC"; then
+  ac_cv_prog_CUCC="$CUCC" # Let the user override the test.
 else
 as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
 for as_dir in $PATH
@@ -4382,7 +4401,7 @@ do
   test -z "$as_dir" && as_dir=.
     for ac_exec_ext in '' $ac_executable_extensions; do
   if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CXX="$ac_prog"
+    ac_cv_prog_CUCC="$ac_prog"
     $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -4392,17 +4411,17 @@ IFS=$as_save_IFS
 
 fi
 fi
-CXX=$ac_cv_prog_CXX
-if test -n "$CXX"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CXX" >&5
-$as_echo "$CXX" >&6; }
+CUCC=$ac_cv_prog_CUCC
+if test -n "$CUCC"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CUCC" >&5
+$as_echo "$CUCC" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
 
 
-  test -n "$CXX" && break
+  test -n "$CUCC" && break
 done
 
       fi
@@ -7240,20 +7259,23 @@ fi
 $as_echo "$hypre_cv_func_MPI_Comm_f2c_macro" >&6; }
    if test $ac_cv_func_MPI_Comm_f2c = yes \
       || test $hypre_cv_func_MPI_Comm_f2c_macro = yes; then
-     $as_echo "#define HYPRE_HAVE_MPI_COMM_F2C 1" >>confdefs.h
+
+$as_echo "#define HYPRE_HAVE_MPI_COMM_F2C 1" >>confdefs.h
 
    fi
 fi
 
 if test "$hypre_using_global_partition" = "no"
 then
-      $as_echo "#define HYPRE_NO_GLOBAL_PARTITION 1" >>confdefs.h
+
+$as_echo "#define HYPRE_NO_GLOBAL_PARTITION 1" >>confdefs.h
 
 fi
 
 if test "$hypre_using_node_aware_mpi" = "yes"
 then
-   $as_echo "#define HYPRE_USING_NODE_AWARE_MPI 1" >>confdefs.h
+
+$as_echo "#define HYPRE_USING_NODE_AWARE_MPI 1" >>confdefs.h
 
 fi
 
@@ -8461,10 +8483,8 @@ fi
 done
 
    NVCCBIN=${CXX}
-   CC=${CUCC}
-   CXX=${CUCC}
-   LINK_CC=${CXX}
-   LINK_CXX=${CXX}
+   LINK_CC=${CUCC}
+   LINK_CXX=${CUCC}
 
       if test "x$HYPRE_CUDA_SM" = "x"
    then
@@ -8485,7 +8505,8 @@ done
    then
      CXXFLAGS+=" -Wno-deprecated-register -Wenum-compare"
    fi
-   CXXFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
+
+   CUFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
 
    CFLAGS=${CXXFLAGS}
    LDFLAGS="-ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -Xcompiler \"${LDFLAGS}\""
@@ -8569,59 +8590,16 @@ $as_echo "#define HYPRE_DEVICE_OPENMP_ALLOC 1" >>confdefs.h
 
 
 
-   for ac_prog in nvcc
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_CUCC+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$CUCC"; then
-  ac_cv_prog_CUCC="$CUCC" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CUCC="$ac_prog"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
 
-fi
-fi
-CUCC=$ac_cv_prog_CUCC
-if test -n "$CUCC"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CUCC" >&5
-$as_echo "$CUCC" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
+         CUFLAGS=${CFLAGS}
 
-
-  test -n "$CUCC" && break
-done
-
-
-   CFLAGS="${CFLAGS}"
-   CXXFLAGS="${CXXFLAGS}"
-
-   if test "$CC" = "clang-gpu" || test "$CC" = "mpiclang-gpu"
+   if test "$CUCC" = "clang-gpu" || test "$CUCC" = "mpiclang-gpu"
    then
-      CFLAGS+=" -fopenmp-nonaliased-maps"
+      CUFLAGS+=" -fopenmp-nonaliased-maps"
    fi
-   if test "$CXX" = "clang++-gpu" || test "$CXX" = "mpiclang++-gpu"
+   if test "$CUCC" = "clang++-gpu" || test "$CUCC" = "mpiclang++-gpu"
    then
-      CXXFLAGS+=" -fopenmp-nonaliased-maps"
+      CUFLAGS+=" -fopenmp-nonaliased-maps"
    fi
    if test "$hypre_using_debug" = "yes"
    then
@@ -8637,16 +8615,14 @@ $as_echo "#define HYPRE_DEVICE_OPENMP_CHECK 1" >>confdefs.h
       HYPRE_CUDA_LIBS+=" -lnvToolsExt"
    fi
 
-      CC=${CXX}
-   LINK_CC=${LINK_CXX}
-   CXXFLAGS="-x c++ ${CXXFLAGS}"
-   CFLAGS=${CXXFLAGS}
-fi
+         LINK_CC=${CUCC}
+   LINK_CXX=${CUCC}
+      fi
 
 if test "$hypre_using_shared" = "yes"
 then
    HYPRE_LIBSUFFIX=".so"
-   if test "x$CXX" = "xnvcc" || test "x$CC" = "xnvcc"
+   if test "x$CUCC" = "xnvcc"
    then
       SHARED_SET_SONAME="-Xlinker=-soname,"
       SHARED_OPTIONS="-Xlinker=-z,defs"
@@ -8668,14 +8644,11 @@ then
                                    SHARED_OPTIONS="-undefined error" ;;
                        *) SHARED_BUILD_FLAG="-shared" ;;
    esac
-   if test "x$CXX" = "xnvcc" || test "x$CC" = "xnvcc"
-   then
-      SHARED_BUILD_FLAG="${SHARED_BUILD_FLAG} ${HYPRE_CUDA_GENCODE}"
-   fi
    SHARED_BUILD_FLAG="${SHARED_BUILD_FLAG} ${EXTRA_BUILDFLAGS}"
    FFLAGS="${FFLAGS} ${SHARED_COMPILE_FLAG}"
    CFLAGS="${CFLAGS} ${SHARED_COMPILE_FLAG}"
    CXXFLAGS="${CXXFLAGS} ${SHARED_COMPILE_FLAG}"
+   CUFLAGS="${CUFLAGS} ${SHARED_COMPILE_FLAG}"
    BUILD_FC_SHARED="${FC} ${SHARED_BUILD_FLAG}"
    if test "$hypre_using_fei" = "yes"
    then
@@ -8684,6 +8657,10 @@ then
       BUILD_CC_SHARED="${CC} ${SHARED_BUILD_FLAG}"
    fi
    BUILD_CXX_SHARED="${CXX} ${SHARED_BUILD_FLAG}"
+   if test "x$CUCC" != "x"
+   then
+      BUILD_CC_SHARED="${CUCC} ${SHARED_BUILD_FLAG} ${HYPRE_CUDA_GENCODE}"
+   fi
 fi
 
 if test "x$hypre_using_cuda_streams" = "xyes"
@@ -8787,23 +8764,28 @@ $as_echo "$HYPRE_ARCH" >&6; }
    fi
    case $HYPRE_ARCH in
       alpha)
-         $as_echo "#define HYPRE_ALPHA 1" >>confdefs.h
+
+$as_echo "#define HYPRE_ALPHA 1" >>confdefs.h
 
          ;;
       sun* | solaris*)
-         $as_echo "#define HYPRE_SOLARIS 1" >>confdefs.h
+
+$as_echo "#define HYPRE_SOLARIS 1" >>confdefs.h
 
          ;;
       hp* | HP*)
-         $as_echo "#define HYPRE_HPPA 1" >>confdefs.h
+
+$as_echo "#define HYPRE_HPPA 1" >>confdefs.h
 
          ;;
       rs6000 | RS6000 | *bgl* | *BGL* | ppc64*)
-         $as_echo "#define HYPRE_RS6000 1" >>confdefs.h
+
+$as_echo "#define HYPRE_RS6000 1" >>confdefs.h
 
          ;;
       IRIX64)
-         $as_echo "#define HYPRE_IRIX64 1" >>confdefs.h
+
+$as_echo "#define HYPRE_IRIX64 1" >>confdefs.h
 
          ;;
       Linux | linux | LINUX)
@@ -8812,16 +8794,19 @@ $as_echo "$HYPRE_ARCH" >&6; }
             systemtype=`grep ^SYS_TYPE /etc/home.config | cut -d" " -f2`
             case $systemtype in
                chaos*)
-                  $as_echo "#define HYPRE_LINUX_CHAOS 1" >>confdefs.h
+
+$as_echo "#define HYPRE_LINUX_CHAOS 1" >>confdefs.h
 
                   ;;
                *)
-                  $as_echo "#define HYPRE_LINUX 1" >>confdefs.h
+
+$as_echo "#define HYPRE_LINUX 1" >>confdefs.h
 
                   ;;
             esac
          else
-            $as_echo "#define HYPRE_LINUX 1" >>confdefs.h
+
+$as_echo "#define HYPRE_LINUX 1" >>confdefs.h
 
          fi
          ;;
