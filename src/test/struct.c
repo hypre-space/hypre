@@ -184,12 +184,12 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
+   /* Initialize Hypre */
+   HYPRE_Init();
+
 #if defined(HYPRE_USING_KOKKOS)
    Kokkos::initialize (argc, argv);
 #endif
-
-   /* Initialize Hypre */
-   HYPRE_Init();
 
 #ifdef HYPRE_DEBUG
    /*cegdb(&argc, &argv, myid);*/
@@ -2887,12 +2887,12 @@ main( hypre_int argc,
       hypre_TFree(offsets, HYPRE_MEMORY_HOST);
    }
 
-   /* Finalize Hypre */
-   HYPRE_Finalize();
-
 #if defined(HYPRE_USING_KOKKOS)
    Kokkos::finalize ();
 #endif
+
+   /* Finalize Hypre */
+   HYPRE_Finalize();
 
    /* Finalize MPI */
    hypre_MPI_Finalize();
