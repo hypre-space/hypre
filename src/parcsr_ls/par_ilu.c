@@ -20,90 +20,123 @@
 void *
 hypre_ILUCreate()
 {
-   hypre_ParILUData                    *ilu_data;
+   hypre_ParILUData                       *ilu_data;
 
-   ilu_data                            = hypre_CTAlloc(hypre_ParILUData,  1, HYPRE_MEMORY_HOST);
+   ilu_data                               = hypre_CTAlloc(hypre_ParILUData,  1, HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_CUDA
-   ((ilu_data) -> matL_des)            = NULL;
-   ((ilu_data) -> matU_des)            = NULL;
-   ((ilu_data) -> matBL_info)          = NULL;
-   ((ilu_data) -> matBU_info)          = NULL;
-   ((ilu_data) -> matSL_info)          = NULL;
-   ((ilu_data) -> matSU_info)          = NULL;
-   ((ilu_data) -> ilu_solve_buffer)    = NULL;
-   ((ilu_data) -> ilu_solve_policy)    = CUSPARSE_SOLVE_POLICY_USE_LEVEL;
-   ((ilu_data) -> Aperm)               = NULL;
-   ((ilu_data) -> matBLU_d)            = NULL;
-   ((ilu_data) -> matSLU_d)            = NULL;
-   ((ilu_data) -> matE_d)              = NULL;
-   ((ilu_data) -> matF_d)              = NULL;
-   ((ilu_data) -> R)                   = NULL;
-   ((ilu_data) -> P)                   = NULL;
-   ((ilu_data) -> Ftemp_upper)         = NULL;
-   ((ilu_data) -> Utemp_lower)         = NULL;
-   ((ilu_data) -> A_diag_fake)         = NULL;
+   ((ilu_data) -> matL_des)               = NULL;
+   ((ilu_data) -> matU_des)               = NULL;
+   ((ilu_data) -> matBL_info)             = NULL;
+   ((ilu_data) -> matBU_info)             = NULL;
+   ((ilu_data) -> matSL_info)             = NULL;
+   ((ilu_data) -> matSU_info)             = NULL;
+   ((ilu_data) -> ilu_solve_buffer)       = NULL;
+   ((ilu_data) -> ilu_solve_policy)       = CUSPARSE_SOLVE_POLICY_USE_LEVEL;
+   ((ilu_data) -> Aperm)                  = NULL;
+   ((ilu_data) -> matBLU_d)               = NULL;
+   ((ilu_data) -> matSLU_d)               = NULL;
+   ((ilu_data) -> matE_d)                 = NULL;
+   ((ilu_data) -> matF_d)                 = NULL;
+   ((ilu_data) -> R)                      = NULL;
+   ((ilu_data) -> P)                      = NULL;
+   ((ilu_data) -> Ftemp_upper)            = NULL;
+   ((ilu_data) -> Utemp_lower)            = NULL;
+   ((ilu_data) -> A_diag_fake)            = NULL;
 #endif
 
    /* general data */
-   (ilu_data -> global_solver)         = 0;
-   (ilu_data -> matA)                  = NULL;
-   (ilu_data -> matL)                  = NULL;
-   (ilu_data -> matD)                  = NULL;
-   (ilu_data -> matU)                  = NULL;
-   (ilu_data -> matS)                  = NULL;
-   (ilu_data -> schur_solver)          = NULL;
-   (ilu_data -> schur_precond)         = NULL;
-   (ilu_data -> rhs)                   = NULL;
-   (ilu_data -> x)                     = NULL;
+   (ilu_data -> global_solver)            = 0;
+   (ilu_data -> matA)                     = NULL;
+   (ilu_data -> matL)                     = NULL;
+   (ilu_data -> matD)                     = NULL;
+   (ilu_data -> matU)                     = NULL;
+   (ilu_data -> matS)                     = NULL;
+   (ilu_data -> schur_solver)             = NULL;
+   (ilu_data -> schur_precond)            = NULL;
+   (ilu_data -> rhs)                      = NULL;
+   (ilu_data -> x)                        = NULL;
 
-   (ilu_data -> droptol)               = hypre_TAlloc(HYPRE_Real,3,HYPRE_MEMORY_HOST);
-   (ilu_data -> own_droptol_data)      = 1;
-   (ilu_data -> droptol)[0]            = 1.0e-02;/* droptol for B */
-   (ilu_data -> droptol)[1]            = 1.0e-02;/* droptol for E and F */
-   (ilu_data -> droptol)[2]            = 1.0e-02;/* droptol for S */
-   (ilu_data -> lfil)                  = 0;
-   (ilu_data -> maxRowNnz)             = 1000;
-   (ilu_data -> CF_marker_array)       = NULL;
-   (ilu_data -> perm)                  = NULL;
-   (ilu_data -> qperm)                 = NULL;
-   (ilu_data -> tol_ddPQ)              = 1.0e-01;
+   (ilu_data -> droptol)                  = hypre_TAlloc(HYPRE_Real,3,HYPRE_MEMORY_HOST);
+   (ilu_data -> droptol)[0]               = 1.0e-02;/* droptol for B */
+   (ilu_data -> droptol)[1]               = 1.0e-02;/* droptol for E and F */
+   (ilu_data -> droptol)[2]               = 1.0e-02;/* droptol for S */
+   (ilu_data -> lfil)                     = 0;
+   (ilu_data -> maxRowNnz)                = 1000;
+   (ilu_data -> CF_marker_array)          = NULL;
+   (ilu_data -> perm)                     = NULL;
+   (ilu_data -> qperm)                    = NULL;
+   (ilu_data -> tol_ddPQ)                 = 1.0e-01;
 
-   (ilu_data -> F)                     = NULL;
-   (ilu_data -> U)                     = NULL;
-   (ilu_data -> Utemp)                 = NULL;
-   (ilu_data -> Ftemp)                 = NULL;
-   ((ilu_data) -> Xtemp)               = NULL;
-   ((ilu_data) -> Ytemp)               = NULL;
-   (ilu_data -> uext)                  = NULL;
-   (ilu_data -> fext)                  = NULL;
-   (ilu_data -> residual)              = NULL;
-   (ilu_data -> rel_res_norms)         = NULL;
+   (ilu_data -> F)                        = NULL;
+   (ilu_data -> U)                        = NULL;
+   (ilu_data -> Utemp)                    = NULL;
+   (ilu_data -> Ftemp)                    = NULL;
+   ((ilu_data) -> Xtemp)                  = NULL;
+   ((ilu_data) -> Ytemp)                  = NULL;
+   (ilu_data -> uext)                     = NULL;
+   (ilu_data -> fext)                     = NULL;
+   (ilu_data -> residual)                 = NULL;
+   (ilu_data -> rel_res_norms)            = NULL;
 
-   (ilu_data -> num_iterations)        = 0;
+   (ilu_data -> num_iterations)           = 0;
 
-   (ilu_data -> max_iter)              = 20;
-   (ilu_data -> tol)                   = 1.0e-7;
+   (ilu_data -> max_iter)                 = 20;
+   (ilu_data -> tol)                      = 1.0e-7;
 
-   (ilu_data -> logging)               = 0;
-   (ilu_data -> print_level)           = 0;
+   (ilu_data -> logging)                  = 0;
+   (ilu_data -> print_level)              = 0;
 
-   (ilu_data -> l1_norms)              = NULL;
+   (ilu_data -> l1_norms)                 = NULL;
 
-   (ilu_data -> operator_complexity)   = 0.;
+   (ilu_data -> operator_complexity)      = 0.;
 
-   (ilu_data -> ilu_type)              = 0;
-   (ilu_data -> nLU)                   = 0;
-   (ilu_data -> nI)                    = 0;
-   (ilu_data -> u_end)                 = NULL;
+   (ilu_data -> ilu_type)                 = 0;
+   (ilu_data -> nLU)                      = 0;
+   (ilu_data -> nI)                       = 0;
+   (ilu_data -> u_end)                    = NULL;
 
    /* reordering_type default to use local RCM */
    (ilu_data -> reordering_type) = 1;
 
    /* see hypre_ILUSetType for more default values */
-   (ilu_data -> test_opt)              = 0;
+   (ilu_data -> test_opt)                 = 0;
    
-   return (void *)                     ilu_data;
+   /* -> GENERAL-SLOTS */
+   (ilu_data -> ss_logging)               = 0;
+   (ilu_data -> ss_print_level)           = 0;
+   
+   /* -> SCHUR-GMRES */
+   (ilu_data -> ss_kDim)                  = 5;
+   (ilu_data -> ss_max_iter)              = 5;
+   (ilu_data -> ss_tol)                   = 1e-02;
+   (ilu_data -> ss_absolute_tol)          = 0.0;
+   (ilu_data -> ss_rel_change)            = 0;
+   
+   /* schur precond data */
+   (ilu_data -> sp_ilu_type)              = 0;
+   (ilu_data -> sp_ilu_lfil)              = 0;
+   (ilu_data -> sp_ilu_max_row_nnz)       = 100;
+   (ilu_data -> sp_ilu_droptol)           = NULL;/* this is not the default option, set it only when switched to */
+   (ilu_data -> sp_print_level)           = 0;
+   (ilu_data -> sp_max_iter)              = 1;
+   (ilu_data -> sp_tol)                   = 1e-09;
+   
+   /* -> SCHUR-NSH */
+   (ilu_data -> ss_nsh_solve_max_iter)    = 5;
+   (ilu_data -> ss_nsh_solve_tol)         = 1e-02;
+   (ilu_data -> ss_nsh_droptol)           = NULL;
+   
+   (ilu_data -> ss_nsh_setup_max_iter)    = 2;
+   (ilu_data -> ss_nsh_max_row_nnz)       = 1000;
+   (ilu_data -> ss_nsh_setup_tol)         = 1e-09;
+   
+   (ilu_data -> ss_nsh_mr_max_iter)       = 2;
+   (ilu_data -> ss_nsh_mr_col_version)    = 0;
+   (ilu_data -> ss_nsh_mr_max_row_nnz)    = 200;
+   (ilu_data -> ss_nsh_mr_tol)            = 1e-09;
+   
+   return (void *)                        ilu_data;
 }
 
 /*--------------------------------------------------------------------------
@@ -354,17 +387,20 @@ hypre_ILUDestroy( void *data )
       (ilu_data -> qperm) = NULL;
    }
    /* droptol array */
-   if((ilu_data -> own_droptol_data))
+   if((ilu_data -> droptol))
    {
       hypre_TFree((ilu_data -> droptol), HYPRE_MEMORY_HOST);
-      (ilu_data -> own_droptol_data) = 0;
       (ilu_data -> droptol) = NULL;
    }
-   if((ilu_data -> sp_own_droptol_data))
+   if((ilu_data -> sp_ilu_droptol))
    {
       hypre_TFree((ilu_data -> sp_ilu_droptol), HYPRE_MEMORY_HOST);
-      (ilu_data -> sp_own_droptol_data) = 0;
       (ilu_data -> sp_ilu_droptol) = NULL;
+   }
+   if((ilu_data -> ss_nsh_droptol))
+   {
+      hypre_TFree((ilu_data -> ss_nsh_droptol), HYPRE_MEMORY_HOST);
+      (ilu_data -> ss_nsh_droptol) = NULL;
    }
    /* ilu data */
    hypre_TFree(ilu_data, HYPRE_MEMORY_HOST);
@@ -393,7 +429,11 @@ hypre_ILUSetMaxNnzPerRow( void *ilu_vdata, HYPRE_Int nzmax )
 HYPRE_Int
 hypre_ILUSetDropThreshold( void *ilu_vdata, HYPRE_Real threshold )
 {
-   hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   if(!(ilu_data -> droptol))
+   {
+      (ilu_data -> droptol)           = hypre_TAlloc(HYPRE_Real, 3, HYPRE_MEMORY_HOST);
+   }
    (ilu_data -> droptol)[0] = threshold;
    (ilu_data -> droptol)[1] = threshold;
    (ilu_data -> droptol)[2] = threshold;
@@ -403,22 +443,12 @@ hypre_ILUSetDropThreshold( void *ilu_vdata, HYPRE_Real threshold )
 HYPRE_Int
 hypre_ILUSetDropThresholdArray( void *ilu_vdata, HYPRE_Real *threshold )
 {
-   hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
-   /* need to free memory if we own droptol array before */
-   if((ilu_data -> own_droptol_data))
+   hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   if(!(ilu_data -> droptol))
    {
-      hypre_TFree((ilu_data -> droptol), HYPRE_MEMORY_HOST);
-      (ilu_data -> own_droptol_data) = 0;
+      (ilu_data -> droptol)           = hypre_TAlloc(HYPRE_Real, 3, HYPRE_MEMORY_HOST);
    }
-   (ilu_data -> droptol) = threshold;
-   return hypre_error_flag;
-}
-/* set if owns threshold data (for ilut) */
-HYPRE_Int
-hypre_ILUSetOwnDropThreshold( void *ilu_vdata, HYPRE_Int own_droptol_data )
-{
-   hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
-   (ilu_data -> own_droptol_data) = own_droptol_data;
+   hypre_TMemcpy( (ilu_data -> droptol), threshold, HYPRE_Real, 3, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
    return hypre_error_flag;
 }
 /* set ILU factorization type */
@@ -426,6 +456,41 @@ HYPRE_Int
 hypre_ILUSetType( void *ilu_vdata, HYPRE_Int ilu_type )
 {
    hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   
+   /* destroy schur solver and/or preconditioner if already have one */
+   if(ilu_data -> schur_solver)
+   {
+      switch(ilu_data -> ilu_type){
+      case 10: case 11: case 40: case 41: case 50:
+         HYPRE_ParCSRGMRESDestroy(ilu_data -> schur_solver); //GMRES for Schur
+         break;
+      case 20: case 21:
+         hypre_NSHDestroy(hypre_ParILUDataSchurSolver(ilu_data));//NSH for Schur
+         break;
+      default:
+         break;
+      }
+      (ilu_data -> schur_solver) = NULL;
+   }
+   if(ilu_data -> schur_precond)
+   {
+      switch(ilu_data -> ilu_type){
+      case 10: case 11: case 40: case 41: //case 50:
+#ifdef HYPRE_USING_CUDA
+         if(ilu_data -> ilu_type != 0 && ilu_data -> ilu_type != 1 && ilu_data -> ilu_type != 10 && ilu_data -> ilu_type != 11)
+         {
+#endif
+            HYPRE_ILUDestroy(ilu_data -> schur_precond); //ILU as precond for Schur
+#ifdef HYPRE_USING_CUDA
+         }
+#endif
+         break;
+      default:
+         break;
+        }
+      (ilu_data -> schur_precond) = NULL;
+   }
+   
    (ilu_data -> ilu_type) = ilu_type;
    /* reset default value, not a large cost
     * assume we won't change back from
@@ -434,54 +499,28 @@ hypre_ILUSetType( void *ilu_vdata, HYPRE_Int ilu_type )
    {
       /* NSH type */
       case 20: case 21:
-         /* set NSH Solver parameters */
-         hypre_ParILUDataSchurNSHSolveMaxIter(ilu_data)        = 5;
-         hypre_ParILUDataSchurNSHSolveTol(ilu_data)            = 1.0e-02;
-         hypre_ParILUDataSchurSolverLogging(ilu_data)          = 0;
-         hypre_ParILUDataSchurSolverPrintLevel(ilu_data)       = 0;
-         if(hypre_ParILUDataSchurNSHOwnDroptolData(ilu_data))
+      {
+         /* only set value when user has not assiged value before */
+         if(!(ilu_data->ss_nsh_droptol))
          {
-            hypre_TFree(hypre_ParILUDataSchurNSHDroptol(ilu_data), HYPRE_MEMORY_HOST);
+            (ilu_data -> ss_nsh_droptol)        = hypre_TAlloc(HYPRE_Real, 2, HYPRE_MEMORY_HOST);
+            (ilu_data->ss_nsh_droptol)[0] = 1e-02;
+            (ilu_data->ss_nsh_droptol)[1] = 1e-02;
          }
-         hypre_ParILUDataSchurNSHDroptol(ilu_data)             = hypre_ParILUDataDroptol(ilu_data);
-         hypre_ParILUDataSchurNSHOwnDroptolData(ilu_data)      = 0;
-
-         /* set NHS inverse parameters */
-         hypre_ParILUDataSchurNSHMaxNumIter(ilu_data)          = 2;/* kDim */
-         hypre_ParILUDataSchurNSHMaxRowNnz(ilu_data)           = 1000;
-         hypre_ParILUDataSchurNSHTol(ilu_data)                 = 1.0e-09;
-
-         /* set MR inverse parameters */
-         hypre_ParILUDataSchurMRMaxIter(ilu_data)              = 2;
-         hypre_ParILUDataSchurMRColVersion(ilu_data)           = 0;/* sp_lfil */
-         hypre_ParILUDataSchurMRMaxRowNnz(ilu_data)            = 200;
-         hypre_ParILUDataSchurMRTol(ilu_data)                  = 1.0e-09;
          break;
+      }
       case 10: case 11: case 40: case 41: case 50:
-         /* default data for schur solver */
-         hypre_ParILUDataSchurGMRESKDim(ilu_data)              = 5;
-         hypre_ParILUDataSchurGMRESTol(ilu_data)               = 1.0e-02;
-         hypre_ParILUDataSchurGMRESAbsoluteTol(ilu_data)       = 0.0;
-         hypre_ParILUDataSchurSolverLogging(ilu_data)          = 0;
-         hypre_ParILUDataSchurSolverPrintLevel(ilu_data)       = 0;
-         hypre_ParILUDataSchurGMRESRelChange(ilu_data)         = 0;
-
-         /* default data for schur precond
-          * default ILU0
-          */
-         hypre_ParILUDataSchurPrecondIluType(ilu_data)         = 0;
-         hypre_ParILUDataSchurPrecondIluLfil(ilu_data)         = 0;
-         hypre_ParILUDataSchurPrecondIluMaxRowNnz(ilu_data)    = 1000;
-         if(hypre_ParILUDataSchurPrecondOwnDroptolData(ilu_data))
+      {
+         /* only set value when user has not assiged value before */
+         if(!(ilu_data->sp_ilu_droptol))
          {
-            hypre_TFree(hypre_ParILUDataSchurPrecondIluDroptol(ilu_data), HYPRE_MEMORY_HOST);
+            (ilu_data -> sp_ilu_droptol)        = hypre_TAlloc(HYPRE_Real, 3, HYPRE_MEMORY_HOST);
+            (ilu_data->sp_ilu_droptol[0]) = 1e-02;
+            (ilu_data->sp_ilu_droptol[1]) = 1e-02;
+            (ilu_data->sp_ilu_droptol[2]) = 1e-02;
          }
-         hypre_ParILUDataSchurPrecondIluDroptol(ilu_data)      = hypre_ParILUDataDroptol(ilu_data);/* use same droptol */
-         hypre_ParILUDataSchurPrecondOwnDroptolData(ilu_data)  = 0;
-         hypre_ParILUDataSchurPrecondPrintLevel(ilu_data)      = 0;
-         hypre_ParILUDataSchurPrecondMaxIter(ilu_data)         = 1;
-         hypre_ParILUDataSchurPrecondTol(ilu_data)             = 1.0e-09;
          break;
+      }
       default:
          break;
    }
@@ -542,24 +581,13 @@ HYPRE_Int
 hypre_ILUSetSchurSolverMaxIter( void *ilu_vdata, HYPRE_Int ss_max_iter )
 {
    hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
-   switch(hypre_ParILUDataIluType(ilu_data))
-   {
-      case 10: case 11: case 40: case 41: case 50:
-         /* GMRES
-          * To avoid restart, GMRES kDim is equal to max num iter
-          */
-         hypre_ParILUDataSchurGMRESKDim(ilu_data) = ss_max_iter;
-         break;
-      case 20: case 21:
-         /* set max num iter if use NSH solve */
-         hypre_ParILUDataSchurNSHSolveMaxIter(ilu_data) = ss_max_iter;
-         break;
-      default:
-         /* warning - not open yet
-          *hypre_printf("Current type has no Schur System\n");
-          */
-         break;
-   }
+   /* for the GMRES solve, the max iter is same as kdim by default */
+   (ilu_data -> ss_kDim) = ss_max_iter;
+   (ilu_data -> ss_max_iter) = ss_max_iter;
+   
+   /* also set this value for NSH solve */
+   (ilu_data -> ss_nsh_solve_max_iter) = ss_max_iter;
+   
    return hypre_error_flag;
 }
 /* Set convergence tolerance for Solver of Schur System */
@@ -633,24 +661,13 @@ HYPRE_Int
 hypre_ILUSetSchurPrecondILUDropThreshold( void *ilu_vdata, HYPRE_Real sp_ilu_droptol )
 {
    hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
-   if(hypre_ParILUDataSchurPrecondOwnDroptolData(ilu_data))
+   if(!(ilu_data -> sp_ilu_droptol))
    {
-      /* if we own data, just change our own data */
-      (ilu_data -> sp_ilu_droptol)[0] = sp_ilu_droptol;
-      (ilu_data -> sp_ilu_droptol)[1] = sp_ilu_droptol;
-      (ilu_data -> sp_ilu_droptol)[2] = sp_ilu_droptol;
+      (ilu_data -> sp_ilu_droptol)           = hypre_TAlloc(HYPRE_Real, 3, HYPRE_MEMORY_HOST);
    }
-   else
-   {
-      /* if we share data with other, create new one
-       * becuase as default we use data from ILU, so we don't want to change it
-       */
-      hypre_ParILUDataSchurPrecondIluDroptol(ilu_data) = hypre_TAlloc(HYPRE_Real, 3, HYPRE_MEMORY_HOST);
-      hypre_ParILUDataSchurPrecondOwnDroptolData(ilu_data)  = 1;
-      hypre_ParILUDataSchurPrecondIluDroptol(ilu_data)[0]   = sp_ilu_droptol;
-      hypre_ParILUDataSchurPrecondIluDroptol(ilu_data)[1]   = sp_ilu_droptol;
-      hypre_ParILUDataSchurPrecondIluDroptol(ilu_data)[2]   = sp_ilu_droptol;
-   }
+   (ilu_data -> sp_ilu_droptol)[0]   = sp_ilu_droptol;
+   (ilu_data -> sp_ilu_droptol)[1]   = sp_ilu_droptol;
+   (ilu_data -> sp_ilu_droptol)[2]   = sp_ilu_droptol;
    return hypre_error_flag;
 }
 /* Set array of IUL drop threshold for ILUT for Precond of Schur System */
@@ -658,21 +675,11 @@ HYPRE_Int
 hypre_ILUSetSchurPrecondILUDropThresholdArray( void *ilu_vdata, HYPRE_Real *sp_ilu_droptol )
 {
    hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
-   /* need to free memory if we own droptol array before */
-   if((ilu_data -> sp_own_droptol_data))
+   if(!(ilu_data -> sp_ilu_droptol))
    {
-      hypre_TFree((ilu_data -> sp_ilu_droptol), HYPRE_MEMORY_HOST);
-      (ilu_data -> sp_own_droptol_data) = 0;
+      (ilu_data -> sp_ilu_droptol)           = hypre_TAlloc(HYPRE_Real, 3, HYPRE_MEMORY_HOST);
    }
-   (ilu_data -> sp_ilu_droptol) = sp_ilu_droptol;
-   return hypre_error_flag;
-}
-/* Set if owns drop threshold array for ILUT for Precond of Schur System */
-HYPRE_Int
-hypre_ILUSetSchurPrecondILUOwnDropThreshold( void *ilu_vdata, HYPRE_Int sp_own_droptol_data )
-{
-   hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
-   (ilu_data -> sp_own_droptol_data) = sp_own_droptol_data;
+   hypre_TMemcpy( (ilu_data -> sp_ilu_droptol), sp_ilu_droptol, HYPRE_Real, 3, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
    return hypre_error_flag;
 }
 /* Set print level for Precond of Schur System */
@@ -706,18 +713,12 @@ HYPRE_Int
 hypre_ILUSetSchurNSHDropThreshold( void *ilu_vdata, HYPRE_Real threshold)
 {
    hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
-   if(hypre_ParILUDataSchurNSHOwnDroptolData(ilu_data) || !hypre_ParILUDataSchurNSHDroptol(ilu_data))
+   if(!(ilu_data -> ss_nsh_droptol))
    {
-      hypre_ParILUDataSchurNSHDroptol(ilu_data)          = hypre_TAlloc(HYPRE_Real, 2, HYPRE_MEMORY_HOST);
-      hypre_ParILUDataSchurNSHOwnDroptolData(ilu_data)   = 1;
-      hypre_ParILUDataSchurNSHDroptol(ilu_data)[0]       = threshold;
-      hypre_ParILUDataSchurNSHDroptol(ilu_data)[1]       = threshold;
+      (ilu_data -> ss_nsh_droptol)           = hypre_TAlloc(HYPRE_Real, 2, HYPRE_MEMORY_HOST);
    }
-   else
-   {
-      hypre_ParILUDataSchurNSHDroptol(ilu_data)[0]       = threshold;
-      hypre_ParILUDataSchurNSHDroptol(ilu_data)[1]       = threshold;
-   }
+   (ilu_data -> ss_nsh_droptol)[0]           = threshold;
+   (ilu_data -> ss_nsh_droptol)[1]           = threshold;
    return hypre_error_flag;
 }
 /* Set tolorance array for NSH for Schur System */
@@ -725,12 +726,11 @@ HYPRE_Int
 hypre_ILUSetSchurNSHDropThresholdArray( void *ilu_vdata, HYPRE_Real *threshold)
 {
    hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
-   if(hypre_ParILUDataSchurNSHOwnDroptolData(ilu_data))
+   if(!(ilu_data -> ss_nsh_droptol))
    {
-      hypre_TFree(hypre_ParILUDataSchurNSHDroptol(ilu_data), HYPRE_MEMORY_HOST);
-      hypre_ParILUDataSchurNSHOwnDroptolData(ilu_data) = 0;
+      (ilu_data -> ss_nsh_droptol)           = hypre_TAlloc(HYPRE_Real, 2, HYPRE_MEMORY_HOST);
    }
-   hypre_ParILUDataSchurNSHDroptol(ilu_data) = threshold;
+   hypre_TMemcpy( (ilu_data -> ss_nsh_droptol), threshold, HYPRE_Real, 2, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
    return hypre_error_flag;
 }
 
@@ -3960,14 +3960,6 @@ hypre_NSHSetDropThresholdArray( void *nsh_vdata, HYPRE_Real *droptol )
       hypre_ParNSHDataOwnDroptolData(nsh_data) = 0;
    }
    hypre_ParNSHDataDroptol(nsh_data) = droptol;
-   return hypre_error_flag;
-}
-/* set own data */
-HYPRE_Int
-hypre_NSHSetOwnDroptolData( void *nsh_vdata, HYPRE_Int own_droptol_data )
-{
-   hypre_ParNSHData   *nsh_data = (hypre_ParNSHData*) nsh_vdata;
-   hypre_ParNSHDataOwnDroptolData(nsh_data) = own_droptol_data;
    return hypre_error_flag;
 }
 /* set MR max iter */

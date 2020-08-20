@@ -646,7 +646,6 @@ hypre_ILUSetup( void               *ilu_vdata,
             HYPRE_ILUSetLevelOfFill       (schur_precond, (ilu_data -> sp_ilu_lfil));
             HYPRE_ILUSetMaxNnzPerRow      (schur_precond, (ilu_data -> sp_ilu_max_row_nnz));
             HYPRE_ILUSetDropThresholdArray(schur_precond, (ilu_data -> sp_ilu_droptol));
-            hypre_ILUSetOwnDropThreshold  (schur_precond, 0);/* using exist droptol */
             HYPRE_ILUSetPrintLevel        (schur_precond, (ilu_data -> sp_print_level));
             HYPRE_ILUSetMaxIter           (schur_precond, (ilu_data -> sp_max_iter));
             HYPRE_ILUSetTol               (schur_precond, (ilu_data -> sp_tol));
@@ -768,7 +767,6 @@ hypre_ILUSetup( void               *ilu_vdata,
             HYPRE_ILUSetLevelOfFill       (schur_precond, (ilu_data -> sp_ilu_lfil));
             HYPRE_ILUSetMaxNnzPerRow      (schur_precond, (ilu_data -> sp_ilu_max_row_nnz));
             HYPRE_ILUSetDropThresholdArray(schur_precond, (ilu_data -> sp_ilu_droptol));
-            hypre_ILUSetOwnDropThreshold  (schur_precond, 0);/* using exist droptol */
             HYPRE_ILUSetPrintLevel        (schur_precond, (ilu_data -> sp_print_level));
             HYPRE_ILUSetMaxIter           (schur_precond, (ilu_data -> sp_max_iter));
             HYPRE_ILUSetTol               (schur_precond, (ilu_data -> sp_tol));

@@ -6030,10 +6030,7 @@ main( hypre_int argc,
          HYPRE_ILUSetDropThreshold(pcg_precond,ilu_droptol);
          /* set max iterations for Schur system solve */
          HYPRE_ILUSetSchurMaxIter( pcg_precond, ilu_schur_max_iter );
-         if(ilu_type == 20 || ilu_type == 21)
-         {
-            HYPRE_ILUSetNSHDropThreshold( pcg_precond, ilu_nsh_droptol);
-         }
+         HYPRE_ILUSetNSHDropThreshold( pcg_precond, ilu_nsh_droptol);
 
          /* setup MGR-PCG solver */
          HYPRE_FlexGMRESSetMaxIter(pcg_solver, mg_max_iter);

@@ -56,7 +56,6 @@ typedef struct hypre_ParILUData_struct
    hypre_ParCSRMatrix   *matmU;
    hypre_ParCSRMatrix   *matS;
    HYPRE_Real           *droptol;/* should be an array of 3 element, for B, (E and F), S respectively */
-   HYPRE_Int            own_droptol_data;/* should I free droptols */
    HYPRE_Int            lfil;
    HYPRE_Int            maxRowNnz;
    HYPRE_Int            *CF_marker_array;
@@ -99,24 +98,39 @@ typedef struct hypre_ParILUData_struct
    hypre_ParVector      *x;
    
    /* schur solver data */
-   HYPRE_Int            ss_kDim;/* dim and max number of iterations for GMRES or max number of iterations for NSH inverse */
-   HYPRE_Int            ss_max_iter;/* max number of iterations for NSH solve */
-   HYPRE_Real           ss_tol;/* stop iteration tol for GMRES or NSH inverse */
-   HYPRE_Real           ss_absolute_tol;/* absolute tol for GMRES or tol for NSH solve */
+   
+   /* -> GENERAL-SLOTS */
    HYPRE_Int            ss_logging;
    HYPRE_Int            ss_print_level;
+   
+   /* -> SCHUR-GMRES */
+   HYPRE_Int            ss_kDim;/* max number of iterations for GMRES */
+   HYPRE_Int            ss_max_iter;/* max number of iterations for GMRES solve */
+   HYPRE_Real           ss_tol;/* stop iteration tol for GMRES */
+   HYPRE_Real           ss_absolute_tol;/* absolute tol for GMRES or tol for NSH solve */
    HYPRE_Int            ss_rel_change;
    
+   /* -> SCHUR-NSH */
+   HYPRE_Int            ss_nsh_setup_max_iter;/* number of iterations for NSH inverse */
+   HYPRE_Int            ss_nsh_solve_max_iter;/* max number of iterations for NSH solve */
+   HYPRE_Real           ss_nsh_setup_tol;/* stop iteration tol for NSH inverse */
+   HYPRE_Real           ss_nsh_solve_tol;/* absolute tol for NSH solve */
+   HYPRE_Int            ss_nsh_max_row_nnz;/* max rows of nonzeros for NSH */
+   HYPRE_Int            ss_nsh_mr_col_version;/* MR column version setting in NSH */
+   HYPRE_Int            ss_nsh_mr_max_row_nnz;/* max rows for MR  */
+   HYPRE_Real           *ss_nsh_droptol;/* droptol array for NSH */
+   HYPRE_Int            ss_nsh_mr_max_iter;/* max MR iteration */
+   HYPRE_Real           ss_nsh_mr_tol;
+   
    /* schur precond data */
-   HYPRE_Int            sp_ilu_type;/* ilu type is use ILU, or max rows of nonzeros for NSH */
-   HYPRE_Int            sp_ilu_lfil;/* level of fill in for ILUK or MR column version setting*/
-   HYPRE_Int            sp_ilu_max_row_nnz;/* max rows for ILUT or MR  */
+   HYPRE_Int            sp_ilu_type;/* ilu type is use ILU */
+   HYPRE_Int            sp_ilu_lfil;/* level of fill in for ILUK */
+   HYPRE_Int            sp_ilu_max_row_nnz;/* max rows for ILUT  */
    /* droptol for ILUT or MR 
     * ILUT: [0], [1], [2] B, E&F, S respectively
     * NSH: [0] for MR, [1] for NSH
     */
-   HYPRE_Real           *sp_ilu_droptol;/* droptol array for ILUT or NSH */
-   HYPRE_Int            sp_own_droptol_data;
+   HYPRE_Real           *sp_ilu_droptol;/* droptol array for ILUT */
    HYPRE_Int            sp_print_level;
    HYPRE_Int            sp_max_iter;/* max precond iter or max MR iteration */
    HYPRE_Real           sp_tol;
@@ -162,7 +176,6 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataMatUModified(ilu_data)                 ((ilu_data) -> matmU)
 #define hypre_ParILUDataMatS(ilu_data)                         ((ilu_data) -> matS)
 #define hypre_ParILUDataDroptol(ilu_data)                      ((ilu_data) -> droptol)
-#define hypre_ParILUDataOwnDroptolData(ilu_data)               ((ilu_data) -> own_droptol_data)
 #define hypre_ParILUDataLfil(ilu_data)                         ((ilu_data) -> lfil)
 #define hypre_ParILUDataMaxRowNnz(ilu_data)                    ((ilu_data) -> maxRowNnz)
 #define hypre_ParILUDataCFMarkerArray(ilu_data)                ((ilu_data) -> CF_marker_array)
@@ -196,35 +209,34 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataSchurPrecond(ilu_data)                 ((ilu_data) -> schur_precond)
 #define hypre_ParILUDataRhs(ilu_data)                          ((ilu_data) -> rhs)
 #define hypre_ParILUDataX(ilu_data)                            ((ilu_data) -> x)
-#define hypre_ParILUDataReorderingType(ilu_data)                            ((ilu_data) -> reordering_type)
+#define hypre_ParILUDataReorderingType(ilu_data)               ((ilu_data) -> reordering_type)
 /* Schur System */
 #define hypre_ParILUDataSchurGMRESKDim(ilu_data)               ((ilu_data) -> ss_kDim)
-#define hypre_ParILUDataSchurNSHMaxNumIter(ilu_data)           ((ilu_data) -> ss_kDim)
-#define hypre_ParILUDataSchurGMRESMaxIter(ilu_data)            ((ilu_data) -> ss_kDim)
-#define hypre_ParILUDataSchurNSHSolveMaxIter(ilu_data)         ((ilu_data) -> ss_max_iter)
+#define hypre_ParILUDataSchurGMRESMaxIter(ilu_data)            ((ilu_data) -> ss_max_iter)
 #define hypre_ParILUDataSchurGMRESTol(ilu_data)                ((ilu_data) -> ss_tol)
-#define hypre_ParILUDataSchurNSHTol(ilu_data)                  ((ilu_data) -> ss_tol)
 #define hypre_ParILUDataSchurGMRESAbsoluteTol(ilu_data)        ((ilu_data) -> ss_absolute_tol)
-#define hypre_ParILUDataSchurNSHSolveTol(ilu_data)             ((ilu_data) -> ss_absolute_tol)
-#define hypre_ParILUDataSchurSolverLogging(ilu_data)           ((ilu_data) -> ss_logging)
-#define hypre_ParILUDataSchurSolverPrintLevel(ilu_data)        ((ilu_data) -> ss_print_level)
 #define hypre_ParILUDataSchurGMRESRelChange(ilu_data)          ((ilu_data) -> ss_rel_change)
 #define hypre_ParILUDataSchurPrecondIluType(ilu_data)          ((ilu_data) -> sp_ilu_type)
-#define hypre_ParILUDataSchurNSHMaxRowNnz(ilu_data)            ((ilu_data) -> sp_ilu_type)
 #define hypre_ParILUDataSchurPrecondIluLfil(ilu_data)          ((ilu_data) -> sp_ilu_lfil)
-#define hypre_ParILUDataSchurMRColVersion(ilu_data)            ((ilu_data) -> sp_ilu_lfil)
 #define hypre_ParILUDataSchurPrecondIluMaxRowNnz(ilu_data)     ((ilu_data) -> sp_ilu_max_row_nnz)
-#define hypre_ParILUDataSchurMRMaxRowNnz(ilu_data)             ((ilu_data) -> sp_ilu_max_row_nnz)
 #define hypre_ParILUDataSchurPrecondIluDroptol(ilu_data)       ((ilu_data) -> sp_ilu_droptol)
-#define hypre_ParILUDataSchurNSHDroptol(ilu_data)              ((ilu_data) -> sp_ilu_droptol)
-#define hypre_ParILUDataSchurPrecondOwnDroptolData(ilu_data)   ((ilu_data) -> sp_own_droptol_data)
-#define hypre_ParILUDataSchurNSHOwnDroptolData(ilu_data)       ((ilu_data) -> sp_own_droptol_data)
 #define hypre_ParILUDataSchurPrecondPrintLevel(ilu_data)       ((ilu_data) -> sp_print_level)
 #define hypre_ParILUDataSchurPrecondMaxIter(ilu_data)          ((ilu_data) -> sp_max_iter)
-#define hypre_ParILUDataSchurMRMaxIter(ilu_data)               ((ilu_data) -> sp_max_iter)
 #define hypre_ParILUDataSchurPrecondTol(ilu_data)              ((ilu_data) -> sp_tol)
-#define hypre_ParILUDataSchurMRTol(ilu_data)                   ((ilu_data) -> sp_tol)
 
+#define hypre_ParILUDataSchurNSHMaxNumIter(ilu_data)           ((ilu_data) -> ss_nsh_setup_max_iter)
+#define hypre_ParILUDataSchurNSHSolveMaxIter(ilu_data)         ((ilu_data) -> ss_nsh_solve_max_iter)
+#define hypre_ParILUDataSchurNSHTol(ilu_data)                  ((ilu_data) -> ss_nsh_setup_tol)
+#define hypre_ParILUDataSchurNSHSolveTol(ilu_data)             ((ilu_data) -> ss_nsh_solve_tol)
+#define hypre_ParILUDataSchurNSHMaxRowNnz(ilu_data)            ((ilu_data) -> ss_nsh_max_row_nnz)
+#define hypre_ParILUDataSchurMRColVersion(ilu_data)            ((ilu_data) -> ss_nsh_mr_col_version)
+#define hypre_ParILUDataSchurMRMaxRowNnz(ilu_data)             ((ilu_data) -> ss_nsh_mr_max_row_nnz)
+#define hypre_ParILUDataSchurNSHDroptol(ilu_data)              ((ilu_data) -> ss_nsh_droptol)
+#define hypre_ParILUDataSchurMRMaxIter(ilu_data)               ((ilu_data) -> ss_nsh_mr_max_iter)
+#define hypre_ParILUDataSchurMRTol(ilu_data)                   ((ilu_data) -> ss_nsh_mr_tol)
+
+#define hypre_ParILUDataSchurSolverLogging(ilu_data)           ((ilu_data) -> ss_logging)
+#define hypre_ParILUDataSchurSolverPrintLevel(ilu_data)        ((ilu_data) -> ss_print_level)
 
 #define FMRK  -1
 #define CMRK  1

@@ -152,10 +152,10 @@ typedef struct
    HYPRE_Real           eu_sparse_A;
    char                *euclidfile;
    HYPRE_Int            ilu_lfil;
-   HYPRE_Int		      ilu_type;
-   HYPRE_Int		      ilu_max_row_nnz;
-   HYPRE_Int		      ilu_max_iter;
-   HYPRE_Real		      ilu_droptol;
+   HYPRE_Int            ilu_type;
+   HYPRE_Int            ilu_max_row_nnz;
+   HYPRE_Int            ilu_max_iter;
+   HYPRE_Real           ilu_droptol;
    HYPRE_Int            ilu_reordering_type;
    
    HYPRE_Real          *max_eig_est;
@@ -1873,7 +1873,6 @@ HYPRE_Int hypre_ILUSetLevelOfFill( void *ilu_vdata, HYPRE_Int lfil );
 HYPRE_Int hypre_ILUSetMaxNnzPerRow( void *ilu_vdata, HYPRE_Int nzmax );
 HYPRE_Int hypre_ILUSetDropThreshold( void *ilu_vdata, HYPRE_Real threshold );
 HYPRE_Int hypre_ILUSetDropThresholdArray( void *ilu_vdata, HYPRE_Real *threshold );
-HYPRE_Int hypre_ILUSetOwnDropThreshold( void *ilu_vdata, HYPRE_Int own_droptol_data );
 HYPRE_Int hypre_ILUSetType( void *ilu_vdata, HYPRE_Int ilu_type );
 HYPRE_Int hypre_ILUSetMaxIter( void *ilu_vdata, HYPRE_Int max_iter );
 HYPRE_Int hypre_ILUSetTol( void *ilu_vdata, HYPRE_Real tol );
@@ -1894,7 +1893,6 @@ HYPRE_Int hypre_ILUSetSchurPrecondILULevelOfFill( void *ilu_vdata, HYPRE_Int sp_
 HYPRE_Int hypre_ILUSetSchurPrecondILUMaxNnzPerRow( void *ilu_vdata, HYPRE_Int sp_ilu_max_row_nnz );
 HYPRE_Int hypre_ILUSetSchurPrecondILUDropThreshold( void *ilu_vdata, HYPRE_Real sp_ilu_droptol );
 HYPRE_Int hypre_ILUSetSchurPrecondILUDropThresholdArray( void *ilu_vdata, HYPRE_Real *sp_ilu_droptol );
-HYPRE_Int hypre_ILUSetSchurPrecondILUOwnDropThreshold( void *ilu_vdata, HYPRE_Int sp_own_droptol_data );
 HYPRE_Int hypre_ILUSetSchurPrecondPrintLevel( void *ilu_vdata, HYPRE_Int sp_print_level );
 HYPRE_Int hypre_ILUSetSchurPrecondMaxIter( void *ilu_vdata, HYPRE_Int sp_max_iter );
 HYPRE_Int hypre_ILUSetSchurPrecondTol( void *ilu_vdata, HYPRE_Int sp_tol );
@@ -1963,7 +1961,6 @@ HYPRE_Int hypre_NSHSetTol( void *nsh_vdata, HYPRE_Real tol );
 HYPRE_Int hypre_NSHSetGlobalSolver( void *nsh_vdata, HYPRE_Int global_solver );
 HYPRE_Int hypre_NSHSetDropThreshold( void *nsh_vdata, HYPRE_Real droptol );
 HYPRE_Int hypre_NSHSetDropThresholdArray( void *nsh_vdata, HYPRE_Real *droptol );
-HYPRE_Int hypre_NSHSetOwnDroptolData( void *nsh_vdata, HYPRE_Int own_droptol_data );
 HYPRE_Int hypre_NSHSetMRMaxIter( void *nsh_vdata, HYPRE_Int mr_max_iter );
 HYPRE_Int hypre_NSHSetMRTol( void *nsh_vdata, HYPRE_Real mr_tol );
 HYPRE_Int hypre_NSHSetMRMaxRowNnz( void *nsh_vdata, HYPRE_Int mr_max_row_nnz );
