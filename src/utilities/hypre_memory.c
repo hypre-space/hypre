@@ -791,23 +791,82 @@ hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
    return ierr;
 }
 
+#ifdef HYPRE_USING_MEMORY_TRACKER
+
 /*--------------------------------------------------------------------------
  * Memory tracker
+ * do not use hypre_T* in the following since we don't want to track them   *
  *--------------------------------------------------------------------------*/
+hypre_MemoryTracker *
+hypre_MemoryTrackerCreate()
+{
+   hypre_MemoryTracker *ptr = (hypre_MemoryTracker *) calloc(1, sizeof(hypre_MemoryTracker));
+   return ptr;
+}
 
-#ifdef HYPRE_USING_MEMORY_TRACKER
-std::vector<hypre_memory_tracker_t> hypre_memory_tracker;
-#endif
+void
+hypre_MemoryTrackerDestroy(hypre_MemoryTracker *tracker)
+{
+   if (tracker)
+   {
+      free(tracker->data);
+      free(tracker);
+   }
+}
 
+void
+hypre_MemoryTrackerInsert(const char           *action,
+                          void                 *ptr,
+                          size_t                nbytes,
+                          hypre_MemoryLocation  memory_location,
+                          const char           *filename,
+                          const char           *function,
+                          HYPRE_Int             line)
+{
+
+   if (ptr == NULL)
+   {
+      return;
+   }
+
+   hypre_MemoryTracker *tracker = hypre_memory_tracker();
+
+   if (tracker->alloced_size <= tracker->actual_size)
+   {
+      tracker->alloced_size = 2 * tracker->alloced_size + 1;
+      tracker->data = (hypre_MemoryTrackerEntry *) realloc(tracker->data, tracker->alloced_size * sizeof(hypre_MemoryTrackerEntry));
+   }
+
+   hypre_assert(tracker->actual_size < tracker->alloced_size);
+
+   hypre_MemoryTrackerEntry *entry = tracker->data + tracker->actual_size;
+
+   sprintf(entry->_action, "%s", action);
+   entry->_ptr = ptr;
+   entry->_nbytes = nbytes;
+   entry->_memory_location = memory_location;
+   sprintf(entry->_filename, "%s", filename);
+   sprintf(entry->_function, "%s", function);
+   entry->_line = line;
+   entry->_err = 0;
+
+   tracker->actual_size ++;
+}
+
+
+/* do not use hypre_printf, hypre_fprintf, which have TAlloc
+ * endless loop "for (i = 0; i < tracker->actual_size; i++)" otherwise */
 HYPRE_Int
 hypre_PrintMemoryTracker()
 {
    HYPRE_Int ierr = 0;
-#ifdef HYPRE_USING_MEMORY_TRACKER
    size_t i;
+   size_t alloc_bytes[hypre_MEMORY_UNIFIED+1] = {0};
    HYPRE_Int myid;
    char filename[256];
    FILE *file;
+
+   hypre_MemoryTracker *tracker = hypre_memory_tracker();
 
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
    hypre_sprintf(filename,"HypreMemoryTrack.log.%05d", myid);
@@ -817,34 +876,68 @@ hypre_PrintMemoryTracker()
       return hypre_error_flag;
    }
 
-   char *mark = hypre_CTAlloc(char, hypre_memory_tracker.size(), HYPRE_MEMORY_HOST);
+   char *mark = (char *) calloc(tracker->actual_size, sizeof(char));
 
-   for (i = 0; i < hypre_memory_tracker.size(); i++)
+   fprintf(file, "==== Operations:\n");
+   fprintf(file, "     ID        EVENT           ADDRESS       BYTE         LOCATION                           FILE                                           FUNCTION           LINE\n");
+
+   for (i = 0; i < tracker->actual_size; i++)
    {
-      if (hypre_memory_tracker[i]._ptr == NULL && hypre_memory_tracker[i]._nbytes == 0)
+      char memory_location[256];
+
+      if (tracker->data[i]._memory_location == hypre_MEMORY_HOST)
       {
-         continue;
+         sprintf(memory_location, "%s", "HOST");
+      }
+      else if (tracker->data[i]._memory_location == hypre_MEMORY_HOST_PINNED)
+      {
+         sprintf(memory_location, "%s", "HOST_PINNED");
+      }
+      else if (tracker->data[i]._memory_location == hypre_MEMORY_DEVICE)
+      {
+         sprintf(memory_location, "%s", "DEVICE");
+      }
+      else if (tracker->data[i]._memory_location == hypre_MEMORY_UNIFIED)
+      {
+         sprintf(memory_location, "%s", "UNIFIED");
+      }
+      else
+      {
+         sprintf(memory_location, "%s", "UNDEFINED");
       }
 
-      hypre_fprintf(file, "%6ld: %8s  %16p  %10ld  %d  %32s  %64s      %d\n", i,
-            hypre_memory_tracker[i]._action,
-            hypre_memory_tracker[i]._ptr,
-            hypre_memory_tracker[i]._nbytes,
-            hypre_memory_tracker[i]._memory_location,
-            hypre_memory_tracker[i]._filename,
-            hypre_memory_tracker[i]._function,
-            hypre_memory_tracker[i]._line);
-
-      if ( strstr(hypre_memory_tracker[i]._action, "alloc") != NULL)
+      char nbytes[32];
+      if (tracker->data[i]._nbytes != (size_t) -1)
       {
+         sprintf(nbytes, "%zu", tracker->data[i]._nbytes);
+      }
+      else
+      {
+         sprintf(nbytes, "%s", "");
+      }
+
+      fprintf(file, " %6zu %12s        %p %10s %16s %30s %50s     %10d\n",
+              i,
+              tracker->data[i]._action,
+              tracker->data[i]._ptr,
+              nbytes,
+              memory_location,
+              tracker->data[i]._filename,
+              tracker->data[i]._function,
+              tracker->data[i]._line);
+
+      if ( strstr(tracker->data[i]._action, "alloc") != NULL)
+      {
+         alloc_bytes[tracker->data[i]._memory_location] += tracker->data[i]._nbytes;
+
          size_t j;
          HYPRE_Int found = 0;
-         for (j = i+1; j < hypre_memory_tracker.size(); j++)
+         for (j = i+1; j < tracker->actual_size; j++)
          {
             if ( mark[j] == 0 &&
-                 strstr(hypre_memory_tracker[j]._action, "free") != NULL &&
-                 hypre_memory_tracker[i]._ptr == hypre_memory_tracker[j]._ptr &&
-                 hypre_memory_tracker[i]._memory_location == hypre_memory_tracker[j]._memory_location )
+                 strstr(tracker->data[j]._action, "free") != NULL &&
+                 tracker->data[i]._ptr == tracker->data[j]._ptr &&
+                 tracker->data[i]._memory_location == tracker->data[j]._memory_location )
             {
                mark[j] = 1;
                found = 1;
@@ -854,18 +947,35 @@ hypre_PrintMemoryTracker()
 
          if (!found)
          {
-            hypre_printf("Proc %3d: [%6d], %16p may have not been freed\n",
-                  myid, i, hypre_memory_tracker[i]._ptr );
+            fprintf(stderr, "%6zu: %16p may have not been freed\n", i, tracker->data[i]._ptr );
+            tracker->data[i]._err = 1;
          }
       }
    }
 
-   hypre_TFree(mark, HYPRE_MEMORY_HOST);
+   fprintf(file, "\n==== Usage (byte):\n");
+   fprintf(file, "HOST: %zu, HOST_PINNED %zu, DEVICE %zu, UNIFIED %zu\n",
+           alloc_bytes[hypre_MEMORY_HOST],
+           alloc_bytes[hypre_MEMORY_HOST_PINNED],
+           alloc_bytes[hypre_MEMORY_DEVICE],
+           alloc_bytes[hypre_MEMORY_UNIFIED]);
+
+   fprintf(file, "\n==== Warnings:\n");
+   for (i = 0; i < tracker->actual_size; i++)
+   {
+      if (strstr(tracker->data[i]._action, "alloc") != NULL && tracker->data[i]._err)
+      {
+         fprintf(file, "%6zu: %p may have not been freed\n", i, tracker->data[i]._ptr );
+      }
+   }
+
+   free(mark);
 
    fclose(file);
-#endif
+
    return ierr;
 }
+#endif
 
 /*--------------------------------------------------------------------------*
  * Memory Pool

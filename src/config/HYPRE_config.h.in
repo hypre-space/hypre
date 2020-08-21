@@ -193,6 +193,9 @@
 /* Define to 1 if executing on host/device with KOKKOS */
 #undef HYPRE_USING_KOKKOS
 
+/* Define to 1 if want to track memory operations in hypre */
+#undef HYPRE_USING_MEMORY_TRACKER
+
 /* Define to 1 if Node Aware MPI library is used */
 #undef HYPRE_USING_NODE_AWARE_MPI
 

@@ -796,6 +796,7 @@ with_MPI_lib_dirs
 with_MPI_flags
 with_node_aware_mpi
 with_node_aware_mpi_include
+with_memory_tracker
 with_blas_lib
 with_blas_libs
 with_blas_lib_dirs
@@ -1544,6 +1545,7 @@ Optional Packages:
   --with-node-aware-mpi   Use Node Aware MPI (default is NO).
   --with-node-aware-mpi-include=DIR
                           User specifies that nap_comm.hpp is in DIR.
+  --with-memory-track     Use memory tracker in hypre (default is NO).
   --with-blas-lib=LIBS    LIBS is space-separated linkable list (enclosed in
                           quotes) of libraries needed for BLAS. OK to use -L
                           and -l flags in the list
@@ -2660,6 +2662,7 @@ hypre_user_gave_caliper_inc=no
 hypre_found_cuda=no
 
 hypre_using_node_aware_mpi=no
+hypre_using_memory_tracker=no
 
 hypre_blas_lib_old_style=no
 hypre_blas_lib_dir_old_style=no
@@ -3465,6 +3468,20 @@ if test "${with_node_aware_mpi_include+set}" = set; then :
     HYPRE_NAP_INCLUDE="$HYPRE_NAP_INCLUDE -I$nap_dir"
  done;
  hypre_using_node_aware_mpi=yes
+
+fi
+
+
+
+# Check whether --with-memory_tracker was given.
+if test "${with_memory_tracker+set}" = set; then :
+  withval=$with_memory_tracker; case "$withval" in
+    yes) hypre_using_memory_tracker=yes;;
+    no)  hypre_using_memory_tracker=no ;;
+    *)   hypre_using_memory_tracker=no ;;
+ esac
+else
+  hypre_using_memory_tracker=no
 
 fi
 
@@ -7264,6 +7281,13 @@ if test "$hypre_using_node_aware_mpi" = "yes"
 then
 
 $as_echo "#define HYPRE_USING_NODE_AWARE_MPI 1" >>confdefs.h
+
+fi
+
+if test "$hypre_using_memory_tracker" = "yes"
+then
+
+$as_echo "#define HYPRE_USING_MEMORY_TRACKER 1" >>confdefs.h
 
 fi
 

@@ -7282,8 +7282,6 @@ main( hypre_int argc,
       hypre_FinalizeMemoryDebug();
    */
 
-   //hypre_PrintMemoryTracker();
-
    /* Finalize Hypre */
    HYPRE_Finalize();
 

@@ -158,6 +158,7 @@ hypre_user_gave_caliper_inc=no
 hypre_found_cuda=no
 
 hypre_using_node_aware_mpi=no
+hypre_using_memory_tracker=no
 
 dnl *********************************************************************
 dnl * Initialize flag-check variables
@@ -736,6 +737,18 @@ AS_HELP_STRING([--with-node-aware-mpi-include=DIR],
     HYPRE_NAP_INCLUDE="$HYPRE_NAP_INCLUDE -I$nap_dir"
  done;
  hypre_using_node_aware_mpi=yes]
+)
+
+dnl ***** memory tracker
+AC_ARG_WITH(memory_tracker,
+AS_HELP_STRING([--with-memory-track],
+               [Use memory tracker in hypre (default is NO).]),
+[case "$withval" in
+    yes) hypre_using_memory_tracker=yes;;
+    no)  hypre_using_memory_tracker=no ;;
+    *)   hypre_using_memory_tracker=no ;;
+ esac],
+[hypre_using_memory_tracker=no]
 )
 
 dnl ***** BLAS
@@ -1360,6 +1373,11 @@ fi
 if test "$hypre_using_node_aware_mpi" = "yes"
 then
    AC_DEFINE(HYPRE_USING_NODE_AWARE_MPI, 1, [Define to 1 if Node Aware MPI library is used])
+fi
+
+if test "$hypre_using_memory_tracker" = "yes"
+then
+   AC_DEFINE(HYPRE_USING_MEMORY_TRACKER, 1, [Define to 1 if want to track memory operations in hypre])
 fi
 
 dnl *********************************************************************
