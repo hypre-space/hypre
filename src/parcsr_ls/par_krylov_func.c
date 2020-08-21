@@ -27,7 +27,7 @@ hypre_ParKrylovFree( void *ptr )
 {
    HYPRE_Int ierr = 0;
 
-   hypre_Free( ptr , HYPRE_MEMORY_HOST);
+   hypre_TFree( ptr , HYPRE_MEMORY_HOST);
 
    return ierr;
 }
