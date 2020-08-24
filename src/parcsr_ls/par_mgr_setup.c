@@ -111,7 +111,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
   HYPRE_Int use_air = 0;
   HYPRE_Int truncate_cg_threshold = (mgr_data -> truncate_coarse_grid_threshold);
-  HYPRE_Real wall_time;
+//  HYPRE_Real wall_time;
 
   /* ----- begin -----*/
   HYPRE_ANNOTATE_FUNC_BEGIN;

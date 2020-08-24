@@ -71,7 +71,7 @@ hypre_MGRSolve( void               *mgr_vdata,
    HYPRE_Int    global_smooth_iters      =  (mgr_data -> global_smooth_iters);
    HYPRE_Int    global_smooth_type =  (mgr_data -> global_smooth_type);
 
-   HYPRE_Real   wall_time = 0.0;
+//   HYPRE_Real   wall_time = 0.0;
 
    HYPRE_Int    i;
 
@@ -615,9 +615,7 @@ hypre_MGRCycle( void               *mgr_vdata,
    HYPRE_Int      use_air = 0;
    HYPRE_Int      my_id;
 
-   HYPRE_Int      use_default_cg_solver = (mgr_data -> use_default_cgrid_solver);
-
-   HYPRE_Real     wall_time;
+//   HYPRE_Real     wall_time;
 
    /* Initialize */
    HYPRE_ANNOTATE_FUNC_BEGIN;
