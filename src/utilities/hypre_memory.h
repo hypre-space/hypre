@@ -131,13 +131,14 @@ typedef struct
    char                  _filename[256];
    char                  _function[256];
    HYPRE_Int             _line;
-   HYPRE_Int             _err;
+   size_t                _pair;
 } hypre_MemoryTrackerEntry;
 
 typedef struct
 {
    size_t actual_size;
    size_t alloced_size;
+   size_t prev_end;
    hypre_MemoryTrackerEntry *data;
 } hypre_MemoryTracker;
 

@@ -11,10 +11,11 @@
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_StructKrylovCAlloc( HYPRE_Int count,
-                          HYPRE_Int elt_size )
+hypre_StructKrylovCAlloc( size_t               count,
+                          size_t               elt_size,
+                          HYPRE_MemoryLocation location)
 {
-   return ( (void*) hypre_CTAlloc(char, count * elt_size, HYPRE_MEMORY_HOST) );
+   return ( (void*) hypre_CTAlloc(char, count * elt_size, location) );
 }
 
 /*--------------------------------------------------------------------------

@@ -65,7 +65,7 @@ hypre_PCGFunctionsCreate(
    pcg_functions->ClearVector = ClearVector;
    pcg_functions->ScaleVector = ScaleVector;
    pcg_functions->Axpy = Axpy;
-/* default preconditioner must be set here but can be changed later... */
+   /* default preconditioner must be set here but can be changed later... */
    pcg_functions->precond_setup = PrecondSetup;
    pcg_functions->precond       = Precond;
 
