@@ -38,17 +38,14 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR::x and y are the same pointer in hypre_CSRMatrixMatvecDevice\n");
    }
 
-   if (trans)
-   {
-      hypre_assert(hypre_CSRMatrixNumCols(A) == hypre_VectorSize(y));
-      hypre_assert(hypre_CSRMatrixNumRows(A) == hypre_VectorSize(x));
-   }
-   else
-   {
-      hypre_assert(hypre_CSRMatrixNumCols(A) == hypre_VectorSize(x));
-      hypre_assert(hypre_CSRMatrixNumRows(A) == hypre_VectorSize(y));
-   }
-   hypre_assert(hypre_VectorSize(y) == hypre_VectorSize(b));
+   HYPRE_Int nx = trans ? hypre_CSRMatrixNumRows(A) : hypre_CSRMatrixNumCols(A);
+   HYPRE_Int ny = trans ? hypre_CSRMatrixNumCols(A) : hypre_CSRMatrixNumRows(A);
+
+   //RL: Note the "<=", since the vectors sometimes can be temporary work spaces that have
+   //    large sizes than the needed (such as in par_cheby.c)
+   hypre_assert(ny <= hypre_VectorSize(y));
+   hypre_assert(nx <= hypre_VectorSize(x));
+   hypre_assert(ny <= hypre_VectorSize(b));
 
    cusparseHandle_t   handle = hypre_HandleCusparseHandle(hypre_handle());
    cusparseMatDescr_t descr  = hypre_HandleCusparseMatDescr(hypre_handle());
@@ -65,9 +62,9 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
    if (b != y)
    {
       HYPRE_THRUST_CALL( copy_n,
-                         hypre_VectorData(b),
-                         hypre_VectorSize(y) - offset,
-                         hypre_VectorData(y) );
+                         hypre_VectorData(b) + offset,
+                         ny - offset,
+                         hypre_VectorData(y) + offset);
    }
 
    if (hypre_CSRMatrixNumNonzeros(A) <= 0)
@@ -88,12 +85,19 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
                                             hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), csc_a, csc_j, csc_i,
                                             CUSPARSE_ACTION_NUMERIC, CUSPARSE_INDEX_BASE_ZERO) );
 
-      HYPRE_CUSPARSE_CALL( cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                          hypre_CSRMatrixNumCols(A), hypre_CSRMatrixNumRows(A),
+      HYPRE_CUSPARSE_CALL( cusparseDcsrmv(handle,
+                                          CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                          hypre_CSRMatrixNumCols(A) - offset,
+                                          hypre_CSRMatrixNumRows(A),
                                           hypre_CSRMatrixNumNonzeros(A),
-                                          &alpha, descr,
-                                          csc_a, csc_i, csc_j,
-                                          hypre_VectorData(x), &beta, hypre_VectorData(y)) );
+                                          &alpha,
+                                          descr,
+                                          csc_a,
+                                          csc_i + offset,
+                                          csc_j,
+                                          hypre_VectorData(x),
+                                          &beta,
+                                          hypre_VectorData(y) + offset) );
 
       hypre_TFree(csc_a, HYPRE_MEMORY_DEVICE);
       hypre_TFree(csc_i, HYPRE_MEMORY_DEVICE);
@@ -101,12 +105,19 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
    }
    else
    {
-      HYPRE_CUSPARSE_CALL( cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                          hypre_CSRMatrixNumRows(A) - offset, hypre_CSRMatrixNumCols(A),
+      HYPRE_CUSPARSE_CALL( cusparseDcsrmv(handle,
+                                          CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                          hypre_CSRMatrixNumRows(A) - offset,
+                                          hypre_CSRMatrixNumCols(A),
                                           hypre_CSRMatrixNumNonzeros(A),
-                                          &alpha, descr,
-                                          hypre_CSRMatrixData(A), hypre_CSRMatrixI(A) + offset, hypre_CSRMatrixJ(A),
-                                          hypre_VectorData(x), &beta, hypre_VectorData(y) + offset) );
+                                          &alpha,
+                                          descr,
+                                          hypre_CSRMatrixData(A),
+                                          hypre_CSRMatrixI(A) + offset,
+                                          hypre_CSRMatrixJ(A),
+                                          hypre_VectorData(x),
+                                          &beta,
+                                          hypre_VectorData(y) + offset) );
    }
 
    hypre_SyncCudaComputeStream(hypre_handle());
