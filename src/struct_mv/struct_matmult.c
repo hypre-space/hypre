@@ -186,6 +186,8 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
    hypre_BoxArray     **data_spaces;
    hypre_BoxArray      *cdata_space, *fdata_space, *Mdata_space, *data_space;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /* RDF TODO: Maybe write StMatrixCreateFromStructMatrix() and
     * StructMatrixCreateFromStMatrix() routines? */
 
@@ -923,5 +925,8 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
    hypre_TFree(data_spaces);
 
    HYPRE_StructMatrixAssemble(M);
+
+   HYPRE_ANNOTATE_FUNC_END;
+
    return hypre_error_flag;
 }

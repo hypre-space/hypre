@@ -390,6 +390,8 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 
    HYPRE_Complex    zero = 0.0;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    n_rows_A = hypre_ParCSRMatrixGlobalNumRows(A);
    n_cols_A = hypre_ParCSRMatrixGlobalNumCols(A);
    n_rows_B = hypre_ParCSRMatrixGlobalNumRows(B);
@@ -402,6 +404,8 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    if (n_cols_A != n_rows_B || num_cols_diag_A != num_rows_diag_B)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC," Error! Incompatible matrix dimensions!\n");
+      HYPRE_ANNOTATE_FUNC_END;
+
       return NULL;
    }
    if ( num_rows_diag_A==num_cols_diag_B) allsquare = 1;
@@ -1089,6 +1093,8 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MATMUL] += hypre_MPI_Wtime();
 #endif
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return C;
 }
@@ -3313,6 +3319,8 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    HYPRE_Int local_num_rows, local_num_cols;
    HYPRE_Int starts_size;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    if (!comm_pkg_A)
    {
       hypre_MatvecCommPkgCreate(A);
@@ -3331,6 +3339,8 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    if (n_rows_A != n_rows_B || num_rows_diag_A != num_rows_diag_B)
    {
         hypre_error_w_msg(HYPRE_ERROR_GENERIC," Error! Incompatible matrix dimensions!\n");
+        HYPRE_ANNOTATE_FUNC_END;
+
 	return NULL;
    }
 
@@ -3834,8 +3844,9 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    if (C_diag) hypre_CSRMatrixDestroy(C_tmp_diag);
    if (C_offd) hypre_CSRMatrixDestroy(C_tmp_offd);
 
-   return C;
+   HYPRE_ANNOTATE_FUNC_END;
 
+   return C;
 }
 
 /* VPM: The functions hypre_union2 and hypre_ParcsrAdd
@@ -3971,6 +3982,8 @@ hypre_ParcsrAdd( HYPRE_Complex alpha,
 
    HYPRE_Int     *marker_diag = hypre_TAlloc(HYPRE_Int, ncol_local);
    HYPRE_Int     *marker_offd = hypre_TAlloc(HYPRE_Int, num_cols_C_offd);
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    hypre_MPI_Comm_rank(comm, &my_id);
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -4139,6 +4152,8 @@ hypre_ParcsrAdd( HYPRE_Complex alpha,
    hypre_TFree(B2C_offd);
    hypre_TFree(marker_diag);
    hypre_TFree(marker_offd);
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
