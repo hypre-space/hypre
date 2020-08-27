@@ -440,6 +440,17 @@ HYPRE_Int
 hypre_SeqVectorScale( HYPRE_Complex alpha,
                       hypre_Vector *y )
 {
+   /* special cases */
+   if (alpha == 1.0)
+   {
+      return 0;
+   }
+
+   if (alpha == 0.0)
+   {
+      return hypre_SeqVectorSetConstantValues(y, 0.0);
+   }
+
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
 #endif
@@ -447,11 +458,6 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
    HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Int      size   = hypre_VectorSize(y);
    HYPRE_Int      ierr = 0;
-
-   if (alpha == 1.0)
-   {
-      return ierr;
-   }
 
    size *= hypre_VectorNumVectors(y);
 
