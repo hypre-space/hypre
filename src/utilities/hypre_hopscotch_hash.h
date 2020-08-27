@@ -132,7 +132,23 @@ hypre_fetch_and_add( HYPRE_Int *ptr, HYPRE_Int value )
 static inline HYPRE_Int
 first_lsb_bit_indx( hypre_uint x )
 {
-  return ffs(x) - 1;
+   HYPRE_Int pos;
+#if defined(_MSC_VER)
+   if (x == 0)
+   {
+      pos = 0;
+   }
+   else
+   {
+      for (pos = 1; !(x & 1); ++pos)
+      {
+         x >>= 1;
+      }
+   }
+#else
+   pos = ffs(x);
+#endif
+   return (pos - 1);
 }
 /**
  * hypre_Hash is adapted from xxHash with the following license.
