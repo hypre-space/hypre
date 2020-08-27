@@ -19,7 +19,7 @@
 #include "HYPRE_krylov.h"
 #include "_hypre_sstruct_mv.h"
 #include "_hypre_sstruct_ls.h"
- 
+
 #define DEBUG 0
 
 /*--------------------------------------------------------------------------
@@ -89,7 +89,7 @@ typedef struct
    Index                  periodic;
 
 } ProblemPartData;
- 
+
 typedef struct
 {
    HYPRE_Int              ndim;
@@ -117,7 +117,7 @@ typedef struct
    HYPRE_Int             *pools;   /* array of size nparts */
 
 } ProblemData;
- 
+
 /*--------------------------------------------------------------------------
  * Read routines
  *--------------------------------------------------------------------------*/
@@ -184,11 +184,11 @@ SScanProblemIndex( char          *sdata_ptr,
          case 1:
             hypre_sscanf(sdata_ptr, "%d", &index[6]);
             break;
-            
+
          case 2:
             hypre_sscanf(sdata_ptr, "%d%d", &index[6], &index[7]);
             break;
-            
+
          case 3:
             hypre_sscanf(sdata_ptr, "%d%d%d", &index[6], &index[7], &index[8]);
             break;
@@ -238,7 +238,7 @@ ReadData( char         *filename,
    /*-----------------------------------------------------------
     * Read data file from process 0, then broadcast
     *-----------------------------------------------------------*/
- 
+
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
    if (myid == 0)
@@ -265,7 +265,7 @@ ReadData( char         *filename,
             sdata = hypre_TReAlloc(sdata, char, (sdata_size + memchunk));
             s= sdata_size + memchunk;
          }
-         
+
          /* read the next input line */
          sdata_line = fgets((sdata + sdata_size), maxline, file);
       }
@@ -294,7 +294,7 @@ ReadData( char         *filename,
    while (sdata_line < (sdata + sdata_size))
    {
       sdata_ptr = sdata_line;
-      
+
       if ( ( hypre_sscanf(sdata_ptr, "%s", key) > 0 ) && ( sdata_ptr[0] != '#' ) )
       {
          sdata_ptr += strcspn(sdata_ptr, " \t\n");
@@ -652,10 +652,10 @@ ReadData( char         *filename,
 
    hypre_TFree(sdata);
 
-   *data_ptr = data; 
+   *data_ptr = data;
    return 0;
 }
- 
+
 /*--------------------------------------------------------------------------
  * Distribute routines
  *--------------------------------------------------------------------------*/
@@ -1089,7 +1089,7 @@ DistributeData( ProblemData   global_data,
 
    hypre_TFree(pool_procs);
 
-   *data_ptr = data; 
+   *data_ptr = data;
    return 0;
 }
 
@@ -1281,7 +1281,7 @@ PrintUsage( char *progname,
 /*--------------------------------------------------------------------------
  * Test driver for semi-structured matrix interface
  *--------------------------------------------------------------------------*/
- 
+
 hypre_int
 main( hypre_int argc,
       char *argv[] )
@@ -1297,7 +1297,7 @@ main( hypre_int argc,
    Index                *block;
    HYPRE_Int                   solver_id;
    HYPRE_Int                   print_system;
-                        
+
    HYPRE_SStructGrid     grid;
    HYPRE_SStructStencil *stencils;
    HYPRE_SStructGraph    graph;
@@ -1320,12 +1320,12 @@ main( hypre_int argc,
 
    HYPRE_Int                   num_iterations;
    HYPRE_Real            final_res_norm;
-                         
+
    HYPRE_Int                   num_procs, myid;
    HYPRE_Int                   time_index;
-                         
+
    HYPRE_Int                   arg_index, part, box, var, entry, s, i, j, k;
-                        
+
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -1533,8 +1533,8 @@ main( hypre_int argc,
     * Set up the graph
     *-----------------------------------------------------------*/
 
-   HYPRE_SStructGraphCreate(hypre_MPI_COMM_WORLD, grid, grid, &graph);
-   HYPRE_SStructGraphSetObjectType(graph, HYPRE_PARCSR);  
+   HYPRE_SStructGraphCreate(hypre_MPI_COMM_WORLD, grid, &graph);
+   HYPRE_SStructGraphSetObjectType(graph, HYPRE_PARCSR);
 
    for (part = 0; part < data.nparts; part++)
    {
@@ -1621,7 +1621,7 @@ main( hypre_int argc,
          }
       }
       h= 1.0/h;
-         
+
       /* set stencil values */
       for (var = 0; var < pdata.nvars; var++)
       {
@@ -1729,7 +1729,7 @@ main( hypre_int argc,
       }
       hypre_TFree(OffProcRows);
     }*/
-                                                                                                                                    
+
    /*-----------------------------------------------------------
     * Set up the linear system
     *-----------------------------------------------------------*/
@@ -1751,7 +1751,7 @@ main( hypre_int argc,
       {
          for (box = 0; box < pdata.nboxes; box++)
          {
-            GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], 
+            GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
                            pdata.vartypes[var], ilower, iupper);
             HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper,
                                             var, values);
@@ -1775,7 +1775,7 @@ main( hypre_int argc,
       {
          for (box = 0; box < pdata.nboxes; box++)
          {
-            GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], 
+            GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
                            pdata.vartypes[var], ilower, iupper);
             HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper,
                                             var, values);
@@ -1819,7 +1819,7 @@ main( hypre_int argc,
    {
       time_index = hypre_InitializeTiming("Maxwell Setup");
       hypre_BeginTiming(time_index);
-                                                                                                                              
+
       HYPRE_SStructMaxwellCreate(hypre_MPI_COMM_WORLD, &solver);
       HYPRE_SStructMaxwellSetMaxIter(solver, 20);
       HYPRE_SStructMaxwellSetTol(solver, 1.0e-8);
@@ -1832,22 +1832,22 @@ main( hypre_int argc,
       HYPRE_SStructMaxwellSetPrintLevel(solver, 1);
       HYPRE_SStructMaxwellSetLogging(solver, 1);
       HYPRE_SStructMaxwellSetup(solver, A, b, x);
-                                                                                                                              
+
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
-                                                                                                                              
+
       time_index = hypre_InitializeTiming("Maxwell Solve");
       hypre_BeginTiming(time_index);
-                                                                                                                              
+
       HYPRE_SStructMaxwellSolve(solver, A, b, x);
-                                                                                                                              
+
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
-                                                                                                                              
+
       HYPRE_SStructMaxwellGetNumIterations(solver, &num_iterations);
       HYPRE_SStructMaxwellGetFinalRelativeResidualNorm(
                                            solver, &final_res_norm);
