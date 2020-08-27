@@ -515,8 +515,6 @@ hypre_PointRelax( void               *relax_vdata,
    /*----------------------------------------------------------
     * Do regular iterations
     *----------------------------------------------------------*/
-   char region_name[64];
-
    while (iter < max_iter)
    {
       if ( p==0 ) rsumsq = 0.0;
