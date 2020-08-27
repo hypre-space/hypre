@@ -1189,9 +1189,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
                      rows[nrows + mi] += index[d]*rs[d]*dom_stride[d];
                      cols[nrows + mi] += index[d]*cs[d];
                   }
-                  ijvalues[nrows + mi] = values[ei + vi*nentries]; // TODO: change access pattern?
-                  /* hypre_printf("[%d, %d, %d]: (%d, %d): %f\n", nrows, mi, (nrows + mi), */
-                  /*               rows[nrows + mi], cols[nrows + mi], ijvalues[nrows + mi]); */
+                  ijvalues[nrows + mi] = values[ei + vi*nentries];
                }
                hypre_BoxLoop2End(mi, vi);
 
@@ -1542,20 +1540,21 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                                        HYPRE_Complex       *values,
                                        HYPRE_Int            action )
 {
-   HYPRE_Int                ndim      = hypre_SStructMatrixNDim(matrix);
-   hypre_SStructGraph      *graph     = hypre_SStructMatrixGraph(matrix);
-   hypre_SStructGrid       *grid      = hypre_SStructGraphGrid(graph);
-   hypre_SStructPMatrix    *pmatrix   = hypre_SStructMatrixPMatrix(matrix, part);
-   hypre_SStructPGrid      *pgrid     = hypre_SStructPMatrixPGrid(pmatrix);
-   hypre_BoxArray          *partbnd   = hypre_SStructPGridPBndBoxArray(pgrid, var);
-   HYPRE_Int               *smap      = hypre_SStructPMatrixSMap(pmatrix, var);
-   hypre_SStructVariable    frvartype = hypre_SStructPGridVarType(pgrid, var);
-   hypre_SStructStencil    *stencil   = hypre_SStructPMatrixStencil(pmatrix, var);
-   hypre_Index             *shape     = hypre_SStructStencilShape(stencil);
-   HYPRE_Int               *vars      = hypre_SStructStencilVars(stencil);
+   HYPRE_Int                ndim       = hypre_SStructMatrixNDim(matrix);
+   hypre_SStructGraph      *graph      = hypre_SStructMatrixGraph(matrix);
+   hypre_SStructGrid       *grid       = hypre_SStructGraphGrid(graph);
+   hypre_SStructPMatrix    *pmatrix    = hypre_SStructMatrixPMatrix(matrix, part);
+   hypre_SStructPGrid      *pgrid      = hypre_SStructPMatrixPGrid(pmatrix);
+   hypre_BoxArrayArray     *pbnd_boxaa = hypre_SStructPGridPBndBoxArrayArray(pgrid, var);
+   HYPRE_Int               *smap       = hypre_SStructPMatrixSMap(pmatrix, var);
+   hypre_SStructVariable    frvartype  = hypre_SStructPGridVarType(pgrid, var);
+   hypre_SStructStencil    *stencil    = hypre_SStructPMatrixStencil(pmatrix, var);
+   hypre_Index             *shape      = hypre_SStructStencilShape(stencil);
+   HYPRE_Int               *vars       = hypre_SStructStencilVars(stencil);
 
    hypre_SStructVariable    tovartype;
    hypre_StructMatrix      *smatrix;
+   hypre_BoxArray          *pbnd_boxa;
    hypre_Box               *box, *vbox;
    hypre_Box               *ibox0, *ibox1;
    hypre_Box               *tobox, *frbox;
@@ -1565,6 +1564,7 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
    hypre_BoxManEntry      **frentries, **toentries;
    hypre_SStructBoxManInfo *frinfo, *toinfo;
    HYPRE_Complex           *tvalues = NULL;
+   HYPRE_Int                box_id;
    HYPRE_Int                nfrentries, ntoentries, frpart, topart;
    HYPRE_Int                entry, sentry, ei, fri, toi, vi, mi;
 
@@ -1643,9 +1643,12 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
 
                   if (action >= 0)
                   {
-                     /* set or add */
-                     hypre_AppendBox(ibox1, partbnd);
+                     /* Update list of part boundaries */
+                     box_id = hypre_BoxManEntryId(frentries[fri]);
+                     pbnd_boxa = hypre_BoxArrayArrayBoxArray(pbnd_boxaa, box_id);
+                     hypre_AppendBox(ibox1, pbnd_boxa);
 
+                     /* set or add */
                      /* copy values into tvalues */
                      start = hypre_BoxIMin(ibox1);
                      hypre_BoxGetSize(ibox1, loop_size);
