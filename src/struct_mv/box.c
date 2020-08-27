@@ -333,8 +333,8 @@ hypre_BoxVolume( hypre_Box *box )
 HYPRE_Real
 hypre_doubleBoxVolume( hypre_Box *box )
 {
-   HYPRE_Real    volume;
-   HYPRE_Int d, ndim = hypre_BoxNDim(box);
+   HYPRE_Real   volume;
+   HYPRE_Int    d, ndim = hypre_BoxNDim(box);
 
    volume = 1.0;
    for (d = 0; d < ndim; d++)
@@ -456,6 +456,11 @@ hypre_BoxGetSize( hypre_Box   *box,
    for (d = 0; d < ndim; d++)
    {
       hypre_IndexD(size, d) = hypre_BoxSizeD(box, d);
+   }
+
+   for (d = ndim; d < HYPRE_MAXDIM; d++)
+   {
+      hypre_IndexD(size, d) = 0;
    }
 
    return hypre_error_flag;
