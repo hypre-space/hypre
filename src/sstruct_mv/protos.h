@@ -189,6 +189,7 @@ HYPRE_Int hypre_SStructMatvecDestroy ( void *matvec_vdata );
 HYPRE_Int hypre_SStructMatvec ( HYPRE_Complex alpha , hypre_SStructMatrix *A , hypre_SStructVector *x , HYPRE_Complex beta , hypre_SStructVector *y );
 
 /* sstruct_matmult.c */
+HYPRE_Int hypre_SStructMatrixBoundaryToUMatrix ( hypre_SStructMatrix *A , hypre_ParCSRMatrix *B , hypre_IJMatrix **ij_Ahat_ptr );
 HYPRE_Int hypre_SStructMatmult( HYPRE_Int nmatrices_input, hypre_SStructMatrix **ssmatrices_input, HYPRE_Int nterms, HYPRE_Int *terms_input, HYPRE_Int *transposes, hypre_SStructMatrix **M_ptr );
 HYPRE_Int hypre_SStructMatPtAP( hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix **PtAP_ptr );
 
