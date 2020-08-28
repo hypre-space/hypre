@@ -180,6 +180,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    for (l = 0; l < (num_levels - 1); l++)
    {
+      HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
       cdir = cdir_l[l];
 
       hypre_PFMGSetCIndex(cdir, cindex);
@@ -252,6 +253,8 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_StructVectorSetNumGhost(tx_l[l+1], x_num_ghost);
       hypre_StructVectorInitialize(tx_l[l+1]);
       hypre_StructVectorAssemble(tx_l[l+1]);
+
+      HYPRE_ANNOTATE_MGLEVEL_END(l);
    }
 
    (pfmg_data -> grid_l) = grid_l;

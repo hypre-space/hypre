@@ -1754,6 +1754,8 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
    HYPRE_Int                part, var, nvars, entry;
    HYPRE_Complex           *values;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /* Set beggining/end of rows and columns that belong to this process */
    HYPRE_IJMatrixGetLocalRange(ij_A, &sizes[0], &sizes[1], &sizes[2], &sizes[3]);
    nrows = sizes[1] - sizes[0] + 1;
@@ -1864,6 +1866,8 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
 
    /* Free memory */
    hypre_TFree(values);
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return (hypre_IJMatrix *) ij_Ahat;
 }

@@ -80,6 +80,8 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    HYPRE_Int                m, s, t;
    HYPRE_Int                part;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /*-------------------------------------------------------
     * Safety checks
     *-------------------------------------------------------*/
@@ -324,6 +326,8 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    /* Set pointer to output matrix */
    *M_ptr = M;
 
+   HYPRE_ANNOTATE_FUNC_END;
+
    return hypre_error_flag;
 }
 
@@ -398,6 +402,8 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_Int              num_boxes;
    HYPRE_Int             *num_ghost;
    HYPRE_Int              nSentries;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /* Get row and column ranges */
    HYPRE_IJMatrixGetLocalRange(ij_A, &sizes[0], &sizes[1], &sizes[2], &sizes[3]);
@@ -567,6 +573,8 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
 
    /* Set pointer to ij_Ahat */
    *ij_Ahat_ptr = ij_Ahat;
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
