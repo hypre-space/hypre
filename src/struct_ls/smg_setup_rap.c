@@ -86,8 +86,8 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
    hypre_StructStencil   *stencil;
    hypre_StructMatrix    *Ac_tmp;
 #if defined(HYPRE_USING_CUDA)
-   HYPRE_Int data_location_A = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
-   HYPRE_Int data_location_Ac = hypre_StructGridDataLocation(hypre_StructMatrixGrid(Ac));
+   HYPRE_MemoryLocation data_location_A = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
+   HYPRE_MemoryLocation data_location_Ac = hypre_StructGridDataLocation(hypre_StructMatrixGrid(Ac));
    if (data_location_A != data_location_Ac)
    {
       Ac_tmp = hypre_SMGCreateRAPOp(R, A, PT, hypre_StructMatrixGrid(Ac));
