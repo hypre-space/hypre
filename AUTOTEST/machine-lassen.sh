@@ -44,14 +44,14 @@ rost="-struct -rt -mpibind -rtol 1e-8 -atol 1e-8"
 rocuda="-cuda_lassen -rt -mpibind"
 
 # CUDA with UM
-co="--with-cuda --enable-unified-memory --enable-persistent --enable-cub --enable-debug --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' HYPRE_CUDA_SM=70"
+co="--with-cuda --enable-unified-memory --enable-persistent --enable-cub --enable-debug --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' HYPRE_CUDA_SM=70"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
 ./renametest.sh basic $output_dir/basic-cuda-um-ij
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ross
 ./renametest.sh basic $output_dir/basic-cuda-um-struct-sstruct
 
 # CUDA with UM [shared library]
-co="--with-cuda --enable-unified-memory --with-openmp --enable-hopscotch --enable-shared --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' HYPRE_CUDA_SM=70"
+co="--with-cuda --enable-unified-memory --with-openmp --enable-hopscotch --enable-shared --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' HYPRE_CUDA_SM=70"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $rocuda
 ./renametest.sh basic $output_dir/basic-cuda-um-shared
 #./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
