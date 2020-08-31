@@ -1341,11 +1341,18 @@ HYPRE_Int hypre_MGRSetNumRelaxSweeps( void *mgr_vdata, HYPRE_Int nsweeps );
 HYPRE_Int hypre_MGRSetNumInterpSweeps( void *mgr_vdata, HYPRE_Int nsweeps );
 HYPRE_Int hypre_MGRSetNumRestrictSweeps( void *mgr_vdata, HYPRE_Int nsweeps );
 HYPRE_Int hypre_MGRSetPrintLevel( void *mgr_vdata, HYPRE_Int print_level );
+HYPRE_Int hypre_MGRSetTruncateCoarseGridThreshold( void *mgr_vdata, HYPRE_Real threshold);
 HYPRE_Int hypre_MGRSetLogging( void *mgr_vdata, HYPRE_Int logging );
 HYPRE_Int hypre_MGRSetMaxIter( void *mgr_vdata, HYPRE_Int max_iter );
 HYPRE_Int hypre_MGRSetPMaxElmts( void *mgr_vdata, HYPRE_Int P_max_elmts);
 HYPRE_Int hypre_MGRSetTol( void *mgr_vdata, HYPRE_Real tol );
 HYPRE_Int hypre_MGRSetAffInv( void *mgr_vdata, hypre_ParCSRMatrix *A_ff_inv);
+#ifdef HYPRE_USING_DSUPERLU
+void *hypre_MGRDirectSolverCreate( void );
+HYPRE_Int hypre_MGRDirectSolverSetup( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u);
+HYPRE_Int hypre_MGRDirectSolverSolve( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u);
+HYPRE_Int hypre_MGRDirectSolverDestroy( void *solver );
+#endif
 // Accessor functions
 HYPRE_Int hypre_MGRGetNumIterations( void *mgr_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int hypre_MGRGetFinalRelativeResidualNorm( void *mgr_vdata, HYPRE_Real *res_norm );
@@ -1496,6 +1503,12 @@ HYPRE_Int hypre_BoomerAMGDDSetup(  void *amgdd_vdata, hypre_ParCSRMatrix *A, hyp
 
 /* par_amgdd_fac_cycle.c */
 HYPRE_Int hypre_BoomerAMGDD_FAC( void *amgdd_vdata, HYPRE_Int first_iteration );
+HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle(void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPRE_Int first_iteration);
+HYPRE_Int hypre_BoomerAMGDD_FAC_FCycle(void *amgdd_vdata, HYPRE_Int first_iteration);
+HYPRE_Int hypre_BoomerAMGDD_FAC_Interpolate( hypre_AMGDDCompGrid *compGrid_f, hypre_AMGDDCompGrid *compGrid_c );
+HYPRE_Int hypre_BoomerAMGDD_FAC_Restrict( hypre_AMGDDCompGrid *compGrid_f, hypre_AMGDDCompGrid *compGrid_c, HYPRE_Int first_iteration );
+HYPRE_Int hypre_BoomerAMGDD_FAC_Relax( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param );
+HYPRE_Int hypre_BoomerAMGDD_FAC_CFL1Jacobi_cpu( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int relax_set );
 HYPRE_Int hypre_BoomerAMGDD_FAC_Jacobi( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param );
 HYPRE_Int hypre_BoomerAMGDD_FAC_GaussSeidel( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param );
 HYPRE_Int hypre_BoomerAMGDD_FAC_CFL1Jacobi( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param );

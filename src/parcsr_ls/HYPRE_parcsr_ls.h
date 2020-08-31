@@ -3493,6 +3493,43 @@ HYPRE_Int HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
  * @{
  **/
 
+#ifdef HYPRE_USING_DSUPERLU
+/**
+ * Create a MGR direct solver object
+ **/
+HYPRE_Int HYPRE_MGRDirectSolverCreate( HYPRE_Solver *solver );
+
+/**
+ * Destroy a MGR direct solver object
+ **/
+HYPRE_Int HYPRE_MGRDirectSolverDestroy( HYPRE_Solver solver );
+
+/**
+ * Setup the MGR direct solver using DSUPERLU
+ * @param solver [IN] object to be set up.
+ * @param A [IN] ParCSR matrix used to construct the solver/preconditioner.
+ * @param b right-hand-side of the linear system to be solved (Ignored by this function).
+ * @param x approximate solution of the linear system to be solved (Ignored by this function).
+ **/
+HYPRE_Int HYPRE_MGRDirectSolverSetup( HYPRE_Solver solver,
+                         HYPRE_ParCSRMatrix A,
+                         HYPRE_ParVector b,
+                         HYPRE_ParVector x      );
+
+ /**
+ * Solve the system using DSUPERLU.
+ *
+ * @param solver [IN] solver or preconditioner object to be applied.
+ * @param A [IN] ParCSR matrix, matrix of the linear system to be solved (Ignored by this function).
+ * @param b [IN] right hand side of the linear system to be solved
+ * @param x [OUT] approximated solution of the linear system to be solved
+ **/
+HYPRE_Int HYPRE_MGRDirectSolverSolve( HYPRE_Solver solver,
+                         HYPRE_ParCSRMatrix A,
+                         HYPRE_ParVector b,
+                         HYPRE_ParVector x      );
+#endif
+
 /**
  * Create a solver object
  **/
@@ -3790,6 +3827,17 @@ HYPRE_Int HYPRE_MGRSetCoarseSolver(HYPRE_Solver          solver,
 HYPRE_Int
 HYPRE_MGRSetPrintLevel( HYPRE_Solver solver,
                         HYPRE_Int print_level );
+
+/**
+ * (Optional) Set the threshold to compress the coarse grid at each level
+ * Use threshold = 0.0 if no truncation is applied. Otherwise, set the threshold
+ * value for dropping entries for the coarse grid.
+ * The default is 0.0.
+ **/
+HYPRE_Int
+HYPRE_MGRSetTruncateCoarseGridThreshold( HYPRE_Solver solver,
+                        HYPRE_Real threshold);
+
 
 /**
  * (Optional) Requests logging of solver diagnostics.

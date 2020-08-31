@@ -8,24 +8,6 @@
 #include "_hypre_parcsr_ls.h"
 
 HYPRE_Int
-hypre_BoomerAMGDD_FAC_Cycle(void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_type, HYPRE_Int first_iteration);
-
-HYPRE_Int
-hypre_BoomerAMGDD_FAC_FCycle(void *amgdd_vdata, HYPRE_Int first_iteration);
-
-HYPRE_Int
-hypre_BoomerAMGDD_FAC_Interpolate( hypre_AMGDDCompGrid *compGrid_f, hypre_AMGDDCompGrid *compGrid_c );
-
-HYPRE_Int
-hypre_BoomerAMGDD_FAC_Restrict( hypre_AMGDDCompGrid *compGrid_f, hypre_AMGDDCompGrid *compGrid_c, HYPRE_Int first_iteration );
-
-HYPRE_Int
-hypre_BoomerAMGDD_FAC_Relax( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param );
-
-HYPRE_Int
-hypre_BoomerAMGDD_FAC_CFL1Jacobi_cpu( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int relax_set );
-
-HYPRE_Int
 hypre_BoomerAMGDD_FAC( void *amgdd_vdata, HYPRE_Int first_iteration )
 {
    HYPRE_Int   myid;
@@ -50,7 +32,6 @@ HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle(void *amgdd_vdata, HYPRE_Int level, HYPRE_
 {
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-   char filename[256];
 
    HYPRE_Int i;
 
@@ -98,7 +79,7 @@ HYPRE_Int hypre_BoomerAMGDD_FAC_FCycle(void *amgdd_vdata, HYPRE_Int first_iterat
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
 
-   HYPRE_Int level, i;
+   HYPRE_Int level;
 
    // Get the AMG structure
    hypre_ParAMGDDData   *amgdd_data = (hypre_ParAMGDDData*) amgdd_vdata;
@@ -176,7 +157,6 @@ hypre_BoomerAMGDD_FAC_Relax( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle
 {
    hypre_ParAMGDDData *amgdd_data = (hypre_ParAMGDDData*) amgdd_vdata;
    hypre_AMGDDCompGrid *compGrid = hypre_ParAMGDDDataCompGrid(amgdd_data)[level];
-   hypre_ParAMGData *amg_data = hypre_ParAMGDDDataAMG(amgdd_data);
    HYPRE_Int numRelax = hypre_ParAMGDDDataFACNumRelax(amgdd_data);
    HYPRE_Int i;
 
@@ -428,7 +408,6 @@ HYPRE_Int
 hypre_BoomerAMGDD_FAC_CFL1Jacobi( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param )
 {
    hypre_ParAMGDDData *amgdd_data = (hypre_ParAMGDDData*) amgdd_vdata;
-   hypre_AMGDDCompGrid *compGrid = hypre_ParAMGDDDataCompGrid(amgdd_data)[level];
 
 #if defined(HYPRE_USING_CUDA)
    if (cycle_param == 1)

@@ -5457,7 +5457,7 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
 
    if (solver_id == 3 || solver_id == 4 || solver_id == 7 ||
-       solver_id == 15 || solver_id == 18 || solver_id == 44 || solver_id == 81)
+       solver_id == 15 || solver_id == 18 || solver_id == 44 || solver_id == 81 || solver_id == 91)
    {
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_BeginTiming(time_index);
@@ -6055,6 +6055,10 @@ main( hypre_int argc,
       else if (solver_id == 81)
       {
          HYPRE_ILUDestroy(pcg_precond);
+      }
+      else if (solver_id == 91)
+      {
+         HYPRE_BoomerAMGDDDestroy(pcg_precond);
       }
 
       if (myid == 0)

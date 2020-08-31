@@ -354,7 +354,6 @@ hypre_BoomerAMGDDSetUserFACRelaxation( void *data,
       HYPRE_Int (*userFACRelaxation)( void *amgdd_vdata , HYPRE_Int level, HYPRE_Int cycle_param ))
 {
    hypre_ParAMGDDData  *amgdd_data = (hypre_ParAMGDDData*) data;
-   hypre_AMGDDCompGrid **compGrid = hypre_ParAMGDDDataCompGrid(amgdd_data);
 
    hypre_ParAMGDDDataUserFACRelaxation(amgdd_data) = userFACRelaxation;
 

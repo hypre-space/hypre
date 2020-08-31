@@ -17,7 +17,6 @@ hypre_BoomerAMGDDSolve( void *amgdd_vdata,
 
    HYPRE_Int error_code;
    HYPRE_Int cycle_count = 0;
-   HYPRE_Int i;
    HYPRE_Real resid_nrm, resid_nrm_init, rhs_norm, relative_resid;
 
    // Get info from amg_data
@@ -181,12 +180,6 @@ hypre_BoomerAMGDD_Cycle( hypre_ParAMGDDData *amgdd_data )
       if (hypre_AMGDDCompGridQ(hypre_ParAMGDDDataCompGrid(amgdd_data)[level])) hypre_AMGDDCompGridVectorSetConstantValues( hypre_AMGDDCompGridQ(hypre_ParAMGDDDataCompGrid(amgdd_data)[level]), 0.0);
    }
 
-   // Setup convergence tolerance info
-   HYPRE_Real resid_nrm = 1.;
-   HYPRE_Real resid_nrm_init = resid_nrm;
-   HYPRE_Real relative_resid = 1.;
-   HYPRE_Real conv_fact = 0;
-
    for (level = amgdd_start_level; level < num_levels; level++)
    {
       hypre_AMGDDCompGridVectorSetConstantValues( hypre_AMGDDCompGridT( hypre_ParAMGDDDataCompGrid(amgdd_data)[level] ), 0.0 );
@@ -222,7 +215,6 @@ hypre_BoomerAMGDD_ResidualCommunication( hypre_ParAMGDDData *amgdd_data )
 
    // level counters, indices, and parameters
    HYPRE_Int                  num_levels, amgdd_start_level;
-   HYPRE_Real                 alpha, beta;
    HYPRE_Int                  level,i;
 
    // info from amg

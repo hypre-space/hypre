@@ -28,7 +28,6 @@ hypre_BoomerAMGDDSetup( void *amgdd_vdata,
    HYPRE_Int   myid, num_procs;
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-   char filename[256];
 
    MPI_Comm 	      comm;
    hypre_ParAMGDDData *amgdd_data = (hypre_ParAMGDDData*) amgdd_vdata;

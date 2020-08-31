@@ -26,9 +26,6 @@ hypre_BoomerAMGDD_LocalToGlobalIndex(hypre_AMGDDCompGrid *compGrid, HYPRE_Int lo
 HYPRE_Int
 hypre_BoomerAMGDD_GetDofRecvProc(HYPRE_Int neighbor_local_index, hypre_ParCSRMatrix *A)
 {
-   HYPRE_Int *colmap = hypre_ParCSRMatrixColMapOffd(A);
-   HYPRE_Int *offdRowPtr = hypre_CSRMatrixI( hypre_ParCSRMatrixOffd(A) );
-
    // Use that column index to find which processor this dof is received from
    hypre_ParCSRCommPkg *commPkg = hypre_ParCSRMatrixCommPkg(A);
    HYPRE_Int recv_proc = -1;
@@ -51,7 +48,7 @@ hypre_BoomerAMGDD_RecursivelyFindNeighborNodes(HYPRE_Int dof_index, HYPRE_Int di
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-   HYPRE_Int         i,j;
+   HYPRE_Int         i;
 
    hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix *offd = hypre_ParCSRMatrixOffd(A);
@@ -84,9 +81,8 @@ hypre_BoomerAMGDD_RecursivelyFindNeighborNodes(HYPRE_Int dof_index, HYPRE_Int di
    return 0;
 }
 
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
-
-HYPRE_Int hypre_BoomerAMGDD_AddToSendAndRequestDofs(hypre_ParCSRMatrix *A, HYPRE_Int *add_flag, HYPRE_Int *add_flag_requests,
+HYPRE_Int
+hypre_BoomerAMGDD_AddToSendAndRequestDofs(hypre_ParCSRMatrix *A, HYPRE_Int *add_flag, HYPRE_Int *add_flag_requests,
                      HYPRE_Int level, HYPRE_Int send_proc,
                      hypre_AMGDDCommPkg *compGridCommPkg,
                      HYPRE_Int **distances,
@@ -590,18 +586,17 @@ hypre_BoomerAMGDD_FindNeighborProcessors(hypre_ParCSRMatrix *A,
 
    return 0;
 }
-#endif
 
 HYPRE_Int
 hypre_BoomerAMGDD_SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int *padding, HYPRE_Int num_ghost_layers)
 {
-   HYPRE_Int               i,j,cnt;
+
+   HYPRE_Int               i,j;
    HYPRE_Int               num_nodes = hypre_ParCSRMatrixNumRows(A);
    hypre_ParCSRCommPkg     *commPkg = hypre_ParCSRMatrixCommPkg(A);
    HYPRE_Int               start,finish;
    HYPRE_Int               num_levels = hypre_AMGDDCommPkgNumLevels(compGridCommPkg);
 
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
    HYPRE_Int max_distance = padding[level] + num_ghost_layers;
 
    HYPRE_Int   myid, num_procs;
@@ -726,10 +721,6 @@ hypre_BoomerAMGDD_SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_A
       hypre_TFree(send_dof_maps, HYPRE_MEMORY_HOST);
    }
 
-#else
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR: AMG-DD requires hypre maps and sets. Recompile with --with-openmp --enable-hopscotch.\n");
-#endif
-
    return 0;
 }
 
@@ -751,13 +742,11 @@ hypre_BoomerAMGDD_UnpackRecvBuffer( HYPRE_Int *recv_buffer,
    hypre_AMGDDCompGrid **compGrid = hypre_ParAMGDDDataCompGrid(amgdd_data);
    hypre_AMGDDCommPkg *compGridCommPkg = hypre_ParAMGDDDataCommPkg(amgdd_data);
    hypre_ParCSRCommPkg *commPkg = hypre_ParCSRMatrixCommPkg( hypre_ParAMGDataAArray(amg_data)[current_level] );
-   HYPRE_Int ****send_flag = hypre_AMGDDCommPkgSendFlag(compGridCommPkg);
-   HYPRE_Int ***num_send_nodes = hypre_AMGDDCommPkgNumSendNodes(compGridCommPkg);
    HYPRE_Int ****recv_map = hypre_AMGDDCommPkgRecvMap(compGridCommPkg);
    HYPRE_Int ***num_recv_nodes = hypre_AMGDDCommPkgNumRecvNodes(compGridCommPkg);
 
-   HYPRE_Int            level, i, j, k;
-   HYPRE_Int            num_psi_levels, row_size, level_start, add_node_cnt;
+   HYPRE_Int            level, i, j;
+   HYPRE_Int            num_psi_levels, level_start, add_node_cnt;
 
    HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -777,7 +766,6 @@ hypre_BoomerAMGDD_UnpackRecvBuffer( HYPRE_Int *recv_buffer,
 
    // Get the compgrid matrix, specifically the nonowned parts that will be added to
    hypre_AMGDDCompGridMatrix *A = hypre_AMGDDCompGridA(compGrid[current_level]);
-   hypre_CSRMatrix *owned_offd = hypre_AMGDDCompGridMatrixOwnedOffd(A);
    hypre_CSRMatrix *nonowned_diag = hypre_AMGDDCompGridMatrixNonOwnedDiag(A);
    hypre_CSRMatrix *nonowned_offd = hypre_AMGDDCompGridMatrixNonOwnedOffd(A);
 
@@ -976,7 +964,7 @@ hypre_BoomerAMGDD_UnpackRecvBuffer( HYPRE_Int *recv_buffer,
 
    // Temporary storage for extra comp grid dofs on this level (will be setup after all recv's during SetupLocalIndices)
    // A_tmp_info[buffer_number] = [ size, [row], size, [row], ... ]
-   HYPRE_Int A_tmp_info_size = 2 + remaining_dofs;
+   HYPRE_Int A_tmp_info_size = 1 + remaining_dofs;
 
    for (i = num_original_recv_dofs; i < num_recv_nodes[current_level][buffer_number][current_level]; i++)
    {
@@ -985,7 +973,6 @@ hypre_BoomerAMGDD_UnpackRecvBuffer( HYPRE_Int *recv_buffer,
    }
    A_tmp_info[buffer_number] = hypre_CTAlloc(HYPRE_Int, A_tmp_info_size, hypre_AMGDDCompGridMemoryLocation(compGrid[current_level]));
    HYPRE_Int A_tmp_info_cnt = 0;
-   A_tmp_info[buffer_number][A_tmp_info_cnt++] = num_original_recv_dofs;
    A_tmp_info[buffer_number][A_tmp_info_cnt++] = remaining_dofs;
    for (i = num_original_recv_dofs; i < num_recv_nodes[current_level][buffer_number][current_level]; i++)
    {
@@ -1009,7 +996,6 @@ hypre_BoomerAMGDD_UnpackRecvBuffer( HYPRE_Int *recv_buffer,
       *recv_map_send_buffer_size += num_recv_nodes[current_level][buffer_number][level];
 
       A = hypre_AMGDDCompGridA(compGrid[level]);
-      owned_offd = hypre_AMGDDCompGridMatrixOwnedOffd(A);
       nonowned_diag = hypre_AMGDDCompGridMatrixNonOwnedDiag(A);
       nonowned_offd = hypre_AMGDDCompGridMatrixNonOwnedOffd(A);
 
@@ -1284,7 +1270,8 @@ hypre_BoomerAMGDD_UnpackRecvBuffer( HYPRE_Int *recv_buffer,
    return 0;
 }
 
-HYPRE_Int PackColInd(HYPRE_Int *send_flag,
+HYPRE_Int
+hypre_BoomerAMGDD_PackColInd(HYPRE_Int *send_flag,
                         HYPRE_Int num_send_nodes,
                         HYPRE_Int *add_flag,
                         hypre_AMGDDCompGrid *compGrid,
@@ -1379,7 +1366,8 @@ HYPRE_Int PackColInd(HYPRE_Int *send_flag,
    return cnt;
 }
 
-HYPRE_Int hypre_BoomerAMGDD_MarkCoarse(HYPRE_Int *list,
+HYPRE_Int
+hypre_BoomerAMGDD_MarkCoarse(HYPRE_Int *list,
            HYPRE_Int *marker,
            HYPRE_Int *owned_coarse_indices,
            HYPRE_Int *nonowned_coarse_indices,
@@ -1563,7 +1551,8 @@ hypre_BoomerAMGDD_SubtractLists(hypre_AMGDDCompGrid *compGrid,
    return 0;
 }
 
-HYPRE_Int hypre_BoomerAMGDD_RemoveRedundancy(hypre_ParAMGData* amg_data,
+HYPRE_Int
+hypre_BoomerAMGDD_RemoveRedundancy(hypre_ParAMGData* amg_data,
                               HYPRE_Int ****send_flag,
                               HYPRE_Int ***num_send_nodes,
                               hypre_AMGDDCompGrid **compGrid,
@@ -1574,7 +1563,6 @@ HYPRE_Int hypre_BoomerAMGDD_RemoveRedundancy(hypre_ParAMGData* amg_data,
 {
    HYPRE_Int current_send_proc = hypre_AMGDDCommPkgSendProcs(compGridCommPkg)[current_level][proc];
    HYPRE_Int prev_proc, prev_level;
-   HYPRE_Int num_send_nodes_before = num_send_nodes[current_level][proc][level];
    for (prev_level = current_level+1; prev_level <= level; prev_level++)
    {
       hypre_ParCSRCommPkg *original_commPkg = hypre_ParCSRMatrixCommPkg(hypre_ParAMGDataAArray(amg_data)[prev_level]);
@@ -1658,11 +1646,10 @@ hypre_BoomerAMGDD_RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypr
    HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-   HYPRE_Int i,index,sort_index,coarse_grid_index;
+   HYPRE_Int i,index,sort_index;
    HYPRE_Int error_code = 0;
 
    HYPRE_Int *sort_map = hypre_AMGDDCompGridNonOwnedSort(compGrid);
-   HYPRE_Int level = hypre_AMGDDCompGridLevel(compGrid);
 
    hypre_CSRMatrix *diag;
    hypre_CSRMatrix *offd;
@@ -1768,11 +1755,10 @@ hypre_BoomerAMGDD_PackSendBuffer(hypre_ParAMGDDData *amgdd_data, HYPRE_Int proc,
    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
    HYPRE_Int num_ghost_layers = hypre_ParAMGDDDataNumGhostLayers(amgdd_data);
 
-   HYPRE_Int            level,i,j,k,cnt,row_length,send_elmt,coarse_grid_index,add_flag_index;
+   HYPRE_Int            level,i,cnt,row_length,send_elmt,add_flag_index;
    HYPRE_Int            nodes_to_add = 0;
    HYPRE_Int            **add_flag = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
    HYPRE_Int            num_psi_levels = 1;
-   HYPRE_Int            coarse_proc;
 
    // initialize send map buffer size
    (*send_flag_buffer_size) = num_levels - current_level - 1;
@@ -2023,7 +2009,7 @@ hypre_BoomerAMGDD_PackSendBuffer(hypre_ParAMGDDData *amgdd_data, HYPRE_Int proc,
       }
 
       // copy indices for matrix A (local connectivity within buffer where available, global index otherwise)
-      cnt = PackColInd(send_flag[current_level][proc][level],
+      cnt = hypre_BoomerAMGDD_PackColInd(send_flag[current_level][proc][level],
                         num_send_nodes[current_level][proc][level],
                         add_flag[level],
                         compGrid[level],

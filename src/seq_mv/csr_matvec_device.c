@@ -152,7 +152,7 @@ hypre_CSRMatrixMatvecMaskedDevice( HYPRE_Int        trans,
    // TODO
    if (offset != 0)
    {
-      hypre_printf("WARNING:: Offset is not zero in hypre_CSRMatrixMatvecMaskedDevice :: \n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"WARNING:: Offset is not zero in hypre_CSRMatrixMatvecMaskedDevice :: \n");
    }
 
    hypre_assert(offset == 0);

@@ -86,10 +86,10 @@ hypre_BoomerAMGDD_FAC_CFL1Jacobi_device( void *amgdd_vdata, HYPRE_Int level, HYP
    double alpha = -relax_weight;
    double beta = relax_weight;
 
-   HYPRE_Complex *owned_u = hypre_VectorData(hypre_AMGDDCompGridVectorOwned(hypre_AMGDDCompGridU(compGrid)));
-   HYPRE_Complex *nonowned_u = hypre_VectorData(hypre_AMGDDCompGridVectorNonOwned(hypre_AMGDDCompGridU(compGrid)));
-   HYPRE_Complex *owned_tmp = hypre_VectorData(hypre_AMGDDCompGridVectorOwned(hypre_AMGDDCompGridTemp2(compGrid)));
-   HYPRE_Complex *nonowned_tmp = hypre_VectorData(hypre_AMGDDCompGridVectorNonOwned(hypre_AMGDDCompGridTemp2(compGrid)));
+   hypre_Vector *owned_u = hypre_AMGDDCompGridVectorOwned(hypre_AMGDDCompGridU(compGrid));
+   hypre_Vector *nonowned_u = hypre_AMGDDCompGridVectorNonOwned(hypre_AMGDDCompGridU(compGrid));
+   hypre_Vector *owned_tmp = hypre_AMGDDCompGridVectorOwned(hypre_AMGDDCompGridTemp2(compGrid));
+   hypre_Vector *nonowned_tmp = hypre_AMGDDCompGridVectorNonOwned(hypre_AMGDDCompGridTemp2(compGrid));
 
    if (relax_set)
    {
@@ -115,13 +115,13 @@ hypre_BoomerAMGDD_FAC_CFL1Jacobi_device( void *amgdd_vdata, HYPRE_Int level, HYP
 
       hypreDevice_MaskedIVAXPY(hypre_AMGDDCompGridNumOwnedCPoints(compGrid),
             hypre_AMGDDCompGridL1Norms(compGrid),
-            owned_tmp,
-            owned_u,
+            hypre_VectorData(owned_tmp),
+            hypre_VectorData(owned_u),
             hypre_AMGDDCompGridOwnedCMask(compGrid));
       hypreDevice_MaskedIVAXPY(hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid),
             &(hypre_AMGDDCompGridL1Norms(compGrid)[ hypre_AMGDDCompGridNumOwnedNodes(compGrid) ]),
-            nonowned_tmp,
-            nononwed_u,
+            hypre_VectorData(nonowned_tmp),
+            hypre_VectorData(nonowned_u),
             hypre_AMGDDCompGridNonOwnedCMask(compGrid));
    }
    else
@@ -148,13 +148,13 @@ hypre_BoomerAMGDD_FAC_CFL1Jacobi_device( void *amgdd_vdata, HYPRE_Int level, HYP
 
       hypreDevice_MaskedIVAXPY(hypre_AMGDDCompGridNumOwnedNodes(compGrid) - hypre_AMGDDCompGridNumOwnedCPoints(compGrid),
             hypre_AMGDDCompGridL1Norms(compGrid),
-            owned_tmp,
-            owned_u,
+            hypre_VectorData(owned_tmp),
+            hypre_VectorData(owned_u),
             hypre_AMGDDCompGridOwnedFMask(compGrid));
       hypreDevice_MaskedIVAXPY(hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid) - hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid),
             &(hypre_AMGDDCompGridL1Norms(compGrid)[ hypre_AMGDDCompGridNumOwnedNodes(compGrid) ]),
-            nonowned_tmp,
-            nononwed_u,
+            hypre_VectorData(nonowned_tmp),
+            hypre_VectorData(nonowned_u),
             hypre_AMGDDCompGridNonOwnedFMask(compGrid));
    }
 

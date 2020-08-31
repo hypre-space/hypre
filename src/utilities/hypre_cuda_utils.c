@@ -641,7 +641,7 @@ hypreDevice_MaskedIVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_
    dim3 bDim = hypre_GetDefaultCUDABlockDimension();
    dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IVAXPY, gDim, bDim, n, a, x, y );
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_MaskedIVAXPY, gDim, bDim, n, a, x, y, mask );
 
    return hypre_error_flag;
 }

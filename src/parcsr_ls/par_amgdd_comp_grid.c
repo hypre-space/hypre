@@ -457,7 +457,7 @@ HYPRE_Int hypre_AMGDDCompGridInitialize( hypre_ParAMGDDData *amgdd_data, HYPRE_I
    HYPRE_Int      myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-   HYPRE_Int         i,j;
+   HYPRE_Int         i;
 
    // Get info from the amg data structure
    hypre_ParAMGData *amg_data = hypre_ParAMGDDDataAMG(amgdd_data);
@@ -1347,7 +1347,7 @@ HYPRE_Int hypre_AMGDDCompGridSetupLocalIndices( hypre_AMGDDCompGrid **compGrid, 
    // when nodes are added to a composite grid, global info is copied over, but local indices must be generated appropriately for all added nodes
    // this must be done on each level as info is added to correctly construct subsequent Psi_c grids
    // also done after each ghost layer is added
-   HYPRE_Int      level,proc,i,j,k;
+   HYPRE_Int      level,proc,i,j;
    HYPRE_Int      global_index, local_index, coarse_index;
 
    HYPRE_Int myid;
@@ -1365,7 +1365,6 @@ HYPRE_Int hypre_AMGDDCompGridSetupLocalIndices( hypre_AMGDDCompGrid **compGrid, 
    for (proc = 0; proc < num_recv_procs; proc++)
    {
       HYPRE_Int cnt = 0;
-      HYPRE_Int num_original_recv_dofs = A_tmp_info[proc][cnt++];
       HYPRE_Int remaining_dofs = A_tmp_info[proc][cnt++];
 
       for (i = 0; i < remaining_dofs; i++)
