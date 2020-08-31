@@ -579,6 +579,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    hypre_ParCSRCommHandleDestroy(comm_handle);
    hypre_TFree(send_buf, HYPRE_MEMORY_DEVICE);
 
+   /* 4. Form D_tau */
    /* 5. Form matrix ~{A_FF}, (return twAFF in AFF data structure ) */
    /* 6. Form matrix ~{A_FC}, (return twAFC in AFC data structure) */
    dtau = hypre_TAlloc(HYPRE_Complex, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
@@ -1226,6 +1227,50 @@ void compute_aff_afc_epe( HYPRE_Int      nr_of_rows,
    HYPRE_Int p, q;
 
    HYPRE_Complex theta, value;
+   HYPRE_Complex dtau_i = 0.0;
+
+   if (lane < 2)
+   {
+      p = read_only_load(AFF_diag_i + row + lane);
+   }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   for (HYPRE_Int j = p + 1 + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   {
+      HYPRE_Int index;
+
+      if (j < q)
+      {
+         index = read_only_load(&AFF_diag_j[j]);
+         dtau_i += read_only_load(&AFF_diag_data[j])*read_only_load(&dtmp[index]);
+      }
+   }
+
+   if (lane < 2)
+   {
+      p = read_only_load(AFF_offd_i + row + lane);
+   }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   {
+      HYPRE_Int index;
+
+      if (j < q)
+      {
+         index = read_only_load(&AFF_offd_j[j]);
+         dtau_i += read_only_load(&AFF_offd_data[j])*read_only_load(&dtmp_offd[index]);
+      }
+   }
+
+   dtau_i = warp_reduce_sum(dtau_i);
+
+   if (lane == 0)
+   {
+      dtau[row] = dtau_i;
+   }
 
    if (lane == 0)
    {
@@ -1338,20 +1383,20 @@ void compute_dlam_dtmp( HYPRE_Int nr_of_rows,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p, q;
+   HYPRE_Int p_diag, p_offd, q_diag, q_offd;
 
    if (lane < 2)
    {
-      p = read_only_load(AFF_diag_i + row + lane);
+      p_diag = read_only_load(AFF_diag_i + row + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 1);
+   p_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 0);
 
    HYPRE_Complex row_sum = 0.0;
 
-   for (HYPRE_Int j = p + 1 + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p_diag + 1 + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_diag); j += HYPRE_WARP_SIZE)
    {
-      if ( j >= q )
+      if ( j >= q_diag )
       {
          continue;
       }
@@ -1363,14 +1408,14 @@ void compute_dlam_dtmp( HYPRE_Int nr_of_rows,
 
    if (lane < 2)
    {
-      p = read_only_load(AFF_offd_i + row + lane);
+      p_offd = read_only_load(AFF_offd_i + row + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 1);
+   p_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 0);
 
-   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_offd); j += HYPRE_WARP_SIZE)
    {
-      if ( j >= q )
+      if ( j >= q_offd )
       {
          continue;
       }
@@ -1382,13 +1427,23 @@ void compute_dlam_dtmp( HYPRE_Int nr_of_rows,
 
    row_sum = warp_reduce_sum(row_sum);
 
+   HYPRE_Complex num, tmp;
+
    if (lane == 0)
    {
-      HYPRE_Complex tmp = rsFC[row]+row_sum;
-      dlam[row] = row_sum;
+      num = (HYPRE_Complex)(q_diag - p_diag + q_offd -p_offd -1);
+      if (num) 
+      {
+         dlam[row] = row_sum/num;
+      }
+      else
+      {
+         dlam[row] = 0.;
+      }
+      tmp = read_only_load(&rsFC[row])+dlam[row];
       if (tmp)
       {
-         dtmp[row] = row_sum/tmp;
+         dtmp[row] = dlam[row]/tmp;
       }
       else
       {

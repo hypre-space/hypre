@@ -1556,8 +1556,8 @@ hypre_BoomerAMGBuildModNewExtPIInterp(hypre_ParCSRMatrix  *A,
 #if defined(HYPRE_USING_CUDA)
    else
    {
-      ierr = hypre_BoomerAMGBuildExtPEInterpDevice(A, CF_marker, S, num_cpts_global, 1, NULL,
-                                                   debug_flag, trunc_factor, max_elmts, P_ptr);
+      ierr = hypre_BoomerAMGBuildExtPEInterpDevice(A,CF_marker,S,num_cpts_global,1,NULL,
+                                                 debug_flag,trunc_factor,max_elmts,col_offd_S_to_A,P_ptr);
    }
 #endif
 
