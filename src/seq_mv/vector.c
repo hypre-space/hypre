@@ -440,6 +440,17 @@ HYPRE_Int
 hypre_SeqVectorScale( HYPRE_Complex alpha,
                       hypre_Vector *y )
 {
+   /* special cases */
+   if (alpha == 1.0)
+   {
+      return 0;
+   }
+
+   if (alpha == 0.0)
+   {
+      return hypre_SeqVectorSetConstantValues(y, 0.0);
+   }
+
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
 #endif

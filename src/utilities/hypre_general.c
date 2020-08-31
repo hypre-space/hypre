@@ -175,10 +175,7 @@ HYPRE_Init()
    /* Keep this check here at the end of HYPRE_Init()
     * Make sure that CUB Allocator has not been setup in HYPRE_Init,
     * otherwise users are not able to set the parameters of CUB
-    * Note: hypre_HandleCubCachingDeviceAllocator and
-    *       hypre_HandleCubCachingManagedAllocator
-    *       are not used, since allocation would happen therein,
-    *       which is not wanted here */
+    */
    if ( hypre_HandleCubDevAllocator(_hypre_handle) ||
         hypre_HandleCubUvmAllocator(_hypre_handle) )
    {

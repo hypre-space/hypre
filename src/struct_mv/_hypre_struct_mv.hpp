@@ -763,7 +763,7 @@ typedef struct hypre_Boxloop_struct
     printf("\n ERROR hypre_newBoxLoop: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
     /* HYPRE_Int *p = NULL; *p = 1; */                                                                                      \
   }                                                                                                                         \
-  hypre_CheckErrorDevice(cudaDeviceSynchronize());                                                                          \
+  HYPRE_CUDA_CALL( cudaDeviceSynchronize() );                                                                               \
 }
 #endif
 
