@@ -1530,7 +1530,7 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
  * Modularized Extended+e Interpolation
  *-----------------------------------------------------------------------*/
 HYPRE_Int
-hypre_BoomerAMGBuildModNewExtPIInterp(hypre_ParCSRMatrix  *A,
+hypre_BoomerAMGBuildModExtPEInterp(hypre_ParCSRMatrix  *A,
                                       HYPRE_Int           *CF_marker,
                                       hypre_ParCSRMatrix  *S,
                                       HYPRE_BigInt        *num_cpts_global,
