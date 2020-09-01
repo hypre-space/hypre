@@ -165,6 +165,7 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
    HYPRE_Int            const_term, var_term; /* booleans used to determine 'need_mask' */
 
    HYPRE_Complex        prod;
+   HYPRE_Complex        pprod;
    HYPRE_Complex       *constp;          /* pointer to constant data */
    HYPRE_Complex       *bitptr;          /* pointer to bit mask data */
    hypre_Index          offset;          /* CommStencil offset */
@@ -865,7 +866,7 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
                           fdbox, fdstart, fdstride, fi,
                           cdbox, cdstart, cdstride, ci);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Mi,fi,ci,prod,t) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Mi,fi,ci,prod,pprod,t,i) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop3For(Mi,fi,ci)
       {
@@ -874,7 +875,6 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
             prod = a[i].cprod;
             for (t = 0; t < nterms; t++)
             {
-               HYPRE_Complex pprod;
                switch (a[i].types[t])
                {
                   case 0: /* variable coefficient on fine data space */
