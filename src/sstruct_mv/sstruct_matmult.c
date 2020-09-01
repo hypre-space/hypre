@@ -570,6 +570,17 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
 
    /* Free memory */
    hypre_TFree(values);
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+      for (var = 0; var < nvars; var++)
+      {
+         hypre_BoxArrayArrayDestroy(convert_boxaa[part][var]);
+      }
+      hypre_TFree(convert_boxaa[part]);
+   }
+   hypre_TFree(convert_boxaa);
 
    /* Set pointer to ij_Ahat */
    *ij_Ahat_ptr = ij_Ahat;

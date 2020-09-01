@@ -3977,7 +3977,7 @@ main( hypre_int argc,
 
       HYPRE_PCGGetNumIterations( (HYPRE_Solver) solver, &num_iterations );
       HYPRE_PCGGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, &final_res_norm );
-      //HYPRE_SStructPCGDestroy(solver);
+      HYPRE_SStructPCGDestroy(solver);
 
       if ((solver_id == 10) || (solver_id == 11))
       {
