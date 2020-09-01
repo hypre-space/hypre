@@ -42,30 +42,30 @@ extern "C" {
 
 typedef struct
 {
-   HYPRE_Int       local_num_rows;   /* defines number of rows on this processors */
+   HYPRE_Int       local_num_rows;   /* defines number of rows on this processor */
+   HYPRE_Int       local_num_rownnz; /* defines number of nonzero rows on this processor */
    HYPRE_Int       local_num_cols;   /* defines number of cols of diag */
-
    HYPRE_Int       need_aux; /* if need_aux = 1, aux_j, aux_data are used to
                                 generate the parcsr matrix (default),
                                 for need_aux = 0, data is put directly into
                                 parcsr structure (requires the knowledge of
                                 offd_i and diag_i ) */
-
+   HYPRE_Int      *rownnz;     /* row_nnz[i] contains the i-th nonzero row id */
    HYPRE_Int      *row_length; /* row_length_diag[i] contains number of stored
                                   elements in i-th row */
-   HYPRE_Int      *row_space; /* row_space_diag[i] contains space allocated to
-                                 i-th row */
-   HYPRE_Int     **aux_j;	/* contains collected column indices */
-   HYPRE_Complex **aux_data; /* contains collected data */
+   HYPRE_Int      *row_space;  /* row_space_diag[i] contains space allocated to
+                                  i-th row */
+   HYPRE_Int     **aux_j;      /* contains collected column indices */
+   HYPRE_Complex **aux_data;   /* contains collected data */
 
-   HYPRE_Int      *indx_diag; /* indx_diag[i] points to first empty space of portion
-                                 in diag_j , diag_data assigned to row i */  
-   HYPRE_Int      *indx_offd; /* indx_offd[i] points to first empty space of portion
-                                 in offd_j , offd_data assigned to row i */  
+   HYPRE_Int      *indx_diag;  /* indx_diag[i] points to first empty space of portion
+                                  in diag_j , diag_data assigned to row i */
+   HYPRE_Int      *indx_offd;  /* indx_offd[i] points to first empty space of portion
+                                  in offd_j , offd_data assigned to row i */
    HYPRE_Int	   max_off_proc_elmts; /* length of off processor stash set for
                                           SetValues and AddTOValues */
    HYPRE_Int	   current_num_elmts; /* current no. of elements stored in stash */
-   HYPRE_Int	   off_proc_i_indx; /* pointer to first empty space in 
+   HYPRE_Int	   off_proc_i_indx; /* pointer to first empty space in
                                        set_off_proc_i_set */
    HYPRE_Int      *off_proc_i; /* length 2*num_off_procs_elmts, contains info pairs
                                   (code, no. of elmts) where code contains global
@@ -81,10 +81,12 @@ typedef struct
  * Accessor functions for the Parallel CSR Matrix structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_AuxParCSRMatrixLocalNumRows(matrix)  ((matrix) -> local_num_rows)
-#define hypre_AuxParCSRMatrixLocalNumCols(matrix)  ((matrix) -> local_num_cols)
+#define hypre_AuxParCSRMatrixLocalNumRows(matrix)   ((matrix) -> local_num_rows)
+#define hypre_AuxParCSRMatrixLocalNumRownnz(matrix) ((matrix) -> local_num_rownnz)
+#define hypre_AuxParCSRMatrixLocalNumCols(matrix)   ((matrix) -> local_num_cols)
 
 #define hypre_AuxParCSRMatrixNeedAux(matrix)   ((matrix) -> need_aux)
+#define hypre_AuxParCSRMatrixRownnz(matrix)    ((matrix) -> rownnz)
 #define hypre_AuxParCSRMatrixRowLength(matrix) ((matrix) -> row_length)
 #define hypre_AuxParCSRMatrixRowSpace(matrix)  ((matrix) -> row_space)
 #define hypre_AuxParCSRMatrixAuxJ(matrix)      ((matrix) -> aux_j)
@@ -191,12 +193,12 @@ typedef struct hypre_IJMatrix_struct
    void       *translator;          /* optional storage_type specfic structure
                                        for holding additional local info */
    void       *assumed_part;	   /* IJMatrix assumed partition */
-   HYPRE_Int         assemble_flag;       /* indicates whether matrix has been 
+   HYPRE_Int         assemble_flag;       /* indicates whether matrix has been
 				       assembled */
 
    HYPRE_Int         global_first_row;    /* these for data items are necessary */
    HYPRE_Int         global_first_col;    /*   to be able to avoind using the global */
-   HYPRE_Int         global_num_rows;     /*   global partition */ 
+   HYPRE_Int         global_num_rows;     /*   global partition */
    HYPRE_Int         global_num_cols;
    HYPRE_Int         omp_flag;
    HYPRE_Int         print_level;
@@ -236,7 +238,7 @@ typedef struct hypre_IJMatrix_struct
 HYPRE_Int
 hypre_GetIJMatrixParCSRMatrix( HYPRE_IJMatrix IJmatrix, Mat *reference )
 #endif
-  
+
 #ifdef ISIS_AVAILABLE
 /* IJMatrix_isis.c */
 HYPRE_Int
@@ -289,9 +291,9 @@ typedef struct hypre_IJVector_struct
 
    HYPRE_Int         global_first_row;    /* these for data items are necessary */
    HYPRE_Int         global_num_rows;     /*   to be able to avoid using the global */
-                                    /*    global partition */ 
-   HYPRE_Int	       print_level; 
-   
+                                    /*    global partition */
+   HYPRE_Int	       print_level;
+
 
 
 } hypre_IJVector;
@@ -458,4 +460,3 @@ HYPRE_Int HYPRE_IJVectorPrint ( HYPRE_IJVector vector , const char *filename );
 #endif
 
 #endif
-
