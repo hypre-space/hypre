@@ -450,7 +450,7 @@ hypre_PointRelax( void               *relax_vdata,
 
             hypre_ForBoxI(j, compute_box_a)
             {
-               HYPRE_ANNOTATE_REGION_BEGIN("Diag scale box", i);
+               HYPRE_ANNOTATE_REGION_BEGIN("%s %d", "Diag scale box", i);
                compute_box = hypre_BoxArrayBox(compute_box_a, j);
 
                start  = hypre_BoxIMin(compute_box);
@@ -490,7 +490,7 @@ hypre_PointRelax( void               *relax_vdata,
                   }
                   hypre_BoxLoop3End(Ai, bi, xi);
                }
-               HYPRE_ANNOTATE_REGION_END("Diag scale box", i);
+               HYPRE_ANNOTATE_REGION_END("%s %d", "Diag scale box", i);
             }
          }
       }
@@ -561,7 +561,7 @@ hypre_PointRelax( void               *relax_vdata,
 
             hypre_ForBoxI(j, compute_box_a)
             {
-               HYPRE_ANNOTATE_REGION_BEGIN("Residual box", i);
+               HYPRE_ANNOTATE_REGION_BEGIN("%s %d", "Residual box", i);
 
                compute_box = hypre_BoxArrayBox(compute_box_a, j);
                if ( constant_coefficient==1 || constant_coefficient==2 )
@@ -583,8 +583,8 @@ hypre_PointRelax( void               *relax_vdata,
                      stride
                      );
                }
-               HYPRE_ANNOTATE_REGION_END("Residual box", i);
-               HYPRE_ANNOTATE_REGION_BEGIN("Diag scale box", i);
+               HYPRE_ANNOTATE_REGION_END("%s %d", "Residual box", i);
+               HYPRE_ANNOTATE_REGION_BEGIN("%s %d", "Diag scale box", i);
 
                Ap = hypre_StructMatrixBoxData(A, i, stencil_diag);
                if ( constant_coefficient==0 || constant_coefficient==2 )
@@ -624,7 +624,7 @@ hypre_PointRelax( void               *relax_vdata,
                      hypre_BoxLoop3End(Ai, ti, xi);
                   }
                }
-               HYPRE_ANNOTATE_REGION_END("Diag scale box", i);
+               HYPRE_ANNOTATE_REGION_END("%s %d", "Diag scale box", i);
             }
          }
       }

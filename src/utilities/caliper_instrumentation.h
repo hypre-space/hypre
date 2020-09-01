@@ -33,14 +33,14 @@ char hypre__markname[512];
 #define HYPRE_ANNOTATE_LOOP_END(id)          CALI_MARK_LOOP_END(id)
 #define HYPRE_ANNOTATE_ITER_BEGIN(id, it)    CALI_MARK_ITERATION_BEGIN(id, it)
 #define HYPRE_ANNOTATE_ITER_END(id)          CALI_MARK_ITERATION_END(id)
-#define HYPRE_ANNOTATE_REGION_BEGIN(str, id)\
+#define HYPRE_ANNOTATE_REGION_BEGIN(...)\
 {\
-   hypre_sprintf(hypre__markname, "%s %d", str, id);\
+   hypre_sprintf(hypre__markname, __VA_ARGS__);\
    CALI_MARK_BEGIN(hypre__markname);\
 }
-#define HYPRE_ANNOTATE_REGION_END(str, id)\
+#define HYPRE_ANNOTATE_REGION_END(...)\
 {\
-   hypre_sprintf(hypre__markname, "%s %d", str, id);\
+   hypre_sprintf(hypre__markname, __VA_ARGS__);\
    CALI_MARK_END(hypre__markname);\
 }
 #define HYPRE_ANNOTATE_MGLEVEL_BEGIN(lvl)\
@@ -62,8 +62,8 @@ char hypre__markname[512];
 #define HYPRE_ANNOTATE_LOOP_END(id)
 #define HYPRE_ANNOTATE_ITER_BEGIN(id, it)
 #define HYPRE_ANNOTATE_ITER_END(id)
-#define HYPRE_ANNOTATE_REGION_BEGIN(str, id)
-#define HYPRE_ANNOTATE_REGION_END(str, id)
+#define HYPRE_ANNOTATE_REGION_BEGIN(...)
+#define HYPRE_ANNOTATE_REGION_END(...)
 #define HYPRE_ANNOTATE_MGLEVEL_BEGIN(lvl)
 #define HYPRE_ANNOTATE_MGLEVEL_END(lvl)
 

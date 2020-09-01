@@ -901,7 +901,7 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
 
       for (part = 0; part < nparts; part++)
       {
-         HYPRE_ANNOTATE_REGION_BEGIN("Diag scale part", part);
+         HYPRE_ANNOTATE_REGION_BEGIN("%s %d", "Diag scale part", part);
 
          pA    = hypre_SStructMatrixPMatrix(A, part);
          px    = hypre_SStructVectorPVector(x, part);
@@ -988,7 +988,7 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
                } /* hypre_ForBoxArrayI */
             } /* loop on compute_i */
          } /* loop on sets */
-         HYPRE_ANNOTATE_REGION_END("Diag scale part", part);
+         HYPRE_ANNOTATE_REGION_END("%s %d", "Diag scale part", part);
       } /* loop on parts */
 
       iter++;
@@ -1001,7 +1001,7 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
    {
       for (part = 0; part < nparts; part++)
       {
-         HYPRE_ANNOTATE_REGION_BEGIN("Residual part", part);
+         HYPRE_ANNOTATE_REGION_BEGIN("%s %d", "Residual part", part);
 
          pA = hypre_SStructMatrixPMatrix(A, part);
          px = hypre_SStructVectorPVector(x, part);
@@ -1126,7 +1126,7 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
                } /* hypre_ForBoxArrayI */
             } /* loop on compute_i */
          } /* loop on sets */
-         HYPRE_ANNOTATE_REGION_END("Residual part", part);
+         HYPRE_ANNOTATE_REGION_END("%s %d", "Residual part", part);
       } /* loop on parts */
 
       /* Compute unstructured component: t = t - U*x */
@@ -1139,7 +1139,7 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
       /* Apply diagonal scaling */
       for (part = 0; part < nparts; part++)
       {
-         HYPRE_ANNOTATE_REGION_BEGIN("Diag scale part", part);
+         HYPRE_ANNOTATE_REGION_BEGIN("%s %d", "Diag scale part", part);
 
          pA = hypre_SStructMatrixPMatrix(A, part);
          px = hypre_SStructVectorPVector(x, part);
@@ -1202,7 +1202,7 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
             } /* hypre_ForBoxI(i, compute_box_a) */
          } /* loop on vars */
 
-         HYPRE_ANNOTATE_REGION_END("Diag scale part", part);
+         HYPRE_ANNOTATE_REGION_END("%s %d", "Diag scale part", part);
       } /* loop on parts */
    } /* loop on iterations */
 

@@ -410,6 +410,7 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    nrows = sizes[1] - sizes[0] + 1;
 
    /* Find boxes to be converted */
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", "Find boxes");
    convert_box   = hypre_BoxCreate(ndim);
    grow_box      = hypre_BoxCreate(ndim);
    ghost_box     = hypre_BoxCreate(ndim);
@@ -450,8 +451,10 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    }
    hypre_BoxDestroy(grow_box);
    hypre_BoxDestroy(convert_box);
+   HYPRE_ANNOTATE_REGION_END("%s", "Find boxes");
 
    /* Set row sizes */
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", "Set rowsizes");
    nvalues = 0; m = 0;
    hypre_SetIndex(ustride, 1);
    row_sizes = hypre_CTAlloc(HYPRE_Int, nrows);
@@ -510,6 +513,7 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
       } /* Loop over vars */
    } /* Loop over parts */
    hypre_BoxDestroy(ghost_box);
+   HYPRE_ANNOTATE_REGION_END("%s", "Set rowsizes");
 
    /* Create and initialize ij_Ahat */
    HYPRE_IJMatrixCreate(comm, sizes[0], sizes[1], sizes[2], sizes[3], &ij_Ahat);
@@ -522,6 +526,7 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    values = hypre_CTAlloc(HYPRE_Complex, nvalues);
 
    /* Set entries of ij_Ahat */
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", "Set entries");
    for (part = 0; part < nparts; part++)
    {
       pA    = hypre_SStructMatrixPMatrix(A, part);
@@ -564,6 +569,7 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
          } /* Loop over convert_boxaa */
       } /* Loop over vars */
    } /* Loop over parts */
+   HYPRE_ANNOTATE_REGION_END("%s", "Set entries");
 
    /* Assemble ij_A */
    HYPRE_IJMatrixAssemble(ij_Ahat);
