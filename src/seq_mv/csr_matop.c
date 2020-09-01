@@ -26,7 +26,7 @@
  * adds two CSR Matrices A and B and returns a CSR Matrix C;
  * Note: The routine does not check for 0-elements which might be generated
  *       through cancellation of elements in A and B or already contained
- in A and B. To remove those, use hypre_CSRMatrixDeleteZeros 
+ in A and B. To remove those, use hypre_CSRMatrixDeleteZeros
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix *
@@ -126,14 +126,14 @@ hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
 
    hypre_TFree(marker);
    return C;
-}       
+}
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMultiply
  * multiplies two CSR Matrices A and B and returns a CSR Matrix C;
  * Note: The routine does not check for 0-elements which might be generated
  *       through cancellation of elements in A and B or already contained
- in A and B. To remove those, use hypre_CSRMatrixDeleteZeros 
+ in A and B. To remove those, use hypre_CSRMatrixDeleteZeros
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix *
@@ -209,7 +209,7 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
     for (ic = ns; ic < ne; ic++)
     {
         C_i[ic] = num_nonzeros;
-	if (allsquare) 
+	if (allsquare)
         {
            B_marker[ic] = ic;
            num_nonzeros++;
@@ -267,7 +267,7 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
    for (ic = ns; ic < ne; ic++)
    {
       row_start = C_i[ic];
-      if (allsquare) 
+      if (allsquare)
       {
          B_marker[ic] = counter;
          C_data[counter] = 0;
@@ -298,7 +298,7 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
   } /*end parallel region */
   hypre_TFree(jj_count);
   return C;
-}       
+}
 
 hypre_CSRMatrix *
 hypre_CSRMatrixDeleteZeros( hypre_CSRMatrix *A, HYPRE_Real tol)
@@ -311,7 +311,7 @@ hypre_CSRMatrixDeleteZeros( hypre_CSRMatrix *A, HYPRE_Real tol)
    HYPRE_Int         num_nonzeros  = hypre_CSRMatrixNumNonzeros(A);
 
    hypre_CSRMatrix  *B;
-   HYPRE_Complex    *B_data; 
+   HYPRE_Complex    *B_data;
    HYPRE_Int        *B_i;
    HYPRE_Int        *B_j;
 
@@ -356,7 +356,7 @@ hypre_CSRMatrixDeleteZeros( hypre_CSRMatrix *A, HYPRE_Real tol)
    }
    else
       return NULL;
-}       
+}
 
 
 /******************************************************************************
@@ -401,8 +401,8 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
    HYPRE_Int           max_col;
    HYPRE_Int           i, j;
 
-   /*-------------------------------------------------------------- 
-    * First, ascertain that num_cols and num_nonzeros has been set. 
+   /*--------------------------------------------------------------
+    * First, ascertain that num_cols and num_nonzeros has been set.
     * If not, set them.
     *--------------------------------------------------------------*/
 
@@ -441,7 +441,7 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
 
    AT_j = hypre_CTAlloc(HYPRE_Int, num_nonzerosAT);
    hypre_CSRMatrixJ(*AT) = AT_j;
-   if (data) 
+   if (data)
    {
       AT_data = hypre_CTAlloc(HYPRE_Complex, num_nonzerosAT);
       hypre_CSRMatrixData(*AT) = AT_data;
@@ -558,12 +558,18 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
    }
    } /*end parallel region */
 
-   hypre_CSRMatrixI(*AT) = bucket; 
+   hypre_CSRMatrixI(*AT) = bucket;
       // JSP: bucket is hypre_NumThreads() times longer than
       // the size needed for AT_i, but this should be OK.
       // If the memory size is a concern, we can allocate
       // a new memory for AT_i and copy from bucket.
    hypre_CSRMatrixI(*AT)[num_colsA] = num_nonzerosA;
+
+   // Set rownnz and num_rownnz
+   if (hypre_CSRMatrixNumRownnz(A) < num_rowsA)
+   {
+      hypre_CSRMatrixSetRownnz(*AT);
+   }
 
    return(0);
 }
