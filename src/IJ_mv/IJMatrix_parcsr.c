@@ -2532,6 +2532,8 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
    HYPRE_Int max_num_threads;
    HYPRE_Int aux_flag, aux_flag_global;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    max_num_threads = hypre_NumThreads();
 
    /* first find out if anyone has an aux_matrix, and create one if you don't
@@ -2921,6 +2923,9 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
 
    hypre_AuxParCSRMatrixDestroy(aux_matrix);
    hypre_IJMatrixTranslator(matrix) = NULL;
+
+   HYPRE_ANNOTATE_FUNC_END;
+
    return hypre_error_flag;
 }
 

@@ -140,16 +140,19 @@ hypre_CSRMatrix *
 hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
                          hypre_CSRMatrix *B)
 {
-   HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
-   HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
-   HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
-   HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
-   HYPRE_Complex    *B_data   = hypre_CSRMatrixData(B);
-   HYPRE_Int        *B_i      = hypre_CSRMatrixI(B);
-   HYPRE_Int        *B_j      = hypre_CSRMatrixJ(B);
-   HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
-   HYPRE_Int         ncols_B  = hypre_CSRMatrixNumCols(B);
+   HYPRE_Complex    *A_data    = hypre_CSRMatrixData(A);
+   HYPRE_Int        *rownnz_A  = hypre_CSRMatrixRownnz(A);
+   HYPRE_Int        *A_i       = hypre_CSRMatrixI(A);
+   HYPRE_Int        *A_j       = hypre_CSRMatrixJ(A);
+   HYPRE_Int         nrows_A   = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int         nnzrows_A = hypre_CSRMatrixNumRownnz(A);
+   HYPRE_Int         ncols_A   = hypre_CSRMatrixNumCols(A);
+   HYPRE_Complex    *B_data    = hypre_CSRMatrixData(B);
+   HYPRE_Int        *B_i       = hypre_CSRMatrixI(B);
+   HYPRE_Int        *B_j       = hypre_CSRMatrixJ(B);
+   HYPRE_Int         nrows_B   = hypre_CSRMatrixNumRows(B);
+   HYPRE_Int         ncols_B   = hypre_CSRMatrixNumCols(B);
+   HYPRE_Int         num_nonzeros_B = hypre_CSRMatrixNumNonzeros(B);
    hypre_CSRMatrix  *C;
    HYPRE_Complex    *C_data;
    HYPRE_Int        *C_i;
@@ -170,134 +173,336 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
 
    if (nrows_A == ncols_B) allsquare = 1;
 
-   C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1);
+   if (num_nonzeros_B == 0)
+   {
+      C = hypre_CSRMatrixCreate(nrows_A, ncols_B, 0);
+      hypre_CSRMatrixInitialize(C);
+
+      return C;
+   }
+
+   C_i = hypre_CTAlloc(HYPRE_Int, nrows_A + 1);
 
    max_num_threads = hypre_NumThreads();
-
    jj_count = hypre_CTAlloc(HYPRE_Int, max_num_threads);
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel private(ia, ib, ic, ja, jb, num_nonzeros, row_start, counter, a_entry, b_entry)
 #endif
    {
-    HYPRE_Int *B_marker = NULL;
-    HYPRE_Int ns, ne, ii, jj;
-    HYPRE_Int size, rest, num_threads;
-    HYPRE_Int i1;
-    ii = hypre_GetThreadNum();
-    num_threads = hypre_NumActiveThreads();
+      HYPRE_Int *B_marker = NULL;
+      HYPRE_Int ns, ne, ii, jj;
+      HYPRE_Int size, rest, num_threads;
+      HYPRE_Int i1, iic;
 
-   size = nrows_A/num_threads;
-   rest = nrows_A - size*num_threads;
-    if (ii < rest)
-    {
-       ns = ii*size+ii;
-       ne = (ii+1)*size+ii+1;
-    }
-    else
-    {
-       ns = ii*size+rest;
-       ne = (ii+1)*size+rest;
-    }
+      ii = hypre_GetThreadNum();
+      num_threads = hypre_NumActiveThreads();
 
-    B_marker = hypre_CTAlloc(HYPRE_Int, ncols_B);
+      size = nnzrows_A/num_threads;
+      rest = nnzrows_A - size*num_threads;
+      if (ii < rest)
+      {
+         ns = ii*size+ii;
+         ne = (ii+1)*size+ii+1;
+      }
+      else
+      {
+         ns = ii*size+rest;
+         ne = (ii+1)*size+rest;
+      }
 
-    for (ib = 0; ib < ncols_B; ib++)
-      B_marker[ib] = -1;
+      B_marker = hypre_CTAlloc(HYPRE_Int, ncols_B);
 
-    num_nonzeros = 0;
-    for (ic = ns; ic < ne; ic++)
-    {
-        C_i[ic] = num_nonzeros;
-	if (allsquare)
-        {
-           B_marker[ic] = ic;
-           num_nonzeros++;
-        }
-	for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
-	{
-	   ja = A_j[ia];
-	   for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
-	   {
-	      jb = B_j[ib];
-	      if (B_marker[jb] != ic)
-	      {
-	 	 B_marker[jb] = ic;
-		 num_nonzeros++;
-	      }
-	   }
-   	}
-   }
-   jj_count[ii] = num_nonzeros;
+      for (ib = 0; ib < ncols_B; ib++)
+      {
+         B_marker[ib] = -1;
+      }
+
+      /* Set B_marker */
+      num_nonzeros = 0;
+      if (rownnz_A == NULL)
+      {
+         for (ic = ns; ic < ne; ic++)
+         {
+            C_i[ic] = num_nonzeros;
+            if (allsquare)
+            {
+               B_marker[ic] = ic;
+               num_nonzeros++;
+            }
+            for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
+            {
+               ja = A_j[ia];
+               for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
+               {
+                  jb = B_j[ib];
+                  if (B_marker[jb] != ic)
+                  {
+                     B_marker[jb] = ic;
+                     num_nonzeros++;
+                  }
+               }
+            }
+         }
+      }
+      else
+      {
+         if (allsquare)
+         {
+            for (ic = ns; ic < ne; ic++)
+            {
+               iic = rownnz_A[ic];
+               C_i[iic] = num_nonzeros;
+               B_marker[iic] = iic;
+               num_nonzeros++;
+               for (ia = A_i[iic]; ia < A_i[iic+1]; ia++)
+               {
+                  ja = A_j[ia];
+                  for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
+                  {
+                     jb = B_j[ib];
+                     if (B_marker[jb] != iic)
+                     {
+                        B_marker[jb] = iic;
+                        num_nonzeros++;
+                     }
+                  }
+               }
+            }
+         }
+         else
+         {
+            for (ic = ns; ic < ne; ic++)
+            {
+               iic = rownnz_A[ic];
+               C_i[iic] = num_nonzeros;
+               for (ia = A_i[iic]; ia < A_i[iic+1]; ia++)
+               {
+                  ja = A_j[ia];
+                  for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
+                  {
+                     jb = B_j[ib];
+                     if (B_marker[jb] != iic)
+                     {
+                        B_marker[jb] = iic;
+                        num_nonzeros++;
+                     }
+                  }
+               }
+            }
+         }
+      }
+      jj_count[ii] = num_nonzeros;
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #endif
 
-    if (ii)
-    {
-       jj = jj_count[0];
-       for (i1 = 1; i1 < ii; i1++)
-          jj += jj_count[i1];
+      if (ii)
+      {
+         jj = jj_count[0];
+         for (i1 = 1; i1 < ii; i1++)
+         {
+            jj += jj_count[i1];
+         }
 
-       for (i1 = ns; i1 < ne; i1++)
-          C_i[i1] += jj;
-    }
-    else
-    {
-       C_i[nrows_A] = 0;
-       for (i1 = 0; i1 < num_threads; i1++)
-          C_i[nrows_A] += jj_count[i1];
+         if (rownnz_A == NULL)
+         {
+            for (i1 = ns; i1 < ne; i1++)
+            {
+               C_i[i1] += jj;
+            }
+         }
+         else
+         {
+            for (i1 = ns; i1 < ne; i1++)
+            {
+               iic = rownnz_A[i1];
+               C_i[iic] += jj;
+            }
+         }
+      }
 
-       C = hypre_CSRMatrixCreate(nrows_A, ncols_B, C_i[nrows_A]);
-       hypre_CSRMatrixI(C) = C_i;
-       hypre_CSRMatrixInitialize(C);
-       C_j = hypre_CSRMatrixJ(C);
-       C_data = hypre_CSRMatrixData(C);
-    }
+      if (rownnz_A != NULL)
+      {
+#ifdef HYPRE_USING_OPENMP
+#pragma omp barrier
+#pragma omp for HYPRE_SMP_SCHEDULE
+#endif
+         for (ic = 0; ic < nrows_A; ic++)
+         {
+            if (C_i[ic+1] < C_i[ic])
+            {
+               C_i[ic+1] = C_i[ic];
+            }
+         }
+      }
+
+      if (ii == 0)
+      {
+         C_i[nrows_A] = 0;
+         for (i1 = 0; i1 < num_threads; i1++)
+         {
+            C_i[nrows_A] += jj_count[i1];
+         }
+
+         C = hypre_CSRMatrixCreate(nrows_A, ncols_B, C_i[nrows_A]);
+         hypre_CSRMatrixI(C) = C_i;
+         hypre_CSRMatrixInitialize(C);
+         C_j = hypre_CSRMatrixJ(C);
+         C_data = hypre_CSRMatrixData(C);
+      }
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #endif
 
-   for (ib = 0; ib < ncols_B; ib++)
-      B_marker[ib] = -1;
+      for (ib = 0; ib < ncols_B; ib++)
+      {
+         B_marker[ib] = -1;
+      }
 
-   counter = C_i[ns];
-   for (ic = ns; ic < ne; ic++)
-   {
-      row_start = C_i[ic];
-      if (allsquare)
+      if (rownnz_A == NULL)
       {
-         B_marker[ic] = counter;
-         C_data[counter] = 0;
-         C_j[counter] = ic;
-         counter++;
+         counter = C_i[ns];
+         if (allsquare)
+         {
+            for (ic = ns; ic < ne; ic++)
+            {
+               row_start = C_i[ic];
+               B_marker[ic] = counter;
+               C_data[counter] = 0;
+               C_j[counter] = ic;
+               counter++;
+               for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
+               {
+                  ja = A_j[ia];
+                  a_entry = A_data[ia];
+                  for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
+                  {
+                     jb = B_j[ib];
+                     b_entry = B_data[ib];
+                     if (B_marker[jb] < row_start)
+                     {
+                        B_marker[jb] = counter;
+                        C_j[B_marker[jb]] = jb;
+                        C_data[B_marker[jb]] = a_entry*b_entry;
+                        counter++;
+                     }
+                     else
+                     {
+                        C_data[B_marker[jb]] += a_entry*b_entry;
+                     }
+                  }
+               }
+            }
+         }
+         else
+         {
+            for (ic = ns; ic < ne; ic++)
+            {
+               row_start = C_i[ic];
+               for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
+               {
+                  ja = A_j[ia];
+                  a_entry = A_data[ia];
+                  for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
+                  {
+                     jb = B_j[ib];
+                     b_entry = B_data[ib];
+                     if (B_marker[jb] < row_start)
+                     {
+                        B_marker[jb] = counter;
+                        C_j[B_marker[jb]] = jb;
+                        C_data[B_marker[jb]] = a_entry*b_entry;
+                        counter++;
+                     }
+                     else
+                     {
+                        C_data[B_marker[jb]] += a_entry*b_entry;
+                     }
+                  }
+               }
+            }
+         } /* if (allsquare) */
       }
-      for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
+      else
       {
-	 ja = A_j[ia];
-	 a_entry = A_data[ia];
-	 for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
-	 {
-	    jb = B_j[ib];
-	    b_entry = B_data[ib];
-	    if (B_marker[jb] < row_start)
-	    {
-		B_marker[jb] = counter;
-		C_j[B_marker[jb]] = jb;
-		C_data[B_marker[jb]] = a_entry*b_entry;
-		counter++;
-	    }
-	    else
-		C_data[B_marker[jb]] += a_entry*b_entry;
-	}
-      }
-   }
-   hypre_TFree(B_marker);
-  } /*end parallel region */
-  hypre_TFree(jj_count);
-  return C;
+         counter = C_i[rownnz_A[ns]];
+         if (allsquare)
+         {
+            for (ic = ns; ic < ne; ic++)
+            {
+               iic = rownnz_A[ic];
+               row_start = C_i[iic];
+               B_marker[iic] = counter;
+               C_data[counter] = 0;
+               C_j[counter] = iic;
+               counter++;
+               for (ia = A_i[iic]; ia < A_i[iic+1]; ia++)
+               {
+                  ja = A_j[ia];
+                  a_entry = A_data[ia];
+                  for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
+                  {
+                     jb = B_j[ib];
+                     b_entry = B_data[ib];
+                     if (B_marker[jb] < row_start)
+                     {
+                        B_marker[jb] = counter;
+                        C_j[B_marker[jb]] = jb;
+                        C_data[B_marker[jb]] = a_entry*b_entry;
+                        counter++;
+                     }
+                     else
+                     {
+                        C_data[B_marker[jb]] += a_entry*b_entry;
+                     }
+                  }
+               }
+            }
+         }
+         else
+         {
+            for (ic = ns; ic < ne; ic++)
+            {
+               iic = rownnz_A[ic];
+               row_start = C_i[iic];
+               for (ia = A_i[iic]; ia < A_i[iic+1]; ia++)
+               {
+                  ja = A_j[ia];
+                  a_entry = A_data[ia];
+                  for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
+                  {
+                     jb = B_j[ib];
+                     b_entry = B_data[ib];
+                     if (B_marker[jb] < row_start)
+                     {
+                        B_marker[jb] = counter;
+                        C_j[B_marker[jb]] = jb;
+                        C_data[B_marker[jb]] = a_entry*b_entry;
+                        counter++;
+                     }
+                     else
+                     {
+                        C_data[B_marker[jb]] += a_entry*b_entry;
+                     }
+                  }
+               }
+            }
+         } /* if (allsquare) */
+      } /* if (rownnz_A == NULL) */
+
+      hypre_TFree(B_marker);
+   } /*end parallel region */
+
+   // Set rownnz and num_rownnz
+   hypre_CSRMatrixSetRownnz(C);
+
+   // Free memory
+   hypre_TFree(jj_count);
+
+   return C;
 }
 
 hypre_CSRMatrix *
