@@ -17,6 +17,8 @@
 #   16: BoomerAMG_COGMRES
 #   17: DS_COGMRES
 #   20: Hybrid_PCG
+#   90: BoomerAMGDD
+#   91: BoomerAMGDD_GMRES
 #
 
 
@@ -52,6 +54,8 @@ mpirun -np 2 ./ij -solver 17 -rhsrand -cgs 2 -unroll 8 > solvers.out.15
 mpirun -np 2 ./ij -solver 17 -rhsrand -unroll 4 > solvers.out.16
 mpirun -np 2 ./ij -solver 3 -rhsrand -check_residual > solvers.out.17
 mpirun -np 2 ./ij -solver 4 -rhsrand -check_residual > solvers.out.18
+mpirun -np 4 ./ij -solver 90 -rhsrand > solvers.out.90
+mpirun -np 4 ./ij -solver 91 -rhsrand > solvers.out.91
 
 #systems AMG run ...unknown approach, hybrid approach, nodal approach
 mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 > solvers.out.sysu
