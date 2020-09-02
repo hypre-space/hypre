@@ -581,6 +581,7 @@ struct FFFC_pred : public thrust::unary_function<Tuple, bool>
    }
 };
 
+/* AFF contains the diagonal of F-F block of A */
 HYPRE_Int
 hypre_ParCSRMatrixGenerateFFFCDevice( hypre_ParCSRMatrix  *A,
                                       HYPRE_Int           *CF_marker_host,
