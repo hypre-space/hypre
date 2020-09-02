@@ -22,7 +22,7 @@ void hypreDevice_extendWtoP( HYPRE_Int P_nr_of_rows, HYPRE_Int W_nr_of_rows, HYP
 
 __global__ void compute_twiaff_w( HYPRE_Int nr_of_rows, HYPRE_Int first_index, HYPRE_Int *AFF_diag_i, HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Complex *AFF_diag_data_old, HYPRE_Int *AFF_offd_i, HYPRE_Int *AFF_offd_j, HYPRE_Complex *AFF_offd_data, HYPRE_Int *AFF_ext_i, HYPRE_BigInt *AFF_ext_j, HYPRE_Complex *AFF_ext_data, HYPRE_Complex *rsW, HYPRE_Complex *rsFC, HYPRE_Complex *rsFC_offd );
 
-__global__ void compute_aff_afc_epe( HYPRE_Int nr_of_rows, HYPRE_Int *AFF_diag_i, HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Int *AFF_offd_i, HYPRE_Int *AFF_offd_j, HYPRE_Complex *AFF_offd_data, HYPRE_Int *AFC_diag_i, HYPRE_Complex *AFC_diag_data, HYPRE_Int *AFC_offd_i, HYPRE_Complex *AFC_offd_data, HYPRE_Complex *rsW, HYPRE_Complex *dlam, HYPRE_Complex *d_tmp, HYPRE_Complex *dtmp_offd, HYPRE_Complex *dtau);
+__global__ void compute_aff_afc_epe( HYPRE_Int nr_of_rows, HYPRE_Int *AFF_diag_i, HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Int *AFF_offd_i, HYPRE_Int *AFF_offd_j, HYPRE_Complex *AFF_offd_data, HYPRE_Int *AFC_diag_i, HYPRE_Complex *AFC_diag_data, HYPRE_Int *AFC_offd_i, HYPRE_Complex *AFC_offd_data, HYPRE_Complex *rsW, HYPRE_Complex *dlam, HYPRE_Complex *d_tmp, HYPRE_Complex *dtmp_offd );
 
 __global__ void compute_dlam_dtmp( HYPRE_Int nr_of_rows, HYPRE_Int *AFF_diag_i, HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Int *AFF_offd_i, HYPRE_Complex *AFF_offd_data, HYPRE_Complex *rsFC, HYPRE_Complex *dlam, HYPRE_Complex *dtmp );
 
