@@ -54,7 +54,7 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
  * hypre_CSRMatrixDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
 {
    HYPRE_Int  ierr=0;
@@ -83,7 +83,7 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
  * hypre_CSRMatrixInitialize
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_CSRMatrixInitialize( hypre_CSRMatrix *matrix )
 {
    HYPRE_Int  num_rows     = hypre_CSRMatrixNumRows(matrix);
@@ -108,7 +108,7 @@ hypre_CSRMatrixInitialize( hypre_CSRMatrix *matrix )
  * hypre_CSRMatrixSetDataOwner
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_CSRMatrixSetDataOwner( hypre_CSRMatrix *matrix,
                              HYPRE_Int              owns_data )
 {
@@ -139,6 +139,8 @@ hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
    HYPRE_Int i, adiag;
    HYPRE_Int irownnz=0;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    for (i=0; i < num_rows; i++)
    {
       adiag = (A_i[i+1] - A_i[i]);
@@ -162,6 +164,9 @@ hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
       }
       hypre_CSRMatrixRownnz(matrix) = Arownnz;
    }
+
+   HYPRE_ANNOTATE_FUNC_END;
+
    return ierr;
 }
 
@@ -184,7 +189,7 @@ hypre_CSRMatrixRead( char *file_name )
    HYPRE_Int      max_col = 0;
 
    HYPRE_Int      file_base = 1;
-   
+
    HYPRE_Int      j;
 
    /*----------------------------------------------------------
@@ -248,9 +253,9 @@ hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix,
    HYPRE_Int     *matrix_i;
    HYPRE_Int     *matrix_j;
    HYPRE_Int      num_rows;
-   
+
    HYPRE_Int      file_base = 1;
-   
+
    HYPRE_Int      j;
 
    HYPRE_Int      ierr = 0;
@@ -380,12 +385,12 @@ hypre_CSRMatrixPrintHB( hypre_CSRMatrix *matrix_input,
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixCopy:
- * copys A to B, 
+ * copys A to B,
  * if copy_data = 0 only the structure of A is copied to B.
- * the routine does not check if the dimensions of A and B match !!! 
+ * the routine does not check if the dimensions of A and B match !!!
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_CSRMatrixCopy( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int copy_data )
 {
    HYPRE_Int      ierr=0;

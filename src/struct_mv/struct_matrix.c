@@ -2051,7 +2051,7 @@ hypre_StructMatrixClearGhostValues( hypre_StructMatrix *matrix )
                hypre_BoxLoop1Begin(ndim, loop_size,
                                    data_box, start, unit_stride, mi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi ) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop1For(mi)
                {

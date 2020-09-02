@@ -516,10 +516,12 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_ANNOTATE_REGION_END("%s", "Set rowsizes");
 
    /* Create and initialize ij_Ahat */
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", "Create Matrix");
    HYPRE_IJMatrixCreate(comm, sizes[0], sizes[1], sizes[2], sizes[3], &ij_Ahat);
    HYPRE_IJMatrixSetObjectType(ij_Ahat, HYPRE_PARCSR);
    HYPRE_IJMatrixSetRowSizes(ij_Ahat, (const HYPRE_Int *) row_sizes);
    HYPRE_IJMatrixInitialize(ij_Ahat);
+   HYPRE_ANNOTATE_REGION_END("%s", "Create Matrix");
 
    /* Free/Allocate memory */
    hypre_TFree(row_sizes);
