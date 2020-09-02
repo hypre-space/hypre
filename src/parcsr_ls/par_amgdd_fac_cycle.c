@@ -407,8 +407,6 @@ HYPRE_Int hypre_BoomerAMGDD_FAC_OrderedGaussSeidel( void *amgdd_vdata, HYPRE_Int
 HYPRE_Int
 hypre_BoomerAMGDD_FAC_CFL1Jacobi( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param )
 {
-   hypre_ParAMGDDData *amgdd_data = (hypre_ParAMGDDData*) amgdd_vdata;
-
 #if defined(HYPRE_USING_CUDA)
    if (cycle_param == 1)
    {

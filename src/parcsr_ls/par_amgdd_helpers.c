@@ -133,7 +133,6 @@ hypre_BoomerAMGDD_AddToSendAndRequestDofs(hypre_ParCSRMatrix *A, HYPRE_Int *add_
    {
       if (add_flag_requests[i])
       {
-         HYPRE_Int neighbor_global_index = hypre_ParCSRMatrixColMapOffd(A)[i];
          HYPRE_Int recv_proc = hypre_BoomerAMGDD_GetDofRecvProc(i, A);
          if (hypre_AMGDDCommPkgRecvProcs(compGridCommPkg)[level][recv_proc] != hypre_AMGDDCommPkgSendProcs(compGridCommPkg)[level][send_proc])
          {
@@ -592,7 +591,6 @@ hypre_BoomerAMGDD_SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_A
 {
 
    HYPRE_Int               i,j;
-   HYPRE_Int               num_nodes = hypre_ParCSRMatrixNumRows(A);
    hypre_ParCSRCommPkg     *commPkg = hypre_ParCSRMatrixCommPkg(A);
    HYPRE_Int               start,finish;
    HYPRE_Int               num_levels = hypre_AMGDDCommPkgNumLevels(compGridCommPkg);
