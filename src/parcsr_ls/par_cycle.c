@@ -433,13 +433,13 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   hypre_ParVectorAxpy(relax_weight[level],Utemp,Aux_U);
                }
                else if (smooth_num_levels > level &&
-	               (smooth_type == 5 || smooth_type == 15))
-	       {
+                       (smooth_type == 5 || smooth_type == 15))
+               {
                   HYPRE_ILUSolve(smoother[level],
                                  (HYPRE_ParCSRMatrix) A_array[level],
                                  (HYPRE_ParVector) Aux_F,
                                  (HYPRE_ParVector) Aux_U);
-	       }
+               }
                else if (smooth_num_levels > level &&
                         (smooth_type == 6 || smooth_type == 16))
                {
