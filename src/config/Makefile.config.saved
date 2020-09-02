@@ -22,7 +22,7 @@ HYPRE_RELEASE_NAME    = hypre
 HYPRE_RELEASE_VERSION = 2.13.0
 HYPRE_RELEASE_DATE    = 2017/10/20
 HYPRE_RELEASE_TIME    = 00:00:00
-HYPRE_RELEASE_BUGS    = hypre-support@llnl.gov
+HYPRE_RELEASE_BUGS    = https://github.com/hypre-space/hypre/issues
 
 HYPRE_SRC_TOP_DIR = /g/g92/li50/workspace/hypre/src
 HYPRE_BUILD_DIR   = /g/g92/li50/workspace/hypre/src/hypre

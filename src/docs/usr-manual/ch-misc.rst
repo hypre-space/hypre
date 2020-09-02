@@ -309,13 +309,11 @@ standard error during execution.
 Bug Reporting and General Support
 ==============================================================================
 
-Simply send and email to ``hypre-support@llnl.gov`` to report bugs, request
-features, or ask general usage questions.  An *issue number* will be assigned to
-your email so that we can track progress (we are using an issue tracking tool
-called Roundup to do this).
+Simply create an issue at ``https://github.com/hypre-space/hypre/issues`` to
+report bugs, request features, or ask general usage questions.
 
 Users should include as much relevant information as possible in their issue
-emails, including at a minimum, the hypre version number being used.  For
+report, including at a minimum, the hypre version number being used.  For
 compile and runtime problems, please also include the machine type, operating
 system, MPI implementation, compiler, and any error messages produced.
 
