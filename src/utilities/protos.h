@@ -120,6 +120,7 @@ void hypre_prefix_sum_triple(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_
 void hypre_prefix_sum_multiple(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int n, HYPRE_Int *workspace);
 
 /* hypre_hopscotch_hash.c */
+
 #ifdef HYPRE_USING_OPENMP
 
 /* Check if atomic operations are available to use concurrent hopscotch hash table */
