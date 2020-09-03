@@ -15,20 +15,22 @@
 typedef struct
 {
    // Info needed for subsequent psi_c residual communication
-	HYPRE_Int 			num_levels; // levels in the amg hierarchy
-	HYPRE_Int 			*num_send_procs; // number of send procs to communicate with
-   HYPRE_Int         *num_recv_procs; // number of recv procs to communicate with
+   HYPRE_Int           num_levels;     // levels in the amg hierarchy
+   HYPRE_Int          *num_send_procs; // number of send procs to communicate with
+   HYPRE_Int          *num_recv_procs; // number of recv procs to communicate with
 
    HYPRE_Int         **send_procs; // list of send procs
    HYPRE_Int         **recv_procs; // list of recv procs
 
-	HYPRE_Int 			**send_buffer_size; // size of send buffer on each level for each proc
-	HYPRE_Int 			**recv_buffer_size; // size of recv buffer on each level for each proc
+   HYPRE_Int         **send_buffer_size; // size of send buffer on each level for each proc
+   HYPRE_Int         **recv_buffer_size; // size of recv buffer on each level for each proc
 
-	HYPRE_Int 			***num_send_nodes; // number of nodes to send on each composite level
-   HYPRE_Int         ***num_recv_nodes; // number of nodes to recv on each composite level
-	HYPRE_Int 			****send_flag; // flags which nodes to send after composite grid is built
-	HYPRE_Int 			****recv_map; // mapping from recv buffer to appropriate local indices on each comp grid
+   HYPRE_Int        ***num_send_nodes; // number of nodes to send on each composite level
+   HYPRE_Int        ***num_recv_nodes; // number of nodes to recv on each composite level
+
+   HYPRE_Int       ****send_flag; // flags which nodes to send after composite grid is built
+   HYPRE_Int       ****recv_map; // mapping from recv buffer to appropriate local indices on each comp grid
+   HYPRE_Int       ****recv_red_marker; // marker indicating a redundant recv
 
 } hypre_AMGDDCommPkg;
 
@@ -36,18 +38,18 @@ typedef struct
  * Accessor functions for the Comp Grid Comm Pkg structure
  *--------------------------------------------------------------------------*/
 
- #define hypre_AMGDDCommPkgNumLevels(compGridCommPkg)				((compGridCommPkg) -> num_levels)
- #define hypre_AMGDDCommPkgNumSendProcs(compGridCommPkg)				((compGridCommPkg) -> num_send_procs)
- #define hypre_AMGDDCommPkgNumRecvProcs(compGridCommPkg)           ((compGridCommPkg) -> num_recv_procs)
- #define hypre_AMGDDCommPkgSendProcs(compGridCommPkg)           ((compGridCommPkg) -> send_procs)
- #define hypre_AMGDDCommPkgRecvProcs(compGridCommPkg)           ((compGridCommPkg) -> recv_procs)
- #define hypre_AMGDDCommPkgSendBufferSize(compGridCommPkg)		((compGridCommPkg) -> send_buffer_size)
- #define hypre_AMGDDCommPkgRecvBufferSize(compGridCommPkg)		((compGridCommPkg) -> recv_buffer_size)
- #define hypre_AMGDDCommPkgNumSendNodes(compGridCommPkg)			((compGridCommPkg) -> num_send_nodes)
- #define hypre_AMGDDCommPkgNumRecvNodes(compGridCommPkg)       ((compGridCommPkg) -> num_recv_nodes)
- #define hypre_AMGDDCommPkgSendFlag(compGridCommPkg)				((compGridCommPkg) -> send_flag)
- #define hypre_AMGDDCommPkgRecvMap(compGridCommPkg)				((compGridCommPkg) -> recv_map)
-
+#define hypre_AMGDDCommPkgNumLevels(compGridCommPkg)      ((compGridCommPkg) -> num_levels)
+#define hypre_AMGDDCommPkgNumSendProcs(compGridCommPkg)   ((compGridCommPkg) -> num_send_procs)
+#define hypre_AMGDDCommPkgNumRecvProcs(compGridCommPkg)   ((compGridCommPkg) -> num_recv_procs)
+#define hypre_AMGDDCommPkgSendProcs(compGridCommPkg)      ((compGridCommPkg) -> send_procs)
+#define hypre_AMGDDCommPkgRecvProcs(compGridCommPkg)      ((compGridCommPkg) -> recv_procs)
+#define hypre_AMGDDCommPkgSendBufferSize(compGridCommPkg) ((compGridCommPkg) -> send_buffer_size)
+#define hypre_AMGDDCommPkgRecvBufferSize(compGridCommPkg) ((compGridCommPkg) -> recv_buffer_size)
+#define hypre_AMGDDCommPkgNumSendNodes(compGridCommPkg)   ((compGridCommPkg) -> num_send_nodes)
+#define hypre_AMGDDCommPkgNumRecvNodes(compGridCommPkg)   ((compGridCommPkg) -> num_recv_nodes)
+#define hypre_AMGDDCommPkgSendFlag(compGridCommPkg)       ((compGridCommPkg) -> send_flag)
+#define hypre_AMGDDCommPkgRecvMap(compGridCommPkg)        ((compGridCommPkg) -> recv_map)
+#define hypre_AMGDDCommPkgRecvRedMarker(compGridCommPkg)  ((compGridCommPkg) -> recv_red_marker)
 
 /*--------------------------------------------------------------------------
  * AMGDDCompGridMatrix (basically a coupled collection of CSR matrices)
@@ -60,7 +62,7 @@ typedef struct
    hypre_CSRMatrix      *nonowned_diag; // Domain: nonowned domain of mat. Range: nonowned range of mat.
    hypre_CSRMatrix      *nonowned_offd; // Domain: owned domain of mat. Range: nonowned range of mat.
 
-   hypre_CSRMatrix      *real_real; // Domain: nonowned real. Range: nonowned real.
+   hypre_CSRMatrix      *real_real;  // Domain: nonowned real. Range: nonowned real.
    hypre_CSRMatrix      *real_ghost; // Domain: nonowned ghost. Range: nonowned real.
 
    HYPRE_Int            owns_owned_matrices;
@@ -87,11 +89,11 @@ typedef struct
 
 typedef struct
 {
-   hypre_Vector         *owned_vector; // Original on-processor points (should be ordered)
+   hypre_Vector         *owned_vector;    // Original on-processor points (should be ordered)
    hypre_Vector         *nonowned_vector; // Off-processor points (not ordered)
 
-   HYPRE_Int            num_real;
-   HYPRE_Int            owns_owned_vector;
+   HYPRE_Int             num_real;
+   HYPRE_Int             owns_owned_vector;
 
 } hypre_AMGDDCompGridVector;
 
@@ -110,26 +112,26 @@ typedef struct
 
 typedef struct
 {
-   HYPRE_Int        level;
+   HYPRE_Int             level;
    HYPRE_MemoryLocation  memory_location;   /* memory location of matrices/vectors */
 
-   HYPRE_Int        first_global_index;
-   HYPRE_Int        last_global_index;
-   HYPRE_Int        num_owned_nodes;
-   HYPRE_Int        num_nonowned_nodes;
-   HYPRE_Int        num_nonowned_real_nodes;
-   HYPRE_Int        num_owned_c_points;
-   HYPRE_Int        num_nonowned_real_c_points;
-   HYPRE_Int        num_missing_col_indices;
+   HYPRE_Int             first_global_index;
+   HYPRE_Int             last_global_index;
+   HYPRE_Int             num_owned_nodes;
+   HYPRE_Int             num_nonowned_nodes;
+   HYPRE_Int             num_nonowned_real_nodes;
+   HYPRE_Int             num_owned_c_points;
+   HYPRE_Int             num_nonowned_real_c_points;
+   HYPRE_Int             num_missing_col_indices;
 
-   HYPRE_Int        *nonowned_global_indices;
-   HYPRE_Int        *nonowned_coarse_indices;
-   HYPRE_Int        *nonowned_real_marker;
-   HYPRE_Int        *nonowned_sort;
-   HYPRE_Int        *nonowned_invsort;
-   HYPRE_Int        *nonowned_diag_missing_col_indices;
+   HYPRE_Int            *nonowned_global_indices;
+   HYPRE_Int            *nonowned_coarse_indices;
+   HYPRE_Int            *nonowned_real_marker;
+   HYPRE_Int            *nonowned_sort;
+   HYPRE_Int            *nonowned_invsort;
+   HYPRE_Int            *nonowned_diag_missing_col_indices;
 
-   HYPRE_Int        *owned_coarse_indices;
+   HYPRE_Int            *owned_coarse_indices;
 
    hypre_AMGDDCompGridMatrix *A;
    hypre_AMGDDCompGridMatrix *P;

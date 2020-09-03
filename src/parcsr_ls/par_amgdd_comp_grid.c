@@ -13,9 +13,6 @@
 
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.h"
-#include <stdio.h>
-#include <math.h>
-
 
 HYPRE_Int hypre_AMGDDCompGridLocalIndexBinarySearch( hypre_AMGDDCompGrid *compGrid, HYPRE_Int global_index )
 {
@@ -666,7 +663,7 @@ HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGDDData *amgdd_data )
    HYPRE_Int      myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-   HYPRE_Int level, i, j;
+   HYPRE_Int level, i, j, k;
    HYPRE_Int start_level = hypre_ParAMGDDDataStartLevel(amgdd_data);
 
    hypre_ParAMGData *amg_data = hypre_ParAMGDDDataAMG(amgdd_data);
@@ -1288,6 +1285,14 @@ HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGDDData *amgdd_data )
                new_num_send_procs++;
             }
          }
+
+         // Free memory
+         for (j = new_num_send_procs; j < num_send_procs; j++)
+         {
+            hypre_AMGDDCommPkgSendLevelDestroy(amgddCommPkg, outer_level, j);
+         }
+
+         // Update number of send processes
          hypre_AMGDDCommPkgNumSendProcs(amgddCommPkg)[outer_level] = new_num_send_procs;
 
          HYPRE_Int num_recv_procs = hypre_AMGDDCommPkgNumRecvProcs(amgddCommPkg)[outer_level];
@@ -1310,6 +1315,14 @@ HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGDDData *amgdd_data )
                new_num_recv_procs++;
             }
          }
+
+         // Free memory
+         for (j = new_num_recv_procs; j < num_recv_procs; j++)
+         {
+            hypre_AMGDDCommPkgRecvLevelDestroy(amgddCommPkg, outer_level, j);
+         }
+
+         // Update number of recv processes
          hypre_AMGDDCommPkgNumRecvProcs(amgddCommPkg)[outer_level] = new_num_recv_procs;
       }
    }
@@ -1550,21 +1563,93 @@ hypre_AMGDDCommPkg* hypre_AMGDDCommPkgCreate(HYPRE_Int num_levels)
 
    hypre_AMGDDCommPkgNumLevels(amgddCommPkg) = num_levels;
 
-   hypre_AMGDDCommPkgNumSendProcs(amgddCommPkg) = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
-   hypre_AMGDDCommPkgNumRecvProcs(amgddCommPkg) = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
-   hypre_AMGDDCommPkgSendProcs(amgddCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
-   hypre_AMGDDCommPkgRecvProcs(amgddCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
-   hypre_AMGDDCommPkgSendBufferSize(amgddCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
-   hypre_AMGDDCommPkgRecvBufferSize(amgddCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
-   hypre_AMGDDCommPkgNumSendNodes(amgddCommPkg) = hypre_CTAlloc(HYPRE_Int**, num_levels, HYPRE_MEMORY_HOST);
-   hypre_AMGDDCommPkgNumRecvNodes(amgddCommPkg) = hypre_CTAlloc(HYPRE_Int**, num_levels, HYPRE_MEMORY_HOST);
-   hypre_AMGDDCommPkgSendFlag(amgddCommPkg) = hypre_CTAlloc(HYPRE_Int***, num_levels, HYPRE_MEMORY_HOST);
-   hypre_AMGDDCommPkgRecvMap(amgddCommPkg) = hypre_CTAlloc(HYPRE_Int***, num_levels, HYPRE_MEMORY_HOST);
+   hypre_AMGDDCommPkgNumSendProcs(amgddCommPkg)   = hypre_CTAlloc(HYPRE_Int,     num_levels, HYPRE_MEMORY_HOST);
+   hypre_AMGDDCommPkgNumRecvProcs(amgddCommPkg)   = hypre_CTAlloc(HYPRE_Int,     num_levels, HYPRE_MEMORY_HOST);
+   hypre_AMGDDCommPkgSendProcs(amgddCommPkg)      = hypre_CTAlloc(HYPRE_Int *,   num_levels, HYPRE_MEMORY_HOST);
+   hypre_AMGDDCommPkgRecvProcs(amgddCommPkg)      = hypre_CTAlloc(HYPRE_Int *,   num_levels, HYPRE_MEMORY_HOST);
+   hypre_AMGDDCommPkgSendBufferSize(amgddCommPkg) = hypre_CTAlloc(HYPRE_Int *,   num_levels, HYPRE_MEMORY_HOST);
+   hypre_AMGDDCommPkgRecvBufferSize(amgddCommPkg) = hypre_CTAlloc(HYPRE_Int *,   num_levels, HYPRE_MEMORY_HOST);
+   hypre_AMGDDCommPkgNumSendNodes(amgddCommPkg)   = hypre_CTAlloc(HYPRE_Int **,  num_levels, HYPRE_MEMORY_HOST);
+   hypre_AMGDDCommPkgNumRecvNodes(amgddCommPkg)   = hypre_CTAlloc(HYPRE_Int **,  num_levels, HYPRE_MEMORY_HOST);
+   hypre_AMGDDCommPkgSendFlag(amgddCommPkg)       = hypre_CTAlloc(HYPRE_Int ***, num_levels, HYPRE_MEMORY_HOST);
+   hypre_AMGDDCommPkgRecvMap(amgddCommPkg)        = hypre_CTAlloc(HYPRE_Int ***, num_levels, HYPRE_MEMORY_HOST);
+   hypre_AMGDDCommPkgRecvRedMarker(amgddCommPkg)  = hypre_CTAlloc(HYPRE_Int ***, num_levels, HYPRE_MEMORY_HOST);
 
    return amgddCommPkg;
 }
 
-HYPRE_Int hypre_AMGDDCommPkgDestroy( hypre_AMGDDCommPkg *amgddCommPkg )
+HYPRE_Int hypre_AMGDDCommPkgSendLevelDestroy ( hypre_AMGDDCommPkg *amgddCommPkg,
+                                               HYPRE_Int           level,
+                                               HYPRE_Int           proc )
+{
+   HYPRE_Int  k;
+
+   if (hypre_AMGDDCommPkgSendFlag(amgddCommPkg))
+   {
+      for (k = 0; k < hypre_AMGDDCommPkgNumLevels(amgddCommPkg); k++)
+      {
+         if (hypre_AMGDDCommPkgSendFlag(amgddCommPkg)[level][proc][k])
+         {
+            hypre_TFree(hypre_AMGDDCommPkgSendFlag(amgddCommPkg)[level][proc][k],
+                        HYPRE_MEMORY_HOST);
+         }
+      }
+      hypre_TFree( hypre_AMGDDCommPkgSendFlag(amgddCommPkg)[level][proc],
+                   HYPRE_MEMORY_HOST );
+   }
+
+   if (hypre_AMGDDCommPkgNumSendNodes(amgddCommPkg))
+   {
+      hypre_TFree(hypre_AMGDDCommPkgNumSendNodes(amgddCommPkg)[level][proc],
+                  HYPRE_MEMORY_HOST);
+   }
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int hypre_AMGDDCommPkgRecvLevelDestroy ( hypre_AMGDDCommPkg *amgddCommPkg,
+                                               HYPRE_Int           level,
+                                               HYPRE_Int           proc )
+{
+   HYPRE_Int  k;
+
+   if (hypre_AMGDDCommPkgRecvMap(amgddCommPkg))
+   {
+      for (k = 0; k < hypre_AMGDDCommPkgNumLevels(amgddCommPkg); k++)
+      {
+         if (hypre_AMGDDCommPkgRecvMap(amgddCommPkg)[level][proc][k])
+         {
+            hypre_TFree(hypre_AMGDDCommPkgRecvMap(amgddCommPkg)[level][proc][k],
+                        HYPRE_MEMORY_HOST);
+         }
+      }
+      hypre_TFree(hypre_AMGDDCommPkgRecvMap(amgddCommPkg)[level][proc], HYPRE_MEMORY_HOST);
+   }
+
+   if (hypre_AMGDDCommPkgRecvRedMarker(amgddCommPkg))
+   {
+      for (k = 0; k < hypre_AMGDDCommPkgNumLevels(amgddCommPkg); k++)
+      {
+         if (hypre_AMGDDCommPkgRecvRedMarker(amgddCommPkg)[level][proc][k])
+         {
+            hypre_TFree(hypre_AMGDDCommPkgRecvRedMarker(amgddCommPkg)[level][proc][k],
+                        HYPRE_MEMORY_HOST);
+         }
+      }
+      hypre_TFree(hypre_AMGDDCommPkgRecvRedMarker(amgddCommPkg)[level][proc],
+                  HYPRE_MEMORY_HOST);
+   }
+
+   if (hypre_AMGDDCommPkgNumRecvNodes(amgddCommPkg))
+   {
+      hypre_TFree(hypre_AMGDDCommPkgNumRecvNodes(amgddCommPkg)[level][proc],
+                  HYPRE_MEMORY_HOST);
+   }
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int hypre_AMGDDCommPkgDestroy ( hypre_AMGDDCommPkg *amgddCommPkg )
 {
    HYPRE_Int         i, j, k;
 
@@ -1638,6 +1723,26 @@ HYPRE_Int hypre_AMGDDCommPkgDestroy( hypre_AMGDDCommPkg *amgddCommPkg )
       hypre_TFree( hypre_AMGDDCommPkgRecvMap(amgddCommPkg), HYPRE_MEMORY_HOST );
    }
 
+   if ( hypre_AMGDDCommPkgRecvRedMarker(amgddCommPkg) )
+   {
+      for (i = 0; i < hypre_AMGDDCommPkgNumLevels(amgddCommPkg); i++)
+      {
+         for (j = 0; j < hypre_AMGDDCommPkgNumRecvProcs(amgddCommPkg)[i]; j++)
+         {
+            for (k = 0; k < hypre_AMGDDCommPkgNumLevels(amgddCommPkg); k++)
+            {
+               if ( hypre_AMGDDCommPkgRecvRedMarker(amgddCommPkg)[i][j][k] )
+               {
+                  hypre_TFree(hypre_AMGDDCommPkgRecvRedMarker(amgddCommPkg)[i][j][k], HYPRE_MEMORY_HOST);
+               }
+            }
+            hypre_TFree(hypre_AMGDDCommPkgRecvRedMarker(amgddCommPkg)[i][j], HYPRE_MEMORY_HOST);
+         }
+         hypre_TFree(hypre_AMGDDCommPkgRecvRedMarker(amgddCommPkg)[i], HYPRE_MEMORY_HOST);
+      }
+      hypre_TFree(hypre_AMGDDCommPkgRecvRedMarker(amgddCommPkg), HYPRE_MEMORY_HOST);
+   }
+
    if ( hypre_AMGDDCommPkgNumSendNodes(amgddCommPkg) )
    {
       for (i = 0; i < hypre_AMGDDCommPkgNumLevels(amgddCommPkg); i++)
@@ -1678,4 +1783,3 @@ HYPRE_Int hypre_AMGDDCommPkgDestroy( hypre_AMGDDCommPkg *amgddCommPkg )
 
    return 0;
 }
-
