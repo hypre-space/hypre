@@ -2573,7 +2573,7 @@ HYPRE_NAME="hypre"
 HYPRE_VERSION="2.19.0"
 HYPRE_DATE="2020/05/26"
 HYPRE_TIME="00:00:00"
-HYPRE_BUGS="hypre-support@llnl.gov"
+HYPRE_BUGS="https://github.com/hypre-space/hypre/issues"
 HYPRE_SRCDIR="`pwd`"
 
 
