@@ -96,6 +96,18 @@ index 19 value -7.497267e-11
 GMRES Iterations = 93
 Final GMRES Relative Residual Norm = 8.225661e-09
 
+# Output file: solvers.out.90
+
+
+BoomerAMGDD Iterations = 10
+Final Relative Residual Norm = 9.214818e-09
+
+# Output file: solvers.out.90
+
+
+GMRES Iterations = 7
+Final GMRES Relative Residual Norm = 5.755980e-09
+
 # Output file: solvers.out.sysh
  Average Convergence Factor = 0.122031
 

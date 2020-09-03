@@ -30,6 +30,7 @@ set(SRCS
   F90_HYPRE_ams.c
   gen_redcs_mat.c
   HYPRE_parcsr_amg.c
+  HYPRE_parcsr_amgdd.c
   HYPRE_parcsr_bicgstab.c
   HYPRE_parcsr_block.c
   HYPRE_parcsr_cgnr.c
@@ -52,6 +53,12 @@ set(SRCS
   HYPRE_ame.c
   par_2s_interp.c
   par_amg.c
+  par_amgdd.c
+  par_amgdd_comp_grid.c
+  par_amgdd_solve.c
+  par_amgdd_helpers.c
+  par_amgdd_fac_cycle.c
+  par_amgdd_setup.c
   par_amg_setup.c
   par_amg_solve.c
   par_amg_solveT.c
@@ -114,7 +121,7 @@ set(SRCS
 
 if (HYPRE_USING_DSUPERLU)
   list(APPEND SRCS dsuperlu.c)
-endif()  
+endif()
 
 target_sources(HYPRE
   PRIVATE ${SRCS}
