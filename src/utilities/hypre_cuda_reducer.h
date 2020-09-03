@@ -277,3 +277,4 @@ struct ReduceSum
 #endif /* #if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) */
 #endif /* #if defined(HYPRE_USING_CUDA) */
 #endif /* #ifndef HYPRE_CUDA_REDUCER_H */
+
