@@ -29,7 +29,8 @@ hypre_BoomerAMGDD_GetDofRecvProc(HYPRE_Int neighbor_local_index, hypre_ParCSRMat
    // Use that column index to find which processor this dof is received from
    hypre_ParCSRCommPkg *commPkg = hypre_ParCSRMatrixCommPkg(A);
    HYPRE_Int recv_proc = -1;
-   for (HYPRE_Int i = 0; i < hypre_ParCSRCommPkgNumRecvs(commPkg); i++)
+   HYPRE_Int i;
+   for (i = 0; i < hypre_ParCSRCommPkgNumRecvs(commPkg); i++)
    {
       if (neighbor_local_index >= hypre_ParCSRCommPkgRecvVecStart(commPkg,i) && neighbor_local_index < hypre_ParCSRCommPkgRecvVecStart(commPkg,i+1))
       {
@@ -462,7 +463,8 @@ hypre_BoomerAMGDD_FindNeighborProcessors(hypre_ParCSRMatrix *A,
    {
       HYPRE_Int cnt = 0;
       HYPRE_Int num_destination_procs = recv_buffers[i][cnt++];
-      for (HYPRE_Int destination_proc = 0; destination_proc < num_destination_procs; destination_proc++)
+      HYPRE_Int destination_proc;
+      for (destination_proc = 0; destination_proc < num_destination_procs; destination_proc++)
       {
          // Get destination proc id and the number of requested dofs
          HYPRE_Int proc_id = recv_buffers[i][cnt++];
@@ -520,7 +522,8 @@ hypre_BoomerAMGDD_FindNeighborProcessors(hypre_ParCSRMatrix *A,
          }
 
          // Loop over the requested dofs for this destination proc
-         for (HYPRE_Int j = 0; j < num_requested_dofs; j++)
+         HYPRE_Int j;
+         for (j = 0; j < num_requested_dofs; j++)
          {
             // Get the local index for this dof on this processor
             HYPRE_Int req_dof_local_index = recv_buffers[i][cnt++] - hypre_ParCSRMatrixFirstRowIndex(A);
