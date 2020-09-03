@@ -223,7 +223,7 @@ hypre_BoomerAMGDD_FindNeighborProcessors(hypre_ParCSRMatrix *A,
    HYPRE_Int *add_flag_requests = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)), HYPRE_MEMORY_HOST);
 
    // Recursively search through the operator stencil to find longer distance neighboring dofs
-   // Loop over long distance send procs
+   // Loop over longdistance send procs
    for (i = 0; i < hypre_AMGDDCommPkgNumSendProcs(compGridCommPkg)[level]; i++)
    {
       if (num_starting_dofs[i])
@@ -257,7 +257,9 @@ hypre_BoomerAMGDD_FindNeighborProcessors(hypre_ParCSRMatrix *A,
    hypre_TFree(add_flag_requests, HYPRE_MEMORY_HOST);
 
    //////////////////////////////////////////////////
-   // Communicate newly connected longer-distance processors to send procs: sending to current long distance send_procs and receiving from current long distance recv_procs
+   // Communicate newly connected longer-distance processors to send procs:
+   // sending to current longdistance send_procs and receiving from current
+   // longdistance recv_procs
    //////////////////////////////////////////////////
 
    // Get the sizes

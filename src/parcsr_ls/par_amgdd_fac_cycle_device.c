@@ -83,8 +83,8 @@ hypre_BoomerAMGDD_FAC_CFL1Jacobi_device( void *amgdd_vdata, HYPRE_Int level, HYP
       hypre_AMGDDCompGridVectorInitialize(hypre_AMGDDCompGridTemp2(compGrid), hypre_AMGDDCompGridNumOwnedNodes(compGrid), hypre_AMGDDCompGridNumNonOwnedNodes(compGrid), hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid));
    }
    hypre_AMGDDCompGridVectorCopy(hypre_AMGDDCompGridF(compGrid), hypre_AMGDDCompGridTemp2(compGrid));
-   double alpha = -relax_weight;
-   double beta = relax_weight;
+   HYPRE_Real alpha = -relax_weight;
+   HYPRE_Real beta = relax_weight;
 
    hypre_Vector *owned_u = hypre_AMGDDCompGridVectorOwned(hypre_AMGDDCompGridU(compGrid));
    hypre_Vector *nonowned_u = hypre_AMGDDCompGridVectorNonOwned(hypre_AMGDDCompGridU(compGrid));
