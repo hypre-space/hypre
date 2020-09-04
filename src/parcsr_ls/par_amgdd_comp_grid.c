@@ -53,24 +53,33 @@ hypre_AMGDDCompGridMatrix* hypre_AMGDDCompGridMatrixCreate()
 
 HYPRE_Int hypre_AMGDDCompGridMatrixDestroy(hypre_AMGDDCompGridMatrix *matrix)
 {
-   if (hypre_AMGDDCompGridMatrixOwnsOwnedMatrices(matrix))
+   if (matrix)
    {
-      if (hypre_AMGDDCompGridMatrixOwnedDiag(matrix)) hypre_CSRMatrixDestroy(hypre_AMGDDCompGridMatrixOwnedDiag(matrix));
-      if (hypre_AMGDDCompGridMatrixOwnedOffd(matrix)) hypre_CSRMatrixDestroy(hypre_AMGDDCompGridMatrixOwnedOffd(matrix));
-   }
-   else if (hypre_AMGDDCompGridMatrixOwnsOffdColIndices(matrix))
-   {
-      if (hypre_CSRMatrixJ(hypre_AMGDDCompGridMatrixOwnedOffd(matrix))) hypre_TFree(hypre_CSRMatrixJ(hypre_AMGDDCompGridMatrixOwnedOffd(matrix)), hypre_CSRMatrixMemoryLocation(hypre_AMGDDCompGridMatrixOwnedOffd(matrix)));
-      if (hypre_AMGDDCompGridMatrixOwnedOffd(matrix)) hypre_TFree(hypre_AMGDDCompGridMatrixOwnedOffd(matrix), HYPRE_MEMORY_HOST);
-   }
-   if (hypre_AMGDDCompGridMatrixNonOwnedDiag(matrix)) hypre_CSRMatrixDestroy(hypre_AMGDDCompGridMatrixNonOwnedDiag(matrix));
-   if (hypre_AMGDDCompGridMatrixNonOwnedOffd(matrix)) hypre_CSRMatrixDestroy(hypre_AMGDDCompGridMatrixNonOwnedOffd(matrix));
-   if (hypre_AMGDDCompGridMatrixRealReal(matrix)) hypre_CSRMatrixDestroy(hypre_AMGDDCompGridMatrixRealReal(matrix));
-   if (hypre_AMGDDCompGridMatrixRealGhost(matrix)) hypre_CSRMatrixDestroy(hypre_AMGDDCompGridMatrixRealGhost(matrix));
+      if (hypre_AMGDDCompGridMatrixOwnsOwnedMatrices(matrix))
+      {
+         hypre_CSRMatrixDestroy(hypre_AMGDDCompGridMatrixOwnedDiag(matrix));
+         hypre_CSRMatrixDestroy(hypre_AMGDDCompGridMatrixOwnedOffd(matrix));
+      }
+      else if (hypre_AMGDDCompGridMatrixOwnsOffdColIndices(matrix))
+      {
+         if (hypre_CSRMatrixJ(hypre_AMGDDCompGridMatrixOwnedOffd(matrix)))
+         {
+            hypre_TFree(hypre_CSRMatrixJ(hypre_AMGDDCompGridMatrixOwnedOffd(matrix)),
+                  hypre_CSRMatrixMemoryLocation(hypre_AMGDDCompGridMatrixOwnedOffd(matrix)));
+         }
 
-   hypre_TFree(matrix, HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_AMGDDCompGridMatrixOwnedOffd(matrix), HYPRE_MEMORY_HOST);
+      }
 
-   return 0;
+      hypre_CSRMatrixDestroy(hypre_AMGDDCompGridMatrixNonOwnedDiag(matrix));
+      hypre_CSRMatrixDestroy(hypre_AMGDDCompGridMatrixNonOwnedOffd(matrix));
+      hypre_CSRMatrixDestroy(hypre_AMGDDCompGridMatrixRealReal(matrix));
+      hypre_CSRMatrixDestroy(hypre_AMGDDCompGridMatrixRealGhost(matrix));
+
+      hypre_TFree(matrix, HYPRE_MEMORY_HOST);
+   }
+
+   return hypre_error_flag;
 }
 
 HYPRE_Int hypre_AMGDDCompGridMatrixSetupRealMatvec(hypre_AMGDDCompGridMatrix *A)
@@ -196,15 +205,25 @@ HYPRE_Int hypre_AMGDDCompGridVectorInitialize(hypre_AMGDDCompGridVector *vector,
 
 HYPRE_Int hypre_AMGDDCompGridVectorDestroy(hypre_AMGDDCompGridVector *vector)
 {
-   if (hypre_AMGDDCompGridVectorOwnsOwnedVector(vector))
+   if (vector)
    {
-      if (hypre_AMGDDCompGridVectorOwned(vector)) hypre_SeqVectorDestroy(hypre_AMGDDCompGridVectorOwned(vector));
+      if (hypre_AMGDDCompGridVectorOwnsOwnedVector(vector))
+      {
+         if (hypre_AMGDDCompGridVectorOwned(vector))
+         {
+            hypre_SeqVectorDestroy(hypre_AMGDDCompGridVectorOwned(vector));
+         }
+      }
+
+      if (hypre_AMGDDCompGridVectorNonOwned(vector))
+      {
+         hypre_SeqVectorDestroy(hypre_AMGDDCompGridVectorNonOwned(vector));
+      }
+
+      hypre_TFree(vector, HYPRE_MEMORY_HOST);
    }
-   if (hypre_AMGDDCompGridVectorNonOwned(vector)) hypre_SeqVectorDestroy(hypre_AMGDDCompGridVectorNonOwned(vector));
 
-   hypre_TFree(vector, HYPRE_MEMORY_HOST);
-
-   return 0;
+   return hypre_error_flag;
 }
 
 HYPRE_Real hypre_AMGDDCompGridVectorInnerProd(hypre_AMGDDCompGridVector *x, hypre_AMGDDCompGridVector *y)
@@ -387,66 +406,44 @@ hypre_AMGDDCompGrid *hypre_AMGDDCompGridCreate ()
 
 HYPRE_Int hypre_AMGDDCompGridDestroy ( hypre_AMGDDCompGrid *compGrid )
 {
-   if (hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid))
-      hypre_TFree(hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
-   if (hypre_AMGDDCompGridNonOwnedCoarseIndices(compGrid))
-      hypre_TFree(hypre_AMGDDCompGridNonOwnedCoarseIndices(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
-   if (hypre_AMGDDCompGridNonOwnedRealMarker(compGrid))
-      hypre_TFree(hypre_AMGDDCompGridNonOwnedRealMarker(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
-   if (hypre_AMGDDCompGridNonOwnedSort(compGrid))
-      hypre_TFree(hypre_AMGDDCompGridNonOwnedSort(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
-   if (hypre_AMGDDCompGridNonOwnedInvSort(compGrid))
-      hypre_TFree(hypre_AMGDDCompGridNonOwnedInvSort(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
-   if (hypre_AMGDDCompGridNonOwnedDiagMissingColIndices(compGrid))
-      hypre_TFree(hypre_AMGDDCompGridNonOwnedDiagMissingColIndices(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
-   if (hypre_AMGDDCompGridOwnedCoarseIndices(compGrid))
-      hypre_TFree(hypre_AMGDDCompGridOwnedCoarseIndices(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
+   HYPRE_MemoryLocation  memory_location;
 
-   if (hypre_AMGDDCompGridA(compGrid))
+   if (compGrid)
+   {
+      memory_location = hypre_AMGDDCompGridMemoryLocation(compGrid);
+
+      hypre_TFree(hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid), memory_location);
+      hypre_TFree(hypre_AMGDDCompGridNonOwnedCoarseIndices(compGrid), memory_location);
+      hypre_TFree(hypre_AMGDDCompGridNonOwnedRealMarker(compGrid), memory_location);
+      hypre_TFree(hypre_AMGDDCompGridNonOwnedSort(compGrid), memory_location);
+      hypre_TFree(hypre_AMGDDCompGridNonOwnedInvSort(compGrid), memory_location);
+      hypre_TFree(hypre_AMGDDCompGridNonOwnedDiagMissingColIndices(compGrid), memory_location);
+      hypre_TFree(hypre_AMGDDCompGridOwnedCoarseIndices(compGrid), memory_location);
+      hypre_TFree(hypre_AMGDDCompGridL1Norms(compGrid), memory_location);
+      hypre_TFree(hypre_AMGDDCompGridCFMarkerArray(compGrid), memory_location);
+      hypre_TFree(hypre_AMGDDCompGridOwnedCMask(compGrid), memory_location);
+      hypre_TFree(hypre_AMGDDCompGridOwnedFMask(compGrid), memory_location);
+      hypre_TFree(hypre_AMGDDCompGridNonOwnedCMask(compGrid), memory_location);
+      hypre_TFree(hypre_AMGDDCompGridNonOwnedFMask(compGrid), memory_location);
+      hypre_TFree(hypre_AMGDDCompGridOwnedRelaxOrdering(compGrid), memory_location);
+      hypre_TFree(hypre_AMGDDCompGridNonOwnedRelaxOrdering(compGrid), memory_location);
+
       hypre_AMGDDCompGridMatrixDestroy(hypre_AMGDDCompGridA(compGrid));
-   if (hypre_AMGDDCompGridP(compGrid))
       hypre_AMGDDCompGridMatrixDestroy(hypre_AMGDDCompGridP(compGrid));
-   if (hypre_AMGDDCompGridR(compGrid))
       hypre_AMGDDCompGridMatrixDestroy(hypre_AMGDDCompGridR(compGrid));
-
-   if (hypre_AMGDDCompGridU(compGrid))
       hypre_AMGDDCompGridVectorDestroy(hypre_AMGDDCompGridU(compGrid));
-   if (hypre_AMGDDCompGridF(compGrid))
       hypre_AMGDDCompGridVectorDestroy(hypre_AMGDDCompGridF(compGrid));
-   if (hypre_AMGDDCompGridT(compGrid))
       hypre_AMGDDCompGridVectorDestroy(hypre_AMGDDCompGridT(compGrid));
-   if (hypre_AMGDDCompGridS(compGrid))
       hypre_AMGDDCompGridVectorDestroy(hypre_AMGDDCompGridS(compGrid));
-   if (hypre_AMGDDCompGridQ(compGrid))
       hypre_AMGDDCompGridVectorDestroy(hypre_AMGDDCompGridQ(compGrid));
-   if (hypre_AMGDDCompGridTemp(compGrid))
       hypre_AMGDDCompGridVectorDestroy(hypre_AMGDDCompGridTemp(compGrid));
-   if (hypre_AMGDDCompGridTemp2(compGrid))
       hypre_AMGDDCompGridVectorDestroy(hypre_AMGDDCompGridTemp2(compGrid));
-   if (hypre_AMGDDCompGridTemp3(compGrid))
       hypre_AMGDDCompGridVectorDestroy(hypre_AMGDDCompGridTemp3(compGrid));
 
-   if (hypre_AMGDDCompGridL1Norms(compGrid))
-      hypre_TFree(hypre_AMGDDCompGridL1Norms(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
-   if (hypre_AMGDDCompGridCFMarkerArray(compGrid))
-      hypre_TFree(hypre_AMGDDCompGridCFMarkerArray(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
-   if (hypre_AMGDDCompGridOwnedCMask(compGrid))
-      hypre_TFree(hypre_AMGDDCompGridOwnedCMask(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
-   if (hypre_AMGDDCompGridOwnedFMask(compGrid))
-      hypre_TFree(hypre_AMGDDCompGridOwnedFMask(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
-   if (hypre_AMGDDCompGridNonOwnedCMask(compGrid))
-      hypre_TFree(hypre_AMGDDCompGridNonOwnedCMask(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
-   if (hypre_AMGDDCompGridNonOwnedFMask(compGrid))
-      hypre_TFree(hypre_AMGDDCompGridNonOwnedFMask(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
-   if (hypre_AMGDDCompGridOwnedRelaxOrdering(compGrid))
-      hypre_TFree(hypre_AMGDDCompGridOwnedRelaxOrdering(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
-   if (hypre_AMGDDCompGridNonOwnedRelaxOrdering(compGrid))
-      hypre_TFree(hypre_AMGDDCompGridNonOwnedRelaxOrdering(compGrid), hypre_AMGDDCompGridMemoryLocation(compGrid));
+      hypre_TFree(compGrid, HYPRE_MEMORY_HOST);
+   }
 
-   hypre_TFree(compGrid, HYPRE_MEMORY_HOST);
-
-
-   return 0;
+   return hypre_error_flag;
 }
 
 HYPRE_Int hypre_AMGDDCompGridInitialize( hypre_ParAMGDDData *amgdd_data, HYPRE_Int padding, HYPRE_Int level )

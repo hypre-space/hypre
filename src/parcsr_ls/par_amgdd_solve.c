@@ -106,8 +106,11 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
       hypre_AMGDDCompGridMatrixOwnedOffd(hypre_AMGDDCompGridA(compGrid)) = hypre_ParCSRMatrixOffd(A);
    }
 
-   hypre_AMGDDCompGridVectorOwned(hypre_AMGDDCompGridU(compGrid)) = hypre_ParVectorLocalVector(u);
-   hypre_AMGDDCompGridVectorOwned(hypre_AMGDDCompGridF(compGrid)) = hypre_ParVectorLocalVector(f);
+   if (compGrid)
+   {
+      hypre_AMGDDCompGridVectorOwned(hypre_AMGDDCompGridU(compGrid)) = hypre_ParVectorLocalVector(u);
+      hypre_AMGDDCompGridVectorOwned(hypre_AMGDDCompGridF(compGrid)) = hypre_ParVectorLocalVector(f);
+   }
 
    /*-----------------------------------------------------------------------
     *    Compute initial fine-grid residual and print
