@@ -5652,16 +5652,19 @@ main( hypre_int argc,
       }
 
       HYPRE_GMRESGetPrecond(pcg_solver, &pcg_precond_gotten);
-      if (pcg_precond_gotten != pcg_precond)
+      if (pcg_precond_gotten != ((solver_id == 3) ? amg_precond : pcg_precond))
       {
          hypre_printf("HYPRE_GMRESGetPrecond got bad precond\n");
          return(-1);
       }
       else
+      {
          if (myid == 0)
+         {
             hypre_printf("HYPRE_GMRESGetPrecond got good precond\n");
-      HYPRE_GMRESSetup
-         (pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
+         }
+      }
+      HYPRE_GMRESSetup(pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
@@ -5671,8 +5674,7 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("GMRES Solve");
       hypre_BeginTiming(time_index);
 
-      HYPRE_GMRESSolve
-         (pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
+      HYPRE_GMRESSolve(pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
@@ -5714,12 +5716,15 @@ main( hypre_int argc,
 
       HYPRE_ParCSRGMRESDestroy(pcg_solver);
 
-      if (solver_id == 3 || solver_id == 15)
+      if (solver_id == 3)
+      {
+         HYPRE_BoomerAMGDestroy(amg_precond);
+      }
+      else if (solver_id == 15)
       {
          HYPRE_BoomerAMGDestroy(pcg_precond);
       }
-
-      if (solver_id == 7)
+      else if (solver_id == 7)
       {
          HYPRE_ParCSRPilutDestroy(pcg_precond);
       }
