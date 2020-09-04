@@ -71,7 +71,9 @@ hypre_BoomerAMGDD_FAC_Jacobi_device( void *amgdd_vdata, HYPRE_Int level )
 }
 
 HYPRE_Int
-hypre_BoomerAMGDD_FAC_CFL1Jacobi_device( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int relax_set )
+hypre_BoomerAMGDD_FAC_CFL1Jacobi_device( void *amgdd_vdata,
+                                         HYPRE_Int level,
+                                         HYPRE_Int relax_set )
 {
    hypre_ParAMGDDData *amgdd_data = (hypre_ParAMGDDData*) amgdd_vdata;
    hypre_AMGDDCompGrid *compGrid = hypre_ParAMGDDDataCompGrid(amgdd_data)[level];
@@ -158,7 +160,7 @@ hypre_BoomerAMGDD_FAC_CFL1Jacobi_device( void *amgdd_vdata, HYPRE_Int level, HYP
             hypre_AMGDDCompGridNonOwnedFMask(compGrid));
    }
 
-   return 0;
+   return hypre_error_flag;
 }
 
 

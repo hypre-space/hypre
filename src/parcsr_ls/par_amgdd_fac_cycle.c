@@ -32,10 +32,11 @@ hypre_BoomerAMGDD_FAC( void *amgdd_vdata, HYPRE_Int first_iteration )
    return hypre_error_flag;
 }
 
-HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle( void      *amgdd_vdata,
-                                       HYPRE_Int  level,
-                                       HYPRE_Int  cycle_type,
-                                       HYPRE_Int  first_iteration )
+HYPRE_Int
+hypre_BoomerAMGDD_FAC_Cycle( void      *amgdd_vdata,
+                             HYPRE_Int  level,
+                             HYPRE_Int  cycle_type,
+                             HYPRE_Int  first_iteration )
 {
    hypre_ParAMGDDData    *amgdd_data = (hypre_ParAMGDDData*) amgdd_vdata;
    hypre_ParAMGData      *amg_data   = hypre_ParAMGDDDataAMG(amgdd_data);
@@ -74,7 +75,9 @@ HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle( void      *amgdd_vdata,
    return hypre_error_flag;
 }
 
-HYPRE_Int hypre_BoomerAMGDD_FAC_FCycle( void *amgdd_vdata, HYPRE_Int first_iteration )
+HYPRE_Int
+ hypre_BoomerAMGDD_FAC_FCycle( void     *amgdd_vdata,
+                               HYPRE_Int first_iteration )
 {
    hypre_ParAMGDDData    *amgdd_data = (hypre_ParAMGDDData*) amgdd_vdata;
    hypre_ParAMGData      *amg_data   = hypre_ParAMGDDDataAMG(amgdd_data);
@@ -163,7 +166,9 @@ hypre_BoomerAMGDD_FAC_Restrict( hypre_AMGDDCompGrid *compGrid_f,
 }
 
 HYPRE_Int
-hypre_BoomerAMGDD_FAC_Relax( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param )
+hypre_BoomerAMGDD_FAC_Relax( void      *amgdd_vdata,
+                             HYPRE_Int  level,
+                             HYPRE_Int  cycle_param )
 {
    hypre_ParAMGDDData   *amgdd_data = (hypre_ParAMGDDData*) amgdd_vdata;
    hypre_AMGDDCompGrid  *compGrid   = hypre_ParAMGDDDataCompGrid(amgdd_data)[level];
@@ -198,7 +203,9 @@ hypre_BoomerAMGDD_FAC_Relax( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle
 }
 
 HYPRE_Int
-hypre_BoomerAMGDD_FAC_Jacobi( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param )
+hypre_BoomerAMGDD_FAC_Jacobi( void *amgdd_vdata,
+                              HYPRE_Int level,
+                              HYPRE_Int cycle_param )
 {
 #if defined(HYPRE_USING_CUDA)
    return hypre_BoomerAMGDD_FAC_Jacobi_device(amgdd_vdata, level);
@@ -272,7 +279,9 @@ hypre_BoomerAMGDD_FAC_Jacobi( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycl
 }
 
 HYPRE_Int
-hypre_BoomerAMGDD_FAC_GaussSeidel( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param )
+hypre_BoomerAMGDD_FAC_GaussSeidel( void *amgdd_vdata,
+                                   HYPRE_Int level,
+                                   HYPRE_Int cycle_param )
 {
    hypre_ParAMGDDData *amgdd_data = (hypre_ParAMGDDData*) amgdd_vdata;
    hypre_AMGDDCompGrid *compGrid = hypre_ParAMGDDDataCompGrid(amgdd_data)[level];
@@ -360,7 +369,10 @@ hypre_BoomerAMGDD_FAC_GaussSeidel( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int
    return hypre_error_flag;
 }
 
-HYPRE_Int hypre_BoomerAMGDD_FAC_OrderedGaussSeidel( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param )
+HYPRE_Int
+hypre_BoomerAMGDD_FAC_OrderedGaussSeidel( void       *amgdd_vdata,
+                                          HYPRE_Int   level,
+                                          HYPRE_Int   cycle_param )
 {
    hypre_ParAMGDDData        *amgdd_data = (hypre_ParAMGDDData*) amgdd_vdata;
    hypre_AMGDDCompGrid       *compGrid = hypre_ParAMGDDDataCompGrid(amgdd_data)[level];
@@ -465,7 +477,9 @@ HYPRE_Int hypre_BoomerAMGDD_FAC_OrderedGaussSeidel( void *amgdd_vdata, HYPRE_Int
 }
 
 HYPRE_Int
-hypre_BoomerAMGDD_FAC_CFL1Jacobi( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param )
+hypre_BoomerAMGDD_FAC_CFL1Jacobi( void      *amgdd_vdata,
+                                  HYPRE_Int  level,
+                                  HYPRE_Int  cycle_param )
 {
 #if defined(HYPRE_USING_CUDA)
    if (cycle_param == 1)
@@ -504,7 +518,9 @@ hypre_BoomerAMGDD_FAC_CFL1Jacobi( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int 
 
 
 HYPRE_Int
-hypre_BoomerAMGDD_FAC_CFL1Jacobi_cpu( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int relax_set )
+hypre_BoomerAMGDD_FAC_CFL1Jacobi_cpu( void      *amgdd_vdata,
+                                      HYPRE_Int  level,
+                                      HYPRE_Int  relax_set )
 {
    HYPRE_Int            i, j;
 
@@ -598,5 +614,5 @@ hypre_BoomerAMGDD_FAC_CFL1Jacobi_cpu( void *amgdd_vdata, HYPRE_Int level, HYPRE_
       }
    }
 
-   return 0;
+   return hypre_error_flag;
 }
