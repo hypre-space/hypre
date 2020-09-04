@@ -14,7 +14,6 @@
 
 typedef struct
 {
-
    /* The underlying AMG hierarchy */
    hypre_ParAMGData          *amg_data;
 
@@ -50,4 +49,3 @@ typedef struct
 #define hypre_ParAMGDDDataUserFACRelaxation(amgdd_data) ((amgdd_data)->amgddUserFACRelaxation)
 
 #endif
-

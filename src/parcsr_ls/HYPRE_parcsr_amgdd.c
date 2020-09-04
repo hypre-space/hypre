@@ -228,8 +228,36 @@ HYPRE_BoomerAMGDDSetUserFACRelaxation( HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_BoomerAMGDDGetAMG( HYPRE_Solver solver,
-                           HYPRE_Solver        * amg_solver )
+HYPRE_BoomerAMGDDGetAMG( HYPRE_Solver  solver,
+                         HYPRE_Solver *amg_solver )
 {
    return( hypre_BoomerAMGDDGetAMG( (void *) solver, (void **) amg_solver ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGDDGetFinalRelativeResidualNorm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGDDGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
+                                               HYPRE_Real   *rel_resid_norm )
+{
+   HYPRE_Solver amg_solver;
+
+   HYPRE_BoomerAMGDDGetAMG(solver, &amg_solver);
+   return( hypre_BoomerAMGGetRelResidualNorm( (void *) amg_solver, rel_resid_norm ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGDDGetNumIterations
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGDDGetNumIterations( HYPRE_Solver   solver,
+                                   HYPRE_Int     *num_iterations )
+{
+   HYPRE_Solver amg_solver;
+
+   HYPRE_BoomerAMGDDGetAMG(solver, &amg_solver);
+   return( hypre_BoomerAMGGetNumIterations( (void *) amg_solver, num_iterations ) );
 }
