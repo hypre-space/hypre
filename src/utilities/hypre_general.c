@@ -8,6 +8,14 @@
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_UMPIRE)
+#include "umpire/interface/umpire.h"
+//#include "umpire/strategy/DynamicPool.hpp"
+//#include "umpire/strategy/AllocationAdvisor.hpp"
+//#include "umpire/strategy/MonotonicAllocationStrategy.hpp"
+//#include "umpire/util/Macros.hpp"
+#endif
+
 /*
 #if defined(HYPRE_USING_KOKKOS)
 #include <Kokkos_Core.hpp>
@@ -169,6 +177,31 @@ HYPRE_Init()
 
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_OMPOffloadOn();
+#endif
+
+#if defined(HYPRE_USING_UMPIRE)
+   printf("WARNING :: EXPERIMENTAL UMPIRE ALLOCATORS IN USE\n");
+
+   /* Need to define pools here unless they are already available */
+   if (1){
+   umpire_resourcemanager rm;
+   umpire_resourcemanager_get_instance(&rm);
+
+
+   umpire_allocator um_allocator;
+   umpire_resourcemanager_get_allocator_by_name(&rm, "UM", &um_allocator);
+
+   size_t pool_size = 1024*1024*1024;
+   pool_size*=4;
+
+   umpire_allocator um_pool;
+   umpire_resourcemanager_make_allocator_pool(&rm, "UM_POOL", um_allocator, pool_size , 512, &um_pool);
+
+   umpire_allocator dev_allocator;
+   umpire_resourcemanager_get_allocator_by_name(&rm, "DEVICE", &dev_allocator);
+   umpire_allocator dev_pool;
+   umpire_resourcemanager_make_allocator_pool(&rm, "DEVICE_POOL", dev_allocator, pool_size,  512, &dev_pool);
+   }
 #endif
 
 #ifdef HYPRE_USING_CUB_ALLOCATOR

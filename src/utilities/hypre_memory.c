@@ -16,6 +16,10 @@
 #include "_hypre_struct_mv.h"
 #include "_hypre_struct_mv.hpp"
 
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_UMPIRE)
+#include "umpire/interface/umpire.h"
+#endif
+
 #ifdef HYPRE_USE_UMALLOC
 #undef HYPRE_USE_UMALLOC
 #endif
@@ -151,6 +155,13 @@ hypre_DeviceMalloc(size_t size, HYPRE_Int zeroinit)
 #elif defined(HYPRE_USING_CUDA)
 #if defined(HYPRE_USING_CUB_ALLOCATOR)
    HYPRE_CUDA_CALL( hypre_CachingMallocDevice(&ptr, size) );
+#elif defined(HYPRE_USING_UMPIRE)
+   umpire_resourcemanager rm;
+   umpire_resourcemanager_get_instance(&rm);
+   umpire_allocator dev_allocator;
+   umpire_resourcemanager_get_allocator_by_name(&rm, "DEVICE_POOL", &dev_allocator);
+   ptr = umpire_allocator_allocate(&dev_allocator, size);
+   //printf("Umpire allocated device pointer %p of size %zu\n",ptr,size);
 #else
    HYPRE_CUDA_CALL( cudaMalloc(&ptr, size) );
 #endif
@@ -173,6 +184,13 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #if defined(HYPRE_USING_CUB_ALLOCATOR)
    HYPRE_CUDA_CALL( hypre_CachingMallocManaged(&ptr, size) );
+#elif defined(HYPRE_USING_UMPIRE)
+umpire_resourcemanager rm;
+   umpire_resourcemanager_get_instance(&rm);
+   umpire_allocator um_allocator;
+   umpire_resourcemanager_get_allocator_by_name(&rm, "UM_POOL", &um_allocator);
+   ptr = umpire_allocator_allocate(&um_allocator, size);
+//printf("Umpire allocated managed pointer %p of size %zu\n",ptr,size);
 #else
    HYPRE_CUDA_CALL( cudaMallocManaged(&ptr, size, cudaMemAttachGlobal) );
 #endif
@@ -274,6 +292,12 @@ hypre_DeviceFree(void *ptr)
 #elif defined(HYPRE_USING_CUDA)
 #ifdef HYPRE_USING_CUB_ALLOCATOR
    HYPRE_CUDA_CALL( hypre_CachingFreeDevice(ptr) );
+#elif defined(HYPRE_USING_UMPIRE)
+   umpire_resourcemanager rm;
+   umpire_resourcemanager_get_instance(&rm);
+   umpire_allocator allocator;
+   umpire_resourcemanager_get_allocator_by_name(&rm, "DEVICE_POOL", &allocator);
+   umpire_allocator_deallocate(&allocator, ptr);
 #else
    HYPRE_CUDA_CALL( cudaFree(ptr) );
 #endif
@@ -286,6 +310,12 @@ hypre_UnifiedFree(void *ptr)
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #ifdef HYPRE_USING_CUB_ALLOCATOR
    HYPRE_CUDA_CALL( hypre_CachingFreeManaged(ptr) );
+#elif defined(HYPRE_USING_UMPIRE)
+   umpire_resourcemanager rm;
+   umpire_resourcemanager_get_instance(&rm);
+   umpire_allocator allocator;
+   umpire_resourcemanager_get_allocator_by_name(&rm, "UM_POOL", &allocator);
+   umpire_allocator_deallocate(&allocator, ptr);
 #else
    HYPRE_CUDA_CALL( cudaFree(ptr) );
 #endif
