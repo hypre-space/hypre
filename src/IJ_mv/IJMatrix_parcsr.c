@@ -2632,7 +2632,9 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
       /* move data into ParCSRMatrix if not there already */
       if (hypre_AuxParCSRMatrixNeedAux(aux_matrix))
       {
-         HYPRE_Int *diag_array, *offd_array;
+         HYPRE_Int  *diag_array;
+         HYPRE_Int  *offd_array;
+
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Init2");
          diag_array = hypre_CTAlloc(HYPRE_Int, max_num_threads);
          offd_array = hypre_CTAlloc(HYPRE_Int, max_num_threads);
@@ -2642,17 +2644,17 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
          num_rownnz = hypre_AuxParCSRMatrixLocalNumRownnz(aux_matrix);
          rownnz = hypre_AuxParCSRMatrixRownnz(aux_matrix);
          diag_pos = hypre_CTAlloc(HYPRE_Int, num_rownnz);
-         i_diag = 0;
-         i_offd = 0;
+         i_diag = i_offd = 0;
          HYPRE_ANNOTATE_REGION_END("%s", "Init2");
+
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel private(i, j, i_diag, i_offd)
 #endif
          {
-            HYPRE_Int *local_j;
+            HYPRE_Int     *local_j;
             HYPRE_Complex *local_data;
-            HYPRE_Int ii, rest, size, ns, ne;
-            HYPRE_Int num_threads, my_thread_num;
+            HYPRE_Int      ii, rest, size, ns, ne;
+            HYPRE_Int      num_threads, my_thread_num;
 
             num_threads = hypre_NumActiveThreads();
             my_thread_num = hypre_GetThreadNum();
@@ -2672,8 +2674,7 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
             }
 
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Count i_diag/offd");
-            i_diag = 0;
-            i_offd = 0;
+            i_diag = i_offd = 0;
             if (rownnz != NULL)
             {
                for (i = ns; i < ne; i++)
@@ -2725,32 +2726,41 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
 #endif
             if (my_thread_num == 0)
             {
-              i_diag = 0;
-              i_offd = 0;
-              for (i = 0; i < num_threads; i++)
-              {
-                 i_diag += diag_array[i];
-                 i_offd += offd_array[i];
-                 diag_array[i] = i_diag;
-                 offd_array[i] = i_offd;
-              }
-              diag_i[num_rows] = i_diag;
-              offd_i[num_rows] = i_offd;
-              if (hypre_CSRMatrixJ(diag))
-                 hypre_TFree(hypre_CSRMatrixJ(diag));
-              if (hypre_CSRMatrixData(diag))
-                 hypre_TFree(hypre_CSRMatrixData(diag));
-              if (hypre_CSRMatrixJ(offd))
-                 hypre_TFree(hypre_CSRMatrixJ(offd));
-              if (hypre_CSRMatrixData(offd))
-                 hypre_TFree(hypre_CSRMatrixData(offd));
-              diag_j = hypre_CTAlloc(HYPRE_Int,i_diag);
-              diag_data = hypre_CTAlloc(HYPRE_Complex,i_diag);
-              if (i_offd > 0)
-              {
-                 offd_j = hypre_CTAlloc(HYPRE_Int,i_offd);
-                 offd_data = hypre_CTAlloc(HYPRE_Complex,i_offd);
-              }
+               i_diag = i_offd = 0;
+               for (i = 0; i < num_threads; i++)
+               {
+                  i_diag += diag_array[i];
+                  i_offd += offd_array[i];
+                  diag_array[i] = i_diag;
+                  offd_array[i] = i_offd;
+               }
+               diag_i[num_rows] = i_diag;
+               offd_i[num_rows] = i_offd;
+
+               if (hypre_CSRMatrixJ(diag))
+               {
+                  hypre_TFree(hypre_CSRMatrixJ(diag));
+               }
+               if (hypre_CSRMatrixData(diag))
+               {
+                  hypre_TFree(hypre_CSRMatrixData(diag));
+               }
+               if (hypre_CSRMatrixJ(offd))
+               {
+                  hypre_TFree(hypre_CSRMatrixJ(offd));
+               }
+               if (hypre_CSRMatrixData(offd))
+               {
+                  hypre_TFree(hypre_CSRMatrixData(offd));
+               }
+
+               diag_j    = hypre_CTAlloc(HYPRE_Int, i_diag);
+               diag_data = hypre_CTAlloc(HYPRE_Complex, i_diag);
+               if (i_offd > 0)
+               {
+                  offd_j = hypre_CTAlloc(HYPRE_Int,i_offd);
+                  offd_data = hypre_CTAlloc(HYPRE_Complex,i_offd);
+               }
             }
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
@@ -2832,29 +2842,24 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
             {
                for (i = ns; i < (ne-1); i++)
                {
-                  for (ii = rownnz[i]; ii < (rownnz[i+1] - 1); ii++)
-                  {
-                     diag_i[ii+1] = diag_i[ii];
-                     offd_i[ii+1] = offd_i[ii];
-                  }
+                  ii = rownnz[i];
+                  size = (rownnz[i+1] - rownnz[i])*sizeof(HYPRE_Int);
+                  memset(&diag_i[ii+1], diag_i[ii], size);
+                  memset(&offd_i[ii+1], offd_i[ii], size);
                }
 
+               ii = rownnz[ne-1];
                if (my_thread_num < (num_threads - 1))
                {
-                  for (ii = rownnz[ne-1]; ii < (rownnz[i+1] - 1); ii++)
-                  {
-                     diag_i[ii+1] = diag_i[ii];
-                     offd_i[ii+1] = offd_i[ii];
-                  }
+                  size = (rownnz[ne] - rownnz[ne-1])*sizeof(HYPRE_Int);
                }
                else
                {
-                  for (ii = rownnz[ne-1]; ii < (num_rows - 1); ii++)
-                  {
-                     diag_i[ii+1] = diag_i[ii];
-                     offd_i[ii+1] = offd_i[ii];
-                  }
+                  size = (num_rows - rownnz[ne-1])*sizeof(HYPRE_Int);
                }
+               memset(&diag_i[ii+1], diag_i[ii], size);
+               memset(&offd_i[ii+1], offd_i[ii], size);
+
             }
             HYPRE_ANNOTATE_REGION_END("%s", "Correct i_diag/offd");
 

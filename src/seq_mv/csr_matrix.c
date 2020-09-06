@@ -131,20 +131,25 @@ hypre_CSRMatrixSetDataOwner( hypre_CSRMatrix *matrix,
 HYPRE_Int
 hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
 {
-   HYPRE_Int    ierr=0;
-   HYPRE_Int  num_rows = hypre_CSRMatrixNumRows(matrix);
-   HYPRE_Int  *A_i = hypre_CSRMatrixI(matrix);
-   HYPRE_Int  *Arownnz;
+   HYPRE_Int    num_rows = hypre_CSRMatrixNumRows(matrix);
+   HYPRE_Int   *A_i = hypre_CSRMatrixI(matrix);
+   HYPRE_Int   *Arownnz;
 
-   HYPRE_Int i, adiag;
-   HYPRE_Int irownnz=0;
+   HYPRE_Int    irownnz = 0;
+   HYPRE_Int    ierr = 0;
+   HYPRE_Int    i;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   for (i=0; i < num_rows; i++)
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) reduction(+:irownnz) HYPRE_SMP_SCHEDULE
+#endif
+   for (i = 0; i < num_rows; i++)
    {
-      adiag = (A_i[i+1] - A_i[i]);
-      if(adiag > 0) irownnz++;
+      if ((A_i[i+1] - A_i[i]) > 0)
+      {
+         irownnz++;
+      }
    }
 
    hypre_CSRMatrixNumRownnz(matrix) = irownnz;
@@ -157,10 +162,12 @@ hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
    {
       Arownnz = hypre_CTAlloc(HYPRE_Int, irownnz);
       irownnz = 0;
-      for (i=0; i < num_rows; i++)
+      for (i = 0; i < num_rows; i++)
       {
-         adiag = A_i[i+1]-A_i[i];
-         if(adiag > 0) Arownnz[irownnz++] = i;
+         if ((A_i[i+1] - A_i[i]) > 0)
+         {
+            Arownnz[irownnz++] = i;
+         }
       }
       hypre_CSRMatrixRownnz(matrix) = Arownnz;
    }
