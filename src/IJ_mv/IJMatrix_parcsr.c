@@ -244,11 +244,11 @@ hypre_IJMatrixSetMaxOffProcElmtsParCSR(hypre_IJMatrix *matrix,
  *****************************************************************************/
 
 HYPRE_Int
-hypre_IJMatrixInitializeParCSR(hypre_IJMatrix *matrix)
+hypre_IJMatrixInitializeParCSR( hypre_IJMatrix *matrix )
 {
-	hypre_ParCSRMatrix *par_matrix = (hypre_ParCSRMatrix *) hypre_IJMatrixObject(matrix);
-	hypre_AuxParCSRMatrix *aux_matrix = (hypre_AuxParCSRMatrix *) hypre_IJMatrixTranslator(matrix);
-   HYPRE_Int local_num_rows;
+   hypre_ParCSRMatrix    *par_matrix = (hypre_ParCSRMatrix *) hypre_IJMatrixObject(matrix);
+   hypre_AuxParCSRMatrix *aux_matrix = (hypre_AuxParCSRMatrix *) hypre_IJMatrixTranslator(matrix);
+   HYPRE_Int              local_num_rows;
 
    if (hypre_IJMatrixAssembleFlag(matrix) == 0)
    {

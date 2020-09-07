@@ -373,6 +373,7 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
 
    hypre_SStructPMatrix  *pA;
    hypre_IJMatrix        *ij_Ahat;
+   hypre_AuxParCSRMatrix *aux_matrix;
 
    HYPRE_Int             *split;
    hypre_BoxArrayArray ***convert_boxaa;
@@ -392,6 +393,7 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    hypre_IndexRef         ilower, iupper;
 
    HYPRE_Int              nrows;
+   HYPRE_Int              ncols;
    HYPRE_Int             *row_sizes;
    HYPRE_Complex         *values;
 
@@ -408,6 +410,7 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    /* Get row and column ranges */
    HYPRE_IJMatrixGetLocalRange(ij_A, &sizes[0], &sizes[1], &sizes[2], &sizes[3]);
    nrows = sizes[1] - sizes[0] + 1;
+   ncols = sizes[3] - sizes[2] + 1;
 
    /* Find boxes to be converted */
    HYPRE_ANNOTATE_REGION_BEGIN("%s", "Find boxes");
@@ -519,12 +522,12 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_ANNOTATE_REGION_BEGIN("%s", "Create Matrix");
    HYPRE_IJMatrixCreate(comm, sizes[0], sizes[1], sizes[2], sizes[3], &ij_Ahat);
    HYPRE_IJMatrixSetObjectType(ij_Ahat, HYPRE_PARCSR);
-   HYPRE_IJMatrixSetRowSizes(ij_Ahat, (const HYPRE_Int *) row_sizes);
+   hypre_AuxParCSRMatrixCreate(&aux_matrix, nrows, ncols, row_sizes);
+   hypre_IJMatrixTranslator(ij_Ahat) = aux_matrix;
    HYPRE_IJMatrixInitialize(ij_Ahat);
    HYPRE_ANNOTATE_REGION_END("%s", "Create Matrix");
 
-   /* Free/Allocate memory */
-   hypre_TFree(row_sizes);
+   /* Allocate memory */
    values = hypre_CTAlloc(HYPRE_Complex, nvalues);
 
    /* Set entries of ij_Ahat */
