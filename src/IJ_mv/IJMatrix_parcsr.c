@@ -1556,8 +1556,8 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix       *matrix,
 HYPRE_Int
 hypre_IJMatrixDestroyParCSR(hypre_IJMatrix *matrix)
 {
-	hypre_ParCSRMatrixDestroy((hypre_ParCSRMatrix *)hypre_IJMatrixObject(matrix));
-	hypre_AuxParCSRMatrixDestroy((hypre_AuxParCSRMatrix*)hypre_IJMatrixTranslator(matrix));
+   hypre_ParCSRMatrixDestroy((hypre_ParCSRMatrix *)hypre_IJMatrixObject(matrix));
+   hypre_AuxParCSRMatrixDestroy((hypre_AuxParCSRMatrix*)hypre_IJMatrixTranslator(matrix));
 
    return hypre_error_flag;
 }
@@ -2850,9 +2850,7 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
                }
                memset(&diag_i[ii+1], diag_i[ii], size);
                memset(&offd_i[ii+1], offd_i[ii], size);
-
             }
-
          } /* end parallel region */
 
          hypre_TFree(diag_array);
