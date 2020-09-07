@@ -584,8 +584,8 @@ typedef struct
    hypre_CSRMatrix      *real_real;  // Domain: nonowned real. Range: nonowned real.
    hypre_CSRMatrix      *real_ghost; // Domain: nonowned ghost. Range: nonowned real.
 
-   HYPRE_Int            owns_owned_matrices;
-   HYPRE_Int            owns_offd_col_indices;
+   HYPRE_Int             owns_owned_matrices;
+   HYPRE_Int             owns_offd_col_indices;
 
 } hypre_AMGDDCompGridMatrix;
 
@@ -593,14 +593,14 @@ typedef struct
  * Accessor functions for the AMGDDCompGridMatrix structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_AMGDDCompGridMatrixOwnedDiag(matrix)            ((matrix) -> owned_diag)
-#define hypre_AMGDDCompGridMatrixOwnedOffd(matrix)            ((matrix) -> owned_offd)
-#define hypre_AMGDDCompGridMatrixNonOwnedDiag(matrix)            ((matrix) -> nonowned_diag)
-#define hypre_AMGDDCompGridMatrixNonOwnedOffd(matrix)            ((matrix) -> nonowned_offd)
-#define hypre_AMGDDCompGridMatrixRealReal(matrix)            ((matrix) -> real_real)
-#define hypre_AMGDDCompGridMatrixRealGhost(matrix)            ((matrix) -> real_ghost)
-#define hypre_AMGDDCompGridMatrixOwnsOwnedMatrices(matrix)       ((matrix) -> owns_owned_matrices)
-#define hypre_AMGDDCompGridMatrixOwnsOffdColIndices(matrix)         ((matrix) -> owns_offd_col_indices)
+#define hypre_AMGDDCompGridMatrixOwnedDiag(matrix)          ((matrix) -> owned_diag)
+#define hypre_AMGDDCompGridMatrixOwnedOffd(matrix)          ((matrix) -> owned_offd)
+#define hypre_AMGDDCompGridMatrixNonOwnedDiag(matrix)       ((matrix) -> nonowned_diag)
+#define hypre_AMGDDCompGridMatrixNonOwnedOffd(matrix)       ((matrix) -> nonowned_offd)
+#define hypre_AMGDDCompGridMatrixRealReal(matrix)           ((matrix) -> real_real)
+#define hypre_AMGDDCompGridMatrixRealGhost(matrix)          ((matrix) -> real_ghost)
+#define hypre_AMGDDCompGridMatrixOwnsOwnedMatrices(matrix)  ((matrix) -> owns_owned_matrices)
+#define hypre_AMGDDCompGridMatrixOwnsOffdColIndices(matrix) ((matrix) -> owns_offd_col_indices)
 
 /*--------------------------------------------------------------------------
  * AMGDDCompGridVector
@@ -620,10 +620,10 @@ typedef struct
  * Accessor functions for the AMGDDCompGridVector structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_AMGDDCompGridVectorOwned(matrix)            ((matrix) -> owned_vector)
-#define hypre_AMGDDCompGridVectorNonOwned(matrix)            ((matrix) -> nonowned_vector)
-#define hypre_AMGDDCompGridVectorNumReal(vector)            ((vector) -> num_real)
-#define hypre_AMGDDCompGridVectorOwnsOwnedVector(matrix)       ((matrix) -> owns_owned_vector)
+#define hypre_AMGDDCompGridVectorOwned(matrix)           ((matrix) -> owned_vector)
+#define hypre_AMGDDCompGridVectorNonOwned(matrix)        ((matrix) -> nonowned_vector)
+#define hypre_AMGDDCompGridVectorNumReal(vector)         ((vector) -> num_real)
+#define hypre_AMGDDCompGridVectorOwnsOwnedVector(matrix) ((matrix) -> owns_owned_vector)
 
 /*--------------------------------------------------------------------------
  * hypre_AMGDDCompGrid
@@ -680,47 +680,45 @@ typedef struct
  * Accessor functions for the Comp Grid structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_AMGDDCompGridLevel(compGrid)               ((compGrid) -> level)
-#define hypre_AMGDDCompGridMemoryLocation(compGrid)               ((compGrid) -> memory_location)
-#define hypre_AMGDDCompGridFirstGlobalIndex(compGrid)               ((compGrid) -> first_global_index)
-#define hypre_AMGDDCompGridLastGlobalIndex(compGrid)               ((compGrid) -> last_global_index)
-#define hypre_AMGDDCompGridNumOwnedNodes(compGrid)               ((compGrid) -> num_owned_nodes)
-#define hypre_AMGDDCompGridNumNonOwnedNodes(compGrid)               ((compGrid) -> num_nonowned_nodes)
-#define hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid)               ((compGrid) -> num_nonowned_real_nodes)
-#define hypre_AMGDDCompGridNumOwnedCPoints(compGrid)               ((compGrid) -> num_owned_c_points)
-#define hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid)               ((compGrid) -> num_nonowned_real_c_points)
-#define hypre_AMGDDCompGridNumMissingColIndices(compGrid)               ((compGrid) -> num_missing_col_indices)
+#define hypre_AMGDDCompGridLevel(compGrid)                  ((compGrid) -> level)
+#define hypre_AMGDDCompGridMemoryLocation(compGrid)         ((compGrid) -> memory_location)
+#define hypre_AMGDDCompGridFirstGlobalIndex(compGrid)       ((compGrid) -> first_global_index)
+#define hypre_AMGDDCompGridLastGlobalIndex(compGrid)        ((compGrid) -> last_global_index)
+#define hypre_AMGDDCompGridNumOwnedNodes(compGrid)          ((compGrid) -> num_owned_nodes)
+#define hypre_AMGDDCompGridNumNonOwnedNodes(compGrid)       ((compGrid) -> num_nonowned_nodes)
+#define hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid)   ((compGrid) -> num_nonowned_real_nodes)
+#define hypre_AMGDDCompGridNumOwnedCPoints(compGrid)        ((compGrid) -> num_owned_c_points)
+#define hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid) ((compGrid) -> num_nonowned_real_c_points)
+#define hypre_AMGDDCompGridNumMissingColIndices(compGrid)   ((compGrid) -> num_missing_col_indices)
+#define hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid)  ((compGrid) -> nonowned_global_indices)
+#define hypre_AMGDDCompGridNonOwnedCoarseIndices(compGrid)  ((compGrid) -> nonowned_coarse_indices)
+#define hypre_AMGDDCompGridNonOwnedRealMarker(compGrid)     ((compGrid) -> nonowned_real_marker)
+#define hypre_AMGDDCompGridNonOwnedSort(compGrid)           ((compGrid) -> nonowned_sort)
+#define hypre_AMGDDCompGridNonOwnedInvSort(compGrid)        ((compGrid) -> nonowned_invsort)
 
-#define hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid)               ((compGrid) -> nonowned_global_indices)
-#define hypre_AMGDDCompGridNonOwnedCoarseIndices(compGrid)               ((compGrid) -> nonowned_coarse_indices)
-#define hypre_AMGDDCompGridNonOwnedRealMarker(compGrid)               ((compGrid) -> nonowned_real_marker)
-#define hypre_AMGDDCompGridNonOwnedSort(compGrid)               ((compGrid) -> nonowned_sort)
-#define hypre_AMGDDCompGridNonOwnedInvSort(compGrid)               ((compGrid) -> nonowned_invsort)
-#define hypre_AMGDDCompGridNonOwnedDiagMissingColIndices(compGrid)               ((compGrid) -> nonowned_diag_missing_col_indices)
+#define hypre_AMGDDCompGridOwnedCoarseIndices(compGrid)            ((compGrid) -> owned_coarse_indices)
+#define hypre_AMGDDCompGridNonOwnedDiagMissingColIndices(compGrid) ((compGrid) -> nonowned_diag_missing_col_indices)
 
-#define hypre_AMGDDCompGridOwnedCoarseIndices(compGrid)               ((compGrid) -> owned_coarse_indices)
+#define hypre_AMGDDCompGridA(compGrid)     ((compGrid) -> A)
+#define hypre_AMGDDCompGridP(compGrid)     ((compGrid) -> P)
+#define hypre_AMGDDCompGridR(compGrid)     ((compGrid) -> R)
+#define hypre_AMGDDCompGridU(compGrid)     ((compGrid) -> u)
+#define hypre_AMGDDCompGridF(compGrid)     ((compGrid) -> f)
+#define hypre_AMGDDCompGridT(compGrid)     ((compGrid) -> t)
+#define hypre_AMGDDCompGridS(compGrid)     ((compGrid) -> s)
+#define hypre_AMGDDCompGridQ(compGrid)     ((compGrid) -> q)
+#define hypre_AMGDDCompGridTemp(compGrid)  ((compGrid) -> temp)
+#define hypre_AMGDDCompGridTemp2(compGrid) ((compGrid) -> temp2)
+#define hypre_AMGDDCompGridTemp3(compGrid) ((compGrid) -> temp3)
 
-#define hypre_AMGDDCompGridA(compGrid)               ((compGrid) -> A)
-#define hypre_AMGDDCompGridP(compGrid)               ((compGrid) -> P)
-#define hypre_AMGDDCompGridR(compGrid)               ((compGrid) -> R)
-
-#define hypre_AMGDDCompGridU(compGrid)           ((compGrid) -> u)
-#define hypre_AMGDDCompGridF(compGrid)           ((compGrid) -> f)
-#define hypre_AMGDDCompGridT(compGrid)           ((compGrid) -> t)
-#define hypre_AMGDDCompGridS(compGrid)           ((compGrid) -> s)
-#define hypre_AMGDDCompGridQ(compGrid)           ((compGrid) -> q)
-#define hypre_AMGDDCompGridTemp(compGrid)        ((compGrid) -> temp)
-#define hypre_AMGDDCompGridTemp2(compGrid)        ((compGrid) -> temp2)
-#define hypre_AMGDDCompGridTemp3(compGrid)        ((compGrid) -> temp3)
-
-#define hypre_AMGDDCompGridL1Norms(compGrid)         ((compGrid) -> l1_norms)
+#define hypre_AMGDDCompGridL1Norms(compGrid)               ((compGrid) -> l1_norms)
 #define hypre_AMGDDCompGridCFMarkerArray(compGrid)         ((compGrid) -> cf_marker_array)
-#define hypre_AMGDDCompGridOwnedCMask(compGrid)         ((compGrid) -> owned_c_mask)
-#define hypre_AMGDDCompGridOwnedFMask(compGrid)         ((compGrid) -> owned_f_mask)
+#define hypre_AMGDDCompGridOwnedCMask(compGrid)            ((compGrid) -> owned_c_mask)
+#define hypre_AMGDDCompGridOwnedFMask(compGrid)            ((compGrid) -> owned_f_mask)
 #define hypre_AMGDDCompGridNonOwnedCMask(compGrid)         ((compGrid) -> nonowned_c_mask)
 #define hypre_AMGDDCompGridNonOwnedFMask(compGrid)         ((compGrid) -> nonowned_f_mask)
-#define hypre_AMGDDCompGridOwnedRelaxOrdering(compGrid)         ((compGrid) -> owned_relax_ordering)
-#define hypre_AMGDDCompGridNonOwnedRelaxOrdering(compGrid)         ((compGrid) -> nonowned_relax_ordering)
+#define hypre_AMGDDCompGridOwnedRelaxOrdering(compGrid)    ((compGrid) -> owned_relax_ordering)
+#define hypre_AMGDDCompGridNonOwnedRelaxOrdering(compGrid) ((compGrid) -> nonowned_relax_ordering)
 
 #endif
 /******************************************************************************
@@ -739,7 +737,6 @@ typedef struct
 
 typedef struct
 {
-
    /* The underlying AMG hierarchy */
    hypre_ParAMGData          *amg_data;
 
@@ -752,30 +749,29 @@ typedef struct
    HYPRE_Real                fac_relax_weight;
    HYPRE_Int                 padding;
    HYPRE_Int                 num_ghost_layers;
-   hypre_AMGDDCompGrid       **amgdd_comp_grid;
-   hypre_AMGDDCommPkg        *amgdd_comm_pkg;
-   HYPRE_Int       (*amgddUserFACRelaxation)( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param );
+   hypre_AMGDDCompGrid     **amgdd_comp_grid;
+   hypre_AMGDDCommPkg       *amgdd_comm_pkg;
 
+   HYPRE_Int       (*amgddUserFACRelaxation)( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param );
 } hypre_ParAMGDDData;
 
 /*--------------------------------------------------------------------------
  * Accessor functions for the hypre_AMGDDData structure
  *--------------------------------------------------------------------------*/
-#define hypre_ParAMGDDDataAMG(amgdd_data) ((amgdd_data)->amg_data)
-#define hypre_ParAMGDDDataStartLevel(amgdd_data) ((amgdd_data)->start_level)
-#define hypre_ParAMGDDDataFACNumCycles(amgdd_data) ((amgdd_data)->fac_num_cycles)
-#define hypre_ParAMGDDDataFACCycleType(amgdd_data) ((amgdd_data)->fac_cycle_type)
-#define hypre_ParAMGDDDataFACRelaxType(amgdd_data) ((amgdd_data)->fac_relax_type)
-#define hypre_ParAMGDDDataFACNumRelax(amgdd_data) ((amgdd_data)->fac_num_relax)
-#define hypre_ParAMGDDDataFACRelaxWeight(amgdd_data) ((amgdd_data)->fac_relax_weight)
-#define hypre_ParAMGDDDataPadding(amgdd_data) ((amgdd_data)->padding)
-#define hypre_ParAMGDDDataNumGhostLayers(amgdd_data) ((amgdd_data)->num_ghost_layers)
-#define hypre_ParAMGDDDataCompGrid(amgdd_data) ((amgdd_data)->amgdd_comp_grid)
-#define hypre_ParAMGDDDataCommPkg(amgdd_data) ((amgdd_data)->amgdd_comm_pkg)
+#define hypre_ParAMGDDDataAMG(amgdd_data)               ((amgdd_data)->amg_data)
+#define hypre_ParAMGDDDataStartLevel(amgdd_data)        ((amgdd_data)->start_level)
+#define hypre_ParAMGDDDataFACNumCycles(amgdd_data)      ((amgdd_data)->fac_num_cycles)
+#define hypre_ParAMGDDDataFACCycleType(amgdd_data)      ((amgdd_data)->fac_cycle_type)
+#define hypre_ParAMGDDDataFACRelaxType(amgdd_data)      ((amgdd_data)->fac_relax_type)
+#define hypre_ParAMGDDDataFACNumRelax(amgdd_data)       ((amgdd_data)->fac_num_relax)
+#define hypre_ParAMGDDDataFACRelaxWeight(amgdd_data)    ((amgdd_data)->fac_relax_weight)
+#define hypre_ParAMGDDDataPadding(amgdd_data)           ((amgdd_data)->padding)
+#define hypre_ParAMGDDDataNumGhostLayers(amgdd_data)    ((amgdd_data)->num_ghost_layers)
+#define hypre_ParAMGDDDataCompGrid(amgdd_data)          ((amgdd_data)->amgdd_comp_grid)
+#define hypre_ParAMGDDDataCommPkg(amgdd_data)           ((amgdd_data)->amgdd_comm_pkg)
 #define hypre_ParAMGDDDataUserFACRelaxation(amgdd_data) ((amgdd_data)->amgddUserFACRelaxation)
 
 #endif
-
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -2345,3 +2341,4 @@ HYPRE_Int hypre_BoomerAMGDD_FixUpRecvMaps ( hypre_AMGDDCompGrid **compGrid, hypr
 #endif
 
 #endif
+

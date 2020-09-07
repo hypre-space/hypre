@@ -33,7 +33,6 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
    HYPRE_Int             num_levels;
    HYPRE_Int             amgdd_start_level;
    HYPRE_Int             fac_num_cycles;
-   HYPRE_Int             error_code;
    HYPRE_Int             cycle_count;
    HYPRE_Int             amg_print_level;
    HYPRE_Int             amg_logging;
@@ -335,12 +334,25 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
       hypre_ParAMGDataNumIterations(amg_data) = cycle_count;
    }
 
+   if (cycle_count == max_iter && tol > 0.)
+   {
+      if (myid == 0)
+      {
+         hypre_printf("\n\n==============================================");
+         hypre_printf("\n NOTE: Convergence tolerance was not achieved\n");
+         hypre_printf("      within the allowed %d V-cycles\n",max_iter);
+         hypre_printf("==============================================");
+      }
+
+      hypre_error(HYPRE_ERROR_CONV);
+   }
+
    if (myid == 0 && amg_print_level > 1)
    {
       hypre_printf("\n");
    }
 
-   return error_code;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------

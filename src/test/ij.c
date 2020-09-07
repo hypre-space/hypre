@@ -8684,7 +8684,7 @@ BuildBigArrayFromOneFile( HYPRE_Int            argc,
    HYPRE_BigInt   *global_array;
    HYPRE_BigInt   *array;
    HYPRE_BigInt   *send_buffer;
-   HYPRE_Int      *send_counts;
+   HYPRE_Int      *send_counts = NULL;
    HYPRE_Int      *displs;
    HYPRE_Int      *array_procs;
    HYPRE_Int       j, jj, proc;
