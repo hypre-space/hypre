@@ -2534,7 +2534,6 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   HYPRE_ANNOTATE_REGION_BEGIN("%s", "Init");
    max_num_threads = hypre_NumThreads();
 
    /* first find out if anyone has an aux_matrix, and create one if you don't
@@ -2614,7 +2613,6 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
             off_proc_i, off_proc_j, off_proc_data);
       }
    }
-   HYPRE_ANNOTATE_REGION_END("%s", "Init");
 
    if (hypre_IJMatrixAssembleFlag(matrix) == 0)
    {
@@ -2635,7 +2633,6 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
          HYPRE_Int  *diag_array;
          HYPRE_Int  *offd_array;
 
-         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Init2");
          diag_array = hypre_CTAlloc(HYPRE_Int, max_num_threads);
          offd_array = hypre_CTAlloc(HYPRE_Int, max_num_threads);
          aux_j = hypre_AuxParCSRMatrixAuxJ(aux_matrix);
@@ -2645,7 +2642,6 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
          rownnz = hypre_AuxParCSRMatrixRownnz(aux_matrix);
          diag_pos = hypre_CTAlloc(HYPRE_Int, num_rownnz);
          i_diag = i_offd = 0;
-         HYPRE_ANNOTATE_REGION_END("%s", "Init2");
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel private(i, j, i_diag, i_offd)
@@ -2673,7 +2669,6 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
                ne = (my_thread_num+1)*size + rest;
             }
 
-            HYPRE_ANNOTATE_REGION_BEGIN("%s", "Count i_diag/offd");
             i_diag = i_offd = 0;
             if (rownnz != NULL)
             {
@@ -2720,7 +2715,6 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
             }
             diag_array[my_thread_num] = i_diag;
             offd_array[my_thread_num] = i_offd;
-            HYPRE_ANNOTATE_REGION_END("%s", "Count i_diag/offd");
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #endif
@@ -2776,7 +2770,6 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
                i_offd = 0;
             }
 
-            HYPRE_ANNOTATE_REGION_BEGIN("%s", "Set entries");
             if (rownnz != NULL)
             {
                for (i = ns; i < ne; i++)
@@ -2834,10 +2827,8 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
                   }
                }
             }
-            HYPRE_ANNOTATE_REGION_END("%s", "Set entries");
 
             /* Correct diag_i and offd_i */
-            HYPRE_ANNOTATE_REGION_BEGIN("%s", "Correct i_diag/offd");
             if (rownnz != NULL)
             {
                for (i = ns; i < (ne-1); i++)
@@ -2861,7 +2852,6 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
                memset(&offd_i[ii+1], offd_i[ii], size);
 
             }
-            HYPRE_ANNOTATE_REGION_END("%s", "Correct i_diag/offd");
 
          } /* end parallel region */
 

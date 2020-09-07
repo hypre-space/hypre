@@ -79,8 +79,6 @@ hypre_AuxParCSRMatrixDestroy( hypre_AuxParCSRMatrix *matrix )
    HYPRE_Int num_rows;
    HYPRE_Int num_rownnz;
 
-   HYPRE_ANNOTATE_FUNC_BEGIN;
-
    if (matrix)
    {
       num_rownnz = hypre_AuxParCSRMatrixLocalNumRownnz(matrix);
@@ -120,8 +118,6 @@ hypre_AuxParCSRMatrixDestroy( hypre_AuxParCSRMatrix *matrix )
       	    hypre_TFree(hypre_AuxParCSRMatrixOffProcData(matrix));
       hypre_TFree(matrix);
    }
-
-   HYPRE_ANNOTATE_FUNC_END;
 
    return ierr;
 }
