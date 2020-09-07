@@ -589,9 +589,11 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
                                    HYPRE_Int data)
 
 {
-   HYPRE_Complex      *A_data = hypre_CSRMatrixData(A);
-   HYPRE_Int          *A_i = hypre_CSRMatrixI(A);
-   HYPRE_Int          *A_j = hypre_CSRMatrixJ(A);
+   HYPRE_Complex      *A_data    = hypre_CSRMatrixData(A);
+   HYPRE_Int          *A_i       = hypre_CSRMatrixI(A);
+   HYPRE_Int          *A_j       = hypre_CSRMatrixJ(A);
+   HYPRE_Int          *rownnz_A  = hypre_CSRMatrixRownnz(A);
+   HYPRE_Int           nnzrows_A = hypre_CSRMatrixNumRownnz(A);
    HYPRE_Int           num_rowsA = hypre_CSRMatrixNumRows(A);
    HYPRE_Int           num_colsA = hypre_CSRMatrixNumCols(A);
    HYPRE_Int           num_nonzerosA = hypre_CSRMatrixNumNonzeros(A);
@@ -610,8 +612,9 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
     * First, ascertain that num_cols and num_nonzeros has been set.
     * If not, set them.
     *--------------------------------------------------------------*/
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   if (! num_nonzerosA)
+   if (!num_nonzerosA)
    {
       num_nonzerosA = A_i[num_rowsA];
    }
@@ -624,7 +627,9 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
          for (j = A_i[i]; j < A_i[i+1]; j++)
          {
             if (A_j[j] > max_col)
+            {
                max_col = A_j[j];
+            }
          }
       }
       num_colsA = max_col+1;
@@ -641,7 +646,9 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
       // JSP: parallel counting sorting breaks down
       // when A has no columns
       hypre_CSRMatrixInitialize(*AT);
-      return 0;
+      HYPRE_ANNOTATE_FUNC_END;
+
+      return hypre_error_flag;
    }
 
    AT_j = hypre_CTAlloc(HYPRE_Int, num_nonzerosAT);
@@ -656,118 +663,176 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
     * Parallel count sort
     *-----------------------------------------------------------------*/
 
-   HYPRE_Int *bucket = hypre_TAlloc(
-    HYPRE_Int, (num_colsA + 1)*hypre_NumThreads());
+   HYPRE_Int *bucket = hypre_TAlloc(HYPRE_Int, (num_colsA + 1)*hypre_NumThreads());
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel
 #endif
    {
-   HYPRE_Int num_threads = hypre_NumActiveThreads();
-   HYPRE_Int my_thread_num = hypre_GetThreadNum();
+      HYPRE_Int   num_threads = hypre_NumActiveThreads();
+      HYPRE_Int   ii = hypre_GetThreadNum();
+      HYPRE_Int   ns, ne, size, rest;
+      HYPRE_Int   offset;
+      HYPRE_Int   i, j, idx;
 
-   HYPRE_Int iBegin = hypre_CSRMatrixGetLoadBalancedPartitionBegin(A);
-   HYPRE_Int iEnd = hypre_CSRMatrixGetLoadBalancedPartitionEnd(A);
-   hypre_assert(iBegin <= iEnd);
-   hypre_assert(iBegin >= 0 && iBegin <= num_rowsA);
-   hypre_assert(iEnd >= 0 && iEnd <= num_rowsA);
+      size = nnzrows_A/num_threads;
+      rest = nnzrows_A - size*num_threads;
+      if (ii < rest)
+      {
+         ns = ii*size + ii;
+         ne = (ii + 1)*size + ii + 1;
+      }
+      else
+      {
+         ns = ii*size + rest;
+         ne = (ii + 1)*size + rest;
+      }
 
-   HYPRE_Int i, j;
-   memset(bucket + my_thread_num*num_colsA, 0, sizeof(HYPRE_Int)*num_colsA);
+      memset(bucket + ii*num_colsA, 0, sizeof(HYPRE_Int)*num_colsA);
 
-   /*-----------------------------------------------------------------
-    * Count the number of entries that will go into each bucket
-    * bucket is used as HYPRE_Int[num_threads][num_colsA] 2D array
-    *-----------------------------------------------------------------*/
+      /*-----------------------------------------------------------------
+       * Count the number of entries that will go into each bucket
+       * bucket is used as HYPRE_Int[num_threads][num_colsA] 2D array
+       *-----------------------------------------------------------------*/
+      if (rownnz_A == NULL)
+      {
+         for (j = A_i[ns]; j < A_i[ne]; ++j)
+         {
+            bucket[ii*num_colsA + A_j[j]]++;
+         }
+      }
+      else
+      {
+         for (j = A_i[rownnz_A[ns]]; j < A_i[rownnz_A[ne]]; ++j)
+         {
+            bucket[ii*num_colsA + A_j[j]]++;
+         }
+      }
 
-   for (j = A_i[iBegin]; j < A_i[iEnd]; ++j) {
-     HYPRE_Int idx = A_j[j];
-     bucket[my_thread_num*num_colsA + idx]++;
-   }
-
-   /*-----------------------------------------------------------------
-    * Parallel prefix sum of bucket with length num_colsA * num_threads
-    * accessed as if it is transposed as HYPRE_Int[num_colsA][num_threads]
-    *-----------------------------------------------------------------*/
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Prefix Sum");
+      /*-----------------------------------------------------------------
+       * Parallel prefix sum of bucket with length num_colsA * num_threads
+       * accessed as if it is transposed as HYPRE_Int[num_colsA][num_threads]
+       *-----------------------------------------------------------------*/
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #endif
+      for (i = ii*num_colsA + 1; i < (ii + 1)*num_colsA; ++i)
+      {
+         HYPRE_Int transpose_i = transpose_idx(i, num_threads, num_colsA);
+         HYPRE_Int transpose_i_minus_1 = transpose_idx(i - 1, num_threads, num_colsA);
 
-   for (i = my_thread_num*num_colsA + 1; i < (my_thread_num + 1)*num_colsA; ++i) {
-     HYPRE_Int transpose_i = transpose_idx(i, num_threads, num_colsA);
-     HYPRE_Int transpose_i_minus_1 = transpose_idx(i - 1, num_threads, num_colsA);
-
-     bucket[transpose_i] += bucket[transpose_i_minus_1];
-   }
+         bucket[transpose_i] += bucket[transpose_i_minus_1];
+      }
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #pragma omp master
 #endif
-   {
-     for (i = 1; i < num_threads; ++i) {
-       HYPRE_Int j0 = num_colsA*i - 1, j1 = num_colsA*(i + 1) - 1;
-       HYPRE_Int transpose_j0 = transpose_idx(j0, num_threads, num_colsA);
-       HYPRE_Int transpose_j1 = transpose_idx(j1, num_threads, num_colsA);
+      {
+         for (i = 1; i < num_threads; ++i)
+         {
+            HYPRE_Int j0 = num_colsA*i - 1, j1 = num_colsA*(i + 1) - 1;
+            HYPRE_Int transpose_j0 = transpose_idx(j0, num_threads, num_colsA);
+            HYPRE_Int transpose_j1 = transpose_idx(j1, num_threads, num_colsA);
 
-       bucket[transpose_j1] += bucket[transpose_j0];
-     }
-   }
+            bucket[transpose_j1] += bucket[transpose_j0];
+         }
+      }
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #endif
 
-   if (my_thread_num > 0) {
-     HYPRE_Int transpose_i0 = transpose_idx(num_colsA*my_thread_num - 1, num_threads, num_colsA);
-     HYPRE_Int offset = bucket[transpose_i0];
+      if (ii > 0)
+      {
+         HYPRE_Int transpose_i0 = transpose_idx(num_colsA*ii - 1,
+                                                num_threads, num_colsA);
+         HYPRE_Int offset = bucket[transpose_i0];
 
-     for (i = my_thread_num*num_colsA; i < (my_thread_num + 1)*num_colsA - 1; ++i) {
-       HYPRE_Int transpose_i = transpose_idx(i, num_threads, num_colsA);
+         for (i = ii*num_colsA; i < (ii + 1)*num_colsA - 1; ++i)
+         {
+            HYPRE_Int transpose_i = transpose_idx(i, num_threads, num_colsA);
 
-       bucket[transpose_i] += offset;
-     }
-   }
+            bucket[transpose_i] += offset;
+         }
+      }
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #endif
+      HYPRE_ANNOTATE_REGION_END("%s", "Prefix Sum");
 
-   /*----------------------------------------------------------------
-    * Load the data and column numbers of AT
-    *----------------------------------------------------------------*/
+      /*----------------------------------------------------------------
+       * Load the data and column numbers of AT
+       *----------------------------------------------------------------*/
 
-   if (data) {
-      for (i = iEnd - 1; i >= iBegin; --i) {
-        for (j = A_i[i + 1] - 1; j >= A_i[i]; --j) {
-          HYPRE_Int idx = A_j[j];
-          --bucket[my_thread_num*num_colsA + idx];
+      if (data)
+      {
+         if (rownnz_A == NULL)
+         {
+            for (i = ne - 1; i >= ns; --i)
+            {
+               for (j = A_i[i + 1] - 1; j >= A_i[i]; --j)
+               {
+                  idx = A_j[j];
+                  --bucket[ii*num_colsA + idx];
 
-          HYPRE_Int offset = bucket[my_thread_num*num_colsA + idx];
+                  offset = bucket[ii*num_colsA + idx];
+                  AT_data[offset] = A_data[j];
+                  AT_j[offset] = i;
+               }
+            }
+         }
+         else
+         {
+            for (i = ne - 1; i >= ns; --i)
+            {
+               for (j = A_i[rownnz_A[i] + 1] - 1; j >= A_i[rownnz_A[i]]; --j)
+               {
+                  idx = A_j[j];
+                  --bucket[ii*num_colsA + idx];
 
-          AT_data[offset] = A_data[j];
-          AT_j[offset] = i;
-        }
+                  offset = bucket[ii*num_colsA + idx];
+                  AT_data[offset] = A_data[j];
+                  AT_j[offset] = rownnz_A[i];
+               }
+            }
+         }
       }
-   }
-   else {
-      for (i = iEnd - 1; i >= iBegin; --i) {
-        for (j = A_i[i + 1] - 1; j >= A_i[i]; --j) {
-          HYPRE_Int idx = A_j[j];
-          --bucket[my_thread_num*num_colsA + idx];
+      else
+      {
+         if (rownnz_A == NULL)
+         {
+            for (i = ne - 1; i >= ns; --i)
+            {
+               for (j = A_i[i + 1] - 1; j >= A_i[i]; --j)
+               {
+                  idx = A_j[j];
+                  --bucket[ii*num_colsA + idx];
 
-          HYPRE_Int offset = bucket[my_thread_num*num_colsA + idx];
+                  offset = bucket[ii*num_colsA + idx];
+                  AT_j[offset] = i;
+               }
+            }
+         }
+         else
+         {
+            for (i = ne - 1; i >= ns; --i)
+            {
+               for (j = A_i[rownnz_A[i] + 1] - 1; j >= A_i[rownnz_A[i]]; --j)
+               {
+                  idx = A_j[j];
+                  --bucket[ii*num_colsA + idx];
 
-          AT_j[offset] = i;
-        }
+                  offset = bucket[ii*num_colsA + idx];
+                  AT_j[offset] = rownnz_A[i];
+               }
+            }
+         }
       }
-   }
    } /*end parallel region */
 
-   hypre_CSRMatrixI(*AT) = bucket;
-      // JSP: bucket is hypre_NumThreads() times longer than
-      // the size needed for AT_i, but this should be OK.
-      // If the memory size is a concern, we can allocate
-      // a new memory for AT_i and copy from bucket.
+   hypre_CSRMatrixI(*AT) = hypre_TReAlloc(bucket, HYPRE_Int, num_colsA);
    hypre_CSRMatrixI(*AT)[num_colsA] = num_nonzerosA;
 
    // Set rownnz and num_rownnz
@@ -776,9 +841,10 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
       hypre_CSRMatrixSetRownnz(*AT);
    }
 
-   return(0);
-}
+   HYPRE_ANNOTATE_FUNC_END;
 
+   return hypre_error_flag;
+}
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixReorder:
