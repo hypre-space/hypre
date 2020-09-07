@@ -751,6 +751,7 @@ typedef struct
    HYPRE_Int                 num_ghost_layers;
    hypre_AMGDDCompGrid     **amgdd_comp_grid;
    hypre_AMGDDCommPkg       *amgdd_comm_pkg;
+   hypre_ParVector          *Ztemp;
 
    HYPRE_Int       (*amgddUserFACRelaxation)( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param );
 } hypre_ParAMGDDData;
@@ -769,6 +770,7 @@ typedef struct
 #define hypre_ParAMGDDDataNumGhostLayers(amgdd_data)    ((amgdd_data)->num_ghost_layers)
 #define hypre_ParAMGDDDataCompGrid(amgdd_data)          ((amgdd_data)->amgdd_comp_grid)
 #define hypre_ParAMGDDDataCommPkg(amgdd_data)           ((amgdd_data)->amgdd_comm_pkg)
+#define hypre_ParAMGDDDataZtemp(amg_data)               ((amgdd_data)->Ztemp)
 #define hypre_ParAMGDDDataUserFACRelaxation(amgdd_data) ((amgdd_data)->amgddUserFACRelaxation)
 
 #endif

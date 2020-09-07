@@ -215,12 +215,12 @@ hypre_BoomerAMGDD_FAC_Jacobi( void      *amgdd_vdata,
                               HYPRE_Int  level,
                               HYPRE_Int  cycle_param )
 {
+#if defined(HYPRE_USING_CUDA)
    hypre_ParAMGDDData      *amgdd_data      = (hypre_ParAMGDDData*) amgdd_vdata;
    hypre_AMGDDCompGrid     *compGrid        = hypre_ParAMGDDDataCompGrid(amgdd_data)[level];
    HYPRE_MemoryLocation     memory_location = hypre_AMGDDCompGridMemoryLocation(compGrid);
+   HYPRE_ExecutionPolicy    exec            = hypre_GetExecPolicy1(memory_location);
 
-#if defined(HYPRE_USING_CUDA)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
    if (exec == HYPRE_EXEC_DEVICE)
    {
       hypre_BoomerAMGDD_FAC_JacobiDevice(amgdd_vdata, level);
@@ -540,12 +540,12 @@ hypre_BoomerAMGDD_FAC_CFL1Jacobi( void      *amgdd_vdata,
                                   HYPRE_Int  level,
                                   HYPRE_Int  cycle_param )
 {
+#if defined(HYPRE_USING_CUDA)
    hypre_ParAMGDDData      *amgdd_data      = (hypre_ParAMGDDData*) amgdd_vdata;
    hypre_AMGDDCompGrid     *compGrid        = hypre_ParAMGDDDataCompGrid(amgdd_data)[level];
    HYPRE_MemoryLocation     memory_location = hypre_AMGDDCompGridMemoryLocation(compGrid);
+   HYPRE_ExecutionPolicy    exec            = hypre_GetExecPolicy1(memory_location);
 
-#if defined(HYPRE_USING_CUDA)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
    if (exec == HYPRE_EXEC_DEVICE)
    {
       if (cycle_param == 1)

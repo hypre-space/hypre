@@ -10,21 +10,36 @@
 #include "hypre_hopscotch_hash.h"
 
 HYPRE_Int
-hypre_BoomerAMGDD_LocalToGlobalIndex(hypre_AMGDDCompGrid *compGrid, HYPRE_Int local_index)
+hypre_BoomerAMGDD_LocalToGlobalIndex( hypre_AMGDDCompGrid *compGrid,
+                                      HYPRE_Int local_index )
 {
-   // Local index starts with 0 at beginning of owned dofs and continues through the nonowned (possible indices that are too large marking real overwriting ghost)
-   if (local_index < 0) local_index = -(local_index+1);
+   /* Local index starts with 0 at beginning of owned dofs and
+      continues through  the nonowned (possible indices that are
+      too large marking real overwriting ghost) */
+
+   if (local_index < 0)
+   {
+      local_index = -(local_index + 1);
+   }
    else if (local_index >= hypre_AMGDDCompGridNumOwnedNodes(compGrid) + hypre_AMGDDCompGridNumNonOwnedNodes(compGrid))
-      local_index -= hypre_AMGDDCompGridNumOwnedNodes(compGrid) + hypre_AMGDDCompGridNumNonOwnedNodes(compGrid);
+   {
+      local_index -= hypre_AMGDDCompGridNumOwnedNodes(compGrid) +
+                     hypre_AMGDDCompGridNumNonOwnedNodes(compGrid);
+   }
 
    if (local_index < hypre_AMGDDCompGridNumOwnedNodes(compGrid))
+   {
       return local_index + hypre_AMGDDCompGridFirstGlobalIndex(compGrid);
+   }
    else
+   {
       return hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid)[local_index - hypre_AMGDDCompGridNumOwnedNodes(compGrid)];
+   }
 }
 
 HYPRE_Int
-hypre_BoomerAMGDD_GetDofRecvProc(HYPRE_Int neighbor_local_index, hypre_ParCSRMatrix *A)
+hypre_BoomerAMGDD_GetDofRecvProc( HYPRE_Int neighbor_local_index,
+                                  hypre_ParCSRMatrix *A )
 {
    // Use that column index to find which processor this dof is received from
    hypre_ParCSRCommPkg *commPkg = hypre_ParCSRMatrixCommPkg(A);
@@ -32,7 +47,8 @@ hypre_BoomerAMGDD_GetDofRecvProc(HYPRE_Int neighbor_local_index, hypre_ParCSRMat
    HYPRE_Int i;
    for (i = 0; i < hypre_ParCSRCommPkgNumRecvs(commPkg); i++)
    {
-      if (neighbor_local_index >= hypre_ParCSRCommPkgRecvVecStart(commPkg,i) && neighbor_local_index < hypre_ParCSRCommPkgRecvVecStart(commPkg,i+1))
+      if (neighbor_local_index >= hypre_ParCSRCommPkgRecvVecStart(commPkg,i) &&
+          neighbor_local_index < hypre_ParCSRCommPkgRecvVecStart(commPkg,i+1))
       {
          /* recv_proc = hypre_ParCSRCommPkgRecvProc(commPkg,i); */
          recv_proc = i;
@@ -44,21 +60,23 @@ hypre_BoomerAMGDD_GetDofRecvProc(HYPRE_Int neighbor_local_index, hypre_ParCSRMat
 }
 
 HYPRE_Int
-hypre_BoomerAMGDD_RecursivelyFindNeighborNodes(HYPRE_Int dof_index, HYPRE_Int distance, hypre_ParCSRMatrix *A, HYPRE_Int *add_flag, HYPRE_Int *add_flag_requests)
+hypre_BoomerAMGDD_RecursivelyFindNeighborNodes( HYPRE_Int            dof_index,
+                                                HYPRE_Int            distance,
+                                                hypre_ParCSRMatrix  *A,
+                                                HYPRE_Int           *add_flag,
+                                                HYPRE_Int           *add_flag_requests)
 {
-   HYPRE_Int   myid;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+   hypre_CSRMatrix  *diag = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrix  *offd = hypre_ParCSRMatrixOffd(A);
 
+   HYPRE_Int         neighbor_index;
    HYPRE_Int         i;
-
-   hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(A);
-   hypre_CSRMatrix *offd = hypre_ParCSRMatrixOffd(A);
 
    // Look at diag neighbors
    for (i = hypre_CSRMatrixI(diag)[dof_index]; i < hypre_CSRMatrixI(diag)[dof_index+1]; i++)
    {
       // Get the index of the neighbor
-      HYPRE_Int neighbor_index = hypre_CSRMatrixJ(diag)[i];
+      neighbor_index = hypre_CSRMatrixJ(diag)[i];
 
       // If the neighbor info is available on this proc
       // And if we still need to visit this index (note that send_dofs[neighbor_index] = distance means we have already added all distance-1 neighbors of index)
@@ -67,16 +85,22 @@ hypre_BoomerAMGDD_RecursivelyFindNeighborNodes(HYPRE_Int dof_index, HYPRE_Int di
       if (add_flag[neighbor_index] < distance)
       {
          add_flag[neighbor_index] = distance;
-         if (distance - 1 > 0) hypre_BoomerAMGDD_RecursivelyFindNeighborNodes(neighbor_index, distance-1, A, add_flag, add_flag_requests);
+         if (distance - 1 > 0)
+         {
+            hypre_BoomerAMGDD_RecursivelyFindNeighborNodes(neighbor_index, distance-1, A, add_flag, add_flag_requests);
+         }
       }
    }
+
    // Look at offd neighbors
    for (i = hypre_CSRMatrixI(offd)[dof_index]; i < hypre_CSRMatrixI(offd)[dof_index+1]; i++)
    {
-      HYPRE_Int neighbor_index = hypre_CSRMatrixJ(offd)[i];
+      neighbor_index = hypre_CSRMatrixJ(offd)[i];
 
       if (add_flag_requests[neighbor_index] < distance)
+      {
          add_flag_requests[neighbor_index] = distance;
+      }
    }
 
    return hypre_error_flag;

@@ -64,7 +64,7 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
    F_array           = hypre_ParAMGDataFArray(amg_data);
    U_array           = hypre_ParAMGDataUArray(amg_data);
    Vtemp             = hypre_ParAMGDataVtemp(amg_data);
-   Ztemp             = hypre_ParAMGDataZtemp(amg_data);
+   Ztemp             = hypre_ParAMGDDDataZtemp(amg_data);
    tol               = hypre_ParAMGDataTol(amg_data);
    cycle_count       = 0;
    if (amg_logging > 1)
@@ -76,11 +76,11 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
    if (!Ztemp)
    {
       Ztemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[amgdd_start_level]),
-                                   hypre_ParCSRMatrixGlobalNumRows(A_array[amgdd_start_level]),
-                                   hypre_ParCSRMatrixRowStarts(A_array[amgdd_start_level]));
+                                    hypre_ParCSRMatrixGlobalNumRows(A_array[amgdd_start_level]),
+                                    hypre_ParCSRMatrixRowStarts(A_array[amgdd_start_level]));
       hypre_ParVectorInitialize(Ztemp);
       hypre_ParVectorSetPartitioningOwner(Ztemp, 0);
-      hypre_ParAMGDataZtemp(amg_data) = Ztemp;
+      hypre_ParAMGDDDataZtemp(amg_data) = Ztemp;
    }
 
    /*-----------------------------------------------------------------------
@@ -243,11 +243,11 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
       // Do FAC cycles
       if (fac_num_cycles > 0)
       {
-         hypre_BoomerAMGDD_FAC((void*) amgdd_data, 0);
+         hypre_BoomerAMGDD_FAC((void*) amgdd_data, 1);
       }
       for (i = 1; i < fac_num_cycles; i++)
       {
-         hypre_BoomerAMGDD_FAC((void*) amgdd_data, 1);
+         hypre_BoomerAMGDD_FAC((void*) amgdd_data, 0);
       }
 
       // Update fine grid solution

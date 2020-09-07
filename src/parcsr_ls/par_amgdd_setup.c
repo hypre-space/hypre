@@ -140,7 +140,7 @@ hypre_BoomerAMGDDSetup( void               *amgdd_vdata,
                                                        num_ghost_layers);
    }
 
-   // Find maximum number of requests and allocate MPI_Request/Status
+   // Find maximum number of requests and allocate memory
    num_requests = 0;
    for (level = num_levels - 1; level >= amgdd_start_level; level--)
    {

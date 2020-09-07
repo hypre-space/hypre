@@ -46,28 +46,38 @@ HYPRE_Int
 hypre_BoomerAMGDDDestroy( void *data )
 {
    hypre_ParAMGDDData  *amgdd_data = (hypre_ParAMGDDData*) data;
-   hypre_ParAMGData    *amg_data   = hypre_ParAMGDDDataAMG(amgdd_data);
-   HYPRE_Int            num_levels = hypre_ParAMGDataNumLevels(amg_data);
+   hypre_ParAMGData    *amg_data;
+   HYPRE_Int            num_levels;
    HYPRE_Int            i;
 
-   /* destroy amgdd composite grids and commpkg */
-   if (hypre_ParAMGDDDataCompGrid(amgdd_data))
+   if (amgdd_data)
    {
-      for (i = 0; i < num_levels; i++)
+      amg_data   = hypre_ParAMGDDDataAMG(amgdd_data);
+      num_levels = hypre_ParAMGDataNumLevels(amg_data);
+
+      /* destroy amgdd composite grids and commpkg */
+      if (hypre_ParAMGDDDataCompGrid(amgdd_data))
       {
-         hypre_AMGDDCompGridDestroy(hypre_ParAMGDDDataCompGrid(amgdd_data)[i]);
+         for (i = 0; i < num_levels; i++)
+         {
+            hypre_AMGDDCompGridDestroy(hypre_ParAMGDDDataCompGrid(amgdd_data)[i]);
+         }
+         hypre_TFree(hypre_ParAMGDDDataCompGrid(amgdd_data), HYPRE_MEMORY_HOST);
       }
-      hypre_TFree(hypre_ParAMGDDDataCompGrid(amgdd_data), HYPRE_MEMORY_HOST);
-   }
-   if (hypre_ParAMGDDDataCommPkg(amgdd_data))
-   {
-      hypre_AMGDDCommPkgDestroy(hypre_ParAMGDDDataCommPkg(amgdd_data));
-   }
 
-   /* destroy the underlying amg */
-   hypre_BoomerAMGDestroy((void*) amg_data);
+      if (hypre_ParAMGDDDataCommPkg(amgdd_data))
+      {
+         hypre_AMGDDCommPkgDestroy(hypre_ParAMGDDDataCommPkg(amgdd_data));
+      }
 
-   hypre_TFree(amgdd_data, HYPRE_MEMORY_HOST);
+      /* destroy temporary vector */
+      hypre_ParVectorDestroy(hypre_ParAMGDDDataZtemp(amgdd_data));
+
+      /* destroy the underlying amg */
+      hypre_BoomerAMGDestroy((void*) amg_data);
+
+      hypre_TFree(amgdd_data, HYPRE_MEMORY_HOST);
+   }
 
    return hypre_error_flag;
 }
