@@ -2282,15 +2282,16 @@ HYPRE_Int hypre_BoomerAMGDD_FAC_FCycle ( void *amgdd_vdata, HYPRE_Int first_iter
 HYPRE_Int hypre_BoomerAMGDD_FAC_Interpolate ( hypre_AMGDDCompGrid *compGrid_f, hypre_AMGDDCompGrid *compGrid_c );
 HYPRE_Int hypre_BoomerAMGDD_FAC_Restrict ( hypre_AMGDDCompGrid *compGrid_f, hypre_AMGDDCompGrid *compGrid_c, HYPRE_Int first_iteration );
 HYPRE_Int hypre_BoomerAMGDD_FAC_Relax ( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param );
-HYPRE_Int hypre_BoomerAMGDD_FAC_CFL1Jacobi_cpu ( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int relax_set );
+HYPRE_Int hypre_BoomerAMGDD_FAC_CFL1JacobiHost ( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int relax_set );
 HYPRE_Int hypre_BoomerAMGDD_FAC_Jacobi ( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param );
+HYPRE_Int hypre_BoomerAMGDD_FAC_JacobiHost ( void *amgdd_vdata, HYPRE_Int level );
 HYPRE_Int hypre_BoomerAMGDD_FAC_GaussSeidel ( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param );
 HYPRE_Int hypre_BoomerAMGDD_FAC_CFL1Jacobi ( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param );
 HYPRE_Int hypre_BoomerAMGDD_FAC_OrderedGaussSeidel ( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param );
 
 /* par_amgdd_fac_cycles_device.c */
-HYPRE_Int hypre_BoomerAMGDD_FAC_Jacobi_device ( void *amgdd_vdata, HYPRE_Int level );
-HYPRE_Int hypre_BoomerAMGDD_FAC_CFL1Jacobi_device ( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int relax_set );
+HYPRE_Int hypre_BoomerAMGDD_FAC_JacobiDevice ( void *amgdd_vdata, HYPRE_Int level );
+HYPRE_Int hypre_BoomerAMGDD_FAC_CFL1JacobiDevice ( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int relax_set );
 
 /* par_amgdd_comp_grid.c */
 hypre_AMGDDCompGridMatrix* hypre_AMGDDCompGridMatrixCreate();

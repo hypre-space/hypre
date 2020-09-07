@@ -151,15 +151,15 @@ hypre_CSRMatrixMatvecDeviceBIGINT( HYPRE_Complex    alpha,
 
 HYPRE_Int
 hypre_CSRMatrixMatvecMaskedDevice( HYPRE_Int        trans,
-                             HYPRE_Complex    alpha,
-                             hypre_CSRMatrix *A,
-                             hypre_Vector    *x,
-                             HYPRE_Complex    beta,
-                             hypre_Vector    *b,
-                             hypre_Vector    *y,
-                             HYPRE_Int       *mask,
-                             HYPRE_Int        size_of_mask,
-                             HYPRE_Int        offset )
+                                   HYPRE_Complex    alpha,
+                                   hypre_CSRMatrix *A,
+                                   hypre_Vector    *x,
+                                   HYPRE_Complex    beta,
+                                   hypre_Vector    *b,
+                                   hypre_Vector    *y,
+                                   HYPRE_Int       *mask,
+                                   HYPRE_Int        size_of_mask,
+                                   HYPRE_Int        offset )
 {
 #ifdef HYPRE_BIGINT
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR: hypre_CSRMatrixMatvecMaskedDevice should not be called when bigint is enabled!");
@@ -198,32 +198,41 @@ hypre_CSRMatrixMatvecMaskedDevice( HYPRE_Int        trans,
 
    if (trans)
    {
-      HYPRE_Complex *csc_a = hypre_TAlloc(HYPRE_Complex, A->num_nonzeros, HYPRE_MEMORY_DEVICE);
-      HYPRE_Int     *csc_j = hypre_TAlloc(HYPRE_Int,     A->num_nonzeros, HYPRE_MEMORY_DEVICE);
-      HYPRE_Int     *csc_i = hypre_TAlloc(HYPRE_Int,     A->num_cols+1,   HYPRE_MEMORY_DEVICE);
+      HYPRE_Complex *csc_a = hypre_TAlloc(HYPRE_Complex, hypre_CSRMatrixNumNonzeros(A), HYPRE_MEMORY_DEVICE);
+      HYPRE_Int     *csc_j = hypre_TAlloc(HYPRE_Int,     hypre_CSRMatrixNumNonzeros(A), HYPRE_MEMORY_DEVICE);
+      HYPRE_Int     *csc_i = hypre_TAlloc(HYPRE_Int,     hypre_CSRMatrixNumCols(A)+1,   HYPRE_MEMORY_DEVICE);
 
-      HYPRE_CUSPARSE_CALL( cusparseDcsr2csc(handle, A->num_rows, A->num_cols, A->num_nonzeros,
-                           A->data, A->i, A->j, csc_a, csc_j, csc_i,
-                           CUSPARSE_ACTION_NUMERIC, CUSPARSE_INDEX_BASE_ZERO) );
+      HYPRE_CUSPARSE_CALL( cusparseDcsr2csc(handle,
+                                            hypre_CSRMatrixNumRows(A),
+                                            hypre_CSRMatrixNumCols(A),
+                                            hypre_CSRMatrixNumNonzeros(A),
+                                            hypre_CSRMatrixData(A),
+                                            hypre_CSRMatrixI(A),
+                                            hypre_CSRMatrixJ(A),
+                                            csc_a,
+                                            csc_j,
+                                            csc_i,
+                                            CUSPARSE_ACTION_NUMERIC,
+                                            CUSPARSE_INDEX_BASE_ZERO) );
 
       HYPRE_CUSPARSE_CALL( cusparseDbsrxmv(handle,
-                            CUSPARSE_DIRECTION_ROW,
-                            CUSPARSE_OPERATION_NON_TRANSPOSE,
-                            size_of_mask,
-                            A->num_rows,
-                            A->num_cols,
-                            A->num_nonzeros,
-                            &alpha,
-                            descr,
-                            csc_a,
-                            mask,
-                            csc_i,
-                            csc_i+1,
-                            csc_j,
-                            1,
-                            x->data,
-                            &beta,
-                            y->data) );
+                                           CUSPARSE_DIRECTION_ROW,
+                                           CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                           size_of_mask,
+                                           hypre_CSRMatrixNumRows(A),
+                                           hypre_CSRMatrixNumCols(A),
+                                           hypre_CSRMatrixNumNonzeros(A),
+                                           &alpha,
+                                           descr,
+                                           csc_a,
+                                           mask,
+                                           csc_i,
+                                           csc_i+1,
+                                           csc_j,
+                                           1,
+                                           hypre_VectorData(x),
+                                           &beta,
+                                           hypre_VectorData(y)) );
 
       hypre_TFree(csc_a, HYPRE_MEMORY_DEVICE);
       hypre_TFree(csc_i, HYPRE_MEMORY_DEVICE);
@@ -231,29 +240,43 @@ hypre_CSRMatrixMatvecMaskedDevice( HYPRE_Int        trans,
    }
    else
    {
-      HYPRE_CUSPARSE_CALL( cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                           A->num_rows-offset, A->num_cols, A->num_nonzeros,
-                           &alpha, descr,
-                           A->data, A->i+offset, A->j,
-                           x->data, &beta, y->data+offset) );
-      HYPRE_CUSPARSE_CALL( cusparseDbsrxmv(handle,
-                            CUSPARSE_DIRECTION_ROW,
-                            CUSPARSE_OPERATION_NON_TRANSPOSE,
-                            size_of_mask,
-                            A->num_rows,
-                            A->num_cols,
-                            A->num_nonzeros,
-                            &alpha,
-                            descr,
-                            A->data,
-                            mask,
-                            A->i+offset,
-                            A->i+offset+1,
-                            A->j,
-                            1,
-                            x->data,
-                            &beta,
-                            y->data) );
+      HYPRE_CUSPARSE_CALL( cusparseDcsrmv(handle,
+                                          CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                          hypre_CSRMatrixNumRows(A)-offset,
+                                          hypre_CSRMatrixNumCols(A),
+                                          hypre_CSRMatrixNumNonzeros(A),
+                                          &alpha,
+                                          descr,
+                                          hypre_CSRMatrixData(A),
+                                          hypre_CSRMatrixI(A)+offset,
+                                          hypre_CSRMatrixJ(A),
+                                          hypre_VectorData(x),
+                                          &beta,
+                                          hypre_VectorData(y)+offset) );
+
+      if (!(hypre_CSRMatrixNumRows(A) < 1) &&
+          !(hypre_CSRMatrixNumCols(A) < 1) &&
+          !(hypre_CSRMatrixNumNonzeros(A) < 1))
+      {
+         HYPRE_CUSPARSE_CALL(cusparseDbsrxmv(handle,
+                                             CUSPARSE_DIRECTION_ROW,
+                                             CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                             size_of_mask,
+                                             hypre_CSRMatrixNumRows(A),
+                                             hypre_CSRMatrixNumCols(A),
+                                             hypre_CSRMatrixNumNonzeros(A),
+                                             &alpha,
+                                             descr,
+                                             hypre_CSRMatrixData(A),
+                                             mask,
+                                             hypre_CSRMatrixI(A)+offset,
+                                             hypre_CSRMatrixI(A)+offset+1,
+                                             hypre_CSRMatrixJ(A),
+                                             1,
+                                             hypre_VectorData(x),
+                                             &beta,
+                                             hypre_VectorData(y)) );
+      }
    }
 
    hypre_SyncCudaComputeStream(hypre_handle());
@@ -263,4 +286,3 @@ hypre_CSRMatrixMatvecMaskedDevice( HYPRE_Int        trans,
 }
 
 #endif
-
