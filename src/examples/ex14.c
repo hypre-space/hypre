@@ -68,10 +68,10 @@
                    finite element problem in the SStruct interface.
 */
 
-#include <math.h>
 #include "_hypre_utilities.h"
 #include "HYPRE_sstruct_mv.h"
 #include "HYPRE_sstruct_ls.h"
+#include "HYPRE_krylov.h"
 #include "HYPRE.h"
 
 #ifndef M_PI
@@ -148,7 +148,10 @@ int main (int argc, char *argv[])
    HYPRE_SStructVector   b;
    HYPRE_SStructVector   x;
 
-   HYPRE_Solver          solver;
+   HYPRE_Int             solver_id = 5;
+   HYPRE_Int             print_system = 0;
+   HYPRE_Int             time_index;
+   HYPRE_Int             object_type;
 
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
@@ -171,10 +174,20 @@ int main (int argc, char *argv[])
             arg_index++;
             n = atoi(argv[arg_index++]);
          }
+         else if ( strcmp(argv[arg_index], "-solver") == 0 )
+         {
+            arg_index++;
+            solver_id = atoi(argv[arg_index++]);
+         }
          else if ( strcmp(argv[arg_index], "-vis") == 0 )
          {
             arg_index++;
             vis = 1;
+         }
+         else if ( strcmp(argv[arg_index], "-print") == 0 )
+         {
+            arg_index++;
+            print_system = 1;
          }
          else if ( strcmp(argv[arg_index], "-help") == 0 )
          {
@@ -189,12 +202,28 @@ int main (int argc, char *argv[])
 
       if ((print_usage) && (myid == 0))
       {
-         printf("\n");
-         printf("Usage: %s [<options>]\n", argv[0]);
-         printf("\n");
-         printf("  -n <n>              : problem size per processor (default: 10)\n");
-         printf("  -vis                : save the solution for GLVis visualization\n");
-         printf("\n");
+         hypre_printf("\n");
+         hypre_printf("Usage: %s [<options>]\n", argv[0]);
+         hypre_printf("\n");
+         hypre_printf("  -n <n>              : problem size per processor (default: 10)\n");
+         hypre_printf("  -vis                : save the solution for GLVis visualization\n");
+         hypre_printf("  -solver <ID>        : solver ID (default = 5)\n");
+         hypre_printf("                         0 - SMG split solver\n");
+         hypre_printf("                         1 - PFMG split solver\n");
+         hypre_printf("                         4 - SSAMG\n");
+         hypre_printf("                         5 - BoomerAMG\n");
+         hypre_printf("                         8 - 1-step Jacobi split solver\n");
+         hypre_printf("                        10 - PCG with SMG split precond\n");
+         hypre_printf("                        11 - PCG with PFMG split precond\n");
+         hypre_printf("                        14 - PCG with SSAMG precond\n");
+         hypre_printf("                        18 - PCG with diagonal scaling\n");
+         hypre_printf("                        19 - PCG\n");
+         hypre_printf("                        20 - PCG with BoomerAMG precond\n");
+         hypre_printf("                        21 - PCG with EUCLID precond\n");
+         hypre_printf("                        22 - PCG with ParaSails precond\n");
+         hypre_printf("                        28 - PCG with diagonal scaling\n");
+         hypre_printf("  -print             : print out the system\n");
+         hypre_printf("\n");
       }
 
       if (print_usage)
@@ -204,11 +233,21 @@ int main (int argc, char *argv[])
       }
    }
 
+   /* Set object type */
+   if (solver_id == 5)
+   {
+      object_type = HYPRE_PARCSR;
+   }
+   else
+   {
+      object_type = HYPRE_SSTRUCT;
+   }
+
    /* Set the rhombus angle, gamma, and the mesh size, h, depending on the
       number of processors np and the given n */
    if (num_procs < 3)
    {
-      if (myid ==0) printf("Must run with at least 3 processors!\n");
+      if (myid ==0) hypre_printf("Must run with at least 3 processors!\n");
       MPI_Finalize();
       exit(1);
    }
@@ -361,10 +400,10 @@ int main (int argc, char *argv[])
       int part;
 
       /* Create the graph object */
-      HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, grid, &graph);
+      HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, &graph);
 
       /* See MatrixSetObjectType below */
-      HYPRE_SStructGraphSetObjectType(graph, HYPRE_PARCSR);
+      HYPRE_SStructGraphSetObjectType(graph, object_type);
 
       /* Indicate that this problem uses finite element stiffness matrices and
          load vectors, instead of stencils. */
@@ -385,14 +424,14 @@ int main (int argc, char *argv[])
       /* Create the matrix object */
       HYPRE_SStructMatrixCreate(MPI_COMM_WORLD, graph, &A);
       /* Use a ParCSR storage */
-      HYPRE_SStructMatrixSetObjectType(A, HYPRE_PARCSR);
+      HYPRE_SStructMatrixSetObjectType(A, object_type);
       /* Indicate that the matrix coefficients are ready to be set */
       HYPRE_SStructMatrixInitialize(A);
 
       /* Create an empty vector object */
       HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &b);
       /* Use a ParCSR storage */
-      HYPRE_SStructVectorSetObjectType(b, HYPRE_PARCSR);
+      HYPRE_SStructVectorSetObjectType(b, object_type);
       /* Indicate that the vector coefficients are ready to be set */
       HYPRE_SStructVectorInitialize(b);
 
@@ -503,6 +542,13 @@ int main (int argc, char *argv[])
    HYPRE_SStructMatrixAssemble(A);
    HYPRE_SStructVectorAssemble(b);
 
+   if (print_system)
+   {
+      HYPRE_SStructVectorGather(b);
+      HYPRE_SStructMatrixPrint("sstruct.out.A", A, 0);
+      HYPRE_SStructVectorPrint("sstruct.out.b", b, 0);
+   }
+
    /* 4. Set up SStruct Vector for the solution vector x */
    {
       int part = myid;
@@ -521,7 +567,7 @@ int main (int argc, char *argv[])
       /* Create an empty vector object */
       HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &x);
       /* Set the object type to ParCSR */
-      HYPRE_SStructVectorSetObjectType(x, HYPRE_PARCSR);
+      HYPRE_SStructVectorSetObjectType(x, object_type);
       /* Indicate that the vector coefficients are ready to be set */
       HYPRE_SStructVectorInitialize(x);
       /* Set the values for the initial guess */
@@ -535,10 +581,12 @@ int main (int argc, char *argv[])
 
    /* 5. Set up and call the solver (Solver options can be found in the
          Reference Manual.) */
-   {
-      double final_res_norm;
-      int its;
+   HYPRE_Real final_res_norm;
+   HYPRE_Int  its;
 
+   if (solver_id == 5)
+   {
+      HYPRE_Solver          solver;
       HYPRE_ParCSRMatrix    par_A;
       HYPRE_ParVector       par_b;
       HYPRE_ParVector       par_x;
@@ -572,59 +620,147 @@ int main (int argc, char *argv[])
 
       /* Gather the solution vector */
       HYPRE_SStructVectorGather(x);
+   }
+   else if ((solver_id >= 10) && (solver_id < 20))
+   {
+      HYPRE_SStructSolver  sstruct_solver;
+      HYPRE_Int  krylov_max_iter = 100;
+      HYPRE_Int  krylov_print_level = 3;
+      HYPRE_Real tol = 1.0e-6;
+      HYPRE_Int  rel_change = 0;
 
-      /* Save the solution for GLVis visualization, see vis/glvis-ex13.sh */
-      if (vis)
+      HYPRE_SStructSolver  sstruct_precond;
+      HYPRE_Int    max_levels = 20;
+      HYPRE_Int    relax_type = 0;
+      HYPRE_Int    usr_jacobi_weight = 0;
+      HYPRE_Real   jacobi_weight = 1.0;
+      HYPRE_Int    n_pre = 0;
+      HYPRE_Int    n_pos = 0;
+
+      time_index = hypre_InitializeTiming("PCG Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_SStructPCGCreate(hypre_MPI_COMM_WORLD, &sstruct_solver);
+      HYPRE_PCGSetMaxIter( (HYPRE_Solver) sstruct_solver, krylov_max_iter );
+      HYPRE_PCGSetTol( (HYPRE_Solver) sstruct_solver, tol );
+      HYPRE_PCGSetTwoNorm( (HYPRE_Solver) sstruct_solver, 1 );
+      HYPRE_PCGSetRelChange( (HYPRE_Solver) sstruct_solver, rel_change );
+      HYPRE_PCGSetPrintLevel( (HYPRE_Solver) sstruct_solver, krylov_print_level );
+
+      if (solver_id == 14)
       {
-         FILE *file;
-         char filename[255];
-
-         int i, part = myid, var = 0;
-         int nvalues = (n+1)*(n+1);
-         double *values = (double*) calloc(nvalues, sizeof(double));
-         int ilower[2] = {0,0};
-         int iupper[2] = {n,n};
-
-         /* get all local data (including a local copy of the shared values) */
-         HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
-                                         var, values);
-
-         sprintf(filename, "%s.%06d", "vis/ex14.sol", myid);
-         if ((file = fopen(filename, "w")) == NULL)
+         /* use SSAMG solver as preconditioner */
+         HYPRE_SStructSSAMGCreate(hypre_MPI_COMM_WORLD, &sstruct_precond);
+         HYPRE_SStructSSAMGSetMaxIter(sstruct_precond, 1);
+         HYPRE_SStructSSAMGSetMaxLevels(sstruct_precond, max_levels);
+         HYPRE_SStructSSAMGSetTol(sstruct_precond, 0.0);
+         HYPRE_SStructSSAMGSetZeroGuess(sstruct_precond);
+         HYPRE_SStructSSAMGSetRelaxType(sstruct_precond, relax_type);
+         if (usr_jacobi_weight)
          {
-            printf("Error: can't open output file %s\n", filename);
-            MPI_Finalize();
-            exit(1);
+            HYPRE_SStructSSAMGSetRelaxWeight(sstruct_precond, jacobi_weight);
          }
+         HYPRE_SStructSSAMGSetNumPreRelax(sstruct_precond, n_pre);
+         HYPRE_SStructSSAMGSetNumPostRelax(sstruct_precond, n_pos);
+         HYPRE_SStructSSAMGSetPrintLevel(sstruct_precond, 1);
+         HYPRE_SStructSSAMGSetLogging(sstruct_precond, 1);
 
-         /* finite element space header */
-         fprintf(file, "FiniteElementSpace\n");
-         fprintf(file, "FiniteElementCollection: H1_2D_P1\n");
-         fprintf(file, "VDim: 1\n");
-         fprintf(file, "Ordering: 0\n\n");
-
-         /* save solution */
-         for (i = 0; i < nvalues; i++)
-            fprintf(file, "%.14e\n", values[i]);
-
-         fflush(file);
-         fclose(file);
-         free(values);
-
-         /* save local finite element mesh */
-         GLVis_PrintLocalRhombusMesh("vis/ex14.mesh", n, myid, gamma);
-
-         /* additional visualization data */
-         GLVis_PrintData("vis/ex14.data", myid, num_procs);
+         HYPRE_PCGSetPrecond( (HYPRE_Solver) sstruct_solver,
+                              (HYPRE_PtrToSolverFcn) HYPRE_SStructSSAMGSolve,
+                              (HYPRE_PtrToSolverFcn) HYPRE_SStructSSAMGSetup,
+                              (HYPRE_Solver) sstruct_precond);
       }
+      HYPRE_PCGSetup( (HYPRE_Solver) sstruct_solver, (HYPRE_Matrix) A,
+                      (HYPRE_Vector) b, (HYPRE_Vector) x);
 
-      if (myid == 0)
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("PCG Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_PCGSolve( (HYPRE_Solver) sstruct_solver, (HYPRE_Matrix) A,
+                      (HYPRE_Vector) b, (HYPRE_Vector) x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_PCGGetNumIterations( (HYPRE_Solver) sstruct_solver, &its );
+      HYPRE_PCGGetFinalRelativeResidualNorm( (HYPRE_Solver) sstruct_solver, &final_res_norm );
+      HYPRE_SStructPCGDestroy(sstruct_solver);
+
+      if (solver_id == 14)
       {
-         printf("\n");
-         printf("Iterations = %d\n", its);
-         printf("Final Relative Residual Norm = %g\n", final_res_norm);
-         printf("\n");
+         HYPRE_SStructSSAMGDestroy(sstruct_precond);
       }
+   }
+   else
+   {
+      if (myid ==0)
+      {
+         hypre_printf("Solver ID not supported: %d\n", solver_id);
+      }
+      MPI_Finalize();
+      exit(1);
+   }
+
+   if (myid == 0)
+   {
+      hypre_printf("\n");
+      hypre_printf("Iterations = %d\n", its);
+      hypre_printf("Final Relative Residual Norm = %g\n", final_res_norm);
+      hypre_printf("\n");
+   }
+
+   /* Save the solution for GLVis visualization, see vis/glvis-ex13.sh */
+   if (vis)
+   {
+      FILE *file;
+      char filename[255];
+
+      int i, part = myid, var = 0;
+      int nvalues = (n+1)*(n+1);
+      double *values = (double*) calloc(nvalues, sizeof(double));
+      int ilower[2] = {0,0};
+      int iupper[2] = {n,n};
+
+      /* get all local data (including a local copy of the shared values) */
+      HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
+                                      var, values);
+
+      hypre_sprintf(filename, "%s.%06d", "vis/ex14.sol", myid);
+      if ((file = fopen(filename, "w")) == NULL)
+      {
+         hypre_printf("Error: can't open output file %s\n", filename);
+         MPI_Finalize();
+         exit(1);
+      }
+
+      /* finite element space header */
+      hypre_fprintf(file, "FiniteElementSpace\n");
+      hypre_fprintf(file, "FiniteElementCollection: H1_2D_P1\n");
+      hypre_fprintf(file, "VDim: 1\n");
+      hypre_fprintf(file, "Ordering: 0\n\n");
+
+      /* save solution */
+      for (i = 0; i < nvalues; i++)
+      {
+         hypre_fprintf(file, "%.14e\n", values[i]);
+      }
+
+      fflush(file);
+      fclose(file);
+      free(values);
+
+      /* save local finite element mesh */
+      GLVis_PrintLocalRhombusMesh("vis/ex14.mesh", n, myid, gamma);
+
+      /* additional visualization data */
+      GLVis_PrintData("vis/ex14.data", myid, num_procs);
    }
 
    /* Free memory */
