@@ -185,7 +185,7 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
 #if defined(HYPRE_USING_CUB_ALLOCATOR)
    HYPRE_CUDA_CALL( hypre_CachingMallocManaged(&ptr, size) );
 #elif defined(HYPRE_USING_UMPIRE)
-umpire_resourcemanager rm;
+   umpire_resourcemanager rm;
    umpire_resourcemanager_get_instance(&rm);
    umpire_allocator um_allocator;
    umpire_resourcemanager_get_allocator_by_name(&rm, "UM_POOL", &um_allocator);
@@ -298,6 +298,7 @@ hypre_DeviceFree(void *ptr)
    umpire_allocator allocator;
    umpire_resourcemanager_get_allocator_by_name(&rm, "DEVICE_POOL", &allocator);
    umpire_allocator_deallocate(&allocator, ptr);
+   ptr=NULL;
 #else
    HYPRE_CUDA_CALL( cudaFree(ptr) );
 #endif
@@ -316,6 +317,7 @@ hypre_UnifiedFree(void *ptr)
    umpire_allocator allocator;
    umpire_resourcemanager_get_allocator_by_name(&rm, "UM_POOL", &allocator);
    umpire_allocator_deallocate(&allocator, ptr);
+   ptr=NULL;
 #else
    HYPRE_CUDA_CALL( cudaFree(ptr) );
 #endif
