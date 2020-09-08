@@ -76,13 +76,11 @@ hypre_AuxParCSRMatrixDestroy( hypre_AuxParCSRMatrix *matrix )
 {
    HYPRE_Int ierr=0;
    HYPRE_Int i;
-   HYPRE_Int num_rows;
    HYPRE_Int num_rownnz;
 
    if (matrix)
    {
       num_rownnz = hypre_AuxParCSRMatrixLocalNumRownnz(matrix);
-      num_rows   = hypre_AuxParCSRMatrixLocalNumRows(matrix);
 
       if (hypre_AuxParCSRMatrixRownnz(matrix))
          hypre_TFree(hypre_AuxParCSRMatrixRownnz(matrix));
