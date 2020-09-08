@@ -129,10 +129,10 @@ hypre_AuxParCSRMatrixInitialize( hypre_AuxParCSRMatrix *matrix )
 {
    HYPRE_Int       local_num_rows     = hypre_AuxParCSRMatrixLocalNumRows(matrix);
    HYPRE_Int      *row_space          = hypre_AuxParCSRMatrixRowSpace(matrix);
+   HYPRE_Int      *rownnz             = hypre_AuxParCSRMatrixRownnz(matrix);
    HYPRE_Int       max_off_proc_elmts = hypre_AuxParCSRMatrixMaxOffProcElmts(matrix);
 
    HYPRE_Int       local_num_rownnz;
-   HYPRE_Int      *rownnz;
    HYPRE_Int     **aux_j;
    HYPRE_Complex **aux_data;
    HYPRE_Int       i, ii;
@@ -197,11 +197,22 @@ hypre_AuxParCSRMatrixInitialize( hypre_AuxParCSRMatrix *matrix )
 
       if (row_space)
       {
-         for (i = 0; i < local_num_rownnz; i++)
+         if (rownnz)
          {
-            ii = rownnz[i];
-            aux_j[ii] = hypre_CTAlloc(HYPRE_Int, row_space[ii]);
-            aux_data[ii] = hypre_CTAlloc(HYPRE_Complex, row_space[ii]);
+            for (i = 0; i < local_num_rownnz; i++)
+            {
+               ii = rownnz[i];
+               aux_j[ii] = hypre_CTAlloc(HYPRE_Int, row_space[ii]);
+               aux_data[ii] = hypre_CTAlloc(HYPRE_Complex, row_space[ii]);
+            }
+         }
+         else
+         {
+            for (i = 0; i < local_num_rownnz; i++)
+            {
+               aux_j[i] = hypre_CTAlloc(HYPRE_Int, row_space[i]);
+               aux_data[i] = hypre_CTAlloc(HYPRE_Complex, row_space[i]);
+            }
          }
       }
       else
