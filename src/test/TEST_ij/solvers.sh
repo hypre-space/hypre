@@ -45,6 +45,22 @@ FILES="\
  ${TNAME}.out.5\
  ${TNAME}.out.6\
  ${TNAME}.out.7\
+ ${TNAME}.out.900\
+ ${TNAME}.out.901\
+ ${TNAME}.out.902\
+ ${TNAME}.out.903\
+ ${TNAME}.out.904\
+ ${TNAME}.out.905\
+ ${TNAME}.out.906\
+ ${TNAME}.out.910\
+ ${TNAME}.out.911\
+ ${TNAME}.out.912\
+ ${TNAME}.out.913\
+ ${TNAME}.out.914\
+ ${TNAME}.out.915\
+ ${TNAME}.out.916\
+ ${TNAME}.out.917\
+ ${TNAME}.out.918\
 "
 
 for i in $FILES
@@ -65,8 +81,6 @@ FILES="\
  ${TNAME}.out.16\
  ${TNAME}.out.17\
  ${TNAME}.out.18\
- ${TNAME}.out.90\
- ${TNAME}.out.91\
 "
 
 for i in $FILES
