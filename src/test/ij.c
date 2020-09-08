@@ -7292,7 +7292,7 @@ main( hypre_int argc,
 
    /* when using cuda-memcheck --leak-check full, uncomment this */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   cudaDeviceReset();
+   //cudaDeviceReset();
 #endif
 
    return (0);

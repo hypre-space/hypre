@@ -229,21 +229,21 @@ HYPRE_Int
 HYPRE_Finalize()
 {
 #if defined(HYPRE_USING_UMPIRE)
-   umpire_resourcemanager rm;
-   umpire_resourcemanager_get_instance(&rm);
-   umpire_allocator dev_allocator;
+   /* umpire_resourcemanager rm; */
+   /* umpire_resourcemanager_get_instance(&rm); */
+   /* umpire_allocator dev_allocator; */
 
-   umpire_resourcemanager_get_allocator_by_name(&rm, "UM_POOL", &dev_allocator);
-   umpire_allocator_release(&dev_allocator);
+   /* umpire_resourcemanager_get_allocator_by_name(&rm, "UM_POOL", &dev_allocator); */
+   /* umpire_allocator_release(&dev_allocator); */
 
-   umpire_resourcemanager_get_allocator_by_name(&rm, "UM", &dev_allocator);
-   umpire_allocator_release(&dev_allocator);
+   /* umpire_resourcemanager_get_allocator_by_name(&rm, "UM", &dev_allocator); */
+   /* umpire_allocator_release(&dev_allocator); */
 
-   umpire_resourcemanager_get_allocator_by_name(&rm, "DEVICE", &dev_allocator);
-   umpire_allocator_release(&dev_allocator);
+   /* umpire_resourcemanager_get_allocator_by_name(&rm, "DEVICE", &dev_allocator); */
+   /* umpire_allocator_release(&dev_allocator); */
 
-   umpire_resourcemanager_get_allocator_by_name(&rm, "DEVICE_POOL", &dev_allocator);
-   umpire_allocator_release(&dev_allocator);
+   /* umpire_resourcemanager_get_allocator_by_name(&rm, "DEVICE_POOL", &dev_allocator); */
+   /* umpire_allocator_release(&dev_allocator); */
 #endif
 
    hypre_HandleDestroy(_hypre_handle);
