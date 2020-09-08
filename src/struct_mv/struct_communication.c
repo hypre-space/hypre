@@ -13,7 +13,7 @@
 #include "_hypre_struct_mv.h"
 
 #define DEBUG 0
-#define DEBUG_COMM_MAT 1
+#define DEBUG_COMM_MAT 0
 
 #if DEBUG
 char       filename[255];
