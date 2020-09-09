@@ -31,6 +31,10 @@
 #include "superlu_ddefs.h"
 #endif
 
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_UMPIRE)
+#include "umpire/interface/umpire.h"
+#endif
+
 /* begin lobpcg */
 
 #define NO_SOLVER -9198
@@ -416,6 +420,25 @@ main( hypre_int argc,
 
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
+
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_UMPIRE)
+   /* Setup Umpire pools */
+   size_t pool_size = 1024*1024*1024;
+   pool_size*=4;
+     
+   umpire_resourcemanager rm;
+   umpire_resourcemanager_get_instance(&rm);
+   
+   umpire_allocator um_allocator,um_pool;
+   umpire_resourcemanager_get_allocator_by_name(&rm, "UM", &um_allocator);
+   umpire_resourcemanager_make_allocator_pool(&rm, "HYPRE_UM_POOL", um_allocator, pool_size , 512, &um_pool);
+
+   umpire_allocator dev_allocator,dev_pool;
+   umpire_resourcemanager_get_allocator_by_name(&rm, "DEVICE", &dev_allocator);
+   umpire_resourcemanager_make_allocator_pool(&rm, "HYPRE_DEVICE_POOL", dev_allocator, pool_size , 512, &dev_pool);
+   
+   
+#endif
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );

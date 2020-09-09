@@ -159,7 +159,7 @@ hypre_DeviceMalloc(size_t size, HYPRE_Int zeroinit)
    umpire_resourcemanager rm;
    umpire_resourcemanager_get_instance(&rm);
    umpire_allocator dev_allocator;
-   umpire_resourcemanager_get_allocator_by_name(&rm, "DEVICE_POOL", &dev_allocator);
+   umpire_resourcemanager_get_allocator_by_name(&rm, "HYPRE_DEVICE_POOL", &dev_allocator);
    ptr = umpire_allocator_allocate(&dev_allocator, size);
    //printf("Umpire allocated device pointer %p of size %zu\n",ptr,size);
 #else
@@ -188,7 +188,7 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
    umpire_resourcemanager rm;
    umpire_resourcemanager_get_instance(&rm);
    umpire_allocator um_allocator;
-   umpire_resourcemanager_get_allocator_by_name(&rm, "UM_POOL", &um_allocator);
+   umpire_resourcemanager_get_allocator_by_name(&rm, "HYPRE_UM_POOL", &um_allocator);
    ptr = umpire_allocator_allocate(&um_allocator, size);
 //printf("Umpire allocated managed pointer %p of size %zu\n",ptr,size);
 #else
@@ -296,7 +296,7 @@ hypre_DeviceFree(void *ptr)
    umpire_resourcemanager rm;
    umpire_resourcemanager_get_instance(&rm);
    umpire_allocator allocator;
-   umpire_resourcemanager_get_allocator_by_name(&rm, "DEVICE_POOL", &allocator);
+   umpire_resourcemanager_get_allocator_by_name(&rm, "HYPRE_DEVICE_POOL", &allocator);
    umpire_allocator_deallocate(&allocator, ptr);
    ptr=NULL;
 #else
@@ -315,7 +315,7 @@ hypre_UnifiedFree(void *ptr)
    umpire_resourcemanager rm;
    umpire_resourcemanager_get_instance(&rm);
    umpire_allocator allocator;
-   umpire_resourcemanager_get_allocator_by_name(&rm, "UM_POOL", &allocator);
+   umpire_resourcemanager_get_allocator_by_name(&rm, "HYPRE_UM_POOL", &allocator);
    umpire_allocator_deallocate(&allocator, ptr);
    ptr=NULL;
 #else

@@ -10,10 +10,15 @@
 
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_UMPIRE)
 #include "umpire/interface/umpire.h"
-//#include "umpire/strategy/DynamicPool.hpp"
-//#include "umpire/strategy/AllocationAdvisor.hpp"
-//#include "umpire/strategy/MonotonicAllocationStrategy.hpp"
-//#include "umpire/util/Macros.hpp"
+
+#include "umpire/Allocator.hpp"
+#include "umpire/ResourceManager.hpp"
+
+#include "umpire/strategy/DynamicPool.hpp"
+#include "umpire/strategy/AllocationAdvisor.hpp"
+#include "umpire/strategy/MonotonicAllocationStrategy.hpp"
+#include "umpire/util/Macros.hpp"
+int check_for_pool(const char *pool);
 #endif
 
 /*
@@ -184,24 +189,39 @@ HYPRE_Init()
 
    /* Need to define pools here unless they are already available */
    if (1){
-   umpire_resourcemanager rm;
-   umpire_resourcemanager_get_instance(&rm);
 
 
-   umpire_allocator um_allocator;
-   umpire_resourcemanager_get_allocator_by_name(&rm, "UM", &um_allocator);
+     size_t pool_size = 1024*1024*1024;
+     pool_size*=4;
+     
+     umpire_resourcemanager rm;
+     umpire_resourcemanager_get_instance(&rm);
 
-   size_t pool_size = 1024*1024*1024;
-   pool_size*=4;
+     /* THE UM POOL */
+     umpire_allocator um_allocator,um_pool;
+     umpire_resourcemanager_get_allocator_by_name(&rm, "UM", &um_allocator);
+   
+     if (check_for_pool("HYPRE_UM_POOL")){
+       umpire_resourcemanager_get_allocator_by_name(&rm, "HYPRE_UM_POOL", &um_pool);
+       printf("Using extant HYPRE_UM_POOL \n");
+     } else{
+       umpire_resourcemanager_make_allocator_pool(&rm, "HYPRE_UM_POOL", um_allocator, pool_size , 512, &um_pool);
+       printf("Creating new HYPRE_UM_POOL \n");
+     }
 
-   umpire_allocator um_pool;
-   umpire_resourcemanager_make_allocator_pool(&rm, "UM_POOL", um_allocator, pool_size , 512, &um_pool);
-
-   umpire_allocator dev_allocator;
-   umpire_resourcemanager_get_allocator_by_name(&rm, "DEVICE", &dev_allocator);
-   umpire_allocator dev_pool;
-   umpire_resourcemanager_make_allocator_pool(&rm, "DEVICE_POOL", dev_allocator, pool_size,  512, &dev_pool);
+     /* THE DEVICE POOL */
+     umpire_allocator dev_pool, dev_allocator;
+     umpire_resourcemanager_get_allocator_by_name(&rm, "DEVICE", &dev_allocator);
+     
+     if (check_for_pool("HYPRE_DEVICE_POOL")){
+       umpire_resourcemanager_get_allocator_by_name(&rm, "HYPRE_DEVICE_POOL", &dev_pool);
+       printf("Using extant HYPRE_DEVICE_POOL \n");
+     } else{
+       umpire_resourcemanager_make_allocator_pool(&rm, "HYPRE_DEVICE_POOL", dev_allocator, pool_size , 512, &dev_pool);
+       printf("Creating new HYPRE_DEVICE_POOL \n");
+     }
    }
+   
 #endif
 
 #ifdef HYPRE_USING_CUB_ALLOCATOR
@@ -263,3 +283,14 @@ HYPRE_Finalize()
    return hypre_error_flag;
 }
 
+int check_for_pool(const char *pool){
+  auto& rm = umpire::ResourceManager::getInstance();
+
+  try{
+    umpire::Allocator allocator = rm.getAllocator(pool);
+  } catch( const std::exception &e ){
+    
+    return 0;
+  }
+  return 1;
+}
