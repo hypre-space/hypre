@@ -74,6 +74,33 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /*-----------------------------------------------------
+    * Sanity checks
+    *-----------------------------------------------------*/
+   if (hypre_SStructMatrixObjectType(A) != HYPRE_SSTRUCT)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Matrix is not HYPRE_SSTRUCT");
+      HYPRE_ANNOTATE_FUNC_END;
+
+      return hypre_error_flag;
+   }
+
+   if (hypre_SStructVectorObjectType(x) != HYPRE_SSTRUCT)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "LHS is not HYPRE_SSTRUCT");
+      HYPRE_ANNOTATE_FUNC_END;
+
+      return hypre_error_flag;
+   }
+
+   if (hypre_SStructVectorObjectType(b) != HYPRE_SSTRUCT)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "RHS is not HYPRE_SSTRUCT");
+      HYPRE_ANNOTATE_FUNC_END;
+
+      return hypre_error_flag;
+   }
+
+   /*-----------------------------------------------------
     * Initialize some data.
     *-----------------------------------------------------*/
    nparts    = hypre_SStructMatrixNParts(A);
