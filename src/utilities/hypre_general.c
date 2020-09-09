@@ -284,6 +284,7 @@ HYPRE_Finalize()
 }
 
 int check_for_pool(const char *pool){
+#if defined(HYPRE_USING_UMPIRE)
   auto& rm = umpire::ResourceManager::getInstance();
 
   try{
@@ -292,5 +293,6 @@ int check_for_pool(const char *pool){
     
     return 0;
   }
+#endif
   return 1;
 }

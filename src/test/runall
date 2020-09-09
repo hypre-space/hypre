@@ -1,0 +1,14 @@
+./runtest.sh TEST_ams/*.sh
+./runtest.sh TEST_ij/*.sh
+./runtest.sh TEST_cuda_lassen/*.sh
+./runtest.sh TEST_cuda_ray/*.sh
+#./runtest.sh TEST_examples/*.sh
+#./runtest.sh TEST_fac/*.sh
+#./runtest.sh TEST_fei/*.sh
+#./runtest.sh TEST_lobpcg/*.sh
+#./runtest.sh TEST_longdouble/*.sh
+#./runtest.sh TEST_single/*.sh
+./runtest.sh TEST_sstruct/*.sh
+./runtest.sh TEST_struct/*.sh
+#./runtest.sh TEST_superlu/*.sh
+#./runtest.sh TEST_timing/*.sh

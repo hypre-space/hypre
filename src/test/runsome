@@ -1,0 +1,6 @@
+./runtest.sh TEST_ams/*.sh
+./runtest.sh TEST_ij/*.sh
+./runtest.sh TEST_cuda_lassen/*.sh
+./runtest.sh TEST_cuda_ray/*.sh
+./runtest.sh TEST_sstruct/*.sh
+./runtest.sh TEST_struct/*.sh
