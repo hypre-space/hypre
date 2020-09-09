@@ -1,0 +1,7 @@
+*.o
+*.a
+*.obj
+*.out.*
+*.err.*
+*.err
+*.out
