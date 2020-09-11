@@ -240,6 +240,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    hypre_SSAMGRelaxSetType(relax_data_l[l], 0);
    hypre_SSAMGRelaxSetMaxIter(relax_data_l[l], num_crelax);
    hypre_SSAMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
+   hypre_SSAMGRelaxSetMatvecData(relax_data_l[l], matvec_data_l[l]);
    hypre_SSAMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 
    (ssamg_data -> relax_data_l)    = relax_data_l;
