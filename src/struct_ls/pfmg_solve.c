@@ -171,9 +171,13 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          {
             norms[i] = sqrt(r_dot_r);
             if (b_dot_b > 0)
+            {
                rel_norms[i] = sqrt(r_dot_r/b_dot_b);
+            }
             else
+            {
                rel_norms[i] = 0.0;
+            }
          }
 
          /* always do at least 1 V-cycle */
@@ -182,10 +186,14 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             if (rel_change)
             {
                if ((e_dot_e/x_dot_x) < eps)
+               {
+                  HYPRE_ANNOTATE_MGLEVEL_END(0);
                   break;
+               }
             }
             else
             {
+               HYPRE_ANNOTATE_MGLEVEL_END(0);
                break;
             }
          }
@@ -314,6 +322,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          hypre_sprintf(filename, "pfmg_xup.%02d.%02d", i, 0);
          hypre_StructVectorPrint(filename, x_l[0], 0);
 #endif
+         HYPRE_ANNOTATE_MGLEVEL_BEGIN(0);
       }
 
       /* part of convergence check */
@@ -332,8 +341,6 @@ hypre_PFMGSolve( void               *pfmg_vdata,
       }
 
       /* fine grid post-relaxation */
-      HYPRE_ANNOTATE_MGLEVEL_BEGIN(0);
-
       hypre_PFMGRelaxSetPostRelax(relax_data_l[0]);
       hypre_PFMGRelaxSetMaxIter(relax_data_l[0], num_post_relax);
       hypre_PFMGRelaxSetZeroGuess(relax_data_l[0], 0);
