@@ -102,7 +102,7 @@ void hypre_swap3_d(HYPRE_Real  *v,
 {
    HYPRE_Int temp;
    HYPRE_Real temp_d;
-   
+
 
    temp_d = v[i];
    v[i] = v[j];
@@ -121,13 +121,13 @@ void hypre_swap3_d(HYPRE_Real  *v,
 void hypre_swap4_d(HYPRE_Real  *v,
                   HYPRE_Int  *w,
                   HYPRE_Int  *z,
-                  HYPRE_Int *y, 
+                  HYPRE_Int *y,
                   HYPRE_Int  i,
                   HYPRE_Int  j )
 {
    HYPRE_Int temp;
    HYPRE_Real temp_d;
-   
+
 
    temp_d = v[i];
    v[i] = v[j];
@@ -152,6 +152,20 @@ void hypre_swap_d( HYPRE_Real *v,
                    HYPRE_Int  j )
 {
    HYPRE_Real temp;
+
+   temp = v[i];
+   v[i] = v[j];
+   v[j] = temp;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+void hypre_swap_c( HYPRE_Complex *v,
+                   HYPRE_Int      i,
+                   HYPRE_Int      j )
+{
+   HYPRE_Complex temp;
 
    temp = v[i];
    v[i] = v[j];
@@ -367,7 +381,3 @@ void hypre_qsort_abs(HYPRE_Real *w,
    hypre_qsort_abs(w, left, last-1);
    hypre_qsort_abs(w, last+1, right);
 }
-
-
-
-

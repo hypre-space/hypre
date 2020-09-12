@@ -854,14 +854,14 @@ HYPRE_Int hypre_CSRMatrixTranspose( hypre_CSRMatrix  *A,
  * first entry in each row is the diagonal one.
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_CSRMatrixReorder(hypre_CSRMatrix *A)
+HYPRE_Int
+hypre_CSRMatrixReorder( hypre_CSRMatrix *A )
 {
-   HYPRE_Int     i, j, tempi, row_size;
-   HYPRE_Complex tempd;
-
    HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
    HYPRE_Int     *A_i = hypre_CSRMatrixI(A);
    HYPRE_Int     *A_j = hypre_CSRMatrixJ(A);
+   HYPRE_Int     *rownnz_A = hypre_CSRMatrixRownnz(A);
+   HYPRE_Int      nnzrows_A  = hypre_CSRMatrixNumRownnz(A);
    HYPRE_Int      num_rows_A = hypre_CSRMatrixNumRows(A);
    HYPRE_Int      num_cols_A = hypre_CSRMatrixNumCols(A);
 
@@ -871,36 +871,97 @@ HYPRE_Int hypre_CSRMatrixReorder(hypre_CSRMatrix *A)
       return -1;
    }
 
-   for (i = 0; i < num_rows_A; i++)
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel
+#endif
    {
-      row_size = A_i[i+1] - A_i[i];
+      HYPRE_Int   num_threads = hypre_NumActiveThreads();
+      HYPRE_Int   mytid = hypre_GetThreadNum();
+      HYPRE_Int   ns, ne, size, rest;
+      HYPRE_Int   i, ii, j;
 
-      for (j = 0; j < row_size; j++)
+      size = nnzrows_A/num_threads;
+      rest = nnzrows_A - size*num_threads;
+      if (mytid < rest)
       {
-         if (A_j[j] == i)
-         {
-            if (j != 0)
-            {
-               tempi = A_j[0];
-               A_j[0] = A_j[j];
-               A_j[j] = tempi;
-
-               tempd = A_data[0];
-               A_data[0] = A_data[j];
-               A_data[j] = tempd;
-            }
-            break;
-         }
-
-         /* diagonal element is missing */
-         if (j == row_size-1)
-         {
-            return -2;
-         }
+         ns = mytid*size + mytid;
+         ne = (mytid + 1)*size + mytid + 1;
+      }
+      else
+      {
+         ns = mytid*size + rest;
+         ne = (mytid + 1)*size + rest;
       }
 
-      A_j    += row_size;
-      A_data += row_size;
+      if (rownnz_A == NULL)
+      {
+         for (i = ns; i < ne; i++)
+         {
+            for (j = A_i[i]; j < A_i[i+1] - 1; j++)
+            {
+               if (A_j[j] == i)
+               {
+                  if (j != A_i[i])
+                  {
+                     hypre_swap(A_j, A_i[i], j);
+                     hypre_swap_c(A_data, A_i[i], j);
+                  }
+                  break;
+               }
+            }
+
+            j = A_i[i+1] - 1;
+            if (A_j[j] == i)
+            {
+               if (j != A_i[i])
+               {
+                  hypre_swap(A_j, A_i[i], j);
+                  hypre_swap_c(A_data, A_i[i], j);
+               }
+               break;
+            }
+            else
+            {
+               /* diagonal element is missing */
+               return -2;
+            }
+         }
+      }
+      else
+      {
+         for (i = ns; i < ne; i++)
+         {
+            ii = A_i[rownnz_A[i]];
+            for (j = A_i[ii]; j < A_i[ii+1] - 1; j++)
+            {
+               if (A_j[j] == ii)
+               {
+                  if (j != A_i[ii])
+                  {
+                     hypre_swap(A_j, A_i[ii], j);
+                     hypre_swap_c(A_data, A_i[ii], j);
+                  }
+                  break;
+               }
+            }
+
+            j = A_i[ii+1] - 1;
+            if (A_j[j] == ii)
+            {
+               if (j != A_i[ii])
+               {
+                  hypre_swap(A_j, A_i[ii], j);
+                  hypre_swap_c(A_data, A_i[ii], j);
+               }
+               break;
+            }
+            else
+            {
+               /* diagonal element is missing */
+               return -2;
+            }
+         }
+      }
    }
 
    return 0;
