@@ -857,13 +857,15 @@ HYPRE_Int hypre_CSRMatrixTranspose( hypre_CSRMatrix  *A,
 HYPRE_Int
 hypre_CSRMatrixReorder( hypre_CSRMatrix *A )
 {
-   HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
-   HYPRE_Int     *A_i = hypre_CSRMatrixI(A);
-   HYPRE_Int     *A_j = hypre_CSRMatrixJ(A);
-   HYPRE_Int     *rownnz_A = hypre_CSRMatrixRownnz(A);
+   HYPRE_Complex *A_data     = hypre_CSRMatrixData(A);
+   HYPRE_Int     *A_i        = hypre_CSRMatrixI(A);
+   HYPRE_Int     *A_j        = hypre_CSRMatrixJ(A);
+   HYPRE_Int     *rownnz_A   = hypre_CSRMatrixRownnz(A);
    HYPRE_Int      nnzrows_A  = hypre_CSRMatrixNumRownnz(A);
    HYPRE_Int      num_rows_A = hypre_CSRMatrixNumRows(A);
    HYPRE_Int      num_cols_A = hypre_CSRMatrixNumCols(A);
+
+   HYPRE_Int      i, ii, j;
 
    /* the matrix should be square */
    if (num_rows_A != num_cols_A)
@@ -871,46 +873,15 @@ hypre_CSRMatrixReorder( hypre_CSRMatrix *A )
       return -1;
    }
 
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel
-#endif
+   if (rownnz_A == NULL)
    {
-      HYPRE_Int   num_threads = hypre_NumActiveThreads();
-      HYPRE_Int   mytid = hypre_GetThreadNum();
-      HYPRE_Int   ns, ne, size, rest;
-      HYPRE_Int   i, ii, j;
-
-      size = nnzrows_A/num_threads;
-      rest = nnzrows_A - size*num_threads;
-      if (mytid < rest)
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i, j) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < num_rows_A; i++)
       {
-         ns = mytid*size + mytid;
-         ne = (mytid + 1)*size + mytid + 1;
-      }
-      else
-      {
-         ns = mytid*size + rest;
-         ne = (mytid + 1)*size + rest;
-      }
-
-      if (rownnz_A == NULL)
-      {
-         for (i = ns; i < ne; i++)
+         for (j = A_i[i]; j < A_i[i+1]; j++)
          {
-            for (j = A_i[i]; j < A_i[i+1] - 1; j++)
-            {
-               if (A_j[j] == i)
-               {
-                  if (j != A_i[i])
-                  {
-                     hypre_swap(A_j, A_i[i], j);
-                     hypre_swap_c(A_data, A_i[i], j);
-                  }
-                  break;
-               }
-            }
-
-            j = A_i[i+1] - 1;
             if (A_j[j] == i)
             {
                if (j != A_i[i])
@@ -920,32 +891,19 @@ hypre_CSRMatrixReorder( hypre_CSRMatrix *A )
                }
                break;
             }
-            else
-            {
-               /* diagonal element is missing */
-               return -2;
-            }
          }
       }
-      else
+   }
+   else
+   {
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i, ii, j) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < nnzrows_A; i++)
       {
-         for (i = ns; i < ne; i++)
+         ii = A_i[rownnz_A[i]];
+         for (j = A_i[ii]; j < A_i[ii+1]; j++)
          {
-            ii = A_i[rownnz_A[i]];
-            for (j = A_i[ii]; j < A_i[ii+1] - 1; j++)
-            {
-               if (A_j[j] == ii)
-               {
-                  if (j != A_i[ii])
-                  {
-                     hypre_swap(A_j, A_i[ii], j);
-                     hypre_swap_c(A_data, A_i[ii], j);
-                  }
-                  break;
-               }
-            }
-
-            j = A_i[ii+1] - 1;
             if (A_j[j] == ii)
             {
                if (j != A_i[ii])
@@ -954,11 +912,6 @@ hypre_CSRMatrixReorder( hypre_CSRMatrix *A )
                   hypre_swap_c(A_data, A_i[ii], j);
                }
                break;
-            }
-            else
-            {
-               /* diagonal element is missing */
-               return -2;
             }
          }
       }
