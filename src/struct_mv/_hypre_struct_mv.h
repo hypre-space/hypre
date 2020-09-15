@@ -2297,9 +2297,11 @@ HYPRE_Int hypre_StructMapCoarseToFine( hypre_Index cindex , hypre_Index origin ,
 HYPRE_Int
 hypre_ComputeCoarseOriginStride( hypre_Index coarse_origin , hypre_Index coarse_stride , hypre_IndexRef origin , hypre_Index stride , HYPRE_Int ndim );
 HYPRE_Int hypre_CoarsenBox( hypre_Box *box , hypre_IndexRef origin , hypre_Index stride );
+HYPRE_Int hypre_CoarsenPosBox( hypre_Box *box , hypre_IndexRef origin , hypre_Index stride );
 HYPRE_Int hypre_RefineBox ( hypre_Box *box , hypre_IndexRef origin , hypre_Index stride );
 HYPRE_Int hypre_CoarsenBoxArray( hypre_BoxArray *box_array , hypre_IndexRef origin , hypre_Index stride );
 HYPRE_Int hypre_CoarsenBoxArrayArray( hypre_BoxArrayArray *box_array_array , hypre_IndexRef origin , hypre_Index stride );
+HYPRE_Int hypre_CoarsenPosBoxArrayArray( hypre_BoxArrayArray *boxaa, hypre_IndexRef origin, hypre_Index stride, hypre_BoxArrayArray **new_boxaa_ptr );
 HYPRE_Int hypre_StructCoarsen( hypre_StructGrid *fgrid , hypre_IndexRef origin , hypre_Index stride , HYPRE_Int prune , hypre_StructGrid **cgrid_ptr );
 
 /* communication_info.c */

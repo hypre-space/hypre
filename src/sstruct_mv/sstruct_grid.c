@@ -2455,10 +2455,8 @@ hypre_SStructGridCoarsen( hypre_SStructGrid   *fgrid,
    hypre_BoxArrayArray     *fpbnd_boxaa;
    hypre_BoxArrayArray     *cpbnd_boxaa;
 
-   hypre_Box               *box;
-   hypre_BoxArray          *boxa;
    hypre_SStructVariable   *vartypes;
-   HYPRE_Int                i, j, part, var, nvars;
+   HYPRE_Int                part, var, nvars;
 
    /* Create coarse SStructGrid */
    HYPRE_SStructGridCreate(comm, ndim, nparts, &cgrid);
@@ -2491,21 +2489,7 @@ hypre_SStructGridCoarsen( hypre_SStructGrid   *fgrid,
          if (hypre_StructGridNumBoxes(scgrid))
          {
             fpbnd_boxaa = hypre_SStructPGridPBndBoxArrayArray(pfgrid, var);
-            cpbnd_boxaa = hypre_BoxArrayArrayClone(fpbnd_boxaa);
-            hypre_ForBoxArrayI(i, cpbnd_boxaa)
-            {
-               boxa = hypre_BoxArrayArrayBoxArray(cpbnd_boxaa, i);
-               hypre_ForBoxI(j, boxa)
-               {
-                  box = hypre_BoxArrayBox(boxa, j);
-
-                  hypre_SnapIndexPos(hypre_BoxIMin(box), origin, strides[part], ndim);
-                  hypre_MapToCoarseIndex(hypre_BoxIMin(box), origin, strides[part], ndim);
-
-                  hypre_SnapIndexPos(hypre_BoxIMax(box), origin, strides[part], ndim);
-                  hypre_MapToCoarseIndex(hypre_BoxIMax(box), origin, strides[part], ndim);
-               }
-            }
+            hypre_CoarsenPosBoxArrayArray(fpbnd_boxaa, origin, strides[part], &cpbnd_boxaa);
             hypre_SStructPGridPBndBoxArrayArray(pcgrid, var) = cpbnd_boxaa;
          }
       }

@@ -160,6 +160,25 @@ hypre_CoarsenBox( hypre_Box      *box,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_CoarsenPosBox( hypre_Box      *box,
+                     hypre_IndexRef  origin,
+                     hypre_Index     stride )
+{
+   HYPRE_Int ndim = hypre_BoxNDim(box);
+
+   hypre_SnapIndexPos(hypre_BoxIMin(box), origin, stride, ndim);
+   hypre_MapToCoarseIndex(hypre_BoxIMin(box), origin, stride, ndim);
+
+   hypre_SnapIndexPos(hypre_BoxIMax(box), origin, stride, ndim);
+   hypre_MapToCoarseIndex(hypre_BoxIMax(box), origin, stride, ndim);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_RefineBox( hypre_Box      *box,
                  hypre_IndexRef  origin,
                  hypre_Index     stride )
@@ -217,6 +236,99 @@ hypre_CoarsenBoxArrayArray( hypre_BoxArrayArray  *box_array_array,
          hypre_CoarsenBox(box, origin, stride);
       }
    }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * The dimensions of the new BoxArrayArray are changed.
+ * hypre_CoarsenPos is used to coarsen the boxes.
+ * It is not possible to have boxes with volume 0.
+ * If 'origin' is NULL, a zero origin is used.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CoarsenPosBoxArrayArray( hypre_BoxArrayArray   *boxaa,
+                               hypre_IndexRef         origin,
+                               hypre_Index            stride,
+                               hypre_BoxArrayArray  **new_boxaa_ptr )
+{
+   HYPRE_Int              ndim = hypre_BoxArrayArrayNDim(boxaa);
+   hypre_BoxArrayArray   *new_boxaa;
+
+   hypre_Box             *box;
+   hypre_BoxArray        *boxa;
+   hypre_BoxArray        *new_boxa;
+
+   HYPRE_Int              count_box;
+   HYPRE_Int              count_boxa;
+   HYPRE_Int              count_boxaa;
+   HYPRE_Int              i, j ;
+
+   /* Allocate box */
+   box = hypre_BoxCreate(ndim);
+
+   /* Find out how many BoxArrays will be coarsened*/
+   count_boxaa = 0;
+   hypre_ForBoxArrayI(i, boxaa)
+   {
+      boxa = hypre_BoxArrayArrayBoxArray(boxaa, i);
+      hypre_ForBoxI(j, boxa)
+      {
+         hypre_CopyBox(hypre_BoxArrayBox(boxa, j), box);
+         hypre_CoarsenPosBox(box, origin, stride);
+         if (hypre_BoxVolume(box))
+         {
+            count_boxaa++;
+            break;
+         }
+      }
+   }
+
+   /* Allocate memory */
+   new_boxaa = hypre_BoxArrayArrayCreate(count_boxaa, ndim);
+
+   /* Coarsen BoxArrayArray */
+   count_boxa = 0;
+   hypre_ForBoxArrayI(i, boxaa)
+   {
+      boxa = hypre_BoxArrayArrayBoxArray(boxaa, i);
+      count_box = 0;
+      hypre_ForBoxI(j, boxa)
+      {
+         hypre_CopyBox(hypre_BoxArrayBox(boxa, j), box);
+         hypre_CoarsenPosBox(box, origin, stride);
+         if (hypre_BoxVolume(box))
+         {
+            count_box++;
+         }
+      }
+
+      if (count_box)
+      {
+         new_boxa = hypre_BoxArrayArrayBoxArray(new_boxaa, count_boxa);
+         hypre_BoxArraySetSize(new_boxa, count_box);
+
+         count_box  = 0;
+         hypre_ForBoxI(j, boxa)
+         {
+            hypre_CopyBox(hypre_BoxArrayBox(boxa, j), box);
+            hypre_CoarsenPosBox(box, origin, stride);
+            if (hypre_BoxVolume(box))
+            {
+               hypre_CopyBox(box, hypre_BoxArrayBox(new_boxa, count_box));
+               count_box++;
+            }
+         }
+         count_boxa++;
+      }
+   }
+
+   /* Free memory */
+   hypre_BoxDestroy(box);
+
+   /* Set pointer to new_boxaa */
+   *new_boxaa_ptr = new_boxaa;
 
    return hypre_error_flag;
 }
