@@ -193,6 +193,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          {
             if ( ((rel_change) && (e_dot_e/x_dot_x) < eps) || (!rel_change) )
             {
+               HYPRE_ANNOTATE_MGLEVEL_END(0);
                break;
             }
          }

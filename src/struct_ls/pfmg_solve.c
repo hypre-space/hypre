@@ -183,15 +183,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          /* always do at least 1 V-cycle */
          if ((r_dot_r/b_dot_b < eps) && (i > 0))
          {
-            if (rel_change)
-            {
-               if ((e_dot_e/x_dot_x) < eps)
-               {
-                  HYPRE_ANNOTATE_MGLEVEL_END(0);
-                  break;
-               }
-            }
-            else
+            if ( ((rel_change) && (e_dot_e/x_dot_x) < eps) || (!rel_change) )
             {
                HYPRE_ANNOTATE_MGLEVEL_END(0);
                break;
