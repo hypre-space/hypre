@@ -16,13 +16,13 @@
 
 __global__ void hypreCUDAKernel_compute_weak_rowsums( HYPRE_Int nr_of_rows, bool has_offd, HYPRE_Int *CF_marker, HYPRE_Int *A_diag_i, HYPRE_Complex *A_diag_a, HYPRE_Int *S_diag_j, HYPRE_Int *A_offd_i, HYPRE_Complex *A_offd_a, HYPRE_Int *S_offd_j, HYPRE_Real *rs, HYPRE_Int flag );
 
-__global__ void compute_aff_afc( HYPRE_Int nr_of_rows, HYPRE_Int *AFF_diag_i, HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Int *AFF_offd_i, HYPRE_Complex *AFF_offd_data, HYPRE_Int *AFC_diag_i, HYPRE_Complex *AFC_diag_data, HYPRE_Int *AFC_offd_i, HYPRE_Complex *AFC_offd_data, HYPRE_Complex *rsW, HYPRE_Complex *rsFC );
+__global__ void hypreCUDAKernel_compute_aff_afc( HYPRE_Int nr_of_rows, HYPRE_Int *AFF_diag_i, HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Int *AFF_offd_i, HYPRE_Complex *AFF_offd_data, HYPRE_Int *AFC_diag_i, HYPRE_Complex *AFC_diag_data, HYPRE_Int *AFC_offd_i, HYPRE_Complex *AFC_offd_data, HYPRE_Complex *rsW, HYPRE_Complex *rsFC );
 
 void hypreDevice_extendWtoP( HYPRE_Int P_nr_of_rows, HYPRE_Int W_nr_of_rows, HYPRE_Int W_nr_of_cols, HYPRE_Int *CF_marker, HYPRE_Int W_diag_nnz, HYPRE_Int *W_diag_i, HYPRE_Int *W_diag_j, HYPRE_Complex *W_diag_data, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Complex *P_diag_data, HYPRE_Int *W_offd_i, HYPRE_Int *P_offd_i );
 
-__global__ void compute_twiaff_w( HYPRE_Int nr_of_rows, HYPRE_BigInt first_index, HYPRE_Int *AFF_diag_i, HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Complex *AFF_diag_data_old, HYPRE_Int *AFF_offd_i, HYPRE_Int *AFF_offd_j, HYPRE_Complex *AFF_offd_data, HYPRE_Int *AFF_ext_i, HYPRE_BigInt *AFF_ext_j, HYPRE_Complex *AFF_ext_data, HYPRE_Complex *rsW, HYPRE_Complex *rsFC, HYPRE_Complex *rsFC_offd );
+__global__ void hypreCUDAKernel_compute_twiaff_w( HYPRE_Int nr_of_rows, HYPRE_BigInt first_index, HYPRE_Int *AFF_diag_i, HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Complex *AFF_diag_data_old, HYPRE_Int *AFF_offd_i, HYPRE_Int *AFF_offd_j, HYPRE_Complex *AFF_offd_data, HYPRE_Int *AFF_ext_i, HYPRE_BigInt *AFF_ext_j, HYPRE_Complex *AFF_ext_data, HYPRE_Complex *rsW, HYPRE_Complex *rsFC, HYPRE_Complex *rsFC_offd );
 
-__global__ void compute_aff_afc_epe( HYPRE_Int nr_of_rows, HYPRE_Int *AFF_diag_i, HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Int *AFF_offd_i, HYPRE_Int *AFF_offd_j, HYPRE_Complex *AFF_offd_data, HYPRE_Int *AFC_diag_i, HYPRE_Complex *AFC_diag_data, HYPRE_Int *AFC_offd_i, HYPRE_Complex *AFC_offd_data, HYPRE_Complex *rsW, HYPRE_Complex *dlam, HYPRE_Complex *d_tmp, HYPRE_Complex *dtmp_offd );
+__global__ void hypreCUDAKernel_compute_aff_afc_epe( HYPRE_Int nr_of_rows, HYPRE_Int *AFF_diag_i, HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Int *AFF_offd_i, HYPRE_Int *AFF_offd_j, HYPRE_Complex *AFF_offd_data, HYPRE_Int *AFC_diag_i, HYPRE_Complex *AFC_diag_data, HYPRE_Int *AFC_offd_i, HYPRE_Complex *AFC_offd_data, HYPRE_Complex *rsW, HYPRE_Complex *dlam, HYPRE_Complex *d_tmp, HYPRE_Complex *dtmp_offd );
 
 __global__ void hypreCUDAKernel_compute_dlam_dtmp( HYPRE_Int nr_of_rows, HYPRE_Int *AFF_diag_i, HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Int *AFF_offd_i, HYPRE_Complex *AFF_offd_data, HYPRE_Complex *rsFC, HYPRE_Complex *dlam, HYPRE_Complex *dtmp );
 
@@ -112,7 +112,7 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
    /* 6. Form matrix ~{A_FC}, (return twAFC in AFC data structure) */
    hypre_NvtxPushRangeColor("Compute interp matrix", 4);
    gDim = hypre_GetDefaultCUDAGridDimension(W_nr_of_rows, "warp", bDim);
-   HYPRE_CUDA_LAUNCH( compute_aff_afc,
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_aff_afc,
                       gDim, bDim,
                       W_nr_of_rows,
                       hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(AFF)),
@@ -344,7 +344,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
 
    hypre_NvtxPushRangeColor("Compute interp matrix", 4);
    gDim = hypre_GetDefaultCUDAGridDimension(W_nr_of_rows, "warp", bDim);
-   HYPRE_CUDA_LAUNCH( compute_twiaff_w,
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_twiaff_w,
                       gDim, bDim,
                       W_nr_of_rows,
                       hypre_ParCSRMatrixFirstRowIndex(AFF),
@@ -589,7 +589,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    /* 6. Form matrix ~{A_FC}, (return twAFC in AFC data structure) */
    hypre_NvtxPushRangeColor("Compute interp matrix", 4);
    gDim = hypre_GetDefaultCUDAGridDimension(W_nr_of_rows, "warp", bDim);
-   HYPRE_CUDA_LAUNCH( compute_aff_afc_epe,
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_aff_afc_epe,
                       gDim, bDim,
                       W_nr_of_rows,
                       hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(AFF)),
@@ -790,18 +790,18 @@ void hypreCUDAKernel_compute_weak_rowsums( HYPRE_Int      nr_of_rows,
 
 //-----------------------------------------------------------------------
 __global__
-void compute_aff_afc( HYPRE_Int      nr_of_rows,
-                      HYPRE_Int     *AFF_diag_i,
-                      HYPRE_Int     *AFF_diag_j,
-                      HYPRE_Complex *AFF_diag_data,
-                      HYPRE_Int     *AFF_offd_i,
-                      HYPRE_Complex *AFF_offd_data,
-                      HYPRE_Int     *AFC_diag_i,
-                      HYPRE_Complex *AFC_diag_data,
-                      HYPRE_Int     *AFC_offd_i,
-                      HYPRE_Complex *AFC_offd_data,
-                      HYPRE_Complex *rsW,
-                      HYPRE_Complex *rsFC )
+void hypreCUDAKernel_compute_aff_afc( HYPRE_Int      nr_of_rows,
+                                      HYPRE_Int     *AFF_diag_i,
+                                      HYPRE_Int     *AFF_diag_j,
+                                      HYPRE_Complex *AFF_diag_data,
+                                      HYPRE_Int     *AFF_offd_i,
+                                      HYPRE_Complex *AFF_offd_data,
+                                      HYPRE_Int     *AFC_diag_i,
+                                      HYPRE_Complex *AFC_diag_data,
+                                      HYPRE_Int     *AFC_offd_i,
+                                      HYPRE_Complex *AFC_offd_data,
+                                      HYPRE_Complex *rsW,
+                                      HYPRE_Complex *rsFC )
 {
    HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
 
@@ -1029,21 +1029,21 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
 //-----------------------------------------------------------------------
 // For Ext+i Interp, scale AFF from the left and the right
 __global__
-void compute_twiaff_w( HYPRE_Int      nr_of_rows,
-                       HYPRE_BigInt   first_index,
-                       HYPRE_Int     *AFF_diag_i,
-                       HYPRE_Int     *AFF_diag_j,
-                       HYPRE_Complex *AFF_diag_data,
-                       HYPRE_Complex *AFF_diag_data_old,
-                       HYPRE_Int     *AFF_offd_i,
-                       HYPRE_Int     *AFF_offd_j,
-                       HYPRE_Complex *AFF_offd_data,
-                       HYPRE_Int     *AFF_ext_i,
-                       HYPRE_BigInt  *AFF_ext_j,
-                       HYPRE_Complex *AFF_ext_data,
-                       HYPRE_Complex *rsW,
-                       HYPRE_Complex *rsFC,
-                       HYPRE_Complex *rsFC_offd )
+void hypreCUDAKernel_compute_twiaff_w( HYPRE_Int      nr_of_rows,
+                                       HYPRE_BigInt   first_index,
+                                       HYPRE_Int     *AFF_diag_i,
+                                       HYPRE_Int     *AFF_diag_j,
+                                       HYPRE_Complex *AFF_diag_data,
+                                       HYPRE_Complex *AFF_diag_data_old,
+                                       HYPRE_Int     *AFF_offd_i,
+                                       HYPRE_Int     *AFF_offd_j,
+                                       HYPRE_Complex *AFF_offd_data,
+                                       HYPRE_Int     *AFF_ext_i,
+                                       HYPRE_BigInt  *AFF_ext_j,
+                                       HYPRE_Complex *AFF_ext_data,
+                                       HYPRE_Complex *rsW,
+                                       HYPRE_Complex *rsFC,
+                                       HYPRE_Complex *rsFC_offd )
 {
    HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
 
@@ -1202,21 +1202,21 @@ void compute_twiaff_w( HYPRE_Int      nr_of_rows,
 
 //-----------------------------------------------------------------------
 __global__
-void compute_aff_afc_epe( HYPRE_Int      nr_of_rows,
-                          HYPRE_Int     *AFF_diag_i,
-                          HYPRE_Int     *AFF_diag_j,
-                          HYPRE_Complex *AFF_diag_data,
-                          HYPRE_Int     *AFF_offd_i,
-                          HYPRE_Int     *AFF_offd_j,
-                          HYPRE_Complex *AFF_offd_data,
-                          HYPRE_Int     *AFC_diag_i,
-                          HYPRE_Complex *AFC_diag_data,
-                          HYPRE_Int     *AFC_offd_i,
-                          HYPRE_Complex *AFC_offd_data,
-                          HYPRE_Complex *rsW,
-                          HYPRE_Complex *dlam,
-                          HYPRE_Complex *dtmp,
-                          HYPRE_Complex *dtmp_offd )
+void hypreCUDAKernel_compute_aff_afc_epe( HYPRE_Int      nr_of_rows,
+                                          HYPRE_Int     *AFF_diag_i,
+                                          HYPRE_Int     *AFF_diag_j,
+                                          HYPRE_Complex *AFF_diag_data,
+                                          HYPRE_Int     *AFF_offd_i,
+                                          HYPRE_Int     *AFF_offd_j,
+                                          HYPRE_Complex *AFF_offd_data,
+                                          HYPRE_Int     *AFC_diag_i,
+                                          HYPRE_Complex *AFC_diag_data,
+                                          HYPRE_Int     *AFC_offd_i,
+                                          HYPRE_Complex *AFC_offd_data,
+                                          HYPRE_Complex *rsW,
+                                          HYPRE_Complex *dlam,
+                                          HYPRE_Complex *dtmp,
+                                          HYPRE_Complex *dtmp_offd )
 {
    HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
 
@@ -1226,39 +1226,45 @@ void compute_aff_afc_epe( HYPRE_Int      nr_of_rows,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p, q;
+   HYPRE_Int pd, qd, po, qo, xd, yd, xo, yo;
 
    HYPRE_Complex theta, value;
    HYPRE_Complex dtau_i = 0.0;
 
    if (lane < 2)
    {
-      p = read_only_load(AFF_diag_i + row + lane);
+      pd = read_only_load(AFF_diag_i + row + lane);
+      po = read_only_load(AFF_offd_i + row + lane);
+      xd = read_only_load(AFC_diag_i + row + lane);
+      xo = read_only_load(AFC_offd_i + row + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   qd = __shfl_sync(HYPRE_WARP_FULL_MASK, pd, 1);
+   pd = __shfl_sync(HYPRE_WARP_FULL_MASK, pd, 0);
+   qo = __shfl_sync(HYPRE_WARP_FULL_MASK, po, 1);
+   po = __shfl_sync(HYPRE_WARP_FULL_MASK, po, 0);
+   yd = __shfl_sync(HYPRE_WARP_FULL_MASK, xd, 1);
+   xd = __shfl_sync(HYPRE_WARP_FULL_MASK, xd, 0);
+   yo = __shfl_sync(HYPRE_WARP_FULL_MASK, xo, 1);
+   xo = __shfl_sync(HYPRE_WARP_FULL_MASK, xo, 0);
 
    /* D_\tau */
-   /* assume the first element is the diagonal */
-   for (HYPRE_Int j = p + 1 + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   /* do not assume the first element is the diagonal */
+   for (HYPRE_Int j = pd + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < qd); j += HYPRE_WARP_SIZE)
    {
-      if (j < q)
+      if (j < qd)
       {
          const HYPRE_Int index = read_only_load(&AFF_diag_j[j]);
-         dtau_i += AFF_diag_data[j] * read_only_load(&dtmp[index]);
+         if (index != row)
+         {
+            dtau_i += AFF_diag_data[j] * read_only_load(&dtmp[index]);
+         }
       }
    }
 
-   if (lane < 2)
+   for (HYPRE_Int j = po + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < qo); j += HYPRE_WARP_SIZE)
    {
-      p = read_only_load(AFF_offd_i + row + lane);
-   }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
-
-   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
-   {
-      if (j < q)
+      if (j < qo)
       {
          const HYPRE_Int index = read_only_load(&AFF_offd_j[j]);
          dtau_i += AFF_offd_data[j] * read_only_load(&dtmp_offd[index]);
@@ -1270,11 +1276,7 @@ void compute_aff_afc_epe( HYPRE_Int      nr_of_rows,
    if (lane == 0)
    {
       value = read_only_load(&rsW[row]) + dtau_i;
-
-      if (value != 0.0)
-      {
-         value = -1.0 / value;
-      }
+      value = value != 0.0 ? -1.0 / value : 0.0;
 
       theta = read_only_load(&dlam[row]);
    }
@@ -1282,19 +1284,11 @@ void compute_aff_afc_epe( HYPRE_Int      nr_of_rows,
    value = __shfl_sync(HYPRE_WARP_FULL_MASK, value, 0);
    theta = __shfl_sync(HYPRE_WARP_FULL_MASK, theta, 0);
 
-   // AFF
-   /* Diag part */
-   if (lane < 2)
-   {
-      p = read_only_load(AFF_diag_i + row + lane);
-   }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
-
+   /* AFF Diag part */
    // do not assume diag is the first element of row
-   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = pd + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < qd); j += HYPRE_WARP_SIZE)
    {
-      if (j < q)
+      if (j < qd)
       {
          if (read_only_load(&AFF_diag_j[j]) == row)
          {
@@ -1307,55 +1301,30 @@ void compute_aff_afc_epe( HYPRE_Int      nr_of_rows,
       }
    }
 
-   /* offd part */
-   if (lane < 2)
+   /* AFF offd part */
+   for (HYPRE_Int j = po + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < qo); j += HYPRE_WARP_SIZE)
    {
-      p = read_only_load(AFF_offd_i + row + lane);
-   }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
-
-   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
-   {
-      if (j < q)
+      if (j < qo)
       {
          AFF_offd_data[j] *= value;
       }
    }
 
-   if (theta != 0.0)
-   {
-      theta = 1.0 / theta;
-   }
+   theta = theta != 0.0 ? 1.0 / theta : 0.0;
 
-   // AFC
-   if (lane < 2)
+   /* AFC Diag part */
+   for (HYPRE_Int j = xd + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < yd); j += HYPRE_WARP_SIZE)
    {
-      p = read_only_load(AFC_diag_i + row + lane);
-   }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
-
-   /* Diag part */
-   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
-   {
-      if (j < q)
+      if (j < yd)
       {
          AFC_diag_data[j] *= theta;
       }
    }
 
-   /* offd part */
-   if (lane < 2)
+   /* AFC offd part */
+   for (HYPRE_Int j = xo + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < yo); j += HYPRE_WARP_SIZE)
    {
-      p = read_only_load(AFC_offd_i + row + lane);
-   }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
-
-   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
-   {
-      if (j < q)
+      if (j < yo)
       {
          AFC_offd_data[j] *= theta;
       }
@@ -1393,13 +1362,21 @@ void hypreCUDAKernel_compute_dlam_dtmp( HYPRE_Int      nr_of_rows,
    p_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 0);
 
    HYPRE_Complex row_sum = 0.0;
+   HYPRE_Int find_diag = 0;
 
-   /* assume the first element is the diagonal */
-   for (HYPRE_Int j = p_diag + 1 + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_diag); j += HYPRE_WARP_SIZE)
+   /* do not assume the first element is the diagonal */
+   for (HYPRE_Int j = p_diag + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_diag); j += HYPRE_WARP_SIZE)
    {
       if ( j < q_diag )
       {
-         row_sum += read_only_load(&AFF_diag_data[j]);
+         if (read_only_load(&AFF_diag_j[j]) == row)
+         {
+            find_diag ++;
+         }
+         else
+         {
+            row_sum += read_only_load(&AFF_diag_data[j]);
+         }
       }
    }
 
@@ -1419,10 +1396,11 @@ void hypreCUDAKernel_compute_dlam_dtmp( HYPRE_Int      nr_of_rows,
    }
 
    row_sum = warp_reduce_sum(row_sum);
+   find_diag = warp_reduce_sum(find_diag);
 
    if (lane == 0)
    {
-      HYPRE_Int num = q_diag - p_diag + q_offd - p_offd - 1;
+      HYPRE_Int num = q_diag - p_diag + q_offd - p_offd - find_diag;
       HYPRE_Complex mu = num > 0 ? row_sum / ((HYPRE_Complex) num) : 0.0;
       /* lambda = beta + mu */
       HYPRE_Complex lam = read_only_load(&rsFC[row]) + mu;
