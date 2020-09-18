@@ -13,7 +13,7 @@
 #include "_hypre_sstruct_ls.h"
 #include "sys_pfmg.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 #define hypre_PFMGSetCIndex(cdir, cindex)       \
    {                                            \
