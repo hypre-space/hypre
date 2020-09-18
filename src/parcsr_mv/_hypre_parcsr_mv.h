@@ -711,6 +711,7 @@ HYPRE_Int HYPRE_ParVectorGetValues ( HYPRE_ParVector vector, HYPRE_Int num_value
 HYPRE_Int hypre_ParCSRMatrixGenerateFFFC(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker , HYPRE_BigInt *cpts_starts , hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **A_FC_ptr , hypre_ParCSRMatrix **A_FF_ptr ) ;
 HYPRE_Int hypre_ParCSRMatrixGenerateFFFC3(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker , HYPRE_BigInt *cpts_starts , hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **A_FC_ptr , hypre_ParCSRMatrix **A_FF_ptr ) ;
 HYPRE_Int hypre_ParCSRMatrixGenerateFFFCD3(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker , HYPRE_BigInt *cpts_starts , hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **A_FC_ptr , hypre_ParCSRMatrix **A_FF_ptr , HYPRE_Real **D_lambda_ptr ) ;
+HYPRE_Int hypre_ParCSRMatrixGenerateFFFC3Device(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker , HYPRE_BigInt *cpts_starts , hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **A_FC_ptr , hypre_ParCSRMatrix **A_FF_ptr ) ;
 
 /* new_commpkg.c */
 HYPRE_Int hypre_PrintCommpkg ( hypre_ParCSRMatrix *A , const char *file_name );

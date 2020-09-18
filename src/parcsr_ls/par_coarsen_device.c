@@ -164,9 +164,11 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
    /*---------------------------------------------------
     * Clean up and return
     *---------------------------------------------------*/
-   if( *CF_marker_ptr == NULL )
+   if (*CF_marker_ptr == NULL)
+   {
       *CF_marker_ptr = hypre_CTAlloc(HYPRE_Int, num_cols_diag, HYPRE_MEMORY_HOST);
-   
+   }
+
    hypre_TMemcpy( *CF_marker_ptr, CF_marker_diag, HYPRE_Int, num_cols_diag, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE );
    hypre_TFree(CF_marker_diag, HYPRE_MEMORY_DEVICE);
 
