@@ -262,14 +262,13 @@ hypre_CoarsenPosBoxArrayArray( hypre_BoxArrayArray   *boxaa,
 
    HYPRE_Int              count_box;
    HYPRE_Int              count_boxa;
-   HYPRE_Int              count_boxaa;
    HYPRE_Int              i, j ;
 
    /* Allocate box */
    box = hypre_BoxCreate(ndim);
 
-   /* Find out how many BoxArrays will be coarsened*/
-   count_boxaa = 0;
+   /* Find out how many BoxArrays will be coarsened */
+   count_boxa = 0;
    hypre_ForBoxArrayI(i, boxaa)
    {
       boxa = hypre_BoxArrayArrayBoxArray(boxaa, i);
@@ -279,14 +278,14 @@ hypre_CoarsenPosBoxArrayArray( hypre_BoxArrayArray   *boxaa,
          hypre_CoarsenPosBox(box, origin, stride);
          if (hypre_BoxVolume(box))
          {
-            count_boxaa++;
+            count_boxa++;
             break;
          }
       }
    }
 
    /* Allocate memory */
-   new_boxaa = hypre_BoxArrayArrayCreate(count_boxaa, ndim);
+   new_boxaa = hypre_BoxArrayArrayCreate(count_boxa, ndim);
 
    /* Coarsen BoxArrayArray */
    count_boxa = 0;
@@ -320,6 +319,7 @@ hypre_CoarsenPosBoxArrayArray( hypre_BoxArrayArray   *boxaa,
                count_box++;
             }
          }
+         hypre_BoxArrayArrayID(new_boxaa, count_boxa) = hypre_BoxArrayArrayID(boxaa, i);
          count_boxa++;
       }
    }
@@ -603,6 +603,8 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 
    hypre_BoxDestroy(new_box);
 
+   // TODO: StructCoarsenAP breaks the regression tests
+#if 0
    /* if there is an assumed partition in the fg, then coarsen those boxes as
       well and add to cg */
    hypre_BoxManGetAssumedPartition(fboxman, &fap);
@@ -615,6 +617,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
       /* set cap */
       hypre_BoxManSetAssumedPartition(cboxman, cap);
    }
+#endif
 
    /* assign new box manager */
    hypre_StructGridSetBoxManager(cgrid, cboxman);
