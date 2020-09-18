@@ -45,17 +45,17 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int          *Soc_offd_j   = hypre_ParCSRMatrixSocOffdJ(S);
    HYPRE_Int          *CF_marker_dev;
    HYPRE_Complex      *Dbeta, *Dbeta_offd, *rsWA, *rsW;
-   hypre_ParCSRMatrix *As_FF, *As_FC, *W, *P;
+   hypre_ParCSRMatrix *As_F2F, *As_FC, *W, *P;
 
    CF_marker_dev = hypre_TAlloc(HYPRE_Int, A_nr_local, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(CF_marker_dev, CF_marker, HYPRE_Int, A_nr_local, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
    //TODO use CF_marker_dev
-   /* As_FF = As_{F2, F}, As_FC = As_{F, C2} */
-   hypre_ParCSRMatrixGenerateFFFC3Device(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF);
+   /* As_F2F = As_{F2, F}, As_FC = As_{F, C2} */
+   hypre_ParCSRMatrixGenerateFFFC3Device(A, CF_marker, num_cpts_global, S, &As_FC, &As_F2F);
 
    HYPRE_Int AFC_nr_local = hypre_ParCSRMatrixNumRows(As_FC);
-   HYPRE_Int AFF_nr_local = hypre_ParCSRMatrixNumRows(As_FF);
+   HYPRE_Int AF2F_nr_local = hypre_ParCSRMatrixNumRows(As_F2F);
 
    /* row sum of AFC, i.e., D_beta */
    Dbeta = hypre_TAlloc(HYPRE_Complex, AFC_nr_local, HYPRE_MEMORY_DEVICE);
@@ -63,14 +63,14 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixComputeRowSumDevice(hypre_ParCSRMatrixOffd(As_FC), NULL, NULL, Dbeta, 0, 1.0, "add");
 
    /* collect off-processor D_beta */
-   hypre_ParCSRCommPkg    *comm_pkg = hypre_ParCSRMatrixCommPkg(As_FF);
+   hypre_ParCSRCommPkg    *comm_pkg = hypre_ParCSRMatrixCommPkg(As_F2F);
    hypre_ParCSRCommHandle *comm_handle;
    if (!comm_pkg)
    {
-      hypre_MatvecCommPkgCreate(As_FF);
-      comm_pkg = hypre_ParCSRMatrixCommPkg(As_FF);
+      hypre_MatvecCommPkgCreate(As_F2F);
+      comm_pkg = hypre_ParCSRMatrixCommPkg(As_F2F);
    }
-   Dbeta_offd = hypre_TAlloc(HYPRE_Complex, hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(As_FF)), HYPRE_MEMORY_DEVICE);
+   Dbeta_offd = hypre_TAlloc(HYPRE_Complex, hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(As_F2F)), HYPRE_MEMORY_DEVICE);
    HYPRE_Int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    HYPRE_Int num_elmts_send = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
    HYPRE_Complex *send_buf = hypre_TAlloc(HYPRE_Complex, num_elmts_send, HYPRE_MEMORY_DEVICE);
@@ -84,7 +84,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    hypre_ParCSRCommHandleDestroy(comm_handle);
    hypre_TFree(send_buf, HYPRE_MEMORY_DEVICE);
 
-   /* weak row sum and diagonal, i.e., DFF + Dgamma */
+   /* weak row sum and diagonal, i.e., DF2F2 + Dgamma */
    rsWA = hypre_TAlloc(HYPRE_Complex, A_nr_local, HYPRE_MEMORY_DEVICE);
 
    dim3 bDim = hypre_GetDefaultCUDABlockDimension();
@@ -105,7 +105,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
                       rsWA,
                       -1 );
 
-   rsW = hypre_TAlloc(HYPRE_Complex, AFF_nr_local, HYPRE_MEMORY_DEVICE);
+   rsW = hypre_TAlloc(HYPRE_Complex, AF2F_nr_local, HYPRE_MEMORY_DEVICE);
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
                                                rsWA,
                                                rsWA + A_nr_local,
@@ -113,7 +113,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
                                                rsW,
                                                equal<HYPRE_Int>(-2) );
 
-   hypre_assert(new_end - rsW == AFF_nr_local);
+   hypre_assert(new_end - rsW == AF2F_nr_local);
 
    hypre_TFree(rsWA, HYPRE_MEMORY_DEVICE);
 
@@ -123,7 +123,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
                       thrust::make_transform_iterator(CF_marker_dev,              is_negative<HYPRE_Int>()),
                       thrust::make_transform_iterator(CF_marker_dev + A_nr_local, is_negative<HYPRE_Int>()),
                       map_to_F );
-   HYPRE_Int *map_F2_to_F = hypre_TAlloc(HYPRE_Int, AFF_nr_local, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int *map_F2_to_F = hypre_TAlloc(HYPRE_Int, AF2F_nr_local, HYPRE_MEMORY_DEVICE);
 
    HYPRE_Int *tmp_end = HYPRE_THRUST_CALL( copy_if,
                                            map_to_F,
@@ -132,23 +132,23 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
                                            map_F2_to_F,
                                            equal<HYPRE_Int>(-2) );
 
-   hypre_assert(tmp_end - map_F2_to_F == AFF_nr_local);
+   hypre_assert(tmp_end - map_F2_to_F == AF2F_nr_local);
 
    hypre_TFree(map_to_F, HYPRE_MEMORY_DEVICE);
 
-   /* add to rsW those in AFF that correspond to Dbeta == 0
-    * diagnoally scale As_FF (from both sides) and replace the diagonal */
-   gDim = hypre_GetDefaultCUDAGridDimension(AFF_nr_local, "warp", bDim);
+   /* add to rsW those in AF2F that correspond to Dbeta == 0
+    * diagnoally scale As_F2F (from both sides) and replace the diagonal */
+   gDim = hypre_GetDefaultCUDAGridDimension(AF2F_nr_local, "warp", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_MMInterpScaleAFF,
                       gDim, bDim,
-                      AFF_nr_local,
-                      hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(As_FF)),
-                      hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(As_FF)),
-                      hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(As_FF)),
-                      hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(As_FF)),
-                      hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(As_FF)),
-                      hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(As_FF)),
+                      AF2F_nr_local,
+                      hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(As_F2F)),
+                      hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(As_F2F)),
+                      hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(As_F2F)),
+                      hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(As_F2F)),
+                      hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(As_F2F)),
+                      hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(As_F2F)),
                       Dbeta,
                       Dbeta_offd,
                       map_F2_to_F,
@@ -160,17 +160,17 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    hypre_TFree(rsW, HYPRE_MEMORY_DEVICE);
 
    /* Perform matrix-matrix multiplication */
-   W = hypre_ParCSRMatMatDevice(As_FF, As_FC);
+   W = hypre_ParCSRMatMatDevice(As_F2F, As_FC);
 
-   hypre_ParCSRMatrixDestroy(As_FF);
+   hypre_ParCSRMatrixDestroy(As_F2F);
    hypre_ParCSRMatrixDestroy(As_FC);
 
    /* Construct P from matrix product W */
-   HYPRE_Int          *P_diag_i, *P_diag_j, *P_offd_i;
-   HYPRE_Complex      *P_diag_data;
-   HYPRE_Int           P_nr_local = A_nr_local - (AFC_nr_local - AFF_nr_local);
-   HYPRE_Int           P_diag_nnz = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(W)) +
-                                    hypre_ParCSRMatrixNumCols(W);
+   HYPRE_Int     *P_diag_i, *P_diag_j, *P_offd_i;
+   HYPRE_Complex *P_diag_data;
+   HYPRE_Int      P_nr_local = A_nr_local - (AFC_nr_local - AF2F_nr_local);
+   HYPRE_Int      P_diag_nnz = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(W)) +
+                               hypre_ParCSRMatrixNumCols(W);
 
    hypre_assert(P_nr_local == hypre_ParCSRMatrixNumRows(W) + hypre_ParCSRMatrixNumCols(W));
 
@@ -192,7 +192,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    hypre_TFree(CF_marker_dev, HYPRE_MEMORY_DEVICE);
 
    hypreDevice_extendWtoP( P_nr_local,
-                           AFF_nr_local,
+                           AF2F_nr_local,
                            hypre_ParCSRMatrixNumCols(W),
                            C2F2_marker,
                            hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(W)),
@@ -299,7 +299,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    /* As_FF = As_{F,F} */
    hypre_ParCSRMatrixGenerateFFFCDevice(A, CF_marker, num_cpts_global, S, NULL, &As_FF);
 
-   hypre_assert(AFC_nr_local = hypre_ParCSRMatrixNumRows(As_FF));
+   hypre_assert(AFC_nr_local == hypre_ParCSRMatrixNumRows(As_FF));
 
    dim3 bDim = hypre_GetDefaultCUDABlockDimension();
    dim3 gDim = hypre_GetDefaultCUDAGridDimension(AFC_nr_local, "warp", bDim);
@@ -324,7 +324,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrixDestroy(As_FF);
    hypre_TFree(Dbeta, HYPRE_MEMORY_DEVICE);
 
-   /* collect off-processor dtmp and dlam*/
+   /* collect off-processor dtmp and dlam */
    dtmp_offd = hypre_TAlloc(HYPRE_Complex, hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(As_F2F)), HYPRE_MEMORY_DEVICE);
    dlam_offd = hypre_TAlloc(HYPRE_Complex, hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(As_F2F)), HYPRE_MEMORY_DEVICE);
 
@@ -361,7 +361,6 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    /* weak row sum and diagonal, i.e., DFF + Dgamma */
    rsWA = hypre_TAlloc(HYPRE_Complex, A_nr_local, HYPRE_MEMORY_DEVICE);
 
-   bDim = hypre_GetDefaultCUDABlockDimension();
    gDim = hypre_GetDefaultCUDAGridDimension(A_nr_local, "warp", bDim);
 
    /* only for rows corresponding to F2 (notice flag == -1) */
@@ -444,11 +443,11 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrixDestroy(As_FC);
 
    /* Construct P from matrix product W */
-   HYPRE_Int          *P_diag_i, *P_diag_j, *P_offd_i;
-   HYPRE_Complex      *P_diag_data;
-   HYPRE_Int           P_nr_local = A_nr_local - (AFC_nr_local - AF2F_nr_local);
-   HYPRE_Int           P_diag_nnz = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(W)) +
-                                    hypre_ParCSRMatrixNumCols(W);
+   HYPRE_Int     *P_diag_i, *P_diag_j, *P_offd_i;
+   HYPRE_Complex *P_diag_data;
+   HYPRE_Int      P_nr_local = A_nr_local - (AFC_nr_local - AF2F_nr_local);
+   HYPRE_Int      P_diag_nnz = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(W)) +
+                               hypre_ParCSRMatrixNumCols(W);
 
    hypre_assert(P_nr_local == hypre_ParCSRMatrixNumRows(W) + hypre_ParCSRMatrixNumCols(W));
 
@@ -559,7 +558,7 @@ void hypreCUDAKernel_MMInterpScaleAFF( HYPRE_Int      AFF_nrows,
 
    if (lane == 0)
    {
-      rowF= read_only_load(&F2_to_F[row]);
+      rowF = read_only_load(&F2_to_F[row]);
    }
    rowF = __shfl_sync(HYPRE_WARP_FULL_MASK, rowF, 0);
 
@@ -687,7 +686,7 @@ void hypreCUDAKernel_MMPEInterpScaleAFF( HYPRE_Int      AFF_nrows,
 
    if (lane == 0)
    {
-      rowF= read_only_load(&F2_to_F[row]);
+      rowF = read_only_load(&F2_to_F[row]);
    }
    rowF = __shfl_sync(HYPRE_WARP_FULL_MASK, rowF, 0);
 
