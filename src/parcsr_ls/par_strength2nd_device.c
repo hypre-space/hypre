@@ -1,3 +1,10 @@
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #include "HYPRE.h"
 #include "HYPRE_parcsr_mv.h"
 #include "HYPRE_IJ_mv.h"
@@ -10,6 +17,135 @@
 #include "HYPRE_utilities.h"
 
 #if defined(HYPRE_USING_CUDA)
+
+#if 1
+//-----------------------------------------------------------------------
+HYPRE_Int
+hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
+                                 HYPRE_Int           *CF_marker_host,
+                                 HYPRE_Int            num_paths,
+                                 HYPRE_BigInt        *coarse_row_starts,
+                                 hypre_ParCSRMatrix **S2_ptr)
+{
+   HYPRE_Int           S_nr_local = hypre_ParCSRMatrixNumRows(S);
+   hypre_CSRMatrix    *S_diag     = hypre_ParCSRMatrixDiag(S);
+   hypre_CSRMatrix    *S_offd     = hypre_ParCSRMatrixOffd(S);
+   HYPRE_Int           S_diag_nnz = hypre_CSRMatrixNumNonzeros(S_diag);
+   HYPRE_Int           S_offd_nnz = hypre_CSRMatrixNumNonzeros(S_offd);
+   hypre_ParCSRMatrix *SI         = hypre_CTAlloc(hypre_ParCSRMatrix, 1, HYPRE_MEMORY_HOST);
+   hypre_CSRMatrix    *Id, *SI_diag;
+   hypre_ParCSRMatrix *S_XC, *S_CX, *S2;
+   HYPRE_Int          *CF_marker, *new_end;
+   HYPRE_Complex       coeff = 2.0;
+
+   /*
+   MPI_Comm comm = hypre_ParCSRMatrixComm(S);
+   HYPRE_Int num_proc, myid;
+   hypre_MPI_Comm_size(comm, &num_proc);
+   hypre_MPI_Comm_rank(comm, &myid);
+   */
+
+   CF_marker = hypre_TAlloc(HYPRE_Int, S_nr_local, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(CF_marker, CF_marker_host, HYPRE_Int, S_nr_local, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
+   /* 1. Create new matrix with added diagonal */
+   hypre_NvtxPushRangeColor("Setup", 1);
+
+   /* give S data arrays */
+   hypre_CSRMatrixData(S_diag) = hypre_TAlloc(HYPRE_Complex, S_diag_nnz, HYPRE_MEMORY_DEVICE );
+   HYPRE_THRUST_CALL( fill,
+                      hypre_CSRMatrixData(S_diag),
+                      hypre_CSRMatrixData(S_diag) + S_diag_nnz,
+                      1.0 );
+
+   hypre_CSRMatrixData(S_offd) = hypre_TAlloc(HYPRE_Complex, S_offd_nnz, HYPRE_MEMORY_DEVICE );
+   HYPRE_THRUST_CALL( fill,
+                      hypre_CSRMatrixData(S_offd),
+                      hypre_CSRMatrixData(S_offd) + S_offd_nnz,
+                      1.0 );
+
+   hypre_MatvecCommPkgCreate(S);
+
+   /* S(C, :) and S(:, C) */
+   hypre_ParCSRMatrixGenerate1DCFDevice(S, CF_marker_host, coarse_row_starts, NULL, &S_CX, &S_XC);
+
+   hypre_assert(S_nr_local == hypre_ParCSRMatrixNumCols(S_CX));
+
+   /* add coeff*I to S_CX */
+   Id = hypre_CSRMatrixCreate( hypre_ParCSRMatrixNumRows(S_CX),
+                               hypre_ParCSRMatrixNumCols(S_CX),
+                               hypre_ParCSRMatrixNumRows(S_CX) );
+
+   hypre_CSRMatrixInitialize_v2(Id, 0, HYPRE_MEMORY_DEVICE);
+
+   HYPRE_THRUST_CALL( sequence,
+                      hypre_CSRMatrixI(Id),
+                      hypre_CSRMatrixI(Id) + hypre_ParCSRMatrixNumRows(S_CX) + 1,
+                      0  );
+
+   new_end = HYPRE_THRUST_CALL( copy_if,
+                                thrust::make_counting_iterator(0),
+                                thrust::make_counting_iterator(hypre_ParCSRMatrixNumCols(S_CX)),
+                                CF_marker,
+                                hypre_CSRMatrixJ(Id),
+                                is_nonnegative<HYPRE_Int>()  );
+
+   hypre_assert(new_end - hypre_CSRMatrixJ(Id) == hypre_ParCSRMatrixNumRows(S_CX));
+
+   hypre_TFree(CF_marker, HYPRE_MEMORY_DEVICE);
+
+   HYPRE_THRUST_CALL( fill,
+                      hypre_CSRMatrixData(Id),
+                      hypre_CSRMatrixData(Id) + hypre_ParCSRMatrixNumRows(S_CX),
+                      coeff );
+
+   SI_diag = hypre_CSRMatrixAddDevice(hypre_ParCSRMatrixDiag(S_CX), Id);
+
+   hypre_CSRMatrixDestroy(Id);
+
+   /* global nnz has changed, but we do not care about it */
+   /*
+   hypre_ParCSRMatrixSetNumNonzeros(S_CX);
+   hypre_ParCSRMatrixDNumNonzeros(S_CX) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(S_CX);
+   */
+
+   hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(S_CX));
+   hypre_ParCSRMatrixDiag(S_CX) = SI_diag;
+
+   hypre_NvtxPopRange();
+
+   /* 2. Perform matrix-matrix multiplication */
+   hypre_NvtxPushRangeColor("Matrix-matrix mult", 3);
+
+   S2 = hypre_ParCSRMatMatDevice(S_CX, S_XC);
+
+   hypre_ParCSRMatrixDestroy(S_CX);
+   hypre_ParCSRMatrixDestroy(S_XC);
+
+   hypre_NvtxPopRange();
+
+   // Clean up matrix before returning it.
+   if (num_paths == 2)
+   {
+      // If num_paths = 2, prune elements < 2.
+      hypre_ParCSRMatrixDropSmallEntriesDevice(S2, 1.5, 0, 0);
+   }
+
+   hypre_TFree(hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(S2)), HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(S2)), HYPRE_MEMORY_DEVICE);
+
+   hypre_CSRMatrixRemoveDiagonalDevice(hypre_ParCSRMatrixDiag(S2));
+
+   /* global nnz has changed, but we do not care about it */
+
+   hypre_MatvecCommPkgCreate(S2);
+
+   *S2_ptr = S2;
+
+   return 0;
+}
+
+#else
 
 //-----------------------------------------------------------------------
 HYPRE_Int hypre_BoomerAMGExtractCCDev( hypre_ParCSRMatrix  *A,
@@ -32,7 +168,7 @@ HYPRE_Int hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
                                            HYPRE_BigInt        *coarse_row_starts,
                                            hypre_ParCSRMatrix **C_ptr)
 {
-   HYPRE_Int nr_of_rows hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(S));
+   HYPRE_Int nr_of_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(S));
    HYPRE_Complex coeff=1;
 
    MPI_Comm comm = hypre_ParCSRMatrixComm(S);
@@ -40,18 +176,21 @@ HYPRE_Int hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
    hypre_MPI_Comm_size(comm, &num_proc);
    hypre_MPI_Comm_rank(comm, &myid);
 
+   HYPRE_Int *CF_marker_d = hypre_TAlloc(HYPRE_Int, nr_of_rows, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(CF_marker_d, CF_marker, HYPRE_Int, nr_of_rows, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
    // 1. Create new matrix with added diagonal, S+coeff*I, for coeff=1 or 2.
    hypre_NvtxPushRangeColor("Setup", 1);
    add_unit_data( S );
    hypre_ParCSRMatrix* SI = hypre_ParCSRMatrixClone( S, 1 );
    add_diagonal( SI );
 
-   // 2. Add a data array to the strength matrix, needed in order 
+   // 2. Add a data array to the strength matrix, needed in order
    //    to use matrix-matrix multiplication.
    add_unit_data( SI );
    hypre_NvtxPopRange();
 
-   // 2b. Scale diagonal by coeff   
+   // 2b. Scale diagonal by coeff
    if( coeff != 1 )
    {
       HYPRE_Int* SI_diag_i=hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(SI));
@@ -74,7 +213,7 @@ HYPRE_Int hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
    HYPRE_CUDA_CALL(cudaDeviceSynchronize());
    hypre_MPI_Barrier(comm);
    hypre_NvtxPushRangeColor("ExtractCCDev", 4);
-   hypre_BoomerAMGExtractCCDev( SIS, CF_marker, coarse_row_starts, &SCC );
+   hypre_BoomerAMGExtractCCDev( SIS, CF_marker_d, coarse_row_starts, &SCC );
    hypre_NvtxPopRange();
    if( num_paths == 2 )
    {
@@ -85,6 +224,8 @@ HYPRE_Int hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
    remove_diagonal( SCC );
    hypre_TFree( hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(SCC)),hypre_ParCSRMatrixMemoryLocation(SCC));
    hypre_TFree( hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(SCC)),hypre_ParCSRMatrixMemoryLocation(SCC));
+
+   hypre_TFree( CF_marker_d, HYPRE_MEMORY_DEVICE);
 
    *C_ptr = SCC;
    return 0;
@@ -153,7 +294,7 @@ void remove_diagonal( hypre_ParCSRMatrix* S )
    thrust::device_ptr<HYPRE_Int> S_diag_jp(S_diag_j), S_diag_j_newp(S_diag_j_new);
    thrust::copy_if(S_diag_jp,S_diag_jp+nnz,dmjp,S_diag_j_newp,is_false());
    hypre_TFree(S_diag_j,ml);
-   hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(S)) = S_diag_j_new;      
+   hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(S)) = S_diag_j_new;
    HYPRE_Complex* S_diag_a = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(S));
    if( S_diag_a != NULL )
    {
@@ -183,7 +324,7 @@ void add_unit_data( hypre_ParCSRMatrix* S )
    // In case data exists, remove old arrays, might have wrong size.
    hypre_TFree(hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(S)),ml);
    hypre_TFree(hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(S)),ml);
-   // Create new data arrays 
+   // Create new data arrays
    HYPRE_Complex* S_diag_a = hypre_CTAlloc( HYPRE_Complex, nnzd, ml );
    HYPRE_Complex* S_offd_a = hypre_CTAlloc( HYPRE_Complex, nnzo, ml );
    thrust::device_ptr<HYPRE_Complex>  S_diag_a_dev(S_diag_a);
@@ -220,7 +361,7 @@ void truncate( hypre_ParCSRMatrix* S, HYPRE_Complex trunc_level )
    thrust::device_ptr<HYPRE_Int> S_diag_jp(S_diag_j), S_diag_j_newp(S_diag_j_new);
    thrust::copy_if(S_diag_jp,S_diag_jp+nnz,dmjp,S_diag_j_newp,is_false());
    hypre_TFree(S_diag_j,ml);
-   hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(S)) = S_diag_j_new;      
+   hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(S)) = S_diag_j_new;
 
    // New data array
    HYPRE_Complex* S_diag_a_new = hypre_CTAlloc( HYPRE_Complex, nnz-no_remove, ml);
@@ -245,14 +386,14 @@ void truncate( hypre_ParCSRMatrix* S, HYPRE_Complex trunc_level )
    dmj=hypre_CTAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
    hypre_CUDAKernel_MarkTrunc_w<<<gDim,bDim>>>( nr_of_rows, S_offd_i, S_offd_a, trunc_level, dm, dmj );
    no_remove=thrust::reduce(dmp,dmp+nr_of_rows);
-   
+
    // New col index array
    HYPRE_Int* S_offd_j_new = hypre_CTAlloc( HYPRE_Int, nnz-no_remove, ml);
    thrust::device_ptr<HYPRE_Int> S_offd_jp(S_offd_j), S_offd_j_newp(S_offd_j_new);
    thrust::device_ptr<HYPRE_Int> dmjp2(dmj);
    thrust::copy_if(S_offd_jp,S_offd_jp+nnz,dmjp2,S_offd_j_newp,is_false());
    hypre_TFree(S_offd_j,ml);
-   hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(S)) = S_offd_j_new;      
+   hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(S)) = S_offd_j_new;
    // New data array
    HYPRE_Complex* S_offd_a_new = hypre_CTAlloc( HYPRE_Complex, nnz-no_remove, ml);
    thrust::device_ptr<HYPRE_Complex> S_offd_ap(S_offd_a), S_offd_a_newp(S_offd_a_new);
@@ -294,7 +435,7 @@ __global__  void hypre_CUDAKernel_AddDiagI( HYPRE_Int nr_of_rows, HYPRE_Int* SI_
 }
 
 //-----------------------------------------------------------------------
-__global__  void hypre_CUDAKernel_AddDiagJ( HYPRE_Int nr_of_rows, HYPRE_Int* SI_diag_i, 
+__global__  void hypre_CUDAKernel_AddDiagJ( HYPRE_Int nr_of_rows, HYPRE_Int* SI_diag_i,
                         HYPRE_Int* SI_diag_j, HYPRE_Int* SI_diag_jnew )
 {
    HYPRE_Int row = hypre_cuda_get_grid_thread_id<1,1>(), ib, ie;
@@ -463,7 +604,7 @@ HYPRE_Int hypre_BoomerAMGExtractCCDev( hypre_ParCSRMatrix  *A,
    thrust::copy_if( ACC_tmp_dev, ACC_tmp_dev+nrofrows, CF_marker_dev, ACC_diag_i_dev, is_positive<HYPRE_Int>() );
    thrust::exclusive_scan( ACC_diag_i_dev, ACC_diag_i_dev+nrofcoarserows+1, ACC_diag_i_dev );
    HYPRE_Int ACC_diag_nnz = ACC_diag_i[nrofcoarserows]; // Should do this on device
-   
+
    HYPRE_Int *ACC_diag_j    = NULL;
    HYPRE_Complex *ACC_diag_a= NULL;
    if( ACC_diag_nnz > 0 )
@@ -479,7 +620,7 @@ HYPRE_Int hypre_BoomerAMGExtractCCDev( hypre_ParCSRMatrix  *A,
    }
    hypre_TFree(CF_array,HYPRE_MEMORY_DEVICE);
 
-   // 2. off-diagonal part of ACC  
+   // 2. off-diagonal part of ACC
    HYPRE_Int* CF_marker_offd;
    getcfmoffd( A, CF_marker, &CF_marker_offd );
 
@@ -508,7 +649,7 @@ HYPRE_Int hypre_BoomerAMGExtractCCDev( hypre_ParCSRMatrix  *A,
    }
    hypre_TFree(ACC_tmp,HYPRE_MEMORY_DEVICE);
    hypre_TFree(CF_array_offd,HYPRE_MEMORY_DEVICE);
-   // 3. Transform diagonal submatrix column index (F,C) to (C)  
+   // 3. Transform diagonal submatrix column index (F,C) to (C)
    HYPRE_Int* fine_to_coarse = hypre_CTAlloc(HYPRE_Int,nrofrows, HYPRE_MEMORY_DEVICE);
    thrust::device_ptr<HYPRE_Int> fine_to_coarse_dev(fine_to_coarse);
    thrust::transform( CF_marker_dev, CF_marker_dev+nrofrows, fine_to_coarse_dev, is_positive<int>());
@@ -553,7 +694,7 @@ HYPRE_Int hypre_BoomerAMGExtractCCDev( hypre_ParCSRMatrix  *A,
       hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(ACC))    = ACC_diag_j;
       hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(ACC)) = ACC_diag_a;
    }
-   
+
    hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(ACC)) = ACC_offd_i;
    if (nr_cols_ACC)
    {
@@ -676,7 +817,7 @@ void restrict_colmap_to_cpts( HYPRE_Int ACC_offd_size, HYPRE_Int* ACC_offd_j,
       thrust::device_ptr<HYPRE_Int> fine_to_coarse_dev(fine_to_coarse);
       thrust::fill(fine_to_coarse_dev,fine_to_coarse_dev+nr_cols_A+1,0);
       hypre_CUDAKernel_MarkCpts<<<grid,block>>>( ACC_offd_size, ACC_offd_j, fine_to_coarse );
-      ncpts = thrust::reduce(fine_to_coarse_dev,fine_to_coarse_dev+nr_cols_A);   
+      ncpts = thrust::reduce(fine_to_coarse_dev,fine_to_coarse_dev+nr_cols_A);
 
    /* Construct new column map */
       new_col_map = hypre_CTAlloc( HYPRE_Int, ncpts, HYPRE_MEMORY_DEVICE );
@@ -688,7 +829,7 @@ void restrict_colmap_to_cpts( HYPRE_Int ACC_offd_size, HYPRE_Int* ACC_offd_j,
       thrust::exclusive_scan( fine_to_coarse_dev, &fine_to_coarse_dev[nr_cols_A+1], fine_to_coarse_dev );
       hypre_CUDAKernel_RemapOffd<<<grid,block>>>( ACC_offd_size, ACC_offd_j, fine_to_coarse );
       cudaDeviceSynchronize();
-   /* Give back memory and return result */ 
+   /* Give back memory and return result */
       //      hypre_TFree(*col_map_P,HYPRE_MEMORY_SHARED);
       hypre_TFree(fine_to_coarse,HYPRE_MEMORY_DEVICE);
       *nr_cols_ACC = ncpts;
@@ -698,7 +839,7 @@ void restrict_colmap_to_cpts( HYPRE_Int ACC_offd_size, HYPRE_Int* ACC_offd_j,
 
 
 /*-----------------------------------------------------------------------*/
-int getSendInfo( HYPRE_Int nr_cols_P, HYPRE_Int* col_map_P, 
+int getSendInfo( HYPRE_Int nr_cols_P, HYPRE_Int* col_map_P,
                  HYPRE_Int* num_cpts, HYPRE_Int num_proc,
                  HYPRE_Int global_nr_of_rows,
                  HYPRE_Int** nrec, HYPRE_Int** recprocs )
@@ -778,10 +919,10 @@ void CoarseToFine_comm( MPI_Comm comm, HYPRE_Int nr_cols_P, HYPRE_Int* col_map_P
    hypre_MPI_Status status;
    HYPRE_Int* first_fine_pr, *fine_to_coarse_h;
    HYPRE_Int first_coarse, myid;
-   
+
    hypre_MPI_Comm_size(comm, &num_proc);
    hypre_MPI_Comm_rank(comm, &myid);
-   fine_to_coarse_h = hypre_CTAlloc(HYPRE_Int, nr_of_rows, HYPRE_MEMORY_HOST ); 
+   fine_to_coarse_h = hypre_CTAlloc(HYPRE_Int, nr_of_rows, HYPRE_MEMORY_HOST );
    hypre_TMemcpy( fine_to_coarse_h, fine_to_coarse, HYPRE_Int, nr_of_rows, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    nrec     = hypre_CTAlloc(HYPRE_Int, num_proc, HYPRE_MEMORY_HOST ); /* receive this number of elements from proc p */
    recprocs = hypre_CTAlloc(HYPRE_Int, nr_cols_P, HYPRE_MEMORY_HOST );
@@ -789,7 +930,7 @@ void CoarseToFine_comm( MPI_Comm comm, HYPRE_Int nr_cols_P, HYPRE_Int* col_map_P
    el       = hypre_CTAlloc(HYPRE_Int, num_proc, HYPRE_MEMORY_HOST );
 
    first_fine_pr = hypre_CTAlloc(HYPRE_Int, num_proc+1, HYPRE_MEMORY_HOST );
-   hypre_MPI_Allgather( &first_diagonal, 1, HYPRE_MPI_INT, first_fine_pr, 1, HYPRE_MPI_INT, comm ); 
+   hypre_MPI_Allgather( &first_diagonal, 1, HYPRE_MPI_INT, first_fine_pr, 1, HYPRE_MPI_INT, comm );
    first_fine_pr[num_proc]=global_nr_of_rows;
 
    fail = getSendInfo( nr_cols_P, col_map_P, first_fine_pr, num_proc, global_nr_of_rows, &nrec, &recprocs );
@@ -809,7 +950,7 @@ void CoarseToFine_comm( MPI_Comm comm, HYPRE_Int nr_cols_P, HYPRE_Int* col_map_P
       tag = 305;
       tag2= 306;
       tag3= 307;
-      
+
       /* Receive wanted number of elements */
       for( p=0 ; p < num_proc ; p++ )
          hypre_MPI_Irecv( &nsend[p], 1, HYPRE_MPI_INT, p, tag, comm, &req[p] );
@@ -820,7 +961,7 @@ void CoarseToFine_comm( MPI_Comm comm, HYPRE_Int nr_cols_P, HYPRE_Int* col_map_P
       /* Send wanted number of elements */
       for( p=0 ; p < num_proc ; p++ )
       {
-         hypre_MPI_Isend(&nrec[p], 1, HYPRE_MPI_INT,  p, tag, comm, &req2[p] );   
+         hypre_MPI_Isend(&nrec[p], 1, HYPRE_MPI_INT,  p, tag, comm, &req2[p] );
          el[p]  = 0;
          buf[p] = hypre_CTAlloc( HYPRE_Int, nrec[p], HYPRE_MEMORY_HOST);
       }
@@ -894,8 +1035,8 @@ void getcfmoffd( hypre_ParCSRMatrix* A, HYPRE_Int* CF_marker, HYPRE_Int** CF_mar
    hypre_ParCSRCommHandle  *comm_handle;
    HYPRE_Int index, num_sends, *int_buf_data, i, j, start;
    HYPRE_Int num_cols_A_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
-   
-   if (num_cols_A_offd > 0) 
+
+   if (num_cols_A_offd > 0)
       *CF_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_A_offd, HYPRE_MEMORY_DEVICE);
    else
    {
@@ -904,8 +1045,8 @@ void getcfmoffd( hypre_ParCSRMatrix* A, HYPRE_Int* CF_marker, HYPRE_Int** CF_mar
    }
    if (!comm_pkg)
    {
-	hypre_MatvecCommPkgCreate(A);
-	comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
+      hypre_MatvecCommPkgCreate(A);
+      comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, 
@@ -913,15 +1054,17 @@ void getcfmoffd( hypre_ParCSRMatrix* A, HYPRE_Int* CF_marker, HYPRE_Int** CF_mar
    index = 0;
    for (i = 0; i < num_sends; i++)
    {
-	start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-	for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+      start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+      for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
 		int_buf_data[index++] 
 		 = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
    }
    comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, 
 	*CF_marker_offd);
-   hypre_ParCSRCommHandleDestroy(comm_handle);   
+   hypre_ParCSRCommHandleDestroy(comm_handle);
    hypre_TFree(int_buf_data,HYPRE_MEMORY_HOST);
 }
+
+#endif
 
 #endif /* #if defined(HYPRE_USING_CUDA) */
