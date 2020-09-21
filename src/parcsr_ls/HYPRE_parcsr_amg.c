@@ -1917,3 +1917,4 @@ HYPRE_BoomerAMGSetIsolatedFPoints(HYPRE_Solver   solver,
                                       1, num_isolated_fpt,
                                       isolated_fpt_index) );
 }
+

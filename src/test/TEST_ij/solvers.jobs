@@ -17,6 +17,8 @@
 #   16: BoomerAMG_COGMRES
 #   17: DS_COGMRES
 #   20: Hybrid_PCG
+#   90: BoomerAMGDD
+#   91: BoomerAMGDD_GMRES
 #
 
 
@@ -52,6 +54,24 @@ mpirun -np 2 ./ij -solver 17 -rhsrand -cgs 2 -unroll 8 > solvers.out.15
 mpirun -np 2 ./ij -solver 17 -rhsrand -unroll 4 > solvers.out.16
 mpirun -np 2 ./ij -solver 3 -rhsrand -check_residual > solvers.out.17
 mpirun -np 2 ./ij -solver 4 -rhsrand -check_residual > solvers.out.18
+
+#BoomerAMG-DD
+mpirun -np 1 ./ij -solver 90 -rhsrand > solvers.out.900
+mpirun -np 2 ./ij -solver 90 -rhsrand > solvers.out.901
+mpirun -np 4 ./ij -solver 90 -rhsrand > solvers.out.902
+mpirun -np 4 ./ij -solver 90 -rhsrand -amgdd_start_level 3 > solvers.out.903
+mpirun -np 4 ./ij -solver 90 -rhsrand -amgdd_start_level 4 > solvers.out.904
+mpirun -np 4 ./ij -solver 90 -rhsrand -amgdd_padding 4 > solvers.out.905
+mpirun -np 4 ./ij -solver 90 -rhsrand -amgdd_padding 4 -amgdd_num_ghost_layers 4 > solvers.out.906
+mpirun -np 1 ./ij -solver 91 -rhsrand > solvers.out.910
+mpirun -np 2 ./ij -solver 91 -rhsrand > solvers.out.911
+mpirun -np 4 ./ij -solver 91 -rhsrand > solvers.out.912
+mpirun -np 4 ./ij -solver 91 -rhsrand -amgdd_num_comp_cycles 3 > solvers.out.913
+mpirun -np 4 ./ij -solver 91 -rhsrand -amgdd_fac_relax_type 0 > solvers.out.914
+mpirun -np 4 ./ij -solver 91 -rhsrand -amgdd_fac_relax_type 1 > solvers.out.915
+mpirun -np 4 ./ij -solver 91 -rhsrand -amgdd_fac_relax_type 2 > solvers.out.916
+mpirun -np 4 ./ij -solver 91 -rhsrand -amgdd_fac_cycle_type 2 > solvers.out.917
+mpirun -np 4 ./ij -solver 91 -rhsrand -amgdd_fac_cycle_type 3 > solvers.out.918
 
 #systems AMG run ...unknown approach, hybrid approach, nodal approach
 mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 > solvers.out.sysu
@@ -100,7 +120,7 @@ mpirun -np 2 ./ij -solver 70 -mgr_nlevels 0 -mgr_bsize 2 -mgr_num_reserved_nodes
 mpirun -np 2 ./ij -solver 70 -mgr_nlevels 0 -mgr_bsize 2 -mgr_num_reserved_nodes 100 > solvers.out.201
 mpirun -np 2 ./ij -solver 70 -mgr_nlevels 1 -mgr_bsize 1 -mgr_num_reserved_nodes 0 > solvers.out.202
 mpirun -np 2 ./ij -solver 70 -mgr_nlevels 1 -mgr_bsize 1 -mgr_num_reserved_nodes 100 > solvers.out.203
-# multi level MGR tests with different coarse grid type strategies 
+# multi level MGR tests with different coarse grid type strategies
 # Fix non C points to F points with different F-relaxation methods (single/multilevel F-relaxation)
 # with/ without reserved coarse nodes
 mpirun -np 2 ./ij -solver 70 -mgr_nlevels 1 -mgr_bsize 2 -mgr_non_c_to_f 1 -mgr_frelax_method 0 -mgr_num_reserved_nodes 0 > solvers.out.204

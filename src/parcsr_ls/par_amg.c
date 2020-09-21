@@ -250,6 +250,8 @@ hypre_BoomerAMGCreate()
 
    hypre_ParAMGDataMemoryLocation(amg_data) = HYPRE_MEMORY_UNDEFINED;
 
+   hypre_ParAMGDataPartialCycleCoarsestLevel(amg_data) = -1;
+   hypre_ParAMGDataPartialCycleControl(amg_data) = -1;
    hypre_ParAMGDataMaxLevels(amg_data) =  max_levels;
    hypre_ParAMGDataUserCoarseRelaxType(amg_data) = 9;
    hypre_ParAMGDataUserRelaxType(amg_data) = -1;
@@ -795,6 +797,7 @@ hypre_BoomerAMGDestroy( void *data )
    {
       hypre_MPI_Comm_free (&new_comm);
    }
+
    hypre_TFree(amg_data, HYPRE_MEMORY_HOST);
 
    HYPRE_ANNOTATE_FUNC_END;

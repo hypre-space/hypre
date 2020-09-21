@@ -879,7 +879,7 @@ hypre_StructGridGetMaxBoxSize(hypre_StructGrid *grid)
 }
 
 HYPRE_Int
-hypre_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_Int data_location )
+hypre_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_MemoryLocation data_location )
 {
    hypre_StructGridDataLocation(grid) = data_location;
 

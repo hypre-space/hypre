@@ -521,7 +521,7 @@ hypre_BoomerAMGBuildModPartialExtInterp(hypre_ParCSRMatrix  *A,
 }
 
 HYPRE_Int
-hypre_BoomerAMGBuildModPartialNewExtPIInterp(hypre_ParCSRMatrix  *A,
+hypre_BoomerAMGBuildModPartialExtPEInterp(hypre_ParCSRMatrix  *A,
                                              HYPRE_Int           *CF_marker,
                                              hypre_ParCSRMatrix  *S,
                                              HYPRE_BigInt        *num_cpts_global,

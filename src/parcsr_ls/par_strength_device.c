@@ -228,8 +228,10 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
              dof_func      - vector over nonzero elements of A_diag, indicating the degree of freedom
              dof_func_offd - vector over nonzero elements of A_offd, indicating the degree of freedom
 
-      Output: S_temp_diag_j - S_diag_j vector before compression, i.e.,elements that are -1 should be removed
-              S_temp_offd_j - S_offd_j vector before compression, i.e.,elements that are -1 should be removed
+      Output: S_temp_diag_j - S_diag_j vector before compression, i.e.,elements that are -1, or -2 should be removed
+                              strong connections: same as A_diag_j; weak: -1; diagonal: -2
+              S_temp_offd_j - S_offd_j vector before compression, i.e.,elements that are -1, or -2 should be removed
+                              strong connections: same as A_offd_j; weak: -1;
               jS_diag       - S_diag_i vector for compressed S_diag
               jS_offd       - S_offd_i vector for compressed S_offd
     */

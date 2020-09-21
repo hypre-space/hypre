@@ -85,7 +85,7 @@ hypre_SMGSetup( void               *smg_vdata,
 
 #if defined(HYPRE_USING_CUDA)
    HYPRE_Int             num_level_GPU = 0;
-   HYPRE_Int             data_location = 0;
+   HYPRE_MemoryLocation  data_location;
    HYPRE_Int             max_box_size  = 0;
    HYPRE_Int             device_level  = (smg_data -> devicelevel);
 #endif

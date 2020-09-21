@@ -27,6 +27,8 @@ FILES="\
  ${TNAME}.out.12\
  ${TNAME}.out.13\
  ${TNAME}.out.14\
+ ${TNAME}.out.15\
+ ${TNAME}.out.16\
 "
 
 for i in $FILES

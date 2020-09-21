@@ -15,7 +15,7 @@ endif()
 set (HYPRE_VERSION 2.19.0)
 set (HYPRE_DATE    2020/05/26)
 set (HYPRE_TIME    00:00:00)
-set (HYPRE_BUGS    hypre-support@llnl.gov)
+set (HYPRE_BUGS    https://github.com/hypre-space/hypre/issues)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
 
 project (hypre
