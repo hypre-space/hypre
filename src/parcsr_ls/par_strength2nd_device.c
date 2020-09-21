@@ -269,7 +269,7 @@ __global__ void hypre_CUDAKernel_MarkDiagonal_w( HYPRE_Int nr_of_rows, HYPRE_Int
 struct is_false
 {
    __host__ __device__
-   bool operator()(const int x)
+   bool operator()(const HYPRE_Int x)
    {
       return x==0;
    }
@@ -305,7 +305,7 @@ void remove_diagonal( hypre_ParCSRMatrix* S )
       hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(S)) = S_diag_a_new;
    }
    thrust::exclusive_scan(dmp,dmp+nr_of_rows+1,dmp);
-   thrust::minus<int> op;
+   thrust::minus<HYPRE_Int> op;
    thrust::device_ptr<HYPRE_Int> S_diag_ip(S_diag_i);
    thrust::transform( S_diag_ip, S_diag_ip+nr_of_rows+1, dmp, S_diag_ip, op );
    hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(S)) = nnz-ndiag;
@@ -371,7 +371,7 @@ void truncate( hypre_ParCSRMatrix* S, HYPRE_Complex trunc_level )
    hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(S)) = S_diag_a_new;
 
    thrust::exclusive_scan(dmp,dmp+nr_of_rows+1,dmp);
-   thrust::minus<int> op;
+   thrust::minus<HYPRE_Int> op;
    thrust::device_ptr<HYPRE_Int> S_diag_ip(S_diag_i);
    thrust::transform( S_diag_ip, S_diag_ip+nr_of_rows+1, dmp, S_diag_ip, op );
    hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(S)) = nnz-no_remove;
@@ -402,7 +402,7 @@ void truncate( hypre_ParCSRMatrix* S, HYPRE_Complex trunc_level )
    hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(S)) = S_offd_a_new;
 
    thrust::exclusive_scan(dmp,dmp+nr_of_rows+1,dmp);
-   //   thrust::minus<int> op;
+   //   thrust::minus<HYPRE_Int> op;
    thrust::device_ptr<HYPRE_Int> S_offd_ip(S_offd_i);
    thrust::transform( S_offd_ip, S_offd_ip+nr_of_rows+1, dmp, S_offd_ip, op );
    hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(S)) = nnz-no_remove;
@@ -444,7 +444,7 @@ __global__  void hypre_CUDAKernel_AddDiagJ( HYPRE_Int nr_of_rows, HYPRE_Int* SI_
    ib = SI_diag_i[row];
    ie = SI_diag_i[row+1];
    SI_diag_jnew[ib] = row;
-   for( int ind=ib+1; ind < ie; ind++ )
+   for( HYPRE_Int ind=ib+1; ind < ie; ind++ )
       SI_diag_jnew[ind] = SI_diag_j[ind-row-1];
 }
 
@@ -456,7 +456,7 @@ __global__ void hypre_CUDAKernel_MarkDiagonal( HYPRE_Int nr_of_rows, HYPRE_Int* 
    if( row >= nr_of_rows )
       return;
    dm[row]=0;
-   for( int ind=S_diag_i[row]; ind < S_diag_i[row+1]; ind++ )
+   for( HYPRE_Int ind=S_diag_i[row]; ind < S_diag_i[row+1]; ind++ )
    {
       dmj[ind]=0;
       if( S_diag_j[ind]==row )
@@ -631,7 +631,7 @@ HYPRE_Int hypre_BoomerAMGExtractCCDev( hypre_ParCSRMatrix  *A,
 
    HYPRE_Int *ACC_offd_i = hypre_CTAlloc(HYPRE_Int,nrofcoarserows+1,HYPRE_MEMORY_DEVICE);
    thrust::device_ptr<HYPRE_Int> ACC_offd_i_dev(ACC_offd_i);
-   thrust::copy_if( ACC_tmp_dev, ACC_tmp_dev+nrofrows, CF_marker_dev, ACC_offd_i_dev, is_positive<int>() );
+   thrust::copy_if( ACC_tmp_dev, ACC_tmp_dev+nrofrows, CF_marker_dev, ACC_offd_i_dev, is_positive<HYPRE_Int>() );
    thrust::exclusive_scan( ACC_offd_i_dev, ACC_offd_i_dev+nrofcoarserows+1, ACC_offd_i_dev );
    HYPRE_Int ACC_offd_nnz = ACC_offd_i[nrofcoarserows];
 
@@ -642,17 +642,17 @@ HYPRE_Int hypre_BoomerAMGExtractCCDev( hypre_ParCSRMatrix  *A,
       ACC_offd_j= hypre_CTAlloc(HYPRE_Int, ACC_offd_nnz, HYPRE_MEMORY_DEVICE);
       thrust::device_ptr<HYPRE_Int> ACC_offd_j_dev(ACC_offd_j), CF_array_offd_dev(CF_array_offd);
       thrust::device_ptr<HYPRE_Int> A_offd_j_dev(A_offd_j);
-      thrust::copy_if( A_offd_j_dev, A_offd_j_dev+A_offd_nnz, CF_array_offd_dev, ACC_offd_j_dev, is_positive<int>() );
+      thrust::copy_if( A_offd_j_dev, A_offd_j_dev+A_offd_nnz, CF_array_offd_dev, ACC_offd_j_dev, is_positive<HYPRE_Int>() );
       ACC_offd_a = hypre_CTAlloc( HYPRE_Complex, ACC_offd_nnz, HYPRE_MEMORY_DEVICE);
       thrust::device_ptr<HYPRE_Complex> A_offd_a_dev(A_offd_a), ACC_offd_a_dev(ACC_offd_a);
-      thrust::copy_if( A_offd_a_dev, A_offd_a_dev+A_offd_nnz, CF_array_offd_dev, ACC_offd_a_dev, is_positive<int>() );
+      thrust::copy_if( A_offd_a_dev, A_offd_a_dev+A_offd_nnz, CF_array_offd_dev, ACC_offd_a_dev, is_positive<HYPRE_Int>() );
    }
    hypre_TFree(ACC_tmp,HYPRE_MEMORY_DEVICE);
    hypre_TFree(CF_array_offd,HYPRE_MEMORY_DEVICE);
    // 3. Transform diagonal submatrix column index (F,C) to (C)
    HYPRE_Int* fine_to_coarse = hypre_CTAlloc(HYPRE_Int,nrofrows, HYPRE_MEMORY_DEVICE);
    thrust::device_ptr<HYPRE_Int> fine_to_coarse_dev(fine_to_coarse);
-   thrust::transform( CF_marker_dev, CF_marker_dev+nrofrows, fine_to_coarse_dev, is_positive<int>());
+   thrust::transform( CF_marker_dev, CF_marker_dev+nrofrows, fine_to_coarse_dev, is_positive<HYPRE_Int>());
    thrust::exclusive_scan( fine_to_coarse_dev, fine_to_coarse_dev+nrofrows, fine_to_coarse_dev );
    if( ACC_diag_nnz > 0 )
    {
@@ -717,7 +717,7 @@ __global__ void hypre_CUDAKernel_GetCfarray( HYPRE_Int nrofrows, HYPRE_Int nnz, 
 {
    HYPRE_Int i=hypre_cuda_get_grid_thread_id<1,1>();
    if( i < nrofrows )
-      for( int ind=A_diag_i[i] ; ind < A_diag_i[i+1] ; ind++ )
+      for( HYPRE_Int ind=A_diag_i[i] ; ind < A_diag_i[i+1] ; ind++ )
          CF_array[ind] = CF_marker[i]>0 && CF_marker[A_diag_j[ind]]>0;
 }
 
@@ -726,9 +726,9 @@ __global__ void hypre_CUDAKernel_GetCfarrayOffd( HYPRE_Int nrofrows, HYPRE_Int n
                                   HYPRE_Int* CF_marker_offd, HYPRE_Int* A_offd_i,
                                   HYPRE_Int* A_offd_j, HYPRE_Int* CF_array )
 {
-   int i=hypre_cuda_get_grid_thread_id<1,1>();
+   HYPRE_Int i=hypre_cuda_get_grid_thread_id<1,1>();
    if( i < nrofrows )
-      for( int ind=A_offd_i[i] ; ind < A_offd_i[i+1] ; ind++ )
+      for( HYPRE_Int ind=A_offd_i[i] ; ind < A_offd_i[i+1] ; ind++ )
          CF_array[ind] = CF_marker[i]>0 && CF_marker_offd[A_offd_j[ind]]>0;
 }
 
@@ -736,7 +736,7 @@ __global__ void hypre_CUDAKernel_GetCfarrayOffd( HYPRE_Int nrofrows, HYPRE_Int n
 __global__ void hypre_CUDAKernel_GetIcarray( HYPRE_Int nrofrows, HYPRE_Int* A_i,
                              HYPRE_Int* CF_marker, HYPRE_Int* CF_array, HYPRE_Int* ACC_tmp )
 {
-   int i = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1,1>();
    if( i >= nrofrows )
    {
       return;
@@ -753,7 +753,7 @@ __global__ void hypre_CUDAKernel_GetIcarray( HYPRE_Int nrofrows, HYPRE_Int* A_i,
    {
       return;
    }
-   int ncl=0;
+   HYPRE_Int ncl=0;
    if (lane < 2)
    {
       ib = read_only_load(A_i + i + lane);
@@ -823,7 +823,7 @@ void restrict_colmap_to_cpts( HYPRE_Int ACC_offd_size, HYPRE_Int* ACC_offd_j,
       new_col_map = hypre_CTAlloc( HYPRE_Int, ncpts, HYPRE_MEMORY_DEVICE );
       thrust::device_ptr<HYPRE_Int> new_col_map_dev(new_col_map), col_map_A_dev(col_map_A);
       thrust::copy_if( col_map_A_dev, col_map_A_dev+nr_cols_A, fine_to_coarse_dev,
-                    new_col_map_dev, is_positive<int>() );
+                    new_col_map_dev, is_positive<HYPRE_Int>() );
 
    /* Map A_offd_j to new local indices */
       thrust::exclusive_scan( fine_to_coarse_dev, &fine_to_coarse_dev[nr_cols_A+1], fine_to_coarse_dev );
@@ -839,7 +839,7 @@ void restrict_colmap_to_cpts( HYPRE_Int ACC_offd_size, HYPRE_Int* ACC_offd_j,
 
 
 /*-----------------------------------------------------------------------*/
-int getSendInfo( HYPRE_Int nr_cols_P, HYPRE_Int* col_map_P,
+HYPRE_Int getSendInfo( HYPRE_Int nr_cols_P, HYPRE_Int* col_map_P,
                  HYPRE_Int* num_cpts, HYPRE_Int num_proc,
                  HYPRE_Int global_nr_of_rows,
                  HYPRE_Int** nrec, HYPRE_Int** recprocs )
