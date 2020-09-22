@@ -58,7 +58,6 @@ typedef struct hypre_Box_struct
    hypre_Index imin;           /* min bounding indices */
    hypre_Index imax;           /* max bounding indices */
    HYPRE_Int   ndim;           /* number of dimensions */
-
 } hypre_Box;
 
 /*--------------------------------------------------------------------------
@@ -73,7 +72,6 @@ typedef struct hypre_BoxArray_struct
    HYPRE_Int   size;          /* Size of box array */
    HYPRE_Int   alloc_size;    /* Size of currently alloced space */
    HYPRE_Int   ndim;          /* number of dimensions */
-
 } hypre_BoxArray;
 
 #define hypre_BoxArrayExcess 10
@@ -89,7 +87,7 @@ typedef struct hypre_BoxArrayArray_struct
    hypre_BoxArray  **box_arrays;    /* Array of pointers to box arrays */
    HYPRE_Int         size;          /* Size of box array array */
    HYPRE_Int         ndim;          /* number of dimensions */
-
+   HYPRE_Int        *ids;           /* box array identifiers */
 } hypre_BoxArrayArray;
 
 /*--------------------------------------------------------------------------
@@ -167,6 +165,10 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 ((box_array_array) -> size)
 #define hypre_BoxArrayArrayNDim(box_array_array) \
 ((box_array_array) -> ndim)
+#define hypre_BoxArrayArrayIDs(box_array_array) \
+((box_array_array) -> ids)
+#define hypre_BoxArrayArrayID(box_array_array, i) \
+((box_array_array) -> ids[i])
 
 /*--------------------------------------------------------------------------
  * Looping macros:

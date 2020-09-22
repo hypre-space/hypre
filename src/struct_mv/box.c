@@ -778,8 +778,8 @@ hypre_BoxArraySetSize( hypre_BoxArray  *box_array,
 
       old_alloc_size = alloc_size;
       alloc_size = size + hypre_BoxArrayExcess;
-      hypre_BoxArrayBoxes(box_array) =
-         hypre_TReAlloc(hypre_BoxArrayBoxes(box_array), hypre_Box, alloc_size);
+      hypre_BoxArrayBoxes(box_array) = hypre_TReAlloc(hypre_BoxArrayBoxes(box_array),
+                                                      hypre_Box, alloc_size);
       hypre_BoxArrayAllocSize(box_array) = alloc_size;
 
       for (i = old_alloc_size; i < alloc_size; i++)
@@ -955,6 +955,8 @@ hypre_BoxArrayArrayCreate( HYPRE_Int size,
    }
    hypre_BoxArrayArraySize(box_array_array) = size;
    hypre_BoxArrayArrayNDim(box_array_array) = ndim;
+   hypre_BoxArrayArrayIDs(box_array_array) =
+      hypre_CTAlloc(HYPRE_Int, size);
 
    return box_array_array;
 }
@@ -970,9 +972,12 @@ hypre_BoxArrayArrayDestroy( hypre_BoxArrayArray *box_array_array )
    if (box_array_array)
    {
       hypre_ForBoxArrayI(i, box_array_array)
+      {
          hypre_BoxArrayDestroy(
             hypre_BoxArrayArrayBoxArray(box_array_array, i));
+      }
 
+      hypre_TFree(hypre_BoxArrayArrayIDs(box_array_array));
       hypre_TFree(hypre_BoxArrayArrayBoxArrays(box_array_array));
       hypre_TFree(box_array_array);
    }
@@ -1006,6 +1011,8 @@ hypre_BoxArrayArrayClone( hypre_BoxArrayArray *box_array_array )
       for (i = 0; i < new_size; i++)
       {
          hypre_AppendBoxArray(box_arrays[i], new_box_arrays[i]);
+         hypre_BoxArrayArrayID(new_box_array_array, i) =
+            hypre_BoxArrayArrayID(box_array_array, i);
       }
    }
 
