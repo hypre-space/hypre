@@ -175,6 +175,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
    hypre_SStructPMatrix    *A_p, *P_p;
    hypre_StructMatrix      *A_s, *P_s;
    hypre_SStructPGrid      *pgrid;
+   hypre_StructGrid        *sgrid;
    hypre_BoxArray          *compute_boxes;
    hypre_BoxArray          *pbnd_boxa;
    hypre_BoxArrayArray     *pbnd_boxaa;
@@ -199,7 +200,8 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
    HYPRE_Int                cdir;
    HYPRE_Int                part, nvars;
-   HYPRE_Int                i, j, si, vi, Ai, Pi;
+   HYPRE_Int                box_id;
+   HYPRE_Int                i, ii, j, si, vi, Ai, Pi;
 
    /*-------------------------------------------------------
     * Set prolongation coefficients for each part
@@ -214,13 +216,15 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
       for (vi = 0; vi < nvars; vi++)
       {
-         A_s = hypre_SStructPMatrixSMatrix(A_p, vi, vi);
-         P_s = hypre_SStructPMatrixSMatrix(P_p, vi, vi);
+         pbnd_boxaa = hypre_SStructPGridPBndBoxArrayArray(pgrid, vi);
 
-         pbnd_boxaa      = hypre_SStructPGridPBndBoxArrayArray(pgrid, vi);
+         A_s = hypre_SStructPMatrixSMatrix(A_p, vi, vi);
          A_stencil       = hypre_StructMatrixStencil(A_s);
          A_stencil_shape = hypre_StructStencilShape(A_stencil);
          A_stencil_size  = hypre_StructStencilSize(A_stencil);
+
+         P_s = hypre_SStructPMatrixSMatrix(P_p, vi, vi);
+         sgrid = hypre_StructMatrixGrid(P_s);
          P_stencil       = hypre_StructMatrixStencil(P_s);
          P_stencil_shape = hypre_StructStencilShape(P_stencil);
          P_stencil_size  = hypre_StructStencilSize(P_stencil);
@@ -288,7 +292,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                hypre_CopyToIndex(stride, ndim, Pstride);
                hypre_StructMatrixMapDataStride(P_s, Pstride);
 
-               compute_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(P_s));
+               compute_boxes = hypre_StructGridBoxes(sgrid);
                hypre_ForBoxI(i, compute_boxes)
                {
                   hypre_CopyBox(hypre_BoxArrayBox(compute_boxes, i), compute_box);
@@ -356,29 +360,38 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                hypre_ForBoxArrayI(i, pbnd_boxaa)
                {
                   pbnd_boxa = hypre_BoxArrayArrayBoxArray(pbnd_boxaa, i);
-                  hypre_ForBoxI(j, pbnd_boxa)
+                  box_id = hypre_BoxArrayArrayID(pbnd_boxaa, i);
+                  ii = hypre_BinarySearch(hypre_StructGridIDs(sgrid),
+                                          box_id,
+                                          hypre_StructGridNumBoxes(sgrid));
+
+                  if (ii > -1)
                   {
-                     hypre_CopyBox(hypre_BoxArrayBox(pbnd_boxa, j), compute_box);
-                     hypre_ProjectBox(compute_box, origin, stride);
-                     hypre_CopyToIndex(hypre_BoxIMin(compute_box), ndim, Pstart);
-                     hypre_StructMatrixMapDataIndex(P_s, Pstart);
-
-                     Pp1 = hypre_StructMatrixBoxData(P_s, i, 1);
-                     Pp2 = hypre_StructMatrixBoxData(P_s, i, 2);
-
-                     hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-                     hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
-                     hypre_BoxLoop1For(Pi)
+                     hypre_ForBoxI(j, pbnd_boxa)
                      {
-                        center = Pp1[Pi] + Pp2[Pi];
-                        if (center)
+                        hypre_CopyBox(hypre_BoxArrayBox(pbnd_boxa, j), compute_box);
+                        hypre_ProjectBox(compute_box, origin, stride);
+                        hypre_CopyToIndex(hypre_BoxIMin(compute_box), ndim, Pstart);
+                        hypre_StructMatrixMapDataIndex(P_s, Pstart);
+
+                        Pp1 = hypre_StructMatrixBoxData(P_s, ii, 1);
+                        Pp2 = hypre_StructMatrixBoxData(P_s, ii, 2);
+                        P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P_s), ii);
+
+                        hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+                        hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
+                        hypre_BoxLoop1For(Pi)
                         {
-                           Pp1[Pi] /= center;
-                           Pp2[Pi] /= center;
+                           center = Pp1[Pi] + Pp2[Pi];
+                           if (center)
+                           {
+                              Pp1[Pi] /= center;
+                              Pp2[Pi] /= center;
+                           }
                         }
-                     }
-                     hypre_BoxLoop1End(Pi);
-                  } /* loop on pbnd_boxa */
+                        hypre_BoxLoop1End(Pi);
+                     } /* loop on pbnd_boxa */
+                  }
                } /* loop on pbnd_boxaa */
 
                hypre_TFree(ventries);

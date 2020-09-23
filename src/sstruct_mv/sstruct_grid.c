@@ -380,6 +380,12 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
          {
             num_boxes = hypre_StructGridNumBoxes(sgrid);
             pbnd_boxaa[t] = hypre_BoxArrayArrayCreate(num_boxes, ndim);
+
+            /* Set BoxArrayArray IDs */
+            for (i = 0; i < num_boxes; i++)
+            {
+               hypre_BoxArrayArrayID(pbnd_boxaa[t], i) = i;
+            }
          }
 
          iboxarray = hypre_BoxArrayClone(hypre_StructGridBoxes(sgrid));
@@ -1032,6 +1038,9 @@ hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
  * a 4D "matrix" based on pi, pj, vi (variable on part pi), and vj.  The upper
  * "triangle" (given by pi < pj) stores the send information and the lower
  * triangle stores the receive information.
+ *
+ * TODO:
+ *       1) Can we reduce the allocation size of cinfo_a?
  *
  *--------------------------------------------------------------------------*/
 

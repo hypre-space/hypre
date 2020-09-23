@@ -400,8 +400,12 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_Int              entry, part, var, nvars;
    HYPRE_Int              nnzs;
    HYPRE_Int              sizes[4];
-   HYPRE_Int              nvalues, i, j, m, mi;
+   HYPRE_Int              nvalues, i, j, k, kk, m, mi;
    HYPRE_Int              num_boxes;
+   HYPRE_Int              pbnd_boxaa_size;
+   HYPRE_Int              convert_boxaa_size;
+   HYPRE_Int              grid_box_id;
+   HYPRE_Int              convert_box_id;
    HYPRE_Int             *num_ghost;
    HYPRE_Int              nSentries;
 
@@ -427,31 +431,54 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
       for (var = 0; var < nvars; var++)
       {
          sgrid = hypre_SStructPGridSGrid(pgrid, var);
-         grid_boxes = hypre_StructGridBoxes(sgrid);
          num_boxes  = hypre_StructGridNumBoxes(sgrid);
+         grid_boxes = hypre_StructGridBoxes(sgrid);
          pbnd_boxaa = hypre_SStructPGridPBndBoxArrayArray(pgrid, var);
+         pbnd_boxaa_size = hypre_BoxArrayArraySize(pbnd_boxaa);
 
-         convert_boxaa[part][var] = hypre_BoxArrayArrayCreate(num_boxes, ndim);
-         hypre_ForBoxArrayI(i, pbnd_boxaa)
+         convert_boxaa_size = hypre_min(num_boxes, pbnd_boxaa_size);
+         convert_boxaa[part][var] = hypre_BoxArrayArrayCreate(convert_boxaa_size, ndim);
+
+         k = kk = 0;
+         hypre_ForBoxArrayI(i, convert_boxaa[part][var])
          {
-            convert_boxa = hypre_BoxArrayArrayBoxArray(convert_boxaa[part][var], i);
-            pbnd_boxa = hypre_BoxArrayArrayBoxArray(pbnd_boxaa, i);
-            grid_box  = hypre_BoxArrayBox(grid_boxes, i);
-            hypre_ForBoxI(j, pbnd_boxa)
+            pbnd_boxa      = hypre_BoxArrayArrayBoxArray(pbnd_boxaa, i);
+            convert_boxa   = hypre_BoxArrayArrayBoxArray(convert_boxaa[part][var], kk);
+            convert_box_id = hypre_BoxArrayArrayID(pbnd_boxaa, i);
+            grid_box_id    = hypre_StructGridID(sgrid, k);
+
+            if (convert_box_id == grid_box_id)
             {
-               box = hypre_BoxArrayBox(pbnd_boxa, j);
-               hypre_CopyBox(box, grow_box);
-               hypre_BoxGrowByValue(grow_box, 1);
-               hypre_IntersectBoxes(grow_box, grid_box, convert_box);
+               grid_box = hypre_BoxArrayBox(grid_boxes, k);
 
-               hypre_AppendBox(convert_box, convert_boxa);
-            }
+               if (hypre_BoxArraySize(pbnd_boxa))
+               {
+                  hypre_ForBoxI(j, pbnd_boxa)
+                  {
+                     box = hypre_BoxArrayBox(pbnd_boxa, j);
+                     hypre_CopyBox(box, grow_box);
+                     hypre_BoxGrowByValue(grow_box, 1);
+                     hypre_IntersectBoxes(grow_box, grid_box, convert_box);
 
-            /* Eliminate duplicated entries */
-            hypre_UnionBoxes(convert_boxa);
-         }
-      }
-   }
+                     hypre_AppendBox(convert_box, convert_boxa);
+                  }
+
+                  /* Eliminate duplicated entries */
+                  hypre_UnionBoxes(convert_boxa);
+
+                  /* Update convert_boxaa */
+                  hypre_BoxArrayArrayID(convert_boxaa[part][var], kk) = convert_box_id;
+                  kk++;
+               }
+
+               /* Go to next grid box */
+               k++;
+            } /* if (grid_box_id == convert_box_id) */
+         } /* loop over grid_boxes */
+
+         hypre_BoxArrayArraySize(convert_boxaa[part][var]) = kk;
+      } /* loop over vars */
+   } /* loop over parts */
    hypre_BoxDestroy(grow_box);
    hypre_BoxDestroy(convert_box);
    HYPRE_ANNOTATE_REGION_END("%s", "Find boxes");
@@ -484,17 +511,41 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
             }
          }
 
+         k = 0;
          hypre_ForBoxArrayI(i, convert_boxaa[part][var])
          {
-            convert_boxa = hypre_BoxArrayArrayBoxArray(convert_boxaa[part][var], i);
-            grid_box = hypre_BoxArrayBox(grid_boxes, i);
+            convert_boxa   = hypre_BoxArrayArrayBoxArray(convert_boxaa[part][var], i);
+            convert_box_id = hypre_BoxArrayArrayID(convert_boxaa[part][var], i);
+            grid_box_id    = hypre_StructGridID(sgrid, k);
+
+            while (grid_box_id != convert_box_id)
+            {
+               grid_box = hypre_BoxArrayBox(grid_boxes, k);
+               hypre_CopyBox(grid_box, ghost_box);
+               hypre_BoxGrowByArray(ghost_box, num_ghost);
+               m += hypre_BoxVolume(ghost_box);
+
+               if (k < hypre_StructGridNumBoxes(sgrid))
+               {
+                  k++;
+                  grid_box_id = hypre_StructGridID(sgrid, k);
+               }
+               else
+               {
+                  hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                                    "grid_box_id == convert_box_id not found");
+                  break;
+               }
+            }
+
+            grid_box = hypre_BoxArrayBox(grid_boxes, k);
             hypre_CopyBox(grid_box, ghost_box);
             hypre_BoxGrowByArray(ghost_box, num_ghost);
 
+            convert_boxa = hypre_BoxArrayArrayBoxArray(convert_boxaa[part][var], i);
             hypre_ForBoxI(j, convert_boxa)
             {
                convert_box = hypre_BoxArrayBox(convert_boxa, j);
-
                start = hypre_BoxIMin(convert_box);
                hypre_BoxGetSize(convert_box, loop_size);
 
@@ -507,12 +558,22 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
                   row_sizes[m + mi] = nnzs;
                }
                hypre_BoxLoop1End(mi);
-
                nvalues += nnzs*hypre_BoxVolume(convert_box);
             } /* Loop over convert_boxa */
 
             m += hypre_BoxVolume(ghost_box);
+
+            /* Go to next grid box */
+            k++;
          } /* Loop over convert_boxaa */
+
+         for (; k < hypre_StructGridNumBoxes(sgrid); k++)
+         {
+            grid_box = hypre_BoxArrayBox(grid_boxes, k);
+            hypre_CopyBox(grid_box, ghost_box);
+            hypre_BoxGrowByArray(ghost_box, num_ghost);
+            m += hypre_BoxVolume(ghost_box);
+         }
       } /* Loop over vars */
    } /* Loop over parts */
    hypre_BoxDestroy(ghost_box);

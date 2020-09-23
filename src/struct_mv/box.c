@@ -954,6 +954,7 @@ hypre_BoxArrayArrayCreate( HYPRE_Int size,
          hypre_BoxArrayCreate(0, ndim);
    }
    hypre_BoxArrayArraySize(box_array_array) = size;
+   hypre_BoxArrayArrayAllocSize(box_array_array) = size;
    hypre_BoxArrayArrayNDim(box_array_array) = ndim;
    hypre_BoxArrayArrayIDs(box_array_array) =
       hypre_CTAlloc(HYPRE_Int, size);
@@ -967,11 +968,14 @@ hypre_BoxArrayArrayCreate( HYPRE_Int size,
 HYPRE_Int
 hypre_BoxArrayArrayDestroy( hypre_BoxArrayArray *box_array_array )
 {
+   HYPRE_Int  alloc_size;
    HYPRE_Int  i;
 
    if (box_array_array)
    {
-      hypre_ForBoxArrayI(i, box_array_array)
+      alloc_size = hypre_BoxArrayArrayAllocSize(box_array_array);
+
+      for (i = 0; i < alloc_size; i++)
       {
          hypre_BoxArrayDestroy(
             hypre_BoxArrayArrayBoxArray(box_array_array, i));
