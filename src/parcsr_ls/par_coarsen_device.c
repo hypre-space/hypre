@@ -256,20 +256,7 @@ hypreCUDAKernel_PMISCoarseningInit(HYPRE_Int   nrows,
       return;
    }
 
-   /*---------------------------------------------
-    * If the measure of i is smaller than 1, then
-    * make i and F point (because it does not influence
-    * any other point)
-    * RL: move this step to pmis init and don't do the check
-    * in pmis iterations. different from cpu impl
-    *---------------------------------------------*/
-   if ( measure_diag[i] < 1.0 )
-   {
-      CF_marker_diag[i] = F_PT;
-      measure_diag[i] = 0.0;
-
-      /* return; */
-   }
+   HYPRE_Int CF_marker_i = 0;
 
    if (CF_init == 1)
    {
@@ -281,14 +268,25 @@ hypreCUDAKernel_PMISCoarseningInit(HYPRE_Int   nrows,
       if ( read_only_load(&S_diag_i[i+1]) - read_only_load(&S_diag_i[i]) == 0 &&
            read_only_load(&S_offd_i[i+1]) - read_only_load(&S_offd_i[i]) == 0 )
       {
-         CF_marker_diag[i] = (CF_init == 3 || CF_init == 4) ? C_PT : SF_PT;
+         CF_marker_i = (CF_init == 3 || CF_init == 4) ? C_PT : SF_PT;
          measure_diag[i] = 0.0;
       }
-      else
-      {
-         CF_marker_diag[i] = 0;
-      }
    }
+
+   /*---------------------------------------------
+    * If the measure of i is smaller than 1, then
+    * make i and F point (because it does not influence
+    * any other point)
+    * RL: move this step to pmis init and don't do the check
+    * in pmis iterations. different from cpu impl
+    *---------------------------------------------*/
+   if (CF_marker_i == 0 && measure_diag[i] < 1.0)
+   {
+      CF_marker_i = F_PT;
+      measure_diag[i] = 0.0;
+   }
+
+   CF_marker_diag[i] = CF_marker_i;
 }
 
 HYPRE_Int
