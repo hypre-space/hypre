@@ -61,8 +61,8 @@ co="--with-cuda --enable-unified-memory --with-openmp --enable-hopscotch --enabl
 
 # OMP 4.5 with UM
 co="--with-device-openmp --enable-unified-memory --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
-./renametest.sh basic $output_dir/basic-deviceomp-um-ij
+#./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
+#./renametest.sh basic $output_dir/basic-deviceomp-um-ij
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ross
 ./renametest.sh basic $output_dir/basic-deviceomp-um-struct-sstruct
 
