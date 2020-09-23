@@ -81,13 +81,24 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Int        trans,
 
    if (trans)
    {
-      HYPRE_Complex *csc_a = hypre_TAlloc(HYPRE_Complex, A->num_nonzeros, HYPRE_MEMORY_DEVICE);
-      HYPRE_Int     *csc_j = hypre_TAlloc(HYPRE_Int,     A->num_nonzeros, HYPRE_MEMORY_DEVICE);
-      HYPRE_Int     *csc_i = hypre_TAlloc(HYPRE_Int,     A->num_cols+1,   HYPRE_MEMORY_DEVICE);
+      HYPRE_Complex *csc_a = hypre_TAlloc(HYPRE_Complex, A_nnz,     HYPRE_MEMORY_DEVICE);
+      HYPRE_Int     *csc_j = hypre_TAlloc(HYPRE_Int,     A_nnz,     HYPRE_MEMORY_DEVICE);
+      HYPRE_Int     *csc_i = hypre_TAlloc(HYPRE_Int,     A_ncols+1, HYPRE_MEMORY_DEVICE);
 
-      HYPRE_CUSPARSE_CALL( cusparseDcsr2csc(handle, A->num_rows, A->num_cols, A->num_nonzeros,
-                           A->data, A->i, A->j, csc_a, csc_j, csc_i,
-                           CUSPARSE_ACTION_NUMERIC, CUSPARSE_INDEX_BASE_ZERO) );
+      HYPRE_CUSPARSE_CALL( cusparseDcsr2csc(handle,
+                                            A_nrows,
+                                            A_ncols,
+                                            A_nnz,
+                                            A->data,
+                                            A->i,
+                                            A->j,
+                                            csc_a,
+                                            csc_j,
+                                            csc_i,
+                                            CUSPARSE_ACTION_NUMERIC,
+                                            CUSPARSE_INDEX_BASE_ZERO) );
+
+      HYPRE_CUDA_CALL(cudaDeviceSynchronize());
 
 #ifdef HYPRE_USING_CUSPARSE
       HYPRE_CUSPARSE_CALL( cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
@@ -123,7 +134,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Int        trans,
                            x_data, &beta, y_data) );
 #else
 #pragma omp target teams distribute parallel for private(i) is_device_ptr(A_data, A_i, A_j, y_data, x_data)
-      for (i = 0; i < A_num_rows; i++)
+      for (i = 0; i < A_nrows; i++)
       {
          HYPRE_Complex tempx = 0.0;
          HYPRE_Int j;
@@ -135,6 +146,8 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Int        trans,
       }
 #endif
    }
+
+   /* HYPRE_CUDA_CALL(cudaDeviceSynchronize()); */
 
    return hypre_error_flag;
 }
