@@ -140,6 +140,57 @@ hypre_AuxParCSRMatrixDestroy( hypre_AuxParCSRMatrix *matrix )
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_AuxParCSRMatrixSetRownnz
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AuxParCSRMatrixSetRownnz( hypre_AuxParCSRMatrix *matrix )
+{
+   HYPRE_Int   local_num_rows = hypre_AuxParCSRMatrixLocalNumRows(matrix);
+   HYPRE_Int  *row_length     = hypre_AuxParCSRMatrixRowLength(matrix);
+   HYPRE_Int  *rownnz         = hypre_AuxParCSRMatrixRownnz(matrix);
+
+   HYPRE_Int   i, local_num_rownnz;
+
+   /* Count number of nonzero rows */
+   local_num_rownnz = 0;
+   for (i = 0; i < local_num_rows; i++)
+   {
+      if (row_length[i] > 0)
+      {
+         local_num_rownnz++;
+      }
+   }
+
+   if (local_num_rownnz != local_num_rows)
+   {
+      if (rownnz)
+      {
+         rownnz = hypre_TReAlloc(rownnz, HYPRE_Int, local_num_rownnz);
+      }
+      else
+      {
+         rownnz = hypre_CTAlloc(HYPRE_Int, local_num_rownnz);
+      }
+
+      /* Find nonzero rows */
+      local_num_rownnz = 0;
+      for (i = 0; i < local_num_rows; i++)
+      {
+         if (row_length[i] > 0)
+         {
+            rownnz[local_num_rownnz++] = i;
+         }
+      }
+
+      hypre_AuxParCSRMatrixLocalNumRownnz(matrix) = local_num_rownnz;
+      hypre_AuxParCSRMatrixRownnz(matrix) = rownnz;
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_AuxParCSRMatrixInitialize
  *--------------------------------------------------------------------------*/
 
@@ -195,7 +246,7 @@ hypre_AuxParCSRMatrixInitialize( hypre_AuxParCSRMatrix *matrix )
 
             /* Find nonzero rows */
             local_num_rownnz = 0;
-            for (i=0; i < local_num_rows; i++)
+            for (i = 0; i < local_num_rows; i++)
             {
                if (row_space[i] > 0)
                {

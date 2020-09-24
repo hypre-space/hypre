@@ -141,7 +141,7 @@ hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
 
 hypre_CSRMatrix *
 hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
-                         hypre_CSRMatrix *B)
+                         hypre_CSRMatrix *B )
 {
    HYPRE_Complex    *A_data    = hypre_CSRMatrixData(A);
    HYPRE_Int        *rownnz_A  = hypre_CSRMatrixRownnz(A);
@@ -156,17 +156,19 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
    HYPRE_Int         nrows_B   = hypre_CSRMatrixNumRows(B);
    HYPRE_Int         ncols_B   = hypre_CSRMatrixNumCols(B);
    HYPRE_Int         num_nonzeros_B = hypre_CSRMatrixNumNonzeros(B);
+
    hypre_CSRMatrix  *C;
    HYPRE_Complex    *C_data;
    HYPRE_Int        *C_i;
    HYPRE_Int        *C_j;
 
-   HYPRE_Int         ia, ib, ic, ja, jb, num_nonzeros=0;
+   HYPRE_Int        *jj_count;
+   HYPRE_Int         ia, ib, ic, ja, jb;
+   HYPRE_Int         num_nonzeros;
    HYPRE_Int         row_start, counter;
    HYPRE_Complex     a_entry, b_entry;
-   HYPRE_Int         allsquare = 0;
+   HYPRE_Int         allsquare;
    HYPRE_Int         max_num_threads;
-   HYPRE_Int         *jj_count;
 
    if (ncols_A != nrows_B)
    {
@@ -174,7 +176,14 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
       return NULL;
    }
 
-   if (nrows_A == ncols_B) allsquare = 1;
+   if (nrows_A == ncols_B)
+   {
+      allsquare = 1;
+   }
+   else
+   {
+      allsquare = 0;
+   }
 
    if (num_nonzeros_B == 0)
    {
@@ -215,11 +224,10 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
       }
 
       B_marker = hypre_CTAlloc(HYPRE_Int, ncols_B);
+      memset(B_marker, -1, ncols_B*sizeof(HYPRE_Int));
 
-      for (ib = 0; ib < ncols_B; ib++)
-      {
-         B_marker[ib] = -1;
-      }
+      /* First pass: compute sizes of C rows. */
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "First pass");
 
       /* Set B_marker */
       num_nonzeros = 0;
@@ -301,6 +309,7 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
 #pragma omp barrier
 #endif
 
+      /* Correct C_i - phase 1 */
       if (ii)
       {
          jj = jj_count[0];
@@ -309,14 +318,7 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
             jj += jj_count[i1];
          }
 
-         if (rownnz_A == NULL)
-         {
-            for (i1 = ns; i1 < ne; i1++)
-            {
-               C_i[i1] += jj;
-            }
-         }
-         else
+         if (rownnz_A != NULL)
          {
             for (i1 = ns; i1 < ne; i1++)
             {
@@ -324,31 +326,53 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
                C_i[iic] += jj;
             }
          }
-      }
-
-      if (rownnz_A != NULL)
-      {
-#ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
-#pragma omp for HYPRE_SMP_SCHEDULE
-#endif
-         for (ic = 0; ic < nrows_A; ic++)
+         else
          {
-            if (C_i[ic+1] < C_i[ic])
+            for (i1 = ns; i1 < ne; i1++)
             {
-               C_i[ic+1] = C_i[ic];
+               C_i[i1] += jj;
             }
          }
       }
 
-      if (ii == 0)
+      if (ii == (num_threads - 1))
       {
          C_i[nrows_A] = 0;
          for (i1 = 0; i1 < num_threads; i1++)
          {
             C_i[nrows_A] += jj_count[i1];
          }
+      }
 
+      /* Correct C_i - phase 2 */
+      if (rownnz_A != NULL)
+      {
+         for (ic = ns; ic < (ne-1); ic++)
+         {
+            for (iic = rownnz_A[ic] + 1; iic < rownnz_A[ic+1]; iic++)
+            {
+               C_i[iic] = C_i[rownnz_A[ic+1]];
+            }
+         }
+
+         if (ii < (num_threads - 1))
+         {
+            for (iic = rownnz_A[ne-1] + 1; iic < rownnz_A[ne]; iic++)
+            {
+               C_i[iic] = C_i[rownnz_A[ne]];
+            }
+         }
+         else
+         {
+            for (iic = rownnz_A[ne-1] + 1; iic < nrows_A; iic++)
+            {
+               C_i[iic] = C_i[nrows_A];
+            }
+         }
+      }
+
+      if (ii == 0)
+      {
          C = hypre_CSRMatrixCreate(nrows_A, ncols_B, C_i[nrows_A]);
          hypre_CSRMatrixI(C) = C_i;
          hypre_CSRMatrixInitialize(C);
@@ -356,15 +380,17 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
          C_data = hypre_CSRMatrixData(C);
       }
 
+      /* End of First Pass */
+      HYPRE_ANNOTATE_REGION_END("%s", "First pass");
+
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #endif
 
-      for (ib = 0; ib < ncols_B; ib++)
-      {
-         B_marker[ib] = -1;
-      }
+      /* Second pass: Fill in C_data and C_j. */
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Second pass");
 
+      memset(B_marker, -1, ncols_B*sizeof(HYPRE_Int));
       if (rownnz_A == NULL)
       {
          counter = C_i[ns];
@@ -496,6 +522,9 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
          } /* if (allsquare) */
       } /* if (rownnz_A == NULL) */
 
+      /* End of Second Pass */
+      HYPRE_ANNOTATE_REGION_END("%s", "Second pass");
+
       hypre_TFree(B_marker);
    } /*end parallel region */
 
@@ -508,8 +537,13 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
    return C;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixDeleteZeros
+ *--------------------------------------------------------------------------*/
+
 hypre_CSRMatrix *
-hypre_CSRMatrixDeleteZeros( hypre_CSRMatrix *A, HYPRE_Real tol)
+hypre_CSRMatrixDeleteZeros( hypre_CSRMatrix *A,
+                            HYPRE_Real       tol )
 {
    HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
@@ -528,9 +562,13 @@ hypre_CSRMatrixDeleteZeros( hypre_CSRMatrix *A, HYPRE_Real tol)
    HYPRE_Int         pos_A, pos_B;
 
    zeros = 0;
-   for (i=0; i < num_nonzeros; i++)
+   for (i = 0; i < num_nonzeros; i++)
+   {
       if (hypre_cabs(A_data[i]) <= tol)
+      {
          zeros++;
+      }
+   }
 
    if (zeros)
    {
@@ -540,9 +578,8 @@ hypre_CSRMatrixDeleteZeros( hypre_CSRMatrix *A, HYPRE_Real tol)
       B_j = hypre_CSRMatrixJ(B);
       B_data = hypre_CSRMatrixData(B);
       B_i[0] = 0;
-      pos_A = 0;
-      pos_B = 0;
-      for (i=0; i < nrows_A; i++)
+      pos_A = pos_B = 0;
+      for (i = 0; i < nrows_A; i++)
       {
          for (j = A_i[i]; j < A_i[i+1]; j++)
          {
@@ -563,7 +600,9 @@ hypre_CSRMatrixDeleteZeros( hypre_CSRMatrix *A, HYPRE_Real tol)
       return B;
    }
    else
+   {
       return NULL;
+   }
 }
 
 
@@ -578,7 +617,10 @@ hypre_CSRMatrixDeleteZeros( hypre_CSRMatrix *A, HYPRE_Real tol)
  * -> ret = idx1*dim2 + idx2
  *        = (idx%dim1)*dim2 + idx/dim1
  */
-static inline HYPRE_Int transpose_idx(HYPRE_Int idx, HYPRE_Int dim1, HYPRE_Int dim2)
+static inline HYPRE_Int
+transpose_idx( HYPRE_Int idx,
+               HYPRE_Int dim1,
+               HYPRE_Int dim2 )
 {
   return idx%dim1*dim2 + idx/dim1;
 }
@@ -587,10 +629,10 @@ static inline HYPRE_Int transpose_idx(HYPRE_Int idx, HYPRE_Int dim1, HYPRE_Int d
  * hypre_CSRMatrixTranspose
  *--------------------------------------------------------------------------*/
 
-
-HYPRE_Int hypre_CSRMatrixTranspose( hypre_CSRMatrix  *A,
-                                    hypre_CSRMatrix **AT,
-                                    HYPRE_Int         data)
+HYPRE_Int
+hypre_CSRMatrixTranspose( hypre_CSRMatrix  *A,
+                          hypre_CSRMatrix **AT,
+                          HYPRE_Int         data)
 
 {
    HYPRE_Complex      *A_data         = hypre_CSRMatrixData(A);
@@ -677,7 +719,7 @@ HYPRE_Int hypre_CSRMatrixTranspose( hypre_CSRMatrix  *A,
       HYPRE_Int   ii = hypre_GetThreadNum();
       HYPRE_Int   ns, ne, size, rest;
       HYPRE_Int   offset;
-      HYPRE_Int   i, j, idx;
+      HYPRE_Int   i, j, ir, idx;
 
       size = nnzrows_A/num_threads;
       rest = nnzrows_A - size*num_threads;
@@ -705,9 +747,13 @@ HYPRE_Int hypre_CSRMatrixTranspose( hypre_CSRMatrix  *A,
       }
       else
       {
-         for (j = A_i[rownnz_A[ns]]; j < A_i[rownnz_A[ne]]; ++j)
+         for (i = ns; i < ne; i++)
          {
-            AT_i[ii*num_cols_A + A_j[j]]++;
+            ir = rownnz_A[i];
+            for (j = A_i[ir]; j < A_i[ir+1]; ++j)
+            {
+               AT_i[ii*num_cols_A + A_j[j]]++;
+            }
          }
       }
 
@@ -917,7 +963,7 @@ hypre_CSRMatrixReorder( hypre_CSRMatrix *A )
       }
    }
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -925,7 +971,8 @@ hypre_CSRMatrixReorder( hypre_CSRMatrix *A )
  * Returns the sum of all matrix elements.
  *--------------------------------------------------------------------------*/
 
-HYPRE_Complex hypre_CSRMatrixSumElts( hypre_CSRMatrix *A )
+HYPRE_Complex
+hypre_CSRMatrixSumElts( hypre_CSRMatrix *A )
 {
    HYPRE_Complex  sum = 0;
    HYPRE_Complex *data = hypre_CSRMatrixData( A );
@@ -935,7 +982,7 @@ HYPRE_Complex hypre_CSRMatrixSumElts( hypre_CSRMatrix *A )
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) reduction(+:sum) HYPRE_SMP_SCHEDULE
 #endif
-   for (i = 0; i < num_nonzeros; ++i)
+   for (i = 0; i < num_nonzeros; i++)
    {
       sum += data[i];
    }

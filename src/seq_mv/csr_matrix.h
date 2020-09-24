@@ -27,20 +27,20 @@
 
 typedef struct
 {
-   HYPRE_Int     *i;
-   HYPRE_Int     *j;
-   HYPRE_Int      num_rows;
-   HYPRE_Int      num_cols;
-   HYPRE_Int      num_nonzeros;
+   HYPRE_Int      *i;
+   HYPRE_Int      *j;
+   HYPRE_Int       num_rows;
+   HYPRE_Int       num_cols;
+   HYPRE_Int       num_nonzeros;
 
    /* Does the CSRMatrix create/destroy `data', `i', `j'? */
-   HYPRE_Int      owns_data;
+   HYPRE_Int       owns_data;
 
    HYPRE_Complex  *data;
 
    /* for compressing rows in matrix multiplication  */
-   HYPRE_Int     *rownnz;
-   HYPRE_Int      num_rownnz;
+   HYPRE_Int      *rownnz;
+   HYPRE_Int       num_rownnz;
 
 } hypre_CSRMatrix;
 
@@ -88,4 +88,3 @@ typedef struct
 #define hypre_CSRBooleanMatrix_Get_OwnsData(matrix) ((matrix)->owns_data)
 
 #endif
-

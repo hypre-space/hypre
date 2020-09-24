@@ -138,11 +138,18 @@ hypre_ReAlloc( char   *ptr,
 #else
    if (ptr == NULL)
    {
-	   ptr = (char*)malloc(size);
+      if (size > 0)
+      {
+         ptr = (char*)malloc(size);
+      }
+   }
+   else if (size == 0)
+   {
+      hypre_Free(ptr);
    }
    else
    {
-	   ptr = (char*)realloc(ptr, size);
+      ptr = (char*)realloc(ptr, size);
    }
 #endif
 
