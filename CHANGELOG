@@ -11,8 +11,10 @@ Version 2.20.0 released 2020/09/24
 
 - New matrix-based interpolation routines for AMG (CPU and GPU)
 - New AMG-DD solver
+- Improved distributed sparse matrix-matrix and triple-matrix product
+  performance on GPUs
 - Updated caliper usage
-- Separated C and C++ headers	
+- Separated C and C++ headers
 - Various bug fixes.
 
 #====================================
