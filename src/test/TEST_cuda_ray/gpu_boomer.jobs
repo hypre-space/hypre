@@ -58,3 +58,18 @@ mpirun -np 1 ./ij -n 256 256 256 -P 1 1 1       -pmis -keepT 1 -rlx 18        -e
 
 mpirun -np 1 ./ij -n 256 256 256 -P 1 1 1       -pmis -keepT 1 -rlx 18        -exec_device -rap 0 -mod_rap2 1 -mm_cusparse 0 -interptype 18 -solver 1 \
  >> gpu_boomer.out.16
+
+mpirun -np 4 ./ij -n 256 256 128 -P 2 2 1 -27pt -pmis -keepT 1 -rlx 7 -w 0.85        -exec_device -mm_cusparse 0 -agg_nl 1 -agg_interp 5 -solver 1 \
+ >> gpu_boomer.out.17
+
+mpirun -np 4 ./ij -n 256 256 128 -P 2 2 1       -pmis -keepT 1 -rlx 7 -w 0.85        -exec_device -mm_cusparse 0 -agg_nl 1 -agg_interp 7 -agg_P12_mx 4 -solver 1 \
+ >> gpu_boomer.out.18
+
+mpirun -np 4 ./ij -n 128 128 128 -P 2 2 1       -pmis -keepT 1 -rlx 7 -w 0.5        -exec_device -mm_cusparse 0 -agg_nl 1 -agg_interp 5 -agg_Pmx 4 -interptype 18 -solver 1 -sysL 3 -nf 3 \
+ >> gpu_boomer.out.19
+
+mpirun -np 2 ./ij -n 200 128 128 -P 2 1 1       -pmis -keepT 1 -rlx 7 -w 0.7        -exec_device -mm_cusparse 0 -agg_nl 1 -agg_interp 5 -agg_Pmx 4 -interptype 18 -solver 1 -vardifconv -eps 1 \
+ >> gpu_boomer.out.20
+
+mpirun -np 4 ./ij -n 200 200 200 -P 2 2 1       -pmis -keepT 1 -rlx 18 -ns 2        -exec_device -mm_cusparse 0 -agg_nl 3 -agg_interp 7 -agg_P12_mx 6 -interptype 6 -solver 1 \
+ >> gpu_boomer.out.21
