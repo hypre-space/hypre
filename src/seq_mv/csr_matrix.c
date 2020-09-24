@@ -207,6 +207,7 @@ hypre_CSRMatrixBigInitialize( hypre_CSRMatrix *matrix )
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixBigJtoJ
+ * RL: TODO GPU impl.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -215,19 +216,23 @@ hypre_CSRMatrixBigJtoJ( hypre_CSRMatrix *matrix )
    HYPRE_Int     num_nonzeros = hypre_CSRMatrixNumNonzeros(matrix);
    HYPRE_BigInt *matrix_big_j = hypre_CSRMatrixBigJ(matrix);
    HYPRE_Int    *matrix_j = NULL;
-   HYPRE_Int     i;
+   HYPRE_Int     ierr = 0;
 
-   HYPRE_Int  ierr=0;
-
-   if (num_nonzeros && matrix_big_j )
+   if (num_nonzeros && matrix_big_j)
    {
+#if defined(HYPRE_MIXEDINT) || defined(HYPRE_BIGINT)
+      HYPRE_Int i;
       matrix_j = hypre_TAlloc(HYPRE_Int, num_nonzeros, hypre_CSRMatrixMemoryLocation(matrix));
       for (i = 0; i < num_nonzeros; i++)
       {
          matrix_j[i] = (HYPRE_Int) matrix_big_j[i];
       }
-      hypre_CSRMatrixJ(matrix) = matrix_j;
       hypre_TFree(matrix_big_j, hypre_CSRMatrixMemoryLocation(matrix));
+#else
+      hypre_assert(sizeof(HYPRE_Int) == sizeof(HYPRE_BigInt));
+      matrix_j = (HYPRE_Int *) matrix_big_j;
+#endif
+      hypre_CSRMatrixJ(matrix) = matrix_j;
       hypre_CSRMatrixBigJ(matrix) = NULL;
    }
 
@@ -236,6 +241,7 @@ hypre_CSRMatrixBigJtoJ( hypre_CSRMatrix *matrix )
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixJtoBigJ
+ * RL: TODO GPU impl.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -244,19 +250,23 @@ hypre_CSRMatrixJtoBigJ( hypre_CSRMatrix *matrix )
    HYPRE_Int     num_nonzeros = hypre_CSRMatrixNumNonzeros(matrix);
    HYPRE_Int    *matrix_j = hypre_CSRMatrixJ(matrix);
    HYPRE_BigInt *matrix_big_j = NULL;
-   HYPRE_Int  i;
+   HYPRE_Int     ierr = 0;
 
-   HYPRE_Int  ierr=0;
-
-   if (num_nonzeros && matrix_j )
+   if (num_nonzeros && matrix_j)
    {
+#if defined(HYPRE_MIXEDINT) || defined(HYPRE_BIGINT)
+      HYPRE_Int i;
       matrix_big_j = hypre_TAlloc(HYPRE_BigInt, num_nonzeros, hypre_CSRMatrixMemoryLocation(matrix));
       for (i = 0; i < num_nonzeros; i++)
       {
          matrix_big_j[i] = (HYPRE_BigInt) matrix_j[i];
       }
-      hypre_CSRMatrixBigJ(matrix) = matrix_big_j;
       hypre_TFree(matrix_j, hypre_CSRMatrixMemoryLocation(matrix));
+#else
+      hypre_assert(sizeof(HYPRE_Int) == sizeof(HYPRE_BigInt));
+      matrix_big_j = (HYPRE_BigInt *) matrix_j;
+#endif
+      hypre_CSRMatrixBigJ(matrix) = matrix_big_j;
       hypre_CSRMatrixJ(matrix) = NULL;
    }
 
