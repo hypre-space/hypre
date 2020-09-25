@@ -59,7 +59,7 @@ hypre_ILUCreate()
    (ilu_data -> num_iterations)        = 0;
 
    (ilu_data -> max_iter)              = 20;
-   (ilu_data -> tol)                   = 1.0e-7;
+   (ilu_data -> tol)                   = 1.0e-6;
 
    (ilu_data -> logging)               = 0;
    (ilu_data -> print_level)           = 0;

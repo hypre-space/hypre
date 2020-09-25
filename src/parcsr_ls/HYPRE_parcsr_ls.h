@@ -187,7 +187,7 @@ HYPRE_Int HYPRE_BoomerAMGSetConvergeType(HYPRE_Solver solver,
 /**
  * (Optional) Set the convergence tolerance, if BoomerAMG is used
  * as a solver. If it is used as a preconditioner, it should be set to 0.
- * The default is 1.e-7.
+ * The default is 1.e-6.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetTol(HYPRE_Solver solver,
                                 HYPRE_Real   tol);
@@ -2893,7 +2893,7 @@ HYPRE_Int HYPRE_ParCSRHybridSolve(HYPRE_Solver       solver,
                                   HYPRE_ParVector    b,
                                   HYPRE_ParVector    x);
 /**
- *  Set the convergence tolerance for the Krylov solver. The default is 1.e-7.
+ *  Set the convergence tolerance for the Krylov solver. The default is 1.e-6.
  **/
 HYPRE_Int HYPRE_ParCSRHybridSetTol(HYPRE_Solver solver,
                                    HYPRE_Real   tol);
@@ -3873,7 +3873,7 @@ HYPRE_MGRSetMaxIter( HYPRE_Solver solver,
 
 /**
  * (Optional) Set the convergence tolerance for the MGR solver.
- * Use tol = 0.0 if MGR is used as a preconditioner. The default is 1.e-7.
+ * Use tol = 0.0 if MGR is used as a preconditioner. The default is 1.e-6.
  **/
 HYPRE_Int
 HYPRE_MGRSetTol( HYPRE_Solver solver,
@@ -3988,7 +3988,7 @@ HYPRE_ILUSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter );
 
 /**
  * (Optional) Set the convergence tolerance for the ILU smoother.
- * Use tol = 0.0 if ILU is used as a preconditioner. The default is 1.e-7.
+ * Use tol = 0.0 if ILU is used as a preconditioner. The default is 1.e-6.
  **/
 HYPRE_Int
 HYPRE_ILUSetTol( HYPRE_Solver solver, HYPRE_Real tol );

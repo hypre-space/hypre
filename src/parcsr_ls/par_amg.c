@@ -200,7 +200,7 @@ hypre_BoomerAMGCreate()
    fcycle = 0;
    cycle_type = 1;
    converge_type = 0;
-   tol = 1.0e-7;
+   tol = 1.0e-6;
 
    num_sweeps = 1;
    relax_down = 13;
