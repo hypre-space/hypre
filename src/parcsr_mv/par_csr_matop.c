@@ -3869,6 +3869,7 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    if (C_diag)
    {
       hypre_ParCSRMatrixDiag(C) = C_diag;
+      hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixDiag(C));
    }
    else
    {
@@ -3884,8 +3885,7 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
       hypre_ParCSRMatrixOffd(C) = C_tmp_offd;
    }
 
-   /* Set nonzero rows data of C */
-   hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixDiag(C));
+   /* Set nonzero rows data of offd_C */
    hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixOffd(C));
 
    if (num_cols_offd_C)

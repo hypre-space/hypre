@@ -129,6 +129,7 @@ hypre_ReAlloc( char   *ptr,
    else if (size == 0)
    {
       hypre_Free(ptr);
+      ptr = NULL;
    }
    else
    {
@@ -146,6 +147,7 @@ hypre_ReAlloc( char   *ptr,
    else if (size == 0)
    {
       hypre_Free(ptr);
+      ptr = NULL;
    }
    else
    {
