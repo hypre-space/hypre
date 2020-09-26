@@ -140,10 +140,10 @@ Numbering *NumberingCreateCopy(Numbering *orig)
 
 void NumberingDestroy(Numbering *numb)
 {
-    free(numb->local_to_global);
+    hypre_TFree(numb->local_to_global,HYPRE_MEMORY_HOST);
     HashDestroy(numb->hash);
 
-    free(numb);
+    hypre_TFree(numb,HYPRE_MEMORY_HOST);
 }
 
 /*--------------------------------------------------------------------------

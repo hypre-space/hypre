@@ -1268,8 +1268,8 @@ void hypre_FormDU(HYPRE_Int lrow, HYPRE_Int first, FactorMatType *ldu,
   uerowptr[lrow] = end;
 
   /* free the row storage */
-  free( rcolind ); rcolind = NULL;
-  free( rvalues ); rvalues = NULL;
+  hypre_TFree( rcolind ,HYPRE_MEMORY_HOST); rcolind = NULL;
+  hypre_TFree( rvalues ,HYPRE_MEMORY_HOST); rvalues = NULL;
 }
 
 

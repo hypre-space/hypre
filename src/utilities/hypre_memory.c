@@ -125,6 +125,18 @@ hypre_UnifiedMemPrefetch(void *ptr, size_t size, hypre_MemoryLocation location)
 static inline void *
 hypre_HostMalloc(size_t size, HYPRE_Int zeroinit)
 {
+
+#if defined(HYPRE_USING_UMPIRE_HOST)
+  void *ptr = NULL;
+  umpire_resourcemanager rm;
+  umpire_resourcemanager_get_instance(&rm);
+  umpire_allocator host_allocator;
+  umpire_resourcemanager_get_allocator_by_name(&rm, "HYPRE_HOST_POOL", &host_allocator);
+  ptr = umpire_allocator_allocate(&host_allocator, size);
+  if (zeroinit) memset(ptr,0,size);
+  return ptr;
+  //if (zeroinit) 
+#else
    void *ptr = NULL;
 
    if (zeroinit)
@@ -137,6 +149,7 @@ hypre_HostMalloc(size_t size, HYPRE_Int zeroinit)
    }
 
    return ptr;
+#endif
 }
 
 static inline void *
@@ -279,7 +292,15 @@ _hypre_MAlloc(size_t size, hypre_MemoryLocation location)
 static inline void
 hypre_HostFree(void *ptr)
 {
+#if defined(HYPRE_USING_UMPIRE_HOST)
+  umpire_resourcemanager rm;
+  umpire_resourcemanager_get_instance(&rm);
+  umpire_allocator allocator;
+  umpire_resourcemanager_get_allocator_by_name(&rm, "HYPRE_HOST_POOL", &allocator);
+  umpire_allocator_deallocate(&allocator, ptr);
+#else
    free(ptr);
+#endif
 }
 
 static inline void
@@ -690,7 +711,15 @@ hypre_ReAlloc(void *ptr, size_t size, HYPRE_MemoryLocation location)
       return NULL;
    }
 
+#if defined(HYPRE_USING_UMPIRE_HOST)
+   umpire_resourcemanager rm;
+   umpire_resourcemanager_get_instance(&rm);
+   umpire_allocator host_allocator;
+   umpire_resourcemanager_get_allocator_by_name(&rm, "HYPRE_HOST_POOL", &host_allocator);
+   ptr = umpire_resourcemanager_reallocate_with_allocator(&rm, ptr, size, host_allocator);
+#else
    ptr = realloc(ptr, size);
+#endif
 
    if (!ptr)
    {

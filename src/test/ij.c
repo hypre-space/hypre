@@ -33,6 +33,10 @@
 
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_UMPIRE)
 #include "umpire/interface/umpire.h"
+#include "umpire/Allocator.hpp"
+#include "umpire/ResourceManager.hpp"
+#include "umpire/strategy/DynamicPool.hpp"
+#include "umpire/util/Macros.hpp"
 #endif
 
 /* begin lobpcg */
@@ -425,7 +429,7 @@ main( hypre_int argc,
    /* Setup Umpire pools */
    size_t pool_size = 1024*1024*1024;
    pool_size*=4;
-     
+
    umpire_resourcemanager rm;
    umpire_resourcemanager_get_instance(&rm);
    
@@ -440,6 +444,32 @@ main( hypre_int argc,
    
 #endif
 
+#if defined(HYPRE_USING_UMPIRE_HOST)
+   if (1){
+
+   size_t pool_size = 1024*1024*1024;
+   pool_size*=4;
+     
+   umpire_resourcemanager rm;
+   umpire_resourcemanager_get_instance(&rm);
+
+   umpire_allocator host_allocator,host_pool;
+   umpire_resourcemanager_get_allocator_by_name(&rm, "HOST", &host_allocator);
+   
+   umpire_resourcemanager_make_allocator_pool(&rm, "HYPRE_HOST_POOL", host_allocator, pool_size , 1024*1024, &host_pool);
+
+   } else {
+     size_t pool_size = 1024*1024*1024;
+     pool_size*=4;
+     auto& rm = umpire::ResourceManager::getInstance();
+
+     auto allocator = rm.getAllocator("HOST");
+     auto pooled_allocator =
+     rm.makeAllocator<umpire::strategy::DynamicPool, false>(
+							    "HYPRE_HOST_POOL", allocator,pool_size);
+   }
+
+#endif
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
