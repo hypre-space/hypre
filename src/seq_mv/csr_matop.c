@@ -29,6 +29,8 @@
  * Note: The routine does not check for 0-elements which might be generated
  *       through cancellation of elements in A and B or already contained
  *       in A and B. To remove those, use hypre_CSRMatrixDeleteZeros
+ *
+ * TODO: Add OpenMP support
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix *
@@ -133,10 +135,11 @@ hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMultiply
- * multiplies two CSR Matrices A and B and returns a CSR Matrix C;
+ *    Multiplies two CSR Matrices A and B and returns a CSR Matrix C;
+ *
  * Note: The routine does not check for 0-elements which might be generated
  *       through cancellation of elements in A and B or already contained
- in A and B. To remove those, use hypre_CSRMatrixDeleteZeros
+ *       in A and B. To remove those, use hypre_CSRMatrixDeleteZeros
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix *
@@ -233,48 +236,22 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
       num_nonzeros = 0;
       if (rownnz_A == NULL)
       {
-         for (ic = ns; ic < ne; ic++)
-         {
-            C_i[ic] = num_nonzeros;
-            if (allsquare)
-            {
-               B_marker[ic] = ic;
-               num_nonzeros++;
-            }
-            for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
-            {
-               ja = A_j[ia];
-               for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
-               {
-                  jb = B_j[ib];
-                  if (B_marker[jb] != ic)
-                  {
-                     B_marker[jb] = ic;
-                     num_nonzeros++;
-                  }
-               }
-            }
-         }
-      }
-      else
-      {
          if (allsquare)
          {
             for (ic = ns; ic < ne; ic++)
             {
-               iic = rownnz_A[ic];
-               C_i[iic] = num_nonzeros;
-               B_marker[iic] = iic;
+               C_i[ic] = num_nonzeros;
+               B_marker[ic] = ic;
                num_nonzeros++;
-               for (ia = A_i[iic]; ia < A_i[iic+1]; ia++)
+               for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
                {
                   ja = A_j[ia];
                   for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
                   {
                      jb = B_j[ib];
-                     if (B_marker[jb] != iic)
+                     if (B_marker[jb] != ic)
                      {
-                        B_marker[jb] = iic;
+                        B_marker[jb] = ic;
                         num_nonzeros++;
                      }
                   }
@@ -285,19 +262,39 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
          {
             for (ic = ns; ic < ne; ic++)
             {
-               iic = rownnz_A[ic];
-               C_i[iic] = num_nonzeros;
-               for (ia = A_i[iic]; ia < A_i[iic+1]; ia++)
+               C_i[ic] = num_nonzeros;
+               for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
                {
                   ja = A_j[ia];
                   for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
                   {
                      jb = B_j[ib];
-                     if (B_marker[jb] != iic)
+                     if (B_marker[jb] != ic)
                      {
-                        B_marker[jb] = iic;
+                        B_marker[jb] = ic;
                         num_nonzeros++;
                      }
+                  }
+               }
+            }
+         }
+      }
+      else
+      {
+         for (ic = ns; ic < ne; ic++)
+         {
+            iic = rownnz_A[ic];
+            C_i[iic] = num_nonzeros;
+            for (ia = A_i[iic]; ia < A_i[iic+1]; ia++)
+            {
+               ja = A_j[ia];
+               for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
+               {
+                  jb = B_j[ib];
+                  if (B_marker[jb] != iic)
+                  {
+                     B_marker[jb] = iic;
+                     num_nonzeros++;
                   }
                }
             }
@@ -458,68 +455,32 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
       else
       {
          counter = C_i[rownnz_A[ns]];
-         if (allsquare)
+         for (ic = ns; ic < ne; ic++)
          {
-            for (ic = ns; ic < ne; ic++)
+            iic = rownnz_A[ic];
+            row_start = C_i[iic];
+            for (ia = A_i[iic]; ia < A_i[iic+1]; ia++)
             {
-               iic = rownnz_A[ic];
-               row_start = C_i[iic];
-               B_marker[iic] = counter;
-               C_data[counter] = 0;
-               C_j[counter] = iic;
-               counter++;
-               for (ia = A_i[iic]; ia < A_i[iic+1]; ia++)
+               ja = A_j[ia];
+               a_entry = A_data[ia];
+               for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
                {
-                  ja = A_j[ia];
-                  a_entry = A_data[ia];
-                  for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
+                  jb = B_j[ib];
+                  b_entry = B_data[ib];
+                  if (B_marker[jb] < row_start)
                   {
-                     jb = B_j[ib];
-                     b_entry = B_data[ib];
-                     if (B_marker[jb] < row_start)
-                     {
-                        B_marker[jb] = counter;
-                        C_j[B_marker[jb]] = jb;
-                        C_data[B_marker[jb]] = a_entry*b_entry;
-                        counter++;
-                     }
-                     else
-                     {
-                        C_data[B_marker[jb]] += a_entry*b_entry;
-                     }
+                     B_marker[jb] = counter;
+                     C_j[B_marker[jb]] = jb;
+                     C_data[B_marker[jb]] = a_entry*b_entry;
+                     counter++;
+                  }
+                  else
+                  {
+                     C_data[B_marker[jb]] += a_entry*b_entry;
                   }
                }
             }
          }
-         else
-         {
-            for (ic = ns; ic < ne; ic++)
-            {
-               iic = rownnz_A[ic];
-               row_start = C_i[iic];
-               for (ia = A_i[iic]; ia < A_i[iic+1]; ia++)
-               {
-                  ja = A_j[ia];
-                  a_entry = A_data[ia];
-                  for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
-                  {
-                     jb = B_j[ib];
-                     b_entry = B_data[ib];
-                     if (B_marker[jb] < row_start)
-                     {
-                        B_marker[jb] = counter;
-                        C_j[B_marker[jb]] = jb;
-                        C_data[B_marker[jb]] = a_entry*b_entry;
-                        counter++;
-                     }
-                     else
-                     {
-                        C_data[B_marker[jb]] += a_entry*b_entry;
-                     }
-                  }
-               }
-            }
-         } /* if (allsquare) */
       } /* if (rownnz_A == NULL) */
 
       /* End of Second Pass */
@@ -597,6 +558,7 @@ hypre_CSRMatrixDeleteZeros( hypre_CSRMatrix *A,
          }
          B_i[i+1] = pos_B;
       }
+
       return B;
    }
    else
