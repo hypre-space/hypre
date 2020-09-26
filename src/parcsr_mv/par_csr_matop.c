@@ -10,8 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#include "_hypre_parcsr_mv.h"
-
 #include "_hypre_utilities.h"
 #include "hypre_hopscotch_hash.h"
 #include "_hypre_parcsr_mv.h"
@@ -47,92 +45,99 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    hypre_profile_times[HYPRE_TIMER_ID_MATMUL] -= hypre_MPI_Wtime();
 #endif
 
-   MPI_Comm           comm = hypre_ParCSRMatrixComm(A);
+   MPI_Comm            comm = hypre_ParCSRMatrixComm(A);
 
-   hypre_CSRMatrix   *A_diag      = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Complex     *A_diag_data = hypre_CSRMatrixData(A_diag);
-   HYPRE_Int         *A_diag_i    = hypre_CSRMatrixI(A_diag);
-   HYPRE_Int         *A_diag_j    = hypre_CSRMatrixJ(A_diag);
-   HYPRE_Int         *rownnz_A    = hypre_CSRMatrixRownnz(A_diag);
+   hypre_CSRMatrix    *A_diag      = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Complex      *A_diag_data = hypre_CSRMatrixData(A_diag);
+   HYPRE_Int          *A_diag_i    = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int          *A_diag_j    = hypre_CSRMatrixJ(A_diag);
+   HYPRE_Int          *A_diag_rz   = hypre_CSRMatrixRownnz(A_diag);
 
-   hypre_CSRMatrix   *A_offd      = hypre_ParCSRMatrixOffd(A);
-   HYPRE_Complex     *A_offd_data = hypre_CSRMatrixData(A_offd);
-   HYPRE_Int         *A_offd_i    = hypre_CSRMatrixI(A_offd);
-   HYPRE_Int         *A_offd_j    = hypre_CSRMatrixJ(A_offd);
+   hypre_CSRMatrix    *A_offd      = hypre_ParCSRMatrixOffd(A);
+   HYPRE_Complex      *A_offd_data = hypre_CSRMatrixData(A_offd);
+   HYPRE_Int          *A_offd_i    = hypre_CSRMatrixI(A_offd);
+   HYPRE_Int          *A_offd_j    = hypre_CSRMatrixJ(A_offd);
+   HYPRE_Int          *A_offd_rz   = hypre_CSRMatrixRownnz(A_offd);
 
-   hypre_CSRMatrix   *B_diag      = hypre_ParCSRMatrixDiag(B);
-   HYPRE_Complex     *B_diag_data = hypre_CSRMatrixData(B_diag);
-   HYPRE_Int         *B_diag_i    = hypre_CSRMatrixI(B_diag);
-   HYPRE_Int         *B_diag_j    = hypre_CSRMatrixJ(B_diag);
+   hypre_CSRMatrix    *B_diag      = hypre_ParCSRMatrixDiag(B);
+   HYPRE_Complex      *B_diag_data = hypre_CSRMatrixData(B_diag);
+   HYPRE_Int          *B_diag_i    = hypre_CSRMatrixI(B_diag);
+   HYPRE_Int          *B_diag_j    = hypre_CSRMatrixJ(B_diag);
 
-   hypre_CSRMatrix   *B_offd         = hypre_ParCSRMatrixOffd(B);
-   HYPRE_Int         *col_map_offd_B = hypre_ParCSRMatrixColMapOffd(B);
-   HYPRE_Complex     *B_offd_data    = hypre_CSRMatrixData(B_offd);
-   HYPRE_Int         *B_offd_i       = hypre_CSRMatrixI(B_offd);
-   HYPRE_Int         *B_offd_j       = hypre_CSRMatrixJ(B_offd);
+   hypre_CSRMatrix    *B_offd         = hypre_ParCSRMatrixOffd(B);
+   HYPRE_Int          *col_map_offd_B = hypre_ParCSRMatrixColMapOffd(B);
+   HYPRE_Complex      *B_offd_data    = hypre_CSRMatrixData(B_offd);
+   HYPRE_Int          *B_offd_i       = hypre_CSRMatrixI(B_offd);
+   HYPRE_Int          *B_offd_j       = hypre_CSRMatrixJ(B_offd);
 
-   HYPRE_Int         *row_starts_A      = hypre_ParCSRMatrixRowStarts(A);
-   HYPRE_Int          num_rownnz_diag_A = hypre_CSRMatrixNumRownnz(A_diag);
-   HYPRE_Int          num_rows_diag_A   = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int          num_cols_diag_A   = hypre_CSRMatrixNumCols(A_diag);
-   HYPRE_Int          num_cols_offd_A   = hypre_CSRMatrixNumCols(A_offd);
+   HYPRE_Int          *row_starts_A      = hypre_ParCSRMatrixRowStarts(A);
+   HYPRE_Int           num_rownnz_diag_A = hypre_CSRMatrixNumRownnz(A_diag);
+   HYPRE_Int           num_rows_diag_A   = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int           num_cols_diag_A   = hypre_CSRMatrixNumCols(A_diag);
 
-   HYPRE_Int         *col_starts_B      = hypre_ParCSRMatrixColStarts(B);
-   HYPRE_Int          first_col_diag_B  = hypre_ParCSRMatrixFirstColDiag(B);
-   HYPRE_Int          num_rows_diag_B   = hypre_CSRMatrixNumRows(B_diag);
-   HYPRE_Int          num_cols_diag_B   = hypre_CSRMatrixNumCols(B_diag);
-   HYPRE_Int          num_cols_offd_B   = hypre_CSRMatrixNumCols(B_offd);
-   HYPRE_Int          last_col_diag_B;
+   HYPRE_Int           num_rownnz_offd_A = hypre_CSRMatrixNumRownnz(A_offd);
+   HYPRE_Int           num_rows_offd_A   = hypre_CSRMatrixNumRows(A_offd);
+   HYPRE_Int           num_cols_offd_A   = hypre_CSRMatrixNumCols(A_offd);
+
+   HYPRE_Int          *col_starts_B      = hypre_ParCSRMatrixColStarts(B);
+   HYPRE_Int           first_col_diag_B  = hypre_ParCSRMatrixFirstColDiag(B);
+   HYPRE_Int           num_rows_diag_B   = hypre_CSRMatrixNumRows(B_diag);
+   HYPRE_Int           num_cols_diag_B   = hypre_CSRMatrixNumCols(B_diag);
+   HYPRE_Int           num_cols_offd_B   = hypre_CSRMatrixNumCols(B_offd);
+   HYPRE_Int           last_col_diag_B;
+
+   HYPRE_Int          *rownnz_A = NULL;
+   HYPRE_Int           num_rownnz_A;
 
    hypre_ParCSRMatrix *C;
    HYPRE_Int          *col_map_offd_C;
    HYPRE_Int          *map_B_to_C = NULL;
 
-   hypre_CSRMatrix *C_diag;
-   HYPRE_Complex   *C_diag_data;
-   HYPRE_Int       *C_diag_i;
-   HYPRE_Int       *C_diag_j;
+   hypre_CSRMatrix    *C_diag;
+   HYPRE_Complex      *C_diag_data;
+   HYPRE_Int          *C_diag_i;
+   HYPRE_Int          *C_diag_j;
 
-   hypre_CSRMatrix *C_offd;
-   HYPRE_Complex   *C_offd_data = NULL;
-   HYPRE_Int       *C_offd_i = NULL;
-   HYPRE_Int       *C_offd_j = NULL;
+   hypre_CSRMatrix    *C_offd;
+   HYPRE_Complex      *C_offd_data = NULL;
+   HYPRE_Int          *C_offd_i = NULL;
+   HYPRE_Int          *C_offd_j = NULL;
 
-   HYPRE_Int        C_diag_size;
-   HYPRE_Int        C_offd_size;
-   HYPRE_Int        num_cols_offd_C = 0;
-   HYPRE_Int        starts_size;
-   HYPRE_Int       *row_starts_C;
-   HYPRE_Int       *col_starts_C;
+   HYPRE_Int           C_diag_size;
+   HYPRE_Int           C_offd_size;
+   HYPRE_Int           num_cols_offd_C = 0;
+   HYPRE_Int           starts_size;
+   HYPRE_Int          *row_starts_C;
+   HYPRE_Int          *col_starts_C;
 
-   hypre_CSRMatrix *Bs_ext;
+   hypre_CSRMatrix    *Bs_ext;
 
-   HYPRE_Complex   *Bs_ext_data;
-   HYPRE_Int       *Bs_ext_i;
-   HYPRE_Int       *Bs_ext_j;
+   HYPRE_Complex      *Bs_ext_data;
+   HYPRE_Int          *Bs_ext_i;
+   HYPRE_Int          *Bs_ext_j;
 
-   HYPRE_Complex   *B_ext_diag_data;
-   HYPRE_Int       *B_ext_diag_i;
-   HYPRE_Int       *B_ext_diag_j;
-   HYPRE_Int        B_ext_diag_size;
+   HYPRE_Complex      *B_ext_diag_data;
+   HYPRE_Int          *B_ext_diag_i;
+   HYPRE_Int          *B_ext_diag_j;
+   HYPRE_Int           B_ext_diag_size;
 
-   HYPRE_Complex   *B_ext_offd_data;
-   HYPRE_Int       *B_ext_offd_i;
-   HYPRE_Int       *B_ext_offd_j;
-   HYPRE_Int        B_ext_offd_size;
+   HYPRE_Complex      *B_ext_offd_data;
+   HYPRE_Int          *B_ext_offd_i;
+   HYPRE_Int          *B_ext_offd_j;
+   HYPRE_Int           B_ext_offd_size;
 
-   HYPRE_Int       *my_diag_array;
-   HYPRE_Int       *my_offd_array;
-   HYPRE_Int       *jj_count_diag_array;
-   HYPRE_Int       *jj_count_offd_array;
+   HYPRE_Int          *my_diag_array;
+   HYPRE_Int          *my_offd_array;
+   HYPRE_Int          *jj_count_diag_array;
+   HYPRE_Int          *jj_count_offd_array;
 
-   HYPRE_Int        n_rows_A, n_cols_A;
-   HYPRE_Int        n_rows_B, n_cols_B;
-   HYPRE_Int        allsquare;
-   HYPRE_Int        num_procs;
-   HYPRE_Int        max_num_threads;
-   HYPRE_Int        i, cnt;
-   HYPRE_Complex    zero = 0.0;
+   HYPRE_Int           n_rows_A, n_cols_A;
+   HYPRE_Int           n_rows_B, n_cols_B;
+   HYPRE_Int           allsquare;
+   HYPRE_Int           num_procs;
+   HYPRE_Int           max_num_threads;
+   HYPRE_Int           i, cnt;
+   HYPRE_Complex       zero = 0.0;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -520,7 +525,7 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
                hypre_qsort0(temp, 0, cnt-1);
                num_cols_offd_C = 1;
                value = temp[0];
-               for (i=1; i < cnt; i++)
+               for (i = 1; i < cnt; i++)
                {
                   if (temp[i] > value)
                   {
@@ -608,6 +613,19 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    jj_count_diag_array = hypre_CTAlloc(HYPRE_Int, max_num_threads);
    jj_count_offd_array = hypre_CTAlloc(HYPRE_Int, max_num_threads);
 
+   /* Set rownnz of A */
+   if (num_rownnz_diag_A != num_rows_diag_A &&
+       num_rownnz_offd_A != num_rows_offd_A )
+   {
+      hypre_MergeOrderedArrays(num_rownnz_diag_A, A_diag_rz,
+                               num_rownnz_offd_A, A_offd_rz,
+                               &num_rownnz_A, &rownnz_A);
+   }
+   else
+   {
+      num_rownnz_A = hypre_max(num_rows_diag_A, num_rows_offd_A);
+   }
+
    /*-----------------------------------------------------------------------
     *  Loop over rows of A
     *-----------------------------------------------------------------------*/
@@ -623,8 +641,8 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
       HYPRE_Int   ii, ns, ne;
 
       num_threads = hypre_NumActiveThreads();
-      size = num_rownnz_diag_A/num_threads;
-      rest = num_rownnz_diag_A - size*num_threads;
+      size = num_rownnz_A/num_threads;
+      rest = num_rownnz_A - size*num_threads;
 
       ii = hypre_GetThreadNum();
       if (ii < rest)
@@ -646,62 +664,88 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
       }
       memset(B_marker, -1, (num_cols_diag_B + num_cols_offd_C)*sizeof(HYPRE_Int));
 
-      for (i1 = ns; i1 < ne; i1++)
+      if (rownnz_A != NULL)
       {
-         if (rownnz_A != NULL)
+         for (i1 = ns; i1 < ne; i1++)
          {
             ii1 = rownnz_A[i1];
-         }
-         else
-         {
-            ii1 = i1;
-         }
 
-         /*--------------------------------------------------------------------
-          *  Set marker for diagonal entry, C_{ii1,ii1} (for square matrices).
-          *--------------------------------------------------------------------*/
+            /*--------------------------------------------------------------------
+             *  Set marker for diagonal entry, C_{ii1,ii1} (for square matrices).
+             *--------------------------------------------------------------------*/
 
-         jj_row_begin_diag = jj_count_diag;
-         jj_row_begin_offd = jj_count_offd;
-         if (allsquare)
-         {
-            B_marker[ii1] = jj_count_diag;
-            jj_count_diag++;
-         }
-
-        /*-----------------------------------------------------------------
-         *  Loop over entries in row ii1 of A_offd.
-         *-----------------------------------------------------------------*/
-
-         if (num_cols_offd_A)
-         {
-            for (jj2 = A_offd_i[ii1]; jj2 < A_offd_i[ii1+1]; jj2++)
+            jj_row_begin_diag = jj_count_diag;
+            jj_row_begin_offd = jj_count_offd;
+            if (allsquare)
             {
-               i2 = A_offd_j[jj2];
+               B_marker[ii1] = jj_count_diag;
+               jj_count_diag++;
+            }
+
+           /*-----------------------------------------------------------------
+            *  Loop over entries in row ii1 of A_offd.
+            *-----------------------------------------------------------------*/
+
+            if (num_cols_offd_A)
+            {
+               for (jj2 = A_offd_i[ii1]; jj2 < A_offd_i[ii1+1]; jj2++)
+               {
+                  i2 = A_offd_j[jj2];
+
+                  /*-----------------------------------------------------------
+                   *  Loop over entries in row i2 of B_ext.
+                   *-----------------------------------------------------------*/
+
+                  for (jj3 = B_ext_offd_i[i2]; jj3 < B_ext_offd_i[i2+1]; jj3++)
+                  {
+                     i3 = num_cols_diag_B + B_ext_offd_j[jj3];
+
+                     /*--------------------------------------------------------
+                      *  Check B_marker to see that C_{ii1,i3} has not already
+                      *  been accounted for. If it has not, mark it and increment
+                      *  counter.
+                      *--------------------------------------------------------*/
+
+                     if (B_marker[i3] < jj_row_begin_offd)
+                     {
+                        B_marker[i3] = jj_count_offd;
+                        jj_count_offd++;
+                     }
+                  }
+                  for (jj3 = B_ext_diag_i[i2]; jj3 < B_ext_diag_i[i2+1]; jj3++)
+                  {
+                     i3 = B_ext_diag_j[jj3];
+
+                     if (B_marker[i3] < jj_row_begin_diag)
+                     {
+                        B_marker[i3] = jj_count_diag;
+                        jj_count_diag++;
+                     }
+                  }
+               }
+            }
+
+            /*-----------------------------------------------------------------
+             *  Loop over entries in row ii1 of A_diag.
+             *-----------------------------------------------------------------*/
+
+            for (jj2 = A_diag_i[ii1]; jj2 < A_diag_i[ii1+1]; jj2++)
+            {
+               i2 = A_diag_j[jj2];
 
                /*-----------------------------------------------------------
-                *  Loop over entries in row i2 of B_ext.
+                *  Loop over entries in row i2 of B_diag.
                 *-----------------------------------------------------------*/
 
-               for (jj3 = B_ext_offd_i[i2]; jj3 < B_ext_offd_i[i2+1]; jj3++)
+               for (jj3 = B_diag_i[i2]; jj3 < B_diag_i[i2+1]; jj3++)
                {
-                  i3 = num_cols_diag_B+B_ext_offd_j[jj3];
+                  i3 = B_diag_j[jj3];
 
                   /*--------------------------------------------------------
                    *  Check B_marker to see that C_{ii1,i3} has not already
                    *  been accounted for. If it has not, mark it and increment
                    *  counter.
                    *--------------------------------------------------------*/
-
-                  if (B_marker[i3] < jj_row_begin_offd)
-                  {
-                     B_marker[i3] = jj_count_offd;
-                     jj_count_offd++;
-                  }
-               }
-               for (jj3 = B_ext_diag_i[i2]; jj3 < B_ext_diag_i[i2+1]; jj3++)
-               {
-                  i3 = B_ext_diag_j[jj3];
 
                   if (B_marker[i3] < jj_row_begin_diag)
                   {
@@ -709,47 +753,114 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
                      jj_count_diag++;
                   }
                }
-            }
-         }
 
-         /*-----------------------------------------------------------------
-          *  Loop over entries in row ii1 of A_diag.
-          *-----------------------------------------------------------------*/
+               /*-----------------------------------------------------------
+                *  Loop over entries in row i2 of B_offd.
+                *-----------------------------------------------------------*/
 
-         for (jj2 = A_diag_i[ii1]; jj2 < A_diag_i[ii1+1]; jj2++)
-         {
-            i2 = A_diag_j[jj2];
-
-            /*-----------------------------------------------------------
-             *  Loop over entries in row i2 of B_diag.
-             *-----------------------------------------------------------*/
-
-            for (jj3 = B_diag_i[i2]; jj3 < B_diag_i[i2+1]; jj3++)
-            {
-               i3 = B_diag_j[jj3];
-
-               /*--------------------------------------------------------
-                *  Check B_marker to see that C_{ii1,i3} has not already
-                *  been accounted for. If it has not, mark it and increment
-                *  counter.
-                *--------------------------------------------------------*/
-
-               if (B_marker[i3] < jj_row_begin_diag)
+               if (num_cols_offd_B)
                {
-                  B_marker[i3] = jj_count_diag;
-                  jj_count_diag++;
+                  for (jj3 = B_offd_i[i2]; jj3 < B_offd_i[i2+1]; jj3++)
+                  {
+                     i3 = num_cols_diag_B + map_B_to_C[B_offd_j[jj3]];
+
+                     /*--------------------------------------------------------
+                      *  Check B_marker to see that C_{ii1,i3} has not already
+                      *  been accounted for. If it has not, mark it and increment
+                      *  counter.
+                      *--------------------------------------------------------*/
+
+                     if (B_marker[i3] < jj_row_begin_offd)
+                     {
+                        B_marker[i3] = jj_count_offd;
+                        jj_count_offd++;
+                     }
+                  }
                }
             }
 
-            /*-----------------------------------------------------------
-             *  Loop over entries in row i2 of B_offd.
-             *-----------------------------------------------------------*/
+            /*--------------------------------------------------------------------
+             * Set C_diag_i and C_offd_i for this row.
+             *--------------------------------------------------------------------*/
 
-            if (num_cols_offd_B)
+            C_diag_i[ii1] = jj_row_begin_diag;
+            C_offd_i[ii1] = jj_row_begin_offd;
+         }
+      }
+      else
+      {
+         for (ii1 = ns; ii1 < ne; ii1++)
+         {
+            /*--------------------------------------------------------------------
+             *  Set marker for diagonal entry, C_{ii1,ii1} (for square matrices).
+             *--------------------------------------------------------------------*/
+
+            jj_row_begin_diag = jj_count_diag;
+            jj_row_begin_offd = jj_count_offd;
+            if (allsquare)
             {
-               for (jj3 = B_offd_i[i2]; jj3 < B_offd_i[i2+1]; jj3++)
+               B_marker[ii1] = jj_count_diag;
+               jj_count_diag++;
+            }
+
+           /*-----------------------------------------------------------------
+            *  Loop over entries in row ii1 of A_offd.
+            *-----------------------------------------------------------------*/
+
+            if (num_cols_offd_A)
+            {
+               for (jj2 = A_offd_i[ii1]; jj2 < A_offd_i[ii1+1]; jj2++)
                {
-                  i3 = num_cols_diag_B+map_B_to_C[B_offd_j[jj3]];
+                  i2 = A_offd_j[jj2];
+
+                  /*-----------------------------------------------------------
+                   *  Loop over entries in row i2 of B_ext.
+                   *-----------------------------------------------------------*/
+
+                  for (jj3 = B_ext_offd_i[i2]; jj3 < B_ext_offd_i[i2+1]; jj3++)
+                  {
+                     i3 = num_cols_diag_B + B_ext_offd_j[jj3];
+
+                     /*--------------------------------------------------------
+                      *  Check B_marker to see that C_{ii1,i3} has not already
+                      *  been accounted for. If it has not, mark it and increment
+                      *  counter.
+                      *--------------------------------------------------------*/
+
+                     if (B_marker[i3] < jj_row_begin_offd)
+                     {
+                        B_marker[i3] = jj_count_offd;
+                        jj_count_offd++;
+                     }
+                  }
+                  for (jj3 = B_ext_diag_i[i2]; jj3 < B_ext_diag_i[i2+1]; jj3++)
+                  {
+                     i3 = B_ext_diag_j[jj3];
+
+                     if (B_marker[i3] < jj_row_begin_diag)
+                     {
+                        B_marker[i3] = jj_count_diag;
+                        jj_count_diag++;
+                     }
+                  }
+               }
+            }
+
+            /*-----------------------------------------------------------------
+             *  Loop over entries in row ii1 of A_diag.
+             *-----------------------------------------------------------------*/
+
+            for (jj2 = A_diag_i[ii1]; jj2 < A_diag_i[ii1+1]; jj2++)
+            {
+               i2 = A_diag_j[jj2];
+
+               /*-----------------------------------------------------------
+                *  Loop over entries in row i2 of B_diag.
+                *-----------------------------------------------------------*/
+
+               for (jj3 = B_diag_i[i2]; jj3 < B_diag_i[i2+1]; jj3++)
+               {
+                  i3 = B_diag_j[jj3];
 
                   /*--------------------------------------------------------
                    *  Check B_marker to see that C_{ii1,i3} has not already
@@ -757,25 +868,51 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
                    *  counter.
                    *--------------------------------------------------------*/
 
-                  if (B_marker[i3] < jj_row_begin_offd)
+                  if (B_marker[i3] < jj_row_begin_diag)
                   {
-                     B_marker[i3] = jj_count_offd;
-                     jj_count_offd++;
+                     B_marker[i3] = jj_count_diag;
+                     jj_count_diag++;
+                  }
+               }
+
+               /*-----------------------------------------------------------
+                *  Loop over entries in row i2 of B_offd.
+                *-----------------------------------------------------------*/
+
+               if (num_cols_offd_B)
+               {
+                  for (jj3 = B_offd_i[i2]; jj3 < B_offd_i[i2+1]; jj3++)
+                  {
+                     i3 = num_cols_diag_B + map_B_to_C[B_offd_j[jj3]];
+
+                     /*--------------------------------------------------------
+                      *  Check B_marker to see that C_{ii1,i3} has not already
+                      *  been accounted for. If it has not, mark it and increment
+                      *  counter.
+                      *--------------------------------------------------------*/
+
+                     if (B_marker[i3] < jj_row_begin_offd)
+                     {
+                        B_marker[i3] = jj_count_offd;
+                        jj_count_offd++;
+                     }
                   }
                }
             }
+
+            /*--------------------------------------------------------------------
+             * Set C_diag_i and C_offd_i for this row.
+             *--------------------------------------------------------------------*/
+
+            C_diag_i[ii1] = jj_row_begin_diag;
+            C_offd_i[ii1] = jj_row_begin_offd;
          }
+      } /* if (rownnz_A != NULL )*/
 
-         /*--------------------------------------------------------------------
-          * Set C_diag_i and C_offd_i for this row.
-          *--------------------------------------------------------------------*/
-
-         C_diag_i[ii1] = jj_row_begin_diag;
-         C_offd_i[ii1] = jj_row_begin_offd;
-      }
       jj_count_diag_array[ii] = jj_count_diag;
       jj_count_offd_array[ii] = jj_count_offd;
       hypre_TFree(B_marker);
+
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #endif
@@ -897,8 +1034,8 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
       HYPRE_Complex  a_entry; /*, a_b_product;*/
 
       num_threads = hypre_NumActiveThreads();
-      size = num_rownnz_diag_A/num_threads;
-      rest = num_rownnz_diag_A - size*num_threads;
+      size = num_rownnz_A/num_threads;
+      rest = num_rownnz_A - size*num_threads;
 
       ii = hypre_GetThreadNum();
       if (ii < rest)
@@ -983,7 +1120,7 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
                   }
                   else
                   {
-                    C_offd_data[B_marker[i3]] += a_entry*B_ext_offd_data[jj3];
+                     C_offd_data[B_marker[i3]] += a_entry*B_ext_offd_data[jj3];
                   }
                }
 
@@ -1071,6 +1208,7 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
       hypre_TFree(B_marker);
 
    } /*end parallel region */
+
    HYPRE_ANNOTATE_REGION_END("%s", "Second pass");
 
    /*-----------------------------------------------------------------------
@@ -1134,6 +1272,7 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    {
       hypre_TFree(map_B_to_C);
    }
+   hypre_TFree(rownnz_A);
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MATMUL] += hypre_MPI_Wtime();
@@ -1153,7 +1292,8 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    send_data contained in the comm_handle).
 */
 
-void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
+void
+hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
    HYPRE_Int ** pB_ext_i,
    HYPRE_Int ** pB_ext_j,
    HYPRE_Complex ** pB_ext_data,
@@ -3309,38 +3449,34 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrix     *A_offd  = hypre_ParCSRMatrixOffd(A);
    hypre_CSRMatrix     *AT_offd = NULL;
 
+   hypre_CSRMatrix      *B_diag = hypre_ParCSRMatrixDiag(B);
+   hypre_CSRMatrix      *B_offd = hypre_ParCSRMatrixOffd(B);
+   HYPRE_Int    *col_map_offd_B = hypre_ParCSRMatrixColMapOffd(B);
+
+   HYPRE_Int   first_col_diag_B = hypre_ParCSRMatrixFirstColDiag(B);
+   HYPRE_Int      *col_starts_B = hypre_ParCSRMatrixColStarts(B);
+   HYPRE_Int      *col_starts_A = hypre_ParCSRMatrixColStarts(A);
+   HYPRE_Int    num_rows_diag_B = hypre_CSRMatrixNumRows(B_diag);
+   HYPRE_Int    num_cols_diag_B = hypre_CSRMatrixNumCols(B_diag);
+   HYPRE_Int    num_cols_offd_B = hypre_CSRMatrixNumCols(B_offd);
    HYPRE_Int	num_rows_diag_A = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_Int	num_cols_diag_A = hypre_CSRMatrixNumCols(A_diag);
-
-   hypre_CSRMatrix     *B_diag  = hypre_ParCSRMatrixDiag(B);
-
-   hypre_CSRMatrix     *B_offd = hypre_ParCSRMatrixOffd(B);
-   HYPRE_Int   *col_map_offd_B = hypre_ParCSRMatrixColMapOffd(B);
-
-   HYPRE_Int  first_col_diag_B = hypre_ParCSRMatrixFirstColDiag(B);
-   HYPRE_Int     *col_starts_A = hypre_ParCSRMatrixColStarts(A);
-   HYPRE_Int     *col_starts_B = hypre_ParCSRMatrixColStarts(B);
-   HYPRE_Int   num_rows_diag_B = hypre_CSRMatrixNumRows(B_diag);
-   HYPRE_Int   num_cols_diag_B = hypre_CSRMatrixNumCols(B_diag);
-   HYPRE_Int   num_cols_offd_B = hypre_CSRMatrixNumCols(B_offd);
 
    hypre_ParCSRMatrix  *C;
    HYPRE_Int           *col_map_offd_C = NULL;
    HYPRE_Int           *map_B_to_C;
 
    hypre_CSRMatrix     *C_diag = NULL;
-   hypre_CSRMatrix     *C_tmp_diag = NULL;
-
    HYPRE_Complex       *C_diag_data = NULL;
    HYPRE_Int           *C_diag_i = NULL;
    HYPRE_Int           *C_diag_j = NULL;
 
-   HYPRE_Int           *C_diag_array = NULL;
-   HYPRE_Int           *C_offd_array = NULL;
+   hypre_CSRMatrix     *C_int = NULL;
+   hypre_CSRMatrix     *C_int_diag;
+   hypre_CSRMatrix     *C_int_offd;
 
    hypre_CSRMatrix     *C_offd = NULL;
    hypre_CSRMatrix     *C_tmp_offd = NULL;
-   hypre_CSRMatrix     *C_int = NULL;
    hypre_CSRMatrix     *C_ext = NULL;
    HYPRE_Int           *C_ext_i;
    HYPRE_Int           *C_ext_j;
@@ -3354,7 +3490,9 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    HYPRE_Int	        C_ext_size = 0;
    HYPRE_Int	        C_ext_diag_size = 0;
    HYPRE_Int	        C_ext_offd_size = 0;
+   HYPRE_Int            C_ext_num_rows;
 
+   hypre_CSRMatrix     *C_tmp_diag = NULL;
    HYPRE_Int           *C_tmp_diag_i;
    HYPRE_Int           *C_tmp_diag_j;
    HYPRE_Complex       *C_tmp_diag_data;
@@ -3370,6 +3508,9 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
 
    HYPRE_Int	        first_col_diag_C;
    HYPRE_Int	        last_col_diag_C;
+
+   HYPRE_Int           *C_diag_array = NULL;
+   HYPRE_Int           *C_offd_array = NULL;
 
    HYPRE_Int           *temp;
    HYPRE_Int           *send_map_starts_A;
@@ -3426,8 +3567,6 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    C_ext_size = 0;
    if (num_procs > 1)
    {
-      hypre_CSRMatrix *C_int_diag;
-      hypre_CSRMatrix *C_int_offd;
       C_tmp_offd = hypre_CSRMatrixMultiply(AT_diag, B_offd);
       C_int_diag = hypre_CSRMatrixMultiply(AT_offd, B_diag);
       C_int_offd = hypre_CSRMatrixMultiply(AT_offd, B_offd);
@@ -3466,7 +3605,6 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    C_tmp_diag_i = hypre_CSRMatrixI(C_tmp_diag);
    if (C_ext_size || num_cols_offd_B)
    {
-      HYPRE_Int C_ext_num_rows;
       num_sends_A = hypre_ParCSRCommPkgNumSends(comm_pkg_A);
       send_map_starts_A = hypre_ParCSRCommPkgSendMapStarts(comm_pkg_A);
       send_map_elmts_A  = hypre_ParCSRCommPkgSendMapElmts(comm_pkg_A);
@@ -3553,8 +3691,8 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
             if (C_ext_j[j] < first_col_diag_C || C_ext_j[j] > last_col_diag_C)
             {
                C_ext_offd_j[cnt_offd] = hypre_BinarySearch(col_map_offd_C,
-                                           C_ext_j[j],
-                                           num_cols_offd_C);
+                                                           C_ext_j[j],
+                                                           num_cols_offd_C);
                C_ext_offd_data[cnt_offd++] = C_ext_data[j];
             }
             else
@@ -3574,7 +3712,7 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
 
    if (num_cols_offd_B)
    {
-      map_B_to_C = hypre_CTAlloc(HYPRE_Int,num_cols_offd_B);
+      map_B_to_C = hypre_CTAlloc(HYPRE_Int, num_cols_offd_B);
 
       cnt = 0;
       for (i = 0; i < num_cols_offd_C; i++)
@@ -3582,10 +3720,13 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
          if (col_map_offd_C[i] == col_map_offd_B[cnt])
          {
             map_B_to_C[cnt++] = i;
-            if (cnt == num_cols_offd_B) break;
+            if (cnt == num_cols_offd_B)
+            {
+               break;
+            }
          }
       }
-      for (i = 0; i < hypre_CSRMatrixI(C_tmp_offd)[hypre_CSRMatrixNumRows(C_tmp_offd)]; i++)
+      for (i = 0; i < C_tmp_offd_i[hypre_CSRMatrixNumRows(C_tmp_offd)]; i++)
       {
          j_indx = C_tmp_offd_j[i];
          C_tmp_offd_j[i] = map_B_to_C[j_indx];
@@ -3612,10 +3753,10 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
       {
          HYPRE_Int *B_marker = NULL;
          HYPRE_Int *B_marker_offd = NULL;
-         HYPRE_Int ik, jk, j1, j2, jcol;
-         HYPRE_Int ns, ne, ii, nnz_d, nnz_o;
-         HYPRE_Int rest, size;
-         HYPRE_Int num_threads = hypre_NumActiveThreads();
+         HYPRE_Int  ik, jk, j1, j2, jcol;
+         HYPRE_Int  ns, ne, ii, nnz_d, nnz_o;
+         HYPRE_Int  rest, size;
+         HYPRE_Int  num_threads = hypre_NumActiveThreads();
 
          size = num_cols_diag_A/num_threads;
          rest = num_cols_diag_A - size*num_threads;
@@ -3691,7 +3832,6 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
 #endif
          if (ii == 0)
          {
-            nnz_d = nnz_o = 0;
             for (ik = 0; ik < num_threads-1; ik++)
             {
                C_diag_array[ik+1] += C_diag_array[ik];
@@ -3879,14 +4019,12 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    if (C_offd)
    {
       hypre_ParCSRMatrixOffd(C) = C_offd;
+      hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixOffd(C));
    }
    else
    {
       hypre_ParCSRMatrixOffd(C) = C_tmp_offd;
    }
-
-   /* Set nonzero rows data of offd_C */
-   hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixOffd(C));
 
    if (num_cols_offd_C)
    {
