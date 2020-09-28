@@ -216,7 +216,6 @@ hypre_CSRMatrixBigJtoJ( hypre_CSRMatrix *matrix )
    HYPRE_Int     num_nonzeros = hypre_CSRMatrixNumNonzeros(matrix);
    HYPRE_BigInt *matrix_big_j = hypre_CSRMatrixBigJ(matrix);
    HYPRE_Int    *matrix_j = NULL;
-   HYPRE_Int     ierr = 0;
 
    if (num_nonzeros && matrix_big_j)
    {
@@ -236,7 +235,7 @@ hypre_CSRMatrixBigJtoJ( hypre_CSRMatrix *matrix )
       hypre_CSRMatrixBigJ(matrix) = NULL;
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -250,7 +249,6 @@ hypre_CSRMatrixJtoBigJ( hypre_CSRMatrix *matrix )
    HYPRE_Int     num_nonzeros = hypre_CSRMatrixNumNonzeros(matrix);
    HYPRE_Int    *matrix_j = hypre_CSRMatrixJ(matrix);
    HYPRE_BigInt *matrix_big_j = NULL;
-   HYPRE_Int     ierr = 0;
 
    if (num_nonzeros && matrix_j)
    {
@@ -270,7 +268,7 @@ hypre_CSRMatrixJtoBigJ( hypre_CSRMatrix *matrix )
       hypre_CSRMatrixJ(matrix) = NULL;
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
