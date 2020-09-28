@@ -978,6 +978,7 @@ HYPRE_Int hypre_SStructGridCoarsen ( hypre_SStructGrid *fgrid, hypre_IndexRef or
 
 /* sstruct_innerprod.c */
 HYPRE_Int hypre_SStructPInnerProd ( hypre_SStructPVector *px , hypre_SStructPVector *py , HYPRE_Real *presult_ptr );
+HYPRE_Int hypre_SStructPInnerProdLocal ( hypre_SStructPVector *px , hypre_SStructPVector *py , HYPRE_Real *presult_ptr );
 HYPRE_Int hypre_SStructInnerProd ( hypre_SStructVector *x , hypre_SStructVector *y , HYPRE_Real *result_ptr );
 
 /* sstruct_matrix.c */

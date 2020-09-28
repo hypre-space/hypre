@@ -19,36 +19,33 @@
 #include "_hypre_struct_mv.h"
 
 /*--------------------------------------------------------------------------
- * hypre_StructInnerProd
+ * hypre_StructInnerProdLocal
  *--------------------------------------------------------------------------*/
 
 HYPRE_Real
-hypre_StructInnerProd( hypre_StructVector *x,
-                       hypre_StructVector *y )
+hypre_StructInnerProdLocal( hypre_StructVector *x,
+                            hypre_StructVector *y )
 {
-   HYPRE_Real       final_innerprod_result;
-   HYPRE_Real       local_result;
-   HYPRE_Real       process_result;
-                   
+   HYPRE_Real       result;
+
    hypre_Box       *x_data_box;
    hypre_Box       *y_data_box;
-                   
+
    HYPRE_Int        xi;
    HYPRE_Int        yi;
-                   
+
    HYPRE_Complex   *xp;
    HYPRE_Complex   *yp;
-                   
+
    hypre_BoxArray  *boxes;
    hypre_Box       *box;
    hypre_Index      loop_size;
    hypre_IndexRef   start;
    hypre_Index      unit_stride;
-                   
+
    HYPRE_Int        i;
 
-   local_result = 0.0;
-   process_result = 0.0;
+   result = 0.0;
 
    hypre_SetIndex(unit_stride, 1);
 
@@ -74,16 +71,32 @@ hypre_StructInnerProd( hypre_StructVector *x,
 #endif
       hypre_BoxLoop2For(xi, yi)
       {
-         local_result += xp[xi] * hypre_conj(yp[yi]);
+         result += xp[xi] * hypre_conj(yp[yi]);
       }
       hypre_BoxLoop2End(xi, yi);
    }
-   process_result = local_result;
 
-   hypre_MPI_Allreduce(&process_result, &final_innerprod_result, 1,
-                       HYPRE_MPI_REAL, hypre_MPI_SUM, hypre_StructVectorComm(x));
+   return result;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_StructInnerProd
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Real
+hypre_StructInnerProd( hypre_StructVector *x,
+                       hypre_StructVector *y )
+{
+   HYPRE_Real local_result;
+   HYPRE_Real global_result;
+
+   local_result = hypre_StructInnerProdLocal(x, y);
+
+   hypre_MPI_Allreduce(&local_result, &global_result, 1,
+                       HYPRE_MPI_REAL, hypre_MPI_SUM,
+                       hypre_StructVectorComm(x));
 
    hypre_IncFLOPCount(2*hypre_StructVectorGlobalSize(x));
 
-   return final_innerprod_result;
+   return hypre_error_flag;
 }
