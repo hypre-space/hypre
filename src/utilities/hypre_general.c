@@ -198,6 +198,8 @@ HYPRE_Finalize()
 {
    hypre_HandleDestroy(_hypre_handle);
 
+   _hypre_handle = NULL;
+
    /*
 #if defined(HYPRE_USING_KOKKOS)
    Kokkos::finalize ();
