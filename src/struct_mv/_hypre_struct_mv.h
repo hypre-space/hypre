@@ -2265,6 +2265,8 @@ HYPRE_Int hypre_AppendBoxArray ( hypre_BoxArray *box_array_0 , hypre_BoxArray *b
 hypre_BoxArrayArray *hypre_BoxArrayArrayCreate ( HYPRE_Int size , HYPRE_Int ndim );
 HYPRE_Int hypre_BoxArrayArrayDestroy ( hypre_BoxArrayArray *box_array_array );
 hypre_BoxArrayArray *hypre_BoxArrayArrayClone ( hypre_BoxArrayArray *box_array_array );
+HYPRE_Int hypre_BoxArrayArrayPrintToFile ( FILE *file , hypre_BoxArrayArray *box_array_array );
+HYPRE_Int hypre_BoxArrayArrayPrint ( MPI_Comm comm , const char *filename , hypre_BoxArrayArray *box_array_array );
 
 /* box_manager.c */
 HYPRE_Int hypre_BoxManEntryGetInfo ( hypre_BoxManEntry *entry , void **info_ptr );

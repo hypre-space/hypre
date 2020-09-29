@@ -1090,3 +1090,64 @@ hypre_BoxArrayArrayClone( hypre_BoxArrayArray *box_array_array )
 
    return new_box_array_array;
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoxArrayArrayPrintToFile( FILE                 *file,
+                                hypre_BoxArrayArray  *box_array_array )
+{
+   hypre_BoxArray  *box_array;
+
+   HYPRE_Int        ndim;
+   HYPRE_Int        size;
+   HYPRE_Int        id;
+   HYPRE_Int        i;
+
+   ndim = hypre_BoxArrayArrayNDim(box_array_array);
+   hypre_fprintf(file, "%d\n", ndim);
+
+   size = hypre_BoxArrayArraySize(box_array_array);
+   hypre_fprintf(file, "%d\n", size);
+
+   hypre_ForBoxArrayI(i, box_array_array)
+   {
+      box_array = hypre_BoxArrayArrayBoxArray(box_array_array, i);
+      id = hypre_BoxArrayArrayID(box_array_array, i);
+      hypre_fprintf(file, "BoxArray %d, ID %d\n", i, id);
+
+      hypre_BoxArrayPrintToFile(file, box_array);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoxArrayArrayPrint( MPI_Comm              comm,
+                          const char           *filename,
+                          hypre_BoxArrayArray  *box_array_array )
+{
+   FILE      *file;
+   char       new_filename[255];
+
+   HYPRE_Int  myid;
+
+   hypre_MPI_Comm_rank(comm, &myid);
+   hypre_sprintf(new_filename, "%s.%05d", filename, myid);
+   if ((file = fopen(new_filename, "w")) == NULL)
+   {
+      hypre_printf("Error: can't open output file %s\n", new_filename);
+      exit(1);
+   }
+
+   hypre_BoxArrayArrayPrintToFile(file, box_array_array);
+
+   fflush(file);
+   fclose(file);
+
+   return hypre_error_flag;
+}

@@ -76,6 +76,8 @@ HYPRE_Int hypre_BoxGrowByBox( hypre_Box *box , hypre_Box *gbox );
 HYPRE_Int hypre_BoxGrowByArray ( hypre_Box *box , HYPRE_Int *array );
 hypre_BoxArray *hypre_BoxArrayCreate ( HYPRE_Int size , HYPRE_Int ndim );
 HYPRE_Int hypre_BoxArrayDestroy ( hypre_BoxArray *box_array );
+HYPRE_Int hypre_BoxArrayPrintToFile ( FILE *file , hypre_BoxArray *box_array );
+HYPRE_Int hypre_BoxArrayPrint ( MPI_Comm comm , const char *filename , hypre_BoxArray *box_array );
 HYPRE_Int hypre_BoxArraySetSize ( hypre_BoxArray *box_array , HYPRE_Int size );
 hypre_BoxArray *hypre_BoxArrayClone ( hypre_BoxArray *box_array );
 HYPRE_Int hypre_AppendBox ( hypre_Box *box , hypre_BoxArray *box_array );
@@ -85,6 +87,8 @@ HYPRE_Int hypre_AppendBoxArray ( hypre_BoxArray *box_array_0 , hypre_BoxArray *b
 hypre_BoxArrayArray *hypre_BoxArrayArrayCreate ( HYPRE_Int size , HYPRE_Int ndim );
 HYPRE_Int hypre_BoxArrayArrayDestroy ( hypre_BoxArrayArray *box_array_array );
 hypre_BoxArrayArray *hypre_BoxArrayArrayClone ( hypre_BoxArrayArray *box_array_array );
+HYPRE_Int hypre_BoxArrayArrayPrintToFile ( FILE *file , hypre_BoxArrayArray *box_array_array );
+HYPRE_Int hypre_BoxArrayArrayPrint ( MPI_Comm comm , const char *filename , hypre_BoxArrayArray *box_array_array );
 
 /* box_manager.c */
 HYPRE_Int hypre_BoxManEntryGetInfo ( hypre_BoxManEntry *entry , void **info_ptr );
