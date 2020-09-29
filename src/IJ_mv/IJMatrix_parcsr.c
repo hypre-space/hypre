@@ -2681,6 +2681,9 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
          HYPRE_Int  *diag_array;
          HYPRE_Int  *offd_array;
 
+         /* Update nonzero rows of aux_matrix */
+         hypre_AuxParCSRMatrixSetRownnz(aux_matrix);
+
          aux_j      = hypre_AuxParCSRMatrixAuxJ(aux_matrix);
          aux_data   = hypre_AuxParCSRMatrixAuxData(aux_matrix);
          row_length = hypre_AuxParCSRMatrixRowLength(aux_matrix);
