@@ -2236,7 +2236,7 @@ PrintUsage( char *progname,
       hypre_printf("  -aug <val>         : number of augmentation vectors LGMRES (def 2);\n");
       hypre_printf("  -rel_change        : conv based on relative change of x (def 0);\n");
       hypre_printf("  -kprint            : print level for krylov solvers  (def 0);\n");
-      hypre_printf("  -lvl <val>         : maximal number of levels (default 100);\n");
+      hypre_printf("  -lvl <val>         : maximum number of levels (default 100);\n");
       hypre_printf("  -v <n_pre> <n_post>: SysPFMG and Struct- # of pre and post relax\n");
       hypre_printf("  -skip <s>          : SysPFMG and Struct- skip relaxation (0 or 1)\n");
       hypre_printf("  -rap <r>           : Struct- coarse grid operator type\n");

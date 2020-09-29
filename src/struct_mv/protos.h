@@ -117,19 +117,24 @@ HYPRE_Int hypre_FillResponseBoxManAssemble1 ( void *p_recv_contact_buf , HYPRE_I
 HYPRE_Int hypre_FillResponseBoxManAssemble2 ( void *p_recv_contact_buf , HYPRE_Int contact_size , HYPRE_Int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , HYPRE_Int *response_message_size );
 
 /* coarsen.c */
-HYPRE_Int hypre_MapToCoarseIndex( hypre_Index index , hypre_IndexRef origin , hypre_Index stride , HYPRE_Int ndim );
-HYPRE_Int hypre_MapToFineIndex( hypre_Index index , hypre_IndexRef origin , hypre_Index stride , HYPRE_Int ndim );
-HYPRE_Int hypre_StructMapFineToCoarse( hypre_Index findex , hypre_Index origin , hypre_Index stride , hypre_Index cindex );
-HYPRE_Int hypre_StructMapCoarseToFine( hypre_Index cindex , hypre_Index origin , hypre_Index stride , hypre_Index findex );
+HYPRE_Int hypre_MapToCoarseIndex ( hypre_Index index , hypre_IndexRef origin , hypre_Index stride , HYPRE_Int ndim );
+HYPRE_Int hypre_MapToFineIndex ( hypre_Index index , hypre_IndexRef origin , hypre_Index stride , HYPRE_Int ndim );
+HYPRE_Int hypre_StructMapFineToCoarse ( hypre_Index findex , hypre_Index origin , hypre_Index stride , hypre_Index cindex );
+HYPRE_Int hypre_StructMapCoarseToFine ( hypre_Index cindex , hypre_Index origin , hypre_Index stride , hypre_Index findex );
 HYPRE_Int
-hypre_ComputeCoarseOriginStride( hypre_Index coarse_origin , hypre_Index coarse_stride , hypre_IndexRef origin , hypre_Index stride , HYPRE_Int ndim );
-HYPRE_Int hypre_CoarsenBox( hypre_Box *box , hypre_IndexRef origin , hypre_Index stride );
-HYPRE_Int hypre_CoarsenPosBox( hypre_Box *box , hypre_IndexRef origin , hypre_Index stride );
+hypre_ComputeCoarseOriginStride ( hypre_Index coarse_origin , hypre_Index coarse_stride , hypre_IndexRef origin , hypre_Index stride , HYPRE_Int ndim );
+HYPRE_Int hypre_CoarsenBox ( hypre_Box *box , hypre_IndexRef origin , hypre_Index stride );
+HYPRE_Int hypre_AdaptiveCoarsenBox ( hypre_Box *box , hypre_Box *refbox , hypre_IndexRef origin , hypre_Index stride );
+HYPRE_Int hypre_CoarsenPosBox ( hypre_Box *box , hypre_IndexRef origin , hypre_Index stride );
+HYPRE_Int hypre_CoarsenNegBox ( hypre_Box *box , hypre_IndexRef origin , hypre_Index stride );
 HYPRE_Int hypre_RefineBox ( hypre_Box *box , hypre_IndexRef origin , hypre_Index stride );
-HYPRE_Int hypre_CoarsenBoxArray( hypre_BoxArray *box_array , hypre_IndexRef origin , hypre_Index stride );
-HYPRE_Int hypre_CoarsenBoxArrayArray( hypre_BoxArrayArray *box_array_array , hypre_IndexRef origin , hypre_Index stride );
-HYPRE_Int hypre_CoarsenPosBoxArrayArray( hypre_BoxArrayArray *boxaa, hypre_IndexRef origin, hypre_Index stride, hypre_BoxArrayArray **new_boxaa_ptr );
-HYPRE_Int hypre_StructCoarsen( hypre_StructGrid *fgrid , hypre_IndexRef origin , hypre_Index stride , HYPRE_Int prune , hypre_StructGrid **cgrid_ptr );
+HYPRE_Int hypre_CoarsenBoxArray ( hypre_BoxArray *box_array , hypre_IndexRef origin , hypre_Index stride );
+HYPRE_Int hypre_CoarsenBoxArrayArray ( hypre_BoxArrayArray *box_array_array , hypre_IndexRef origin , hypre_Index stride );
+HYPRE_Int hypre_CoarsenUpdateBoxArrayArray ( hypre_BoxArrayArray *boxaa , hypre_IndexRef origin , hypre_Index stride , hypre_BoxArrayArray **new_boxaa_ptr );
+HYPRE_Int hypre_CoarsenPosBoxArrayArray ( hypre_BoxArrayArray *boxaa , hypre_IndexRef origin , hypre_Index stride , hypre_BoxArrayArray **new_boxaa_ptr );
+HYPRE_Int hypre_CoarsenNegBoxArrayArray ( hypre_BoxArrayArray *boxaa , hypre_IndexRef origin , hypre_Index stride , hypre_BoxArrayArray **new_boxaa_ptr );
+HYPRE_Int hypre_AdaptiveCoarsenBoxArrayArray ( hypre_BoxArrayArray *boxaa , hypre_BoxArray *refboxa , hypre_IndexRef origin , hypre_Index stride , hypre_BoxArrayArray **new_boxaa_ptr );
+HYPRE_Int hypre_StructCoarsen ( hypre_StructGrid *fgrid , hypre_IndexRef origin , hypre_Index stride , HYPRE_Int prune , hypre_StructGrid **cgrid_ptr );
 
 /* communication_info.c */
 hypre_CommStencil *hypre_CommStencilCreate ( HYPRE_Int  ndim );

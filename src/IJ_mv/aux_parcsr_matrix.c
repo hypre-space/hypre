@@ -62,9 +62,9 @@ hypre_AuxParCSRMatrixCreate( hypre_AuxParCSRMatrix **aux_matrix,
    hypre_AuxParCSRMatrixOffProcJ(matrix) = NULL;
    hypre_AuxParCSRMatrixOffProcData(matrix) = NULL;
 
-
    *aux_matrix = matrix;
-   return 0;
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -77,7 +77,7 @@ hypre_AuxParCSRMatrixDestroy( hypre_AuxParCSRMatrix *matrix )
    HYPRE_Int   num_rownnz;
    HYPRE_Int   num_rows;
    HYPRE_Int  *rownnz;
-   HYPRE_Int   i, ierr = 0;
+   HYPRE_Int   i;
 
    if (matrix)
    {
@@ -136,7 +136,7 @@ hypre_AuxParCSRMatrixDestroy( hypre_AuxParCSRMatrix *matrix )
       hypre_TFree(matrix);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -148,12 +148,17 @@ hypre_AuxParCSRMatrixSetRownnz( hypre_AuxParCSRMatrix *matrix )
 {
    HYPRE_Int   local_num_rows = hypre_AuxParCSRMatrixLocalNumRows(matrix);
    HYPRE_Int  *row_length     = hypre_AuxParCSRMatrixRowLength(matrix);
-   HYPRE_Int  *rownnz         = hypre_AuxParCSRMatrixRownnz(matrix);
+   HYPRE_Int   num_rownnz_old = hypre_AuxParCSRMatrixLocalNumRownnz(matrix);
+   HYPRE_Int  *rownnz_old     = hypre_AuxParCSRMatrixRownnz(matrix);
+   HYPRE_Int  *rownnz;
 
-   HYPRE_Int   i, local_num_rownnz;
+   HYPRE_Int   i, ii, local_num_rownnz;
 
    /* Count number of nonzero rows */
    local_num_rownnz = 0;
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) reduction(+:local_num_rownnz) HYPRE_SMP_SCHEDULE
+#endif
    for (i = 0; i < local_num_rows; i++)
    {
       if (row_length[i] > 0)
@@ -164,14 +169,7 @@ hypre_AuxParCSRMatrixSetRownnz( hypre_AuxParCSRMatrix *matrix )
 
    if (local_num_rownnz != local_num_rows)
    {
-      if (rownnz)
-      {
-         rownnz = hypre_TReAlloc(rownnz, HYPRE_Int, local_num_rownnz);
-      }
-      else
-      {
-         rownnz = hypre_CTAlloc(HYPRE_Int, local_num_rownnz);
-      }
+      rownnz = hypre_CTAlloc(HYPRE_Int, local_num_rownnz);
 
       /* Find nonzero rows */
       local_num_rownnz = 0;
@@ -183,8 +181,33 @@ hypre_AuxParCSRMatrixSetRownnz( hypre_AuxParCSRMatrix *matrix )
          }
       }
 
+      /* Free memory if necessary */
+      if (rownnz_old && (local_num_rownnz < num_rownnz_old))
+      {
+         ii = 0;
+         for (i = 0; i < num_rownnz_old; i++)
+         {
+            if (rownnz_old[i] == rownnz[ii])
+            {
+               ii++;
+            }
+            else
+            {
+               hypre_TFree(hypre_AuxParCSRMatrixAuxJ(matrix)[rownnz_old[i]]);
+               hypre_TFree(hypre_AuxParCSRMatrixAuxData(matrix)[rownnz_old[i]]);
+            }
+         }
+         hypre_TFree(rownnz_old);
+      }
+
       hypre_AuxParCSRMatrixLocalNumRownnz(matrix) = local_num_rownnz;
       hypre_AuxParCSRMatrixRownnz(matrix) = rownnz;
+   }
+   else
+   {
+      hypre_TFree(rownnz_old);
+      hypre_AuxParCSRMatrixLocalNumRownnz(matrix) = local_num_rows;
+      hypre_AuxParCSRMatrixRownnz(matrix) = NULL;
    }
 
    return hypre_error_flag;
@@ -317,7 +340,7 @@ HYPRE_Int
 hypre_AuxParCSRMatrixSetMaxOffPRocElmts( hypre_AuxParCSRMatrix *matrix,
 					 HYPRE_Int max_off_proc_elmts )
 {
-   HYPRE_Int ierr = 0;
    hypre_AuxParCSRMatrixMaxOffProcElmts(matrix) = max_off_proc_elmts;
-   return ierr;
+
+   return hypre_error_flag;
 }

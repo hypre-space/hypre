@@ -2498,7 +2498,9 @@ hypre_SStructGridCoarsen( hypre_SStructGrid   *fgrid,
          if (hypre_StructGridNumBoxes(scgrid))
          {
             fpbnd_boxaa = hypre_SStructPGridPBndBoxArrayArray(pfgrid, var);
-            hypre_CoarsenPosBoxArrayArray(fpbnd_boxaa, origin, strides[part], &cpbnd_boxaa);
+            hypre_AdaptiveCoarsenBoxArrayArray(fpbnd_boxaa,
+                                               hypre_StructGridBoxes(sfgrid),
+                                               origin, strides[part], &cpbnd_boxaa);
             hypre_SStructPGridPBndBoxArrayArray(pcgrid, var) = cpbnd_boxaa;
          }
       }
