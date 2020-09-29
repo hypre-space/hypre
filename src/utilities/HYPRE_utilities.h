@@ -40,15 +40,20 @@ extern "C" {
 #define HYPRE_Version() "HYPRE_RELEASE_NAME Date Compiled: " __DATE__ " " __TIME__
 
 /*--------------------------------------------------------------------------
- * Big int stuff
+ * Big int and limits stuff
  *--------------------------------------------------------------------------*/
+#include <limits.h>
 
 #ifdef HYPRE_BIGINT
 typedef long long int HYPRE_Int;
 #define HYPRE_MPI_INT MPI_LONG_LONG_INT
+#define HYPRE_INT_MAX LLONG_MAX
+#define HYPRE_INT_MIN LLONG_MIN
 #else
 typedef int HYPRE_Int;
 #define HYPRE_MPI_INT MPI_INT
+#define HYPRE_INT_MAX INT_MAX
+#define HYPRE_INT_MIN INT_MIN
 #endif
 
 /*--------------------------------------------------------------------------

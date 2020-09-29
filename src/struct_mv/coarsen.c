@@ -173,7 +173,7 @@ hypre_AdaptiveCoarsenBox( hypre_Box      *box,
    HYPRE_Int   d, cdir;
 
    /* Find minimum and maximum stride*/
-   min_stride = 2048;
+   min_stride = HYPRE_INT_MAX;
    max_stride = - min_stride;
    for (d = 0; d < ndim; d++)
    {
