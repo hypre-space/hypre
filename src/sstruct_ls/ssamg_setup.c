@@ -276,9 +276,11 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    Pones_l = hypre_TAlloc(hypre_SStructVector *, num_levels - 1);
 
    /* Print fine level grid */
-#ifdef DEBUG_WITH_GLVIS
    hypre_sprintf(filename, "ssgrid.l%02d", 0);
+#if DEBUG_WITH_GLVIS
    hypre_SStructGridPrintGLVis(grid_l[0], filename, NULL, NULL);
+#else
+   hypre_SStructGridPrint(grid_l[0], filename);
 #endif
 
    /* Print fine level matrix */
@@ -288,9 +290,11 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    for (l = 0; l < (num_levels - 1); l++)
    {
       /* Print coarse grids */
-#ifdef DEBUG_WITH_GLVIS
       hypre_sprintf(filename, "ssgrid.l%02d", l+1);
+#if DEBUG_WITH_GLVIS
       hypre_SStructGridPrintGLVis(grid_l[l+1], filename, NULL, NULL);
+#else
+      hypre_SStructGridPrint(grid_l[l+1], filename);
 #endif
       /* Print coarse matrices */
       hypre_sprintf(filename, "ssamg_A.l%02d", l+1);
@@ -313,7 +317,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       hypre_SStructMatvecCompute(interp_data_l[l], 1.0, P_l[l], ones_l[l], 0.0, Pones_l[l]);
       hypre_sprintf(filename, "ssamg_Pones.l%02d", l);
 
-#ifdef DEBUG_WITH_GLVIS
+#if DEBUG_WITH_GLVIS
       HYPRE_SStructVectorPrintGLVis(Pones_l[l], filename);
 #else
       HYPRE_SStructVectorPrint(filename, Pones_l[l], 0);

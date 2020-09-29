@@ -2234,9 +2234,9 @@ hypre_SStructGridIntersect( hypre_SStructGrid   *grid,
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_SStructGridPrintGLVis( hypre_SStructGrid *grid,
-                             const char *meshprefix,
-                             HYPRE_Real *trans,
-                             HYPRE_Real *origin )
+                             const char        *meshprefix,
+                             HYPRE_Real        *trans,
+                             HYPRE_Real        *origin )
 {
    HYPRE_Int            ndim   = hypre_SStructGridNDim(grid);
    HYPRE_Int            nparts = hypre_SStructGridNParts(grid);
@@ -2427,6 +2427,58 @@ hypre_SStructGridPrintGLVis( hypre_SStructGrid *grid,
       hypre_TFree(T);
       hypre_TFree(O);
    }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridPrint( hypre_SStructGrid *grid,
+                        const char        *filename )
+{
+   MPI_Comm             comm = hypre_SStructGridComm(grid);
+   HYPRE_Int            nparts = hypre_SStructGridNParts(grid);
+
+   hypre_SStructPGrid  *pgrid;
+   hypre_BoxArrayArray *pbnd_boxaa;
+
+   FILE                *file;
+   char                 new_filename[255];
+   HYPRE_Int            myid;
+   HYPRE_Int            nvars;
+   HYPRE_Int            part, vi, vj;
+
+   hypre_MPI_Comm_rank(comm, &myid);
+   hypre_sprintf(new_filename, "%s.%05d", filename, myid);
+   if ((file = fopen(new_filename, "w")) == NULL)
+   {
+      hypre_printf("Error: can't open output file %s\n", new_filename);
+      exit(1);
+   }
+
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+
+      for (vi = 0; vi < nvars; vi++)
+      {
+         for (vj = 0; vj < nvars; vj++)
+         {
+            pbnd_boxaa = hypre_SStructPGridPBndBoxArrayArray(pgrid, vi*nvars + vj);
+            if (pbnd_boxaa != NULL)
+            {
+               hypre_fprintf(file, "\nPart %d - var (%d, %d)\n", part, vi, vj);
+               hypre_BoxArrayArrayPrintToFile(file, pbnd_boxaa);
+            }
+         }
+      }
+   }
+
+   fflush(file);
+   fclose(file);
 
    return hypre_error_flag;
 }
