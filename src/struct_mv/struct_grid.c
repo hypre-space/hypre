@@ -1112,34 +1112,12 @@ HYPRE_Int
 hypre_StructGridPrint( FILE             *file,
                        hypre_StructGrid *grid )
 {
+   HYPRE_Int   ndim = hypre_StructGridNDim(grid);
+   HYPRE_Int   d;
 
-   hypre_BoxArray  *boxes;
-   hypre_Box       *box;
+   /* Print box array */
+   hypre_BoxArrayPrintToFile(file, hypre_StructGridBoxes(grid));
 
-   HYPRE_Int        i, d, ndim;
-
-   ndim = hypre_StructGridNDim(grid);
-   hypre_fprintf(file, "%d\n", ndim);
-
-   boxes = hypre_StructGridBoxes(grid);
-   hypre_fprintf(file, "%d\n", hypre_BoxArraySize(boxes));
-
-   /* Print lines of the form: "%d:  (%d, %d, %d)  x  (%d, %d, %d)\n" */
-   hypre_ForBoxI(i, boxes)
-   {
-      box = hypre_BoxArrayBox(boxes, i);
-      hypre_fprintf(file, "%d:  (%d", i, hypre_BoxIMinD(box, 0));
-      for (d = 1; d < ndim; d++)
-      {
-         hypre_fprintf(file, ", %d", hypre_BoxIMinD(box, d));
-      }
-      hypre_fprintf(file, ")  x  (%d", hypre_BoxIMaxD(box, 0));
-      for (d = 1; d < ndim; d++)
-      {
-         hypre_fprintf(file, ", %d", hypre_BoxIMaxD(box, d));
-      }
-      hypre_fprintf(file, ")\n");
-   }
    /* Print line of the form: "Periodic: %d %d %d\n" */
    hypre_fprintf(file, "\nPeriodic:");
    for (d = 0; d < ndim; d++)

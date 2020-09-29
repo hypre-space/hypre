@@ -764,6 +764,74 @@ hypre_BoxArrayDestroy( hypre_BoxArray *box_array )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_BoxArrayPrintToFile( FILE            *file,
+                           hypre_BoxArray  *box_array )
+{
+   hypre_Box *box;
+
+   HYPRE_Int  ndim;
+   HYPRE_Int  size;
+   HYPRE_Int  i, d;
+
+   ndim = hypre_BoxArrayNDim(box_array);
+   hypre_fprintf(file, "%d\n", ndim);
+
+   size = hypre_BoxArraySize(box_array);
+   hypre_fprintf(file, "%d\n", size);
+
+   /* Print lines of the form: "%d:  (%d, %d, %d)  x  (%d, %d, %d)\n" */
+   hypre_ForBoxI(i, box_array)
+   {
+      box = hypre_BoxArrayBox(box_array, i);
+      hypre_fprintf(file, "%d:  (%d", i, hypre_BoxIMinD(box, 0));
+      for (d = 1; d < ndim; d++)
+      {
+         hypre_fprintf(file, ", %d", hypre_BoxIMinD(box, d));
+      }
+      hypre_fprintf(file, ")  x  (%d", hypre_BoxIMaxD(box, 0));
+      for (d = 1; d < ndim; d++)
+      {
+         hypre_fprintf(file, ", %d", hypre_BoxIMaxD(box, d));
+      }
+      hypre_fprintf(file, ")\n");
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoxArrayPrint( MPI_Comm         comm,
+                     const char      *filename,
+                     hypre_BoxArray  *box_array )
+{
+   FILE      *file;
+   char       new_filename[255];
+
+   HYPRE_Int  myid;
+
+   hypre_MPI_Comm_rank(comm, &myid);
+   hypre_sprintf(new_filename, "%s.%05d", filename, myid);
+   if ((file = fopen(new_filename, "w")) == NULL)
+   {
+      hypre_printf("Error: can't open output file %s\n", new_filename);
+      exit(1);
+   }
+
+   hypre_BoxArrayPrintToFile(file, box_array);
+
+   fflush(file);
+   fclose(file);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_BoxArraySetSize( hypre_BoxArray  *box_array,
                        HYPRE_Int        size      )
 {
