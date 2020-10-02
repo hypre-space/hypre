@@ -3839,6 +3839,7 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    {
       C_tmp_offd = hypre_CSRMatrixCreate(num_cols_diag_A, 0, 0);
       hypre_CSRMatrixInitialize(C_tmp_offd);
+      hypre_CSRMatrixNumRownnz(C_tmp_offd) = 0;
    }
    hypre_CSRMatrixDestroy(AT_diag);
    hypre_CSRMatrixDestroy(AT_offd);
@@ -3986,7 +3987,7 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
 
    /*-----------------------------------------------------------------------
     *  Need to compute C_diag = C_tmp_diag + C_ext_diag
-    *  and  C_offd = C_tmp_offd + C_ext_offd   !!!!
+    *              an  C_offd = C_tmp_offd + C_ext_offd
     *  First generate structure
     *-----------------------------------------------------------------------*/
 
@@ -4110,7 +4111,7 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
 
         /*-----------------------------------------------------------------------
          *  Need to compute C_diag = C_tmp_diag + C_ext_diag
-         *  and  C_offd = C_tmp_offd + C_ext_offd   !!!!
+         *              and C_offd = C_tmp_offd + C_ext_offd
          *  Now fill in values
          *-----------------------------------------------------------------------*/
          memset(B_marker, -1, num_cols_diag_B*sizeof(HYPRE_Int));
@@ -4446,13 +4447,18 @@ hypre_MergeOrderedArrays( HYPRE_Int  size1,     HYPRE_Int  *array1,
    i = j = k = 0;
    while (i < size1 && j < size2)
    {
-      if (array1[i] < array2[j])
+      if (array1[i] > array2[j])
+      {
+         array3[k++] = array2[j++];
+      }
+      else if (array1[i] < array2[j])
       {
          array3[k++] = array1[i++];
       }
       else
       {
-         array3[k++] = array2[j++];
+         array3[k++] = array1[i++];
+         j++;
       }
    }
 
