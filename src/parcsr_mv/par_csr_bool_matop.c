@@ -102,7 +102,7 @@ hypre_ParBooleanMatmul( hypre_ParCSRBooleanMatrix *A,
    }
    if (num_rows_diag_A == num_cols_diag_B)
    {
-       allsquare = 1;
+      allsquare = 1;
    }
    else
    {

@@ -44,7 +44,7 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
    hypre_CSRMatrixNumNonzeros(matrix) = num_nonzeros;
 
    /* set defaults */
-   hypre_CSRMatrixOwnsData(matrix) = 1;
+   hypre_CSRMatrixOwnsData(matrix)  = 1;
    hypre_CSRMatrixNumRownnz(matrix) = num_rows;
 
    return matrix;
@@ -110,13 +110,11 @@ hypre_CSRMatrixInitialize( hypre_CSRMatrix *matrix )
 
 HYPRE_Int
 hypre_CSRMatrixSetDataOwner( hypre_CSRMatrix *matrix,
-                             HYPRE_Int              owns_data )
+                             HYPRE_Int        owns_data )
 {
-   HYPRE_Int    ierr=0;
-
    hypre_CSRMatrixOwnsData(matrix) = owns_data;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -136,7 +134,6 @@ hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
    HYPRE_Int   *Arownnz;
 
    HYPRE_Int    irownnz = 0;
-   HYPRE_Int    ierr = 0;
    HYPRE_Int    i;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -174,7 +171,7 @@ hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
 
    HYPRE_ANNOTATE_FUNC_END;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
