@@ -95,6 +95,7 @@ typedef struct hypre_SSAMGData_struct
 #define hypre_SSAMGDataLogging(ssamg_data)        ((ssamg_data) -> logging)
 #define hypre_SSAMGDataDxyz(ssamg_data)           ((ssamg_data) -> dxyz)
 #define hypre_SSAMGDataGridl(ssamg_data)          ((ssamg_data) -> grid_l)
+#define hypre_SSAMGDataAl(ssamg_data)             ((ssamg_data) -> A_l)
 #define hypre_SSAMGDataCdir(ssamg_data)           ((ssamg_data) -> cdir_l)
 #define hypre_SSAMGDataNorms(ssamg_data)          ((ssamg_data) -> norms)
 #define hypre_SSAMGDataRelNorms(ssamg_data)       ((ssamg_data) -> rel_norms)
