@@ -312,6 +312,7 @@ typedef struct hypre_ParCSRMatrix_struct
 
    HYPRE_Int             global_num_rows;
    HYPRE_Int             global_num_cols;
+   HYPRE_Int             global_num_rownnz; /* global number of nonzero rows */
    HYPRE_Int             first_row_index;
    HYPRE_Int             first_col_diag;
    /* need to know entire local range in case row_starts and col_starts
@@ -366,6 +367,7 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixComm(matrix)            ((matrix) -> comm)
 #define hypre_ParCSRMatrixGlobalNumRows(matrix)   ((matrix) -> global_num_rows)
 #define hypre_ParCSRMatrixGlobalNumCols(matrix)   ((matrix) -> global_num_cols)
+#define hypre_ParCSRMatrixGlobalNumRownnz(matrix) ((matrix) -> global_num_rownnz)
 #define hypre_ParCSRMatrixFirstRowIndex(matrix)   ((matrix) -> first_row_index)
 #define hypre_ParCSRMatrixFirstColDiag(matrix)    ((matrix) -> first_col_diag)
 #define hypre_ParCSRMatrixLastRowIndex(matrix)    ((matrix) -> last_row_index)
@@ -822,6 +824,7 @@ HYPRE_Int hypre_ParCSRMatrixDestroy ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_ParCSRMatrixInitialize ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_ParCSRMatrixSetNumNonzeros ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_ParCSRMatrixSetDNumNonzeros ( hypre_ParCSRMatrix *matrix );
+HYPRE_Int hypre_ParCSRMatrixSetNumRownnz ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_ParCSRMatrixSetDataOwner ( hypre_ParCSRMatrix *matrix , HYPRE_Int owns_data );
 HYPRE_Int hypre_ParCSRMatrixSetRowStartsOwner ( hypre_ParCSRMatrix *matrix , HYPRE_Int owns_row_starts );
 HYPRE_Int hypre_ParCSRMatrixSetColStartsOwner ( hypre_ParCSRMatrix *matrix , HYPRE_Int owns_col_starts );

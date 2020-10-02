@@ -280,6 +280,69 @@ hypre_ParCSRMatrixSetDNumNonzeros( hypre_ParCSRMatrix *matrix )
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixSetNumRownnz
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixSetNumRownnz( hypre_ParCSRMatrix *matrix )
+{
+   MPI_Comm          comm;
+   hypre_CSRMatrix  *diag = hypre_ParCSRMatrixDiag(matrix);
+   hypre_CSRMatrix  *offd = hypre_ParCSRMatrixOffd(matrix);
+
+   HYPRE_Int         local_num_rownnz;
+   HYPRE_Int         global_num_rownnz;
+   HYPRE_Int         num_rownnz_diag;
+   HYPRE_Int         num_rownnz_offd;
+
+   HYPRE_Int        *rownnz_diag;
+   HYPRE_Int        *rownnz_offd;
+
+   HYPRE_Int         i, j;
+
+   if (!matrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   comm = hypre_ParCSRMatrixComm(matrix);
+   diag = hypre_ParCSRMatrixDiag(matrix);
+   offd = hypre_ParCSRMatrixOffd(matrix);
+
+   rownnz_diag = hypre_CSRMatrixRownnz(diag);
+   rownnz_offd = hypre_CSRMatrixRownnz(diag);
+
+   num_rownnz_diag = hypre_CSRMatrixNumRownnz(diag);
+   num_rownnz_offd = hypre_CSRMatrixNumRownnz(offd);
+
+   i = j = 0;
+   local_num_rownnz = 0;
+   while (i < num_rownnz_diag && j < num_rownnz_offd)
+   {
+      local_num_rownnz++;
+      if (rownnz_diag[i] < rownnz_offd[j])
+      {
+         i++;
+      }
+      else
+      {
+         j++;
+      }
+   }
+
+   local_num_rownnz += (num_rownnz_diag - i) +
+                       (num_rownnz_offd - j);
+
+   hypre_MPI_Allreduce(&local_num_rownnz, &global_num_rownnz, 1, HYPRE_MPI_INT,
+                       hypre_MPI_SUM, comm);
+
+   hypre_ParCSRMatrixGlobalNumRownnz(matrix) = global_num_rownnz;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixSetDataOwner
  *--------------------------------------------------------------------------*/
 
