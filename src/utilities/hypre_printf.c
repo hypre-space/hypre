@@ -86,6 +86,20 @@ free_format( char *newformat )
    return 0;
 }
 
+HYPRE_Int
+hypre_ndigits( HYPRE_BigInt number )
+{
+   HYPRE_Int     ndigits = 0;
+
+   while (number)
+   {
+      number /= 10;
+      ndigits++;
+   }
+
+   return ndigits;
+}
+
 /* printf functions */
 
 HYPRE_Int
@@ -188,7 +202,18 @@ hypre_sscanf( char *s, const char *format, ...)
 
 #else
 
-/* this is used only to eliminate compiler warnings */
-HYPRE_Int hypre_printf_empty;
+HYPRE_Int
+hypre_ndigits( HYPRE_Int number )
+{
+   HYPRE_Int     ndigits = 0;
+
+   while (number)
+   {
+      number /= 10;
+      ndigits++;
+   }
+
+   return ndigits;
+}
 
 #endif

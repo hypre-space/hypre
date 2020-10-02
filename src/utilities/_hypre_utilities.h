@@ -918,6 +918,7 @@ HYPRE_Real    hypre_cimag( HYPRE_Complex value );
 
 /* hypre_printf.c */
 #ifdef HYPRE_BIGINT
+HYPRE_Int hypre_ndigits( HYPRE_BigInt number );
 HYPRE_Int hypre_printf( const char *format , ... );
 HYPRE_Int hypre_fprintf( FILE *stream , const char *format, ... );
 HYPRE_Int hypre_sprintf( char *s , const char *format, ... );
@@ -925,6 +926,7 @@ HYPRE_Int hypre_scanf( const char *format , ... );
 HYPRE_Int hypre_fscanf( FILE *stream , const char *format, ... );
 HYPRE_Int hypre_sscanf( char *s , const char *format, ... );
 #else
+HYPRE_Int hypre_ndigits( HYPRE_Int number );
 #define hypre_printf  printf
 #define hypre_fprintf fprintf
 #define hypre_sprintf sprintf
