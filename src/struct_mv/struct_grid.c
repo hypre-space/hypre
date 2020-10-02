@@ -872,14 +872,14 @@ hypre_StructGridGetMaxBoxSize(hypre_StructGrid *grid)
       box_size = hypre_BoxVolume(box);
       if (box_size > max_box_size)
       {
-	 max_box_size = box_size;
+         max_box_size = box_size;
       }
    }
    return max_box_size;
 }
 
 HYPRE_Int
-hypre_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_Int data_location )
+hypre_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_MemoryLocation data_location )
 {
    hypre_StructGridDataLocation(grid) = data_location;
 

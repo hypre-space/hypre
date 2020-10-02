@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
+#include "_hypre_struct_mv.hpp"
 #include "pfmg.h"
 
 #ifdef MAX_DEPTH
@@ -303,17 +304,18 @@ hypre_PFMGSetupInterpOp_CC0
    HYPRE_Int      *data_indices_boxi_d; /* On device */
    hypre_Index    *stencil_shape_d;
 
-#if (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)) && (HYPRE_MEMORY_HOST_ACT != HYPRE_MEMORY_SHARED)
-   data_indices_boxi_d = hypre_TAlloc(HYPRE_Int,   stencil_size, HYPRE_MEMORY_DEVICE);
-   stencil_shape_d     = hypre_TAlloc(hypre_Index, stencil_size, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(data_indices_boxi_d, data_indices[i], HYPRE_Int, stencil_size,
-                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(stencil_shape_d, stencil_shape, hypre_Index, stencil_size, 
-                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-#else
-   data_indices_boxi_d = data_indices[i];
-   stencil_shape_d     = stencil_shape;
-#endif
+   if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+   {
+      data_indices_boxi_d = hypre_TAlloc(HYPRE_Int,   stencil_size, HYPRE_MEMORY_DEVICE);
+      stencil_shape_d     = hypre_TAlloc(hypre_Index, stencil_size, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(data_indices_boxi_d, data_indices[i], HYPRE_Int, stencil_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(stencil_shape_d, stencil_shape, hypre_Index, stencil_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      data_indices_boxi_d = data_indices[i];
+      stencil_shape_d     = stencil_shape;
+   }
 
 #define DEVICE_VAR is_device_ptr(Pp0,Pp1,matrixA_data,stencil_shape_d,data_indices_boxi_d)
    hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
@@ -407,10 +409,11 @@ hypre_PFMGSetupInterpOp_CC0
                         "Warning 0 center in interpolation. Setting interp = 0.");
    }
 
-#if (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)) && (HYPRE_MEMORY_HOST_ACT != HYPRE_MEMORY_SHARED)
-   hypre_TFree(data_indices_boxi_d, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(stencil_shape_d,     HYPRE_MEMORY_DEVICE);
-#endif
+   if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+   {
+      hypre_TFree(data_indices_boxi_d, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(stencil_shape_d,     HYPRE_MEMORY_DEVICE);
+   }
 
    return hypre_error_flag;
 }

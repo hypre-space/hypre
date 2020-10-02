@@ -34,25 +34,25 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    hypre_ParCSRBlockMatrix **A_block_array;
    hypre_ParCSRBlockMatrix **P_block_array;
 
-   hypre_CSRMatrix *A_diag;
+   hypre_CSRMatrix *A_diag, *A_diag_clone;
    HYPRE_Real      *A_diag_data;
    HYPRE_Int       *A_diag_i;
 
    hypre_CSRBlockMatrix *A_block_diag;
 
-   hypre_CSRMatrix *A_offd;
+   hypre_CSRMatrix *A_offd, *A_offd_clone;
    HYPRE_Real      *A_offd_data;
    HYPRE_Int       *A_offd_i;
 
    hypre_CSRBlockMatrix *A_block_offd;
 
-   hypre_CSRMatrix *P_diag;
+   hypre_CSRMatrix *P_diag, *P_diag_clone;
    HYPRE_Real      *P_diag_data;
    HYPRE_Int       *P_diag_i;
 
    hypre_CSRBlockMatrix *P_block_diag;
 
-   hypre_CSRMatrix *P_offd;
+   hypre_CSRMatrix *P_offd, *P_offd_clone;
    HYPRE_Real      *P_offd_data;
    HYPRE_Int       *P_offd_i;
 
@@ -343,6 +343,18 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       {
          hypre_printf(" Interpolation = extended interpolation\n");
       }
+      else if (interp_type == 15)
+      {
+         hypre_printf(" Interpolation = direct interpolation with separation of weights\n");
+      }
+      else if (interp_type == 16)
+      {
+         hypre_printf(" Interpolation = extended interpolation with MMs\n");
+      }
+      else if (interp_type == 17)
+      {
+         hypre_printf(" Interpolation = extended+i interpolation with MMs\n");
+      }
       else if (interp_type == 8)
       {
          hypre_printf(" Interpolation = standard interpolation\n");
@@ -527,12 +539,28 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       else
       {
          A_diag = hypre_ParCSRMatrixDiag(A_array[level]);
-         A_diag_data = hypre_CSRMatrixData(A_diag);
-         A_diag_i = hypre_CSRMatrixI(A_diag);
+         if ( hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A_diag)) != hypre_MEMORY_HOST )
+         {
+            A_diag_clone = hypre_CSRMatrixClone_v2(A_diag, 1, HYPRE_MEMORY_HOST);
+         }
+         else
+         {
+            A_diag_clone = A_diag;
+         }
+         A_diag_data = hypre_CSRMatrixData(A_diag_clone);
+         A_diag_i = hypre_CSRMatrixI(A_diag_clone);
 
          A_offd = hypre_ParCSRMatrixOffd(A_array[level]);
-         A_offd_data = hypre_CSRMatrixData(A_offd);
-         A_offd_i = hypre_CSRMatrixI(A_offd);
+         if ( hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A_offd)) != hypre_MEMORY_HOST )
+         {
+            A_offd_clone = hypre_CSRMatrixClone_v2(A_offd, 1, HYPRE_MEMORY_HOST);
+         }
+         else
+         {
+            A_offd_clone = A_offd;
+         }
+         A_offd_data = hypre_CSRMatrixData(A_offd_clone);
+         A_offd_i = hypre_CSRMatrixI(A_offd_clone);
 
          row_starts = hypre_ParCSRMatrixRowStarts(A_array[level]);
 
@@ -585,6 +613,16 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
             }
          }
          avg_entries = global_nonzeros / ((HYPRE_Real) fine_size);
+
+         if (A_diag_clone != A_diag)
+         {
+            hypre_CSRMatrixDestroy(A_diag_clone);
+         }
+
+         if (A_offd_clone != A_offd)
+         {
+            hypre_CSRMatrixDestroy(A_offd_clone);
+         }
       }
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
@@ -799,12 +837,28 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       else
       {
          P_diag = hypre_ParCSRMatrixDiag(P_array[level]);
-         P_diag_data = hypre_CSRMatrixData(P_diag);
-         P_diag_i = hypre_CSRMatrixI(P_diag);
+         if ( hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(P_diag)) != hypre_MEMORY_HOST )
+         {
+            P_diag_clone = hypre_CSRMatrixClone_v2(P_diag, 1, HYPRE_MEMORY_HOST);
+         }
+         else
+         {
+            P_diag_clone = P_diag;
+         }
+         P_diag_data = hypre_CSRMatrixData(P_diag_clone);
+         P_diag_i = hypre_CSRMatrixI(P_diag_clone);
 
          P_offd = hypre_ParCSRMatrixOffd(P_array[level]);
-         P_offd_data = hypre_CSRMatrixData(P_offd);
-         P_offd_i = hypre_CSRMatrixI(P_offd);
+         if ( hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(P_offd)) != hypre_MEMORY_HOST )
+         {
+            P_offd_clone = hypre_CSRMatrixClone_v2(P_offd, 1, HYPRE_MEMORY_HOST);
+         }
+         else
+         {
+            P_offd_clone = P_offd;
+         }
+         P_offd_data = hypre_CSRMatrixData(P_offd_clone);
+         P_offd_i = hypre_CSRMatrixI(P_offd_clone);
 
          row_starts = hypre_ParCSRMatrixRowStarts(P_array[level]);
 
@@ -873,6 +927,16 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
          }
          avg_entries = ((HYPRE_Real) (global_nonzeros - coarse_size)) / ((HYPRE_Real) (fine_size - coarse_size));
+
+         if (P_diag_clone != P_diag)
+         {
+            hypre_CSRMatrixDestroy(P_diag_clone);
+         }
+
+         if (P_offd_clone != P_offd)
+         {
+            hypre_CSRMatrixDestroy(P_offd_clone);
+         }
       }
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION

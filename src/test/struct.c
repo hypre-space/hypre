@@ -20,6 +20,7 @@
 
 /* RDF: Why is this include here? */
 #include "_hypre_struct_mv.h"
+#include "_hypre_struct_mv.hpp"
 
 #ifdef HYPRE_DEBUG
 /*#include <cegdb.h>*/
@@ -184,7 +185,11 @@ main( hypre_int argc,
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
    /* Initialize Hypre */
-   HYPRE_Init(argc, argv);
+   HYPRE_Init();
+
+#if defined(HYPRE_USING_KOKKOS)
+   Kokkos::initialize (argc, argv);
+#endif
 
 #ifdef HYPRE_DEBUG
    /*cegdb(&argc, &argv, myid);*/
@@ -2881,6 +2886,10 @@ main( hypre_int argc,
          hypre_TFree(offsets[i], HYPRE_MEMORY_HOST);
       hypre_TFree(offsets, HYPRE_MEMORY_HOST);
    }
+
+#if defined(HYPRE_USING_KOKKOS)
+   Kokkos::finalize ();
+#endif
 
    /* Finalize Hypre */
    HYPRE_Finalize();

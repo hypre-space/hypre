@@ -15,6 +15,7 @@ ln -s config/configure.in .
 rm -rf aclocal.m4 configure autom4te.cache
 
 autoconf --include=config
+autoheader configure.in
 rm configure.in
 
 cat >> configure <<EOF

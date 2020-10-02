@@ -57,21 +57,23 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
    HYPRE_Int       rlx_coarse;
    HYPRE_Int      *grid_relax_type;
    HYPRE_Int      *num_grid_sweeps;
-   HYPRE_Real      **l1_norms;
-   HYPRE_Real    alpha, beta;
-   HYPRE_Real *u_data;
-   HYPRE_Real *v_data;
-   HYPRE_Real *l1_norms_lvl;
-   HYPRE_Real *D_inv;
-   HYPRE_Real *x_global;
-   HYPRE_Real *r_global;
-   HYPRE_Real *relax_weight;
-   HYPRE_Real *omega;
+   hypre_Vector  **l1_norms;
+   HYPRE_Real      alpha, beta;
+   HYPRE_Real     *u_data;
+   HYPRE_Real     *v_data;
+   hypre_Vector   *l1_norms_lvl;
+   HYPRE_Real     *D_inv;
+   HYPRE_Real     *x_global;
+   HYPRE_Real     *r_global;
+   HYPRE_Real     *relax_weight;
+   HYPRE_Real     *omega;
 
 #if 0
    HYPRE_Real   *D_mat;
    HYPRE_Real   *S_vec;
 #endif
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /* Acquire data and allocate storage */
 
@@ -118,6 +120,8 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
    rlx_coarse = grid_relax_type[3];
    for (level = 0; level < num_levels-1; level++)
    {
+      HYPRE_ANNOTATE_MGLEVEL_BEGIN(level);
+
       fine_grid = level;
       coarse_grid = level + 1;
 
@@ -155,7 +159,8 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
                hypre_BoomerAMGRelaxIF(A_array[fine_grid],F_array[fine_grid],
                      CF_marker_array[fine_grid], rlx_down,rlx_order,1,
                    relax_weight[fine_grid], omega[fine_grid],
-                   l1_norms[level], U_array[fine_grid], Vtemp, Ztemp);
+                   l1_norms[level] ? hypre_VectorData(l1_norms[level]) : NULL,
+                   U_array[fine_grid], Vtemp, Ztemp);
                hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
             }
          }
@@ -164,12 +169,14 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
             num_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[fine_grid]));
             for (j=0; j < num_grid_sweeps[1]; j++)
             {
-             hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
+               hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-             for (i = 0; i < num_rows; i++)
-               u_data[i] += v_data[i] / l1_norms_lvl[i];
+               for (i = 0; i < num_rows; i++)
+               {
+                  u_data[i] += v_data[i] / hypre_VectorData(l1_norms_lvl)[i];
+               }
             }
          }
 
@@ -196,9 +203,12 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
          hypre_ParCSRMatrixMatvecT(alpha,R_array[fine_grid],Vtemp,
                                       beta,F_array[coarse_grid]);
       }
+
+      HYPRE_ANNOTATE_MGLEVEL_END(level);
    }
 
    /* additive smoothing and solve coarse grid */
+   HYPRE_ANNOTATE_MGLEVEL_BEGIN(num_levels - 1);
    if (addlvl < num_levels)
    {
       if (simple > -1)
@@ -237,19 +247,24 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
       for (j=0; j < num_grid_sweeps[3]; j++)
          if (rlx_coarse == 18)
             hypre_ParCSRRelax(A_array[fine_grid], F_array[fine_grid],
-                              1, 1, l1_norms[fine_grid],
+                              1, 1,
+                              l1_norms[fine_grid] ? hypre_VectorData(l1_norms[fine_grid]) : NULL,
                               1.0, 1.0 ,0,0,0,0,
                               U_array[fine_grid], Vtemp, Ztemp);
          else
             hypre_BoomerAMGRelaxIF(A_array[fine_grid],F_array[fine_grid],
-                  NULL, rlx_coarse,0,0,
-                relax_weight[fine_grid], omega[fine_grid],
-                l1_norms[fine_grid], U_array[fine_grid], Vtemp, Ztemp);
+                                   NULL, rlx_coarse,0,0,
+                                   relax_weight[fine_grid], omega[fine_grid],
+                                   l1_norms[fine_grid] ? hypre_VectorData(l1_norms[fine_grid]) : NULL,
+                                   U_array[fine_grid], Vtemp, Ztemp);
    }
+   HYPRE_ANNOTATE_MGLEVEL_END(num_levels - 1);
 
    /* up cycle */
    for (level = num_levels-1; level > 0; level--)
    {
+      HYPRE_ANNOTATE_MGLEVEL_BEGIN(level);
+
       fine_grid = level - 1;
       coarse_grid = level;
 
@@ -264,10 +279,11 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
             /*hypre_BoomerAMGRelax(A_array[fine_grid],F_array[fine_grid],NULL,rlx_up,0,*/
             for (j=0; j < num_grid_sweeps[2]; j++)
               hypre_BoomerAMGRelaxIF(A_array[fine_grid],F_array[fine_grid],
-                    CF_marker_array[fine_grid],
-                    rlx_up,rlx_order,2,
-                relax_weight[fine_grid], omega[fine_grid],
-                l1_norms[fine_grid], U_array[fine_grid], Vtemp, Ztemp);
+                                     CF_marker_array[fine_grid],
+                                     rlx_up,rlx_order,2,
+                                     relax_weight[fine_grid], omega[fine_grid],
+                                     l1_norms[fine_grid] ? hypre_VectorData(l1_norms[fine_grid]) : NULL,
+                                     U_array[fine_grid], Vtemp, Ztemp);
          else if (rlx_order)
          {
             HYPRE_Int loc_relax_points[2];
@@ -278,15 +294,17 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
                 hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid],F_array[fine_grid],
                                             CF_marker_array[fine_grid],
                                             loc_relax_points[i],
-                                            1.0, l1_norms[fine_grid],
+                                            1.0,
+                                            l1_norms[fine_grid] ? hypre_VectorData(l1_norms[fine_grid]) : NULL,
                                             U_array[fine_grid], Vtemp);
          }
          else
             for (j=0; j < num_grid_sweeps[2]; j++)
             hypre_ParCSRRelax(A_array[fine_grid], F_array[fine_grid],
-                                 1, 1, l1_norms[fine_grid],
-                                 1.0, 1.0 ,0,0,0,0,
-                                 U_array[fine_grid], Vtemp, Ztemp);
+                              1, 1,
+                              l1_norms[fine_grid] ? hypre_VectorData(l1_norms[fine_grid]) : NULL,
+                              1.0, 1.0 ,0,0,0,0,
+                              U_array[fine_grid], Vtemp, Ztemp);
       }
       else /* additive version */
       {
@@ -296,7 +314,11 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
                                      U_array[coarse_grid],
                                      beta, U_array[fine_grid]);
       }
+
+      HYPRE_ANNOTATE_MGLEVEL_END(level);
    }
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return(Solve_err_flag);
 }
@@ -336,7 +358,7 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
    HYPRE_Real    *tmp_data;
    HYPRE_Real    *x_data;
    HYPRE_Real    *r_data;
-   HYPRE_Real    *l1_norms;
+   hypre_Vector  *l1_norms;
    HYPRE_Real    *A_tmp_diag_data;
    HYPRE_Real    *A_tmp_offd_data;
    HYPRE_Real    *D_data = NULL;
@@ -396,7 +418,7 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
    HYPRE_Int       num_nonzeros_diag;
    HYPRE_Int       num_nonzeros_offd;
 
-   HYPRE_Real  **l1_norms_ptr = NULL;
+   hypre_Vector  **l1_norms_ptr = NULL;
    /*HYPRE_Real   *relax_weight = NULL;
    HYPRE_Int      relax_type; */
    HYPRE_Int       add_rlx;
@@ -816,22 +838,24 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
       }
       else
       {
-        l1_norms = l1_norms_ptr[level];
+         l1_norms = l1_norms_ptr[level];
 #ifdef HYPRE_USING_OPENMP
 #pragma omp for private(i) HYPRE_SMP_SCHEDULE
 #endif
-        for (i=0; i < num_rows_tmp; i++)
-        {
-           D_data[i] = 1.0/l1_norms[i];
-           L_diag_i[cnt_row+i] = start_diag + A_tmp_diag_i[i+1];
-           L_offd_i[cnt_row+i] = start_offd + A_tmp_offd_i[i+1];
-        }
-        if (ns > 1)
-          for (i=0; i < num_rows_tmp; i++)
-          {
-            Atilde_diag_i[cnt_row+i] = start_diag + A_tmp_diag_i[i+1];
-            Atilde_offd_i[cnt_row+i] = start_offd + A_tmp_offd_i[i+1];
-          }
+         for (i=0; i < num_rows_tmp; i++)
+         {
+            D_data[i] = 1.0 / hypre_VectorData(l1_norms)[i];
+            L_diag_i[cnt_row+i] = start_diag + A_tmp_diag_i[i+1];
+            L_offd_i[cnt_row+i] = start_offd + A_tmp_offd_i[i+1];
+         }
+         if (ns > 1)
+         {
+            for (i=0; i < num_rows_tmp; i++)
+            {
+               Atilde_diag_i[cnt_row+i] = start_diag + A_tmp_diag_i[i+1];
+               Atilde_offd_i[cnt_row+i] = start_offd + A_tmp_offd_i[i+1];
+            }
+         }
       }
 
       if (num_procs > 1)
@@ -1021,8 +1045,8 @@ HYPRE_Int hypre_CreateDinv(void *amg_vdata)
  /* Local variables  */
    HYPRE_Int       Solve_err_flag = 0;
 
-   HYPRE_Real  **l1_norms_ptr = NULL;
-   HYPRE_Real  *l1_norms;
+   hypre_Vector  **l1_norms_ptr = NULL;
+   hypre_Vector   *l1_norms;
    HYPRE_Int l1_start;
 
    /* Acquire data and allocate storage */
@@ -1103,7 +1127,9 @@ HYPRE_Int hypre_CreateDinv(void *amg_vdata)
 #pragma omp for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i=0; i < num_rows_tmp; i++)
+         {
             D_inv[l1_start+i] = add_rlx_wt/A_tmp_diag_data[A_tmp_diag_i[i]];
+         }
       }
       else
       {
@@ -1112,7 +1138,9 @@ HYPRE_Int hypre_CreateDinv(void *amg_vdata)
 #pragma omp for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i=0; i < num_rows_tmp; i++)
-            D_inv[l1_start+i] = 1.0/l1_norms[i];
+         {
+            D_inv[l1_start+i] = 1.0 / hypre_VectorData(l1_norms)[i];
+         }
       }
       l1_start += num_rows_tmp;
    }

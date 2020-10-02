@@ -12,10 +12,10 @@ else()
 endif()
 
 # The version number.
-set (HYPRE_VERSION 2.18.2)
-set (HYPRE_DATE    2019/10/28)
+set (HYPRE_VERSION 2.20.0)
+set (HYPRE_DATE    2020/09/24)
 set (HYPRE_TIME    00:00:00)
-set (HYPRE_BUGS    hypre-support@llnl.gov)
+set (HYPRE_BUGS    https://github.com/hypre-space/hypre/issues)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
 
 project (hypre
@@ -69,6 +69,7 @@ option(HYPRE_PRINT_ERRORS            "Print HYPRE errors" OFF)
 option(HYPRE_TIMING                  "Use HYPRE timing routines" OFF)
 option(HYPRE_BUILD_EXAMPLES          "Build examples" OFF)
 option(HYPRE_BUILD_TESTS             "Build tests" OFF)
+option(HYPRE_USING_HOST_MEMORY       "Use host memory" ON)
 
 option(TPL_DSUPERLU_LIBRARIES        "List of absolute paths to SuperLU_Dist link libraries [].")
 option(TPL_DSUPERLU_INCLUDE_DIRS     "List of absolute paths to SuperLU_Dist include directories [].")

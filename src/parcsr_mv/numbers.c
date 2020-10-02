@@ -9,9 +9,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "_hypre_utilities.h"
-
-#include "numbers.h"
+#include "_hypre_parcsr_mv.h"
 
 hypre_NumbersNode * hypre_NumbersNewNode()
 /* makes a new node for a tree representing numbers */

@@ -63,9 +63,11 @@ void MemDestroy(Mem *m)
 
     /* Free all blocks of memory */
     for (i=0; i<m->num_blocks; i++)
-        free(m->blocks[i]);
+    {
+        hypre_TFree(m->blocks[i], HYPRE_MEMORY_HOST);
+    }
 
-    free(m);
+    hypre_TFree(m, HYPRE_MEMORY_HOST);
 }
 
 /*--------------------------------------------------------------------------
@@ -77,48 +79,48 @@ void MemDestroy(Mem *m)
 
 char *MemAlloc(Mem *m, HYPRE_Int size)
 {
-    HYPRE_Int req;
-    char *p;
+   HYPRE_Int req;
+   char *p;
 
-    /* Align on 16-byte boundary */
-    size = ((size + 15) / 16) * 16;
+   /* Align on 16-byte boundary */
+   size = ((size + 15) / 16) * 16;
 
-    if (m->bytes_left < size)
-    {
-        /* Allocate a new block */
-        if (m->num_blocks+1 > MEM_MAXBLOCKS)
-        {
-	    hypre_printf("MemAlloc: max number of blocks %d exceeded.\n",
-	        MEM_MAXBLOCKS);
-	    PARASAILS_EXIT;
-        }
+   if (m->bytes_left < size)
+   {
+      /* Allocate a new block */
+      if (m->num_blocks+1 > MEM_MAXBLOCKS)
+      {
+         hypre_printf("MemAlloc: max number of blocks %d exceeded.\n",
+               MEM_MAXBLOCKS);
+         PARASAILS_EXIT;
+      }
 
-	/* Size of requested block */
-	req = MAX(size, MEM_BLOCKSIZE);
+      /* Size of requested block */
+      req = MAX(size, MEM_BLOCKSIZE);
 
-        m->avail = hypre_TAlloc(char, req, HYPRE_MEMORY_HOST);
+      m->avail = hypre_TAlloc(char, req, HYPRE_MEMORY_HOST);
 
-        if (m->avail == NULL)
-        {
-	    hypre_printf("MemAlloc: request for %d bytes failed.\n", req);
-	    PARASAILS_EXIT;
-        }
+      if (m->avail == NULL)
+      {
+         hypre_printf("MemAlloc: request for %d bytes failed.\n", req);
+         PARASAILS_EXIT;
+      }
 
-        m->blocks[m->num_blocks] = m->avail;
-        m->num_blocks++;
-        m->bytes_left = req;
-	m->total_bytes += size;
-	m->bytes_alloc += req;
-	if (req > MEM_BLOCKSIZE)
-	    m->num_over++;
-    }
+      m->blocks[m->num_blocks] = m->avail;
+      m->num_blocks++;
+      m->bytes_left = req;
+      m->total_bytes += size;
+      m->bytes_alloc += req;
+      if (req > MEM_BLOCKSIZE)
+         m->num_over++;
+   }
 
-    p = m->avail;
-    m->avail += size;
-    m->bytes_left -= size;
-    m->total_bytes += size;
+   p = m->avail;
+   m->avail += size;
+   m->bytes_left -= size;
+   m->total_bytes += size;
 
-    return p;
+   return p;
 }
 
 /*--------------------------------------------------------------------------
@@ -135,7 +137,7 @@ void MemStat(Mem *m, FILE *stream, char *msg)
     hypre_fprintf(stream, "bytes_alloc: %ld\n", m->bytes_alloc);
     if (m->bytes_alloc != 0)
         hypre_fprintf(stream, "efficiency : %f\n", m->total_bytes /
-	    (HYPRE_Real) m->bytes_alloc);
+              (HYPRE_Real) m->bytes_alloc);
     hypre_fprintf(stream, "*********************\n");
     fflush(stream);
 }

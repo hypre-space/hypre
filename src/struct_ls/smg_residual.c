@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
+#include "_hypre_struct_mv.hpp"
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -56,14 +57,14 @@ hypre_SMGResidualSetup( void               *residual_vdata,
                         hypre_StructVector *b,
                         hypre_StructVector *r              )
 {
-	hypre_SMGResidualData  *residual_data = (hypre_SMGResidualData  *)residual_vdata;
+   hypre_SMGResidualData  *residual_data = (hypre_SMGResidualData  *)residual_vdata;
 
    hypre_IndexRef          base_index  = (residual_data -> base_index);
    hypre_IndexRef          base_stride = (residual_data -> base_stride);
 
    hypre_StructGrid       *grid;
    hypre_StructStencil    *stencil;
-                       
+
    hypre_BoxArray         *base_points;
    hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
@@ -124,24 +125,24 @@ hypre_SMGResidual( void               *residual_vdata,
    hypre_ComputePkg       *compute_pkg = (residual_data -> compute_pkg);
 
    hypre_CommHandle       *comm_handle;
-                       
+
    hypre_BoxArrayArray    *compute_box_aa;
    hypre_BoxArray         *compute_box_a;
    hypre_Box              *compute_box;
-                       
+
    hypre_Box              *A_data_box;
    hypre_Box              *x_data_box;
    hypre_Box              *b_data_box;
    hypre_Box              *r_data_box;
-                         
+
    HYPRE_Real             *Ap;
    HYPRE_Real             *xp;
    HYPRE_Real             *bp;
    HYPRE_Real             *rp;
-                       
+
    hypre_Index             loop_size;
    hypre_IndexRef          start;
-                       
+
    hypre_StructStencil    *stencil;
    hypre_Index            *stencil_shape;
    HYPRE_Int               stencil_size;
@@ -253,7 +254,7 @@ hypre_SMGResidual( void               *residual_vdata,
          }
       }
    }
-   
+
    hypre_IncFLOPCount(residual_data -> flops);
    hypre_EndTiming(residual_data -> time_index);
 
@@ -262,7 +263,7 @@ hypre_SMGResidual( void               *residual_vdata,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 hypre_SMGResidualSetBase( void        *residual_vdata,
                           hypre_Index  base_index,
@@ -270,7 +271,7 @@ hypre_SMGResidualSetBase( void        *residual_vdata,
 {
    hypre_SMGResidualData *residual_data = (hypre_SMGResidualData  *)residual_vdata;
    HYPRE_Int              d;
- 
+
    for (d = 0; d < 3; d++)
    {
       hypre_IndexD((residual_data -> base_index),  d)
@@ -278,7 +279,7 @@ hypre_SMGResidualSetBase( void        *residual_vdata,
       hypre_IndexD((residual_data -> base_stride), d)
          = hypre_IndexD(base_stride, d);
    }
- 
+
    return hypre_error_flag;
 }
 

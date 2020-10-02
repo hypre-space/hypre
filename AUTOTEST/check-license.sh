@@ -67,6 +67,7 @@ cat > check-license.remove <<EOF
 ./src/config/config.guess
 ./src/config/config.sub
 ./src/config/depcomp
+./src/config/HYPRE_config.h.in
 ./src/config/install-sh
 ./src/config/missing
 ./src/config/mkinstalldirs
@@ -78,6 +79,7 @@ cat > check-license.remove <<EOF
 ./src/docs/usr-manual/conf.py
 ./src/docs/usr-manual/zREADME
 ./src/examples/vis.c
+./src/utilities/hypre_cub_allocator.h
 ./src/lapack/COPYING
 ./src/nopoe
 ./src/tarch

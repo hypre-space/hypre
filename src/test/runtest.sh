@@ -103,7 +103,18 @@ function MpirunString
          shift
          RunString="srun -n$*"
          ;;
-
+      pascal*)
+         shift
+         RunString="srun -n$*"
+         ;;
+      ray*)
+         shift
+         RunString="lrun -n$*"
+         ;;
+      lassen*)
+         shift
+         RunString="lrun -n$*"
+         ;;
       *)
          shift
          if [ $NumThreads -gt 0 ] ; then
@@ -546,6 +557,7 @@ hypre_MPI_Init
 job [0-9]* queued and waiting for resources
 job [0-9]* has been allocated resources
 SLURMINFO: Job [0-9]* is pending allocation of resources.
+slurmstepd: error: _is_a_lwp:
 ATTENTION: [0-9\-]*  Couldn't create .*, job may not be checkpointable
 ATTENTION: [0-9\-]* Error opening file
 ### .*File.cc.*

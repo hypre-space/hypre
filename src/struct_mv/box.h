@@ -18,6 +18,13 @@
 #define HYPRE_MAXDIM 3
 #endif
 
+#if defined(HYPRE_USING_RAJA) || defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#define hypre_BoxLoopSetOneBlock()
+#else
+#define hypre_BoxLoopSetOneBlock zypre_BoxLoopSetOneBlock
+#endif
+#define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
+
 /*--------------------------------------------------------------------------
  * hypre_Index:
  *   This is used to define indices in index space, or dimension

@@ -11,6 +11,7 @@
  *****************************************************************************/
 
 #include "_hypre_struct_ls.h"
+#include "_hypre_struct_mv.hpp"
 
 #define DEBUG 0
 
@@ -52,16 +53,16 @@
 typedef struct
 {
    MPI_Comm              comm;
-                      
+
    HYPRE_Int             num_levels;
-                      
+
    HYPRE_Int             ndim;
    HYPRE_Int             cdir;         /* coarsening direction */
    hypre_Index           base_index;
    hypre_Index           base_stride;
 
    hypre_StructGrid    **grid_l;
-                    
+
    hypre_BoxArray       *base_points;
    hypre_BoxArray      **fine_points_l;
 
@@ -88,7 +89,7 @@ hypre_CyclicReductionCreate( MPI_Comm  comm )
    hypre_CyclicReductionData *cyc_red_data;
 
    cyc_red_data = hypre_CTAlloc(hypre_CyclicReductionData,  1, HYPRE_MEMORY_HOST);
-   
+
    (cyc_red_data -> comm) = comm;
    (cyc_red_data -> ndim) = 3;
    (cyc_red_data -> cdir) = 0;
@@ -121,10 +122,10 @@ hypre_CycRedCreateCoarseOp( hypre_StructMatrix *A,
    hypre_StructStencil   *Ac_stencil;
    HYPRE_Int              Ac_stencil_size;
    HYPRE_Int              Ac_num_ghost[] = {0, 0, 0, 0, 0, 0};
-                       
+
    HYPRE_Int              i;
    HYPRE_Int              stencil_rank;
- 
+
    /*-----------------------------------------------
     * Define Ac_stencil
     *-----------------------------------------------*/
@@ -199,7 +200,7 @@ hypre_CycRedCreateCoarseOp( hypre_StructMatrix *A,
    hypre_StructMatrixSetNumGhost(Ac, Ac_num_ghost);
 
    hypre_StructMatrixInitializeShell(Ac);
- 
+
    return Ac;
 }
 
@@ -235,7 +236,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
    HYPRE_Real             *a_cc, *a_cw, *a_ce;
    HYPRE_Real             *ac_cc, *ac_cw, *ac_ce;
-                         
+
    HYPRE_Int               offsetA;
 
    stridef = cstride;
@@ -266,7 +267,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
       /*-----------------------------------------------
        * Extract pointers for 3-point fine grid operator:
-       * 
+       *
        * a_cc is pointer for center coefficient
        * a_cw is pointer for west coefficient
        * a_ce is pointer for east coefficient
@@ -286,7 +287,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
        *
        * If A is symmetric so is Ac.  We build only the
        * lower triangular part (plus diagonal).
-       * 
+       *
        * ac_cc is pointer for center coefficient (etc.)
        *-----------------------------------------------*/
 
@@ -309,12 +310,12 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
        * to data associated with the point which we are
        * building the stencil for.  The below offsets
        * are used in refering to data associated with
-       * other points. 
+       * other points.
        *-----------------------------------------------*/
 
       hypre_SetIndex3(index,0,0,0);
       hypre_IndexD(index, cdir) = 1;
-      offsetA = hypre_BoxOffsetDistance(A_dbox,index); 
+      offsetA = hypre_BoxOffsetDistance(A_dbox,index);
 
       /*-----------------------------------------------
        * non-symmetric case
@@ -334,8 +335,8 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
             ac_cw[iAc] = -a_cw[iA] * a_cw[iAm1] / a_cc[iAm1];
 
-            ac_cc[iAc] = a_cc[iA] - a_cw[iA] * a_ce[iAm1] / a_cc[iAm1] - 
-                         a_ce[iA] * a_cw[iAp1] / a_cc[iAp1];   
+            ac_cc[iAc] = a_cc[iA] - a_cw[iA] * a_ce[iAm1] / a_cc[iAm1] -
+                         a_ce[iA] * a_cw[iAp1] / a_cc[iAp1];
 
             ac_ce[iAc] = -a_ce[iA] * a_ce[iAp1] / a_cc[iAp1];
 
@@ -362,8 +363,8 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
             ac_cw[iAc] = -a_cw[iA] * a_cw[iAm1] / a_cc[iAm1];
 
-            ac_cc[iAc] = a_cc[iA] - a_cw[iA] * a_ce[iAm1] / a_cc[iAm1] - 
-                         a_ce[iA] * a_cw[iAp1] / a_cc[iAp1];   
+            ac_cc[iAc] = a_cc[iA] - a_cw[iA] * a_ce[iAm1] / a_cc[iAm1] -
+                         a_ce[iA] * a_cw[iAp1] / a_cc[iAp1];
          }
          hypre_BoxLoop2End(iA, iAc);
 #undef DEVICE_VAR
@@ -495,13 +496,13 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    hypre_StructGrid       *grid;
 
    hypre_Box              *cbox;
-                    
+
    HYPRE_Int               l;
    HYPRE_Int               flop_divisor;
 
    HYPRE_Int               x_num_ghost[] = {0, 0, 0, 0, 0, 0};
 #if defined(HYPRE_USING_CUDA)
-   HYPRE_Int               data_location = 0;
+   HYPRE_MemoryLocation    data_location = HYPRE_MEMORY_DEVICE;
 #endif
 
    /*-----------------------------------------------------
@@ -517,7 +518,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    {
       max_levels = (cyc_red_data -> max_levels);
    }
-   
+
 
    grid_l    = hypre_TAlloc(hypre_StructGrid *,  num_levels, HYPRE_MEMORY_HOST);
    hypre_StructGridRef(grid, &grid_l[0]);
@@ -550,7 +551,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
 #if defined(HYPRE_USING_CUDA)
       hypre_StructGridDataLocation(grid_l[l+1]) = data_location;
-#endif      
+#endif
    }
    num_levels = l + 1;
 
@@ -585,7 +586,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       fine_points_l[l] = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid_l[l]));
       hypre_ProjectBoxArray(fine_points_l[l], findex, stride);
    }
-  
+
    fine_points_l[l] = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid_l[l]));
    if (num_levels == 1)
    {
@@ -597,7 +598,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    /*-----------------------------------------------------
     * Set up matrix and vector structures
     *-----------------------------------------------------*/
-   
+
    A_l  = hypre_TAlloc(hypre_StructMatrix *,  num_levels, HYPRE_MEMORY_HOST);
    x_l  = hypre_TAlloc(hypre_StructVector *,  num_levels, HYPRE_MEMORY_HOST);
 
@@ -635,14 +636,14 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       if (data_location != HYPRE_MEMORY_HOST)
       {
          hypre_StructVectorInitializeData(x_l[l+1], data);
-	 hypre_StructVectorAssemble(x_l[l+1]);
-	 data += hypre_StructVectorDataSize(x_l[l+1]);
+         hypre_StructVectorAssemble(x_l[l+1]);
+         data += hypre_StructVectorDataSize(x_l[l+1]);
       }
       else
       {
-	 hypre_StructVectorInitializeData(x_l[l+1], data_const);
-	 hypre_StructVectorAssemble(x_l[l+1]);
-	 data_const += hypre_StructVectorDataSize(x_l[l+1]);
+         hypre_StructVectorInitializeData(x_l[l+1], data_const);
+         hypre_StructVectorAssemble(x_l[l+1]);
+         data_const += hypre_StructVectorDataSize(x_l[l+1]);
       }
 #else
       hypre_StructVectorInitializeData(x_l[l+1], data);
@@ -722,10 +723,10 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
 
    if (num_levels > 1)
    {
-      (cyc_red_data -> solve_flops) +=  
+      (cyc_red_data -> solve_flops) +=
          hypre_StructVectorGlobalSize(x_l[l])/2;
    }
-   
+
 
    /*-----------------------------------------------------
     * Finalize some things
@@ -774,7 +775,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
    hypre_StructVector  **x_l             = (cyc_red_data -> x_l);
    hypre_ComputePkg    **down_compute_pkg_l = (cyc_red_data -> down_compute_pkg_l);
    hypre_ComputePkg    **up_compute_pkg_l   = (cyc_red_data -> up_compute_pkg_l);
-                    
+
    hypre_StructGrid     *fgrid;
    HYPRE_Int            *fgrid_ids;
    hypre_StructGrid     *cgrid;
@@ -782,30 +783,30 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
    HYPRE_Int            *cgrid_ids;
 
    hypre_CommHandle     *comm_handle;
-                     
+
    hypre_BoxArrayArray  *compute_box_aa;
    hypre_BoxArray       *compute_box_a;
    hypre_Box            *compute_box;
-                     
+
    hypre_Box            *A_dbox;
    hypre_Box            *x_dbox;
    hypre_Box            *b_dbox;
    hypre_Box            *xc_dbox;
-                     
+
    HYPRE_Real           *Ap, *Awp, *Aep;
    HYPRE_Real           *xp, *xwp, *xep;
    HYPRE_Real           *bp;
    HYPRE_Real           *xcp;
-                     
+
    hypre_Index           cindex;
    hypre_Index           stride;
-                       
+
    hypre_Index           index;
    hypre_Index           loop_size;
    hypre_Index           start;
    hypre_Index           startc;
    hypre_Index           stridec;
-                     
+
    HYPRE_Int             compute_i, fi, ci, j, l;
 
    hypre_BeginTiming(cyc_red_data -> time_index);
@@ -868,7 +869,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
     * F-points.  The coarse-grid solution vector contains
     * the restricted (injected) fine-grid residual.
     *--------------------------------------------------*/
- 
+
    for (l = 0; l < num_levels - 1 ; l++)
    {
       /* set cindex and stride */
@@ -896,7 +897,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                              A_dbox, start, stride, Ai,
                              x_dbox, start, stride, xi);
          {
-            xp[xi] /= Ap[Ai]; 
+            xp[xi] /= Ap[Ai];
          }
          hypre_BoxLoop2End(Ai, xi);
 #undef DEVICE_VAR
@@ -968,14 +969,14 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                hypre_StructMapFineToCoarse(start, cindex, stride, startc);
 
                hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-                           
+
 #define DEVICE_VAR is_device_ptr(xcp,xp,Awp,xwp,Aep,xep)
                hypre_BoxLoop3Begin(hypre_StructVectorNDim(x), loop_size,
                                    A_dbox, start, stride, Ai,
                                    x_dbox, start, stride, xi,
                                    xc_dbox, startc, stridec, xci);
                {
-                  xcp[xci] = xp[xi] - Awp[Ai] * xwp[xi+xwp_offset] - 
+                  xcp[xci] = xp[xi] - Awp[Ai] * xwp[xi+xwp_offset] -
                                       Aep[Ai] * xep[xi+xep_offset];
                }
                hypre_BoxLoop3End(Ai, xi, xci);
@@ -1020,7 +1021,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
       {
          if (Ap[Ai] != 0.0)
          {
-            xp[xi] /= Ap[Ai]; 
+            xp[xi] /= Ap[Ai];
          }
       }
       hypre_BoxLoop2End(Ai, xi);
@@ -1163,7 +1164,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
 /*--------------------------------------------------------------------------
  * hypre_CyclicReductionSetBase
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 hypre_CyclicReductionSetBase( void        *cyc_red_vdata,
                               hypre_Index  base_index,
@@ -1171,7 +1172,7 @@ hypre_CyclicReductionSetBase( void        *cyc_red_vdata,
 {
    hypre_CyclicReductionData *cyc_red_data = (hypre_CyclicReductionData *)cyc_red_vdata;
    HYPRE_Int                d;
- 
+
    for (d = 0; d < 3; d++)
    {
       hypre_IndexD((cyc_red_data -> base_index),  d) =
@@ -1179,20 +1180,20 @@ hypre_CyclicReductionSetBase( void        *cyc_red_vdata,
       hypre_IndexD((cyc_red_data -> base_stride), d) =
          hypre_IndexD(base_stride, d);
    }
- 
+
    return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_CyclicReductionSetCDir
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 hypre_CyclicReductionSetCDir( void        *cyc_red_vdata,
                               HYPRE_Int    cdir )
 {
    hypre_CyclicReductionData *cyc_red_data = (hypre_CyclicReductionData *)cyc_red_vdata;
- 
+
    (cyc_red_data -> cdir) = cdir;
 
    return hypre_error_flag;
@@ -1246,10 +1247,10 @@ hypre_CyclicReductionDestroy( void *cyc_red_vdata )
 
 HYPRE_Int
 hypre_CyclicReductionSetMaxLevel( void   *cyc_red_vdata,
-				  HYPRE_Int   max_level  )
+                                  HYPRE_Int   max_level  )
 {
    hypre_CyclicReductionData *cyc_red_data = (hypre_CyclicReductionData *)cyc_red_vdata;
    (cyc_red_data -> max_levels) = max_level;
- 
+
    return hypre_error_flag;
 }

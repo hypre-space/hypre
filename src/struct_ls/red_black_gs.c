@@ -12,6 +12,7 @@
  *****************************************************************************/
 
 #include "_hypre_struct_ls.h"
+#include "_hypre_struct_mv.hpp"
 #include "red_black_gs.h"
 
 /*--------------------------------------------------------------------------
@@ -82,7 +83,7 @@ hypre_RedBlackGSSetup( void               *relax_vdata,
    hypre_StructStencil   *stencil;
    hypre_Index            diag_index;
    hypre_ComputeInfo     *compute_info;
-                       
+
    /*----------------------------------------------------------
     * Find the matrix diagonal
     *----------------------------------------------------------*/
@@ -133,33 +134,33 @@ hypre_RedBlackGS( void               *relax_vdata,
    HYPRE_Int              ndim = hypre_StructMatrixNDim(A);
 
    hypre_CommHandle      *comm_handle;
-                        
+
    hypre_BoxArrayArray   *compute_box_aa;
    hypre_BoxArray        *compute_box_a;
    hypre_Box             *compute_box;
-                        
+
    hypre_Box             *A_dbox;
    hypre_Box             *b_dbox;
    hypre_Box             *x_dbox;
-                        
+
    HYPRE_Int              Astart, Ani, Anj;
    HYPRE_Int              bstart, bni, bnj;
    HYPRE_Int              xstart, xni, xnj;
    HYPRE_Int              xoff0, xoff1, xoff2, xoff3, xoff4, xoff5;
-                        
+
    HYPRE_Real            *Ap;
    HYPRE_Real            *Ap0, *Ap1, *Ap2, *Ap3, *Ap4, *Ap5;
    HYPRE_Real            *bp;
    HYPRE_Real            *xp;
-                        
+
    hypre_IndexRef         start;
    hypre_Index            loop_size;
-                        
+
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
    HYPRE_Int              stencil_size;
    HYPRE_Int              offd[6];
-                        
+
    HYPRE_Int              iter, rb, redblack, d;
    HYPRE_Int              compute_i, i, j;
    HYPRE_Int              ni, nj, nk;
@@ -297,7 +298,7 @@ hypre_RedBlackGS( void               *relax_vdata,
             }
          }
       }
-      
+
       rb = (rb + 1) % 2;
       iter++;
    }
@@ -415,7 +416,7 @@ hypre_RedBlackGS( void               *relax_vdata,
                                              xstart,xni,xnj,xi);
                      {
                         xp[xi] =
-                           (bp[bi] - 
+                           (bp[bi] -
                             Ap0[Ai] * xp[xi + xoff0] -
                             Ap1[Ai] * xp[xi + xoff1] -
                             Ap2[Ai] * xp[xi + xoff2] -
@@ -436,7 +437,7 @@ hypre_RedBlackGS( void               *relax_vdata,
                                              xstart,xni,xnj,xi);
                      {
                         xp[xi] =
-                           (bp[bi] - 
+                           (bp[bi] -
                             Ap0[Ai] * xp[xi + xoff0] -
                             Ap1[Ai] * xp[xi + xoff1] -
                             Ap2[Ai] * xp[xi + xoff2] -
@@ -455,7 +456,7 @@ hypre_RedBlackGS( void               *relax_vdata,
                                              xstart,xni,xnj,xi);
                      {
                         xp[xi] =
-                           (bp[bi] - 
+                           (bp[bi] -
                             Ap0[Ai] * xp[xi + xoff0] -
                             Ap1[Ai] * xp[xi + xoff1]) / Ap[Ai];
                      }
@@ -471,7 +472,7 @@ hypre_RedBlackGS( void               *relax_vdata,
       rb = (rb + 1) % 2;
       iter++;
    }
-   
+
    (relax_data -> num_iterations) = iter / 2;
 
    /*-----------------------------------------------------------------------

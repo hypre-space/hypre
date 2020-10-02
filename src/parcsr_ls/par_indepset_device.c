@@ -10,6 +10,7 @@
  *****************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
+#include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_CUDA)
 __global__ void
@@ -223,7 +224,7 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
    }
    else
    {
-      curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle);
+      curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle());
 
       HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, 2747 + my_id) );
 

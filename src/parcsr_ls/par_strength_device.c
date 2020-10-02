@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
+#include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_CUDA)
 
@@ -64,6 +65,8 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    HYPRE_Int                num_sends;
    HYPRE_Int                index, start, j;
 
+   HYPRE_MemoryLocation     memory_location = hypre_ParCSRMatrixMemoryLocation(A);
+
    /*--------------------------------------------------------------
     * Compute a  ParCSR strength matrix, S.
     *
@@ -81,14 +84,14 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    num_nonzeros_diag = hypre_CSRMatrixNumNonzeros(A_diag);
    num_nonzeros_offd = hypre_CSRMatrixNumNonzeros(A_offd);
 
-   S_diag_i = hypre_CTAlloc(HYPRE_Int, num_variables+1, HYPRE_MEMORY_SHARED);
-   S_offd_i = hypre_CTAlloc(HYPRE_Int, num_variables+1, HYPRE_MEMORY_SHARED);
-   S_temp_diag_j = hypre_CTAlloc(HYPRE_Int, num_nonzeros_diag, HYPRE_MEMORY_DEVICE);
-   S_temp_offd_j = hypre_CTAlloc(HYPRE_Int, num_nonzeros_offd, HYPRE_MEMORY_DEVICE);
+   S_diag_i = hypre_TAlloc(HYPRE_Int, num_variables+1, memory_location);
+   S_offd_i = hypre_TAlloc(HYPRE_Int, num_variables+1, memory_location);
+   S_temp_diag_j = hypre_TAlloc(HYPRE_Int, num_nonzeros_diag, HYPRE_MEMORY_DEVICE);
+   S_temp_offd_j = hypre_TAlloc(HYPRE_Int, num_nonzeros_offd, HYPRE_MEMORY_DEVICE);
 
    if (num_functions > 1)
    {
-      dof_func_offd_dev = hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_DEVICE);
+      dof_func_offd_dev = hypre_TAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_DEVICE);
    }
 
   /*-------------------------------------------------------------------
@@ -104,7 +107,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 
    if (num_functions > 1 )
    {
-      HYPRE_Int *int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
+      HYPRE_Int *int_buf_data = hypre_TAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
       index = 0;
       for (i = 0; i < num_sends; i++)
       {
@@ -120,7 +123,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 
       hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
 
-      dof_func_dev = hypre_CTAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_DEVICE);
+      dof_func_dev = hypre_TAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(dof_func_dev, dof_func, HYPRE_Int, num_variables, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
    }
 
@@ -141,18 +144,17 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 
    HYPRE_Int *tmp, S_num_nonzeros_diag, S_num_nonzeros_offd;
 
-   hypre_TMemcpy(&S_num_nonzeros_diag, &S_diag_i[num_variables], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(&S_num_nonzeros_offd, &S_offd_i[num_variables], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(&S_num_nonzeros_diag, &S_diag_i[num_variables], HYPRE_Int, 1, HYPRE_MEMORY_HOST, memory_location);
+   hypre_TMemcpy(&S_num_nonzeros_offd, &S_offd_i[num_variables], HYPRE_Int, 1, HYPRE_MEMORY_HOST, memory_location);
 
-   S_diag_j = hypre_TAlloc(HYPRE_Int, S_num_nonzeros_diag, HYPRE_MEMORY_SHARED);
-   S_offd_j = hypre_TAlloc(HYPRE_Int, S_num_nonzeros_offd, HYPRE_MEMORY_SHARED);
+   S_diag_j = hypre_TAlloc(HYPRE_Int, S_num_nonzeros_diag, memory_location);
+   S_offd_j = hypre_TAlloc(HYPRE_Int, S_num_nonzeros_offd, memory_location);
 
-   /* remove those -1's */
-   tmp = HYPRE_THRUST_CALL(copy_if, S_temp_diag_j, S_temp_diag_j + num_nonzeros_diag, S_diag_j, is_nonnegative());
+   tmp = HYPRE_THRUST_CALL(copy_if, S_temp_diag_j, S_temp_diag_j + num_nonzeros_diag, S_diag_j, is_nonnegative<HYPRE_Int>());
 
    hypre_assert(S_num_nonzeros_diag == tmp - S_diag_j);
 
-   tmp = HYPRE_THRUST_CALL(copy_if, S_temp_offd_j, S_temp_offd_j + num_nonzeros_offd, S_offd_j, is_nonnegative());
+   tmp = HYPRE_THRUST_CALL(copy_if, S_temp_offd_j, S_temp_offd_j + num_nonzeros_offd, S_offd_j, is_nonnegative<HYPRE_Int>());
 
    hypre_assert(S_num_nonzeros_offd == tmp - S_offd_j);
 
@@ -171,6 +173,8 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    hypre_CSRMatrixJ(S_diag) = S_diag_j;
    hypre_CSRMatrixI(S_offd) = S_offd_i;
    hypre_CSRMatrixJ(S_offd) = S_offd_j;
+   hypre_CSRMatrixMemoryLocation(S_diag) = memory_location;
+   hypre_CSRMatrixMemoryLocation(S_offd) = memory_location;
 
    hypre_ParCSRMatrixCommPkg(S) = NULL;
 
@@ -178,12 +182,17 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(S), hypre_ParCSRMatrixColMapOffd(A),
                  HYPRE_Int, num_cols_offd, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
+   hypre_ParCSRMatrixSocDiagJ(S) = S_temp_diag_j;
+   hypre_ParCSRMatrixSocOffdJ(S) = S_temp_offd_j;
+
    *S_ptr = S;
 
    hypre_TFree(dof_func_offd_dev, HYPRE_MEMORY_DEVICE);
    hypre_TFree(dof_func_dev,      HYPRE_MEMORY_DEVICE);
+   /*
    hypre_TFree(S_temp_diag_j,     HYPRE_MEMORY_DEVICE);
    hypre_TFree(S_temp_offd_j,     HYPRE_MEMORY_DEVICE);
+   */
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_CREATES] += hypre_MPI_Wtime();
@@ -219,8 +228,10 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
              dof_func      - vector over nonzero elements of A_diag, indicating the degree of freedom
              dof_func_offd - vector over nonzero elements of A_offd, indicating the degree of freedom
 
-      Output: S_temp_diag_j - S_diag_j vector before compression, i.e.,elements that are -1 should be removed
-              S_temp_offd_j - S_offd_j vector before compression, i.e.,elements that are -1 should be removed
+      Output: S_temp_diag_j - S_diag_j vector before compression, i.e.,elements that are -1, or -2 should be removed
+                              strong connections: same as A_diag_j; weak: -1; diagonal: -2
+              S_temp_offd_j - S_offd_j vector before compression, i.e.,elements that are -1, or -2 should be removed
+                              strong connections: same as A_offd_j; weak: -1;
               jS_diag       - S_diag_i vector for compressed S_diag
               jS_offd       - S_offd_i vector for compressed S_offd
     */
@@ -327,6 +338,12 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
          S_temp_diag_j[i] = cond * (1 + read_only_load(&A_diag_j[i])) - 1;
          row_nnz_diag += cond;
       }
+   }
+
+   /* !!! mark diagonal as -2 !!! */
+   if (diag_pos >= 0)
+   {
+      S_temp_diag_j[diag_pos] = -2;
    }
 
    for (HYPRE_Int i = p_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_offd); i += HYPRE_WARP_SIZE)

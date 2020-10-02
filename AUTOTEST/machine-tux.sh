@@ -50,6 +50,8 @@ mv -f check-int.??? $output_dir
 mv -f check-double.??? $output_dir
 ./test.sh check-mpi.sh $src_dir
 mv -f check-mpi.??? $output_dir
+./test.sh check-headers.sh $src_dir
+mv -f check-headers.??? $output_dir
 
 # Basic build and run tests
 mo="-j test"
@@ -117,6 +119,11 @@ co="--with-openmp"
 RO="-ams -ij -sstruct -struct -lobpcg -rt -D HYPRE_NO_SAVED -nthreads 2"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $RO
 ./renametest.sh basic $output_dir/basic--with-openmp
+
+co="--with-openmp --enable-hopscotch"
+RO="-ij -sstruct -struct -lobpcg -rt -D HYPRE_NO_SAVED -nthreads 2"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $RO
+./renametest.sh basic $output_dir/basic--with-concurrent-hopscotch
 
 co="--enable-single --enable-debug"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: -single

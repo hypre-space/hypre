@@ -38,19 +38,20 @@ shift
 # Basic build and run tests
 mo="-j test"
 eo=""
-roij="-ij -rt -mpibind -rtol 1e-3 -atol 1e-3"
+roij="-ij -ams -rt -mpibind -rtol 1e-3 -atol 1e-3"
 ross="-struct -sstruct -rt -mpibind -rtol 1e-6 -atol 1e-6"
 rost="-struct -rt -mpibind -rtol 1e-8 -atol 1e-8"
+rocuda="-cuda_lassen -rt -mpibind"
 
 # CUDA with UM
-co="--with-cuda --enable-unified-memory --enable-persistent --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' HYPRE_CUDA_SM=70"
+co="--with-cuda --enable-unified-memory --enable-persistent --enable-cub --enable-debug --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' HYPRE_CUDA_SM=70"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
 ./renametest.sh basic $output_dir/basic-cuda-um-ij
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ross
 ./renametest.sh basic $output_dir/basic-cuda-um-struct-sstruct
 
 # CUDA with UM [shared library, no run]
-co="--with-cuda --enable-unified-memory --with-openmp --enable-hopscotch --enable-shared --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' HYPRE_CUDA_SM=70"
+co="--with-cuda --enable-unified-memory --with-openmp --enable-hopscotch --enable-shared --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' HYPRE_CUDA_SM=70"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-cuda-um-shared
 #./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
@@ -60,15 +61,15 @@ co="--with-cuda --enable-unified-memory --with-openmp --enable-hopscotch --enabl
 
 # OMP 4.5 with UM
 co="--with-device-openmp --enable-unified-memory --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' HYPRE_CUDA_SM=70"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
-./renametest.sh basic $output_dir/basic-deviceomp-um-ij
+#./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
+#./renametest.sh basic $output_dir/basic-deviceomp-um-ij
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ross
 ./renametest.sh basic $output_dir/basic-deviceomp-um-struct-sstruct
 
 # OMP 4.5 with UM [shared library, no run]
-co="--with-device-openmp --enable-unified-memory --enable-shared --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029:1500-030:1501-308\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029:1500-030:1501-308\\' HYPRE_CUDA_SM=70"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo
-./renametest.sh basic $output_dir/basic-deviceomp-um-shared
+#co="--with-device-openmp --enable-unified-memory --enable-shared --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029:1500-030:1501-308\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029:1500-030:1501-308\\' HYPRE_CUDA_SM=70"
+#./test.sh basic.sh $src_dir -co: $co -mo: $mo
+#./renametest.sh basic $output_dir/basic-deviceomp-um-shared
 #./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
 #./renametest.sh basic $output_dir/basic-deviceomp-um-shared-ij
 #./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ross
@@ -81,12 +82,15 @@ co="--with-device-openmp --enable-unified-memory --enable-shared --with-extra-CF
 #./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ross
 #./renametest.sh basic $output_dir/basic-deviceomp-um-debug-struct-sstruct
 
-# CUDA w.o UM, only struct
-#co="--with-cuda --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' HYPRE_CUDA_SM=70"
-#./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $rost
-#./renametest.sh basic $output_dir/basic-cuda-nonum-struct
+# CUDA w.o UM
+co="--with-cuda --enable-debug --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' HYPRE_CUDA_SM=70"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $rost
+./renametest.sh basic $output_dir/basic-cuda-nonum-struct
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $rocuda
+./renametest.sh basic $output_dir/basic-cuda-nonum-cuda
 
-# OMP4.5 w.o UM, only struct [in debug mode]
+
+# OMP 4.5 w.o UM, only struct [in debug mode]
 co="--with-device-openmp --enable-debug --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' HYPRE_CUDA_SM=70"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $rost
 ./renametest.sh basic $output_dir/basic-deviceomp-nonum-debug-struct
@@ -101,5 +105,4 @@ for errfile in $( find $output_dir ! -size 0 -name "*.err" )
 do
    echo $errfile >&2
 done
-
 

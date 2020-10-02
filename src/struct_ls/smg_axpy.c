@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
+#include "_hypre_struct_mv.hpp"
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -20,15 +21,15 @@ hypre_SMGAxpy( HYPRE_Real          alpha,
    HYPRE_Int         ndim = hypre_StructVectorNDim(x);
    hypre_Box        *x_data_box;
    hypre_Box        *y_data_box;
-                    
+
    HYPRE_Real       *xp;
    HYPRE_Real       *yp;
-                    
+
    hypre_BoxArray   *boxes;
    hypre_Box        *box;
    hypre_Index       loop_size;
    hypre_IndexRef    start;
-                    
+
    HYPRE_Int         i;
 
    box = hypre_BoxCreate(ndim);

@@ -34,20 +34,7 @@ HYPRE_INC_INSTALL = @HYPRE_INCINSTALL@
 HYPRE_LIB_SUFFIX = @HYPRE_LIBSUFFIX@
 
 .SUFFIXES:
-.SUFFIXES: .o .f .c .C .cxx .cc .cu
-
-.f.o:
-	$(FC) $(FFLAGS) -c $< 
-.c.o:
-	$(CC) $(CFLAGS) -c $< 
-.C.o:
-	$(CXX) $(CXXFLAGS) -c $<
-.cxx.o:
-	$(CXX) $(CXXFLAGS) -c $<
-.cc.o:
-	$(CXX) $(CXXFLAGS) -c $<
-#.cu.o:
-#	$(CUCC) $(CUFLAGS) -c $<
+.SUFFIXES: .o .obj .f .c .C .cxx .cc
 
 FC       = @FC@
 FFLAGS   = @FFLAGS@ @FCFLAGS@ $(FC_COMPILE_FLAGS)
@@ -58,8 +45,26 @@ CFLAGS   = @CFLAGS@ @DEFS@ $(C_COMPILE_FLAGS)
 CXX      = @CXX@
 CXXFLAGS = @CXXFLAGS@ @DEFS@ $(CXX_COMPILE_FLAGS)
 
-#CUCC     = @CUCC@
-#CUFLAGS  = @CUFLAGS@ @DEFS@ ${CU_COMPILE_FLAGS}
+CUCC     = @CUCC@
+CUFLAGS  = @CUFLAGS@ @DEFS@ ${C_COMPILE_FLAGS}
+
+.f.o:
+	$(FC) $(FFLAGS) -c $<
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+.C.o:
+	$(CXX) $(CXXFLAGS) -c $<
+.cxx.o:
+	$(CXX) $(CXXFLAGS) -c $<
+.cc.o:
+	$(CXX) $(CXXFLAGS) -c $<
+ifeq ($(CUCC), )
+.c.obj:
+	$(CC) $(CFLAGS) -c $< -o $@
+else
+.c.obj:
+	$(CUCC) $(CUFLAGS) -c $< -o $@
+endif
 
 LINK_FC  = @LINK_FC@
 LINK_CC  = @LINK_CC@
@@ -88,13 +93,13 @@ FLIBS   = @FLIBS@
 INCLUDES = @CALIPER_INCLUDE@ @HYPRE_RAJA_INCLUDE@ @HYPRE_KOKKOS_INCLUDE@ @HYPRE_CUDA_INCL@ @HYPRE_NAP_INCLUDE@
 
 ##################################################################
-##  LAPACK Library Flags 
+##  LAPACK Library Flags
 ##################################################################
 LAPACKLIBS      = @LAPACKLIBS@
 LAPACKLIBDIRS   = @LAPACKLIBDIRS@
 
 ##################################################################
-##  BLAS Library Flags 
+##  BLAS Library Flags
 ##################################################################
 BLASLIBS        = @BLASLIBS@
 BLASLIBDIRS     = @BLASLIBDIRS@

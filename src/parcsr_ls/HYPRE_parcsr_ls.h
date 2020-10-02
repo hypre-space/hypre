@@ -187,7 +187,7 @@ HYPRE_Int HYPRE_BoomerAMGSetConvergeType(HYPRE_Solver solver,
 /**
  * (Optional) Set the convergence tolerance, if BoomerAMG is used
  * as a solver. If it is used as a preconditioner, it should be set to 0.
- * The default is 1.e-7.
+ * The default is 1.e-6.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetTol(HYPRE_Solver solver,
                                 HYPRE_Real   tol);
@@ -418,10 +418,10 @@ HYPRE_Int HYPRE_BoomerAMGSetNodalDiag(HYPRE_Solver solver,
  *    - 0  : classical modified interpolation
  *    - 1  : LS interpolation (for use with GSMG)
  *    - 2  : classical modified interpolation for hyperbolic PDEs
- *    - 3  : direct interpolation (with separation of weights)
+ *    - 3  : direct interpolation (with separation of weights) (also for GPU use)
  *    - 4  : multipass interpolation
  *    - 5  : multipass interpolation (with separation of weights)
- *    - 6  : extended+i interpolation
+ *    - 6  : extended+i interpolation (also for GPU use)
  *    - 7  : extended+i (if no common C neighbor) interpolation
  *    - 8  : standard interpolation
  *    - 9  : standard interpolation (with separation of weights)
@@ -430,7 +430,11 @@ HYPRE_Int HYPRE_BoomerAMGSetNodalDiag(HYPRE_Solver solver,
  *           with diagonalized diagonal blocks
  *    - 12 : FF interpolation
  *    - 13 : FF1 interpolation
- *    - 14 : extended interpolation
+ *    - 14 : extended interpolation (also for GPU use)
+ *    - 15 : interpolation with adaptive weights (GPU use only)
+ *    - 16 : extended interpolation in matrix-matrix form
+ *    - 17 : extended+i interpolation in matrix-matrix form
+ *    - 18 : extended+e interpolation in matrix-matrix form
  *
  * The default is ext+i interpolation (interp_type 6) trunctated to at most 4
  * elements per row. (see HYPRE_BoomerAMGSetPMaxElmts).
@@ -469,6 +473,9 @@ HYPRE_Int HYPRE_BoomerAMGSetSepWeight(HYPRE_Solver solver,
  *    - 2 : 2-stage standard interpolation
  *    - 3 : 2-stage extended interpolation
  *    - 4 : multipass interpolation
+ *    - 5 : 2-stage extended interpolation in matrix-matrix form
+ *    - 6 : 2-stage extended+i interpolation in matrix-matrix form
+ *    - 7 : 2-stage extended+e interpolation in matrix-matrix form
  **/
 HYPRE_Int HYPRE_BoomerAMGSetAggInterpType(HYPRE_Solver solver,
                                           HYPRE_Int    agg_interp_type);
@@ -1139,6 +1146,7 @@ HYPRE_Int HYPRE_BoomerAMGInitGridRelaxation(HYPRE_Int    **num_grid_sweeps_ptr,
 /**
  * (Optional) If rap2 not equal 0, the triple matrix product RAP is
  * replaced by two matrix products.
+ * (Required for triple matrix product generation on GPUs)
  **/
 HYPRE_Int HYPRE_BoomerAMGSetRAP2(HYPRE_Solver solver,
                                  HYPRE_Int    rap2);
@@ -1146,6 +1154,7 @@ HYPRE_Int HYPRE_BoomerAMGSetRAP2(HYPRE_Solver solver,
 /**
  * (Optional) If mod_rap2 not equal 0, the triple matrix product RAP is
  * replaced by two matrix products with modularized kernels
+ * (Required for triple matrix product generation on GPUs)
  **/
 HYPRE_Int HYPRE_BoomerAMGSetModuleRAP2(HYPRE_Solver solver,
                                        HYPRE_Int    mod_rap2);
@@ -1153,6 +1162,7 @@ HYPRE_Int HYPRE_BoomerAMGSetModuleRAP2(HYPRE_Solver solver,
 /**
  * (Optional) If set to 1, the local interpolation transposes will
  * be saved to use more efficient matvecs instead of matvecTs
+ * (Recommended for efficient use on GPUs)
  **/
 HYPRE_Int HYPRE_BoomerAMGSetKeepTranspose(HYPRE_Solver solver,
                                       HYPRE_Int    keepTranspose);
@@ -1188,13 +1198,19 @@ HYPRE_Int HYPRE_BoomerAMGSetCoordinates (HYPRE_Solver  solver,
  *
  * @param solver [IN] solver or preconditioner
  * @param cgrid [IN/ OUT] preallocated array. On return, contains grid hierarchy info.
- **/ 
-HYPRE_Int HYPRE_BoomerAMGGetGridHierarchy(HYPRE_Solver solver, 
+ **/
+HYPRE_Int HYPRE_BoomerAMGGetGridHierarchy(HYPRE_Solver solver,
                                                   HYPRE_Int *cgrid );
 
 #ifdef HYPRE_USING_DSUPERLU
 /**
  * HYPRE_BoomerAMGSetDSLUThreshold
+ *
+ * Usage:
+ *  Set slu_threshold >= max_coarse_size (from HYPRE_BoomerAMGSetMaxCoarseSize(...))
+ *  to turn on use of superLU for the coarse grid solve. SuperLU is used if the
+ *  coarse grid size > max_coarse_size and the grid level is < (max_num_levels - 1)
+ *  (set with HYPRE_BoomerAMGSetMaxLevels(...)).
  **/
 
 HYPRE_Int HYPRE_BoomerAMGSetDSLUThreshold (HYPRE_Solver solver,
@@ -1251,6 +1267,149 @@ HYPRE_Int HYPRE_BoomerAMGSetIsolatedFPoints(HYPRE_Solver  solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGSetSabs (HYPRE_Solver solver,
                                   HYPRE_Int Sabs );
+
+/**@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name ParCSR BoomerAMGDD Solver and Preconditioner
+ *
+ * Communication reducing solver and preconditioner built on top of algebraic multigrid
+ *
+ * @{
+ **/
+
+/**
+ * Create a solver object.
+ **/
+HYPRE_Int HYPRE_BoomerAMGDDCreate( HYPRE_Solver *solver );
+
+/**
+ * Destroy a solver object.
+ **/
+HYPRE_Int HYPRE_BoomerAMGDDDestroy( HYPRE_Solver solver );
+
+/**
+ * Set up the BoomerAMGDD solver or preconditioner.
+ * If used as a preconditioner, this function should be passed
+ * to the iterative solver \e SetPrecond function.
+ *
+ * @param solver [IN] object to be set up.
+ * @param A [IN] ParCSR matrix used to construct the solver/preconditioner.
+ * @param b Ignored by this function.
+ * @param x Ignored by this function.
+ **/
+HYPRE_Int HYPRE_BoomerAMGDDSetup( HYPRE_Solver       solver,
+                                  HYPRE_ParCSRMatrix A,
+                                  HYPRE_ParVector    b,
+                                  HYPRE_ParVector    x );
+
+/**
+ * Solve the system or apply AMG-DD as a preconditioner.
+ * If used as a preconditioner, this function should be passed
+ * to the iterative solver \e SetPrecond function.
+ *
+ * @param solver [IN] solver or preconditioner object to be applied.
+ * @param A [IN] ParCSR matrix, matrix of the linear system to be solved
+ * @param b [IN] right hand side of the linear system to be solved
+ * @param x [OUT] approximated solution of the linear system to be solved
+ **/
+HYPRE_Int HYPRE_BoomerAMGDDSolve( HYPRE_Solver       solver,
+                                  HYPRE_ParCSRMatrix A,
+                                  HYPRE_ParVector    b,
+                                  HYPRE_ParVector    x );
+
+/**
+ * (Optional) Set the number of pre- and post-relaxations per level for
+ * AMG-DD inner FAC cycles. Default is 1.
+ **/
+HYPRE_Int
+HYPRE_BoomerAMGDDSetFACNumRelax( HYPRE_Solver solver,
+                                 HYPRE_Int    amgdd_fac_num_relax );
+
+/**
+ * (Optional) Set the number of inner FAC cycles per AMG-DD iteration.
+ * Default is 2.
+ **/
+HYPRE_Int
+HYPRE_BoomerAMGDDSetFACNumCycles( HYPRE_Solver solver,
+                                  HYPRE_Int    amgdd_fac_num_cycles );
+
+/**
+ * (Optional) Set the cycle type for the AMG-DD inner FAC cycles.
+ * 1 (default) = V-cycle, 2 = W-cycle, 3 = F-cycle
+ **/
+HYPRE_Int
+HYPRE_BoomerAMGDDSetFACCycleType( HYPRE_Solver solver,
+                                  HYPRE_Int    amgdd_fac_cycle_type );
+
+/**
+ * (Optional) Set the relaxation type for the AMG-DD inner FAC cycles.
+ * 0 = Jacobi, 1 = Gauss-Seidel, 2 = ordered Gauss-Seidel, 3 (default) = C/F L1-scaled Jacobi
+ **/
+HYPRE_Int
+HYPRE_BoomerAMGDDSetFACRelaxType( HYPRE_Solver solver,
+                                  HYPRE_Int    amgdd_fac_relax_type );
+
+/**
+ * (Optional) Set the relaxation weight for the AMG-DD inner FAC cycles. Default is 1.0.
+ **/
+HYPRE_Int
+HYPRE_BoomerAMGDDSetFACRelaxWeight( HYPRE_Solver solver,
+                                    HYPRE_Real   amgdd_fac_relax_weight );
+
+/**
+ * (Optional) Set the AMG-DD start level. Default is 0.
+ **/
+HYPRE_Int
+HYPRE_BoomerAMGDDSetStartLevel( HYPRE_Solver solver,
+                                HYPRE_Int    start_level );
+
+/**
+ * (Optional) Set the AMG-DD padding. Default is 1.
+ **/
+HYPRE_Int
+HYPRE_BoomerAMGDDSetPadding( HYPRE_Solver solver,
+                             HYPRE_Int    padding );
+
+/**
+ * (Optional) Set the AMG-DD number of ghost layers. Default is 1.
+ **/
+HYPRE_Int
+HYPRE_BoomerAMGDDSetNumGhostLayers( HYPRE_Solver solver,
+                                    HYPRE_Int    num_ghost_layers );
+
+/**
+ * (Optional) Pass a custom user-defined function as a relaxation method for the AMG-DD FAC cycles.
+ * Function should have the following form, where amgdd_solver is of type hypre_ParAMGDDData* and level is the level on which to relax:
+ * HYPRE_Int userFACRelaxation( HYPRE_Solver amgdd_solver, HYPRE_Int level )
+ **/
+HYPRE_Int
+HYPRE_BoomerAMGDDSetUserFACRelaxation( HYPRE_Solver solver,
+   HYPRE_Int (*userFACRelaxation)( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param ) );
+
+/**
+ * (Optional) Get the underlying AMG hierarchy as a HYPRE_Solver object.
+ **/
+HYPRE_Int
+HYPRE_BoomerAMGDDGetAMG( HYPRE_Solver  solver,
+                         HYPRE_Solver *amg_solver );
+
+/**
+ * Returns the norm of the final relative residual.
+ **/
+HYPRE_Int
+HYPRE_BoomerAMGDDGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
+                                               HYPRE_Real   *rel_resid_norm );
+
+/**
+ * Returns the number of iterations taken.
+ **/
+HYPRE_Int
+HYPRE_BoomerAMGDDGetNumIterations( HYPRE_Solver   solver,
+                                   HYPRE_Int     *num_iterations );
 
 /**@}*/
 
@@ -2734,7 +2893,7 @@ HYPRE_Int HYPRE_ParCSRHybridSolve(HYPRE_Solver       solver,
                                   HYPRE_ParVector    b,
                                   HYPRE_ParVector    x);
 /**
- *  Set the convergence tolerance for the Krylov solver. The default is 1.e-7.
+ *  Set the convergence tolerance for the Krylov solver. The default is 1.e-6.
  **/
 HYPRE_Int HYPRE_ParCSRHybridSetTol(HYPRE_Solver solver,
                                    HYPRE_Real   tol);
@@ -3229,6 +3388,9 @@ HYPRE_ParCSRHybridSetNumGridSweeps(HYPRE_Solver  solver,
                                    HYPRE_Int    *num_grid_sweeps);
 
 
+HYPRE_Int
+HYPRE_ParCSRHybridGetSetupSolveTime( HYPRE_Solver solver,
+                                     HYPRE_Real  *time    );
 /**@}*/
 
 /*--------------------------------------------------------------------------
@@ -3345,6 +3507,43 @@ HYPRE_Int HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
  * @{
  **/
 
+#ifdef HYPRE_USING_DSUPERLU
+/**
+ * Create a MGR direct solver object
+ **/
+HYPRE_Int HYPRE_MGRDirectSolverCreate( HYPRE_Solver *solver );
+
+/**
+ * Destroy a MGR direct solver object
+ **/
+HYPRE_Int HYPRE_MGRDirectSolverDestroy( HYPRE_Solver solver );
+
+/**
+ * Setup the MGR direct solver using DSUPERLU
+ * @param solver [IN] object to be set up.
+ * @param A [IN] ParCSR matrix used to construct the solver/preconditioner.
+ * @param b right-hand-side of the linear system to be solved (Ignored by this function).
+ * @param x approximate solution of the linear system to be solved (Ignored by this function).
+ **/
+HYPRE_Int HYPRE_MGRDirectSolverSetup( HYPRE_Solver solver,
+                         HYPRE_ParCSRMatrix A,
+                         HYPRE_ParVector b,
+                         HYPRE_ParVector x      );
+
+ /**
+ * Solve the system using DSUPERLU.
+ *
+ * @param solver [IN] solver or preconditioner object to be applied.
+ * @param A [IN] ParCSR matrix, matrix of the linear system to be solved (Ignored by this function).
+ * @param b [IN] right hand side of the linear system to be solved
+ * @param x [OUT] approximated solution of the linear system to be solved
+ **/
+HYPRE_Int HYPRE_MGRDirectSolverSolve( HYPRE_Solver solver,
+                         HYPRE_ParCSRMatrix A,
+                         HYPRE_ParVector b,
+                         HYPRE_ParVector x      );
+#endif
+
 /**
  * Create a solver object
  **/
@@ -3396,14 +3595,14 @@ HYPRE_Int HYPRE_MGRSolve( HYPRE_Solver solver,
  * @param block_coarse_indexes [IN] index for each block coarse point per level
  **/
 HYPRE_Int HYPRE_MGRSetCpointsByContiguousBlock( HYPRE_Solver solver,
-                         HYPRE_Int  block_size, 
+                         HYPRE_Int  block_size,
                          HYPRE_Int max_num_levels,
-                         HYPRE_BigInt *idx_array, 
-                         HYPRE_Int *num_block_coarse_points, 
+                         HYPRE_BigInt *idx_array,
+                         HYPRE_Int *num_block_coarse_points,
                          HYPRE_Int  **block_coarse_indexes);
 
 /**
- * Set the block data (by grid points) and prescribe the coarse indexes per block 
+ * Set the block data (by grid points) and prescribe the coarse indexes per block
  * for each reduction level.
  *
  * @param solver [IN] solver or preconditioner object
@@ -3417,6 +3616,28 @@ HYPRE_Int HYPRE_MGRSetCpointsByBlock( HYPRE_Solver solver,
                          HYPRE_Int max_num_levels,
                          HYPRE_Int *num_block_coarse_points,
                          HYPRE_Int  **block_coarse_indexes);
+
+/*--------------------------------------------------------------------------
+ * HYPRE_Int HYPRE_MGRSetCpointsByPointMarkerArray
+ *--------------------------------------------------------------------------*/
+/**
+ * Set the coarse indices for the levels using an array of tags for all the
+ * local degrees of freedom.
+ * TODO: Rename the function to make it more descriptive.
+ *
+ * @param solver [IN] solver or preconditioner object
+ * @param block_size [IN] system block size
+ * @param max_num_levels [IN] maximum number of reduction levels
+ * @param num_block_coarse_points [IN] number of coarse points per block per level
+ * @param lvl_block_coarse_indexes [IN] indices for the coarse points per level
+ * @param point_marker_array [IN] array of tags for the local degrees of freedom
+ **/
+HYPRE_Int HYPRE_MGRSetCpointsByPointMarkerArray( HYPRE_Solver solver,
+                         HYPRE_Int  block_size,
+                         HYPRE_Int  max_num_levels,
+                         HYPRE_Int  *num_block_coarse_points,
+                         HYPRE_Int  **lvl_block_coarse_indexes,
+                         HYPRE_Int  *point_marker_array);
 
 /**
  * (Optional) Set non C-points to F-points.
@@ -3511,7 +3732,7 @@ HYPRE_MGRSetCoarseGridMethod(HYPRE_Solver solver, HYPRE_Int *cg_method );
 
 /**
  * (Optional) Set the number of functions for F-relaxation V-cycle.
- * For problems like elasticity, one may want to perform coarsening and 
+ * For problems like elasticity, one may want to perform coarsening and
  * interpolation for block matrices. The number of functions corresponds
  * to the number of scalar PDEs in the system.
  **/
@@ -3589,7 +3810,7 @@ HYPRE_Int HYPRE_MGRSetFSolver(HYPRE_Solver          solver,
                              HYPRE_PtrToParSolverFcn  fine_grid_solver_setup,
                              HYPRE_Solver          fsolver );
 
-HYPRE_Int HYPRE_MGRBuildAffNew(HYPRE_ParCSRMatrix A,
+HYPRE_Int HYPRE_MGRBuildAff(HYPRE_ParCSRMatrix A,
                                HYPRE_Int *CF_marker,
                                HYPRE_Int debug_flag,
                                HYPRE_ParCSRMatrix *A_ff);
@@ -3622,6 +3843,17 @@ HYPRE_MGRSetPrintLevel( HYPRE_Solver solver,
                         HYPRE_Int print_level );
 
 /**
+ * (Optional) Set the threshold to compress the coarse grid at each level
+ * Use threshold = 0.0 if no truncation is applied. Otherwise, set the threshold
+ * value for dropping entries for the coarse grid.
+ * The default is 0.0.
+ **/
+HYPRE_Int
+HYPRE_MGRSetTruncateCoarseGridThreshold( HYPRE_Solver solver,
+                        HYPRE_Real threshold);
+
+
+/**
  * (Optional) Requests logging of solver diagnostics.
  * Requests additional computations for diagnostic and similar
  * data to be logged by the user. Default to 0 for do nothing.  The latest
@@ -3641,7 +3873,7 @@ HYPRE_MGRSetMaxIter( HYPRE_Solver solver,
 
 /**
  * (Optional) Set the convergence tolerance for the MGR solver.
- * Use tol = 0.0 if MGR is used as a preconditioner. The default is 1.e-7.
+ * Use tol = 0.0 if MGR is used as a preconditioner. The default is 1.e-6.
  **/
 HYPRE_Int
 HYPRE_MGRSetTol( HYPRE_Solver solver,
@@ -3703,10 +3935,10 @@ HYPRE_MGRGetFinalRelativeResidualNorm(  HYPRE_Solver solver,
 /**
  * @name ParCSR ILU Solver
  *
- * (Parallel) ILU smoother 
+ * (Parallel) ILU smoother
  *
  * @{
- **/                                                       
+ **/
 
 /**
  * Create a solver object
@@ -3721,12 +3953,12 @@ HYPRE_Int HYPRE_ILUDestroy( HYPRE_Solver solver );
 /**
  * Setup the ILU solver or preconditioner.
  * If used as a preconditioner, this function should be passed
- * to the iterative solver \e SetPrecond function.  
+ * to the iterative solver \e SetPrecond function.
  *
  * @param solver [IN] object to be set up.
  * @param A [IN] ParCSR matrix used to construct the solver/preconditioner.
  * @param b right-hand-side of the linear system to be solved (Ignored by this function).
- * @param x approximate solution of the linear system to be solved (Ignored by this function).  
+ * @param x approximate solution of the linear system to be solved (Ignored by this function).
  **/
 HYPRE_Int HYPRE_ILUSetup( HYPRE_Solver solver,
                          HYPRE_ParCSRMatrix A,
@@ -3756,21 +3988,21 @@ HYPRE_ILUSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter );
 
 /**
  * (Optional) Set the convergence tolerance for the ILU smoother.
- * Use tol = 0.0 if ILU is used as a preconditioner. The default is 1.e-7. 
+ * Use tol = 0.0 if ILU is used as a preconditioner. The default is 1.e-6.
  **/
 HYPRE_Int
 HYPRE_ILUSetTol( HYPRE_Solver solver, HYPRE_Real tol );
 
 /**
  * (Optional) Set the level of fill k, for level-based ILU(k)
- * The default is 0 (for ILU(0)). 
+ * The default is 0 (for ILU(0)).
  **/
 HYPRE_Int
 HYPRE_ILUSetLevelOfFill( HYPRE_Solver solver, HYPRE_Int lfil );
 
 /**
  * (Optional) Set the max non-zeros per row in L and U factors (for ilut)
- * The default is 1000. 
+ * The default is 1000.
  **/
 HYPRE_Int
 HYPRE_ILUSetMaxNnzPerRow( HYPRE_Solver solver, HYPRE_Int nzmax );
@@ -3778,7 +4010,7 @@ HYPRE_ILUSetMaxNnzPerRow( HYPRE_Solver solver, HYPRE_Int nzmax );
 /**
  * (Optional) Set the threshold for dropping in L and U factors (for ilut).
  * Any fill-in less than this threshold is dropped in the factorization.
- * The default is 1.0e-2. 
+ * The default is 1.0e-2.
  **/
 HYPRE_Int
 HYPRE_ILUSetDropThreshold( HYPRE_Solver solver, HYPRE_Real threshold );
@@ -3789,7 +4021,7 @@ HYPRE_ILUSetDropThreshold( HYPRE_Solver solver, HYPRE_Real threshold );
  *    - threshold[0] : threshold for matrix B (upper left).
  *    - threshold[1] : threshold for matrix E and F.
  *    - threshold[2] : threshold for matrix S (Schur Complement).
- * The default is 1.0e-2. 
+ * The default is 1.0e-2.
  **/
 HYPRE_Int
 HYPRE_ILUSetDropThresholdArray( HYPRE_Solver solver, HYPRE_Real *threshold );
@@ -3797,7 +4029,7 @@ HYPRE_ILUSetDropThresholdArray( HYPRE_Solver solver, HYPRE_Real *threshold );
 /**
  * (Optional) Set the threshold for dropping in Newton–Schulz–Hotelling iteration (for NHS-ILU).
  * Any entries less than this threshold is dropped when forming the approximate inverse matrix.
- * The default is 1.0e-2.  
+ * The default is 1.0e-2.
  **/
 HYPRE_Int
 HYPRE_ILUSetNSHDropThreshold( HYPRE_Solver solver, HYPRE_Real threshold );
@@ -3810,7 +4042,7 @@ HYPRE_ILUSetNSHDropThreshold( HYPRE_Solver solver, HYPRE_Real threshold );
  *    - threshold[0] : threshold for Minimal Residual iteration (create initial guess for NSH).
  *    - threshold[1] : threshold for Newton–Schulz–Hotelling iteration.
  *
- * The default is 1.0e-2. 
+ * The default is 1.0e-2.
  **/
 HYPRE_Int
 HYPRE_ILUSetNSHDropThresholdArray( HYPRE_Solver solver, HYPRE_Real *threshold );

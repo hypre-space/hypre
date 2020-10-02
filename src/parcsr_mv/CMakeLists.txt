@@ -14,6 +14,7 @@ set(SRCS
   F90_HYPRE_parcsr_vector.c
   F90_parcsr_matrix.c
   F90_par_vector.c
+  gen_fffc.c
   HYPRE_parcsr_matrix.c
   HYPRE_parcsr_vector.c
   new_commpkg.c
@@ -30,6 +31,7 @@ set(SRCS
   par_vector.c
   par_make_system.c
   par_csr_triplemat.c
+  par_csr_matop_device.c
 )
 
 target_sources(HYPRE

@@ -37,7 +37,7 @@ hypre_LocateAssummedPartition(MPI_Comm comm, HYPRE_BigInt row_start, HYPRE_BigIn
    HYPRE_Int        complete;
 
    /*HYPRE_Int        locate_row_start[2]; */
-   HYPRE_Int        locate_ranges;
+   /*HYPRE_Int        locate_ranges;*/
 
    HYPRE_Int        locate_row_count, rows_found;
 
@@ -189,13 +189,13 @@ hypre_LocateAssummedPartition(MPI_Comm comm, HYPRE_BigInt row_start, HYPRE_BigIn
    /*locate_row_start[0]=0;
    locate_row_start[1]=0;*/
 
-   locate_ranges = 0;
+   /*locate_ranges = 0;*/
 
    if (part->row_end < row_start  || row_end < part->row_start  )
    /*no overlap - so all of my assumed rows */
    {
       /*locate_row_start[0] = part->row_start;*/
-      locate_ranges++;
+      /*locate_ranges++;*/
       locate_row_count += part->row_end - part->row_start + 1;
    }
    else /* the two regions overlap */
@@ -203,7 +203,7 @@ hypre_LocateAssummedPartition(MPI_Comm comm, HYPRE_BigInt row_start, HYPRE_BigIn
       if (part->row_start < row_start)
       {/* check for locate rows on the low end of the local range */
          /*locate_row_start[0] = part->row_start;*/
-         locate_ranges++;
+         /*locate_ranges++;*/
          locate_row_count += (row_start-1) - part->row_start + 1;
       }
       if (row_end < part->row_end) /* check the high end */
@@ -216,7 +216,7 @@ hypre_LocateAssummedPartition(MPI_Comm comm, HYPRE_BigInt row_start, HYPRE_BigIn
            {
            locate_row_start[0] = row_end +1;
            }*/
-         locate_ranges++;
+         /*locate_ranges++;*/
          locate_row_count += part->row_end - (row_end + 1) + 1;
       }
    }
@@ -307,9 +307,9 @@ hypre_LocateAssummedPartition(MPI_Comm comm, HYPRE_BigInt row_start, HYPRE_BigIn
 
 hypre_IJAssumedPart*
 hypre_AssumedPartitionCreate(MPI_Comm comm,
-                             HYPRE_Int global_num,
-                             HYPRE_Int start,
-                             HYPRE_Int end)
+                             HYPRE_BigInt global_num,
+                             HYPRE_BigInt start,
+                             HYPRE_BigInt end)
 {
    hypre_IJAssumedPart *apart;
    HYPRE_Int myid;

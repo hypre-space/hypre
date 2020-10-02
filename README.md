@@ -12,14 +12,15 @@ SPDX-License-Identifier: (Apache-2.0 OR MIT)
 preconditioners and solvers featuring multigrid methods for the solution of
 large, sparse linear systems of equations on massively parallel computers.
 
-Documentation can be found [here](https://hypre.readthedocs.io/en/latest/).
+For documentation, see our [readthedocs page](https://hypre.readthedocs.io/en/latest/).
 
 To install HYPRE, please see either the documentation or the file [INSTALL.md](./INSTALL.md).
 
 An overview of the HYPRE release history can be found in the file [CHANGELOG](./CHANGELOG).
 
 We appreciate feedback from users.  Please submit comments, suggestions, and
-issue reports to hypre-support@llnl.gov.
+report issues on our [issues page](https://github.com/hypre-space/hypre/issues).
+See also [SUPPORT.md](./SUPPORT.md).
 
 
 License
