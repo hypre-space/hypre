@@ -17,6 +17,9 @@
  * index space that contains index 'origin' and has stride 'stride'.
  *
  * If 'origin' is NULL, a zero origin is used.
+ *
+ * This is equivalent to:
+ *    index = ceil( (index - origin) / stride ) * stride
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -55,6 +58,9 @@ hypre_SnapIndexPos( hypre_Index    index,
  * index space that contains index 'origin' and has stride 'stride'.
  *
  * If 'origin' is NULL, a zero origin is used.
+ *
+ * This is equivalent to:
+ *    index = floor( (index - origin) / stride ) * stride
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
