@@ -45,7 +45,14 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
 
    /* set defaults */
    hypre_CSRMatrixOwnsData(matrix)  = 1;
-   hypre_CSRMatrixNumRownnz(matrix) = num_rows;
+   if (num_nonzeros)
+   {
+      hypre_CSRMatrixNumRownnz(matrix) = num_rows;
+   }
+   else
+   {
+      hypre_CSRMatrixNumRownnz(matrix) = 0;
+   }
 
    return matrix;
 }

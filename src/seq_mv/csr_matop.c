@@ -31,6 +31,7 @@
  *       in A and B. To remove those, use hypre_CSRMatrixDeleteZeros
  *
  * TODO: Add OpenMP support
+ *       Use rownnz_A and rownnz_B. Compute rownnz_C
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix *
@@ -54,7 +55,7 @@ hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
 
    HYPRE_Int         ia, ib, ic, jcol, num_nonzeros;
    HYPRE_Int         pos;
-   HYPRE_Int         *marker;
+   HYPRE_Int        *marker;
 
    if (nrows_A != nrows_B || ncols_A != ncols_B)
    {
@@ -62,13 +63,9 @@ hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
       return NULL;
    }
 
-   marker = hypre_CTAlloc(HYPRE_Int, ncols_A);
    C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1);
-
-   for (ia = 0; ia < ncols_A; ia++)
-   {
-      marker[ia] = -1;
-   }
+   marker = hypre_CTAlloc(HYPRE_Int, ncols_A);
+   memset(marker, -1, ncols_A*sizeof(HYPRE_Int));
 
    num_nonzeros = 0;
    C_i[0] = 0;
@@ -97,9 +94,7 @@ hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
    hypre_CSRMatrixInitialize(C);
    C_j = hypre_CSRMatrixJ(C);
    C_data = hypre_CSRMatrixData(C);
-
-   for (ia = 0; ia < ncols_A; ia++)
-      marker[ia] = -1;
+   memset(marker, -1, ncols_A*sizeof(HYPRE_Int));
 
    pos = 0;
    for (ic = 0; ic < nrows_A; ic++)
@@ -130,6 +125,7 @@ hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
    }
 
    hypre_TFree(marker);
+
    return C;
 }
 
