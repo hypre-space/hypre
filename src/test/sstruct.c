@@ -2229,7 +2229,7 @@ PrintUsage( char *progname,
       hypre_printf("  -rhsone            : rhs is vector with unit components\n");
       hypre_printf("  -rhszero           : rhs is vector with zero components\n");
       hypre_printf("  -xone              : solution (x) is vector with unit components\n");
-      hypre_printf("  -x0rand            : initial solution (x0) is vector with random components \n");
+      hypre_printf("  -x0rand            : initial solution (x0) has random components \n");
       hypre_printf("  -tol <val>         : convergence tolerance (def 1e-6)\n");
       hypre_printf("  -itr <val>         : maximum number of iterations (def 100);\n");
       hypre_printf("  -k <val>           : dimension Krylov space for GMRES (def 10);\n");
@@ -2237,7 +2237,9 @@ PrintUsage( char *progname,
       hypre_printf("  -rel_change        : conv based on relative change of x (def 0);\n");
       hypre_printf("  -kprint            : print level for krylov solvers  (def 0);\n");
       hypre_printf("  -lvl <val>         : maximum number of levels (default 100);\n");
-      hypre_printf("  -v <n_pre> <n_post>: SysPFMG and Struct- # of pre and post relax\n");
+      hypre_printf("  -v <n_pre>         : # of pre-relaxation sweeps (def 1)\n");
+      hypre_printf("     <n_post>        : # of pos-relaxation sweeps (def 1)\n");
+      hypre_printf("     <n_coarse>      : # of coarse grid solver sweeps (def 1)\n");
       hypre_printf("  -skip <s>          : SysPFMG and Struct- skip relaxation (0 or 1)\n");
       hypre_printf("  -rap <r>           : Struct- coarse grid operator type\n");
       hypre_printf("                        0 - Galerkin (default)\n");
@@ -2370,7 +2372,7 @@ main( hypre_int argc,
    HYPRE_Int             rap;
    HYPRE_Int             relax;
    HYPRE_Int             maxLevels;
-   HYPRE_Int             n_pre, n_post;
+   HYPRE_Int             n_pre, n_post, n_coarse;
    HYPRE_Int             skip;
    HYPRE_Int             jump;
 
@@ -2524,10 +2526,11 @@ main( hypre_int argc,
    print_system = 0;
    rhs_value = 1.0;
    sol_type = 1;
-   sol0_type = 1;
+   sol0_type = 0;
    skip = 0;
    n_pre  = 1;
    n_post = 1;
+   n_coarse = 1;
    vis = 0;
    seed = 1;
 
@@ -2640,10 +2643,15 @@ main( hypre_int argc,
          arg_index++;
          sol_type = 1;
       }
-      else if ( strcmp(argv[arg_index], "-x0rand") == 0 )
+      else if ( strcmp(argv[arg_index], "-x0one") == 0 )
       {
          arg_index++;
          sol0_type = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-x0rand") == 0 )
+      {
+         arg_index++;
+         sol0_type = 2;
       }
       else if ( strcmp(argv[arg_index], "-tol") == 0 )
       {
@@ -2680,6 +2688,7 @@ main( hypre_int argc,
          arg_index++;
          n_pre = atoi(argv[arg_index++]);
          n_post = atoi(argv[arg_index++]);
+         n_coarse = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-skip") == 0 )
       {
@@ -3422,10 +3431,14 @@ main( hypre_int argc,
    switch (sol0_type)
    {
       case 0:
-         HYPRE_SStructVectorSetConstantValues(x, 1.0);
+         HYPRE_SStructVectorSetConstantValues(x, 0.0);
          break;
 
       case 1:
+         HYPRE_SStructVectorSetConstantValues(x, 1.0);
+         break;
+
+      case 2:
          HYPRE_SStructVectorSetRandomValues(x, seed);
          break;
    }
@@ -3749,6 +3762,7 @@ main( hypre_int argc,
       }
       HYPRE_SStructSSAMGSetNumPreRelax(solver, n_pre);
       HYPRE_SStructSSAMGSetNumPostRelax(solver, n_post);
+      HYPRE_SStructSSAMGSetNumCoarseRelax(solver, n_coarse);
       HYPRE_SStructSSAMGSetPrintLevel(solver, printLevel);
       HYPRE_SStructSSAMGSetLogging(solver, 2);
       HYPRE_SStructSSAMGSetup(solver, A, b, x);
@@ -3938,6 +3952,7 @@ main( hypre_int argc,
          }
          HYPRE_SStructSSAMGSetNumPreRelax(precond, n_pre);
          HYPRE_SStructSSAMGSetNumPostRelax(precond, n_post);
+         HYPRE_SStructSSAMGSetNumCoarseRelax(precond, n_coarse);
          HYPRE_SStructSSAMGSetPrintLevel(precond, 1);
          HYPRE_SStructSSAMGSetLogging(precond, 1);
 
@@ -4448,7 +4463,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
          HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_pre, 1);
          HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_post, 2);
-         HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_pre, 3);
+         HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_coarse, 3);
          if (usr_jacobi_weight)
          {
             HYPRE_BoomerAMGSetRelaxWt(par_precond, jacobi_weight);
