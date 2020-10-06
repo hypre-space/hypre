@@ -440,40 +440,41 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
          convert_boxaa[part][var] = hypre_BoxArrayArrayCreate(convert_boxaa_size, ndim);
 
          k = kk = 0;
-         hypre_ForBoxArrayI(i, convert_boxaa[part][var])
+         hypre_ForBoxArrayI(i, pbnd_boxaa)
          {
             pbnd_boxa      = hypre_BoxArrayArrayBoxArray(pbnd_boxaa, i);
-            convert_boxa   = hypre_BoxArrayArrayBoxArray(convert_boxaa[part][var], kk);
             convert_box_id = hypre_BoxArrayArrayID(pbnd_boxaa, i);
             grid_box_id    = hypre_StructGridID(sgrid, k);
+            convert_boxa   = hypre_BoxArrayArrayBoxArray(convert_boxaa[part][var], kk);
 
-            if (convert_box_id == grid_box_id)
+            /* Find matching box id */
+            while (convert_box_id != grid_box_id)
             {
-               grid_box = hypre_BoxArrayBox(grid_boxes, k);
+               k++;
+               hypre_assert(k < hypre_StructGridNumBoxes(sgrid));
+               grid_box_id = hypre_StructGridID(sgrid, k);
+            }
+            grid_box = hypre_BoxArrayBox(grid_boxes, k);
 
-               if (hypre_BoxArraySize(pbnd_boxa))
+            if (hypre_BoxArraySize(pbnd_boxa))
+            {
+               hypre_ForBoxI(j, pbnd_boxa)
                {
-                  hypre_ForBoxI(j, pbnd_boxa)
-                  {
-                     box = hypre_BoxArrayBox(pbnd_boxa, j);
-                     hypre_CopyBox(box, grow_box);
-                     hypre_BoxGrowByValue(grow_box, 1);
-                     hypre_IntersectBoxes(grow_box, grid_box, convert_box);
+                  box = hypre_BoxArrayBox(pbnd_boxa, j);
+                  hypre_CopyBox(box, grow_box);
+                  hypre_BoxGrowByValue(grow_box, 1);
+                  hypre_IntersectBoxes(grow_box, grid_box, convert_box);
 
-                     hypre_AppendBox(convert_box, convert_boxa);
-                  }
-
-                  /* Eliminate duplicated entries */
-                  hypre_UnionBoxes(convert_boxa);
-
-                  /* Update convert_boxaa */
-                  hypre_BoxArrayArrayID(convert_boxaa[part][var], kk) = convert_box_id;
-                  kk++;
+                  hypre_AppendBox(convert_box, convert_boxa);
                }
 
-               /* Go to next grid box */
-               k++;
-            } /* if (grid_box_id == convert_box_id) */
+               /* Eliminate duplicated entries */
+               hypre_UnionBoxes(convert_boxa);
+
+               /* Update convert_boxaa */
+               hypre_BoxArrayArrayID(convert_boxaa[part][var], kk) = convert_box_id;
+               kk++;
+            }
          } /* loop over grid_boxes */
 
          hypre_BoxArrayArraySize(convert_boxaa[part][var]) = kk;

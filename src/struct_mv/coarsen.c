@@ -319,6 +319,7 @@ hypre_AdaptiveCoarsenBoxArrayArray( hypre_BoxArrayArray   *boxaa,
 
    HYPRE_Int              count_box;
    HYPRE_Int              count_boxa;
+   HYPRE_Int              box_id;
    HYPRE_Int              i, j ;
 
    /* Allocate box */
@@ -329,7 +330,8 @@ hypre_AdaptiveCoarsenBoxArrayArray( hypre_BoxArrayArray   *boxaa,
    hypre_ForBoxArrayI(i, boxaa)
    {
       boxa   = hypre_BoxArrayArrayBoxArray(boxaa, i);
-      refbox = hypre_BoxArrayBox(refboxa, i);
+      box_id = hypre_BoxArrayArrayID(boxaa, i);
+      refbox = hypre_BoxArrayBox(refboxa, box_id); // BinarySearch ?
       hypre_ForBoxI(j, boxa)
       {
          hypre_CopyBox(hypre_BoxArrayBox(boxa, j), box);
@@ -350,7 +352,9 @@ hypre_AdaptiveCoarsenBoxArrayArray( hypre_BoxArrayArray   *boxaa,
    hypre_ForBoxArrayI(i, boxaa)
    {
       boxa   = hypre_BoxArrayArrayBoxArray(boxaa, i);
-      refbox = hypre_BoxArrayBox(refboxa, i);
+      box_id = hypre_BoxArrayArrayID(boxaa, i);
+      refbox = hypre_BoxArrayBox(refboxa, box_id);
+
       count_box = 0;
       hypre_ForBoxI(j, boxa)
       {
