@@ -3953,7 +3953,7 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetNumPreRelax(precond, n_pre);
          HYPRE_SStructSSAMGSetNumPostRelax(precond, n_post);
          HYPRE_SStructSSAMGSetNumCoarseRelax(precond, n_coarse);
-         HYPRE_SStructSSAMGSetPrintLevel(precond, 1);
+         HYPRE_SStructSSAMGSetPrintLevel(precond, printLevel);
          HYPRE_SStructSSAMGSetLogging(precond, 1);
 
          HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
