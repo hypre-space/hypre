@@ -736,8 +736,10 @@ hypre_BoxArrayCreate( HYPRE_Int size,
    hypre_BoxArraySize(box_array)      = size;
    hypre_BoxArrayAllocSize(box_array) = size;
    hypre_BoxArrayNDim(box_array)      = ndim;
+   hypre_BoxArrayIDs(box_array)       = hypre_CTAlloc(HYPRE_Int, size);
    for (i = 0; i < size; i++)
    {
+      hypre_BoxArrayID(box_array, i) = i;
       box = hypre_BoxArrayBox(box_array, i);
       hypre_BoxNDim(box) = ndim;
    }
@@ -754,6 +756,7 @@ hypre_BoxArrayDestroy( hypre_BoxArray *box_array )
    if (box_array)
    {
       hypre_TFree(hypre_BoxArrayBoxes(box_array));
+      hypre_TFree(hypre_BoxArrayIDs(box_array));
       hypre_TFree(box_array);
    }
 
@@ -848,6 +851,8 @@ hypre_BoxArraySetSize( hypre_BoxArray  *box_array,
       alloc_size = size + hypre_BoxArrayExcess;
       hypre_BoxArrayBoxes(box_array) = hypre_TReAlloc(hypre_BoxArrayBoxes(box_array),
                                                       hypre_Box, alloc_size);
+      hypre_BoxArrayIDs(box_array) = hypre_TReAlloc(hypre_BoxArrayIDs(box_array),
+                                                    HYPRE_Int, alloc_size);
       hypre_BoxArrayAllocSize(box_array) = alloc_size;
 
       for (i = old_alloc_size; i < alloc_size; i++)
@@ -883,6 +888,7 @@ hypre_BoxArrayClone( hypre_BoxArray *box_array )
    {
       hypre_CopyBox(hypre_BoxArrayBox(box_array, i),
                     hypre_BoxArrayBox(new_box_array, i));
+      hypre_BoxArrayID(new_box_array, i) = hypre_BoxArrayID(box_array, i);
    }
 
    return new_box_array;
@@ -920,6 +926,7 @@ hypre_DeleteBox( hypre_BoxArray *box_array,
    {
       hypre_CopyBox(hypre_BoxArrayBox(box_array, i+1),
                     hypre_BoxArrayBox(box_array, i));
+      hypre_BoxArrayID(box_array, i) = hypre_BoxArrayID(box_array, i+1);
    }
 
    hypre_BoxArraySize(box_array) --;
@@ -963,6 +970,7 @@ hypre_DeleteMultipleBoxes( hypre_BoxArray *box_array,
       {
          hypre_CopyBox(hypre_BoxArrayBox(box_array, i+j),
                        hypre_BoxArrayBox(box_array, i));
+         hypre_BoxArrayID(box_array, i) = hypre_BoxArrayID(box_array, i+j);
       }
    }
 

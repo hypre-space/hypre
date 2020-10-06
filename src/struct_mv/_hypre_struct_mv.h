@@ -72,6 +72,7 @@ typedef struct hypre_BoxArray_struct
    HYPRE_Int   size;          /* Size of box array */
    HYPRE_Int   alloc_size;    /* Size of currently alloced space */
    HYPRE_Int   ndim;          /* number of dimensions */
+   HYPRE_Int  *ids;           /* box identifiers */
 } hypre_BoxArray;
 
 #define hypre_BoxArrayExcess 10
@@ -153,6 +154,8 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 #define hypre_BoxArraySize(box_array)      ((box_array) -> size)
 #define hypre_BoxArrayAllocSize(box_array) ((box_array) -> alloc_size)
 #define hypre_BoxArrayNDim(box_array)      ((box_array) -> ndim)
+#define hypre_BoxArrayIDs(box_array)       ((box_array) -> ids)
+#define hypre_BoxArrayID(box_array, i)     ((box_array) -> ids[i])
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_BoxArrayArray

@@ -170,7 +170,7 @@ hypre_StructGridSetBoxes( hypre_StructGrid *grid,
 
 HYPRE_Int
 hypre_StructGridSetBoundingBox( hypre_StructGrid *grid,
-                                hypre_Box   *new_bb )
+                                hypre_Box        *new_bb )
 {
 
    hypre_BoxDestroy(hypre_StructGridBoundingBox(grid));
@@ -185,7 +185,7 @@ hypre_StructGridSetBoundingBox( hypre_StructGrid *grid,
 
 HYPRE_Int
 hypre_StructGridSetIDs( hypre_StructGrid *grid,
-                        HYPRE_Int   *ids )
+                        HYPRE_Int        *ids )
 {
    hypre_TFree(hypre_StructGridIDs(grid));
    hypre_StructGridIDs(grid) = ids;
@@ -297,12 +297,21 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
       to set them */
    if (hypre_StructGridIDs(grid) == NULL)
    {
+      /* TODO: Move IDs to BoxArray data structure */
       ids = hypre_CTAlloc(HYPRE_Int, num_local_boxes);
-      for (i=0; i< num_local_boxes; i++)
+      for (i = 0; i < num_local_boxes; i++)
       {
          ids[i] = i;
       }
       hypre_StructGridIDs(grid) = ids;
+
+      hypre_BoxArrayIDs(local_boxes) = hypre_TReAlloc(hypre_BoxArrayIDs(local_boxes),
+                                                      HYPRE_Int,
+                                                      num_local_boxes);
+      for (i = 0; i < num_local_boxes; i++)
+      {
+         hypre_BoxArrayID(local_boxes, i) = i;
+      }
    }
    else
    {

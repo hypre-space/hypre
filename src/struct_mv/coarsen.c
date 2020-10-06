@@ -300,6 +300,8 @@ hypre_CoarsenBoxArrayArray( hypre_BoxArrayArray  *box_array_array,
  * hypre_AdaptiveCoarsenBox is used to coarsen the boxes.
  * It is not possible to have boxes with volume 0.
  * If 'origin' is NULL, a zero origin is used.
+ *
+ * TODO: Substitute the BinarySearch for a loop over the largest BoxArray
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -309,18 +311,20 @@ hypre_AdaptiveCoarsenBoxArrayArray( hypre_BoxArrayArray   *boxaa,
                                     hypre_Index            stride,
                                     hypre_BoxArrayArray  **new_boxaa_ptr )
 {
-   HYPRE_Int              ndim = hypre_BoxArrayArrayNDim(boxaa);
-   hypre_BoxArrayArray   *new_boxaa;
+   HYPRE_Int              ndim         = hypre_BoxArrayArrayNDim(boxaa);
+   HYPRE_Int              num_refboxes = hypre_BoxArraySize(refboxa);
+   HYPRE_Int             *refbox_ids   = hypre_BoxArrayIDs(refboxa);
 
    hypre_Box             *box;
    hypre_Box             *refbox;
    hypre_BoxArray        *boxa;
    hypre_BoxArray        *new_boxa;
+   hypre_BoxArrayArray   *new_boxaa;
 
    HYPRE_Int              count_box;
    HYPRE_Int              count_boxa;
    HYPRE_Int              box_id;
-   HYPRE_Int              i, j ;
+   HYPRE_Int              i, ii, j;
 
    /* Allocate box */
    box = hypre_BoxCreate(ndim);
@@ -331,7 +335,11 @@ hypre_AdaptiveCoarsenBoxArrayArray( hypre_BoxArrayArray   *boxaa,
    {
       boxa   = hypre_BoxArrayArrayBoxArray(boxaa, i);
       box_id = hypre_BoxArrayArrayID(boxaa, i);
-      refbox = hypre_BoxArrayBox(refboxa, box_id); // BinarySearch ?
+
+      ii = hypre_BinarySearch(refbox_ids, box_id, num_refboxes);
+      hypre_assert(ii > -1);
+      refbox = hypre_BoxArrayBox(refboxa, ii);
+
       hypre_ForBoxI(j, boxa)
       {
          hypre_CopyBox(hypre_BoxArrayBox(boxa, j), box);
@@ -353,7 +361,9 @@ hypre_AdaptiveCoarsenBoxArrayArray( hypre_BoxArrayArray   *boxaa,
    {
       boxa   = hypre_BoxArrayArrayBoxArray(boxaa, i);
       box_id = hypre_BoxArrayArrayID(boxaa, i);
-      refbox = hypre_BoxArrayBox(refboxa, box_id);
+
+      ii = hypre_BinarySearch(refbox_ids, box_id, num_refboxes);
+      refbox = hypre_BoxArrayBox(refboxa, ii);
 
       count_box = 0;
       hypre_ForBoxI(j, boxa)
@@ -486,6 +496,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    /* RDF TODO: Inherit num ghost from fgrid here... */
 
    /* coarsen boxes and create the coarse grid ids (same as fgrid) */
+   /* TODO: Move this to hypre_CoarsenBoxArray */
    if (prune)
    {
       /* Compute number of active boxes in the coarse grid */
@@ -512,6 +523,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
          {
             hypre_CopyBox(box, hypre_BoxArrayBox(cboxes, count));
             cids[count] = fids[i];
+            hypre_BoxArrayID(cboxes, count) = fids[i];
             count++;
          }
       }
@@ -527,6 +539,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
          box = hypre_BoxArrayBox(fboxes, i);
          hypre_CoarsenBox(box, origin, stride);
          hypre_CopyBox(box, hypre_BoxArrayBox(cboxes, i));
+         hypre_BoxArrayID(cboxes, i) = fids[i];
          cids[i] = fids[i];
       }
    }
