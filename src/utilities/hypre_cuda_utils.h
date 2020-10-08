@@ -8,10 +8,6 @@
 #ifndef HYPRE_CUDA_UTILS_H
 #define HYPRE_CUDA_UTILS_H
 
-#ifdef __cplusplus
-extern "C++" {
-#endif
-
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
 #include <cuda.h>
@@ -731,10 +727,6 @@ void hypre_CudaDataCubCachingAllocatorDestroy(hypre_CudaData *data);
 cudaStream_t hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i);
 
 #endif // #if defined(HYPRE_USING_CUDA)
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef HYPRE_CUDA_UTILS_H */
 
