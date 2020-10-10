@@ -76,6 +76,10 @@ cat > $INTERNAL_HEADER <<@
 #ifndef hypre_UTILITIES_HPP
 #define hypre_UTILITIES_HPP
 
+#ifdef __cplusplus
+extern "C++" {
+#endif
+
 @
 
 #===========================================================================
@@ -91,6 +95,10 @@ cat hypre_cub_allocator.h        >> $INTERNAL_HEADER
 #===========================================================================
 
 cat >> $INTERNAL_HEADER <<@
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 
