@@ -2368,6 +2368,7 @@ main( hypre_int argc,
 
    /* parameters for multigrid */
    HYPRE_Real            jacobi_weight;
+   HYPRE_Real            strong_threshold;
    HYPRE_Int             usr_jacobi_weight;
    HYPRE_Int             rap;
    HYPRE_Int             relax;
@@ -2531,6 +2532,7 @@ main( hypre_int argc,
    n_pre  = 1;
    n_post = 1;
    n_coarse = 1;
+   strong_threshold = 0.5;
    vis = 0;
    seed = 1;
 
@@ -2710,6 +2712,11 @@ main( hypre_int argc,
          arg_index++;
          jacobi_weight= atof(argv[arg_index++]);
          usr_jacobi_weight= 1; /* flag user weight */
+      }
+      else if ( strcmp(argv[arg_index], "-th") == 0 )
+      {
+         arg_index++;
+         strong_threshold  = atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-jump") == 0 )
       {
@@ -3017,6 +3024,10 @@ main( hypre_int argc,
                      to_index[j] += k * pdata.graph_to_strides[box][j];
 #endif
                   }
+
+                  /* hypre_printf("index: (%d, %d, %d) - to_index: (%d, %d, %d)\n", */
+                  /*                 index[0], index[1], index[2], */
+                  /*                 to_index[0], to_index[1], to_index[2]); */
                   HYPRE_SStructGraphAddEntries(graph, part, index,
                                                pdata.graph_vars[box],
                                                pdata.graph_to_parts[box],
@@ -3794,6 +3805,7 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_BoomerAMGCreate(&par_solver);
+      HYPRE_BoomerAMGSetStrongThreshold(par_solver, strong_threshold);
       HYPRE_BoomerAMGSetMaxIter(par_solver, maxIterations);
       HYPRE_BoomerAMGSetMaxLevels(par_solver, maxLevels);
       HYPRE_BoomerAMGSetTol(par_solver, tol);
@@ -3812,6 +3824,10 @@ main( hypre_int argc,
       else
       {
          HYPRE_BoomerAMGSetRelaxType(par_solver, relax);
+      }
+      if (old_default)
+      {
+         HYPRE_BoomerAMGSetOldDefault(par_solver);
       }
       HYPRE_BoomerAMGSetup(par_solver, par_A, par_b, par_x);
 
@@ -4455,7 +4471,7 @@ main( hypre_int argc,
       {
          /* use BoomerAMG as preconditioner */
          HYPRE_BoomerAMGCreate(&par_precond);
-         if (old_default) HYPRE_BoomerAMGSetOldDefault(par_precond);
+         HYPRE_BoomerAMGSetStrongThreshold(par_precond, strong_threshold);
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
          HYPRE_BoomerAMGSetMaxLevels(par_precond, maxLevels);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
@@ -4475,6 +4491,10 @@ main( hypre_int argc,
          else
          {
             HYPRE_BoomerAMGSetRelaxType(par_precond, relax);
+         }
+         if (old_default)
+         {
+            HYPRE_BoomerAMGSetOldDefault(par_precond);
          }
 
          HYPRE_PCGSetPrecond( par_solver,
@@ -4694,12 +4714,31 @@ main( hypre_int argc,
       {
          /* use BoomerAMG as preconditioner */
          HYPRE_BoomerAMGCreate(&par_precond);
-         if (old_default) HYPRE_BoomerAMGSetOldDefault(par_precond);
-         HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
-         HYPRE_BoomerAMGSetTol(par_precond, 0.0);
-         HYPRE_BoomerAMGSetPrintLevel(par_precond, 1);
-         HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
+         HYPRE_BoomerAMGSetStrongThreshold(par_precond, strong_threshold);
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
+         HYPRE_BoomerAMGSetMaxLevels(par_precond, maxLevels);
+         HYPRE_BoomerAMGSetTol(par_precond, 0.0);
+         HYPRE_BoomerAMGSetPrintLevel(par_precond, printLevel);
+         HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
+         HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_pre, 1);
+         HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_post, 2);
+         HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_pre, 3);
+         if (usr_jacobi_weight)
+         {
+            HYPRE_BoomerAMGSetRelaxWt(par_precond, jacobi_weight);
+         }
+         if (relax == 1)
+         {
+            HYPRE_BoomerAMGSetRelaxType(par_precond, 0);
+         }
+         else
+         {
+            HYPRE_BoomerAMGSetRelaxType(par_precond, relax);
+         }
+         if (old_default)
+         {
+            HYPRE_BoomerAMGSetOldDefault(par_precond);
+         }
          HYPRE_GMRESSetPrecond( par_solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
                                 (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
@@ -4906,12 +4945,31 @@ main( hypre_int argc,
       {
          /* use BoomerAMG as preconditioner */
          HYPRE_BoomerAMGCreate(&par_precond);
-         if (old_default) HYPRE_BoomerAMGSetOldDefault(par_precond);
-         HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
-         HYPRE_BoomerAMGSetTol(par_precond, 0.0);
-         HYPRE_BoomerAMGSetPrintLevel(par_precond, 1);
-         HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
+         HYPRE_BoomerAMGSetStrongThreshold(par_precond, strong_threshold);
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
+         HYPRE_BoomerAMGSetMaxLevels(par_precond, maxLevels);
+         HYPRE_BoomerAMGSetTol(par_precond, 0.0);
+         HYPRE_BoomerAMGSetPrintLevel(par_precond, printLevel);
+         HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
+         HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_pre, 1);
+         HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_post, 2);
+         HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_pre, 3);
+         if (usr_jacobi_weight)
+         {
+            HYPRE_BoomerAMGSetRelaxWt(par_precond, jacobi_weight);
+         }
+         if (relax == 1)
+         {
+            HYPRE_BoomerAMGSetRelaxType(par_precond, 0);
+         }
+         else
+         {
+            HYPRE_BoomerAMGSetRelaxType(par_precond, relax);
+         }
+         if (old_default)
+         {
+            HYPRE_BoomerAMGSetOldDefault(par_precond);
+         }
          HYPRE_BiCGSTABSetPrecond( par_solver,
                                    (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
                                    (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
@@ -5120,12 +5178,31 @@ main( hypre_int argc,
       {
          /* use BoomerAMG as preconditioner */
          HYPRE_BoomerAMGCreate(&par_precond);
-         if (old_default) HYPRE_BoomerAMGSetOldDefault(par_precond);
-         HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
-         HYPRE_BoomerAMGSetTol(par_precond, 0.0);
-         HYPRE_BoomerAMGSetPrintLevel(par_precond, 1);
-         HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
+         HYPRE_BoomerAMGSetStrongThreshold(par_precond, strong_threshold);
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
+         HYPRE_BoomerAMGSetMaxLevels(par_precond, maxLevels);
+         HYPRE_BoomerAMGSetTol(par_precond, 0.0);
+         HYPRE_BoomerAMGSetPrintLevel(par_precond, printLevel);
+         HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
+         HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_pre, 1);
+         HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_post, 2);
+         HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_pre, 3);
+         if (usr_jacobi_weight)
+         {
+            HYPRE_BoomerAMGSetRelaxWt(par_precond, jacobi_weight);
+         }
+         if (relax == 1)
+         {
+            HYPRE_BoomerAMGSetRelaxType(par_precond, 0);
+         }
+         else
+         {
+            HYPRE_BoomerAMGSetRelaxType(par_precond, relax);
+         }
+         if (old_default)
+         {
+            HYPRE_BoomerAMGSetOldDefault(par_precond);
+         }
          HYPRE_FlexGMRESSetPrecond( par_solver,
                                     (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
                                     (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
@@ -5182,12 +5259,15 @@ main( hypre_int argc,
       {
          /* use BoomerAMG as preconditioner */
          HYPRE_BoomerAMGCreate(&par_precond);
-         if (old_default) HYPRE_BoomerAMGSetOldDefault(par_precond);
-         HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
+         HYPRE_BoomerAMGSetStrongThreshold(par_precond, strong_threshold);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
          HYPRE_BoomerAMGSetPrintLevel(par_precond, 1);
          HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
+         if (old_default)
+         {
+            HYPRE_BoomerAMGSetOldDefault(par_precond);
+         }
          HYPRE_LGMRESSetPrecond( par_solver,
                                  (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
                                  (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
