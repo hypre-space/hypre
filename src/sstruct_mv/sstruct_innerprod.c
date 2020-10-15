@@ -27,7 +27,6 @@ hypre_SStructPInnerProd( hypre_SStructPVector *px,
                          hypre_SStructPVector *py,
                          HYPRE_Real           *presult_ptr )
 {
-   HYPRE_Int    nvars = hypre_SStructPVectorNVars(px);
    HYPRE_Real   local_result;
    HYPRE_Real   global_result;
 

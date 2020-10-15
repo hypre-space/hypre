@@ -1002,6 +1002,11 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
          if (Uverank > -1)
          {
             Uventry = hypre_SStructGraphUVEntry(graph, Uverank);
+
+            /* Sanity check */
+            hypre_assert(entry < hypre_SStructUVEntryNUEntries(Uventry));
+
+            /* Set column number and coefficient */
             col_coords[ncoeffs] = hypre_SStructUVEntryToRank(Uventry, entry);
             coeffs[ncoeffs] = values[i];
             ncoeffs++;

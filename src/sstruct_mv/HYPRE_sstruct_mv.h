@@ -993,15 +993,17 @@ HYPRE_SStructVectorSetValues(HYPRE_SStructVector  vector,
 /**
  * Set vector coefficients to a constant value over the grid.
  **/
-HYPRE_Int HYPRE_SStructVectorSetConstantValues(HYPRE_SStructVector vector,
-                                               HYPRE_Complex       value);
+HYPRE_Int
+HYPRE_SStructVectorSetConstantValues(HYPRE_SStructVector vector,
+                                     HYPRE_Complex       value);
 
 /**
  * Set vector coefficients to random values between -1.0 and 1.0 over the grid.
  * The parameter {\tt seed} controls the generation of random numbers.
  **/
-HYPRE_Int HYPRE_SStructVectorSetRandomValues(HYPRE_SStructVector  vector,
-                                             HYPRE_Int            seed);
+HYPRE_Int
+HYPRE_SStructVectorSetRandomValues(HYPRE_SStructVector  vector,
+                                   HYPRE_Int            seed);
 
 /**
  * Add to vector coefficients index by index.
