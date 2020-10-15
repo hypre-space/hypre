@@ -79,6 +79,7 @@ typedef struct hypre_SStructGraph_struct
    HYPRE_Int               Uvesize;    /* size of Uventries array */
    HYPRE_Int               Uemaxsize;  /* max size of Uentries */
    HYPRE_Int             **Uveoffsets; /* offsets for computing rank indexes */
+   hypre_Box            ***Uvboxes;    /* (part, var) array of boxes for non-stencil entries */
 
    /* These are created in GraphAddEntries() then deleted in GraphAssemble() */
    hypre_SStructGraphEntry **graph_entries;
@@ -124,6 +125,8 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructGraphUEMaxSize(graph)      ((graph) -> Uemaxsize)
 #define hypre_SStructGraphUVEOffsets(graph)     ((graph) -> Uveoffsets)
 #define hypre_SStructGraphUVEOffset(graph, p, v)((graph) -> Uveoffsets[p][v])
+#define hypre_SStructGraphUVBoxes(graph)        ((graph) -> Uvboxes)
+#define hypre_SStructGraphUVBox(graph, p, v)    ((graph) -> Uvboxes[p][v])
 
 #define hypre_SStructGraphEntries(graph)        ((graph) -> graph_entries)
 #define hypre_SStructNGraphEntries(graph)       ((graph) -> n_graph_entries)

@@ -457,6 +457,7 @@ typedef struct hypre_SStructGraph_struct
    HYPRE_Int               Uvesize;    /* size of Uventries array */
    HYPRE_Int               Uemaxsize;  /* max size of Uentries */
    HYPRE_Int             **Uveoffsets; /* offsets for computing rank indexes */
+   hypre_Box            ***Uvboxes;    /* (part, var) array of boxes for non-stencil entries */
 
    /* These are created in GraphAddEntries() then deleted in GraphAssemble() */
    hypre_SStructGraphEntry **graph_entries;
@@ -502,6 +503,8 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructGraphUEMaxSize(graph)      ((graph) -> Uemaxsize)
 #define hypre_SStructGraphUVEOffsets(graph)     ((graph) -> Uveoffsets)
 #define hypre_SStructGraphUVEOffset(graph, p, v)((graph) -> Uveoffsets[p][v])
+#define hypre_SStructGraphUVBoxes(graph)        ((graph) -> Uvboxes)
+#define hypre_SStructGraphUVBox(graph, p, v)    ((graph) -> Uvboxes[p][v])
 
 #define hypre_SStructGraphEntries(graph)        ((graph) -> graph_entries)
 #define hypre_SStructNGraphEntries(graph)       ((graph) -> n_graph_entries)
@@ -878,7 +881,6 @@ HYPRE_Int HYPRE_SStructMatrixAddFEMValues ( HYPRE_SStructMatrix matrix , HYPRE_I
 HYPRE_Int HYPRE_SStructMatrixGetValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , HYPRE_Int *index , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , HYPRE_Complex *values );
 HYPRE_Int HYPRE_SStructMatrixGetFEMValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , HYPRE_Int *index , HYPRE_Complex *values );
 HYPRE_Int HYPRE_SStructMatrixSetBoxValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , HYPRE_Complex *values );
-HYPRE_Int hypre_SStructUMatrixSetBoxValuesHelper ( hypre_SStructMatrix *matrix , HYPRE_Int part , hypre_Index ilower , hypre_Index iupper , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , HYPRE_Complex *values , HYPRE_Int action , HYPRE_IJMatrix ijmatrix );
 HYPRE_Int HYPRE_SStructMatrixAddToBoxValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , HYPRE_Complex *values );
 HYPRE_Int HYPRE_SStructMatrixGetBoxValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , HYPRE_Complex *values );
 HYPRE_Int HYPRE_SStructMatrixAssemble ( HYPRE_SStructMatrix matrix );
@@ -999,6 +1001,7 @@ HYPRE_Int hypre_SStructPMatrixPrint ( const char *filename , hypre_SStructPMatri
 HYPRE_Int hypre_SStructUMatrixInitialize ( hypre_SStructMatrix *matrix );
 HYPRE_Int hypre_SStructUMatrixSetValues ( hypre_SStructMatrix *matrix , HYPRE_Int part , hypre_Index index , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , HYPRE_Complex *values , HYPRE_Int action );
 HYPRE_Int hypre_SStructUMatrixSetBoxValues ( hypre_SStructMatrix *matrix , HYPRE_Int part , hypre_Index ilower , hypre_Index iupper , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , HYPRE_Complex *values , HYPRE_Int action );
+HYPRE_Int hypre_SStructUMatrixSetBoxValuesHelper ( hypre_SStructMatrix *matrix , HYPRE_Int part , hypre_Index ilower , hypre_Index iupper , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , HYPRE_Complex *values , HYPRE_Int action , HYPRE_IJMatrix ijmatrix );
 HYPRE_Int hypre_SStructUMatrixAssemble ( hypre_SStructMatrix *matrix );
 HYPRE_Int hypre_SStructMatrixMapDataBox ( hypre_SStructMatrix  *matrix, HYPRE_Int part, HYPRE_Int vi, HYPRE_Int  vj, hypre_Box *map_vbox );
 HYPRE_Int hypre_SStructMatrixRef ( hypre_SStructMatrix *matrix , hypre_SStructMatrix **matrix_ref );
@@ -1006,16 +1009,14 @@ HYPRE_Int hypre_SStructMatrixSplitEntries ( hypre_SStructMatrix *matrix , HYPRE_
 HYPRE_Int hypre_SStructMatrixSetValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , HYPRE_Int *index , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , HYPRE_Complex *values , HYPRE_Int action );
 HYPRE_Int hypre_SStructMatrixSetBoxValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , HYPRE_Complex *values , HYPRE_Int action );
 HYPRE_Int hypre_SStructMatrixSetInterPartValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , hypre_Index ilower , hypre_Index iupper , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , HYPRE_Complex *values , HYPRE_Int action );
-hypre_IJMatrix* hypre_SStructMatrixToUMatrix ( HYPRE_SStructMatrix  matrix );
+hypre_IJMatrix* hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix );
 
 /* sstruct_matvec.c */
 HYPRE_Int hypre_SStructPMatvecCreate ( void **pmatvec_vdata_ptr );
 HYPRE_Int hypre_SStructPMatvecSetTranspose ( void *pmatvec_vdata , HYPRE_Int  transpose );
-HYPRE_Int hypre_SStructPMatvecSetSkipDiag ( void *pmatvec_vdata , HYPRE_Int  skip_diag );
-HYPRE_Int hypre_SStructPMatvecDestroy ( void *pmatvec_vdata );
 HYPRE_Int hypre_SStructPMatvecSetup ( void *pmatvec_vdata , hypre_SStructPMatrix *pA , hypre_SStructPVector *px );
 HYPRE_Int hypre_SStructPMatvecCompute ( void *pmatvec_vdata , HYPRE_Complex alpha , hypre_SStructPMatrix *pA , hypre_SStructPVector *px , HYPRE_Complex beta , hypre_SStructPVector *py );
-HYPRE_Int hypre_SStructPMatvecDiagScale ( HYPRE_Complex alpha , hypre_SStructPMatrix *A , hypre_SStructPVector *x , HYPRE_Complex beta , hypre_SStructPVector *y );
+HYPRE_Int hypre_SStructPMatvecDestroy ( void *pmatvec_vdata );
 HYPRE_Int hypre_SStructPMatvec ( HYPRE_Complex alpha , hypre_SStructPMatrix *pA , hypre_SStructPVector *px , HYPRE_Complex beta , hypre_SStructPVector *py );
 HYPRE_Int hypre_SStructMatvecCreate ( void **matvec_vdata_ptr );
 HYPRE_Int hypre_SStructMatvecSetTranspose ( void *matvec_vdata , HYPRE_Int  transpose );
@@ -1028,8 +1029,8 @@ HYPRE_Int hypre_SStructMatvec ( HYPRE_Complex alpha , hypre_SStructMatrix *A , h
 
 /* sstruct_matmult.c */
 HYPRE_Int hypre_SStructMatrixBoundaryToUMatrix ( hypre_SStructMatrix *A , hypre_ParCSRMatrix *B , hypre_IJMatrix **ij_Ahat_ptr );
-HYPRE_Int hypre_SStructMatmult ( HYPRE_Int nmatrices_input, hypre_SStructMatrix **ssmatrices_input, HYPRE_Int nterms, HYPRE_Int *terms_input, HYPRE_Int *transposes, hypre_SStructMatrix **M_ptr );
-HYPRE_Int hypre_SStructMatPtAP ( hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix **PtAP_ptr );
+HYPRE_Int hypre_SStructMatmult ( HYPRE_Int nmatrices_input , hypre_SStructMatrix **ssmatrices_input , HYPRE_Int nterms , HYPRE_Int *terms_input , HYPRE_Int *transposes , hypre_SStructMatrix **M_ptr );
+HYPRE_Int hypre_SStructMatPtAP ( hypre_SStructMatrix *A , hypre_SStructMatrix *P , hypre_SStructMatrix **PtAP_ptr );
 
 /* sstruct_scale.c */
 HYPRE_Int hypre_SStructPScale ( HYPRE_Complex alpha , hypre_SStructPVector *py );
@@ -1070,3 +1071,4 @@ HYPRE_Int hypre_SStructVectorPrintGLVis ( hypre_SStructVector *vector, const cha
 #endif
 
 #endif
+

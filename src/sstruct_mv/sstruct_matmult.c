@@ -140,8 +140,8 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    t = terms[nmatrices - 1];
    ijmatrix = hypre_SStructMatrixIJMatrix(ssmatrices[t]);
    HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uMold);
-   hypre_SStructMatrixBoundaryToUMatrix(ssmatrices[t], parcsr_uM, &ij_sA[t]);
-   //ij_sA[t] = hypre_SStructMatrixToUMatrix(ssmatrices[t]);
+   //hypre_SStructMatrixBoundaryToUMatrix(ssmatrices[t], parcsr_uM, &ij_sA[t]);
+   ij_sA[t] = hypre_SStructMatrixToUMatrix(ssmatrices[t]);
    HYPRE_IJMatrixGetObject(ij_sA[t], (void **) &parcsr_sMold);
 
 #if DEBUG_MATMULT
@@ -367,6 +367,7 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_IJMatrix         ij_A     = hypre_SStructMatrixIJMatrix(A);
    hypre_SStructGraph    *graph    = hypre_SStructMatrixGraph(A);
    hypre_SStructGrid     *grid     = hypre_SStructGraphGrid(graph);
+   hypre_Box           ***Uvboxes  = hypre_SStructGraphUVBoxes(graph);
    hypre_SStructPGrid    *pgrid;
    hypre_StructGrid      *sgrid;
    hypre_SStructStencil  *stencil;
@@ -386,6 +387,7 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    hypre_Box             *grid_box;
    hypre_Box             *ghost_box;
    hypre_Box             *convert_box;
+   hypre_Box             *Uvbox;
 
    hypre_Index            ustride;
    hypre_Index            loop_size;
@@ -433,10 +435,18 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
          sgrid = hypre_SStructPGridSGrid(pgrid, var);
          num_boxes  = hypre_StructGridNumBoxes(sgrid);
          grid_boxes = hypre_StructGridBoxes(sgrid);
+
+         /* Exit this loop if there are no grid boxes */
+         if (!num_boxes)
+         {
+            convert_boxaa[part][var] = hypre_BoxArrayArrayCreate(0, ndim);
+            continue;
+         }
+
          pbnd_boxaa = hypre_SStructPGridPBndBoxArrayArray(pgrid, var);
          pbnd_boxaa_size = hypre_BoxArrayArraySize(pbnd_boxaa);
 
-         convert_boxaa_size = hypre_min(num_boxes, pbnd_boxaa_size);
+         convert_boxaa_size = hypre_min(num_boxes, pbnd_boxaa_size) + 1;
          convert_boxaa[part][var] = hypre_BoxArrayArrayCreate(convert_boxaa_size, ndim);
 
          k = kk = 0;
@@ -476,6 +486,16 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
                kk++;
             }
          } /* loop over grid_boxes */
+
+         /* Add non-stencil couplings */
+         Uvbox = Uvboxes[part][var];
+         if (hypre_BoxVolume(Uvbox))
+         {
+            convert_boxa = hypre_BoxArrayArrayBoxArray(convert_boxaa[part][var], kk);
+            hypre_AppendBox(Uvbox, convert_boxa);
+            hypre_BoxArrayArrayID(convert_boxaa[part][var], kk) = -1;
+            kk++;
+         }
 
          hypre_BoxArrayArraySize(convert_boxaa[part][var]) = kk;
       } /* loop over vars */
@@ -519,53 +539,68 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
             convert_box_id = hypre_BoxArrayArrayID(convert_boxaa[part][var], i);
             grid_box_id    = hypre_StructGridID(sgrid, k);
 
-            while (grid_box_id != convert_box_id)
+            /* Exit in case of non-stencil coupling */
+            if (convert_box_id > 0)
             {
+               while (grid_box_id != convert_box_id)
+               {
+                  grid_box = hypre_BoxArrayBox(grid_boxes, k);
+                  hypre_CopyBox(grid_box, ghost_box);
+                  hypre_BoxGrowByArray(ghost_box, num_ghost);
+                  m += hypre_BoxVolume(ghost_box);
+
+                  if (k < (hypre_StructGridNumBoxes(sgrid) - 1))
+                  {
+                     k++;
+                     grid_box_id = hypre_StructGridID(sgrid, k);
+                  }
+                  else
+                  {
+                     hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                                       "grid_box_id == convert_box_id not found");
+                     break;
+                  }
+               }
+
                grid_box = hypre_BoxArrayBox(grid_boxes, k);
                hypre_CopyBox(grid_box, ghost_box);
                hypre_BoxGrowByArray(ghost_box, num_ghost);
-               m += hypre_BoxVolume(ghost_box);
 
-               if (k < hypre_StructGridNumBoxes(sgrid))
+               convert_boxa = hypre_BoxArrayArrayBoxArray(convert_boxaa[part][var], i);
+               hypre_ForBoxI(j, convert_boxa)
                {
-                  k++;
-                  grid_box_id = hypre_StructGridID(sgrid, k);
-               }
-               else
-               {
-                  hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                                    "grid_box_id == convert_box_id not found");
-                  break;
-               }
-            }
+                  convert_box = hypre_BoxArrayBox(convert_boxa, j);
+                  start = hypre_BoxIMin(convert_box);
+                  hypre_BoxGetSize(convert_box, loop_size);
 
-            grid_box = hypre_BoxArrayBox(grid_boxes, k);
-            hypre_CopyBox(grid_box, ghost_box);
-            hypre_BoxGrowByArray(ghost_box, num_ghost);
-
-            convert_boxa = hypre_BoxArrayArrayBoxArray(convert_boxaa[part][var], i);
-            hypre_ForBoxI(j, convert_boxa)
-            {
-               convert_box = hypre_BoxArrayBox(convert_boxa, j);
-               start = hypre_BoxIMin(convert_box);
-               hypre_BoxGetSize(convert_box, loop_size);
-
-               hypre_BoxLoop1Begin(ndim, loop_size, ghost_box, start, ustride, mi);
+                  hypre_BoxLoop1Begin(ndim, loop_size, ghost_box, start, ustride, mi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi) HYPRE_SMP_SCHEDULE
 #endif
-               hypre_BoxLoop1For(mi)
+                  hypre_BoxLoop1For(mi)
+                  {
+                     row_sizes[m + mi] = nnzs;
+                  }
+                  hypre_BoxLoop1End(mi);
+                  nvalues += nnzs*hypre_BoxVolume(convert_box);
+               } /* Loop over convert_boxa */
+
+               m += hypre_BoxVolume(ghost_box);
+
+               /* Go to next grid box */
+               k++;
+            }
+            else
+            {
+               /* Update size of values array */
+               hypre_ForBoxI(j, convert_boxa)
                {
-                  row_sizes[m + mi] = nnzs;
+                  convert_box = hypre_BoxArrayBox(convert_boxa, j);
+                  nvalues += nnzs*hypre_BoxVolume(convert_box);
                }
-               hypre_BoxLoop1End(mi);
-               nvalues += nnzs*hypre_BoxVolume(convert_box);
-            } /* Loop over convert_boxa */
 
-            m += hypre_BoxVolume(ghost_box);
-
-            /* Go to next grid box */
-            k++;
+               /* TODO: Update rowsizes for non-stencil couplings */
+            } /* if (convert_box_id) */
          } /* Loop over convert_boxaa */
 
          for (; k < hypre_StructGridNumBoxes(sgrid); k++)
@@ -623,6 +658,9 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
                convert_box = hypre_BoxArrayBox(convert_boxa, j);
                ilower = hypre_BoxIMin(convert_box);
                iupper = hypre_BoxIMax(convert_box);
+
+               hypre_assert(hypre_BoxVolume(convert_box) > 0);
+               hypre_assert(hypre_BoxVolume(convert_box) < nvalues);
 
                /* GET values from this box */
                hypre_SStructPMatrixSetBoxValues(pA, ilower, iupper, var,
