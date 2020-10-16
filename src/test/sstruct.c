@@ -2342,6 +2342,7 @@ main( hypre_int argc,
    HYPRE_SStructSolver   solver;
    HYPRE_SStructSolver   precond;
 
+   HYPRE_IJMatrix        ij_A;
    HYPRE_ParCSRMatrix    par_A;
    HYPRE_ParVector       par_b;
    HYPRE_ParVector       par_x;
@@ -3607,23 +3608,26 @@ main( hypre_int argc,
          HYPRE_SStructMatrixPrint("sstruct.out.G",  G, 0);
       }
 
-#if 0
+      if (object_type != HYPRE_PARCSR)
       {
-         HYPRE_IJMatrix ij_A;
-
-         if (object_type != HYPRE_PARCSR)
+         if (!myid)
          {
-            if (!myid) hypre_printf("Converting SStructMatrix to IJMatrix...\n");
-            HYPRE_SStructMatrixToUMatrix(A, &ij_A);
-
-            if (!myid) hypre_printf("Printing IJMatrix...\n");
-            HYPRE_IJMatrixPrint(ij_A, "structIJ");
-
-            if (!myid) hypre_printf("Destroying IJMatrix...\n");
-            HYPRE_IJMatrixDestroy(ij_A);
+            hypre_printf("Converting SStructMatrix to IJMatrix...\n");
          }
+         HYPRE_SStructMatrixToIJMatrix(A, &ij_A);
+
+         if (!myid)
+         {
+            hypre_printf("Printing IJMatrix...\n");
+         }
+         HYPRE_IJMatrixPrint(ij_A, "IJ.out.A");
+
+         if (!myid)
+         {
+            hypre_printf("Destroying IJMatrix...\n");
+         }
+         HYPRE_IJMatrixDestroy(ij_A);
       }
-#endif
    }
 
    /*-----------------------------------------------------------
