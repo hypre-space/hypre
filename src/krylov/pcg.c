@@ -403,6 +403,7 @@ hypre_PCGSolve( void *pcg_vdata,
    }
    else    /* bi_prod==0.0: the rhs vector b is zero */
    {
+#if 0
       /* Set x equal to zero and return */
       (*(pcg_functions->CopyVector))(b, x);
       if (logging>0 || print_level>0)
@@ -416,7 +417,10 @@ hypre_PCGSolve( void *pcg_vdata,
       return hypre_error_flag;
       /* In this case, for the original parcsr pcg, the code would take special
          action to force iterations even though the exact value was known. */
-   };
+#else
+      bi_prod = 1.0;
+#endif
+   }
 
    /* r = b - Ax */
    (*(pcg_functions->CopyVector))(b, r);

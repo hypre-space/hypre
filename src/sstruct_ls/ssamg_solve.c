@@ -103,9 +103,9 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       eps = tol*tol;
 
       /* if rhs is zero, return a zero solution */
-#if 0
       if (!(b_dot_b > 0.0))
       {
+#if 0
          hypre_SStructVectorSetConstantValues(x_l[0], 0.0);
          if (logging > 0)
          {
@@ -117,8 +117,9 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          HYPRE_ANNOTATE_FUNC_END;
 
          return hypre_error_flag;
-      }
 #endif
+         b_dot_b = 1.0;
+      }
    }
 
    /*-----------------------------------------------------
@@ -178,14 +179,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          if (logging > 0)
          {
             norms[i] = sqrt(r_dot_r);
-            if (b_dot_b > 0)
-            {
-               rel_norms[i] = sqrt(r_dot_r/b_dot_b);
-            }
-            else
-            {
-               rel_norms[i] = 0.0;
-            }
+            rel_norms[i] = sqrt(r_dot_r/b_dot_b);
          }
 
          /* always do at least 1 V-cycle */
