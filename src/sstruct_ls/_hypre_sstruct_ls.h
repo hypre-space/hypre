@@ -578,6 +578,7 @@ HYPRE_Int HYPRE_SStructSSAMGSetNumCoarseRelax ( HYPRE_SStructSolver solver, HYPR
 HYPRE_Int HYPRE_SStructSSAMGSetDxyz ( HYPRE_SStructSolver  solver, HYPRE_Int nparts, HYPRE_Real **dxyz );
 HYPRE_Int HYPRE_SStructSSAMGSetLogging ( HYPRE_SStructSolver solver, HYPRE_Int logging );
 HYPRE_Int HYPRE_SStructSSAMGSetPrintLevel ( HYPRE_SStructSolver solver, HYPRE_Int print_level );
+HYPRE_Int HYPRE_SStructSSAMGSetPrintFreq ( HYPRE_SStructSolver solver, HYPRE_Int print_freq );
 HYPRE_Int HYPRE_SStructSSAMGGetNumIterations ( HYPRE_SStructSolver  solver, HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_SStructSSAMGGetFinalRelativeResidualNorm ( HYPRE_SStructSolver  solver, HYPRE_Real *norm );
 
@@ -703,6 +704,7 @@ HYPRE_Int hypre_SSAMGSetNumPreRelax ( void *ssamg_vdata , HYPRE_Int num_pre_rela
 HYPRE_Int hypre_SSAMGSetNumPosRelax ( void *ssamg_vdata , HYPRE_Int num_pos_relax );
 HYPRE_Int hypre_SSAMGSetNumCoarseRelax ( void *ssamg_vdata , HYPRE_Int num_coarse_relax );
 HYPRE_Int hypre_SSAMGSetPrintLevel ( void *ssamg_vdata , HYPRE_Int print_level );
+HYPRE_Int hypre_SSAMGSetPrintFreq ( void *ssamg_vdata , HYPRE_Int print_freq );
 HYPRE_Int hypre_SSAMGSetLogging ( void *ssamg_vdata , HYPRE_Int logging );
 HYPRE_Int hypre_SSAMGPrintLogging ( void *ssamg_vdata );
 HYPRE_Int hypre_SSAMGPrintStats ( void *ssamg_vdata );

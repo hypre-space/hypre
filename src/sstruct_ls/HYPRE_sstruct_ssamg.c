@@ -202,6 +202,22 @@ HYPRE_SStructSSAMGSetPrintLevel( HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
+*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGSetPrintFreq( HYPRE_SStructSolver solver,
+                                HYPRE_Int           print_freq )
+{
+   if (print_freq < 1)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   return( hypre_SSAMGSetPrintFreq( (void *) solver, print_freq) );
+}
+
+/*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

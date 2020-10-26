@@ -63,6 +63,7 @@ typedef struct hypre_SSAMGData_struct
    HYPRE_Int               num_iterations;
    HYPRE_Int               time_index;
    HYPRE_Int               print_level;
+   HYPRE_Int               print_freq;
 
    /* additional log info (logged when `logging' > 0) */
    HYPRE_Int               logging;
@@ -92,6 +93,7 @@ typedef struct hypre_SSAMGData_struct
 #define hypre_SSAMGDataNumCoarseRelax(ssamg_data) ((ssamg_data) -> num_coarse_relax)
 #define hypre_SSAMGDataTimeIndex(ssamg_data)      ((ssamg_data) -> time_index)
 #define hypre_SSAMGDataPrintLevel(ssamg_data)     ((ssamg_data) -> print_level)
+#define hypre_SSAMGDataPrintFreq(ssamg_data)      ((ssamg_data) -> print_freq)
 #define hypre_SSAMGDataLogging(ssamg_data)        ((ssamg_data) -> logging)
 #define hypre_SSAMGDataDxyz(ssamg_data)           ((ssamg_data) -> dxyz)
 #define hypre_SSAMGDataGridl(ssamg_data)          ((ssamg_data) -> grid_l)

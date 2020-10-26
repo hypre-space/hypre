@@ -39,6 +39,7 @@ hypre_SSAMGCreate( hypre_MPI_Comm comm )
    (ssamg_data -> num_coarse_relax) = -1;
    (ssamg_data -> logging)          = 0;
    (ssamg_data -> print_level)      = 0;
+   (ssamg_data -> print_freq)       = 1;
 
    /* initialize */
    (ssamg_data -> nparts)           = -1;
@@ -314,6 +315,20 @@ hypre_SSAMGSetPrintLevel( void       *ssamg_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SSAMGSetPrintFreq( void       *ssamg_vdata,
+                         HYPRE_Int   print_freq)
+{
+   hypre_SSAMGData *ssamg_data = (hypre_SSAMGData *) ssamg_vdata;
+
+   hypre_SSAMGDataPrintFreq(ssamg_data) = print_freq;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SSAMGSetLogging( void       *ssamg_vdata,
                        HYPRE_Int   logging)
 {
@@ -335,6 +350,7 @@ hypre_SSAMGPrintLogging( void *ssamg_vdata )
    HYPRE_Int          num_iterations = (ssamg_data -> num_iterations);
    HYPRE_Int          logging        = (ssamg_data -> logging);
    HYPRE_Int          print_level    = (ssamg_data -> print_level);
+   HYPRE_Int          print_freq     = (ssamg_data -> print_freq);
    HYPRE_Real        *norms          = (ssamg_data -> norms);
    HYPRE_Real        *rel_norms      = (ssamg_data -> rel_norms);
    HYPRE_Int          myid, i;
@@ -348,13 +364,13 @@ hypre_SSAMGPrintLogging( void *ssamg_vdata )
       {
          hypre_printf("Iters         ||r||_2   conv.rate  ||r||_2/||b||_2\n");
          hypre_printf("% 5d    %e    %f     %e\n", 0, norms[0], convr, rel_norms[0]);
-         for (i = print_level; i < num_iterations; i = (i + print_level))
+         for (i = print_freq; i < num_iterations; i = (i + print_freq))
          {
             convr = norms[i] / norms[i-1];
             hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);
          }
 
-         if ((i != num_iterations) && (num_iterations > 0))
+         if ((i != num_iterations - 1) && (num_iterations > 0))
          {
             i = (num_iterations - 1);
             hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);

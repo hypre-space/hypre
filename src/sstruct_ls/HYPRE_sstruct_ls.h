@@ -411,6 +411,12 @@ HYPRE_Int
 HYPRE_SStructSSAMGSetPrintLevel(HYPRE_SStructSolver solver,
                                 HYPRE_Int           print_level);
 
+/**
+ * (Optional) Set printing frequency.
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGSetPrintFreq(HYPRE_SStructSolver solver,
+                               HYPRE_Int           print_freq);
 
 /**
  * Return the number of iterations taken.

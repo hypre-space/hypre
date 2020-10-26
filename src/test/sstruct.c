@@ -2387,6 +2387,8 @@ main( hypre_int argc,
    HYPRE_Int             solver_type;
    HYPRE_Int             maxIterations;
    HYPRE_Int             krylov_print_level;
+   HYPRE_Int             print_level;
+   HYPRE_Int             print_freq;
    HYPRE_Real            tol;
 
    /* parameters for GMRES */
@@ -2418,7 +2420,6 @@ main( hypre_int argc,
    HYPRE_Int verbosity = 1;
    HYPRE_Int iterations;
    HYPRE_Int checkOrtho = 0;
-   HYPRE_Int printLevel = 1;
    HYPRE_Int pcgIterations = 0;
    HYPRE_Int pcgMode = 0;
    HYPRE_Int old_default = 0;
@@ -2504,6 +2505,8 @@ main( hypre_int argc,
    rel_change = 0;
    k_dim = 10;
    aug_dim = 2;
+   print_level = 1;
+   print_freq = 1;
    krylov_print_level = 2;
 
    pooldist   = 0;
@@ -2692,6 +2695,16 @@ main( hypre_int argc,
          arg_index++;
          krylov_print_level = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-plevel") == 0 )
+      {
+         arg_index++;
+         print_level = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-pfreq") == 0 )
+      {
+         arg_index++;
+         print_freq = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-lvl") == 0 )
       {
          arg_index++;
@@ -2816,11 +2829,6 @@ main( hypre_int argc,
       {		 /* uses old BoomerAMG defaults */
          arg_index++;
          old_default = 1;
-      }
-      else if ( strcmp(argv[arg_index], "-vout") == 0 )
-      {
-         arg_index++;
-         printLevel = atoi(argv[arg_index++]);
       }
       else
       {
@@ -3799,7 +3807,8 @@ main( hypre_int argc,
       HYPRE_SStructSSAMGSetNumPreRelax(solver, n_pre);
       HYPRE_SStructSSAMGSetNumPostRelax(solver, n_post);
       HYPRE_SStructSSAMGSetNumCoarseRelax(solver, n_coarse);
-      HYPRE_SStructSSAMGSetPrintLevel(solver, printLevel);
+      HYPRE_SStructSSAMGSetPrintLevel(solver, print_level);
+      HYPRE_SStructSSAMGSetPrintFreq(solver, print_freq);
       HYPRE_SStructSSAMGSetLogging(solver, 2);
       HYPRE_SStructSSAMGSetup(solver, A, b, x);
 
@@ -3836,7 +3845,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetMaxIter(par_solver, maxIterations);
       HYPRE_BoomerAMGSetMaxLevels(par_solver, maxLevels);
       HYPRE_BoomerAMGSetTol(par_solver, tol);
-      HYPRE_BoomerAMGSetPrintLevel(par_solver, printLevel);
+      HYPRE_BoomerAMGSetPrintLevel(par_solver, print_level);
       HYPRE_BoomerAMGSetCycleNumSweeps(par_solver, n_pre, 1);
       HYPRE_BoomerAMGSetCycleNumSweeps(par_solver, n_post, 2);
       HYPRE_BoomerAMGSetCycleNumSweeps(par_solver, n_pre, 3);
@@ -3996,7 +4005,8 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetNumPreRelax(precond, n_pre);
          HYPRE_SStructSSAMGSetNumPostRelax(precond, n_post);
          HYPRE_SStructSSAMGSetNumCoarseRelax(precond, n_coarse);
-         HYPRE_SStructSSAMGSetPrintLevel(precond, printLevel);
+         HYPRE_SStructSSAMGSetPrintLevel(precond, print_level);
+         HYPRE_SStructSSAMGSetPrintFreq(precond, print_freq);
          HYPRE_SStructSSAMGSetLogging(precond, 1);
 
          HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
@@ -4219,7 +4229,7 @@ main( hypre_int argc,
 
          }
 
-         if ( printLevel ) {
+         if ( print_level ) {
 
             if ( myid == 0 ) {
                if ( (filePtr = fopen("values.txt", "w")) ) {
@@ -4238,7 +4248,7 @@ main( hypre_int argc,
                   fclose(filePtr);
                }
 
-               if ( printLevel > 1 ) {
+               if ( print_level > 1 ) {
 
                   printBuffer = utilities_FortranMatrixCreate();
 
@@ -4413,7 +4423,7 @@ main( hypre_int argc,
 
          }
 
-         if ( printLevel ) {
+         if ( print_level ) {
 
             if ( myid == 0 ) {
                if ( (filePtr = fopen("values.txt", "w")) ) {
@@ -4432,7 +4442,7 @@ main( hypre_int argc,
                   fclose(filePtr);
                }
 
-               if ( printLevel > 1 ) {
+               if ( print_level > 1 ) {
 
                   printBuffer = utilities_FortranMatrixCreate();
 
@@ -4504,7 +4514,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
          HYPRE_BoomerAMGSetMaxLevels(par_precond, maxLevels);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
-         HYPRE_BoomerAMGSetPrintLevel(par_precond, printLevel);
+         HYPRE_BoomerAMGSetPrintLevel(par_precond, print_level);
          HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
          HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_pre, 1);
          HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_post, 2);
@@ -4749,7 +4759,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
          HYPRE_BoomerAMGSetMaxLevels(par_precond, maxLevels);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
-         HYPRE_BoomerAMGSetPrintLevel(par_precond, printLevel);
+         HYPRE_BoomerAMGSetPrintLevel(par_precond, print_level);
          HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
          HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_pre, 1);
          HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_post, 2);
@@ -4982,7 +4992,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
          HYPRE_BoomerAMGSetMaxLevels(par_precond, maxLevels);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
-         HYPRE_BoomerAMGSetPrintLevel(par_precond, printLevel);
+         HYPRE_BoomerAMGSetPrintLevel(par_precond, print_level);
          HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
          HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_pre, 1);
          HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_post, 2);
@@ -5217,7 +5227,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
          HYPRE_BoomerAMGSetMaxLevels(par_precond, maxLevels);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
-         HYPRE_BoomerAMGSetPrintLevel(par_precond, printLevel);
+         HYPRE_BoomerAMGSetPrintLevel(par_precond, print_level);
          HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
          HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_pre, 1);
          HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_post, 2);
