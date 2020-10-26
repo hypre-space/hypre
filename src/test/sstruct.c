@@ -2226,10 +2226,12 @@ PrintUsage( char *progname,
       hypre_printf("                        249- Struct BiCGSTAB\n");
       hypre_printf("  -print             : print out the system\n");
       hypre_printf("  -rhsfromcosine     : solution is cosine function (default)\n");
-      hypre_printf("  -rhsone            : rhs is vector with unit components\n");
-      hypre_printf("  -rhszero           : rhs is vector with zero components\n");
-      hypre_printf("  -xone              : solution (x) is vector with unit components\n");
+      hypre_printf("  -rhszero           : rhs vector has zero components\n");
+      hypre_printf("  -rhsone            : rhs vector has unit components\n");
+      hypre_printf("  -x0zero            : initial solution (x0) has zero components \n");
+      hypre_printf("  -x0one             : initial solution (x0) has unit components \n");
       hypre_printf("  -x0rand            : initial solution (x0) has random components \n");
+      hypre_printf("  -xone              : solution (x) is vector with unit components\n");
       hypre_printf("  -tol <val>         : convergence tolerance (def 1e-6)\n");
       hypre_printf("  -itr <val>         : maximum number of iterations (def 100);\n");
       hypre_printf("  -k <val>           : dimension Krylov space for GMRES (def 10);\n");
@@ -2370,6 +2372,8 @@ main( hypre_int argc,
    /* parameters for multigrid */
    HYPRE_Real            jacobi_weight;
    HYPRE_Real            strong_threshold;
+   HYPRE_Int             P_max_elmts;
+   HYPRE_Int             coarsen_type;
    HYPRE_Int             usr_jacobi_weight;
    HYPRE_Int             rap;
    HYPRE_Int             relax;
@@ -2526,14 +2530,16 @@ main( hypre_int argc,
 
    solver_id = 39;
    print_system = 0;
-   rhs_value = 1.0;
-   sol_type = 1;
-   sol0_type = 0;
+   rhs_value = 0.0;
+   sol_type = -1;
+   sol0_type = 2;
    skip = 0;
    n_pre  = 1;
    n_post = 1;
    n_coarse = 1;
    strong_threshold = 0.5;
+   P_max_elmts = 4;
+   coarsen_type = 1;
    vis = 0;
    seed = 1;
 
@@ -2646,6 +2652,11 @@ main( hypre_int argc,
          arg_index++;
          sol_type = 1;
       }
+      else if ( strcmp(argv[arg_index], "-x0zero") == 0 )
+      {
+         arg_index++;
+         sol0_type = 0;
+      }
       else if ( strcmp(argv[arg_index], "-x0one") == 0 )
       {
          arg_index++;
@@ -2718,6 +2729,16 @@ main( hypre_int argc,
       {
          arg_index++;
          strong_threshold  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-Pmx") == 0 )
+      {
+         arg_index++;
+         P_max_elmts  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-coarsen") == 0 )
+      {
+         arg_index++;
+         coarsen_type = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-jump") == 0 )
       {
@@ -3810,6 +3831,8 @@ main( hypre_int argc,
 
       HYPRE_BoomerAMGCreate(&par_solver);
       HYPRE_BoomerAMGSetStrongThreshold(par_solver, strong_threshold);
+      HYPRE_BoomerAMGSetPMaxElmts(par_solver, P_max_elmts);
+      HYPRE_BoomerAMGSetCoarsenType(par_solver, coarsen_type);
       HYPRE_BoomerAMGSetMaxIter(par_solver, maxIterations);
       HYPRE_BoomerAMGSetMaxLevels(par_solver, maxLevels);
       HYPRE_BoomerAMGSetTol(par_solver, tol);
@@ -4476,6 +4499,8 @@ main( hypre_int argc,
          /* use BoomerAMG as preconditioner */
          HYPRE_BoomerAMGCreate(&par_precond);
          HYPRE_BoomerAMGSetStrongThreshold(par_precond, strong_threshold);
+         HYPRE_BoomerAMGSetPMaxElmts(par_precond, P_max_elmts);
+         HYPRE_BoomerAMGSetCoarsenType(par_precond, coarsen_type);
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
          HYPRE_BoomerAMGSetMaxLevels(par_precond, maxLevels);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
@@ -4719,6 +4744,8 @@ main( hypre_int argc,
          /* use BoomerAMG as preconditioner */
          HYPRE_BoomerAMGCreate(&par_precond);
          HYPRE_BoomerAMGSetStrongThreshold(par_precond, strong_threshold);
+         HYPRE_BoomerAMGSetPMaxElmts(par_precond, P_max_elmts);
+         HYPRE_BoomerAMGSetCoarsenType(par_precond, coarsen_type);
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
          HYPRE_BoomerAMGSetMaxLevels(par_precond, maxLevels);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
@@ -4950,6 +4977,8 @@ main( hypre_int argc,
          /* use BoomerAMG as preconditioner */
          HYPRE_BoomerAMGCreate(&par_precond);
          HYPRE_BoomerAMGSetStrongThreshold(par_precond, strong_threshold);
+         HYPRE_BoomerAMGSetPMaxElmts(par_precond, P_max_elmts);
+         HYPRE_BoomerAMGSetCoarsenType(par_precond, coarsen_type);
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
          HYPRE_BoomerAMGSetMaxLevels(par_precond, maxLevels);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
@@ -5183,6 +5212,8 @@ main( hypre_int argc,
          /* use BoomerAMG as preconditioner */
          HYPRE_BoomerAMGCreate(&par_precond);
          HYPRE_BoomerAMGSetStrongThreshold(par_precond, strong_threshold);
+         HYPRE_BoomerAMGSetPMaxElmts(par_precond, P_max_elmts);
+         HYPRE_BoomerAMGSetCoarsenType(par_precond, coarsen_type);
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
          HYPRE_BoomerAMGSetMaxLevels(par_precond, maxLevels);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
@@ -5264,6 +5295,8 @@ main( hypre_int argc,
          /* use BoomerAMG as preconditioner */
          HYPRE_BoomerAMGCreate(&par_precond);
          HYPRE_BoomerAMGSetStrongThreshold(par_precond, strong_threshold);
+         HYPRE_BoomerAMGSetPMaxElmts(par_precond, P_max_elmts);
+         HYPRE_BoomerAMGSetCoarsenType(par_precond, coarsen_type);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
          HYPRE_BoomerAMGSetPrintLevel(par_precond, 1);
          HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
