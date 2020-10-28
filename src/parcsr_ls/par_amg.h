@@ -66,17 +66,17 @@ typedef struct
    /* solve params */
    HYPRE_Int      max_iter;
    HYPRE_Int      min_iter;
-   HYPRE_Int      cycle_type;    
-   HYPRE_Int     *num_grid_sweeps;  
-   HYPRE_Int     *grid_relax_type;   
+   HYPRE_Int      cycle_type;
+   HYPRE_Int     *num_grid_sweeps;
+   HYPRE_Int     *grid_relax_type;
    HYPRE_Int    **grid_relax_points;
    HYPRE_Int      relax_order;
-   HYPRE_Int      user_coarse_relax_type;   
-   HYPRE_Int      user_relax_type;   
-   HYPRE_Int      user_num_sweeps;   
-   HYPRE_Real     user_relax_weight;   
+   HYPRE_Int      user_coarse_relax_type;
+   HYPRE_Int      user_relax_type;
+   HYPRE_Int      user_num_sweeps;
+   HYPRE_Real     user_relax_weight;
    HYPRE_Real     outer_wt;
-   HYPRE_Real  *relax_weight; 
+   HYPRE_Real  *relax_weight;
    HYPRE_Real  *omega;
    HYPRE_Real   tol;
 
@@ -89,7 +89,7 @@ typedef struct
    HYPRE_Int      nodal_diag;
    HYPRE_Int      num_points;
    HYPRE_Int     *dof_func;
-   HYPRE_Int     *dof_point;           
+   HYPRE_Int     *dof_point;
    HYPRE_Int     *point_dof_map;
 
    /* data generated in the setup phase */
@@ -184,7 +184,7 @@ typedef struct
    HYPRE_Int               num_interp_vectors;
    HYPRE_Int               num_levels_interp_vectors; /* not set by user */
    hypre_ParVector **interp_vectors;
-   hypre_ParVector ***interp_vectors_array;   
+   hypre_ParVector ***interp_vectors_array;
    HYPRE_Int               interp_vec_variant;
    HYPRE_Int               interp_vec_first_level;
    HYPRE_Real        interp_vectors_abs_q_trunc;
@@ -230,7 +230,7 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 /* setup params */
-		  		      
+
 #define hypre_ParAMGDataRestriction(amg_data) ((amg_data)->restr_par)
 #define hypre_ParAMGDataMaxLevels(amg_data) ((amg_data)->max_levels)
 #define hypre_ParAMGDataStrongThreshold(amg_data) \
@@ -259,10 +259,10 @@ typedef struct
 #define hypre_ParAMGDataISType(amg_data) ((amg_data)->IS_type)
 #define hypre_ParAMGDataCRUseCG(amg_data) ((amg_data)->CR_use_CG)
 #define hypre_ParAMGDataL1Norms(amg_data) ((amg_data)->l1_norms)
- #define hypre_ParAMGDataCGCIts(amg_data) ((amg_data)->cgc_its)
- #define hypre_ParAMGDataMaxCoarseSize(amg_data) ((amg_data)->max_coarse_size)
- #define hypre_ParAMGDataMinCoarseSize(amg_data) ((amg_data)->min_coarse_size)
- #define hypre_ParAMGDataSeqThreshold(amg_data) ((amg_data)->seq_threshold)
+#define hypre_ParAMGDataCGCIts(amg_data) ((amg_data)->cgc_its)
+#define hypre_ParAMGDataMaxCoarseSize(amg_data) ((amg_data)->max_coarse_size)
+#define hypre_ParAMGDataMinCoarseSize(amg_data) ((amg_data)->min_coarse_size)
+#define hypre_ParAMGDataSeqThreshold(amg_data) ((amg_data)->seq_threshold)
 
 /* solve params */
 
@@ -304,34 +304,34 @@ typedef struct
 #define hypre_ParAMGDataDofFuncArray(amg_data) ((amg_data)->dof_func_array)
 #define hypre_ParAMGDataDofPointArray(amg_data) ((amg_data)->dof_point_array)
 #define hypre_ParAMGDataPointDofMapArray(amg_data) \
-((amg_data)->point_dof_map_array) 
-#define hypre_ParAMGDataNumLevels(amg_data) ((amg_data)->num_levels)	
+((amg_data)->point_dof_map_array)
+#define hypre_ParAMGDataNumLevels(amg_data) ((amg_data)->num_levels)
 #define hypre_ParAMGDataSmoothType(amg_data) ((amg_data)->smooth_type)
 #define hypre_ParAMGDataSmoothNumLevels(amg_data) \
 ((amg_data)->smooth_num_levels)
 #define hypre_ParAMGDataSmoothNumSweeps(amg_data) \
-((amg_data)->smooth_num_sweeps)	
-#define hypre_ParAMGDataSmoother(amg_data) ((amg_data)->smoother)	
-#define hypre_ParAMGDataVariant(amg_data) ((amg_data)->schw_variant)	
-#define hypre_ParAMGDataOverlap(amg_data) ((amg_data)->schw_overlap)	
-#define hypre_ParAMGDataDomainType(amg_data) ((amg_data)->schw_domain_type)	
+((amg_data)->smooth_num_sweeps)
+#define hypre_ParAMGDataSmoother(amg_data) ((amg_data)->smoother)
+#define hypre_ParAMGDataVariant(amg_data) ((amg_data)->schw_variant)
+#define hypre_ParAMGDataOverlap(amg_data) ((amg_data)->schw_overlap)
+#define hypre_ParAMGDataDomainType(amg_data) ((amg_data)->schw_domain_type)
 #define hypre_ParAMGDataSchwarzRlxWeight(amg_data) \
 ((amg_data)->schwarz_rlx_weight)
 #define hypre_ParAMGDataSchwarzUseNonSymm(amg_data) \
 ((amg_data)->schwarz_use_nonsymm)
-#define hypre_ParAMGDataSym(amg_data) ((amg_data)->ps_sym)	
-#define hypre_ParAMGDataLevel(amg_data) ((amg_data)->ps_level)	
+#define hypre_ParAMGDataSym(amg_data) ((amg_data)->ps_sym)
+#define hypre_ParAMGDataLevel(amg_data) ((amg_data)->ps_level)
 #define hypre_ParAMGDataMaxNzPerRow(amg_data) ((amg_data)->pi_max_nz_per_row)
-#define hypre_ParAMGDataThreshold(amg_data) ((amg_data)->ps_threshold)	
-#define hypre_ParAMGDataFilter(amg_data) ((amg_data)->ps_filter)	
-#define hypre_ParAMGDataDropTol(amg_data) ((amg_data)->pi_drop_tol)	
-#define hypre_ParAMGDataEuclidFile(amg_data) ((amg_data)->euclidfile)	
-#define hypre_ParAMGDataEuLevel(amg_data) ((amg_data)->eu_level)	
+#define hypre_ParAMGDataThreshold(amg_data) ((amg_data)->ps_threshold)
+#define hypre_ParAMGDataFilter(amg_data) ((amg_data)->ps_filter)
+#define hypre_ParAMGDataDropTol(amg_data) ((amg_data)->pi_drop_tol)
+#define hypre_ParAMGDataEuclidFile(amg_data) ((amg_data)->euclidfile)
+#define hypre_ParAMGDataEuLevel(amg_data) ((amg_data)->eu_level)
 #define hypre_ParAMGDataEuSparseA(amg_data) ((amg_data)->eu_sparse_A)
 #define hypre_ParAMGDataEuBJ(amg_data) ((amg_data)->eu_bj)
 
-#define hypre_ParAMGDataMaxEigEst(amg_data) ((amg_data)->max_eig_est)	
-#define hypre_ParAMGDataMinEigEst(amg_data) ((amg_data)->min_eig_est)	
+#define hypre_ParAMGDataMaxEigEst(amg_data) ((amg_data)->max_eig_est)
+#define hypre_ParAMGDataMinEigEst(amg_data) ((amg_data)->min_eig_est)
 #define hypre_ParAMGDataChebyOrder(amg_data) ((amg_data)->cheby_order)
 #define hypre_ParAMGDataChebyFraction(amg_data) ((amg_data)->cheby_fraction)
 
@@ -425,7 +425,5 @@ typedef struct
 
 #define hypre_ParAMGDataRAP2(amg_data) ((amg_data)->rap2)
 #define hypre_ParAMGDataKeepTranspose(amg_data) ((amg_data)->keepTranspose)
+
 #endif
-
-
-
