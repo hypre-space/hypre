@@ -372,7 +372,7 @@ hypre_SSAMGPrintLogging( void *ssamg_vdata )
 
          if ((i != num_iterations - 1) && (num_iterations > 0))
          {
-            i = (num_iterations - 1);
+            i = num_iterations;
             hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);
          }
       }
