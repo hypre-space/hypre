@@ -48,6 +48,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    HYPRE_Int             num_pre_relax   = (pfmg_data -> num_pre_relax);
    HYPRE_Int             num_post_relax  = (pfmg_data -> num_post_relax);
    HYPRE_Int             num_levels      = (pfmg_data -> num_levels);
+   HYPRE_Int             print_level     = (pfmg_data -> print_level);
    hypre_StructMatrix  **A_l             = (pfmg_data -> A_l);
    hypre_StructMatrix  **P_l             = (pfmg_data -> P_l);
    hypre_StructMatrix  **RT_l            = (pfmg_data -> RT_l);
@@ -69,10 +70,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 
    HYPRE_Int             i, l;
    HYPRE_Int             constant_coefficient;
-
-#if DEBUG
    char                  filename[255];
-#endif
 
    /*-----------------------------------------------------
     * Initialize some things and deal with special cases
@@ -134,6 +132,23 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          b_dot_b = 1.0;
 #endif
       }
+   }
+
+   /* Print initial solution and residual */
+   if (print_level > 1)
+   {
+      /* Print solution */
+      hypre_sprintf(filename, "pfmg_x.i%02d", 0);
+      hypre_StructVectorPrint(filename, x_l[0], 0);
+
+      /* Compute residual (b - Ax) */
+      hypre_StructCopy(b_l[0], r_l[0]);
+      hypre_StructMatvecCompute(matvec_data_l[0], -1.0,
+                                A_l[0], x_l[0], 1.0, r_l[0]);
+
+      /* Print residual */
+      hypre_sprintf(filename, "pfmg_r.i%02d", 0);
+      hypre_StructVectorPrint(filename, r_l[0], 0);
    }
 
    /*-----------------------------------------------------
@@ -341,8 +356,24 @@ hypre_PFMGSolve( void               *pfmg_vdata,
       hypre_PFMGRelaxSetMaxIter(relax_data_l[0], num_post_relax);
       hypre_PFMGRelaxSetZeroGuess(relax_data_l[0], 0);
       hypre_PFMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
-      (pfmg_data -> num_iterations) = (i + 1);
 
+      if (print_level > 1)
+      {
+         /* Print solution */
+         hypre_sprintf(filename, "pfmg_x.i%02d", (i + 1));
+         hypre_StructVectorPrint(filename, x_l[0], 0);
+
+         /* Compute fine grid residual (b - Ax) */
+         hypre_StructCopy(b_l[0], r_l[0]);
+         hypre_StructMatvecCompute(matvec_data_l[0], -1.0,
+                                   A_l[0], x_l[0], 1.0, r_l[0]);
+
+         /* Print residual */
+         hypre_sprintf(filename, "pfmg_r.i%02d", (i + 1));
+         hypre_StructVectorPrint(filename, r_l[0], 0);
+      }
+
+      (pfmg_data -> num_iterations) = (i + 1);
       HYPRE_ANNOTATE_MGLEVEL_END(0);
    }
 
