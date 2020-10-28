@@ -41,20 +41,12 @@
 
 /* end lobpcg */
 
-HYPRE_Int  SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* period);
-
-HYPRE_Int  AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
-                           HYPRE_Real        cx,
-                           HYPRE_Real        cy,
-                           HYPRE_Real        cz,
-                           HYPRE_Real        conx,
-                           HYPRE_Real        cony,
-                           HYPRE_Real        conz) ;
-
-HYPRE_Int AddValuesVector( hypre_StructGrid  *gridvector,
-                           hypre_StructVector *zvector,
-                           HYPRE_Int          *period,
-                           HYPRE_Real         value  )  ;
+HYPRE_Int SetStencilBndry(HYPRE_StructMatrix A, HYPRE_StructGrid grid, HYPRE_Int *period );
+HYPRE_Int AddValuesMatrix(HYPRE_StructMatrix A, HYPRE_StructGrid grid,
+                          HYPRE_Real cx, HYPRE_Real cy, HYPRE_Real cz,
+                          HYPRE_Real conx, HYPRE_Real cony, HYPRE_Real conz);
+HYPRE_Int AddValuesVector(hypre_StructGrid *grid, hypre_StructVector *zvector,
+                          HYPRE_Int *period, HYPRE_Int type, HYPRE_Real value);
 
 /*--------------------------------------------------------------------------
  * Test driver for structured matrix interface (structured storage)
@@ -110,10 +102,13 @@ main( hypre_int argc,
    HYPRE_Int           usr_jacobi_weight;
    HYPRE_Int           jump;
    HYPRE_Int           rep, reps;
+   HYPRE_Int           max_iterations;
+
+   HYPRE_Int           rhs_type, x0_type;
+   HYPRE_Real          rhs_value, x0_value;
 
    HYPRE_Int         **iupper;
    HYPRE_Int         **ilower;
-
    HYPRE_Int           istart[3];
    HYPRE_Int           periodic[3];
    HYPRE_Int         **offsets;
@@ -149,7 +144,6 @@ main( hypre_int argc,
    HYPRE_Int blockSize = 1;
    HYPRE_Int verbosity = 1;
    HYPRE_Int iterations;
-   HYPRE_Int maxIterations = 100;
    HYPRE_Int checkOrtho = 0;
    HYPRE_Int printLevel = 0;
    HYPRE_Int pcgIterations = 0;
@@ -228,11 +222,17 @@ main( hypre_int argc,
    cony = 0.0;
    conz = 0.0;
 
+   rhs_type  = 1;
+   rhs_value = 0.0;
+   x0_type   = 0;
+   x0_value  = 0.0;
+
    n_pre  = 1;
    n_post = 1;
 
    solver_id = 0;
    solver_type = 1;
+   max_iterations = 100;
 
    istart[0] = -3;
    istart[1] = -3;
@@ -340,6 +340,40 @@ main( hypre_int argc,
          read_x0fromfile_param = 1;
          read_x0fromfile_index = arg_index;
       }
+      else if (strcmp(argv[arg_index], "-rhszero") == 0)
+      {
+         arg_index++;
+         rhs_type  = 1;
+         rhs_value = 0.0;
+      }
+      else if (strcmp(argv[arg_index], "-rhsone") == 0)
+      {
+         arg_index++;
+         rhs_type  = 1;
+         rhs_value = 1.0;
+      }
+      else if (strcmp(argv[arg_index], "-rhsrand") == 0)
+      {
+         arg_index++;
+         rhs_type  = 0;
+      }
+      else if (strcmp(argv[arg_index], "-x0zero") == 0)
+      {
+         arg_index++;
+         x0_type  = 1;
+         x0_value = 0.0;
+      }
+      else if (strcmp(argv[arg_index], "-x0one") == 0)
+      {
+         arg_index++;
+         x0_type  = 1;
+         x0_value = 1.0;
+      }
+      else if (strcmp(argv[arg_index], "-x0rand") == 0)
+      {
+         arg_index++;
+         x0_type  = 0;
+      }
       else if (strcmp(argv[arg_index], "-repeats") == 0 )
       {
          arg_index++;
@@ -355,7 +389,9 @@ main( hypre_int argc,
             arg_index++;
 	 }
 	 else /* end lobpcg */
+         {
             solver_id = atoi(argv[arg_index++]);
+         }
       }
       else if ( strcmp(argv[arg_index], "-v") == 0 )
       {
@@ -407,7 +443,7 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-itr") == 0 )
       {
          arg_index++;
-         maxIterations = atoi(argv[arg_index++]);
+         max_iterations = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-cf") == 0 )
       {
@@ -483,11 +519,11 @@ main( hypre_int argc,
    }
 
    /* begin lobpcg */
-
    if ( solver_id == 0 && lobpcgFlag )
+   {
       solver_id = 10;
-
-   /*end lobpcg */
+   }
+   /* end lobpcg */
 
    sum = read_x0fromfile_param + read_rhsfromfile_param + read_fromfile_param;
 
@@ -511,6 +547,12 @@ main( hypre_int argc,
       hypre_printf("  -fromfile <name>    : prefix name for matrixfiles\n");
       hypre_printf("  -rhsfromfile <name> : prefix name for rhsfiles\n");
       hypre_printf("  -x0fromfile <name>  : prefix name for firstguessfiles\n");
+      hypre_printf("  -rhszero            : rhs vector has zero components\n");
+      hypre_printf("  -rhsone             : rhs vector has unit components\n");
+      hypre_printf("  -rhsrand            : rhs vector has random components \n");
+      hypre_printf("  -x0zero             : initial solution (x0) has zero components \n");
+      hypre_printf("  -x0one              : initial solution (x0) has unit components \n");
+      hypre_printf("  -x0rand             : initial solution (x0) has random components \n");
       hypre_printf("  -repeats <reps>     : number of times to repeat the run, default 1.  For solver 0,1,3\n");
       hypre_printf("  -solver <ID>        : solver ID\n");
       hypre_printf("                        0  - SMG (default)\n");
@@ -647,42 +689,49 @@ main( hypre_int argc,
     * Print driver parameters
     *-----------------------------------------------------------*/
 
-   if (myid == 0 && sum == 0)
+   if (myid == 0)
    {
       hypre_printf("Running with these driver parameters:\n");
-      hypre_printf("  (nx, ny, nz)    = (%d, %d, %d)\n", nx, ny, nz);
-      hypre_printf("  (istart[0],istart[1],istart[2]) = (%d, %d, %d)\n", \
-                   istart[0],istart[1],istart[2]);
-      hypre_printf("  (Px, Py, Pz)    = (%d, %d, %d)\n", P,  Q,  R);
-      hypre_printf("  (bx, by, bz)    = (%d, %d, %d)\n", bx, by, bz);
-      hypre_printf("  (px, py, pz)    = (%d, %d, %d)\n", px, py, pz);
-      hypre_printf("  (cx, cy, cz)    = (%f, %f, %f)\n", cx, cy, cz);
-      hypre_printf("  (conx,cony,conz)= (%f, %f, %f)\n", conx, cony, conz);
-      hypre_printf("  (n_pre, n_post) = (%d, %d)\n", n_pre, n_post);
-      hypre_printf("  dim             = %d\n", dim);
-      hypre_printf("  skip            = %d\n", skip);
-      hypre_printf("  sym             = %d\n", sym);
-      hypre_printf("  rap             = %d\n", rap);
-      hypre_printf("  relax           = %d\n", relax);
-      hypre_printf("  jump            = %d\n", jump);
-      hypre_printf("  solver ID       = %d\n", solver_id);
-   }
-
-   if (myid == 0 && sum > 0)
-   {
-      hypre_printf("Running with these driver parameters:\n");
-      hypre_printf("  (cx, cy, cz)    = (%f, %f, %f)\n", cx, cy, cz);
-      hypre_printf("  (conx,cony,conz)= (%f, %f, %f)\n", conx, cony, conz);
-      hypre_printf("  (n_pre, n_post) = (%d, %d)\n", n_pre, n_post);
-      hypre_printf("  dim             = %d\n", dim);
-      hypre_printf("  skip            = %d\n", skip);
-      hypre_printf("  sym             = %d\n", sym);
-      hypre_printf("  rap             = %d\n", rap);
-      hypre_printf("  relax           = %d\n", relax);
-      hypre_printf("  jump            = %d\n", jump);
-      hypre_printf("  solver ID       = %d\n", solver_id);
-      hypre_printf("  the grid is read from  file \n");
-
+      if (sum == 0)
+      {
+         hypre_printf("  (nx, ny, nz)     = (%d, %d, %d)\n", nx, ny, nz);
+         hypre_printf("  (ist0,ist1,ist2) = (%d, %d, %d)\n", \
+                      istart[0],istart[1],istart[2]);
+         hypre_printf("  (Px, Py, Pz)     = (%d, %d, %d)\n", P,  Q,  R);
+         hypre_printf("  (bx, by, bz)     = (%d, %d, %d)\n", bx, by, bz);
+         hypre_printf("  (px, py, pz)     = (%d, %d, %d)\n", px, py, pz);
+      }
+      else
+      {
+         hypre_printf("  the grid is read from file  \n");
+      }
+      hypre_printf("  (cx, cy, cz)     = (%f, %f, %f)\n", cx, cy, cz);
+      hypre_printf("  (conx,cony,conz) = (%f, %f, %f)\n", conx, cony, conz);
+      hypre_printf("  (n_pre, n_post)  = (%d, %d)\n", n_pre, n_post);
+      hypre_printf("  dim              = %d\n", dim);
+      hypre_printf("  skip             = %d\n", skip);
+      hypre_printf("  sym              = %d\n", sym);
+      hypre_printf("  rap              = %d\n", rap);
+      hypre_printf("  relax            = %d\n", relax);
+      hypre_printf("  jump             = %d\n", jump);
+      hypre_printf("  solver ID        = %d\n", solver_id);
+      if (rhs_type == 0)
+      {
+         hypre_printf("  rhs has random components\n");
+      }
+      else
+      {
+         hypre_printf("  rhs value        = %20.15e\n", rhs_value);
+      }
+      if (x0_type == 0)
+      {
+         hypre_printf("  initial sol (x0) has random components\n");
+      }
+      else
+      {
+         hypre_printf("  initial sol (x0) = %20.15e\n", x0_value);
+      }
+      hypre_printf("\n");
    }
 
    /*-----------------------------------------------------------
@@ -691,7 +740,7 @@ main( hypre_int argc,
 
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
 
-   for ( rep=0; rep<reps; ++rep )
+   for (rep = 0; rep < reps; ++rep)
    {
       time_index = hypre_InitializeTiming("Struct Interface");
       hypre_BeginTiming(time_index);
@@ -877,12 +926,15 @@ main( hypre_int argc,
       /* We do the extreme cases first reading everything from files => sum = 3
        * building things from scratch (grid,stencils,extents) sum = 0 */
 
-      if ( (read_fromfile_param ==1) &&
-           (read_x0fromfile_param ==1) &&
-           (read_rhsfromfile_param ==1)
-         )
+      if ((read_fromfile_param == 1) &&
+          (read_x0fromfile_param == 1) &&
+          (read_rhsfromfile_param == 1))
       {
-         hypre_printf("\nreading linear system from files: matrix, rhs and x0\n");
+         if (myid == 0)
+         {
+            hypre_printf("\nReading linear system from files: matrix, rhs and x0\n");
+         }
+
          /* ghost selection for reading the matrix and vectors */
          for (i = 0; i < dim; i++)
          {
@@ -932,8 +984,10 @@ main( hypre_int argc,
                   ib++;
                }
                break;
+
             case 2:
                for (iy = 0; iy < by; iy++)
+               {
                   for (ix = 0; ix < bx; ix++)
                   {
                      ilower[ib][0] = istart[0]+ nx*(bx*p+ix);
@@ -942,10 +996,14 @@ main( hypre_int argc,
                      iupper[ib][1] = istart[1]+ ny*(by*q+iy+1) - 1;
                      ib++;
                   }
+               }
                break;
+
             case 3:
                for (iz = 0; iz < bz; iz++)
+               {
                   for (iy = 0; iy < by; iy++)
+                  {
                      for (ix = 0; ix < bx; ix++)
                      {
                         ilower[ib][0] = istart[0]+ nx*(bx*p+ix);
@@ -956,6 +1014,8 @@ main( hypre_int argc,
                         iupper[ib][2] = istart[2]+ nz*(bz*r+iz+1) - 1;
                         ib++;
                      }
+                  }
+               }
                break;
          }
 
@@ -985,22 +1045,22 @@ main( hypre_int argc,
          }
 
          HYPRE_StructMatrixCreate(hypre_MPI_COMM_WORLD, grid, stencil, &A);
-         if ( solver_id == 3 || solver_id == 4 ||
+         if ( solver_id == 3  || solver_id == 4 ||
               solver_id == 13 || solver_id == 14 )
          {
             stencil_size  = hypre_StructStencilSize(stencil);
             stencil_entries = hypre_CTAlloc(HYPRE_Int, stencil_size);
-            if ( solver_id == 3 || solver_id == 13)
+            if (solver_id == 3 || solver_id == 13)
             {
-               for ( i=0; i<stencil_size; ++i ) stencil_entries[i]=i;
-               hypre_StructMatrixSetConstantEntries(
-                  A, stencil_size, stencil_entries );
-               /* ... note: SetConstantEntries is where the constant_coefficient
-                  flag is set in A */
-               hypre_TFree( stencil_entries );
+               for (i = 0; i < stencil_size; ++i)
+               {
+                  stencil_entries[i] = i;
+               }
+               /* SetConstantEntries is where the constant_coefficient flag is set in A */
+               hypre_StructMatrixSetConstantEntries(A, stencil_size, stencil_entries);
                constant_coefficient = 1;
             }
-            if ( solver_id == 4 || solver_id == 14)
+            else
             {
                stencil_diag_entry = hypre_StructStencilDiagEntry(stencil);
                hypre_assert(stencil_size >= 1);
@@ -1019,11 +1079,10 @@ main( hypre_int argc,
                      stencil_entries[i] = i;
                   }
                }
-               hypre_StructMatrixSetConstantEntries(
-                  A, stencil_size, stencil_entries );
-               hypre_TFree( stencil_entries );
+               hypre_StructMatrixSetConstantEntries(A, stencil_size, stencil_entries);
                constant_coefficient = 2;
             }
+            hypre_TFree(stencil_entries);
          }
          HYPRE_StructMatrixSetSymmetric(A, sym);
          HYPRE_StructMatrixSetNumGhost(A, A_num_ghost);
@@ -1033,12 +1092,16 @@ main( hypre_int argc,
           * Fill in the matrix elements
           *-----------------------------------------------------------*/
 
-         AddValuesMatrix(A,grid,cx,cy,cz,conx,cony,conz);
+         AddValuesMatrix(A, grid, cx, cy, cz, conx, cony, conz);
 
-         /* Zero out stencils reaching to real boundary */
-         /* But in constant coefficient case, no special stencils! */
+         /* Zero out stencils reaching to real boundary.
+            But in constant coefficient case, no special stencils! */
+         if (constant_coefficient == 0)
+         {
+            SetStencilBndry(A, grid, periodic);
+         }
 
-         if ( constant_coefficient == 0 ) SetStencilBndry(A,grid,periodic);
+         /* Assemble matrix */
          HYPRE_StructMatrixAssemble(A);
 
          /*-----------------------------------------------------------
@@ -1053,14 +1116,13 @@ main( hypre_int argc,
           * compatibility condition. Achieved by setting a source and
           *  sink of equal strength.  All other problems have rhs = 1.
           *-----------------------------------------------------------*/
-
-         AddValuesVector(grid,b,periodic,1.0);
+         AddValuesVector(grid, b, periodic, rhs_type, rhs_value);
          HYPRE_StructVectorAssemble(b);
 
          HYPRE_StructVectorCreate(hypre_MPI_COMM_WORLD, grid, &x);
          HYPRE_StructVectorInitialize(x);
 
-         AddValuesVector(grid,x,periodx0,0.0);
+         AddValuesVector(grid, x, periodx0, x0_type, x0_value);
          HYPRE_StructVectorAssemble(x);
 
          HYPRE_StructGridDestroy(grid);
@@ -1073,21 +1135,21 @@ main( hypre_int argc,
          hypre_TFree(ilower);
          hypre_TFree(iupper);
       }
-
-      /* the grid will be read from file.  */
-      if ( (sum > 0 ) && (sum < 3))
+      else if ((sum > 0 ) && (sum < 3))
       {
+         /* the grid will be read from file.  */
          /* the grid will come from rhs or from x0 */
          if (read_fromfile_param == 0)
          {
-
             if ((read_rhsfromfile_param > 0) && (read_x0fromfile_param == 0))
             {
                /* read right hand side, extract grid, construct matrix,
                   construct x0 */
-
-               hypre_printf("\ninitial rhs from file prefix :%s\n",
-                            argv[read_rhsfromfile_index]);
+               if (myid == 0)
+               {
+                  hypre_printf("\ninitial rhs from file prefix :%s\n",
+                               argv[read_rhsfromfile_index]);
+               }
 
                /* ghost selection for vector  */
                for (i = 0; i < dim; i++)
@@ -1107,7 +1169,7 @@ main( hypre_int argc,
                HYPRE_StructVectorCreate(hypre_MPI_COMM_WORLD, readgrid, &x);
                HYPRE_StructVectorInitialize(x);
 
-               AddValuesVector(readgrid,x,periodx0,0.0);
+               AddValuesVector(readgrid, x, periodx0, x0_type, x0_value);
                HYPRE_StructVectorAssemble(x);
 
                HYPRE_StructMatrixCreate(hypre_MPI_COMM_WORLD,
@@ -1120,24 +1182,25 @@ main( hypre_int argc,
                 * Fill in the matrix elements
                 *-----------------------------------------------------------*/
 
-               AddValuesMatrix(A,readgrid,cx,cy,cz,conx,cony,conz);
+               AddValuesMatrix(A, readgrid, cx, cy, cz, conx, cony, conz);
 
                /* Zero out stencils reaching to real boundary */
 
-               if ( constant_coefficient==0 )
-                  SetStencilBndry(A,readgrid,readperiodic);
+               if (constant_coefficient == 0)
+               {
+                  SetStencilBndry(A, readgrid, readperiodic);
+               }
                HYPRE_StructMatrixAssemble(A);
             }
-            /* done with one case rhs=1 x0 = 0 */
-
-            /* case when rhs=0 and read x0=1 */
-            if ((read_rhsfromfile_param == 0) && (read_x0fromfile_param > 0))
+            else if ((read_rhsfromfile_param == 0) && (read_x0fromfile_param > 0))
             {
                /* read right hand side, extract grid, construct matrix,
                   construct x0 */
-
-               hypre_printf("\ninitial x0 from file prefix :%s\n",
-                            argv[read_x0fromfile_index]);
+               if (myid == 0)
+               {
+                  hypre_printf("\ninitial x0 from file prefix :%s\n",
+                               argv[read_x0fromfile_index]);
+               }
 
                /* ghost selection for vector  */
                for (i = 0; i < dim; i++)
@@ -1155,7 +1218,7 @@ main( hypre_int argc,
 
                HYPRE_StructVectorCreate(hypre_MPI_COMM_WORLD, readgrid, &b);
                HYPRE_StructVectorInitialize(b);
-               AddValuesVector(readgrid,b,readperiodic,1.0);
+               AddValuesVector(readgrid, b, readperiodic, rhs_type, rhs_value);
 
                HYPRE_StructVectorAssemble(b);
 
@@ -1169,26 +1232,26 @@ main( hypre_int argc,
                 * Fill in the matrix elements
                 *-----------------------------------------------------------*/
 
-               AddValuesMatrix(A,readgrid,cx,cy,cz,conx,cony,conz);
+               AddValuesMatrix(A, readgrid, cx, cy, cz, conx, cony, conz);
 
                /* Zero out stencils reaching to real boundary */
-
-               if ( constant_coefficient == 0 )
-                  SetStencilBndry(A,readgrid,readperiodic);
+               if (constant_coefficient == 0)
+               {
+                  SetStencilBndry(A, readgrid, readperiodic);
+               }
                HYPRE_StructMatrixAssemble(A);
             }
-            /* done with one case rhs=0 x0 = 1  */
-
-            /* the other case when read rhs > 0 and read x0 > 0  */
-            if ((read_rhsfromfile_param > 0) && (read_x0fromfile_param > 0))
+            else if ((read_rhsfromfile_param > 0) && (read_x0fromfile_param > 0))
             {
                /* read right hand side, extract grid, construct matrix,
                   construct x0 */
-
-               hypre_printf("\ninitial rhs  from file prefix :%s\n",
-                            argv[read_rhsfromfile_index]);
-               hypre_printf("\ninitial x0  from file prefix :%s\n",
-                            argv[read_x0fromfile_index]);
+               if (myid == 0)
+               {
+                  hypre_printf("\ninitial rhs  from file prefix :%s\n",
+                               argv[read_rhsfromfile_index]);
+                  hypre_printf("\ninitial x0  from file prefix :%s\n",
+                               argv[read_x0fromfile_index]);
+               }
 
                /* ghost selection for vector  */
                for (i = 0; i < dim; i++)
@@ -1220,22 +1283,25 @@ main( hypre_int argc,
                 * Fill in the matrix elements
                 *-----------------------------------------------------------*/
 
-               AddValuesMatrix(A,readgrid,cx,cy,cz,conx,cony,conz);
+               AddValuesMatrix(A, readgrid, cx, cy, cz, conx, cony, conz);
 
                /* Zero out stencils reaching to real boundary */
 
-               if ( constant_coefficient == 0 )
+               if (constant_coefficient == 0)
+               {
                   SetStencilBndry(A,readgrid,readperiodic);
+               }
                HYPRE_StructMatrixAssemble(A);
-            }
-            /* done with one case rhs=1 x0 = 1  */
-         }
-         /* done with the case where you no read matrix  */
-
-         if (read_fromfile_param == 1)  /* still sum > 0  */
+            } /* done with one case rhs=1 x0 = 1  */
+         } /* done with the case where you no read matrix */
+         else if (read_fromfile_param == 1)  /* still sum > 0  */
          {
-            hypre_printf("\nreading matrix from file:%s\n",
-                         argv[read_fromfile_index]);
+            if (myid == 0)
+            {
+               hypre_printf("\nreading matrix from file:%s\n",
+                            argv[read_fromfile_index]);
+            }
+
             /* ghost selection for reading the matrix  */
             for (i = 0; i < dim; i++)
             {
@@ -1253,8 +1319,11 @@ main( hypre_int argc,
             if ((read_rhsfromfile_param > 0) && (read_x0fromfile_param == 0))
             {
                /* read right hand side ,construct x0 */
-               hypre_printf("\ninitial rhs from file prefix :%s\n",
-                            argv[read_rhsfromfile_index]);
+               if (myid == 0)
+               {
+                  hypre_printf("\ninitial rhs from file prefix :%s\n",
+                               argv[read_rhsfromfile_index]);
+               }
 
                /* ghost selection for vector  */
                for (i = 0; i < dim; i++)
@@ -1268,17 +1337,20 @@ main( hypre_int argc,
                                          argv[read_rhsfromfile_index],
                                          v_num_ghost);
 
-               HYPRE_StructVectorCreate(hypre_MPI_COMM_WORLD, readgrid,&x);
+               HYPRE_StructVectorCreate(hypre_MPI_COMM_WORLD, readgrid, &x);
                HYPRE_StructVectorInitialize(x);
-               AddValuesVector(readgrid,x,periodx0,0.0);
+
+               AddValuesVector(readgrid, x, periodx0, x0_type, x0_value);
                HYPRE_StructVectorAssemble(x);
             }
-
-            if ((read_rhsfromfile_param == 0) && (read_x0fromfile_param > 0))
+            else if ((read_rhsfromfile_param == 0) && (read_x0fromfile_param > 0))
             {
                /* read x0, construct rhs*/
-               hypre_printf("\ninitial x0 from file prefix :%s\n",
-                            argv[read_x0fromfile_index]);
+               if (myid == 0)
+               {
+                  hypre_printf("\ninitial x0 from file prefix :%s\n",
+                               argv[read_x0fromfile_index]);
+               }
 
                /* ghost selection for vector  */
                for (i = 0; i < dim; i++)
@@ -1294,38 +1366,36 @@ main( hypre_int argc,
 
                HYPRE_StructVectorCreate(hypre_MPI_COMM_WORLD, readgrid, &b);
                HYPRE_StructVectorInitialize(b);
-               AddValuesVector(readgrid,b,readperiodic,1.0);
+               AddValuesVector(readgrid, b, readperiodic, rhs_type, rhs_value);
                HYPRE_StructVectorAssemble(b);
             }
-
-            if ((read_rhsfromfile_param == 0) && (read_x0fromfile_param == 0))
+            else if((read_rhsfromfile_param == 0) && (read_x0fromfile_param == 0))
             {
                /* construct x0 , construct b*/
                HYPRE_StructVectorCreate(hypre_MPI_COMM_WORLD, readgrid, &b);
                HYPRE_StructVectorInitialize(b);
-               AddValuesVector(readgrid,b,readperiodic,1.0);
+               AddValuesVector(readgrid, b, readperiodic, rhs_type, rhs_value);
                HYPRE_StructVectorAssemble(b);
 
 
                HYPRE_StructVectorCreate(hypre_MPI_COMM_WORLD, readgrid, &x);
                HYPRE_StructVectorInitialize(x);
-               AddValuesVector(readgrid,x,periodx0,0.0);
+               AddValuesVector(readgrid, x, periodx0, x0_type, x0_value);
                HYPRE_StructVectorAssemble(x);
             }
-         }
-         /* finish the read of matrix  */
+         } /* finish the read of matrix */
       }
-      /* finish the sum > 0 case   */
-
-      /* linear system complete  */
+      /* linear system complete */
 
       hypre_EndTiming(time_index);
-      if ( reps==1 ) {
+      if (reps == 1)
+      {
          hypre_PrintTiming("Struct Interface", hypre_MPI_COMM_WORLD);
          hypre_FinalizeTiming(time_index);
          hypre_ClearTiming();
       }
-      else if ( rep==reps-1 ) {
+      else if (rep == reps-1)
+      {
          hypre_FinalizeTiming(time_index);
       }
 
@@ -1359,7 +1429,7 @@ main( hypre_int argc,
 
          HYPRE_StructSMGCreate(hypre_MPI_COMM_WORLD, &solver);
          HYPRE_StructSMGSetMemoryUse(solver, 0);
-         HYPRE_StructSMGSetMaxIter(solver, maxIterations);
+         HYPRE_StructSMGSetMaxIter(solver, max_iterations);
          HYPRE_StructSMGSetTol(solver, tol);
          HYPRE_StructSMGSetRelChange(solver, 0);
          HYPRE_StructSMGSetNumPreRelax(solver, n_pre);
@@ -1369,12 +1439,14 @@ main( hypre_int argc,
          HYPRE_StructSMGSetup(solver, A, b, x);
 
          hypre_EndTiming(time_index);
-         if ( reps==1 ) {
+         if (reps == 1)
+         {
             hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
             hypre_FinalizeTiming(time_index);
             hypre_ClearTiming();
          }
-         else if ( rep==reps-1 ) {
+         else if (rep == reps-1)
+         {
             hypre_FinalizeTiming(time_index);
          }
 
@@ -1384,12 +1456,14 @@ main( hypre_int argc,
          HYPRE_StructSMGSolve(solver, A, b, x);
 
          hypre_EndTiming(time_index);
-         if ( reps==1 ) {
+         if (reps == 1)
+         {
             hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
             hypre_FinalizeTiming(time_index);
             hypre_ClearTiming();
          }
-         else if ( rep==reps-1 ) {
+         else if (rep == reps-1)
+         {
             hypre_PrintTiming("Interface, Setup, and Solve times:",
                               hypre_MPI_COMM_WORLD );
             hypre_FinalizeTiming(time_index);
@@ -1412,7 +1486,7 @@ main( hypre_int argc,
 
          HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &solver);
          /*HYPRE_StructPFMGSetMaxLevels( solver, 9 );*/
-         HYPRE_StructPFMGSetMaxIter(solver, maxIterations);
+         HYPRE_StructPFMGSetMaxIter(solver, max_iterations);
          HYPRE_StructPFMGSetTol(solver, tol);
          HYPRE_StructPFMGSetRelChange(solver, 0);
          HYPRE_StructPFMGSetRAPType(solver, rap);
@@ -1430,28 +1504,31 @@ main( hypre_int argc,
          HYPRE_StructPFMGSetup(solver, A, b, x);
 
          hypre_EndTiming(time_index);
-         if ( reps==1 ) {
+         if (reps==1)
+         {
             hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
             hypre_FinalizeTiming(time_index);
             hypre_ClearTiming();
          }
-         else if ( rep==reps-1 ) {
+         else if (rep == reps-1)
+         {
             hypre_FinalizeTiming(time_index);
          }
 
          time_index = hypre_InitializeTiming("PFMG Solve");
          hypre_BeginTiming(time_index);
 
-
          HYPRE_StructPFMGSolve(solver, A, b, x);
 
          hypre_EndTiming(time_index);
-         if ( reps==1 ) {
+         if (reps == 1)
+         {
             hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
             hypre_FinalizeTiming(time_index);
             hypre_ClearTiming();
          }
-         else if ( rep==reps-1 ) {
+         else if (rep == reps-1)
+         {
             hypre_PrintTiming("Interface, Setup, and Solve times",
                               hypre_MPI_COMM_WORLD);
             hypre_FinalizeTiming(time_index);
@@ -1519,7 +1596,7 @@ main( hypre_int argc,
          hypre_BeginTiming(time_index);
 
          HYPRE_StructJacobiCreate(hypre_MPI_COMM_WORLD, &solver);
-         HYPRE_StructJacobiSetMaxIter(solver, maxIterations);
+         HYPRE_StructJacobiSetMaxIter(solver, max_iterations);
          HYPRE_StructJacobiSetTol(solver, tol);
          HYPRE_StructJacobiSetup(solver, A, b, x);
 
@@ -1553,7 +1630,7 @@ main( hypre_int argc,
          hypre_BeginTiming(time_index);
 
          HYPRE_StructPCGCreate(hypre_MPI_COMM_WORLD, &solver);
-         HYPRE_PCGSetMaxIter( (HYPRE_Solver)solver, maxIterations );
+         HYPRE_PCGSetMaxIter( (HYPRE_Solver)solver, max_iterations );
          HYPRE_PCGSetTol( (HYPRE_Solver)solver, tol );
          HYPRE_PCGSetTwoNorm( (HYPRE_Solver)solver, 1 );
          HYPRE_PCGSetRelChange( (HYPRE_Solver)solver, 0 );
@@ -1818,7 +1895,7 @@ main( hypre_int argc,
             hypre_ClearTiming();
 
             HYPRE_LOBPCGCreate(interpreter, &matvec_fn, (HYPRE_Solver*)&lobpcg_solver);
-            HYPRE_LOBPCGSetMaxIter((HYPRE_Solver)lobpcg_solver, maxIterations);
+            HYPRE_LOBPCGSetMaxIter((HYPRE_Solver)lobpcg_solver, max_iterations);
             HYPRE_LOBPCGSetPrecondUsageMode((HYPRE_Solver)lobpcg_solver, pcgMode);
             HYPRE_LOBPCGSetTol((HYPRE_Solver)lobpcg_solver, tol);
             HYPRE_LOBPCGSetPrintLevel((HYPRE_Solver)lobpcg_solver, verbosity);
@@ -1942,7 +2019,7 @@ main( hypre_int argc,
             hypre_BeginTiming(time_index);
 
             HYPRE_LOBPCGCreate(interpreter, &matvec_fn, (HYPRE_Solver*)&solver);
-            HYPRE_LOBPCGSetMaxIter( (HYPRE_Solver)solver, maxIterations );
+            HYPRE_LOBPCGSetMaxIter( (HYPRE_Solver)solver, max_iterations );
             HYPRE_LOBPCGSetTol( (HYPRE_Solver)solver, tol );
             HYPRE_LOBPCGSetPrintLevel( (HYPRE_Solver)solver, verbosity );
 
@@ -2168,8 +2245,8 @@ main( hypre_int argc,
          hypre_BeginTiming(time_index);
 
          HYPRE_StructHybridCreate(hypre_MPI_COMM_WORLD, &solver);
-         HYPRE_StructHybridSetDSCGMaxIter(solver, maxIterations);
-         HYPRE_StructHybridSetPCGMaxIter(solver, maxIterations);
+         HYPRE_StructHybridSetDSCGMaxIter(solver, max_iterations);
+         HYPRE_StructHybridSetPCGMaxIter(solver, max_iterations);
          HYPRE_StructHybridSetTol(solver, tol);
          /*HYPRE_StructHybridSetPCGAbsoluteTolFactor(solver, 1.0e-200);*/
          HYPRE_StructHybridSetConvergenceTol(solver, cf_tol);
@@ -2296,7 +2373,7 @@ main( hypre_int argc,
 
          HYPRE_StructGMRESCreate(hypre_MPI_COMM_WORLD, &solver);
          HYPRE_GMRESSetKDim( (HYPRE_Solver) solver, 5 );
-         HYPRE_GMRESSetMaxIter( (HYPRE_Solver)solver, maxIterations );
+         HYPRE_GMRESSetMaxIter( (HYPRE_Solver)solver, max_iterations );
          HYPRE_GMRESSetTol( (HYPRE_Solver)solver, tol );
          HYPRE_GMRESSetRelChange( (HYPRE_Solver)solver, 0 );
          HYPRE_GMRESSetPrintLevel( (HYPRE_Solver)solver, 1 );
@@ -2442,7 +2519,7 @@ main( hypre_int argc,
          hypre_BeginTiming(time_index);
 
          HYPRE_StructBiCGSTABCreate(hypre_MPI_COMM_WORLD, &solver);
-         HYPRE_BiCGSTABSetMaxIter( (HYPRE_Solver)solver, maxIterations );
+         HYPRE_BiCGSTABSetMaxIter( (HYPRE_Solver)solver, max_iterations );
          HYPRE_BiCGSTABSetTol( (HYPRE_Solver)solver, tol );
          HYPRE_BiCGSTABSetPrintLevel( (HYPRE_Solver)solver, 1 );
          HYPRE_BiCGSTABSetLogging( (HYPRE_Solver)solver, 1 );
@@ -2587,7 +2664,7 @@ main( hypre_int argc,
 
          HYPRE_StructLGMRESCreate(hypre_MPI_COMM_WORLD, &solver);
          HYPRE_LGMRESSetKDim( (HYPRE_Solver) solver, 5 );
-         HYPRE_LGMRESSetMaxIter( (HYPRE_Solver)solver, maxIterations );
+         HYPRE_LGMRESSetMaxIter( (HYPRE_Solver)solver, max_iterations );
          HYPRE_LGMRESSetTol( (HYPRE_Solver)solver, tol );
          HYPRE_LGMRESSetPrintLevel( (HYPRE_Solver)solver, 1 );
          HYPRE_LGMRESSetLogging( (HYPRE_Solver)solver, 1 );
@@ -2679,7 +2756,7 @@ main( hypre_int argc,
 
          HYPRE_StructFlexGMRESCreate(hypre_MPI_COMM_WORLD, &solver);
          HYPRE_FlexGMRESSetKDim( (HYPRE_Solver) solver, 5 );
-         HYPRE_FlexGMRESSetMaxIter( (HYPRE_Solver)solver, maxIterations );
+         HYPRE_FlexGMRESSetMaxIter( (HYPRE_Solver)solver, max_iterations );
          HYPRE_FlexGMRESSetTol( (HYPRE_Solver)solver, tol );
          HYPRE_FlexGMRESSetPrintLevel( (HYPRE_Solver)solver, 1 );
          HYPRE_FlexGMRESSetLogging( (HYPRE_Solver)solver, 1 );
@@ -2846,52 +2923,59 @@ main( hypre_int argc,
  *-------------------------------------------------------------------------*/
 
 HYPRE_Int
-AddValuesVector( hypre_StructGrid  *gridvector,
+AddValuesVector( hypre_StructGrid   *grid,
                  hypre_StructVector *zvector,
                  HYPRE_Int          *period,
-                 HYPRE_Real         value  )
+                 HYPRE_Int           type,
+                 HYPRE_Real          value )
 {
-/* #include  "_hypre_struct_mv.h" */
-   HYPRE_Int ierr = 0;
-   hypre_BoxArray     *gridboxes;
-   HYPRE_Int          i,ib;
-   hypre_IndexRef     ilower;
-   hypre_IndexRef     iupper;
+   HYPRE_Int           ierr = 0;
+   hypre_BoxArray     *boxes;
+   HYPRE_Int           i, ib;
+   hypre_IndexRef      ilower;
+   hypre_IndexRef      iupper;
    hypre_Box          *box;
    HYPRE_Real         *values;
-   HYPRE_Int          volume,dim;
+   HYPRE_Int           volume, ndim;
 
-   gridboxes =  hypre_StructGridBoxes(gridvector);
-   dim       =  hypre_StructGridNDim(gridvector);
+   ndim  = hypre_StructGridNDim(grid);
+   boxes = hypre_StructGridBoxes(grid);
 
-   ib=0;
-   hypre_ForBoxI(ib, gridboxes)
+   hypre_ForBoxI(ib, boxes)
    {
-      box      = hypre_BoxArrayBox(gridboxes, ib);
-      volume   =  hypre_BoxVolume(box);
-      values   = hypre_CTAlloc(HYPRE_Real, volume);
+      box    = hypre_BoxArrayBox(boxes, ib);
+      volume = hypre_BoxVolume(box);
+      values = hypre_CTAlloc(HYPRE_Real, volume);
 
       /*-----------------------------------------------------------
        * For periodic b.c. in all directions, need rhs to satisfy
        * compatibility condition. Achieved by setting a source and
-       *  sink of equal strength.  All other problems have rhs = 1.
+       * sink of equal strength.
        *-----------------------------------------------------------*/
 
-      if ((dim == 2 && period[0] != 0 && period[1] != 0) ||
-          (dim == 3 && period[0] != 0 && period[1] != 0 && period[2] != 0))
+      if ((ndim == 2 && period[0] != 0 && period[1] != 0) ||
+          (ndim == 3 && period[0] != 0 && period[1] != 0 && period[2] != 0))
       {
-         for (i = 0; i < volume; i++)
-         {
-            values[i] = 0.0;
-         }
-         values[0]         =  value;
+         values[0]          =  value;
          values[volume - 1] = -value;
       }
       else
       {
-         for (i = 0; i < volume; i++)
+         if (type == 0)
          {
-            values[i] = value;
+            /* Use value */
+            for (i = 0; i < volume; i++)
+            {
+               values[i] = value;
+            }
+         }
+         else
+         {
+            /* Use random numbers */
+            for (i = 0; i < volume; i++)
+            {
+               values[i] = 2.0 * hypre_Rand() - 1.0;
+            }
          }
       }
 
@@ -2899,7 +2983,6 @@ AddValuesVector( hypre_StructGrid  *gridvector,
       iupper = hypre_BoxIMax(box);
       HYPRE_StructVectorSetBoxValues(zvector, ilower, iupper, values);
       hypre_TFree(values);
-
    }
 
    return ierr;
@@ -2913,78 +2996,85 @@ AddValuesVector( hypre_StructGrid  *gridvector,
  ******************************************************************************/
 
 HYPRE_Int
-AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
-                HYPRE_Real        cx,
-                HYPRE_Real        cy,
-                HYPRE_Real        cz,
-                HYPRE_Real        conx,
-                HYPRE_Real        cony,
-                HYPRE_Real        conz)
+AddValuesMatrix( HYPRE_StructMatrix A,
+                 HYPRE_StructGrid   grid,
+                 HYPRE_Real         cx,
+                 HYPRE_Real         cy,
+                 HYPRE_Real         cz,
+                 HYPRE_Real         conx,
+                 HYPRE_Real         cony,
+                 HYPRE_Real         conz )
 {
 
-   HYPRE_Int ierr=0;
-   hypre_BoxArray     *gridboxes;
-   HYPRE_Int           i,s,bi;
+   HYPRE_Int           ierr = 0;
+   hypre_BoxArray     *boxes;
+   HYPRE_Int           i, s, bi;
    hypre_IndexRef      ilower;
    hypre_IndexRef      iupper;
    hypre_Box          *box;
    HYPRE_Real         *values;
-   HYPRE_Real          east,west;
-   HYPRE_Real          north,south;
-   HYPRE_Real          top,bottom;
+   HYPRE_Real          east, west;
+   HYPRE_Real          north, south;
+   HYPRE_Real          top, bottom;
    HYPRE_Real          center;
-   HYPRE_Int           volume,dim,sym;
+   HYPRE_Int           volume, ndim, sym;
    HYPRE_Int          *stencil_indices;
    HYPRE_Int           stencil_size;
    HYPRE_Int           constant_coefficient;
 
-   gridboxes =  hypre_StructGridBoxes(gridmatrix);
-   dim       =  hypre_StructGridNDim(gridmatrix);
-   sym       =  hypre_StructMatrixSymmetric(A);
+   boxes =  hypre_StructGridBoxes(grid);
+   ndim  =  hypre_StructGridNDim(grid);
+   sym   =  hypre_StructMatrixSymmetric(A);
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
 
-   bi=0;
-
-   east = -cx;
-   west = -cx;
-   north = -cy;
-   south = -cy;
-   top = -cz;
+   east   = -cx;
+   west   = -cx;
+   north  = -cy;
+   south  = -cy;
+   top    = -cz;
    bottom = -cz;
    center = 2.0*cx;
-   if (dim > 1) center += 2.0*cy;
-   if (dim > 2) center += 2.0*cz;
+   if (ndim > 1)
+   {
+      center += 2.0*cy;
+   }
+   if (ndim > 2)
+   {
+      center += 2.0*cz;
+   }
 
-   stencil_size = 1 + (2 - sym) * dim;
+   stencil_size = 1 + (2 - sym) * ndim;
    stencil_indices = hypre_CTAlloc(HYPRE_Int, stencil_size);
    for (s = 0; s < stencil_size; s++)
    {
       stencil_indices[s] = s;
    }
 
-   if(sym)
+   if (sym)
    {
-      if ( constant_coefficient==0 )
+      if (constant_coefficient == 0)
       {
-         hypre_ForBoxI(bi, gridboxes)
+         hypre_ForBoxI(bi, boxes)
          {
-            box      = hypre_BoxArrayBox(gridboxes, bi);
-            volume   =  hypre_BoxVolume(box);
-            values   = hypre_CTAlloc(HYPRE_Real, stencil_size*volume);
+            box    = hypre_BoxArrayBox(boxes, bi);
+            volume = hypre_BoxVolume(box);
+            values = hypre_CTAlloc(HYPRE_Real, stencil_size*volume);
 
             for (i = 0; i < stencil_size*volume; i += stencil_size)
             {
-               switch (dim)
+               switch (ndim)
                {
                   case 1:
                      values[i  ] = west;
                      values[i+1] = center;
                      break;
+
                   case 2:
                      values[i  ] = west;
                      values[i+1] = south;
                      values[i+2] = center;
                      break;
+
                   case 3:
                      values[i  ] = west;
                      values[i+1] = south;
@@ -3000,20 +3090,22 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             hypre_TFree(values);
          }
       }
-      else if ( constant_coefficient==1 )
+      else if (constant_coefficient == 1)
       {
-         values   = hypre_CTAlloc(HYPRE_Real, stencil_size);
-         switch (dim)
+         values = hypre_CTAlloc(HYPRE_Real, stencil_size);
+         switch (ndim)
          {
             case 1:
                values[0] = west;
                values[1] = center;
                break;
+
             case 2:
                values[0] = west;
                values[1] = south;
                values[2] = center;
                break;
+
             case 3:
                values[0] = west;
                values[1] = south;
@@ -3021,7 +3113,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
                values[3] = center;
                break;
          }
-         if (hypre_BoxArraySize(gridboxes) > 0)
+         if (hypre_BoxArraySize(boxes) > 0)
          {
             HYPRE_StructMatrixSetConstantValues(A, stencil_size,
                                                 stencil_indices, values);
@@ -3030,46 +3122,48 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
       }
       else
       {
-         hypre_assert( constant_coefficient==2 );
+         hypre_assert(constant_coefficient == 2);
 
          /* stencil index for the center equals dim, so it's easy to leave out */
-         values   = hypre_CTAlloc(HYPRE_Real, stencil_size-1);
-         switch (dim)
+         values = hypre_CTAlloc(HYPRE_Real, stencil_size-1);
+         switch (ndim)
          {
             case 1:
                values[0] = west;
                break;
+
             case 2:
                values[0] = west;
                values[1] = south;
                break;
+
             case 3:
                values[0] = west;
                values[1] = south;
                values[2] = bottom;
                break;
          }
-         if (hypre_BoxArraySize(gridboxes) > 0)
+         if (hypre_BoxArraySize(boxes) > 0)
          {
             HYPRE_StructMatrixSetConstantValues(A, stencil_size-1,
                                                 stencil_indices, values);
          }
          hypre_TFree(values);
 
-         hypre_ForBoxI(bi, gridboxes)
+         hypre_ForBoxI(bi, boxes)
          {
-            box      = hypre_BoxArrayBox(gridboxes, bi);
-            volume   =  hypre_BoxVolume(box);
+            box      = hypre_BoxArrayBox(boxes, bi);
+            volume   = hypre_BoxVolume(box);
             values   = hypre_CTAlloc(HYPRE_Real, volume);
 
-            for ( i=0; i < volume; ++i )
+            for (i = 0; i < volume; ++i)
             {
                values[i] = center;
             }
             ilower = hypre_BoxIMin(box);
             iupper = hypre_BoxIMax(box);
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
-                                           stencil_indices+dim, values);
+                                           stencil_indices + ndim, values);
             hypre_TFree(values);
          }
       }
@@ -3107,23 +3201,24 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
          center -= conz;
       }
 
-      if ( constant_coefficient==0 )
+      if (constant_coefficient == 0)
       {
-         hypre_ForBoxI(bi, gridboxes)
+         hypre_ForBoxI(bi, boxes)
          {
-            box      = hypre_BoxArrayBox(gridboxes, bi);
-            volume   =  hypre_BoxVolume(box);
-            values   = hypre_CTAlloc(HYPRE_Real, stencil_size*volume);
+            box    = hypre_BoxArrayBox(boxes, bi);
+            volume = hypre_BoxVolume(box);
+            values = hypre_CTAlloc(HYPRE_Real, stencil_size*volume);
 
             for (i = 0; i < stencil_size*volume; i += stencil_size)
             {
-               switch (dim)
+               switch (ndim)
                {
                   case 1:
                      values[i  ] = west;
                      values[i+1] = center;
                      values[i+2] = east;
                      break;
+
                   case 2:
                      values[i  ] = west;
                      values[i+1] = south;
@@ -3131,6 +3226,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
                      values[i+3] = east;
                      values[i+4] = north;
                      break;
+
                   case 3:
                      values[i  ] = west;
                      values[i+1] = south;
@@ -3150,17 +3246,18 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             hypre_TFree(values);
          }
       }
-      else if ( constant_coefficient==1 )
+      else if (constant_coefficient == 1)
       {
-         values = hypre_CTAlloc( HYPRE_Real, stencil_size );
+         values = hypre_CTAlloc(HYPRE_Real, stencil_size);
 
-         switch (dim)
+         switch (ndim)
          {
             case 1:
                values[0] = west;
                values[1] = center;
                values[2] = east;
                break;
+
             case 2:
                values[0] = west;
                values[1] = south;
@@ -3168,6 +3265,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
                values[3] = east;
                values[4] = north;
                break;
+
             case 3:
                values[0] = west;
                values[1] = south;
@@ -3179,7 +3277,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
                break;
          }
 
-         if (hypre_BoxArraySize(gridboxes) > 0)
+         if (hypre_BoxArraySize(boxes) > 0)
          {
             HYPRE_StructMatrixSetConstantValues(A, stencil_size,
                                                 stencil_indices, values);
@@ -3189,9 +3287,9 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
       }
       else
       {
-         hypre_assert( constant_coefficient==2 );
-         values = hypre_CTAlloc( HYPRE_Real, stencil_size-1 );
-         switch (dim)
+         hypre_assert(constant_coefficient == 2);
+         values = hypre_CTAlloc(HYPRE_Real, stencil_size - 1);
+         switch (ndim)
          {  /* no center in stencil_indices and values */
             case 1:
                stencil_indices[0] = 0;
@@ -3199,6 +3297,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
                values[0] = west;
                values[1] = east;
                break;
+
             case 2:
                stencil_indices[0] = 0;
                stencil_indices[1] = 1;
@@ -3209,6 +3308,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
                values[2] = east;
                values[3] = north;
                break;
+
             case 3:
                stencil_indices[0] = 0;
                stencil_indices[1] = 1;
@@ -3225,7 +3325,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
                break;
          }
 
-         if (hypre_BoxArraySize(gridboxes) > 0)
+         if (hypre_BoxArraySize(boxes) > 0)
          {
             HYPRE_StructMatrixSetConstantValues(A, stencil_size-1,
                                                 stencil_indices, values);
@@ -3234,14 +3334,14 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
 
 
          /* center is variable */
-         stencil_indices[0] = dim; /* refers to center */
-         hypre_ForBoxI(bi, gridboxes)
+         stencil_indices[0] = ndim; /* refers to center */
+         hypre_ForBoxI(bi, boxes)
          {
-            box      = hypre_BoxArrayBox(gridboxes, bi);
-            volume   =  hypre_BoxVolume(box);
-            values   = hypre_CTAlloc(HYPRE_Real, volume);
+            box    = hypre_BoxArrayBox(boxes, bi);
+            volume = hypre_BoxVolume(box);
+            values = hypre_CTAlloc(HYPRE_Real, volume);
 
-            for ( i=0; i < volume; ++i )
+            for (i = 0; i < volume; ++i)
             {
                values[i] = center;
             }
@@ -3265,34 +3365,37 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
  *********************************************************************************/
 
 HYPRE_Int
-SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* period)
+SetStencilBndry( HYPRE_StructMatrix  A,
+                 HYPRE_StructGrid    grid,
+                 HYPRE_Int          *period )
 {
 
-   HYPRE_Int ierr=0;
-   hypre_BoxArray    *gridboxes;
+   HYPRE_Int          ierr = 0;
+   hypre_BoxArray    *boxes;
    HYPRE_Int          size,i,j,d,ib;
    HYPRE_Int        **ilower;
    HYPRE_Int        **iupper;
    HYPRE_Int         *vol;
    HYPRE_Int         *istart, *iend;
    hypre_Box         *box;
-   hypre_Box         *dummybox;
-   hypre_Box         *boundingbox;
+   hypre_Box         *bbox;
    HYPRE_Real        *values;
-   HYPRE_Int          volume, dim;
-   HYPRE_Int         *stencil_indices;
+   HYPRE_Int          ndim;
+   HYPRE_Int          stencil_indices[1] = {0};
    HYPRE_Int          constant_coefficient;
 
-   gridboxes       = hypre_StructGridBoxes(gridmatrix);
-   boundingbox     = hypre_StructGridBoundingBox(gridmatrix);
-   istart          = hypre_BoxIMin(boundingbox);
-   iend            = hypre_BoxIMax(boundingbox);
-   size            = hypre_StructGridNumBoxes(gridmatrix);
-   dim             = hypre_StructGridNDim(gridmatrix);
-   stencil_indices = hypre_CTAlloc(HYPRE_Int, 1);
+   boxes  = hypre_StructGridBoxes(grid);
+   bbox   = hypre_StructGridBoundingBox(grid);
+   istart = hypre_BoxIMin(bbox);
+   iend   = hypre_BoxIMax(bbox);
+   size   = hypre_StructGridNumBoxes(grid);
+   ndim   = hypre_StructGridNDim(grid);
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
-   if ( constant_coefficient>0 ) return 1;
+   if (constant_coefficient > 0)
+   {
+      return 1;
+   }
    /*...no space dependence if constant_coefficient==1,
      and space dependence only for diagonal if constant_coefficient==2 --
      and this function only touches off-diagonal entries */
@@ -3302,31 +3405,24 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
    iupper = hypre_CTAlloc(HYPRE_Int*, size);
    for (i = 0; i < size; i++)
    {
-      ilower[i] = hypre_CTAlloc(HYPRE_Int, dim);
-      iupper[i] = hypre_CTAlloc(HYPRE_Int, dim);
+      ilower[i] = hypre_CTAlloc(HYPRE_Int, ndim);
+      iupper[i] = hypre_CTAlloc(HYPRE_Int, ndim);
    }
 
-   i = 0;
-   ib = 0;
-   hypre_ForBoxI(i, gridboxes)
+   hypre_ForBoxI(i, boxes)
    {
-      dummybox = hypre_BoxCreate(dim);
-      box      = hypre_BoxArrayBox(gridboxes, i);
-      volume   =  hypre_BoxVolume(box);
-      vol[i]   = volume;
-      hypre_CopyBox(box,dummybox);
-      for (d = 0; d < dim; d++)
+      box = hypre_BoxArrayBox(boxes, i);
+      for (d = 0; d < ndim; d++)
       {
-         ilower[ib][d] = hypre_BoxIMinD(dummybox,d);
-         iupper[ib][d] = hypre_BoxIMaxD(dummybox,d);
+         ilower[i][d] = hypre_BoxIMinD(box, d);
+         iupper[i][d] = hypre_BoxIMaxD(box, d);
       }
-      ib++ ;
-      hypre_BoxDestroy(dummybox);
+      vol[i] = hypre_BoxVolume(box);
    }
 
-   if ( constant_coefficient==0 )
+   if (constant_coefficient == 0)
    {
-      for (d = 0; d < dim; d++)
+      for (d = 0; d < ndim; d++)
       {
          for (ib = 0; ib < size; ib++)
          {
@@ -3337,7 +3433,7 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
                values[i] = 0.0;
             }
 
-            if( ilower[ib][d] == istart[d] && period[d] == 0 )
+            if (ilower[ib][d] == istart[d] && period[d] == 0)
             {
                j = iupper[ib][d];
                iupper[ib][d] = istart[d];
@@ -3347,11 +3443,11 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
                iupper[ib][d] = j;
             }
 
-            if( iupper[ib][d] == iend[d] && period[d] == 0 )
+            if (iupper[ib][d] == iend[d] && period[d] == 0)
             {
                j = ilower[ib][d];
                ilower[ib][d] = iend[d];
-               stencil_indices[0] = dim + 1 + d;
+               stencil_indices[0] = ndim + 1 + d;
                HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
                                               1, stencil_indices, values);
                ilower[ib][d] = j;
@@ -3362,8 +3458,7 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
    }
 
    hypre_TFree(vol);
-   hypre_TFree(stencil_indices);
-   for (ib =0 ; ib < size ; ib++)
+   for (ib = 0 ; ib < size ; ib++)
    {
       hypre_TFree(ilower[ib]);
       hypre_TFree(iupper[ib]);
