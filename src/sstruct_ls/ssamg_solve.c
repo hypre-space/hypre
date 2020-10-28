@@ -120,15 +120,32 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       }
    }
 
-   /*-----------------------------------------------------
-    * Do V-cycles:
-    *   For each index l, "fine" = l, "coarse" = (l+1)
-    *-----------------------------------------------------*/
+   /* Print initial solution and residual */
+   if (print_level > 1)
+   {
+      /* Print solution */
+      hypre_sprintf(filename, "ssamg_x.i%02d", 0);
+      HYPRE_SStructVectorPrint(filename, x_l[0], 0);
+
+      /* Compute residual (b - Ax) */
+      hypre_SStructCopy(b_l[0], r_l[0]);
+      hypre_SStructMatvecCompute(matvec_data_l[0], -1.0,
+                                 A_l[0], x_l[0], 1.0, r_l[0]);
+
+      /* Print residual */
+      hypre_sprintf(filename, "ssamg_r.i%02d", 0);
+      HYPRE_SStructVectorPrint(filename, r_l[0], 0);
+   }
 
 #if DEBUG
    HYPRE_SStructVectorPrint("ssamg_x.i00.l00", x_l[0], 0);
    HYPRE_SStructVectorPrint("ssamg_b.i00.l00", b_l[0], 0);
 #endif
+
+   /*-----------------------------------------------------
+    * Do V-cycles:
+    *   For each index l, "fine" = l, "coarse" = (l+1)
+    *-----------------------------------------------------*/
 
    for (i = 0; i < max_iter; i++)
    {
@@ -347,10 +364,20 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       }
 #endif
 
-      if (print_level > 1 && !(i%print_freq))
+      if (print_level > 1 && !((i + 1)%print_freq))
       {
-         hypre_sprintf(filename, "ssamg_x.i%02d.l%02d", i, 0);
+         /* Print solution */
+         hypre_sprintf(filename, "ssamg_x.i%02d", (i + 1));
          HYPRE_SStructVectorPrint(filename, x_l[0], 0);
+
+         /* Compute fine grid residual (b - Ax) */
+         hypre_SStructCopy(b_l[0], r_l[0]);
+         hypre_SStructMatvecCompute(matvec_data_l[0], -1.0,
+                                    A_l[0], x_l[0], 1.0, r_l[0]);
+
+         /* Print residual */
+         hypre_sprintf(filename, "ssamg_r.i%02d", (i + 1));
+         HYPRE_SStructVectorPrint(filename, r_l[0], 0);
       }
 
       (ssamg_data -> num_iterations) = i + 1;
