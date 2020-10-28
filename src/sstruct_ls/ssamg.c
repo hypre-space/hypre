@@ -355,6 +355,7 @@ hypre_SSAMGPrintLogging( void *ssamg_vdata )
    HYPRE_Real        *rel_norms      = (ssamg_data -> rel_norms);
    HYPRE_Int          myid, i;
    HYPRE_Real         convr = 1.0;
+   HYPRE_Real         avg_convr;
 
    hypre_MPI_Comm_rank(comm, &myid);
 
@@ -375,6 +376,13 @@ hypre_SSAMGPrintLogging( void *ssamg_vdata )
             i = num_iterations;
             hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);
          }
+      }
+
+      if (rel_norms[0] > 0.)
+      {
+         avg_convr = pow((rel_norms[num_iterations]/rel_norms[0]),
+                         (1.0/(HYPRE_Real) num_iterations));
+         hypre_printf("\nAverage convergence factor = %f\n", avg_convr);
       }
    }
 

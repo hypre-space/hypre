@@ -35,7 +35,7 @@ hypre_PFMGCreate( MPI_Comm  comm )
    (pfmg_data -> dxyz)[0]          = 0.0;
    (pfmg_data -> dxyz)[1]          = 0.0;
    (pfmg_data -> dxyz)[2]          = 0.0;
-   (pfmg_data -> relax_type)       = 1;       /* weighted Jacobi */
+   (pfmg_data -> relax_type)       = 1;     /* weighted Jacobi */
    (pfmg_data -> jacobi_weight)    = 0.0;
    (pfmg_data -> usr_jacobi_weight)= 0;     /* no user Jacobi weight */
    (pfmg_data -> rap_type)         = 0;
@@ -124,8 +124,8 @@ hypre_PFMGDestroy( void *pfmg_vdata )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGSetTol( void   *pfmg_vdata,
-                  HYPRE_Real  tol       )
+hypre_PFMGSetTol( void       *pfmg_vdata,
+                  HYPRE_Real  tol )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -135,8 +135,8 @@ hypre_PFMGSetTol( void   *pfmg_vdata,
 }
 
 HYPRE_Int
-hypre_PFMGGetTol( void   *pfmg_vdata,
-                  HYPRE_Real *tol       )
+hypre_PFMGGetTol( void       *pfmg_vdata,
+                  HYPRE_Real *tol )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -149,8 +149,8 @@ hypre_PFMGGetTol( void   *pfmg_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGSetMaxIter( void *pfmg_vdata,
-                      HYPRE_Int   max_iter  )
+hypre_PFMGSetMaxIter( void      *pfmg_vdata,
+                      HYPRE_Int  max_iter  )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -160,8 +160,8 @@ hypre_PFMGSetMaxIter( void *pfmg_vdata,
 }
 
 HYPRE_Int
-hypre_PFMGGetMaxIter( void *pfmg_vdata,
-                      HYPRE_Int * max_iter  )
+hypre_PFMGGetMaxIter( void      *pfmg_vdata,
+                      HYPRE_Int *max_iter  )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -174,8 +174,8 @@ hypre_PFMGGetMaxIter( void *pfmg_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGSetMaxLevels( void *pfmg_vdata,
-                        HYPRE_Int   max_levels  )
+hypre_PFMGSetMaxLevels( void      *pfmg_vdata,
+                        HYPRE_Int  max_levels  )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -185,8 +185,8 @@ hypre_PFMGSetMaxLevels( void *pfmg_vdata,
 }
 
 HYPRE_Int
-hypre_PFMGGetMaxLevels( void *pfmg_vdata,
-                        HYPRE_Int * max_levels  )
+hypre_PFMGGetMaxLevels( void      *pfmg_vdata,
+                        HYPRE_Int *max_levels  )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -199,8 +199,8 @@ hypre_PFMGGetMaxLevels( void *pfmg_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGSetRelChange( void *pfmg_vdata,
-                        HYPRE_Int   rel_change  )
+hypre_PFMGSetRelChange( void      *pfmg_vdata,
+                        HYPRE_Int  rel_change  )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -210,8 +210,8 @@ hypre_PFMGSetRelChange( void *pfmg_vdata,
 }
 
 HYPRE_Int
-hypre_PFMGGetRelChange( void *pfmg_vdata,
-                        HYPRE_Int * rel_change  )
+hypre_PFMGGetRelChange( void      *pfmg_vdata,
+                        HYPRE_Int *rel_change  )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -224,8 +224,8 @@ hypre_PFMGGetRelChange( void *pfmg_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGSetZeroGuess( void *pfmg_vdata,
-                        HYPRE_Int   zero_guess )
+hypre_PFMGSetZeroGuess( void      *pfmg_vdata,
+                        HYPRE_Int  zero_guess )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -235,8 +235,8 @@ hypre_PFMGSetZeroGuess( void *pfmg_vdata,
 }
 
 HYPRE_Int
-hypre_PFMGGetZeroGuess( void *pfmg_vdata,
-                        HYPRE_Int * zero_guess )
+hypre_PFMGGetZeroGuess( void      *pfmg_vdata,
+                        HYPRE_Int *zero_guess )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -249,8 +249,8 @@ hypre_PFMGGetZeroGuess( void *pfmg_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGSetRelaxType( void *pfmg_vdata,
-                        HYPRE_Int   relax_type )
+hypre_PFMGSetRelaxType( void      *pfmg_vdata,
+                        HYPRE_Int  relax_type )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -260,8 +260,8 @@ hypre_PFMGSetRelaxType( void *pfmg_vdata,
 }
 
 HYPRE_Int
-hypre_PFMGGetRelaxType( void *pfmg_vdata,
-                        HYPRE_Int * relax_type )
+hypre_PFMGGetRelaxType( void      *pfmg_vdata,
+                        HYPRE_Int *relax_type )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -273,8 +273,8 @@ hypre_PFMGGetRelaxType( void *pfmg_vdata,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_PFMGSetJacobiWeight( void  *pfmg_vdata,
-                           HYPRE_Real weight )
+hypre_PFMGSetJacobiWeight( void       *pfmg_vdata,
+                           HYPRE_Real  weight )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -285,7 +285,7 @@ hypre_PFMGSetJacobiWeight( void  *pfmg_vdata,
 }
 
 HYPRE_Int
-hypre_PFMGGetJacobiWeight( void  *pfmg_vdata,
+hypre_PFMGGetJacobiWeight( void       *pfmg_vdata,
                            HYPRE_Real *weight )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
@@ -300,8 +300,8 @@ hypre_PFMGGetJacobiWeight( void  *pfmg_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGSetRAPType( void *pfmg_vdata,
-                      HYPRE_Int   rap_type )
+hypre_PFMGSetRAPType( void      *pfmg_vdata,
+                      HYPRE_Int  rap_type )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -311,8 +311,8 @@ hypre_PFMGSetRAPType( void *pfmg_vdata,
 }
 
 HYPRE_Int
-hypre_PFMGGetRAPType( void *pfmg_vdata,
-                      HYPRE_Int * rap_type )
+hypre_PFMGGetRAPType( void      *pfmg_vdata,
+                      HYPRE_Int *rap_type )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -325,8 +325,8 @@ hypre_PFMGGetRAPType( void *pfmg_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGSetNumPreRelax( void *pfmg_vdata,
-                          HYPRE_Int   num_pre_relax )
+hypre_PFMGSetNumPreRelax( void      *pfmg_vdata,
+                          HYPRE_Int  num_pre_relax )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -336,8 +336,8 @@ hypre_PFMGSetNumPreRelax( void *pfmg_vdata,
 }
 
 HYPRE_Int
-hypre_PFMGGetNumPreRelax( void *pfmg_vdata,
-                          HYPRE_Int * num_pre_relax )
+hypre_PFMGGetNumPreRelax( void      *pfmg_vdata,
+                          HYPRE_Int *num_pre_relax )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -350,8 +350,8 @@ hypre_PFMGGetNumPreRelax( void *pfmg_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGSetNumPostRelax( void *pfmg_vdata,
-                           HYPRE_Int   num_post_relax )
+hypre_PFMGSetNumPostRelax( void      *pfmg_vdata,
+                           HYPRE_Int  num_post_relax )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -361,8 +361,8 @@ hypre_PFMGSetNumPostRelax( void *pfmg_vdata,
 }
 
 HYPRE_Int
-hypre_PFMGGetNumPostRelax( void *pfmg_vdata,
-                           HYPRE_Int * num_post_relax )
+hypre_PFMGGetNumPostRelax( void      *pfmg_vdata,
+                           HYPRE_Int *num_post_relax )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -375,8 +375,8 @@ hypre_PFMGGetNumPostRelax( void *pfmg_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGSetSkipRelax( void *pfmg_vdata,
-                        HYPRE_Int  skip_relax )
+hypre_PFMGSetSkipRelax( void     *pfmg_vdata,
+                        HYPRE_Int skip_relax )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -386,7 +386,7 @@ hypre_PFMGSetSkipRelax( void *pfmg_vdata,
 }
 
 HYPRE_Int
-hypre_PFMGGetSkipRelax( void *pfmg_vdata,
+hypre_PFMGGetSkipRelax( void      *pfmg_vdata,
                         HYPRE_Int *skip_relax )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
@@ -400,8 +400,8 @@ hypre_PFMGGetSkipRelax( void *pfmg_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGSetDxyz( void   *pfmg_vdata,
-                   HYPRE_Real *dxyz       )
+hypre_PFMGSetDxyz( void       *pfmg_vdata,
+                   HYPRE_Real *dxyz )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -416,8 +416,8 @@ hypre_PFMGSetDxyz( void   *pfmg_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGSetLogging( void *pfmg_vdata,
-                      HYPRE_Int   logging)
+hypre_PFMGSetLogging( void      *pfmg_vdata,
+                      HYPRE_Int  logging )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -427,8 +427,8 @@ hypre_PFMGSetLogging( void *pfmg_vdata,
 }
 
 HYPRE_Int
-hypre_PFMGGetLogging( void *pfmg_vdata,
-                      HYPRE_Int * logging)
+hypre_PFMGGetLogging( void      *pfmg_vdata,
+                      HYPRE_Int *logging )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -441,8 +441,8 @@ hypre_PFMGGetLogging( void *pfmg_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGSetPrintLevel( void *pfmg_vdata,
-                         HYPRE_Int   print_level)
+hypre_PFMGSetPrintLevel( void      *pfmg_vdata,
+                         HYPRE_Int  print_level)
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -452,8 +452,8 @@ hypre_PFMGSetPrintLevel( void *pfmg_vdata,
 }
 
 HYPRE_Int
-hypre_PFMGGetPrintLevel( void *pfmg_vdata,
-                         HYPRE_Int * print_level)
+hypre_PFMGGetPrintLevel( void      *pfmg_vdata,
+                         HYPRE_Int *print_level)
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -466,8 +466,8 @@ hypre_PFMGGetPrintLevel( void *pfmg_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGGetNumIterations( void *pfmg_vdata,
-                            HYPRE_Int  *num_iterations )
+hypre_PFMGGetNumIterations( void      *pfmg_vdata,
+                            HYPRE_Int *num_iterations )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
@@ -491,6 +491,7 @@ hypre_PFMGPrintLogging( void *pfmg_vdata )
    HYPRE_Real        *rel_norms      = (pfmg_data -> rel_norms);
    HYPRE_Int          myid, i;
    HYPRE_Real         convr = 1.0;
+   HYPRE_Real         avg_convr;
 
    hypre_MPI_Comm_rank(comm, &myid);
 
@@ -500,11 +501,18 @@ hypre_PFMGPrintLogging( void *pfmg_vdata )
       {
          hypre_printf("Iters         ||r||_2   conv.rate  ||r||_2/||b||_2\n");
          hypre_printf("% 5d    %e    %f     %e\n", 0, norms[0], convr, rel_norms[0]);
-         for (i = 1; i < num_iterations; i++)
+         for (i = 1; i <= num_iterations; i++)
          {
             convr = norms[i] / norms[i-1];
             hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);
          }
+      }
+
+      if (rel_norms[0] > 0.)
+      {
+         avg_convr = pow((rel_norms[num_iterations]/rel_norms[0]),
+                         (1.0/(HYPRE_Real) num_iterations));
+         hypre_printf("\nAverage convergence factor = %f\n", avg_convr);
       }
    }
 
@@ -515,7 +523,7 @@ hypre_PFMGPrintLogging( void *pfmg_vdata )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGGetFinalRelativeResidualNorm( void   *pfmg_vdata,
+hypre_PFMGGetFinalRelativeResidualNorm( void       *pfmg_vdata,
                                         HYPRE_Real *relative_residual_norm )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
