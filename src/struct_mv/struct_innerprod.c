@@ -98,5 +98,5 @@ hypre_StructInnerProd( hypre_StructVector *x,
 
    hypre_IncFLOPCount(2*hypre_StructVectorGlobalSize(x));
 
-   return hypre_error_flag;
+   return global_result;
 }
