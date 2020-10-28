@@ -2237,11 +2237,14 @@ PrintUsage( char *progname,
       hypre_printf("  -k <val>           : dimension Krylov space for GMRES (def 10);\n");
       hypre_printf("  -aug <val>         : number of augmentation vectors LGMRES (def 2);\n");
       hypre_printf("  -rel_change        : conv based on relative change of x (def 0);\n");
-      hypre_printf("  -kprint            : print level for krylov solvers  (def 0);\n");
+      hypre_printf("  -kprint <val>      : print level for krylov solvers  (def 2);\n");
+      hypre_printf("  -plevel <val>      : print level for prec/solvers (def 1);\n");
+      hypre_printf("  -pfreq <val>       : print frequency for prec/solvers (def 1);\n");
       hypre_printf("  -lvl <val>         : maximum number of levels (default 100);\n");
       hypre_printf("  -v <n_pre>         : # of pre-relaxation sweeps (def 1)\n");
       hypre_printf("     <n_post>        : # of pos-relaxation sweeps (def 1)\n");
       hypre_printf("     <n_coarse>      : # of coarse grid solver sweeps (def 1)\n");
+      hypre_printf("  -max_coarse <val>  : maximum coarse size (def 1) \n");
       hypre_printf("  -skip <s>          : SysPFMG and Struct- skip relaxation (0 or 1)\n");
       hypre_printf("  -rap <r>           : Struct- coarse grid operator type\n");
       hypre_printf("                        0 - Galerkin (default)\n");
@@ -2286,7 +2289,7 @@ PrintUsage( char *progname,
       hypre_printf("                       non-convergent eigenpairs and final eigenvalues and residuals (default)\n");
       hypre_printf("  -verb 2            : print eigenvalues and residuals on each iteration\n");
       hypre_printf("\n");
-      hypre_printf("  -pcgitr <val>      : maximal number of inner PCG iterations for preconditioning (default 1);\n");
+      hypre_printf("  -pcgitr <val>      : maximum number of inner PCG iterations for preconditioning (default 1);\n");
       hypre_printf("                       if <val> = 0 then the preconditioner is applied directly\n");
       hypre_printf("\n");
       hypre_printf("  -pcgtol <val>      : residual tolerance for inner iterations (default 0.01)\n");
@@ -2377,15 +2380,16 @@ main( hypre_int argc,
    HYPRE_Int             usr_jacobi_weight;
    HYPRE_Int             rap;
    HYPRE_Int             relax;
-   HYPRE_Int             maxLevels;
+   HYPRE_Int             max_levels;
    HYPRE_Int             n_pre, n_post, n_coarse;
+   HYPRE_Int             max_coarse_size;
    HYPRE_Int             skip;
    HYPRE_Int             jump;
 
    /* parameters for Solvers */
    HYPRE_Int             rel_change;
    HYPRE_Int             solver_type;
-   HYPRE_Int             maxIterations;
+   HYPRE_Int             max_iterations;
    HYPRE_Int             krylov_print_level;
    HYPRE_Int             print_level;
    HYPRE_Int             print_freq;
@@ -2499,8 +2503,9 @@ main( hypre_int argc,
    jump  = 0;
    solver_type = 1;
    cf_tol = 0.90;
-   maxIterations = 100;
-   maxLevels = 100;
+   max_iterations = 100;
+   max_levels = 100;
+   max_coarse_size = 1;
    tol = 1.0e-6;
    rel_change = 0;
    k_dim = 10;
@@ -2678,7 +2683,7 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-itr") == 0 )
       {
          arg_index++;
-         maxIterations = atoi(argv[arg_index++]);
+         max_iterations = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-k") == 0 )
       {
@@ -2708,7 +2713,7 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-lvl") == 0 )
       {
          arg_index++;
-         maxLevels = atoi(argv[arg_index++]);
+         max_levels = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-v") == 0 )
       {
@@ -2716,6 +2721,11 @@ main( hypre_int argc,
          n_pre = atoi(argv[arg_index++]);
          n_post = atoi(argv[arg_index++]);
          n_coarse = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-max_coarse") == 0 )
+      {
+         arg_index++;
+         max_coarse_size = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-skip") == 0 )
       {
@@ -3750,7 +3760,7 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_SStructSysPFMGCreate(hypre_MPI_COMM_WORLD, &solver);
-      HYPRE_SStructSysPFMGSetMaxIter(solver, maxIterations);
+      HYPRE_SStructSysPFMGSetMaxIter(solver, max_iterations);
       HYPRE_SStructSysPFMGSetTol(solver, tol);
       HYPRE_SStructSysPFMGSetRelChange(solver, rel_change);
       /* weighted Jacobi = 1; red-black GS = 2 */
@@ -3794,8 +3804,8 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_SStructSSAMGCreate(hypre_MPI_COMM_WORLD, &solver);
-      HYPRE_SStructSSAMGSetMaxIter(solver, maxIterations);
-      HYPRE_SStructSSAMGSetMaxLevels(solver, maxLevels);
+      HYPRE_SStructSSAMGSetMaxIter(solver, max_iterations);
+      HYPRE_SStructSSAMGSetMaxLevels(solver, max_levels);
       HYPRE_SStructSSAMGSetTol(solver, tol);
       HYPRE_SStructSSAMGSetRelChange(solver, rel_change);
       /* weighted Jacobi = 1; red-black GS = 2 */
@@ -3842,8 +3852,9 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetStrongThreshold(par_solver, strong_threshold);
       HYPRE_BoomerAMGSetPMaxElmts(par_solver, P_max_elmts);
       HYPRE_BoomerAMGSetCoarsenType(par_solver, coarsen_type);
-      HYPRE_BoomerAMGSetMaxIter(par_solver, maxIterations);
-      HYPRE_BoomerAMGSetMaxLevels(par_solver, maxLevels);
+      HYPRE_BoomerAMGSetMaxIter(par_solver, max_iterations);
+      HYPRE_BoomerAMGSetMaxLevels(par_solver, max_levels);
+      HYPRE_BoomerAMGSetMaxCoarseSize(par_solver, max_coarse_size);
       HYPRE_BoomerAMGSetTol(par_solver, tol);
       HYPRE_BoomerAMGSetPrintLevel(par_solver, print_level);
       HYPRE_BoomerAMGSetCycleNumSweeps(par_solver, n_pre, 1);
@@ -3893,7 +3904,7 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_SStructSplitCreate(hypre_MPI_COMM_WORLD, &solver);
-      HYPRE_SStructSplitSetMaxIter(solver, maxIterations);
+      HYPRE_SStructSplitSetMaxIter(solver, max_iterations);
       HYPRE_SStructSplitSetTol(solver, tol);
       if (solver_id == 0)
       {
@@ -3940,7 +3951,7 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_SStructPCGCreate(hypre_MPI_COMM_WORLD, &solver);
-      HYPRE_PCGSetMaxIter( (HYPRE_Solver) solver, maxIterations );
+      HYPRE_PCGSetMaxIter( (HYPRE_Solver) solver, max_iterations );
       HYPRE_PCGSetTol( (HYPRE_Solver) solver, tol );
       HYPRE_PCGSetTwoNorm( (HYPRE_Solver) solver, 1 );
       HYPRE_PCGSetRelChange( (HYPRE_Solver) solver, rel_change );
@@ -3994,7 +4005,7 @@ main( hypre_int argc,
          /* use SSAMG solver as preconditioner */
          HYPRE_SStructSSAMGCreate(hypre_MPI_COMM_WORLD, &precond);
          HYPRE_SStructSSAMGSetMaxIter(precond, 1);
-         HYPRE_SStructSSAMGSetMaxLevels(precond, maxLevels);
+         HYPRE_SStructSSAMGSetMaxLevels(precond, max_levels);
          HYPRE_SStructSSAMGSetTol(precond, 0.0);
          HYPRE_SStructSSAMGSetZeroGuess(precond);
          HYPRE_SStructSSAMGSetRelaxType(precond, relax);
@@ -4135,7 +4146,7 @@ main( hypre_int argc,
             /* use SSAMG solver as preconditioner */
             HYPRE_SStructSSAMGCreate(hypre_MPI_COMM_WORLD, &precond);
             HYPRE_SStructSSAMGSetMaxIter(precond, 1);
-            HYPRE_SStructSSAMGSetMaxLevels(precond, maxLevels);
+            HYPRE_SStructSSAMGSetMaxLevels(precond, max_levels);
             HYPRE_SStructSSAMGSetTol(precond, 0.0);
             HYPRE_SStructSSAMGSetZeroGuess(precond);
             HYPRE_SStructSSAMGSetRelaxType(precond, relax);
@@ -4175,7 +4186,7 @@ main( hypre_int argc,
          hypre_ClearTiming();
 
          HYPRE_LOBPCGCreate(interpreter, &matvec_fn, (HYPRE_Solver*)&lobpcg_solver);
-         HYPRE_LOBPCGSetMaxIter((HYPRE_Solver)lobpcg_solver, maxIterations);
+         HYPRE_LOBPCGSetMaxIter((HYPRE_Solver)lobpcg_solver, max_iterations);
          HYPRE_LOBPCGSetPrecondUsageMode((HYPRE_Solver)lobpcg_solver, pcgMode);
          HYPRE_LOBPCGSetTol((HYPRE_Solver)lobpcg_solver, tol);
          HYPRE_LOBPCGSetPrintLevel((HYPRE_Solver)lobpcg_solver, verbosity);
@@ -4294,7 +4305,7 @@ main( hypre_int argc,
          hypre_BeginTiming(time_index);
 
          HYPRE_LOBPCGCreate(interpreter, &matvec_fn, (HYPRE_Solver*)&solver);
-         HYPRE_LOBPCGSetMaxIter( (HYPRE_Solver) solver, maxIterations );
+         HYPRE_LOBPCGSetMaxIter( (HYPRE_Solver) solver, max_iterations );
          HYPRE_LOBPCGSetTol( (HYPRE_Solver) solver, tol );
          HYPRE_LOBPCGSetPrintLevel( (HYPRE_Solver) solver, verbosity );
 
@@ -4341,7 +4352,7 @@ main( hypre_int argc,
             /* use SSAMG solver as preconditioner */
             HYPRE_SStructSSAMGCreate(hypre_MPI_COMM_WORLD, &precond);
             HYPRE_SStructSSAMGSetMaxIter(precond, 1);
-            HYPRE_SStructSSAMGSetMaxLevels(precond, maxLevels);
+            HYPRE_SStructSSAMGSetMaxLevels(precond, max_levels);
             HYPRE_SStructSSAMGSetTol(precond, 0.0);
             HYPRE_SStructSSAMGSetZeroGuess(precond);
             HYPRE_SStructSSAMGSetRelaxType(precond, relax);
@@ -4498,7 +4509,7 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_ParCSRPCGCreate(hypre_MPI_COMM_WORLD, &par_solver);
-      HYPRE_PCGSetMaxIter( par_solver, maxIterations );
+      HYPRE_PCGSetMaxIter( par_solver, max_iterations );
       HYPRE_PCGSetTol( par_solver, tol );
       HYPRE_PCGSetTwoNorm( par_solver, 1 );
       HYPRE_PCGSetRelChange( par_solver, rel_change );
@@ -4512,7 +4523,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetPMaxElmts(par_precond, P_max_elmts);
          HYPRE_BoomerAMGSetCoarsenType(par_precond, coarsen_type);
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
-         HYPRE_BoomerAMGSetMaxLevels(par_precond, maxLevels);
+         HYPRE_BoomerAMGSetMaxLevels(par_precond, max_levels);
+         HYPRE_BoomerAMGSetMaxCoarseSize(par_precond, max_coarse_size);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
          HYPRE_BoomerAMGSetPrintLevel(par_precond, print_level);
          HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
@@ -4620,7 +4632,7 @@ main( hypre_int argc,
 
       HYPRE_SStructGMRESCreate(hypre_MPI_COMM_WORLD, &solver);
       HYPRE_GMRESSetKDim( (HYPRE_Solver) solver, k_dim );
-      HYPRE_GMRESSetMaxIter( (HYPRE_Solver) solver, maxIterations );
+      HYPRE_GMRESSetMaxIter( (HYPRE_Solver) solver, max_iterations );
       HYPRE_GMRESSetTol( (HYPRE_Solver) solver, tol );
       HYPRE_GMRESSetPrintLevel( (HYPRE_Solver) solver, krylov_print_level );
       HYPRE_GMRESSetLogging( (HYPRE_Solver) solver, 1 );
@@ -4668,7 +4680,7 @@ main( hypre_int argc,
          /* use SSAMG solver as preconditioner */
          HYPRE_SStructSSAMGCreate(hypre_MPI_COMM_WORLD, &precond);
          HYPRE_SStructSSAMGSetMaxIter(precond, 1);
-         HYPRE_SStructSSAMGSetMaxLevels(precond, maxLevels);
+         HYPRE_SStructSSAMGSetMaxLevels(precond, max_levels);
          HYPRE_SStructSSAMGSetTol(precond, 0.0);
          HYPRE_SStructSSAMGSetZeroGuess(precond);
          HYPRE_SStructSSAMGSetRelaxType(precond, relax);
@@ -4744,7 +4756,7 @@ main( hypre_int argc,
 
       HYPRE_ParCSRGMRESCreate(hypre_MPI_COMM_WORLD, &par_solver);
       HYPRE_GMRESSetKDim(par_solver, k_dim);
-      HYPRE_GMRESSetMaxIter(par_solver, maxIterations);
+      HYPRE_GMRESSetMaxIter(par_solver, max_iterations);
       HYPRE_GMRESSetTol(par_solver, tol);
       HYPRE_GMRESSetPrintLevel(par_solver, krylov_print_level);
       HYPRE_GMRESSetLogging(par_solver, 1);
@@ -4757,7 +4769,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetPMaxElmts(par_precond, P_max_elmts);
          HYPRE_BoomerAMGSetCoarsenType(par_precond, coarsen_type);
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
-         HYPRE_BoomerAMGSetMaxLevels(par_precond, maxLevels);
+         HYPRE_BoomerAMGSetMaxLevels(par_precond, max_levels);
+         HYPRE_BoomerAMGSetMaxCoarseSize(par_precond, max_coarse_size);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
          HYPRE_BoomerAMGSetPrintLevel(par_precond, print_level);
          HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
@@ -4854,7 +4867,7 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_SStructBiCGSTABCreate(hypre_MPI_COMM_WORLD, &solver);
-      HYPRE_BiCGSTABSetMaxIter( (HYPRE_Solver) solver, maxIterations );
+      HYPRE_BiCGSTABSetMaxIter( (HYPRE_Solver) solver, max_iterations );
       HYPRE_BiCGSTABSetTol( (HYPRE_Solver) solver, tol );
       HYPRE_BiCGSTABSetPrintLevel( (HYPRE_Solver) solver, krylov_print_level );
       HYPRE_BiCGSTABSetLogging( (HYPRE_Solver) solver, 1 );
@@ -4902,7 +4915,7 @@ main( hypre_int argc,
          /* use SSAMG solver as preconditioner */
          HYPRE_SStructSSAMGCreate(hypre_MPI_COMM_WORLD, &precond);
          HYPRE_SStructSSAMGSetMaxIter(precond, 1);
-         HYPRE_SStructSSAMGSetMaxLevels(precond, maxLevels);
+         HYPRE_SStructSSAMGSetMaxLevels(precond, max_levels);
          HYPRE_SStructSSAMGSetTol(precond, 0.0);
          HYPRE_SStructSSAMGSetZeroGuess(precond);
          HYPRE_SStructSSAMGSetRelaxType(precond, relax);
@@ -4977,7 +4990,7 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_ParCSRBiCGSTABCreate(hypre_MPI_COMM_WORLD, &par_solver);
-      HYPRE_BiCGSTABSetMaxIter(par_solver, maxIterations);
+      HYPRE_BiCGSTABSetMaxIter(par_solver, max_iterations);
       HYPRE_BiCGSTABSetTol(par_solver, tol);
       HYPRE_BiCGSTABSetPrintLevel(par_solver, krylov_print_level);
       HYPRE_BiCGSTABSetLogging(par_solver, 1);
@@ -4990,7 +5003,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetPMaxElmts(par_precond, P_max_elmts);
          HYPRE_BoomerAMGSetCoarsenType(par_precond, coarsen_type);
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
-         HYPRE_BoomerAMGSetMaxLevels(par_precond, maxLevels);
+         HYPRE_BoomerAMGSetMaxLevels(par_precond, max_levels);
+         HYPRE_BoomerAMGSetMaxCoarseSize(par_precond, max_coarse_size);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
          HYPRE_BoomerAMGSetPrintLevel(par_precond, print_level);
          HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
@@ -5088,7 +5102,7 @@ main( hypre_int argc,
 
       HYPRE_SStructFlexGMRESCreate(hypre_MPI_COMM_WORLD, &solver);
       HYPRE_FlexGMRESSetKDim( (HYPRE_Solver) solver, k_dim );
-      HYPRE_FlexGMRESSetMaxIter( (HYPRE_Solver) solver, maxIterations );
+      HYPRE_FlexGMRESSetMaxIter( (HYPRE_Solver) solver, max_iterations );
       HYPRE_FlexGMRESSetTol( (HYPRE_Solver) solver, tol );
       HYPRE_FlexGMRESSetPrintLevel( (HYPRE_Solver) solver, krylov_print_level );
       HYPRE_FlexGMRESSetLogging( (HYPRE_Solver) solver, 1 );
@@ -5136,7 +5150,7 @@ main( hypre_int argc,
          /* use SSAMG solver as preconditioner */
          HYPRE_SStructSSAMGCreate(hypre_MPI_COMM_WORLD, &precond);
          HYPRE_SStructSSAMGSetMaxIter(precond, 1);
-         HYPRE_SStructSSAMGSetMaxLevels(precond, maxLevels);
+         HYPRE_SStructSSAMGSetMaxLevels(precond, max_levels);
          HYPRE_SStructSSAMGSetTol(precond, 0.0);
          HYPRE_SStructSSAMGSetZeroGuess(precond);
          HYPRE_SStructSSAMGSetRelaxType(precond, relax);
@@ -5212,7 +5226,7 @@ main( hypre_int argc,
 
       HYPRE_ParCSRFlexGMRESCreate(hypre_MPI_COMM_WORLD, &par_solver);
       HYPRE_FlexGMRESSetKDim(par_solver, k_dim);
-      HYPRE_FlexGMRESSetMaxIter(par_solver, maxIterations);
+      HYPRE_FlexGMRESSetMaxIter(par_solver, max_iterations);
       HYPRE_FlexGMRESSetTol(par_solver, tol);
       HYPRE_FlexGMRESSetPrintLevel(par_solver, krylov_print_level);
       HYPRE_FlexGMRESSetLogging(par_solver, 1);
@@ -5225,7 +5239,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetPMaxElmts(par_precond, P_max_elmts);
          HYPRE_BoomerAMGSetCoarsenType(par_precond, coarsen_type);
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
-         HYPRE_BoomerAMGSetMaxLevels(par_precond, maxLevels);
+         HYPRE_BoomerAMGSetMaxLevels(par_precond, max_levels);
+         HYPRE_BoomerAMGSetMaxCoarseSize(par_precond, max_coarse_size);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
          HYPRE_BoomerAMGSetPrintLevel(par_precond, print_level);
          HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
@@ -5295,7 +5310,7 @@ main( hypre_int argc,
       HYPRE_ParCSRLGMRESCreate(hypre_MPI_COMM_WORLD, &par_solver);
       HYPRE_LGMRESSetKDim(par_solver, k_dim);
       HYPRE_LGMRESSetAugDim(par_solver, aug_dim);
-      HYPRE_LGMRESSetMaxIter(par_solver, maxIterations);
+      HYPRE_LGMRESSetMaxIter(par_solver, max_iterations);
       HYPRE_LGMRESSetTol(par_solver, tol);
       HYPRE_LGMRESSetPrintLevel(par_solver, krylov_print_level);
       HYPRE_LGMRESSetLogging(par_solver, 1);
@@ -5307,10 +5322,27 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetStrongThreshold(par_precond, strong_threshold);
          HYPRE_BoomerAMGSetPMaxElmts(par_precond, P_max_elmts);
          HYPRE_BoomerAMGSetCoarsenType(par_precond, coarsen_type);
-         HYPRE_BoomerAMGSetTol(par_precond, 0.0);
-         HYPRE_BoomerAMGSetPrintLevel(par_precond, 1);
-         HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
+         HYPRE_BoomerAMGSetMaxLevels(par_precond, max_levels);
+         HYPRE_BoomerAMGSetMaxCoarseSize(par_precond, max_coarse_size);
+         HYPRE_BoomerAMGSetTol(par_precond, 0.0);
+         HYPRE_BoomerAMGSetPrintLevel(par_precond, print_level);
+         HYPRE_BoomerAMGSetPrintFileName(par_precond, "sstruct.out.log");
+         HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_pre, 1);
+         HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_post, 2);
+         HYPRE_BoomerAMGSetCycleNumSweeps(par_precond, n_pre, 3);
+         if (usr_jacobi_weight)
+         {
+            HYPRE_BoomerAMGSetRelaxWt(par_precond, jacobi_weight);
+         }
+         if (relax == 1)
+         {
+            HYPRE_BoomerAMGSetRelaxType(par_precond, 0);
+         }
+         else
+         {
+            HYPRE_BoomerAMGSetRelaxType(par_precond, relax);
+         }
          if (old_default)
          {
             HYPRE_BoomerAMGSetOldDefault(par_precond);
@@ -5399,7 +5431,7 @@ main( hypre_int argc,
 
       HYPRE_StructSMGCreate(hypre_MPI_COMM_WORLD, &struct_solver);
       HYPRE_StructSMGSetMemoryUse(struct_solver, 0);
-      HYPRE_StructSMGSetMaxIter(struct_solver, maxIterations);
+      HYPRE_StructSMGSetMaxIter(struct_solver, max_iterations);
       HYPRE_StructSMGSetTol(struct_solver, tol);
       HYPRE_StructSMGSetRelChange(struct_solver, rel_change);
       HYPRE_StructSMGSetNumPreRelax(struct_solver, n_pre);
@@ -5434,8 +5466,8 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &struct_solver);
-      HYPRE_StructPFMGSetMaxLevels(struct_solver, maxLevels);
-      HYPRE_StructPFMGSetMaxIter(struct_solver, maxIterations);
+      HYPRE_StructPFMGSetMaxLevels(struct_solver, max_levels);
+      HYPRE_StructPFMGSetMaxIter(struct_solver, max_iterations);
       HYPRE_StructPFMGSetTol(struct_solver, tol);
       HYPRE_StructPFMGSetRelChange(struct_solver, rel_change);
       HYPRE_StructPFMGSetRAPType(struct_solver, rap);
@@ -5532,7 +5564,7 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_StructSparseMSGCreate(hypre_MPI_COMM_WORLD, &struct_solver);
-      HYPRE_StructSparseMSGSetMaxIter(struct_solver, maxIterations);
+      HYPRE_StructSparseMSGSetMaxIter(struct_solver, max_iterations);
       HYPRE_StructSparseMSGSetJump(struct_solver, jump);
       HYPRE_StructSparseMSGSetTol(struct_solver, tol);
       HYPRE_StructSparseMSGSetRelChange(struct_solver, rel_change);
@@ -5578,7 +5610,7 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_StructJacobiCreate(hypre_MPI_COMM_WORLD, &struct_solver);
-      HYPRE_StructJacobiSetMaxIter(struct_solver, maxIterations);
+      HYPRE_StructJacobiSetMaxIter(struct_solver, max_iterations);
       HYPRE_StructJacobiSetTol(struct_solver, tol);
       HYPRE_StructJacobiSetup(struct_solver, sA, sb, sx);
 
@@ -5613,7 +5645,7 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_StructPCGCreate(hypre_MPI_COMM_WORLD, &struct_solver);
-      HYPRE_PCGSetMaxIter( (HYPRE_Solver)struct_solver, maxIterations );
+      HYPRE_PCGSetMaxIter( (HYPRE_Solver)struct_solver, max_iterations );
       HYPRE_PCGSetTol( (HYPRE_Solver)struct_solver, tol );
       HYPRE_PCGSetTwoNorm( (HYPRE_Solver)struct_solver, 1 );
       HYPRE_PCGSetRelChange( (HYPRE_Solver)struct_solver, rel_change );
@@ -5641,7 +5673,7 @@ main( hypre_int argc,
       {
          /* use symmetric PFMG as preconditioner */
          HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
-         HYPRE_StructPFMGSetMaxLevels(struct_solver, maxLevels);
+         HYPRE_StructPFMGSetMaxLevels(struct_solver, max_levels);
          HYPRE_StructPFMGSetMaxIter(struct_precond, 1);
          HYPRE_StructPFMGSetTol(struct_precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(struct_precond);
@@ -5762,8 +5794,8 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_StructHybridCreate(hypre_MPI_COMM_WORLD, &struct_solver);
-      HYPRE_StructHybridSetDSCGMaxIter(struct_solver, maxIterations);
-      HYPRE_StructHybridSetPCGMaxIter(struct_solver, maxIterations);
+      HYPRE_StructHybridSetDSCGMaxIter(struct_solver, max_iterations);
+      HYPRE_StructHybridSetPCGMaxIter(struct_solver, max_iterations);
       HYPRE_StructHybridSetTol(struct_solver, tol);
       /*HYPRE_StructHybridSetPCGAbsoluteTolFactor(struct_solver, 1.0e-200);*/
       HYPRE_StructHybridSetConvergenceTol(struct_solver, cf_tol);
@@ -5800,7 +5832,7 @@ main( hypre_int argc,
       {
          /* use symmetric PFMG as preconditioner */
          HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
-         HYPRE_StructPFMGSetMaxLevels(struct_solver, maxLevels);
+         HYPRE_StructPFMGSetMaxLevels(struct_solver, max_levels);
          HYPRE_StructPFMGSetMaxIter(struct_precond, 1);
          HYPRE_StructPFMGSetTol(struct_precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(struct_precond);
@@ -5891,7 +5923,7 @@ main( hypre_int argc,
 
       HYPRE_StructGMRESCreate(hypre_MPI_COMM_WORLD, &struct_solver);
       HYPRE_GMRESSetKDim( (HYPRE_Solver) struct_solver, k_dim );
-      HYPRE_GMRESSetMaxIter( (HYPRE_Solver) struct_solver, maxIterations );
+      HYPRE_GMRESSetMaxIter( (HYPRE_Solver) struct_solver, max_iterations );
       HYPRE_GMRESSetTol( (HYPRE_Solver) struct_solver, tol );
       HYPRE_GMRESSetRelChange( (HYPRE_Solver) struct_solver, rel_change );
       HYPRE_GMRESSetPrintLevel( (HYPRE_Solver) struct_solver, krylov_print_level );
@@ -5919,7 +5951,7 @@ main( hypre_int argc,
       {
          /* use symmetric PFMG as preconditioner */
          HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
-         HYPRE_StructPFMGSetMaxLevels(struct_solver, maxLevels);
+         HYPRE_StructPFMGSetMaxLevels(struct_solver, max_levels);
          HYPRE_StructPFMGSetMaxIter(struct_precond, 1);
          HYPRE_StructPFMGSetTol(struct_precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(struct_precond);
@@ -6038,7 +6070,7 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_StructBiCGSTABCreate(hypre_MPI_COMM_WORLD, &struct_solver);
-      HYPRE_BiCGSTABSetMaxIter( (HYPRE_Solver)struct_solver, maxIterations );
+      HYPRE_BiCGSTABSetMaxIter( (HYPRE_Solver)struct_solver, max_iterations );
       HYPRE_BiCGSTABSetTol( (HYPRE_Solver)struct_solver, tol );
       HYPRE_BiCGSTABSetPrintLevel( (HYPRE_Solver)struct_solver, krylov_print_level );
       HYPRE_BiCGSTABSetLogging( (HYPRE_Solver)struct_solver, 1 );
@@ -6065,7 +6097,7 @@ main( hypre_int argc,
       {
          /* use symmetric PFMG as preconditioner */
          HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
-         HYPRE_StructPFMGSetMaxLevels(struct_solver, maxLevels);
+         HYPRE_StructPFMGSetMaxLevels(struct_solver, max_levels);
          HYPRE_StructPFMGSetMaxIter(struct_precond, 1);
          HYPRE_StructPFMGSetTol(struct_precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(struct_precond);
@@ -6256,8 +6288,8 @@ main( hypre_int argc,
       hypre_printf("\n");
       hypre_printf("Iterations = %d\n", num_iterations);
       hypre_printf("RHS Norm = %e\n", rhs_norm);
-      hypre_printf("Real  Relative Residual Norm = %e\n", real_res_norm);
-      hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
+      hypre_printf("Real  Relative Residual Norm = %20.15e\n", real_res_norm);
+      hypre_printf("Final Relative Residual Norm = %20.15e\n", final_res_norm);
       hypre_printf("\n");
    }
 
