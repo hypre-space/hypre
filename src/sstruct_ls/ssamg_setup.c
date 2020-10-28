@@ -516,7 +516,15 @@ hypre_SSAMGCoarsen( void          *ssamg_vdata,
    for (l = 0; l < max_levels; l++)
    {
       weights[l] = hypre_CTAlloc(HYPRE_Real, nparts);
+      if (usr_relax > 0.0)
+      {
+         for (part = 0; part < nparts; part++)
+         {
+            weights[l][part] = usr_relax;
+         }
+      }
    }
+
    for (part = 0; part < nparts; part++)
    {
       hypre_SetIndex(strides[part], 1);
@@ -569,11 +577,7 @@ hypre_SSAMGCoarsen( void          *ssamg_vdata,
          }
 
          /* Change relax_weights */
-         if (usr_relax > 0.0)
-         {
-            weights[l][part] = usr_relax;
-         }
-         else
+         if (usr_relax <= 0.0)
          {
             beta = 0.0;
             if (dxyz_flag[part] || (ndim == 1))
@@ -633,7 +637,11 @@ hypre_SSAMGCoarsen( void          *ssamg_vdata,
          }
          else
          {
-            weights[l][part] = 1.0; // Coarse grid relax weight
+            /* Update coarse grid relax weight */
+            if (max_levels > 1)
+            {
+               weights[l][part] = 1.0;
+            }
          }
       } /* loop on parts */
 
