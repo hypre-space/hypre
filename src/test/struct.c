@@ -2980,9 +2980,11 @@ AddValuesVector( hypre_StructGrid   *grid,
    hypre_Box          *box;
    HYPRE_Real         *values;
    HYPRE_Int           volume, ndim;
+   HYPRE_Int           seed = 1;
 
    ndim  = hypre_StructGridNDim(grid);
    boxes = hypre_StructGridBoxes(grid);
+   hypre_SeedRand(seed);
 
    hypre_ForBoxI(ib, boxes)
    {

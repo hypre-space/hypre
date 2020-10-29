@@ -2368,6 +2368,7 @@ main( hypre_int argc,
    HYPRE_Real            final_res_norm;
    HYPRE_Real            real_res_norm;
    HYPRE_Real            rhs_norm;
+   HYPRE_Real            x0_norm;
 
    HYPRE_Int             num_procs, myid;
    HYPRE_Int             time_index;
@@ -3494,6 +3495,8 @@ main( hypre_int argc,
          break;
    }
    HYPRE_SStructVectorAssemble(x);
+   HYPRE_SStructInnerProd(x, x, &x0_norm);
+   x0_norm = sqrt(x0_norm);
 
    hypre_EndTiming(time_index);
    hypre_PrintTiming("SStruct Interface", hypre_MPI_COMM_WORLD);
@@ -6287,8 +6290,9 @@ main( hypre_int argc,
    {
       hypre_printf("\n");
       hypre_printf("Iterations = %d\n", num_iterations);
-      hypre_printf("RHS Norm = %e\n", rhs_norm);
-      hypre_printf("Real  Relative Residual Norm = %20.15e\n", real_res_norm);
+      hypre_printf("RHS Norm = %20.15e\n", rhs_norm);
+      hypre_printf("Initial LHS (x0) Norm = %20.15e\n", x0_norm);
+      hypre_printf("Real Relative Residual Norm  = %20.15e\n", real_res_norm);
       hypre_printf("Final Relative Residual Norm = %20.15e\n", final_res_norm);
       hypre_printf("\n");
    }
