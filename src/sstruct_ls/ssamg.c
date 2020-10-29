@@ -379,7 +379,7 @@ hypre_SSAMGPrintLogging( void *ssamg_vdata )
          }
       }
 
-      if (rel_norms[0] > 0.)
+      if ((print_level > 1) && (rel_norms[0] > 0.))
       {
          avg_convr = pow((rel_norms[num_iterations]/rel_norms[0]),
                          (1.0/(HYPRE_Real) num_iterations));
