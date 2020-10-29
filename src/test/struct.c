@@ -80,12 +80,16 @@ main( hypre_int argc,
    HYPRE_StructMatrix  A;
    HYPRE_StructVector  b;
    HYPRE_StructVector  x;
+   HYPRE_StructVector  res;
 
    HYPRE_StructSolver  solver;
    HYPRE_StructSolver  precond;
    HYPRE_Int           num_iterations;
    HYPRE_Int           time_index;
    HYPRE_Real          final_res_norm;
+   HYPRE_Real          real_res_norm;
+   HYPRE_Real          rhs_norm;
+   HYPRE_Real          x0_norm;
    HYPRE_Real          cf_tol;
 
    HYPRE_Int           num_procs, myid;
@@ -224,9 +228,9 @@ main( hypre_int argc,
    cony = 0.0;
    conz = 0.0;
 
-   rhs_type  = 1;
+   rhs_type  = 0;
    rhs_value = 0.0;
-   x0_type   = 0;
+   x0_type   = 1;
    x0_value  = 0.0;
 
    n_pre  = 1;
@@ -733,19 +737,19 @@ main( hypre_int argc,
       hypre_printf("  solver ID        = %d\n", solver_id);
       if (rhs_type == 0)
       {
-         hypre_printf("  rhs has random components\n");
+         hypre_printf("  rhs value        = %20.15e\n", rhs_value);
       }
       else
       {
-         hypre_printf("  rhs value        = %20.15e\n", rhs_value);
+         hypre_printf("  rhs has random components\n");
       }
       if (x0_type == 0)
       {
-         hypre_printf("  initial sol (x0) has random components\n");
+         hypre_printf("  initial sol (x0) = %20.15e\n", x0_value);
       }
       else
       {
-         hypre_printf("  initial sol (x0) = %20.15e\n", x0_value);
+         hypre_printf("  initial sol (x0) has random components\n");
       }
       hypre_printf("\n");
    }
@@ -1414,6 +1418,12 @@ main( hypre_int argc,
       {
          hypre_FinalizeTiming(time_index);
       }
+
+      /* Compute vector norms */
+      HYPRE_StructVectorInnerProd(b, b, &rhs_norm);
+      HYPRE_StructVectorInnerProd(x, x, &x0_norm);
+      rhs_norm = sqrt(rhs_norm);
+      x0_norm = sqrt(x0_norm);
 
       /*-----------------------------------------------------------
        * Print out the system and initial guess
@@ -2854,6 +2864,19 @@ main( hypre_int argc,
 
       }
 
+      /* Compute residual */
+      HYPRE_StructVectorCreate(hypre_MPI_COMM_WORLD, grid, &res);
+      HYPRE_StructVectorInitialize(res);
+      HYPRE_StructVectorAssemble(res);
+      HYPRE_StructVectorCopy(b, res);
+      HYPRE_StructMatrixMatvec(-1.0, A, x, 1.0, res);
+      HYPRE_StructVectorInnerProd(res, res, &real_res_norm);
+      real_res_norm = sqrt(real_res_norm);
+      if (rhs_norm > 0)
+      {
+         real_res_norm = real_res_norm/rhs_norm;
+      }
+
       /*-----------------------------------------------------------
        * Print the solution and other info
        *-----------------------------------------------------------*/
@@ -2861,13 +2884,17 @@ main( hypre_int argc,
       if (print_system)
       {
          HYPRE_StructVectorPrint("struct.out.x", x, 0);
+         HYPRE_StructVectorPrint("struct.out.r", res, 0);
       }
 
-      if (myid == 0 && rep==reps-1 /* begin lobpcg */ && !lobpcgFlag /* end lobpcg */)
+      if (myid == 0 && rep == reps-1 /* begin lobpcg */ && !lobpcgFlag /* end lobpcg */)
       {
          hypre_printf("\n");
          hypre_printf("Iterations = %d\n", num_iterations);
-         hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         hypre_printf("RHS Norm = %20.15e\n", rhs_norm);
+         hypre_printf("Initial LHS (x0) Norm = %20.15e\n", x0_norm);
+         hypre_printf("Real Relative Residual Norm  = %20.15e\n", real_res_norm);
+         hypre_printf("Final Relative Residual Norm = %20.15e\n", final_res_norm);
          hypre_printf("\n");
       }
 
@@ -2916,15 +2943,15 @@ main( hypre_int argc,
       HYPRE_StructMatrixDestroy(A);
       HYPRE_StructVectorDestroy(b);
       HYPRE_StructVectorDestroy(x);
+      HYPRE_StructVectorDestroy(res);
 
-      for ( i = 0; i < (2-sym)*dim + 1; i++)
+      for (i = 0; i < (2-sym)*dim + 1; i++)
       {
          hypre_TFree(offsets[i]);
       }
       hypre_TFree(offsets);
 
       hypre_FinalizeMemoryDebug();
-
    }
 
    /* Finalize MPI */
