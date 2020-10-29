@@ -312,9 +312,9 @@ hypre_GMRESSolve(void  *gmres_vdata,
    guard_zero_residual = 0.0;
 
    (*(gmres_functions->CommInfo))(A,&my_id,&num_procs);
-   if ( logging>0 || print_level>0 )
+   if (logging > 0 || print_level > 0)
    {
-      norms          = (gmres_data -> norms);
+      norms = (gmres_data -> norms);
    }
 
    /* initialize work arrays */
@@ -327,9 +327,9 @@ hypre_GMRESSolve(void  *gmres_vdata,
    }
 
    hh = hypre_CTAllocF(HYPRE_Real*,k_dim+1,gmres_functions);
-   for (i=0; i < k_dim+1; i++)
+   for (i = 0; i < k_dim+1; i++)
    {
-   	hh[i] = hypre_CTAllocF(HYPRE_Real,k_dim,gmres_functions);
+      hh[i] = hypre_CTAllocF(HYPRE_Real,k_dim,gmres_functions);
    }
 
    (*(gmres_functions->CopyVector))(b,p[0]);
@@ -340,9 +340,22 @@ hypre_GMRESSolve(void  *gmres_vdata,
    b_norm = sqrt((*(gmres_functions->InnerProd))(b,b));
    real_r_norm_old = b_norm;
 
+   /* Print initial residual and solution vectors */
+   if (print_level > 2 && gmres_functions->PrintVector)
+   {
+      hypre_sprintf(filename, "gmres_x.i00");
+      (*(gmres_functions->PrintVector))(x, filename);
+
+      hypre_sprintf(filename, "gmres_r.i00");
+      (*(gmres_functions->PrintVector))(r, filename);
+   }
+
    /* Since it is does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
-   if (b_norm != 0.) ieee_check = b_norm/b_norm; /* INF -> NaN conversion */
+   if (b_norm != 0.)
+   {
+      ieee_check = b_norm/b_norm; /* INF -> NaN conversion */
+   }
    if (ieee_check != ieee_check)
    {
       /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
@@ -391,16 +404,17 @@ hypre_GMRESSolve(void  *gmres_vdata,
       return hypre_error_flag;
    }
 
-   if ( logging>0 || print_level > 0)
+   if (logging>0 || print_level > 0)
    {
       norms[0] = r_norm;
-      if ( print_level>1 && my_id == 0 )
+      if (print_level > 1 && my_id == 0)
       {
   	 hypre_printf("L2 norm of b: %e\n", b_norm);
          if (b_norm == 0.0)
+         {
             hypre_printf("Rel_resid_norm actually contains the residual norm\n");
+         }
          hypre_printf("Initial L2 norm of residual: %e\n", r_norm);
-
       }
    }
    iter = 0;
@@ -414,8 +428,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    {
      /* convergence criterion |r_i|/|r0| <= accuracy if |b| = 0 */
      den_norm= r_norm;
-   };
-
+   }
 
    /* convergence criteria: |r_i| <= max( a_tol, r_tol * den_norm)
       den_norm = |r_0| or |b|
@@ -427,206 +440,228 @@ hypre_GMRESSolve(void  *gmres_vdata,
 
    /* so now our stop criteria is |r_i| <= epsilon */
 
-   if ( print_level>1 && my_id == 0 )
+   if (print_level > 1 && my_id == 0)
    {
       if (b_norm > 0.0)
-         {hypre_printf("=============================================\n\n");
-          hypre_printf("Iters     resid.norm     conv.rate  rel.res.norm\n");
-          hypre_printf("-----    ------------    ---------- ------------\n");
-
-          }
-
+      {
+         hypre_printf("=============================================\n\n");
+         hypre_printf("Iters     resid.norm     conv.rate  rel.res.norm\n");
+         hypre_printf("-----    ------------    ---------- ------------\n");
+      }
       else
-         {hypre_printf("=============================================\n\n");
-          hypre_printf("Iters     resid.norm     conv.rate\n");
-          hypre_printf("-----    ------------    ----------\n");
-
-          };
+      {
+         hypre_printf("=============================================\n\n");
+         hypre_printf("Iters     resid.norm     conv.rate\n");
+         hypre_printf("-----    ------------    ----------\n");
+      }
    }
-
 
    /* once the rel. change check has passed, we do not want to check it again */
    rel_change_passed = 0;
 
-
    /* outer iteration cycle */
    while (iter < max_iter)
    {
-   /* initialize first term of hessenberg system */
+      /* initialize first term of hessenberg system */
+      rs[0] = r_norm;
+      if (r_norm == 0.0)
+      {
+         hypre_TFreeF(c,gmres_functions);
+         hypre_TFreeF(s,gmres_functions);
+         hypre_TFreeF(rs,gmres_functions);
+         if (rel_change)
+         {
+            hypre_TFreeF(rs_2,gmres_functions);
+         }
+         for (i = 0; i < k_dim+1; i++)
+         {
+            hypre_TFreeF(hh[i],gmres_functions);
+         }
+         hypre_TFreeF(hh,gmres_functions);
+         HYPRE_ANNOTATE_FUNC_END;
 
-	rs[0] = r_norm;
-        if (r_norm == 0.0)
-        {
-           hypre_TFreeF(c,gmres_functions);
-           hypre_TFreeF(s,gmres_functions);
-           hypre_TFreeF(rs,gmres_functions);
-           if (rel_change)  hypre_TFreeF(rs_2,gmres_functions);
-           for (i=0; i < k_dim+1; i++) hypre_TFreeF(hh[i],gmres_functions);
-           hypre_TFreeF(hh,gmres_functions);
-           HYPRE_ANNOTATE_FUNC_END;
+         return hypre_error_flag;
+      }
 
-	   return hypre_error_flag;
-	}
+      /* see if we are already converged and
+         should print the final norm and exit */
+      if (r_norm  <= epsilon && iter >= min_iter)
+      {
+         if (!rel_change) /* shouldn't exit after no iterations if
+                           * relative change is on*/
+         {
+            (*(gmres_functions->CopyVector))(b,r);
+            (*(gmres_functions->Matvec))(matvec_data,-1.0,A,x,1.0,r);
+            r_norm = sqrt((*(gmres_functions->InnerProd))(r,r));
+            if (r_norm  <= epsilon)
+            {
+               if ( print_level>1 && my_id == 0)
+               {
+                  hypre_printf("\n\n");
+                  hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
+               }
+               break;
+            }
+            else
+            {
+               if (print_level > 0 && my_id == 0)
+               {
+                  hypre_printf("false convergence 1\n");
+               }
+            }
+         }
+      }
 
-        /* see if we are already converged and
-           should print the final norm and exit */
-	if (r_norm  <= epsilon && iter >= min_iter)
-        {
-           if (!rel_change) /* shouldn't exit after no iterations if
-                             * relative change is on*/
-           {
-              (*(gmres_functions->CopyVector))(b,r);
-              (*(gmres_functions->Matvec))(matvec_data,-1.0,A,x,1.0,r);
-              r_norm = sqrt((*(gmres_functions->InnerProd))(r,r));
-              if (r_norm  <= epsilon)
-              {
-                 if ( print_level>1 && my_id == 0)
-                 {
-                    hypre_printf("\n\n");
-                    hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
-                 }
-                 break;
-              }
-              else
-                 if ( print_level>0 && my_id == 0)
-                    hypre_printf("false convergence 1\n");
-           }
-	}
+      t = 1.0 / r_norm;
+      (*(gmres_functions->ScaleVector))(t,p[0]);
+      i = 0;
 
+      /***RESTART CYCLE (right-preconditioning) ***/
+      while (i < k_dim && iter < max_iter)
+      {
+         i++;
+         iter++;
+         (*(gmres_functions->ClearVector))(r);
+         precond(precond_data, A, p[i-1], r);
+         (*(gmres_functions->Matvec))(matvec_data, 1.0, A, r, 0.0, p[i]);
 
+         /* modified Gram_Schmidt */
+         for (j = 0; j < i; j++)
+         {
+            hh[j][i-1] = (*(gmres_functions->InnerProd))(p[j],p[i]);
+            (*(gmres_functions->Axpy))(-hh[j][i-1],p[j],p[i]);
+         }
+         t = sqrt((*(gmres_functions->InnerProd))(p[i],p[i]));
+         hh[i][i-1] = t;
+         if (t != 0.0)
+         {
+            t = 1.0/t;
+            (*(gmres_functions->ScaleVector))(t,p[i]);
+         }
+         /* done with modified Gram_schmidt and Arnoldi step.
+            update factorization of hh */
+         for (j = 1; j < i; j++)
+         {
+            t = hh[j-1][i-1];
+            hh[j-1][i-1] = s[j-1]*hh[j][i-1] + c[j-1]*t;
+            hh[j][i-1] = -s[j-1]*t + c[j-1]*hh[j][i-1];
+         }
+         t= hh[i][i-1]*hh[i][i-1];
+         t+= hh[i-1][i-1]*hh[i-1][i-1];
+         gamma = sqrt(t);
+         if (gamma == 0.0)
+         {
+            gamma = epsmac;
+         }
+         c[i-1]  = hh[i-1][i-1]/gamma;
+         s[i-1]  = hh[i][i-1]/gamma;
+         rs[i]   = -hh[i][i-1]*rs[i-1];
+         rs[i]  /=  gamma;
+         rs[i-1] = c[i-1]*rs[i-1];
 
-      	t = 1.0 / r_norm;
-	(*(gmres_functions->ScaleVector))(t,p[0]);
-	i = 0;
+         /* determine residual norm */
+         hh[i-1][i-1] = s[i-1]*hh[i][i-1] + c[i-1]*hh[i-1][i-1];
+         r_norm = fabs(rs[i]);
 
-        /***RESTART CYCLE (right-preconditioning) ***/
-        while (i < k_dim && iter < max_iter)
-	{
-           i++;
-           iter++;
-           (*(gmres_functions->ClearVector))(r);
-           precond(precond_data, A, p[i-1], r);
-           (*(gmres_functions->Matvec))(matvec_data, 1.0, A, r, 0.0, p[i]);
-           /* modified Gram_Schmidt */
-           for (j=0; j < i; j++)
-           {
-              hh[j][i-1] = (*(gmres_functions->InnerProd))(p[j],p[i]);
-              (*(gmres_functions->Axpy))(-hh[j][i-1],p[j],p[i]);
-           }
-           t = sqrt((*(gmres_functions->InnerProd))(p[i],p[i]));
-           hh[i][i-1] = t;
-           if (t != 0.0)
-           {
-              t = 1.0/t;
-              (*(gmres_functions->ScaleVector))(t,p[i]);
-           }
-           /* done with modified Gram_schmidt and Arnoldi step.
-              update factorization of hh */
-           for (j = 1; j < i; j++)
-           {
-              t = hh[j-1][i-1];
-              hh[j-1][i-1] = s[j-1]*hh[j][i-1] + c[j-1]*t;
-              hh[j][i-1] = -s[j-1]*t + c[j-1]*hh[j][i-1];
-           }
-           t= hh[i][i-1]*hh[i][i-1];
-           t+= hh[i-1][i-1]*hh[i-1][i-1];
-           gamma = sqrt(t);
-           if (gamma == 0.0) gamma = epsmac;
-           c[i-1] = hh[i-1][i-1]/gamma;
-           s[i-1] = hh[i][i-1]/gamma;
-           rs[i] = -hh[i][i-1]*rs[i-1];
-           rs[i]/=  gamma;
-           rs[i-1] = c[i-1]*rs[i-1];
-           /* determine residual norm */
-           hh[i-1][i-1] = s[i-1]*hh[i][i-1] + c[i-1]*hh[i-1][i-1];
-           r_norm = fabs(rs[i]);
+         /* print ? */
+         if (print_level > 0)
+         {
+            norms[iter] = r_norm;
+            if (print_level > 1 && my_id == 0)
+            {
+               if (b_norm > 0.0)
+               {
+                  hypre_printf("% 5d    %e    %f   %e\n", iter,
+                                norms[iter],norms[iter]/norms[iter-1],
+                                norms[iter]/b_norm);
+               }
+               else
+               {
+                  hypre_printf("% 5d    %e    %f\n", iter, norms[iter],
+                                norms[iter]/norms[iter-1]);
+               }
+            }
+         }
 
-           /* print ? */
-           if ( print_level>0 )
-           {
-              norms[iter] = r_norm;
-              if ( print_level>1 && my_id == 0 )
-              {
-                 if (b_norm > 0.0)
-                    hypre_printf("% 5d    %e    %f   %e\n", iter,
-                           norms[iter],norms[iter]/norms[iter-1],
-                           norms[iter]/b_norm);
-                 else
-                    hypre_printf("% 5d    %e    %f\n", iter, norms[iter],
-                           norms[iter]/norms[iter-1]);
-              }
-           }
+         /* print solution */
+         if (print_level > 2 && gmres_functions->PrintVector)
+         {
+            /* extra copy of rs so we don't need to change the later solve */
+            for (k = 0; k < i; k++)
+            {
+               rs_2[k] = rs[k];
+            }
 
-           /* print solution */
-           if (print_level > 2 && gmres_functions->PrintVector)
-           {
-              /* extra copy of rs so we don't need to change the later solve */
-              for (k = 0; k<i; k++)
-              {
-                 rs_2[k] = rs[k];
-              }
+            /* solve tri. system */
+            rs_2[i-1] = rs_2[i-1]/hh[i-1][i-1];
+            for (k = i-2; k >= 0; k--)
+            {
+               t = 0.0;
+               for (j = k+1; j < i; j++)
+               {
+                  t -= hh[k][j]*rs_2[j];
+               }
+               t+= rs_2[k];
+               rs_2[k] = t/hh[k][k];
+            }
 
-              /* solve tri. system */
-              rs_2[i-1] = rs_2[i-1]/hh[i-1][i-1];
-              for (k = i-2; k >= 0; k--)
-              {
-                 t = 0.0;
-                 for (j = k+1; j < i; j++)
-                 {
-                    t -= hh[k][j]*rs_2[j];
-                 }
-                 t+= rs_2[k];
-                 rs_2[k] = t/hh[k][k];
-              }
+            (*(gmres_functions->CopyVector))(p[i-1],w);
+            (*(gmres_functions->ScaleVector))(rs_2[i-1],w);
+            for (j = i-2; j >= 0; j--)
+            {
+               (*(gmres_functions->Axpy))(rs_2[j], p[j], w);
+            }
 
-              (*(gmres_functions->CopyVector))(p[i-1],w);
-              (*(gmres_functions->ScaleVector))(rs_2[i-1],w);
-              for (j = i-2; j >=0; j--)
-              {
-                 (*(gmres_functions->Axpy))(rs_2[j], p[j], w);
-              }
+            (*(gmres_functions->ClearVector))(r);
 
-              (*(gmres_functions->ClearVector))(r);
+            /* find correction (in r) */
+            precond(precond_data, A, w, r);
 
-              /* find correction (in r) */
-              precond(precond_data, A, w, r);
+            /* copy current solution (x) to w (don't want to over-write x)*/
+            (*(gmres_functions->CopyVector))(x,w);
 
-              /* copy current solution (x) to w (don't want to over-write x)*/
-              (*(gmres_functions->CopyVector))(x,w);
+            /* add the correction to find current solution */
+            (*(gmres_functions->Axpy))(1.0,r,w);
 
-              /* add the correction to find current solution */
-              (*(gmres_functions->Axpy))(1.0,r,w);
+            /* compute real residual */
+            (*(gmres_functions->CopyVector))(b,r);
+            (*(gmres_functions->Matvec))(matvec_data,-1.0, A, x, 1.0, r);
 
-              hypre_sprintf(filename, "gmres_x.%02d", iter);
-              (*(gmres_functions->PrintVector))(w, filename);
-           }
+            /* print solution vector */
+            hypre_sprintf(filename, "gmres_x.i%02d", iter);
+            (*(gmres_functions->PrintVector))(w, filename);
 
-           /* convergence factor tolerance */
-           if (cf_tol > 0.0)
-           {
-              cf_ave_0 = cf_ave_1;
-              cf_ave_1 = pow( r_norm / r_norm_0, 1.0/(2.0*iter));
+            /* print residual vector */
+            hypre_sprintf(filename, "gmres_r.i%02d", iter);
+            (*(gmres_functions->PrintVector))(r, filename);
+         }
 
-              weight   = fabs(cf_ave_1 - cf_ave_0);
-              weight   = weight / hypre_max(cf_ave_1, cf_ave_0);
-              weight   = 1.0 - weight;
+         /* convergence factor tolerance */
+         if (cf_tol > 0.0)
+         {
+            cf_ave_0 = cf_ave_1;
+            cf_ave_1 = pow( r_norm / r_norm_0, 1.0/(2.0*iter));
+
+            weight   = fabs(cf_ave_1 - cf_ave_0);
+            weight   = weight / hypre_max(cf_ave_1, cf_ave_0);
+            weight   = 1.0 - weight;
 #if 0
-              hypre_printf("I = %d: cf_new = %e, cf_old = %e, weight = %e\n",
-                     i, cf_ave_1, cf_ave_0, weight );
+            hypre_printf("I = %d: cf_new = %e, cf_old = %e, weight = %e\n",
+                         i, cf_ave_1, cf_ave_0, weight );
 #endif
-              if (weight * cf_ave_1 > cf_tol)
-              {
-                 break_value = 1;
-                 break;
-              }
-           }
-           /* should we exit the restart cycle? (conv. check) */
-           if (r_norm <= epsilon && iter >= min_iter)
-           {
-              if (rel_change && !rel_change_passed)
-              {
+            if (weight * cf_ave_1 > cf_tol)
+            {
+               break_value = 1;
+               break;
+            }
+         }
 
-                 /* To decide whether to break here: to actually
+         /* should we exit the restart cycle? (conv. check) */
+         if (r_norm <= epsilon && iter >= min_iter)
+         {
+            if (rel_change && !rel_change_passed)
+            {
+               /* To decide whether to break here: to actually
                   determine the relative change requires the approx
                   solution (so a triangular solve) and a
                   precond. solve - so if we have to do this many
@@ -639,267 +674,287 @@ hypre_GMRESSolve(void  *gmres_vdata,
                   Here we will check the relative here as we don't
                   want to exit the restart cycle prematurely */
 
-                 for (k=0; k<i; k++) /* extra copy of rs so we don't need
-                                        to change the later solve */
-                    rs_2[k] = rs[k];
+               /* extra copy of rs so we don't need to change the later solve */
+               for (k = 0; k < i; k++)
+               {
+                  rs_2[k] = rs[k];
+               }
 
-                 /* solve tri. system*/
-                 rs_2[i-1] = rs_2[i-1]/hh[i-1][i-1];
-                 for (k = i-2; k >= 0; k--)
-                 {
-                    t = 0.0;
-                    for (j = k+1; j < i; j++)
-                    {
-                       t -= hh[k][j]*rs_2[j];
-                    }
-                    t+= rs_2[k];
-                    rs_2[k] = t/hh[k][k];
-                 }
+               /* solve tri. system*/
+               rs_2[i-1] = rs_2[i-1]/hh[i-1][i-1];
+               for (k = i-2; k >= 0; k--)
+               {
+                  t = 0.0;
+                  for (j = k+1; j < i; j++)
+                  {
+                     t -= hh[k][j]*rs_2[j];
+                  }
+                  t+= rs_2[k];
+                  rs_2[k] = t/hh[k][k];
+               }
 
-                 (*(gmres_functions->CopyVector))(p[i-1],w);
-                 (*(gmres_functions->ScaleVector))(rs_2[i-1],w);
-                 for (j = i-2; j >=0; j--)
-                    (*(gmres_functions->Axpy))(rs_2[j], p[j], w);
+               (*(gmres_functions->CopyVector))(p[i-1],w);
+               (*(gmres_functions->ScaleVector))(rs_2[i-1],w);
+               for (j = i-2; j >= 0; j--)
+               {
+                  (*(gmres_functions->Axpy))(rs_2[j], p[j], w);
+               }
 
-                 (*(gmres_functions->ClearVector))(r);
-                 /* find correction (in r) */
-                 precond(precond_data, A, w, r);
-                 /* copy current solution (x) to w (don't want to over-write x)*/
-                 (*(gmres_functions->CopyVector))(x,w);
+               (*(gmres_functions->ClearVector))(r);
 
-                 /* add the correction */
-                 (*(gmres_functions->Axpy))(1.0,r,w);
+               /* find correction (in r) */
+               precond(precond_data, A, w, r);
 
-                 /* now w is the approx solution  - get the norm*/
-                 x_norm = sqrt( (*(gmres_functions->InnerProd))(w,w) );
+               /* copy current solution (x) to w (don't want to over-write x)*/
+               (*(gmres_functions->CopyVector))(x,w);
 
-                 if ( !(x_norm <= guard_zero_residual ))
-                    /* don't divide by zero */
-                 {  /* now get  x_i - x_i-1 */
+               /* add the correction */
+               (*(gmres_functions->Axpy))(1.0,r,w);
 
-                    if (num_rel_change_check)
-                    {
-                       /* have already checked once so we can avoid another precond.
-                          solve */
-                       (*(gmres_functions->CopyVector))(w, r);
-                       (*(gmres_functions->Axpy))(-1.0, w_2, r);
-                       /* now r contains x_i - x_i-1*/
+               /* now w is the approx solution  - get the norm*/
+               x_norm = sqrt( (*(gmres_functions->InnerProd))(w,w) );
 
-                       /* save current soln w in w_2 for next time */
-                       (*(gmres_functions->CopyVector))(w, w_2);
-                    }
-                    else
-                    {
-                       /* first time to check rel change*/
+               if (!(x_norm <= guard_zero_residual ))
+                  /* don't divide by zero */
+               {  /* now get  x_i - x_i-1 */
+                  if (num_rel_change_check)
+                  {
+                     /* have already checked once so we can avoid another precond. solve */
+                     (*(gmres_functions->CopyVector))(w, r);
+                     (*(gmres_functions->Axpy))(-1.0, w_2, r);
+                     /* now r contains x_i - x_i-1*/
 
-                       /* first save current soln w in w_2 for next time */
-                       (*(gmres_functions->CopyVector))(w, w_2);
+                     /* save current soln w in w_2 for next time */
+                     (*(gmres_functions->CopyVector))(w, w_2);
+                  }
+                  else
+                  {
+                     /* first time to check rel change*/
 
-                       /* for relative change take x_(i-1) to be
-                          x + M^{-1}[sum{j=0..i-2} rs_j p_j ].
-                          Now
-                          x_i - x_{i-1}= {x + M^{-1}[sum{j=0..i-1} rs_j p_j ]}
-                          - {x + M^{-1}[sum{j=0..i-2} rs_j p_j ]}
-                          = M^{-1} rs_{i-1}{p_{i-1}} */
+                     /* first save current soln w in w_2 for next time */
+                     (*(gmres_functions->CopyVector))(w, w_2);
 
-                       (*(gmres_functions->ClearVector))(w);
-                       (*(gmres_functions->Axpy))(rs_2[i-1], p[i-1], w);
-                       (*(gmres_functions->ClearVector))(r);
-                       /* apply the preconditioner */
-                       precond(precond_data, A, w, r);
-                       /* now r contains x_i - x_i-1 */
-                    }
-                    /* find the norm of x_i - x_i-1 */
-                    w_norm = sqrt( (*(gmres_functions->InnerProd))(r,r) );
-                    relative_error = w_norm/x_norm;
-                    if (relative_error <= r_tol)
-                    {
-                       rel_change_passed = 1;
-                       break;
-                    }
-                 }
-                 else
-                 {
-                    rel_change_passed = 1;
-                    break;
+                     /* for relative change take x_(i-1) to be
+                        x + M^{-1}[sum{j=0..i-2} rs_j p_j ].
+                        Now
+                        x_i - x_{i-1}= {x + M^{-1}[sum{j=0..i-1} rs_j p_j ]}
+                        - {x + M^{-1}[sum{j=0..i-2} rs_j p_j ]}
+                        = M^{-1} rs_{i-1}{p_{i-1}} */
 
-                 }
-                 num_rel_change_check++;
-              }
-           else /* no relative change */
-              {
-                 break;
-              }
-           }
+                     (*(gmres_functions->ClearVector))(w);
+                     (*(gmres_functions->Axpy))(rs_2[i-1], p[i-1], w);
+                     (*(gmres_functions->ClearVector))(r);
 
+                     /* apply the preconditioner */
+                     precond(precond_data, A, w, r);
+                     /* now r contains x_i - x_i-1 */
+                  }
+                  /* find the norm of x_i - x_i-1 */
+                  w_norm = sqrt( (*(gmres_functions->InnerProd))(r,r) );
+                  relative_error = w_norm/x_norm;
+                  if (relative_error <= r_tol)
+                  {
+                     rel_change_passed = 1;
+                     break;
+                  }
+               }
+               else
+               {
+                  rel_change_passed = 1;
+                  break;
+               }
+               num_rel_change_check++;
+            }
+            else /* no relative change */
+            {
+               break;
+            }
+         }
+      } /*** end of restart cycle ***/
 
-	} /*** end of restart cycle ***/
+      /* now compute solution, first solve upper triangular system */
+      if (break_value)
+      {
+         break;
+      }
 
-	/* now compute solution, first solve upper triangular system */
+      rs[i-1] = rs[i-1]/hh[i-1][i-1];
+      for (k = i-2; k >= 0; k--)
+      {
+         t = 0.0;
+         for (j = k+1; j < i; j++)
+         {
+            t -= hh[k][j]*rs[j];
+         }
+         t+= rs[k];
+         rs[k] = t/hh[k][k];
+      }
 
-	if (break_value) break;
+      (*(gmres_functions->CopyVector))(p[i-1],w);
+      (*(gmres_functions->ScaleVector))(rs[i-1],w);
+      for (j = i-2; j >= 0; j--)
+      {
+         (*(gmres_functions->Axpy))(rs[j], p[j], w);
+      }
 
-	rs[i-1] = rs[i-1]/hh[i-1][i-1];
-	for (k = i-2; k >= 0; k--)
-	{
-           t = 0.0;
-           for (j = k+1; j < i; j++)
-           {
-              t -= hh[k][j]*rs[j];
-           }
-           t+= rs[k];
-           rs[k] = t/hh[k][k];
-	}
+      (*(gmres_functions->ClearVector))(r);
+      /* find correction (in r) */
+      precond(precond_data, A, w, r);
 
-        (*(gmres_functions->CopyVector))(p[i-1],w);
-        (*(gmres_functions->ScaleVector))(rs[i-1],w);
-        for (j = i-2; j >=0; j--)
-                (*(gmres_functions->Axpy))(rs[j], p[j], w);
+      /* update current solution x (in x) */
+      (*(gmres_functions->Axpy))(1.0,r,x);
 
-	(*(gmres_functions->ClearVector))(r);
-	/* find correction (in r) */
-        precond(precond_data, A, w, r);
+      /* check for convergence by evaluating the actual residual */
+      if (r_norm  <= epsilon && iter >= min_iter)
+      {
+         if (skip_real_r_check)
+         {
+            (gmres_data -> converged) = 1;
+            break;
+         }
 
-        /* update current solution x (in x) */
-	(*(gmres_functions->Axpy))(1.0,r,x);
+         /* calculate actual residual norm */
+         (*(gmres_functions->CopyVector))(b,r);
+         (*(gmres_functions->Matvec))(matvec_data,-1.0,A,x,1.0,r);
+         real_r_norm_new = r_norm = sqrt( (*(gmres_functions->InnerProd))(r,r) );
 
+         if (r_norm <= epsilon)
+         {
+            if (rel_change && !rel_change_passed) /* calculate the relative change */
+            {
+               /* calculate the norm of the solution */
+               x_norm = sqrt( (*(gmres_functions->InnerProd))(x,x) );
 
-        /* check for convergence by evaluating the actual residual */
-	if (r_norm  <= epsilon && iter >= min_iter)
-        {
-           if (skip_real_r_check)
-           {
-              (gmres_data -> converged) = 1;
-              break;
-           }
+               if ( !(x_norm <= guard_zero_residual ))
+                  /* don't divide by zero */
+               {
+                  /* for relative change take x_(i-1) to be
+                     x + M^{-1}[sum{j=0..i-2} rs_j p_j ].
+                     Now
+                     x_i - x_{i-1}= {x + M^{-1}[sum{j=0..i-1} rs_j p_j ]}
+                     - {x + M^{-1}[sum{j=0..i-2} rs_j p_j ]}
+                     = M^{-1} rs_{i-1}{p_{i-1}} */
+                  (*(gmres_functions->ClearVector))(w);
+                  (*(gmres_functions->Axpy))(rs[i-1], p[i-1], w);
+                  (*(gmres_functions->ClearVector))(r);
 
-           /* calculate actual residual norm*/
-           (*(gmres_functions->CopyVector))(b,r);
-           (*(gmres_functions->Matvec))(matvec_data,-1.0,A,x,1.0,r);
-           real_r_norm_new = r_norm = sqrt( (*(gmres_functions->InnerProd))(r,r) );
+                  /* apply the preconditioner */
+                  precond(precond_data, A, w, r);
 
-           if (r_norm <= epsilon)
-           {
-              if (rel_change && !rel_change_passed) /* calculate the relative change */
-              {
+                  /* find the norm of x_i - x_i-1 */
+                  w_norm = sqrt( (*(gmres_functions->InnerProd))(r,r) );
+                  relative_error= w_norm/x_norm;
+                  if (relative_error < r_tol)
+                  {
+                     (gmres_data -> converged) = 1;
+                     if ( print_level > 1 && my_id == 0)
+                     {
+                        hypre_printf("\n\n");
+                        hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
+                     }
+                     break;
+                  }
+               }
+               else
+               {
+                  (gmres_data -> converged) = 1;
+                  if (print_level > 1 && my_id == 0)
+                  {
+                     hypre_printf("\n\n");
+                     hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
+                  }
+                  break;
+               }
+            }
+            else /* don't need to check rel. change */
+            {
+               if (print_level > 1 && my_id == 0)
+               {
+                  hypre_printf("\n\n");
+                  hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
+               }
+               (gmres_data -> converged) = 1;
+               break;
+            }
+         }
+         else /* conv. has not occurred, according to true residual */
+         {
+            /* exit if the real residual norm has not decreased */
+            if (real_r_norm_new >= real_r_norm_old)
+            {
+               if (print_level > 1 && my_id == 0)
+               {
+                  hypre_printf("\n\n");
+                  hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
+               }
+               (gmres_data -> converged) = 1;
+               break;
+            }
 
-                 /* calculate the norm of the solution */
-                 x_norm = sqrt( (*(gmres_functions->InnerProd))(x,x) );
+            /* report discrepancy between real/GMRES residuals and restart */
+            if (print_level > 0 && my_id == 0)
+            {
+               hypre_printf("false convergence 2, L2 norm of residual: %e\n", r_norm);
+            }
 
-                 if ( !(x_norm <= guard_zero_residual ))
-                    /* don't divide by zero */
-                 {
+            (*(gmres_functions->CopyVector))(r,p[0]);
+            i = 0;
+            real_r_norm_old = real_r_norm_new;
+         }
+      } /* end of convergence check */
 
-                    /* for relative change take x_(i-1) to be
-                       x + M^{-1}[sum{j=0..i-2} rs_j p_j ].
-                       Now
-                       x_i - x_{i-1}= {x + M^{-1}[sum{j=0..i-1} rs_j p_j ]}
-                       - {x + M^{-1}[sum{j=0..i-2} rs_j p_j ]}
-                       = M^{-1} rs_{i-1}{p_{i-1}} */
-                    (*(gmres_functions->ClearVector))(w);
-                    (*(gmres_functions->Axpy))(rs[i-1], p[i-1], w);
-                    (*(gmres_functions->ClearVector))(r);
-                    /* apply the preconditioner */
-                    precond(precond_data, A, w, r);
-                    /* find the norm of x_i - x_i-1 */
-                    w_norm = sqrt( (*(gmres_functions->InnerProd))(r,r) );
-                    relative_error= w_norm/x_norm;
-                    if ( relative_error < r_tol )
-                    {
-                       (gmres_data -> converged) = 1;
-                       if ( print_level>1 && my_id == 0 )
-                       {
-                          hypre_printf("\n\n");
-                          hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
-                       }
-                       break;
-                    }
-                 }
-                 else
-                 {
-                    (gmres_data -> converged) = 1;
-                    if ( print_level>1 && my_id == 0 )
-                    {
-                       hypre_printf("\n\n");
-                       hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
-                    }
-                    break;
-                 }
+      /* compute residual vector and continue loop */
+      for (j = i; j > 0; j--)
+      {
+         rs[j-1] = -s[j-1]*rs[j];
+         rs[j] = c[j-1]*rs[j];
+      }
 
-              }
-              else /* don't need to check rel. change */
-              {
-                 if ( print_level>1 && my_id == 0 )
-                 {
-                    hypre_printf("\n\n");
-                    hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
-                 }
-                 (gmres_data -> converged) = 1;
-                 break;
-              }
-           }
-           else /* conv. has not occurred, according to true residual */
-           {
-              /* exit if the real residual norm has not decreased */
-              if (real_r_norm_new >= real_r_norm_old)
-              {
-                 if (print_level > 1 && my_id == 0)
-                 {
-                    hypre_printf("\n\n");
-                    hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
-                 }
-                 (gmres_data -> converged) = 1;
-                 break;
-              }
-
-              /* report discrepancy between real/GMRES residuals and restart */
-              if ( print_level>0 && my_id == 0)
-                 hypre_printf("false convergence 2, L2 norm of residual: %e\n", r_norm);
-              (*(gmres_functions->CopyVector))(r,p[0]);
-              i = 0;
-              real_r_norm_old = real_r_norm_new;
-           }
-	} /* end of convergence check */
-
-        /* compute residual vector and continue loop */
-	for (j=i ; j > 0; j--)
-	{
-           rs[j-1] = -s[j-1]*rs[j];
-           rs[j] = c[j-1]*rs[j];
-	}
-
-        if (i) (*(gmres_functions->Axpy))(rs[i]-1.0,p[i],p[i]);
-        for (j=i-1 ; j > 0; j--)
-           (*(gmres_functions->Axpy))(rs[j],p[j],p[i]);
-
-        if (i)
-        {
-           (*(gmres_functions->Axpy))(rs[0]-1.0,p[0],p[0]);
-           (*(gmres_functions->Axpy))(1.0,p[i],p[0]);
-        }
+      if (i)
+      {
+         (*(gmres_functions->Axpy))(rs[i]-1.0,p[i],p[i]);
+      }
+      for (j = i-1; j > 0; j--)
+      {
+         (*(gmres_functions->Axpy))(rs[j],p[j],p[i]);
+      }
+      if (i)
+      {
+         (*(gmres_functions->Axpy))(rs[0]-1.0,p[0],p[0]);
+         (*(gmres_functions->Axpy))(1.0,p[i],p[0]);
+      }
    } /* END of iteration while loop */
 
-
-   if ( print_level>1 && my_id == 0 )
-          hypre_printf("\n\n");
+   if (print_level > 1 && my_id == 0)
+   {
+      hypre_printf("\n\n");
+   }
 
    (gmres_data -> num_iterations) = iter;
    if (b_norm > 0.0)
+   {
       (gmres_data -> rel_residual_norm) = r_norm/b_norm;
+   }
    if (b_norm == 0.0)
+   {
       (gmres_data -> rel_residual_norm) = r_norm;
+   }
 
-   if (iter >= max_iter && r_norm > epsilon) hypre_error(HYPRE_ERROR_CONV);
-
+   if (iter >= max_iter && r_norm > epsilon)
+   {
+      hypre_error(HYPRE_ERROR_CONV);
+   }
 
    hypre_TFreeF(c,gmres_functions);
    hypre_TFreeF(s,gmres_functions);
    hypre_TFreeF(rs,gmres_functions);
-   if (rel_change)  hypre_TFreeF(rs_2,gmres_functions);
-
-   for (i=0; i < k_dim+1; i++)
+   if (rel_change)
    {
-   	hypre_TFreeF(hh[i],gmres_functions);
+      hypre_TFreeF(rs_2,gmres_functions);
+   }
+   for (i = 0; i < k_dim+1; i++)
+   {
+      hypre_TFreeF(hh[i],gmres_functions);
    }
    hypre_TFreeF(hh,gmres_functions);
 
