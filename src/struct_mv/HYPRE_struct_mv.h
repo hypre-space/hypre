@@ -564,9 +564,15 @@ HYPRE_Int HYPRE_StructVectorPrint(const char         *filename,
 /**
  * Clone a vector x.
  **/
-HYPRE_Int
-HYPRE_StructVectorClone( HYPRE_StructVector x,
-                         HYPRE_StructVector *y_ptr );
+HYPRE_Int HYPRE_StructVectorClone( HYPRE_StructVector x,
+                                   HYPRE_StructVector *y_ptr );
+
+/**
+ * Compute {\tt result}, the inner product of vectors {\tt x} and {\tt y}.
+ **/
+HYPRE_Int HYPRE_StructVectorInnerProd( HYPRE_StructVector  x,
+                                       HYPRE_StructVector  y,
+                                       HYPRE_Real         *result );
 
 /* Revisit these interface routines */
 HYPRE_Int HYPRE_StructVectorScaleValues ( HYPRE_StructVector vector , HYPRE_Complex factor );

@@ -369,3 +369,17 @@ HYPRE_StructVectorClone( HYPRE_StructVector x,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructVectorInnerProd
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructVectorInnerProd( HYPRE_StructVector  x,
+                             HYPRE_StructVector  y,
+                             HYPRE_Real         *result )
+{
+   *result = hypre_StructInnerProd(x, y);
+
+   return hypre_error_flag;
+}
