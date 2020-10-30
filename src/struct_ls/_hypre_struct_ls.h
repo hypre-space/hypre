@@ -369,6 +369,8 @@ HYPRE_Int hypre_PFMGSetLogging ( void *pfmg_vdata , HYPRE_Int logging );
 HYPRE_Int hypre_PFMGGetLogging ( void *pfmg_vdata , HYPRE_Int *logging );
 HYPRE_Int hypre_PFMGSetPrintLevel ( void *pfmg_vdata , HYPRE_Int print_level );
 HYPRE_Int hypre_PFMGGetPrintLevel ( void *pfmg_vdata , HYPRE_Int *print_level );
+HYPRE_Int hypre_PFMGSetPrintFreq ( void *pfmg_vdata , HYPRE_Int print_freq );
+HYPRE_Int hypre_PFMGGetPrintFreq ( void *pfmg_vdata , HYPRE_Int *print_freq );
 HYPRE_Int hypre_PFMGGetNumIterations ( void *pfmg_vdata , HYPRE_Int *num_iterations );
 HYPRE_Int hypre_PFMGPrintLogging ( void *pfmg_vdata );
 HYPRE_Int hypre_PFMGGetFinalRelativeResidualNorm ( void *pfmg_vdata , HYPRE_Real *relative_residual_norm );

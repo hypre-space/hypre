@@ -44,6 +44,7 @@ hypre_PFMGCreate( MPI_Comm  comm )
    (pfmg_data -> skip_relax)       = 1;
    (pfmg_data -> logging)          = 0;
    (pfmg_data -> print_level)      = 0;
+   (pfmg_data -> print_freq)       = 1;
 
    /* initialize */
    (pfmg_data -> num_levels) = -1;
@@ -458,6 +459,31 @@ hypre_PFMGGetPrintLevel( void      *pfmg_vdata,
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
    *print_level = (pfmg_data -> print_level);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_PFMGSetPrintFreq( void       *pfmg_vdata,
+                        HYPRE_Int   print_freq)
+{
+   hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
+
+   (pfmg_data -> print_freq) = print_freq;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_PFMGGetPrintFreq( void       *pfmg_vdata,
+                        HYPRE_Int  *print_freq)
+{
+   hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
+
+   *print_freq = (pfmg_data -> print_freq);
 
    return hypre_error_flag;
 }
