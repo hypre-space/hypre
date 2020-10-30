@@ -26,41 +26,40 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
 {
    hypre_SysPFMGData       *sys_pfmg_data = (hypre_SysPFMGData*)sys_pfmg_vdata;
 
-   hypre_SStructPMatrix *A;
-   hypre_SStructPVector *b;
-   hypre_SStructPVector *x;
+   hypre_SStructPMatrix    *A;
+   hypre_SStructPVector    *b;
+   hypre_SStructPVector    *x;
 
-   HYPRE_Real            tol             = (sys_pfmg_data -> tol);
-   HYPRE_Int             max_iter        = (sys_pfmg_data -> max_iter);
-   HYPRE_Int             rel_change      = (sys_pfmg_data -> rel_change);
-   HYPRE_Int             zero_guess      = (sys_pfmg_data -> zero_guess);
-   HYPRE_Int             num_pre_relax   = (sys_pfmg_data -> num_pre_relax);
-   HYPRE_Int             num_post_relax  = (sys_pfmg_data -> num_post_relax);
-   HYPRE_Int             num_levels      = (sys_pfmg_data -> num_levels);
-   hypre_SStructPMatrix  **A_l           = (sys_pfmg_data -> A_l);
-   hypre_SStructPMatrix  **P_l           = (sys_pfmg_data -> P_l);
-   hypre_SStructPMatrix  **RT_l          = (sys_pfmg_data -> RT_l);
-   hypre_SStructPVector  **b_l           = (sys_pfmg_data -> b_l);
-   hypre_SStructPVector  **x_l           = (sys_pfmg_data -> x_l);
-   hypre_SStructPVector  **r_l           = (sys_pfmg_data -> r_l);
-   hypre_SStructPVector  **e_l           = (sys_pfmg_data -> e_l);
-   void                **relax_data_l    = (sys_pfmg_data -> relax_data_l);
-   void                **matvec_data_l   = (sys_pfmg_data -> matvec_data_l);
-   void                **restrict_data_l = (sys_pfmg_data -> restrict_data_l);
-   void                **interp_data_l   = (sys_pfmg_data -> interp_data_l);
-   HYPRE_Int             logging         = (sys_pfmg_data -> logging);
-   HYPRE_Real           *norms           = (sys_pfmg_data -> norms);
-   HYPRE_Real           *rel_norms       = (sys_pfmg_data -> rel_norms);
-   HYPRE_Int            *active_l        = (sys_pfmg_data -> active_l);
+   HYPRE_Real              tol             = (sys_pfmg_data -> tol);
+   HYPRE_Int               max_iter        = (sys_pfmg_data -> max_iter);
+   HYPRE_Int               rel_change      = (sys_pfmg_data -> rel_change);
+   HYPRE_Int               zero_guess      = (sys_pfmg_data -> zero_guess);
+   HYPRE_Int               num_pre_relax   = (sys_pfmg_data -> num_pre_relax);
+   HYPRE_Int               num_post_relax  = (sys_pfmg_data -> num_post_relax);
+   HYPRE_Int               num_levels      = (sys_pfmg_data -> num_levels);
+   hypre_SStructPMatrix  **A_l             = (sys_pfmg_data -> A_l);
+   hypre_SStructPMatrix  **P_l             = (sys_pfmg_data -> P_l);
+   hypre_SStructPMatrix  **RT_l            = (sys_pfmg_data -> RT_l);
+   hypre_SStructPVector  **b_l             = (sys_pfmg_data -> b_l);
+   hypre_SStructPVector  **x_l             = (sys_pfmg_data -> x_l);
+   hypre_SStructPVector  **r_l             = (sys_pfmg_data -> r_l);
+   hypre_SStructPVector  **e_l             = (sys_pfmg_data -> e_l);
+   void                  **relax_data_l    = (sys_pfmg_data -> relax_data_l);
+   void                  **matvec_data_l   = (sys_pfmg_data -> matvec_data_l);
+   void                  **restrict_data_l = (sys_pfmg_data -> restrict_data_l);
+   void                  **interp_data_l   = (sys_pfmg_data -> interp_data_l);
+   HYPRE_Real             *norms           = (sys_pfmg_data -> norms);
+   HYPRE_Real             *rel_norms       = (sys_pfmg_data -> rel_norms);
+   HYPRE_Int              *active_l        = (sys_pfmg_data -> active_l);
+   HYPRE_Int               logging         = (sys_pfmg_data -> logging);
+   HYPRE_Int               print_level     = (sys_pfmg_data -> print_level);
+   HYPRE_Int               print_freq      = (sys_pfmg_data -> print_freq);
 
    HYPRE_Real            b_dot_b, r_dot_r, eps = 0;
    HYPRE_Real            e_dot_e = 0, x_dot_x = 1;
 
    HYPRE_Int             i, l;
-
-#if DEBUG
    char                  filename[255];
-#endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -78,14 +77,12 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
    hypre_SStructPVectorRef(hypre_SStructVectorPVector(b_in, 0), &b);
    hypre_SStructPVectorRef(hypre_SStructVectorPVector(x_in, 0), &x);
 
-
    hypre_SStructPMatrixDestroy(A_l[0]);
    hypre_SStructPVectorDestroy(b_l[0]);
    hypre_SStructPVectorDestroy(x_l[0]);
    hypre_SStructPMatrixRef(A, &A_l[0]);
    hypre_SStructPVectorRef(b, &b_l[0]);
    hypre_SStructPVectorRef(x, &x_l[0]);
-
 
    (sys_pfmg_data -> num_iterations) = 0;
 
@@ -104,28 +101,54 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
       return hypre_error_flag;
    }
 
+   if (((tol > 0.) && (logging > 0)) || (print_level > 1))
+   {
+      /* Compute fine grid residual (b - Ax) */
+      hypre_SStructPCopy(b_l[0], r_l[0]);
+      hypre_SStructPMatvecCompute(matvec_data_l[0], -1.0,
+                                  A_l[0], x_l[0], 1.0, r_l[0]);
+   }
+
    /* part of convergence check */
-   if (tol > 0.0)
+   if (tol > 0.)
    {
       /* eps = (tol^2) */
       hypre_SStructPInnerProd(b_l[0], b_l[0], &b_dot_b);
       eps = tol*tol;
 
       /* if rhs is zero, return a zero solution */
-      if (b_dot_b == 0.0)
+      if (!(b_dot_b > 0.0))
       {
-         hypre_SStructPVectorSetConstantValues(x, 0.0);
-         if (logging > 0)
-         {
-            norms[0]     = 0.0;
-            rel_norms[0] = 0.0;
-         }
-
-         hypre_EndTiming(sys_pfmg_data -> time_index);
+#if 0
+         hypre_SStructPVectorSetConstantValues(x_l[0], 0.0);
+         hypre_EndTiming(ssamg_data -> time_index);
          HYPRE_ANNOTATE_FUNC_END;
 
          return hypre_error_flag;
+#else
+         b_dot_b = 1.0;
+#endif
       }
+
+      if (logging > 0)
+      {
+         hypre_SStructPInnerProd(r_l[0], r_l[0], &r_dot_r);
+
+         norms[0] = sqrt(r_dot_r);
+         rel_norms[0] = sqrt(r_dot_r/b_dot_b);
+      }
+   }
+
+   /* Print initial solution and residual */
+   if (print_level > 1)
+   {
+      /* Print solution */
+      hypre_sprintf(filename, "sys_pfmg_x.i%02d", 0);
+      hypre_SStructPVectorPrint(filename, x_l[0], 0);
+
+      /* Print residual */
+      hypre_sprintf(filename, "sys_pfmg_r.i%02d", 0);
+      hypre_SStructPVectorPrint(filename, r_l[0], 0);
    }
 
    /*-----------------------------------------------------
@@ -151,35 +174,6 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
       hypre_SStructPCopy(b_l[0], r_l[0]);
       hypre_SStructPMatvecCompute(matvec_data_l[0],
                                   -1.0, A_l[0], x_l[0], 1.0, r_l[0]);
-
-      /* convergence check */
-      if (tol > 0.0)
-      {
-         hypre_SStructPInnerProd(r_l[0], r_l[0], &r_dot_r);
-
-         if (logging > 0)
-         {
-            norms[i] = sqrt(r_dot_r);
-            if (b_dot_b > 0)
-            {
-               rel_norms[i] = sqrt(r_dot_r/b_dot_b);
-            }
-            else
-            {
-               rel_norms[i] = 0.0;
-            }
-         }
-
-         /* always do at least 1 V-cycle */
-         if ((r_dot_r/b_dot_b < eps) && (i > 0))
-         {
-            if ( ((rel_change) && (e_dot_e/x_dot_x) < eps) || (!rel_change) )
-            {
-               HYPRE_ANNOTATE_MGLEVEL_END(0);
-               break;
-            }
-         }
-      }
 
       if (num_levels > 1)
       {
@@ -300,9 +294,53 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
       hypre_SysPFMGRelaxSetMaxIter(relax_data_l[0], num_post_relax);
       hypre_SysPFMGRelaxSetZeroGuess(relax_data_l[0], 0);
       hypre_SysPFMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
-      HYPRE_ANNOTATE_MGLEVEL_END(0);
 
+      if ((logging > 0) || (print_level > 1))
+      {
+         /* Recompute fine grid residual (b - Ax) after post-smoothing */
+         hypre_SStructPCopy(b_l[0], r_l[0]);
+         hypre_SStructPMatvecCompute(matvec_data_l[0], -1.0,
+                                     A_l[0], x_l[0], 1.0, r_l[0]);
+
+         if (logging > 0)
+         {
+            hypre_SStructPInnerProd(r_l[0], r_l[0], &r_dot_r);
+
+            norms[i+1] = sqrt(r_dot_r);
+            rel_norms[i+1] = sqrt(r_dot_r/b_dot_b);
+         }
+
+         if (print_level > 1 && !((i + 1)%print_freq))
+         {
+            /* Print solution */
+            hypre_sprintf(filename, "sys_pfmg_x.i%02d", (i + 1));
+            hypre_SStructPVectorPrint(filename, x_l[0], 0);
+
+            /* Print residual */
+            hypre_sprintf(filename, "sys_pfmg_r.i%02d", (i + 1));
+            hypre_SStructPVectorPrint(filename, r_l[0], 0);
+         }
+      }
+      else
+      {
+         /* r_l[0] is the fine grid residual computed after pre-smoothing */
+         hypre_SStructPInnerProd(r_l[0], r_l[0], &r_dot_r);
+      }
+
+      HYPRE_ANNOTATE_MGLEVEL_END(0);
       (sys_pfmg_data -> num_iterations) = (i + 1);
+
+      /* convergence check */
+      if (tol > 0.0)
+      {
+         if (r_dot_r/b_dot_b < eps)
+         {
+            if (((rel_change) && (e_dot_e/x_dot_x) < eps) || (!rel_change))
+            {
+               break;
+            }
+         }
+      }
    }
 
    /*-----------------------------------------------------
