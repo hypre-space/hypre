@@ -93,7 +93,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       return hypre_error_flag;
    }
 
-   if ((tol > 0.) && (logging > 0) || (print_level > 1))
+   if (((tol > 0.) && (logging > 0)) || (print_level > 1))
    {
       /* Compute fine grid residual (b - Ax) */
       hypre_SStructCopy(b_l[0], r_l[0]);
@@ -117,8 +117,9 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          HYPRE_ANNOTATE_FUNC_END;
 
          return hypre_error_flag;
-#endif
+#else
          b_dot_b = 1.0;
+#endif
       }
 
       if (logging > 0)
@@ -136,11 +137,6 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       /* Print solution */
       hypre_sprintf(filename, "ssamg_x.i%02d", 0);
       HYPRE_SStructVectorPrint(filename, x_l[0], 0);
-
-      /* Compute residual (b - Ax) */
-      hypre_SStructCopy(b_l[0], r_l[0]);
-      hypre_SStructMatvecCompute(matvec_data_l[0], -1.0,
-                                 A_l[0], x_l[0], 1.0, r_l[0]);
 
       /* Print residual */
       hypre_sprintf(filename, "ssamg_r.i%02d", 0);

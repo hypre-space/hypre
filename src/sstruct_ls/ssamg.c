@@ -930,10 +930,6 @@ hypre_SSAMGGetFinalRelativeResidualNorm( void       *ssamg_vdata,
       {
          hypre_error_in_arg(1);
       }
-      else if (num_iterations == max_iter)
-      {
-         *relative_residual_norm = rel_norms[num_iterations-1];
-      }
       else
       {
          *relative_residual_norm = rel_norms[num_iterations];
