@@ -420,8 +420,8 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    if ((pfmg_data -> logging) > 0)
    {
       max_iter = (pfmg_data -> max_iter);
-      (pfmg_data -> norms)     = hypre_TAlloc(HYPRE_Real, max_iter);
-      (pfmg_data -> rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter);
+      (pfmg_data -> norms)     = hypre_TAlloc(HYPRE_Real, max_iter+1);
+      (pfmg_data -> rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter+1);
    }
 
 #if DEBUG
