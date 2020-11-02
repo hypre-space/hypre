@@ -3776,7 +3776,7 @@ main( hypre_int argc,
       HYPRE_SStructSysPFMGSetNumPostRelax(solver, n_post);
       HYPRE_SStructSysPFMGSetSkipRelax(solver, skip);
       /*HYPRE_StructPFMGSetDxyz(solver, dxyz);*/
-      HYPRE_SStructSysPFMGSetPrintLevel(solver, 1);
+      HYPRE_SStructSysPFMGSetPrintLevel(solver, print_level);
       HYPRE_SStructSysPFMGSetLogging(solver, 1);
       HYPRE_SStructSysPFMGSetup(solver, A, b, x);
 
