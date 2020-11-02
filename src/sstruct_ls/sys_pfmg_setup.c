@@ -121,9 +121,9 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
     *--------------------------------------------------------*/
    nvars    = hypre_SStructPMatrixNVars(A);
    sys_dxyz = hypre_TAlloc(HYPRE_Real *, nvars);
-   for ( i = 0; i < nvars; i++)
+   for (i = 0; i < nvars; i++)
    {
-      sys_dxyz[i] = hypre_TAlloc(HYPRE_Real, 3);
+      sys_dxyz[i] = hypre_CTAlloc(HYPRE_Real, 3);
    }
 
    /*-----------------------------------------------------
@@ -577,6 +577,7 @@ hypre_SysStructCoarsen( hypre_SStructPGrid  *fgrid,
 
    for (t = 0; t < 8; t++)
    {
+      hypre_SStructPGridVTPBndBoxArrayArray(cgrid, t) = NULL;
       hypre_SStructPGridVTSGrid(cgrid, t)     = NULL;
       hypre_SStructPGridVTIBoxArray(cgrid, t) = NULL;
    }
