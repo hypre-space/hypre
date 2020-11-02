@@ -34,7 +34,7 @@ blocks of rows as follows:
    \end{array}
    \right]
 
-In the above example, the matrix is distributed accross the :math:`P` processes,
+In the above example, the matrix is distributed across the :math:`P` processes,
 :math:`0, 1, ..., P-1` by blocks of rows.  Each submatrix :math:`A_p` is "owned"
 by a single process and its first and last row numbers are given by the global
 indices ``ilower`` and ``iupper`` in the ``Create()`` call below.
