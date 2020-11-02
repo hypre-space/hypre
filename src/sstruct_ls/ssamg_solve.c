@@ -102,7 +102,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
    }
 
    /* part of convergence check */
-   if (tol > 0)
+   if (tol > 0.)
    {
       /* eps = (tol^2) */
       hypre_SStructInnerProd(b_l[0], b_l[0], &b_dot_b);

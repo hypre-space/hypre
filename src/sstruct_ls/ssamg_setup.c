@@ -382,12 +382,9 @@ hypre_SSAMGComputeNumCoarseRelax( void *ssamg_vdata )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SSAMGComputeMaxLevels: maximum number of levels for multigrid.
- *   Computes max_levels for each part independently and takes the minimum
- *   over all. This may not make sense to AMR!
- *
- * TODO: Before implementing, check if this makes sense
+ * hypre_SSAMGComputeMaxLevels
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SSAMGComputeMaxLevels( hypre_SStructGrid  *grid,
                              HYPRE_Int          *max_levels )
@@ -422,7 +419,6 @@ hypre_SSAMGComputeMaxLevels( hypre_SStructGrid  *grid,
 
    return hypre_error_flag;
 }
-
 
 /*--------------------------------------------------------------------------
  * hypre_SSAMGComputeDxyz computes dxyz for each part independently.
