@@ -1524,6 +1524,10 @@ void hypre_NvtxPushRangeColor(const char *name, HYPRE_Int cid);
 void hypre_NvtxPushRange(const char *name);
 void hypre_NvtxPopRange();
 
+/* hypre_utilities.c */
+HYPRE_Int hypre_multmod(HYPRE_Int a, HYPRE_Int b, HYPRE_Int mod);
+
+
 #ifdef __cplusplus
 }
 #endif
