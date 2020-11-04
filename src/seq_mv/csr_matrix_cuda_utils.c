@@ -86,7 +86,7 @@ hypre_CSRMatrixToCusparseSpMat(const hypre_CSRMatrix *A,
  * @warning Assumes CSRMatrix uses doubles for values
  */
 cusparseDnVecDescr_t
-hypre_VectorTocusparseDnVec(const hypre_Vector *x,
+hypre_VectorToCusparseDnVec(const hypre_Vector *x,
                                   HYPRE_Int     offset,
                                   HYPRE_Int     size_override)
 {

@@ -1106,22 +1106,34 @@ hypre_SortCSRCusparse( HYPRE_Int      n,
    void *pBuffer = NULL;
 
    csru2csrInfo_t sortInfoA;
-   HYPRE_CUSPARSE_CALL(cusparseCreateCsru2csrInfo(&sortInfoA));
+   HYPRE_CUSPARSE_CALL( cusparseCreateCsru2csrInfo(&sortInfoA) );
 
    HYPRE_Int isDoublePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double);
    HYPRE_Int isSinglePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double) / 2;
 
    if (isDoublePrecision)
    {
-      HYPRE_CUSPARSE_CALL(cusparseDcsru2csr_bufferSizeExt(cusparsehandle, n, m, nnzA, d_a_sorted, d_ia, d_ja_sorted, sortInfoA, &pBufferSizeInBytes));
+      HYPRE_CUSPARSE_CALL( cusparseDcsru2csr_bufferSizeExt(cusparsehandle,
+                                                           n, m, nnzA, d_a_sorted, d_ia, d_ja_sorted,
+                                                           sortInfoA, &pBufferSizeInBytes) );
+
       pBuffer = hypre_TAlloc(char, pBufferSizeInBytes, HYPRE_MEMORY_DEVICE);
-      HYPRE_CUSPARSE_CALL(cusparseDcsru2csr(cusparsehandle, n, m, nnzA, descrA, d_a_sorted, d_ia, d_ja_sorted, sortInfoA, pBuffer));
+
+      HYPRE_CUSPARSE_CALL( cusparseDcsru2csr(cusparsehandle,
+                                             n, m, nnzA, descrA, d_a_sorted, d_ia, d_ja_sorted,
+                                             sortInfoA, pBuffer) );
    }
    else if (isSinglePrecision)
    {
-      HYPRE_CUSPARSE_CALL(cusparseScsru2csr_bufferSizeExt(cusparsehandle, n, m, nnzA, (float *) d_a_sorted, d_ia, d_ja_sorted, sortInfoA, &pBufferSizeInBytes));
+      HYPRE_CUSPARSE_CALL( cusparseScsru2csr_bufferSizeExt(cusparsehandle,
+                                                           n, m, nnzA, (float *) d_a_sorted, d_ia, d_ja_sorted,
+                                                           sortInfoA, &pBufferSizeInBytes));
+
       pBuffer = hypre_TAlloc(char, pBufferSizeInBytes, HYPRE_MEMORY_DEVICE);
-      HYPRE_CUSPARSE_CALL(cusparseScsru2csr(cusparsehandle, n, m, nnzA, descrA, (float *)d_a_sorted, d_ia, d_ja_sorted, sortInfoA, pBuffer));
+
+      HYPRE_CUSPARSE_CALL( cusparseScsru2csr(cusparsehandle,
+                                             n, m, nnzA, descrA, (float *)d_a_sorted, d_ia, d_ja_sorted,
+                                             sortInfoA, pBuffer) );
    }
 
    hypre_TFree(pBuffer, HYPRE_MEMORY_DEVICE);

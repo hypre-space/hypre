@@ -308,7 +308,7 @@ hypre_Free_core(void *ptr, hypre_MemoryLocation location)
       return;
    }
 
-#if 0 //#ifdef HYPRE_DEBUG
+#ifdef HYPRE_DEBUG
    hypre_MemoryLocation tmp;
    hypre_GetPointerLocation(ptr, &tmp);
    /* do not use hypre_assert, which has alloc and free;
@@ -729,9 +729,9 @@ hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
    *memory_location = hypre_MEMORY_UNDEFINED;
 
 #if (CUDART_VERSION >= 10000)
-// #if (CUDART_VERSION >= 11000)
-//    HYPRE_CUDA_CALL( cudaPointerGetAttributes(&attr, ptr) );
-// #else
+ #if (CUDART_VERSION >= 11000)
+   HYPRE_CUDA_CALL( cudaPointerGetAttributes(&attr, ptr) );
+ #else
    cudaError_t err = cudaPointerGetAttributes(&attr, ptr);
    if (err != cudaSuccess)
    {
@@ -739,7 +739,7 @@ hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
       /* clear the error */
       cudaGetLastError();
    }
-// #endif
+ #endif
    if (attr.type == cudaMemoryTypeUnregistered)
    {
       *memory_location = hypre_MEMORY_HOST;

@@ -203,8 +203,8 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
    char  *dBuffer    = NULL;
    HYPRE_Int x_size_override = trans ? hypre_CSRMatrixNumRows(A) : hypre_CSRMatrixNumCols(A);
    HYPRE_Int y_size_override = trans ? hypre_CSRMatrixNumCols(A) : hypre_CSRMatrixNumRows(A);
-   cusparseDnVecDescr_t vecX = hypre_VectorTocusparseDnVec(x,      0, x_size_override);
-   cusparseDnVecDescr_t vecY = hypre_VectorTocusparseDnVec(y, offset, y_size_override - offset);
+   cusparseDnVecDescr_t vecX = hypre_VectorToCusparseDnVec(x,      0, x_size_override);
+   cusparseDnVecDescr_t vecY = hypre_VectorToCusparseDnVec(y, offset, y_size_override - offset);
 
    HYPRE_CUSPARSE_CALL( cusparseSpMV_bufferSize(handle,
                                                 CUSPARSE_OPERATION_NON_TRANSPOSE,
