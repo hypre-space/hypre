@@ -4,6 +4,10 @@
 #ifndef hypre_UTILITIES_HPP
 #define hypre_UTILITIES_HPP
 
+#ifdef __cplusplus
+extern "C++" {
+#endif
+
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -13,10 +17,6 @@
 
 #ifndef HYPRE_CUDA_UTILS_H
 #define HYPRE_CUDA_UTILS_H
-
-#ifdef __cplusplus
-extern "C++" {
-#endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
@@ -670,6 +670,19 @@ struct less_than : public thrust::unary_function<T,bool>
    }
 };
 
+template<typename T>
+struct equal : public thrust::unary_function<T,bool>
+{
+   T val;
+
+   equal(T val_) { val = val_; }
+
+   __host__ __device__ bool operator()(const T &x)
+   {
+      return (x == val);
+   }
+};
+
 /* hypre_cuda_utils.c */
 dim3 hypre_GetDefaultCUDABlockDimension();
 
@@ -725,10 +738,6 @@ cudaStream_t hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i);
 
 #endif // #if defined(HYPRE_USING_CUDA)
 
-#ifdef __cplusplus
-}
-#endif
-
 #endif /* #ifndef HYPRE_CUDA_UTILS_H */
 
 /******************************************************************************
@@ -745,10 +754,6 @@ cudaStream_t hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i);
 
 #if defined(HYPRE_USING_CUDA)
 #if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS)
-
-#ifdef __cplusplus
-extern "C++" {
-#endif
 
 template<typename T> void OneBlockReduce(T *d_arr, HYPRE_Int N, T *h_out);
 
@@ -1003,10 +1008,6 @@ struct ReduceSum
    }
 };
 
-#ifdef __cplusplus
-}
-#endif
-
 #endif /* #if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) */
 #endif /* #if defined(HYPRE_USING_CUDA) */
 #endif /* #ifndef HYPRE_CUDA_REDUCER_H */
@@ -1048,10 +1049,6 @@ struct ReduceSum
 #define HYPRE_CUB_ALLOCATOR_HEADER
 
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUB_ALLOCATOR)
-
-#ifdef __cplusplus
-extern "C++" {
-#endif
 
 #include <set>
 #include <map>
@@ -1840,13 +1837,13 @@ struct hypre_cub_CachingDeviceAllocator
     }
 };
 
+#endif // #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUB_ALLOCATOR)
+#endif // #ifndef HYPRE_CUB_ALLOCATOR_HEADER
+
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif // #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUB_ALLOCATOR)
-
-#endif // #ifndef HYPRE_CUB_ALLOCATOR_HEADER
-
-
 #endif
+

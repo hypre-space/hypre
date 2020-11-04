@@ -33,29 +33,29 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
    MPI_Comm comm = hypre_ParCSRMatrixComm(A);
    MPI_Comm new_comm;
 
-   hypre_CSRMatrix *A_diag_host, *A_offd_host;
-   if (hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A_diag)) != hypre_MEMORY_HOST)
-   {
-      A_diag_host = hypre_CSRMatrixClone_v2(A_diag, 1, HYPRE_MEMORY_HOST);
-   }
-   else
-   {
-      A_diag_host = A_diag;
-   }
-   if (hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A_offd)) != hypre_MEMORY_HOST)
-   {
-      A_offd_host = hypre_CSRMatrixClone_v2(A_offd, 1, HYPRE_MEMORY_HOST);
-   }
-   else
-   {
-      A_offd_host = A_offd;
-   }
-
    /* Generate sub communicator: processes that have nonzero num_rows */
    hypre_GenerateSubComm(comm, num_rows, &new_comm);
 
    if (num_rows)
    {
+      hypre_CSRMatrix *A_diag_host, *A_offd_host;
+      if (hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A_diag)) != hypre_MEMORY_HOST)
+      {
+         A_diag_host = hypre_CSRMatrixClone_v2(A_diag, 1, HYPRE_MEMORY_HOST);
+      }
+      else
+      {
+         A_diag_host = A_diag;
+      }
+      if (hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A_offd)) != hypre_MEMORY_HOST)
+      {
+         A_offd_host = hypre_CSRMatrixClone_v2(A_offd, 1, HYPRE_MEMORY_HOST);
+      }
+      else
+      {
+         A_offd_host = A_offd;
+      }
+
       HYPRE_BigInt *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
       HYPRE_Int  *A_diag_i    = hypre_CSRMatrixI(A_diag_host);
       HYPRE_Int  *A_offd_i    = hypre_CSRMatrixI(A_offd_host);

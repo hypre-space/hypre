@@ -52,8 +52,14 @@ HYPRE_OMPOffloadOn()
    hypre__global_offload = 1;
    hypre__offload_device_num = omp_get_default_device();
    hypre__offload_host_num   = omp_get_initial_device();
-   hypre_fprintf(stdout, "Hypre OMP 4.5 offloading has been turned on. Device %d\n",
-                 hypre__offload_device_num);
+
+   /*
+   HYPRE_Int myid, nproc;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &nproc);
+   hypre_fprintf(stdout, "Proc %d: Hypre OMP 4.5 offloading has been turned on. Device %d\n",
+                 myid, hypre__offload_device_num);
+   */
 
    return 0;
 }
@@ -61,7 +67,13 @@ HYPRE_OMPOffloadOn()
 HYPRE_Int
 HYPRE_OMPOffloadOff()
 {
-   fprintf(stdout, "Hypre OMP 4.5 offloading has been turned off\n");
+   /*
+   HYPRE_Int myid, nproc;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &nproc);
+   fprintf(stdout, "Proc %d: Hypre OMP 4.5 offloading has been turned off\n", myid);
+   */
+
    hypre__global_offload = 0;
    hypre__offload_device_num = omp_get_initial_device();
    hypre__offload_host_num   = omp_get_initial_device();

@@ -13,10 +13,6 @@
 #if defined(HYPRE_USING_CUDA)
 #if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS)
 
-#ifdef __cplusplus
-extern "C++" {
-#endif
-
 template<typename T> void OneBlockReduce(T *d_arr, HYPRE_Int N, T *h_out);
 
 struct HYPRE_double4
@@ -270,10 +266,7 @@ struct ReduceSum
    }
 };
 
-#ifdef __cplusplus
-}
-#endif
-
 #endif /* #if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) */
 #endif /* #if defined(HYPRE_USING_CUDA) */
 #endif /* #ifndef HYPRE_CUDA_REDUCER_H */
+

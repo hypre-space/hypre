@@ -18,9 +18,17 @@
 
 #ifdef HYPRE_USING_CALIPER
 
+#ifdef __cplusplus
+extern "C++" {
+#endif
+
 #include <caliper/cali.h>
 
-char hypre__levelname[16];
+#ifdef __cplusplus
+}
+#endif
+
+static char hypre__levelname[16];
 
 #define HYPRE_ANNOTATE_FUNC_BEGIN          CALI_MARK_FUNCTION_BEGIN
 #define HYPRE_ANNOTATE_FUNC_END            CALI_MARK_FUNCTION_END

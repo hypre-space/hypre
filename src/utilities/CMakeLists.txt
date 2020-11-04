@@ -31,6 +31,7 @@ set(SRCS
   hypre_prefix_sum.c
   hypre_printf.c
   hypre_qsort.c
+  hypre_utilities.c
   mpistubs.c
   qsplit.c
   random.c

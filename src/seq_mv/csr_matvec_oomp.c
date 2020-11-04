@@ -13,17 +13,8 @@
 
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
-#ifdef HYPRE_USING_CUSPARSE
-#include "csr_matrix_cuda_utils.h"
-#endif
-
 
 #if defined(HYPRE_USING_DEVICE_OPENMP)
-
-#if (CUDART_VERSION >= 11000)
-#error "Currently (2020-08-07) Hypre's Device OpenMP with Cuda 11 has not been Quality Controlled. If you try to use it, please let us know if it does or doesn't work for you."
-//Note: There seems to be a bug that exhibits itself on lassen related to mpibind. I have been unable to determine exactly what causes it. --Luke
-#endif
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMatvec
@@ -96,47 +87,31 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Int        trans,
 
    if (trans)
    {
-      HYPRE_Complex *csc_a = hypre_TAlloc(HYPRE_Complex, A->num_nonzeros, HYPRE_MEMORY_DEVICE);
-      HYPRE_Int     *csc_j = hypre_TAlloc(HYPRE_Int,     A->num_nonzeros, HYPRE_MEMORY_DEVICE);
-      HYPRE_Int     *csc_i = hypre_TAlloc(HYPRE_Int,     A->num_cols+1,   HYPRE_MEMORY_DEVICE);
+      HYPRE_Complex *csc_a = hypre_TAlloc(HYPRE_Complex, A_nnz,     HYPRE_MEMORY_DEVICE);
+      HYPRE_Int     *csc_j = hypre_TAlloc(HYPRE_Int,     A_nnz,     HYPRE_MEMORY_DEVICE);
+      HYPRE_Int     *csc_i = hypre_TAlloc(HYPRE_Int,     A_ncols+1, HYPRE_MEMORY_DEVICE);
 
-#if (CUDART_VERSION <= 11000)
-      HYPRE_CUSPARSE_CALL( cusparseDcsr2csc(handle, A->num_rows, A->num_cols, A->num_nonzeros,
-                           A->data, A->i, A->j, csc_a, csc_j, csc_i,
-                           CUSPARSE_ACTION_NUMERIC, CUSPARSE_INDEX_BASE_ZERO) );
-#else
+      HYPRE_CUSPARSE_CALL( cusparseDcsr2csc(handle,
+                                            A_nrows,
+                                            A_ncols,
+                                            A_nnz,
+                                            A->data,
+                                            A->i,
+                                            A->j,
+                                            csc_a,
+                                            csc_j,
+                                            csc_i,
+                                            CUSPARSE_ACTION_NUMERIC,
+                                            CUSPARSE_INDEX_BASE_ZERO) );
 
-      size_t bufferSize = 0;
-      size_t *buffer;
-      HYPRE_CUSPARSE_CALL( cusparseCsr2cscEx2_bufferSize(handle, A->num_rows, A->num_cols, A->num_nonzeros,
-                           A->data, A->i, A->j, csc_a, csc_i, csc_j,
-                           CUDA_R_64F,CUSPARSE_ACTION_NUMERIC, CUSPARSE_INDEX_BASE_ZERO,
-                           CUSPARSE_CSR2CSC_ALG1, &bufferSize));
-      buffer = (size_t*) hypre_TAlloc(char,     bufferSize,    HYPRE_MEMORY_DEVICE);
-
-      HYPRE_CUSPARSE_CALL( cusparseCsr2cscEx2(handle, A->num_rows, A->num_cols, A->num_nonzeros,
-                           A->data, A->i, A->j, csc_a, csc_i, csc_j,
-                           CUDA_R_64F,CUSPARSE_ACTION_NUMERIC, CUSPARSE_INDEX_BASE_ZERO,
-                           CUSPARSE_CSR2CSC_ALG1, buffer));
-
-      hypre_TFree(buffer, HYPRE_MEMORY_DEVICE);
-
-#endif
+      HYPRE_CUDA_CALL(cudaDeviceSynchronize());
 
 #ifdef HYPRE_USING_CUSPARSE
-#if (CUDART_VERSION <= 11000)
       HYPRE_CUSPARSE_CALL( cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
                            A->num_cols, A->num_rows, A->num_nonzeros,
                            &alpha, descr,
                            csc_a, csc_i, csc_j,
                            x->data, &beta, y->data) );
-#else
-      hypre_cusparse_csrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                           A_ncols, A_nrows, A_nnz,
-                           &alpha,
-                           csc_a, csc_i, csc_j,
-                           x->data, &beta, y->data);
-#endif
 #else
 #pragma omp target teams distribute parallel for private(i) is_device_ptr(csc_a, csc_i, csc_j, y_data, x_data)
       for (i = 0; i < A_ncols; i++)
@@ -158,22 +133,14 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Int        trans,
    else
    {
 #ifdef HYPRE_USING_CUSPARSE
-#if (CUDART_VERSION <= 11000)
       HYPRE_CUSPARSE_CALL( cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
                            A_nrows, A_ncols, A_nnz,
                            &alpha, descr,
                            A_data, A_i, A_j,
                            x_data, &beta, y_data) );
 #else
-      hypre_cusparse_csrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                           A_nrows, A_ncols, A_nnz,
-                           &alpha,
-                           A_data, A_i, A_j,
-                           x_data, &beta, y_data);
-#endif
-#else
 #pragma omp target teams distribute parallel for private(i) is_device_ptr(A_data, A_i, A_j, y_data, x_data)
-      for (i = 0; i < A_num_rows; i++)
+      for (i = 0; i < A_nrows; i++)
       {
          HYPRE_Complex tempx = 0.0;
          HYPRE_Int j;
@@ -185,6 +152,8 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Int        trans,
       }
 #endif
    }
+
+   /* HYPRE_CUDA_CALL(cudaDeviceSynchronize()); */
 
    return hypre_error_flag;
 }
