@@ -277,104 +277,6 @@ hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v)
    return hypre_error_flag;
 }
 
-#if 0
-__global__ void
-hypreCUDAKernel_CsrRowPtrsToIndices(HYPRE_Int n, HYPRE_Int *ptr, HYPRE_Int *num, HYPRE_Int *idx)
-{
-   /* warp id in the grid */
-   HYPRE_Int global_warp_id = blockIdx.x * blockDim.y + threadIdx.y;
-   /* lane id inside the warp */
-   HYPRE_Int lane_id = threadIdx.x;
-
-   if (global_warp_id < n)
-   {
-      HYPRE_Int istart, iend, k;
-
-      if (lane_id < 2)
-      {
-         k = read_only_load(ptr + global_warp_id + lane_id);
-      }
-      istart = __shfl_sync(HYPRE_WARP_FULL_MASK, k, 0);
-      iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, k, 1);
-
-      HYPRE_Int i;
-      for (i = istart + lane_id; i < iend; i += HYPRE_WARP_SIZE)
-      {
-         HYPRE_Int j;
-         if (num == NULL)
-         {
-            j = global_warp_id;
-         }
-         else
-         {
-            j = read_only_load(num + global_warp_id);
-         }
-         idx[i] = j;
-      }
-   }
-}
-
-HYPRE_Int*
-hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr)
-{
-   /* trivial case */
-   if (nrows <= 0)
-   {
-      return NULL;
-   }
-
-   HYPRE_Int *d_row_ind = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
-
-   HYPRE_Int num_warps_per_block = 16;
-   const dim3 bDim(HYPRE_WARP_SIZE, num_warps_per_block);
-   const dim3 gDim((nrows + num_warps_per_block - 1) / num_warps_per_block);
-
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CsrRowPtrsToIndices, gDim, bDim,
-                      nrows, d_row_ptr, NULL, d_row_ind );
-
-   return d_row_ind;
-}
-
-HYPRE_Int
-hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_ind)
-{
-   /* trivial case */
-   if (nrows <= 0)
-   {
-      return hypre_error_flag;
-   }
-
-   HYPRE_Int num_warps_per_block = 16;
-   const dim3 bDim(HYPRE_WARP_SIZE, num_warps_per_block);
-   const dim3 gDim((nrows + num_warps_per_block - 1) / num_warps_per_block);
-
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CsrRowPtrsToIndices, gDim, bDim,
-                      nrows, d_row_ptr, NULL, d_row_ind );
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_num, HYPRE_Int *d_row_ind)
-{
-   /* trivial case */
-   if (nrows <= 0)
-   {
-      return hypre_error_flag;
-   }
-
-   HYPRE_Int num_warps_per_block = 16;
-   const dim3 bDim(HYPRE_WARP_SIZE, num_warps_per_block);
-   const dim3 gDim((nrows + num_warps_per_block - 1) / num_warps_per_block);
-
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CsrRowPtrsToIndices, gDim, bDim,
-                      nrows, d_row_ptr, d_row_num, d_row_ind );
-
-   return hypre_error_flag;
-}
-
-#else
-
 struct hypre_empty_row_functor
 {
    // This is needed for clang
@@ -454,9 +356,6 @@ hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_
 template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_num, HYPRE_Int *d_row_ind);
 #if defined(HYPRE_MIXEDINT) || defined(HYPRE_BIGINT)
 template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr, HYPRE_BigInt *d_row_num, HYPRE_BigInt *d_row_ind);
-#endif
-
-
 #endif
 
 HYPRE_Int*
@@ -777,6 +676,64 @@ hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in,  T2 *keys2_in,  T3 *vals
 }
 
 template HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N, HYPRE_Int *keys1_in, HYPRE_Int *keys2_in, HYPRE_Complex *vals_in, HYPRE_Int *keys1_out, HYPRE_Int *keys2_out, HYPRE_Complex *vals_out);
+
+/*
+ * @brief Determines the associated CudaDataType for the HYPRE_Complex typedef
+ * @return Returns cuda data type corresponding with HYPRE_Complex
+ *
+ * @todo Should be known compile time
+ * @todo Support more sizes
+ * @todo Support complex
+ * @warning Only works for Single and Double precision
+ * @note Perhaps some typedefs should be added where HYPRE_Complex is typedef'd
+ */
+cudaDataType
+hypre_HYPREComplexToCudaDataType()
+{
+   /*
+   if (sizeof(char)*CHAR_BIT != 8)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ERROR:  Unsupported char size");
+      hypre_assert(false);
+   }
+   */
+#if defined(HYPRE_COMPLEX)
+   return CUDA_C_64F;
+#else
+#if defined(HYPRE_SINGLE)
+   hypre_assert(sizeof(HYPRE_Complex) == 4);
+   return CUDA_R_32F;
+#elif defined(HYPRE_LONG_DOUBLE)
+#error "long double is not supported on GPUs"
+#else
+   hypre_assert(sizeof(HYPRE_Complex) == 8);
+   return CUDA_R_64F;
+#endif
+#endif // #if defined(HYPRE_COMPLEX)
+}
+
+/*
+ * @brief Determines the associated cusparseIndexType_t for the HYPRE_Int typedef
+ */
+cusparseIndexType_t
+hypre_HYPREIntToCusparseIndexType()
+{
+   /*
+   if(sizeof(char)*CHAR_BIT!=8)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ERROR:  Unsupported char size");
+      hypre_assert(false);
+   }
+   */
+
+#if defined(HYPRE_BIGINT)
+   hypre_assert(sizeof(HYPRE_Int) == 8);
+   return CUSPARSE_INDEX_64I;
+#else
+   hypre_assert(sizeof(HYPRE_Int) == 4);
+   return CUSPARSE_INDEX_32I;
+#endif
+}
 
 #endif // #if defined(HYPRE_USING_CUDA)
 

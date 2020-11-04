@@ -2072,11 +2072,11 @@ AC_SUBST(RAJA_LIBS)
 dnl *********************************************************************
 dnl * KOKKOS information
 dnl *********************************************************************
+AC_SUBST(HYPRE_KOKKOS_SRC_DIR)
 AC_SUBST(HYPRE_KOKKOS_LIB_DIR)
 AC_SUBST(HYPRE_KOKKOS_INCLUDE)
 AC_SUBST(HYPRE_KOKKOS_LIB)
 AC_SUBST(KOKKOS_LIBS)
-AC_SUBST(HYPRE_KOKKOS_INC_FILE)
 
 dnl *********************************************************************
 dnl * CUDA stuff

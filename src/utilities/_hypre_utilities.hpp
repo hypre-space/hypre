@@ -35,6 +35,15 @@ extern "C++" {
 #error CUDA_VERSION Undefined!
 #endif
 
+#if CUDA_VERSION >= 11000
+#define THRUST_IGNORE_DEPRECATED_CPP11
+#define CUB_IGNORE_DEPRECATED_CPP11
+#define THRUST_IGNORE_DEPRECATED_CPP_DIALECT
+#define CUB_IGNORE_DEPRECATED_CPP_DIALECT
+#endif
+
+#define CUSPARSE_NEWAPI_VERSION 11000
+
 #define HYPRE_CUDA_CALL(call) do {                                                           \
    cudaError_t err = call;                                                                   \
    if (cudaSuccess != err) {                                                                 \
@@ -54,8 +63,8 @@ extern "C++" {
 #define HYPRE_CUSPARSE_CALL(call) do {                                                       \
    cusparseStatus_t err = call;                                                              \
    if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
-      hypre_printf("CUSPARSE ERROR (code = %d, %d) at %s:%d\n",                              \
-            err, err == CUSPARSE_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);               \
+      hypre_printf("CUSPARSE ERROR (code = %d, %s) at %s:%d\n",                              \
+            err, cusparseGetErrorString(err), __FILE__, __LINE__);                           \
       assert(0); exit(1);                                                                    \
    } } while(0)
 
@@ -735,6 +744,10 @@ cudaError_t hypre_CachingFreeManaged(void *ptr);
 void hypre_CudaDataCubCachingAllocatorDestroy(hypre_CudaData *data);
 
 cudaStream_t hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i);
+
+cudaDataType hypre_HYPREComplexToCudaDataType();
+
+cusparseIndexType_t hypre_HYPREIntToCusparseIndexType();
 
 #endif // #if defined(HYPRE_USING_CUDA)
 
