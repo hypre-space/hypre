@@ -1040,6 +1040,48 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
    return hypre_error_flag;
 }
 
+#endif /* HYPRE_USING_CUDA */
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+
+HYPRE_Int
+hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
+                               hypre_CSRMatrix **AT_ptr,
+                               HYPRE_Int         data)
+{
+   HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
+   HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
+   HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
+   HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int         nnz_A    = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Complex    *C_data;
+   HYPRE_Int        *C_i;
+   HYPRE_Int        *C_j;
+   hypre_CSRMatrix  *C;
+
+#if defined(HYPRE_USING_CUSPARSE)
+   hypreDevice_CSRSpTransCusparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
+#else
+   hypreDevice_CSRSpTrans(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
+#endif
+
+   C = hypre_CSRMatrixCreate(ncols_A, nrows_A, nnz_A);
+   hypre_CSRMatrixI(C) = C_i;
+   hypre_CSRMatrixJ(C) = C_j;
+   hypre_CSRMatrixData(C) = C_data;
+   hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
+
+   *AT_ptr = C;
+
+   hypre_SyncCudaComputeStream(hypre_handle());
+
+   return hypre_error_flag;
+}
+
+#endif
+
+#if defined(HYPRE_USING_CUSPARSE)
 /*
  * @brief Sorts an unsorted CSR INPLACE
  * @param[in] n Number of rows
@@ -1085,44 +1127,5 @@ hypre_SortCSRCusparse( HYPRE_Int      n,
    hypre_TFree(pBuffer, HYPRE_MEMORY_DEVICE);
    HYPRE_CUSPARSE_CALL(cusparseDestroyCsru2csrInfo(sortInfoA));
 }
-
-#endif /* HYPRE_USING_CUDA */
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-
-HYPRE_Int
-hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
-                               hypre_CSRMatrix **AT_ptr,
-                               HYPRE_Int         data)
-{
-   HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
-   HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
-   HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
-   HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
-   HYPRE_Int         nnz_A    = hypre_CSRMatrixNumNonzeros(A);
-   HYPRE_Complex    *C_data;
-   HYPRE_Int        *C_i;
-   HYPRE_Int        *C_j;
-   hypre_CSRMatrix  *C;
-
-#if defined(HYPRE_USING_CUSPARSE)
-   hypreDevice_CSRSpTransCusparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
-#else
-   hypreDevice_CSRSpTrans(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
 #endif
 
-   C = hypre_CSRMatrixCreate(ncols_A, nrows_A, nnz_A);
-   hypre_CSRMatrixI(C) = C_i;
-   hypre_CSRMatrixJ(C) = C_j;
-   hypre_CSRMatrixData(C) = C_data;
-   hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
-
-   *AT_ptr = C;
-
-   hypre_SyncCudaComputeStream(hypre_handle());
-
-   return hypre_error_flag;
-}
-
-#endif
