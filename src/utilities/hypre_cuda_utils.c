@@ -704,7 +704,7 @@ hypre_HYPREComplexToCudaDataType()
    hypre_assert(sizeof(HYPRE_Complex) == 4);
    return CUDA_R_32F;
 #elif defined(HYPRE_LONG_DOUBLE)
-#error "long double is not supported on GPUs"
+#error "Long Double is not supported on GPUs"
 #else
    hypre_assert(sizeof(HYPRE_Complex) == 8);
    return CUDA_R_64F;

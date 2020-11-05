@@ -636,11 +636,11 @@ CALIPER_INCLUDE
 HYPRE_CUDA_LIBS
 HYPRE_CUDA_INCL
 CUFLAGS
-HYPRE_KOKKOS_INC_FILE
 KOKKOS_LIBS
 HYPRE_KOKKOS_LIB
 HYPRE_KOKKOS_INCLUDE
 HYPRE_KOKKOS_LIB_DIR
+HYPRE_KOKKOS_SRC_DIR
 RAJA_LIBS
 HYPRE_RAJA_LIB
 HYPRE_RAJA_INCLUDE
@@ -3784,7 +3784,7 @@ fi
 if test "${with_cuda+set}" = set; then :
   withval=$with_cuda; case "$withval" in
     yes) hypre_user_chose_cuda=yes
-    	 hypre_using_cuda=yes ;;
+         hypre_using_cuda=yes ;;
     no)  hypre_using_cuda=no ;;
     *)   hypre_using_cuda=no ;;
  esac
@@ -8649,11 +8649,14 @@ then
    fi
 fi
 
-if test "x$hypre_using_cuda_streams" = "xyes"
+if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes"
 then
+   if test "x$hypre_using_cuda_streams" = "xyes"]
+   then
 
 $as_echo "#define HYPRE_USING_CUDA_STREAMS 1" >>confdefs.h
 
+   fi
 fi
 
 if test "x$hypre_using_um" = "xyes"
