@@ -61,6 +61,10 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
                              hypre_Vector    *y,
                              HYPRE_Int        offset )
 {
+#if defined(HYPRE_USING_CUDA)
+   hypre_NvtxPushRange("CSRMatrixMatvec");
+#endif
+
    // TODO: RL: do we need offset > 0 at all?
    hypre_assert(offset == 0);
 
@@ -107,6 +111,10 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
    }
 
    hypre_SyncCudaComputeStream(hypre_handle());
+
+#if defined(HYPRE_USING_CUDA)
+   hypre_NvtxPopRange();
+#endif
 
    return hypre_error_flag;
 }
