@@ -8,7 +8,7 @@
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
+#if defined(HYPRE_USING_CUSPARSE)
 #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
 /*
  * @brief Creates a cuda csr descriptor for a raw CSR matrix
@@ -102,5 +102,5 @@ hypre_VectorToCusparseDnVec(const hypre_Vector *x,
 }
 
 #endif // #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
-#endif // #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
+#endif // #if defined(HYPRE_USING_CUSPARSE)
 
