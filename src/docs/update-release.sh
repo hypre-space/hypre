@@ -23,5 +23,5 @@ sed -e "s#today = .*#today = '$usrdate'#" > $usrconf.tmp
 mv $usrconf.tmp $usrconf
 
 # Reference manual
-sed -e "s/PROJECT_NUMBER .*=.*/PROJECT_NUMBER = '$version'/" $refconf > $refconf.tmp
+sed -e "s/PROJECT_NUMBER .*=.*/PROJECT_NUMBER = $version/" $refconf > $refconf.tmp
 mv $refconf.tmp $refconf
