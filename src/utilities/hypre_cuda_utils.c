@@ -677,6 +677,9 @@ hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in,  T2 *keys2_in,  T3 *vals
 
 template HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N, HYPRE_Int *keys1_in, HYPRE_Int *keys2_in, HYPRE_Complex *vals_in, HYPRE_Int *keys1_out, HYPRE_Int *keys2_out, HYPRE_Complex *vals_out);
 
+#endif // #if defined(HYPRE_USING_CUDA)
+
+#if defined(HYPRE_USING_CUSPARSE)
 /*
  * @brief Determines the associated CudaDataType for the HYPRE_Complex typedef
  * @return Returns cuda data type corresponding with HYPRE_Complex
@@ -734,8 +737,7 @@ hypre_HYPREIntToCusparseIndexType()
    return CUSPARSE_INDEX_32I;
 #endif
 }
-
-#endif // #if defined(HYPRE_USING_CUDA)
+#endif // #if defined(HYPRE_USING_CUSPARSE)
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 

@@ -735,11 +735,15 @@ void hypre_CudaDataCubCachingAllocatorDestroy(hypre_CudaData *data);
 
 cudaStream_t hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i);
 
+#endif // #if defined(HYPRE_USING_CUDA)
+
+#if defined(HYPRE_USING_CUSPARSE)
+
 cudaDataType hypre_HYPREComplexToCudaDataType();
 
 cusparseIndexType_t hypre_HYPREIntToCusparseIndexType();
 
-#endif // #if defined(HYPRE_USING_CUDA)
+#endif // #if defined(HYPRE_USING_CUSPARSE)
 
 #endif /* #ifndef HYPRE_CUDA_UTILS_H */
 
