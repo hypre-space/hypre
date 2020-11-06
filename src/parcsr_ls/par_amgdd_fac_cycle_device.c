@@ -132,31 +132,31 @@ hypre_BoomerAMGDD_FAC_CFL1JacobiDevice( void      *amgdd_vdata,
    {
       mat = hypre_AMGDDCompGridMatrixOwnedDiag(hypre_AMGDDCompGridA(compGrid));
       beta = relax_weight;
-      hypre_CSRMatrixMatvecMaskedDevice(0, alpha, mat, owned_u,
+      hypre_CSRMatrixMatvecMaskedDevice(alpha, mat, owned_u,
                                         beta, owned_tmp, owned_tmp,
                                         hypre_AMGDDCompGridOwnedCMask(compGrid),
-                                        num_owned_c, 0);
+                                        num_owned_c);
 
       mat = hypre_AMGDDCompGridMatrixOwnedOffd(hypre_AMGDDCompGridA(compGrid));
       beta = 1.0;
-      hypre_CSRMatrixMatvecMaskedDevice(0, alpha, mat, nonowned_u,
+      hypre_CSRMatrixMatvecMaskedDevice(alpha, mat, nonowned_u,
                                         beta, owned_tmp, owned_tmp,
                                         hypre_AMGDDCompGridOwnedCMask(compGrid),
-                                        num_owned_c, 0);
+                                        num_owned_c);
 
       mat = hypre_AMGDDCompGridMatrixNonOwnedDiag(hypre_AMGDDCompGridA(compGrid));
       beta = relax_weight;
-      hypre_CSRMatrixMatvecMaskedDevice(0, alpha, mat, nonowned_u,
+      hypre_CSRMatrixMatvecMaskedDevice(alpha, mat, nonowned_u,
                                         beta, nonowned_tmp, nonowned_tmp,
                                         hypre_AMGDDCompGridNonOwnedCMask(compGrid),
-                                        num_nonowned_rc, 0);
+                                        num_nonowned_rc);
 
       mat = hypre_AMGDDCompGridMatrixNonOwnedOffd(hypre_AMGDDCompGridA(compGrid));
       beta = 1.0;
-      hypre_CSRMatrixMatvecMaskedDevice(0, alpha, mat, owned_u,
+      hypre_CSRMatrixMatvecMaskedDevice(alpha, mat, owned_u,
                                         beta, nonowned_tmp, nonowned_tmp,
                                         hypre_AMGDDCompGridNonOwnedCMask(compGrid),
-                                        num_nonowned_rc, 0);
+                                        num_nonowned_rc);
 
       hypreDevice_MaskedIVAXPY(num_owned_c,
                                hypre_AMGDDCompGridL1Norms(compGrid),
@@ -174,31 +174,31 @@ hypre_BoomerAMGDD_FAC_CFL1JacobiDevice( void      *amgdd_vdata,
    {
       mat = hypre_AMGDDCompGridMatrixOwnedDiag(hypre_AMGDDCompGridA(compGrid));
       beta = relax_weight;
-      hypre_CSRMatrixMatvecMaskedDevice(0, alpha, mat, owned_u,
+      hypre_CSRMatrixMatvecMaskedDevice(alpha, mat, owned_u,
                                         beta, owned_tmp, owned_tmp,
                                         hypre_AMGDDCompGridOwnedFMask(compGrid),
-                                        num_owned_f, 0);
+                                        num_owned_f);
 
       mat = hypre_AMGDDCompGridMatrixOwnedOffd(hypre_AMGDDCompGridA(compGrid));
       beta = 1.0;
-      hypre_CSRMatrixMatvecMaskedDevice(0, alpha, mat, nonowned_u,
+      hypre_CSRMatrixMatvecMaskedDevice(alpha, mat, nonowned_u,
                                         beta, owned_tmp, owned_tmp,
                                         hypre_AMGDDCompGridOwnedFMask(compGrid),
-                                        num_owned_f, 0);
+                                        num_owned_f);
 
       mat = hypre_AMGDDCompGridMatrixNonOwnedDiag(hypre_AMGDDCompGridA(compGrid));
       beta = relax_weight;
-      hypre_CSRMatrixMatvecMaskedDevice(0, alpha, mat, nonowned_u,
+      hypre_CSRMatrixMatvecMaskedDevice(alpha, mat, nonowned_u,
                                         beta, nonowned_tmp, nonowned_tmp,
                                         hypre_AMGDDCompGridNonOwnedFMask(compGrid),
-                                        num_nonowned_rf, 0);
+                                        num_nonowned_rf);
 
       mat = hypre_AMGDDCompGridMatrixNonOwnedOffd(hypre_AMGDDCompGridA(compGrid));
       beta = 1.0;
-      hypre_CSRMatrixMatvecMaskedDevice(0, alpha, mat, owned_u,
+      hypre_CSRMatrixMatvecMaskedDevice(alpha, mat, owned_u,
                                         beta, nonowned_tmp, nonowned_tmp,
                                         hypre_AMGDDCompGridNonOwnedFMask(compGrid),
-                                        num_nonowned_rf, 0);
+                                        num_nonowned_rf);
 
       hypreDevice_MaskedIVAXPY(num_owned_f,
                                hypre_AMGDDCompGridL1Norms(compGrid),

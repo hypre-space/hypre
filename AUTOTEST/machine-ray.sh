@@ -89,7 +89,6 @@ co="--with-cuda --enable-debug --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=150
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $rocuda
 ./renametest.sh basic $output_dir/basic-cuda-nonum-cuda
 
-
 # OMP 4.5 w.o UM, only struct [in debug mode]
 co="--with-device-openmp --enable-debug --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $rost
