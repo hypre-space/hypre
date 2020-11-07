@@ -12,16 +12,16 @@
  *  Comment:
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_BoomerAMGBuildModPartialExtInterp(hypre_ParCSRMatrix  *A,
-                                        HYPRE_Int           *CF_marker,
-                                        hypre_ParCSRMatrix  *S,
-                                        HYPRE_BigInt        *num_cpts_global,
-                                        HYPRE_BigInt        *num_old_cpts_global,
-                                        HYPRE_Int            debug_flag,
-                                        HYPRE_Real           trunc_factor,
-                                        HYPRE_Int            max_elmts,
-                                        HYPRE_Int           *col_offd_S_to_A,
-                                        hypre_ParCSRMatrix **P_ptr)
+hypre_BoomerAMGBuildModPartialExtInterpHost( hypre_ParCSRMatrix  *A,
+                                             HYPRE_Int           *CF_marker,
+                                             hypre_ParCSRMatrix  *S,
+                                             HYPRE_BigInt        *num_cpts_global,
+                                             HYPRE_BigInt        *num_old_cpts_global,
+                                             HYPRE_Int            debug_flag,
+                                             HYPRE_Real           trunc_factor,
+                                             HYPRE_Int            max_elmts,
+                                             HYPRE_Int           *col_offd_S_to_A,
+                                             hypre_ParCSRMatrix **P_ptr )
 {
    /* Communication Variables */
    MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
@@ -521,16 +521,56 @@ hypre_BoomerAMGBuildModPartialExtInterp(hypre_ParCSRMatrix  *A,
 }
 
 HYPRE_Int
-hypre_BoomerAMGBuildModPartialExtPEInterp(hypre_ParCSRMatrix  *A,
-                                             HYPRE_Int           *CF_marker,
-                                             hypre_ParCSRMatrix  *S,
-                                             HYPRE_BigInt        *num_cpts_global,
-                                             HYPRE_BigInt        *num_old_cpts_global,
-                                             HYPRE_Int            debug_flag,
-                                             HYPRE_Real           trunc_factor,
-                                             HYPRE_Int            max_elmts,
-                                             HYPRE_Int           *col_offd_S_to_A,
-                                             hypre_ParCSRMatrix **P_ptr)
+hypre_BoomerAMGBuildModPartialExtInterp( hypre_ParCSRMatrix  *A,
+                                         HYPRE_Int           *CF_marker,
+                                         hypre_ParCSRMatrix  *S,
+                                         HYPRE_BigInt        *num_cpts_global,
+                                         HYPRE_BigInt        *num_old_cpts_global,
+                                         HYPRE_Int            debug_flag,
+                                         HYPRE_Real           trunc_factor,
+                                         HYPRE_Int            max_elmts,
+                                         HYPRE_Int           *col_offd_S_to_A,
+                                         hypre_ParCSRMatrix **P_ptr )
+{
+#if defined(HYPRE_USING_CUDA)
+   hypre_NvtxPushRange("PartialExtInterp");
+#endif
+
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+
+   HYPRE_Int ierr = 0;
+
+   if (exec == HYPRE_EXEC_HOST)
+   {
+      ierr = hypre_BoomerAMGBuildModPartialExtInterpHost(A, CF_marker, S, num_cpts_global, num_old_cpts_global,
+                                                         debug_flag, trunc_factor, max_elmts, col_offd_S_to_A, P_ptr);
+   }
+#if defined(HYPRE_USING_CUDA)
+   else
+   {
+      ierr = hypre_BoomerAMGBuildModPartialExtInterpDevice(A, CF_marker, S, num_cpts_global, num_old_cpts_global,
+                                                           debug_flag, trunc_factor, max_elmts, col_offd_S_to_A, P_ptr);
+   }
+#endif
+
+#if defined(HYPRE_USING_CUDA)
+   hypre_NvtxPopRange();
+#endif
+
+   return ierr;
+}
+
+HYPRE_Int
+hypre_BoomerAMGBuildModPartialExtPEInterpHost( hypre_ParCSRMatrix  *A,
+                                               HYPRE_Int           *CF_marker,
+                                               hypre_ParCSRMatrix  *S,
+                                               HYPRE_BigInt        *num_cpts_global,
+                                               HYPRE_BigInt        *num_old_cpts_global,
+                                               HYPRE_Int            debug_flag,
+                                               HYPRE_Real           trunc_factor,
+                                               HYPRE_Int            max_elmts,
+                                               HYPRE_Int           *col_offd_S_to_A,
+                                               hypre_ParCSRMatrix **P_ptr)
 {
    /* Communication Variables */
    MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
@@ -1013,18 +1053,26 @@ hypre_BoomerAMGBuildModPartialExtPEInterp(hypre_ParCSRMatrix  *A,
 
          new_ncols_P_offd = 0;
          for (i=0; i < num_cols_P_offd; i++)
-            if (P_marker[i]) new_ncols_P_offd++;
+         {
+            if (P_marker[i])
+            {
+               new_ncols_P_offd++;
+            }
+         }
 
          new_col_map_offd = hypre_CTAlloc(HYPRE_BigInt, new_ncols_P_offd, HYPRE_MEMORY_HOST);
          map = hypre_CTAlloc(HYPRE_Int, new_ncols_P_offd, HYPRE_MEMORY_HOST);
 
          index = 0;
          for (i=0; i < num_cols_P_offd; i++)
+         {
             if (P_marker[i])
             {
                new_col_map_offd[index] = col_map_offd_P[i];
                map[index++] = i;
             }
+         }
+
          hypre_TFree(P_marker, HYPRE_MEMORY_HOST);
 
 
@@ -1033,8 +1081,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterp(hypre_ParCSRMatrix  *A,
 #endif
          for (i=0; i < P_offd_size; i++)
          {
-            P_offd_j[i] = hypre_BinarySearch(map, P_offd_j[i],
-               new_ncols_P_offd);
+            P_offd_j[i] = hypre_BinarySearch(map, P_offd_j[i], new_ncols_P_offd);
          }
          hypre_TFree(col_map_offd_P, HYPRE_MEMORY_HOST);
          hypre_ParCSRMatrixColMapOffd(P) = new_col_map_offd;
@@ -1066,3 +1113,44 @@ hypre_BoomerAMGBuildModPartialExtPEInterp(hypre_ParCSRMatrix  *A,
 
    return hypre_error_flag;
 }
+
+HYPRE_Int
+hypre_BoomerAMGBuildModPartialExtPEInterp( hypre_ParCSRMatrix  *A,
+                                           HYPRE_Int           *CF_marker,
+                                           hypre_ParCSRMatrix  *S,
+                                           HYPRE_BigInt        *num_cpts_global,
+                                           HYPRE_BigInt        *num_old_cpts_global,
+                                           HYPRE_Int            debug_flag,
+                                           HYPRE_Real           trunc_factor,
+                                           HYPRE_Int            max_elmts,
+                                           HYPRE_Int           *col_offd_S_to_A,
+                                           hypre_ParCSRMatrix **P_ptr )
+{
+#if defined(HYPRE_USING_CUDA)
+   hypre_NvtxPushRange("PartialExtPEInterp");
+#endif
+
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+
+   HYPRE_Int ierr = 0;
+
+   if (exec == HYPRE_EXEC_HOST)
+   {
+      ierr = hypre_BoomerAMGBuildModPartialExtPEInterpHost(A, CF_marker, S, num_cpts_global, num_old_cpts_global,
+                                                           debug_flag, trunc_factor, max_elmts, col_offd_S_to_A, P_ptr);
+   }
+#if defined(HYPRE_USING_CUDA)
+   else
+   {
+      ierr = hypre_BoomerAMGBuildModPartialExtPEInterpDevice(A, CF_marker, S, num_cpts_global, num_old_cpts_global,
+                                                             debug_flag, trunc_factor, max_elmts, col_offd_S_to_A, P_ptr);
+   }
+#endif
+
+#if defined(HYPRE_USING_CUDA)
+   hypre_NvtxPopRange();
+#endif
+
+   return ierr;
+}
+

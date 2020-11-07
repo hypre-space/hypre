@@ -8,6 +8,94 @@
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
 
+#if defined(HYPRE_USING_CUSPARSE)
+
+HYPRE_Int
+hypreDevice_CSRSpTransCusparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int       nnzA,
+                               HYPRE_Int  *d_ia,     HYPRE_Int  *d_ja,     HYPRE_Complex  *d_aa,
+                               HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out,
+                               HYPRE_Int   want_data)
+{
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_SPTRANS] -= hypre_MPI_Wtime();
+#endif
+
+   /* trivial case */
+   if (nnzA == 0)
+   {
+      *d_ic_out = hypre_CTAlloc(HYPRE_Int, n + 1, HYPRE_MEMORY_DEVICE);
+      *d_jc_out = hypre_CTAlloc(HYPRE_Int,     0, HYPRE_MEMORY_DEVICE);
+      *d_ac_out = hypre_CTAlloc(HYPRE_Complex, 0, HYPRE_MEMORY_DEVICE);
+
+      return hypre_error_flag;
+   }
+
+   cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
+   cusparseAction_t action = want_data ? CUSPARSE_ACTION_NUMERIC : CUSPARSE_ACTION_SYMBOLIC;
+   HYPRE_Complex *csc_a;
+   if (want_data)
+   {
+      csc_a = hypre_TAlloc(HYPRE_Complex, nnzA,  HYPRE_MEMORY_DEVICE);
+   }
+   else
+   {
+      csc_a = NULL;
+      d_aa = NULL;
+   }
+   HYPRE_Int *csc_j = hypre_TAlloc(HYPRE_Int, nnzA,  HYPRE_MEMORY_DEVICE);
+   HYPRE_Int *csc_i = hypre_TAlloc(HYPRE_Int, n + 1, HYPRE_MEMORY_DEVICE);
+
+#if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
+   size_t bufferSize = 0;
+   const cudaDataType data_type = hypre_HYPREComplexToCudaDataType();
+
+   HYPRE_CUSPARSE_CALL( cusparseCsr2cscEx2_bufferSize(handle,
+                                                      m, n, nnzA,
+                                                      d_aa, d_ia, d_ja,
+                                                      csc_a, csc_i, csc_j,
+                                                      data_type,
+                                                      action,
+                                                      CUSPARSE_INDEX_BASE_ZERO,
+                                                      CUSPARSE_CSR2CSC_ALG1,
+                                                      &bufferSize) );
+
+   char *dBuffer = hypre_TAlloc(char, bufferSize, HYPRE_MEMORY_DEVICE);
+
+   HYPRE_CUSPARSE_CALL( cusparseCsr2cscEx2(handle,
+                                           m, n, nnzA,
+                                           d_aa, d_ia, d_ja,
+                                           csc_a, csc_i, csc_j,
+                                           data_type,
+                                           action,
+                                           CUSPARSE_INDEX_BASE_ZERO,
+                                           CUSPARSE_CSR2CSC_ALG1,
+                                           dBuffer) );
+
+   hypre_TFree(dBuffer, HYPRE_MEMORY_DEVICE);
+#else
+   HYPRE_CUSPARSE_CALL( cusparseDcsr2csc(handle,
+                                         m, n, nnzA,
+                                         d_aa, d_ia, d_ja,
+                                         csc_a, csc_j, csc_i,
+                                         action,
+                                         CUSPARSE_INDEX_BASE_ZERO) );
+#endif
+
+   *d_ic_out = csc_i;
+   *d_jc_out = csc_j;
+   *d_ac_out = csc_a;
+
+#ifdef HYPRE_PROFILE
+   cudaThreadSynchronize();
+   hypre_profile_times[HYPRE_TIMER_ID_SPTRANS] += hypre_MPI_Wtime();
+#endif
+
+   return hypre_error_flag;
+}
+
+#endif // #if defined(HYPRE_USING_CUSPARSE)
+
+
 #if defined(HYPRE_USING_CUDA)
 
 HYPRE_Int

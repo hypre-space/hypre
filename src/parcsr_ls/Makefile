@@ -153,7 +153,9 @@ CUFILES =\
  par_interp_trunc_device.c\
  par_lr_interp_device.c\
  par_strength_device.c\
- par_amgdd_fac_cycle_device.c
+ par_strength2nd_device.c\
+ par_amgdd_fac_cycle_device.c\
+ par_2s_interp_device.c
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}

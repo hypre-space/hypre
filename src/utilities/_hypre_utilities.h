@@ -1125,9 +1125,17 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts, HYPRE_Int *contact_proc
 
 #ifdef HYPRE_USING_CALIPER
 
+#ifdef __cplusplus
+extern "C++" {
+#endif
+
 #include <caliper/cali.h>
 
-char hypre__levelname[16];
+#ifdef __cplusplus
+}
+#endif
+
+static char hypre__levelname[16];
 
 #define HYPRE_ANNOTATE_FUNC_BEGIN          CALI_MARK_FUNCTION_BEGIN
 #define HYPRE_ANNOTATE_FUNC_END            CALI_MARK_FUNCTION_END
@@ -1490,6 +1498,10 @@ HYPRE_Int hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v);
 void hypre_NvtxPushRangeColor(const char *name, HYPRE_Int cid);
 void hypre_NvtxPushRange(const char *name);
 void hypre_NvtxPopRange();
+
+/* hypre_utilities.c */
+HYPRE_Int hypre_multmod(HYPRE_Int a, HYPRE_Int b, HYPRE_Int mod);
+
 
 #ifdef __cplusplus
 }

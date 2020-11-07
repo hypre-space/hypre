@@ -503,12 +503,12 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
  * ----------------------------------------------------------------------------- */
 
 HYPRE_Int
-hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix *A,
-                                HYPRE_Int           *CF_marker,
-                                HYPRE_BigInt        *cpts_starts,
-                                hypre_ParCSRMatrix  *S,
-                                hypre_ParCSRMatrix **A_FC_ptr,
-                                hypre_ParCSRMatrix **A_FF_ptr)
+hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
+                                 HYPRE_Int           *CF_marker,
+                                 HYPRE_BigInt        *cpts_starts,
+                                 hypre_ParCSRMatrix  *S,
+                                 hypre_ParCSRMatrix **A_FC_ptr,
+                                 hypre_ParCSRMatrix **A_FF_ptr)
 {
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
@@ -1054,12 +1054,12 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix *A,
 
 HYPRE_Int
 hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
-                                HYPRE_Int           *CF_marker,
-                                HYPRE_BigInt        *cpts_starts,
-                                hypre_ParCSRMatrix  *S,
-                                hypre_ParCSRMatrix **A_FC_ptr,
-                                hypre_ParCSRMatrix **A_FF_ptr,
-                                HYPRE_Real         **D_lambda_ptr)
+                                  HYPRE_Int           *CF_marker,
+                                  HYPRE_BigInt        *cpts_starts,
+                                  hypre_ParCSRMatrix  *S,
+                                  hypre_ParCSRMatrix **A_FC_ptr,
+                                  hypre_ParCSRMatrix **A_FF_ptr,
+                                  HYPRE_Real         **D_lambda_ptr)
 {
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);

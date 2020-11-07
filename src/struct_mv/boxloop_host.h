@@ -20,7 +20,7 @@
 
 #ifdef HYPRE_USING_OPENMP
 #define HYPRE_BOX_REDUCTION
-#ifdef WIN32
+#if defined(WIN32) && defined(_MSC_VER)
 #define Pragma(x) __pragma(HYPRE_XSTR(x))
 #else
 #define Pragma(x) _Pragma(HYPRE_XSTR(x))
