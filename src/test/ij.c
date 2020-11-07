@@ -7431,6 +7431,28 @@ main( hypre_int argc,
       HYPRE_ParVectorDestroy(x);
    }
 
+/*
+#define LEN 4
+hypre_HandleDefaultExecPolicy(hypre_handle()) = HYPRE_EXEC_DEVICE;
+
+printf("%d: first row %d, last row %d\n", myid, first_local_row, last_local_row);
+HYPRE_BigInt  tmp_ind[LEN] = {0,20,40,64};
+for (i = 0; i < LEN; i++)
+{
+   tmp_ind[i] += first_local_row;
+}
+HYPRE_Complex tmp_val[LEN];
+HYPRE_BigInt *ij_ind = hypre_TAlloc(HYPRE_BigInt, LEN, HYPRE_MEMORY_DEVICE);
+hypre_TMemcpy(ij_ind, tmp_ind, HYPRE_BigInt, LEN, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+HYPRE_Complex *ij_val = hypre_CTAlloc(HYPRE_Complex, LEN, HYPRE_MEMORY_DEVICE);
+HYPRE_IJVectorGetValues(ij_x, LEN, ij_ind, ij_val);
+hypre_TMemcpy(tmp_val, ij_val, HYPRE_Complex, LEN, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+for (i = 0; i < LEN; i++)
+{
+   printf("x[%4d] = %e\n", tmp_ind[i], tmp_val[i]);
+}
+*/
+
    HYPRE_IJVectorDestroy(ij_x);
 
    if (build_rbm)

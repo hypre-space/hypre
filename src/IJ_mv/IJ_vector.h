@@ -30,15 +30,15 @@ typedef struct hypre_IJVector_struct
    void         *object;            /* Structure for storing local portion */
 
    void         *translator;        /* Structure for storing off processor
-				       information */
+                                       information */
 
-   void         *assumed_part;        /* IJ Vector assumed partition */
+   void         *assumed_part;      /* IJ Vector assumed partition */
 
-   HYPRE_BigInt  global_first_row;    /* these for data items are necessary */
-   HYPRE_BigInt  global_num_rows;     /*   to be able to avoid using the global */
-                                    /*    global partition */ 
-   HYPRE_Int     print_level; 
-   
+   HYPRE_BigInt  global_first_row;  /* these for data items are necessary */
+   HYPRE_BigInt  global_num_rows;   /* to be able to avoid using the global */
+                                    /* global partition */
+   HYPRE_Int     print_level;
+
 
 
 } hypre_IJVector;

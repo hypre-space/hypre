@@ -378,4 +378,3 @@ hypreCUDAKernel_IJVectorAssemblePar(HYPRE_Int n, HYPRE_Complex *x, HYPRE_BigInt 
 
 #endif
 
-

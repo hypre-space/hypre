@@ -1269,55 +1269,50 @@ HYPRE_Complex hypre_ParVectorLocalSumElts( hypre_ParVector * vector )
    return hypre_SeqVectorSumElts( hypre_ParVectorLocalVector(vector) );
 }
 
-/*
-#ifdef HYPRE_USING_UNIFIED_MEMORY
-hypre_int hypre_ParVectorIsManaged(hypre_ParVector *vector){
-  if (vector==NULL) return 1;
-  return hypre_SeqVectorIsManaged(hypre_ParVectorLocalVector(vector));
-}
-#endif
-*/
-
 HYPRE_Int
-hypre_ParVectorGetValues(hypre_ParVector *vector,
-                         HYPRE_Int num_values,
-                         HYPRE_BigInt *indices,
-                         HYPRE_Complex *values)
+hypre_ParVectorGetValuesHost(hypre_ParVector *vector,
+                             HYPRE_Int        num_values,
+                             HYPRE_BigInt    *indices,
+                             HYPRE_Complex   *values)
 {
-   HYPRE_Int i, j;
-   HYPRE_BigInt first_index, last_index, index;
-   hypre_Vector *local_vector;
-   HYPRE_Complex *data;
+   HYPRE_Int     i, ierr = 0;
+   HYPRE_BigInt  first_index = hypre_ParVectorFirstIndex(vector);
+   HYPRE_BigInt  last_index = hypre_ParVectorLastIndex(vector);
+   hypre_Vector *local_vector = hypre_ParVectorLocalVector(vector);
+   HYPRE_Complex *data = hypre_VectorData(local_vector);
 
-   first_index = hypre_ParVectorFirstIndex(vector);
-   last_index = hypre_ParVectorLastIndex(vector);
-   local_vector = hypre_ParVectorLocalVector(vector);
-   data = hypre_VectorData(local_vector);
-
+   /*
    if (hypre_VectorOwnsData(local_vector) == 0)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Vector does not own data! -- hypre_ParVectorGetValues.");
       return hypre_error_flag;
    }
+   */
 
    if (indices)
    {
-      for (i=0; i < num_values; i++)
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) reduction(+:ierr) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < num_values; i++)
       {
-         index = indices[i];
+         HYPRE_BigInt index = indices[i];
          if (index < first_index || index > last_index)
          {
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Index out of range! -- hypre_ParVectorGetValues.");
-            return hypre_error_flag;
+            ierr ++;
+         }
+         else
+         {
+            HYPRE_Int local_index = (HYPRE_Int) (index - first_index);
+            values[i] = data[local_index];
          }
       }
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,j) HYPRE_SMP_SCHEDULE
-#endif
-      for (j = 0; j < num_values; j++)
+
+      if (ierr)
       {
-         i = (HYPRE_Int)(indices[j] - first_index);
-         values[j] = data[i];
+         hypre_error_in_arg(3);
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Index out of range! -- hypre_ParVectorGetValues.");
+         hypre_printf("Index out of range! -- hypre_ParVectorGetValues\n");
       }
    }
    else
@@ -1327,11 +1322,34 @@ hypre_ParVectorGetValues(hypre_ParVector *vector,
          hypre_error_in_arg(2);
          return hypre_error_flag;
       }
+
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-      for (j = 0; j < num_values; j++)
-         values[j] = data[j];
+      for (i = 0; i < num_values; i++)
+      {
+         values[i] = data[i];
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_ParVectorGetValues(hypre_ParVector *vector,
+                         HYPRE_Int        num_values,
+                         HYPRE_BigInt    *indices,
+                         HYPRE_Complex   *values)
+{
+#if defined(HYPRE_USING_CUDA)
+   if (HYPRE_EXEC_DEVICE == hypre_GetExecPolicy1( hypre_ParVectorMemoryLocation(vector) ))
+   {
+      hypre_ParVectorGetValuesDevice(vector, num_values, indices, values);
+   }
+   else
+#endif
+   {
+      hypre_ParVectorGetValuesHost(vector, num_values, indices, values);
    }
 
    return hypre_error_flag;
