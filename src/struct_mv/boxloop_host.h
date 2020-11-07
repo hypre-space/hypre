@@ -25,10 +25,12 @@
 #else
 #define Pragma(x) _Pragma(HYPRE_XSTR(x))
 #endif
+#define OMP0 Pragma(omp parallel for HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
 #define OMP1 Pragma(omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
-#else
+#else /* #ifdef HYPRE_USING_OPENMP */
+#define OMP0
 #define OMP1
-#endif
+#endif /* #ifdef HYPRE_USING_OPENMP */
 
 typedef struct hypre_Boxloop_struct
 {
@@ -239,8 +241,8 @@ typedef struct hypre_Boxloop_struct
 #define hypre_LoopBegin(size, idx)                                            \
 {                                                                             \
    HYPRE_Int idx;                                                             \
-   OMP1                                                                       \
-   for (idx = 0;idx < size;idx ++)                                            \
+   OMP0                                                                       \
+   for (idx = 0; idx < size; idx ++)                                          \
    {
 
 #define hypre_LoopEnd()                                                       \
