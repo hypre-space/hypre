@@ -1139,7 +1139,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
 #endif
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(ncols,rows,cols,ijvalues,values,ncols)
+#define DEVICE_VAR is_device_ptr(ncols,rows,cols,ijvalues,values)
                hypre_BoxLoop2Begin(ndim, loop_size,
                                    box,       start, stride, mi,
                                    value_box, start, stride, vi);
@@ -1597,6 +1597,8 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                      /* copy values into tvalues */
                      start = hypre_BoxIMin(ibox1);
                      hypre_BoxGetSize(ibox1, loop_size);
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tvalues,values)
                      hypre_BoxLoop2Begin(ndim, loop_size,
                                          ibox1, start, stride, mi,
                                          value_box, start, stride, vi);
@@ -1604,7 +1606,8 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                         tvalues[mi] = values[ei + vi*nentries];
                      }
                      hypre_BoxLoop2End(mi, vi);
-
+#undef DEVICE_VAR
+#define DEVICE_VAR
                      /* put values into UMatrix */
                      hypre_SStructUMatrixSetBoxValues(
                         matrix, part, ibox1, var, 1, &entry, ibox1, tvalues, action);
@@ -1623,6 +1626,8 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                      /* copy tvalues into values */
                      start = hypre_BoxIMin(ibox1);
                      hypre_BoxGetSize(ibox1, loop_size);
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tvalues,values)
                      hypre_BoxLoop2Begin(ndim, loop_size,
                                          ibox1, start, stride, mi,
                                          value_box, start, stride, vi);
@@ -1630,7 +1635,8 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                         values[ei + vi*nentries] = tvalues[mi];
                      }
                      hypre_BoxLoop2End(mi, vi);
-
+#undef DEVICE_VAR
+#define DEVICE_VAR
                   } /* end if action */
                } /* end if nonzero ibox1 */
             } /* end of "from" boxman entries loop */

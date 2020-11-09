@@ -639,7 +639,7 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
                {
                   if (action > 0)
                   {
-#define DEVICE_VAR is_device_ptr(values)
+#define DEVICE_VAR is_device_ptr(matp,values)
                      hypre_LoopBegin(1, k)
                      {
                         *matp += values[s];
