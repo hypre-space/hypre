@@ -54,8 +54,8 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
    void                 **interp_data_l   = (ssamg_data -> interp_data_l);
 
    /* Local Variables */
-   HYPRE_Real             b_dot_b, r_dot_r, eps = 0;
-   HYPRE_Real             e_dot_e = 0, x_dot_x = 1;
+   HYPRE_Real             b_dot_b = 1.0, r_dot_r, eps = 0;
+   HYPRE_Real             e_dot_e = 0.0, x_dot_x = 1.0;
    HYPRE_Int              i, l;
    char                   filename[255];
 

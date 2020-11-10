@@ -1148,7 +1148,7 @@ HYPRE_IJMatrixAdd( HYPRE_Complex    alpha,
          if (partitioning_A[i] != partitioning_B[i])
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                              "Input matrices must have same row partitioning!");
+                              "Input matrices must have same col partitioning!");
             return hypre_error_flag;
          }
       }
