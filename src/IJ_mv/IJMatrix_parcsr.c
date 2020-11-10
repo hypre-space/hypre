@@ -1612,6 +1612,39 @@ hypre_IJMatrixDestroyParCSR(hypre_IJMatrix *matrix)
 
 /******************************************************************************
  *
+ * hypre_IJMatrixTransposeParCSR
+ *
+ * Tranposes an IJMatrix of type ParCSRMatrix
+ *
+ *****************************************************************************/
+
+HYPRE_Int
+hypre_IJMatrixTransposeParCSR( hypre_IJMatrix  *matrix_A,
+                               hypre_IJMatrix  *matrix_AT )
+{
+   hypre_ParCSRMatrix *par_A  = (hypre_ParCSRMatrix*) hypre_IJMatrixObject(matrix_A);
+   hypre_ParCSRMatrix *par_AT;
+
+   /* Free old object if existent */
+   if (hypre_IJMatrixObject(matrix_AT))
+   {
+      par_AT = (hypre_ParCSRMatrix*) hypre_IJMatrixObject(matrix_AT);
+      hypre_ParCSRMatrixDestroy(par_AT);
+      hypre_IJMatrixObject(matrix_AT) = NULL;
+   }
+
+   hypre_ParCSRMatrixTranspose(par_A, &par_AT, 1);
+   hypre_ParCSRMatrixSetNumNonzeros(par_AT);
+   hypre_ParCSRMatrixSetDNumNonzeros(par_AT);
+   hypre_MatvecCommPkgCreate(par_AT);
+
+   hypre_IJMatrixObject(matrix_AT) = (void *) par_AT;
+
+   return hypre_error_flag;
+}
+
+/******************************************************************************
+ *
  * hypre_IJMatrixAssembleOffProcValsParCSR
  *
  * This is for handling set and get values calls to off-proc. entries -
