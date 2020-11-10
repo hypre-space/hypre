@@ -291,11 +291,22 @@ HYPRE_Int HYPRE_IJMatrixPrint(HYPRE_IJMatrix  matrix,
                               const char     *filename);
 
 /**
- * Transpose an IJMatrix
+ * Transpose an IJMatrix.
  **/
 HYPRE_Int
 HYPRE_IJMatrixTranspose( HYPRE_IJMatrix  matrix_A,
                          HYPRE_IJMatrix *matrix_AT );
+
+/**
+ * Performs C = alpha*A + beta*B
+ **/
+HYPRE_Int
+HYPRE_IJMatrixAdd( HYPRE_Complex    alpha,
+                   HYPRE_IJMatrix   matrix_A,
+                   HYPRE_Complex    beta,
+                   HYPRE_IJMatrix   matrix_B,
+                   HYPRE_IJMatrix  *matrix_C );
+
 
 /*@}*/
 

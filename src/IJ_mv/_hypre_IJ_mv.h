@@ -377,7 +377,8 @@ HYPRE_Int hypre_IJMatrixGetValuesParCSR ( hypre_IJMatrix *matrix , HYPRE_Int nro
 HYPRE_Int hypre_IJMatrixSetValuesParCSR ( hypre_IJMatrix *matrix , HYPRE_Int nrows , HYPRE_Int *ncols , const HYPRE_Int *rows , const HYPRE_Int *cols , const HYPRE_Complex *values );
 HYPRE_Int hypre_IJMatrixAddToValuesParCSR ( hypre_IJMatrix *matrix , HYPRE_Int nrows , HYPRE_Int *ncols , const HYPRE_Int *rows , const HYPRE_Int *cols , const HYPRE_Complex *values );
 HYPRE_Int hypre_IJMatrixDestroyParCSR ( hypre_IJMatrix *matrix );
-HYPRE_Int hypre_IJMatrixTransposeParCSR ( hypre_IJMatrix  *matrix_A, hypre_IJMatrix  *matrix_AT );
+HYPRE_Int hypre_IJMatrixTransposeParCSR ( hypre_IJMatrix  *matrix_A , hypre_IJMatrix *matrix_AT );
+HYPRE_Int hypre_IJMatrixAddParCSR ( HYPRE_Complex alpha , hypre_IJMatrix *matrix_A , HYPRE_Complex beta , hypre_IJMatrix *matrix_B , hypre_IJMatrix *matrix_C );
 HYPRE_Int hypre_IJMatrixAssembleOffProcValsParCSR ( hypre_IJMatrix *matrix , HYPRE_Int off_proc_i_indx , HYPRE_Int max_off_proc_elmts , HYPRE_Int current_num_elmts , HYPRE_Int *off_proc_i , HYPRE_Int *off_proc_j , HYPRE_Complex *off_proc_data );
 HYPRE_Int hypre_FillResponseIJOffProcVals ( void *p_recv_contact_buf , HYPRE_Int contact_size , HYPRE_Int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , HYPRE_Int *response_message_size );
 HYPRE_Int hypre_FindProc ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int list_length );

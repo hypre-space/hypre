@@ -1081,3 +1081,89 @@ HYPRE_IJMatrixTranspose( HYPRE_IJMatrix  matrix_A,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixAdd
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJMatrixAdd( HYPRE_Complex    alpha,
+                   HYPRE_IJMatrix   matrix_A,
+                   HYPRE_Complex    beta,
+                   HYPRE_IJMatrix   matrix_B,
+                   HYPRE_IJMatrix  *matrix_C )
+{
+   hypre_IJMatrix   *ij_A = (hypre_IJMatrix *) matrix_A;
+   hypre_IJMatrix   *ij_B = (hypre_IJMatrix *) matrix_B;
+   hypre_IJMatrix   *ij_C;
+
+   HYPRE_Int        *partitioning_A;
+   HYPRE_Int        *partitioning_B;
+   HYPRE_Int         num_procs, i, size;
+
+   if (!ij_A)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   hypre_MPI_Comm_size(hypre_IJMatrixComm(ij_A), &num_procs);
+   ij_C = hypre_CTAlloc(hypre_IJMatrix, 1);
+
+   hypre_IJMatrixComm(ij_C)         = hypre_IJMatrixComm(ij_A);
+   hypre_IJMatrixObject(ij_C)       = NULL;
+   hypre_IJMatrixTranslator(ij_C)   = NULL;
+   hypre_IJMatrixAssumedPart(ij_C)  = NULL;
+   hypre_IJMatrixObjectType(ij_C)   = hypre_IJMatrixObjectType(ij_A);
+   hypre_IJMatrixAssembleFlag(ij_C) = 1;
+   hypre_IJMatrixPrintLevel(ij_C)   = hypre_IJMatrixPrintLevel(ij_A);
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   size = 2;
+#else
+   size = num_procs + 1;
+#endif
+
+   /* Check if A and B have the same row partitionings */
+   partitioning_A = hypre_IJMatrixRowPartitioning(ij_A);
+   partitioning_B = hypre_IJMatrixRowPartitioning(ij_B);
+   for (i = 0; i < size; i++)
+   {
+      if (partitioning_A[i] != partitioning_B[i])
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "Input matrices must have same row partitioning!");
+         return hypre_error_flag;
+      }
+   }
+
+   /* Check if A and B have the same col partitionings */
+   if ((partitioning_A != hypre_IJMatrixColPartitioning(ij_A)) ||
+       (partitioning_B != hypre_IJMatrixColPartitioning(ij_B)))
+   {
+      partitioning_A = hypre_IJMatrixColPartitioning(ij_A);
+      partitioning_B = hypre_IJMatrixColPartitioning(ij_B);
+      for (i = 0; i < size; i++)
+      {
+         if (partitioning_A[i] != partitioning_B[i])
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "Input matrices must have same row partitioning!");
+            return hypre_error_flag;
+         }
+      }
+   }
+
+   if (hypre_IJMatrixObjectType(ij_A) == HYPRE_PARCSR)
+   {
+      hypre_IJMatrixAddParCSR(alpha, ij_A, beta, ij_B, ij_C);
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   *matrix_C = (HYPRE_IJMatrix) ij_C;
+
+   return hypre_error_flag;
+}
