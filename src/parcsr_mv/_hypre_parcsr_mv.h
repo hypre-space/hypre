@@ -792,6 +792,7 @@ HYPRE_Int hypre_MergeOrderedArrays ( HYPRE_Int size1 , HYPRE_Int *array1 , HYPRE
  * TODO: delete them when merging recmat and master */
 void hypre_union2(HYPRE_Int  n1, HYPRE_Int *arr1, HYPRE_Int  n2, HYPRE_Int *arr2, HYPRE_Int *n3, HYPRE_Int *arr3, HYPRE_Int *map1, HYPRE_Int *map2);
 HYPRE_Int hypre_ParcsrAdd( HYPRE_Complex alpha, hypre_ParCSRMatrix *A, HYPRE_Complex beta, hypre_ParCSRMatrix *B, hypre_ParCSRMatrix **Cout );
+HYPRE_Int hypre_ParCSRMatrixInfNorm ( hypre_ParCSRMatrix *A , HYPRE_Real *norm );
 
 #ifdef HYPRE_USING_PERSISTENT_COMM
 hypre_ParCSRPersistentCommHandle *

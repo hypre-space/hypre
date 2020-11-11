@@ -1083,6 +1083,36 @@ HYPRE_IJMatrixTranspose( HYPRE_IJMatrix  matrix_A,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixNorm
+ *
+ *  TODO: Add other norms
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJMatrixNorm( HYPRE_IJMatrix  matrix,
+                    HYPRE_Real     *norm )
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (!ijmatrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR)
+   {
+      hypre_IJMatrixNormParCSR(ijmatrix, norm);
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJMatrixAdd
  *--------------------------------------------------------------------------*/
 
@@ -1099,6 +1129,8 @@ HYPRE_IJMatrixAdd( HYPRE_Complex    alpha,
 
    HYPRE_Int        *partitioning_A;
    HYPRE_Int        *partitioning_B;
+   HYPRE_Int        *row_partitioning_C;
+   HYPRE_Int        *col_partitioning_C;
    HYPRE_Int         num_procs, i, size;
 
    if (!ij_A)
@@ -1137,6 +1169,14 @@ HYPRE_IJMatrixAdd( HYPRE_Complex    alpha,
       }
    }
 
+   /* Copy row partitioning of A to C */
+   row_partitioning_C = hypre_CTAlloc(HYPRE_Int, size);
+   for (i = 0; i < size; i++)
+   {
+      row_partitioning_C[i] = partitioning_A[i];
+   }
+   hypre_IJMatrixRowPartitioning(ij_C) = row_partitioning_C;
+
    /* Check if A and B have the same col partitionings */
    if ((partitioning_A != hypre_IJMatrixColPartitioning(ij_A)) ||
        (partitioning_B != hypre_IJMatrixColPartitioning(ij_B)))
@@ -1152,6 +1192,18 @@ HYPRE_IJMatrixAdd( HYPRE_Complex    alpha,
             return hypre_error_flag;
          }
       }
+
+      /* Copy col partitioning of A to C */
+      col_partitioning_C = hypre_CTAlloc(HYPRE_Int, size);
+      for (i = 0; i < size; i++)
+      {
+         col_partitioning_C[i] = partitioning_A[i];
+      }
+      hypre_IJMatrixColPartitioning(ij_C) = col_partitioning_C;
+   }
+   else
+   {
+      hypre_IJMatrixColPartitioning(ij_C) = hypre_IJMatrixRowPartitioning(ij_A);
    }
 
    if (hypre_IJMatrixObjectType(ij_A) == HYPRE_PARCSR)

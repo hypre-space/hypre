@@ -4939,3 +4939,55 @@ hypre_ParcsrAdd( HYPRE_Complex        alpha,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixInfNorm
+ *
+ * Computes the infinity norm of A:
+ *
+ *       norm = max_{j} sum_{i} |A_{ij}|
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_ParCSRMatrixInfNorm( hypre_ParCSRMatrix  *A,
+                           HYPRE_Real          *norm )
+{
+   MPI_Comm            comm     = hypre_ParCSRMatrixComm(A);
+
+   /* diag part of A */
+   hypre_CSRMatrix    *A_diag   = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Complex      *A_diag_a = hypre_CSRMatrixData(A_diag);
+   HYPRE_Int          *A_diag_i = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int    num_rows_diag_A = hypre_CSRMatrixNumRows(A_diag);
+
+   /* off-diag part of A */
+   hypre_CSRMatrix    *A_offd   = hypre_ParCSRMatrixOffd(A);
+   HYPRE_Complex      *A_offd_a = hypre_CSRMatrixData(A_offd);
+   HYPRE_Int          *A_offd_i = hypre_CSRMatrixI(A_offd);
+
+   /* Local variables */
+   HYPRE_Int           i, j;
+   HYPRE_Real          maxsum = 0.0;
+   HYPRE_Real          rowsum;
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,j,rowsum) reduction(max:maxsum) HYPRE_SMP_SCHEDULE
+#endif
+   for (i = 0; i < num_rows_diag_A; i++)
+   {
+      rowsum = 0.0;
+      for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
+      {
+         rowsum += fabs(A_diag_a[j]);
+      }
+      for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
+      {
+         rowsum += fabs(A_offd_a[j]);
+      }
+
+      maxsum = hypre_max(maxsum, rowsum);
+   }
+
+   hypre_MPI_Allreduce(&maxsum, norm, 1, HYPRE_MPI_REAL, hypre_MPI_MAX, comm);
+
+   return hypre_error_flag;
+}

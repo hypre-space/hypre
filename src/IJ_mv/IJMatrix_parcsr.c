@@ -1645,6 +1645,27 @@ hypre_IJMatrixTransposeParCSR( hypre_IJMatrix  *matrix_A,
 
 /******************************************************************************
  *
+ * hypre_IJMatrixNormParCSR
+ *
+ * Computes the Infinity norm of an IJMatrix of type ParCSRMatrix
+ *
+ * TODO: Add other norms
+ *
+ *****************************************************************************/
+
+HYPRE_Int
+hypre_IJMatrixNormParCSR( hypre_IJMatrix *matrix,
+                          HYPRE_Real     *norm )
+{
+   hypre_ParCSRMatrix *par_matrix = (hypre_ParCSRMatrix*) hypre_IJMatrixObject(matrix);
+
+   hypre_ParCSRMatrixInfNorm(par_matrix, norm);
+
+   return hypre_error_flag;
+}
+
+/******************************************************************************
+ *
  * hypre_IJMatrixAddParCSR
  *
  * Performs C = alpha*A + beta*B, where A, B and C are IJMatrices of
@@ -1672,9 +1693,9 @@ hypre_IJMatrixAddParCSR( HYPRE_Complex    alpha,
    }
 
    hypre_ParcsrAdd(alpha, par_A, beta, par_B, &par_C);
-   /* hypre_ParCSRMatrixSetNumNonzeros(par_AT); */
-   /* hypre_ParCSRMatrixSetDNumNonzeros(par_AT); */
-   /* hypre_MatvecCommPkgCreate(par_AT); */
+   hypre_ParCSRMatrixSetNumNonzeros(par_C);
+   hypre_ParCSRMatrixSetDNumNonzeros(par_C);
+   hypre_MatvecCommPkgCreate(par_C);
 
    hypre_IJMatrixObject(matrix_C) = (void *) par_C;
 

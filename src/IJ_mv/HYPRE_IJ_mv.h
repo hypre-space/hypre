@@ -298,6 +298,13 @@ HYPRE_IJMatrixTranspose( HYPRE_IJMatrix  matrix_A,
                          HYPRE_IJMatrix *matrix_AT );
 
 /**
+ * Computes the infinity norm of an IJMatrix
+ **/
+HYPRE_Int
+HYPRE_IJMatrixNorm( HYPRE_IJMatrix  matrix,
+                    HYPRE_Real     *norm );
+
+/**
  * Performs C = alpha*A + beta*B
  **/
 HYPRE_Int
