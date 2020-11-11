@@ -914,48 +914,123 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
          if (nodal == 0) /* no nodal coarsening */
          {
-           if (coarsen_type == 6)
+            if (coarsen_type == 6)
+            {
                hypre_BoomerAMGCoarsenFalgout(S, A_array[level], measure_type,
                                              debug_flag, &CF_marker);
-           else if (coarsen_type == 7)
+            }
+            else if (coarsen_type == 7)
+            {
                hypre_BoomerAMGCoarsen(S, A_array[level], 2,
                                       debug_flag, &CF_marker);
-           else if (coarsen_type == 8)
+            }
+            else if (coarsen_type == 8)
+            {
                hypre_BoomerAMGCoarsenPMIS(S, A_array[level], 0,
                                           debug_flag, &CF_marker);
-           else if (coarsen_type == 9)
+            }
+            else if (coarsen_type == 9)
+            {
                hypre_BoomerAMGCoarsenPMIS(S, A_array[level], 2,
                                           debug_flag, &CF_marker);
-           else if (coarsen_type == 10)
+            }
+            else if (coarsen_type == 10)
+            {
                hypre_BoomerAMGCoarsenHMIS(S, A_array[level], measure_type,
                                           debug_flag, &CF_marker);
-           else if (coarsen_type == 21 || coarsen_type == 22)
+            }
+            else if (coarsen_type == 21 || coarsen_type == 22)
+            {
                hypre_BoomerAMGCoarsenCGCb(S, A_array[level], measure_type,
-                           coarsen_type, cgc_its, debug_flag, &CF_marker);
-           else if (coarsen_type == 98)
+                                          coarsen_type, cgc_its, debug_flag,
+                                          &CF_marker);
+            }
+            else if (coarsen_type == 98)
+            {
                hypre_BoomerAMGCoarsenCR1(A_array[level], &CF_marker,
-                        &coarse_size,
-                        num_CR_relax_steps, IS_type, 0);
-           else if (coarsen_type == 99)
-           {
-                  hypre_BoomerAMGCreateS(A_array[level],
-                        CR_strong_th, 1,
-                        num_functions, dof_func_array[level],&SCR);
-                  hypre_BoomerAMGCoarsenCR(A_array[level], &CF_marker,
-                        &coarse_size,
-                        num_CR_relax_steps, IS_type, 1, grid_relax_type[0],
-                        relax_weight[level], omega[level], CR_rate,
-                        NULL,NULL,CR_use_CG,SCR);
-                  hypre_ParCSRMatrixDestroy(SCR);
-           }
-           else if (coarsen_type)
-                  hypre_BoomerAMGCoarsenRuge(S, A_array[level],
-                        measure_type, coarsen_type, debug_flag, &CF_marker);
-           else
-                  hypre_BoomerAMGCoarsen(S, A_array[level], 0,
+                                         &coarse_size, num_CR_relax_steps, IS_type, 0);
+            }
+            else if (coarsen_type == 99)
+            {
+               hypre_BoomerAMGCreateS(A_array[level], CR_strong_th, 1,
+                                      num_functions, dof_func_array[level], &SCR);
+               hypre_BoomerAMGCoarsenCR(A_array[level], &CF_marker, &coarse_size,
+                                        num_CR_relax_steps, IS_type, 1, grid_relax_type[0],
+                                        relax_weight[level], omega[level], CR_rate,
+                                        NULL, NULL, CR_use_CG, SCR);
+               hypre_ParCSRMatrixDestroy(SCR);
+            }
+            else if (coarsen_type == 999)
+            {
+               /* Read CF splitting from file */
+               HYPRE_Int  num_markers;
+               FILE      *file;
+               char       CFfile[256];
+               char       line[32];
+               char       msg[512];
+
+               hypre_sprintf(CFfile, "CFmarker.l%02d.%05d.txt", level, my_id);
+               if ((file = fopen(CFfile, "r")) == NULL)
+               {
+                  hypre_sprintf(msg, "Error: can't open input file %s\n", CFfile);
+                  hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+
+                  return hypre_error_flag;
+               }
+
+               if (fgets(line, 32, file) == NULL)
+               {
+                  hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: CFfile read error!\n");
+
+                  return hypre_error_flag;
+               }
+               num_markers = atoi(line);
+               if (num_markers != local_num_vars)
+               {
+                  hypre_sprintf(msg,
+                                "CFfile: num_vars (%d) != num_markers (%d) at level %d\n",
+                                local_num_vars, num_markers, level);
+                  hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+
+                  return hypre_error_flag;
+               }
+
+               CF_marker = hypre_CTAlloc(HYPRE_Int, local_num_vars);
+               for (i = 0; i < local_num_vars; i++)
+               {
+                  if (fgets(line, 32, file) == NULL)
+                  {
+                     hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: CFfile read error!\n");
+
+                     return hypre_error_flag;
+                  }
+
+                  CF_marker[i] = atoi(line);
+                  if (CF_marker[i] != -1 && CF_marker[i] !=  1 &&
+                      CF_marker[i] != -3 && CF_marker[i] !=  2 && CF_marker[i] != -2)
+                  {
+                     hypre_sprintf(msg,
+                                   "Unsupported CF value at %d: %d. Setting to Fine point\n",
+                                   i, CF_marker[i]);
+                     hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+                     CF_marker[i] = -1;
+                  }
+               }
+               fclose(file);
+            }
+            else if (coarsen_type)
+            {
+               hypre_BoomerAMGCoarsenRuge(S, A_array[level], measure_type,
+                                          coarsen_type, debug_flag, &CF_marker);
+            }
+            else
+            {
+               hypre_BoomerAMGCoarsen(S, A_array[level], 0,
                                       debug_flag, &CF_marker);
-           if (level < agg_num_levels)
-           {
+            }
+
+            if (level < agg_num_levels)
+            {
                hypre_BoomerAMGCoarseParms(comm, local_num_vars,
                         1, dof_func_array[level], CF_marker,
                         &coarse_dof_func,&coarse_pnts_global1);
@@ -984,7 +1059,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                else
                   hypre_BoomerAMGCoarsen(S2, S2, 0, debug_flag, &CFN_marker);
                hypre_ParCSRMatrixDestroy(S2);
-           }
+            }
          }
          else if (block_mode)
          {
@@ -2431,7 +2506,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    {
      HYPRE_Int *CF, *CFc, *itemp;
      FILE* fp;
-     char filename[256];
+     char filename[512];
      HYPRE_Int coorddim = hypre_ParAMGDataCoordDim (amg_data);
      float *coordinates = hypre_ParAMGDataCoordinates (amg_data);
 
