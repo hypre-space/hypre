@@ -672,7 +672,7 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
    {
       hypre_printf("\nSSAMG Setup Parameters:\n\n");
 
-      if (print_level > 1)
+      if (print_level > -1)
       {
          /* Print coarsening direction */
          hypre_printf("Coarsening direction:\n\n");
