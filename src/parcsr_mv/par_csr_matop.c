@@ -4977,11 +4977,11 @@ hypre_ParCSRMatrixInfNorm( hypre_ParCSRMatrix  *A,
       rowsum = 0.0;
       for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
       {
-         rowsum += fabs(A_diag_a[j]);
+         rowsum += hypre_cabs(A_diag_a[j]);
       }
       for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
       {
-         rowsum += fabs(A_offd_a[j]);
+         rowsum += hypre_cabs(A_offd_a[j]);
       }
 
       maxsum = hypre_max(maxsum, rowsum);
