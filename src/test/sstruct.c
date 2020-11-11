@@ -2224,6 +2224,7 @@ PrintUsage( char *progname,
       hypre_printf("                        247- Struct BiCGSTAB with 2-step Jacobi\n");
       hypre_printf("                        248- Struct BiCGSTAB with diagonal scaling\n");
       hypre_printf("                        249- Struct BiCGSTAB\n");
+      hypre_printf("  -sym               : check symmetry of matrix A");
       hypre_printf("  -print             : print out the system\n");
       hypre_printf("  -rhsfromcosine     : solution is cosine function (default)\n");
       hypre_printf("  -rhszero           : rhs vector has zero components\n");
@@ -2332,6 +2333,7 @@ main( hypre_int argc,
    Index                *block;
    HYPRE_Int             solver_id, object_type;
    HYPRE_Int             print_system;
+   HYPRE_Int             check_symmetry;
    HYPRE_Int             sol_type;
    HYPRE_Int             sol0_type;
    HYPRE_Real            rhs_value;
@@ -2539,6 +2541,7 @@ main( hypre_int argc,
 
    solver_id = 39;
    print_system = 0;
+   check_symmetry = 0;
    rhs_value = 0.0;
    sol_type = -1;
    sol0_type = 2;
@@ -2630,6 +2633,11 @@ main( hypre_int argc,
       {
          arg_index++;
          print_system = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-sym") == 0 )
+      {
+         arg_index++;
+         check_symmetry = 1;
       }
       else if ( strcmp(argv[arg_index], "-vis") == 0 )
       {
@@ -2943,6 +2951,10 @@ main( hypre_int argc,
       pdata = data.pdata[part];
       for (box = 0; box < pdata.nboxes; box++)
       {
+         hypre_printf("Part %02d | Box %02d: (%d, %d, %d) x (%d, %d, %d)\n",
+                      part, box,
+                      pdata.ilowers[box][0], pdata.ilowers[box][1], pdata.ilowers[box][2],
+                      pdata.iuppers[box][0], pdata.iuppers[box][1], pdata.iuppers[box][2]);
          HYPRE_SStructGridSetExtents(grid, part,
                                      pdata.ilowers[box], pdata.iuppers[box]);
       }
@@ -3015,6 +3027,7 @@ main( hypre_int argc,
 
    for (part = 0; part < data.nparts; part++)
    {
+      //hypre_printf("Building SStructGraph - part %d\n", part);
       pdata = data.pdata[part];
 
       if (data.nstencils > 0)
@@ -3039,6 +3052,7 @@ main( hypre_int argc,
       /* add entries */
       for (box = 0; box < pdata.graph_nboxes; box++)
       {
+         //hypre_printf("Building SStructGraph - box %d\n", box);
          for (index[2] = pdata.graph_ilowers[box][2];
               index[2] <= pdata.graph_iuppers[box][2];
               index[2] += pdata.graph_strides[box][2])
@@ -3065,10 +3079,12 @@ main( hypre_int argc,
                      to_index[j] += k * pdata.graph_to_strides[box][j];
 #endif
                   }
-
-                  /* hypre_printf("index: (%d, %d, %d) - to_index: (%d, %d, %d)\n", */
-                  /*                 index[0], index[1], index[2], */
-                  /*                 to_index[0], to_index[1], to_index[2]); */
+#if 0
+                  hypre_printf("index: [%d](%d, %d, %d) - to_index: [%d](%d, %d, %d)\n",
+                                  part, index[0], index[1], index[2],
+                                  pdata.graph_to_parts[box], to_index[0],
+                                  to_index[1], to_index[2]);
+#endif
                   HYPRE_SStructGraphAddEntries(graph, part, index,
                                                pdata.graph_vars[box],
                                                pdata.graph_to_parts[box],
@@ -3634,6 +3650,11 @@ main( hypre_int argc,
    }
 
    /*-----------------------------------------------------------
+    * Convert SStructMatrix to IJMatrix
+    *-----------------------------------------------------------*/
+   HYPRE_SStructMatrixToIJMatrix(A, &ij_A);
+
+   /*-----------------------------------------------------------
     * Print out the system and initial guess
     *-----------------------------------------------------------*/
 
@@ -3652,24 +3673,25 @@ main( hypre_int argc,
 
       if (object_type != HYPRE_PARCSR)
       {
-         if (!myid)
-         {
-            hypre_printf("Converting SStructMatrix to IJMatrix...\n");
-         }
-         HYPRE_SStructMatrixToIJMatrix(A, &ij_A);
-
-         if (!myid)
-         {
-            hypre_printf("Printing IJMatrix...\n");
-         }
          HYPRE_IJMatrixPrint(ij_A, "IJ.out.A");
-
-         if (!myid)
-         {
-            hypre_printf("Destroying IJMatrix...\n");
-         }
-         HYPRE_IJMatrixDestroy(ij_A);
       }
+   }
+
+   if (check_symmetry)
+   {
+      HYPRE_IJMatrix  ij_AT, ij_B;
+      HYPRE_Real      B_norm;
+
+      /* Compute Frobenius norm of (A - A^T) */
+      HYPRE_IJMatrixTranspose(ij_A, &ij_AT);
+      HYPRE_IJMatrixAdd(1.0, ij_A, -1.0, ij_AT, &ij_B);
+      HYPRE_IJMatrixNorm(ij_B, &B_norm);
+      HYPRE_IJMatrixPrint(ij_B, "IJ.out.B");
+      hypre_printf("Frobenius norm (A - A^T) = %20.15e\n\n", B_norm);
+
+      /* Free memory */
+      HYPRE_IJMatrixDestroy(ij_AT);
+      HYPRE_IJMatrixDestroy(ij_B);
    }
 
    /*-----------------------------------------------------------
@@ -4019,9 +4041,9 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetNumPreRelax(precond, n_pre);
          HYPRE_SStructSSAMGSetNumPostRelax(precond, n_post);
          HYPRE_SStructSSAMGSetNumCoarseRelax(precond, n_coarse);
-         HYPRE_SStructSSAMGSetPrintLevel(precond, print_level);
+         HYPRE_SStructSSAMGSetPrintLevel(precond, 1);
          HYPRE_SStructSSAMGSetPrintFreq(precond, print_freq);
-         HYPRE_SStructSSAMGSetLogging(precond, 1);
+         HYPRE_SStructSSAMGSetLogging(precond, 0);
 
          HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
                               (HYPRE_PtrToSolverFcn) HYPRE_SStructSSAMGSolve,
@@ -6330,6 +6352,7 @@ main( hypre_int argc,
       HYPRE_SStructGridDestroy(G_grid);
       HYPRE_SStructMatrixDestroy(G);
    }
+   HYPRE_IJMatrixDestroy(ij_A);
 
    DestroyData(data);
 
