@@ -18,6 +18,7 @@
 
 
 #include "_hypre_utilities.h"
+#include "_hypre_parcsr_mv.h" // Delete this
 
 
 #include "HYPRE_sstruct_ls.h"
@@ -39,6 +40,9 @@
 /* end lobpcg */
 
 #define DEBUG 0
+
+HYPRE_Int GenerateAMRTest ( HYPRE_Int nx , HYPRE_Int ny , HYPRE_Int sx , HYPRE_Int sy , HYPRE_CSRMatrix *S_ptr , HYPRE_CSRMatrix *U_ptr , HYPRE_CSRMatrix *A_ptr , HYPRE_Vector *rhs_ptr);
+HYPRE_Int GenerateAMRTestVM ( HYPRE_Int nx , HYPRE_Int ny , HYPRE_Int sx , HYPRE_Int sy , HYPRE_CSRMatrix *S_ptr , HYPRE_CSRMatrix *U_ptr , HYPRE_CSRMatrix *A_ptr , HYPRE_Vector *rhs_ptr);
 
 /*--------------------------------------------------------------------------
  * Data structures
@@ -2225,6 +2229,7 @@ PrintUsage( char *progname,
       hypre_printf("                        248- Struct BiCGSTAB with diagonal scaling\n");
       hypre_printf("                        249- Struct BiCGSTAB\n");
       hypre_printf("  -sym               : check symmetry of matrix A");
+      hypre_printf("  -Aones             : compute A times vector of ones");
       hypre_printf("  -print             : print out the system\n");
       hypre_printf("  -rhsfromcosine     : solution is cosine function (default)\n");
       hypre_printf("  -rhszero           : rhs vector has zero components\n");
@@ -2334,6 +2339,7 @@ main( hypre_int argc,
    HYPRE_Int             solver_id, object_type;
    HYPRE_Int             print_system;
    HYPRE_Int             check_symmetry;
+   HYPRE_Int             check_Aones;
    HYPRE_Int             sol_type;
    HYPRE_Int             sol0_type;
    HYPRE_Real            rhs_value;
@@ -2542,6 +2548,7 @@ main( hypre_int argc,
    solver_id = 39;
    print_system = 0;
    check_symmetry = 0;
+   check_Aones = 0;
    rhs_value = 0.0;
    sol_type = -1;
    sol0_type = 2;
@@ -2638,6 +2645,11 @@ main( hypre_int argc,
       {
          arg_index++;
          check_symmetry = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-Aones") == 0 )
+      {
+         arg_index++;
+         check_Aones = 1;
       }
       else if ( strcmp(argv[arg_index], "-vis") == 0 )
       {
@@ -3692,6 +3704,27 @@ main( hypre_int argc,
       /* Free memory */
       HYPRE_IJMatrixDestroy(ij_AT);
       HYPRE_IJMatrixDestroy(ij_B);
+   }
+
+   if (check_Aones)
+   {
+      HYPRE_SStructVector ones;
+      HYPRE_SStructVector Aones;
+
+      HYPRE_SStructVectorCreate(hypre_MPI_COMM_WORLD, grid, &ones);
+      HYPRE_SStructVectorInitialize(ones);
+      HYPRE_SStructVectorSetConstantValues(ones, 1.0);
+      HYPRE_SStructVectorAssemble(ones);
+
+      HYPRE_SStructVectorCreate(hypre_MPI_COMM_WORLD, grid, &Aones);
+      HYPRE_SStructVectorInitialize(Aones);
+      HYPRE_SStructVectorAssemble(Aones);
+
+      HYPRE_SStructMatrixMatvec(1.0, A, ones, 0.0, Aones);
+      HYPRE_SStructVectorPrint("sstruct.out.Aones", Aones, 0);
+
+      HYPRE_SStructVectorDestroy(ones);
+      HYPRE_SStructVectorDestroy(Aones);
    }
 
    /*-----------------------------------------------------------
