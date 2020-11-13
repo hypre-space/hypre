@@ -317,6 +317,66 @@ hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_CSRMatrixPrintCOO
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixPrintCOO( hypre_CSRMatrix *matrix,
+                         char            *file_name )
+{
+   FILE    *fp;
+
+   HYPRE_Complex *matrix_data;
+   HYPRE_Int     *matrix_i;
+   HYPRE_Int     *matrix_j;
+   HYPRE_Int      num_rows;
+   HYPRE_Int      num_nonzeros;
+
+   HYPRE_Int      i, j;
+
+   /*----------------------------------------------------------
+    * Print the matrix data
+    *----------------------------------------------------------*/
+
+   matrix_data  = hypre_CSRMatrixData(matrix);
+   matrix_i     = hypre_CSRMatrixI(matrix);
+   matrix_j     = hypre_CSRMatrixJ(matrix);
+   num_rows     = hypre_CSRMatrixNumRows(matrix);
+   num_nonzeros = hypre_CSRMatrixNumNonzeros(matrix);
+
+   hypre_assert(num_nonzeros == matrix_i[num_rows]);
+
+   fp = fopen(file_name, "w");
+   hypre_fprintf(fp, "%d %d\n", num_rows, num_nonzeros);
+   for (i = 0; i < num_rows; i++)
+   {
+      if (matrix_data)
+      {
+         for (j = matrix_i[i]; j < matrix_i[i+1]; j++)
+         {
+#ifdef HYPRE_COMPLEX
+            hypre_fprintf(fp, "%d %d %.14e , %.14e\n", i, matrix_j[j],
+                          hypre_creal(matrix_data[j]), hypre_cimag(matrix_data[j]))
+#else
+            hypre_fprintf(fp, "%d %d %.14e\n", i, matrix_j[j], matrix_data[j]);
+#endif
+         }
+      }
+      else
+      {
+         for (j = matrix_i[i]; j < matrix_i[i+1]; j++)
+         {
+            hypre_fprintf(fp, "%d %d\n", i, matrix_j[j]);
+         }
+      }
+   }
+
+   fclose(fp);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_CSRMatrixPrintHB: print a CSRMatrix in Harwell-Boeing format
  *--------------------------------------------------------------------------*/
 
