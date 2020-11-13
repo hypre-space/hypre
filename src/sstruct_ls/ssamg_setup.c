@@ -15,6 +15,7 @@
 #include "ssamg.h"
 
 #define DEBUG 0
+#define DEBUG_SYMMETRY 0
 #define DEBUG_WITH_GLVIS 0
 
 /*--------------------------------------------------------------------------
@@ -331,7 +332,33 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    }
    hypre_TFree(ones_l);
    hypre_TFree(Pones_l);
-#endif
+
+#if DEBUG_SYMMETRY
+   HYPRE_IJMatrix  ij_A, ij_AT, ij_B;
+   HYPRE_Real      B_norm;
+
+   /* Compute Frobenius norm of (A - A^T) */
+   for (l = 0; l < num_levels; l++)
+   {
+      HYPRE_SStructMatrixToIJMatrix(A_l[l], &ij_A);
+      HYPRE_IJMatrixTranspose(ij_A, &ij_AT);
+      HYPRE_IJMatrixAdd(1.0, ij_A, -1.0, ij_AT, &ij_B);
+      HYPRE_IJMatrixNorm(ij_B, &B_norm);
+      hypre_printf("Frobenius norm (A[%02d] - A[%02d]^T) = %20.15e\n", l, l, B_norm);
+
+      /* Print matrices */
+      hypre_sprintf(filename, "ssamg_ijA.l%02d", l);
+      HYPRE_IJMatrixPrint(ij_A, filename);
+      hypre_sprintf(filename, "ssamg_ijB.l%02d", l);
+      HYPRE_IJMatrixPrint(ij_B, filename);
+
+      /* Free memory */
+      HYPRE_IJMatrixDestroy(ij_A);
+      HYPRE_IJMatrixDestroy(ij_AT);
+      HYPRE_IJMatrixDestroy(ij_B);
+   }
+#endif // if (DEBUG_SYMMETRY)
+#endif // if (DEBUG)
 
    HYPRE_ANNOTATE_FUNC_END;
 
