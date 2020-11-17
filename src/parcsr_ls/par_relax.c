@@ -19,18 +19,18 @@
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGRelax
  *--------------------------------------------------------------------------*/
-
-HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
-                                 hypre_ParVector    *f,
-                                 HYPRE_Int          *cf_marker,
-                                 HYPRE_Int           relax_type,
-                                 HYPRE_Int           relax_points,
-                                 HYPRE_Real          relax_weight,
-                                 HYPRE_Real          omega,
-                                 HYPRE_Real         *l1_norms,
-                                 hypre_ParVector    *u,
-                                 hypre_ParVector    *Vtemp,
-                                 hypre_ParVector    *Ztemp )
+HYPRE_Int
+hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
+                      hypre_ParVector    *f,
+                      HYPRE_Int          *cf_marker,
+                      HYPRE_Int           relax_type,
+                      HYPRE_Int           relax_points,
+                      HYPRE_Real          relax_weight,
+                      HYPRE_Real          omega,
+                      HYPRE_Real         *l1_norms,
+                      hypre_ParVector    *u,
+                      hypre_ParVector    *Vtemp,
+                      hypre_ParVector    *Ztemp )
 {
    MPI_Comm         comm = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -122,9 +122,9 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
     *     relax_type = 10 -> On-processor direct forward solve for matrices with
     *                        triangular structure (indices need not be ordered
     *                        triangular)
-    *     relax_type = 11 -> Two Stage approximation to GS. Uses the strict lower 
+    *     relax_type = 11 -> Two Stage approximation to GS. Uses the strict lower
     *                        part of the diagonal matrix
-    *     relax_type = 12 -> Two Stage approximation to GS. Uses the full diagonal 
+    *     relax_type = 12 -> Two Stage approximation to GS. Uses the full diagonal
     *                        matrix
     *     relax_type = 13 -> hybrid L1 Gauss-Seidel forward solve
     *     relax_type = 14 -> hybrid L1 Gauss-Seidel backward solve
@@ -383,32 +383,33 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
           *-----------------------------------------------------------------*/
          hypre_ParVectorCopy(f, Vtemp);
 
-	 /*-----------------------------------------------------------------
-	  * Perform Matvec Vtemp=f-Au
-	  *-----------------------------------------------------------------*/
-	 hypre_ParCSRMatrixMatvec(-relax_weight, A, u, relax_weight, Vtemp);
+         /*-----------------------------------------------------------------
+          * Perform Matvec Vtemp=f-Au
+          *-----------------------------------------------------------------*/
+         hypre_ParCSRMatrixMatvec(-relax_weight, A, u, relax_weight, Vtemp);
 
 #if defined(HYPRE_USING_CUDA)
-	 hypre_CSRMatrixTwoStageGaussSeidelDevice(Vtemp_local, u_local, A_diag, A_offd, omega, 1);
+         hypre_CSRMatrixTwoStageGaussSeidelDevice(Vtemp_local, u_local, A_diag, A_offd, omega, 1);
 #else
-	 /* Need to check that EVERY diagonal is nonzero first. If any are, throw exception */
-	 for (i = 0; i < n; i++)
-	   {
-	     if (A_diag_data[A_diag_i[i]] == 0.0) ; /* How does HYPRE handle exceptions ??? */
-	   }
-	 
-	 for (i = 0; i < n; i++) /* Run the smoother */
-	   {
-	     res = 0.0;
-	     for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
-	       {
-		 ii = A_diag_j[jj];
-		 if (ii<i)
-		   res -= (A_diag_data[jj] / A_diag_data[A_diag_i[ii]]) * Vtemp_data[ii];
-	       }
-	     u_data[i] += (Vtemp_data[i] + omega*res)/A_diag_data[A_diag_i[i]];
-	   }
+         /* Need to check that EVERY diagonal is nonzero first. If any are, throw exception */
+         for (i = 0; i < n; i++)
+         {
+            if (A_diag_data[A_diag_i[i]] == 0.0) ; /* How does HYPRE handle exceptions ??? */
+         }
 
+         for (i = 0; i < n; i++) /* Run the smoother */
+         {
+            res = 0.0;
+            for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
+            {
+               ii = A_diag_j[jj];
+               if (ii < i)
+               {
+                  res -= (A_diag_data[jj] / A_diag_data[A_diag_i[ii]]) * Vtemp_data[ii];
+               }
+            }
+            u_data[i] += (Vtemp_data[i] + omega*res)/A_diag_data[A_diag_i[i]];
+         }
 #endif
       }
       break;
@@ -422,37 +423,33 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
           *-----------------------------------------------------------------*/
          hypre_ParVectorCopy(f, Vtemp);
 
-	 /*-----------------------------------------------------------------
-	  * Perform Matvec Vtemp=f-Au
-	  *-----------------------------------------------------------------*/
-	 hypre_ParCSRMatrixMatvec(-relax_weight,A, u, relax_weight, Vtemp);
+         /*-----------------------------------------------------------------
+          * Perform Matvec Vtemp=f-Au
+          *-----------------------------------------------------------------*/
+         hypre_ParCSRMatrixMatvec(-relax_weight, A, u, relax_weight, Vtemp);
 
 #if defined(HYPRE_USING_CUDA)
-	 hypre_CSRMatrixTwoStageGaussSeidelDevice(Vtemp_local, u_local, A_diag, A_offd, omega, 0);
+         hypre_CSRMatrixTwoStageGaussSeidelDevice(Vtemp_local, u_local, A_diag, A_offd, omega, 0);
 #else
-	 /* Need to check that EVERY diagonal is nonzero first. If any are, throw exception */
-	 for (i = 0; i < n; i++)
-	   {
-	     if (A_diag_data[A_diag_i[i]] == 0.0) ; /* How does HYPRE handle exceptions ??? */
-	   }
-	 
-	 for (i = 0; i < n; i++) /* Run the smoother */
-	   {
-	     
-	     res = Vtemp_data[i];
-	     for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
-	       {
-		 ii = A_diag_j[jj];
-		 res -= (A_diag_data[jj] / A_diag_data[A_diag_i[ii]]) * Vtemp_data[ii];
-	       }
-	     u_data[i] += (Vtemp_data[i] + omega*res)/A_diag_data[A_diag_i[i]];
-	   }
+         /* Need to check that EVERY diagonal is nonzero first. If any are, throw exception */
+         for (i = 0; i < n; i++)
+         {
+            if (A_diag_data[A_diag_i[i]] == 0.0) ; /* How does HYPRE handle exceptions ??? */
+         }
 
+         for (i = 0; i < n; i++) /* Run the smoother */
+         {
+            res = Vtemp_data[i];
+            for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
+            {
+               ii = A_diag_j[jj];
+               res -= (A_diag_data[jj] / A_diag_data[A_diag_i[ii]]) * Vtemp_data[ii];
+            }
+            u_data[i] += (Vtemp_data[i] + omega*res) / A_diag_data[A_diag_i[i]];
+         }
 #endif
       }
       break;
-
-
 
       /* Hybrid: Jacobi off-processor, Gauss-Seidel on-processor (forward loop) */
       case 3:
@@ -542,11 +539,15 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
               if (num_threads > 1)
               {
                  tmp_data = Ztemp_data;
+
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
                  for (i = 0; i < n; i++)
+                 {
                     tmp_data[i] = u_data[i];
+                 }
+
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size) HYPRE_SMP_SCHEDULE
 #endif
@@ -576,9 +577,13 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                           {
                              ii = A_diag_j[jj];
                              if (ii >= ns && ii < ne)
+                             {
                                 res -= A_diag_data[jj] * u_data[ii];
+                             }
                              else
+                             {
                                 res -= A_diag_data[jj] * tmp_data[ii];
+                             }
                           }
                           for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
                           {
@@ -593,15 +598,13 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
               else
               {
 #if defined(HYPRE_USING_CUDA)
-		 hypre_CSRMatrixGaussSeidelDevice(Vext_data, f_local, u_local, A_diag, A_offd);
+                 hypre_CSRMatrixGaussSeidelDevice(Vext_data, f_local, u_local, A_diag, A_offd);
 #else
                  for (i = 0; i < n; i++) /* interior points first */
                  {
-
                     /*-----------------------------------------------------------
                      * If diagonal is nonzero, relax point i; otherwise, skip it.
                      *-----------------------------------------------------------*/
-
                     if ( A_diag_data[A_diag_i[i]] != zero)
                     {
                        res = f_data[i];
@@ -1859,7 +1862,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                else
                {
 #if defined(HYPRE_USING_CUDA)
-		  hypre_CSRMatrixSymmetricGaussSeidelDevice(Vext_data, f_local, u_local, A_diag, A_offd);
+                  hypre_CSRMatrixSymmetricGaussSeidelDevice(Vext_data, f_local, u_local, A_diag, A_offd);
 #else
                   for (i = 0; i < n; i++) /* interior points first */
                   {
@@ -2430,8 +2433,6 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          /*-----------------------------------------------------------------
           * Copy f into temporary vector.
           *-----------------------------------------------------------------*/
-         //hypre_SeqVectorPrefetch(hypre_ParVectorLocalVector(Vtemp), HYPRE_MEMORY_DEVICE);
-         //hypre_SeqVectorPrefetch(hypre_ParVectorLocalVector(f), HYPRE_MEMORY_DEVICE);
          hypre_ParVectorCopy(f, Vtemp);
 
          /*-----------------------------------------------------------------
