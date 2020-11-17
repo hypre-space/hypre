@@ -1958,7 +1958,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
                                 A_dbox, start, stride, Ai, cxb)
    {
-      HYPRE_Real tcx;
+      HYPRE_Real tcx = 0.0;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       tcx -= diag * (a_cw[Ai]  + a_ce[Ai]  +  a_aw[Ai] +  a_ae[Ai] +  a_bw[Ai] +  a_be[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
       tcx -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
@@ -1970,7 +1970,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
                                 A_dbox, start, stride, Ai, cyb)
    {
-      HYPRE_Real tcy;
+      HYPRE_Real tcy = 0.0;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       tcy -= diag * (a_cs[Ai]  + a_cn[Ai]  +  a_an[Ai] +  a_as[Ai] +  a_bn[Ai] +  a_bs[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
       tcy -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
@@ -1982,7 +1982,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
                                 A_dbox, start, stride, Ai, czb)
    {
-      HYPRE_Real tcz;
+      HYPRE_Real tcz = 0.0;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       tcz -= diag * (a_ac[Ai]  +  a_bc[Ai] +  a_aw[Ai] +  a_ae[Ai] +  a_an[Ai] +  a_as[Ai] +  a_bw[Ai] +  a_be[Ai] + a_bn[Ai] + a_bs[Ai]);
       tcz -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
@@ -1994,7 +1994,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
                                 A_dbox, start, stride, Ai, sqcxb)
    {
-      HYPRE_Real tcx;
+      HYPRE_Real tcx = 0.0;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       tcx -= diag * (a_cw[Ai]  + a_ce[Ai]  +  a_aw[Ai] +  a_ae[Ai] +  a_bw[Ai] +  a_be[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
       tcx -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
@@ -2006,7 +2006,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
                                 A_dbox, start, stride, Ai, sqcyb);
    {
-      HYPRE_Real tcy;
+      HYPRE_Real tcy = 0.0;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       tcy -= diag * (a_cs[Ai]  + a_cn[Ai]  +  a_an[Ai] +  a_as[Ai] +  a_bn[Ai] +  a_bs[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
       tcy -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
@@ -2018,7 +2018,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
                                 A_dbox, start, stride, Ai, sqczb)
    {
-      HYPRE_Real tcz;
+      HYPRE_Real tcz = 0.0;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       tcz -= diag * (a_ac[Ai]  +  a_bc[Ai] +  a_aw[Ai] +  a_ae[Ai] +  a_an[Ai] +  a_as[Ai] +  a_bw[Ai] +  a_be[Ai] + a_bn[Ai] + a_bs[Ai]);
       tcz -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
@@ -2058,7 +2058,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
                                 A_dbox, start, stride, Ai, sum6)
    {
-      HYPRE_Real tcx = 0, tcy = 0, tcz = 0;
+      HYPRE_Real tcx = 0.0, tcy = 0.0, tcz = 0.0;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
 
       tcx -= diag * (a_cw[Ai]  + a_ce[Ai]  +  a_aw[Ai] +  a_ae[Ai] +  a_bw[Ai] +  a_be[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);

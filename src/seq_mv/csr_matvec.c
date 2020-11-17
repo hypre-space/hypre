@@ -19,27 +19,14 @@
 
 /* y[offset:end] = alpha*A[offset:end,:]*x + beta*b[offset:end] */
 HYPRE_Int
-hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
-                                 hypre_CSRMatrix *A,
-                                 hypre_Vector    *x,
-                                 HYPRE_Complex    beta,
-                                 hypre_Vector    *b,
-                                 hypre_Vector    *y,
-                                 HYPRE_Int        offset )
+hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
+                                     hypre_CSRMatrix *A,
+                                     hypre_Vector    *x,
+                                     HYPRE_Complex    beta,
+                                     hypre_Vector    *b,
+                                     hypre_Vector    *y,
+                                     HYPRE_Int        offset )
 {
-#ifdef HYPRE_PROFILE
-   HYPRE_Real time_begin = hypre_MPI_Wtime();
-#endif
-
-#if defined(HYPRE_USING_CUDA) /* CUDA */
-#ifdef HYPRE_BIGINT
-   HYPRE_Int ierr = hypre_CSRMatrixMatvecDeviceBIGINT(alpha, A, x, beta, b, y, offset);
-#else
-   HYPRE_Int ierr = hypre_CSRMatrixMatvecDevice(0, alpha, A, x, beta, b, y, offset);
-#endif
-#elif defined(HYPRE_USING_DEVICE_OPENMP) /* OMP 4.5 */
-   HYPRE_Int ierr = hypre_CSRMatrixMatvecOutOfPlaceOOMP(0, alpha, A, x, beta, b, y, offset);
-#else /* CPU */
    HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i      = hypre_CSRMatrixI(A) + offset;
    HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
@@ -401,7 +388,37 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
       hypre_SeqVectorDestroy(x_tmp);
    }
 
-#endif /* CPU */
+   return ierr;
+}
+
+HYPRE_Int
+hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
+                                 hypre_CSRMatrix *A,
+                                 hypre_Vector    *x,
+                                 HYPRE_Complex    beta,
+                                 hypre_Vector    *b,
+                                 hypre_Vector    *y,
+                                 HYPRE_Int        offset )
+{
+#ifdef HYPRE_PROFILE
+   HYPRE_Real time_begin = hypre_MPI_Wtime();
+#endif
+
+   HYPRE_Int ierr = 0;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   //HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+   //RL: TODO back to hypre_GetExecPolicy1 later
+   HYPRE_ExecutionPolicy exec = HYPRE_EXEC_DEVICE;
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      ierr = hypre_CSRMatrixMatvecDevice(0, alpha, A, x, beta, b, y, offset);
+   }
+   else
+#endif
+   {
+      ierr = hypre_CSRMatrixMatvecOutOfPlaceHost(alpha, A, x, beta, b, y, offset);
+   }
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MATVEC] += hypre_MPI_Wtime() - time_begin;
@@ -431,17 +448,12 @@ hypre_CSRMatrixMatvec( HYPRE_Complex    alpha,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
-                        hypre_CSRMatrix *A,
-                        hypre_Vector    *x,
-                        HYPRE_Complex    beta,
-                        hypre_Vector    *y     )
+hypre_CSRMatrixMatvecTHost( HYPRE_Complex    alpha,
+                            hypre_CSRMatrix *A,
+                            hypre_Vector    *x,
+                            HYPRE_Complex    beta,
+                            hypre_Vector    *y     )
 {
-#if defined(HYPRE_USING_CUDA) /* CUDA */
-   HYPRE_Int ierr = hypre_CSRMatrixMatvecDevice(1, alpha, A, x, beta, y, y, 0 );
-#elif defined(HYPRE_USING_DEVICE_OPENMP) /* OMP 4.5 */
-   HYPRE_Int ierr = hypre_CSRMatrixMatvecOutOfPlaceOOMP(1, alpha, A, x, beta, y, y, 0);
-#else /* CPU */
    HYPRE_Complex    *A_data    = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i       = hypre_CSRMatrixI(A);
    HYPRE_Int        *A_j       = hypre_CSRMatrixJ(A);
@@ -643,8 +655,43 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
       }
    }
 
-   if (x == y) hypre_SeqVectorDestroy(x_tmp);
+   if (x == y)
+   {
+      hypre_SeqVectorDestroy(x_tmp);
+   }
 
+   return ierr;
+}
+
+HYPRE_Int
+hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
+                        hypre_CSRMatrix *A,
+                        hypre_Vector    *x,
+                        HYPRE_Complex    beta,
+                        hypre_Vector    *y )
+{
+#ifdef HYPRE_PROFILE
+   HYPRE_Real time_begin = hypre_MPI_Wtime();
+#endif
+
+   HYPRE_Int ierr = 0;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   //HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+   //RL: TODO back to hypre_GetExecPolicy1 later
+   HYPRE_ExecutionPolicy exec = HYPRE_EXEC_DEVICE;
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      ierr = hypre_CSRMatrixMatvecDevice(1, alpha, A, x, beta, y, y, 0 );
+   }
+   else
+#endif
+   {
+      ierr = hypre_CSRMatrixMatvecTHost(alpha, A, x, beta, y);
+   }
+
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_MATVEC] += hypre_MPI_Wtime() - time_begin;
 #endif
 
    return ierr;

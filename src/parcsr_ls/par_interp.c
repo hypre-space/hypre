@@ -2693,7 +2693,7 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
    if (exec == HYPRE_EXEC_DEVICE)
    {
       ierr = hypre_BoomerAMGBuildDirInterpDevice(A,CF_marker,S,num_cpts_global,num_functions,dof_func,
-                                                 debug_flag,trunc_factor,max_elmts,col_offd_S_to_A, 
+                                                 debug_flag,trunc_factor,max_elmts,col_offd_S_to_A,
                                                  interp_type, P_ptr);
    }
    else
@@ -2711,17 +2711,33 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
 }
 
 /*------------------------------------------------
- * Drop entries in interpolation matrix P 
- *
+ * Drop entries in interpolation matrix P
+ * max_elmts == 0 means no limit on rownnz
  *------------------------------------------------*/
 HYPRE_Int
 hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
                                  HYPRE_Real          trunc_factor,
                                  HYPRE_Int           max_elmts)
 {
-   HYPRE_Int rescale = 1; // rescale P
-   HYPRE_Int nrm_type = 0; // Use infty-norm of row to perform treshold dropping
-   return hypre_ParCSRMatrixTruncate(P, trunc_factor, max_elmts, rescale, nrm_type);
+   if (trunc_factor <= 0.0 && max_elmts == 0)
+   {
+      return 0;
+   }
+
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(P) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      return hypre_BoomerAMGInterpTruncationDevice(P, trunc_factor, max_elmts);
+   }
+   else
+#endif
+   {
+      HYPRE_Int rescale = 1; // rescale P
+      HYPRE_Int nrm_type = 0; // Use infty-norm of row to perform treshold dropping
+      return hypre_ParCSRMatrixTruncate(P, trunc_factor, max_elmts, rescale, nrm_type);
+   }
 }
 
 /*---------------------------------------------------------------------------

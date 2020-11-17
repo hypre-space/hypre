@@ -9,11 +9,11 @@
 #include <math.h>
 
 #ifdef HYPRE_USING_DSUPERLU
-/*#include "superlu.h"*/
+#include "dsuperlu.h"
 
 #include <math.h>
 #include "superlu_ddefs.h"
-
+/*
 #ifndef hypre_DSLU_DATA_HEADER
 #define hypre_DSLU_DATA_HEADER
 
@@ -32,7 +32,7 @@ typedef struct
 hypre_DSLUData;
 
 #endif
-
+*/
 HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE_Int print_level)
 {
       /* Par Data Structure variables */

@@ -110,8 +110,8 @@ hypre_MGRSetup( void               *mgr_vdata,
   hypre_ParCSRMatrix *A_ff_inv = (mgr_data -> A_ff_inv);
 
   HYPRE_Int use_air = 0;
-
-  HYPRE_Real wall_time;
+  HYPRE_Int truncate_cg_threshold = (mgr_data -> truncate_coarse_grid_threshold);
+//  HYPRE_Real wall_time;
 
   /* ----- begin -----*/
   HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -414,7 +414,7 @@ hypre_MGRSetup( void               *mgr_vdata,
     mgr_data -> n_block = n;
     mgr_data -> left_size = 0;
   }
-  wall_time = time_getWallclockSeconds();
+  //wall_time = time_getWallclockSeconds();
   if (global_smooth_iters > 0)
   {
     if (global_smooth_type == 0)
@@ -445,7 +445,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       HYPRE_ILUSetup(mgr_data -> global_smoother, A, f, u);
     }
   }
-  wall_time = time_getWallclockSeconds() - wall_time;
+  //wall_time = time_getWallclockSeconds() - wall_time;
   //hypre_printf("Proc = %d     Global smoother setup: %f\n", my_id, wall_time);
 
   /* clear old l1_norm data, if created */
@@ -871,6 +871,9 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
     }
 
+    // truncate the coarse grid
+    hypre_ParCSRMatrixTruncate(RAP_ptr, truncate_cg_threshold, 0, 0, 0);
+
     if (Frelax_method[lev] == 2) // full AMG
     {
       // user provided AMG solver
@@ -1087,10 +1090,10 @@ hypre_MGRSetup( void               *mgr_vdata,
   }
 
   /* setup coarse grid solver */
-  wall_time = time_getWallclockSeconds();
+  //wall_time = time_getWallclockSeconds();
   coarse_grid_solver_setup((mgr_data -> coarse_grid_solver), RAP_ptr, F_array[num_c_levels], U_array[num_c_levels]);
   //hypre_ParCSRMatrixPrintIJ(RAP_ptr,1,1,"RAP");
-  wall_time = time_getWallclockSeconds() - wall_time;
+  //wall_time = time_getWallclockSeconds() - wall_time;
   //hypre_printf("Proc = %d   Coarse grid setup: %f\n", my_id, wall_time);
 
   /* Setup smoother for fine grid */

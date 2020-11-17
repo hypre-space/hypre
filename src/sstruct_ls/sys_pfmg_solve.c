@@ -155,21 +155,21 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
          {
             norms[i] = sqrt(r_dot_r);
             if (b_dot_b > 0)
+            {
                rel_norms[i] = sqrt(r_dot_r/b_dot_b);
+            }
             else
+            {
                rel_norms[i] = 0.0;
+            }
          }
 
          /* always do at least 1 V-cycle */
          if ((r_dot_r/b_dot_b < eps) && (i > 0))
          {
-            if (rel_change)
+            if ( ((rel_change) && (e_dot_e/x_dot_x) < eps) || (!rel_change) )
             {
-               if ((e_dot_e/x_dot_x) < eps)
-                  break;
-            }
-            else
-            {
+               HYPRE_ANNOTATE_MGLEVEL_END(0);
                break;
             }
          }

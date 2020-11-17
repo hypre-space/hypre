@@ -102,15 +102,16 @@ hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_)
 #if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaSetDevice(device_id) );
 #else
+   HYPRE_CUDA_CALL( cudaSetDevice(device_id) );
    omp_set_default_device(device_id);
 #endif
 
    hypre_HandleCudaDevice(hypre_handle_) = device_id;
 
-   /*
+#if defined(HYPRE_DEBUG) && defined(HYPRE_PRINT_ERRORS)
    hypre_printf("Proc [global %d/%d, local %d/%d] can see %d GPUs and is running on %d\n",
                  myid, nproc, myNodeid, NodeSize, nDevices, device_id);
-   */
+#endif
 
    return hypre_error_flag;
 }
@@ -175,10 +176,7 @@ HYPRE_Init()
    /* Keep this check here at the end of HYPRE_Init()
     * Make sure that CUB Allocator has not been setup in HYPRE_Init,
     * otherwise users are not able to set the parameters of CUB
-    * Note: hypre_HandleCubCachingDeviceAllocator and
-    *       hypre_HandleCubCachingManagedAllocator
-    *       are not used, since allocation would happen therein,
-    *       which is not wanted here */
+    */
    if ( hypre_HandleCubDevAllocator(_hypre_handle) ||
         hypre_HandleCubUvmAllocator(_hypre_handle) )
    {
@@ -199,6 +197,8 @@ HYPRE_Int
 HYPRE_Finalize()
 {
    hypre_HandleDestroy(_hypre_handle);
+
+   _hypre_handle = NULL;
 
    /*
 #if defined(HYPRE_USING_KOKKOS)

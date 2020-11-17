@@ -711,6 +711,10 @@ HYPRE_Int HYPRE_ParVectorGetValues ( HYPRE_ParVector vector, HYPRE_Int num_value
 HYPRE_Int hypre_ParCSRMatrixGenerateFFFC(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker , HYPRE_BigInt *cpts_starts , hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **A_FC_ptr , hypre_ParCSRMatrix **A_FF_ptr ) ;
 HYPRE_Int hypre_ParCSRMatrixGenerateFFFC3(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker , HYPRE_BigInt *cpts_starts , hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **A_FC_ptr , hypre_ParCSRMatrix **A_FF_ptr ) ;
 HYPRE_Int hypre_ParCSRMatrixGenerateFFFCD3(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker , HYPRE_BigInt *cpts_starts , hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **A_FC_ptr , hypre_ParCSRMatrix **A_FF_ptr , HYPRE_Real **D_lambda_ptr ) ;
+HYPRE_Int hypre_ParCSRMatrixGenerateFFFC3Device(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker , HYPRE_BigInt *cpts_starts , hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **A_FC_ptr , hypre_ParCSRMatrix **A_FF_ptr ) ;
+HYPRE_Int hypre_ParCSRMatrixGenerateCFDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker_host, HYPRE_BigInt *cpts_starts, hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **ACF_ptr) ;
+HYPRE_Int hypre_ParCSRMatrixGenerateCCDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker_host, HYPRE_BigInt *cpts_starts, hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **ACC_ptr) ;
+HYPRE_Int hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker_host, HYPRE_BigInt *cpts_starts, hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **ACX_ptr, hypre_ParCSRMatrix **AXC_ptr ) ;
 
 /* new_commpkg.c */
 HYPRE_Int hypre_PrintCommpkg ( hypre_ParCSRMatrix *A , const char *file_name );
@@ -740,6 +744,7 @@ hypre_CSRMatrix *hypre_ParCSRMatrixExtractAExt ( hypre_ParCSRMatrix *A , HYPRE_I
 
 /* par_csr_assumed_part.c */
 HYPRE_Int hypre_LocateAssummedPartition ( MPI_Comm comm , HYPRE_BigInt row_start , HYPRE_BigInt row_end , HYPRE_BigInt global_first_row , HYPRE_BigInt global_num_rows , hypre_IJAssumedPart *part , HYPRE_Int myid );
+hypre_IJAssumedPart *hypre_AssumedPartitionCreate ( MPI_Comm comm , HYPRE_BigInt global_num , HYPRE_BigInt start , HYPRE_BigInt end );
 HYPRE_Int hypre_ParCSRMatrixCreateAssumedPartition ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_AssumedPartitionDestroy ( hypre_IJAssumedPart *apart );
 HYPRE_Int hypre_GetAssumedPartitionProcFromRow ( MPI_Comm comm , HYPRE_BigInt row , HYPRE_BigInt global_first_row , HYPRE_BigInt global_num_rows , HYPRE_Int *proc_id );
@@ -819,6 +824,7 @@ hypre_CSRMatrix* hypre_ConcatDiagAndOffdDevice(hypre_ParCSRMatrix *A);
 HYPRE_Int hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A, hypre_CSRMatrix *E, hypre_CSRMatrix **B_ptr, HYPRE_Int *num_cols_offd_ptr, HYPRE_BigInt **cols_map_offd_ptr);
 HYPRE_Int hypre_ParCSRMatrixGetRowDevice( hypre_ParCSRMatrix *mat, HYPRE_BigInt row, HYPRE_Int *size, HYPRE_BigInt **col_ind, HYPRE_Complex **values );
 HYPRE_Int hypre_ParCSRDiagScale( HYPRE_ParCSRMatrix HA, HYPRE_ParVector Hy, HYPRE_ParVector Hx );
+HYPRE_Int hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A, HYPRE_Complex tol, HYPRE_Int abs, HYPRE_Int option);
 
 #ifdef HYPRE_USING_PERSISTENT_COMM
 hypre_ParCSRPersistentCommHandle* hypre_ParCSRPersistentCommHandleCreate(HYPRE_Int job, hypre_ParCSRCommPkg *comm_pkg);

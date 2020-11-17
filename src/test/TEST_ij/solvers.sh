@@ -9,7 +9,7 @@ RTOL=$1
 ATOL=$2
 
 #=============================================================================
-# IJ: Run multiplicative and mult_additive cycle and compare results 
+# IJ: Run multiplicative and mult_additive cycle and compare results
 #                    should be the same
 #=============================================================================
 
@@ -21,7 +21,7 @@ tail -17 ${TNAME}.out.110 | head -6 > ${TNAME}.testdata.temp
 diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
-# IJ: MGR case nlevels < 1 and bsize < 2 should be the same 
+# IJ: MGR case nlevels < 1 and bsize < 2 should be the same
 #                    compare results
 #=============================================================================
 
@@ -45,6 +45,22 @@ FILES="\
  ${TNAME}.out.5\
  ${TNAME}.out.6\
  ${TNAME}.out.7\
+ ${TNAME}.out.900\
+ ${TNAME}.out.901\
+ ${TNAME}.out.902\
+ ${TNAME}.out.903\
+ ${TNAME}.out.904\
+ ${TNAME}.out.905\
+ ${TNAME}.out.906\
+ ${TNAME}.out.910\
+ ${TNAME}.out.911\
+ ${TNAME}.out.912\
+ ${TNAME}.out.913\
+ ${TNAME}.out.914\
+ ${TNAME}.out.915\
+ ${TNAME}.out.916\
+ ${TNAME}.out.917\
+ ${TNAME}.out.918\
 "
 
 for i in $FILES

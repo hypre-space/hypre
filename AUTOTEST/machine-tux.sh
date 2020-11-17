@@ -120,6 +120,11 @@ RO="-ams -ij -sstruct -struct -lobpcg -rt -D HYPRE_NO_SAVED -nthreads 2"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $RO
 ./renametest.sh basic $output_dir/basic--with-openmp
 
+co="--with-openmp --enable-hopscotch"
+RO="-ij -sstruct -struct -lobpcg -rt -D HYPRE_NO_SAVED -nthreads 2"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $RO
+./renametest.sh basic $output_dir/basic--with-concurrent-hopscotch
+
 co="--enable-single --enable-debug"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: -single
 ./renametest.sh basic $output_dir/basic--enable-single

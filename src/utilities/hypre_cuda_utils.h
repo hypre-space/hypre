@@ -8,10 +8,6 @@
 #ifndef HYPRE_CUDA_UTILS_H
 #define HYPRE_CUDA_UTILS_H
 
-#ifdef __cplusplus
-extern "C++" {
-#endif
-
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
 #include <cuda.h>
@@ -28,6 +24,15 @@ extern "C++" {
 #ifndef CUDA_VERSION
 #error CUDA_VERSION Undefined!
 #endif
+
+#if CUDA_VERSION >= 11000
+#define THRUST_IGNORE_DEPRECATED_CPP11
+#define CUB_IGNORE_DEPRECATED_CPP11
+#define THRUST_IGNORE_DEPRECATED_CPP_DIALECT
+#define CUB_IGNORE_DEPRECATED_CPP_DIALECT
+#endif
+
+#define CUSPARSE_NEWAPI_VERSION 11000
 
 #define HYPRE_CUDA_CALL(call) do {                                                           \
    cudaError_t err = call;                                                                   \
@@ -48,8 +53,8 @@ extern "C++" {
 #define HYPRE_CUSPARSE_CALL(call) do {                                                       \
    cusparseStatus_t err = call;                                                              \
    if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
-      hypre_printf("CUSPARSE ERROR (code = %d, %d) at %s:%d\n",                              \
-            err, err == CUSPARSE_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);               \
+      hypre_printf("CUSPARSE ERROR (code = %d, %s) at %s:%d\n",                              \
+            err, cusparseGetErrorString(err), __FILE__, __LINE__);                           \
       assert(0); exit(1);                                                                    \
    } } while(0)
 
@@ -367,28 +372,28 @@ hypre_double atomicAdd(hypre_double* address, hypre_double val)
 
 template <typename T>
 static __device__ __forceinline__
-T __shfl_sync(unsigned mask, T val, hypre_int src_line, hypre_int width=32)
+T __shfl_sync(unsigned mask, T val, hypre_int src_line, hypre_int width=HYPRE_WARP_SIZE)
 {
    return __shfl(val, src_line, width);
 }
 
 template <typename T>
 static __device__ __forceinline__
-T __shfl_down_sync(unsigned mask, T val, unsigned delta, hypre_int width=32)
+T __shfl_down_sync(unsigned mask, T val, unsigned delta, hypre_int width=HYPRE_WARP_SIZE)
 {
    return __shfl_down(val, delta, width);
 }
 
 template <typename T>
 static __device__ __forceinline__
-T __shfl_xor_sync(unsigned mask, T val, unsigned lanemask, hypre_int width=32)
+T __shfl_xor_sync(unsigned mask, T val, unsigned lanemask, hypre_int width=HYPRE_WARP_SIZE)
 {
    return __shfl_xor(val, lanemask, width);
 }
 
 template <typename T>
 static __device__ __forceinline__
-T __shfl_up_sync(unsigned mask, T val, unsigned delta, hypre_int width=32)
+T __shfl_up_sync(unsigned mask, T val, unsigned delta, hypre_int width=HYPRE_WARP_SIZE)
 {
    return __shfl_up(val, delta, width);
 }
@@ -413,30 +418,30 @@ static __device__ __forceinline__
 T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum)
 {
 #pragma unroll
-   for (hypre_int d = 2; d <= 32; d <<= 1)
+   for (hypre_int d = 2; d <=HYPRE_WARP_SIZE; d <<= 1)
    {
       T t = __shfl_up_sync(HYPRE_WARP_FULL_MASK, in, d >> 1);
-      if ( (lane_id & (d - 1)) == d - 1 )
+      if ( (lane_id & (d - 1)) == (d - 1) )
       {
          in += t;
       }
    }
 
-   all_sum = __shfl_sync(HYPRE_WARP_FULL_MASK, in, 31);
+   all_sum = __shfl_sync(HYPRE_WARP_FULL_MASK, in, HYPRE_WARP_SIZE-1);
 
-   if (lane_id == 31)
+   if (lane_id == HYPRE_WARP_SIZE-1)
    {
       in = 0;
    }
 
 #pragma unroll
-   for (hypre_int d = 16; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
    {
       T t = __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
 
-      if ( (lane_id & (d - 1)) == d - 1)
+      if ( (lane_id & (d - 1)) == (d - 1))
       {
-         if ( (lane_id & (d << 1 - 1)) == (d << 1 - 1) )
+        if ( (lane_id & ((d << 1) - 1)) == ((d << 1) - 1) )
          {
             in += t;
          }
@@ -454,7 +459,7 @@ static __device__ __forceinline__
 T warp_reduce_sum(T in)
 {
 #pragma unroll
-  for (hypre_int d = 16; d > 0; d >>= 1)
+  for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
   {
     in += __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d);
   }
@@ -466,7 +471,7 @@ static __device__ __forceinline__
 T warp_allreduce_sum(T in)
 {
 #pragma unroll
-  for (hypre_int d = 16; d > 0; d >>= 1)
+  for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
   {
     in += __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
   }
@@ -478,7 +483,7 @@ static __device__ __forceinline__
 T warp_reduce_max(T in)
 {
 #pragma unroll
-  for (hypre_int d = 16; d > 0; d >>= 1)
+  for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
   {
     in = max(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
   }
@@ -490,7 +495,7 @@ static __device__ __forceinline__
 T warp_allreduce_max(T in)
 {
 #pragma unroll
-  for (hypre_int d = 16; d > 0; d >>= 1)
+  for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
   {
     in = max(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
   }
@@ -502,7 +507,7 @@ static __device__ __forceinline__
 T warp_reduce_min(T in)
 {
 #pragma unroll
-  for (hypre_int d = 16; d > 0; d >>= 1)
+  for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
   {
     in = min(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
   }
@@ -514,7 +519,7 @@ static __device__ __forceinline__
 T warp_allreduce_min(T in)
 {
 #pragma unroll
-  for (hypre_int d = 16; d > 0; d >>= 1)
+  for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
   {
     in = min(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
   }
@@ -664,6 +669,19 @@ struct less_than : public thrust::unary_function<T,bool>
    }
 };
 
+template<typename T>
+struct equal : public thrust::unary_function<T,bool>
+{
+   T val;
+
+   equal(T val_) { val = val_; }
+
+   __host__ __device__ bool operator()(const T &x)
+   {
+      return (x == val);
+   }
+};
+
 /* hypre_cuda_utils.c */
 dim3 hypre_GetDefaultCUDABlockDimension();
 
@@ -719,9 +737,13 @@ cudaStream_t hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i);
 
 #endif // #if defined(HYPRE_USING_CUDA)
 
-#ifdef __cplusplus
-}
-#endif
+#if defined(HYPRE_USING_CUSPARSE)
+
+cudaDataType hypre_HYPREComplexToCudaDataType();
+
+cusparseIndexType_t hypre_HYPREIntToCusparseIndexType();
+
+#endif // #if defined(HYPRE_USING_CUSPARSE)
 
 #endif /* #ifndef HYPRE_CUDA_UTILS_H */
 

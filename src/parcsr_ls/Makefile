@@ -35,6 +35,8 @@ HEADERS =\
  block_tridiag.h\
  Common.h\
  par_amg.h\
+ par_amgdd.h\
+ par_amgdd_comp_grid.h\
  schwarz.h
 
 FILES =\
@@ -59,6 +61,7 @@ FILES =\
  F90_HYPRE_ams.c\
  gen_redcs_mat.c\
  HYPRE_parcsr_amg.c\
+ HYPRE_parcsr_amgdd.c\
  HYPRE_parcsr_bicgstab.c\
  HYPRE_parcsr_block.c\
  HYPRE_parcsr_cgnr.c\
@@ -80,6 +83,12 @@ FILES =\
  HYPRE_ame.c\
  par_2s_interp.c\
  par_amg.c\
+ par_amgdd.c\
+ par_amgdd_comp_grid.c\
+ par_amgdd_setup.c\
+ par_amgdd_solve.c\
+ par_amgdd_fac_cycle.c\
+ par_amgdd_helpers.c\
  par_amg_setup.c\
  par_amg_solve.c\
  par_amg_solveT.c\
@@ -131,7 +140,7 @@ FILES =\
  ame.c\
  par_restr.c\
  par_lr_restr.c\
- superlu.c
+ dsuperlu.c
 
 CUFILES =\
  ams.c\
@@ -143,7 +152,10 @@ CUFILES =\
  par_interp_device.c\
  par_interp_trunc_device.c\
  par_lr_interp_device.c\
- par_strength_device.c
+ par_strength_device.c\
+ par_strength2nd_device.c\
+ par_amgdd_fac_cycle_device.c\
+ par_2s_interp_device.c
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}

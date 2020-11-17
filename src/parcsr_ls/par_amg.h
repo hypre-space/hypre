@@ -80,6 +80,9 @@ typedef struct
    HYPRE_Real    *omega;
    HYPRE_Int      converge_type;
    HYPRE_Real     tol;
+   HYPRE_Int      partial_cycle_coarsest_level;
+   HYPRE_Int      partial_cycle_control;
+
 
    /* problem data */
    hypre_ParCSRMatrix  *A;
@@ -314,6 +317,8 @@ typedef struct
 #define hypre_ParAMGDataCycleType(amg_data) ((amg_data)->cycle_type)
 #define hypre_ParAMGDataConvergeType(amg_data) ((amg_data)->converge_type)
 #define hypre_ParAMGDataTol(amg_data) ((amg_data)->tol)
+#define hypre_ParAMGDataPartialCycleCoarsestLevel(amg_data) ((amg_data)->partial_cycle_coarsest_level)
+#define hypre_ParAMGDataPartialCycleControl(amg_data) ((amg_data)->partial_cycle_control)
 #define hypre_ParAMGDataNumGridSweeps(amg_data) ((amg_data)->num_grid_sweeps)
 #define hypre_ParAMGDataUserCoarseRelaxType(amg_data) ((amg_data)->user_coarse_relax_type)
 #define hypre_ParAMGDataUserRelaxType(amg_data) ((amg_data)->user_relax_type)
