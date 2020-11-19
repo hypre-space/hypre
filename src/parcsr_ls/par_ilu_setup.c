@@ -64,7 +64,6 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Int            *perm                = hypre_ParILUDataPerm(ilu_data);
    HYPRE_Int            *qperm               = hypre_ParILUDataQPerm(ilu_data);
    HYPRE_Real           tol_ddPQ             = hypre_ParILUDataTolDDPQ(ilu_data);
-   HYPRE_Int            test_opt             = hypre_ParILUDataTestOption(ilu_data);
    
 #ifdef HYPRE_USING_CUDA
    /* pointers to cusparse data, note that they are not NULL only when needed */
@@ -101,7 +100,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    hypre_ParCSRMatrix   *matS                = hypre_ParILUDataMatS(ilu_data);
 //   hypre_ParCSRMatrix   *matM                = NULL;
    HYPRE_Int            nnzBEF;
-   HYPRE_Int            nnzG;/* g stands for global */
+//   HYPRE_Int            nnzG;/* g stands for global */
    HYPRE_Real           nnzS;/* total nnz in S */
    HYPRE_Int            nnzS_offd;
    HYPRE_Int            size_C/* total size of coarse grid */;
@@ -505,6 +504,7 @@ hypre_ILUSetup( void               *ilu_vdata,
                break;
       case 50: 
 #ifdef HYPRE_USING_CUDA
+               HYPRE_Int            test_opt       = hypre_ParILUDataTestOption(ilu_data);
                hypre_ILUSetupRAPILU0Device(matA, perm, n, nLU, matL_des, matU_des, ilu_solve_policy,
                               &ilu_solve_buffer, &matAL_info, &matAU_info, &matBL_info, &matBU_info, &matSL_info, &matSU_info,
                               &Aperm, &matS, &matALU_d, &matBLU_d, &matSLU_d, &matE_d, &matF_d, test_opt); //RAP + hypre_modified_ilu0
@@ -1096,6 +1096,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    /* switch to compute complexity */
 
 #ifdef HYPRE_USING_CUDA
+   HYPRE_Int            nnzG;/* Global nnz */
    if(ilu_type == 0 && fill_level == 0)
    {
       /* The nnz is for sure 1.0 in this case */

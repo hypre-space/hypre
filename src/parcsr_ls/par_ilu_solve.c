@@ -118,7 +118,6 @@ hypre_ILUSolve( void               *ilu_vdata,
    hypre_ParVector      *rhs           = hypre_ParILUDataRhs(ilu_data);
    hypre_ParVector      *x             = hypre_ParILUDataX(ilu_data);
 
-   HYPRE_Int            test_opt       = hypre_ParILUDataTestOption(ilu_data);
    /* begin */
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -285,6 +284,7 @@ hypre_ILUSolve( void               *ilu_vdata,
             break;
          case 50:
 #ifdef HYPRE_USING_CUDA
+            HYPRE_Int            test_opt       = hypre_ParILUDataTestOption(ilu_data);
             hypre_ILUSolveRAPGMRES(matA, F_array, U_array, perm, nLU, matS, Utemp, Ftemp, Xtemp, Ytemp, schur_solver, schur_precond, rhs, x, u_end,
                                  matL_des, matU_des, matAL_info, matAU_info, matBL_info, matBU_info, matSL_info, matSU_info,
                                  Aperm, matALU_d, matBLU_d, matE_d, matF_d, ilu_solve_policy, ilu_solve_buffer, test_opt);//GMRES-RAP

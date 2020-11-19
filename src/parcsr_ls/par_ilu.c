@@ -3542,10 +3542,8 @@ hypre_ParILURAPSchurGMRESSolveH( void               *ilu_vdata,
    HYPRE_Int               nLU                  = hypre_ParILUDataNLU(ilu_data);
    HYPRE_Int               m                    = n - nLU;
    
-   hypre_ParVector         *f_vec               = (hypre_ParVector *) f;
    hypre_Vector            *f_local             = hypre_ParVectorLocalVector(f);
    HYPRE_Real              *f_data              = hypre_VectorData(f_local);
-   hypre_ParVector         *u_vec               = (hypre_ParVector *) u;
    hypre_Vector            *u_local             = hypre_ParVectorLocalVector(u);
    HYPRE_Real              *u_data              = hypre_VectorData(u_local);
    
@@ -3554,10 +3552,6 @@ hypre_ParILURAPSchurGMRESSolveH( void               *ilu_vdata,
    HYPRE_Real              *utemp_data          = hypre_VectorData(utemp_local);
    
    HYPRE_Int               *u_end               = hypre_ParILUDataUEnd(ilu_data);
-   
-   HYPRE_Real zero = 0.0;
-   HYPRE_Real one = 1.0;
-   HYPRE_Real mone = -1.0;
    
    /* permuted L solve */
    for(i = 0 ; i < m ; i ++)
@@ -3643,21 +3637,14 @@ hypre_ParILURAPSchurGMRESMatvecH( void   *matvec_data,
    HYPRE_Int               *u_end               = hypre_ParILUDataUEnd(ilu_data);
    hypre_ParCSRMatrix      *A                   = hypre_ParILUDataMatA(ilu_data);
    hypre_ParCSRMatrix      *L                   = hypre_ParILUDataMatL(ilu_data);
-   HYPRE_Real              *D                   = hypre_ParILUDataMatD(ilu_data);
    hypre_ParCSRMatrix      *U                   = hypre_ParILUDataMatU(ilu_data);
    hypre_ParCSRMatrix      *mL                  = hypre_ParILUDataMatLModified(ilu_data);
    HYPRE_Real              *mD                  = hypre_ParILUDataMatDModified(ilu_data);
    hypre_ParCSRMatrix      *mU                  = hypre_ParILUDataMatUModified(ilu_data);
    
    hypre_CSRMatrix         *L_diag              = hypre_ParCSRMatrixDiag(L);
-   HYPRE_Int               *L_diag_i            = hypre_CSRMatrixI(L_diag);
-   HYPRE_Int               *L_diag_j            = hypre_CSRMatrixJ(L_diag);
-   HYPRE_Real              *L_diag_data         = hypre_CSRMatrixData(L_diag);
    
    hypre_CSRMatrix         *U_diag              = hypre_ParCSRMatrixDiag(U);
-   HYPRE_Int               *U_diag_i            = hypre_CSRMatrixI(U_diag);
-   HYPRE_Int               *U_diag_j            = hypre_CSRMatrixJ(U_diag);
-   HYPRE_Real              *U_diag_data         = hypre_CSRMatrixData(U_diag);
    
    hypre_CSRMatrix         *mL_diag             = hypre_ParCSRMatrixDiag(mL);
    HYPRE_Int               *mL_diag_i           = hypre_CSRMatrixI(mL_diag);
@@ -3672,7 +3659,6 @@ hypre_ParILURAPSchurGMRESMatvecH( void   *matvec_data,
    HYPRE_Int               *perm                = hypre_ParILUDataPerm(ilu_data);
    HYPRE_Int               n                    = hypre_ParCSRMatrixNumRows(A);
    HYPRE_Int               nLU                  = hypre_ParILUDataNLU(ilu_data);
-   HYPRE_Int               m                    = n - nLU;
    
    hypre_ParVector         *x_vec               = (hypre_ParVector *) x;
    hypre_Vector            *x_local             = hypre_ParVectorLocalVector(x_vec);
