@@ -1858,7 +1858,6 @@ hypre_ILUSetupILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qper
    HYPRE_BigInt            *S_offd_colmap       = NULL;
    HYPRE_Int               S_offd_nnz;
    HYPRE_Int               S_offd_ncols;
-   S_offd = hypre_ParCSRMatrixOffd(matS);
    
    /* set data slots */
    A_offd                                       = hypre_ParCSRMatrixOffd(A);
@@ -2133,7 +2132,6 @@ hypre_ILUSetupILUKDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm,
    HYPRE_BigInt            *S_offd_colmap       = NULL;
    HYPRE_Int               S_offd_nnz;
    HYPRE_Int               S_offd_ncols;
-   S_offd = hypre_ParCSRMatrixOffd(matS);
    
    /* set data slots */
    A_offd                                       = hypre_ParCSRMatrixOffd(A);
@@ -2448,7 +2446,6 @@ hypre_ILUSetupILUTDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    HYPRE_BigInt            *S_offd_colmap       = NULL;
    HYPRE_Int               S_offd_nnz;
    HYPRE_Int               S_offd_ncols;
-   S_offd = hypre_ParCSRMatrixOffd(matS);
    
    /* set data slots */
    A_offd                                       = hypre_ParCSRMatrixOffd(A);
