@@ -10,7 +10,7 @@
 #include "ams.h"
 #include "_hypre_utilities.hpp"
 
-HYPRE_Int hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega, HYPRE_Real *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp, HYPRE_Int GS_order, HYPRE_Int Symm, HYPRE_Int Skip_diag, HYPRE_Int Topo_order );
+HYPRE_Int hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega, HYPRE_Real *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp, HYPRE_Int GS_order, HYPRE_Int Symm, HYPRE_Int Skip_diag, HYPRE_Int forced_seq, HYPRE_Int Topo_order );
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRRelax
@@ -27,6 +27,7 @@ HYPRE_Int hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A, hyp
  *
  * The default value of relax_type is 2.
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_ParCSRRelax( hypre_ParCSRMatrix *A,              /* matrix to relax with */
                    hypre_ParVector    *f,              /* right-hand side */
@@ -53,21 +54,26 @@ hypre_ParCSRRelax( hypre_ParCSRMatrix *A,              /* matrix to relax with *
       }
       else if (relax_type == 2 || relax_type == 4) /* offd-l1-scaled block GS */
       {
+#if 0
          if (relax_weight == 1.0 && omega == 1.0) /* symmetric Gauss-Seidel */
          {
-            hypre_BoomerAMGRelax(A, f, NULL, 8, 0, relax_weight, omega, l1_norms, u, v, z);
+            hypre_BoomerAMGRelaxHybridGaussSeidel_core(A, f, NULL, 0, 1.0, 1.0, l1_norms, u, v, z,
+                                                       1, 1 /* symm */, 0 /* skip diag */, 1, 0);
          }
          else if (relax_weight == 1.0) /* SSOR */
          {
             hypre_BoomerAMGRelaxHybridGaussSeidel_core(A, f, NULL, 0, omega, 1.0, l1_norms, u, v, z,
-                                                       1, 1 /* symm */, 0, /*skip diag */ 0);
+                                                       1, 1 /* symm */, 0 /* skip diag */, 1, 0);
          }
          else /* scaled SSOR */
          {
-            /* !!! relax_weight and omega flipped !!! */
-            hypre_BoomerAMGRelaxHybridGaussSeidel_core(A, f, NULL, 0, omega, relax_weight, l1_norms, u, v, z,
-                                                       1, 1 /* symm */, 0, /*skip diag */ 0);
+#endif
+         /* !!! relax_weight and omega flipped !!! */
+         hypre_BoomerAMGRelaxHybridGaussSeidel_core(A, f, NULL, 0, omega, relax_weight, l1_norms, u, v, z,
+                                                    1, 1 /* symm */, 0 /* skip diag */, 1, 0);
+#if 0
          }
+#endif
       }
       else if (relax_type == 3) /* Kaczmarz */
       {

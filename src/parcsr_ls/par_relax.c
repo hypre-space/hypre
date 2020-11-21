@@ -16,7 +16,6 @@
 #include "_hypre_lapack.h"
 #include "../sstruct_ls/gselim.h"
 
-
 HYPRE_Int hypre_BoomerAMGRelax0WeightedJacobi( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, hypre_ParVector *u, hypre_ParVector *Vtemp );
 
 HYPRE_Int hypre_BoomerAMGRelax1GaussSeidel( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_points, hypre_ParVector *u );
@@ -641,6 +640,7 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
                                             HYPRE_Int           GS_order,
                                             HYPRE_Int           Symm,
                                             HYPRE_Int           Skip_diag,
+                                            HYPRE_Int           forced_seq,
                                             HYPRE_Int           Topo_order )
 {
    MPI_Comm             comm          = hypre_ParCSRMatrixComm(A);
@@ -674,13 +674,12 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
    HYPRE_Complex        res, res0, res2;
 
    HYPRE_Int num_procs, my_id, num_threads, i, j, ii, jj, num_sends;
-   HYPRE_Int ns, ne, size, rest;
-   HYPRE_Int sweep;
+   HYPRE_Int ns, ne, size, rest, sweep;
    hypre_ParCSRCommHandle *comm_handle;
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   num_threads = hypre_NumThreads();
+   num_threads = forced_seq ? 1 : hypre_NumThreads();
 
    /* GS order: forward or backward */
    const HYPRE_Int gs_order = GS_order > 0 ? 1 : -1;
@@ -787,18 +786,31 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
    hypre_profile_times[HYPRE_TIMER_ID_RELAX] -= hypre_MPI_Wtime();
 #endif
 
+   if (num_threads > 1 || !non_scale)
+   {
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-   for (i = 0; i < num_rows; i++)
-   {
-      Vtemp_data[i] = u_data[i];
+      for (i = 0; i < num_rows; i++)
+      {
+         Vtemp_data[i] = u_data[i];
+      }
    }
 
    if (num_threads > 1)
    {
+      /*
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < num_rows; i++)
+      {
+         Ztemp_data[i] = u_data[i];
+      }
+      */
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size,sweep) HYPRE_SMP_SCHEDULE
 #endif
       for (j = 0; j < num_threads; j++)
       {
@@ -1006,7 +1018,7 @@ hypre_BoomerAMGRelax3HybridGaussSeidel( hypre_ParCSRMatrix *A,
                                         hypre_ParVector    *Ztemp )
 {
    return hypre_BoomerAMGRelaxHybridGaussSeidel_core(A, f, cf_marker, relax_points, relax_weight, omega, NULL, u, Vtemp, Ztemp,
-                                                     1 /* forward */,  0 /* nonsymm */, 1 /* skip diag */, 0);
+                                                     1 /* forward */,  0 /* nonsymm */, 1 /* skip diag */, 0, 0);
 }
 
 /* backward hybrid G-S */
@@ -1022,7 +1034,7 @@ hypre_BoomerAMGRelax4HybridGaussSeidel( hypre_ParCSRMatrix *A,
                                         hypre_ParVector    *Ztemp )
 {
    return hypre_BoomerAMGRelaxHybridGaussSeidel_core(A, f, cf_marker, relax_points, relax_weight, omega, NULL, u, Vtemp, Ztemp,
-                                                     -1 /* backward */, 0 /* nosymm */, 1 /* skip diag */, 0);
+                                                     -1 /* backward */, 0 /* nosymm */, 1 /* skip diag */, 0, 0);
 }
 
 /* chaotic forward G-S */
@@ -1135,7 +1147,7 @@ hypre_BoomerAMGRelax6HybridSSOR( hypre_ParCSRMatrix *A,
                                  hypre_ParVector    *Ztemp )
 {
    return hypre_BoomerAMGRelaxHybridGaussSeidel_core(A, f, cf_marker, relax_points, relax_weight, omega, NULL, u, Vtemp, Ztemp,
-                                                     1, 1 /* symm */, 1 /* skip diag */, 0);
+                                                     1, 1 /* symm */, 1 /* skip diag */, 0, 0);
 }
 
 HYPRE_Int
@@ -1205,7 +1217,7 @@ hypre_BoomerAMGRelax8HybridL1SSOR( hypre_ParCSRMatrix *A,
    const HYPRE_Int skip_diag = relax_weight == 1.0 && omega == 1.0 ? 0 : 1;
 
    return hypre_BoomerAMGRelaxHybridGaussSeidel_core(A, f, cf_marker, relax_points, relax_weight, omega, l1_norms, u, Vtemp, Ztemp,
-                                                     1, 1 /* symm */, skip_diag, 0);
+                                                     1, 1 /* symm */, skip_diag, 0, 0);
 }
 
 
@@ -1222,7 +1234,7 @@ hypre_BoomerAMGRelax10TopoOrderedGaussSeidel( hypre_ParCSRMatrix *A,
                                               hypre_ParVector    *Ztemp )
 {
    return hypre_BoomerAMGRelaxHybridGaussSeidel_core(A, f, cf_marker, relax_points, relax_weight, omega, NULL, u, Vtemp, Ztemp,
-                                                     1 /* forward */, 0 /* nonsymm */, 1 /* skip_diag */, 1);
+                                                     1 /* forward */, 0 /* nonsymm */, 1 /* skip_diag */, 0, 1);
 }
 
 /* forward l1 hybrid G-S */
@@ -1241,7 +1253,7 @@ hypre_BoomerAMGRelax13HybridL1GaussSeidel( hypre_ParCSRMatrix *A,
    const HYPRE_Int skip_diag = relax_weight == 1.0 && omega == 1.0 ? 0 : 1;
 
    return hypre_BoomerAMGRelaxHybridGaussSeidel_core(A, f, cf_marker, relax_points, relax_weight, omega, l1_norms, u, Vtemp, Ztemp,
-                                                     1 /* forward */, 0 /* nonsymm */, skip_diag, 0);
+                                                     1 /* forward */, 0 /* nonsymm */, skip_diag, 0, 0);
 }
 
 /* backward l1 hybrid G-S */
@@ -1260,7 +1272,7 @@ hypre_BoomerAMGRelax14HybridL1GaussSeidel( hypre_ParCSRMatrix *A,
    const HYPRE_Int skip_diag = relax_weight == 1.0 && omega == 1.0 ? 0 : 1;
 
    return hypre_BoomerAMGRelaxHybridGaussSeidel_core(A, f, cf_marker, relax_points, relax_weight, omega, l1_norms, u, Vtemp, Ztemp,
-                                                     -1 /* backward */, 0 /* nonsymm */, skip_diag, 0);
+                                                     -1 /* backward */, 0 /* nonsymm */, skip_diag, 0, 0);
 }
 
 HYPRE_Int
