@@ -932,7 +932,6 @@ HYPRE_Int hypre_AMSConstructDiscreteGradient ( hypre_ParCSRMatrix *A , hypre_Par
 HYPRE_Int hypre_AMSFEISetup ( void *solver , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x , HYPRE_Int num_vert , HYPRE_Int num_local_vert , HYPRE_BigInt *vert_number , HYPRE_Real *vert_coord , HYPRE_Int num_edges , HYPRE_BigInt *edge_vertex );
 HYPRE_Int hypre_AMSFEIDestroy ( void *solver );
 HYPRE_Int hypre_ParCSRComputeL1NormsThreads ( hypre_ParCSRMatrix *A , HYPRE_Int option , HYPRE_Int num_threads , HYPRE_Int *cf_marker , HYPRE_Real **l1_norm_ptr );
-HYPRE_Int hypre_ParCSRRelaxThreads ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Int relax_type , HYPRE_Int relax_times , HYPRE_Real *l1_norms , HYPRE_Real relax_weight , HYPRE_Real omega , hypre_ParVector *u , hypre_ParVector *Vtemp , hypre_ParVector *z );
 
 /* aux_interp.c */
 HYPRE_Int hypre_alt_insert_new_nodes ( hypre_ParCSRCommPkg *comm_pkg , hypre_ParCSRCommPkg *extend_comm_pkg , HYPRE_Int *IN_marker , HYPRE_Int full_off_procNodes , HYPRE_Int *OUT_marker );
