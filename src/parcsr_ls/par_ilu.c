@@ -511,7 +511,8 @@ hypre_ILUSetType( void *ilu_vdata, HYPRE_Int ilu_type )
       }
       case 10: case 11: case 40: case 41: case 50:
       {
-         /* only set value when user has not assiged value before */
+         /* Set value of droptol for solving Schur system (if not set by user) */
+         /* NOTE: This is currently not exposed to users */
          if(!(ilu_data->sp_ilu_droptol))
          {
             (ilu_data -> sp_ilu_droptol)        = hypre_TAlloc(HYPRE_Real, 3, HYPRE_MEMORY_HOST);
@@ -630,7 +631,7 @@ hypre_ILUSetSchurSolverRelChange( void *ilu_vdata, HYPRE_Int ss_rel_change )
    (ilu_data -> ss_rel_change) = ss_rel_change;
    return hypre_error_flag;
 }
-/* Set IUL type for Precond of Schur System */
+/* Set ILU type for Precond of Schur System */
 HYPRE_Int
 hypre_ILUSetSchurPrecondILUType( void *ilu_vdata, HYPRE_Int sp_ilu_type )
 {
@@ -638,7 +639,7 @@ hypre_ILUSetSchurPrecondILUType( void *ilu_vdata, HYPRE_Int sp_ilu_type )
    (ilu_data -> sp_ilu_type) = sp_ilu_type;
    return hypre_error_flag;
 }
-/* Set IUL level of fill for Precond of Schur System */
+/* Set ILU level of fill for Precond of Schur System */
 HYPRE_Int
 hypre_ILUSetSchurPrecondILULevelOfFill( void *ilu_vdata, HYPRE_Int sp_ilu_lfil )
 {
@@ -646,7 +647,7 @@ hypre_ILUSetSchurPrecondILULevelOfFill( void *ilu_vdata, HYPRE_Int sp_ilu_lfil )
    (ilu_data -> sp_ilu_lfil) = sp_ilu_lfil;
    return hypre_error_flag;
 }
-/* Set IUL max nonzeros per row for Precond of Schur System */
+/* Set ILU max nonzeros per row for Precond of Schur System */
 HYPRE_Int
 hypre_ILUSetSchurPrecondILUMaxNnzPerRow( void *ilu_vdata, HYPRE_Int sp_ilu_max_row_nnz )
 {
@@ -654,7 +655,7 @@ hypre_ILUSetSchurPrecondILUMaxNnzPerRow( void *ilu_vdata, HYPRE_Int sp_ilu_max_r
    (ilu_data -> sp_ilu_max_row_nnz) = sp_ilu_max_row_nnz;
    return hypre_error_flag;
 }
-/* Set IUL drop threshold for ILUT for Precond of Schur System
+/* Set ILU drop threshold for ILUT for Precond of Schur System
  * We don't want to influence the original ILU, so create new array if not own data
  */
 HYPRE_Int
@@ -670,7 +671,7 @@ hypre_ILUSetSchurPrecondILUDropThreshold( void *ilu_vdata, HYPRE_Real sp_ilu_dro
    (ilu_data -> sp_ilu_droptol)[2]   = sp_ilu_droptol;
    return hypre_error_flag;
 }
-/* Set array of IUL drop threshold for ILUT for Precond of Schur System */
+/* Set array of ILU drop threshold for ILUT for Precond of Schur System */
 HYPRE_Int
 hypre_ILUSetSchurPrecondILUDropThresholdArray( void *ilu_vdata, HYPRE_Real *sp_ilu_droptol )
 {
@@ -706,7 +707,7 @@ hypre_ILUSetSchurPrecondTol( void *ilu_vdata, HYPRE_Int sp_tol )
    (ilu_data -> sp_tol) = sp_tol;
    return hypre_error_flag;
 }
-/* Set tolorance for NSH for Schur System
+/* Set tolorance for dropping in NSH for Schur System
  * We don't want to influence the original ILU, so create new array if not own data
  */
 HYPRE_Int
@@ -721,7 +722,10 @@ hypre_ILUSetSchurNSHDropThreshold( void *ilu_vdata, HYPRE_Real threshold)
    (ilu_data -> ss_nsh_droptol)[1]           = threshold;
    return hypre_error_flag;
 }
-/* Set tolorance array for NSH for Schur System */
+/* Set tolorance array for NSH for Schur System 
+ *    - threshold[0] : threshold for Minimal Residual iteration (initial guess for NSH).
+ *    - threshold[1] : threshold for Newton–Schulz–Hotelling iteration.
+*/
 HYPRE_Int
 hypre_ILUSetSchurNSHDropThresholdArray( void *ilu_vdata, HYPRE_Real *threshold)
 {

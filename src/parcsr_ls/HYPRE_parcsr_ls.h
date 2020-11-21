@@ -4017,14 +4017,14 @@ HYPRE_Int HYPRE_ILUSolve( HYPRE_Solver solver,
 
 /**
  * (Optional) Set maximum number of iterations if used as a solver.
- * Set this to 1 if ILU is used as a preconditioner. The default is 5.
+ * Set this to 1 if ILU is used as a preconditioner. The default is 20.
  **/
 HYPRE_Int
 HYPRE_ILUSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter );
 
 /**
  * (Optional) Set the convergence tolerance for the ILU smoother.
- * Use tol = 0.0 if ILU is used as a preconditioner. The default is 1.e-6.
+ * Use tol = 0.0 if ILU is used as a preconditioner. The default is 1.e-7.
  **/
 HYPRE_Int
 HYPRE_ILUSetTol( HYPRE_Solver solver, HYPRE_Real tol );
@@ -4037,14 +4037,14 @@ HYPRE_Int
 HYPRE_ILUSetLevelOfFill( HYPRE_Solver solver, HYPRE_Int lfil );
 
 /**
- * (Optional) Set the max non-zeros per row in L and U factors (for ilut)
+ * (Optional) Set the max non-zeros per row in L and U factors (for ILUT)
  * The default is 1000.
  **/
 HYPRE_Int
 HYPRE_ILUSetMaxNnzPerRow( HYPRE_Solver solver, HYPRE_Int nzmax );
 
 /**
- * (Optional) Set the threshold for dropping in L and U factors (for ilut).
+ * (Optional) Set the threshold for dropping in L and U factors (for ILUT).
  * Any fill-in less than this threshold is dropped in the factorization.
  * The default is 1.0e-2.
  **/
@@ -4052,9 +4052,11 @@ HYPRE_Int
 HYPRE_ILUSetDropThreshold( HYPRE_Solver solver, HYPRE_Real threshold );
 
 /**
- * (Optional) Set the array of thresholds for dropping in ilut.
+ * (Optional) Set the array of thresholds for dropping in ILUT.
+ * B, E, and F correspond to upper left, lower left and upper right 
+ * of 2 x 2 block decomposition respectively.
  * Any fill-in less than thresholds is dropped in the factorization.
- *    - threshold[0] : threshold for matrix B (upper left).
+ *    - threshold[0] : threshold for matrix B.
  *    - threshold[1] : threshold for matrix E and F.
  *    - threshold[2] : threshold for matrix S (Schur Complement).
  * The default is 1.0e-2.
@@ -4063,19 +4065,19 @@ HYPRE_Int
 HYPRE_ILUSetDropThresholdArray( HYPRE_Solver solver, HYPRE_Real *threshold );
 
 /**
- * (Optional) Set the threshold for dropping in Newton–Schulz–Hotelling iteration (for NHS-ILU).
- * Any entries less than this threshold is dropped when forming the approximate inverse matrix.
+ * (Optional) Set the threshold for dropping in Newton–Schulz–Hotelling iteration (NHS-ILU).
+ * Any entries less than this threshold are dropped when forming the approximate inverse matrix.
  * The default is 1.0e-2.
  **/
 HYPRE_Int
 HYPRE_ILUSetNSHDropThreshold( HYPRE_Solver solver, HYPRE_Real threshold );
 
 /**
- * (Optional) Set the array of thresholds for dropping Newton–Schulz–Hotelling
+ * (Optional) Set the array of thresholds for dropping in Newton–Schulz–Hotelling
  * iteration (for NHS-ILU).  Any fill-in less than thresholds is dropped when
  * forming the approximate inverse matrix.
  *
- *    - threshold[0] : threshold for Minimal Residual iteration (create initial guess for NSH).
+ *    - threshold[0] : threshold for Minimal Residual iteration (initial guess for NSH).
  *    - threshold[1] : threshold for Newton–Schulz–Hotelling iteration.
  *
  * The default is 1.0e-2.
@@ -4085,9 +4087,9 @@ HYPRE_ILUSetNSHDropThresholdArray( HYPRE_Solver solver, HYPRE_Real *threshold );
 
 /**
  * (Optional) Set maximum number of iterations for Schur System Solve.
- * For ILU-GMRES, this is the maximum number of iterations for GMRES.
- * The dimension of GMRES is set equal to this value to avoid restart.
- * For ILU-NSH, this is the maximum number of iterations for NSH solve.
+ * For GMRES-ILU, this is the maximum number of iterations for GMRES.
+ * The Krylov dimension for GMRES is set equal to this value to avoid restart.
+ * For NSH-ILU, this is the maximum number of iterations for NSH solve.
  * The default is 5.
  **/
 HYPRE_Int
@@ -4097,8 +4099,17 @@ HYPRE_ILUSetSchurMaxIter( HYPRE_Solver solver, HYPRE_Int ss_max_iter );
  * Set the type of ILU factorization.
  *
  * Options for \e ilu_type are:
- *    - 0 : BJ with ilu(0) (default)
- *    - 1 : BJ with ilut
+ *    - 0 : BJ with ILU(k) (default, with k = 0)
+ *    - 1 : BJ with ILUT
+ *    - 10 : GMRES with ILU(k)
+ *    - 11 : GMRES with ILUT
+ *    - 20 : NSH with ILU(k)
+ *    - 21 : NSH with ILUT
+ *    - 30 : RAS with ILU(k)
+ *    - 31 : RAS with ILUT
+ *    - 40 : (nonsymmetric permutation) DDPQ-GMRES with ILU(k)
+ *    - 41 : (nonsymmetric permutation) DDPQ-GMRES with ILUT  
+ *    - 50 : GMRES with RAP-ILU(0) using MILU(0) for P 
  **/
 HYPRE_Int
 HYPRE_ILUSetType( HYPRE_Solver solver, HYPRE_Int ilu_type );
@@ -4127,7 +4138,7 @@ HYPRE_ILUSetPrintLevel( HYPRE_Solver solver, HYPRE_Int print_level );
 /**
  * (Optional) Requests logging of solver diagnostics.
  * Requests additional computations for diagnostic and similar
- * data to be logged by the user. Default to 0 for do nothing.  The latest
+ * data to be logged by the user. Default is 0, do nothing.  The latest
  * residual will be available if logging > 1.
  **/
 HYPRE_Int
