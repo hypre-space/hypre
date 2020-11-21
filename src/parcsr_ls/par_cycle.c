@@ -492,6 +492,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   {
                      if ( hypre_NumThreads() == 1 )
                      {
+                        /*
                         hypre_ParCSRRelax(A_array[level],
                                           Aux_F,
                                           1,
@@ -502,6 +503,15 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                           Aux_U,
                                           Vtemp,
                                           Ztemp);
+                        */
+                        hypre_ParCSRRelax_L1_Jacobi(A_array[level],
+                                                    Aux_F,
+                                                    NULL,
+                                                    0,
+                                                    relax_weight[level],
+                                                    l1_norms_level ? hypre_VectorData(l1_norms_level) : NULL,
+                                                    Aux_U,
+                                                    Vtemp);
                      }
                      else
                      {
