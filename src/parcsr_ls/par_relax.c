@@ -712,6 +712,12 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
       hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
 #endif
 
+      if (!comm_pkg)
+      {
+         hypre_MatvecCommPkgCreate(A);
+         comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+      }
+
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
 #if defined(HYPRE_USING_PERSISTENT_COMM)
