@@ -332,6 +332,21 @@ hypre_ILUDestroy( void *data )
       hypre_TFree((ilu_data -> matD), HYPRE_MEMORY_DEVICE);
       (ilu_data -> matD) = NULL;
    }
+   if(ilu_data -> matmL)
+   {
+      hypre_ParCSRMatrixDestroy((ilu_data -> matmL));
+      (ilu_data -> matmL) = NULL;
+   }
+   if(ilu_data -> matmU)
+   {
+      hypre_ParCSRMatrixDestroy((ilu_data -> matmU));
+      (ilu_data -> matmU) = NULL;
+   }
+   if(ilu_data -> matmD)
+   {
+      hypre_TFree((ilu_data -> matmD), HYPRE_MEMORY_DEVICE);
+      (ilu_data -> matmD) = NULL;
+   }
    if(ilu_data -> matS)
    {
       hypre_ParCSRMatrixDestroy((ilu_data -> matS));
@@ -354,9 +369,9 @@ hypre_ILUDestroy( void *data )
    if(ilu_data -> schur_precond)
    {
       switch(ilu_data -> ilu_type){
-      case 10: case 11: case 40: case 41: //case 50:
+      case 10: case 11: case 40: case 41: case 50:
 #ifdef HYPRE_USING_CUDA
-         if(ilu_data -> ilu_type != 0 && ilu_data -> ilu_type != 1 && ilu_data -> ilu_type != 10 && ilu_data -> ilu_type != 11)
+         if(ilu_data -> ilu_type != 10 && ilu_data -> ilu_type != 11 && ilu_data -> ilu_type != 50)
          {
 #endif
             HYPRE_ILUDestroy(ilu_data -> schur_precond); //ILU as precond for Schur
@@ -475,9 +490,9 @@ hypre_ILUSetType( void *ilu_vdata, HYPRE_Int ilu_type )
    if(ilu_data -> schur_precond)
    {
       switch(ilu_data -> ilu_type){
-      case 10: case 11: case 40: case 41: //case 50:
+      case 10: case 11: case 40: case 41: case 50:
 #ifdef HYPRE_USING_CUDA
-         if(ilu_data -> ilu_type != 0 && ilu_data -> ilu_type != 1 && ilu_data -> ilu_type != 10 && ilu_data -> ilu_type != 11)
+         if(ilu_data -> ilu_type != 10 && ilu_data -> ilu_type != 11 && ilu_data -> ilu_type != 50)
          {
 #endif
             HYPRE_ILUDestroy(ilu_data -> schur_precond); //ILU as precond for Schur

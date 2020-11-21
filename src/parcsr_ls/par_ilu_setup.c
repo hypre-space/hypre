@@ -271,12 +271,12 @@ hypre_ILUSetup( void               *ilu_vdata,
    }
    if(matD)
    {
-      hypre_TFree(matD, HYPRE_MEMORY_HOST);
+      hypre_TFree(matD, HYPRE_MEMORY_DEVICE);
       matD = NULL;
    }
    if(matmD)
    {
-      hypre_TFree(matmD, HYPRE_MEMORY_HOST);
+      hypre_TFree(matmD, HYPRE_MEMORY_DEVICE);
       matmD = NULL;
    }
    if(CF_marker_array)
@@ -344,7 +344,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    if (hypre_ParILUDataSchurSolver(ilu_data))
    {
       switch(ilu_type){
-         case 10: case 11:
+         case 10: case 11: case 40: case 41: case 50:
             HYPRE_ParCSRGMRESDestroy(hypre_ParILUDataSchurSolver(ilu_data)); //GMRES for Schur
             break;
          case 20: case 21:
@@ -358,8 +358,17 @@ hypre_ILUSetup( void               *ilu_vdata,
    if(hypre_ParILUDataSchurPrecond(ilu_data))
    {
       switch(ilu_type){
-         case 10: case 11:
+         case 10: case 11: case 40: case 41: case 50:
+#ifdef HYPRE_USING_CUDA
+         if(hypre_ParILUDataIluType(ilu_data) != 10 && 
+            hypre_ParILUDataIluType(ilu_data) != 11 && 
+            hypre_ParILUDataIluType(ilu_data) != 50)
+         {
+#endif
             HYPRE_ILUDestroy(hypre_ParILUDataSchurPrecond(ilu_data)); //ILU as precond for Schur
+#ifdef HYPRE_USING_CUDA
+         }
+#endif
             break;
          default:
             break;
@@ -1141,7 +1150,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          switch(ilu_type)
          {
             case 10: case 11: case 40: case 41: case 50:
-               /* now we need to compute the preoconditioner */
+               /* now we need to compute the preconditioner */
                schur_precond_ilu = (hypre_ParILUData*) (ilu_data -> schur_precond);
                /* borrow i for local nnz of S */
                i = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(matS));
@@ -3542,7 +3551,7 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n,
 
 /* Modified ILU(0) with RAP like solve
  * A = input matrix
- * Not explicitly forming the matrix, the previous version was abondoned
+ * Not explicitly forming the matrix
  */
 HYPRE_Int
 hypre_ILUSetupRAPILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n, HYPRE_Int nLU,
@@ -3639,8 +3648,8 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYP
  * A = input matrix
  * perm = permutation array indicating ordering of rows. Perm could come from a
  *    CF_marker array or a reordering routine. When set to NULL, indentity permutation is used.
- * qperm = permutation array indicating ordering of columns When set to NULL, indentity permutation is used.
- * nI = number of interial unknowns
+ * qperm = permutation array indicating ordering of columns When set to NULL, identity permutation is used.
+ * nI = number of interior unknowns
  * nLU = size of incomplete factorization, nLU should obey nLU <= nI.
  *    Schur complement is formed if nLU < n
  * Lptr, Dptr, Uptr, Sptr = L, D, U, S factors.
