@@ -107,8 +107,9 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Int            buffer_size;
    HYPRE_Int            send_size;
    HYPRE_Int            recv_size;
+#ifdef HYPRE_USING_CUDA   
    HYPRE_Int            test_opt;
-
+#endif
    /* ----- begin -----*/
    HYPRE_ANNOTATE_FUNC_BEGIN;
 

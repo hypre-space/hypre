@@ -97,7 +97,9 @@ hypre_ILUSolve( void               *ilu_vdata,
    HYPRE_Real           operat_cmplxty = (ilu_data -> operator_complexity);
 
    HYPRE_Int            Solve_err_flag;
+#ifdef HYPRE_USING_CUDA   
    HYPRE_Int            test_opt;
+#endif
 
    /* problem size */
    HYPRE_Int            n              = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));

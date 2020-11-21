@@ -12,7 +12,6 @@
  *****************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
-#include "protos.h"
 #include "par_amg.h"
 #ifdef HYPRE_USING_DSUPERLU
 #include <math.h>
