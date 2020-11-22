@@ -94,7 +94,7 @@ hypre_ILUSolve( void               *ilu_vdata,
    HYPRE_Real           rhs_norm       = 0.0;
    HYPRE_Real           old_resnorm;
    HYPRE_Real           ieee_check     = 0.0;
-   HYPRE_Real           operat_cmplxty = (ilu_data -> operator_complexity);
+   HYPRE_Real           operat_cmplxty = hypre_ParILUDataOperatorComplexity(ilu_data);
 
    HYPRE_Int            Solve_err_flag;
 #ifdef HYPRE_USING_CUDA   
@@ -117,10 +117,10 @@ hypre_ILUSolve( void               *ilu_vdata,
 
    if(logging > 1)
    {
-      residual = (ilu_data -> residual);
+      residual = hypre_ParILUDataResidual(ilu_data);
    }
 
-   (ilu_data -> num_iterations) = 0;
+   hypre_ParILUDataNumIterations(ilu_data) = 0;
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
@@ -211,7 +211,7 @@ hypre_ILUSolve( void               *ilu_vdata,
          if(logging > 0)
          {
             rel_resnorm = 0.0;
-            (ilu_data -> final_rel_residual_norm) = rel_resnorm;
+            hypre_ParILUDataFinalRelResidualNorm(ilu_data) = rel_resnorm;
          }
          HYPRE_ANNOTATE_FUNC_END;
 
@@ -333,8 +333,8 @@ hypre_ILUSolve( void               *ilu_vdata,
       }
 
       ++iter;
-      (ilu_data -> num_iterations) = iter;
-      (ilu_data -> final_rel_residual_norm) = rel_resnorm;
+      hypre_ParILUDataNumIterations(ilu_data) = iter;
+      hypre_ParILUDataFinalRelResidualNorm(ilu_data) = rel_resnorm;
 
       if (my_id == 0 && print_level > 1)
       {

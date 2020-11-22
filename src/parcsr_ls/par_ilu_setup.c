@@ -143,32 +143,32 @@ hypre_ILUSetup( void               *ilu_vdata,
    }
    if(!matAL_info)
    {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info((ilu_data) -> matAL_info)) );
+      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatALILUSolveInfo(ilu_data))) );
       matAL_info = NULL;
    }
    if(!matAU_info)
    {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info((ilu_data) -> matAU_info)) );
+      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatAUILUSolveInfo(ilu_data))) );
       matAU_info = NULL;
    }
    if(!matBL_info)
    {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info((ilu_data) -> matBL_info)) );
+      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatBLILUSolveInfo(ilu_data))) );
       matBL_info = NULL;
    }
    if(!matBU_info)
    {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info((ilu_data) -> matBU_info)) );
+      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatBUILUSolveInfo(ilu_data))) );
       matBU_info = NULL;
    }
    if(!matSL_info)
    {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info((ilu_data) -> matSL_info)) );
+      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatSLILUSolveInfo(ilu_data))) );
       matSL_info = NULL;
    }
    if(!matSU_info)
    {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info((ilu_data) -> matSU_info)) );
+      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatSUILUSolveInfo(ilu_data))) );
       matSU_info = NULL;
    }
    if(ilu_solve_buffer)
@@ -564,11 +564,11 @@ hypre_ILUSetup( void               *ilu_vdata,
             /* setup GMRES parameters */
             HYPRE_GMRESSetKDim            (schur_solver, hypre_ParILUDataSchurGMRESKDim(ilu_data));
             HYPRE_GMRESSetMaxIter         (schur_solver, hypre_ParILUDataSchurGMRESMaxIter(ilu_data));/* we don't need that many solves */
-            HYPRE_GMRESSetTol             (schur_solver, (ilu_data -> ss_tol));
-            HYPRE_GMRESSetAbsoluteTol     (schur_solver, (ilu_data -> ss_absolute_tol));
-            HYPRE_GMRESSetLogging         (schur_solver, (ilu_data -> ss_logging));
-            HYPRE_GMRESSetPrintLevel      (schur_solver, (ilu_data -> ss_print_level));/* set to zero now, don't print */
-            HYPRE_GMRESSetRelChange       (schur_solver, (ilu_data -> ss_rel_change));
+            HYPRE_GMRESSetTol             (schur_solver, hypre_ParILUDataSchurGMRESTol(ilu_data));
+            HYPRE_GMRESSetAbsoluteTol     (schur_solver, hypre_ParILUDataSchurGMRESAbsoluteTol(ilu_data));
+            HYPRE_GMRESSetLogging         (schur_solver, hypre_ParILUDataSchurSolverLogging(ilu_data));
+            HYPRE_GMRESSetPrintLevel      (schur_solver, hypre_ParILUDataSchurSolverPrintLevel(ilu_data));/* set to zero now, don't print */
+            HYPRE_GMRESSetRelChange       (schur_solver, hypre_ParILUDataSchurGMRESRelChange(ilu_data));
 
             /* setup preconditioner parameters */
             /* create Unit precond */
@@ -616,22 +616,22 @@ hypre_ILUSetup( void               *ilu_vdata,
 
             HYPRE_GMRESSetKDim            (schur_solver, hypre_ParILUDataSchurGMRESKDim(ilu_data));
             HYPRE_GMRESSetMaxIter         (schur_solver, hypre_ParILUDataSchurGMRESMaxIter(ilu_data));/* we don't need that many solves */
-            HYPRE_GMRESSetTol             (schur_solver, (ilu_data -> ss_tol));
-            HYPRE_GMRESSetAbsoluteTol     (schur_solver, (ilu_data -> ss_absolute_tol));
-            HYPRE_GMRESSetLogging         (schur_solver, (ilu_data -> ss_logging));
-            HYPRE_GMRESSetPrintLevel      (schur_solver, (ilu_data -> ss_print_level));/* set to zero now, don't print */
-            HYPRE_GMRESSetRelChange       (schur_solver, (ilu_data -> ss_rel_change));
+            HYPRE_GMRESSetTol             (schur_solver, hypre_ParILUDataSchurGMRESTol(ilu_data));
+            HYPRE_GMRESSetAbsoluteTol     (schur_solver, hypre_ParILUDataSchurGMRESAbsoluteTol(ilu_data));
+            HYPRE_GMRESSetLogging         (schur_solver, hypre_ParILUDataSchurSolverLogging(ilu_data));
+            HYPRE_GMRESSetPrintLevel      (schur_solver, hypre_ParILUDataSchurSolverPrintLevel(ilu_data));/* set to zero now, don't print */
+            HYPRE_GMRESSetRelChange       (schur_solver, hypre_ParILUDataSchurGMRESRelChange(ilu_data));
 
             /* setup preconditioner parameters */
             /* create precond, the default is ILU0 */
             HYPRE_ILUCreate               (&schur_precond);
-            HYPRE_ILUSetType              (schur_precond, (ilu_data -> sp_ilu_type));
-            HYPRE_ILUSetLevelOfFill       (schur_precond, (ilu_data -> sp_ilu_lfil));
-            HYPRE_ILUSetMaxNnzPerRow      (schur_precond, (ilu_data -> sp_ilu_max_row_nnz));
-            HYPRE_ILUSetDropThresholdArray(schur_precond, (ilu_data -> sp_ilu_droptol));
-            HYPRE_ILUSetPrintLevel        (schur_precond, (ilu_data -> sp_print_level));
-            HYPRE_ILUSetMaxIter           (schur_precond, (ilu_data -> sp_max_iter));
-            HYPRE_ILUSetTol               (schur_precond, (ilu_data -> sp_tol));
+            HYPRE_ILUSetType              (schur_precond, hypre_ParILUDataSchurPrecondIluType(ilu_data));
+            HYPRE_ILUSetLevelOfFill       (schur_precond, hypre_ParILUDataSchurPrecondIluLfil(ilu_data));
+            HYPRE_ILUSetMaxNnzPerRow      (schur_precond, hypre_ParILUDataSchurPrecondIluMaxRowNnz(ilu_data));
+            HYPRE_ILUSetDropThresholdArray(schur_precond, hypre_ParILUDataSchurPrecondIluDroptol(ilu_data));
+            HYPRE_ILUSetPrintLevel        (schur_precond, hypre_ParILUDataSchurPrecondPrintLevel(ilu_data));
+            HYPRE_ILUSetMaxIter           (schur_precond, hypre_ParILUDataSchurPrecondMaxIter(ilu_data));
+            HYPRE_ILUSetTol               (schur_precond, hypre_ParILUDataSchurPrecondTol(ilu_data));
 
             /* add preconditioner to solver */
             HYPRE_GMRESSetPrecond(schur_solver,
@@ -737,22 +737,22 @@ hypre_ILUSetup( void               *ilu_vdata,
 
             HYPRE_GMRESSetKDim            (schur_solver, hypre_ParILUDataSchurGMRESKDim(ilu_data));
             HYPRE_GMRESSetMaxIter         (schur_solver, hypre_ParILUDataSchurGMRESMaxIter(ilu_data));/* we don't need that many solves */
-            HYPRE_GMRESSetTol             (schur_solver, (ilu_data -> ss_tol));
-            HYPRE_GMRESSetAbsoluteTol     (schur_solver, (ilu_data -> ss_absolute_tol));
-            HYPRE_GMRESSetLogging         (schur_solver, (ilu_data -> ss_logging));
-            HYPRE_GMRESSetPrintLevel      (schur_solver, (ilu_data -> ss_print_level));/* set to zero now, don't print */
-            HYPRE_GMRESSetRelChange       (schur_solver, (ilu_data -> ss_rel_change));
+            HYPRE_GMRESSetTol             (schur_solver, hypre_ParILUDataSchurGMRESTol(ilu_data));
+            HYPRE_GMRESSetAbsoluteTol     (schur_solver, hypre_ParILUDataSchurGMRESAbsoluteTol(ilu_data));
+            HYPRE_GMRESSetLogging         (schur_solver, hypre_ParILUDataSchurSolverLogging(ilu_data));
+            HYPRE_GMRESSetPrintLevel      (schur_solver, hypre_ParILUDataSchurSolverPrintLevel(ilu_data));/* set to zero now, don't print */
+            HYPRE_GMRESSetRelChange       (schur_solver, hypre_ParILUDataSchurGMRESRelChange(ilu_data));
 
             /* setup preconditioner parameters */
             /* create precond, the default is ILU0 */
             HYPRE_ILUCreate               (&schur_precond);
-            HYPRE_ILUSetType              (schur_precond, (ilu_data -> sp_ilu_type));
-            HYPRE_ILUSetLevelOfFill       (schur_precond, (ilu_data -> sp_ilu_lfil));
-            HYPRE_ILUSetMaxNnzPerRow      (schur_precond, (ilu_data -> sp_ilu_max_row_nnz));
-            HYPRE_ILUSetDropThresholdArray(schur_precond, (ilu_data -> sp_ilu_droptol));
-            HYPRE_ILUSetPrintLevel        (schur_precond, (ilu_data -> sp_print_level));
-            HYPRE_ILUSetMaxIter           (schur_precond, (ilu_data -> sp_max_iter));
-            HYPRE_ILUSetTol               (schur_precond, (ilu_data -> sp_tol));
+            HYPRE_ILUSetType              (schur_precond, hypre_ParILUDataSchurPrecondIluType(ilu_data));
+            HYPRE_ILUSetLevelOfFill       (schur_precond, hypre_ParILUDataSchurPrecondIluLfil(ilu_data));
+            HYPRE_ILUSetMaxNnzPerRow      (schur_precond, hypre_ParILUDataSchurPrecondIluMaxRowNnz(ilu_data));
+            HYPRE_ILUSetDropThresholdArray(schur_precond, hypre_ParILUDataSchurPrecondIluDroptol(ilu_data));
+            HYPRE_ILUSetPrintLevel        (schur_precond, hypre_ParILUDataSchurPrecondPrintLevel(ilu_data));
+            HYPRE_ILUSetMaxIter           (schur_precond, hypre_ParILUDataSchurPrecondMaxIter(ilu_data));
+            HYPRE_ILUSetTol               (schur_precond, hypre_ParILUDataSchurPrecondTol(ilu_data));
 
             /* add preconditioner to solver */
             HYPRE_GMRESSetPrecond(schur_solver,
@@ -849,11 +849,11 @@ hypre_ILUSetup( void               *ilu_vdata,
             }
             HYPRE_GMRESSetKDim            (schur_solver, hypre_ParILUDataSchurGMRESKDim(ilu_data));
             HYPRE_GMRESSetMaxIter         (schur_solver, hypre_ParILUDataSchurGMRESMaxIter(ilu_data));/* we don't need that many solves */
-            HYPRE_GMRESSetTol             (schur_solver, (ilu_data -> ss_tol));
-            HYPRE_GMRESSetAbsoluteTol     (schur_solver, (ilu_data -> ss_absolute_tol));
-            HYPRE_GMRESSetLogging         (schur_solver, (ilu_data -> ss_logging));
-            HYPRE_GMRESSetPrintLevel      (schur_solver, (ilu_data -> ss_print_level));/* set to zero now, don't print */
-            HYPRE_GMRESSetRelChange       (schur_solver, (ilu_data -> ss_rel_change));
+            HYPRE_GMRESSetTol             (schur_solver, hypre_ParILUDataSchurGMRESTol(ilu_data));
+            HYPRE_GMRESSetAbsoluteTol     (schur_solver, hypre_ParILUDataSchurGMRESAbsoluteTol(ilu_data));
+            HYPRE_GMRESSetLogging         (schur_solver, hypre_ParILUDataSchurSolverLogging(ilu_data));
+            HYPRE_GMRESSetPrintLevel      (schur_solver, hypre_ParILUDataSchurSolverPrintLevel(ilu_data));/* set to zero now, don't print */
+            HYPRE_GMRESSetRelChange       (schur_solver, hypre_ParILUDataSchurGMRESRelChange(ilu_data));
 
             /* setup preconditioner parameters */
             /* create Schur precond */
@@ -984,11 +984,11 @@ hypre_ILUSetup( void               *ilu_vdata,
             }
             HYPRE_GMRESSetKDim            (schur_solver, hypre_ParILUDataSchurGMRESKDim(ilu_data));
             HYPRE_GMRESSetMaxIter         (schur_solver, hypre_ParILUDataSchurGMRESMaxIter(ilu_data));/* we don't need that many solves */
-            HYPRE_GMRESSetTol             (schur_solver, (ilu_data -> ss_tol));
-            HYPRE_GMRESSetAbsoluteTol     (schur_solver, (ilu_data -> ss_absolute_tol));
-            HYPRE_GMRESSetLogging         (schur_solver, (ilu_data -> ss_logging));
-            HYPRE_GMRESSetPrintLevel      (schur_solver, (ilu_data -> ss_print_level));/* set to zero now, don't print */
-            HYPRE_GMRESSetRelChange       (schur_solver, (ilu_data -> ss_rel_change));
+            HYPRE_GMRESSetTol             (schur_solver, hypre_ParILUDataSchurGMRESTol(ilu_data));
+            HYPRE_GMRESSetAbsoluteTol     (schur_solver, hypre_ParILUDataSchurGMRESAbsoluteTol(ilu_data));
+            HYPRE_GMRESSetLogging         (schur_solver, hypre_ParILUDataSchurSolverLogging(ilu_data));
+            HYPRE_GMRESSetPrintLevel      (schur_solver, hypre_ParILUDataSchurSolverPrintLevel(ilu_data));/* set to zero now, don't print */
+            HYPRE_GMRESSetRelChange       (schur_solver, hypre_ParILUDataSchurGMRESRelChange(ilu_data));
 
             /* setup preconditioner parameters */
             /* create Schur precond */
@@ -1083,7 +1083,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    if(ilu_type == 0 && fill_level == 0)
    {
       /* The nnz is for sure 1.0 in this case */
-      (ilu_data -> operator_complexity) =  1.0;
+      hypre_ParILUDataOperatorComplexity(ilu_data) =  1.0;
    }
    else if(ilu_type == 10 && fill_level == 0)
    {
@@ -1107,12 +1107,12 @@ hypre_ILUSetup( void               *ilu_vdata,
          nnzS = hypre_ParCSRMatrixDNumNonzeros(matS);
          /* if we have Schur system need to reduce it from size_C */
       }
-      (ilu_data -> operator_complexity) =  ((HYPRE_Real)nnzG + nnzS) /
+      hypre_ParILUDataOperatorComplexity(ilu_data) =  ((HYPRE_Real)nnzG + nnzS) /
                                            hypre_ParCSRMatrixDNumNonzeros(matA);
    }
    else if(ilu_type == 50)
    {
-      (ilu_data -> operator_complexity) =  1.0;
+      hypre_ParILUDataOperatorComplexity(ilu_data) =  1.0;
    }
    else if(ilu_type == 0 || ilu_type == 1 || ilu_type == 10 || ilu_type == 11)
    {
@@ -1135,7 +1135,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          nnzS = hypre_ParCSRMatrixDNumNonzeros(matS);
          /* if we have Schur system need to reduce it from size_C */
       }
-      (ilu_data -> operator_complexity) =  ((HYPRE_Real)nnzG + nnzS) /
+      hypre_ParILUDataOperatorComplexity(ilu_data) =  ((HYPRE_Real)nnzG + nnzS) /
                                            hypre_ParCSRMatrixDNumNonzeros(matA);
    }
    else
@@ -1151,11 +1151,11 @@ hypre_ILUSetup( void               *ilu_vdata,
          {
             case 10: case 11: case 40: case 41: case 50:
                /* now we need to compute the preconditioner */
-               schur_precond_ilu = (hypre_ParILUData*) (ilu_data -> schur_precond);
+               schur_precond_ilu = (hypre_ParILUData*) (hypre_ParILUDataSchurPrecond(ilu_data));
                /* borrow i for local nnz of S */
                i = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(matS));
                hypre_MPI_Allreduce(&i, &nnzS_offd, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
-               nnzS = nnzS * (schur_precond_ilu -> operator_complexity) +nnzS_offd;
+               nnzS = nnzS * hypre_ParILUDataOperatorComplexity(ilu_data) +nnzS_offd;
                break;
             case 20: case 21:
                schur_solver_nsh = (hypre_ParNSHData*) hypre_ParILUDataSchurSolver(ilu_data);
@@ -1166,7 +1166,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          }
       }
 
-      (ilu_data -> operator_complexity) =  ((HYPRE_Real)size_C + nnzS +
+      hypre_ParILUDataOperatorComplexity(ilu_data) =  ((HYPRE_Real)size_C + nnzS +
                                           hypre_ParCSRMatrixDNumNonzeros(matL) +
                                           hypre_ParCSRMatrixDNumNonzeros(matU))/
                                           hypre_ParCSRMatrixDNumNonzeros(matA);
@@ -1175,7 +1175,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 #endif
    if ((my_id == 0) && (print_level > 0))
    {
-      hypre_printf("ILU SETUP: operator complexity = %f  \n", ilu_data -> operator_complexity);
+      hypre_printf("ILU SETUP: operator complexity = %f  \n", hypre_ParILUDataOperatorComplexity(ilu_data));
    }
 
    if ( logging > 1 ) {
@@ -1185,13 +1185,13 @@ hypre_ILUSetup( void               *ilu_vdata,
                hypre_ParCSRMatrixRowStarts(matA) );
       hypre_ParVectorInitialize(residual);
       hypre_ParVectorSetPartitioningOwner(residual,0);
-      (ilu_data -> residual) = residual;
+      hypre_ParILUDataResidual(ilu_data) = residual;
    }
    else{
-      (ilu_data -> residual) = NULL;
+      hypre_ParILUDataResidual(ilu_data) = NULL;
    }
-   rel_res_norms = hypre_CTAlloc(HYPRE_Real, (ilu_data -> max_iter), HYPRE_MEMORY_HOST);
-   (ilu_data -> rel_res_norms) = rel_res_norms;
+   rel_res_norms = hypre_CTAlloc(HYPRE_Real, hypre_ParILUDataMaxIter(ilu_data), HYPRE_MEMORY_HOST);
+   hypre_ParILUDataRelResNorms(ilu_data) = rel_res_norms;
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
