@@ -1249,7 +1249,6 @@ typedef struct
 #define hypre_HandleCubUvmAllocator(hypre_handle)                hypre_CudaDataCubUvmAllocator(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleCudaDevice(hypre_handle)                     hypre_CudaDataCudaDevice(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleCudaComputeStreamNum(hypre_handle)           hypre_CudaDataCudaComputeStreamNum(hypre_HandleCudaData(hypre_handle))
-#define hypre_HandleCudaComputeStreamSync(hypre_handle)          hypre_CudaDataCudaComputeStreamSync(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleCudaReduceBuffer(hypre_handle)               hypre_CudaDataCudaReduceBuffer(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleStructCommRecvBuffer(hypre_handle)           hypre_CudaDataStructCommRecvBuffer(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleStructCommSendBuffer(hypre_handle)           hypre_CudaDataStructCommSendBuffer(hypre_HandleCudaData(hypre_handle))
@@ -1604,6 +1603,11 @@ void hypre_NvtxPopRange();
 
 /* hypre_utilities.c */
 HYPRE_Int hypre_multmod(HYPRE_Int a, HYPRE_Int b, HYPRE_Int mod);
+
+HYPRE_Int hypre_SetSyncCudaCompute(HYPRE_Int action);
+HYPRE_Int hypre_RestoreSyncCudaCompute();
+HYPRE_Int hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr);
+HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
 
 
 #ifdef __cplusplus

@@ -1174,8 +1174,9 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
    hypre_ParVectorLocalVector(&l1_norms_parvec) = &l1_norms_vec;
 
 #if defined(HYPRE_USING_CUDA)
-   HYPRE_Int sync_stream = hypre_HandleCudaComputeStreamSync(hypre_handle());
-   hypre_HandleCudaComputeStreamSync(hypre_handle()) = 0;
+   HYPRE_Int sync_stream;
+   hypre_GetSyncCudaCompute(&sync_stream);
+   hypre_SetSyncCudaCompute(0);
 #endif
 
    /*-----------------------------------------------------------------
@@ -1194,7 +1195,7 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
    hypre_ParVectorElmdivpy(Vtemp, &l1_norms_parvec, u);
 
 #if defined(HYPRE_USING_CUDA)
-   hypre_HandleCudaComputeStreamSync(hypre_handle()) = sync_stream;
+   hypre_SetSyncCudaCompute(sync_stream);
    hypre_SyncCudaComputeStream(hypre_handle());
 #endif
 

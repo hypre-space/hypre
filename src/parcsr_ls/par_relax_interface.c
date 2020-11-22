@@ -22,7 +22,7 @@ hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A,
                         HYPRE_Int          *cf_marker,
                         HYPRE_Int           relax_type,
                         HYPRE_Int           relax_order,
-                        HYPRE_Int           cycle_type,
+                        HYPRE_Int           cycle_param,
                         HYPRE_Real          relax_weight,
                         HYPRE_Real          omega,
                         HYPRE_Real         *l1_norms,
@@ -33,9 +33,9 @@ hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A,
    HYPRE_Int i, Solve_err_flag = 0;
    HYPRE_Int relax_points[2];
 
-   if (relax_order == 1 && cycle_type < 3)
+   if (relax_order == 1 && cycle_param < 3)
    {
-      if (cycle_type < 2)
+      if (cycle_param < 2)
       {
          /* CF down cycle */
          relax_points[0] =  1;

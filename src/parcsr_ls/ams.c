@@ -10,8 +10,6 @@
 #include "ams.h"
 #include "_hypre_utilities.hpp"
 
-HYPRE_Int hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega, HYPRE_Real *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp, HYPRE_Int GS_order, HYPRE_Int Symm, HYPRE_Int Skip_diag, HYPRE_Int forced_seq, HYPRE_Int Topo_order );
-
 /*--------------------------------------------------------------------------
  * hypre_ParCSRRelax
  *

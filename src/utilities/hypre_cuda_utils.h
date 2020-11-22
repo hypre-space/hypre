@@ -95,8 +95,6 @@ struct hypre_CudaData
    /* by default, hypre puts GPU computations in this stream
     * Do not be confused with the default (null) CUDA stream */
    HYPRE_Int                         cuda_compute_stream_num;
-   /* if synchronize the stream after computations */
-   HYPRE_Int                         cuda_compute_stream_sync;
    /* work space for hypre's CUDA reducer */
    void                             *cuda_reduce_buffer;
    /* the device buffers needed to do MPI communication for struct comm */
@@ -121,7 +119,6 @@ struct hypre_CudaData
 #define hypre_CudaDataCubUvmAllocator(data)                ((data) -> cub_uvm_allocator)
 #define hypre_CudaDataCudaDevice(data)                     ((data) -> cuda_device)
 #define hypre_CudaDataCudaComputeStreamNum(data)           ((data) -> cuda_compute_stream_num)
-#define hypre_CudaDataCudaComputeStreamSync(data)          ((data) -> cuda_compute_stream_sync)
 #define hypre_CudaDataCudaReduceBuffer(data)               ((data) -> cuda_reduce_buffer)
 #define hypre_CudaDataStructCommRecvBuffer(data)           ((data) -> struct_comm_recv_buffer)
 #define hypre_CudaDataStructCommSendBuffer(data)           ((data) -> struct_comm_send_buffer)
