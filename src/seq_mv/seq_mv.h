@@ -298,6 +298,7 @@ hypre_CSRMatrix* hypre_CSRMatrixIdentityDevice(HYPRE_Int n, HYPRE_Complex alp);
 HYPRE_Int hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A);
 HYPRE_Int hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A, HYPRE_Complex tol, HYPRE_Int abs, HYPRE_Int option);
 void hypre_SortCSRCusparse( HYPRE_Int n, HYPRE_Int m, HYPRE_Int nnzA, const HYPRE_Int *d_ia, HYPRE_Int *d_ja_sorted, HYPRE_Complex *d_a_sorted );
+HYPRE_Int hypre_CSRMatrixSortRow(hypre_CSRMatrix *A);
 
 /* csr_matrix.c */
 hypre_CSRMatrix *hypre_CSRMatrixCreate ( HYPRE_Int num_rows , HYPRE_Int num_cols , HYPRE_Int num_nonzeros );
