@@ -1224,6 +1224,72 @@ HYPRE_BoomerAMGSetEuBJ( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetILUType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetILUType( HYPRE_Solver  solver,
+                        HYPRE_Int	      ilu_type)
+{
+   return( hypre_BoomerAMGSetILUType( (void *) solver, ilu_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetILULevel
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetILULevel( HYPRE_Solver  solver,
+                        HYPRE_Int	      ilu_lfil)
+{
+   return( hypre_BoomerAMGSetILULevel( (void *) solver, ilu_lfil ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetILUMaxRowNnz
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetILUMaxRowNnz( HYPRE_Solver  solver,
+                        HYPRE_Int	      ilu_max_row_nnz)
+{
+   return( hypre_BoomerAMGSetILUMaxRowNnz( (void *) solver, ilu_max_row_nnz ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetILUMaxIter
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetILUMaxIter( HYPRE_Solver  solver,
+                        HYPRE_Int	      ilu_max_iter)
+{
+   return( hypre_BoomerAMGSetILUMaxIter( (void *) solver, ilu_max_iter ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetILUDroptol
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetILUDroptol( HYPRE_Solver  solver,
+                        HYPRE_Real	      ilu_droptol)
+{
+   return( hypre_BoomerAMGSetILUDroptol( (void *) solver, ilu_droptol ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetILULocalReordering
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetILULocalReordering( HYPRE_Solver  solver,
+                        HYPRE_Int	      ilu_reordering_type)
+{
+   return( hypre_BoomerAMGSetILULocalReordering( (void *) solver, ilu_reordering_type ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetNumFunctions, HYPRE_BoomerAMGGetNumFunctions
  *--------------------------------------------------------------------------*/
 

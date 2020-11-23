@@ -156,7 +156,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int     eu_level;
    HYPRE_Int     eu_bj;
    HYPRE_Real    eu_sparse_A;
-
+   HYPRE_Int     ilu_type;
+   HYPRE_Int     ilu_lfil;
+   HYPRE_Int     ilu_max_row_nnz;
+   HYPRE_Int     ilu_max_iter;
+   HYPRE_Real    ilu_droptol;
+   HYPRE_Int     ilu_reordering_type;
+   
    HYPRE_Int interp_type, restri_type;
    HYPRE_Int post_interp_type;  /* what to do after computing the interpolation matrix
                                    0 for nothing, 1 for a Jacobi step */
@@ -262,6 +268,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    eu_level = hypre_ParAMGDataEuLevel(amg_data);
    eu_sparse_A = hypre_ParAMGDataEuSparseA(amg_data);
    eu_bj = hypre_ParAMGDataEuBJ(amg_data);
+   ilu_type = hypre_ParAMGDataILUType(amg_data);
+   ilu_lfil = hypre_ParAMGDataILULevel(amg_data);
+   ilu_max_row_nnz = hypre_ParAMGDataILUMaxRowNnz(amg_data);
+   ilu_droptol = hypre_ParAMGDataILUDroptol(amg_data);
+   ilu_max_iter = hypre_ParAMGDataILUMaxIter(amg_data);
+   ilu_reordering_type = hypre_ParAMGDataILULocalReordering(amg_data);
    interp_type = hypre_ParAMGDataInterpType(amg_data);
    restri_type = hypre_ParAMGDataRestriction(amg_data); /* RL */
    post_interp_type = hypre_ParAMGDataPostInterpType(amg_data);
@@ -3232,20 +3244,15 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       else if ((smooth_type == 5 || smooth_type == 15) && smooth_num_levels > j)
       {
          HYPRE_ILUCreate( &smoother[j]);
-         if (eu_bj)
-         {
-            HYPRE_ILUSetType(smoother[j],0);
-         }
-         else
-         {
-            HYPRE_ILUSetType(smoother[j],30);
-         }
-         HYPRE_ILUSetMaxIter(smoother[j],1);
-         /* set tol to zero since we are doing just 1 iteration */
+         HYPRE_ILUSetType( smoother[j], ilu_type);
+         HYPRE_ILUSetLocalReordering( smoother[j], ilu_reordering_type);
+         HYPRE_ILUSetMaxIter(smoother[j], ilu_max_iter);
          HYPRE_ILUSetTol(smoother[j], 0.);
-         HYPRE_ILUSetLogging(smoother[j],0);
-         HYPRE_ILUSetPrintLevel(smoother[j],0);
-         HYPRE_ILUSetLevelOfFill(smoother[j],eu_level);
+         HYPRE_ILUSetDropThreshold(smoother[j], ilu_droptol);
+         HYPRE_ILUSetLogging(smoother[j], 0);
+         HYPRE_ILUSetPrintLevel(smoother[j], 0);
+         HYPRE_ILUSetLevelOfFill(smoother[j], ilu_lfil);
+         HYPRE_ILUSetMaxNnzPerRow(smoother[j],ilu_max_row_nnz);
          HYPRE_ILUSetup(smoother[j],
                         (HYPRE_ParCSRMatrix) A_array[j],
                         (HYPRE_ParVector) F_array[j],
