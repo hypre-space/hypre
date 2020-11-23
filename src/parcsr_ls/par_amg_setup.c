@@ -3247,7 +3247,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          HYPRE_ILUSetType( smoother[j], ilu_type);
          HYPRE_ILUSetLocalReordering( smoother[j], ilu_reordering_type);
          HYPRE_ILUSetMaxIter(smoother[j], ilu_max_iter);
-         HYPRE_ILUSetTol(smoother[j], ilu_droptol);
+         HYPRE_ILUSetTol(smoother[j], 0.);
+         HYPRE_ILUSetDropThreshold(smoother[j], ilu_droptol);
          HYPRE_ILUSetLogging(smoother[j], 0);
          HYPRE_ILUSetPrintLevel(smoother[j], 0);
          HYPRE_ILUSetLevelOfFill(smoother[j], ilu_lfil);

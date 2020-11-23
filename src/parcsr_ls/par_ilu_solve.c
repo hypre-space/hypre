@@ -545,7 +545,6 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
 
    /* done, now everything are in u_temp, update solution */
    hypre_ParVectorAxpy(beta, utemp, u);
-
    return hypre_error_flag;
 }
 

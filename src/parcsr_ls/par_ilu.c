@@ -109,7 +109,7 @@ hypre_ILUCreate()
    /* -> SCHUR-GMRES */
    hypre_ParILUDataSchurGMRESKDim(ilu_data) = 5;
    hypre_ParILUDataSchurGMRESMaxIter(ilu_data) = 5;
-   hypre_ParILUDataSchurGMRESTol(ilu_data) = 1e-02;
+   hypre_ParILUDataSchurGMRESTol(ilu_data) = 0.0;
    hypre_ParILUDataSchurGMRESAbsoluteTol(ilu_data) = 0.0;
    hypre_ParILUDataSchurGMRESRelChange(ilu_data) = 0;
 
@@ -120,7 +120,7 @@ hypre_ILUCreate()
    hypre_ParILUDataSchurPrecondIluDroptol(ilu_data) = NULL;/* this is not the default option, set it only when switched to */
    hypre_ParILUDataSchurPrecondPrintLevel(ilu_data) = 0;
    hypre_ParILUDataSchurPrecondMaxIter(ilu_data) = 1;
-   hypre_ParILUDataSchurPrecondTol(ilu_data) = 1e-09;
+   hypre_ParILUDataSchurPrecondTol(ilu_data) = 0.0;
 
    /* -> SCHUR-NSH */
    hypre_ParILUDataSchurNSHSolveMaxIter(ilu_data) = 5;

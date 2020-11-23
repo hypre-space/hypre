@@ -358,11 +358,10 @@ hypre_ILUSetup( void               *ilu_vdata,
    if(hypre_ParILUDataSchurPrecond(ilu_data))
    {
       switch(ilu_type){
-         case 10: case 11: case 40: case 41: case 50:
+         case 10: case 11: case 40: case 41:
 #ifdef HYPRE_USING_CUDA
          if(hypre_ParILUDataIluType(ilu_data) != 10 && 
-            hypre_ParILUDataIluType(ilu_data) != 11 && 
-            hypre_ParILUDataIluType(ilu_data) != 50)
+            hypre_ParILUDataIluType(ilu_data) != 11)
          {
 #endif
             HYPRE_ILUDestroy(hypre_ParILUDataSchurPrecond(ilu_data)); //ILU as precond for Schur
@@ -537,7 +536,7 @@ hypre_ILUSetup( void               *ilu_vdata,
             hypre_SeqVectorInitialize(Utemp_lower);
 
             /* create GMRES */
-            HYPRE_ParCSRGMRESCreate(comm, &schur_solver);
+//            HYPRE_ParCSRGMRESCreate(comm, &schur_solver);
 
             hypre_GMRESFunctions * gmres_functions;
 
@@ -817,7 +816,7 @@ hypre_ILUSetup( void               *ilu_vdata,
             hypre_SeqVectorInitialize(Utemp_lower);
 
             /* create GMRES */
-            HYPRE_ParCSRGMRESCreate(comm, &schur_solver);
+//            HYPRE_ParCSRGMRESCreate(comm, &schur_solver);
 
             hypre_GMRESFunctions * gmres_functions;
 
@@ -952,7 +951,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 
             /* add when necessary */
             /* create GMRES */
-            HYPRE_ParCSRGMRESCreate(comm, &schur_solver);
+//            HYPRE_ParCSRGMRESCreate(comm, &schur_solver);
 
             hypre_GMRESFunctions * gmres_functions;
 
@@ -1155,7 +1154,7 @@ hypre_ILUSetup( void               *ilu_vdata,
                /* borrow i for local nnz of S */
                i = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(matS));
                hypre_MPI_Allreduce(&i, &nnzS_offd, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
-               nnzS = nnzS * hypre_ParILUDataOperatorComplexity(ilu_data) +nnzS_offd;
+               nnzS = nnzS * hypre_ParILUDataOperatorComplexity(schur_precond_ilu) +nnzS_offd;
                break;
             case 20: case 21:
                schur_solver_nsh = (hypre_ParNSHData*) hypre_ParILUDataSchurSolver(ilu_data);
