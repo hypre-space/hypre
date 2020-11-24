@@ -20,6 +20,96 @@
 #include "_hypre_struct_mv.h"
 
 /*--------------------------------------------------------------------------
+ * hypre_BoxSplit
+ *
+ * Splits a box into two in the direction of the nonzero component of index
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoxSplit( hypre_Box    *box,
+                hypre_Index   index,
+                hypre_Box   **lbox_ptr,
+                hypre_Box   **rbox_ptr )
+{
+   HYPRE_Int    ndim = hypre_BoxNDim(box);
+
+   hypre_Box   *lbox;
+   hypre_Box   *rbox;
+   HYPRE_Int    meaningful;
+   HYPRE_Int    splitdir;
+   HYPRE_Int    d;
+
+   /* Find split direction */
+   meaningful = 0;
+   for (d = 0; d < ndim; d++)
+   {
+      if (hypre_IndexD(index, d) != HYPRE_INT_MAX)
+      {
+         meaningful++;
+         splitdir = d;
+      }
+   }
+
+   /* Check if index has a single meaningful component */
+   if (meaningful != 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Several split directions found! Using last one");
+   }
+
+   /* Allocate lbox if needed */
+   if (*lbox_ptr != NULL)
+   {
+      lbox = hypre_BoxCreate(ndim);
+   }
+   else
+   {
+      lbox = *lbox_ptr;
+   }
+
+   /* Allocate rbox if needed */
+   if (*rbox_ptr != NULL)
+   {
+      rbox = hypre_BoxCreate(ndim);
+   }
+   else
+   {
+      rbox = *rbox_ptr;
+   }
+
+   /* Set 0 < d < splitdir */
+   for (d = 0; d < splitdir; d++)
+   {
+      hypre_BoxIMinD(lbox, d) = hypre_BoxIMinD(box, d);
+      hypre_BoxIMaxD(lbox, d) = hypre_BoxIMaxD(box, d);
+
+      hypre_BoxIMinD(rbox, d) = hypre_BoxIMinD(box, d);
+      hypre_BoxIMaxD(rbox, d) = hypre_BoxIMaxD(box, d);
+   }
+
+   /* Set splitdir */
+   hypre_BoxIMinD(lbox, splitdir) = hypre_BoxIMinD(box, splitdir);
+   hypre_BoxIMaxD(lbox, splitdir) = hypre_IndexD(index, splitdir) - 1;
+   hypre_BoxIMinD(rbox, splitdir) = hypre_IndexD(index, splitdir);
+   hypre_BoxIMaxD(rbox, splitdir) = hypre_BoxIMaxD(box, splitdir);
+
+   /* Set splitdir < d < ndim */
+   for (d = (splitdir + 1); d < ndim; d++)
+   {
+      hypre_BoxIMinD(lbox, d) = hypre_BoxIMinD(box, d);
+      hypre_BoxIMaxD(lbox, d) = hypre_BoxIMaxD(box, d);
+
+      hypre_BoxIMinD(rbox, d) = hypre_BoxIMinD(box, d);
+      hypre_BoxIMaxD(rbox, d) = hypre_BoxIMaxD(box, d);
+   }
+
+   /* Set pointer to boxes */
+   *lbox_ptr = lbox;
+   *rbox_ptr = rbox;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * Intersect box1 and box2.
  * If the boxes do not intersect, the result is a box with zero volume.
  *--------------------------------------------------------------------------*/
