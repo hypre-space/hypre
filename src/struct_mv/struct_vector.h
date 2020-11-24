@@ -44,11 +44,11 @@ typedef struct hypre_StructVector_struct
    HYPRE_Int            *data_indices; /* Array of indices into the data array.
                                           data_indices[b] is the starting index
                                           of data corresponding to boxnum b. */
-                      
+
    HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; /* Num ghost layers in each
                                                      * direction */
    HYPRE_Int             bghost_not_clear; /* Are boundary ghosts clear? */
-                      
+
    HYPRE_Int             global_size;  /* Total number coefficients */
 
    HYPRE_Int             ref_count;
@@ -81,7 +81,7 @@ typedef struct hypre_StructVector_struct
 #define hypre_StructVectorBGhostNotClear(vector)((vector) -> bghost_not_clear)
 #define hypre_StructVectorGlobalSize(vector)    ((vector) -> global_size)
 #define hypre_StructVectorRefCount(vector)      ((vector) -> ref_count)
- 
+
 #define hypre_StructVectorSaveGrid(vector)      ((vector) -> save_grid)
 #define hypre_StructVectorSaveStride(vector)    ((vector) -> save_stride)
 #define hypre_StructVectorSaveData(vector)      ((vector) -> save_data)
@@ -93,10 +93,10 @@ hypre_StructGridNDim(hypre_StructVectorGrid(vector))
 
 #define hypre_StructVectorBox(vector, b) \
 hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)
- 
+
 #define hypre_StructVectorBoxData(vector, b) \
 (hypre_StructVectorData(vector) + hypre_StructVectorDataIndices(vector)[b])
- 
+
 #define hypre_StructVectorBoxDataValue(vector, b, index) \
 (hypre_StructVectorBoxData(vector, b) + \
  hypre_BoxIndexRank(hypre_StructVectorBox(vector, b), index))

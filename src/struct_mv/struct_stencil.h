@@ -29,7 +29,7 @@ typedef struct hypre_StructStencil_struct
    HYPRE_Int      size;       /* Number of stencil coefficients */
    HYPRE_Int      ndim;       /* Number of dimensions */
    HYPRE_Int      diag_entry; /* Index of the diagonal entry (zero offset) */
- 
+
    HYPRE_Int      ref_count;
 
 } hypre_StructStencil;

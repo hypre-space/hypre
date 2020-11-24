@@ -56,13 +56,13 @@ typedef struct
 #define hypre_StTermID(term)           ((term) -> id)
 #define hypre_StTermEntry(term)        ((term) -> entry)
 #define hypre_StTermShift(term)        ((term) -> shift)
-                                      
+
 #define hypre_StCoeffNTerms(coeff)     ((coeff) -> nterms)
 #define hypre_StCoeffTerms(coeff)      ((coeff) -> terms)
 #define hypre_StCoeffTerm(coeff, t)   &((coeff) -> terms[t])
 #define hypre_StCoeffPrev(coeff)       ((coeff) -> prev)
 #define hypre_StCoeffNext(coeff)       ((coeff) -> next)
-                                      
+
 #define hypre_StMatrixID(stmat)        ((stmat) -> id)
 #define hypre_StMatrixSize(stmat)      ((stmat) -> size)
 #define hypre_StMatrixRMap(stmat)      ((stmat) -> rmap)
