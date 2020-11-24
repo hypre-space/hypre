@@ -835,18 +835,12 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
 
          for (sweep = 0; sweep < num_sweeps; sweep++)
          {
-            HYPRE_Int order;
-            if (num_sweeps == 1)
-            {
-               order = gs_order;
-            }
-            else
-            {
-               order = sweep == 0 ? 1: -1;
-            }
+            hypre_Iterator iter;
+            hypre_IteratorFirst(&iter) = ns;
+            hypre_IteratorLast(&iter) = ne;
+            hypre_IteratorDirection(&iter) = num_sweeps == 1 ? gs_order : sweep == 0 ? 1 : -1;
 
-            hypre_Iterator *iter = hypre_IteratorCreate(ns, ne, order);
-            for ( i = hypre_IteratorBegin(iter); i != hypre_IteratorEnd(iter); i += hypre_IteratorStep(iter) )
+            for ( i = hypre_IteratorBegin(&iter); i != hypre_IteratorEnd(&iter); i += hypre_IteratorStep(&iter) )
             {
                const HYPRE_Int row = proc_ordering ? proc_ordering[i] : i;
                const HYPRE_Complex di = use_l1_norms ? l1_norms[row] : A_diag_data[A_diag_i[row]];
@@ -912,8 +906,7 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
                      }
                   }
                }
-            }
-            hypre_IteratorDestroy(iter);
+            } /* for ( i = ...) */
          } /* for (sweep = 0; sweep < num_sweeps; sweep++) */
       } /* for (j = 0; j < num_threads; j++) */
    }
@@ -921,18 +914,12 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
    {
       for (sweep = 0; sweep < num_sweeps; sweep++)
       {
-         HYPRE_Int order;
-         if (num_sweeps == 1)
-         {
-            order = gs_order;
-         }
-         else
-         {
-            order = sweep == 0 ? 1: -1;
-         }
+         hypre_Iterator iter;
+         hypre_IteratorFirst(&iter) = 0;
+         hypre_IteratorLast(&iter) = num_rows;
+         hypre_IteratorDirection(&iter) = num_sweeps == 1 ? gs_order : sweep == 0 ? 1 : -1;
 
-         hypre_Iterator *iter = hypre_IteratorCreate(0, num_rows, order);
-         for ( i = hypre_IteratorBegin(iter); i != hypre_IteratorEnd(iter); i += hypre_IteratorStep(iter) )
+         for ( i = hypre_IteratorBegin(&iter); i != hypre_IteratorEnd(&iter); i += hypre_IteratorStep(&iter) )
          {
             const HYPRE_Int row = proc_ordering ? proc_ordering[i] : i;
             const HYPRE_Complex di = use_l1_norms ? l1_norms[row] : A_diag_data[A_diag_i[row]];
@@ -991,8 +978,7 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
                   }
                }
             }
-         }
-         hypre_IteratorDestroy(iter);
+         } /* for ( i = ...) */
       } /* for (sweep = 0; sweep < num_sweeps; sweep++) */
    } /* if (num_threads > 1) */
 
