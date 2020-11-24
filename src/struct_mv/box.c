@@ -748,6 +748,349 @@ hypre_BoxArrayCreate( HYPRE_Int size,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_BoxArrayCreateFromIndices
+ *
+ * Build an array of boxes [box_array_ptr] spanning input indices [indices_in]
+ *
+ * This is based on the Berger-Rigoutsos algorithm.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
+                                 HYPRE_Int         num_indices_in,
+                                 HYPRE_Int        *indices_in,
+                                 HYPRE_Real        threshold,
+                                 hypre_BoxArray  **box_array_ptr )
+{
+   /* Data structures */
+   hypre_BoxBinTree  *boxbt;
+   hypre_BoxBTNode   *btnode;
+   hypre_BoxBTNode   *lnode;
+   hypre_BoxBTNode   *rnode;
+   hypre_BoxBTQueue  *btqueue;
+   //hypre_BoxBTStack  *btstack;
+   hypre_BoxArray    *box_array;
+
+   /* Local variables */
+   HYPRE_Int         *signature[HYPRE_MAXDIM];
+   HYPRE_Int         *laplacian[HYPRE_MAXDIM];
+   HYPRE_Int          cut[HYPRE_MAXDIM];
+   HYPRE_Int          direction[HYPRE_MAXDIM];
+   HYPRE_Int          sign[HYPRE_MAXDIM];
+   HYPRE_Int          signcoord[HYPRE_MAXDIM];
+
+   hypre_Box         *box;
+   hypre_Box         *lbox;
+   hypre_Box         *rbox;
+   hypre_Box         *bbox;
+
+   HYPRE_Int         *indices;
+   HYPRE_Int         *lbox_indices;
+   HYPRE_Int         *rbox_indices;
+   HYPRE_Int          splitdir, dir, d, i;
+   HYPRE_Int          index, size, capacity, change;
+   HYPRE_Int          num_indices;
+   HYPRE_Int          num_lbox_indices, num_rbox_indices;
+   HYPRE_Int          offset, loffset, roffset;
+   //HYPRE_Int          num_leafs;
+   HYPRE_Int          cut_by_hole;
+   HYPRE_Real         box_efficiency;
+
+   /* Compute bounding box */
+   bbox = hypre_BoxCreate(ndim);
+   for (d = 0; d < ndim; d++)
+   {
+      hypre_BoxIMinD(bbox, d) = HYPRE_INT_MAX;
+      hypre_BoxIMaxD(bbox, d) = - HYPRE_INT_MAX;
+   }
+   for (i = 0; i < num_indices_in; i++)
+   {
+      offset = ndim*i;
+      for (d = 0; d < ndim; d++)
+      {
+         hypre_BoxIMinD(bbox, d) = hypre_min(hypre_BoxIMinD(bbox, d),
+                                             indices_in[d + offset]);
+         hypre_BoxIMaxD(bbox, d) = hypre_max(hypre_BoxIMaxD(bbox, d),
+                                             indices_in[d + offset]);
+      }
+   }
+
+   /* Exit in the trivial case */
+   box_efficiency = (HYPRE_Real) num_indices_in /
+                    hypre_doubleBoxVolume(bbox);
+   if (box_efficiency >= threshold)
+   {
+      *box_array_ptr = hypre_BoxArrayCreate(1, ndim);
+      hypre_CopyBox(bbox, hypre_BoxArrayBox(*box_array_ptr, 0));
+
+      return hypre_error_flag;
+   }
+
+   /* Allocate memory */
+   capacity = 0;
+   for (d = 0; d < ndim; d++)
+   {
+      size = hypre_BoxSizeD(bbox, d);
+      signature[d] = hypre_CTAlloc(HYPRE_Int, size + 2);
+      laplacian[d] = hypre_CTAlloc(HYPRE_Int, size);
+      capacity += hypre_Log2(size);
+   }
+   lbox_indices = hypre_CTAlloc(HYPRE_Int, num_indices_in);
+   rbox_indices = hypre_CTAlloc(HYPRE_Int, num_indices_in);
+   hypre_BoxBinTreeCreate(ndim, &boxbt);
+   hypre_BoxBTQueueCreate(&btqueue);
+
+   /* Initialize data */
+   hypre_BoxBinTreeInitialize(boxbt, num_indices_in, indices_in, bbox);
+   hypre_BoxBTQueueInitialize(capacity, btqueue);
+   hypre_BoxBTQueueInsert(hypre_BoxBinTreeRoot(boxbt), btqueue);
+
+   /* level order traversal */
+   //num_leafs = 0;
+   box_array = hypre_BoxArrayCreate(capacity, ndim);
+   while (hypre_BoxBTQueueSize(btqueue) > 0)
+   {
+      /* Retrieve node data */
+      hypre_BoxBTQueueDelete(btqueue, &btnode);
+      box = hypre_BoxBTNodeBox(btnode);
+      indices = hypre_BoxBTNodeIndices(btnode);
+      num_indices = hypre_BoxBTNodeNumIndices(btnode);
+
+      /* Compute box efficiency */
+      box_efficiency = (HYPRE_Real) num_indices /
+                       hypre_doubleBoxVolume(box);
+
+      /* Decide wheter to split the box or not */
+      if (box_efficiency < threshold)
+      {
+         /* Build direction array */
+         direction[0] = 0;
+         for (d = 1; d < ndim; d++)
+         {
+            size = hypre_BoxSizeD(box, d);
+            direction[d] = d;
+            for (i = 0; i < d; i++)
+            {
+               if (size > hypre_BoxSizeD(box, i))
+               {
+                  hypre_swap(direction, i, d);
+               }
+            }
+         }
+
+         /* Compute signatures */
+         for (d = 0; d < ndim; d++)
+         {
+            offset = d*num_indices;
+            signature[d][0] = 0;
+            for (i = 0; i < num_indices; i++)
+            {
+               index = indices[i + offset];
+               signature[d][index + 1]++;
+            }
+            index = hypre_BoxSizeD(box, d);
+            signature[d][index + 1] = 0;
+         }
+
+         /* Look for holes */
+         hypre_SetIndex(cut, HYPRE_INT_MAX);
+         cut_by_hole = 0;
+         for (d = 0; d < ndim; d++)
+         {
+            dir = direction[d];
+            for (i = 0; i < hypre_BoxSizeD(box, dir); i++)
+            {
+               if (signature[dir][i+1] == 0)
+               {
+                  hypre_IndexD(cut, dir) = i;
+                  splitdir = dir;
+                  break;
+               }
+            }
+            if (hypre_IndexD(cut, dir) > -1)
+            {
+               break;
+               cut_by_hole = 1;
+            }
+         }
+
+         /* Look for inflection points in the laplacian */
+         if (!cut_by_hole)
+         {
+            hypre_SetIndex(sign, 0);
+            hypre_SetIndex(signcoord, 0);
+
+            /* Compute laplacian */
+            for (d = 0; d < ndim; d++)
+            {
+               for (i = 1; i < hypre_BoxSizeD(box, d) + 1; i++)
+               {
+                  laplacian[d][i-1] = signature[d][i-1] +
+                                      signature[d][i+1] -
+                                      2*signature[d][i];
+               }
+
+               /* Look for largest change in the current direction */
+               for (i = 0; i < hypre_BoxSizeD(box, d) - 1; i++)
+               {
+                  if ((laplacian[d][i+1] >= 0) != (laplacian[d][i] >= 0))
+                  {
+                     change = hypre_abs(laplacian[d][i+1] - laplacian[d][i]);
+                     if (change > hypre_IndexD(sign, d))
+                     {
+                        hypre_IndexD(sign, d) = change;
+                        hypre_IndexD(signcoord, d) = i;
+                     }
+                  }
+               }
+            }
+
+            /* Look for largest sign change among all directions */
+            dir = 0;
+            for (d = 1; d < ndim; d++)
+            {
+               if (hypre_IndexD(sign, dir) < hypre_IndexD(sign, d))
+               {
+                  dir = d;
+               }
+            }
+
+            /* Set cut direction and coordinate */
+            hypre_IndexD(cut, dir) = hypre_IndexD(signcoord, dir);
+            splitdir = dir;
+         }
+
+         /* Create left/right nodes */
+         hypre_BoxBTNodeCreate(ndim, &lnode);
+         hypre_BoxBTNodeCreate(ndim, &rnode);
+
+         /* Split box of the current node */
+         hypre_BoxSplit(box, cut, &hypre_BoxBTNodeBox(lnode), &hypre_BoxBTNodeBox(rnode));
+
+         /* Split indices */
+         num_lbox_indices = 0;
+         num_rbox_indices = 0;
+         offset = splitdir*num_indices;
+         for (i = 0; i < num_indices; i++)
+         {
+            index = indices[i + offset];
+            if (index < hypre_IndexD(cut, splitdir))
+            {
+               for (d = 0; d < splitdir; d++)
+               {
+                  loffset = d*num_indices;
+                  lbox_indices[num_lbox_indices + loffset] = indices[i + loffset];
+               }
+
+               loffset = splitdir*num_indices;
+               lbox_indices[num_lbox_indices + loffset] = indices[i + loffset];
+               for (d = splitdir; d < ndim; d++)
+               {
+                  loffset = d*num_indices;
+                  lbox_indices[num_lbox_indices + loffset] = indices[i + loffset];
+               }
+
+               lbox_indices[offset + num_lbox_indices++] = index;
+            }
+            else
+            {
+               for (d = 0; d < splitdir; d++)
+               {
+                  roffset = d*num_indices;
+                  rbox_indices[num_rbox_indices + roffset] = indices[i + roffset];
+               }
+
+               roffset = splitdir*num_indices;
+               rbox_indices[num_rbox_indices + roffset] = indices[i + roffset];
+               for (d = splitdir; d < ndim; d++)
+               {
+                  roffset = d*num_indices;
+                  rbox_indices[num_rbox_indices + roffset] = indices[i + roffset];
+               }
+
+               rbox_indices[offset + num_rbox_indices++] = index;
+            }
+         }
+
+         /* Reorder lbox_indices and rbox_indices */
+         for (d = 1; d < ndim; d++)
+         {
+            offset = d*num_indices;
+            loffset = d*num_lbox_indices;
+            for (i = 0; i < num_lbox_indices; i++)
+            {
+               lbox_indices[i + loffset] = lbox_indices[i + offset];
+            }
+
+            roffset = d*num_rbox_indices;
+            for (i = 0; i < num_rbox_indices; i++)
+            {
+               rbox_indices[i + roffset] = rbox_indices[i + offset];
+            }
+         }
+
+         /* Update bounding boxes if cut by hole */
+         if (cut_by_hole)
+         {
+            lbox = hypre_BoxBTNodeBox(lnode);
+            rbox = hypre_BoxBTNodeBox(rnode);
+            for (d = 0; d < ndim; d++)
+            {
+               hypre_BoxIMinD(lbox, d) = HYPRE_INT_MAX;
+               hypre_BoxIMaxD(lbox, d) = - HYPRE_INT_MAX;
+               loffset = d*num_lbox_indices;
+               for (i = 0; i < num_lbox_indices; i++)
+               {
+                  hypre_BoxIMinD(lbox, d) = hypre_min(hypre_BoxIMinD(lbox, d),
+                                                      lbox_indices[i + loffset]);
+               }
+
+               hypre_BoxIMinD(rbox, d) = HYPRE_INT_MAX;
+               hypre_BoxIMaxD(rbox, d) = - HYPRE_INT_MAX;
+               roffset = d*num_rbox_indices;
+               for (i = 0; i < num_rbox_indices; i++)
+               {
+                  hypre_BoxIMinD(rbox, d) = hypre_min(hypre_BoxIMinD(rbox, d),
+                                                      rbox_indices[i + roffset]);
+               }
+            }
+            hypre_assert(hypre_BoxVolume(lbox) > 0);
+            hypre_assert(hypre_BoxVolume(rbox) > 0);
+         }
+
+         /* Copy splitted indices to leaf nodes */
+         hypre_BoxBTNodeSetIndices(lnode, num_lbox_indices, lbox_indices);
+         hypre_BoxBTNodeSetIndices(rnode, num_rbox_indices, rbox_indices);
+
+         /* Insert newly created nodes to queue */
+         hypre_BoxBTQueueInsert(lnode, btqueue);
+         hypre_BoxBTQueueInsert(rnode, btqueue);
+      }
+      else
+      {
+         hypre_AppendBox(hypre_BoxBTNodeBox(btnode), box_array);
+      } /* if (box_efficiency < threshold) */
+   } /* while (hypre_BoxBTQueueSize(btqueue) > 0) */
+
+   /* Set pointer to output */
+   *box_array_ptr = box_array;
+
+   /* Free memory */
+   for (d = 0; d < ndim; d++)
+   {
+      hypre_TFree(signature[d]);
+      hypre_TFree(laplacian[d]);
+   }
+   hypre_TFree(lbox_indices);
+   hypre_TFree(rbox_indices);
+   hypre_BoxBinTreeDestroy(boxbt);
+   hypre_BoxBTQueueDestroy(btqueue);
+   //hypre_BoxBTStackDestroy(btstack);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
