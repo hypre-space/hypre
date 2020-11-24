@@ -40,6 +40,7 @@ extern "C" {
 #===========================================================================
 
 cat box.h                  >> $INTERNAL_HEADER
+cat box_ds.h               >> $INTERNAL_HEADER
 cat assumed_part.h         >> $INTERNAL_HEADER
 cat box_manager.h          >> $INTERNAL_HEADER
 cat struct_grid.h          >> $INTERNAL_HEADER
@@ -63,5 +64,4 @@ cat >> $INTERNAL_HEADER <<@
 #endif
 
 #endif
-
 @
