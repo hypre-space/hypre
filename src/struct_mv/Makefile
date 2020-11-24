@@ -26,6 +26,7 @@ HEADERS =\
  _hypre_struct_mv.h\
  assumed_part.h\
  box.h\
+ box_ds.h\
  box_manager.h\
  computation.h\
  struct_communication.h\
@@ -40,6 +41,7 @@ FILES =\
  box_algebra.c\
  box_boundary.c\
  box.c\
+ box_ds.c\
  box_manager.c\
  coarsen.c\
  communication_info.c\
