@@ -835,12 +835,12 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
 
          for (sweep = 0; sweep < num_sweeps; sweep++)
          {
-            hypre_Iterator iter;
-            hypre_IteratorFirst(&iter) = ns;
-            hypre_IteratorLast(&iter) = ne;
-            hypre_IteratorDirection(&iter) = num_sweeps == 1 ? gs_order : sweep == 0 ? 1 : -1;
+            const HYPRE_Int iorder = num_sweeps == 1 ? gs_order : sweep == 0 ? 1 : -1;
+            const HYPRE_Int ibegin = iorder > 0 ? ns : ne - 1;
+            const HYPRE_Int iend = iorder > 0 ? ne : ns - 1;
+            const HYPRE_Int istep = iorder > 0 ? 1 : -1;
 
-            for ( i = hypre_IteratorBegin(&iter); i != hypre_IteratorEnd(&iter); i += hypre_IteratorStep(&iter) )
+            for (i = ibegin; i != iend; i += istep)
             {
                const HYPRE_Int row = proc_ordering ? proc_ordering[i] : i;
                const HYPRE_Complex di = use_l1_norms ? l1_norms[row] : A_diag_data[A_diag_i[row]];
@@ -914,12 +914,12 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
    {
       for (sweep = 0; sweep < num_sweeps; sweep++)
       {
-         hypre_Iterator iter;
-         hypre_IteratorFirst(&iter) = 0;
-         hypre_IteratorLast(&iter) = num_rows;
-         hypre_IteratorDirection(&iter) = num_sweeps == 1 ? gs_order : sweep == 0 ? 1 : -1;
+         const HYPRE_Int iorder = num_sweeps == 1 ? gs_order : sweep == 0 ? 1 : -1;
+         const HYPRE_Int ibegin = iorder > 0 ? 0 : num_rows - 1;
+         const HYPRE_Int iend = iorder > 0 ? num_rows : -1;
+         const HYPRE_Int istep = iorder > 0 ? 1 : -1;
 
-         for ( i = hypre_IteratorBegin(&iter); i != hypre_IteratorEnd(&iter); i += hypre_IteratorStep(&iter) )
+         for (i = ibegin; i != iend; i += istep)
          {
             const HYPRE_Int row = proc_ordering ? proc_ordering[i] : i;
             const HYPRE_Complex di = use_l1_norms ? l1_norms[row] : A_diag_data[A_diag_i[row]];
