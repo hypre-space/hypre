@@ -14,39 +14,6 @@
 #include "_hypre_parcsr_ls.h"
 #include "Common.h"
 #include "_hypre_lapack.h"
-#include "../sstruct_ls/gselim.h"
-
-HYPRE_Int hypre_BoomerAMGRelax0WeightedJacobi( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, hypre_ParVector *u, hypre_ParVector *Vtemp );
-
-HYPRE_Int hypre_BoomerAMGRelax1GaussSeidel( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_points, hypre_ParVector *u );
-
-HYPRE_Int hypre_BoomerAMGRelax2GaussSeidel( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_points, hypre_ParVector *u );
-
-HYPRE_Int hypre_BoomerAMGRelax5ChaoticHybridGaussSeidel( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_points, hypre_ParVector *u );
-
-HYPRE_Int hypre_BoomerAMGRelax3HybridGaussSeidel( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
-
-HYPRE_Int hypre_BoomerAMGRelax4HybridGaussSeidel( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
-
-HYPRE_Int hypre_BoomerAMGRelax6HybridSSOR( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
-
-HYPRE_Int hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp );
-
-HYPRE_Int hypre_BoomerAMGRelax8HybridL1SSOR( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega, HYPRE_Real *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
-
-HYPRE_Int hypre_BoomerAMGRelax10TopoOrderedGaussSeidel( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
-
-HYPRE_Int hypre_BoomerAMGRelax13HybridL1GaussSeidel( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega, HYPRE_Real *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
-
-HYPRE_Int hypre_BoomerAMGRelax14HybridL1GaussSeidel( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega, HYPRE_Real *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
-
-HYPRE_Int hypre_BoomerAMGRelax18WeightedL1Jacobi( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp );
-
-HYPRE_Int hypre_BoomerAMGRelax19GaussElim( hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
-
-HYPRE_Int hypre_BoomerAMGRelax98GaussElimPivot( hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
-
-HYPRE_Int hypre_BoomerAMGRelaxKaczmarz( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Real omega, HYPRE_Real *l1_norms, hypre_ParVector *u );
 
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGRelax
@@ -223,9 +190,6 @@ hypre_BoomerAMGRelaxWeightedJacobi_core( hypre_ParCSRMatrix *A,
    HYPRE_Int num_procs, my_id, i, j, ii, jj, index, num_sends, start;
    hypre_ParCSRCommHandle *comm_handle;
 
-   /* use l1_norm or diagonal */
-   const HYPRE_Int use_l1_norms = l1_norms ? 1 : 0;
-
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
@@ -273,7 +237,7 @@ hypre_BoomerAMGRelaxWeightedJacobi_core( hypre_ParCSRMatrix *A,
 #endif
    for (i = 0; i < num_rows; i++)
    {
-      const HYPRE_Complex di = use_l1_norms ? l1_norms[i] : A_diag_data[A_diag_i[i]];
+      const HYPRE_Complex di = l1_norms ? l1_norms[i] : A_diag_data[A_diag_i[i]];
 
       /*-----------------------------------------------------------
        * If i is of the right type ( C or F or All ) and diagonal is
@@ -355,7 +319,15 @@ hypre_BoomerAMGRelax18WeightedL1Jacobi( hypre_ParCSRMatrix *A,
    else
 #endif
    {
-      return hypre_BoomerAMGRelaxWeightedJacobi_core(A, f, cf_marker, relax_points, relax_weight, l1_norms, u, Vtemp, 0);
+      /* in the case of non-CF, use relax-7 which is faster */
+      if (relax_points == 0)
+      {
+         return hypre_BoomerAMGRelax7Jacobi(A, f, relax_points, relax_weight, l1_norms, u, Vtemp);
+      }
+      else
+      {
+         return hypre_BoomerAMGRelaxWeightedJacobi_core(A, f, cf_marker, relax_points, relax_weight, l1_norms, u, Vtemp, 0);
+      }
    }
 }
 
@@ -675,12 +647,9 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
    HYPRE_Complex       *v_buf_data    = NULL;
    HYPRE_Int           *proc_ordering = NULL;
 
-   HYPRE_Complex        zero             = 0.0;
-   HYPRE_Real           one_minus_omega  = 1.0 - omega;
-   HYPRE_Complex        res, res0, res2;
+   const HYPRE_Real     one_minus_omega  = 1.0 - omega;
+   HYPRE_Int            num_procs, my_id, num_threads, j, num_sends;
 
-   HYPRE_Int num_procs, my_id, num_threads, i, j, ii, jj, num_sends;
-   HYPRE_Int ns, ne, size, rest, sweep;
    hypre_ParCSRCommHandle *comm_handle;
 
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -691,8 +660,6 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
    const HYPRE_Int gs_order = GS_order > 0 ? 1 : -1;
    /* for symmetric GS, a forward followed by a backward */
    const HYPRE_Int num_sweeps = Symm ? 2 : 1;
-   /* use l1_norm or diagonal */
-   const HYPRE_Int use_l1_norms = l1_norms ? 1 : 0;
    /* if relax_weight and omega are both 1.0 */
    const HYPRE_Int non_scale = relax_weight == 1.0 && omega == 1.0;
    /* */
@@ -739,9 +706,9 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for HYPRE_SMP_SCHEDULE
 #endif
-      for (i = begin; i < end; i++)
+      for (j = begin; j < end; j++)
       {
-         v_buf_data[i - begin] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, i)];
+         v_buf_data[j - begin] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
       }
 
 #ifdef HYPRE_PROFILE
@@ -795,190 +762,75 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
    if (num_threads > 1 || !non_scale)
    {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
 #endif
-      for (i = 0; i < num_rows; i++)
+      for (j = 0; j < num_rows; j++)
       {
-         Vtemp_data[i] = u_data[i];
+         Vtemp_data[j] = u_data[j];
       }
    }
 
    if (num_threads > 1)
    {
-      /*
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-      for (i = 0; i < num_rows; i++)
-      {
-         Ztemp_data[i] = u_data[i];
-      }
-      */
-
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size,sweep) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
 #endif
       for (j = 0; j < num_threads; j++)
       {
-         size = num_rows / num_threads;
-         rest = num_rows - size * num_threads;
-         if (j < rest)
-         {
-            ns = j * size + j;
-            ne = (j + 1) * size + j + 1;
-         }
-         else
-         {
-            ns = j * size + rest;
-            ne = (j + 1) * size + rest;
-         }
+         HYPRE_Int ns, ne, sweep;
+         hypre_partition1D(num_rows, num_threads, j, &ns, &ne);
 
          for (sweep = 0; sweep < num_sweeps; sweep++)
          {
             const HYPRE_Int iorder = num_sweeps == 1 ? gs_order : sweep == 0 ? 1 : -1;
             const HYPRE_Int ibegin = iorder > 0 ? ns : ne - 1;
             const HYPRE_Int iend = iorder > 0 ? ne : ns - 1;
-            const HYPRE_Int istep = iorder > 0 ? 1 : -1;
 
-            for (i = ibegin; i != iend; i += istep)
+            if (non_scale)
             {
-               const HYPRE_Int row = proc_ordering ? proc_ordering[i] : i;
-               const HYPRE_Complex di = use_l1_norms ? l1_norms[row] : A_diag_data[A_diag_i[row]];
-
-               /*-----------------------------------------------------------
-                * Relax only C or F points as determined by relax_points.
-                * If row is of the right type ( C or F or All) and diagonal is
-                * nonzero, relax point row; otherwise, skip it.
-                *-----------------------------------------------------------*/
-               if ( (relax_points == 0 || cf_marker[row] == relax_points) && di != zero )
-               {
-                  res = f_data[row];
-                  res0 = 0.0;
-                  res2 = 0.0;
-
-                  for (jj = A_diag_i[row] + Skip_diag; jj < A_diag_i[row+1]; jj++)
-                  {
-                     ii = A_diag_j[jj];
-                     if (ii >= ns && ii < ne)
-                     {
-                        if (non_scale)
-                        {
-                           res -= A_diag_data[jj] * u_data[ii];
-                        }
-                        else
-                        {
-                           res0 -= A_diag_data[jj] * u_data[ii];
-                           res2 += A_diag_data[jj] * Vtemp_data[ii];
-                        }
-                     }
-                     else
-                     {
-                        res -= A_diag_data[jj] * Vtemp_data[ii];
-                     }
-                  }
-
-                  for (jj = A_offd_i[row]; jj < A_offd_i[row+1]; jj++)
-                  {
-                     ii = A_offd_j[jj];
-                     res -= A_offd_data[jj] * v_ext_data[ii];
-                  }
-
-                  if (non_scale)
-                  {
-                     if (Skip_diag)
-                     {
-                        u_data[row] = res / di;
-                     }
-                     else
-                     {
-                        u_data[row] += res / di;
-                     }
-                  }
-                  else
-                  {
-                     if (Skip_diag)
-                     {
-                        u_data[row] = u_data[row] * prod + relax_weight * (omega * res + res0 + one_minus_omega * res2) / di;
-                     }
-                     else
-                     {
-                        u_data[row] += relax_weight * (omega * res + res0 + one_minus_omega * res2) / di;
-                     }
-                  }
-               }
-            } /* for ( i = ...) */
+               hypre_HybridGaussSeidelNSThreads(A_diag_i, A_diag_j, A_diag_data, A_offd_i, A_offd_j, A_offd_data,
+                                                f_data, cf_marker, relax_points, l1_norms, u_data, Vtemp_data, v_ext_data,
+                                                ns, ne, ibegin, iend, iorder, Skip_diag);
+            }
+            else
+            {
+               hypre_HybridGaussSeidelThreads(A_diag_i, A_diag_j, A_diag_data, A_offd_i, A_offd_j, A_offd_data,
+                                              f_data, cf_marker, relax_points, relax_weight, omega, one_minus_omega,
+                                              prod, l1_norms, u_data, Vtemp_data, v_ext_data, ns, ne, ibegin, iend, iorder, Skip_diag);
+            }
          } /* for (sweep = 0; sweep < num_sweeps; sweep++) */
       } /* for (j = 0; j < num_threads; j++) */
    }
    else /* if (num_threads > 1) */
    {
+      HYPRE_Int sweep;
       for (sweep = 0; sweep < num_sweeps; sweep++)
       {
          const HYPRE_Int iorder = num_sweeps == 1 ? gs_order : sweep == 0 ? 1 : -1;
          const HYPRE_Int ibegin = iorder > 0 ? 0 : num_rows - 1;
          const HYPRE_Int iend = iorder > 0 ? num_rows : -1;
-         const HYPRE_Int istep = iorder > 0 ? 1 : -1;
 
-         for (i = ibegin; i != iend; i += istep)
+         if (Topo_order)
          {
-            const HYPRE_Int row = proc_ordering ? proc_ordering[i] : i;
-            const HYPRE_Complex di = use_l1_norms ? l1_norms[row] : A_diag_data[A_diag_i[row]];
-
-            /*-----------------------------------------------------------
-             * Relax only C or F points as determined by relax_points.
-             * If row is of the right type ( C or F or All) and diagonal is
-             * nonzero, relax point row; otherwise, skip it.
-             *-----------------------------------------------------------*/
-            if ( (relax_points == 0 || cf_marker[row] == relax_points) && di != zero )
+            hypre_HybridGaussSeidelOrderedNS(A_diag_i, A_diag_j, A_diag_data, A_offd_i, A_offd_j, A_offd_data,
+                                             f_data, cf_marker, relax_points, u_data, Vtemp_data, v_ext_data,
+                                             ibegin, iend, iorder, proc_ordering);
+         }
+         else
+         {
+            if (non_scale)
             {
-               res = f_data[row];
-               res0 = 0.0;
-               res2 = 0.0;
-
-               for (jj = A_diag_i[row] + Skip_diag; jj < A_diag_i[row+1]; jj++)
-               {
-                  ii = A_diag_j[jj];
-                  if (non_scale)
-                  {
-                     res -= A_diag_data[jj] * u_data[ii];
-                  }
-                  else
-                  {
-                     res0 -= A_diag_data[jj] * u_data[ii];
-                     res2 += A_diag_data[jj] * Vtemp_data[ii];
-                  }
-               }
-
-               for (jj = A_offd_i[row]; jj < A_offd_i[row+1]; jj++)
-               {
-                  ii = A_offd_j[jj];
-                  res -= A_offd_data[jj] * v_ext_data[ii];
-               }
-
-               if (non_scale)
-               {
-                  if (Skip_diag)
-                  {
-                     u_data[row] = res / di;
-                  }
-                  else
-                  {
-                     u_data[row] += res / di;
-                  }
-               }
-               else
-               {
-                  if (Skip_diag)
-                  {
-                     u_data[row] = u_data[row] * prod + relax_weight * (omega * res + res0 + one_minus_omega * res2) / di;
-                  }
-                  else
-                  {
-                     u_data[row] += relax_weight * (omega * res + res0 + one_minus_omega * res2) / di;
-                  }
-               }
+               hypre_HybridGaussSeidelNS(A_diag_i, A_diag_j, A_diag_data, A_offd_i, A_offd_j, A_offd_data,
+                                         f_data, cf_marker, relax_points, l1_norms, u_data, Vtemp_data, v_ext_data,
+                                         ibegin, iend, iorder, Skip_diag);
             }
-         } /* for ( i = ...) */
+            else
+            {
+               hypre_HybridGaussSeidel(A_diag_i, A_diag_j, A_diag_data, A_offd_i, A_offd_j, A_offd_data,
+                                       f_data, cf_marker, relax_points, relax_weight, omega, one_minus_omega,
+                                       prod, l1_norms, u_data, Vtemp_data, v_ext_data, ibegin, iend, iorder, Skip_diag);
+            }
+         }
       } /* for (sweep = 0; sweep < num_sweeps; sweep++) */
    } /* if (num_threads > 1) */
 
@@ -1213,7 +1065,6 @@ hypre_BoomerAMGRelax8HybridL1SSOR( hypre_ParCSRMatrix *A,
                                                      1, 1 /* symm */, skip_diag, 0, 0);
 }
 
-
 /* forward hybrid topology ordered G-S */
 HYPRE_Int
 hypre_BoomerAMGRelax10TopoOrderedGaussSeidel( hypre_ParCSRMatrix *A,
@@ -1227,7 +1078,7 @@ hypre_BoomerAMGRelax10TopoOrderedGaussSeidel( hypre_ParCSRMatrix *A,
                                               hypre_ParVector    *Ztemp )
 {
    return hypre_BoomerAMGRelaxHybridGaussSeidel_core(A, f, cf_marker, relax_points, relax_weight, omega, NULL, u, Vtemp, Ztemp,
-                                                     1 /* forward */, 0 /* nonsymm */, 1 /* skip_diag */, 0, 1);
+                                                     1 /* forward */, 0 /* nonsymm */, 1 /* skip_diag */, 1, 1);
 }
 
 /* forward l1 hybrid G-S */
@@ -1246,7 +1097,7 @@ hypre_BoomerAMGRelax13HybridL1GaussSeidel( hypre_ParCSRMatrix *A,
    const HYPRE_Int skip_diag = relax_weight == 1.0 && omega == 1.0 ? 0 : 1;
 
    return hypre_BoomerAMGRelaxHybridGaussSeidel_core(A, f, cf_marker, relax_points, relax_weight, omega, l1_norms, u, Vtemp, Ztemp,
-                                                     1 /* forward */, 0 /* nonsymm */, skip_diag, 0, 0);
+                                                     1 /* forward */, 0 /* nonsymm */, skip_diag, 0, 0 );
 }
 
 /* backward l1 hybrid G-S */
@@ -1265,7 +1116,7 @@ hypre_BoomerAMGRelax14HybridL1GaussSeidel( hypre_ParCSRMatrix *A,
    const HYPRE_Int skip_diag = relax_weight == 1.0 && omega == 1.0 ? 0 : 1;
 
    return hypre_BoomerAMGRelaxHybridGaussSeidel_core(A, f, cf_marker, relax_points, relax_weight, omega, l1_norms, u, Vtemp, Ztemp,
-                                                     -1 /* backward */, 0 /* nonsymm */, skip_diag, 0, 0);
+                                                     -1 /* backward */, 0 /* nonsymm */, skip_diag, 0, 0 );
 }
 
 HYPRE_Int
@@ -1288,7 +1139,7 @@ hypre_BoomerAMGRelax19GaussElim( hypre_ParCSRMatrix *A,
    HYPRE_Real      *f_vector_data;
    HYPRE_Real      *A_mat;
    HYPRE_Real      *b_vec;
-   HYPRE_Int        i, jj, column, relax_error;
+   HYPRE_Int        i, jj, column, relax_error = 0;
 
    /*-----------------------------------------------------------------
     *  Generate CSR matrix from ParCSRMatrix A

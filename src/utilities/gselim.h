@@ -5,8 +5,8 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#ifndef GSELIM_H
-#define GSELIM_H
+#ifndef HYPRE_GSELIM_H
+#define HYPRE_GSELIM_H
 
 #define hypre_gselim(A,x,n,error)                      \
 {                                                      \
@@ -65,4 +65,5 @@
    }                                                   \
 }
 
-#endif
+#endif /* #ifndef HYPRE_GSELIM_H */
+
