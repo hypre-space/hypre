@@ -117,9 +117,6 @@ FILES =\
  par_mgr.c\
  par_mgr_setup.c\
  par_mgr_solve.c\
- par_ilu.c\
- par_ilu_setup.c \
- par_ilu_solve.c \
  par_nongalerkin.c\
  par_nodal_systems.c\
  par_rap.c\
@@ -147,6 +144,9 @@ FILES =\
 
 CUFILES =\
  ams.c\
+ par_ilu.c\
+ par_ilu_setup.c \
+ par_ilu_solve.c \
  par_coarsen_device.c\
  par_indepset_device.c\
  par_interp_device.c\

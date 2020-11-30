@@ -1143,5 +1143,15 @@ hypre_SortCSRCusparse( HYPRE_Int      n,
    hypre_TFree(pBuffer, HYPRE_MEMORY_DEVICE);
    HYPRE_CUSPARSE_CALL(cusparseDestroyCsru2csrInfo(sortInfoA));
 }
+
+HYPRE_Int
+hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
+{
+   hypre_SortCSRCusparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A), hypre_CSRMatrixNumNonzeros(A),
+                         hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A));
+
+   return hypre_error_flag;
+}
+
 #endif
 
