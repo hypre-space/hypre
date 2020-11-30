@@ -25,14 +25,18 @@ hypre_BoxBTNodeCreate( HYPRE_Int         ndim,
                        hypre_BoxBTNode **btnode_ptr )
 {
    hypre_BoxBTNode *btnode;
+   HYPRE_Int        d;
 
    btnode = hypre_TAlloc(hypre_BoxBTNode, 1);
 
    hypre_BoxBTNodeNumIndices(btnode) = 0;
-   hypre_BoxBTNodeIndices(btnode)    = NULL;
    hypre_BoxBTNodeBox(btnode)        = hypre_BoxCreate(ndim);
    hypre_BoxBTNodeLeft(btnode)       = NULL;
    hypre_BoxBTNodeRight(btnode)      = NULL;
+   for (d = 0; d < HYPRE_MAXDIM; d++)
+   {
+      hypre_BoxBTNodeIndices(btnode, d) = NULL;
+   }
 
    /* Set pointer */
    *btnode_ptr = btnode;
@@ -45,18 +49,21 @@ hypre_BoxBTNodeCreate( HYPRE_Int         ndim,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoxBTNodeSetIndices( hypre_BoxBTNode *btnode,
-                           HYPRE_Int        num_indices,
-                           HYPRE_Int       *indices )
+hypre_BoxBTNodeSetIndices( hypre_BoxBTNode * btnode,
+                           HYPRE_Int         num_indices,
+                           HYPRE_Int       **indices )
 {
    HYPRE_Int  ndim = hypre_BoxBTNodeNDim(btnode);
-   HYPRE_Int  i;
+   HYPRE_Int  d, i;
 
    hypre_BoxBTNodeNumIndices(btnode) = num_indices;
-   hypre_BoxBTNodeIndices(btnode)    = hypre_TAlloc(HYPRE_Int, num_indices*ndim);
-   for (i = 0; i < num_indices*ndim; i++)
+   for (d = 0; d < ndim; d++)
    {
-      hypre_BoxBTNodeIndex(btnode, i) = indices[i];
+      hypre_BoxBTNodeIndices(btnode, d) = hypre_TAlloc(HYPRE_Int, num_indices);
+      for (i = 0; i < num_indices; i++)
+      {
+         hypre_BoxBTNodeIndex(btnode, d, i) = indices[d][i];
+      }
    }
 
    return hypre_error_flag;
@@ -67,14 +74,20 @@ hypre_BoxBTNodeSetIndices( hypre_BoxBTNode *btnode,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoxBTNodeInitialize( hypre_BoxBTNode *btnode,
-                           HYPRE_Int        num_indices,
-                           HYPRE_Int       *indices,
-                           hypre_Box       *box )
+hypre_BoxBTNodeInitialize( hypre_BoxBTNode  *btnode,
+                           HYPRE_Int         num_indices,
+                           HYPRE_Int       **indices,
+                           hypre_Box        *box )
 {
+   HYPRE_Int  ndim = hypre_BoxNDim(box);
+   HYPRE_Int  d;
+
+   hypre_CopyBox(box, hypre_BoxBTNodeBox(btnode));
    hypre_BoxBTNodeNumIndices(btnode) = num_indices;
-   hypre_BoxBTNodeIndices(btnode)    = indices;
-   hypre_BoxBTNodeBox(btnode)        = box;
+   for (d = 0; d < ndim; d++)
+   {
+      hypre_BoxBTNodeIndices(btnode, d) = indices[d];
+   }
 
    return hypre_error_flag;
 }
@@ -86,12 +99,19 @@ hypre_BoxBTNodeInitialize( hypre_BoxBTNode *btnode,
 HYPRE_Int
 hypre_BoxBTNodeDestroy( hypre_BoxBTNode *btnode )
 {
+   HYPRE_Int         d, ndim;
+
    if (btnode)
    {
-      hypre_TFree(hypre_BoxBTNodeIndices(btnode));
+      ndim = hypre_BoxBTNodeNDim(btnode);
+      for (d = 0; d < HYPRE_MAXDIM; d++)
+      {
+         hypre_TFree(hypre_BoxBTNodeIndices(btnode, d));
+      }
+
       hypre_BoxDestroy(hypre_BoxBTNodeBox(btnode));
-      hypre_assert(hypre_BoxBTNodeLeft(btnode) == NULL);
-      hypre_assert(hypre_BoxBTNodeRight(btnode) == NULL);
+      //hypre_assert(hypre_BoxBTNodeLeft(btnode) == NULL);
+      //hypre_assert(hypre_BoxBTNodeRight(btnode) == NULL);
       hypre_TFree(btnode);
    }
 
@@ -129,10 +149,10 @@ hypre_BoxBinTreeCreate( HYPRE_Int          ndim,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoxBinTreeInitialize( hypre_BoxBinTree  *boxbt,
-                            HYPRE_Int          num_indices,
-                            HYPRE_Int         *indices,
-                            hypre_Box         *box )
+hypre_BoxBinTreeInitialize( hypre_BoxBinTree   *boxbt,
+                            HYPRE_Int           num_indices,
+                            HYPRE_Int         **indices,
+                            hypre_Box          *box )
 {
    hypre_BoxBTNode   *btroot;
 
@@ -187,7 +207,9 @@ hypre_BoxBinTreeDestroy( hypre_BoxBinTree *boxbt )
          hypre_BoxBTStackDelete(btstack, &btnode);
          rnode = hypre_BoxBTNodeRight(btnode);
 
-         if (rnode && hypre_BoxBTStackNodePeek(btstack) == rnode)
+         if (rnode &&
+             hypre_BoxBTStackSize(btstack) &&
+             hypre_BoxBTStackNodePeek(btstack) == rnode)
          {
             /* Swap the two last nodes of stack */
             hypre_BoxBTStackDelete(btstack, &btwork);
@@ -202,8 +224,9 @@ hypre_BoxBinTreeDestroy( hypre_BoxBinTree *boxbt )
          }
       }
 
-      /* Free memory for stack */
+      /* Free memory */
       hypre_BoxBTStackDestroy(btstack);
+      hypre_TFree(boxbt);
    }
 
    return hypre_error_flag;
@@ -242,8 +265,14 @@ HYPRE_Int
 hypre_BoxBTStackInitialize( HYPRE_Int           capacity,
                             hypre_BoxBTStack   *btstack )
 {
+   HYPRE_Int  i;
+
    hypre_BoxBTStackCapacity(btstack) = capacity;
    hypre_BoxBTStackNodes(btstack) = hypre_TAlloc(hypre_BoxBTNode *, capacity);
+   for (i = 0; i < capacity; i++)
+   {
+      hypre_BoxBTStackNode(btstack, i) = NULL;
+   }
 
    return hypre_error_flag;
 }
@@ -288,8 +317,8 @@ hypre_BoxBTStackInsert( hypre_BoxBTNode    *btnode,
                                                       hypre_BoxBTNode *, capacity);
    }
 
-   hypre_BoxBTStackNodePeek(btstack) = btnode;
    hypre_BoxBTStackSize(btstack)++;
+   hypre_BoxBTStackNodePeek(btstack) = btnode;
 
    return hypre_error_flag;
 }
@@ -307,6 +336,7 @@ hypre_BoxBTStackDelete( hypre_BoxBTStack    *btstack,
    if (size > 0)
    {
       *btnode_ptr = hypre_BoxBTStackNodePeek(btstack);
+      hypre_BoxBTStackNodePeek(btstack) = NULL;
       hypre_BoxBTStackSize(btstack)--;
    }
    else
@@ -353,8 +383,14 @@ HYPRE_Int
 hypre_BoxBTQueueInitialize( HYPRE_Int           capacity,
                             hypre_BoxBTQueue   *btqueue )
 {
+   HYPRE_Int  i;
+
    hypre_BoxBTQueueCapacity(btqueue) = capacity;
    hypre_BoxBTQueueNodes(btqueue) = hypre_TAlloc(hypre_BoxBTNode *, capacity);
+   for (i = 0; i < capacity; i++)
+   {
+      hypre_BoxBTQueueNode(btqueue, i) = NULL;
+   }
 
    return hypre_error_flag;
 }
@@ -383,16 +419,17 @@ hypre_BoxBTQueueInsert( hypre_BoxBTNode    *btnode,
                         hypre_BoxBTQueue   *btqueue )
 {
    HYPRE_Int   capacity = hypre_BoxBTQueueCapacity(btqueue);
+   HYPRE_Int   size     = hypre_BoxBTQueueSize(btqueue);
    HYPRE_Int   head     = hypre_BoxBTQueueHead(btqueue);
-   HYPRE_Int   tail     = hypre_BoxBTQueueTail(btqueue);
+   HYPRE_Int   *tail    = &hypre_BoxBTQueueTail(btqueue);
 
    HYPRE_Int   i, offset;
 
    /* Double the capacity if limit is reached */
-   if (head == tail + 1)
+   if (capacity == size)
    {
       offset   = capacity;
-      capacity += hypre_max(tail, capacity);
+      capacity += hypre_max(*tail, capacity);
       if (capacity < 0)
       {
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Integer overflow! Using capacity=INT_MAX");
@@ -403,15 +440,20 @@ hypre_BoxBTQueueInsert( hypre_BoxBTNode    *btnode,
                                                       hypre_BoxBTNode *, capacity);
 
       /* Reorganize items in the queue */
-      for (i = 0; i < tail; i++)
+      for (i = 0; i < *tail; i++)
       {
          hypre_BoxBTQueueNode(btqueue, offset + i) = hypre_BoxBTQueueNode(btqueue, i);
+         hypre_BoxBTQueueNode(btqueue, i) = NULL;
+      }
+      for (i = *tail + offset; i < capacity; i++)
+      {
+         hypre_BoxBTQueueNode(btqueue, i) = NULL;
       }
       hypre_BoxBTQueueTail(btqueue) += offset;
    }
 
-   hypre_BoxBTQueueNode(btqueue, tail) = btnode;
-   if (tail == (capacity - 1))
+   hypre_BoxBTQueueNode(btqueue, *tail) = btnode;
+   if (*tail == (capacity - 1))
    {
       hypre_BoxBTQueueTail(btqueue) = 0;
    }
@@ -433,17 +475,14 @@ hypre_BoxBTQueueDelete( hypre_BoxBTQueue    *btqueue,
                         hypre_BoxBTNode    **btnode_ptr )
 {
    HYPRE_Int   capacity = hypre_BoxBTQueueCapacity(btqueue);
+   HYPRE_Int   size     = hypre_BoxBTQueueSize(btqueue);
    HYPRE_Int   head     = hypre_BoxBTQueueHead(btqueue);
    HYPRE_Int   tail     = hypre_BoxBTQueueTail(btqueue);
 
-   if (tail == 0 && head <= tail)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Empty queue!");
-      *btnode_ptr = NULL;
-   }
-   else
+   if (size)
    {
       *btnode_ptr = hypre_BoxBTQueueNode(btqueue, head);
+      hypre_BoxBTQueueNode(btqueue, head) = NULL;
       if (head == (capacity - 1))
       {
          hypre_BoxBTQueueHead(btqueue) = 0;
@@ -453,6 +492,11 @@ hypre_BoxBTQueueDelete( hypre_BoxBTQueue    *btqueue,
          hypre_BoxBTQueueHead(btqueue)++;
       }
       hypre_BoxBTQueueSize(btqueue)--;
+   }
+   else
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Empty queue!");
+      *btnode_ptr = NULL;
    }
 
    return hypre_error_flag;

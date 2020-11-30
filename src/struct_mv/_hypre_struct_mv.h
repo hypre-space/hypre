@@ -1007,17 +1007,17 @@ for (J = 0; J < N; J++)
  *--------------------------------------------------------------------------*/
 typedef struct hypre_BoxBTNode_struct
 {
-   HYPRE_Int    num_indices;
-   HYPRE_Int   *indices;
-   hypre_Box   *box;
+   HYPRE_Int     num_indices;
+   HYPRE_Int    *indices[HYPRE_MAXDIM];
+   hypre_Box    *box;
    struct hypre_BoxBTNode_struct  *left;
    struct hypre_BoxBTNode_struct  *right;
 } hypre_BoxBTNode;
 
 #define hypre_BoxBTNodeNDim(btnode)        ((btnode) -> box -> ndim)
 #define hypre_BoxBTNodeNumIndices(btnode)  ((btnode) -> num_indices)
-#define hypre_BoxBTNodeIndices(btnode)     ((btnode) -> indices)
-#define hypre_BoxBTNodeIndex(btnode, i)    ((btnode) -> indices[i])
+#define hypre_BoxBTNodeIndices(btnode, d)  ((btnode) -> indices[d])
+#define hypre_BoxBTNodeIndex(btnode, d, i) ((btnode) -> indices[d][i])
 #define hypre_BoxBTNodeBox(btnode)         ((btnode) -> box)
 #define hypre_BoxBTNodeLeft(btnode)        ((btnode) -> left)
 #define hypre_BoxBTNodeRight(btnode)       ((btnode) -> right)
@@ -1050,7 +1050,7 @@ typedef struct hypre_BoxBTStack_struct
 #define hypre_BoxBTStackCapacity(btstack)  ((btstack) -> capacity)
 #define hypre_BoxBTStackNodes(btstack)     ((btstack) -> nodes)
 #define hypre_BoxBTStackNode(btstack, i)   ((btstack) -> nodes[i])
-#define hypre_BoxBTStackNodePeek(btstack)  ((btstack) -> nodes[(btstack) -> size])
+#define hypre_BoxBTStackNodePeek(btstack)  ((btstack) -> nodes[(btstack) -> size - 1])
 
 /*--------------------------------------------------------------------------
  * hypre_BoxBTQueue:
@@ -2354,6 +2354,7 @@ HYPRE_Int hypre_BoxGrowByValue ( hypre_Box *box , HYPRE_Int val );
 HYPRE_Int hypre_BoxGrowByBox ( hypre_Box *box , hypre_Box *gbox );
 HYPRE_Int hypre_BoxGrowByArray ( hypre_Box *box , HYPRE_Int *array );
 hypre_BoxArray *hypre_BoxArrayCreate ( HYPRE_Int size , HYPRE_Int ndim );
+HYPRE_Int hypre_BoxArrayCreateFromIndices ( HYPRE_Int ndim , HYPRE_Int num_indices_in , HYPRE_Int **indices_in , HYPRE_Real threshold , hypre_BoxArray **box_array_ptr );
 HYPRE_Int hypre_BoxArrayDestroy ( hypre_BoxArray *box_array );
 HYPRE_Int hypre_BoxArrayPrintToFile ( FILE *file , hypre_BoxArray *box_array );
 HYPRE_Int hypre_BoxArrayPrint ( MPI_Comm comm , const char *filename , hypre_BoxArray *box_array );
@@ -2371,11 +2372,11 @@ HYPRE_Int hypre_BoxArrayArrayPrint ( MPI_Comm comm , const char *filename , hypr
 
 /* box_ds.c */
 HYPRE_Int hypre_BoxBTNodeCreate ( HYPRE_Int ndim , hypre_BoxBTNode **btnode_ptr );
-HYPRE_Int hypre_BoxBTNodeSetIndices ( hypre_BoxBTNode *btnode , HYPRE_Int num_indices , HYPRE_Int *indices );
-HYPRE_Int hypre_BoxBTNodeInitialize ( hypre_BoxBTNode *btnode , HYPRE_Int num_indices , HYPRE_Int *indices , hypre_Box *box );
+HYPRE_Int hypre_BoxBTNodeSetIndices ( hypre_BoxBTNode *btnode , HYPRE_Int num_indices , HYPRE_Int **indices );
+HYPRE_Int hypre_BoxBTNodeInitialize ( hypre_BoxBTNode *btnode , HYPRE_Int num_indices , HYPRE_Int **indices , hypre_Box *box );
 HYPRE_Int hypre_BoxBTNodeDestroy ( hypre_BoxBTNode *btnode );
 HYPRE_Int hypre_BoxBinTreeCreate ( HYPRE_Int ndim , hypre_BoxBinTree **boxbt_ptr );
-HYPRE_Int hypre_BoxBinTreeInitialize ( hypre_BoxBinTree  *boxbt , HYPRE_Int num_indices , HYPRE_Int *indices , hypre_Box *box );
+HYPRE_Int hypre_BoxBinTreeInitialize ( hypre_BoxBinTree  *boxbt , HYPRE_Int num_indices , HYPRE_Int **indices , hypre_Box *box );
 HYPRE_Int hypre_BoxBinTreeDestroy ( hypre_BoxBinTree *boxbt );
 HYPRE_Int hypre_BoxBTStackCreate ( hypre_BoxBTStack  **btstack_ptr );
 HYPRE_Int hypre_BoxBTStackInitialize ( HYPRE_Int capacity , hypre_BoxBTStack *btstack );

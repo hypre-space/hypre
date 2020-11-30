@@ -28,17 +28,17 @@
  *--------------------------------------------------------------------------*/
 typedef struct hypre_BoxBTNode_struct
 {
-   HYPRE_Int    num_indices;
-   HYPRE_Int   *indices;
-   hypre_Box   *box;
+   HYPRE_Int     num_indices;
+   HYPRE_Int    *indices[HYPRE_MAXDIM];
+   hypre_Box    *box;
    struct hypre_BoxBTNode_struct  *left;
    struct hypre_BoxBTNode_struct  *right;
 } hypre_BoxBTNode;
 
 #define hypre_BoxBTNodeNDim(btnode)        ((btnode) -> box -> ndim)
 #define hypre_BoxBTNodeNumIndices(btnode)  ((btnode) -> num_indices)
-#define hypre_BoxBTNodeIndices(btnode)     ((btnode) -> indices)
-#define hypre_BoxBTNodeIndex(btnode, i)    ((btnode) -> indices[i])
+#define hypre_BoxBTNodeIndices(btnode, d)  ((btnode) -> indices[d])
+#define hypre_BoxBTNodeIndex(btnode, d, i) ((btnode) -> indices[d][i])
 #define hypre_BoxBTNodeBox(btnode)         ((btnode) -> box)
 #define hypre_BoxBTNodeLeft(btnode)        ((btnode) -> left)
 #define hypre_BoxBTNodeRight(btnode)       ((btnode) -> right)
@@ -71,7 +71,7 @@ typedef struct hypre_BoxBTStack_struct
 #define hypre_BoxBTStackCapacity(btstack)  ((btstack) -> capacity)
 #define hypre_BoxBTStackNodes(btstack)     ((btstack) -> nodes)
 #define hypre_BoxBTStackNode(btstack, i)   ((btstack) -> nodes[i])
-#define hypre_BoxBTStackNodePeek(btstack)  ((btstack) -> nodes[(btstack) -> size])
+#define hypre_BoxBTStackNodePeek(btstack)  ((btstack) -> nodes[(btstack) -> size - 1])
 
 /*--------------------------------------------------------------------------
  * hypre_BoxBTQueue:

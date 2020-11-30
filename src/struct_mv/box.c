@@ -752,13 +752,16 @@ hypre_BoxArrayCreate( HYPRE_Int size,
  *
  * Build an array of boxes [box_array_ptr] spanning input indices [indices_in]
  *
+ * Assumptions:
+ *    1) indices_in is a (ndim x num_indices) two-dimensional array
+ *
  * This is based on the Berger-Rigoutsos algorithm.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
                                  HYPRE_Int         num_indices_in,
-                                 HYPRE_Int        *indices_in,
+                                 HYPRE_Int       **indices_in,
                                  HYPRE_Real        threshold,
                                  hypre_BoxArray  **box_array_ptr )
 {
@@ -768,7 +771,6 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
    hypre_BoxBTNode   *lnode;
    hypre_BoxBTNode   *rnode;
    hypre_BoxBTQueue  *btqueue;
-   //hypre_BoxBTStack  *btstack;
    hypre_BoxArray    *box_array;
 
    /* Local variables */
@@ -784,17 +786,22 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
    hypre_Box         *rbox;
    hypre_Box         *bbox;
 
-   HYPRE_Int         *indices;
-   HYPRE_Int         *lbox_indices;
-   HYPRE_Int         *rbox_indices;
+   HYPRE_Int         *indices[HYPRE_MAXDIM];
+   HYPRE_Int         *lbox_indices[HYPRE_MAXDIM];
+   HYPRE_Int         *rbox_indices[HYPRE_MAXDIM];
    HYPRE_Int          splitdir, dir, d, i;
    HYPRE_Int          index, size, capacity, change;
    HYPRE_Int          num_indices;
    HYPRE_Int          num_lbox_indices, num_rbox_indices;
-   HYPRE_Int          offset, loffset, roffset;
-   //HYPRE_Int          num_leafs;
    HYPRE_Int          cut_by_hole;
    HYPRE_Real         box_efficiency;
+   HYPRE_Real         box_dvolume;
+
+   /* Exit in trivial case */
+   if (num_indices_in <= 0)
+   {
+      return hypre_error_flag;
+   }
 
    /* Compute bounding box */
    bbox = hypre_BoxCreate(ndim);
@@ -802,16 +809,12 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
    {
       hypre_BoxIMinD(bbox, d) = HYPRE_INT_MAX;
       hypre_BoxIMaxD(bbox, d) = - HYPRE_INT_MAX;
-   }
-   for (i = 0; i < num_indices_in; i++)
-   {
-      offset = ndim*i;
-      for (d = 0; d < ndim; d++)
+      for (i = 0; i < num_indices_in; i++)
       {
          hypre_BoxIMinD(bbox, d) = hypre_min(hypre_BoxIMinD(bbox, d),
-                                             indices_in[d + offset]);
+                                             indices_in[d][i]);
          hypre_BoxIMaxD(bbox, d) = hypre_max(hypre_BoxIMaxD(bbox, d),
-                                             indices_in[d + offset]);
+                                             indices_in[d][i]);
       }
    }
 
@@ -820,8 +823,12 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
                     hypre_doubleBoxVolume(bbox);
    if (box_efficiency >= threshold)
    {
-      *box_array_ptr = hypre_BoxArrayCreate(1, ndim);
-      hypre_CopyBox(bbox, hypre_BoxArrayBox(*box_array_ptr, 0));
+      if (*box_array_ptr == NULL)
+      {
+         *box_array_ptr = hypre_BoxArrayCreate(1, ndim);
+      }
+      hypre_AppendBox(bbox, *box_array_ptr);
+      hypre_BoxDestroy(bbox);
 
       return hypre_error_flag;
    }
@@ -833,10 +840,10 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
       size = hypre_BoxSizeD(bbox, d);
       signature[d] = hypre_CTAlloc(HYPRE_Int, size + 2);
       laplacian[d] = hypre_CTAlloc(HYPRE_Int, size);
+      lbox_indices[d] = hypre_CTAlloc(HYPRE_Int, num_indices_in);
+      rbox_indices[d] = hypre_CTAlloc(HYPRE_Int, num_indices_in);
       capacity += hypre_Log2(size);
    }
-   lbox_indices = hypre_CTAlloc(HYPRE_Int, num_indices_in);
-   rbox_indices = hypre_CTAlloc(HYPRE_Int, num_indices_in);
    hypre_BoxBinTreeCreate(ndim, &boxbt);
    hypre_BoxBTQueueCreate(&btqueue);
 
@@ -845,20 +852,55 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
    hypre_BoxBTQueueInitialize(capacity, btqueue);
    hypre_BoxBTQueueInsert(hypre_BoxBinTreeRoot(boxbt), btqueue);
 
+   /* Create output BoxArray */
+   if (*box_array_ptr)
+   {
+      box_array = *box_array_ptr;
+   }
+   else
+   {
+      box_array = hypre_BoxArrayCreate(capacity, ndim);
+      hypre_BoxArraySetSize(box_array, 0);
+   }
+
    /* level order traversal */
-   //num_leafs = 0;
-   box_array = hypre_BoxArrayCreate(capacity, ndim);
    while (hypre_BoxBTQueueSize(btqueue) > 0)
    {
       /* Retrieve node data */
       hypre_BoxBTQueueDelete(btqueue, &btnode);
       box = hypre_BoxBTNodeBox(btnode);
-      indices = hypre_BoxBTNodeIndices(btnode);
       num_indices = hypre_BoxBTNodeNumIndices(btnode);
+      for (d = 0; d < ndim; d++)
+      {
+         indices[d] = hypre_BoxBTNodeIndices(btnode, d);
+      }
+      hypre_assert(num_indices > 0);
+
+      /* Update bounding box */
+      for (d = 0; d < ndim; d++)
+      {
+         hypre_BoxIMinD(box, d) = HYPRE_INT_MAX;
+         hypre_BoxIMaxD(box, d) = - HYPRE_INT_MAX;
+         for (i = 0; i < num_indices; i++)
+         {
+            hypre_BoxIMinD(box, d) = hypre_min(hypre_BoxIMinD(box, d),
+                                               indices[d][i]);
+            hypre_BoxIMaxD(box, d) = hypre_max(hypre_BoxIMaxD(box, d),
+                                               indices[d][i]);
+         }
+      }
 
       /* Compute box efficiency */
-      box_efficiency = (HYPRE_Real) num_indices /
-                       hypre_doubleBoxVolume(box);
+      box_dvolume = hypre_doubleBoxVolume(box);
+      if (box_dvolume > 0.0)
+      {
+         box_efficiency = (HYPRE_Real) num_indices / box_dvolume;
+      }
+      else
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Found non-positive box volume!");
+         return hypre_error_flag;
+      }
 
       /* Decide wheter to split the box or not */
       if (box_efficiency < threshold)
@@ -881,11 +923,10 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
          /* Compute signatures */
          for (d = 0; d < ndim; d++)
          {
-            offset = d*num_indices;
             signature[d][0] = 0;
             for (i = 0; i < num_indices; i++)
             {
-               index = indices[i + offset];
+               index = indices[d][i] - hypre_BoxIMinD(box, d);
                signature[d][index + 1]++;
             }
             index = hypre_BoxSizeD(box, d);
@@ -902,15 +943,15 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
             {
                if (signature[dir][i+1] == 0)
                {
-                  hypre_IndexD(cut, dir) = i;
+                  hypre_IndexD(cut, dir) = i + hypre_BoxIMinD(box, d);
                   splitdir = dir;
                   break;
                }
             }
-            if (hypre_IndexD(cut, dir) > -1)
+            if (hypre_IndexD(cut, dir) != HYPRE_INT_MAX)
             {
-               break;
                cut_by_hole = 1;
+               break;
             }
          }
 
@@ -939,7 +980,7 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
                      if (change > hypre_IndexD(sign, d))
                      {
                         hypre_IndexD(sign, d) = change;
-                        hypre_IndexD(signcoord, d) = i;
+                        hypre_IndexD(signcoord, d) = i + hypre_BoxIMinD(box, d);
                      }
                   }
                }
@@ -959,103 +1000,36 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
             hypre_IndexD(cut, dir) = hypre_IndexD(signcoord, dir);
             splitdir = dir;
          }
+         hypre_assert((splitdir >= 0) && (splitdir < ndim));
 
          /* Create left/right nodes */
          hypre_BoxBTNodeCreate(ndim, &lnode);
          hypre_BoxBTNodeCreate(ndim, &rnode);
-
-         /* Split box of the current node */
-         hypre_BoxSplit(box, cut, &hypre_BoxBTNodeBox(lnode), &hypre_BoxBTNodeBox(rnode));
+         hypre_BoxBTNodeLeft(btnode)  = lnode;
+         hypre_BoxBTNodeRight(btnode) = rnode;
 
          /* Split indices */
          num_lbox_indices = 0;
          num_rbox_indices = 0;
-         offset = splitdir*num_indices;
          for (i = 0; i < num_indices; i++)
          {
-            index = indices[i + offset];
-            if (index < hypre_IndexD(cut, splitdir))
+            index = indices[splitdir][i];
+            if (index <= hypre_IndexD(cut, splitdir))
             {
-               for (d = 0; d < splitdir; d++)
+               for (d = 0; d < ndim; d++)
                {
-                  loffset = d*num_indices;
-                  lbox_indices[num_lbox_indices + loffset] = indices[i + loffset];
+                  lbox_indices[d][num_lbox_indices] = indices[d][i];
                }
-
-               loffset = splitdir*num_indices;
-               lbox_indices[num_lbox_indices + loffset] = indices[i + loffset];
-               for (d = splitdir; d < ndim; d++)
-               {
-                  loffset = d*num_indices;
-                  lbox_indices[num_lbox_indices + loffset] = indices[i + loffset];
-               }
-
-               lbox_indices[offset + num_lbox_indices++] = index;
+               num_lbox_indices++;
             }
             else
             {
-               for (d = 0; d < splitdir; d++)
+               for (d = 0; d < ndim; d++)
                {
-                  roffset = d*num_indices;
-                  rbox_indices[num_rbox_indices + roffset] = indices[i + roffset];
+                  rbox_indices[d][num_rbox_indices] = indices[d][i];
                }
-
-               roffset = splitdir*num_indices;
-               rbox_indices[num_rbox_indices + roffset] = indices[i + roffset];
-               for (d = splitdir; d < ndim; d++)
-               {
-                  roffset = d*num_indices;
-                  rbox_indices[num_rbox_indices + roffset] = indices[i + roffset];
-               }
-
-               rbox_indices[offset + num_rbox_indices++] = index;
+               num_rbox_indices++;
             }
-         }
-
-         /* Reorder lbox_indices and rbox_indices */
-         for (d = 1; d < ndim; d++)
-         {
-            offset = d*num_indices;
-            loffset = d*num_lbox_indices;
-            for (i = 0; i < num_lbox_indices; i++)
-            {
-               lbox_indices[i + loffset] = lbox_indices[i + offset];
-            }
-
-            roffset = d*num_rbox_indices;
-            for (i = 0; i < num_rbox_indices; i++)
-            {
-               rbox_indices[i + roffset] = rbox_indices[i + offset];
-            }
-         }
-
-         /* Update bounding boxes if cut by hole */
-         if (cut_by_hole)
-         {
-            lbox = hypre_BoxBTNodeBox(lnode);
-            rbox = hypre_BoxBTNodeBox(rnode);
-            for (d = 0; d < ndim; d++)
-            {
-               hypre_BoxIMinD(lbox, d) = HYPRE_INT_MAX;
-               hypre_BoxIMaxD(lbox, d) = - HYPRE_INT_MAX;
-               loffset = d*num_lbox_indices;
-               for (i = 0; i < num_lbox_indices; i++)
-               {
-                  hypre_BoxIMinD(lbox, d) = hypre_min(hypre_BoxIMinD(lbox, d),
-                                                      lbox_indices[i + loffset]);
-               }
-
-               hypre_BoxIMinD(rbox, d) = HYPRE_INT_MAX;
-               hypre_BoxIMaxD(rbox, d) = - HYPRE_INT_MAX;
-               roffset = d*num_rbox_indices;
-               for (i = 0; i < num_rbox_indices; i++)
-               {
-                  hypre_BoxIMinD(rbox, d) = hypre_min(hypre_BoxIMinD(rbox, d),
-                                                      rbox_indices[i + roffset]);
-               }
-            }
-            hypre_assert(hypre_BoxVolume(lbox) > 0);
-            hypre_assert(hypre_BoxVolume(rbox) > 0);
          }
 
          /* Copy splitted indices to leaf nodes */
@@ -1080,12 +1054,12 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
    {
       hypre_TFree(signature[d]);
       hypre_TFree(laplacian[d]);
+      hypre_TFree(lbox_indices[d]);
+      hypre_TFree(rbox_indices[d]);
    }
-   hypre_TFree(lbox_indices);
-   hypre_TFree(rbox_indices);
+   hypre_BoxDestroy(bbox);
    hypre_BoxBinTreeDestroy(boxbt);
    hypre_BoxBTQueueDestroy(btqueue);
-   //hypre_BoxBTStackDestroy(btstack);
 
    return hypre_error_flag;
 }
