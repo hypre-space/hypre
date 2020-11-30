@@ -110,6 +110,7 @@ FILES =\
  par_krylov_func.c\
  par_mod_lr_interp.c\
  par_multi_interp.c\
+ par_mod_multi_interp.c\
  par_laplace.c\
  par_laplace_27pt.c\
  par_laplace_9pt.c\
