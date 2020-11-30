@@ -988,7 +988,7 @@ hypre_CudaSpTriMatrixDataCreate()
 
    cusparseMatDescr_t mat_descr;
    HYPRE_CUSPARSE_CALL( cusparseCreateMatDescr(&mat_descr) );
-   hypre_CudaSpTriMatrixDataMatDescr(matrix_data) = mat_descr;   
+   hypre_CudaSpTriMatrixDataMatDescr(matrix_data) = mat_descr;
 
    csrsv2Info_t solve_info;
    HYPRE_CUSPARSE_CALL( cusparseCreateCsrsv2Info(&solve_info) );

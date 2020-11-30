@@ -491,6 +491,16 @@ HYPRE_Int hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int m, HYPRE_Int k, HYPRE_In
 
 HYPRE_Int hypreDevice_CSRSpGemmCusparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int nnzB, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out);
 
+/* csr_mat_sptrisolve_device.c */
+#if defined(HYPRE_USING_CUDA)
+HYPRE_Int hypre_CSRMatrixPrintMemoryUsage ( char * FILENAME, char * FUNCTIONNAME, HYPRE_Int LINENUMBER );
+HYPRE_Int hypre_CSRMatrixDestroyTriMatsSolveDataDevice ( hypre_CSRMatrix *matrix );
+HYPRE_Int hypre_CSRMatrixDestroyTriMats ( hypre_CSRMatrix *matrix );
+HYPRE_Int hypre_CSRMatrixGaussSeidelDevice (  HYPRE_Real     *Vext_data, hypre_Vector   *f, hypre_Vector   *u, hypre_CSRMatrix *diag, hypre_CSRMatrix *offd );
+HYPRE_Int hypre_CSRMatrixSymmetricGaussSeidelDevice (  HYPRE_Real     *Vext_data, hypre_Vector   *f, hypre_Vector   *u, hypre_CSRMatrix *diag, hypre_CSRMatrix *offd );
+HYPRE_Int hypre_CSRMatrixTwoStageGaussSeidelDevice (  hypre_Vector   *r, hypre_Vector   *u, hypre_CSRMatrix *diag, hypre_CSRMatrix *offd, HYPRE_Real omega, HYPRE_Int choice);
+#endif
+
 
 #ifdef __cplusplus
 }

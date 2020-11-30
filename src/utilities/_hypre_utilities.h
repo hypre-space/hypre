@@ -1262,10 +1262,6 @@ typedef struct
 #define hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle) hypre_CudaDataSpgemmRownnzEstimateMultFactor(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleSpgemmHashType(hypre_handle)                 hypre_CudaDataSpgemmHashType(hypre_HandleCudaData(hypre_handle))
 
-
-struct hypre_CudaSpTriMatrixData;
-typedef struct hypre_CudaSpTriMatrixData hypre_CudaSpTriMatrixData;
-
 //#ifdef __cplusplus
 //}
 //#endif
