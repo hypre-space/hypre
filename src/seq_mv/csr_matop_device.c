@@ -817,6 +817,7 @@ hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A,
 
 /* type 0: diag
  *      1: abs diag
+ *      2: diag inverse
  */
 __global__ void
 hypreCUDAKernel_CSRExtractDiag( HYPRE_Int      nrows,
@@ -858,6 +859,10 @@ hypreCUDAKernel_CSRExtractDiag( HYPRE_Int      nrows,
          else if (type == 1)
          {
             d[row] = fabs(aa[j]);
+         }
+         else if (type == 2)
+         {
+            d[row] = 1.0 / aa[j];
          }
       }
 
@@ -1082,8 +1087,7 @@ hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE)
-/*
- * @brief Sorts an unsorted CSR INPLACE
+/* @brief This functions sorts values and column indices in each row in ascending order INPLACE
  * @param[in] n Number of rows
  * @param[in] m Number of columns
  * @param[in] nnzA Number of nonzeroes

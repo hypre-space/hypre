@@ -42,27 +42,19 @@ extern "C" {
 
 typedef struct
 {
-   HYPRE_Int     *i;
-   HYPRE_Int     *j;
-   HYPRE_BigInt  *big_j;
-   HYPRE_Int      num_rows;
-   HYPRE_Int      num_cols;
-   HYPRE_Int      num_nonzeros;
-   hypre_int     *i_short;
-   hypre_int     *j_short;
-
-   /* Does the CSRMatrix create/destroy `data', `i', `j'? */
-   HYPRE_Int      owns_data;
-
-   HYPRE_Complex *data;
-
-   /* for compressing rows in matrix multiplication  */
-   HYPRE_Int     *rownnz;
-   HYPRE_Int      num_rownnz;
-
-   /* memory location of arrays i, j, data */
-   HYPRE_MemoryLocation      memory_location;
-
+   HYPRE_Int           *i;
+   HYPRE_Int           *j;
+   HYPRE_BigInt        *big_j;
+   HYPRE_Int            num_rows;
+   HYPRE_Int            num_cols;
+   HYPRE_Int            num_nonzeros;
+   hypre_int           *i_short;
+   hypre_int           *j_short;
+   HYPRE_Int            owns_data;       /* Does the CSRMatrix create/destroy `data', `i', `j'? */
+   HYPRE_Complex       *data;
+   HYPRE_Int           *rownnz;          /* for compressing rows in matrix multiplication  */
+   HYPRE_Int            num_rownnz;
+   HYPRE_MemoryLocation memory_location; /* memory location of arrays i, j, data */
 
 #if defined(HYPRE_USING_CUDA)
    /* Data structures for sparse triangular solves */
@@ -375,16 +367,6 @@ HYPRE_Int HYPRE_CSRMatrixInitialize ( HYPRE_CSRMatrix matrix );
 HYPRE_CSRMatrix HYPRE_CSRMatrixRead ( char *file_name );
 void HYPRE_CSRMatrixPrint ( HYPRE_CSRMatrix matrix , char *file_name );
 HYPRE_Int HYPRE_CSRMatrixGetNumRows ( HYPRE_CSRMatrix matrix , HYPRE_Int *num_rows );
-
-/* csr_mat_sptrisolve_device.c */
-#if defined(HYPRE_USING_CUDA)
-HYPRE_Int hypre_CSRMatrixPrintMemoryUsage ( char * FILENAME, char * FUNCTIONNAME, HYPRE_Int LINENUMBER );
-HYPRE_Int hypre_CSRMatrixDestroyTriMatsSolveDataDevice ( hypre_CSRMatrix *matrix );
-HYPRE_Int hypre_CSRMatrixDestroyTriMats ( hypre_CSRMatrix *matrix );
-HYPRE_Int hypre_CSRMatrixGaussSeidelDevice (  HYPRE_Real     *Vext_data, hypre_Vector   *f, hypre_Vector   *u, hypre_CSRMatrix *diag, hypre_CSRMatrix *offd );
-HYPRE_Int hypre_CSRMatrixSymmetricGaussSeidelDevice (  HYPRE_Real     *Vext_data, hypre_Vector   *f, hypre_Vector   *u, hypre_CSRMatrix *diag, hypre_CSRMatrix *offd );
-HYPRE_Int hypre_CSRMatrixTwoStageGaussSeidelDevice (  hypre_Vector   *r, hypre_Vector   *u, hypre_CSRMatrix *diag, hypre_CSRMatrix *offd, HYPRE_Real omega, HYPRE_Int choice);
-#endif
 
 /* HYPRE_mapped_matrix.c */
 HYPRE_MappedMatrix HYPRE_MappedMatrixCreate ( void );
