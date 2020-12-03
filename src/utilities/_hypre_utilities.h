@@ -962,7 +962,7 @@ void hypre_qsort4_abs ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int 
 void hypre_qsort_abs ( HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
 
 /* hypre_unique.c */
-HYPRE_Int hypre_UniqueIntArrayND ( HYPRE_Int ndim , HYPRE_Int size , HYPRE_Int **array );
+HYPRE_Int hypre_UniqueIntArrayND ( HYPRE_Int ndim , HYPRE_Int *size , HYPRE_Int **array );
 
 /* qsplit.c */
 HYPRE_Int hypre_DoubleQuickSplit ( HYPRE_Real *values , HYPRE_Int *indices , HYPRE_Int list_length , HYPRE_Int NumberKept );

@@ -19,13 +19,13 @@
 #include "_hypre_utilities.h"
 
 /*--------------------------------------------------------------------------
- * hypre_CompareEntriesIntArrayND
+ * hypre_EntriesEqualIntArrayND
  *--------------------------------------------------------------------------*/
-static HYPRE_Int
-hypre_CompareEntriesIntArrayND( HYPRE_Int   ndim,
-                                HYPRE_Int   posA,
-                                HYPRE_Int   posB,
-                                HYPRE_Int **array )
+static inline HYPRE_Int
+hypre_EntriesEqualIntArrayND( HYPRE_Int   ndim,
+                              HYPRE_Int   posA,
+                              HYPRE_Int   posB,
+                              HYPRE_Int **array )
 {
    HYPRE_Int d;
 
@@ -41,37 +41,53 @@ hypre_CompareEntriesIntArrayND( HYPRE_Int   ndim,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_UniqueNDimIntArray
+ * hypre_CopyEntriesIntArrayND
+ *--------------------------------------------------------------------------*/
+static inline void
+hypre_CopyEntriesIntArrayND( HYPRE_Int   ndim,
+                             HYPRE_Int   posA,
+                             HYPRE_Int   posB,
+                             HYPRE_Int **array )
+{
+   HYPRE_Int d;
+
+   for (d = 0; d < ndim; d++)
+   {
+      array[d][posA] = array[d][posB];
+   }
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_UniqueIntArrayND
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_UniqueIntArrayND( HYPRE_Int    ndim,
-                        HYPRE_Int    size,
+                        HYPRE_Int   *size,
                         HYPRE_Int  **array )
 {
-   HYPRE_Int d, i, ii;
+   HYPRE_Int i, ii;
 
    /* Sort n-dimensional array */
-   hypre_qsortND(array, ndim, 0, size - 1);
+   hypre_qsortND(array, ndim, 0, *size - 1);
 
    /* Eliminate duplicates */
    i = 0; ii = 1;
-   while (ii < size)
+   while (ii < *size)
    {
-      if (hypre_CompareEntriesIntArrayND(ndim, i, ii, array))
+      if (hypre_EntriesEqualIntArrayND(ndim, i, ii, array))
       {
          ii++;
       }
       else
       {
          i++;
-         for (d = 0; d < ndim; d++)
-         {
-            array[d][i] = array[d][ii];
-         }
+         hypre_CopyEntriesIntArrayND(ndim, i, ii, array);
          ii++;
       }
    }
+
+   *size = i;
 
    return hypre_error_flag;
 }
