@@ -48,6 +48,7 @@ FILES =\
  hypre_memory.c\
  hypre_printf.c\
  hypre_qsort.c\
+ hypre_unique.c\
  memory_dmalloc.c\
  mpistubs.c\
  qsplit.c\

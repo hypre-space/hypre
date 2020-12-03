@@ -223,7 +223,6 @@ void hypre_qsortND( HYPRE_Int **v,
                     HYPRE_Int   right )
 {
    HYPRE_Int  i, d, last;
-   HYPRE_Int  work;
 
    if (left >= right)
    {
