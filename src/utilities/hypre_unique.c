@@ -68,6 +68,12 @@ hypre_UniqueIntArrayND( HYPRE_Int    ndim,
 {
    HYPRE_Int i, ii;
 
+   /* Trivial case */
+   if (*size < 1)
+   {
+      return hypre_error_flag;
+   }
+
    /* Sort n-dimensional array */
    hypre_qsortND(array, ndim, 0, *size - 1);
 
@@ -87,7 +93,7 @@ hypre_UniqueIntArrayND( HYPRE_Int    ndim,
       }
    }
 
-   *size = i;
+   *size = i + 1;
 
    return hypre_error_flag;
 }
