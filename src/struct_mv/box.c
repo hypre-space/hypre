@@ -795,12 +795,16 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
    HYPRE_Int          cut_by_hole;
    HYPRE_Real         box_efficiency;
    HYPRE_Real         box_dvolume;
+   HYPRE_Real         box_minvol;
 
    /* Exit in trivial case */
    if (num_indices_in <= 0)
    {
       return hypre_error_flag;
    }
+
+   /* Set defaults */
+   box_minvol = (HYPRE_Real) hypre_pow2(ndim);
 
    /* Compute bounding box */
    bbox = hypre_BoxCreate(ndim);
@@ -818,9 +822,9 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
    }
 
    /* Exit in the trivial case */
-   box_efficiency = (HYPRE_Real) num_indices_in /
-                    hypre_doubleBoxVolume(bbox);
-   if (box_efficiency >= threshold)
+   box_dvolume = hypre_doubleBoxVolume(bbox);
+   box_efficiency = (HYPRE_Real) num_indices_in / box_dvolume;
+   if ((box_efficiency >= threshold) || (box_dvolume <= box_minvol))
    {
       if (*box_array_ptr == NULL)
       {
@@ -1030,6 +1034,8 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
                num_rbox_indices++;
             }
          }
+         hypre_assert(num_lbox_indices > 0);
+         hypre_assert(num_rbox_indices > 0);
 
          /* Copy splitted indices to leaf nodes */
          hypre_BoxBTNodeSetIndices(lnode, num_lbox_indices, lbox_indices);
