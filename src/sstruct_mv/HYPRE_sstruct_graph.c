@@ -383,7 +383,14 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    HYPRE_Int                 nprocs, myproc;
    HYPRE_Int                 part, var;
    hypre_IndexRef            index;
-   HYPRE_Int                 i, j, d;
+   HYPRE_Int                 i, ii, j, d;
+
+   hypre_Box                *pbnd_box;
+   hypre_BoxArray           *boxa;
+   hypre_BoxArray           *pbnd_boxa;
+   hypre_BoxArrayArray      *pbnd_boxaa;
+   HYPRE_Int               **idxcnt;
+   HYPRE_Int             ****indices;
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
 
@@ -662,13 +669,30 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    hypre_SStructGraphUVEOffsets(graph) = Uveoffsets;
    hypre_BoxDestroy(grow_box);
 
-   /* now set up nUventries, iUventries, and Uventries */
-
+   /* now set up indices, nUventries, iUventries, and Uventries */
+   indices = hypre_TAlloc(HYPRE_Int ***, nparts);
+   for (part = 0; part < nparts; part++)
+   {
+      indices[part] = hypre_TAlloc(HYPRE_Int **, nvars);
+      for (var = 0; var < nvars; var++)
+      {
+         indices[part][var] = hypre_CTAlloc(HYPRE_Int *, ndim);
+         for (d = 0; d < ndim; d++)
+         {
+            /* TODO: n_add_entries is a too large upper bound */
+            indices[part][var][d] = hypre_CTAlloc(HYPRE_Int, n_add_entries);
+         }
+      }
+   }
+   idxcnt = hypre_TAlloc(HYPRE_Int *, nparts);
+   for (part = 0; part < nparts; part++)
+   {
+      idxcnt[part] = hypre_CTAlloc(HYPRE_Int, nvars);
+   }
    iUventries = hypre_TAlloc(HYPRE_Int, n_add_entries);
    Uventries = hypre_CTAlloc(hypre_SStructUVEntry *, Uvesize);
    hypre_SStructGraphIUVEntries(graph) = iUventries;
    hypre_SStructGraphUVEntries(graph)  = Uventries;
-
    nUventries = 0;
 
    /* go through each entry that was added */
@@ -684,10 +708,17 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       to_index = hypre_SStructGraphEntryToIndex(new_entry);
 
       /* Safety checks */
-      hypre_assert(part >= 0);
-      hypre_assert(part < nparts);
-      hypre_assert(to_part >= 0);
-      hypre_assert(to_part < nparts);
+      hypre_assert((part >= 0) && (part < nparts));
+      hypre_assert((to_part >= 0) && (to_part < nparts));
+
+      /* Build indices array */
+      for (d = 0; d < ndim; d++)
+      {
+         indices[part][var][d][idxcnt[part][var]] = hypre_IndexD(index, d);
+         indices[to_part][to_var][d][idxcnt[to_part][to_var]] = hypre_IndexD(to_index, d);
+      }
+      idxcnt[part][var]++;
+      idxcnt[to_part][to_var]++;
 
       /* compute location (rank) for Uventry */
       hypre_SStructGraphGetUVEntryRank(graph, part, var, index, &Uverank);
@@ -748,7 +779,62 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
 
    }/* end of loop through add entries */
 
-   /* free the storage for the add entires */
+   /*---------------------------------------------------------
+    * Set up part boundary data
+    *---------------------------------------------------------*/
+
+   /* Create part boundary boxes */
+   pbnd_box = hypre_BoxCreate(ndim);
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+      for (var = 0; var < nvars; var++)
+      {
+         sgrid = hypre_SStructPGridSGrid(pgrid, var);
+         boxes = hypre_StructGridBoxes(sgrid);
+         pbnd_boxaa = hypre_SStructPGridPBndBoxArrayArray(pgrid, var);
+
+         /* Eliminate duplicate entries */
+         hypre_UniqueIntArrayND(ndim, idxcnt[part][var], indices[part][var]);
+
+         /* Create array of boxes */
+         boxa = NULL;
+         hypre_BoxArrayCreateFromIndices(ndim, idxcnt[part][var],
+                                         indices[part][var], 0.8, &boxa);
+
+         /* Intersect newly created BoxArray with grid boxes */
+         if (boxa)
+         {
+            hypre_ForBoxI(i, boxes)
+            {
+               pbnd_boxa = hypre_BoxArrayArrayBoxArray(pbnd_boxaa, i);
+               hypre_ForBoxI(ii, boxa)
+               {
+                  hypre_IntersectBoxes(hypre_BoxArrayBox(boxes, i),
+                                       hypre_BoxArrayBox(boxa, ii),
+                                       pbnd_box);
+                  if (hypre_BoxVolume(pbnd_box) > 0)
+                  {
+                     hypre_AppendBox(pbnd_box, pbnd_boxa);
+                  }
+               }
+            }
+
+            /* Free memory */
+            hypre_BoxArrayDestroy(boxa);
+         }
+      }
+   }
+
+   /* Free memory */
+   for (part = 0; part < nparts; part++)
+   {
+      hypre_TFree(idxcnt[part]);
+   }
+   hypre_TFree(idxcnt);
+
+   /* Free the storage for the add entires */
    hypre_TFree(add_entries);
 
    /*---------------------------------------------------------
