@@ -799,7 +799,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          pbnd_boxaa = hypre_SStructPGridPBndBoxArrayArray(pgrid, var);
 
          /* Eliminate duplicate entries */
-         hypre_UniqueIntArrayND(ndim, idxcnt[part][var], &indices[part][var]);
+         hypre_UniqueIntArrayND(ndim, &idxcnt[part][var], indices[part][var]);
 
          /* Create array of boxes */
          boxa = NULL;
