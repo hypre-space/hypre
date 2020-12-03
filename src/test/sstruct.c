@@ -2946,12 +2946,13 @@ main( hypre_int argc,
         ((solver_id >= 60) && (solver_id < 70)) ||
         ((solver_id >= 80) && (solver_id < 90)) ||
         ((solver_id >= 90) && (solver_id < 100)) ||
-        (solver_id == 120) || (solver_id == 5))
+        (solver_id == 120) || (solver_id == 5) ||
+        (solver_id == -2))
    {
       object_type = HYPRE_PARCSR;
    }
 
-   if (solver_id >= 200)
+   else if (solver_id >= 200)
    {
       object_type = HYPRE_STRUCT;
    }
@@ -6228,7 +6229,7 @@ main( hypre_int argc,
     * Test matvec
     *-----------------------------------------------------------*/
 
-   else if (solver_id == -1)
+   else if (solver_id < 0)
    {
       void  *matvec_data;
 
