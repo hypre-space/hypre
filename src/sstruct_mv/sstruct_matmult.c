@@ -13,6 +13,7 @@
 #include "_hypre_sstruct_mv.h"
 
 #define DEBUG_MATMULT 0
+#define DEBUG_MATCONV 1
 
 /*--------------------------------------------------------------------------
  * hypre_SStructMatmult
@@ -410,8 +411,11 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_Int              convert_box_id;
    HYPRE_Int             *num_ghost;
    HYPRE_Int              nSentries;
+   HYPRE_Int              myid;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
    /* Get row and column ranges */
    HYPRE_IJMatrixGetLocalRange(ij_A, &sizes[0], &sizes[1], &sizes[2], &sizes[3]);
@@ -662,19 +666,40 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
                hypre_assert(hypre_BoxVolume(convert_box) > 0);
                hypre_assert(hypre_BoxVolume(convert_box) < nvalues);
 
+#if DEBUG_MATCONV
+               if (!myid)
+               {
+                  hypre_printf("Part %d - boxa %d - box %d - Converting %d entries - ",
+                               part, i, j, hypre_BoxVolume(convert_box));
+                  hypre_printf("(%d, %d, %d) x (%d, %d, %d)\n",
+                               ilower[0], ilower[1], ilower[2],
+                               iupper[0], iupper[1], iupper[2]);
+               }
+#endif
                /* GET values from this box */
+               HYPRE_ANNOTATE_REGION_BEGIN("%s %d %s %d", "Get values part", part, "convert_box", j);
                hypre_SStructPMatrixSetBoxValues(pA, ilower, iupper, var,
                                                 nSentries, Sentries, values, -1);
+               HYPRE_ANNOTATE_REGION_END("%s %d %s %d", "Get values part", part, "convert_box", j);
 
                /* SET values to ij_Ahat */
+               HYPRE_ANNOTATE_REGION_BEGIN("%s %d %s %d", "Set values part", part, "convert_box", j);
                hypre_SStructUMatrixSetBoxValuesHelper(A, part, ilower, iupper,
                                                       var, nSentries, Sentries,
                                                       values, 0, ij_Ahat);
+               HYPRE_ANNOTATE_REGION_END("%s %d %s %d", "Set values part", part, "convert_box", j);
             } /* Loop over convert_boxa */
          } /* Loop over convert_boxaa */
       } /* Loop over vars */
    } /* Loop over parts */
    HYPRE_ANNOTATE_REGION_END("%s", "Set entries");
+
+#if DEBUG_MATCONV
+   if (!myid)
+   {
+      hypre_printf("\n");
+   }
+#endif
 
    /* Assemble ij_A */
    HYPRE_IJMatrixAssemble(ij_Ahat);
