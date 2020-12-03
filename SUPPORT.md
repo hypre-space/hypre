@@ -8,10 +8,5 @@ SPDX-License-Identifier: (Apache-2.0 OR MIT)
 HYPRE Support Information
 =========================
 
-For any questions or issues concerning hypre 
-
-contact  hypre-support@llnl.gov
-
-or
-
-submit an issue at https://github.com/hypre-space/hypre/issues
+For any questions or issues concerning hypre, submit an issue at
+https://github.com/hypre-space/hypre/issues.

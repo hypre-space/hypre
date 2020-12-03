@@ -111,6 +111,14 @@ function MpirunString
          shift
          RunString="lrun -T$*"
          ;;
+      ray*)
+         shift
+         RunString="lrun -n$*"
+         ;;
+      lassen*)
+         shift
+         RunString="lrun -n$*"
+         ;;
       *)
          shift
          if [ $NumThreads -gt 0 ] ; then
@@ -549,6 +557,7 @@ CleanUp $TestDirNames $ExecFileNames
 
 # Filter misleading error messages
 cat > runtest.filters <<EOF
+lrun warning: default mapping forced to idle
 hypre_MPI_Init
 job [0-9]* queued and waiting for resources
 job [0-9]* has been allocated resources

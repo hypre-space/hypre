@@ -96,6 +96,12 @@ hypre_BoomerAMGCreate()
    HYPRE_Real   drop_tol;
    HYPRE_Real   eu_sparse_A;
    char    *euclidfile;
+   HYPRE_Int    ilu_lfil;
+   HYPRE_Int	 ilu_type;
+   HYPRE_Int    ilu_max_row_nnz;
+   HYPRE_Int    ilu_max_iter;
+   HYPRE_Real   ilu_droptol;
+   HYPRE_Int    ilu_reordering_type;
 
    HYPRE_Int cheby_order;
    HYPRE_Int cheby_eig_est;
@@ -193,6 +199,12 @@ hypre_BoomerAMGCreate()
    eu_level = 0;
    eu_sparse_A = 0.0;
    eu_bj = 0;
+   ilu_lfil = 0;
+   ilu_type = 0;
+   ilu_max_row_nnz = 20;
+   ilu_max_iter = 1;
+   ilu_droptol = 0.01;
+   ilu_reordering_type = 1;
 
    /* solve params */
    min_iter  = 0;
@@ -200,7 +212,7 @@ hypre_BoomerAMGCreate()
    fcycle = 0;
    cycle_type = 1;
    converge_type = 0;
-   tol = 1.0e-7;
+   tol = 1.0e-6;
 
    num_sweeps = 1;
    relax_down = 13;
@@ -250,6 +262,8 @@ hypre_BoomerAMGCreate()
 
    hypre_ParAMGDataMemoryLocation(amg_data) = HYPRE_MEMORY_UNDEFINED;
 
+   hypre_ParAMGDataPartialCycleCoarsestLevel(amg_data) = -1;
+   hypre_ParAMGDataPartialCycleControl(amg_data) = -1;
    hypre_ParAMGDataMaxLevels(amg_data) =  max_levels;
    hypre_ParAMGDataUserCoarseRelaxType(amg_data) = 9;
    hypre_ParAMGDataUserRelaxType(amg_data) = -1;
@@ -308,6 +322,12 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetEuLevel(amg_data, eu_level);
    hypre_BoomerAMGSetEuSparseA(amg_data, eu_sparse_A);
    hypre_BoomerAMGSetEuBJ(amg_data, eu_bj);
+   hypre_BoomerAMGSetILUType(amg_data, ilu_type);
+   hypre_BoomerAMGSetILULevel(amg_data, ilu_lfil);
+   hypre_BoomerAMGSetILUMaxRowNnz(amg_data, ilu_max_row_nnz);
+   hypre_BoomerAMGSetILUDroptol(amg_data, ilu_droptol);
+   hypre_BoomerAMGSetILUMaxIter(amg_data, ilu_max_iter);
+   hypre_BoomerAMGSetILULocalReordering(amg_data, ilu_reordering_type);
 
    hypre_BoomerAMGSetMinIter(amg_data, min_iter);
    hypre_BoomerAMGSetMaxIter(amg_data, max_iter);
@@ -795,6 +815,7 @@ hypre_BoomerAMGDestroy( void *data )
    {
       hypre_MPI_Comm_free (&new_comm);
    }
+
    hypre_TFree(amg_data, HYPRE_MEMORY_HOST);
 
    HYPRE_ANNOTATE_FUNC_END;
@@ -3976,6 +3997,96 @@ hypre_BoomerAMGSetEuBJ( void     *data,
       return hypre_error_flag;
    }
    hypre_ParAMGDataEuBJ(amg_data) = eu_bj;
+
+   return hypre_error_flag;
+}
+HYPRE_Int
+hypre_BoomerAMGSetILUType( void     *data,
+                        HYPRE_Int       ilu_type)
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   hypre_ParAMGDataILUType(amg_data) = ilu_type;
+
+   return hypre_error_flag;
+}
+HYPRE_Int
+hypre_BoomerAMGSetILULevel( void     *data,
+                        HYPRE_Int       ilu_lfil)
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   hypre_ParAMGDataILULevel(amg_data) = ilu_lfil;
+
+   return hypre_error_flag;
+}
+HYPRE_Int
+hypre_BoomerAMGSetILUDroptol( void     *data,
+                        HYPRE_Real       ilu_droptol)
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   hypre_ParAMGDataILUDroptol(amg_data) = ilu_droptol;
+
+   return hypre_error_flag;
+}
+HYPRE_Int
+hypre_BoomerAMGSetILUMaxIter( void     *data,
+                        HYPRE_Int       ilu_max_iter)
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   hypre_ParAMGDataILUMaxIter(amg_data) = ilu_max_iter;
+
+   return hypre_error_flag;
+}
+HYPRE_Int
+hypre_BoomerAMGSetILUMaxRowNnz( void     *data,
+                        HYPRE_Int       ilu_max_row_nnz)
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   hypre_ParAMGDataILUMaxRowNnz(amg_data) = ilu_max_row_nnz;
+
+   return hypre_error_flag;
+}
+HYPRE_Int 
+hypre_BoomerAMGSetILULocalReordering( void     *data,
+                        HYPRE_Int       ilu_reordering_type)
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   hypre_ParAMGDataILULocalReordering(amg_data) = ilu_reordering_type;
 
    return hypre_error_flag;
 }

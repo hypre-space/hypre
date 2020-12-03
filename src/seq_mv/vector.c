@@ -282,7 +282,10 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
    //hypre_SeqVectorPrefetch(v, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_CUDA)
-   HYPRE_THRUST_CALL( fill_n, vector_data, size, value );
+   if (size > 0)
+   {
+      HYPRE_THRUST_CALL( fill_n, vector_data, size, value );
+   }
 #else
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
