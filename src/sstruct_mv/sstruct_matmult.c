@@ -81,6 +81,11 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    HYPRE_Int                m, s, t;
    HYPRE_Int                part;
 
+#if DEBUG_MATCONV
+   HYPRE_Int myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+#endif
+
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /*-------------------------------------------------------
@@ -141,6 +146,12 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    t = terms[nmatrices - 1];
    ijmatrix = hypre_SStructMatrixIJMatrix(ssmatrices[t]);
    HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uMold);
+#if DEBUG_MATCONV
+   if (!myid)
+   {
+      hypre_printf("ssmat[%d] conversion\n", t);
+   }
+#endif
    hypre_SStructMatrixBoundaryToUMatrix(ssmatrices[t], parcsr_uM, &ij_sA[t]);
    //ij_sA[t] = hypre_SStructMatrixToUMatrix(ssmatrices[t]);
    HYPRE_IJMatrixGetObject(ij_sA[t], (void **) &parcsr_sMold);
@@ -160,6 +171,12 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
       /* Convert sA_n to IJMatrix */
       if (ij_sA[t] == NULL)
       {
+#if DEBUG_MATCONV
+         if (!myid)
+         {
+            hypre_printf("ssmat[%d] conversion\n", t);
+         }
+#endif
          hypre_SStructMatrixBoundaryToUMatrix(ssmatrices[t], parcsr_uMold, &ij_sA[t]);
       }
       HYPRE_IJMatrixGetObject(ij_sA[t], (void **) &parcsr_sA);
@@ -368,7 +385,6 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_IJMatrix         ij_A     = hypre_SStructMatrixIJMatrix(A);
    hypre_SStructGraph    *graph    = hypre_SStructMatrixGraph(A);
    hypre_SStructGrid     *grid     = hypre_SStructGraphGrid(graph);
-   hypre_Box           ***Uvboxes  = hypre_SStructGraphUVBoxes(graph);
    hypre_SStructPGrid    *pgrid;
    hypre_StructGrid      *sgrid;
    hypre_SStructStencil  *stencil;
@@ -388,7 +404,6 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    hypre_Box             *grid_box;
    hypre_Box             *ghost_box;
    hypre_Box             *convert_box;
-   hypre_Box             *Uvbox;
 
    hypre_Index            ustride;
    hypre_Index            loop_size;
@@ -411,11 +426,13 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_Int              convert_box_id;
    HYPRE_Int             *num_ghost;
    HYPRE_Int              nSentries;
-   HYPRE_Int              myid;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
+#if DEBUG_MATCONV
+   HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+#endif
 
    /* Get row and column ranges */
    HYPRE_IJMatrixGetLocalRange(ij_A, &sizes[0], &sizes[1], &sizes[2], &sizes[3]);
@@ -476,7 +493,7 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
                {
                   box = hypre_BoxArrayBox(pbnd_boxa, j);
                   hypre_CopyBox(box, grow_box);
-                  hypre_BoxGrowByValue(grow_box, 1);
+                  hypre_BoxGrowByValue(grow_box, 0);
                   hypre_IntersectBoxes(grow_box, grid_box, convert_box);
 
                   hypre_AppendBox(convert_box, convert_boxa);
@@ -490,16 +507,6 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
                kk++;
             }
          } /* loop over grid_boxes */
-
-         /* Add non-stencil couplings */
-         Uvbox = Uvboxes[part][var];
-         if (hypre_BoxVolume(Uvbox))
-         {
-            convert_boxa = hypre_BoxArrayArrayBoxArray(convert_boxaa[part][var], kk);
-            hypre_AppendBox(Uvbox, convert_boxa);
-            hypre_BoxArrayArrayID(convert_boxaa[part][var], kk) = -1;
-            kk++;
-         }
 
          hypre_BoxArrayArraySize(convert_boxaa[part][var]) = kk;
       } /* loop over vars */
