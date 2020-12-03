@@ -80,7 +80,6 @@ hypre_BoomerAMGRelaxHybridGaussSeidelDevice( hypre_ParCSRMatrix *A,
 void
 hypre_TwoStageGaussSeidelMatvec(hypre_CSRMatrix *A,
                                 hypre_Vector    *x,
-                                HYPRE_Complex   *invdiag,
                                 hypre_Vector    *r,
                                 HYPRE_Complex    omega,
                                 hypre_Vector    *inout,
@@ -88,20 +87,15 @@ hypre_TwoStageGaussSeidelMatvec(hypre_CSRMatrix *A,
 {
    if (option == 0)
    {
+      /* spmv with the full matrix */
       hypre_CSRMatrixMatvecDevice(0.0, -omega, A, x, 1.0 + omega, r, r, 0.0);
    }
    else
    {
+      /* spmv with L */
       hypre_CSRMatrixSpMVDevice(-1.0, A, x, 1.0, r, -2);
    }
-   /*
-   HYPRE_THRUST_CALL( transform,
-                      invdiag,
-                      invdiag + hypre_CSRMatrixNumRows(A),
-                      hypre_VectorData(r),
-                      hypre_VectorData(r),
-                      thrust::multiplies<HYPRE_Complex>() );
-   */
+
    hypreDevice_DiagScaleVector(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixI(A), hypre_CSRMatrixData(A),
                                hypre_VectorData(r), 1.0, hypre_VectorData(inout));
 }
@@ -116,19 +110,8 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelDevice ( hypre_ParCSRMatrix *A,
                                                 hypre_ParVector    *z,
                                                 HYPRE_Int           choice)
 {
-   hypre_NvtxPushRange("BoomerAMGRelax11");
+   hypre_NvtxPushRange("BoomerAMGRelaxTwoStageGaussSeidelDevice");
 
-   /*
-   if (hypre_ParVectorNumVectors(z) < 2)
-   {
-      hypre_Vector *old_z = hypre_ParVectorLocalVector(z);
-      hypre_Vector *new_z = hypre_SeqMultiVectorCreate(hypre_VectorSize(old_z), 2);
-      hypre_VectorMemoryLocation(new_z) = hypre_VectorMemoryLocation(old_z);
-      hypre_SeqVectorDestroy(old_z);
-      hypre_SeqVectorInitialize(new_z);
-      hypre_ParVectorLocalVector(z) = new_z;
-   }
-   */
    hypre_CSRMatrix *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Int        num_rows     = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_Int       *A_diag_i     = hypre_CSRMatrixI(A_diag);
@@ -139,48 +122,13 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelDevice ( hypre_ParCSRMatrix *A,
    HYPRE_Complex   *r_data       = hypre_VectorData(r_local);
    HYPRE_Complex   *z_data       = hypre_VectorData(z_local);
 
-   HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(A_diag);
+   hypre_ParCSRMatrixMatvecOutOfPlace(-relax_weight, A, u, relax_weight, f, r);
 
-   HYPRE_Complex *workvector = z_data;
-   hypre_Vector *w1 = hypre_SeqVectorCreate(num_rows);
-   hypre_VectorData(w1) = workvector;
-   hypre_VectorMemoryLocation(w1) = memory_location;
-   hypre_VectorOwnsData(w1) = 0;
+   hypreDevice_DiagScaleVector(num_rows, A_diag_i, A_diag_data, r_data, 0.0, z_data);
 
-   HYPRE_Complex *workvector2 = NULL;
-
-   hypre_ParVectorCopy(f, r);
-   hypre_ParCSRMatrixMatvec(-relax_weight, A, u, relax_weight, r);
-
-   /* Need to subtract out the diagonal matrix diagonal times u_data
-    * because L/U have the diagonal built in for the solves */
-   /*
-   HYPRE_THRUST_CALL( transform,
-                      r_data,
-                      r_data + num_rows_diag,
-                      workvector2,
-                      workvector,
-                      thrust::multiplies<HYPRE_Complex>() );
-   */
-   hypreDevice_DiagScaleVector(num_rows, A_diag_i, A_diag_data, r_data, 0.0, workvector);
-
-   if (choice == 0)
-   {
-      /* spmv with the full matrix */
-      hypre_TwoStageGaussSeidelMatvec(A_diag, w1, workvector2, r_local, omega, u_local, 0);
-   }
-   else if (choice == 1)
-   {
-      /* spmv with L */
-      hypre_TwoStageGaussSeidelMatvec(A_diag, w1, workvector2, r_local, omega, u_local, 1);
-
-      //spmvL(num_rows, nnz_diag, hypre_CSRMatrixData(A_diag), hypre_CSRMatrixI(A_diag),
-      //      hypre_CSRMatrixJ(A_diag), workvector, workvector2, r_data, omega, u_data);
-   }
+   hypre_TwoStageGaussSeidelMatvec(A_diag, z_local, r_local, omega, u_local, choice);
 
    hypre_NvtxPopRange();
-
-   hypre_SeqVectorDestroy(w1);
 
    return 0;
 }
