@@ -354,8 +354,28 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                      }
                   }
                   hypre_BoxLoop2End(Ai, Pi);
+
+#if 0
+                  /* Adjust weights everywhere */
+                  hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Pi,center) HYPRE_SMP_SCHEDULE
+#endif
+                  hypre_BoxLoop1For(Pi)
+                  {
+                     center = Pp1[Pi] + Pp2[Pi];
+                     if (center)
+                     {
+                        Pp1[Pi] /= center;
+                        Pp2[Pi] /= center;
+                     }
+                  }
+                  hypre_BoxLoop1End(Pi);
+
+#endif
                } /* loop on compute_boxes */
 
+#if 1
                /* Adjust weights at part boundaries */
                hypre_ForBoxArrayI(i, pbnd_boxaa)
                {
@@ -393,7 +413,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                      } /* loop on pbnd_boxa */
                   }
                } /* loop on pbnd_boxaa */
-
+#endif
                hypre_TFree(ventries);
                hypre_BoxDestroy(compute_box);
             } /* if constant variables*/

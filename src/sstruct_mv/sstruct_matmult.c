@@ -140,8 +140,8 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    t = terms[nmatrices - 1];
    ijmatrix = hypre_SStructMatrixIJMatrix(ssmatrices[t]);
    HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uMold);
-   //hypre_SStructMatrixBoundaryToUMatrix(ssmatrices[t], parcsr_uM, &ij_sA[t]);
-   ij_sA[t] = hypre_SStructMatrixToUMatrix(ssmatrices[t]);
+   hypre_SStructMatrixBoundaryToUMatrix(ssmatrices[t], parcsr_uM, &ij_sA[t]);
+   //ij_sA[t] = hypre_SStructMatrixToUMatrix(ssmatrices[t]);
    HYPRE_IJMatrixGetObject(ij_sA[t], (void **) &parcsr_sMold);
 
 #if DEBUG_MATMULT
