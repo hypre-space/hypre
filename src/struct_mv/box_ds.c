@@ -103,7 +103,6 @@ hypre_BoxBTNodeDestroy( hypre_BoxBTNode *btnode )
 
    if (btnode)
    {
-      ndim = hypre_BoxBTNodeNDim(btnode);
       for (d = 0; d < HYPRE_MAXDIM; d++)
       {
          hypre_TFree(hypre_BoxBTNodeIndices(btnode, d));
