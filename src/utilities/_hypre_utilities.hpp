@@ -149,25 +149,19 @@ cublasHandle_t hypre_CudaDataCublasHandle(hypre_CudaData *data);
 cusparseHandle_t hypre_CudaDataCusparseHandle(hypre_CudaData *data);
 cusparseMatDescr_t hypre_CudaDataCusparseMatDescr(hypre_CudaData *data);
 
-// Data structure and accessor routines for Cuda Sparse Triangular Matrices : PJM
-struct hypre_CudaSpTriMatrixData
+// Data structure and accessor routines for Cuda Sparse Triangular Matrices
+struct hypre_CsrsvData
 {
-   csrsv2Info_t       cusparse_solve_info;
-   cusparseMatDescr_t cusparse_mat_descr;
-   void  *work_buffer;
+   csrsv2Info_t info_L;
+   csrsv2Info_t info_U;
+   hypre_int    BufferSize;
+   char        *Buffer;
 };
 
-#define hypre_CudaSpTriMatrixDataSolveInfo(matrix)       ((matrix) -> cusparse_solve_info)
-#define hypre_CudaSpTriMatrixDataMatDescr(matrix)        ((matrix) -> cusparse_mat_descr)
-#define hypre_CudaSpTriMatrixDataWorkBuffer(matrix)      ((matrix) -> work_buffer)
-
-hypre_CudaSpTriMatrixData* hypre_CudaSpTriMatrixDataCreate();
-void hypre_CudaSpTriMatrixDataDestroy(hypre_CudaSpTriMatrixData* matrix_data, HYPRE_MemoryLocation memory_location);
-
-
-#endif //#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-
-#if defined(HYPRE_USING_CUDA)
+#define hypre_CsrsvDataInfoL(data)      ((data) -> info_L)
+#define hypre_CsrsvDataInfoU(data)      ((data) -> info_U)
+#define hypre_CsrsvDataBufferSize(data) ((data) -> BufferSize)
+#define hypre_CsrsvDataBuffer(data)     ((data) -> Buffer)
 
 #include <thrust/execution_policy.h>
 #include <thrust/system/cuda/execution_policy.h>
