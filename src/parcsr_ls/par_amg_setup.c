@@ -214,36 +214,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int       dslu_threshold = hypre_ParAMGDataDSLUThreshold(amg_data);
 #endif
 
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_UNIFIED_MEMORY)
-#if 0
-   if ( hypre_ParAMGDataPrintLevel(amg_data) > 3 )
-   {
-      if (!hypre_ParCSRMatrixIsManaged(A))
-      {
-         hypre_fprintf(stderr,"WARNING:: INVALID A in hypre_BoomerAMGSetup::Address %p\n",A);
-         //exit(2);
-      }
-      else if(!hypre_ParVectorIsManaged(f))
-      {
-         hypre_fprintf(stderr,"WARNING:: INVALID f in hypre_BoomerAMGSetup::Address %p\n",f);
-         //exit(2);
-      } else if (!hypre_ParVectorIsManaged(u))
-      {
-         hypre_fprintf(stderr,"WARNING:: INVALID u in hypre_BoomerAMGSetup::Address %p\n",u);
-         //exit(2);
-      }
-   }
-#endif
-#endif
-
-#if defined(HYPRE_USING_CUDA)
-   /* any time we call setup, we need to reset the flags to rebuild the L/D/U matrices if used */
-   hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(A);
-   hypre_CSRMatrixRebuildTriMats(diag) = 1;
-#endif
-
-   /*hypre_CSRMatrix *A_new;*/
-
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
 

@@ -44,13 +44,10 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
    hypre_CSRMatrixOwnsData(matrix)  = 1;
    hypre_CSRMatrixNumRownnz(matrix) = num_rows;
 
-#if defined(HYPRE_USING_CUDA)
-   hypre_CSRMatrixSortedJ(matrix)        = NULL;
-   hypre_CSRMatrixSortedData(matrix)     = NULL;
-
-   hypre_CSRMatrixWorkVector(matrix)             = NULL;
-   hypre_CSRMatrixWorkVector2(matrix)            = NULL;
-   hypre_CSRMatrixRebuildTriMats(matrix)         = 1;
+#if defined(HYPRE_USING_CUSPARSE)
+   hypre_CSRMatrixSortedJ(matrix)    = NULL;
+   hypre_CSRMatrixSortedData(matrix) = NULL;
+   hypre_CSRMatrixCsrsvData(matrix)  = NULL;
 #endif
    return matrix;
 }

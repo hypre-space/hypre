@@ -45,12 +45,6 @@ typedef struct
    HYPRE_Complex        *sorted_data;
    hypre_CsrsvData      *csrsv_data;
 #endif
-#if defined(HYPRE_USING_CUDA)
-   /* Data structures for sparse triangular solves */
-   HYPRE_Complex  *work_vector;
-   HYPRE_Complex  *work_vector2;
-   HYPRE_Int rebuildTriMats; // Every time amg setup is called, this flag is set to 1. After D, L and U are built, the flag is set to 0
-#endif
 
 } hypre_CSRMatrix;
 
@@ -74,13 +68,6 @@ typedef struct
 #define hypre_CSRMatrixSortedJ(matrix)              ((matrix) -> sorted_j)
 #define hypre_CSRMatrixSortedData(matrix)           ((matrix) -> sorted_data)
 #define hypre_CSRMatrixCsrsvData(matrix)            ((matrix) -> csrsv_data)
-#endif
-
-#if defined(HYPRE_USING_CUDA)
-/* Accessors for sparse triangular solve */
-#define hypre_CSRMatrixWorkVector(matrix)           ((matrix) -> work_vector)
-#define hypre_CSRMatrixWorkVector2(matrix)          ((matrix) -> work_vector2)
-#define hypre_CSRMatrixRebuildTriMats(matrix)       ((matrix) -> rebuildTriMats)
 #endif
 
 HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBegin( hypre_CSRMatrix *A );
