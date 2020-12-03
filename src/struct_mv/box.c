@@ -752,8 +752,9 @@ hypre_BoxArrayCreate( HYPRE_Int size,
  *
  * Build an array of boxes [box_array_ptr] spanning input indices [indices_in]
  *
- * Assumptions:
+ * Notes:
  *    1) indices_in is a (ndim x num_indices) two-dimensional array
+ *    2) This function takes ownership on indices_in and frees it at the end.
  *
  * This is based on the Berger-Rigoutsos algorithm.
  *--------------------------------------------------------------------------*/

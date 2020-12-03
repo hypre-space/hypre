@@ -673,6 +673,9 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    indices = hypre_TAlloc(HYPRE_Int ***, nparts);
    for (part = 0; part < nparts; part++)
    {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+
       indices[part] = hypre_TAlloc(HYPRE_Int **, nvars);
       for (var = 0; var < nvars; var++)
       {
@@ -830,12 +833,19 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    /* Free memory */
    for (part = 0; part < nparts; part++)
    {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+      for (var = 0; var < nvars; var++)
+      {
+         hypre_TFree(indices[part][var]);
+      }
       hypre_TFree(idxcnt[part]);
+      hypre_TFree(indices[part]);
    }
    hypre_TFree(idxcnt);
-
-   /* Free the storage for the add entires */
+   hypre_TFree(indices);
    hypre_TFree(add_entries);
+   hypre_BoxDestroy(pbnd_box);
 
    /*---------------------------------------------------------
     * Set up the FEM stencil information
