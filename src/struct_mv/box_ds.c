@@ -99,7 +99,7 @@ hypre_BoxBTNodeInitialize( hypre_BoxBTNode  *btnode,
 HYPRE_Int
 hypre_BoxBTNodeDestroy( hypre_BoxBTNode *btnode )
 {
-   HYPRE_Int         d, ndim;
+   HYPRE_Int         d;
 
    if (btnode)
    {
@@ -420,7 +420,6 @@ hypre_BoxBTQueueInsert( hypre_BoxBTNode    *btnode,
 {
    HYPRE_Int   capacity = hypre_BoxBTQueueCapacity(btqueue);
    HYPRE_Int   size     = hypre_BoxBTQueueSize(btqueue);
-   HYPRE_Int   head     = hypre_BoxBTQueueHead(btqueue);
    HYPRE_Int   *tail    = &hypre_BoxBTQueueTail(btqueue);
 
    HYPRE_Int   i, offset;
@@ -477,7 +476,6 @@ hypre_BoxBTQueueDelete( hypre_BoxBTQueue    *btqueue,
    HYPRE_Int   capacity = hypre_BoxBTQueueCapacity(btqueue);
    HYPRE_Int   size     = hypre_BoxBTQueueSize(btqueue);
    HYPRE_Int   head     = hypre_BoxBTQueueHead(btqueue);
-   HYPRE_Int   tail     = hypre_BoxBTQueueTail(btqueue);
 
    if (size)
    {

@@ -782,8 +782,6 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
    HYPRE_Int          signcoord[HYPRE_MAXDIM];
 
    hypre_Box         *box;
-   hypre_Box         *lbox;
-   hypre_Box         *rbox;
    hypre_Box         *bbox;
 
    HYPRE_Int         *indices[HYPRE_MAXDIM];
