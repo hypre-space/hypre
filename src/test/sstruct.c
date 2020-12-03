@@ -3670,7 +3670,10 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Convert SStructMatrix to IJMatrix
     *-----------------------------------------------------------*/
-   HYPRE_SStructMatrixToIJMatrix(A, &ij_A);
+   if (print_system || check_symmetry)
+   {
+      HYPRE_SStructMatrixToIJMatrix(A, &ij_A);
+   }
 
    /*-----------------------------------------------------------
     * Print out the system and initial guess
@@ -6367,7 +6370,10 @@ main( hypre_int argc,
       HYPRE_SStructGridDestroy(G_grid);
       HYPRE_SStructMatrixDestroy(G);
    }
-   HYPRE_IJMatrixDestroy(ij_A);
+   if ((print_system || check_symmetry) && (object_type == HYPRE_SSTRUCT))
+   {
+      HYPRE_IJMatrixDestroy(ij_A);
+   }
 
    DestroyData(data);
 
