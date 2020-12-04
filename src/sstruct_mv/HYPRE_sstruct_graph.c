@@ -498,13 +498,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
             if (hypre_IndexInBox(index, bbox))
             {
                /* compute new gather box extents based on index */
-               for (d = 0; d < ndim; d++)
-               {
-                  hypre_BoxIMinD(Uvbox, d) =
-                     hypre_min(hypre_BoxIMinD(Uvbox, d), hypre_IndexD(index, d));
-                  hypre_BoxIMaxD(Uvbox, d) =
-                     hypre_max(hypre_BoxIMaxD(Uvbox, d), hypre_IndexD(index, d));
-               }
+               hypre_BoxSpanIndex(Uvbox, index);
             }
          }
       }
@@ -623,13 +617,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          if (hypre_IndexInBox(index, bbox))
          {
             /* compute new gather box extents based on index */
-            for (d = 0; d < ndim; d++)
-            {
-               hypre_BoxIMinD(Uvbox, d) =
-                  hypre_min(hypre_BoxIMinD(Uvbox, d), hypre_IndexD(index, d));
-               hypre_BoxIMaxD(Uvbox, d) =
-                  hypre_max(hypre_BoxIMaxD(Uvbox, d), hypre_IndexD(index, d));
-            }
+            hypre_BoxSpanIndex(Uvbox, index);
          }
       }
    }
