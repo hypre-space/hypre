@@ -23,9 +23,18 @@
 
 #ifdef HYPRE_USING_CALIPER
 
+#ifdef __cplusplus
+extern "C++" {
+#endif
+
 #include <caliper/cali.h>
 
-char hypre__markname[512];
+#ifdef __cplusplus
+}
+#endif
+
+static HYPRE_Int hypre__maxlevel = 0;
+static char hypre__markname[512];
 
 #define HYPRE_ANNOTATE_FUNC_BEGIN            CALI_MARK_FUNCTION_BEGIN
 #define HYPRE_ANNOTATE_FUNC_END              CALI_MARK_FUNCTION_END
@@ -43,15 +52,22 @@ char hypre__markname[512];
    hypre_sprintf(hypre__markname, __VA_ARGS__);\
    CALI_MARK_END(hypre__markname);\
 }
+#define HYPRE_ANNOTATE_MAX_MGLEVEL(lvl)      hypre__maxlevel = lvl;
 #define HYPRE_ANNOTATE_MGLEVEL_BEGIN(lvl)\
 {\
-   hypre_sprintf(hypre__markname, "MG level %d", lvl);\
-   CALI_MARK_BEGIN(hypre__markname);\
+   if (lvl < hypre__maxlevel)\
+   {\
+      hypre_sprintf(hypre__markname, "MG level %d", lvl);\
+      CALI_MARK_BEGIN(hypre__markname);\
+   }\
 }
 #define HYPRE_ANNOTATE_MGLEVEL_END(lvl)\
 {\
-   hypre_sprintf(hypre__markname, "MG level %d", lvl);\
-   CALI_MARK_END(hypre__markname);\
+   if (lvl < hypre__maxlevel)\
+   {\
+      hypre_sprintf(hypre__markname, "MG level %d", lvl);\
+      CALI_MARK_END(hypre__markname);\
+   }\
 }
 
 #else
@@ -64,6 +80,7 @@ char hypre__markname[512];
 #define HYPRE_ANNOTATE_ITER_END(id)
 #define HYPRE_ANNOTATE_REGION_BEGIN(...)
 #define HYPRE_ANNOTATE_REGION_END(...)
+#define HYPRE_ANNOTATE_MAX_MGLEVEL(lvl)
 #define HYPRE_ANNOTATE_MGLEVEL_BEGIN(lvl)
 #define HYPRE_ANNOTATE_MGLEVEL_END(lvl)
 

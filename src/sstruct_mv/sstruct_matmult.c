@@ -617,7 +617,6 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
                   convert_box = hypre_BoxArrayBox(convert_boxa, j);
                   nvalues += nnzs*hypre_BoxVolume(convert_box);
                }
-
                /* TODO: Update rowsizes for non-stencil couplings */
             } /* if (convert_box_id) */
          } /* Loop over convert_boxaa */
