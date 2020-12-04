@@ -13,7 +13,7 @@
 #include "_hypre_sstruct_mv.h"
 
 #define DEBUG_MATMULT 0
-#define DEBUG_MATCONV 1
+#define DEBUG_MATCONV 0
 
 /*--------------------------------------------------------------------------
  * hypre_SStructMatmult
@@ -130,6 +130,8 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
     * Compute unstructured component
     *-------------------------------------------------------*/
 
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", "UMatrix computation");
+
    /* Temporary work matrices */
    parcsr = hypre_TAlloc(hypre_ParCSRMatrix *, 3);
    ij_sA  = hypre_TAlloc(hypre_IJMatrix *, nmatrices);
@@ -163,7 +165,7 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    hypre_ParCSRMatrixPrintIJ(parcsr_sMold, 0, 0, "parcsr_sP");
 #endif
 
-   /* Compute M recursively */
+   /* Compute M iteratively */
    for (m = (nmatrices - 2); m >= 0; m--)
    {
       t = terms[m];
@@ -296,9 +298,13 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    }
    hypre_TFree(ij_sA);
 
+   HYPRE_ANNOTATE_REGION_END("%s", "UMatrix computation");
+
    /*-------------------------------------------------------
     * Create the resulting SStructMatrix
     *-------------------------------------------------------*/
+
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", "Build SStructMatrix");
 
    /* Create graph_M */
    grid_M = hypre_SStructGraphDomGrid(hypre_SStructMatrixGraph(ssmatrices[1]));
@@ -327,6 +333,8 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    hypre_IJMatrixAssembleFlag(ij_M) = 1;
    hypre_IJMatrixSetObject(ij_M, parcsr_uM);
    HYPRE_SStructMatrixAssemble(M);
+
+   HYPRE_ANNOTATE_REGION_END("%s", "Build SStructMatrix");
 
    /*-------------------------------------------------------
     * Free memory
@@ -682,19 +690,23 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
                                ilower[0], ilower[1], ilower[2],
                                iupper[0], iupper[1], iupper[2]);
                }
+               HYPRE_ANNOTATE_REGION_BEGIN("%s %d %s %d", "Get values part", part, "convert_box", j);
 #endif
                /* GET values from this box */
-               HYPRE_ANNOTATE_REGION_BEGIN("%s %d %s %d", "Get values part", part, "convert_box", j);
                hypre_SStructPMatrixSetBoxValues(pA, ilower, iupper, var,
                                                 nSentries, Sentries, values, -1);
-               HYPRE_ANNOTATE_REGION_END("%s %d %s %d", "Get values part", part, "convert_box", j);
 
-               /* SET values to ij_Ahat */
+#if DEBUG_MATCONV
+               HYPRE_ANNOTATE_REGION_END("%s %d %s %d", "Get values part", part, "convert_box", j);
                HYPRE_ANNOTATE_REGION_BEGIN("%s %d %s %d", "Set values part", part, "convert_box", j);
+#endif
+               /* SET values to ij_Ahat */
                hypre_SStructUMatrixSetBoxValuesHelper(A, part, ilower, iupper,
                                                       var, nSentries, Sentries,
                                                       values, 0, ij_Ahat);
+#if DEBUG_MATCONV
                HYPRE_ANNOTATE_REGION_END("%s %d %s %d", "Set values part", part, "convert_box", j);
+#endif
             } /* Loop over convert_boxa */
          } /* Loop over convert_boxaa */
       } /* Loop over vars */

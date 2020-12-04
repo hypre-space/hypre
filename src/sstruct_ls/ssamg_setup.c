@@ -71,8 +71,10 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    HYPRE_Int              l, part;
    HYPRE_Int              nparts;
    HYPRE_Int              num_levels;
+   HYPRE_Int              myid;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_MPI_Comm_rank(hypre_SStructMatrixComm(A), &myid);
 
    /*-----------------------------------------------------
     * Sanity checks
@@ -164,6 +166,10 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    for (l = 0; l < (num_levels - 1); l++)
    {
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
+      if (!myid)
+      {
+         hypre_printf("Level %d/%d\n", l, num_levels);
+      }
 
       // Build prolongation matrix
       P_l[l]  = hypre_SSAMGCreateInterpOp(A_l[l], grid_l[l+1], cdir_l[l]);
@@ -270,9 +276,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    hypre_SStructVector  **ones_l;
    hypre_SStructVector  **Pones_l;
    char                   filename[255];
-   HYPRE_Int              myid;
 
-   hypre_MPI_Comm_rank(hypre_SStructMatrixComm(A_l[0]), &myid);
    ones_l  = hypre_TAlloc(hypre_SStructVector *, num_levels - 1);
    Pones_l = hypre_TAlloc(hypre_SStructVector *, num_levels - 1);
 
