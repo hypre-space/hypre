@@ -89,6 +89,7 @@ extern "C++" {
 cat hypre_cuda_utils.h           >> $INTERNAL_HEADER
 cat hypre_cuda_reducer.h         >> $INTERNAL_HEADER
 cat hypre_cub_allocator.h        >> $INTERNAL_HEADER
+cat umpire_allocator.h           >> $INTERNAL_HEADER
 
 #===========================================================================
 # Include guards

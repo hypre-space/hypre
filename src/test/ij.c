@@ -448,11 +448,11 @@ main( hypre_int argc,
    
    umpire_allocator um_allocator,um_pool;
    umpire_resourcemanager_get_allocator_by_name(&rm, "UM", &um_allocator);
-   umpire_resourcemanager_make_allocator_pool(&rm, "HYPRE_UM_POOL", um_allocator, pool_size , 512, &um_pool);
+   umpire_resourcemanager_make_allocator_list_pool(&rm, "HYPRE_UM_POOL", um_allocator, pool_size , 1024*1024*1024, &um_pool);
 
    umpire_allocator dev_allocator,dev_pool;
    umpire_resourcemanager_get_allocator_by_name(&rm, "DEVICE", &dev_allocator);
-   umpire_resourcemanager_make_allocator_pool(&rm, "HYPRE_DEVICE_POOL", dev_allocator, pool_size , 512, &dev_pool);
+   umpire_resourcemanager_make_allocator_list_pool(&rm, "HYPRE_DEVICE_POOL", dev_allocator, pool_size , 1024*1024*1024, &dev_pool);
    
    
 #endif

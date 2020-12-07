@@ -224,7 +224,7 @@ using namespace thrust::placeholders;
 /* RL: TODO Want macro HYPRE_THRUST_CALL to return value but I don't know how to do it right
  * The following one works OK for now */
 #define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
-   thrust::func_name(thrust::cuda::par.on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
+   thrust::func_name(thrust::cuda::par(ualloc).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
 
 /* return the number of threads in block */
 template <hypre_int dim>
@@ -1856,6 +1856,45 @@ struct hypre_cub_CachingDeviceAllocator
 
 #endif // #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUB_ALLOCATOR)
 #endif // #ifndef HYPRE_CUB_ALLOCATOR_HEADER
+
+#include "umpire/ResourceManager.hpp"
+#include "umpire/strategy/DynamicPool.hpp"
+#include "umpire/util/Macros.hpp"
+#include <string>
+struct hypre_umpire_allocator
+{
+  typedef char value_type;
+
+  hypre_umpire_allocator() {
+  }
+
+  ~hypre_umpire_allocator()
+  {
+    // auto hwm = umpire::ResourceManager::getInstance()
+    //   .getAllocator("HYPRE_DEVICE_POOL")
+    //   .getHighWatermark();
+    // std::cout<<" High Water Mark is "<<hwm<<"bytes\n";
+  }
+
+  char *allocate(std::ptrdiff_t num_bytes)
+  {
+    //std::cout<<"umpire allocate "<<num_bytes<<"\n";
+    umpire::ResourceManager &rma = umpire::ResourceManager::getInstance();
+    auto allocator = rma.getAllocator("HYPRE_DEVICE_POOL");
+    char *result = static_cast<char *>(allocator.allocate(num_bytes));
+    return result;
+  }
+
+  void deallocate(char *ptr, size_t)
+  {
+    //std::cout<<"umpire de-allocate \n";
+    umpire::ResourceManager &rma = umpire::ResourceManager::getInstance();
+    auto allocator = rma.getAllocator("HYPRE_DEVICE_POOL");
+    allocator.deallocate(ptr);
+  }
+
+
+};
 
 
 #ifdef __cplusplus

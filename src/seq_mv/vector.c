@@ -284,6 +284,7 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
 #if defined(HYPRE_USING_CUDA)
    if (size > 0)
    {
+     hypre_umpire_allocator ualloc;
       HYPRE_THRUST_CALL( fill_n, vector_data, size, value );
    }
 #else
@@ -470,6 +471,7 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 #if defined(HYPRE_USING_CUBLAS)
    HYPRE_CUBLAS_CALL( cublasDscal(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, y_data, 1) );
 #else
+   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL( transform, y_data, y_data + size, y_data, alpha * _1 );
 #endif
 #else
@@ -523,6 +525,7 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 #if defined(HYPRE_USING_CUBLAS)
    HYPRE_CUBLAS_CALL( cublasDaxpy(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, x_data, 1, y_data, 1) );
 #else
+   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL( transform, x_data, x_data + size, y_data, y_data, alpha * _1 + _2 );
 #endif
 #else
@@ -577,6 +580,7 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
 #if defined(HYPRE_USING_CUBLAS)
    HYPRE_CUBLAS_CALL( cublasDdot(hypre_HandleCublasHandle(hypre_handle()), size, x_data, 1, y_data, 1, &result) );
 #else
+   hypre_umpire_allocator ualloc;
    result = HYPRE_THRUST_CALL( inner_product, x_data, x_data + size, y_data, 0.0 );
 #endif
 #else

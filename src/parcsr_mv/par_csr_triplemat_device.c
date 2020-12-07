@@ -106,6 +106,7 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
 
       // split into diag and offd
       in_range<HYPRE_Int> pred(0, hypre_ParCSRMatrixNumCols(B) - 1);
+      hypre_umpire_allocator ualloc;
       HYPRE_Int nnz_C_diag = HYPRE_THRUST_CALL( count_if,
                                                 hypre_CSRMatrixJ(Cbar),
                                                 hypre_CSRMatrixJ(Cbar) + hypre_CSRMatrixNumNonzeros(Cbar),
@@ -266,6 +267,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       hypre_CSRMatrixOwnsData(Cint) = 0;
 
       hypre_CSRMatrixI(Cint) = hypre_CSRMatrixI(Cbar) + hypre_ParCSRMatrixNumCols(A);
+      hypre_umpire_allocator ualloc;
       HYPRE_THRUST_CALL( transform,
                          hypre_CSRMatrixI(Cint),
                          hypre_CSRMatrixI(Cint) + hypre_CSRMatrixNumRows(Cint) + 1,
@@ -582,6 +584,7 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       hypre_CSRMatrixOwnsData(Cint) = 0;
 
       hypre_CSRMatrixI(Cint) = hypre_CSRMatrixI(Cbar) + hypre_ParCSRMatrixNumCols(R);
+      hypre_umpire_allocator ualloc;
       HYPRE_THRUST_CALL( transform,
                          hypre_CSRMatrixI(Cint),
                          hypre_CSRMatrixI(Cint) + hypre_CSRMatrixNumRows(Cint) + 1,

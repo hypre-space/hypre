@@ -169,6 +169,8 @@ hypre_DeviceMalloc(size_t size, HYPRE_Int zeroinit)
 #if defined(HYPRE_USING_CUB_ALLOCATOR)
    HYPRE_CUDA_CALL( hypre_CachingMallocDevice(&ptr, size) );
 #elif defined(HYPRE_USING_UMPIRE)
+   static int count=0;
+   //printf("DEVICE CALL COUNT IS %d\n",++count);
    umpire_resourcemanager rm;
    umpire_resourcemanager_get_instance(&rm);
    umpire_allocator dev_allocator;
@@ -198,6 +200,8 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
 #if defined(HYPRE_USING_CUB_ALLOCATOR)
    HYPRE_CUDA_CALL( hypre_CachingMallocManaged(&ptr, size) );
 #elif defined(HYPRE_USING_UMPIRE)
+   static int count=0;
+   //printf("MANAGED CALL COUNT IS %d\n",++count);
    umpire_resourcemanager rm;
    umpire_resourcemanager_get_instance(&rm);
    umpire_allocator um_allocator;

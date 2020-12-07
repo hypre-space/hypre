@@ -1,0 +1,39 @@
+#include "umpire/ResourceManager.hpp"
+#include "umpire/strategy/DynamicPool.hpp"
+#include "umpire/util/Macros.hpp"
+#include <string>
+struct hypre_umpire_allocator
+{
+  typedef char value_type;
+
+  hypre_umpire_allocator() {
+  }
+
+  ~hypre_umpire_allocator()
+  {
+    // auto hwm = umpire::ResourceManager::getInstance()
+    //   .getAllocator("HYPRE_DEVICE_POOL")
+    //   .getHighWatermark();
+    // std::cout<<" High Water Mark is "<<hwm<<"bytes\n";
+  }
+
+  char *allocate(std::ptrdiff_t num_bytes)
+  {
+    //std::cout<<"umpire allocate "<<num_bytes<<"\n";
+    umpire::ResourceManager &rma = umpire::ResourceManager::getInstance();
+    auto allocator = rma.getAllocator("HYPRE_DEVICE_POOL");
+    char *result = static_cast<char *>(allocator.allocate(num_bytes));
+    return result;
+  }
+
+  void deallocate(char *ptr, size_t)
+  {
+    //std::cout<<"umpire de-allocate \n";
+    umpire::ResourceManager &rma = umpire::ResourceManager::getInstance();
+    auto allocator = rma.getAllocator("HYPRE_DEVICE_POOL");
+    allocator.deallocate(ptr);
+  }
+
+
+};
+

@@ -1100,6 +1100,7 @@ hypre_ILUSolveCusparseLU(hypre_ParCSRMatrix *A, cusparseMatDescr_t matL_des, cus
    hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A, u, beta, f, ftemp);
 
    /* apply permutation */
+   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL(gather, perm, perm + n, ftemp_data, utemp_data);
 
    if(isDoublePrecision)
@@ -1240,6 +1241,7 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
     */
 
    /* apply permutation before we can start our solve */
+   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL(gather, perm, perm + n, ftemp_data, utemp_data);
 
    if(nLU > 0)
@@ -1461,6 +1463,7 @@ hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
          /* apply permutation before we can start our solve
           * Au=f -> (PAQ)Q'u=Pf
           */
+	 hypre_umpire_allocator ualloc;
          HYPRE_THRUST_CALL(gather, perm, perm + n, utemp_data, ftemp_data);
 
          /* A-smoothing
@@ -1700,6 +1703,7 @@ hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
          /* apply permutation before we can start our solve
           * Au=f -> (PAQ)Q'u=Pf
           */
+	 hypre_umpire_allocator ualloc;
          HYPRE_THRUST_CALL(gather, perm, perm + n, ftemp_data, utemp_data);
 
          /* A-smoothing

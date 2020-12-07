@@ -53,6 +53,7 @@ hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
 
    /* give S data arrays */
    hypre_CSRMatrixData(S_diag) = hypre_TAlloc(HYPRE_Complex, S_diag_nnz, HYPRE_MEMORY_DEVICE );
+   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL( fill,
                       hypre_CSRMatrixData(S_diag),
                       hypre_CSRMatrixData(S_diag) + S_diag_nnz,
@@ -355,7 +356,7 @@ void truncate( hypre_ParCSRMatrix* S, HYPRE_Complex trunc_level )
    hypre_CUDAKernel_MarkTrunc_w<<<gDim,bDim>>>( nr_of_rows, S_diag_i, S_diag_a, trunc_level, dm, dmj );
    thrust::device_ptr<HYPRE_Int>  dmp(dm), dmjp(dmj);
    HYPRE_Int no_remove=thrust::reduce(dmp,dmp+nr_of_rows);
-
+ 
    // New col index array
    HYPRE_Int* S_diag_j_new = hypre_CTAlloc( HYPRE_Int, nnz-no_remove, ml);
    thrust::device_ptr<HYPRE_Int> S_diag_jp(S_diag_j), S_diag_j_newp(S_diag_j_new);

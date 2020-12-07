@@ -214,7 +214,7 @@ using namespace thrust::placeholders;
 /* RL: TODO Want macro HYPRE_THRUST_CALL to return value but I don't know how to do it right
  * The following one works OK for now */
 #define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
-   thrust::func_name(thrust::cuda::par.on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
+   thrust::func_name(thrust::cuda::par(ualloc).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
 
 /* return the number of threads in block */
 template <hypre_int dim>

@@ -255,7 +255,7 @@ int umpire_pool_exists(const char *pool){
 #if defined(HYPRE_USING_UMPIRE)
   umpire_resourcemanager rm;
   umpire_resourcemanager_get_instance(&rm);
-  if (umpire_resourcemanager_is_allocator(&rm, pool)) return 1;
+  if (umpire_resourcemanager_is_allocator_name(&rm, pool)) return 1;
   return 0;
 #endif
   return 0;

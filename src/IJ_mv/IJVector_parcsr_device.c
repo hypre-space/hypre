@@ -68,6 +68,7 @@ hypre_IJVectorSetAddValuesParDevice(hypre_IJVector       *vector,
       hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
       hypre_Vector    *local_vector = hypre_ParVectorLocalVector(par_vector);
       HYPRE_Int        num_values2 = hypre_min( hypre_VectorSize(local_vector), num_values );
+      hypre_umpire_allocator ualloc;
       HYPRE_BigInt    *indices2 = hypre_TAlloc(HYPRE_BigInt, num_values2, HYPRE_MEMORY_DEVICE);
       HYPRE_THRUST_CALL(sequence, indices2, indices2 + num_values2, vec_start);
 
@@ -114,6 +115,7 @@ hypre_IJVectorSetAddValuesParDevice(hypre_IJVector       *vector,
       hypre_AuxParVectorMaxStackElmts(aux_vector) = stack_elmts_max_new;
    }
 
+   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL(fill_n, stack_sora + stack_elmts_current, num_values, SorA);
 
    hypre_TMemcpy(stack_i    + stack_elmts_current, indices, HYPRE_BigInt,  num_values, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
@@ -163,6 +165,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
    char          *stack_sora = hypre_AuxParVectorStackSorA(aux_vector);
 
    in_range<HYPRE_BigInt> pred(vec_start, vec_stop);
+   hypre_umpire_allocator ualloc;
    HYPRE_Int nelms_on = HYPRE_THRUST_CALL(count_if, stack_i, stack_i+nelms, pred);
    HYPRE_Int nelms_off = nelms - nelms_on;
    HYPRE_Int nelms_off_max;
@@ -275,6 +278,7 @@ HYPRE_Int
 hypre_IJVectorAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, char  *X0, HYPRE_Complex  *A0,
                                      HYPRE_Int *N1, HYPRE_BigInt **I1, char **X1, HYPRE_Complex **A1 )
 {
+  hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL( stable_sort_by_key,
                       I0,
                       I0 + N0,
@@ -319,6 +323,7 @@ HYPRE_Int
 hypre_IJVectorAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, char *X0, HYPRE_Complex  *A0,
                                      HYPRE_Int *N1, HYPRE_BigInt **I1,           HYPRE_Complex **A1)
 {
+  hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL( stable_sort_by_key,
                       I0,
                       I0 + N0,

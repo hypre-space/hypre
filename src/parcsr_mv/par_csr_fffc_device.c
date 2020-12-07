@@ -283,6 +283,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
    hypre_TMemcpy(CF_marker, CF_marker_host, HYPRE_Int, n_local, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
+   hypre_umpire_allocator ualloc;
    if (option == 2)
    {
       nF2_local = HYPRE_THRUST_CALL( count,
@@ -1107,6 +1108,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
    hypre_TMemcpy(CF_marker, CF_marker_host, HYPRE_Int, n_local, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
    /* map from all points (i.e, F+C) to F/C indices */
+   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL( exclusive_scan,
                       thrust::make_transform_iterator(CF_marker,           is_negative<HYPRE_Int>()),
                       thrust::make_transform_iterator(CF_marker + n_local, is_negative<HYPRE_Int>()),

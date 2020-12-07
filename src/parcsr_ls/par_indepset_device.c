@@ -239,6 +239,7 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
    }
 
    thrust::plus<HYPRE_Real> op;
+   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL(transform, measure_array, measure_array + num_rows_diag,
                      urand, measure_array, op);
 

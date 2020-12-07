@@ -75,6 +75,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int num_elmts_send = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
    HYPRE_Complex *send_buf = hypre_TAlloc(HYPRE_Complex, num_elmts_send, HYPRE_MEMORY_DEVICE);
    hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
+   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL( gather,
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elmts_send,
@@ -340,6 +341,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Complex *send_buf = hypre_TAlloc(HYPRE_Complex, num_elmts_send, HYPRE_MEMORY_DEVICE);
    hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
 
+   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL( gather,
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elmts_send,

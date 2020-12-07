@@ -94,6 +94,7 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
    hypre_assert(A_nr_of_rows == W_nr_of_rows + hypre_ParCSRMatrixNumCols(AFC));
 
    rsW = hypre_TAlloc(HYPRE_Complex, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
+   hypre_umpire_allocator ualloc;
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
                                                rsWA,
                                                rsWA + A_nr_of_rows,
@@ -292,6 +293,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    hypre_assert(A_nr_of_rows == W_nr_of_rows + hypre_ParCSRMatrixNumCols(AFC));
 
    rsW = hypre_TAlloc(HYPRE_Complex, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
+   hypre_umpire_allocator ualloc;
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
                                                rsWA,
                                                rsWA + A_nr_of_rows,
@@ -530,6 +532,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    hypre_assert(A_nr_of_rows == W_nr_of_rows + hypre_ParCSRMatrixNumCols(AFC));
 
    rsW = hypre_TAlloc(HYPRE_Complex, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
+   hypre_umpire_allocator ualloc;
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
                                                rsWA,
                                                rsWA + A_nr_of_rows,
@@ -922,6 +925,7 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
 {
    // row index shift P --> W
    HYPRE_Int *PWoffset = hypre_TAlloc(HYPRE_Int, P_nr_of_rows + 1, HYPRE_MEMORY_DEVICE);
+   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL( transform,
                       CF_marker,
                       &CF_marker[P_nr_of_rows],
