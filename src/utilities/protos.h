@@ -256,4 +256,10 @@ void hypre_NvtxPopRange();
 
 /* hypre_utilities.c */
 HYPRE_Int hypre_multmod(HYPRE_Int a, HYPRE_Int b, HYPRE_Int mod);
+void hypre_partition1D(HYPRE_Int n, HYPRE_Int p, HYPRE_Int j, HYPRE_Int *s, HYPRE_Int *e);
+
+HYPRE_Int hypre_SetSyncCudaCompute(HYPRE_Int action);
+HYPRE_Int hypre_RestoreSyncCudaCompute();
+HYPRE_Int hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr);
+HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
 

@@ -503,7 +503,7 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 HYPRE_Int
 hypre_SeqVectorAxpy( HYPRE_Complex alpha,
                      hypre_Vector *x,
-                     hypre_Vector *y     )
+                     hypre_Vector *y )
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
@@ -550,6 +550,59 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
    return ierr;
 }
 
+/* y = y + x ./ b */
+HYPRE_Int
+hypre_SeqVectorElmdivpy( hypre_Vector *x,
+                         hypre_Vector *b,
+                         hypre_Vector *y )
+{
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
+#endif
+
+   HYPRE_Complex *x_data = hypre_VectorData(x);
+   HYPRE_Complex *b_data = hypre_VectorData(b);
+   HYPRE_Complex *y_data = hypre_VectorData(y);
+   HYPRE_Int      size   = hypre_VectorSize(b);
+
+#if defined(HYPRE_USING_CUDA)
+   //HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_VectorMemoryLocation(x), hypre_VectorMemoryLocation(b) );
+   //RL: TODO back to hypre_GetExecPolicy2 later
+   HYPRE_ExecutionPolicy exec = HYPRE_EXEC_DEVICE;
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      //TODO
+      //hypre_SeqVectorElmdivpyDevice(x, b, y);
+      /*
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+#pragma omp target teams distribute parallel for private(i) is_device_ptr(u_data,v_data,l1_norms)
+#endif
+      */
+      hypreDevice_IVAXPY(size, b_data, x_data, y_data);
+   }
+   else
+#endif
+   {
+      HYPRE_Int i;
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < size; i++)
+      {
+         y_data[i] += x_data[i] / b_data[i];
+      }
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   hypre_SyncCudaComputeStream(hypre_handle());
+#endif
+
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
+#endif
+
+   return hypre_error_flag;
+}
 
 /*--------------------------------------------------------------------------
  * hypre_SeqVectorInnerProd

@@ -9,7 +9,6 @@
 #include "Common.h"
 #include "_hypre_blas.h"
 #include "_hypre_lapack.h"
-#include "../sstruct_ls/gselim.h"
 
 /*-------------------------------------------------------------------------
  *
