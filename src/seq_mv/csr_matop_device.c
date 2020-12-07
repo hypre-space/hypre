@@ -15,8 +15,6 @@
 #include "csr_matrix.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
-
 #if defined(HYPRE_USING_CUSPARSE)
 hypre_CsrsvData*
 hypre_CsrsvDataCreate()
@@ -52,6 +50,8 @@ hypre_CsrsvDataDestroy(hypre_CsrsvData* data)
    hypre_TFree(data, HYPRE_MEMORY_HOST);
 }
 #endif /* #if defined(HYPRE_USING_CUSPARSE) */
+
+#if defined(HYPRE_USING_CUDA)
 
 hypre_CSRMatrix*
 hypre_CSRMatrixAddDevice ( hypre_CSRMatrix *A,
@@ -1207,6 +1207,26 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
    HYPRE_Complex *u_data = hypre_VectorData(u);
    HYPRE_Complex  alpha  = 1.0;
    hypre_int      buffer_size;
+   hypre_int      structural_zero;
+
+   if (nrow != ncol)
+   {
+      hypre_assert(0);
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (nrow <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   if (nnzA <= 0)
+   {
+      hypre_assert(0);
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
 
    if ( !A_sj && !A_sa )
    {
@@ -1251,6 +1271,15 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                                                        nrow, nnzA, descr, A_sa, A_i, A_sj,
                                                        hypre_CsrsvDataInfoL(csrsv_data), CUSPARSE_SOLVE_POLICY_USE_LEVEL,
                                                        hypre_CsrsvDataBuffer(csrsv_data)) );
+
+         cusparseStatus_t status = cusparseXcsrsv2_zeroPivot(handle, hypre_CsrsvDataInfoL(csrsv_data), &structural_zero);
+         if (CUSPARSE_STATUS_ZERO_PIVOT == status)
+         {
+            hypre_printf("hypre_CSRMatrixTriLowerUpperSolveCusparse A(%d,%d) is missing\n", structural_zero, structural_zero);
+            hypre_assert(0);
+            hypre_error_in_arg(1);
+            return hypre_error_flag;
+         }
       }
 
       HYPRE_CUSPARSE_CALL( cusparseDcsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
@@ -1282,6 +1311,15 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                                                        nrow, nnzA, descr, A_sa, A_i, A_sj,
                                                        hypre_CsrsvDataInfoU(csrsv_data), CUSPARSE_SOLVE_POLICY_USE_LEVEL,
                                                        hypre_CsrsvDataBuffer(csrsv_data)) );
+
+         cusparseStatus_t status = cusparseXcsrsv2_zeroPivot(handle, hypre_CsrsvDataInfoU(csrsv_data), &structural_zero);
+         if (CUSPARSE_STATUS_ZERO_PIVOT == status)
+         {
+            hypre_printf("hypre_CSRMatrixTriLowerUpperSolveCusparse A(%d,%d) is missing\n", structural_zero, structural_zero);
+            hypre_assert(0);
+            hypre_error_in_arg(1);
+            return hypre_error_flag;
+         }
       }
 
       HYPRE_CUSPARSE_CALL( cusparseDcsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
