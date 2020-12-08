@@ -1489,7 +1489,10 @@ hypre_BoomerAMGRelax11TwoStageGaussSeidelHost( hypre_ParCSRMatrix *A,
    /* Need to check that EVERY diagonal is nonzero first. If any are, throw exception */
    for (i = 0; i < num_rows; i++)
    {
-      if (A_diag_data[A_diag_i[i]] == 0.0) {}; /* How does HYPRE handle exceptions ??? */
+      if (A_diag_data[A_diag_i[i]] == 0.0)
+      {
+         hypre_error_in_arg(1);
+      }
    }
 
    for (i = 0; i < num_rows; i++) /* Run the smoother */
@@ -1560,7 +1563,10 @@ hypre_BoomerAMGRelax12TwoStageGaussSeidelHost( hypre_ParCSRMatrix *A,
    /* Need to check that EVERY diagonal is nonzero first. If any are, throw exception */
    for (i = 0; i < num_rows; i++)
    {
-      if (A_diag_data[A_diag_i[i]] == 0.0) {}; /* How does HYPRE handle exceptions ??? */
+      if (A_diag_data[A_diag_i[i]] == 0.0)
+      {
+         hypre_error_in_arg(1);
+      }
    }
 
    for (i = 0; i < num_rows; i++) /* Run the smoother */
