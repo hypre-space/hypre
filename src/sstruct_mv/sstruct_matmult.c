@@ -646,7 +646,6 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    values = hypre_CTAlloc(HYPRE_Complex, nvalues);
 
    /* Set entries of ij_Ahat */
-   HYPRE_ANNOTATE_REGION_BEGIN("%s", "Set entries");
    for (part = 0; part < nparts; part++)
    {
       pA    = hypre_SStructMatrixPMatrix(A, part);
@@ -692,17 +691,21 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
                HYPRE_ANNOTATE_REGION_BEGIN("%s %d %s %d", "Get values part", part, "convert_box", j);
 #endif
                /* GET values from this box */
+               HYPRE_ANNOTATE_REGION_BEGIN("%s", "Get entries");
                hypre_SStructPMatrixSetBoxValues(pA, ilower, iupper, var,
                                                 nSentries, Sentries, values, -1);
+               HYPRE_ANNOTATE_REGION_END("%s", "Get entries");
 
 #if DEBUG_MATCONV
                HYPRE_ANNOTATE_REGION_END("%s %d %s %d", "Get values part", part, "convert_box", j);
                HYPRE_ANNOTATE_REGION_BEGIN("%s %d %s %d", "Set values part", part, "convert_box", j);
 #endif
                /* SET values to ij_Ahat */
+               HYPRE_ANNOTATE_REGION_BEGIN("%s", "Set entries");
                hypre_SStructUMatrixSetBoxValuesHelper(A, part, ilower, iupper,
                                                       var, nSentries, Sentries,
                                                       values, 0, ij_Ahat);
+               HYPRE_ANNOTATE_REGION_END("%s", "Set entries");
 #if DEBUG_MATCONV
                HYPRE_ANNOTATE_REGION_END("%s %d %s %d", "Set values part", part, "convert_box", j);
 #endif
@@ -710,7 +713,6 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
          } /* Loop over convert_boxaa */
       } /* Loop over vars */
    } /* Loop over parts */
-   HYPRE_ANNOTATE_REGION_END("%s", "Set entries");
 
 #if DEBUG_MATCONV
    if (!myid)

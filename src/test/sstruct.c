@@ -40,6 +40,7 @@
 /* end lobpcg */
 
 #define DEBUG 0
+#define DEBUG_SSGRAPH 1
 
 /*--------------------------------------------------------------------------
  * Data structures
@@ -3046,7 +3047,9 @@ main( hypre_int argc,
 
    for (part = 0; part < data.nparts; part++)
    {
-      //hypre_printf("Building SStructGraph - part %d\n", part);
+#if DEBUG_SSGRAPH
+      hypre_printf("Building SStructGraph - part %d\n", part);
+#endif
       pdata = data.pdata[part];
 
       if (data.nstencils > 0)
@@ -3071,7 +3074,9 @@ main( hypre_int argc,
       /* add entries */
       for (box = 0; box < pdata.graph_nboxes; box++)
       {
-         //hypre_printf("Building SStructGraph - box %d\n", box);
+#if DEBUG_SSGRAPH
+         hypre_printf("Building SStructGraph - box %d\n", box);
+#endif
          for (index[2] = pdata.graph_ilowers[box][2];
               index[2] <= pdata.graph_iuppers[box][2];
               index[2] += pdata.graph_strides[box][2])
@@ -3098,7 +3103,7 @@ main( hypre_int argc,
                      to_index[j] += k * pdata.graph_to_strides[box][j];
 #endif
                   }
-#if 0
+#if DEBUG_SSGRAPH
                   hypre_printf("index: [%d](%d, %d, %d) - to_index: [%d](%d, %d, %d)\n",
                                   part, index[0], index[1], index[2],
                                   pdata.graph_to_parts[box], to_index[0],
