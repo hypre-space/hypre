@@ -38,7 +38,7 @@ shift
 # Basic build and run tests
 mo="-j test"
 eo=""
-roij="-ij -ams -rt -mpibind -rtol 1e-3 -atol 1e-3"
+roij="-ij -ams -rt -mpibind -rtol 1e-3 -atol 8e-3"
 ross="-struct -sstruct -rt -mpibind -rtol 1e-6 -atol 1e-6"
 rost="-struct -rt -mpibind -rtol 1e-8 -atol 1e-8"
 rocuda="-cuda_ray -rt -mpibind"
