@@ -1072,7 +1072,7 @@ main( hypre_int argc,
       }
       else if ( strcmp(argv[arg_index], "-ilu_sm_max_iter") == 0 )
       {                /* number of iteration when applied as a smoother */
-         arg_index++;        
+         arg_index++;
          ilu_sm_max_iter = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-ilu_lfil") == 0 )
@@ -3480,7 +3480,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetILUDroptol(amg_solver, ilu_droptol);
       HYPRE_BoomerAMGSetILUMaxRowNnz(amg_solver, ilu_max_row_nnz);
       HYPRE_BoomerAMGSetILUMaxIter(amg_solver, ilu_sm_max_iter);
-      
+
       HYPRE_BoomerAMGSetNumFunctions(amg_solver, num_functions);
       HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
       HYPRE_BoomerAMGSetAggInterpType(amg_solver, agg_interp_type);
@@ -3632,7 +3632,8 @@ main( hypre_int argc,
 
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
-      HYPRE_ParVectorSetRandomValues(x, 775);
+      //HYPRE_ParVectorSetRandomValues(x, 775);
+      hypre_ParVectorCopy(x0_save, x);
 
       HYPRE_Real tt, maxtt = 0.0, tset = 0.0, tsol = 0.0;
 

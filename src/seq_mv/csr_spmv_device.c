@@ -70,8 +70,8 @@ hypre_csr_v_k_shuffle(HYPRE_Int     n,
 {
    /*------------------------------------------------------------*
     *               CSR spmv-vector kernel
-    *              shared memory reduction
-    *           (Group of K threads) per row
+    *               warp-shuffle reduction
+    *            (Group of K threads) per row
     *------------------------------------------------------------*/
    const HYPRE_Int grid_ngroups = gridDim.x * (SPMV_BLOCKDIM / K);
    HYPRE_Int grid_group_id = (blockIdx.x * SPMV_BLOCKDIM + threadIdx.x) / K;
@@ -163,42 +163,47 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int      nrows,
                              HYPRE_Complex *d_y )
 {
    const HYPRE_Int rownnz = (nnz + nrows - 1) / nrows;
-   const HYPRE_Int bDim = SPMV_BLOCKDIM;
+   const dim3 bDim(SPMV_BLOCKDIM);
 
    if (rownnz >= 64)
    {
       const HYPRE_Int group_size = 32;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
-      const HYPRE_Int gDim = (nrows + num_groups_per_block - 1) / num_groups_per_block;
-      hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real> <<<gDim, bDim>>>(nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y);
+      const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
+      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+                         nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
    }
    else if (rownnz >= 32)
    {
       const HYPRE_Int group_size = 16;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
-      const HYPRE_Int gDim = (nrows + num_groups_per_block - 1) / num_groups_per_block;
-      hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real> <<<gDim, bDim>>>(nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y);
+      const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
+      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+                         nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
    }
    else if (rownnz >= 16)
    {
       const HYPRE_Int group_size = 8;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
-      const HYPRE_Int gDim = (nrows + num_groups_per_block - 1) / num_groups_per_block;
-      hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real> <<<gDim, bDim>>>(nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y);
+      const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
+      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+                         nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
    }
    else if (rownnz >= 8)
    {
       const HYPRE_Int group_size = 4;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
-      const HYPRE_Int gDim = (nrows + num_groups_per_block - 1) / num_groups_per_block;
-      hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real> <<<gDim, bDim>>>(nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y);
+      const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
+      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+                         nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
    }
    else
    {
       const HYPRE_Int group_size = 4;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
-      const HYPRE_Int gDim = (nrows + num_groups_per_block - 1) / num_groups_per_block;
-      hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real> <<<gDim, bDim>>>(nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y);
+      const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
+      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+                         nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
    }
 
    return hypre_error_flag;
