@@ -754,9 +754,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       HYPRE_THRUST_CALL( transform_if, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm, thrust::negate<HYPRE_Real>(),
                          is_negative<HYPRE_Real>() );
       //bool any_zero = HYPRE_THRUST_CALL( any_of, l1_norm, l1_norm + num_rows, thrust::not1(thrust::identity<HYPRE_Complex>()) );
-      thrust::device_ptr<HYPRE_Real> l1_normd = thrust::device_pointer_cast(l1_norm);
-      //bool any_zero = 0.0 == HYPRE_THRUST_CALL( reduce, thrust::cuda::par(ualloc), l1_normd, l1_normd + num_rows, std::static_cast<HYPRE_Real>(1.0), thrust::minimum<HYPRE_Real>() );
-      bool any_zero = 0.0 == HYPRE_THRUST_CALL( reduce, l1_normd, l1_normd + num_rows, 1.0, thrust::minimum<HYPRE_Real>() );
+      bool any_zero = 0.0 == HYPRE_THRUST_CALL( reduce, l1_norm, l1_norm + num_rows, 1.0, thrust::minimum<HYPRE_Real>() );
       if ( any_zero )
       {
          hypre_error_in_arg(1);
