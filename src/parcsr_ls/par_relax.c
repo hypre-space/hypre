@@ -1485,6 +1485,7 @@ hypre_BoomerAMGRelax11TwoStageGaussSeidelHost( hypre_ParCSRMatrix *A,
    HYPRE_Complex   *u_data      = hypre_VectorData(u_local);
    HYPRE_Int        i, jj, ii;
 
+   hypre_ParCSRMatrixMatvecOutOfPlace(-relax_weight, A, u, relax_weight, f, Vtemp);
 
    /* Need to check that EVERY diagonal is nonzero first. If any are, throw exception */
    for (i = 0; i < num_rows; i++)
@@ -1559,6 +1560,8 @@ hypre_BoomerAMGRelax12TwoStageGaussSeidelHost( hypre_ParCSRMatrix *A,
    hypre_Vector    *u_local     = hypre_ParVectorLocalVector(u);
    HYPRE_Complex   *u_data      = hypre_VectorData(u_local);
    HYPRE_Int        i, jj, ii;
+
+   hypre_ParCSRMatrixMatvecOutOfPlace(-relax_weight, A, u, relax_weight, f, Vtemp);
 
    /* Need to check that EVERY diagonal is nonzero first. If any are, throw exception */
    for (i = 0; i < num_rows; i++)
