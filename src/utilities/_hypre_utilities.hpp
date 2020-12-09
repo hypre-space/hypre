@@ -223,8 +223,13 @@ using namespace thrust::placeholders;
 
 /* RL: TODO Want macro HYPRE_THRUST_CALL to return value but I don't know how to do it right
  * The following one works OK for now */
+#ifdef HYPRE_USING_UMPIRE
 #define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
    thrust::func_name(thrust::cuda::par(ualloc).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
+#else
+#define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
+   thrust::func_name(thrust::cuda::par.on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
+#endif
 
 /* return the number of threads in block */
 template <hypre_int dim>
@@ -1857,10 +1862,12 @@ struct hypre_cub_CachingDeviceAllocator
 #endif // #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUB_ALLOCATOR)
 #endif // #ifndef HYPRE_CUB_ALLOCATOR_HEADER
 
+#ifdef HYPRE_USING_UMPIRE
 #include "umpire/ResourceManager.hpp"
 #include "umpire/strategy/DynamicPool.hpp"
 #include "umpire/util/Macros.hpp"
 #include <string>
+
 struct hypre_umpire_allocator
 {
   typedef char value_type;
@@ -1896,6 +1903,32 @@ struct hypre_umpire_allocator
 
 };
 
+#else
+// Dummy struct for when Umpire is not being used
+struct hypre_umpire_allocator
+{
+  typedef char value_type;
+
+  hypre_umpire_allocator() {
+  }
+
+  ~hypre_umpire_allocator(){}
+  
+
+  char *allocate(std::ptrdiff_t num_bytes)
+  {
+    return 0;
+  }
+
+  void deallocate(char *ptr, size_t)
+  {
+  }
+
+
+};
+
+
+#endif
 
 #ifdef __cplusplus
 }

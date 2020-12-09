@@ -1,7 +1,9 @@
+#ifdef HYPRE_USING_UMPIRE
 #include "umpire/ResourceManager.hpp"
 #include "umpire/strategy/DynamicPool.hpp"
 #include "umpire/util/Macros.hpp"
 #include <string>
+
 struct hypre_umpire_allocator
 {
   typedef char value_type;
@@ -37,3 +39,29 @@ struct hypre_umpire_allocator
 
 };
 
+#else
+// Dummy struct for when Umpire is not being used
+struct hypre_umpire_allocator
+{
+  typedef char value_type;
+
+  hypre_umpire_allocator() {
+  }
+
+  ~hypre_umpire_allocator(){}
+  
+
+  char *allocate(std::ptrdiff_t num_bytes)
+  {
+    return 0;
+  }
+
+  void deallocate(char *ptr, size_t)
+  {
+  }
+
+
+};
+
+
+#endif
