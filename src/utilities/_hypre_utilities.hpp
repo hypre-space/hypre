@@ -1913,7 +1913,7 @@ struct hypre_umpire_allocator
   }
 
   ~hypre_umpire_allocator(){}
-  
+
 
   char *allocate(std::ptrdiff_t num_bytes)
   {

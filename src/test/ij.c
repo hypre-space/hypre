@@ -445,7 +445,7 @@ main( hypre_int argc,
 
    umpire_resourcemanager rm;
    umpire_resourcemanager_get_instance(&rm);
-   
+
    umpire_allocator um_allocator,um_pool;
    umpire_resourcemanager_get_allocator_by_name(&rm, "UM", &um_allocator);
    umpire_resourcemanager_make_allocator_list_pool(&rm, "HYPRE_UM_POOL", um_allocator, pool_size , 1024*1024*1024, &um_pool);
@@ -453,8 +453,8 @@ main( hypre_int argc,
    umpire_allocator dev_allocator,dev_pool;
    umpire_resourcemanager_get_allocator_by_name(&rm, "DEVICE", &dev_allocator);
    umpire_resourcemanager_make_allocator_list_pool(&rm, "HYPRE_DEVICE_POOL", dev_allocator, pool_size , 1024*1024*1024, &dev_pool);
-   
-   
+
+
 #endif
 
 #if defined(HYPRE_USING_UMPIRE_HOST)
@@ -462,13 +462,13 @@ main( hypre_int argc,
 
    size_t pool_size = 1024*1024*1024;
    pool_size*=4;
-     
+
    umpire_resourcemanager rm;
    umpire_resourcemanager_get_instance(&rm);
 
    umpire_allocator host_allocator,host_pool;
    umpire_resourcemanager_get_allocator_by_name(&rm, "HOST", &host_allocator);
-   
+
    umpire_resourcemanager_make_allocator_pool(&rm, "HYPRE_HOST_POOL", host_allocator, pool_size , 1024*1024, &host_pool);
 
    } else {
@@ -479,7 +479,7 @@ main( hypre_int argc,
      auto allocator = rm.getAllocator("HOST");
      auto pooled_allocator =
      rm.makeAllocator<umpire::strategy::DynamicPool, false>(
-							    "HYPRE_HOST_POOL", allocator,pool_size);
+           "HYPRE_HOST_POOL", allocator,pool_size);
    }
 
 #endif
@@ -1125,7 +1125,7 @@ main( hypre_int argc,
       }
       else if ( strcmp(argv[arg_index], "-ilu_sm_max_iter") == 0 )
       {                /* number of iteration when applied as a smoother */
-         arg_index++;        
+         arg_index++;
          ilu_sm_max_iter = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-ilu_lfil") == 0 )
@@ -3533,7 +3533,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetILUDroptol(amg_solver, ilu_droptol);
       HYPRE_BoomerAMGSetILUMaxRowNnz(amg_solver, ilu_max_row_nnz);
       HYPRE_BoomerAMGSetILUMaxIter(amg_solver, ilu_sm_max_iter);
-      
+
       HYPRE_BoomerAMGSetNumFunctions(amg_solver, num_functions);
       HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
       HYPRE_BoomerAMGSetAggInterpType(amg_solver, agg_interp_type);
@@ -4931,7 +4931,7 @@ main( hypre_int argc,
             mv_MultiVectorDestroy( constraints );
          if ( lobpcgGen )
             mv_MultiVectorDestroy( workspace );
-         free( eigenvalues );
+         hypre_TFree(eigenvalues, HYPRE_MEMORY_HOST);
 
          HYPRE_ParCSRPCGDestroy(pcg_solver);
 
@@ -5331,8 +5331,7 @@ main( hypre_int argc,
             mv_MultiVectorDestroy( constraints );
          if ( lobpcgGen )
             mv_MultiVectorDestroy( workspace );
-         free( eigenvalues );
-
+         hypre_TFree(eigenvalues, HYPRE_MEMORY_HOST);
       } /* if ( pcgIterations > 0 ) */
 
       hypre_TFree( interpreter , HYPRE_MEMORY_HOST);

@@ -1954,8 +1954,7 @@ main( hypre_int argc,
 
             HYPRE_LOBPCGDestroy((HYPRE_Solver)lobpcg_solver);
             mv_MultiVectorDestroy( eigenvectors );
-            free( eigenvalues );
-
+            hypre_TFree(eigenvalues, HYPRE_MEMORY_HOST);
          }
          else
          {
@@ -2176,7 +2175,7 @@ main( hypre_int argc,
             }
 
             mv_MultiVectorDestroy( eigenvectors );
-            free( eigenvalues );
+            hypre_TFree(eigenvalues, HYPRE_MEMORY_HOST);
          }
 
          hypre_TFree( interpreter , HYPRE_MEMORY_HOST);
