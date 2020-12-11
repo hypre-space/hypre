@@ -1862,7 +1862,15 @@ struct hypre_cub_CachingDeviceAllocator
 #endif // #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUB_ALLOCATOR)
 #endif // #ifndef HYPRE_CUB_ALLOCATOR_HEADER
 
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifdef HYPRE_USING_UMPIRE
+
 #include "umpire/ResourceManager.hpp"
 #include "umpire/strategy/DynamicPool.hpp"
 #include "umpire/util/Macros.hpp"
@@ -1899,11 +1907,10 @@ struct hypre_umpire_allocator
     auto allocator = rma.getAllocator("HYPRE_DEVICE_POOL");
     allocator.deallocate(ptr);
   }
-
-
 };
 
-#else
+#else /* #ifdef HYPRE_USING_UMPIRE */
+
 // Dummy struct for when Umpire is not being used
 struct hypre_umpire_allocator
 {
@@ -1923,12 +1930,9 @@ struct hypre_umpire_allocator
   void deallocate(char *ptr, size_t)
   {
   }
-
-
 };
 
-
-#endif
+#endif /* #ifdef HYPRE_USING_UMPIRE */
 
 #ifdef __cplusplus
 }
