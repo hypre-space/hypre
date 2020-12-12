@@ -39,8 +39,9 @@ find . -type f -print | egrep '[.]*[.](c|cc|cpp|cxx|C|h|hpp|hxx|H)$' |
   egrep -v '/hypre/include' |
   egrep -v '/utilities/hypre_memory.c' > check-mem.files
 
-egrep '(^|[^[:alnum:]_]+)malloc[[:space:]]*\(' `cat check-mem.files` >&2
-egrep '(^|[^[:alnum:]_]+)calloc[[:space:]]*\(' `cat check-mem.files` >&2
-egrep '(^|[^[:alnum:]_]+)free[[:space:]]*\('   `cat check-mem.files` >&2
+egrep '(^|[^[:alnum:]_]+)malloc[[:space:]]*\('  `cat check-mem.files` >&2
+egrep '(^|[^[:alnum:]_]+)calloc[[:space:]]*\('  `cat check-mem.files` >&2
+egrep '(^|[^[:alnum:]_]+)realloc[[:space:]]*\(' `cat check-mem.files` >&2
+egrep '(^|[^[:alnum:]_]+)free[[:space:]]*\('    `cat check-mem.files` >&2
 
 rm -f check-mem.files
