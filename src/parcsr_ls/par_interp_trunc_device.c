@@ -136,7 +136,6 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
 
    hypre_TMemcpy(P_j, P_diag_j, HYPRE_Int, nnz_diag, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    /* offd col id := -2 - offd col id */
-   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL(transform, P_offd_j, P_offd_j + nnz_offd, P_j + nnz_diag, -_1 - 2);
 
    hypre_TMemcpy(P_a,            P_diag_a, HYPRE_Real, nnz_diag, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);

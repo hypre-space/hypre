@@ -16,10 +16,6 @@
 #include "_hypre_struct_mv.h"
 #include "_hypre_struct_mv.hpp"
 
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_UMPIRE)
-#include "umpire/interface/umpire.h"
-#endif
-
 #ifdef HYPRE_USE_UMALLOC
 #undef HYPRE_USE_UMALLOC
 #endif
@@ -125,20 +121,15 @@ hypre_UnifiedMemPrefetch(void *ptr, size_t size, hypre_MemoryLocation location)
 static inline void *
 hypre_HostMalloc(size_t size, HYPRE_Int zeroinit)
 {
-
-#if defined(HYPRE_USING_UMPIRE_HOST)
-  void *ptr = NULL;
-  umpire_resourcemanager rm;
-  umpire_resourcemanager_get_instance(&rm);
-  umpire_allocator host_allocator;
-  umpire_resourcemanager_get_allocator_by_name(&rm, "HYPRE_HOST_POOL", &host_allocator);
-  ptr = umpire_allocator_allocate(&host_allocator, size);
-  if (zeroinit) memset(ptr,0,size);
-  return ptr;
-  //if (zeroinit) 
-#else
    void *ptr = NULL;
 
+#if defined(HYPRE_USING_UMPIRE_HOST)
+   hypre_umpire_host_pooled_allocate(&ptr, size);
+   if (zeroinit)
+   {
+      memset(ptr, 0, size);
+   }
+#else
    if (zeroinit)
    {
       ptr = calloc(size, 1);
@@ -147,9 +138,9 @@ hypre_HostMalloc(size_t size, HYPRE_Int zeroinit)
    {
       ptr = malloc(size);
    }
+#endif
 
    return ptr;
-#endif
 }
 
 static inline void *
@@ -168,15 +159,8 @@ hypre_DeviceMalloc(size_t size, HYPRE_Int zeroinit)
 #elif defined(HYPRE_USING_CUDA)
 #if defined(HYPRE_USING_CUB_ALLOCATOR)
    HYPRE_CUDA_CALL( hypre_CachingMallocDevice(&ptr, size) );
-#elif defined(HYPRE_USING_UMPIRE)
-   static int count=0;
-   //printf("DEVICE CALL COUNT IS %d\n",++count);
-   umpire_resourcemanager rm;
-   umpire_resourcemanager_get_instance(&rm);
-   umpire_allocator dev_allocator;
-   umpire_resourcemanager_get_allocator_by_name(&rm, "HYPRE_DEVICE_POOL", &dev_allocator);
-   ptr = umpire_allocator_allocate(&dev_allocator, size);
-   //printf("Umpire allocated device pointer %p of size %zu\n",ptr,size);
+#elif defined(HYPRE_USING_UMPIRE_DEVICE)
+   hypre_umpire_device_pooled_allocate(&ptr, size);
 #else
    HYPRE_CUDA_CALL( cudaMalloc(&ptr, size) );
 #endif
@@ -199,15 +183,8 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #if defined(HYPRE_USING_CUB_ALLOCATOR)
    HYPRE_CUDA_CALL( hypre_CachingMallocManaged(&ptr, size) );
-#elif defined(HYPRE_USING_UMPIRE)
-   static int count=0;
-   //printf("MANAGED CALL COUNT IS %d\n",++count);
-   umpire_resourcemanager rm;
-   umpire_resourcemanager_get_instance(&rm);
-   umpire_allocator um_allocator;
-   umpire_resourcemanager_get_allocator_by_name(&rm, "HYPRE_UM_POOL", &um_allocator);
-   ptr = umpire_allocator_allocate(&um_allocator, size);
-//printf("Umpire allocated managed pointer %p of size %zu\n",ptr,size);
+#elif defined(HYPRE_USING_UMPIRE_UM)
+   hypre_umpire_um_pooled_allocate(&ptr, size);
 #else
    HYPRE_CUDA_CALL( cudaMallocManaged(&ptr, size, cudaMemAttachGlobal) );
 #endif
@@ -236,7 +213,11 @@ hypre_HostPinnedMalloc(size_t size, HYPRE_Int zeroinit)
    void *ptr = NULL;
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_UMPIRE_PINNED)
+   hypre_umpire_pinned_pooled_allocate(&ptr, size);
+#else
    HYPRE_CUDA_CALL( cudaMallocHost(&ptr, size) );
+#endif
 
    if (zeroinit)
    {
@@ -297,11 +278,7 @@ static inline void
 hypre_HostFree(void *ptr)
 {
 #if defined(HYPRE_USING_UMPIRE_HOST)
-  umpire_resourcemanager rm;
-  umpire_resourcemanager_get_instance(&rm);
-  umpire_allocator allocator;
-  umpire_resourcemanager_get_allocator_by_name(&rm, "HYPRE_HOST_POOL", &allocator);
-  umpire_allocator_deallocate(&allocator, ptr);
+   hypre_umpire_host_pooled_free(ptr);
 #else
    free(ptr);
 #endif
@@ -317,13 +294,8 @@ hypre_DeviceFree(void *ptr)
 #elif defined(HYPRE_USING_CUDA)
 #ifdef HYPRE_USING_CUB_ALLOCATOR
    HYPRE_CUDA_CALL( hypre_CachingFreeDevice(ptr) );
-#elif defined(HYPRE_USING_UMPIRE)
-   umpire_resourcemanager rm;
-   umpire_resourcemanager_get_instance(&rm);
-   umpire_allocator allocator;
-   umpire_resourcemanager_get_allocator_by_name(&rm, "HYPRE_DEVICE_POOL", &allocator);
-   umpire_allocator_deallocate(&allocator, ptr);
-   ptr=NULL;
+#elif defined(HYPRE_USING_UMPIRE_DEVICE)
+   hypre_umpire_device_pooled_free(ptr);
 #else
    HYPRE_CUDA_CALL( cudaFree(ptr) );
 #endif
@@ -336,13 +308,8 @@ hypre_UnifiedFree(void *ptr)
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #ifdef HYPRE_USING_CUB_ALLOCATOR
    HYPRE_CUDA_CALL( hypre_CachingFreeManaged(ptr) );
-#elif defined(HYPRE_USING_UMPIRE)
-   umpire_resourcemanager rm;
-   umpire_resourcemanager_get_instance(&rm);
-   umpire_allocator allocator;
-   umpire_resourcemanager_get_allocator_by_name(&rm, "HYPRE_UM_POOL", &allocator);
-   umpire_allocator_deallocate(&allocator, ptr);
-   ptr=NULL;
+#elif defined(HYPRE_USING_UMPIRE_UM)
+   hypre_umpire_um_pooled_free(ptr);
 #else
    HYPRE_CUDA_CALL( cudaFree(ptr) );
 #endif
@@ -353,7 +320,11 @@ static inline void
 hypre_HostPinnedFree(void *ptr)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_UMPIRE_PINNED)
+   hypre_umpire_pinned_pooled_free(ptr);
+#else
    HYPRE_CUDA_CALL( cudaFreeHost(ptr) );
+#endif
 #endif
 }
 
@@ -1022,4 +993,188 @@ hypre_CudaDataCubCachingAllocatorDestroy(hypre_CudaData *data)
 }
 
 #endif // #ifdef HYPRE_USING_CUB_ALLOCATOR
+
+#if defined(HYPRE_USING_UMPIRE_HOST)
+HYPRE_Int
+hypre_umpire_host_pooled_allocate(void **ptr, size_t nbytes)
+{
+   const char *resource_name = "HOST";
+   const char *pool_name = "HYPRE_HOST_POOL";
+   hypre_Handle *handle = hypre_handle();
+
+   umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);
+   umpire_allocator pooled_allocator;
+
+   if ( umpire_resourcemanager_is_allocator_name(rm_ptr, pool_name) )
+   {
+      umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &pooled_allocator);
+   }
+   else
+   {
+      umpire_allocator allocator;
+      umpire_resourcemanager_get_allocator_by_name(rm_ptr, resource_name, &allocator);
+      umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
+                                                 hypre_HandleUmpireUMPoolSize(handle), 512, &pooled_allocator);
+   }
+
+   *ptr = umpire_allocator_allocate(&pooled_allocator, nbytes);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_umpire_host_pooled_free(void *ptr)
+{
+   hypre_Handle *handle = hypre_handle();
+   const char *pool_name = "HYPRE_HOST_POOL";
+   umpire_allocator pooled_allocator;
+
+   umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);
+
+   hypre_assert(umpire_resourcemanager_is_allocator_name(rm_ptr, pool_name));
+
+   umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &pooled_allocator);
+   umpire_allocator_deallocate(&pooled_allocator, ptr);
+
+   return hypre_error_flag;
+}
+#endif
+
+#if defined(HYPRE_USING_UMPIRE_DEVICE)
+HYPRE_Int
+hypre_umpire_device_pooled_allocate(void **ptr, size_t nbytes)
+{
+   const char resource_name[] = "DEVICE";
+   const char pool_name[] = "HYPRE_DEVICE_POOL";
+   hypre_Handle *handle = hypre_handle();
+
+   umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);
+   umpire_allocator pooled_allocator;
+
+   if ( umpire_resourcemanager_is_allocator_name(rm_ptr, pool_name) )
+   {
+      umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &pooled_allocator);
+   }
+   else
+   {
+      umpire_allocator allocator;
+      umpire_resourcemanager_get_allocator_by_name(rm_ptr, resource_name, &allocator);
+      umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
+                                                 hypre_HandleUmpireUMPoolSize(handle), 512, &pooled_allocator);
+   }
+
+   *ptr = umpire_allocator_allocate(&pooled_allocator, nbytes);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_umpire_device_pooled_free(void *ptr)
+{
+   hypre_Handle *handle = hypre_handle();
+   const char *pool_name = "HYPRE_DEVICE_POOL";
+   umpire_allocator pooled_allocator;
+
+   umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);
+
+   hypre_assert(umpire_resourcemanager_is_allocator_name(rm_ptr, pool_name));
+
+   umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &pooled_allocator);
+   umpire_allocator_deallocate(&pooled_allocator, ptr);
+
+   return hypre_error_flag;
+}
+#endif
+
+#if defined(HYPRE_USING_UMPIRE_UM)
+HYPRE_Int
+hypre_umpire_um_pooled_allocate(void **ptr, size_t nbytes)
+{
+   const char *resource_name = "UM";
+   const char *pool_name = "HYPRE_UM_POOL";
+   hypre_Handle *handle = hypre_handle();
+
+   umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);
+   umpire_allocator pooled_allocator;
+
+   if ( umpire_resourcemanager_is_allocator_name(rm_ptr, pool_name) )
+   {
+      umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &pooled_allocator);
+   }
+   else
+   {
+      umpire_allocator allocator;
+      umpire_resourcemanager_get_allocator_by_name(rm_ptr, resource_name, &allocator);
+      umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
+                                                 hypre_HandleUmpireUMPoolSize(handle), 512, &pooled_allocator);
+   }
+
+   *ptr = umpire_allocator_allocate(&pooled_allocator, nbytes);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_umpire_um_pooled_free(void *ptr)
+{
+   hypre_Handle *handle = hypre_handle();
+   const char *pool_name = "HYPRE_UM_POOL";
+   umpire_allocator pooled_allocator;
+
+   umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);
+
+   hypre_assert(umpire_resourcemanager_is_allocator_name(rm_ptr, pool_name));
+
+   umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &pooled_allocator);
+   umpire_allocator_deallocate(&pooled_allocator, ptr);
+
+   return hypre_error_flag;
+}
+#endif
+
+#if defined(HYPRE_USING_UMPIRE_PINNED)
+HYPRE_Int
+hypre_umpire_pinned_pooled_allocate(void **ptr, size_t nbytes)
+{
+   const char *resource_name = "PINNED";
+   const char *pool_name = "HYPRE_PINNED_POOL";
+   hypre_Handle *handle = hypre_handle();
+
+   umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);
+   umpire_allocator pooled_allocator;
+
+   if ( umpire_resourcemanager_is_allocator_name(rm_ptr, pool_name) )
+   {
+      umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &pooled_allocator);
+   }
+   else
+   {
+      umpire_allocator allocator;
+      umpire_resourcemanager_get_allocator_by_name(rm_ptr, resource_name, &allocator);
+      umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
+                                                 hypre_HandleUmpireUMPoolSize(handle), 512, &pooled_allocator);
+   }
+
+   *ptr = umpire_allocator_allocate(&pooled_allocator, nbytes);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_umpire_pinned_pooled_free(void *ptr)
+{
+   const hypre_Handle *handle = hypre_handle();
+   const char *pool_name = "HYPRE_PINNED_POOL";
+   umpire_allocator pooled_allocator;
+
+   umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);
+
+   hypre_assert(umpire_resourcemanager_is_allocator_name(rm_ptr, pool_name));
+
+   umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &pooled_allocator);
+   umpire_allocator_deallocate(&pooled_allocator, ptr);
+
+   return hypre_error_flag;
+}
+#endif
 

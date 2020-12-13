@@ -144,7 +144,6 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    hypre_TMemcpy(d_jt, d_ja, HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
    /* sort: by col */
-   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL(sequence, d_pm, d_pm + nnzA);
    HYPRE_THRUST_CALL(stable_sort_by_key, d_jt, d_jt + nnzA, d_pm);
    HYPRE_THRUST_CALL(gather, d_pm, d_pm + nnzA, d_it, d_jc);

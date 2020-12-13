@@ -104,7 +104,6 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
     * Note: CF_marker_offd is not sync'ed */
    hypre_PMISCoarseningInitDevice(S, comm_pkg, CF_init, measure_diag, measure_offd, (HYPRE_Real *) send_buf,
                                   &graph_diag_size, graph_diag, CF_marker_diag);
-   hypre_umpire_allocator ualloc;
 
    while (1)
    {
@@ -321,7 +320,6 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
                       num_rows_diag, CF_init, S_diag_i, S_offd_i, measure_diag, CF_marker_diag );
 
    /* communicate for measure_offd */
-   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL(gather,
                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
@@ -496,7 +494,6 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
    hypre_ParCSRCommHandle *comm_handle;
 
    /* communicate for measure_offd */
-   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL(gather,
                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +

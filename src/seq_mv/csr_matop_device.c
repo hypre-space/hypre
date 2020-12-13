@@ -281,7 +281,6 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int         job,                 /* 0: qu
    HYPRE_Int      num_cols_offd_C;
 
    in_range<HYPRE_BigInt> pred1(first_col_diag_B, last_col_diag_B);
-   hypre_umpire_allocator ualloc;
    /* get diag and offd nnz */
    if (job == 0)
    {
@@ -488,7 +487,6 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
    HYPRE_Int  num_reduced_col_indices;
    HYPRE_Int *reduced_col_indices;
    HYPRE_Int *reduced_col_nnz;
-   hypre_umpire_allocator ualloc;
 
    A_j_sorted = hypre_TAlloc(HYPRE_Int, nnz_A, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(A_j_sorted, A_j, HYPRE_Int, nnz_A, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
@@ -611,7 +609,6 @@ hypre_CSRMatrixCheckDiagFirstDevice( hypre_CSRMatrix *A )
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CSRCheckDiagFirst, gDim, bDim, hypre_CSRMatrixNumRows(A),
                       hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), result );
 
-   hypre_umpire_allocator ualloc;
    HYPRE_Int ierr = HYPRE_THRUST_CALL( reduce,
                                        result,
                                        result + hypre_CSRMatrixNumRows(A) );
@@ -646,7 +643,6 @@ hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A)
    HYPRE_Int     *new_ii;
    HYPRE_Int     *new_j;
    HYPRE_Complex *new_data;
-   hypre_umpire_allocator ualloc;
    new_nnz = HYPRE_THRUST_CALL( count_if,
                                 thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)),
                                 thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)) + nnz,
@@ -913,7 +909,6 @@ hypre_CSRMatrixStack2Device(hypre_CSRMatrix *A, hypre_CSRMatrix *B)
                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(C_i + hypre_CSRMatrixNumRows(A) + 1, hypre_CSRMatrixI(B) + 1, HYPRE_Int, hypre_CSRMatrixNumRows(B),
                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL( transform,
                       C_i + hypre_CSRMatrixNumRows(A) + 1,
                       C_i + hypre_CSRMatrixNumRows(C) + 1,
@@ -947,7 +942,6 @@ hypre_CSRMatrixIdentityDevice(HYPRE_Int n, HYPRE_Complex alp)
 
    hypre_CSRMatrixInitialize_v2(A, 0, HYPRE_MEMORY_DEVICE);
 
-   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL( sequence,
                       hypre_CSRMatrixI(A),
                       hypre_CSRMatrixI(A) + n + 1,
@@ -986,8 +980,7 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
    HYPRE_Int     *new_ii;
    HYPRE_Int     *new_j;
    HYPRE_Complex *new_data;
-   hypre_umpire_allocator ualloc;
-   
+
    if (abs == 0)
    {
       if (option == 0)

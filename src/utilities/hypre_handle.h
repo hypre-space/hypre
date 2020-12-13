@@ -14,10 +14,6 @@
 #ifndef HYPRE_HANDLE_H
 #define HYPRE_HANDLE_H
 
-//#ifdef __cplusplus
-//extern "C++" {
-//#endif
-
 struct hypre_CudaData;
 typedef struct hypre_CudaData hypre_CudaData;
 
@@ -29,6 +25,13 @@ typedef struct
    HYPRE_ExecutionPolicy  struct_exec_policy;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_CudaData        *cuda_data;
+#endif
+#if defined(HYPRE_USING_UMPIRE)
+   size_t                 umpire_device_pool_size;
+   size_t                 umpire_um_pool_size;
+   size_t                 umpire_host_pool_size;
+   size_t                 umpire_pinned_pool_size;
+   umpire_resourcemanager umpire_rm;
 #endif
 } hypre_Handle;
 
@@ -63,10 +66,13 @@ typedef struct
 #define hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle)   hypre_CudaDataSpgemmRownnzEstimateNsamples(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle) hypre_CudaDataSpgemmRownnzEstimateMultFactor(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleSpgemmHashType(hypre_handle)                 hypre_CudaDataSpgemmHashType(hypre_HandleCudaData(hypre_handle))
+#define hypre_HandleUmpireDeviceAllocator(hypre_handle)          hypre_CudaDataUmpireDeviceAllocator(hypre_HandleCudaData(hypre_handle))
 
-//#ifdef __cplusplus
-//}
-//#endif
+#define hypre_HandleUmpireResourceMan(hypre_handle)              ((hypre_handle) -> umpire_rm)
+#define hypre_HandleUmpireDevicePoolSize(hypre_handle)           ((hypre_handle) -> umpire_device_pool_size)
+#define hypre_HandleUmpireUMPoolSize(hypre_handle)               ((hypre_handle) -> umpire_um_pool_size)
+#define hypre_HandleUmpireHostPoolSize(hypre_handle)             ((hypre_handle) -> umpire_host_pool_size)
+#define hypre_HandleUmpirePinnedPoolSize(hypre_handle)           ((hypre_handle) -> umpire_pinned_pool_size)
 
 #endif
 

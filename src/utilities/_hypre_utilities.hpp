@@ -15,6 +15,61 @@ extern "C++" {
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#ifndef HYPRE_UMPIRE_ALLOCATOR_H
+#define HYPRE_UMPIRE_ALLOCATOR_H
+
+#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_UMPIRE_DEVICE)
+
+/*
+#include "umpire/Allocator.hpp"
+#include "umpire/ResourceManager.hpp"
+
+#include "umpire/strategy/DynamicPool.hpp"
+#include "umpire/strategy/AllocationAdvisor.hpp"
+#include "umpire/strategy/MonotonicAllocationStrategy.hpp"
+#include "umpire/util/Macros.hpp"
+*/
+
+struct hypre_umpire_device_allocator
+{
+   typedef char value_type;
+
+   hypre_umpire_device_allocator()
+   {
+      // constructor
+   }
+
+   ~hypre_umpire_device_allocator()
+   {
+      // destructor
+   }
+
+   char *allocate(std::ptrdiff_t num_bytes)
+   {
+      char *ptr = NULL;
+      hypre_umpire_device_pooled_allocate((void**) &ptr, num_bytes);
+      return ptr;
+   }
+
+   void deallocate(char *ptr, size_t n)
+   {
+      hypre_umpire_device_pooled_free(ptr);
+   }
+};
+
+#endif /* #ifdef HYPRE_USING_UMPIRE_DEVICE */
+#endif /* #if defined(HYPRE_USING_CUDA) */
+
+#endif
+
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef HYPRE_CUDA_UTILS_H
 #define HYPRE_CUDA_UTILS_H
 
@@ -101,6 +156,9 @@ struct hypre_CudaData
    hypre_cub_CachingDeviceAllocator *cub_dev_allocator;
    hypre_cub_CachingDeviceAllocator *cub_uvm_allocator;
 #endif
+#ifdef HYPRE_USING_UMPIRE_DEVICE
+   hypre_umpire_device_allocator     umpire_device_allocator;
+#endif
    HYPRE_Int                         cuda_device;
    /* by default, hypre puts GPU computations in this stream
     * Do not be confused with the default (null) CUDA stream */
@@ -143,6 +201,7 @@ struct hypre_CudaData
 #define hypre_CudaDataSpgemmRownnzEstimateNsamples(data)   ((data) -> spgemm_rownnz_estimate_nsamples)
 #define hypre_CudaDataSpgemmRownnzEstimateMultFactor(data) ((data) -> spgemm_rownnz_estimate_mult_factor)
 #define hypre_CudaDataSpgemmHashType(data)                 ((data) -> spgemm_hash_type)
+#define hypre_CudaDataUmpireDeviceAllocator(data)          ((data) -> umpire_device_allocator)
 
 cudaStream_t hypre_CudaDataCudaComputeStream(hypre_CudaData *data);
 hypre_CudaData* hypre_CudaDataCreate();
@@ -223,9 +282,9 @@ using namespace thrust::placeholders;
 
 /* RL: TODO Want macro HYPRE_THRUST_CALL to return value but I don't know how to do it right
  * The following one works OK for now */
-#ifdef HYPRE_USING_UMPIRE
+#ifdef HYPRE_USING_UMPIRE_DEVICE
 #define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
-   thrust::func_name(thrust::cuda::par(ualloc).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
+   thrust::func_name(thrust::cuda::par(hypre_HandleUmpireDeviceAllocator(hypre_handle())).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
 #else
 #define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
    thrust::func_name(thrust::cuda::par.on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
@@ -1862,77 +1921,6 @@ struct hypre_cub_CachingDeviceAllocator
 #endif // #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUB_ALLOCATOR)
 #endif // #ifndef HYPRE_CUB_ALLOCATOR_HEADER
 
-/******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
- * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
- *
- * SPDX-License-Identifier: (Apache-2.0 OR MIT)
- ******************************************************************************/
-
-#ifdef HYPRE_USING_UMPIRE
-
-#include "umpire/ResourceManager.hpp"
-#include "umpire/strategy/DynamicPool.hpp"
-#include "umpire/util/Macros.hpp"
-#include <string>
-
-struct hypre_umpire_allocator
-{
-  typedef char value_type;
-
-  hypre_umpire_allocator() {
-  }
-
-  ~hypre_umpire_allocator()
-  {
-    // auto hwm = umpire::ResourceManager::getInstance()
-    //   .getAllocator("HYPRE_DEVICE_POOL")
-    //   .getHighWatermark();
-    // std::cout<<" High Water Mark is "<<hwm<<"bytes\n";
-  }
-
-  char *allocate(std::ptrdiff_t num_bytes)
-  {
-    //std::cout<<"umpire allocate "<<num_bytes<<"\n";
-    umpire::ResourceManager &rma = umpire::ResourceManager::getInstance();
-    auto allocator = rma.getAllocator("HYPRE_DEVICE_POOL");
-    char *result = static_cast<char *>(allocator.allocate(num_bytes));
-    return result;
-  }
-
-  void deallocate(char *ptr, size_t)
-  {
-    //std::cout<<"umpire de-allocate \n";
-    umpire::ResourceManager &rma = umpire::ResourceManager::getInstance();
-    auto allocator = rma.getAllocator("HYPRE_DEVICE_POOL");
-    allocator.deallocate(ptr);
-  }
-};
-
-#else /* #ifdef HYPRE_USING_UMPIRE */
-
-// Dummy struct for when Umpire is not being used
-struct hypre_umpire_allocator
-{
-  typedef char value_type;
-
-  hypre_umpire_allocator() {
-  }
-
-  ~hypre_umpire_allocator(){}
-
-
-  char *allocate(std::ptrdiff_t num_bytes)
-  {
-    return 0;
-  }
-
-  void deallocate(char *ptr, size_t)
-  {
-  }
-};
-
-#endif /* #ifdef HYPRE_USING_UMPIRE */
 
 #ifdef __cplusplus
 }

@@ -694,7 +694,6 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
 #if defined(HYPRE_USING_CUDA)
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         hypre_umpire_allocator ualloc;
          HYPRE_THRUST_CALL( transform, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm, l1_norm_op1() );
       }
       else
@@ -717,7 +716,6 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
 #if defined(HYPRE_USING_CUDA)
       if ( exec == HYPRE_EXEC_DEVICE)
       {
-         hypre_umpire_allocator ualloc;
          thrust::identity<HYPRE_Complex> identity;
          HYPRE_THRUST_CALL( replace_if, l1_norm, l1_norm + num_rows, thrust::not1(identity), 1.0 );
       }
@@ -750,7 +748,6 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
 #if defined(HYPRE_USING_CUDA)
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypre_umpire_allocator ualloc;
       HYPRE_THRUST_CALL( transform_if, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm, thrust::negate<HYPRE_Real>(),
                          is_negative<HYPRE_Real>() );
       //bool any_zero = HYPRE_THRUST_CALL( any_of, l1_norm, l1_norm + num_rows, thrust::not1(thrust::identity<HYPRE_Complex>()) );

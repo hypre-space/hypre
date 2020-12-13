@@ -8,20 +8,6 @@
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_UMPIRE)
-#include "umpire/interface/umpire.h"
-
-#include "umpire/Allocator.hpp"
-#include "umpire/ResourceManager.hpp"
-
-#include "umpire/strategy/DynamicPool.hpp"
-#include "umpire/strategy/AllocationAdvisor.hpp"
-#include "umpire/strategy/MonotonicAllocationStrategy.hpp"
-#include "umpire/util/Macros.hpp"
-int umpire_pool_exists(const char *pool);
-#endif
-void hypre_umpire_init();
-
 /*
 #if defined(HYPRE_USING_KOKKOS)
 #include <Kokkos_Core.hpp>
@@ -141,7 +127,6 @@ hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_)
 HYPRE_Int
 HYPRE_Init()
 {
-  hypre_umpire_init();
    if (!_hypre_handle)
    {
       _hypre_handle = hypre_HandleCreate();
@@ -187,9 +172,6 @@ HYPRE_Init()
    HYPRE_OMPOffloadOn();
 #endif
 
-
-
-
 #ifdef HYPRE_USING_CUB_ALLOCATOR
    /* Keep this check here at the end of HYPRE_Init()
     * Make sure that CUB Allocator has not been setup in HYPRE_Init,
@@ -200,6 +182,10 @@ HYPRE_Init()
    {
       hypre_printf("ERROR: CUB Allocators have been setup ... \n");
    }
+#endif
+
+#if defined(HYPRE_USING_UMPIRE)
+   hypre_UmpireInit(_hypre_handle);
 #endif
 
    return hypre_error_flag;
@@ -251,75 +237,20 @@ HYPRE_Finalize()
    return hypre_error_flag;
 }
 
-int umpire_pool_exists(const char *pool){
 #if defined(HYPRE_USING_UMPIRE)
-  umpire_resourcemanager rm;
-  umpire_resourcemanager_get_instance(&rm);
-  if (umpire_resourcemanager_is_allocator_name(&rm, pool)) return 1;
-  return 0;
-#endif
-  return 0;
+HYPRE_Int
+hypre_UmpireInit(hypre_Handle *hypre_handle)
+{
+   //hypre_printf("WARNING :: EXPERIMENTAL UMPIRE ALLOCATORS IN USE\n");
+
+   umpire_resourcemanager_get_instance(&hypre_HandleUmpireResourceMan(hypre_handle));
+
+   hypre_HandleUmpireDevicePoolSize(hypre_handle) = 4LL * 1024 * 1024 * 1024;
+   hypre_HandleUmpireUMPoolSize(hypre_handle)     = 4LL * 1024 * 1024 * 1024;
+   hypre_HandleUmpireHostPoolSize(hypre_handle)   = 4LL * 1024 * 1024 * 1024;
+   hypre_HandleUmpirePinnedPoolSize(hypre_handle) = 4LL * 1024 * 1024 * 1024;
+
+   return hypre_error_flag;
 }
-void hypre_umpire_init(){
-#if defined(HYPRE_USING_UMPIRE)
-   printf("WARNING :: EXPERIMENTAL UMPIRE ALLOCATORS IN USE\n");
-
-   /* Need to define pools here unless they are already available */
-   if (1){
-
-
-     size_t pool_size = 1024*1024*1024;
-     pool_size*=4;
-     
-     umpire_resourcemanager rm;
-     umpire_resourcemanager_get_instance(&rm);
-
-     /* THE UM POOL */
-     umpire_allocator um_allocator,um_pool;
-     umpire_resourcemanager_get_allocator_by_name(&rm, "UM", &um_allocator);
-   
-     if (umpire_pool_exists("HYPRE_UM_POOL")){
-       //umpire_resourcemanager_get_allocator_by_name(&rm, "HYPRE_UM_POOL", &um_pool);
-       printf("Using extant HYPRE_UM_POOL \n");
-     } else{
-       umpire_resourcemanager_make_allocator_pool(&rm, "HYPRE_UM_POOL", um_allocator, pool_size , 512, &um_pool);
-       printf("Creating new HYPRE_UM_POOL \n");
-     }
-
-     /* THE DEVICE POOL */
-     umpire_allocator dev_pool, dev_allocator;
-     umpire_resourcemanager_get_allocator_by_name(&rm, "DEVICE", &dev_allocator);
-     
-     if (umpire_pool_exists("HYPRE_DEVICE_POOL")){
-       //umpire_resourcemanager_get_allocator_by_name(&rm, "HYPRE_DEVICE_POOL", &dev_pool);
-       printf("Using extant HYPRE_DEVICE_POOL \n");
-     } else{
-       umpire_resourcemanager_make_allocator_pool(&rm, "HYPRE_DEVICE_POOL", dev_allocator, pool_size , 512, &dev_pool);
-       printf("Creating new HYPRE_DEVICE_POOL \n");
-     }
-
-     
-   }
-   
 #endif
 
-#if defined(HYPRE_USING_UMPIRE_HOST)
-   {
-     /* THE HOSTPOOL */
-     umpire_resourcemanager rm;
-     umpire_resourcemanager_get_instance(&rm);
-     umpire_allocator host_pool, host_allocator;
-     umpire_resourcemanager_get_allocator_by_name(&rm, "HOST", &host_allocator);
-     
-     if (umpire_pool_exists("HYPRE_HOST_POOL")){
-       //umpire_resourcemanager_get_allocator_by_name(&rm, "HYPRE_HOST_POOL", &host_pool);
-       printf("Using extant HYPRE_HOST_POOL \n");
-     } else{
-       size_t pool_size = 1024*1024*1024;
-       pool_size*=4;
-       umpire_resourcemanager_make_allocator_pool(&rm, "HYPRE_HOST_POOL", host_allocator, pool_size , 512, &host_pool);
-       printf("Creating new HYPRE_HOST_POOL \n");
-     }
-   }
-#endif
-}

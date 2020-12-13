@@ -203,7 +203,6 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    fine_to_coarse_d = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
    /* The scan will make fine_to_coarse[i] for i a coarse point hold a
     * coarse point index in the range from 0 to n_coarse-1 */
-   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL( exclusive_scan,
                       thrust::make_transform_iterator(CF_marker_dev,          is_nonnegative<HYPRE_Int>()),
                       thrust::make_transform_iterator(CF_marker_dev + n_fine, is_nonnegative<HYPRE_Int>()),

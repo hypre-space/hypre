@@ -224,7 +224,6 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       /* if on device, no need to Sync: send_data is on device memory */
 #if defined(HYPRE_USING_CUDA)
       /* pack send data on device */
-      hypre_umpire_allocator ualloc;
       HYPRE_THRUST_CALL( gather,
                          hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                          hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +

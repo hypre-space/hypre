@@ -38,6 +38,7 @@ HYPRE_Int hypre_HandleDestroy(hypre_Handle *hypre_handle_);
 HYPRE_Int HYPRE_Init();
 HYPRE_Int HYPRE_Finalize();
 HYPRE_Int hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_);
+HYPRE_Int hypre_UmpireInit(hypre_Handle *hypre_handle);
 
 /* hypre_qsort.c */
 void hypre_swap ( HYPRE_Int *v , HYPRE_Int i , HYPRE_Int j );
@@ -238,7 +239,6 @@ void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int *
 void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len, HYPRE_BigInt **sorted);
 void hypre_sort_and_create_inverse_map(HYPRE_Int *in, HYPRE_Int len, HYPRE_Int **out, hypre_UnorderedIntMap *inverse_map);
 void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPRE_BigInt **out, hypre_UnorderedBigIntMap *inverse_map);
-
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);

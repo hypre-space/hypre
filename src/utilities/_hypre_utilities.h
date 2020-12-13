@@ -536,6 +536,10 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 #include <stdio.h>
 #include <stdlib.h>
 
+#if defined(HYPRE_USING_UMPIRE)
+#include "umpire/interface/umpire.h"
+#endif
+
 /* stringification:
  * _Pragma(string-literal), so we need to cast argument to a string
  * The three dots as last argument of the macro tells compiler that this is a variadic macro.
@@ -767,6 +771,14 @@ HYPRE_ExecutionPolicy hypre_GetExecPolicy2(HYPRE_MemoryLocation location1, HYPRE
 HYPRE_Int hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location);
 HYPRE_Int hypre_PrintMemoryTracker();
 HYPRE_Int hypre_SetCubMemPoolSize( hypre_uint bin_growth, hypre_uint min_bin, hypre_uint max_bin, size_t max_cached_bytes );
+HYPRE_Int hypre_umpire_host_pooled_allocate(void **ptr, size_t nbytes);
+HYPRE_Int hypre_umpire_host_pooled_free(void *ptr);
+HYPRE_Int hypre_umpire_device_pooled_allocate(void **ptr, size_t nbytes);
+HYPRE_Int hypre_umpire_device_pooled_free(void *ptr);
+HYPRE_Int hypre_umpire_um_pooled_allocate(void **ptr, size_t nbytes);
+HYPRE_Int hypre_umpire_um_pooled_free(void *ptr);
+HYPRE_Int hypre_umpire_pinned_pooled_allocate(void **ptr, size_t nbytes);
+HYPRE_Int hypre_umpire_pinned_pooled_free(void *ptr);
 
 /* memory_dmalloc.c */
 HYPRE_Int hypre_InitMemoryDebugDML( HYPRE_Int id );
@@ -1212,10 +1224,6 @@ static char hypre__levelname[16];
 #ifndef HYPRE_HANDLE_H
 #define HYPRE_HANDLE_H
 
-//#ifdef __cplusplus
-//extern "C++" {
-//#endif
-
 struct hypre_CudaData;
 typedef struct hypre_CudaData hypre_CudaData;
 
@@ -1227,6 +1235,13 @@ typedef struct
    HYPRE_ExecutionPolicy  struct_exec_policy;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_CudaData        *cuda_data;
+#endif
+#if defined(HYPRE_USING_UMPIRE)
+   size_t                 umpire_device_pool_size;
+   size_t                 umpire_um_pool_size;
+   size_t                 umpire_host_pool_size;
+   size_t                 umpire_pinned_pool_size;
+   umpire_resourcemanager umpire_rm;
 #endif
 } hypre_Handle;
 
@@ -1261,10 +1276,13 @@ typedef struct
 #define hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle)   hypre_CudaDataSpgemmRownnzEstimateNsamples(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle) hypre_CudaDataSpgemmRownnzEstimateMultFactor(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleSpgemmHashType(hypre_handle)                 hypre_CudaDataSpgemmHashType(hypre_HandleCudaData(hypre_handle))
+#define hypre_HandleUmpireDeviceAllocator(hypre_handle)          hypre_CudaDataUmpireDeviceAllocator(hypre_HandleCudaData(hypre_handle))
 
-//#ifdef __cplusplus
-//}
-//#endif
+#define hypre_HandleUmpireResourceMan(hypre_handle)              ((hypre_handle) -> umpire_rm)
+#define hypre_HandleUmpireDevicePoolSize(hypre_handle)           ((hypre_handle) -> umpire_device_pool_size)
+#define hypre_HandleUmpireUMPoolSize(hypre_handle)               ((hypre_handle) -> umpire_um_pool_size)
+#define hypre_HandleUmpireHostPoolSize(hypre_handle)             ((hypre_handle) -> umpire_host_pool_size)
+#define hypre_HandleUmpirePinnedPoolSize(hypre_handle)           ((hypre_handle) -> umpire_pinned_pool_size)
 
 #endif
 
@@ -1308,6 +1326,7 @@ HYPRE_Int hypre_HandleDestroy(hypre_Handle *hypre_handle_);
 HYPRE_Int HYPRE_Init();
 HYPRE_Int HYPRE_Finalize();
 HYPRE_Int hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_);
+HYPRE_Int hypre_UmpireInit(hypre_Handle *hypre_handle);
 
 /* hypre_qsort.c */
 void hypre_swap ( HYPRE_Int *v , HYPRE_Int i , HYPRE_Int j );
@@ -1508,7 +1527,6 @@ void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int *
 void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len, HYPRE_BigInt **sorted);
 void hypre_sort_and_create_inverse_map(HYPRE_Int *in, HYPRE_Int len, HYPRE_Int **out, hypre_UnorderedIntMap *inverse_map);
 void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPRE_BigInt **out, hypre_UnorderedBigIntMap *inverse_map);
-
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);

@@ -363,7 +363,6 @@ hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix      *B_ext,
     * B_ext_rownnz contains the number of elements of row j
     * (to be determined through send_map_elmnts on the receiving end)
     *--------------------------------------------------------------------------*/
-   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL(adjacent_difference, B_ext_i_d, B_ext_i_d + B_ext_nrows + 1, B_ext_rownnz_d);
    hypre_TMemcpy(B_ext_rownnz_h, B_ext_rownnz_d + 1, HYPRE_Int, B_ext_nrows,
                  HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
@@ -595,7 +594,6 @@ hypre_ConcatDiagAndOffdDevice(hypre_ParCSRMatrix *A)
 
    hypreDevice_GetRowNnz(hypre_CSRMatrixNumRows(B), NULL, hypre_CSRMatrixI(A_diag), hypre_CSRMatrixI(A_offd), hypre_CSRMatrixI(B));
 
-   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL( exclusive_scan,
                       hypre_CSRMatrixI(B),
                       hypre_CSRMatrixI(B) + hypre_CSRMatrixNumRows(B) + 1,
@@ -711,7 +709,6 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
    hypre_CSRMatrixInitialize_v2(B, 0, HYPRE_MEMORY_DEVICE);
 
    hypreDevice_GetRowNnz(hypre_ParCSRMatrixNumRows(A), NULL, hypre_CSRMatrixI(A_diag), hypre_CSRMatrixI(A_offd), hypre_CSRMatrixI(B));
-   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL( exclusive_scan,
                       hypre_CSRMatrixI(B),
                       hypre_CSRMatrixI(B) + hypre_ParCSRMatrixNumRows(A) + 1,
@@ -961,7 +958,6 @@ hypre_ParCSRMatrixGetRowDevice( hypre_ParCSRMatrix  *mat,
 
       hypre_TMemcpy(size, row_nnz + local_row, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
-      hypre_umpire_allocator ualloc;
       max_row_nnz = HYPRE_THRUST_CALL(reduce, row_nnz, row_nnz + nrows, 0, thrust::maximum<HYPRE_Int>());
 
 /*
@@ -1063,7 +1059,6 @@ hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
    tmp_j = hypre_TAlloc(HYPRE_Int, hypre_CSRMatrixNumNonzeros(A_offd), HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(tmp_j, hypre_CSRMatrixJ(A_offd), HYPRE_Int, hypre_CSRMatrixNumNonzeros(A_offd),
                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL( sort,
                       tmp_j,
                       tmp_j + hypre_CSRMatrixNumNonzeros(A_offd) );

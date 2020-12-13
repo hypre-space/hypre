@@ -135,7 +135,6 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
       hypre_AuxParCSRMatrixMaxStackElmts(aux_matrix) = stack_elmts_max_new;
    }
 
-   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL(fill_n, stack_sora + stack_elmts_current, nelms, SorA);
 
    if (ncols)
@@ -233,7 +232,6 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
    */
 
    /* output X: 0: keep, 1: zero-out */
-   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL(
          exclusive_scan_by_key,
          make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0+N0, J0+N0))),
@@ -292,8 +290,7 @@ hypre_IJMatrixAssembleSortAndReduce2(HYPRE_Int  N0, HYPRE_Int  *I0, HYPRE_Int  *
    HYPRE_Int     *J = hypre_TAlloc(HYPRE_Int,     N0, HYPRE_MEMORY_DEVICE);
    char          *X = hypre_TAlloc(char,          N0, HYPRE_MEMORY_DEVICE);
    HYPRE_Complex *A = hypre_TAlloc(HYPRE_Complex, N0, HYPRE_MEMORY_DEVICE);
-   
-   hypre_umpire_allocator ualloc;
+
    auto new_end = HYPRE_THRUST_CALL(
          reduce_by_key,
          thrust::make_zip_iterator(thrust::make_tuple(I0,      J0     )), /* keys_first */
@@ -325,7 +322,6 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
    HYPRE_Complex *A = hypre_TAlloc(HYPRE_Complex, N0, HYPRE_MEMORY_DEVICE);
 
    /* output in X0: 0: keep, 1: zero-out */
-   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL(
          inclusive_scan_by_key,
          make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0+N0, J0+N0))),
@@ -335,7 +331,6 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
          thrust::equal_to< thrust::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
          thrust::maximum<char>() );
 
-   
    HYPRE_THRUST_CALL(replace_if, A0, A0 + N0, X0, thrust::identity<char>(), 0.0);
 
    auto new_end = HYPRE_THRUST_CALL(
@@ -429,7 +424,6 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
    char          *stack_sora = hypre_AuxParCSRMatrixStackSorA(aux_matrix);
 
    in_range<HYPRE_BigInt> pred(row_start, row_end-1);
-   hypre_umpire_allocator ualloc;
    HYPRE_Int nelms_on = HYPRE_THRUST_CALL(count_if, stack_i, stack_i+nelms, pred);
    HYPRE_Int nelms_off = nelms - nelms_on;
    HYPRE_Int nelms_off_max;
@@ -760,7 +754,6 @@ hypre_IJMatrixSetConstantValuesParCSRDevice( hypre_IJMatrix *matrix,
    HYPRE_Int           nnz_diag   = hypre_CSRMatrixNumNonzeros(diag);
    HYPRE_Int           nnz_offd   = hypre_CSRMatrixNumNonzeros(offd);
 
-   hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL( fill_n, diag_data, nnz_diag, value );
    HYPRE_THRUST_CALL( fill_n, offd_data, nnz_offd, value );
 

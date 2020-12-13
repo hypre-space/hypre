@@ -250,14 +250,12 @@ hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int 
 HYPRE_Int
 hypreDevice_IntegerReduceSum(HYPRE_Int n, HYPRE_Int *d_i)
 {
-  hypre_umpire_allocator ualloc;
    return HYPRE_THRUST_CALL(reduce, d_i, d_i + n);
 }
 
 HYPRE_Int
 hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 {
-  hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL(inclusive_scan, d_i, d_i + n, d_i);
 
    return hypre_error_flag;
@@ -266,7 +264,6 @@ hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 HYPRE_Int
 hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 {
-  hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL(exclusive_scan, d_i, d_i + n, d_i);
 
    return hypre_error_flag;
@@ -275,7 +272,6 @@ hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 HYPRE_Int
 hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v)
 {
-  hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL( fill_n, d_x, n, v);
 
    return hypre_error_flag;
@@ -320,7 +316,7 @@ hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
    {
       return hypre_error_flag;
    }
-   hypre_umpire_allocator ualloc;
+
    HYPRE_THRUST_CALL( fill, d_row_ind, d_row_ind + nnz, 0 );
 
    HYPRE_THRUST_CALL( scatter_if,
@@ -349,7 +345,7 @@ hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_
    HYPRE_Int *map = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
 
    hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnz, d_row_ptr, map);
-   hypre_umpire_allocator ualloc;
+
    HYPRE_THRUST_CALL(gather, map, map + nnz, d_row_num, d_row_ind);
 
    hypre_TFree(map, HYPRE_MEMORY_DEVICE);
@@ -366,7 +362,7 @@ HYPRE_Int*
 hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind)
 {
    HYPRE_Int *d_row_ptr = hypre_TAlloc(HYPRE_Int, nrows+1, HYPRE_MEMORY_DEVICE);
-   hypre_umpire_allocator ualloc;
+
    HYPRE_THRUST_CALL( lower_bound,
                       d_row_ind, d_row_ind + nnz,
                       thrust::counting_iterator<HYPRE_Int>(0),
@@ -379,7 +375,6 @@ hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row
 HYPRE_Int
 hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind, HYPRE_Int *d_row_ptr)
 {
-  hypre_umpire_allocator ualloc;
    HYPRE_THRUST_CALL( lower_bound,
                       d_row_ind, d_row_ind + nnz,
                       thrust::counting_iterator<HYPRE_Int>(0),
@@ -429,7 +424,7 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
    }
 
    hypre_TMemcpy(map2, map, HYPRE_Int, ny, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_umpire_allocator ualloc;
+
    HYPRE_THRUST_CALL(sort_by_key, map2, map2+ny, y);
 
    thrust::pair<HYPRE_Int*, HYPRE_Real*> new_end =
@@ -615,7 +610,7 @@ hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HY
 {
    auto begin_keys = thrust::make_zip_iterator(thrust::make_tuple(keys1,     keys2));
    auto end_keys   = thrust::make_zip_iterator(thrust::make_tuple(keys1 + N, keys2 + N));
-   hypre_umpire_allocator ualloc;
+
    if (opt == 0)
    {
       HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, vals, thrust::less< thrust::tuple<T1, T2> >());
@@ -647,7 +642,7 @@ hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *val
    auto begin_keys = thrust::make_zip_iterator(thrust::make_tuple(keys1,     keys2));
    auto end_keys   = thrust::make_zip_iterator(thrust::make_tuple(keys1 + N, keys2 + N));
    auto begin_vals = thrust::make_zip_iterator(thrust::make_tuple(vals1,     vals2));
-   hypre_umpire_allocator ualloc;
+
    if (opt == 0)
    {
       HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, begin_vals, thrust::less< thrust::tuple<T1, T2> >());
@@ -675,7 +670,7 @@ hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in,  T2 *keys2_in,  T3 *vals
    auto begin_keys_out = thrust::make_zip_iterator(thrust::make_tuple(keys1_out,    keys2_out   ));
    thrust::equal_to< thrust::tuple<T1, T2> > pred;
    thrust::plus<T3> func;
-   hypre_umpire_allocator ualloc;
+
    auto new_end = HYPRE_THRUST_CALL(reduce_by_key, begin_keys_in, end_keys_in, vals_in, begin_keys_out, vals_out, pred, func);
 
    return new_end.second - vals_out;
