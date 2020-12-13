@@ -7521,11 +7521,6 @@ main( hypre_int argc,
       HYPRE_IJVectorDestroy(ij_b);
    }
 
-   if (build_x0_type == 0)
-   {
-      HYPRE_ParVectorDestroy(x);
-   }
-
    HYPRE_IJVectorDestroy(ij_x);
 
    if (build_rbm)

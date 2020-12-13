@@ -1264,7 +1264,6 @@ typedef struct
 #define hypre_HandleCubUvmAllocator(hypre_handle)                hypre_CudaDataCubUvmAllocator(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleCudaDevice(hypre_handle)                     hypre_CudaDataCudaDevice(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleCudaComputeStreamNum(hypre_handle)           hypre_CudaDataCudaComputeStreamNum(hypre_HandleCudaData(hypre_handle))
-#define hypre_HandleCudaComputeStreamSync(hypre_handle)          hypre_CudaDataCudaComputeStreamSync(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleCudaReduceBuffer(hypre_handle)               hypre_CudaDataCudaReduceBuffer(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleStructCommRecvBuffer(hypre_handle)           hypre_CudaDataStructCommRecvBuffer(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleStructCommSendBuffer(hypre_handle)           hypre_CudaDataStructCommSendBuffer(hypre_HandleCudaData(hypre_handle))
@@ -1285,6 +1284,75 @@ typedef struct
 #define hypre_HandleUmpirePinnedPoolSize(hypre_handle)           ((hypre_handle) -> umpire_pinned_pool_size)
 
 #endif
+
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+#ifndef HYPRE_GSELIM_H
+#define HYPRE_GSELIM_H
+
+#define hypre_gselim(A,x,n,error)                      \
+{                                                      \
+   HYPRE_Int    j,k,m;                                 \
+   HYPRE_Real factor;                                  \
+   HYPRE_Real divA;                                    \
+   error = 0;                                          \
+   if (n == 1)  /* A is 1x1 */                         \
+   {                                                   \
+      if (A[0] != 0.0)                                 \
+      {                                                \
+         x[0] = x[0]/A[0];                             \
+      }                                                \
+      else                                             \
+      {                                                \
+         error++;                                      \
+      }                                                \
+   }                                                   \
+   else/* A is nxn. Forward elimination */             \
+   {                                                   \
+      for (k = 0; k < n-1; k++)                        \
+      {                                                \
+         if (A[k*n+k] != 0.0)                          \
+         {                                             \
+            divA = 1.0/A[k*n+k];                       \
+            for (j = k+1; j < n; j++)                  \
+            {                                          \
+               if (A[j*n+k] != 0.0)                    \
+               {                                       \
+                  factor = A[j*n+k]*divA;              \
+                  for (m = k+1; m < n; m++)            \
+                  {                                    \
+                     A[j*n+m]  -= factor * A[k*n+m];   \
+                  }                                    \
+                  x[j] -= factor * x[k];               \
+               }                                       \
+            }                                          \
+         }                                             \
+      }                                                \
+      /* Back Substitution  */                         \
+      for (k = n-1; k > 0; --k)                        \
+      {                                                \
+         if (A[k*n+k] != 0.0)                          \
+         {                                             \
+            x[k] /= A[k*n+k];                          \
+            for (j = 0; j < k; j++)                    \
+            {                                          \
+               if (A[j*n+k] != 0.0)                    \
+               {                                       \
+                  x[j] -= x[k] * A[j*n+k];             \
+               }                                       \
+            }                                          \
+         }                                             \
+      }                                                \
+      if (A[0] != 0.0) x[0] /= A[0];                   \
+   }                                                   \
+}
+
+#endif /* #ifndef HYPRE_GSELIM_H */
 
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
@@ -1544,6 +1612,12 @@ void hypre_NvtxPopRange();
 
 /* hypre_utilities.c */
 HYPRE_Int hypre_multmod(HYPRE_Int a, HYPRE_Int b, HYPRE_Int mod);
+void hypre_partition1D(HYPRE_Int n, HYPRE_Int p, HYPRE_Int j, HYPRE_Int *s, HYPRE_Int *e);
+
+HYPRE_Int hypre_SetSyncCudaCompute(HYPRE_Int action);
+HYPRE_Int hypre_RestoreSyncCudaCompute();
+HYPRE_Int hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr);
+HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
 
 
 #ifdef __cplusplus
