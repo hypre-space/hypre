@@ -40,7 +40,7 @@
 /* end lobpcg */
 
 #define DEBUG 0
-#define DEBUG_SSGRAPH 1
+#define DEBUG_SSGRAPH 0
 
 /*--------------------------------------------------------------------------
  * Data structures
@@ -2155,6 +2155,9 @@ PrintUsage( char *progname,
       hypre_printf("  -P <Px> <Py> <Pz>   : refine and distribute part(s)\n");
       hypre_printf("  -b <bx> <by> <bz>   : refine and block part(s)\n");
       hypre_printf("  -solver <ID>        : solver ID (default = 39)\n");
+      hypre_printf("                        -1 - Struct  Matvec\n");
+      hypre_printf("                        -2 - SStruct Matvec\n");
+      hypre_printf("                        -3 - ParCSR  Matvec\n");
       hypre_printf("                         0 - SMG split solver\n");
       hypre_printf("                         1 - PFMG split solver\n");
       hypre_printf("                         3 - SysPFMG\n");
@@ -2226,7 +2229,6 @@ PrintUsage( char *progname,
       hypre_printf("                        247- Struct BiCGSTAB with 2-step Jacobi\n");
       hypre_printf("                        248- Struct BiCGSTAB with diagonal scaling\n");
       hypre_printf("                        249- Struct BiCGSTAB\n");
-      hypre_printf("                         -1- SStruct Matvec\n");
       hypre_printf("  -reps              : number of times to repeat\n");
       hypre_printf("  -sym               : check symmetry of matrix A\n");
       hypre_printf("  -Aones             : compute A times vector of ones\n");
@@ -2948,14 +2950,32 @@ main( hypre_int argc,
         ((solver_id >= 80) && (solver_id < 90)) ||
         ((solver_id >= 90) && (solver_id < 100)) ||
         (solver_id == 120) || (solver_id == 5) ||
-        (solver_id == -2))
+        (solver_id == -3))
    {
       object_type = HYPRE_PARCSR;
    }
 
-   else if (solver_id >= 200)
+   else if (solver_id >= 200 || solver_id == -2)
    {
       object_type = HYPRE_STRUCT;
+   }
+
+   if (myid == 0)
+   {
+      switch (object_type)
+      {
+         case HYPRE_STRUCT:
+            hypre_printf("Setting object type to Struct\n");
+            break;
+
+         case HYPRE_SSTRUCT:
+            hypre_printf("Setting object type to SStruct\n");
+            break;
+
+         case HYPRE_PARCSR:
+            hypre_printf("Setting object type to ParCSR\n");
+            break;
+      }
    }
 
    /*-----------------------------------------------------------
