@@ -906,7 +906,7 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
       }
 
       /* Decide wheter to split the box or not */
-      if (box_efficiency < threshold)
+      if (box_efficiency < threshold && box_dvolume > box_minvol)
       {
          /* Build direction array */
          direction[0] = 0;
@@ -962,7 +962,7 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
          if (!cut_by_hole)
          {
             hypre_SetIndex(sign, 0);
-            hypre_SetIndex(signcoord, 0);
+            hypre_CopyToIndex(hypre_BoxIMin(box), ndim, signcoord);
 
             /* Compute laplacian */
             for (d = 0; d < ndim; d++)
@@ -1044,6 +1044,16 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
          /* Insert newly created nodes to queue */
          hypre_BoxBTQueueInsert(lnode, btqueue);
          hypre_BoxBTQueueInsert(rnode, btqueue);
+
+         /* Reset signatures */
+         for (d = 0; d < ndim; d++)
+         {
+            for (i = 0; i < num_indices; i++)
+            {
+               index = indices[d][i] - hypre_BoxIMinD(box, d);
+               signature[d][index + 1] = 0;
+            }
+         }
       }
       else
       {
