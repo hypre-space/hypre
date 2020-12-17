@@ -59,7 +59,7 @@ typedef struct
    HYPRE_Real      *vector_values;
 
 } Data;
- 
+
 /*--------------------------------------------------------------------------
  * Read routines
  *--------------------------------------------------------------------------*/
@@ -106,7 +106,7 @@ ReadData( char  *filename,
    /*-----------------------------------------------------------
     * Read data file from process 0, then broadcast
     *-----------------------------------------------------------*/
- 
+
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
    if (myid == 0)
@@ -133,7 +133,7 @@ ReadData( char  *filename,
             sdata = hypre_TReAlloc(sdata, char, (sdata_size + memchunk));
             s= sdata_size + memchunk;
          }
-         
+
          /* read the next input line */
          sdata_line = fgets((sdata + sdata_size), maxline, file);
       }
@@ -160,7 +160,7 @@ ReadData( char  *filename,
    while (sdata_line < (sdata + sdata_size))
    {
       sdata_ptr = sdata_line;
-      
+
       if ( ( hypre_sscanf(sdata_ptr, "%s", key) > 0 ) && ( sdata_ptr[0] != '#' ) )
       {
          sdata_ptr += strcspn(sdata_ptr, " \t\n");
@@ -254,10 +254,10 @@ ReadData( char  *filename,
 
    hypre_TFree(sdata);
 
-   *data_ptr = data; 
+   *data_ptr = data;
    return 0;
 }
- 
+
 /*--------------------------------------------------------------------------
  * Distribute routines
  *--------------------------------------------------------------------------*/
@@ -445,7 +445,7 @@ DistributeData( Data       global_data,
       data.max_boxsize = 0;
    }
 
-   *data_ptr = data; 
+   *data_ptr = data;
    return 0;
 }
 
@@ -558,7 +558,7 @@ PrintUsage( char      *progname,
 /*--------------------------------------------------------------------------
  * Test driver for semi-structured matrix interface
  *--------------------------------------------------------------------------*/
- 
+
 hypre_int
 main( hypre_int  argc,
       char      *argv[] )
@@ -569,7 +569,7 @@ main( hypre_int  argc,
    Index                 refine;
    Index                 distribute;
    Index                 block;
-                        
+
    HYPRE_StructGrid      grid;
    HYPRE_StructStencil  *stencils;
    HYPRE_StructMatrix   *matrices;
@@ -586,7 +586,7 @@ main( hypre_int  argc,
    HYPRE_Int             mv_A, mv_x, mv_y;
    HYPRE_Int             nterms, *terms, *trans;
    char                  transposechar;
-                        
+
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -828,7 +828,7 @@ main( hypre_int  argc,
          matrices[mi] = NULL;
          continue;
       }
-      
+
       for (ei = 0; ei < data.matrix_sizes[mi]; ei++)
       {
          Index ilower, iupper, origin, stride;
@@ -973,7 +973,7 @@ main( hypre_int  argc,
 #endif
 
       HYPRE_StructMatrixMatvec(1.0, matrices[mv_A], vectors[mv_x], 1.0, vectors[mv_y]);
-      
+
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Matrix-vector multiply", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
@@ -997,7 +997,7 @@ main( hypre_int  argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_StructMatrixMatvecT(1.0, matrices[mv_A], vectors[mv_x], 1.0, vectors[mv_y]);
-      
+
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Transpose matrix-vector multiply", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
@@ -1020,8 +1020,8 @@ main( hypre_int  argc,
       time_index = hypre_InitializeTiming("Matrix-matrix multiply");
       hypre_BeginTiming(time_index);
 
-      hypre_StructMatmult(data.nmatrices, matrices, nterms, terms, trans, &M);
-      
+      hypre_StructMatmult(data.nmatrices, matrices, nterms, terms, trans, NULL, &M);
+
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Matrix-matrix multiply", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);

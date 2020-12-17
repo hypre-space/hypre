@@ -112,6 +112,7 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
                      HYPRE_Int            nterms,
                      HYPRE_Int           *terms_input,
                      HYPRE_Int           *transposes,
+                     hypre_StructGrid    *Mgrid_in,
                      hypre_StructMatrix **M_ptr )
 {
    MPI_Comm             comm;
@@ -294,8 +295,15 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
    hypre_CopyToIndex(dom_stride, ndim, Mdom_stride);
    if (coarsen)
    {
-      /* Note: Mgrid may have fewer boxes than grid as a result of coarsening */
-      HYPRE_StructGridCoarsen(grid, coarsen_stride, &Mgrid);
+      if (Mgrid_in)
+      {
+         hypre_StructGridRef(Mgrid_in, &Mgrid);
+      }
+      else
+      {
+         /* Note: Mgrid may have fewer boxes than grid as a result of coarsening */
+         HYPRE_StructGridCoarsen(grid, coarsen_stride, &Mgrid);
+      }
       hypre_MapToCoarseIndex(Mran_stride, NULL, coarsen_stride, ndim);
       hypre_MapToCoarseIndex(Mdom_stride, NULL, coarsen_stride, ndim);
    }

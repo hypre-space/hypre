@@ -220,7 +220,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
             terms[0] = 2;
          }
 
-         hypre_StructMatmult(nmatrices, matrices, nterms, terms, trans, &A_l[l+1]);
+         hypre_StructMatmult(nmatrices, matrices, nterms, terms, trans, NULL, &A_l[l+1]);
          hypre_StructGridRef(hypre_StructMatrixGrid(A_l[l+1]), &grid_l[l+1]);
       }
       else
