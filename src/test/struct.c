@@ -97,7 +97,8 @@ main( hypre_int argc,
    HYPRE_Int           p, q, r;
    HYPRE_Int           dim;
    HYPRE_Int           n_pre, n_post;
-   HYPRE_Int           nblocks ;
+   HYPRE_Int           nblocks;
+   HYPRE_Int           max_levels;
    HYPRE_Int           skip;
    HYPRE_Int           sym;
    HYPRE_Int           rap;
@@ -208,6 +209,7 @@ main( hypre_int argc,
    usr_jacobi_weight= 0;
    jump  = 0;
    reps = 1;
+   max_levels = 100;
 
    nx = 10;
    ny = 10;
@@ -236,7 +238,7 @@ main( hypre_int argc,
    n_pre  = 1;
    n_post = 1;
 
-   solver_id = 0;
+   solver_id = 1;
    solver_type = 1;
    max_iterations = 100;
    print_level = 1;
@@ -392,6 +394,11 @@ main( hypre_int argc,
          arg_index++;
          print_level = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-lvl") == 0 )
+      {
+         arg_index++;
+         max_levels = atoi(argv[arg_index++]);
+      }
       else if (strcmp(argv[arg_index], "-repeats") == 0 )
       {
          arg_index++;
@@ -417,6 +424,7 @@ main( hypre_int argc,
          n_pre = atoi(argv[arg_index++]);
          n_post = atoi(argv[arg_index++]);
       }
+
       else if ( strcmp(argv[arg_index], "-rap") == 0 )
       {
          arg_index++;
@@ -573,6 +581,7 @@ main( hypre_int argc,
       hypre_printf("  -x0rand             : initial solution (x0) has random components \n");
       hypre_printf("  -kprint <val>       : print level for krylov solvers\n");
       hypre_printf("  -plevel <val>       : print level for prec/solvers\n");
+      hypre_printf("  -lvl <val>          : maximum number of levels (default 100);\n");
       hypre_printf("  -repeats <reps>     : number of times to repeat the run, default 1.  For solver 0,1,3\n");
       hypre_printf("  -solver <ID>        : solver ID\n");
       hypre_printf("                        0  - SMG (default)\n");
@@ -715,8 +724,7 @@ main( hypre_int argc,
       if (sum == 0)
       {
          hypre_printf("  (nx, ny, nz)     = (%d, %d, %d)\n", nx, ny, nz);
-         hypre_printf("  (ist0,ist1,ist2) = (%d, %d, %d)\n", \
-                      istart[0],istart[1],istart[2]);
+         hypre_printf("  (ix, iy, iz)     = (%d, %d, %d)\n", istart[0], istart[1], istart[2]);
          hypre_printf("  (Px, Py, Pz)     = (%d, %d, %d)\n", P,  Q,  R);
          hypre_printf("  (bx, by, bz)     = (%d, %d, %d)\n", bx, by, bz);
          hypre_printf("  (px, py, pz)     = (%d, %d, %d)\n", px, py, pz);
@@ -1511,7 +1519,7 @@ main( hypre_int argc,
          hypre_BeginTiming(time_index);
 
          HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &solver);
-         /*HYPRE_StructPFMGSetMaxLevels( solver, 9 );*/
+         HYPRE_StructPFMGSetMaxLevels(solver, max_levels);
          HYPRE_StructPFMGSetMaxIter(solver, max_iterations);
          HYPRE_StructPFMGSetTol(solver, tol);
          HYPRE_StructPFMGSetRelChange(solver, 0);
@@ -1684,6 +1692,7 @@ main( hypre_int argc,
          {
             /* use symmetric PFMG as preconditioner */
             HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &precond);
+            HYPRE_StructPFMGSetMaxLevels(precond, max_levels);
             HYPRE_StructPFMGSetMaxIter(precond, 1);
             HYPRE_StructPFMGSetTol(precond, 0.0);
             HYPRE_StructPFMGSetZeroGuess(precond);
@@ -1843,6 +1852,7 @@ main( hypre_int argc,
             {
                /* use symmetric PFMG as preconditioner */
                HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &precond);
+               HYPRE_StructPFMGSetMaxLevels(precond, max_levels);
                HYPRE_StructPFMGSetMaxIter(precond, 1);
                HYPRE_StructPFMGSetTol(precond, 0.0);
                HYPRE_StructPFMGSetZeroGuess(precond);
@@ -2071,6 +2081,7 @@ main( hypre_int argc,
             {
                /* use symmetric PFMG as preconditioner */
                HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &precond);
+               HYPRE_StructPFMGSetMaxLevels(precond, max_levels);
                HYPRE_StructPFMGSetMaxIter(precond, 1);
                HYPRE_StructPFMGSetTol(precond, 0.0);
                HYPRE_StructPFMGSetZeroGuess(precond);
@@ -2309,6 +2320,7 @@ main( hypre_int argc,
          {
             /* use symmetric PFMG as preconditioner */
             HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &precond);
+            HYPRE_StructPFMGSetMaxLevels(precond, max_levels);
             HYPRE_StructPFMGSetMaxIter(precond, 1);
             HYPRE_StructPFMGSetTol(precond, 0.0);
             HYPRE_StructPFMGSetZeroGuess(precond);
@@ -2427,6 +2439,7 @@ main( hypre_int argc,
          {
             /* use symmetric PFMG as preconditioner */
             HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &precond);
+            HYPRE_StructPFMGSetMaxLevels(precond, max_levels);
             HYPRE_StructPFMGSetMaxIter(precond, 1);
             HYPRE_StructPFMGSetTol(precond, 0.0);
             HYPRE_StructPFMGSetZeroGuess(precond);
@@ -2572,6 +2585,7 @@ main( hypre_int argc,
          {
             /* use symmetric PFMG as preconditioner */
             HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &precond);
+            HYPRE_StructPFMGSetMaxLevels(precond, max_levels);
             HYPRE_StructPFMGSetMaxIter(precond, 1);
             HYPRE_StructPFMGSetTol(precond, 0.0);
             HYPRE_StructPFMGSetZeroGuess(precond);
@@ -2717,6 +2731,7 @@ main( hypre_int argc,
          {
             /* use symmetric PFMG as preconditioner */
             HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &precond);
+            HYPRE_StructPFMGSetMaxLevels(precond, max_levels);
             HYPRE_StructPFMGSetMaxIter(precond, 1);
             HYPRE_StructPFMGSetTol(precond, 0.0);
             HYPRE_StructPFMGSetZeroGuess(precond);
@@ -2809,6 +2824,7 @@ main( hypre_int argc,
          {
             /* use symmetric PFMG as preconditioner */
             HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &precond);
+            HYPRE_StructPFMGSetMaxLevels(precond, max_levels);
             HYPRE_StructPFMGSetMaxIter(precond, 1);
             HYPRE_StructPFMGSetTol(precond, 0.0);
             HYPRE_StructPFMGSetZeroGuess(precond);
