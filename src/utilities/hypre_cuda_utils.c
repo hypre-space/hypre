@@ -384,6 +384,15 @@ hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
    return hypre_error_flag;
 }
 
+__global__ void
+hypreCUDAKernel_ScatterAddTrivial(HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYPRE_Real *y)
+{
+   for (HYPRE_Int i = 0; i < n; i++)
+   {
+      x[map[i]] += y[i];
+   }
+}
+
 /* x[map[i]] += y[i], same index cannot appear more than once in map */
 __global__ void
 hypreCUDAKernel_ScatterAdd(HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYPRE_Real *y)
@@ -396,9 +405,12 @@ hypreCUDAKernel_ScatterAdd(HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYPRE_Rea
    }
 }
 
-/* Generalized x[map[i]] += y[i] where the same index may appear more
- * than once in map
- * Note: content in y will be destroyed */
+/* Generalized Scatter-and-Add
+ * for i = 0 : ny-1, x[map[i]] += y[i];
+ * Note: An index is allowed to appear more than once in map
+ *       Content in y will be destroyed
+ *       When work != NULL, work is at least of size [2*sizeof(HYPRE_Int)+sizeof(HYPRE_Complex)]*ny
+ */
 HYPRE_Int
 hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y, char *work)
 {
@@ -407,44 +419,59 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
       return hypre_error_flag;
    }
 
-   HYPRE_Int *map2, *reduced_map;
-   HYPRE_Real *reduced_y;
-
-   if (work)
+   if (ny <= 2)
    {
-      map2 = (HYPRE_Int *) work;
-      reduced_map = map2 + ny;
-      reduced_y = (HYPRE_Real *) (reduced_map + ny);
+      /* trivial cases, n = 1, 2 */
+      dim3 bDim = 1;
+      dim3 gDim = 1;
+      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_ScatterAddTrivial, bDim, gDim, ny, x, map, y );
    }
    else
    {
-      map2        = hypre_TAlloc(HYPRE_Int,  ny, HYPRE_MEMORY_DEVICE);
-      reduced_map = hypre_TAlloc(HYPRE_Int,  ny, HYPRE_MEMORY_DEVICE);
-      reduced_y   = hypre_TAlloc(HYPRE_Real, ny, HYPRE_MEMORY_DEVICE);
-   }
+      /* general cases */
+      HYPRE_Int *map2, *reduced_map, reduced_n;
+      HYPRE_Real *reduced_y;
 
-   hypre_TMemcpy(map2, map, HYPRE_Int, ny, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+      if (work)
+      {
+         map2 = (HYPRE_Int *) work;
+         reduced_map = map2 + ny;
+         reduced_y = (HYPRE_Real *) (reduced_map + ny);
+      }
+      else
+      {
+         map2        = hypre_TAlloc(HYPRE_Int,  ny, HYPRE_MEMORY_DEVICE);
+         reduced_map = hypre_TAlloc(HYPRE_Int,  ny, HYPRE_MEMORY_DEVICE);
+         reduced_y   = hypre_TAlloc(HYPRE_Real, ny, HYPRE_MEMORY_DEVICE);
+      }
 
-   HYPRE_THRUST_CALL(sort_by_key, map2, map2+ny, y);
+      hypre_TMemcpy(map2, map, HYPRE_Int, ny, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-   thrust::pair<HYPRE_Int*, HYPRE_Real*> new_end =
-      HYPRE_THRUST_CALL(reduce_by_key, map2, map2+ny, y, reduced_map, reduced_y);
+      HYPRE_THRUST_CALL(sort_by_key, map2, map2 + ny, y);
 
-   HYPRE_Int reduced_n = new_end.first - reduced_map;
+      thrust::pair<HYPRE_Int*, HYPRE_Real*> new_end = HYPRE_THRUST_CALL( reduce_by_key,
+                                                                         map2,
+                                                                         map2 + ny,
+                                                                         y,
+                                                                         reduced_map,
+                                                                         reduced_y );
 
-   hypre_assert(reduced_n == new_end.second - reduced_y);
+      reduced_n = new_end.first - reduced_map;
 
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(reduced_n, "thread", bDim);
+      hypre_assert(reduced_n == new_end.second - reduced_y);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_ScatterAdd, gDim, bDim,
-                      reduced_n, x, reduced_map, reduced_y );
+      dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+      dim3 gDim = hypre_GetDefaultCUDAGridDimension(reduced_n, "thread", bDim);
 
-   if (!work)
-   {
-      hypre_TFree(map2, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(reduced_map, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(reduced_y, HYPRE_MEMORY_DEVICE);
+      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_ScatterAdd, gDim, bDim,
+                         reduced_n, x, reduced_map, reduced_y );
+
+      if (!work)
+      {
+         hypre_TFree(map2, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(reduced_map, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(reduced_y, HYPRE_MEMORY_DEVICE);
+      }
    }
 
    return hypre_error_flag;
@@ -546,19 +573,27 @@ hypreDevice_MaskedIVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_
 }
 
 __global__ void
-hypreCUDAKernel_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex *y)
+hypreCUDAKernel_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y)
 {
    HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
 
    if (i < n)
    {
-      y[i] = x[i] / A_data[A_i[i]];
+      if (beta != 0.0)
+      {
+         y[i] = x[i] / A_data[A_i[i]] + beta * y[i];
+      }
+      else
+      {
+         y[i] = x[i] / A_data[A_i[i]];
+      }
    }
 }
 
-/* y = diag(A) \ x. A_i[i] points to the ith diagonal entry of A */
+/* y = diag(A) \ x + beta y
+ * Note: Assume A_i[i] points to the ith diagonal entry of A */
 HYPRE_Int
-hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex *y)
+hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y)
 {
    /* trivial case */
    if (n <= 0)
@@ -569,7 +604,7 @@ hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, 
    dim3 bDim = hypre_GetDefaultCUDABlockDimension();
    dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_DiagScaleVector, gDim, bDim, n, A_i, A_data, x, y );
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_DiagScaleVector, gDim, bDim, n, A_i, A_data, x, beta, y );
 
    return hypre_error_flag;
 }
@@ -890,8 +925,13 @@ hypre_CudaDataCreate()
 }
 
 void
-hypre_CudaDataDestroy(hypre_CudaData* data)
+hypre_CudaDataDestroy(hypre_CudaData *data)
 {
+   if (!data)
+   {
+      return;
+   }
+
    hypre_TFree(hypre_CudaDataCudaReduceBuffer(data),     HYPRE_MEMORY_DEVICE);
    hypre_TFree(hypre_CudaDataStructCommRecvBuffer(data), HYPRE_MEMORY_DEVICE);
    hypre_TFree(hypre_CudaDataStructCommSendBuffer(data), HYPRE_MEMORY_DEVICE);

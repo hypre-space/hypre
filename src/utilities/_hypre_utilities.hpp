@@ -141,13 +141,29 @@ struct hypre_CudaData
 #define hypre_CudaDataSpgemmRownnzEstimateMultFactor(data) ((data) -> spgemm_rownnz_estimate_mult_factor)
 #define hypre_CudaDataSpgemmHashType(data)                 ((data) -> spgemm_hash_type)
 
-cudaStream_t hypre_CudaDataCudaComputeStream(hypre_CudaData *data);
 hypre_CudaData* hypre_CudaDataCreate();
 void hypre_CudaDataDestroy(hypre_CudaData* data);
-curandGenerator_t hypre_CudaDataCurandGenerator(hypre_CudaData *data);
-cublasHandle_t hypre_CudaDataCublasHandle(hypre_CudaData *data);
-cusparseHandle_t hypre_CudaDataCusparseHandle(hypre_CudaData *data);
+
+curandGenerator_t  hypre_CudaDataCurandGenerator(hypre_CudaData *data);
+cublasHandle_t     hypre_CudaDataCublasHandle(hypre_CudaData *data);
+cusparseHandle_t   hypre_CudaDataCusparseHandle(hypre_CudaData *data);
 cusparseMatDescr_t hypre_CudaDataCusparseMatDescr(hypre_CudaData *data);
+cudaStream_t       hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i);
+cudaStream_t       hypre_CudaDataCudaComputeStream(hypre_CudaData *data);
+
+// Data structure and accessor routines for Cuda Sparse Triangular Matrices
+struct hypre_CsrsvData
+{
+   csrsv2Info_t info_L;
+   csrsv2Info_t info_U;
+   hypre_int    BufferSize;
+   char        *Buffer;
+};
+
+#define hypre_CsrsvDataInfoL(data)      ((data) -> info_L)
+#define hypre_CsrsvDataInfoU(data)      ((data) -> info_U)
+#define hypre_CsrsvDataBufferSize(data) ((data) -> BufferSize)
+#define hypre_CsrsvDataBuffer(data)     ((data) -> Buffer)
 
 #endif //#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
@@ -739,8 +755,6 @@ cudaError_t hypre_CachingFreeDevice(void *ptr);
 cudaError_t hypre_CachingFreeManaged(void *ptr);
 
 void hypre_CudaDataCubCachingAllocatorDestroy(hypre_CudaData *data);
-
-cudaStream_t hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i);
 
 #endif // #if defined(HYPRE_USING_CUDA)
 

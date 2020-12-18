@@ -162,11 +162,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int     ilu_max_iter;
    HYPRE_Real    ilu_droptol;
    HYPRE_Int     ilu_reordering_type;
-   
+   HYPRE_Int     needZ = 0;
+
    HYPRE_Int interp_type, restri_type;
    HYPRE_Int post_interp_type;  /* what to do after computing the interpolation matrix
                                    0 for nothing, 1 for a Jacobi step */
-
 
    /*for fittting interp vectors */
    /*HYPRE_Int                smooth_interp_vectors= hypre_ParAMGSmoothInterpVectors(amg_data); */
@@ -213,30 +213,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #ifdef HYPRE_USING_DSUPERLU
    HYPRE_Int       dslu_threshold = hypre_ParAMGDataDSLUThreshold(amg_data);
 #endif
-
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_UNIFIED_MEMORY)
-#if 0
-   if ( hypre_ParAMGDataPrintLevel(amg_data) > 3 )
-   {
-      if (!hypre_ParCSRMatrixIsManaged(A))
-      {
-         hypre_fprintf(stderr,"WARNING:: INVALID A in hypre_BoomerAMGSetup::Address %p\n",A);
-         //exit(2);
-      }
-      else if(!hypre_ParVectorIsManaged(f))
-      {
-         hypre_fprintf(stderr,"WARNING:: INVALID f in hypre_BoomerAMGSetup::Address %p\n",f);
-         //exit(2);
-      } else if (!hypre_ParVectorIsManaged(u))
-      {
-         hypre_fprintf(stderr,"WARNING:: INVALID u in hypre_BoomerAMGSetup::Address %p\n",u);
-         //exit(2);
-      }
-   }
-#endif
-#endif
-
-   /*hypre_CSRMatrix *A_new;*/
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
@@ -756,12 +732,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                  hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
                                  hypre_ParCSRMatrixRowStarts(A_array[0]));
    hypre_ParVectorInitialize_v2(Vtemp, memory_location);
-   hypre_ParVectorSetPartitioningOwner(Vtemp,0);
+   hypre_ParVectorSetPartitioningOwner(Vtemp, 0);
    hypre_ParAMGDataVtemp(amg_data) = Vtemp;
 
-   if ( (smooth_num_levels > 0 && smooth_type > 9) ||
-        relax_weight[0] < 0 || omega[0] < 0 ||
-        hypre_ParAMGDataSchwarzRlxWeight(amg_data) < 0 )
+   if ( (smooth_num_levels > 0 && smooth_type > 9) || relax_weight[0] < 0 || omega[0] < 0 || hypre_ParAMGDataSchwarzRlxWeight(amg_data) < 0 )
    {
       Ptemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
                                  hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
@@ -769,58 +743,55 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       hypre_ParVectorInitialize(Ptemp);
       hypre_ParVectorSetPartitioningOwner(Ptemp,0);
       hypre_ParAMGDataPtemp(amg_data) = Ptemp;
+
       Rtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
                                  hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
                                  hypre_ParCSRMatrixRowStarts(A_array[0]));
       hypre_ParVectorInitialize(Rtemp);
-      hypre_ParVectorSetPartitioningOwner(Rtemp,0);
+      hypre_ParVectorSetPartitioningOwner(Rtemp, 0);
       hypre_ParAMGDataRtemp(amg_data) = Rtemp;
    }
 
    /* See if we need the Ztemp vector */
-   if ( (smooth_num_levels > 0 && smooth_type > 6) ||
-        relax_weight[0] < 0 || omega[0] < 0 ||
-        hypre_ParAMGDataSchwarzRlxWeight(amg_data) < 0 )
+   if ( (smooth_num_levels > 0 && smooth_type > 6) || relax_weight[0] < 0 || omega[0] < 0 || hypre_ParAMGDataSchwarzRlxWeight(amg_data) < 0 )
    {
-      Ztemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
-                                    hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
-                                    hypre_ParCSRMatrixRowStarts(A_array[0]));
-      hypre_ParVectorInitialize(Ztemp);
-      hypre_ParVectorSetPartitioningOwner(Ztemp,0);
-      hypre_ParAMGDataZtemp(amg_data) = Ztemp;
+      needZ = hypre_max(needZ, 1);
    }
-   else if (grid_relax_type[0] == 16 || grid_relax_type[1] == 16 || grid_relax_type[2] == 16 || grid_relax_type[3] == 16)
+
+   if ( grid_relax_type[0] == 16 || grid_relax_type[1] == 16 || grid_relax_type[2] == 16 || grid_relax_type[3] == 16 )
    {
       /* Chebyshev */
-       Ztemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
-                                     hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
-                                     hypre_ParCSRMatrixRowStarts(A_array[0]));
-       hypre_ParVectorInitialize(Ztemp);
-       hypre_ParVectorSetPartitioningOwner(Ztemp,0);
-       hypre_ParAMGDataZtemp(amg_data) = Ztemp;
-
+      needZ = hypre_max(needZ, 1);
    }
-   else if (num_threads > 1)
+
+#if !defined(HYPRE_USING_CUDA)
+   /* GPU impl. needs Z */
+   if (num_threads > 1)
+#endif
    {
-      /* we need the temp Z vector for relaxation 3 and 6 now if we are
-       * using threading */
+      /* we need the temp Z vector for relaxation 3 and 6 now if we are using threading */
       for (j = 1; j < 4; j++)
       {
-         if (grid_relax_type[j] == 3 || grid_relax_type[j] == 4 || grid_relax_type[j] == 6  ||
-             grid_relax_type[j] == 8 || grid_relax_type[j] == 13 || grid_relax_type[j] == 14)
+         if (grid_relax_type[j] ==  3 || grid_relax_type[j] ==  4 || grid_relax_type[j] ==  6 ||
+             grid_relax_type[j] ==  8 || grid_relax_type[j] == 13 || grid_relax_type[j] == 14 ||
+             grid_relax_type[j] == 11 || grid_relax_type[j] == 12)
          {
-            Ztemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
-                                          hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
-                                          hypre_ParCSRMatrixRowStarts(A_array[0]));
-            hypre_ParVectorInitialize(Ztemp);
-            hypre_ParVectorSetPartitioningOwner(Ztemp,0);
-            hypre_ParAMGDataZtemp(amg_data) = Ztemp;
+            needZ = hypre_max(needZ, 1);
             break;
          }
       }
    }
 
-
+   if (needZ)
+   {
+      Ztemp = hypre_ParMultiVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
+                                         hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
+                                         hypre_ParCSRMatrixRowStarts(A_array[0]),
+                                         needZ);
+      hypre_ParVectorInitialize(Ztemp);
+      hypre_ParVectorSetPartitioningOwner(Ztemp, 0);
+      hypre_ParAMGDataZtemp(amg_data) = Ztemp;
+   }
 
    F_array = hypre_ParAMGDataFArray(amg_data);
    U_array = hypre_ParAMGDataUArray(amg_data);
@@ -937,7 +908,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParVectorInitialize_v2(U_array[level], memory_location);
             hypre_ParVectorSetPartitioningOwner(U_array[level],0);
          }
-
       }
 
       /*-------------------------------------------------------------
