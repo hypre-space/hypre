@@ -20,6 +20,7 @@ void *
 hypre_SSAMGCreate( hypre_MPI_Comm comm )
 {
    hypre_SSAMGData   *ssamg_data;
+   HYPRE_Int          d;
 
    ssamg_data = hypre_CTAlloc(hypre_SSAMGData, 1);
 
@@ -45,6 +46,10 @@ hypre_SSAMGCreate( hypre_MPI_Comm comm )
    /* initialize */
    (ssamg_data -> nparts)           = -1;
    (ssamg_data -> num_levels)       = -1;
+   for (d = 0; d < 3; d++)
+   {
+      (ssamg_data -> dxyz[d])       = NULL;
+   }
 
    return (void *) ssamg_data;
 }
@@ -127,7 +132,9 @@ hypre_SSAMGDestroy( void *ssamg_vdata )
       {
          hypre_TFree(ssamg_data -> dxyz[p]);
       }
-      hypre_TFree(ssamg_data -> dxyz);
+      hypre_TFree(ssamg_data -> dxyz[0]);
+      hypre_TFree(ssamg_data -> dxyz[1]);
+      hypre_TFree(ssamg_data -> dxyz[2]);
 
       hypre_FinalizeTiming(ssamg_data -> time_index);
       hypre_TFree(ssamg_data);

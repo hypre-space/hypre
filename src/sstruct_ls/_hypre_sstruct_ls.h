@@ -746,7 +746,7 @@ HYPRE_Int hypre_SSAMGSetup ( void *ssamg_vdata , hypre_SStructMatrix *A , hypre_
 HYPRE_Int hypre_SSAMGComputeNumCoarseRelax ( void *ssamg_vdata );
 HYPRE_Int hypre_SSAMGComputeMaxLevels ( hypre_SStructGrid *grid , HYPRE_Int *max_levels );
 HYPRE_Int hypre_SSAMGComputeDxyz ( hypre_SStructMatrix *A , HYPRE_Real **dxyz , HYPRE_Int *dxyz_flag );
-HYPRE_Int hypre_SSAMGCoarsen ( void *ssamg_vdata , HYPRE_Int *dxyz_flag , HYPRE_Real **dxyz );
+HYPRE_Int hypre_SSAMGCoarsen ( void *ssamg_vdata , hypre_SStructGrid *grid , HYPRE_Int *dxyz_flag , HYPRE_Real **dxyz );
 
 /* ssamg_solve.c */
 HYPRE_Int hypre_SSAMGSolve ( void *ssamg_vdata , hypre_SStructMatrix *A , hypre_SStructVector *b , hypre_SStructVector *x );

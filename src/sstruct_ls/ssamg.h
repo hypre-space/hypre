@@ -40,10 +40,13 @@ typedef struct hypre_SSAMGData_struct
    HYPRE_Int               num_coarse_relax; /* number of coarse relaxation sweeps */
    HYPRE_Int               relax_type;       /* relaxation type flag */
    HYPRE_Real              usr_relax_weight; /* user relax weight */
-   HYPRE_Real            **relax_weights;    /* (nlevels x nparts) array of relax weights */
-   HYPRE_Int             **cdir_l;           /* (nlevels x nparts) array of coarsening dir */
-   HYPRE_Real            **dxyz;             /* (nparts x 3) array used to determine cdir */
-   hypre_SStructGrid     **grid_l;           /* (nlevels x nparts) array of grids */
+   HYPRE_Real             *dxyz[3];          /* nparts array used to determine cdir */
+
+   /* (nlevels x nparts) arrays */
+   HYPRE_Int             **active_l;         /* active parts for relaxation */
+   HYPRE_Int             **cdir_l;           /* coarsening directions */
+   HYPRE_Real            **relax_weights;    /* relaxation weights */
+   hypre_SStructGrid     **grid_l;           /* grids */
 
    /* work matrices and vectors */
    hypre_SStructMatrix   **A_l;
@@ -100,6 +103,8 @@ typedef struct hypre_SSAMGData_struct
 #define hypre_SSAMGDataPrintFreq(ssamg_data)      ((ssamg_data) -> print_freq)
 #define hypre_SSAMGDataLogging(ssamg_data)        ((ssamg_data) -> logging)
 #define hypre_SSAMGDataDxyz(ssamg_data)           ((ssamg_data) -> dxyz)
+#define hypre_SSAMGDataDxyzD(ssamg_data, d)       ((ssamg_data) -> dxyz[d])
+#define hypre_SSAMGDataActivel(ssamg_data)        ((ssamg_data) -> active_l)
 #define hypre_SSAMGDataGridl(ssamg_data)          ((ssamg_data) -> grid_l)
 #define hypre_SSAMGDataAl(ssamg_data)             ((ssamg_data) -> A_l)
 #define hypre_SSAMGDataCdir(ssamg_data)           ((ssamg_data) -> cdir_l)
