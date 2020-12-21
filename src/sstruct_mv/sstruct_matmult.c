@@ -57,17 +57,7 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    hypre_SStructPMatrix    *pmatrix;
    hypre_StructMatrix     **smatrices;   /* nmatrices array */
    hypre_StructMatrix     **smatrices_M; /* nparts array */
-
-   /* Temporary data structures */
-   hypre_ParCSRMatrix     **parcsr;
-   hypre_ParCSRMatrix      *parcsr_sA;
-   hypre_ParCSRMatrix      *parcsr_uA;
    hypre_ParCSRMatrix      *parcsr_uM;
-   hypre_ParCSRMatrix      *parcsr_uMold;
-   hypre_ParCSRMatrix      *parcsr_sM;
-   hypre_ParCSRMatrix      *parcsr_sMold;
-   hypre_IJMatrix          *ijmatrix;
-   hypre_IJMatrix         **ij_sA;
    hypre_IJMatrix          *ij_M;
 
    /* Stencil data */
@@ -129,8 +119,89 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    /*-------------------------------------------------------
     * Compute unstructured component
     *-------------------------------------------------------*/
+   hypre_SStructMatmultU(nmatrices, ssmatrices, nterms, terms, transposes, &parcsr_uM);
 
-   HYPRE_ANNOTATE_REGION_BEGIN("%s", "UMatrix computation");
+   /*-------------------------------------------------------
+    * Create the resulting SStructMatrix
+    *-------------------------------------------------------*/
+
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", "Build SStructMatrix");
+
+   /* Create graph_M */
+   grid_M = hypre_SStructGraphDomGrid(hypre_SStructMatrixGraph(ssmatrices[1]));
+   HYPRE_SStructGraphCreate(comm, grid_M, (HYPRE_SStructGraph*) &graph_M);
+   HYPRE_SStructGraphSetObjectType(graph_M, HYPRE_SSTRUCT);
+   for (part = 0; part < nparts; part++)
+   {
+      HYPRE_SStructGraphSetStencil(graph_M, part, 0, stencils_M[part]);
+   }
+   HYPRE_SStructGraphAssemble(graph_M);
+
+   /* Create matrix M */
+   HYPRE_SStructMatrixCreate(comm, graph_M, &M);
+   HYPRE_SStructMatrixInitialize(M);
+   for (part = 0; part < nparts; part++)
+   {
+      pmatrix = hypre_SStructMatrixPMatrix(M, part);
+      hypre_StructMatrixDestroy(hypre_SStructPMatrixSMatrix(pmatrix, vi, vj));
+      hypre_SStructPMatrixSMatrix(pmatrix, vi, vj) = hypre_StructMatrixRef(smatrices_M[part]);
+   }
+
+   ij_M = hypre_SStructMatrixIJMatrix(M);
+   hypre_IJMatrixDestroyParCSR(ij_M);
+   hypre_IJMatrixObject(ij_M) = NULL;
+   hypre_IJMatrixTranslator(ij_M) = NULL;
+   hypre_IJMatrixAssembleFlag(ij_M) = 1;
+   hypre_IJMatrixSetObject(ij_M, parcsr_uM);
+   HYPRE_SStructMatrixAssemble(M);
+
+   HYPRE_ANNOTATE_REGION_END("%s", "Build SStructMatrix");
+
+   /*-------------------------------------------------------
+    * Free memory
+    *-------------------------------------------------------*/
+   HYPRE_SStructGraphDestroy(graph_M);
+   for (part = 0; part < nparts; part++)
+   {
+      hypre_StructMatrixDestroy(smatrices_M[part]);
+      HYPRE_SStructStencilDestroy(stencils_M[part]);
+   }
+   hypre_TFree(smatrices);
+   hypre_TFree(smatrices_M);
+   hypre_TFree(stencils_M);
+
+   /* Set pointer to output matrix */
+   *M_ptr = M;
+
+   HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructMatmultU
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_SStructMatmultU( HYPRE_Int             nmatrices,
+                       hypre_SStructMatrix **ssmatrices,
+                       HYPRE_Int             nterms,
+                       HYPRE_Int            *terms,
+                       HYPRE_Int            *transposes,
+                       hypre_ParCSRMatrix  **uM_ptr )
+{
+   hypre_ParCSRMatrix     **parcsr;
+   hypre_ParCSRMatrix      *parcsr_sA;
+   hypre_ParCSRMatrix      *parcsr_uA;
+   hypre_ParCSRMatrix      *parcsr_uM;
+   hypre_ParCSRMatrix      *parcsr_uMold;
+   hypre_ParCSRMatrix      *parcsr_sM;
+   hypre_ParCSRMatrix      *parcsr_sMold;
+   hypre_IJMatrix          *ijmatrix;
+   hypre_IJMatrix         **ij_sA;
+
+   HYPRE_Int                m, t;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /* Temporary work matrices */
    parcsr = hypre_TAlloc(hypre_ParCSRMatrix *, 3);
@@ -148,14 +219,7 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    t = terms[nmatrices - 1];
    ijmatrix = hypre_SStructMatrixIJMatrix(ssmatrices[t]);
    HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uMold);
-#if DEBUG_MATCONV
-   if (!myid)
-   {
-      hypre_printf("ssmat[%d] conversion\n", t);
-   }
-#endif
    hypre_SStructMatrixBoundaryToUMatrix(ssmatrices[t], parcsr_uM, &ij_sA[t]);
-   //ij_sA[t] = hypre_SStructMatrixToUMatrix(ssmatrices[t]);
    HYPRE_IJMatrixGetObject(ij_sA[t], (void **) &parcsr_sMold);
 
 #if DEBUG_MATMULT
@@ -173,12 +237,6 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
       /* Convert sA_n to IJMatrix */
       if (ij_sA[t] == NULL)
       {
-#if DEBUG_MATCONV
-         if (!myid)
-         {
-            hypre_printf("ssmat[%d] conversion\n", t);
-         }
-#endif
          hypre_SStructMatrixBoundaryToUMatrix(ssmatrices[t], parcsr_uMold, &ij_sA[t]);
       }
       HYPRE_IJMatrixGetObject(ij_sA[t], (void **) &parcsr_sA);
@@ -298,68 +356,15 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    }
    hypre_TFree(ij_sA);
 
-   HYPRE_ANNOTATE_REGION_END("%s", "UMatrix computation");
-
-   /*-------------------------------------------------------
-    * Create the resulting SStructMatrix
-    *-------------------------------------------------------*/
-
-   HYPRE_ANNOTATE_REGION_BEGIN("%s", "Build SStructMatrix");
-
-   /* Create graph_M */
-   grid_M = hypre_SStructGraphDomGrid(hypre_SStructMatrixGraph(ssmatrices[1]));
-   HYPRE_SStructGraphCreate(comm, grid_M, (HYPRE_SStructGraph*) &graph_M);
-   HYPRE_SStructGraphSetObjectType(graph_M, HYPRE_SSTRUCT);
-   for (part = 0; part < nparts; part++)
-   {
-      HYPRE_SStructGraphSetStencil(graph_M, part, 0, stencils_M[part]);
-   }
-   HYPRE_SStructGraphAssemble(graph_M);
-
-   /* Create matrix M */
-   HYPRE_SStructMatrixCreate(comm, graph_M, &M);
-   HYPRE_SStructMatrixInitialize(M);
-   for (part = 0; part < nparts; part++)
-   {
-      pmatrix = hypre_SStructMatrixPMatrix(M, part);
-      hypre_StructMatrixDestroy(hypre_SStructPMatrixSMatrix(pmatrix, vi, vj));
-      hypre_SStructPMatrixSMatrix(pmatrix, vi, vj) = hypre_StructMatrixRef(smatrices_M[part]);
-   }
-
-   ij_M = hypre_SStructMatrixIJMatrix(M);
-   hypre_IJMatrixDestroyParCSR(ij_M);
-   hypre_IJMatrixObject(ij_M) = NULL;
-   hypre_IJMatrixTranslator(ij_M) = NULL;
-   hypre_IJMatrixAssembleFlag(ij_M) = 1;
-   hypre_IJMatrixSetObject(ij_M, parcsr_uM);
-   HYPRE_SStructMatrixAssemble(M);
-
-   HYPRE_ANNOTATE_REGION_END("%s", "Build SStructMatrix");
-
-   /*-------------------------------------------------------
-    * Free memory
-    *-------------------------------------------------------*/
-   HYPRE_SStructGraphDestroy(graph_M);
-   for (part = 0; part < nparts; part++)
-   {
-      hypre_StructMatrixDestroy(smatrices_M[part]);
-      HYPRE_SStructStencilDestroy(stencils_M[part]);
-   }
-   hypre_TFree(smatrices);
-   hypre_TFree(smatrices_M);
-   hypre_TFree(stencils_M);
-
-   /* Set pointer to output matrix */
-   *M_ptr = M;
+   *uM_ptr = parcsr_uM;
 
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
 
-
 /*--------------------------------------------------------------------------
- * hypre_SStructMatmult
+ * hypre_SStructMatPtAP
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_SStructMatPtAP( hypre_SStructMatrix   *A,
