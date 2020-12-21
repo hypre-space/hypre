@@ -13,6 +13,8 @@
 #ifndef hypre_SSAMG_HEADER
 #define hypre_SSAMG_HEADER
 
+#define DEBUG_LVL_TIMES 0
+
 /*--------------------------------------------------------------------------
  * hypre_SSAMGData
  *

@@ -362,8 +362,8 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
  * hypre_SStructMatmult
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_SStructMatPtAP( hypre_SStructMatrix   *P,
-                      hypre_SStructMatrix   *A,
+hypre_SStructMatPtAP( hypre_SStructMatrix   *A,
+                      hypre_SStructMatrix   *P,
                       hypre_SStructMatrix  **PtAP_ptr )
 {
    hypre_SStructMatrix  *matrices[3] = {A, P, P};

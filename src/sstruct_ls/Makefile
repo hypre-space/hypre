@@ -111,7 +111,8 @@ FILES =\
  ssamg_setup.c\
  ssamg_relax.c\
  ssamg_solve.c\
- ssamg_interp.c
+ ssamg_interp.c\
+ ssamg_setup_rap.c
 
 OBJS = ${FILES:.c=.o}
 

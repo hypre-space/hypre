@@ -166,10 +166,6 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    for (l = 0; l < (num_levels - 1); l++)
    {
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
-      if (!myid)
-      {
-         hypre_printf("Level %d/%d\n", l, num_levels);
-      }
 
       // Build prolongation matrix
       P_l[l]  = hypre_SSAMGCreateInterpOp(A_l[l], grid_l[l+1], cdir_l[l]);
@@ -180,7 +176,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       hypre_SStructMatrixRef(P_l[l], &RT_l[l]);
 
       // Compute coarse matrix
-      hypre_SStructMatPtAP(P_l[l], A_l[l], &A_l[l+1]);
+      hypre_SSAMGComputeRAP(A_l[l], P_l[l], grid_l[l+1], cdir_l[l], 0, &A_l[l+1]);
 
       // Build SStructVectors
       HYPRE_SStructVectorCreate(comm, grid_l[l+1], &b_l[l+1]);
