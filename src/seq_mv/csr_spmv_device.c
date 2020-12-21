@@ -225,6 +225,15 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Complex    alpha,
    HYPRE_Complex *d_x   = hypre_VectorData(x);
    HYPRE_Complex *d_y   = hypre_VectorData(y);
 
+   if (nnz <= 0 || alpha == 0.0)
+   {
+      hypre_SeqVectorScale(beta, y);
+
+      return hypre_error_flag;
+   }
+
+   hypre_assert(nrows > 0);
+
    if (fill == 0)
    {
       return hypreDevice_CSRMatrixMatvec<0>(nrows, nnz, alpha, d_ia, d_ja, d_a, d_x, beta, d_y);
