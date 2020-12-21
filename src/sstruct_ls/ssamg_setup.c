@@ -41,12 +41,13 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    hypre_SStructGrid     *grid       = hypre_SStructGraphGrid(graph);
 
    /* Solver parameters */
-   MPI_Comm               comm       = hypre_SSAMGDataComm(ssamg_data);
-   HYPRE_Int              max_iter   = hypre_SSAMGDataMaxIter(ssamg_data);
-   HYPRE_Int              max_levels = hypre_SSAMGDataMaxLevels(ssamg_data);
-   HYPRE_Int              relax_type = hypre_SSAMGDataRelaxType(ssamg_data);
-   HYPRE_Int              num_crelax = hypre_SSAMGDataNumCoarseRelax(ssamg_data);
-   HYPRE_Real           **dxyz       = hypre_SSAMGDataDxyz(ssamg_data);
+   MPI_Comm               comm         = hypre_SSAMGDataComm(ssamg_data);
+   HYPRE_Int              non_galerkin = hypre_SSAMGDataNonGalerkin(ssamg_data);
+   HYPRE_Int              max_iter     = hypre_SSAMGDataMaxIter(ssamg_data);
+   HYPRE_Int              max_levels   = hypre_SSAMGDataMaxLevels(ssamg_data);
+   HYPRE_Int              relax_type   = hypre_SSAMGDataRelaxType(ssamg_data);
+   HYPRE_Int              num_crelax   = hypre_SSAMGDataNumCoarseRelax(ssamg_data);
+   HYPRE_Real           **dxyz         = hypre_SSAMGDataDxyz(ssamg_data);
    HYPRE_Int            **cdir_l;
    hypre_SStructGrid    **grid_l;
 
@@ -176,7 +177,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       hypre_SStructMatrixRef(P_l[l], &RT_l[l]);
 
       // Compute coarse matrix
-      hypre_SSAMGComputeRAP(A_l[l], P_l[l], grid_l[l+1], cdir_l[l], 0, &A_l[l+1]);
+      hypre_SSAMGComputeRAP(A_l[l], P_l[l], grid_l[l+1], cdir_l[l], non_galerkin, &A_l[l+1]);
 
       // Build SStructVectors
       HYPRE_SStructVectorCreate(comm, grid_l[l+1], &b_l[l+1]);

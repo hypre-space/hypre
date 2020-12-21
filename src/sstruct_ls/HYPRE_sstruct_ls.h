@@ -311,8 +311,9 @@ HYPRE_SStructSSAMGSetMaxIter(HYPRE_SStructSolver solver,
 /**
  * (Optional) Set maximum number of levels of the multigrid hierarchy.
  **/
-HYPRE_Int HYPRE_SStructSSAMGSetMaxLevels (HYPRE_SStructSolver solver,
-                                          HYPRE_Int max_levels);
+HYPRE_Int
+HYPRE_SStructSSAMGSetMaxLevels(HYPRE_SStructSolver solver,
+                               HYPRE_Int           max_levels);
 
 /**
  * (Optional) Additionally require that the relative difference in
@@ -321,6 +322,24 @@ HYPRE_Int HYPRE_SStructSSAMGSetMaxLevels (HYPRE_SStructSolver solver,
 HYPRE_Int
 HYPRE_SStructSSAMGSetRelChange(HYPRE_SStructSolver solver,
                                HYPRE_Int           rel_change);
+
+/**
+ * (Optional) Set type of coarse-grid operator to use.
+ *
+ * Current operators set by {\tt rap\_type} are:
+ *
+ * \begin{tabular}{l@{ -- }l}
+ * 0 & Galerkin (default) \\
+ * 1 & non-Galerkin 5-pt or 7-pt stencils \\
+ * \end{tabular}
+ *
+ * Both operators are constructed algebraically. The non-Galerkin option
+ * maintains a 5-pt stencil in 2D and a 7-pt stencil in 3D on all grid levels.
+ * The stencil coefficients are computed by averaging techniques.
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGSetNonGalerkinRAP(HYPRE_SStructSolver solver,
+                                    HYPRE_Int           non_galerkin);
 
 /**
  * (Optional) Use a zero initial guess.  This allows the solver to cut corners

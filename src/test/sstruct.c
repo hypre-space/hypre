@@ -2254,7 +2254,7 @@ PrintUsage( char *progname,
       hypre_printf("     <n_coarse>      : # of coarse grid solver sweeps (def 1)\n");
       hypre_printf("  -max_coarse <val>  : maximum coarse size (def 1) \n");
       hypre_printf("  -skip <s>          : SysPFMG and Struct- skip relaxation (0 or 1)\n");
-      hypre_printf("  -rap <r>           : Struct- coarse grid operator type\n");
+      hypre_printf("  -rap <r>           : coarse grid operator type\n");
       hypre_printf("                        0 - Galerkin (default)\n");
       hypre_printf("                        1 - non-Galerkin ParFlow operators\n");
       hypre_printf("                        2 - Galerkin, general operators\n");
@@ -3910,6 +3910,7 @@ main( hypre_int argc,
       HYPRE_SStructSSAMGSetNumPreRelax(solver, n_pre);
       HYPRE_SStructSSAMGSetNumPostRelax(solver, n_post);
       HYPRE_SStructSSAMGSetNumCoarseRelax(solver, n_coarse);
+      HYPRE_SStructSSAMGSetNonGalerkinRAP(solver, rap);
       HYPRE_SStructSSAMGSetPrintLevel(solver, print_level);
       HYPRE_SStructSSAMGSetPrintFreq(solver, print_freq);
       HYPRE_SStructSSAMGSetLogging(solver, 2);
@@ -4109,6 +4110,7 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetNumPreRelax(precond, n_pre);
          HYPRE_SStructSSAMGSetNumPostRelax(precond, n_post);
          HYPRE_SStructSSAMGSetNumCoarseRelax(precond, n_coarse);
+         HYPRE_SStructSSAMGSetNonGalerkinRAP(precond, rap);
          HYPRE_SStructSSAMGSetPrintLevel(precond, 1);
          HYPRE_SStructSSAMGSetPrintFreq(precond, print_freq);
          HYPRE_SStructSSAMGSetLogging(precond, 0);
@@ -4350,6 +4352,7 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetTol(precond, 0.0);
          HYPRE_SStructSSAMGSetZeroGuess(precond);
          HYPRE_SStructSSAMGSetRelaxType(precond, relax);
+         HYPRE_SStructSSAMGSetNonGalerkinRAP(precond, rap);
          if (usr_jacobi_weight)
          {
             HYPRE_SStructSSAMGSetRelaxWeight(precond, jacobi_weight);
@@ -4585,6 +4588,7 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetTol(precond, 0.0);
          HYPRE_SStructSSAMGSetZeroGuess(precond);
          HYPRE_SStructSSAMGSetRelaxType(precond, relax);
+         HYPRE_SStructSSAMGSetNonGalerkinRAP(precond, rap);
          if (usr_jacobi_weight)
          {
             HYPRE_SStructSSAMGSetRelaxWeight(precond, jacobi_weight);
@@ -4820,6 +4824,7 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetTol(precond, 0.0);
          HYPRE_SStructSSAMGSetZeroGuess(precond);
          HYPRE_SStructSSAMGSetRelaxType(precond, relax);
+         HYPRE_SStructSSAMGSetNonGalerkinRAP(precond, rap);
          if (usr_jacobi_weight)
          {
             HYPRE_SStructSSAMGSetRelaxWeight(precond, jacobi_weight);
@@ -5973,6 +5978,7 @@ main( hypre_int argc,
                HYPRE_SStructSSAMGSetTol(precond, 0.0);
                HYPRE_SStructSSAMGSetZeroGuess(precond);
                HYPRE_SStructSSAMGSetRelaxType(precond, relax);
+               HYPRE_SStructSSAMGSetNonGalerkinRAP(precond, rap);
                if (usr_jacobi_weight)
                {
                   HYPRE_SStructSSAMGSetRelaxWeight(precond, jacobi_weight);
@@ -6108,6 +6114,7 @@ main( hypre_int argc,
                HYPRE_SStructSSAMGSetTol(precond, 0.0);
                HYPRE_SStructSSAMGSetZeroGuess(precond);
                HYPRE_SStructSSAMGSetRelaxType(precond, relax);
+               HYPRE_SStructSSAMGSetNonGalerkinRAP(precond, rap);
                if (usr_jacobi_weight)
                {
                   HYPRE_SStructSSAMGSetRelaxWeight(precond, jacobi_weight);

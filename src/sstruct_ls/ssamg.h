@@ -28,11 +28,12 @@ typedef struct hypre_SSAMGData_struct
    hypre_MPI_Comm          comm;
    HYPRE_Int               nparts;
 
-   HYPRE_Real              tol;
-   HYPRE_Int               max_iter;
-   HYPRE_Int               max_levels; /* max_level <= 0 means no limit */
-   HYPRE_Int               rel_change;
-   HYPRE_Int               zero_guess;
+   HYPRE_Real              tol;              /* relative tolerance for convergence */
+   HYPRE_Int               max_iter;         /* max. number of iterations */
+   HYPRE_Int               max_levels;       /* max_level <= 0 means no limit */
+   HYPRE_Int               rel_change;       /* tests convergence with rel change of x */
+   HYPRE_Int               zero_guess;       /* initial guess is vector of zeros */
+   HYPRE_Int               non_galerkin;     /* controls choice of RAP codes */
    HYPRE_Int               num_levels;       /* number of levels of the multigrid hierarchy */
    HYPRE_Int               num_pre_relax;    /* number of pre relaxation sweeps */
    HYPRE_Int               num_post_relax;   /* number of post relaxation sweeps */
@@ -86,6 +87,7 @@ typedef struct hypre_SSAMGData_struct
 #define hypre_SSAMGDataMaxIter(ssamg_data)        ((ssamg_data) -> max_iter)
 #define hypre_SSAMGDataRelChange(ssamg_data)      ((ssamg_data) -> rel_change)
 #define hypre_SSAMGDataZeroGuess(ssamg_data)      ((ssamg_data) -> zero_guess)
+#define hypre_SSAMGDataNonGalerkin(ssamg_data)    ((ssamg_data) -> non_galerkin)
 #define hypre_SSAMGDataNumIterations(ssamg_data)  ((ssamg_data) -> num_iterations)
 #define hypre_SSAMGDataRelaxType(ssamg_data)      ((ssamg_data) -> relax_type)
 #define hypre_SSAMGDataUsrRelaxWeight(ssamg_data) ((ssamg_data) -> usr_relax_weight)

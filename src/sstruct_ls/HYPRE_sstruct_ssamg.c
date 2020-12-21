@@ -106,6 +106,16 @@ HYPRE_SStructSSAMGSetRelChange( HYPRE_SStructSolver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructSSAMGSetNonGalerkinRAP( HYPRE_SStructSolver solver,
+                                     HYPRE_Int           non_galerkin )
+{
+   return( hypre_SSAMGSetNonGalerkinRAP( (void *) solver, non_galerkin ) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructSSAMGSetZeroGuess( HYPRE_SStructSolver solver )
 {
    return( hypre_SSAMGSetZeroGuess( (void *) solver, 1 ) );

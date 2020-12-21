@@ -68,7 +68,7 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
 
    /* This function works for a single variable type only */
    HYPRE_Int                vi = 0, vj = 0;
-   HYPRE_Int                m, s, t;
+   HYPRE_Int                m, s;
    HYPRE_Int                part;
 
 #if DEBUG_MATCONV

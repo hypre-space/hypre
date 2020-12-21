@@ -108,11 +108,12 @@ FILES =\
  sys_semi_interp.c\
  sys_semi_restrict.c\
  ssamg.c\
+ ssamg_stats.c\
  ssamg_setup.c\
+ ssamg_setup_rap.c\
  ssamg_relax.c\
  ssamg_solve.c\
- ssamg_interp.c\
- ssamg_setup_rap.c
+ ssamg_interp.c
 
 OBJS = ${FILES:.c=.o}
 

@@ -62,6 +62,7 @@ hypre_SSAMGComputeRAPNonGlk( hypre_SStructMatrix  *A,
                              hypre_SStructMatrix **Ac_ptr )
 {
    MPI_Comm                 comm   = hypre_SStructMatrixComm(A);
+   HYPRE_Int                ndim   = hypre_SStructMatrixNDim(A);
    hypre_SStructGraph      *graph  = hypre_SStructMatrixGraph(P);
    HYPRE_Int                nparts = hypre_SStructGraphNParts(graph);
    hypre_SStructGrid       *cgrid  = hypre_SStructGraphDomGrid(graph);
@@ -71,6 +72,7 @@ hypre_SSAMGComputeRAPNonGlk( hypre_SStructMatrix  *A,
    hypre_SStructPGrid      *pcgrid;
    hypre_StructGrid        *scgrid;
    hypre_StructMatrix   ****sAc;
+   hypre_SStructStencil    *st_Ac;
    hypre_StructMatrix      *sA, *sP;
    hypre_SStructPMatrix    *pA, *pP, *pAc;
    hypre_SStructMatrix     *Ac;
@@ -83,13 +85,11 @@ hypre_SSAMGComputeRAPNonGlk( hypre_SStructMatrix  *A,
 
    hypre_Index              cindex;
    hypre_Index              cstride;
+   hypre_Index             *st_shape;
    HYPRE_Int                cdir;
    HYPRE_Int                nvars;
    HYPRE_Int                st_size;
-   HYPRE_Int                part, vi, vj;
-
-   /* Create SStructGraph of Ac */
-   HYPRE_SStructGraphCreate(comm, cgrid, &cgraph);
+   HYPRE_Int                part, s, vi, vj;
 
    /* Allocate memory */
    sAc = hypre_TAlloc(hypre_StructMatrix ***, nparts);
@@ -105,6 +105,10 @@ hypre_SSAMGComputeRAPNonGlk( hypre_SStructMatrix  *A,
       }
    }
 
+   /* Create SStructGraph of Ac */
+   HYPRE_SStructGraphCreate(comm, cgrid, &cgraph);
+   HYPRE_SStructGraphSetObjectType(cgraph, HYPRE_SSTRUCT);
+
    /* Compute struct component of Ac */
    hypre_SetIndex(cindex, 0);
    for (part = 0; part < nparts; part++)
@@ -115,37 +119,51 @@ hypre_SSAMGComputeRAPNonGlk( hypre_SStructMatrix  *A,
       nvars  = hypre_SStructPMatrixNVars(pA);
       pcgrid = hypre_SStructGridPGrid(cgrid, part);
 
-      if (cdir > -1)
+      hypre_SetIndex(cstride, 1);
+      hypre_IndexD(cstride, cdir) = 2;
+      for (vi = 0; vi < nvars; vi++)
       {
-         hypre_SetIndex(cstride, 1);
-         hypre_IndexD(cstride, cdir) = 2;
-         for (vi = 0; vi < nvars; vi++)
+         sA      = hypre_SStructPMatrixSMatrix(pA, vi, vi);
+         sP      = hypre_SStructPMatrixSMatrix(pP, vi, vi);
+         scgrid  = hypre_SStructPGridSGrid(pcgrid, vi);
+         stencil = hypre_StructMatrixUserStencil(sA);
+         st_size = hypre_StructStencilSize(stencil);
+
+         if (st_size == 5 || st_size == 7)
          {
-            sA      = hypre_SStructPMatrixSMatrix(pA, vi, vi);
-            sP      = hypre_SStructPMatrixSMatrix(pP, vi, vi);
-            scgrid  = hypre_SStructPGridSGrid(pcgrid, vi);
-            stencil = hypre_StructMatrixUserStencil(sA);
-            st_size = hypre_StructStencilSize(stencil);
-
-            if (st_size == 5 || st_size == 7)
-            {
-               sAc[part][vi][vi] = hypre_PFMGCreateRAPOp(sP, sA, sP, scgrid, cdir, 1);
-               hypre_PFMGSetupRAPOp(sP, sA, sP, cdir, cindex, cstride, 1, sAc[part][vi][vi]);
-            }
-            else
-            {
-               /* Use generic StructMatmult */
-               hypre_StructMatrix *smatrices[3] = {sA, sP, sP};
-
-               hypre_StructMatmult(3, smatrices, 3, terms, trans, NULL,
-                                   &sAc[part][vi][vi]);
-            }
+            sAc[part][vi][vi] = hypre_PFMGCreateRAPOp(sP, sA, sP, scgrid, cdir, 1);
+            hypre_StructMatrixInitialize(sAc[part][vi][vi]);
+            hypre_PFMGSetupRAPOp(sP, sA, sP, cdir, cindex, cstride, 1, sAc[part][vi][vi]);
          }
+         else
+         {
+            /* Use generic StructMatmult */
+            hypre_StructMatrix *smatrices[3] = {sA, sP, sP};
+
+            hypre_StructMatmult(3, smatrices, 3, terms, trans, NULL,
+                                &sAc[part][vi][vi]);
+         }
+
+         /* Create SStructStencil object for M */
+         stencil  = hypre_StructMatrixStencil(sAc[part][vi][vi]);
+         st_size  = hypre_StructStencilSize(stencil);
+         st_shape = hypre_StructStencilShape(stencil);
+
+         HYPRE_SStructStencilCreate(ndim, st_size, &st_Ac);
+         for (s = 0; s < st_size; s++)
+         {
+            HYPRE_SStructStencilSetEntry(st_Ac, s, st_shape[s], vi);
+         }
+         HYPRE_SStructGraphSetStencil(cgraph, part, vi, st_Ac);
+         HYPRE_SStructStencilDestroy(st_Ac);
       }
    }
 
    /* Compute unstructured component of Ac */
    hypre_SStructMatmultU(3, ssmatrices, 3, terms, trans, &parcsr_uAc);
+
+   /* Assemble SStructGraph */
+   HYPRE_SStructGraphAssemble(cgraph);
 
    /* Create Ac */
    HYPRE_SStructMatrixCreate(comm, cgraph, &Ac);
