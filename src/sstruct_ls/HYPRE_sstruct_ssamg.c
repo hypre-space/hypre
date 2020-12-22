@@ -144,6 +144,16 @@ HYPRE_SStructSSAMGSetRelaxType( HYPRE_SStructSolver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructSSAMGSetSkipRelax( HYPRE_SStructSolver solver,
+                                HYPRE_Int           skip_relax )
+{
+   return( hypre_SSAMGSetSkipRelax( (void *) solver, skip_relax) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructSSAMGSetRelaxWeight( HYPRE_SStructSolver solver,
                                   HYPRE_Real          relax_weight )
 {

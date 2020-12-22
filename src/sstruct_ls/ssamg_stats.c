@@ -26,11 +26,13 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
    HYPRE_Int               non_galerkin  = hypre_SSAMGDataNonGalerkin(ssamg_data);
    HYPRE_Int               print_level   = hypre_SSAMGDataPrintLevel(ssamg_data);
    HYPRE_Int               relax_type    = hypre_SSAMGDataRelaxType(ssamg_data);
+   HYPRE_Int               skip_relax    = hypre_SSAMGDataSkipRelax(ssamg_data);
    HYPRE_Int               num_pre_relax = hypre_SSAMGDataNumPreRelax(ssamg_data);
    HYPRE_Int               num_pos_relax = hypre_SSAMGDataNumPosRelax(ssamg_data);
    HYPRE_Int               num_crelax    = hypre_SSAMGDataNumCoarseRelax(ssamg_data);
    HYPRE_Int               nparts        = hypre_SSAMGDataNParts(ssamg_data);
    HYPRE_Int             **cdir_l        = hypre_SSAMGDataCdir(ssamg_data);
+   HYPRE_Int             **active_l      = hypre_SSAMGDataActivel(ssamg_data);
    HYPRE_Real            **weights       = hypre_SSAMGDataRelaxWeights(ssamg_data);
 
    hypre_SStructMatrix   **A_l = hypre_SSAMGDataAl(ssamg_data);
@@ -327,10 +329,41 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
             hypre_printf("\n\n");
          }
 
-         /* Print Relaxation factor */
+         /* Print active parts */
+         if (skip_relax > 0)
+         {
+            hypre_printf("Active parts:\n\n");
+            chunk_size = hypre_min(nparts, nparts_per_line);
+            for (chunk = 0; chunk < nparts; chunk += chunk_size)
+            {
+               ndigits = 4;
+               hypre_printf("lev   ");
+               chunk_last = hypre_min(chunk + chunk_size, nparts);
+               for (part = chunk; part < chunk_last; part++)
+               {
+                  hypre_printf("pt. %d  ", part);
+                  ndigits += 7;
+               }
+               hypre_printf("\n");
+               for (i = 0; i < ndigits; i++) hypre_printf("%s", "=");
+               hypre_printf("\n");
+               for (l = 0; l < num_levels; l++)
+               {
+                  hypre_printf("%3d  ", l);
+                  for (part = chunk; part < chunk_last; part++)
+                  {
+                     hypre_printf("%6d ", active_l[l][part]);
+                  }
+                  hypre_printf("\n");
+               }
+               hypre_printf("\n\n");
+            }
+         }
+
+         /* Print relaxation weights */
          if (relax_type > 0)
          {
-            hypre_printf("Relaxation factors:\n\n");
+            hypre_printf("Relaxation weights:\n\n");
             chunk_size = hypre_min(nparts, nparts_per_line);
             for (chunk = 0; chunk < nparts; chunk += chunk_size)
             {
@@ -485,6 +518,15 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       else
       {
          hypre_printf("RAP type: galerkin\n");
+      }
+      hypre_printf("Relaxation skip: ");
+      if (skip_relax)
+      {
+         hypre_printf("on\n");
+      }
+      else
+      {
+         hypre_printf("none\n");
       }
       hypre_printf("Relaxation type: ");
       if (relax_type == 0)

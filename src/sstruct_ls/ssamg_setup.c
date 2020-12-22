@@ -10,7 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#include "_hypre_struct_ls.h"  /*Call to hypre_PFMGComputeDxyz */
 #include "_hypre_sstruct_ls.h"
 #include "ssamg.h"
 
@@ -49,6 +48,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    HYPRE_Int              relax_type   = hypre_SSAMGDataRelaxType(ssamg_data);
    HYPRE_Int              num_crelax   = hypre_SSAMGDataNumCoarseRelax(ssamg_data);
    HYPRE_Real           **dxyz         = hypre_SSAMGDataDxyz(ssamg_data);
+   HYPRE_Int            **active_l;
    HYPRE_Int            **cdir_l;
    hypre_SStructGrid    **grid_l;
 
@@ -62,14 +62,14 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    hypre_SStructVector  **e_l  = (ssamg_data -> e_l);
    hypre_SStructVector  **tx_l = (ssamg_data -> tx_l);
 
-   /* Data for */
+   /* Data pointers */
    void                 **relax_data_l    = (ssamg_data -> relax_data_l);
    void                 **matvec_data_l   = (ssamg_data -> matvec_data_l);
    void                 **restrict_data_l = (ssamg_data -> restrict_data_l);
    void                 **interp_data_l   = (ssamg_data -> interp_data_l);
-   HYPRE_Real           **relax_weights;
 
    HYPRE_Int             *dxyz_flag;
+   HYPRE_Real           **relax_weights;
    HYPRE_Int              d, l;
    HYPRE_Int              nparts;
    HYPRE_Int              num_levels;
@@ -133,6 +133,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    /* Get info from ssamg_data */
    cdir_l        = hypre_SSAMGDataCdir(ssamg_data);
    grid_l        = hypre_SSAMGDataGridl(ssamg_data);
+   active_l      = hypre_SSAMGDataActivel(ssamg_data);
    num_crelax    = hypre_SSAMGDataNumCoarseRelax(ssamg_data);
    relax_weights = hypre_SSAMGDataRelaxWeights(ssamg_data);
 
@@ -223,6 +224,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       hypre_SSAMGRelaxCreate(comm, nparts, &relax_data_l[l]);
       hypre_SSAMGRelaxSetTol(relax_data_l[l], 0.0);
       hypre_SSAMGRelaxSetWeights(relax_data_l[l], relax_weights[l]);
+      hypre_SSAMGRelaxSetActiveParts(relax_data_l[l], active_l[l]);
       hypre_SSAMGRelaxSetType(relax_data_l[l], relax_type);
       hypre_SSAMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
       hypre_SSAMGRelaxSetMatvecData(relax_data_l[l], matvec_data_l[l]);
@@ -236,6 +238,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    hypre_SSAMGRelaxCreate(comm, nparts, &relax_data_l[l]);
    hypre_SSAMGRelaxSetTol(relax_data_l[l], 0.0);
    hypre_SSAMGRelaxSetWeights(relax_data_l[l], relax_weights[l]);
+   hypre_SSAMGRelaxSetActiveParts(relax_data_l[l], active_l[l]);
    hypre_SSAMGRelaxSetType(relax_data_l[l], 0);
    hypre_SSAMGRelaxSetMaxIter(relax_data_l[l], num_crelax);
    hypre_SSAMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
@@ -499,6 +502,7 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
 {
    hypre_SSAMGData      *ssamg_data  = (hypre_SSAMGData *) ssamg_vdata;
    HYPRE_Int             ndim        = hypre_SStructGridNDim(grid);
+   HYPRE_Int             skip_relax  = hypre_SSAMGDataSkipRelax(ssamg_data);
    HYPRE_Int             max_levels  = hypre_SSAMGDataMaxLevels(ssamg_data);
    HYPRE_Int             nparts      = hypre_SSAMGDataNParts(ssamg_data);
    HYPRE_Real            usr_relax   = hypre_SSAMGDataUsrRelaxWeight(ssamg_data);
@@ -513,14 +517,14 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
    HYPRE_Real          **weights;
    hypre_Index          *periodic;
    hypre_Index          *strides;
+   hypre_Index          *coarsen;
 
-   hypre_Index           coarsen;
    hypre_Index           cindex;
    hypre_Index           zero;
    HYPRE_Int             num_levels;
    HYPRE_Int             part;
    HYPRE_Int             l, d, cdir;
-   HYPRE_Int             coarse;
+   HYPRE_Int             coarse_flag;
    HYPRE_Int             cbox_imin, cbox_imax;
    HYPRE_Real            min_dxyz;
    HYPRE_Real            alpha, beta;
@@ -533,13 +537,14 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
    cbox     = hypre_TAlloc(hypre_Box *, nparts);
    periodic = hypre_TAlloc(hypre_Index, nparts);
    strides  = hypre_TAlloc(hypre_Index, nparts);
+   coarsen  = hypre_TAlloc(hypre_Index, nparts);
 
    hypre_SStructGridRef(grid, &grid_l[0]);
 
    /* Initalize data */
    for (l = 0; l < max_levels; l++)
    {
-      weights[l] = hypre_CTAlloc(HYPRE_Real, nparts);
+      weights[l]  = hypre_CTAlloc(HYPRE_Real, nparts);
       if (usr_relax > 0.0)
       {
          for (part = 0; part < nparts; part++)
@@ -547,14 +552,22 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
             weights[l][part] = usr_relax;
          }
       }
+
+      active_l[l] = hypre_CTAlloc(HYPRE_Int, nparts);
+      for (part = 0; part < nparts; part++)
+      {
+         active_l[l][part] = 1;
+      }
    }
 
    for (part = 0; part < nparts; part++)
    {
       hypre_SetIndex(strides[part], 1);
+
+      /* Force relaxation on finest grid */
+      hypre_SetIndex(coarsen[part], 1);
    }
    hypre_SetIndex(zero, 0);
-   hypre_SetIndex(coarsen, 1);
 
    /* Get grid bounding box and periodicity data */
    for (part = 0; part < nparts; part++)
@@ -566,7 +579,6 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
       hypre_CopyIndex(hypre_StructGridPeriodic(sgrid), periodic[part]);
    }
 
-   /* Force relaxation on finest grid */
    for (l = 0; l < max_levels; l++)
    {
       cdir_l[l] = hypre_TAlloc(HYPRE_Int, nparts);
@@ -575,7 +587,7 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
          cdir_l[l][part] = -1;
       }
 
-      coarse = 0;
+      coarse_flag = 0;
       for (part = 0; part < nparts; part++)
       {
          /* Initialize min_dxyz */
@@ -625,6 +637,7 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
 
          if ((cdir > -1) && (l < (max_levels - 1)))
          {
+            coarse_flag = 1;
             cdir_l[l][part] = cdir;
 
             /* don't coarsen if a periodic direction and not divisible by 2 */
@@ -634,14 +647,21 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
                continue;
             }
 
-            coarse = 1;
-            /* if (hypre_IndexD(coarsen, cdir) != 0) */
-            /* { */
-            /*    /\* coarsened previously in this direction, relax level l *\/ */
-            /*    active_l[l][part] = 1; */
-            /*    hypre_SetIndex(coarsen, 0); */
-            /* } */
-            /* hypre_IndexD(coarsen, cdir) = 1; */
+            if (hypre_IndexD(coarsen[part], cdir) != 0)
+            {
+               /* coarsened previously in this direction, relax level l */
+               active_l[l][part] = 1;
+               //hypre_IndexD(coarsen[part], cdir) = 0;
+               hypre_SetIndex(coarsen[part], 0);
+            }
+            else
+            {
+               if (skip_relax)
+               {
+                  active_l[l][part] = 0;
+               }
+            }
+            hypre_IndexD(coarsen[part], cdir) = 1;
 
             /* set cindex and stride */
             hypre_SetIndex(cindex, 0);
@@ -670,7 +690,7 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
       } /* loop on parts */
 
       // If there's no part to be coarsened, exit loop
-      if (!coarse)
+      if (!coarse_flag)
       {
          num_levels = l + 1;
          break;
@@ -688,6 +708,7 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
    hypre_TFree(cbox);
    hypre_TFree(periodic);
    hypre_TFree(strides);
+   hypre_TFree(coarsen);
 
    /* Output */
    hypre_SSAMGDataCdir(ssamg_data)         = cdir_l;

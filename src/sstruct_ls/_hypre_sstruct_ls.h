@@ -571,6 +571,7 @@ HYPRE_Int HYPRE_SStructSSAMGSetRelChange ( HYPRE_SStructSolver solver, HYPRE_Int
 HYPRE_Int HYPRE_SStructSSAMGSetZeroGuess ( HYPRE_SStructSolver solver );
 HYPRE_Int HYPRE_SStructSSAMGSetNonZeroGuess ( HYPRE_SStructSolver solver );
 HYPRE_Int HYPRE_SStructSSAMGSetRelaxType ( HYPRE_SStructSolver solver, HYPRE_Int relax_type );
+HYPRE_Int HYPRE_SStructSSAMGSetSkipRelax ( HYPRE_SStructSolver solver, HYPRE_Int skip_relax );
 HYPRE_Int HYPRE_SStructSSAMGSetRelaxWeight ( HYPRE_SStructSolver solver, HYPRE_Real relax_weight );
 HYPRE_Int HYPRE_SStructSSAMGSetNumPreRelax ( HYPRE_SStructSolver solver, HYPRE_Int num_pre_relax );
 HYPRE_Int HYPRE_SStructSSAMGSetNumPostRelax ( HYPRE_SStructSolver solver, HYPRE_Int num_post_relax );
@@ -731,6 +732,7 @@ HYPRE_Int hypre_SSAMGRelaxSetPreRelax ( void  *relax_vdata );
 HYPRE_Int hypre_SSAMGRelaxSetPostRelax ( void  *relax_vdata );
 HYPRE_Int hypre_SSAMGRelaxSetTol ( void *relax_vdata , HYPRE_Real tol );
 HYPRE_Int hypre_SSAMGRelaxSetWeights ( void *relax_vdata , HYPRE_Real *weights );
+HYPRE_Int hypre_SSAMGRelaxSetActiveParts ( void *relax_vdata , HYPRE_Int *active_p );
 HYPRE_Int hypre_SSAMGRelaxSetMatvecData ( void  *relax_vdata , void  *matvec_vdata );
 HYPRE_Int hypre_SSAMGRelaxSetNumNodesets ( void *relax_vdata , HYPRE_Int num_nodesets );
 HYPRE_Int hypre_SSAMGRelaxSetNodeset ( void *relax_vdata , HYPRE_Int nodeset , HYPRE_Int nodeset_size , hypre_Index nodeset_stride , hypre_Index *nodeset_indices );

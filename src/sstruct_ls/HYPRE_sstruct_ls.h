@@ -372,6 +372,15 @@ HYPRE_SStructSSAMGSetRelaxType(HYPRE_SStructSolver solver,
                                HYPRE_Int           relax_type);
 
 /**
+ * (Optional) Skip relaxation on certain grids for isotropic problems.  This can
+ * greatly improve efficiency by eliminating unnecessary relaxations when the
+ * underlying problem is isotropic.
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGSetSkipRelax(HYPRE_SStructSolver solver,
+                               HYPRE_Int           skip_relax);
+
+/**
  * (Optional) Set Jacobi Weight.
  **/
 HYPRE_Int

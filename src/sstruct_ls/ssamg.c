@@ -35,6 +35,7 @@ hypre_SSAMGCreate( hypre_MPI_Comm comm )
    (ssamg_data -> zero_guess)       = 0;
    (ssamg_data -> max_levels)       = 0;
    (ssamg_data -> relax_type)       = 0;
+   (ssamg_data -> skip_relax)       = 0;
    (ssamg_data -> usr_relax_weight) = 0.0;
    (ssamg_data -> num_pre_relax)    = 1;
    (ssamg_data -> num_post_relax)   = 1;
@@ -87,6 +88,7 @@ hypre_SSAMGDestroy( void *ssamg_vdata )
          HYPRE_SStructMatrixDestroy(ssamg_data -> A_l[0]);
          HYPRE_SStructGridDestroy(ssamg_data -> grid_l[0]);
          hypre_TFree(ssamg_data -> cdir_l[0]);
+         hypre_TFree(ssamg_data -> active_l[0]);
          hypre_TFree(ssamg_data -> relax_weights[0]);
          for (l = 1; l < num_levels; l++)
          {
@@ -102,6 +104,7 @@ hypre_SSAMGDestroy( void *ssamg_vdata )
             hypre_SStructMatvecDestroy(ssamg_data -> restrict_data_l[l-1]);
             hypre_SStructMatvecDestroy(ssamg_data -> interp_data_l[l-1]);
             hypre_TFree(ssamg_data -> cdir_l[l]);
+            hypre_TFree(ssamg_data -> active_l[l]);
             hypre_TFree(ssamg_data -> relax_weights[l]);
          }
 
@@ -118,6 +121,7 @@ hypre_SSAMGDestroy( void *ssamg_vdata )
          hypre_TFree(ssamg_data -> RT_l);
          hypre_TFree(ssamg_data -> grid_l);
          hypre_TFree(ssamg_data -> cdir_l);
+         hypre_TFree(ssamg_data -> active_l);
          hypre_TFree(ssamg_data -> relax_weights);
          hypre_TFree(ssamg_data -> relax_data_l);
          hypre_TFree(ssamg_data -> matvec_data_l);
@@ -259,6 +263,20 @@ hypre_SSAMGSetRelaxType( void       *ssamg_vdata,
    hypre_SSAMGData *ssamg_data = (hypre_SSAMGData *) ssamg_vdata;
 
    hypre_SSAMGDataRelaxType(ssamg_data) = relax_type;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetSkipRelax( void       *ssamg_vdata,
+                         HYPRE_Int   skip_relax)
+{
+   hypre_SSAMGData *ssamg_data = (hypre_SSAMGData *) ssamg_vdata;
+
+   hypre_SSAMGDataSkipRelax(ssamg_data) = skip_relax;
 
    return hypre_error_flag;
 }
