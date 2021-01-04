@@ -412,7 +412,8 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
 #else /* #ifndef HYPRE_WITH_GPU_AWARE_MPI */
    send_data = send_data_in;
    recv_data = recv_data_in;
-   // TODO RL
+   // TODO RL: it seems that we need to sync the CUDA stream before doing GPU-GPU MPI.
+   // Need to check MPI documentation whether this is acutally true
    hypre_SyncCudaComputeStream(hypre_handle());
 #endif
 
