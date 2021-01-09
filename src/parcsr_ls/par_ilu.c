@@ -124,7 +124,7 @@ hypre_ILUCreate()
 
    /* -> SCHUR-NSH */
    hypre_ParILUDataSchurNSHSolveMaxIter(ilu_data) = 5;
-   hypre_ParILUDataSchurNSHSolveTol(ilu_data) = 1e-02;
+   hypre_ParILUDataSchurNSHSolveTol(ilu_data) = 0.0;
    hypre_ParILUDataSchurNSHDroptol(ilu_data) = NULL;/* this is not the default option, set it only when switched to */
 
    hypre_ParILUDataSchurNSHMaxNumIter(ilu_data) = 2;
