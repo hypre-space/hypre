@@ -3649,7 +3649,8 @@ main( hypre_int argc,
 
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
-      HYPRE_ParVectorSetRandomValues(x, 775);
+      //HYPRE_ParVectorSetRandomValues(x, 775);
+      hypre_ParVectorCopy(x0_save, x);
 
       HYPRE_Real tt, maxtt = 0.0, tset = 0.0, tsol = 0.0;
 

@@ -44,6 +44,11 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
    hypre_CSRMatrixOwnsData(matrix)  = 1;
    hypre_CSRMatrixNumRownnz(matrix) = num_rows;
 
+#if defined(HYPRE_USING_CUSPARSE)
+   hypre_CSRMatrixSortedJ(matrix)    = NULL;
+   hypre_CSRMatrixSortedData(matrix) = NULL;
+   hypre_CSRMatrixCsrsvData(matrix)  = NULL;
+#endif
    return matrix;
 }
 
@@ -68,6 +73,11 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
          hypre_TFree(hypre_CSRMatrixData(matrix), memory_location);
          hypre_TFree(hypre_CSRMatrixJ(matrix),    memory_location);
          hypre_TFree(hypre_CSRMatrixBigJ(matrix), memory_location);
+#if defined(HYPRE_USING_CUSPARSE)
+         hypre_TFree(hypre_CSRMatrixSortedData(matrix), memory_location);
+         hypre_TFree(hypre_CSRMatrixSortedJ(matrix), memory_location);
+         hypre_CsrsvDataDestroy(hypre_CSRMatrixCsrsvData(matrix));
+#endif
       }
 
       hypre_TFree(matrix, HYPRE_MEMORY_HOST);

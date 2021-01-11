@@ -1128,7 +1128,7 @@ hypre_ParCSRDiagScale( HYPRE_ParCSRMatrix HA,
    HYPRE_Int local_size = hypre_VectorSize(hypre_ParVectorLocalVector(x));
    HYPRE_Int ierr = 0;
 #if defined(HYPRE_USING_CUDA)
-   hypreDevice_DiagScaleVector(local_size, A_i, A_data, y_data, x_data);
+   hypreDevice_DiagScaleVector(local_size, A_i, A_data, y_data, 0.0, x_data);
    //hypre_SyncCudaComputeStream(hypre_handle());
 #else /* #if defined(HYPRE_USING_CUDA) */
    HYPRE_Int i;
@@ -1139,7 +1139,7 @@ hypre_ParCSRDiagScale( HYPRE_ParCSRMatrix HA,
 #endif
    for (i = 0; i < local_size; i++)
    {
-      x_data[i] = y_data[i]/A_data[A_i[i]];
+      x_data[i] = y_data[i] / A_data[A_i[i]];
    }
 #endif /* #if defined(HYPRE_USING_CUDA) */
 
