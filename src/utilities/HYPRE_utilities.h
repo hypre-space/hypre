@@ -184,6 +184,8 @@ typedef enum _HYPRE_MemoryLocation
 HYPRE_Int HYPRE_SetMemoryLocation(HYPRE_MemoryLocation memory_location);
 HYPRE_Int HYPRE_GetMemoryLocation(HYPRE_MemoryLocation *memory_location);
 
+#include <stdlib.h>
+
 /*--------------------------------------------------------------------------
  * HYPRE execution policy
  *--------------------------------------------------------------------------*/
