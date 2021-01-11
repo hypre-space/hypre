@@ -35,10 +35,9 @@ HYPRE_Real    hypre_cimag( HYPRE_Complex value );
 hypre_Handle* hypre_handle();
 hypre_Handle* hypre_HandleCreate();
 HYPRE_Int hypre_HandleDestroy(hypre_Handle *hypre_handle_);
-HYPRE_Int HYPRE_Init();
-HYPRE_Int HYPRE_Finalize();
 HYPRE_Int hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_);
-HYPRE_Int hypre_UmpireInit(hypre_Handle *hypre_handle);
+HYPRE_Int hypre_UmpireInit(hypre_Handle *hypre_handle_);
+HYPRE_Int hypre_UmpireFinalize(hypre_Handle *hypre_handle_);
 
 /* hypre_qsort.c */
 void hypre_swap ( HYPRE_Int *v , HYPRE_Int i , HYPRE_Int j );

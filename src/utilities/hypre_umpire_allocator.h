@@ -39,6 +39,7 @@ struct hypre_umpire_device_allocator
    {
       char *ptr = NULL;
       hypre_umpire_device_pooled_allocate((void**) &ptr, num_bytes);
+
       return ptr;
    }
 

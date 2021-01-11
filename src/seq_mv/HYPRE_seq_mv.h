@@ -47,6 +47,7 @@ HYPRE_Int HYPRE_CSRMatrixInitialize( HYPRE_CSRMatrix matrix );
 HYPRE_CSRMatrix HYPRE_CSRMatrixRead( char *file_name );
 void HYPRE_CSRMatrixPrint( HYPRE_CSRMatrix matrix , char *file_name );
 HYPRE_Int HYPRE_CSRMatrixGetNumRows( HYPRE_CSRMatrix matrix , HYPRE_Int *num_rows );
+HYPRE_Int HYPRE_CSRMatrixSetSpGemmUseCusparse( HYPRE_Int use_cusparse );
 
 /* HYPRE_mapped_matrix.c */
 HYPRE_MappedMatrix HYPRE_MappedMatrixCreate( void );

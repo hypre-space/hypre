@@ -129,7 +129,6 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
                                        CF_marker_diag, CF_marker_offd, comm_pkg, (HYPRE_Int *) send_buf);
 
          /* sync CF_marker_offd */
-
          HYPRE_THRUST_CALL( gather,
                             hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                             hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +

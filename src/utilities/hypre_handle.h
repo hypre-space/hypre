@@ -23,10 +23,14 @@ typedef struct
    HYPRE_MemoryLocation   memory_location;
    HYPRE_ExecutionPolicy  default_exec_policy;
    HYPRE_ExecutionPolicy  struct_exec_policy;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    hypre_CudaData        *cuda_data;
 #endif
 #if defined(HYPRE_USING_UMPIRE)
+   char                   umpire_device_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
+   char                   umpire_um_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
+   char                   umpire_host_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
+   char                   umpire_pinned_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
    size_t                 umpire_device_pool_size;
    size_t                 umpire_um_pool_size;
    size_t                 umpire_host_pool_size;
@@ -72,6 +76,10 @@ typedef struct
 #define hypre_HandleUmpireUMPoolSize(hypre_handle)               ((hypre_handle) -> umpire_um_pool_size)
 #define hypre_HandleUmpireHostPoolSize(hypre_handle)             ((hypre_handle) -> umpire_host_pool_size)
 #define hypre_HandleUmpirePinnedPoolSize(hypre_handle)           ((hypre_handle) -> umpire_pinned_pool_size)
+#define hypre_HandleUmpireDevicePoolName(hypre_handle)           ((hypre_handle) -> umpire_device_pool_name)
+#define hypre_HandleUmpireUMPoolName(hypre_handle)               ((hypre_handle) -> umpire_um_pool_name)
+#define hypre_HandleUmpireHostPoolName(hypre_handle)             ((hypre_handle) -> umpire_host_pool_name)
+#define hypre_HandleUmpirePinnedPoolName(hypre_handle)           ((hypre_handle) -> umpire_pinned_pool_name)
 
 #endif
 

@@ -538,6 +538,7 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 
 #if defined(HYPRE_USING_UMPIRE)
 #include "umpire/interface/umpire.h"
+#define HYPRE_UMPIRE_POOL_NAME_MAX_LEN 1024
 #endif
 
 /* stringification:
@@ -773,6 +774,7 @@ HYPRE_Int hypre_PrintMemoryTracker();
 HYPRE_Int hypre_SetCubMemPoolSize( hypre_uint bin_growth, hypre_uint min_bin, hypre_uint max_bin, size_t max_cached_bytes );
 HYPRE_Int hypre_umpire_host_pooled_allocate(void **ptr, size_t nbytes);
 HYPRE_Int hypre_umpire_host_pooled_free(void *ptr);
+void *hypre_umpire_host_pooled_realloc(void *ptr, size_t size);
 HYPRE_Int hypre_umpire_device_pooled_allocate(void **ptr, size_t nbytes);
 HYPRE_Int hypre_umpire_device_pooled_free(void *ptr);
 HYPRE_Int hypre_umpire_um_pooled_allocate(void **ptr, size_t nbytes);
@@ -1233,10 +1235,14 @@ typedef struct
    HYPRE_MemoryLocation   memory_location;
    HYPRE_ExecutionPolicy  default_exec_policy;
    HYPRE_ExecutionPolicy  struct_exec_policy;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    hypre_CudaData        *cuda_data;
 #endif
 #if defined(HYPRE_USING_UMPIRE)
+   char                   umpire_device_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
+   char                   umpire_um_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
+   char                   umpire_host_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
+   char                   umpire_pinned_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
    size_t                 umpire_device_pool_size;
    size_t                 umpire_um_pool_size;
    size_t                 umpire_host_pool_size;
@@ -1282,6 +1288,10 @@ typedef struct
 #define hypre_HandleUmpireUMPoolSize(hypre_handle)               ((hypre_handle) -> umpire_um_pool_size)
 #define hypre_HandleUmpireHostPoolSize(hypre_handle)             ((hypre_handle) -> umpire_host_pool_size)
 #define hypre_HandleUmpirePinnedPoolSize(hypre_handle)           ((hypre_handle) -> umpire_pinned_pool_size)
+#define hypre_HandleUmpireDevicePoolName(hypre_handle)           ((hypre_handle) -> umpire_device_pool_name)
+#define hypre_HandleUmpireUMPoolName(hypre_handle)               ((hypre_handle) -> umpire_um_pool_name)
+#define hypre_HandleUmpireHostPoolName(hypre_handle)             ((hypre_handle) -> umpire_host_pool_name)
+#define hypre_HandleUmpirePinnedPoolName(hypre_handle)           ((hypre_handle) -> umpire_pinned_pool_name)
 
 #endif
 
@@ -1391,10 +1401,9 @@ HYPRE_Real    hypre_cimag( HYPRE_Complex value );
 hypre_Handle* hypre_handle();
 hypre_Handle* hypre_HandleCreate();
 HYPRE_Int hypre_HandleDestroy(hypre_Handle *hypre_handle_);
-HYPRE_Int HYPRE_Init();
-HYPRE_Int HYPRE_Finalize();
 HYPRE_Int hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_);
-HYPRE_Int hypre_UmpireInit(hypre_Handle *hypre_handle);
+HYPRE_Int hypre_UmpireInit(hypre_Handle *hypre_handle_);
+HYPRE_Int hypre_UmpireFinalize(hypre_Handle *hypre_handle_);
 
 /* hypre_qsort.c */
 void hypre_swap ( HYPRE_Int *v , HYPRE_Int i , HYPRE_Int j );

@@ -95,3 +95,12 @@ HYPRE_CSRMatrixGetNumRows( HYPRE_CSRMatrix matrix, HYPRE_Int *num_rows )
    return 0;
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_CSRMatrixSetSpGemmUseCusparse
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_CSRMatrixSetSpGemmUseCusparse( HYPRE_Int use_cusparse )
+{
+   return hypre_CSRMatrixDeviceSpGemmSetUseCusparse(use_cusparse);
+}
+

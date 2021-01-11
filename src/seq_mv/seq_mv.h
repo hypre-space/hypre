@@ -454,7 +454,7 @@ HYPRE_Int hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateMultFactor( HYPRE_Real val
 
 HYPRE_Int hypre_CSRMatrixDeviceSpGemmSetHashType( char value );
 
-HYPRE_Int hypre_CSRMatrixDeviceSpGemmUseCusparse( HYPRE_Int use_cusparse );
+HYPRE_Int hypre_CSRMatrixDeviceSpGemmSetUseCusparse( HYPRE_Int use_cusparse );
 
 HYPRE_Int hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_rc);
 

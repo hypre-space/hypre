@@ -687,11 +687,8 @@ hypre_ReAlloc(void *ptr, size_t size, HYPRE_MemoryLocation location)
    }
 
 #if defined(HYPRE_USING_UMPIRE_HOST)
-   umpire_resourcemanager rm;
-   umpire_resourcemanager_get_instance(&rm);
-   umpire_allocator host_allocator;
-   umpire_resourcemanager_get_allocator_by_name(&rm, "HYPRE_HOST_POOL", &host_allocator);
-   ptr = umpire_resourcemanager_reallocate_with_allocator(&rm, ptr, size, host_allocator);
+   ptr = hypre_umpire_host_pooled_realloc(ptr, size);
+
 #else
    ptr = realloc(ptr, size);
 #endif
@@ -913,7 +910,6 @@ hypre_SetCubMemPoolSize(hypre_uint cub_bin_growth,
                         hypre_uint cub_max_bin,
                         size_t     cub_max_cached_bytes)
 {
-   HYPRE_Int ierr = 0;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #ifdef HYPRE_USING_CUB_ALLOCATOR
    hypre_HandleCubBinGrowth(hypre_handle())      = cub_bin_growth;
@@ -933,7 +929,16 @@ hypre_SetCubMemPoolSize(hypre_uint cub_bin_growth,
 #endif
 #endif
 
-   return ierr;
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+HYPRE_SetGPUMemoryPoolSize(HYPRE_Int bin_growth,
+                           HYPRE_Int min_bin,
+                           HYPRE_Int max_bin,
+                           size_t    max_cached_bytes)
+{
+   return hypre_SetCubMemPoolSize(bin_growth, min_bin, max_bin, max_cached_bytes);
 }
 
 #ifdef HYPRE_USING_CUB_ALLOCATOR
@@ -998,9 +1003,9 @@ hypre_CudaDataCubCachingAllocatorDestroy(hypre_CudaData *data)
 HYPRE_Int
 hypre_umpire_host_pooled_allocate(void **ptr, size_t nbytes)
 {
-   const char *resource_name = "HOST";
-   const char *pool_name = "HYPRE_HOST_POOL";
    hypre_Handle *handle = hypre_handle();
+   const char *resource_name = "HOST";
+   const char *pool_name = hypre_HandleUmpireHostPoolName(handle);
 
    umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);
    umpire_allocator pooled_allocator;
@@ -1026,7 +1031,7 @@ HYPRE_Int
 hypre_umpire_host_pooled_free(void *ptr)
 {
    hypre_Handle *handle = hypre_handle();
-   const char *pool_name = "HYPRE_HOST_POOL";
+   const char *pool_name = hypre_HandleUmpireHostPoolName(handle);
    umpire_allocator pooled_allocator;
 
    umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);
@@ -1038,15 +1043,32 @@ hypre_umpire_host_pooled_free(void *ptr)
 
    return hypre_error_flag;
 }
+
+void *
+hypre_umpire_host_pooled_realloc(void *ptr, size_t size)
+{
+   hypre_Handle *handle = hypre_handle();
+   const char *pool_name = hypre_HandleUmpireHostPoolName(handle);
+   umpire_allocator pooled_allocator;
+
+   umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);
+
+   hypre_assert(umpire_resourcemanager_is_allocator_name(rm_ptr, pool_name));
+
+   umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &pooled_allocator);
+   ptr = umpire_resourcemanager_reallocate_with_allocator(rm_ptr, ptr, size, pooled_allocator);
+
+   return ptr;
+}
 #endif
 
 #if defined(HYPRE_USING_UMPIRE_DEVICE)
 HYPRE_Int
 hypre_umpire_device_pooled_allocate(void **ptr, size_t nbytes)
 {
-   const char resource_name[] = "DEVICE";
-   const char pool_name[] = "HYPRE_DEVICE_POOL";
    hypre_Handle *handle = hypre_handle();
+   const char *resource_name = "DEVICE";
+   const char *pool_name = hypre_HandleUmpireDevicePoolName(handle);
 
    umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);
    umpire_allocator pooled_allocator;
@@ -1072,7 +1094,7 @@ HYPRE_Int
 hypre_umpire_device_pooled_free(void *ptr)
 {
    hypre_Handle *handle = hypre_handle();
-   const char *pool_name = "HYPRE_DEVICE_POOL";
+   const char *pool_name = hypre_HandleUmpireDevicePoolName(handle);
    umpire_allocator pooled_allocator;
 
    umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);
@@ -1090,9 +1112,9 @@ hypre_umpire_device_pooled_free(void *ptr)
 HYPRE_Int
 hypre_umpire_um_pooled_allocate(void **ptr, size_t nbytes)
 {
-   const char *resource_name = "UM";
-   const char *pool_name = "HYPRE_UM_POOL";
    hypre_Handle *handle = hypre_handle();
+   const char *resource_name = "UM";
+   const char *pool_name = hypre_HandleUmpireUMPoolName(handle);
 
    umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);
    umpire_allocator pooled_allocator;
@@ -1118,7 +1140,7 @@ HYPRE_Int
 hypre_umpire_um_pooled_free(void *ptr)
 {
    hypre_Handle *handle = hypre_handle();
-   const char *pool_name = "HYPRE_UM_POOL";
+   const char *pool_name = hypre_HandleUmpireUMPoolName(handle);
    umpire_allocator pooled_allocator;
 
    umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);
@@ -1136,9 +1158,9 @@ hypre_umpire_um_pooled_free(void *ptr)
 HYPRE_Int
 hypre_umpire_pinned_pooled_allocate(void **ptr, size_t nbytes)
 {
-   const char *resource_name = "PINNED";
-   const char *pool_name = "HYPRE_PINNED_POOL";
    hypre_Handle *handle = hypre_handle();
+   const char *resource_name = "PINNED";
+   const char *pool_name = hypre_HandleUmpirePinnedPoolName(handle);
 
    umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);
    umpire_allocator pooled_allocator;
@@ -1164,7 +1186,7 @@ HYPRE_Int
 hypre_umpire_pinned_pooled_free(void *ptr)
 {
    const hypre_Handle *handle = hypre_handle();
-   const char *pool_name = "HYPRE_PINNED_POOL";
+   const char *pool_name = hypre_HandleUmpirePinnedPoolName(handle);
    umpire_allocator pooled_allocator;
 
    umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);

@@ -281,6 +281,7 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int         job,                 /* 0: qu
    HYPRE_Int      num_cols_offd_C;
 
    in_range<HYPRE_BigInt> pred1(first_col_diag_B, last_col_diag_B);
+
    /* get diag and offd nnz */
    if (job == 0)
    {
@@ -643,6 +644,7 @@ hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A)
    HYPRE_Int     *new_ii;
    HYPRE_Int     *new_j;
    HYPRE_Complex *new_data;
+
    new_nnz = HYPRE_THRUST_CALL( count_if,
                                 thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)),
                                 thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)) + nnz,
