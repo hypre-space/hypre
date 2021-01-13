@@ -54,8 +54,14 @@ awk -v filename="$SNAME" 'BEGIN{
          # get corresponding value in saved array
          val = saved_array[++key];
 
-         # floating point field comparison
-         if($NF != int($NF))
+         if($NF !~ /[0-9]+/)
+         {
+            err = 1.0;
+            pass=0;
+            printf "(%d) - %s\n", ln, saved_line[key-1]
+            printf "(%d) + %s      (err %.2e)\n\n", ln, $0, err
+         }
+         else if($NF != int($NF)) # floating point field comparison
          {
             err = val - $NF;
             # get absolute value of err and val
