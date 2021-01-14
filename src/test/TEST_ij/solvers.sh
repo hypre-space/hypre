@@ -179,6 +179,7 @@ FILES="\
  ${TNAME}.out.322\
  ${TNAME}.out.323\
  ${TNAME}.out.324\
+ ${TNAME}.out.325\
 "
 
 for i in $FILES
