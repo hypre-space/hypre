@@ -38,7 +38,7 @@ awk -v ofilename="$FNAME" -v sfilename="$SNAME" 'BEGIN{
          for(id=1; id<=NF; id++)
          {
             # check if field is numeric
-            if($id ~ /[0-9]+/)
+            if($id ~ /^[0-9]+/)
             {
                ln_id[saved_key]=ln;
                saved_line[saved_key]=$0;
@@ -60,7 +60,7 @@ awk -v ofilename="$FNAME" -v sfilename="$SNAME" 'BEGIN{
          for(id=1; id<=NF; id++)
          {
             # check if field is numeric
-            if($id ~ /[0-9]+/)
+            if($id ~ /^[0-9]+/)
             {
                out_line[out_key]=$0;
                out_array[++out_key]=$id;
@@ -87,7 +87,7 @@ awk -v ofilename="$FNAME" -v sfilename="$SNAME" 'BEGIN{
       out_val = out_array[id];      
 
       # floating point field comparison
-      if(saved_val != int(saved_val) && out_val != int(out_val)) 
+      if(length(saved_val) != length(int(saved_val)) && length(out_val) != length(int(out_val))) 
       {
          err = saved_val - out_val;
          # get absolute value of err and saved_val
@@ -105,7 +105,7 @@ awk -v ofilename="$FNAME" -v sfilename="$SNAME" 'BEGIN{
             printf "(%d) + %s      (err %.2e)\n\n", ln_id[id-1], out_line[id-1], err
          }
       }
-      else if(saved_val == int(saved_val) && out_val == int(out_val))# integer comparison
+      else if(length(saved_val) == length(int(saved_val)) && length(out_val) == length(int(out_val)))# integer comparison
       {
          tau = saved_val - out_val;
          # get absolute value of tau
