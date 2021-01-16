@@ -94,7 +94,7 @@ awk -v ofilename="$FNAME" -v sfilename="$SNAME" 'BEGIN{
          err = err < 0 ? -err : err;
          saved_val = saved_val < 0 ? -saved_val : saved_val;
          # abs err <= atol or rel err <= rtol
-         if(err <= atol || err <= rtol*val)
+         if(err <= atol || err <= rtol*saved_val)
          {
             #print "PASSED"
          }
@@ -102,7 +102,7 @@ awk -v ofilename="$FNAME" -v sfilename="$SNAME" 'BEGIN{
          {
             pass=0;
             printf "(%d) - %s\n", ln_id[id-1], saved_line[id-1]
-            printf "(%d) + %s      (err %.2e)\n\n", ln_id[id-1], out_line[id-1], err
+            printf "(%d) + %s      (saved %e  out %e err %.2e)\n\n", ln_id[id-1], out_line[id-1], saved_val, out_val, err
          }
       }
       else if(length(saved_val) == length(int(saved_val)) && length(out_val) == length(int(out_val)))# integer comparison
@@ -110,8 +110,8 @@ awk -v ofilename="$FNAME" -v sfilename="$SNAME" 'BEGIN{
          tau = saved_val - out_val;
          # get absolute value of tau
          tau = tau < 0 ? -tau : tau;
-         # get ceiling of rtol*val (= max allowed change)
-         gamma = int(1.0 + rtol*val);
+         # get ceiling of rtol*saved_val (= max allowed change)
+         gamma = int(1.0 + rtol*saved_val);
          if(tau <= gamma)
          {
             #print "PASSED"
@@ -119,7 +119,7 @@ awk -v ofilename="$FNAME" -v sfilename="$SNAME" 'BEGIN{
          else
          {
             pass=0;
-            printf "(%d) %s <-- %s, err %d\n", ln, $0, val, tau
+            printf "(%d) %s <-- %s, err %d\n", ln, $0, saved_val, tau
          }
       }      
       else # type mismatch
