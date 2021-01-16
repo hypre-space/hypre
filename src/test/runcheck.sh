@@ -102,7 +102,7 @@ awk -v ofilename="$FNAME" -v sfilename="$SNAME" 'BEGIN{
          {
             pass=0;
             printf "(%d) - %s\n", ln_id[id-1], saved_line[id-1]
-            printf "(%d) + %s      (saved %e  out %e err %.2e)\n\n", ln_id[id-1], out_line[id-1], saved_val, out_val, err
+            printf "(%d) + %s      (err %.2e)\n\n", ln_id[id-1], out_line[id-1], err
          }
       }
       else if(length(saved_val) == length(int(saved_val)) && length(out_val) == length(int(out_val)))# integer comparison
