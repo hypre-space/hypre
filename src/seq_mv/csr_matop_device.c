@@ -618,6 +618,9 @@ hypre_CSRMatrixMoveDiagFirstDevice( hypre_CSRMatrix  *A )
    return hypre_error_flag;
 }
 
+/* check if diagonal entry is the first one at each row
+ * Return: the number of rows that do not have the first entry as diagonal
+ */
 __global__ void
 hypreCUDAKernel_CSRCheckDiagFirst( HYPRE_Int  nrows,
                                    HYPRE_Int *ia,
@@ -643,8 +646,65 @@ hypre_CSRMatrixCheckDiagFirstDevice( hypre_CSRMatrix *A )
    dim3 gDim = hypre_GetDefaultCUDAGridDimension(hypre_CSRMatrixNumRows(A), "thread", bDim);
 
    HYPRE_Int *result = hypre_TAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A), HYPRE_MEMORY_DEVICE);
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CSRCheckDiagFirst, gDim, bDim, hypre_CSRMatrixNumRows(A),
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CSRCheckDiagFirst, gDim, bDim,
+                      hypre_CSRMatrixNumRows(A),
                       hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), result );
+
+   HYPRE_Int ierr = HYPRE_THRUST_CALL( reduce,
+                                       result,
+                                       result + hypre_CSRMatrixNumRows(A) );
+
+   hypre_TFree(result, HYPRE_MEMORY_DEVICE);
+
+   hypre_SyncCudaComputeStream(hypre_handle());
+
+   return ierr;
+}
+
+/* check if diagonal entry is the first one at each row, and
+ * assign numerical zero diag value `v'
+ * Return: the number of rows that do not have the first entry as diagonal
+ */
+__global__ void
+hypreCUDAKernel_CSRCheckDiagFirstSetValueZero( HYPRE_Complex  v,
+                                               HYPRE_Int      nrows,
+                                               HYPRE_Int     *ia,
+                                               HYPRE_Int     *ja,
+                                               HYPRE_Complex *data,
+                                               HYPRE_Int     *result )
+{
+   const HYPRE_Int row = hypre_cuda_get_grid_thread_id<1,1>();
+   if (row < nrows)
+   {
+      const HYPRE_Int j = ia[row];
+      const HYPRE_Int col = ja[j];
+
+      result[row] = col != row;
+
+      if (col == row && data[j] == 0.0)
+      {
+         data[j] = v;
+      }
+   }
+}
+
+HYPRE_Int
+hypre_CSRMatrixCheckDiagFirstSetValueZeroDevice( hypre_CSRMatrix *A,
+                                                 HYPRE_Complex    v )
+{
+   if (hypre_CSRMatrixNumRows(A) != hypre_CSRMatrixNumCols(A))
+   {
+      return -1;
+   }
+
+   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   dim3 gDim = hypre_GetDefaultCUDAGridDimension(hypre_CSRMatrixNumRows(A), "thread", bDim);
+
+   HYPRE_Int *result = hypre_TAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A), HYPRE_MEMORY_DEVICE);
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CSRCheckDiagFirstSetValueZero, gDim, bDim,
+                      v, hypre_CSRMatrixNumRows(A),
+                      hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A),
+                      result );
 
    HYPRE_Int ierr = HYPRE_THRUST_CALL( reduce,
                                        result,
@@ -1234,6 +1294,13 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
       hypre_CSRMatrixSortedData(A) = A_sa = hypre_TAlloc(HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(A_sj, A_j, HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(A_sa, A_a, HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+
+#if defined(HYPRE_USING_CUDA)
+      hypre_CSRMatrixData(A) = A_sa;
+      HYPRE_Int err = hypre_CSRMatrixCheckDiagFirstSetValueZeroDevice(A, INFINITY);  hypre_assert(err == 0);
+      hypre_CSRMatrixData(A) = A_a;
+#endif
+
       hypre_SortCSRCusparse(nrow, ncol, nnzA, A_i, A_sj, A_sa);
    }
 
