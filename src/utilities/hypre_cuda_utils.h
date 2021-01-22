@@ -273,7 +273,7 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_cuda_get_num_warps()
 {
-   return hypre_cuda_get_num_threads<dim>() >> 5;
+   return hypre_cuda_get_num_threads<dim>() >> HYPRE_WARP_BITSHIFT;
 }
 
 /* return the warp id in block */
@@ -281,7 +281,7 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_cuda_get_warp_id()
 {
-   return hypre_cuda_get_thread_id<dim>() >> 5;
+   return hypre_cuda_get_thread_id<dim>() >> HYPRE_WARP_BITSHIFT;
 }
 
 /* return the thread lane id in warp */
@@ -759,4 +759,3 @@ cusparseIndexType_t hypre_HYPREIntToCusparseIndexType();
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
 #endif /* #ifndef HYPRE_CUDA_UTILS_H */
-

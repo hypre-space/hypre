@@ -142,7 +142,7 @@ T blockReduceSum(T val)
    //HYPRE_Int lane = threadIdx.x % warpSize;
    //HYPRE_Int wid  = threadIdx.x / warpSize;
    HYPRE_Int lane = threadIdx.x & (warpSize - 1);
-   HYPRE_Int wid  = threadIdx.x >> 5;
+   HYPRE_Int wid  = threadIdx.x >> HYPRE_WARP_BITSHIFT;
 
    val = warpReduceSum(val);       // Each warp performs partial reduction
 
@@ -269,4 +269,3 @@ struct ReduceSum
 #endif /* #if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) */
 #endif /* #if defined(HYPRE_USING_CUDA) */
 #endif /* #ifndef HYPRE_CUDA_REDUCER_H */
-
