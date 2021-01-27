@@ -58,7 +58,7 @@ hypre_GetDefaultCUDAGridDimension( HYPRE_Int n,
    }
    else if (granularity[0] == 'w')
    {
-      HYPRE_Int num_warps_per_block = num_threads_per_block >> 5;
+      HYPRE_Int num_warps_per_block = num_threads_per_block >> HYPRE_WARP_BITSHIFT;
 
       hypre_assert(num_warps_per_block * HYPRE_WARP_SIZE == num_threads_per_block);
 
@@ -1076,4 +1076,3 @@ hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle)
 }
 
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-
