@@ -69,7 +69,9 @@
 struct hypre_cub_CachingDeviceAllocator;
 typedef struct hypre_cub_CachingDeviceAllocator hypre_cub_CachingDeviceAllocator;
 
+// HYPRE_WARP_BITSHIFT is just log2 of HYPRE_WARP_SIZE
 #define HYPRE_WARP_SIZE       32
+#define HYPRE_WARP_BITSHIFT   5
 #define HYPRE_WARP_FULL_MASK  0xFFFFFFFF
 #define HYPRE_MAX_NUM_WARPS   (64 * 64 * 32)
 #define HYPRE_FLT_LARGE       1e30
@@ -271,7 +273,7 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_cuda_get_num_warps()
 {
-   return hypre_cuda_get_num_threads<dim>() >> 5;
+   return hypre_cuda_get_num_threads<dim>() >> HYPRE_WARP_BITSHIFT;
 }
 
 /* return the warp id in block */
@@ -279,7 +281,7 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_cuda_get_warp_id()
 {
-   return hypre_cuda_get_thread_id<dim>() >> 5;
+   return hypre_cuda_get_thread_id<dim>() >> HYPRE_WARP_BITSHIFT;
 }
 
 /* return the thread lane id in warp */
@@ -757,4 +759,3 @@ cusparseIndexType_t hypre_HYPREIntToCusparseIndexType();
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
 #endif /* #ifndef HYPRE_CUDA_UTILS_H */
-
