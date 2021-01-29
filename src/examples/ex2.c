@@ -30,18 +30,10 @@
 
 /* Struct linear solvers header */
 #include "HYPRE_struct_ls.h"
+#include "ex.h"
 
 #ifdef HYPRE_EXVIS
 #include "vis.c"
-#endif
-
-#if defined(HYPRE_USING_CUDA)
-#include <cuda_runtime.h>
-#define Malloc(type, count) ( {void *ptr = NULL; cudaMallocManaged(&ptr, count*sizeof(type), cudaMemAttachGlobal); (type *) ptr;} )
-#define Free(ptr) ( cudaFree(ptr), ptr = NULL )
-#else
-#define Malloc(type, count) ( (type *) malloc(count*sizeof(type)) )
-#define Free(ptr) ( free(ptr), ptr = NULL )
 #endif
 
 int main (int argc, char *argv[])
@@ -75,6 +67,9 @@ int main (int argc, char *argv[])
 
    /* Initialize HYPRE */
    HYPRE_Init();
+
+   /* Print GPU info */
+   HYPRE_PrintDeviceInfo();
 
    /* Parse command line */
    {
@@ -193,7 +188,7 @@ int main (int argc, char *argv[])
 
             int nentries = 5;
             int nvalues  = 30; /* 6 grid points, each with 5 stencil entries */
-            double *values = Malloc(double, 30);
+            double *values = (double *) malloc(30*sizeof(double));
 
             int stencil_indices[5];
             for (j = 0; j < nentries; j++) /* label the stencil indices -
@@ -211,7 +206,7 @@ int main (int argc, char *argv[])
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, nentries,
                                            stencil_indices, values);
 
-            Free(values);
+            free(values);
          }
 
          /* Set the matrix coefficients for some set of stencil entries
@@ -222,7 +217,7 @@ int main (int argc, char *argv[])
 
             int nentries = 5;
             int nvalues  = 60; /* 12 grid points, each with 5 stencil entries */
-            double *values = Malloc(double, 60);
+            double *values = (double *) malloc(60*sizeof(double));
 
             int stencil_indices[5];
             for (j = 0; j < nentries; j++)
@@ -238,7 +233,7 @@ int main (int argc, char *argv[])
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, nentries,
                                            stencil_indices, values);
 
-            Free(values);
+            free(values);
          }
       }
       else if (myid == 1)
@@ -251,7 +246,7 @@ int main (int argc, char *argv[])
 
             int nentries = 5;
             int nvalues  = 80; /* 16 grid points, each with 5 stencil entries */
-            double *values = Malloc(double, 80);
+            double *values = (double *) malloc(80*sizeof(double));
 
             int stencil_indices[5];
             for (j = 0; j < nentries; j++)
@@ -267,7 +262,7 @@ int main (int argc, char *argv[])
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, nentries,
                                            stencil_indices, values);
 
-            Free(values);
+            free(values);
          }
       }
 
@@ -276,7 +271,7 @@ int main (int argc, char *argv[])
       if (myid == 0)
       {
          int maxnvalues = 6;
-         double *values = Malloc(double, 6);
+         double *values = (double *) malloc(6*sizeof(double));
 
          for (i = 0; i < maxnvalues; i++)
             values[i] = 0.0;
@@ -337,12 +332,12 @@ int main (int argc, char *argv[])
                                            stencil_indices, values);
          }
 
-         Free(values);
+         free(values);
       }
       else if (myid == 1)
       {
          int maxnvalues = 4;
-         double *values = Malloc(double, 4);
+         double *values = (double *) malloc(4*sizeof(double));
 
          for (i = 0; i < maxnvalues; i++)
             values[i] = 0.0;
@@ -380,7 +375,7 @@ int main (int argc, char *argv[])
                                            stencil_indices, values);
          }
 
-         Free(values);
+         free(values);
       }
 
       /* This is a collective call finalizing the matrix assembly.
@@ -406,7 +401,7 @@ int main (int argc, char *argv[])
             int iupper[2] = {-1, 2};
 
             int nvalues = 6;  /* 6 grid points */
-            double *values = Malloc(double, 6);
+            double *values = (double *) malloc(6*sizeof(double));
 
             for (i = 0; i < nvalues; i ++)
                values[i] = 1.0;
@@ -416,7 +411,7 @@ int main (int argc, char *argv[])
                values[i] = 0.0;
             HYPRE_StructVectorSetBoxValues(x, ilower, iupper, values);
 
-            Free(values);
+            free(values);
          }
 
          /* Set the vector coefficients over the gridpoints in my second box */
@@ -425,7 +420,7 @@ int main (int argc, char *argv[])
             int iupper[2] = { 2, 4};
 
             int nvalues = 12; /* 12 grid points */
-            double *values = Malloc(double, 12);
+            double *values = (double *) malloc(12*sizeof(double));
 
             for (i = 0; i < nvalues; i ++)
                values[i] = 1.0;
@@ -435,7 +430,7 @@ int main (int argc, char *argv[])
                values[i] = 0.0;
             HYPRE_StructVectorSetBoxValues(x, ilower, iupper, values);
 
-            Free(values);
+            free(values);
          }
       }
       else if (myid == 1)
@@ -446,7 +441,7 @@ int main (int argc, char *argv[])
             int iupper[2] = { 6, 4};
 
             int nvalues = 16; /* 16 grid points */
-            double *values = Malloc(double, 16);
+            double *values = (double *) malloc(16*sizeof(double));
 
             for (i = 0; i < nvalues; i ++)
                values[i] = 1.0;
@@ -456,7 +451,7 @@ int main (int argc, char *argv[])
                values[i] = 0.0;
             HYPRE_StructVectorSetBoxValues(x, ilower, iupper, values);
 
-            Free(values);
+            free(values);
          }
       }
 

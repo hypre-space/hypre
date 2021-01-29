@@ -139,6 +139,9 @@ HYPRE_Int HYPRE_ClearAllErrors();
 /* Clears the given error code from the hypre error flag */
 HYPRE_Int HYPRE_ClearError(HYPRE_Int hypre_error_code);
 
+/* Print GPU information */
+HYPRE_Int HYPRE_PrintDeviceInfo();
+
 /*--------------------------------------------------------------------------
  * HYPRE Version routines
  *--------------------------------------------------------------------------*/
