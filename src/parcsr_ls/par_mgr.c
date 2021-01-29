@@ -77,7 +77,7 @@ hypre_MGRCreate()
   (mgr_data -> use_default_fsolver) = -1; // set to -1 to avoid printing when not used
   (mgr_data -> omega) = 1.;
   (mgr_data -> max_iter) = 20;
-  (mgr_data -> tol) = 1.0e-7;
+  (mgr_data -> tol) = 1.0e-6;
   (mgr_data -> relax_type) = 0;
   (mgr_data -> relax_order) = 1; // not fully utilized. Only used to compute L1-norms.
   (mgr_data -> interp_type) = NULL;

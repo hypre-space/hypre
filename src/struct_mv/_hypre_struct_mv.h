@@ -1556,11 +1556,11 @@ typedef struct hypre_StructVector_struct
                                           the data array.  data_indices[b]
                                           is the starting index of vector
                                           data corresponding to box b. */
-                      
+
    HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; /* Num ghost layers in each
                                                      * direction */
    HYPRE_Int             bghost_not_clear; /* Are boundary ghosts clear? */
-                      
+
    HYPRE_BigInt          global_size;  /* Total number coefficients */
 
    HYPRE_Int             ref_count;
@@ -1582,16 +1582,16 @@ typedef struct hypre_StructVector_struct
 #define hypre_StructVectorBGhostNotClear(vector)((vector) -> bghost_not_clear)
 #define hypre_StructVectorGlobalSize(vector)    ((vector) -> global_size)
 #define hypre_StructVectorRefCount(vector)      ((vector) -> ref_count)
- 
+
 #define hypre_StructVectorNDim(vector) \
 hypre_StructGridNDim(hypre_StructVectorGrid(vector))
 
 #define hypre_StructVectorBox(vector, b) \
 hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)
- 
+
 #define hypre_StructVectorBoxData(vector, b) \
 (hypre_StructVectorData(vector) + hypre_StructVectorDataIndices(vector)[b])
- 
+
 #define hypre_StructVectorBoxDataValue(vector, b, index) \
 (hypre_StructVectorBoxData(vector, b) + \
  hypre_BoxIndexRank(hypre_StructVectorBox(vector, b), index))
@@ -2493,7 +2493,7 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
 
 #ifdef HYPRE_USING_OPENMP
 #define HYPRE_BOX_REDUCTION
-#ifdef WIN32
+#if defined(WIN32) && defined(_MSC_VER)
 #define Pragma(x) __pragma(HYPRE_XSTR(x))
 #else
 #define Pragma(x) _Pragma(HYPRE_XSTR(x))

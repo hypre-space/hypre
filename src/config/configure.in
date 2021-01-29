@@ -48,10 +48,10 @@ dnl * Set package information so it only has to be modified in one place
 dnl *********************************************************************
 
 m4_define([M4_HYPRE_NAME],    [hypre])
-m4_define([M4_HYPRE_VERSION], [2.19.0])
-m4_define([M4_HYPRE_DATE],    [2020/05/26])
+m4_define([M4_HYPRE_VERSION], [2.20.0])
+m4_define([M4_HYPRE_DATE],    [2020/09/24])
 m4_define([M4_HYPRE_TIME],    [00:00:00])
-m4_define([M4_HYPRE_BUGS],    [hypre-support@llnl.gov])
+m4_define([M4_HYPRE_BUGS],    [https://github.com/hypre-space/hypre/issues])
 m4_define([M4_HYPRE_SRCDIR],  [`pwd`])
 
 m4_include([config/hypre_blas_macros.m4])
@@ -1043,7 +1043,7 @@ AS_HELP_STRING([--with-cuda],
                [Use CUDA. Require cuda-8.0 or higher (default is NO).]),
 [case "$withval" in
     yes) hypre_user_chose_cuda=yes
-    	 hypre_using_cuda=yes ;;
+         hypre_using_cuda=yes ;;
     no)  hypre_using_cuda=no ;;
     *)   hypre_using_cuda=no ;;
  esac],
@@ -1771,7 +1771,7 @@ then
 
    CUFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
 
-   CFLAGS=${CXXFLAGS}
+   dnl CFLAGS=${CXXFLAGS}
    LDFLAGS="-ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -Xcompiler \"${LDFLAGS}\""
    HYPRE_CUDA_INCL="-I${HYPRE_CUDA_PATH}/include"
    HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcudart"
@@ -1888,12 +1888,11 @@ then
    then
       SHARED_SET_SONAME="-Xlinker=-soname,"
       SHARED_OPTIONS="-Xlinker=-z,defs"
-      SHARED_COMPILE_FLAG="-Xcompiler \"-fPIC\""
    else
       SHARED_SET_SONAME="-Wl,-soname,"
       SHARED_OPTIONS="-Wl,-z,defs"
-      SHARED_COMPILE_FLAG="-fPIC"
    fi
+   SHARED_COMPILE_FLAG="-fPIC"
    case $hypre_platform in
       AIX* | aix* | Aix*) SHARED_COMPILE_FLAG="-qmkshrobj"
                           SHARED_BUILD_FLAG="-G"
@@ -1911,7 +1910,7 @@ dnl                          LINK_F77="${F77} -brtl"
    FFLAGS="${FFLAGS} ${SHARED_COMPILE_FLAG}"
    CFLAGS="${CFLAGS} ${SHARED_COMPILE_FLAG}"
    CXXFLAGS="${CXXFLAGS} ${SHARED_COMPILE_FLAG}"
-   CUFLAGS="${CUFLAGS} ${SHARED_COMPILE_FLAG}"
+   CUFLAGS="${CUFLAGS} -Xcompiler \"${SHARED_COMPILE_FLAG}\""
 dnl   BUILD_F77_SHARED="${F77} ${SHARED_BUILD_FLAG}"
    BUILD_FC_SHARED="${FC} ${SHARED_BUILD_FLAG}"
    if test "$hypre_using_fei" = "yes"
@@ -1927,9 +1926,12 @@ dnl   BUILD_F77_SHARED="${F77} ${SHARED_BUILD_FLAG}"
    fi
 fi
 
-if test "x$hypre_using_cuda_streams" = "xyes"
+if [test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes"]
 then
-   AC_DEFINE([HYPRE_USING_CUDA_STREAMS],1,[Define to 1 if using CUDA streams])
+   if test "x$hypre_using_cuda_streams" = "xyes"]
+   then
+      AC_DEFINE([HYPRE_USING_CUDA_STREAMS],1,[Define to 1 if using CUDA streams])
+   fi
 fi
 
 dnl *********************************************************************
@@ -2073,11 +2075,11 @@ AC_SUBST(RAJA_LIBS)
 dnl *********************************************************************
 dnl * KOKKOS information
 dnl *********************************************************************
+AC_SUBST(HYPRE_KOKKOS_SRC_DIR)
 AC_SUBST(HYPRE_KOKKOS_LIB_DIR)
 AC_SUBST(HYPRE_KOKKOS_INCLUDE)
 AC_SUBST(HYPRE_KOKKOS_LIB)
 AC_SUBST(KOKKOS_LIBS)
-AC_SUBST(HYPRE_KOKKOS_INC_FILE)
 
 dnl *********************************************************************
 dnl * CUDA stuff

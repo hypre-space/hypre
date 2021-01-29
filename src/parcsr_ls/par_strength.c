@@ -1726,11 +1726,11 @@ hypre_BoomerAMGCreateSCommPkg(hypre_ParCSRMatrix *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix  *S,
-                           HYPRE_Int           *CF_marker,
-                           HYPRE_Int            num_paths,
-                           HYPRE_BigInt        *coarse_row_starts,
-                           hypre_ParCSRMatrix **C_ptr)
+hypre_BoomerAMGCreate2ndSHost( hypre_ParCSRMatrix  *S,
+                               HYPRE_Int           *CF_marker,
+                               HYPRE_Int            num_paths,
+                               HYPRE_BigInt        *coarse_row_starts,
+                               hypre_ParCSRMatrix **C_ptr)
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_CREATE_2NDS] -= hypre_MPI_Wtime();
@@ -2914,6 +2914,41 @@ hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix  *S,
 
    return 0;
 }
+
+//-----------------------------------------------------------------------
+HYPRE_Int
+hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix  *S,
+                           HYPRE_Int           *CF_marker,
+                           HYPRE_Int            num_paths,
+                           HYPRE_BigInt        *coarse_row_starts,
+                           hypre_ParCSRMatrix **C_ptr)
+{
+#if defined(HYPRE_USING_CUDA)
+   hypre_NvtxPushRange("Create2ndS");
+#endif
+
+   HYPRE_Int ierr = 0;
+
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(S)) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      ierr = hypre_BoomerAMGCreate2ndSDevice( S, CF_marker, num_paths, coarse_row_starts, C_ptr );
+   }
+   else
+#endif
+   {
+      ierr = hypre_BoomerAMGCreate2ndSHost( S, CF_marker, num_paths, coarse_row_starts, C_ptr );
+   }
+
+#if defined(HYPRE_USING_CUDA)
+   hypre_NvtxPopRange();
+#endif
+
+   return ierr;
+}
+
 
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGCorrectCFMarker : corrects CF_marker after aggr. coarsening

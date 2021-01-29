@@ -1033,19 +1033,19 @@ hypre_BoomerAMGBuildModExtPIInterp(hypre_ParCSRMatrix  *A,
 }
 
 /*---------------------------------------------------------------------------
- * hypre_BoomerAMGBuildModNewExtPIInterp
+ * hypre_BoomerAMGBuildModExtPEInterp
  *  Comment:
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_BoomerAMGBuildModNewExtPIInterp(hypre_ParCSRMatrix   *A,
-                                      HYPRE_Int            *CF_marker,
-                                      hypre_ParCSRMatrix   *S,
-                                      HYPRE_BigInt         *num_cpts_global,
-                                      HYPRE_Int             debug_flag,
-                                      HYPRE_Real            trunc_factor,
-                                      HYPRE_Int             max_elmts,
-                                      HYPRE_Int            *col_offd_S_to_A,
-                                      hypre_ParCSRMatrix  **P_ptr)
+hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
+                                       HYPRE_Int            *CF_marker,
+                                       hypre_ParCSRMatrix   *S,
+                                       HYPRE_BigInt         *num_cpts_global,
+                                       HYPRE_Int             debug_flag,
+                                       HYPRE_Real            trunc_factor,
+                                       HYPRE_Int             max_elmts,
+                                       HYPRE_Int            *col_offd_S_to_A,
+                                       hypre_ParCSRMatrix  **P_ptr)
 {
    /* Communication Variables */
    MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
@@ -1524,5 +1524,47 @@ hypre_BoomerAMGBuildModNewExtPIInterp(hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrixDestroy(W);
 
    return hypre_error_flag;
+}
+
+/*-----------------------------------------------------------------------*
+ * Modularized Extended+e Interpolation
+ *-----------------------------------------------------------------------*/
+HYPRE_Int
+hypre_BoomerAMGBuildModExtPEInterp(hypre_ParCSRMatrix  *A,
+                                      HYPRE_Int           *CF_marker,
+                                      hypre_ParCSRMatrix  *S,
+                                      HYPRE_BigInt        *num_cpts_global,
+                                      HYPRE_Int            debug_flag,
+                                      HYPRE_Real           trunc_factor,
+                                      HYPRE_Int            max_elmts,
+                                      HYPRE_Int           *col_offd_S_to_A,
+                                      hypre_ParCSRMatrix **P_ptr)
+{
+#if defined(HYPRE_USING_CUDA)
+   hypre_NvtxPushRange("ExtPEInterp");
+#endif
+
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+
+   HYPRE_Int ierr = 0;
+
+   if (exec == HYPRE_EXEC_HOST)
+   {
+      ierr = hypre_BoomerAMGBuildModExtPEInterpHost(A, CF_marker, S, num_cpts_global,
+                                                    debug_flag, trunc_factor, max_elmts, col_offd_S_to_A, P_ptr);
+   }
+#if defined(HYPRE_USING_CUDA)
+   else
+   {
+      ierr = hypre_BoomerAMGBuildExtPEInterpDevice(A,CF_marker,S,num_cpts_global,1,NULL,
+                                                 debug_flag,trunc_factor,max_elmts,col_offd_S_to_A,P_ptr);
+   }
+#endif
+
+#if defined(HYPRE_USING_CUDA)
+   hypre_NvtxPopRange();
+#endif
+
+   return ierr;
 }
 
