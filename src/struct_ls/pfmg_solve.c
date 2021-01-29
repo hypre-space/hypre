@@ -13,7 +13,7 @@
 #include "_hypre_struct_ls.h"
 #include "pfmg.h"
 
-#define DEBUG 0
+#define DEBUG 1
 
 /*--------------------------------------------------------------------------
  * hypre_PFMGSolve

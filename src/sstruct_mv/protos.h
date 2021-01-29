@@ -187,6 +187,8 @@ HYPRE_Int hypre_SStructPMatvec ( HYPRE_Complex alpha , hypre_SStructPMatrix *pA 
 HYPRE_Int hypre_SStructMatvecCreate ( void **matvec_vdata_ptr );
 HYPRE_Int hypre_SStructMatvecSetTranspose ( void *matvec_vdata , HYPRE_Int  transpose );
 HYPRE_Int hypre_SStructMatvecSetSkipDiag ( void *matvec_vdata , HYPRE_Int  skip_diag );
+HYPRE_Int hypre_SStructMatvecSetActiveParts ( void *matvec_vdata , HYPRE_Int *active );
+HYPRE_Int hypre_SStructMatvecSetAllPartsActive( void *matvec_vdata );
 HYPRE_Int hypre_SStructMatvecSetup ( void *matvec_vdata , hypre_SStructMatrix *A , hypre_SStructVector *x );
 HYPRE_Int hypre_SStructMatvecCompute ( void *matvec_vdata , HYPRE_Complex alpha , hypre_SStructMatrix *A , hypre_SStructVector *x , HYPRE_Complex beta , hypre_SStructVector *y );
 HYPRE_Int hypre_SStructMatvecDiagScale ( HYPRE_Complex *alpha , hypre_SStructMatrix *A , hypre_SStructVector *x , HYPRE_Complex *beta , hypre_SStructVector *y );

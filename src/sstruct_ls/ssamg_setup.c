@@ -13,8 +13,8 @@
 #include "_hypre_sstruct_ls.h"
 #include "ssamg.h"
 
-#define DEBUG 0
-#define DEBUG_SYMMETRY 0
+#define DEBUG 1
+#define DEBUG_SYMMETRY 1
 #define DEBUG_WITH_GLVIS 0
 
 /*--------------------------------------------------------------------------

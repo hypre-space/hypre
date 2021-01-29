@@ -812,6 +812,11 @@ hypre_SSAMGRelax( void                *relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SSAMGRelaxGeneric
+ *
+ * Computes x_{k+1} = (1 - w)*x_k + w*inv(D)*(b - (L + U)*x_k)
+ * Does not unroll stencil loops. Use hypre_SSAMGRelaxMV for better performance
+ *
  * TODO:
  *       1) Do we really need nodesets?
  *       2) Can we reduce communication?
@@ -1229,10 +1234,6 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
                } /* hypre_ForBoxI(i, compute_box_a) */
             } /* loop on vars */
          }
-         else
-         {
-            hypre_SStructPVectorSetConstantValues(px, zero);
-         } /* if (active_p[part]) */
          HYPRE_ANNOTATE_REGION_END("%s %d", "Diag scale part", part);
       } /* loop on parts */
    } /* loop on iterations */
