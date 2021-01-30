@@ -27,6 +27,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 /* Struct linear solvers header */
@@ -170,6 +171,7 @@ int main (int argc, char *argv[])
                                                   defined above */
          int nentries = 5;
          int nvalues  = 30; /* 6 grid points, each with 5 stencil entries */
+         /* double values[30]; OK to use constant-length array for CPUs */
          double *values = (double *) malloc(30*sizeof(double));
 
          /* We have 6 grid points, each with 5 stencil entries */
@@ -191,6 +193,7 @@ int main (int argc, char *argv[])
          int stencil_indices[5] = {0,1,2,3,4};
          int nentries = 5;
          int nvalues  = 60; /* 12 grid points, each with 5 stencil entries */
+         /* double values[60]; OK to use constant-length array for CPUs */
          double *values = (double *) malloc(60*sizeof(double));
 
          for (i = 0; i < nvalues; i += nentries)
@@ -209,6 +212,7 @@ int main (int argc, char *argv[])
       /* Set the coefficients reaching outside of the boundary to 0 */
       if (myid == 0)
       {
+         /* double values[3]; OK to use constant-length array for CPUs */
          double *values = (double *) malloc(3*sizeof(double));
          for (i = 0; i < 3; i++)
             values[i] = 0.0;
@@ -237,6 +241,7 @@ int main (int argc, char *argv[])
       }
       else if (myid == 1)
       {
+         /* double values[4]; OK to use constant-length array for CPUs */
          double *values = (double *) malloc(4*sizeof(double));
          for (i = 0; i < 4; i++)
             values[i] = 0.0;
@@ -292,6 +297,7 @@ int main (int argc, char *argv[])
       if (myid == 0)
       {
          int ilower[2]={-3,1}, iupper[2]={-1,2};
+         /* double values[6]; OK to use constant-length array for CPUs */
          double *values = (double *) malloc(6*sizeof(double)); /* 6 grid points */
 
          for (i = 0; i < 6; i ++)
@@ -306,6 +312,7 @@ int main (int argc, char *argv[])
       else if (myid == 1)
       {
          int ilower[2]={0,1}, iupper[2]={2,4};
+         /* double values[12]; OK to use constant-length array for CPUs */
          double *values = (double *) malloc(12*sizeof(double)); /* 12 grid points */
 
          for (i = 0; i < 12; i ++)
