@@ -15,7 +15,12 @@
 #include <HYPRE_config.h>
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+
 #include <cuda_runtime.h>
+
+#ifndef HYPRE_USING_UNIFIED_MEMORY
+#error *** Running the examples on GPUs requires Unified Memory. Please reconfigure and rebuild with --enable-unified-memory ***
+#endif
 
 static inline void*
 gpu_malloc(size_t size)
