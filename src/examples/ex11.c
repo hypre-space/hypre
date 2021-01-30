@@ -177,6 +177,8 @@ int main (int argc, char *argv[])
    */
    {
       int nnz;
+      /* double values[5];
+       * int cols[5]; OK to use constant-length arrays for CPUs */
       double *values = (double *) malloc(5*sizeof(double));
       int *cols = (int *) malloc(5*sizeof(int));
 

@@ -26,6 +26,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 /* Struct linear solvers header */
@@ -188,6 +189,7 @@ int main (int argc, char *argv[])
 
             int nentries = 5;
             int nvalues  = 30; /* 6 grid points, each with 5 stencil entries */
+            /* double values[30]; OK to use constant-length array for CPUs */
             double *values = (double *) malloc(30*sizeof(double));
 
             int stencil_indices[5];
@@ -217,6 +219,7 @@ int main (int argc, char *argv[])
 
             int nentries = 5;
             int nvalues  = 60; /* 12 grid points, each with 5 stencil entries */
+            /* double values[60]; OK to use constant-length array for CPUs */
             double *values = (double *) malloc(60*sizeof(double));
 
             int stencil_indices[5];
@@ -246,6 +249,7 @@ int main (int argc, char *argv[])
 
             int nentries = 5;
             int nvalues  = 80; /* 16 grid points, each with 5 stencil entries */
+            /* double values[80]; OK to use constant-length array for CPUs */
             double *values = (double *) malloc(80*sizeof(double));
 
             int stencil_indices[5];
@@ -271,6 +275,7 @@ int main (int argc, char *argv[])
       if (myid == 0)
       {
          int maxnvalues = 6;
+         /* double values[6]; OK to use constant-length array for CPUs */
          double *values = (double *) malloc(6*sizeof(double));
 
          for (i = 0; i < maxnvalues; i++)
@@ -337,6 +342,7 @@ int main (int argc, char *argv[])
       else if (myid == 1)
       {
          int maxnvalues = 4;
+         /* double values[4]; OK to use constant-length array for CPUs */
          double *values = (double *) malloc(4*sizeof(double));
 
          for (i = 0; i < maxnvalues; i++)
@@ -401,6 +407,7 @@ int main (int argc, char *argv[])
             int iupper[2] = {-1, 2};
 
             int nvalues = 6;  /* 6 grid points */
+            /* double values[6]; OK to use constant-length array for CPUs */
             double *values = (double *) malloc(6*sizeof(double));
 
             for (i = 0; i < nvalues; i ++)
@@ -420,6 +427,7 @@ int main (int argc, char *argv[])
             int iupper[2] = { 2, 4};
 
             int nvalues = 12; /* 12 grid points */
+            /* double values[12]; OK to use constant-length array for CPUs */
             double *values = (double *) malloc(12*sizeof(double));
 
             for (i = 0; i < nvalues; i ++)
@@ -441,6 +449,7 @@ int main (int argc, char *argv[])
             int iupper[2] = { 6, 4};
 
             int nvalues = 16; /* 16 grid points */
+            /* double values[16]; OK to use constant-length array for CPUs */
             double *values = (double *) malloc(16*sizeof(double));
 
             for (i = 0; i < nvalues; i ++)

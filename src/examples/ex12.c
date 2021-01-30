@@ -232,7 +232,8 @@ int main (int argc, char *argv[])
                                                   defined above */
          int nentries = 5;
          int nvalues  = 60; /* 12 grid points, each with 5 stencil entries */
-         double *values = (double *) malloc(nvalues*sizeof(double));
+         /* double values[60]; OK to use constant-length arrays for CPUs */
+         double *values = (double *) malloc(60*sizeof(double));
 
          for (i = 0; i < nvalues; i += nentries)
          {
@@ -252,7 +253,8 @@ int main (int argc, char *argv[])
          int stencil_indices[5] = {0,1,2,3,4};
          int nentries = 5;
          int nvalues  = 100; /* 20 grid points, each with 5 stencil entries */
-         double *values = (double *) malloc(nvalues*sizeof(double));
+         /* double values[100]; OK to use constant-length array for CPUs */
+         double *values = (double *) malloc(100*sizeof(double));
 
          for (i = 0; i < nvalues; i += nentries)
          {
@@ -271,6 +273,7 @@ int main (int argc, char *argv[])
        * both ilower *and* iupper may be different from those in ex1. */
       if (myid == 0)
       {
+         /* double values[4]; OK to use constant-length array for CPUs */
          double *values = (double *) malloc(4*sizeof(double));
          for (i = 0; i < 4; i++)
             values[i] = 0.0;
@@ -300,6 +303,7 @@ int main (int argc, char *argv[])
       }
       else if (myid == 1)
       {
+         /* double values[5]; OK to use constant-length array for CPUs */
          double *values = (double *) malloc(5*sizeof(double));
          for (i = 0; i < 5; i++)
             values[i] = 0.0;
@@ -361,6 +365,7 @@ int main (int argc, char *argv[])
       if (myid == 0)
       {
          int ilower[2]={-4,0}, iupper[2]={-1,2};
+         /* double values[12]; OK to use constant-length array for CPUs */
          double *values = (double *) malloc(12*sizeof(double)); /* 12 grid points */
 
          for (i = 0; i < 12; i ++)
@@ -376,6 +381,7 @@ int main (int argc, char *argv[])
       else if (myid == 1)
       {
          int ilower[2]={0,1}, iupper[2]={2,4};
+         /* double values[20]; OK to use constant-length array for CPUs */
          double *values = (double *) malloc(20*sizeof(double)); /* 20 grid points */
 
          for (i = 0; i < 20; i ++)
