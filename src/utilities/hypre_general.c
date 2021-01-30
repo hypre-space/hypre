@@ -220,7 +220,7 @@ HYPRE_PrintDeviceInfo()
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
   hypre_int dev;
-  cudaDeviceProp deviceProp;
+  struct cudaDeviceProp deviceProp;
 
   HYPRE_CUDA_CALL( cudaGetDevice(&dev) );
   HYPRE_CUDA_CALL( cudaGetDeviceProperties(&deviceProp, dev) );
