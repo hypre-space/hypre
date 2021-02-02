@@ -425,17 +425,19 @@ main( hypre_int argc,
    HYPRE_Int amgdd_fac_cycle_type = 1;
    HYPRE_Int amgdd_num_ghost_layers = 1;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_Int spgemm_use_cusparse = 1;
-   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
 #endif
+   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
    HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
 
+#ifdef HYPRE_USING_CUB_ALLOCATOR
    /* CUB Allocator */
    hypre_uint mempool_bin_growth   = 8,
               mempool_min_bin      = 3,
               mempool_max_bin      = 9;
    size_t mempool_max_cached_bytes = 2000LL * 1024 * 1024;
+#endif
 
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
@@ -1129,6 +1131,7 @@ main( hypre_int argc,
          spgemm_use_cusparse = atoi(argv[arg_index++]);
       }
 #endif
+#ifdef HYPRE_USING_CUB_ALLOCATOR
       else if ( strcmp(argv[arg_index], "-mempool_growth") == 0 )
       {
          arg_index++;
@@ -1150,6 +1153,7 @@ main( hypre_int argc,
          arg_index++;
          mempool_max_cached_bytes = atoi(argv[arg_index++])*1024LL*1024LL;
       }
+#endif
       else
       {
          arg_index++;
@@ -2179,8 +2183,10 @@ main( hypre_int argc,
    /* default execution policy */
    HYPRE_SetExecutionPolicy(default_exec_policy);
 
+#if defined(HYPRE_USING_GPU)
    /* use cuSPARSE for SpGEMM */
    HYPRE_CSRMatrixSetSpGemmUseCusparse(spgemm_use_cusparse);
+#endif
 
    /*-----------------------------------------------------------
     * Set up matrix
