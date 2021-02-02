@@ -2155,13 +2155,22 @@ main( hypre_int argc,
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
 
+#ifdef HYPRE_USING_CUB_ALLOCATOR
    /* To be effective, hypre_SetCubMemPoolSize must immediately follow HYPRE_Init */
    HYPRE_SetGPUMemoryPoolSize( mempool_bin_growth, mempool_min_bin,
                                mempool_max_bin, mempool_max_cached_bytes );
-
+#endif
 
 #if defined(HYPRE_USING_UMPIRE)
    /* Setup Umpire pools */
+   HYPRE_SetUmpireDevicePoolName("HYPRE_DEVICE_POOL_TEST");
+   HYPRE_SetUmpireUMPoolName("HYPRE_UM_POOL_TEST");
+   HYPRE_SetUmpireHostPoolName("HYPRE_HOST_POOL_TEST");
+   HYPRE_SetUmpirePinnedPoolName("HYPRE_PINNED_POOL_TEST");
+   HYPRE_SetUmpireDevicePoolSize(4LL * 1024 * 1024 * 1024);
+   HYPRE_SetUmpireUMPoolSize(4LL * 1024 * 1024 * 1024);
+   HYPRE_SetUmpireHostPoolSize(4LL * 1024 * 1024 * 1024);
+   HYPRE_SetUmpirePinnedPoolSize(4LL * 1024 * 1024 * 1024);
 #endif
 
    /* default memory location */
