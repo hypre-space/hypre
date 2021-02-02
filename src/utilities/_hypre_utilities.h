@@ -1247,6 +1247,11 @@ typedef struct
    size_t                 umpire_um_pool_size;
    size_t                 umpire_host_pool_size;
    size_t                 umpire_pinned_pool_size;
+   size_t                 umpire_block_size;
+   HYPRE_Int              own_umpire_device_pool;
+   HYPRE_Int              own_umpire_um_pool;
+   HYPRE_Int              own_umpire_host_pool;
+   HYPRE_Int              own_umpire_pinned_pool;
    umpire_resourcemanager umpire_rm;
 #endif
 } hypre_Handle;
@@ -1288,10 +1293,15 @@ typedef struct
 #define hypre_HandleUmpireUMPoolSize(hypre_handle)               ((hypre_handle) -> umpire_um_pool_size)
 #define hypre_HandleUmpireHostPoolSize(hypre_handle)             ((hypre_handle) -> umpire_host_pool_size)
 #define hypre_HandleUmpirePinnedPoolSize(hypre_handle)           ((hypre_handle) -> umpire_pinned_pool_size)
+#define hypre_HandleUmpireBlockSize(hypre_handle)                ((hypre_handle) -> umpire_block_size)
 #define hypre_HandleUmpireDevicePoolName(hypre_handle)           ((hypre_handle) -> umpire_device_pool_name)
 #define hypre_HandleUmpireUMPoolName(hypre_handle)               ((hypre_handle) -> umpire_um_pool_name)
 #define hypre_HandleUmpireHostPoolName(hypre_handle)             ((hypre_handle) -> umpire_host_pool_name)
 #define hypre_HandleUmpirePinnedPoolName(hypre_handle)           ((hypre_handle) -> umpire_pinned_pool_name)
+#define hypre_HandleOwnUmpireDevicePool(hypre_handle)            ((hypre_handle) -> own_umpire_device_pool)
+#define hypre_HandleOwnUmpireUMPool(hypre_handle)                ((hypre_handle) -> own_umpire_um_pool)
+#define hypre_HandleOwnUmpireHostPool(hypre_handle)              ((hypre_handle) -> own_umpire_host_pool)
+#define hypre_HandleOwnUmpirePinnedPool(hypre_handle)            ((hypre_handle) -> own_umpire_pinned_pool)
 
 #endif
 

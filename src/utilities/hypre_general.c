@@ -204,7 +204,7 @@ HYPRE_Int
 HYPRE_Finalize()
 {
 #if defined(HYPRE_USING_UMPIRE)
-   //hypre_UmpireFinalize(_hypre_handle);
+   hypre_UmpireFinalize(_hypre_handle);
 #endif
 
    hypre_HandleDestroy(_hypre_handle);
@@ -249,14 +249,20 @@ hypre_UmpireInit(hypre_Handle *hypre_handle_)
    hypre_HandleUmpireHostPoolSize(hypre_handle_)   = 4LL * 1024 * 1024 * 1024;
    hypre_HandleUmpirePinnedPoolSize(hypre_handle_) = 4LL * 1024 * 1024 * 1024;
 
+   hypre_HandleUmpireBlockSize(hypre_handle_) = 512;
+
    strcpy(hypre_HandleUmpireDevicePoolName(hypre_handle_), "HYPRE_DEVICE_POOL");
    strcpy(hypre_HandleUmpireUMPoolName(hypre_handle_),     "HYPRE_UM_POOL");
    strcpy(hypre_HandleUmpireHostPoolName(hypre_handle_),   "HYPRE_HOST_POOL");
    strcpy(hypre_HandleUmpirePinnedPoolName(hypre_handle_), "HYPRE_PINNED_POOL");
 
+   hypre_HandleOwnUmpireDevicePool(hypre_handle_) = 0;
+   hypre_HandleOwnUmpireUMPool(hypre_handle_)     = 0;
+   hypre_HandleOwnUmpireHostPool(hypre_handle_)   = 0;
+   hypre_HandleOwnUmpirePinnedPool(hypre_handle_) = 0;
+
    return hypre_error_flag;
 }
-
 
 HYPRE_Int
 hypre_UmpireFinalize(hypre_Handle *hypre_handle_)
@@ -265,6 +271,7 @@ hypre_UmpireFinalize(hypre_Handle *hypre_handle_)
    umpire_allocator allocator;
 
 #if defined(HYPRE_USING_UMPIRE_HOST)
+   if (hypre_HandleOwnUmpireHostPool(hypre_handle_))
    {
       const char *pool_name = hypre_HandleUmpireHostPoolName(hypre_handle_);
       umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &allocator);
@@ -273,6 +280,7 @@ hypre_UmpireFinalize(hypre_Handle *hypre_handle_)
 #endif
 
 #if defined(HYPRE_USING_UMPIRE_DEVICE)
+   if (hypre_HandleOwnUmpireDevicePool(hypre_handle_))
    {
       const char *pool_name = hypre_HandleUmpireDevicePoolName(hypre_handle_);
       umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &allocator);
@@ -281,6 +289,7 @@ hypre_UmpireFinalize(hypre_Handle *hypre_handle_)
 #endif
 
 #if defined(HYPRE_USING_UMPIRE_UM)
+   if (hypre_HandleOwnUmpireUMPool(hypre_handle_))
    {
       const char *pool_name = hypre_HandleUmpireUMPoolName(hypre_handle_);
       umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &allocator);
@@ -289,6 +298,7 @@ hypre_UmpireFinalize(hypre_Handle *hypre_handle_)
 #endif
 
 #if defined(HYPRE_USING_UMPIRE_PINNED)
+   if (hypre_HandleOwnUmpirePinnedPool(hypre_handle_))
    {
       const char *pool_name = hypre_HandleUmpirePinnedPoolName(hypre_handle_);
       umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &allocator);
