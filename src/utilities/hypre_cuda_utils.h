@@ -93,6 +93,9 @@ struct hypre_CudaData
    hypre_cub_CachingDeviceAllocator *cub_dev_allocator;
    hypre_cub_CachingDeviceAllocator *cub_uvm_allocator;
 #endif
+#ifdef HYPRE_USING_UMPIRE_DEVICE
+   hypre_umpire_device_allocator     umpire_device_allocator;
+#endif
    HYPRE_Int                         cuda_device;
    /* by default, hypre puts GPU computations in this stream
     * Do not be confused with the default (null) CUDA stream */
@@ -132,6 +135,7 @@ struct hypre_CudaData
 #define hypre_CudaDataSpgemmRownnzEstimateNsamples(data)   ((data) -> spgemm_rownnz_estimate_nsamples)
 #define hypre_CudaDataSpgemmRownnzEstimateMultFactor(data) ((data) -> spgemm_rownnz_estimate_mult_factor)
 #define hypre_CudaDataSpgemmHashType(data)                 ((data) -> spgemm_hash_type)
+#define hypre_CudaDataUmpireDeviceAllocator(data)          ((data) -> umpire_device_allocator)
 
 hypre_CudaData* hypre_CudaDataCreate();
 void hypre_CudaDataDestroy(hypre_CudaData* data);
@@ -228,8 +232,13 @@ using namespace thrust::placeholders;
 
 /* RL: TODO Want macro HYPRE_THRUST_CALL to return value but I don't know how to do it right
  * The following one works OK for now */
+#ifdef HYPRE_USING_UMPIRE_DEVICE
+#define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
+   thrust::func_name(thrust::cuda::par(hypre_HandleUmpireDeviceAllocator(hypre_handle())).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
+#else
 #define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
    thrust::func_name(thrust::cuda::par.on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
+#endif
 
 /* return the number of threads in block */
 template <hypre_int dim>

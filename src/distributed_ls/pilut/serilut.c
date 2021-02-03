@@ -39,7 +39,7 @@
 **************************************************************************/
 HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
              FactorMatType *ldu,
-	     ReduceMatType *rmat, HYPRE_Int maxnz, HYPRE_Real tol, 
+             ReduceMatType *rmat, HYPRE_Int maxnz, HYPRE_Real tol, 
              hypre_PilutSolverGlobals *globals)
 {
   HYPRE_Int i, ii, j, k, kk, l, m, ierr, diag_present;
@@ -67,13 +67,13 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
   iperm    = ldu->iperm;
 
   /* Allocate work space */
-  if (jr) { free(jr); jr = NULL; }
+  hypre_TFree(jr, HYPRE_MEMORY_HOST);
   jr = hypre_idx_malloc_init(nrows, -1, "hypre_SerILUT: jr");
-  if (lr) { free(lr); lr = NULL; }
+  hypre_TFree(lr, HYPRE_MEMORY_HOST);
   lr = hypre_idx_malloc_init(nrows, -1, "hypre_SerILUT: lr");
-  if (jw) { free(jw); jw = NULL; }
+  hypre_TFree(jw, HYPRE_MEMORY_HOST);
   jw = hypre_idx_malloc(nrows, "hypre_SerILUT: jw");
-  if (w) { free(w); w = NULL; }
+  hypre_TFree(w, HYPRE_MEMORY_HOST);
   w  =  hypre_fp_malloc(nrows, "hypre_SerILUT: w" );
 
   /* Find structural union of local rows */
@@ -193,7 +193,7 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
       w[jr[k]] = mult;
 
       if (fabs(mult) < rtol)
-        continue;	/* First drop test */
+         continue;/* First drop test */
 
       for (l=usrowptr[kk]; l<uerowptr[kk]; l++) {
         m = jr[ucolind[l]];
@@ -252,8 +252,8 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 
     for (lastjr=1, lastlr=0, j=0, diag_present=0; j<row_size; j++) {
       if (col_ind[j] >= firstrow  &&
-	  col_ind[j] < lastrow    &&
-	  iperm[col_ind[j]-firstrow] < nlocal) 
+            col_ind[j] < lastrow    &&
+            iperm[col_ind[j]-firstrow] < nlocal) 
         lr[lastlr++] = iperm[col_ind[j]-firstrow]; /* Copy the L elements separately */
 
       if (col_ind[j] != i+firstrow) { /* Off-diagonal element */
@@ -289,7 +289,7 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
       w[jr[k]] = mult;
 
       if (fabs(mult) < rtol)
-        continue;	/* First drop test */
+         continue;/* First drop test */
 
       for (l=usrowptr[kk]; l<uerowptr[kk]; l++) {
         m = jr[ucolind[l]];
@@ -298,7 +298,7 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
           continue;  /* Don't add fill if the element is too small */
 
         if (m == -1) {  /* Create fill */
-	  hypre_CheckBounds(firstrow, ucolind[l], lastrow, globals);
+           hypre_CheckBounds(firstrow, ucolind[l], lastrow, globals);
           if (iperm[ucolind[l]-firstrow] < nlocal) 
             lr[lastlr++] = iperm[ucolind[l]-firstrow]; /* Copy the L elements separately */
 
@@ -313,8 +313,8 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 
     /* Apply 2nd dropping rule -- forms partial L and rmat */
     hypre_SecondDropUpdate(maxnz, MAX(3*maxnz, row_size),
-		     rtol, i+firstrow,
-		     nlocal, perm, iperm, ldu, rmat, globals);
+          rtol, i+firstrow,
+          nlocal, perm, iperm, ldu, rmat, globals);
   }
 
 #ifdef HYPRE_TIMING
@@ -346,7 +346,7 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 HYPRE_Int hypre_SelectInterior( HYPRE_Int local_num_rows, 
                     HYPRE_DistributedMatrix matrix, 
                     HYPRE_Int *external_rows,
-		    HYPRE_Int *newperm, HYPRE_Int *newiperm, 
+                    HYPRE_Int *newperm, HYPRE_Int *newiperm, 
                     hypre_PilutSolverGlobals *globals )
 {
   HYPRE_Int nbnd, nlocal, i, j;
@@ -478,8 +478,8 @@ HYPRE_Int hypre_ExchangeStructuralUnions( DataDistType *ddist,
 * greater than tol are kept. The elements are stored into LDU.
 **************************************************************************/
 void hypre_SecondDrop(HYPRE_Int maxnz, HYPRE_Real tol, HYPRE_Int row,
-		HYPRE_Int *perm, HYPRE_Int *iperm,
-		FactorMatType *ldu, hypre_PilutSolverGlobals *globals)
+                HYPRE_Int *perm, HYPRE_Int *iperm,
+                FactorMatType *ldu, hypre_PilutSolverGlobals *globals)
 {
   HYPRE_Int i, j;
   HYPRE_Int diag, lrow;
@@ -632,8 +632,8 @@ void hypre_SecondDrop(HYPRE_Int maxnz, HYPRE_Real tol, HYPRE_Int row,
 * This version keeps only maxnzkeep 
 **************************************************************************/
 void hypre_SecondDropUpdate(HYPRE_Int maxnz, HYPRE_Int maxnzkeep, HYPRE_Real tol, HYPRE_Int row,
-		      HYPRE_Int nlocal, HYPRE_Int *perm, HYPRE_Int *iperm, 
-		      FactorMatType *ldu, ReduceMatType *rmat,
+      HYPRE_Int nlocal, HYPRE_Int *perm, HYPRE_Int *iperm, 
+      FactorMatType *ldu, ReduceMatType *rmat,
                       hypre_PilutSolverGlobals *globals )
 {
   HYPRE_Int i, j, nl;
@@ -670,14 +670,14 @@ void hypre_SecondDropUpdate(HYPRE_Int maxnz, HYPRE_Int maxnzkeep, HYPRE_Real tol
     last = 1, first = lastjr-1;
     while (1) {
       while (last < first         &&     /* and [last] is L */
-	     jw[last] >= firstrow &&
-	     jw[last] < lastrow   &&
-	     iperm[jw[last]-firstrow] < nlocal)
+            jw[last] >= firstrow &&
+            jw[last] < lastrow   &&
+            iperm[jw[last]-firstrow] < nlocal)
         last++;
       while (last < first            &&  /* and [first] is not L */
-	     !(jw[first] >= firstrow &&
-	       jw[first] < lastrow   &&
-	       iperm[jw[first]-firstrow] < nlocal))
+            !(jw[first] >= firstrow &&
+               jw[first] < lastrow   &&
+               iperm[jw[first]-firstrow] < nlocal))
         first--;
 
       if (last < first) {
@@ -688,8 +688,8 @@ void hypre_SecondDropUpdate(HYPRE_Int maxnz, HYPRE_Int maxnzkeep, HYPRE_Real tol
 
       if (last == first) {
         if (jw[last] >= firstrow &&
-	    jw[last] < lastrow   &&
-	    iperm[jw[last]-firstrow] < nlocal) {
+              jw[last] < lastrow   &&
+              iperm[jw[last]-firstrow] < nlocal) {
           first++;
           last++;
         }

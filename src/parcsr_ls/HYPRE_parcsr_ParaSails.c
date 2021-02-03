@@ -109,7 +109,7 @@ HYPRE_ParCSRParaSailsDestroy( HYPRE_Solver solver )
    secret = (Secret *) solver;
    hypre_ParaSailsDestroy(secret->obj);
 
-   free(secret);
+   hypre_TFree(secret,HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 #endif
@@ -419,7 +419,7 @@ HYPRE_ParaSailsDestroy( HYPRE_Solver solver )
    secret = (Secret *) solver;
    hypre_ParaSailsDestroy(secret->obj);
 
-   free(secret);
+   hypre_TFree(secret,HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 #endif

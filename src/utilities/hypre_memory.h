@@ -71,6 +71,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#if defined(HYPRE_USING_UMPIRE)
+#include "umpire/interface/umpire.h"
+#define HYPRE_UMPIRE_POOL_NAME_MAX_LEN 1024
+#endif
+
 /* stringification:
  * _Pragma(string-literal), so we need to cast argument to a string
  * The three dots as last argument of the macro tells compiler that this is a variadic macro.
@@ -302,6 +307,15 @@ HYPRE_ExecutionPolicy hypre_GetExecPolicy2(HYPRE_MemoryLocation location1, HYPRE
 HYPRE_Int hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location);
 HYPRE_Int hypre_PrintMemoryTracker();
 HYPRE_Int hypre_SetCubMemPoolSize( hypre_uint bin_growth, hypre_uint min_bin, hypre_uint max_bin, size_t max_cached_bytes );
+HYPRE_Int hypre_umpire_host_pooled_allocate(void **ptr, size_t nbytes);
+HYPRE_Int hypre_umpire_host_pooled_free(void *ptr);
+void *hypre_umpire_host_pooled_realloc(void *ptr, size_t size);
+HYPRE_Int hypre_umpire_device_pooled_allocate(void **ptr, size_t nbytes);
+HYPRE_Int hypre_umpire_device_pooled_free(void *ptr);
+HYPRE_Int hypre_umpire_um_pooled_allocate(void **ptr, size_t nbytes);
+HYPRE_Int hypre_umpire_um_pooled_free(void *ptr);
+HYPRE_Int hypre_umpire_pinned_pooled_allocate(void **ptr, size_t nbytes);
+HYPRE_Int hypre_umpire_pinned_pooled_free(void *ptr);
 
 /* memory_dmalloc.c */
 HYPRE_Int hypre_InitMemoryDebugDML( HYPRE_Int id );

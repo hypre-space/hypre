@@ -43,13 +43,15 @@ shift
 ./test.sh check-license.sh $src_dir/..
 mv -f check-license.??? $output_dir
 
-# Check for 'int', 'double', and 'MPI_'
+# Check usage of int, double, MPI, memory, headers
 ./test.sh check-int.sh $src_dir
 mv -f check-int.??? $output_dir
 ./test.sh check-double.sh $src_dir
 mv -f check-double.??? $output_dir
 ./test.sh check-mpi.sh $src_dir
 mv -f check-mpi.??? $output_dir
+./test.sh check-mem.sh $src_dir
+mv -f check-mem.??? $output_dir
 ./test.sh check-headers.sh $src_dir
 mv -f check-headers.??? $output_dir
 
