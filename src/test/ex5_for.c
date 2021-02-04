@@ -219,9 +219,9 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
          /* The left identity block:position i-n */
          if ((i-n)>=0)
          {
-	    cols[nnz] = i-n;
-	    values[nnz] = -1.0;
-	    nnz++;
+            cols[nnz] = i-n;
+            values[nnz] = -1.0;
+            nnz++;
          }
 
          /* The left -1: position i-1 */
@@ -321,9 +321,9 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       HYPRE_IJVectorSetValues(x, local_size, rows, x_values);
 #endif
 
-      free(x_values);
-      free(rhs_values);
-      free(rows);
+      hypre_TFree(x_values, HYPRE_MEMORY_HOST);
+      hypre_TFree(rhs_values, HYPRE_MEMORY_HOST);
+      hypre_TFree(rows, HYPRE_MEMORY_HOST);
    }
 
 #ifdef HYPRE_FORTRAN
