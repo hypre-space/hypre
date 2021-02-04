@@ -137,7 +137,11 @@ HYPRE_Int hypre_cr(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Real *A_data, HYPRE_Int
          break;
       }
    }
-   free(e0); free(e1); return hypre_error_flag;
+
+   hypre_TFree(e0, HYPRE_MEMORY_HOST);
+   hypre_TFree(e1, HYPRE_MEMORY_HOST);
+
+   return hypre_error_flag;
 }
 
 /* take an ind. set over the candidates*/
@@ -281,7 +285,12 @@ HYPRE_Int hypre_IndepSetGreedy(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Int n, HYPR
          }
       }
    }
-   free(ma); free(list); free(head_mem); free(tail_mem);
+
+   hypre_TFree(ma, HYPRE_MEMORY_HOST);
+   hypre_TFree(list, HYPRE_MEMORY_HOST);
+   hypre_TFree(head_mem, HYPRE_MEMORY_HOST);
+   hypre_TFree(tail_mem, HYPRE_MEMORY_HOST);
+
    return hypre_error_flag;
 }
 
@@ -390,7 +399,12 @@ HYPRE_Int hypre_IndepSetGreedyS(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Int n, HYP
          }
       }
    }
-   free(ma); free(list); free(head_mem); free(tail_mem);
+
+   hypre_TFree(ma, HYPRE_MEMORY_HOST);
+   hypre_TFree(list, HYPRE_MEMORY_HOST);
+   hypre_TFree(head_mem, HYPRE_MEMORY_HOST);
+   hypre_TFree(tail_mem, HYPRE_MEMORY_HOST);
+
    return hypre_error_flag;
 }
 

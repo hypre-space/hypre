@@ -87,6 +87,7 @@ extern "C++" {
 # Structures and prototypes
 #===========================================================================
 
+cat hypre_umpire_allocator.h     >> $INTERNAL_HEADER
 cat hypre_cuda_utils.h           >> $INTERNAL_HEADER
 cat hypre_cuda_reducer.h         >> $INTERNAL_HEADER
 cat hypre_cub_allocator.h        >> $INTERNAL_HEADER

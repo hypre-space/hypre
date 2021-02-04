@@ -58,7 +58,7 @@ hypre_GetDefaultCUDAGridDimension( HYPRE_Int n,
    }
    else if (granularity[0] == 'w')
    {
-      HYPRE_Int num_warps_per_block = num_threads_per_block >> 5;
+      HYPRE_Int num_warps_per_block = num_threads_per_block >> HYPRE_WARP_BITSHIFT;
 
       hypre_assert(num_warps_per_block * HYPRE_WARP_SIZE == num_threads_per_block);
 
@@ -705,6 +705,7 @@ hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in,  T2 *keys2_in,  T3 *vals
    auto begin_keys_out = thrust::make_zip_iterator(thrust::make_tuple(keys1_out,    keys2_out   ));
    thrust::equal_to< thrust::tuple<T1, T2> > pred;
    thrust::plus<T3> func;
+
    auto new_end = HYPRE_THRUST_CALL(reduce_by_key, begin_keys_in, end_keys_in, vals_in, begin_keys_out, vals_out, pred, func);
 
    return new_end.second - vals_out;
@@ -1076,4 +1077,3 @@ hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle)
 }
 
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-

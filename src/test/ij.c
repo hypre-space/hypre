@@ -17,7 +17,7 @@
 #include <math.h>
 
 #include "_hypre_utilities.h"
-#include "_hypre_utilities.hpp"
+//#include "_hypre_utilities.hpp"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_mv.h"
 
@@ -27,8 +27,18 @@
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"
 
+#if defined(HYPRE_USING_GPU)
+#include <cuda.h>
+#include <cuda_runtime.h>
+#include <cuda_profiler_api.h>
+#endif
+
 #ifdef HYPRE_USING_DSUPERLU
 #include "superlu_ddefs.h"
+#endif
+
+#if defined(HYPRE_USING_UMPIRE)
+#include "umpire/interface/umpire.h"
 #endif
 
 /* begin lobpcg */
@@ -415,17 +425,19 @@ main( hypre_int argc,
    HYPRE_Int amgdd_fac_cycle_type = 1;
    HYPRE_Int amgdd_num_ghost_layers = 1;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_Int spgemm_use_cusparse = 1;
-   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
 #endif
+   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
    HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
 
+#ifdef HYPRE_USING_CUB_ALLOCATOR
    /* CUB Allocator */
    hypre_uint mempool_bin_growth   = 8,
               mempool_min_bin      = 3,
               mempool_max_bin      = 9;
    size_t mempool_max_cached_bytes = 2000LL * 1024 * 1024;
+#endif
 
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
@@ -1101,7 +1113,7 @@ main( hypre_int argc,
          ilu_nsh_droptol = atof(argv[arg_index++]);
       }
       /* end ilu options */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
       else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
       {
          arg_index++;
@@ -1119,6 +1131,7 @@ main( hypre_int argc,
          spgemm_use_cusparse = atoi(argv[arg_index++]);
       }
 #endif
+#ifdef HYPRE_USING_CUB_ALLOCATOR
       else if ( strcmp(argv[arg_index], "-mempool_growth") == 0 )
       {
          arg_index++;
@@ -1140,6 +1153,7 @@ main( hypre_int argc,
          arg_index++;
          mempool_max_cached_bytes = atoi(argv[arg_index++])*1024LL*1024LL;
       }
+#endif
       else
       {
          arg_index++;
@@ -1205,7 +1219,6 @@ main( hypre_int argc,
    }
 
    /* defaults for Schwarz */
-
    variant = 0;  /* multiplicative */
    overlap = 1;  /* 1 layer overlap */
    domain_type = 2; /* through agglomeration */
@@ -2146,14 +2159,33 @@ main( hypre_int argc,
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
 
+#ifdef HYPRE_USING_CUB_ALLOCATOR
    /* To be effective, hypre_SetCubMemPoolSize must immediately follow HYPRE_Init */
-   hypre_SetCubMemPoolSize( mempool_bin_growth, mempool_min_bin,
-                            mempool_max_bin, mempool_max_cached_bytes );
+   HYPRE_SetGPUMemoryPoolSize( mempool_bin_growth, mempool_min_bin,
+                               mempool_max_bin, mempool_max_cached_bytes );
+#endif
 
-   hypre_HandleMemoryLocation(hypre_handle())    = memory_location;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   hypre_HandleDefaultExecPolicy(hypre_handle()) = default_exec_policy;
-   hypre_HandleSpgemmUseCusparse(hypre_handle()) = spgemm_use_cusparse;
+#if defined(HYPRE_USING_UMPIRE)
+   /* Setup Umpire pools */
+   HYPRE_SetUmpireDevicePoolName("HYPRE_DEVICE_POOL_TEST");
+   HYPRE_SetUmpireUMPoolName("HYPRE_UM_POOL_TEST");
+   HYPRE_SetUmpireHostPoolName("HYPRE_HOST_POOL_TEST");
+   HYPRE_SetUmpirePinnedPoolName("HYPRE_PINNED_POOL_TEST");
+   HYPRE_SetUmpireDevicePoolSize(4LL * 1024 * 1024 * 1024);
+   HYPRE_SetUmpireUMPoolSize(4LL * 1024 * 1024 * 1024);
+   HYPRE_SetUmpireHostPoolSize(4LL * 1024 * 1024 * 1024);
+   HYPRE_SetUmpirePinnedPoolSize(4LL * 1024 * 1024 * 1024);
+#endif
+
+   /* default memory location */
+   HYPRE_SetMemoryLocation(memory_location);
+
+   /* default execution policy */
+   HYPRE_SetExecutionPolicy(default_exec_policy);
+
+#if defined(HYPRE_USING_GPU)
+   /* use cuSPARSE for SpGEMM */
+   HYPRE_CSRMatrixSetSpGemmUseCusparse(spgemm_use_cusparse);
 #endif
 
    /*-----------------------------------------------------------
@@ -3225,7 +3257,7 @@ main( hypre_int argc,
          HYPRE_ParCSRMatrixMatvec(1., parcsr_A, x, 0., b);
       }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
       cudaDeviceSynchronize();
 #endif
 
@@ -3557,7 +3589,7 @@ main( hypre_int argc,
       hypre_NvtxPopRange();
 #endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
       cudaDeviceSynchronize();
 #endif
 
@@ -3595,7 +3627,7 @@ main( hypre_int argc,
       hypre_NvtxPopRange();
 #endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
       cudaDeviceSynchronize();
 #endif
 
@@ -3656,7 +3688,7 @@ main( hypre_int argc,
       hypre_NvtxPopRange();
 #endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
       cudaDeviceSynchronize();
 #endif
 
@@ -3688,7 +3720,7 @@ main( hypre_int argc,
       hypre_NvtxPopRange();
 #endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
       cudaDeviceSynchronize();
 #endif
 
@@ -4879,7 +4911,7 @@ main( hypre_int argc,
             mv_MultiVectorDestroy( constraints );
          if ( lobpcgGen )
             mv_MultiVectorDestroy( workspace );
-         free( eigenvalues );
+         hypre_TFree(eigenvalues, HYPRE_MEMORY_HOST);
 
          HYPRE_ParCSRPCGDestroy(pcg_solver);
 
@@ -5279,8 +5311,7 @@ main( hypre_int argc,
             mv_MultiVectorDestroy( constraints );
          if ( lobpcgGen )
             mv_MultiVectorDestroy( workspace );
-         free( eigenvalues );
-
+         hypre_TFree(eigenvalues, HYPRE_MEMORY_HOST);
       } /* if ( pcgIterations > 0 ) */
 
       hypre_TFree( interpreter , HYPRE_MEMORY_HOST);

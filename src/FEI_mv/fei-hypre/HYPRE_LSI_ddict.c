@@ -48,21 +48,21 @@ HYPRE_LSI_DDICT;
 
 extern int  HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix,MH_Matrix *,
                                      MPI_Comm, int *, MH_Context *);
-extern int  HYPRE_LSI_DDICTComposeOverlappedMatrix(MH_Matrix *, int *, 
-                 int **recv_lengths, int **int_buf, double **dble_buf, 
+extern int  HYPRE_LSI_DDICTComposeOverlappedMatrix(MH_Matrix *, int *,
+                 int **recv_lengths, int **int_buf, double **dble_buf,
                  int **sindex_array, int **sindex_array2, int *offset);
 extern int  HYPRE_LSI_DDICTGetRowLengths(MH_Matrix *Amat, int *leng, int **);
 extern int  HYPRE_LIS_DDICTGetOffProcRows(MH_Matrix *Amat, int leng, int *,
                  int Noffset, int *map, int *map2, int **int_buf,
                  double **dble_buf);
 extern int  HYPRE_LSI_DDICTDecompose(HYPRE_LSI_DDICT *ict_ptr,MH_Matrix *Amat,
-                 int total_recv_leng, int *recv_lengths, int *ext_ja, 
+                 int total_recv_leng, int *recv_lengths, int *ext_ja,
                  double *ext_aa, int *map, int *map2, int Noffset);
 extern void HYPRE_LSI_qsort1a(int *, int *, int, int);
 extern int  HYPRE_LSI_SplitDSort(double *,int,int*,int);
 extern int  HYPRE_LSI_Search(int *, int, int);
 
-extern int  HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa, 
+extern int  HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa,
                  int *mat_ja, int *mat_ia, double *rowNorms);
 
 extern int  MH_ExchBdry(double *, void *);
@@ -78,7 +78,7 @@ extern int  MH_GetRow(void *, int, int *, int, int *, double *, int *);
 int HYPRE_LSI_DDICTCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
    HYPRE_LSI_DDICT *ict_ptr;
-   
+
    ict_ptr = hypre_TAlloc(HYPRE_LSI_DDICT, 1, HYPRE_MEMORY_HOST);
 
    if (ict_ptr == NULL) return 1;
@@ -106,24 +106,21 @@ int HYPRE_LSI_DDICTDestroy( HYPRE_Solver solver )
    HYPRE_LSI_DDICT *ict_ptr;
 
    ict_ptr = (HYPRE_LSI_DDICT *) solver;
-   if ( ict_ptr->mat_ja != NULL ) free(ict_ptr->mat_ja);
-   if ( ict_ptr->mat_aa != NULL ) free(ict_ptr->mat_aa);
-   ict_ptr->mat_ja = NULL;
-   ict_ptr->mat_aa = NULL;
-   if ( ict_ptr->mh_mat != NULL ) 
+   hypre_TFree(ict_ptr->mat_ja, HYPRE_MEMORY_HOST);
+   hypre_TFree(ict_ptr->mat_aa, HYPRE_MEMORY_HOST);
+   if ( ict_ptr->mh_mat != NULL )
    {
-      if (ict_ptr->mh_mat->sendProc != NULL) free(ict_ptr->mh_mat->sendProc);
-      if (ict_ptr->mh_mat->sendLeng != NULL) free(ict_ptr->mh_mat->sendLeng);
-      if (ict_ptr->mh_mat->recvProc != NULL) free(ict_ptr->mh_mat->recvProc);
-      if (ict_ptr->mh_mat->recvLeng != NULL) free(ict_ptr->mh_mat->recvLeng);
+      hypre_TFree(ict_ptr->mh_mat->sendProc, HYPRE_MEMORY_HOST);
+      hypre_TFree(ict_ptr->mh_mat->sendLeng, HYPRE_MEMORY_HOST);
+      hypre_TFree(ict_ptr->mh_mat->recvProc, HYPRE_MEMORY_HOST);
+      hypre_TFree(ict_ptr->mh_mat->recvLeng, HYPRE_MEMORY_HOST);
       for ( i = 0; i < ict_ptr->mh_mat->sendProcCnt; i++ )
-         if (ict_ptr->mh_mat->sendList[i] != NULL) 
-            free(ict_ptr->mh_mat->sendList[i]);
-      if (ict_ptr->mh_mat->sendList != NULL) free(ict_ptr->mh_mat->sendList);
-      free(ict_ptr);
-   }  
+         hypre_TFree(ict_ptr->mh_mat->sendList[i], HYPRE_MEMORY_HOST);
+      hypre_TFree(ict_ptr->mh_mat->sendList, HYPRE_MEMORY_HOST);
+      hypre_TFree(ict_ptr, HYPRE_MEMORY_HOST);
+   }
    ict_ptr->mh_mat = NULL;
-   free(ict_ptr);
+   hypre_TFree(ict_ptr, HYPRE_MEMORY_HOST);
 
    return 0;
 }
@@ -208,14 +205,14 @@ int HYPRE_LSI_DDICTSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
          dtmp -= ( mat_aa[j] * dbuf2[mat_ja[j]] );
       dbuf2[i] = dtmp * mat_aa[i];
    }
-   for ( i = extNrows-1; i >= 0; i-- ) 
+   for ( i = extNrows-1; i >= 0; i-- )
    {
       dbuf2[i] *= mat_aa[i];
       dtmp = dbuf2[i];
       for ( j = mat_ja[i]; j < mat_ja[i+1]; j++ )
          dbuf2[mat_ja[j]] -= ( dtmp * mat_aa[j] );
-   } 
-   if ( dbuf != NULL ) free(dbuf);
+   }
+   hypre_TFree(dbuf, HYPRE_MEMORY_HOST);
 
    for ( i = 0; i < Nrows; i++ ) soln[i] = dbuf2[i];
 
@@ -223,10 +220,10 @@ int HYPRE_LSI_DDICTSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 
    for ( i = 0; i < length; i++ ) soln[ibuf[i]] = soln[ibuf[i]] + dbuf[i];
 
-   if ( ibuf  != NULL ) free(ibuf);
-   if ( dbuf  != NULL ) free(dbuf);
-   if ( dbuf2 != NULL ) free(dbuf2);
-   free(context);
+   hypre_TFree(ibuf, HYPRE_MEMORY_HOST);
+   hypre_TFree(dbuf, HYPRE_MEMORY_HOST);
+   hypre_TFree(dbuf2, HYPRE_MEMORY_HOST);
+   hypre_TFree(context, HYPRE_MEMORY_HOST);
 
    return 0;
 }
@@ -267,15 +264,15 @@ int HYPRE_LSI_DDICTSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    mh_mat = hypre_TAlloc( MH_Matrix, 1, HYPRE_MEMORY_HOST);
    context->Amat = mh_mat;
    HYPRE_LSI_MLConstructMHMatrix(A_csr,mh_mat,MPI_COMM_WORLD,
-                                 context->partition,context); 
+                                 context->partition,context);
 
    /* ---------------------------------------------------------------- */
    /* compose the enlarged overlapped local matrix                     */
    /* ---------------------------------------------------------------- */
-   
+
    if ( overlap_flag )
    {
-      HYPRE_LSI_DDICTComposeOverlappedMatrix(mh_mat, &total_recv_leng, 
+      HYPRE_LSI_DDICTComposeOverlappedMatrix(mh_mat, &total_recv_leng,
                  &recv_lengths, &int_buf, &dble_buf, &map, &map2,&offset);
    }
    else
@@ -293,8 +290,8 @@ int HYPRE_LSI_DDICTSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
       MPI_Allreduce(parray2,parray,nprocs,MPI_INT,MPI_SUM,MPI_COMM_WORLD);
       offset = 0;
       for (i = 0; i < mypid; i++) offset += parray[i];
-      free(parray);
-      free(parray2);
+      hypre_TFree(parray, HYPRE_MEMORY_HOST);
+      hypre_TFree(parray2, HYPRE_MEMORY_HOST);
    }
 
    /* ---------------------------------------------------------------- */
@@ -312,13 +309,13 @@ int HYPRE_LSI_DDICTSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
                    ict_ptr->mat_aa[j]);
    }
    ict_ptr->mh_mat = mh_mat;
-   if ( recv_lengths != NULL ) free( recv_lengths );
-   if ( int_buf      != NULL ) free( int_buf );
-   if ( dble_buf     != NULL ) free( dble_buf );
-   if ( map          != NULL ) free( map );
-   if ( map2         != NULL ) free( map2 );
-   free( context->partition );
-   free( context );
+   hypre_TFree(recv_lengths, HYPRE_MEMORY_HOST);
+   hypre_TFree(int_buf, HYPRE_MEMORY_HOST);
+   hypre_TFree(dble_buf, HYPRE_MEMORY_HOST);
+   hypre_TFree(map, HYPRE_MEMORY_HOST);
+   hypre_TFree(map2, HYPRE_MEMORY_HOST);
+   hypre_TFree(context->partition, HYPRE_MEMORY_HOST);
+   hypre_TFree(context, HYPRE_MEMORY_HOST);
    return 0;
 }
 
@@ -393,31 +390,33 @@ int HYPRE_LSI_DDICTGetRowLengths(MH_Matrix *Amat, int *leng, int **recv_leng)
          index = sendList[i][j];
          while (MH_GetRow(context,1,&index,allocated_space,cols,vals,&m)==0)
          {
-            free(cols); free(vals);
+            hypre_TFree(cols, HYPRE_MEMORY_HOST);
+            hypre_TFree(vals, HYPRE_MEMORY_HOST);
             allocated_space += 200 + 1;
             cols = hypre_TAlloc(int, allocated_space , HYPRE_MEMORY_HOST);
             vals = hypre_TAlloc(double, allocated_space , HYPRE_MEMORY_HOST);
-         } 
+         }
          temp_list[j] = m;
       }
       msgtype = mtype;
       MPI_Send((void*)temp_list,length,MPI_INT,proc_id,msgtype,MPI_COMM_WORLD);
-      free( temp_list );
+      hypre_TFree(temp_list, HYPRE_MEMORY_HOST);
    }
-   free(cols);
-   free(vals);
-   free(context);
+   hypre_TFree(cols, HYPRE_MEMORY_HOST);
+   hypre_TFree(vals, HYPRE_MEMORY_HOST);
+   hypre_TFree(context, HYPRE_MEMORY_HOST);
 
    /* ---------------------------------------------------------------- */
    /* wait for messages                                                */
    /* ---------------------------------------------------------------- */
 
-   for ( i = 0; i < nRecv; i++ ) 
+   for ( i = 0; i < nRecv; i++ )
    {
       MPI_Wait( &Request[i], &status );
    }
 
-   if (nRecv > 0) free( Request );
+   if (nRecv > 0)
+      hypre_TFree(Request, HYPRE_MEMORY_HOST);
    return 0;
 }
 
@@ -510,11 +509,12 @@ int HYPRE_LSI_DDICTGetOffProcRows(MH_Matrix *Amat, int leng, int *recv_leng,
          index = sendList[i][j];
          while (MH_GetRow(context,1,&index,allocated_space,cols,vals,&m)==0)
          {
-            free(cols); free(vals);
+            hypre_TFree(cols, HYPRE_MEMORY_HOST);
+            hypre_TFree(vals, HYPRE_MEMORY_HOST);
             allocated_space += 200 + 1;
             cols = hypre_TAlloc(int, allocated_space , HYPRE_MEMORY_HOST);
             vals = hypre_TAlloc(double, allocated_space , HYPRE_MEMORY_HOST);
-         } 
+         }
          nnz += m;
       }
       if ( nnz > 0 ) send_buf = hypre_TAlloc(double,  nnz , HYPRE_MEMORY_HOST);
@@ -529,10 +529,11 @@ int HYPRE_LSI_DDICTGetOffProcRows(MH_Matrix *Amat, int leng, int *recv_leng,
       msgtype = mtype;
       MPI_Send((void*) send_buf, nnz, MPI_DOUBLE, proc_id, msgtype,
                        MPI_COMM_WORLD);
-      if ( nnz > 0 ) free( send_buf );
+      if ( nnz > 0 )
+         hypre_TFree(send_buf, HYPRE_MEMORY_HOST);
    }
-   free(cols);
-   free(vals);
+   hypre_TFree(cols, HYPRE_MEMORY_HOST);
+   hypre_TFree(vals, HYPRE_MEMORY_HOST);
 
    /* ---------------------------------------------------------------- */
    /* wait for all messages                                            */
@@ -597,10 +598,11 @@ int HYPRE_LSI_DDICTGetOffProcRows(MH_Matrix *Amat, int leng, int *recv_leng,
       msgtype = mtype;
       MPI_Send((void*) isend_buf, nnz, MPI_INT, proc_id, msgtype,
                        MPI_COMM_WORLD);
-      if ( nnz > 0 ) free( isend_buf );
+      if ( nnz > 0 )
+         hypre_TFree(isend_buf, HYPRE_MEMORY_HOST);
    }
-   free(cols);
-   free(vals);
+   hypre_TFree(cols, HYPRE_MEMORY_HOST);
+   hypre_TFree(vals, HYPRE_MEMORY_HOST);
 
    /* ----------------------------------------------------------- */
    /* post receives for all messages                              */
@@ -611,8 +613,8 @@ int HYPRE_LSI_DDICTGetOffProcRows(MH_Matrix *Amat, int leng, int *recv_leng,
       MPI_Wait(request+i, &status);
    }
 
-   free(request);
-   free(context);
+   hypre_TFree(request, HYPRE_MEMORY_HOST);
+   hypre_TFree(context, HYPRE_MEMORY_HOST);
    return 0;
 }
 
@@ -620,9 +622,9 @@ int HYPRE_LSI_DDICTGetOffProcRows(MH_Matrix *Amat, int leng, int *recv_leng,
 /* construct an enlarged overlapped local matrix                             */
 /*---------------------------------------------------------------------------*/
 
-int HYPRE_LSI_DDICTComposeOverlappedMatrix(MH_Matrix *mh_mat, 
-              int *total_recv_leng, int **recv_lengths, int **int_buf, 
-              double **dble_buf, int **sindex_array, int **sindex_array2, 
+int HYPRE_LSI_DDICTComposeOverlappedMatrix(MH_Matrix *mh_mat,
+              int *total_recv_leng, int **recv_lengths, int **int_buf,
+              double **dble_buf, int **sindex_array, int **sindex_array2,
               int *offset)
 {
    int        i, nprocs, mypid, Nrows, *proc_array, *proc_array2;
@@ -666,7 +668,7 @@ int HYPRE_LSI_DDICTComposeOverlappedMatrix(MH_Matrix *mh_mat,
    NrowsOffset = 0;
    for (i = 0; i < mypid; i++) NrowsOffset += proc_array[i];
    for (i = 1; i < nprocs; i++) proc_array[i] += proc_array[i-1];
-   free(proc_array2);
+   hypre_TFree(proc_array2, HYPRE_MEMORY_HOST);
 
    /* ---------------------------------------------------------------- */
    /* compose the column index map (index_array,index_array2)          */
@@ -681,16 +683,16 @@ int HYPRE_LSI_DDICTComposeOverlappedMatrix(MH_Matrix *mh_mat,
    MH_ExchBdry(dble_array, context);
    if ( extNrows-Nrows > 0 )
       index_array = hypre_TAlloc(int, (extNrows-Nrows) , HYPRE_MEMORY_HOST);
-   else 
+   else
       index_array = NULL;
    for (i = Nrows; i < extNrows; i++) index_array[i-Nrows] = dble_array[i];
    if ( extNrows-Nrows > 0 )
       index_array2  = hypre_TAlloc(int, (extNrows-Nrows) , HYPRE_MEMORY_HOST);
-   else 
+   else
       index_array2 = NULL;
    for (i = 0; i < extNrows-Nrows; i++) index_array2[i] = i;
-   free( dble_array );
-   free(context);
+   hypre_TFree(dble_array, HYPRE_MEMORY_HOST);
+   hypre_TFree(context, HYPRE_MEMORY_HOST);
 
    /* ---------------------------------------------------------------- */
    /* send the lengths of each row to remote processor                 */
@@ -699,10 +701,10 @@ int HYPRE_LSI_DDICTComposeOverlappedMatrix(MH_Matrix *mh_mat,
    /* ---------------------------------------------------------------- */
 
    HYPRE_LSI_DDICTGetRowLengths(mh_mat, total_recv_leng, recv_lengths);
-   HYPRE_LSI_DDICTGetOffProcRows(mh_mat, *total_recv_leng, *recv_lengths, 
+   HYPRE_LSI_DDICTGetOffProcRows(mh_mat, *total_recv_leng, *recv_lengths,
               NrowsOffset,index_array,index_array2,int_buf, dble_buf);
 
-   free(proc_array);
+   hypre_TFree(proc_array, HYPRE_MEMORY_HOST);
    HYPRE_LSI_qsort1a(index_array, index_array2, 0, extNrows-Nrows-1);
    (*sindex_array) = index_array;
    (*sindex_array2) = index_array2;
@@ -715,7 +717,7 @@ int HYPRE_LSI_DDICTComposeOverlappedMatrix(MH_Matrix *mh_mat,
 /*---------------------------------------------------------------------------*/
 
 int HYPRE_LSI_DDICTDecompose(HYPRE_LSI_DDICT *ict_ptr,MH_Matrix *Amat,
-           int total_recv_leng, int *recv_lengths, int *ext_ja, double *ext_aa, 
+           int total_recv_leng, int *recv_lengths, int *ext_ja, double *ext_aa,
            int *map, int *map2, int Noffset)
 {
    int          i, j, row_leng, *mat_ia, *mat_ja, allocated_space, *cols, mypid;
@@ -755,7 +757,8 @@ int HYPRE_LSI_DDICTDecompose(HYPRE_LSI_DDICT *ict_ptr,MH_Matrix *Amat,
       rowNorms[i] = 0.0;
       while (MH_GetRow(context,1,&i,allocated_space,cols,vals,&row_leng)==0)
       {
-         free(vals); free(cols);
+         hypre_TFree(vals, HYPRE_MEMORY_HOST);
+         hypre_TFree(cols, HYPRE_MEMORY_HOST);
          allocated_space += 200 + 1;
          cols = hypre_TAlloc(int, allocated_space , HYPRE_MEMORY_HOST);
          vals = hypre_TAlloc(double, allocated_space , HYPRE_MEMORY_HOST);
@@ -780,12 +783,12 @@ rowNorms[i] = 1.0;
    {
       rel_tau   = tau * rowNorms[i];
       MH_GetRow(context,1,&i,allocated_space,cols,vals,&row_leng);
-      for ( j = 0; j < row_leng; j++ ) 
+      for ( j = 0; j < row_leng; j++ )
       {
-         if ( cols[j] <= i && habs(vals[j]) > rel_tau ) 
+         if ( cols[j] <= i && habs(vals[j]) > rel_tau )
          {
-            mat_aa[total_nnz] = vals[j];    
-            mat_ja[total_nnz++] = cols[j];    
+            mat_aa[total_nnz] = vals[j];
+            mat_ja[total_nnz++] = cols[j];
          }
       }
       mat_ia[i+1] = total_nnz;
@@ -812,10 +815,10 @@ rowNorms[i+Nrows] = 1.0;
       rel_tau = tau * rowNorms[i+Nrows];
       for ( j = offset; j < offset+recv_lengths[i]; j++ )
       {
-         if (ext_ja[j] != -1 && ext_ja[j] <= Nrows+i && habs(ext_aa[j]) > rel_tau) 
+         if (ext_ja[j] != -1 && ext_ja[j] <= Nrows+i && habs(ext_aa[j]) > rel_tau)
          {
-            mat_aa[total_nnz] = ext_aa[j];    
-            mat_ja[total_nnz++] = ext_ja[j];    
+            mat_aa[total_nnz] = ext_aa[j];
+            mat_ja[total_nnz++] = ext_ja[j];
          }
       }
       offset += recv_lengths[i];
@@ -826,12 +829,12 @@ rowNorms[i+Nrows] = 1.0;
    /* clean up a little                                                */
    /* ---------------------------------------------------------------- */
 
-   if ( Amat->rowptr != NULL ) {free (Amat->rowptr); Amat->rowptr = NULL;}
-   if ( Amat->colnum != NULL ) {free (Amat->colnum); Amat->colnum = NULL;}
-   if ( Amat->values != NULL ) {free (Amat->values); Amat->values = NULL;}
-   free(context);
-   free(cols);
-   free(vals);
+   hypre_TFree(Amat->rowptr, HYPRE_MEMORY_HOST);
+   hypre_TFree(Amat->colnum, HYPRE_MEMORY_HOST);
+   hypre_TFree(Amat->values, HYPRE_MEMORY_HOST);
+   hypre_TFree(context, HYPRE_MEMORY_HOST);
+   hypre_TFree(cols, HYPRE_MEMORY_HOST);
+   hypre_TFree(vals, HYPRE_MEMORY_HOST);
 
    /* ---------------------------------------------------------------- */
    /* call ICT factorization                                           */
@@ -839,12 +842,12 @@ rowNorms[i+Nrows] = 1.0;
 
    HYPRE_LSI_DDICTFactorize(ict_ptr, mat_aa, mat_ja, mat_ia, rowNorms);
 
-   free( mat_aa );
-   free( mat_ia );
-   free( mat_ja );
-   free(rowNorms);
+   hypre_TFree(mat_aa , HYPRE_MEMORY_HOST);
+   hypre_TFree(mat_ia , HYPRE_MEMORY_HOST);
+   hypre_TFree(mat_ja , HYPRE_MEMORY_HOST);
+   hypre_TFree(rowNorms, HYPRE_MEMORY_HOST);
 
-   if ( ict_ptr->outputLevel > 0 ) 
+   if ( ict_ptr->outputLevel > 0 )
    {
       total_nnz = ict_ptr->mat_ja[extNrows];
       printf("%d : DDICT number of nonzeros     = %d\n",mypid,total_nnz);
@@ -857,9 +860,9 @@ rowNorms[i+Nrows] = 1.0;
 /* function for doing ICT factorization                                      */
 /*---------------------------------------------------------------------------*/
 
-int HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa, 
+int HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa,
                  int *mat_ja, int *mat_ia, double *rowNorms)
-{ 
+{
    int    i, j, row_leng, first, row_beg, row_endp1, track_leng, *track_array;
    int    k, mypid, nnz_count, num_small_pivot,  printstep, extNrows;
    int    *msr_iptr, *msc_jptr, *msc_jend, rowMax, Lcount, sortcnt, *sortcols;
@@ -876,7 +879,7 @@ int HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa,
    fillin    = ict_ptr->fillin;
    extNrows  = ict_ptr->extNrows;
    rowMax    = 0;
-   for ( i = 0; i < extNrows; i++ ) 
+   for ( i = 0; i < extNrows; i++ )
    {
       row_leng = mat_ia[i+1] - mat_ia[i];
       if ( row_leng > rowMax ) rowMax = row_leng;
@@ -897,9 +900,9 @@ int HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa,
    msr_aptr    = hypre_TAlloc(double,  (totalFill+extNrows) , HYPRE_MEMORY_HOST);
    msc_aptr    = hypre_TAlloc(double,  (totalFill+extNrows) , HYPRE_MEMORY_HOST);
    msc_jptr[0] = msc_jend[0] = extNrows + 1;
-   for ( i = 1; i <= extNrows; i++ ) 
+   for ( i = 1; i <= extNrows; i++ )
    {
-      msc_jptr[i] = msc_jptr[i-1] + rowMax * (fillin + 1); 
+      msc_jptr[i] = msc_jptr[i-1] + rowMax * (fillin + 1);
       msc_jend[i] = msc_jptr[i];
    }
    for ( i = 0; i < extNrows; i++ ) dble_buf[i] = 0.0;
@@ -915,9 +918,9 @@ int HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa,
 
    for ( i = 0; i < extNrows; i++ )
    {
-      if ( i % printstep == 0 && ict_ptr->outputLevel > 0 ) 
+      if ( i % printstep == 0 && ict_ptr->outputLevel > 0 )
          printf("%4d : DDICT Processing row %6d (%6d)\n",mypid,i,extNrows);
-      
+
       /* ------------------------------------------------------------- */
       /* get the row information                                       */
       /* ------------------------------------------------------------- */
@@ -956,7 +959,7 @@ int HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa,
             for ( k = msc_jptr[j]; k < msc_jend[j]; k++ )
             {
                colIndex = msc_jptr[k];
-               if ( colIndex > j && colIndex < i ) 
+               if ( colIndex > j && colIndex < i )
                {
                   if ( dble_buf[colIndex] != 0.0 )
                      dble_buf[colIndex] -= (ddata * msc_aptr[k]);
@@ -968,7 +971,7 @@ int HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa,
                }
             }
             dble_buf[j] = ddata;
-         } 
+         }
          else dble_buf[j] = 0.0;
       }
 
@@ -989,7 +992,7 @@ int HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa,
          }
          else dble_buf[index] = 0.0;
       }
-      if ( sortcnt > Lcount ) 
+      if ( sortcnt > Lcount )
       {
          HYPRE_LSI_SplitDSort(sortvals,sortcnt,sortcols,Lcount);
          for ( j = Lcount; j < sortcnt; j++ ) dble_buf[sortcols[j]] = 0.0;
@@ -1005,7 +1008,7 @@ int HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa,
                   printf("%d : DDICT negative pivot  (%d,%d,%d)\n", mypid,
                          i, j, extNrows);
                   num_small_pivot++;
-                  for ( k = j; k < row_leng; k++ ) 
+                  for ( k = j; k < row_leng; k++ )
                   {
                      index = track_array[k];
                      dble_buf[index] = 0.0;
@@ -1015,17 +1018,17 @@ int HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa,
                }
             }
          }
-         for ( j = 0; j < Lcount; j++ ) 
+         for ( j = 0; j < Lcount; j++ )
          {
             index = sortcols[j];
             ddata = dble_buf[i] - (dble_buf[index] * dble_buf[index]);
             if ( ddata > 1.0E-10 ) dble_buf[i] = ddata;
-            else 
+            else
             {
                printf("%d : (2) DDICT negative pivot  (%d,%d,%d)\n", mypid,
                       i, j, extNrows);
                num_small_pivot++;
-               for ( k = j; k < Lcount; k++ ) 
+               for ( k = j; k < Lcount; k++ )
                {
                   index = sortcols[k];
                   dble_buf[index] = 0.0;
@@ -1049,7 +1052,7 @@ int HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa,
                   printf("%d : DDICT negative pivot  (%d,%d,%d)\n", mypid,
                          i, j, extNrows);
                   num_small_pivot++;
-                  for ( k = j; k < row_leng; k++ ) 
+                  for ( k = j; k < row_leng; k++ )
                   {
                      index = track_array[k];
                      dble_buf[index] = 0.0;
@@ -1059,17 +1062,17 @@ int HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa,
                }
             }
          }
-         for ( j = 0; j < sortcnt; j++ ) 
+         for ( j = 0; j < sortcnt; j++ )
          {
             index = sortcols[j];
             ddata = dble_buf[i] - (dble_buf[index] * dble_buf[index]);
             if ( ddata > 1.0E-10 ) dble_buf[i] = ddata;
-            else 
+            else
             {
                printf("%d : (2) DDICT negative pivot  (%d,%d,%d)\n", mypid,
                       i, j, extNrows);
                num_small_pivot++;
-               for ( k = j; k < sortcnt; k++ ) 
+               for ( k = j; k < sortcnt; k++ )
                {
                   index = sortcols[k];
                   dble_buf[index] = 0.0;
@@ -1079,10 +1082,10 @@ int HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa,
             }
          }
       }
-      if ( dble_buf[i] > 0 ) 
+      if ( dble_buf[i] > 0 )
       {
-         if ( dble_buf[i] < 1.0E-10 ) 
-         { 
+         if ( dble_buf[i] < 1.0E-10 )
+         {
             num_small_pivot++;
             msc_aptr[i] = msr_aptr[i] = 1.0E5;
          }
@@ -1096,7 +1099,7 @@ int HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa,
          msc_aptr[i] = msr_aptr[i] = 1.0 / sqrt( - dble_buf[i] );
          dble_buf[i] = 0.0;
       }
-      for ( j = 0; j < track_leng; j++ ) 
+      for ( j = 0; j < track_leng; j++ )
       {
          index = track_array[j];
          if ( index < i && dble_buf[index] != 0.0 )
@@ -1104,8 +1107,8 @@ int HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa,
             msr_aptr[nnz_count] = dble_buf[index];
             msr_iptr[nnz_count++] = index;
             colIndex = msc_jend[index]++;
-            msc_aptr[colIndex] = dble_buf[index];  
-            msc_jptr[colIndex] = i;  
+            msc_aptr[colIndex] = dble_buf[index];
+            msc_jptr[colIndex] = i;
             dble_buf[index] = 0.0;
          }
       }
@@ -1115,7 +1118,7 @@ int HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa,
    if ( nnz_count > totalFill+extNrows )
       printf("%4d : DDICT WARNING : buffer overflow (%d,%d)\n",mypid,nnz_count,
               totalFill+extNrows);
-   if ( ict_ptr->outputLevel > 0 ) 
+   if ( ict_ptr->outputLevel > 0 )
    {
       printf("%4d : DDICT number of nonzeros     = %d\n",mypid,nnz_count);
       printf("%4d : DDICT number of small pivots = %d\n",mypid,num_small_pivot);
@@ -1125,13 +1128,13 @@ int HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa,
    /* deallocate temporary storage space                         */
    /* ---------------------------------------------------------- */
 
-   free(track_array);
-   free(sortcols);
-   free(sortvals);
-   free(dble_buf);
-   free(msc_jptr);
-   free(msc_jend);
-   free(msc_aptr);
+   hypre_TFree(track_array, HYPRE_MEMORY_HOST);
+   hypre_TFree(sortcols, HYPRE_MEMORY_HOST);
+   hypre_TFree(sortvals, HYPRE_MEMORY_HOST);
+   hypre_TFree(dble_buf, HYPRE_MEMORY_HOST);
+   hypre_TFree(msc_jptr, HYPRE_MEMORY_HOST);
+   hypre_TFree(msc_jend, HYPRE_MEMORY_HOST);
+   hypre_TFree(msc_aptr, HYPRE_MEMORY_HOST);
 
    ict_ptr->mat_ja = msr_iptr;
    ict_ptr->mat_aa = msr_aptr;

@@ -57,10 +57,10 @@ Hash *HashCreate(HYPRE_Int size)
 
 void HashDestroy(Hash *h)
 {
-    free(h->keys);
-    free(h->table);
-    free(h->data);
-    free(h);
+    hypre_TFree(h->keys,HYPRE_MEMORY_HOST);
+    hypre_TFree(h->table,HYPRE_MEMORY_HOST);
+    hypre_TFree(h->data,HYPRE_MEMORY_HOST);
+    hypre_TFree(h,HYPRE_MEMORY_HOST);
 }
 
 /*--------------------------------------------------------------------------

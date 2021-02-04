@@ -32,7 +32,7 @@ hypre_int get_thread_id()
 static __device__ __forceinline__
 hypre_int get_warp_id()
 {
-   // return get_thread_id() >> 5;                          // in general cases
+   // return get_thread_id() >> HYPRE_WARP_BITSHIFT;        // in general cases
    return threadIdx.z;                                      // if blockDim.x * blockDim.y = WARP_SIZE
 }
 
@@ -88,4 +88,3 @@ HYPRE_Int csr_spmm_create_hash_table(HYPRE_Int m, HYPRE_Int *d_rc, HYPRE_Int *d_
 
 #endif /* HYPRE_USING_CUDA */
 #endif
-

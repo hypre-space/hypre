@@ -1819,8 +1819,9 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
       hypre_TFree(P_ext_offd_data, HYPRE_MEMORY_HOST);
       hypre_TFree(P_ext_offd_j, HYPRE_MEMORY_HOST);
    }
-   free(r_a_products);
-   free(r_a_p_products);
+
+   hypre_TFree(r_a_products,HYPRE_MEMORY_HOST);
+   hypre_TFree(r_a_p_products,HYPRE_MEMORY_HOST);
    return(0);
 }
 
