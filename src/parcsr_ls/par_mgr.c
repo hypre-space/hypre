@@ -2143,9 +2143,8 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
   HYPRE_Int             *A_h_correction_offd_i = hypre_CSRMatrixI(A_h_correction_offd);
   HYPRE_Int             *A_h_correction_offd_j = hypre_CSRMatrixJ(A_h_correction_offd);
 
-  // Allow for maximum dropping with Pmax = 0
-  //if (Pmax > 0)
-  //{
+  if (Pmax > 0)
+  {
     if (ordering == 0) // interleaved ordering
     {
       HYPRE_Int *A_h_correction_diag_i_new = hypre_CTAlloc(HYPRE_Int, n_local_cpoints+1, memory_location);
@@ -2242,10 +2241,10 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
     }
     else
     {
-      hypre_printf("Error!! Block ordering is not supported at the moment\n");
+      hypre_printf("Error!! Block ordering for non-Galerkin coarse grid is not currently supported\n");
       exit(-1);
     }
-  //}
+  }
   //hypre_MGRParCSRMatrixTruncate(A_h_correction, max_elmts);
   //wall_time = time_getWallclockSeconds() - wall_time;
   //hypre_printf("Filter A_h_correction time: %1.5f\n", wall_time);
