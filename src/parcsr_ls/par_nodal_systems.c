@@ -129,7 +129,6 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    comm_pkg_AN = NULL;
    col_map_offd_AN = NULL;
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    row_starts_AN = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
 
    for (i=0; i < 2; i++)
@@ -143,25 +142,6 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    }
 
    global_num_nodes = hypre_ParCSRMatrixGlobalNumRows(A)/(HYPRE_BigInt)num_functions;
-
-
-#else
-   row_starts_AN = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
-
-  for (i=0; i < num_procs+1; i++)
-   {
-      row_starts_AN[i] = row_starts[i]/(HYPRE_BigInt)num_functions;
-      if (row_starts_AN[i]*(HYPRE_BigInt)num_functions < row_starts[i])
-      {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"nodes not properly aligned or incomplete info!\n");
-         return hypre_error_flag;
-      }
-   }
-
-   global_num_nodes = row_starts_AN[num_procs];
-
-#endif
-
 
    num_nodes =  num_variables/num_functions;
    num_fun2 = num_functions*num_functions;
@@ -929,7 +909,6 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
             CF_marker[cnt++] = CFN_marker[i];
    }
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    row_starts_S = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
    for (i=0; i < 2; i++)
       row_starts_S[i] = (HYPRE_BigInt)num_functions*row_starts_SN[i];
@@ -944,23 +923,6 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
    {
       col_starts_S = row_starts_S;
    }
-#else
-   row_starts_S = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
-   for (i=0; i < num_procs+1; i++)
-      row_starts_S[i] = (HYPRE_BigInt)num_functions*row_starts_SN[i];
-
-   if (row_starts_SN != col_starts_SN)
-   {
-      col_starts_S = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
-      for (i=0; i < num_procs+1; i++)
-         col_starts_S[i] = (HYPRE_BigInt)num_functions*col_starts_SN[i];
-   }
-   else
-   {
-      col_starts_S = row_starts_S;
-   }
-#endif
-
 
    SN_num_nonzeros_diag = SN_diag_i[num_nodes];
    SN_num_nonzeros_offd = SN_offd_i[num_nodes];

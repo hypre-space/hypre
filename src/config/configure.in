@@ -337,27 +337,6 @@ then
    AC_DEFINE(HYPRE_HOPSCOTCH, 1, [Define to 1 if hopscotch hashing])
 fi
 
-dnl * The --with-no-global-partition option is retained here for
-dnl * backward compatibility (no help string is printed).
-dnl * The new --enable-global-partition option takes precedence.
-hypre_using_global_partition=no
-AC_ARG_WITH(no-global-partition,,
-[case "${withval}" in
-    yes) hypre_using_global_partition=no ;;
-    no)  hypre_using_global_partition=yes ;;
-    *)   hypre_using_global_partition=no ;;
- esac]
-)
-AC_ARG_ENABLE(global-partition,
-AS_HELP_STRING([--enable-global-partition],
-               [Use global partitioning (default is NO).]),
-[case "${enableval}" in
-    yes) hypre_using_global_partition=yes ;;
-    no)  hypre_using_global_partition=no ;;
-    *)   hypre_using_global_partition=yes ;;
- esac]
-)
-
 AC_ARG_ENABLE(fortran,
 AS_HELP_STRING([--enable-fortran],
                [Require a working Fortran compiler (default is YES).]),
@@ -1454,16 +1433,6 @@ else
       || test $hypre_cv_func_MPI_Comm_f2c_macro = yes; then
      AC_DEFINE(HYPRE_HAVE_MPI_COMM_F2C,1,[Define to 1 if the routine MPI_Comm_f2c is found])
    fi
-fi
-
-dnl * It would be better if this could be defined above, but much work is needed
-dnl * to make that happen.
-if test "$hypre_using_global_partition" = "no"
-then
-dnl   if test "$hypre_using_mpi" != "no"
-dnl   then
-      AC_DEFINE(HYPRE_NO_GLOBAL_PARTITION, 1, [No global partitioning being used])
-dnl   fi
 fi
 
 if test "$hypre_using_node_aware_mpi" = "yes"

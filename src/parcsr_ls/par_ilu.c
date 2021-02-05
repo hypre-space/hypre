@@ -2087,8 +2087,6 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
       {
          big_col = A_ext_j[j];
          /* First check if that belongs to the diagonal part */
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-
          if( big_col >= A_col_starts[0] && big_col < A_col_starts[1] )
          {
             /* this is a diagonal entry, rperm (map old to new) and shift it */
@@ -2099,17 +2097,6 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
             E_ext_data[E_nnz++]  = A_ext_data[j];
          }
 
-#else
-         if( big_col >= A_col_starts[my_id] && big_col < A_col_starts[my_id+1] )
-         {
-            /* this is a diagonal entry, rperm (map old to new) and shift it */
-
-            /* Note here, the result of big_col - A_col_starts[0] in no longer a HYPRE_BigInt */
-            idx = (HYPRE_Int)(big_col - A_col_starts[my_id]);
-            E_ext_j[E_nnz]       = rperm[idx];
-            E_ext_data[E_nnz++]  = A_ext_data[j];
-         }
-#endif
          /* If not, apply binary search to check if is offdiagonal */
          else
          {

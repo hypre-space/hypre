@@ -166,7 +166,6 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
          n_Fpts = fpt_array[num_threads];
          big_Fpts = n_Fpts;
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
          fpts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
          hypre_MPI_Scan(&big_Fpts, fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
          fpts_starts[0] = fpts_starts[1] - big_Fpts;
@@ -177,17 +176,6 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
          }
          hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
          hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-         fpts_starts = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
-         hypre_MPI_Allgather(&big_Fpts, 1, HYPRE_MPI_BIG_INT, &fpts_starts[1], 1, HYPRE_MPI_BIG_INT, comm);
-         fpts_starts[0] = 0;
-         for (i = 2; i < num_procs+1; i++)
-         {
-            fpts_starts[i] += fpts_starts[i-1];
-         }
-         total_global_fpts = fpts_starts[num_procs];
-         total_global_cpts = cpts_starts[num_procs];
-#endif
       }
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
@@ -197,19 +185,11 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
       {
          if (CF_marker[i] > 0)
          {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
             big_convert[i] = (HYPRE_BigInt)fine_to_coarse[i] + cpts_starts[0];
-#else
-            big_convert[i] = (HYPRE_BigInt)fine_to_coarse[i] + cpts_starts[my_id];
-#endif
          }
          else
          {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
             big_convert[i] = (HYPRE_BigInt)fine_to_fine[i] + fpts_starts[0];
-#else
-            big_convert[i] = (HYPRE_BigInt)fine_to_fine[i] + fpts_starts[my_id];
-#endif
          }
       }
 
@@ -664,7 +644,6 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
          big_Fpts = n_Fpts;
          big_new_Fpts = n_new_Fpts;
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
          fpts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
          new_fpts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
          hypre_MPI_Scan(&big_Fpts, fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
@@ -680,22 +659,6 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
          hypre_MPI_Bcast(&total_global_new_fpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
          hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
          hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-         fpts_starts = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
-         new_fpts_starts = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
-         hypre_MPI_Allgather(&big_Fpts, 1, HYPRE_MPI_BIG_INT, &fpts_starts[1], 1, HYPRE_MPI_BIG_INT, comm);
-         hypre_MPI_Allgather(&big_new_Fpts, 1, HYPRE_MPI_BIG_INT, &new_fpts_starts[1], 1, HYPRE_MPI_BIG_INT, comm);
-         fpts_starts[0] = 0;
-         new_fpts_starts[0] = 0;
-         for (i = 2; i < num_procs+1; i++)
-         {
-            fpts_starts[i] += fpts_starts[i-1];
-            new_fpts_starts[i] += new_fpts_starts[i-1];
-         }
-         total_global_new_fpts = new_fpts_starts[num_procs];
-         total_global_fpts = fpts_starts[num_procs];
-         total_global_cpts = cpts_starts[num_procs];
-#endif
       }
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
@@ -705,19 +668,11 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
       {
          if (CF_marker[i] > 0)
          {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
             big_convert[i] = (HYPRE_BigInt)fine_to_coarse[i] + cpts_starts[0];
-#else
-            big_convert[i] = (HYPRE_BigInt)fine_to_coarse[i] + cpts_starts[my_id];
-#endif
          }
          else
          {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
             big_convert[i] = (HYPRE_BigInt)fine_to_fine[i] + fpts_starts[0];
-#else
-            big_convert[i] = (HYPRE_BigInt)fine_to_fine[i] + fpts_starts[my_id];
-#endif
          }
       }
 
@@ -1216,7 +1171,6 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
          big_Fpts = n_Fpts;
          big_new_Fpts = n_new_Fpts;
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
          fpts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
          new_fpts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
          hypre_MPI_Scan(&big_Fpts, fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
@@ -1232,22 +1186,6 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
          hypre_MPI_Bcast(&total_global_new_fpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
          hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
          hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-         fpts_starts = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
-         new_fpts_starts = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
-         hypre_MPI_Allgather(&big_Fpts, 1, HYPRE_MPI_BIG_INT, &fpts_starts[1], 1, HYPRE_MPI_BIG_INT, comm);
-         hypre_MPI_Allgather(&big_new_Fpts, 1, HYPRE_MPI_BIG_INT, &new_fpts_starts[1], 1, HYPRE_MPI_BIG_INT, comm);
-         fpts_starts[0] = 0;
-         new_fpts_starts[0] = 0;
-         for (i = 2; i < num_procs+1; i++)
-         {
-            fpts_starts[i] += fpts_starts[i-1];
-            new_fpts_starts[i] += new_fpts_starts[i-1];
-         }
-         total_global_new_fpts = new_fpts_starts[num_procs];
-         total_global_fpts = fpts_starts[num_procs];
-         total_global_cpts = cpts_starts[num_procs];
-#endif
       }
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
@@ -1257,19 +1195,11 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
       {
          if (CF_marker[i] > 0)
          {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
             big_convert[i] = (HYPRE_BigInt)fine_to_coarse[i] + cpts_starts[0];
-#else
-            big_convert[i] = (HYPRE_BigInt)fine_to_coarse[i] + cpts_starts[my_id];
-#endif
          }
          else
          {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
             big_convert[i] = (HYPRE_BigInt)fine_to_fine[i] + fpts_starts[0];
-#else
-            big_convert[i] = (HYPRE_BigInt)fine_to_fine[i] + fpts_starts[my_id];
-#endif
          }
       }
 
