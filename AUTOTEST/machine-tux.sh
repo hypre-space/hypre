@@ -138,9 +138,9 @@ co="--enable-mixedint --enable-debug"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic--enable-mixedint
 
-## co="--enable-debug --with-print-errors"
-## ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
-## ./renametest.sh basic $output_dir/basic--valgrind
+co="--enable-debug --with-print-errors"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
+./renametest.sh basic $output_dir/basic--valgrind
 
 # CMake build and run tests
 mo="-j"
