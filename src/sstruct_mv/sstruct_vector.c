@@ -940,14 +940,14 @@ hypre_SStructVectorPrintGLVis( hypre_SStructVector  *vector,
    FILE                   *file[8];
    char                    filename[255];
    char                    fe_coll[100];
-   HYPRE_Int               cellNV;
-   HYPRE_Int               var_off;
-   HYPRE_Int               vinc[8][3] = {{0, 0, 0}, {1, 0, 0},
-                                         {1, 1, 0}, {0, 1, 0},
-                                         {0, 0, 1}, {1, 0, 1},
-                                         {1, 1, 1}, {0, 1, 1}};
+//   HYPRE_Int               cellNV;
+//   HYPRE_Int               var_off;
+//   HYPRE_Int               vinc[8][3] = {{0, 0, 0}, {1, 0, 0},
+//                                         {1, 1, 0}, {0, 1, 0},
+//                                         {0, 0, 1}, {1, 0, 1},
+//                                         {1, 1, 1}, {0, 1, 1}};
    HYPRE_Int               myid;
-   HYPRE_Int               i, v, d, ndim, datai;
+   HYPRE_Int               i, ndim, datai;
    HYPRE_Int               part, nparts;
    HYPRE_Int               var, nvars;
    HYPRE_Int               dbox_volume;
@@ -960,11 +960,11 @@ hypre_SStructVectorPrintGLVis( hypre_SStructVector  *vector,
    switch (ndim)
    {
       case 2:
-         cellNV = 4;
+//         cellNV = 4;
          break;
 
       case 3:
-         cellNV = 8;
+//         cellNV = 8;
          break;
 
       default:
@@ -1011,12 +1011,12 @@ hypre_SStructVectorPrintGLVis( hypre_SStructVector  *vector,
          {
             case HYPRE_SSTRUCT_VARIABLE_CELL:
                hypre_sprintf(fe_coll, "Local_L2_%dD_P0", ndim);
-               var_off = 0;
+//               var_off = 0;
                break;
 
             case HYPRE_SSTRUCT_VARIABLE_NODE:
                hypre_sprintf(fe_coll, "Local_H1_%dD_P1", ndim);
-               var_off = 1;
+//               var_off = 1;
                break;
 
             default:

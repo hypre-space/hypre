@@ -794,10 +794,9 @@ hypre_SSAMGRelax( void                *relax_vdata,
                   hypre_SStructVector *b,
                   hypre_SStructVector *x )
 {
+#if 0
    hypre_SSAMGRelaxData *relax_data   = (hypre_SSAMGRelaxData *) relax_vdata;
    HYPRE_Int             num_nodesets = (relax_data -> num_nodesets);
-
-#if 0
    if (num_nodesets == 1)
    {
       hypre_SSAMGRelaxMV(relax_vdata, A, b, x);

@@ -459,7 +459,6 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    HYPRE_Int         coarsen_factor, known;
    HYPRE_Int         num, last_proc;
    hypre_BoxManager *fboxman, *cboxman;
-   hypre_StructAssumedPart *fap = NULL, *cap = NULL;
 
    hypre_BoxManEntry *entries;
    hypre_BoxManEntry *entry;

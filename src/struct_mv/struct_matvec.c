@@ -642,7 +642,6 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
    hypre_StructMatvecData  *matvec_data = (hypre_StructMatvecData  *)matvec_vdata;
 
    hypre_ComputePkg        *compute_pkg = (matvec_data -> compute_pkg);
-   hypre_BoxArray          *data_space  = (matvec_data -> data_space);
    HYPRE_Int                transpose   = (matvec_data -> transpose);
    HYPRE_Int                skip_diag   = (matvec_data -> skip_diag);
    HYPRE_Int                nentries    = (matvec_data -> nentries);
