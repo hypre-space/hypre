@@ -109,9 +109,6 @@
 /* Define to 1 if using long long int for HYPRE_BigInt */
 #undef HYPRE_MIXEDINT
 
-/* No global partitioning being used */
-#undef HYPRE_NO_GLOBAL_PARTITION
-
 /* Print HYPRE errors */
 #undef HYPRE_PRINT_ERRORS
 

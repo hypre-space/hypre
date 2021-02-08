@@ -64,32 +64,9 @@ GenerateLaplacian9pt( MPI_Comm comm,
 
    local_num_rows = nx_local*ny_local;
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-
    global_part = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
    global_part[0] = ny_part[q]*nx + nx_part[p]*ny_local;
    global_part[1] = global_part[0]+(HYPRE_BigInt)local_num_rows;
-
-#else
-   HYPRE_Int nx_size, ny_size;
-   HYPRE_Int jx, jy;
-
-   global_part = hypre_CTAlloc(HYPRE_BigInt, P*Q+1, HYPRE_MEMORY_HOST);
-
-   global_part[0] = 0;
-   cnt = 1;
-   for (jy = 0; jy < Q; jy++)
-   {
-      ny_size = (HYPRE_Int)(ny_part[jy+1]-ny_part[jy]);
-      for (jx = 0; jx < P; jx++)
-      {
-         nx_size = (HYPRE_Int)(nx_part[jx+1] - nx_part[jx]);
-         global_part[cnt] = global_part[cnt-1];
-         global_part[cnt++] += (HYPRE_BigInt)(nx_size*ny_size);
-      }
-   }
-
-#endif
 
    diag_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1, HYPRE_MEMORY_HOST);
    offd_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1, HYPRE_MEMORY_HOST);

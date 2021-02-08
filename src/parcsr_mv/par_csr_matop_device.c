@@ -930,15 +930,8 @@ hypre_ParCSRMatrixGetRowDevice( hypre_ParCSRMatrix  *mat,
 
    hypre_ParCSRMatrixGetrowactive(mat) = 1;
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    row_start = hypre_ParCSRMatrixFirstRowIndex(mat);
    row_end = hypre_ParCSRMatrixLastRowIndex(mat) + 1;
-#else
-   HYPRE_Int my_id;
-   hypre_MPI_Comm_rank(hypre_ParCSRMatrixComm(mat), &my_id);
-   row_end = hypre_ParCSRMatrixRowStarts(mat)[ my_id + 1 ];
-   row_start = hypre_ParCSRMatrixRowStarts(mat)[ my_id ];
-#endif
    nrows = row_end - row_start;
 
    if (row < row_start || row >= row_end)

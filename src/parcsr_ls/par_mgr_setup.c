@@ -1406,12 +1406,8 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
                         num_functions, dof_func_array[lev_local], CF_marker_local,
                         &coarse_dof_func_lvl, &coarse_pnts_global_lvl);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
     if (my_id == (num_procs -1)) coarse_size = coarse_pnts_global_lvl[1];
       hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-    coarse_size = coarse_pnts_global_lvl[num_procs];
-#endif
     //hypre_printf("Coarse size = %d \n", coarse_size);
     if (coarse_size == 0) // stop coarsening
     {
@@ -1504,12 +1500,8 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
     hypre_BoomerAMGBuildCoarseOperatorKT(P_local, A_array_local[lev_local],
                                     P_local, 0, &RAP_local);
 /*
-#ifdef HYPRE_NO_GLOBAL_PARTITION
     if (my_id == (num_procs -1)) coarse_size = coarse_pnts_global_lvl[1];
     hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-    coarse_size = coarse_pnts_global_lvl[num_procs];
-#endif
 */
     lev_local++;
 
