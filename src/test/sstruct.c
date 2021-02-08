@@ -15,7 +15,7 @@
 #include "HYPRE_struct_ls.h"
 #include "HYPRE_krylov.h"
 #include "_hypre_sstruct_mv.h"
-#include "_hypre_struct_mv.hpp"
+//#include "_hypre_struct_mv.hpp"
 
 /* begin lobpcg */
 
