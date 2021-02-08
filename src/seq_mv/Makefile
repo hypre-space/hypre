@@ -48,6 +48,7 @@ CUFILES =\
  csr_spgemm_device_rowbound.c\
  csr_spgemm_device_rowest.c\
  csr_spgemm_device_util.c\
+ csr_spmv_device.c\
  csr_sptrans_device.c\
  vector.c
 

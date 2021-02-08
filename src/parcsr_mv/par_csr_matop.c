@@ -2065,9 +2065,10 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix  *A,
  * G_csr is the node to edge connectivity matrix
  * ----------------------------------------------------------------------------- */
 
-void hypre_ParCSRMatrixGenSpanningTree( hypre_ParCSRMatrix *G_csr,
-                                        HYPRE_Int **indices,
-                                        HYPRE_Int G_type )
+void 
+hypre_ParCSRMatrixGenSpanningTree( hypre_ParCSRMatrix *G_csr,
+                                   HYPRE_Int         **indices,
+                                   HYPRE_Int           G_type )
 {
    HYPRE_BigInt nrows_G, ncols_G;
    HYPRE_Int *G_diag_i, *G_diag_j, *GT_diag_mat, i, j, k, edge;
@@ -2114,8 +2115,11 @@ void hypre_ParCSRMatrixGenSpanningTree( hypre_ParCSRMatrix *G_csr,
          }
       }
       G_diag_i[0] = 0;
-      for (i = 1; i <= nrows_G; i++) G_diag_i[i] = G_diag_i[i-1] + counts[i-1];
-      free(counts);
+      for (i = 1; i <= nrows_G; i++)
+      {
+         G_diag_i[i] = G_diag_i[i-1] + counts[i-1];
+      }
+      hypre_TFree(counts, HYPRE_MEMORY_HOST);
    }
 
    /* form G transpose in special form (2 nodes per edge max) */
@@ -2167,9 +2171,9 @@ void hypre_ParCSRMatrixGenSpanningTree( hypre_ParCSRMatrix *G_csr,
          }
       }
    }
-   free(nodes_marked);
-   free(queue);
-   free(GT_diag_mat);
+   hypre_TFree(nodes_marked, HYPRE_MEMORY_HOST);
+   hypre_TFree(queue, HYPRE_MEMORY_HOST);
+   hypre_TFree(GT_diag_mat, HYPRE_MEMORY_HOST);
 
    /* fetch the communication information from */
 
@@ -2219,7 +2223,7 @@ void hypre_ParCSRMatrixGenSpanningTree( hypre_ParCSRMatrix *G_csr,
       pgraph_j = hypre_TAlloc(HYPRE_Int, pgraph_i[nprocs] , HYPRE_MEMORY_HOST);
       hypre_MPI_Allgatherv(proc_array, n_proc_array, HYPRE_MPI_INT, pgraph_j,
                            recv_cnts, pgraph_i, HYPRE_MPI_INT, comm);
-      free(recv_cnts);
+      hypre_TFree(recv_cnts, HYPRE_MEMORY_HOST);
 
       /* BFS on the processor graph to determine parent and children */
 
@@ -2256,10 +2260,10 @@ void hypre_ParCSRMatrixGenSpanningTree( hypre_ParCSRMatrix *G_csr,
          for (i = 0; i < nprocs; i++)
             if (nodes_marked[i] == mypid) children[n_children++] = i;
       }
-      free(nodes_marked);
-      free(queue);
-      free(pgraph_i);
-      free(pgraph_j);
+      hypre_TFree(nodes_marked, HYPRE_MEMORY_HOST);
+      hypre_TFree(queue, HYPRE_MEMORY_HOST);
+      hypre_TFree(pgraph_i, HYPRE_MEMORY_HOST);
+      hypre_TFree(pgraph_j, HYPRE_MEMORY_HOST);
    }
 
    /* first, connection with my parent : if the edge in my parent *
@@ -2313,7 +2317,10 @@ void hypre_ParCSRMatrixGenSpanningTree( hypre_ParCSRMatrix *G_csr,
          }
       }
    }
-   if (n_children > 0) free(children);
+   if (n_children > 0)
+   {
+      hypre_TFree(children, HYPRE_MEMORY_HOST);
+   }
 
    /* count the size of the tree */
 
@@ -2326,11 +2333,11 @@ void hypre_ParCSRMatrixGenSpanningTree( hypre_ParCSRMatrix *G_csr,
    for (i = 0; i < ncols_G; i++)
       if (edges_marked[i] == 1) t_indices[tree_size++] = i;
    (*indices) = t_indices;
-   free(edges_marked);
+   hypre_TFree(edges_marked, HYPRE_MEMORY_HOST);
    if (G_type != 0)
    {
-      free(G_diag_i);
-      free(G_diag_j);
+      hypre_TFree(G_diag_i, HYPRE_MEMORY_HOST);
+      hypre_TFree(G_diag_j, HYPRE_MEMORY_HOST);
    }
 }
 
@@ -2695,9 +2702,9 @@ void hypre_ParCSRMatrixExtractSubmatrices( hypre_ParCSRMatrix *A_csr,
    (*submatrices)[1] = A12_csr;
    (*submatrices)[2] = A21_csr;
    (*submatrices)[3] = A22_csr;
-   free(proc_offsets1);
-   free(proc_offsets2);
-   free(exp_indices);
+   hypre_TFree(proc_offsets1, HYPRE_MEMORY_HOST);
+   hypre_TFree(proc_offsets2, HYPRE_MEMORY_HOST);
+   hypre_TFree(exp_indices, HYPRE_MEMORY_HOST);
 }
 
 /* -----------------------------------------------------------------------------
@@ -2965,9 +2972,9 @@ void hypre_ParCSRMatrixExtractRowSubmatrices( hypre_ParCSRMatrix *A_csr,
 
    (*submatrices)[0] = A11_csr;
    (*submatrices)[1] = A21_csr;
-   free(proc_offsets1);
-   free(proc_offsets2);
-   free(exp_indices);
+   hypre_TFree(proc_offsets1, HYPRE_MEMORY_HOST);
+   hypre_TFree(proc_offsets2, HYPRE_MEMORY_HOST);
+   hypre_TFree(exp_indices, HYPRE_MEMORY_HOST);
 }
 
 /* -----------------------------------------------------------------------------

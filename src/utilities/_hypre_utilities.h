@@ -536,6 +536,11 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 #include <stdio.h>
 #include <stdlib.h>
 
+#if defined(HYPRE_USING_UMPIRE)
+#include "umpire/interface/umpire.h"
+#define HYPRE_UMPIRE_POOL_NAME_MAX_LEN 1024
+#endif
+
 /* stringification:
  * _Pragma(string-literal), so we need to cast argument to a string
  * The three dots as last argument of the macro tells compiler that this is a variadic macro.
@@ -732,6 +737,15 @@ HYPRE_ExecutionPolicy hypre_GetExecPolicy2(HYPRE_MemoryLocation location1, HYPRE
 HYPRE_Int hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location);
 HYPRE_Int hypre_PrintMemoryTracker();
 HYPRE_Int hypre_SetCubMemPoolSize( hypre_uint bin_growth, hypre_uint min_bin, hypre_uint max_bin, size_t max_cached_bytes );
+HYPRE_Int hypre_umpire_host_pooled_allocate(void **ptr, size_t nbytes);
+HYPRE_Int hypre_umpire_host_pooled_free(void *ptr);
+void *hypre_umpire_host_pooled_realloc(void *ptr, size_t size);
+HYPRE_Int hypre_umpire_device_pooled_allocate(void **ptr, size_t nbytes);
+HYPRE_Int hypre_umpire_device_pooled_free(void *ptr);
+HYPRE_Int hypre_umpire_um_pooled_allocate(void **ptr, size_t nbytes);
+HYPRE_Int hypre_umpire_um_pooled_free(void *ptr);
+HYPRE_Int hypre_umpire_pinned_pooled_allocate(void **ptr, size_t nbytes);
+HYPRE_Int hypre_umpire_pinned_pooled_free(void *ptr);
 
 #ifdef HYPRE_USING_MEMORY_TRACKER
 hypre_MemoryTracker * hypre_MemoryTrackerCreate();
@@ -1184,10 +1198,6 @@ static char hypre__levelname[16];
 #ifndef HYPRE_HANDLE_H
 #define HYPRE_HANDLE_H
 
-//#ifdef __cplusplus
-//extern "C++" {
-//#endif
-
 struct hypre_CudaData;
 typedef struct hypre_CudaData hypre_CudaData;
 
@@ -1197,8 +1207,24 @@ typedef struct
    HYPRE_MemoryLocation   memory_location;
    HYPRE_ExecutionPolicy  default_exec_policy;
    HYPRE_ExecutionPolicy  struct_exec_policy;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    hypre_CudaData        *cuda_data;
+#endif
+#if defined(HYPRE_USING_UMPIRE)
+   char                   umpire_device_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
+   char                   umpire_um_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
+   char                   umpire_host_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
+   char                   umpire_pinned_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
+   size_t                 umpire_device_pool_size;
+   size_t                 umpire_um_pool_size;
+   size_t                 umpire_host_pool_size;
+   size_t                 umpire_pinned_pool_size;
+   size_t                 umpire_block_size;
+   HYPRE_Int              own_umpire_device_pool;
+   HYPRE_Int              own_umpire_um_pool;
+   HYPRE_Int              own_umpire_host_pool;
+   HYPRE_Int              own_umpire_pinned_pool;
+   umpire_resourcemanager umpire_rm;
 #endif
 } hypre_Handle;
 
@@ -1221,7 +1247,6 @@ typedef struct
 #define hypre_HandleCubUvmAllocator(hypre_handle)                hypre_CudaDataCubUvmAllocator(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleCudaDevice(hypre_handle)                     hypre_CudaDataCudaDevice(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleCudaComputeStreamNum(hypre_handle)           hypre_CudaDataCudaComputeStreamNum(hypre_HandleCudaData(hypre_handle))
-#define hypre_HandleCudaComputeStreamSync(hypre_handle)          hypre_CudaDataCudaComputeStreamSync(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleCudaReduceBuffer(hypre_handle)               hypre_CudaDataCudaReduceBuffer(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleStructCommRecvBuffer(hypre_handle)           hypre_CudaDataStructCommRecvBuffer(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleStructCommSendBuffer(hypre_handle)           hypre_CudaDataStructCommSendBuffer(hypre_HandleCudaData(hypre_handle))
@@ -1233,12 +1258,93 @@ typedef struct
 #define hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle)   hypre_CudaDataSpgemmRownnzEstimateNsamples(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle) hypre_CudaDataSpgemmRownnzEstimateMultFactor(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleSpgemmHashType(hypre_handle)                 hypre_CudaDataSpgemmHashType(hypre_HandleCudaData(hypre_handle))
+#define hypre_HandleUmpireDeviceAllocator(hypre_handle)          hypre_CudaDataUmpireDeviceAllocator(hypre_HandleCudaData(hypre_handle))
 
-//#ifdef __cplusplus
-//}
-//#endif
+#define hypre_HandleUmpireResourceMan(hypre_handle)              ((hypre_handle) -> umpire_rm)
+#define hypre_HandleUmpireDevicePoolSize(hypre_handle)           ((hypre_handle) -> umpire_device_pool_size)
+#define hypre_HandleUmpireUMPoolSize(hypre_handle)               ((hypre_handle) -> umpire_um_pool_size)
+#define hypre_HandleUmpireHostPoolSize(hypre_handle)             ((hypre_handle) -> umpire_host_pool_size)
+#define hypre_HandleUmpirePinnedPoolSize(hypre_handle)           ((hypre_handle) -> umpire_pinned_pool_size)
+#define hypre_HandleUmpireBlockSize(hypre_handle)                ((hypre_handle) -> umpire_block_size)
+#define hypre_HandleUmpireDevicePoolName(hypre_handle)           ((hypre_handle) -> umpire_device_pool_name)
+#define hypre_HandleUmpireUMPoolName(hypre_handle)               ((hypre_handle) -> umpire_um_pool_name)
+#define hypre_HandleUmpireHostPoolName(hypre_handle)             ((hypre_handle) -> umpire_host_pool_name)
+#define hypre_HandleUmpirePinnedPoolName(hypre_handle)           ((hypre_handle) -> umpire_pinned_pool_name)
+#define hypre_HandleOwnUmpireDevicePool(hypre_handle)            ((hypre_handle) -> own_umpire_device_pool)
+#define hypre_HandleOwnUmpireUMPool(hypre_handle)                ((hypre_handle) -> own_umpire_um_pool)
+#define hypre_HandleOwnUmpireHostPool(hypre_handle)              ((hypre_handle) -> own_umpire_host_pool)
+#define hypre_HandleOwnUmpirePinnedPool(hypre_handle)            ((hypre_handle) -> own_umpire_pinned_pool)
 
 #endif
+
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+#ifndef HYPRE_GSELIM_H
+#define HYPRE_GSELIM_H
+
+#define hypre_gselim(A,x,n,error)                      \
+{                                                      \
+   HYPRE_Int    j,k,m;                                 \
+   HYPRE_Real factor;                                  \
+   HYPRE_Real divA;                                    \
+   error = 0;                                          \
+   if (n == 1)  /* A is 1x1 */                         \
+   {                                                   \
+      if (A[0] != 0.0)                                 \
+      {                                                \
+         x[0] = x[0]/A[0];                             \
+      }                                                \
+      else                                             \
+      {                                                \
+         error++;                                      \
+      }                                                \
+   }                                                   \
+   else/* A is nxn. Forward elimination */             \
+   {                                                   \
+      for (k = 0; k < n-1; k++)                        \
+      {                                                \
+         if (A[k*n+k] != 0.0)                          \
+         {                                             \
+            divA = 1.0/A[k*n+k];                       \
+            for (j = k+1; j < n; j++)                  \
+            {                                          \
+               if (A[j*n+k] != 0.0)                    \
+               {                                       \
+                  factor = A[j*n+k]*divA;              \
+                  for (m = k+1; m < n; m++)            \
+                  {                                    \
+                     A[j*n+m]  -= factor * A[k*n+m];   \
+                  }                                    \
+                  x[j] -= factor * x[k];               \
+               }                                       \
+            }                                          \
+         }                                             \
+      }                                                \
+      /* Back Substitution  */                         \
+      for (k = n-1; k > 0; --k)                        \
+      {                                                \
+         if (A[k*n+k] != 0.0)                          \
+         {                                             \
+            x[k] /= A[k*n+k];                          \
+            for (j = 0; j < k; j++)                    \
+            {                                          \
+               if (A[j*n+k] != 0.0)                    \
+               {                                       \
+                  x[j] -= x[k] * A[j*n+k];             \
+               }                                       \
+            }                                          \
+         }                                             \
+      }                                                \
+      if (A[0] != 0.0) x[0] /= A[0];                   \
+   }                                                   \
+}
+
+#endif /* #ifndef HYPRE_GSELIM_H */
 
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
@@ -1280,9 +1386,9 @@ hypre_MemoryTracker* hypre_memory_tracker();
 hypre_Handle* hypre_handle();
 hypre_Handle* hypre_HandleCreate();
 HYPRE_Int hypre_HandleDestroy(hypre_Handle *hypre_handle_);
-HYPRE_Int HYPRE_Init();
-HYPRE_Int HYPRE_Finalize();
 HYPRE_Int hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_);
+HYPRE_Int hypre_UmpireInit(hypre_Handle *hypre_handle_);
+HYPRE_Int hypre_UmpireFinalize(hypre_Handle *hypre_handle_);
 
 /* hypre_qsort.c */
 void hypre_swap ( HYPRE_Int *v , HYPRE_Int i , HYPRE_Int j );
@@ -1484,11 +1590,10 @@ void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len, H
 void hypre_sort_and_create_inverse_map(HYPRE_Int *in, HYPRE_Int len, HYPRE_Int **out, hypre_UnorderedIntMap *inverse_map);
 void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPRE_BigInt **out, hypre_UnorderedBigIntMap *inverse_map);
 
-
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_SyncCudaDevice(hypre_Handle *hypre_handle);
-HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex *y);
+HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y);
 HYPRE_Int hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y);
 HYPRE_Int hypreDevice_MaskedIVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y, HYPRE_Int *mask);
 HYPRE_Int hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v);
@@ -1501,6 +1606,12 @@ void hypre_NvtxPopRange();
 
 /* hypre_utilities.c */
 HYPRE_Int hypre_multmod(HYPRE_Int a, HYPRE_Int b, HYPRE_Int mod);
+void hypre_partition1D(HYPRE_Int n, HYPRE_Int p, HYPRE_Int j, HYPRE_Int *s, HYPRE_Int *e);
+
+HYPRE_Int hypre_SetSyncCudaCompute(HYPRE_Int action);
+HYPRE_Int hypre_RestoreSyncCudaCompute();
+HYPRE_Int hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr);
+HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
 
 
 #ifdef __cplusplus

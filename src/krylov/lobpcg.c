@@ -76,7 +76,7 @@ HYPRE_Int   (*dsygv) (HYPRE_Int *itype, char *jobz, char *uplo, HYPRE_Int *
 				       a, &lda, b, &ldb,
 				       lmd, &work[0], &lwork, &info );
 
-  free( work );
+  hypre_TFree( work ,HYPRE_MEMORY_HOST);
   return info;
 
 }
@@ -981,7 +981,7 @@ es" argument */
   utilities_FortranMatrixDestroy( residualNorms );
   utilities_FortranMatrixDestroy( residualNormsHistory );	
 
-  free( activeMask );
+  hypre_TFree( activeMask ,HYPRE_MEMORY_HOST);
 
   return exitFlag;
 }

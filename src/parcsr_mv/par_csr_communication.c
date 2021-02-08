@@ -342,13 +342,13 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
     * job = 11: similar to job = 1, but exchanges data of type HYPRE_Int (not HYPRE_Complex),
     *           requires send_data and recv_data to be ints
     *           recv_vec_starts and send_map_starts need to be set in comm_pkg.
-    * job = 12: similar to job = 1, but exchanges data of type HYPRE_Int (not HYPRE_Complex),
+    * job = 12: similar to job = 2, but exchanges data of type HYPRE_Int (not HYPRE_Complex),
     *           requires send_data and recv_data to be ints
     *           recv_vec_starts and send_map_starts need to be set in comm_pkg.
     * job = 21: similar to job = 1, but exchanges data of type HYPRE_BigInt (not HYPRE_Complex),
     *           requires send_data and recv_data to be ints
     *           recv_vec_starts and send_map_starts need to be set in comm_pkg.
-    * job = 22: similar to job = 1, but exchanges data of type HYPRE_BigInt (not HYPRE_Complex),
+    * job = 22: similar to job = 2, but exchanges data of type HYPRE_BigInt (not HYPRE_Complex),
     *           requires send_data and recv_data to be ints
     *           recv_vec_starts and send_map_starts need to be set in comm_pkg.
     * default: ignores send_data and recv_data, requires send_mpi_types
@@ -412,8 +412,9 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
 #else /* #ifndef HYPRE_WITH_GPU_AWARE_MPI */
    send_data = send_data_in;
    recv_data = recv_data_in;
-   // TODO RL
-   HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle())) );
+   // TODO RL: it seems that we need to sync the CUDA stream before doing GPU-GPU MPI.
+   // Need to check MPI documentation whether this is acutally true
+   hypre_SyncCudaComputeStream(hypre_handle());
 #endif
 
    num_requests = num_sends + num_recvs;

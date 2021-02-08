@@ -136,7 +136,7 @@ typedef struct
    HYPRE_Int             *graph_entries;
    HYPRE_Int              graph_values_size;
    HYPRE_Real            *graph_values;
-   HYPRE_Real            *d_graph_values; /* copy of graph_values on device */
+   HYPRE_Real            *d_graph_values;
    HYPRE_Int             *graph_boxsizes;
 
    /* MatrixSetValues */
@@ -212,7 +212,7 @@ typedef struct
    HYPRE_Int        fem_nsparse;  /* number of nonzeros in values_full */
    HYPRE_Int       *fem_sparsity; /* nonzeros in values_full */
    HYPRE_Real      *fem_values;   /* nonzero values in values_full */
-   HYPRE_Real      *d_fem_values; /* copy of fem_values on device */
+   HYPRE_Real      *d_fem_values;
 
    HYPRE_Int        fem_rhs_true;
    HYPRE_Real      *fem_rhs_values;
@@ -4089,8 +4089,7 @@ main( hypre_int argc,
 
          HYPRE_LOBPCGDestroy((HYPRE_Solver)lobpcg_solver);
          mv_MultiVectorDestroy( eigenvectors );
-         free( eigenvalues );
-
+         hypre_TFree(eigenvalues, HYPRE_MEMORY_HOST);
       }
       else {
 
@@ -4258,7 +4257,7 @@ main( hypre_int argc,
          }
 
          mv_MultiVectorDestroy( eigenvectors );
-         free( eigenvalues );
+         hypre_TFree(eigenvalues, HYPRE_MEMORY_HOST);
       }
 
       hypre_TFree( interpreter , HYPRE_MEMORY_HOST);

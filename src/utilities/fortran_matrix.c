@@ -37,7 +37,7 @@ utilities_FortranMatrixAllocateData( HYPRE_BigInt  h, HYPRE_BigInt w,
    hypre_assert( mtx != NULL );
 
    if ( mtx->value != NULL && mtx->ownsValues )
-      free( mtx->value );
+      hypre_TFree( mtx->value ,HYPRE_MEMORY_HOST);
 
    mtx->value = hypre_CTAlloc(HYPRE_Real,  h*w, HYPRE_MEMORY_HOST);
    hypre_assert ( mtx->value != NULL );
@@ -57,7 +57,7 @@ utilities_FortranMatrixWrap( HYPRE_Real* v, HYPRE_BigInt gh, HYPRE_BigInt  h, HY
    hypre_assert( mtx != NULL );
 
    if ( mtx->value != NULL && mtx->ownsValues )
-      free( mtx->value );
+      hypre_TFree( mtx->value ,HYPRE_MEMORY_HOST);
 
    mtx->value = v;
    hypre_assert ( mtx->value != NULL );
@@ -76,9 +76,9 @@ utilities_FortranMatrixDestroy( utilities_FortranMatrix* mtx ) {
       return;
 
    if ( mtx->ownsValues && mtx->value != NULL )
-      free(mtx->value);
+      hypre_TFree(mtx->value,HYPRE_MEMORY_HOST);
 
-   free(mtx);
+   hypre_TFree(mtx,HYPRE_MEMORY_HOST);
 }
 
 HYPRE_BigInt
@@ -622,7 +622,7 @@ utilities_FortranMatrixSelectBlock( utilities_FortranMatrix* mtx,
                                     utilities_FortranMatrix* block ) {
 
    if ( block->value != NULL && block->ownsValues )
-      free( block->value );
+      hypre_TFree( block->value ,HYPRE_MEMORY_HOST);
 
    block->globalHeight = mtx->globalHeight;
    if ( iTo < iFrom || jTo < jFrom ) {
@@ -684,7 +684,7 @@ utilities_FortranMatrixUpperInv( utilities_FortranMatrix* u ) {
       }
    }
 
-   free( diag );
+   hypre_TFree( diag ,HYPRE_MEMORY_HOST);
 
 }
 

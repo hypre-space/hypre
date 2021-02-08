@@ -7,7 +7,11 @@
 
 #include "_hypre_utilities.h"
 
-HYPRE_Int hypre_multmod(HYPRE_Int a, HYPRE_Int b, HYPRE_Int mod)
+/* This function computes (a*b) % mod, which can avoid overflow in large value of (a*b) */
+HYPRE_Int
+hypre_multmod(HYPRE_Int a,
+              HYPRE_Int b,
+              HYPRE_Int mod)
 {
     HYPRE_Int res = 0; // Initialize result
     a %= mod;
@@ -24,5 +28,34 @@ HYPRE_Int hypre_multmod(HYPRE_Int a, HYPRE_Int b, HYPRE_Int mod)
         b >>= 1;  // b = b / 2
     }
     return res;
+}
+
+void
+hypre_partition1D(HYPRE_Int  n, /* total number of elements */
+                  HYPRE_Int  p, /* number of partitions */
+                  HYPRE_Int  j, /* index of this partition */
+                  HYPRE_Int *s, /* first element in this partition */
+                  HYPRE_Int *e  /* past-the-end element */ )
+
+{
+   if (1 == p)
+   {
+      *s = 0;
+      *e = n;
+      return;
+   }
+
+   HYPRE_Int size = n / p;
+   HYPRE_Int rest = n - size * p;
+   if (j < rest)
+   {
+      *s = j * (size + 1);
+      *e = (j + 1) * (size + 1);
+   }
+   else
+   {
+      *s = j * size + rest;
+      *e = (j + 1) * size + rest;
+   }
 }
 

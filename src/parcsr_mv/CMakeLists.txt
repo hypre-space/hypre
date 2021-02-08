@@ -29,6 +29,7 @@ set(SRCS
   par_csr_matop_marked.c
   par_csr_matvec.c
   par_vector.c
+  par_vector_batched.c
   par_make_system.c
   par_csr_triplemat.c
   par_csr_matop_device.c
@@ -38,6 +39,6 @@ target_sources(HYPRE
   PRIVATE ${SRCS}
           ${HDRS}
   )
-  
+
 convert_filenames_to_full_paths(HDRS)
 set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HDRS} PARENT_SCOPE)

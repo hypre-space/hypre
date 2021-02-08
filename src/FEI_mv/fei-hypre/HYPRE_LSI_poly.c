@@ -37,13 +37,13 @@ HYPRE_LSI_Poly;
 #define habs(x) ((x > 0) ? (x) : -(x))
 
 /*--------------------------------------------------------------------------
- * HYPRE_LSI_PolyCreate - Return a polynomial preconditioner object "solver". 
+ * HYPRE_LSI_PolyCreate - Return a polynomial preconditioner object "solver".
  *--------------------------------------------------------------------------*/
 
 int HYPRE_LSI_PolyCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
    HYPRE_LSI_Poly *poly_ptr;
-   
+
    poly_ptr = hypre_TAlloc(HYPRE_LSI_Poly, 1, HYPRE_MEMORY_HOST);
 
    if (poly_ptr == NULL) return 1;
@@ -68,8 +68,8 @@ int HYPRE_LSI_PolyDestroy( HYPRE_Solver solver )
    HYPRE_LSI_Poly *poly_ptr;
 
    poly_ptr = (HYPRE_LSI_Poly *) solver;
-   if ( poly_ptr->coefficients != NULL ) free(poly_ptr->coefficients);
-   free(poly_ptr);
+   hypre_TFree(poly_ptr->coefficients, HYPRE_MEMORY_HOST);
+   hypre_TFree(poly_ptr, HYPRE_MEMORY_HOST);
 
    return 0;
 }
@@ -85,14 +85,14 @@ int HYPRE_LSI_PolySetOrder(HYPRE_Solver solver, int order )
    poly_ptr->order = order;
    if ( poly_ptr->order < 0 ) poly_ptr->order = 0;
    if ( poly_ptr->order > 8 ) poly_ptr->order = 8;
-   if ( poly_ptr->coefficients != NULL ) free( poly_ptr->coefficients );
+   hypre_TFree(poly_ptr->coefficients, HYPRE_MEMORY_HOST);
    poly_ptr->coefficients = NULL;
 
    return 0;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_LSI_PolySetOutputLevel - Set debug level 
+ * HYPRE_LSI_PolySetOutputLevel - Set debug level
  *--------------------------------------------------------------------------*/
 
 int HYPRE_LSI_PolySetOutputLevel(HYPRE_Solver solver, int level)
@@ -127,20 +127,20 @@ int HYPRE_LSI_PolySolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
       exit(1);
    }
    orig_rhs = hypre_TAlloc(double,  Nrows , HYPRE_MEMORY_HOST);
-   for ( i = 0; i < Nrows; i++ ) 
+   for ( i = 0; i < Nrows; i++ )
    {
-      orig_rhs[i] = rhs[i]; 
-      soln[i] = rhs[i] * coefs[order]; 
+      orig_rhs[i] = rhs[i];
+      soln[i] = rhs[i] * coefs[order];
    }
-   for (i = order - 1; i >= 0; i-- ) 
+   for (i = order - 1; i >= 0; i-- )
    {
       HYPRE_ParCSRMatrixMatvec(1.0, A, x, 0.0, b);
       mult = coefs[i];
       for ( j = 0; j < Nrows; j++ )
          soln[j] = mult * orig_rhs[j] + rhs[j];
    }
-   for ( i = 0; i < Nrows; i++ ) rhs[i] = orig_rhs[i]; 
-   free( orig_rhs );
+   for ( i = 0; i < Nrows; i++ ) rhs[i] = orig_rhs[i];
+   hypre_TFree(orig_rhs, HYPRE_MEMORY_HOST);
 
    return 0;
 }
@@ -183,7 +183,7 @@ int HYPRE_LSI_PolySetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
 
    startRow  = row_partition[my_id];
    endRow    = row_partition[my_id+1] - 1;
-   hypre_TFree( row_partition , HYPRE_MEMORY_HOST); 
+   hypre_TFree( row_partition , HYPRE_MEMORY_HOST);
    poly_ptr->Nrows = endRow - startRow + 1;
 
    max_norm = 0.0;
@@ -202,7 +202,7 @@ int HYPRE_LSI_PolySetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
       HYPRE_ParCSRMatrixRestoreRow(A_csr, i, &rowLeng, &colInd, &colVal);
    }
 #ifndef HYPRE_SEQUENTIAL
-   MPI_Allreduce(&max_norm, &dtemp, 1, MPI_DOUBLE, MPI_MAX, poly_ptr->comm); 
+   MPI_Allreduce(&max_norm, &dtemp, 1, MPI_DOUBLE, MPI_MAX, poly_ptr->comm);
 #endif
    if ( pos_diag == 0 && neg_diag > 0 ) max_norm = - max_norm;
 
@@ -210,13 +210,13 @@ int HYPRE_LSI_PolySetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    /* fill in the coefficient table                                    */
    /* ---------------------------------------------------------------- */
 
-   switch ( order ) 
+   switch ( order )
    {
        case 0: coefs[0] = 1.0;     break;
        case 1: coefs[0] = 5.0;     coefs[1] = -1.0;   break;
-       case 2: coefs[0] = 14.0;    coefs[1] = -7.0;   coefs[2] = 1.0; 
+       case 2: coefs[0] = 14.0;    coefs[1] = -7.0;   coefs[2] = 1.0;
                break;
-       case 3: coefs[0] = 30.0;    coefs[1] = -27.0;  coefs[2] = 9.0; 
+       case 3: coefs[0] = 30.0;    coefs[1] = -27.0;  coefs[2] = 9.0;
                coefs[3] = -1.0;    break;
        case 4: coefs[0] = 55.0;    coefs[1] = -77.0;   coefs[2] = 44.0;
                coefs[3] = -11.0;   coefs[4] = 1.0;     break;
@@ -226,7 +226,7 @@ int HYPRE_LSI_PolySetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
        case 6: coefs[0] = 140.0;   coefs[1] = -378.0;  coefs[2] = 450.0;
                coefs[3] = -275.0;  coefs[4] = 90.0;    coefs[5] = -15.0;
                coefs[6] = 1.0;     break;
-       case 7: coefs[0] = 204.0;   coefs[1] = -714.0;  coefs[2] = 1122.0; 
+       case 7: coefs[0] = 204.0;   coefs[1] = -714.0;  coefs[2] = 1122.0;
                coefs[3] = -935.0;  coefs[4] = 442.0;   coefs[5] = -119.0;
                coefs[6] = 17.0;    coefs[7] = -1.0;    break;
        case 8: coefs[0] = 285.0;   coefs[1] = -1254.0; coefs[2] = 2508.0;
