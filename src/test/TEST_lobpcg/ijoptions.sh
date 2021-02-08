@@ -43,30 +43,24 @@ echo  "# ${TNAME}.out.orthchk"              >> ${TNAME}.out
 tail -14 ${TNAME}.out.orthchk     | head -3 >> ${TNAME}.out
 
 echo  "# ${TNAME}.out.itr.100"              >> ${TNAME}.out
-tail -15 ${TNAME}.out.itr.100     | head -5 >> ${TNAME}.out
+tail -14 ${TNAME}.out.itr.100     | head -4 >> ${TNAME}.out
 echo  "# ${TNAME}.out.itr.2"                >> ${TNAME}.out
-tail -15 ${TNAME}.out.itr.2       | head -5 >> ${TNAME}.out
+tail -14 ${TNAME}.out.itr.2       | head -4 >> ${TNAME}.out
 echo  "# ${TNAME}.out.vrand.2"              >> ${TNAME}.out
-tail -15 ${TNAME}.out.vrand.2     | head -5 >> ${TNAME}.out
-
-echo  "# ${TNAME}.out.verb.0"               >> ${TNAME}.out
-tail -40 ${TNAME}.out.verb.0      | head -2 >> ${TNAME}.out
+tail -14 ${TNAME}.out.vrand.2     | head -4 >> ${TNAME}.out
 
 echo  "# ${TNAME}.out.verb.2"               >> ${TNAME}.out
 tail -11 ${TNAME}.out.verb.2      | head -3 >> ${TNAME}.out
 
-# Make sure that the output files are reasonable
-CHECK_LINE="Complexity"
-OUT_COUNT=`grep "$CHECK_LINE" ${TNAME}.out | wc -l`
-SAVED_COUNT=`grep "$CHECK_LINE" ${TNAME}.saved | wc -l`
-if [ "$OUT_COUNT" != "$SAVED_COUNT" ]; then
-   echo "Incorrect number of \"$CHECK_LINE\" lines in ${TNAME}.out" >&2
+# Make sure that the output file is reasonable
+RUNCOUNT=18
+OUTCOUNT=`grep "Eigenvalue" ${TNAME}.out | wc -l`
+if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
+   echo "Incorrect number of runs in ${TNAME}.out" >&2
 fi
 
-if [ -z $HYPRE_NO_SAVED ]; then
-   #diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
-   (../runcheck.sh ${TNAME}.out ${TNAME}.saved $RTOL $ATOL) >&2
-fi
+echo  "# ${TNAME}.out.verb.0"               >> ${TNAME}.out
+tail -40 ${TNAME}.out.verb.0      | head -2 >> ${TNAME}.out
 
 #=============================================================================
 # remove temporary files
