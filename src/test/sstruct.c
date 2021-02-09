@@ -2445,7 +2445,7 @@ main( hypre_int argc,
 
    /* parse command line for input file name */
    infile = infile_default;
-   while (arg_index < argc)
+   if (argc > 1)
    {
       if ( strcmp(argv[arg_index], "-in") == 0 )
       {
@@ -2473,38 +2473,7 @@ main( hypre_int argc,
          hypre_printf("HYPRE Single = %d\n", single);
          exit(1);
       }
-#if defined(HYPRE_USING_GPU)
-      else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
-      {
-         arg_index++;
-         default_exec_policy = HYPRE_EXEC_HOST;
-      }
-      else if ( strcmp(argv[arg_index], "-exec_device") == 0 )
-      {
-         arg_index++;
-         default_exec_policy = HYPRE_EXEC_DEVICE;
-      }
-      else if ( strcmp(argv[arg_index], "-mm_cusparse") == 0 )
-      {
-         arg_index++;
-         spgemm_use_cusparse = atoi(argv[arg_index++]);
-      }
-#endif
-      else
-      {
-         arg_index++;
-      }
    }
-
-   /* default memory location */
-   HYPRE_SetMemoryLocation(memory_location);
-
-   /* default execution policy */
-   HYPRE_SetExecutionPolicy(default_exec_policy);
-
-#if defined(HYPRE_USING_GPU)
-   HYPRE_CSRMatrixSetSpGemmUseCusparse(spgemm_use_cusparse);
-#endif
 
    ReadData(infile, &global_data);
 
@@ -2563,6 +2532,7 @@ main( hypre_int argc,
     * Parse command line
     *-----------------------------------------------------------*/
 
+   arg_index = 1;
    while (arg_index < argc)
    {
       if ( strcmp(argv[arg_index], "-pt") == 0 )
@@ -2788,12 +2758,39 @@ main( hypre_int argc,
          arg_index++;
          printLevel = atoi(argv[arg_index++]);
       }
+#if defined(HYPRE_USING_GPU)
+      else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
+      {
+         arg_index++;
+         default_exec_policy = HYPRE_EXEC_HOST;
+      }
+      else if ( strcmp(argv[arg_index], "-exec_device") == 0 )
+      {
+         arg_index++;
+         default_exec_policy = HYPRE_EXEC_DEVICE;
+      }
+      else if ( strcmp(argv[arg_index], "-mm_cusparse") == 0 )
+      {
+         arg_index++;
+         spgemm_use_cusparse = atoi(argv[arg_index++]);
+      }
+#endif
       else
       {
          arg_index++;
          /*break;*/
       }
    }
+
+   /* default memory location */
+   HYPRE_SetMemoryLocation(memory_location);
+
+   /* default execution policy */
+   HYPRE_SetExecutionPolicy(default_exec_policy);
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_CSRMatrixSetSpGemmUseCusparse(spgemm_use_cusparse);
+#endif
 
    if ( solver_id == 39 && lobpcgFlag )
       solver_id = 10;
