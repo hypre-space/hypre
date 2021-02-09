@@ -1340,6 +1340,12 @@ main( hypre_int argc,
 
    HYPRE_Int             arg_index, part, box, var, entry, s, i, j, k;
 
+#if defined(HYPRE_USING_GPU)
+   HYPRE_Int spgemm_use_cusparse = 1;
+#endif
+   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
+   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
+
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -1351,10 +1357,6 @@ main( hypre_int argc,
 
    /* Initialize Hypre */
    HYPRE_Init();
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   /* hypre_HandleDefaultExecPolicy(hypre_handle()) = HYPRE_EXEC_DEVICE; */
-#endif
 
    /*-----------------------------------------------------------
     * Read input file
@@ -1465,6 +1467,23 @@ main( hypre_int argc,
          arg_index++;
          print_system = 1;
       }
+#if defined(HYPRE_USING_GPU)
+      else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
+      {
+         arg_index++;
+         default_exec_policy = HYPRE_EXEC_HOST;
+      }
+      else if ( strcmp(argv[arg_index], "-exec_device") == 0 )
+      {
+         arg_index++;
+         default_exec_policy = HYPRE_EXEC_DEVICE;
+      }
+      else if ( strcmp(argv[arg_index], "-mm_cusparse") == 0 )
+      {
+         arg_index++;
+         spgemm_use_cusparse = atoi(argv[arg_index++]);
+      }
+#endif
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
          PrintUsage(argv[0], myid);
@@ -1476,6 +1495,17 @@ main( hypre_int argc,
          break;
       }
    }
+
+   /* default memory location */
+   HYPRE_SetMemoryLocation(memory_location);
+
+   /* default execution policy */
+   HYPRE_SetExecutionPolicy(default_exec_policy);
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_CSRMatrixSetSpGemmUseCusparse(spgemm_use_cusparse);
+#endif
+
 
    /*-----------------------------------------------------------
     * Distribute data
