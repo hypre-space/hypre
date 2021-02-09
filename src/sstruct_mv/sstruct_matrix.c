@@ -850,6 +850,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    col_coords = hypre_SStructMatrixTmpColCoords(matrix);
    coeffs     = hypre_SStructMatrixTmpCoeffs(matrix);
 
+   /* RL: copy values to host since the following for-loop is on CPU */
    if ( hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST )
    {
       h_values = hypre_TAlloc(HYPRE_Complex, nentries, HYPRE_MEMORY_HOST);
@@ -860,6 +861,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
       h_values = values;
    }
 
+   /* RL: TODO Port it to GPU? */
    ncoeffs = 0;
    for (i = 0; i < nentries; i++)
    {
