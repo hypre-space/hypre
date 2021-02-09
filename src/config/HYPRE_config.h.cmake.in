@@ -47,9 +47,6 @@
 /* Use internal LAPACK library */
 #cmakedefine HYPRE_USING_HYPRE_LAPACK
 
-/* Use assumed partition */
-#cmakedefine HYPRE_NO_GLOBAL_PARTITION
-
 /* Print HYPRE errors */
 #cmakedefine HYPRE_PRINT_ERRORS
 

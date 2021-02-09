@@ -770,8 +770,6 @@ enable_complex
 enable_maxdim
 enable_persistent
 enable_hopscotch
-with_no_global_partition
-enable_global_partition
 enable_fortran
 enable_unified_memory
 enable_cuda_streams
@@ -1487,8 +1485,6 @@ Optional Features:
   --enable-persistent     Uses persistent communication (default is NO).
   --enable-hopscotch      Uses hopscotch hashing if configured with OpenMP and
                           atomic capability available(default is NO).
-  --enable-global-partition
-                          Use global partitioning (default is NO).
   --enable-fortran        Require a working Fortran compiler (default is YES).
   --enable-unified-memory Use unified memory for allocating the memory
                           (default is NO).
@@ -1503,7 +1499,6 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-
   --with-LD=ARG           Set linker to ARG. The environment variable 'LD'
                           will be overridden.
   --with-LDFLAGS=ARG      User can manually set linker flags. The 'LDFLAGS'
@@ -2973,29 +2968,6 @@ then
 $as_echo "#define HYPRE_HOPSCOTCH 1" >>confdefs.h
 
 fi
-
-hypre_using_global_partition=no
-
-# Check whether --with-no-global-partition was given.
-if test "${with_no_global_partition+set}" = set; then :
-  withval=$with_no_global_partition; case "${withval}" in
-    yes) hypre_using_global_partition=no ;;
-    no)  hypre_using_global_partition=yes ;;
-    *)   hypre_using_global_partition=no ;;
- esac
-
-fi
-
-# Check whether --enable-global-partition was given.
-if test "${enable_global_partition+set}" = set; then :
-  enableval=$enable_global_partition; case "${enableval}" in
-    yes) hypre_using_global_partition=yes ;;
-    no)  hypre_using_global_partition=no ;;
-    *)   hypre_using_global_partition=yes ;;
- esac
-
-fi
-
 
 # Check whether --enable-fortran was given.
 if test "${enable_fortran+set}" = set; then :
@@ -7422,13 +7394,6 @@ $as_echo "$hypre_cv_func_MPI_Comm_f2c_macro" >&6; }
 $as_echo "#define HYPRE_HAVE_MPI_COMM_F2C 1" >>confdefs.h
 
    fi
-fi
-
-if test "$hypre_using_global_partition" = "no"
-then
-
-$as_echo "#define HYPRE_NO_GLOBAL_PARTITION 1" >>confdefs.h
-
 fi
 
 if test "$hypre_using_node_aware_mpi" = "yes"

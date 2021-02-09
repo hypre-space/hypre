@@ -208,8 +208,5 @@ The straightforward approach to determining neighbors involves constructing a
 global partition of the data.  This approach, however, requires :math:`O(P)`
 storage and computations and is not scalable for machines with tens of thousands
 of processors.  The *assumed partition* algorithm was developed to address this
-problem [BaFY2006]_.  It is used by default in hypre and is recommended in
-general.  For modest numbers of processors (less than a hundred or so), a global
-partition may produce slightly faster results and can be turned on by compiling
-the library as detailed in Section :ref:`config_options`.
+problem [BaFY2006]_.  It is the approach used in hypre.
 
