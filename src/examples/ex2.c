@@ -26,10 +26,12 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 /* Struct linear solvers header */
 #include "HYPRE_struct_ls.h"
+#include "ex.h"
 
 #ifdef HYPRE_EXVIS
 #include "vis.c"
@@ -56,9 +58,6 @@ int main (int argc, char *argv[])
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
-   /* Initialize HYPRE */
-   HYPRE_Init();
-
    if (num_procs != 2)
    {
       if (myid == 0) printf("Must run with 2 processors!\n");
@@ -66,6 +65,12 @@ int main (int argc, char *argv[])
 
       return(0);
    }
+
+   /* Initialize HYPRE */
+   HYPRE_Init();
+
+   /* Print GPU info */
+   HYPRE_PrintDeviceInfo();
 
    /* Parse command line */
    {
@@ -184,7 +189,8 @@ int main (int argc, char *argv[])
 
             int nentries = 5;
             int nvalues  = 30; /* 6 grid points, each with 5 stencil entries */
-            double values[30];
+            /* double values[30]; OK to use constant-length array for CPUs */
+            double *values = (double *) malloc(30*sizeof(double));
 
             int stencil_indices[5];
             for (j = 0; j < nentries; j++) /* label the stencil indices -
@@ -201,6 +207,8 @@ int main (int argc, char *argv[])
 
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, nentries,
                                            stencil_indices, values);
+
+            free(values);
          }
 
          /* Set the matrix coefficients for some set of stencil entries
@@ -211,7 +219,8 @@ int main (int argc, char *argv[])
 
             int nentries = 5;
             int nvalues  = 60; /* 12 grid points, each with 5 stencil entries */
-            double values[60];
+            /* double values[60]; OK to use constant-length array for CPUs */
+            double *values = (double *) malloc(60*sizeof(double));
 
             int stencil_indices[5];
             for (j = 0; j < nentries; j++)
@@ -226,6 +235,8 @@ int main (int argc, char *argv[])
 
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, nentries,
                                            stencil_indices, values);
+
+            free(values);
          }
       }
       else if (myid == 1)
@@ -238,7 +249,8 @@ int main (int argc, char *argv[])
 
             int nentries = 5;
             int nvalues  = 80; /* 16 grid points, each with 5 stencil entries */
-            double values[80];
+            /* double values[80]; OK to use constant-length array for CPUs */
+            double *values = (double *) malloc(80*sizeof(double));
 
             int stencil_indices[5];
             for (j = 0; j < nentries; j++)
@@ -253,6 +265,8 @@ int main (int argc, char *argv[])
 
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, nentries,
                                            stencil_indices, values);
+
+            free(values);
          }
       }
 
@@ -261,7 +275,8 @@ int main (int argc, char *argv[])
       if (myid == 0)
       {
          int maxnvalues = 6;
-         double values[6];
+         /* double values[6]; OK to use constant-length array for CPUs */
+         double *values = (double *) malloc(6*sizeof(double));
 
          for (i = 0; i < maxnvalues; i++)
             values[i] = 0.0;
@@ -321,11 +336,15 @@ int main (int argc, char *argv[])
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
                                            stencil_indices, values);
          }
+
+         free(values);
       }
       else if (myid == 1)
       {
          int maxnvalues = 4;
-         double values[4];
+         /* double values[4]; OK to use constant-length array for CPUs */
+         double *values = (double *) malloc(4*sizeof(double));
+
          for (i = 0; i < maxnvalues; i++)
             values[i] = 0.0;
 
@@ -361,6 +380,8 @@ int main (int argc, char *argv[])
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
                                            stencil_indices, values);
          }
+
+         free(values);
       }
 
       /* This is a collective call finalizing the matrix assembly.
@@ -386,7 +407,8 @@ int main (int argc, char *argv[])
             int iupper[2] = {-1, 2};
 
             int nvalues = 6;  /* 6 grid points */
-            double values[6];
+            /* double values[6]; OK to use constant-length array for CPUs */
+            double *values = (double *) malloc(6*sizeof(double));
 
             for (i = 0; i < nvalues; i ++)
                values[i] = 1.0;
@@ -395,6 +417,8 @@ int main (int argc, char *argv[])
             for (i = 0; i < nvalues; i ++)
                values[i] = 0.0;
             HYPRE_StructVectorSetBoxValues(x, ilower, iupper, values);
+
+            free(values);
          }
 
          /* Set the vector coefficients over the gridpoints in my second box */
@@ -403,7 +427,8 @@ int main (int argc, char *argv[])
             int iupper[2] = { 2, 4};
 
             int nvalues = 12; /* 12 grid points */
-            double values[12];
+            /* double values[12]; OK to use constant-length array for CPUs */
+            double *values = (double *) malloc(12*sizeof(double));
 
             for (i = 0; i < nvalues; i ++)
                values[i] = 1.0;
@@ -412,6 +437,8 @@ int main (int argc, char *argv[])
             for (i = 0; i < nvalues; i ++)
                values[i] = 0.0;
             HYPRE_StructVectorSetBoxValues(x, ilower, iupper, values);
+
+            free(values);
          }
       }
       else if (myid == 1)
@@ -422,7 +449,8 @@ int main (int argc, char *argv[])
             int iupper[2] = { 6, 4};
 
             int nvalues = 16; /* 16 grid points */
-            double values[16];
+            /* double values[16]; OK to use constant-length array for CPUs */
+            double *values = (double *) malloc(16*sizeof(double));
 
             for (i = 0; i < nvalues; i ++)
                values[i] = 1.0;
@@ -431,6 +459,8 @@ int main (int argc, char *argv[])
             for (i = 0; i < nvalues; i ++)
                values[i] = 0.0;
             HYPRE_StructVectorSetBoxValues(x, ilower, iupper, values);
+
+            free(values);
          }
       }
 
