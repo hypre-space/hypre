@@ -1549,7 +1549,7 @@ Optional Packages:
   --with-node-aware-mpi   Use Node Aware MPI (default is NO).
   --with-node-aware-mpi-include=DIR
                           User specifies that nap_comm.hpp is in DIR.
-  --with-memory-track     Use memory tracker in hypre (default is NO).
+  --with-memory-tracker   Use memory tracker in hypre (default is NO).
   --with-blas-lib=LIBS    LIBS is space-separated linkable list (enclosed in
                           quotes) of libraries needed for BLAS. OK to use -L
                           and -l flags in the list

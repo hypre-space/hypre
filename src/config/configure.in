@@ -725,7 +725,7 @@ AS_HELP_STRING([--with-node-aware-mpi-include=DIR],
 
 dnl ***** memory tracker
 AC_ARG_WITH(memory_tracker,
-AS_HELP_STRING([--with-memory-track],
+AS_HELP_STRING([--with-memory-tracker],
                [Use memory tracker in hypre (default is NO).]),
 [case "$withval" in
     yes) hypre_using_memory_tracker=yes;;
