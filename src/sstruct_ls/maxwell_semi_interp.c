@@ -999,7 +999,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
             the column ranks of the connected fine edges. */
          hypre_SerialBoxLoop0Begin(ndim, loop_size);
          {
-            hypre_BoxLoopGetIndex(lindex);
+            zypre_BoxLoopGetIndex(lindex);
             hypre_SetIndex3(cindex, lindex[0], lindex[1], lindex[2]);
             hypre_AddIndexes(cindex, cstart, 3, cindex);
 
@@ -1268,7 +1268,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
                      hypre_SerialBoxLoop0Begin(ndim, loop_size);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(cindex, lindex[0], lindex[1], lindex[2]);
                         hypre_AddIndexes(cindex, start, 3, cindex);
 
@@ -1365,7 +1365,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
                      hypre_SerialBoxLoop0Begin(ndim, loop_size);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(cindex, lindex[0], lindex[1], lindex[2]);
                         hypre_AddIndexes(cindex, start, 3, cindex);
 
@@ -1461,7 +1461,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
                      hypre_SerialBoxLoop0Begin(ndim, loop_size);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(cindex, lindex[0], lindex[1], lindex[2]);
                         hypre_AddIndexes(cindex, start, 3, cindex);
 
@@ -1680,7 +1680,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
             hypre_SerialBoxLoop0Begin(ndim, loop_size);
             {
-               hypre_BoxLoopGetIndex(lindex);
+               zypre_BoxLoopGetIndex(lindex);
                hypre_SetIndex3(cindex, lindex[0], lindex[1], lindex[2]);
                hypre_AddIndexes(cindex, start, 3, cindex);
 
@@ -1894,7 +1894,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
             hypre_SerialBoxLoop0Begin(ndim, loop_size);
             {
-               hypre_BoxLoopGetIndex(lindex);
+               zypre_BoxLoopGetIndex(lindex);
                hypre_SetIndex3(cindex, lindex[0], lindex[1], lindex[2]);
                hypre_AddIndexes(cindex, start, 3, cindex);
 
@@ -1945,7 +1945,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
          hypre_SerialBoxLoop0Begin(ndim, loop_size);
          {
-            hypre_BoxLoopGetIndex(lindex);
+            zypre_BoxLoopGetIndex(lindex);
             hypre_SetIndex3(cindex, lindex[0], lindex[1], lindex[2]);
             hypre_AddIndexes(cindex, start, 3, cindex);
 
@@ -2313,7 +2313,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
             hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                       &copy_box, start, stride, m);
             {
-               hypre_BoxLoopGetIndex(lindex);
+               zypre_BoxLoopGetIndex(lindex);
                hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
                for (k= 0; k< 3; k++)
                {
@@ -2436,7 +2436,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                                &copy_box, start, rfactor, m);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
                         for (k= 0; k< 3; k++)
                         {
@@ -2512,7 +2512,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                                &copy_box, start, rfactor, m);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
                         for (k= 0; k< 3; k++)
                         {
@@ -2613,7 +2613,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                                &copy_box, start, rfactor, m);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                         for (k= 0; k< 3; k++)
@@ -2688,7 +2688,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                                &copy_box, start, rfactor, m);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
                         for (k= 0; k< 3; k++)
                         {
@@ -2788,7 +2788,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                                &copy_box, start, rfactor, m);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                         for (k= 0; k< 3; k++)
@@ -2866,7 +2866,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                                &copy_box, start, rfactor, m);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                         for (k= 0; k< 3; k++)
@@ -2958,7 +2958,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                             &copy_box, start, rfactor, m);
                   {
-                     hypre_BoxLoopGetIndex(lindex);
+                     zypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
                      for (k= 0; k< 3; k++)
                      {
@@ -3014,7 +3014,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                             &copy_box, start, rfactor, m);
                   {
-                     hypre_BoxLoopGetIndex(lindex);
+                     zypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                      for (k= 0; k< 3; k++)
@@ -3071,7 +3071,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                             &copy_box, start, rfactor, m);
                   {
-                     hypre_BoxLoopGetIndex(lindex);
+                     zypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
                      for (k= 0; k< 3; k++)
                      {
@@ -3138,7 +3138,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                             &copy_box, start, rfactor, m);
                   {
-                     hypre_BoxLoopGetIndex(lindex);
+                     zypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
                      for (k= 0; k< 3; k++)
                      {
@@ -3206,7 +3206,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                             &copy_box, start, rfactor, m);
                   {
-                     hypre_BoxLoopGetIndex(lindex);
+                     zypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
                      for (k= 0; k< 3; k++)
                      {
@@ -3451,7 +3451,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                       &copy_box, start, stride, m);
             {
                HYPRE_BigInt big_j;
-               hypre_BoxLoopGetIndex(lindex);
+               zypre_BoxLoopGetIndex(lindex);
                hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
                for (j= 0; j< 3; j++)
                {
@@ -3602,7 +3602,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                                &copy_box, start, rfactor, m);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                         /* because of rfactor striding, cindex= findex. But adjust
@@ -3740,7 +3740,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                                &copy_box, start, rfactor, m);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                         /* because of rfactor striding, cindex= findex. But adjust
@@ -3904,7 +3904,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                                &copy_box, start, rfactor, m);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                         /* because of rfactor striding, cindex= findex. But adjust
@@ -4037,7 +4037,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                                &copy_box, start, rfactor, m);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                         /* because of rfactor striding, cindex= findex. But adjust
@@ -4201,7 +4201,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                                &copy_box, start, rfactor, m);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                         /* because of rfactor striding, cindex= findex. But adjust
@@ -4333,7 +4333,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                                &copy_box, start, rfactor, m);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                         /* because of rfactor striding, cindex= findex. But adjust
@@ -4490,7 +4490,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                             &copy_box, start, rfactor, r);
                   {
-                     hypre_BoxLoopGetIndex(lindex);
+                     zypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                      /*****************************************************
@@ -4573,7 +4573,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                             &copy_box, start, rfactor, r);
                   {
-                     hypre_BoxLoopGetIndex(lindex);
+                     zypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                      /*****************************************************
@@ -4656,7 +4656,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                             &copy_box, start, rfactor, r);
                   {
-                     hypre_BoxLoopGetIndex(lindex);
+                     zypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                      /*****************************************************
@@ -4810,7 +4810,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                             &copy_box, start, rfactor, r);
                   {
-                     hypre_BoxLoopGetIndex(lindex);
+                     zypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                      /*****************************************************
@@ -4965,7 +4965,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                             &copy_box, start, rfactor, r);
                   {
-                     hypre_BoxLoopGetIndex(lindex);
+                     zypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                      /*****************************************************

@@ -14,6 +14,22 @@
 #endif
 */
 
+#ifdef HYPRE_USING_MEMORY_TRACKER
+hypre_MemoryTracker *_hypre_memory_tracker = NULL;
+
+/* accessor to the global ``_hypre_memory_tracker'' */
+hypre_MemoryTracker*
+hypre_memory_tracker()
+{
+   if (!_hypre_memory_tracker)
+   {
+      _hypre_memory_tracker = hypre_MemoryTrackerCreate();
+   }
+
+   return _hypre_memory_tracker;
+}
+#endif
+
 /* global variable _hypre_handle:
  * Outside this file, do NOT access it directly,
  * but use hypre_handle() instead (see hypre_handle.h) */
@@ -127,6 +143,13 @@ hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_)
 HYPRE_Int
 HYPRE_Init()
 {
+#ifdef HYPRE_USING_MEMORY_TRACKER
+   if (!_hypre_memory_tracker)
+   {
+      _hypre_memory_tracker = hypre_MemoryTrackerCreate();
+   }
+#endif
+
    if (!_hypre_handle)
    {
       _hypre_handle = hypre_HandleCreate();
@@ -227,6 +250,11 @@ HYPRE_Finalize()
 #endif
 */
    HYPRE_CUDA_CALL( cudaGetLastError() );
+#endif
+
+#ifdef HYPRE_USING_MEMORY_TRACKER
+   hypre_PrintMemoryTracker();
+   hypre_MemoryTrackerDestroy(_hypre_memory_tracker);
 #endif
 
    return hypre_error_flag;

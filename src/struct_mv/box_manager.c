@@ -573,7 +573,7 @@ hypre_BoxManDestroy( hypre_BoxManager *manager )
 
       hypre_TFree(hypre_BoxManEntries(manager), HYPRE_MEMORY_HOST);
 
-      hypre_Free((char *)hypre_BoxManInfoObjects(manager), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_BoxManInfoObjects(manager), HYPRE_MEMORY_HOST);
       
       hypre_TFree(hypre_BoxManIndexTable(manager), HYPRE_MEMORY_HOST);
       
@@ -2105,7 +2105,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
                
             }
             hypre_TFree(entries, HYPRE_MEMORY_HOST);
-            hypre_Free((char*)hypre_BoxManInfoObjects(manager), HYPRE_MEMORY_HOST);
+            hypre_TFree(hypre_BoxManInfoObjects(manager), HYPRE_MEMORY_HOST);
 
             hypre_BoxManEntries(manager) = new_entries;
             hypre_BoxManMaxNEntries(manager) = size;

@@ -272,7 +272,6 @@ hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
       return hypre_error_flag;
    }
 
-
    hypre_assert(hypre_VectorSize(local_vector) == (HYPRE_Int)(vec_stop - vec_start));
 
    hypre_SeqVectorSetConstantValues(local_vector, 0.0);
@@ -646,25 +645,24 @@ hypre_IJVectorAssemblePar(hypre_IJVector *vector)
  *****************************************************************************/
 
 HYPRE_Int
-hypre_IJVectorGetValuesPar(hypre_IJVector  *vector,
-                           HYPRE_Int        num_values,
-                           const HYPRE_BigInt *indices,
-                           HYPRE_Complex   *values)
+hypre_IJVectorGetValuesPar(hypre_IJVector *vector,
+                           HYPRE_Int       num_values,
+                     const HYPRE_BigInt   *indices,
+                           HYPRE_Complex  *values)
 {
-   HYPRE_Int my_id;
-   HYPRE_Int j,  k;
-   HYPRE_BigInt i, vec_start, vec_stop;
-   HYPRE_Complex *data;
-   HYPRE_Int ierr = 0;
-
-   HYPRE_BigInt *IJpartitioning = hypre_IJVectorPartitioning(vector);
-   hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
-   MPI_Comm comm = hypre_IJVectorComm(vector);
-   hypre_Vector *local_vector;
-   HYPRE_Int print_level = hypre_IJVectorPrintLevel(vector);
+   HYPRE_Int        my_id;
+   MPI_Comm         comm           = hypre_IJVectorComm(vector);
+   HYPRE_BigInt    *IJpartitioning = hypre_IJVectorPartitioning(vector);
+   HYPRE_BigInt     vec_start;
+   HYPRE_BigInt     vec_stop;
+   hypre_ParVector *par_vector     = (hypre_ParVector*) hypre_IJVectorObject(vector);
+   HYPRE_Int        print_level    = hypre_IJVectorPrintLevel(vector);
 
    /* If no components are to be retrieved, perform no checking and return */
-   if (num_values < 1) return 0;
+   if (num_values < 1)
+   {
+      return 0;
+   }
 
    hypre_MPI_Comm_rank(comm, &my_id);
 
@@ -682,7 +680,7 @@ hypre_IJVectorGetValuesPar(hypre_IJVector  *vector,
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
-   local_vector = hypre_ParVectorLocalVector(par_vector);
+
    if (!IJpartitioning)
    {
       if (print_level)
@@ -694,6 +692,8 @@ hypre_IJVectorGetValuesPar(hypre_IJVector  *vector,
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
+
+   hypre_Vector *local_vector = hypre_ParVectorLocalVector(par_vector);
    if (!local_vector)
    {
       if (print_level)
@@ -721,58 +721,10 @@ hypre_IJVectorGetValuesPar(hypre_IJVector  *vector,
       return hypre_error_flag;
    }
 
-   /* Determine whether indices points to local indices only, and if not, let
-      user know of catastrophe and exit.  If indices == NULL, assume that
-      num_values components are to be retrieved from block starting at
-      vec_start */
+   hypre_assert(vec_start == hypre_ParVectorFirstIndex(par_vector));
+   hypre_assert(vec_stop  == hypre_ParVectorLastIndex(par_vector) + 1);
 
-   if (indices)
-   {
-      for (i = 0; i < num_values; i++)
-      {
-         ierr += (indices[i] <  vec_start);
-         ierr += (indices[i] >= vec_stop);
-      }
-   }
-
-   if (ierr)
-   {
-      if (print_level)
-      {
-         hypre_printf("indices beyond local range -- ");
-         hypre_printf("hypre_IJVectorGetValuesPar\n");
-         hypre_printf("**** Indices specified are unusable ****\n");
-      }
-      hypre_error_in_arg(3);
-      return hypre_error_flag;
-   }
-
-   data = hypre_VectorData(local_vector);
-
-   if (indices)
-   {
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,j) HYPRE_SMP_SCHEDULE
-#endif
-      for (j = 0; j < num_values; j++)
-      {
-         k = (HYPRE_Int)(indices[j] - vec_start);
-         values[j] = data[k];
-      }
-   }
-   else
-   {
-     if (num_values > (HYPRE_Int)(vec_stop-vec_start))
-     {
-        hypre_error_in_arg(2);
-        return hypre_error_flag;
-     }
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
-#endif
-      for (j = 0; j < num_values; j++)
-         values[j] = data[j];
-   }
+   hypre_ParVectorGetValues(par_vector, num_values, (HYPRE_BigInt *) indices, values);
 
    return hypre_error_flag;
 }

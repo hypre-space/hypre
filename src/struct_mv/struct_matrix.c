@@ -549,7 +549,6 @@ hypre_StructMatrixInitialize( hypre_StructMatrix *matrix )
  *
  * should not be called to set a constant-coefficient part of the matrix,
  *   call hypre_StructMatrixSetConstantValues instead
- * RL: values must be a host pointer
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -640,22 +639,21 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
                {
                   if (action > 0)
                   {
-                     HYPRE_Complex matval;
-                     hypre_TMemcpy(&matval, matp, HYPRE_Complex, 1,
-                                   HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-                     matval += values[s];
-                     hypre_TMemcpy(matp, &matval, HYPRE_Complex, 1,
-                                   HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+#define DEVICE_VAR is_device_ptr(matp,values)
+                     hypre_LoopBegin(1, k)
+                     {
+                        *matp += values[s];
+                     }
+                     hypre_LoopEnd()
+#undef DEVICE_VAR
                   }
                   else if (action > -1)
                   {
-                     hypre_TMemcpy(matp, &(values[s]), HYPRE_Complex, 1,
-                                   HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                     hypre_TMemcpy(matp, values + s, HYPRE_Complex, 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
                   }
                   else /* action < 0 */
                   {
-                     hypre_TMemcpy(&(values[s]), matp, HYPRE_Complex, 1,
-                                   HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+                     hypre_TMemcpy(values + s, matp, HYPRE_Complex, 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
                   }
                }
                else
