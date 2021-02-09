@@ -158,8 +158,8 @@ void PCG_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,
       Axpy(n, 1.0, s, p);
    }
 
-   free(p);
-   free(s);
+   hypre_TFree(p, HYPRE_MEMORY_HOST);
+   hypre_TFree(s, HYPRE_MEMORY_HOST);
 
    /* compute exact relative residual norm */
    MatrixMatvec(mat, x, r);  /* r = Ax */
@@ -167,7 +167,7 @@ void PCG_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,
    Axpy(n, 1.0, b, r);       /* r = r + b */
    i_prod = InnerProd(n, r, r, comm);
 
-   free(r);
+   hypre_TFree(r, HYPRE_MEMORY_HOST);
 
    if (mype == 0)
       hypre_printf("Iter (%4d): computed rrn    : %e\n", i, sqrt(i_prod/bi_prod));

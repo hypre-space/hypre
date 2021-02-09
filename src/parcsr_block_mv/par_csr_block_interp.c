@@ -148,14 +148,9 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix *A,
    num_threads = 1;
    
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   my_first_cpt = num_cpts_global[my_id];
-   total_global_cpts = num_cpts_global[num_procs];
-#endif
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -1047,19 +1042,11 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix *A,
    /* copy row starts since A will be destroyed */
    A_col_starts = hypre_ParCSRBlockMatrixColStarts(A);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    P_row_starts = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST); /* don't free this */
    for (i = 0; i < 2; i++)
    {
       P_row_starts[i] =  A_col_starts[i];
    }
-#else
-   P_row_starts = hypre_CTAlloc(HYPRE_BigInt,  num_procs + 1, HYPRE_MEMORY_HOST); /* don't free this */
-   for (i = 0; i < num_procs + 1; i++)
-   {
-      P_row_starts[i] =  A_col_starts[i];
-   }
-#endif
 
    /* Now create P - as a block matrix */
    P = hypre_ParCSRBlockMatrixCreate(comm, block_size,
@@ -1783,14 +1770,9 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix *A,
    num_threads = hypre_NumThreads();
 
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   my_first_cpt = num_cpts_global[my_id];
-   total_global_cpts = num_cpts_global[num_procs];
-#endif
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -2708,19 +2690,11 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix *A,
    /* copy row starts since A will be destroyed */
    A_col_starts = hypre_ParCSRBlockMatrixColStarts(A);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    P_row_starts = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST); /* don't free this */
    for (i = 0; i < 2; i++)
    {
       P_row_starts[i] =  A_col_starts[i];
    }
-#else
-   P_row_starts = hypre_CTAlloc(HYPRE_BigInt,  num_procs + 1, HYPRE_MEMORY_HOST); /* don't free this */
-   for (i = 0; i < num_procs + 1; i++)
-   {
-      P_row_starts[i] =  A_col_starts[i];
-   }
-#endif
 
    /* Now create P - as a block matrix */
    P = hypre_ParCSRBlockMatrixCreate(comm, block_size,
@@ -2975,14 +2949,9 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix    *A,
    num_threads = hypre_NumThreads();
 
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   my_first_cpt = num_cpts_global[my_id];
-   total_global_cpts = num_cpts_global[num_procs];
-#endif
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -3835,19 +3804,11 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix    *A,
    /* copy row starts since A will be destroyed */
    A_col_starts = hypre_ParCSRBlockMatrixColStarts(A);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    P_row_starts = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST); /* don't free this */
    for (i = 0; i < 2; i++)
    {
       P_row_starts[i] =  A_col_starts[i];
    }
-#else
-   P_row_starts = hypre_CTAlloc(HYPRE_BigInt,  num_procs + 1, HYPRE_MEMORY_HOST); /* don't free this */
-   for (i = 0; i < num_procs + 1; i++)
-   {
-      P_row_starts[i] =  A_col_starts[i];
-   }
-#endif
 
    /* Now create P - as a block matrix */
    P = hypre_ParCSRBlockMatrixCreate(comm, block_size,
@@ -4102,14 +4063,9 @@ hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix   *A,
    num_threads = hypre_NumThreads();
 
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   my_first_cpt = num_cpts_global[my_id];
-   total_global_cpts = num_cpts_global[num_procs];
-#endif
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -4951,19 +4907,11 @@ hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix   *A,
    /* copy row starts since A will be destroyed */
    A_col_starts = hypre_ParCSRBlockMatrixColStarts(A);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    P_row_starts = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST); /* don't free this */
    for (i = 0; i < 2; i++)
    {
       P_row_starts[i] =  A_col_starts[i];
    }
-#else
-   P_row_starts = hypre_CTAlloc(HYPRE_BigInt,  num_procs + 1, HYPRE_MEMORY_HOST); /* don't free this */
-   for (i = 0; i < num_procs + 1; i++)
-   {
-      P_row_starts[i] =  A_col_starts[i];
-   }
-#endif
 
    /* Now create P - as a block matrix */
    P = hypre_ParCSRBlockMatrixCreate(comm, block_size,
@@ -5186,14 +5134,9 @@ hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix    *A,
    hypre_MPI_Comm_rank(comm,&my_id);
    num_threads = hypre_NumThreads();
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   my_first_cpt = num_cpts_global[my_id];
-   total_global_cpts = num_cpts_global[num_procs];
-#endif
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -5742,19 +5685,11 @@ hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix    *A,
    /* copy row starts since A will be destroyed */
    A_col_starts = hypre_ParCSRBlockMatrixColStarts(A);
    
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    P_row_starts = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST); /* don't free this */
    for (i = 0; i < 2; i++)
    {
       P_row_starts[i] =  A_col_starts[i];
    }
-#else
-   P_row_starts = hypre_CTAlloc(HYPRE_BigInt,  num_procs + 1, HYPRE_MEMORY_HOST); /* don't free this */
-   for (i = 0; i < num_procs + 1; i++)
-   {
-      P_row_starts[i] =  A_col_starts[i];
-   }
-#endif
 
 
    /* Now create P - as a block matrix */                                                                         
@@ -6010,14 +5945,9 @@ hypre_BoomerAMGBuildBlockStdInterp(hypre_ParCSRBlockMatrix *A,
    hypre_MPI_Comm_size(comm, &num_procs);   
    hypre_MPI_Comm_rank(comm,&my_id);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_INT, num_procs-1, comm);
-#else
-   my_first_cpt = num_cpts_global[my_id];
-   total_global_cpts = num_cpts_global[num_procs];
-#endif
 
    if (!comm_pkg)
    {

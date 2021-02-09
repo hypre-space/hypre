@@ -96,7 +96,6 @@ hypre_BoomerAMGCoarseParms(MPI_Comm    comm,
    }
 
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    {
       HYPRE_BigInt scan_recv;
       
@@ -109,20 +108,6 @@ hypre_BoomerAMGCoarseParms(MPI_Comm    comm,
 
    }
       
-
-#else
-   coarse_pnts_global = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
-
-   hypre_MPI_Allgather(&local_coarse_size,1,HYPRE_MPI_BIG_INT,&coarse_pnts_global[1],
-		1,HYPRE_MPI_BIG_INT,comm);
-
-   for (i=2; i < num_procs+1; i++)
-      coarse_pnts_global[i] += coarse_pnts_global[i-1];
-#endif
-
-
-
-
    *coarse_pnts_global_ptr = coarse_pnts_global;
 
 #ifdef HYPRE_PROFILE

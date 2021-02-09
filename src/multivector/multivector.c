@@ -89,7 +89,7 @@ mv_MultiVectorDestroy( mv_MultiVectorPtr v) {
 
   if ( v->ownsData )
     (v->interpreter->DestroyMultiVector)( v->data );
-  free( v );
+  hypre_TFree( v ,HYPRE_MEMORY_HOST);
 }
 
 void

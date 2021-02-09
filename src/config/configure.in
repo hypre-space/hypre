@@ -150,6 +150,11 @@ hypre_using_cusparse=yes
 hypre_using_cublas=no
 hypre_using_curand=yes
 hypre_using_cub=no
+hypre_using_umpire=no
+hypre_using_umpire_host=no
+hypre_using_umpire_device=no
+hypre_using_umpire_um=no
+hypre_using_umpire_pinned=no
 
 hypre_using_caliper=no
 hypre_user_gave_caliper_lib=no
@@ -319,7 +324,7 @@ fi
 AC_ARG_ENABLE(hopscotch,
 AS_HELP_STRING([--enable-hopscotch],
                [Uses hopscotch hashing if configured with OpenMP and
-		atomic capability available(default is NO).]),
+                atomic capability available(default is NO).]),
 [case "${enableval}" in
     yes) hypre_using_hopscotch=yes ;;
     no)  hypre_using_hopscotch=no ;;
@@ -331,27 +336,6 @@ if test "$hypre_using_hopscotch" = "yes"
 then
    AC_DEFINE(HYPRE_HOPSCOTCH, 1, [Define to 1 if hopscotch hashing])
 fi
-
-dnl * The --with-no-global-partition option is retained here for
-dnl * backward compatibility (no help string is printed).
-dnl * The new --enable-global-partition option takes precedence.
-hypre_using_global_partition=no
-AC_ARG_WITH(no-global-partition,,
-[case "${withval}" in
-    yes) hypre_using_global_partition=no ;;
-    no)  hypre_using_global_partition=yes ;;
-    *)   hypre_using_global_partition=no ;;
- esac]
-)
-AC_ARG_ENABLE(global-partition,
-AS_HELP_STRING([--enable-global-partition],
-               [Use global partitioning (default is NO).]),
-[case "${enableval}" in
-    yes) hypre_using_global_partition=yes ;;
-    no)  hypre_using_global_partition=no ;;
-    *)   hypre_using_global_partition=yes ;;
- esac]
-)
 
 AC_ARG_ENABLE(fortran,
 AS_HELP_STRING([--enable-fortran],
@@ -848,8 +832,8 @@ AS_HELP_STRING([--with-fmangle=FMANGLE],
 [hypre_fmangle=0; AC_HYPRE_SET_FMANGLE],
 [hypre_fmangle=0]
 )
-AC_DEFINE_UNQUOTED(HYPRE_FMANGLE, 
-		   [$hypre_fmangle],
+AC_DEFINE_UNQUOTED(HYPRE_FMANGLE,
+                   [$hypre_fmangle],
 [Define as follows to set the Fortran name mangling scheme:
  0 = unspecified;
  1 = no underscores;
@@ -1063,18 +1047,6 @@ AS_HELP_STRING([--with-raja],
 [hypre_using_raja=no]
 )
 
-dnl ***** Kokkos
-
-AC_ARG_WITH(kokkos,
-AS_HELP_STRING([--with-kokkos],
-               [Use Kokkos. Require kokkos package to be compiled properly(default is NO).]),
-[case "$withval" in
-    yes) hypre_user_chose_kokkos=yes ;;
-    no)  hypre_user_chose_kokkos=no ;;
-    *)   hypre_user_chose_kokkos=no ;;
- esac]
-)
-
 AC_ARG_WITH(raja-include,
 AS_HELP_STRING([--with-raja-include=DIR],
                [User specifies that RAJA/*.h is in DIR.  The options
@@ -1120,17 +1092,16 @@ AS_HELP_STRING([--with-raja-lib-dirs=DIRS],
  hypre_user_chose_raja=yes]
 )
 
-AC_ARG_WITH(kokkos-lib-dirs,
-AS_HELP_STRING([--with-kokkos-lib-dirs=DIRS],
-               [DIRS is space-separated list (enclosed in quotes) of
-                directories containing the libraries and
-                Makefile.kokkos is assumed to be in DIRS/../ .
-                The  options --with-kokkos-libs and --with-kokkos-dirs
-                must be used together.]),
-[for kokkos_lib_dir in $withval; do
-    HYPRE_KOKKOS_LIB_DIR="-L$kokkos_lib_dir $HYPRE_KOKKOS_LIB_DIR"
- done;
-hypre_user_chose_kokkos=yes]
+dnl ***** Kokkos
+
+AC_ARG_WITH(kokkos,
+AS_HELP_STRING([--with-kokkos],
+               [Use Kokkos. Require kokkos package to be compiled properly(default is NO).]),
+[case "$withval" in
+    yes) hypre_user_chose_kokkos=yes ;;
+    no)  hypre_user_chose_kokkos=no ;;
+    *)   hypre_user_chose_kokkos=no ;;
+ esac]
 )
 
 AC_ARG_WITH(kokkos-include,
@@ -1163,6 +1134,123 @@ AS_HELP_STRING([--with-kokkos-libs=LIBS],
     HYPRE_KOKKOS_LIB="-l$kokkos_lib $HYPRE_KOKKOS_LIB"
  done;
 hypre_user_chose_kokkos=yes]
+)
+
+AC_ARG_WITH(kokkos-lib-dirs,
+AS_HELP_STRING([--with-kokkos-lib-dirs=DIRS],
+               [DIRS is space-separated list (enclosed in quotes) of
+                directories containing the libraries and
+                Makefile.kokkos is assumed to be in DIRS/../ .
+                The  options --with-kokkos-libs and --with-kokkos-dirs
+                must be used together.]),
+[for kokkos_lib_dir in $withval; do
+    HYPRE_KOKKOS_LIB_DIR="-L$kokkos_lib_dir $HYPRE_KOKKOS_LIB_DIR"
+ done;
+hypre_user_chose_kokkos=yes]
+)
+
+dnl **** Umpire
+
+AC_ARG_WITH(umpire-host,
+AS_HELP_STRING([--with-umpire-host],
+               [Use Umpire Allocator for host memory (default is NO).]),
+[case "${withval}" in
+    yes) hypre_using_umpire_host=yes ;;
+    no)  hypre_using_umpire_host=no ;;
+    *)   hypre_using_umpire_host=no ;;
+ esac],
+[hypre_using_umpire_host=no]
+)
+
+AC_ARG_WITH(umpire-device,
+AS_HELP_STRING([--with-umpire-device],
+               [Use Umpire Allocator for device memory (default is NO).]),
+[case "${withval}" in
+    yes) hypre_using_umpire_device=yes ;;
+    no)  hypre_using_umpire_device=no ;;
+    *)   hypre_using_umpire_device=no ;;
+ esac],
+[hypre_using_umpire_device=no]
+)
+
+AC_ARG_WITH(umpire-um,
+AS_HELP_STRING([--with-umpire-um],
+               [Use Umpire Allocator for unified memory (default is NO).]),
+[case "${withval}" in
+    yes) hypre_using_umpire_um=yes ;;
+    no)  hypre_using_umpire_um=no ;;
+    *)   hypre_using_umpire_um=no ;;
+ esac],
+[hypre_using_umpire_um=no]
+)
+
+AC_ARG_WITH(umpire-pinned,
+AS_HELP_STRING([--with-umpire-pinned],
+               [Use Umpire Allocator for pinned memory (default is NO).]),
+[case "${withval}" in
+    yes) hypre_using_umpire_pinned=yes ;;
+    no)  hypre_using_umpire_pinned=no ;;
+    *)   hypre_using_umpire_pinned=no ;;
+ esac],
+[hypre_using_umpire_pinned=no]
+)
+
+dnl the default setting with Umpire, for device and um
+AC_ARG_WITH(umpire,
+AS_HELP_STRING([--with-umpire],
+               [Use Umpire Allocator for device and unified memory (default is NO).]),
+[case "${withval}" in
+    yes) hypre_using_umpire_device=yes
+         hypre_using_umpire_um=yes ;;
+    no) ;;
+    *) ;;
+ esac],
+[]
+)
+
+AC_ARG_WITH(umpire-include,
+AS_HELP_STRING([--with-umpire-include=DIR],
+               [User specifies that UMPIRE headers is in DIR.  The options
+                --with-umpire-include --with-umpire-libs and
+                --with-umpire-dirs must be used together.]),
+[for umpire_dir in $withval; do
+HYPRE_UMPIRE_INCLUDE="-I$umpire_dir $HYPRE_UMPIRE_INCLUDE"
+done;
+]
+)
+
+AC_ARG_WITH(umpire-lib,
+AS_HELP_STRING([--with-umpire-lib=LIBS],
+               [LIBS is space-separated linkable list (enclosed in quotes) of libraries
+                needed for UMPIRE. OK to use -L and -l flags in the list]),
+[for umpire_lib in $withval; do
+       HYPRE_UMPIRE_LIB="$umpire_lib $HYPRE_UMPIRE_LIB"
+ done;
+]
+)
+
+AC_ARG_WITH(umpire-libs,
+AS_HELP_STRING([--with-umpire-libs=LIBS],
+               [LIBS is space-separated list (enclosed in quotes) of libraries
+                needed for UMPIRE (base name only). The options --with-umpire-libs and
+                --with-umpire-dirs must be used together.]),
+[for umpire_lib in $withval; do
+    HYPRE_UMPIRE_LIB="-l$umpire_lib $HYPRE_UMPIRE_LIB"
+ done;
+]
+)
+
+AC_ARG_WITH(umpire-lib-dirs,
+AS_HELP_STRING([--with-umpire-lib-dirs=DIRS],
+               [DIRS is space-separated list (enclosed in quotes) of
+                directories containing the libraries specified by
+                --with-umpire-libs, e.g "usr/lib /usr/local/lib".
+                The  options --with-umpire-libs and --with-umpire-dirs
+                must be used together.]),
+[for umpire_lib_dir in $withval; do
+    HYPRE_UMPIRE_LIB_DIR="-L$umpire_lib_dir $HYPRE_UMPIRE_LIB_DIR"
+ done;
+]
 )
 
 dnl ***** Caliper
@@ -1345,16 +1433,6 @@ else
       || test $hypre_cv_func_MPI_Comm_f2c_macro = yes; then
      AC_DEFINE(HYPRE_HAVE_MPI_COMM_F2C,1,[Define to 1 if the routine MPI_Comm_f2c is found])
    fi
-fi
-
-dnl * It would be better if this could be defined above, but much work is needed
-dnl * to make that happen.
-if test "$hypre_using_global_partition" = "no"
-then
-dnl   if test "$hypre_using_mpi" != "no"
-dnl   then
-      AC_DEFINE(HYPRE_NO_GLOBAL_PARTITION, 1, [No global partitioning being used])
-dnl   fi
 fi
 
 if test "$hypre_using_node_aware_mpi" = "yes"
@@ -1669,7 +1747,6 @@ dnl * Set raja options
 dnl *********************************************************************
 if test "x$hypre_user_chose_raja" = "xyes"
 then
-   RAJA_LIBS=" $HYPRE_RAJA_LIB_DIR $HYPRE_RAJA_LIB "
    AC_DEFINE(HYPRE_USING_RAJA, 1, [Define to 1 if executing on host/device with RAJA])
 
    if test "$hypre_using_cuda" != "yes"
@@ -1691,7 +1768,6 @@ dnl * Set kokkos options
 dnl *********************************************************************
 if test "x$hypre_user_chose_kokkos" = "xyes"
 then
-   KOKKOS_LIBS="$HYPRE_KOKKOS_LIB_DIR $HYPRE_KOKKOS_LIB"
    AC_DEFINE(HYPRE_USING_KOKKOS, 1, [Define to 1 if executing on host/device with KOKKOS])
 
    if test "$hypre_using_cuda" != "yes"
@@ -1709,10 +1785,44 @@ then
 fi
 
 dnl *********************************************************************
+dnl * Set umpire options
+dnl *********************************************************************
+if test "x$hypre_using_umpire_host" = "xyes"
+then
+   hypre_using_umpire=yes
+   AC_DEFINE(HYPRE_USING_UMPIRE_HOST, 1, [Define to 1 if using UMPIRE for host memory])
+fi
+
+if test "x$hypre_using_umpire_device" = "xyes"
+then
+   hypre_using_umpire=yes
+   AC_DEFINE(HYPRE_USING_UMPIRE_DEVICE, 1, [Define to 1 if using UMPIRE for device memory])
+fi
+
+if test "x$hypre_using_umpire_um" = "xyes"
+then
+   hypre_using_umpire=yes
+   AC_DEFINE(HYPRE_USING_UMPIRE_UM, 1, [Define to 1 if using UMPIRE for unified memory])
+fi
+
+if test "x$hypre_using_umpire_pinned" = "xyes"
+then
+   hypre_using_umpire=yes
+   AC_DEFINE(HYPRE_USING_UMPIRE_PINNED, 1, [Define to 1 if using UMPIRE for pinned memory])
+fi
+
+if test "x$hypre_using_umpire" = "xyes"
+then
+   AC_DEFINE(HYPRE_USING_UMPIRE, 1, [Define to 1 if using UMPIRE])
+fi
+
+dnl *********************************************************************
 dnl * Set cuda options
 dnl *********************************************************************
 if test "$hypre_user_chose_cuda" = "yes"
 then
+   AC_DEFINE(HYPRE_USING_GPU, 1, [Define to 1 if executing on GPU device])
+
    AC_DEFINE(HYPRE_USING_CUDA, 1, [Define to 1 if executing on device with CUDA])
 
    AC_DEFINE(HYPRE_USING_CUSPARSE, 1, [Define to 1 if using cuSPARSE])
@@ -1773,7 +1883,7 @@ then
 
    dnl CFLAGS=${CXXFLAGS}
    LDFLAGS="-ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -Xcompiler \"${LDFLAGS}\""
-   HYPRE_CUDA_INCL="-I${HYPRE_CUDA_PATH}/include"
+   HYPRE_CUDA_INCLUDE="-I${HYPRE_CUDA_PATH}/include"
    HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcudart"
    if test "$hypre_using_nvtx" = "yes"
    then
@@ -1839,7 +1949,11 @@ then
    then
       AC_DEFINE(HYPRE_USING_NVTX, 1, [NVTX being used])
    fi
+
    AC_DEFINE(HYPRE_USING_DEVICE_OPENMP, 1, [Define to 1 if executing on device with OpenMP])
+
+   AC_DEFINE(HYPRE_USING_GPU, 1, [Define to 1 if executing on GPU device])
+
    AC_DEFINE(HYPRE_DEVICE_OPENMP_ALLOC, 1, [Define to 1 if using OpenMP on device [target alloc version]])
 
    dnl AC_DEFINE(HYPRE_DEVICE_OPENMP_MAPPED, 1, [Define to 1 if using OpenMP on device [target mapped version]])
@@ -1863,7 +1977,7 @@ then
       AC_DEFINE(HYPRE_DEVICE_OPENMP_CHECK, 1, [Define to 1 if strictly checking OpenMP offload directives])
    fi
 
-   HYPRE_CUDA_INCL="-I${HYPRE_CUDA_PATH}/include"
+   HYPRE_CUDA_INCLUDE="-I${HYPRE_CUDA_PATH}/include"
    HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcusparse -lcudart -lcurand"
    if test "$hypre_using_nvtx" = "yes"
    then
@@ -2058,7 +2172,6 @@ AC_SUBST(HYPRE_FEI_FEMLI_FILES)
 dnl *********************************************************************
 dnl * BLAS & LAPACK related information
 dnl *********************************************************************
-AC_SUBST(HYPRE_KOKKOS_PATH)
 AC_SUBST(BLASLIBDIRS)
 AC_SUBST(BLASLIBS)
 AC_SUBST(LAPACKLIBDIRS)
@@ -2070,7 +2183,6 @@ dnl *********************************************************************
 AC_SUBST(HYPRE_RAJA_LIB_DIR)
 AC_SUBST(HYPRE_RAJA_INCLUDE)
 AC_SUBST(HYPRE_RAJA_LIB)
-AC_SUBST(RAJA_LIBS)
 
 dnl *********************************************************************
 dnl * KOKKOS information
@@ -2079,13 +2191,19 @@ AC_SUBST(HYPRE_KOKKOS_SRC_DIR)
 AC_SUBST(HYPRE_KOKKOS_LIB_DIR)
 AC_SUBST(HYPRE_KOKKOS_INCLUDE)
 AC_SUBST(HYPRE_KOKKOS_LIB)
-AC_SUBST(KOKKOS_LIBS)
+
+dnl *********************************************************************
+dnl * UMPIRE information
+dnl *********************************************************************
+AC_SUBST(HYPRE_UMPIRE_LIB_DIR)
+AC_SUBST(HYPRE_UMPIRE_INCLUDE)
+AC_SUBST(HYPRE_UMPIRE_LIB)
 
 dnl *********************************************************************
 dnl * CUDA stuff
 dnl *********************************************************************
 AC_SUBST(CUFLAGS)
-AC_SUBST(HYPRE_CUDA_INCL)
+AC_SUBST(HYPRE_CUDA_INCLUDE)
 AC_SUBST(HYPRE_CUDA_LIBS)
 
 dnl *********************************************************************

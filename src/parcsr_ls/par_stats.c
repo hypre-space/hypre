@@ -196,11 +196,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    block_mode = hypre_ParAMGDataBlockMode(amg_data);
 
    send_buff     = hypre_CTAlloc(HYPRE_Real,  6, HYPRE_MEMORY_HOST);
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    gather_buff = hypre_CTAlloc(HYPRE_Real, 6, HYPRE_MEMORY_HOST);
-#else
-   gather_buff = hypre_CTAlloc(HYPRE_Real, 6*num_procs, HYPRE_MEMORY_HOST);
-#endif
 
    if (my_id==0)
    {
@@ -295,9 +291,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          hypre_printf(" measures are determined %s\n\n",
                (measure_type ? "globally" : "locally"));
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
       hypre_printf( "\n No global partition option chosen.\n\n");
-#endif
 
       if (interp_type == 0)
       {
@@ -625,8 +619,6 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          }
       }
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-
       numrows = (HYPRE_Int)(row_starts[1]-row_starts[0]);
       if (!numrows) /* if we don't have any rows, then don't have this count toward
                        min row sum or min num entries */
@@ -655,44 +647,6 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          hypre_printf("  %*.1f  %10.3e  %10.3e\n", ndigits[2], avg_entries,
                global_min_rsum, global_max_rsum);
       }
-
-#else
-
-      send_buff[0] = (HYPRE_Real) min_entries;
-      send_buff[1] = (HYPRE_Real) max_entries;
-      send_buff[2] = min_rowsum;
-      send_buff[3] = max_rowsum;
-
-      hypre_MPI_Gather(send_buff,4,HYPRE_MPI_REAL,gather_buff,4,HYPRE_MPI_REAL,0,comm);
-
-      if (my_id == 0)
-      {
-         global_min_e = 1000000;
-         global_max_e = 0;
-         global_min_rsum = 1.0e7;
-         global_max_rsum = 0.0;
-         for (j = 0; j < num_procs; j++)
-         {
-            numrows = row_starts[j+1]-row_starts[j];
-            if (numrows)
-            {
-               global_min_e = hypre_min(global_min_e, (HYPRE_Int) gather_buff[j*4]);
-               global_min_rsum = hypre_min(global_min_rsum, gather_buff[j*4 +2]);
-            }
-            global_max_e = hypre_max(global_max_e, (HYPRE_Int) gather_buff[j*4 +1]);
-            global_max_rsum = hypre_max(global_max_rsum, gather_buff[j*4 +3]);
-         }
-
-         hypre_printf("%3d %*b %*.0f  %0.3f  %4d %4d",
-               level, ndigits[0], fine_size, ndigits[1], global_nonzeros,
-               sparse, global_min_e, global_max_e);
-         hypre_printf("  %*.1f  %10.3e  %10.3e\n", ndigits[2], avg_entries,
-               global_min_rsum, global_max_rsum);
-      }
-
-#endif
-
-
    }
 
    ndigits[0] = 5;
@@ -939,8 +893,6 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          }
       }
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-
       numrows = row_starts[1]-row_starts[0];
       if (!numrows) /* if we don't have any rows, then don't have this count toward
                        min row sum or min num entries */
@@ -975,54 +927,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
                avg_entries, global_min_wt, global_max_wt,
                global_min_rsum, global_max_rsum);
       }
-
-
-#else
-
-      send_buff[0] = (HYPRE_Real) min_entries;
-      send_buff[1] = (HYPRE_Real) max_entries;
-      send_buff[2] = min_rowsum;
-      send_buff[3] = max_rowsum;
-      send_buff[4] = min_weight;
-      send_buff[5] = max_weight;
-
-      hypre_MPI_Gather(send_buff,6,HYPRE_MPI_REAL,gather_buff,6,HYPRE_MPI_REAL,0,comm);
-
-      if (my_id == 0)
-      {
-         global_min_e = 1000000;
-         global_max_e = 0;
-         global_min_rsum = 1.0e7;
-         global_max_rsum = 0.0;
-         global_min_wt = 1.0e7;
-         global_max_wt = 0.0;
-
-         for (j = 0; j < num_procs; j++)
-         {
-            numrows = row_starts[j+1] - row_starts[j];
-            if (numrows)
-            {
-               global_min_e = hypre_min(global_min_e, (HYPRE_Int) gather_buff[j*6]);
-               global_min_rsum = hypre_min(global_min_rsum, gather_buff[j*6+2]);
-               global_min_wt = hypre_min(global_min_wt, gather_buff[j*6+4]);
-            }
-            global_max_e = hypre_max(global_max_e, (HYPRE_Int) gather_buff[j*6+1]);
-            global_max_rsum = hypre_max(global_max_rsum, gather_buff[j*6+3]);
-            global_max_wt = hypre_max(global_max_wt, gather_buff[j*6+5]);
-         }
-
-         hypre_printf("%3d %*b x %-*b %3d  %3d",
-               level, ndigits[0], fine_size, ndigits[0], coarse_size,
-               global_min_e, global_max_e);
-         hypre_printf("  %4.1f  %10.3e  %10.3e  %10.3e  %10.3e\n",
-               avg_entries, global_min_wt, global_max_wt,
-               global_min_rsum, global_max_rsum);
-      }
-
-#endif
-
    }
-
 
    total_variables = 0;
    operat_cmplxty = 0;

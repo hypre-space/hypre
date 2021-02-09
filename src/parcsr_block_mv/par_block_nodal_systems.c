@@ -107,19 +107,11 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
 /* Set up the new matrix AN */
 
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    row_starts_AN = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
    for (i=0; i < 2; i++)
    {
       row_starts_AN[i] = row_starts[i];
    }
-#else
-   row_starts_AN = hypre_CTAlloc(HYPRE_BigInt,  num_procs+1, HYPRE_MEMORY_HOST);
-   for (i=0; i < num_procs+1; i++)
-   {
-      row_starts_AN[i] = row_starts[i];
-   }
-#endif
 
    global_num_nodes = hypre_ParCSRBlockMatrixGlobalNumRows(A);
    num_nodes = hypre_CSRBlockMatrixNumRows(A_diag);

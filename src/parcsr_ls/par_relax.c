@@ -1202,17 +1202,11 @@ hypre_BoomerAMGRelax19GaussElim( hypre_ParCSRMatrix *A,
    /*-----------------------------------------------------------------
     *  Generate CSR matrix from ParCSRMatrix A
     *-----------------------------------------------------------------*/
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    /* all processors are needed for these routines */
    A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
    f_vector = hypre_ParVectorToVectorAll(f);
-#endif
    if (num_rows)
    {
-#ifndef HYPRE_NO_GLOBAL_PARTITION
-      A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
-      f_vector = hypre_ParVectorToVectorAll(f);
-#endif
       A_CSR_i = hypre_CSRMatrixI(A_CSR);
       A_CSR_j = hypre_CSRMatrixJ(A_CSR);
       A_CSR_data = hypre_CSRMatrixData(A_CSR);
@@ -1248,7 +1242,6 @@ hypre_BoomerAMGRelax19GaussElim( hypre_ParCSRMatrix *A,
       hypre_SeqVectorDestroy(f_vector);
       f_vector = NULL;
    }
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    else
    {
       hypre_CSRMatrixDestroy(A_CSR);
@@ -1256,7 +1249,6 @@ hypre_BoomerAMGRelax19GaussElim( hypre_ParCSRMatrix *A,
       hypre_SeqVectorDestroy(f_vector);
       f_vector = NULL;
    }
-#endif
 
    return relax_error;
 }
@@ -1289,17 +1281,11 @@ hypre_BoomerAMGRelax98GaussElimPivot( hypre_ParCSRMatrix *A,
    /*-----------------------------------------------------------------
     *  Generate CSR matrix from ParCSRMatrix A
     *-----------------------------------------------------------------*/
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    /* all processors are needed for these routines */
    A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
    f_vector = hypre_ParVectorToVectorAll(f);
-#endif
    if (num_rows)
    {
-#ifndef HYPRE_NO_GLOBAL_PARTITION
-      A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
-      f_vector = hypre_ParVectorToVectorAll(f);
-#endif
       A_CSR_i = hypre_CSRMatrixI(A_CSR);
       A_CSR_j = hypre_CSRMatrixJ(A_CSR);
       A_CSR_data = hypre_CSRMatrixData(A_CSR);
@@ -1344,7 +1330,6 @@ hypre_BoomerAMGRelax98GaussElimPivot( hypre_ParCSRMatrix *A,
       hypre_SeqVectorDestroy(f_vector);
       f_vector = NULL;
    }
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    else
    {
       hypre_CSRMatrixDestroy(A_CSR);
@@ -1352,7 +1337,6 @@ hypre_BoomerAMGRelax98GaussElimPivot( hypre_ParCSRMatrix *A,
       hypre_SeqVectorDestroy(f_vector);
       f_vector = NULL;
    }
-#endif
 
    return relax_error;
 }

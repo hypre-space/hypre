@@ -13,6 +13,7 @@ set(SRCS
   csr_matrix.c
   csr_matvec.c
   csr_matvec_device.c
+  csr_spgemm_device.c
   genpart.c
   HYPRE_csr_matrix.c
   HYPRE_mapped_matrix.c

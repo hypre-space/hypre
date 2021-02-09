@@ -58,7 +58,6 @@ option(HYPRE_ENABLE_COMPLEX          "Use complex values" OFF)
 option(HYPRE_ENABLE_HYPRE_BLAS       "Use internal BLAS library" ON)
 option(HYPRE_ENABLE_HYPRE_LAPACK     "Use internal LAPACK library" ON)
 option(HYPRE_ENABLE_PERSISTENT_COMM  "Use persistent communication" OFF)
-option(HYPRE_ENABLE_GLOBAL_PARTITION "Use global partitioning" OFF)
 option(HYPRE_ENABLE_FEI              "Use FEI" OFF) # TODO: Add this cmake feature
 option(HYPRE_WITH_MPI                "Compile with MPI" ON)
 option(HYPRE_WITH_OPENMP             "Use OpenMP" OFF)
@@ -113,12 +112,6 @@ if (HYPRE_ENABLE_PERSISTENT_COMM)
   set(HYPRE_USING_PERSISTENT_COMM ON CACHE BOOL "" FORCE)
 endif()
 
-if (HYPRE_ENABLE_GLOBAL_PARTITION)
-  set(HYPRE_NO_GLOBAL_PARTITION OFF CACHE BOOL "" FORCE)
-else()
-  set(HYPRE_NO_GLOBAL_PARTITION ON CACHE BOOL "" FORCE)
-endif()
-
 if (HYPRE_WITH_MPI)
   set(HYPRE_SEQUENTIAL OFF CACHE BOOL "" FORCE)
 else()
@@ -154,7 +147,6 @@ if (HYPRE_SHARED OR HYPRE_BIGINT OR HYPRE_SINGLE OR HYPRE_LONG_DOUBLE)
 endif ()
 
 if (HYPRE_SEQUENTIAL)
-  set (HYPRE_NO_GLOBAL_PARTITION OFF CACHE BOOL "" FORCE)
   set (HYPRE_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 endif ()
 
