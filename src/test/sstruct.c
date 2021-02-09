@@ -2532,7 +2532,6 @@ main( hypre_int argc,
     * Parse command line
     *-----------------------------------------------------------*/
 
-   arg_index = 1;
    while (arg_index < argc)
    {
       if ( strcmp(argv[arg_index], "-pt") == 0 )
