@@ -260,6 +260,21 @@ HYPRE_Finalize()
    return hypre_error_flag;
 }
 
+HYPRE_Int
+HYPRE_PrintDeviceInfo()
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+  hypre_int dev;
+  struct cudaDeviceProp deviceProp;
+
+  HYPRE_CUDA_CALL( cudaGetDevice(&dev) );
+  HYPRE_CUDA_CALL( cudaGetDeviceProperties(&deviceProp, dev) );
+  hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GB\n", deviceProp.name, deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem/1e9);
+#endif
+
+   return hypre_error_flag;
+}
+
 /******************************************************************************
  *
  * hypre Umpire
