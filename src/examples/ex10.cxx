@@ -1,3 +1,10 @@
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 /*
    Example 10
 
@@ -47,6 +54,9 @@ int main(int argc, char *argv[])
    MPI_Init(&argc, &argv);
    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
    MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
+
+   /* Initialize HYPRE */
+   HYPRE_Init();
 
    // Set default parameters
    n = 4*nprocs;
@@ -525,6 +535,9 @@ int main(int argc, char *argv[])
       delete [] nodeIDList;
    }
    delete feiPtr;
+
+   /* Finalize HYPRE */
+   HYPRE_Finalize();
 
    // Finalize MPI
    MPI_Finalize();

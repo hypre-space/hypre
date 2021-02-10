@@ -1,21 +1,13 @@
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
-
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 ###  the inclusion of these routines based on the configure options.
 
 include ../config/Makefile.config
 
-C_COMPILE_FLAGS = ${INCLUDES} -I.. -I../utilities
+C_COMPILE_FLAGS = ${INCLUDES} -I.. -I../blas -I../utilities
 
 LAPACK_HEADERS =  f2c.h hypre_lapack.h
 LAPACK_FILES = \
@@ -29,6 +21,7 @@ LAPACK_FILES = \
  dgeqrf.c\
  dgesvd.c\
  dgetrf.c\
+ dgetri.c\
  dgetrs.c\
  dgetf2.c\
  dlabad.c\
@@ -84,9 +77,10 @@ LAPACK_FILES = \
  dsygv.c\
  dsytd2.c\
  dsytrd.c\
+ dtrtri.c\
+ dtrti2.c\
  ieeeck.c\
  ilaenv.c\
- lapack_utils.c\
  lsame.c\
  xerbla.c
 
@@ -99,6 +93,7 @@ OBJS = ${LAPACK_FILES:.c=.o}
 all: ${OBJS} dlamch.o
 
 install: all
+	cp -fR $(srcdir)/_hypre_lapack.h $(HYPRE_INC_INSTALL)
 
 clean:
 	rm -rf *.o
@@ -112,8 +107,5 @@ distclean: clean
 # compile without optimization
 dlamch.o : dlamch.c ${LAPACK_HEADERS}
 	${CC} ${CFLAGS} -c dlamch.c
-
-ilaenv.o : ilaenv.c ${LAPACK_HEADERS}
-	${CC} ${CFLAGS} -I../blas -c ilaenv.c
 
 ${OBJS}: ${LAPACK_HEADERS}

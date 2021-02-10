@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -28,7 +20,7 @@
  *   Internal routine for freeing a matrix stored in Parcsr form.
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_DistributedMatrixDestroyParCSR( hypre_DistributedMatrix *distributed_matrix )
 {
 
@@ -41,10 +33,10 @@ hypre_DistributedMatrixDestroyParCSR( hypre_DistributedMatrix *distributed_matri
 
   /* matrix must be set before calling this function*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_DistributedMatrixInitializeParCSR(hypre_DistributedMatrix *matrix)
 {
-   
+
    return 0;
 }
 
@@ -57,7 +49,7 @@ hypre_DistributedMatrixInitializeParCSR(hypre_DistributedMatrix *matrix)
  *   Internal routine for printing a matrix stored in Parcsr form.
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_DistributedMatrixPrintParCSR( hypre_DistributedMatrix *matrix )
 {
    HYPRE_Int  ierr=0;
@@ -71,12 +63,12 @@ hypre_DistributedMatrixPrintParCSR( hypre_DistributedMatrix *matrix )
  * hypre_DistributedMatrixGetLocalRangeParCSR
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_DistributedMatrixGetLocalRangeParCSR( hypre_DistributedMatrix *matrix,
-                             HYPRE_Int *row_start,
-                             HYPRE_Int *row_end,
-                             HYPRE_Int *col_start,
-                             HYPRE_Int *col_end )
+                             HYPRE_BigInt *row_start,
+                             HYPRE_BigInt *row_end,
+                             HYPRE_BigInt *col_start,
+                             HYPRE_BigInt *col_end )
 {
    HYPRE_Int ierr=0;
    HYPRE_ParCSRMatrix Parcsr_matrix = (HYPRE_ParCSRMatrix) hypre_DistributedMatrixLocalStorage(matrix);
@@ -84,7 +76,7 @@ hypre_DistributedMatrixGetLocalRangeParCSR( hypre_DistributedMatrix *matrix,
    if (!Parcsr_matrix) return(-1);
 
 
-   ierr = HYPRE_ParCSRMatrixGetLocalRange( Parcsr_matrix, row_start, row_end, 
+   ierr = HYPRE_ParCSRMatrixGetLocalRange( Parcsr_matrix, row_start, row_end,
 					col_start, col_end );
 
    return(ierr);
@@ -94,11 +86,11 @@ hypre_DistributedMatrixGetLocalRangeParCSR( hypre_DistributedMatrix *matrix,
  * hypre_DistributedMatrixGetRowParCSR
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_DistributedMatrixGetRowParCSR( hypre_DistributedMatrix *matrix,
-                             HYPRE_Int row,
+                             HYPRE_BigInt row,
                              HYPRE_Int *size,
-                             HYPRE_Int **col_ind,
+                             HYPRE_BigInt **col_ind,
                              HYPRE_Real **values )
 {
    HYPRE_Int ierr = 0;
@@ -108,6 +100,11 @@ hypre_DistributedMatrixGetRowParCSR( hypre_DistributedMatrix *matrix,
 
    ierr = HYPRE_ParCSRMatrixGetRow( Parcsr_matrix, row, size, col_ind, values);
 
+   // RL: if HYPRE_ParCSRMatrixGetRow was on device, need the next line to guarantee it's done
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   hypre_SyncCudaComputeStream(hypre_handle());
+#endif
+
    return(ierr);
 }
 
@@ -115,11 +112,11 @@ hypre_DistributedMatrixGetRowParCSR( hypre_DistributedMatrix *matrix,
  * hypre_DistributedMatrixRestoreRowParCSR
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_DistributedMatrixRestoreRowParCSR( hypre_DistributedMatrix *matrix,
-                             HYPRE_Int row,
+                             HYPRE_BigInt row,
                              HYPRE_Int *size,
-                             HYPRE_Int **col_ind,
+                             HYPRE_BigInt **col_ind,
                              HYPRE_Real **values )
 {
    HYPRE_Int ierr;
@@ -127,7 +124,7 @@ hypre_DistributedMatrixRestoreRowParCSR( hypre_DistributedMatrix *matrix,
 
    if (Parcsr_matrix == NULL) return(-1);
 
-   ierr = HYPRE_ParCSRMatrixRestoreRow( Parcsr_matrix, row, size, col_ind, values); 
+   ierr = HYPRE_ParCSRMatrixRestoreRow( Parcsr_matrix, row, size, col_ind, values);
 
    return(ierr);
 }

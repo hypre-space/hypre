@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_Euclid.h"
 /* #include "ExternalRows_dh.h" */
@@ -317,7 +312,7 @@ void rcv_external_rows_private(ExternalRows_dh er)
     nz = rcv_nz_counts[i];
     hypre_MPI_Irecv(extRowCval+offset, nz, HYPRE_MPI_INT,    nabor, CVAL_TAG, comm_dh, er->req1+i);
     hypre_MPI_Irecv(extRowFill+offset, nz, HYPRE_MPI_INT,    nabor, FILL_TAG, comm_dh, er->req2+i);
-    hypre_MPI_Irecv(extRowAval+offset, nz, hypre_MPI_DOUBLE, nabor, AVAL_TAG, comm_dh, er->req3+i);
+    hypre_MPI_Irecv(extRowAval+offset, nz, hypre_MPI_REAL, nabor, AVAL_TAG, comm_dh, er->req3+i);
     offset += nz;
   }
 
@@ -503,9 +498,9 @@ void send_external_rows_private(ExternalRows_dh er)
   for (i=first_bdry, j=0; i<m; ++i, ++j) {
     HYPRE_Int tmp = (rp[i+1] - diag[i]);
 
-    memcpy(cvalSend+offset, cval+diag[i], tmp*sizeof(HYPRE_Int));
-    memcpy(fillSend+offset, fill+diag[i], tmp*sizeof(HYPRE_Int));
-    memcpy(avalSend+offset, aval+diag[i], tmp*sizeof(HYPRE_Real));
+    hypre_TMemcpy(cvalSend+offset,  cval+diag[i], HYPRE_Int, tmp, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+    hypre_TMemcpy(fillSend+offset,  fill+diag[i], HYPRE_Int, tmp, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+    hypre_TMemcpy(avalSend+offset,  aval+diag[i], HYPRE_Real, tmp, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
     offset += tmp;
   }
 
@@ -537,7 +532,7 @@ void send_external_rows_private(ExternalRows_dh er)
     HYPRE_Int nabor = hiNabors[i];
     hypre_MPI_Isend(cvalSend, nz, HYPRE_MPI_INT,    nabor, CVAL_TAG, comm_dh, er->cval_req+i);
     hypre_MPI_Isend(fillSend, nz, HYPRE_MPI_INT,    nabor, FILL_TAG, comm_dh, er->fill_req+i); 
-    hypre_MPI_Isend(avalSend, nz, hypre_MPI_DOUBLE, nabor, AVAL_TAG, comm_dh, er->aval_req+i);
+    hypre_MPI_Isend(avalSend, nz, hypre_MPI_REAL, nabor, AVAL_TAG, comm_dh, er->aval_req+i);
   }
   END_FUNC_DH
 }

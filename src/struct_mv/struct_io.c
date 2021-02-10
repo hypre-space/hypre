@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -33,21 +28,39 @@ hypre_PrintBoxArrayData( FILE            *file,
 {
    hypre_Box       *box;
    hypre_Box       *data_box;
-                   
+
    HYPRE_Int        data_box_volume;
-   HYPRE_Int        datai;
-                   
+
    hypre_Index      loop_size;
    hypre_IndexRef   start;
    hypre_Index      stride;
    hypre_Index      index;
-                   
+
    HYPRE_Int        i, j, d;
    HYPRE_Complex    value;
+   HYPRE_Complex   *data_host;
+   HYPRE_Complex   *data_host_saved = NULL;
 
    /*----------------------------------------
     * Print data
     *----------------------------------------*/
+   if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+   {
+      HYPRE_Int tot_size = 0;
+      hypre_ForBoxI(i, data_space)
+      {
+         data_box = hypre_BoxArrayBox(data_space, i);
+         data_box_volume = hypre_BoxVolume(data_box);
+         tot_size += num_values * data_box_volume;
+      }
+      data_host = hypre_CTAlloc(HYPRE_Complex, tot_size, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(data_host, data, HYPRE_Complex, tot_size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      data_host_saved = data_host;
+   }
+   else
+   {
+      data_host = data;
+   }
 
    hypre_SetIndex(stride, 1);
 
@@ -61,9 +74,8 @@ hypre_PrintBoxArrayData( FILE            *file,
 
       hypre_BoxGetSize(box, loop_size);
 
-      hypre_BoxLoop1Begin(ndim, loop_size,
-                          data_box, start, stride, datai);
-      hypre_BoxLoop1For(datai)
+      hypre_SerialBoxLoop1Begin(ndim, loop_size,
+                                data_box, start, stride, datai);
       {
          /* Print lines of the form: "%d: (%d, %d, %d; %d) %.14e\n" */
          hypre_BoxLoopGetIndex(index);
@@ -75,7 +87,7 @@ hypre_PrintBoxArrayData( FILE            *file,
             {
                hypre_fprintf(file, ", %d", hypre_IndexD(index, d));
             }
-            value = data[datai + j*data_box_volume];
+            value = data_host[datai + j*data_box_volume];
 #ifdef HYPRE_COMPLEX
             hypre_fprintf(file, "; %d) %.14e , %.14e\n",
                           value_ids[j], hypre_creal(value), hypre_cimag(value));
@@ -84,10 +96,12 @@ hypre_PrintBoxArrayData( FILE            *file,
 #endif
          }
       }
-      hypre_BoxLoop1End(datai);
+      hypre_SerialBoxLoop1End(datai);
 
-      data += num_values*data_box_volume;
+      data_host += num_values*data_box_volume;
    }
+
+   hypre_TFree(data_host_saved, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -108,14 +122,13 @@ hypre_ReadBoxArrayData( FILE            *file,
 {
    hypre_Box       *box;
    hypre_Box       *data_box;
-                   
+
    HYPRE_Int        data_box_volume;
-   HYPRE_Int        datai;
-                   
+
    hypre_Index      loop_size;
    hypre_IndexRef   start;
    hypre_Index      stride;
-                   
+
    HYPRE_Int        i, j, d, idummy;
 
    /*----------------------------------------
@@ -134,9 +147,8 @@ hypre_ReadBoxArrayData( FILE            *file,
 
       hypre_BoxGetSize(box, loop_size);
 
-      hypre_BoxLoop1Begin(ndim, loop_size,
-                          data_box, start, stride, datai);
-      hypre_BoxLoop1For(datai)
+      hypre_SerialBoxLoop1Begin(ndim, loop_size,
+                                data_box, start, stride, datai);
       {
          /* Read lines of the form: "%d: (%d, %d, %d; %d) %le\n" */
          for (j = 0; j < num_values; j++)
@@ -150,7 +162,7 @@ hypre_ReadBoxArrayData( FILE            *file,
                          &idummy, &data[datai + j*data_box_volume]);
          }
       }
-      hypre_BoxLoop1End(datai);
+      hypre_SerialBoxLoop1End(datai);
 
       data += num_values*data_box_volume;
    }
@@ -176,14 +188,13 @@ hypre_ReadBoxArrayData_CC( FILE            *file,
 {
    hypre_Box       *box;
    hypre_Box       *data_box;
-                   
+
    HYPRE_Int        data_box_volume, constant_stencil_size;
-   HYPRE_Int        datai;
-                   
+
    hypre_Index      loop_size;
    hypre_IndexRef   start;
    hypre_Index      stride;
-                   
+
    HYPRE_Int        i, j, d, idummy;
 
    /*----------------------------------------
@@ -218,9 +229,8 @@ hypre_ReadBoxArrayData_CC( FILE            *file,
 
       if ( constant_coefficient==2 )
       {
-         hypre_BoxLoop1Begin(ndim, loop_size,
-                             data_box, start, stride, datai);
-         hypre_BoxLoop1For(datai)
+         hypre_SerialBoxLoop1Begin(ndim, loop_size,
+                                   data_box, start, stride, datai);
          {
             /* Read line of the form: "%d: (%d, %d, %d; %d) %.14e\n" */
             hypre_fscanf(file, "%d: (%d", &idummy, &idummy);
@@ -230,7 +240,7 @@ hypre_ReadBoxArrayData_CC( FILE            *file,
             }
             hypre_fscanf(file, "; %d) %le\n", &idummy, &data[datai]);
          }
-         hypre_BoxLoop1End(datai);
+         hypre_SerialBoxLoop1End(datai);
          data += data_box_volume;
       }
 

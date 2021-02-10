@@ -2,26 +2,26 @@
 
 Operator Matrix Information:
 
-            nonzero         entries per row        row sums
-lev   rows  entries  sparse  min  max   avg       min         max
-===================================================================
- 0    1089     5313  0.004     3    5   4.9   0.000e+00   2.000e+00
- 1     545     4641  0.016     4    9   8.5   0.000e+00   2.500e+00
- 2     157     1535  0.062     4   14   9.8  -4.233e-16   3.020e+00
- 3      57      773  0.238     4   21  13.6   7.589e-17   3.294e+00
- 4      19      251  0.695     8   18  13.2   9.852e-02   2.814e+00
- 5       6       36  1.000     6    6   6.0   1.232e+00   1.875e+00
+             nonzero            entries/row          row sums
+lev    rows  entries sparse   min  max     avg      min         max
+======================================================================
+  0    1089     5313  0.004     3    5     4.9   0.000e+00   2.000e+00
+  1     545     4641  0.016     4    9     8.5   0.000e+00   2.500e+00
+  2     157     1535  0.062     4   14     9.8  -4.233e-16   3.020e+00
+  3      57      773  0.238     4   21    13.6   7.589e-17   3.294e+00
+  4      19      251  0.695     8   18    13.2   9.852e-02   2.814e+00
+  5       6       36  1.000     6    6     6.0   1.232e+00   1.875e+00
 
 
 Interpolation Matrix Information:
-                 entries/row    min     max         row sums
-lev  rows cols    min max     weight   weight     min       max 
-=================================================================
- 0  1089 x 545     1   4   2.500e-01 2.500e-01 7.500e-01 1.000e+00
- 1   545 x 157     1   4   7.143e-02 5.000e-01 2.857e-01 1.000e+00
- 2   157 x 57      1   6   2.767e-02 5.489e-01 2.630e-01 1.000e+00
- 3    57 x 19      0   5   1.892e-02 7.312e-01 0.000e+00 1.000e+00
- 4    19 x 6       0   4   2.675e-02 4.155e-01 0.000e+00 1.000e+00
+                    entries/row        min        max            row sums
+lev  rows x cols  min  max  avgW     weight      weight       min         max
+================================================================================
+  0  1089 x 545     1    4   3.9   2.500e-01   2.500e-01   7.500e-01   1.000e+00
+  1   545 x 157     1    4   2.8   7.143e-02   5.000e-01   2.857e-01   1.000e+00
+  2   157 x 57      1    6   3.1   2.767e-02   5.489e-01   2.630e-01   1.000e+00
+  3    57 x 19      0    5   2.4   1.892e-02   7.312e-01   0.000e+00   1.000e+00
+  4    19 x 6       0    4   2.2   2.675e-02   4.155e-01   0.000e+00   1.000e+00
 
 
      Complexity:    grid = 1.719927
@@ -93,25 +93,13 @@ Iterations = 7
 Final Relative Residual Norm = 6.309890e-09
 
 # Output file: bigint.out.2
-=============================================
-SStruct phase times:
-=============================================
-SStruct Setup:
-  wall clock time = 0.210000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 0.210000 seconds
-  cpu MFLOPS      = 0.000000
+
+SStruct Setup time = 0.370296 seconds
 
 Problem size: 26460
 
-=============================================
-Setup phase times:
-=============================================
-AMS Setup:
-  wall clock time = 0.090000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 0.100000 seconds
-  cpu MFLOPS      = 0.000000
+
+AMS Setup time = 0.460101 seconds
 
 <C*b,b>: 8.373120e-02
 
@@ -127,14 +115,8 @@ Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
     7    1.393405e-07    0.178534    4.815415e-07
 
 
-=============================================
-Solve phase times:
-=============================================
-AMS Solve:
-  wall clock time = 0.160000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 0.160000 seconds
-  cpu MFLOPS      = 0.000000
+
+AMS Solve time = 0.607814 seconds
 
 
 Iterations = 7

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -32,7 +27,7 @@ hypre_StructStencilCreate( HYPRE_Int     dim,
    hypre_Index            diag_offset;
    HYPRE_Int              diag_entry;
 
-   stencil = hypre_TAlloc(hypre_StructStencil, 1);
+   stencil = hypre_TAlloc(hypre_StructStencil, 1, HYPRE_MEMORY_HOST);
 
    hypre_StructStencilShape(stencil)     = shape;
    hypre_StructStencilSize(stencil)      = size;
@@ -70,8 +65,8 @@ hypre_StructStencilDestroy( hypre_StructStencil *stencil )
       hypre_StructStencilRefCount(stencil) --;
       if (hypre_StructStencilRefCount(stencil) == 0)
       {
-         hypre_TFree(hypre_StructStencilShape(stencil));
-         hypre_TFree(stencil);
+         hypre_TFree(hypre_StructStencilShape(stencil), HYPRE_MEMORY_HOST);
+         hypre_TFree(stencil, HYPRE_MEMORY_HOST);
       }
    }
 
@@ -139,7 +134,7 @@ hypre_StructStencilSymmetrize( hypre_StructStencil  *stencil,
     *------------------------------------------------------*/
 
    ndim = hypre_StructStencilNDim(stencil);
-   symm_stencil_shape = hypre_CTAlloc(hypre_Index, 2*stencil_size);
+   symm_stencil_shape = hypre_CTAlloc(hypre_Index, 2*stencil_size, HYPRE_MEMORY_HOST);
    for (i = 0; i < stencil_size; i++)
    {
       hypre_CopyIndex(stencil_shape[i], symm_stencil_shape[i]);
@@ -149,7 +144,7 @@ hypre_StructStencilSymmetrize( hypre_StructStencil  *stencil,
     * Create symmetric stencil entries and 'symm_entries'
     *------------------------------------------------------*/
 
-   symm_entries = hypre_CTAlloc(HYPRE_Int, 2*stencil_size);
+   symm_entries = hypre_CTAlloc(HYPRE_Int, 2*stencil_size, HYPRE_MEMORY_HOST);
    for (i = 0; i < 2*stencil_size; i++)
       symm_entries[i] = -1;
 

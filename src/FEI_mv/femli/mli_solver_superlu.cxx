@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /* **************************************************************************** 
  * -- SuperLU routine (version 1.1) --
@@ -59,12 +54,13 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
    int      nnz, row_num, irow, i, j, rowSize, *cols, *recvCntArray;
    int      *dispArray, itemp, *cntArray, icol, colNum, index;
    int      *etree, permcSpec, lwork, panel_size, relax, info, mypid, nprocs;
-   double   *vals, *csrAA, *gcsrAA, *gcscAA, diagPivotThresh, dropTol;
+   double   *vals, *csrAA, *gcsrAA, *gcscAA, diagPivotThresh;
    MPI_Comm mpiComm;
    hypre_ParCSRMatrix *hypreA;
    SuperMatrix        AC;
    superlu_options_t  slu_options;
    SuperLUStat_t      slu_stat;
+   GlobalLU_t         Glu;
 
    /* ---------------------------------------------------------------
     * fetch matrix
@@ -184,9 +180,9 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
             exit(1);
          }
    }
-   gcscJA = (int *)    malloc( (globalNRows+1) * sizeof(int) );
-   gcscIA = (int *)    malloc( globalNnz * sizeof(int) );
-   gcscAA = (double *) malloc( globalNnz * sizeof(double) );
+   gcscJA = hypre_TAlloc(int,  (globalNRows+1) , HYPRE_MEMORY_HOST);
+   gcscIA = hypre_TAlloc(int,  globalNnz , HYPRE_MEMORY_HOST);
+   gcscAA = hypre_TAlloc(double,  globalNnz , HYPRE_MEMORY_HOST);
    gcscJA[0] = 0;
    nnz = 0;
    for ( icol = 1; icol <= globalNRows; icol++ ) 
@@ -232,7 +228,6 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
    slu_options.SymmetricMode = NO;
    sp_preorder(&slu_options, &superLU_Amat, permC_, etree, &AC);
    diagPivotThresh = 1.0;
-   dropTol = 0.0;
    panel_size = sp_ienv(1);
    relax = sp_ienv(2);
    StatInit(&slu_stat);
@@ -240,9 +235,12 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
    slu_options.ColPerm = MY_PERMC;
    slu_options.DiagPivotThresh = diagPivotThresh;
 
-   dgstrf(&slu_options, &AC, dropTol, relax, panel_size,
+//   dgstrf(&slu_options, &AC, dropTol, relax, panel_size,
+//          etree, NULL, lwork, permC_, permR_, &superLU_Lmat,
+//          &superLU_Umat, &slu_stat, &info);
+   dgstrf(&slu_options, &AC, relax, panel_size,
           etree, NULL, lwork, permC_, permR_, &superLU_Lmat,
-          &superLU_Umat, &slu_stat, &info);
+          &superLU_Umat, &Glu, &slu_stat, &info);
    Destroy_CompCol_Permuted(&AC);
    Destroy_CompCol_Matrix(&superLU_Amat);
    delete [] etree;

@@ -1,28 +1,19 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
- * PrunedRows - Collection of pruned rows that are cached on the local 
+ * PrunedRows - Collection of pruned rows that are cached on the local
  * processor.  Direct access to these rows is available, via the local
  * index number.
  *
  *****************************************************************************/
 
 #include <stdlib.h>
-#include <assert.h>
 #include "Common.h"
 #include "Mem.h"
 #include "Matrix.h"
@@ -40,23 +31,23 @@
  * diag_scale - diagonal scale object used to scale the thresholding (input)
  * thresh     - threshold for pruning the matrix (input)
  *
- * The local pruned rows are stored in the first part of the len and ind 
+ * The local pruned rows are stored in the first part of the len and ind
  * arrays.
  *--------------------------------------------------------------------------*/
 
-PrunedRows *PrunedRowsCreate(Matrix *mat, HYPRE_Int size, DiagScale *diag_scale, 
+PrunedRows *PrunedRowsCreate(Matrix *mat, HYPRE_Int size, DiagScale *diag_scale,
   HYPRE_Real thresh)
 {
     HYPRE_Int row, len, *ind, count, j, *data;
     HYPRE_Real *val, temp;
 
-    PrunedRows *p = (PrunedRows *) malloc(sizeof(PrunedRows));
+    PrunedRows *p = hypre_TAlloc(PrunedRows, 1, HYPRE_MEMORY_HOST);
 
     p->mem  = MemCreate();
     p->size = MAX(size, mat->end_row - mat->beg_row + 1);
 
-    p->len = (HYPRE_Int *)  malloc(p->size * sizeof(HYPRE_Int));
-    p->ind = (HYPRE_Int **) malloc(p->size * sizeof(HYPRE_Int *));
+    p->len = hypre_TAlloc(HYPRE_Int, p->size , HYPRE_MEMORY_HOST);
+    p->ind = hypre_TAlloc(HYPRE_Int *, p->size , HYPRE_MEMORY_HOST);
 
     /* Prune and store the rows on the local processor */
 
@@ -68,7 +59,7 @@ PrunedRows *PrunedRowsCreate(Matrix *mat, HYPRE_Int size, DiagScale *diag_scale,
         for (j=0; j<len; j++)
         {
             temp = DiagScaleGet(diag_scale, row);
-            if (temp*ABS(val[j])*DiagScaleGet(diag_scale, ind[j]) 
+            if (temp*ABS(val[j])*DiagScaleGet(diag_scale, ind[j])
               >= thresh && ind[j] != row)
                 count++;
         }
@@ -81,7 +72,7 @@ PrunedRows *PrunedRowsCreate(Matrix *mat, HYPRE_Int size, DiagScale *diag_scale,
         for (j=0; j<len; j++)
         {
             temp = DiagScaleGet(diag_scale, row);
-            if (temp*ABS(val[j])*DiagScaleGet(diag_scale, ind[j]) 
+            if (temp*ABS(val[j])*DiagScaleGet(diag_scale, ind[j])
               >= thresh && ind[j] != row)
                 *data++ = ind[j];
         }
@@ -97,9 +88,9 @@ PrunedRows *PrunedRowsCreate(Matrix *mat, HYPRE_Int size, DiagScale *diag_scale,
 void PrunedRowsDestroy(PrunedRows *p)
 {
     MemDestroy(p->mem);
-    free(p->len);
-    free(p->ind);
-    free(p);
+    hypre_TFree(p->len,HYPRE_MEMORY_HOST);
+    hypre_TFree(p->ind,HYPRE_MEMORY_HOST);
+    hypre_TFree(p,HYPRE_MEMORY_HOST);
 }
 
 /*--------------------------------------------------------------------------
@@ -126,8 +117,8 @@ void PrunedRowsPut(PrunedRows *p, HYPRE_Int index, HYPRE_Int len, HYPRE_Int *ind
 #ifdef PARASAILS_DEBUG
 	hypre_printf("StoredRows resize %d\n", p->size);
 #endif
-	p->len = (HYPRE_Int *)  realloc(p->len, p->size * sizeof(HYPRE_Int));
-	p->ind = (HYPRE_Int **) realloc(p->ind, p->size * sizeof(HYPRE_Int *));
+	p->len = hypre_TReAlloc(p->len,HYPRE_Int,  p->size , HYPRE_MEMORY_HOST);
+	p->ind = hypre_TReAlloc(p->ind,HYPRE_Int *,  p->size , HYPRE_MEMORY_HOST);
     }
 
     p->len[index] = len;
@@ -135,7 +126,7 @@ void PrunedRowsPut(PrunedRows *p, HYPRE_Int index, HYPRE_Int len, HYPRE_Int *ind
 }
 
 /*--------------------------------------------------------------------------
- * PrunedRowsGet - Return the row with index "index" through the pointers 
+ * PrunedRowsGet - Return the row with index "index" through the pointers
  * "lenp" and "indp" in the pruned rows object "p".
  *--------------------------------------------------------------------------*/
 

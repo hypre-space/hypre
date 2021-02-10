@@ -1,15 +1,8 @@
 #!/bin/sh
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 testname=`basename $0 .sh`
 tests=""
@@ -21,10 +14,10 @@ case $1 in
 
    $0 [-h] {src_dir} [options] [-rt <options for runtest.sh script>]
 
-   where: -h|-help   prints this usage information and exits
-          {src_dir}  is the hypre source directory
+   where: {src_dir}  is the hypre source directory
           -<test>    run <test>  (test = ams, fac, ij, sstruct, struct)
           -all       run all tests (default behavior)
+          -h|-help   prints this usage information and exits
 
    This script runs runtest.sh in {src_dir}/test with optional parameters.
 

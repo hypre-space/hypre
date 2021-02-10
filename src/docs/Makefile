@@ -1,52 +1,18 @@
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 include ../config/Makefile.config
 
 .SUFFIXES:
 .SUFFIXES: .c .dxx .html .tex
 
-PDFLATEX = pdflatex --interaction=nonstopmode
-# LATEX = latex -interaction=nonstopmode
-# MAKEINDEX = makeindex -q
-# DVIPS = dvips -q
-# PSPDF = ps2pdf
-# 
-# ONLINE_OPTS =\
-#  -split 2\
-#  -show_section_numbers\
-#  -bottom_navigation
-
-##################################################################
-# Files
-##################################################################
-
-USR_FILES =\
- usr_intro.tex\
- usr_starting.tex\
- usr_struct.tex\
- usr_sstruct.tex\
- usr_fei.tex\
- usr_ij.tex\
- usr_solvers.tex\
- usr_misc.tex\
- usr_manual.tex
-
 ##################################################################
 # Targets
 ##################################################################
 
-# all: html pdf
-all: pdf
+all: usr
 
 install: all
 	@ \
@@ -66,13 +32,10 @@ install: all
 	done
 
 clean:
-	@/bin/rm -f *.aux *.bbl *.blg *.dvi *.log *.dlog *.toc
-	@/bin/rm -f *.idx *.ilg *.ind *.brf *.out
-	@/bin/rm -f vref_manual.* version.tex
-	@/bin/rm -fr HYPRE_usr_manual
-	@/bin/rm -f  HYPRE_usr_manual.p*
-	@/bin/rm -fr HYPRE_ref_manual
-	@/bin/rm -f  HYPRE_ref_manual.tex HYPRE_ref_manual.p*
+	@cd usr-manual; make clean
+	@cd ref-manual; make clean
+	@/bin/rm -fr usr-manual-html ref-manual-html
+	@/bin/rm -fr usr-manual.pdf  ref-manual.pdf
 
 distclean: clean
 
@@ -80,36 +43,17 @@ distclean: clean
 # Rules
 ##################################################################
 
-html: ref_html
+usr: ref
+	@cd usr-manual; make html; make latexpdf
+	@mv usr-manual/_build/html usr-manual-html
+	@mv usr-manual/_build/latex/hypre.pdf usr-manual.pdf
 
-pdf: usr ref_pdf
-
-usr: HYPRE_usr_manual.pdf
-
-ref: ref_html ref_pdf
-ref_html: HYPRE_ref_manual/index.html
-ref_pdf: HYPRE_ref_manual.pdf
-
-##########
-
-HYPRE_usr_manual.pdf: version.tex ${USR_FILES}
-	${PDFLATEX} usr_manual
-	bibtex usr_manual
-	${PDFLATEX} usr_manual
-	${PDFLATEX} usr_manual
-	mv usr_manual.pdf HYPRE_usr_manual.pdf
+ref:
+	@cd ref-manual; make
+	@mv ref-manual/html ref-manual-html
+	@mv ref-manual/latex/refman.pdf ref-manual.pdf
 
 ##########
-
-HYPRE_ref_manual/index.html: vref_manual.dxx 
-	mkdir -p HYPRE_ref_manual
-	doc++ -d HYPRE_ref_manual -B hypre_wiw.html vref_manual.dxx 2>&1
-	cp -f hypre_wiw.gif HYPRE_ref_manual
-
-HYPRE_ref_manual.pdf: version.tex vref_manual.tex
-	${PDFLATEX} vref_manual
-	${PDFLATEX} vref_manual
-	mv vref_manual.pdf HYPRE_ref_manual.pdf
 
 vref_manual.tex: vref_manual.dxx
 	doc++ -t -o vref_manual.tex vref_manual.dxx

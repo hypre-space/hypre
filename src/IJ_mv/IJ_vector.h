@@ -1,18 +1,11 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
-
-
-
+#if 0
 /******************************************************************************
  *
  * Header info for the hypre_IJMatrix structures
@@ -30,9 +23,9 @@ typedef struct hypre_IJVector_struct
 {
    MPI_Comm      comm;
 
-   HYPRE_Int 		*partitioning;      /* Indicates partitioning over tasks */
+   HYPRE_BigInt	*partitioning;      /* Indicates partitioning over tasks */
 
-   HYPRE_Int           object_type;       /* Indicates the type of "local storage" */
+   HYPRE_Int     object_type;       /* Indicates the type of "local storage" */
 
    void         *object;            /* Structure for storing local portion */
 
@@ -41,10 +34,10 @@ typedef struct hypre_IJVector_struct
 
    void         *assumed_part;        /* IJ Vector assumed partition */
 
-   HYPRE_Int         global_first_row;    /* these for data items are necessary */
-   HYPRE_Int         global_num_rows;     /*   to be able to avoid using the global */
+   HYPRE_BigInt  global_first_row;    /* these for data items are necessary */
+   HYPRE_BigInt  global_num_rows;     /*   to be able to avoid using the global */
                                     /*    global partition */ 
-   HYPRE_Int	       print_level; 
+   HYPRE_Int     print_level; 
    
 
 
@@ -76,5 +69,7 @@ typedef struct hypre_IJVector_struct
  * prototypes for operations on local objects
  *--------------------------------------------------------------------------*/
 /* #include "./internal_protos.h" */
+
+#endif
 
 #endif

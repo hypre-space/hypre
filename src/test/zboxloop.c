@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -19,11 +14,14 @@
 #include "HYPRE_krylov.h"
 
 #include "_hypre_struct_mv.h"
+#include "_hypre_struct_mv.hpp"
 
 /*--------------------------------------------------------------------------
  * Test driver to time new boxloops and compare to the old ones
  *--------------------------------------------------------------------------*/
- 
+
+#define DEVICE_VAR
+
 hypre_int
 main( hypre_int argc,
       char *argv[] )
@@ -38,10 +36,11 @@ main( hypre_int argc,
    HYPRE_Int         rep, reps, fail, sum;
    HYPRE_Int         size;
    hypre_Box        *x1_data_box, *x2_data_box, *x3_data_box, *x4_data_box;
-   HYPRE_Int         xi1, xi2, xi3, xi4;
+   //HYPRE_Int         xi1, xi2, xi3, xi4;
+   HYPRE_Int         xi1;
    HYPRE_Real       *xp1, *xp2, *xp3, *xp4;
    hypre_Index       loop_size, start, unit_stride, index;
-   
+
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -55,7 +54,7 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
- 
+
    dim = 3;
 
    nx = 10;
@@ -69,7 +68,7 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Parse command line
     *-----------------------------------------------------------*/
- 
+
    print_usage = 0;
    arg_index = 1;
    while (arg_index < argc)
@@ -107,7 +106,7 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Print usage info
     *-----------------------------------------------------------*/
- 
+
    if ( (print_usage) && (myid == 0) )
    {
       hypre_printf("\n");
@@ -163,17 +162,17 @@ main( hypre_int argc,
    hypre_CopyBox(x1_data_box, x4_data_box);
 
    size = (nx+2)*(ny+2)*(nz+2);
-   xp1 = hypre_CTAlloc(HYPRE_Real, size);
-   xp2 = hypre_CTAlloc(HYPRE_Real, size);
-   xp3 = hypre_CTAlloc(HYPRE_Real, size);
-   xp4 = hypre_CTAlloc(HYPRE_Real, size);
+   xp1 = hypre_CTAlloc(HYPRE_Real,  size, HYPRE_MEMORY_HOST);
+   xp2 = hypre_CTAlloc(HYPRE_Real,  size, HYPRE_MEMORY_HOST);
+   xp3 = hypre_CTAlloc(HYPRE_Real,  size, HYPRE_MEMORY_HOST);
+   xp4 = hypre_CTAlloc(HYPRE_Real,  size, HYPRE_MEMORY_HOST);
 
    reps = 1000000000/(nx*ny*nz+1000);
 
    /*-----------------------------------------------------------
     * Print driver parameters
     *-----------------------------------------------------------*/
- 
+
    if (myid == 0)
    {
       hypre_printf("Running with these driver parameters:\n");
@@ -191,9 +190,6 @@ main( hypre_int argc,
 
    zypre_BoxLoop1Begin(dim, loop_size,
                        x1_data_box, start, unit_stride, xi1);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ZYPRE_BOX_PRIVATE,xi1) HYPRE_SMP_SCHEDULE
-#endif
    zypre_BoxLoop1For(xi1)
    {
       xp1[xi1] ++;
@@ -203,9 +199,8 @@ main( hypre_int argc,
    /* Use old boxloop to check that values are set to 1 */
    fail = 0;
    sum = 0;
-   hypre_BoxLoop1Begin(3, loop_size,
-                       x1_data_box, start, unit_stride, xi1);
-   hypre_BoxLoop1For(xi1)
+   hypre_SerialBoxLoop1Begin(3, loop_size,
+                             x1_data_box, start, unit_stride, xi1);
    {
       sum += xp1[xi1];
       if (xp1[xi1] != 1)
@@ -216,7 +211,7 @@ main( hypre_int argc,
          fail = 1;
       }
    }
-   hypre_BoxLoop1End(xi1);
+   hypre_SerialBoxLoop1End(xi1);
 
    if (sum != (nx*ny*nz))
    {
@@ -245,13 +240,9 @@ main( hypre_int argc,
    {
       xi1 = 0;
       hypre_BoxLoop0Begin(3, loop_size);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) firstprivate(xi1) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop0For()
       {
          xp1[xi1] += xp1[xi1];
-         xi1++;
+         //xi1++;
       }
       hypre_BoxLoop0End();
    }
@@ -264,10 +255,6 @@ main( hypre_int argc,
    {
       hypre_BoxLoop1Begin(3, loop_size,
                           x1_data_box, start, unit_stride, xi1);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi1) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop1For(xi1)
       {
          xp1[xi1] += xp1[xi1];
       }
@@ -283,10 +270,6 @@ main( hypre_int argc,
       hypre_BoxLoop2Begin(3, loop_size,
                           x1_data_box, start, unit_stride, xi1,
                           x2_data_box, start, unit_stride, xi2);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi1,xi2) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop2For(xi1, xi2)
       {
          xp1[xi1] += xp1[xi1] + xp2[xi2];
       }
@@ -303,10 +286,6 @@ main( hypre_int argc,
                           x1_data_box, start, unit_stride, xi1,
                           x2_data_box, start, unit_stride, xi2,
                           x3_data_box, start, unit_stride, xi3);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi1,xi2,xi3) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop3For(xi1, xi2, xi3)
       {
          xp1[xi1] += xp1[xi1] + xp2[xi2] + xp3[xi3];
       }
@@ -324,10 +303,6 @@ main( hypre_int argc,
                           x2_data_box, start, unit_stride, xi2,
                           x3_data_box, start, unit_stride, xi3,
                           x4_data_box, start, unit_stride, xi4);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi1,xi2,xi3,xi4) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop4For(xi1, xi2, xi3, xi4)
       {
          xp1[xi1] += xp1[xi1] + xp2[xi2] + xp3[xi3] + xp4[xi4];
       }
@@ -370,7 +345,7 @@ main( hypre_int argc,
       zypre_BoxLoop1Begin(dim, loop_size,
                           x1_data_box, start, unit_stride, xi1);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ZYPRE_BOX_PRIVATE,xi1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       zypre_BoxLoop1For(xi1)
       {
@@ -389,7 +364,7 @@ main( hypre_int argc,
                           x1_data_box, start, unit_stride, xi1,
                           x2_data_box, start, unit_stride, xi2);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ZYPRE_BOX_PRIVATE,xi1,xi2) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       zypre_BoxLoop2For(xi1, xi2)
       {
@@ -409,7 +384,7 @@ main( hypre_int argc,
                           x2_data_box, start, unit_stride, xi2,
                           x3_data_box, start, unit_stride, xi3);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ZYPRE_BOX_PRIVATE,xi1,xi2,xi3) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       zypre_BoxLoop3For(xi1, xi2, xi3)
       {
@@ -430,7 +405,7 @@ main( hypre_int argc,
                           x3_data_box, start, unit_stride, xi3,
                           x4_data_box, start, unit_stride, xi4);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ZYPRE_BOX_PRIVATE,xi1,xi2,xi3,xi4) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       zypre_BoxLoop4For(xi1, xi2, xi3, xi4)
       {
@@ -452,10 +427,10 @@ main( hypre_int argc,
    hypre_BoxDestroy(x2_data_box);
    hypre_BoxDestroy(x3_data_box);
    hypre_BoxDestroy(x4_data_box);
-   hypre_TFree(xp1);
-   hypre_TFree(xp2);
-   hypre_TFree(xp3);
-   hypre_TFree(xp4);
+   hypre_TFree(xp1, HYPRE_MEMORY_HOST);
+   hypre_TFree(xp2, HYPRE_MEMORY_HOST);
+   hypre_TFree(xp3, HYPRE_MEMORY_HOST);
+   hypre_TFree(xp4, HYPRE_MEMORY_HOST);
 
    /* Finalize MPI */
    hypre_MPI_Finalize();

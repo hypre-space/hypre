@@ -1,15 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -17,7 +11,6 @@
  *
  *****************************************************************************/
 
-#include <assert.h>
 #include <float.h>
 #include <math.h>
 #include <stdlib.h>
@@ -29,7 +22,7 @@
 
 static HYPRE_Int
 lobpcg_chol( utilities_FortranMatrix* a, 
-        HYPRE_Int (*dpotrf) (char *uplo, HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Int *info) )
+        HYPRE_Int (*dpotrf) (const char *uplo, HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Int *info) )
 {
 
   HYPRE_Int lda, n;
@@ -77,13 +70,13 @@ HYPRE_Int   (*dsygv) (HYPRE_Int *itype, char *jobz, char *uplo, HYPRE_Int *
   ldb = utilities_FortranMatrixGlobalHeight( mtxB );
   lwork = 10*n;
 
-  work = (HYPRE_Real*)calloc( lwork, sizeof(HYPRE_Real) );
+  work = hypre_CTAlloc(HYPRE_Real,  lwork, HYPRE_MEMORY_HOST);
 
   (*dsygv)( &itype, &jobz, &uplo, &n, 
 				       a, &lda, b, &ldb,
 				       lmd, &work[0], &lwork, &info );
 
-  free( work );
+  hypre_TFree( work ,HYPRE_MEMORY_HOST);
   return info;
 
 }
@@ -121,7 +114,7 @@ lobpcg_MultiVectorImplicitQR(
 mv_MultiVectorPtr x, mv_MultiVectorPtr y,
 utilities_FortranMatrix* r,
 mv_MultiVectorPtr z,
-HYPRE_Int (*dpotrf) (char *uplo, HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Int *info)
+HYPRE_Int (*dpotrf) (const char *uplo, HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Int *info)
 
 ){
 
@@ -176,7 +169,7 @@ HYPRE_Int* activeMask
   for ( i = 0; i < n; i++ ) {
     if ( utilities_FortranMatrixValue( resNorms, i + 1, 1 ) >
 	 utilities_FortranMatrixValue( lambda, i + 1, 1 )*rtol + atol
-	 + DBL_EPSILON ) {
+	 + HYPRE_REAL_EPSILON ) {
       activeMask[i] = 1; 
       notConverged++;
     }
@@ -489,7 +482,7 @@ es" argument */
   historyColumn = utilities_FortranMatrixCreate();
   
   /* initializing soft locking mask */
-  activeMask = (HYPRE_Int*)calloc( sizeX, sizeof(HYPRE_Int) );
+  activeMask = hypre_CTAlloc(HYPRE_Int,  sizeX, HYPRE_MEMORY_HOST);
   hypre_assert( activeMask != NULL );
   for ( i = 0; i < sizeX; i++ )
     activeMask[i] = 1;
@@ -988,7 +981,7 @@ es" argument */
   utilities_FortranMatrixDestroy( residualNorms );
   utilities_FortranMatrixDestroy( residualNormsHistory );	
 
-  free( activeMask );
+  hypre_TFree( activeMask ,HYPRE_MEMORY_HOST);
 
   return exitFlag;
 }

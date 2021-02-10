@@ -1,8 +1,14 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-#include "hypre_lapack.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dlaswp_(integer *n, doublereal *a, integer *lda, integer 
+/* Subroutine */ integer dlaswp_(integer *n, doublereal *a, integer *lda, integer 
 	*k1, integer *k2, integer *ipiv, integer *incx)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   
@@ -141,4 +147,6 @@
 
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

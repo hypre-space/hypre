@@ -1,8 +1,14 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-#include "hypre_blas.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
+#include "hypre_blas.h"
 
-/* Subroutine */ HYPRE_Int dtrmm_(const char *side,const char *uplo,const char *transa,const char *diag, 
+/* Subroutine */ integer dtrmm_(const char *side,const char *uplo,const char *transa,const char *diag, 
 	integer *m, integer *n, doublereal *alpha, doublereal *a, integer *
 	lda, doublereal *b, integer *ldb)
 {
@@ -13,10 +19,10 @@
     static doublereal temp;
     static integer i__, j, k;
     static logical lside;
-    extern logical hypre_lsame_(const char *,const char *);
+    extern logical lsame_(const char *,const char *);
     static integer nrowa;
     static logical upper;
-    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
     static logical nounit;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 #define b_ref(a_1,a_2) b[(a_2)*b_dim1 + a_1]
@@ -111,23 +117,23 @@
     b_offset = 1 + b_dim1 * 1;
     b -= b_offset;
     /* Function Body */
-    lside = hypre_lsame_(side, "L");
+    lside = lsame_(side, "L");
     if (lside) {
 	nrowa = *m;
     } else {
 	nrowa = *n;
     }
-    nounit = hypre_lsame_(diag, "N");
-    upper = hypre_lsame_(uplo, "U");
+    nounit = lsame_(diag, "N");
+    upper = lsame_(uplo, "U");
     info = 0;
-    if (! lside && ! hypre_lsame_(side, "R")) {
+    if (! lside && ! lsame_(side, "R")) {
 	info = 1;
-    } else if (! upper && ! hypre_lsame_(uplo, "L")) {
+    } else if (! upper && ! lsame_(uplo, "L")) {
 	info = 2;
-    } else if (! hypre_lsame_(transa, "N") && ! hypre_lsame_(transa,
-	     "T") && ! hypre_lsame_(transa, "C")) {
+    } else if (! lsame_(transa, "N") && ! lsame_(transa,
+	     "T") && ! lsame_(transa, "C")) {
 	info = 3;
-    } else if (! hypre_lsame_(diag, "U") && ! hypre_lsame_(diag, 
+    } else if (! lsame_(diag, "U") && ! lsame_(diag, 
 	    "N")) {
 	info = 4;
     } else if (*m < 0) {
@@ -140,7 +146,7 @@
 	info = 11;
     }
     if (info != 0) {
-	hypre_xerbla_("DTRMM ", &info);
+	xerbla_("DTRMM ", &info);
 	return 0;
     }
 /*     Quick return if possible. */
@@ -162,7 +168,7 @@
     }
 /*     Start the operations. */
     if (lside) {
-	if (hypre_lsame_(transa, "N")) {
+	if (lsame_(transa, "N")) {
 /*           Form  B := alpha*A*B. */
 	    if (upper) {
 		i__1 = *n;
@@ -250,7 +256,7 @@
 	    }
 	}
     } else {
-	if (hypre_lsame_(transa, "N")) {
+	if (lsame_(transa, "N")) {
 /*           Form  B := alpha*B*A. */
 	    if (upper) {
 		for (j = *n; j >= 1; --j) {
@@ -374,3 +380,6 @@
 #undef b_ref
 #undef a_ref
 
+#ifdef __cplusplus
+}
+#endif

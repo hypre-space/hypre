@@ -48,14 +48,8 @@ Iterations = 5
 Final Relative Residual Norm = 9.21374e-08
 
 # Output file: default.out.4
-=============================================
-Setup phase times:
-=============================================
-PCG Setup:
-  wall clock time = 32.000000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 25.090000 seconds
-  cpu MFLOPS      = 0.000000
+
+PCG Setup time = 18.529574 seconds
 
 <b,b>: 5.738541e-05
 
@@ -70,14 +64,8 @@ Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
     6    4.515981e-10    0.041264    5.961443e-08
 
 
-=============================================
-Solve phase times:
-=============================================
-PCG Solve:
-  wall clock time = 8.160000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 6.650000 seconds
-  cpu MFLOPS      = 0.000000
+
+PCG Solve time = 18.618895 seconds
 
 
 Iterations = 6
@@ -87,26 +75,26 @@ Final Relative Residual Norm = 5.961443e-08
 
 Operator Matrix Information:
 
-            nonzero         entries per row        row sums
-lev   rows  entries  sparse  min  max   avg       min         max
-===================================================================
- 0    1089     5313  0.004     3    5   4.9   0.000e+00   2.000e+00
- 1     545     4641  0.016     4    9   8.5   0.000e+00   2.500e+00
- 2     157     1535  0.062     4   14   9.8  -4.233e-16   3.020e+00
- 3      57      773  0.238     4   21  13.6   7.589e-17   3.294e+00
- 4      19      251  0.695     8   18  13.2   9.852e-02   2.814e+00
- 5       6       36  1.000     6    6   6.0   1.232e+00   1.875e+00
+             nonzero            entries/row          row sums
+lev    rows  entries sparse   min  max     avg      min         max
+======================================================================
+  0    1089     5313  0.004     3    5     4.9   0.000e+00   2.000e+00
+  1     545     4641  0.016     4    9     8.5   0.000e+00   2.500e+00
+  2     157     1535  0.062     4   14     9.8  -4.233e-16   3.020e+00
+  3      57      773  0.238     4   21    13.6   7.589e-17   3.294e+00
+  4      19      251  0.695     8   18    13.2   9.852e-02   2.814e+00
+  5       6       36  1.000     6    6     6.0   1.232e+00   1.875e+00
 
 
 Interpolation Matrix Information:
-                 entries/row    min     max         row sums
-lev  rows cols    min max     weight   weight     min       max 
-=================================================================
- 0  1089 x 545     1   4   2.500e-01 2.500e-01 7.500e-01 1.000e+00
- 1   545 x 157     1   4   7.143e-02 5.000e-01 2.857e-01 1.000e+00
- 2   157 x 57      1   6   2.767e-02 5.489e-01 2.630e-01 1.000e+00
- 3    57 x 19      0   5   1.892e-02 7.312e-01 0.000e+00 1.000e+00
- 4    19 x 6       0   4   2.675e-02 4.155e-01 0.000e+00 1.000e+00
+                    entries/row        min        max            row sums
+lev  rows x cols  min  max  avgW     weight      weight       min         max
+================================================================================
+  0  1089 x 545     1    4   3.9   2.500e-01   2.500e-01   7.500e-01   1.000e+00
+  1   545 x 157     1    4   2.8   7.143e-02   5.000e-01   2.857e-01   1.000e+00
+  2   157 x 57      1    6   3.1   2.767e-02   5.489e-01   2.630e-01   1.000e+00
+  3    57 x 19      0    5   2.4   1.892e-02   7.312e-01   0.000e+00   1.000e+00
+  4    19 x 6       0    4   2.2   2.675e-02   4.155e-01   0.000e+00   1.000e+00
 
 
      Complexity:    grid = 1.719927
@@ -181,26 +169,26 @@ Final Relative Residual Norm = 6.309890e-09
 
 Operator Matrix Information:
 
-            nonzero         entries per row        row sums
-lev   rows  entries  sparse  min  max   avg       min         max
-===================================================================
- 0    1089     5313  0.004     3    5   4.9   0.000e+00   2.000e+00
- 1     545     4641  0.016     4    9   8.5   0.000e+00   2.500e+00
- 2     157     1535  0.062     4   14   9.8  -4.233e-16   3.020e+00
- 3      57      773  0.238     4   21  13.6   7.589e-17   3.294e+00
- 4      19      251  0.695     8   18  13.2   9.852e-02   2.814e+00
- 5       6       36  1.000     6    6   6.0   1.232e+00   1.875e+00
+             nonzero            entries/row          row sums
+lev    rows  entries sparse   min  max     avg      min         max
+======================================================================
+  0    1089     5313  0.004     3    5     4.9   0.000e+00   2.000e+00
+  1     545     4641  0.016     4    9     8.5   0.000e+00   2.500e+00
+  2     157     1535  0.062     4   14     9.8  -4.233e-16   3.020e+00
+  3      57      773  0.238     4   21    13.6   7.589e-17   3.294e+00
+  4      19      251  0.695     8   18    13.2   9.852e-02   2.814e+00
+  5       6       36  1.000     6    6     6.0   1.232e+00   1.875e+00
 
 
 Interpolation Matrix Information:
-                 entries/row    min     max         row sums
-lev  rows cols    min max     weight   weight     min       max 
-=================================================================
- 0  1089 x 545     1   4   2.500e-01 2.500e-01 7.500e-01 1.000e+00
- 1   545 x 157     1   4   7.143e-02 5.000e-01 2.857e-01 1.000e+00
- 2   157 x 57      1   6   2.767e-02 5.489e-01 2.630e-01 1.000e+00
- 3    57 x 19      0   5   1.892e-02 7.312e-01 0.000e+00 1.000e+00
- 4    19 x 6       0   4   2.675e-02 4.155e-01 0.000e+00 1.000e+00
+                    entries/row        min        max            row sums
+lev  rows x cols  min  max  avgW     weight      weight       min         max
+================================================================================
+  0  1089 x 545     1    4   3.9   2.500e-01   2.500e-01   7.500e-01   1.000e+00
+  1   545 x 157     1    4   2.8   7.143e-02   5.000e-01   2.857e-01   1.000e+00
+  2   157 x 57      1    6   3.1   2.767e-02   5.489e-01   2.630e-01   1.000e+00
+  3    57 x 19      0    5   2.4   1.892e-02   7.312e-01   0.000e+00   1.000e+00
+  4    19 x 6       0    4   2.2   2.675e-02   4.155e-01   0.000e+00   1.000e+00
 
 
      Complexity:    grid = 1.719927
@@ -283,14 +271,8 @@ Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
 
 
 # Output file: default.out.7
-=============================================
-Setup phase times:
-=============================================
-PCG Setup:
-  wall clock time = 32.380000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 25.270000 seconds
-  cpu MFLOPS      = 0.000000
+
+PCG Setup time = 18.965017 seconds
 
 <b,b>: 5.738541e-05
 
@@ -305,14 +287,8 @@ Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
     6    4.515981e-10    0.041264    5.961443e-08
 
 
-=============================================
-Solve phase times:
-=============================================
-PCG Solve:
-  wall clock time = 7.260000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 5.790000 seconds
-  cpu MFLOPS      = 0.000000
+
+PCG Solve time = 19.035867 seconds
 
 
 Iterations = 6
@@ -360,148 +336,6 @@ Final L2 norm of residual: 4.903805e-09
 
 Iterations = 9
 Final Relative Residual Norm = 6.57147e-07
-
-# Output file: default.out.10
-***************************************************
-* Preconditioned Conjugate Gradient solver 
-* maximum no. of iterations = 100
-* convergence tolerance     = 1.000000e-06
-*--------------------------------------------------
-AMG max levels   = 30
-AMG coarsen type = 10
-AMG measure type = 0
-AMG threshold    = 2.500000e-01
-AMG numsweeps    = 1
-AMG relax type   = 6
-AMG relax weight = 1.000000e+00
-AMG relax omega  = 1.000000e+00
-AMG system size  = 1
-AMG smooth type  = 0
-AMG smooth numlevels  = 0
-AMG smooth numsweeps  = 1
-AMG Schwarz variant = 0
-AMG Schwarz overlap = 1
-AMG Schwarz domain type = 2
-AMG Schwarz relax weight = 1.000000e+00
-***************************************************
-<b,b>: 6.829186e-05
-
-
-Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
------    ------------   ---------  ------------ 
-    1    6.568705e-03    0.794868    7.948685e-01
-    2    2.229023e-03    0.339340    2.697305e-01
-    3    4.395103e-04    0.197176    5.318444e-02
-    4    6.154722e-05    0.140036    7.447730e-03
-    5    9.106693e-06    0.147963    1.101986e-03
-    6    1.448916e-06    0.159105    1.753310e-04
-    7    2.542814e-07    0.175498    3.077019e-05
-    8    3.559798e-08    0.139994    4.307655e-06
-    9    5.739829e-09    0.161240    6.945675e-07
-
-
-***************************************************
-*                Solver Statistics                *
-*-------------------------------------------------*
-** HYPRE preconditioner setup time = 1.199627e-02
-** HYPRE solution time             = 1.896429e-02
-** HYPRE total time                = 3.096056e-02
-** HYPRE number of iterations      = 9
-** HYPRE final residual norm       = 5.739829e-09
-***************************************************
-# Output file: default.out.11
- 2   132 x 29      0   4   5.687e-03 5.328e-01 0.000e+00 1.000e+00
- 3    29 x 4       1   4   6.881e-03 4.675e-01 7.079e-02 1.000e+00
-
-
-     Complexity:    grid = 1.651974
-                operator = 2.383776
-                memory = 3.295125
-
-
-
-
-BoomerAMG SOLVER PARAMETERS:
-
-  Maximum number of cycles:         1 
-  Stopping Tolerance:               0.000000e+00 
-  Cycle type (1 = V, 2 = W, etc.):  1
-
-  Relaxation Parameters:
-   Visiting Grid:                     down   up  coarse
-            Number of sweeps:            2    2     1 
-   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:     13   14     9 
-   Point types, partial sweeps (1=C, -1=F):
-                  Pre-CG relaxation (down):   0   0
-                   Post-CG relaxation (up):   0   0
-                             Coarsest grid:   0
-
-
-Solving standard eigenvalue problem with preconditioning
-
-block size 10
-
-No constraints
-
-
-Initial Max. Residual   2.03558352288229e+00
-Iteration 1 	bsize 10 	maxres   6.81010023232597e-01
-Iteration 2 	bsize 10 	maxres   2.16106638420483e-01
-Iteration 3 	bsize 10 	maxres   1.33255378957699e-01
-Iteration 4 	bsize 10 	maxres   6.63135103881281e-02
-Iteration 5 	bsize 10 	maxres   5.98898745939707e-02
-Iteration 6 	bsize 10 	maxres   3.24851727613947e-02
-Iteration 7 	bsize 10 	maxres   1.24818484659858e-02
-Iteration 8 	bsize 9 	maxres   3.28135782117784e-03
-Iteration 9 	bsize 9 	maxres   1.37465135021034e-03
-Iteration 10 	bsize 7 	maxres   5.53538771528421e-04
-Iteration 11 	bsize 6 	maxres   2.39420582335701e-04
-Iteration 12 	bsize 4 	maxres   1.65909557562297e-04
-Iteration 13 	bsize 4 	maxres   9.99715384081695e-05
-Iteration 14 	bsize 3 	maxres   5.93603896817596e-05
-Iteration 15 	bsize 2 	maxres   2.88451774920854e-05
-Iteration 16 	bsize 2 	maxres   1.03761599946811e-05
-Iteration 17 	bsize 2 	maxres   5.80576550088874e-06
-Iteration 18 	bsize 2 	maxres   4.76778988364290e-06
-Iteration 19 	bsize 2 	maxres   4.89371670567952e-06
-Iteration 20 	bsize 2 	maxres   3.10957559901931e-06
-Iteration 21 	bsize 2 	maxres   1.85952798560890e-06
-Iteration 22 	bsize 2 	maxres   9.96634709813028e-07
-Iteration 23 	bsize 2 	maxres   6.38856516889256e-07
-Iteration 24 	bsize 2 	maxres   3.57575647705605e-07
-Iteration 25 	bsize 1 	maxres   2.50720421537878e-07
-Iteration 26 	bsize 1 	maxres   1.33984380971654e-07
-
-Eigenvalue lambda   1.70632948198619e-02
-Eigenvalue lambda   4.25854480421056e-02
-Eigenvalue lambda   4.25854480421299e-02
-Eigenvalue lambda   6.81076012644266e-02
-Eigenvalue lambda   8.48803610641320e-02
-Eigenvalue lambda   8.48803610649201e-02
-Eigenvalue lambda   1.10402514286512e-01
-Eigenvalue lambda   1.10402514291700e-01
-Eigenvalue lambda   1.43587188598359e-01
-Eigenvalue lambda   1.43587188847947e-01
-Residual   2.59873942049052e-08
-Residual   1.18843349666549e-08
-Residual   1.23872744529267e-08
-Residual   5.10375475086747e-08
-Residual   5.10377811863076e-08
-Residual   3.70656076366488e-08
-Residual   3.63780666486010e-08
-Residual   1.18640460683670e-07
-Residual   1.21370637119926e-07
-Residual   1.33984380971654e-07
-
-26 iterations
-=============================================
-Solve phase times:
-=============================================
-LOBPCG Solve:
-  wall clock time = 0.090000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 0.090000 seconds
-  cpu MFLOPS      = 0.000000
 
 # Output file: default.out.12
 <C*b,b>: 3.210115e+01
@@ -588,25 +422,13 @@ Iterations = 8
 Final Relative Residual Norm = 2.7253e-07
 
 # Output file: default.out.15
-=============================================
-SStruct phase times:
-=============================================
-SStruct Setup:
-  wall clock time = 0.220000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 0.220000 seconds
-  cpu MFLOPS      = 0.000000
+
+SStruct Setup time = 0.348600 seconds
 
 Problem size: 26460
 
-=============================================
-Setup phase times:
-=============================================
-AMS Setup:
-  wall clock time = 0.090000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 0.100000 seconds
-  cpu MFLOPS      = 0.000000
+
+AMS Setup time = 0.426681 seconds
 
 <C*b,b>: 8.373120e-02
 
@@ -622,14 +444,8 @@ Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
     7    1.393405e-07    0.178534    4.815415e-07
 
 
-=============================================
-Solve phase times:
-=============================================
-AMS Solve:
-  wall clock time = 0.150000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 0.150000 seconds
-  cpu MFLOPS      = 0.000000
+
+AMS Solve time = 0.565226 seconds
 
 
 Iterations = 7

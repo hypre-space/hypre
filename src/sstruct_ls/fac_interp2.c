@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  * OpenMP Problems
@@ -58,7 +53,7 @@ hypre_FacSemiInterpCreate2( void **fac_interp_vdata_ptr )
    HYPRE_Int                 ierr= 0;
    hypre_FacSemiInterpData2  *fac_interp_data;
 
-   fac_interp_data = hypre_CTAlloc(hypre_FacSemiInterpData2, 1);
+   fac_interp_data = hypre_CTAlloc(hypre_FacSemiInterpData2,  1, HYPRE_MEMORY_HOST);
    *fac_interp_vdata_ptr= (void *) fac_interp_data;
 
    return ierr;
@@ -81,36 +76,36 @@ hypre_FacSemiInterpDestroy2( void *fac_interp_vdata)
 
       for (i= 0; i< (fac_interp_data-> nvars); i++)
       {
-         hypre_TFree(fac_interp_data -> recv_boxnum_map[i]);
+         hypre_TFree(fac_interp_data -> recv_boxnum_map[i], HYPRE_MEMORY_HOST);
          hypre_BoxArrayArrayDestroy(fac_interp_data -> identity_arrayboxes[i]);
 
          size= hypre_BoxArrayArraySize(fac_interp_data -> ownboxes[i]);
          hypre_BoxArrayArrayDestroy(fac_interp_data -> ownboxes[i]);
          for (j= 0; j< size; j++)
          {
-            hypre_TFree(fac_interp_data -> own_cboxnums[i][j]);
+            hypre_TFree(fac_interp_data -> own_cboxnums[i][j], HYPRE_MEMORY_HOST);
          }
-         hypre_TFree(fac_interp_data -> own_cboxnums[i]);
+         hypre_TFree(fac_interp_data -> own_cboxnums[i], HYPRE_MEMORY_HOST);
 
          hypre_CommPkgDestroy(fac_interp_data -> gnodes_comm_pkg[i]);
          hypre_CommPkgDestroy(fac_interp_data -> interlevel_comm[i]);
 
       }
-      hypre_TFree(fac_interp_data -> recv_boxnum_map);
-      hypre_TFree(fac_interp_data -> identity_arrayboxes);
-      hypre_TFree(fac_interp_data -> ownboxes);
-      hypre_TFree(fac_interp_data -> own_cboxnums);
+      hypre_TFree(fac_interp_data -> recv_boxnum_map, HYPRE_MEMORY_HOST);
+      hypre_TFree(fac_interp_data -> identity_arrayboxes, HYPRE_MEMORY_HOST);
+      hypre_TFree(fac_interp_data -> ownboxes, HYPRE_MEMORY_HOST);
+      hypre_TFree(fac_interp_data -> own_cboxnums, HYPRE_MEMORY_HOST);
 
-      hypre_TFree(fac_interp_data -> gnodes_comm_pkg);
-      hypre_TFree(fac_interp_data -> interlevel_comm);
+      hypre_TFree(fac_interp_data -> gnodes_comm_pkg, HYPRE_MEMORY_HOST);
+      hypre_TFree(fac_interp_data -> interlevel_comm, HYPRE_MEMORY_HOST);
 
       for (i= 0; i< (fac_interp_data -> ndim); i++)
       {
-         hypre_TFree(fac_interp_data -> weights[i]);
+         hypre_TFree(fac_interp_data -> weights[i], HYPRE_MEMORY_HOST);
       }
-      hypre_TFree(fac_interp_data -> weights);
+      hypre_TFree(fac_interp_data -> weights, HYPRE_MEMORY_HOST);
 
-      hypre_TFree(fac_interp_data);
+      hypre_TFree(fac_interp_data, HYPRE_MEMORY_HOST);
    }
    return ierr;
 }
@@ -199,7 +194,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
     * stencil pattern for each StructVector, i.e., linear interpolation for
     * each variable.
     *------------------------------------------------------------------------*/
-   gnodes_comm_pkg= hypre_CTAlloc(hypre_CommPkg *, nvars);
+   gnodes_comm_pkg= hypre_CTAlloc(hypre_CommPkg *,  nvars, HYPRE_MEMORY_HOST);
    for (vars= 0; vars< nvars; vars++)
    {
       e_var= hypre_SStructPVectorSVector(ec, vars);
@@ -240,7 +235,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
     * is also communicated. However, the recv_grid will consists of the 
     * unstretched boxes so that overlapping does not occur.
     *--------------------------------------------------------------------------*/
-   identity_arrayboxes= hypre_CTAlloc(hypre_BoxArrayArray *, nvars);
+   identity_arrayboxes= hypre_CTAlloc(hypre_BoxArrayArray *,  nvars, HYPRE_MEMORY_HOST);
 
    pgrid= hypre_SStructPVectorPGrid(ec);
    hypre_ClearIndex(index);
@@ -301,7 +296,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
                                  intersect_boxes, tmp_boxarray);
          hypre_MinUnionBoxes(hypre_BoxArrayArrayBoxArray(identity_arrayboxes[vars], ci));
 
-         hypre_TFree(boxman_entries);
+         hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
          hypre_BoxArrayDestroy(intersect_boxes);
       }
    }
@@ -312,14 +307,14 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
     * fboxes are coarsened. For each coarsened fbox, we need a boxarray of
     * recvboxes or ownboxes.
     *--------------------------------------------------------------------------*/
-   ownboxes= hypre_CTAlloc(hypre_BoxArrayArray *, nvars);
-   own_cboxnums= hypre_CTAlloc(HYPRE_Int **, nvars);
+   ownboxes= hypre_CTAlloc(hypre_BoxArrayArray *,  nvars, HYPRE_MEMORY_HOST);
+   own_cboxnums= hypre_CTAlloc(HYPRE_Int **,  nvars, HYPRE_MEMORY_HOST);
 
-   recv_boxes= hypre_CTAlloc(hypre_BoxArrayArray *, nvars);
-   recv_processes= hypre_CTAlloc(HYPRE_Int **, nvars);
+   recv_boxes= hypre_CTAlloc(hypre_BoxArrayArray *,  nvars, HYPRE_MEMORY_HOST);
+   recv_processes= hypre_CTAlloc(HYPRE_Int **,  nvars, HYPRE_MEMORY_HOST);
 
    /* dummy pointer for CommInfoCreate */
-   recv_remote_boxnums= hypre_CTAlloc(HYPRE_Int **, nvars);
+   recv_remote_boxnums= hypre_CTAlloc(HYPRE_Int **,  nvars, HYPRE_MEMORY_HOST);
    hypre_ClearIndex(index);
    for (i= 0; i< ndim; i++)
    {
@@ -334,10 +329,10 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
       boxarray= hypre_StructGridBoxes(hypre_SStructPGridSGrid(pgrid, vars));
 
       ownboxes[vars] = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray), ndim);
-      own_cboxnums[vars]= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(boxarray));
+      own_cboxnums[vars]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray), HYPRE_MEMORY_HOST);
       recv_boxes[vars]    = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray), ndim);
-      recv_processes[vars]= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(boxarray));
-      recv_remote_boxnums[vars]= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(boxarray));
+      recv_processes[vars]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray), HYPRE_MEMORY_HOST);
+      recv_remote_boxnums[vars]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray), HYPRE_MEMORY_HOST);
 
       hypre_ForBoxI(fi, boxarray)
       {
@@ -378,9 +373,9 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
             }
          }
 
-         own_cboxnums[vars][fi]  = hypre_CTAlloc(HYPRE_Int, cnt1);
-         recv_processes[vars][fi]= hypre_CTAlloc(HYPRE_Int, cnt2);
-         recv_remote_boxnums[vars][fi]= hypre_CTAlloc(HYPRE_Int , cnt2);
+         own_cboxnums[vars][fi]  = hypre_CTAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
+         recv_processes[vars][fi]= hypre_CTAlloc(HYPRE_Int,  cnt2, HYPRE_MEMORY_HOST);
+         recv_remote_boxnums[vars][fi]= hypre_CTAlloc(HYPRE_Int ,  cnt2, HYPRE_MEMORY_HOST);
 
          cnt1= 0; cnt2= 0;
          for (i= 0; i< nboxman_entries; i++)
@@ -411,7 +406,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
                cnt2++;
             }
          }
-         hypre_TFree(boxman_entries);
+         hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
       }  /* hypre_ForBoxI(fi, boxarray) */
    }     /* for (vars= 0; vars< nvars; vars++) */
 
@@ -428,7 +423,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    HYPRE_SStructGridCreate(hypre_SStructPVectorComm(ec),
                            ndim, 1, &temp_grid);
    hypre_SStructPGridCreate(hypre_SStructPVectorComm(ec), ndim, &recv_cgrid);
-   recv_boxnum_map= hypre_CTAlloc(HYPRE_Int *, nvars);
+   recv_boxnum_map= hypre_CTAlloc(HYPRE_Int *,  nvars, HYPRE_MEMORY_HOST);
 
    cnt2= 0;
    hypre_ClearIndex(index);
@@ -444,7 +439,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
          boxarray= hypre_BoxArrayArrayBoxArray(recv_boxes[vars], i);
          cnt1+= hypre_BoxArraySize(boxarray);
       }
-      recv_boxnum_map[vars]= hypre_CTAlloc(HYPRE_Int, cnt1);
+      recv_boxnum_map[vars]= hypre_CTAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
       
       cnt1= 0;
       hypre_ForBoxArrayI(i, recv_boxes[vars])
@@ -521,9 +516,9 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
     * will be on the processor. Also, note that the remote_boxnums are
     * with respect to the recv_cgrid box numbering.
     *--------------------------------------------------------------------------*/
-   send_boxes= hypre_CTAlloc(hypre_BoxArrayArray *, nvars);
-   send_processes= hypre_CTAlloc(HYPRE_Int **, nvars);
-   send_remote_boxnums= hypre_CTAlloc(HYPRE_Int **, nvars);
+   send_boxes= hypre_CTAlloc(hypre_BoxArrayArray *,  nvars, HYPRE_MEMORY_HOST);
+   send_processes= hypre_CTAlloc(HYPRE_Int **,  nvars, HYPRE_MEMORY_HOST);
+   send_remote_boxnums= hypre_CTAlloc(HYPRE_Int **,  nvars, HYPRE_MEMORY_HOST);
 
    hypre_ClearIndex(index);
    for (i= 0; i< ndim; i++)
@@ -542,8 +537,8 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
       boxarray= hypre_StructGridBoxes(hypre_SStructPGridSGrid(pgrid, vars));
 
       send_boxes[vars]= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray), ndim);
-      send_processes[vars]= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(boxarray));
-      send_remote_boxnums[vars]= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(boxarray));
+      send_processes[vars]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray), HYPRE_MEMORY_HOST);
+      send_remote_boxnums[vars]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray), HYPRE_MEMORY_HOST);
 
       hypre_ForBoxI(ci, boxarray)
       {
@@ -562,8 +557,8 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
                cnt1++;
             }
          }
-         send_processes[vars][ci]     = hypre_CTAlloc(HYPRE_Int, cnt1);
-         send_remote_boxnums[vars][ci]= hypre_CTAlloc(HYPRE_Int, cnt1);
+         send_processes[vars][ci]     = hypre_CTAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
+         send_remote_boxnums[vars][ci]= hypre_CTAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
 
          cnt1= 0;
          for (i= 0; i< nboxman_entries; i++)
@@ -590,7 +585,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
             }
          }
 
-         hypre_TFree(boxman_entries);
+         hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
       }  /* hypre_ForBoxI(ci, boxarray) */
    }    /* for (vars= 0; vars< nvars; vars++) */
 
@@ -602,7 +597,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    /*--------------------------------------------------------------------------
     * Can create the interlevel_comm.
     *--------------------------------------------------------------------------*/
-   interlevel_comm= hypre_CTAlloc(hypre_CommPkg *, nvars);
+   interlevel_comm= hypre_CTAlloc(hypre_CommPkg *,  nvars, HYPRE_MEMORY_HOST);
 
    num_values= 1;
    for (vars= 0; vars< nvars; vars++)
@@ -626,20 +621,20 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
                           &interlevel_comm[vars]);
       hypre_CommInfoDestroy(comm_info);
    }
-   hypre_TFree(send_boxes);
-   hypre_TFree(recv_boxes);
-   hypre_TFree(send_processes);
-   hypre_TFree(recv_processes);
-   hypre_TFree(send_remote_boxnums);
-   hypre_TFree(recv_remote_boxnums);
+   hypre_TFree(send_boxes, HYPRE_MEMORY_HOST);
+   hypre_TFree(recv_boxes, HYPRE_MEMORY_HOST);
+   hypre_TFree(send_processes, HYPRE_MEMORY_HOST);
+   hypre_TFree(recv_processes, HYPRE_MEMORY_HOST);
+   hypre_TFree(send_remote_boxnums, HYPRE_MEMORY_HOST);
+   hypre_TFree(recv_remote_boxnums, HYPRE_MEMORY_HOST);
 
    (fac_interp_data -> interlevel_comm)= interlevel_comm;
 
    /* interpolation weights */
-   weights= hypre_TAlloc(HYPRE_Real *, ndim);
+   weights= hypre_TAlloc(HYPRE_Real *,  ndim, HYPRE_MEMORY_HOST);
    for (i= 0; i< ndim; i++)
    {
-      weights[i]= hypre_CTAlloc(HYPRE_Real, rfactors[i]+1);
+      weights[i]= hypre_CTAlloc(HYPRE_Real,  rfactors[i]+1, HYPRE_MEMORY_HOST);
    }
 
    hypre_ClearIndex(refine_factors_half);
@@ -740,9 +735,6 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
    hypre_StructVector     *recv_var;
    HYPRE_Complex          *sdata, *rdata;
 
-   HYPRE_Int               xci;
-   HYPRE_Int               ei;
-
    HYPRE_Real           ***xcp;
    HYPRE_Real           ***ep;
 
@@ -840,17 +832,17 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
       jsize= 1;
    }
   
-   xcp  = hypre_TAlloc(HYPRE_Real **, ksize);
-   ep   = hypre_TAlloc(HYPRE_Real **, refine_factors[2]);
+   xcp  = hypre_TAlloc(HYPRE_Real **,  ksize, HYPRE_MEMORY_HOST);
+   ep   = hypre_TAlloc(HYPRE_Real **,  refine_factors[2], HYPRE_MEMORY_HOST);
 
    for (k= 0; k< refine_factors[2]; k++)
    {
-      ep[k]= hypre_TAlloc(HYPRE_Real *, refine_factors[1]);
+      ep[k]= hypre_TAlloc(HYPRE_Real *,  refine_factors[1], HYPRE_MEMORY_HOST);
    }
 
    for (k= 0; k< ksize; k++)  
    {
-      xcp[k]= hypre_TAlloc(HYPRE_Real *, jsize);
+      xcp[k]= hypre_TAlloc(HYPRE_Real *,  jsize, HYPRE_MEMORY_HOST);
    }
 
    for (var= 0; var< nvars; var++)
@@ -966,17 +958,9 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
             hypre_CopyIndex(hypre_BoxIMin(ownbox), startc);
             hypre_BoxGetSize(ownbox, loop_size);
 
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                e_dbox,  start,  stride,  ei,
-                                xc_dbox, startc, stridec, xci);
-#if 1
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ei,xci,lindex,imax,jmax,kmax,k,offset_kp1,zweight2,kshift,zweight1,j,offset_jp1,yweight2,jshift,yweight1,i,offset_ip1,xweight2,ishift,xweight1) HYPRE_SMP_SCHEDULE
-#endif
-#else
-            hypre_BoxLoopSetOneBlock();
-#endif
-            hypre_BoxLoop2For(ei, xci)
+            hypre_SerialBoxLoop2Begin(ndim, loop_size,
+                                      e_dbox,  start,  stride,  ei,
+                                      xc_dbox, startc, stridec, xci);
             {
                /*--------------------------------------------------------
                 * Linear interpolation. Determine the weights and the
@@ -1190,7 +1174,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                   }         /* for (j= 0; j< jmax; j++) */
                }            /* for (k= 0; k< kmax; k++) */ 
             }
-            hypre_BoxLoop2End(ei, xci);
+            hypre_SerialBoxLoop2End(ei, xci);
 
          }/* hypre_ForBoxI(bi, own_abox) */
       }   /* hypre_ForBoxArray(fi, fgrid_boxes) */
@@ -1296,7 +1280,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                for (j=0; j< jsize; j++)
                {
                   hypre_SetIndex3(temp_index2, 
-                                 ptr_ishift, j+ptr_jshift, k+ptr_kshift);
+                                  ptr_ishift, j+ptr_jshift, k+ptr_kshift);
                   xcp[k][j]= hypre_StructVectorBoxData(recv_var, bi) +
                      hypre_BoxOffsetDistance(xc_dbox, temp_index2);
                }
@@ -1305,17 +1289,9 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
             hypre_CopyIndex(hypre_BoxIMin(ownbox), startc);
             hypre_BoxGetSize(ownbox, loop_size);
 
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                e_dbox,  start,  stride,  ei,
-                                xc_dbox, startc, stridec, xci);
-#if 1
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ei,xci,lindex,imax,jmax,kmax,k,offset_kp1,zweight2,kshift,zweight1,j,offset_jp1,yweight2,jshift,yweight1,i,offset_ip1,xweight2,ishift,xweight1) HYPRE_SMP_SCHEDULE
-#endif
-#else
-            hypre_BoxLoopSetOneBlock();
-#endif
-            hypre_BoxLoop2For(ei, xci)
+            hypre_SerialBoxLoop2Begin(ndim, loop_size,
+                                      e_dbox,  start,  stride,  ei,
+                                      xc_dbox, startc, stridec, xci);
             {
                /*--------------------------------------------------------
                 * Linear interpolation. Determine the weights and the
@@ -1532,7 +1508,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                   }         /* for (j= 0; j< jmax; j++) */
                }            /* for (k= 0; k< kmax; k++) */
             }
-            hypre_BoxLoop2End(ei, xci);
+            hypre_SerialBoxLoop2End(ei, xci);
 
          }  /* if (hypre_BoxVolume(ownbox)) */
       }     /* hypre_ForBoxI(bi, own_abox) */
@@ -1540,15 +1516,15 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
 
    for (k= 0; k< ksize; k++)
    {
-      hypre_TFree(xcp[k]);
+      hypre_TFree(xcp[k], HYPRE_MEMORY_HOST);
    }
-   hypre_TFree(xcp);
+   hypre_TFree(xcp, HYPRE_MEMORY_HOST);
 
    for (k= 0; k< refine_factors[2]; k++)
    {
-      hypre_TFree(ep[k]);
+      hypre_TFree(ep[k], HYPRE_MEMORY_HOST);
    }
-   hypre_TFree(ep);
+   hypre_TFree(ep, HYPRE_MEMORY_HOST);
 
    /*-----------------------------------------------------------------------
     * Return

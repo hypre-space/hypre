@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -375,7 +370,7 @@ void
 hypre_F90_IFACE(hypre_amsconstructdiscretegradient, HYPRE_AMSCONSTRUCTDISCRETEGRADIENT)
    ( hypre_F90_Obj *A,
      hypre_F90_Obj *x_coord,
-     hypre_F90_IntArray *edge_vertex,
+     hypre_F90_BigIntArray *edge_vertex,
      hypre_F90_Int *edge_orientation,
      hypre_F90_Obj *G,
      hypre_F90_Int *ierr)
@@ -384,7 +379,7 @@ hypre_F90_IFACE(hypre_amsconstructdiscretegradient, HYPRE_AMSCONSTRUCTDISCRETEGR
       ( HYPRE_AMSConstructDiscreteGradient(
            hypre_F90_PassObj (HYPRE_ParCSRMatrix, A),
            hypre_F90_PassObj (HYPRE_ParVector, x_coord),
-           hypre_F90_PassIntArray (edge_vertex),
+           hypre_F90_PassBigIntArray (edge_vertex),
            hypre_F90_PassInt (edge_orientation),
            hypre_F90_PassObjRef (HYPRE_ParCSRMatrix, G) ) );
 }

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
 #include "pfmg.h"
@@ -67,7 +62,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    HYPRE_Int            *active_l        = (pfmg_data -> active_l);
 
    HYPRE_Real            b_dot_b = 0, r_dot_r, eps = 0;
-   HYPRE_Real            e_dot_e, x_dot_x;
+   HYPRE_Real            e_dot_e = 0.0, x_dot_x = 1.0;
 
    HYPRE_Int             i, l;
    HYPRE_Int             constant_coefficient;
@@ -205,6 +200,12 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          {
             HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
 
+#if defined(HYPRE_USING_CUDA)
+            if (hypre_StructGridDataLocation(hypre_StructVectorGrid(r_l[l])) == HYPRE_MEMORY_HOST)
+            {
+               hypre_SetDeviceOff();
+            }
+#endif
             if (constant_coefficient)
             {
                hypre_StructVectorClearAllValues(r_l[l]);
@@ -268,6 +269,12 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 
          for (l = (num_levels - 2); l >= 1; l--)
          {
+#if defined(HYPRE_USING_CUDA)
+            if (hypre_StructGridDataLocation(hypre_StructVectorGrid(e_l[l])) == HYPRE_MEMORY_DEVICE)
+            {
+               hypre_SetDeviceOn();
+            }
+#endif
             if (constant_coefficient)
             {
                hypre_StructVectorClearAllValues(e_l[l]);
@@ -294,7 +301,12 @@ hypre_PFMGSolve( void               *pfmg_vdata,
                hypre_PFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
             }
          }
-
+#if defined(HYPRE_USING_CUDA)
+         if (hypre_StructGridDataLocation(hypre_StructVectorGrid(e_l[0])) == HYPRE_MEMORY_DEVICE)
+         {
+            hypre_SetDeviceOn();
+         }
+#endif
          if (constant_coefficient)
          {
             hypre_StructVectorClearAllValues(e_l[0]);

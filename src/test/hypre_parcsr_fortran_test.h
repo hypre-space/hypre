@@ -1,19 +1,14 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 /******************************************************************************
  * Definitions of ParCSR Fortran interface routines
  *****************************************************************************/
@@ -86,7 +81,7 @@ extern void hypre_F90_NAME(fhypre_csrmatrixtoparcsrmatrix, FHYPRE_CSRMATRIXTOPAR
 #define HYPRE_ParCSRMatrixMatvec  \
         hypre_F90_NAME(fhypre_parcsrmatrixmatvec, FHYPRE_PARCSRMATRIXMATVEC)
 extern void hypre_F90_NAME(fhypre_parcsrmatrixmatvec, FHYPRE_PARCSRMATRIXMATVEC)
-                      (HYPRE_Real *, hypre_F90_Obj *, hypre_F90_Obj *, HYPRE_Real *, hypre_F90_Obj *);  
+                      (HYPRE_Real *, hypre_F90_Obj *, hypre_F90_Obj *, HYPRE_Real *, hypre_F90_Obj *);
 
 #define HYPRE_ParCSRMatrixMatvecT  \
         hypre_F90_NAME(fhypre_parcsrmatrixmatvect, FHYPRE_PARCSRMATRIXMATVECT)
@@ -224,6 +219,16 @@ extern void hypre_F90_NAME(fhypre_boomeramgsetmaxlevels, FHYPRE_BOOMERAMGSETMAXL
         hypre_F90_NAME(fhypre_boomeramggetmaxlevels, FHYPRE_BOOMERAMGGETMAXLEVELS)
 extern void hypre_F90_NAME(fhypre_boomeramggetmaxlevels, FHYPRE_BOOMERAMGGETMAXLEVELS)
                       (hypre_F90_Obj *, HYPRE_Int *);
+
+#define HYPRE_BoomerAMGSetCoarsenCutFactor  \
+        hypre_F90_NAME(fhypre_boomeramgsetcoarsencutfa, FHYPRE_BOOMERAMGSETCOARSENCUTFAC)
+extern void hypre_F90_NAME(fhypre_boomeramgsetcoarsencutfa, FHYPRE_BOOMERAMGSETCOARSENCUTFAC)
+                      (hypre_F90_Obj *, HYPRE_Real *);
+
+#define HYPRE_BoomerAMGGetCoarsenCutFactor  \
+        hypre_F90_NAME(fhypre_boomeramggetcoarsencutfa, FHYPRE_BOOMERAMGGETCOARSENCUTFAC)
+extern void hypre_F90_NAME(fhypre_boomeramggetcoarsencutfa, FHYPRE_BOOMERAMGGETCOARSENCUTFAC)
+                      (hypre_F90_Obj *, HYPRE_Real *);
 
 #define HYPRE_BoomerAMGSetStrongThreshold  \
         hypre_F90_NAME(fhypre_boomeramgsetstrongthrshl, FHYPRE_BOOMERAMGSETSTRONGTHRSHL)
@@ -873,6 +878,93 @@ extern void hypre_F90_NAME(fhypre_parcsrgmresgetnumiterati, FHYPRE_PARCSRGMRESGE
 #define HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm  \
         hypre_F90_NAME(fhypre_parcsrgmresgetfinalrelat, FHYPRE_PARCSRGMRESGETFINALRELAT)
 extern void hypre_F90_NAME(fhypre_parcsrgmresgetfinalrelat, FHYPRE_PARCSRGMRESGETFINALRELAT)
+                      (hypre_F90_Obj *, HYPRE_Real *);
+
+
+
+#define HYPRE_ParCSRCOGMRESCreate  \
+        hypre_F90_NAME(fhypre_parcsrcogmrescreate, FHYPRE_PARCSRCOGMRESCREATE)
+extern void hypre_F90_NAME(fhypre_parcsrcogmrescreate, FHYPRE_PARCSRCOGMRESCREATE)
+                      (HYPRE_Int *, hypre_F90_Obj *);
+
+#define HYPRE_ParCSRCOGMRESDestroy  \
+        hypre_F90_NAME(fhypre_parcsrcogmresdestroy, FHYPRE_PARCSRCOGMRESDESTROY)
+extern void hypre_F90_NAME(fhypre_parcsrcogmresdestroy, FHYPRE_PARCSRCOGMRESDESTROY)
+                      (hypre_F90_Obj *);
+
+#define HYPRE_ParCSRCOGMRESSetup  \
+        hypre_F90_NAME(fhypre_parcsrcogmressetup, FHYPRE_PARCSRCOGMRESSETUP)
+extern void hypre_F90_NAME(fhypre_parcsrcogmressetup, FHYPRE_PARCSRCOGMRESSETUP)
+                      (hypre_F90_Obj *, hypre_F90_Obj *, hypre_F90_Obj *, hypre_F90_Obj *);
+
+#define HYPRE_ParCSRCOGMRESSolve  \
+        hypre_F90_NAME(fhypre_parcsrcogmressolve, FHYPRE_PARCSRCOGMRESSOLVE)
+extern void hypre_F90_NAME(fhypre_parcsrcogmressolve, FHYPRE_PARCSRCOGMRESSOLVE)
+                      (hypre_F90_Obj *, hypre_F90_Obj *, hypre_F90_Obj *, hypre_F90_Obj *);
+
+#define HYPRE_ParCSRCOGMRESSetKDim  \
+        hypre_F90_NAME(fhypre_parcsrcogmressetkdim, FHYPRE_PARCSRCOGMRESSETKDIM)
+extern void hypre_F90_NAME(fhypre_parcsrcogmressetkdim, FHYPRE_PARCSRCOGMRESSETKDIM)
+                      (hypre_F90_Obj *, HYPRE_Int *);
+
+#define HYPRE_ParCSRCOGMRESSetUnroll  \
+        hypre_F90_NAME(fhypre_parcsrcogmressetunroll, FHYPRE_PARCSRCOGMRESSETUNROLL)
+extern void hypre_F90_NAME(fhypre_parcsrcogmressetunroll, FHYPRE_PARCSRCOGMRESSETUNROLL)
+                      (hypre_F90_Obj *, HYPRE_Int *);
+
+#define HYPRE_ParCSRCOGMRESSetCGS  \
+        hypre_F90_NAME(fhypre_parcsrcogmressetcgs, FHYPRE_PARCSRCOGMRESSETCGS)
+extern void hypre_F90_NAME(fhypre_parcsrcogmressetcgs, FHYPRE_PARCSRCOGMRESSETCGS)
+                      (hypre_F90_Obj *, HYPRE_Int *);
+
+#define HYPRE_ParCSRCOGMRESSetTol  \
+        hypre_F90_NAME(fhypre_parcsrcogmressettol, FHYPRE_PARCSRCOGMRESSETTOL)
+extern void hypre_F90_NAME(fhypre_parcsrcogmressettol, FHYPRE_PARCSRCOGMRESSETTOL)
+                      (hypre_F90_Obj *, HYPRE_Real *);
+
+#define HYPRE_ParCSRCOGMRESSetAbsoluteTol  \
+        hypre_F90_NAME(fhypre_parcsrcogmressetabsolutet, FHYPRE_PARCSRCOGMRESSETABSOLUTET)
+extern void hypre_F90_NAME(fhypre_parcsrcogmressetabsolutet, FHYPRE_PARCSRCOGMRESSETABSOLUTET)
+                      (hypre_F90_Obj *, HYPRE_Real *);
+
+#define HYPRE_ParCSRCOGMRESSetMinIter  \
+        hypre_F90_NAME(fhypre_parcsrcogmressetminiter, FHYPRE_PARCSRCOGMRESSETMINITER)
+extern void hypre_F90_NAME(fhypre_parcsrcogmressetminiter, FHYPRE_PARCSRCOGMRESSETMINITER)
+                      (hypre_F90_Obj *, HYPRE_Int *);
+
+#define HYPRE_ParCSRCOGMRESSetMaxIter  \
+        hypre_F90_NAME(fhypre_parcsrcogmressetmaxiter, FHYPRE_PARCSRCOGMRESSETMAXITER)
+extern void hypre_F90_NAME(fhypre_parcsrcogmressetmaxiter, FHYPRE_PARCSRCOGMRESSETMAXITER)
+                      (hypre_F90_Obj *, HYPRE_Int *);
+
+#define HYPRE_ParCSRCOGMRESSetPrecond  \
+        hypre_F90_NAME(fhypre_parcsrcogmressetprecond, FHYPRE_PARCSRCOGMRESSETPRECOND)
+extern void hypre_F90_NAME(fhypre_parcsrcogmressetprecond, FHYPRE_PARCSRCOGMRESSETPRECOND)
+                      (hypre_F90_Obj *, HYPRE_Int *, hypre_F90_Obj *);
+
+#define HYPRE_ParCSRCOGMRESGetPrecond  \
+        hypre_F90_NAME(fhypre_parcsrcogmresgetprecond, FHYPRE_PARCSRCOGMRESGETPRECOND)
+extern void hypre_F90_NAME(fhypre_parcsrcogmresgetprecond, FHYPRE_PARCSRCOGMRESGETPRECOND)
+                      (hypre_F90_Obj *, hypre_F90_Obj *);
+
+#define HYPRE_ParCSRCOGMRESSetLogging  \
+        hypre_F90_NAME(fhypre_parcsrcogmressetlogging, FHYPRE_PARCSRCOGMRESSETLOGGING)
+extern void hypre_F90_NAME(fhypre_parcsrcogmressetlogging, FHYPRE_PARCSRCOGMRESSETLOGGING)
+                      (hypre_F90_Obj *, HYPRE_Int *);
+
+#define HYPRE_ParCSRCOGMRESSetPrintLevel  \
+        hypre_F90_NAME(fhypre_parcsrcogmressetprintlevel, FHYPRE_PARCSRCOGMRESSETPRINTLEVEL)
+extern void hypre_F90_NAME(fhypre_parcsrcogmressetprintlevel, FHYPRE_PARCSRCOGMRESSETPRINTLEVEL)
+                      (hypre_F90_Obj *, HYPRE_Int *);
+
+#define HYPRE_ParCSRCOGMRESGetNumIterations  \
+        hypre_F90_NAME(fhypre_parcsrcogmresgetnumiterat, FHYPRE_PARCSRCOGMRESGETNUMITERAT)
+extern void hypre_F90_NAME(fhypre_parcsrcogmresgetnumiterat, FHYPRE_PARCSRCOGMRESGETNUMITERAT)
+                      (hypre_F90_Obj *, HYPRE_Int *);
+
+#define HYPRE_ParCSRCOGMRESGetFinalRelativeResidualNorm  \
+        hypre_F90_NAME(fhypre_parcsrcogmresgetfinalrela, FHYPRE_PARCSRCOGMRESGETFINALRELA)
+extern void hypre_F90_NAME(fhypre_parcsrcogmresgetfinalrela, FHYPRE_PARCSRCOGMRESGETFINALRELA)
                       (hypre_F90_Obj *, HYPRE_Real *);
 
 

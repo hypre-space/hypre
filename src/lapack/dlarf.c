@@ -1,8 +1,14 @@
-#include "../blas/hypre_blas.h"
-#include "hypre_lapack.h"
-#include "f2c.h"
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-/* Subroutine */ HYPRE_Int dlarf_(const char *side, integer *m, integer *n, doublereal *v,
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "f2c.h"
+#include "hypre_lapack.h"
+
+/* Subroutine */ integer dlarf_(const char *side, integer *m, integer *n, doublereal *v,
 	 integer *incv, doublereal *tau, doublereal *c__, integer *ldc, 
 	doublereal *work)
 {
@@ -74,11 +80,11 @@
     integer c_dim1, c_offset;
     doublereal d__1;
     /* Local variables */
-    extern /* Subroutine */ HYPRE_Int dger_(integer *, integer *, doublereal *, 
+    extern /* Subroutine */ integer dger_(integer *, integer *, doublereal *, 
 	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
 	    integer *);
     extern logical lsame_(const char *,const char *);
-    extern /* Subroutine */ HYPRE_Int dgemv_(const char *, integer *, integer *, 
+    extern /* Subroutine */ integer dgemv_(const char *, integer *, integer *, 
 	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
 	    doublereal *, doublereal *, integer *);
 
@@ -131,3 +137,6 @@
 
 } /* dlarf_ */
 
+#ifdef __cplusplus
+}
+#endif

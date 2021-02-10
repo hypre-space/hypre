@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_Euclid.h"
 /* #include "Hash_dh.h" */
@@ -109,7 +104,8 @@ HashData * Hash_dhLookup(Hash_dh h, HYPRE_Int key)
   for (i=0; i<size; ++i) {
     HYPRE_Int tmp, idx;
     HASH_2(key, size, &tmp)
-    idx = (start + i*tmp) % size;
+    /* idx = (start + i*tmp) % size; */
+    idx = (start + hypre_multmod(i, tmp, size)) % size;
     if (data[idx].mark != curMark) {
       break;  /* key wasn't found */
     } else {
@@ -150,11 +146,12 @@ void Hash_dhInsert(Hash_dh h, HYPRE_Int key, HashData *dataIN)
     HYPRE_Int tmp, idx;
     HASH_2(key, size, &tmp)
 
-    idx = (start + i*tmp) % size;
+    /* idx = (start + i*tmp) % size; */
+    idx = (start + hypre_multmod(i, tmp, size)) % size;
     if (data[idx].mark < curMark) {
       data[idx].key = key;
       data[idx].mark = curMark;
-      memcpy(&(data[idx].data), dataIN, sizeof(HashData));
+      hypre_TMemcpy(&(data[idx].data),  dataIN, HashData, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       break;
     }
   }

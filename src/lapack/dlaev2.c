@@ -1,8 +1,14 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-#include "hypre_lapack.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dlaev2_(doublereal *a, doublereal *b, doublereal *c__, 
+/* Subroutine */ integer dlaev2_(doublereal *a, doublereal *b, doublereal *c__, 
 	doublereal *rt1, doublereal *rt2, doublereal *cs1, doublereal *sn1)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   
@@ -69,8 +75,6 @@
        Compute the eigenvalues */
     /* System generated locals */
     doublereal d__1;
-    /* Builtin functions */
-    HYPRE_Real sqrt(doublereal);
     /* Local variables */
     static doublereal acmn, acmx, ab, df, cs, ct, tb, sm, tn, rt, adf, acs;
     static integer sgn1, sgn2;
@@ -164,3 +168,6 @@
 
 } /* dlaev2_ */
 
+#ifdef __cplusplus
+}
+#endif

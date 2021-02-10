@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef hypre_STRUCT_LS_HEADER
 #define hypre_STRUCT_LS_HEADER
@@ -42,6 +37,7 @@ HYPRE_Int hypre_CyclicReduction ( void *cyc_red_vdata , hypre_StructMatrix *A , 
 HYPRE_Int hypre_CyclicReductionSetCDir ( void *cyc_red_vdata , HYPRE_Int cdir );
 HYPRE_Int hypre_CyclicReductionSetBase ( void *cyc_red_vdata , hypre_Index base_index , hypre_Index base_stride );
 HYPRE_Int hypre_CyclicReductionDestroy ( void *cyc_red_vdata );
+HYPRE_Int hypre_CyclicReductionSetMaxLevel( void   *cyc_red_vdata, HYPRE_Int   max_level  );
 
 /* general.c */
 HYPRE_Int hypre_Log2 ( HYPRE_Int p );
@@ -58,6 +54,10 @@ HYPRE_Int hypre_HybridSetTwoNorm ( void *hybrid_vdata , HYPRE_Int two_norm );
 HYPRE_Int hypre_HybridSetStopCrit ( void *hybrid_vdata , HYPRE_Int stop_crit );
 HYPRE_Int hypre_HybridSetRelChange ( void *hybrid_vdata , HYPRE_Int rel_change );
 HYPRE_Int hypre_HybridSetSolverType ( void *hybrid_vdata , HYPRE_Int solver_type );
+HYPRE_Int hypre_HybridSetRecomputeResidual( void *hybrid_vdata , HYPRE_Int recompute_residual );
+HYPRE_Int hypre_HybridGetRecomputeResidual( void *hybrid_vdata , HYPRE_Int *recompute_residual );
+HYPRE_Int hypre_HybridSetRecomputeResidualP( void *hybrid_vdata , HYPRE_Int recompute_residual_p );
+HYPRE_Int hypre_HybridGetRecomputeResidualP( void *hybrid_vdata , HYPRE_Int *recompute_residual_p );
 HYPRE_Int hypre_HybridSetKDim ( void *hybrid_vdata , HYPRE_Int k_dim );
 HYPRE_Int hypre_HybridSetPrecond ( void *pcg_vdata , HYPRE_Int (*pcg_precond_solve )(void*, void*, void*, void*), HYPRE_Int (*pcg_precond_setup )(void*, void*, void*, void*), void *pcg_precond );
 HYPRE_Int hypre_HybridSetLogging ( void *hybrid_vdata , HYPRE_Int logging );
@@ -227,6 +227,7 @@ HYPRE_Int HYPRE_StructPFMGSetPrintLevel ( HYPRE_StructSolver solver , HYPRE_Int 
 HYPRE_Int HYPRE_StructPFMGGetPrintLevel ( HYPRE_StructSolver solver , HYPRE_Int *print_level );
 HYPRE_Int HYPRE_StructPFMGGetNumIterations ( HYPRE_StructSolver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_StructPFMGGetFinalRelativeResidualNorm ( HYPRE_StructSolver solver , HYPRE_Real *norm );
+HYPRE_Int hypre_PFMGSetDeviceLevel( void *pfmg_vdata, HYPRE_Int   device_level  );
 
 /* HYPRE_struct_smg.c */
 HYPRE_Int HYPRE_StructSMGCreate ( MPI_Comm comm , HYPRE_StructSolver *solver );
@@ -254,6 +255,7 @@ HYPRE_Int HYPRE_StructSMGSetPrintLevel ( HYPRE_StructSolver solver , HYPRE_Int p
 HYPRE_Int HYPRE_StructSMGGetPrintLevel ( HYPRE_StructSolver solver , HYPRE_Int *print_level );
 HYPRE_Int HYPRE_StructSMGGetNumIterations ( HYPRE_StructSolver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_StructSMGGetFinalRelativeResidualNorm ( HYPRE_StructSolver solver , HYPRE_Real *norm );
+HYPRE_Int hypre_StructSMGSetDeviceLevel( void   *smg_vdata, HYPRE_Int   device_level);
 
 /* HYPRE_struct_sparse_msg.c */
 HYPRE_Int HYPRE_StructSparseMSGCreate ( MPI_Comm comm , HYPRE_StructSolver *solver );
@@ -292,8 +294,8 @@ HYPRE_Int hypre_JacobiSetTempVec ( void *jacobi_vdata , hypre_StructVector *t );
 HYPRE_Int hypre_JacobiGetFinalRelativeResidualNorm ( void *jacobi_vdata , HYPRE_Real *norm );
 
 /* pcg_struct.c */
-char *hypre_StructKrylovCAlloc ( HYPRE_Int count , HYPRE_Int elt_size );
-HYPRE_Int hypre_StructKrylovFree ( char *ptr );
+void *hypre_StructKrylovCAlloc ( HYPRE_Int count , HYPRE_Int elt_size );
+HYPRE_Int hypre_StructKrylovFree ( void *ptr );
 void *hypre_StructKrylovCreateVector ( void *vvector );
 void *hypre_StructKrylovCreateVectorArray ( HYPRE_Int n , void *vvector );
 HYPRE_Int hypre_StructKrylovDestroyVector ( void *vvector );
@@ -398,15 +400,20 @@ HYPRE_Int hypre_PFMGCoarsen( hypre_Box  *cbox, hypre_Index  periodic, HYPRE_Int 
 
 
 /* pfmg_setup_interp.c */
-hypre_StructMatrix *hypre_zPFMGCreateInterpOp ( hypre_StructMatrix *A , HYPRE_Int cdir , hypre_Index stride );
-HYPRE_Int hypre_zPFMGSetupInterpOp ( hypre_StructMatrix *P , hypre_StructMatrix *A , HYPRE_Int cdir );
-/* RDF: OLD STUFF TO PHASE OUT */
 hypre_StructMatrix *hypre_PFMGCreateInterpOp ( hypre_StructMatrix *A , hypre_StructGrid *cgrid , HYPRE_Int cdir , HYPRE_Int rap_type );
 HYPRE_Int hypre_PFMGSetupInterpOp ( hypre_StructMatrix *A , HYPRE_Int cdir , hypre_Index findex , hypre_Index stride , hypre_StructMatrix *P , HYPRE_Int rap_type );
 HYPRE_Int hypre_PFMGSetupInterpOp_CC0 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int rap_type , HYPRE_Int si0 , HYPRE_Int si1 );
 HYPRE_Int hypre_PFMGSetupInterpOp_CC1 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int rap_type , HYPRE_Int si0 , HYPRE_Int si1 );
 HYPRE_Int hypre_PFMGSetupInterpOp_CC2 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int rap_type , HYPRE_Int si0 , HYPRE_Int si1 );
+HYPRE_Int hypre_PFMGSetupInterpOp_CC0_SS5 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int rap_type , hypre_Index *P_stencil_shape );  
+HYPRE_Int hypre_PFMGSetupInterpOp_CC0_SS9 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int rap_type , hypre_Index *P_stencil_shape );
+HYPRE_Int hypre_PFMGSetupInterpOp_CC0_SS7 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int rap_type , hypre_Index *P_stencil_shape );
 
+HYPRE_Int hypre_PFMGSetupInterpOp_CC0_SS15 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int rap_type , hypre_Index *P_stencil_shape );
+
+HYPRE_Int hypre_PFMGSetupInterpOp_CC0_SS19 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int rap_type , hypre_Index *P_stencil_shape );
+
+HYPRE_Int hypre_PFMGSetupInterpOp_CC0_SS27 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int rap_type , hypre_Index *P_stencil_shape );
 /* pfmg_setup_rap5.c */
 hypre_StructMatrix *hypre_PFMGCreateCoarseOp5 ( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , HYPRE_Int cdir );
 HYPRE_Int hypre_PFMGBuildCoarseOp5 ( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , HYPRE_Int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
@@ -445,6 +452,8 @@ HYPRE_Int hypre_PointRelaxSetPointset ( void *relax_vdata , HYPRE_Int pointset ,
 HYPRE_Int hypre_PointRelaxSetPointsetRank ( void *relax_vdata , HYPRE_Int pointset , HYPRE_Int pointset_rank );
 HYPRE_Int hypre_PointRelaxSetTempVec ( void *relax_vdata , hypre_StructVector *t );
 HYPRE_Int hypre_PointRelaxGetFinalRelativeResidualNorm ( void *relax_vdata , HYPRE_Real *norm );
+HYPRE_Int hypre_relax_wtx ( void *relax_vdata , HYPRE_Int pointset , hypre_StructVector *t , hypre_StructVector *x );
+HYPRE_Int hypre_relax_copy ( void *relax_vdata , HYPRE_Int pointset , hypre_StructVector *t , hypre_StructVector *x );
 
 /* red_black_constantcoef_gs.c */
 HYPRE_Int hypre_RedBlackConstantCoefGS ( void *relax_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
@@ -522,6 +531,7 @@ HYPRE_Int hypre_SMGGetNumIterations ( void *smg_vdata , HYPRE_Int *num_iteration
 HYPRE_Int hypre_SMGPrintLogging ( void *smg_vdata , HYPRE_Int myid );
 HYPRE_Int hypre_SMGGetFinalRelativeResidualNorm ( void *smg_vdata , HYPRE_Real *relative_residual_norm );
 HYPRE_Int hypre_SMGSetStructVectorConstantValues ( hypre_StructVector *vector , HYPRE_Real values , hypre_BoxArray *box_array , hypre_Index stride );
+HYPRE_Int hypre_StructSMGSetMaxLevel( void   *smg_vdata, HYPRE_Int   max_level  );
 
 /* smg_relax.c */
 void *hypre_SMGRelaxCreate ( MPI_Comm comm );
@@ -550,6 +560,7 @@ HYPRE_Int hypre_SMGRelaxSetNumPreRelax ( void *relax_vdata , HYPRE_Int num_pre_r
 HYPRE_Int hypre_SMGRelaxSetNumPostRelax ( void *relax_vdata , HYPRE_Int num_post_relax );
 HYPRE_Int hypre_SMGRelaxSetNewMatrixStencil ( void *relax_vdata , hypre_StructStencil *diff_stencil );
 HYPRE_Int hypre_SMGRelaxSetupBaseBoxArray ( void *relax_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
+HYPRE_Int hypre_SMGRelaxSetMaxLevel( void *relax_vdata, HYPRE_Int   num_max_level );
 
 /* smg_residual.c */
 void *hypre_SMGResidualCreate ( void );
@@ -643,3 +654,4 @@ HYPRE_Int hypre_SparseMSGSolve ( void *smsg_vdata , hypre_StructMatrix *A , hypr
 #endif
 
 #endif
+

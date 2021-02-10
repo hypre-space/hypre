@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -76,7 +68,7 @@ static void ExchangeDiagEntries(MPI_Comm comm, Matrix *mat, HYPRE_Int reqlen,
         }
 
         /* Post receive for diagonal values */
-        hypre_MPI_Irecv(&diags[i], j-i, hypre_MPI_DOUBLE, this_pe, DIAG_VALS_TAG, 
+        hypre_MPI_Irecv(&diags[i], j-i, hypre_MPI_REAL, this_pe, DIAG_VALS_TAG, 
 	    comm, &requests[*num_requests]);
 
         /* Request rows in reqind[i..j-1] */
@@ -130,7 +122,7 @@ static void ExchangeDiagEntriesServer(MPI_Comm comm, Matrix *mat,
 	    sendbuf[j] = local_diags[recvbuf[j] - mat->beg_row];
 
 	/* Use ready-mode send, since receives already posted */
-	hypre_MPI_Irsend(sendbuf, count, hypre_MPI_DOUBLE, source, 
+	hypre_MPI_Irsend(sendbuf, count, hypre_MPI_REAL, source, 
 	    DIAG_VALS_TAG, comm, &requests[i]);
     }
 }
@@ -152,11 +144,11 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
     Mem *mem;
     hypre_MPI_Request *requests2;
 
-    DiagScale *p = (DiagScale *) malloc(sizeof(DiagScale));
+    DiagScale *p = hypre_TAlloc(DiagScale, 1, HYPRE_MEMORY_HOST);
 
     /* Storage for local diagonal entries */
     p->local_diags = (HYPRE_Real *) 
-        malloc((A->end_row - A->beg_row + 1) * sizeof(HYPRE_Real));
+        hypre_TAlloc(HYPRE_Real, (A->end_row - A->beg_row + 1) , HYPRE_MEMORY_HOST);
 
     /* Extract the local diagonal entries */
     for (row=0; row<=A->end_row - A->beg_row; row++)
@@ -184,35 +176,35 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
     p->ext_diags = NULL;
     if (len)
     {
-        ind = (HYPRE_Int *) malloc(len * sizeof(HYPRE_Int));
-        memcpy(ind, &numb->local_to_global[numb->num_loc], len * sizeof(HYPRE_Int));
+        ind = hypre_TAlloc(HYPRE_Int, len , HYPRE_MEMORY_HOST);
+        hypre_TMemcpy(ind,  &numb->local_to_global[numb->num_loc], HYPRE_Int, len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
         /* buffer for receiving diagonal values from other processors */
-        p->ext_diags = (HYPRE_Real *) malloc(len * sizeof(HYPRE_Real));
+        p->ext_diags = hypre_TAlloc(HYPRE_Real, len , HYPRE_MEMORY_HOST);
     }
 
     hypre_MPI_Comm_size(A->comm, &npes);
-    requests = (hypre_MPI_Request *) malloc(npes * sizeof(hypre_MPI_Request));
-    statuses = (hypre_MPI_Status  *) malloc(npes * sizeof(hypre_MPI_Status));
-    replies_list = (HYPRE_Int *) calloc(npes, sizeof(HYPRE_Int));
+    requests = hypre_TAlloc(hypre_MPI_Request, npes , HYPRE_MEMORY_HOST);
+    statuses = hypre_TAlloc(hypre_MPI_Status, npes , HYPRE_MEMORY_HOST);
+    replies_list = hypre_CTAlloc(HYPRE_Int, npes, HYPRE_MEMORY_HOST);
 
     ExchangeDiagEntries(A->comm, A, len, ind, p->ext_diags, &num_requests, 
         requests, replies_list);
 
     num_replies = FindNumReplies(A->comm, replies_list);
-    free(replies_list);
+    hypre_TFree(replies_list,HYPRE_MEMORY_HOST);
 
     mem = MemCreate();
     requests2 = NULL;
     if (num_replies)
-        requests2 = (hypre_MPI_Request *) malloc(num_replies * sizeof(hypre_MPI_Request));
+        requests2 = hypre_TAlloc(hypre_MPI_Request, num_replies , HYPRE_MEMORY_HOST);
 
     ExchangeDiagEntriesServer(A->comm, A, p->local_diags, num_replies,
 	mem, requests2);
 
     /* Wait for all replies */
     hypre_MPI_Waitall(num_requests, requests, statuses);
-    free(requests);
+    hypre_TFree(requests,HYPRE_MEMORY_HOST);
 
     p->offset = A->end_row - A->beg_row + 1;
 
@@ -221,20 +213,20 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
     NumberingGlobalToLocal(numb, len, ind, ind);
     temp = NULL;
     if (len)
-        temp = (HYPRE_Real *) malloc(len * sizeof(HYPRE_Real));
+        temp = hypre_TAlloc(HYPRE_Real, len , HYPRE_MEMORY_HOST);
     for (j=0; j<len; j++)
 	temp[ind[j]-p->offset] = p->ext_diags[j];
 
-    free(ind);
-    free(p->ext_diags);
+    hypre_TFree(ind,HYPRE_MEMORY_HOST);
+    hypre_TFree(p->ext_diags,HYPRE_MEMORY_HOST);
     p->ext_diags = temp;
 
     /* Wait for all sends */
     hypre_MPI_Waitall(num_replies, requests2, statuses);
-    free(requests2);
+    hypre_TFree(requests2,HYPRE_MEMORY_HOST);
     MemDestroy(mem);
 
-    free(statuses);
+    hypre_TFree(statuses,HYPRE_MEMORY_HOST);
     return p;
 }
 
@@ -244,10 +236,10 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
 
 void DiagScaleDestroy(DiagScale *p)
 {
-    free(p->local_diags);
-    free(p->ext_diags);
+    hypre_TFree(p->local_diags,HYPRE_MEMORY_HOST);
+    hypre_TFree(p->ext_diags,HYPRE_MEMORY_HOST);
 
-    free(p);
+    hypre_TFree(p,HYPRE_MEMORY_HOST);
 }
 
 /*--------------------------------------------------------------------------

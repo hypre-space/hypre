@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -188,7 +180,7 @@ HYPRE_DistributedMatrixGetContext( HYPRE_DistributedMatrix matrix )
 
 HYPRE_Int
 HYPRE_DistributedMatrixGetDims( HYPRE_DistributedMatrix matrix, 
-                               HYPRE_Int *M, HYPRE_Int *N )
+                               HYPRE_BigInt *M, HYPRE_BigInt *N )
 {
    HYPRE_Int ierr=0;
 
@@ -204,7 +196,7 @@ HYPRE_DistributedMatrixGetDims( HYPRE_DistributedMatrix matrix,
 
 HYPRE_Int
 HYPRE_DistributedMatrixSetDims( HYPRE_DistributedMatrix matrix, 
-                               HYPRE_Int M, HYPRE_Int N )
+                               HYPRE_BigInt M, HYPRE_BigInt N )
 {
    HYPRE_Int ierr=0;
 
@@ -234,8 +226,8 @@ HYPRE_DistributedMatrixPrint( HYPRE_DistributedMatrix matrix )
 
 HYPRE_Int
 HYPRE_DistributedMatrixGetLocalRange( HYPRE_DistributedMatrix matrix, 
-                               HYPRE_Int *row_start, HYPRE_Int *row_end ,
-                               HYPRE_Int *col_start, HYPRE_Int *col_end )
+                               HYPRE_BigInt *row_start, HYPRE_BigInt *row_end ,
+                               HYPRE_BigInt *col_start, HYPRE_BigInt *col_end )
 {
    return( hypre_DistributedMatrixGetLocalRange( (hypre_DistributedMatrix *) matrix,
                              row_start, row_end, col_start, col_end ) );
@@ -247,9 +239,9 @@ HYPRE_DistributedMatrixGetLocalRange( HYPRE_DistributedMatrix matrix,
 
 HYPRE_Int 
 HYPRE_DistributedMatrixGetRow( HYPRE_DistributedMatrix matrix,
-                             HYPRE_Int row,
+                             HYPRE_BigInt row,
                              HYPRE_Int *size,
-                             HYPRE_Int **col_ind,
+                             HYPRE_BigInt **col_ind,
                              HYPRE_Real **values )
 {
    return( hypre_DistributedMatrixGetRow( (hypre_DistributedMatrix *) matrix,
@@ -265,9 +257,9 @@ HYPRE_DistributedMatrixGetRow( HYPRE_DistributedMatrix matrix,
 
 HYPRE_Int 
 HYPRE_DistributedMatrixRestoreRow( HYPRE_DistributedMatrix matrix,
-                             HYPRE_Int row,
+                             HYPRE_BigInt row,
                              HYPRE_Int *size,
-                             HYPRE_Int **col_ind,
+                             HYPRE_BigInt **col_ind,
                              HYPRE_Real **values )
 {
    return( hypre_DistributedMatrixRestoreRow( (hypre_DistributedMatrix *) matrix,

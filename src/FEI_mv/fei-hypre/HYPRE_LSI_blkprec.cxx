@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- *********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 //******************************************************************************
 //******************************************************************************
@@ -106,7 +101,7 @@ int HYPRE_LSI_BlockPrecondCreate(MPI_Comm mpi_comm, HYPRE_Solver *solver)
 {
    (void) mpi_comm;
    HYPRE_LSI_BlockPrecond *cprecon = (HYPRE_LSI_BlockPrecond *)
-                                     calloc(1, sizeof(HYPRE_LSI_BlockPrecond));
+                                     hypre_CTAlloc(HYPRE_LSI_BlockPrecond, 1, HYPRE_MEMORY_HOST);
    HYPRE_LSI_BlockP *precon = (HYPRE_LSI_BlockP *) new HYPRE_LSI_BlockP();
    cprecon->precon = (void *) precon;
    (*solver) = (HYPRE_Solver) cprecon;
@@ -2168,10 +2163,10 @@ int HYPRE_LSI_BlockP::setupPrecon(HYPRE_Solver *precon, HYPRE_IJMatrix Amat,
           HYPRE_BoomerAMGSetMeasureType(*precon, 1);
           HYPRE_BoomerAMGSetStrongThreshold(*precon,param_ptr.AMGThresh_);
           HYPRE_BoomerAMGSetNumFunctions(*precon, param_ptr.AMGSystemSize_);
-          nsweeps = hypre_CTAlloc(int,4);
+          nsweeps = hypre_CTAlloc(int,4,HYPRE_MEMORY_HOST);
           for ( i = 0; i < 4; i++ ) nsweeps[i] = param_ptr.AMGNSweeps_;
           HYPRE_BoomerAMGSetNumGridSweeps(*precon, nsweeps);
-          relaxType = hypre_CTAlloc(int,4);
+          relaxType = hypre_CTAlloc(int,4,HYPRE_MEMORY_HOST);
           for ( i = 0; i < 4; i++ ) relaxType[i] = param_ptr.AMGRelaxType_;
           HYPRE_BoomerAMGSetGridRelaxType(*precon, relaxType);
           //double relax_wt[25];
@@ -2189,8 +2184,8 @@ int HYPRE_LSI_BlockP::setupPrecon(HYPRE_Solver *precon, HYPRE_IJMatrix Amat,
           break;
       case 5 :
           HYPRE_EuclidCreate( mpi_comm, precon );
-          targv = (char **) malloc( 4 * sizeof(char*) );
-          for ( i = 0; i < 4; i++ ) targv[i] = (char *) malloc(sizeof(char)*50);
+          targv = hypre_TAlloc(char*,  4 , HYPRE_MEMORY_HOST);
+          for ( i = 0; i < 4; i++ ) targv[i] = hypre_TAlloc(char, 50, HYPRE_MEMORY_HOST);
           strcpy(targv[0], "-level");
           sprintf(targv[1], "%1d", param_ptr.EuclidNLevels_);
           strcpy(targv[2], "-sparseA");
@@ -2403,10 +2398,10 @@ int HYPRE_LSI_BlockP::setupSolver(HYPRE_Solver *solver, HYPRE_IJMatrix Amat,
           HYPRE_BoomerAMGSetMeasureType(*solver, 1);
           HYPRE_BoomerAMGSetStrongThreshold(*solver,param_ptr.AMGThresh_);
           HYPRE_BoomerAMGSetNumFunctions(*solver, param_ptr.AMGSystemSize_);
-          nsweeps = hypre_CTAlloc(int,4);
+          nsweeps = hypre_CTAlloc(int,4,HYPRE_MEMORY_HOST);
           for ( i = 0; i < 4; i++ ) nsweeps[i] = param_ptr.AMGNSweeps_;
           HYPRE_BoomerAMGSetNumGridSweeps(*solver, nsweeps);
-          relaxType = hypre_CTAlloc(int,4);
+          relaxType = hypre_CTAlloc(int,4,HYPRE_MEMORY_HOST);
           for ( i = 0; i < 4; i++ ) relaxType[i] = param_ptr.AMGRelaxType_;
           HYPRE_BoomerAMGSetGridRelaxType(*solver, relaxType);
           //double relax_wt[25];

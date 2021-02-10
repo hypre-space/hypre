@@ -1,9 +1,14 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-#include <stdio.h>
-#include "hypre_lapack.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int xerbla_(const char *srname, integer *info)
+/* Subroutine */ integer xerbla_(const char *srname, integer *info)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
@@ -36,10 +41,13 @@
 */
 
     hypre_printf("** On entry to %6s, parameter number %2i had an illegal value\n",
-		srname, (HYPRE_Int)*info);
+		srname, (integer)*info);
 
 /*     End of XERBLA */
 
     return 0;
 } /* xerbla_ */
 
+#ifdef __cplusplus
+}
+#endif

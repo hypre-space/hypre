@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_Euclid.h"
 /* #include "Mat_dh.h" */
@@ -251,7 +246,7 @@ void setup_matvec_receives_private(Mat_dh mat, HYPRE_Int *beg_rows, HYPRE_Int *e
     /* Count of number of number of indices needed from this_pe */
     outlist[this_pe] = j-i;
 
-    ierr = hypre_MPI_Recv_init(&mat->recvbuf[i+m], j-i, hypre_MPI_DOUBLE, this_pe, 555,
+    ierr = hypre_MPI_Recv_init(&mat->recvbuf[i+m], j-i, hypre_MPI_REAL, this_pe, 555,
             comm_dh, &mat->recv_req[mat->num_recv]); CHECK_MPI_V_ERROR(ierr);
 
     mat->num_recv++;
@@ -289,7 +284,7 @@ void setup_matvec_sends_private(Mat_dh mat, HYPRE_Int *inlist)
       ierr = hypre_MPI_Irecv(&mat->sendind[j], inlist[i], HYPRE_MPI_INT, i, 444, comm_dh,
                             &requests[mat->num_send]); CHECK_MPI_V_ERROR(ierr);
       /* Set up the send */
-      ierr = hypre_MPI_Send_init(&mat->sendbuf[j], inlist[i], hypre_MPI_DOUBLE, i, 555, comm_dh,
+      ierr = hypre_MPI_Send_init(&mat->sendbuf[j], inlist[i], hypre_MPI_REAL, i, 555, comm_dh,
                        &mat->send_req[mat->num_send]); CHECK_MPI_V_ERROR(ierr);
 
       mat->num_send++;
@@ -601,8 +596,8 @@ void Mat_dhReduceTiming(Mat_dh mat)
   if (mat->time[MATVEC_MPI_TIME]) {
     mat->time[MATVEC_RATIO] = mat->time[MATVEC_TIME] / mat->time[MATVEC_MPI_TIME];
   }
-  hypre_MPI_Allreduce(mat->time, mat->time_min, MAT_DH_BINS, hypre_MPI_DOUBLE, hypre_MPI_MIN, comm_dh);
-  hypre_MPI_Allreduce(mat->time, mat->time_max, MAT_DH_BINS, hypre_MPI_DOUBLE, hypre_MPI_MAX, comm_dh);
+  hypre_MPI_Allreduce(mat->time, mat->time_min, MAT_DH_BINS, hypre_MPI_REAL, hypre_MPI_MIN, comm_dh);
+  hypre_MPI_Allreduce(mat->time, mat->time_max, MAT_DH_BINS, hypre_MPI_REAL, hypre_MPI_MAX, comm_dh);
   END_FUNC_DH
 }
 
@@ -1482,16 +1477,18 @@ part[]
   }
 
   /* compute permutation vector */
-  { HYPRE_Int *tmp = (HYPRE_Int*)MALLOC_DH(blocks*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-    memcpy(tmp, beg_row, blocks*sizeof(HYPRE_Int));
-    for (i=0; i<m; ++i) {
-      bk = part[i];  /* block to which row i belongs */
-      new = tmp[bk];
-      tmp[bk] += 1;
-      o2n[i] = new;
-      n2o[new] = i;
-    }
-    FREE_DH(tmp);
+  {
+	 HYPRE_Int *tmp = (HYPRE_Int*)MALLOC_DH(blocks*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+	 hypre_TMemcpy(tmp,  beg_row, HYPRE_Int, blocks, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+	 for (i=0; i<m; ++i)
+	 {
+		bk = part[i];  /* block to which row i belongs */
+		new = tmp[bk];
+		tmp[bk] += 1;
+		o2n[i] = new;
+		n2o[new] = i;
+	 }
+	 FREE_DH(tmp);
   }
 
   FREE_DH(part); CHECK_V_ERROR;

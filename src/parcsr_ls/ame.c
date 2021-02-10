@@ -1,18 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
 #include "float.h"
@@ -32,7 +23,7 @@ void * hypre_AMECreate()
 {
    hypre_AMEData *ame_data;
 
-   ame_data = hypre_CTAlloc(hypre_AMEData, 1);
+   ame_data = hypre_CTAlloc(hypre_AMEData,  1, HYPRE_MEMORY_HOST);
 
    /* Default parameters */
 
@@ -72,7 +63,7 @@ void * hypre_AMECreate()
 
 HYPRE_Int hypre_AMEDestroy(void *esolver)
 {
-	hypre_AMEData *ame_data = (hypre_AMEData *) esolver;
+   hypre_AMEData *ame_data = (hypre_AMEData *) esolver;
    hypre_AMSData *ams_data;
    mv_InterfaceInterpreter* interpreter;
    mv_MultiVectorPtr eigenvectors;
@@ -102,12 +93,12 @@ HYPRE_Int hypre_AMEDestroy(void *esolver)
       HYPRE_ParCSRPCGDestroy(ame_data -> B2_G);
 
    if (ame_data -> eigenvalues)
-      hypre_TFree(ame_data -> eigenvalues);
+      hypre_TFree(ame_data -> eigenvalues, HYPRE_MEMORY_HOST);
    if (eigenvectors)
       mv_MultiVectorDestroy(eigenvectors);
 
    if (interpreter)
-      hypre_TFree(interpreter);
+      hypre_TFree(interpreter, HYPRE_MEMORY_HOST);
 
    if (ams_data ->  beta_is_zero)
    {
@@ -118,7 +109,7 @@ HYPRE_Int hypre_AMEDestroy(void *esolver)
    }
 
    if (ame_data)
-      hypre_TFree(ame_data);
+      hypre_TFree(ame_data, HYPRE_MEMORY_HOST);
 
    /* Fields initialized using the Set functions are not destroyed */
 
@@ -205,7 +196,7 @@ HYPRE_Int hypre_AMESetTol(void *esolver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMESetRTol(void *esolver,
-			   HYPRE_Real tol)
+                           HYPRE_Real tol)
 {
    hypre_AMEData *ame_data = (hypre_AMEData *) esolver;
    ame_data -> rtol = tol;
@@ -267,7 +258,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
       nv = hypre_ParCSRMatrixNumCols(ams_data -> G);
       ne = hypre_ParCSRMatrixNumRows(ams_data -> G);
 
-      edge_bc = hypre_TAlloc(HYPRE_Int, ne);
+      edge_bc = hypre_TAlloc(HYPRE_Int,  ne, HYPRE_MEMORY_HOST);
       for (i = 0; i < ne; i++)
          edge_bc[i] = 0;
 
@@ -299,7 +290,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
          }
       }
 
-      hypre_ParCSRMatrixTranspose(ams_data -> G, &Gt, 1);
+      hypre_ParCSRMatrixTranspose(ams_data->G, &Gt, 1);
 
       /* Use a Matvec communication to find which of the edges
          connected to local vertices are on the boundary */
@@ -309,15 +300,16 @@ HYPRE_Int hypre_AMESetup(void *esolver)
          HYPRE_Int num_sends, *int_buf_data;
          HYPRE_Int index, start;
 
-         offd_edge_bc = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(Gt)));
+         offd_edge_bc = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(Gt)), HYPRE_MEMORY_HOST);
 
          hypre_MatvecCommPkgCreate(Gt);
          comm_pkg = hypre_ParCSRMatrixCommPkg(Gt);
 
          num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-         int_buf_data = hypre_CTAlloc(HYPRE_Int,
-                                      hypre_ParCSRCommPkgSendMapStart(comm_pkg,
-                                                                      num_sends));
+         int_buf_data = hypre_CTAlloc(
+               HYPRE_Int,
+               hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+               HYPRE_MEMORY_HOST );
          index = 0;
          for (i = 0; i < num_sends; i++)
          {
@@ -331,7 +323,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
          comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg,
                                                     int_buf_data, offd_edge_bc);
          hypre_ParCSRCommHandleDestroy(comm_handle);
-         hypre_TFree(int_buf_data);
+         hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
       }
 
       /* Eliminate boundary vertex entries in G^t */
@@ -373,7 +365,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
       hypre_ParCSRMatrixTranspose(Gt, &ame_data -> G, 1);
 
       hypre_ParCSRMatrixDestroy(Gt);
-      hypre_TFree(offd_edge_bc);
+      hypre_TFree(offd_edge_bc, HYPRE_MEMORY_HOST);
    }
 
    /* Compute G^t M G */
@@ -431,11 +423,11 @@ HYPRE_Int hypre_AMESetup(void *esolver)
       mv_InterfaceInterpreter* interpreter;
       mv_MultiVectorPtr eigenvectors;
 
-      ame_data -> interpreter = hypre_CTAlloc(mv_InterfaceInterpreter,1);
+      ame_data -> interpreter = hypre_CTAlloc(mv_InterfaceInterpreter, 1, HYPRE_MEMORY_HOST);
       interpreter = (mv_InterfaceInterpreter*) ame_data -> interpreter;
       HYPRE_ParCSRSetupInterpreter(interpreter);
 
-      ame_data -> eigenvalues = hypre_CTAlloc(HYPRE_Real, ame_data -> block_size);
+      ame_data -> eigenvalues = hypre_CTAlloc(HYPRE_Real,  ame_data -> block_size, HYPRE_MEMORY_HOST);
 
       ame_data -> eigenvectors =
          mv_MultiVectorCreateFromSampleVector(interpreter,
@@ -466,7 +458,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
       }
    }
 
-   hypre_TFree(edge_bc);
+   hypre_TFree(edge_bc, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -588,16 +580,11 @@ HYPRE_Int hypre_AMESolve(void *esolver)
    lobpcg_Tolerance lobpcg_tol;
    HYPRE_Real *residuals;
 
-#ifdef HYPRE_USING_ESSL
-   blap_fn.dsygv  = dsygv;
-   blap_fn.dpotrf = dpotrf;
-#else
-   blap_fn.dsygv  = hypre_F90_NAME_LAPACK(dsygv,DSYGV);
-   blap_fn.dpotrf = hypre_F90_NAME_LAPACK(dpotrf,DPOTRF);
-#endif
+   blap_fn.dsygv  = hypre_dsygv;
+   blap_fn.dpotrf = hypre_dpotrf;
    lobpcg_tol.relative = ame_data -> rtol;
    lobpcg_tol.absolute = ame_data -> atol;
-   residuals = hypre_TAlloc(HYPRE_Real, ame_data -> block_size);
+   residuals = hypre_TAlloc(HYPRE_Real,  ame_data -> block_size, HYPRE_MEMORY_HOST);
 
    lobpcg_solve((mv_MultiVectorPtr) ame_data -> eigenvectors,
                 esolver, hypre_AMEMultiOperatorA,
@@ -610,7 +597,7 @@ HYPRE_Int hypre_AMESolve(void *esolver)
                 residuals,
                 NULL, ame_data -> block_size);
 
-   hypre_TFree(residuals);
+   hypre_TFree(residuals, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }

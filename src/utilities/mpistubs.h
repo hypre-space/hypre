@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -43,13 +38,18 @@ extern "C" {
 #define MPI_Status          hypre_MPI_Status
 #define MPI_Op              hypre_MPI_Op
 #define MPI_Aint            hypre_MPI_Aint
+#define MPI_Info            hypre_MPI_Info
 
-#define MPI_COMM_WORLD      hypre_MPI_COMM_WORLD
-#define MPI_COMM_NULL       hypre_MPI_COMM_NULL
+#define MPI_COMM_WORLD       hypre_MPI_COMM_WORLD
+#define MPI_COMM_NULL        hypre_MPI_COMM_NULL
+#define MPI_COMM_SELF        hypre_MPI_COMM_SELF
+#define MPI_COMM_TYPE_SHARED hypre_MPI_COMM_TYPE_SHARED
 
 #define MPI_BOTTOM  	    hypre_MPI_BOTTOM
 
+#define MPI_FLOAT           hypre_MPI_FLOAT
 #define MPI_DOUBLE          hypre_MPI_DOUBLE
+#define MPI_LONG_DOUBLE     hypre_MPI_LONG_DOUBLE
 #define MPI_INT             hypre_MPI_INT
 #define MPI_LONG_LONG_INT   hypre_MPI_INT
 #define MPI_CHAR            hypre_MPI_CHAR
@@ -61,15 +61,17 @@ extern "C" {
 #define MPI_MIN             hypre_MPI_MIN
 #define MPI_MAX             hypre_MPI_MAX
 #define MPI_LOR             hypre_MPI_LOR
+#define MPI_LAND            hypre_MPI_LAND
+#define MPI_SUCCESS         hypre_MPI_SUCCESS
+#define MPI_STATUSES_IGNORE hypre_MPI_STATUSES_IGNORE
 
 #define MPI_UNDEFINED       hypre_MPI_UNDEFINED
 #define MPI_REQUEST_NULL    hypre_MPI_REQUEST_NULL
+#define MPI_INFO_NULL       hypre_MPI_INFO_NULL
 #define MPI_ANY_SOURCE      hypre_MPI_ANY_SOURCE
 #define MPI_ANY_TAG         hypre_MPI_ANY_TAG
 #define MPI_SOURCE          hypre_MPI_SOURCE
 #define MPI_TAG             hypre_MPI_TAG
-#define MPI_SUCCESS         hypre_MPI_SUCCESS
-#define MPI_STATUSES_IGNORE hypre_MPI_STATUSES_IGNORE
 
 #define MPI_Init            hypre_MPI_Init
 #define MPI_Finalize        hypre_MPI_Finalize
@@ -85,6 +87,7 @@ extern "C" {
 #define MPI_Comm_rank       hypre_MPI_Comm_rank
 #define MPI_Comm_free       hypre_MPI_Comm_free
 #define MPI_Comm_split      hypre_MPI_Comm_split
+#define MPI_Comm_split_type hypre_MPI_Comm_split_type
 #define MPI_Group_incl      hypre_MPI_Group_incl
 #define MPI_Group_free      hypre_MPI_Group_free
 #define MPI_Address         hypre_MPI_Address
@@ -93,9 +96,9 @@ extern "C" {
 #define MPI_Allgather       hypre_MPI_Allgather
 #define MPI_Allgatherv      hypre_MPI_Allgatherv
 #define MPI_Gather          hypre_MPI_Gather
-#define MPI_Gatherv          hypre_MPI_Gatherv
+#define MPI_Gatherv         hypre_MPI_Gatherv
 #define MPI_Scatter         hypre_MPI_Scatter
-#define MPI_Scatterv         hypre_MPI_Scatterv
+#define MPI_Scatterv        hypre_MPI_Scatterv
 #define MPI_Bcast           hypre_MPI_Bcast
 #define MPI_Send            hypre_MPI_Send
 #define MPI_Recv            hypre_MPI_Recv
@@ -122,6 +125,10 @@ extern "C" {
 #define MPI_Type_struct     hypre_MPI_Type_struct
 #define MPI_Type_commit     hypre_MPI_Type_commit
 #define MPI_Type_free       hypre_MPI_Type_free
+#define MPI_Op_free         hypre_MPI_Op_free
+#define MPI_Op_create       hypre_MPI_Op_create
+#define MPI_User_function   hypre_MPI_User_function
+#define MPI_Info_create     hypre_MPI_Info_create
 
 /*--------------------------------------------------------------------------
  * Types, etc.
@@ -132,37 +139,47 @@ typedef HYPRE_Int hypre_MPI_Comm;
 typedef HYPRE_Int hypre_MPI_Group;
 typedef HYPRE_Int hypre_MPI_Request;
 typedef HYPRE_Int hypre_MPI_Datatype;
+typedef void (hypre_MPI_User_function) ();
 
 typedef struct
 {
    HYPRE_Int hypre_MPI_SOURCE;
    HYPRE_Int hypre_MPI_TAG;
 } hypre_MPI_Status;
+
 typedef HYPRE_Int  hypre_MPI_Op;
 typedef HYPRE_Int  hypre_MPI_Aint;
+typedef HYPRE_Int  hypre_MPI_Info;
 
-#define  hypre_MPI_COMM_WORLD 0
+#define  hypre_MPI_COMM_SELF   1
+#define  hypre_MPI_COMM_WORLD  0
 #define  hypre_MPI_COMM_NULL  -1
+
+#define  hypre_MPI_COMM_TYPE_SHARED 0
 
 #define  hypre_MPI_BOTTOM  0x0
 
-#define  hypre_MPI_DOUBLE 0
-#define  hypre_MPI_INT 1
-#define  hypre_MPI_CHAR 2
-#define  hypre_MPI_LONG 3
-#define  hypre_MPI_BYTE 4
-#define  hypre_MPI_REAL 5
-#define  hypre_MPI_COMPLEX 6
+#define  hypre_MPI_FLOAT 0
+#define  hypre_MPI_DOUBLE 1
+#define  hypre_MPI_LONG_DOUBLE 2
+#define  hypre_MPI_INT 3
+#define  hypre_MPI_CHAR 4
+#define  hypre_MPI_LONG 5
+#define  hypre_MPI_BYTE 6
+#define  hypre_MPI_REAL 7
+#define  hypre_MPI_COMPLEX 8
 
 #define  hypre_MPI_SUM 0
 #define  hypre_MPI_MIN 1
 #define  hypre_MPI_MAX 2
 #define  hypre_MPI_LOR 3
+#define  hypre_MPI_LAND 4
 #define  hypre_MPI_SUCCESS 0
 #define  hypre_MPI_STATUSES_IGNORE 0
 
 #define  hypre_MPI_UNDEFINED -9999
 #define  hypre_MPI_REQUEST_NULL  0
+#define  hypre_MPI_INFO_NULL     0
 #define  hypre_MPI_ANY_SOURCE    1
 #define  hypre_MPI_ANY_TAG       1
 
@@ -179,13 +196,18 @@ typedef MPI_Datatype hypre_MPI_Datatype;
 typedef MPI_Status   hypre_MPI_Status;
 typedef MPI_Op       hypre_MPI_Op;
 typedef MPI_Aint     hypre_MPI_Aint;
+typedef MPI_Info     hypre_MPI_Info;
+typedef MPI_User_function    hypre_MPI_User_function;
 
-#define  hypre_MPI_COMM_WORLD MPI_COMM_WORLD
-#define  hypre_MPI_COMM_NULL  MPI_COMM_NULL
-#define  hypre_MPI_BOTTOM     MPI_BOTTOM
-#define  hypre_MPI_SUCCESS    MPI_SUCCESS
+#define  hypre_MPI_COMM_WORLD         MPI_COMM_WORLD
+#define  hypre_MPI_COMM_NULL          MPI_COMM_NULL
+#define  hypre_MPI_BOTTOM             MPI_BOTTOM
+#define  hypre_MPI_COMM_SELF          MPI_COMM_SELF
+#define  hypre_MPI_COMM_TYPE_SHARED   MPI_COMM_TYPE_SHARED
 
+#define  hypre_MPI_FLOAT   MPI_FLOAT
 #define  hypre_MPI_DOUBLE  MPI_DOUBLE
+#define  hypre_MPI_LONG_DOUBLE  MPI_LONG_DOUBLE
 /* HYPRE_MPI_INT is defined in HYPRE_utilities.h */
 #define  hypre_MPI_INT     HYPRE_MPI_INT
 #define  hypre_MPI_CHAR    MPI_CHAR
@@ -200,14 +222,16 @@ typedef MPI_Aint     hypre_MPI_Aint;
 #define  hypre_MPI_MIN MPI_MIN
 #define  hypre_MPI_MAX MPI_MAX
 #define  hypre_MPI_LOR MPI_LOR
+#define  hypre_MPI_SUCCESS MPI_SUCCESS
+#define  hypre_MPI_STATUSES_IGNORE MPI_STATUSES_IGNORE
 
 #define  hypre_MPI_UNDEFINED       MPI_UNDEFINED
 #define  hypre_MPI_REQUEST_NULL    MPI_REQUEST_NULL
+#define  hypre_MPI_INFO_NULL       MPI_INFO_NULL
 #define  hypre_MPI_ANY_SOURCE      MPI_ANY_SOURCE
 #define  hypre_MPI_ANY_TAG         MPI_ANY_TAG
 #define  hypre_MPI_SOURCE          MPI_SOURCE
 #define  hypre_MPI_TAG             MPI_TAG
-#define  hypre_MPI_STATUSES_IGNORE MPI_STATUSES_IGNORE
 #define  hypre_MPI_LAND            MPI_LAND
 
 #endif
@@ -272,10 +296,17 @@ HYPRE_Int hypre_MPI_Type_hvector( HYPRE_Int count , HYPRE_Int blocklength , hypr
 HYPRE_Int hypre_MPI_Type_struct( HYPRE_Int count , HYPRE_Int *array_of_blocklengths , hypre_MPI_Aint *array_of_displacements , hypre_MPI_Datatype *array_of_types , hypre_MPI_Datatype *newtype );
 HYPRE_Int hypre_MPI_Type_commit( hypre_MPI_Datatype *datatype );
 HYPRE_Int hypre_MPI_Type_free( hypre_MPI_Datatype *datatype );
-HYPRE_Int hypre_MPI_CheckCommMatrix( hypre_MPI_Comm comm , HYPRE_Int num_recvs , HYPRE_Int *recvs , HYPRE_Int num_sends , HYPRE_Int *sends );
+HYPRE_Int hypre_MPI_Op_free( hypre_MPI_Op *op );
+HYPRE_Int hypre_MPI_Op_create( hypre_MPI_User_function *function , hypre_int commute , hypre_MPI_Op *op );
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+HYPRE_Int hypre_MPI_Comm_split_type(hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key, hypre_MPI_Info info, hypre_MPI_Comm *newcomm);
+HYPRE_Int hypre_MPI_Info_create(hypre_MPI_Info *info);
+HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
+#endif
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
+

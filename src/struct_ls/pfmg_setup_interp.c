@@ -1,16 +1,12 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
+#include "_hypre_struct_mv.hpp"
 #include "pfmg.h"
 
 /*--------------------------------------------------------------------------
@@ -49,7 +45,7 @@ hypre_zPFMGCreateInterpOp( hypre_StructMatrix *A,
 
    /* Set up the stencil for P */
    stencil_size = 3;
-   stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size);
+   stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size, HYPRE_MEMORY_HOST);
    for (i = 0; i < stencil_size; i++)
    {
       hypre_SetIndex(stencil_shape[i], 0);
@@ -145,7 +141,7 @@ hypre_zPFMGSetupInterpOp( hypre_StructMatrix *P,
       Pstenc2 = hypre_IndexD(P_stencil_shape[2], cdir);
 
       /* Compute the constant part of the stencil collapse */
-      ventries = hypre_TAlloc(HYPRE_Int, A_stencil_size);
+      ventries = hypre_TAlloc(HYPRE_Int, A_stencil_size, HYPRE_MEMORY_HOST);
       nventries = 0;
       Pconst0 = 0.0;
       Pconst1 = 0.0;
@@ -249,7 +245,7 @@ hypre_zPFMGSetupInterpOp( hypre_StructMatrix *P,
       }
 
       hypre_BoxDestroy(compute_box);
-      hypre_TFree(ventries);
+      hypre_TFree(ventries, HYPRE_MEMORY_HOST);
    }
 
    hypre_StructMatrixAssemble(P);
@@ -289,7 +285,7 @@ hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
    /* set up stencil */
    stencil_size = 2;
    stencil_dim = hypre_StructStencilNDim(hypre_StructMatrixStencil(A));
-   stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size);
+   stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size, HYPRE_MEMORY_HOST);
    for (i = 0; i < stencil_size; i++)
    {
       hypre_SetIndex3(stencil_shape[i], 0, 0, 0);
@@ -308,13 +304,13 @@ hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
    {
       HYPRE_Int *entries;
 
-      entries = hypre_TAlloc(HYPRE_Int, stencil_size);
+      entries = hypre_TAlloc(HYPRE_Int, stencil_size, HYPRE_MEMORY_HOST);
       for (i = 0; i < stencil_size; i++)
       {
          entries[i] = i;
       }
       hypre_StructMatrixSetConstantEntries(P, stencil_size, entries);
-      hypre_TFree(entries);
+      hypre_TFree(entries, HYPRE_MEMORY_HOST);
    }
 
    hypre_StructStencilDestroy(stencil);

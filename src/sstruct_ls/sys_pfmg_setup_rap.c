@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
 
@@ -57,10 +52,10 @@ hypre_SysPFMGCreateRAPOp( hypre_SStructPMatrix *R,
    vartype = hypre_SStructPGridVarType(coarse_grid, 0);
    cgrid = hypre_SStructPGridVTSGrid(coarse_grid, vartype);
 
-   RAP_stencils = hypre_CTAlloc(hypre_SStructStencil *, nvars);
+   RAP_stencils = hypre_CTAlloc(hypre_SStructStencil *,  nvars, HYPRE_MEMORY_HOST);
 
-   RAP_shapes = hypre_CTAlloc(hypre_Index *, nvars);
-   sstencil_sizes = hypre_CTAlloc(HYPRE_Int, nvars);
+   RAP_shapes = hypre_CTAlloc(hypre_Index *,  nvars, HYPRE_MEMORY_HOST);
+   sstencil_sizes = hypre_CTAlloc(HYPRE_Int,  nvars, HYPRE_MEMORY_HOST);
 
    /*--------------------------------------------------------------------------
     * Symmetry within a block is exploited, but not symmetry of the form
@@ -87,8 +82,8 @@ hypre_SysPFMGCreateRAPOp( hypre_SStructPMatrix *R,
             shape = hypre_StructStencilShape(sstencil);
             sstencil_sizes[vj] = hypre_StructStencilSize(sstencil);
             stencil_size += sstencil_sizes[vj];
-            RAP_shapes[vj] = hypre_CTAlloc(hypre_Index,
-                                           sstencil_sizes[vj]);
+            RAP_shapes[vj] = hypre_CTAlloc(hypre_Index, 
+                                           sstencil_sizes[vj], HYPRE_MEMORY_HOST);
             for (s = 0; s < sstencil_sizes[vj]; s++)
             {
                hypre_CopyIndex(shape[s],RAP_shapes[vj][s]);
@@ -109,7 +104,7 @@ hypre_SysPFMGCreateRAPOp( hypre_SStructPMatrix *R,
                                             sten_cntr, RAP_shapes[vj][s], vj);
                sten_cntr++;
             }
-            hypre_TFree(RAP_shapes[vj]);
+            hypre_TFree(RAP_shapes[vj], HYPRE_MEMORY_HOST);
          }
       }
    }
@@ -118,8 +113,8 @@ hypre_SysPFMGCreateRAPOp( hypre_SStructPMatrix *R,
    hypre_SStructPMatrixCreate(hypre_SStructPMatrixComm(A), 
                               coarse_grid, RAP_stencils, &RAP);
 
-   hypre_TFree(RAP_shapes);
-   hypre_TFree(sstencil_sizes);
+   hypre_TFree(RAP_shapes, HYPRE_MEMORY_HOST);
+   hypre_TFree(sstencil_sizes, HYPRE_MEMORY_HOST);
 
    return RAP;
 }

@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -25,7 +17,7 @@
  * HYPRE_CSRMatrixCreate
  *--------------------------------------------------------------------------*/
 
-HYPRE_CSRMatrix 
+HYPRE_CSRMatrix
 HYPRE_CSRMatrixCreate( HYPRE_Int  num_rows,
                        HYPRE_Int  num_cols,
                        HYPRE_Int *row_sizes )
@@ -34,7 +26,7 @@ HYPRE_CSRMatrixCreate( HYPRE_Int  num_rows,
    HYPRE_Int             *matrix_i;
    HYPRE_Int              i;
 
-   matrix_i = hypre_CTAlloc(HYPRE_Int, num_rows + 1);
+   matrix_i = hypre_CTAlloc(HYPRE_Int,  num_rows + 1, HYPRE_MEMORY_HOST);
    matrix_i[0] = 0;
    for (i = 0; i < num_rows; i++)
    {
@@ -51,7 +43,7 @@ HYPRE_CSRMatrixCreate( HYPRE_Int  num_rows,
  * HYPRE_CSRMatrixDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_CSRMatrixDestroy( HYPRE_CSRMatrix matrix )
 {
    return( hypre_CSRMatrixDestroy( (hypre_CSRMatrix *) matrix ) );
@@ -71,7 +63,7 @@ HYPRE_CSRMatrixInitialize( HYPRE_CSRMatrix matrix )
  * HYPRE_CSRMatrixRead
  *--------------------------------------------------------------------------*/
 
-HYPRE_CSRMatrix 
+HYPRE_CSRMatrix
 HYPRE_CSRMatrixRead( char            *file_name )
 {
    return ( (HYPRE_CSRMatrix) hypre_CSRMatrixRead( file_name ) );
@@ -81,7 +73,7 @@ HYPRE_CSRMatrixRead( char            *file_name )
  * HYPRE_CSRMatrixPrint
  *--------------------------------------------------------------------------*/
 
-void 
+void
 HYPRE_CSRMatrixPrint( HYPRE_CSRMatrix  matrix,
                       char            *file_name )
 {
@@ -103,4 +95,12 @@ HYPRE_CSRMatrixGetNumRows( HYPRE_CSRMatrix matrix, HYPRE_Int *num_rows )
    return 0;
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_CSRMatrixSetSpGemmUseCusparse
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_CSRMatrixSetSpGemmUseCusparse( HYPRE_Int use_cusparse )
+{
+   return hypre_CSRMatrixDeviceSpGemmSetUseCusparse(use_cusparse);
+}
 

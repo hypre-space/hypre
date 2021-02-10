@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /* Include headers for problem and solver data structure */
 #include "./DistributedMatrixPilutSolver.h"
@@ -35,16 +27,16 @@ HYPRE_Int  HYPRE_NewDistributedMatrixPilutSolver(
 
    /* Allocate structure for holding solver data */
    solver = (hypre_DistributedMatrixPilutSolver *) 
-            hypre_CTAlloc( hypre_DistributedMatrixPilutSolver, 1);
+            hypre_CTAlloc( hypre_DistributedMatrixPilutSolver,  1, HYPRE_MEMORY_HOST);
 
    /* Initialize components of solver */
    hypre_DistributedMatrixPilutSolverComm(solver) = comm;
    hypre_DistributedMatrixPilutSolverDataDist(solver) = 
-         (DataDistType *) hypre_CTAlloc( DataDistType, 1 );
+         (DataDistType *) hypre_CTAlloc( DataDistType,  1 , HYPRE_MEMORY_HOST);
 
    /* Structure for holding "global variables"; makes code thread safe(r) */
    globals = hypre_DistributedMatrixPilutSolverGlobals(solver) = 
-       (hypre_PilutSolverGlobals *) hypre_CTAlloc( hypre_PilutSolverGlobals, 1 );
+       (hypre_PilutSolverGlobals *) hypre_CTAlloc( hypre_PilutSolverGlobals,  1 , HYPRE_MEMORY_HOST);
 
    jr = NULL;
    lr = NULL;
@@ -79,10 +71,10 @@ HYPRE_Int  HYPRE_NewDistributedMatrixPilutSolver(
 
    /* Data distribution structure */
    DataDistTypeRowdist(hypre_DistributedMatrixPilutSolverDataDist(solver))
-       = (HYPRE_Int *) hypre_CTAlloc( HYPRE_Int, nprocs+1 );
+       = (HYPRE_Int *) hypre_CTAlloc( HYPRE_Int,  nprocs+1 , HYPRE_MEMORY_HOST);
 
    hypre_DistributedMatrixPilutSolverFactorMat(solver) = 
-          (FactorMatType *) hypre_CTAlloc( FactorMatType, 1 );
+          (FactorMatType *) hypre_CTAlloc( FactorMatType,  1 , HYPRE_MEMORY_HOST);
 
    ldu = hypre_DistributedMatrixPilutSolverFactorMat(solver);
 
@@ -131,59 +123,59 @@ HYPRE_Int HYPRE_FreeDistributedMatrixPilutSolver (
   globals = hypre_DistributedMatrixPilutSolverGlobals(solver);
 #endif
 
-  hypre_TFree( DataDistTypeRowdist(hypre_DistributedMatrixPilutSolverDataDist(solver)));
-  hypre_TFree( hypre_DistributedMatrixPilutSolverDataDist(solver) );
+  hypre_TFree( DataDistTypeRowdist(hypre_DistributedMatrixPilutSolverDataDist(solver)), HYPRE_MEMORY_HOST);
+  hypre_TFree( hypre_DistributedMatrixPilutSolverDataDist(solver) , HYPRE_MEMORY_HOST);
   
   /* Free malloced members of the FactorMat member */
   ldu = hypre_DistributedMatrixPilutSolverFactorMat(solver);
 
-  hypre_TFree( ldu->lcolind );
-  hypre_TFree( ldu->ucolind );
+  hypre_TFree( ldu->lcolind , HYPRE_MEMORY_HOST);
+  hypre_TFree( ldu->ucolind , HYPRE_MEMORY_HOST);
 
-  hypre_TFree( ldu->lvalues );
-  hypre_TFree( ldu->uvalues );
+  hypre_TFree( ldu->lvalues , HYPRE_MEMORY_HOST);
+  hypre_TFree( ldu->uvalues , HYPRE_MEMORY_HOST);
 
-  hypre_TFree( ldu->lrowptr );
-  hypre_TFree( ldu->urowptr );
+  hypre_TFree( ldu->lrowptr , HYPRE_MEMORY_HOST);
+  hypre_TFree( ldu->urowptr , HYPRE_MEMORY_HOST);
 
-  hypre_TFree( ldu->dvalues );
-  hypre_TFree( ldu->nrm2s );
-  hypre_TFree( ldu->perm );
-  hypre_TFree( ldu->iperm );
+  hypre_TFree( ldu->dvalues , HYPRE_MEMORY_HOST);
+  hypre_TFree( ldu->nrm2s , HYPRE_MEMORY_HOST);
+  hypre_TFree( ldu->perm , HYPRE_MEMORY_HOST);
+  hypre_TFree( ldu->iperm , HYPRE_MEMORY_HOST);
 
-  hypre_TFree( ldu->gatherbuf );
+  hypre_TFree( ldu->gatherbuf , HYPRE_MEMORY_HOST);
 
-  hypre_TFree( ldu->lx );
-  hypre_TFree( ldu->ux );
+  hypre_TFree( ldu->lx , HYPRE_MEMORY_HOST);
+  hypre_TFree( ldu->ux , HYPRE_MEMORY_HOST);
 
     /* Beginning of TriSolveCommType freeing */
-    hypre_TFree( ldu->lcomm.raddr );
-    hypre_TFree( ldu->ucomm.raddr );
+    hypre_TFree( ldu->lcomm.raddr , HYPRE_MEMORY_HOST);
+    hypre_TFree( ldu->ucomm.raddr , HYPRE_MEMORY_HOST);
 
-    hypre_TFree( ldu->lcomm.spes );
-    hypre_TFree( ldu->ucomm.spes );
+    hypre_TFree( ldu->lcomm.spes , HYPRE_MEMORY_HOST);
+    hypre_TFree( ldu->ucomm.spes , HYPRE_MEMORY_HOST);
 
-    hypre_TFree( ldu->lcomm.sptr );
-    hypre_TFree( ldu->ucomm.sptr );
+    hypre_TFree( ldu->lcomm.sptr , HYPRE_MEMORY_HOST);
+    hypre_TFree( ldu->ucomm.sptr , HYPRE_MEMORY_HOST);
 
-    hypre_TFree( ldu->lcomm.sindex );
-    hypre_TFree( ldu->ucomm.sindex );
+    hypre_TFree( ldu->lcomm.sindex , HYPRE_MEMORY_HOST);
+    hypre_TFree( ldu->ucomm.sindex , HYPRE_MEMORY_HOST);
 
-    hypre_TFree( ldu->lcomm.auxsptr );
-    hypre_TFree( ldu->ucomm.auxsptr );
+    hypre_TFree( ldu->lcomm.auxsptr , HYPRE_MEMORY_HOST);
+    hypre_TFree( ldu->ucomm.auxsptr , HYPRE_MEMORY_HOST);
 
-    hypre_TFree( ldu->lcomm.rpes );
-    hypre_TFree( ldu->ucomm.rpes );
+    hypre_TFree( ldu->lcomm.rpes , HYPRE_MEMORY_HOST);
+    hypre_TFree( ldu->ucomm.rpes , HYPRE_MEMORY_HOST);
 
-    hypre_TFree( ldu->lcomm.rdone );
-    hypre_TFree( ldu->ucomm.rdone );
+    hypre_TFree( ldu->lcomm.rdone , HYPRE_MEMORY_HOST);
+    hypre_TFree( ldu->ucomm.rdone , HYPRE_MEMORY_HOST);
 
-    hypre_TFree( ldu->lcomm.rnum );
-    hypre_TFree( ldu->ucomm.rnum );
+    hypre_TFree( ldu->lcomm.rnum , HYPRE_MEMORY_HOST);
+    hypre_TFree( ldu->ucomm.rnum , HYPRE_MEMORY_HOST);
 
     /* End of TriSolveCommType freeing */
 
-  hypre_TFree( hypre_DistributedMatrixPilutSolverFactorMat(solver) );
+  hypre_TFree( hypre_DistributedMatrixPilutSolverFactorMat(solver) , HYPRE_MEMORY_HOST);
   /* End of FactorMat member */
 
 #ifdef HYPRE_TIMING
@@ -203,9 +195,9 @@ HYPRE_Int HYPRE_FreeDistributedMatrixPilutSolver (
   hypre_FinalizeTiming( globals->Ul_timer );
 #endif
 
-  hypre_TFree( hypre_DistributedMatrixPilutSolverGlobals(solver) );
+  hypre_TFree( hypre_DistributedMatrixPilutSolverGlobals(solver) , HYPRE_MEMORY_HOST);
 
-  hypre_TFree(solver);
+  hypre_TFree(solver, HYPRE_MEMORY_HOST);
 
   return(0);
 }

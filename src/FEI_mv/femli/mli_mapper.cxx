@@ -1,24 +1,18 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include <string.h>
-#include <assert.h>
 #include "_hypre_utilities.h"
 #include "HYPRE.h"
 #include "mli_mapper.h"
 #include "mli_utils.h"
 
 /***************************************************************************
- * constructor function for the MLI_Mapper 
+ * constructor function for the MLI_Mapper
  *--------------------------------------------------------------------------*/
 
 MLI_Mapper::MLI_Mapper()
@@ -29,7 +23,7 @@ MLI_Mapper::MLI_Mapper()
 }
 
 /***************************************************************************
- * destructor function for the MLI_Mapper 
+ * destructor function for the MLI_Mapper
  *--------------------------------------------------------------------------*/
 
 MLI_Mapper::~MLI_Mapper()
@@ -63,16 +57,16 @@ int MLI_Mapper::setMap(int nItems, int *itemList, int *mapList)
  * adjust map offset (This is used for slide surface reduction)
  *--------------------------------------------------------------------------*/
 
-int MLI_Mapper::adjustMapOffset(MPI_Comm comm, int *procNRows, 
+int MLI_Mapper::adjustMapOffset(MPI_Comm comm, int *procNRows,
                                 int *procOffsets)
 {
    int i, j, nprocs;
 
    if ( nEntries <= 0 ) return -1;
    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-   for ( i = 0; i < nEntries; i++ ) 
+   for ( i = 0; i < nEntries; i++ )
    {
-      for ( j = 0; j < nprocs; j++ ) 
+      for ( j = 0; j < nprocs; j++ )
          if ( tokenList[i] < procNRows[j] ) break;
       tokenMap[i] -= procOffsets[j-1];
    }
@@ -95,7 +89,7 @@ int MLI_Mapper::getMap(int nItems, int *itemList, int *mapList)
    MLI_Utils_IntQSort2( itemTemp, itemAux, 0, nItems-1 );
 
    counter = 0;
-   for ( i = 0; i < nItems; i++ ) 
+   for ( i = 0; i < nItems; i++ )
    {
       if ( itemTemp[i] == tokenList[counter] )
          mapList[itemAux[i]] = tokenMap[counter];
@@ -116,7 +110,7 @@ int MLI_Mapper::getMap(int nItems, int *itemList, int *mapList)
       {
          printf("MLI_Mapper::getMap - item not found %d.\n", itemList[i]);
          exit(1);
-      } 
+      }
    }
    delete [] itemTemp;
    delete [] itemAux;
@@ -124,7 +118,7 @@ int MLI_Mapper::getMap(int nItems, int *itemList, int *mapList)
 }
 
 /***************************************************************************
- * setParams 
+ * setParams
  *--------------------------------------------------------------------------*/
 
 int MLI_Mapper::setParams(char *param_string, int argc, char **argv)

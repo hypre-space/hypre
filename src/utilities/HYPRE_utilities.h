@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -33,45 +28,65 @@
 extern "C" {
 #endif
 
-/*
- * Before a version of HYPRE goes out the door, increment the version
- * number and check in this file (for CVS to substitute the Date).
- */
-#define HYPRE_Version() "HYPRE_RELEASE_NAME Date Compiled: " __DATE__ " " __TIME__
-
 /*--------------------------------------------------------------------------
- * Big int and limits stuff
+ * Big int stuff
  *--------------------------------------------------------------------------*/
-#include <limits.h>
 
-#ifdef HYPRE_BIGINT
+#if defined(HYPRE_BIGINT)
+typedef long long int HYPRE_BigInt;
 typedef long long int HYPRE_Int;
+#define HYPRE_MPI_BIG_INT MPI_LONG_LONG_INT
 #define HYPRE_MPI_INT MPI_LONG_LONG_INT
-#define HYPRE_INT_MAX LLONG_MAX
-#define HYPRE_INT_MIN LLONG_MIN
-#else
+
+#elif defined(HYPRE_MIXEDINT)
+typedef long long int HYPRE_BigInt;
 typedef int HYPRE_Int;
+#define HYPRE_MPI_BIG_INT MPI_LONG_LONG_INT
 #define HYPRE_MPI_INT MPI_INT
-#define HYPRE_INT_MAX INT_MAX
-#define HYPRE_INT_MIN INT_MIN
+
+#else /* default */
+typedef int HYPRE_BigInt;
+typedef int HYPRE_Int;
+#define HYPRE_MPI_BIG_INT MPI_INT
+#define HYPRE_MPI_INT MPI_INT
 #endif
 
 /*--------------------------------------------------------------------------
  * Real and Complex types
  *--------------------------------------------------------------------------*/
+
 #include <float.h>
 
+#if defined(HYPRE_SINGLE)
+typedef float HYPRE_Real;
+#define HYPRE_REAL_MAX FLT_MAX
+#define HYPRE_REAL_MIN FLT_MIN
+#define HYPRE_REAL_EPSILON FLT_EPSILON
+#define HYPRE_REAL_MIN_EXP FLT_MIN_EXP
+#define HYPRE_MPI_REAL MPI_FLOAT
+
+#elif defined(HYPRE_LONG_DOUBLE)
+typedef long double HYPRE_Real;
+#define HYPRE_REAL_MAX LDBL_MAX
+#define HYPRE_REAL_MIN LDBL_MIN
+#define HYPRE_REAL_EPSILON LDBL_EPSILON
+#define HYPRE_REAL_MIN_EXP DBL_MIN_EXP
+#define HYPRE_MPI_REAL MPI_LONG_DOUBLE
+
+#else /* default */
 typedef double HYPRE_Real;
 #define HYPRE_REAL_MAX DBL_MAX
 #define HYPRE_REAL_MIN DBL_MIN
 #define HYPRE_REAL_EPSILON DBL_EPSILON
 #define HYPRE_REAL_MIN_EXP DBL_MIN_EXP
 #define HYPRE_MPI_REAL MPI_DOUBLE
+#endif
 
-#ifdef HYPRE_COMPLEX
+#if defined(HYPRE_COMPLEX)
 typedef double _Complex HYPRE_Complex;
 #define HYPRE_MPI_COMPLEX MPI_C_DOUBLE_COMPLEX  /* or MPI_LONG_DOUBLE ? */
-#else
+
+#else  /* default */
 typedef HYPRE_Real HYPRE_Complex;
 #define HYPRE_MPI_COMPLEX HYPRE_MPI_REAL
 #endif
@@ -93,6 +108,13 @@ typedef HYPRE_Int MPI_Comm;
 #define HYPRE_ERROR_ARG             4   /* argument error */
 /* bits 4-8 are reserved for the index of the argument error */
 #define HYPRE_ERROR_CONV          256   /* method did not converge as expected */
+
+/*--------------------------------------------------------------------------
+ * HYPRE init/finalize
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_Init();
+HYPRE_Int HYPRE_Finalize();
 
 /*--------------------------------------------------------------------------
  * HYPRE error user functions
@@ -118,12 +140,84 @@ HYPRE_Int HYPRE_ClearAllErrors();
 HYPRE_Int HYPRE_ClearError(HYPRE_Int hypre_error_code);
 
 /*--------------------------------------------------------------------------
+ * HYPRE Version routines
+ *--------------------------------------------------------------------------*/
+
+/* RDF: This macro is used by the FEI code.  Want to eventually remove. */
+#define HYPRE_VERSION "HYPRE_RELEASE_NAME Date Compiled: " __DATE__ " " __TIME__
+
+/**
+ * Allocates and returns a string with version number information in it.
+ **/
+HYPRE_Int
+HYPRE_Version( char **version_ptr );
+
+/**
+ * Returns version number information in integer form.  Use 'NULL' for values
+ * not needed.  The argument {\tt single} is a single sortable integer
+ * representation of the release number.
+ **/
+HYPRE_Int
+HYPRE_VersionNumber( HYPRE_Int  *major_ptr,
+                     HYPRE_Int  *minor_ptr,
+                     HYPRE_Int  *patch_ptr,
+                     HYPRE_Int  *single_ptr );
+
+/*--------------------------------------------------------------------------
  * HYPRE AP user functions
  *--------------------------------------------------------------------------*/
 
 /*Checks whether the AP is on */
 HYPRE_Int HYPRE_AssumedPartitionCheck();
 
+/*--------------------------------------------------------------------------
+ * HYPRE memory location
+ *--------------------------------------------------------------------------*/
+
+typedef enum _HYPRE_MemoryLocation
+{
+   HYPRE_MEMORY_UNDEFINED = -1,
+   HYPRE_MEMORY_HOST          ,
+   HYPRE_MEMORY_DEVICE
+} HYPRE_MemoryLocation;
+
+HYPRE_Int HYPRE_SetMemoryLocation(HYPRE_MemoryLocation memory_location);
+HYPRE_Int HYPRE_GetMemoryLocation(HYPRE_MemoryLocation *memory_location);
+
+#include <stdlib.h>
+
+/*--------------------------------------------------------------------------
+ * HYPRE execution policy
+ *--------------------------------------------------------------------------*/
+
+typedef enum _HYPRE_ExecutionPolicy
+{
+   HYPRE_EXEC_UNDEFINED = -1,
+   HYPRE_EXEC_HOST          ,
+   HYPRE_EXEC_DEVICE
+} HYPRE_ExecutionPolicy;
+
+HYPRE_Int HYPRE_SetExecutionPolicy(HYPRE_ExecutionPolicy exec_policy);
+HYPRE_Int HYPRE_GetExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy);
+
+/*--------------------------------------------------------------------------
+ * HYPRE UMPIRE
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_SetUmpireDevicePoolSize(size_t nbytes);
+HYPRE_Int HYPRE_SetUmpireUMPoolSize(size_t nbytes);
+HYPRE_Int HYPRE_SetUmpireHostPoolSize(size_t nbytes);
+HYPRE_Int HYPRE_SetUmpirePinnedPoolSize(size_t nbytes);
+HYPRE_Int HYPRE_SetUmpireDevicePoolName(const char *pool_name);
+HYPRE_Int HYPRE_SetUmpireUMPoolName(const char *pool_name);
+HYPRE_Int HYPRE_SetUmpireHostPoolName(const char *pool_name);
+HYPRE_Int HYPRE_SetUmpirePinnedPoolName(const char *pool_name);
+
+/*--------------------------------------------------------------------------
+ * HYPRE GPU memory pool
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_SetGPUMemoryPoolSize(HYPRE_Int bin_growth, HYPRE_Int min_bin, HYPRE_Int max_bin, size_t max_cached_bytes);
 
 #ifdef __cplusplus
 }

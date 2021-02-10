@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -21,20 +16,20 @@
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-char *
+void *
 hypre_SStructKrylovCAlloc( HYPRE_Int count,
                            HYPRE_Int elt_size )
 {
-   return( hypre_CAlloc( count, elt_size ) );
+   return( (void*) hypre_CTAlloc( char, count * elt_size , HYPRE_MEMORY_HOST) );
 }
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructKrylovFree( char *ptr )
+hypre_SStructKrylovFree( void *ptr )
 {
-   hypre_Free( ptr );
+   hypre_Free( ptr , HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -115,7 +110,7 @@ hypre_SStructKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
 
    object_type= hypre_SStructVectorObjectType(vector);
 
-   new_vector = hypre_CTAlloc(hypre_SStructVector*,n);
+   new_vector = hypre_CTAlloc(hypre_SStructVector*, n, HYPRE_MEMORY_HOST);
    for (i=0; i < n; i++)
    {
       HYPRE_SStructVectorCreate(hypre_SStructVectorComm(vector),

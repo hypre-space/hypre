@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
 #include "sys_pfmg.h"
@@ -21,7 +16,7 @@ hypre_SysPFMGCreate( MPI_Comm  comm )
 {
    hypre_SysPFMGData *sys_pfmg_data;
 
-   sys_pfmg_data = hypre_CTAlloc(hypre_SysPFMGData, 1);
+   sys_pfmg_data = hypre_CTAlloc(hypre_SysPFMGData, 1, HYPRE_MEMORY_HOST);
 
    (sys_pfmg_data -> comm)       = comm;
    (sys_pfmg_data -> time_index) = hypre_InitializeTiming("SYS_PFMG");
@@ -65,8 +60,8 @@ hypre_SysPFMGDestroy( void *sys_pfmg_vdata )
    {
       if ((sys_pfmg_data -> logging) > 0)
       {
-         hypre_TFree(sys_pfmg_data -> norms);
-         hypre_TFree(sys_pfmg_data -> rel_norms);
+         hypre_TFree(sys_pfmg_data -> norms, HYPRE_MEMORY_HOST);
+         hypre_TFree(sys_pfmg_data -> rel_norms, HYPRE_MEMORY_HOST);
       }
 
       if ((sys_pfmg_data -> num_levels) > -1)
@@ -81,10 +76,10 @@ hypre_SysPFMGDestroy( void *sys_pfmg_vdata )
             hypre_SysSemiRestrictDestroy(sys_pfmg_data -> restrict_data_l[l]);
             hypre_SysSemiInterpDestroy(sys_pfmg_data -> interp_data_l[l]);
          }
-         hypre_TFree(sys_pfmg_data -> relax_data_l);
-         hypre_TFree(sys_pfmg_data -> matvec_data_l);
-         hypre_TFree(sys_pfmg_data -> restrict_data_l);
-         hypre_TFree(sys_pfmg_data -> interp_data_l);
+         hypre_TFree(sys_pfmg_data -> relax_data_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(sys_pfmg_data -> matvec_data_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(sys_pfmg_data -> restrict_data_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(sys_pfmg_data -> interp_data_l, HYPRE_MEMORY_HOST);
 
          hypre_SStructPVectorDestroy(sys_pfmg_data -> tx_l[0]);
          /*hypre_SStructPGridDestroy(sys_pfmg_data -> grid_l[0]);*/
@@ -101,21 +96,21 @@ hypre_SysPFMGDestroy( void *sys_pfmg_vdata )
             hypre_SStructPVectorDestroy(sys_pfmg_data -> x_l[l+1]);
             hypre_SStructPVectorDestroy(sys_pfmg_data -> tx_l[l+1]);
          }
-         hypre_SharedTFree(sys_pfmg_data -> data);
-         hypre_TFree(sys_pfmg_data -> cdir_l);
-         hypre_TFree(sys_pfmg_data -> active_l);
-         hypre_TFree(sys_pfmg_data -> grid_l);
-         hypre_TFree(sys_pfmg_data -> P_grid_l);
-         hypre_TFree(sys_pfmg_data -> A_l);
-         hypre_TFree(sys_pfmg_data -> P_l);
-         hypre_TFree(sys_pfmg_data -> RT_l);
-         hypre_TFree(sys_pfmg_data -> b_l);
-         hypre_TFree(sys_pfmg_data -> x_l);
-         hypre_TFree(sys_pfmg_data -> tx_l);
+         hypre_TFree(sys_pfmg_data -> data, HYPRE_MEMORY_HOST);
+         hypre_TFree(sys_pfmg_data -> cdir_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(sys_pfmg_data -> active_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(sys_pfmg_data -> grid_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(sys_pfmg_data -> P_grid_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(sys_pfmg_data -> A_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(sys_pfmg_data -> P_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(sys_pfmg_data -> RT_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(sys_pfmg_data -> b_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(sys_pfmg_data -> x_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(sys_pfmg_data -> tx_l, HYPRE_MEMORY_HOST);
       }
 
       hypre_FinalizeTiming(sys_pfmg_data -> time_index);
-      hypre_TFree(sys_pfmg_data);
+      hypre_TFree(sys_pfmg_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;

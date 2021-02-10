@@ -1,7 +1,12 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-#include "../blas/hypre_blas.h"
-#include "hypre_lapack.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
+#include "hypre_lapack.h"
 
 logical lsame_(const char *ca,const char *cb)
 {
@@ -104,3 +109,6 @@ e
     return ret_val;
 } /* lsame_ */
 
+#ifdef __cplusplus
+}
+#endif

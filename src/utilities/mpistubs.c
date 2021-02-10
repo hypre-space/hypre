@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_utilities.h"
 
@@ -17,7 +12,7 @@
  *
  * The 'comm' argument for MPI_Comm_f2c is MPI_Fint, which is always the size of
  * a Fortran integer and hence usually the size of hypre_int.
- *****************************************************************************/
+ ****************************************************************************/
 
 hypre_MPI_Comm
 hypre_MPI_Comm_f2c( hypre_int comm )
@@ -25,7 +20,7 @@ hypre_MPI_Comm_f2c( hypre_int comm )
 #ifdef HYPRE_HAVE_MPI_COMM_F2C
    return (hypre_MPI_Comm) MPI_Comm_f2c(comm);
 #else
-   return (hypre_MPI_Comm) comm;
+   return (hypre_MPI_Comm) (size_t)comm;
 #endif
 }
 
@@ -216,7 +211,7 @@ hypre_MPI_Allgather( void               *sendbuf,
 
       case hypre_MPI_BYTE:
       {
-         memcpy(recvbuf, sendbuf, sendcount);
+         hypre_Memcpy(recvbuf,  sendbuf,  sendcount, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       }
       break;
 
@@ -528,7 +523,7 @@ hypre_MPI_Allreduce( void              *sendbuf,
 
       case hypre_MPI_BYTE:
       {
-         memcpy(recvbuf, sendbuf, count);
+         hypre_Memcpy(recvbuf,  sendbuf,  count, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       }
       break;
 
@@ -651,15 +646,22 @@ hypre_MPI_Op_free( hypre_MPI_Op *op )
    return(0);
 }
 
-HYPRE_Int
-hypre_MPI_CheckCommMatrix( hypre_MPI_Comm   comm,
-                           HYPRE_Int        num_recvs,
-                           HYPRE_Int       *recvs,
-                           HYPRE_Int        num_sends,
-                           HYPRE_Int       *sends )
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+HYPRE_Int hypre_MPI_Comm_split_type( hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key, hypre_MPI_Info info, hypre_MPI_Comm *newcomm )
 {
-   return(0);
+   return (0);
 }
+
+HYPRE_Int hypre_MPI_Info_create( hypre_MPI_Info *info )
+{
+   return (0);
+}
+
+HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info )
+{
+   return (0);
+}
+#endif
 
 /******************************************************************************
  * MPI stubs to do casting of HYPRE_Int and hypre_int correctly
@@ -774,13 +776,13 @@ hypre_MPI_Group_incl( hypre_MPI_Group  group,
    HYPRE_Int  i;
    HYPRE_Int  ierr;
 
-   mpi_ranks = hypre_TAlloc(hypre_int, n);
+   mpi_ranks = hypre_TAlloc(hypre_int,  n, HYPRE_MEMORY_HOST);
    for (i = 0; i < n; i++)
    {
       mpi_ranks[i] = (hypre_int) ranks[i];
    }
    ierr = (HYPRE_Int) MPI_Group_incl(group, (hypre_int)n, mpi_ranks, newgroup);
-   hypre_TFree(mpi_ranks);
+   hypre_TFree(mpi_ranks, HYPRE_MEMORY_HOST);
 
    return ierr;
 }
@@ -855,8 +857,8 @@ hypre_MPI_Allgatherv( void               *sendbuf,
    HYPRE_Int  ierr;
 
    MPI_Comm_size(comm, &csize);
-   mpi_recvcounts = hypre_TAlloc(hypre_int, csize);
-   mpi_displs = hypre_TAlloc(hypre_int, csize);
+   mpi_recvcounts = hypre_TAlloc(hypre_int, csize, HYPRE_MEMORY_HOST);
+   mpi_displs = hypre_TAlloc(hypre_int, csize, HYPRE_MEMORY_HOST);
    for (i = 0; i < csize; i++)
    {
       mpi_recvcounts[i] = (hypre_int) recvcounts[i];
@@ -865,8 +867,8 @@ hypre_MPI_Allgatherv( void               *sendbuf,
    ierr = (HYPRE_Int) MPI_Allgatherv(sendbuf, (hypre_int)sendcount, sendtype,
                                      recvbuf, mpi_recvcounts, mpi_displs,
                                      recvtype, comm);
-   hypre_TFree(mpi_recvcounts);
-   hypre_TFree(mpi_displs);
+   hypre_TFree(mpi_recvcounts, HYPRE_MEMORY_HOST);
+   hypre_TFree(mpi_displs, HYPRE_MEMORY_HOST);
 
    return ierr;
 }
@@ -907,8 +909,8 @@ hypre_MPI_Gatherv(void               *sendbuf,
    MPI_Comm_rank(comm, &croot);
    if (croot == (hypre_int) root)
    {
-      mpi_recvcounts = hypre_TAlloc(hypre_int, csize);
-      mpi_displs = hypre_TAlloc(hypre_int, csize);
+      mpi_recvcounts = hypre_TAlloc(hypre_int,  csize, HYPRE_MEMORY_HOST);
+      mpi_displs = hypre_TAlloc(hypre_int,  csize, HYPRE_MEMORY_HOST);
       for (i = 0; i < csize; i++)
       {
          mpi_recvcounts[i] = (hypre_int) recvcounts[i];
@@ -918,8 +920,8 @@ hypre_MPI_Gatherv(void               *sendbuf,
    ierr = (HYPRE_Int) MPI_Gatherv(sendbuf, (hypre_int)sendcount, sendtype,
                                      recvbuf, mpi_recvcounts, mpi_displs,
                                      recvtype, (hypre_int) root, comm);
-   hypre_TFree(mpi_recvcounts);
-   hypre_TFree(mpi_displs);
+   hypre_TFree(mpi_recvcounts, HYPRE_MEMORY_HOST);
+   hypre_TFree(mpi_displs, HYPRE_MEMORY_HOST);
 
    return ierr;
 }
@@ -960,8 +962,8 @@ hypre_MPI_Scatterv(void               *sendbuf,
    MPI_Comm_rank(comm, &croot);
    if (croot == (hypre_int) root)
    {
-      mpi_sendcounts = hypre_TAlloc(hypre_int, csize);
-      mpi_displs = hypre_TAlloc(hypre_int, csize);
+      mpi_sendcounts = hypre_TAlloc(hypre_int,  csize, HYPRE_MEMORY_HOST);
+      mpi_displs = hypre_TAlloc(hypre_int,  csize, HYPRE_MEMORY_HOST);
       for (i = 0; i < csize; i++)
       {
          mpi_sendcounts[i] = (hypre_int) sendcounts[i];
@@ -971,8 +973,8 @@ hypre_MPI_Scatterv(void               *sendbuf,
    ierr = (HYPRE_Int) MPI_Scatterv(sendbuf, mpi_sendcounts, mpi_displs, sendtype,
                                      recvbuf, (hypre_int) recvcount,
                                      recvtype, (hypre_int) root, comm);
-   hypre_TFree(mpi_sendcounts);
-   hypre_TFree(mpi_displs);
+   hypre_TFree(mpi_sendcounts, HYPRE_MEMORY_HOST);
+   hypre_TFree(mpi_displs, HYPRE_MEMORY_HOST);
 
    return ierr;
 }
@@ -1256,7 +1258,7 @@ hypre_MPI_Type_struct( HYPRE_Int           count,
    HYPRE_Int  i;
    HYPRE_Int  ierr;
 
-   mpi_array_of_blocklengths = hypre_TAlloc(hypre_int, count);
+   mpi_array_of_blocklengths = hypre_TAlloc(hypre_int,  count, HYPRE_MEMORY_HOST);
    for (i = 0; i < count; i++)
    {
       mpi_array_of_blocklengths[i] = (hypre_int) array_of_blocklengths[i];
@@ -1272,7 +1274,7 @@ hypre_MPI_Type_struct( HYPRE_Int           count,
                                          newtype);
 #endif
 
-   hypre_TFree(mpi_array_of_blocklengths);
+   hypre_TFree(mpi_array_of_blocklengths, HYPRE_MEMORY_HOST);
 
    return ierr;
 }
@@ -1301,118 +1303,24 @@ hypre_MPI_Op_create( hypre_MPI_User_function *function, hypre_int commute, hypre
    return (HYPRE_Int) MPI_Op_create(function, commute, op);
 }
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int
-hypre_MPI_CheckCommMatrix( hypre_MPI_Comm   comm,
-                           HYPRE_Int        num_recvs,
-                           HYPRE_Int       *recvs,
-                           HYPRE_Int        num_sends,
-                           HYPRE_Int       *sends )
+hypre_MPI_Comm_split_type( hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key, hypre_MPI_Info info, hypre_MPI_Comm *newcomm )
 {
-   HYPRE_Int    nprocs, myid;
-
-   HYPRE_Int   *displs         = NULL;
-   HYPRE_Int   *num_recvs_proc = NULL;
-   HYPRE_Int   *num_sends_proc = NULL;
-   HYPRE_Int   *global_recvs   = NULL;
-   HYPRE_Int   *global_sends   = NULL;
-
-   HYPRE_Int    global_num_recvs;
-   HYPRE_Int    global_num_sends;
-   HYPRE_Int    from_proc, to_proc;
-   HYPRE_Int    i, entry, proc, cnt;
-
-   hypre_MPI_Comm_rank(comm, &myid);
-   hypre_MPI_Comm_size(comm, &nprocs);
-
-   if (myid == 0)
-   {
-      num_recvs_proc = hypre_CTAlloc(HYPRE_Int, nprocs);
-      num_sends_proc = hypre_CTAlloc(HYPRE_Int, nprocs);
-      displs = hypre_CTAlloc(HYPRE_Int, nprocs + 1);
-   }
-
-   /* Gather receives */
-   hypre_MPI_Gather(&num_recvs, 1, HYPRE_MPI_INT,
-                    num_recvs_proc, 1, HYPRE_MPI_INT,
-                    0, comm);
-   if (myid == 0)
-   {
-      global_num_recvs = displs[0] = 0;
-      for (proc = 0; proc < nprocs; proc++)
-      {
-         global_num_recvs += num_recvs_proc[proc];
-         displs[proc + 1] = displs[proc] + num_recvs_proc[proc];
-      }
-      global_recvs = hypre_CTAlloc(HYPRE_Int, global_num_recvs);
-   }
-   hypre_MPI_Gatherv(recvs, num_recvs, HYPRE_MPI_INT,
-                     global_recvs, num_recvs_proc, displs, HYPRE_MPI_INT,
-                     0, comm);
-
-   /* Gather sends */
-   hypre_MPI_Gather(&num_sends, 1, HYPRE_MPI_INT,
-                    num_sends_proc, 1, HYPRE_MPI_INT,
-                    0, comm);
-   if (myid == 0)
-   {
-      global_num_sends = displs[0] = 0;
-      for (proc = 0; proc < nprocs; proc++)
-      {
-         global_num_sends += num_sends_proc[proc];
-         displs[proc + 1] = displs[proc] + num_sends_proc[proc];
-      }
-      global_sends = hypre_CTAlloc(HYPRE_Int, global_num_sends);
-   }
-   hypre_MPI_Gatherv(sends, num_sends, HYPRE_MPI_INT,
-                     global_sends, num_sends_proc, displs, HYPRE_MPI_INT,
-                     0, comm);
-
-   /* Check for matching send/recv. */
-   if (myid == 0)
-   {
-      cnt = 0;
-      for (from_proc = 0; from_proc < nprocs; from_proc++)
-      {
-         for (i = 0; i < num_sends_proc[from_proc]; i++)
-         {
-            to_proc = global_sends[cnt++];
-            entry = hypre_BinarySearch(&global_recvs[to_proc], from_proc,
-                                       num_recvs_proc[to_proc]);
-            if (entry == -1)
-            {
-               hypre_printf("Proc %d posts a send to proc %d without a matching recv!\n",
-                            from_proc, to_proc);
-            }
-         }
-      }
-
-      cnt = 0;
-      for (from_proc = 0; from_proc < nprocs; from_proc++)
-      {
-         for (i = 0; i < num_recvs_proc[from_proc]; i++)
-         {
-            to_proc = global_recvs[cnt++];
-            entry = hypre_BinarySearch(&global_sends[to_proc], from_proc,
-                                       num_sends_proc[to_proc]);
-            if (entry == -1)
-            {
-               hypre_printf("Proc %d posts a recv to proc %d without a matching send!\n",
-                            from_proc, to_proc);
-            }
-         }
-      }
-   }
-
-   if (myid == 0)
-   {
-      hypre_TFree(displs);
-      hypre_TFree(num_recvs_proc);
-      hypre_TFree(num_sends_proc);
-      hypre_TFree(global_recvs);
-      hypre_TFree(global_sends);
-   }
-
-   return hypre_error_flag;
+   return (HYPRE_Int) MPI_Comm_split_type(comm, split_type, key, info, newcomm );
 }
+
+HYPRE_Int
+hypre_MPI_Info_create( hypre_MPI_Info *info )
+{
+   return (HYPRE_Int) MPI_Info_create(info);
+}
+
+HYPRE_Int
+hypre_MPI_Info_free( hypre_MPI_Info *info )
+{
+   return (HYPRE_Int) MPI_Info_free(info);
+}
+#endif
 
 #endif

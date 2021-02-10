@@ -1,3 +1,9 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* ddot.f -- translated by f2c (version 19960315).
    You must link the resulting object file with the libraries:
@@ -91,3 +97,6 @@ L60:
     return ret_val;
 } /* ddot_ */
 
+#ifdef __cplusplus
+}
+#endif

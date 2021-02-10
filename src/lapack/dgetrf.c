@@ -1,8 +1,14 @@
-#include "../blas/hypre_blas.h"
-#include "hypre_lapack.h"
-#include "f2c.h"
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-/* Subroutine */ HYPRE_Int dgetrf_(integer *m, integer *n, doublereal *a, integer *
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "f2c.h"
+#include "hypre_lapack.h"
+
+/* Subroutine */ integer dgetrf_(integer *m, integer *n, doublereal *a, integer *
 	lda, integer *ipiv, integer *info)
 {
 /*  -- LAPACK routine (version 3.0) --   
@@ -70,20 +76,20 @@
     integer a_dim1, a_offset, i__1, i__2, i__3, i__4, i__5;
     /* Local variables */
     static integer i__, j;
-    extern /* Subroutine */ HYPRE_Int dgemm_(const char *,const char *, integer *, integer *, 
+    extern /* Subroutine */ integer dgemm_(const char *,const char *, integer *, integer *, 
 	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, integer *);
     static integer iinfo;
-    extern /* Subroutine */ HYPRE_Int dtrsm_(const char *,const char *,const char *,const char *, 
+    extern /* Subroutine */ integer dtrsm_(const char *,const char *,const char *,const char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *), dgetf2_(
 	    integer *, integer *, doublereal *, integer *, integer *, integer 
 	    *);
     static integer jb, nb;
-    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
     extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ HYPRE_Int dlaswp_(integer *, doublereal *, integer *, 
+    extern /* Subroutine */ integer dlaswp_(integer *, doublereal *, integer *, 
 	    integer *, integer *, integer *, integer *);
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 
@@ -195,4 +201,6 @@
 
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- *********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /**************************************************************************
   Module:  FEI_HYPRE_Impl.cpp
@@ -18,20 +13,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <math.h>
 
-#if HAVE_SUPERLU_20
-#include "dsp_defs.h"
-#include "superlu_util.h"
-#endif
-#if HAVE_SUPERLU
-#include "slu_ddefs.h"
-#include "slu_util.h"
-#endif
-
 /*-------------------------------------------------------------------------
- MPI definitions 
+ MPI definitions
  -------------------------------------------------------------------------*/
 
 #include "FEI_HYPRE_include.h"
@@ -44,6 +29,15 @@
 
 #include "FEI_HYPRE_Impl.h"
 
+#ifdef HAVE_SUPERLU_20
+#include "dsp_defs.h"
+#include "superlu_util.h"
+#endif
+#ifdef HAVE_SUPERLU
+#include "slu_ddefs.h"
+#include "slu_util.h"
+#endif
+
 extern "C"
 {
   int HYPRE_LSI_Search(int *, int, int);
@@ -53,13 +47,13 @@ extern "C"
 
 /**************************************************************************
  **************************************************************************
- Each element block contains a number of elements of the same type (e.g. 
+ Each element block contains a number of elements of the same type (e.g.
  hex or tet element).  For this implementation, all element block should
- have the same number of degree of freedom per node. 
+ have the same number of degree of freedom per node.
  **************************************************************************/
 
 /**************************************************************************
- Constructor 
+ Constructor
  -------------------------------------------------------------------------*/
 FEI_HYPRE_Elem_Block::FEI_HYPRE_Elem_Block( int blockID )
 {
@@ -80,7 +74,7 @@ FEI_HYPRE_Elem_Block::FEI_HYPRE_Elem_Block( int blockID )
 }
 
 /**************************************************************************
- destructor 
+ destructor
  -------------------------------------------------------------------------*/
 FEI_HYPRE_Elem_Block::~FEI_HYPRE_Elem_Block()
 {
@@ -89,29 +83,29 @@ FEI_HYPRE_Elem_Block::~FEI_HYPRE_Elem_Block()
    if ( elemIDs_ != NULL ) delete [] elemIDs_;
    if ( elemNodeLists_ != NULL )
    {
-      for ( iE = 0; iE < numElems_; iE++ ) 
-         if ( elemNodeLists_[iE] != NULL ) 
+      for ( iE = 0; iE < numElems_; iE++ )
+         if ( elemNodeLists_[iE] != NULL )
             delete [] elemNodeLists_[iE];
       delete [] elemNodeLists_;
    }
    if ( elemMatrices_ != NULL )
    {
-      for ( iE = 0; iE < numElems_; iE++ ) 
-         if ( elemMatrices_[iE] != NULL ) 
+      for ( iE = 0; iE < numElems_; iE++ )
+         if ( elemMatrices_[iE] != NULL )
             delete [] elemMatrices_[iE];
       delete [] elemMatrices_;
    }
    if ( rhsVectors_ != NULL )
    {
-      for ( iE = 0; iE < numElems_; iE++ ) 
-         if ( rhsVectors_[iE] != NULL ) 
+      for ( iE = 0; iE < numElems_; iE++ )
+         if ( rhsVectors_[iE] != NULL )
             delete [] rhsVectors_[iE];
       delete [] rhsVectors_;
    }
    if ( solnVectors_ != NULL )
    {
-      for ( iE = 0; iE < numElems_; iE++ ) 
-         if ( solnVectors_[iE] != NULL ) 
+      for ( iE = 0; iE < numElems_; iE++ )
+         if ( solnVectors_[iE] != NULL )
             delete [] solnVectors_[iE];
       delete [] solnVectors_;
    }
@@ -122,7 +116,7 @@ FEI_HYPRE_Elem_Block::~FEI_HYPRE_Elem_Block()
 }
 
 /**************************************************************************
- initialization 
+ initialization
  -------------------------------------------------------------------------*/
 int FEI_HYPRE_Elem_Block::initialize(int numElements, int numNodesPerElement,
                                    int dofPerNode)
@@ -132,29 +126,29 @@ int FEI_HYPRE_Elem_Block::initialize(int numElements, int numNodesPerElement,
    if ( elemIDs_ != NULL ) delete [] elemIDs_;
    if ( elemNodeLists_ != NULL )
    {
-      for ( iE = 0; iE < numElems_; iE++ ) 
-         if ( elemNodeLists_[iE] != NULL ) 
+      for ( iE = 0; iE < numElems_; iE++ )
+         if ( elemNodeLists_[iE] != NULL )
             delete [] elemNodeLists_[iE];
       delete [] elemNodeLists_;
    }
    if ( elemMatrices_ != NULL )
    {
-      for ( iE = 0; iE < numElems_; iE++ ) 
-         if ( elemMatrices_[iE] != NULL ) 
+      for ( iE = 0; iE < numElems_; iE++ )
+         if ( elemMatrices_[iE] != NULL )
             delete [] elemMatrices_[iE];
       delete [] elemMatrices_;
    }
    if ( rhsVectors_ != NULL )
    {
-      for ( iE = 0; iE < numElems_; iE++ ) 
-         if ( rhsVectors_[iE] != NULL ) 
+      for ( iE = 0; iE < numElems_; iE++ )
+         if ( rhsVectors_[iE] != NULL )
             delete [] rhsVectors_[iE];
       delete [] rhsVectors_;
    }
    if ( solnVectors_ != NULL )
    {
-      for ( iE = 0; iE < numElems_; iE++ ) 
-         if ( solnVectors_[iE] != NULL ) 
+      for ( iE = 0; iE < numElems_; iE++ )
+         if ( solnVectors_[iE] != NULL )
             delete [] solnVectors_[iE];
       delete [] solnVectors_;
    }
@@ -175,33 +169,33 @@ int FEI_HYPRE_Elem_Block::initialize(int numElements, int numNodesPerElement,
 }
 
 /**************************************************************************
- reset the system for reloading (no reinitialization needed) 
+ reset the system for reloading (no reinitialization needed)
  -------------------------------------------------------------------------*/
 int FEI_HYPRE_Elem_Block::reset()
 {
    if ( elemNodeLists_ != NULL )
    {
-      for ( int iE = 0; iE < numElems_; iE++ ) 
+      for ( int iE = 0; iE < numElems_; iE++ )
       {
-         if ( elemNodeLists_[iE] != NULL ) 
+         if ( elemNodeLists_[iE] != NULL )
             delete [] elemNodeLists_[iE];
          elemNodeLists_[iE] = NULL;
       }
    }
    if ( elemMatrices_ != NULL )
    {
-      for ( int iE = 0; iE < numElems_; iE++ ) 
+      for ( int iE = 0; iE < numElems_; iE++ )
       {
-         if ( elemMatrices_[iE] != NULL ) 
+         if ( elemMatrices_[iE] != NULL )
             delete [] elemMatrices_[iE];
          elemMatrices_[iE] = NULL;
       }
    }
    if ( rhsVectors_ != NULL )
    {
-      for ( int iE = 0; iE < numElems_; iE++ ) 
+      for ( int iE = 0; iE < numElems_; iE++ )
       {
-         if ( rhsVectors_[iE] != NULL ) 
+         if ( rhsVectors_[iE] != NULL )
             delete [] rhsVectors_[iE];
          rhsVectors_[iE] = NULL;
       }
@@ -219,8 +213,8 @@ int FEI_HYPRE_Elem_Block::resetRHSVectors(double s)
 
    if ( rhsVectors_ != NULL )
    {
-      for ( iE = 0; iE < numElems_; iE++ ) 
-         for ( iD = 0; iD < matDim; iD++ ) rhsVectors_[iE][iD] = s; 
+      for ( iE = 0; iE < numElems_; iE++ )
+         for ( iD = 0; iD < matDim; iD++ ) rhsVectors_[iE][iD] = s;
    }
    currElem_ = 0;
    return 0;
@@ -235,17 +229,17 @@ int FEI_HYPRE_Elem_Block::resetSolnVectors(double s)
 
    if ( solnVectors_ != NULL )
    {
-      for ( iE = 0; iE < numElems_; iE++ ) 
-         for ( iD = 0; iD < matDim; iD++ ) solnVectors_[iE][iD] = s; 
+      for ( iE = 0; iE < numElems_; iE++ )
+         for ( iD = 0; iD < matDim; iD++ ) solnVectors_[iE][iD] = s;
    }
    currElem_ = 0;
    return 0;
 }
 
 /**************************************************************************
- load individual element information 
+ load individual element information
  -------------------------------------------------------------------------*/
-int FEI_HYPRE_Elem_Block::loadElemInfo(int elemID, int *elemConn, 
+int FEI_HYPRE_Elem_Block::loadElemInfo(int elemID, int *elemConn,
                                      double **elemStiff, double *elemLoad)
 {
    if ( currElem_ >= numElems_ )
@@ -254,7 +248,7 @@ int FEI_HYPRE_Elem_Block::loadElemInfo(int elemID, int *elemConn,
       exit(1);
    }
 #if 0
-   printf("Loading element %d : ", elemID); 
+   printf("Loading element %d : ", elemID);
    for ( int iN2 = 0; iN2 < nodesPerElem_; iN2++ )
       printf("%d ", elemConn[iN2]);
    printf("\n");
@@ -281,9 +275,9 @@ int FEI_HYPRE_Elem_Block::loadElemInfo(int elemID, int *elemConn,
 }
 
 /**************************************************************************
- load individual element matrix only 
+ load individual element matrix only
  -------------------------------------------------------------------------*/
-int FEI_HYPRE_Elem_Block::loadElemMatrix(int elemID, int *elemConn, 
+int FEI_HYPRE_Elem_Block::loadElemMatrix(int elemID, int *elemConn,
                                        double **elemStiff)
 {
    if ( currElem_ >= numElems_ )
@@ -292,7 +286,7 @@ int FEI_HYPRE_Elem_Block::loadElemMatrix(int elemID, int *elemConn,
       exit(1);
    }
 #if 0
-   printf("Loading element %d : ", elemID); 
+   printf("Loading element %d : ", elemID);
    for ( int iN = 0; iN < nodesPerElem_; iN++ )
       printf("%d ", elemConn[iN]);
    printf("\n");
@@ -316,7 +310,7 @@ int FEI_HYPRE_Elem_Block::loadElemMatrix(int elemID, int *elemConn,
 }
 
 /**************************************************************************
- load individual load information 
+ load individual load information
  -------------------------------------------------------------------------*/
 int FEI_HYPRE_Elem_Block::loadElemRHS(int elemID, double *elemLoad)
 {
@@ -335,7 +329,7 @@ int FEI_HYPRE_Elem_Block::loadElemRHS(int elemID, double *elemLoad)
       }
       currElem_ = HYPRE_LSI_Search(sortedIDs_, elemID, numElems_);
    }
-   if ( rhsVectors_ == NULL ) 
+   if ( rhsVectors_ == NULL )
    {
       rhsVectors_ = new double*[numElems_];
       for ( iE = 0; iE < numElems_; iE++ ) rhsVectors_[iE] = NULL;
@@ -365,12 +359,12 @@ int FEI_HYPRE_Elem_Block::checkLoadComplete()
 }
 
 /**************************************************************************
- FEI_HYPRE_Impl is the core linear system interface.  Each 
+ FEI_HYPRE_Impl is the core linear system interface.  Each
  instantiation supports multiple elememt blocks.
  **************************************************************************/
 
 /**************************************************************************
- Constructor 
+ Constructor
  -------------------------------------------------------------------------*/
 FEI_HYPRE_Impl::FEI_HYPRE_Impl( MPI_Comm comm )
 {
@@ -459,7 +453,7 @@ FEI_HYPRE_Impl::FEI_HYPRE_Impl( MPI_Comm comm )
 }
 
 /**************************************************************************
- destructor 
+ destructor
  -------------------------------------------------------------------------*/
 FEI_HYPRE_Impl::~FEI_HYPRE_Impl()
 {
@@ -471,14 +465,14 @@ FEI_HYPRE_Impl::~FEI_HYPRE_Impl()
    if ( globalNodeOffsets_   != NULL ) delete [] globalNodeOffsets_;
    if ( recvLengs_           != NULL ) delete [] recvLengs_;
    if ( recvProcs_           != NULL ) delete [] recvProcs_;
-   if ( recvProcIndices_     != NULL ) 
+   if ( recvProcIndices_     != NULL )
    {
       for (int iP = 0; iP < nRecvs_; iP++) delete [] recvProcIndices_[iP];
       delete [] recvProcIndices_;
    }
    if ( sendLengs_           != NULL ) delete [] sendLengs_;
    if ( sendProcs_           != NULL ) delete [] sendProcs_;
-   if ( sendProcIndices_     != NULL ) 
+   if ( sendProcIndices_     != NULL )
    {
       for (int iP = 0; iP < nSends_; iP++) delete [] sendProcIndices_[iP];
       delete [] sendProcIndices_;
@@ -493,17 +487,17 @@ FEI_HYPRE_Impl::~FEI_HYPRE_Impl()
    if ( solnVector_          != NULL ) delete [] solnVector_;
    if ( rhsVector_           != NULL ) delete [] rhsVector_;
    if ( BCNodeIDs_           != NULL ) delete [] BCNodeIDs_;
-   if ( BCNodeAlpha_ != NULL ) 
+   if ( BCNodeAlpha_ != NULL )
    {
       for ( int iD = 0; iD < numBCNodes_; iD++ ) delete [] BCNodeAlpha_[iD];
       delete [] BCNodeAlpha_;
    }
-   if ( BCNodeBeta_ != NULL ) 
+   if ( BCNodeBeta_ != NULL )
    {
       for ( int iD = 0; iD < numBCNodes_; iD++ ) delete [] BCNodeBeta_[iD];
       delete [] BCNodeBeta_;
    }
-   if ( BCNodeGamma_ != NULL ) 
+   if ( BCNodeGamma_ != NULL )
    {
       for ( int iD = 0; iD < numBCNodes_; iD++ ) delete [] BCNodeGamma_[iD];
       delete [] BCNodeGamma_;
@@ -517,7 +511,7 @@ int FEI_HYPRE_Impl::parameters(int numParams, char **paramString)
 {
    int  i, olevel;
    char param[256], param1[256];
-#if HAVE_SUPERLU
+#ifdef HAVE_SUPERLU
    int  nprocs;
 #endif
 
@@ -566,8 +560,8 @@ int FEI_HYPRE_Impl::parameters(int numParams, char **paramString)
          else if ( ! strcmp(param, "gmres") )   solverID_ = 1;
          else if ( ! strcmp(param, "cgs") )     solverID_ = 2;
          else if ( ! strcmp(param, "bicgstab")) solverID_ = 3;
-#if HAVE_SUPERLU
-         else if ( ! strcmp(param, "superlu") ) 
+#ifdef HAVE_SUPERLU
+         else if ( ! strcmp(param, "superlu") )
          {
             MPI_Comm_size( mpiComm_, &nprocs );
             if ( nprocs == 1 ) solverID_ = 4;
@@ -592,7 +586,7 @@ int FEI_HYPRE_Impl::parameters(int numParams, char **paramString)
 }
 
 /**************************************************************************
- initialize nodal degree of freedom 
+ initialize nodal degree of freedom
  -------------------------------------------------------------------------*/
 int FEI_HYPRE_Impl::initFields(int numFields, int *fieldSizes, int *fieldIDs)
 {
@@ -601,7 +595,7 @@ int FEI_HYPRE_Impl::initFields(int numFields, int *fieldSizes, int *fieldIDs)
    {
       printf("%4d : FEI_HYPRE_Impl::initFields WARNING -  numFields != 1.",
              mypid_);
-      printf(" Take field 0.\n"); 
+      printf(" Take field 0.\n");
       nodeDOF_ = fieldSizes[0];
       return -1;
    }
@@ -612,17 +606,17 @@ int FEI_HYPRE_Impl::initFields(int numFields, int *fieldSizes, int *fieldIDs)
 /**************************************************************************
  set element and node information
  -------------------------------------------------------------------------*/
-int FEI_HYPRE_Impl::initElemBlock(int elemBlockID, int numElements, 
-                      int numNodesPerElement, int *numFieldsPerNode, 
-                      int **nodalFieldIDs, int numElemDOFFieldsPerElement, 
+int FEI_HYPRE_Impl::initElemBlock(int elemBlockID, int numElements,
+                      int numNodesPerElement, int *numFieldsPerNode,
+                      int **nodalFieldIDs, int numElemDOFFieldsPerElement,
                       int *elemDOFFieldIDs, int interleaveStrategy)
 {
    (void) numFieldsPerNode;
    (void) nodalFieldIDs;
-   (void) numElemDOFFieldsPerElement; 
+   (void) numElemDOFFieldsPerElement;
    (void) elemDOFFieldIDs;
    (void) interleaveStrategy;
-   if ( outputLevel_ >= 2 ) 
+   if ( outputLevel_ >= 2 )
    {
       printf("%4d : FEI_HYPRE_Impl::initElemBlock begins... \n", mypid_);
       printf("               elemBlockID  = %d \n", elemBlockID);
@@ -636,7 +630,7 @@ int FEI_HYPRE_Impl::initElemBlock(int elemBlockID, int numElements,
          printf("\n");
       }
       for ( int iE = 0; iE < numElemDOFFieldsPerElement; iE++ )
-         printf("               Element field IDs %d = %d\n", iE, 
+         printf("               Element field IDs %d = %d\n", iE,
                 elemDOFFieldIDs[iE]);
    }
    if ( numBlocks_ == 0 )
@@ -655,7 +649,7 @@ int FEI_HYPRE_Impl::initElemBlock(int elemBlockID, int numElements,
             printf("repeated blockID\n");
             exit(1);
          }
-      } 
+      }
       FEI_HYPRE_Elem_Block **tempBlocks = elemBlocks_;
       numBlocks_++;
       elemBlocks_ = new FEI_HYPRE_Elem_Block*[numBlocks_];
@@ -664,9 +658,9 @@ int FEI_HYPRE_Impl::initElemBlock(int elemBlockID, int numElements,
       elemBlocks_[numBlocks_-1] = new FEI_HYPRE_Elem_Block(elemBlockID);
    }
    elemBlocks_[numBlocks_-1]->initialize(numElements, numNodesPerElement,
-                                         nodeDOF_); 
+                                         nodeDOF_);
    FLAG_LoadComplete_= 0;
-   if ( outputLevel_ >= 2 ) 
+   if ( outputLevel_ >= 2 )
       printf("%4d : FEI_HYPRE_Impl::initElemBlock ends.\n", mypid_);
    return 0;
 }
@@ -680,7 +674,7 @@ int FEI_HYPRE_Impl::initSharedNodes(int nShared, int *sharedIDs,
    int iN, iP, newNumShared, *oldSharedIDs, *oldSharedNProcs;
    int **oldSharedProcs;
 
-   if ( outputLevel_ >= 2 ) 
+   if ( outputLevel_ >= 2 )
       printf("%4d : FEI_HYPRE_Impl::initSharedNodes begins... \n", mypid_);
    TimerLoadStart_ = MPI_Wtime();
    if ( numSharedNodes_ > 0 )
@@ -688,24 +682,24 @@ int FEI_HYPRE_Impl::initSharedNodes(int nShared, int *sharedIDs,
       newNumShared = numSharedNodes_ + nShared;
       oldSharedIDs = sharedNodeIDs_;
       sharedNodeIDs_ = new int[newNumShared];
-      for ( iN = 0; iN < numSharedNodes_; iN++ ) 
+      for ( iN = 0; iN < numSharedNodes_; iN++ )
          sharedNodeIDs_[iN] = oldSharedIDs[iN];
-      for ( iN = 0; iN < nShared; iN++ ) 
+      for ( iN = 0; iN < nShared; iN++ )
          sharedNodeIDs_[iN+numSharedNodes_] = sharedIDs[iN];
       oldSharedNProcs = sharedNodeNProcs_;
       sharedNodeNProcs_ = new int[newNumShared];
-      for ( iN = 0; iN < numSharedNodes_; iN++ ) 
+      for ( iN = 0; iN < numSharedNodes_; iN++ )
          sharedNodeNProcs_[iN] = oldSharedNProcs[iN];
-      for ( iN = 0; iN < nShared; iN++ ) 
+      for ( iN = 0; iN < nShared; iN++ )
          sharedNodeNProcs_[iN+numSharedNodes_] = sharedNProcs[iN];
       oldSharedProcs = sharedNodeProcs_;
       sharedNodeProcs_ = new int*[newNumShared];
-      for ( iN = 0; iN < numSharedNodes_; iN++ ) 
+      for ( iN = 0; iN < numSharedNodes_; iN++ )
          sharedNodeProcs_[iN] = oldSharedProcs[iN];
-      for ( iN = 0; iN < nShared; iN++ ) 
+      for ( iN = 0; iN < nShared; iN++ )
       {
          sharedNodeProcs_[iN+numSharedNodes_] = new int[sharedNProcs[iN]];
-         for ( iP = 0; iP < sharedNProcs[iN]; iP++ ) 
+         for ( iP = 0; iP < sharedNProcs[iN]; iP++ )
             sharedNodeProcs_[iN+numSharedNodes_][iP] = sharedProcs[iN][iP];
       }
       numSharedNodes_ = newNumShared;
@@ -717,21 +711,21 @@ int FEI_HYPRE_Impl::initSharedNodes(int nShared, int *sharedIDs,
    {
       numSharedNodes_ = nShared;
       sharedNodeIDs_ = new int[nShared];
-      for ( iN = 0; iN < nShared; iN++ ) 
+      for ( iN = 0; iN < nShared; iN++ )
          sharedNodeIDs_[iN] = sharedIDs[iN];
       sharedNodeNProcs_ = new int[nShared];
-      for ( iN = 0; iN < nShared; iN++ ) 
+      for ( iN = 0; iN < nShared; iN++ )
          sharedNodeNProcs_[iN] = sharedNProcs[iN];
       sharedNodeProcs_ = new int*[nShared];
-      for ( iN = 0; iN < nShared; iN++ ) 
+      for ( iN = 0; iN < nShared; iN++ )
       {
          sharedNodeProcs_[iN] = new int[sharedNProcs[iN]];
-         for ( iP = 0; iP < sharedNProcs[iN]; iP++ ) 
+         for ( iP = 0; iP < sharedNProcs[iN]; iP++ )
             sharedNodeProcs_[iN][iP] = sharedProcs[iN][iP];
       }
    }
    TimerLoad_ += MPI_Wtime() - TimerLoadStart_;
-   if ( outputLevel_ >= 2 ) 
+   if ( outputLevel_ >= 2 )
       printf("%4d : FEI_HYPRE_Impl::initSharedNodes ends. \n", mypid_);
    return 0;
 }
@@ -752,14 +746,14 @@ int FEI_HYPRE_Impl::resetSystem(double s)
    if ( globalNodeOffsets_   != NULL ) delete [] globalNodeOffsets_;
    if ( recvLengs_           != NULL ) delete [] recvLengs_;
    if ( recvProcs_           != NULL ) delete [] recvProcs_;
-   if ( recvProcIndices_     != NULL ) 
+   if ( recvProcIndices_     != NULL )
    {
       for (int iP = 0; iP < nRecvs_; iP++) delete [] recvProcIndices_[iP];
       delete [] recvProcIndices_;
    }
    if ( sendLengs_           != NULL ) delete [] sendLengs_;
    if ( sendProcs_           != NULL ) delete [] sendProcs_;
-   if ( sendProcIndices_     != NULL ) 
+   if ( sendProcIndices_     != NULL )
    {
       for (int iP = 0; iP < nSends_; iP++) delete [] sendProcIndices_[iP];
       delete [] sendProcIndices_;
@@ -771,23 +765,23 @@ int FEI_HYPRE_Impl::resetSystem(double s)
    if ( offdJA_              != NULL ) delete [] offdJA_;
    if ( offdAA_              != NULL ) delete [] offdAA_;
    if ( diagonal_            != NULL ) delete [] diagonal_;
-   if ( BCNodeAlpha_ != NULL ) 
+   if ( BCNodeAlpha_ != NULL )
    {
       for ( int iD = 0; iD < numBCNodes_; iD++ ) delete [] BCNodeAlpha_[iD];
       delete [] BCNodeAlpha_;
    }
-   if ( BCNodeBeta_ != NULL ) 
+   if ( BCNodeBeta_ != NULL )
    {
       for ( int iD = 0; iD < numBCNodes_; iD++ ) delete [] BCNodeBeta_[iD];
       delete [] BCNodeBeta_;
    }
-   if ( BCNodeGamma_ != NULL ) 
+   if ( BCNodeGamma_ != NULL )
    {
       for ( int iD = 0; iD < numBCNodes_; iD++ ) delete [] BCNodeGamma_[iD];
       delete [] BCNodeGamma_;
    }
-   if ( BCNodeIDs_ != NULL ) delete [] BCNodeIDs_; 
-   if ( rhsVector_ != NULL ) delete [] rhsVector_; 
+   if ( BCNodeIDs_ != NULL ) delete [] BCNodeIDs_;
+   if ( rhsVector_ != NULL ) delete [] rhsVector_;
    nSends_              = 0;
    nRecvs_              = 0;
    nodeGlobalIDs_       = NULL;
@@ -838,14 +832,14 @@ int FEI_HYPRE_Impl::resetMatrix(double s)
    if ( globalNodeOffsets_   != NULL ) delete [] globalNodeOffsets_;
    if ( recvLengs_           != NULL ) delete [] recvLengs_;
    if ( recvProcs_           != NULL ) delete [] recvProcs_;
-   if ( recvProcIndices_     != NULL ) 
+   if ( recvProcIndices_     != NULL )
    {
       for (int iP = 0; iP < nRecvs_; iP++) delete [] recvProcIndices_[iP];
       delete [] recvProcIndices_;
    }
    if ( sendLengs_           != NULL ) delete [] sendLengs_;
    if ( sendProcs_           != NULL ) delete [] sendProcs_;
-   if ( sendProcIndices_     != NULL ) 
+   if ( sendProcIndices_     != NULL )
    {
       for (int iP = 0; iP < nSends_; iP++) delete [] sendProcIndices_[iP];
       delete [] sendProcIndices_;
@@ -857,22 +851,22 @@ int FEI_HYPRE_Impl::resetMatrix(double s)
    if ( offdJA_              != NULL ) delete [] offdJA_;
    if ( offdAA_              != NULL ) delete [] offdAA_;
    if ( diagonal_            != NULL ) delete [] diagonal_;
-   if ( BCNodeAlpha_ != NULL ) 
+   if ( BCNodeAlpha_ != NULL )
    {
       for ( int iD = 0; iD < numBCNodes_; iD++ ) delete [] BCNodeAlpha_[iD];
       delete [] BCNodeAlpha_;
    }
-   if ( BCNodeBeta_ != NULL ) 
+   if ( BCNodeBeta_ != NULL )
    {
       for ( int iD = 0; iD < numBCNodes_; iD++ ) delete [] BCNodeBeta_[iD];
       delete [] BCNodeBeta_;
    }
-   if ( BCNodeGamma_ != NULL ) 
+   if ( BCNodeGamma_ != NULL )
    {
       for ( int iD = 0; iD < numBCNodes_; iD++ ) delete [] BCNodeGamma_[iD];
       delete [] BCNodeGamma_;
    }
-   if ( BCNodeIDs_ != NULL ) delete [] BCNodeIDs_; 
+   if ( BCNodeIDs_ != NULL ) delete [] BCNodeIDs_;
    nSends_              = 0;
    nRecvs_              = 0;
    nodeGlobalIDs_       = NULL;
@@ -914,7 +908,7 @@ int FEI_HYPRE_Impl::resetRHSVector(double s)
    (void) s;
    if ( outputLevel_ >= 2 )
       printf("%4d : FEI_HYPRE_Impl::resetRHSVector begins...\n", mypid_);
-   for ( int iB = 0; iB < numBlocks_; iB++ ) 
+   for ( int iB = 0; iB < numBlocks_; iB++ )
       elemBlocks_[iB]->resetRHSVectors(s);
    if ( outputLevel_ >= 2 )
       printf("%4d : FEI_HYPRE_Impl::resetRHSVector ends.\n", mypid_);
@@ -929,7 +923,7 @@ int FEI_HYPRE_Impl::resetInitialGuess(double s)
    (void) s;
    if ( outputLevel_ >= 2 )
       printf("%4d : FEI_HYPRE_Impl::resetInitialGuess begins...\n", mypid_);
-   for ( int iB = 0; iB < numBlocks_; iB++ ) 
+   for ( int iB = 0; iB < numBlocks_; iB++ )
       elemBlocks_[iB]->resetSolnVectors(s);
    if ( outputLevel_ >= 2 )
       printf("%4d : FEI_HYPRE_Impl::resetInitialGuess ends (%e).\n", mypid_, s);
@@ -946,7 +940,7 @@ int FEI_HYPRE_Impl::loadNodeBCs(int numNodes, int *nodeIDs, int fieldID,
    double **oldBCAlpha, **oldBCBeta, **oldBCGamma;
 
    (void) fieldID;
-   if ( outputLevel_ >= 2 ) 
+   if ( outputLevel_ >= 2 )
       printf("%4d : FEI_HYPRE_Impl::loadNodeBCs begins...(%d)\n",mypid_,numNodes);
    TimerLoadStart_ = MPI_Wtime();
    if ( numNodes > 0 )
@@ -958,13 +952,13 @@ int FEI_HYPRE_Impl::loadNodeBCs(int numNodes, int *nodeIDs, int fieldID,
          BCNodeAlpha_  = new double*[numBCNodes_];
          BCNodeBeta_   = new double*[numBCNodes_];
          BCNodeGamma_  = new double*[numBCNodes_];
-         for ( iN = 0; iN < numNodes; iN++ ) 
+         for ( iN = 0; iN < numNodes; iN++ )
          {
             BCNodeIDs_[iN]   = nodeIDs[iN];
             BCNodeAlpha_[iN] = new double[nodeDOF_];
             BCNodeBeta_[iN]  = new double[nodeDOF_];
             BCNodeGamma_[iN] = new double[nodeDOF_];
-            for ( iD = 0; iD < nodeDOF_; iD++ ) 
+            for ( iD = 0; iD < nodeDOF_; iD++ )
             {
                BCNodeAlpha_[iN][iD] = alpha[iN][iD];
                BCNodeBeta_[iN][iD]  = beta[iN][iD];
@@ -984,24 +978,24 @@ int FEI_HYPRE_Impl::loadNodeBCs(int numNodes, int *nodeIDs, int fieldID,
          BCNodeAlpha_  = new double*[numBCNodes_];
          BCNodeBeta_   = new double*[numBCNodes_];
          BCNodeGamma_  = new double*[numBCNodes_];
-         for ( iN = 0; iN < oldNumBCNodes; iN++ ) 
+         for ( iN = 0; iN < oldNumBCNodes; iN++ )
          {
             BCNodeIDs_[iN]   = oldBCNodeIDs[iN];
             BCNodeAlpha_[iN] = oldBCAlpha[iN];
             BCNodeBeta_[iN]  = oldBCBeta[iN];
             BCNodeGamma_[iN] = oldBCGamma[iN];
-         }   
+         }
          delete [] oldBCNodeIDs;
          delete [] oldBCAlpha;
          delete [] oldBCBeta;
          delete [] oldBCGamma;
-         for ( iN = 0; iN < numNodes; iN++ ) 
+         for ( iN = 0; iN < numNodes; iN++ )
          {
             BCNodeIDs_[oldNumBCNodes+iN]   = nodeIDs[iN];
             BCNodeAlpha_[oldNumBCNodes+iN] = new double[nodeDOF_];
             BCNodeBeta_[oldNumBCNodes+iN]  = new double[nodeDOF_];
             BCNodeGamma_[oldNumBCNodes+iN] = new double[nodeDOF_];
-            for ( iD = 0; iD < nodeDOF_; iD++ ) 
+            for ( iD = 0; iD < nodeDOF_; iD++ )
             {
                BCNodeAlpha_[oldNumBCNodes+iN][iD] = alpha[iN][iD];
                BCNodeBeta_[oldNumBCNodes+iN][iD]  = beta[iN][iD];
@@ -1011,16 +1005,16 @@ int FEI_HYPRE_Impl::loadNodeBCs(int numNodes, int *nodeIDs, int fieldID,
       }
    }
    TimerLoad_ += MPI_Wtime() - TimerLoadStart_;
-   if ( outputLevel_ >= 2 ) 
+   if ( outputLevel_ >= 2 )
       printf("%4d : FEI_HYPRE_Impl::loadNodeBCs ends.\n", mypid_);
    return 0;
 }
 
 /**************************************************************************
- load element connectivities, stiffness matrices, and element load 
+ load element connectivities, stiffness matrices, and element load
  -------------------------------------------------------------------------*/
 int FEI_HYPRE_Impl::sumInElem(int elemBlockID, int elemID, int *elemConn,
-                           double **elemStiff, double *elemLoad, 
+                           double **elemStiff, double *elemLoad,
                            int elemFormat)
 {
    int iB=0;
@@ -1040,17 +1034,17 @@ int FEI_HYPRE_Impl::sumInElem(int elemBlockID, int elemID, int *elemConn,
    }
 #endif
 #ifdef HAVE_DEBUG
-   if ( outputLevel_ > 0 && elemBlocks_[iB]->getCurrentElem()==0 ) 
-      printf("%4d : FEI_HYPRE_Impl::sumInElem begins... \n", mypid_); 
+   if ( outputLevel_ > 0 && elemBlocks_[iB]->getCurrentElem()==0 )
+      printf("%4d : FEI_HYPRE_Impl::sumInElem begins... \n", mypid_);
 #endif
    if ( elemBlocks_[iB]->getCurrentElem()==0 ) TimerLoadStart_ = MPI_Wtime();
    elemBlocks_[iB]->loadElemInfo(elemID, elemConn, elemStiff, elemLoad);
-   if ( elemBlocks_[iB]->getCurrentElem()==elemBlocks_[iB]->getNumElems() ) 
+   if ( elemBlocks_[iB]->getCurrentElem()==elemBlocks_[iB]->getNumElems() )
       TimerLoad_ += MPI_Wtime() - TimerLoadStart_;
 #ifdef HAVE_DEBUG
-   if ( outputLevel_ > 0 && 
-        elemBlocks_[iB]->getCurrentElem()==elemBlocks_[iB]->getNumElems() ) 
-      printf("%4d : FEI_HYPRE_Impl::sumInElem ends. \n", mypid_); 
+   if ( outputLevel_ > 0 &&
+        elemBlocks_[iB]->getCurrentElem()==elemBlocks_[iB]->getNumElems() )
+      printf("%4d : FEI_HYPRE_Impl::sumInElem ends. \n", mypid_);
 #endif
    return 0;
 }
@@ -1078,17 +1072,17 @@ int FEI_HYPRE_Impl::sumInElemMatrix(int elemBlockID, int elemID, int *elemConn,
    }
 #endif
 #ifdef HAVE_DEBUG
-   if ( outputLevel_ > 0 && elemBlocks_[iB]->getCurrentElem()==0 ) 
-      printf("%4d : FEI_HYPRE_Impl::sumInElemMatrix begins... \n", mypid_); 
+   if ( outputLevel_ > 0 && elemBlocks_[iB]->getCurrentElem()==0 )
+      printf("%4d : FEI_HYPRE_Impl::sumInElemMatrix begins... \n", mypid_);
 #endif
    if ( elemBlocks_[iB]->getCurrentElem()==0 ) TimerLoadStart_ = MPI_Wtime();
    elemBlocks_[iB]->loadElemMatrix(elemID, elemConn, elemStiff);
-   if ( elemBlocks_[iB]->getCurrentElem()==elemBlocks_[iB]->getNumElems() ) 
+   if ( elemBlocks_[iB]->getCurrentElem()==elemBlocks_[iB]->getNumElems() )
       TimerLoad_ += MPI_Wtime() - TimerLoadStart_;
 #ifdef HAVE_DEBUG
-   if ( outputLevel_ > 0 && 
-        elemBlocks_[iB]->getCurrentElem()==elemBlocks_[iB]->getNumElems() ) 
-      printf("%4d : FEI_HYPRE_Impl::sumInElemMatrix ends. \n", mypid_); 
+   if ( outputLevel_ > 0 &&
+        elemBlocks_[iB]->getCurrentElem()==elemBlocks_[iB]->getNumElems() )
+      printf("%4d : FEI_HYPRE_Impl::sumInElemMatrix ends. \n", mypid_);
 #endif
    return 0;
 }
@@ -1120,7 +1114,7 @@ int FEI_HYPRE_Impl::sumInElemRHS(int elemBlockID, int elemID, int *elemConn,
 }
 
 /**************************************************************************
- assemble matrix information 
+ assemble matrix information
  -------------------------------------------------------------------------*/
 int FEI_HYPRE_Impl::loadComplete()
 {
@@ -1138,7 +1132,7 @@ int FEI_HYPRE_Impl::loadComplete()
     * get machine information
     * ----------------------------------------------------------------*/
 
-   if ( outputLevel_ >= 2 ) 
+   if ( outputLevel_ >= 2 )
       printf("%4d : FEI_HYPRE_Impl::loadComplete begins.... \n", mypid_);
    TimerLoadStart_ = MPI_Wtime();
    MPI_Comm_size( mpiComm_, &nprocs );
@@ -1151,7 +1145,7 @@ int FEI_HYPRE_Impl::loadComplete()
    for ( iB = 0; iB < numBlocks_; iB++ )
    {
       ierr = elemBlocks_[iB]->checkLoadComplete();
-      assert( !ierr );
+      hypre_assert( !ierr );
    }
 
    /* -----------------------------------------------------------------
@@ -1165,32 +1159,32 @@ int FEI_HYPRE_Impl::loadComplete()
       sharedNodeProcAux = new int*[numSharedNodes_];
       for ( iN = 0; iN < numSharedNodes_; iN++ ) nodeIDs[iN] = iN;
       IntSort2(sharedNodeIDs_, nodeIDs, 0, numSharedNodes_-1);
-      for ( iN = 0; iN < numSharedNodes_; iN++ ) 
+      for ( iN = 0; iN < numSharedNodes_; iN++ )
       {
-         sharedNodeProcAux[iN] = sharedNodeProcs_[iN]; 
+         sharedNodeProcAux[iN] = sharedNodeProcs_[iN];
          nodeIDAux[iN] = sharedNodeNProcs_[iN];
       }
-      for ( iN = 0; iN < numSharedNodes_; iN++ ) 
+      for ( iN = 0; iN < numSharedNodes_; iN++ )
       {
          index = nodeIDs[iN];
-         sharedNodeProcs_[iN] = sharedNodeProcAux[index]; 
+         sharedNodeProcs_[iN] = sharedNodeProcAux[index];
          sharedNodeNProcs_[iN] = nodeIDAux[index];
       }
       delete [] sharedNodeProcAux;
       delete [] nodeIDAux;
       delete [] nodeIDs;
       index = 0;
-      for ( iN = 1; iN < numSharedNodes_; iN++ ) 
+      for ( iN = 1; iN < numSharedNodes_; iN++ )
       {
          if ( sharedNodeIDs_[iN] == sharedNodeIDs_[index] )
          {
             nodeIDAux = sharedNodeProcs_[index];
-            sharedNodeProcs_[index] = 
+            sharedNodeProcs_[index] =
                new int[sharedNodeNProcs_[index]+sharedNodeNProcs_[iN]];
-            for ( iP = 0; iP < sharedNodeNProcs_[index]; iP++ ) 
-               sharedNodeProcs_[index][iP] = nodeIDAux[iP]; 
-            for ( iP = 0; iP < sharedNodeNProcs_[iN]; iP++ ) 
-               sharedNodeProcs_[index][sharedNodeNProcs_[index]+iP] = 
+            for ( iP = 0; iP < sharedNodeNProcs_[index]; iP++ )
+               sharedNodeProcs_[index][iP] = nodeIDAux[iP];
+            for ( iP = 0; iP < sharedNodeNProcs_[iN]; iP++ )
+               sharedNodeProcs_[index][sharedNodeNProcs_[index]+iP] =
                                        sharedNodeProcs_[iN][iP];
 
             sharedNodeNProcs_[index] += sharedNodeNProcs_[iN];
@@ -1206,11 +1200,11 @@ int FEI_HYPRE_Impl::loadComplete()
          }
       }
       if ( numSharedNodes_ > 0 ) numSharedNodes_ = index + 1;
-      for ( iN = 0; iN < numSharedNodes_; iN++ ) 
+      for ( iN = 0; iN < numSharedNodes_; iN++ )
       {
          IntSort(sharedNodeProcs_[iN], 0, sharedNodeNProcs_[iN]-1);
          index = 0;
-         for ( iP = 1; iP < sharedNodeNProcs_[iN]; iP++ ) 
+         for ( iP = 1; iP < sharedNodeNProcs_[iN]; iP++ )
             if (sharedNodeProcs_[iN][iP] != sharedNodeProcs_[iN][index])
                sharedNodeProcs_[iN][++index] = sharedNodeProcs_[iN][iP];
          sharedNodeNProcs_[iN] = index + 1;
@@ -1266,13 +1260,13 @@ int FEI_HYPRE_Impl::loadComplete()
       {
          for ( iN2 = index-1; iN2 >= 0; iN2-- )
          {
-            if ( nodeIDs[iN2] == nodeIDs[index] ) 
+            if ( nodeIDs[iN2] == nodeIDs[index] )
                nodeIDAux[iN2] = - nodeIDAux[iN2] - 1;
             else break;
          }
          for ( iN2 = index+1; iN2 < totalNNodes; iN2++ )
          {
-            if ( nodeIDs[iN2] == nodeIDs[index] ) 
+            if ( nodeIDs[iN2] == nodeIDs[index] )
                nodeIDAux[iN2] = - nodeIDAux[iN2] - 1;
             else break;
          }
@@ -1285,10 +1279,10 @@ int FEI_HYPRE_Impl::loadComplete()
    localNNodes = numLocalNodes_ = 0;
    for ( iN = 1; iN < totalNNodes; iN++ )
    {
-      if ( nodeIDs[iN] != nodeIDs[iN-1] ) 
+      if ( nodeIDs[iN] != nodeIDs[iN-1] )
       {
          localNNodes++;
-         if ( nodeIDAux[iN] >= 0 ) numLocalNodes_++; 
+         if ( nodeIDAux[iN] >= 0 ) numLocalNodes_++;
       }
    }
    if ( totalNNodes > 0 ) localNNodes++;
@@ -1332,7 +1326,7 @@ int FEI_HYPRE_Impl::loadComplete()
    }
 
    /* -----------------------------------------------------------------
-    * rewrite the element connectivities with local node numbers 
+    * rewrite the element connectivities with local node numbers
     * ----------------------------------------------------------------*/
 
    if ( totalNNodes > 0 ) nodeIDAux2 = new int[totalNNodes];
@@ -1353,7 +1347,7 @@ int FEI_HYPRE_Impl::loadComplete()
             elemNodeList[iE][iN] = nodeIDAux2[totalNNodes++];
       }
    }
-   if ( totalNNodes > 0 ) 
+   if ( totalNNodes > 0 )
    {
       delete [] nodeIDAux;
       delete [] nodeIDAux2;
@@ -1367,15 +1361,15 @@ int FEI_HYPRE_Impl::loadComplete()
    globalNodeOffsets_ = new int[nprocs+1];
    MPI_Allgather(&numLocalNodes_, 1, MPI_INT, globalNodeOffsets_, 1,
                  MPI_INT, mpiComm_);
-   for ( iP = nprocs; iP > 0; iP-- ) 
+   for ( iP = nprocs; iP > 0; iP-- )
       globalNodeOffsets_[iP] = globalNodeOffsets_[iP-1];
    globalNodeOffsets_[0] = 0;
-   for ( iP = 1; iP <= nprocs; iP++ ) 
+   for ( iP = 1; iP <= nprocs; iP++ )
       globalNodeOffsets_[iP] += globalNodeOffsets_[iP-1];
    nodeOffset = globalNodeOffsets_[mypid_];
 
    /* -----------------------------------------------------------------
-    * next construct communication pattern 
+    * next construct communication pattern
     * ----------------------------------------------------------------*/
 
    /* -- create an aux array for holding mapped external node IDs -- */
@@ -1401,7 +1395,7 @@ int FEI_HYPRE_Impl::loadComplete()
          sndrcvReg[iN] = 1; // recv
          pnum  = mypid_;
          for ( iP = 0; iP < sharedNodeNProcs_[iN]; iP++ )
-            if (sharedNodeProcs_[iN][iP] < pnum) 
+            if (sharedNodeProcs_[iN][iP] < pnum)
                pnum = sharedNodeProcs_[iN][iP];
          ownerProcs[index] = pnum;
          pArrayAux[index] = pnum;
@@ -1429,7 +1423,7 @@ int FEI_HYPRE_Impl::loadComplete()
       for ( iP = 0; iP < nRecv; iP++ ) recvLengs[iP] = 0;
       for ( iN = 0; iN < numSharedNodes_; iN++ )
       {
-         if ( sndrcvReg[iN] == 1 ) 
+         if ( sndrcvReg[iN] == 1 )
          {
             index = HYPRE_LSI_Search(&(nodeGlobalIDs_[numLocalNodes_]),
                                  sharedNodeIDs_[iN], numExtNodes_);
@@ -1488,7 +1482,7 @@ int FEI_HYPRE_Impl::loadComplete()
          }
       }
       if ( nSend > 0 ) sendBuf = new int*[nSend];
-      for ( iP = 0; iP < nSend; iP++ ) 
+      for ( iP = 0; iP < nSend; iP++ )
       {
          sendBuf[iP]   = new int[sendLengs[iP]];
          sendLengs[iP] = 0;
@@ -1527,7 +1521,7 @@ int FEI_HYPRE_Impl::loadComplete()
 
    /* -- fix the send index array -- */
 
-   for (iP = 0; iP < nSend; iP++) 
+   for (iP = 0; iP < nSend; iP++)
       for ( iN = 0; iN < sendLengs[iP]; iN++ )
          sendBuf[iP][iN] -= nodeOffset;
 
@@ -1548,7 +1542,7 @@ int FEI_HYPRE_Impl::loadComplete()
    /* -- construct the receive communication pattern -- */
 
    nRecvs_ = nRecv;
-   if ( nRecv > 0 ) 
+   if ( nRecv > 0 )
    {
       recvProcs_ = recvProcs;
       recvLengs_ = recvLengs;
@@ -1556,15 +1550,15 @@ int FEI_HYPRE_Impl::loadComplete()
    else recvProcs_ = recvLengs_ = NULL;
    if ( nRecv > 0 ) recvProcIndices_ = recvBuf;
    else             recvProcIndices_ = NULL;
-   
+
    /* -- construct the send communication pattern -- */
 
    nSends_ = nSend;
-   if ( nSend > 0 ) 
+   if ( nSend > 0 )
    {
       sendLengs_ = sendLengs;
       sendProcs_ = sendProcs;
-   } 
+   }
    else sendLengs_ = sendProcs_ = NULL;
    if ( nSend > 0 ) sendProcIndices_ = sendBuf;
    else             sendProcIndices_ = NULL;
@@ -1577,7 +1571,7 @@ int FEI_HYPRE_Impl::loadComplete()
    TimerLoad_ += MPI_Wtime() - TimerLoadStart_;
    if ( FLAG_PrintMatrix_ > 0 ) printLinearSystem();
    FLAG_LoadComplete_ = 1;
-   if ( outputLevel_ >= 2 ) 
+   if ( outputLevel_ >= 2 )
       printf("%4d : FEI_HYPRE_Impl::loadComplete ends. \n", mypid_);
    return 0;
 }
@@ -1680,15 +1674,15 @@ int FEI_HYPRE_Impl::residualNorm(int whichNorm, int numFields, int* fieldIDs,
    extNRows   = numExtNodes_ * nodeDOF_;
    totalNRows = localNRows + extNRows;
    rVec       = new double[totalNRows];
-   matvec( solnVector_, rVec ); 
-   for ( irow = 0; irow < localNRows; irow++ ) 
+   matvec( solnVector_, rVec );
+   for ( irow = 0; irow < localNRows; irow++ )
       rVec[irow] = rhsVector_[irow] - rVec[irow];
 
-   switch(whichNorm) 
+   switch(whichNorm)
    {
       case 0:
            rnorm = 0.0;
-           for ( irow = 0; irow < localNRows; irow++ ) 
+           for ( irow = 0; irow < localNRows; irow++ )
            {
               dtemp = fabs( rVec[irow] );
               if ( dtemp > rnorm ) rnorm = dtemp;
@@ -1698,14 +1692,14 @@ int FEI_HYPRE_Impl::residualNorm(int whichNorm, int numFields, int* fieldIDs,
            break;
       case 1:
            rnorm = 0.0;
-           for ( irow = 0; irow < localNRows; irow++ ) 
+           for ( irow = 0; irow < localNRows; irow++ )
               rnorm += fabs( rVec[irow] );
            MPI_Allreduce(&rnorm, &dtemp, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
            (*norms) = dtemp;
            break;
       case 2:
            rnorm = 0.0;
-           for ( irow = 0; irow < localNRows; irow++ ) 
+           for ( irow = 0; irow < localNRows; irow++ )
               rnorm += rVec[irow] * rVec[irow];
            MPI_Allreduce(&rnorm, &dtemp, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
            (*norms) = sqrt(dtemp);
@@ -1721,16 +1715,16 @@ int FEI_HYPRE_Impl::residualNorm(int whichNorm, int numFields, int* fieldIDs,
 int FEI_HYPRE_Impl::getNumBlockActNodes(int blockID, int *numNodes)
 {
    int localNNodes, iB, iE, iN, totalNNodes, nElems;
-   int elemNNodes, **elemNodeLists, *nodeIDs;  
+   int elemNNodes, **elemNodeLists, *nodeIDs;
 
-   if ( numBlocks_ == 1 ) 
+   if ( numBlocks_ == 1 )
    {
       (*numNodes) = numLocalNodes_ + numExtNodes_;
-      if ( outputLevel_ >= 2 ) 
+      if ( outputLevel_ >= 2 )
       {
-         printf("%4d : FEI_HYPRE_Impl::getNumBlockActNodes blockID = %d.\n", 
+         printf("%4d : FEI_HYPRE_Impl::getNumBlockActNodes blockID = %d.\n",
                 mypid_, blockID);
-         printf("%4d : FEI_HYPRE_Impl::getNumBlockActNodes numNodes = %d\n", 
+         printf("%4d : FEI_HYPRE_Impl::getNumBlockActNodes numNodes = %d\n",
                 mypid_, (*numNodes));
       }
       return 0;
@@ -1744,8 +1738,8 @@ int FEI_HYPRE_Impl::getNumBlockActNodes(int blockID, int *numNodes)
          printf("%4d : FEI_HYPRE_Impl::getNumBlockActNodes ERROR -",mypid_);
          printf(" invalid blockID\n");
          exit(1);
-      } 
-      totalNNodes = numLocalNodes_ + numExtNodes_; 
+      }
+      totalNNodes = numLocalNodes_ + numExtNodes_;
       nodeIDs     = new int[totalNNodes];
       for ( iN = 0; iN < totalNNodes; iN++ ) nodeIDs[iN] = 0;
       nElems      = elemBlocks_[iB]->getNumElems();
@@ -1755,16 +1749,16 @@ int FEI_HYPRE_Impl::getNumBlockActNodes(int blockID, int *numNodes)
          for ( iN = 0; iN < elemNNodes; iN++ )
             nodeIDs[elemNodeLists[iE][iN]] = 1;
       localNNodes = 0;
-      for ( iN = 0; iN < totalNNodes; iN++ ) 
+      for ( iN = 0; iN < totalNNodes; iN++ )
          if ( nodeIDs[iN] == 1 ) localNNodes++;
       delete [] nodeIDs;
       (*numNodes) = localNNodes;
 
-      if ( outputLevel_ >= 2 ) 
+      if ( outputLevel_ >= 2 )
       {
-         printf("%4d : FEI_HYPRE_Impl::getNumBlockActNodes blockID = %d.\n", 
+         printf("%4d : FEI_HYPRE_Impl::getNumBlockActNodes blockID = %d.\n",
                 mypid_, blockID);
-         printf("%4d : FEI_HYPRE_Impl::getNumBlockActNodes numNodes = %d\n", 
+         printf("%4d : FEI_HYPRE_Impl::getNumBlockActNodes numNodes = %d\n",
                 mypid_, (*numNodes));
       }
    }
@@ -1780,11 +1774,11 @@ int FEI_HYPRE_Impl::getNumBlockActEqns(int blockID, int *numEqns)
 
    getNumBlockActNodes(blockID, &numNodes);
    (*numEqns) = numNodes * nodeDOF_;
-   if ( outputLevel_ >= 2 ) 
+   if ( outputLevel_ >= 2 )
    {
-      printf("%4d : FEI_HYPRE_Impl::getNumBlockActEqns blockID = %d\n", 
+      printf("%4d : FEI_HYPRE_Impl::getNumBlockActEqns blockID = %d\n",
              mypid_, blockID);
-      printf("%4d : FEI_HYPRE_Impl::getNumBlockActEqns numEqns = %d\n", 
+      printf("%4d : FEI_HYPRE_Impl::getNumBlockActEqns numEqns = %d\n",
              mypid_, (*numEqns));
    }
    return 0;
@@ -1796,16 +1790,16 @@ int FEI_HYPRE_Impl::getNumBlockActEqns(int blockID, int *numEqns)
 int FEI_HYPRE_Impl::getBlockNodeIDList(int blockID,int numNodes,int *nodeList)
 {
    int localNNodes, iB, iE, iN, totalNNodes, nElems;
-   int elemNNodes, **elemNodeLists, *nodeIDs;  
+   int elemNNodes, **elemNodeLists, *nodeIDs;
 
-   if ( outputLevel_ >= 2 ) 
+   if ( outputLevel_ >= 2 )
    {
-      printf("%4d : FEI_HYPRE_Impl::getBlockNodeIDList blockID  = %d\n", 
+      printf("%4d : FEI_HYPRE_Impl::getBlockNodeIDList blockID  = %d\n",
              mypid_, blockID);
-      printf("%4d : FEI_HYPRE_Impl::getBlockNodeIDList numNodes = %d\n", 
+      printf("%4d : FEI_HYPRE_Impl::getBlockNodeIDList numNodes = %d\n",
              mypid_, numNodes);
    }
-   if ( numBlocks_ == 1 ) 
+   if ( numBlocks_ == 1 )
    {
       localNNodes = numLocalNodes_ + numExtNodes_;
       if ( localNNodes != numNodes )
@@ -1815,7 +1809,7 @@ int FEI_HYPRE_Impl::getBlockNodeIDList(int blockID,int numNodes,int *nodeList)
          exit(1);
       }
       for ( iN = 0; iN < localNNodes; iN++ )
-         nodeList[iN] = nodeGlobalIDs_[iN]; 
+         nodeList[iN] = nodeGlobalIDs_[iN];
       return 0;
    }
    else
@@ -1827,8 +1821,8 @@ int FEI_HYPRE_Impl::getBlockNodeIDList(int blockID,int numNodes,int *nodeList)
          printf("%4d : FEI_HYPRE_Impl::getBlockNodeIDList ERROR -",mypid_);
          printf(" invalid blockID.\n");
          exit(1);
-      } 
-      totalNNodes = numLocalNodes_ + numExtNodes_; 
+      }
+      totalNNodes = numLocalNodes_ + numExtNodes_;
       nodeIDs     = new int[totalNNodes];
       for ( iN = 0; iN < totalNNodes; iN++ ) nodeIDs[iN] = 0;
       nElems      = elemBlocks_[iB]->getNumElems();
@@ -1838,7 +1832,7 @@ int FEI_HYPRE_Impl::getBlockNodeIDList(int blockID,int numNodes,int *nodeList)
          for ( iN = 0; iN < elemNNodes; iN++ )
             nodeIDs[elemNodeLists[iE][iN]] = 1;
       localNNodes = 0;
-      for ( iN = 0; iN < totalNNodes; iN++ ) 
+      for ( iN = 0; iN < totalNNodes; iN++ )
          if ( nodeIDs[iN] == 1 ) nodeList[localNNodes++] = nodeGlobalIDs_[iN];
       if ( localNNodes != numNodes )
       {
@@ -1852,7 +1846,7 @@ int FEI_HYPRE_Impl::getBlockNodeIDList(int blockID,int numNodes,int *nodeList)
 }
 
 /**************************************************************************
- get solution 
+ get solution
  -------------------------------------------------------------------------*/
 int FEI_HYPRE_Impl::getBlockNodeSolution(int blockID,int numNodes,
                          int *nodeList, int *nodeOffsets, double *solnValues)
@@ -1862,14 +1856,14 @@ int FEI_HYPRE_Impl::getBlockNodeSolution(int blockID,int numNodes,
    double *dataBuf, **solnVecs;
 
    (void) nodeList;
-   if ( outputLevel_ >= 2 ) 
+   if ( outputLevel_ >= 2 )
    {
-      printf("%4d : FEI_HYPRE_Impl::getBlockNodeSolution blockID  = %d\n", 
+      printf("%4d : FEI_HYPRE_Impl::getBlockNodeSolution blockID  = %d\n",
              mypid_, blockID);
-      printf("%4d : FEI_HYPRE_Impl::getBlockNodeSolution numNodes = %d\n", 
+      printf("%4d : FEI_HYPRE_Impl::getBlockNodeSolution numNodes = %d\n",
              mypid_, numNodes);
    }
-   if ( numBlocks_ == 1 ) 
+   if ( numBlocks_ == 1 )
    {
       for ( iN = 0; iN < numNodes; iN++ )
       {
@@ -1887,8 +1881,8 @@ int FEI_HYPRE_Impl::getBlockNodeSolution(int blockID,int numNodes,
          printf("%4d : FEI_HYPRE_Impl::getBlockNodeSolution ERROR -",mypid_);
          printf(" invalid blockID.\n");
          exit(1);
-      } 
-      totalNNodes = numLocalNodes_ + numExtNodes_; 
+      }
+      totalNNodes = numLocalNodes_ + numExtNodes_;
       nodeIDs     = new int[totalNNodes];
       dataBuf     = new double[totalNNodes*nodeDOF_];
       for ( iN = 0; iN < totalNNodes; iN++ ) nodeIDs[iN] = 0;
@@ -1907,10 +1901,10 @@ int FEI_HYPRE_Impl::getBlockNodeSolution(int blockID,int numNodes,
          }
       }
       localNNodes = 0;
-      for ( iN = 0; iN < totalNNodes; iN++ ) 
+      for ( iN = 0; iN < totalNNodes; iN++ )
       {
          nodeID = nodeIDs[iN];
-         if ( nodeID == 1 ) 
+         if ( nodeID == 1 )
          {
             nodeOffsets[localNNodes] = localNNodes * nodeDOF_;
             for ( iD = 0; iD < nodeDOF_; iD++ )
@@ -1930,11 +1924,11 @@ int FEI_HYPRE_Impl::getBlockNodeSolution(int blockID,int numNodes,
 void FEI_HYPRE_Impl::buildGlobalMatrixVector()
 {
    int    matDim, *diagCounts=NULL, nElems, elemNNodes, **elemNodeLists=NULL;
-   int    iB, iD, iE, iN, offset, iD2, iD3, iN2, *elemNodeList=NULL, diagNNZ; 
+   int    iB, iD, iE, iN, offset, iD2, iD3, iN2, *elemNodeList=NULL, diagNNZ;
    int    offdNNZ, *offdCounts=NULL, rowIndBase, rowInd, colIndBase, colInd;
    int    bound, iCount, index, iBegin, *TdiagIA=NULL, *TdiagJA=NULL;
    int    *ToffdIA=NULL, *ToffdJA=NULL, elemNExt, elemNLocal, nodeID;
-   int    diagOffset, offdOffset; 
+   int    diagOffset, offdOffset;
    double **elemMats=NULL, *elemMat=NULL, *TdiagAA=NULL, *ToffdAA=NULL;
    double alpha, beta, gamma1;
 
@@ -1985,25 +1979,25 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
             }
          }
       }
-   }  
+   }
 
    /* -----------------------------------------------------------------
-    * allocate the CSR matrix storage space 
+    * allocate the CSR matrix storage space
     * -----------------------------------------------------------------*/
 
    diagNNZ = offdNNZ = 0;
-   for ( iD = 0; iD < matDim; iD++ ) 
+   for ( iD = 0; iD < matDim; iD++ )
    {
       diagNNZ += diagCounts[iD];
       offdNNZ += offdCounts[iD];
    }
-   if ( diagNNZ > 0 ) 
+   if ( diagNNZ > 0 )
    {
       TdiagIA = new int[matDim+1];
       TdiagJA = new int[diagNNZ];
       TdiagAA = new double[diagNNZ];
    }
-   if ( offdNNZ > 0 ) 
+   if ( offdNNZ > 0 )
    {
       ToffdIA = new int[matDim+1];
       ToffdJA = new int[offdNNZ];
@@ -2011,7 +2005,7 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
    }
 
    /* -----------------------------------------------------------------
-    * get ready for loading up the CSR matrix 
+    * get ready for loading up the CSR matrix
     * -----------------------------------------------------------------*/
 
    offset = 0;
@@ -2021,7 +2015,7 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
       offset += diagCounts[iD];
    }
    offset = 0;
-   if ( offdNNZ > 0 ) 
+   if ( offdNNZ > 0 )
    {
       for ( iD = 0; iD < matDim; iD++ )
       {
@@ -2031,7 +2025,7 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
    }
 
    /* -----------------------------------------------------------------
-    * load the CSR matrix 
+    * load the CSR matrix
     * -----------------------------------------------------------------*/
 
    bound = numLocalNodes_ * nodeDOF_;
@@ -2051,12 +2045,12 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
             for ( iN = 0; iN < elemNNodes; iN++ )
             {
                colInd = elemNodeList[iN];
-               if ( colInd >= bound ) 
+               if ( colInd >= bound )
                {
                   for ( iN2 = 0; iN2 < elemNNodes; iN2++ )
                   {
                      rowInd = elemNodeList[iN2];
-                     if ( *elemMat != 0.0 ) 
+                     if ( *elemMat != 0.0 )
                      {
                         index = ToffdIA[rowInd]++;
                         ToffdJA[index] = colInd;
@@ -2070,7 +2064,7 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
                   for ( iN2 = 0; iN2 < elemNNodes; iN2++ )
                   {
                      rowInd = elemNodeList[iN2];
-                     if ( *elemMat != 0.0 ) 
+                     if ( *elemMat != 0.0 )
                      {
                         index = TdiagIA[rowInd]++;
                         TdiagJA[index] = colInd;
@@ -2103,9 +2097,9 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
                      for ( iD2 = 0; iD2 < nodeDOF_; iD2++ )
                      {
                         rowInd = rowIndBase + iD2;
-                        if ( elemMat[offset] != 0.0 ) 
+                        if ( elemMat[offset] != 0.0 )
                         {
-                           if ( colInd >= bound ) 
+                           if ( colInd >= bound )
                            {
                               index = ToffdIA[rowInd]++;
                               ToffdJA[index] = colInd;
@@ -2156,7 +2150,7 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
    }
    for ( iD = 0; iD < matDim; iD++ )
    {
-      if ( diagCounts[iD] > 0 ) 
+      if ( diagCounts[iD] > 0 )
       {
          iBegin = TdiagIA[iD];
          iCount = diagCounts[iD];
@@ -2165,7 +2159,7 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
             IntSort2a(&(TdiagJA[iBegin]),&(TdiagAA[iBegin]),0,iCount-1);
          for ( iD2 = iBegin+1; iD2 < iBegin+iCount; iD2++ )
          {
-            if ( TdiagJA[iD2] == TdiagJA[index] ) 
+            if ( TdiagJA[iD2] == TdiagJA[index] )
                TdiagAA[index] += TdiagAA[iD2];
             else
             {
@@ -2177,7 +2171,7 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
          if ( iCount > 0 && TdiagAA[index] != 0.0 ) index++;
          diagCounts[iD] = index - iBegin;
       }
-      if ( offdCounts[iD] > 0 ) 
+      if ( offdCounts[iD] > 0 )
       {
          iBegin = ToffdIA[iD];
          iCount = offdCounts[iD];
@@ -2186,7 +2180,7 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
             IntSort2a(&(ToffdJA[iBegin]),&(ToffdAA[iBegin]),0,iCount-1);
          for ( iD2 = iBegin+1; iD2 < iBegin+iCount; iD2++ )
          {
-            if ( ToffdJA[iD2] == ToffdJA[index] ) 
+            if ( ToffdJA[iD2] == ToffdJA[index] )
                ToffdAA[index] += ToffdAA[iD2];
             else
             {
@@ -2213,9 +2207,9 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
       {
          for ( iD = index*nodeDOF_; iD < (index+1)*nodeDOF_; iD++ )
          {
-            alpha = BCNodeAlpha_[iN][iD%nodeDOF_]; 
-            beta  = BCNodeBeta_[iN][iD%nodeDOF_]; 
-            gamma1= BCNodeGamma_[iN][iD%nodeDOF_]; 
+            alpha = BCNodeAlpha_[iN][iD%nodeDOF_];
+            beta  = BCNodeBeta_[iN][iD%nodeDOF_];
+            gamma1= BCNodeGamma_[iN][iD%nodeDOF_];
             if ( beta == 0.0 && alpha != 0.0 )
             {
                for (iD2=TdiagIA[iD]; iD2<TdiagIA[iD]+diagCounts[iD]; iD2++)
@@ -2228,7 +2222,7 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
                      {
                         if ( TdiagJA[iD3] == iD && TdiagAA[iD3] != 0.0 )
                         {
-                           rhsVector_[rowInd] -= (gamma1/alpha*TdiagAA[iD3]); 
+                           rhsVector_[rowInd] -= (gamma1/alpha*TdiagAA[iD3]);
                            TdiagAA[iD3] = 0.0;
                            break;
                         }
@@ -2296,9 +2290,9 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
          index += numLocalNodes_;
          for ( iD = index*nodeDOF_; iD < (index+1)*nodeDOF_; iD++ )
          {
-            alpha = BCNodeAlpha_[iN][iD%nodeDOF_]; 
-            beta  = BCNodeBeta_[iN][iD%nodeDOF_]; 
-            gamma1= BCNodeGamma_[iN][iD%nodeDOF_]; 
+            alpha = BCNodeAlpha_[iN][iD%nodeDOF_];
+            beta  = BCNodeBeta_[iN][iD%nodeDOF_];
+            gamma1= BCNodeGamma_[iN][iD%nodeDOF_];
             if ( beta == 0.0 && alpha != 0.0 )
             {
                if ( numExtNodes_ > 0 )
@@ -2361,23 +2355,23 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
 
    /* -----------------------------------------------------------------
     * recompute the sparsity structure of the compressed matrix
-    * allocate and load the final CSR matrix 
+    * allocate and load the final CSR matrix
     * -----------------------------------------------------------------*/
 
    diagNNZ = 0;
-   for ( iD = 0; iD < matDim; iD++ ) 
+   for ( iD = 0; iD < matDim; iD++ )
    {
-      for ( iD2 = TdiagIA[iD]; iD2 < TdiagIA[iD]+diagCounts[iD]; iD2++ ) 
+      for ( iD2 = TdiagIA[iD]; iD2 < TdiagIA[iD]+diagCounts[iD]; iD2++ )
          if ( TdiagAA[iD2] != 0.0 ) diagNNZ++;
    }
    if ( offdNNZ > 0 )
    {
       offdNNZ = 0;
-      for ( iD = 0; iD < matDim; iD++ ) 
-         for ( iD2 = ToffdIA[iD]; iD2 < ToffdIA[iD]+offdCounts[iD]; iD2++ ) 
+      for ( iD = 0; iD < matDim; iD++ )
+         for ( iD2 = ToffdIA[iD]; iD2 < ToffdIA[iD]+offdCounts[iD]; iD2++ )
             if ( ToffdAA[iD2] != 0.0 ) offdNNZ++;
    }
-   if ( diagNNZ > 0 ) 
+   if ( diagNNZ > 0 )
    {
       diagIA_ = new int[matDim+1];
       diagJA_ = new int[diagNNZ];
@@ -2385,7 +2379,7 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
       diagonal_ = new double[matDim];
       diagIA_[0] = 0;
    }
-   if ( offdNNZ > 0 ) 
+   if ( offdNNZ > 0 )
    {
       offdIA_ = new int[matDim+1];
       offdJA_ = new int[offdNNZ];
@@ -2393,41 +2387,41 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
       offdIA_[0] = 0;
    }
    diagOffset = offdOffset = 0;
-   for ( iD = 0; iD < matDim; iD++ ) 
+   for ( iD = 0; iD < matDim; iD++ )
    {
       iCount = diagCounts[iD];
       index  = TdiagIA[iD];
       diagonal_[iD] = 0.0;
-      for ( iD2 = 0; iD2 < iCount; iD2++ ) 
+      for ( iD2 = 0; iD2 < iCount; iD2++ )
       {
-         if ( TdiagJA[index] == iD ) 
+         if ( TdiagJA[index] == iD )
          {
             if ( TdiagAA[index] != 0.0 ) diagonal_[iD] = TdiagAA[index];
          }
-         if ( TdiagJA[index] >= 0 && TdiagAA[index] != 0.0 ) 
+         if ( TdiagJA[index] >= 0 && TdiagAA[index] != 0.0 )
          {
             diagJA_[diagOffset] = TdiagJA[index];
             diagAA_[diagOffset++] = TdiagAA[index];
          }
-         index++; 
+         index++;
       }
       diagIA_[iD+1] = diagOffset;
-      if ( offdNNZ > 0 ) 
+      if ( offdNNZ > 0 )
       {
          iCount = offdCounts[iD];
          index  = ToffdIA[iD];
-         for ( iD2 = 0; iD2 < iCount; iD2++ ) 
+         for ( iD2 = 0; iD2 < iCount; iD2++ )
          {
-            if ( ToffdJA[index] == iD ) 
+            if ( ToffdJA[index] == iD )
             {
                if ( ToffdAA[index] != 0.0 ) diagonal_[iD] = ToffdAA[index];
             }
-            if ( ToffdJA[index] >= 0 && ToffdAA[index] != 0.0 ) 
+            if ( ToffdJA[index] >= 0 && ToffdAA[index] != 0.0 )
             {
                offdJA_[offdOffset] = ToffdJA[index];
                offdAA_[offdOffset++] = ToffdAA[index];
             }
-            index++; 
+            index++;
          }
          offdIA_[iD+1] = offdOffset;
       }
@@ -2438,7 +2432,7 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
     * -----------------------------------------------------------------*/
 
    PVectorReverseChange( diagonal_ );
-   for ( iD = 0; iD < numLocalNodes_*nodeDOF_; iD++ ) 
+   for ( iD = 0; iD < numLocalNodes_*nodeDOF_; iD++ )
    {
       if ( diagonal_[iD] == 0.0 ) diagonal_[iD] = 1.0;
       else                        diagonal_[iD] = 1.0 / diagonal_[iD];
@@ -2447,19 +2441,19 @@ void FEI_HYPRE_Impl::buildGlobalMatrixVector()
    /* -----------------------------------------------------------------
     * clean up
     * -----------------------------------------------------------------*/
-      
+
    if ( matDim > 0 )
    {
       delete [] diagCounts;
       delete [] offdCounts;
    }
-   if ( diagNNZ > 0 ) 
+   if ( diagNNZ > 0 )
    {
       delete [] TdiagIA;
       delete [] TdiagJA;
       delete [] TdiagAA;
    }
-   if ( offdNNZ > 0 ) 
+   if ( offdNNZ > 0 )
    {
       delete [] ToffdIA;
       delete [] ToffdJA;
@@ -2487,7 +2481,7 @@ int FEI_HYPRE_Impl::solveUsingCG()
    extNRows   = numExtNodes_ * nodeDOF_;
    totalNRows = localNRows + extNRows;
    rVec       = new double[totalNRows];
- 
+
    /* -----------------------------------------------------------------
     * assemble the initial guess vector
     * -----------------------------------------------------------------*/
@@ -2497,12 +2491,12 @@ int FEI_HYPRE_Impl::solveUsingCG()
    /* -----------------------------------------------------------------
     * compute initial residual vector and norm
     * -----------------------------------------------------------------*/
- 
-   matvec( solnVector_, rVec ); 
-   for ( irow = 0; irow < localNRows; irow++ ) 
+
+   matvec( solnVector_, rVec );
+   for ( irow = 0; irow < localNRows; irow++ )
       rVec[irow] = rhsVector_[irow] - rVec[irow];
    rnorm0 = rnorm = 0.0;
-   for ( irow = 0; irow < localNRows; irow++ ) 
+   for ( irow = 0; irow < localNRows; irow++ )
    {
       rnorm0 += (rVec[irow] * rVec[irow]);
       rnorm  += (rhsVector_[irow] * rhsVector_[irow]);
@@ -2514,7 +2508,7 @@ int FEI_HYPRE_Impl::solveUsingCG()
    rnorm  = sqrt(dArray2[0]);
    if ( outputLevel_ >= 2 && mypid_ == 0 )
       printf("\tFEI_HYPRE_Impl initial rnorm = %e (%e)\n",rnorm,rnorm0);
-   if ( rnorm0 == 0.0 ) 
+   if ( rnorm0 == 0.0 )
    {
       delete [] rVec;
       return 0;
@@ -2538,17 +2532,17 @@ int FEI_HYPRE_Impl::solveUsingCG()
     * loop until convergence is achieved
     * -----------------------------------------------------------------*/
 
-   while ( converged == 0 && numTrials < 2 ) 
+   while ( converged == 0 && numTrials < 2 )
    {
       innerIteration = 0;
-      while ( rnorm >= eps1 && iter < krylovMaxIterations_ ) 
+      while ( rnorm >= eps1 && iter < krylovMaxIterations_ )
       {
          iter++;
          innerIteration++;
          if ( innerIteration == 1 )
          {
             if ( diagonal_ != NULL )
-               for (irow = 0; irow < localNRows; irow++) 
+               for (irow = 0; irow < localNRows; irow++)
                   zVec[irow] = rVec[irow] * diagonal_[irow];
             else
                for (irow = 0; irow < localNRows; irow++)
@@ -2556,7 +2550,7 @@ int FEI_HYPRE_Impl::solveUsingCG()
 
             rhom1 = rho;
             rho   = 0.0;
-            for ( irow = 0; irow < localNRows; irow++ ) 
+            for ( irow = 0; irow < localNRows; irow++ )
                rho += rVec[irow] * zVec[irow];
             dArray[0] = rho;
             MPI_Allreduce(dArray, dArray2, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
@@ -2564,56 +2558,56 @@ int FEI_HYPRE_Impl::solveUsingCG()
             beta = 0.0;
          }
          else beta = rho / rhom1;
-         for ( irow = 0; irow < localNRows; irow++ ) 
+         for ( irow = 0; irow < localNRows; irow++ )
             pVec[irow] = zVec[irow] + beta * pVec[irow];
-         matvec( pVec, apVec ); 
+         matvec( pVec, apVec );
          sigma = 0.0;
-         for ( irow = 0; irow < localNRows; irow++ ) 
+         for ( irow = 0; irow < localNRows; irow++ )
             sigma += pVec[irow] * apVec[irow];
          dArray[0] = sigma;
          MPI_Allreduce(dArray, dArray2, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
          sigma  = dArray2[0];
-         alpha  = rho / sigma; 
-         for ( irow = 0; irow < localNRows; irow++ ) 
+         alpha  = rho / sigma;
+         for ( irow = 0; irow < localNRows; irow++ )
          {
             solnVector_[irow] += alpha * pVec[irow];
             rVec[irow] -= alpha * apVec[irow];
          }
          rnorm = 0.0;
-         for ( irow = 0; irow < localNRows; irow++ ) 
+         for ( irow = 0; irow < localNRows; irow++ )
             rnorm += rVec[irow] * rVec[irow];
          dArray[0] = rnorm;
 
          if ( diagonal_ != NULL )
-            for (irow = 0; irow < localNRows; irow++) 
+            for (irow = 0; irow < localNRows; irow++)
                zVec[irow] = rVec[irow] * diagonal_[irow];
          else
             for (irow = 0; irow < localNRows; irow++) zVec[irow] = rVec[irow];
 
          rhom1 = rho;
          rho   = 0.0;
-         for ( irow = 0; irow < localNRows; irow++ ) 
+         for ( irow = 0; irow < localNRows; irow++ )
             rho += rVec[irow] * zVec[irow];
          dArray[1] = rho;
          MPI_Allreduce(dArray, dArray2, 2, MPI_DOUBLE, MPI_SUM, mpiComm_);
-         rho = dArray2[1]; 
+         rho = dArray2[1];
          rnorm = sqrt( dArray2[0] );
          if ( outputLevel_ >= 2 && iter % 1 == 0 && mypid_ == 0 )
             printf("\tFEI_HYPRE_Impl : iteration %d - rnorm = %e (%e)\n",
                    iter, rnorm, eps1);
       }
-      matvec( solnVector_, rVec ); 
-      for ( irow = 0; irow < localNRows; irow++ ) 
-         rVec[irow] = rhsVector_[irow] - rVec[irow]; 
+      matvec( solnVector_, rVec );
+      for ( irow = 0; irow < localNRows; irow++ )
+         rVec[irow] = rhsVector_[irow] - rVec[irow];
       rnorm = 0.0;
-      for ( irow = 0; irow < localNRows; irow++ ) 
+      for ( irow = 0; irow < localNRows; irow++ )
          rnorm += rVec[irow] * rVec[irow];
       dArray[0] = rnorm;
       MPI_Allreduce(dArray, dArray2, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
       rnorm = sqrt( dArray2[0] );
       if ( outputLevel_ >= 2 && mypid_ == 0 )
          printf("\tFEI_HYPRE_Impl actual rnorm = %e \n",rnorm);
-      if ( (rnorm < eps1 || rnorm < 1.0e-16) || 
+      if ( (rnorm < eps1 || rnorm < 1.0e-16) ||
             iter >= krylovMaxIterations_ ) converged = 1;
       numTrials++;
    }
@@ -2656,7 +2650,7 @@ int FEI_HYPRE_Impl::solveUsingGMRES()
    for (iV = 0; iV <= gmresDim_+1; iV++) kVectors[iV] = new double[totalNRows];
    dArray  = new double[gmresDim_+1];
    dArray2 = new double[gmresDim_+1];
- 
+
    /* -----------------------------------------------------------------
     * assemble the initial guess vector
     * -----------------------------------------------------------------*/
@@ -2666,13 +2660,13 @@ int FEI_HYPRE_Impl::solveUsingGMRES()
    /* -----------------------------------------------------------------
     * compute initial residual vector and norm
     * -----------------------------------------------------------------*/
- 
+
    tVector = kVectors[1];
-   matvec( solnVector_, tVector ); 
-   for ( irow = 0; irow < localNRows; irow++ ) 
+   matvec( solnVector_, tVector );
+   for ( irow = 0; irow < localNRows; irow++ )
       tVector[irow] = rhsVector_[irow] - tVector[irow];
    rnorm0 = rnorm = 0.0;
-   for ( irow = 0; irow < localNRows; irow++ ) 
+   for ( irow = 0; irow < localNRows; irow++ )
    {
       rnorm0 += (tVector[irow] * tVector[irow]);
       rnorm  += (rhsVector_[irow] * rhsVector_[irow]);
@@ -2685,7 +2679,7 @@ int FEI_HYPRE_Impl::solveUsingGMRES()
    if ( outputLevel_ >= 2 && mypid_ == 0 )
       printf("\tFEI_HYPRE_Impl initial rnorm = %e (%e)\n",
              rnorm, rnorm0);
-   if ( rnorm0 < 1.0e-20 ) 
+   if ( rnorm0 < 1.0e-20 )
    {
       for (iV = 0; iV <= gmresDim_+1; iV++) delete [] kVectors[iV];
       delete [] kVectors;
@@ -2712,7 +2706,7 @@ int FEI_HYPRE_Impl::solveUsingGMRES()
 
    iter = 0;
 
-   while ( rnorm >= eps1 && iter < krylovMaxIterations_ ) 
+   while ( rnorm >= eps1 && iter < krylovMaxIterations_ )
    {
       dtemp = 1.0 / rnorm;
       tVector = kVectors[1];
@@ -2720,8 +2714,8 @@ int FEI_HYPRE_Impl::solveUsingGMRES()
       RS[1] = rnorm;
       innerIterations = 0;
 
-      while ( innerIterations < gmresDim_ && rnorm >= eps1 && 
-              iter < krylovMaxIterations_ ) 
+      while ( innerIterations < gmresDim_ && rnorm >= eps1 &&
+              iter < krylovMaxIterations_ )
       {
          innerIterations++;
          iter++;
@@ -2730,63 +2724,63 @@ int FEI_HYPRE_Impl::solveUsingGMRES()
          v1   = kVectors[kStep];
          v2   = kVectors[0];
          if ( diagonal_ != NULL )
-            for (irow = 0; irow < localNRows; irow++) 
+            for (irow = 0; irow < localNRows; irow++)
                v2[irow] = v1[irow] * diagonal_[irow];
          else
             for (irow = 0; irow < localNRows; irow++) v2[irow] = v1[irow];
 
-         matvec( kVectors[0], kVectors[kp1] ); 
+         matvec( kVectors[0], kVectors[kp1] );
 
 #if 0
          tVector = kVectors[kp1];
-         for ( iV = 1; iV <= kStep; iV++ ) 
+         for ( iV = 1; iV <= kStep; iV++ )
          {
             dtemp = 0.0;
             tVector2 = kVectors[iV];
-            for ( irow = 0; irow < localNRows; irow++ ) 
+            for ( irow = 0; irow < localNRows; irow++ )
                dtemp += tVector2[irow] * tVector[irow];
             dArray[iV-1] = dtemp;
          }
-         MPI_Allreduce(dArray, dArray2, kStep, MPI_DOUBLE, MPI_SUM, 
+         MPI_Allreduce(dArray, dArray2, kStep, MPI_DOUBLE, MPI_SUM,
                        mpiComm_);
 
          tVector  = kVectors[kp1];
-         for ( iV = 1; iV <= kStep; iV++ ) 
+         for ( iV = 1; iV <= kStep; iV++ )
          {
             dtemp = dArray2[iV-1];
-            HH[iV][kStep] = dtemp;  
+            HH[iV][kStep] = dtemp;
             tVector2 = kVectors[iV];
-            for ( irow = 0; irow < localNRows; irow++ ) 
+            for ( irow = 0; irow < localNRows; irow++ )
                tVector[irow] -= dtemp * tVector2[irow];
          }
 #else
          tVector = kVectors[kp1];
-         for ( iV = 1; iV <= kStep; iV++ ) 
+         for ( iV = 1; iV <= kStep; iV++ )
          {
             dtemp = 0.0;
             tVector2 = kVectors[iV];
-            for ( irow = 0; irow < localNRows; irow++ ) 
+            for ( irow = 0; irow < localNRows; irow++ )
                dtemp += tVector2[irow] * tVector[irow];
             dArray[0] = dtemp;
             MPI_Allreduce(dArray, dArray2, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
             dtemp = dArray2[0];
-            HH[iV][kStep] = dtemp;  
-            for ( irow = 0; irow < localNRows; irow++ ) 
+            HH[iV][kStep] = dtemp;
+            for ( irow = 0; irow < localNRows; irow++ )
                tVector[irow] -= dtemp * tVector2[irow];
          }
 #endif
          dtemp = 0.0;
-         for ( irow = 0; irow < localNRows; irow++ ) 
+         for ( irow = 0; irow < localNRows; irow++ )
             dtemp += tVector[irow] * tVector[irow];
          MPI_Allreduce(&dtemp, dArray2, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
          dtemp = sqrt(dArray2[0]);
          HH[kp1][kStep] = dtemp;
-         if ( dtemp != 0.0 ) 
+         if ( dtemp != 0.0 )
          {
             dtemp = 1.0 / dtemp;
             for (irow = 0; irow < localNRows; irow++) tVector[irow] *= dtemp;
          }
-         for ( iV = 2; iV <= kStep; iV++ ) 
+         for ( iV = 2; iV <= kStep; iV++ )
          {
             dtemp = HH[iV-1][kStep];
             HH[iV-1][kStep] =  C[iV-1] * dtemp + S[iV-1] * HH[iV][kStep];
@@ -2799,7 +2793,7 @@ int FEI_HYPRE_Impl::solveUsingGMRES()
          S[kStep]  = HH[kp1][kStep] / gam;
          RS[kp1]   = -S[kStep] * RS[kStep];
          RS[kStep] = C[kStep] * RS[kStep];
-         HH[kStep][kStep] = C[kStep] * HH[kStep][kStep] + 
+         HH[kStep][kStep] = C[kStep] * HH[kStep][kStep] +
                             S[kStep] * HH[kp1][kStep];
          rnorm = habs(RS[kp1]);
          if ( outputLevel_ >= 2 && mypid_ == 0 )
@@ -2807,42 +2801,42 @@ int FEI_HYPRE_Impl::solveUsingGMRES()
                    iter, rnorm);
       }
       RS[kStep] = RS[kStep] / HH[kStep][kStep];
-      for ( iV = 2; iV <= kStep; iV++ ) 
+      for ( iV = 2; iV <= kStep; iV++ )
       {
          iV2 = kStep - iV + 1;
          dtemp = RS[iV2];
-         for ( jV = iV2+1; jV <= kStep; jV++ ) 
+         for ( jV = iV2+1; jV <= kStep; jV++ )
             dtemp = dtemp - HH[iV2][jV] * RS[jV];
          RS[iV2] = dtemp / HH[iV2][iV2];
       }
       tVector = kVectors[1];
       dtemp   = RS[1];
       for ( irow = 0; irow < localNRows; irow++ ) tVector[irow] *= dtemp;
-      for ( iV = 2; iV <= kStep; iV++ ) 
+      for ( iV = 2; iV <= kStep; iV++ )
       {
          dtemp = RS[iV];
          tVector2 = kVectors[iV];
-         for ( irow = 0; irow < localNRows; irow++ ) 
+         for ( irow = 0; irow < localNRows; irow++ )
             tVector[irow] += dtemp * tVector2[irow];
       }
       tVector = kVectors[1];
       if ( diagonal_ != NULL )
       {
-         for (irow = 0; irow < localNRows; irow++) 
+         for (irow = 0; irow < localNRows; irow++)
             tVector[irow] *= diagonal_[irow];
       }
-      for (irow = 0; irow < localNRows; irow++) 
+      for (irow = 0; irow < localNRows; irow++)
          solnVector_[irow] += tVector[irow];
-      matvec( solnVector_, tVector ); 
-      for ( irow = 0; irow < localNRows; irow++ ) 
+      matvec( solnVector_, tVector );
+      for ( irow = 0; irow < localNRows; irow++ )
          tVector[irow] = rhsVector_[irow] - tVector[irow];
       rnorm = 0.0;
-      for ( irow = 0; irow < localNRows; irow++ ) 
+      for ( irow = 0; irow < localNRows; irow++ )
          rnorm += (tVector[irow] * tVector[irow]);
       MPI_Allreduce(&rnorm, dArray2, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
       rnorm = sqrt(dArray2[0]);
    }
-   if ( rnorm < eps1 ) converged = 1; 
+   if ( rnorm < eps1 ) converged = 1;
    if ( outputLevel_ >= 2 && mypid_ == 0 )
       printf("\tFEI_HYPRE_Impl : final rnorm = %e\n", rnorm);
 
@@ -2868,7 +2862,7 @@ int FEI_HYPRE_Impl::solveUsingGMRES()
 }
 
 /**************************************************************************
- solve linear system using CGS 
+ solve linear system using CGS
  -------------------------------------------------------------------------*/
 int FEI_HYPRE_Impl::solveUsingCGS()
 {
@@ -2886,7 +2880,7 @@ int FEI_HYPRE_Impl::solveUsingCGS()
    extNRows   = numExtNodes_ * nodeDOF_;
    totalNRows = localNRows + extNRows;
    rVec       = new double[totalNRows];
- 
+
    /* -----------------------------------------------------------------
     * assemble the initial guess vector
     * -----------------------------------------------------------------*/
@@ -2896,12 +2890,12 @@ int FEI_HYPRE_Impl::solveUsingCGS()
    /* -----------------------------------------------------------------
     * compute initial residual vector and norm
     * -----------------------------------------------------------------*/
- 
-   matvec( solnVector_, rVec ); 
-   for ( irow = 0; irow < localNRows; irow++ ) 
+
+   matvec( solnVector_, rVec );
+   for ( irow = 0; irow < localNRows; irow++ )
       rVec[irow] = rhsVector_[irow] - rVec[irow];
    rnorm0 = rnorm = 0.0;
-   for ( irow = 0; irow < localNRows; irow++ ) 
+   for ( irow = 0; irow < localNRows; irow++ )
    {
       rnorm0 += (rVec[irow] * rVec[irow]);
       rnorm  += (rhsVector_[irow] * rhsVector_[irow]);
@@ -2913,7 +2907,7 @@ int FEI_HYPRE_Impl::solveUsingCGS()
    rnorm  = sqrt(dArray2[0]);
    if ( outputLevel_ >= 1 && mypid_ == 0 )
       printf("\tFEI_HYPRE_Impl initial rnorm = %e (%e)\n",rnorm,rnorm0);
-   if ( rnorm0 == 0.0 ) 
+   if ( rnorm0 == 0.0 )
    {
       delete [] rVec;
       return 0;
@@ -2943,16 +2937,16 @@ int FEI_HYPRE_Impl::solveUsingCGS()
     * loop until convergence is achieved
     * -----------------------------------------------------------------*/
 
-   while ( converged == 0 && numTrials < 2 ) 
+   while ( converged == 0 && numTrials < 2 )
    {
       innerIteration = 0;
-      while ( rnorm >= eps1 && iter < krylovMaxIterations_ ) 
+      while ( rnorm >= eps1 && iter < krylovMaxIterations_ )
       {
          iter++;
          innerIteration++;
          rho1 = rho2;
          beta2 = beta * beta;
-         for (irow = 0; irow < totalNRows; irow++) 
+         for (irow = 0; irow < totalNRows; irow++)
          {
             tVec[irow] = beta * qVec[irow];
             uVec[irow] = rVec[irow] + tVec[irow];
@@ -2960,28 +2954,28 @@ int FEI_HYPRE_Impl::solveUsingCGS()
          }
          if ( diagonal_ != NULL )
          {
-            for (irow = 0; irow < localNRows; irow++) 
+            for (irow = 0; irow < localNRows; irow++)
                tVec[irow] = pVec[irow] * diagonal_[irow];
          }
          else
             for (irow = 0; irow < localNRows; irow++) tVec[irow] = pVec[irow];
 
-         matvec( tVec, vVec ); 
+         matvec( tVec, vVec );
          sigma = 0.0;
-         for ( irow = 0; irow < localNRows; irow++ ) 
+         for ( irow = 0; irow < localNRows; irow++ )
             sigma += (rhVec[irow] * vVec[irow]);
          MPI_Allreduce(&sigma, dArray, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
          sigma = dArray[0];
          alpha = rho1 / sigma;
 
-         for (irow = 0; irow < totalNRows; irow++) 
+         for (irow = 0; irow < totalNRows; irow++)
          {
             qVec[irow] = uVec[irow] - alpha * vVec[irow];
             uVec[irow] += qVec[irow];
          }
          if ( diagonal_ != NULL )
          {
-            for (irow = 0; irow < localNRows; irow++) 
+            for (irow = 0; irow < localNRows; irow++)
             {
                tVec[irow] = uVec[irow] * diagonal_[irow];
                solnVector_[irow] += alpha * uVec[irow] * diagonal_[irow];
@@ -2989,19 +2983,19 @@ int FEI_HYPRE_Impl::solveUsingCGS()
          }
          else
          {
-            for (irow = 0; irow < localNRows; irow++) 
+            for (irow = 0; irow < localNRows; irow++)
             {
                tVec[irow] = uVec[irow];
                solnVector_[irow] += alpha * uVec[irow];
             }
          }
-         matvec( tVec, vVec ); 
+         matvec( tVec, vVec );
 
-         for (irow = 0; irow < totalNRows; irow++) 
+         for (irow = 0; irow < totalNRows; irow++)
             rVec[irow] -= alpha * vVec[irow];
 
          dtemp = dtemp2 = 0.0;
-         for ( irow = 0; irow < localNRows; irow++ ) 
+         for ( irow = 0; irow < localNRows; irow++ )
          {
             dtemp  += (rVec[irow] * rhVec[irow]);
             dtemp2 += (rVec[irow] * rVec[irow]);
@@ -3016,11 +3010,11 @@ int FEI_HYPRE_Impl::solveUsingCGS()
             printf("\tFEI_HYPRE_Impl : iteration %d - rnorm = %e (%e)\n",
                    iter, rnorm, eps1);
       }
-      matvec( solnVector_, rVec ); 
-      for ( irow = 0; irow < localNRows; irow++ ) 
-         rVec[irow] = rhsVector_[irow] - rVec[irow]; 
+      matvec( solnVector_, rVec );
+      for ( irow = 0; irow < localNRows; irow++ )
+         rVec[irow] = rhsVector_[irow] - rVec[irow];
       rnorm = 0.0;
-      for ( irow = 0; irow < localNRows; irow++ ) 
+      for ( irow = 0; irow < localNRows; irow++ )
          rnorm += rVec[irow] * rVec[irow];
       MPI_Allreduce(&rnorm, dArray, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
       rnorm = sqrt( dArray[0] );
@@ -3050,7 +3044,7 @@ int FEI_HYPRE_Impl::solveUsingCGS()
 }
 
 /**************************************************************************
- solve linear system using Bicgstab 
+ solve linear system using Bicgstab
  -------------------------------------------------------------------------*/
 int FEI_HYPRE_Impl::solveUsingBicgstab()
 {
@@ -3070,7 +3064,7 @@ int FEI_HYPRE_Impl::solveUsingBicgstab()
    totalNRows  = localNRows + extNRows;
    rVec        = new double[totalNRows];
    vecByteSize = localNRows * sizeof(double);
- 
+
    /* -----------------------------------------------------------------
     * assemble the initial guess vector
     * -----------------------------------------------------------------*/
@@ -3080,12 +3074,12 @@ int FEI_HYPRE_Impl::solveUsingBicgstab()
    /* -----------------------------------------------------------------
     * compute initial residual vector and norm
     * -----------------------------------------------------------------*/
- 
-   matvec( solnVector_, rVec ); 
-   for ( irow = 0; irow < localNRows; irow++ ) 
+
+   matvec( solnVector_, rVec );
+   for ( irow = 0; irow < localNRows; irow++ )
       rVec[irow] = rhsVector_[irow] - rVec[irow];
    rnorm0 = rnorm = 0.0;
-   for ( irow = 0; irow < localNRows; irow++ ) 
+   for ( irow = 0; irow < localNRows; irow++ )
    {
       rnorm0 += (rVec[irow] * rVec[irow]);
       rnorm  += (rhsVector_[irow] * rhsVector_[irow]);
@@ -3097,7 +3091,7 @@ int FEI_HYPRE_Impl::solveUsingBicgstab()
    rnorm  = sqrt(dArray2[0]);
    if ( outputLevel_ >= 1 && mypid_ == 0 )
       printf("\tFEI_HYPRE_Impl initial rnorm = %e (%e)\n",rnorm,rnorm0);
-   if ( rnorm0 == 0.0 ) 
+   if ( rnorm0 == 0.0 )
    {
       delete [] rVec;
       return 0;
@@ -3117,7 +3111,7 @@ int FEI_HYPRE_Impl::solveUsingBicgstab()
    gammapp = new double[blen+1];
    mat     = new double*[blen+1];
    tau     = new double*[blen+1];
-   for ( iM = 1; iM <= blen; iM++ ) 
+   for ( iM = 1; iM <= blen; iM++ )
    {
       mat[iM] = new double[blen+1];
       tau[iM] = new double[blen+1];
@@ -3127,7 +3121,7 @@ int FEI_HYPRE_Impl::solveUsingBicgstab()
    tVec  = new double[totalNRows];
    utVec = new double*[blen+2];
    rtVec = new double*[blen+2];
-   for ( iM = 0; iM < blen+2; iM++ ) 
+   for ( iM = 0; iM < blen+2; iM++ )
    {
       utVec[iM] = new double[totalNRows];
       rtVec[iM] = new double[totalNRows];
@@ -3139,7 +3133,7 @@ int FEI_HYPRE_Impl::solveUsingBicgstab()
     * loop until convergence is achieved
     * -----------------------------------------------------------------*/
 
-   while ( converged == 0 && numTrials < 2 ) 
+   while ( converged == 0 && numTrials < 2 )
    {
       innerIteration = 0;
       memcpy( rhVec, rVec, vecByteSize );
@@ -3148,7 +3142,7 @@ int FEI_HYPRE_Impl::solveUsingBicgstab()
       memset( utVec[0], 0, vecByteSize );
       omega = rho = 1.0;
       alpha = 0.0;
-      while ( rnorm >= eps1 && iter < krylovMaxIterations_ ) 
+      while ( rnorm >= eps1 && iter < krylovMaxIterations_ )
       {
          iter += blen;
          innerIteration += blen;
@@ -3158,71 +3152,71 @@ int FEI_HYPRE_Impl::solveUsingBicgstab()
          for ( iM = 0; iM < blen; iM++ )
          {
             dtemp = 0.0;
-            for ( irow = 0; irow < localNRows; irow++ ) 
+            for ( irow = 0; irow < localNRows; irow++ )
                dtemp += (rhVec[irow] * rtVec[iM+1][irow]);
             MPI_Allreduce(&dtemp, &rho1, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
             beta = alpha * rho1 / rho;
             rho   = rho1;
             dtemp = -beta;
-            for ( jM = 0; jM <= iM; jM++ ) 
-               for ( irow = 0; irow < localNRows; irow++ ) 
-                  utVec[jM+1][irow] = dtemp * utVec[jM+1][irow] + 
-                                      rtVec[jM+1][irow]; 
+            for ( jM = 0; jM <= iM; jM++ )
+               for ( irow = 0; irow < localNRows; irow++ )
+                  utVec[jM+1][irow] = dtemp * utVec[jM+1][irow] +
+                                      rtVec[jM+1][irow];
             if ( diagonal_ != NULL )
             {
-               for (irow = 0; irow < localNRows; irow++) 
+               for (irow = 0; irow < localNRows; irow++)
                   tVec[irow] = utVec[iM+1][irow] * diagonal_[irow];
             }
             else
             {
                memcpy( tVec, utVec[iM+1], vecByteSize );
             }
-            matvec( tVec, utVec[iM+2] ); 
+            matvec( tVec, utVec[iM+2] );
             dtemp = 0.0;
-            for ( irow = 0; irow < localNRows; irow++ ) 
+            for ( irow = 0; irow < localNRows; irow++ )
                dtemp += (rhVec[irow] * utVec[iM+2][irow]);
             MPI_Allreduce(&dtemp, &gamma1, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
 
-            alpha = rho / gamma1; 
-            for ( jM = 0; jM <= iM; jM++ ) 
-               for ( irow = 0; irow < localNRows; irow++ ) 
-                  rtVec[jM+1][irow] -= alpha * utVec[jM+2][irow]; 
+            alpha = rho / gamma1;
+            for ( jM = 0; jM <= iM; jM++ )
+               for ( irow = 0; irow < localNRows; irow++ )
+                  rtVec[jM+1][irow] -= alpha * utVec[jM+2][irow];
 
             if ( diagonal_ != NULL )
             {
-               for (irow = 0; irow < localNRows; irow++) 
+               for (irow = 0; irow < localNRows; irow++)
                   tVec[irow] = rtVec[iM+1][irow] * diagonal_[irow];
             }
             else
             {
                memcpy( tVec, rtVec[iM+1], vecByteSize );
             }
-            matvec( tVec, rtVec[iM+2] ); 
-            for (irow = 0; irow < localNRows; irow++) 
+            matvec( tVec, rtVec[iM+2] );
+            for (irow = 0; irow < localNRows; irow++)
                xhVec[irow] += alpha * utVec[1][irow];
          }
          for ( iM = 1; iM <= blen; iM++ )
             for ( jM = 1; jM <= blen; jM++ ) mat[iM][jM] = 0.0;
          for ( iM = 1; iM <= blen; iM++ )
          {
-            for ( jM = 1; jM <= iM-1; jM++ ) 
+            for ( jM = 1; jM <= iM-1; jM++ )
             {
                dtemp = 0.0;
-               for ( irow = 0; irow < localNRows; irow++ ) 
+               for ( irow = 0; irow < localNRows; irow++ )
                   dtemp += (rtVec[jM+1][irow] * rtVec[iM+1][irow]);
                MPI_Allreduce(&dtemp, &dtemp2, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
                tau[jM][iM] = dtemp2 / sigma[jM];
                mat[jM][iM] = tau[jM][iM] * sigma[jM];
                dtemp = -tau[jM][iM];
-               for (irow = 0; irow < localNRows; irow++) 
+               for (irow = 0; irow < localNRows; irow++)
                   rtVec[iM+1][irow] += dtemp * rtVec[jM+1][irow];
             }
             dtemp = 0.0;
-            for ( irow = 0; irow < localNRows; irow++ ) 
+            for ( irow = 0; irow < localNRows; irow++ )
                dtemp += (rtVec[iM+1][irow] * rtVec[iM+1][irow]);
             dArray[0] = dtemp;
             dtemp = 0.0;
-            for ( irow = 0; irow < localNRows; irow++ ) 
+            for ( irow = 0; irow < localNRows; irow++ )
                dtemp += (rtVec[1][irow] * rtVec[iM+1][irow]);
             dArray[1] = dtemp;
             MPI_Allreduce(dArray, dArray2, 2, MPI_DOUBLE, MPI_SUM, mpiComm_);
@@ -3232,44 +3226,44 @@ int FEI_HYPRE_Impl::solveUsingBicgstab()
          }
          gammanp[blen] = gammap[blen];
          omega = gammanp[blen];
-         for ( iM = blen-1; iM >= 1; iM-- ) 
+         for ( iM = blen-1; iM >= 1; iM-- )
          {
            gammanp[iM] = gammap[iM];
            for (jM=iM+1; jM<=blen; jM++)
              gammanp[iM] = gammanp[iM] - tau[iM][jM] * gammanp[jM];
          }
-         for (iM=1; iM<=blen-1; iM++) 
+         for (iM=1; iM<=blen-1; iM++)
          {
             gammapp[iM] = gammanp[iM+1];
             for (jM=iM+1; jM<=blen-1; jM++)
                gammapp[iM] = gammapp[iM] + tau[iM][jM] * gammanp[jM+1];
          }
          dtemp = gammanp[1];
-         for (irow = 0; irow < localNRows; irow++) 
+         for (irow = 0; irow < localNRows; irow++)
             xhVec[irow] += dtemp * rtVec[1][irow];
          dtemp = - gammap[blen];
-         for (irow = 0; irow < localNRows; irow++) 
+         for (irow = 0; irow < localNRows; irow++)
             rtVec[1][irow] += dtemp * rtVec[blen+1][irow];
          dtemp = - gammanp[blen];
-         for (irow = 0; irow < localNRows; irow++) 
+         for (irow = 0; irow < localNRows; irow++)
             utVec[1][irow] += dtemp * utVec[blen+1][irow];
-         for (iM=1; iM<=blen-1; iM++) 
+         for (iM=1; iM<=blen-1; iM++)
          {
             dtemp = - gammanp[iM];
-            for (irow = 0; irow < localNRows; irow++) 
+            for (irow = 0; irow < localNRows; irow++)
                utVec[1][irow] += dtemp * utVec[iM+1][irow];
             dtemp = gammapp[iM];
-            for (irow = 0; irow < localNRows; irow++) 
+            for (irow = 0; irow < localNRows; irow++)
                xhVec[irow] += dtemp * rtVec[iM+1][irow];
             dtemp = - gammap[iM];
-            for (irow = 0; irow < localNRows; irow++) 
+            for (irow = 0; irow < localNRows; irow++)
                rtVec[1][irow] += dtemp * rtVec[iM+1][irow];
          }
          memcpy( utVec[0], utVec[1], vecByteSize );
          memcpy( rtVec[0], rtVec[1], vecByteSize );
          memcpy( solnVector_, xhVec, vecByteSize );
          dtemp = 0.0;
-         for ( irow = 0; irow < localNRows; irow++ ) 
+         for ( irow = 0; irow < localNRows; irow++ )
             dtemp += (rtVec[1][irow] * rtVec[1][irow]);
          MPI_Allreduce(&dtemp, &rnorm, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
          rnorm = sqrt( rnorm );
@@ -3280,14 +3274,14 @@ int FEI_HYPRE_Impl::solveUsingBicgstab()
 
       if ( diagonal_ != NULL )
       {
-         for (irow = 0; irow < localNRows; irow++) 
+         for (irow = 0; irow < localNRows; irow++)
             solnVector_[irow] *= diagonal_[irow];
       }
-      matvec( solnVector_, rVec ); 
-      for ( irow = 0; irow < localNRows; irow++ ) 
-         rVec[irow] = rhsVector_[irow] - rVec[irow]; 
+      matvec( solnVector_, rVec );
+      for ( irow = 0; irow < localNRows; irow++ )
+         rVec[irow] = rhsVector_[irow] - rVec[irow];
       rnorm = 0.0;
-      for ( irow = 0; irow < localNRows; irow++ ) 
+      for ( irow = 0; irow < localNRows; irow++ )
          rnorm += rVec[irow] * rVec[irow];
       MPI_Allreduce(&rnorm, dArray, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
       rnorm = sqrt( dArray[0] );
@@ -3311,7 +3305,7 @@ int FEI_HYPRE_Impl::solveUsingBicgstab()
    delete [] gammap;
    delete [] gammanp;
    delete [] gammapp;
-   for ( iM = 1; iM <= blen; iM++ ) 
+   for ( iM = 1; iM <= blen; iM++ )
    {
       delete [] mat[iM];
       delete [] tau[iM];
@@ -3322,7 +3316,7 @@ int FEI_HYPRE_Impl::solveUsingBicgstab()
    delete [] rhVec;
    delete [] xhVec;
    delete [] tVec;
-   for ( iM = 0; iM < blen+2; iM++ ) 
+   for ( iM = 0; iM < blen+2; iM++ )
    {
       delete [] utVec[iM];
       delete [] rtVec[iM];
@@ -3334,17 +3328,18 @@ int FEI_HYPRE_Impl::solveUsingBicgstab()
 }
 
 /**************************************************************************
- solve linear system using SuperLU 
+ solve linear system using SuperLU
  -------------------------------------------------------------------------*/
 int FEI_HYPRE_Impl::solveUsingSuperLU()
 {
-#if HAVE_SUPERLU
+#ifdef HAVE_SUPERLU
    int    localNRows, localNnz, *countArray, irow, jcol, *cscIA, *cscJA;
    int    colNum, index, *etree, permcSpec, lwork, panelSize, relax, info;
    int    *permC, *permR;
-   double *cscAA, diagPivotThresh, dropTol, *rVec, rnorm;
+   double *cscAA, diagPivotThresh, *rVec, rnorm;
    superlu_options_t slu_options;
    SuperLUStat_t     slu_stat;
+   GlobalLU_t        Glu;
    trans_t           trans;
    SuperMatrix superLU_Amat;
    SuperMatrix superLU_Lmat;
@@ -3355,7 +3350,7 @@ int FEI_HYPRE_Impl::solveUsingSuperLU()
    /* ---------------------------------------------------------------
     * conversion from CSR to CSC
     * -------------------------------------------------------------*/
-   
+
    localNRows = numLocalNodes_ * nodeDOF_;
    countArray = new int[localNRows];
    for ( irow = 0; irow < localNRows; irow++ ) countArray[irow] = 0;
@@ -3363,9 +3358,9 @@ int FEI_HYPRE_Impl::solveUsingSuperLU()
       for ( jcol = diagIA_[irow]; jcol < diagIA_[irow+1]; jcol++ )
          countArray[diagJA_[jcol]]++;
    localNnz = diagIA_[localNRows];
-   cscJA = (int *)    malloc( (localNRows+1) * sizeof(int) );
-   cscIA = (int *)    malloc( localNnz * sizeof(int) );
-   cscAA = (double *) malloc( localNnz * sizeof(double) );
+   cscJA = hypre_TAlloc(int,  (localNRows+1) , HYPRE_MEMORY_HOST);
+   cscIA = hypre_TAlloc(int,  localNnz , HYPRE_MEMORY_HOST);
+   cscAA = hypre_TAlloc(double,  localNnz , HYPRE_MEMORY_HOST);
    cscJA[0] = 0;
    localNnz = 0;
    for ( jcol = 1; jcol <= localNRows; jcol++ )
@@ -3396,8 +3391,8 @@ int FEI_HYPRE_Impl::solveUsingSuperLU()
     * make SuperMatrix
     * -------------------------------------------------------------*/
 
-   dCreate_CompCol_Matrix(&superLU_Amat, localNRows, localNRows, 
-                          cscJA[localNRows], cscAA, cscIA, cscJA, SLU_NC, 
+   dCreate_CompCol_Matrix(&superLU_Amat, localNRows, localNRows,
+                          cscJA[localNRows], cscAA, cscIA, cscJA, SLU_NC,
                           SLU_D, SLU_GE);
    etree     = new int[localNRows];
    permC     = new int[localNRows];
@@ -3408,7 +3403,6 @@ int FEI_HYPRE_Impl::solveUsingSuperLU()
    slu_options.SymmetricMode = NO;
    sp_preorder(&slu_options, &superLU_Amat, permC, etree, &AC);
    diagPivotThresh = 1.0;
-   dropTol = 0.0;
    panelSize = sp_ienv(1);
    relax = sp_ienv(2);
    StatInit(&slu_stat);
@@ -3417,9 +3411,12 @@ int FEI_HYPRE_Impl::solveUsingSuperLU()
    slu_options.Fact = DOFACT;
    slu_options.DiagPivotThresh = diagPivotThresh;
 
-   dgstrf(&slu_options, &AC, dropTol, relax, panelSize,
+//   dgstrf(&slu_options, &AC, dropTol, relax, panelSize,
+//          etree, NULL, lwork, permC, permR, &superLU_Lmat,
+//          &superLU_Umat, &slu_stat, &info);
+   dgstrf(&slu_options, &AC, relax, panelSize,
           etree, NULL, lwork, permC, permR, &superLU_Lmat,
-          &superLU_Umat, &slu_stat, &info);
+          &superLU_Umat, &Glu, &slu_stat, &info);
 
    Destroy_CompCol_Permuted(&AC);
    Destroy_CompCol_Matrix(&superLU_Amat);
@@ -3430,9 +3427,9 @@ int FEI_HYPRE_Impl::solveUsingSuperLU()
     * -----------------------------------------------------------*/
 
    solnVector_ = new double[localNRows];
-   for ( irow = 0; irow < localNRows; irow++ ) 
+   for ( irow = 0; irow < localNRows; irow++ )
       solnVector_[irow] = rhsVector_[irow];
-   dCreate_Dense_Matrix(&B, localNRows, 1, solnVector_, localNRows, 
+   dCreate_Dense_Matrix(&B, localNRows, 1, solnVector_, localNRows,
                         SLU_DN, SLU_D, SLU_GE);
 
    /* -------------------------------------------------------------
@@ -3440,14 +3437,14 @@ int FEI_HYPRE_Impl::solveUsingSuperLU()
     * -----------------------------------------------------------*/
 
    trans = NOTRANS;
-   dgstrs (trans, &superLU_Lmat, &superLU_Umat, permC, permR, &B, 
+   dgstrs (trans, &superLU_Lmat, &superLU_Umat, permC, permR, &B,
            &slu_stat, &info);
    rVec = new double[localNRows];
-   matvec( solnVector_, rVec ); 
-   for ( irow = 0; irow < localNRows; irow++ ) 
-      rVec[irow] = rhsVector_[irow] - rVec[irow]; 
+   matvec( solnVector_, rVec );
+   for ( irow = 0; irow < localNRows; irow++ )
+      rVec[irow] = rhsVector_[irow] - rVec[irow];
    rnorm = 0.0;
-   for ( irow = 0; irow < localNRows; irow++ ) 
+   for ( irow = 0; irow < localNRows; irow++ )
       rnorm += rVec[irow] * rVec[irow];
    rnorm = sqrt( rnorm );
    if ( outputLevel_ >= 2 && mypid_ == 0 )
@@ -3476,7 +3473,7 @@ int FEI_HYPRE_Impl::solveUsingSuperLU()
    return (1);
 #endif
 }
- 
+
 /**************************************************************************
  matrix vector multiply
  -------------------------------------------------------------------------*/
@@ -3496,10 +3493,10 @@ void FEI_HYPRE_Impl::matvec(double *xvec, double *yvec)
    {
       int matDim = ( numLocalNodes_ + numExtNodes_ ) * nodeDOF_;
       double ddata;
-      for ( int iD = 0; iD < matDim; iD++ ) 
+      for ( int iD = 0; iD < matDim; iD++ )
       {
          ddata = 0.0;
-         for ( int iD2 = diagIA_[iD]; iD2 < diagIA_[iD+1]; iD2++ ) 
+         for ( int iD2 = diagIA_[iD]; iD2 < diagIA_[iD+1]; iD2++ )
            ddata += diagAA_[iD2] * xvec[diagJA_[iD2]];
          yvec[iD] = ddata;
       }
@@ -3513,10 +3510,10 @@ void FEI_HYPRE_Impl::matvec(double *xvec, double *yvec)
    {
       int matDim = ( numLocalNodes_ + numExtNodes_ ) * nodeDOF_;
       double ddata;
-      for ( int iD = 0; iD < matDim; iD++ ) 
+      for ( int iD = 0; iD < matDim; iD++ )
       {
          ddata = 0.0;
-         for ( int iD2 = offdIA_[iD]; iD2 < offdIA_[iD+1]; iD2++ ) 
+         for ( int iD2 = offdIA_[iD]; iD2 < offdIA_[iD+1]; iD2++ )
            ddata += offdAA_[iD2] * xvec[offdJA_[iD2]];
          yvec[iD] += ddata;
       }
@@ -3530,7 +3527,7 @@ void FEI_HYPRE_Impl::matvec(double *xvec, double *yvec)
 }
 
 /**************************************************************************
- form right hand side vector from element load vectors 
+ form right hand side vector from element load vectors
  -------------------------------------------------------------------------*/
 void FEI_HYPRE_Impl::assembleRHSVector()
 {
@@ -3565,7 +3562,7 @@ void FEI_HYPRE_Impl::assembleRHSVector()
 }
 
 /**************************************************************************
- form solution vector 
+ form solution vector
  -------------------------------------------------------------------------*/
 void FEI_HYPRE_Impl::assembleSolnVector()
 {
@@ -3619,7 +3616,7 @@ void FEI_HYPRE_Impl::disassembleSolnVector()
             eqnIndex1 = elemNodeLists[iE][iN] * nodeDOF_;
             eqnIndex2 = iN * nodeDOF_;
             for ( iD = 0; iD < nodeDOF_; iD++ )
-               solnVectors[iE][eqnIndex2+iD] = solnVector_[eqnIndex1+iD]; 
+               solnVectors[iE][eqnIndex2+iD] = solnVector_[eqnIndex1+iD];
          }
       }
    }
@@ -3752,17 +3749,17 @@ void FEI_HYPRE_Impl::PVectorInterChange( double *dvec )
    MPI_Request *requests;
    MPI_Status  status;
 
-   if ( nRecvs_ > 0 ) 
+   if ( nRecvs_ > 0 )
    {
       dRecvBufs = new double*[nRecvs_];
       requests  = new MPI_Request[nRecvs_];
-      for ( iP = 0; iP < nRecvs_; iP++ ) 
+      for ( iP = 0; iP < nRecvs_; iP++ )
          dRecvBufs[iP] = new double[recvLengs_[iP]*nodeDOF_];
    }
-   if ( nSends_ > 0 ) 
+   if ( nSends_ > 0 )
    {
       dSendBufs = new double*[nSends_];
-      for ( iP = 0; iP < nSends_; iP++ ) 
+      for ( iP = 0; iP < nSends_; iP++ )
       {
          dSendBufs[iP] = new double[sendLengs_[iP]*nodeDOF_];
          for ( iD = 0; iD < sendLengs_[iP]; iD++ )
@@ -3770,7 +3767,7 @@ void FEI_HYPRE_Impl::PVectorInterChange( double *dvec )
             ind1 = sendProcIndices_[iP][iD] * nodeDOF_;
             ind2 = iD * nodeDOF_;
             for ( iD2 = 0; iD2 < nodeDOF_; iD2++ )
-               dSendBufs[iP][ind2+iD2] = dvec[ind1+iD2]; 
+               dSendBufs[iP][ind2+iD2] = dvec[ind1+iD2];
          }
       }
    }
@@ -3790,12 +3787,12 @@ void FEI_HYPRE_Impl::PVectorInterChange( double *dvec )
          ind1 = recvProcIndices_[iP][iD] * nodeDOF_;
          ind2 = iD * nodeDOF_;
          for ( iD2 = 0; iD2 < nodeDOF_; iD2++ )
-            dvec[ind1+iD2] = dRecvBufs[iP][ind2+iD2]; 
+            dvec[ind1+iD2] = dRecvBufs[iP][ind2+iD2];
       }
       delete [] dRecvBufs[iP];
    }
    if ( nRecvs_ > 0 ) delete [] dRecvBufs;
-   if ( nSends_ > 0 ) 
+   if ( nSends_ > 0 )
    {
       for ( iP = 0; iP < nSends_; iP++ ) delete [] dSendBufs[iP];
       delete [] dSendBufs;
@@ -3812,17 +3809,17 @@ void FEI_HYPRE_Impl::PVectorReverseChange( double *dvec )
    MPI_Request *requests;
    MPI_Status  status;
 
-   if ( nSends_ > 0 ) 
+   if ( nSends_ > 0 )
    {
       dRecvBufs = new double*[nSends_];
       requests  = new MPI_Request[nSends_];
-      for ( iP = 0; iP < nSends_; iP++ ) 
+      for ( iP = 0; iP < nSends_; iP++ )
          dRecvBufs[iP] = new double[sendLengs_[iP]*nodeDOF_];
    }
-   if ( nRecvs_ > 0 ) 
+   if ( nRecvs_ > 0 )
    {
       dSendBufs = new double*[nRecvs_];
-      for ( iP = 0; iP < nRecvs_; iP++ ) 
+      for ( iP = 0; iP < nRecvs_; iP++ )
       {
          dSendBufs[iP] = new double[recvLengs_[iP]*nodeDOF_];
          for ( iD = 0; iD < recvLengs_[iP]; iD++ )
@@ -3830,7 +3827,7 @@ void FEI_HYPRE_Impl::PVectorReverseChange( double *dvec )
             ind1 = recvProcIndices_[iP][iD] * nodeDOF_;
             ind2 = iD * nodeDOF_;
             for ( iD2 = 0; iD2 < nodeDOF_; iD2++ )
-               dSendBufs[iP][ind2+iD2] = dvec[ind1+iD2]; 
+               dSendBufs[iP][ind2+iD2] = dvec[ind1+iD2];
          }
       }
    }
@@ -3850,12 +3847,12 @@ void FEI_HYPRE_Impl::PVectorReverseChange( double *dvec )
          ind1 = sendProcIndices_[iP][iD] * nodeDOF_;
          ind2 = iD * nodeDOF_;
          for ( iD2 = 0; iD2 < nodeDOF_; iD2++ )
-            dvec[ind1+iD2] += dRecvBufs[iP][ind2+iD2]; 
+            dvec[ind1+iD2] += dRecvBufs[iP][ind2+iD2];
       }
       delete [] dRecvBufs[iP];
    }
    if ( nSends_ > 0 ) delete [] dRecvBufs;
-   if ( nRecvs_ > 0 ) 
+   if ( nRecvs_ > 0 )
    {
       for ( iP = 0; iP < nRecvs_; iP++ ) delete [] dSendBufs[iP];
       delete [] dSendBufs;
@@ -3882,16 +3879,16 @@ void FEI_HYPRE_Impl::printLinearSystem()
    {
       for ( iD2 = diagIA_[iD]; iD2 < diagIA_[iD+1]; iD2++ )
          if ( diagJA_[iD2] == iD )
-            fprintf(fp,"%6d  %6d  %25.16e \n", iD+1+offset, 
+            fprintf(fp,"%6d  %6d  %25.16e \n", iD+1+offset,
                     diagJA_[iD2]+1+offset, diagAA_[iD2]);
       for ( iD2 = diagIA_[iD]; iD2 < diagIA_[iD+1]; iD2++ )
          if ( diagJA_[iD2] != iD )
-            fprintf(fp,"%6d  %6d  %25.16e \n", iD+1+offset, 
+            fprintf(fp,"%6d  %6d  %25.16e \n", iD+1+offset,
                     diagJA_[iD2]+1+offset, diagAA_[iD2]);
       if ( offdIA_ != NULL )
       {
          for ( iD2 = offdIA_[iD]; iD2 < offdIA_[iD+1]; iD2++ )
-            fprintf(fp,"%6d  %6d  %25.16e \n", iD+1+offset, 
+            fprintf(fp,"%6d  %6d  %25.16e \n", iD+1+offset,
                     nodeExtNewGlobalIDs_[offdJA_[iD2]-iEnd]+1,offdAA_[iD2]);
       }
    }
@@ -3922,7 +3919,7 @@ void FEI_HYPRE_Impl::printLinearSystem()
    fprintf(fp, "%6d \n", iEnd);
    for ( iD = 0; iD < iEnd; iD++ )
    {
-      fprintf(fp,"%6d  %25.16e \n", iD+1+offset, rhsVector_[iD]); 
+      fprintf(fp,"%6d  %25.16e \n", iD+1+offset, rhsVector_[iD]);
    }
    iBegin = numLocalNodes_ * nodeDOF_;
    iEnd   = (numLocalNodes_ + numExtNodes_ ) * nodeDOF_;

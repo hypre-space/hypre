@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -17,6 +12,7 @@
  *****************************************************************************/
 
 #include "_hypre_struct_mv.h"
+#include "_hypre_struct_mv.hpp"
 
 /*--------------------------------------------------------------------------
  * hypre_StructInnerProdLocal
@@ -31,9 +27,6 @@ hypre_StructInnerProdLocal( hypre_StructVector *x,
    hypre_Box       *x_data_box;
    hypre_Box       *y_data_box;
 
-   HYPRE_Int        xi;
-   HYPRE_Int        yi;
-
    HYPRE_Complex   *xp;
    HYPRE_Complex   *yp;
 
@@ -43,9 +36,10 @@ hypre_StructInnerProdLocal( hypre_StructVector *x,
    hypre_IndexRef   start;
    hypre_Index      unit_stride;
 
+   HYPRE_Int        ndim = hypre_StructVectorNDim(x);
    HYPRE_Int        i;
 
-   result = 0.0;
+   HYPRE_Real       result = 0.0;
 
    hypre_SetIndex(unit_stride, 1);
 
@@ -63,17 +57,38 @@ hypre_StructInnerProdLocal( hypre_StructVector *x,
 
       hypre_BoxGetSize(box, loop_size);
 
-      hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
-                          x_data_box, start, unit_stride, xi,
-                          y_data_box, start, unit_stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,yi) reduction(+:local_result) HYPRE_SMP_SCHEDULE
+#if defined(HYPRE_USING_KOKKOS)
+      HYPRE_Real box_sum = 0.0;
+#elif defined(HYPRE_USING_RAJA)
+      ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> box_sum(0.0);
+#elif defined(HYPRE_USING_CUDA)
+      ReduceSum<HYPRE_Real> box_sum(0.0);
+#else
+      HYPRE_Real box_sum = 0.0;
 #endif
-      hypre_BoxLoop2For(xi, yi)
+
+#ifdef HYPRE_BOX_REDUCTION
+#undef HYPRE_BOX_REDUCTION
+#endif
+
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+#define HYPRE_BOX_REDUCTION map(tofrom: box_sum) reduction(+:box_sum)
+#else
+#define HYPRE_BOX_REDUCTION reduction(+:box_sum)
+#endif
+
+#define DEVICE_VAR is_device_ptr(yp,xp)
+      hypre_BoxLoop2ReductionBegin(ndim, loop_size,
+                                   x_data_box, start, unit_stride, xi,
+                                   y_data_box, start, unit_stride, yi,
+                                   box_sum)
       {
-         result += xp[xi] * hypre_conj(yp[yi]);
+         HYPRE_Real tmp = xp[xi] * hypre_conj(yp[yi]);
+         box_sum += tmp;
       }
-      hypre_BoxLoop2End(xi, yi);
+      hypre_BoxLoop2ReductionEnd(xi, yi, box_sum);
+
+      result += (HYPRE_Real) box_sum;
    }
 
    return result;
@@ -92,8 +107,7 @@ hypre_StructInnerProd( hypre_StructVector *x,
 
    local_result = hypre_StructInnerProdLocal(x, y);
 
-   hypre_MPI_Allreduce(&local_result, &global_result, 1,
-                       HYPRE_MPI_REAL, hypre_MPI_SUM,
+   hypre_MPI_Allreduce(&local_result, &global_result, 1, HYPRE_MPI_REAL, hypre_MPI_SUM,
                        hypre_StructVectorComm(x));
 
    hypre_IncFLOPCount(2*hypre_StructVectorGlobalSize(x));

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -61,7 +56,7 @@ typedef struct
    hypre_Index            *pnbor_offsets;
 
    HYPRE_Int               local_size;       /* Number of variables locally */
-   HYPRE_Int               global_size;      /* Total number of variables */
+   HYPRE_BigInt            global_size;      /* Total number of variables */
 
    hypre_Index             periodic;         /* Indicates if pgrid is periodic */
 
@@ -93,17 +88,17 @@ enum hypre_SStructBoxManInfoType
 
 typedef struct
 {
-   HYPRE_Int  type;
-   HYPRE_Int  offset;
-   HYPRE_Int  ghoffset;
+   HYPRE_Int     type;
+   HYPRE_BigInt  offset;
+   HYPRE_BigInt  ghoffset;
 
 } hypre_SStructBoxManInfo;
 
 typedef struct
 {
    HYPRE_Int    type;
-   HYPRE_Int    offset;   /* minimum offset for this box */
-   HYPRE_Int    ghoffset; /* minimum offset ghost for this box */
+   HYPRE_BigInt offset;   /* minimum offset for this box */
+   HYPRE_BigInt ghoffset; /* minimum offset ghost for this box */
    HYPRE_Int    proc;     /* redundant with the proc in the entry, but
                              makes some coding easier */
    HYPRE_Int    boxnum;   /* this is different from the entry id */
@@ -158,10 +153,10 @@ typedef struct hypre_SStructGrid_struct
    hypre_BoxManager        ***boxmans;      /* manager for each part, var */
    hypre_BoxManager        ***nbor_boxmans; /* manager for each part, var */
 
-   HYPRE_Int                  start_rank;
+   HYPRE_BigInt               start_rank;
 
    HYPRE_Int                  local_size;  /* Number of variables locally */
-   HYPRE_Int                  global_size; /* Total number of variables */
+   HYPRE_BigInt               global_size; /* Total number of variables */
 
    HYPRE_Int                  ref_count;
 
@@ -169,6 +164,7 @@ typedef struct hypre_SStructGrid_struct
    // TODO: deprecate these ones. SStructMatrix should hold these data instead
    HYPRE_Int               ghlocal_size;  /* GEC0902 Number of vars including ghosts */
    HYPRE_Int               ghstart_rank;  /* GEC0902 start rank including ghosts  */
+   
 } hypre_SStructGrid;
 
 /*--------------------------------------------------------------------------

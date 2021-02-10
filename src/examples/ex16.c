@@ -1,3 +1,10 @@
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 /*
    Example 16
 
@@ -17,13 +24,17 @@
                    an n x n sub-mesh of data, so the global mesh is nN x nN.
 */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <math.h>
-#include "_hypre_utilities.h"
 #include "HYPRE_sstruct_mv.h"
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE.h"
 
+#ifdef HYPRE_EXVIS
 #include "vis.c"
+#endif
 
 /*
    This routine computes the stiffness matrix for the Laplacian on a square of
@@ -239,6 +250,9 @@ int main (int argc, char *argv[])
    MPI_Init(&argc, &argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+
+   /* Initialize HYPRE */
+   HYPRE_Init();
 
    /* Set default parameters */
    n = 10;
@@ -575,6 +589,7 @@ int main (int argc, char *argv[])
       /* Save the solution for GLVis visualization, see vis/glvis-ex16.sh */
       if (vis)
       {
+#ifdef HYPRE_EXVIS
          FILE *file;
          char  filename[255];
 
@@ -636,6 +651,7 @@ int main (int argc, char *argv[])
 
          /* Additional visualization data */
          GLVis_PrintData("vis/ex16.data", myid, num_procs);
+#endif
       }
 
       if (myid == 0)
@@ -653,6 +669,9 @@ int main (int argc, char *argv[])
    HYPRE_SStructMatrixDestroy(A);
    HYPRE_SStructVectorDestroy(b);
    HYPRE_SStructVectorDestroy(x);
+
+   /* Finalize HYPRE */
+   HYPRE_Finalize();
 
    /* Finalize MPI */
    MPI_Finalize();

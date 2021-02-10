@@ -1,3 +1,10 @@
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 /*
    Example 2
 
@@ -19,11 +26,14 @@
 */
 
 #include <stdio.h>
+#include <string.h>
 
 /* Struct linear solvers header */
 #include "HYPRE_struct_ls.h"
 
+#ifdef HYPRE_EXVIS
 #include "vis.c"
+#endif
 
 int main (int argc, char *argv[])
 {
@@ -45,6 +55,9 @@ int main (int argc, char *argv[])
    MPI_Init(&argc, &argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+
+   /* Initialize HYPRE */
+   HYPRE_Init();
 
    if (num_procs != 2)
    {
@@ -243,7 +256,7 @@ int main (int argc, char *argv[])
          }
       }
 
-      /* For each box, set any coefficients that reach ouside of the
+      /* For each box, set any coefficients that reach outside of the
          boundary to 0 */
       if (myid == 0)
       {
@@ -457,9 +470,11 @@ int main (int argc, char *argv[])
    /* Save the solution for GLVis visualization, see vis/glvis-ex2.sh */
    if (vis)
    {
+#ifdef HYPRE_EXVIS
       GLVis_PrintStructGrid(grid, "vis/ex2.mesh", myid, NULL, NULL);
       GLVis_PrintStructVector(x, "vis/ex2.sol", myid);
       GLVis_PrintData("vis/ex2.data", myid, num_procs);
+#endif
    }
 
    /* Free memory */
@@ -470,6 +485,9 @@ int main (int argc, char *argv[])
    HYPRE_StructVectorDestroy(x);
    HYPRE_StructPCGDestroy(solver);
    HYPRE_StructSMGDestroy(precond);
+
+   /* Finalize HYPRE */
+   HYPRE_Finalize();
 
    /* Finalize MPI */
    MPI_Finalize();

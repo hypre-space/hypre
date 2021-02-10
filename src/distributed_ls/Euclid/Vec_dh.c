@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include <stdlib.h>
 #include "_hypre_Euclid.h"
@@ -58,7 +53,7 @@ void Vec_dhCopy(Vec_dh x, Vec_dh y)
   if (x->vals == NULL) SET_V_ERROR("x->vals is NULL");
   if (y->vals == NULL) SET_V_ERROR("y->vals is NULL");
   if (x->n != y->n) SET_V_ERROR("x and y are different lengths");
-  memcpy(y->vals, x->vals, x->n*sizeof(HYPRE_Real));
+  hypre_TMemcpy(y->vals,  x->vals, HYPRE_Real, x->n, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
   END_FUNC_DH
 }
 
@@ -68,7 +63,7 @@ void Vec_dhCopy(Vec_dh x, Vec_dh y)
 void Vec_dhDuplicate(Vec_dh v, Vec_dh *out)
 {
   START_FUNC_DH
-  Vec_dh tmp; 
+  Vec_dh tmp;
   HYPRE_Int size = v->n;
   if (v->vals == NULL) SET_V_ERROR("v->vals is NULL");
   Vec_dhCreate(out); CHECK_V_ERROR;
@@ -107,7 +102,7 @@ void Vec_dhSetRand(Vec_dh v)
    * so all values are in [0.0,1.0]
    */
   for (i=0; i<m; ++i) max = MAX(max, vals[i]);
-  for (i=0; i<m; ++i) vals[i] = vals[i]/max; 
+  for (i=0; i<m; ++i) vals[i] = vals[i]/max;
   END_FUNC_DH
 }
 
@@ -223,7 +218,7 @@ void Vec_dhRead(Vec_dh *vout, HYPRE_Int ignore, char *filename)
   HYPRE_Int items, n, i;
   HYPRE_Real *v, w;
   char junk[MAX_JUNK];
-  
+
   Vec_dhCreate(&tmp); CHECK_V_ERROR;
   *vout = tmp;
 
@@ -238,8 +233,9 @@ void Vec_dhRead(Vec_dh *vout, HYPRE_Int ignore, char *filename)
     hypre_printf("Vec_dhRead:: ignoring following header lines:\n");
     hypre_printf("--------------------------------------------------------------\n");
     for (i=0; i<ignore; ++i) {
-      fgets(junk, MAX_JUNK, fp);
-      hypre_printf("%s", junk);
+      if (fgets(junk, MAX_JUNK, fp) != NULL) {
+        hypre_printf("%s", junk);
+      }
     }
     hypre_printf("--------------------------------------------------------------\n");
   }
@@ -264,7 +260,9 @@ void Vec_dhRead(Vec_dh *vout, HYPRE_Int ignore, char *filename)
   rewind(fp);
   rewind(fp);
   for (i=0; i<ignore; ++i) {
-    fgets(junk, MAX_JUNK, fp);
+    if (fgets(junk, MAX_JUNK, fp) != NULL) {
+      hypre_printf("%s", junk);
+    }
   }
 
   /* read values */

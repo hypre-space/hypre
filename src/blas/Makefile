@@ -1,15 +1,7 @@
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
-
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 ###  Internal BLAS routines may be compiled in this sub-directory
 ###  Generally, the Makefile in the utilities subdirectory controls
@@ -22,28 +14,30 @@ C_COMPILE_FLAGS = ${INCLUDES} -I.. -I../utilities
 
 BLAS_HEADERS =  f2c.h  hypre_blas.h
 BLAS_FILES = \
-blas_utils.c\
-dasum.c\
-daxpy.c\
-dcopy.c\
-ddot.c\
-dgemm.c\
-dgemv.c\
-dger.c\
-dnrm2.c\
-drot.c\
-dscal.c\
-dswap.c\
-dsymm.c\
-dsymv.c\
-dsyr2.c\
-dsyr2k.c\
-dsyrk.c\
-dtrmm.c\
-dtrmv.c\
-dtrsm.c\
-dtrsv.c\
-idamax.c
+ dasum.c\
+ daxpy.c\
+ dcopy.c\
+ ddot.c\
+ dgemm.c\
+ dgemv.c\
+ dger.c\
+ dnrm2.c\
+ drot.c\
+ dscal.c\
+ dswap.c\
+ dsymm.c\
+ dsymv.c\
+ dsyr2.c\
+ dsyr2k.c\
+ dsyrk.c\
+ dtrmm.c\
+ dtrmv.c\
+ dtrsm.c\
+ dtrsv.c\
+ f2c.c\
+ idamax.c\
+ lsame.c\
+ xerbla.c
 
 OBJS = ${BLAS_FILES:.c=.o}
 
@@ -54,6 +48,7 @@ OBJS = ${BLAS_FILES:.c=.o}
 all: ${OBJS}
 
 install: all
+	cp -fR $(srcdir)/_hypre_blas.h $(HYPRE_INC_INSTALL)
 
 clean:
 	rm -rf *.o

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
 
@@ -128,7 +123,7 @@ hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
 
    /* set up stencil_shape */
    stencil_size = 2;
-   stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size);
+   stencil_shape = hypre_CTAlloc(hypre_Index,  stencil_size, HYPRE_MEMORY_HOST);
    for (i = 0; i < stencil_size; i++)
    {
       hypre_SetIndex3(stencil_shape[i], 0, 0, 0);
@@ -139,7 +134,7 @@ hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
    /* set up P_stencils */
    ndim = hypre_StructStencilNDim(hypre_SStructPMatrixSStencil(A, 0, 0));
    nvars = hypre_SStructPMatrixNVars(A);
-   P_stencils = hypre_CTAlloc(hypre_SStructStencil *, nvars);
+   P_stencils = hypre_CTAlloc(hypre_SStructStencil *,  nvars, HYPRE_MEMORY_HOST);
    for (s = 0; s < nvars; s++)
    {
       HYPRE_SStructStencilCreate(ndim, stencil_size, &P_stencils[s]);
@@ -154,7 +149,7 @@ hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
    hypre_SStructPMatrixCreate(hypre_SStructPMatrixComm(A), cgrid,
                               P_stencils, &P);
 
-   hypre_TFree(stencil_shape);
+   hypre_TFree(stencil_shape, HYPRE_MEMORY_HOST);
 
    return P;
 }

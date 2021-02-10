@@ -1,18 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -20,7 +11,6 @@
  *
  *****************************************************************************/
 
-#include <assert.h>
 #include "HYPRE.h"
 #include "utilities/_hypre_utilities.h"
 #include "IJ_mv/_hypre_IJ_mv.h"
@@ -34,7 +24,7 @@
 void *hypre_BlockTridiagCreate()
 {
    hypre_BlockTridiagData *b_data;
-   b_data = hypre_CTAlloc(hypre_BlockTridiagData, 1);
+   b_data = hypre_CTAlloc(hypre_BlockTridiagData,  1, HYPRE_MEMORY_HOST);
    b_data->threshold = 0.0;
    b_data->num_sweeps = 1;
    b_data->relax_type = 6;
@@ -83,12 +73,12 @@ HYPRE_Int hypre_BlockTridiagDestroy(void *data)
    }
    if (b_data->index_set1)
    {
-      hypre_TFree(b_data->index_set1);
+      hypre_TFree(b_data->index_set1, HYPRE_MEMORY_HOST);
       b_data->index_set1 = NULL;
    }
    if (b_data->index_set2)
    {
-      hypre_TFree(b_data->index_set2);
+      hypre_TFree(b_data->index_set2, HYPRE_MEMORY_HOST);
       b_data->index_set2 = NULL;
    }
    if (b_data->A11)
@@ -116,7 +106,7 @@ HYPRE_Int hypre_BlockTridiagDestroy(void *data)
       HYPRE_BoomerAMGDestroy(b_data->precon2);
       b_data->precon2 = NULL;
    }
-   hypre_TFree(b_data);
+   hypre_TFree(b_data, HYPRE_MEMORY_HOST);
    return (0);
 }
 
@@ -144,7 +134,7 @@ HYPRE_Int hypre_BlockTridiagSetup(void *data, hypre_ParCSRMatrix *A,
    nrows1 = index_set1[0];
    nrows  = hypre_ParCSRMatrixNumRows(A);
    nrows2 = nrows - nrows1;
-   b_data->index_set2 = hypre_CTAlloc(HYPRE_Int, nrows2+1);
+   b_data->index_set2 = hypre_CTAlloc(HYPRE_Int,  nrows2+1, HYPRE_MEMORY_HOST);
    index_set2 = b_data->index_set2;
    index_set2[0] = nrows2;
    count = 1;
@@ -154,7 +144,7 @@ HYPRE_Int hypre_BlockTridiagSetup(void *data, hypre_ParCSRMatrix *A,
          index_set2[count++] = j;
    for (i = index_set1[nrows1]+1; i < nrows; i++) index_set2[count++] = i;
 
-   submatrices = hypre_CTAlloc(hypre_ParCSRMatrix *, 4);
+   submatrices = hypre_CTAlloc(hypre_ParCSRMatrix *,  4, HYPRE_MEMORY_HOST);
    hypre_ParCSRMatrixExtractSubmatrices(A, index_set1, &submatrices);
 
    nrows1 = hypre_ParCSRMatrixNumRows(submatrices[0]);
@@ -230,7 +220,7 @@ HYPRE_Int hypre_BlockTridiagSetup(void *data, hypre_ParCSRMatrix *A,
    b_data->A21 = submatrices[2];
    b_data->A22 = submatrices[3];
 
-   hypre_TFree(submatrices);
+   hypre_TFree(submatrices, HYPRE_MEMORY_HOST);
    return (0);
 }
 
@@ -308,7 +298,7 @@ HYPRE_Int hypre_BlockTridiagSetIndexSet(void *data, HYPRE_Int n, HYPRE_Int *inds
    hypre_BlockTridiagData *b_data = (hypre_BlockTridiagData *) data;
 
    if (n <= 0 || inds == NULL) ierr = 1;
-   b_data->index_set1 = hypre_CTAlloc(HYPRE_Int, n+1);
+   b_data->index_set1 = hypre_CTAlloc(HYPRE_Int,  n+1, HYPRE_MEMORY_HOST);
    indices = b_data->index_set1;
    indices[0] = n;
    for (i = 0; i < n; i++) indices[i+1] = inds[i];

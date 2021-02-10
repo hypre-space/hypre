@@ -1,8 +1,14 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-#include "hypre_lapack.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dlasr_(const char *side,const char *pivot,const char *direct, integer *m,
+/* Subroutine */ integer dlasr_(const char *side,const char *pivot,const char *direct, integer *m,
 	 integer *n, doublereal *c__, doublereal *s, doublereal *a, integer *
 	lda)
 {
@@ -114,7 +120,7 @@
     static integer i__, j;
     extern logical lsame_(const char *,const char *);
     static doublereal ctemp, stemp;
-    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 
     --c__;
@@ -392,4 +398,6 @@
 
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

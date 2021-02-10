@@ -1,16 +1,12 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
+#include "_hypre_struct_mv.hpp"
 
 /*--------------------------------------------------------------------------
  * hypre_SparseMSGInterpData data structure
@@ -38,7 +34,7 @@ hypre_SparseMSGInterpCreate( )
 {
    hypre_SparseMSGInterpData *interp_data;
 
-   interp_data = hypre_CTAlloc(hypre_SparseMSGInterpData, 1);
+   interp_data = hypre_CTAlloc(hypre_SparseMSGInterpData,  1, HYPRE_MEMORY_HOST);
    (interp_data -> time_index)  = hypre_InitializeTiming("SparseMSGInterp");
 
    return (void *) interp_data;
@@ -58,11 +54,11 @@ hypre_SparseMSGInterpSetup( void               *interp_vdata,
                             hypre_Index         stride,
                             hypre_Index         strideP       )
 {
-	hypre_SparseMSGInterpData   *interp_data = (hypre_SparseMSGInterpData   *)interp_vdata;
+   hypre_SparseMSGInterpData   *interp_data = (hypre_SparseMSGInterpData   *)interp_vdata;
 
    hypre_StructGrid       *grid;
    hypre_StructStencil    *stencil;
-                       
+
    hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
 
@@ -123,29 +119,25 @@ hypre_SparseMSGInterp( void               *interp_vdata,
    HYPRE_Int              *cgrid_ids;
 
    hypre_CommHandle       *comm_handle;
-                       
+
    hypre_BoxArrayArray    *compute_box_aa;
    hypre_BoxArray         *compute_box_a;
    hypre_Box              *compute_box;
-                       
+
    hypre_Box              *P_dbox;
    hypre_Box              *xc_dbox;
    hypre_Box              *e_dbox;
-                       
-   HYPRE_Int               Pi;
-   HYPRE_Int               xci;
-   HYPRE_Int               ei;
-                         
+
    HYPRE_Real             *Pp0, *Pp1;
    HYPRE_Real             *xcp;
    HYPRE_Real             *ep, *ep0, *ep1;
-                       
+
    hypre_Index             loop_size;
    hypre_Index             start;
    hypre_Index             startc;
    hypre_Index             startP;
    hypre_Index             stridec;
-                       
+
    hypre_StructStencil    *stencil;
    hypre_Index            *stencil_shape;
 
@@ -199,17 +191,15 @@ hypre_SparseMSGInterp( void               *interp_vdata,
 
       hypre_BoxGetSize(compute_box, loop_size);
 
+#define DEVICE_VAR is_device_ptr(ep,xcp)
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(P), loop_size,
                           e_dbox,  start,  stride,  ei,
                           xc_dbox, startc, stridec, xci);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ei,xci) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop2For(ei, xci)
       {
          ep[ei] = xcp[xci];
       }
       hypre_BoxLoop2End(ei, xci);
+#undef DEVICE_VAR
    }
 
    /*-----------------------------------------------------------------------
@@ -259,18 +249,16 @@ hypre_SparseMSGInterp( void               *interp_vdata,
 
             hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
+#define DEVICE_VAR is_device_ptr(ep,Pp0,ep0,Pp1,ep1)
             hypre_BoxLoop2Begin(hypre_StructMatrixNDim(P), loop_size,
                                 P_dbox, startP, strideP, Pi,
                                 e_dbox, start,  stride,  ei);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Pi,ei) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop2For(Pi, ei)
             {
                ep[ei] =  (Pp0[Pi] * ep0[ei] +
                           Pp1[Pi] * ep1[ei]);
             }
             hypre_BoxLoop2End(Pi, ei);
+#undef DEVICE_VAR
          }
       }
    }
@@ -301,7 +289,7 @@ hypre_SparseMSGInterpDestroy( void *interp_vdata )
       hypre_StructMatrixDestroy(interp_data -> P);
       hypre_ComputePkgDestroy(interp_data -> compute_pkg);
       hypre_FinalizeTiming(interp_data -> time_index);
-      hypre_TFree(interp_data);
+      hypre_TFree(interp_data, HYPRE_MEMORY_HOST);
    }
 
    return ierr;

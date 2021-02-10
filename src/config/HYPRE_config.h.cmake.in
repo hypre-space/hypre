@@ -1,29 +1,39 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
-#define HYPRE_RELEASE_NAME @CMAKE_PROJECT_NAME@
-#define HYPRE_RELEASE_VERSION @HYPRE_VERSION@
-#define HYPRE_RELEASE_DATE @HYPRE_DATE@
-#define HYPRE_RELEASE_TIME @HYPRE_TIME@
-#define HYPRE_RELEASE_BUGS @HYPRE_BUGS@
+#define HYPRE_RELEASE_NAME    "@CMAKE_PROJECT_NAME@"
+#define HYPRE_RELEASE_VERSION "@HYPRE_VERSION@"
+#define HYPRE_RELEASE_DATE    "@HYPRE_DATE@"
+#define HYPRE_RELEASE_TIME    "@HYPRE_TIME@"
+#define HYPRE_RELEASE_BUGS    "@HYPRE_BUGS@"
 
-/* Use long long int for HYPRE_Int */
+/* Use long long int for HYPRE_BigInt */
+#cmakedefine HYPRE_MIXEDINT
+
+/* Use long long int for HYPRE_BigInt and HYPRE_Int*/
 #cmakedefine HYPRE_BIGINT
+
+/* Use single precision values for HYPRE_Real */
+#cmakedefine HYPRE_SINGLE
+
+/* Use quad precision values for HYPRE_Real */
+#cmakedefine HYPRE_LONG_DOUBLE
 
 /* Use complex values */
 #cmakedefine HYPRE_COMPLEX
 
 /* Define to be the max dimension size (must be at least 3) */
 #define HYPRE_MAXDIM 3
+
+/* Use persistent communication */
+#cmakedefine HYPRE_USING_PERSISTENT_COMM
+
+/* Use hopscotch hashing */
+#cmakedefine HYPRE_HOPSCOTCH
 
 /* Compile without MPI */
 #cmakedefine HYPRE_SEQUENTIAL
@@ -46,6 +56,15 @@
 /* Use OpenMP */
 #cmakedefine HYPRE_USING_OPENMP
 
+/* Use Caliper instrumentation */
+#cmakedefine HYPRE_USING_CALIPER
+
+/* Use SuperLU_Dist */
+#cmakedefine HYPRE_USING_DSUPERLU
+
+/* Use SuperLU */
+#cmakedefine HAVE_SUPERLU
+
 /* #undef HYPRE_HAVE_MPI */
 /* #undef HYPRE_HAVE_MPI_COMM_F2C */
 
@@ -54,7 +73,8 @@
  * 1 = no underscores
  * 2 = one underscore
  * 3 = two underscores
- * 4 = caps, no underscores */
+ * 4 = caps, no underscores
+ * 5 = one underscore before and after */
 #define HYPRE_FMANGLE 0
 
 /* Define as in HYPRE_FMANGLE to set the BLAS name mangling scheme */
@@ -69,3 +89,6 @@
 
 /* As F77_FUNC, but for C identifiers containing underscores. */
 #define HYPRE_F77_FUNC_(name,NAME) name ## __
+
+/* Define to 1 if using host memory only */
+#cmakedefine HYPRE_USING_HOST_MEMORY 1

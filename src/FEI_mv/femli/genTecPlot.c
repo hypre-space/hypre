@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include <stdio.h>
 
@@ -36,7 +31,7 @@ main(int argc, char **argv)
       exit(1);
    }
    fscanf(fp,"%d %d", &nrows, &ncols);
-   eVec = (double *) malloc(nrows*ncols*sizeof(double));
+   eVec = hypre_TAlloc(double, nrows*ncols, HYPRE_MEMORY_HOST);
    for (i = 0; i < nrows; i++)
       for (j = 0; j < ncols; j++) fscanf(fp,"%lg", &eVec[i+j*nrows]);
    fclose(fp);
@@ -50,7 +45,7 @@ main(int argc, char **argv)
       exit(1);
    }
    fscanf(fp,"%d", &nElems);
-   elemNodeList = (int *) malloc(nElems*8*sizeof(int));
+   elemNodeList = hypre_TAlloc(int, nElems*8, HYPRE_MEMORY_HOST);
    ncnt = 0;
    for (i = 0; i < nElems; i++)
    {
@@ -73,7 +68,7 @@ main(int argc, char **argv)
       exit(1);
    }
    fscanf(fp,"%d", &nNodes);
-   nodalCoord = (double *) malloc(nNodes*3*sizeof(double));
+   nodalCoord = hypre_TAlloc(double, nNodes*3, HYPRE_MEMORY_HOST);
    ncnt = 0;
    for (i = 0; i < nNodes; i++)
    {

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
 
@@ -144,6 +139,40 @@ HYPRE_ParCSRHybridSetSolverType( HYPRE_Solver solver,
                                  HYPRE_Int    solver_type )
 {
    return( hypre_AMGHybridSetSolverType( (void *) solver, solver_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetRecomputeResidual( HYPRE_Solver  solver,
+                                        HYPRE_Int     recompute_residual )
+{
+   return( hypre_AMGHybridSetRecomputeResidual( (void *) solver, recompute_residual ) );
+}
+
+HYPRE_Int
+HYPRE_ParCSRHybridGetRecomputeResidual( HYPRE_Solver  solver,
+                                        HYPRE_Int    *recompute_residual )
+{
+   return( hypre_AMGHybridGetRecomputeResidual( (void *) solver, recompute_residual ) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetRecomputeResidualP( HYPRE_Solver  solver,
+                                         HYPRE_Int     recompute_residual_p )
+{
+   return( hypre_AMGHybridSetRecomputeResidualP( (void *) solver, recompute_residual_p ) );
+}
+
+HYPRE_Int
+HYPRE_ParCSRHybridGetRecomputeResidualP( HYPRE_Solver  solver,
+                                         HYPRE_Int    *recompute_residual_p )
+{
+   return( hypre_AMGHybridGetRecomputeResidualP( (void *) solver, recompute_residual_p ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -419,6 +448,17 @@ HYPRE_ParCSRHybridSetRelaxOrder( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetKeepTranspose
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetKeepTranspose( HYPRE_Solver solver,
+                            HYPRE_Int    keepT    )
+{
+   return( hypre_AMGHybridSetKeepTranspose( (void *) solver, keepT ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRHybridSetMaxCoarseSize
  *--------------------------------------------------------------------------*/
 
@@ -575,6 +615,19 @@ HYPRE_ParCSRHybridSetDofFunc( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetNonGalerkTol
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetNonGalerkinTol( HYPRE_Solver solver,
+                              HYPRE_Int   nongalerk_num_tol,
+                              HYPRE_Real  *nongalerkin_tol)
+{
+   return( hypre_AMGHybridSetNonGalerkinTol( (void *) solver, nongalerk_num_tol, nongalerkin_tol ) );
+}
+
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRHybridGetNumIterations
  *--------------------------------------------------------------------------*/
 
@@ -616,4 +669,12 @@ HYPRE_ParCSRHybridGetFinalRelativeResidualNorm( HYPRE_Solver solver,
                                                 HYPRE_Real  *norm    )
 {
    return( hypre_AMGHybridGetFinalRelativeResidualNorm( (void *) solver, norm ) );
+}
+
+
+HYPRE_Int
+HYPRE_ParCSRHybridGetSetupSolveTime( HYPRE_Solver solver,
+                                     HYPRE_Real  *time    )
+{
+   return( hypre_AMGHybridGetSetupSolveTime( (void *) solver, time ) );
 }

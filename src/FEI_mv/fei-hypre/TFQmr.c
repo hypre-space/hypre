@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -76,7 +68,7 @@ void * hypre_TFQmrCreate( )
 {
    hypre_TFQmrData *tfqmr_data;
  
-   tfqmr_data = hypre_CTAlloc(hypre_TFQmrData, 1);
+   tfqmr_data = hypre_CTAlloc(hypre_TFQmrData,  1, HYPRE_MEMORY_HOST);
  
    /* set defaults */
    (tfqmr_data -> tol)            = 1.0e-06;
@@ -116,7 +108,7 @@ int hypre_TFQmrDestroy( void *tfqmr_vdata )
    {
       if ((tfqmr_data -> logging) > 0)
       {
-         hypre_TFree(tfqmr_data -> norms);
+         hypre_TFree(tfqmr_data -> norms, HYPRE_MEMORY_HOST);
       }
  
       hypre_ParKrylovMatvecDestroy(tfqmr_data -> matvec_data);
@@ -132,7 +124,7 @@ int hypre_TFQmrDestroy( void *tfqmr_vdata )
       hypre_ParKrylovDestroyVector(tfqmr_data -> d);
       hypre_ParKrylovDestroyVector(tfqmr_data -> t3);
  
-      hypre_TFree(tfqmr_data);
+      hypre_TFree(tfqmr_data, HYPRE_MEMORY_HOST);
    }
  
    return(ierr);
@@ -190,7 +182,7 @@ int hypre_TFQmrSetup( void *tfqmr_vdata, void *A, void *b, void *x         )
    if ((tfqmr_data -> logging) > 0)
    {
       if ((tfqmr_data -> norms) == NULL)
-         (tfqmr_data -> norms) = hypre_CTAlloc(double, max_iter + 1);
+         (tfqmr_data -> norms) = hypre_CTAlloc(double,  max_iter + 1, HYPRE_MEMORY_HOST);
       if ((tfqmr_data -> log_file_name) == NULL)
 		  (tfqmr_data -> log_file_name) = (char*)"tfqmr.out.log";
    }

@@ -1,49 +1,66 @@
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
 ########################################################################
 # Compiler and external dependences
 ########################################################################
-include ../config/Makefile.config
+CC        = mpicc
+F77       = mpif77
+CXX       = mpicxx
+F90       = mpifort
+HYPRE_DIR = ../hypre
 
-CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
-CDEFS = -DHYPRE_TIMING -DHYPRE_FORTRAN
-CXXDEFS = -DNOFEI -DHYPRE_TIMING -DMPICH_SKIP_MPICXX
+########################################################################
+# Compiling and linking options
+########################################################################
+COPTS     = -g -Wall
+CINCLUDES = -I$(HYPRE_DIR)/include
+#CDEFS     = -DHYPRE_EXVIS
+CDEFS     = 
+CFLAGS    = $(COPTS) $(CINCLUDES) $(CDEFS)
+FOPTS     = -g
+FINCLUDES = $(CINCLUDES)
+FFLAGS    = $(FOPTS) $(FINCLUDES)
+CXXOPTS   = $(COPTS) -Wno-deprecated
+CXXINCLUDES = $(CINCLUDES) -I..
+CXXDEFS   = $(CDEFS)
+IFLAGS_BXX = 
+CXXFLAGS  = $(CXXOPTS) $(CXXINCLUDES) $(CXXDEFS) $(IFLAGS_BXX)
+IF90FLAGS = 
+F90FLAGS = $(FFLAGS) $(IF90FLAGS)
 
-C_COMPILE_FLAGS = \
- -I$(srcdir)\
- -I$(srcdir)/..\
- -I${HYPRE_BUILD_DIR}/include\
- ${CINCLUDES}\
- ${CDEFS}
 
-CXX_COMPILE_FLAGS = \
- -I$(srcdir)\
- -I$(srcdir)/..\
- -I$(srcdir)/../FEI_mv/fei-base\
- -I${HYPRE_BUILD_DIR}/include\
- ${CINCLUDES}\
- ${CXXDEFS}
+LINKOPTS  = $(COPTS)
+LIBS      = -L$(HYPRE_DIR)/lib -lHYPRE -lm
+LFLAGS    = $(LINKOPTS) $(LIBS) -lstdc++
+LFLAGS_B =\
+ -L${HYPRE_DIR}/lib\
+ -lbHYPREClient-C\
+ -lbHYPREClient-CX\
+ -lbHYPREClient-F\
+ -lbHYPRE\
+ -lsidl -ldl -lxml2
+LFLAGS77 = $(LFLAGS)
+LFLAGS90 =
 
-F77_COMPILE_FLAGS = \
- -I$(srcdir)\
- -I$(srcdir)/..\
- -I${HYPRE_BUILD_DIR}/include\
- ${CINCLUDES}
+########################################################################
+# Rules for compiling the source files
+########################################################################
+.SUFFIXES: .c .f .cxx .f90
 
-MPILIBFLAGS = ${MPILIBDIRS} ${MPILIBS} ${MPIFLAGS}
-LAPACKLIBFLAGS = ${LAPACKLIBDIRS} ${LAPACKLIBS}
-BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
-LIBFLAGS = ${LDFLAGS} ${LIBS}
-
-LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib -Wl,-rpath,${HYPRE_BUILD_DIR}/lib -lHYPRE\
- ${MPILIBFLAGS}\
- ${LAPACKLIBFLAGS}\
- ${BLASLIBFLAGS}\
- ${LIBFLAGS}
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+.f.o:
+	$(F77) $(FFLAGS) -c $<
+.cxx.o:
+	$(CXX) $(CXXFLAGS) -c $<
 
 ########################################################################
 # List of all programs to be compiled
 ########################################################################
-ALLPROGS = ex1 ex2 ex3 ex4 ex5 ex5f ex6 ex7 ex8 ex9 ex10 ex11 ex12 ex12f \
+ALLPROGS = ex1 ex2 ex3 ex4 ex5 ex5f ex6 ex7 ex8 ex9 ex11 ex12 ex12f \
            ex13 ex14 ex15 ex16
 BIGINTPROGS = ex5big ex15big
 FORTRANPROGS = ex5f ex12f
@@ -66,139 +83,139 @@ complex: $(COMPLEXPROGS)
 # Example 1
 ########################################################################
 ex1: ex1.o
-	${LINK_CC} -o $@ $^ ${CFLAGS} ${LFLAGS}
+	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 2
 ########################################################################
 ex2: ex2.o
-	${LINK_CC} -o $@ $^ ${CFLAGS} ${LFLAGS}
+	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 3
 ########################################################################
 ex3: ex3.o
-	${LINK_CC} -o $@ $^ ${CFLAGS} ${LFLAGS}
+	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 4
 ########################################################################
 ex4: ex4.o
-	${LINK_CC} -o $@ $^ ${CFLAGS} ${LFLAGS}
+	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 5
 ########################################################################
 ex5: ex5.o
-	${LINK_CC} -o $@ $^ ${CFLAGS} ${LFLAGS}
+	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 5 with 64-bit integers
 ########################################################################
 ex5big: ex5big.o
-	${LINK_CC} -o $@ $^ ${CFLAGS} ${LFLAGS}
+	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 5 Fortran 77
 ########################################################################
 ex5f: ex5f.o
-	${LINK_FC} -o $@ $^ ${FFLAGS} ${LFLAGS}
+	$(F77) -o $@ $^ $(LFLAGS77)
 
 ########################################################################
 # Example 6
 ########################################################################
 ex6: ex6.o
-	${LINK_CC} -o $@ $^ ${CFLAGS} ${LFLAGS}
+	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 7
 ########################################################################
 ex7: ex7.o
-	${LINK_CC} -o $@ $^ ${CFLAGS} ${LFLAGS}
+	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 8
 ########################################################################
 ex8: ex8.o
-	${LINK_CC} -o $@ $^ ${CFLAGS} ${LFLAGS}
+	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 9
 ########################################################################
 ex9: ex9.o
-	${LINK_CC} -o $@ $^ ${CFLAGS} ${LFLAGS}
+	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 10
 ########################################################################
 ex10: ex10.o
-	${LINK_CCX} -o $@ $^ ${CXXFLAGS} ${LFLAGS}
+	$(CXX) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 11
 ########################################################################
 ex11: ex11.o
-	${LINK_CC} -o $@ $^ ${CFLAGS} ${LFLAGS}
+	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 12
 ########################################################################
 ex12: ex12.o
-	${LINK_CC} -o $@ $^ ${CFLAGS} ${LFLAGS}
+	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 12 Fortran 77
 ########################################################################
 ex12f: ex12f.o
-	${LINK_FC} -o $@ $^ ${FFLAGS} ${LFLAGS}
+	$(F77) -o $@ $^ $(LFLAGS77)
 
 ########################################################################
 # Example 13
 ########################################################################
 ex13: ex13.o
-	${LINK_CC} -o $@ $^ ${CFLAGS} ${LFLAGS}
+	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 14
 ########################################################################
 ex14: ex14.o
-	${LINK_CC} -o $@ $^ ${CFLAGS} ${LFLAGS}
+	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 15
 ########################################################################
 ex15: ex15.o
-	${LINK_CC} -o $@ $^ ${CFLAGS} ${LFLAGS}
+	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 15 with 64-bit integers
 ########################################################################
 ex15big: ex15big.o
-	${LINK_CC} -o $@ $^ ${CFLAGS} ${LFLAGS}
+	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 16
 ########################################################################
 ex16: ex16.o
-	${LINK_CC} -o $@ $^ ${CFLAGS} ${LFLAGS}
+	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 17
 ########################################################################
 ex17: ex17.o
-	${LINK_CC} -o $@ $^ ${CFLAGS} ${LFLAGS}
+	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 18
 ########################################################################
 ex18: ex18.o
-	${LINK_CC} -o $@ $^ ${CFLAGS} ${LFLAGS}
+	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 18 (complex)
 ########################################################################
 ex18comp: ex18comp.o
-	${LINK_CC} -o $@ $^ ${CFLAGS} ${LFLAGS}
+	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Clean up

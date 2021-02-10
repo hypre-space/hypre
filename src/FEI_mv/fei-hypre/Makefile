@@ -1,27 +1,19 @@
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
-
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 include ../../config/Makefile.config
 
 BASE_DIR = ${HYPRE_FEI_BASE_DIR}
 
-SUPERLU_INCLUDE = -I$(srcdir)/../SuperLU/SRC
-SUPERLU_LIB     = -L$(srcdir)/../SuperLU
+#SUPERLU_INCLUDE = -I$(srcdir)/../SuperLU/SRC
+#SUPERLU_LIB     = -L$(srcdir)/../SuperLU
 
 CINCLUDES=${INCLUDES} ${MPIINCLUDE} -I../ml/src/Include
 CXXINCLUDES=${INCLUDES} ${MPIINCLUDE} -I../ml/src/Include
-CDEFS = -DHAVE_SUPERLU -DBOOL_NOT_SUPPORTED -DHAVE_MLI
-CXXDEFS = -DHAVE_SUPERLU -DBOOL_NOT_SUPPORTED -DMPICH_SKIP_MPICXX -DHAVE_MLI
+CDEFS = -DBOOL_NOT_SUPPORTED
+CXXDEFS = ${CDEFS} -DMPICH_SKIP_MPICXX
 
 C_COMPILE_FLAGS = \
  ${CDEFS}\
@@ -41,6 +33,7 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)/../../distributed_ls\
  -I$(srcdir)/../fei-base\
  ${SUPERLU_INCLUDE}\
+ ${DSUPERLU_INCLUDE}\
  ${CINCLUDES}
 
 CXX_COMPILE_FLAGS = \
@@ -61,6 +54,7 @@ CXX_COMPILE_FLAGS = \
  -I$(srcdir)/../femli\
  -I$(srcdir)/../fei-base\
  ${SUPERLU_INCLUDE}\
+ ${DSUPERLU_INCLUDE}\
  ${CXXINCLUDES}
 
 HEADERS =\
@@ -72,11 +66,7 @@ HEADERS =\
  $(BASE_DIR)/fei_Data.hpp  \
  $(BASE_DIR)/fei_Lookup.hpp  \
  $(BASE_DIR)/fei_LinearSystemCore.hpp \
- $(BASE_DIR)/cfei.h\
- $(BASE_DIR)/fei_bool.h\
  $(BASE_DIR)/fei_defs.h\
- $(BASE_DIR)/fei_mpi.h\
- $(BASE_DIR)/fei_version.h\
  LLNL_FEI_Impl.h\
  LLNL_FEI_Fei.h\
  LLNL_FEI_LSCore.h\
@@ -158,7 +148,7 @@ OBJSC = ${FILESC:.c=.o}
 OBJSCXX = ${FILESCXX:.cxx=.o}
 OBJS = ${OBJSC} ${OBJSCXX}
 
-SONAME = libHYPRE_FEI-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_FEI-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -174,10 +164,7 @@ all: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
 	cp -fR $(BASE_DIR)/fei_Data.hpp $(HYPRE_BUILD_DIR)/include
 	cp -fR $(BASE_DIR)/fei_Lookup.hpp $(HYPRE_BUILD_DIR)/include
 	cp -fR $(BASE_DIR)/fei_LinearSystemCore.hpp $(HYPRE_BUILD_DIR)/include
-	cp -fR $(BASE_DIR)/cfei.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(BASE_DIR)/fei_bool.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(BASE_DIR)/fei_defs.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(BASE_DIR)/fei_mpi.h $(HYPRE_BUILD_DIR)/include
 
 install: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/cfei-hypre.h $(HYPRE_INC_INSTALL)
@@ -189,10 +176,7 @@ install: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
 	cp -fR $(BASE_DIR)/fei_Data.hpp $(HYPRE_BUILD_DIR)/include
 	cp -fR $(BASE_DIR)/fei_Lookup.hpp $(HYPRE_BUILD_DIR)/include
 	cp -fR $(BASE_DIR)/fei_LinearSystemCore.hpp $(HYPRE_BUILD_DIR)/include
-	cp -fR $(BASE_DIR)/cfei.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(BASE_DIR)/fei_bool.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(BASE_DIR)/fei_defs.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(BASE_DIR)/fei_mpi.h $(HYPRE_BUILD_DIR)/include
 	@echo  ""
 
 clean:
@@ -210,7 +194,7 @@ libHYPRE_FEI.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_FEI.so: ${OBJS}
+libHYPRE_FEI.so libHYPRE_FEI.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -sf ${SONAME} $@

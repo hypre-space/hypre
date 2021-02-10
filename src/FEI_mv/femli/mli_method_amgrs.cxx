@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #define PDEGREE 1
 #define MU      0.5
@@ -23,7 +18,6 @@
 /* #define MLI_USE_HYPRE_MATMATMULT */
 
 #include <string.h>
-#include <assert.h>
 #include "HYPRE.h"
 #include "_hypre_parcsr_ls.h"
 #include "mli_utils.h"
@@ -175,7 +169,7 @@ int MLI_Method_AMGRS::setParams(char *in_name, int argc, char *argv[])
       useInjectionForR_ = 1;
       return 0;
    }
-   else if ( !strcmp(param1, "setSmoother" ) || 
+   else if ( !strcmp(param1, "setSmoother" ) ||
              !strcmp(param1, "setPreSmoother" ))
    {
       sscanf(in_name,"%s %s", param1, param2);
@@ -186,7 +180,7 @@ int MLI_Method_AMGRS::setParams(char *in_name, int argc, char *argv[])
          printf("     argument[0] : number of relaxation sweeps \n");
          printf("     argument[1] : relaxation weights\n");
          return 1;
-      } 
+      }
       nSweeps = *(int *)   argv[0];
       weights = (double *) argv[1];
       return ( setSmoother(param2, nSweeps, weights) );
@@ -211,7 +205,7 @@ int MLI_Method_AMGRS::setParams(char *in_name, int argc, char *argv[])
          printf("     argument[0] : number of relaxation sweeps \n");
          printf("     argument[1] : relaxation weights\n");
          return 1;
-      } 
+      }
       else if ( strcmp(param2, "SuperLU") )
       {
          nSweeps   = *(int *)   argv[0];
@@ -235,11 +229,11 @@ int MLI_Method_AMGRS::setParams(char *in_name, int argc, char *argv[])
  * generate multilevel structure
  * --------------------------------------------------------------------- */
 
-int MLI_Method_AMGRS::setup( MLI *mli ) 
+int MLI_Method_AMGRS::setup( MLI *mli )
 {
    int             k, level, irow, localNRows, mypid, nprocs, startRow;
    int             numNodes, one=1, globalNRows, *coarsePartition;
-   int             *CFMarkers, coarseNRows, *dofArray, *cdofArray=NULL;
+   int             *CFMarkers=NULL, coarseNRows, *dofArray, *cdofArray=NULL;
    int             *reduceArray1, *reduceArray2, *rowLengs, ierr, zeroNRows;
    int             startCol, localNCols, colInd, rowNum;
    int             globalCoarseNRows, numTrials;
@@ -290,7 +284,7 @@ int MLI_Method_AMGRS::setup( MLI *mli )
       /* ------fetch fine grid matrix----------------------------------- */
 
       mli_Amat = mli->getSystemMatrix(level);
-      assert ( mli_Amat != NULL );
+      hypre_assert ( mli_Amat != NULL );
       hypreA = (hypre_ParCSRMatrix *) mli_Amat->getMatrix();
       startRow    = hypre_ParCSRMatrixFirstRowIndex(hypreA);
       localNRows  = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(hypreA));
@@ -303,7 +297,7 @@ int MLI_Method_AMGRS::setup( MLI *mli )
       {
          printf("\tMLI_Method_AMGRS::setup - nrows not divisible by dof.\n");
          printf("\tMLI_Method_AMGRS::setup - revert nodeDOF to 1.\n");
-         nodeDOF_ = 1; 
+         nodeDOF_ = 1;
          numNodes = localNRows / nodeDOF_;
       }
       if ( level == 0 )
@@ -346,14 +340,14 @@ int MLI_Method_AMGRS::setup( MLI *mli )
                             	 coarsenScheme_, outputLevel_, &CFMarkers);
               break;
          case MLI_METHOD_AMGRS_FALGOUT :
-              hypre_BoomerAMGCoarsenFalgout(hypreS, hypreA, measureType_, 
+              hypre_BoomerAMGCoarsenFalgout(hypreS, hypreA, measureType_,
                                             outputLevel_, &CFMarkers);
               break;
          case MLI_METHOD_AMGRS_CR :
               hypre_BoomerAMGCoarsen(hypreS, hypreA, 0, outputLevel_,
                             	     &CFMarkers);
               k = 0;
-              for (irow = 0; irow < localNRows; irow++) 
+              for (irow = 0; irow < localNRows; irow++)
               {
                  if (CFMarkers[irow] > 0) {CFMarkers[irow] = 1; k++;}
                  else if (CFMarkers[irow] < 0) CFMarkers[irow] = 0;
@@ -363,7 +357,7 @@ int MLI_Method_AMGRS::setup( MLI *mli )
               mli_Affmat = performCR(mli_Amat,CFMarkers,&mli_Afcmat,numTrials,
                                      hypreS2);
               k = 0;
-              for (irow = 0; irow < localNRows; irow++) 
+              for (irow = 0; irow < localNRows; irow++)
               {
                  if (CFMarkers[irow] > 0) {CFMarkers[irow] = 1; k++;}
                  else if (CFMarkers[irow] <= 0) CFMarkers[irow] = -1;
@@ -392,7 +386,7 @@ int MLI_Method_AMGRS::setup( MLI *mli )
 
       /* ------construct processor maps for the coarse grid------------- */
 
-      coarsePartition = (int *) hypre_CTAlloc(int, nprocs+1);
+      coarsePartition = (int *) hypre_CTAlloc(int, nprocs+1, HYPRE_MEMORY_HOST);
       coarsePartition[0] = 0;
       MPI_Allgather(&coarseNRows, 1, MPI_INT, &(coarsePartition[1]),
 		    1, MPI_INT, comm);
@@ -419,19 +413,19 @@ int MLI_Method_AMGRS::setup( MLI *mli )
             }
          }
       }
-          
+
       /* ------ wrap up creating the multigrid hierarchy --------------- */
 
       if ( coarsePartition[nprocs] < minCoarseSize_ ||
-           coarsePartition[nprocs] == globalNRows || zeroNRows == 1 ) 
+           coarsePartition[nprocs] == globalNRows || zeroNRows == 1 )
       {
          if ( symmetric_ == 0 )
          {
             delete mli_ATmat;
             hypre_ParCSRMatrixDestroy(hypreST);
          }
-         hypre_TFree( coarsePartition );
-         if ( CFMarkers != NULL ) hypre_TFree( CFMarkers );
+         hypre_TFree( coarsePartition , HYPRE_MEMORY_HOST);
+         if ( CFMarkers != NULL ) hypre_TFree( CFMarkers , HYPRE_MEMORY_HOST);
          if ( hypreS  != NULL ) hypre_ParCSRMatrixDestroy(hypreS);
          if ( hypreS2 != NULL ) hypre_ParCSRMatrixDestroy(hypreS2);
          if ( coarsenScheme_ == MLI_METHOD_AMGRS_CR )
@@ -473,12 +467,12 @@ int MLI_Method_AMGRS::setup( MLI *mli )
       //===============================================
 #endif
       {
-         hypre_BoomerAMGBuildInterp(hypreA, CFMarkers, hypreS, 
-                     coarsePartition, nodeDOF_, dofArray, outputLevel_, 
+         hypre_BoomerAMGBuildInterp(hypreA, CFMarkers, hypreS,
+                     coarsePartition, nodeDOF_, dofArray, outputLevel_,
                      truncFactor_, mxelmtsP_, mapStoA, &hypreP);
          funcPtr = new MLI_Function();
          MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
-         sprintf(paramString, "HYPRE_ParCSR" ); 
+         sprintf(paramString, "HYPRE_ParCSR" );
          mli_Pmat = new MLI_Matrix( (void *) hypreP, paramString, funcPtr );
          mli->setProlongation(level+1, mli_Pmat);
          delete funcPtr;
@@ -504,32 +498,32 @@ int MLI_Method_AMGRS::setup( MLI *mli )
          ierr = HYPRE_IJMatrixCreate(comm, startCol, startCol+localNCols-1,
                         startRow,startRow+localNRows-1,&IJRmat);
          ierr = HYPRE_IJMatrixSetObjectType(IJRmat, HYPRE_PARCSR);
-         assert(!ierr);
+         hypre_assert(!ierr);
          rowLengs = new int[localNCols];
          for ( k = 0; k < localNCols; k++ ) rowLengs[k] = 1;
          ierr = HYPRE_IJMatrixSetRowSizes(IJRmat, rowLengs);
          ierr = HYPRE_IJMatrixInitialize(IJRmat);
-         assert(!ierr);
+         hypre_assert(!ierr);
          delete [] rowLengs;
          delete [] reduceArray1;
          delete [] reduceArray2;
          k = 0;
-         for ( irow = 0; irow < localNCols; irow++ ) 
+         for ( irow = 0; irow < localNCols; irow++ )
          {
-            while ( CFMarkers[k] != 1 ) k++; 
+            while ( CFMarkers[k] != 1 ) k++;
             rowNum = startCol + irow;
             colInd = k + startRow;
-            HYPRE_IJMatrixSetValues(IJRmat, 1, &one, (const int *) &rowNum, 
+            HYPRE_IJMatrixSetValues(IJRmat, 1, &one, (const int *) &rowNum,
                     (const int *) &colInd, (const double *) &colVal);
             k++;
          }
          ierr = HYPRE_IJMatrixAssemble(IJRmat);
-         assert( !ierr );
+         hypre_assert( !ierr );
          HYPRE_IJMatrixGetObject(IJRmat, (void **) &hypreR);
          hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) hypreR);
          funcPtr = new MLI_Function();
          MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
-         sprintf(paramString, "HYPRE_ParCSR" ); 
+         sprintf(paramString, "HYPRE_ParCSR" );
          mli_Rmat = new MLI_Matrix( (void *) hypreR, paramString, funcPtr );
          mli->setRestriction(level, mli_Rmat);
          delete funcPtr;
@@ -538,14 +532,14 @@ int MLI_Method_AMGRS::setup( MLI *mli )
       }
       else if ( symmetric_ == 0 )
       {
-         hypre_BoomerAMGBuildInterp(hypreAT, CFMarkers, hypreST, 
-                     coarsePartition, nodeDOF_, dofArray, outputLevel_, 
+         hypre_BoomerAMGBuildInterp(hypreAT, CFMarkers, hypreST,
+                     coarsePartition, nodeDOF_, dofArray, outputLevel_,
                      truncFactor_, mxelmtsP_, mapStoA, &hypreRT);
          hypreRT->owns_col_starts = 0;
          hypre_ParCSRMatrixTranspose( hypreRT, &hypreR, one );
          funcPtr = new MLI_Function();
          MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
-         sprintf(paramString, "HYPRE_ParCSR" ); 
+         sprintf(paramString, "HYPRE_ParCSR" );
          mli_Rmat = new MLI_Matrix( (void *) hypreR, paramString, funcPtr );
          mli->setRestriction(level, mli_Rmat);
          delete funcPtr;
@@ -559,8 +553,8 @@ int MLI_Method_AMGRS::setup( MLI *mli )
          mli_Rmat = new MLI_Matrix(mli_Pmat->getMatrix(), paramString, NULL);
          mli->setRestriction(level, mli_Rmat);
       }
-      if ( CFMarkers != NULL ) hypre_TFree( CFMarkers );
-      //if ( coarsePartition != NULL ) hypre_TFree( coarsePartition );
+      if ( CFMarkers != NULL ) hypre_TFree( CFMarkers , HYPRE_MEMORY_HOST);
+      //if ( coarsePartition != NULL ) hypre_TFree( coarsePartition , HYPRE_MEMORY_HOST);
 
       startTime = MLI_Utils_WTime();
 
@@ -576,8 +570,8 @@ int MLI_Method_AMGRS::setup( MLI *mli )
          //if (hypre_ParCSRMatrixOwnsRowStarts(hypreCA) == 0)
          //{
          //   rowColStarts = hypre_ParCSRMatrixRowStarts(hypreR);
-         //   newRowColStarts = (int *) malloc((nprocs+1) * sizeof(int));
-         //   for (irow = 0; irow <= nprocs; irow++) 
+         //   newRowColStarts = hypre_TAlloc(int, (nprocs+1) , HYPRE_MEMORY_HOST);
+         //   for (irow = 0; irow <= nprocs; irow++)
          //      newRowColStarts[irow] = rowColStarts[irow];
          //   hypre_ParCSRMatrixRowStarts(hypreCA) = newRowColStarts;
          //   hypre_ParCSRMatrixOwnsRowStarts(hypreCA) = 1;
@@ -585,15 +579,15 @@ int MLI_Method_AMGRS::setup( MLI *mli )
          //if (hypre_ParCSRMatrixOwnsColStarts(hypreCA) == 0)
          //{
          //   rowColStarts = hypre_ParCSRMatrixColStarts(hypreAP);
-         //   newRowColStarts = (int *) malloc((nprocs+1) * sizeof(int));
-         //   for (irow = 0; irow <= nprocs; irow++) 
+         //   newRowColStarts = hypre_TAlloc(int, (nprocs+1) , HYPRE_MEMORY_HOST);
+         //   for (irow = 0; irow <= nprocs; irow++)
          //      newRowColStarts[irow] = rowColStarts[irow];
          //   hypre_ParCSRMatrixColStarts(hypreCA) = newRowColStarts;
          //   hypre_ParCSRMatrixOwnsColStarts(hypreCA) = 1;
          //}
          //funcPtr = new MLI_Function();
          //MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
-         //sprintf(paramString, "HYPRE_ParCSR" ); 
+         //sprintf(paramString, "HYPRE_ParCSR" );
          //mli_cAmat = new MLI_Matrix((void *) hypreCA, paramString, funcPtr);
          //delete funcPtr;
          //hypre_ParCSRMatrixDestroy( hypreR );
@@ -610,7 +604,7 @@ int MLI_Method_AMGRS::setup( MLI *mli )
          hypre_ParCSRMatrixDestroy( hypreAP );
          funcPtr = new MLI_Function();
          MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
-         sprintf(paramString, "HYPRE_ParCSR" ); 
+         sprintf(paramString, "HYPRE_ParCSR" );
          mli_cAmat = new MLI_Matrix((void *) hypreCA, paramString, funcPtr);
          delete funcPtr;
 #else
@@ -622,7 +616,7 @@ int MLI_Method_AMGRS::setup( MLI *mli )
       mli->setSystemMatrix(level+1, mli_cAmat);
       elapsedTime = (MLI_Utils_WTime() - startTime);
       RAPTime_ += elapsedTime;
-      if ( mypid == 0 && outputLevel_ > 0 ) 
+      if ( mypid == 0 && outputLevel_ > 0 )
          printf("\tRAP computed, time = %e seconds.\n", elapsedTime);
 
       /* ------set the smoothers---------------------------------------- */
@@ -688,7 +682,7 @@ int MLI_Method_AMGRS::setOutputLevel( int level )
 }
 
 /* ********************************************************************* *
- * set number of levels 
+ * set number of levels
  * --------------------------------------------------------------------- */
 
 int MLI_Method_AMGRS::setNumLevels( int nlevels )
@@ -721,7 +715,7 @@ int MLI_Method_AMGRS::setSmoother(char *stype, int num, double *wgt)
 }
 
 /* ********************************************************************* *
- * set coarse solver 
+ * set coarse solver
  * --------------------------------------------------------------------- */
 
 int MLI_Method_AMGRS::setCoarseSolver( char *stype, int num, double *wgt )
@@ -737,8 +731,8 @@ int MLI_Method_AMGRS::setCoarseSolver( char *stype, int num, double *wgt )
    delete [] coarseSolverWeights_ ;
    if ( wgt != NULL && strcmp(coarseSolver_, "SuperLU") )
    {
-      coarseSolverWeights_ = new double[coarseSolverNSweeps_]; 
-      for (i = 0; i < coarseSolverNSweeps_; i++) 
+      coarseSolverWeights_ = new double[coarseSolverNSweeps_];
+      for (i = 0; i < coarseSolverNSweeps_; i++)
          coarseSolverWeights_ [i] = wgt[i];
    }
    else coarseSolverWeights_  = NULL;
@@ -746,7 +740,7 @@ int MLI_Method_AMGRS::setCoarseSolver( char *stype, int num, double *wgt )
 }
 
 /* ********************************************************************* *
- * set measure type 
+ * set measure type
  * --------------------------------------------------------------------- */
 
 int MLI_Method_AMGRS::setMeasureType( int mtype )
@@ -756,7 +750,7 @@ int MLI_Method_AMGRS::setMeasureType( int mtype )
 }
 
 /* ********************************************************************* *
- * set node degree of freedom 
+ * set node degree of freedom
  * --------------------------------------------------------------------- */
 
 int MLI_Method_AMGRS::setNodeDOF( int dof )
@@ -766,22 +760,22 @@ int MLI_Method_AMGRS::setNodeDOF( int dof )
 }
 
 /* ********************************************************************* *
- * set coarsening scheme 
+ * set coarsening scheme
  * --------------------------------------------------------------------- */
 
 int MLI_Method_AMGRS::setCoarsenScheme( int scheme )
 {
-   if ( scheme == MLI_METHOD_AMGRS_CLJP ) 
+   if ( scheme == MLI_METHOD_AMGRS_CLJP )
    {
       coarsenScheme_ = MLI_METHOD_AMGRS_CLJP;
       return 0;
    }
-   else if ( scheme == MLI_METHOD_AMGRS_RUGE ) 
+   else if ( scheme == MLI_METHOD_AMGRS_RUGE )
    {
       coarsenScheme_ = MLI_METHOD_AMGRS_RUGE;
       return 0;
    }
-   else if ( scheme == MLI_METHOD_AMGRS_FALGOUT ) 
+   else if ( scheme == MLI_METHOD_AMGRS_FALGOUT )
    {
       coarsenScheme_ = MLI_METHOD_AMGRS_FALGOUT;
       return 0;
@@ -838,10 +832,10 @@ int MLI_Method_AMGRS::print()
       printf("\t*** symmetric flag          = %d\n", symmetric_);
       printf("\t*** R injection flag        = %d\n", useInjectionForR_);
       printf("\t*** minimum coarse size     = %d\n", minCoarseSize_);
-      printf("\t*** smoother type           = %s\n", smoother_); 
+      printf("\t*** smoother type           = %s\n", smoother_);
       printf("\t*** smoother nsweeps        = %d\n", smootherNSweeps_);
-      printf("\t*** coarse solver type      = %s\n", coarseSolver_); 
-      printf("\t*** coarse solver nsweeps   = %d\n", coarseSolverNSweeps_);  
+      printf("\t*** coarse solver type      = %s\n", coarseSolver_);
+      printf("\t*** coarse solver nsweeps   = %d\n", coarseSolverNSweeps_);
       printf("\t********************************************************\n");
    }
    return 0;
@@ -1021,32 +1015,32 @@ MLI_Matrix *MLI_Method_AMGRS::performCR(MLI_Matrix *mli_Amat, int *indepSet,
 #if 0
    if (numTrials != 1)
    {
-      for (irow = 0; irow < localNRows; irow++) indepSet[irow] = 1; 
-      for (irow = 0; irow < localNRows; irow++) 
+      for (irow = 0; irow < localNRows; irow++) indepSet[irow] = 1;
+      for (irow = 0; irow < localNRows; irow++)
       {
          if (indepSet[irow] == 1)  /* if I am a C-point */
          {
             indepSet[irow] = 0;  /* set myself to be a F-pt */
-            for (jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++) 
+            for (jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++)
             {
                colInd = ADiagJ[jcol]; /* for each of my neighbors */
-               if (indepSet[colInd] == 1) /* if it is a C-point */ 
+               if (indepSet[colInd] == 1) /* if it is a C-point */
                {
                   /* if I depend strongly on it, leave it as C-pt */
-                  for (kcol = SDiagI[irow]; kcol < SDiagI[irow+1]; kcol++) 
+                  for (kcol = SDiagI[irow]; kcol < SDiagI[irow+1]; kcol++)
                   {
-                     if (SDiagJ[kcol] == colInd) 
+                     if (SDiagJ[kcol] == colInd)
                      {
                         indepSet[colInd] = -1;
                         break;
                      }
                   }
                   /* if I don't depend strongly on it, see if it depends on me*/
-                  if (kcol == SDiagI[irow+1]) 
+                  if (kcol == SDiagI[irow+1])
                   {
-                     for (kcol=SDiagI[colInd]; kcol < SDiagI[colInd+1]; kcol++) 
+                     for (kcol=SDiagI[colInd]; kcol < SDiagI[colInd+1]; kcol++)
                      {
-                        if (SDiagJ[kcol] == irow) 
+                        if (SDiagJ[kcol] == irow)
                         {
                            indepSet[colInd] = -1;
                            break;
@@ -1057,41 +1051,41 @@ MLI_Matrix *MLI_Method_AMGRS::performCR(MLI_Matrix *mli_Amat, int *indepSet,
             }
          }
       }
-      for (irow = 0; irow < localNRows; irow++) 
+      for (irow = 0; irow < localNRows; irow++)
          if (indepSet[irow] < 0) indepSet[irow] = 1;
       count = 0;
-      for (irow = 0; irow < localNRows; irow++) 
+      for (irow = 0; irow < localNRows; irow++)
          if (indepSet[irow] == 1) count++;
 
       /* ------------------------------------------------------ */
       /* select second set of fine points                       */
       /* ------------------------------------------------------ */
 
-      for (irow = 0; irow < localNRows; irow++) 
+      for (irow = 0; irow < localNRows; irow++)
       {
          if (indepSet[irow] == 1)  /* if I am a C-point */
          {
             count = 0;
-            for (jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++) 
+            for (jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++)
             {
                colInd = ADiagJ[jcol]; /* for each of my neighbors */
-               if (indepSet[colInd] == 0) /* if it is a F-point */ 
+               if (indepSet[colInd] == 0) /* if it is a F-point */
                {
                   /* if I depend strongly on it, increment counter */
-                  for (kcol = SDiagI[irow]; kcol < SDiagI[irow+1]; kcol++) 
+                  for (kcol = SDiagI[irow]; kcol < SDiagI[irow+1]; kcol++)
                   {
-                     if (SDiagJ[kcol] == colInd) 
+                     if (SDiagJ[kcol] == colInd)
                      {
                         count++;
                         break;
                      }
                   }
                   /* if I don't depend strongly on it, see if it depends on me*/
-                  if (kcol == SDiagI[irow+1]) 
+                  if (kcol == SDiagI[irow+1])
                   {
-                     for (kcol=SDiagI[colInd]; kcol < SDiagI[colInd+1]; kcol++) 
+                     for (kcol=SDiagI[colInd]; kcol < SDiagI[colInd+1]; kcol++)
                      {
-                        if (SDiagJ[kcol] == irow) 
+                        if (SDiagJ[kcol] == irow)
                         {
                            count++;
                            break;
@@ -1104,7 +1098,7 @@ MLI_Matrix *MLI_Method_AMGRS::performCR(MLI_Matrix *mli_Amat, int *indepSet,
          }
       }
       count = 0;
-      for (irow = 0; irow < localNRows; irow++) 
+      for (irow = 0; irow < localNRows; irow++)
          if (indepSet[irow] == 1) count++;
    }
 #endif
@@ -1155,20 +1149,20 @@ MLI_Matrix *MLI_Method_AMGRS::performCR(MLI_Matrix *mli_Amat, int *indepSet,
       ierr = HYPRE_IJMatrixCreate(comm,startRow,startRow+localNRows-1,
                            FStartRow,FStartRow+FNRows-1,&IJPFF);
       ierr = HYPRE_IJMatrixSetObjectType(IJPFF, HYPRE_PARCSR);
-      assert(!ierr);
+      hypre_assert(!ierr);
       rowLengs = new int[localNRows];
       for (irow = 0; irow < localNRows; irow++) rowLengs[irow] = 1;
       ierr = HYPRE_IJMatrixSetRowSizes(IJPFF, rowLengs);
       ierr = HYPRE_IJMatrixInitialize(IJPFF);
-      assert(!ierr);
+      hypre_assert(!ierr);
 
       ierr = HYPRE_IJMatrixCreate(comm,startRow,startRow+localNRows-1,
                    CStartRow,CStartRow+CNRows-1, &IJPFC);
       ierr = HYPRE_IJMatrixSetObjectType(IJPFC, HYPRE_PARCSR);
-      assert(!ierr);
+      hypre_assert(!ierr);
       ierr = HYPRE_IJMatrixSetRowSizes(IJPFC, rowLengs);
       ierr = HYPRE_IJMatrixInitialize(IJPFC);
-      assert(!ierr);
+      hypre_assert(!ierr);
       delete [] rowLengs;
 
       /* --------------------------------------------------- */
@@ -1180,7 +1174,7 @@ MLI_Matrix *MLI_Method_AMGRS::performCR(MLI_Matrix *mli_Amat, int *indepSet,
       for (irow = 0; irow < localNRows; irow++)
       {
          rowIndex = startRow + irow;
-         if (indepSet[irow] == 0) 
+         if (indepSet[irow] == 0)
          {
             colIndex = FStartRow + rowCount;
             HYPRE_IJMatrixSetValues(IJPFF,1,&one,(const int *) &rowIndex,
@@ -1196,27 +1190,27 @@ MLI_Matrix *MLI_Method_AMGRS::performCR(MLI_Matrix *mli_Amat, int *indepSet,
          }
       }
       ierr = HYPRE_IJMatrixAssemble(IJPFF);
-      assert( !ierr );
+      hypre_assert( !ierr );
       HYPRE_IJMatrixGetObject(IJPFF, (void **) &hyprePFF);
       //hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) hyprePFF);
       sprintf(paramString, "HYPRE_ParCSR" );
       mli_PFFMat = new MLI_Matrix((void *)hyprePFF,paramString,NULL);
 
       ierr = HYPRE_IJMatrixAssemble(IJPFC);
-      assert( !ierr );
+      hypre_assert( !ierr );
       HYPRE_IJMatrixGetObject(IJPFC, (void **) &hyprePFC);
       //hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) hyprePFC);
       hypreAPFC = hypre_ParMatmul(hypreA, hyprePFC);
       hypre_ParCSRMatrixTranspose(hyprePFF, &hyprePFFT, 1);
       hypreAfc = hypre_ParMatmul(hyprePFFT, hypreAPFC);
       rowStarts = hypre_ParCSRMatrixRowStarts(hyprePFFT);
-      newRowStarts = (int *) malloc((nprocs+1) * sizeof(int));
-      for (irow = 0; irow <= nprocs; irow++) 
+      newRowStarts = hypre_TAlloc(int, (nprocs+1) , HYPRE_MEMORY_HOST);
+      for (irow = 0; irow <= nprocs; irow++)
          newRowStarts[irow] = rowStarts[irow];
       hypre_ParCSRMatrixRowStarts(hypreAfc) = newRowStarts;
       colStarts = hypre_ParCSRMatrixColStarts(hypreAPFC);
-      newColStarts = (int *) malloc((nprocs+1) * sizeof(int));
-      for (irow = 0; irow <= nprocs; irow++) 
+      newColStarts = hypre_TAlloc(int, (nprocs+1) , HYPRE_MEMORY_HOST);
+      for (irow = 0; irow <= nprocs; irow++)
          newColStarts[irow] = colStarts[irow];
       hypre_ParCSRMatrixColStarts(hypreAfc) = newColStarts;
       hypre_ParCSRMatrixOwnsRowStarts(hypreAfc) = 1;
@@ -1292,7 +1286,7 @@ MLI_Matrix *MLI_Method_AMGRS::performCR(MLI_Matrix *mli_Amat, int *indepSet,
       strcpy(paramString, "relaxWeight");
       aratio = 0.0;
       XData = (double *) hypre_VectorData(hypre_ParVectorLocalVector(hypreX));
-      XaccData = (double *) 
+      XaccData = (double *)
                hypre_VectorData(hypre_ParVectorLocalVector(hypreXacc));
       for (iV = 0; iV < numVectors; iV++)
       {
@@ -1326,7 +1320,7 @@ MLI_Matrix *MLI_Method_AMGRS::performCR(MLI_Matrix *mli_Amat, int *indepSet,
             ratio1 = habs(XData[irow]);
             XaccData[irow] = ratio1;
             if (ratio1 > aratio) aratio = ratio1;
-         } 
+         }
          printf("\tTrial %3d : Jacobi norms = %16.8e %16.8e %16.8e\n",iT,
                 rnorm0,rnorm1,aratio);
          if (rnorm0 > 1.0e-10) aratio = rnorm1 / rnorm0;
@@ -1337,36 +1331,36 @@ MLI_Matrix *MLI_Method_AMGRS::performCR(MLI_Matrix *mli_Amat, int *indepSet,
       /* --------------------------------------------------- */
       /* select fine points                                  */
       /* --------------------------------------------------- */
-      
-      if (iV == numVectors) aratio /= (double) numVectors; 
-      if (aratio < targetMu) 
+
+      if (iV == numVectors) aratio /= (double) numVectors;
+      if (aratio < targetMu)
       {
          if (stopRefine == 0)
          {
-            for (irow = 0; irow < localNRows; irow++) 
+            for (irow = 0; irow < localNRows; irow++)
             {
                if (indepSet[irow] == 1)  /* if I am a C-point */
                {
                   count = 0;
-                  for (jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++) 
+                  for (jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++)
                   {
                      colInd = ADiagJ[jcol]; /* for each of my neighbors */
-                     if (indepSet[colInd] == 0) /* if it is a F-point */ 
+                     if (indepSet[colInd] == 0) /* if it is a F-point */
                      {
                         /* if I depend strongly on it, increment counter */
-                        for (kcol= SDiagI[irow]; kcol < SDiagI[irow+1]; kcol++) 
+                        for (kcol= SDiagI[irow]; kcol < SDiagI[irow+1]; kcol++)
                         {
-                           if (SDiagJ[kcol] == colInd) 
+                           if (SDiagJ[kcol] == colInd)
                            {
                               count++;
                               break;
                            }
                         }
-                        if (kcol == SDiagI[irow+1]) 
+                        if (kcol == SDiagI[irow+1])
                         {
                           for (kcol=SDiagI[colInd];kcol<SDiagI[colInd+1];kcol++)
                           {
-                             if (SDiagJ[kcol] == irow) 
+                             if (SDiagJ[kcol] == irow)
                              {
                                 count++;
                                 break;
@@ -1385,10 +1379,10 @@ MLI_Matrix *MLI_Method_AMGRS::performCR(MLI_Matrix *mli_Amat, int *indepSet,
          sortIndices = new int[localNRows];
          for (irow = 0; irow < localNRows; irow++) sortIndices[irow] = -1;
          iC = 0;
-         for (irow = 0; irow < localNRows; irow++) 
+         for (irow = 0; irow < localNRows; irow++)
             if (indepSet[irow] != 1) sortIndices[irow] = iC++;
 
-         for (irow = 0; irow < localNRows; irow++) 
+         for (irow = 0; irow < localNRows; irow++)
          {
             iC = sortIndices[irow];
             if (indepSet[irow] == 0 && (habs(XaccData[iC]) > 0.1))
@@ -1396,24 +1390,24 @@ MLI_Matrix *MLI_Method_AMGRS::performCR(MLI_Matrix *mli_Amat, int *indepSet,
                aratio = targetMu;
                //stopRefine = 1;
                indepSet[irow] = 1; /* set it to a coarse point */
-               for (jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++) 
+               for (jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++)
                {
                   colInd = ADiagJ[jcol];
-                  if (indepSet[colInd] == 0) /* if it is a F-point */ 
+                  if (indepSet[colInd] == 0) /* if it is a F-point */
                   {
-                     for (kcol = SDiagI[irow]; kcol < SDiagI[irow+1]; kcol++) 
+                     for (kcol = SDiagI[irow]; kcol < SDiagI[irow+1]; kcol++)
                      {
-                        if (SDiagJ[kcol] == colInd) 
+                        if (SDiagJ[kcol] == colInd)
                         {
                            indepSet[colInd] = -1;
                            break;
                         }
                      }
-                     if (kcol == SDiagI[irow+1]) 
+                     if (kcol == SDiagI[irow+1])
                      {
-                        for (kcol=SDiagI[colInd];kcol<SDiagI[colInd+1];kcol++) 
+                        for (kcol=SDiagI[colInd];kcol<SDiagI[colInd+1];kcol++)
                         {
-                           if (SDiagJ[kcol] == irow) 
+                           if (SDiagJ[kcol] == irow)
                            {
                               indepSet[colInd] = -1;
                               break;
@@ -1424,15 +1418,15 @@ MLI_Matrix *MLI_Method_AMGRS::performCR(MLI_Matrix *mli_Amat, int *indepSet,
                }
             }
          }
-         for (irow = 0; irow < localNRows; irow++) 
+         for (irow = 0; irow < localNRows; irow++)
             if (indepSet[irow] == -1) indepSet[irow] = 0;
          delete [] sortIndices;
-      } 
+      }
 
       /* --------------------------------------------------- */
       /* clean up                                            */
       /* --------------------------------------------------- */
-      
+
       HYPRE_IJMatrixDestroy(IJPFF);
       hypre_ParCSRMatrixDestroy(hyprePFFT);
       hypre_ParCSRMatrixDestroy(hypreAPFC);
@@ -1514,12 +1508,12 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
    ierr = HYPRE_IJMatrixCreate(comm,AffStartRow,AffStartRow+AffNRows-1,
                            AffStartRow,AffStartRow+AffNRows-1,&IJInvD);
    ierr = HYPRE_IJMatrixSetObjectType(IJInvD, HYPRE_PARCSR);
-   assert(!ierr);
+   hypre_assert(!ierr);
    rowLengs = new int[AffNRows];
    for (irow = 0; irow < AffNRows; irow++) rowLengs[irow] = 1;
    ierr = HYPRE_IJMatrixSetRowSizes(IJInvD, rowLengs);
    ierr = HYPRE_IJMatrixInitialize(IJInvD);
-   assert(!ierr);
+   hypre_assert(!ierr);
    delete [] rowLengs;
 
    /* ------------------------------------------------------ */
@@ -1530,14 +1524,14 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
    for (irow = 0; irow < localNRows; irow++)
    {
       rowIndex = startRow + irow;
-      if (indepSet[irow] == 0) 
+      if (indepSet[irow] == 0)
       {
-         HYPRE_ParCSRMatrixGetRow((HYPRE_ParCSRMatrix) hypreA, rowIndex, 
+         HYPRE_ParCSRMatrixGetRow((HYPRE_ParCSRMatrix) hypreA, rowIndex,
                                   &rowSize, &colInd, &colVal);
          colValue = 1.0;
          for (jcol = 0; jcol < rowSize; jcol++)
          {
-            if (colInd[jcol] == rowIndex) 
+            if (colInd[jcol] == rowIndex)
             {
                colValue = colVal[jcol];
                break;
@@ -1546,17 +1540,17 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
          if (colValue >= 0.0)
          {
             for (jcol = 0; jcol < rowSize; jcol++)
-               if (colInd[jcol] != rowIndex && 
-                   (indepSet[colInd[jcol]-startRow] == 0) && 
-                   colVal[jcol] > 0.0) 
+               if (colInd[jcol] != rowIndex &&
+                   (indepSet[colInd[jcol]-startRow] == 0) &&
+                   colVal[jcol] > 0.0)
                   colValue += colVal[jcol];
          }
          else
          {
             for (jcol = 0; jcol < rowSize; jcol++)
-               if (colInd[jcol] != rowIndex && 
-                   (indepSet[colInd[jcol]-startRow] == 0) && 
-                   colVal[jcol] < 0.0) 
+               if (colInd[jcol] != rowIndex &&
+                   (indepSet[colInd[jcol]-startRow] == 0) &&
+                   colVal[jcol] < 0.0)
                   colValue += colVal[jcol];
          }
          colValue = 1.0 / colValue;
@@ -1564,7 +1558,7 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
          HYPRE_IJMatrixSetValues(IJInvD,1,&one,(const int *) &colIndex,
                     (const int *) &colIndex, (const double *) &colValue);
          rowCount++;
-         HYPRE_ParCSRMatrixRestoreRow((HYPRE_ParCSRMatrix) hypreA, rowIndex, 
+         HYPRE_ParCSRMatrixRestoreRow((HYPRE_ParCSRMatrix) hypreA, rowIndex,
                                       &rowSize, &colInd, &colVal);
       }
    }
@@ -1574,11 +1568,11 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
    /* ------------------------------------------------------ */
 
    ierr = HYPRE_IJMatrixAssemble(IJInvD);
-   assert( !ierr );
+   hypre_assert( !ierr );
    HYPRE_IJMatrixGetObject(IJInvD, (void **) &hypreInvD);
    ierr += HYPRE_IJMatrixSetObjectType(IJInvD, -1);
    ierr += HYPRE_IJMatrixDestroy(IJInvD);
-   assert( !ierr );
+   hypre_assert( !ierr );
 
    /* ------------------------------------------------------ */
    /* generate polynomial of Aff and invD                    */
@@ -1592,8 +1586,8 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
       ADiagI = hypre_CSRMatrixI(ADiag);
       ADiagJ = hypre_CSRMatrixJ(ADiag);
       ADiagA = hypre_CSRMatrixData(ADiag);
-      for (irow = 0; irow < AffNRows; irow++) 
-         for (jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++) 
+      for (irow = 0; irow < AffNRows; irow++)
+         for (jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++)
             ADiagA[jcol] = - ADiagA[jcol];
    }
    else if (PDegree == 1)
@@ -1606,26 +1600,26 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
       ADiagI = hypre_CSRMatrixI(ADiag);
       ADiagJ = hypre_CSRMatrixJ(ADiag);
       ADiagA = hypre_CSRMatrixData(ADiag);
-      for (irow = 0; irow < AffNRows; irow++) 
+      for (irow = 0; irow < AffNRows; irow++)
       {
-         for (jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++) 
+         for (jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++)
          {
-            if (ADiagJ[jcol] == irow) 
+            if (ADiagJ[jcol] == irow)
                  ADiagA[jcol] = - omega*DDiagA[irow]*(2.0-omega*ADiagA[jcol]);
             else ADiagA[jcol] = omega * omega * DDiagA[irow] * ADiagA[jcol];
          }
       }
       hypre_ParCSRMatrixOwnsColStarts(hypreInvD) = 0;
       rowStarts = hypre_ParCSRMatrixRowStarts(hypreA);
-      newRowStarts = (int *) malloc((nprocs+1) * sizeof(int));
-      for (irow = 0; irow <= nprocs; irow++) 
+      newRowStarts = hypre_TAlloc(int, (nprocs+1) , HYPRE_MEMORY_HOST);
+      for (irow = 0; irow <= nprocs; irow++)
          newRowStarts[irow] = rowStarts[irow];
       hypre_ParCSRMatrixRowStarts(hypreP) = newRowStarts;
 #else
       ierr = HYPRE_IJMatrixCreate(comm,AffStartRow,AffStartRow+AffNRows-1,
                            AffStartRow,AffStartRow+AffNRows-1,&IJP);
       ierr = HYPRE_IJMatrixSetObjectType(IJP, HYPRE_PARCSR);
-      assert(!ierr);
+      hypre_assert(!ierr);
       rowLengs = new int[AffNRows];
       maxRowLeng = 0;
       ADiag   = hypre_ParCSRMatrixDiag(hypreAff);
@@ -1641,11 +1635,11 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
             if (ADiagJ[jcol] != irow && ADiagA[jcol]*ADiagA[index] < 0.0)
                newRowSize++;
          rowLengs[irow] = newRowSize;
-         if (newRowSize > maxRowLeng) maxRowLeng = newRowSize; 
+         if (newRowSize > maxRowLeng) maxRowLeng = newRowSize;
       }
       ierr = HYPRE_IJMatrixSetRowSizes(IJP, rowLengs);
       ierr = HYPRE_IJMatrixInitialize(IJP);
-      assert(!ierr);
+      hypre_assert(!ierr);
       delete [] rowLengs;
       newColInd = new int[maxRowLeng];
       newColVal = new double[maxRowLeng];
@@ -1663,7 +1657,7 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
          {
             if (ADiagJ[jcol] != irow && ADiagA[jcol]*ADiagA[index] < 0.0)
             {
-               newColInd[newRowSize] = AffStartRow + ADiagJ[jcol]; 
+               newColInd[newRowSize] = AffStartRow + ADiagJ[jcol];
                newColVal[newRowSize++] = ADiagA[jcol];
             }
             else
@@ -1678,12 +1672,12 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
          ierr = HYPRE_IJMatrixSetValues(IJP, 1, &newRowSize,
                    (const int *) &rowIndex, (const int *) newColInd,
                    (const double *) newColVal);
-         assert(!ierr);
+         hypre_assert(!ierr);
       }
       delete [] newColInd;
       delete [] newColVal;
       ierr = HYPRE_IJMatrixAssemble(IJP);
-      assert( !ierr );
+      hypre_assert( !ierr );
       HYPRE_IJMatrixGetObject(IJP, (void **) &hypreAD);
       hypreP = hypre_ParMatmul(hypreAD, hypreInvD);
       hypre_ParCSRMatrixOwnsRowStarts(hypreP) = 1;
@@ -1710,17 +1704,17 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
       ierr = HYPRE_IJMatrixCreate(comm,AffStartRow,AffStartRow+AffNRows-1,
                            AffStartRow,AffStartRow+AffNRows-1,&IJP);
       ierr = HYPRE_IJMatrixSetObjectType(IJP, HYPRE_PARCSR);
-      assert(!ierr);
+      hypre_assert(!ierr);
       rowLengs = new int[AffNRows];
       maxRowLeng = 0;
       for (irow = 0; irow < AffNRows; irow++)
       {
          newRowSize = 0;
          for (jcol = ADDiagI[irow]; jcol < ADDiagI[irow+1]; jcol++)
-            newColInd[newRowSize] = ADDiagJ[jcol]; 
+            newColInd[newRowSize] = ADDiagJ[jcol];
          for (jcol = AD2DiagI[irow]; jcol < AD2DiagI[irow+1]; jcol++)
-            newColInd[newRowSize] = AD2DiagJ[jcol]; 
-         if (newRowSize > maxRowLeng) maxRowLeng = newRowSize; 
+            newColInd[newRowSize] = AD2DiagJ[jcol];
+         if (newRowSize > maxRowLeng) maxRowLeng = newRowSize;
          hypre_qsort0(newColInd, 0, newRowSize-1);
          ncount = 0;
          for ( jcol = 0; jcol < newRowSize; jcol++ )
@@ -1729,14 +1723,14 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
             {
                ncount++;
                newColInd[ncount] = newColInd[jcol];
-            } 
+            }
          }
          newRowSize = ncount + 1;
          rowLengs[irow] = newRowSize;
       }
       ierr = HYPRE_IJMatrixSetRowSizes(IJP, rowLengs);
       ierr = HYPRE_IJMatrixInitialize(IJP);
-      assert(!ierr);
+      hypre_assert(!ierr);
       delete [] rowLengs;
       nnz = 0;
       for (irow = 0; irow < AffNRows; irow++)
@@ -1745,16 +1739,16 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
          newRowSize = 0;
          for (jcol = ADDiagI[irow]; jcol < ADDiagI[irow+1]; jcol++)
          {
-            newColInd[newRowSize] = ADDiagJ[jcol]; 
-            if (ADDiagJ[jcol] == irow) 
-               newColVal[newRowSize++] = 3.0 * (1.0 - ADDiagA[jcol]); 
+            newColInd[newRowSize] = ADDiagJ[jcol];
+            if (ADDiagJ[jcol] == irow)
+               newColVal[newRowSize++] = 3.0 * (1.0 - ADDiagA[jcol]);
             else
-               newColVal[newRowSize++] = - 3.0 * ADDiagA[jcol]; 
+               newColVal[newRowSize++] = - 3.0 * ADDiagA[jcol];
          }
          for (jcol = AD2DiagI[irow]; jcol < AD2DiagI[irow+1]; jcol++)
          {
-            newColInd[newRowSize] = AD2DiagJ[jcol]; 
-            newColVal[newRowSize++] = AD2DiagA[jcol]; 
+            newColInd[newRowSize] = AD2DiagJ[jcol];
+            newColVal[newRowSize++] = AD2DiagA[jcol];
          }
          hypre_qsort1(newColInd, newColVal, 0, newRowSize-1);
          ncount = 0;
@@ -1767,26 +1761,26 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
                ncount++;
                newColVal[ncount] = newColVal[jcol];
                newColInd[ncount] = newColInd[jcol];
-            } 
+            }
          }
          newRowSize = ncount + 1;
          for ( jcol = 0; jcol < newRowSize; jcol++ )
             newColVal[jcol] = - (DDiagA[irow] * newColVal[jcol]);
-     
+
          ierr = HYPRE_IJMatrixSetValues(IJP, 1, &newRowSize,
                    (const int *) &rowIndex, (const int *) newColInd,
                    (const double *) newColVal);
          nnz += newRowSize;
-         assert(!ierr);
+         hypre_assert(!ierr);
       }
       delete [] newColInd;
       delete [] newColVal;
       ierr = HYPRE_IJMatrixAssemble(IJP);
-      assert( !ierr );
+      hypre_assert( !ierr );
       HYPRE_IJMatrixGetObject(IJP, (void **) &hypreP);
       ierr += HYPRE_IJMatrixSetObjectType(IJP, -1);
       ierr += HYPRE_IJMatrixDestroy(IJP);
-      assert(!ierr);
+      hypre_assert(!ierr);
       hypre_ParCSRMatrixDestroy(hypreAD);
       hypre_ParCSRMatrixDestroy(hypreAD2);
    }
@@ -1813,23 +1807,23 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
    ierr = HYPRE_IJMatrixCreate(comm,startRow,startRow+localNRows-1,
                         AccStartRow,AccStartRow+AccNRows-1,&IJP);
    ierr = HYPRE_IJMatrixSetObjectType(IJP, HYPRE_PARCSR);
-   assert(!ierr);
+   hypre_assert(!ierr);
    rowLengs = new int[localNRows];
    maxRowLeng = 0;
    ncount = 0;
    for (irow = 0; irow < localNRows; irow++)
    {
       if (indepSet[irow] == 1) rowLengs[irow] = 1;
-      else                     
+      else
       {
          rowLengs[irow] = tPDiagI[ncount+1] - tPDiagI[ncount];
          ncount++;
       }
-      if (rowLengs[irow] > maxRowLeng) maxRowLeng = rowLengs[irow]; 
+      if (rowLengs[irow] > maxRowLeng) maxRowLeng = rowLengs[irow];
    }
    ierr = HYPRE_IJMatrixSetRowSizes(IJP, rowLengs);
    ierr = HYPRE_IJMatrixInitialize(IJP);
-   assert(!ierr);
+   hypre_assert(!ierr);
    delete [] rowLengs;
    fCount = 0;
    cCount = 0;
@@ -1844,14 +1838,14 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
          newColInd[0] = AccStartRow + cCount;
          newColVal[0] = 1.0;
          cCount++;
-      } 
+      }
       else
       {
          newRowSize = 0;
          for (jcol = tPDiagI[fCount]; jcol < tPDiagI[fCount+1]; jcol++)
          {
-            newColInd[newRowSize] = tPDiagJ[jcol] + AccStartRow; 
-            newColVal[newRowSize++] = tPDiagA[jcol]; 
+            newColInd[newRowSize] = tPDiagJ[jcol] + AccStartRow;
+            newColVal[newRowSize++] = tPDiagA[jcol];
          }
          fCount++;
       }
@@ -1865,7 +1859,7 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
       ncount = 0;
       for (jcol = 0; jcol < newRowSize; jcol++)
       {
-         if (habs(newColVal[jcol]) > dtemp) 
+         if (habs(newColVal[jcol]) > dtemp)
          {
             newColInd[ncount] = newColInd[jcol];
             newColVal[ncount++] = newColVal[jcol];
@@ -1883,17 +1877,17 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
       ierr = HYPRE_IJMatrixSetValues(IJP, 1, &newRowSize,
                    (const int *) &rowIndex, (const int *) newColInd,
                    (const double *) newColVal);
-      assert(!ierr);
+      hypre_assert(!ierr);
    }
    delete [] newColInd;
    delete [] newColVal;
    ierr = HYPRE_IJMatrixAssemble(IJP);
-   assert( !ierr );
+   hypre_assert( !ierr );
    hypre_ParCSRMatrixDestroy(hypreP);
    HYPRE_IJMatrixGetObject(IJP, (void **) &hypreP);
    ierr += HYPRE_IJMatrixSetObjectType(IJP, -1);
    ierr += HYPRE_IJMatrixDestroy(IJP);
-   assert(!ierr);
+   hypre_assert(!ierr);
 
    /* ------------------------------------------------------ */
    /* package the P matrix                                   */
@@ -1906,4 +1900,3 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
    delete funcPtr;
    return mli_Pmat;
 }
-

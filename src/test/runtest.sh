@@ -1,16 +1,25 @@
 #!/bin/sh
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
 
 # global variables
 BatchMode=0
 NoRun=0
-JobCheckInterval=10        #sleep time between jobs finished check
+JobCheckInterval=10        # sleep time between jobs finished check
 InputString=""
+RunPrefix=`type -p mpirun`
+RunPrefix="$RunPrefix -np"
 RunString=""
 RunEcho=""
-ExecFileNames=""           #string of executable file names used
-TestDirNames=""            #string of names of TEST_* directories used
+ExecFileNames=""           # string of executable file names used
+TestDirNames=""            # string of names of TEST_* directories used
 HOST=`hostname`
-NumThreads=0               #number of OpenMP threads to use if > 0
+NumThreads=0               # number of OpenMP threads to use if > 0
+Valgrind=""                # string to add to MpirunString when using valgrind
+mpibind=""                 # string to add to MpirunString when using mpibind
 
 function usage
 {
@@ -22,7 +31,12 @@ function usage
    printf "\n"
    printf " with options:\n"
    printf "    -h|-help       prints this usage information and exits\n"
+   printf "    -mpi <prefix>  MPI run prefix; default is 'mpirun -np'\n"
    printf "    -nthreads <n>  use 'n' OpenMP threads\n"
+   printf "    -rtol <tol>    use relative tolerance 'tol' to compare numeric test values\n"
+   printf "    -atol <tol>    use absolute tolerance 'tol' to compare numeric test values\n"
+   printf "    -valgrind      use valgrind memory checker\n"
+   printf "    -mpibind       use mpibind\n"
    printf "    -n|-norun      turn off execute mode, echo what would be run\n"
    printf "    -t|-trace      echo each command\n"
    printf "    -D <var>       define <var> when running tests\n"
@@ -52,8 +66,9 @@ function usage
 function MpirunString
 {
    case $HOST in
-      *bgl*) shift
+      *bgl*)
          BatchMode=1
+         shift
          MY_NUM_TASKS=$1  
          MY_EXECUTE_DIR=`pwd`
          MY_EXECUTE_JOB=`pwd`/$EXECFILE
@@ -63,7 +78,8 @@ function MpirunString
          RunString="mpirun -verbose 1 -np $MY_NUM_TASKS -exe $MY_EXECUTE_JOB"
          RunString="${RunString} -cwd $MY_EXECUTE_DIR -args \" $MY_ARGS \" "
          ;;
-      up*) CPUS_PER_NODE=8
+      up*)
+         CPUS_PER_NODE=8
          POE_NUM_PROCS=$2
          POE_NUM_NODES=`expr $POE_NUM_PROCS + $CPUS_PER_NODE - 1`
          POE_NUM_NODES=`expr $POE_NUM_NODES / $CPUS_PER_NODE`
@@ -74,18 +90,8 @@ function MpirunString
          # RunString="${RunString} -nodes $POE_NUM_NODES $MY_ARGS"
          RunString="poe $MY_ARGS -rmpool pdebug -procs $POE_NUM_PROCS -nodes $POE_NUM_NODES"
          ;;
-      *dawn*) shift
-         BatchMode=1
-         MY_NUM_TASKS=$1  
-         MY_EXECUTE_DIR=`pwd`
-         MY_EXECUTE_JOB=`pwd`/$EXECFILE
+      rztopaz*|aztec*|cab*|quartz*|sierra*|syrah*|vulcan*)
          shift
-         shift
-         MY_ARGS="$*"
-         RunString="mpirun -verbose 1 -np $MY_NUM_TASKS -exe $MY_EXECUTE_JOB"
-         RunString="${RunString} -cwd $MY_EXECUTE_DIR -args \" $MY_ARGS \" "
-         ;;
-      rzzeus*|rzmerl*|ansel*|aztec*|cab*|sierra*|vulcan*) shift
          if [ $NumThreads -gt 0 ] ; then
             export OMP_NUM_THREADS=$NumThreads
             RunString="srun -p pdebug -c $NumThreads -n$*"
@@ -93,19 +99,34 @@ function MpirunString
             RunString="srun -p pdebug -n$*"
          fi
          ;;
-      tux*) BatchMode=0
+      surface*)
+         shift
+         RunString="srun -n$*"
+         ;;
+      pascal*)
+         shift
+         RunString="srun -n$*"
+         ;;
+      rzansel*)
+         shift
+         RunString="lrun -T$*"
+         ;;
+      ray*)
+         shift
+         RunString="lrun -n$*"
+         ;;
+      lassen*)
+         shift
+         RunString="lrun -n$*"
+         ;;
+      *)
+         shift
          if [ $NumThreads -gt 0 ] ; then
             export OMP_NUM_THREADS=$NumThreads
          fi
-         MACHINES_FILE="hostname"
-         if [ ! -f $MACHINES_FILE ] ; then
-            hostname > $MACHINES_FILE
-         fi
-         MPIRUN=`type mpirun|sed -e 's/^.* //'`
-         RunString="$MPIRUN -machinefile $MACHINES_FILE $*"
-         ;;
-      *) MPIRUN=`type mpirun|sed -e 's/^.* //'`
-         RunString="$MPIRUN $*"
+         RunString="$RunPrefix $1"
+         shift
+         RunString="$RunString $mpibind $Valgrind $*"
          ;;
    esac
 }
@@ -171,35 +192,6 @@ function CalcProcs
    return 1
 }
 
-# determine if HOST machine can process batch queues
-#    set to run in debug pool unless batch MUST be used.
-function CheckBatch
-{
-   case $HOST in
-      alc*) BATCH_MODE=0
-         ;;
-      peng*) BATCH_MODE=0
-         ;;
-      thun*) BATCH_MODE=0
-         ;;
-      *bgl*) BATCH_MODE=1
-         ;;
-      up*) BATCH_MODE=0
-         ;;
-      *dawn*) BATCH_MODE=1
-         ;;
-      vert*) BATCH_MODE=0
-         ;;
-      hera*) BATCH_MODE=0
-         ;;
-      *zeus*) BATCH_MODE=0
-         ;;
-      *) BATCH_MODE=0
-         ;;
-   esac
-   return $BATCH_MODE
-}
-
 # check the path to the executable if the executable exists; save the name to
 # ExecFileNames
 function CheckPath
@@ -213,6 +205,7 @@ function CheckPath
                ExecFileNames="$ExecFileNames $EXECFILE"
                return 0
             else
+               echo $EXECFILE
                echo "Cannot find executable!!!"
                return 1
             fi
@@ -303,12 +296,12 @@ function ExecuteJobs
             ;; 
 
          *mpirun*)
-            RunCmd=`echo $InputLine| sed -e 's/^[ \t]*mpirun[ \t]*//'` 
-            RunCmd=`echo $RunCmd | sed -e 's/[ \t]*>.*$//'`
-            OutFile=`echo $InputLine | sed -e 's/^.*>//'`
-            OutFile=`echo $OutFile | sed -e 's/ //g'`
-            ErrFile=`echo $OutFile | sed -e 's/\.out\./.err./'`
-            RunName=`echo $OutFile | sed -e 's/\.out.*$//'`
+            RunCmd=`echo $InputLine| sed -e 's/^[ \t]*mpirun[ \t]*//'` # remove 'mpirun'
+            RunCmd=`echo $RunCmd | sed -e 's/[ \t]*>.*$//'`            # remove output redirect
+            OutFile=`echo $InputLine | sed -e 's/^.*>//'`           # set output file
+            OutFile=`echo $OutFile | sed -e 's/ //g'`               # remove extra space
+            ErrFile=`echo $OutFile | sed -e 's/\.out\./.err./'`  # set error file
+            RunName=`echo $OutFile | sed -e 's/\.out.*$//'`   # set test run name
             CheckPath $RunCmd               # check path to executable
             if [ "$?" -gt 0 ] ; then
                cat >> $RunName.err <<- EOF
@@ -390,10 +383,12 @@ function ExecuteTest
    StartDir=$1
    WorkingDir=$2
    InputFile=$3
+   RTOL=$4
+   ATOL=$5
    SavePWD=`pwd`
    cd $WorkingDir
    (cat $InputFile.err.* > $InputFile.err)
-   (./$InputFile.sh     >> $InputFile.err 2>> $InputFile.err)
+   (./$InputFile.sh $RTOL $ATOL   >> $InputFile.err 2>> $InputFile.err)
    cd $SavePWD
 }
 
@@ -422,7 +417,7 @@ function PostProcess
 }
 
                
-# removes executable and hostname files from all TEST_* directories
+# removes executables from all TEST_* directories
 function CleanUp
 {
    if [ "$BatchMode" -eq 0 ] ; then
@@ -433,13 +428,8 @@ function CleanUp
             ExecuteFile=$i/$j
             if [ -x $ExecuteFile ] ; then
                rm -f $ExecuteFile
-               rm -f hostname
             fi
          done
-         ExecuteFile=$i/hostname
-         if [ -f $ExecuteFile ] ; then
-            rm -f $ExecuteFile
-         fi
          case $i in
             TEST_examples)
                rm -f ex? ex?? ex??f
@@ -453,8 +443,6 @@ function StartCrunch
 {
    rm -f ~/insure.log*
 
-   CheckBatch
-   BatchMode=$?
    ExecuteJobs "$@"
    ExecuteTest "$@"
    PostProcess "$@"
@@ -464,7 +452,7 @@ function StartCrunch
 #==========================================================================
 
 # main
-
+# Set default check tolerance
 while [ "$*" ]
 do
    case $1 in
@@ -472,10 +460,33 @@ do
          usage
          exit
          ;;
+      -mpi)
+         shift
+         MPIRunPrefix=$1
+         shift
+         ;;
       -nthreads)
          shift
          NumThreads=$1
          shift
+         ;;
+      -rtol)
+         shift
+         RTOL=$1
+         shift
+         ;;
+      -atol)
+         shift
+         ATOL=$1
+         shift
+         ;;
+      -valgrind)
+         shift
+         Valgrind="valgrind -q --suppressions=`pwd`/runtest.valgrind --leak-check=yes --track-origins=yes"
+         ;;
+      -mpibind)
+         shift
+         mpibind="mpibind"
          ;;
       -n|-norun)
          NoRun=1
@@ -513,7 +524,14 @@ do
                      ;;
                esac
                if [ -r $DirPart/$FilePart.jobs ] ; then
-                  StartCrunch $CurDir $DirPart $FilePart
+
+                  # Check for an mpirun routine
+                  if [ x$MPIRunprefix != "x" ]
+                  then
+                     RunPrefix=$MPIRunPrefix
+                  fi
+
+                  StartCrunch $CurDir $DirPart $FilePart $RTOL $ATOL
                else
                   printf "%s: test command file %s/%s.jobs does not exist\n" \
                      $0 $DirPart $FilePart
@@ -539,10 +557,12 @@ CleanUp $TestDirNames $ExecFileNames
 
 # Filter misleading error messages
 cat > runtest.filters <<EOF
+lrun warning: default mapping forced to idle
 hypre_MPI_Init
 job [0-9]* queued and waiting for resources
 job [0-9]* has been allocated resources
 SLURMINFO: Job [0-9]* is pending allocation of resources.
+slurmstepd: error: _is_a_lwp:
 ATTENTION: [0-9\-]*  Couldn't create .*, job may not be checkpointable
 ATTENTION: [0-9\-]* Error opening file
 ### .*File.cc.*
@@ -553,11 +573,11 @@ do
   do
     if (egrep -f runtest.filters $errfile > /dev/null) ; then
         original=`dirname $errfile`/`basename $errfile .err`.fil
-	echo "This file contains the original copy of $errfile before filtering" > $original
-	cat $errfile >> $original
-	mv $errfile $errfile.tmp
-	egrep -v -f runtest.filters $errfile.tmp > $errfile
-	rm -f $errfile.tmp
+        echo "This file contains the original copy of $errfile before filtering" > $original
+        cat $errfile >> $original
+        mv $errfile $errfile.tmp
+        egrep -v -f runtest.filters $errfile.tmp > $errfile
+        rm -f $errfile.tmp
     fi
   done
 done

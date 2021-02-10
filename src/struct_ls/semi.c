@@ -1,15 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
 
@@ -56,7 +50,6 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
    hypre_CommInfo       *comm_info;
    hypre_CommPkg        *comm_pkg;
    hypre_CommHandle     *comm_handle;
-   HYPRE_Complex        *data;
 
    HYPRE_Int             num_ghost[] = {0, 0, 0, 0, 0, 0};
    HYPRE_Int             i, j, s, dim;
@@ -88,7 +81,7 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
    hypre_CommInfoProjectSend(comm_info, index, stride);
    hypre_CommInfoProjectRecv(comm_info, index, stride);
 
-   for (s = 0; s < 3; s++)
+   for (s = 0; s < 4; s++)
    {
       switch(s)
       {
@@ -96,12 +89,18 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
             box_aa = hypre_CommInfoSendBoxes(comm_info);
             hypre_SetIndex3(hypre_CommInfoSendStride(comm_info), 1, 1, 1);
             break;
+
          case 1:
             box_aa = hypre_CommInfoRecvBoxes(comm_info);
             hypre_SetIndex3(hypre_CommInfoRecvStride(comm_info), 1, 1, 1);
             break;
+
          case 2:
             box_aa = hypre_CommInfoSendRBoxes(comm_info);
+            break;
+
+         case 3:
+            box_aa = hypre_CommInfoRecvRBoxes(comm_info);
             break;
       }
 
@@ -119,6 +118,12 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
          }
    }
 
+   comm_pkg = hypre_StructMatrixCommPkg(P);
+   if (comm_pkg)
+   {
+      hypre_CommPkgDestroy(comm_pkg);
+   }
+   
    hypre_CommPkgCreate(comm_info,
                        hypre_StructMatrixDataSpace(P),
                        hypre_StructMatrixDataSpace(P),
@@ -126,11 +131,14 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
                        hypre_StructMatrixComm(P),
                        &comm_pkg);
    hypre_CommInfoDestroy(comm_info);
+   hypre_StructMatrixCommPkg(P) = comm_pkg;
 
-   data = hypre_StructMatrixVData(P);
-   hypre_InitializeCommunication(comm_pkg, &data, &data, 0, 0, &comm_handle);
+   hypre_InitializeCommunication(comm_pkg,
+                                 hypre_StructMatrixStencilData(P)[0],//hypre_StructMatrixData(P),
+                                 hypre_StructMatrixStencilData(P)[0],//hypre_StructMatrixData(P),
+				 0, 0,
+                                 &comm_handle);
    hypre_FinalizeCommunication(comm_handle);
-   hypre_CommPkgDestroy(comm_pkg);
 
    return hypre_error_flag;
 }

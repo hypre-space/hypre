@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -17,6 +12,7 @@
  *****************************************************************************/
 
 #include "_hypre_struct_mv.h"
+#include "_hypre_struct_mv.hpp"
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -174,7 +170,7 @@ hypre_StructVectorCreate( MPI_Comm          comm,
    hypre_StructVector  *vector;
    HYPRE_Int            i;
 
-   vector = hypre_CTAlloc(hypre_StructVector, 1);
+   vector = hypre_CTAlloc(hypre_StructVector, 1, HYPRE_MEMORY_HOST);
 
    hypre_StructVectorComm(vector)           = comm;
    hypre_StructGridRef(grid, &hypre_StructVectorGrid(vector));
@@ -217,14 +213,14 @@ hypre_StructVectorDestroy( hypre_StructVector *vector )
       {
          if (hypre_StructVectorDataAlloced(vector))
          {
-            hypre_SharedTFree(hypre_StructVectorData(vector));
+            hypre_TFree(hypre_StructVectorData(vector), HYPRE_MEMORY_HOST);
          }
-         hypre_TFree(hypre_StructVectorDataIndices(vector));
+         hypre_TFree(hypre_StructVectorDataIndices(vector), HYPRE_MEMORY_HOST);
          hypre_BoxArrayDestroy(hypre_StructVectorDataSpace(vector));
-         hypre_TFree(hypre_StructVectorBoxnums(vector));
+         hypre_TFree(hypre_StructVectorBoxnums(vector), HYPRE_MEMORY_HOST);
          hypre_StructGridDestroy(hypre_StructVectorGrid(vector));
          hypre_StructVectorForget(vector);
-         hypre_TFree(vector);
+         hypre_TFree(vector, HYPRE_MEMORY_HOST);
       }
    }
 
@@ -251,7 +247,7 @@ hypre_StructVectorSetBoxnums( hypre_StructVector *vector,
    hypre_StructGridComputeBoxnums(hypre_StructVectorGrid(vector), nboxes, boxnums,
                                   hypre_StructVectorStride(vector),
                                   &vec_nboxes, &vec_boxnums);
-   hypre_TFree(hypre_StructVectorBoxnums(vector));
+   hypre_TFree(hypre_StructVectorBoxnums(vector), HYPRE_MEMORY_HOST);
    hypre_StructVectorNBoxes(vector)  = vec_nboxes;
    hypre_StructVectorBoxnums(vector) = vec_boxnums;
 
@@ -329,7 +325,7 @@ hypre_StructVectorComputeDataSpace( hypre_StructVector *vector,
       for (d = 0; d < ndim; d++)
       {
          hypre_BoxIMinD(data_box, d) -= num_ghost[2*d];
-         hypre_BoxIMaxD(data_box, d) += num_ghost[2*d + 1];
+         hypre_BoxIMaxD(data_box, d) += num_ghost[2*d+1];
       }
       hypre_StructVectorMapDataBox(vector, data_box);
    }
@@ -376,7 +372,7 @@ hypre_StructVectorResize( hypre_StructVector *vector,
    }
 
    /* Set up data_indices and data_size */
-   data_indices = hypre_CTAlloc(HYPRE_Int, hypre_BoxArraySize(data_space));
+   data_indices = hypre_CTAlloc(HYPRE_Int, hypre_BoxArraySize(data_space), HYPRE_MEMORY_HOST);
    data_size = 0;
    hypre_ForBoxI(i, data_space)
    {
@@ -399,16 +395,16 @@ hypre_StructVectorResize( hypre_StructVector *vector,
          old_ids = hypre_StructGridIDs(hypre_StructVectorSaveGrid(vector));
       }
 
-     /* The following (data_size + 1) ensures a non-null data pointer after
+     /* The following (data_size+1) ensures a non-null data pointer after
       * Initialize(), even if data_space has size zero. This enables a reindex
       * and resize between a data_space of size zero and one that is not. */
-      data = hypre_SharedCTAlloc(HYPRE_Complex, data_size + 1);
+      data = hypre_CTAlloc(HYPRE_Complex, data_size+1, HYPRE_MEMORY_HOST);
 
       /* Copy the data */
       hypre_StructDataCopy(old_data, old_data_space, old_ids, data, data_space, ids, ndim, 1);
       if (hypre_StructVectorDataAlloced(vector))
       {
-         hypre_TFree(old_data);
+         hypre_TFree(old_data, HYPRE_MEMORY_HOST);
          old_data = NULL;
       }
    }
@@ -421,7 +417,7 @@ hypre_StructVectorResize( hypre_StructVector *vector,
    /* Clean up and save data */
    if (old_data_space != NULL)
    {
-      hypre_TFree(old_data_indices);
+      hypre_TFree(old_data_indices, HYPRE_MEMORY_HOST);
 
       /* If Reindex() has not been called, save a copy of the grid info */
       if (hypre_StructVectorSaveGrid(vector) == NULL)
@@ -462,10 +458,10 @@ hypre_StructVectorRestore( hypre_StructVector *vector )
       /* Move the data */
       if (hypre_StructVectorDataAlloced(vector))
       {
-         data = hypre_SharedCTAlloc(HYPRE_Complex, data_size + 1);
+         data = hypre_CTAlloc(HYPRE_Complex, data_size+1, HYPRE_MEMORY_HOST);
       }
       hypre_StructDataCopy(old_data, old_data_space, old_ids, data, data_space, ids, ndim, 1);
-      hypre_TFree(old_data);
+      hypre_TFree(old_data, HYPRE_MEMORY_HOST);
 
       /* Reset certain fields to enable the Resize call below */
       hypre_StructVectorSaveGrid(vector)      = NULL;
@@ -582,7 +578,7 @@ hypre_StructVectorInitialize( hypre_StructVector *vector )
 
    hypre_StructVectorInitializeShell(vector);
 
-   data = hypre_SharedCTAlloc(HYPRE_Complex, hypre_StructVectorDataSize(vector));
+   data = hypre_CTAlloc(HYPRE_Complex, hypre_StructVectorDataSize(vector), HYPRE_MEMORY_HOST);
    hypre_StructVectorInitializeData(vector, data);
    hypre_StructVectorDataAlloced(vector) = 1;
 
@@ -982,8 +978,8 @@ hypre_StructVectorSetNumGhost( hypre_StructVector *vector,
 
    for (d = 0; d < ndim; d++)
    {
-      hypre_StructVectorNumGhost(vector)[2*d]     = num_ghost[2*d];
-      hypre_StructVectorNumGhost(vector)[2*d + 1] = num_ghost[2*d + 1];
+      hypre_StructVectorNumGhost(vector)[2*d]   = num_ghost[2*d];
+      hypre_StructVectorNumGhost(vector)[2*d+1] = num_ghost[2*d+1];
    }
 
    return hypre_error_flag;
@@ -1145,15 +1141,44 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
 
       hypre_BoxGetSize(box, loop_size);
 
-      hypre_BoxLoop1Begin(ndim, loop_size, dbox, start, unit_stride, vi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,vi) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop1For(vi)
+      /* TODO: generate on host and copy to device. FIX? */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+      HYPRE_Int loop_n = 1, ii;
+      for (ii = 0; ii < hypre_StructVectorNDim(vector); ii++)
       {
-         vp[vi] = 2.0 * hypre_Rand() - 1.0;
+         loop_n *= loop_size[ii];
+      }
+
+      HYPRE_Real *rand_host   = hypre_TAlloc(HYPRE_Real, loop_n, HYPRE_MEMORY_HOST);
+      HYPRE_Real *rand_device = hypre_TAlloc(HYPRE_Real, loop_n, HYPRE_MEMORY_DEVICE);
+
+      ii = 0;
+      hypre_SerialBoxLoop0Begin(hypre_StructVectorNDim(vector),loop_size)
+      {
+         rand_host[ii++] = 2.0*hypre_Rand() - 1.0;
+      }
+      hypre_SerialBoxLoop0End()
+      hypre_TMemcpy(rand_device, rand_host, HYPRE_Real, loop_n,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+#endif
+
+#define DEVICE_VAR is_device_ptr(vp, rand_device)
+      hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
+                          dbox, start, unit_stride, vi);
+      {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+         vp[vi] = rand_device[idx];
+#else
+         vp[vi] = 2.0*hypre_Rand() - 1.0;
+#endif
       }
       hypre_BoxLoop1End(vi);
+#undef DEVICE_VAR
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+      hypre_TFree(rand_device, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(rand_host, HYPRE_MEMORY_HOST);
+#endif
    }
 
    return hypre_error_flag;
@@ -1709,7 +1734,7 @@ hypre_StructVectorClone( hypre_StructVector *x )
 
    y = hypre_StructVectorCreate(comm, grid);
    hypre_StructVectorNBoxes(y)  = n_boxes;
-   hypre_StructVectorBoxnums(y) = hypre_CTAlloc(HYPRE_Int, n_boxes);
+   hypre_StructVectorBoxnums(y) = hypre_CTAlloc(HYPRE_Int, n_boxes, HYPRE_MEMORY_HOST);
    for (i = 0; i < n_boxes; i++)
    {
        hypre_StructVectorBoxnums(y)[i] = box_nums[i];
@@ -1718,8 +1743,8 @@ hypre_StructVectorClone( hypre_StructVector *x )
 
    hypre_StructVectorDataSize(y)    = data_size;
    hypre_StructVectorDataSpace(y)   = hypre_BoxArrayClone(data_space);
-   hypre_StructVectorData(y)        = hypre_CTAlloc(HYPRE_Complex, data_size + 1);
-   hypre_StructVectorDataIndices(y) = hypre_CTAlloc(HYPRE_Int, data_space_size);
+   hypre_StructVectorData(y)        = hypre_CTAlloc(HYPRE_Complex, data_size+1, HYPRE_MEMORY_HOST);
+   hypre_StructVectorDataIndices(y) = hypre_CTAlloc(HYPRE_Int, data_space_size, HYPRE_MEMORY_HOST);
 
    for (i = 0; i < data_space_size; i++)
    {

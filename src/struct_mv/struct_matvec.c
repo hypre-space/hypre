@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -46,7 +41,7 @@ hypre_StructMatvecCreate( )
 {
    hypre_StructMatvecData *matvec_data;
 
-   matvec_data = hypre_CTAlloc(hypre_StructMatvecData, 1);
+   matvec_data = hypre_CTAlloc(hypre_StructMatvecData, 1, HYPRE_MEMORY_HOST);
    matvec_data -> stentries = NULL;
 
    return (void *) matvec_data;
@@ -66,8 +61,8 @@ hypre_StructMatvecDestroy( void *matvec_vdata )
       hypre_StructVectorDestroy(matvec_data -> x);
       hypre_ComputePkgDestroy(matvec_data -> compute_pkg);
       hypre_BoxArrayDestroy(matvec_data -> data_space);
-      hypre_TFree(matvec_data -> stentries);
-      hypre_TFree(matvec_data);
+      hypre_TFree(matvec_data -> stentries, HYPRE_MEMORY_HOST);
+      hypre_TFree(matvec_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;
@@ -169,7 +164,7 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
    hypre_StructVectorReindex(x, grid, dom_stride);
    hypre_StructNumGhostFromStencil(stencil, &num_ghost);
    hypre_StructVectorComputeDataSpace(x, num_ghost, &data_space);
-   hypre_TFree(num_ghost);
+   hypre_TFree(num_ghost, HYPRE_MEMORY_HOST);
 
    /* This computes the communication pattern for the new x data_space */
    hypre_CreateComputeInfo(grid, stencil, &compute_info);
@@ -183,7 +178,7 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
    /* Set active stencil entries if it hasn't been done yet */
    stencil_size = hypre_StructStencilSize(stencil);
    stencil_diag = hypre_StructStencilDiagEntry(stencil);
-   (matvec_data -> stentries) = hypre_TAlloc(HYPRE_Int, stencil_size);
+   (matvec_data -> stentries) = hypre_TAlloc(HYPRE_Int, stencil_size, HYPRE_MEMORY_HOST);
    for (i = 0; i < stencil_size; i++)
    {
       (matvec_data -> stentries[i]) = i;

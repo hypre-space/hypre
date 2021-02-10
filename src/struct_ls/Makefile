@@ -1,15 +1,7 @@
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
-
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 include ../config/Makefile.config
 
@@ -34,7 +26,7 @@ HEADERS =\
  sparse_msg.h
 
 FILES =\
- cyclic_reduction.c\
+ coarsen.c\
  F90_HYPRE_struct_bicgstab.c\
  F90_HYPRE_struct_cycred.c\
  F90_HYPRE_struct_flexgmres.c\
@@ -53,56 +45,61 @@ FILES =\
  HYPRE_struct_flexgmres.c\
  HYPRE_struct_gmres.c\
  HYPRE_struct_hybrid.c\
- HYPRE_struct_int.c\
  HYPRE_struct_jacobi.c\
  HYPRE_struct_lgmres.c\
- HYPRE_struct_pcg.c\
  HYPRE_struct_pfmg.c\
  HYPRE_struct_smg.c\
  HYPRE_struct_sparse_msg.c\
  jacobi.c\
  pcg_struct.c\
- pfmg2_setup_rap.c\
- pfmg3_setup_rap.c\
  pfmg.c\
  pfmg_relax.c\
+ pfmg_setup_rap.c\
+ pfmg_solve.c\
+ semi.c\
+ smg_relax.c\
+ smg_setup.c\
+ smg_setup_rap.c\
+ smg_setup_restrict.c\
+ smg_solve.c\
+ sparse_msg.c\
+ sparse_msg_setup.c\
+ sparse_msg_setup_rap.c\
+ sparse_msg_solve.c
+
+CUFILES =\
+ cyclic_reduction.c\
+ HYPRE_struct_int.c\
+ HYPRE_struct_pcg.c\
+ pfmg2_setup_rap.c\
+ pfmg3_setup_rap.c\
  pfmg_setup.c\
  pfmg_setup_interp.c\
  pfmg_setup_rap5.c\
  pfmg_setup_rap7.c\
- pfmg_setup_rap.c\
- pfmg_solve.c\
  point_relax.c\
  red_black_constantcoef_gs.c\
  red_black_gs.c\
- semi.c\
  semi_interp.c\
  semi_restrict.c\
  semi_setup_rap.c\
  smg2_setup_rap.c\
  smg3_setup_rap.c\
- smg_axpy.c\
  smg.c\
- smg_relax.c\
+ smg_axpy.c\
  smg_residual.c\
- smg_setup.c\
  smg_setup_interp.c\
- smg_setup_rap.c\
- smg_setup_restrict.c\
- smg_solve.c\
  sparse_msg2_setup_rap.c\
  sparse_msg3_setup_rap.c\
- sparse_msg.c\
  sparse_msg_filter.c\
  sparse_msg_interp.c\
- sparse_msg_restrict.c\
- sparse_msg_setup.c\
- sparse_msg_setup_rap.c\
- sparse_msg_solve.c
+ sparse_msg_restrict.c
 
-OBJS = ${FILES:.c=.o}
+COBJS = ${FILES:.c=.o}
+CUOBJS = ${CUFILES:.c=.obj}
+OBJS = ${COBJS} ${CUOBJS}
 
-SONAME = libHYPRE_struct_ls-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_struct_ls-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -119,7 +116,7 @@ install: libHYPRE_struct_ls${HYPRE_LIB_SUFFIX}
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o libHYPRE*
+	rm -f *.o* libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
@@ -133,9 +130,9 @@ libHYPRE_struct_ls.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_struct_ls.so: ${OBJS}
+libHYPRE_struct_ls.so libHYPRE_struct_ls.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -sf ${SONAME} $@
+	ln -s ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

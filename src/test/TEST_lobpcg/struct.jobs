@@ -1,0 +1,39 @@
+#!/bin/sh
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+#=============================================================================
+# Run default case with all available PCG preconditioners (solvers): 
+#    10: SMG (default)
+#    11: PFMG
+#    17: 2-step Jacobi
+#    18: Diagonal scaling
+#    19: none
+#=============================================================================
+
+# PCG run... LOBPCG with one eigenpair .... LOBPCG with 5 eigenpairs
+mpirun -np 2 ./struct -solver 10 -tol 1.e-6 > struct.out.10.lobpcg
+mpirun -np 2 ./struct -lobpcg -solver 10 -tol 1.e-6 -pcgitr 0 -seed 1 -vrand 1 > struct.out.10.lobpcg.1
+mpirun -np 2 ./struct -lobpcg -solver 10 -tol 1.e-6 -pcgitr 0  -seed 1 -vrand 5  > struct.out.10.lobpcg.5
+
+# PCG run... LOBPCG with one eigenpair .... LOBPCG with 5 eigenpairs
+mpirun -np 2 ./struct -solver 11 -tol 1.e-6  > struct.out.11.lobpcg
+mpirun -np 2 ./struct -lobpcg -solver 11 -tol 1.e-6  -pcgitr 0 -seed 1 -vrand 1  > struct.out.11.lobpcg.1
+mpirun -np 2 ./struct -lobpcg -solver 11 -tol 1.e-6  -pcgitr 0 -seed 1 -vrand 5  > struct.out.11.lobpcg.5
+
+# PCG run... LOBPCG with one eigenpair .... LOBPCG with 5 eigenpairs
+mpirun -np 2 ./struct -solver 17  > struct.out.17.lobpcg
+mpirun -np 2 ./struct -lobpcg -solver 17 -tol 1.e-6  -pcgitr 10 -seed 1 -vrand 1  > struct.out.17.lobpcg.1
+mpirun -np 2 ./struct -lobpcg -solver 17 -tol 1.e-6  -pcgitr 10 -pcgtol 0 -seed 1 -vrand 5  > struct.out.17.lobpcg.5
+
+# PCG run... LOBPCG with one eigenpair .... LOBPCG with 5 eigenpairs
+mpirun -np 2 ./struct -solver 18  > struct.out.18.lobpcg
+mpirun -np 2 ./struct -lobpcg -solver 18 -tol 1.e-6  -pcgitr 10 -pcgtol 0 -seed 1 -vrand 1  > struct.out.18.lobpcg.1
+mpirun -np 2 ./struct -lobpcg -solver 18 -tol 1.e-6  -pcgitr 10 -pcgtol 0 -seed 1 -vrand 5  > struct.out.18.lobpcg.5
+
+# PCG run... LOBPCG with one eigenpair .... LOBPCG with 5 eigenpairs
+mpirun -np 2 ./struct -solver 19  > struct.out.19.lobpcg
+mpirun -np 2 ./struct -lobpcg -solver 19 -tol 1.e-6  -pcgitr 10 -pcgtol 0 -seed 1 -vrand 1  > struct.out.19.lobpcg.1
+mpirun -np 2 ./struct -lobpcg -solver 19 -tol 1.e-6  -pcgitr 10 -pcgtol 0 -seed 1 -vrand 5  > struct.out.19.lobpcg.5

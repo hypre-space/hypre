@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
 #include "fac.h"
@@ -24,7 +16,7 @@ hypre_FACCreate( MPI_Comm  comm )
 {
     hypre_FACData *fac_data;
 
-    fac_data = hypre_CTAlloc(hypre_FACData, 1);
+    fac_data = hypre_CTAlloc(hypre_FACData,  1, HYPRE_MEMORY_HOST);
 
    (fac_data -> comm)       = comm;
    (fac_data -> time_index) = hypre_InitializeTiming("FAC");
@@ -58,8 +50,8 @@ hypre_FACDestroy2(void *fac_vdata)
 
    if (fac_data)
    {
-      hypre_TFree((fac_data ->plevels) );
-      hypre_TFree((fac_data ->prefinements) );
+      hypre_TFree((fac_data ->plevels) , HYPRE_MEMORY_HOST);
+      hypre_TFree((fac_data ->prefinements) , HYPRE_MEMORY_HOST);
 
       HYPRE_SStructGraphDestroy(hypre_SStructMatrixGraph((fac_data -> A_rap)));
       HYPRE_SStructMatrixDestroy((fac_data -> A_rap));
@@ -92,26 +84,26 @@ hypre_FACDestroy2(void *fac_vdata)
       }
       hypre_SStructMatvecDestroy( (fac_data -> matvec_data) );
 
-      hypre_TFree(fac_data -> A_level);
-      hypre_TFree(fac_data -> x_level); 
-      hypre_TFree(fac_data -> b_level); 
-      hypre_TFree(fac_data -> r_level); 
-      hypre_TFree(fac_data -> e_level); 
-      hypre_TFree(fac_data -> tx_level); 
-      hypre_TFree(fac_data -> relax_data_level); 
-      hypre_TFree(fac_data -> restrict_data_level); 
-      hypre_TFree(fac_data -> matvec_data_level); 
-      hypre_TFree(fac_data -> pmatvec_data_level); 
-      hypre_TFree(fac_data -> interp_data_level); 
+      hypre_TFree(fac_data -> A_level, HYPRE_MEMORY_HOST);
+      hypre_TFree(fac_data -> x_level, HYPRE_MEMORY_HOST); 
+      hypre_TFree(fac_data -> b_level, HYPRE_MEMORY_HOST); 
+      hypre_TFree(fac_data -> r_level, HYPRE_MEMORY_HOST); 
+      hypre_TFree(fac_data -> e_level, HYPRE_MEMORY_HOST); 
+      hypre_TFree(fac_data -> tx_level, HYPRE_MEMORY_HOST); 
+      hypre_TFree(fac_data -> relax_data_level, HYPRE_MEMORY_HOST); 
+      hypre_TFree(fac_data -> restrict_data_level, HYPRE_MEMORY_HOST); 
+      hypre_TFree(fac_data -> matvec_data_level, HYPRE_MEMORY_HOST); 
+      hypre_TFree(fac_data -> pmatvec_data_level, HYPRE_MEMORY_HOST); 
+      hypre_TFree(fac_data -> interp_data_level, HYPRE_MEMORY_HOST); 
 
-      hypre_TFree(fac_data -> grid_level); 
-      hypre_TFree(fac_data -> graph_level); 
+      hypre_TFree(fac_data -> grid_level, HYPRE_MEMORY_HOST); 
+      hypre_TFree(fac_data -> graph_level, HYPRE_MEMORY_HOST); 
 
       HYPRE_SStructVectorDestroy(fac_data -> tx);
 
-      hypre_TFree(fac_data -> level_to_part);
-      hypre_TFree(fac_data -> part_to_level);
-      hypre_TFree(fac_data -> refine_factors);
+      hypre_TFree(fac_data -> level_to_part, HYPRE_MEMORY_HOST);
+      hypre_TFree(fac_data -> part_to_level, HYPRE_MEMORY_HOST);
+      hypre_TFree(fac_data -> refine_factors, HYPRE_MEMORY_HOST);
 
       if ( (fac_data -> csolver_type) == 1)
       {
@@ -125,13 +117,13 @@ hypre_FACDestroy2(void *fac_vdata)
 
       if ((fac_data -> logging) > 0)
       {
-         hypre_TFree(fac_data -> norms);
-         hypre_TFree(fac_data -> rel_norms);
+         hypre_TFree(fac_data -> norms, HYPRE_MEMORY_HOST);
+         hypre_TFree(fac_data -> rel_norms, HYPRE_MEMORY_HOST);
       }
 
       hypre_FinalizeTiming(fac_data -> time_index);
 
-      hypre_TFree(fac_data);
+      hypre_TFree(fac_data, HYPRE_MEMORY_HOST);
    }
 
    return(ierr);
@@ -163,7 +155,7 @@ hypre_FACSetPLevels( void *fac_vdata,
    HYPRE_Int      ierr       = 0;
    HYPRE_Int      i;
 
-   fac_plevels= hypre_CTAlloc(HYPRE_Int, nparts);
+   fac_plevels= hypre_CTAlloc(HYPRE_Int,  nparts, HYPRE_MEMORY_HOST);
 
    for (i= 0; i< nparts; i++)
    {
@@ -188,7 +180,7 @@ hypre_FACSetPRefinements( void         *fac_vdata,
    HYPRE_Int      ierr       = 0;
    HYPRE_Int      i;
 
-   fac_prefinements= hypre_TAlloc(hypre_Index, nparts);
+   fac_prefinements= hypre_TAlloc(hypre_Index,  nparts, HYPRE_MEMORY_HOST);
 
    for (i= 0; i< nparts; i++)
    {
