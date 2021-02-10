@@ -219,8 +219,6 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
          HYPRE_IJMatrixDestroy(hypre_SStructMatrixIJMatrix(matrix));
          hypre_TFree(hypre_SStructMatrixSEntries(matrix), HYPRE_MEMORY_HOST);
          hypre_TFree(hypre_SStructMatrixUEntries(matrix), HYPRE_MEMORY_HOST);
-         hypre_TFree(hypre_SStructMatrixTmpColCoords(matrix), HYPRE_MEMORY_HOST);
-         hypre_TFree(hypre_SStructMatrixTmpCoeffs(matrix), HYPRE_MEMORY_HOST);
          hypre_TFree(matrix, HYPRE_MEMORY_HOST);
       }
    }

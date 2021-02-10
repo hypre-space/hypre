@@ -2048,7 +2048,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                                                A_dbox, fstart, stridef, iA,
                                                crse_dbox, cstart, stridec, iAc);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         for (i= 0; i< stencil_size; i++)
                         {
                            rank=  stencil_ranks[i];

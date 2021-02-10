@@ -56,20 +56,10 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
 {
    HYPRE_BigInt *row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
    HYPRE_BigInt *col_partitioning = hypre_IJMatrixColPartitioning(matrix);
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    HYPRE_BigInt row_start = row_partitioning[0];
    HYPRE_BigInt row_end   = row_partitioning[1];
    HYPRE_BigInt col_start = col_partitioning[0];
    HYPRE_BigInt col_end   = col_partitioning[1];
-#else
-   MPI_Comm comm = hypre_IJMatrixComm(matrix);
-   HYPRE_Int my_id;
-   hypre_MPI_Comm_rank(comm, &my_id);
-   HYPRE_BigInt row_start = row_partitioning[my_id];
-   HYPRE_BigInt row_end   = row_partitioning[my_id+1];
-   HYPRE_BigInt col_start = col_partitioning[my_id];
-   HYPRE_BigInt col_end   = col_partitioning[my_id+1];
-#endif
    HYPRE_Int num_local_rows = row_end - row_start;
    HYPRE_Int num_local_cols = col_end - col_start;
    const char SorA = action[0] == 's' ? 1 : 0;
@@ -388,19 +378,10 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
    MPI_Comm comm = hypre_IJMatrixComm(matrix);
    HYPRE_BigInt *row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
    HYPRE_BigInt *col_partitioning = hypre_IJMatrixColPartitioning(matrix);
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    HYPRE_BigInt row_start = row_partitioning[0];
    HYPRE_BigInt row_end   = row_partitioning[1];
    HYPRE_BigInt col_start = col_partitioning[0];
    HYPRE_BigInt col_end   = col_partitioning[1];
-#else
-   HYPRE_Int my_id;
-   hypre_MPI_Comm_rank(comm, &my_id);
-   HYPRE_BigInt row_start = row_partitioning[my_id];
-   HYPRE_BigInt row_end   = row_partitioning[my_id+1];
-   HYPRE_BigInt col_start = col_partitioning[my_id];
-   HYPRE_BigInt col_end   = col_partitioning[my_id+1];
-#endif
    HYPRE_Int nrows = row_end - row_start;
    HYPRE_Int ncols = col_end - col_start;
 

@@ -20,7 +20,7 @@ HYPRE_StructPCGCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
       chance of name conflicts. */
    hypre_PCGFunctions * pcg_functions =
       hypre_PCGFunctionsCreate(
-         hypre_CAlloc, hypre_StructKrylovFree,
+         hypre_StructKrylovCAlloc, hypre_StructKrylovFree,
          hypre_StructKrylovCommInfo,
          hypre_StructKrylovCreateVector,
          hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,

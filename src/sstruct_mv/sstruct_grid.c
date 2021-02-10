@@ -604,7 +604,6 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
       } /* end of variable loop */
    } /* end of part loop */
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    {
       /* need to do a gather entries on neighbor information so that we have
          what we need for the NborBoxManagers function */
@@ -694,7 +693,6 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
       hypre_BoxDestroy(nbor_box);
       hypre_BoxArrayDestroy(local_boxes);
    }
-#endif
 
    /* now call the assembles */
    for (part = 0; part < nparts; part++)
@@ -784,7 +782,6 @@ hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
           * but we don't gather anything currently for the neighbor boxman, so
           * the next bit of code is not needed right now. */
 #if 0
-#ifdef HYPRE_NO_GLOBAL_PARTITION
          {
             MPI_Comm     comm        = hypre_SStructGridComm(grid);
             hypre_Box   *vbox;
@@ -827,7 +824,6 @@ hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
                hypre_BoxIMaxD(bounding_box, d) = -recvbuf6[d+ndim];
             }
          }
-#endif
 #endif
          /* Here we want to create a new manager for the neighbor information
           * (instead of adding to the current and reassembling).  This uses a

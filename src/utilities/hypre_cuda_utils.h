@@ -653,7 +653,6 @@ struct is_nonnegative : public thrust::unary_function<T,bool>
    }
 };
 
-
 template<typename T>
 struct in_range : public thrust::unary_function<T, bool>
 {

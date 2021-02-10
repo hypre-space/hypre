@@ -40,7 +40,7 @@ mo="-j test"
 eo=""
 roij="-ij -ams -rt -mpibind -rtol 1e-3 -atol 2e-2"
 ross="-struct -sstruct -rt -mpibind -rtol 1e-6 -atol 1e-6"
-rost="-struct -rt -mpibind -rtol 1e-8 -atol 1e-8"
+rost="-struct -rt -mpibind -save cuda"
 rocuda="-cuda_lassen -rt -mpibind"
 
 # CUDA with UM

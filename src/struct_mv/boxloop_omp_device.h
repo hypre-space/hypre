@@ -163,14 +163,14 @@ i1 += hypre__i_1 * hypre__I_1; \
 hypre__I_1 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,1); \
 /* */ \
 hypre__J /= HYPRE_XCONCAT2(hypre__loop_size,j); \
-/* !!! special for BoxLoop1: save the 3-D id */ \
-/* HYPRE_XCONCAT2(hypre__id,j) = hypre__i; */
+/* save the 3-D id */ \
+HYPRE_XCONCAT2(hypre__id,j) = hypre__i;
 
 
 #define zypre_omp4_BoxLoopSet1(i1) \
 HYPRE_Int hypre__I_1, hypre__i, hypre__i_1, hypre__J, i1, idx; \
-/* HYPRE_Int hypre__id_0, hypre__id_1, hypre__id_2; */ \
-hypre__I_1 = 1;  idx = hypre__J = hypre__thread;  i1 = 0; \
+HYPRE_Int hypre__id_0, hypre__id_1, hypre__id_2;               \
+hypre__I_1 = 1;  idx = hypre__J = hypre__thread;  i1 = 0;      \
 /*if (hypre__ndim > 0)*/ { zypre_omp4_BoxLoopSet1Body(0, i1) } \
   if (hypre__ndim > 1)   { zypre_omp4_BoxLoopSet1Body(1, i1) } \
   if (hypre__ndim > 2)   { zypre_omp4_BoxLoopSet1Body(2, i1) }
@@ -192,11 +192,14 @@ i2 += hypre__i_2 * hypre__I_2; \
 hypre__I_1 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,1); \
 hypre__I_2 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,2); \
 /* */ \
-hypre__J /= HYPRE_XCONCAT2(hypre__loop_size,j);
+hypre__J /= HYPRE_XCONCAT2(hypre__loop_size,j); \
+/* save the 3-D id */ \
+HYPRE_XCONCAT2(hypre__id,j) = hypre__i;
 
 
 #define zypre_omp4_BoxLoopSet2(i1, i2) \
 HYPRE_Int hypre__I_1, hypre__I_2, hypre__i, hypre__i_1, hypre__i_2, hypre__J, i1, i2; \
+HYPRE_Int hypre__id_0, hypre__id_1, hypre__id_2;               \
 hypre__I_1 = hypre__I_2 = 1;  hypre__J = hypre__thread;  i1 = i2 = 0; \
 /*if (hypre__ndim > 0)*/ { zypre_omp4_BoxLoopSet2Body(0, i1, i2) } \
   if (hypre__ndim > 1)   { zypre_omp4_BoxLoopSet2Body(1, i1, i2) } \
@@ -222,11 +225,14 @@ hypre__I_1 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,1); \
 hypre__I_2 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,2); \
 hypre__I_3 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,3); \
 /* */ \
-hypre__J /= HYPRE_XCONCAT2(hypre__loop_size,j);
+hypre__J /= HYPRE_XCONCAT2(hypre__loop_size,j); \
+/* save the 3-D id */ \
+HYPRE_XCONCAT2(hypre__id,j) = hypre__i;
 
 
 #define zypre_omp4_BoxLoopSet3(i1, i2, i3) \
 HYPRE_Int hypre__I_1, hypre__I_2, hypre__I_3, hypre__i, hypre__i_1, hypre__i_2, hypre__i_3, hypre__J, i1, i2, i3; \
+HYPRE_Int hypre__id_0, hypre__id_1, hypre__id_2; \
 hypre__I_1 = hypre__I_2 = hypre__I_3 = 1;  hypre__J = hypre__thread;  i1 = i2 = i3 = 0; \
 /*if (hypre__ndim > 0)*/ { zypre_omp4_BoxLoopSet3Body(0, i1, i2, i3) } \
   if (hypre__ndim > 1)   { zypre_omp4_BoxLoopSet3Body(1, i1, i2, i3) } \
@@ -283,11 +289,14 @@ hypre__I_2 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,2); \
 hypre__I_3 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,3); \
 hypre__I_4 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,4); \
 /* */ \
-hypre__J /= HYPRE_XCONCAT2(hypre__loop_size,j);
+hypre__J /= HYPRE_XCONCAT2(hypre__loop_size,j); \
+/* save the 3-D id */ \
+HYPRE_XCONCAT2(hypre__id,j) = hypre__i;
 
 
 #define zypre_omp4_BoxLoopSet4(i1, i2, i3, i4) \
 HYPRE_Int hypre__I_1, hypre__I_2, hypre__I_3, hypre__I_4, hypre__i, hypre__i_1, hypre__i_2, hypre__i_3, hypre__i_4, hypre__J, i1, i2, i3, i4; \
+HYPRE_Int hypre__id_0, hypre__id_1, hypre__id_2; \
 hypre__I_1 = hypre__I_2 = hypre__I_3 = hypre__I_4 = 1;  hypre__J = hypre__thread;  i1 = i2 = i3 = i4 = 0; \
 /*if (hypre__ndim > 0)*/ { zypre_omp4_BoxLoopSet4Body(0, i1, i2, i3, i4) } \
   if (hypre__ndim > 1)   { zypre_omp4_BoxLoopSet4Body(1, i1, i2, i3, i4) } \
@@ -539,12 +548,12 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
    HYPRE_Int idx, hypre__size = size; \
    for (idx = 0; idx < hypre__size; idx++) \
    {
+#endif
 
-#define hypre_newBoxLoopGetIndex(index) \
+#define hypre_BoxLoopGetIndex(index) \
   index[0] = hypre__id_0; \
   index[1] = hypre__id_1; \
   index[2] = hypre__id_2;
-#endif
 
 /* Reduction */
 #define hypre_BoxLoop1ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1, reducesum) \

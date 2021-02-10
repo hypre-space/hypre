@@ -3,26 +3,26 @@
 !
 !     SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-!     
+!
 !     Example 12
-!     
+!
 !     Interface:    Semi-Structured interface (SStruct)
-!     
+!
 !     Compile with: make ex12f (may need to edit HYPRE_DIR in Makefile)
-!  
+!
 !     Sample runs:  mpirun -np 2 ex12f
-!  
+!
 !     Description: The grid layout is the same as ex1, but with nodal
 !     unknowns. The solver is PCG preconditioned with either PFMG or
 !     BoomerAMG, set with 'precond_id' below.
-!  
+!
 !     We recommend viewing the Struct examples before viewing this and
 !     the other SStruct examples.  This is one of the simplest SStruct
 !     examples, used primarily to demonstrate how to set up
 !     non-cell-centered problems, and to demonstrate how easy it is to
 !     switch between structured solvers (PFMG) and solvers designed for
 !     more general settings (AMG).
-!  
+!
 
       program ex12f
 
@@ -227,14 +227,14 @@
          iupper(1) = -1
          iupper(2) =  2
 !        12 grid points, each with 5 stencil entries
-         nvalues = 60 
+         nvalues = 60
       else if (myid .eq. 1) then
          ilower(1) = -1
          ilower(2) =  0
          iupper(1) =  2
          iupper(2) =  4
 !        12 grid points, each with 5 stencil entries
-         nvalues = 100 
+         nvalues = 100
       endif
 
       do i = 1, nvalues, nentries

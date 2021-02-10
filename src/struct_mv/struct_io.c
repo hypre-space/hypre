@@ -78,8 +78,7 @@ hypre_PrintBoxArrayData( FILE            *file,
                                 data_box, start, stride, datai);
       {
          /* Print lines of the form: "%d: (%d, %d, %d; %d) %.14e\n" */
-         hypre_BoxLoopGetIndex(index);
-         hypre_AddIndexes(index, start, ndim, index); /* shift by start */
+         zypre_BoxLoopGetIndex(index);
          for (j = 0; j < num_values; j++)
          {
             hypre_fprintf(file, "%d: (%d", i, hypre_IndexD(index, 0));

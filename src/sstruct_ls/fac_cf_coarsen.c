@@ -340,7 +340,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                             A_dbox, node_extents, stridec, iA);
                   {
-                     hypre_BoxLoopGetIndex(lindex);
+                     zypre_BoxLoopGetIndex(lindex);
                      for (i= 0; i< stencil_size; i++)
                      {
                         if (i != centre)

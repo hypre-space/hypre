@@ -386,8 +386,6 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    HYPRE_Int               **idxcnt;
    HYPRE_Int             ****indices;
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-
    /* may need to re-do box managers for the AP*/
    hypre_BoxManager        ***new_managers = NULL;
    hypre_BoxManager          *orig_boxman;
@@ -576,46 +574,6 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    hypre_BoxDestroy(new_box);
 
    /* end of AP stuff */
-
-#else
-
-   /* Build Uvboxes */
-   for (j = 0; j < n_add_entries; j++)
-   {
-      new_entry = add_entries[j];
-
-      /* check part, var, index, to_part, to_var, to_index */
-      for (k = 0; k < 2; k++)
-      {
-         switch (k)
-         {
-            case 0:
-               part  = hypre_SStructGraphEntryPart(new_entry);
-               var   = hypre_SStructGraphEntryVar(new_entry);
-               index = hypre_SStructGraphEntryIndex(new_entry);
-               break;
-
-            case 1:
-               part  = hypre_SStructGraphEntryToPart(new_entry);
-               var   = hypre_SStructGraphEntryToVar(new_entry);
-               index = hypre_SStructGraphEntryToIndex(new_entry);
-               break;
-         }
-
-         /* if the index is not within the bounds of the struct grid bounding
-            box (which has been set in the box manager) then there should not
-            be a coupling here (doesn't make sense) */
-         bbox  = hypre_BoxManBoundingBox(managers[part][var]);
-         Uvbox = Uvboxes[part][var];
-
-         if (hypre_IndexInBox(index, bbox))
-         {
-            /* compute new gather box extents based on index */
-            hypre_BoxSpanIndex(Uvbox, index);
-         }
-      }
-   }
-#endif
 
    hypre_MPI_Comm_size(comm, &nprocs);
    hypre_MPI_Comm_rank(comm, &myproc);

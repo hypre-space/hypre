@@ -24,6 +24,7 @@
 #include <string.h>
 #include <math.h>
 #include "HYPRE_sstruct_ls.h"
+#include "ex.h"
 
 #define NDIM   4
 #define NPARTS 1
@@ -58,6 +59,9 @@ int main (int argc, char *argv[])
 
    /* Initialize HYPRE */
    HYPRE_Init();
+
+   /* Print GPU info */
+   HYPRE_PrintDeviceInfo();
 
    /* Set defaults */
    n = 4;

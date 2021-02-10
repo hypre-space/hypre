@@ -104,14 +104,9 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
    n_Cpts = num_cpts_global[1]-num_cpts_global[0];
-#else
-   total_global_cpts = num_cpts_global[num_procs];
-   n_Cpts = num_cpts_global[my_id+1]-num_cpts_global[my_id];
-#endif
 
    hypre_ParCSRMatrixGenerateFFFC(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF);
 
@@ -577,14 +572,9 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
    n_Cpts = num_cpts_global[1]-num_cpts_global[0];
-#else
-   total_global_cpts = num_cpts_global[num_procs];
-   n_Cpts = num_cpts_global[my_id+1]-num_cpts_global[my_id];
-#endif
 
    hypre_ParCSRMatrixGenerateFFFC(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF);
 
@@ -612,11 +602,7 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
    As_FF_offd_data = hypre_CSRMatrixData(As_FF_offd);
    n_Fpts = hypre_CSRMatrixNumRows(As_FF_diag);
    num_cols_A_FF_offd = hypre_CSRMatrixNumCols(As_FF_offd);
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    first_index = hypre_ParCSRMatrixRowStarts(As_FF)[0];
-#else
-   first_index = hypre_ParCSRMatrixRowStarts(As_FF)[my_id];
-#endif
    tmp_FF_diag_data = hypre_CTAlloc(HYPRE_Real, As_FF_diag_i[n_Fpts], memory_location_P);
 
    D_q = hypre_CTAlloc(HYPRE_Real, n_Fpts, memory_location_P);
@@ -1136,14 +1122,9 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
    n_Cpts = num_cpts_global[1]-num_cpts_global[0];
-#else
-   total_global_cpts = num_cpts_global[num_procs];
-   n_Cpts = num_cpts_global[my_id+1]-num_cpts_global[my_id];
-#endif
 
    hypre_ParCSRMatrixGenerateFFFC(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF);
 

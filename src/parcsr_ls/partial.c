@@ -135,7 +135,6 @@ hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_mark
    hypre_MPI_Comm_rank(comm,&my_id);
    max_num_threads = hypre_NumThreads();
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
    /*my_first_old_cpt = num_old_cpts_global[0];*/
    n_coarse_old = (HYPRE_Int)(num_old_cpts_global[1] - num_old_cpts_global[0]);
@@ -147,14 +146,6 @@ hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_mark
    }
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
    hypre_MPI_Bcast(&total_old_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   my_first_cpt = num_cpts_global[my_id];
-   /*my_first_old_cpt = num_old_cpts_global[my_id];*/
-   total_global_cpts = num_cpts_global[num_procs];
-   total_old_global_cpts = num_old_cpts_global[num_procs];
-   n_coarse_old = (HYPRE_Int)(num_old_cpts_global[my_id+1] - num_old_cpts_global[my_id]);
-   /*n_coarse = num_cpts_global[my_id+1] - num_cpts_global[my_id];*/
-#endif
 
    if (!comm_pkg)
    {
@@ -980,7 +971,6 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
    /*my_first_old_cpt = num_old_cpts_global[0];*/
    n_coarse_old = (HYPRE_Int)(num_old_cpts_global[1] - num_old_cpts_global[0]);
@@ -993,14 +983,6 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
    }
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
    hypre_MPI_Bcast(&total_old_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   my_first_cpt = num_cpts_global[my_id];
-   /*my_first_old_cpt = num_old_cpts_global[my_id];*/
-   total_global_cpts = num_cpts_global[num_procs];
-   total_old_global_cpts = num_old_cpts_global[num_procs];
-   n_coarse_old = (HYPRE_Int)(num_old_cpts_global[my_id+1] - num_old_cpts_global[my_id]);
-   /*n_coarse = num_cpts_global[my_id+1] - num_cpts_global[my_id];*/
-#endif
 
    if (!comm_pkg)
    {
@@ -1967,7 +1949,6 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
    /*my_first_old_cpt = num_old_cpts_global[0];*/
    n_coarse_old = (HYPRE_Int)(num_old_cpts_global[1] - num_old_cpts_global[0]);
@@ -1979,14 +1960,6 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
    }
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
    hypre_MPI_Bcast(&total_old_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   my_first_cpt = num_cpts_global[my_id];
-   /*my_first_old_cpt = num_old_cpts_global[my_id];*/
-   total_global_cpts = num_cpts_global[num_procs];
-   total_old_global_cpts = num_old_cpts_global[num_procs];
-   n_coarse_old = (HYPRE_Int)(num_old_cpts_global[my_id+1] - num_old_cpts_global[my_id]);
-   /*n_coarse = num_cpts_global[my_id+1] - num_cpts_global[my_id];*/
-#endif
 
    if (!comm_pkg)
    {

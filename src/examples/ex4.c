@@ -58,6 +58,7 @@
 #include <math.h>
 #include "HYPRE_krylov.h"
 #include "HYPRE_struct_ls.h"
+#include "ex.h"
 
 #ifdef M_PI
   #define PI M_PI
@@ -229,6 +230,9 @@ int main (int argc, char *argv[])
 
    /* Initialize HYPRE */
    HYPRE_Init();
+
+   /* Print GPU info */
+   HYPRE_PrintDeviceInfo();
 
    /* Set default parameters */
    n         = 33;

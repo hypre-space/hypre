@@ -23,7 +23,7 @@ HYPRE_ParCSRPCGCreate( MPI_Comm comm, HYPRE_Solver *solver )
    }
    pcg_functions =
       hypre_PCGFunctionsCreate(
-         hypre_CAlloc, hypre_ParKrylovFree, hypre_ParKrylovCommInfo,
+         hypre_ParKrylovCAlloc, hypre_ParKrylovFree, hypre_ParKrylovCommInfo,
          hypre_ParKrylovCreateVector,
          hypre_ParKrylovDestroyVector, hypre_ParKrylovMatvecCreate,
          hypre_ParKrylovMatvec, hypre_ParKrylovMatvecDestroy,

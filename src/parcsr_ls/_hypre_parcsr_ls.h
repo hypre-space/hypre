@@ -2064,7 +2064,7 @@ HYPRE_Real bndfun_rs ( HYPRE_Real xx , HYPRE_Real yy , HYPRE_Real zz );
 
 
 /* pcg_par.c */
-void *hypre_ParKrylovCAlloc ( HYPRE_Int count , HYPRE_Int elt_size );
+void *hypre_ParKrylovCAlloc ( size_t count , size_t elt_size, HYPRE_MemoryLocation location );
 HYPRE_Int hypre_ParKrylovFree ( void *ptr );
 void *hypre_ParKrylovCreateVector ( void *vvector );
 void *hypre_ParKrylovCreateVectorArray ( HYPRE_Int n , void *vvector );

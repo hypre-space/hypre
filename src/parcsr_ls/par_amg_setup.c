@@ -1443,12 +1443,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                           num_functions, dof_func_array[level], CF_marker,
                                           &coarse_dof_func,&coarse_pnts_global);
             }
-#ifdef HYPRE_NO_GLOBAL_PARTITION
             if (my_id == (num_procs -1)) coarse_size = coarse_pnts_global[1];
             hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-            coarse_size = coarse_pnts_global[num_procs];
-#endif
             /* if no coarse-grid, stop coarsening, and set the
              * coarsest solve to be a single sweep of default smoother or smoother set by user */
             if ((coarse_size == 0) || (coarse_size == fine_size))
@@ -1683,13 +1679,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker,
                                                  col_offd_SN_to_AN, num_functions, nodal, 0, NULL,
                                                  &CF3_marker, &col_offd_S_to_A, &S);
-#ifdef HYPRE_NO_GLOBAL_PARTITION
                   for (i=0; i < 2; i++)
                      coarse_pnts_global1[i] *= num_functions;
-#else
-                  for (i=1; i < num_procs+1; i++)
-                     coarse_pnts_global1[i] *= num_functions;
-#endif
                   if (col_offd_SN_to_AN == NULL)
                      col_offd_S_to_A = NULL;
                   if (agg_interp_type == 1)
@@ -1824,12 +1815,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                }
                AN = NULL;
             }
-#ifdef HYPRE_NO_GLOBAL_PARTITION
             if (my_id == (num_procs -1)) coarse_size = coarse_pnts_global[1];
             hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-            coarse_size = coarse_pnts_global[num_procs];
-#endif
          }
          else /* no aggressive coarsening */
          {
@@ -1847,12 +1834,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                           num_functions, dof_func_array[level], CF_marker,
                                           &coarse_dof_func,&coarse_pnts_global);
             }
-#ifdef HYPRE_NO_GLOBAL_PARTITION
             if (my_id == (num_procs -1)) coarse_size = coarse_pnts_global[1];
             hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-            coarse_size = coarse_pnts_global[num_procs];
-#endif
  xxxxxxxxxxxxxxxxxxxxxxxxx change for min_coarse_size */
             if (debug_flag==1)
             {
@@ -2127,14 +2110,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
                  }
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
                  /* we need to set the global number of cols in P, as this was
                     not done in the interp
                     (which calls the matrix create) since we didn't
                     have the global partition */
                  /*  this has to be done before converting from block to non-block*/
                  hypre_ParCSRBlockMatrixGlobalNumCols(P_block_array[level]) = coarse_size;
-#endif
 
                  /* if we don't do nodal relaxation, we need a CF_array that is
                     not nodal - right now we don't allow this to happen though*/
