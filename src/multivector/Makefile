@@ -55,6 +55,6 @@ libHYPRE_multivector.a: ${OBJS}
 libHYPRE_multivector.so libHYPRE_multivector.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -sf ${SONAME} $@
+	ln -s ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

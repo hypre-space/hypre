@@ -180,7 +180,7 @@ install: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
 	@echo  ""
 
 clean:
-	rm -rf *.o libHYPRE*
+	rm -rf *.o libHYPRE* 
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
@@ -197,6 +197,7 @@ libHYPRE_FEI.a: ${OBJS}
 libHYPRE_FEI.so libHYPRE_FEI.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -sf ${SONAME} $@
+	ln -s ${SONAME} $@
 
 ${OBJS}: ${HEADERS}
+

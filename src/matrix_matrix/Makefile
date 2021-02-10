@@ -20,7 +20,7 @@ EXTRA_FILES =\
  internal_protos.h
 
 HEADERS = HYPRE_matrix_matrix_protos.h
-
+ 
 FILES =\
  HYPRE_ConvertParCSRMatrixToDistributedMatrix.c\
  HYPRE_ConvertPETScMatrixToDistributedMatrix.c
@@ -59,6 +59,6 @@ libHYPRE_MatrixMatrix.a: ${OBJS}
 libHYPRE_MatrixMatrix.so libHYPRE_MatrixMatrix.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -sf ${SONAME} $@
+	ln -s ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

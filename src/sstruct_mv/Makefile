@@ -90,6 +90,6 @@ libHYPRE_sstruct_mv.a: ${OBJS}
 libHYPRE_sstruct_mv.so libHYPRE_sstruct_mv.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -sf ${SONAME} $@
+	ln -s ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

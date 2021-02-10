@@ -6,7 +6,7 @@
 include ../config/Makefile.config
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
-
+ 
 C_COMPILE_FLAGS = \
  -I..\
  -I$(srcdir)/..\
@@ -86,6 +86,6 @@ libHYPRE_krylov.a: ${OBJS}
 libHYPRE_krylov.so libHYPRE_krylov.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -sf ${SONAME} $@
+	ln -s ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

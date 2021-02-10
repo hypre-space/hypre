@@ -197,6 +197,6 @@ libHYPRE_parcsr_ls.a: ${OBJS}
 libHYPRE_parcsr_ls.so libHYPRE_parcsr_ls.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -sf ${SONAME} $@
+	ln -s ${SONAME} $@
 
 ${OBJS}: ${HEADERS}
