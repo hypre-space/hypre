@@ -104,10 +104,10 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
     * Initialize some data.
     *-----------------------------------------------------*/
    nparts    = hypre_SStructMatrixNParts(A);
-   dxyz_flag = hypre_TAlloc(HYPRE_Int, nparts);
+   dxyz_flag = hypre_TAlloc(HYPRE_Int, nparts, HYPRE_MEMORY_HOST);
    for (d = 0; d < ndim; d++)
    {
-      dxyz[d] = hypre_CTAlloc(HYPRE_Real, nparts);
+      dxyz[d] = hypre_CTAlloc(HYPRE_Real, nparts, HYPRE_MEMORY_HOST);
       hypre_SSAMGDataDxyzD(ssamg_data, d) = dxyz[d];
    }
    hypre_SSAMGDataNParts(ssamg_data) = nparts;
@@ -137,12 +137,12 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
     *-----------------------------------------------------*/
 
    num_levels = hypre_SSAMGDataNumLevels(ssamg_data);
-   A_l  = hypre_TAlloc(hypre_SStructMatrix *, num_levels);
-   P_l  = hypre_TAlloc(hypre_SStructMatrix *, num_levels - 1);
-   RT_l = hypre_TAlloc(hypre_SStructMatrix *, num_levels - 1);
-   b_l  = hypre_TAlloc(hypre_SStructVector *, num_levels);
-   x_l  = hypre_TAlloc(hypre_SStructVector *, num_levels);
-   tx_l = hypre_TAlloc(hypre_SStructVector *, num_levels);
+   A_l  = hypre_TAlloc(hypre_SStructMatrix *, num_levels, HYPRE_MEMORY_HOST);
+   P_l  = hypre_TAlloc(hypre_SStructMatrix *, num_levels - 1, HYPRE_MEMORY_HOST);
+   RT_l = hypre_TAlloc(hypre_SStructMatrix *, num_levels - 1, HYPRE_MEMORY_HOST);
+   b_l  = hypre_TAlloc(hypre_SStructVector *, num_levels, HYPRE_MEMORY_HOST);
+   x_l  = hypre_TAlloc(hypre_SStructVector *, num_levels, HYPRE_MEMORY_HOST);
+   tx_l = hypre_TAlloc(hypre_SStructVector *, num_levels, HYPRE_MEMORY_HOST);
    r_l  = tx_l;
    e_l  = tx_l;
 
@@ -199,10 +199,10 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
     * Set up multigrid operators and call setup routines
     *-----------------------------------------------------*/
 
-   relax_data_l    = hypre_TAlloc(void *, num_levels);
-   matvec_data_l   = hypre_TAlloc(void *, num_levels);
-   restrict_data_l = hypre_TAlloc(void *, num_levels);
-   interp_data_l   = hypre_TAlloc(void *, num_levels);
+   relax_data_l    = hypre_TAlloc(void *, num_levels, HYPRE_MEMORY_HOST);
+   matvec_data_l   = hypre_TAlloc(void *, num_levels, HYPRE_MEMORY_HOST);
+   restrict_data_l = hypre_TAlloc(void *, num_levels, HYPRE_MEMORY_HOST);
+   interp_data_l   = hypre_TAlloc(void *, num_levels, HYPRE_MEMORY_HOST);
 
    for (l = 0; l < (num_levels - 1); l++)
    {
@@ -252,23 +252,23 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    if ((ssamg_data -> logging) > 0)
    {
       max_iter = (ssamg_data -> max_iter);
-      (ssamg_data -> norms)     = hypre_TAlloc(HYPRE_Real, max_iter + 1);
-      (ssamg_data -> rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter + 1);
+      (ssamg_data -> norms)     = hypre_TAlloc(HYPRE_Real, max_iter + 1, HYPRE_MEMORY_HOST);
+      (ssamg_data -> rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter + 1, HYPRE_MEMORY_HOST);
    }
 
    /* Print statistics */
    hypre_SSAMGPrintStats(ssamg_vdata);
 
    /* Free memory */
-   hypre_TFree(dxyz_flag);
+   hypre_TFree(dxyz_flag, HYPRE_MEMORY_HOST);
 
 #if DEBUG
    hypre_SStructVector  **ones_l;
    hypre_SStructVector  **Pones_l;
    char                   filename[255];
 
-   ones_l  = hypre_TAlloc(hypre_SStructVector *, num_levels - 1);
-   Pones_l = hypre_TAlloc(hypre_SStructVector *, num_levels - 1);
+   ones_l  = hypre_TAlloc(hypre_SStructVector *, num_levels - 1, HYPRE_MEMORY_HOST);
+   Pones_l = hypre_TAlloc(hypre_SStructVector *, num_levels - 1, HYPRE_MEMORY_HOST);
 
    /* Print fine level grid */
    hypre_sprintf(filename, "ssgrid.l%02d", 0);
@@ -324,8 +324,8 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       HYPRE_SStructVectorDestroy(ones_l[l]);
       HYPRE_SStructVectorDestroy(Pones_l[l]);
    }
-   hypre_TFree(ones_l);
-   hypre_TFree(Pones_l);
+   hypre_TFree(ones_l, HYPRE_MEMORY_HOST);
+   hypre_TFree(Pones_l, HYPRE_MEMORY_HOST);
 
 #if DEBUG_SYMMETRY
    HYPRE_IJMatrix  ij_A, ij_AT, ij_B;
@@ -525,21 +525,21 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
    HYPRE_Real            alpha, beta;
 
    /* Allocate data */
-   grid_l   = hypre_TAlloc(hypre_SStructGrid *, max_levels);
-   active_l = hypre_TAlloc(HYPRE_Int *, max_levels);
-   cdir_l   = hypre_TAlloc(HYPRE_Int *, max_levels);
-   weights  = hypre_TAlloc(HYPRE_Real *, max_levels);
-   cbox     = hypre_TAlloc(hypre_Box *, nparts);
-   periodic = hypre_TAlloc(hypre_Index, nparts);
-   strides  = hypre_TAlloc(hypre_Index, nparts);
-   coarsen  = hypre_TAlloc(hypre_Index, nparts);
+   grid_l   = hypre_TAlloc(hypre_SStructGrid *, max_levels, HYPRE_MEMORY_HOST);
+   active_l = hypre_TAlloc(HYPRE_Int *, max_levels, HYPRE_MEMORY_HOST);
+   cdir_l   = hypre_TAlloc(HYPRE_Int *, max_levels, HYPRE_MEMORY_HOST);
+   weights  = hypre_TAlloc(HYPRE_Real *, max_levels, HYPRE_MEMORY_HOST);
+   cbox     = hypre_TAlloc(hypre_Box *, nparts, HYPRE_MEMORY_HOST);
+   periodic = hypre_TAlloc(hypre_Index, nparts, HYPRE_MEMORY_HOST);
+   strides  = hypre_TAlloc(hypre_Index, nparts, HYPRE_MEMORY_HOST);
+   coarsen  = hypre_TAlloc(hypre_Index, nparts, HYPRE_MEMORY_HOST);
 
    hypre_SStructGridRef(grid, &grid_l[0]);
 
    /* Initalize data */
    for (l = 0; l < max_levels; l++)
    {
-      weights[l]  = hypre_CTAlloc(HYPRE_Real, nparts);
+      weights[l]  = hypre_CTAlloc(HYPRE_Real, nparts, HYPRE_MEMORY_HOST);
       if (usr_relax > 0.0)
       {
          for (part = 0; part < nparts; part++)
@@ -548,7 +548,7 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
          }
       }
 
-      active_l[l] = hypre_CTAlloc(HYPRE_Int, nparts);
+      active_l[l] = hypre_CTAlloc(HYPRE_Int, nparts, HYPRE_MEMORY_HOST);
       for (part = 0; part < nparts; part++)
       {
          active_l[l][part] = 1;
@@ -576,7 +576,7 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
 
    for (l = 0; l < max_levels; l++)
    {
-      cdir_l[l] = hypre_TAlloc(HYPRE_Int, nparts);
+      cdir_l[l] = hypre_TAlloc(HYPRE_Int, nparts, HYPRE_MEMORY_HOST);
       for (part = 0; part < nparts; part++)
       {
          cdir_l[l][part] = -1;
@@ -700,10 +700,10 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
    {
       hypre_BoxDestroy(cbox[part]);
    }
-   hypre_TFree(cbox);
-   hypre_TFree(periodic);
-   hypre_TFree(strides);
-   hypre_TFree(coarsen);
+   hypre_TFree(cbox, HYPRE_MEMORY_HOST);
+   hypre_TFree(periodic, HYPRE_MEMORY_HOST);
+   hypre_TFree(strides, HYPRE_MEMORY_HOST);
+   hypre_TFree(coarsen, HYPRE_MEMORY_HOST);
 
    /* Output */
    hypre_SSAMGDataCdir(ssamg_data)         = cdir_l;

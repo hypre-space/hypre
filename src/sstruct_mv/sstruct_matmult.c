@@ -84,9 +84,9 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    /*-------------------------------------------------------
     * Compute structured component
     *-------------------------------------------------------*/
-   smatrices   = hypre_TAlloc(hypre_StructMatrix *, nmatrices);
-   smatrices_M = hypre_TAlloc(hypre_StructMatrix *, nparts);
-   stencils_M  = hypre_TAlloc(hypre_SStructStencil *, nparts);
+   smatrices   = hypre_TAlloc(hypre_StructMatrix *, nmatrices, HYPRE_MEMORY_HOST);
+   smatrices_M = hypre_TAlloc(hypre_StructMatrix *, nparts, HYPRE_MEMORY_HOST);
+   stencils_M  = hypre_TAlloc(hypre_SStructStencil *, nparts, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
       for (m = 0; m < nmatrices; m++)
@@ -161,9 +161,9 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
       hypre_StructMatrixDestroy(smatrices_M[part]);
       HYPRE_SStructStencilDestroy(stencils_M[part]);
    }
-   hypre_TFree(smatrices);
-   hypre_TFree(smatrices_M);
-   hypre_TFree(stencils_M);
+   hypre_TFree(smatrices, HYPRE_MEMORY_HOST);
+   hypre_TFree(smatrices_M, HYPRE_MEMORY_HOST);
+   hypre_TFree(stencils_M, HYPRE_MEMORY_HOST);
 
    /* Set pointer to output matrix */
    *M_ptr = M;
@@ -199,8 +199,8 @@ hypre_SStructMatmultU( HYPRE_Int             nmatrices,
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /* Temporary work matrices */
-   parcsr = hypre_TAlloc(hypre_ParCSRMatrix *, 3);
-   ij_sA  = hypre_TAlloc(hypre_IJMatrix *, nmatrices);
+   parcsr = hypre_TAlloc(hypre_ParCSRMatrix *, 3, HYPRE_MEMORY_HOST);
+   ij_sA  = hypre_TAlloc(hypre_IJMatrix *, nmatrices, HYPRE_MEMORY_HOST);
    for (m = 0; m < nmatrices; m++)
    {
       ij_sA[m] = NULL;
@@ -340,7 +340,7 @@ hypre_SStructMatmultU( HYPRE_Int             nmatrices,
    }
 
    /* Free temporary work matrices */
-   hypre_TFree(parcsr);
+   hypre_TFree(parcsr, HYPRE_MEMORY_HOST);
    hypre_ParCSRMatrixDestroy(parcsr_sM);
    for (m = 0; m < nmatrices; m++)
    {
@@ -349,7 +349,7 @@ hypre_SStructMatmultU( HYPRE_Int             nmatrices,
          HYPRE_IJMatrixDestroy(ij_sA[m]);
       }
    }
-   hypre_TFree(ij_sA);
+   hypre_TFree(ij_sA, HYPRE_MEMORY_HOST);
 
    *uM_ptr = parcsr_uM;
 
@@ -452,13 +452,13 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    convert_box   = hypre_BoxCreate(ndim);
    grow_box      = hypre_BoxCreate(ndim);
    ghost_box     = hypre_BoxCreate(ndim);
-   convert_boxaa = hypre_TAlloc(hypre_BoxArrayArray **, nparts);
+   convert_boxaa = hypre_TAlloc(hypre_BoxArrayArray **, nparts, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
       pgrid = hypre_SStructGridPGrid(grid, part);
       nvars = hypre_SStructPGridNVars(pgrid);
 
-      convert_boxaa[part] = hypre_TAlloc(hypre_BoxArrayArray *, nvars);
+      convert_boxaa[part] = hypre_TAlloc(hypre_BoxArrayArray *, nvars, HYPRE_MEMORY_HOST);
       for (var = 0; var < nvars; var++)
       {
          sgrid = hypre_SStructPGridSGrid(pgrid, var);
@@ -527,7 +527,7 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_ANNOTATE_REGION_BEGIN("%s", "Set rowsizes");
    nvalues = 0; m = 0;
    hypre_SetIndex(ustride, 1);
-   row_sizes = hypre_CTAlloc(HYPRE_Int, nrows);
+   row_sizes = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
       pA    = hypre_SStructMatrixPMatrix(A, part);
@@ -643,7 +643,7 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_ANNOTATE_REGION_END("%s", "Create Matrix");
 
    /* Allocate memory */
-   values = hypre_CTAlloc(HYPRE_Complex, nvalues);
+   values = hypre_CTAlloc(HYPRE_Complex, nvalues, HYPRE_MEMORY_HOST);
 
    /* Set entries of ij_Ahat */
    for (part = 0; part < nparts; part++)
@@ -725,7 +725,7 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_IJMatrixAssemble(ij_Ahat);
 
    /* Free memory */
-   hypre_TFree(values);
+   hypre_TFree(values, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
       pgrid = hypre_SStructGridPGrid(grid, part);
@@ -734,9 +734,9 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
       {
          hypre_BoxArrayArrayDestroy(convert_boxaa[part][var]);
       }
-      hypre_TFree(convert_boxaa[part]);
+      hypre_TFree(convert_boxaa[part], HYPRE_MEMORY_HOST);
    }
-   hypre_TFree(convert_boxaa);
+   hypre_TFree(convert_boxaa, HYPRE_MEMORY_HOST);
 
    /* Set pointer to ij_Ahat */
    *ij_Ahat_ptr = ij_Ahat;

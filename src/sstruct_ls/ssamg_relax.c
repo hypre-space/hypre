@@ -70,7 +70,7 @@ hypre_SSAMGRelaxCreate( MPI_Comm    comm,
 {
    hypre_SSAMGRelaxData  *relax_data;
 
-   relax_data = hypre_CTAlloc(hypre_SSAMGRelaxData, 1);
+   relax_data = hypre_CTAlloc(hypre_SSAMGRelaxData, 1, HYPRE_MEMORY_HOST);
 
    (relax_data -> comm)       = comm;
    (relax_data -> time_index) = hypre_InitializeTiming("SSAMG Relax");
@@ -121,44 +121,44 @@ hypre_SSAMGRelaxDestroy( void *relax_vdata )
          nvars   = hypre_SStructPMatrixNVars(pmatrix);
          for (i = 0; i < (relax_data -> num_nodesets); i++)
          {
-            hypre_TFree(relax_data -> nodeset_indices[i]);
+            hypre_TFree(relax_data -> nodeset_indices[i], HYPRE_MEMORY_HOST);
             for (vi = 0; vi < nvars; vi++)
             {
                hypre_ComputePkgDestroy(relax_data -> svec_compute_pkgs[part][i][vi]);
             }
-            hypre_TFree(relax_data -> svec_compute_pkgs[part][i]);
+            hypre_TFree(relax_data -> svec_compute_pkgs[part][i], HYPRE_MEMORY_HOST);
             hypre_ComputePkgDestroy(relax_data -> compute_pkgs[part][i]);
          }
-         hypre_TFree(relax_data -> svec_compute_pkgs[part]);
-         hypre_TFree(relax_data -> comm_handle[part]);
-         hypre_TFree(relax_data -> compute_pkgs[part]);
+         hypre_TFree(relax_data -> svec_compute_pkgs[part], HYPRE_MEMORY_HOST);
+         hypre_TFree(relax_data -> comm_handle[part], HYPRE_MEMORY_HOST);
+         hypre_TFree(relax_data -> compute_pkgs[part], HYPRE_MEMORY_HOST);
       }
       HYPRE_SStructMatrixDestroy(relax_data -> A);
       HYPRE_SStructVectorDestroy(relax_data -> b);
       HYPRE_SStructVectorDestroy(relax_data -> x);
       HYPRE_SStructVectorDestroy(relax_data -> t);
 
-      hypre_TFree(relax_data -> nodeset_sizes);
-      hypre_TFree(relax_data -> nodeset_ranks);
-      hypre_TFree(relax_data -> nodeset_strides);
-      hypre_TFree(relax_data -> nodeset_indices);
-      hypre_TFree(relax_data -> svec_compute_pkgs);
-      hypre_TFree(relax_data -> comm_handle);
-      hypre_TFree(relax_data -> compute_pkgs);
-      hypre_TFree(relax_data -> x_loc);
-      hypre_TFree((relax_data ->A_loc)[0]);
-      hypre_TFree(relax_data -> A_loc);
-      hypre_TFree(relax_data -> bp);
-      hypre_TFree(relax_data -> xp);
-      hypre_TFree(relax_data -> tp);
+      hypre_TFree(relax_data -> nodeset_sizes, HYPRE_MEMORY_HOST);
+      hypre_TFree(relax_data -> nodeset_ranks, HYPRE_MEMORY_HOST);
+      hypre_TFree(relax_data -> nodeset_strides, HYPRE_MEMORY_HOST);
+      hypre_TFree(relax_data -> nodeset_indices, HYPRE_MEMORY_HOST);
+      hypre_TFree(relax_data -> svec_compute_pkgs, HYPRE_MEMORY_HOST);
+      hypre_TFree(relax_data -> comm_handle, HYPRE_MEMORY_HOST);
+      hypre_TFree(relax_data -> compute_pkgs, HYPRE_MEMORY_HOST);
+      hypre_TFree(relax_data -> x_loc, HYPRE_MEMORY_HOST);
+      hypre_TFree((relax_data ->A_loc)[0], HYPRE_MEMORY_HOST);
+      hypre_TFree(relax_data -> A_loc, HYPRE_MEMORY_HOST);
+      hypre_TFree(relax_data -> bp, HYPRE_MEMORY_HOST);
+      hypre_TFree(relax_data -> xp, HYPRE_MEMORY_HOST);
+      hypre_TFree(relax_data -> tp, HYPRE_MEMORY_HOST);
       for (vi = 0; vi < nvars; vi++)
       {
-         hypre_TFree((relax_data -> Ap)[vi]);
+         hypre_TFree((relax_data -> Ap)[vi], HYPRE_MEMORY_HOST);
       }
-      hypre_TFree(relax_data -> Ap);
-      hypre_TFree(relax_data -> mweights);
+      hypre_TFree(relax_data -> Ap, HYPRE_MEMORY_HOST);
+      hypre_TFree(relax_data -> mweights, HYPRE_MEMORY_HOST);
       hypre_FinalizeTiming(relax_data -> time_index);
-      hypre_TFree(relax_data);
+      hypre_TFree(relax_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;
@@ -261,19 +261,19 @@ hypre_SSAMGRelaxSetNumNodesets( void      *relax_vdata,
    /* free up old nodeset memory */
    for (i = 0; i < (relax_data -> num_nodesets); i++)
    {
-      hypre_TFree(relax_data -> nodeset_indices[i]);
+      hypre_TFree(relax_data -> nodeset_indices[i], HYPRE_MEMORY_HOST);
    }
-   hypre_TFree(relax_data -> nodeset_sizes);
-   hypre_TFree(relax_data -> nodeset_ranks);
-   hypre_TFree(relax_data -> nodeset_strides);
-   hypre_TFree(relax_data -> nodeset_indices);
+   hypre_TFree(relax_data -> nodeset_sizes, HYPRE_MEMORY_HOST);
+   hypre_TFree(relax_data -> nodeset_ranks, HYPRE_MEMORY_HOST);
+   hypre_TFree(relax_data -> nodeset_strides, HYPRE_MEMORY_HOST);
+   hypre_TFree(relax_data -> nodeset_indices, HYPRE_MEMORY_HOST);
 
    /* alloc new nodeset memory */
    (relax_data -> num_nodesets)    = num_nodesets;
-   (relax_data -> nodeset_sizes)   = hypre_TAlloc(HYPRE_Int    , num_nodesets);
-   (relax_data -> nodeset_ranks)   = hypre_TAlloc(HYPRE_Int    , num_nodesets);
-   (relax_data -> nodeset_strides) = hypre_TAlloc(hypre_Index  , num_nodesets);
-   (relax_data -> nodeset_indices) = hypre_TAlloc(hypre_Index *, num_nodesets);
+   (relax_data -> nodeset_sizes)   = hypre_TAlloc(HYPRE_Int    , num_nodesets, HYPRE_MEMORY_HOST);
+   (relax_data -> nodeset_ranks)   = hypre_TAlloc(HYPRE_Int    , num_nodesets, HYPRE_MEMORY_HOST);
+   (relax_data -> nodeset_strides) = hypre_TAlloc(hypre_Index  , num_nodesets, HYPRE_MEMORY_HOST);
+   (relax_data -> nodeset_indices) = hypre_TAlloc(hypre_Index *, num_nodesets, HYPRE_MEMORY_HOST);
    for (i = 0; i < num_nodesets; i++)
    {
       (relax_data -> nodeset_sizes[i])   = 0;
@@ -298,11 +298,12 @@ hypre_SSAMGRelaxSetNodeset( void         *relax_vdata,
    HYPRE_Int             i;
 
    /* free up old nodeset memory */
-   hypre_TFree(relax_data -> nodeset_indices[nodeset]);
+   hypre_TFree(relax_data -> nodeset_indices[nodeset], HYPRE_MEMORY_HOST);
 
    /* alloc new nodeset memory */
    (relax_data -> nodeset_sizes[nodeset])   = nodeset_size;
-   (relax_data -> nodeset_indices[nodeset]) = hypre_TAlloc(hypre_Index, nodeset_size);
+   (relax_data -> nodeset_indices[nodeset]) = hypre_TAlloc(hypre_Index, nodeset_size,
+                                                           HYPRE_MEMORY_HOST);
 
    /* set values */
    hypre_CopyIndex(nodeset_stride, (relax_data -> nodeset_strides[nodeset]));
@@ -534,7 +535,7 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
    /*----------------------------------------------------------
     * Set mweights = (1 - weights)
     *----------------------------------------------------------*/
-   mweights = hypre_TAlloc(HYPRE_Real, nparts);
+   mweights = hypre_TAlloc(HYPRE_Real, nparts, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
       mweights[part] = 1.0 - weights[part];
@@ -546,11 +547,11 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
     *----------------------------------------------------------*/
    // TODO: Why nthreads is used in all TAllocs?
    nvars = 1;
-   x_loc = hypre_TAlloc(HYPRE_Real  , hypre_NumThreads()*nvars);
-   A_loc = hypre_TAlloc(HYPRE_Real *, hypre_NumThreads()*nvars);
+   x_loc = hypre_TAlloc(HYPRE_Real  , hypre_NumThreads()*nvars, HYPRE_MEMORY_HOST);
+   A_loc = hypre_TAlloc(HYPRE_Real *, hypre_NumThreads()*nvars, HYPRE_MEMORY_HOST);
 
    // nvars*nvars is probably not needed here!
-   A_loc[0] = hypre_TAlloc(HYPRE_Real  , hypre_NumThreads()*nvars*nvars);
+   A_loc[0] = hypre_TAlloc(HYPRE_Real  , hypre_NumThreads()*nvars*nvars, HYPRE_MEMORY_HOST);
 
    for (vi = 1; vi < hypre_NumThreads()*nvars; vi++)
    {
@@ -558,21 +559,21 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
    }
 
    /* Allocate pointers for vector and matrix */
-   bp = hypre_TAlloc(HYPRE_Real  *, nvars);
-   xp = hypre_TAlloc(HYPRE_Real  *, nvars);
-   tp = hypre_TAlloc(HYPRE_Real  *, nvars);
-   Ap = hypre_TAlloc(HYPRE_Real **, nvars);
+   bp = hypre_TAlloc(HYPRE_Real  *, nvars, HYPRE_MEMORY_HOST);
+   xp = hypre_TAlloc(HYPRE_Real  *, nvars, HYPRE_MEMORY_HOST);
+   tp = hypre_TAlloc(HYPRE_Real  *, nvars, HYPRE_MEMORY_HOST);
+   Ap = hypre_TAlloc(HYPRE_Real **, nvars, HYPRE_MEMORY_HOST);
    for (vi = 0; vi < nvars; vi++)
    {
-      Ap[vi] = hypre_TAlloc(HYPRE_Real *, nvars);
+      Ap[vi] = hypre_TAlloc(HYPRE_Real *, nvars, HYPRE_MEMORY_HOST);
    }
 
    /*----------------------------------------------------------
     * Set up the compute packages for each part
     *----------------------------------------------------------*/
-   svec_compute_pkgs = hypre_CTAlloc(hypre_ComputePkg ***, nparts);
-   compute_pkgs      = hypre_CTAlloc(hypre_ComputePkg  **, nparts);
-   comm_handle       = hypre_CTAlloc(hypre_CommHandle  **, nparts);
+   svec_compute_pkgs = hypre_CTAlloc(hypre_ComputePkg ***, nparts, HYPRE_MEMORY_HOST);
+   compute_pkgs      = hypre_CTAlloc(hypre_ComputePkg  **, nparts, HYPRE_MEMORY_HOST);
+   comm_handle       = hypre_CTAlloc(hypre_CommHandle  **, nparts, HYPRE_MEMORY_HOST);
 
    for (part = 0; part < nparts; part++)
    {
@@ -582,9 +583,12 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
       nvars = hypre_SStructPMatrixNVars(pA);
       sgrid = hypre_StructMatrixGrid(sA);
 
-      svec_compute_pkgs[part] = hypre_CTAlloc(hypre_ComputePkg **, num_nodesets);
-      compute_pkgs[part]      = hypre_CTAlloc(hypre_ComputePkg  *, num_nodesets);
-      comm_handle[part]       = hypre_CTAlloc(hypre_CommHandle  *, nvars);
+      svec_compute_pkgs[part] = hypre_CTAlloc(hypre_ComputePkg **, num_nodesets,
+                                              HYPRE_MEMORY_HOST);
+      compute_pkgs[part]      = hypre_CTAlloc(hypre_ComputePkg  *, num_nodesets,
+                                              HYPRE_MEMORY_HOST);
+      comm_handle[part]       = hypre_CTAlloc(hypre_CommHandle  *, nvars,
+                                              HYPRE_MEMORY_HOST);
 
       for (set = 0; set < num_nodesets; set++)
       {
@@ -594,7 +598,8 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
           * package to define independent and dependent computations
           * (compute_pkgs).
           *----------------------------------------------------------*/
-         svec_compute_pkgs[part][set] = hypre_CTAlloc(hypre_ComputePkg *, nvars);
+         svec_compute_pkgs[part][set] = hypre_CTAlloc(hypre_ComputePkg *, nvars,
+                                                      HYPRE_MEMORY_HOST);
 
          /*----------------------------------------------------------
           * The first execution (vi=-1) sets up the stencil to
@@ -636,8 +641,8 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
                   }
                }
             }
-            sstencil_union_shape = hypre_CTAlloc(hypre_Index,
-                                                 sstencil_union_count);
+            sstencil_union_shape = hypre_CTAlloc(hypre_Index, sstencil_union_count,
+                                                 HYPRE_MEMORY_HOST);
             sstencil_union_count = 0;
             if (vi == -1)
             {

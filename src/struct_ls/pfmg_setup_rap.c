@@ -82,7 +82,7 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
 
       stencil = hypre_StructMatrixUserStencil(RAP);
       nentries = hypre_StructStencilSize(stencil);
-      entries = hypre_TAlloc(HYPRE_Int, nentries);
+      entries = hypre_TAlloc(HYPRE_Int, nentries, HYPRE_MEMORY_HOST);
       for (i = 0; i < nentries; i++)
       {
          entries[i] = i;
@@ -100,7 +100,7 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
          }
       }
       hypre_StructMatrixSetConstantEntries(RAP, nentries, entries);
-      hypre_TFree(entries);
+      hypre_TFree(entries, HYPRE_MEMORY_HOST);
    }
 
    return RAP;

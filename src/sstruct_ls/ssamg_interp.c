@@ -46,9 +46,9 @@ hypre_SSAMGCreateInterpOp( hypre_SStructMatrix  *A,
    /*-------------------------------------------------------
     * Allocate data
     *-------------------------------------------------------*/
-   st_shape     = hypre_CTAlloc(hypre_Index *, nparts);
-   strides      = hypre_CTAlloc(hypre_Index, nparts);
-   num_centries = hypre_CTAlloc(HYPRE_Int, nparts);
+   st_shape     = hypre_CTAlloc(hypre_Index *, nparts, HYPRE_MEMORY_HOST);
+   strides      = hypre_CTAlloc(hypre_Index, nparts, HYPRE_MEMORY_HOST);
+   num_centries = hypre_CTAlloc(HYPRE_Int, nparts, HYPRE_MEMORY_HOST);
 
    /*-------------------------------------------------------
     * Create SStructGraph data structure for P
@@ -74,7 +74,7 @@ hypre_SSAMGCreateInterpOp( hypre_SStructMatrix  *A,
          hypre_IndexD(strides[part], cdir) = 2;
 
          stencil_size_P     = 3;
-         st_shape[part]     = hypre_CTAlloc(hypre_Index, stencil_size_P);
+         st_shape[part]     = hypre_CTAlloc(hypre_Index, stencil_size_P, HYPRE_MEMORY_HOST);
          num_centries[part] = stencil_size_P;
          for (vi = 0; vi < nvars; vi++)
          {
@@ -117,7 +117,7 @@ hypre_SSAMGCreateInterpOp( hypre_SStructMatrix  *A,
          /* This part is not coarsened */
          hypre_IndexD(strides[part], 0) = 2;
          stencil_size_P     = 1;
-         st_shape[part]     = hypre_CTAlloc(hypre_Index, 1);
+         st_shape[part]     = hypre_CTAlloc(hypre_Index, 1, HYPRE_MEMORY_HOST);
          num_centries[part] = stencil_size_P;
          for (vi = 0; vi < nvars; vi++)
          {
@@ -143,13 +143,13 @@ hypre_SSAMGCreateInterpOp( hypre_SStructMatrix  *A,
 
    /* Free memory */
    HYPRE_SStructGraphDestroy(graph_P);
-   hypre_TFree(strides);
-   hypre_TFree(num_centries);
+   hypre_TFree(strides, HYPRE_MEMORY_HOST);
+   hypre_TFree(num_centries, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
-      hypre_TFree(st_shape[part]);
+      hypre_TFree(st_shape[part], HYPRE_MEMORY_HOST);
    }
-   hypre_TFree(st_shape);
+   hypre_TFree(st_shape, HYPRE_MEMORY_HOST);
 
    return P;
 }
@@ -248,7 +248,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                Pstenc2 = hypre_IndexD(P_stencil_shape[2], cdir);
 
                /* Compute the constant part of the stencil collapse */
-               ventries = hypre_TAlloc(HYPRE_Int, A_stencil_size);
+               ventries = hypre_TAlloc(HYPRE_Int, A_stencil_size, HYPRE_MEMORY_HOST);
                nventries = 0;
                Pconst[0] = 0.0;
                Pconst[1] = 0.0;
@@ -409,7 +409,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                   }
                } /* loop on pbnd_boxaa */
 #endif
-               hypre_TFree(ventries);
+               hypre_TFree(ventries, HYPRE_MEMORY_HOST);
                hypre_BoxDestroy(compute_box);
             } /* if constant variables*/
          } /* if (P_stencil_size > 1)*/

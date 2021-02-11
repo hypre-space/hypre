@@ -106,21 +106,21 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
    /* Allocate memory */
    if (myid == 0)
    {
-      global_num_rows     = hypre_CTAlloc(HYPRE_Int, num_levels);
-      global_num_rownnz   = hypre_CTAlloc(HYPRE_Int, num_levels);
-      global_num_nonzeros = hypre_CTAlloc(HYPRE_Int, num_levels);
-      global_min_entries  = hypre_CTAlloc(HYPRE_Int, num_levels);
-      global_max_entries  = hypre_CTAlloc(HYPRE_Int, num_levels);
-      global_avg_entries  = hypre_CTAlloc(HYPRE_Real, num_levels);
-      global_min_rowsum   = hypre_CTAlloc(HYPRE_Complex, num_levels);
-      global_max_rowsum   = hypre_CTAlloc(HYPRE_Complex, num_levels);
-      global_num_parts    = hypre_CTAlloc(HYPRE_Int, num_levels);
-      global_num_boxes    = hypre_CTAlloc(HYPRE_Int, num_levels);
-      global_num_dofs     = hypre_CTAlloc(HYPRE_Int, num_levels);
-      global_num_ghrows   = hypre_CTAlloc(HYPRE_Int, num_levels);
-      global_min_stsize   = hypre_CTAlloc(HYPRE_Int, num_levels);
-      global_max_stsize   = hypre_CTAlloc(HYPRE_Int, num_levels);
-      global_avg_stsize   = hypre_CTAlloc(HYPRE_Real, num_levels);
+      global_num_rows     = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+      global_num_rownnz   = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+      global_num_nonzeros = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+      global_min_entries  = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+      global_max_entries  = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+      global_avg_entries  = hypre_CTAlloc(HYPRE_Real, num_levels, HYPRE_MEMORY_HOST);
+      global_min_rowsum   = hypre_CTAlloc(HYPRE_Complex, num_levels, HYPRE_MEMORY_HOST);
+      global_max_rowsum   = hypre_CTAlloc(HYPRE_Complex, num_levels, HYPRE_MEMORY_HOST);
+      global_num_parts    = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+      global_num_boxes    = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+      global_num_dofs     = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+      global_num_ghrows   = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+      global_min_stsize   = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+      global_max_stsize   = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+      global_avg_stsize   = hypre_CTAlloc(HYPRE_Real, num_levels, HYPRE_MEMORY_HOST);
    }
 
    /* Gather UMatrix info */
@@ -209,7 +209,7 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
          global_max_rowsum[l]  =   recv_buffer[3];
       }
 
-      hypre_TFree(rownnz);
+      hypre_TFree(rownnz, HYPRE_MEMORY_HOST);
    }
 
    /* Gather SMatrix info */
@@ -546,21 +546,21 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
 
    if (myid == 0)
    {
-      hypre_TFree(global_num_rows);
-      hypre_TFree(global_num_rownnz);
-      hypre_TFree(global_num_nonzeros);
-      hypre_TFree(global_min_entries);
-      hypre_TFree(global_max_entries);
-      hypre_TFree(global_avg_entries);
-      hypre_TFree(global_min_rowsum);
-      hypre_TFree(global_max_rowsum);
-      hypre_TFree(global_num_parts);
-      hypre_TFree(global_num_boxes);
-      hypre_TFree(global_num_dofs);
-      hypre_TFree(global_num_ghrows);
-      hypre_TFree(global_min_stsize);
-      hypre_TFree(global_max_stsize);
-      hypre_TFree(global_avg_stsize);
+      hypre_TFree(global_num_rows, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_num_rownnz, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_num_nonzeros, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_min_entries, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_max_entries, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_avg_entries, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_min_rowsum, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_max_rowsum, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_num_parts, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_num_boxes, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_num_dofs, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_num_ghrows, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_min_stsize, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_max_stsize, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_avg_stsize, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;

@@ -87,16 +87,16 @@ hypre_SSAMGComputeRAPNonGlk( hypre_SStructMatrix  *A,
    HYPRE_Int                part, s, vi, vj;
 
    /* Allocate memory */
-   sAc = hypre_TAlloc(hypre_StructMatrix ***, nparts);
+   sAc = hypre_TAlloc(hypre_StructMatrix ***, nparts, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
       pcgrid = hypre_SStructGridPGrid(cgrid, part);
       nvars  = hypre_SStructPGridNVars(pcgrid);
 
-      sAc[part] = hypre_TAlloc(hypre_StructMatrix **, nvars);
+      sAc[part] = hypre_TAlloc(hypre_StructMatrix **, nvars, HYPRE_MEMORY_HOST);
       for (vi = 0; vi < nvars; vi++)
       {
-         sAc[part][vi] = hypre_TAlloc(hypre_StructMatrix *, nvars);
+         sAc[part][vi] = hypre_TAlloc(hypre_StructMatrix *, nvars, HYPRE_MEMORY_HOST);
       }
    }
 
@@ -196,11 +196,11 @@ hypre_SSAMGComputeRAPNonGlk( hypre_SStructMatrix  *A,
          {
             hypre_StructMatrixDestroy(sAc[part][vi][vj]);
          }
-         hypre_TFree(sAc[part][vi]);
+         hypre_TFree(sAc[part][vi], HYPRE_MEMORY_HOST);
       }
-      hypre_TFree(sAc[part]);
+      hypre_TFree(sAc[part], HYPRE_MEMORY_HOST);
    }
-   hypre_TFree(sAc);
+   hypre_TFree(sAc, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }

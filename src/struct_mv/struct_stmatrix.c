@@ -126,9 +126,9 @@ hypre_StCoeffCreate( HYPRE_Int       nterms,
 {
    hypre_StCoeff *coeff;
 
-   coeff = hypre_CTAlloc(hypre_StCoeff, 1);
+   coeff = hypre_CTAlloc(hypre_StCoeff, 1, HYPRE_MEMORY_HOST);
    (coeff->nterms) = nterms;
-   (coeff->terms) = hypre_CTAlloc(hypre_StTerm, nterms);
+   (coeff->terms) = hypre_CTAlloc(hypre_StTerm, nterms, HYPRE_MEMORY_HOST);
    (coeff->prev) = NULL;
    (coeff->next) = NULL;
 
@@ -186,8 +186,8 @@ hypre_StCoeffDestroy( hypre_StCoeff *coeff )
    while (coeff != NULL)
    {
       next = (coeff->next);
-      hypre_TFree(coeff->terms);
-      hypre_TFree(coeff);
+      hypre_TFree(coeff->terms, HYPRE_MEMORY_HOST);
+      hypre_TFree(coeff, HYPRE_MEMORY_HOST);
       coeff = next;
    }
 
@@ -332,7 +332,7 @@ hypre_StMatrixCreate( HYPRE_Int        id,
    hypre_StMatrix  *matrix;
    HYPRE_Int        d;
 
-   matrix = hypre_TAlloc(hypre_StMatrix, 1);
+   matrix = hypre_TAlloc(hypre_StMatrix, 1, HYPRE_MEMORY_HOST);
 
    (matrix->id)   = id;
    (matrix->size) = size;
@@ -341,8 +341,8 @@ hypre_StMatrixCreate( HYPRE_Int        id,
       (matrix->rmap[d]) = 1;
       (matrix->dmap[d]) = 1;
    }
-   (matrix->shapes)  = hypre_CTAlloc(hypre_Index, size);
-   (matrix->coeffs)  = hypre_CTAlloc(hypre_StCoeff *, size);
+   (matrix->shapes)  = hypre_CTAlloc(hypre_Index, size, HYPRE_MEMORY_HOST);
+   (matrix->coeffs)  = hypre_CTAlloc(hypre_StCoeff *, size, HYPRE_MEMORY_HOST);
 
    *matrix_ptr = matrix;
 
@@ -388,9 +388,9 @@ hypre_StMatrixDestroy( hypre_StMatrix *matrix )
    {
       hypre_StCoeffDestroy(matrix->coeffs[entry]);
    }
-   hypre_TFree(matrix->shapes);
-   hypre_TFree(matrix->coeffs);
-   hypre_TFree(matrix);
+   hypre_TFree(matrix->shapes, HYPRE_MEMORY_HOST);
+   hypre_TFree(matrix->coeffs, HYPRE_MEMORY_HOST);
+   hypre_TFree(matrix, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -584,7 +584,7 @@ hypre_StMatrixMatmat( hypre_StMatrix  *A,
    }
 
    /* Compute stenc(AB) = B^T stenc(A) */
-   ABbox = hypre_TAlloc(HYPRE_Int, ABboxsize);
+   ABbox = hypre_TAlloc(HYPRE_Int, ABboxsize, HYPRE_MEMORY_HOST);
    for (ABii = 0; ABii < ABboxsize; ABii++)
    {
       ABbox[ABii] = -1;
@@ -638,8 +638,8 @@ hypre_StMatrixMatmat( hypre_StMatrix  *A,
       }
    }
    (C->size)    = Csize;
-   (C->shapes)  = hypre_TReAlloc((C->shapes), hypre_Index, Csize);
-   (C->coeffs)  = hypre_TReAlloc((C->coeffs), hypre_StCoeff *, Csize);
+   (C->shapes)  = hypre_TReAlloc((C->shapes), hypre_Index, Csize, HYPRE_MEMORY_HOST);
+   (C->coeffs)  = hypre_TReAlloc((C->coeffs), hypre_StCoeff *, Csize, HYPRE_MEMORY_HOST);
    if (!isrowstencil)
    {
       /* An StMatrix always has a row stencil */
@@ -651,7 +651,7 @@ hypre_StMatrixMatmat( hypre_StMatrix  *A,
    /* Clean up */
    hypre_StMatrixDestroy(Aclone);
    hypre_StMatrixDestroy(Bclone);
-   hypre_TFree(ABbox);
+   hypre_TFree(ABbox, HYPRE_MEMORY_HOST);
 
    *C_ptr = C;
 
@@ -749,7 +749,7 @@ hypre_StMatrixPrint( hypre_StMatrix *matrix,
          boxlo[d] = boxhi[d] = 0;
       }
 
-      box = hypre_TAlloc(HYPRE_Int, boxsize);
+      box = hypre_TAlloc(HYPRE_Int, boxsize, HYPRE_MEMORY_HOST);
       for (ii = 0; ii < boxsize; ii++)
       {
          box[ii] = -1;
@@ -779,7 +779,7 @@ hypre_StMatrixPrint( hypre_StMatrix *matrix,
       }
       hypre_printf("\n");
 
-      hypre_TFree(box);
+      hypre_TFree(box, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;
