@@ -15,7 +15,7 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 {
    hypre_error_flag |= ierr;
 
-#if defined(HYPRE_PRINT_ERRORS) || defined(HYPRE_DEBUG)
+#ifdef HYPRE_PRINT_ERRORS
    if (msg)
    {
       hypre_fprintf(
@@ -28,10 +28,6 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
          stderr, "hypre error in file \"%s\", line %d, error code = %d\n",
          filename, line, ierr);
    }
-#endif
-
-#ifdef HYPRE_DEBUG
-   exit(-1);
 #endif
 }
 
