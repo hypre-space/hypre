@@ -375,8 +375,9 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    }
    else
    {
-      printf("Unknown row nnz estimation method %d! \n", row_est_mtd);
-      exit(-1);
+      char msg[256];
+      hypre_sprintf(msg, "Unknown row nnz estimation method %d! \n", row_est_mtd);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
    }
 
 #ifdef HYPRE_PROFILE

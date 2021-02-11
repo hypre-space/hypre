@@ -29,25 +29,30 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
                               hypre_Vector    *y,
                               HYPRE_Int        offset )
 {
+   if (hypre_VectorData(x) == hypre_VectorData(y))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ERROR::x and y are the same pointer in hypre_CSRMatrixMatvecDevice2");
+   }
+
 #ifdef HYPRE_USING_CUSPARSE
 #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
-      /* Luke E: The generic API is techinically supported on 10.1,10.2 as a preview,
-       * with Dscrmv being deprecated. However, there are limitations.
-       * While in Cuda < 11, there are specific mentions of using csr2csc involving
-       * transposed matrix products with dcsrm*,
-       * they are not present in SpMV interface.
-       */
-      hypre_CSRMatrixMatvecCusparseNewAPI(trans, alpha, A, x, beta, y, offset);
+   /* Luke E: The generic API is techinically supported on 10.1,10.2 as a preview,
+    * with Dscrmv being deprecated. However, there are limitations.
+    * While in Cuda < 11, there are specific mentions of using csr2csc involving
+    * transposed matrix products with dcsrm*,
+    * they are not present in SpMV interface.
+    */
+   hypre_CSRMatrixMatvecCusparseNewAPI(trans, alpha, A, x, beta, y, offset);
 #else
-      hypre_CSRMatrixMatvecCusparseOldAPI(trans, alpha, A, x, beta, y, offset);
+   hypre_CSRMatrixMatvecCusparseOldAPI(trans, alpha, A, x, beta, y, offset);
 #endif
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
-      hypre_CSRMatrixMatvecOMPOffload(trans, alpha, A, x, beta, y, offset);
+   hypre_CSRMatrixMatvecOMPOffload(trans, alpha, A, x, beta, y, offset);
 #else // #ifdef HYPRE_USING_CUSPARSE
 #error HYPRE SPMV TODO
 #endif
 
-      return hypre_error_flag;
+   return hypre_error_flag;
 }
 
 /* y = alpha * A * x + beta * b */
@@ -67,11 +72,6 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
 
    // TODO: RL: do we need offset > 0 at all?
    hypre_assert(offset == 0);
-
-   if (hypre_VectorData(x) == hypre_VectorData(y))
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR::x and y are the same pointer in hypre_CSRMatrixMatvecDevice\n");
-   }
 
    HYPRE_Int nx = trans ? hypre_CSRMatrixNumRows(A) : hypre_CSRMatrixNumCols(A);
    HYPRE_Int ny = trans ? hypre_CSRMatrixNumCols(A) : hypre_CSRMatrixNumRows(A);
@@ -130,11 +130,6 @@ hypre_CSRMatrixMatvecMaskedDevice( HYPRE_Complex    alpha,
                                    HYPRE_Int       *mask,
                                    HYPRE_Int        size_of_mask )
 {
-   if (hypre_VectorData(x) == hypre_VectorData(y))
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR::x and y are the same pointer in hypre_CSRMatrixMatvecMaskedDevice\n");
-   }
-
    if (hypre_VectorData(b) != hypre_VectorData(y))
    {
       hypre_TMemcpy( hypre_VectorData(y),
