@@ -1265,8 +1265,64 @@ HYPRE_SStructVectorPrint(const char          *filename,
                          HYPRE_SStructVector  vector,
                          HYPRE_Int            all);
 
-/**@}*/
-/**@}*/
+/**
+ * Copy a vector (y <-- x).
+ **/
+HYPRE_Int
+HYPRE_SStructVectorCopy(HYPRE_SStructVector x,
+                        HYPRE_SStructVector y);
+
+/**
+ * Scale a vector (y <-- alpha*x).
+ **/
+HYPRE_Int
+HYPRE_SStructVectorScale(HYPRE_Complex       alpha,
+                         HYPRE_SStructVector y);
+
+/**
+ * Compute \e result, the inner product of vectors \e x and \e y.
+ **/
+HYPRE_Int
+HYPRE_SStructInnerProd(HYPRE_SStructVector  x,
+                       HYPRE_SStructVector  y,
+                       HYPRE_Real          *result);
+
+/**
+ * Add two vectors (y <-- alpha*x + y).
+ **/
+HYPRE_Int
+HYPRE_SStructAxpy(HYPRE_Complex       alpha,
+                  HYPRE_SStructVector x,
+                  HYPRE_SStructVector y);
+
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name SStruct Other
+ *
+ * @{
+ **/
+
+/**
+ * AMRNEW
+ *
+ * Get a reference to the constructed matrix and right-hand-side (rhs) objects
+ * for an AMR system.  This routine is similar to the routines \e
+ * HYPRE_SStructMatrixGetObject and \e HYPRE_SStructVectorGetObject, but
+ * ensures that trivial equations such as Dirichlet conditions are also
+ * satisfied exactly in the AMR system.
+ */
+HYPRE_Int
+HYPRE_SStructGetAMRObjects(HYPRE_SStructMatrix   matrix,
+                           HYPRE_SStructVector   rhs,
+                           void                **matrix_object,
+                           void                **rhs_object);
+
+/*@}*/
+/*@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
