@@ -337,6 +337,30 @@ HYPRE_Int HYPRE_IJMatrixRead(const char     *filename,
 HYPRE_Int HYPRE_IJMatrixPrint(HYPRE_IJMatrix  matrix,
                               const char     *filename);
 
+/**
+ * Transpose an IJMatrix.
+ **/
+HYPRE_Int
+HYPRE_IJMatrixTranspose( HYPRE_IJMatrix  matrix_A,
+                         HYPRE_IJMatrix *matrix_AT );
+
+/**
+ * Computes the infinity norm of an IJMatrix
+ **/
+HYPRE_Int
+HYPRE_IJMatrixNorm( HYPRE_IJMatrix  matrix,
+                    HYPRE_Real     *norm );
+
+/**
+ * Performs C = alpha*A + beta*B
+ **/
+HYPRE_Int
+HYPRE_IJMatrixAdd( HYPRE_Complex    alpha,
+                   HYPRE_IJMatrix   matrix_A,
+                   HYPRE_Complex    beta,
+                   HYPRE_IJMatrix   matrix_B,
+                   HYPRE_IJMatrix  *matrix_C );
+
 /**@}*/
 
 /*--------------------------------------------------------------------------

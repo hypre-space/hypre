@@ -22,8 +22,9 @@
 
 typedef struct
 {
-   HYPRE_Int            local_num_rows;          /* defines number of rows on this processors */
-   HYPRE_Int            local_num_cols;          /* defines number of cols of diag */
+   HYPRE_Int            local_num_rows;    /* defines number of rows on this processor */
+   HYPRE_Int            local_num_rownnz;  /* defines number of nonzero rows on this processor */
+   HYPRE_Int            local_num_cols;    /* defines number of cols of diag */
 
    HYPRE_Int            need_aux;                /* if need_aux = 1, aux_j, aux_data are used to
                                                     generate the parcsr matrix (default),
@@ -31,9 +32,10 @@ typedef struct
                                                     parcsr structure (requires the knowledge of
                                                     offd_i and diag_i ) */
 
-   HYPRE_Int           *row_length;              /* row_length_diag[i] contains number of stored
+   HYPRE_Int           *rownnz;                  /* row_nnz[i] contains the i-th nonzero row id */
+   HYPRE_Int           *row_length;              /* row_length[i] contains number of stored
                                                     elements in i-th row */
-   HYPRE_Int           *row_space;               /* row_space_diag[i] contains space allocated to
+   HYPRE_Int           *row_space;               /* row_space[i] contains space allocated to
                                                     i-th row */
 
    HYPRE_Int           *diag_sizes;              /* user input row lengths of diag */
@@ -82,9 +84,11 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 #define hypre_AuxParCSRMatrixLocalNumRows(matrix)         ((matrix) -> local_num_rows)
+#define hypre_AuxParCSRMatrixLocalNumRownnz(matrix)       ((matrix) -> local_num_rownnz)
 #define hypre_AuxParCSRMatrixLocalNumCols(matrix)         ((matrix) -> local_num_cols)
 
 #define hypre_AuxParCSRMatrixNeedAux(matrix)              ((matrix) -> need_aux)
+#define hypre_AuxParCSRMatrixRownnz(matrix)               ((matrix) -> rownnz)
 #define hypre_AuxParCSRMatrixRowLength(matrix)            ((matrix) -> row_length)
 #define hypre_AuxParCSRMatrixRowSpace(matrix)             ((matrix) -> row_space)
 #define hypre_AuxParCSRMatrixAuxJ(matrix)                 ((matrix) -> aux_j)
