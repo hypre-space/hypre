@@ -211,6 +211,63 @@ void hypre_swap_d( HYPRE_Real *v,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+static inline void
+hypre_swapND( HYPRE_Int **v,
+              HYPRE_Int   ndim,
+              HYPRE_Int   i,
+              HYPRE_Int   j )
+{
+   HYPRE_Int d, temp;
+
+   for (d = 0; d < ndim; d++)
+   {
+      temp    = v[d][i];
+      v[d][i] = v[d][j];
+      v[d][j] = temp;
+   }
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+void hypre_qsortND( HYPRE_Int **v,
+                    HYPRE_Int   ndim,
+                    HYPRE_Int   left,
+                    HYPRE_Int   right )
+{
+   HYPRE_Int  i, d, last;
+
+   if (left >= right)
+   {
+      return;
+   }
+
+   hypre_swapND(v, ndim, left, (left+right)/2);
+   last = left;
+   for (i = left+1; i <= right; i++)
+   {
+      for (d = ndim - 1; d >= 0; d--)
+      {
+         if (v[d][i] < v[d][left])
+         {
+            hypre_swapND(v, ndim, ++last, i);
+            break;
+         }
+
+         if (v[d][i] > v[d][left])
+         {
+            break;
+         }
+      }
+   }
+   hypre_swapND(v, ndim, left, last);
+   hypre_qsortND(v, ndim, left, last-1);
+   hypre_qsortND(v, ndim, last+1, right);
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 void hypre_qsort0( HYPRE_Int *v,
              HYPRE_Int  left,
              HYPRE_Int  right )

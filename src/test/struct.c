@@ -3014,6 +3014,7 @@ main( hypre_int argc,
          hypre_TFree(offsets[i], HYPRE_MEMORY_HOST);
       }
       hypre_TFree(offsets, HYPRE_MEMORY_HOST);
+   }
 
 #if defined(HYPRE_USING_KOKKOS)
    Kokkos::finalize ();
@@ -3156,7 +3157,7 @@ AddValuesMatrix( HYPRE_StructMatrix A,
 
    HYPRE_Int           ierr = 0;
    hypre_BoxArray     *boxes;
-   HYPRE_Int           bi;
+   HYPRE_Int           s,bi;
    hypre_IndexRef      ilower;
    hypre_IndexRef      iupper;
    hypre_Box          *box;
