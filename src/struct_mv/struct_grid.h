@@ -80,6 +80,7 @@ typedef struct hypre_StructGrid_struct
 #if defined(HYPRE_USING_CUDA)
 #define hypre_StructGridDataLocation(grid)  ((grid) -> data_location)
 #endif
+
 /*--------------------------------------------------------------------------
  * Looping macros:
  *--------------------------------------------------------------------------*/
@@ -91,3 +92,6 @@ typedef struct hypre_StructGrid_struct
 #define hypre_SetDeviceOn()                 hypre_HandleStructExecPolicy(hypre_handle()) = HYPRE_EXEC_DEVICE
 #define hypre_SetDeviceOff()                hypre_HandleStructExecPolicy(hypre_handle()) = HYPRE_EXEC_HOST
 #endif
+
+#endif
+

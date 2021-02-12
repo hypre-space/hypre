@@ -18,6 +18,9 @@ HYPRE_Int hypre_BinarySearch2 ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int lo
 HYPRE_Int *hypre_LowerBound( HYPRE_Int *first, HYPRE_Int *last, HYPRE_Int value );
 HYPRE_BigInt *hypre_BigLowerBound( HYPRE_BigInt *first, HYPRE_BigInt *last, HYPRE_BigInt value );
 
+/* general.c */
+HYPRE_Int hypre_Log2( HYPRE_Int p );
+
 /* hypre_complex.c */
 #ifdef HYPRE_COMPLEX
 HYPRE_Complex hypre_conj( HYPRE_Complex value );
@@ -76,6 +79,9 @@ void hypre_BigSwap( HYPRE_BigInt *v, HYPRE_Int  i, HYPRE_Int  j );
 void hypre_BigQsort0( HYPRE_BigInt *v, HYPRE_Int  left, HYPRE_Int  right );
 void hypre_topo_sort(const HYPRE_Int *row_ptr, const HYPRE_Int *col_inds, const HYPRE_Complex *data, HYPRE_Int *ordering, HYPRE_Int n);
 void hypre_dense_topo_sort(const HYPRE_Complex *L, HYPRE_Int *ordering, HYPRE_Int n, HYPRE_Int is_col_major);
+
+/* hypre_unique.c */
+HYPRE_Int hypre_UniqueIntArrayND ( HYPRE_Int ndim , HYPRE_Int *size , HYPRE_Int **array );
 
 /* qsplit.c */
 HYPRE_Int hypre_DoubleQuickSplit ( HYPRE_Real *values , HYPRE_Int *indices , HYPRE_Int list_length , HYPRE_Int NumberKept );

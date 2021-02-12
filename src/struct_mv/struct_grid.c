@@ -891,15 +891,13 @@ hypre_StructGridPrintVTK( const char       *filename,
             hypre_BoxGrowByArray(box, growth_array);
 
             hypre_BoxGetSize(box, loop_size);
-            hypre_BoxLoop0Begin(ndim, loop_size);
-            hypre_BoxLoopSetOneBlock();
-            hypre_BoxLoop0For()
+            hypre_SerialBoxLoop0Begin(ndim, loop_size);
             {
                hypre_BoxLoopGetIndex(index);
                hypre_AddIndexes(index, hypre_BoxIMin(box), ndim, coords);
                hypre_fprintf(fp, "\t\t\t\t\t%d 0 0\n", coords[0]);
             }
-            hypre_BoxLoop0End();
+            hypre_SerialBoxLoop0End();
 
             hypre_BoxGrowByArray(box, shrink_array);
          }
@@ -912,15 +910,13 @@ hypre_StructGridPrintVTK( const char       *filename,
             hypre_BoxGrowByArray(box, growth_array);
 
             hypre_BoxGetSize(box, loop_size);
-            hypre_BoxLoop0Begin(ndim, loop_size);
-            hypre_BoxLoopSetOneBlock();
-            hypre_BoxLoop0For()
+            hypre_SerialBoxLoop0Begin(ndim, loop_size);
             {
                hypre_BoxLoopGetIndex(index);
                hypre_AddIndexes(index, hypre_BoxIMin(box), ndim, coords);
                hypre_fprintf(fp, "\t\t\t\t\t%d %d 0\n", coords[0], coords[1]);
             }
-            hypre_BoxLoop0End();
+            hypre_SerialBoxLoop0End();
 
             hypre_BoxGrowByArray(box, shrink_array);
          }
@@ -933,15 +929,13 @@ hypre_StructGridPrintVTK( const char       *filename,
             hypre_BoxGrowByArray(box, growth_array);
 
             hypre_BoxGetSize(box, loop_size);
-            hypre_BoxLoop0Begin(ndim, loop_size);
-            hypre_BoxLoopSetOneBlock();
-            hypre_BoxLoop0For()
+            hypre_SerialBoxLoop0Begin(ndim, loop_size);
             {
                hypre_BoxLoopGetIndex(index);
                hypre_AddIndexes(index, hypre_BoxIMin(box), ndim, coords);
                hypre_fprintf(fp, "\t\t\t\t\t%d %d %d\n", coords[0], coords[1], coords[2]);
             }
-            hypre_BoxLoop0End();
+            hypre_SerialBoxLoop0End();
 
             hypre_BoxGrowByArray(box, shrink_array);
          }
@@ -964,9 +958,7 @@ hypre_StructGridPrintVTK( const char       *filename,
             hypre_BoxGrowByArray(box, shrink_array);
 
             hypre_BoxGetSize(box, loop_size);
-            hypre_BoxLoop0Begin(ndim, loop_size);
-            hypre_BoxLoopSetOneBlock();
-            hypre_BoxLoop0For()
+            hypre_SerialBoxLoop0Begin(ndim, loop_size);
             {
                hypre_BoxLoopGetIndex(index);
 
@@ -975,7 +967,7 @@ hypre_StructGridPrintVTK( const char       *filename,
 
                hypre_fprintf(fp, "\t\t\t\t\t%d %d\n", n[0], n[1]);
             }
-            hypre_BoxLoop0End();
+            hypre_SerialBoxLoop0End();
 
             offset += partial_volume[0];
          }
@@ -990,9 +982,7 @@ hypre_StructGridPrintVTK( const char       *filename,
             hypre_BoxGrowByArray(box, shrink_array);
 
             hypre_BoxGetSize(box, loop_size);
-            hypre_BoxLoop0Begin(ndim, loop_size);
-            hypre_BoxLoopSetOneBlock();
-            hypre_BoxLoop0For()
+            hypre_SerialBoxLoop0Begin(ndim, loop_size);
             {
                hypre_BoxLoopGetIndex(index);
 
@@ -1006,7 +996,7 @@ hypre_StructGridPrintVTK( const char       *filename,
                for(j = 1; j < cell_nnodes; j++) hypre_fprintf(fp, " %d", n[j]);
                hypre_fprintf(fp, "\n");
             }
-            hypre_BoxLoop0End();
+            hypre_SerialBoxLoop0End();
 
             offset += partial_volume[1];
          }
@@ -1021,9 +1011,7 @@ hypre_StructGridPrintVTK( const char       *filename,
             hypre_BoxGrowByArray(box, shrink_array);
 
             hypre_BoxGetSize(box, loop_size);
-            hypre_BoxLoop0Begin(ndim, loop_size);
-            hypre_BoxLoopSetOneBlock();
-            hypre_BoxLoop0For()
+            hypre_SerialBoxLoop0Begin(ndim, loop_size);
             {
                hypre_BoxLoopGetIndex(index);
 
@@ -1043,7 +1031,7 @@ hypre_StructGridPrintVTK( const char       *filename,
                for(j = 1; j < cell_nnodes; j++) hypre_fprintf(fp, " %d", n[j]);
                hypre_fprintf(fp, "\n");
             }
-            hypre_BoxLoop0End();
+            hypre_SerialBoxLoop0End();
 
             offset += partial_volume[2];
          }

@@ -94,7 +94,7 @@ hypre_zPFMGSetupInterpOp( hypre_StructMatrix *P,
    hypre_Index            Astart, Astride, Pstart, Pstride;
    hypre_Index            origin, stride, loop_size;
                         
-   HYPRE_Int              i, si, vi, Ai, Pi;
+   HYPRE_Int              i, si, vi;
 
    /*----------------------------------------------------------
     * Initialize some things
@@ -201,10 +201,6 @@ hypre_zPFMGSetupInterpOp( hypre_StructMatrix *P,
          hypre_BoxLoop2Begin(ndim, loop_size,
                              A_dbox, Astart, Astride, Ai,
                              P_dbox, Pstart, Pstride, Pi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,Pi,si,center,Ap,Astenc) HYPRE_SMP_SCHEDULE
-#endif
-         hypre_BoxLoop2For(Ai, Pi)
          {
             center  = Pconst0;
             Pp1[Pi] = Pconst1;
@@ -483,7 +479,6 @@ hypre_PFMGSetupInterpOp_CC0
   HYPRE_Int           si1 )
 {
    HYPRE_Int              si;
-   HYPRE_Int              Ai, Pi;
    HYPRE_Real            *Ap;
    HYPRE_Real             center;
    HYPRE_Int              Astenc;
@@ -496,10 +491,6 @@ hypre_PFMGSetupInterpOp_CC0
    hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                        A_dbox, start, stride, Ai,
                        P_dbox, startc, stridec, Pi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,Pi,si,center,Ap,Astenc,mrk0,mrk1) HYPRE_SMP_SCHEDULE
-#endif
-   hypre_BoxLoop2For(Ai, Pi)
    {
       center  = 0.0;
       Pp0[Pi] = 0.0;
@@ -755,10 +746,6 @@ hypre_PFMGSetupInterpOp_CC2
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                           A_dbox, start, stride, Ai,
                           P_dbox, startc, stridec, Pi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,Pi,center,Ap,Astenc,mrk0,mrk1) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop2For(Ai, Pi)
       {
          Pp0[Pi] = P0;
          Pp1[Pi] = P1;

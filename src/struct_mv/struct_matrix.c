@@ -1352,7 +1352,6 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
    hypre_Box           *data_box;
    hypre_IndexRef       data_start;
    hypre_Index          data_stride;
-   HYPRE_Int            datai;
    HYPRE_Complex       *datap;
 
    hypre_Box           *dval_box;
@@ -1447,10 +1446,6 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                      hypre_BoxGetSize(int_box, loop_size);
                      hypre_BoxLoop1Begin(hypre_StructMatrixNDim(matrix), loop_size,
                                          dval_box, dval_start, dval_stride, dvali);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,dvali) HYPRE_SMP_SCHEDULE
-#endif
-                     hypre_BoxLoop1For(dvali)
                      {
                         values[dvali] = *datap;
                      }
@@ -1471,10 +1466,6 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                      hypre_BoxLoop2Begin(hypre_StructMatrixNDim(matrix), loop_size,
                                          data_box, data_start, data_stride, datai,
                                          dval_box, dval_start, dval_stride, dvali);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai,dvali) HYPRE_SMP_SCHEDULE
-#endif
-                     hypre_BoxLoop2For(datai, dvali)
                      {
                         datap[datai] += values[dvali];
                      }
@@ -1485,10 +1476,6 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                      hypre_BoxLoop2Begin(hypre_StructMatrixNDim(matrix), loop_size,
                                          data_box, data_start, data_stride, datai,
                                          dval_box, dval_start, dval_stride, dvali);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai,dvali) HYPRE_SMP_SCHEDULE
-#endif
-                     hypre_BoxLoop2For(datai, dvali)
                      {
                         datap[datai] = values[dvali];
                      }
@@ -1499,10 +1486,6 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                      hypre_BoxLoop2Begin(hypre_StructMatrixNDim(matrix), loop_size,
                                          data_box, data_start, data_stride, datai,
                                          dval_box, dval_start, dval_stride, dvali);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai,dvali) HYPRE_SMP_SCHEDULE
-#endif
-                     hypre_BoxLoop2For(datai, dvali)
                      {
                         values[dvali] = datap[datai];
                         if (action == -2)
@@ -1680,7 +1663,6 @@ hypre_StructMatrixClearBoxValues( hypre_StructMatrix *matrix,
    hypre_Box           *data_box;
    hypre_IndexRef       data_start;
    hypre_Index          data_stride;
-   HYPRE_Int            datai;
    HYPRE_Complex       *datap;
 
    hypre_Index          loop_size;
@@ -1747,10 +1729,6 @@ hypre_StructMatrixClearBoxValues( hypre_StructMatrix *matrix,
 
                hypre_BoxLoop1Begin(hypre_StructMatrixNDim(matrix), loop_size,
                                    data_box,data_start,data_stride,datai);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai) HYPRE_SMP_SCHEDULE
-#endif
-               hypre_BoxLoop1For(datai)
                {
                   datap[datai] = 0.0;
                }
@@ -1989,7 +1967,6 @@ hypre_StructMatrixClearGhostValues( hypre_StructMatrix *matrix )
 {
    HYPRE_Int             ndim = hypre_StructMatrixNDim(matrix);
 
-   HYPRE_Int             mi;
    HYPRE_Complex        *mp;
 
    hypre_StructStencil  *stencil;
@@ -2046,10 +2023,6 @@ hypre_StructMatrixClearGhostValues( hypre_StructMatrix *matrix )
 
                hypre_BoxLoop1Begin(ndim, loop_size,
                                    data_box, start, unit_stride, mi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi) HYPRE_SMP_SCHEDULE
-#endif
-               hypre_BoxLoop1For(mi)
                {
                   mp[mi] = 0.0;
                }
@@ -2231,7 +2204,6 @@ hypre_StructMatrixPrint( const char         *filename,
       hypre_Box       *grid_box;
       hypre_Box       *data_box;
       HYPRE_Int        data_box_volume;
-      HYPRE_Int        datai;
       hypre_Index      loop_size;
       hypre_IndexRef   start;
       hypre_Index      stride;
@@ -2256,7 +2228,6 @@ hypre_StructMatrixPrint( const char         *filename,
 
          hypre_BoxLoop1Begin(ndim, loop_size,
                              data_box, start, stride, datai);
-         hypre_BoxLoop1For(datai)
          {
             /* Print lines of the form: "%d: (%d, %d, %d; %d) %.14e\n" */
             hypre_BoxLoopGetIndex(index);
@@ -2536,7 +2507,7 @@ hypre_StructMatrixClearBoundary( hypre_StructMatrix *matrix)
    hypre_StructGrid    *grid;
    hypre_StructStencil *stencil;
 
-   HYPRE_Int           i, j, di, e;
+   HYPRE_Int           i, j, e;
 
    /*-----------------------------------------------------------------------
     * Set the matrix coefficients
@@ -2578,10 +2549,6 @@ hypre_StructMatrixClearBoundary( hypre_StructMatrix *matrix)
                      hypre_BoxGetSize(tbox, loop_size);
                      dstart = hypre_BoxIMin(tbox);
                      hypre_BoxLoop1Begin(ndim, loop_size, dbox, dstart, dstride, di);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,di) HYPRE_SMP_SCHEDULE
-#endif
-                     hypre_BoxLoop1For(di)
                      {
                         data[di] = 0.0;
                      }

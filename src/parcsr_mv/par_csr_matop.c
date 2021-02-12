@@ -5589,3 +5589,103 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_MergeOrderedArrays: merge two ordered arrays
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MergeOrderedArrays( HYPRE_Int  size1,     HYPRE_Int  *array1,
+                          HYPRE_Int  size2,     HYPRE_Int  *array2,
+                          HYPRE_Int *size3_ptr, HYPRE_Int **array3_ptr )
+{
+   HYPRE_Int  *array3;
+   HYPRE_Int   i, j, k;
+
+   array3 = hypre_CTAlloc(HYPRE_Int, (size1 + size2), HYPRE_MEMORY_HOST);
+
+   i = j = k = 0;
+   while (i < size1 && j < size2)
+   {
+      if (array1[i] > array2[j])
+      {
+         array3[k++] = array2[j++];
+      }
+      else if (array1[i] < array2[j])
+      {
+         array3[k++] = array1[i++];
+      }
+      else
+      {
+         array3[k++] = array1[i++];
+         j++;
+      }
+   }
+
+   while (i < size1)
+   {
+      array3[k++] = array1[i++];
+   }
+
+   while (j < size2)
+   {
+      array3[k++] = array2[j++];
+   }
+
+   /* Set pointers */
+   *size3_ptr  = k;
+   *array3_ptr = hypre_TReAlloc(array3, HYPRE_Int, k, HYPRE_MEMORY_HOST);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixInfNorm
+ *
+ * Computes the infinity norm of A:
+ *
+ *       norm = max_{j} sum_{i} |A_{ij}|
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_ParCSRMatrixInfNorm( hypre_ParCSRMatrix  *A,
+                           HYPRE_Real          *norm )
+{
+   MPI_Comm            comm     = hypre_ParCSRMatrixComm(A);
+
+   /* diag part of A */
+   hypre_CSRMatrix    *A_diag   = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Complex      *A_diag_a = hypre_CSRMatrixData(A_diag);
+   HYPRE_Int          *A_diag_i = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int    num_rows_diag_A = hypre_CSRMatrixNumRows(A_diag);
+
+   /* off-diag part of A */
+   hypre_CSRMatrix    *A_offd   = hypre_ParCSRMatrixOffd(A);
+   HYPRE_Complex      *A_offd_a = hypre_CSRMatrixData(A_offd);
+   HYPRE_Int          *A_offd_i = hypre_CSRMatrixI(A_offd);
+
+   /* Local variables */
+   HYPRE_Int           i, j;
+   HYPRE_Real          maxsum = 0.0;
+   HYPRE_Real          rowsum;
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,j,rowsum) reduction(max:maxsum) HYPRE_SMP_SCHEDULE
+#endif
+   for (i = 0; i < num_rows_diag_A; i++)
+   {
+      rowsum = 0.0;
+      for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
+      {
+         rowsum += hypre_cabs(A_diag_a[j]);
+      }
+      for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
+      {
+         rowsum += hypre_cabs(A_offd_a[j]);
+      }
+
+      maxsum = hypre_max(maxsum, rowsum);
+   }
+
+   hypre_MPI_Allreduce(&maxsum, norm, 1, HYPRE_MPI_REAL, hypre_MPI_MAX, comm);
+
+   return hypre_error_flag;
+}

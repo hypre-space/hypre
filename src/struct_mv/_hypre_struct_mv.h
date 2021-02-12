@@ -1159,6 +1159,7 @@ typedef struct hypre_StructGrid_struct
 #if defined(HYPRE_USING_CUDA)
 #define hypre_StructGridDataLocation(grid)  ((grid) -> data_location)
 #endif
+
 /*--------------------------------------------------------------------------
  * Looping macros:
  *--------------------------------------------------------------------------*/
@@ -1170,6 +1171,9 @@ typedef struct hypre_StructGrid_struct
 #define hypre_SetDeviceOn()                 hypre_HandleStructExecPolicy(hypre_handle()) = HYPRE_EXEC_DEVICE
 #define hypre_SetDeviceOff()                hypre_HandleStructExecPolicy(hypre_handle()) = HYPRE_EXEC_HOST
 #endif
+
+#endif
+
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -2256,7 +2260,7 @@ HYPRE_Int hypre_StructMatrixResize ( hypre_StructMatrix *matrix , hypre_BoxArray
 HYPRE_Int hypre_StructMatrixRestore ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixForget ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixInitializeShell ( hypre_StructMatrix *matrix );
-HYPRE_Int hypre_StructMatrixInitializeData ( hypre_StructMatrix *matrix , HYPRE_Complex *data ,HYPRE_Complex *data_const);
+HYPRE_Int hypre_StructMatrixInitializeData ( hypre_StructMatrix *matrix , HYPRE_Complex *data );
 HYPRE_Int hypre_StructMatrixInitialize ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixSetValues ( hypre_StructMatrix *matrix , hypre_Index grid_index , HYPRE_Int num_stencil_indices , HYPRE_Int *stencil_indices , HYPRE_Complex *values , HYPRE_Int action , HYPRE_Int boxnum , HYPRE_Int outside );
 HYPRE_Int hypre_StructMatrixSetBoxValues ( hypre_StructMatrix *matrix , hypre_Box *set_box , hypre_Box *value_box , HYPRE_Int num_stencil_indices , HYPRE_Int *stencil_indices , HYPRE_Complex *values , HYPRE_Int action , HYPRE_Int boxnum , HYPRE_Int outside );

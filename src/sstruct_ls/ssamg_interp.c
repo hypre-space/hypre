@@ -196,7 +196,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
    HYPRE_Int                cdir;
    HYPRE_Int                part, nvars;
    HYPRE_Int                box_id;
-   HYPRE_Int                i, ii, j, si, vi, Ai, Pi;
+   HYPRE_Int                i, ii, j, si, vi;
 
    /*-------------------------------------------------------
     * Set prolongation coefficients for each part
@@ -308,10 +308,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       A_dbox, Astart, Astride, Ai,
                                       P_dbox, Pstart, Pstride, Pi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,Pi,si,center,Ap,Astenc) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop2For(Ai, Pi)
                   {
                      center  = Pconst[0];
                      Pp1[Pi] = Pconst[1];
@@ -353,10 +349,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 #if 0
                   /* Adjust weights everywhere */
                   hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Pi,center) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop1For(Pi)
                   {
                      center = Pp1[Pi] + Pp2[Pi];
                      if (center)
@@ -395,7 +387,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
                         hypre_BoxGetStrideSize(compute_box, stride, loop_size);
                         hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
-                        hypre_BoxLoop1For(Pi)
                         {
                            center = Pp1[Pi] + Pp2[Pi];
                            if (center)

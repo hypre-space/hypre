@@ -39,6 +39,7 @@ FILES =\
  binsearch.c\
  exchange_data.c\
  fortran_matrix.c\
+ general.c\
  hypre_ap.c\
  hypre_complex.c\
  hypre_error.c\

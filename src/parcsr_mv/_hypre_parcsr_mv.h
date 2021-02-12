@@ -308,6 +308,7 @@ typedef struct hypre_ParCSRMatrix_struct
 
    HYPRE_BigInt          global_num_rows;
    HYPRE_BigInt          global_num_cols;
+   HYPRE_Int             global_num_rownnz; /* global number of nonzero rows */
    HYPRE_BigInt          first_row_index;
    HYPRE_BigInt          first_col_diag;
    /* need to know entire local range in case row_starts and col_starts
@@ -378,6 +379,7 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixComm(matrix)                   ((matrix) -> comm)
 #define hypre_ParCSRMatrixGlobalNumRows(matrix)          ((matrix) -> global_num_rows)
 #define hypre_ParCSRMatrixGlobalNumCols(matrix)          ((matrix) -> global_num_cols)
+#define hypre_ParCSRMatrixGlobalNumRownnz(matrix) ((matrix) -> global_num_rownnz)
 #define hypre_ParCSRMatrixFirstRowIndex(matrix)          ((matrix) -> first_row_index)
 #define hypre_ParCSRMatrixFirstColDiag(matrix)           ((matrix) -> first_col_diag)
 #define hypre_ParCSRMatrixLastRowIndex(matrix)           ((matrix) -> last_row_index)
@@ -845,6 +847,8 @@ HYPRE_Int hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix *A, HYPRE_Int blockSize, 
 HYPRE_Int hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, HYPRE_BigInt *cpts_starts, const char *job, hypre_ParCSRMatrix **B_ptr, HYPRE_Real strength_thresh);
 
 HYPRE_Int hypre_ParcsrAdd( HYPRE_Complex alpha, hypre_ParCSRMatrix *A, HYPRE_Complex beta, hypre_ParCSRMatrix *B, hypre_ParCSRMatrix **Cout);
+HYPRE_Int hypre_MergeOrderedArrays( HYPRE_Int size1, HYPRE_Int  *array1, HYPRE_Int size2, HYPRE_Int *array2, HYPRE_Int *size3_ptr, HYPRE_Int **array3_ptr );
+HYPRE_Int hypre_ParCSRMatrixInfNorm ( hypre_ParCSRMatrix *A , HYPRE_Real *norm );
 
 /* par_csr_matop_marked.c */
 void hypre_ParMatmul_RowSizes_Marked ( HYPRE_Int **C_diag_i , HYPRE_Int **C_offd_i , HYPRE_Int **B_marker , HYPRE_Int *A_diag_i , HYPRE_Int *A_diag_j , HYPRE_Int *A_offd_i , HYPRE_Int *A_offd_j , HYPRE_Int *B_diag_i , HYPRE_Int *B_diag_j , HYPRE_Int *B_offd_i , HYPRE_Int *B_offd_j , HYPRE_Int *B_ext_diag_i , HYPRE_Int *B_ext_diag_j , HYPRE_Int *B_ext_offd_i , HYPRE_Int *B_ext_offd_j , HYPRE_Int *map_B_to_C , HYPRE_Int *C_diag_size , HYPRE_Int *C_offd_size , HYPRE_Int num_rows_diag_A , HYPRE_Int num_cols_offd_A , HYPRE_Int allsquare , HYPRE_Int num_cols_diag_B , HYPRE_Int num_cols_offd_B , HYPRE_Int num_cols_offd_C , HYPRE_Int *CF_marker , HYPRE_Int *dof_func , HYPRE_Int *dof_func_offd );
@@ -862,6 +866,7 @@ HYPRE_Int hypre_ParCSRMatrixInitialize_v2( hypre_ParCSRMatrix *matrix, HYPRE_Mem
 HYPRE_Int hypre_ParCSRMatrixInitialize ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_ParCSRMatrixSetNumNonzeros ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_ParCSRMatrixSetDNumNonzeros ( hypre_ParCSRMatrix *matrix );
+HYPRE_Int hypre_ParCSRMatrixSetNumRownnz ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_ParCSRMatrixSetDataOwner ( hypre_ParCSRMatrix *matrix , HYPRE_Int owns_data );
 HYPRE_Int hypre_ParCSRMatrixSetRowStartsOwner ( hypre_ParCSRMatrix *matrix , HYPRE_Int owns_row_starts );
 HYPRE_Int hypre_ParCSRMatrixSetColStartsOwner ( hypre_ParCSRMatrix *matrix , HYPRE_Int owns_col_starts );
@@ -893,6 +898,7 @@ HYPRE_Int hypre_ParCSRMatrixMatvecOutOfPlace ( HYPRE_Complex alpha , hypre_ParCS
 HYPRE_Int hypre_ParCSRMatrixMatvec ( HYPRE_Complex alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , HYPRE_Complex beta , hypre_ParVector *y );
 HYPRE_Int hypre_ParCSRMatrixMatvecT ( HYPRE_Complex alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , HYPRE_Complex beta , hypre_ParVector *y );
 HYPRE_Int hypre_ParCSRMatrixMatvec_FF ( HYPRE_Complex alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , HYPRE_Complex beta , hypre_ParVector *y , HYPRE_Int *CF_marker , HYPRE_Int fpt );
+HYPRE_Int hypre_ParCSRMatrixMatvecDiagScale ( HYPRE_Complex alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , HYPRE_Complex beta , hypre_ParVector *y );
 
 /* par_csr_triplemat.c */
 hypre_ParCSRMatrix *hypre_ParCSRMatMat( hypre_ParCSRMatrix  *A, hypre_ParCSRMatrix  *B );

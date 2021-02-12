@@ -22,7 +22,7 @@ HYPRE_Real
 hypre_StructInnerProdLocal( hypre_StructVector *x,
                             hypre_StructVector *y )
 {
-   HYPRE_Real       result;
+   HYPRE_Real       result = 0.0;
 
    hypre_Box       *x_data_box;
    hypre_Box       *y_data_box;
@@ -38,8 +38,6 @@ hypre_StructInnerProdLocal( hypre_StructVector *x,
 
    HYPRE_Int        ndim = hypre_StructVectorNDim(x);
    HYPRE_Int        i;
-
-   HYPRE_Real       result = 0.0;
 
    hypre_SetIndex(unit_stride, 1);
 

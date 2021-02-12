@@ -1283,7 +1283,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
             size += hypre_CommBlockPfxsize(comm_block);
          }
       }
-      send_buffers[i] = hypre_SharedTAlloc(HYPRE_Complex, size, HYPRE_MEMORY_HOST);
+      send_buffers[i] = hypre_TAlloc(HYPRE_Complex, size, HYPRE_MEMORY_HOST);
       send_bufsizes[i] = size;
    }
 
@@ -1302,7 +1302,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
             size += hypre_CommBlockPfxsize(comm_block);
          }
       }
-      recv_buffers[i] = hypre_SharedTAlloc(HYPRE_Complex, size, HYPRE_MEMORY_HOST);
+      recv_buffers[i] = hypre_TAlloc(HYPRE_Complex, size, HYPRE_MEMORY_HOST);
       recv_bufsizes[i] = size;
    }
 
@@ -1669,11 +1669,11 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
    hypre_TFree(hypre_CommHandleStatus(comm_handle), HYPRE_MEMORY_HOST);
    for (i = 0; i < num_sends; i++)
    {
-      hypre_SharedTFree(send_buffers[i], HYPRE_MEMORY_HOST);
+      hypre_TFree(send_buffers[i], HYPRE_MEMORY_HOST);
    }
    for (i = 0; i < num_recvs; i++)
    {
-      hypre_SharedTFree(recv_buffers[i], HYPRE_MEMORY_HOST);
+      hypre_TFree(recv_buffers[i], HYPRE_MEMORY_HOST);
    }
    hypre_TFree(send_buffers, HYPRE_MEMORY_HOST);
    hypre_TFree(recv_buffers, HYPRE_MEMORY_HOST);

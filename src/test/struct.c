@@ -18,6 +18,10 @@
 #include "_hypre_struct_mv.h"
 #endif
 
+/* RDF: Why is this include here? */
+#include "_hypre_struct_mv.h"
+#include "_hypre_struct_mv.hpp"
+
 /* begin lobpcg */
 
 #define NO_SOLVER -9198
@@ -514,12 +518,6 @@ main( hypre_int argc,
          /* lobpcg: seed for srand */
          arg_index++;
          lobpcgSeed = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-itr") == 0 )
-      {
-         /* lobpcg: max # of iterations */
-         arg_index++;
-         maxIterations = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-tol") == 0 )
       {
@@ -3634,7 +3632,6 @@ SetStencilBndry( HYPRE_StructMatrix  A,
                  HYPRE_StructGrid    grid,
                  HYPRE_Int          *period )
 {
-
    HYPRE_Int          ierr = 0;
    hypre_BoxArray    *boxes;
    HYPRE_Int          size,i,j,d,ib;

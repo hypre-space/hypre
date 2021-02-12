@@ -66,7 +66,6 @@ typedef struct
    hypre_BoxArray      **fine_points_l;
 
    HYPRE_Real           *data;
-   HYPRE_Real           *data_const;
    hypre_StructMatrix  **A_l;
    hypre_StructVector  **x_l;
 
@@ -196,7 +195,7 @@ hypre_CycRedCreateCoarseOp( hypre_StructMatrix *A,
    {
       Ac_num_ghost[2*cdir + 1] = 1;
    }
-   hypre_StructMatrixSetNumGhost(Ac, Ac_num_ghost);
+   HYPRE_StructMatrixSetNumGhost(Ac, Ac_num_ghost);
 
    hypre_StructMatrixInitializeShell(Ac);
 
@@ -479,9 +478,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    hypre_BoxArray         *base_points;
    hypre_BoxArray        **fine_points_l;
    HYPRE_Real             *data;
-   HYPRE_Real             *data_const;
    HYPRE_Int               data_size = 0;
-   HYPRE_Int               data_size_const = 0;
    hypre_StructMatrix    **A_l;
    hypre_StructVector    **x_l;
    hypre_ComputePkg      **down_compute_pkg_l;
@@ -511,7 +508,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    grid = hypre_StructMatrixGrid(A);
 
    /* Compute a preliminary num_levels value based on the grid */
-   cbox = hypre_BoxDuplicate(hypre_StructGridBoundingBox(grid));
+   cbox = hypre_BoxClone(hypre_StructGridBoundingBox(grid));
    num_levels = hypre_Log2(hypre_BoxSizeD(cbox, cdir)) + 2;
    if (cyc_red_data -> max_levels > 0)
    {
@@ -564,7 +561,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
     * Set up base points
     *-----------------------------------------------------*/
 
-   base_points = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid_l[0]));
+   base_points = hypre_BoxArrayClone(hypre_StructGridBoxes(grid_l[0]));
    hypre_ProjectBoxArray(base_points, base_index, base_stride);
 
    (cyc_red_data -> base_points) = base_points;
@@ -581,11 +578,11 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_CycRedSetFIndex(base_index, base_stride, l, cdir, findex);
       hypre_CycRedSetStride(base_index, base_stride, l, cdir, stride);
 
-      fine_points_l[l] = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid_l[l]));
+      fine_points_l[l] = hypre_BoxArrayClone(hypre_StructGridBoxes(grid_l[l]));
       hypre_ProjectBoxArray(fine_points_l[l], findex, stride);
    }
 
-   fine_points_l[l] = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid_l[l]));
+   fine_points_l[l] = hypre_BoxArrayClone(hypre_StructGridBoxes(grid_l[l]));
    if (num_levels == 1)
    {
       hypre_ProjectBoxArray(fine_points_l[l], base_index, base_stride);
@@ -609,26 +606,21 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    for (l = 0; l < (num_levels - 1); l++)
    {
       A_l[l+1] = hypre_CycRedCreateCoarseOp(A_l[l], grid_l[l+1], cdir);
-      //hypre_StructMatrixInitializeShell(A_l[l+1]);
       data_size += hypre_StructMatrixDataSize(A_l[l+1]);
-      data_size_const += hypre_StructMatrixDataConstSize(A_l[l+1]);
 
       x_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
       hypre_StructVectorSetNumGhost(x_l[l+1], x_num_ghost);
       hypre_StructVectorInitializeShell(x_l[l+1]);
-      hypre_StructVectorSetDataSize(x_l[l+1], &data_size, &data_size_const);
+      data_size += hypre_StructVectorDataSize(x_l[l+1]);
    }
 
    data =  hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_DEVICE);
-   data_const = hypre_CTAlloc(HYPRE_Real,data_size_const,HYPRE_MEMORY_HOST);
    (cyc_red_data -> data) = data;
-   (cyc_red_data -> data_const) = data_const;
 
    for (l = 0; l < (num_levels - 1); l++)
    {
-      hypre_StructMatrixInitializeData(A_l[l+1], data, data_const);
+      hypre_StructMatrixInitializeData(A_l[l+1], data);
       data += hypre_StructMatrixDataSize(A_l[l+1]);
-      data_const += hypre_StructMatrixDataConstSize(A_l[l+1]);
 
 #if defined(HYPRE_USING_CUDA)
       if (data_location != HYPRE_MEMORY_HOST)

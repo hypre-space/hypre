@@ -2443,7 +2443,7 @@ hypre_BoxManIntersect ( hypre_BoxManager *manager,
                         HYPRE_Int *nentries_ptr )
 {
    HYPRE_Int           ndim = hypre_BoxManNDim(manager);
-   HYPRE_Int           d, ii;
+   HYPRE_Int           d;
    HYPRE_Int           find_index_d, current_index_d;
    HYPRE_Int          *man_indexes_d;
    HYPRE_Int           man_index_size_d;

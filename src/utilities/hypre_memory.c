@@ -13,8 +13,6 @@
 
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
-#include "_hypre_struct_mv.h"
-#include "_hypre_struct_mv.hpp"
 
 #ifdef HYPRE_USE_UMALLOC
 #undef HYPRE_USE_UMALLOC

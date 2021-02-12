@@ -416,7 +416,6 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    hypre_Index            ustride;
    hypre_Index            loop_size;
    hypre_IndexRef         start;
-   hypre_IndexRef         ilower, iupper;
 
    HYPRE_Int              nrows;
    HYPRE_Int              ncols;
@@ -426,7 +425,7 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_Int              entry, part, var, nvars;
    HYPRE_Int              nnzs;
    HYPRE_Int              sizes[4];
-   HYPRE_Int              nvalues, i, j, k, kk, m, mi;
+   HYPRE_Int              nvalues, i, j, k, kk, m;
    HYPRE_Int              num_boxes;
    HYPRE_Int              pbnd_boxaa_size;
    HYPRE_Int              convert_boxaa_size;
@@ -593,10 +592,6 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
                   hypre_BoxGetSize(convert_box, loop_size);
 
                   hypre_BoxLoop1Begin(ndim, loop_size, ghost_box, start, ustride, mi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop1For(mi)
                   {
                      row_sizes[m + mi] = nnzs;
                   }
@@ -673,8 +668,6 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
             hypre_ForBoxI(j, convert_boxa)
             {
                convert_box = hypre_BoxArrayBox(convert_boxa, j);
-               ilower = hypre_BoxIMin(convert_box);
-               iupper = hypre_BoxIMax(convert_box);
 
                hypre_assert(hypre_BoxVolume(convert_box) > 0);
                hypre_assert(hypre_BoxVolume(convert_box) < nvalues);
@@ -682,6 +675,8 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
 #if DEBUG_MATCONV
                if (!myid)
                {
+                  hypre_IndexRef  ilower = hypre_BoxIMin(convert_box);
+                  hypre_IndexRef  iupper = hypre_BoxIMax(convert_box);
                   hypre_printf("Part %d - boxa %d - box %d - Converting %d entries - ",
                                part, i, j, hypre_BoxVolume(convert_box));
                   hypre_printf("(%d, %d, %d) x (%d, %d, %d)\n",
@@ -692,8 +687,8 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
 #endif
                /* GET values from this box */
                HYPRE_ANNOTATE_REGION_BEGIN("%s", "Get entries");
-               hypre_SStructPMatrixSetBoxValues(pA, ilower, iupper, var,
-                                                nSentries, Sentries, values, -1);
+               hypre_SStructPMatrixSetBoxValues(pA, convert_box, var,
+                                                nSentries, Sentries, convert_box, values, -1);
                HYPRE_ANNOTATE_REGION_END("%s", "Get entries");
 
 #if DEBUG_MATCONV
@@ -702,9 +697,9 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
 #endif
                /* SET values to ij_Ahat */
                HYPRE_ANNOTATE_REGION_BEGIN("%s", "Set entries");
-               hypre_SStructUMatrixSetBoxValuesHelper(A, part, ilower, iupper,
+               hypre_SStructUMatrixSetBoxValuesHelper(A, part, convert_box,
                                                       var, nSentries, Sentries,
-                                                      values, 0, ij_Ahat);
+                                                      convert_box, values, 0, ij_Ahat);
                HYPRE_ANNOTATE_REGION_END("%s", "Set entries");
 #if DEBUG_MATCONV
                HYPRE_ANNOTATE_REGION_END("%s %d %s %d", "Set values part", part, "convert_box", j);

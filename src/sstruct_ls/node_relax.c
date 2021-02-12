@@ -890,8 +890,11 @@ hypre_NodeRelax( void                 *relax_vdata,
                      A_block = hypre_SStructPMatrixSMatrix(A,vi,vj);
                      if (A_block != NULL)
                      {
-                        h_Ap[vi*nvars+vj] = hypre_StructMatrixBoxData( hypre_SStructPMatrixSMatrix(A,vi,vj),
-                                                                       i, diag_rank[vi][vj]);
+                        stencil = hypre_StructMatrixStencil(A_block);
+                        stencil_diag_entry = hypre_StructStencilDiagEntry(stencil);
+
+                        h_Ap[vi*nvars+vj] =
+                           hypre_StructMatrixBoxData(A_block, i, stencil_diag_entry);
                      }
                      else
                      {

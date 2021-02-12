@@ -166,7 +166,7 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
    HYPRE_Complex       *bitptr;          /* pointer to bit mask data */
    hypre_Index          offset;          /* CommStencil offset */
    hypre_IndexRef       shift, offsetref;
-   HYPRE_Int            d, i, j, m, t, e, b, ci, fi, Mi, Mj, Mb, id, entry, Mentry;
+   HYPRE_Int            d, i, j, m, t, e, b, Mj, Mb, id, entry, Mentry;
 
    hypre_Index          Mstart;      /* M's stencil location on the base index space */
    hypre_Box           *loop_box;    /* boxloop extents on the base index space */
@@ -665,10 +665,6 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
 
             hypre_BoxLoop1Begin(ndim, loop_size,
                                 fdbox, fdstart, fdstride, fi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,fi) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop1For(fi)
             {
                bitptr[fi] = ((HYPRE_Int) bitptr[fi]) | bitval;
             }
@@ -868,10 +864,6 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
                           Mdbox, Mdstart, Mdstride, Mi,
                           fdbox, fdstart, fdstride, fi,
                           cdbox, cdstart, cdstride, ci);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Mi,fi,ci,prod,pprod,t,i) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop3For(Mi,fi,ci)
       {
          for (i = 0; i < na; i++)
          {

@@ -332,9 +332,6 @@ hypre_PointRelax( void               *relax_vdata,
    void                  *matvec_data = NULL;
 
    HYPRE_Int              Ai;
-   HYPRE_Int              bi;
-   HYPRE_Int              xi;
-   HYPRE_Int              ti;
 
    hypre_IndexRef         stride;
    hypre_IndexRef         start;

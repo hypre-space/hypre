@@ -715,6 +715,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixMatvec_FF
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
                              hypre_ParCSRMatrix *A,
@@ -842,3 +843,48 @@ hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
    return ierr;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixMatvecDiagScale
+ *
+ * y = alpha*inv(A_D)*x + beta*y
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixMatvecDiagScale( HYPRE_Complex       alpha,
+                                   hypre_ParCSRMatrix *A,
+                                   hypre_ParVector    *x,
+                                   HYPRE_Complex       beta,
+                                   hypre_ParVector    *y )
+{
+   hypre_CSRMatrix   *diag     = hypre_ParCSRMatrixDiag(A);
+   hypre_Vector      *x_local  = hypre_ParVectorLocalVector(x);
+   hypre_Vector      *y_local  = hypre_ParVectorLocalVector(y);
+
+   HYPRE_Int          num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_Int          num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
+   HYPRE_Int          x_size   = hypre_ParVectorGlobalSize(x);
+   HYPRE_Int          y_size   = hypre_ParVectorGlobalSize(y);
+
+   /* Safety checks */
+   if (num_rows != y_size)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "A and y do not match");
+      return hypre_error_flag;
+   }
+
+   if (num_cols != x_size)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "A and x do not match");
+      return hypre_error_flag;
+   }
+
+   if (num_rows != num_cols)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "A is not square");
+      return hypre_error_flag;
+   }
+
+   hypre_CSRMatrixMatvecDiagScale(alpha, diag, x_local, beta, y_local);
+
+   return hypre_error_flag;
+}

@@ -2354,9 +2354,7 @@ hypre_SStructGridPrintGLVis( hypre_SStructGrid *grid,
          box = hypre_BoxArrayBox(boxes, i);
 
          hypre_BoxGetSize(box, loop_size);
-         hypre_BoxLoop0Begin(ndim, loop_size);
-         hypre_BoxLoopSetOneBlock();
-         hypre_BoxLoop0For()
+         hypre_SerialBoxLoop0Begin(ndim, loop_size);
          {
             hypre_fprintf(file, "1 %d ", element_id);
             for (v = 0; v < cellNV; v++, vertex++)
@@ -2365,7 +2363,7 @@ hypre_SStructGridPrintGLVis( hypre_SStructGrid *grid,
             }
             hypre_fprintf(file, "\n");
          }
-         hypre_BoxLoop0End()
+         hypre_SerialBoxLoop0End()
       }
    }
 
@@ -2388,9 +2386,7 @@ hypre_SStructGridPrintGLVis( hypre_SStructGrid *grid,
          box = hypre_BoxArrayBox(boxes, i);
 
          hypre_BoxGetSize(box, loop_size);
-         hypre_BoxLoop0Begin(ndim, loop_size);
-         hypre_BoxLoopSetOneBlock();
-         hypre_BoxLoop0For()
+         hypre_SerialBoxLoop0Begin(ndim, loop_size);
          {
             hypre_BoxLoopGetIndex(index);
             hypre_AddIndexes(index, hypre_BoxIMin(box), ndim, index);
@@ -2409,7 +2405,7 @@ hypre_SStructGridPrintGLVis( hypre_SStructGrid *grid,
                hypre_fprintf(file, "\n");
             }
          }
-         hypre_BoxLoop0End()
+         hypre_SerialBoxLoop0End()
       }
       hypre_fprintf(file, "\n");
 

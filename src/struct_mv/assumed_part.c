@@ -1275,7 +1275,7 @@ hypre_StructAssumedPartitionCreate(
       for (j = 0; j < proc_count; j++)
       {
          tmp_proc_ids[count] = proc_array[j];
-         tmp_box_nums[count] = local_boxnums[i];
+         tmp_box_nums[count] = i;
          tmp_box_inds[count] = i;
          count++;
       }
@@ -1307,7 +1307,6 @@ hypre_StructAssumedPartitionCreate(
    {
       proc_array[0] = tmp_proc_ids[0];
 
-      contact_boxinfo[index++] = tmp_box_nums[0];
       box = hypre_BoxArrayBox(local_boxes, tmp_box_inds[0]);
       for (d = 0; d < ndim; d++)
       {
@@ -1328,7 +1327,6 @@ hypre_StructAssumedPartitionCreate(
 
       /* These boxes are not copied in a particular order */
 
-      contact_boxinfo[index++] = tmp_box_nums[i];
       box = hypre_BoxArrayBox(local_boxes, tmp_box_inds[i]);
       for (d = 0; d < ndim; d++)
       {
@@ -1352,8 +1350,6 @@ hypre_StructAssumedPartitionCreate(
    hypre_StructAssumedPartMyPartitionIdsSize(assumed_part) = 0;
    hypre_StructAssumedPartMyPartitionIdsAlloc(assumed_part) = box_count;
    hypre_StructAssumedPartMyPartitionProcIds(assumed_part)
-      = hypre_CTAlloc(HYPRE_Int,  box_count, HYPRE_MEMORY_HOST);
-   hypre_StructAssumedPartMyPartitionBoxnums(assumed_part)
       = hypre_CTAlloc(HYPRE_Int,  box_count, HYPRE_MEMORY_HOST);
    hypre_StructAssumedPartMyPartitionNumDistinctProcs(assumed_part) = 0;
 

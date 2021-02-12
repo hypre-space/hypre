@@ -869,8 +869,6 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
    hypre_Box               *x_data_box;
    hypre_Box               *t_data_box;
 
-   HYPRE_Int                Ai, bi, xi, ti;
-
    hypre_IndexRef           stride;
    hypre_IndexRef           start;
    hypre_Index              loop_size;
@@ -985,10 +983,6 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
                                                   A_data_box, start, stride, Ai,
                                                   x_data_box, start, stride, xi,
                                                   b_data_box, start, stride, bi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,bi) HYPRE_SMP_SCHEDULE
-#endif
-                              hypre_BoxLoop3For(Ai, xi, bi)
                               {
                                  xp[xi] = weights[part] * bp[bi] / Ap[Ai];
                               }
@@ -1000,10 +994,6 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
                                                   A_data_box, start, stride, Ai,
                                                   x_data_box, start, stride, xi,
                                                   b_data_box, start, stride, bi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,bi) HYPRE_SMP_SCHEDULE
-#endif
-                              hypre_BoxLoop3For(Ai, xi, bi)
                               {
                                  xp[xi] = bp[bi] / Ap[Ai];
                               }
@@ -1104,10 +1094,6 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
                            hypre_BoxLoop2Begin(ndim, loop_size,
                                                b_data_box, start, stride, bi,
                                                t_data_box, start, stride, ti);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,bi,ti) HYPRE_SMP_SCHEDULE
-#endif
-                           hypre_BoxLoop2For(bi, ti)
                            {
                               tp[ti] = bp[bi];
                            }
@@ -1137,10 +1123,6 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
                                                            A_data_box, start, stride, Ai,
                                                            x_data_box, start, stride, xi,
                                                            t_data_box, start, stride, ti);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
-#endif
-                                       hypre_BoxLoop3For(Ai, xi, ti)
                                        {
                                           tp[ti] -= Ap[Ai] * xp[xi];
                                        }
@@ -1205,10 +1187,6 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
                                          A_data_box, start, stride, Ai,
                                          x_data_box, start, stride, xi,
                                          t_data_box, start, stride, ti);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
-#endif
-                     hypre_BoxLoop3For(Ai, xi, ti)
                      {
                         xp[xi] = (1.0 - weights[part]) * xp[xi] +
                                   weights[part] * tp[ti] / Ap[Ai];
@@ -1221,10 +1199,6 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
                                          A_data_box, start, stride, Ai,
                                          x_data_box, start, stride, xi,
                                          t_data_box, start, stride, ti);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
-#endif
-                     hypre_BoxLoop3For(Ai, xi, ti)
                      {
                         xp[xi] = tp[ti] / Ap[Ai];
                      }

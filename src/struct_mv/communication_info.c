@@ -52,7 +52,7 @@ hypre_CommStencilSetEntry( hypre_CommStencil  *comm_stencil,
    hypre_IndexRef         imin = hypre_BoxIMin(box);
    hypre_IndexRef         imax = hypre_BoxIMax(box);
    hypre_Index            loop_size;
-   HYPRE_Int              d, m, ii;
+   HYPRE_Int              d, m;
 
    hypre_BoxInit(box, ndim);
 
@@ -77,14 +77,12 @@ hypre_CommStencilSetEntry( hypre_CommStencil  *comm_stencil,
 
    /* update comm-stencil data */
    hypre_BoxGetSize(box, loop_size);
-   hypre_BoxLoop1Begin(ndim, loop_size,
-                       csbox, imin, stride, ii);
-   hypre_BoxLoopSetOneBlock();
-   hypre_BoxLoop1For(ii)
+   hypre_SerialBoxLoop1Begin(ndim, loop_size,
+                             csbox, imin, stride, ii);
    {
       csdata[ii] = 1;
    }
-   hypre_BoxLoop1End(ii);
+   hypre_SerialBoxLoop1End(ii);
 
    return hypre_error_flag;
 }

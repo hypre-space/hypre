@@ -26,7 +26,6 @@ HEADERS =\
  sparse_msg.h
 
 FILES =\
- coarsen.c\
  F90_HYPRE_struct_bicgstab.c\
  F90_HYPRE_struct_cycred.c\
  F90_HYPRE_struct_flexgmres.c\

@@ -925,7 +925,7 @@ hypre_SStructVectorPrintGLVis( hypre_SStructVector  *vector,
 //                                         {0, 0, 1}, {1, 0, 1},
 //                                         {1, 1, 1}, {0, 1, 1}};
    HYPRE_Int               myid;
-   HYPRE_Int               i, ndim, datai;
+   HYPRE_Int               i, ndim;
    HYPRE_Int               part, nparts;
    HYPRE_Int               var, nvars;
    HYPRE_Int               dbox_volume;
@@ -1024,7 +1024,6 @@ hypre_SStructVectorPrintGLVis( hypre_SStructVector  *vector,
             {
                case HYPRE_SSTRUCT_VARIABLE_CELL:
                   hypre_BoxLoop1Begin(ndim, loop_size, dbox, start, stride, datai);
-                  hypre_BoxLoop1For(datai)
                   {
                      hypre_fprintf(file[vartype], "%.14e\n", data[datai]);
                   }

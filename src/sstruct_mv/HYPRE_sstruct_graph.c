@@ -121,7 +121,7 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
    hypre_SStructUVEntry  **Uventries;
    hypre_SStructUVEntry   *Uventry;
    HYPRE_BigInt          **Uveoffsets;
-   HYPRE_Int               nvars;
+   hypre_Box            ***Uvboxes;
    HYPRE_Int               part, var, i;
 
    if (graph)

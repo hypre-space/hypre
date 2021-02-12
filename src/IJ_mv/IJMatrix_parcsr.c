@@ -2637,9 +2637,9 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
          num_rownnz = hypre_AuxParCSRMatrixLocalNumRownnz(aux_matrix);
          rownnz     = hypre_AuxParCSRMatrixRownnz(aux_matrix);
 
-         diag_array = hypre_CTAlloc(HYPRE_Int, max_num_threads);
-         offd_array = hypre_CTAlloc(HYPRE_Int, max_num_threads);
-         diag_pos   = hypre_TAlloc(HYPRE_Int, num_rownnz);
+         diag_array = hypre_CTAlloc(HYPRE_Int, max_num_threads, HYPRE_MEMORY_HOST);
+         offd_array = hypre_CTAlloc(HYPRE_Int, max_num_threads, HYPRE_MEMORY_HOST);
+         diag_pos   = hypre_TAlloc(HYPRE_Int, num_rownnz, HYPRE_MEMORY_HOST);
          memset(diag_pos, -1, num_rownnz*sizeof(HYPRE_Int));
 
          i_diag = i_offd = 0;

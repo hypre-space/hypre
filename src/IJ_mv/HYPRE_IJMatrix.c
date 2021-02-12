@@ -1225,7 +1225,7 @@ HYPRE_IJMatrixTranspose( HYPRE_IJMatrix  matrix_A,
    }
 
    hypre_MPI_Comm_size(hypre_IJMatrixComm(ij_A), &num_procs);
-   ij_AT = hypre_CTAlloc(hypre_IJMatrix, 1);
+   ij_AT = hypre_CTAlloc(hypre_IJMatrix, 1, HYPRE_MEMORY_HOST);
 
    hypre_IJMatrixComm(ij_AT)         = hypre_IJMatrixComm(ij_A);
    hypre_IJMatrixObject(ij_AT)       = NULL;
@@ -1240,7 +1240,7 @@ HYPRE_IJMatrixTranspose( HYPRE_IJMatrix  matrix_A,
 #else
    size = num_procs + 1;
 #endif
-   row_partitioning = hypre_CTAlloc(HYPRE_Int, size);
+   row_partitioning = hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
    for (i = 0; i < size; i++)
    {
       row_partitioning[i] = hypre_IJMatrixColPartitioning(ij_A)[i];
@@ -1249,7 +1249,7 @@ HYPRE_IJMatrixTranspose( HYPRE_IJMatrix  matrix_A,
    if (hypre_IJMatrixRowPartitioning(ij_A) !=
        hypre_IJMatrixColPartitioning(ij_A))
    {
-      col_partitioning = hypre_CTAlloc(HYPRE_Int, size);
+      col_partitioning = hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
       for (i = 0; i < size; i++)
       {
          col_partitioning[i] = hypre_IJMatrixRowPartitioning(ij_A)[i];
@@ -1338,7 +1338,7 @@ HYPRE_IJMatrixAdd( HYPRE_Complex    alpha,
    }
 
    hypre_MPI_Comm_size(hypre_IJMatrixComm(ij_A), &num_procs);
-   ij_C = hypre_CTAlloc(hypre_IJMatrix, 1);
+   ij_C = hypre_CTAlloc(hypre_IJMatrix, 1, HYPRE_MEMORY_HOST);
 
    hypre_IJMatrixComm(ij_C)         = hypre_IJMatrixComm(ij_A);
    hypre_IJMatrixObject(ij_C)       = NULL;
@@ -1368,7 +1368,7 @@ HYPRE_IJMatrixAdd( HYPRE_Complex    alpha,
    }
 
    /* Copy row partitioning of A to C */
-   row_partitioning_C = hypre_CTAlloc(HYPRE_Int, size);
+   row_partitioning_C = hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
    for (i = 0; i < size; i++)
    {
       row_partitioning_C[i] = partitioning_A[i];
@@ -1392,7 +1392,7 @@ HYPRE_IJMatrixAdd( HYPRE_Complex    alpha,
       }
 
       /* Copy col partitioning of A to C */
-      col_partitioning_C = hypre_CTAlloc(HYPRE_Int, size);
+      col_partitioning_C = hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
       for (i = 0; i < size; i++)
       {
          col_partitioning_C[i] = partitioning_A[i];

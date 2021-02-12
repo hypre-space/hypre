@@ -1474,31 +1474,11 @@ HYPRE_SStructSetupInterpreter(mv_InterfaceInterpreter *i);
 HYPRE_Int
 HYPRE_SStructSetupMatvec(HYPRE_MatvecFunctions *mv);
 
-/* The next routines should not be here (lower-case prefix). (RDF) */
-
-/*
- * Set hypre_SStructPVector to random values.
- **/
-HYPRE_Int
-hypre_SStructPVectorSetRandomValues(hypre_SStructPVector *pvector, HYPRE_Int seed);
-
-/*
- * Set hypre_SStructVector to random values.
- **/
-HYPRE_Int
-hypre_SStructVectorSetRandomValues(hypre_SStructVector *vector, HYPRE_Int seed);
-
-/*
- * Same as hypre_SStructVectorSetRandomValues except uses void pointer.
- **/
-HYPRE_Int
-hypre_SStructSetRandomValues(void *v, HYPRE_Int seed);
-
 /**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
-/*@}*/
+/**@}*/
 
 #ifdef __cplusplus
 }

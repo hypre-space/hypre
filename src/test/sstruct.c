@@ -16,6 +16,8 @@
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE_struct_ls.h"
 #include "HYPRE_krylov.h"
+#include "_hypre_sstruct_mv.h"
+//#include "_hypre_struct_mv.hpp"
 
 /* begin lobpcg */
 
@@ -2432,7 +2434,6 @@ main( hypre_int argc,
    HYPRE_Int	         aug_dim;
 
    /* Misc */
-   HYPRE_Int             ierr;
    HYPRE_Int             vis;
    HYPRE_Int             seed;
    HYPRE_Int             reps;
@@ -2445,17 +2446,19 @@ main( hypre_int argc,
    HYPRE_Int             arg_index, part, var, box, s, entry, i, j, k, size;
    HYPRE_Int             row, col;
    HYPRE_Int             gradient_matrix;
-   HYPRE_Int             old_default;
 
    /* begin lobpcg */
 
    HYPRE_SStructSolver      lobpcg_solver;
 
    HYPRE_Int                lobpcgFlag = 0;
+   HYPRE_Int                lobpcgSeed = 0;
    HYPRE_Int                blockSize = 1;
    HYPRE_Int                verbosity = 1;
    HYPRE_Int                iterations;
+   HYPRE_Int                maxIterations = 100;
    HYPRE_Int                checkOrtho = 0;
+   HYPRE_Int                printLevel = 0;
    HYPRE_Int                pcgIterations = 0;
    HYPRE_Int                pcgMode = 0;
    HYPRE_Int                old_default = 0;
@@ -6979,8 +6982,6 @@ main( hypre_int argc,
    hypre_TFree(refine, HYPRE_MEMORY_HOST);
    hypre_TFree(distribute, HYPRE_MEMORY_HOST);
    hypre_TFree(block, HYPRE_MEMORY_HOST);
-
-   hypre_FinalizeMemoryDebug();
 
    /* Finalize MPI */
    hypre_MPI_Finalize();

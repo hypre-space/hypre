@@ -33,7 +33,7 @@ hypre_StructDataCopy( HYPRE_Complex   *fr_data,        /* from */
    HYPRE_Int       fr_data_off,  to_data_off;
    HYPRE_Int       fr_data_vol,  to_data_vol;
    HYPRE_Complex  *fr_dp, *to_dp;
-   HYPRE_Int       fb, tb, fi, ti, val;
+   HYPRE_Int       fb, tb, val;
    hypre_Box      *int_box;
    hypre_IndexRef  start;
    hypre_Index     stride, loop_size;
@@ -74,10 +74,6 @@ hypre_StructDataCopy( HYPRE_Complex   *fr_data,        /* from */
             hypre_BoxLoop2Begin(ndim, loop_size,
                                 fr_data_box, start, stride, fi,
                                 to_data_box, start, stride, ti);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,fi,ti) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop2For(fi, ti)
             {
                to_dp[ti] = fr_dp[fi];
             }
@@ -107,7 +103,7 @@ hypre_StructNumGhostFromStencil( hypre_StructStencil  *stencil,
    hypre_IndexRef  stencil_offset;
    HYPRE_Int       s, d, m;
 
-   num_ghost = hypre_CTAlloc(HYPRE_Int, 2*ndim);
+   num_ghost = hypre_CTAlloc(HYPRE_Int, 2*ndim, HYPRE_MEMORY_HOST);
 
    for (s = 0; s < hypre_StructStencilSize(stencil); s++)
    {

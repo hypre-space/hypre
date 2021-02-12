@@ -602,10 +602,6 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       {
          hypre_BoxLoop1Begin(ndim, loop_size,
                              A_dbox, start, stride, Ai);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,si,Ap,diag,Astenc,tcx,tcy,tcz) reduction(+:cx,cy,cz,sqcx,sqcy,sqcz) HYPRE_SMP_SCHEDULE
-#endif
-         hypre_BoxLoop1For(Ai)
          {
             tcx = 0.0;
             tcy = 0.0;
@@ -756,7 +752,6 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
 
    HYPRE_Real            *Ap;
    hypre_Box             *A_dbox;
-   HYPRE_Int              Ai;
 
    HYPRE_Int              i, si;
 
@@ -790,10 +785,6 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
       {
          hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
                              A_dbox, start, stride, Ai);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai) reduction(*:diag_product) HYPRE_SMP_SCHEDULE
-#endif
-         hypre_BoxLoop1For(Ai)
          {
             diag_product *= Ap[Ai];
          }
