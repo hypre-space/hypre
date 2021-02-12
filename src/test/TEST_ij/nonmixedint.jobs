@@ -11,6 +11,6 @@
 # 2: solvers.out.7
 #=============================================================================
 
-mpirun -np 8 ./ij -P 2 2 2 -cgc -interptype 0 -Pmx 0 > coarsening.out.10
-mpirun -np 2 ./ij -solver 7 -rhsrand > solvers.out.6
-mpirun -np 2 ./ij -solver 8 -rhsrand > solvers.out.7
+mpirun -np 8 ./ij -P 2 2 2 -cgc -interptype 0 -Pmx 0 > nonmixedint.out.0
+mpirun -np 2 ./ij -solver 7 -rhsrand > nonmixedint.out.1
+mpirun -np 2 ./ij -solver 8 -rhsrand > nonmixedint.out.2
