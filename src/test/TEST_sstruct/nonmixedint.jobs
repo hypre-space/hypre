@@ -1,0 +1,22 @@
+#!/bin/sh
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+#=============================================================================
+# sstruct: cases that cannot run with mixed-int
+# 0: solvers.out.5
+# 1: solvers.out.6
+# 2: solvers.out.12
+# 3: solvers.out.13
+# 4: 
+#=============================================================================
+
+mpirun -np 2  ./sstruct -P 1 1 2 -solver 21 > solvers.out.5
+mpirun -np 2  ./sstruct -P 1 1 2 -solver 22 > solvers.out.6
+mpirun -np 2  ./sstruct -P 1 1 2 -solver 41 > solvers.out.12
+mpirun -np 2  ./sstruct -P 1 1 2 -solver 42 > solvers.out.13
+mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 22 > emptyProc.out.06
+mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 42 > emptyProc.out.14
+mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 62 > emptyProc.out.20
