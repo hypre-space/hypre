@@ -18,15 +18,11 @@ FILES="\
  ${TNAME}.out.2\
  ${TNAME}.out.3\
  ${TNAME}.out.4\
- ${TNAME}.out.5\
- ${TNAME}.out.6\
  ${TNAME}.out.7\
  ${TNAME}.out.8\
  ${TNAME}.out.9\
  ${TNAME}.out.10\
  ${TNAME}.out.11\
- ${TNAME}.out.12\
- ${TNAME}.out.13\
  ${TNAME}.out.14\
  ${TNAME}.out.15\
  ${TNAME}.out.16\
@@ -35,6 +31,10 @@ FILES="\
  ${TNAME}.out.19\
  ${TNAME}.out.20\
 "
+# ${TNAME}.out.5\
+# ${TNAME}.out.6\
+# ${TNAME}.out.12\
+# ${TNAME}.out.13\
 
 for i in $FILES
 do
