@@ -27,10 +27,10 @@ done > ${TNAME}.out.a
 FILES="\
  ${TNAME}.out.1.lobpcg\
  ${TNAME}.out.2.lobpcg\
- ${TNAME}.out.8.lobpcg\
  ${TNAME}.out.12.lobpcg\
- ${TNAME}.out.43.lobpcg\
 "
+#${TNAME}.out.8.lobpcg\
+#${TNAME}.out.43.lobpcg\
 
 for i in $FILES
 do
