@@ -89,12 +89,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
    HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
 
-#if DEBUG
-   hypre_StructVector   *ones  = NULL;
-   hypre_StructVector   *Pones = NULL;
-   char                  filename[255];
-#endif
-
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /*-----------------------------------------------------
@@ -109,17 +103,17 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    hypre_PFMGComputeMaxLevels(grid, &max_levels);
    if ((pfmg_data -> max_levels) > 0)
    {
-      (pfmg_data -> max_levels) = hypre_min((pfmg_data -> max_levels), max_levels);
-      max_levels = hypre_min((pfmg_data -> max_levels), max_levels);
+      max_levels = hypre_min(max_levels, (pfmg_data -> max_levels));
    }
+   (pfmg_data -> max_levels) = max_levels;
 
    /* compute dxyz */
    hypre_PFMGComputeDxyz(A, dxyz, &dxyz_flag);
 
    /* Run coarsening */
    cbox = hypre_BoxClone(hypre_StructGridBoundingBox(grid));
-   hypre_PFMGCoarsen(cbox, periodic, max_levels, dxyz_flag, dxyz, &cdir_l,
-                     &active_l, &relax_weights, &num_levels);
+   hypre_PFMGCoarsen(cbox, periodic, max_levels, dxyz_flag, dxyz,
+                     &cdir_l, &active_l, &relax_weights, &num_levels);
    cmaxsize = hypre_BoxMaxSize(cbox);
    hypre_BoxDestroy(cbox);
 
@@ -140,9 +134,8 @@ hypre_PFMGSetup( void               *pfmg_vdata,
     *-----------------------------------------------------*/
 
    /*-----------------------------------------------------
-    * Modify the rap_type if red-black Gauss-Seidel is
-    * used. Red-black gs is used only in the non-Galerkin
-    * case.
+    * Modify the rap_type if red-black Gauss-Seidel is used.
+    * Red-black gs is used only in the non-Galerkin case.
     *-----------------------------------------------------*/
    if (relax_type == 2 || relax_type == 3)   /* red-black gs */
    {
@@ -284,36 +277,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       restrict_data_l[l] = hypre_StructMatvecCreate();
       hypre_StructMatvecSetTranspose(restrict_data_l[l], 1);
       hypre_StructMatvecSetup(restrict_data_l[l], RT_l[l], r_l[l]);
-
-#if DEBUG
-      // Check if P interpolates vector of ones
-      if (ones != NULL)
-      {
-         HYPRE_StructVectorDestroy(ones);
-      }
-      HYPRE_StructVectorCreate(comm, grid_l[l+1], &ones);
-      HYPRE_StructVectorInitialize(ones);
-      HYPRE_StructVectorSetConstantValues(ones, 1.0);
-      HYPRE_StructVectorAssemble(ones);
-
-      hypre_sprintf(filename, "pfmg_ones.%02d", l);
-      HYPRE_StructVectorPrint(filename, ones, 0);
-
-      if (Pones != NULL)
-      {
-         HYPRE_StructVectorDestroy(Pones);
-      }
-      HYPRE_StructVectorCreate(comm, grid_l[l], &Pones);
-      HYPRE_StructVectorInitialize(Pones);
-      HYPRE_StructVectorAssemble(Pones);
-
-      /* interpolate error and correct (x = Pe_c) */
-      hypre_StructMatvecCompute(interp_data_l[l], 1.0, P_l[l], ones, 0.0, Pones);
-
-      hypre_sprintf(filename, "pfmg_Pones.%02d", l);
-      HYPRE_StructVectorPrint(filename, Pones, 0);
-#endif
-
    }
 
    /*-----------------------------------------------------
@@ -322,11 +285,10 @@ hypre_PFMGSetup( void               *pfmg_vdata,
     * Note that a processor with zero diagonal will set
     * active_l =0, other processors will not. This is OK
     * as we only want to avoid the division by zero on the
-    * one processor which owns the single coarse grid
-    * point.
+    * one processor which owns the single coarse grid point.
     *-----------------------------------------------------*/
 
-   if ( hypre_ZeroDiagonal(A_l[l]))
+   if (hypre_ZeroDiagonal(A_l[l]))
    {
       active_l[l] = 0;
    }
@@ -421,15 +383,42 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    }
 
 #if DEBUG
-   for (l = 0; l < (num_levels - 1); l++)
    {
+      hypre_StructVector   *ones  = NULL;
+      hypre_StructVector   *Pones = NULL;
+      char                  filename[255];
+
+      for (l = 0; l < (num_levels - 1); l++)
+      {
+         hypre_sprintf(filename, "pfmg_A.%02d", l);
+         hypre_StructMatrixPrint(filename, A_l[l], 0);
+         hypre_sprintf(filename, "pfmg_P.%02d", l);
+         hypre_StructMatrixPrint(filename, P_l[l], 0);
+
+         // Check if P interpolates vector of ones
+         HYPRE_StructVectorCreate(comm, hypre_StructMatrixGrid(A_l[l+1]), &ones);
+         HYPRE_StructVectorInitialize(ones);
+         HYPRE_StructVectorSetConstantValues(ones, 1.0);
+         HYPRE_StructVectorAssemble(ones);
+
+         HYPRE_StructVectorCreate(comm, hypre_StructMatrixGrid(A_l[l]), &Pones);
+         HYPRE_StructVectorInitialize(Pones);
+         HYPRE_StructVectorAssemble(Pones);
+
+         /* interpolate (x = P e_c) */
+         hypre_StructMatvec(1.0, P_l[l], ones, 0.0, Pones);
+
+         hypre_sprintf(filename, "pfmg_ones.%02d", l);
+         HYPRE_StructVectorPrint(filename, ones, 0);
+         hypre_sprintf(filename, "pfmg_Pones.%02d", l);
+         HYPRE_StructVectorPrint(filename, Pones, 0);
+
+         HYPRE_StructVectorDestroy(ones);
+         HYPRE_StructVectorDestroy(Pones);
+      }
       hypre_sprintf(filename, "pfmg_A.%02d", l);
       hypre_StructMatrixPrint(filename, A_l[l], 0);
-      hypre_sprintf(filename, "pfmg_P.%02d", l);
-      hypre_StructMatrixPrint(filename, P_l[l], 0);
    }
-   hypre_sprintf(filename, "pfmg_A.%02d", l);
-   hypre_StructMatrixPrint(filename, A_l[l], 0);
 #endif
 
    HYPRE_ANNOTATE_FUNC_END;
@@ -442,19 +431,19 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
 HYPRE_Int
 hypre_PFMGComputeMaxLevels( hypre_StructGrid   *grid,
-                            HYPRE_Int          *max_levels )
+                            HYPRE_Int          *max_levels_ptr )
 {
-   hypre_Box       *bbox;
-   HYPRE_Int        d, ndim;
+   HYPRE_Int        ndim = hypre_StructGridNDim(grid);
+   hypre_Box       *bbox = hypre_StructGridBoundingBox(grid);
+   HYPRE_Int        max_levels, d;
 
-   ndim = hypre_StructGridNDim(grid);
-   bbox = hypre_StructGridBoundingBox(grid);
-
-   *max_levels = 0;
+   max_levels = 1;
    for (d = 0; d < ndim; d++)
    {
-      *max_levels += hypre_Log2(hypre_BoxSizeD(bbox, d)) + 2;
+      max_levels += hypre_Log2(hypre_BoxSizeD(bbox, d)) + 2;
    }
+
+   *max_levels_ptr = max_levels;
 
    return hypre_error_flag;
 }
@@ -504,6 +493,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    /*----------------------------------------------------------
     * Exit if user gives dxyz different than zero
     *----------------------------------------------------------*/
+
    if ((dxyz[0] != 0) && (dxyz[1] != 0) && (dxyz[2] != 0))
    {
       *dxyz_flag = 0;
@@ -922,9 +912,6 @@ hypre_PFMGCoarsen( hypre_Box     *cbox,
       /* update periodic */
       periodic[cdir] /= 2;
 
-      /* build the coarse grid */
-      /* RDF: RAP is already coarsening the grid; we shouldn't be doing this twice! */
-      //hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
    }
    *num_levels = l + 1;
 

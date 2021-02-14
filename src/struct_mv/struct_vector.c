@@ -381,6 +381,10 @@ hypre_StructVectorResize( hypre_StructVector *vector,
       data_indices[i] = data_size;
       data_size += hypre_BoxVolume(data_box);
    }
+   /* The following ensures a non-null data pointer after Initialize(), even if
+    * the data_space has size zero.  This enables a reindex and resize between a
+    * data_space of size zero and one that is not. */
+   data_size++;
 
    /* Copy or move old_data to data */
    data = NULL;
@@ -395,10 +399,7 @@ hypre_StructVectorResize( hypre_StructVector *vector,
          old_ids = hypre_StructGridIDs(hypre_StructVectorSaveGrid(vector));
       }
 
-     /* The following (data_size+1) ensures a non-null data pointer after
-      * Initialize(), even if data_space has size zero. This enables a reindex
-      * and resize between a data_space of size zero and one that is not. */
-      data = hypre_CTAlloc(HYPRE_Complex, data_size+1, HYPRE_MEMORY_HOST);
+      data = hypre_CTAlloc(HYPRE_Complex, data_size, HYPRE_MEMORY_HOST);
 
       /* Copy the data */
       hypre_StructDataCopy(old_data, old_data_space, old_ids, data, data_space, ids, ndim, 1);
@@ -458,7 +459,7 @@ hypre_StructVectorRestore( hypre_StructVector *vector )
       /* Move the data */
       if (hypre_StructVectorDataAlloced(vector))
       {
-         data = hypre_CTAlloc(HYPRE_Complex, data_size+1, HYPRE_MEMORY_HOST);
+         data = hypre_CTAlloc(HYPRE_Complex, data_size, HYPRE_MEMORY_HOST);
       }
       hypre_StructDataCopy(old_data, old_data_space, old_ids, data, data_space, ids, ndim, 1);
       hypre_TFree(old_data, HYPRE_MEMORY_HOST);
