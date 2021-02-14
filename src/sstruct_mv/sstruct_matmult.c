@@ -97,7 +97,7 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
 
       /* Multiply StructMatrices (part, vi, vj)-block */
       hypre_StructMatmult(nmatrices, smatrices, nterms, terms,
-                          transposes, NULL, &smatrices_M[part]);
+                          transposes, &smatrices_M[part]);
 
       /* Create SStructStencil object for M */
       stencil_M       = hypre_StructMatrixStencil(smatrices_M[part]);

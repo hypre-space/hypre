@@ -222,8 +222,8 @@ main( hypre_int argc,
    cony = 0.0;
    conz = 0.0;
 
-   rhs_type  = 0;
-   rhs_value = 0.0;
+   rhs_type  = 1;
+   rhs_value = 1.0;
    x0_type   = 1;
    x0_value  = 0.0;
 
@@ -233,8 +233,8 @@ main( hypre_int argc,
    solver_id = 1;
    solver_type = 1;
    max_iterations = 100;
-   print_level = 1;
-   krylov_print_level = 1;
+   print_level = 0;
+   krylov_print_level = 0;
    recompute_res = 0;   /* What should be the default here? */
 
    istart[0] = -3;
@@ -768,22 +768,22 @@ main( hypre_int argc,
       hypre_printf("  relax            = %d\n", relax);
       hypre_printf("  jump             = %d\n", jump);
       hypre_printf("  solver ID        = %d\n", solver_id);
-      if (rhs_type == 0)
-      {
-         hypre_printf("  rhs value        = %20.15e\n", rhs_value);
-      }
-      else
-      {
-         hypre_printf("  rhs has random components\n");
-      }
-      if (x0_type == 0)
-      {
-         hypre_printf("  initial sol (x0) = %20.15e\n", x0_value);
-      }
-      else
-      {
-         hypre_printf("  initial sol (x0) has random components\n");
-      }
+//      if (rhs_type == 0)
+//      {
+//         hypre_printf("  rhs value        = %20.15e\n", rhs_value);
+//      }
+//      else
+//      {
+//         hypre_printf("  rhs has random components\n");
+//      }
+//      if (x0_type == 0)
+//      {
+//         hypre_printf("  initial sol (x0) = %20.15e\n", x0_value);
+//      }
+//      else
+//      {
+//         hypre_printf("  initial sol (x0) has random components\n");
+//      }
       hypre_printf("\n");
    }
 
@@ -1187,6 +1187,7 @@ main( hypre_int argc,
           * compatibility condition. Achieved by setting a source and
           *  sink of equal strength.  All other problems have rhs = 1.
           *-----------------------------------------------------------*/
+
          AddValuesVector(grid, b, periodic, rhs_type, rhs_value);
          HYPRE_StructVectorAssemble(b);
 
@@ -2955,10 +2956,11 @@ main( hypre_int argc,
       {
          hypre_printf("\n");
          hypre_printf("Iterations = %d\n", num_iterations);
-         hypre_printf("RHS Norm = %20.15e\n", rhs_norm);
-         hypre_printf("Initial LHS (x0) Norm = %20.15e\n", x0_norm);
-         hypre_printf("Real Relative Residual Norm  = %20.15e\n", real_res_norm);
-         hypre_printf("Final Relative Residual Norm = %20.15e\n", final_res_norm);
+//         hypre_printf("RHS Norm = %20.15e\n", rhs_norm);
+//         hypre_printf("Initial LHS (x0) Norm = %20.15e\n", x0_norm);
+//         hypre_printf("Real Relative Residual Norm  = %20.15e\n", real_res_norm);
+//         hypre_printf("Final Relative Residual Norm = %20.15e\n", final_res_norm);
+         hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
          hypre_printf("\n");
       }
 
@@ -3095,7 +3097,7 @@ AddValuesVector( hypre_StructGrid   *grid,
       }
       else
       {
-         if (type == 0)
+         if (type > 0)
          {
             /* Use value */
             hypre_LoopBegin(volume,i)

@@ -468,7 +468,7 @@ HYPRE_StructMatrixMatmat( HYPRE_StructMatrix  A,
       nmatrices = 1;
       terms[1] = 0;
    }
-   hypre_StructMatmult(nmatrices, matrices, nterms, terms, transposes, NULL, C);
+   hypre_StructMatmult(nmatrices, matrices, nterms, terms, transposes, C);
 
    return hypre_error_flag;
 }

@@ -135,8 +135,7 @@ hypre_SSAMGComputeRAPNonGlk( hypre_SStructMatrix  *A,
             /* Use generic StructMatmult */
             hypre_StructMatrix *smatrices[3] = {sA, sP, sP};
 
-            hypre_StructMatmult(3, smatrices, 3, terms, trans, NULL,
-                                &sAc[part][vi][vi]);
+            hypre_StructMatmult(3, smatrices, 3, terms, trans, &sAc[part][vi][vi]);
          }
 
          /* Create SStructStencil object for M */

@@ -107,7 +107,6 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
                      HYPRE_Int            nterms,
                      HYPRE_Int           *terms_input,
                      HYPRE_Int           *transposes,
-                     hypre_StructGrid    *Mgrid_in,
                      hypre_StructMatrix **M_ptr )
 {
    MPI_Comm             comm;
@@ -290,15 +289,8 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
    hypre_CopyToIndex(dom_stride, ndim, Mdom_stride);
    if (coarsen)
    {
-      if (Mgrid_in)
-      {
-         hypre_StructGridRef(Mgrid_in, &Mgrid);
-      }
-      else
-      {
-         /* Note: Mgrid may have fewer boxes than grid as a result of coarsening */
-         HYPRE_StructGridCoarsen(grid, coarsen_stride, &Mgrid);
-      }
+      /* Note: Mgrid may have fewer boxes than grid as a result of coarsening */
+      HYPRE_StructGridCoarsen(grid, coarsen_stride, &Mgrid);
       hypre_MapToCoarseIndex(Mran_stride, NULL, coarsen_stride, ndim);
       hypre_MapToCoarseIndex(Mdom_stride, NULL, coarsen_stride, ndim);
    }
@@ -341,17 +333,17 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
    const_values  = hypre_TAlloc(HYPRE_Complex, size, HYPRE_MEMORY_HOST);
    a = hypre_TAlloc(struct a_struct, na, HYPRE_MEMORY_HOST);
 
-   comm_stencils = hypre_TAlloc(hypre_CommStencil *, nmatrices+1, HYPRE_MEMORY_HOST);
-   for (m = 0; m < nmatrices+1; m++)
-   {
-      comm_stencils[m] = hypre_CommStencilCreate(ndim);
-   }
-
    na = 0;
    nconst = 0;
    need_mask = 0;
    if (hypre_StructGridNumBoxes(grid) > 0)
    {
+      comm_stencils = hypre_TAlloc(hypre_CommStencil *, nmatrices+1, HYPRE_MEMORY_HOST);
+      for (m = 0; m < nmatrices+1; m++)
+      {
+         comm_stencils[m] = hypre_CommStencilCreate(ndim);
+      }
+
       i = 0;
       for (e = 0; e < size; e++)  /* Loop over each stencil coefficient in st_M */
       {
@@ -461,6 +453,27 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
    /* Free up some stuff */
    hypre_TFree(const_entries, HYPRE_MEMORY_HOST);
    hypre_TFree(const_values, HYPRE_MEMORY_HOST);
+
+   /* If all constant coefficients, return */
+   if (na == 0)
+   {
+      /* Free up some stuff */
+      hypre_StMatrixDestroy(st_M);
+      hypre_TFree(matrices, HYPRE_MEMORY_HOST);
+      hypre_TFree(terms, HYPRE_MEMORY_HOST);
+      hypre_TFree(a, HYPRE_MEMORY_HOST);
+      if (hypre_StructGridNumBoxes(grid) > 0)
+      {
+         for (m = 0; m < nmatrices+1; m++)
+         {
+            hypre_CommStencilDestroy(comm_stencils[m]);
+         }
+         hypre_TFree(comm_stencils, HYPRE_MEMORY_HOST);
+      }
+
+      HYPRE_StructMatrixAssemble(M);
+      return hypre_error_flag;
+   }
 
    /* Set variable values in M */
 

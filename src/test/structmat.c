@@ -808,8 +808,7 @@ main( hypre_int  argc,
                                      data.matrix_offsets[mi][ei]);
       }
 
-      HYPRE_StructMatrixCreate(
-         hypre_MPI_COMM_WORLD, grid, stencils[mi], &matrices[mi]);
+      HYPRE_StructMatrixCreate(hypre_MPI_COMM_WORLD, grid, stencils[mi], &matrices[mi]);
       HYPRE_StructMatrixSetRangeStride(matrices[mi], data.matrix_rstrides[mi]);
       HYPRE_StructMatrixSetDomainStride(matrices[mi], data.matrix_dstrides[mi]);
       HYPRE_StructMatrixSetSymmetric(matrices[mi], data.matrix_symmetric[mi]);
@@ -1018,7 +1017,7 @@ main( hypre_int  argc,
       time_index = hypre_InitializeTiming("Matrix-matrix multiply");
       hypre_BeginTiming(time_index);
 
-      hypre_StructMatmult(data.nmatrices, matrices, nterms, terms, trans, NULL, &M);
+      hypre_StructMatmult(data.nmatrices, matrices, nterms, terms, trans, &M);
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Matrix-matrix multiply", hypre_MPI_COMM_WORLD);

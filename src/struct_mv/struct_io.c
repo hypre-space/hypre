@@ -54,7 +54,8 @@ hypre_PrintBoxArrayData( FILE            *file,
          tot_size += num_values * data_box_volume;
       }
       data_host = hypre_CTAlloc(HYPRE_Complex, tot_size, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(data_host, data, HYPRE_Complex, tot_size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(data_host, data, HYPRE_Complex, tot_size,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
       data_host_saved = data_host;
    }
    else
@@ -81,10 +82,10 @@ hypre_PrintBoxArrayData( FILE            *file,
          zypre_BoxLoopGetIndex(index);
          for (j = 0; j < num_values; j++)
          {
-            hypre_fprintf(file, "%d: (%d", i, hypre_IndexD(index, 0));
+            hypre_fprintf(file, "%d: (%d", i, hypre_IndexD(start, 0) + hypre_IndexD(index, 0));
             for (d = 1; d < ndim; d++)
             {
-               hypre_fprintf(file, ", %d", hypre_IndexD(index, d));
+               hypre_fprintf(file, ", %d", hypre_IndexD(start, d) + hypre_IndexD(index, d));
             }
             value = data_host[datai + j*data_box_volume];
 #ifdef HYPRE_COMPLEX
