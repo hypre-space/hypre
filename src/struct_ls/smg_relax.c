@@ -586,14 +586,12 @@ hypre_SMGRelaxSetupASol( void               *relax_vdata,
          hypre_SMGSetMemoryUse(solve_data[i], (relax_data -> memory_use));
          hypre_SMGSetTol(solve_data[i], 0.0);
          hypre_SMGSetMaxIter(solve_data[i], 1);
-         hypre_StructSMGSetMaxLevel(solve_data[i], (relax_data -> max_level));	 
          hypre_SMGSetup(solve_data[i], A_sol, temp_vec, x);
       }
       else
       {
          solve_data[i] = hypre_CyclicReductionCreate(relax_data -> comm);
          hypre_CyclicReductionSetBase(solve_data[i], base_index, base_stride);
-         //hypre_CyclicReductionSetMaxLevel(solve_data[i], -1);//(relax_data -> max_level)+10);
          hypre_CyclicReductionSetup(solve_data[i], A_sol, temp_vec, x);
       }
    }
@@ -932,16 +930,3 @@ hypre_SMGRelaxSetupBaseBoxArray( void               *relax_vdata,
    return hypre_error_flag;
 }
 
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SMGRelaxSetMaxLevel( void *relax_vdata,
-			   HYPRE_Int   num_max_level )
-{
-   hypre_SMGRelaxData *relax_data = (hypre_SMGRelaxData  *)relax_vdata;
-
-   (relax_data -> max_level) = num_max_level;
-
-   return hypre_error_flag;
-}

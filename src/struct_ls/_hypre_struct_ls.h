@@ -37,7 +37,6 @@ HYPRE_Int hypre_CyclicReduction ( void *cyc_red_vdata , hypre_StructMatrix *A , 
 HYPRE_Int hypre_CyclicReductionSetCDir ( void *cyc_red_vdata , HYPRE_Int cdir );
 HYPRE_Int hypre_CyclicReductionSetBase ( void *cyc_red_vdata , hypre_Index base_index , hypre_Index base_stride );
 HYPRE_Int hypre_CyclicReductionDestroy ( void *cyc_red_vdata );
-HYPRE_Int hypre_CyclicReductionSetMaxLevel( void   *cyc_red_vdata, HYPRE_Int   max_level  );
 
 /* general.c */
 HYPRE_Int hypre_Log2 ( HYPRE_Int p );
@@ -526,7 +525,6 @@ HYPRE_Int hypre_SMGGetNumIterations ( void *smg_vdata , HYPRE_Int *num_iteration
 HYPRE_Int hypre_SMGPrintLogging ( void *smg_vdata , HYPRE_Int myid );
 HYPRE_Int hypre_SMGGetFinalRelativeResidualNorm ( void *smg_vdata , HYPRE_Real *relative_residual_norm );
 HYPRE_Int hypre_SMGSetStructVectorConstantValues ( hypre_StructVector *vector , HYPRE_Real values , hypre_BoxArray *box_array , hypre_Index stride );
-HYPRE_Int hypre_StructSMGSetMaxLevel( void   *smg_vdata, HYPRE_Int   max_level  );
 
 /* smg_relax.c */
 void *hypre_SMGRelaxCreate ( MPI_Comm comm );

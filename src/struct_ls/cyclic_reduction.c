@@ -1231,16 +1231,3 @@ hypre_CyclicReductionDestroy( void *cyc_red_vdata )
    return hypre_error_flag;
 }
 
-/*--------------------------------------------------------------------------
- * hypre_CyclicReductionDestroy
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_CyclicReductionSetMaxLevel( void   *cyc_red_vdata,
-                                  HYPRE_Int   max_level  )
-{
-   hypre_CyclicReductionData *cyc_red_data = (hypre_CyclicReductionData *)cyc_red_vdata;
-   (cyc_red_data -> max_levels) = max_level;
-
-   return hypre_error_flag;
-}

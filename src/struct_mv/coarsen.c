@@ -506,8 +506,8 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
          }
       }
 
-      cids   = hypre_TAlloc(HYPRE_Int, count, HYPRE_MEMORY_HOST);
       cboxes = hypre_BoxArrayCreate(count, ndim);
+      cids   = hypre_TAlloc(HYPRE_Int, count, HYPRE_MEMORY_HOST);
       count = 0;
       hypre_ForBoxI(i, fboxes)
       {
@@ -526,14 +526,11 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    else
    {
       /* number of boxes in coarse and fine grids are equal */
-      cids   = hypre_TAlloc(HYPRE_Int, hypre_BoxArraySize(fboxes), HYPRE_MEMORY_HOST);
       cboxes = hypre_BoxArrayClone(fboxes);
+      hypre_CoarsenBoxArray(cboxes, origin, stride);
+      cids   = hypre_TAlloc(HYPRE_Int, hypre_BoxArraySize(fboxes), HYPRE_MEMORY_HOST);
       hypre_ForBoxI(i, fboxes)
       {
-         box = hypre_BoxArrayBox(fboxes, i);
-         hypre_CoarsenBox(box, origin, stride);
-         hypre_CopyBox(box, hypre_BoxArrayBox(cboxes, i));
-         hypre_BoxArrayID(cboxes, i) = fids[i];
          cids[i] = fids[i];
       }
    }

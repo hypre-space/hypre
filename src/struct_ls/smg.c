@@ -505,17 +505,6 @@ hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
-hypre_StructSMGSetMaxLevel( void   *smg_vdata,
-                            HYPRE_Int   max_level  )
-{
-   hypre_SMGData *smg_data = (hypre_SMGData *)smg_vdata;
-
-   (smg_data -> max_levels) = max_level;
-
-   return hypre_error_flag;
-}
-
 #if defined(HYPRE_USING_CUDA)
 HYPRE_Int
 hypre_StructSMGSetDeviceLevel( void   *smg_vdata,

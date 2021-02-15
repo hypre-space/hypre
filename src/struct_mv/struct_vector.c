@@ -1684,7 +1684,7 @@ hypre_StructVectorClone( hypre_StructVector *x )
 
    hypre_StructVectorDataSize(y)    = data_size;
    hypre_StructVectorDataSpace(y)   = hypre_BoxArrayClone(data_space);
-   hypre_StructVectorData(y)        = hypre_CTAlloc(HYPRE_Complex, data_size+1, HYPRE_MEMORY_HOST);
+   hypre_StructVectorData(y)        = hypre_CTAlloc(HYPRE_Complex, data_size, HYPRE_MEMORY_HOST);
    hypre_StructVectorDataIndices(y) = hypre_CTAlloc(HYPRE_Int, data_space_size, HYPRE_MEMORY_HOST);
 
    for (i = 0; i < data_space_size; i++)
