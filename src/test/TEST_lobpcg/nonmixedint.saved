@@ -1,0 +1,40 @@
+# Output file: nonmixedint.out.0.lobpcg
+Iterations = 15
+Final Relative Residual Norm = 6.352784e-07
+
+# Output file: nonmixedint.out.0.lobpcg.1
+Eigenvalue lambda   2.43042158313109e-01
+Residual   4.35799317942064e-07
+
+# Output file: nonmixedint.out.0.lobpcg.5
+Eigenvalue lambda   2.43042158313016e-01
+Eigenvalue lambda   4.79521039879678e-01
+Eigenvalue lambda   4.79521039879699e-01
+Eigenvalue lambda   4.79521039879799e-01
+Eigenvalue lambda   7.15999921446891e-01
+Residual   1.37749965131754e-07
+Residual   4.63010776375628e-07
+Residual   3.87579831562450e-07
+Residual   5.41642190641787e-07
+Residual   9.41630860798197e-07
+
+# Output file: nonmixedint.out.1.lobpcg
+Iterations = 9
+Final Relative Residual Norm = 5.971754e-07
+
+# Output file: nonmixedint.out.1.lobpcg.1
+Eigenvalue lambda   2.43042158313103e-01
+Residual   4.06686999057609e-07
+
+# Output file: nonmixedint.out.1.lobpcg.5
+Eigenvalue lambda   2.43042158313016e-01
+Eigenvalue lambda   4.79521039879682e-01
+Eigenvalue lambda   4.79521039879706e-01
+Eigenvalue lambda   4.79521039879825e-01
+Eigenvalue lambda   7.15999921446956e-01
+Residual   1.61376258673867e-07
+Residual   4.76948835732272e-07
+Residual   4.01718127440120e-07
+Residual   5.82137557078099e-07
+Residual   9.97061314149104e-07
+
