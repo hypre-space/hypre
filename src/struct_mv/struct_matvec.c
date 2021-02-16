@@ -227,7 +227,11 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    }
    else
    {
-      hypre_StructMatvecSquareCompute(matvec_vdata, alpha, A, x, beta, y);
+      hypre_StructMatvecRectglCompute(matvec_vdata, alpha, A, x, beta, y);
+// RDF: Something isn't quite right with SquareCompute.  As a test problem to
+// debug this, run the second job in 'TEST_sstruct/cycred.jobs'.
+//
+//      hypre_StructMatvecSquareCompute(matvec_vdata, alpha, A, x, beta, y);
    }
 
    return hypre_error_flag;

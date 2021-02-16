@@ -1928,6 +1928,7 @@ DistributeData( ProblemData   global_data,
    }
 
    hypre_TFree(pool_procs, HYPRE_MEMORY_HOST);
+
    *data_ptr = data;
 
    return 0;
@@ -2495,11 +2496,6 @@ main( hypre_int argc,
    /* Initialize Hypre */
    HYPRE_Init();
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   //hypre_HandleDefaultExecPolicy(hypre_handle()) = HYPRE_EXEC_DEVICE;
-   //hypre_HandleSpgemmUseCusparse(hypre_handle()) = 1;
-#endif
-
    /*-----------------------------------------------------------
     * Read input file
     *-----------------------------------------------------------*/
@@ -2564,7 +2560,7 @@ main( hypre_int argc,
    max_iterations = 100;
    max_levels = 100;
    max_coarse_size = 1;
-   tol = 1.0e-9;
+   tol = 1.0e-6;
    rel_change = 0;
    k_dim = 10;
    aug_dim = 2;
@@ -2601,9 +2597,9 @@ main( hypre_int argc,
    print_system = 0;
    check_symmetry = 0;
    check_Aones = 0;
-   rhs_value = 0.0;
+   rhs_value = 1.0;
    sol_type = -1;
-   sol0_type = 2;
+   sol0_type = 0;
    skip = 0;
    n_pre  = 1;
    n_post = 1;
@@ -3072,10 +3068,10 @@ main( hypre_int argc,
       pdata = data.pdata[part];
       for (box = 0; box < pdata.nboxes; box++)
       {
-         hypre_printf("Part %02d | Box %02d: (%d, %d, %d) x (%d, %d, %d)\n",
-                      part, box,
-                      pdata.ilowers[box][0], pdata.ilowers[box][1], pdata.ilowers[box][2],
-                      pdata.iuppers[box][0], pdata.iuppers[box][1], pdata.iuppers[box][2]);
+//         hypre_printf("Part %02d | Box %02d: (%d, %d, %d) x (%d, %d, %d)\n",
+//                      part, box,
+//                      pdata.ilowers[box][0], pdata.ilowers[box][1], pdata.ilowers[box][2],
+//                      pdata.iuppers[box][0], pdata.iuppers[box][1], pdata.iuppers[box][2]);
          HYPRE_SStructGridSetExtents(grid, part,
                                      pdata.ilowers[box], pdata.iuppers[box]);
       }
@@ -3778,9 +3774,10 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Convert SStructMatrix to IJMatrix
     *-----------------------------------------------------------*/
+
    if (print_system || check_symmetry)
    {
-      HYPRE_SStructMatrixToIJMatrix(A, &ij_A);
+//      HYPRE_SStructMatrixToIJMatrix(A, &ij_A);
    }
 
    /*-----------------------------------------------------------
@@ -3802,7 +3799,7 @@ main( hypre_int argc,
 
       if (object_type != HYPRE_PARCSR)
       {
-         HYPRE_IJMatrixPrint(ij_A, "IJ.out.A");
+//         HYPRE_IJMatrixPrint(ij_A, "IJ.out.A");
       }
    }
 
@@ -5537,22 +5534,6 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridSetSolverType(par_solver, solver_type);
       HYPRE_ParCSRHybridSetRecomputeResidual(par_solver, recompute_res);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-      /*
-      HYPRE_ParCSRHybridSetPMaxElmts(par_solver, 8);
-      HYPRE_ParCSRHybridSetRelaxType(par_solver, 18);
-      HYPRE_ParCSRHybridSetCycleRelaxType(par_solver, 9, 3);
-      HYPRE_ParCSRHybridSetCoarsenType(par_solver, 8);
-      HYPRE_ParCSRHybridSetInterpType(par_solver, 3);
-      HYPRE_ParCSRHybridSetMaxCoarseSize(par_solver, 20);
-      */
-#endif
-
-#if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPushRange("HybridSolve");
-#endif
-      //cudaProfilerStart();
-
       HYPRE_ParCSRHybridSetup(par_solver,par_A,par_b,par_x);
 
       hypre_EndTiming(time_index);
@@ -5574,11 +5555,6 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridGetFinalRelativeResidualNorm(par_solver, &final_res_norm);
 
       HYPRE_ParCSRHybridDestroy(par_solver);
-
-#if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPopRange();
-#endif
-      //cudaProfilerStop();
    }
 
    /*-----------------------------------------------------------
@@ -6857,10 +6833,11 @@ main( hypre_int argc,
    {
       hypre_printf("\n");
       hypre_printf("Iterations = %d\n", num_iterations);
-      hypre_printf("RHS Norm = %20.15e\n", rhs_norm);
-      hypre_printf("Initial LHS (x0) Norm = %20.15e\n", x0_norm);
-      hypre_printf("Real Relative Residual Norm  = %20.15e\n", real_res_norm);
-      hypre_printf("Final Relative Residual Norm = %20.15e\n", final_res_norm);
+      hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
+//      hypre_printf("RHS Norm = %20.15e\n", rhs_norm);
+//      hypre_printf("Initial LHS (x0) Norm = %20.15e\n", x0_norm);
+//      hypre_printf("Real Relative Residual Norm  = %20.15e\n", real_res_norm);
+//      hypre_printf("Final Relative Residual Norm = %20.15e\n", final_res_norm);
       hypre_printf("\n");
    }
 
