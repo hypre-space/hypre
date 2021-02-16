@@ -326,7 +326,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          /* If no coarsening occurred, apply a simple smoother once */
          Aux_U = U_array[level];
          Aux_F = F_array[level];
-         num_sweep = 1;
+         num_sweep = num_grid_sweeps[0];
          /* TK: Use the user relax type (instead of 0) to allow for setting a
            convergent smoother (e.g. in the solution of singular problems). */
          relax_type = hypre_ParAMGDataUserRelaxType(amg_data);

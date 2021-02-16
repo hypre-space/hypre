@@ -610,6 +610,38 @@ hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, 
 }
 
 __global__ void
+hypreCUDAKernel_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y, HYPRE_Complex *z)
+{
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+
+   if (i < n)
+   {
+      HYPRE_Complex t = x[i] / A_data[A_i[i]];
+      y[i] = t;
+      z[i] += beta*t;
+   }
+}
+
+/* y = diag(A) \ x + beta y
+ * Note: Assume A_i[i] points to the ith diagonal entry of A */
+HYPRE_Int
+hypreDevice_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y, HYPRE_Complex *z)
+{
+   /* trivial case */
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
+
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_DiagScaleVector2, gDim, bDim, n, A_i, A_data, x, beta, y, z );
+
+   return hypre_error_flag;
+}
+
+__global__ void
 hypreCUDAKernel_BigToSmallCopy(      HYPRE_Int*    __restrict__ tgt,
                                const HYPRE_BigInt* __restrict__ src,
                                      HYPRE_Int                  size)
