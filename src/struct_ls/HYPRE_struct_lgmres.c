@@ -14,7 +14,7 @@ HYPRE_StructLGMRESCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 {
    hypre_LGMRESFunctions * lgmres_functions =
       hypre_LGMRESFunctionsCreate(
-         hypre_CAlloc, hypre_StructKrylovFree,
+         hypre_StructKrylovCAlloc, hypre_StructKrylovFree,
          hypre_StructKrylovCommInfo,
          hypre_StructKrylovCreateVector,
          hypre_StructKrylovCreateVectorArray,

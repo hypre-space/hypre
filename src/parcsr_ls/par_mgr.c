@@ -902,14 +902,9 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
   // TODO: enable threading
   num_threads = 1;
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
   //my_first_cpt = num_cpts_global[0];
   if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-  //my_first_cpt = num_cpts_global[my_id];
-  total_global_cpts = num_cpts_global[num_procs];
-#endif
 
   /*-------------------------------------------------------------------
   * Get the CF_marker data for the off-processor columns
@@ -1476,14 +1471,9 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
   // TODO: enable threading
   num_threads = 1;
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    //my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   //my_first_cpt = num_cpts_global[my_id];
-   total_global_cpts = num_cpts_global[num_procs];
-#endif
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -2502,14 +2492,9 @@ hypre_MGRBuildInterpApproximateInverseExp(hypre_ParCSRMatrix   *A,
   hypre_MPI_Comm_rank(comm,&my_id);
 //  num_threads = hypre_NumThreads();
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
 //  my_first_cpt = num_cpts_global[0];
   if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-//  my_first_cpt = num_cpts_global[my_id];
-  total_global_cpts = num_cpts_global[num_procs];
-#endif
 
   /*-----------------------------------------------------------------------
    *  First Pass: Determine size of P and fill in fine_to_coarse mapping.
@@ -2786,14 +2771,9 @@ hypre_MGRBuildInterpApproximateInverse(hypre_ParCSRMatrix   *A,
   hypre_MPI_Comm_rank(comm,&my_id);
 //  num_threads = hypre_NumThreads();
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
 //  my_first_cpt = num_cpts_global[0];
   if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-//  my_first_cpt = num_cpts_global[my_id];
-  total_global_cpts = num_cpts_global[num_procs];
-#endif
 
   /*-----------------------------------------------------------------------
    *  First Pass: Determine size of P and fill in fine_to_coarse mapping.
@@ -4725,14 +4705,9 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
 
   //hypre_printf("my_id = %d, cpts_this = %d, cpts_next = %d\n", my_id, num_row_cpts_global[0], num_row_cpts_global[1]);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
 //  my_first_row_cpt = num_row_cpts_global[0];
   if (my_id == (num_procs -1)) total_global_row_cpts = num_row_cpts_global[1];
   hypre_MPI_Bcast(&total_global_row_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-//  my_first_row_cpt = num_row_cpts_global[my_id];
-  total_global_row_cpts = num_row_cpts_global[num_procs];
-#endif
 
   /* get the number of coarse rows */
   hypre_BoomerAMGCoarseParms(comm, local_numrows, 1, NULL, col_cf_marker, &coarse_dof_func_ptr, &num_col_cpts_global);
@@ -4741,14 +4716,9 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
 
   //hypre_printf("my_id = %d, cpts_this = %d, cpts_next = %d\n", my_id, num_col_cpts_global[0], num_col_cpts_global[1]);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
 //  my_first_col_cpt = num_col_cpts_global[0];
   if (my_id == (num_procs -1)) total_global_col_cpts = num_col_cpts_global[1];
   hypre_MPI_Bcast(&total_global_col_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-//  my_first_col_cpt = num_col_cpts_global[my_id];
-  total_global_col_cpts = num_col_cpts_global[num_procs];
-#endif
 
   /*-------------------------------------------------------------------
    * Get the CF_marker data for the off-processor columns
@@ -5085,13 +5055,11 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
 
   hypre_GetCommPkgRTFromCommPkgA(Ablock, A, fine_to_coarse, tmp_map_offd);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
   /* Create the assumed partition */
   if (hypre_ParCSRMatrixAssumedPartition(Ablock) == NULL)
   {
     hypre_ParCSRMatrixCreateAssumedPartition(Ablock);
   }
-#endif
 
   *A_block_ptr= Ablock;
 

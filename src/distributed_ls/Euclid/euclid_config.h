@@ -38,7 +38,7 @@
 #define EXIT_NOW(msg) \
       { setError_dh(msg, __FUNC__, __FILE__, __LINE__); \
         ERRCHKA; \
-      } 
+      }
 
 #define ERRCHKA   \
     if (errFlag_dh) {  \
@@ -52,7 +52,7 @@
         Mem_dhPrint(mem_dh, stderr, false); \
       } \
       EUCLID_EXIT; \
-    } 
+    }
 
 
   /* let Euclid do its thing, before handing off to PETSc;
@@ -70,10 +70,10 @@
       printErrorMsg(stderr);  \
       hypre_fprintf(stderr, "\n[%i] ierr = %i, errFlag_dh = %i\n", myid_dh, ierr, errFlag_dh); \
       CHKERRA(ierr); \
-    } 
+    }
 
 
-#define MAX_SUBDOMAINS  20   
+#define MAX_SUBDOMAINS  20
   /* The maximum number of subdomains into which
      the matrix may be partitioned.  Rule of thumb:
      MAX_SUBDOMAINS >= number of threads.
@@ -86,7 +86,7 @@
 
 /*---------------------------------------------------------------------
  * Memory management.  These macros work with functions in Mem_dh.c;
- * Change if you want to use some memory management and reporting schemes 
+ * Change if you want to use some memory management and reporting schemes
  * other than that supplied with Euclid.   These depend on the global
  * object "Mem_dh mem_dh" which is defined in globalObjects.c (yuck!)
  ---------------------------------------------------------------------*/
@@ -103,11 +103,11 @@
 #endif
 
 
-  /* The actual calls used by Mem_dh objects to allocate/free memory 
+  /* The actual calls used by Mem_dh objects to allocate/free memory
    * from the heap.
    */
-#define PRIVATE_MALLOC  malloc
-#define PRIVATE_FREE    free
+#define PRIVATE_MALLOC(size)  ( hypre_TAlloc(char, size, HYPRE_MEMORY_HOST) )
+#define PRIVATE_FREE(ptr)     ( hypre_TFree(ptr, HYPRE_MEMORY_HOST) )
 
 /*------------------ Memory management end -----------------------------*/
 

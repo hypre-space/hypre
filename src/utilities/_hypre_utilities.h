@@ -536,6 +536,11 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 #include <stdio.h>
 #include <stdlib.h>
 
+#if defined(HYPRE_USING_UMPIRE)
+#include "umpire/interface/umpire.h"
+#define HYPRE_UMPIRE_POOL_NAME_MAX_LEN 1024
+#endif
+
 /* stringification:
  * _Pragma(string-literal), so we need to cast argument to a string
  * The three dots as last argument of the macro tells compiler that this is a variadic macro.
@@ -543,8 +548,6 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
  */
 #define HYPRE_STR(...) #__VA_ARGS__
 #define HYPRE_XSTR(...) HYPRE_STR(__VA_ARGS__)
-
-//#define HYPRE_USING_MEMORY_TRACKER
 
 #ifdef __cplusplus
 extern "C" {
@@ -589,13 +592,7 @@ hypre_GetActualMemLocation(HYPRE_MemoryLocation location)
 
 #ifdef HYPRE_USING_MEMORY_TRACKER
 
-#ifdef __cplusplus
-extern "C++" {
-#endif
-
-#include <vector>
-
-struct hypre_memory_tracker_t
+typedef struct
 {
    char                  _action[16];
    void                 *_ptr;
@@ -604,49 +601,23 @@ struct hypre_memory_tracker_t
    char                  _filename[256];
    char                  _function[256];
    HYPRE_Int             _line;
+   size_t                _pair;
+} hypre_MemoryTrackerEntry;
 
-   hypre_memory_tracker_t(const char *action, void *ptr, size_t nbytes,
-                          hypre_MemoryLocation memory_location, const char *filename,
-                          const char *function, HYPRE_Int line)
-   {
-      sprintf(_action, "%s", action);
-      _ptr = ptr;
-      _nbytes = nbytes;
-      _memory_location = memory_location;
-      sprintf(_filename, "%s", filename);
-      sprintf(_function, "%s", function);
-      _line = line;
-   }
-
-   void print()
-   {
-      printf("%8s  %16p  %10ld  %d  %32s  %64s      %d\n",
-            _action, _ptr, _nbytes, _memory_location, _filename, _function, _line);
-
-   }
-};
-
-extern std::vector<hypre_memory_tracker_t> hypre_memory_tracker;
-
-static inline void hypre_MemoryTrackerInsert(struct hypre_memory_tracker_t const &memory)
+typedef struct
 {
-   if (memory._memory_location != hypre_MEMORY_HOST) /* if we only want to track GPU memory */
-   {
-      hypre_memory_tracker.push_back(memory);
-   }
-}
-
-#ifdef __cplusplus
-}
-#endif
+   size_t actual_size;
+   size_t alloced_size;
+   size_t prev_end;
+   hypre_MemoryTrackerEntry *data;
+} hypre_MemoryTracker;
 
 /* These Allocs are with memory tracker, for debug */
 #define hypre_TAlloc(type, count, location)                                                                                           \
 (                                                                                                                                     \
 {                                                                                                                                     \
    void *ptr = hypre_MAlloc((size_t)(sizeof(type) * (count)), location);                                                              \
-   hypre_MemoryTrackerInsert( hypre_memory_tracker_t("malloc", ptr, sizeof(type)*(count), hypre_GetActualMemLocation(location),       \
-                              __FILE__, __func__, __LINE__) );                                                                        \
+   hypre_MemoryTrackerInsert("malloc", ptr, sizeof(type)*(count), hypre_GetActualMemLocation(location), __FILE__, __func__, __LINE__);\
    (type *) ptr;                                                                                                                      \
 }                                                                                                                                     \
 )
@@ -655,7 +626,7 @@ static inline void hypre_MemoryTrackerInsert(struct hypre_memory_tracker_t const
 (                                                                                                                                     \
 {                                                                                                                                     \
    void *ptr = _hypre_MAlloc((size_t)(sizeof(type) * (count)), location);                                                             \
-   hypre_MemoryTrackerInsert( hypre_memory_tracker_t("malloc", ptr, sizeof(type)*(count), location, __FILE__, __func__, __LINE__) );  \
+   hypre_MemoryTrackerInsert("malloc", ptr, sizeof(type)*(count), location, __FILE__, __func__, __LINE__);                            \
    (type *) ptr;                                                                                                                      \
 }                                                                                                                                     \
 )
@@ -664,29 +635,29 @@ static inline void hypre_MemoryTrackerInsert(struct hypre_memory_tracker_t const
 (                                                                                                                                     \
 {                                                                                                                                     \
    void *ptr = hypre_CAlloc((size_t)(count), (size_t)sizeof(type), location);                                                         \
-   hypre_MemoryTrackerInsert( hypre_memory_tracker_t("calloc", ptr, sizeof(type)*(count), hypre_GetActualMemLocation(location),       \
-                              __FILE__, __func__, __LINE__) );                                                                        \
+   hypre_MemoryTrackerInsert("calloc", ptr, sizeof(type)*(count), hypre_GetActualMemLocation(location), __FILE__, __func__, __LINE__);\
    (type *) ptr;                                                                                                                      \
 }                                                                                                                                     \
 )
 
-#define hypre_TReAlloc(ptr, type, count, location)                                      \
-(                                                                                       \
-{                                                                                       \
-   (type *) hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count)), location);     \
-}                                                                                       \
+#define hypre_TReAlloc(ptr, type, count, location)                                                                                         \
+(                                                                                                                                          \
+{                                                                                                                                          \
+   hypre_MemoryTrackerInsert("rfree", ptr, (size_t) -1, hypre_GetActualMemLocation(location), __FILE__, __func__, __LINE__);               \
+   void *new_ptr = hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count)), location);                                                 \
+   hypre_MemoryTrackerInsert("rmalloc", new_ptr, sizeof(type)*(count), hypre_GetActualMemLocation(location), __FILE__, __func__, __LINE__);\
+   (type *) new_ptr;                                                                                                                       \
+}                                                                                                                                          \
 )
 
-#define hypre_TReAlloc_v2(ptr, old_type, old_count, new_type, new_count, location)                                                                \
-(                                                                                                                                                 \
-{                                                                                                                                                 \
-   hypre_MemoryTrackerInsert( hypre_memory_tracker_t("rfree", ptr, sizeof(old_type)*(old_count), hypre_GetActualMemLocation(location),            \
-                              __FILE__, __func__, __LINE__) );                                                                                    \
-   void *new_ptr = hypre_ReAlloc_v2((char *)ptr, (size_t)(sizeof(old_type)*(old_count)), (size_t)(sizeof(new_type)*(new_count)), location);       \
-   hypre_MemoryTrackerInsert( hypre_memory_tracker_t("rmalloc", new_ptr, sizeof(new_type)*(new_count), hypre_GetActualMemLocation(location),      \
-                              __FILE__, __func__, __LINE__) );                                                                                    \
-   (new_type *) new_ptr;                                                                                                                          \
-}                                                                                                                                                 \
+#define hypre_TReAlloc_v2(ptr, old_type, old_count, new_type, new_count, location)                                                                 \
+(                                                                                                                                                  \
+{                                                                                                                                                  \
+   hypre_MemoryTrackerInsert("rfree", ptr, sizeof(old_type)*(old_count), hypre_GetActualMemLocation(location), __FILE__, __func__, __LINE__);      \
+   void *new_ptr = hypre_ReAlloc_v2((char *)ptr, (size_t)(sizeof(old_type)*(old_count)), (size_t)(sizeof(new_type)*(new_count)), location);        \
+   hypre_MemoryTrackerInsert("rmalloc", new_ptr, sizeof(new_type)*(new_count), hypre_GetActualMemLocation(location), __FILE__, __func__, __LINE__);\
+   (new_type *) new_ptr;                                                                                                                           \
+}                                                                                                                                                  \
 )
 
 #define hypre_TMemcpy(dst, src, type, count, locdst, locsrc)                                     \
@@ -696,20 +667,19 @@ static inline void hypre_MemoryTrackerInsert(struct hypre_memory_tracker_t const
 }                                                                                                \
 )
 
-#define hypre_TFree(ptr, location)                                                                              \
-(                                                                                                               \
-{                                                                                                               \
-   hypre_MemoryTrackerInsert( hypre_memory_tracker_t("free", ptr, 0, hypre_GetActualMemLocation(location),      \
-                              __FILE__, __func__, __LINE__) );                                                  \
-   hypre_Free((void *)ptr, location);                                                                           \
-   ptr = NULL;                                                                                                  \
-}                                                                                                               \
+#define hypre_TFree(ptr, location)                                                                                          \
+(                                                                                                                           \
+{                                                                                                                           \
+   hypre_MemoryTrackerInsert("free", ptr, (size_t) -1, hypre_GetActualMemLocation(location), __FILE__, __func__, __LINE__); \
+   hypre_Free((void *)ptr, location);                                                                                       \
+   ptr = NULL;                                                                                                              \
+}                                                                                                                           \
 )
 
 #define _hypre_TFree(ptr, location)                                                                             \
 (                                                                                                               \
 {                                                                                                               \
-   hypre_MemoryTrackerInsert( hypre_memory_tracker_t("free", ptr, 0, location, __FILE__, __func__, __LINE__) ); \
+   hypre_MemoryTrackerInsert("free", ptr, (size_t) -1, location, __FILE__, __func__, __LINE__);                 \
    _hypre_Free((void *)ptr, location);                                                                          \
    ptr = NULL;                                                                                                  \
 }                                                                                                               \
@@ -767,6 +737,22 @@ HYPRE_ExecutionPolicy hypre_GetExecPolicy2(HYPRE_MemoryLocation location1, HYPRE
 HYPRE_Int hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location);
 HYPRE_Int hypre_PrintMemoryTracker();
 HYPRE_Int hypre_SetCubMemPoolSize( hypre_uint bin_growth, hypre_uint min_bin, hypre_uint max_bin, size_t max_cached_bytes );
+HYPRE_Int hypre_umpire_host_pooled_allocate(void **ptr, size_t nbytes);
+HYPRE_Int hypre_umpire_host_pooled_free(void *ptr);
+void *hypre_umpire_host_pooled_realloc(void *ptr, size_t size);
+HYPRE_Int hypre_umpire_device_pooled_allocate(void **ptr, size_t nbytes);
+HYPRE_Int hypre_umpire_device_pooled_free(void *ptr);
+HYPRE_Int hypre_umpire_um_pooled_allocate(void **ptr, size_t nbytes);
+HYPRE_Int hypre_umpire_um_pooled_free(void *ptr);
+HYPRE_Int hypre_umpire_pinned_pooled_allocate(void **ptr, size_t nbytes);
+HYPRE_Int hypre_umpire_pinned_pooled_free(void *ptr);
+
+#ifdef HYPRE_USING_MEMORY_TRACKER
+hypre_MemoryTracker * hypre_MemoryTrackerCreate();
+void hypre_MemoryTrackerDestroy(hypre_MemoryTracker *tracker);
+void hypre_MemoryTrackerInsert(const char *action, void *ptr, size_t nbytes, hypre_MemoryLocation memory_location, const char *filename, const char *function, HYPRE_Int line);
+HYPRE_Int hypre_PrintMemoryTracker();
+#endif
 
 /* memory_dmalloc.c */
 HYPRE_Int hypre_InitMemoryDebugDML( HYPRE_Int id );
@@ -1153,9 +1139,17 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts, HYPRE_Int *contact_proc
 
 #ifdef HYPRE_USING_CALIPER
 
+#ifdef __cplusplus
+extern "C++" {
+#endif
+
 #include <caliper/cali.h>
 
-char hypre__levelname[16];
+#ifdef __cplusplus
+}
+#endif
+
+static char hypre__levelname[16];
 
 #define HYPRE_ANNOTATE_FUNC_BEGIN          CALI_MARK_FUNCTION_BEGIN
 #define HYPRE_ANNOTATE_FUNC_END            CALI_MARK_FUNCTION_END
@@ -1204,10 +1198,6 @@ char hypre__levelname[16];
 #ifndef HYPRE_HANDLE_H
 #define HYPRE_HANDLE_H
 
-//#ifdef __cplusplus
-//extern "C++" {
-//#endif
-
 struct hypre_CudaData;
 typedef struct hypre_CudaData hypre_CudaData;
 
@@ -1217,8 +1207,24 @@ typedef struct
    HYPRE_MemoryLocation   memory_location;
    HYPRE_ExecutionPolicy  default_exec_policy;
    HYPRE_ExecutionPolicy  struct_exec_policy;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    hypre_CudaData        *cuda_data;
+#endif
+#if defined(HYPRE_USING_UMPIRE)
+   char                   umpire_device_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
+   char                   umpire_um_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
+   char                   umpire_host_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
+   char                   umpire_pinned_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
+   size_t                 umpire_device_pool_size;
+   size_t                 umpire_um_pool_size;
+   size_t                 umpire_host_pool_size;
+   size_t                 umpire_pinned_pool_size;
+   size_t                 umpire_block_size;
+   HYPRE_Int              own_umpire_device_pool;
+   HYPRE_Int              own_umpire_um_pool;
+   HYPRE_Int              own_umpire_host_pool;
+   HYPRE_Int              own_umpire_pinned_pool;
+   umpire_resourcemanager umpire_rm;
 #endif
 } hypre_Handle;
 
@@ -1241,7 +1247,6 @@ typedef struct
 #define hypre_HandleCubUvmAllocator(hypre_handle)                hypre_CudaDataCubUvmAllocator(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleCudaDevice(hypre_handle)                     hypre_CudaDataCudaDevice(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleCudaComputeStreamNum(hypre_handle)           hypre_CudaDataCudaComputeStreamNum(hypre_HandleCudaData(hypre_handle))
-#define hypre_HandleCudaComputeStreamSync(hypre_handle)          hypre_CudaDataCudaComputeStreamSync(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleCudaReduceBuffer(hypre_handle)               hypre_CudaDataCudaReduceBuffer(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleStructCommRecvBuffer(hypre_handle)           hypre_CudaDataStructCommRecvBuffer(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleStructCommSendBuffer(hypre_handle)           hypre_CudaDataStructCommSendBuffer(hypre_HandleCudaData(hypre_handle))
@@ -1253,12 +1258,93 @@ typedef struct
 #define hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle)   hypre_CudaDataSpgemmRownnzEstimateNsamples(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle) hypre_CudaDataSpgemmRownnzEstimateMultFactor(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleSpgemmHashType(hypre_handle)                 hypre_CudaDataSpgemmHashType(hypre_HandleCudaData(hypre_handle))
+#define hypre_HandleUmpireDeviceAllocator(hypre_handle)          hypre_CudaDataUmpireDeviceAllocator(hypre_HandleCudaData(hypre_handle))
 
-//#ifdef __cplusplus
-//}
-//#endif
+#define hypre_HandleUmpireResourceMan(hypre_handle)              ((hypre_handle) -> umpire_rm)
+#define hypre_HandleUmpireDevicePoolSize(hypre_handle)           ((hypre_handle) -> umpire_device_pool_size)
+#define hypre_HandleUmpireUMPoolSize(hypre_handle)               ((hypre_handle) -> umpire_um_pool_size)
+#define hypre_HandleUmpireHostPoolSize(hypre_handle)             ((hypre_handle) -> umpire_host_pool_size)
+#define hypre_HandleUmpirePinnedPoolSize(hypre_handle)           ((hypre_handle) -> umpire_pinned_pool_size)
+#define hypre_HandleUmpireBlockSize(hypre_handle)                ((hypre_handle) -> umpire_block_size)
+#define hypre_HandleUmpireDevicePoolName(hypre_handle)           ((hypre_handle) -> umpire_device_pool_name)
+#define hypre_HandleUmpireUMPoolName(hypre_handle)               ((hypre_handle) -> umpire_um_pool_name)
+#define hypre_HandleUmpireHostPoolName(hypre_handle)             ((hypre_handle) -> umpire_host_pool_name)
+#define hypre_HandleUmpirePinnedPoolName(hypre_handle)           ((hypre_handle) -> umpire_pinned_pool_name)
+#define hypre_HandleOwnUmpireDevicePool(hypre_handle)            ((hypre_handle) -> own_umpire_device_pool)
+#define hypre_HandleOwnUmpireUMPool(hypre_handle)                ((hypre_handle) -> own_umpire_um_pool)
+#define hypre_HandleOwnUmpireHostPool(hypre_handle)              ((hypre_handle) -> own_umpire_host_pool)
+#define hypre_HandleOwnUmpirePinnedPool(hypre_handle)            ((hypre_handle) -> own_umpire_pinned_pool)
 
 #endif
+
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+#ifndef HYPRE_GSELIM_H
+#define HYPRE_GSELIM_H
+
+#define hypre_gselim(A,x,n,error)                      \
+{                                                      \
+   HYPRE_Int    j,k,m;                                 \
+   HYPRE_Real factor;                                  \
+   HYPRE_Real divA;                                    \
+   error = 0;                                          \
+   if (n == 1)  /* A is 1x1 */                         \
+   {                                                   \
+      if (A[0] != 0.0)                                 \
+      {                                                \
+         x[0] = x[0]/A[0];                             \
+      }                                                \
+      else                                             \
+      {                                                \
+         error++;                                      \
+      }                                                \
+   }                                                   \
+   else/* A is nxn. Forward elimination */             \
+   {                                                   \
+      for (k = 0; k < n-1; k++)                        \
+      {                                                \
+         if (A[k*n+k] != 0.0)                          \
+         {                                             \
+            divA = 1.0/A[k*n+k];                       \
+            for (j = k+1; j < n; j++)                  \
+            {                                          \
+               if (A[j*n+k] != 0.0)                    \
+               {                                       \
+                  factor = A[j*n+k]*divA;              \
+                  for (m = k+1; m < n; m++)            \
+                  {                                    \
+                     A[j*n+m]  -= factor * A[k*n+m];   \
+                  }                                    \
+                  x[j] -= factor * x[k];               \
+               }                                       \
+            }                                          \
+         }                                             \
+      }                                                \
+      /* Back Substitution  */                         \
+      for (k = n-1; k > 0; --k)                        \
+      {                                                \
+         if (A[k*n+k] != 0.0)                          \
+         {                                             \
+            x[k] /= A[k*n+k];                          \
+            for (j = 0; j < k; j++)                    \
+            {                                          \
+               if (A[j*n+k] != 0.0)                    \
+               {                                       \
+                  x[j] -= x[k] * A[j*n+k];             \
+               }                                       \
+            }                                          \
+         }                                             \
+      }                                                \
+      if (A[0] != 0.0) x[0] /= A[0];                   \
+   }                                                   \
+}
+
+#endif /* #ifndef HYPRE_GSELIM_H */
 
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
@@ -1294,12 +1380,15 @@ HYPRE_Real    hypre_cimag( HYPRE_Complex value );
 #endif
 
 /* hypre_general.c */
+#ifdef HYPRE_USING_MEMORY_TRACKER
+hypre_MemoryTracker* hypre_memory_tracker();
+#endif
 hypre_Handle* hypre_handle();
 hypre_Handle* hypre_HandleCreate();
 HYPRE_Int hypre_HandleDestroy(hypre_Handle *hypre_handle_);
-HYPRE_Int HYPRE_Init();
-HYPRE_Int HYPRE_Finalize();
 HYPRE_Int hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_);
+HYPRE_Int hypre_UmpireInit(hypre_Handle *hypre_handle_);
+HYPRE_Int hypre_UmpireFinalize(hypre_Handle *hypre_handle_);
 
 /* hypre_qsort.c */
 void hypre_swap ( HYPRE_Int *v , HYPRE_Int i , HYPRE_Int j );
@@ -1501,11 +1590,10 @@ void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len, H
 void hypre_sort_and_create_inverse_map(HYPRE_Int *in, HYPRE_Int len, HYPRE_Int **out, hypre_UnorderedIntMap *inverse_map);
 void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPRE_BigInt **out, hypre_UnorderedBigIntMap *inverse_map);
 
-
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_SyncCudaDevice(hypre_Handle *hypre_handle);
-HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex *y);
+HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y);
 HYPRE_Int hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y);
 HYPRE_Int hypreDevice_MaskedIVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y, HYPRE_Int *mask);
 HYPRE_Int hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v);
@@ -1515,6 +1603,16 @@ HYPRE_Int hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v);
 void hypre_NvtxPushRangeColor(const char *name, HYPRE_Int cid);
 void hypre_NvtxPushRange(const char *name);
 void hypre_NvtxPopRange();
+
+/* hypre_utilities.c */
+HYPRE_Int hypre_multmod(HYPRE_Int a, HYPRE_Int b, HYPRE_Int mod);
+void hypre_partition1D(HYPRE_Int n, HYPRE_Int p, HYPRE_Int j, HYPRE_Int *s, HYPRE_Int *e);
+
+HYPRE_Int hypre_SetSyncCudaCompute(HYPRE_Int action);
+HYPRE_Int hypre_RestoreSyncCudaCompute();
+HYPRE_Int hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr);
+HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
+
 
 #ifdef __cplusplus
 }

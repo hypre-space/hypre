@@ -34,7 +34,7 @@ blocks of rows as follows:
    \end{array}
    \right]
 
-In the above example, the matrix is distributed accross the :math:`P` processes,
+In the above example, the matrix is distributed across the :math:`P` processes,
 :math:`0, 1, ..., P-1` by blocks of rows.  Each submatrix :math:`A_p` is "owned"
 by a single process and its first and last row numbers are given by the global
 indices ``ilower`` and ``iupper`` in the ``Create()`` call below.
@@ -208,8 +208,5 @@ The straightforward approach to determining neighbors involves constructing a
 global partition of the data.  This approach, however, requires :math:`O(P)`
 storage and computations and is not scalable for machines with tens of thousands
 of processors.  The *assumed partition* algorithm was developed to address this
-problem [BaFY2006]_.  It is used by default in hypre and is recommended in
-general.  For modest numbers of processors (less than a hundred or so), a global
-partition may produce slightly faster results and can be turned on by compiling
-the library as detailed in Section :ref:`config_options`.
+problem [BaFY2006]_.  It is the approach used in hypre.
 

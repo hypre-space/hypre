@@ -1,0 +1,13 @@
+*.o
+*.obj
+*.a
+*.so
+*.out.*
+*.err.*
+*.err
+*.out
+config.log
+config.status
+Makefile.config
+HYPRE_config.h
+autom4te.cache

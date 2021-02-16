@@ -1363,7 +1363,7 @@ matrix_matrix_product(    HYPRE_Int **i_element_edge_pointer,
       }
    }
 
-   free(j_local_element_edge);
+   hypre_TFree(j_local_element_edge, HYPRE_MEMORY_HOST);
 
    for (i=0; i < num_elements; i++)
       i_element_edge[i+1] += i_element_edge[i];

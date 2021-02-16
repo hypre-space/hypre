@@ -634,14 +634,15 @@ SUPERLU_INCLUDE
 CALIPER_LIBS
 CALIPER_INCLUDE
 HYPRE_CUDA_LIBS
-HYPRE_CUDA_INCL
+HYPRE_CUDA_INCLUDE
 CUFLAGS
-HYPRE_KOKKOS_INC_FILE
-KOKKOS_LIBS
+HYPRE_UMPIRE_LIB
+HYPRE_UMPIRE_INCLUDE
+HYPRE_UMPIRE_LIB_DIR
 HYPRE_KOKKOS_LIB
 HYPRE_KOKKOS_INCLUDE
 HYPRE_KOKKOS_LIB_DIR
-RAJA_LIBS
+HYPRE_KOKKOS_SRC_DIR
 HYPRE_RAJA_LIB
 HYPRE_RAJA_INCLUDE
 HYPRE_RAJA_LIB_DIR
@@ -649,7 +650,6 @@ LAPACKLIBS
 LAPACKLIBDIRS
 BLASLIBS
 BLASLIBDIRS
-HYPRE_KOKKOS_PATH
 HYPRE_FEI_FEMLI_FILES
 HYPRE_FEI_HYPRE_FILES
 HYPRE_FEI_SUBDIRS
@@ -770,8 +770,6 @@ enable_complex
 enable_maxdim
 enable_persistent
 enable_hopscotch
-with_no_global_partition
-enable_global_partition
 enable_fortran
 enable_unified_memory
 enable_cuda_streams
@@ -796,6 +794,7 @@ with_MPI_lib_dirs
 with_MPI_flags
 with_node_aware_mpi
 with_node_aware_mpi_include
+with_memory_tracker
 with_blas_lib
 with_blas_libs
 with_blas_lib_dirs
@@ -820,15 +819,24 @@ with_mli
 with_MPI
 with_cuda
 with_raja
-with_kokkos
 with_raja_include
 with_raja_lib
 with_raja_libs
 with_raja_lib_dirs
-with_kokkos_lib_dirs
+with_kokkos
 with_kokkos_include
 with_kokkos_lib
 with_kokkos_libs
+with_kokkos_lib_dirs
+with_umpire_host
+with_umpire_device
+with_umpire_um
+with_umpire_pinned
+with_umpire
+with_umpire_include
+with_umpire_lib
+with_umpire_libs
+with_umpire_lib_dirs
 with_caliper
 with_caliper_include
 with_caliper_lib
@@ -1477,8 +1485,6 @@ Optional Features:
   --enable-persistent     Uses persistent communication (default is NO).
   --enable-hopscotch      Uses hopscotch hashing if configured with OpenMP and
                           atomic capability available(default is NO).
-  --enable-global-partition
-                          Use global partitioning (default is NO).
   --enable-fortran        Require a working Fortran compiler (default is YES).
   --enable-unified-memory Use unified memory for allocating the memory
                           (default is NO).
@@ -1493,7 +1499,6 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-
   --with-LD=ARG           Set linker to ARG. The environment variable 'LD'
                           will be overridden.
   --with-LDFLAGS=ARG      User can manually set linker flags. The 'LDFLAGS'
@@ -1544,6 +1549,7 @@ Optional Packages:
   --with-node-aware-mpi   Use Node Aware MPI (default is NO).
   --with-node-aware-mpi-include=DIR
                           User specifies that nap_comm.hpp is in DIR.
+  --with-memory-tracker   Use memory tracker in hypre (default is NO).
   --with-blas-lib=LIBS    LIBS is space-separated linkable list (enclosed in
                           quotes) of libraries needed for BLAS. OK to use -L
                           and -l flags in the list
@@ -1608,8 +1614,6 @@ Optional Packages:
                           NO).
   --with-raja             Use RAJA. Require RAJA package to be compiled
                           properly (default is NO).
-  --with-kokkos           Use Kokkos. Require kokkos package to be compiled
-                          properly(default is NO).
   --with-raja-include=DIR User specifies that RAJA/*.h is in DIR. The options
                           --with-raja-include --with-raja-libs and
                           --with-raja-lib-dirs must be used together.
@@ -1626,12 +1630,8 @@ Optional Packages:
                           --with-raja-libs, e.g "usr/lib /usr/local/lib". The
                           options --with-raja-libs and --raja-blas-lib-dirs
                           must be used together.
-  --with-kokkos-lib-dirs=DIRS
-                          DIRS is space-separated list (enclosed in quotes) of
-                          directories containing the libraries and
-                          Makefile.kokkos is assumed to be in DIRS/../ . The
-                          options --with-kokkos-libs and --with-kokkos-dirs
-                          must be used together.
+  --with-kokkos           Use Kokkos. Require kokkos package to be compiled
+                          properly(default is NO).
   --with-kokkos-include=DIR
                           User specifies that KOKKOS headers is in DIR. The
                           options --with-kokkos-include --with-kokkos-libs and
@@ -1643,6 +1643,39 @@ Optional Packages:
                           libraries needed for KOKKOS (base name only). The
                           options --with-kokkos-libs and --with-kokkos-dirs
                           must be used together.
+  --with-kokkos-lib-dirs=DIRS
+                          DIRS is space-separated list (enclosed in quotes) of
+                          directories containing the libraries and
+                          Makefile.kokkos is assumed to be in DIRS/../ . The
+                          options --with-kokkos-libs and --with-kokkos-dirs
+                          must be used together.
+  --with-umpire-host      Use Umpire Allocator for host memory (default is
+                          NO).
+  --with-umpire-device    Use Umpire Allocator for device memory (default is
+                          NO).
+  --with-umpire-um        Use Umpire Allocator for unified memory (default is
+                          NO).
+  --with-umpire-pinned    Use Umpire Allocator for pinned memory (default is
+                          NO).
+  --with-umpire           Use Umpire Allocator for device and unified memory
+                          (default is NO).
+  --with-umpire-include=DIR
+                          User specifies that UMPIRE headers is in DIR. The
+                          options --with-umpire-include --with-umpire-libs and
+                          --with-umpire-dirs must be used together.
+  --with-umpire-lib=LIBS  LIBS is space-separated linkable list (enclosed in
+                          quotes) of libraries needed for UMPIRE. OK to use -L
+                          and -l flags in the list
+  --with-umpire-libs=LIBS LIBS is space-separated list (enclosed in quotes) of
+                          libraries needed for UMPIRE (base name only). The
+                          options --with-umpire-libs and --with-umpire-dirs
+                          must be used together.
+  --with-umpire-lib-dirs=DIRS
+                          DIRS is space-separated list (enclosed in quotes) of
+                          directories containing the libraries specified by
+                          --with-umpire-libs, e.g "usr/lib /usr/local/lib".
+                          The options --with-umpire-libs and
+                          --with-umpire-dirs must be used together.
   --with-caliper          Use Caliper instrumentation (default is NO).
   --with-caliper-include=DIR
                           Directory where Caliper is installed.
@@ -2652,6 +2685,11 @@ hypre_using_cusparse=yes
 hypre_using_cublas=no
 hypre_using_curand=yes
 hypre_using_cub=no
+hypre_using_umpire=no
+hypre_using_umpire_host=no
+hypre_using_umpire_device=no
+hypre_using_umpire_um=no
+hypre_using_umpire_pinned=no
 
 hypre_using_caliper=no
 hypre_user_gave_caliper_lib=no
@@ -2660,6 +2698,7 @@ hypre_user_gave_caliper_inc=no
 hypre_found_cuda=no
 
 hypre_using_node_aware_mpi=no
+hypre_using_memory_tracker=no
 
 hypre_blas_lib_old_style=no
 hypre_blas_lib_dir_old_style=no
@@ -2929,29 +2968,6 @@ then
 $as_echo "#define HYPRE_HOPSCOTCH 1" >>confdefs.h
 
 fi
-
-hypre_using_global_partition=no
-
-# Check whether --with-no-global-partition was given.
-if test "${with_no_global_partition+set}" = set; then :
-  withval=$with_no_global_partition; case "${withval}" in
-    yes) hypre_using_global_partition=no ;;
-    no)  hypre_using_global_partition=yes ;;
-    *)   hypre_using_global_partition=no ;;
- esac
-
-fi
-
-# Check whether --enable-global-partition was given.
-if test "${enable_global_partition+set}" = set; then :
-  enableval=$enable_global_partition; case "${enableval}" in
-    yes) hypre_using_global_partition=yes ;;
-    no)  hypre_using_global_partition=no ;;
-    *)   hypre_using_global_partition=yes ;;
- esac
-
-fi
-
 
 # Check whether --enable-fortran was given.
 if test "${enable_fortran+set}" = set; then :
@@ -3470,6 +3486,20 @@ fi
 
 
 
+# Check whether --with-memory_tracker was given.
+if test "${with_memory_tracker+set}" = set; then :
+  withval=$with_memory_tracker; case "$withval" in
+    yes) hypre_using_memory_tracker=yes;;
+    no)  hypre_using_memory_tracker=no ;;
+    *)   hypre_using_memory_tracker=no ;;
+ esac
+else
+  hypre_using_memory_tracker=no
+
+fi
+
+
+
 
 # Check whether --with-blas-lib was given.
 if test "${with_blas_lib+set}" = set; then :
@@ -3784,7 +3814,7 @@ fi
 if test "${with_cuda+set}" = set; then :
   withval=$with_cuda; case "$withval" in
     yes) hypre_user_chose_cuda=yes
-    	 hypre_using_cuda=yes ;;
+         hypre_using_cuda=yes ;;
     no)  hypre_using_cuda=no ;;
     *)   hypre_using_cuda=no ;;
  esac
@@ -3805,19 +3835,6 @@ if test "${with_raja+set}" = set; then :
  esac
 else
   hypre_using_raja=no
-
-fi
-
-
-
-
-# Check whether --with-kokkos was given.
-if test "${with_kokkos+set}" = set; then :
-  withval=$with_kokkos; case "$withval" in
-    yes) hypre_user_chose_kokkos=yes ;;
-    no)  hypre_user_chose_kokkos=no ;;
-    *)   hypre_user_chose_kokkos=no ;;
- esac
 
 fi
 
@@ -3867,12 +3884,14 @@ fi
 
 
 
-# Check whether --with-kokkos-lib-dirs was given.
-if test "${with_kokkos_lib_dirs+set}" = set; then :
-  withval=$with_kokkos_lib_dirs; for kokkos_lib_dir in $withval; do
-    HYPRE_KOKKOS_LIB_DIR="-L$kokkos_lib_dir $HYPRE_KOKKOS_LIB_DIR"
- done;
-hypre_user_chose_kokkos=yes
+
+# Check whether --with-kokkos was given.
+if test "${with_kokkos+set}" = set; then :
+  withval=$with_kokkos; case "$withval" in
+    yes) hypre_user_chose_kokkos=yes ;;
+    no)  hypre_user_chose_kokkos=no ;;
+    *)   hypre_user_chose_kokkos=no ;;
+ esac
 
 fi
 
@@ -3906,6 +3925,130 @@ if test "${with_kokkos_libs+set}" = set; then :
     HYPRE_KOKKOS_LIB="-l$kokkos_lib $HYPRE_KOKKOS_LIB"
  done;
 hypre_user_chose_kokkos=yes
+
+fi
+
+
+
+# Check whether --with-kokkos-lib-dirs was given.
+if test "${with_kokkos_lib_dirs+set}" = set; then :
+  withval=$with_kokkos_lib_dirs; for kokkos_lib_dir in $withval; do
+    HYPRE_KOKKOS_LIB_DIR="-L$kokkos_lib_dir $HYPRE_KOKKOS_LIB_DIR"
+ done;
+hypre_user_chose_kokkos=yes
+
+fi
+
+
+
+
+# Check whether --with-umpire-host was given.
+if test "${with_umpire_host+set}" = set; then :
+  withval=$with_umpire_host; case "${withval}" in
+    yes) hypre_using_umpire_host=yes ;;
+    no)  hypre_using_umpire_host=no ;;
+    *)   hypre_using_umpire_host=no ;;
+ esac
+else
+  hypre_using_umpire_host=no
+
+fi
+
+
+
+# Check whether --with-umpire-device was given.
+if test "${with_umpire_device+set}" = set; then :
+  withval=$with_umpire_device; case "${withval}" in
+    yes) hypre_using_umpire_device=yes ;;
+    no)  hypre_using_umpire_device=no ;;
+    *)   hypre_using_umpire_device=no ;;
+ esac
+else
+  hypre_using_umpire_device=no
+
+fi
+
+
+
+# Check whether --with-umpire-um was given.
+if test "${with_umpire_um+set}" = set; then :
+  withval=$with_umpire_um; case "${withval}" in
+    yes) hypre_using_umpire_um=yes ;;
+    no)  hypre_using_umpire_um=no ;;
+    *)   hypre_using_umpire_um=no ;;
+ esac
+else
+  hypre_using_umpire_um=no
+
+fi
+
+
+
+# Check whether --with-umpire-pinned was given.
+if test "${with_umpire_pinned+set}" = set; then :
+  withval=$with_umpire_pinned; case "${withval}" in
+    yes) hypre_using_umpire_pinned=yes ;;
+    no)  hypre_using_umpire_pinned=no ;;
+    *)   hypre_using_umpire_pinned=no ;;
+ esac
+else
+  hypre_using_umpire_pinned=no
+
+fi
+
+
+
+# Check whether --with-umpire was given.
+if test "${with_umpire+set}" = set; then :
+  withval=$with_umpire; case "${withval}" in
+    yes) hypre_using_umpire_device=yes
+         hypre_using_umpire_um=yes ;;
+    no) ;;
+    *) ;;
+ esac
+fi
+
+
+
+# Check whether --with-umpire-include was given.
+if test "${with_umpire_include+set}" = set; then :
+  withval=$with_umpire_include; for umpire_dir in $withval; do
+HYPRE_UMPIRE_INCLUDE="-I$umpire_dir $HYPRE_UMPIRE_INCLUDE"
+done;
+
+
+fi
+
+
+
+# Check whether --with-umpire-lib was given.
+if test "${with_umpire_lib+set}" = set; then :
+  withval=$with_umpire_lib; for umpire_lib in $withval; do
+       HYPRE_UMPIRE_LIB="$umpire_lib $HYPRE_UMPIRE_LIB"
+ done;
+
+
+fi
+
+
+
+# Check whether --with-umpire-libs was given.
+if test "${with_umpire_libs+set}" = set; then :
+  withval=$with_umpire_libs; for umpire_lib in $withval; do
+    HYPRE_UMPIRE_LIB="-l$umpire_lib $HYPRE_UMPIRE_LIB"
+ done;
+
+
+fi
+
+
+
+# Check whether --with-umpire-lib-dirs was given.
+if test "${with_umpire_lib_dirs+set}" = set; then :
+  withval=$with_umpire_lib_dirs; for umpire_lib_dir in $withval; do
+    HYPRE_UMPIRE_LIB_DIR="-L$umpire_lib_dir $HYPRE_UMPIRE_LIB_DIR"
+ done;
+
 
 fi
 
@@ -7253,17 +7396,17 @@ $as_echo "#define HYPRE_HAVE_MPI_COMM_F2C 1" >>confdefs.h
    fi
 fi
 
-if test "$hypre_using_global_partition" = "no"
-then
-
-$as_echo "#define HYPRE_NO_GLOBAL_PARTITION 1" >>confdefs.h
-
-fi
-
 if test "$hypre_using_node_aware_mpi" = "yes"
 then
 
 $as_echo "#define HYPRE_USING_NODE_AWARE_MPI 1" >>confdefs.h
+
+fi
+
+if test "$hypre_using_memory_tracker" = "yes"
+then
+
+$as_echo "#define HYPRE_USING_MEMORY_TRACKER 1" >>confdefs.h
 
 fi
 
@@ -7765,7 +7908,7 @@ then
 
 if test "x${hypre_user_chose_cflags}" = "xno"
 then
-   case "${CC}" in
+   case `basename "${CC}"` in
       gcc|mpigcc|mpicc)
         CFLAGS="-g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
@@ -7805,7 +7948,7 @@ fi
 
 if test "x${hypre_user_chose_cxxflags}" = "xno"
 then
-   case "${CXX}" in
+   case `basename "${CXX}"` in
       g++|gCC|mpig++|mpicxx|mpic++|mpiCC)
         CXXFLAGS="-g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
@@ -7841,7 +7984,7 @@ fi
 
 if test "x${hypre_user_chose_fflags}" = "xno"
 then
-   case "${FC}" in
+   case `basename "${FC}"` in
       g77|gfortran|mpigfortran|mpif77)
         FFLAGS="-g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
@@ -7881,7 +8024,7 @@ else
 
 if test "x${hypre_user_chose_cflags}" = "xno"
 then
-   case "${CC}" in
+   case `basename "${CC}"` in
       gcc|mpigcc|mpicc)
         CFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
@@ -7921,7 +8064,7 @@ fi
 
 if test "x${hypre_user_chose_cxxflags}" = "xno"
 then
-   case "${CXX}" in
+   case `basename "${CXX}"` in
       g++|gCC|mpig++|mpicxx|mpic++|mpiCC)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
@@ -7957,7 +8100,7 @@ fi
 
 if test "x${hypre_user_chose_fflags}" = "xno"
 then
-   case "${FC}" in
+   case `basename "${FC}"` in
       g77|gfortran|mpigfortran|mpif77)
         FFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
@@ -8345,7 +8488,6 @@ fi
 
 if test "x$hypre_user_chose_raja" = "xyes"
 then
-   RAJA_LIBS=" $HYPRE_RAJA_LIB_DIR $HYPRE_RAJA_LIB "
 
 $as_echo "#define HYPRE_USING_RAJA 1" >>confdefs.h
 
@@ -8365,7 +8507,6 @@ fi
 
 if test "x$hypre_user_chose_kokkos" = "xyes"
 then
-   KOKKOS_LIBS="$HYPRE_KOKKOS_LIB_DIR $HYPRE_KOKKOS_LIB"
 
 $as_echo "#define HYPRE_USING_KOKKOS 1" >>confdefs.h
 
@@ -8383,8 +8524,51 @@ $as_echo "#define HYPRE_USING_KOKKOS 1" >>confdefs.h
    CFLAGS=${CXXFLAGS}
 fi
 
+if test "x$hypre_using_umpire_host" = "xyes"
+then
+   hypre_using_umpire=yes
+
+$as_echo "#define HYPRE_USING_UMPIRE_HOST 1" >>confdefs.h
+
+fi
+
+if test "x$hypre_using_umpire_device" = "xyes"
+then
+   hypre_using_umpire=yes
+
+$as_echo "#define HYPRE_USING_UMPIRE_DEVICE 1" >>confdefs.h
+
+fi
+
+if test "x$hypre_using_umpire_um" = "xyes"
+then
+   hypre_using_umpire=yes
+
+$as_echo "#define HYPRE_USING_UMPIRE_UM 1" >>confdefs.h
+
+fi
+
+if test "x$hypre_using_umpire_pinned" = "xyes"
+then
+   hypre_using_umpire=yes
+
+$as_echo "#define HYPRE_USING_UMPIRE_PINNED 1" >>confdefs.h
+
+fi
+
+if test "x$hypre_using_umpire" = "xyes"
+then
+
+$as_echo "#define HYPRE_USING_UMPIRE 1" >>confdefs.h
+
+fi
+
 if test "$hypre_user_chose_cuda" = "yes"
 then
+
+$as_echo "#define HYPRE_USING_GPU 1" >>confdefs.h
+
+
 
 $as_echo "#define HYPRE_USING_CUDA 1" >>confdefs.h
 
@@ -8497,7 +8681,7 @@ done
    CUFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
 
       LDFLAGS="-ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -Xcompiler \"${LDFLAGS}\""
-   HYPRE_CUDA_INCL="-I${HYPRE_CUDA_PATH}/include"
+   HYPRE_CUDA_INCLUDE="-I${HYPRE_CUDA_PATH}/include"
    HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcudart"
    if test "$hypre_using_nvtx" = "yes"
    then
@@ -8570,7 +8754,13 @@ $as_echo "#define HYPRE_USING_NVTX 1" >>confdefs.h
 
    fi
 
+
 $as_echo "#define HYPRE_USING_DEVICE_OPENMP 1" >>confdefs.h
+
+
+
+$as_echo "#define HYPRE_USING_GPU 1" >>confdefs.h
+
 
 
 $as_echo "#define HYPRE_DEVICE_OPENMP_ALLOC 1" >>confdefs.h
@@ -8595,7 +8785,7 @@ $as_echo "#define HYPRE_DEVICE_OPENMP_CHECK 1" >>confdefs.h
 
    fi
 
-   HYPRE_CUDA_INCL="-I${HYPRE_CUDA_PATH}/include"
+   HYPRE_CUDA_INCLUDE="-I${HYPRE_CUDA_PATH}/include"
    HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcusparse -lcudart -lcurand"
    if test "$hypre_using_nvtx" = "yes"
    then
@@ -8649,11 +8839,14 @@ then
    fi
 fi
 
-if test "x$hypre_using_cuda_streams" = "xyes"
+if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes"
 then
+   if test "x$hypre_using_cuda_streams" = "xyes"]
+   then
 
 $as_echo "#define HYPRE_USING_CUDA_STREAMS 1" >>confdefs.h
 
+   fi
 fi
 
 if test "x$hypre_using_um" = "xyes"
@@ -8797,6 +8990,7 @@ $as_echo "#define HYPRE_LINUX 1" >>confdefs.h
          fi
          ;;
    esac
+
 
 
 

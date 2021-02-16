@@ -4,6 +4,66 @@
 #ifndef hypre_UTILITIES_HPP
 #define hypre_UTILITIES_HPP
 
+#ifdef __cplusplus
+extern "C++" {
+#endif
+
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+#ifndef HYPRE_UMPIRE_ALLOCATOR_H
+#define HYPRE_UMPIRE_ALLOCATOR_H
+
+#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_UMPIRE_DEVICE)
+
+/*
+#include "umpire/Allocator.hpp"
+#include "umpire/ResourceManager.hpp"
+
+#include "umpire/strategy/DynamicPool.hpp"
+#include "umpire/strategy/AllocationAdvisor.hpp"
+#include "umpire/strategy/MonotonicAllocationStrategy.hpp"
+#include "umpire/util/Macros.hpp"
+*/
+
+struct hypre_umpire_device_allocator
+{
+   typedef char value_type;
+
+   hypre_umpire_device_allocator()
+   {
+      // constructor
+   }
+
+   ~hypre_umpire_device_allocator()
+   {
+      // destructor
+   }
+
+   char *allocate(std::ptrdiff_t num_bytes)
+   {
+      char *ptr = NULL;
+      hypre_umpire_device_pooled_allocate((void**) &ptr, num_bytes);
+
+      return ptr;
+   }
+
+   void deallocate(char *ptr, size_t n)
+   {
+      hypre_umpire_device_pooled_free(ptr);
+   }
+};
+
+#endif /* #ifdef HYPRE_USING_UMPIRE_DEVICE */
+#endif /* #if defined(HYPRE_USING_CUDA) */
+
+#endif
+
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -13,10 +73,6 @@
 
 #ifndef HYPRE_CUDA_UTILS_H
 #define HYPRE_CUDA_UTILS_H
-
-#ifdef __cplusplus
-extern "C++" {
-#endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
@@ -34,6 +90,15 @@ extern "C++" {
 #ifndef CUDA_VERSION
 #error CUDA_VERSION Undefined!
 #endif
+
+#if CUDA_VERSION >= 11000
+#define THRUST_IGNORE_DEPRECATED_CPP11
+#define CUB_IGNORE_DEPRECATED_CPP11
+#define THRUST_IGNORE_DEPRECATED_CPP_DIALECT
+#define CUB_IGNORE_DEPRECATED_CPP_DIALECT
+#endif
+
+#define CUSPARSE_NEWAPI_VERSION 11000
 
 #define HYPRE_CUDA_CALL(call) do {                                                           \
    cudaError_t err = call;                                                                   \
@@ -54,8 +119,8 @@ extern "C++" {
 #define HYPRE_CUSPARSE_CALL(call) do {                                                       \
    cusparseStatus_t err = call;                                                              \
    if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
-      hypre_printf("CUSPARSE ERROR (code = %d, %d) at %s:%d\n",                              \
-            err, err == CUSPARSE_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);               \
+      hypre_printf("CUSPARSE ERROR (code = %d, %s) at %s:%d\n",                              \
+            err, cusparseGetErrorString(err), __FILE__, __LINE__);                           \
       assert(0); exit(1);                                                                    \
    } } while(0)
 
@@ -70,7 +135,9 @@ extern "C++" {
 struct hypre_cub_CachingDeviceAllocator;
 typedef struct hypre_cub_CachingDeviceAllocator hypre_cub_CachingDeviceAllocator;
 
+// HYPRE_WARP_BITSHIFT is just log2 of HYPRE_WARP_SIZE
 #define HYPRE_WARP_SIZE       32
+#define HYPRE_WARP_BITSHIFT   5
 #define HYPRE_WARP_FULL_MASK  0xFFFFFFFF
 #define HYPRE_MAX_NUM_WARPS   (64 * 64 * 32)
 #define HYPRE_FLT_LARGE       1e30
@@ -92,12 +159,13 @@ struct hypre_CudaData
    hypre_cub_CachingDeviceAllocator *cub_dev_allocator;
    hypre_cub_CachingDeviceAllocator *cub_uvm_allocator;
 #endif
+#ifdef HYPRE_USING_UMPIRE_DEVICE
+   hypre_umpire_device_allocator     umpire_device_allocator;
+#endif
    HYPRE_Int                         cuda_device;
    /* by default, hypre puts GPU computations in this stream
     * Do not be confused with the default (null) CUDA stream */
    HYPRE_Int                         cuda_compute_stream_num;
-   /* if synchronize the stream after computations */
-   HYPRE_Int                         cuda_compute_stream_sync;
    /* work space for hypre's CUDA reducer */
    void                             *cuda_reduce_buffer;
    /* the device buffers needed to do MPI communication for struct comm */
@@ -122,7 +190,6 @@ struct hypre_CudaData
 #define hypre_CudaDataCubUvmAllocator(data)                ((data) -> cub_uvm_allocator)
 #define hypre_CudaDataCudaDevice(data)                     ((data) -> cuda_device)
 #define hypre_CudaDataCudaComputeStreamNum(data)           ((data) -> cuda_compute_stream_num)
-#define hypre_CudaDataCudaComputeStreamSync(data)          ((data) -> cuda_compute_stream_sync)
 #define hypre_CudaDataCudaReduceBuffer(data)               ((data) -> cuda_reduce_buffer)
 #define hypre_CudaDataStructCommRecvBuffer(data)           ((data) -> struct_comm_recv_buffer)
 #define hypre_CudaDataStructCommSendBuffer(data)           ((data) -> struct_comm_send_buffer)
@@ -134,14 +201,31 @@ struct hypre_CudaData
 #define hypre_CudaDataSpgemmRownnzEstimateNsamples(data)   ((data) -> spgemm_rownnz_estimate_nsamples)
 #define hypre_CudaDataSpgemmRownnzEstimateMultFactor(data) ((data) -> spgemm_rownnz_estimate_mult_factor)
 #define hypre_CudaDataSpgemmHashType(data)                 ((data) -> spgemm_hash_type)
+#define hypre_CudaDataUmpireDeviceAllocator(data)          ((data) -> umpire_device_allocator)
 
-cudaStream_t hypre_CudaDataCudaComputeStream(hypre_CudaData *data);
 hypre_CudaData* hypre_CudaDataCreate();
 void hypre_CudaDataDestroy(hypre_CudaData* data);
-curandGenerator_t hypre_CudaDataCurandGenerator(hypre_CudaData *data);
-cublasHandle_t hypre_CudaDataCublasHandle(hypre_CudaData *data);
-cusparseHandle_t hypre_CudaDataCusparseHandle(hypre_CudaData *data);
+
+curandGenerator_t  hypre_CudaDataCurandGenerator(hypre_CudaData *data);
+cublasHandle_t     hypre_CudaDataCublasHandle(hypre_CudaData *data);
+cusparseHandle_t   hypre_CudaDataCusparseHandle(hypre_CudaData *data);
 cusparseMatDescr_t hypre_CudaDataCusparseMatDescr(hypre_CudaData *data);
+cudaStream_t       hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i);
+cudaStream_t       hypre_CudaDataCudaComputeStream(hypre_CudaData *data);
+
+// Data structure and accessor routines for Cuda Sparse Triangular Matrices
+struct hypre_CsrsvData
+{
+   csrsv2Info_t info_L;
+   csrsv2Info_t info_U;
+   hypre_int    BufferSize;
+   char        *Buffer;
+};
+
+#define hypre_CsrsvDataInfoL(data)      ((data) -> info_L)
+#define hypre_CsrsvDataInfoU(data)      ((data) -> info_U)
+#define hypre_CsrsvDataBufferSize(data) ((data) -> BufferSize)
+#define hypre_CsrsvDataBuffer(data)     ((data) -> Buffer)
 
 #endif //#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
@@ -214,8 +298,13 @@ using namespace thrust::placeholders;
 
 /* RL: TODO Want macro HYPRE_THRUST_CALL to return value but I don't know how to do it right
  * The following one works OK for now */
+#ifdef HYPRE_USING_UMPIRE_DEVICE
+#define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
+   thrust::func_name(thrust::cuda::par(hypre_HandleUmpireDeviceAllocator(hypre_handle())).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
+#else
 #define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
    thrust::func_name(thrust::cuda::par.on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
+#endif
 
 /* return the number of threads in block */
 template <hypre_int dim>
@@ -259,7 +348,7 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_cuda_get_num_warps()
 {
-   return hypre_cuda_get_num_threads<dim>() >> 5;
+   return hypre_cuda_get_num_threads<dim>() >> HYPRE_WARP_BITSHIFT;
 }
 
 /* return the warp id in block */
@@ -267,7 +356,7 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_cuda_get_warp_id()
 {
-   return hypre_cuda_get_thread_id<dim>() >> 5;
+   return hypre_cuda_get_thread_id<dim>() >> HYPRE_WARP_BITSHIFT;
 }
 
 /* return the thread lane id in warp */
@@ -630,7 +719,6 @@ struct is_nonnegative : public thrust::unary_function<T,bool>
    }
 };
 
-
 template<typename T>
 struct in_range : public thrust::unary_function<T, bool>
 {
@@ -734,16 +822,17 @@ cudaError_t hypre_CachingFreeManaged(void *ptr);
 
 void hypre_CudaDataCubCachingAllocatorDestroy(hypre_CudaData *data);
 
-cudaStream_t hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i);
-
 #endif // #if defined(HYPRE_USING_CUDA)
 
-#ifdef __cplusplus
-}
-#endif
+#if defined(HYPRE_USING_CUSPARSE)
+
+cudaDataType hypre_HYPREComplexToCudaDataType();
+
+cusparseIndexType_t hypre_HYPREIntToCusparseIndexType();
+
+#endif // #if defined(HYPRE_USING_CUSPARSE)
 
 #endif /* #ifndef HYPRE_CUDA_UTILS_H */
-
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -758,10 +847,6 @@ cudaStream_t hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i);
 
 #if defined(HYPRE_USING_CUDA)
 #if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS)
-
-#ifdef __cplusplus
-extern "C++" {
-#endif
 
 template<typename T> void OneBlockReduce(T *d_arr, HYPRE_Int N, T *h_out);
 
@@ -892,7 +977,7 @@ T blockReduceSum(T val)
    //HYPRE_Int lane = threadIdx.x % warpSize;
    //HYPRE_Int wid  = threadIdx.x / warpSize;
    HYPRE_Int lane = threadIdx.x & (warpSize - 1);
-   HYPRE_Int wid  = threadIdx.x >> 5;
+   HYPRE_Int wid  = threadIdx.x >> HYPRE_WARP_BITSHIFT;
 
    val = warpReduceSum(val);       // Each warp performs partial reduction
 
@@ -1016,14 +1101,9 @@ struct ReduceSum
    }
 };
 
-#ifdef __cplusplus
-}
-#endif
-
 #endif /* #if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) */
 #endif /* #if defined(HYPRE_USING_CUDA) */
 #endif /* #ifndef HYPRE_CUDA_REDUCER_H */
-
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
  * Copyright (c) 2011-2018, NVIDIA CORPORATION.  All rights reserved.
@@ -1061,10 +1141,6 @@ struct ReduceSum
 #define HYPRE_CUB_ALLOCATOR_HEADER
 
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUB_ALLOCATOR)
-
-#ifdef __cplusplus
-extern "C++" {
-#endif
 
 #include <set>
 #include <map>
@@ -1853,14 +1929,13 @@ struct hypre_cub_CachingDeviceAllocator
     }
 };
 
+#endif // #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUB_ALLOCATOR)
+#endif // #ifndef HYPRE_CUB_ALLOCATOR_HEADER
+
+
 #ifdef __cplusplus
 }
 #endif
-
-#endif // #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUB_ALLOCATOR)
-
-#endif // #ifndef HYPRE_CUB_ALLOCATOR_HEADER
-
 
 #endif
 

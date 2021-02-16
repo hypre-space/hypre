@@ -325,7 +325,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
       hypre_SerialBoxLoop0Begin(ndim, loop_size);
       {
          pshift = pshifts[p];
-         hypre_BoxLoopGetIndex(pshift);
+         zypre_BoxLoopGetIndex(pshift);
          hypre_AddIndexes(pshift, hypre_BoxIMin(box), ndim, pshift);
          notcenter = 0;
          for (d = 0; d < ndim; d++)

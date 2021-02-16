@@ -82,6 +82,7 @@
 #include "HYPRE_sstruct_mv.h"
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE.h"
+#include "ex.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979
@@ -168,6 +169,9 @@ int main (int argc, char *argv[])
 
    /* Initialize HYPRE */
    HYPRE_Init();
+
+   /* Print GPU info */
+   HYPRE_PrintDeviceInfo();
 
    /* Set default parameters */
    n = 10;

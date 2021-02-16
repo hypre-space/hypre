@@ -492,7 +492,7 @@ HYPRE_Int hypre_SStructKrylovIdentitySetup ( void *vdata , void *A , void *b , v
 HYPRE_Int hypre_SStructKrylovIdentity ( void *vdata , void *A , void *b , void *x );
 
 /* krylov_sstruct.c */
-void *hypre_SStructKrylovCAlloc ( HYPRE_Int count , HYPRE_Int elt_size );
+void *hypre_SStructKrylovCAlloc ( size_t count, size_t elt_size, HYPRE_MemoryLocation location );
 HYPRE_Int hypre_SStructKrylovFree ( void *ptr );
 void *hypre_SStructKrylovCreateVector ( void *vvector );
 void *hypre_SStructKrylovCreateVectorArray ( HYPRE_Int n , void *vvector );

@@ -156,7 +156,7 @@ hypre_APSubdivideRegion( hypre_Box      *region,
    hypre_SerialBoxLoop0Begin(ndim, div);
    {
       box = hypre_BoxArrayBox(box_array, count);
-      hypre_BoxLoopGetIndex(index);
+      zypre_BoxLoopGetIndex(index);
       for (i = 0; i < ndim; i++)
       {
          j = hypre_IndexD(index, i);

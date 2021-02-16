@@ -70,36 +70,9 @@ GenerateLaplacian( MPI_Comm       comm,
 
    local_num_rows = nx_local*ny_local*nz_local;
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-
    global_part = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
    global_part[0] = nz_part[ir]*nx*ny+(ny_part[iq]*nx+nx_part[ip]*ny_local)*nz_local;
    global_part[1] = global_part[0] + (HYPRE_BigInt)local_num_rows;
-
-#else
-
-   HYPRE_Int nx_size, ny_size, nz_size;
-   HYPRE_Int jx, jy, jz;
-   global_part = hypre_CTAlloc(HYPRE_BigInt, P*Q*R+1, HYPRE_MEMORY_HOST);
-
-   global_part[0] = 0;
-   cnt = 1;
-   for (jz = 0; jz < R; jz++)
-   {
-      nz_size = (HYPRE_Int)(nz_part[jz+1]-nz_part[jz]);
-      for (jy = 0; jy < Q; jy++)
-      {
-         ny_size = (HYPRE_Int)(ny_part[jy+1]-ny_part[jy]);
-         for (jx = 0; jx < P; jx++)
-         {
-            nx_size = (HYPRE_Int)(nx_part[jx+1] - nx_part[jx]);
-            global_part[cnt] = global_part[cnt-1];
-            global_part[cnt++] += (HYPRE_BigInt)(nx_size*ny_size*nz_size);
-         }
-      }
-   }
-
-#endif
 
    diag_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1, HYPRE_MEMORY_HOST);
    offd_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1, HYPRE_MEMORY_HOST);
@@ -459,37 +432,10 @@ GenerateSysLaplacian( MPI_Comm comm,
    local_grid_size = nx_local*ny_local*nz_local;
    local_num_rows = num_fun*local_grid_size;
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-
    global_part = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
    global_part[0] = nz_part[r]*nx*ny+(ny_part[q]*nx+nx_part[p]*ny_local)*nz_local;
    global_part[1] = global_part[0] + (HYPRE_BigInt)local_grid_size;
    gp_size = 2;
-
-#else
-
-   HYPRE_Int nx_size, ny_size, nz_size;
-   HYPRE_Int jx, jy, jz;
-   global_part = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
-
-   global_part[0] = 0;
-   cnt = 1;
-   for (jz = 0; jz < R; jz++)
-   {
-      nz_size = (HYPRE_Int)(nz_part[jz+1]-nz_part[jz]);
-      for (jy = 0; jy < Q; jy++)
-      {
-         ny_size = (HYPRE_Int)(ny_part[jy+1]-ny_part[jy]);
-         for (jx = 0; jx < P; jx++)
-         {
-            nx_size = (HYPRE_Int)(nx_part[jx+1] - nx_part[jx]);
-            global_part[cnt] = global_part[cnt-1];
-            global_part[cnt++] += (HYPRE_BigInt)(nx_size*ny_size*nz_size);
-         }
-      }
-   }
-   gp_size = num_procs+1;
-#endif
 
    diag_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1, HYPRE_MEMORY_HOST);
    offd_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1, HYPRE_MEMORY_HOST);
@@ -968,37 +914,10 @@ GenerateSysLaplacianVCoef( MPI_Comm       comm,
    nz_local = (HYPRE_Int)(nz_part[r+1] - nz_part[r]);
 
    local_grid_size = nx_local*ny_local*nz_local;
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-
    global_part = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
    global_part[0] = nz_part[r]*nx*ny+(ny_part[q]*nx+nx_part[p]*ny_local)*nz_local;
    global_part[1] = global_part[0] + (HYPRE_BigInt)local_grid_size;
    gp_size = 2;
-
-#else
-
-   HYPRE_Int nx_size, ny_size, nz_size;
-   HYPRE_Int jx, jy, jz;
-   global_part = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
-
-   global_part[0] = 0;
-   cnt = 1;
-   for (jz = 0; jz < R; jz++)
-   {
-      nz_size = (HYPRE_Int)(nz_part[jz+1]-nz_part[jz]);
-      for (jy = 0; jy < Q; jy++)
-      {
-         ny_size = (HYPRE_Int)(ny_part[jy+1]-ny_part[jy]);
-         for (jx = 0; jx < P; jx++)
-         {
-            nx_size = (HYPRE_Int)(nx_part[jx+1] - nx_part[jx]);
-            global_part[cnt] = global_part[cnt-1];
-            global_part[cnt++] += (HYPRE_BigInt)(nx_size*ny_size*nz_size);
-         }
-      }
-   }
-   gp_size = num_procs+1;
-#endif
 
    local_num_rows = num_fun*local_grid_size;
    diag_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1, HYPRE_MEMORY_HOST);

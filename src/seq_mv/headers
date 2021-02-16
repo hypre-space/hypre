@@ -37,11 +37,11 @@ extern "C" {
 # Structures and prototypes
 #===========================================================================
 
-cat csr_matrix.h          >> $INTERNAL_HEADER
-cat mapped_matrix.h       >> $INTERNAL_HEADER
-cat multiblock_matrix.h   >> $INTERNAL_HEADER
-cat vector.h              >> $INTERNAL_HEADER
-cat protos.h              >> $INTERNAL_HEADER
+cat csr_matrix.h            >> $INTERNAL_HEADER
+cat mapped_matrix.h         >> $INTERNAL_HEADER
+cat multiblock_matrix.h     >> $INTERNAL_HEADER
+cat vector.h                >> $INTERNAL_HEADER
+cat protos.h                >> $INTERNAL_HEADER
 
 #../utilities/protos *.c               >> $INTERNAL_HEADER
 

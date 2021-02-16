@@ -2041,19 +2041,12 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
 
          /*  Generate CSR matrix from ParCSRMatrix A */
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
          /* all processors are needed for these routines */
          A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A_ParCSR);
          f_vector = hypre_ParVectorToVectorAll(f);
-#endif
 
          if (n)
          {
-
-#ifndef HYPRE_NO_GLOBAL_PARTITION
-            A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A_ParCSR);
-            f_vector = hypre_ParVectorToVectorAll(f);
-#endif
             A_CSR_i = hypre_CSRMatrixI(A_CSR);
             A_CSR_j = hypre_CSRMatrixJ(A_CSR);
             A_CSR_data = hypre_CSRMatrixData(A_CSR);
@@ -2095,7 +2088,6 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
             f_vector = NULL;
          
          }
-#ifdef HYPRE_NO_GLOBAL_PARTITION
          else 
          {
             hypre_CSRMatrixDestroy(A_CSR);
@@ -2103,7 +2095,6 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
             hypre_SeqVectorDestroy(f_vector);
             f_vector = NULL;
          }
-#endif
 
          hypre_ParCSRMatrixDestroy(A_ParCSR);
          A_ParCSR = NULL;

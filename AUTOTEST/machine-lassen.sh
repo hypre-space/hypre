@@ -38,9 +38,9 @@ shift
 # Basic build and run tests
 mo="-j test"
 eo=""
-roij="-ij -ams -rt -mpibind -rtol 1e-3 -atol 1e-3"
+roij="-ij -ams -rt -mpibind -rtol 1e-3 -atol 2e-2"
 ross="-struct -sstruct -rt -mpibind -rtol 1e-6 -atol 1e-6"
-rost="-struct -rt -mpibind -rtol 1e-8 -atol 1e-8"
+rost="-struct -rt -mpibind -save cuda"
 rocuda="-cuda_lassen -rt -mpibind"
 
 # CUDA with UM
@@ -88,7 +88,6 @@ co="--with-cuda --enable-debug --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=150
 ./renametest.sh basic $output_dir/basic-cuda-nonum-struct
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $rocuda
 ./renametest.sh basic $output_dir/basic-cuda-nonum-cuda
-
 
 # OMP 4.5 w.o UM, only struct [in debug mode]
 co="--with-device-openmp --enable-debug --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' HYPRE_CUDA_SM=70"

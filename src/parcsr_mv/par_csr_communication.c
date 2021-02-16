@@ -342,13 +342,13 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
     * job = 11: similar to job = 1, but exchanges data of type HYPRE_Int (not HYPRE_Complex),
     *           requires send_data and recv_data to be ints
     *           recv_vec_starts and send_map_starts need to be set in comm_pkg.
-    * job = 12: similar to job = 1, but exchanges data of type HYPRE_Int (not HYPRE_Complex),
+    * job = 12: similar to job = 2, but exchanges data of type HYPRE_Int (not HYPRE_Complex),
     *           requires send_data and recv_data to be ints
     *           recv_vec_starts and send_map_starts need to be set in comm_pkg.
     * job = 21: similar to job = 1, but exchanges data of type HYPRE_BigInt (not HYPRE_Complex),
     *           requires send_data and recv_data to be ints
     *           recv_vec_starts and send_map_starts need to be set in comm_pkg.
-    * job = 22: similar to job = 1, but exchanges data of type HYPRE_BigInt (not HYPRE_Complex),
+    * job = 22: similar to job = 2, but exchanges data of type HYPRE_BigInt (not HYPRE_Complex),
     *           requires send_data and recv_data to be ints
     *           recv_vec_starts and send_map_starts need to be set in comm_pkg.
     * default: ignores send_data and recv_data, requires send_mpi_types
@@ -412,8 +412,9 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
 #else /* #ifndef HYPRE_WITH_GPU_AWARE_MPI */
    send_data = send_data_in;
    recv_data = recv_data_in;
-   // TODO RL
-   HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle())) );
+   // TODO RL: it seems that we need to sync the CUDA stream before doing GPU-GPU MPI.
+   // Need to check MPI documentation whether this is acutally true
+   hypre_SyncCudaComputeStream(hypre_handle());
 #endif
 
    num_requests = num_sends + num_recvs;
@@ -913,7 +914,6 @@ hypre_MatvecCommPkgCreate ( hypre_ParCSRMatrix *A )
    HYPRE_BigInt  first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
    HYPRE_BigInt *col_map_offd   = hypre_ParCSRMatrixColMapOffd(A);
    HYPRE_Int  num_cols_offd   = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    HYPRE_BigInt  global_num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
    /* Create the assumed partition and should own it */
    if  (hypre_ParCSRMatrixAssumedPartition(A) == NULL)
@@ -922,26 +922,15 @@ hypre_MatvecCommPkgCreate ( hypre_ParCSRMatrix *A )
       hypre_ParCSRMatrixOwnsAssumedPartition(A) = 1;
    }
    hypre_IJAssumedPart *apart = hypre_ParCSRMatrixAssumedPartition(A);
-#else
-   HYPRE_BigInt *col_starts   = hypre_ParCSRMatrixColStarts(A);
-   HYPRE_Int  num_cols_diag   = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
-#endif
    /*-----------------------------------------------------------
     * setup commpkg
     *----------------------------------------------------------*/
    hypre_ParCSRCommPkg *comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
    hypre_ParCSRMatrixCommPkg(A) = comm_pkg;
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    hypre_ParCSRCommPkgCreateApart ( comm, col_map_offd, first_col_diag,
                                     num_cols_offd, global_num_cols,
                                     apart,
                                     comm_pkg );
-#else
-   hypre_ParCSRCommPkgCreate      ( comm, col_map_offd, first_col_diag,
-                                    col_starts,
-                                    num_cols_diag, num_cols_offd,
-                                    comm_pkg );
-#endif
 
    return hypre_error_flag;
 }
@@ -1013,14 +1002,9 @@ hypre_ParCSRFindExtendCommPkg(MPI_Comm              comm,
    hypre_ParCSRCommPkg *new_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
    *extend_comm_pkg = new_comm_pkg;
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    hypre_assert(apart != NULL);
    hypre_ParCSRCommPkgCreateApart ( comm, indices, my_first, indices_len, global_num, apart,
                                     new_comm_pkg );
-#else
-   hypre_ParCSRCommPkgCreate      ( comm, indices, my_first, starts, local_num, indices_len,
-                                    new_comm_pkg );
-#endif
 
    return hypre_error_flag;
 }

@@ -1833,16 +1833,10 @@ hypre_BoomerAMGCreate2ndSHost( hypre_ParCSRMatrix  *S,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = coarse_row_starts[0];
    my_last_cpt = coarse_row_starts[1]-1;
    if (my_id == (num_procs -1)) global_num_coarse = coarse_row_starts[1];
    hypre_MPI_Bcast(&global_num_coarse, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   my_first_cpt = coarse_row_starts[my_id];
-   my_last_cpt = coarse_row_starts[my_id+1]-1;
-   global_num_coarse = coarse_row_starts[num_procs];
-#endif
 
    if (num_cols_offd_S)
    {

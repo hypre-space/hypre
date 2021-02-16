@@ -36,10 +36,6 @@
 
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUB_ALLOCATOR)
 
-#ifdef __cplusplus
-extern "C++" {
-#endif
-
 #include <set>
 #include <map>
 
@@ -827,11 +823,6 @@ struct hypre_cub_CachingDeviceAllocator
     }
 };
 
-#ifdef __cplusplus
-}
-#endif
-
 #endif // #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUB_ALLOCATOR)
-
 #endif // #ifndef HYPRE_CUB_ALLOCATOR_HEADER
 

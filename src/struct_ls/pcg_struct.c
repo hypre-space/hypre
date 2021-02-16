@@ -11,10 +11,11 @@
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_StructKrylovCAlloc( HYPRE_Int count,
-                          HYPRE_Int elt_size )
+hypre_StructKrylovCAlloc( size_t               count,
+                          size_t               elt_size,
+                          HYPRE_MemoryLocation location)
 {
-   return ( (void*) hypre_CTAlloc(char, count * elt_size, HYPRE_MEMORY_HOST) );
+   return ( (void*) hypre_CTAlloc(char, count * elt_size, location) );
 }
 
 /*--------------------------------------------------------------------------
@@ -23,7 +24,7 @@ hypre_StructKrylovCAlloc( HYPRE_Int count,
 HYPRE_Int
 hypre_StructKrylovFree( void *ptr )
 {
-   hypre_Free( ptr , HYPRE_MEMORY_HOST);
+   hypre_TFree( ptr , HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -34,7 +35,7 @@ hypre_StructKrylovFree( void *ptr )
 void *
 hypre_StructKrylovCreateVector( void *vvector )
 {
-	hypre_StructVector *vector = (hypre_StructVector *)vvector;
+   hypre_StructVector *vector = (hypre_StructVector *)vvector;
    hypre_StructVector *new_vector;
    HYPRE_Int          *num_ghost= hypre_StructVectorNumGhost(vector);
 

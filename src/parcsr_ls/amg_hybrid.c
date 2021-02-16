@@ -1849,7 +1849,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          {
             pcg_functions =
                hypre_PCGFunctionsCreate(
-                  hypre_CAlloc, hypre_ParKrylovFree,
+                  hypre_ParKrylovCAlloc, hypre_ParKrylovFree,
                   hypre_ParKrylovCommInfo,
                   hypre_ParKrylovCreateVector,
                   hypre_ParKrylovDestroyVector, hypre_ParKrylovMatvecCreate,
@@ -1915,7 +1915,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          {
             gmres_functions =
                hypre_GMRESFunctionsCreate(
-                  hypre_CAlloc, hypre_ParKrylovFree,
+                  hypre_ParKrylovCAlloc, hypre_ParKrylovFree,
                   hypre_ParKrylovCommInfo,
                   hypre_ParKrylovCreateVector,
                   hypre_ParKrylovCreateVectorArray,
