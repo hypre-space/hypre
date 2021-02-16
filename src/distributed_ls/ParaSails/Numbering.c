@@ -22,7 +22,7 @@
  *****************************************************************************/
 
 #include <stdlib.h>
-#include <memory.h>
+//#include <memory.h>
 #include "Common.h"
 #include "Numbering.h"
 #include "OrderStat.h"

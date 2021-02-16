@@ -19,7 +19,7 @@
  *****************************************************************************/
 
 #include <stdlib.h>
-#include <memory.h>
+//#include <memory.h>
 #include "Common.h"
 #include "Matrix.h"
 #include "Numbering.h"
