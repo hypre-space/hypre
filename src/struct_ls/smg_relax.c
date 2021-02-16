@@ -57,7 +57,6 @@ typedef struct
    HYPRE_Int               num_pre_relax;
    HYPRE_Int               num_post_relax;
 
-   HYPRE_Int               max_level;
 } hypre_SMGRelaxData;
 
 /*--------------------------------------------------------------------------
@@ -99,7 +98,7 @@ hypre_SMGRelaxCreate( MPI_Comm  comm )
 
    (relax_data -> num_pre_relax)  = 1;
    (relax_data -> num_post_relax) = 1;
-   (relax_data -> max_level)      = -1;
+
    return (void *) relax_data;
 }
 

@@ -9,6 +9,9 @@
 #include "smg.h"
 
 #define DEBUG 0
+#if DEBUG
+   static HYPRE_Int  static_print_debug = 0;
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -78,6 +81,7 @@ hypre_SMGSetup( void               *smg_vdata,
 
 #if DEBUG
    char                  filename[255];
+   HYPRE_Int             print_debug = static_print_debug++;
 #endif
 
    /*-----------------------------------------------------
@@ -410,7 +414,7 @@ hypre_SMGSetup( void               *smg_vdata,
    }
 
 #if DEBUG
-   if(hypre_StructGridNDim(grid_l[0]) == 3)
+   if(print_debug == 0)
    {
       for (l = 0; l < (num_levels - 1); l++)
       {
@@ -421,6 +425,8 @@ hypre_SMGSetup( void               *smg_vdata,
       }
       hypre_sprintf(filename, "zout_A.%02d", l);
       hypre_StructMatrixPrint(filename, A_l[l], 0);
+
+      print_debug = 0;
    }
 #endif
 

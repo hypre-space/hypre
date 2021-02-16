@@ -74,7 +74,6 @@ typedef struct
 
    HYPRE_Int             time_index;
    HYPRE_BigInt          solve_flops;
-   HYPRE_Int             max_levels;
 
 } hypre_CyclicReductionData;
 
@@ -92,7 +91,6 @@ hypre_CyclicReductionCreate( MPI_Comm  comm )
    (cyc_red_data -> comm) = comm;
    (cyc_red_data -> cdir) = 0;
    (cyc_red_data -> time_index)  = hypre_InitializeTiming("CyclicReduction");
-   (cyc_red_data -> max_levels)  = -1;
 
    /* set defaults */
    hypre_SetIndex3((cyc_red_data -> base_index), 0, 0, 0);
@@ -234,6 +232,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
    HYPRE_Real             *a_cc, *a_cw, *a_ce;
    HYPRE_Real             *ac_cc, *ac_cw, *ac_ce;
+   HYPRE_Real              accm1, accp1;
 
    HYPRE_Int               offsetA;
 
@@ -331,13 +330,25 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
             HYPRE_Int iAm1 = iA - offsetA;
             HYPRE_Int iAp1 = iA + offsetA;
 
-            ac_cw[iAc] = -a_cw[iA] * a_cw[iAm1] / a_cc[iAm1];
+            /* Avoid division by zero along domain boundaries */
+            accm1 = 1.0;
+            accp1 = 1.0;
+            if (a_cc[iAm1] != 0.0)
+            {
+               accm1 = a_cc[iAm1];
+            }
+            if (a_cc[iAp1] != 0.0)
+            {
+               accp1 = a_cc[iAp1];
+            }
 
-            ac_cc[iAc] = a_cc[iA] - a_cw[iA] * a_ce[iAm1] / a_cc[iAm1] -
-                         a_ce[iA] * a_cw[iAp1] / a_cc[iAp1];
+            ac_cw[iAc] = - a_cw[iA] *a_cw[iAm1] / accm1;
 
-            ac_ce[iAc] = -a_ce[iA] * a_ce[iAp1] / a_cc[iAp1];
+            ac_cc[iAc] = a_cc[iA]
+               - a_cw[iA] * a_ce[iAm1] / accm1
+               - a_ce[iA] * a_cw[iAp1] / accp1;
 
+            ac_ce[iAc] = - a_ce[iA] *a_ce[iAp1] / accp1;
          }
          hypre_BoxLoop2End(iA, iAc);
 #undef DEVICE_VAR
@@ -359,10 +370,23 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
             HYPRE_Int iAm1 = iA - offsetA;
             HYPRE_Int iAp1 = iA + offsetA;
 
-            ac_cw[iAc] = -a_cw[iA] * a_cw[iAm1] / a_cc[iAm1];
+            /* Avoid division by zero along domain boundaries */
+            accm1 = 1.0;
+            accp1 = 1.0;
+            if (a_cc[iAm1] != 0.0)
+            {
+               accm1 = a_cc[iAm1];
+            }
+            if (a_cc[iAp1] != 0.0)
+            {
+               accp1 = a_cc[iAp1];
+            }
 
-            ac_cc[iAc] = a_cc[iA] - a_cw[iA] * a_ce[iAm1] / a_cc[iAm1] -
-                         a_ce[iA] * a_cw[iAp1] / a_cc[iAp1];
+            ac_cw[iAc] = - a_cw[iA] *a_cw[iAm1] / accm1;
+
+            ac_cc[iAc] = a_cc[iA]
+               - a_cw[iA] * a_ce[iAm1] / accm1
+               - a_ce[iA] * a_cw[iAp1] / accp1;
          }
          hypre_BoxLoop2End(iA, iAc);
 #undef DEVICE_VAR
@@ -473,7 +497,6 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    hypre_IndexRef          base_stride = (cyc_red_data -> base_stride);
 
    HYPRE_Int               num_levels;
-   HYPRE_Int               max_levels = -1;
    hypre_StructGrid      **grid_l;
    hypre_BoxArray         *base_points;
    hypre_BoxArray        **fine_points_l;
@@ -497,9 +520,6 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    HYPRE_Int               flop_divisor;
 
    HYPRE_Int               x_num_ghost[] = {0, 0, 0, 0, 0, 0};
-#if defined(HYPRE_USING_CUDA)
-   HYPRE_MemoryLocation    data_location = HYPRE_MEMORY_DEVICE;
-#endif
 
    /*-----------------------------------------------------
     * Set up coarse grids
@@ -510,18 +530,10 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    /* Compute a preliminary num_levels value based on the grid */
    cbox = hypre_BoxClone(hypre_StructGridBoundingBox(grid));
    num_levels = hypre_Log2(hypre_BoxSizeD(cbox, cdir)) + 2;
-   if (cyc_red_data -> max_levels > 0)
-   {
-      max_levels = (cyc_red_data -> max_levels);
-   }
-
 
    grid_l    = hypre_TAlloc(hypre_StructGrid *,  num_levels, HYPRE_MEMORY_HOST);
    hypre_StructGridRef(grid, &grid_l[0]);
 
-#if defined(HYPRE_USING_CUDA)
-   data_location = hypre_StructGridDataLocation(grid);
-#endif
    for (l = 0; ; l++)
    {
       /* set cindex and stride */
@@ -529,8 +541,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_CycRedSetStride(base_index, base_stride, l, cdir, stride);
 
       /* check to see if we should coarsen */
-      if ( hypre_BoxIMinD(cbox, cdir) == hypre_BoxIMaxD(cbox, cdir) ||
-           (l == (max_levels - 1)))
+      if ( hypre_BoxIMinD(cbox, cdir) == hypre_BoxIMaxD(cbox, cdir) )
       {
          /* stop coarsening */
          break;
@@ -545,9 +556,6 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
 
       /* coarsen the grid */
       hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
-#if defined(HYPRE_USING_CUDA)
-      hypre_StructGridDataLocation(grid_l[l+1]) = data_location;
-#endif
    }
    num_levels = l + 1;
 
@@ -621,25 +629,9 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    {
       hypre_StructMatrixInitializeData(A_l[l+1], data);
       data += hypre_StructMatrixDataSize(A_l[l+1]);
-
-#if defined(HYPRE_USING_CUDA)
-      if (data_location != HYPRE_MEMORY_HOST)
-      {
-         hypre_StructVectorInitializeData(x_l[l+1], data);
-         hypre_StructVectorAssemble(x_l[l+1]);
-         data += hypre_StructVectorDataSize(x_l[l+1]);
-      }
-      else
-      {
-         hypre_StructVectorInitializeData(x_l[l+1], data_const);
-         hypre_StructVectorAssemble(x_l[l+1]);
-         data_const += hypre_StructVectorDataSize(x_l[l+1]);
-      }
-#else
       hypre_StructVectorInitializeData(x_l[l+1], data);
       hypre_StructVectorAssemble(x_l[l+1]);
       data += hypre_StructVectorDataSize(x_l[l+1]);
-#endif
    }
 
    (cyc_red_data -> A_l)  = A_l;

@@ -84,25 +84,6 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
 #endif
 
    hypre_StructStencil   *stencil;
-   hypre_StructMatrix    *Ac_tmp;
-#if defined(HYPRE_USING_CUDA)
-   HYPRE_MemoryLocation data_location_A = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
-   HYPRE_MemoryLocation data_location_Ac = hypre_StructGridDataLocation(hypre_StructMatrixGrid(Ac));
-   if (data_location_A != data_location_Ac)
-   {
-      Ac_tmp = hypre_SMGCreateRAPOp(R, A, PT, hypre_StructMatrixGrid(Ac));
-      hypre_StructMatrixSymmetric(Ac_tmp) = hypre_StructMatrixSymmetric(Ac);
-      hypre_StructMatrixConstantCoefficient(Ac_tmp) = hypre_StructMatrixConstantCoefficient(Ac);
-      hypre_StructGridDataLocation(hypre_StructMatrixGrid(Ac)) = data_location_A;
-      HYPRE_StructMatrixInitialize(Ac_tmp);
-   }
-   else
-   {
-      Ac_tmp = Ac;
-   }
-#else
-   Ac_tmp = Ac;
-#endif
 
    stencil = hypre_StructMatrixStencil(A);
 #if OLDRAP
@@ -114,25 +95,25 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
          /*--------------------------------------------------------------------
           *    Set lower triangular (+ diagonal) coefficients
           *--------------------------------------------------------------------*/
-         hypre_SMG2BuildRAPSym(A, PT, R, Ac_tmp, cindex, cstride);
+         hypre_SMG2BuildRAPSym(A, PT, R, Ac, cindex, cstride);
 
          /*--------------------------------------------------------------------
           *    For non-symmetric A, set upper triangular coefficients as well
           *--------------------------------------------------------------------*/
          if(!hypre_StructMatrixSymmetric(A))
          {
-            hypre_SMG2BuildRAPNoSym(A, PT, R, Ac_tmp, cindex, cstride);
+            hypre_SMG2BuildRAPNoSym(A, PT, R, Ac, cindex, cstride);
             /*-----------------------------------------------------------------
              *    Collapse stencil for periodic probems on coarsest grid.
              *-----------------------------------------------------------------*/
-            hypre_SMG2RAPPeriodicNoSym(Ac_tmp, cindex, cstride);
+            hypre_SMG2RAPPeriodicNoSym(Ac, cindex, cstride);
          }
          else
          {
             /*-----------------------------------------------------------------
              *    Collapse stencil for periodic problems on coarsest grid.
              *-----------------------------------------------------------------*/
-            hypre_SMG2RAPPeriodicSym(Ac_tmp, cindex, cstride);
+            hypre_SMG2RAPPeriodicSym(Ac, cindex, cstride);
          }
 
          break;
@@ -142,25 +123,25 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
          /*--------------------------------------------------------------------
           *    Set lower triangular (+ diagonal) coefficients
           *--------------------------------------------------------------------*/
-         hypre_SMG3BuildRAPSym(A, PT, R, Ac_tmp, cindex, cstride);
+         hypre_SMG3BuildRAPSym(A, PT, R, Ac, cindex, cstride);
 
          /*--------------------------------------------------------------------
           *    For non-symmetric A, set upper triangular coefficients as well
           *--------------------------------------------------------------------*/
          if(!hypre_StructMatrixSymmetric(A))
          {
-            hypre_SMG3BuildRAPNoSym(A, PT, R, Ac_tmp, cindex, cstride);
+            hypre_SMG3BuildRAPNoSym(A, PT, R, Ac, cindex, cstride);
             /*-----------------------------------------------------------------
              *    Collapse stencil for periodic probems on coarsest grid.
              *-----------------------------------------------------------------*/
-            hypre_SMG3RAPPeriodicNoSym(Ac_tmp, cindex, cstride);
+            hypre_SMG3RAPPeriodicNoSym(Ac, cindex, cstride);
          }
          else
          {
             /*-----------------------------------------------------------------
              *    Collapse stencil for periodic problems on coarsest grid.
              *-----------------------------------------------------------------*/
-            hypre_SMG3RAPPeriodicSym(Ac_tmp, cindex, cstride);
+            hypre_SMG3RAPPeriodicSym(Ac, cindex, cstride);
          }
 
          break;
@@ -175,32 +156,20 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
       case 2:
          cdir = 1;
          hypre_SemiBuildRAP(A, PT, R, cdir, cindex, cstride,
-                            P_stored_as_transpose, Ac_tmp);
+                            P_stored_as_transpose, Ac);
          break;
 
       case 3:
          cdir = 2;
          hypre_SemiBuildRAP(A, PT, R, cdir, cindex, cstride,
-                            P_stored_as_transpose, Ac_tmp);
+                            P_stored_as_transpose, Ac);
          break;
 
    }
 #endif
 
-   hypre_StructMatrixAssemble(Ac_tmp);
+   hypre_StructMatrixAssemble(Ac);
 
-#if defined(HYPRE_USING_CUDA)
-   if (data_location_A != data_location_Ac)
-   {
-
-     hypre_TMemcpy(hypre_StructMatrixDataConst(Ac), hypre_StructMatrixData(Ac_tmp),HYPRE_Complex,hypre_StructMatrixDataSize(Ac_tmp),HYPRE_MEMORY_HOST,HYPRE_MEMORY_DEVICE);
-      hypre_SetDeviceOff();
-      hypre_StructGridDataLocation(hypre_StructMatrixGrid(Ac)) = data_location_Ac;
-      hypre_StructMatrixAssemble(Ac);
-      hypre_SetDeviceOn();
-      hypre_StructMatrixDestroy(Ac_tmp);
-   }
-#endif
    return hypre_error_flag;
 }
 
