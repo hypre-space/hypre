@@ -69,7 +69,6 @@ FILES="\
  ${TNAME}.out.51\
  ${TNAME}.out.52\
  ${TNAME}.out.53\
- ${TNAME}.out.60\
 "
 
 for i in $FILES

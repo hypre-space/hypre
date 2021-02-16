@@ -1154,65 +1154,6 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
 }
 
 /*--------------------------------------------------------------------------
- * Takes a function pointer of the form:  HYPRE_Complex  f(i,j,k)
- * RDF: This function doesn't appear to be used anywhere.
- *--------------------------------------------------------------------------*/
-
-/* ONLY3D */
-
-HYPRE_Int
-hypre_StructVectorSetFunctionValues( hypre_StructVector *vector,
-                                     HYPRE_Complex     (*fcn)(HYPRE_Int, HYPRE_Int, HYPRE_Int) )
-{
-   hypre_Box          *v_data_box;
-
-   HYPRE_Complex      *vp;
-
-   hypre_BoxArray     *boxes;
-   hypre_Box          *box;
-   hypre_Index         loop_size;
-   hypre_IndexRef      start;
-   hypre_Index         unit_stride;
-
-   HYPRE_Int           b, i, j, k;
-
-   /*-----------------------------------------------------------------------
-    * Set the vector coefficients
-    *-----------------------------------------------------------------------*/
-
-   hypre_SetIndex(unit_stride, 1);
-
-   boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
-   hypre_ForBoxI(b, boxes)
-   {
-      box      = hypre_BoxArrayBox(boxes, b);
-      start = hypre_BoxIMin(box);
-
-      v_data_box =
-         hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b);
-      vp = hypre_StructVectorBoxData(vector, b);
-
-      hypre_BoxGetSize(box, loop_size);
-
-      i = hypre_IndexD(start, 0);
-      j = hypre_IndexD(start, 1);
-      k = hypre_IndexD(start, 2);
-
-      hypre_SerialBoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
-                                v_data_box, start, unit_stride, vi);
-      {
-         vp[vi] = fcn(i, j, k);
-         i++;
-         j++;
-         k++;
-      }
-      hypre_SerialBoxLoop1End(vi);
-   }
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
