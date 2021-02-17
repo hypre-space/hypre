@@ -452,8 +452,6 @@ function StartCrunch
 {
    rm -f ~/insure.log*
 
-   TestName=$3
-
    ExecuteJobs "$@"
    ExecuteTest "$@"
    PostProcess "$@"
