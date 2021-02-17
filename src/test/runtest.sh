@@ -454,12 +454,9 @@ function StartCrunch
 
    TestName=$3
 
-   # if --with-mixedint, do NOT run nonmixedint.sh
-   if [ -z $HYPRE_MIXEDINT ] || [ $TestName != "nonmixedint" ]; then
-      ExecuteJobs "$@"
-      ExecuteTest "$@"
-      PostProcess "$@"
-   fi
+   ExecuteJobs "$@"
+   ExecuteTest "$@"
+   PostProcess "$@"
 }
 
 #==========================================================================

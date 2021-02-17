@@ -135,7 +135,7 @@ co="--enable-bigint --enable-debug"
 ./renametest.sh basic $output_dir/basic--enable-bigint
 
 co="--enable-mixedint --enable-debug"
-RO="-ams -ij -sstruct -struct -lobpcg -rt -D HYPRE_MIXEDINT"
+RO="-ams -ij-mixed -sstruct-mixed -struct -lobpcg-mixed"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $RO
 ./renametest.sh basic $output_dir/basic--enable-mixedint
 
