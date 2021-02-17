@@ -13,33 +13,18 @@ ATOL=$2
 #=============================================================================
 
 FILES="\
- ${TNAME}.out.0\
- ${TNAME}.out.1\
- ${TNAME}.out.2\
- ${TNAME}.out.3\
- ${TNAME}.out.4\
- ${TNAME}.out.7\
- ${TNAME}.out.8\
- ${TNAME}.out.9\
- ${TNAME}.out.10\
- ${TNAME}.out.11\
- ${TNAME}.out.14\
- ${TNAME}.out.15\
- ${TNAME}.out.16\
- ${TNAME}.out.17\
- ${TNAME}.out.18\
- ${TNAME}.out.19\
- ${TNAME}.out.20\
+ ${TNAME}.out.0.lobpcg\
+ ${TNAME}.out.1.lobpcg\
 "
-# ${TNAME}.out.5\
-# ${TNAME}.out.6\
-# ${TNAME}.out.12\
-# ${TNAME}.out.13\
 
 for i in $FILES
 do
   echo "# Output file: $i"
   tail -3 $i
+  echo "# Output file: $i.1"
+  tail -13 $i.1 | head -3
+  echo "# Output file: $i.5"
+  tail -21 $i.5 | head -11
 done > ${TNAME}.out
 
 # Make sure that the output file is reasonable
@@ -53,4 +38,5 @@ fi
 # remove temporary files
 #=============================================================================
 
-# rm -f ${TNAME}.testdata*
+rm -f ${TNAME}.testdata*
+rm -f residuals.txt values.txt vectors.[01].*
