@@ -2598,7 +2598,7 @@ main( hypre_int argc,
    check_symmetry = 0;
    check_Aones = 0;
    rhs_value = 1.0;
-   sol_type = -1;
+   sol_type = 0;
    sol0_type = 0;
    skip = 0;
    n_pre  = 1;
@@ -2720,11 +2720,13 @@ main( hypre_int argc,
       {
          arg_index++;
          rhs_value = 0.0;
+         sol_type = -1;
       }
       else if ( strcmp(argv[arg_index], "-rhsone") == 0 )
       {
          arg_index++;
          rhs_value = 1.0;
+         sol_type = -1;
       }
       else if ( strcmp(argv[arg_index], "-xfromcosine") == 0 )
       {
@@ -3568,6 +3570,7 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Create solution vector
     *-----------------------------------------------------------*/
+
    HYPRE_SStructVectorCreate(hypre_MPI_COMM_WORLD, grid, &x);
    HYPRE_SStructVectorSetObjectType(x, object_type);
    HYPRE_SStructVectorInitialize(x);
@@ -3606,15 +3609,58 @@ main( hypre_int argc,
    }
 
    HYPRE_SStructVectorAssemble(x);
+
+//   /*-----------------------------------------------------------
+//    * RDF: Temporary test in case SStructMatrixMatvec still has a bug...
+//    *
+//    * Get the objects out
+//    * NOTE: This should go after the cosine part, but for the bug
+//    *-----------------------------------------------------------*/
+//
+//   if (object_type == HYPRE_PARCSR)
+//   {
+//      HYPRE_SStructMatrixGetObject(A, (void **) &par_A);
+//      HYPRE_SStructVectorGetObject(b, (void **) &par_b);
+//      HYPRE_SStructVectorGetObject(x, (void **) &par_x);
+//   }
+//   else if (object_type == HYPRE_STRUCT)
+//   {
+//      HYPRE_SStructMatrixGetObject(A, (void **) &sA);
+//      HYPRE_SStructVectorGetObject(b, (void **) &sb);
+//      HYPRE_SStructVectorGetObject(x, (void **) &sx);
+//   }
+//
+//   if (sol_type == 0 || sol_type == 1)
+//   {
+//      /* This if/else is due to a bug in SStructMatvec */
+//      if (object_type == HYPRE_SSTRUCT)
+//      {
+//         /* Apply A to x to yield righthand side */
+//         hypre_SStructMatvec(1.0, A, x, 0.0, b);
+//      }
+//      else if (object_type == HYPRE_PARCSR)
+//      {
+//         /* Apply A to x to yield righthand side */
+//         HYPRE_ParCSRMatrixMatvec(1.0, par_A, par_x, 0.0, par_b );
+//      }
+//      else if (object_type == HYPRE_STRUCT)
+//      {
+//         /* Apply A to x to yield righthand side */
+//         hypre_StructMatvec(1.0, sA, sx, 0.0, sb);
+//      }
+//   }
+
    if (sol_type == 0 || sol_type == 1)
    {
       HYPRE_SStructMatrixMatvec(1.0, A, x, 0.0, b);
    }
+
    HYPRE_SStructVectorDestroy(x);
 
    /*-----------------------------------------------------------
     * Set initial solution
     *-----------------------------------------------------------*/
+
    HYPRE_SStructVectorCreate(hypre_MPI_COMM_WORLD, grid, &x);
    HYPRE_SStructVectorSetObjectType(x, object_type);
    HYPRE_SStructVectorInitialize(x);

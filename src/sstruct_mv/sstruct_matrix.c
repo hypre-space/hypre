@@ -603,8 +603,11 @@ hypre_SStructPMatrixAssemble( hypre_SStructPMatrix *pmatrix )
 /*--------------------------------------------------------------------------
  * TODO: Deprecate this function. var == -1 or to_var == -1 are never used.
  *       These cases are used only in HYPRE_SStructMatrixSetSymmetric.
+ *
+ * RDF: The '-1' cases are used in the sstruct driver, and the thought was that
+ * it would be a useful way to set everything symmetric.
  *--------------------------------------------------------------------------*/
-#if 0
+#if 1
 HYPRE_Int
 hypre_SStructPMatrixSetSymmetric( hypre_SStructPMatrix *pmatrix,
                                   HYPRE_Int             var,

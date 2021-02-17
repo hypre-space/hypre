@@ -984,7 +984,7 @@ HYPRE_SStructMatrixSetSymmetric( HYPRE_SStructMatrix matrix,
 {
    HYPRE_Int          ***msymmetric = hypre_SStructMatrixSymmetric(matrix);
    hypre_SStructGraph   *graph      = hypre_SStructMatrixGraph(matrix);
-   hypre_SStructPGrid   *pgrid      = hypre_SStructGraphPGrid(graph, part);
+   hypre_SStructPGrid   *pgrid;
 
    HYPRE_Int             pstart = part;
    HYPRE_Int             psize  = 1;
@@ -1002,6 +1002,7 @@ HYPRE_SStructMatrixSetSymmetric( HYPRE_SStructMatrix matrix,
 
    for (p = pstart; p < (pstart + psize); p++)
    {
+      pgrid = hypre_SStructGraphPGrid(graph, p);
       if (var == -1)
       {
          vstart = 0;
