@@ -252,8 +252,10 @@ hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
    HYPRE_Int          ***centries     = hypre_SStructPMatrixCEntries(pmatrix);
    hypre_IndexRef        dom_stride   = hypre_SStructPMatrixDomainStride(pmatrix);
    hypre_IndexRef        ran_stride   = hypre_SStructPMatrixRangeStride(pmatrix);
+//   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM];
    hypre_StructMatrix   *smatrix;
    HYPRE_Int             vi, vj;
+//   HYPRE_Int             d, ndim;
 
 #if 0
    ndim = hypre_SStructPMatrixNDim(pmatrix);
@@ -281,7 +283,7 @@ hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
                                                  num_centries[vi][vj],
                                                  centries[vi][vj]);
             HYPRE_StructMatrixSetSymmetric(smatrix, symmetric[vi][vj]);
-            /* hypre_StructMatrixSetNumGhost(smatrix, num_ghost); */
+//            HYPRE_StructMatrixSetNumGhost(smatrix, num_ghost);
             hypre_StructMatrixInitialize(smatrix);
             /* needed to get AddTo accumulation correct between processors */
             hypre_StructMatrixClearGhostValues(smatrix);
@@ -734,7 +736,8 @@ hypre_SStructPMatrixPrint( const char           *filename,
          smatrix = hypre_SStructPMatrixSMatrix(pmatrix, vi, vj);
          if (smatrix != NULL)
          {
-            hypre_sprintf(new_filename, "%s.v%1d%1d", filename, vi, vj);
+//            hypre_sprintf(new_filename, "%s.v%1d%1d", filename, vi, vj);
+            hypre_sprintf(new_filename, "%s.%1d%1d", filename, vi, vj);
             hypre_StructMatrixPrint(new_filename, smatrix, all);
          }
       }

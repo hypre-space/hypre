@@ -2378,7 +2378,7 @@ main( hypre_int argc,
    HYPRE_SStructSolver   solver;
    HYPRE_SStructSolver   precond;
 
-   HYPRE_IJMatrix        ij_A;
+//   HYPRE_IJMatrix        ij_A;
    HYPRE_ParCSRMatrix    par_A;
    HYPRE_ParVector       par_b;
    HYPRE_ParVector       par_x;
@@ -2558,15 +2558,15 @@ main( hypre_int argc,
    cf_tol = 0.90;
    num_iterations = -1;
    max_iterations = 100;
-   max_levels = 100;
-   max_coarse_size = 1;
+   max_levels = 25;
+   max_coarse_size = 9;
    tol = 1.0e-6;
    rel_change = 0;
-   k_dim = 10;
+   k_dim = 5;
    aug_dim = 2;
    print_level = 1;
    print_freq = 1;
-   krylov_print_level = 2;
+   krylov_print_level = 1;
    final_res_norm = 0.0;
 
    nparts = global_data.nparts;
@@ -2604,13 +2604,18 @@ main( hypre_int argc,
    n_pre  = 1;
    n_post = 1;
    n_coarse = 1;
-   strong_threshold = 0.5;
+   strong_threshold = 0.25;
    P_max_elmts = 4;
-   coarsen_type = 1;
+   coarsen_type = 10;
    vis = 0;
    seed = 1;
 
    old_default = 0;
+
+   if (global_data.rhs_true || global_data.fem_rhs_true)
+   {
+      sol_type = -1;
+   }
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -3849,22 +3854,22 @@ main( hypre_int argc,
       }
    }
 
-   if (check_symmetry)
-   {
-      HYPRE_IJMatrix  ij_AT, ij_B;
-      HYPRE_Real      B_norm;
-
-      /* Compute Frobenius norm of (A - A^T) */
-      HYPRE_IJMatrixTranspose(ij_A, &ij_AT);
-      HYPRE_IJMatrixAdd(1.0, ij_A, -1.0, ij_AT, &ij_B);
-      HYPRE_IJMatrixNorm(ij_B, &B_norm);
-      HYPRE_IJMatrixPrint(ij_B, "IJ.out.B");
-      hypre_printf("Frobenius norm (A - A^T) = %20.15e\n\n", B_norm);
-
-      /* Free memory */
-      HYPRE_IJMatrixDestroy(ij_AT);
-      HYPRE_IJMatrixDestroy(ij_B);
-   }
+//   if (check_symmetry)
+//   {
+//      HYPRE_IJMatrix  ij_AT, ij_B;
+//      HYPRE_Real      B_norm;
+//
+//      /* Compute Frobenius norm of (A - A^T) */
+//      HYPRE_IJMatrixTranspose(ij_A, &ij_AT);
+//      HYPRE_IJMatrixAdd(1.0, ij_A, -1.0, ij_AT, &ij_B);
+//      HYPRE_IJMatrixNorm(ij_B, &B_norm);
+//      HYPRE_IJMatrixPrint(ij_B, "IJ.out.B");
+//      hypre_printf("Frobenius norm (A - A^T) = %20.15e\n\n", B_norm);
+//
+//      /* Free memory */
+//      HYPRE_IJMatrixDestroy(ij_AT);
+//      HYPRE_IJMatrixDestroy(ij_B);
+//   }
 
    if (check_Aones)
    {
@@ -4084,14 +4089,14 @@ main( hypre_int argc,
       {
          HYPRE_BoomerAMGSetRelaxWt(par_solver, jacobi_weight);
       }
-      if (relax == 1)
-      {
-         HYPRE_BoomerAMGSetRelaxType(par_solver, 0);
-      }
-      else
-      {
-         HYPRE_BoomerAMGSetRelaxType(par_solver, relax);
-      }
+//      if (relax == 1)
+//      {
+//         HYPRE_BoomerAMGSetRelaxType(par_solver, 0);
+//      }
+//      else
+//      {
+//         HYPRE_BoomerAMGSetRelaxType(par_solver, relax);
+//      }
       if (old_default)
       {
          HYPRE_BoomerAMGSetOldDefault(par_solver);
@@ -4709,14 +4714,14 @@ main( hypre_int argc,
          {
             HYPRE_BoomerAMGSetRelaxWt(par_precond, jacobi_weight);
          }
-         if (relax == 1)
-         {
-            HYPRE_BoomerAMGSetRelaxType(par_precond, 0);
-         }
-         else
-         {
-            HYPRE_BoomerAMGSetRelaxType(par_precond, relax);
-         }
+//         if (relax == 1)
+//         {
+//            HYPRE_BoomerAMGSetRelaxType(par_precond, 0);
+//         }
+//         else
+//         {
+//            HYPRE_BoomerAMGSetRelaxType(par_precond, relax);
+//         }
          if (old_default)
          {
             HYPRE_BoomerAMGSetOldDefault(par_precond);
@@ -4957,14 +4962,14 @@ main( hypre_int argc,
          {
             HYPRE_BoomerAMGSetRelaxWt(par_precond, jacobi_weight);
          }
-         if (relax == 1)
-         {
-            HYPRE_BoomerAMGSetRelaxType(par_precond, 0);
-         }
-         else
-         {
-            HYPRE_BoomerAMGSetRelaxType(par_precond, relax);
-         }
+//         if (relax == 1)
+//         {
+//            HYPRE_BoomerAMGSetRelaxType(par_precond, 0);
+//         }
+//         else
+//         {
+//            HYPRE_BoomerAMGSetRelaxType(par_precond, relax);
+//         }
          if (old_default)
          {
             HYPRE_BoomerAMGSetOldDefault(par_precond);
@@ -5193,14 +5198,14 @@ main( hypre_int argc,
          {
             HYPRE_BoomerAMGSetRelaxWt(par_precond, jacobi_weight);
          }
-         if (relax == 1)
-         {
-            HYPRE_BoomerAMGSetRelaxType(par_precond, 0);
-         }
-         else
-         {
-            HYPRE_BoomerAMGSetRelaxType(par_precond, relax);
-         }
+//         if (relax == 1)
+//         {
+//            HYPRE_BoomerAMGSetRelaxType(par_precond, 0);
+//         }
+//         else
+//         {
+//            HYPRE_BoomerAMGSetRelaxType(par_precond, relax);
+//         }
          if (old_default)
          {
             HYPRE_BoomerAMGSetOldDefault(par_precond);
@@ -5431,14 +5436,14 @@ main( hypre_int argc,
          {
             HYPRE_BoomerAMGSetRelaxWt(par_precond, jacobi_weight);
          }
-         if (relax == 1)
-         {
-            HYPRE_BoomerAMGSetRelaxType(par_precond, 0);
-         }
-         else
-         {
-            HYPRE_BoomerAMGSetRelaxType(par_precond, relax);
-         }
+//         if (relax == 1)
+//         {
+//            HYPRE_BoomerAMGSetRelaxType(par_precond, 0);
+//         }
+//         else
+//         {
+//            HYPRE_BoomerAMGSetRelaxType(par_precond, relax);
+//         }
          if (old_default)
          {
             HYPRE_BoomerAMGSetOldDefault(par_precond);
@@ -5515,14 +5520,14 @@ main( hypre_int argc,
          {
             HYPRE_BoomerAMGSetRelaxWt(par_precond, jacobi_weight);
          }
-         if (relax == 1)
-         {
-            HYPRE_BoomerAMGSetRelaxType(par_precond, 0);
-         }
-         else
-         {
-            HYPRE_BoomerAMGSetRelaxType(par_precond, relax);
-         }
+//         if (relax == 1)
+//         {
+//            HYPRE_BoomerAMGSetRelaxType(par_precond, 0);
+//         }
+//         else
+//         {
+//            HYPRE_BoomerAMGSetRelaxType(par_precond, relax);
+//         }
          if (old_default)
          {
             HYPRE_BoomerAMGSetOldDefault(par_precond);
@@ -6996,7 +7001,7 @@ main( hypre_int argc,
    }
    if ((print_system || check_symmetry) && (object_type == HYPRE_SSTRUCT))
    {
-      HYPRE_IJMatrixDestroy(ij_A);
+//      HYPRE_IJMatrixDestroy(ij_A);
    }
 
    DestroyData(data);
