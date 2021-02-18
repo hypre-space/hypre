@@ -1,0 +1,30 @@
+#!/bin/sh
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+#=============================================================================
+# sstruct: cases that cannot run with mixed-int
+#  0: solvers.out.5
+#  1: solvers.out.6
+#  2: solvers.out.12
+#  3: solvers.out.13
+#  4: emptyProc.out.06
+#  5: emptyProc.out.14
+#  6: emptyProc.out.20
+# 14: emptyProc.out.106
+# 15: emptyProc.out.114
+# 16: emptyProc.out.120
+#=============================================================================
+
+mpirun -np 2  ./sstruct -P 1 1 2 -solver 21 > nonmixedint.out.0
+mpirun -np 2  ./sstruct -P 1 1 2 -solver 22 > nonmixedint.out.1
+mpirun -np 2  ./sstruct -P 1 1 2 -solver 41 > nonmixedint.out.2
+mpirun -np 2  ./sstruct -P 1 1 2 -solver 42 > nonmixedint.out.3
+mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 22 > nonmixedint.out.4
+mpirun -np 2  ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 22 > nonmixedint.out.14
+mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 42 > nonmixedint.out.5
+mpirun -np 2  ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 42 > nonmixedint.out.15
+mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 62 > nonmixedint.out.6
+mpirun -np 2  ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 62 > nonmixedint.out.16

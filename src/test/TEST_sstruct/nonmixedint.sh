@@ -9,6 +9,19 @@ RTOL=$1
 ATOL=$2
 
 #=============================================================================
+# sstruct: Test various empty proc problems
+#=============================================================================
+
+TNUMS="4 5 6"
+
+for i in $TNUMS
+do
+  tail -3 ${TNAME}.out.${i}  > ${TNAME}.testdata
+  tail -3 ${TNAME}.out.1${i} > ${TNAME}.testdata.temp
+  (../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $RTOL $ATOL) >&2
+done
+
+#=============================================================================
 # compare with baseline case
 #=============================================================================
 
@@ -18,23 +31,9 @@ FILES="\
  ${TNAME}.out.2\
  ${TNAME}.out.3\
  ${TNAME}.out.4\
- ${TNAME}.out.7\
- ${TNAME}.out.8\
- ${TNAME}.out.9\
- ${TNAME}.out.10\
- ${TNAME}.out.11\
- ${TNAME}.out.14\
- ${TNAME}.out.15\
- ${TNAME}.out.16\
- ${TNAME}.out.17\
- ${TNAME}.out.18\
- ${TNAME}.out.19\
- ${TNAME}.out.20\
-"
-# ${TNAME}.out.5\
-# ${TNAME}.out.6\
-# ${TNAME}.out.12\
-# ${TNAME}.out.13\
+ ${TNAME}.out.5\
+ ${TNAME}.out.6\
+ "
 
 for i in $FILES
 do
@@ -53,4 +52,4 @@ fi
 # remove temporary files
 #=============================================================================
 
-# rm -f ${TNAME}.testdata*
+rm -f ${TNAME}.testdata*

@@ -43,8 +43,6 @@ FILES="\
  ${TNAME}.out.3\
  ${TNAME}.out.4\
  ${TNAME}.out.5\
- ${TNAME}.out.6\
- ${TNAME}.out.7\
  ${TNAME}.out.900\
  ${TNAME}.out.901\
  ${TNAME}.out.902\
@@ -62,6 +60,8 @@ FILES="\
  ${TNAME}.out.917\
  ${TNAME}.out.918\
 "
+#${TNAME}.out.6\
+#${TNAME}.out.7\
 
 for i in $FILES
 do
