@@ -2008,6 +2008,7 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
   HYPRE_Int my_id;
   MPI_Comm comm = hypre_ParCSRMatrixComm(A);
   hypre_MPI_Comm_rank(comm,&my_id);
+  HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
   n_local_fine_grid = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
   c_marker = hypre_CTAlloc(HYPRE_Int, n_local_fine_grid, HYPRE_MEMORY_HOST);
@@ -2147,14 +2148,14 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
   //{
     if (ordering == 0) // interleaved ordering
     {
-      HYPRE_Int *A_h_correction_diag_i_new = hypre_CTAlloc(HYPRE_Int, n_local_cpoints+1, HYPRE_MEMORY_HOST);
-      HYPRE_Int *A_h_correction_diag_j_new = hypre_CTAlloc(HYPRE_Int, (bsize + max_elmts)*n_local_cpoints, HYPRE_MEMORY_HOST);
-      HYPRE_Complex *A_h_correction_diag_data_new = hypre_CTAlloc(HYPRE_Complex, (bsize + max_elmts)*n_local_cpoints, HYPRE_MEMORY_HOST);
+      HYPRE_Int *A_h_correction_diag_i_new = hypre_CTAlloc(HYPRE_Int, n_local_cpoints+1, memory_location);
+      HYPRE_Int *A_h_correction_diag_j_new = hypre_CTAlloc(HYPRE_Int, (bsize + max_elmts)*n_local_cpoints, memory_location);
+      HYPRE_Complex *A_h_correction_diag_data_new = hypre_CTAlloc(HYPRE_Complex, (bsize + max_elmts)*n_local_cpoints, memory_location);
       HYPRE_Int num_nonzeros_diag_new = 0;
 
-      HYPRE_Int *A_h_correction_offd_i_new = hypre_CTAlloc(HYPRE_Int, n_local_cpoints+1, HYPRE_MEMORY_HOST);
-      HYPRE_Int *A_h_correction_offd_j_new = hypre_CTAlloc(HYPRE_Int, max_elmts*n_local_cpoints, HYPRE_MEMORY_HOST);
-      HYPRE_Complex *A_h_correction_offd_data_new = hypre_CTAlloc(HYPRE_Complex, max_elmts*n_local_cpoints, HYPRE_MEMORY_HOST);
+      HYPRE_Int *A_h_correction_offd_i_new = hypre_CTAlloc(HYPRE_Int, n_local_cpoints+1, memory_location);
+      HYPRE_Int *A_h_correction_offd_j_new = hypre_CTAlloc(HYPRE_Int, max_elmts*n_local_cpoints, memory_location);
+      HYPRE_Complex *A_h_correction_offd_data_new = hypre_CTAlloc(HYPRE_Complex, max_elmts*n_local_cpoints, memory_location);
       HYPRE_Int num_nonzeros_offd_new = 0;
 
 
@@ -2223,17 +2224,17 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
         hypre_TFree(aux_data, HYPRE_MEMORY_HOST);
       }
 
-      hypre_TFree(A_h_correction_diag_i, HYPRE_MEMORY_HOST);
-      hypre_TFree(A_h_correction_diag_j, HYPRE_MEMORY_HOST);
-      hypre_TFree(A_h_correction_diag_data, HYPRE_MEMORY_HOST);
+      hypre_TFree(A_h_correction_diag_i, memory_location);
+      hypre_TFree(A_h_correction_diag_j, memory_location);
+      hypre_TFree(A_h_correction_diag_data, memory_location);
       hypre_CSRMatrixI(A_h_correction_diag) = A_h_correction_diag_i_new;
       hypre_CSRMatrixJ(A_h_correction_diag) = A_h_correction_diag_j_new;
       hypre_CSRMatrixData(A_h_correction_diag) = A_h_correction_diag_data_new;
       hypre_CSRMatrixNumNonzeros(A_h_correction_diag) = num_nonzeros_diag_new;
 
-      if (A_h_correction_offd_i) hypre_TFree(A_h_correction_offd_i, HYPRE_MEMORY_HOST);
-      if (A_h_correction_offd_j) hypre_TFree(A_h_correction_offd_j, HYPRE_MEMORY_HOST);
-      if (A_h_correction_offd_data) hypre_TFree(A_h_correction_offd_data, HYPRE_MEMORY_HOST);
+      if (A_h_correction_offd_i) hypre_TFree(A_h_correction_offd_i, memory_location);
+      if (A_h_correction_offd_j) hypre_TFree(A_h_correction_offd_j, memory_location);
+      if (A_h_correction_offd_data) hypre_TFree(A_h_correction_offd_data, memory_location);
       hypre_CSRMatrixI(A_h_correction_offd) = A_h_correction_offd_i_new;
       hypre_CSRMatrixJ(A_h_correction_offd) = A_h_correction_offd_j_new;
       hypre_CSRMatrixData(A_h_correction_offd) = A_h_correction_offd_data_new;
@@ -3143,11 +3144,21 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
   hypre_ParCSRMatrix    *P_ptr = NULL;
   //HYPRE_Real       jac_trunc_threshold = trunc_factor;
   //HYPRE_Real       jac_trunc_threshold_minus = 0.5*jac_trunc_threshold;
+  HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
   /* Interpolation for each level */
   if (interp_type <3)
   {
-    hypre_MGRBuildP( A,CF_marker,num_cpts_global,interp_type,debug_flag,&P_ptr);
+    if (exec == HYPRE_EXEC_HOST)
+    {
+      hypre_MGRBuildP( A,CF_marker,num_cpts_global,interp_type,debug_flag,&P_ptr);
+    }
+#if defined(HYPRE_USING_CUDA)
+    else
+    {
+      hypre_MGRBuildPDevice(A, CF_marker, num_cpts_global, interp_type, &P_ptr);
+    }
+#endif
     /* Could do a few sweeps of Jacobi to further improve P */
     //for(i=0; i<numsweeps; i++)
     //  hypre_BoomerAMGJacobiInterp(A, &P_ptr, S,1, NULL, CF_marker, 0, jac_trunc_threshold, jac_trunc_threshold_minus );
@@ -4642,6 +4653,7 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
   MPI_Comm        comm = hypre_ParCSRMatrixComm(A);
   hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
   hypre_ParCSRCommHandle  *comm_handle;
+  HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
   HYPRE_Real      *A_diag_data = hypre_CSRMatrixData(A_diag);
@@ -4892,18 +4904,18 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
 
   Ablock_diag_size = jj_counter;
 
-  Ablock_diag_i    = hypre_CTAlloc(HYPRE_Int, ii_counter+1, HYPRE_MEMORY_HOST);
-  Ablock_diag_j    = hypre_CTAlloc(HYPRE_Int, Ablock_diag_size, HYPRE_MEMORY_HOST);
-  Ablock_diag_data = hypre_CTAlloc(HYPRE_Real, Ablock_diag_size, HYPRE_MEMORY_HOST);
+  Ablock_diag_i    = hypre_CTAlloc(HYPRE_Int, ii_counter+1, memory_location);
+  Ablock_diag_j    = hypre_CTAlloc(HYPRE_Int, Ablock_diag_size, memory_location);
+  Ablock_diag_data = hypre_CTAlloc(HYPRE_Real, Ablock_diag_size, memory_location);
 
   Ablock_diag_i[ii_counter] = jj_counter;
 
 
   Ablock_offd_size = jj_counter_offd;
 
-  Ablock_offd_i    = hypre_CTAlloc(HYPRE_Int, ii_counter+1, HYPRE_MEMORY_HOST);
-  Ablock_offd_j    = hypre_CTAlloc(HYPRE_Int, Ablock_offd_size, HYPRE_MEMORY_HOST);
-  Ablock_offd_data = hypre_CTAlloc(HYPRE_Real, Ablock_offd_size, HYPRE_MEMORY_HOST);
+  Ablock_offd_i    = hypre_CTAlloc(HYPRE_Int, ii_counter+1, memory_location);
+  Ablock_offd_j    = hypre_CTAlloc(HYPRE_Int, Ablock_offd_size, memory_location);
+  Ablock_offd_data = hypre_CTAlloc(HYPRE_Real, Ablock_offd_size, memory_location);
 
   /*-----------------------------------------------------------------------
    *  Intialize some stuff.
@@ -5057,7 +5069,7 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
       }
     }
 
-    col_map_offd_Ablock = hypre_CTAlloc(HYPRE_BigInt, num_cols_Ablock_offd, HYPRE_MEMORY_HOST);
+    col_map_offd_Ablock = hypre_CTAlloc(HYPRE_BigInt, num_cols_Ablock_offd, memory_location);
     tmp_map_offd = hypre_CTAlloc(HYPRE_Int, num_cols_Ablock_offd, HYPRE_MEMORY_HOST);
     index = 0;
     for (i=0; i < num_cols_Ablock_offd; i++)

@@ -1063,6 +1063,43 @@ hypre_CSRMatrixIdentityDevice(HYPRE_Int n, HYPRE_Complex alp)
    return A;
 }
 
+/* A = diag(v) */
+hypre_CSRMatrix *
+hypre_CSRMatrixDiagMatrixFromVectorDevice(HYPRE_Int n, HYPRE_Complex *v)
+{
+   hypre_CSRMatrix *A = hypre_CSRMatrixCreate(n, n, n);
+
+   hypre_CSRMatrixInitialize_v2(A, 0, HYPRE_MEMORY_DEVICE);
+
+   HYPRE_THRUST_CALL( sequence,
+                      hypre_CSRMatrixI(A),
+                      hypre_CSRMatrixI(A) + n + 1,
+                      0  );
+
+   HYPRE_THRUST_CALL( sequence,
+                      hypre_CSRMatrixJ(A),
+                      hypre_CSRMatrixJ(A) + n,
+                      0  );
+
+   HYPRE_THRUST_CALL( copy,
+                      v,
+                      v + n,
+                      hypre_CSRMatrixData(A) );
+
+   return A;
+}
+
+/* B = diagm(A) */
+hypre_CSRMatrix *
+hypre_CSRMatrixDiagMatrixFromMatrixDevice(hypre_CSRMatrix *A, HYPRE_Int type)
+{
+  HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
+  HYPRE_Complex  *data   = hypre_CTAlloc(HYPRE_Complex, nrows, HYPRE_MEMORY_DEVICE);
+  hypre_CSRMatrixExtractDiagonalDevice(A, data, type);
+
+  return hypre_CSRMatrixDiagMatrixFromVectorDevice(nrows, data);
+}
+
 /* abs    == 1, use absolute values
  * option == 0, drop all the entries that are smaller than tol
  * TODO more options
