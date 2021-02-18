@@ -24,9 +24,9 @@
 
 
 # ij: test systems AMG
-#	  unknown approach
-#	  hybrid approach with block smoother
-# 	  nodal approach
+#       unknown approach
+#       hybrid approach with block smoother
+#       nodal approach
 #       more solvers:
 #        51: BoomerAMG_LGMRES
 #        50: DS_LGMRES
@@ -41,8 +41,8 @@ mpirun -np 2 ./ij -solver 3 -rhsrand > solvers.out.2
 mpirun -np 2 ./ij -solver 4 -rhsrand > solvers.out.3
 mpirun -np 2 ./ij -solver 5 -rhsrand -w 0.67 -ns 2 > solvers.out.4
 mpirun -np 2 ./ij -solver 6 -rhsrand > solvers.out.5
-mpirun -np 2 ./ij -solver 7 -rhsrand > solvers.out.6
-mpirun -np 2 ./ij -solver 8 -rhsrand > solvers.out.7
+#mpirun -np 2 ./ij -solver 7 -rhsrand > solvers.out.6
+#mpirun -np 2 ./ij -solver 8 -rhsrand > solvers.out.7
 mpirun -np 2 ./ij -solver 20 -rhsrand > solvers.out.8
 mpirun -np 2 ./ij -solver 20 -cf 0.5 -rhsrand > solvers.out.9
 mpirun -np 2 ./ij -solver 20 -cf 0.5 -rhsrand -solver_type 2 > solvers.out.10

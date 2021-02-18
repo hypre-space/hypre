@@ -1,0 +1,20 @@
+#!/bin/sh
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+#=============================================================================
+# ij: LOBPCG cases
+# 0: ijdefault.out.8
+# 1: ijdefault.out.43
+#=============================================================================
+#PCG run ...LOBPCG run for one eigenpair...LOBPCG for 5 eigenpairs
+mpirun -np 2  ./ij -solver 8 -tol 1.e-6  > nonmixedint.out.0.lobpcg
+mpirun -np 2  ./ij -lobpcg -solver 8 -tol 1.e-6  -pcgitr 10 -seed 1 -vrand 1 > nonmixedint.out.0.lobpcg.1
+mpirun -np 2  ./ij -lobpcg -solver 8 -tol 1.e-6  -pcgitr 10 -seed 1 -vrand 5 > nonmixedint.out.0.lobpcg.5
+
+#PCG run ...LOBPCG run for one eigenpair...LOBPCG for 5 eigenpairs
+mpirun -np 2  ./ij -solver 43 -tol 1.e-6  > nonmixedint.out.1.lobpcg
+mpirun -np 2  ./ij -lobpcg -solver 43 -tol 1.e-6  -pcgitr 10 -seed 1 -vrand 1 > nonmixedint.out.1.lobpcg.1
+mpirun -np 2  ./ij -lobpcg -solver 43 -tol 1.e-6  -pcgitr 10 -seed 1 -vrand 5 > nonmixedint.out.1.lobpcg.5
