@@ -2643,9 +2643,6 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
          memset(diag_pos, -1, num_rownnz*sizeof(HYPRE_Int));
 
          i_diag = i_offd = 0;
-         diag_pos = hypre_CTAlloc(HYPRE_Int,  num_rows, HYPRE_MEMORY_HOST);
-         i_diag = 0;
-         i_offd = 0;
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel private(i, j, i_diag, i_offd)
 #endif
@@ -4270,4 +4267,3 @@ hypre_IJMatrixAddToValuesOMPParCSR( hypre_IJMatrix       *matrix,
 
    return hypre_error_flag;
 }
-
