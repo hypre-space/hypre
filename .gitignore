@@ -11,3 +11,18 @@ config.status
 Makefile.config
 HYPRE_config.h
 autom4te.cache
+*.TVD.v4breakpoints*
+
+# Drivers #
+###########
+ams_driver
+ij
+ij_assembly
+ij_mv
+maxwell_unscaled
+sstruct
+sstruct_fac
+struct
+struct_migrate
+structmat
+zboxloop
