@@ -1615,13 +1615,7 @@ hypre_StructVectorClone( hypre_StructVector *x )
    HYPRE_Int           i;
 
    y = hypre_StructVectorCreate(comm, grid);
-   hypre_StructVectorNBoxes(y)  = n_boxes;
-   hypre_StructVectorBoxnums(y) = hypre_CTAlloc(HYPRE_Int, n_boxes, HYPRE_MEMORY_HOST);
-   for (i = 0; i < n_boxes; i++)
-   {
-       hypre_StructVectorBoxnums(y)[i] = box_nums[i];
-   }
-   hypre_CopyIndex(hypre_StructVectorStride(x), hypre_StructVectorStride(y));
+   hypre_StructVectorSetBoxnums(y, n_boxes, box_nums, hypre_StructVectorStride(x));
 
    hypre_StructVectorDataSize(y)    = data_size;
    hypre_StructVectorDataSpace(y)   = hypre_BoxArrayClone(data_space);

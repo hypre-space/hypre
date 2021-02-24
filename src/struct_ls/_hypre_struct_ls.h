@@ -399,7 +399,7 @@ HYPRE_Int hypre_PFMGCoarsen( hypre_Box  *cbox, hypre_Index  periodic, HYPRE_Int 
 
 
 /* pfmg_setup_interp.c */
-hypre_StructMatrix *hypre_zPFMGCreateInterpOp ( hypre_StructMatrix *A , HYPRE_Int cdir , hypre_Index stride );
+hypre_StructMatrix *hypre_zPFMGCreateInterpOp ( hypre_StructMatrix *A , HYPRE_Int cdir , hypre_Index stride , HYPRE_Int rap_type );
 HYPRE_Int hypre_zPFMGSetupInterpOp ( hypre_StructMatrix *P , hypre_StructMatrix *A , HYPRE_Int cdir );
 /* RDF: OLD STUFF TO PHASE OUT */
 hypre_StructMatrix *hypre_PFMGCreateInterpOp ( hypre_StructMatrix *A , hypre_StructGrid *cgrid , HYPRE_Int cdir , HYPRE_Int rap_type );

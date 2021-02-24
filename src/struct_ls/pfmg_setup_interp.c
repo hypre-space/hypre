@@ -14,14 +14,15 @@
 
 hypre_StructMatrix *
 hypre_zPFMGCreateInterpOp( hypre_StructMatrix *A,
-                          HYPRE_Int           cdir,
-                          hypre_Index         stride )
+                           HYPRE_Int           cdir,
+                           hypre_Index         stride,
+                           HYPRE_Int           rap_type )
 {
    HYPRE_Int             ndim = hypre_StructMatrixNDim(A);
    hypre_StructMatrix   *P;
    hypre_StructStencil  *stencil;
    hypre_Index          *stencil_shape;
-   HYPRE_Int             stencil_size;
+   HYPRE_Int             stencil_size, diag_entry;
    HYPRE_Int             centries[3] = {0, 1, 2};
    HYPRE_Int             ncentries, i;
 
@@ -29,6 +30,7 @@ hypre_zPFMGCreateInterpOp( hypre_StructMatrix *A,
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);
    stencil_size  = hypre_StructStencilSize(stencil);
+   diag_entry    = hypre_StructStencilDiagEntry(stencil);
    ncentries = 3; /* Make all entries in P constant by default */
    for (i = 0; i < stencil_size; i++)
    {
@@ -41,6 +43,15 @@ hypre_zPFMGCreateInterpOp( hypre_StructMatrix *A,
             break;
          }
       }
+   }
+   /* If diagonal of A is not constant and using RAP, do variable interpolation.
+    *
+    * NOTE: This is important right now because of an issue with MatMult, where
+    * it computes constant stencil entries that may not truly be constant along
+    * grid boundaries. */
+   if (!hypre_StructMatrixConstEntry(A, diag_entry) && (rap_type == 0))
+   {
+      ncentries = 1; /* Make only the diagonal of P constant */
    }
 
    /* Set up the stencil for P */

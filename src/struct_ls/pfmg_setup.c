@@ -176,7 +176,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_PFMGSetStride(cdir, stride);
 
       /* set up interpolation and restriction operators */
-      P_l[l] = hypre_zPFMGCreateInterpOp(A_l[l], cdir, stride);
+      P_l[l] = hypre_zPFMGCreateInterpOp(A_l[l], cdir, stride, rap_type);
       RT_l[l] = P_l[l];
 #if 0 /* TODO: Allow RT != P */
       if (nonsymmetric_cycle)

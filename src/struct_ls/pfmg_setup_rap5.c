@@ -208,17 +208,17 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
    cgrid_ids = hypre_StructGridIDs(cgrid);
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(RAP);
-   hypre_assert( hypre_StructMatrixConstantCoefficient(A) == constant_coefficient );
-   if ( constant_coefficient==0 )
-   {
-      hypre_assert( hypre_StructMatrixConstantCoefficient(R) == 0 );
-      hypre_assert( hypre_StructMatrixConstantCoefficient(P) == 0 );
-   }
-   else /* 1 or 2 */
-   {
-      hypre_assert( hypre_StructMatrixConstantCoefficient(R) == 1 );
-      hypre_assert( hypre_StructMatrixConstantCoefficient(P) == 1 );
-   }
+//   hypre_assert( hypre_StructMatrixConstantCoefficient(A) == constant_coefficient );
+//   if ( constant_coefficient==0 )
+//   {
+//      hypre_assert( hypre_StructMatrixConstantCoefficient(R) == 0 );
+//      hypre_assert( hypre_StructMatrixConstantCoefficient(P) == 0 );
+//   }
+//   else /* 1 or 2 */
+//   {
+//      hypre_assert( hypre_StructMatrixConstantCoefficient(R) == 1 );
+//      hypre_assert( hypre_StructMatrixConstantCoefficient(P) == 1 );
+//   }
 
    fcbox = hypre_BoxCreate(ndim);
    bdy_boxes = hypre_BoxArrayCreate(0, ndim);
