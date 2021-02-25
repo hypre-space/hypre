@@ -302,13 +302,6 @@ HYPRE_Int hypre_set_precond(HYPRE_Int matrix_id, HYPRE_Int solver_id, HYPRE_Int 
                                     (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup,
                                     (HYPRE_Solver) precond);
               }
-           else if (precond_id == HYPRE_SPARSEMSG)
-              {
-               HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
-                                    (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSolve,
-                                    (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSetup,
-                                    (HYPRE_Solver) precond);
-              }
            else if (precond_id == HYPRE_JACOBI)
               {
                HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
@@ -344,13 +337,6 @@ HYPRE_Int hypre_set_precond(HYPRE_Int matrix_id, HYPRE_Int solver_id, HYPRE_Int 
                                     (HYPRE_PtrToStructSolverFcn) HYPRE_StructPFMGSetup,
                                     (HYPRE_StructSolver) precond);
               }
-           else if (precond_id == HYPRE_SPARSEMSG)
-              {
-               HYPRE_StructHybridSetPrecond( (HYPRE_StructSolver) solver,
-                                    (HYPRE_PtrToStructSolverFcn) HYPRE_StructSparseMSGSolve,
-                                    (HYPRE_PtrToStructSolverFcn) HYPRE_StructSparseMSGSetup,
-                                    (HYPRE_StructSolver) precond);
-              }
           }
 
 /************************************************************************
@@ -370,13 +356,6 @@ HYPRE_Int hypre_set_precond(HYPRE_Int matrix_id, HYPRE_Int solver_id, HYPRE_Int 
                HYPRE_GMRESSetPrecond( (HYPRE_Solver) solver,
                                     (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
                                     (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup,
-                                    (HYPRE_Solver) precond);
-              }
-           else if (precond_id == HYPRE_SPARSEMSG)
-              {
-               HYPRE_GMRESSetPrecond( (HYPRE_Solver) solver,
-                                    (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSolve,
-                                    (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSetup,
                                     (HYPRE_Solver) precond);
               }
            else if (precond_id == HYPRE_JACOBI)
@@ -412,13 +391,6 @@ HYPRE_Int hypre_set_precond(HYPRE_Int matrix_id, HYPRE_Int solver_id, HYPRE_Int 
                HYPRE_BiCGSTABSetPrecond( (HYPRE_Solver) solver,
                                     (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
                                     (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup,
-                                    (HYPRE_Solver) precond);
-              }
-           else if (precond_id == HYPRE_SPARSEMSG)
-              {
-               HYPRE_BiCGSTABSetPrecond( (HYPRE_Solver) solver,
-                                    (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSolve,
-                                    (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSetup,
                                     (HYPRE_Solver) precond);
               }
            else if (precond_id == HYPRE_JACOBI)
@@ -621,9 +593,6 @@ HYPRE_Int hypre_destroy_precond(HYPRE_Int precond_id, void *precond)
 
     else if (precond_id == HYPRE_SMG)
         HYPRE_SMGDestroy(precond);
-
-    else if (precond_id == HYPRE_SPARSEMSG)
-        HYPRE_SparseMSGDestroy(precond);
 
     else if (precond_id == HYPRE_SPLIT)
         HYPRE_SplitDestroy(precond);

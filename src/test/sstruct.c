@@ -2215,29 +2215,24 @@ PrintUsage( char *progname,
       hypre_printf("                        150- AMS solver\n");
       hypre_printf("                        200- Struct SMG\n");
       hypre_printf("                        201- Struct PFMG\n");
-      hypre_printf("                        202- Struct SparseMSG\n");
       hypre_printf("                        203- Struct PFMG constant coefficients\n");
       hypre_printf("                        204- Struct PFMG constant coefficients variable diagonal\n");
       hypre_printf("                        205- Struct Cyclic Reduction\n");
       hypre_printf("                        208- Struct Jacobi\n");
       hypre_printf("                        210- Struct CG with SMG precond\n");
       hypre_printf("                        211- Struct CG with PFMG precond\n");
-      hypre_printf("                        212- Struct CG with SparseMSG precond\n");
       hypre_printf("                        217- Struct CG with 2-step Jacobi\n");
       hypre_printf("                        218- Struct CG with diagonal scaling\n");
       hypre_printf("                        219- Struct CG\n");
       hypre_printf("                        220- Struct Hybrid with SMG precond\n");
       hypre_printf("                        221- Struct Hybrid with PFMG precond\n");
-      hypre_printf("                        222- Struct Hybrid with SparseMSG precond\n");
       hypre_printf("                        230- Struct GMRES with SMG precond\n");
       hypre_printf("                        231- Struct GMRES with PFMG precond\n");
-      hypre_printf("                        232- Struct GMRES with SparseMSG precond\n");
       hypre_printf("                        237- Struct GMRES with 2-step Jacobi\n");
       hypre_printf("                        238- Struct GMRES with diagonal scaling\n");
       hypre_printf("                        239- Struct GMRES\n");
       hypre_printf("                        240- Struct BiCGSTAB with SMG precond\n");
       hypre_printf("                        241- Struct BiCGSTAB with PFMG precond\n");
-      hypre_printf("                        242- Struct BiCGSTAB with SparseMSG precond\n");
       hypre_printf("                        247- Struct BiCGSTAB with 2-step Jacobi\n");
       hypre_printf("                        248- Struct BiCGSTAB with diagonal scaling\n");
       hypre_printf("                        249- Struct BiCGSTAB\n");
@@ -2281,7 +2276,6 @@ PrintUsage( char *progname,
       hypre_printf("                        2 - R/B Gauss-Seidel\n");
       hypre_printf("                        3 - R/B Gauss-Seidel (nonsymmetric)\n");
       hypre_printf("  -w <jacobi_weight> : jacobi weight\n");
-      hypre_printf("  -jump <num>        : Struct- num levels to jump in SparseMSG\n");
       hypre_printf("  -solver_type <ID>  : Struct- solver type for Hybrid\n");
       hypre_printf("                        1 - PCG (default)\n");
       hypre_printf("                        2 - GMRES\n");
@@ -2416,7 +2410,6 @@ main( hypre_int argc,
    HYPRE_Int             n_pre, n_post, n_coarse;
    HYPRE_Int             max_coarse_size;
    HYPRE_Int             skip;
-   HYPRE_Int             jump;
 
    /* parameters for Solvers */
    HYPRE_Int             rel_change;
@@ -2552,7 +2545,6 @@ main( hypre_int argc,
    rap   = 0;
    relax = 1;
    usr_jacobi_weight= 0;
-   jump  = 0;
    solver_type = 1;
    recompute_res = 0;   /* What should be the default here? */
    cf_tol = 0.90;
@@ -2845,11 +2837,6 @@ main( hypre_int argc,
       {
          arg_index++;
          coarsen_type = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-jump") == 0 )
-      {
-         arg_index++;
-         jump = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-solver_type") == 0 )
       {
@@ -5743,52 +5730,6 @@ main( hypre_int argc,
    }
 
    /*-----------------------------------------------------------
-    * Solve the system using SparseMSG
-    *-----------------------------------------------------------*/
-
-   else if (solver_id == 202)
-   {
-      time_index = hypre_InitializeTiming("SparseMSG Setup");
-      hypre_BeginTiming(time_index);
-
-      HYPRE_StructSparseMSGCreate(hypre_MPI_COMM_WORLD, &struct_solver);
-      HYPRE_StructSparseMSGSetMaxIter(struct_solver, max_iterations);
-      HYPRE_StructSparseMSGSetJump(struct_solver, jump);
-      HYPRE_StructSparseMSGSetTol(struct_solver, tol);
-      HYPRE_StructSparseMSGSetRelChange(struct_solver, rel_change);
-      HYPRE_StructSparseMSGSetRelaxType(struct_solver, relax);
-      if (usr_jacobi_weight)
-      {
-         HYPRE_StructSparseMSGSetJacobiWeight(struct_solver, jacobi_weight);
-      }
-      HYPRE_StructSparseMSGSetNumPreRelax(struct_solver, n_pre);
-      HYPRE_StructSparseMSGSetNumPostRelax(struct_solver, n_post);
-      HYPRE_StructSparseMSGSetPrintLevel(struct_solver, 1);
-      HYPRE_StructSparseMSGSetLogging(struct_solver, 1);
-      HYPRE_StructSparseMSGSetup(struct_solver, sA, sb, sx);
-
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-
-      time_index = hypre_InitializeTiming("SparseMSG Solve");
-      hypre_BeginTiming(time_index);
-
-      HYPRE_StructSparseMSGSolve(struct_solver, sA, sb, sx);
-
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-
-      HYPRE_StructSparseMSGGetNumIterations(struct_solver, &num_iterations);
-      HYPRE_StructSparseMSGGetFinalRelativeResidualNorm(struct_solver,
-                                                        &final_res_norm);
-      HYPRE_StructSparseMSGDestroy(struct_solver);
-   }
-
-   /*-----------------------------------------------------------
     * Solve the system using Jacobi
     *-----------------------------------------------------------*/
 
@@ -5884,29 +5825,6 @@ main( hypre_int argc,
                               (HYPRE_Solver) struct_precond);
       }
 
-      else if (solver_id == 212)
-      {
-         /* use symmetric SparseMSG as preconditioner */
-         HYPRE_StructSparseMSGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
-         HYPRE_StructSparseMSGSetMaxIter(struct_precond, 1);
-         HYPRE_StructSparseMSGSetJump(struct_precond, jump);
-         HYPRE_StructSparseMSGSetTol(struct_precond, 0.0);
-         HYPRE_StructSparseMSGSetZeroGuess(struct_precond);
-         HYPRE_StructSparseMSGSetRelaxType(struct_precond, relax);
-         if (usr_jacobi_weight)
-         {
-            HYPRE_StructSparseMSGSetJacobiWeight(struct_precond, jacobi_weight);
-         }
-         HYPRE_StructSparseMSGSetNumPreRelax(struct_precond, n_pre);
-         HYPRE_StructSparseMSGSetNumPostRelax(struct_precond, n_post);
-         HYPRE_StructSparseMSGSetPrintLevel(struct_precond, 0);
-         HYPRE_StructSparseMSGSetLogging(struct_precond, 0);
-         HYPRE_PCGSetPrecond( (HYPRE_Solver) struct_solver,
-                              (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSolve,
-                              (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSetup,
-                              (HYPRE_Solver) struct_precond);
-      }
-
       else if (solver_id == 217)
       {
          /* use two-step Jacobi as preconditioner */
@@ -5962,10 +5880,6 @@ main( hypre_int argc,
       else if (solver_id == 211)
       {
          HYPRE_StructPFMGDestroy(struct_precond);
-      }
-      else if (solver_id == 212)
-      {
-         HYPRE_StructSparseMSGDestroy(struct_precond);
       }
       else if (solver_id == 217)
       {
@@ -6044,29 +5958,6 @@ main( hypre_int argc,
                                       struct_precond);
       }
 
-      else if (solver_id == 222)
-      {
-         /* use symmetric SparseMSG as preconditioner */
-         HYPRE_StructSparseMSGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
-         HYPRE_StructSparseMSGSetJump(struct_precond, jump);
-         HYPRE_StructSparseMSGSetMaxIter(struct_precond, 1);
-         HYPRE_StructSparseMSGSetTol(struct_precond, 0.0);
-         HYPRE_StructSparseMSGSetZeroGuess(struct_precond);
-         HYPRE_StructSparseMSGSetRelaxType(struct_precond, relax);
-         if (usr_jacobi_weight)
-         {
-            HYPRE_StructSparseMSGSetJacobiWeight(struct_precond, jacobi_weight);
-         }
-         HYPRE_StructSparseMSGSetNumPreRelax(struct_precond, n_pre);
-         HYPRE_StructSparseMSGSetNumPostRelax(struct_precond, n_post);
-         HYPRE_StructSparseMSGSetPrintLevel(struct_precond, 0);
-         HYPRE_StructSparseMSGSetLogging(struct_precond, 0);
-         HYPRE_StructHybridSetPrecond(struct_solver,
-                                      HYPRE_StructSparseMSGSolve,
-                                      HYPRE_StructSparseMSGSetup,
-                                      struct_precond);
-      }
-
       HYPRE_StructHybridSetup(struct_solver, sA, sb, sx);
 
       hypre_EndTiming(time_index);
@@ -6095,10 +5986,6 @@ main( hypre_int argc,
       else if (solver_id == 221)
       {
          HYPRE_StructPFMGDestroy(struct_precond);
-      }
-      else if (solver_id == 222)
-      {
-         HYPRE_StructSparseMSGDestroy(struct_precond);
       }
    }
 
@@ -6162,29 +6049,6 @@ main( hypre_int argc,
                                 (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup,
                                 (HYPRE_Solver)struct_precond);
       }
-      else if (solver_id == 232)
-      {
-         /* use symmetric SparseMSG as preconditioner */
-         HYPRE_StructSparseMSGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
-         HYPRE_StructSparseMSGSetMaxIter(struct_precond, 1);
-         HYPRE_StructSparseMSGSetJump(struct_precond, jump);
-         HYPRE_StructSparseMSGSetTol(struct_precond, 0.0);
-         HYPRE_StructSparseMSGSetZeroGuess(struct_precond);
-         HYPRE_StructSparseMSGSetRelaxType(struct_precond, relax);
-         if (usr_jacobi_weight)
-         {
-            HYPRE_StructSparseMSGSetJacobiWeight(struct_precond, jacobi_weight);
-         }
-         HYPRE_StructSparseMSGSetNumPreRelax(struct_precond, n_pre);
-         HYPRE_StructSparseMSGSetNumPostRelax(struct_precond, n_post);
-         HYPRE_StructSparseMSGSetPrintLevel(struct_precond, 0);
-         HYPRE_StructSparseMSGSetLogging(struct_precond, 0);
-         HYPRE_GMRESSetPrecond( (HYPRE_Solver)struct_solver,
-                                (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSolve,
-                                (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSetup,
-                                (HYPRE_Solver)struct_precond);
-      }
-
       else if (solver_id == 237)
       {
          /* use two-step Jacobi as preconditioner */
@@ -6240,10 +6104,6 @@ main( hypre_int argc,
       else if (solver_id == 231)
       {
          HYPRE_StructPFMGDestroy(struct_precond);
-      }
-      else if (solver_id == 232)
-      {
-         HYPRE_StructSparseMSGDestroy(struct_precond);
       }
       else if (solver_id == 237)
       {
@@ -6310,29 +6170,6 @@ main( hypre_int argc,
                                    (HYPRE_Solver)struct_precond);
       }
 
-      else if (solver_id == 242)
-      {
-         /* use symmetric SparseMSG as preconditioner */
-         HYPRE_StructSparseMSGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
-         HYPRE_StructSparseMSGSetMaxIter(struct_precond, 1);
-         HYPRE_StructSparseMSGSetJump(struct_precond, jump);
-         HYPRE_StructSparseMSGSetTol(struct_precond, 0.0);
-         HYPRE_StructSparseMSGSetZeroGuess(struct_precond);
-         HYPRE_StructSparseMSGSetRelaxType(struct_precond, relax);
-         if (usr_jacobi_weight)
-         {
-            HYPRE_StructSparseMSGSetJacobiWeight(struct_precond, jacobi_weight);
-         }
-         HYPRE_StructSparseMSGSetNumPreRelax(struct_precond, n_pre);
-         HYPRE_StructSparseMSGSetNumPostRelax(struct_precond, n_post);
-         HYPRE_StructSparseMSGSetPrintLevel(struct_precond, 0);
-         HYPRE_StructSparseMSGSetLogging(struct_precond, 0);
-         HYPRE_BiCGSTABSetPrecond( (HYPRE_Solver)struct_solver,
-                                   (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSolve,
-                                   (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSetup,
-                                   (HYPRE_Solver)struct_precond);
-      }
-
       else if (solver_id == 247)
       {
          /* use two-step Jacobi as preconditioner */
@@ -6388,10 +6225,6 @@ main( hypre_int argc,
       else if (solver_id == 241)
       {
          HYPRE_StructPFMGDestroy(struct_precond);
-      }
-      else if (solver_id == 242)
-      {
-         HYPRE_StructSparseMSGDestroy(struct_precond);
       }
       else if (solver_id == 247)
       {

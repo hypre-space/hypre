@@ -22,8 +22,7 @@ HEADERS =\
  _hypre_struct_ls.h\
  pfmg.h\
  red_black_gs.h\
- smg.h\
- sparse_msg.h
+ smg.h
 
 FILES =\
  F90_HYPRE_struct_bicgstab.c\
@@ -37,7 +36,6 @@ FILES =\
  F90_HYPRE_struct_pcg.c\
  F90_HYPRE_struct_pfmg.c\
  F90_HYPRE_struct_smg.c\
- F90_HYPRE_struct_sparse_msg.c\
  hybrid.c\
  HYPRE_struct_bicgstab.c\
  HYPRE_struct_cycred.c\
@@ -48,7 +46,6 @@ FILES =\
  HYPRE_struct_lgmres.c\
  HYPRE_struct_pfmg.c\
  HYPRE_struct_smg.c\
- HYPRE_struct_sparse_msg.c\
  jacobi.c\
  pcg_struct.c\
  pfmg.c\
@@ -60,11 +57,7 @@ FILES =\
  smg_setup.c\
  smg_setup_rap.c\
  smg_setup_restrict.c\
- smg_solve.c\
- sparse_msg.c\
- sparse_msg_setup.c\
- sparse_msg_setup_rap.c\
- sparse_msg_solve.c
+ smg_solve.c
 
 CUFILES =\
  cyclic_reduction.c\
@@ -87,12 +80,7 @@ CUFILES =\
  smg.c\
  smg_axpy.c\
  smg_residual.c\
- smg_setup_interp.c\
- sparse_msg2_setup_rap.c\
- sparse_msg3_setup_rap.c\
- sparse_msg_filter.c\
- sparse_msg_interp.c\
- sparse_msg_restrict.c
+ smg_setup_interp.c
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}
