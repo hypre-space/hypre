@@ -388,6 +388,8 @@ hypre_StructMatvecRectglCompute( void               *matvec_vdata,
          }
          hypre_BoxLoop1End(yi);
       }
+      hypre_BoxDestroy(compute_box);
+
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
