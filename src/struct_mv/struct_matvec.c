@@ -601,13 +601,16 @@ hypre_StructMatvecRectglCompute( void               *matvec_vdata,
 
    if (x_tmp)
    {
+      /* Reset x to be the same as y */
       hypre_StructVectorDestroy(x_tmp);
       x = y;
    }
+   else
+   {
+      /* Restore the original grid and data layout for x */
+      hypre_StructVectorRestore(x);
+   }
    hypre_BoxDestroy(compute_box);
-
-   /* This restores the original grid and data layout */
-   hypre_StructVectorRestore(x);
 
    HYPRE_ANNOTATE_FUNC_END;
 
