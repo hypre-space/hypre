@@ -299,7 +299,7 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
    }
 #endif /* defined(HYPRE_USING_CUDA) */
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    hypre_SyncCudaComputeStream(hypre_handle());
 #endif
 
@@ -486,7 +486,7 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 
 #endif /* defined(HYPRE_USING_CUDA) */
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    hypre_SyncCudaComputeStream(hypre_handle());
 #endif
 
@@ -539,7 +539,7 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 
 #endif /* defined(HYPRE_USING_CUDA) */
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    hypre_SyncCudaComputeStream(hypre_handle());
 #endif
 
@@ -593,7 +593,7 @@ hypre_SeqVectorElmdivpy( hypre_Vector *x,
       }
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    hypre_SyncCudaComputeStream(hypre_handle());
 #endif
 
@@ -649,7 +649,7 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
    }
 #endif /* defined(HYPRE_USING_CUDA) */
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    hypre_SyncCudaComputeStream(hypre_handle());
 #endif
 
