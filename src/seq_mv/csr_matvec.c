@@ -406,7 +406,7 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    //HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
    //RL: TODO back to hypre_GetExecPolicy1 later
    HYPRE_ExecutionPolicy exec = HYPRE_EXEC_DEVICE;
@@ -676,7 +676,7 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    //HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
    //RL: TODO back to hypre_GetExecPolicy1 later
    HYPRE_ExecutionPolicy exec = HYPRE_EXEC_DEVICE;
@@ -822,4 +822,3 @@ hypre_CSRMatrixMatvec_FF( HYPRE_Complex    alpha,
 
    return ierr;
 }
-
