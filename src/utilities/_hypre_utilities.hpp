@@ -187,6 +187,8 @@ struct hypre_CudaData
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    cudaStream_t                      cuda_streams[HYPRE_MAX_NUM_STREAMS];
+#elif defined(HYPRE_USING_HIP)
+   hipStream_t                       cuda_streams[HYPRE_MAX_NUM_STREAMS];
 #endif
 
 #ifdef HYPRE_USING_CUB_ALLOCATOR
@@ -260,6 +262,9 @@ cusparseMatDescr_t hypre_CudaDataCusparseMatDescr(hypre_CudaData *data);
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 cudaStream_t       hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i);
 cudaStream_t       hypre_CudaDataCudaComputeStream(hypre_CudaData *data);
+#elif defined(HYPRE_USING_HIP)
+hipStream_t        hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i);
+hipStream_t        hypre_CudaDataCudaComputeStream(hypre_CudaData *data);
 #endif
 
 // Data structure and accessor routines for Cuda Sparse Triangular Matrices
