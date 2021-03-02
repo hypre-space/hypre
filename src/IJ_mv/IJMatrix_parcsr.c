@@ -2685,7 +2685,7 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
                      else
                      {
                         i_diag++;
-                        if (local_j[j] - col_0 == i)
+                        if ((HYPRE_Int)(local_j[j] - col_0) == i)
                         {
                            diag_pos[i] = j;
                         }
@@ -2695,7 +2695,7 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
             }
             else
             {
-               for (i=ns; i < ne; i++)
+               for (i = ns; i < ne; i++)
                {
                   local_j = aux_j[i];
                   local_data = aux_data[i];
@@ -2709,7 +2709,7 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
                      else
                      {
                         i_diag++;
-                        if ((HYPRE_Int)(local_j[j]-col_0) == i)
+                        if ((HYPRE_Int)(local_j[j] - col_0) == i)
                         {
                            diag_pos[i] = j;
                         }
@@ -2772,14 +2772,14 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
                   local_data = aux_data[ii];
                   if (diag_pos[i] > -1)
                   {
-                     diag_j[i_diag] = local_j[diag_pos[i]] - col_0;
+		     diag_j[i_diag] = (HYPRE_Int)(local_j[diag_pos[i]] - col_0);
                      diag_data[i_diag++] = local_data[diag_pos[i]];
                   }
                   for (j = 0; j < row_length[ii]; j++)
                   {
                      if (local_j[j] < col_0 || local_j[j] > col_n)
                      {
-                        offd_j[i_offd] = local_j[j];
+                        big_offd_j[i_offd] = local_j[j];
                         offd_data[i_offd++] = local_data[j];
                      }
                      else if (j != diag_pos[i])
@@ -2792,7 +2792,7 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
             }
             else
             {
-               for (i=ns; i < ne; i++)
+               for (i = ns; i < ne; i++)
                {
                   diag_i[i] = i_diag;
                   offd_i[i] = i_offd;
@@ -2803,7 +2803,7 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
                      diag_j[i_diag] = (HYPRE_Int)(local_j[diag_pos[i]] - col_0);
                      diag_data[i_diag++] = local_data[diag_pos[i]];
                   }
-                  for (j=0; j < row_length[i]; j++)
+                  for (j = 0; j < row_length[i]; j++)
                   {
                      if (local_j[j] < col_0 || local_j[j] > col_n)
                      {
@@ -2877,7 +2877,7 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
          for (i = 0; i < num_rows; i++)
          {
             j0 = diag_i[i];
-            for (j=j0; j < diag_i[i+1]; j++)
+            for (j = j0; j < diag_i[i+1]; j++)
             {
                if (diag_j[j] == i)
                {
@@ -2907,14 +2907,14 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
       nnz_offd = offd_i[num_rows];
       if (nnz_offd)
       {
-         tmp_j = hypre_CTAlloc(HYPRE_BigInt,  nnz_offd, HYPRE_MEMORY_HOST);
-         for (i=0; i < nnz_offd; i++)
+         tmp_j = hypre_CTAlloc(HYPRE_BigInt, nnz_offd, HYPRE_MEMORY_HOST);
+         for (i = 0; i < nnz_offd; i++)
          {
             tmp_j[i] = big_offd_j[i];
          }
          hypre_BigQsort0(tmp_j,0,nnz_offd-1);
          num_cols_offd = 1;
-         for (i=0; i < nnz_offd-1; i++)
+         for (i = 0; i < nnz_offd-1; i++)
          {
             if (tmp_j[i+1] > tmp_j[i])
             {
@@ -2922,21 +2922,21 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
             }
          }
          col_map_offd = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd, HYPRE_MEMORY_HOST);
-         for (i=0; i < num_cols_offd; i++)
+         for (i = 0; i < num_cols_offd; i++)
          {
             col_map_offd[i] = tmp_j[i];
          }
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i)
 #endif
-         for (i=0; i < nnz_offd; i++)
+         for (i = 0; i < nnz_offd; i++)
          {
-            offd_j[i]=hypre_BigBinarySearch(col_map_offd,big_offd_j[i],num_cols_offd);
+            offd_j[i] = hypre_BigBinarySearch(col_map_offd,big_offd_j[i],num_cols_offd);
          }
 
          if (base)
          {
-            for (i=0; i < num_cols_offd; i++)
+            for (i = 0; i < num_cols_offd; i++)
             {
                col_map_offd[i] -= base;
             }
