@@ -157,11 +157,23 @@ typedef struct hypre_cub_CachingDeviceAllocator hypre_cub_CachingDeviceAllocator
 
 struct hypre_CudaData
 {
+#if defined(HYPRE_USING_CURAND)
    curandGenerator_t                 curand_generator;
+#endif
+
+#if defined(HYPRE_USING_CUBLAS)
    cublasHandle_t                    cublas_handle;
+#endif
+
+#if defined(HYPRE_USING_CUSPARSE)
    cusparseHandle_t                  cusparse_handle;
    cusparseMatDescr_t                cusparse_mat_descr;
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    cudaStream_t                      cuda_streams[HYPRE_MAX_NUM_STREAMS];
+#endif
+
 #ifdef HYPRE_USING_CUB_ALLOCATOR
    hypre_uint                        cub_bin_growth;
    hypre_uint                        cub_min_bin;
@@ -217,18 +229,31 @@ struct hypre_CudaData
 hypre_CudaData* hypre_CudaDataCreate();
 void hypre_CudaDataDestroy(hypre_CudaData* data);
 
+#if defined(HYPRE_USING_CURAND)
 curandGenerator_t  hypre_CudaDataCurandGenerator(hypre_CudaData *data);
+#endif
+
+#if defined(HYPRE_USING_CUBLAS)
 cublasHandle_t     hypre_CudaDataCublasHandle(hypre_CudaData *data);
+#endif
+
+#if defined(HYPRE_USING_CUSPARSE)
 cusparseHandle_t   hypre_CudaDataCusparseHandle(hypre_CudaData *data);
 cusparseMatDescr_t hypre_CudaDataCusparseMatDescr(hypre_CudaData *data);
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 cudaStream_t       hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i);
 cudaStream_t       hypre_CudaDataCudaComputeStream(hypre_CudaData *data);
+#endif
 
 // Data structure and accessor routines for Cuda Sparse Triangular Matrices
 struct hypre_CsrsvData
 {
+#if defined(HYPRE_USING_CUSPARSE)
    csrsv2Info_t info_L;
    csrsv2Info_t info_U;
+#endif
    hypre_int    BufferSize;
    char        *Buffer;
 };
