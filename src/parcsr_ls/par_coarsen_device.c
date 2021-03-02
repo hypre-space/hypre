@@ -41,10 +41,10 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
    HYPRE_Int                *diag_iwork;
    HYPRE_Int                *CF_marker_diag;
    HYPRE_Int                *CF_marker_offd;
-   HYPRE_Int                 ierr = 0;
    HYPRE_Int                 iter = 0;
    void                     *send_buf;
    HYPRE_Int                 my_id, num_procs;
+   HYPRE_Int                 aug_rand;
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PMIS] -= hypre_MPI_Wtime();
@@ -98,7 +98,19 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
     * The measures are augmented by a random number between 0 and 1
     * Note that measure_offd is not sync'ed
     *-------------------------------------------------------------------*/
-   hypre_GetGlobalMeasureDevice(S, comm_pkg, CF_init, 2, measure_diag, measure_offd, (HYPRE_Real *) send_buf);
+
+   if (CF_init == 2 || CF_init == 4)
+   {
+      /* seq rand */
+      aug_rand = hypre_HandleUseGpuRand(hypre_handle()) ? 11 : 12;
+   }
+   else
+   {
+      /* each proc generate rand numbers independently */
+      aug_rand = hypre_HandleUseGpuRand(hypre_handle()) ? 1 : 2;
+   }
+
+   hypre_GetGlobalMeasureDevice(S, comm_pkg, CF_init, aug_rand, measure_diag, measure_offd, (HYPRE_Real *) send_buf);
 
    /* initialize CF marker, graph arrays and measure_diag, measure_offd is sync'ed
     * Note: CF_marker_offd is not sync'ed */
@@ -121,14 +133,14 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
          break;
       }
 
-      if (!CF_init || iter)
+      if (CF_init == 0 || CF_init == 2 || iter)
       {
          /* on input CF_marker_offd does not need to be sync'ed, (but has minimal requirement on
           * the values, see comments therein), and will NOT be sync'ed on exit */
          hypre_BoomerAMGIndepSetDevice(S, measure_diag, measure_offd, graph_diag_size, graph_diag,
                                        CF_marker_diag, CF_marker_offd, comm_pkg, (HYPRE_Int *) send_buf);
 
-         /* sync CF_marker_offd */
+         /* sync CF_marker_offd: so it has correct 1/0 now */
          HYPRE_THRUST_CALL( gather,
                             hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                             hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
@@ -147,7 +159,7 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
 
       /* From the IS, set C/F-pts in CF_marker_diag (for the nodes still in graph) and
        * clear their values in measure_diag. measure_offd is sync'ed afterwards.
-       * Note: CF_marker_offd is NOT sync'ed */
+       * Note: CF_marker_offd Needs to be sync'ed on entry is NOT sync'ed on exit */
       hypre_PMISCoarseningUpdateCFDevice(S, measure_diag, measure_offd, graph_diag_size, graph_diag,
                                          CF_marker_diag, CF_marker_offd, comm_pkg, (HYPRE_Real *) send_buf,
                                          (HYPRE_Int *)send_buf);
@@ -191,7 +203,7 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
    hypre_profile_times[HYPRE_TIMER_ID_PMIS] += hypre_MPI_Wtime();
 #endif
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 HYPRE_Int
@@ -395,8 +407,9 @@ hypreCUDAKernel_PMISCoarseningUpdateCF(HYPRE_Int   graph_diag_size,
       /*-------------------------------------------------
        * Now treat the case where this node is not in the
        * independent set: loop over
-       * all the points j that influence equation i; if
-       * j is a C point, then make i an F point.
+       * all the points j that influence equation 'row'; if
+       * any j is a C point, then make row an F point and 
+       * clear the measure
        *-------------------------------------------------*/
       if (lane < 2)
       {
@@ -528,13 +541,3 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
 
 #endif // #if defined(HYPRE_USING_CUDA)
 
-
-
-/*
-   cudaError_t cudaerr = cudaGetLastError();
-   if (cudaerr != cudaSuccess)
-   {
-      hypre_printf("CUDA error: %s\n",cudaGetErrorString(cudaerr));
-   }
-   exit(0);
-*/

@@ -1448,7 +1448,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
       break;
     }
 
-    hypre_BoomerAMGBuildExtPIInterp(A_array_local[lev_local], CF_marker_local,
+    hypre_BoomerAMGBuildExtPIInterpHost(A_array_local[lev_local], CF_marker_local,
                         S_local, coarse_pnts_global_lvl, num_functions, dof_func_array[lev_local],
                         debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P_local);
 

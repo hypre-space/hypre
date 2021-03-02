@@ -13,39 +13,33 @@ ATOL=$2
 #=============================================================================
 
 FILES="\
- ${TNAME}.out.1\
- ${TNAME}.out.2\
- ${TNAME}.out.3\
- ${TNAME}.out.4\
- ${TNAME}.out.5\
- ${TNAME}.out.6\
- ${TNAME}.out.7\
- ${TNAME}.out.8\
- ${TNAME}.out.9\
- ${TNAME}.out.10\
- ${TNAME}.out.11\
- ${TNAME}.out.12\
- ${TNAME}.out.13\
- ${TNAME}.out.14\
- ${TNAME}.out.15\
- ${TNAME}.out.16\
- ${TNAME}.out.17\
- ${TNAME}.out.18\
- ${TNAME}.out.19\
- ${TNAME}.out.20\
- ${TNAME}.out.21\
+ ${TNAME}.out.900\
+ ${TNAME}.out.901\
+ ${TNAME}.out.902\
+ ${TNAME}.out.903\
+ ${TNAME}.out.904\
+ ${TNAME}.out.905\
+ ${TNAME}.out.906\
+ ${TNAME}.out.910\
+ ${TNAME}.out.911\
+ ${TNAME}.out.912\
+ ${TNAME}.out.913\
+ ${TNAME}.out.914\
+ ${TNAME}.out.915\
+ ${TNAME}.out.916\
+ ${TNAME}.out.917\
+ ${TNAME}.out.918\
 "
 
 for i in $FILES
 do
   echo "# Output file: $i"
-  grep -A 3 "Complexity" $i
   tail -3 $i
 done > ${TNAME}.out
 
 # Make sure that the output file is reasonable
 RUNCOUNT=`echo $FILES | wc -w`
-OUTCOUNT=`grep "Complexity" ${TNAME}.out | wc -l`
+OUTCOUNT=`grep "Iterations" ${TNAME}.out | wc -l`
 if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
    echo "Incorrect number of runs in ${TNAME}.out" >&2
 fi
@@ -54,4 +48,3 @@ fi
 # remove temporary files
 #=============================================================================
 
-rm -f ${TNAME}.testdata*

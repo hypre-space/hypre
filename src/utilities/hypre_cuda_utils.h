@@ -114,6 +114,8 @@ struct hypre_CudaData
    HYPRE_Int                         spgemm_rownnz_estimate_nsamples;
    float                             spgemm_rownnz_estimate_mult_factor;
    char                              spgemm_hash_type;
+   /* PMIS */
+   HYPRE_Int                         use_gpu_rand;
 };
 
 #define hypre_CudaDataCubBinGrowth(data)                   ((data) -> cub_bin_growth)
@@ -136,6 +138,7 @@ struct hypre_CudaData
 #define hypre_CudaDataSpgemmRownnzEstimateMultFactor(data) ((data) -> spgemm_rownnz_estimate_mult_factor)
 #define hypre_CudaDataSpgemmHashType(data)                 ((data) -> spgemm_hash_type)
 #define hypre_CudaDataUmpireDeviceAllocator(data)          ((data) -> umpire_device_allocator)
+#define hypre_CudaDataUseGpuRand(data)                     ((data) -> use_gpu_rand)
 
 hypre_CudaData* hypre_CudaDataCreate();
 void hypre_CudaDataDestroy(hypre_CudaData* data);

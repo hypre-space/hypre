@@ -33,6 +33,10 @@ typedef struct hypre_Boxloop_struct
 extern "C++" {
 #endif
 
+/* -------------------------
+ *     parfor-loop
+ * ------------------------*/
+
 template <typename LOOP_BODY>
 __global__ void
 forall_kernel( LOOP_BODY loop_body,
@@ -73,56 +77,9 @@ BoxLoopforall( HYPRE_Int length,
    }
 }
 
-
-#if 0
-template <typename LOOP_BODY>
-__global__ void
-reductionforall_kernel( HYPRE_Int length,
-                        LOOP_BODY loop_body )
-{
-   const HYPRE_Int thread_id = hypre_cuda_get_grid_thread_id<1,1>();
-   const HYPRE_Int n_threads = hypre_cuda_get_grid_num_threads<1,1>();
-
-   loop_body(thread_id, n_threads, length);
-}
-
-template<typename LOOP_BODY, typename REDUCER>
-void
-ReductionBoxLoopforall( HYPRE_Int  length,
-                        REDUCER   &reducer,
-                        LOOP_BODY  loop_body )
-{
-   if (length <= 0)
-   {
-      return;
-   }
-
-   HYPRE_ExecutionPolicy exec_policy = hypre_HandleStructExecPolicy(hypre_handle());
-
-   if (exec_policy == HYPRE_EXEC_HOST)
-   {
-      hypre_assert(0);
-   }
-   else if (exec_policy == HYPRE_EXEC_DEVICE)
-   {
-      const dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-      dim3 gDim = hypre_GetDefaultCUDAGridDimension(length, "thread", bDim);
-
-      /* Note: we assume gDim cannot exceed 1024
-       *       and bDim < WARP * WARP
-       */
-      gDim.x = hypre_min(gDim.x, 1024);
-      reducer.nblocks = gDim.x;
-
-      /*
-      hypre_printf("length= %d, blocksize = %d, gridsize = %d\n", length, bDim.x, gDim.x);
-      */
-
-      HYPRE_CUDA_LAUNCH( reductionforall_kernel, gDim, bDim, length, loop_body );
-   }
-}
-
-#else
+/* ------------------------------
+ *     parforreduction-loop
+ * -----------------------------*/
 
 template <typename LOOP_BODY, typename REDUCER>
 __global__ void
@@ -133,14 +90,12 @@ reductionforall_kernel( HYPRE_Int length,
    const HYPRE_Int thread_id = hypre_cuda_get_grid_thread_id<1,1>();
    const HYPRE_Int n_threads = hypre_cuda_get_grid_num_threads<1,1>();
 
-   //using ValueT = typename REDUCER::value_type;
-   //ValueT value;
-
    for (HYPRE_Int idx = thread_id; idx < length; idx += n_threads)
    {
       loop_body(idx, reducer);
    }
 
+   /* reduction in block-level and the save the results in reducer */
    reducer.BlockReduce();
 }
 
@@ -159,7 +114,10 @@ ReductionBoxLoopforall( HYPRE_Int  length,
 
    if (exec_policy == HYPRE_EXEC_HOST)
    {
-      hypre_assert(0);
+      for (HYPRE_Int idx = 0; idx < length; idx++)
+      {
+         loop_body(idx, reducer);
+      }
    }
    else if (exec_policy == HYPRE_EXEC_DEVICE)
    {
@@ -179,8 +137,6 @@ ReductionBoxLoopforall( HYPRE_Int  length,
       HYPRE_CUDA_LAUNCH( reductionforall_kernel, gDim, bDim, length, reducer, loop_body );
    }
 }
-
-#endif
 
 #ifdef __cplusplus
 }
@@ -300,8 +256,7 @@ else                                                            \
 #define hypre_newBoxLoop0Begin(ndim, loop_size)                                                       \
 {                                                                                                     \
    hypre_newBoxLoopInit(ndim, loop_size);                                                             \
-   HYPRE_ExecutionPolicy exec_policy = hypre_HandleStructExecPolicy(hypre_handle());                  \
-   BoxLoopforall(exec_policy, hypre__tot, HYPRE_LAMBDA (HYPRE_Int idx)                                \
+   BoxLoopforall(hypre__tot, HYPRE_LAMBDA (HYPRE_Int idx)                                             \
    {
 
 #define hypre_newBoxLoop0End()                                                                        \
@@ -379,7 +334,7 @@ else                                                            \
       hypre_BoxLoopIncK(4, databox4, i4);
 
 #define hypre_newBoxLoop4End(i1, i2, i3, i4)                                                          \
-   });                                                                                               \
+   });                                                                                                \
 }
 
 /* Basic BoxLoops have no boxes */
@@ -415,50 +370,6 @@ else                                                            \
    });                                                                                                \
 }
 
-#if 0
-/* Reduction BoxLoop1 */
-#define hypre_BoxLoop1ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1, reducesum)                     \
-{                                                                                                                \
-   hypre_newBoxLoopInit(ndim, loop_size);                                                                        \
-   hypre_BoxLoopDataDeclareK(1, ndim, loop_size, dbox1, start1, stride1);                                        \
-   ReductionBoxLoopforall(hypre__tot, reducesum, HYPRE_LAMBDA (HYPRE_Int tid, HYPRE_Int nt, HYPRE_Int len)       \
-   {                                                                                                             \
-      for (HYPRE_Int idx = tid; idx < len; idx += nt)                                                            \
-      {                                                                                                          \
-         hypre_newBoxLoopDeclare(databox1);                                                                      \
-         hypre_BoxLoopIncK(1, databox1, i1);
-
-#define hypre_BoxLoop1ReductionEnd(i1, reducesum)                                                                \
-      }                                                                                                          \
-      /* reduction in block-level and the save the results in reducesum */                                       \
-      reducesum.BlockReduce();                                                                                   \
-   });                                                                                                           \
-}
-
-/* Reduction BoxLoop2 */
-#define hypre_BoxLoop2ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1,                                \
-                                                      dbox2, start2, stride2, i2, reducesum)                     \
-{                                                                                                                \
-   hypre_newBoxLoopInit(ndim, loop_size);                                                                        \
-   hypre_BoxLoopDataDeclareK(1, ndim, loop_size, dbox1, start1, stride1);                                        \
-   hypre_BoxLoopDataDeclareK(2, ndim, loop_size, dbox2, start2, stride2);                                        \
-   ReductionBoxLoopforall(hypre__tot, reducesum, HYPRE_LAMBDA (HYPRE_Int tid, HYPRE_Int nt, HYPRE_Int len)       \
-   {                                                                                                             \
-      for (HYPRE_Int idx = tid; idx < len; idx += nt)                                                            \
-      {                                                                                                          \
-         hypre_newBoxLoopDeclare(databox1);                                                                      \
-         hypre_BoxLoopIncK(1, databox1, i1);                                                                     \
-         hypre_BoxLoopIncK(2, databox2, i2);
-
-#define hypre_BoxLoop2ReductionEnd(i1, i2, reducesum)                                                            \
-      }                                                                                                          \
-      /* reduction in block-level and the save the results in reducesum */                                       \
-      reducesum.BlockReduce();                                                                                   \
-   });                                                                                                           \
-}
-
-#else
-
 /* Reduction BoxLoop1 */
 #define hypre_BoxLoop1ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1, reducesum)                     \
 {                                                                                                                \
@@ -466,8 +377,8 @@ else                                                            \
    hypre_BoxLoopDataDeclareK(1, ndim, loop_size, dbox1, start1, stride1);                                        \
    ReductionBoxLoopforall(hypre__tot, reducesum, HYPRE_LAMBDA (HYPRE_Int idx, decltype(reducesum) &reducesum)    \
    {                                                                                                             \
-         hypre_newBoxLoopDeclare(databox1);                                                                      \
-         hypre_BoxLoopIncK(1, databox1, i1);
+      hypre_newBoxLoopDeclare(databox1);                                                                         \
+      hypre_BoxLoopIncK(1, databox1, i1);
 
 #define hypre_BoxLoop1ReductionEnd(i1, reducesum)                                                                \
    });                                                                                                           \
@@ -482,15 +393,13 @@ else                                                            \
    hypre_BoxLoopDataDeclareK(2, ndim, loop_size, dbox2, start2, stride2);                                        \
    ReductionBoxLoopforall(hypre__tot, reducesum, HYPRE_LAMBDA (HYPRE_Int idx, decltype(reducesum) &reducesum)    \
    {                                                                                                             \
-         hypre_newBoxLoopDeclare(databox1);                                                                      \
-         hypre_BoxLoopIncK(1, databox1, i1);                                                                     \
-         hypre_BoxLoopIncK(2, databox2, i2);
+      hypre_newBoxLoopDeclare(databox1);                                                                         \
+      hypre_BoxLoopIncK(1, databox1, i1);                                                                        \
+      hypre_BoxLoopIncK(2, databox2, i2);
 
 #define hypre_BoxLoop2ReductionEnd(i1, i2, reducesum)                                                            \
    });                                                                                                           \
 }
-
-#endif
 
 /* Renamings */
 #define hypre_BoxLoopBlock()       0

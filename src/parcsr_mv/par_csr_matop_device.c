@@ -497,6 +497,11 @@ hypre_ParCSRMatrixExtractBExtDeviceInit( hypre_ParCSRMatrix  *B,
             hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(B))) == HYPRE_MEMORY_DEVICE );
    */
 
+   if (!hypre_ParCSRMatrixCommPkg(A))
+   {
+      hypre_MatvecCommPkgCreate(A);
+   }
+
    hypre_ParcsrGetExternalRowsDeviceInit(B,
                                          hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)),
                                          hypre_ParCSRMatrixColMapOffd(A),
@@ -518,6 +523,7 @@ hypre_ParCSRMatrixExtractBExtDevice( hypre_ParCSRMatrix *B,
                                      HYPRE_Int want_data )
 {
    void *request;
+
    hypre_ParCSRMatrixExtractBExtDeviceInit(B, A, want_data, &request);
    return hypre_ParCSRMatrixExtractBExtDeviceWait(request);
 }

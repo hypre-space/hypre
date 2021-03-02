@@ -1047,6 +1047,27 @@ AS_HELP_STRING([--with-cuda],
 [hypre_using_cuda=no]
 )
 
+AC_ARG_WITH(cuda-home,
+AS_HELP_STRING([--with-cuda-home=DIR],
+               [User specifies CUDA_HOME in DIR.]),
+[for cuda_dir in $withval; do
+    CUDA_HOME="$cuda_dir"
+ done;
+ hypre_using_cuda=yes]
+)
+
+AC_ARG_WITH(cuda-arch,
+AS_HELP_STRING([--with-cuda-arch=ARG],
+               [User specifies NVIDIA GPU architecture that the CUDA files will be compiled for in ARG, where ARG is a space-separated
+                list (enclosed in quotes) of numbers.]),
+[
+ if test "x${withval}" != "x"
+ then
+    HYPRE_CUDA_SM="${HYPRE_CUDA_SM} ${withval}"
+ fi
+]
+)
+
 dnl ***** RAJA
 
 AC_ARG_WITH(raja,
@@ -1621,9 +1642,9 @@ dnl *********************************************************************
 dnl * Set default link commands and suffix values
 dnl *********************************************************************
 dnl LINK_F77="${F77}"
-LINK_FC="${FC}"
-LINK_CC="${CC}"
-LINK_CXX="${CXX}"
+LINK_FC='${FC}'
+LINK_CC='${CC}'
+LINK_CXX='${CXX}'
 
 HYPRE_LIBSUFFIX=".a"
 
@@ -1871,18 +1892,21 @@ then
    fi
 
    dnl let CC/CXX and LINK be CUCC and let host compiler be CXX
-   AC_CHECK_PROGS(CUCC, nvcc)
+   AC_CHECK_PROGS(CUCC, nvcc, [""], ["${CUDA_HOME}/bin"])
    NVCCBIN=${CXX}
-   LINK_CC=${CUCC}
-   LINK_CXX=${CUCC}
+   LINK_CC='${CUCC}'
+   LINK_CXX='${CUCC}'
 
    dnl CUDA SM
    if test "x$HYPRE_CUDA_SM" = "x"
    then
-      HYPRE_CUDA_SM=60
+      HYPRE_CUDA_SM=70
    fi
 
-   HYPRE_CUDA_GENCODE="-gencode arch=compute_${HYPRE_CUDA_SM},\"code=sm_${HYPRE_CUDA_SM}\""
+   HYPRE_CUDA_GENCODE=""
+   for sm in ${HYPRE_CUDA_SM}; do
+      HYPRE_CUDA_GENCODE="${HYPRE_CUDA_GENCODE} -gencode arch=compute_${sm},code=sm_${sm}"
+   done
 
    CUFLAGS+="-lineinfo -ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -expt-extended-lambda -dc -std=c++11 --x cu"
    if test "$hypre_using_debug" = "yes"
@@ -1901,8 +1925,9 @@ then
 
    dnl CFLAGS=${CXXFLAGS}
    LDFLAGS="-ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -Xcompiler \"${LDFLAGS}\""
-   HYPRE_CUDA_INCLUDE="-I${HYPRE_CUDA_PATH}/include"
-   HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcudart"
+   HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
+   HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64'
+   HYPRE_CUDA_LIBS+=" -lcudart"
    if test "$hypre_using_nvtx" = "yes"
    then
       HYPRE_CUDA_LIBS+=" -lnvToolsExt"
@@ -1995,8 +2020,9 @@ then
       AC_DEFINE(HYPRE_DEVICE_OPENMP_CHECK, 1, [Define to 1 if strictly checking OpenMP offload directives])
    fi
 
-   HYPRE_CUDA_INCLUDE="-I${HYPRE_CUDA_PATH}/include"
-   HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcusparse -lcudart -lcurand"
+   HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
+   HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64'
+   HYPRE_CUDA_LIBS="-lcudart -lcusparse -lcurand"
    if test "$hypre_using_nvtx" = "yes"
    then
       HYPRE_CUDA_LIBS+=" -lnvToolsExt"
@@ -2004,8 +2030,8 @@ then
 
    dnl let CC be CXX
    dnl CC=${CXX}
-   LINK_CC=${CUCC}
-   LINK_CXX=${CUCC}
+   LINK_CC='${CUCC}'
+   LINK_CXX='${CUCC}'
    dnl CXXFLAGS="-x c++ ${CXXFLAGS}"
    dnl CFLAGS=${CXXFLAGS}
 fi
@@ -2029,9 +2055,9 @@ then
       AIX* | aix* | Aix*) SHARED_COMPILE_FLAG="-qmkshrobj"
                           SHARED_BUILD_FLAG="-G"
 dnl                          LINK_F77="${F77} -brtl"
-                          LINK_FC="${FC} -brtl"
-                          LINK_CC="${CC} -brtl"
-                          LINK_CXX="${CXX} -brtl" ;;
+                          LINK_FC='${FC} -brtl'
+                          LINK_CC='${CC} -brtl'
+                          LINK_CXX='${CXX} -brtl' ;;
       DARWIN* | darwin* | Darwin*) SHARED_BUILD_FLAG="-dynamiclib -undefined dynamic_lookup"
                                    HYPRE_LIBSUFFIX=".dylib"
                                    SHARED_SET_SONAME="-install_name @rpath/"
@@ -2220,7 +2246,15 @@ AC_SUBST(HYPRE_UMPIRE_LIB)
 dnl *********************************************************************
 dnl * CUDA stuff
 dnl *********************************************************************
+if [test "x$CUCC" == "xnvcc"]
+then
+   CUCC_FULL='${HYPRE_CUDA_PATH}/bin/nvcc'
+else
+   CUCC_FULL=${CUCC}
+fi
 AC_SUBST(CUFLAGS)
+AC_SUBST(CUCC_FULL)
+AC_SUBST(HYPRE_CUDA_PATH)
 AC_SUBST(HYPRE_CUDA_INCLUDE)
 AC_SUBST(HYPRE_CUDA_LIBS)
 

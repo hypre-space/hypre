@@ -180,6 +180,8 @@ struct hypre_CudaData
    HYPRE_Int                         spgemm_rownnz_estimate_nsamples;
    float                             spgemm_rownnz_estimate_mult_factor;
    char                              spgemm_hash_type;
+   /* PMIS */
+   HYPRE_Int                         use_gpu_rand;
 };
 
 #define hypre_CudaDataCubBinGrowth(data)                   ((data) -> cub_bin_growth)
@@ -202,6 +204,7 @@ struct hypre_CudaData
 #define hypre_CudaDataSpgemmRownnzEstimateMultFactor(data) ((data) -> spgemm_rownnz_estimate_mult_factor)
 #define hypre_CudaDataSpgemmHashType(data)                 ((data) -> spgemm_hash_type)
 #define hypre_CudaDataUmpireDeviceAllocator(data)          ((data) -> umpire_device_allocator)
+#define hypre_CudaDataUseGpuRand(data)                     ((data) -> use_gpu_rand)
 
 hypre_CudaData* hypre_CudaDataCreate();
 void hypre_CudaDataDestroy(hypre_CudaData* data);
@@ -1028,6 +1031,8 @@ OneBlockReduceKernel(T *arr, HYPRE_Int N)
 template <typename T>
 struct ReduceSum
 {
+   using value_type = T;
+
    T init;                    /* initial value passed in */
    mutable T __thread_sum;    /* place to hold local sum of a thread,
                                  and partial sum of a block */
@@ -1084,12 +1089,23 @@ struct ReduceSum
    operator T()
    {
       T val;
-      /* 2nd reduction with only *one* block */
-      hypre_assert(nblocks >= 0 && nblocks <= 1024);
-      const dim3 gDim(1), bDim(1024);
-      HYPRE_CUDA_LAUNCH( OneBlockReduceKernel, gDim, bDim, d_buf, nblocks );
-      hypre_TMemcpy(&val, d_buf, T, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-      val += init;
+
+      HYPRE_ExecutionPolicy exec_policy = hypre_HandleStructExecPolicy(hypre_handle());
+
+      if (exec_policy == HYPRE_EXEC_HOST)
+      {
+         val = __thread_sum;
+         val += init;
+      }
+      else
+      {
+         /* 2nd reduction with only *one* block */
+         hypre_assert(nblocks >= 0 && nblocks <= 1024);
+         const dim3 gDim(1), bDim(1024);
+         HYPRE_CUDA_LAUNCH( OneBlockReduceKernel, gDim, bDim, d_buf, nblocks );
+         hypre_TMemcpy(&val, d_buf, T, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+         val += init;
+      }
 
       return val;
    }

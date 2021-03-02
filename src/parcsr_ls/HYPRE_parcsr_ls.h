@@ -1843,6 +1843,10 @@ HYPRE_Int HYPRE_ParCSRPilutSetDropTolerance(HYPRE_Solver solver,
 HYPRE_Int HYPRE_ParCSRPilutSetFactorRowSize(HYPRE_Solver solver,
                                             HYPRE_Int    size);
 
+
+HYPRE_Int HYPRE_ParCSRPilutSetLogging(HYPRE_Solver solver,
+                                      HYPRE_Int    logging );
+
 /**@}*/
 
 /*--------------------------------------------------------------------------
@@ -4053,7 +4057,7 @@ HYPRE_ILUSetDropThreshold( HYPRE_Solver solver, HYPRE_Real threshold );
 
 /**
  * (Optional) Set the array of thresholds for dropping in ILUT.
- * B, E, and F correspond to upper left, lower left and upper right 
+ * B, E, and F correspond to upper left, lower left and upper right
  * of 2 x 2 block decomposition respectively.
  * Any fill-in less than thresholds is dropped in the factorization.
  *    - threshold[0] : threshold for matrix B.
@@ -4108,8 +4112,8 @@ HYPRE_ILUSetSchurMaxIter( HYPRE_Solver solver, HYPRE_Int ss_max_iter );
  *    - 30 : RAS with ILU(k)
  *    - 31 : RAS with ILUT
  *    - 40 : (nonsymmetric permutation) DDPQ-GMRES with ILU(k)
- *    - 41 : (nonsymmetric permutation) DDPQ-GMRES with ILUT  
- *    - 50 : GMRES with RAP-ILU(0) using MILU(0) for P 
+ *    - 41 : (nonsymmetric permutation) DDPQ-GMRES with ILUT
+ *    - 50 : GMRES with RAP-ILU(0) using MILU(0) for P
  **/
 HYPRE_Int
 HYPRE_ILUSetType( HYPRE_Solver solver, HYPRE_Int ilu_type );

@@ -10,15 +10,18 @@
 
 #if defined(HYPRE_USING_CUDA)
 
+/*
+ * The architecture identification macro __CUDA_ARCH__ is assigned a three-digit value string xy0
+ * (ending in a literal 0) during each nvcc compilation stage 1 that compiles for compute_xy.
+ * This macro can be used in the implementation of GPU functions for determining the virtual architecture
+ * for which it is currently being compiled. The host code (the non-GPU code) must not depend on it.
+ * Note that compute_XX refers to a PTX version and sm_XX refers to a cubin version.
+*/
 __global__ void
-hypreCUDAKernel_CompileFlagSafetyCheck(HYPRE_Int cuda_arch_actual)
+hypreCUDAKernel_CompileFlagSafetyCheck(hypre_int *cuda_arch_compile)
 {
-#ifdef __CUDA_ARCH__
-   if (cuda_arch_actual != __CUDA_ARCH__)
-   {
-      printf("ERROR: Compile arch flags %d does not match actual device arch = sm_%d\n", __CUDA_ARCH__, cuda_arch_actual);
-      assert(0);
-   }
+#if defined(__CUDA_ARCH__)
+   cuda_arch_compile[0] = __CUDA_ARCH__;
 #endif
 }
 
@@ -28,12 +31,32 @@ void hypre_CudaCompileFlagCheck()
 
    struct cudaDeviceProp props;
    cudaGetDeviceProperties(&props, device);
-   HYPRE_Int cuda_arch_actual = props.major*100 + props.minor*10;
-
+   hypre_int cuda_arch_actual = props.major*100 + props.minor*10;
+   hypre_int cuda_arch_compile = -1;
    dim3 gDim(1,1,1), bDim(1,1,1);
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CompileFlagSafetyCheck, gDim, bDim, cuda_arch_actual );
 
-   HYPRE_CUDA_CALL(cudaDeviceSynchronize());
+   hypre_int *cuda_arch_compile_d = hypre_TAlloc(hypre_int, 1, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(cuda_arch_compile_d, &cuda_arch_compile, hypre_int, 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CompileFlagSafetyCheck, gDim, bDim, cuda_arch_compile_d );
+   hypre_TMemcpy(&cuda_arch_compile, cuda_arch_compile_d, hypre_int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(cuda_arch_compile_d, HYPRE_MEMORY_DEVICE);
+
+   /* HYPRE_CUDA_CALL(cudaDeviceSynchronize()); */
+
+   if (-1 == cuda_arch_compile)
+   {
+      hypre_error_w_msg(1, "hypre error: no proper cuda_arch found");
+   }
+   else if (cuda_arch_actual != cuda_arch_compile)
+   {
+      char msg[256];
+      hypre_sprintf(msg, "hypre warning: Compile 'arch=compute_' does not match device arch %d", cuda_arch_actual);
+      hypre_error_w_msg(1, msg);
+      /*
+      hypre_printf("%s\n", msg);
+      hypre_MPI_Abort(hypre_MPI_COMM_WORLD, -1);
+      */
+   }
 }
 
 dim3
@@ -831,6 +854,38 @@ hypre_CudaDataCurandGenerator(hypre_CudaData *data)
 
    return gen;
 }
+
+HYPRE_Int
+hypre_CurandUniform( HYPRE_Int          n,
+                     HYPRE_Real        *urand,
+                     HYPRE_Int          set_seed,
+                     hypre_ulonglongint seed,
+                     HYPRE_Int          set_offset,
+                     hypre_ulonglongint offset)
+{
+   curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle());
+
+   if (set_seed)
+   {
+      HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, seed) );
+   }
+
+   if (set_offset)
+   {
+      HYPRE_CURAND_CALL( curandSetGeneratorOffset(gen, offset) );
+   }
+
+   if (sizeof(HYPRE_Real) == sizeof(hypre_double))
+   {
+      HYPRE_CURAND_CALL( curandGenerateUniformDouble(gen, (hypre_double *) urand, n) );
+   }
+   else if (sizeof(HYPRE_Real) == sizeof(float))
+   {
+      HYPRE_CURAND_CALL( curandGenerateUniform(gen, (float *) urand, n) );
+   }
+
+   return hypre_error_flag;
+}
 #endif
 
 #if defined(HYPRE_USING_CUBLAS)
@@ -911,6 +966,13 @@ hypre_CudaDataCreate()
    hypre_CudaDataSpgemmRownnzEstimateNsamples(data) = 32;
    hypre_CudaDataSpgemmRownnzEstimateMultFactor(data) = 1.5;
    hypre_CudaDataSpgemmHashType(data) = 'L';
+
+   /* pmis */
+#ifdef HYPRE_USING_CURAND
+   hypre_CudaDataUseGpuRand(data) = 1;
+#else
+   hypre_CudaDataUseGpuRand(data) = 0;
+#endif
 
    /* cub */
 #ifdef HYPRE_USING_CUB_ALLOCATOR

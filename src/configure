@@ -635,6 +635,8 @@ CALIPER_LIBS
 CALIPER_INCLUDE
 HYPRE_CUDA_LIBS
 HYPRE_CUDA_INCLUDE
+HYPRE_CUDA_PATH
+CUCC_FULL
 CUFLAGS
 HYPRE_UMPIRE_LIB
 HYPRE_UMPIRE_INCLUDE
@@ -818,6 +820,8 @@ with_fei_inc_dir
 with_mli
 with_MPI
 with_cuda
+with_cuda_home
+with_cuda_arch
 with_raja
 with_raja_include
 with_raja_lib
@@ -1612,6 +1616,11 @@ Optional Packages:
                           may affect which compiler is chosen.
   --with-cuda             Use CUDA. Require cuda-8.0 or higher (default is
                           NO).
+  --with-cuda-home=DIR    User specifies CUDA_HOME in DIR.
+  --with-cuda-arch=ARG    User specifies NVIDIA GPU architecture that the CUDA
+                          files will be compiled for in ARG, where ARG is a
+                          space-separated list (enclosed in quotes) of
+                          numbers.
   --with-raja             Use RAJA. Require RAJA package to be compiled
                           properly (default is NO).
   --with-raja-include=DIR User specifies that RAJA/*.h is in DIR. The options
@@ -3820,6 +3829,30 @@ if test "${with_cuda+set}" = set; then :
  esac
 else
   hypre_using_cuda=no
+
+fi
+
+
+
+# Check whether --with-cuda-home was given.
+if test "${with_cuda_home+set}" = set; then :
+  withval=$with_cuda_home; for cuda_dir in $withval; do
+    CUDA_HOME="$cuda_dir"
+ done;
+ hypre_using_cuda=yes
+
+fi
+
+
+
+# Check whether --with-cuda-arch was given.
+if test "${with_cuda_arch+set}" = set; then :
+  withval=$with_cuda_arch;
+ if test "x${withval}" != "x"
+ then
+    HYPRE_CUDA_SM="${HYPRE_CUDA_SM} ${withval}"
+ fi
+
 
 fi
 
@@ -8146,9 +8179,9 @@ case $hypre_platform in
                        FFLAGS="${FFLAGS} -blpdata" ;;
 esac
 
-LINK_FC="${FC}"
-LINK_CC="${CC}"
-LINK_CXX="${CXX}"
+LINK_FC='${FC}'
+LINK_CC='${CC}'
+LINK_CXX='${CXX}'
 
 HYPRE_LIBSUFFIX=".a"
 
@@ -8625,7 +8658,7 @@ else
   ac_cv_prog_CUCC="$CUCC" # Let the user override the test.
 else
 as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
+for as_dir in "${CUDA_HOME}/bin"
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.
@@ -8653,17 +8686,34 @@ fi
 
   test -n "$CUCC" && break
 done
+test -n "$CUCC" || CUCC=""""
 
    NVCCBIN=${CXX}
-   LINK_CC=${CUCC}
-   LINK_CXX=${CUCC}
+   LINK_CC='${CUCC}'
+   LINK_CXX='${CUCC}'
+
+   BBB="a      b"
+   AAA=${BBB}
+   CCC="${AAA}"
+   DDD="a ${BBB}"
+   if test "$DDD" = "a b"
+   then
+      echo ok
+   else
+      echo notok
+   fi
+   echo ${CCC}
+
 
       if test "x$HYPRE_CUDA_SM" = "x"
    then
-      HYPRE_CUDA_SM=60
+      HYPRE_CUDA_SM=70
    fi
 
-   HYPRE_CUDA_GENCODE="-gencode arch=compute_${HYPRE_CUDA_SM},\"code=sm_${HYPRE_CUDA_SM}\""
+   HYPRE_CUDA_GENCODE=""
+   for sm in ${HYPRE_CUDA_SM}; do
+      HYPRE_CUDA_GENCODE="${HYPRE_CUDA_GENCODE} -gencode arch=compute_${sm},code=sm_${sm}"
+   done
 
    CUFLAGS+="-lineinfo -ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -expt-extended-lambda -dc -std=c++11 --x cu"
    if test "$hypre_using_debug" = "yes"
@@ -8681,8 +8731,9 @@ done
    CUFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
 
       LDFLAGS="-ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -Xcompiler \"${LDFLAGS}\""
-   HYPRE_CUDA_INCLUDE="-I${HYPRE_CUDA_PATH}/include"
-   HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcudart"
+   HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
+   HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64'
+   HYPRE_CUDA_LIBS+=" -lcudart"
    if test "$hypre_using_nvtx" = "yes"
    then
       HYPRE_CUDA_LIBS+=" -lnvToolsExt"
@@ -8785,15 +8836,16 @@ $as_echo "#define HYPRE_DEVICE_OPENMP_CHECK 1" >>confdefs.h
 
    fi
 
-   HYPRE_CUDA_INCLUDE="-I${HYPRE_CUDA_PATH}/include"
-   HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcusparse -lcudart -lcurand"
+   HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
+   HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64'
+   HYPRE_CUDA_LIBS="-lcudart -lcusparse -lcurand"
    if test "$hypre_using_nvtx" = "yes"
    then
       HYPRE_CUDA_LIBS+=" -lnvToolsExt"
    fi
 
-         LINK_CC=${CUCC}
-   LINK_CXX=${CUCC}
+         LINK_CC='${CUCC}'
+   LINK_CXX='${CUCC}'
       fi
 
 if test "$hypre_using_shared" = "yes"
@@ -8811,9 +8863,9 @@ then
    case $hypre_platform in
       AIX* | aix* | Aix*) SHARED_COMPILE_FLAG="-qmkshrobj"
                           SHARED_BUILD_FLAG="-G"
-                          LINK_FC="${FC} -brtl"
-                          LINK_CC="${CC} -brtl"
-                          LINK_CXX="${CXX} -brtl" ;;
+                          LINK_FC='${FC} -brtl'
+                          LINK_CC='${CC} -brtl'
+                          LINK_CXX='${CXX} -brtl' ;;
       DARWIN* | darwin* | Darwin*) SHARED_BUILD_FLAG="-dynamiclib -undefined dynamic_lookup"
                                    HYPRE_LIBSUFFIX=".dylib"
                                    SHARED_SET_SONAME="-install_name @rpath/"
@@ -9067,6 +9119,14 @@ $as_echo "#define HYPRE_LINUX 1" >>confdefs.h
 
 
 
+
+
+if test "x$CUCC" == "xnvcc"
+then
+   CUCC_FULL='${HYPRE_CUDA_PATH}/bin/nvcc'
+else
+   CUCC_FULL=${CUCC}
+fi
 
 
 

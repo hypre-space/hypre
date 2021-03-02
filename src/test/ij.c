@@ -246,11 +246,7 @@ main( hypre_int argc,
    HYPRE_Real   add_trunc_factor = 0;
    HYPRE_Int    rap2     = 0;
    HYPRE_Int    mod_rap2 = 0;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_Int    keepTranspose = 1;
-#else
    HYPRE_Int    keepTranspose = 0;
-#endif
 #ifdef HYPRE_USING_DSUPERLU
    HYPRE_Int    dslu_threshold = -1;
 #endif
@@ -269,6 +265,14 @@ main( hypre_int argc,
    HYPRE_Int  cheby_variant = 0;
    HYPRE_Int  cheby_scale = 1;
    HYPRE_Real cheby_fraction = .3;
+
+#if defined(HYPRE_USING_GPU)
+   keepTranspose = 1;
+   coarsen_type  = 8;
+   mod_rap2      = 1;
+   HYPRE_Int spgemm_use_cusparse = 0;
+   HYPRE_Int use_curand = 1;
+#endif
 
    /* for CGC BM Aug 25, 2006 */
    HYPRE_Int      cgcits = 1;
@@ -425,11 +429,9 @@ main( hypre_int argc,
    HYPRE_Int amgdd_fac_cycle_type = 1;
    HYPRE_Int amgdd_num_ghost_layers = 1;
 
-#if defined(HYPRE_USING_GPU)
-   HYPRE_Int spgemm_use_cusparse = 1;
-#endif
-   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
-   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
+   /* default execution policy and memory space */
+   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
+   HYPRE_MemoryLocation  memory_location     = HYPRE_MEMORY_DEVICE;
 
 #ifdef HYPRE_USING_CUB_ALLOCATOR
    /* CUB Allocator */
@@ -1123,12 +1125,16 @@ main( hypre_int argc,
       {
          arg_index++;
          default_exec_policy = HYPRE_EXEC_DEVICE;
-         rap2 = mod_rap2 = 1;
       }
       else if ( strcmp(argv[arg_index], "-mm_cusparse") == 0 )
       {
          arg_index++;
          spgemm_use_cusparse = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-use_curand") == 0 )
+      {
+         arg_index++;
+         use_curand = atoi(argv[arg_index++]);
       }
 #endif
 #ifdef HYPRE_USING_CUB_ALLOCATOR
@@ -2185,7 +2191,9 @@ main( hypre_int argc,
 
 #if defined(HYPRE_USING_GPU)
    /* use cuSPARSE for SpGEMM */
-   HYPRE_CSRMatrixSetSpGemmUseCusparse(spgemm_use_cusparse);
+   HYPRE_SetSpGemmUseCusparse(spgemm_use_cusparse);
+   /* use cuRand for PMIS */
+   HYPRE_SetUseGpuRand(use_curand);
 #endif
 
    /*-----------------------------------------------------------
@@ -5764,23 +5772,43 @@ main( hypre_int argc,
 
       if (check_residual)
       {
-         HYPRE_BigInt *indices;
+         HYPRE_BigInt *indices_h, *indices_d;
+         HYPRE_Complex *values_h, *values_d;
          HYPRE_Int num_values = 20;
          HYPRE_ParCSRGMRESGetResidual(pcg_solver, &residual);
          HYPRE_ParCSRMatrixGetLocalRange( parcsr_A,
                                           &first_local_row, &last_local_row ,
                                           &first_local_col, &last_local_col );
          local_num_rows = (HYPRE_Int)(last_local_row - first_local_row + 1);
-         if (local_num_rows < 20) num_values = local_num_rows;
-         indices = hypre_CTAlloc(HYPRE_BigInt, num_values, HYPRE_MEMORY_HOST);
-         values = hypre_CTAlloc(HYPRE_Real, num_values, HYPRE_MEMORY_HOST);
-         for (i=0; i < num_values; i++)
-            indices[i] = first_local_row+i;
-         HYPRE_ParVectorGetValues((HYPRE_ParVector) residual,num_values,indices,values);
-         for (i=0; i < num_values; i++)
-            if (myid ==0) hypre_printf("index %d value %e\n", i, values[i]);
-         hypre_TFree(indices, HYPRE_MEMORY_HOST);
-         hypre_TFree(values, HYPRE_MEMORY_HOST);
+         if (local_num_rows < 20)
+         {
+            num_values = local_num_rows;
+         }
+         indices_h = hypre_TAlloc(HYPRE_BigInt, num_values, HYPRE_MEMORY_HOST);
+         values_h = hypre_TAlloc(HYPRE_Complex, num_values, HYPRE_MEMORY_HOST);
+         indices_d = hypre_TAlloc(HYPRE_BigInt, num_values, HYPRE_MEMORY_DEVICE);
+         values_d = hypre_TAlloc(HYPRE_Complex, num_values, HYPRE_MEMORY_DEVICE);
+         for (i = 0; i < num_values; i++)
+         {
+            indices_h[i] = first_local_row + i;
+         }
+         hypre_TMemcpy(indices_d, indices_h, HYPRE_BigInt, num_values, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
+         HYPRE_ParVectorGetValues((HYPRE_ParVector) residual, num_values, indices_d, values_d);
+
+         hypre_TMemcpy(values_h, values_d, HYPRE_Complex, num_values, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+         for (i = 0; i < num_values; i++)
+         {
+            if (myid == 0)
+            {
+               hypre_printf("index %d value %e\n", i, values_h[i]);
+            }
+         }
+         hypre_TFree(indices_h, HYPRE_MEMORY_HOST);
+         hypre_TFree(values_h, HYPRE_MEMORY_HOST);
+         hypre_TFree(indices_d, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(values_d, HYPRE_MEMORY_DEVICE);
       }
 
 #if SECOND_TIME
@@ -6535,6 +6563,8 @@ main( hypre_int argc,
                                   (HYPRE_PtrToSolverFcn) HYPRE_ParCSRPilutSolve,
                                   (HYPRE_PtrToSolverFcn) HYPRE_ParCSRPilutSetup,
                                   pcg_precond);
+
+         HYPRE_ParCSRPilutSetLogging(pcg_precond, 0);
 
          if (drop_tol >= 0 )
             HYPRE_ParCSRPilutSetDropTolerance( pcg_precond,

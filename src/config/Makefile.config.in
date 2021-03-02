@@ -45,7 +45,7 @@ CFLAGS   = @CFLAGS@ @DEFS@ $(C_COMPILE_FLAGS)
 CXX      = @CXX@
 CXXFLAGS = @CXXFLAGS@ @DEFS@ $(CXX_COMPILE_FLAGS)
 
-CUCC     = @CUCC@
+CUCC     = @CUCC_FULL@
 CUFLAGS  = @CUFLAGS@ @DEFS@ ${C_COMPILE_FLAGS}
 
 .f.o:
@@ -120,6 +120,7 @@ HYPRE_NAP_INCLUDE = @HYPRE_NAP_INCLUDE@
 ##################################################################
 ##  CUDA options
 ##################################################################
+HYPRE_CUDA_PATH = @HYPRE_CUDA_PATH@
 HYPRE_CUDA_INCLUDE = @HYPRE_CUDA_INCLUDE@
 HYPRE_CUDA_LIBS = @HYPRE_CUDA_LIBS@
 

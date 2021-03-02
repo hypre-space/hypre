@@ -54,8 +54,8 @@ hypre_HandleCreate()
 
    hypre_HandleMemoryLocation(hypre_handle_) = HYPRE_MEMORY_DEVICE;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   hypre_HandleDefaultExecPolicy(hypre_handle_) = HYPRE_EXEC_HOST;
+#if defined(HYPRE_USING_GPU)
+   hypre_HandleDefaultExecPolicy(hypre_handle_) = HYPRE_EXEC_DEVICE;
    hypre_HandleStructExecPolicy(hypre_handle_) = HYPRE_EXEC_DEVICE;
    hypre_HandleCudaData(hypre_handle_) = hypre_CudaDataCreate();
 #endif
@@ -71,7 +71,7 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
       return hypre_error_flag;
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    hypre_CudaDataDestroy(hypre_HandleCudaData(hypre_handle_));
 #endif
 
@@ -80,7 +80,7 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
    return hypre_error_flag;
 }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
 /* use_device == -1 to let Hypre decide on which device to use */
 HYPRE_Int
 hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_)
@@ -263,7 +263,7 @@ HYPRE_Finalize()
 HYPRE_Int
 HYPRE_PrintDeviceInfo()
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
   hypre_int dev;
   struct cudaDeviceProp deviceProp;
 
