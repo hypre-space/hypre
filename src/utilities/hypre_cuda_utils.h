@@ -51,6 +51,15 @@
       assert(0); exit(1);                                                                    \
    } } while(0)
 
+#elif defined(HYPRE_USING_HIP)
+#define HYPRE_HIP_CALL(call) do {                                                           \
+   hipError_t err = call;                                                                   \
+   if (hipSuccess != err) {                                                                 \
+      hypre_printf("HIP ERROR (code = %d, %s) at %s:%d\n", err, hipGetErrorString(err),    \
+                   __FILE__, __LINE__);                                                     \
+      assert(0); exit(1);                                                                   \
+   } } while(0)
+
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
 #define HYPRE_CUBLAS_CALL(call) do {                                                         \
