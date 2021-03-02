@@ -79,7 +79,7 @@ main( hypre_int  argc,
    HYPRE_Int                 time_index;
    HYPRE_Int                 print_usage;
    HYPRE_MemoryLocation      memory_location;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy    default_exec_policy;
 #endif
    char                      memory_location_name[8];
@@ -137,7 +137,7 @@ main( hypre_int  argc,
    cy = 2.0;
    cz = 3.0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    default_exec_policy = HYPRE_EXEC_DEVICE;
 #endif
    memory_location     = HYPRE_MEMORY_DEVICE;
@@ -282,7 +282,7 @@ main( hypre_int  argc,
       hypre_printf("\n");
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    hypre_HandleDefaultExecPolicy(hypre_handle()) = default_exec_policy;
 #endif
 
@@ -424,7 +424,7 @@ main( hypre_int  argc,
    hypre_MPI_Finalize();
 
    /* when using cuda-memcheck --leak-check full, uncomment this */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    cudaDeviceReset();
 #endif
 
