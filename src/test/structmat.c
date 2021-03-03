@@ -545,6 +545,7 @@ PrintUsage( char      *progname,
       hypre_printf("\n");
       hypre_printf("  -mat-vec <A> <x> <y> : compute A*x + y\n");
       hypre_printf("  -matTvec <A> <x> <y> : compute A^T*x + y\n");
+      hypre_printf("  -ab      <a> <b>     : alpha/beta values for matvec (default = 1)\n");
       hypre_printf("\n");
       hypre_printf("  -mat-mat <n> <A>[T] <B>[T] ... : compute A*B*... or A^T*B*..., etc. \n");
       hypre_printf("                                 : for n possibly transposed matrices \n");
@@ -577,7 +578,7 @@ main( hypre_int  argc,
    HYPRE_StructVector   *vectors;
    HYPRE_StructMatrix    M;
 
-   HYPRE_Real           *values;
+   HYPRE_Real           *values, alpha, beta;
 
    HYPRE_Int             num_procs, myid, outlev, ierr;
    HYPRE_Int             time_index;
@@ -649,6 +650,9 @@ main( hypre_int  argc,
    do_matvecT = 0;
    do_matmat = 0;
 
+   alpha = 1.0;
+   beta  = 1.0;
+
    /*-----------------------------------------------------------
     * Parse command line
     *-----------------------------------------------------------*/
@@ -710,6 +714,12 @@ main( hypre_int  argc,
          mv_A = atoi(argv[arg_index++]);
          mv_x = atoi(argv[arg_index++]);
          mv_y = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ab") == 0 )
+      {
+         arg_index++;
+         alpha = atof(argv[arg_index++]);
+         beta  = atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-mat-mat") == 0 )
       {
@@ -804,8 +814,7 @@ main( hypre_int  argc,
       HYPRE_StructStencilCreate(ndim, data.matrix_sizes[mi], &stencils[mi]);
       for (ei = 0; ei < data.matrix_sizes[mi]; ei++)
       {
-         HYPRE_StructStencilSetEntry(stencils[mi], ei,
-                                     data.matrix_offsets[mi][ei]);
+         HYPRE_StructStencilSetEntry(stencils[mi], ei, data.matrix_offsets[mi][ei]);
       }
 
       HYPRE_StructMatrixCreate(hypre_MPI_COMM_WORLD, grid, stencils[mi], &matrices[mi]);
@@ -969,7 +978,7 @@ main( hypre_int  argc,
       }
 #endif
 
-      HYPRE_StructMatrixMatvec(1.0, matrices[mv_A], vectors[mv_x], 1.0, vectors[mv_y]);
+      HYPRE_StructMatrixMatvec(alpha, matrices[mv_A], vectors[mv_x], beta, vectors[mv_y]);
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Matrix-vector multiply", hypre_MPI_COMM_WORLD);
@@ -993,7 +1002,7 @@ main( hypre_int  argc,
       time_index = hypre_InitializeTiming("Transpose matrix-vector multiply");
       hypre_BeginTiming(time_index);
 
-      HYPRE_StructMatrixMatvecT(1.0, matrices[mv_A], vectors[mv_x], 1.0, vectors[mv_y]);
+      HYPRE_StructMatrixMatvecT(alpha, matrices[mv_A], vectors[mv_x], beta, vectors[mv_y]);
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Transpose matrix-vector multiply", hypre_MPI_COMM_WORLD);

@@ -257,19 +257,20 @@ HYPRE_Int HYPRE_StructSMGGetFinalRelativeResidualNorm ( HYPRE_StructSolver solve
 HYPRE_Int hypre_StructSMGSetDeviceLevel( void   *smg_vdata, HYPRE_Int   device_level);
 
 /* jacobi.c */
-void *hypre_JacobiCreate ( MPI_Comm comm );
-HYPRE_Int hypre_JacobiDestroy ( void *jacobi_vdata );
-HYPRE_Int hypre_JacobiSetup ( void *jacobi_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
-HYPRE_Int hypre_JacobiSolve ( void *jacobi_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
-HYPRE_Int hypre_JacobiSetTol ( void *jacobi_vdata , HYPRE_Real tol );
-HYPRE_Int hypre_JacobiGetTol ( void *jacobi_vdata , HYPRE_Real *tol );
-HYPRE_Int hypre_JacobiSetMaxIter ( void *jacobi_vdata , HYPRE_Int max_iter );
-HYPRE_Int hypre_JacobiGetMaxIter ( void *jacobi_vdata , HYPRE_Int *max_iter );
-HYPRE_Int hypre_JacobiSetZeroGuess ( void *jacobi_vdata , HYPRE_Int zero_guess );
-HYPRE_Int hypre_JacobiGetZeroGuess ( void *jacobi_vdata , HYPRE_Int *zero_guess );
-HYPRE_Int hypre_JacobiGetNumIterations ( void *jacobi_vdata , HYPRE_Int *num_iterations );
-HYPRE_Int hypre_JacobiSetTempVec ( void *jacobi_vdata , hypre_StructVector *t );
-HYPRE_Int hypre_JacobiGetFinalRelativeResidualNorm ( void *jacobi_vdata , HYPRE_Real *norm );
+void *hypre_StructJacobiCreate ( MPI_Comm comm );
+HYPRE_Int hypre_StructJacobiDestroy ( void *jacobi_vdata );
+HYPRE_Int hypre_StructJacobiSetup ( void *jacobi_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
+HYPRE_Int hypre_StructJacobiSolve ( void *jacobi_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
+HYPRE_Int hypre_StructJacobiSetTol ( void *jacobi_vdata , HYPRE_Real tol );
+HYPRE_Int hypre_StructJacobiGetTol ( void *jacobi_vdata , HYPRE_Real *tol );
+HYPRE_Int hypre_StructJacobiSetMaxIter ( void *jacobi_vdata , HYPRE_Int max_iter );
+HYPRE_Int hypre_StructJacobiGetMaxIter ( void *jacobi_vdata , HYPRE_Int *max_iter );
+HYPRE_Int hypre_StructJacobiSetZeroGuess ( void *jacobi_vdata , HYPRE_Int zero_guess );
+HYPRE_Int hypre_StructJacobiGetZeroGuess ( void *jacobi_vdata , HYPRE_Int *zero_guess );
+HYPRE_Int hypre_StructJacobiGetNumIterations ( void *jacobi_vdata , HYPRE_Int *num_iterations );
+HYPRE_Int hypre_StructJacobiSetWeight( void *jacobi_vdata , HYPRE_Real weight );
+HYPRE_Int hypre_StructJacobiSetTempVec ( void *jacobi_vdata , hypre_StructVector *t );
+HYPRE_Int hypre_StructJacobiGetFinalRelativeResidualNorm ( void *jacobi_vdata , HYPRE_Real *norm );
 
 /* pcg_struct.c */
 void *hypre_StructKrylovCAlloc ( size_t count, size_t elt_size, HYPRE_MemoryLocation location );
@@ -404,29 +405,6 @@ HYPRE_Int hypre_PFMGSetupRAPOp ( hypre_StructMatrix *R , hypre_StructMatrix *A ,
 
 /* pfmg_solve.c */
 HYPRE_Int hypre_PFMGSolve ( void *pfmg_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
-
-/* point_relax.c */
-void *hypre_PointRelaxCreate ( MPI_Comm comm );
-HYPRE_Int hypre_PointRelaxDestroy ( void *relax_vdata );
-HYPRE_Int hypre_PointRelaxSetup ( void *relax_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
-HYPRE_Int hypre_PointRelax ( void *relax_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
-HYPRE_Int hypre_PointRelax_core0 ( hypre_StructMatrix *A , HYPRE_Int constant_coefficient , hypre_Box *compute_box , HYPRE_Real *bp , HYPRE_Real *xp , HYPRE_Real *tp , HYPRE_Int boxarray_id , hypre_Box *A_data_box , hypre_Box *b_data_box , hypre_Box *x_data_box , hypre_Box *t_data_box , hypre_IndexRef stride );
-HYPRE_Int hypre_PointRelax_core12 ( hypre_StructMatrix *A , HYPRE_Int constant_coefficient , hypre_Box *compute_box , HYPRE_Real *bp , HYPRE_Real *xp , HYPRE_Real *tp , HYPRE_Int boxarray_id , hypre_Box *A_data_box , hypre_Box *b_data_box , hypre_Box *x_data_box , hypre_Box *t_data_box , hypre_IndexRef stride );
-HYPRE_Int hypre_PointRelaxSetTol ( void *relax_vdata , HYPRE_Real tol );
-HYPRE_Int hypre_PointRelaxGetTol ( void *relax_vdata , HYPRE_Real *tol );
-HYPRE_Int hypre_PointRelaxSetMaxIter ( void *relax_vdata , HYPRE_Int max_iter );
-HYPRE_Int hypre_PointRelaxGetMaxIter ( void *relax_vdata , HYPRE_Int *max_iter );
-HYPRE_Int hypre_PointRelaxSetZeroGuess ( void *relax_vdata , HYPRE_Int zero_guess );
-HYPRE_Int hypre_PointRelaxGetZeroGuess ( void *relax_vdata , HYPRE_Int *zero_guess );
-HYPRE_Int hypre_PointRelaxGetNumIterations ( void *relax_vdata , HYPRE_Int *num_iterations );
-HYPRE_Int hypre_PointRelaxSetWeight ( void *relax_vdata , HYPRE_Real weight );
-HYPRE_Int hypre_PointRelaxSetNumPointsets ( void *relax_vdata , HYPRE_Int num_pointsets );
-HYPRE_Int hypre_PointRelaxSetPointset ( void *relax_vdata , HYPRE_Int pointset , HYPRE_Int pointset_size , hypre_Index pointset_stride , hypre_Index *pointset_indices );
-HYPRE_Int hypre_PointRelaxSetPointsetRank ( void *relax_vdata , HYPRE_Int pointset , HYPRE_Int pointset_rank );
-HYPRE_Int hypre_PointRelaxSetTempVec ( void *relax_vdata , hypre_StructVector *t );
-HYPRE_Int hypre_PointRelaxGetFinalRelativeResidualNorm ( void *relax_vdata , HYPRE_Real *norm );
-HYPRE_Int hypre_relax_wtx ( void *relax_vdata , HYPRE_Int pointset , hypre_StructVector *t , hypre_StructVector *x );
-HYPRE_Int hypre_relax_copy ( void *relax_vdata , HYPRE_Int pointset , hypre_StructVector *t , hypre_StructVector *x );
 
 /* red_black_constantcoef_gs.c */
 HYPRE_Int hypre_RedBlackConstantCoefGS ( void *relax_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );

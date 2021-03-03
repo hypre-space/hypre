@@ -46,7 +46,6 @@ FILES =\
  HYPRE_struct_lgmres.c\
  HYPRE_struct_pfmg.c\
  HYPRE_struct_smg.c\
- jacobi.c\
  pcg_struct.c\
  pfmg.c\
  pfmg_relax.c\
@@ -63,13 +62,13 @@ CUFILES =\
  cyclic_reduction.c\
  HYPRE_struct_int.c\
  HYPRE_struct_pcg.c\
+ jacobi.c\
  pfmg2_setup_rap.c\
  pfmg3_setup_rap.c\
  pfmg_setup.c\
  pfmg_setup_interp.c\
  pfmg_setup_rap5.c\
  pfmg_setup_rap7.c\
- point_relax.c\
  red_black_constantcoef_gs.c\
  red_black_gs.c\
  semi_interp.c\

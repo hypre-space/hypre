@@ -206,41 +206,6 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
 }
 
 /*--------------------------------------------------------------------------
- *
- *--------------------------------------------------------------------------*/
-HYPRE_Int
-hypre_StructMatvecCompute( void               *matvec_vdata,
-                           HYPRE_Complex       alpha,
-                           hypre_StructMatrix *A,
-                           hypre_StructVector *x,
-                           HYPRE_Complex       beta,
-                           hypre_StructVector *y )
-{
-   hypre_StructMatvecData  *matvec_data   = (hypre_StructMatvecData  *)matvec_vdata;
-   HYPRE_Int                transpose     = (matvec_data -> transpose);
-   HYPRE_Int                dom_is_coarse = hypre_StructMatrixDomainIsCoarse(A);
-   HYPRE_Int                ran_is_coarse = hypre_StructMatrixRangeIsCoarse(A);
-
-   if (transpose || dom_is_coarse || ran_is_coarse)
-   {
-      hypre_StructMatvecRectglCompute(matvec_vdata, alpha, A, x, beta, y);
-   }
-   else
-   {
-      hypre_StructMatvecRectglCompute(matvec_vdata, alpha, A, x, beta, y);
-// RDF: Something isn't quite right with SquareCompute.  As a test problem to
-// debug this, run the second job in 'TEST_sstruct/cycred.jobs'.
-//
-//      hypre_StructMatvecSquareCompute(matvec_vdata, alpha, A, x, beta, y);
-   }
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *
- * StructMatvec specialization for rectangular matrices.
- *
  * The grids for A, x, and y must be compatible with respect to matrix-vector
  * multiply, but the initial grid boxes and strides may differ.  The routines
  * Reindex() and Resize() are called to convert the grid for the vector x to
@@ -273,6 +238,41 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
  *
  * RDF TODO: Consider modifications to the current DataMap interfaces to avoid
  * making assumptions like the above.  Look at the Matmult routine as well.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatvecCompute( void               *matvec_vdata,
+                           HYPRE_Complex       alpha,
+                           hypre_StructMatrix *A,
+                           hypre_StructVector *x,
+                           HYPRE_Complex       beta,
+                           hypre_StructVector *y )
+{
+   hypre_StructMatvecData  *matvec_data   = (hypre_StructMatvecData  *)matvec_vdata;
+   HYPRE_Int                transpose     = (matvec_data -> transpose);
+   HYPRE_Int                dom_is_coarse = hypre_StructMatrixDomainIsCoarse(A);
+   HYPRE_Int                ran_is_coarse = hypre_StructMatrixRangeIsCoarse(A);
+
+   if (transpose || dom_is_coarse || ran_is_coarse)
+   {
+      hypre_StructMatvecRectglCompute(matvec_vdata, alpha, A, x, beta, y);
+   }
+   else
+   {
+      hypre_StructMatvecRectglCompute(matvec_vdata, alpha, A, x, beta, y);
+// RDF: Something isn't quite right with SquareCompute.  As a test problem to
+// debug this, run the second job in 'TEST_sstruct/cycred.jobs'.  Also note that
+// in the current way this is structured, the ghost layer sizes for x may not be
+// correct, because no resizing is done.
+//
+//      hypre_StructMatvecSquareCompute(matvec_vdata, alpha, A, x, beta, y);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * StructMatvec code for rectangular matrices
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -388,6 +388,8 @@ hypre_StructMatvecRectglCompute( void               *matvec_vdata,
          }
          hypre_BoxLoop1End(yi);
       }
+      hypre_BoxDestroy(compute_box);
+
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
@@ -421,11 +423,12 @@ hypre_StructMatvecRectglCompute( void               *matvec_vdata,
             compute_box_aa = hypre_ComputePkgIndtBoxes(compute_pkg);
 
             /*--------------------------------------------------------------
-             * initialize y= (beta/alpha)*y normally (where everything
-             * is multiplied by alpha at the end),
+             * Initialize y = -(beta/alpha)*y and multiply everything by -alpha
+             * at the end.  This optimizes the matvec for residual computations
+             * where alpha=-1 and beta=1.
              *--------------------------------------------------------------*/
 
-            temp = beta / alpha;
+            temp = -(beta/alpha);
             if (temp != 1.0)
             {
                boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
@@ -502,9 +505,9 @@ hypre_StructMatvecRectglCompute( void               *matvec_vdata,
          xp = hypre_StructVectorBoxData(x, xb);
          yp = hypre_StructVectorBoxData(y, yb);
 
+         /* TODO optimization: Unroll these loops in a separate kernel */
          hypre_ForBoxI(j, compute_box_a)
          {
-            /* TODO (later, for optimization): Unroll these loops */
             for (si = skip_diag; si < nentries; si++)
             {
                /* If the domain grid is coarse, the compute box will change
@@ -555,7 +558,7 @@ hypre_StructMatvecRectglCompute( void               *matvec_vdata,
                                       x_data_box, xdstart, xdstride, xi,
                                       y_data_box, ydstart, ydstride, yi);
                   {
-                     yp[yi] += Ap[0] * xp[xi];
+                     yp[yi] -= Ap[0] * xp[xi];
                   }
                   hypre_BoxLoop2End(xi, yi);
                }
@@ -567,34 +570,49 @@ hypre_StructMatvecRectglCompute( void               *matvec_vdata,
                                       x_data_box, xdstart, xdstride, xi,
                                       y_data_box, ydstart, ydstride, yi);
                   {
-                     yp[yi] += Ap[Ai] * xp[xi];
+                     yp[yi] -= Ap[Ai] * xp[xi];
                   }
                   hypre_BoxLoop3End(Ai, xi, yi);
                }
-            }
-
-            if (alpha != 1.0)
-            {
-               hypre_BoxLoop1Begin(ndim, loop_size,
-                                   y_data_box, ydstart, ydstride, yi);
-               {
-                  yp[yi] *= alpha;
-               }
-               hypre_BoxLoop1End(yi);
             }
          }
       }
    }
 
+   temp = -alpha;
+   if (temp != 1.0)
+   {
+      boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
+      hypre_ForBoxI(i, boxes)
+      {
+         hypre_CopyBox(hypre_BoxArrayBox(boxes, i), compute_box);
+         hypre_StructVectorMapDataBox(y, compute_box);
+         hypre_BoxGetSize(compute_box, loop_size);
+         y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
+         start = hypre_BoxIMin(compute_box);
+         yp = hypre_StructVectorBoxData(y, i);
+
+         hypre_BoxLoop1Begin(ndim, loop_size,
+                             y_data_box, start, ustride, yi);
+         {
+            yp[yi] *= temp;
+         }
+         hypre_BoxLoop1End(yi);
+      }
+   }
+
    if (x_tmp)
    {
+      /* Reset x to be the same as y */
       hypre_StructVectorDestroy(x_tmp);
       x = y;
    }
+   else
+   {
+      /* Restore the original grid and data layout for x */
+      hypre_StructVectorRestore(x);
+   }
    hypre_BoxDestroy(compute_box);
-
-   /* This restores the original grid and data layout */
-   hypre_StructVectorRestore(x);
 
    HYPRE_ANNOTATE_FUNC_END;
 
@@ -602,7 +620,14 @@ hypre_StructMatvecRectglCompute( void               *matvec_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * StructMatvec specialization for square matrices.
+ * StructMatvec code for square matrices.
+ *
+ * TODO: This should be converted into a kernel routine that is called from the
+ * main rectangular-matrix matvec routine (see the "TODO optimization" comment).
+ * For now, it would work only for the square matrix case, but it eventually
+ * could serve as the kernel in the rectangular case as well.  By restructuring
+ * it this way, all of the needed resizing (to get the ghost layer size correct)
+ * will be done as well.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -705,10 +730,11 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
             compute_box_aa = hypre_ComputePkgIndtBoxes(compute_pkg);
 
             /*--------------------------------------------------------------
-             * initialize y= (beta/alpha)*y normally (where everything
-             * is multiplied by alpha at the end),
+             * Initialize y = -(beta/alpha)*y and multiply everything by -alpha
+             * at the end.  This optimizes the matvec for residual computations
+             * where alpha=-1 and beta=1.
              *--------------------------------------------------------------*/
-            temp = beta / alpha;
+            temp = -(beta/alpha);
             hypre_StructScale(temp, y);
          }
          break;
@@ -809,7 +835,7 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
                                          x_data_box, start, ustride, xi,
                                          y_data_box, start, ustride, yi);
                      {
-                        yp[yi] += Ap0[0]  * xp[xi + xoff0] +
+                        yp[yi] -= Ap0[0]  * xp[xi + xoff0] +
                                   Ap1[0]  * xp[xi + xoff1] +
                                   Ap2[0]  * xp[xi + xoff2] +
                                   Ap3[0]  * xp[xi + xoff3] +
@@ -827,7 +853,7 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
                                          x_data_box, start, ustride, xi,
                                          y_data_box, start, ustride, yi);
                      {
-                        yp[yi] += Ap0[0]  * xp[xi + xoff0] +
+                        yp[yi] -= Ap0[0]  * xp[xi + xoff0] +
                                   Ap1[0]  * xp[xi + xoff1] +
                                   Ap2[0]  * xp[xi + xoff2] +
                                   Ap3[0]  * xp[xi + xoff3] +
@@ -844,7 +870,7 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
                                          x_data_box, start, ustride, xi,
                                          y_data_box, start, ustride, yi);
                      {
-                        yp[yi] += Ap0[0]  * xp[xi + xoff0] +
+                        yp[yi] -= Ap0[0]  * xp[xi + xoff0] +
                                   Ap1[0]  * xp[xi + xoff1] +
                                   Ap2[0]  * xp[xi + xoff2] +
                                   Ap3[0]  * xp[xi + xoff3] +
@@ -860,7 +886,7 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
                                          x_data_box, start, ustride, xi,
                                          y_data_box, start, ustride, yi);
                      {
-                        yp[yi] += Ap0[0]  * xp[xi + xoff0] +
+                        yp[yi] -= Ap0[0]  * xp[xi + xoff0] +
                                   Ap1[0]  * xp[xi + xoff1] +
                                   Ap2[0]  * xp[xi + xoff2] +
                                   Ap3[0]  * xp[xi + xoff3] +
@@ -875,7 +901,7 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
                                          x_data_box, start, ustride, xi,
                                          y_data_box, start, ustride, yi);
                      {
-                        yp[yi] += Ap0[0]  * xp[xi + xoff0] +
+                        yp[yi] -= Ap0[0]  * xp[xi + xoff0] +
                                   Ap1[0]  * xp[xi + xoff1] +
                                   Ap2[0]  * xp[xi + xoff2] +
                                   Ap3[0]  * xp[xi + xoff3] +
@@ -889,7 +915,7 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
                                          x_data_box, start, ustride, xi,
                                          y_data_box, start, ustride, yi);
                      {
-                        yp[yi] += Ap0[0]  * xp[xi + xoff0] +
+                        yp[yi] -= Ap0[0]  * xp[xi + xoff0] +
                                   Ap1[0]  * xp[xi + xoff1] +
                                   Ap2[0]  * xp[xi + xoff2] +
                                   Ap3[0]  * xp[xi + xoff3];
@@ -902,7 +928,7 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
                                          x_data_box, start, ustride, xi,
                                          y_data_box, start, ustride, yi);
                      {
-                        yp[yi] += Ap0[0]  * xp[xi + xoff0] +
+                        yp[yi] -= Ap0[0]  * xp[xi + xoff0] +
                                   Ap1[0]  * xp[xi + xoff1] +
                                   Ap2[0]  * xp[xi + xoff2];
                      }
@@ -914,7 +940,7 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
                                          x_data_box, start, ustride, xi,
                                          y_data_box, start, ustride, yi);
                      {
-                        yp[yi] += Ap0[0]  * xp[xi + xoff0] +
+                        yp[yi] -= Ap0[0]  * xp[xi + xoff0] +
                                   Ap1[0]  * xp[xi + xoff1];
                      }
                      hypre_BoxLoop2End(xi, yi);
@@ -925,7 +951,7 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
                                          x_data_box, start, ustride, xi,
                                          y_data_box, start, ustride, yi);
                      {
-                        yp[yi] += Ap0[0]  * xp[xi + xoff0];
+                        yp[yi] -= Ap0[0]  * xp[xi + xoff0];
                      }
                      hypre_BoxLoop2End(xi, yi);
                      break;
@@ -985,7 +1011,7 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
                                          x_data_box, start, ustride, xi,
                                          y_data_box, start, ustride, yi);
                      {
-                        yp[yi] += Ap0[Ai]  * xp[xi + xoff0] +
+                        yp[yi] -= Ap0[Ai]  * xp[xi + xoff0] +
                                   Ap1[Ai]  * xp[xi + xoff1] +
                                   Ap2[Ai]  * xp[xi + xoff2] +
                                   Ap3[Ai]  * xp[xi + xoff3] +
@@ -1004,7 +1030,7 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
                                          x_data_box, start, ustride, xi,
                                          y_data_box, start, ustride, yi);
                      {
-                        yp[yi] += Ap0[Ai]  * xp[xi + xoff0] +
+                        yp[yi] -= Ap0[Ai]  * xp[xi + xoff0] +
                                   Ap1[Ai]  * xp[xi + xoff1] +
                                   Ap2[Ai]  * xp[xi + xoff2] +
                                   Ap3[Ai]  * xp[xi + xoff3] +
@@ -1022,7 +1048,7 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
                                          x_data_box, start, ustride, xi,
                                          y_data_box, start, ustride, yi);
                      {
-                        yp[yi] += Ap0[Ai]  * xp[xi + xoff0] +
+                        yp[yi] -= Ap0[Ai]  * xp[xi + xoff0] +
                                   Ap1[Ai]  * xp[xi + xoff1] +
                                   Ap2[Ai]  * xp[xi + xoff2] +
                                   Ap3[Ai]  * xp[xi + xoff3] +
@@ -1039,7 +1065,7 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
                                          x_data_box, start, ustride, xi,
                                          y_data_box, start, ustride, yi);
                      {
-                        yp[yi] += Ap0[Ai]  * xp[xi + xoff0] +
+                        yp[yi] -= Ap0[Ai]  * xp[xi + xoff0] +
                                   Ap1[Ai]  * xp[xi + xoff1] +
                                   Ap2[Ai]  * xp[xi + xoff2] +
                                   Ap3[Ai]  * xp[xi + xoff3] +
@@ -1055,7 +1081,7 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
                                          x_data_box, start, ustride, xi,
                                          y_data_box, start, ustride, yi);
                      {
-                        yp[yi] += Ap0[Ai]  * xp[xi + xoff0] +
+                        yp[yi] -= Ap0[Ai]  * xp[xi + xoff0] +
                                   Ap1[Ai]  * xp[xi + xoff1] +
                                   Ap2[Ai]  * xp[xi + xoff2] +
                                   Ap3[Ai]  * xp[xi + xoff3] +
@@ -1070,7 +1096,7 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
                                          x_data_box, start, ustride, xi,
                                          y_data_box, start, ustride, yi);
                      {
-                        yp[yi] += Ap0[Ai]  * xp[xi + xoff0] +
+                        yp[yi] -= Ap0[Ai]  * xp[xi + xoff0] +
                                   Ap1[Ai]  * xp[xi + xoff1] +
                                   Ap2[Ai]  * xp[xi + xoff2] +
                                   Ap3[Ai]  * xp[xi + xoff3];
@@ -1084,7 +1110,7 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
                                          x_data_box, start, ustride, xi,
                                          y_data_box, start, ustride, yi);
                      {
-                        yp[yi] += Ap0[Ai]  * xp[xi + xoff0] +
+                        yp[yi] -= Ap0[Ai]  * xp[xi + xoff0] +
                                   Ap1[Ai]  * xp[xi + xoff1] +
                                   Ap2[Ai]  * xp[xi + xoff2];
                      }
@@ -1097,7 +1123,7 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
                                          x_data_box, start, ustride, xi,
                                          y_data_box, start, ustride, yi);
                      {
-                        yp[yi] += Ap0[Ai]  * xp[xi + xoff0] +
+                        yp[yi] -= Ap0[Ai]  * xp[xi + xoff0] +
                                   Ap1[Ai]  * xp[xi + xoff1];
                      }
                      hypre_BoxLoop3End(Ai, xi, yi);
@@ -1109,7 +1135,7 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
                                          x_data_box, start, ustride, xi,
                                          y_data_box, start, ustride, yi);
                      {
-                        yp[yi] += Ap0[Ai]  * xp[xi + xoff0];
+                        yp[yi] -= Ap0[Ai]  * xp[xi + xoff0];
                      }
                      hypre_BoxLoop3End(Ai, xi, yi);
                      break;
@@ -1129,7 +1155,7 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
                                       x_data_box, start, ustride, xi,
                                       y_data_box, start, ustride, yi);
                   {
-                     yp[yi] += Ap[0] * xp[xi];
+                     yp[yi] -= Ap[0] * xp[xi];
                   }
                   hypre_BoxLoop2End(xi, yi);
                }
@@ -1141,19 +1167,19 @@ hypre_StructMatvecSquareCompute( void               *matvec_vdata,
                                       x_data_box, start, ustride, xi,
                                       y_data_box, start, ustride, yi);
                   {
-                     yp[yi] += Ap[Ai] * xp[xi];
+                     yp[yi] -= Ap[Ai] * xp[xi];
                   }
                   hypre_BoxLoop3End(Ai, xi, yi);
                }
             }
 #endif //UNROLL_STENCIL_LOOPS
 
-            if (alpha != 1.0)
+            if (-alpha != 1.0)
             {
                hypre_BoxLoop1Begin(ndim, loop_size,
                                    y_data_box, start, ustride, yi);
                {
-                  yp[yi] *= alpha;
+                  yp[yi] *= -alpha;
                }
                hypre_BoxLoop1End(yi);
             }
