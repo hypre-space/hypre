@@ -81,40 +81,9 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
 }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-/* use_device == -1 to let Hypre decide on which device to use */
 HYPRE_Int
-hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_)
+hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
 {
-   HYPRE_Int myid, nproc, myNodeid, NodeSize;
-   HYPRE_Int device_id;
-   hypre_MPI_Comm node_comm;
-
-   // TODO should not use COMM_WORLD
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
-   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &nproc);
-
-   hypre_MPI_Comm_split_type(hypre_MPI_COMM_WORLD, hypre_MPI_COMM_TYPE_SHARED,
-                             myid, hypre_MPI_INFO_NULL, &node_comm);
-   hypre_MPI_Comm_rank(node_comm, &myNodeid);
-   hypre_MPI_Comm_size(node_comm, &NodeSize);
-   hypre_MPI_Comm_free(&node_comm);
-
-   HYPRE_Int nDevices;
-#if defined(HYPRE_USING_CUDA)
-   HYPRE_CUDA_CALL( cudaGetDeviceCount(&nDevices) );
-#else
-   nDevices = omp_get_num_devices();
-#endif
-
-   if (use_device < 0)
-   {
-      device_id = myNodeid % nDevices;
-   }
-   else
-   {
-      device_id = use_device;
-   }
-
 #if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaSetDevice(device_id) );
 #else
@@ -125,13 +94,24 @@ hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_)
    hypre_HandleCudaDevice(hypre_handle_) = device_id;
 
 #if defined(HYPRE_DEBUG) && defined(HYPRE_PRINT_ERRORS)
-   hypre_printf("Proc [global %d/%d, local %d/%d] can see %d GPUs and is running on %d\n",
-                 myid, nproc, myNodeid, NodeSize, nDevices, device_id);
+   HYPRE_Int myid, nproc;
+   hypre_int nDevices;
+
+   // TODO should not use COMM_WORLD. What to use?
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &nproc);
+
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_CUDA_CALL( cudaGetDeviceCount(&nDevices) );
+#else
+   nDevices = omp_get_num_devices();
+#endif
+   hypre_printf("Proc [%d/%d] can see %d GPUs and is running on %d\n",
+                myid, nproc, nDevices, device_id);
 #endif
 
    return hypre_error_flag;
 }
-
 #endif //#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
 /******************************************************************************
@@ -162,7 +142,10 @@ HYPRE_Init()
     * that was in effect when you created the stream.
     * So, we should first set the device and create the streams
     */
-   hypre_SetDevice(-1, _hypre_handle);
+   hypre_int device_id;
+   HYPRE_CUDA_CALL( cudaGetDevice(&device_id) );
+
+   hypre_SetDevice(device_id, _hypre_handle);
 
    /* To include the cost of creating streams/cudahandles in HYPRE_Init */
    /* If not here, will be done at the first use */
