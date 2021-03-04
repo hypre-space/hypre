@@ -865,6 +865,38 @@ hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
 #endif // CUDART_VERSION >= 10000
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
+#if defined(HYPRE_USING_HIP)
+
+   struct hipPointerAttribute_t attr;
+   *memory_location = hypre_MEMORY_UNDEFINED;
+
+   hipError_t err = hipPointerGetAttributes(&attr, ptr);
+   if (err != hipSuccess)
+   {
+      ierr = 1;
+
+      /* clear the error */
+      hipGetLastError();
+
+      if (err == hipErrorInvalidValue)
+      {
+         *memory_location = hypre_MEMORY_HOST;
+      }
+   }
+   else if (attr.isManaged)
+   {
+      *memory_location = hypre_MEMORY_UNIFIED;
+   }
+   else if (attr.memoryType == hipMemoryTypeDevice)
+   {
+      *memory_location = hypre_MEMORY_DEVICE;
+   }
+   else if (attr.memoryType == hipMemoryTypeHost)
+   {
+      *memory_location = hypre_MEMORY_HOST_PINNED;
+   }
+#endif // defined(HYPRE_USING_HIP)
+
 #else /* #if defined(HYPRE_USING_GPU) */
    *memory_location = hypre_MEMORY_HOST;
 #endif
