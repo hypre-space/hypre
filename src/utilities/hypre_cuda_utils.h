@@ -222,7 +222,11 @@ struct hypre_CsrsvData
 #if defined(HYPRE_USING_CUDA)
 
 #include <thrust/execution_policy.h>
+#if defined(HYPRE_USING_CUDA)
 #include <thrust/system/cuda/execution_policy.h>
+#elif defined(HYPRE_USING_HIP)
+#include <thrust/system/hip/execution_policy.h>
+#endif
 #include <thrust/count.h>
 #include <thrust/device_ptr.h>
 #include <thrust/unique.h>
@@ -308,12 +312,27 @@ using namespace thrust::placeholders;
 /* RL: TODO Want macro HYPRE_THRUST_CALL to return value but I don't know how to do it right
  * The following one works OK for now */
 #ifdef HYPRE_USING_UMPIRE_DEVICE
+
+#if defined(HYPRE_USING_CUDA)
 #define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
    thrust::func_name(thrust::cuda::par(hypre_HandleUmpireDeviceAllocator(hypre_handle())).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
+#elif defined(HYPRE_USING_HIP)
+#define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
+   thrust::func_name(thrust::hip::par(hypre_HandleUmpireDeviceAllocator(hypre_handle())).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
+#endif // HYPRE_USING_CUDA
+
 #else
+
+#if defined(HYPRE_USING_CUDA)
 #define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
    thrust::func_name(thrust::cuda::par.on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
-#endif
+#elif defined(HYPRE_USING_HIP)
+#define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
+   thrust::func_name(thrust::hip::par.on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
+#endif // HYPRE_USING_CUDA
+
+#endif // HYPRE_USING_UMPIRE_DEVICE
+
 
 /* return the number of threads in block */
 template <hypre_int dim>
