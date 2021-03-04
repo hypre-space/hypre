@@ -285,7 +285,7 @@ struct hypre_CsrsvData
 
 #endif //#if defined(HYPRE_USING_GPU)
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 #include <thrust/execution_policy.h>
 #if defined(HYPRE_USING_CUDA)
@@ -920,7 +920,7 @@ cudaError_t hypre_CachingFreeManaged(void *ptr);
 
 void hypre_CudaDataCubCachingAllocatorDestroy(hypre_CudaData *data);
 
-#endif // #if defined(HYPRE_USING_CUDA)
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 #if defined(HYPRE_USING_CUSPARSE)
 
