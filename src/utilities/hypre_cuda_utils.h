@@ -467,7 +467,8 @@ hypre_double atomicAdd(hypre_double* address, hypre_double val)
 }
 #endif
 
-#if CUDA_VERSION < 9000
+// There are no *_sync functions in HIP
+#if defined(HYPRE_USING_HIP) || (CUDA_VERSION < 9000)
 
 template <typename T>
 static __device__ __forceinline__
@@ -502,7 +503,7 @@ void __syncwarp()
 {
 }
 
-#endif
+#endif // #if defined(HYPRE_USING_HIP) || (CUDA_VERSION < 9000)
 
 template <typename T>
 static __device__ __forceinline__
