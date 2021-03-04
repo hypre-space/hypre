@@ -314,8 +314,9 @@ using namespace thrust::placeholders;
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
 
-#ifdef HYPRE_DEBUG                                                                                                   \
+#if defined(HYPRE_DEBUG)
 
+#if defined(HYPRE_USING_CUDA)
 #define HYPRE_CUDA_LAUNCH(kernel_name, gridsize, blocksize, ...)                                                     \
 {                                                                                                                    \
    if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                  \
@@ -332,8 +333,26 @@ using namespace thrust::placeholders;
    hypre_SyncCudaComputeStream(hypre_handle());                                                                      \
    HYPRE_CUDA_CALL( cudaGetLastError() );                                                                            \
 }
+#elif defined(HYPRE_USING_HIP)
+#define HYPRE_CUDA_LAUNCH(kernel_name, gridsize, blocksize, ...)                                                     \
+{                                                                                                                    \
+   if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                  \
+        blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                   \
+   {                                                                                                                 \
+      /* hypre_printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                                 \
+                 __FILE__, __LINE__,                                                                                 \
+                 gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */                      \
+   }                                                                                                                 \
+   else                                                                                                              \
+   {                                                                                                                 \
+      (kernel_name) <<< (gridsize), (blocksize), 0, hypre_HandleCudaComputeStream(hypre_handle()) >>> (__VA_ARGS__); \
+   }                                                                                                                 \
+   hypre_SyncCudaComputeStream(hypre_handle());                                                                      \
+   HYPRE_HIP_CALL( hipGetLastError() );                                                                            \
+}
+#endif //HYPRE_USING_CUDA
 
-#else
+#else // #if defined(HYPRE_DEBUG)
 
 #define HYPRE_CUDA_LAUNCH(kernel_name, gridsize, blocksize, ...)                                                     \
 {                                                                                                                    \
@@ -350,7 +369,7 @@ using namespace thrust::placeholders;
    }                                                                                                                 \
 }
 
-#endif
+#endif // defined(HYPRE_DEBUG)
 
 /* RL: TODO Want macro HYPRE_THRUST_CALL to return value but I don't know how to do it right
  * The following one works OK for now */
