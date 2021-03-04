@@ -821,6 +821,7 @@ HYPRE_Int hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HY
 
 void hypre_CudaCompileFlagCheck();
 
+#if defined(HYPRE_USING_CUDA)
 cudaError_t hypre_CachingMallocDevice(void **ptr, size_t nbytes);
 
 cudaError_t hypre_CachingMallocManaged(void **ptr, size_t nbytes);
@@ -828,6 +829,8 @@ cudaError_t hypre_CachingMallocManaged(void **ptr, size_t nbytes);
 cudaError_t hypre_CachingFreeDevice(void *ptr);
 
 cudaError_t hypre_CachingFreeManaged(void *ptr);
+#endif
+
 
 void hypre_CudaDataCubCachingAllocatorDestroy(hypre_CudaData *data);
 
