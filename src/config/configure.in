@@ -1811,7 +1811,7 @@ fi
 
 if [test "x$hypre_using_um" = "xyes"]
 then
-   if [test "x$hypre_using_cuda" != "yes" && test "x$hypre_using_device_openmp" != "xyes" && test "x$hypre_using_hip" != "xyes"]
+   if [test "x$hypre_using_cuda" != "xyes" && test "x$hypre_using_device_openmp" != "xyes" && test "x$hypre_using_hip" != "xyes"]
    then
       AC_MSG_ERROR([Asked for unified memory, but not using CUDA, HIP, or device OpenMP!])
    fi
