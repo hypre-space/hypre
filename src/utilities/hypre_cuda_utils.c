@@ -775,12 +775,21 @@ hypre_HYPREIntToCusparseIndexType()
 }
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 cudaStream_t
+#elif defined(HYPRE_USING_HIP)
+hipStream_t
+#endif
 hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i)
 {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    cudaStream_t stream = 0;
+#elif defined(HYPRE_USING_HIP)
+   hipStream_t stream = 0;
+#endif
+
 #if defined(HYPRE_USING_CUDA_STREAMS)
    if (i >= HYPRE_MAX_NUM_STREAMS)
    {
@@ -1076,4 +1085,4 @@ hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle)
    return hypre_error_flag;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#endif // #if defined(HYPRE_USING_GPU)
