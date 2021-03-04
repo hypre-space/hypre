@@ -806,8 +806,12 @@ hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i)
       return data->cuda_streams[i];
    }
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    //HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream,cudaStreamNonBlocking));
    HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream, cudaStreamDefault));
+#elif defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL(hipStreamCreateWithFlags(&stream, hipStreamDefault));
+#endif
 
    data->cuda_streams[i] = stream;
 #endif
@@ -815,7 +819,11 @@ hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i)
    return stream;
 }
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 cudaStream_t
+#elif defined(HYPRE_USING_HIP)
+hipStream_t
+#endif
 hypre_CudaDataCudaComputeStream(hypre_CudaData *data)
 {
    return hypre_CudaDataCudaStream(data,
@@ -976,7 +984,11 @@ hypre_CudaDataDestroy(hypre_CudaData *data)
    {
       if (data->cuda_streams[i])
       {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
          HYPRE_CUDA_CALL( cudaStreamDestroy(data->cuda_streams[i]) );
+#elif defined(HYPRE_USING_HIP)
+         HYPRE_HIP_CALL( hipStreamDestroy(data->cuda_streams[i]) );
+#endif
       }
    }
 
@@ -992,6 +1004,8 @@ hypre_SyncCudaDevice(hypre_Handle *hypre_handle)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#elif defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL( hipDeviceSynchronize() );
 #endif
    return hypre_error_flag;
 }
@@ -1034,10 +1048,14 @@ hypre_SyncCudaComputeStream_core(HYPRE_Int     action,
          *cuda_compute_stream_sync_ptr = cuda_compute_stream_sync;
          break;
       case 4:
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          if (cuda_compute_stream_sync)
          {
-            HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle)) ) ;
+#if defined(HYPRE_USING_CUDA)
+            HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle)) );
+#elif defined(HYPRE_USING_HIP)
+            HYPRE_HIP_CALL( hipStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle)) );
+#endif
          }
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
          HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
