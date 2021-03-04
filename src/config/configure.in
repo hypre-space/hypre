@@ -1809,31 +1809,29 @@ then
    fi
 fi
 
-
-if [ test "x$hypre_using_um" = "xyes"]
+if [test "x$hypre_using_um" = "xyes"]
 then
-  if [test "$hypre_using_cuda" = "yes" || test "$hypre_using_device_openmp" = "yes"]
-  then
-     AC_CHECK_HEADERS(["${CUDA_HOME}/include/cuda.h"], [hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_HOME}])
-
-     if test "x$hypre_found_cuda" != "xyes"
-     then
-        AC_CHECK_HEADERS(["${CUDA_PATH}/include/cuda.h"], [hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_PATH}])
-     fi
-
-     if test "x$hypre_found_cuda" != "xyes"
-     then
-        AC_MSG_ERROR([unable to find cuda.h ... Ensure that CUDA_HOME or CUDA_PATH is set])
-     fi
-  dnl if not using cuda, make sure we're using hip
-  dnl if not error. if we are, HIP will be checked below.
-  else
-    if [test "x$hypre_using_hip" != "xyes"]
-    then
-       AC_MSG_ERROR([Asked for unified memory, but not using CUDA, HIP, or device OpenMP!])
-    fi
-  fi
+   if [test "x$hypre_using_cuda" != "xyes" && test "x$hypre_using_device_openmp" != "xyes" && test "x$hypre_using_hip" != "xyes"]
+   then
+      AC_MSG_ERROR([Asked for unified memory, but not using CUDA, HIP, or device OpenMP!])
+   fi
 fi dnl hypre_using_um
+
+dnl CUDA
+if [test "$hypre_using_cuda" = "yes" || test "$hypre_using_device_openmp" = "yes"]
+then
+   AC_CHECK_HEADERS(["${CUDA_HOME}/include/cuda.h"], [hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_HOME}])
+
+   if test "x$hypre_found_cuda" != "xyes"
+   then
+      AC_CHECK_HEADERS(["${CUDA_PATH}/include/cuda.h"], [hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_PATH}])
+   fi
+
+   if test "x$hypre_found_cuda" != "xyes"
+   then
+      AC_MSG_ERROR([unable to find cuda.h ... Ensure that CUDA_HOME or CUDA_PATH is set])
+   fi
+fi
 
 dnl *********************************************************************
 dnl * Check for HIP header
