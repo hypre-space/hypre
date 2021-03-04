@@ -8692,19 +8692,6 @@ test -n "$CUCC" || CUCC=""""
    LINK_CC='${CUCC}'
    LINK_CXX='${CUCC}'
 
-   BBB="a      b"
-   AAA=${BBB}
-   CCC="${AAA}"
-   DDD="a ${BBB}"
-   if test "$DDD" = "a b"
-   then
-      echo ok
-   else
-      echo notok
-   fi
-   echo ${CCC}
-
-
       if test "x$HYPRE_CUDA_SM" = "x"
    then
       HYPRE_CUDA_SM=70
