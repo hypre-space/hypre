@@ -633,6 +633,8 @@ SUPERLU_LIBS
 SUPERLU_INCLUDE
 CALIPER_LIBS
 CALIPER_INCLUDE
+HYPRE_HIP_LIBS
+HYPRE_HIP_INCL
 HYPRE_CUDA_LIBS
 HYPRE_CUDA_INCLUDE
 HYPRE_CUDA_PATH
@@ -686,6 +688,8 @@ LINK_FC
 FFLAGS
 HOSTNAME
 HYPRE_ARCH
+HIPCC
+HYPRE_ROCM_PREFIX
 EGREP
 GREP
 CPP
@@ -780,6 +784,9 @@ enable_cusparse
 enable_cub
 enable_cublas
 enable_curand
+enable_rocsparse
+enable_rocblas
+enable_rocrand
 enable_gpu_aware_mpi
 with_LD
 with_LDFLAGS
@@ -820,8 +827,12 @@ with_fei_inc_dir
 with_mli
 with_MPI
 with_cuda
+<<<<<<< HEAD
 with_cuda_home
 with_cuda_arch
+=======
+with_hip
+>>>>>>> 2e97ffcc9eb39e58ecafc8da0d7f488044cea265
 with_raja
 with_raja_include
 with_raja_lib
@@ -1498,6 +1509,9 @@ Optional Features:
   --enable-cub            Use CUB Allocator (default is NO).
   --enable-cublas         Use cuBLAS (default is NO).
   --enable-curand         Use cuRAND (default is YES).
+  --enable-rocsparse      Use rocSPARSE (default is YES).
+  --enable-rocblas        Use rocBLAS (default is NO).
+  --enable-rocrand        Use rocRAND (default is YES).
   --enable-gpu-aware-mpi  Use GPU memory aware MPI
 
 Optional Packages:
@@ -1616,11 +1630,15 @@ Optional Packages:
                           may affect which compiler is chosen.
   --with-cuda             Use CUDA. Require cuda-8.0 or higher (default is
                           NO).
+<<<<<<< HEAD
   --with-cuda-home=DIR    User specifies CUDA_HOME in DIR.
   --with-cuda-arch=ARG    User specifies NVIDIA GPU architecture that the CUDA
                           files will be compiled for in ARG, where ARG is a
                           space-separated list (enclosed in quotes) of
                           numbers.
+=======
+  --with-hip              Use HIP for AMD GPUs. (default is NO).
+>>>>>>> 2e97ffcc9eb39e58ecafc8da0d7f488044cea265
   --with-raja             Use RAJA. Require RAJA package to be compiled
                           properly (default is NO).
   --with-raja-include=DIR User specifies that RAJA/*.h is in DIR. The options
@@ -2709,6 +2727,17 @@ hypre_found_cuda=no
 hypre_using_node_aware_mpi=no
 hypre_using_memory_tracker=no
 
+
+hypre_user_chose_hip=no
+hypre_using_hip=no
+hypre_using_rocsparse=no
+hypre_using_rocblas=no
+hypre_using_rocrand=no
+
+hypre_found_hip=no
+
+
+
 hypre_blas_lib_old_style=no
 hypre_blas_lib_dir_old_style=no
 hypre_lapack_lib_old_style=no
@@ -3080,6 +3109,48 @@ else
   hypre_using_curand=yes
 
 fi
+
+
+
+
+# Check whether --enable-rocsparse was given.
+if test "${enable_rocsparse+set}" = set; then :
+  enableval=$enable_rocsparse; case "${enableval}" in
+    yes) hypre_using_rocsparse=yes ;;
+    no)  hypre_using_rocsparse=no ;;
+    *)   hypre_using_rocsparse=yes ;;
+ esac
+else
+  hypre_using_rocsparse=yes
+
+fi
+
+
+# Check whether --enable-rocblas was given.
+if test "${enable_rocblas+set}" = set; then :
+  enableval=$enable_rocblas; case "${enableval}" in
+    yes) hypre_using_rocblas=yes ;;
+    no)  hypre_using_rocblas=no ;;
+    *)   hypre_using_rocblas=no ;;
+ esac
+else
+  hypre_using_rocblas=no
+
+fi
+
+
+# Check whether --enable-rocrand was given.
+if test "${enable_rocrand+set}" = set; then :
+  enableval=$enable_rocrand; case "${enableval}" in
+    yes) hypre_using_rocrand=yes ;;
+    no)  hypre_using_rocrand=no ;;
+    *)   hypre_using_rocrand=yes ;;
+ esac
+else
+  hypre_using_rocrand=yes
+
+fi
+
 
 
 # Check whether --enable-gpu-aware-mpi was given.
@@ -3855,6 +3926,23 @@ if test "${with_cuda_arch+set}" = set; then :
 
 
 fi
+
+
+
+
+# Check whether --with-hip was given.
+if test "${with_hip+set}" = set; then :
+  withval=$with_hip; case "$withval" in
+    yes) hypre_user_chose_hip=yes
+         hypre_using_hip=yes ;;
+    no)  hypre_using_hip=no ;;
+    *)   hypre_using_hip=no ;;
+ esac
+else
+  hypre_using_hip=no
+
+fi
+
 
 
 
@@ -8342,8 +8430,14 @@ $as_echo "$as_me: WARNING: *****************************************************
    fi
 fi
 
-
-if test "$hypre_using_cuda" = "yes" || test "$hypre_using_device_openmp" = "yes" || test "$hypre_using_um" = "yes"
+if test "x$hypre_using_um" = "xyes"
+then
+   if test "x$hypre_using_cuda" != "xyes" && test "x$hypre_using_device_openmp" != "xyes" && test "x$hypre_using_hip" != "xyes"
+   then
+      as_fn_error $? "Asked for unified memory, but not using CUDA, HIP, or device OpenMP!" "$LINENO" 5
+   fi
+fi
+if test "$hypre_using_cuda" = "yes" || test "$hypre_using_device_openmp" = "yes"
 then
    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ANSI C header files" >&5
 $as_echo_n "checking for ANSI C header files... " >&6; }
@@ -8518,6 +8612,34 @@ done
       as_fn_error $? "unable to find cuda.h ... Ensure that CUDA_HOME or CUDA_PATH is set" "$LINENO" 5
    fi
 fi
+
+
+if  test x"$hypre_using_hip" == x"yes" ; then :
+   if  test -n "$ROCM_PATH"; then :
+   HYPRE_ROCM_PREFIX=$ROCM_PATH
+else
+   HYPRE_ROCM_PREFIX=/opt/rocm
+fi
+
+
+        for ac_header in "${HYPRE_ROCM_PREFIX}/include/hip/hip_common.h"
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+ hypre_found_hip=yes
+else
+  as_fn_error $? "unable to find ${HYPRE_ROCM_PREFIX}/include/hip/hip_common.h ... Ensure ROCm is installed and set ROCM_PATH environment variable to ROCm installation path." "$LINENO" 5
+fi
+
+done
+
+fi
+
+
 
 if test "x$hypre_user_chose_raja" = "xyes"
 then
@@ -8742,6 +8864,106 @@ test -n "$CUCC" || CUCC=""""
    fi
 fi
 
+if test x"$hypre_user_chose_hip" == x"yes"; then :
+
+
+$as_echo "#define HYPRE_USING_GPU 1" >>confdefs.h
+
+
+$as_echo "#define HYPRE_USING_HIP 1" >>confdefs.h
+
+
+                                                for ac_prog in hipcc
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_HIPCC+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$HIPCC"; then
+  ac_cv_prog_HIPCC="$HIPCC" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_HIPCC="$ac_prog"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+HIPCC=$ac_cv_prog_HIPCC
+if test -n "$HIPCC"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $HIPCC" >&5
+$as_echo "$HIPCC" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$HIPCC" && break
+done
+
+
+                                CUCC=${HIPCC}
+        LINK_CC=${HIPCC}
+        LINK_CXX=${HIPCC}
+
+                                        HIPCXXFLAGS="-O2 -x hip -Wall"
+
+        if test x"$hypre_using_debug" == x"yes"; then :
+  HIPCXXFLAGS="-g -ggdb ${HIPCXXFLAGS}"
+fi
+
+                        CUFLAGS="${HIPCPPFLAGS} ${HIPCXXFLAGS} ${CXXFLAGS}"
+
+                        HYPRE_HIP_INCL="-I${HYPRE_ROCM_PREFIX}/rocthrust/include"
+        HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocprim/include"
+
+                HYPRE_HIP_LIBS="-L${HYPRE_ROCM_PREFIX}/lib -lamdhip64"
+
+                if test x"$hypre_using_rocsparse" == x"yes"; then :
+
+$as_echo "#define HYPRE_USING_ROCSPARSE 1" >>confdefs.h
+
+	       HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lrocsparse"
+               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocsparse/include"
+
+fi
+
+                                if test x"$hypre_using_rocblas" == x"yes"; then :
+
+$as_echo "#define HYPRE_USING_ROCBLAS 1" >>confdefs.h
+
+              HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocblas/include"
+
+fi
+
+                if test x"$hypre_using_rocrand" == x"yes"; then :
+
+$as_echo "#define HYPRE_USING_ROCRAND 1" >>confdefs.h
+
+               HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lrocrand"
+               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocrand/include"
+
+fi
+
+
+fi
+
+
+
 if test "$hypre_using_um" != "yes"
 then
       if test "$hypre_user_chose_cuda" = "yes"
@@ -8750,6 +8972,19 @@ then
 $as_echo "$as_me: ***********************************************************" >&6;}
       { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring with --with-cuda=yes without unified memory." >&5
 $as_echo "$as_me: Configuring with --with-cuda=yes without unified memory." >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: It only works for struct interface." >&5
+$as_echo "$as_me: It only works for struct interface." >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: Use --enable-unified-memory to compile with unified memory." >&5
+$as_echo "$as_me: Use --enable-unified-memory to compile with unified memory." >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: ***********************************************************" >&5
+$as_echo "$as_me: ***********************************************************" >&6;}
+   fi
+   if test "$hypre_user_chose_hip" = "yes"
+   then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: ***********************************************************" >&5
+$as_echo "$as_me: ***********************************************************" >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring with --with-hip=yes without unified memory." >&5
+$as_echo "$as_me: Configuring with --with-hip=yes without unified memory." >&6;}
       { $as_echo "$as_me:${as_lineno-$LINENO}: It only works for struct interface." >&5
 $as_echo "$as_me: It only works for struct interface." >&6;}
       { $as_echo "$as_me:${as_lineno-$LINENO}: Use --enable-unified-memory to compile with unified memory." >&5
@@ -8894,7 +9129,7 @@ then
 $as_echo "#define HYPRE_USING_UNIFIED_MEMORY 1" >>confdefs.h
 
 else
-   if test "x$hypre_user_chose_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes"
+   if test "x$hypre_user_chose_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes" || test "x$hypre_user_chose_hip" = "xyes"
    then
 
 $as_echo "#define HYPRE_USING_DEVICE_MEMORY 1" >>confdefs.h
@@ -9114,6 +9349,9 @@ then
 else
    CUCC_FULL=${CUCC}
 fi
+
+
+
 
 
 
