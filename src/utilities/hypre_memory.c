@@ -76,6 +76,8 @@ hypre_DeviceMemset(void *ptr, HYPRE_Int value, size_t num)
    HYPRE_OMPOffload(hypre__offload_device_num, ptr, num, "update", "to");
 #elif defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaMemset(ptr, value, num) );
+#elif defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL( hipMemset(ptr, value, num) );
 #endif
 }
 
@@ -84,6 +86,8 @@ hypre_UnifiedMemset(void *ptr, HYPRE_Int value, size_t num)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_CUDA_CALL( cudaMemset(ptr, value, num) );
+#elif defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL( hipMemset(ptr, value, num) );
 #endif
 }
 
@@ -166,6 +170,9 @@ hypre_DeviceMalloc(size_t size, HYPRE_Int zeroinit)
 #else
    HYPRE_CUDA_CALL( cudaMalloc(&ptr, size) );
 #endif // HYPRE_USING_CUB_ALLOCATOR
+
+#elif defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL( hipMalloc(&ptr, size) );
 #endif
 
    if (ptr && zeroinit)
@@ -188,6 +195,8 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
    hypre_umpire_um_pooled_allocate(&ptr, size);
 #elif defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaMallocManaged(&ptr, size, cudaMemAttachGlobal) );
+#elif defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL( hipMallocManaged(&ptr, size, hipMemAttachGlobal) );
 #endif
    //HYPRE_CUDA_CALL( cudaMemAdvise(ptr, size, cudaMemAdviseSetPreferredLocation,
    //                               hypre_HandleCudaDevice(hypre_handle())) );
@@ -218,6 +227,8 @@ hypre_HostPinnedMalloc(size_t size, HYPRE_Int zeroinit)
    hypre_umpire_pinned_pooled_allocate(&ptr, size);
 #elif defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaMallocHost(&ptr, size) );
+#elif defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL( hipHostMalloc(&ptr, size) );
 #endif
 
    if (zeroinit)
@@ -292,13 +303,15 @@ hypre_DeviceFree(void *ptr)
    omp_target_free(ptr, hypre__offload_device_num);
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_OMPOffload(hypre__offload_device_num, ptr, ((size_t *) ptr)[-1], "exit", "delete");
-#elif defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #ifdef HYPRE_USING_CUB_ALLOCATOR
    HYPRE_CUDA_CALL( hypre_CachingFreeDevice(ptr) );
 #elif defined(HYPRE_USING_UMPIRE_DEVICE)
    hypre_umpire_device_pooled_free(ptr);
-#else
+#elif defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaFree(ptr) );
+#elif defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL( hipFree(ptr) );
 #endif
 #endif
 }
@@ -313,6 +326,8 @@ hypre_UnifiedFree(void *ptr)
    hypre_umpire_um_pooled_free(ptr);
 #elif defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaFree(ptr) );
+#elif defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL( hipFree(ptr) );
 #endif
 #endif
 }
@@ -325,6 +340,8 @@ hypre_HostPinnedFree(void *ptr)
    hypre_umpire_pinned_pooled_free(ptr);
 #elif defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaFreeHost(ptr) );
+#elif defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL( hipHostFree(ptr) );
 #endif
 #endif
 }
@@ -413,6 +430,8 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
    {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
       HYPRE_CUDA_CALL( cudaMemcpy(dst, src, size, cudaMemcpyDeviceToDevice) );
+#elif defined(HYPRE_USING_HIP)
+      HYPRE_HIP_CALL( hipMemcpy(dst, src, size, hipMemcpyDeviceToDevice) );
 #endif
       return;
    }
@@ -423,6 +442,8 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
    {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
       HYPRE_CUDA_CALL( cudaMemcpy(dst, src, size, cudaMemcpyHostToDevice) );
+#elif defined(HYPRE_USING_HIP)
+      HYPRE_HIP_CALL( hipMemcpy(dst, src, size, hipMemcpyHostToDevice) );
 #endif
       return;
    }
@@ -433,6 +454,8 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
    {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
       HYPRE_CUDA_CALL( cudaMemcpy(dst, src, size, cudaMemcpyDeviceToHost) );
+#elif defined(HYPRE_USING_HIP)
+      HYPRE_HIP_CALL( hipMemcpy(dst, src, size, hipMemcpyDeviceToHost) );
 #endif
       return;
    }
@@ -448,6 +471,8 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
       HYPRE_OMPOffload(hypre__offload_device_num, dst, size, "update", "to");
 #elif defined(HYPRE_USING_CUDA)
       HYPRE_CUDA_CALL( cudaMemcpy(dst, src, size, cudaMemcpyHostToDevice) );
+#elif defined(HYPRE_USING_HIP)
+      HYPRE_HIP_CALL( hipMemcpy(dst, src, size, hipMemcpyHostToDevice) );
 #endif
       return;
    }
@@ -463,6 +488,8 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
       memcpy(dst, src, size);
 #elif defined(HYPRE_USING_CUDA)
       HYPRE_CUDA_CALL( cudaMemcpy( dst, src, size, cudaMemcpyDeviceToHost) );
+#elif defined(HYPRE_USING_HIP)
+      HYPRE_HIP_CALL( hipMemcpy(dst, src, size, hipMemcpyDeviceToHost) );
 #endif
       return;
    }
@@ -479,6 +506,8 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
       HYPRE_OMPOffload(hypre__offload_device_num, dst, size, "update", "to");
 #elif defined(HYPRE_USING_CUDA)
       HYPRE_CUDA_CALL( cudaMemcpy(dst, src, size, cudaMemcpyDeviceToDevice) );
+#elif defined(HYPRE_USING_HIP)
+      HYPRE_HIP_CALL( hipMemcpy(dst, src, size, hipMemcpyDeviceToDevice) );
 #endif
       return;
    }
