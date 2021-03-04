@@ -942,7 +942,7 @@ cusparseIndexType_t hypre_HYPREIntToCusparseIndexType();
 #ifndef HYPRE_CUDA_REDUCER_H
 #define HYPRE_CUDA_REDUCER_H
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS)
 
 template<typename T> void OneBlockReduce(T *d_arr, HYPRE_Int N, T *h_out);
@@ -1022,7 +1022,7 @@ struct HYPRE_double6
 __inline__ __host__ __device__
 HYPRE_Real warpReduceSum(HYPRE_Real val)
 {
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
   for (HYPRE_Int offset = warpSize/2; offset > 0; offset /= 2)
   {
     val += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val, offset);
@@ -1033,7 +1033,7 @@ HYPRE_Real warpReduceSum(HYPRE_Real val)
 
 __inline__ __host__ __device__
 HYPRE_double4 warpReduceSum(HYPRE_double4 val) {
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
   for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
   {
     val.x += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.x, offset);
@@ -1047,7 +1047,7 @@ HYPRE_double4 warpReduceSum(HYPRE_double4 val) {
 
 __inline__ __host__ __device__
 HYPRE_double6 warpReduceSum(HYPRE_double6 val) {
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
   for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
   {
     val.x += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.x, offset);
@@ -1066,7 +1066,7 @@ template <typename T>
 __inline__ __host__ __device__
 T blockReduceSum(T val)
 {
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
    //static __shared__ T shared[HYPRE_WARP_SIZE]; // Shared mem for HYPRE_WARP_SIZE partial sums
 
    __shared__ T shared[HYPRE_WARP_SIZE];        // Shared mem for HYPRE_WARP_SIZE partial sums
@@ -1161,7 +1161,7 @@ struct ReduceSum
    __host__ __device__
    void BlockReduce() const
    {
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
       __thread_sum = blockReduceSum(__thread_sum);
       if (threadIdx.x == 0)
       {
@@ -1199,7 +1199,7 @@ struct ReduceSum
 };
 
 #endif /* #if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) */
-#endif /* #if defined(HYPRE_USING_CUDA) */
+#endif /* #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
 #endif /* #ifndef HYPRE_CUDA_REDUCER_H */
 /******************************************************************************
  * Copyright (c) 2011, Duane Merrill.  All rights reserved.
