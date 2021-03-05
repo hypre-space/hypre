@@ -224,6 +224,7 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
    }
    else
    {
+#if defined(HYPRE_USING_CURAND)
       curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle());
 
       HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, 2747 + my_id) );
@@ -236,6 +237,7 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
       {
          HYPRE_CURAND_CALL( curandGenerateUniform(gen, (float *) urand, num_rows_diag) );
       }
+#endif
    }
 
    thrust::plus<HYPRE_Real> op;
