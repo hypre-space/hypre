@@ -8,7 +8,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 __global__ void hypre_BoomerAMGCreateS_rowcount( HYPRE_Int nr_of_rows,
                                                  HYPRE_Real max_row_sum, HYPRE_Real strength_threshold,
@@ -369,5 +369,4 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    }
 }
 
-#endif /* #if defined(HYPRE_USING_CUDA) */
-
+#endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
