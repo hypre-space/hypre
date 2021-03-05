@@ -48,6 +48,8 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
 #endif
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_CSRMatrixMatvecOMPOffload(trans, alpha, A, x, beta, y, offset);
+#elif defined(HYPRE_USING_HIP)
+#warning SPMV NOT IMPLEMENTED FOR HIP YET
 #else // #ifdef HYPRE_USING_CUSPARSE
 #error HYPRE SPMV TODO
 #endif
