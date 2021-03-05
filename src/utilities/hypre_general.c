@@ -102,6 +102,8 @@ hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_)
    HYPRE_Int nDevices;
 #if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaGetDeviceCount(&nDevices) );
+#elif defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL( hipGetDeviceCount(&nDevices) );
 #else
    nDevices = omp_get_num_devices();
 #endif
@@ -117,6 +119,8 @@ hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_)
 
 #if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaSetDevice(device_id) );
+#elif defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL( hipSetDevice(device_id) );
 #else
    HYPRE_CUDA_CALL( cudaSetDevice(device_id) );
    omp_set_default_device(device_id);
@@ -156,7 +160,12 @@ HYPRE_Init()
    }
 
 #if defined(HYPRE_USING_GPU)
+
+#if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaGetLastError() );
+#elif defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL( hipGetLastError() );
+#endif
 
    /* Notice: the cudaStream created is specific to the device
     * that was in effect when you created the stream.
@@ -168,7 +177,7 @@ HYPRE_Init()
    /* If not here, will be done at the first use */
    hypre_HandleCudaComputeStream(_hypre_handle);
    //hypre_HandleCudaPrefetchStream(_hypre_handle);
-#endif
+#endif // HYPRE_USING_GPU
 
 #if defined(HYPRE_USING_CUBLAS)
    hypre_HandleCublasHandle(_hypre_handle);
@@ -250,6 +259,8 @@ HYPRE_Finalize()
 #endif
 */
    HYPRE_CUDA_CALL( cudaGetLastError() );
+#elif defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL( hipGetLastError() );
 #endif
 
 #ifdef HYPRE_USING_MEMORY_TRACKER
