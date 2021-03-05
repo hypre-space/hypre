@@ -243,6 +243,7 @@ struct hypre_CsrsvData
 #include <thrust/inner_product.h>
 #include <thrust/logical.h>
 #include <thrust/replace.h>
+#include <thrust/sequence.h>
 
 using namespace thrust::placeholders;
 
