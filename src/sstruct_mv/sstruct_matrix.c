@@ -391,7 +391,7 @@ hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix,
    hypre_StructMatrixSetBoxValues(smatrix, set_box, value_box, nentries, sentries,
                                   values, action, -1, 0);
    /* TODO: Why need DeviceSync? */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    hypre_SyncCudaDevice(hypre_handle());
 #endif
    /* set (AddTo/Get) or clear (Set) values outside the grid in ghost zones */
@@ -1115,7 +1115,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                start = hypre_BoxIMin(int_box);
                hypre_BoxGetSize(int_box, loop_size);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
                hypre_assert(ndim <= 3);
 
                HYPRE_Int rs_0, rs_1, rs_2;
@@ -1155,7 +1155,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                   rows[mi] = row_base;
                   cols[ci] = col_base;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
                   if (ndim > 0)
                   {
                      rows[mi] += index[0] * rs_0;
@@ -1657,4 +1657,3 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
 
    return hypre_error_flag;
 }
-

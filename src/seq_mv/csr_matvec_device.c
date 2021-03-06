@@ -15,7 +15,7 @@
 #include "_hypre_utilities.hpp"
 #include "csr_matrix_cuda_utils.h"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
 
 /* y = alpha * A * x + beta * y
  * This function is supposed to be only used inside the other functions in this file
@@ -300,4 +300,4 @@ hypre_CSRMatrixMatvecCusparseOldAPI( HYPRE_Int        trans,
 
 #endif // #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
 #endif // #if defined(HYPRE_USING_CUSPARSE)
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#endif // #if defined(HYPRE_USING_GPU)
