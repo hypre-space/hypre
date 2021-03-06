@@ -1259,7 +1259,7 @@ hypre_CSRMatrixIntersectPattern(hypre_CSRMatrix *A,
 
 #endif /* HYPRE_USING_CUDA */
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
 
 HYPRE_Int
 hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
@@ -1518,4 +1518,3 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
 }
 
 #endif /* #if defined(HYPRE_USING_CUSPARSE) */
-

@@ -4084,7 +4084,7 @@ hypre_BoomerAMGSetILUMaxRowNnz( void     *data,
 
    return hypre_error_flag;
 }
-HYPRE_Int 
+HYPRE_Int
 hypre_BoomerAMGSetILULocalReordering( void     *data,
                         HYPRE_Int       ilu_reordering_type)
 {

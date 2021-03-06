@@ -33,10 +33,6 @@
 #include <cuda_profiler_api.h>
 #endif
 
-#ifdef HYPRE_USING_DSUPERLU
-#include "superlu_ddefs.h"
-#endif
-
 #if defined(HYPRE_USING_UMPIRE)
 #include "umpire/interface/umpire.h"
 #endif
@@ -7573,7 +7569,7 @@ main( hypre_int argc,
    hypre_MPI_Finalize();
 
    /* when using cuda-memcheck --leak-check full, uncomment this */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    cudaDeviceReset();
 #endif
 

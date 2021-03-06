@@ -842,7 +842,8 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
     * If boxloops run on GPUs, allocate device buffer,
     * since cannot access host memory from device */
    HYPRE_Int alloc_dev_buffer = 0;
-#if (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP))
+   /* In the case of running on device and cannot access host memory from device */
+#if defined(HYPRE_USING_GPU)
 #if defined(HYPRE_USING_RAJA) || defined(HYPRE_USING_KOKKOS)
    alloc_dev_buffer = 1;
 #elif defined(HYPRE_USING_CUDA)
@@ -852,7 +853,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 #endif
 #endif
 
-#if (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP))
+#if defined(HYPRE_USING_GPU)
    if (alloc_dev_buffer)
    {
       send_buffers_device = hypre_TAlloc(HYPRE_Complex *, num_sends, HYPRE_MEMORY_HOST);
@@ -896,7 +897,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    }
 
    /* allocate device recv buffers */
-#if (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP))
+#if defined(HYPRE_USING_GPU)
    if (alloc_dev_buffer)
    {
       recv_buffers_device = hypre_TAlloc(HYPRE_Complex *, num_recvs, HYPRE_MEMORY_HOST);
@@ -1214,7 +1215,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
     /* **be cautious to hypre_CommPkgRecvBufsize that is different in the first comm.** */
 
    HYPRE_Int alloc_dev_buffer = 0;
-#if (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP))
+#if defined(HYPRE_USING_GPU)
 #if defined(HYPRE_USING_RAJA) || defined(HYPRE_USING_KOKKOS)
    alloc_dev_buffer = 1;
 #elif defined(HYPRE_USING_CUDA)
@@ -1466,4 +1467,3 @@ hypre_CommPkgDestroy( hypre_CommPkg *comm_pkg )
 
    return hypre_error_flag;
 }
-
