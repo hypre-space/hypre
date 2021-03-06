@@ -452,7 +452,7 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataNonGalerkinTol(amg_data) = nongalerkin_tol;
    hypre_ParAMGDataNonGalTolArray(amg_data) = NULL;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    hypre_ParAMGDataRAP2(amg_data)              = 1;
    hypre_ParAMGDataKeepTranspose(amg_data)     = 1;
    hypre_ParAMGDataModularizedMatMat(amg_data) = 1;
@@ -4075,7 +4075,7 @@ hypre_BoomerAMGSetILUMaxRowNnz( void     *data,
 
    return hypre_error_flag;
 }
-HYPRE_Int 
+HYPRE_Int
 hypre_BoomerAMGSetILULocalReordering( void     *data,
                         HYPRE_Int       ilu_reordering_type)
 {
