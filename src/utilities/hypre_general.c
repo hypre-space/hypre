@@ -198,15 +198,18 @@ HYPRE_Init()
    HYPRE_OMPOffloadOn();
 #endif
 
-#ifdef HYPRE_USING_CUB_ALLOCATOR
+#ifdef HYPRE_USING_DEVICE_POOL
    /* Keep this check here at the end of HYPRE_Init()
-    * Make sure that CUB Allocator has not been setup in HYPRE_Init,
-    * otherwise users are not able to set the parameters of CUB
+    * Make sure that device pool allocator has not been setup in HYPRE_Init,
+    * otherwise users are not able to set the parametersB
     */
    if ( hypre_HandleCubDevAllocator(_hypre_handle) ||
         hypre_HandleCubUvmAllocator(_hypre_handle) )
    {
-      hypre_printf("ERROR: CUB Allocators have been setup ... \n");
+      char msg[256];
+      hypre_sprintf(msg, "%s %s", "ERROR: device pool allocators have been created in", __func__);
+      hypre_fprintf(stderr, "%s\n", msg);
+      hypre_error_w_msg(-1, msg);
    }
 #endif
 
@@ -483,9 +486,25 @@ HYPRE_SetExecutionPolicy(HYPRE_ExecutionPolicy exec_policy)
 }
 
 HYPRE_Int
+HYPRE_SetStructExecutionPolicy(HYPRE_ExecutionPolicy exec_policy)
+{
+   hypre_HandleStructExecPolicy(hypre_handle()) = exec_policy;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
 HYPRE_GetExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy)
 {
    *exec_policy = hypre_HandleDefaultExecPolicy(hypre_handle());
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+HYPRE_GetStructExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy)
+{
+   *exec_policy = hypre_HandleStructExecPolicy(hypre_handle());
 
    return hypre_error_flag;
 }

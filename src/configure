@@ -781,7 +781,7 @@ enable_unified_memory
 enable_cuda_streams
 enable_nvtx
 enable_cusparse
-enable_cub
+enable_device_memory_pool
 enable_cublas
 enable_curand
 enable_rocsparse
@@ -827,12 +827,9 @@ with_fei_inc_dir
 with_mli
 with_MPI
 with_cuda
-<<<<<<< HEAD
+with_hip
 with_cuda_home
 with_cuda_arch
-=======
-with_hip
->>>>>>> 2e97ffcc9eb39e58ecafc8da0d7f488044cea265
 with_raja
 with_raja_include
 with_raja_lib
@@ -1506,7 +1503,8 @@ Optional Features:
   --enable-cuda-streams   Use CUDA streams (default is YES).
   --enable-nvtx           Use NVTX (default is NO).
   --enable-cusparse       Use cuSPARSE (default is YES).
-  --enable-cub            Use CUB Allocator (default is NO).
+  --enable-device-memory-pool
+                          Use device pooling allocator (default is NO).
   --enable-cublas         Use cuBLAS (default is NO).
   --enable-curand         Use cuRAND (default is YES).
   --enable-rocsparse      Use rocSPARSE (default is YES).
@@ -1630,15 +1628,12 @@ Optional Packages:
                           may affect which compiler is chosen.
   --with-cuda             Use CUDA. Require cuda-8.0 or higher (default is
                           NO).
-<<<<<<< HEAD
+  --with-hip              Use HIP for AMD GPUs. (default is NO).
   --with-cuda-home=DIR    User specifies CUDA_HOME in DIR.
   --with-cuda-arch=ARG    User specifies NVIDIA GPU architecture that the CUDA
                           files will be compiled for in ARG, where ARG is a
                           space-separated list (enclosed in quotes) of
                           numbers.
-=======
-  --with-hip              Use HIP for AMD GPUs. (default is NO).
->>>>>>> 2e97ffcc9eb39e58ecafc8da0d7f488044cea265
   --with-raja             Use RAJA. Require RAJA package to be compiled
                           properly (default is NO).
   --with-raja-include=DIR User specifies that RAJA/*.h is in DIR. The options
@@ -2711,7 +2706,7 @@ hypre_using_nvtx=no
 hypre_using_cusparse=yes
 hypre_using_cublas=no
 hypre_using_curand=yes
-hypre_using_cub=no
+hypre_using_device_pool=no
 hypre_using_umpire=no
 hypre_using_umpire_host=no
 hypre_using_umpire_device=no
@@ -3072,15 +3067,15 @@ else
 fi
 
 
-# Check whether --enable-cub was given.
-if test "${enable_cub+set}" = set; then :
-  enableval=$enable_cub; case "${enableval}" in
-    yes) hypre_using_cub=yes ;;
-    no)  hypre_using_cub=no ;;
-    *)   hypre_using_cub=no ;;
+# Check whether --enable-device-memory-pool was given.
+if test "${enable_device_memory_pool+set}" = set; then :
+  enableval=$enable_device_memory_pool; case "${enableval}" in
+    yes) hypre_using_device_pool=yes ;;
+    no)  hypre_using_device_pool=no ;;
+    *)   hypre_using_device_pool=no ;;
  esac
 else
-  hypre_using_cub=no
+  hypre_using_device_pool=no
 
 fi
 
@@ -3905,6 +3900,22 @@ fi
 
 
 
+
+# Check whether --with-hip was given.
+if test "${with_hip+set}" = set; then :
+  withval=$with_hip; case "$withval" in
+    yes) hypre_user_chose_hip=yes
+         hypre_using_hip=yes ;;
+    no)  hypre_using_hip=no ;;
+    *)   hypre_using_hip=no ;;
+ esac
+else
+  hypre_using_hip=no
+
+fi
+
+
+
 # Check whether --with-cuda-home was given.
 if test "${with_cuda_home+set}" = set; then :
   withval=$with_cuda_home; for cuda_dir in $withval; do
@@ -3926,23 +3937,6 @@ if test "${with_cuda_arch+set}" = set; then :
 
 
 fi
-
-
-
-
-# Check whether --with-hip was given.
-if test "${with_hip+set}" = set; then :
-  withval=$with_hip; case "$withval" in
-    yes) hypre_user_chose_hip=yes
-         hypre_using_hip=yes ;;
-    no)  hypre_using_hip=no ;;
-    *)   hypre_using_hip=no ;;
- esac
-else
-  hypre_using_hip=no
-
-fi
-
 
 
 
@@ -8746,10 +8740,10 @@ $as_echo "#define HYPRE_USING_CUSPARSE 1" >>confdefs.h
 
    fi
 
-   if test "$hypre_using_cub" = "yes"
+   if test "$hypre_using_device_pool" = "yes"
    then
 
-$as_echo "#define HYPRE_USING_CUB_ALLOCATOR 1" >>confdefs.h
+$as_echo "#define HYPRE_USING_DEVICE_POOL 1" >>confdefs.h
 
    fi
 
@@ -8841,8 +8835,7 @@ test -n "$CUCC" || CUCC=""""
 
       LDFLAGS="-ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -Xcompiler \"${LDFLAGS}\""
    HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
-   HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64'
-   HYPRE_CUDA_LIBS+=" -lcudart"
+   HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64 -lcudart'
    if test "$hypre_using_nvtx" = "yes"
    then
       HYPRE_CUDA_LIBS+=" -lnvToolsExt"
@@ -9059,8 +9052,7 @@ $as_echo "#define HYPRE_DEVICE_OPENMP_CHECK 1" >>confdefs.h
    fi
 
    HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
-   HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64'
-   HYPRE_CUDA_LIBS="-lcudart -lcusparse -lcurand"
+   HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64 -lcudart -lcusparse -lcurand'
    if test "$hypre_using_nvtx" = "yes"
    then
       HYPRE_CUDA_LIBS+=" -lnvToolsExt"

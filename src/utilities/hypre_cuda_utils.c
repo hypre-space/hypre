@@ -25,6 +25,11 @@ hypreCUDAKernel_CompileFlagSafetyCheck(hypre_int *cuda_arch_compile)
 #endif
 }
 
+/*
+ * Assume this function is called inside HYPRE_Init(), at a place where we do not want to
+ * activate memory pooling, so we do not use hypre's memory model to Alloc and Free.
+ * See commented out code below (and do not delete)
+*/
 void hypre_CudaCompileFlagCheck()
 {
    HYPRE_Int device = hypre_HandleCudaDevice(hypre_handle());
@@ -35,11 +40,14 @@ void hypre_CudaCompileFlagCheck()
    hypre_int cuda_arch_compile = -1;
    dim3 gDim(1,1,1), bDim(1,1,1);
 
-   hypre_int *cuda_arch_compile_d = hypre_TAlloc(hypre_int, 1, HYPRE_MEMORY_DEVICE);
+   hypre_int *cuda_arch_compile_d = NULL;
+   //cuda_arch_compile_d = hypre_TAlloc(hypre_int, 1, HYPRE_MEMORY_DEVICE);
+   HYPRE_CUDA_CALL( cudaMalloc(&cuda_arch_compile_d, sizeof(hypre_int)) );
    hypre_TMemcpy(cuda_arch_compile_d, &cuda_arch_compile, hypre_int, 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CompileFlagSafetyCheck, gDim, bDim, cuda_arch_compile_d );
    hypre_TMemcpy(&cuda_arch_compile, cuda_arch_compile_d, hypre_int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(cuda_arch_compile_d, HYPRE_MEMORY_DEVICE);
+   //hypre_TFree(cuda_arch_compile_d, HYPRE_MEMORY_DEVICE);
+   HYPRE_CUDA_CALL( cudaFree(cuda_arch_compile_d) );
 
    /* HYPRE_CUDA_CALL(cudaDeviceSynchronize()); */
 
@@ -974,8 +982,8 @@ hypre_CudaDataCreate()
    hypre_CudaDataUseGpuRand(data) = 0;
 #endif
 
-   /* cub */
-#ifdef HYPRE_USING_CUB_ALLOCATOR
+   /* device pool */
+#ifdef HYPRE_USING_DEVICE_POOL
    hypre_CudaDataCubBinGrowth(data)      = 8u;
    hypre_CudaDataCubMinBin(data)         = 1u;
    hypre_CudaDataCubMaxBin(data)         = (hypre_uint) -1;
@@ -1033,7 +1041,7 @@ hypre_CudaDataDestroy(hypre_CudaData *data)
       }
    }
 
-#ifdef HYPRE_USING_CUB_ALLOCATOR
+#ifdef HYPRE_USING_DEVICE_POOL
    hypre_CudaDataCubCachingAllocatorDestroy(data);
 #endif
 

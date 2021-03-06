@@ -11,7 +11,7 @@ case $1 in
    -h|-help)
       cat <<EOF
 
-   **** Only run this script on the lassen cluster ****
+   **** Only run this script on the lassen/ray cluster ****
 
    $0 [-h|-help] {src_dir}
 
@@ -38,66 +38,47 @@ shift
 # Basic build and run tests
 mo="-j test"
 eo=""
-roij="-ij -ams -rt -mpibind -rtol 1e-3 -atol 2e-2"
-ross="-struct -sstruct -rt -mpibind -rtol 1e-6 -atol 1e-6"
-rost="-struct -rt -mpibind -save cuda"
-rocuda="-cuda_lassen -rt -mpibind"
 
-# CUDA with UM
-co="--with-cuda --enable-unified-memory --enable-persistent --enable-cub --enable-debug --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' HYPRE_CUDA_SM=70"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
-./renametest.sh basic $output_dir/basic-cuda-um-ij
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ross
-./renametest.sh basic $output_dir/basic-cuda-um-struct-sstruct
+##########
+## CUDA ##
+##########
 
-# CUDA with UM [shared library, no run]
-co="--with-cuda --enable-unified-memory --with-openmp --enable-hopscotch --enable-shared --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' HYPRE_CUDA_SM=70"
+# CUDA with UM in debug mode [ij, ams, struct, sstruct]
+co="--with-cuda --enable-unified-memory --enable-persistent --enable-debug --with-cuda-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
+ro="-ij -ams -struct -sstruct -rt -mpibind -save cuda"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./renametest.sh basic $output_dir/basic-cuda-um
+
+# CUDA with UM with shared library [no run]
+co="--with-cuda --enable-unified-memory --with-openmp --enable-hopscotch --enable-shared --with-cuda-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-cuda-um-shared
-#./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
-#./renametest.sh basic $output_dir/basic-cuda-um-shared-ij
-#./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ross
-#./renametest.sh basic $output_dir/basic-cuda-um-shared-struct-sstruct
 
-# OMP 4.5 with UM
-co="--with-device-openmp --enable-unified-memory --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' HYPRE_CUDA_SM=70"
-#./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
-#./renametest.sh basic $output_dir/basic-deviceomp-um-ij
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ross
-./renametest.sh basic $output_dir/basic-deviceomp-um-struct-sstruct
-
-# OMP 4.5 with UM [shared library, no run]
-#co="--with-device-openmp --enable-unified-memory --enable-shared --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029:1500-030:1501-308\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029:1500-030:1501-308\\' HYPRE_CUDA_SM=70"
-#./test.sh basic.sh $src_dir -co: $co -mo: $mo
-#./renametest.sh basic $output_dir/basic-deviceomp-um-shared
-#./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
-#./renametest.sh basic $output_dir/basic-deviceomp-um-shared-ij
-#./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ross
-#./renametest.sh basic $output_dir/basic-deviceomp-um-shared-struct-sstruct
-
-# OMP 4.5 with UM [in debug mode]
-#co="--with-device-openmp --enable-unified-memory --enable-debug --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' HYPRE_CUDA_SM=70"
-#./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
-#./renametest.sh basic $output_dir/basic-deviceomp-um-debug-ij
-#./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ross
-#./renametest.sh basic $output_dir/basic-deviceomp-um-debug-struct-sstruct
-
-# CUDA w.o UM
-co="--with-cuda --enable-debug --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' HYPRE_CUDA_SM=70"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $rost
-./renametest.sh basic $output_dir/basic-cuda-nonum-struct
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $rocuda
-./renametest.sh basic $output_dir/basic-cuda-nonum-cuda
-
-# OMP 4.5 w.o UM, only struct [in debug mode]
-co="--with-device-openmp --enable-debug --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' HYPRE_CUDA_SM=70"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $rost
-./renametest.sh basic $output_dir/basic-deviceomp-nonum-debug-struct
-
-# CUDA with UM without MPI
-#co="--with-cuda --enable-unified-memory --without-MPI --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' HYPRE_CUDA_SM=70"
+# CUDA with UM without MPI [no run]
+#co="--with-cuda --enable-unified-memory --without-MPI --with-cuda-arch=\\'60 70\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
 #./test.sh basic.sh $src_dir -co: $co -mo: $mo
 #./renametest.sh basic $output_dir/basic-cuda-um-without-MPI
+
+# CUDA without UM with device memory pool [ij-benchmark, struct]
+co="--with-cuda --enable-device-memory-pool --with-cuda-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
+ro="-ij-bench -struct -rt -mpibind -save cuda"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./renametest.sh basic $output_dir/basic-cuda-nonum
+
+############
+## OMP4.5 ##
+############
+
+# OMP 4.5 with UM with shared library [no run]
+#co="--with-device-openmp --enable-unified-memory --enable-shared --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029:1500-030:1501-308\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029:1500-030:1501-308\\'"
+#./test.sh basic.sh $src_dir -co: $co -mo: $mo
+#./renametest.sh basic $output_dir/basic-deviceomp-um-shared
+
+# OMP 4.5 without UM in debug mode [struct]
+co="--with-device-openmp --enable-debug --with-cuda-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
+ro="-struct -rt -mpibind -save cuda"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./renametest.sh basic $output_dir/basic-deviceomp-nonum-debug-struct
 
 # Echo to stderr all nonempty error files in $output_dir
 for errfile in $( find $output_dir ! -size 0 -name "*.err" )

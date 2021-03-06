@@ -85,7 +85,7 @@ struct hypre_CudaData
    cusparseHandle_t                  cusparse_handle;
    cusparseMatDescr_t                cusparse_mat_descr;
    cudaStream_t                      cuda_streams[HYPRE_MAX_NUM_STREAMS];
-#ifdef HYPRE_USING_CUB_ALLOCATOR
+#ifdef HYPRE_USING_DEVICE_POOL
    hypre_uint                        cub_bin_growth;
    hypre_uint                        cub_min_bin;
    hypre_uint                        cub_max_bin;
@@ -235,9 +235,13 @@ using namespace thrust::placeholders;
 
 /* RL: TODO Want macro HYPRE_THRUST_CALL to return value but I don't know how to do it right
  * The following one works OK for now */
+
 #ifdef HYPRE_USING_UMPIRE_DEVICE
 #define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
    thrust::func_name(thrust::cuda::par(hypre_HandleUmpireDeviceAllocator(hypre_handle())).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
+#elif HYPRE_USING_DEVICE_POOL
+#define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
+   thrust::func_name(thrust::cuda::par(*(hypre_HandleCubDevAllocator(hypre_handle()))).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
 #else
 #define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
    thrust::func_name(thrust::cuda::par.on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
@@ -756,6 +760,8 @@ cudaError_t hypre_CachingMallocManaged(void **ptr, size_t nbytes);
 cudaError_t hypre_CachingFreeDevice(void *ptr);
 
 cudaError_t hypre_CachingFreeManaged(void *ptr);
+
+hypre_cub_CachingDeviceAllocator * hypre_CudaDataCubCachingAllocatorCreate(hypre_uint bin_growth, hypre_uint min_bin, hypre_uint max_bin, size_t max_cached_bytes, bool skip_cleanup, bool debug, bool use_managed_memory);
 
 void hypre_CudaDataCubCachingAllocatorDestroy(hypre_CudaData *data);
 

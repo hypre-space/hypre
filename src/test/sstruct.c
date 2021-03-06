@@ -2787,6 +2787,8 @@ main( hypre_int argc,
    /* default execution policy */
    HYPRE_SetExecutionPolicy(default_exec_policy);
 
+   HYPRE_SetStructExecutionPolicy(HYPRE_EXEC_DEVICE);
+
 #if defined(HYPRE_USING_GPU)
    HYPRE_SetSpGemmUseCusparse(spgemm_use_cusparse);
 #endif

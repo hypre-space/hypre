@@ -968,10 +968,10 @@ hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg )
       hypre_TFree(hypre_ParCSRCommPkgRecvMPITypes(comm_pkg), HYPRE_MEMORY_HOST); */
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_MEMORY)
-   //hypre_TFree(hypre_ParCSRCommPkgTmpData(comm_pkg),   HYPRE_MEMORY_DEVICE);
-   //hypre_TFree(hypre_ParCSRCommPkgBufData(comm_pkg),   HYPRE_MEMORY_DEVICE);
-   _hypre_TFree(hypre_ParCSRCommPkgTmpData(comm_pkg), hypre_MEMORY_DEVICE);
-   _hypre_TFree(hypre_ParCSRCommPkgBufData(comm_pkg), hypre_MEMORY_DEVICE);
+   hypre_TFree(hypre_ParCSRCommPkgTmpData(comm_pkg),   HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_ParCSRCommPkgBufData(comm_pkg),   HYPRE_MEMORY_DEVICE);
+   //_hypre_TFree(hypre_ParCSRCommPkgTmpData(comm_pkg), hypre_MEMORY_DEVICE);
+   //_hypre_TFree(hypre_ParCSRCommPkgBufData(comm_pkg), hypre_MEMORY_DEVICE);
    hypre_TFree(hypre_ParCSRCommPkgWorkSpace(comm_pkg), HYPRE_MEMORY_DEVICE);
 #endif
 

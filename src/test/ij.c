@@ -433,8 +433,8 @@ main( hypre_int argc,
    HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
    HYPRE_MemoryLocation  memory_location     = HYPRE_MEMORY_DEVICE;
 
-#ifdef HYPRE_USING_CUB_ALLOCATOR
-   /* CUB Allocator */
+#ifdef HYPRE_USING_DEVICE_POOL
+   /* device pool allocator */
    hypre_uint mempool_bin_growth   = 8,
               mempool_min_bin      = 3,
               mempool_max_bin      = 9;
@@ -1137,7 +1137,7 @@ main( hypre_int argc,
          use_curand = atoi(argv[arg_index++]);
       }
 #endif
-#ifdef HYPRE_USING_CUB_ALLOCATOR
+#ifdef HYPRE_USING_DEVICE_POOL
       else if ( strcmp(argv[arg_index], "-mempool_growth") == 0 )
       {
          arg_index++;
@@ -2165,7 +2165,7 @@ main( hypre_int argc,
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
 
-#ifdef HYPRE_USING_CUB_ALLOCATOR
+#ifdef HYPRE_USING_DEVICE_POOL
    /* To be effective, hypre_SetCubMemPoolSize must immediately follow HYPRE_Init */
    HYPRE_SetGPUMemoryPoolSize( mempool_bin_growth, mempool_min_bin,
                                mempool_max_bin, mempool_max_cached_bytes );
