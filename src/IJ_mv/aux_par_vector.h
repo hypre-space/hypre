@@ -33,7 +33,7 @@ typedef struct
 #if defined(HYPRE_USING_CUDA)
    HYPRE_Int            max_stack_elmts;      /* length of stash for SetValues and AddToValues*/
    HYPRE_Int            current_stack_elmts;  /* current no. of elements stored in stash */
-   HYPRE_BigInt        *stack_i;              /* contains column indices */
+   HYPRE_BigInt        *stack_i;              /* contains row indices */
    HYPRE_Complex       *stack_data;           /* contains corresponding data */
    char                *stack_sora;
    HYPRE_Int            usr_off_proc_elmts;   /* the num of off-proc elements usr guided */
