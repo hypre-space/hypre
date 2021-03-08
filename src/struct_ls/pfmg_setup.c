@@ -1114,7 +1114,7 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
       tcx = -diag * (a_cw[Ai] + a_ce[Ai]);
       tcy = -diag * (a_cn[Ai] + a_cs[Ai]);
 
-#if !defined(HYPRE_USING_RAJA) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
       HYPRE_double4 tmp(tcx, tcy, tcx*tcx, tcy*tcy);
       sum4 += tmp;
 #else
@@ -1129,7 +1129,7 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
 
 #endif /* kokkos */
 
-#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
    HYPRE_double4 tmp = (HYPRE_double4) sum4;
    cxyz[0]   = tmp.x;
    cxyz[1]   = tmp.y;
@@ -1304,7 +1304,7 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
        tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
        tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
 
-#if !defined(HYPRE_USING_RAJA) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
        HYPRE_double4 tmp(tcx, tcy, tcx*tcx, tcy*tcy);
        sum4 += tmp;
 #else
@@ -1319,7 +1319,7 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
 
 #endif /* kokkos */
 
-#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
    HYPRE_double4 tmp = (HYPRE_double4) sum4;
    cxyz[0]   = tmp.x;
    cxyz[1]   = tmp.y;
@@ -1501,7 +1501,7 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
       tcx = -diag * (a_cw[Ai] + a_ce[Ai]);
       tcy = -diag * (a_cs[Ai] + a_cn[Ai]);
       tcz = -diag * (a_ac[Ai] + a_bc[Ai]);
-#if !defined(HYPRE_USING_RAJA) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
       HYPRE_double6 tmp(tcx, tcy, tcz, tcx*tcx, tcy*tcy, tcz*tcz);
       sum6 += tmp;
 #else
@@ -1518,7 +1518,7 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
 
 #endif /* kokkos */
 
-#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
    HYPRE_double6 tmp = (HYPRE_double6) sum6;
    cxyz[0]   = tmp.x;
    cxyz[1]   = tmp.y;
@@ -1757,7 +1757,7 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
       tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_an[Ai] + a_as[Ai] + a_bn[Ai] + a_bs[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
       tcz = -diag * (a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_an[Ai] + a_as[Ai] +  a_bw[Ai]  + a_be[Ai] +  a_bn[Ai] +  a_bs[Ai]);
 
-#if !defined(HYPRE_USING_RAJA) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
       HYPRE_double6 tmp(tcx, tcy, tcz, tcx*tcx, tcy*tcy, tcz*tcz);
       sum6 += tmp;
 #else
@@ -1774,7 +1774,7 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
 
 #endif /* kokkos */
 
-#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
    HYPRE_double6 tmp = (HYPRE_double6) sum6;
    cxyz[0]   = tmp.x;
    cxyz[1]   = tmp.y;
@@ -2069,7 +2069,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
 
       tcz -= diag * (a_ac[Ai]  +  a_bc[Ai] +  a_aw[Ai] +  a_ae[Ai] +  a_an[Ai] +  a_as[Ai] +  a_bw[Ai] +  a_be[Ai] + a_bn[Ai] + a_bs[Ai]);
       tcz -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
-#if !defined(HYPRE_USING_RAJA) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
       HYPRE_double6 tmp(tcx, tcy, tcz, tcx*tcx, tcy*tcy, tcz*tcz);
       sum6 += tmp;
 #else
@@ -2086,7 +2086,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
 
 #endif /* kokkos */
 
-#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
    HYPRE_double6 tmp = (HYPRE_double6) sum6;
    cxyz[0]   = tmp.x;
    cxyz[1]   = tmp.y;
