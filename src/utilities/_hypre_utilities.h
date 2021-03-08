@@ -1598,6 +1598,8 @@ HYPRE_Int hypreDevice_MaskedIVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex 
 HYPRE_Int hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v);
 #endif
 
+HYPRE_Int hypre_bind_device(HYPRE_Int myid, HYPRE_Int nproc, MPI_Comm comm);
+
 /* hypre_nvtx.c */
 void hypre_NvtxPushRangeColor(const char *name, HYPRE_Int cid);
 void hypre_NvtxPushRange(const char *name);

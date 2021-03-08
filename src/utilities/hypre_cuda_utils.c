@@ -1077,3 +1077,51 @@ hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle)
 }
 
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+
+HYPRE_Int
+hypre_bind_device( HYPRE_Int myid,
+                   HYPRE_Int nproc,
+                   MPI_Comm  comm )
+{
+#ifdef HYPRE_USING_GPU
+   HYPRE_Int myNodeid, NodeSize;
+   HYPRE_Int device_id, nDevices;
+   hypre_MPI_Comm node_comm;
+
+   /* get myid on this node */
+   hypre_MPI_Comm_split_type( comm, hypre_MPI_COMM_TYPE_SHARED,
+                              myid, hypre_MPI_INFO_NULL, &node_comm );
+   hypre_MPI_Comm_rank(node_comm, &myNodeid);
+   hypre_MPI_Comm_size(node_comm, &NodeSize);
+   hypre_MPI_Comm_free(&node_comm);
+
+   /* get number of devices on this node */
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_CUDA_CALL( cudaGetDeviceCount(&nDevices) );
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
+   nDevices = omp_get_num_devices();
+#else
+#error hip
+#endif
+
+   /* set device */
+   device_id = myNodeid % nDevices;
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_CUDA_CALL( cudaSetDevice(device_id) );
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_CUDA_CALL( cudaSetDevice(device_id) );
+   omp_set_default_device(device_id);
+#else
+#error hip
+#endif
+
+#if defined(HYPRE_DEBUG) && defined(HYPRE_PRINT_ERRORS)
+   hypre_printf("Proc [global %d/%d, local %d/%d] can see %d GPUs and is running on %d\n",
+                myid, nproc, myNodeid, NodeSize, nDevices, device_id);
+#endif
+
+#endif /* #ifdef HYPRE_USING_GPU */
+
+   return hypre_error_flag;
+}
+

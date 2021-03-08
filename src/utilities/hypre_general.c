@@ -93,23 +93,6 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
 
    hypre_HandleCudaDevice(hypre_handle_) = device_id;
 
-#if defined(HYPRE_DEBUG) && defined(HYPRE_PRINT_ERRORS)
-   HYPRE_Int myid, nproc;
-   hypre_int nDevices;
-
-   // TODO should not use COMM_WORLD. What to use?
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
-   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &nproc);
-
-#if defined(HYPRE_USING_CUDA)
-   HYPRE_CUDA_CALL( cudaGetDeviceCount(&nDevices) );
-#else
-   nDevices = omp_get_num_devices();
-#endif
-   hypre_printf("Proc [%d/%d] can see %d GPUs and is running on %d\n",
-                myid, nproc, nDevices, device_id);
-#endif
-
    return hypre_error_flag;
 }
 #endif //#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
