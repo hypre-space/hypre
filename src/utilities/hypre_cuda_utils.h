@@ -41,6 +41,10 @@
 
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
+#if defined(HYPRE_USING_ROCSPARSE)
+#include <rocsparse.h>
+#endif
+
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #define HYPRE_CUDA_CALL(call) do {                                                           \
@@ -76,6 +80,14 @@
       hypre_printf("CUSPARSE ERROR (code = %d, %s) at %s:%d\n",                              \
             err, cusparseGetErrorString(err), __FILE__, __LINE__);                           \
       hypre_assert(0); exit(1);                                                              \
+   } } while(0)
+
+#define HYPRE_ROCSPARSE_CALL(call) do {                                                      \
+   rocsparse_status err = call;                                                              \
+   if (rocsparse_status_success != err) {                                                    \
+      hypre_printf("rocSPARSE ERROR (code = %d) at %s:%d\n",                                 \
+            err, __FILE__, __LINE__);                                                        \
+      assert(0); exit(1);                                                                    \
    } } while(0)
 
 
