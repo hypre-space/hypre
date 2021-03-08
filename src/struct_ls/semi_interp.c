@@ -357,4 +357,3 @@ hypre_SemiInterpDestroy( void *interp_vdata )
 
    return hypre_error_flag;
 }
-

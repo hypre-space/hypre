@@ -328,4 +328,3 @@ hypre_SemiRestrictDestroy( void *restrict_vdata )
 
    return hypre_error_flag;
 }
-
