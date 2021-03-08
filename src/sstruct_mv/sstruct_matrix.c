@@ -908,7 +908,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
       }
    }
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_BigInt  *d_row_coords = hypre_SStructMatrixTmpRowCoordsDevice(matrix);
    HYPRE_BigInt  *d_col_coords = hypre_SStructMatrixTmpColCoordsDevice(matrix);
    HYPRE_Complex *d_coeffs     = hypre_SStructMatrixTmpCoeffsDevice(matrix);
