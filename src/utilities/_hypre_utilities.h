@@ -1246,6 +1246,7 @@ typedef struct
 #define hypre_HandleCublasHandle(hypre_handle)                   hypre_CudaDataCublasHandle(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleCusparseHandle(hypre_handle)                 hypre_CudaDataCusparseHandle(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleCusparseMatDescr(hypre_handle)               hypre_CudaDataCusparseMatDescr(hypre_HandleCudaData(hypre_handle))
+#define hypre_HandleRocsparseMatInfo(hypre_handle)               hypre_CudaDataRocsparseMatInfo(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleCudaComputeStream(hypre_handle)              hypre_CudaDataCudaComputeStream(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleCubBinGrowth(hypre_handle)                   hypre_CudaDataCubBinGrowth(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleCubMinBin(hypre_handle)                      hypre_CudaDataCubMinBin(hypre_HandleCudaData(hypre_handle))
@@ -1284,7 +1285,6 @@ typedef struct
 #define hypre_HandleOwnUmpirePinnedPool(hypre_handle)            ((hypre_handle) -> own_umpire_pinned_pool)
 
 #endif
-
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
