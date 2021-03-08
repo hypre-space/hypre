@@ -74,8 +74,9 @@ struct hypre_umpire_device_allocator
 #ifndef HYPRE_CUDA_UTILS_H
 #define HYPRE_CUDA_UTILS_H
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <cuda_profiler_api.h>
@@ -100,6 +101,14 @@ struct hypre_umpire_device_allocator
 
 #define CUSPARSE_NEWAPI_VERSION 11000
 
+#elif defined(HYPRE_USING_HIP)
+
+#include <hip/hip_runtime.h>
+
+#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #define HYPRE_CUDA_CALL(call) do {                                                           \
    cudaError_t err = call;                                                                   \
    if (cudaSuccess != err) {                                                                 \
@@ -107,6 +116,8 @@ struct hypre_umpire_device_allocator
                    __FILE__, __LINE__);                                                      \
       assert(0); exit(1);                                                                    \
    } } while(0)
+
+#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
 #define HYPRE_CUBLAS_CALL(call) do {                                                         \
    cublasStatus_t err = call;                                                                \
@@ -227,7 +238,7 @@ struct hypre_CsrsvData
 #define hypre_CsrsvDataBufferSize(data) ((data) -> BufferSize)
 #define hypre_CsrsvDataBuffer(data)     ((data) -> Buffer)
 
-#endif //#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#endif //#if defined(HYPRE_USING_GPU)
 
 #if defined(HYPRE_USING_CUDA)
 
