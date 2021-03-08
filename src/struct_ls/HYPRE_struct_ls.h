@@ -318,7 +318,7 @@ HYPRE_Int HYPRE_StructPFMGGetNumIterations(HYPRE_StructSolver  solver,
 HYPRE_Int HYPRE_StructPFMGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
                                                  HYPRE_Real         *norm);
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 HYPRE_Int
 HYPRE_StructPFMGSetDeviceLevel( HYPRE_StructSolver  solver,
 				HYPRE_Int   device_level  );
@@ -441,7 +441,7 @@ HYPRE_Int HYPRE_StructSMGGetNumIterations(HYPRE_StructSolver  solver,
 HYPRE_Int HYPRE_StructSMGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
                                                 HYPRE_Real         *norm);
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 HYPRE_Int
 HYPRE_StructSMGSetDeviceLevel( HYPRE_StructSolver  solver,
 			       HYPRE_Int   device_level  );

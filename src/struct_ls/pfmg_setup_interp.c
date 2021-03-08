@@ -295,7 +295,7 @@ hypre_PFMGSetupInterpOp_CC0
    HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
    HYPRE_Int              warning_cnt= 0;
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_Int              data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
 #endif
 
@@ -334,7 +334,7 @@ hypre_PFMGSetupInterpOp_CC0
 
       for (si = 0; si < stencil_size; si++)
       {
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          if (data_location != HYPRE_MEMORY_HOST)
          {
             Ap     = matrixA_data + data_indices_boxi_d[si];
@@ -449,7 +449,7 @@ hypre_PFMGSetupInterpOp_CC0
    HYPRE_Int              dim, si, loop_length = 1, Astenc;
    HYPRE_Real            *Ap, *center, *Ap0, *Ap1;
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    //What TODO? HYPRE_Int data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
 #endif
 
