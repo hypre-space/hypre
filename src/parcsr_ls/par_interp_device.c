@@ -8,7 +8,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 __global__ void hypre_BoomerAMGBuildDirInterp_getnnz( HYPRE_Int nr_of_rows, HYPRE_Int *S_diag_i, HYPRE_Int *S_diag_j, HYPRE_Int *S_offd_i, HYPRE_Int *S_offd_j, HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd, HYPRE_Int *P_diag_i, HYPRE_Int *P_offd_i, HYPRE_Int *col_offd_S_to_A);
 
@@ -1009,5 +1009,4 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( HYPRE_Int   nr_of_rows,
    }
 }
 
-#endif
-
+#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)

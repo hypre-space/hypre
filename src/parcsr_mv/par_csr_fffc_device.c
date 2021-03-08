@@ -9,7 +9,7 @@
 #include "_hypre_parcsr_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 typedef thrust::tuple<HYPRE_Int, HYPRE_Int> Tuple;
 //typedef thrust::tuple<HYPRE_Int, HYPRE_Int, HYPRe_Int> Tuple3;
@@ -1406,5 +1406,4 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
    return hypre_error_flag;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA)
-
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)

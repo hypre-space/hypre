@@ -764,7 +764,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       needZ = hypre_max(needZ, 1);
    }
 
-#if !defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP)
    /* GPU impl. needs Z */
    if (num_threads > 1)
 #endif

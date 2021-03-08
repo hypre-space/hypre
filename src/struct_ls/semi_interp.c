@@ -171,7 +171,7 @@ hypre_SemiInterp( void               *interp_vdata,
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
    cgrid_ids = hypre_StructGridIDs(cgrid);
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_MemoryLocation data_location_f = hypre_StructGridDataLocation(fgrid);
    HYPRE_MemoryLocation data_location_c = hypre_StructGridDataLocation(cgrid);
 
@@ -322,7 +322,7 @@ hypre_SemiInterp( void               *interp_vdata,
          }
       }
    }
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    if (data_location_f != data_location_c)
    {
       hypre_StructVectorDestroy(xc_tmp);
@@ -357,4 +357,3 @@ hypre_SemiInterpDestroy( void *interp_vdata )
 
    return hypre_error_flag;
 }
-

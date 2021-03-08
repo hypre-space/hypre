@@ -538,13 +538,13 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
                        HYPRE_Int             *dof_func,
                        hypre_ParCSRMatrix   **S_ptr)
 {
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_NvtxPushRange("CreateS");
 #endif
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -557,7 +557,7 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
       ierr = hypre_BoomerAMGCreateSHost(A,strength_threshold,max_row_sum,num_functions,dof_func,S_ptr);
    }
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_NvtxPopRange();
 #endif
 
@@ -2917,13 +2917,13 @@ hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix  *S,
                            HYPRE_BigInt        *coarse_row_starts,
                            hypre_ParCSRMatrix **C_ptr)
 {
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_NvtxPushRange("Create2ndS");
 #endif
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(S)) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -2936,7 +2936,7 @@ hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix  *S,
       ierr = hypre_BoomerAMGCreate2ndSHost( S, CF_marker, num_paths, coarse_row_starts, C_ptr );
    }
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_NvtxPopRange();
 #endif
 
