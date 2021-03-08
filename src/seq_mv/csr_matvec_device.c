@@ -68,7 +68,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
                              hypre_Vector    *y,
                              HYPRE_Int        offset )
 {
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_NvtxPushRange("CSRMatrixMatvec");
 #endif
 
@@ -114,7 +114,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
 
    hypre_SyncCudaComputeStream(hypre_handle());
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_NvtxPopRange();
 #endif
 
