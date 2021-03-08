@@ -8,7 +8,7 @@
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 /* in Matlab notation: if num_b != NULL, C = A, and
  *                                       for each num_b[i], A(num_b[i], :) += B(i,:).
@@ -136,5 +136,4 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
    return hypre_error_flag;
 }
 
-#endif
-
+#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)

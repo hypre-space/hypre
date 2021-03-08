@@ -30,7 +30,7 @@ typedef struct
 
    HYPRE_MemoryLocation memory_location;
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_Int            max_stack_elmts;      /* length of stash for SetValues and AddToValues*/
    HYPRE_Int            current_stack_elmts;  /* current no. of elements stored in stash */
    HYPRE_BigInt        *stack_i;              /* contains row indices */
@@ -53,7 +53,7 @@ typedef struct
 
 #define hypre_AuxParVectorMemoryLocation(vector)       ((vector) -> memory_location)
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #define hypre_AuxParVectorMaxStackElmts(vector)        ((vector) -> max_stack_elmts)
 #define hypre_AuxParVectorCurrentStackElmts(vector)    ((vector) -> current_stack_elmts)
 #define hypre_AuxParVectorStackI(vector)               ((vector) -> stack_i)
@@ -65,4 +65,3 @@ typedef struct
 #endif
 
 #endif /* #ifndef hypre_AUX_PAR_VECTOR_HEADER */
-

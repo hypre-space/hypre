@@ -341,7 +341,7 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
       {
          hypre_assert( constant_coefficient == 2 );
          data_const_size += stencil_size;
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          if (hypre_StructGridDataLocation(grid) == HYPRE_MEMORY_HOST)
          {
             /* in this case, "data" is put on host using the space of
@@ -403,7 +403,7 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
        * if data location has not been set outside, set up the data location
        * based on the total number of
        *-----------------------------------------------------------------------*/
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       if (hypre_StructGridDataLocation(grid) == HYPRE_MEMORY_HOST)
       {
          data_const_size = data_size + data_const_size;
@@ -451,7 +451,7 @@ hypre_StructMatrixInitializeData( hypre_StructMatrix *matrix,
    hypre_Index          *stencil_shape;
    HYPRE_Complex       **stencil_data;
    HYPRE_Int stencil_size, i;
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_StructGrid     *grid = hypre_StructMatrixGrid(matrix);
 #endif
    hypre_StructMatrixData(matrix) = data;
@@ -469,7 +469,7 @@ hypre_StructMatrixInitializeData( hypre_StructMatrix *matrix,
    {
       for (i = 0; i < stencil_size; i++)
       {
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
          {
             stencil_data[i] = hypre_StructMatrixData(matrix);
@@ -497,7 +497,7 @@ hypre_StructMatrixInitializeData( hypre_StructMatrix *matrix,
          /* diagonal, variable coefficient */
          if (hypre_IndexEqual(stencil_shape[i], 0, ndim))
          {
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
             if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
             {
                stencil_data[i] = hypre_StructMatrixData(matrix);
@@ -1227,7 +1227,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
    HYPRE_Int             *num_ghost = hypre_StructMatrixNumGhost(matrix);
 
    HYPRE_Int              comm_num_values, mat_num_values, constant_coefficient;
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_Int              stencil_size;
    hypre_StructStencil   *stencil;
 #endif
@@ -1363,7 +1363,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
    if ( constant_coefficient==0 )
    {
       comm_num_values = mat_num_values;
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       if (hypre_StructGridDataLocation(grid) == HYPRE_MEMORY_HOST)
       {
          matrix_data_comm = hypre_StructMatrixDataConst(matrix);
@@ -1377,7 +1377,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
    else /* constant_coefficient==2 */
    {
       comm_num_values = 1;
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       if (hypre_StructGridDataLocation(grid) == HYPRE_MEMORY_HOST)
       {
          stencil = hypre_StructMatrixStencil(matrix);
@@ -1786,7 +1786,7 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
       stencil_size = hypre_StructStencilSize(stencil);
       hypre_assert(stencil_size ==
                    hypre_StructStencilSize( hypre_StructMatrixStencil(to_matrix) ) );
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       if (hypre_StructGridDataLocation(hypre_StructMatrixGrid(from_matrix)) == HYPRE_MEMORY_HOST)
       {
          stencil = hypre_StructMatrixStencil(from_matrix);
@@ -2029,4 +2029,3 @@ hypre_StructMatrixClearBoundary( hypre_StructMatrix *matrix)
 
    return hypre_error_flag;
 }
-

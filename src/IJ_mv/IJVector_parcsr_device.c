@@ -14,7 +14,7 @@
 #include "_hypre_IJ_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 template<typename T1, typename T2>
 struct hypre_IJVectorAssembleFunctor : public thrust::binary_function< thrust::tuple<T1, T2>, thrust::tuple<T1, T2>, thrust::tuple<T1, T2> >
@@ -362,4 +362,3 @@ hypreCUDAKernel_IJVectorAssemblePar(HYPRE_Int n, HYPRE_Complex *x, HYPRE_BigInt 
 }
 
 #endif
-
