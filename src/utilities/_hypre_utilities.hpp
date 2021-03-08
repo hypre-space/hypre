@@ -595,7 +595,7 @@ void __syncwarp()
 // with this overload for CUDA, just for HIP.
 #if defined(HYPRE_USING_HIP)
 static __device__ __forceinline__
-int __any_sync(unsigned mask, int predicate)
+hypre_int __any_sync(unsigned mask, hypre_int predicate)
 {
   return __any(predicate);
 }
