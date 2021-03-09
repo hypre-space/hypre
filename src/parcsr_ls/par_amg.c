@@ -839,11 +839,14 @@ hypre_BoomerAMGSetRestriction( void *data,
       return hypre_error_flag;
    }
 
-   /* RL: currently, only 0: R = P^T
-    *                     1: AIR
-    *                     2: AIR-2
-    *                     15: a special version of AIR-2 with less communication cost
-    *                     k(k>=3,k!=15): Neumann AIR of degree k-3
+   /* currently, only 0: R = P^T
+    *                 1: AIR
+    *                 2: AIR-2
+    *                 15: a special version of AIR-2 with less communication cost
+    *                 k(k >= 3 and k <=10): Neumann AIR of degree k-3
+    *                 11: adaptive AIR-1
+    *                 12: adaptive AIR-2
+    *                 13: adaptive AIR-1.5
     */
    if (restr_par < 0)
    {

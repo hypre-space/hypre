@@ -4809,14 +4809,21 @@ hypre_ParcsrGetExternalRowsWait(void *vrequest)
    return A_ext;
 }
 
-/* C = alpha * A + beta * B
+/* C = alpha * A + beta * B, (alpha and beta are scalars)          or
+ * C = Alpha * A + Beta * B  (Alpha and Beta are diagonal matrices),
+ * if Alpha/Beta != NULL, alpha/beta is ignored
+ * Special Option:
+ *    Option == 1: Beta (ignored) == I - Alpha
  * A and B are assumed to have the same row and column partitionings */
 HYPRE_Int
-hypre_ParcsrAdd( HYPRE_Complex alpha,
-                 hypre_ParCSRMatrix *A,
-                 HYPRE_Complex beta,
-                 hypre_ParCSRMatrix *B,
-                 hypre_ParCSRMatrix **Cout )
+hypre_ParcsrAdd_core( HYPRE_Complex        alpha,
+                      hypre_ParVector     *Alpha,
+                      hypre_ParCSRMatrix  *A,
+                      HYPRE_Complex        beta,
+                      hypre_ParVector     *Beta,
+                      hypre_ParCSRMatrix  *B,
+                      hypre_ParCSRMatrix **Cout,
+                      HYPRE_Int            Option)
 {
    MPI_Comm         comm     = hypre_ParCSRMatrixComm(A);
    HYPRE_Int        num_procs, my_id;
@@ -4868,6 +4875,11 @@ hypre_ParcsrAdd( HYPRE_Complex alpha,
    hypre_assert(ncol_local == hypre_CSRMatrixNumCols(B_diag));
    HYPRE_Int        nnz_diag_B = B_diag_i[nrow_local];
    HYPRE_Int        nnz_offd_B = B_offd_i[nrow_local];
+
+   hypre_Vector    *Alpha_local = Alpha ? hypre_ParVectorLocalVector(Alpha) : NULL;
+   HYPRE_Complex   *Alpha_local_data = Alpha_local ? hypre_VectorData(Alpha_local) : NULL;
+   hypre_Vector    *Beta_local = Beta ? hypre_ParVectorLocalVector(Beta) : NULL;
+   HYPRE_Complex   *Beta_local_data = Beta_local ? hypre_VectorData(Beta_local) : NULL;
 
    HYPRE_MemoryLocation memory_location_A = hypre_ParCSRMatrixMemoryLocation(A);
    HYPRE_MemoryLocation memory_location_B = hypre_ParCSRMatrixMemoryLocation(B);
@@ -4923,6 +4935,17 @@ hypre_ParcsrAdd( HYPRE_Complex alpha,
       HYPRE_Int diag_i_start = nnz_diag_C;
       HYPRE_Int offd_i_start = nnz_offd_C;
 
+      HYPRE_Complex alpha_i = Alpha_local_data ? Alpha_local_data[i] : alpha;
+      HYPRE_Complex beta_i = 0.0;
+      if (Option == 1)
+      {
+         beta_i = 1.0 - alpha_i;
+      }
+      else
+      {
+         beta_i = Beta_local_data ? Beta_local_data[i] : beta;
+      }
+
       for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
       {
          HYPRE_Int     col = A_diag_j[j];
@@ -4932,7 +4955,7 @@ hypre_ParcsrAdd( HYPRE_Complex alpha,
             /* this col has not been seen before, create new entry */
             marker_diag[col] = nnz_diag_C;
             C_diag_j[nnz_diag_C] = col;
-            C_diag_a[nnz_diag_C] = alpha * val;
+            C_diag_a[nnz_diag_C] = alpha_i * val;
             nnz_diag_C ++;
          }
          else
@@ -4952,7 +4975,7 @@ hypre_ParcsrAdd( HYPRE_Complex alpha,
             /* this col has not been seen before, create new entry */
             marker_diag[col] = nnz_diag_C;
             C_diag_j[nnz_diag_C] = col;
-            C_diag_a[nnz_diag_C] = beta * val;
+            C_diag_a[nnz_diag_C] = beta_i * val;
             nnz_diag_C ++;
          }
          else
@@ -4962,7 +4985,7 @@ hypre_ParcsrAdd( HYPRE_Complex alpha,
 
             hypre_assert(C_diag_j[p] == col);
 
-            C_diag_a[p] += beta * val;
+            C_diag_a[p] += beta_i * val;
          }
       }
 
@@ -4983,7 +5006,7 @@ hypre_ParcsrAdd( HYPRE_Complex alpha,
             /* this col has not been seen before, create new entry */
             marker_offd[colC] = nnz_offd_C;
             C_offd_j[nnz_offd_C] = colC;
-            C_offd_a[nnz_offd_C] = alpha * val;
+            C_offd_a[nnz_offd_C] = alpha_i * val;
             nnz_offd_C ++;
          }
          else
@@ -5004,7 +5027,7 @@ hypre_ParcsrAdd( HYPRE_Complex alpha,
             /* this col has not been seen before, create new entry */
             marker_offd[colC] = nnz_offd_C;
             C_offd_j[nnz_offd_C] = colC;
-            C_offd_a[nnz_offd_C] = beta * val;
+            C_offd_a[nnz_offd_C] = beta_i * val;
             nnz_offd_C ++;
          }
          else
@@ -5014,7 +5037,7 @@ hypre_ParcsrAdd( HYPRE_Complex alpha,
 
             hypre_assert(C_offd_j[p] == colC);
 
-            C_offd_a[p] += beta * val;
+            C_offd_a[p] += beta_i * val;
          }
       }
 
@@ -5067,6 +5090,27 @@ hypre_ParcsrAdd( HYPRE_Complex alpha,
    hypre_TFree(marker_offd, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_ParcsrAdd( HYPRE_Complex        alpha,
+                 hypre_ParCSRMatrix  *A,
+                 HYPRE_Complex        beta,
+                 hypre_ParCSRMatrix  *B,
+                 hypre_ParCSRMatrix **Cout )
+{
+   return hypre_ParcsrAdd_core(alpha, NULL, A, beta, NULL, B, Cout, 0);
+}
+
+HYPRE_Int
+hypre_ParcsrAddv( hypre_ParVector     *Alpha,
+                  hypre_ParCSRMatrix  *A,
+                  hypre_ParVector     *Beta,
+                  hypre_ParCSRMatrix  *B,
+                  hypre_ParCSRMatrix **Cout,
+                  HYPRE_Int            opt)
+{
+   return hypre_ParcsrAdd_core(0.0, Alpha, A, 0.0, Beta, B, Cout, opt);
 }
 
 HYPRE_Real

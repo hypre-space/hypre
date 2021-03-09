@@ -99,6 +99,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParCSRMatrix  *SCR;
    hypre_ParCSRMatrix  *P = NULL;
    hypre_ParCSRMatrix  *R = NULL;
+   hypre_ParCSRMatrix  *R_new = NULL;
+   hypre_ParVector     *adapv = NULL;
    hypre_ParCSRMatrix  *A_H;
    hypre_ParCSRMatrix  *AN = NULL;
    hypre_ParCSRMatrix  *P1;
@@ -1845,7 +1847,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                fflush(NULL);
             }
 
-            /* RL: build restriction */
+            /* build restriction that is not P^{T}
+             * restri_type 1, 2: AIR-1,2
+             *             15  : AIR 1.5
+             *             3-10: NeumannAIR degree (0, 1,..., 7)
+             *             11  : adaptive AIR */
             if (restri_type)
             {
                HYPRE_Real filter_thresholdR;
@@ -1874,7 +1880,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                     col_offd_Sabs_to_A, &R, restri_type == 15,
                                                     is_triangular, gmres_switch);
                }
-               else
+               else if (restri_type >= 3 && restri_type <= 10)
                {
                   HYPRE_Int NeumannAIRDeg = restri_type - 3;
                   hypre_assert(NeumannAIRDeg >= 0);
@@ -1885,6 +1891,18 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                       NeumannAIRDeg, strong_thresholdR,
                                                       filter_thresholdR, debug_flag,
                                                       col_offd_Sabs_to_A, &R );
+               }
+               else if (restri_type == 12 || restri_type == 13)
+               {
+                  hypre_BoomerAMGBuildAdapRestrDist2AIR(A_array[level], CF_marker,
+                                                        Sabs, coarse_pnts_global, 1, NULL,
+                                                        filter_thresholdR, debug_flag,
+                                                        col_offd_Sabs_to_A, &R, &adapv, restri_type == 13,
+                                                        is_triangular, gmres_switch);
+               }
+               else
+               {
+                  hypre_error_w_msg(restri_type, "AMG: Unknown restriction type!");
                }
 
 #if DEBUG_SAVE_ALL_OPS
@@ -2214,7 +2232,27 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
            }
 
+           /* for adaptive AIR */
+           if (R && adapv)
+           {
+              hypre_ParCSRMatrix *PT = NULL;
+              if (P)
+              {
+                 hypre_ParCSRMatrixTranspose(P, &PT, 1);
+                 hypre_ParcsrAddv(adapv, PT, NULL, R, &R_new, 1);
+                 hypre_ParVectorDestroy(adapv);
+                 hypre_ParCSRMatrixDestroy(PT);
+                 hypre_TFree(hypre_ParCSRMatrixRowStarts(R_new), HYPRE_MEMORY_HOST);
+                 hypre_TFree(hypre_ParCSRMatrixColStarts(R_new), HYPRE_MEMORY_HOST);
+                 hypre_ParCSRMatrixRowStarts(R_new) = hypre_ParCSRMatrixRowStarts(R);
+                 hypre_ParCSRMatrixColStarts(R_new) = hypre_ParCSRMatrixColStarts(R);
+                 hypre_ParCSRMatrixOwnsColStarts(R_new) = 0;
+                 hypre_ParCSRMatrixOwnsRowStarts(R) = 0;
+                 hypre_ParCSRMatrixDestroy(R);
+                 R = R_new;
+              }
 
+           }
          } /* end of no aggressive coarsening */
 
          /*dof_func_array[level+1] = NULL;

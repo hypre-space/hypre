@@ -9,36 +9,40 @@
 #include <math.h>
 
 // Data structure for stack
-struct stack
+typedef struct
 {
-   int maxsize;    // define max capacity of stack
-   int top;
-   int *items;
-};
+   HYPRE_Int maxsize;    // define max capacity of stack
+   HYPRE_Int top;
+   HYPRE_Int *items;
+} stack;
 
 // Utility function to initialize stack
-struct stack* newStack(int capacity)
+static inline stack*
+newStack(HYPRE_Int capacity)
 {
-   struct stack *pt = (struct stack*)malloc(sizeof(struct stack));
+   stack *pt = hypre_TAlloc(stack, 1, HYPRE_MEMORY_HOST);
 
    pt->maxsize = capacity;
    pt->top = -1;
-   pt->items = (int*)malloc(sizeof(int) * capacity);
+   pt->items = hypre_TAlloc(HYPRE_Int, capacity, HYPRE_MEMORY_HOST);
 
    return pt;
 }
 
-int isEmpty(struct stack *pt)
+static inline HYPRE_Int
+isEmpty(stack *pt)
 {
    return (pt->top == -1);
 }
 
-int isFull(struct stack *pt)
+static inline HYPRE_Int
+isFull(stack *pt)
 {
    return (pt->top == (pt->maxsize - 1));
 }
 
-void push(struct stack *pt, int x)
+static inline void
+push(stack *pt, HYPRE_Int x)
 {
    // check if stack is full
    if (isFull(pt))
@@ -52,10 +56,11 @@ void push(struct stack *pt, int x)
 }
 
 // Utility function to return top element in a stack
-int peek(struct stack *pt)
+static inline HYPRE_Int
+peek(stack *pt)
 {
    // check for empty stack
-   if (!isEmpty(pt)) 
+   if (!isEmpty(pt))
    {
       return pt->items[pt->top];
    }
@@ -63,42 +68,62 @@ int peek(struct stack *pt)
    return -1;
 }
 
-int pop(struct stack *pt)
+static inline HYPRE_Int
+pop(stack *pt)
 {
    // decrement stack size by 1 and return popped element
    return pt->items[pt->top--];
+}
+
+static inline void
+deleteStack(stack *pt)
+{
+   if (pt)
+   {
+      hypre_TFree(pt->items, HYPRE_MEMORY_HOST);
+   }
+   hypre_TFree(pt, HYPRE_MEMORY_HOST);
 }
 
 /**
  * Solves the feedback arc set problem using the heuristics of Eades et al.
  * http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.47.7745&rep=rep1&type=pdf
  */
-void hypre_solve_fas(int n, double A[], int *ordering)
+void
+hypre_solve_fas( HYPRE_Int      n,
+                 HYPRE_Complex  A[],
+                 HYPRE_Int     *ordering)
 {
-   int i, k, v, nodes_left;
-   int order_next_pos = 0;
-   int order_next_neg = -1;
-   double val, diff, maxdiff;
-   double tol = 1e-12;
+   HYPRE_Int i, k, v, nodes_left;
+   HYPRE_Int order_next_pos = 0;
+   HYPRE_Int order_next_neg = -1;
+   HYPRE_Complex val, diff, maxdiff;
+   HYPRE_Real tol = 1e-12;
 
    // TODO : delete later too
-   struct stack *sources = newStack(n);
-   struct stack *sinks = newStack(n);
+   stack *sources = newStack(n);
+   stack *sinks = newStack(n);
 
    // Fill in degree/strength of nodes
-   int* indegrees = (int*)calloc(sizeof(int), n);
-   int* outdegrees = (int*)calloc(sizeof(int), n);
-   double* instrengths = (double*)calloc(sizeof(double), n);
-   double* outstrengths = (double*)calloc(sizeof(double), n);
+   HYPRE_Int* indegrees = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+   HYPRE_Int* outdegrees = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+   HYPRE_Complex* instrengths = hypre_CTAlloc(HYPRE_Complex, n, HYPRE_MEMORY_HOST);
+   HYPRE_Complex* outstrengths = hypre_CTAlloc(HYPRE_Complex, n, HYPRE_MEMORY_HOST);
 
-   for (i=0; i<n; i++) {
-      for (k=0; k<n; k++) {
+   for (i = 0; i < n; i++)
+   {
+      for (k = 0; k < n; k++)
+      {
          // Skip diagonal entries i=k
-         if (i == k) continue;
+         if (i == k)
+         {
+            continue;
+         }
 
          // A(i,k) != 0
          val = fabs(A[i + k*n]);
-         if (val > tol) {
+         if (val > tol)
+         {
             indegrees[k]++;
             instrengths[k] += val;
             outdegrees[i]++;
@@ -109,22 +134,27 @@ void hypre_solve_fas(int n, double A[], int *ordering)
 
    /* Find initial sources and sinks */
    nodes_left = n;
-   for (i = 0; i < n; i++) {
-      if (indegrees[i] == 0) {
-         if (outdegrees[i] == 0) {
+   for (i = 0; i < n; i++)
+   {
+      if (indegrees[i] == 0)
+      {
+         if (outdegrees[i] == 0)
+         {
             // Isolated vertex, we simply ignore it
             nodes_left--;
             ordering[i] = order_next_pos++;
             indegrees[i] = -1;
             outdegrees[i] = -1;
          }
-         else {
+         else
+         {
             // This is a source
             push(sources, i);
             //printf("Source %d\n",i);
          }
       }
-      else if (outdegrees[i] == 0) {
+      else if (outdegrees[i] == 0)
+      {
          // This is a sink
          push(sinks, i);
          //printf("Sink %d\n",i);
@@ -132,10 +162,12 @@ void hypre_solve_fas(int n, double A[], int *ordering)
    }
 
    /* While we have any nodes left... */
-   //int it=0;
-   while (nodes_left > 0) {
+   //HYPRE_Int it=0;
+   while (nodes_left > 0)
+   {
       /* (1) Remove the sources one by one */
-      while (!isEmpty(sources)) {
+      while (!isEmpty(sources))
+      {
          i = pop(sources);
          // Add the node to the ordering
          //printf("source node %d, order %d\n", i, order_next_pos);
@@ -146,22 +178,29 @@ void hypre_solve_fas(int n, double A[], int *ordering)
          outdegrees[i] = -1;
 
          // Find outgoing neighbors and decrease their degrees
-         for (k = 0; k < n; k++) {
-            if (i == k) continue;
+         for (k = 0; k < n; k++)
+         {
+            if (i == k)
+            {
+               continue;
+            }
             val = fabs(A[i + n*k]);
-            if (val < tol) {
+            if (val < tol)
+            {
                continue; // No such edge, continue
             }
 
-            if (indegrees[k] <= 0) {
+            if (indegrees[k] <= 0)
+            {
                continue; // Already removed, continue
             }
 
             indegrees[k]--;
             instrengths[k] -= val;
-            if (indegrees[k] == 0) {
+            if (indegrees[k] == 0)
+            {
                push(sources, k);
-               printf("Source %d\n",k);
+               //printf("Source %d\n",k);
             }
             A[i + n*k] = 0.0;
          }
@@ -169,33 +208,42 @@ void hypre_solve_fas(int n, double A[], int *ordering)
       }
 
       /* (2) Remove the sinks one by one */
-      while (!isEmpty(sinks)) {
+      while (!isEmpty(sinks))
+      {
          i = pop(sinks);
          // Check if removed in previous iteration
-         if (indegrees[i] < 0) {
+         if (indegrees[i] < 0)
+         {
             continue;
          }
          // Add the node to the ordering
-         printf("sink node %d, order %d\n", v, order_next_neg);
+         //printf("sink node %d, order %d\n", v, order_next_neg);
          ordering[i] = order_next_neg--;
          // Exclude the node from further searches
          indegrees[i] = outdegrees[i] = -1;
 
          // Find incoming neighbors and decrease their degrees
-         for (k = 0; k < n; k++) {
-            if (i == k) continue;
+         for (k = 0; k < n; k++)
+         {
+            if (i == k)
+            {
+               continue;
+            }
             val = fabs(A[k + n*i]);
-            if (val < tol) {
+            if (val < tol)
+            {
                continue; // No such edge, continue
             }
 
-            if (outdegrees[k] <= 0) {
+            if (outdegrees[k] <= 0)
+            {
                continue; // Already removed, continue
             }
 
             outdegrees[k]--;
             outstrengths[k] -= val;
-            if (outdegrees[k] == 0) {
+            if (outdegrees[k] == 0)
+            {
                push(sinks, k);
             }
             A[k + n*i] = 0.0;
@@ -207,56 +255,74 @@ void hypre_solve_fas(int n, double A[], int *ordering)
        * difference between its out-strength and in-strength */
       v = -1;
       maxdiff = -(1e50);
-      for (i = 0; i < n; i++) {
-         if (outdegrees[i] < 0) {
+      for (i = 0; i < n; i++)
+      {
+         if (outdegrees[i] < 0)
+         {
             continue;
          }
          diff = outstrengths[i] - instrengths[i];
-         if (diff > maxdiff) {
+         if (diff > maxdiff)
+         {
             maxdiff = diff;
             v = i;
          }
       }
-      if (v >= 0) {
+      if (v >= 0)
+      {
          // Remove vertex v
-         printf("vertex node %d, order %d\n", v, order_next_pos);
+         //printf("vertex node %d, order %d\n", v, order_next_pos);
          ordering[v] = order_next_pos++;
 
          // Update vertices from outgoing edges
-         for (k = 0; k < n; k++) {
-            if (v == k) continue;
+         for (k = 0; k < n; k++)
+         {
+            if (v == k)
+            {
+               continue;
+            }
             val = fabs(A[v + n*k]);
-            if (val < tol) {
+            if (val < tol)
+            {
                continue; // No such edge, continue
             }
 
-            if (indegrees[k] <= 0) {
+            if (indegrees[k] <= 0)
+            {
                continue; // Already removed, continue
             }
 
             indegrees[k]--;
             instrengths[k] -= val;
-            if (indegrees[k] == 0) {
+            if (indegrees[k] == 0)
+            {
                push(sources, k);
             }
             A[v + n*k] = 0.0;
          }
 
          // Update vertices from incoming edges
-         for (k = 0; k < n; k++) {
-            if (v == k) continue;
+         for (k = 0; k < n; k++)
+         {
+            if (v == k)
+            {
+               continue;
+            }
             val = fabs(A[k + n*v]);
-            if (val < tol) {
+            if (val < tol)
+            {
                continue; // No such edge, continue
             }
 
-            if (outdegrees[k] <= 0) {
+            if (outdegrees[k] <= 0)
+            {
                continue; // Already removed, continue
             }
 
             outdegrees[k]--;
             outstrengths[k] -= val;
-            if (outdegrees[k] == 0) {
+            if (outdegrees[k] == 0)
+            {
                push(sinks, k);
             }
             A[k + n*v] = 0.0;
@@ -269,8 +335,10 @@ void hypre_solve_fas(int n, double A[], int *ordering)
    }
 
    // Move sink nodes to end of ordering
-   for (i = 0; i < n; i++) {
-      if (ordering[i] < 0) {
+   for (i = 0; i < n; i++)
+   {
+      if (ordering[i] < 0)
+      {
          ordering[i] += n;
       }
    }
@@ -281,57 +349,97 @@ void hypre_solve_fas(int n, double A[], int *ordering)
    free(outdegrees);
    free(outstrengths);
 
-   // TODO : free structs
+   // free structs
+   deleteStack(sources);
+   deleteStack(sinks);
 }
 
-double hypre_getOrderedNormRatio(int n, double *A, int *ordering, int pow)
+HYPRE_Real
+hypre_getOrderedNormRatio( HYPRE_Int      n,
+                           HYPRE_Complex *A,
+                           HYPRE_Int     *ordering,
+                           HYPRE_Int      pow)
 {
-   double tol = 1e-12;
-   double outlier = 2;
+   HYPRE_Real tol = 1e-12;
+   HYPRE_Real outlier = 2.0;
 
-   double normL = 0;
-   double normU = 0;
-   int i,j;
-   int nnzL = 0;
-   int nnzU = 0;
-   for (i=0; i<n; i++) {
-      for (j=0; j<n; j++) {
-         if (i < j) {
-            if (fabs(A[ordering[i]+n*ordering[j]]) > tol) nnzU++;
-            if (pow == 2) normU += A[ordering[i]+n*ordering[j]]*A[ordering[i]+n*ordering[j]];
-            else normU += fabs(A[ordering[i]+n*ordering[j]]);
+   HYPRE_Real normL = 0;
+   HYPRE_Real normU = 0;
+   HYPRE_Int i,j;
+   HYPRE_Int nnzL = 0;
+   HYPRE_Int nnzU = 0;
+   for (i = 0; i < n; i++)
+   {
+      for (j = 0; j < n; j++)
+      {
+         if (i < j)
+         {
+            if (fabs(A[ordering[i]+n*ordering[j]]) > tol)
+            {
+               nnzU++;
+            }
+
+            if (pow == 2)
+            {
+               normU += A[ordering[i]+n*ordering[j]]*A[ordering[i]+n*ordering[j]];
+            }
+            else
+            {
+               normU += fabs(A[ordering[i]+n*ordering[j]]);
+            }
          }
-         else if (i > j) {
-            if (fabs(A[ordering[i]+n*ordering[j]]) > tol) nnzL++;
-            if (pow == 2) normL += A[ordering[i]+n*ordering[j]]*A[ordering[i]+n*ordering[j]];
-            else normL += fabs(A[ordering[i]+n*ordering[j]]);
+         else if (i > j)
+         {
+            if (fabs(A[ordering[i]+n*ordering[j]]) > tol)
+            {
+               nnzL++;
+            }
+            if (pow == 2)
+            {
+               normL += A[ordering[i]+n*ordering[j]]*A[ordering[i]+n*ordering[j]];
+            }
+            else
+            {
+               normL += fabs(A[ordering[i]+n*ordering[j]]);
+            }
          }
       }
    }
-   if (pow == 2) normL = sqrt(normL);
-   if (pow == 2) normU = sqrt(normU);
+
+   if (pow == 2)
+   {
+      normL = sqrt(normL);
+      normU = sqrt(normU);
+   }
 
    // standard deviation
-   double meanL = normL/nnzL;
-   double meanU = normU/nnzU;
-   double stdL = 0;
-   double stdU = 0;
-   for (i=0; i<n; i++) {
-      for (j=0; j<n; j++) {
-         if (i < j) {
-            if (fabs(A[ordering[i]+n*ordering[j]]) > tol) {
-               double temp = ( fabs(A[ordering[i]+n*ordering[j]]) - meanU );
-               stdU += temp*temp;
+   HYPRE_Real meanL = normL / nnzL;
+   HYPRE_Real meanU = normU / nnzU;
+   HYPRE_Real stdL = 0;
+   HYPRE_Real stdU = 0;
+   for (i = 0; i < n; i++)
+   {
+      for (j = 0; j < n; j++)
+      {
+         if (i < j)
+         {
+            if (fabs(A[ordering[i] + n*ordering[j]]) > tol)
+            {
+               HYPRE_Real temp = fabs(A[ordering[i]+n*ordering[j]]) - meanU;
+               stdU += temp * temp;
             }
          }
-         else if (i > j) {
-            if (fabs(A[ordering[i]+n*ordering[j]]) > tol) {
-               double temp = ( fabs(A[ordering[i]+n*ordering[j]]) - meanL );
-               stdL += temp*temp;
+         else if (i > j)
+         {
+            if (fabs(A[ordering[i]+n*ordering[j]]) > tol)
+            {
+               HYPRE_Real temp = fabs(A[ordering[i]+n*ordering[j]]) - meanL;
+               stdL += temp * temp;
             }
          }
       }
    }
+
    stdL = sqrt(stdL / nnzL);
    stdU = sqrt(stdU / nnzU);
 
@@ -339,32 +447,51 @@ double hypre_getOrderedNormRatio(int n, double *A, int *ordering, int pow)
    //printf("Mean(U) = %1.3f, Std(U) = %1.3f\n",meanU,stdU);
 
    // Mean without outliers
-   int nnzL_0 = 0;
-   int nnzU_0 = 0;
-   double normU_0 = 0;
-   double normL_0 = 0;
-   for (i=0; i<n; i++) {
-      for (j=0; j<n; j++) {
-         double temp = fabs(A[ordering[i]+n*ordering[j]]);
-         if (i < j) {
-            if ( (temp > tol) && (fabs(temp - meanU) < outlier*stdU) ) {
+   HYPRE_Int nnzL_0 = 0;
+   HYPRE_Int nnzU_0 = 0;
+   HYPRE_Real normU_0 = 0;
+   HYPRE_Real normL_0 = 0;
+   for (i = 0; i < n; i++)
+   {
+      for (j = 0; j < n; j++)
+      {
+         HYPRE_Real temp = fabs(A[ordering[i]+n*ordering[j]]);
+         if (i < j)
+         {
+            if ( (temp > tol) && (fabs(temp - meanU) < outlier * stdU) )
+            {
                normU_0 += temp;
                nnzU_0++;
             }
          }
-         else if (i > j) {
-            if ( (temp > tol) && (fabs(temp - meanL) < outlier*stdL) ) {
+         else if (i > j)
+         {
+            if ( (temp > tol) && (fabs(temp - meanL) < outlier * stdL) )
+            {
                normL_0 += temp;
                nnzL_0++;
             }
          }
       }
    }
-   //printf("Mod mean(L) = %1.3f\n",normU_0/nnzU_0);
-   //printf("Mod mean(U) = %1.3f\n",normL_0/nnzL_0);
-   //printf("Ratio mod means = %1.3f\n\n",(normL_0/nnzL_0)/(normU_0/nnzU_0));
 
-   if (normL > normU) return normU/normL;
-   else return normL/normU;
+   /*
+   printf("Mod mean(L) = %1.3f\n",normU_0/nnzU_0);
+   printf("Mod mean(U) = %1.3f\n",normL_0/nnzL_0);
+   printf("Ratio mod means = %1.3f\n\n",(normL_0/nnzL_0)/(normU_0/nnzU_0));
+   */
+
+   if (normL == 0.0 && normU == 0.0)
+   {
+      return 1.0;
+   }
+   if (normL > normU)
+   {
+      return normU / normL;
+   }
+   else
+   {
+      return normL / normU;
+   }
 }
 

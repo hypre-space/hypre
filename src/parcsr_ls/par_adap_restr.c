@@ -15,9 +15,6 @@
 //    to get ordering for triangular solve. Can provide
 
 
-HYPRE_Int AIR_TOT_SOL_SIZE = 0;
-HYPRE_Int AIR_MAX_SOL_SIZE = 0;
-
 #define AIR_DEBUG 0
 #define EPSILON 1e-18
 #define EPSIMAC 1e-16
@@ -173,17 +170,12 @@ hypre_BoomerAMGBuildAdapRestrDist2AIR(hypre_ParCSRMatrix   *A,
    hypre_MPI_Comm_rank(comm, &my_id);
 
    /*-------------- global number of C points and my start position */
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    /*my_first_cpt = num_cpts_global[0];*/
    if (my_id == (num_procs -1))
    {
       total_global_cpts = num_cpts_global[1];
    }
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   /*my_first_cpt = num_cpts_global[my_id];*/
-   total_global_cpts = num_cpts_global[num_procs];
-#endif
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -220,7 +212,7 @@ hypre_BoomerAMGBuildAdapRestrDist2AIR(hypre_ParCSRMatrix   *A,
 
    /* send buffer, of size send_map_starts[num_sends]),
     * i.e., number of entries to send */
-   send_buf_i = hypre_CTAlloc(HYPRE_Int , num_elems_send, HYPRE_MEMORY_HOST);
+   send_buf_i = hypre_CTAlloc(HYPRE_Int, num_elems_send, HYPRE_MEMORY_HOST);
 
    /* copy CF markers of elements to send to buffer
     * RL: why copy them with two for loops? Why not just loop through all in one */
@@ -1306,6 +1298,8 @@ hypre_BoomerAMGBuildAdapRestrDist2AIR(hypre_ParCSRMatrix   *A,
 
       adapv_data[ic] = hypre_getOrderedNormRatio(local_size, DAi, reordering, 1);
 
+      hypre_assert( adapv_data[ic] >= 0.0 &&  adapv_data[ic] <= 1.0 );
+
       /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
        * We have Ai and bi built. Solve the linear system by:
        *    - forward solve for triangular matrix
@@ -1565,7 +1559,7 @@ hypre_BoomerAMGBuildAdapRestrDist2AIR(hypre_ParCSRMatrix   *A,
    */
 
    /* Filter small entries from R */
-   if (filter_thresholdR > 0) 
+   if (filter_thresholdR > 0)
    {
       hypre_ParCSRMatrixDropSmallEntries(R, filter_thresholdR, -1);
    }
@@ -1578,6 +1572,8 @@ hypre_BoomerAMGBuildAdapRestrDist2AIR(hypre_ParCSRMatrix   *A,
 
    hypre_ParVectorOwnsPartitioning(adapv) = 0;
    hypre_VectorData(hypre_ParVectorLocalVector(adapv)) = adapv_data;
+
+   *adapv_ptr = adapv;
 
    hypre_TFree(tmp_map_offd, HYPRE_MEMORY_HOST);
    hypre_TFree(CF_marker_offd, HYPRE_MEMORY_HOST);
@@ -1616,6 +1612,9 @@ hypre_BoomerAMGBuildAdapRestrDist2AIR(hypre_ParCSRMatrix   *A,
    hypre_TFree(Dbi, HYPRE_MEMORY_HOST);
    hypre_TFree(Dxi, HYPRE_MEMORY_HOST);
    hypre_TFree(Ipi, HYPRE_MEMORY_HOST);
+   hypre_TFree(DAi_copy, HYPRE_MEMORY_HOST);
+   hypre_TFree(ordering, HYPRE_MEMORY_HOST);
+   hypre_TFree(reordering, HYPRE_MEMORY_HOST);
 #if AIR_DEBUG
    hypre_TFree(TMPA, HYPRE_MEMORY_HOST);
    hypre_TFree(TMPb, HYPRE_MEMORY_HOST);
@@ -1736,17 +1735,12 @@ hypre_BoomerAMGBuildAdapRestrAIR(hypre_ParCSRMatrix   *A,
    hypre_MPI_Comm_rank(comm, &my_id);
 
    /*-------------- global number of C points and my start position */
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    /*my_first_cpt = num_cpts_global[0];*/
    if (my_id == (num_procs -1))
    {
       total_global_cpts = num_cpts_global[1];
    }
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   /*my_first_cpt = num_cpts_global[my_id];*/
-   total_global_cpts = num_cpts_global[num_procs];
-#endif
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
