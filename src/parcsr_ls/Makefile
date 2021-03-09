@@ -82,6 +82,7 @@ FILES =\
  HYPRE_ads.c\
  HYPRE_ame.c\
  par_2s_interp.c\
+ par_adap_restr.c\
  par_amg.c\
  par_amgdd.c\
  par_amgdd_comp_grid.c\

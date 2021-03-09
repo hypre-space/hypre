@@ -1613,6 +1613,10 @@ HYPRE_Int hypre_RestoreSyncCudaCompute();
 HYPRE_Int hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr);
 HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
 
+/* hypre_minfeedarcset.c */
+void hypre_solve_fas(HYPRE_Int n, HYPRE_Complex *A, HYPRE_Int *ordering);
+HYPRE_Real hypre_getOrderedNormRatio(HYPRE_Int n, HYPRE_Complex *A, HYPRE_Int *ordering, HYPRE_Int pow);
+
 
 #ifdef __cplusplus
 }

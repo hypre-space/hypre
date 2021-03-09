@@ -44,6 +44,7 @@ FILES =\
  hypre_error.c\
  hypre_hopscotch_hash.c\
  hypre_merge_sort.c\
+ hypre_minfeedarcset.c\
  hypre_mpi_comm_f2c.c\
  hypre_prefix_sum.c\
  hypre_printf.c\
