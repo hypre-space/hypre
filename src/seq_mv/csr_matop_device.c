@@ -1161,11 +1161,22 @@ hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
    HYPRE_Int        *C_j;
    hypre_CSRMatrix  *C;
 
+
+   /* trivial case */
+   if (nnz_A == 0)
+   {
+      C_i =    hypre_CTAlloc(HYPRE_Int,     ncols_A + 1, HYPRE_MEMORY_DEVICE);
+      C_j =    hypre_CTAlloc(HYPRE_Int,     0,           HYPRE_MEMORY_DEVICE);
+      C_data = hypre_CTAlloc(HYPRE_Complex, 0,           HYPRE_MEMORY_DEVICE);
+   }
+   else
+   {
 #if defined(HYPRE_USING_CUSPARSE)
-   hypreDevice_CSRSpTransCusparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
+     hypreDevice_CSRSpTransCusparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
 #else
-   hypreDevice_CSRSpTrans(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
+     hypreDevice_CSRSpTrans(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
 #endif
+   }
 
    C = hypre_CSRMatrixCreate(ncols_A, nrows_A, nnz_A);
    hypre_CSRMatrixI(C) = C_i;
