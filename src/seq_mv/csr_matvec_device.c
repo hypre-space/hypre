@@ -48,8 +48,8 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
 #endif
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_CSRMatrixMatvecOMPOffload(trans, alpha, A, x, beta, y, offset);
-#elif defined(HYPRE_USING_HIP)
-#warning SPMV NOT IMPLEMENTED FOR HIP YET
+#elif defined(HYPRE_USING_ROCSPARSE)
+   hypre_CSRMatrixMatvecRocsparse(trans, alpha, A, x, beta, y, offset);
 #else // #ifdef HYPRE_USING_CUSPARSE
 #error HYPRE SPMV TODO
 #endif
@@ -250,7 +250,7 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
    return hypre_error_flag;
 }
 
-#else
+#else // #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
 
 HYPRE_Int
 hypre_CSRMatrixMatvecCusparseOldAPI( HYPRE_Int        trans,
@@ -302,4 +302,54 @@ hypre_CSRMatrixMatvecCusparseOldAPI( HYPRE_Int        trans,
 
 #endif // #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
 #endif // #if defined(HYPRE_USING_CUSPARSE)
+
+#if defined(HYPRE_USING_ROCSPARSE)
+HYPRE_Int
+hypre_CSRMatrixMatvecRocsparse( HYPRE_Int        trans,
+                                HYPRE_Complex    alpha,
+                                hypre_CSRMatrix *A,
+                                hypre_Vector    *x,
+                                HYPRE_Complex    beta,
+                                hypre_Vector    *y,
+                                HYPRE_Int        offset )
+{
+  rocsparse_handle handle = hypre_HandleCusparseHandle(hypre_handle());
+  rocsparse_mat_descr descr = hypre_HandleCusparseMatDescr(hypre_handle());
+  rocsparse_mat_info info = hypre_HandleRocsparseMatInfo(hypre_handle());
+
+  hypre_CSRMatrix *B;
+
+   if (trans)
+   {
+      hypre_CSRMatrixTransposeDevice(A, &B, 1);
+   }
+   else
+   {
+      B = A;
+   }
+
+   HYPRE_ROCSPARSE_CALL( rocsparse_dcsrmv(handle,
+                                          rocsparse_operation_none,
+                                          hypre_CSRMatrixNumRows(B) - offset,
+                                          hypre_CSRMatrixNumCols(B),
+                                          hypre_CSRMatrixNumNonzeros(B),
+                                          &alpha,
+                                          descr,
+                                          hypre_CSRMatrixData(B),
+                                          hypre_CSRMatrixI(B) + offset,
+                                          hypre_CSRMatrixJ(B),
+                                          info,
+                                          hypre_VectorData(x),
+                                          &beta,
+                                          hypre_VectorData(y) + offset) );
+
+   if (trans)
+     {
+       hypre_CSRMatrixDestroy(B);
+     }
+
+   return hypre_error_flag;
+}
+#endif // #if defined(HYPRE_USING_ROCSPARSE)
+
 #endif // #if defined(HYPRE_USING_GPU)

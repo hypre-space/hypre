@@ -348,6 +348,7 @@ HYPRE_Int hypre_CSRMatrixMatvecMaskedDevice(HYPRE_Complex alpha, hypre_CSRMatrix
 HYPRE_Int hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int trans, HYPRE_Complex alpha, hypre_CSRMatrix *A, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y, HYPRE_Int offset );
 HYPRE_Int hypre_CSRMatrixMatvecCusparseOldAPI( HYPRE_Int trans, HYPRE_Complex alpha, hypre_CSRMatrix *A, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y, HYPRE_Int offset );
 HYPRE_Int hypre_CSRMatrixMatvecOMPOffload (HYPRE_Int trans, HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *y, HYPRE_Int offset );
+HYPRE_Int hypre_CSRMatrixMatvecRocsparse (HYPRE_Int trans, HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *y, HYPRE_Int offset );
 
 /* genpart.c */
 HYPRE_Int hypre_GeneratePartitioning ( HYPRE_BigInt length , HYPRE_Int num_procs , HYPRE_BigInt **part_ptr );
@@ -491,7 +492,6 @@ HYPRE_Int hypre_CSRMatrixSpMVDevice( HYPRE_Complex alpha, hypre_CSRMatrix *A, hy
 hypre_CsrsvData* hypre_CsrsvDataCreate();
 void hypre_CsrsvDataDestroy(hypre_CsrsvData* data);
 #endif
-
 
 #ifdef __cplusplus
 }
