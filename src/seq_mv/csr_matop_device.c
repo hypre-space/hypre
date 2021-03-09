@@ -1195,6 +1195,19 @@ hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
 
 #endif
 
+HYPRE_Int
+hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
+{
+#if defined(HYPRE_USING_CUSPARSE)
+   hypre_SortCSRCusparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A), hypre_CSRMatrixNumNonzeros(A),
+                         hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A));
+#else
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"hypre_CSRMatrixSortRow only implemented for cuSPARSE!\n");
+#endif
+
+   return hypre_error_flag;
+}
+
 #if defined(HYPRE_USING_CUSPARSE)
 /* @brief This functions sorts values and column indices in each row in ascending order INPLACE
  * @param[in] n Number of rows
@@ -1251,15 +1264,6 @@ hypre_SortCSRCusparse( HYPRE_Int      n,
 
    hypre_TFree(pBuffer, HYPRE_MEMORY_DEVICE);
    HYPRE_CUSPARSE_CALL(cusparseDestroyCsru2csrInfo(sortInfoA));
-}
-
-HYPRE_Int
-hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
-{
-   hypre_SortCSRCusparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A), hypre_CSRMatrixNumNonzeros(A),
-                         hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A));
-
-   return hypre_error_flag;
 }
 
 HYPRE_Int
