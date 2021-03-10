@@ -12,7 +12,7 @@
 #include "seq_mv.h"
 #include "csr_spgemm_device.h"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - *
                        NAIVE
@@ -286,10 +286,13 @@ void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_i
    //d_V1 = hypre_TAlloc(T, nsamples*N, HYPRE_MEMORY_DEVICE);
    //d_V2 = hypre_TAlloc(T, nsamples*K, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_CURAND)
    curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle());
    //CURAND_CALL(curandSetGeneratorOrdering(gen, CURAND_ORDERING_PSEUDO_SEEDED));
    /* random V1: uniform --> exp */
    HYPRE_CURAND_CALL(curandGenerateUniform(gen, d_V1, nsamples * N));
+#endif
+
    //  CURAND_CALL(curandGenerateUniformDouble(gen, d_V1, nsamples * N));
    dim3 gDim( (nsamples * N + bDim.z * HYPRE_WARP_SIZE - 1) / (bDim.z * HYPRE_WARP_SIZE) );
 
@@ -388,5 +391,4 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    return hypre_error_flag;
 }
 
-#endif /* HYPRE_USING_CUDA */
-
+#endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */

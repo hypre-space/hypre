@@ -40,7 +40,7 @@ hypre_StructInnerProd( hypre_StructVector *x,
    HYPRE_Int        ndim = hypre_StructVectorNDim(x);
    HYPRE_Int        i;
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    //const HYPRE_Int  data_location = hypre_StructGridDataLocation(hypre_StructVectorGrid(y));
 #endif
 
@@ -66,7 +66,7 @@ hypre_StructInnerProd( hypre_StructVector *x,
       HYPRE_Real box_sum = 0.0;
 #elif defined(HYPRE_USING_RAJA)
       ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> box_sum(0.0);
-#elif defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       ReduceSum<HYPRE_Real> box_sum(0.0);
 #else
       HYPRE_Real box_sum = 0.0;

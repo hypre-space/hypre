@@ -117,4 +117,3 @@ csr_spmm_create_hash_table(HYPRE_Int m, HYPRE_Int *d_rc, HYPRE_Int *d_rf, HYPRE_
 }
 
 #endif /* HYPRE_USING_CUDA */
-

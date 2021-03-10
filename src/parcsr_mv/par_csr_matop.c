@@ -2002,7 +2002,7 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix  *A,
  * G_csr is the node to edge connectivity matrix
  * ----------------------------------------------------------------------------- */
 
-void 
+void
 hypre_ParCSRMatrixGenSpanningTree( hypre_ParCSRMatrix *G_csr,
                                    HYPRE_Int         **indices,
                                    HYPRE_Int           G_type )
@@ -3830,7 +3830,7 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
      hypre_CSRMatrixDestroy(C_tmp_offd);
    }
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    if ( hypre_GetExecPolicy2(memory_location_A, memory_location_B) == HYPRE_EXEC_DEVICE )
    {
       hypre_CSRMatrixMoveDiagFirstDevice(hypre_ParCSRMatrixDiag(C));
@@ -5588,4 +5588,3 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
 
    return hypre_error_flag;
 }
-

@@ -8,12 +8,6 @@
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
-/*
-#if defined(HYPRE_USING_KOKKOS)
-#include <Kokkos_Core.hpp>
-#endif
-*/
-
 #ifdef HYPRE_USING_MEMORY_TRACKER
 hypre_MemoryTracker *_hypre_memory_tracker = NULL;
 
@@ -54,7 +48,7 @@ hypre_HandleCreate()
 
    hypre_HandleMemoryLocation(hypre_handle_) = HYPRE_MEMORY_DEVICE;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    hypre_HandleDefaultExecPolicy(hypre_handle_) = HYPRE_EXEC_HOST;
    hypre_HandleStructExecPolicy(hypre_handle_) = HYPRE_EXEC_DEVICE;
    hypre_HandleCudaData(hypre_handle_) = hypre_CudaDataCreate();
@@ -71,7 +65,7 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
       return hypre_error_flag;
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    hypre_CudaDataDestroy(hypre_HandleCudaData(hypre_handle_));
 #endif
 
@@ -80,22 +74,89 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
    return hypre_error_flag;
 }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int
 hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
 {
-#if defined(HYPRE_USING_CUDA)
-   HYPRE_CUDA_CALL( cudaSetDevice(device_id) );
-#else
+
+#if defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_CUDA_CALL( cudaSetDevice(device_id) );
    omp_set_default_device(device_id);
 #endif
 
-   hypre_HandleCudaDevice(hypre_handle_) = device_id;
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_CUDA_CALL( cudaSetDevice(device_id) );
+#endif
+
+#if defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL( hipSetDevice(device_id) );
+#endif
+
+#if defined(HYPRE_USING_GPU)
+   if (hypre_handle_)
+   {
+      hypre_HandleCudaDevice(hypre_handle_) = device_id;
+   }
+#endif
 
    return hypre_error_flag;
 }
-#endif //#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+
+/* Note: it doesn't return device_id in hypre_Handle->hypre_CudaData,
+ *       calls API instead. But these two should match at all times
+ */
+HYPRE_Int
+hypre_GetDevice(hypre_int *device_id)
+{
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+   *device_id = omp_get_default_device();
+#endif
+
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_CUDA_CALL( cudaGetDevice(device_id) );
+#endif
+
+#if defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL( hipGetDevice(device_id) );
+#endif
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_GetDeviceCount(hypre_int *device_count)
+{
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+   *device_count = omp_get_num_devices();
+#endif
+
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_CUDA_CALL( cudaGetDeviceCount(device_count) );
+#endif
+
+#if defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL( hipGetDeviceCount(device_count) );
+#endif
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_GetDeviceLastError()
+{
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_CUDA_CALL( cudaGetLastError() );
+#endif
+
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_CUDA_CALL( cudaGetLastError() );
+#endif
+
+#if defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL( hipGetLastError() );
+#endif
+
+   return hypre_error_flag;
+}
 
 /******************************************************************************
  *
@@ -119,22 +180,23 @@ HYPRE_Init()
    }
 
 #if defined(HYPRE_USING_GPU)
-   HYPRE_CUDA_CALL( cudaGetLastError() );
+   hypre_GetDeviceLastError();
 
    /* Notice: the cudaStream created is specific to the device
     * that was in effect when you created the stream.
     * So, we should first set the device and create the streams
     */
    hypre_int device_id;
-   HYPRE_CUDA_CALL( cudaGetDevice(&device_id) );
-
+   hypre_GetDevice(&device_id);
    hypre_SetDevice(device_id, _hypre_handle);
 
    /* To include the cost of creating streams/cudahandles in HYPRE_Init */
    /* If not here, will be done at the first use */
    hypre_HandleCudaComputeStream(_hypre_handle);
+
+   /* A separate stream for prefetching */
    //hypre_HandleCudaPrefetchStream(_hypre_handle);
-#endif
+#endif // HYPRE_USING_GPU
 
 #if defined(HYPRE_USING_CUBLAS)
    hypre_HandleCublasHandle(_hypre_handle);
@@ -148,12 +210,6 @@ HYPRE_Init()
 #if defined(HYPRE_USING_CURAND)
    hypre_HandleCurandGenerator(_hypre_handle);
 #endif
-
-   /*
-#if defined(HYPRE_USING_KOKKOS)
-   Kokkos::initialize (argc, argv);
-#endif
-   */
 
    /* Check if cuda arch flags in compiling match the device */
 #if defined(HYPRE_USING_CUDA)
@@ -200,23 +256,7 @@ HYPRE_Finalize()
 
    _hypre_handle = NULL;
 
-   /*
-#if defined(HYPRE_USING_KOKKOS)
-   Kokkos::finalize ();
-#endif
-   */
-
-#if defined(HYPRE_USING_CUDA)
-/*
-#if defined(HYPRE_DEBUG)
-   if (cudaSuccess == cudaPeekAtLastError() )
-   {
-      hypre_printf("OK...\n");
-   }
-#endif
-*/
-   HYPRE_CUDA_CALL( cudaGetLastError() );
-#endif
+   hypre_GetDeviceLastError();
 
 #ifdef HYPRE_USING_MEMORY_TRACKER
    hypre_PrintMemoryTracker();
@@ -229,12 +269,30 @@ HYPRE_Finalize()
 HYPRE_Int
 HYPRE_PrintDeviceInfo()
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_DEVICE_OPENMP)
   hypre_int dev;
   struct cudaDeviceProp deviceProp;
 
   HYPRE_CUDA_CALL( cudaGetDevice(&dev) );
   HYPRE_CUDA_CALL( cudaGetDeviceProperties(&deviceProp, dev) );
+  hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GB\n", deviceProp.name, deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem/1e9);
+#endif
+
+#if defined(HYPRE_USING_CUDA)
+  hypre_int dev;
+  struct cudaDeviceProp deviceProp;
+
+  HYPRE_CUDA_CALL( cudaGetDevice(&dev) );
+  HYPRE_CUDA_CALL( cudaGetDeviceProperties(&deviceProp, dev) );
+  hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GB\n", deviceProp.name, deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem/1e9);
+#endif
+
+#if defined(HYPRE_USING_HIP)
+  hypre_int dev;
+  hipDeviceProp_t deviceProp;
+
+  HYPRE_HIP_CALL( hipGetDevice(&dev) );
+  HYPRE_HIP_CALL( hipGetDeviceProperties(&deviceProp, dev) );
   hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GB\n", deviceProp.name, deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem/1e9);
 #endif
 
