@@ -100,7 +100,6 @@ hypre_solve_fas( HYPRE_Int      n,
    HYPRE_Complex val, diff, maxdiff;
    HYPRE_Real tol = 1e-12;
 
-   // TODO : delete later too
    stack *sources = newStack(n);
    stack *sinks = newStack(n);
 
@@ -150,19 +149,16 @@ hypre_solve_fas( HYPRE_Int      n,
          {
             // This is a source
             push(sources, i);
-            //printf("Source %d\n",i);
          }
       }
       else if (outdegrees[i] == 0)
       {
          // This is a sink
          push(sinks, i);
-         //printf("Sink %d\n",i);
       }
    }
 
    /* While we have any nodes left... */
-   //HYPRE_Int it=0;
    while (nodes_left > 0)
    {
       /* (1) Remove the sources one by one */
@@ -170,7 +166,6 @@ hypre_solve_fas( HYPRE_Int      n,
       {
          i = pop(sources);
          // Add the node to the ordering
-         //printf("source node %d, order %d\n", i, order_next_pos);
          ordering[i] = order_next_pos++;
 
          // Exclude the node from further searches
@@ -200,7 +195,6 @@ hypre_solve_fas( HYPRE_Int      n,
             if (indegrees[k] == 0)
             {
                push(sources, k);
-               //printf("Source %d\n",k);
             }
             A[i + n*k] = 0.0;
          }
@@ -217,7 +211,6 @@ hypre_solve_fas( HYPRE_Int      n,
             continue;
          }
          // Add the node to the ordering
-         //printf("sink node %d, order %d\n", v, order_next_neg);
          ordering[i] = order_next_neg--;
          // Exclude the node from further searches
          indegrees[i] = outdegrees[i] = -1;
@@ -271,7 +264,6 @@ hypre_solve_fas( HYPRE_Int      n,
       if (v >= 0)
       {
          // Remove vertex v
-         //printf("vertex node %d, order %d\n", v, order_next_pos);
          ordering[v] = order_next_pos++;
 
          // Update vertices from outgoing edges
@@ -375,6 +367,7 @@ HYPRE_Real
 hypre_getOrderedNormRatio( HYPRE_Int      n,
                            HYPRE_Complex *A,
                            HYPRE_Int     *ordering,
+                           HYPRE_Real     default_weight,
                            HYPRE_Int      pow)
 {
    HYPRE_Real tol = 1e-12;
@@ -432,11 +425,11 @@ hypre_getOrderedNormRatio( HYPRE_Int      n,
    // Check for trivial returns here
    if (normU < tol && normL < tol)
    {
-      return 0.0;
+      return default_weight;  // Diagonal system
    }
    else if (normU < tol || normL < tol)
    {
-      return 0.0;
+      return 0.0;    // Triangular systems
    }
 
    // standard deviation
@@ -470,9 +463,6 @@ hypre_getOrderedNormRatio( HYPRE_Int      n,
    stdL = sqrt(stdL / nnzL);
    stdU = sqrt(stdU / nnzU);
 
-   //printf("Mean(L) = %1.3f, Std(L) = %1.3f\n",meanL,stdL);
-   //printf("Mean(U) = %1.3f, Std(U) = %1.3f\n",meanU,stdU);
-
    // Mean without outliers
    HYPRE_Int nnzL_0 = 0;
    HYPRE_Int nnzU_0 = 0;
@@ -502,21 +492,23 @@ hypre_getOrderedNormRatio( HYPRE_Int      n,
       }
    }
 
-   /*
-   printf("Mod mean(L) = %1.3f\n",normU_0/nnzU_0);
-   printf("Mod mean(U) = %1.3f\n",normL_0/nnzL_0);
-   printf("Ratio mod means = %1.3f\n\n",(normL_0/nnzL_0)/(normU_0/nnzU_0));
-   */
    HYPRE_Real modU = normU_0/nnzU_0;
    HYPRE_Real modL = normL_0/nnzL_0;
+   // Trimmed means both ~ 0, use non-trimmed means
    if (normU_0 < tol && normL_0 < tol)
    {
-      if (normU > normL) return normL / normU;
-      else return normU / normL;
+      if (meanU > meanL)
+      {
+         return meanL / meanU;
+      }
+      else
+      {
+         return meanU / meanL;
+      }
    }
    else if (normU_0 < tol || normL_0 < tol) 
    {
-      return 0.0;
+      return 0.0;    // Triangular trimmed systems
    }
    else if (modU > modL)
    {

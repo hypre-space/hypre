@@ -116,6 +116,7 @@ hypre_BoomerAMGBuildAdapRestrDist2AIR(hypre_ParCSRMatrix   *A,
    /* for MFAS minimum feedback arc set */
    HYPRE_Complex   *DAi_copy;
    HYPRE_Int       *ordering;
+   HYPRE_Real       default_weight = 0.0;
 
    /* if the size of local system is larger than gmres_switch, use GMRES */
    char Aisol_method;
@@ -1288,7 +1289,17 @@ hypre_BoomerAMGBuildAdapRestrDist2AIR(hypre_ParCSRMatrix   *A,
       }
 
       hypre_solve_fas(local_size, DAi_copy, ordering);
-      adapv_data[ic] = hypre_getOrderedNormRatio(local_size, DAi, ordering, 1);
+      adapv_data[ic] = hypre_getOrderedNormRatio(local_size, DAi, ordering, 
+         default_weight, 1);
+      // Update default weight based on most recent system
+      if (adapv_data[ic] > 0.5)
+      {
+         default_weight = 1.0;
+      }
+      else
+      {
+         default_weight = 0.0;
+      }
       
       // DEBUG
       // if (adapv_data[ic] > 0) hypre_printf("c[%d] = %f, ", adapv_data[ic]);
