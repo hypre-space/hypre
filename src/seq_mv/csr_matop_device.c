@@ -51,7 +51,7 @@ hypre_CsrsvDataDestroy(hypre_CsrsvData* data)
 }
 #endif /* #if defined(HYPRE_USING_CUSPARSE) */
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 hypre_CSRMatrix*
 hypre_CSRMatrixAddDevice ( hypre_CSRMatrix *A,
@@ -1141,7 +1141,7 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
    return hypre_error_flag;
 }
 
-#endif /* HYPRE_USING_CUDA */
+#endif /* HYPRE_USING_CUDA || defined(HYPRE_USING_HIP) */
 
 #if defined(HYPRE_USING_GPU)
 
@@ -1295,7 +1295,7 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
       hypre_TMemcpy(A_sj, A_j, HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(A_sa, A_a, HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       hypre_CSRMatrixData(A) = A_sa;
       HYPRE_Int err = hypre_CSRMatrixCheckDiagFirstSetValueZeroDevice(A, INFINITY);  hypre_assert(err == 0);
       hypre_CSRMatrixData(A) = A_a;

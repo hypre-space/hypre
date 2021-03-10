@@ -2666,13 +2666,13 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
                                HYPRE_Int             interp_type,
                                hypre_ParCSRMatrix  **P_ptr)
 {
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_NvtxPushRange("DirInterp");
 #endif
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -2688,7 +2688,7 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
                                                debug_flag,trunc_factor,max_elmts,col_offd_S_to_A, P_ptr);
    }
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_NvtxPopRange();
 #endif
 
@@ -2709,7 +2709,7 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
       return 0;
    }
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(P) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -4387,4 +4387,3 @@ hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A,
 
    return hypre_error_flag;
 }
-

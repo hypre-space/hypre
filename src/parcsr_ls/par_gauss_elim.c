@@ -365,7 +365,7 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 #include "_hypre_utilities.h"
 #include "_hypre_blas.h"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 #define BLOCK_SIZE 512
 
@@ -425,5 +425,5 @@ HYPRE_Int hypre_dgemv_device(HYPRE_Int m, HYPRE_Int n, HYPRE_Int lda, HYPRE_Real
    return hypre_error_flag;
 }
 
-#endif
+#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #endif

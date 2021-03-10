@@ -48,6 +48,8 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
 #endif
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_CSRMatrixMatvecOMPOffload(trans, alpha, A, x, beta, y, offset);
+#elif defined(HYPRE_USING_HIP)
+#warning SPMV NOT IMPLEMENTED FOR HIP YET
 #else // #ifdef HYPRE_USING_CUSPARSE
 #error HYPRE SPMV TODO
 #endif
@@ -66,7 +68,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
                              hypre_Vector    *y,
                              HYPRE_Int        offset )
 {
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_NvtxPushRange("CSRMatrixMatvec");
 #endif
 
@@ -112,7 +114,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
 
    hypre_SyncCudaComputeStream(hypre_handle());
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_NvtxPopRange();
 #endif
 
