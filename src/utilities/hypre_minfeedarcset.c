@@ -343,6 +343,23 @@ hypre_solve_fas( HYPRE_Int      n,
       }
    }
 
+   // Convert ordering from solve_fas to correct format (store
+   // in indegrees to avoid allocating another array).
+   for (i=0; i<n; i++)
+   {
+      for (k=0; k<n; k++)
+      {
+         if (ordering[k] == i)
+         {
+            indegrees[i] = k;
+         }
+      }
+   }
+   for (i=0; i<n; i++)
+   {
+      ordering[i] = indegrees[i];
+   }
+
    // Clean up
    free(indegrees);
    free(instrengths);
@@ -410,6 +427,16 @@ hypre_getOrderedNormRatio( HYPRE_Int      n,
    {
       normL = sqrt(normL);
       normU = sqrt(normU);
+   }
+
+   // Check for trivial returns here
+   if (normU < tol && normL < tol)
+   {
+      return 0.0;
+   }
+   else if (normU < tol || normL < tol)
+   {
+      return 0.0;
    }
 
    // standard deviation
@@ -480,18 +507,24 @@ hypre_getOrderedNormRatio( HYPRE_Int      n,
    printf("Mod mean(U) = %1.3f\n",normL_0/nnzL_0);
    printf("Ratio mod means = %1.3f\n\n",(normL_0/nnzL_0)/(normU_0/nnzU_0));
    */
-
-   if (normL == 0.0 && normU == 0.0)
+   HYPRE_Real modU = normU_0/nnzU_0;
+   HYPRE_Real modL = normL_0/nnzL_0;
+   if (normU_0 < tol && normL_0 < tol)
    {
-      return 1.0;
+      if (normU > normL) return normL / normU;
+      else return normU / normL;
    }
-   if (normL > normU)
+   else if (normU_0 < tol || normL_0 < tol) 
    {
-      return normU / normL;
+      return 0.0;
+   }
+   else if (modU > modL)
+   {
+      return modL / modU;
    }
    else
    {
-      return normL / normU;
+      return modU / modL;
    }
 }
 

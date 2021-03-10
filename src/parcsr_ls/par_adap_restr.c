@@ -116,7 +116,6 @@ hypre_BoomerAMGBuildAdapRestrDist2AIR(hypre_ParCSRMatrix   *A,
    /* for MFAS minimum feedback arc set */
    HYPRE_Complex   *DAi_copy;
    HYPRE_Int       *ordering;
-   HYPRE_Int       *reordering;
 
    /* if the size of local system is larger than gmres_switch, use GMRES */
    char Aisol_method;
@@ -951,7 +950,6 @@ hypre_BoomerAMGBuildAdapRestrDist2AIR(hypre_ParCSRMatrix   *A,
    /* for fas */
    DAi_copy = hypre_CTAlloc(HYPRE_Complex, local_max_size*local_max_size, HYPRE_MEMORY_HOST);
    ordering = hypre_CTAlloc(HYPRE_Int, local_max_size, HYPRE_MEMORY_HOST);
-   reordering = hypre_CTAlloc(HYPRE_Int, local_max_size, HYPRE_MEMORY_HOST);
 
    // Allocate memory for GMRES if it will be used
    HYPRE_Int kdim_max = hypre_min(gmresAi_maxit, local_max_size);
@@ -1290,13 +1288,11 @@ hypre_BoomerAMGBuildAdapRestrDist2AIR(hypre_ParCSRMatrix   *A,
       }
 
       hypre_solve_fas(local_size, DAi_copy, ordering);
-
-      for (j = 0; j < local_size; j++)
-      {
-         reordering[ordering[j]] = j;
-      }
-
-      adapv_data[ic] = hypre_getOrderedNormRatio(local_size, DAi, reordering, 1);
+      adapv_data[ic] = hypre_getOrderedNormRatio(local_size, DAi, ordering, 1);
+      
+      // DEBUG
+      // if (adapv_data[ic] > 0) hypre_printf("c[%d] = %f, ", adapv_data[ic]);
+      // DEBUG
 
       hypre_assert( adapv_data[ic] >= 0.0 &&  adapv_data[ic] <= 1.0 );
 
@@ -1614,7 +1610,6 @@ hypre_BoomerAMGBuildAdapRestrDist2AIR(hypre_ParCSRMatrix   *A,
    hypre_TFree(Ipi, HYPRE_MEMORY_HOST);
    hypre_TFree(DAi_copy, HYPRE_MEMORY_HOST);
    hypre_TFree(ordering, HYPRE_MEMORY_HOST);
-   hypre_TFree(reordering, HYPRE_MEMORY_HOST);
 #if AIR_DEBUG
    hypre_TFree(TMPA, HYPRE_MEMORY_HOST);
    hypre_TFree(TMPb, HYPRE_MEMORY_HOST);
