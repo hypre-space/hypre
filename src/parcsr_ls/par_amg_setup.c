@@ -1353,19 +1353,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
             else
             {
-               col_offd_S_to_A = NULL;
-               /* hypre_BoomerAMGCreateScalarCFS(A_array[level],
-                  SN, CFN_marker, col_offd_SN_to_AN,
-                  num_functions, nodal, 0, NULL, &CF_marker,
-                  &col_offd_S_to_A, &S); */
-
-               hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker, col_offd_SN_to_AN,
-                                              num_functions, nodal, 0, NULL, &CF_marker,
-                                              &col_offd_S_to_A, &S);
-               if (col_offd_SN_to_AN == NULL)
-               {
-                  col_offd_S_to_A = NULL;
-               }
+               hypre_BoomerAMGCreateScalarCFS(SN, A_array[level], CFN_marker, 
+                                              num_functions, nodal, &CF_marker,
+                                              &S);
                hypre_TFree(CFN_marker, HYPRE_MEMORY_HOST);
                hypre_TFree(col_offd_SN_to_AN, HYPRE_MEMORY_HOST);
                hypre_ParCSRMatrixDestroy(SN);
@@ -1649,17 +1639,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                   local_num_vars/num_functions, CF2_marker);
                   hypre_TFree(CF2_marker, HYPRE_MEMORY_HOST);
                   hypre_TFree(coarse_pnts_global1, HYPRE_MEMORY_HOST);
-                  col_offd_S_to_A = NULL;
 
-/*                  hypre_BoomerAMGCreateScalarCFS(A_array[level],SN, CFN_marker,
-                    col_offd_SN_to_AN, num_functions, nodal, 0, NULL,
-                    &CF_marker, &col_offd_S_to_A, &S); */
-
-                  hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker,
-                                                 col_offd_SN_to_AN, num_functions, nodal, 0, NULL,
-                                                 &CF_marker, &col_offd_S_to_A, &S);
-                  if (col_offd_SN_to_AN == NULL)
-                     col_offd_S_to_A = NULL;
+                  hypre_BoomerAMGCreateScalarCFS(SN, A_array[level], CFN_marker,
+                                                 num_functions, nodal, 
+                                                 &CF_marker, &S);
                   hypre_TFree(CFN_marker, HYPRE_MEMORY_HOST);
                   hypre_BoomerAMGCoarseParms(comm, local_num_vars,
                                              num_functions, dof_func_array[level], CF_marker,
@@ -1672,17 +1655,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                }
                else
                {
-                  col_offd_S_to_A = NULL;
-/*                  hypre_BoomerAMGCreateScalarCFS(A_array[level],SN, CFN_marker,
-                    col_offd_SN_to_AN, num_functions, nodal, 0, NULL,
-                    &CF_marker, &col_offd_S_to_A, &S);*/
-                  hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker,
-                                                 col_offd_SN_to_AN, num_functions, nodal, 0, NULL,
-                                                 &CF3_marker, &col_offd_S_to_A, &S);
+                  hypre_BoomerAMGCreateScalarCFS(SN, A_array[level], CFN_marker,
+                                                 num_functions, nodal, 
+                                                 &CF3_marker, &S);
                   for (i=0; i < 2; i++)
                      coarse_pnts_global1[i] *= num_functions;
-                  if (col_offd_SN_to_AN == NULL)
-                     col_offd_S_to_A = NULL;
                   if (agg_interp_type == 1)
                   {
                      hypre_BoomerAMGBuildExtPIInterp(A_array[level],
@@ -1732,12 +1709,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_TFree(CF3_marker, HYPRE_MEMORY_HOST);
                   hypre_TFree(col_offd_S_to_A, HYPRE_MEMORY_HOST);
                   hypre_ParCSRMatrixDestroy(S);
-                  /* hypre_BoomerAMGCreateScalarCFS(A_array[level],SN, CFN_marker,
-                     col_offd_SN_to_AN, num_functions, nodal, 0, NULL,
-                     &CF_marker, &col_offd_S_to_A, &S); */
-                  hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker,
-                                                 col_offd_SN_to_AN, num_functions, nodal, 0, NULL,
-                                                 &CF_marker, &col_offd_S_to_A, &S);
+                  hypre_BoomerAMGCreateScalarCFS(SN, A_array[level], CFN_marker,
+                                                 num_functions, nodal, 
+                                                 &CF_marker, &S);
 
                   if (col_offd_SN_to_AN == NULL)
                   {

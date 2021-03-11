@@ -1109,7 +1109,7 @@ HYPRE_Int hypre_BoomerAMGBuildMultipass ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_
 
 /* par_nodal_systems.c */
 HYPRE_Int hypre_BoomerAMGCreateNodalA ( hypre_ParCSRMatrix *A , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int option , HYPRE_Int diag_option , hypre_ParCSRMatrix **AN_ptr );
-HYPRE_Int hypre_BoomerAMGCreateScalarCFS ( hypre_ParCSRMatrix *SN , HYPRE_Int *CFN_marker , HYPRE_Int *col_offd_SN_to_AN , HYPRE_Int num_functions , HYPRE_Int nodal , HYPRE_Int data , HYPRE_Int **dof_func_ptr , HYPRE_Int **CF_marker_ptr , HYPRE_Int **col_offd_S_to_A_ptr , hypre_ParCSRMatrix **S_ptr );
+HYPRE_Int hypre_BoomerAMGCreateScalarCFS ( hypre_ParCSRMatrix *SN , hypre_ParCSRMatrix *A , HYPRE_Int *CFN_marker , HYPRE_Int num_functions , HYPRE_Int nodal , HYPRE_Int **CF_marker_ptr , hypre_ParCSRMatrix **S_ptr );
 HYPRE_Int hypre_BoomerAMGCreateScalarCF ( HYPRE_Int *CFN_marker , HYPRE_Int num_functions , HYPRE_Int num_nodes , HYPRE_Int **dof_func_ptr , HYPRE_Int **CF_marker_ptr );
 
 /* par_nongalerkin.c */
