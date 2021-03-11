@@ -304,6 +304,20 @@ hypre_CSRMatrixMatvecCusparseOldAPI( HYPRE_Int        trans,
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
 #if defined(HYPRE_USING_ROCSPARSE)
+// We need a stub for this function since it's called elsewhere
+HYPRE_Int
+hypre_CSRMatrixMatvecMaskedDevice( HYPRE_Complex    /*alpha*/,
+                                   hypre_CSRMatrix */*A*/,
+                                   hypre_Vector    */*x*/,
+                                   HYPRE_Complex    /*beta*/,
+                                   hypre_Vector    */*b*/,
+                                   hypre_Vector    */*y*/,
+                                   HYPRE_Int       */*mask*/,
+                                   HYPRE_Int        /*size_of_mask*/ )
+{
+  hypre_error_w_msg(HYPRE_ERROR_GENERIC, "hypre_CSRMatrixMatvecMaskedDevice not implemented for rocSPARSE!\n");
+}
+
 HYPRE_Int
 hypre_CSRMatrixMatvecRocsparse( HYPRE_Int        trans,
                                 HYPRE_Complex    alpha,
