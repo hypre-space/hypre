@@ -8,7 +8,7 @@
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 __global__ void
 hypreCUDAKernel_CompileFlagSafetyCheck(HYPRE_Int cuda_arch_actual)
@@ -24,6 +24,9 @@ hypreCUDAKernel_CompileFlagSafetyCheck(HYPRE_Int cuda_arch_actual)
 
 void hypre_CudaCompileFlagCheck()
 {
+  // This is really only defined for CUDA and not for HIP
+#if defined(HYPRE_USING_CUDA)
+
    HYPRE_Int device = hypre_HandleCudaDevice(hypre_handle());
 
    struct cudaDeviceProp props;
@@ -34,6 +37,8 @@ void hypre_CudaCompileFlagCheck()
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CompileFlagSafetyCheck, gDim, bDim, cuda_arch_actual );
 
    HYPRE_CUDA_CALL(cudaDeviceSynchronize());
+
+#endif // defined(HYPRE_USING_CUDA)
 }
 
 dim3
@@ -713,7 +718,7 @@ hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in,  T2 *keys2_in,  T3 *vals
 
 template HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N, HYPRE_Int *keys1_in, HYPRE_Int *keys2_in, HYPRE_Complex *vals_in, HYPRE_Int *keys1_out, HYPRE_Int *keys2_out, HYPRE_Complex *vals_out);
 
-#endif // #if defined(HYPRE_USING_CUDA)
+#endif // #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP)
 
 #if defined(HYPRE_USING_CUSPARSE)
 /*

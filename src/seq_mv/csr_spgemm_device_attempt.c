@@ -192,7 +192,7 @@ csr_spmm_attempt(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
    __shared__ volatile char s_failed[NUM_WARPS_PER_BLOCK];
    volatile char *warp_s_failed = s_failed + warp_id;
 
-#ifdef HYPRE_DEBUG
+#if defined(HYPRE_DEBUG) && !defined(HYPRE_USING_HIP)
    assert(blockDim.z              == NUM_WARPS_PER_BLOCK);
    assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
    assert(NUM_WARPS_PER_BLOCK <= HYPRE_WARP_SIZE);
@@ -250,7 +250,7 @@ csr_spmm_attempt(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
                                                           ghash_size, jg + istart_g, ag + istart_g,
                                                           failed, warp_s_failed);
 
-#ifdef HYPRE_DEBUG
+#if defined(HYPRE_DEBUG) && !defined(HYPRE_USING_HIP)
       if (attempt == 2)
       {
          assert(failed == 0);
@@ -358,7 +358,7 @@ copy_from_hash_into_C(HYPRE_Int  M,   HYPRE_Int *js,  HYPRE_Complex *as,
    /* lane id inside the warp */
    volatile const HYPRE_Int lane_id = get_lane_id();
 
-#ifdef HYPRE_DEBUG
+#if defined(HYPRE_DEBUG) && !defined(HYPRE_USING_HIP)
    assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 #endif
 
@@ -410,7 +410,7 @@ copy_from_hash_into_C(HYPRE_Int  M,   HYPRE_Int *js,  HYPRE_Complex *as,
          (lane_id, js + i * SHMEM_HASH_SIZE, as + i * SHMEM_HASH_SIZE, g2_size, jg2 + istart_g2,
          ag2 + istart_g2, jc + istart_c, ac + istart_c);
       }
-#ifdef HYPRE_DEBUG
+#if defined(HYPRE_DEBUG)  && !defined(HYPRE_USING_HIP)
       assert(istart_c + j == iend_c);
 #endif
    }

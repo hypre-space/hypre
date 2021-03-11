@@ -661,7 +661,9 @@ hypre_BoomerAMGBuildDirInterp_getcoef( HYPRE_Int   nr_of_rows,
       k += sum;
    }
 
+#if !defined(HYPRE_USING_HIP)
    assert(k == q_diag_P);
+#endif
 
    /* offd part */
    HYPRE_Int p_offd_A, q_offd_A, p_offd_P, q_offd_P;
@@ -725,7 +727,9 @@ hypre_BoomerAMGBuildDirInterp_getcoef( HYPRE_Int   nr_of_rows,
       k += sum;
    }
 
+#if !defined(HYPRE_USING_HIP)
    assert(k == q_offd_P);
+#endif
 
    diagonal  = warp_allreduce_sum(diagonal);
    sum_N_pos = warp_allreduce_sum(sum_N_pos);
@@ -921,7 +925,9 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( HYPRE_Int   nr_of_rows,
       k += sum;
    }
 
+#if !defined(HYPRE_USING_HIP)
    assert(k == q_diag_P);
+#endif
 
    /* offd part */
    HYPRE_Int p_offd_A, q_offd_A, p_offd_P, q_offd_P;
@@ -977,7 +983,9 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( HYPRE_Int   nr_of_rows,
       k += sum;
    }
 
+#if !defined(HYPRE_USING_HIP)
    assert(k == q_offd_P);
+#endif
 
    diagonal  = warp_allreduce_sum(diagonal);
    sum_F     = warp_allreduce_sum(sum_F);
