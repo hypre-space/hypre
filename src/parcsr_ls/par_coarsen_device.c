@@ -261,7 +261,9 @@ hypreCUDAKernel_PMISCoarseningInit(HYPRE_Int   nrows,
    if (CF_init == 1)
    {
       // TODO
+#if !defined(HYPRE_USING_HIP)
       assert(0);
+#endif
    }
    else
    {
@@ -389,7 +391,7 @@ hypreCUDAKernel_PMISCoarseningUpdateCF(HYPRE_Int   graph_diag_size,
    }
    else
    {
-#ifdef HYPRE_DEBUG
+#if defined(HYPRE_DEBUG) && !defined(HYPRE_USING_HIP)
       assert(marker_row == 0);
 #endif
       /*-------------------------------------------------
