@@ -8,18 +8,19 @@
 #include "seq_mv.h"
 #include "csr_spgemm_device.h"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 /* assume d_i is of length (m+1) and contains the "sizes" in d_i[1], ..., d_i[m]
    the value of d_i[0] is not assumed
  */
 void csr_spmm_create_ija(HYPRE_Int m, HYPRE_Int *d_i, HYPRE_Int **d_j, HYPRE_Complex **d_a, HYPRE_Int *nnz)
 {
-   cudaMemset(d_i, 0, sizeof(HYPRE_Int));
+   hypre_Memset(d_i, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
+
    /* make ghash pointers by prefix scan */
    HYPRE_THRUST_CALL(inclusive_scan, d_i, d_i + m + 1, d_i);
    /* total size */
-   cudaMemcpy(nnz, d_i + m, sizeof(HYPRE_Int), cudaMemcpyDeviceToHost);
+   hypre_Memcpy(nnz, d_i + m, sizeof(HYPRE_Int), HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    if (d_j)
    {
       *d_j = hypre_TAlloc(HYPRE_Int, *nnz, HYPRE_MEMORY_DEVICE);
@@ -34,11 +35,14 @@ void csr_spmm_create_ija(HYPRE_Int m, HYPRE_Int *d_i, HYPRE_Int **d_j, HYPRE_Com
 void csr_spmm_create_ija(HYPRE_Int m, HYPRE_Int *d_c, HYPRE_Int **d_i, HYPRE_Int **d_j, HYPRE_Complex **d_a, HYPRE_Int *nnz)
 {
    *d_i = hypre_TAlloc(HYPRE_Int, m+1, HYPRE_MEMORY_DEVICE);
-   cudaMemset(*d_i, 0, sizeof(HYPRE_Int));
+   hypre_Memset(d_i, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
+
    /* make ghash pointers by prefix scan */
    HYPRE_THRUST_CALL(inclusive_scan, d_c, d_c + m, *d_i + 1);
+
    /* total size */
-   cudaMemcpy(nnz, (*d_i) + m, sizeof(HYPRE_Int), cudaMemcpyDeviceToHost);
+   hypre_Memcpy(nnz, (*d_i) + m, sizeof(HYPRE_Int), HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
    if (d_j)
    {
       *d_j = hypre_TAlloc(HYPRE_Int, *nnz, HYPRE_MEMORY_DEVICE);
@@ -107,7 +111,7 @@ csr_spmm_create_hash_table(HYPRE_Int m, HYPRE_Int *d_rc, HYPRE_Int *d_rf, HYPRE_
    }
    else
    {
-      cudaMemset(*d_ghash_i, 0, (num_ghash + 1) * sizeof(HYPRE_Int));
+      hypre_Memset(*d_ghash_i, 0, (num_ghash + 1) * sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
       HYPRE_CUDA_LAUNCH( csr_spmm_get_ghash_size, gDim, bDim, m, num_ghash, d_rc, d_rf, (*d_ghash_i) + 1, SHMEM_HASH_SIZE );
    }
 
@@ -116,4 +120,4 @@ csr_spmm_create_hash_table(HYPRE_Int m, HYPRE_Int *d_rc, HYPRE_Int *d_rf, HYPRE_
    return hypre_error_flag;
 }
 
-#endif /* HYPRE_USING_CUDA */
+#endif /* defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
