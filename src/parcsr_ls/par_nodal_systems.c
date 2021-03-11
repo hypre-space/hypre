@@ -816,8 +816,8 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
    HYPRE_Int          *S_offd_i;
    HYPRE_Int          *S_offd_j;
    HYPRE_Real         *S_offd_data;
-   HYPRE_BigInt       *row_starts_S;
-   HYPRE_BigInt       *col_starts_S;
+   HYPRE_BigInt       *row_starts_S = NULL;
+   HYPRE_BigInt       *col_starts_S = NULL;
    HYPRE_BigInt       *row_starts_A = hypre_ParCSRMatrixRowStarts(A);
    HYPRE_BigInt       *col_starts_A = hypre_ParCSRMatrixColStarts(A);
    hypre_CSRMatrix    *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -839,7 +839,7 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
    //HYPRE_Int          *dof_func;
    HYPRE_Int           num_nodes = hypre_CSRMatrixNumRows(SN_diag);
    HYPRE_Int           num_variables;
-   hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(SN);
+   /*hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(SN);
    HYPRE_Int           num_sends;
    HYPRE_Int           num_recvs;
    HYPRE_Int          *send_procs;
@@ -852,23 +852,19 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
    HYPRE_Int          *send_map_starts_S;
    HYPRE_Int          *send_map_elmts_S;
    HYPRE_Int          *recv_procs_S;
-   HYPRE_Int          *recv_vec_starts_S;
+   HYPRE_Int          *recv_vec_starts_S; */
    HYPRE_Int          *S_marker;
    HYPRE_Int          *S_marker_offd = NULL;
    HYPRE_Int          *S_tmp_j;
 
    HYPRE_Int           num_coarse_nodes;
-   HYPRE_Int           i,j,k,k1,jj,cnt;
-   HYPRE_BigInt        big_k1;
-   HYPRE_Int           row, start, end;
+   HYPRE_Int           i,j,k,cnt;
+   //HYPRE_BigInt        big_k1;
+   //HYPRE_Int           row, start, end;
    HYPRE_Int           num_procs;
-   HYPRE_Int           num_cols_offd_SN = hypre_CSRMatrixNumCols(SN_offd);
    HYPRE_Int           num_cols_offd_A = hypre_CSRMatrixNumCols(A_offd);
-   HYPRE_Int           num_cols_offd_S;
    HYPRE_Int           A_num_nonzeros_diag;
    HYPRE_Int           A_num_nonzeros_offd;
-   HYPRE_Int           SN_num_nonzeros_diag;
-   HYPRE_Int           SN_num_nonzeros_offd;
    HYPRE_Int           S_num_nonzeros_diag;
    HYPRE_Int           S_num_nonzeros_offd;
    HYPRE_BigInt        global_num_vars;
@@ -933,8 +929,8 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
       col_starts_S = row_starts_S;
    }
 
-   SN_num_nonzeros_diag = SN_diag_i[num_nodes];
-   SN_num_nonzeros_offd = SN_offd_i[num_nodes];
+   /*SN_num_nonzeros_diag = SN_diag_i[num_nodes];
+   SN_num_nonzeros_offd = SN_offd_i[num_nodes];*/
    A_num_nonzeros_diag = A_diag_i[num_variables];
    A_num_nonzeros_offd = A_offd_i[num_variables];
 
