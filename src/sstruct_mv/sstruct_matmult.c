@@ -7,7 +7,7 @@
 
 #include "_hypre_sstruct_mv.h"
 
-#define DEBUG_MATMULT 0
+#define DEBUG_MATMULT 1
 #define DEBUG_MATCONV 0
 
 /*--------------------------------------------------------------------------
@@ -175,7 +175,10 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
 
 /*--------------------------------------------------------------------------
  * hypre_SStructMatmultU
+ *
+ * Computes the unstructured component of the SStructMatmult.
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SStructMatmultU( HYPRE_Int             nmatrices,
                        hypre_SStructMatrix **ssmatrices,
@@ -558,7 +561,7 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
             grid_box_id    = hypre_StructGridID(sgrid, k);
 
             /* Exit in case of non-stencil coupling */
-            if (convert_box_id > 0)
+            if (convert_box_id > -1)
             {
                while (grid_box_id != convert_box_id)
                {
