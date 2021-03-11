@@ -811,11 +811,9 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
    hypre_CSRMatrix    *S_diag;
    HYPRE_Int          *S_diag_i;
    HYPRE_Int          *S_diag_j;
-   HYPRE_Real         *S_diag_data;
    hypre_CSRMatrix    *S_offd;
    HYPRE_Int          *S_offd_i;
    HYPRE_Int          *S_offd_j;
-   HYPRE_Real         *S_offd_data;
    HYPRE_BigInt       *row_starts_S = NULL;
    HYPRE_BigInt       *col_starts_S = NULL;
    HYPRE_BigInt       *row_starts_A = hypre_ParCSRMatrixRowStarts(A);
