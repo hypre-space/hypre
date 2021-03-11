@@ -2408,11 +2408,13 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
    HYPRE_Int num_cols_offd;
    HYPRE_Int *diag_pos;
    HYPRE_BigInt *col_map_offd;
+   HYPRE_Int *rownnz;
    HYPRE_Int *row_length;
    HYPRE_BigInt **aux_j;
    HYPRE_Complex **aux_data;
    HYPRE_Int my_id, num_procs;
    HYPRE_Int num_rows;
+   HYPRE_Int num_rownnz;
    HYPRE_Int i_diag, i_offd;
    HYPRE_BigInt col_0, col_n;
    HYPRE_Int nnz_offd;
@@ -2435,6 +2437,8 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
    //HYPRE_Int row_len;
    HYPRE_Int max_num_threads;
    HYPRE_Int aux_flag, aux_flag_global;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    max_num_threads = hypre_NumThreads();
 
@@ -2529,28 +2533,37 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
       /* move data into ParCSRMatrix if not there already */
       if (hypre_AuxParCSRMatrixNeedAux(aux_matrix))
       {
-         HYPRE_Int *diag_array, *offd_array;
-         diag_array = hypre_CTAlloc(HYPRE_Int, max_num_threads, HYPRE_MEMORY_HOST);
-         offd_array = hypre_CTAlloc(HYPRE_Int, max_num_threads, HYPRE_MEMORY_HOST);
+         HYPRE_Int  *diag_array;
+         HYPRE_Int  *offd_array;
+
+         /* Update nonzero rows of aux_matrix */
+         hypre_AuxParCSRMatrixSetRownnz(aux_matrix);
+
          aux_j = hypre_AuxParCSRMatrixAuxJ(aux_matrix);
          aux_data = hypre_AuxParCSRMatrixAuxData(aux_matrix);
          row_length = hypre_AuxParCSRMatrixRowLength(aux_matrix);
-         diag_pos = hypre_CTAlloc(HYPRE_Int,  num_rows, HYPRE_MEMORY_HOST);
-         i_diag = 0;
-         i_offd = 0;
+         num_rownnz = hypre_AuxParCSRMatrixLocalNumRownnz(aux_matrix);
+         rownnz     = hypre_AuxParCSRMatrixRownnz(aux_matrix);
+
+         diag_array = hypre_CTAlloc(HYPRE_Int, max_num_threads, HYPRE_MEMORY_HOST);
+         offd_array = hypre_CTAlloc(HYPRE_Int, max_num_threads, HYPRE_MEMORY_HOST);
+         diag_pos   = hypre_TAlloc(HYPRE_Int, num_rownnz, HYPRE_MEMORY_HOST);
+         memset(diag_pos, -1, num_rownnz*sizeof(HYPRE_Int));
+
+         i_diag = i_offd = 0;
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel private(i, j, i_diag, i_offd)
 #endif
          {
             HYPRE_BigInt *local_j;
             HYPRE_Complex *local_data;
-            HYPRE_Int rest, size, ns, ne;
+            HYPRE_Int ii, rest, size, ns, ne;
             HYPRE_Int num_threads, my_thread_num;
             num_threads = hypre_NumActiveThreads();
             my_thread_num = hypre_GetThreadNum();
 
-            size = num_rows/num_threads;
-            rest = num_rows - size*num_threads;
+            size = num_rownnz/num_threads;
+            rest = num_rownnz - size*num_threads;
 
             if (my_thread_num < rest)
             {
@@ -2563,25 +2576,51 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
                ne = (my_thread_num+1)*size + rest;
             }
 
-            i_diag = 0;
-            i_offd = 0;
-            for (i=ns; i < ne; i++)
+            i_diag = i_offd = 0;
+            if (rownnz != NULL)
             {
-               local_j = aux_j[i];
-               local_data = aux_data[i];
-               diag_pos[i] = -1;
-               for (j=0; j < row_length[i]; j++)
+               for (i = ns; i < ne; i++)
                {
-                  if (local_j[j] < col_0 || local_j[j] > col_n)
+                  ii = rownnz[i];
+                  local_j = aux_j[ii];
+                  local_data = aux_data[ii];
+                  for (j = 0; j < row_length[ii]; j++)
                   {
-                     i_offd++;
-                  }
-                  else
-                  {
-                     i_diag++;
-                     if ((HYPRE_Int)(local_j[j]-col_0) == i)
+                     if (local_j[j] < col_0 || local_j[j] > col_n)
                      {
-                        diag_pos[i] = j;
+                        i_offd++;
+                     }
+                     else
+                     {
+                        i_diag++;
+                        if ((HYPRE_Int)(local_j[j] - col_0) == i)
+                        {
+                           diag_pos[i] = j;
+                        }
+                     }
+                  }
+               }
+            }
+            else
+            {
+               for (i = ns; i < ne; i++)
+               {
+                  local_j = aux_j[i];
+                  local_data = aux_data[i];
+                  diag_pos[i] = -1;
+                  for (j=0; j < row_length[i]; j++)
+                  {
+                     if (local_j[j] < col_0 || local_j[j] > col_n)
+                     {
+                        i_offd++;
+                     }
+                     else
+                     {
+                        i_diag++;
+                        if ((HYPRE_Int)(local_j[j] - col_0) == i)
+                        {
+                           diag_pos[i] = j;
+                        }
                      }
                   }
                }
@@ -2630,28 +2669,90 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
                i_diag = 0;
                i_offd = 0;
             }
-            for (i=ns; i < ne; i++)
+            if (rownnz != NULL)
             {
-               diag_i[i] = i_diag;
-               offd_i[i] = i_offd;
-               local_j = aux_j[i];
-               local_data = aux_data[i];
-               if (diag_pos[i] > -1)
+               for (i = ns; i < ne; i++)
                {
-                  diag_j[i_diag] = (HYPRE_Int)(local_j[diag_pos[i]] - col_0);
-                  diag_data[i_diag++] = local_data[diag_pos[i]];
-               }
-               for (j=0; j < row_length[i]; j++)
-               {
-                  if (local_j[j] < col_0 || local_j[j] > col_n)
+                  ii = rownnz[i];
+                  diag_i[ii] = i_diag;
+                  offd_i[ii] = i_offd;
+                  local_j = aux_j[ii];
+                  local_data = aux_data[ii];
+                  if (diag_pos[i] > -1)
                   {
-                     big_offd_j[i_offd] = local_j[j];
-                     offd_data[i_offd++] = local_data[j];
+		     diag_j[i_diag] = (HYPRE_Int)(local_j[diag_pos[i]] - col_0);
+                     diag_data[i_diag++] = local_data[diag_pos[i]];
                   }
-                  else if (j != diag_pos[i])
+                  for (j = 0; j < row_length[ii]; j++)
                   {
-                     diag_j[i_diag] = (HYPRE_Int)(local_j[j] - col_0);
-                     diag_data[i_diag++] = local_data[j];
+                     if (local_j[j] < col_0 || local_j[j] > col_n)
+                     {
+                        big_offd_j[i_offd] = local_j[j];
+                        offd_data[i_offd++] = local_data[j];
+                     }
+                     else if (j != diag_pos[i])
+                     {
+                        diag_j[i_diag] = local_j[j] - col_0;
+                        diag_data[i_diag++] = local_data[j];
+                     }
+                  }
+               }
+            }
+            else
+            {
+               for (i = ns; i < ne; i++)
+               {
+                  diag_i[i] = i_diag;
+                  offd_i[i] = i_offd;
+                  local_j = aux_j[i];
+                  local_data = aux_data[i];
+                  if (diag_pos[i] > -1)
+                  {
+                     diag_j[i_diag] = (HYPRE_Int)(local_j[diag_pos[i]] - col_0);
+                     diag_data[i_diag++] = local_data[diag_pos[i]];
+                  }
+                  for (j = 0; j < row_length[i]; j++)
+                  {
+                     if (local_j[j] < col_0 || local_j[j] > col_n)
+                     {
+                        big_offd_j[i_offd] = local_j[j];
+                        offd_data[i_offd++] = local_data[j];
+                     }
+                     else if (j != diag_pos[i])
+                     {
+                        diag_j[i_diag] = (HYPRE_Int)(local_j[j] - col_0);
+                        diag_data[i_diag++] = local_data[j];
+                     }
+                  }
+               }
+            }
+
+            /* Correct diag_i and offd_i */
+            if (rownnz != NULL)
+            {
+               for (i = ns; i < (ne-1); i++)
+               {
+                  for (ii = rownnz[i] + 1; ii < rownnz[i+1]; ii++)
+                  {
+                     diag_i[ii] = diag_i[rownnz[i+1]];
+                     offd_i[ii] = offd_i[rownnz[i+1]];
+                  }
+               }
+
+               if (my_thread_num < (num_threads - 1))
+               {
+                  for (ii = rownnz[ne-1] + 1; ii < rownnz[ne]; ii++)
+                  {
+                     diag_i[ii] = diag_i[rownnz[ne]];
+                     offd_i[ii] = offd_i[rownnz[ne]];
+                  }
+               }
+               else
+               {
+                  for (ii = rownnz[ne-1] + 1; ii < num_rows; ii++)
+                  {
+                     diag_i[ii] = diag_i[num_rows];
+                     offd_i[ii] = offd_i[num_rows];
                   }
                }
             }
@@ -2684,7 +2785,7 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
          for (i = 0; i < num_rows; i++)
          {
             j0 = diag_i[i];
-            for (j=j0; j < diag_i[i+1]; j++)
+            for (j = j0; j < diag_i[i+1]; j++)
             {
                if (diag_j[j] == i)
                {
@@ -2714,14 +2815,14 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
       nnz_offd = offd_i[num_rows];
       if (nnz_offd)
       {
-         tmp_j = hypre_CTAlloc(HYPRE_BigInt,  nnz_offd, HYPRE_MEMORY_HOST);
-         for (i=0; i < nnz_offd; i++)
+         tmp_j = hypre_CTAlloc(HYPRE_BigInt, nnz_offd, HYPRE_MEMORY_HOST);
+         for (i = 0; i < nnz_offd; i++)
          {
             tmp_j[i] = big_offd_j[i];
          }
          hypre_BigQsort0(tmp_j,0,nnz_offd-1);
          num_cols_offd = 1;
-         for (i=0; i < nnz_offd-1; i++)
+         for (i = 0; i < nnz_offd-1; i++)
          {
             if (tmp_j[i+1] > tmp_j[i])
             {
@@ -2729,21 +2830,21 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
             }
          }
          col_map_offd = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd, HYPRE_MEMORY_HOST);
-         for (i=0; i < num_cols_offd; i++)
+         for (i = 0; i < num_cols_offd; i++)
          {
             col_map_offd[i] = tmp_j[i];
          }
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i)
 #endif
-         for (i=0; i < nnz_offd; i++)
+         for (i = 0; i < nnz_offd; i++)
          {
-            offd_j[i]=hypre_BigBinarySearch(col_map_offd,big_offd_j[i],num_cols_offd);
+            offd_j[i] = hypre_BigBinarySearch(col_map_offd,big_offd_j[i],num_cols_offd);
          }
 
          if (base)
          {
-            for (i=0; i < num_cols_offd; i++)
+            for (i = 0; i < num_cols_offd; i++)
             {
                col_map_offd[i] -= base;
             }
@@ -2759,6 +2860,8 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
 
    hypre_AuxParCSRMatrixDestroy(aux_matrix);
    hypre_IJMatrixTranslator(matrix) = NULL;
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -4072,4 +4175,3 @@ hypre_IJMatrixAddToValuesOMPParCSR( hypre_IJMatrix       *matrix,
 
    return hypre_error_flag;
 }
-
