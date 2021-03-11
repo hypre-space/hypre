@@ -1423,6 +1423,17 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
 
 
 #if defined(HYPRE_USING_ROCSPARSE)
+// FIXME: We need a stub for this function until we can implement a rocsparse version
+HYPRE_Int
+hypre_CSRMatrixTriLowerUpperSolveCusparse(char             /*uplo*/,
+                                          hypre_CSRMatrix */*A*/,
+                                          hypre_Vector    */*f*/,
+                                          hypre_Vector    */*u*/ )
+{
+  hypre_error_w_msg(HYPRE_ERROR_GENERIC, "hypre_CSRMatrixTriLowerUpperSolveCusparse not implemented for rocSPARSE!\n");
+}
+
+
 /* @brief This functions sorts values and column indices in each row in ascending order OUT-OF-PLACE
  * @param[in] n Number of rows
  * @param[in] m Number of columns
