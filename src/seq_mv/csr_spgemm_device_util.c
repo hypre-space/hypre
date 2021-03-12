@@ -35,7 +35,7 @@ void csr_spmm_create_ija(HYPRE_Int m, HYPRE_Int *d_i, HYPRE_Int **d_j, HYPRE_Com
 void csr_spmm_create_ija(HYPRE_Int m, HYPRE_Int *d_c, HYPRE_Int **d_i, HYPRE_Int **d_j, HYPRE_Complex **d_a, HYPRE_Int *nnz)
 {
    *d_i = hypre_TAlloc(HYPRE_Int, m+1, HYPRE_MEMORY_DEVICE);
-   hypre_Memset(d_i, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
+   hypre_Memset(*d_i, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
 
    /* make ghash pointers by prefix scan */
    HYPRE_THRUST_CALL(inclusive_scan, d_c, d_c + m, *d_i + 1);
