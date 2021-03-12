@@ -20,7 +20,7 @@ void csr_spmm_create_ija(HYPRE_Int m, HYPRE_Int *d_i, HYPRE_Int **d_j, HYPRE_Com
    /* make ghash pointers by prefix scan */
    HYPRE_THRUST_CALL(inclusive_scan, d_i, d_i + m + 1, d_i);
    /* total size */
-   hypre_Memcpy(nnz, d_i + m, sizeof(HYPRE_Int), HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(nnz, d_i + m, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    if (d_j)
    {
       *d_j = hypre_TAlloc(HYPRE_Int, *nnz, HYPRE_MEMORY_DEVICE);
@@ -41,7 +41,7 @@ void csr_spmm_create_ija(HYPRE_Int m, HYPRE_Int *d_c, HYPRE_Int **d_i, HYPRE_Int
    HYPRE_THRUST_CALL(inclusive_scan, d_c, d_c + m, *d_i + 1);
 
    /* total size */
-   hypre_Memcpy(nnz, (*d_i) + m, sizeof(HYPRE_Int), HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(nnz, (*d_i) + m, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
    if (d_j)
    {
