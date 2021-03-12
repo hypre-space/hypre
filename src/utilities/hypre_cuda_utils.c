@@ -17,7 +17,7 @@ hypreCUDAKernel_CompileFlagSafetyCheck(HYPRE_Int cuda_arch_actual)
    if (cuda_arch_actual != __CUDA_ARCH__)
    {
       printf("ERROR: Compile arch flags %d does not match actual device arch = sm_%d\n", __CUDA_ARCH__, cuda_arch_actual);
-      assert(0);
+      hypre_device_assert(0);
    }
 #endif
 }

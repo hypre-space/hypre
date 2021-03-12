@@ -37,10 +37,10 @@ hypre_CSRMatrixToCusparseSpMat_core( HYPRE_Int      n,
    cusparseSpMatDescr_t matA;
 
    /*
-   assert( (hypre_CSRMatrixNumRows(A) - offset != 0) &&
-           (hypre_CSRMatrixNumCols(A) != 0) &&
-           (hypre_CSRMatrixNumNonzeros(A) != 0) &&
-           "Matrix has no nonzeros");
+   hypre_assert( (hypre_CSRMatrixNumRows(A) - offset != 0) &&
+                 (hypre_CSRMatrixNumCols(A) != 0) &&
+                 (hypre_CSRMatrixNumNonzeros(A) != 0) &&
+                 "Matrix has no nonzeros");
    */
 
    HYPRE_CUSPARSE_CALL( cusparseCreateCsr(&matA,

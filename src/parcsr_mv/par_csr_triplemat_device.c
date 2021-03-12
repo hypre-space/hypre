@@ -486,9 +486,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
 
-#ifdef HYPRE_DEBUG
    hypre_assert(!hypre_CSRMatrixCheckDiagFirstDevice(hypre_ParCSRMatrixDiag(C)));
-#endif
 
    hypre_SyncCudaComputeStream(hypre_handle());
 
@@ -802,9 +800,7 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
 
-#ifdef HYPRE_DEBUG
    hypre_assert(!hypre_CSRMatrixCheckDiagFirstDevice(hypre_ParCSRMatrixDiag(C)));
-#endif
 
    hypre_SyncCudaComputeStream(hypre_handle());
 

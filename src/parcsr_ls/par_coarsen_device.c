@@ -389,9 +389,8 @@ hypreCUDAKernel_PMISCoarseningUpdateCF(HYPRE_Int   graph_diag_size,
    }
    else
    {
-#if defined(HYPRE_DEBUG)
       hypre_device_assert(marker_row == 0);
-#endif
+
       /*-------------------------------------------------
        * Now treat the case where this node is not in the
        * independent set: loop over

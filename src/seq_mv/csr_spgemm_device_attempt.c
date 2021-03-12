@@ -192,11 +192,9 @@ csr_spmm_attempt(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
    __shared__ volatile char s_failed[NUM_WARPS_PER_BLOCK];
    volatile char *warp_s_failed = s_failed + warp_id;
 
-#if defined(HYPRE_DEBUG)
    hypre_device_assert(blockDim.z              == NUM_WARPS_PER_BLOCK);
    hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
    hypre_device_assert(NUM_WARPS_PER_BLOCK <= HYPRE_WARP_SIZE);
-#endif
 
    for (HYPRE_Int i = blockIdx.x * NUM_WARPS_PER_BLOCK + warp_id;
             i < M;
@@ -358,9 +356,7 @@ copy_from_hash_into_C(HYPRE_Int  M,   HYPRE_Int *js,  HYPRE_Complex *as,
    /* lane id inside the warp */
    volatile const HYPRE_Int lane_id = get_lane_id();
 
-#if defined(HYPRE_DEBUG)
    hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
-#endif
 
    for (HYPRE_Int i = blockIdx.x * NUM_WARPS_PER_BLOCK + warp_id;
             i < M;
