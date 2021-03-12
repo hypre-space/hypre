@@ -38,7 +38,12 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 #define hypre_device_assert(EX)
 #endif
 #else /* #ifdef HYPRE_DEBUG */
-#define hypre_assert(EX)
+/* this is to silence compiler's unused variable warnings */
+#ifdef __cplusplus
+#define hypre_assert(EX) do { if (0) { static_cast<void> (EX); } } while (0)
+#else
+#define hypre_assert(EX) do { if (0) { (void) (EX); } } while (0)
+#endif
 #define hypre_device_assert(EX)
 #endif
 
