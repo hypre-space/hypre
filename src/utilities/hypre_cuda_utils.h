@@ -86,6 +86,15 @@
       assert(0); exit(1);                                                                    \
    } } while(0)
 
+
+// Currently, asserts in device kernels in HIP
+// do not behave well.
+#if defined(HYPRE_USING_CUDA)
+#define hypre_device_assert(EX) assert(EX)
+#elif defined(HYPRE_USING_HIP)
+#define hypre_device_assert(EX)
+#endif
+
 struct hypre_cub_CachingDeviceAllocator;
 typedef struct hypre_cub_CachingDeviceAllocator hypre_cub_CachingDeviceAllocator;
 
