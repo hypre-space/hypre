@@ -128,8 +128,8 @@ csr_spmm_compute_row_numer(HYPRE_Int  rowi,
                pos = hash_insert_numer<HashType, FAILED_SYMBL>
                      (g_HashSize, g_HashKeys, g_HashVals, k_idx, k_val, num_new_insert);
             }
-#if defined(HYPRE_DEBUG) && !defined(HYPRE_USING_HIP)
-            assert(pos != -1);
+#if defined(HYPRE_DEBUG)
+            hypre_device_assert(pos != -1);
 #endif
          }
       }
@@ -214,9 +214,9 @@ csr_spmm_numeric(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
    volatile HYPRE_Int  *warp_s_HashKeys = s_HashKeys + warp_id * SHMEM_HASH_SIZE;
    volatile HYPRE_Complex *warp_s_HashVals = s_HashVals + warp_id * SHMEM_HASH_SIZE;
 
-#if defined(HYPRE_DEBUG) && !defined(HYPRE_USING_HIP)
-   assert(blockDim.z              == NUM_WARPS_PER_BLOCK);
-   assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
+#if defined(HYPRE_DEBUG)
+   hypre_device_assert(blockDim.z              == NUM_WARPS_PER_BLOCK);
+   hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 #endif
 
    /* a warp working on the ith row */
@@ -289,14 +289,14 @@ csr_spmm_numeric(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
              (lane_id, warp_s_HashKeys, warp_s_HashVals, ghash_size, jg + istart_g,
               ag + istart_g, jc + istart_c, ac + istart_c);
 
-#if defined(HYPRE_DEBUG) && !defined(HYPRE_USING_HIP)
+#if defined(HYPRE_DEBUG)
       if (FAILED_SYMBL)
       {
-         assert(istart_c + j <= iend_c);
+         hypre_device_assert(istart_c + j <= iend_c);
       }
       else
       {
-         assert(istart_c + j == iend_c);
+         hypre_device_assert(istart_c + j == iend_c);
       }
 #endif
    }
@@ -315,8 +315,8 @@ copy_from_Cext_into_C(HYPRE_Int  M,
    /* lane id inside the warp */
    volatile const HYPRE_Int lane_id = get_lane_id();
 
-#if defined(HYPRE_DEBUG) && !defined(HYPRE_USING_HIP)
-   assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
+#if defined(HYPRE_DEBUG)
+   hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 #endif
 
    for (HYPRE_Int i = blockIdx.x * NUM_WARPS_PER_BLOCK + warp_id;
@@ -334,9 +334,9 @@ copy_from_Cext_into_C(HYPRE_Int  M,
       HYPRE_Int istart_c = __shfl_sync(HYPRE_WARP_FULL_MASK, kc, 0);
       HYPRE_Int iend_c   = __shfl_sync(HYPRE_WARP_FULL_MASK, kc, 1);
       HYPRE_Int istart_x = __shfl_sync(HYPRE_WARP_FULL_MASK, kx, 0);
-#if defined(HYPRE_DEBUG) && !defined(HYPRE_USING_HIP)
+#if defined(HYPRE_DEBUG)
       HYPRE_Int iend_x   = __shfl_sync(HYPRE_WARP_FULL_MASK, kx, 1);
-      assert(iend_c - istart_c <= iend_x - istart_x);
+      hypre_device_assert(iend_c - istart_c <= iend_x - istart_x);
 #endif
 
       HYPRE_Int p = istart_x - istart_c;

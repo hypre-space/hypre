@@ -261,9 +261,7 @@ hypreCUDAKernel_PMISCoarseningInit(HYPRE_Int   nrows,
    if (CF_init == 1)
    {
       // TODO
-#if !defined(HYPRE_USING_HIP)
-      assert(0);
-#endif
+      hypre_device_assert(0);
    }
    else
    {
@@ -391,8 +389,8 @@ hypreCUDAKernel_PMISCoarseningUpdateCF(HYPRE_Int   graph_diag_size,
    }
    else
    {
-#if defined(HYPRE_DEBUG) && !defined(HYPRE_USING_HIP)
-      assert(marker_row == 0);
+#if defined(HYPRE_DEBUG)
+      hypre_device_assert(marker_row == 0);
 #endif
       /*-------------------------------------------------
        * Now treat the case where this node is not in the

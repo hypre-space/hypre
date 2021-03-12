@@ -151,10 +151,10 @@ void csr_spmm_symbolic(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
 
    char failed = 0;
 
-#if defined(HYPRE_DEBUG) && !defined(HYPRE_USING_HIP)
-   assert(blockDim.z              == NUM_WARPS_PER_BLOCK);
-   assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
-   assert(NUM_WARPS_PER_BLOCK <= HYPRE_WARP_SIZE);
+#if defined(HYPRE_DEBUG)
+   hypre_device_assert(blockDim.z              == NUM_WARPS_PER_BLOCK);
+   hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
+   hypre_device_assert(NUM_WARPS_PER_BLOCK <= HYPRE_WARP_SIZE);
 #endif
 
    for (HYPRE_Int i = grid_warp_id; i < M; i += num_warps)
@@ -205,10 +205,10 @@ void csr_spmm_symbolic(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
                                                SHMEM_HASH_SIZE, warp_s_HashKeys,
                                                ghash_size, jg + istart_g, failed);
 
-#if defined(HYPRE_DEBUG) && !defined(HYPRE_USING_HIP)
+#if defined(HYPRE_DEBUG)
       if (ATTEMPT == 2)
       {
-         assert(failed == 0);
+         hypre_device_assert(failed == 0);
       }
 #endif
 
