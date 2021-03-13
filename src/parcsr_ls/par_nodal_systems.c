@@ -969,9 +969,9 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
          }
          for (j = SN_diag_i[in]; j < SN_diag_i[in+1]; j++)
          {
-            for (k = 0; k < num_functions; k++)
+            //for (k = 0; k < num_functions; k++)
             {
-               index = SN_diag_j[j]*num_functions+k;
+               index = SN_diag_j[j]*num_functions+kn;
                index_A = S_marker[index];
                if (index_A > position) 
                {
@@ -1026,9 +1026,9 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
          }
          for (j = SN_offd_i[in]; j < SN_offd_i[in+1]; j++)
          {
-            for (k = 0; k < num_functions; k++)
+            //for (k = 0; k < num_functions; k++)
             {
-               big_index = col_map_offd_SN[SN_offd_j[j]]*num_functions+k;
+               big_index = col_map_offd_SN[SN_offd_j[j]]*num_functions+kn;
                index = hypre_BigBinarySearch(col_map_offd_A,big_index, num_cols_offd_A);
                if (index > -1) 
                {
