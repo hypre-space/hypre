@@ -113,16 +113,16 @@ struct hypre_umpire_device_allocator
    if (cudaSuccess != err) {                                                                 \
       hypre_printf("CUDA ERROR (code = %d, %s) at %s:%d\n", err, cudaGetErrorString(err),    \
                    __FILE__, __LINE__);                                                      \
-      assert(0); exit(1);                                                                    \
+      hypre_assert(0); exit(1);                                                              \
    } } while(0)
 
 #elif defined(HYPRE_USING_HIP)
 #define HYPRE_HIP_CALL(call) do {                                                           \
    hipError_t err = call;                                                                   \
    if (hipSuccess != err) {                                                                 \
-      hypre_printf("HIP ERROR (code = %d, %s) at %s:%d\n", err, hipGetErrorString(err),    \
+      hypre_printf("HIP ERROR (code = %d, %s) at %s:%d\n", err, hipGetErrorString(err),     \
                    __FILE__, __LINE__);                                                     \
-      assert(0); exit(1);                                                                   \
+      hypre_assert(0); exit(1);                                                             \
    } } while(0)
 
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
@@ -132,7 +132,7 @@ struct hypre_umpire_device_allocator
    if (CUBLAS_STATUS_SUCCESS != err) {                                                       \
       hypre_printf("CUBLAS ERROR (code = %d, %d) at %s:%d\n",                                \
             err, err == CUBLAS_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);                 \
-      assert(0); exit(1);                                                                    \
+      hypre_assert(0); exit(1);                                                              \
    } } while(0)
 
 #define HYPRE_CUSPARSE_CALL(call) do {                                                       \
@@ -140,7 +140,7 @@ struct hypre_umpire_device_allocator
    if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
       hypre_printf("CUSPARSE ERROR (code = %d, %s) at %s:%d\n",                              \
             err, cusparseGetErrorString(err), __FILE__, __LINE__);                           \
-      assert(0); exit(1);                                                                    \
+      hypre_assert(0); exit(1);                                                              \
    } } while(0)
 
 
@@ -148,7 +148,7 @@ struct hypre_umpire_device_allocator
    curandStatus_t err = call;                                                                \
    if (CURAND_STATUS_SUCCESS != err) {                                                       \
       hypre_printf("CURAND ERROR (code = %d) at %s:%d\n", err, __FILE__, __LINE__);          \
-      assert(0); exit(1);                                                                    \
+      hypre_assert(0); exit(1);                                                              \
    } } while(0)
 
 struct hypre_cub_CachingDeviceAllocator;
