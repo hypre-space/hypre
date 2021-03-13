@@ -1152,7 +1152,7 @@ hypre_bind_device( HYPRE_Int myid,
    device_id = myNodeid % nDevices;
    hypre_SetDevice(device_id, NULL);
 
-#if defined(HYPRE_DEBUG) && defined(HYPRE_PRINT_ERRORS)
+#if defined(HYPRE_DEBUG)
    hypre_printf("Proc [global %d/%d, local %d/%d] can see %d GPUs and is running on %d\n",
                 myid, nproc, myNodeid, NodeSize, nDevices, device_id);
 #endif

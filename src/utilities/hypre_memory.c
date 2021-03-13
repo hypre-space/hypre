@@ -1433,12 +1433,11 @@ HYPRE_Int
 hypre_umpire_device_pooled_allocate(void **ptr, size_t nbytes)
 {
    hypre_Handle *handle = hypre_handle();
-   //const hypre_int device_id = hypre_HandleCudaDevice(handle);
-   const char *resource_name = "DEVICE";
-   //char resource_name[16];
+   const hypre_int device_id = hypre_HandleCudaDevice(handle);
+   char resource_name[16];
    const char *pool_name = hypre_HandleUmpireDevicePoolName(handle);
 
-   //hypre_sprintf(resource_name, "%s::%d", "DEVICE", device_id);
+   hypre_sprintf(resource_name, "%s::%d", "DEVICE", device_id);
 
    umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);
    umpire_allocator pooled_allocator;
@@ -1486,12 +1485,8 @@ HYPRE_Int
 hypre_umpire_um_pooled_allocate(void **ptr, size_t nbytes)
 {
    hypre_Handle *handle = hypre_handle();
-   //const hypre_int device_id = hypre_HandleCudaDevice(handle);
-   //char resource_name[16];
    const char *resource_name = "UM";
    const char *pool_name = hypre_HandleUmpireUMPoolName(handle);
-
-   //hypre_sprintf(resource_name, "%s::%d", "UM", device_id);
 
    umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);
    umpire_allocator pooled_allocator;
@@ -1540,11 +1535,7 @@ hypre_umpire_pinned_pooled_allocate(void **ptr, size_t nbytes)
 {
    hypre_Handle *handle = hypre_handle();
    const char *resource_name = "PINNED";
-   //const hypre_int device_id = hypre_HandleCudaDevice(handle);
-   //char resource_name[16];
    const char *pool_name = hypre_HandleUmpirePinnedPoolName(handle);
-
-   //hypre_sprintf(resource_name, "%s::%d", "PINNED", device_id);
 
    umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);
    umpire_allocator pooled_allocator;
