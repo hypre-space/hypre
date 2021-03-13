@@ -65,9 +65,7 @@ void csr_spmm_rownnz_naive(HYPRE_Int M, /*HYPRE_Int K,*/ HYPRE_Int N, HYPRE_Int 
    /* lane id inside the warp */
    volatile const HYPRE_Int lane_id = get_lane_id();
 
-#ifdef HYPRE_DEBUG
-   assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
-#endif
+   hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 
    for (HYPRE_Int i = blockIdx.x * NUM_WARPS_PER_BLOCK + warp_id;
             i < M;
@@ -112,9 +110,7 @@ void expdistfromuniform(HYPRE_Int n, float *x)
    const HYPRE_Int global_thread_id  = blockIdx.x * get_block_size() + get_thread_id();
    const HYPRE_Int total_num_threads = gridDim.x  * get_block_size();
 
-#ifdef HYPRE_DEBUG
-   assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
-#endif
+   hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 
    for (HYPRE_Int i = global_thread_id; i < n; i += total_num_threads)
    {
@@ -138,11 +134,9 @@ void cohen_rowest_kernel(HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T
    volatile HYPRE_Int  *warp_s_col = s_col + warp_id * SHMEM_SIZE_PER_WARP;
 #endif
 
-#ifdef HYPRE_DEBUG
-   assert(blockDim.z              == NUM_WARPS_PER_BLOCK);
-   assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
-   assert(sizeof(T) == sizeof(float));
-#endif
+   hypre_device_assert(blockDim.z              == NUM_WARPS_PER_BLOCK);
+   hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
+   hypre_device_assert(sizeof(T) == sizeof(float));
 
    for (HYPRE_Int i = blockIdx.x * NUM_WARPS_PER_BLOCK + warp_id;
             i < nrow;
@@ -205,9 +199,8 @@ void cohen_rowest_kernel(HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T
                HYPRE_Int colk = __shfl_sync(HYPRE_WARP_FULL_MASK, col, k);
                if (colk == -1)
                {
-#ifdef HYPRE_DEBUG
-                  assert(j + HYPRE_WARP_SIZE >= iend);
-#endif
+                  hypre_device_assert(j + HYPRE_WARP_SIZE >= iend);
+
                   break;
                }
                if (r + lane_id < nsamples)

@@ -28,9 +28,7 @@
 #include "HYPRE_krylov.h"
 
 #if defined(HYPRE_USING_GPU)
-#include <cuda.h>
-#include <cuda_runtime.h>
-#include <cuda_profiler_api.h>
+#include "_hypre_utilities.hpp"
 #endif
 
 #if defined(HYPRE_USING_UMPIRE)
@@ -3254,7 +3252,7 @@ main( hypre_int argc,
       }
 
 #if defined(HYPRE_USING_GPU)
-      cudaDeviceSynchronize();
+      hypre_SyncCudaDevice(hypre_handle());
 #endif
 
       hypre_EndTiming(time_index);
@@ -3586,7 +3584,7 @@ main( hypre_int argc,
 #endif
 
 #if defined(HYPRE_USING_GPU)
-      cudaDeviceSynchronize();
+      hypre_SyncCudaDevice(hypre_handle());
 #endif
 
       hypre_EndTiming(time_index);
@@ -3624,7 +3622,7 @@ main( hypre_int argc,
 #endif
 
 #if defined(HYPRE_USING_GPU)
-      cudaDeviceSynchronize();
+      hypre_SyncCudaDevice(hypre_handle());
 #endif
 
       hypre_EndTiming(time_index);
@@ -3685,7 +3683,7 @@ main( hypre_int argc,
 #endif
 
 #if defined(HYPRE_USING_GPU)
-      cudaDeviceSynchronize();
+      hypre_SyncCudaDevice(hypre_handle());
 #endif
 
       tt = hypre_MPI_Wtime() - tt;
@@ -3717,7 +3715,7 @@ main( hypre_int argc,
 #endif
 
 #if defined(HYPRE_USING_GPU)
-      cudaDeviceSynchronize();
+      hypre_SyncCudaDevice(hypre_handle());
 #endif
 
       tt = hypre_MPI_Wtime() - tt;
@@ -7539,8 +7537,10 @@ main( hypre_int argc,
    hypre_MPI_Finalize();
 
    /* when using cuda-memcheck --leak-check full, uncomment this */
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_CUDA)
    cudaDeviceReset();
+#elif defined(HYPRE_USING_HIP)
+   hipDeviceReset();
 #endif
 
    return (0);
