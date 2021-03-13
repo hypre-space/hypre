@@ -8876,10 +8876,12 @@ done
         LINK_CC=${HIPCC}
         LINK_CXX=${HIPCC}
 
-                                        HIPCXXFLAGS="-O2 -x hip -Wall"
+                                HIPCXXFLAGS="-x hip"
 
-        if test x"$hypre_using_debug" == x"yes"; then :
-  HIPCXXFLAGS="-g -ggdb ${HIPCXXFLAGS}"
+                                if test x"$hypre_using_debug" == x"yes"; then :
+  HIPCXXFLAGS="-O0 -Wall -g -ggdb ${HIPCXXFLAGS}"
+elif HIPCXXFLAGS="-O2 ${HIPCXXFLAGS}"; then :
+
 fi
 
                         CUFLAGS="${HIPCPPFLAGS} ${HIPCXXFLAGS} ${CXXFLAGS}"

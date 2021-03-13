@@ -2042,14 +2042,17 @@ AS_IF([test x"$hypre_user_chose_hip" == x"yes"],
         LINK_CC=${HIPCC}
         LINK_CXX=${HIPCC}
 
-        dnl At least -O2, but the user can override with CFLAGS/CXXFLAGS on the configure line.
         dnl The "-x hip" is necessary to override the detection of .c files which clang
         dnl interprets as C and therefore invokes the C compiler rather than the HIP part
         dnl of clang.
-        HIPCXXFLAGS="-O2 -x hip -Wall"
+        HIPCXXFLAGS="-x hip"
 
+        dnl If not in debug mode, at least -O2, but the user can override with
+        dnl CFLAGS/CXXFLAGS on the configure line. If in debug mode, -O0 -Wall
+        dnl plus flags for debugging symbols
         AS_IF([test x"$hypre_using_debug" == x"yes"],
-              [HIPCXXFLAGS="-g -ggdb ${HIPCXXFLAGS}"])
+              [HIPCXXFLAGS="-O0 -Wall -g -ggdb ${HIPCXXFLAGS}"],
+              [HIPCXXFLAGS="-O2 ${HIPCXXFLAGS}"],)
 
         dnl (Ab)Use CUFLAGS to capture HIP compilation flags
         dnl Put CXXFLAGS at the end so the user can override the optimization level.
