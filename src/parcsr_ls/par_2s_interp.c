@@ -695,7 +695,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpHost( hypre_ParCSRMatrix  *A,
    start_array = hypre_CTAlloc(HYPRE_Int, num_threads+1, HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel private(i,j,start,stop,startf,stopf,startnewf,stopnewf,row,fpt)
+#pragma omp parallel private(i,j,start,stop,startf,stopf,startnewf,stopnewf,row,fpt,index)
 #endif
    {
       HYPRE_Int my_thread_num = hypre_GetThreadNum();
@@ -851,6 +851,9 @@ hypre_BoomerAMGBuildModPartialExtPEInterpHost( hypre_ParCSRMatrix  *A,
          }
       }
 
+#ifdef HYPRE_USING_OPENMP
+#pragma omp barrier
+#endif
       /* Create D_w = D_alpha + D_gamma + D_tau */
       row = 0;
       if (my_thread_num) row = new_fpt_array[my_thread_num-1];
@@ -938,7 +941,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpHost( hypre_ParCSRMatrix  *A,
    }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel private(i,j,start,stop,startnewf,stopnewf,c_pt,row,cnt_diag,cnt_offd)
+#pragma omp parallel private(i,j,start,stop,c_pt,row,cnt_diag,cnt_offd)
 #endif
    {
       HYPRE_Int rowp;
