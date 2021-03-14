@@ -969,15 +969,14 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
          }
          for (j = SN_diag_i[in]; j < SN_diag_i[in+1]; j++)
          {
-            //for (k = 0; k < num_functions; k++)
+            // only include diagonal elements of block, assuming unknown-based 
+            // approach for interpolation, i.e. ignore connections between different variables
+            index = SN_diag_j[j]*num_functions+kn;
+            index_A = S_marker[index];
+            if (index_A > position) 
             {
-               index = SN_diag_j[j]*num_functions+kn;
-               index_A = S_marker[index];
-               if (index_A > position) 
-               {
-                  S_tmp_j[index_A] = A_diag_j[index_A];
-                  S_cnt++;
-               }
+               S_tmp_j[index_A] = A_diag_j[index_A];
+               S_cnt++;
             }
          }
          S_diag_i[i+1] = S_cnt;
@@ -995,7 +994,6 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
    } 
 
    S_num_nonzeros_diag = S_cnt;
-   //Generate S_offd_i and S_offd_j . This is more tricky!
 
    for (i=0; i < A_num_nonzeros_offd; i++)
    {
@@ -1026,18 +1024,15 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
          }
          for (j = SN_offd_i[in]; j < SN_offd_i[in+1]; j++)
          {
-            //for (k = 0; k < num_functions; k++)
+            big_index = col_map_offd_SN[SN_offd_j[j]]*num_functions+kn;
+            index = hypre_BigBinarySearch(col_map_offd_A,big_index, num_cols_offd_A);
+            if (index > -1) 
             {
-               big_index = col_map_offd_SN[SN_offd_j[j]]*num_functions+kn;
-               index = hypre_BigBinarySearch(col_map_offd_A,big_index, num_cols_offd_A);
-               if (index > -1) 
+               index_A = S_marker_offd[index];
+               if (index_A > position) 
                {
-                  index_A = S_marker_offd[index];
-                  if (index_A > position) 
-                  {
-                     S_tmp_j[index_A] = A_offd_j[index_A];
-                     S_cnt++;
-                  }
+                  S_tmp_j[index_A] = A_offd_j[index_A];
+                  S_cnt++;
                }
             }
          }
