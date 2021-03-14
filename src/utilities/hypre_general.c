@@ -80,7 +80,7 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
    return hypre_error_flag;
 }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
 /* use_device == -1 to let Hypre decide on which device to use */
 HYPRE_Int
 hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_)
@@ -99,9 +99,26 @@ hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_)
    hypre_MPI_Comm_size(node_comm, &NodeSize);
    hypre_MPI_Comm_free(&node_comm);
 
-   HYPRE_Int nDevices;
+   HYPRE_Int nDevices=0;
+
 #if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaGetDeviceCount(&nDevices) );
+#elif defined(HYPRE_USING_SYCL)
+   cl::sycl::gpu_selector device_selector;
+   cl::sycl::platform platform(device_selector);
+   auto const& gpu_devices = platform.get_devices();
+   for (int i = 0; i < gpu_devices.size(); i++) {
+     if (gpu_devices[i].is_gpu()) {
+       if(gpu_devices[i].get_info<cl::sycl::info::device::partition_max_sub_devices>() > 0) {
+	 auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<cl::sycl::info::partition_property::partition_by_affinity_domain>(
+	   cl::sycl::info::partition_affinity_domain::numa);
+	 nDevices += subDevicesDomainNuma.size();
+       }
+       else {
+	 nDevices++;
+       }
+     }
+   }
 #else
    nDevices = omp_get_num_devices();
 #endif
@@ -117,12 +134,39 @@ hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_)
 
 #if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaSetDevice(device_id) );
+#elif defined(HYPRE_USING_SYCL)
+   HYPRE_Int local_nDevices=0;
+
+   for (int i = 0; i < gpu_devices.size(); i++) {
+     if (gpu_devices[i].is_gpu()) {
+       // multi-tile GPUs
+       if (gpu_devices[i].get_info<cl::sycl::info::device::partition_max_sub_devices>() > 0) {
+         auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<cl::sycl::info::partition_property::partition_by_affinity_domain>(
+           cl::sycl::info::partition_affinity_domain::numa);
+         for (const auto &tile : SubDevicesDomainNuma) {
+           if (local_nDevices == device_id) {
+             hypre_HandleSyclDevice(hypre_handle_) = tile;
+           }
+           local_nDevices++;
+         }
+       }
+       // single-tile GPUs
+       else {
+         if (local_nDevices == device_id) {
+           hypre_HandleSyclDevice(hypre_handle_) = gpu_devices[i];
+         }
+         local_nDevices++;
+       }
+     }
+   }
 #else
    HYPRE_CUDA_CALL( cudaSetDevice(device_id) );
    omp_set_default_device(device_id);
 #endif
 
+#if !defined(HYPRE_USING_SYCL)
    hypre_HandleCudaDevice(hypre_handle_) = device_id;
+#endif
 
 #if defined(HYPRE_DEBUG) && defined(HYPRE_PRINT_ERRORS)
    hypre_printf("Proc [global %d/%d, local %d/%d] can see %d GPUs and is running on %d\n",
@@ -132,7 +176,7 @@ hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_)
    return hypre_error_flag;
 }
 
-#endif //#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#endif //#if defined(HYPRE_USING_GPU)
 
 /******************************************************************************
  *
@@ -489,4 +533,3 @@ HYPRE_GetExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy)
 
    return hypre_error_flag;
 }
-
