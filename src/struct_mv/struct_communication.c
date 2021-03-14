@@ -846,7 +846,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 #if defined(HYPRE_USING_GPU)
 #if defined(HYPRE_USING_RAJA) || defined(HYPRE_USING_KOKKOS)
    alloc_dev_buffer = 1;
-#elif defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    alloc_dev_buffer = (hypre_HandleStructExecPolicy(hypre_handle()) == HYPRE_EXEC_DEVICE);
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    alloc_dev_buffer = hypre__global_offload;
@@ -1218,7 +1218,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 #if defined(HYPRE_USING_GPU)
 #if defined(HYPRE_USING_RAJA) || defined(HYPRE_USING_KOKKOS)
    alloc_dev_buffer = 1;
-#elif defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    alloc_dev_buffer = (hypre_HandleStructExecPolicy(hypre_handle()) == HYPRE_EXEC_DEVICE);
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    alloc_dev_buffer = hypre__global_offload;

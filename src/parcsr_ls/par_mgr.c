@@ -2006,7 +2006,7 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
   for (i = 0; i < n_local_fine_grid; i++)
   {
     HYPRE_Int point_type = CF_marker[i];
-    assert(point_type == 1 || point_type == -1);
+    hypre_assert(point_type == 1 || point_type == -1);
     c_marker[i] = point_type;
     f_marker[i] = -point_type;
   }

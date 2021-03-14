@@ -85,7 +85,7 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
 
    hypre_StructStencil   *stencil;
    hypre_StructMatrix    *Ac_tmp;
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_MemoryLocation data_location_A = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
    HYPRE_MemoryLocation data_location_Ac = hypre_StructGridDataLocation(hypre_StructMatrixGrid(Ac));
    if (data_location_A != data_location_Ac)
@@ -189,7 +189,7 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
 
    hypre_StructMatrixAssemble(Ac_tmp);
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    if (data_location_A != data_location_Ac)
    {
 
@@ -203,4 +203,3 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
 #endif
    return hypre_error_flag;
 }
-

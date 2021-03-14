@@ -9,7 +9,7 @@
 #include "aux_interp.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 #define MAX_C_CONNECTIONS 100
 #define HAVE_COMMON_C 1
@@ -1409,5 +1409,4 @@ void hypreCUDAKernel_compute_dlam_dtmp( HYPRE_Int      nr_of_rows,
    }
 }
 
-#endif
-
+#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)

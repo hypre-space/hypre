@@ -201,7 +201,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          {
             HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
             if (hypre_StructGridDataLocation(hypre_StructVectorGrid(r_l[l])) == HYPRE_MEMORY_HOST)
             {
                hypre_SetDeviceOff();
@@ -273,7 +273,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 
          for (l = (num_levels - 2); l >= 1; l--)
          {
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
             if (hypre_StructGridDataLocation(hypre_StructVectorGrid(e_l[l])) == HYPRE_MEMORY_DEVICE)
             {
                hypre_SetDeviceOn();
@@ -305,7 +305,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
                hypre_PFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
             }
          }
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          if (hypre_StructGridDataLocation(hypre_StructVectorGrid(e_l[0])) == HYPRE_MEMORY_DEVICE)
          {
             hypre_SetDeviceOn();
