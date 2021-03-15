@@ -96,7 +96,7 @@ hypreDevice_CSRSpTransCusparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 HYPRE_Int
 hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int       nnzA,
@@ -180,5 +180,4 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    return hypre_error_flag;
 }
 
-#endif /* HYPRE_USING_CUDA */
-
+#endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */

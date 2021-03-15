@@ -8,7 +8,7 @@
 #include "_hypre_parcsr_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 /* option == 1, T = HYPRE_BigInt
  * option == 2, T = HYPRE_Int,
@@ -811,5 +811,4 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
    return C;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA)
-
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)

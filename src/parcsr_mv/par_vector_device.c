@@ -7,7 +7,7 @@
 #include "_hypre_parcsr_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 HYPRE_Int
 hypre_ParVectorGetValuesDevice(hypre_ParVector *vector,
@@ -66,5 +66,4 @@ hypre_ParVectorGetValuesDevice(hypre_ParVector *vector,
    return hypre_error_flag;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA)
-
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
