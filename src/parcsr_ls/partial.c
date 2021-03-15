@@ -1640,8 +1640,8 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
                   ahat_offd[jj] = 0;
                }
             }
-            if (sum_neg_C*diagonal) alfa = sum_neg/sum_neg_C/diagonal;
-            if (sum_pos_C*diagonal) beta = sum_pos/sum_pos_C/diagonal;
+            if (sum_neg_C*diagonal != 0.0) alfa = sum_neg/sum_neg_C/diagonal;
+            if (sum_pos_C*diagonal != 0.0) beta = sum_pos/sum_pos_C/diagonal;
 
             /*-----------------------------------------------------------------
              * Set interpolation weight by dividing by the diagonal.
@@ -1703,7 +1703,7 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
                   ahat_offd[jj] = 0;
                }
             }
-            if (sum_C*diagonal) alfa = sum/sum_C/diagonal;
+            if (sum_C*diagonal != 0.0) alfa = sum/sum_C/diagonal;
 
             /*-----------------------------------------------------------------
              * Set interpolation weight by dividing by the diagonal.
@@ -2568,4 +2568,3 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
 
    return hypre_error_flag;
 }
-

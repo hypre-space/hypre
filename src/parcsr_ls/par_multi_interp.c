@@ -1861,7 +1861,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                   }
                }
                diagonal = A_diag_data[A_diag_i[i1]];
-               if (sum_C*diagonal) alfa = -sum_N/(sum_C*diagonal);
+               if (sum_C*diagonal != 0.0) alfa = -sum_N/(sum_C*diagonal);
 
                for (j=P_diag_i[i1]; j < P_diag_i[i1+1]; j++)
                   P_diag_data[j] *= alfa;
