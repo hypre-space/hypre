@@ -1069,15 +1069,6 @@ hypre_MemoryTrackerInsert(const char           *action,
    /* -1 is the initial value */
    entry->_pair = (size_t) -1;
 
-   /*
-   HYPRE_Int myid;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
-   if (myid == 0 && tracker->actual_size == 3655)
-   {
-      assert(0);
-   }
-   */
-
    tracker->actual_size ++;
 }
 
