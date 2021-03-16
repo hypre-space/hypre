@@ -310,21 +310,21 @@ void hypre_BoomerAMGCreateS_rowcount( cl::sycl::nd_item<1>& item,
       }
    }
 
-   diag = warp_allreduce_sum(diag);
+   diag = warp_allreduce_sum(diag, item);
 
    /* sign of diag */
    const HYPRE_Int sdiag = diag > 0.0 ? 1 : -1;
 
    /* compute scaling factor and row sum */
-   row_sum = warp_allreduce_sum(row_sum);
+   row_sum = warp_allreduce_sum(row_sum, item);
 
    if (diag > 0.0)
    {
-      row_scale = warp_allreduce_min(row_min);
+     row_scale = warp_allreduce_min(row_min, item);
    }
    else
    {
-      row_scale = warp_allreduce_max(row_max);
+     row_scale = warp_allreduce_max(row_max, item);
    }
 
    /* compute row of S */
@@ -365,8 +365,8 @@ void hypre_BoomerAMGCreateS_rowcount( cl::sycl::nd_item<1>& item,
       }
    }
 
-   row_nnz_diag = warp_reduce_sum(row_nnz_diag);
-   row_nnz_offd = warp_reduce_sum(row_nnz_offd);
+   row_nnz_diag = warp_reduce_sum(row_nnz_diag, item);
+   row_nnz_offd = warp_reduce_sum(row_nnz_offd, item);
 
    if (0 == lane)
    {

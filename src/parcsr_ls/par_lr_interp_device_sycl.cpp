@@ -754,7 +754,7 @@ void hypreSYCLKernel_compute_weak_rowsums( cl::sycl::nd_item<1>& item,
       }
    }
 
-   rl = warp_reduce_sum(rl);
+   rl = warp_reduce_sum(rl, item);
 
    if (lane == 0)
    {
@@ -1095,7 +1095,7 @@ void hypreSYCLKernel_compute_twiaff_w( cl::sycl::nd_item<1>& item,
             break;
          }
       }
-      kmatch = warp_reduce_max(kmatch);
+      kmatch = warp_reduce_max(kmatch, item);
 
       if (lane == 0)
       {
@@ -1147,7 +1147,7 @@ void hypreSYCLKernel_compute_twiaff_w( cl::sycl::nd_item<1>& item,
             break;
          }
       }
-      kmatch = warp_reduce_max(kmatch);
+      kmatch = warp_reduce_max(kmatch, item);
 
       if (lane == 0)
       {
@@ -1259,7 +1259,7 @@ void hypreSYCLKernel_compute_aff_afc_epe( cl::sycl::nd_item<1>& item,
       }
    }
 
-   dtau_i = warp_reduce_sum(dtau_i);
+   dtau_i = warp_reduce_sum(dtau_i, item);
 
    if (lane == 0)
    {
@@ -1388,8 +1388,8 @@ void hypreSYCLKernel_compute_dlam_dtmp( cl::sycl::nd_item<1>& item,
     }
   }
 
-  row_sum = warp_reduce_sum(row_sum);
-  find_diag = warp_reduce_sum(find_diag);
+  row_sum = warp_reduce_sum(row_sum, item);
+  find_diag = warp_reduce_sum(find_diag, item);
 
   if (lane == 0)
   {
