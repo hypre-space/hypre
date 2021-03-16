@@ -2239,7 +2239,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
               if (P)
               {
                  hypre_ParCSRMatrixTranspose(P, &PT, 1);
-                 hypre_ParcsrAddv(adapv, PT, NULL, R, &R_new, 1);
+                 hypre_ParcsrAddv(adapv, PT, NULL, R, &R_new, 1, 1);
                  hypre_ParVectorDestroy(adapv);
                  hypre_ParCSRMatrixDestroy(PT);
                  hypre_TFree(hypre_ParCSRMatrixRowStarts(R_new), HYPRE_MEMORY_HOST);

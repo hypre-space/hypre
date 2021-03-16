@@ -4812,8 +4812,9 @@ hypre_ParcsrGetExternalRowsWait(void *vrequest)
 /* C = alpha * A + beta * B, (alpha and beta are scalars)          or
  * C = Alpha * A + Beta * B  (Alpha and Beta are diagonal matrices),
  * if Alpha/Beta != NULL, alpha/beta is ignored
- * Special Option:
- *    Option == 1: Beta (ignored) == I - Alpha
+ * Special Options (when != NULL)
+ *    Option[0] = 1: Beta (which is ignored) = I - Alpha
+ *    Option[1] = 1: skip zeros in Alpha and beta
  * A and B are assumed to have the same row and column partitionings */
 HYPRE_Int
 hypre_ParcsrAdd_core( HYPRE_Complex        alpha,
@@ -4823,14 +4824,16 @@ hypre_ParcsrAdd_core( HYPRE_Complex        alpha,
                       hypre_ParVector     *Beta,
                       hypre_ParCSRMatrix  *B,
                       hypre_ParCSRMatrix **Cout,
-                      HYPRE_Int            Option)
+                      HYPRE_Int           *Options)
 {
    MPI_Comm         comm     = hypre_ParCSRMatrixComm(A);
+   HYPRE_Int        i, j;
+   HYPRE_Int        betaoneminusalpha = Options ? Options[0] == 1 : 0;
+   HYPRE_Int        skipzeroalphabeta = Options ? Options[1] == 1 : 0;
    HYPRE_Int        num_procs, my_id;
+
    hypre_MPI_Comm_rank(comm, &my_id);
    hypre_MPI_Comm_size(comm, &num_procs);
-
-   HYPRE_Int i, j;
 
    /* diag part of A */
    hypre_CSRMatrix *A_diag   = hypre_ParCSRMatrixDiag(A);
@@ -4937,7 +4940,8 @@ hypre_ParcsrAdd_core( HYPRE_Complex        alpha,
 
       HYPRE_Complex alpha_i = Alpha_local_data ? Alpha_local_data[i] : alpha;
       HYPRE_Complex beta_i = 0.0;
-      if (Option == 1)
+
+      if (betaoneminusalpha == 1)
       {
          beta_i = 1.0 - alpha_i;
       }
@@ -4946,46 +4950,55 @@ hypre_ParcsrAdd_core( HYPRE_Complex        alpha,
          beta_i = Beta_local_data ? Beta_local_data[i] : beta;
       }
 
-      for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
+      /* diag part */
+      /* Ci = Alpha_i * Ai */
+      if (skipzeroalphabeta == 0 || alpha_i != 0.0)
       {
-         HYPRE_Int     col = A_diag_j[j];
-         HYPRE_Complex val = A_diag_a[j];
-         if (marker_diag[col] < diag_i_start)
+         for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
          {
-            /* this col has not been seen before, create new entry */
-            marker_diag[col] = nnz_diag_C;
-            C_diag_j[nnz_diag_C] = col;
-            C_diag_a[nnz_diag_C] = alpha_i * val;
-            nnz_diag_C ++;
-         }
-         else
-         {
-            /* this should not happen */
-            hypre_printf("hypre warning: invalid ParCSR matrix %s %s %d\n",
-                         __FILE__, __func__, __LINE__);
+            HYPRE_Int     col = A_diag_j[j];
+            HYPRE_Complex val = A_diag_a[j];
+            if (marker_diag[col] < diag_i_start)
+            {
+               /* this col has not been seen before, create new entry */
+               marker_diag[col] = nnz_diag_C;
+               C_diag_j[nnz_diag_C] = col;
+               C_diag_a[nnz_diag_C] = alpha_i * val;
+               nnz_diag_C ++;
+            }
+            else
+            {
+               /* this should not happen */
+               hypre_printf("hypre warning: invalid ParCSR matrix %s %s %d\n",
+                     __FILE__, __func__, __LINE__);
+            }
          }
       }
 
-      for (j = B_diag_i[i]; j < B_diag_i[i+1]; j++)
+      /* Ci += Beta_i * Bi */
+      if (skipzeroalphabeta == 0 || beta_i != 0.0)
       {
-         HYPRE_Int     col = B_diag_j[j];
-         HYPRE_Complex val = B_diag_a[j];
-         if (marker_diag[col] < diag_i_start /*&& hypre_abs(val) > 0.0*/)
+         for (j = B_diag_i[i]; j < B_diag_i[i+1]; j++)
          {
-            /* this col has not been seen before, create new entry */
-            marker_diag[col] = nnz_diag_C;
-            C_diag_j[nnz_diag_C] = col;
-            C_diag_a[nnz_diag_C] = beta_i * val;
-            nnz_diag_C ++;
-         }
-         else
-         {
-            /* existing entry, update */
-            HYPRE_Int p = marker_diag[col];
+            HYPRE_Int     col = B_diag_j[j];
+            HYPRE_Complex val = B_diag_a[j];
+            if (marker_diag[col] < diag_i_start /*&& hypre_abs(val) > 0.0*/)
+            {
+               /* this col has not been seen before, create new entry */
+               marker_diag[col] = nnz_diag_C;
+               C_diag_j[nnz_diag_C] = col;
+               C_diag_a[nnz_diag_C] = beta_i * val;
+               nnz_diag_C ++;
+            }
+            else
+            {
+               /* existing entry, update */
+               HYPRE_Int p = marker_diag[col];
 
-            hypre_assert(C_diag_j[p] == col);
+               hypre_assert(C_diag_j[p] == col);
 
-            C_diag_a[p] += beta_i * val;
+               C_diag_a[p] += beta_i * val;
+            }
          }
       }
 
@@ -4996,60 +5009,67 @@ hypre_ParcsrAdd_core( HYPRE_Complex        alpha,
          continue;
       }
 
-      for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
+      /* offd part */
+      /* Ci = Alpha_i * Ai */
+      if (skipzeroalphabeta == 0 || alpha_i != 0.0)
       {
-         HYPRE_Int     colA = A_offd_j[j];
-         HYPRE_Int     colC = A2C_offd[colA];
-         HYPRE_Complex val  = A_offd_a[j];
-         if (marker_offd[colC] < offd_i_start)
+         for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
          {
-            /* this col has not been seen before, create new entry */
-            marker_offd[colC] = nnz_offd_C;
-            C_offd_j[nnz_offd_C] = colC;
-            C_offd_a[nnz_offd_C] = alpha_i * val;
-            nnz_offd_C ++;
-         }
-         else
-         {
-            /* this should not happen */
-            hypre_printf("hypre warning: invalid ParCSR matrix %s %s %d\n",
-                         __FILE__, __func__, __LINE__);
+            HYPRE_Int     colA = A_offd_j[j];
+            HYPRE_Int     colC = A2C_offd[colA];
+            HYPRE_Complex val  = A_offd_a[j];
+            if (marker_offd[colC] < offd_i_start)
+            {
+               /* this col has not been seen before, create new entry */
+               marker_offd[colC] = nnz_offd_C;
+               C_offd_j[nnz_offd_C] = colC;
+               C_offd_a[nnz_offd_C] = alpha_i * val;
+               nnz_offd_C ++;
+            }
+            else
+            {
+               /* this should not happen */
+               hypre_printf("hypre warning: invalid ParCSR matrix %s %s %d\n",
+                     __FILE__, __func__, __LINE__);
+            }
          }
       }
 
-      for (j = B_offd_i[i]; j < B_offd_i[i+1]; j++)
+      /* Ci += Beta_i * Bi */
+      if (skipzeroalphabeta == 0 || beta_i != 0.0)
       {
-         HYPRE_Int     colB = B_offd_j[j];
-         HYPRE_Int     colC = B2C_offd[colB];
-         HYPRE_Complex val  = B_offd_a[j];
-         if (marker_offd[colC] < offd_i_start /*&& hypre_abs(val) > 0.0*/)
+         for (j = B_offd_i[i]; j < B_offd_i[i+1]; j++)
          {
-            /* this col has not been seen before, create new entry */
-            marker_offd[colC] = nnz_offd_C;
-            C_offd_j[nnz_offd_C] = colC;
-            C_offd_a[nnz_offd_C] = beta_i * val;
-            nnz_offd_C ++;
-         }
-         else
-         {
-            /* existing entry, update */
-            HYPRE_Int p = marker_offd[colC];
+            HYPRE_Int     colB = B_offd_j[j];
+            HYPRE_Int     colC = B2C_offd[colB];
+            HYPRE_Complex val  = B_offd_a[j];
+            if (marker_offd[colC] < offd_i_start /*&& hypre_abs(val) > 0.0*/)
+            {
+               /* this col has not been seen before, create new entry */
+               marker_offd[colC] = nnz_offd_C;
+               C_offd_j[nnz_offd_C] = colC;
+               C_offd_a[nnz_offd_C] = beta_i * val;
+               nnz_offd_C ++;
+            }
+            else
+            {
+               /* existing entry, update */
+               HYPRE_Int p = marker_offd[colC];
 
-            hypre_assert(C_offd_j[p] == colC);
+               hypre_assert(C_offd_j[p] == colC);
 
-            C_offd_a[p] += beta_i * val;
+               C_offd_a[p] += beta_i * val;
+            }
          }
       }
 
       C_offd_i[i+1] = nnz_offd_C;
    }
 
-   j = 2;
-
-   row_starts_C = hypre_TAlloc(HYPRE_BigInt, j, HYPRE_MEMORY_HOST);
-   col_starts_C = hypre_TAlloc(HYPRE_BigInt, j, HYPRE_MEMORY_HOST);
-   memcpy(row_starts_C, hypre_ParCSRMatrixRowStarts(A), j*sizeof(HYPRE_BigInt));
-   memcpy(col_starts_C, hypre_ParCSRMatrixColStarts(A), j*sizeof(HYPRE_BigInt));
+   row_starts_C = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   col_starts_C = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   memcpy(row_starts_C, hypre_ParCSRMatrixRowStarts(A), 2*sizeof(HYPRE_BigInt));
+   memcpy(col_starts_C, hypre_ParCSRMatrixColStarts(A), 2*sizeof(HYPRE_BigInt));
 
    /* Now, we should have everything of Parcsr matrix C */
    C = hypre_ParCSRMatrixCreate(comm,
@@ -5099,7 +5119,7 @@ hypre_ParcsrAdd( HYPRE_Complex        alpha,
                  hypre_ParCSRMatrix  *B,
                  hypre_ParCSRMatrix **Cout )
 {
-   return hypre_ParcsrAdd_core(alpha, NULL, A, beta, NULL, B, Cout, 0);
+   return hypre_ParcsrAdd_core(alpha, NULL, A, beta, NULL, B, Cout, NULL);
 }
 
 HYPRE_Int
@@ -5108,9 +5128,14 @@ hypre_ParcsrAddv( hypre_ParVector     *Alpha,
                   hypre_ParVector     *Beta,
                   hypre_ParCSRMatrix  *B,
                   hypre_ParCSRMatrix **Cout,
-                  HYPRE_Int            opt)
+                  HYPRE_Int            skipzero,
+                  HYPRE_Int            betaEq1MinusAlpha)
 {
-   return hypre_ParcsrAdd_core(0.0, Alpha, A, 0.0, Beta, B, Cout, opt);
+   HYPRE_Int options[2];
+   options[0] = betaEq1MinusAlpha;
+   options[1] = skipzero;
+
+   return hypre_ParcsrAdd_core(0.0, Alpha, A, 0.0, Beta, B, Cout, options);
 }
 
 HYPRE_Real
