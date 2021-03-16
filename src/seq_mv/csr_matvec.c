@@ -224,6 +224,14 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
 
       if (temp == 0.0)
       {
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+         for (i = 0; i < num_rows; i++)
+         {
+            y_data[i] = 0.0;
+         }
+
          if (alpha == 1.0)
          {
 #ifdef HYPRE_USING_OPENMP
@@ -301,12 +309,15 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
          } // y = A*x - b
          else if (alpha == -1.0)
          {
+            /* NOTE: $y = b - A*x$ breaks a few regression tests, so we compute
+                     $y = -(A*x - b)$ instead */
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < num_rows; i++)
             {
-               y_data[i] = b_data[i];
+               //y_data[i] = b_data[i];
+               y_data[i] = b_data[i]*temp;
             }
 
 #ifdef HYPRE_USING_OPENMP
@@ -315,12 +326,23 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             for (i = 0; i < num_rownnz; i++)
             {
                m = A_rownnz[i];
-               tempx = b_data[m];
+               //tempx = b_data[m];
+               tempx = 0.0;
                for (j = A_i[m]; j < A_i[m+1]; j++)
                {
-                  tempx -= A_data[j] * x_data[A_j[j]];
+                  //tempx -= A_data[j] * x_data[A_j[j]];
+                  tempx += A_data[j] * x_data[A_j[j]];
                }
-               y_data[m] = tempx;
+               //y_data[m] = tempx;
+               y_data[m] += tempx;
+            }
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+            for (i = 0; i < num_rows; i++)
+            {
+               y_data[i] *= alpha;
             }
          } // y = -A*x + b
          else
@@ -348,7 +370,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             }
          } // y = alpha*(A*x - b)
       } // temp == -1
-      else if (temp == 1.0)
+      else if (temp == 1.0) // beta == alpha
       {
          if (alpha == 1.0)
          {
@@ -366,12 +388,12 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             for (i = 0; i < num_rownnz; i++)
             {
                m = A_rownnz[i];
-               tempx = b_data[m];
+               tempx = 0.0;
                for (j = A_i[m]; j < A_i[m+1]; j++)
                {
                   tempx += A_data[j] * x_data[A_j[j]];
                }
-               y_data[m] = tempx;
+               y_data[m] += tempx;
             }
          } // y = A*x + b
          else if (alpha == -1.0)
@@ -432,7 +454,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
 #endif
             for (i = 0; i < num_rows; i++)
             {
-               y_data[i] = temp*b_data[i];
+               y_data[i] = beta*b_data[i];
             }
 
 #ifdef HYPRE_USING_OPENMP
@@ -441,14 +463,14 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             for (i = 0; i < num_rownnz; i++)
             {
                m = A_rownnz[i];
-               tempx = b_data[m]*temp;
+               tempx = beta*b_data[m];
                for (j = A_i[m]; j < A_i[m+1]; j++)
                {
                   tempx += A_data[j] * x_data[A_j[j]];
                }
                y_data[m] = tempx;
             }
-         } // y = A*x + temp*b
+         } // y = A*x + beta*b
          else if (-1 == alpha)
          {
 #ifdef HYPRE_USING_OPENMP
@@ -465,14 +487,14 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             for (i = 0; i < num_rownnz; i++)
             {
                m = A_rownnz[i];
-               tempx = -b_data[m]*temp;
+               tempx = -temp*b_data[m];
                for (j = A_i[m]; j < A_i[m+1]; j++)
                {
                   tempx -= A_data[j] * x_data[A_j[j]];
                }
                y_data[m] = tempx;
             }
-         } // y = -A*x - temp*y
+         } // y = -A*x - temp*b
          else
          {
 #ifdef HYPRE_USING_OPENMP
@@ -489,14 +511,14 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             for (i = 0; i < num_rownnz; i++)
             {
                m = A_rownnz[i];
-               tempx = b_data[m]*temp;
+               tempx = temp*b_data[m];
                for (j = A_i[m]; j < A_i[m+1]; j++)
                {
                   tempx += A_data[j] * x_data[A_j[j]];
                }
                y_data[m] = alpha*tempx;
             }
-         } // y = alpha*(A*x + temp*y)
+         } // y = alpha*(A*x + temp*b)
       } // temp != 0 && temp != -1 && temp != 1
    }
    else
