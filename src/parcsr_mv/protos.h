@@ -204,7 +204,7 @@ HYPRE_Int hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix *A, HYPRE_Int
 
 HYPRE_Int hypre_ParcsrAdd( HYPRE_Complex alpha, hypre_ParCSRMatrix *A, HYPRE_Complex beta, hypre_ParCSRMatrix *B, hypre_ParCSRMatrix **Cout);
 
-HYPRE_Int hypre_ParcsrAddv( hypre_ParVector *Alpha, hypre_ParCSRMatrix *A, hypre_ParVector *Beta, hypre_ParCSRMatrix *B, hypre_ParCSRMatrix **Cout, HYPRE_Int skipzero, HYPRE_Int betaEq1MinusAlpha);
+HYPRE_Int hypre_ParcsrAddv( hypre_ParVector *Alpha, hypre_ParCSRMatrix *A, hypre_ParVector *Beta, hypre_ParCSRMatrix *B, hypre_ParCSRMatrix **Cout, HYPRE_Int skipzero, HYPRE_Real skiptol, HYPRE_Int betaEq1MinusAlpha);
 
 /* par_csr_matop_marked.c */
 void hypre_ParMatmul_RowSizes_Marked ( HYPRE_Int **C_diag_i , HYPRE_Int **C_offd_i , HYPRE_Int **B_marker , HYPRE_Int *A_diag_i , HYPRE_Int *A_diag_j , HYPRE_Int *A_offd_i , HYPRE_Int *A_offd_j , HYPRE_Int *B_diag_i , HYPRE_Int *B_diag_j , HYPRE_Int *B_offd_i , HYPRE_Int *B_offd_j , HYPRE_Int *B_ext_diag_i , HYPRE_Int *B_ext_diag_j , HYPRE_Int *B_ext_offd_i , HYPRE_Int *B_ext_offd_j , HYPRE_Int *map_B_to_C , HYPRE_Int *C_diag_size , HYPRE_Int *C_offd_size , HYPRE_Int num_rows_diag_A , HYPRE_Int num_cols_offd_A , HYPRE_Int allsquare , HYPRE_Int num_cols_diag_B , HYPRE_Int num_cols_offd_B , HYPRE_Int num_cols_offd_C , HYPRE_Int *CF_marker , HYPRE_Int *dof_func , HYPRE_Int *dof_func_offd );

@@ -4813,8 +4813,9 @@ hypre_ParcsrGetExternalRowsWait(void *vrequest)
  * C = Alpha * A + Beta * B  (Alpha and Beta are diagonal matrices),
  * if Alpha/Beta != NULL, alpha/beta is ignored
  * Special Options (when != NULL)
- *    Option[0] = 1: Beta (which is ignored) = I - Alpha
- *    Option[1] = 1: skip zeros in Alpha and beta
+ *    IntOptions[0] : 1: Beta (which is ignored) = I - Alpha
+ *    IntOptions[1] : 1: skip zeros in Alpha and beta
+ *    RealOptions[0]: tolerance to skip zeros
  * A and B are assumed to have the same row and column partitionings */
 HYPRE_Int
 hypre_ParcsrAdd_core( HYPRE_Complex        alpha,
@@ -4824,12 +4825,14 @@ hypre_ParcsrAdd_core( HYPRE_Complex        alpha,
                       hypre_ParVector     *Beta,
                       hypre_ParCSRMatrix  *B,
                       hypre_ParCSRMatrix **Cout,
-                      HYPRE_Int           *Options)
+                      HYPRE_Real          *RealOptions,
+                      HYPRE_Int           *IntOptions)
 {
    MPI_Comm         comm     = hypre_ParCSRMatrixComm(A);
    HYPRE_Int        i, j;
-   HYPRE_Int        betaoneminusalpha = Options ? Options[0] == 1 : 0;
-   HYPRE_Int        skipzeroalphabeta = Options ? Options[1] == 1 : 0;
+   HYPRE_Int        betaoneminusalpha = IntOptions ? IntOptions[0] == 1 : 0;
+   HYPRE_Int        skipzeroalphabeta = IntOptions ? IntOptions[1] == 1 : 0;
+   HYPRE_Real       skiptolerance     = skipzeroalphabeta ? RealOptions[0] : 0.0;
    HYPRE_Int        num_procs, my_id;
 
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -4952,7 +4955,7 @@ hypre_ParcsrAdd_core( HYPRE_Complex        alpha,
 
       /* diag part */
       /* Ci = Alpha_i * Ai */
-      if (skipzeroalphabeta == 0 || alpha_i != 0.0)
+      if (skipzeroalphabeta == 0 || hypre_abs(alpha_i) > skiptolerance)
       {
          for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
          {
@@ -4976,7 +4979,7 @@ hypre_ParcsrAdd_core( HYPRE_Complex        alpha,
       }
 
       /* Ci += Beta_i * Bi */
-      if (skipzeroalphabeta == 0 || beta_i != 0.0)
+      if (skipzeroalphabeta == 0 || hypre_abs(beta_i) > skiptolerance)
       {
          for (j = B_diag_i[i]; j < B_diag_i[i+1]; j++)
          {
@@ -5011,7 +5014,7 @@ hypre_ParcsrAdd_core( HYPRE_Complex        alpha,
 
       /* offd part */
       /* Ci = Alpha_i * Ai */
-      if (skipzeroalphabeta == 0 || alpha_i != 0.0)
+      if (skipzeroalphabeta == 0 || hypre_abs(alpha_i) > skiptolerance)
       {
          for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
          {
@@ -5036,7 +5039,7 @@ hypre_ParcsrAdd_core( HYPRE_Complex        alpha,
       }
 
       /* Ci += Beta_i * Bi */
-      if (skipzeroalphabeta == 0 || beta_i != 0.0)
+      if (skipzeroalphabeta == 0 || hypre_abs(beta_i) > skiptolerance)
       {
          for (j = B_offd_i[i]; j < B_offd_i[i+1]; j++)
          {
@@ -5119,7 +5122,7 @@ hypre_ParcsrAdd( HYPRE_Complex        alpha,
                  hypre_ParCSRMatrix  *B,
                  hypre_ParCSRMatrix **Cout )
 {
-   return hypre_ParcsrAdd_core(alpha, NULL, A, beta, NULL, B, Cout, NULL);
+   return hypre_ParcsrAdd_core(alpha, NULL, A, beta, NULL, B, Cout, NULL, NULL);
 }
 
 HYPRE_Int
@@ -5129,13 +5132,14 @@ hypre_ParcsrAddv( hypre_ParVector     *Alpha,
                   hypre_ParCSRMatrix  *B,
                   hypre_ParCSRMatrix **Cout,
                   HYPRE_Int            skipzero,
+                  HYPRE_Real           skiptol,
                   HYPRE_Int            betaEq1MinusAlpha)
 {
    HYPRE_Int options[2];
    options[0] = betaEq1MinusAlpha;
    options[1] = skipzero;
 
-   return hypre_ParcsrAdd_core(0.0, Alpha, A, 0.0, Beta, B, Cout, options);
+   return hypre_ParcsrAdd_core(0.0, Alpha, A, 0.0, Beta, B, Cout, &skiptol, options);
 }
 
 HYPRE_Real
