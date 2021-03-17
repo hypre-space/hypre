@@ -4155,26 +4155,24 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrixFirstColDiag(C) = first_col_diag;
    hypre_ParCSRMatrixLastRowIndex(C) = first_row_index + (HYPRE_BigInt)local_num_rows - 1;
    hypre_ParCSRMatrixLastColDiag(C) = first_col_diag + (HYPRE_BigInt)local_num_cols - 1;
-
    hypre_ParCSRMatrixColMapOffd(C) = NULL;
-
    hypre_ParCSRMatrixAssumedPartition(C) = NULL;
-
-   hypre_ParCSRMatrixRowStarts(C) = col_starts_A;
-   hypre_ParCSRMatrixColStarts(C) = col_starts_B;
-
    hypre_ParCSRMatrixCommPkg(C) = NULL;
    hypre_ParCSRMatrixCommPkgT(C) = NULL;
+
+   /* C owns row/col starts*/
+   hypre_ParCSRMatrixRowStarts(C) = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   hypre_ParCSRMatrixColStarts(C) = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   memcpy(hypre_ParCSRMatrixRowStarts(C), hypre_ParCSRMatrixRowStarts(A), 2*sizeof(HYPRE_BigInt));
+   memcpy(hypre_ParCSRMatrixColStarts(C), hypre_ParCSRMatrixColStarts(A), 2*sizeof(HYPRE_BigInt));
+   hypre_ParCSRMatrixSetRowStartsOwner(C, 1);
+   hypre_ParCSRMatrixSetColStartsOwner(C, 1);
 
    /* set defaults */
    hypre_ParCSRMatrixOwnsData(C) = 1;
    hypre_ParCSRMatrixRowindices(C) = NULL;
    hypre_ParCSRMatrixRowvalues(C) = NULL;
    hypre_ParCSRMatrixGetrowactive(C) = 0;
-
-   /* Note that C does not own the partitionings */
-   hypre_ParCSRMatrixSetRowStartsOwner(C,0);
-   hypre_ParCSRMatrixSetColStartsOwner(C,0);
 
    if (C_diag)
    {
