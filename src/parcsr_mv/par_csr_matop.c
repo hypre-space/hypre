@@ -5304,8 +5304,8 @@ hypre_ParcsrAdd( HYPRE_Complex        alpha,
    HYPRE_Int  num_rownnz_offd_A = hypre_CSRMatrixNumRownnz(A_offd);
    HYPRE_Int    num_rows_offd_A = hypre_CSRMatrixNumRows(A_offd);
    HYPRE_Int    num_cols_offd_A = hypre_CSRMatrixNumCols(A_offd);
-   HYPRE_Int    *col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
    HYPRE_Int         nnz_offd_A = hypre_CSRMatrixNumNonzeros(A_offd);
+   HYPRE_BigInt *col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
    HYPRE_Int          *A2C_offd;
 
    /* diag part of B */
@@ -5328,8 +5328,8 @@ hypre_ParcsrAdd( HYPRE_Complex        alpha,
    HYPRE_Int  num_rownnz_offd_B = hypre_CSRMatrixNumRownnz(B_offd);
    HYPRE_Int    num_rows_offd_B = hypre_CSRMatrixNumRows(B_offd);
    HYPRE_Int    num_cols_offd_B = hypre_CSRMatrixNumCols(B_offd);
-   HYPRE_Int    *col_map_offd_B = hypre_ParCSRMatrixColMapOffd(B);
    HYPRE_Int         nnz_offd_B = hypre_CSRMatrixNumNonzeros(B_offd);
+   HYPRE_BigInt *col_map_offd_B = hypre_ParCSRMatrixColMapOffd(B);
    HYPRE_Int          *B2C_offd;
 
    /* C */
