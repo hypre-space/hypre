@@ -331,7 +331,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
                                   oneapi::dpl::make_counting_iterator(num_cols_A_offd),
                                   P_marker,
                                   P_colids,
-                                  std::identity<HYPRE_Int>());
+                                  std::_Identity<HYPRE_Int>());
       hypre_assert(new_end - P_colids == num_cols_P_offd);
 
       tmp_map_offd_h = hypre_TAlloc(HYPRE_Int, num_cols_P_offd, HYPRE_MEMORY_HOST);

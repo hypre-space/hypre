@@ -447,7 +447,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                    oneapi::dpl::make_transform_iterator(recv_buf, -_1-1) + num_cols_A_offd,
                                    offd_mark,
                                    col_map_offd_AFF,
-                                   std::identity<HYPRE_Int>() );
+                                   std::_Identity<HYPRE_Int>() );
       hypre_assert(tmp_end - col_map_offd_AFF == num_cols_AFF_offd);
       hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
 
@@ -594,7 +594,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                    recv_buf + num_cols_A_offd,
                                    offd_mark,
                                    col_map_offd_AFC,
-                                   std::identity<HYPRE_Int>());
+                                   std::_Identity<HYPRE_Int>());
       hypre_assert(tmp_end - col_map_offd_AFC == num_cols_AFC_offd);
       hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
 
@@ -742,7 +742,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                    oneapi::dpl::make_transform_iterator(recv_buf, -_1-1) + num_cols_A_offd,
                                    offd_mark,
                                    col_map_offd_ACF,
-                                   std::identity<HYPRE_Int>());
+                                   std::_Identity<HYPRE_Int>());
       hypre_assert(tmp_end - col_map_offd_ACF == num_cols_ACF_offd);
       hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
 
@@ -891,7 +891,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                    recv_buf + num_cols_A_offd,
                                    offd_mark,
                                    col_map_offd_ACC,
-                                   std::identity<HYPRE_Int>());
+                                   std::_Identity<HYPRE_Int>());
       hypre_assert(tmp_end - col_map_offd_ACC == num_cols_ACC_offd);
       hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
 
@@ -1212,7 +1212,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                                    col_map_offd_A + num_cols_A_offd,
                                    offd_mark,
                                    col_map_offd_ACX,
-                                   std::identity<HYPRE_Int>());
+                                   std::_Identity<HYPRE_Int>());
       hypre_assert(tmp_end - col_map_offd_ACX == num_cols_ACX_offd);
       hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
 
@@ -1349,7 +1349,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                                    recv_buf + num_cols_A_offd,
                                    offd_mark,
                                    col_map_offd_AXC,
-                                   std::identity<HYPRE_Int>());
+                                   std::_Identity<HYPRE_Int>());
       hypre_assert(tmp_end - col_map_offd_AXC == num_cols_AXC_offd);
       hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
 

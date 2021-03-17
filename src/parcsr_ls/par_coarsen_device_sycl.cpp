@@ -163,7 +163,7 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
                                               graph_diag,
                                               graph_diag + graph_diag_size,
                                               diag_iwork,
-                                              std::identity<HYPRE_Int>() );
+                                              std::_Identity<HYPRE_Int>() );
 
       graph_diag_size = new_end - graph_diag;
    }
@@ -339,7 +339,7 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
                      oneapi::dpl::make_counting_iterator(num_rows_diag),
                      CF_marker_diag,
                      graph_diag,
-                     std::identity<HYPRE_Int>());
+                     std::_Identity<HYPRE_Int>());
 
    *graph_diag_size = new_end - graph_diag;
 

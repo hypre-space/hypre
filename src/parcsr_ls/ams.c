@@ -10,6 +10,8 @@
 #include "ams.h"
 #include "_hypre_utilities.hpp"
 
+#include <dpct/dpl_utils.hpp> // for dpct::transform_if
+
 /*--------------------------------------------------------------------------
  * hypre_ParCSRRelax
  *
@@ -314,6 +316,14 @@ struct l1_norm_op1 : public thrust::binary_function<HYPRE_Complex, HYPRE_Complex
       return x <= 4.0/3.0 * y ? y : x;
    }
 };
+#elif defined(HYPRE_USING_SYCL)
+struct l1_norm_op1
+{
+   HYPRE_Complex operator()(HYPRE_Complex &x, HYPRE_Complex &y) const
+   {
+      return x <= 4.0/3.0 * y ? y : x;
+   }
+};
 #endif
 
 HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
@@ -445,6 +455,12 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
          HYPRE_THRUST_CALL( transform, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm, l1_norm_op1() );
       }
       else
+#elif defined(HYPRE_USING_SYCL)
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+         HYPRE_ONEDPL_CALL( transform, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm, l1_norm_op1() );
+      }
+      else
 #endif
       {
          for (i = 0; i < num_rows; i++)
@@ -466,6 +482,13 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       {
          thrust::identity<HYPRE_Complex> identity;
          HYPRE_THRUST_CALL( replace_if, l1_norm, l1_norm + num_rows, thrust::not1(identity), 1.0 );
+      }
+      else
+#elif defined(HYPRE_USING_SYCL)
+      if ( exec == HYPRE_EXEC_DEVICE)
+      {
+         std::_Identity<HYPRE_Complex> identity;
+         HYPRE_ONEDPL_CALL( replace_if, l1_norm, l1_norm + num_rows, std::not1(identity), 1.0 );
       }
       else
 #endif
@@ -504,6 +527,23 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       {
          hypre_error_in_arg(1);
       }
+   }
+   else
+#elif defined(HYPRE_USING_SYCL)
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+     /* HYPRE_ONEDPL_CALL( transform_if, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm, std::negate<HYPRE_Real>(), */
+     /*                    is_negative<HYPRE_Real>() ); */
+
+     // abb NOTE: The above snippet can be activated once dpl supports transform_if API.
+     dpct::transform_if( l1_norm, l1_norm + num_rows, diag_tmp, l1_norm, std::negate<HYPRE_Real>(), is_negative<HYPRE_Real>() );
+
+     //bool any_zero = HYPRE_ONEDPL_CALL( any_of, l1_norm, l1_norm + num_rows, std::not1(std::_Identity<HYPRE_Complex>()) );
+     bool any_zero = 0.0 == HYPRE_ONEDPL_CALL( reduce, l1_norm, l1_norm + num_rows, 1.0, std::minimum<HYPRE_Real>() );
+     if ( any_zero )
+     {
+       hypre_error_in_arg(1);
+     }
    }
    else
 #endif
@@ -3377,4 +3417,3 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
 
    return hypre_error_flag;
 }
-
