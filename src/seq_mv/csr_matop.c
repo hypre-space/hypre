@@ -515,6 +515,12 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
          {
             C_i[nrows_A] += jj_count[i1];
          }
+
+         C = hypre_CSRMatrixCreate(nrows_A, ncols_B, C_i[nrows_A]);
+         hypre_CSRMatrixI(C) = C_i;
+         hypre_CSRMatrixInitialize_v2(C, 0, memory_location_C);
+         C_j = hypre_CSRMatrixJ(C);
+         C_data = hypre_CSRMatrixData(C);
       }
 
       /* Correct C_i - phase 2 */
@@ -542,15 +548,6 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
                C_i[iic] = C_i[nrows_A];
             }
          }
-      }
-
-      if (ii == 0)
-      {
-         C = hypre_CSRMatrixCreate(nrows_A, ncols_B, C_i[nrows_A]);
-         hypre_CSRMatrixI(C) = C_i;
-         hypre_CSRMatrixInitialize_v2(C, 0, memory_location_C);
-         C_j = hypre_CSRMatrixJ(C);
-         C_data = hypre_CSRMatrixData(C);
       }
       /* End of First Pass */
 
