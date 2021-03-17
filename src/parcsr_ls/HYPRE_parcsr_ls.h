@@ -411,6 +411,13 @@ HYPRE_Int HYPRE_BoomerAMGSetNodalDiag(HYPRE_Solver solver,
                                       HYPRE_Int    nodal_diag);
 
 
+/*
+ * (Optional) Sets whether to keep same sign in S for nodal > 0
+ * The default is 0, i.e., discard those elements.
+ */
+HYPRE_Int HYPRE_BoomerAMGSetKeepSameSign(HYPRE_Solver solver,
+                                         HYPRE_Int    keep_same_sign);
+
 /**
  * (Optional) Defines which parallel interpolation operator is used.
  * There are the following options for \e interp_type:

@@ -1339,6 +1339,17 @@ HYPRE_BoomerAMGSetNodalDiag( HYPRE_Solver  solver,
 {
    return( hypre_BoomerAMGSetNodalDiag( (void *) solver, nodal ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetKeepSameSign
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetKeepSameSign( HYPRE_Solver  solver,
+                                HYPRE_Int     keep_same_sign  )
+{
+   return( hypre_BoomerAMGSetKeepSameSign( (void *) solver, keep_same_sign ) );
+}
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetDofFunc
  *--------------------------------------------------------------------------*/

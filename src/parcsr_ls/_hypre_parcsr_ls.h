@@ -109,6 +109,7 @@ typedef struct
    HYPRE_Int      nodal;
    HYPRE_Int      nodal_levels;
    HYPRE_Int      nodal_diag;
+   HYPRE_Int      keep_same_sign;
    HYPRE_Int      num_points;
    HYPRE_Int     *dof_func;
    HYPRE_Int     *dof_point;
@@ -355,6 +356,7 @@ typedef struct
 #define hypre_ParAMGDataNodal(amg_data) ((amg_data)->nodal)
 #define hypre_ParAMGDataNodalLevels(amg_data) ((amg_data)->nodal_levels)
 #define hypre_ParAMGDataNodalDiag(amg_data) ((amg_data)->nodal_diag)
+#define hypre_ParAMGDataKeepSameSign(amg_data) ((amg_data)->keep_same_sign)
 #define hypre_ParAMGDataNumPoints(amg_data) ((amg_data)->num_points)
 #define hypre_ParAMGDataDofFunc(amg_data) ((amg_data)->dof_func)
 #define hypre_ParAMGDataDofPoint(amg_data) ((amg_data)->dof_point)
@@ -1171,6 +1173,7 @@ HYPRE_Int HYPRE_BoomerAMGGetNumFunctions ( HYPRE_Solver solver , HYPRE_Int *num_
 HYPRE_Int HYPRE_BoomerAMGSetNodal ( HYPRE_Solver solver , HYPRE_Int nodal );
 HYPRE_Int HYPRE_BoomerAMGSetNodalLevels ( HYPRE_Solver solver , HYPRE_Int nodal_levels );
 HYPRE_Int HYPRE_BoomerAMGSetNodalDiag ( HYPRE_Solver solver , HYPRE_Int nodal );
+HYPRE_Int HYPRE_BoomerAMGSetKeepSameSign ( HYPRE_Solver solver , HYPRE_Int keep_same_sign );
 HYPRE_Int HYPRE_BoomerAMGSetDofFunc ( HYPRE_Solver solver , HYPRE_Int *dof_func );
 HYPRE_Int HYPRE_BoomerAMGSetNumPaths ( HYPRE_Solver solver , HYPRE_Int num_paths );
 HYPRE_Int HYPRE_BoomerAMGSetAggNumLevels ( HYPRE_Solver solver , HYPRE_Int agg_num_levels );
@@ -1659,6 +1662,7 @@ HYPRE_Int hypre_BoomerAMGGetNumFunctions ( void *data , HYPRE_Int *num_functions
 HYPRE_Int hypre_BoomerAMGSetNodal ( void *data , HYPRE_Int nodal );
 HYPRE_Int hypre_BoomerAMGSetNodalLevels ( void *data , HYPRE_Int nodal_levels );
 HYPRE_Int hypre_BoomerAMGSetNodalDiag ( void *data , HYPRE_Int nodal );
+HYPRE_Int hypre_BoomerAMGSetKeepSameSign ( void *data , HYPRE_Int keep_same_sign );
 HYPRE_Int hypre_BoomerAMGSetNumPaths ( void *data , HYPRE_Int num_paths );
 HYPRE_Int hypre_BoomerAMGSetAggNumLevels ( void *data , HYPRE_Int agg_num_levels );
 HYPRE_Int hypre_BoomerAMGSetAggInterpType ( void *data , HYPRE_Int agg_interp_type );
@@ -1896,7 +1900,7 @@ HYPRE_Int hypre_BoomerAMGBuildMultipass ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_
 
 /* par_nodal_systems.c */
 HYPRE_Int hypre_BoomerAMGCreateNodalA ( hypre_ParCSRMatrix *A , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int option , HYPRE_Int diag_option , hypre_ParCSRMatrix **AN_ptr );
-HYPRE_Int hypre_BoomerAMGCreateScalarCFS ( hypre_ParCSRMatrix *SN , hypre_ParCSRMatrix *A , HYPRE_Int *CFN_marker , HYPRE_Int num_functions , HYPRE_Int nodal , HYPRE_Int **CF_marker_ptr , hypre_ParCSRMatrix **S_ptr );
+HYPRE_Int hypre_BoomerAMGCreateScalarCFS ( hypre_ParCSRMatrix *SN , hypre_ParCSRMatrix *A , HYPRE_Int *CFN_marker , HYPRE_Int num_functions , HYPRE_Int nodal , HYPRE_Int keep_same_sign , HYPRE_Int **dof_func_ptr , HYPRE_Int **CF_marker_ptr , hypre_ParCSRMatrix **S_ptr );
 HYPRE_Int hypre_BoomerAMGCreateScalarCF ( HYPRE_Int *CFN_marker , HYPRE_Int num_functions , HYPRE_Int num_nodes , HYPRE_Int **dof_func_ptr , HYPRE_Int **CF_marker_ptr );
 
 /* par_nongalerkin.c */

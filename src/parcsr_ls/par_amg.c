@@ -53,6 +53,7 @@ hypre_BoomerAMGCreate()
    HYPRE_Int    P_max_elmts;
    HYPRE_Int    num_functions;
    HYPRE_Int    nodal, nodal_levels, nodal_diag;
+   HYPRE_Int    keep_same_sign;
    HYPRE_Int    num_paths;
    HYPRE_Int    agg_num_levels;
    HYPRE_Int    agg_interp_type;
@@ -167,6 +168,7 @@ hypre_BoomerAMGCreate()
    nodal = 0;
    nodal_levels = max_levels;
    nodal_diag = 0;
+   keep_same_sign = 0;
    num_paths = 1;
    agg_num_levels = 0;
    post_interp_type = 0;
@@ -295,6 +297,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetNodal(amg_data, nodal);
    hypre_BoomerAMGSetNodalLevels(amg_data, nodal_levels);
    hypre_BoomerAMGSetNodal(amg_data, nodal_diag);
+   hypre_BoomerAMGSetKeepSameSign(amg_data, keep_same_sign);
    hypre_BoomerAMGSetNumPaths(amg_data, num_paths);
    hypre_BoomerAMGSetAggNumLevels(amg_data, agg_num_levels);
    hypre_BoomerAMGSetAggInterpType(amg_data, agg_interp_type);
@@ -3128,6 +3131,25 @@ hypre_BoomerAMGSetNodalDiag( void     *data,
       return hypre_error_flag;
    }
    hypre_ParAMGDataNodalDiag(amg_data) = nodal;
+
+   return hypre_error_flag;
+}
+/*--------------------------------------------------------------------------
+ * Indicate whether to discard same sign coefficients in S for nodal>0 
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGSetKeepSameSign( void      *data,
+                                HYPRE_Int  keep_same_sign )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   hypre_ParAMGDataKeepSameSign(amg_data) = keep_same_sign;
 
    return hypre_error_flag;
 }
