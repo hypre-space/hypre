@@ -14,7 +14,7 @@
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 #define SPMV_BLOCKDIM 512
 #define VERSION 1
@@ -258,5 +258,4 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Complex    alpha,
    return hypre_error_flag;
 }
 
-#endif /*#if defined(HYPRE_USING_CUDA) */
-
+#endif /*#if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */

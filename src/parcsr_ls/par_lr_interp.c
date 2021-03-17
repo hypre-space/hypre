@@ -5420,7 +5420,7 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
                               HYPRE_Int *col_offd_S_to_A,
                               hypre_ParCSRMatrix  **P_ptr)
 {
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_NvtxPushRange("ExtInterp");
 #endif
 
@@ -5433,7 +5433,7 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
       ierr = hypre_BoomerAMGBuildExtInterpHost(A,CF_marker,S,num_cpts_global,num_functions,dof_func,
                                                debug_flag,trunc_factor,max_elmts,col_offd_S_to_A,P_ptr);
    }
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    else
    {
       ierr = hypre_BoomerAMGBuildExtInterpDevice(A,CF_marker,S,num_cpts_global,num_functions,dof_func,
@@ -5441,7 +5441,7 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    }
 #endif
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_NvtxPopRange();
 #endif
 
@@ -5463,7 +5463,7 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix   *A,
                                 HYPRE_Int            *col_offd_S_to_A,
                                 hypre_ParCSRMatrix  **P_ptr)
 {
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_NvtxPushRange("ExtPIInterp");
 #endif
 
@@ -5476,7 +5476,7 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix   *A,
       ierr = hypre_BoomerAMGBuildExtPIInterpHost(A, CF_marker, S, num_cpts_global, num_functions, dof_func,
                                                  debug_flag, trunc_factor, max_elmts, col_offd_S_to_A, P_ptr);
    }
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    else
    {
       ierr = hypre_BoomerAMGBuildExtPIInterpDevice(A, CF_marker, S, num_cpts_global, num_functions, dof_func,
@@ -5484,10 +5484,9 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix   *A,
    }
 #endif
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_NvtxPopRange();
 #endif
 
    return ierr;
 }
-

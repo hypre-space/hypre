@@ -1003,7 +1003,6 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
    } 
 
    S_num_nonzeros_diag = S_cnt;
-   //Generate S_offd_i and S_offd_j . This is more tricky!
 
    for (i=0; i < A_num_nonzeros_offd; i++)
    {

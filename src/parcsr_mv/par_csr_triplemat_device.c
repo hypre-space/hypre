@@ -8,7 +8,7 @@
 #include "_hypre_parcsr_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 /* option == 1, T = HYPRE_BigInt
  * option == 2, T = HYPRE_Int,
@@ -486,9 +486,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
 
-#ifdef HYPRE_DEBUG
    hypre_assert(!hypre_CSRMatrixCheckDiagFirstDevice(hypre_ParCSRMatrixDiag(C)));
-#endif
 
    hypre_SyncCudaComputeStream(hypre_handle());
 
@@ -802,14 +800,11 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
 
-#ifdef HYPRE_DEBUG
    hypre_assert(!hypre_CSRMatrixCheckDiagFirstDevice(hypre_ParCSRMatrixDiag(C)));
-#endif
 
    hypre_SyncCudaComputeStream(hypre_handle());
 
    return C;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA)
-
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
