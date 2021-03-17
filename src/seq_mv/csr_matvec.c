@@ -174,7 +174,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             m = A_rownnz[i];
             for (j = 0; j < num_vectors; j++)
             {
-               tempx = 0;
+               tempx = 0.0;
                for (jj = A_i[m]; jj < A_i[m+1]; jj++)
                {
                   tempx += A_data[jj] * x_data[j*vecstride_x + A_j[jj]*idxstride_x];
@@ -192,7 +192,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
          {
             for (j = 0; j < num_vectors; ++j)
             {
-               tempx = 0;
+               tempx = 0.0;
                for (jj = A_i[i]; jj < A_i[i+1]; jj++)
                {
                   tempx += A_data[jj] * x_data[j*vecstride_x + A_j[jj]*idxstride_x];
@@ -299,25 +299,22 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             for (i = 0; i < num_rownnz; i++)
             {
                m = A_rownnz[i];
-               tempx = -b_data[m];
+               tempx = 0.0;
                for (j = A_i[m]; j < A_i[m+1]; j++)
                {
                   tempx += A_data[j] * x_data[A_j[j]];
                }
-               y_data[m] = tempx;
+               y_data[m] = tempx - b_data[m];
             }
          } // y = A*x - b
          else if (alpha == -1.0)
          {
-            /* NOTE: $y = b - A*x$ breaks a few regression tests, so we compute
-                     $y = -(A*x - b)$ instead */
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < num_rows; i++)
             {
-               //y_data[i] = b_data[i];
-               y_data[i] = b_data[i]*temp;
+               y_data[i] = b_data[i];
             }
 
 #ifdef HYPRE_USING_OPENMP
@@ -326,23 +323,12 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             for (i = 0; i < num_rownnz; i++)
             {
                m = A_rownnz[i];
-               //tempx = b_data[m];
                tempx = 0.0;
                for (j = A_i[m]; j < A_i[m+1]; j++)
                {
-                  //tempx -= A_data[j] * x_data[A_j[j]];
                   tempx += A_data[j] * x_data[A_j[j]];
                }
-               //y_data[m] = tempx;
-               y_data[m] += tempx;
-            }
-
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-            for (i = 0; i < num_rows; i++)
-            {
-               y_data[i] *= alpha;
+               y_data[m] = b_data[m] - tempx;
             }
          } // y = -A*x + b
          else
@@ -361,12 +347,12 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             for (i = 0; i < num_rownnz; i++)
             {
                m = A_rownnz[i];
-               tempx = -b_data[m];
+               tempx = 0.0;
                for (j = A_i[m]; j < A_i[m+1]; j++)
                {
                   tempx += A_data[j] * x_data[A_j[j]];
                }
-               y_data[m] = alpha*tempx;
+               y_data[m] = alpha*(tempx - b_data[m]);
             }
          } // y = alpha*(A*x - b)
       } // temp == -1
@@ -412,12 +398,12 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             for (i = 0; i < num_rownnz; i++)
             {
                m = A_rownnz[i];
-               tempx = -b_data[m];
+               tempx = 0.0;
                for (j = A_i[m]; j < A_i[m+1]; j++)
                {
                   tempx -= A_data[j] * x_data[A_j[j]];
                }
-               y_data[m] = tempx;
+               y_data[m] = tempx - b_data[m];
             }
          } // y = -A*x - b
          else
@@ -436,12 +422,12 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             for (i = 0; i < num_rownnz; i++)
             {
                m = A_rownnz[i];
-               tempx = b_data[m];
+               tempx = 0.0;
                for (j = A_i[m]; j < A_i[m+1]; j++)
                {
                   tempx += A_data[j] * x_data[A_j[j]];
                }
-               y_data[m] = alpha*tempx;
+               y_data[m] = alpha*(tempx + b_data[m]);
             }
          } // y = alpha*(A*x + b)
       }
@@ -463,12 +449,12 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             for (i = 0; i < num_rownnz; i++)
             {
                m = A_rownnz[i];
-               tempx = beta*b_data[m];
+               tempx = 0.0;
                for (j = A_i[m]; j < A_i[m+1]; j++)
                {
                   tempx += A_data[j] * x_data[A_j[j]];
                }
-               y_data[m] = tempx;
+               y_data[m] = tempx + beta*b_data[m];
             }
          } // y = A*x + beta*b
          else if (-1 == alpha)
@@ -487,12 +473,12 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             for (i = 0; i < num_rownnz; i++)
             {
                m = A_rownnz[i];
-               tempx = -temp*b_data[m];
+               tempx = 0.0;
                for (j = A_i[m]; j < A_i[m+1]; j++)
                {
                   tempx -= A_data[j] * x_data[A_j[j]];
                }
-               y_data[m] = tempx;
+               y_data[m] = tempx - temp*b_data[m];
             }
          } // y = -A*x - temp*b
          else
@@ -511,12 +497,12 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             for (i = 0; i < num_rownnz; i++)
             {
                m = A_rownnz[i];
-               tempx = temp*b_data[m];
+               tempx = 0.0;
                for (j = A_i[m]; j < A_i[m+1]; j++)
                {
                   tempx += A_data[j] * x_data[A_j[j]];
                }
-               y_data[m] = alpha*tempx;
+               y_data[m] = alpha*tempx + beta*b_data[m];
             }
          } // y = alpha*(A*x + temp*b)
       } // temp != 0 && temp != -1 && temp != 1
@@ -1130,187 +1116,4 @@ hypre_CSRMatrixMatvec_FF( HYPRE_Complex    alpha,
    }
 
    return ierr;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_CSRMatrixMatvecDiagScale
- *
- * y = alpha*inv(A_D)*x + beta*y
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_CSRMatrixMatvecDiagScale( HYPRE_Complex     alpha,
-                                hypre_CSRMatrix  *A,
-                                hypre_Vector     *x,
-                                HYPRE_Complex     beta,
-                                hypre_Vector     *y )
-{
-   HYPRE_Int          num_rows    = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int          num_cols    = hypre_CSRMatrixNumCols(A);
-   HYPRE_Int          x_size      = hypre_VectorSize(x);
-   HYPRE_Int          y_size      = hypre_VectorSize(y);
-   HYPRE_Int          num_vectors = hypre_VectorNumVectors(x);
-   HYPRE_Int          x_idxstride = hypre_VectorIndexStride(x);
-   HYPRE_Int          x_vecstride = hypre_VectorVectorStride(x);
-   HYPRE_Int          y_idxstride = hypre_VectorIndexStride(y);
-   HYPRE_Int          y_vecstride = hypre_VectorVectorStride(y);
-   HYPRE_Complex     *x_data      = hypre_VectorData(x);
-   HYPRE_Complex     *y_data      = hypre_VectorData(y);
-   HYPRE_Complex     *A_data      = hypre_CSRMatrixData(A);
-   HYPRE_Int         *A_i         = hypre_CSRMatrixI(A);
-
-   HYPRE_Int          i, j, k0, k1;
-
-   /* Safety checks */
-   if (num_vectors != hypre_VectorNumVectors(y))
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "multivec x and y do not match");
-      return hypre_error_flag;
-   }
-
-   if (num_rows != y_size)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "A and y do not match");
-      return hypre_error_flag;
-   }
-
-   if (num_cols != x_size)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "A and x do not match");
-      return hypre_error_flag;
-   }
-
-   if (num_rows != num_cols)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "A is not square");
-      return hypre_error_flag;
-   }
-
-   /* y = alpha*inv(A_D)*x + beta*y */
-   if (beta == 0.0)
-   {
-      if (alpha == 1.0)
-      {
-         if (num_vectors == 1)
-         {
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-            for (i = 0; i < num_rows; i++)
-            {
-               y_data[i] = x_data[i] / A_data[A_i[i]];
-            }
-         }
-         else
-         {
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,j,k0,k1) HYPRE_SMP_SCHEDULE
-#endif
-            for (i = 0; i < num_rows; i++)
-            {
-               k0 = i*y_idxstride;
-               k1 = i*x_idxstride;
-               for (j = 0; j < num_vectors; ++j)
-               {
-                  y_data[j*y_vecstride + k0] = x_data[j*x_vecstride + k1] /
-                                               A_data[A_i[i]];
-               }
-            }
-         }
-      }
-      else
-      {
-         if (num_vectors == 1)
-         {
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-            for (i = 0; i < num_rows; i++)
-            {
-               y_data[i] = alpha * x_data[i] / A_data[A_i[i]];
-            }
-         }
-         else
-         {
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,j,k0,k1) HYPRE_SMP_SCHEDULE
-#endif
-            for (i = 0; i < num_rows; i++)
-            {
-               k0 = i*y_idxstride;
-               k1 = i*x_idxstride;
-               for (j = 0; j < num_vectors; ++j)
-               {
-                  y_data[j*y_vecstride + k0] = alpha * x_data[j*x_vecstride + k1] /
-                                               A_data[A_i[i]];
-               }
-            }
-         }
-      } /* if (alpha == 1.0) */
-   }
-   else
-   {
-      if (alpha == 1.0)
-      {
-         if (num_vectors == 1)
-         {
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-            for (i = 0; i < num_rows; i++)
-            {
-               y_data[i] = x_data[i] / A_data[A_i[i]] + beta * y_data[i];
-            }
-         }
-         else
-         {
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,j,k0,k1) HYPRE_SMP_SCHEDULE
-#endif
-            for (i = 0; i < num_rows; i++)
-            {
-               k0 = i*y_idxstride;
-               k1 = i*x_idxstride;
-               for (j = 0; j < num_vectors; ++j)
-               {
-                  y_data[j*y_vecstride + k0] = beta * y_data[j*y_vecstride + k0] +
-                                               x_data[j*x_vecstride + k1] /
-                                               A_data[A_i[i]];
-               }
-            }
-         }
-      }
-      else
-      {
-         if (num_vectors == 1)
-         {
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-            for (i = 0; i < num_rows; i++)
-            {
-               y_data[i] = alpha * x_data[i] / A_data[A_i[i]] + beta * y_data[i];
-            }
-         }
-         else
-         {
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,j,k0,k1) HYPRE_SMP_SCHEDULE
-#endif
-            for (i = 0; i < num_rows; i++)
-            {
-               k0 = i*y_idxstride;
-               k1 = i*x_idxstride;
-               for (j = 0; j < num_vectors; ++j)
-               {
-                  y_data[j*y_vecstride + k0] =  beta * y_data[j*y_vecstride + k0] +
-                                               alpha * x_data[j*x_vecstride + k1] /
-                                               A_data[A_i[i]];
-               }
-            }
-         }
-      } /* if (alpha == 1.0) */
-   } /* if (beta == 0.0) */
-
-   return hypre_error_flag;
 }
