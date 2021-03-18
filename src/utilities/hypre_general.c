@@ -214,6 +214,7 @@ HYPRE_Init()
    hypre_HandleCudaComputeStream(_hypre_handle);
 #elif defined(HYPRE_USING_SYCL)
    hypre_HandleSyclComputeQueue(_hypre_handle);
+   hypre_HandleonemklrngGenerator(_hypre_handle);
 #endif
    //hypre_HandleCudaPrefetchStream(_hypre_handle);
 #endif // HYPRE_USING_GPU
