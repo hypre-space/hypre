@@ -112,6 +112,12 @@ main( hypre_int  argc,
    hypre_MPI_Comm_size(comm, &num_procs );
    hypre_MPI_Comm_rank(comm, &myid );
 
+   /*-----------------------------------------------------------------
+    * GPU Device binding
+    * Must be done before HYPRE_Init() and should not be changed after
+    *-----------------------------------------------------------------*/
+   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+
    /* Initialize Hypre */
    /* Initialize Hypre: must be the first Hypre function to call */
    time_index = hypre_InitializeTiming("Hypre init");

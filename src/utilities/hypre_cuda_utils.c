@@ -782,14 +782,18 @@ hypre_HYPREIntToCusparseIndexType()
 
 #if defined(HYPRE_USING_GPU)
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+cudaStream_t
+#elif defined(HYPRE_USING_CUDA)
 cudaStream_t
 #elif defined(HYPRE_USING_HIP)
 hipStream_t
 #endif
 hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+   cudaStream_t stream = 0;
+#elif defined(HYPRE_USING_CUDA)
    cudaStream_t stream = 0;
 #elif defined(HYPRE_USING_HIP)
    hipStream_t stream = 0;
@@ -811,7 +815,9 @@ hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i)
       return data->cuda_streams[i];
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream, cudaStreamDefault));
+#elif defined(HYPRE_USING_CUDA)
    //HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream,cudaStreamNonBlocking));
    HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream, cudaStreamDefault));
 #elif defined(HYPRE_USING_HIP)
@@ -824,7 +830,9 @@ hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i)
    return stream;
 }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+cudaStream_t
+#elif defined(HYPRE_USING_CUDA)
 cudaStream_t
 #elif defined(HYPRE_USING_HIP)
 hipStream_t
@@ -989,7 +997,9 @@ hypre_CudaDataDestroy(hypre_CudaData *data)
    {
       if (data->cuda_streams[i])
       {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+         HYPRE_CUDA_CALL( cudaStreamDestroy(data->cuda_streams[i]) );
+#elif defined(HYPRE_USING_CUDA)
          HYPRE_CUDA_CALL( cudaStreamDestroy(data->cuda_streams[i]) );
 #elif defined(HYPRE_USING_HIP)
          HYPRE_HIP_CALL( hipStreamDestroy(data->cuda_streams[i]) );
@@ -1007,7 +1017,9 @@ hypre_CudaDataDestroy(hypre_CudaData *data)
 HYPRE_Int
 hypre_SyncCudaDevice(hypre_Handle *hypre_handle)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#elif defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
 #elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipDeviceSynchronize() );
@@ -1053,7 +1065,9 @@ hypre_SyncCudaComputeStream_core(HYPRE_Int     action,
          *cuda_compute_stream_sync_ptr = cuda_compute_stream_sync;
          break;
       case 4:
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+         HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#else
          if (cuda_compute_stream_sync)
          {
 #if defined(HYPRE_USING_CUDA)
@@ -1062,8 +1076,6 @@ hypre_SyncCudaComputeStream_core(HYPRE_Int     action,
             HYPRE_HIP_CALL( hipStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle)) );
 #endif
          }
-#elif defined(HYPRE_USING_DEVICE_OPENMP)
-         HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
 #endif
          break;
       default:
@@ -1109,3 +1121,49 @@ hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle)
 }
 
 #endif // #if defined(HYPRE_USING_GPU)
+
+
+/* This function is supposed to be used in the test drivers to mimic
+ * users' GPU binding approaches
+ * It is supposed to be called before HYPRE_Init,
+ * so that HYPRE_Init can get the wanted device id
+ */
+HYPRE_Int
+hypre_bind_device( HYPRE_Int myid,
+                   HYPRE_Int nproc,
+                   MPI_Comm  comm )
+{
+#ifdef HYPRE_USING_GPU
+   /* proc id (rank) on the running node */
+   HYPRE_Int myNodeid;
+   /* num of procs (size) on the node */
+   HYPRE_Int NodeSize;
+   /* num of devices seen */
+   hypre_int nDevices;
+   /* device id that want to bind */
+   hypre_int device_id;
+
+   hypre_MPI_Comm node_comm;
+   hypre_MPI_Comm_split_type( comm, hypre_MPI_COMM_TYPE_SHARED,
+                              myid, hypre_MPI_INFO_NULL, &node_comm );
+   hypre_MPI_Comm_rank(node_comm, &myNodeid);
+   hypre_MPI_Comm_size(node_comm, &NodeSize);
+   hypre_MPI_Comm_free(&node_comm);
+
+   /* get number of devices on this node */
+   hypre_GetDeviceCount(&nDevices);
+
+   /* set device */
+   device_id = myNodeid % nDevices;
+   hypre_SetDevice(device_id, NULL);
+
+#if defined(HYPRE_DEBUG) && defined(HYPRE_PRINT_ERRORS)
+   hypre_printf("Proc [global %d/%d, local %d/%d] can see %d GPUs and is running on %d\n",
+                myid, nproc, myNodeid, NodeSize, nDevices, device_id);
+#endif
+
+#endif /* #ifdef HYPRE_USING_GPU */
+
+   return hypre_error_flag;
+}
+

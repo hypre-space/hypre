@@ -1424,8 +1424,11 @@ HYPRE_Int
 hypre_umpire_device_pooled_allocate(void **ptr, size_t nbytes)
 {
    hypre_Handle *handle = hypre_handle();
-   const char *resource_name = "DEVICE";
+   const hypre_int device_id = hypre_HandleCudaDevice(handle);
+   char resource_name[16];
    const char *pool_name = hypre_HandleUmpireDevicePoolName(handle);
+
+   hypre_sprintf(resource_name, "%s::%d", "DEVICE", device_id);
 
    umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);
    umpire_allocator pooled_allocator;
