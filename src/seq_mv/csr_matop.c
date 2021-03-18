@@ -526,6 +526,9 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
       /* Correct C_i - phase 2 */
       if (rownnz_A != NULL)
       {
+#ifdef HYPRE_USING_OPENMP
+#pragma omp barrier
+#endif
          for (ic = ns; ic < (ne-1); ic++)
          {
             for (iic = rownnz_A[ic] + 1; iic < rownnz_A[ic+1]; iic++)

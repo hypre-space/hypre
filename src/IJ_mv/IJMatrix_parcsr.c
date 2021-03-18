@@ -2730,6 +2730,9 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
             /* Correct diag_i and offd_i */
             if (rownnz != NULL)
             {
+#ifdef HYPRE_USING_OPENMP
+#pragma omp barrier
+#endif
                for (i = ns; i < (ne-1); i++)
                {
                   for (ii = rownnz[i] + 1; ii < rownnz[i+1]; ii++)
