@@ -40,7 +40,6 @@ hypre_BoomerAMGCreate()
    HYPRE_Real   agg_trunc_factor;
    HYPRE_Real   agg_P12_trunc_factor;
    HYPRE_Real   jacobi_trunc_threshold;
-   HYPRE_Real   S_commpkg_switch;
    HYPRE_Real   CR_rate;
    HYPRE_Real   CR_strong_th;
    HYPRE_Real   A_drop_tol;
@@ -154,7 +153,6 @@ hypre_BoomerAMGCreate()
    agg_trunc_factor = 0.0;
    agg_P12_trunc_factor = 0.0;
    jacobi_trunc_threshold = 0.01;
-   S_commpkg_switch = 1.0;
    interp_type = 0;
    sep_weight = 0;
    coarsen_type = 10;
@@ -284,7 +282,6 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetAggTruncFactor(amg_data, agg_trunc_factor);
    hypre_BoomerAMGSetAggP12TruncFactor(amg_data, agg_P12_trunc_factor);
    hypre_BoomerAMGSetJacobiTruncThreshold(amg_data, jacobi_trunc_threshold);
-   hypre_BoomerAMGSetSCommPkgSwitch(amg_data, S_commpkg_switch);
    hypre_BoomerAMGSetSepWeight(amg_data, sep_weight);
    hypre_BoomerAMGSetMeasureType(amg_data, measure_type);
    hypre_BoomerAMGSetCoarsenType(amg_data, coarsen_type);
@@ -1500,40 +1497,6 @@ hypre_BoomerAMGGetPostInterpType( void     *data,
    }
 
    *post_interp_type = hypre_ParAMGDataPostInterpType(amg_data);
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_BoomerAMGSetSCommPkgSwitch( void     *data,
-                                  HYPRE_Real    S_commpkg_switch )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   hypre_ParAMGDataSCommPkgSwitch(amg_data) = S_commpkg_switch;
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_BoomerAMGGetSCommPkgSwitch( void     *data,
-                                  HYPRE_Real *  S_commpkg_switch )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   *S_commpkg_switch = hypre_ParAMGDataSCommPkgSwitch(amg_data);
 
    return hypre_error_flag;
 }

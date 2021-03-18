@@ -20,7 +20,6 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
                                      HYPRE_Int            debug_flag,
                                      HYPRE_Real           trunc_factor,
                                      HYPRE_Int            max_elmts,
-                                     HYPRE_Int           *col_offd_S_to_A,
                                      hypre_ParCSRMatrix **P_ptr)
 {
    /* Communication Variables */
@@ -429,7 +428,6 @@ hypre_BoomerAMGBuildModExtInterp(hypre_ParCSRMatrix  *A,
                                  HYPRE_Int            debug_flag,
                                  HYPRE_Real           trunc_factor,
                                  HYPRE_Int            max_elmts,
-                                 HYPRE_Int           *col_offd_S_to_A,
                                  hypre_ParCSRMatrix **P_ptr)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -443,13 +441,13 @@ hypre_BoomerAMGBuildModExtInterp(hypre_ParCSRMatrix  *A,
    if (exec == HYPRE_EXEC_HOST)
    {
       ierr = hypre_BoomerAMGBuildModExtInterpHost(A,CF_marker,S,num_cpts_global,
-                                                  debug_flag,trunc_factor,max_elmts,col_offd_S_to_A,P_ptr);
+                                                  debug_flag,trunc_factor,max_elmts,P_ptr);
    }
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    else
    {
       ierr = hypre_BoomerAMGBuildExtInterpDevice(A,CF_marker,S,num_cpts_global,1,NULL,
-                                                 debug_flag,trunc_factor,max_elmts,col_offd_S_to_A,P_ptr);
+                                                 debug_flag,trunc_factor,max_elmts,P_ptr);
    }
 #endif
 
@@ -473,7 +471,6 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
                                        HYPRE_Int            debug_flag,
                                        HYPRE_Real           trunc_factor,
                                        HYPRE_Int            max_elmts,
-                                       HYPRE_Int           *col_offd_S_to_A,
                                        hypre_ParCSRMatrix **P_ptr)
 {
    /* Communication Variables */
@@ -987,7 +984,6 @@ hypre_BoomerAMGBuildModExtPIInterp(hypre_ParCSRMatrix  *A,
                                    HYPRE_Int            debug_flag,
                                    HYPRE_Real           trunc_factor,
                                    HYPRE_Int            max_elmts,
-                                   HYPRE_Int           *col_offd_S_to_A,
                                    hypre_ParCSRMatrix **P_ptr)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -1001,7 +997,7 @@ hypre_BoomerAMGBuildModExtPIInterp(hypre_ParCSRMatrix  *A,
    if (exec == HYPRE_EXEC_HOST)
    {
       ierr = hypre_BoomerAMGBuildModExtPIInterpHost(A, CF_marker, S, num_cpts_global,
-                                                    debug_flag, trunc_factor, max_elmts, col_offd_S_to_A, P_ptr);
+                                                    debug_flag, trunc_factor, max_elmts, P_ptr);
    }
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    else
@@ -1030,7 +1026,6 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
                                        HYPRE_Int             debug_flag,
                                        HYPRE_Real            trunc_factor,
                                        HYPRE_Int             max_elmts,
-                                       HYPRE_Int            *col_offd_S_to_A,
                                        hypre_ParCSRMatrix  **P_ptr)
 {
    /* Communication Variables */
@@ -1518,7 +1513,6 @@ hypre_BoomerAMGBuildModExtPEInterp(hypre_ParCSRMatrix  *A,
                                       HYPRE_Int            debug_flag,
                                       HYPRE_Real           trunc_factor,
                                       HYPRE_Int            max_elmts,
-                                      HYPRE_Int           *col_offd_S_to_A,
                                       hypre_ParCSRMatrix **P_ptr)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -1532,13 +1526,13 @@ hypre_BoomerAMGBuildModExtPEInterp(hypre_ParCSRMatrix  *A,
    if (exec == HYPRE_EXEC_HOST)
    {
       ierr = hypre_BoomerAMGBuildModExtPEInterpHost(A, CF_marker, S, num_cpts_global,
-                                                    debug_flag, trunc_factor, max_elmts, col_offd_S_to_A, P_ptr);
+                                                    debug_flag, trunc_factor, max_elmts, P_ptr);
    }
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    else
    {
       ierr = hypre_BoomerAMGBuildExtPEInterpDevice(A,CF_marker,S,num_cpts_global,1,NULL,
-                                                 debug_flag,trunc_factor,max_elmts,col_offd_S_to_A,P_ptr);
+                                                 debug_flag,trunc_factor,max_elmts,P_ptr);
    }
 #endif
 

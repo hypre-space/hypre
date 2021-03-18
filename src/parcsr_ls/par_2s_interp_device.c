@@ -30,7 +30,6 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
                                                HYPRE_Int            debug_flag,
                                                HYPRE_Real           trunc_factor,
                                                HYPRE_Int            max_elmts,
-                                               HYPRE_Int           *col_offd_S_to_A,
                                                hypre_ParCSRMatrix **P_ptr )
 {
    HYPRE_Int           A_nr_local   = hypre_ParCSRMatrixNumRows(A);
@@ -264,7 +263,6 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
                                                  HYPRE_Int            debug_flag,
                                                  HYPRE_Real           trunc_factor,
                                                  HYPRE_Int            max_elmts,
-                                                 HYPRE_Int           *col_offd_S_to_A,
                                                  hypre_ParCSRMatrix **P_ptr )
 {
    HYPRE_Int           A_nr_local   = hypre_ParCSRMatrixNumRows(A);
