@@ -233,11 +233,11 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
       row = startf;
       for (i=start; i < stop; i++)
       {
-         HYPRE_Int jA, jS, jC;
          if (CF_marker[i] < 0)
          {
             if (num_functions > 1)
             {
+               HYPRE_Int jA, jS, jC;
                jC = A_diag_i[i];
                for (j=S_diag_i[i]; j < S_diag_i[i+1]; j++)
                {
