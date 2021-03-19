@@ -2146,6 +2146,12 @@ main( hypre_int argc,
       hypre_printf("  solver ID    = %d\n\n", solver_id);
    }
 
+   /*-----------------------------------------------------------------
+    * GPU Device binding
+    * Must be done before HYPRE_Init() and should not be changed after
+    *-----------------------------------------------------------------*/
+   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+
    time_index = hypre_InitializeTiming("Hypre init");
    hypre_BeginTiming(time_index);
 
@@ -9614,3 +9620,4 @@ BuildParIsoLaplacian( HYPRE_Int argc, char** argv, HYPRE_ParCSRMatrix *A_ptr )
 }
 
 /* end lobpcg */
+
