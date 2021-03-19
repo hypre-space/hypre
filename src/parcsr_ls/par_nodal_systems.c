@@ -1010,7 +1010,7 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
    }
 
    S_marker_offd = hypre_TAlloc(HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST);
-   col_map_offd_S = hypre_TAlloc(HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST);
+   col_map_offd_S = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_A, HYPRE_MEMORY_HOST);
    for (i=0; i < num_cols_offd_A; i++)
    {
       S_marker_offd[i] = -1;

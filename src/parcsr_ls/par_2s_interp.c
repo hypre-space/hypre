@@ -634,7 +634,7 @@ hypre_BoomerAMGBuildModPartialExtInterp( hypre_ParCSRMatrix  *A,
    else
    {
       ierr = hypre_BoomerAMGBuildModPartialExtInterpDevice(A, CF_marker, S, num_cpts_global, num_old_cpts_global,
-                                                           debug_flag, trunc_factor, max_elmts, NULL, P_ptr);
+                                                           debug_flag, trunc_factor, max_elmts, P_ptr);
    }
 #endif
 
@@ -803,7 +803,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpHost( hypre_ParCSRMatrix  *A,
 #endif
    {
       HYPRE_Int my_thread_num = hypre_GetThreadNum();
-      HYPRE_Real beta;
+      HYPRE_Real beta, gamma;
 
       start = (n_fine/num_threads)*my_thread_num;
       if (my_thread_num == num_threads-1)
@@ -1082,11 +1082,11 @@ hypre_BoomerAMGBuildModPartialExtPEInterpHost( hypre_ParCSRMatrix  *A,
       }
       for (i=startf; i<stopf; i++)
       {
-         beta = D_inv[i];
+         gamma = D_inv[i];
          for (j=As_FC_diag_i[i]; j < As_FC_diag_i[i+1]; j++)
-            As_FC_diag_data[j] *= beta;
+            As_FC_diag_data[j] *= gamma;
          for (j=As_FC_offd_i[i]; j < As_FC_offd_i[i+1]; j++)
-            As_FC_offd_data[j] *= beta;
+            As_FC_offd_data[j] *= gamma;
       }
 
    }   /* end parallel region */
@@ -1317,7 +1317,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterp( hypre_ParCSRMatrix  *A,
    else
    {
       ierr = hypre_BoomerAMGBuildModPartialExtPEInterpDevice(A, CF_marker, S, num_cpts_global, num_old_cpts_global,
-                                                             debug_flag, trunc_factor, max_elmts, NULL, P_ptr);
+                                                             debug_flag, trunc_factor, max_elmts, P_ptr);
    }
 #endif
 

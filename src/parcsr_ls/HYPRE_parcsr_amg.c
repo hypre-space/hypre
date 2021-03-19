@@ -399,8 +399,7 @@ HYPRE_Int
 HYPRE_BoomerAMGSetSCommPkgSwitch( HYPRE_Solver solver,
                                   HYPRE_Real   S_commpkg_switch  )
 {
-   return( hypre_BoomerAMGSetSCommPkgSwitch( (void *) solver,
-                                             S_commpkg_switch ) );
+   return 0;
 }
 
 /*--------------------------------------------------------------------------
