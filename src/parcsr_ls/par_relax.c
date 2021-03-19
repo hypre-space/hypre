@@ -1460,7 +1460,7 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelHost( hypre_ParCSRMatrix *A,
                                              HYPRE_Real          omega,
                                              hypre_ParVector    *u,
                                              hypre_ParVector    *Vtemp,
-                                             HYPRE_Int          num_inner_iters)
+                                             HYPRE_Int           num_inner_iters)
 {
    hypre_CSRMatrix *A_diag      = hypre_ParCSRMatrixDiag(A);
    HYPRE_Int        num_rows    = hypre_CSRMatrixNumRows(A_diag);
@@ -1471,8 +1471,8 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelHost( hypre_ParCSRMatrix *A,
    HYPRE_Complex   *Vtemp_data  = hypre_VectorData(Vtemp_local);
    hypre_Vector    *u_local     = hypre_ParVectorLocalVector(u);
    HYPRE_Complex   *u_data      = hypre_VectorData(u_local);
-   HYPRE_Int        i, jj, ii;
-   HYPRE_Complex multiplier = 1.0;
+   HYPRE_Int        i, k, jj, ii;
+   HYPRE_Complex    multiplier  = 1.0;
 
    /* Need to check that EVERY diagonal is nonzero first. If any are, throw exception */
 #if 0
@@ -1487,39 +1487,39 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelHost( hypre_ParCSRMatrix *A,
 
    hypre_ParCSRMatrixMatvecOutOfPlace(-relax_weight, A, u, relax_weight, f, Vtemp);
 
-   
+
    for (i = 0; i < num_rows; i++) /* Run the smoother */
    {
-     // V = V/D
-     Vtemp_data[i] /= A_diag_data[A_diag_i[i]];
+      // V = V/D
+      Vtemp_data[i] /= A_diag_data[A_diag_i[i]];
 
-     // u = u + m*v
-     u_data[i] += multiplier*Vtemp_data[i];
+      // u = u + m*v
+      u_data[i] += multiplier * Vtemp_data[i];
    }
 
-      // adjust for the alternating series
+   // adjust for the alternating series
    multiplier *= -1.0;
 
-   for (int k=0; k<num_inner_iters; ++k)
+   for (k = 0; k < num_inner_iters; ++k)
    {
       // By going from bottom to top, we can update Vtemp in place because
       // we're operating with the strict, lower triangular matrix
       for (i = num_rows-1; i >=0; i--) /* Run the smoother */
       {
-	 // spmv for the row first
+         // spmv for the row first
          HYPRE_Complex res = 0.0;
-	 for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
-	 {
+         for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
+         {
             ii = A_diag_j[jj];
-	    if (ii < i)
-	    {
-	      res += A_diag_data[jj]*Vtemp_data[ii];
-	    }
-	 }
-	 // diagonal scaling has to come after the spmv accumulation. It's a row scaling
-	 // not column
-	 Vtemp_data[i] = res/A_diag_data[A_diag_i[i]];
-	 u_data[i] += multiplier * Vtemp_data[i];
+            if (ii < i)
+            {
+               res += A_diag_data[jj] * Vtemp_data[ii];
+            }
+         }
+         // diagonal scaling has to come after the spmv accumulation. It's a row scaling
+         // not column
+         Vtemp_data[i] = res / A_diag_data[A_diag_i[i]];
+         u_data[i] += multiplier * Vtemp_data[i];
       }
 
       // adjust for the alternating series
@@ -1528,7 +1528,6 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelHost( hypre_ParCSRMatrix *A,
 
    return hypre_error_flag;
 }
-
 
 HYPRE_Int
 hypre_BoomerAMGRelax11TwoStageGaussSeidel( hypre_ParCSRMatrix *A,

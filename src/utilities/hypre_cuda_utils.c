@@ -627,7 +627,8 @@ hypreCUDAKernel_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_d
    }
 }
 
-/* y = diag(A) \ x + beta y
+/* y = diag(A) \ x
+ * z = beta * (diag(A) \ x) + z
  * Note: Assume A_i[i] points to the ith diagonal entry of A */
 HYPRE_Int
 hypreDevice_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y, HYPRE_Complex *z)

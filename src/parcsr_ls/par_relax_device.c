@@ -96,23 +96,24 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelDevice ( hypre_ParCSRMatrix *A,
    HYPRE_Complex   *u_data       = hypre_VectorData(u_local);
    HYPRE_Complex   *r_data       = hypre_VectorData(r_local);
    HYPRE_Complex   *z_data       = hypre_VectorData(z_local);
-   HYPRE_Complex multiplier = 1.0;
+   HYPRE_Int        zsize        = hypre_VectorSize(z_local);
+   HYPRE_Int        rsize        = hypre_VectorSize(r_local);
+   HYPRE_Complex    multiplier   = 1.0;
+   HYPRE_Int        i;
 
    hypre_ParCSRMatrixMatvecOutOfPlace(-relax_weight, A, u, relax_weight, f, r);
 
    hypreDevice_DiagScaleVector(num_rows, A_diag_i, A_diag_data, r_data, 0.0, z_data);
 
-   HYPRE_Int        zsize     = hypre_VectorSize(z_local);
-   HYPRE_Int        rsize     = hypre_VectorSize(r_local);
-
    // set this so that axpy works out properly. Reset later.
-   hypre_VectorSize(z_local)  = rsize;
+   hypre_VectorSize(z_local) = rsize;
 
    // 1) u = u + z
    hypre_SeqVectorAxpy(multiplier, z_local, u_local);
    multiplier *= -1.0;
 
-   for (int i=0; i<num_inner_iters; ++i) {
+   for (i = 0; i < num_inner_iters; ++i) 
+   {
        // 2) r = Lz
        hypre_CSRMatrixSpMVDevice(1.0, A_diag, z_local, 0.0, r_local, -2);
        // 3) z = r/D, u = u + m*z
@@ -121,7 +122,7 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelDevice ( hypre_ParCSRMatrix *A,
    }
 
    // reset this
-   hypre_VectorSize(z_local)  = zsize;
+   hypre_VectorSize(z_local) = zsize;
 
    hypre_NvtxPopRange();
 
@@ -129,3 +130,4 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelDevice ( hypre_ParCSRMatrix *A,
 }
 
 #endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+
