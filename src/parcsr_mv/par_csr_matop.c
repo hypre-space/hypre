@@ -409,6 +409,9 @@ hypre_ParMatmul_RowSizes( HYPRE_MemoryLocation   memory_location,
       /* Correct diag_i and offd_i - phase 2 */
       if (rownnz_A != NULL)
       {
+#ifdef HYPRE_USING_OPENMP
+#pragma omp barrier
+#endif
          for (i1 = ns; i1 < (ne-1); i1++)
          {
             for (ii1 = rownnz_A[i1] + 1; ii1 < rownnz_A[i1+1]; ii1++)
