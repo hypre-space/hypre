@@ -105,13 +105,6 @@ hypre_AuxParCSRMatrixDestroy( hypre_AuxParCSRMatrix *matrix )
             }
          }
 
-         for (i = 0; i < num_rows; i++)
-         {
-            if (hypre_AuxParCSRMatrixAuxJ(matrix)[i])
-            {
-               break;
-            }
-         }
          hypre_TFree(hypre_AuxParCSRMatrixAuxJ(matrix), HYPRE_MEMORY_HOST);
       }
 
