@@ -4166,8 +4166,8 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    /* C owns row/col starts*/
    hypre_ParCSRMatrixRowStarts(C) = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
    hypre_ParCSRMatrixColStarts(C) = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   memcpy(hypre_ParCSRMatrixRowStarts(C), hypre_ParCSRMatrixRowStarts(A), 2*sizeof(HYPRE_BigInt));
-   memcpy(hypre_ParCSRMatrixColStarts(C), hypre_ParCSRMatrixColStarts(A), 2*sizeof(HYPRE_BigInt));
+   memcpy(hypre_ParCSRMatrixRowStarts(C), hypre_ParCSRMatrixColStarts(A), 2*sizeof(HYPRE_BigInt));
+   memcpy(hypre_ParCSRMatrixColStarts(C), hypre_ParCSRMatrixColStarts(B), 2*sizeof(HYPRE_BigInt));
    hypre_ParCSRMatrixSetRowStartsOwner(C, 1);
    hypre_ParCSRMatrixSetColStartsOwner(C, 1);
 
