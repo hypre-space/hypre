@@ -5427,7 +5427,7 @@ hypre_ParcsrAdd( HYPRE_Complex        alpha,
    /* Set diag_C */
    if (rownnz_diag_C == NULL)
    {
-      for (i = 0; i < num_rows_diag_A; i++)
+      for (i = 0; i < num_rownnz_diag_C; i++)
       {
          HYPRE_Int diag_i_start = nnz_diag_C;
          for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
@@ -5478,7 +5478,7 @@ hypre_ParcsrAdd( HYPRE_Complex        alpha,
    }
    else
    {
-      for (i = 0; i < num_rows_diag_A; i++)
+      for (i = 0; i < num_rownnz_diag_C; i++)
       {
          ii = rownnz_diag_C[i];
 
