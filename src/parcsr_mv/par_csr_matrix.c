@@ -85,10 +85,11 @@ hypre_ParCSRMatrixCreate( MPI_Comm comm,
       hypre_CSRMatrixCreate(local_num_rows, num_cols_offd, num_nonzeros_offd);
    hypre_ParCSRMatrixDiagT(matrix) = NULL;
    hypre_ParCSRMatrixOffdT(matrix) = NULL; // JSP: transposed matrices are optional
-   hypre_ParCSRMatrixGlobalNumRows(matrix) = global_num_rows;
-   hypre_ParCSRMatrixGlobalNumCols(matrix) = global_num_cols;
-   hypre_ParCSRMatrixFirstRowIndex(matrix) = first_row_index;
-   hypre_ParCSRMatrixFirstColDiag(matrix) = first_col_diag;
+   hypre_ParCSRMatrixGlobalNumRows(matrix)   = global_num_rows;
+   hypre_ParCSRMatrixGlobalNumCols(matrix)   = global_num_cols;
+   hypre_ParCSRMatrixGlobalNumRownnz(matrix) = global_num_rows;
+   hypre_ParCSRMatrixFirstRowIndex(matrix)   = first_row_index;
+   hypre_ParCSRMatrixFirstColDiag(matrix)    = first_col_diag;
 
    hypre_ParCSRMatrixLastRowIndex(matrix) = first_row_index + local_num_rows - 1;
    hypre_ParCSRMatrixLastColDiag(matrix) = first_col_diag + local_num_cols - 1;
@@ -405,18 +406,16 @@ hypre_ParCSRMatrixSetDNumNonzeros( hypre_ParCSRMatrix *matrix )
 HYPRE_Int
 hypre_ParCSRMatrixSetNumRownnz( hypre_ParCSRMatrix *matrix )
 {
-   MPI_Comm          comm;
+   MPI_Comm          comm = hypre_ParCSRMatrixComm(matrix);
    hypre_CSRMatrix  *diag = hypre_ParCSRMatrixDiag(matrix);
    hypre_CSRMatrix  *offd = hypre_ParCSRMatrixOffd(matrix);
+   HYPRE_Int        *rownnz_diag = hypre_CSRMatrixRownnz(diag);
+   HYPRE_Int        *rownnz_offd = hypre_CSRMatrixRownnz(diag);
+   HYPRE_Int         num_rownnz_diag = hypre_CSRMatrixNumRownnz(diag);
+   HYPRE_Int         num_rownnz_offd = hypre_CSRMatrixNumRownnz(offd);
 
-   HYPRE_Int         local_num_rownnz;
-   HYPRE_Int         global_num_rownnz;
-   HYPRE_Int         num_rownnz_diag;
-   HYPRE_Int         num_rownnz_offd;
-
-   HYPRE_Int        *rownnz_diag;
-   HYPRE_Int        *rownnz_offd;
-
+   HYPRE_BigInt      local_num_rownnz;
+   HYPRE_BigInt      global_num_rownnz;
    HYPRE_Int         i, j;
 
    if (!matrix)
@@ -425,18 +424,7 @@ hypre_ParCSRMatrixSetNumRownnz( hypre_ParCSRMatrix *matrix )
       return hypre_error_flag;
    }
 
-   comm = hypre_ParCSRMatrixComm(matrix);
-   diag = hypre_ParCSRMatrixDiag(matrix);
-   offd = hypre_ParCSRMatrixOffd(matrix);
-
-   rownnz_diag = hypre_CSRMatrixRownnz(diag);
-   rownnz_offd = hypre_CSRMatrixRownnz(diag);
-
-   num_rownnz_diag = hypre_CSRMatrixNumRownnz(diag);
-   num_rownnz_offd = hypre_CSRMatrixNumRownnz(offd);
-
-   i = j = 0;
-   local_num_rownnz = 0;
+   local_num_rownnz = i = j = 0;
    while (i < num_rownnz_diag && j < num_rownnz_offd)
    {
       local_num_rownnz++;
@@ -450,11 +438,10 @@ hypre_ParCSRMatrixSetNumRownnz( hypre_ParCSRMatrix *matrix )
       }
    }
 
-   local_num_rownnz += (num_rownnz_diag - i) +
-                       (num_rownnz_offd - j);
+   local_num_rownnz += (HYPRE_BigInt) ((num_rownnz_diag - i) + (num_rownnz_offd - j));
 
-   hypre_MPI_Allreduce(&local_num_rownnz, &global_num_rownnz, 1, HYPRE_MPI_INT,
-                       hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&local_num_rownnz, &global_num_rownnz, 1,
+                       HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
 
    hypre_ParCSRMatrixGlobalNumRownnz(matrix) = global_num_rownnz;
 
@@ -3046,4 +3033,3 @@ hypre_ParCSRMatrixTruncate(hypre_ParCSRMatrix *A,
 
    return ierr;
 }
-
