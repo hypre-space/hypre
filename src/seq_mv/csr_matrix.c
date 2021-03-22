@@ -42,7 +42,14 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
 
    /* set defaults */
    hypre_CSRMatrixOwnsData(matrix)  = 1;
-   hypre_CSRMatrixNumRownnz(matrix) = num_rows;
+   if (num_nonzeros)
+   {
+      hypre_CSRMatrixNumRownnz(matrix) = num_rows;
+   }
+   else
+   {
+      hypre_CSRMatrixNumRownnz(matrix) = 0;
+   }
 
 #if defined(HYPRE_USING_CUSPARSE)
    hypre_CSRMatrixSortedJ(matrix)    = NULL;
@@ -1024,4 +1031,3 @@ hypre_CSRMatrixPrefetch( hypre_CSRMatrix *A, HYPRE_MemoryLocation memory_locatio
 
    return ierr;
 }
-
