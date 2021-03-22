@@ -307,6 +307,7 @@ typedef struct hypre_ParCSRMatrix_struct
 
    HYPRE_BigInt          global_num_rows;
    HYPRE_BigInt          global_num_cols;
+   HYPRE_BigInt          global_num_rownnz;
    HYPRE_BigInt          first_row_index;
    HYPRE_BigInt          first_col_diag;
    /* need to know entire local range in case row_starts and col_starts
@@ -377,6 +378,7 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixComm(matrix)                   ((matrix) -> comm)
 #define hypre_ParCSRMatrixGlobalNumRows(matrix)          ((matrix) -> global_num_rows)
 #define hypre_ParCSRMatrixGlobalNumCols(matrix)          ((matrix) -> global_num_cols)
+#define hypre_ParCSRMatrixGlobalNumRownnz(matrix)        ((matrix) -> global_num_rownnz)
 #define hypre_ParCSRMatrixFirstRowIndex(matrix)          ((matrix) -> first_row_index)
 #define hypre_ParCSRMatrixFirstColDiag(matrix)           ((matrix) -> first_col_diag)
 #define hypre_ParCSRMatrixLastRowIndex(matrix)           ((matrix) -> last_row_index)
@@ -950,3 +952,4 @@ HYPRE_Int hypre_ParVectorGetValuesDevice(hypre_ParVector *vector, HYPRE_Int num_
 #endif
 
 #endif
+
