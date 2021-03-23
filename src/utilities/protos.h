@@ -240,6 +240,7 @@ typedef struct
  * 1) Merge sort can take advantage of eliminating duplicates.
  * 2) Merge sort is more efficiently parallelizable than qsort
  */
+HYPRE_Int hypre_MergeOrderedArrays( HYPRE_Int size1 , HYPRE_Int *array1 , HYPRE_Int size2 , HYPRE_Int *array2 , HYPRE_Int *size3_ptr , HYPRE_Int **array3_ptr);
 void hypre_union2(HYPRE_Int n1, HYPRE_BigInt *arr1, HYPRE_Int n2, HYPRE_BigInt *arr2, HYPRE_Int *n3, HYPRE_BigInt *arr3, HYPRE_Int *map1, HYPRE_Int *map2);
 void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int **sorted);
 void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len, HYPRE_BigInt **sorted);
@@ -264,7 +265,6 @@ void hypre_NvtxPopRange();
 
 /* hypre_utilities.c */
 HYPRE_Int hypre_multmod(HYPRE_Int a, HYPRE_Int b, HYPRE_Int mod);
-HYPRE_Int hypre_MergeOrderedArrays( HYPRE_Int size1 , HYPRE_Int *array1 , HYPRE_Int size2 , HYPRE_Int *array2 , HYPRE_Int *size3_ptr , HYPRE_Int **array3_ptr);
 void hypre_partition1D(HYPRE_Int n, HYPRE_Int p, HYPRE_Int j, HYPRE_Int *s, HYPRE_Int *e);
 
 HYPRE_Int hypre_SetSyncCudaCompute(HYPRE_Int action);
