@@ -1475,7 +1475,6 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelHost( hypre_ParCSRMatrix *A,
    HYPRE_Complex    multiplier  = 1.0;
 
    /* Need to check that EVERY diagonal is nonzero first. If any are, throw exception */
-#if 0
    for (i = 0; i < num_rows; i++)
    {
       if (A_diag_data[A_diag_i[i]] == 0.0)
@@ -1483,7 +1482,6 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelHost( hypre_ParCSRMatrix *A,
          hypre_error_in_arg(1);
       }
    }
-#endif
 
    hypre_ParCSRMatrixMatvecOutOfPlace(-relax_weight, A, u, relax_weight, f, Vtemp);
 
