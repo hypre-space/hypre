@@ -304,7 +304,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
                {
                   tempx += A_data[j] * x_data[A_j[j]];
                }
-               y_data[m] = tempx - b_data[m];
+               y_data[m] += tempx;
             }
          } // y = A*x - b
          else if (alpha == -1.0)
@@ -328,7 +328,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
                {
                   tempx += A_data[j] * x_data[A_j[j]];
                }
-               y_data[m] = b_data[m] - tempx;
+               y_data[m] -= tempx;
             }
          } // y = -A*x + b
          else
@@ -352,7 +352,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
                {
                   tempx += A_data[j] * x_data[A_j[j]];
                }
-               y_data[m] = alpha*(tempx - b_data[m]);
+               y_data[m] += alpha*tempx;
             }
          } // y = alpha*(A*x - b)
       } // temp == -1
@@ -403,7 +403,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
                {
                   tempx -= A_data[j] * x_data[A_j[j]];
                }
-               y_data[m] = tempx - b_data[m];
+               y_data[m] += tempx;
             }
          } // y = -A*x - b
          else
@@ -427,7 +427,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
                {
                   tempx += A_data[j] * x_data[A_j[j]];
                }
-               y_data[m] = alpha*(tempx + b_data[m]);
+               y_data[m] += alpha*tempx;
             }
          } // y = alpha*(A*x + b)
       }
@@ -454,7 +454,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
                {
                   tempx += A_data[j] * x_data[A_j[j]];
                }
-               y_data[m] = tempx + beta*b_data[m];
+               y_data[m] += tempx;
             }
          } // y = A*x + beta*b
          else if (-1 == alpha)
@@ -478,7 +478,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
                {
                   tempx -= A_data[j] * x_data[A_j[j]];
                }
-               y_data[m] = tempx - temp*b_data[m];
+               y_data[m] += tempx;
             }
          } // y = -A*x - temp*b
          else
@@ -502,7 +502,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
                {
                   tempx += A_data[j] * x_data[A_j[j]];
                }
-               y_data[m] = alpha*tempx + beta*b_data[m];
+               y_data[m] += alpha*tempx;
             }
          } // y = alpha*(A*x + temp*b)
       } // temp != 0 && temp != -1 && temp != 1
