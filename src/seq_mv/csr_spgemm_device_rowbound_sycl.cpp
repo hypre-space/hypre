@@ -11,12 +11,12 @@
 #include <algorithm>
 
 #if defined(HYPRE_USING_SYCL)
-// abb: check for HYPRE_WARP_SIZE
+
 template <typename T>
 using relaxed_atomic_ref =
-  cl::sycl::ONEAPI::atomic_ref< T, cl::sycl::ONEAPI::memory_order::relaxed,
-				cl::sycl::ONEAPI::memory_scope::device,
-				cl::sycl::access::address_space::global_space>;
+  sycl::ONEAPI::atomic_ref< T, sycl::ONEAPI::memory_order::relaxed,
+			    sycl::ONEAPI::memory_scope::device,
+			    sycl::access::address_space::local_space>;
 
 /*- - - - - - - - - - - - - - - - - - - - - - - - - -
  *- - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -25,7 +25,8 @@ using relaxed_atomic_ref =
  *- - - - - - - - - - - - - - - - - - - - - - - - - -
  */
 template <char HashType>
-static __inline__ __attribute__((always_inline)) HYPRE_Int hash_insert_symbl(
+static __inline__ __attribute__((always_inline))
+HYPRE_Int hash_insert_symbl(
     HYPRE_Int HashSize,           /* capacity of the hash table */
     volatile HYPRE_Int *HashKeys, /* assumed to be initialized as all -1's */
     HYPRE_Int key,                /* assumed to be nonnegative */
@@ -46,12 +47,12 @@ static __inline__ __attribute__((always_inline)) HYPRE_Int hash_insert_symbl(
       }
 
       /* try to insert key+1 into slot j */
-      // HYPRE_Int old = dpct::atomic_compare_exchange_strong(
-      //     (HYPRE_Int *)(HashKeys + j), -1, key);
-      // abb: check this function
-      relaxed_atomic_ref<HYPRE_Int*>((HYPRE_Int *)(HashKeys + j)).compare_exchange_strong(-1, &key,
-											  cl::sycl::memory_order::relaxed,
-											  cl::sycl::memory_order::relaxed);
+      sycl::atomic<HYPRE_Int, sycl::access::address_space::local_space>
+        obj(sycl::multi_ptr<HYPRE_Int, sycl::access::address_space::local_space>((HYPRE_Int*)(HashKeys + j)));
+      HYPRE_Int old = obj.compare_exchange_strong(-1, key, sycl::memory_order::relaxed,
+                                                  sycl::memory_order::relaxed);
+      // enable the following for SYCL 2020:
+      //relaxed_atomic_ref<HYPRE_Int*>((HYPRE_Int *)(HashKeys + j)).compare_exchange_strong(-1, key);
       if (old == -1)
       {
          count++;
@@ -66,49 +67,56 @@ static __inline__ __attribute__((always_inline)) HYPRE_Int hash_insert_symbl(
 }
 
 template <char HashType>
-static __inline__ __attribute__((always_inline)) HYPRE_Int csr_spmm_compute_row_symbl(
+static __inline__ __attribute__((always_inline))
+HYPRE_Int csr_spmm_compute_row_symbl(
     HYPRE_Int rowi, HYPRE_Int lane_id, HYPRE_Int *ia, HYPRE_Int *ja,
     HYPRE_Int *ib, HYPRE_Int *jb, HYPRE_Int s_HashSize,
     volatile HYPRE_Int *s_HashKeys, HYPRE_Int g_HashSize, HYPRE_Int *g_HashKeys,
     char &failed, sycl::nd_item<3>& item)
 {
+   sycl::ONEAPI::sub_group SG = item.get_sub_group();
+   HYPRE_Int threadIdx_x = item.get_local_id(2);
+   HYPRE_Int threadIdx_y = item.get_local_id(1);
+   HYPRE_Int blockDim_y = item.get_local_range().get(1);
+   HYPRE_Int blockDim_x = item.get_local_range().get(2);
+
    /* load the start and end position of row i of A */
    HYPRE_Int j = -1;
    if (lane_id < 2)
    {
       j = read_only_load(ia + rowi + lane_id);
    }
-   const HYPRE_Int istart = item.shuffle(j, 0);
-   const HYPRE_Int iend   = item.shuffle(j, 1);
+   const HYPRE_Int istart = SG.shuffle(j, 0);
+   const HYPRE_Int iend   = SG.shuffle(j, 1);
 
    HYPRE_Int num_new_insert = 0;
 
    /* load column idx and values of row i of A */
-   for (HYPRE_Int i = istart; i < iend; i += item.get_local_range(1))
+   for (HYPRE_Int i = istart; i < iend; i += blockDim_y)
    {
       HYPRE_Int colA = -1;
 
-      if (item.get_local_id(2) == 0 && i + item.get_local_id(1) < iend)
+      if (threadIdx_x == 0 && i + threadIdx_y < iend)
       {
-	colA = read_only_load(ja + i + item.get_local_id(1));
+	colA = read_only_load(ja + i + threadIdx_y);
       }
 
-      /* threads in the same ygroup work on one row together */
-      const HYPRE_Int rowB = item.shuffle(colA, 0);
+      /* work-items in the same ygroup work on one row together */
+      const HYPRE_Int rowB = SG.shuffle(colA, 0, blockDim_x);
       /* open this row of B, collectively */
       HYPRE_Int tmp = -1;
-      if (rowB != -1 && item.get_local_id(2) < 2)
+      if (rowB != -1 && threadIdx_x < 2)
       {
-	tmp = read_only_load(ib+rowB+item.get_local_id(2));
+	tmp = read_only_load(ib+rowB+threadIdx_x);
       }
-      const HYPRE_Int rowB_start = item.shuffle(tmp, 0);
-      const HYPRE_Int rowB_end   = item.shuffle(tmp, 1);
+      const HYPRE_Int rowB_start = SG.shuffle(tmp, 0, blockDim_x);
+      const HYPRE_Int rowB_end   = SG.shuffle(tmp, 1, blockDim_x);
 
-      for (HYPRE_Int k = rowB_start; k < rowB_end; k += item.get_local_range(2))
+      for (HYPRE_Int k = rowB_start; k < rowB_end; k += blockDim_x)
       {
-         if (k + item.get_local_id(2) < rowB_end)
+         if (k + threadIdx_x < rowB_end)
          {
-            const HYPRE_Int k_idx = read_only_load(jb + k + item.get_local_id(2));
+            const HYPRE_Int k_idx = read_only_load(jb + k + threadIdx_x);
             /* first try to insert into shared memory hash table */
             HYPRE_Int pos = hash_insert_symbl<HashType>(s_HashSize, s_HashKeys, k_idx, num_new_insert);
             if (-1 == pos)
@@ -131,37 +139,42 @@ static __inline__ __attribute__((always_inline)) HYPRE_Int csr_spmm_compute_row_
    return num_new_insert;
 }
 
-template <HYPRE_Int NUM_WARPS_PER_BLOCK, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int ATTEMPT, char HashType>
+template <HYPRE_Int NUM_SUBGROUPS_PER_WG, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int ATTEMPT, char HashType>
 void csr_spmm_symbolic(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
                        HYPRE_Int *ia, HYPRE_Int *ja,
                        HYPRE_Int *ib, HYPRE_Int *jb,
                        HYPRE_Int *ig, HYPRE_Int *jg,
-                       HYPRE_Int *rc, HYPRE_Int *rf, sycl::nd_item<3>& item,
-                       volatile HYPRE_Int *s_HashKeys)
+                       HYPRE_Int *rc, HYPRE_Int *rf,
+		       sycl::nd_item<3>& item,
+                       volatile HYPRE_Int *s_HashKeys) // shared
 {
-   volatile const HYPRE_Int num_warps =
-       NUM_WARPS_PER_BLOCK * item.get_group_range(2);
-   /* warp id inside the block */
-   volatile const HYPRE_Int warp_id = get_warp_id();
-   /* warp id in the grid */
-   volatile const HYPRE_Int grid_warp_id =
-       item.get_group(2) * NUM_WARPS_PER_BLOCK + warp_id;
-   /* lane id inside the warp */
-   volatile HYPRE_Int lane_id = get_lane_id();
-   /* shared memory hash table */
+   sycl::ONEAPI::sub_group SG = item.get_sub_group();
+   HYPRE_Int sub_group_size = SG.get_local_range().get(0);
+   HYPRE_Int blockDim_x = item.get_local_range().get(2);
+   HYPRE_Int blockDim_y = item.get_local_range().get(1);
+   HYPRE_Int blockDim_z = item.get_local_range().get(0);
 
-   /* shared memory hash table for this warp */
-   volatile HYPRE_Int *warp_s_HashKeys = s_HashKeys + warp_id * SHMEM_HASH_SIZE;
+   volatile const HYPRE_Int num_subgroups = NUM_SUBGROUPS_PER_WG *
+     (item.get_group_range(0) * item.get_group_range(1) * item.get_group_range(2));
+   /* warp id inside the WG */
+   volatile const HYPRE_Int subgroup_id = SG.get_group_linear_id();
+   /* warp id in the grid */
+   volatile const HYPRE_Int grid_subgroup_id =
+       item.get_group(2) * NUM_SUBGROUPS_PER_WG + subgroup_id;
+   /* lane id inside the subgroup */
+   volatile HYPRE_Int lane_id = SG.get_local_linear_id();
+   /* shared memory hash table for this subgroup */
+   volatile HYPRE_Int *warp_s_HashKeys = s_HashKeys + subgroup_id * SHMEM_HASH_SIZE;
 
    char failed = 0;
 
 #ifdef HYPRE_DEBUG
-   assert(blockDim.z              == NUM_WARPS_PER_BLOCK);
-   assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
-   assert(NUM_WARPS_PER_BLOCK <= HYPRE_WARP_SIZE);
+   assert(blockDim_z              == NUM_SUBGROUPS_PER_WG);
+   assert(blockDim_x * blockDim_y == sub_group_size);
+   assert(NUM_SUBGROUPS_PER_WG <= sub_group_size);
 #endif
 
-   for (HYPRE_Int i = grid_warp_id; i < M; i += num_warps)
+   for (HYPRE_Int i = grid_subgroup_id; i < M; i += num_subgroups)
    {
       HYPRE_Int j;
 
@@ -171,7 +184,7 @@ void csr_spmm_symbolic(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
          {
             j = rf[i];
          }
-         j = item.shuffle(j, 0);
+         j = SG.shuffle(j, 0);
          if (j == 0)
          {
             continue;
@@ -182,10 +195,10 @@ void csr_spmm_symbolic(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
       HYPRE_Int istart_g, iend_g, ghash_size;
       if (lane_id < 2)
       {
-         j = read_only_load(ig + grid_warp_id + lane_id);
+         j = read_only_load(ig + grid_subgroup_id + lane_id);
       }
-      istart_g = item.shuffle(j, 0);
-      iend_g   = item.shuffle(j, 1);
+      istart_g = SG.shuffle(j, 0);
+      iend_g   = SG.shuffle(j, 1);
 
       /* size of global hash table allocated for this row
          (must be power of 2 and >= the actual size of the row of C) */
@@ -193,20 +206,17 @@ void csr_spmm_symbolic(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
 
       /* initialize warp's shared and global memory hash table */
 #pragma unrolll
-      for (HYPRE_Int k = lane_id; k < SHMEM_HASH_SIZE; k += HYPRE_WARP_SIZE)
+      for (HYPRE_Int k = lane_id; k < SHMEM_HASH_SIZE; k += sub_group_size)
       {
          warp_s_HashKeys[k] = -1;
       }
 #pragma unrolll
-      for (HYPRE_Int k = lane_id; k < ghash_size; k += HYPRE_WARP_SIZE)
+      for (HYPRE_Int k = lane_id; k < ghash_size; k += sub_group_size)
       {
          jg[istart_g+k] = -1;
       }
-      /*
-      DPCT1007:1: Migration of this CUDA API is not supported by the Intel(R)
-      DPC++ Compatibility Tool.
-      */
-      __syncwarp();
+
+      SG.barrier();
 
       /* work with two hash tables */
       j = csr_spmm_compute_row_symbl<HashType>(
@@ -221,12 +231,12 @@ void csr_spmm_symbolic(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
 #endif
 
       /* num of nonzeros of this row (an upper bound) */
-      j = warp_reduce_sum(j);
+      j = warp_reduce_sum(j, item);
 
       /* if this row failed */
       if (ATTEMPT == 1)
       {
-         failed = warp_reduce_sum(failed);
+	failed = warp_reduce_sum(failed, item);
       }
 
       if (lane_id == 0)
@@ -255,17 +265,18 @@ void gpu_csr_spmm_rownnz_attempt(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    hypre_profile_times[HYPRE_TIMER_ID_SPMM_SYMBOLIC] -= hypre_MPI_Wtime();
 #endif
 
-   const HYPRE_Int num_warps_per_block =  20;
+   const HYPRE_Int num_subgroups_per_WG =  20;
    const HYPRE_Int shmem_hash_size     = 256;//512;
    const HYPRE_Int BDIMX               =   2;
    const HYPRE_Int BDIMY               =  16;
 
-   /* CUDA kernel configurations */
-   sycl::range<3> bDim(num_warps_per_block, BDIMY, BDIMX);
-   hypre_assert(bDim.x * bDim.y == HYPRE_WARP_SIZE);
-   // for cases where one WARP works on a row
-   HYPRE_Int num_warps = min(m, HYPRE_MAX_NUM_WARPS);
-   sycl::range<3> gDim(1, 1, (num_warps + bDim[0] - 1) / bDim[0]);
+   /* SYCL kernel configurations */
+   sycl::range<3> bDim(num_subgroups_per_WG, BDIMY, BDIMX);
+   hypre_assert(bDim[2] * bDim[1] == HYPRE_SUBGROUP_SIZE);
+
+   // for cases where one SUB-GROUP works on a row
+   HYPRE_Int num_subgroups = min(m, HYPRE_MAX_NUM_SUBGROUPS);
+   sycl::range<3> gDim(1, 1, (num_subgroups + bDim[0] - 1) / bDim[0]);
    // number of active warps
    HYPRE_Int num_act_warps = std::min<unsigned int>(bDim[0] * gDim[2], m);
 
@@ -277,39 +288,57 @@ void gpu_csr_spmm_rownnz_attempt(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    HYPRE_Int  *d_ghash_i, *d_ghash_j, ghash_size, *d_act;
    if (ATTEMPT == 1)
    {
-      d_act = NULL; /* all rows are active */
+      d_act = nullptr; /* all rows are active */
    }
    else
    {
       d_act = d_rf;
    }
    csr_spmm_create_hash_table(m, d_rc, d_act, shmem_hash_size, num_act_warps,
-                              &d_ghash_i, &d_ghash_j, NULL, &ghash_size);
+                              &d_ghash_i, &d_ghash_j, nullptr, &ghash_size);
 
    /* ---------------------------------------------------------------------------
     * symbolic multiplication:
     * On output, it provides an upper bound of nnz in rows of C
     * ---------------------------------------------------------------------------*/
-   if (hash_type == 'L')
-   {
-      HYPRE_SYCL_LAUNCH( (csr_spmm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'L'>), gDim, bDim,
-                         m, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
-   }
-   else if (hash_type == 'Q')
-   {
-      HYPRE_SYCL_LAUNCH( (csr_spmm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'Q'>), gDim, bDim,
-                         m, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
-   }
-   else if (hash_type == 'D')
-   {
-      HYPRE_SYCL_LAUNCH( (csr_spmm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'D'>), gDim, bDim,
-                         m, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
-   }
-   else
-   {
-      printf("Unrecognized hash type ... [L(inear), Q(uadratic), D(ouble)]\n");
-      exit(0);
-   }
+   hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) {
+       sycl::range<1> shared_range(num_subgroups_per_WG * shmem_hash_size);
+       sycl::accessor<HYPRE_Int, 1, sycl::access_mode::read_write,
+                      sycl::target::local> s_HashKeys_acc(shared_range, cgh);
+
+       if (hash_type == 'L')
+       {
+         cgh.parallel_for(sycl::nd_range<3>(gDim*bDim, bDim),
+                          [=] (sycl::nd_item<3> item) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
+                            csr_spmm_symbolic<num_subgroups_per_WG, shmem_hash_size, ATTEMPT, 'L'>(
+                              m, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf,
+                              item, s_HashKeys_acc.get_pointer());
+                          });
+       }
+       else if (hash_type == 'Q')
+       {
+         cgh.parallel_for(sycl::nd_range<3>(gDim*bDim, bDim),
+                          [=] (sycl::nd_item<3> item) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
+                            csr_spmm_symbolic<num_subgroups_per_WG, shmem_hash_size, ATTEMPT, 'Q'>(
+                              m, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf,
+                              item, s_HashKeys_acc.get_pointer());
+                          });
+       }
+       else if (hash_type == 'D')
+       {
+         cgh.parallel_for(sycl::nd_range<3>(gDim*bDim, bDim),
+                          [=] (sycl::nd_item<3> item) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
+                            csr_spmm_symbolic<num_subgroups_per_WG, shmem_hash_size, ATTEMPT, 'D'>(
+                              m, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf,
+                              item, s_HashKeys_acc.get_pointer());
+                          });
+       }
+       else
+       {
+         printf("Unrecognized hash type ... [L(inear), Q(uadratic), D(ouble)]\n");
+         exit(0);
+       }
+     });
 
    hypre_TFree(d_ghash_i, HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_ghash_j, HYPRE_MEMORY_DEVICE);

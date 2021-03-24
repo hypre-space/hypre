@@ -104,14 +104,13 @@ hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_)
 #if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaGetDeviceCount(&nDevices) );
 #elif defined(HYPRE_USING_SYCL)
-   cl::sycl::gpu_selector device_selector;
-   cl::sycl::platform platform(device_selector);
+   sycl::platform platform(sycl::gpu_selector{});
    auto const& gpu_devices = platform.get_devices();
    for (int i = 0; i < gpu_devices.size(); i++) {
      if (gpu_devices[i].is_gpu()) {
-       if(gpu_devices[i].get_info<cl::sycl::info::device::partition_max_sub_devices>() > 0) {
-	 auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<cl::sycl::info::partition_property::partition_by_affinity_domain>(
-	   cl::sycl::info::partition_affinity_domain::numa);
+       if(gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0) {
+	 auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>(
+	   sycl::info::partition_affinity_domain::numa);
 	 nDevices += subDevicesDomainNuma.size();
        }
        else {
@@ -140,9 +139,9 @@ hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_)
    for (int i = 0; i < gpu_devices.size(); i++) {
      if (gpu_devices[i].is_gpu()) {
        // multi-tile GPUs
-       if (gpu_devices[i].get_info<cl::sycl::info::device::partition_max_sub_devices>() > 0) {
-         auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<cl::sycl::info::partition_property::partition_by_affinity_domain>(
-           cl::sycl::info::partition_affinity_domain::numa);
+       if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0) {
+         auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>(
+           sycl::info::partition_affinity_domain::numa);
          for (const auto &tile : SubDevicesDomainNuma) {
            if (local_nDevices == device_id) {
              hypre_HandleSyclDevice(hypre_handle_) = tile;

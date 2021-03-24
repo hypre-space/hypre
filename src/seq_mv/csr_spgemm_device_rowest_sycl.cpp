@@ -24,7 +24,7 @@ rownnz_naive_rowi(sycl::nd_item<3>& item, HYPRE_Int rowi, HYPRE_Int lane_id, HYP
                   HYPRE_Int *ja, HYPRE_Int *ib, HYPRE_Int &row_nnz_sum,
                   HYPRE_Int &row_nnz_max)
 {
-   cl::sycl::ONEAPI::sub_group SG = item.get_sub_group();
+   sycl::ONEAPI::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    /* load the start and end position of row i of A */
