@@ -84,7 +84,7 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelDevice ( hypre_ParCSRMatrix *A,
                                                 hypre_ParVector    *z,
                                                 HYPRE_Int           num_inner_iters)
 {
-   hypre_NvtxPushRange("BoomerAMGRelaxTwoStageGaussSeidelDevice");
+   hypre_GpuProfilingPushRange("BoomerAMGRelaxTwoStageGaussSeidelDevice");
 
    hypre_CSRMatrix *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Int        num_rows     = hypre_CSRMatrixNumRows(A_diag);
@@ -124,7 +124,7 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelDevice ( hypre_ParCSRMatrix *A,
    // reset this
    hypre_VectorSize(z_local) = zsize;
 
-   hypre_NvtxPopRange();
+   hypre_GpuProfilingPopRange();
 
    return 0;
 }

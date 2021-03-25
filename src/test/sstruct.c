@@ -4976,7 +4976,7 @@ main( hypre_int argc,
 #endif
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPushRange("HybridSolve");
+      hypre_GpuProfilingPushRange("HybridSolve");
 #endif
       //cudaProfilerStart();
 
@@ -5013,7 +5013,7 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridDestroy(par_solver);
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPopRange();
+      hypre_GpuProfilingPopRange();
 #endif
       //cudaProfilerStop();
 

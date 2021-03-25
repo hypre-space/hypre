@@ -539,7 +539,7 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
                        hypre_ParCSRMatrix   **S_ptr)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_NvtxPushRange("CreateS");
+   hypre_GpuProfilingPushRange("CreateS");
 #endif
 
    HYPRE_Int ierr = 0;
@@ -558,7 +558,7 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
    }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_NvtxPopRange();
+   hypre_GpuProfilingPopRange();
 #endif
 
    return ierr;
@@ -2918,7 +2918,7 @@ hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix  *S,
                            hypre_ParCSRMatrix **C_ptr)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_NvtxPushRange("Create2ndS");
+   hypre_GpuProfilingPushRange("Create2ndS");
 #endif
 
    HYPRE_Int ierr = 0;
@@ -2937,7 +2937,7 @@ hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix  *S,
    }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_NvtxPopRange();
+   hypre_GpuProfilingPopRange();
 #endif
 
    return ierr;
