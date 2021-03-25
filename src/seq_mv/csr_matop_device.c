@@ -1161,11 +1161,24 @@ hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
    HYPRE_Int        *C_j;
    hypre_CSRMatrix  *C;
 
+
+   /* trivial case */
+   if (nnz_A == 0)
+   {
+      C_i =    hypre_CTAlloc(HYPRE_Int,     ncols_A + 1, HYPRE_MEMORY_DEVICE);
+      C_j =    hypre_CTAlloc(HYPRE_Int,     0,           HYPRE_MEMORY_DEVICE);
+      C_data = hypre_CTAlloc(HYPRE_Complex, 0,           HYPRE_MEMORY_DEVICE);
+   }
+   else
+   {
 #if defined(HYPRE_USING_CUSPARSE)
-   hypreDevice_CSRSpTransCusparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
+     hypreDevice_CSRSpTransCusparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
+#elif defined(HYPRE_USING_ROCSPARSE)
+     hypreDevice_CSRSpTransRocsparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
 #else
-   hypreDevice_CSRSpTrans(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
+     hypreDevice_CSRSpTrans(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
 #endif
+   }
 
    C = hypre_CSRMatrixCreate(ncols_A, nrows_A, nnz_A);
    hypre_CSRMatrixI(C) = C_i;
@@ -1181,6 +1194,22 @@ hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
 }
 
 #endif
+
+HYPRE_Int
+hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
+{
+#if defined(HYPRE_USING_CUSPARSE)
+   hypre_SortCSRCusparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A), hypre_CSRMatrixNumNonzeros(A),
+                         hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A));
+#elif defined(HYPRE_USING_ROCSPARSE)
+   hypre_SortCSRRocsparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A), hypre_CSRMatrixNumNonzeros(A),
+                          hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A));
+#else
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"hypre_CSRMatrixSortRow only implemented for cuSPARSE!\n");
+#endif
+
+   return hypre_error_flag;
+}
 
 #if defined(HYPRE_USING_CUSPARSE)
 /* @brief This functions sorts values and column indices in each row in ascending order INPLACE
@@ -1238,15 +1267,6 @@ hypre_SortCSRCusparse( HYPRE_Int      n,
 
    hypre_TFree(pBuffer, HYPRE_MEMORY_DEVICE);
    HYPRE_CUSPARSE_CALL(cusparseDestroyCsru2csrInfo(sortInfoA));
-}
-
-HYPRE_Int
-hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
-{
-   hypre_SortCSRCusparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A), hypre_CSRMatrixNumNonzeros(A),
-                         hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A));
-
-   return hypre_error_flag;
 }
 
 HYPRE_Int
@@ -1400,3 +1420,79 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
 }
 
 #endif /* #if defined(HYPRE_USING_CUSPARSE) */
+
+
+#if defined(HYPRE_USING_ROCSPARSE)
+// FIXME: We need a stub for this function until we can implement a rocsparse version
+HYPRE_Int
+hypre_CSRMatrixTriLowerUpperSolveCusparse(char             /*uplo*/,
+                                          hypre_CSRMatrix */*A*/,
+                                          hypre_Vector    */*f*/,
+                                          hypre_Vector    */*u*/ )
+{
+  hypre_error_w_msg(HYPRE_ERROR_GENERIC, "hypre_CSRMatrixTriLowerUpperSolveCusparse not implemented for rocSPARSE!\n");
+}
+
+
+/* @brief This functions sorts values and column indices in each row in ascending order OUT-OF-PLACE
+ * @param[in] n Number of rows
+ * @param[in] m Number of columns
+ * @param[in] nnzA Number of nonzeroes
+ * @param[in] *d_ia (Unsorted) Row indices
+ * @param[in,out] *d_ja_sorted On Start: Unsorted column indices. On return: Sorted column indices
+ * @param[in,out] *d_a_sorted On Start: Unsorted values. On Return: Sorted values corresponding with column indices
+ */
+void
+hypre_SortCSRRocsparse( HYPRE_Int      n,
+                        HYPRE_Int      m,
+                        HYPRE_Int      nnzA,
+                  const HYPRE_Int     *d_ia,
+                        HYPRE_Int     *d_ja_sorted,
+                        HYPRE_Complex *d_a_sorted )
+{
+   rocsparse_handle handle = hypre_HandleCusparseHandle(hypre_handle());
+
+   // FIXME: This is an abuse. Really, each matrix should have its own
+   //        rocsparse_mat_descr and rocsparse_mat_info and these should
+   //        not be global variables.
+   rocsparse_mat_descr descrA = hypre_HandleCusparseMatDescr(hypre_handle());
+
+   size_t pBufferSizeInBytes = 0;
+   void *pBuffer = NULL;
+   HYPRE_Int *P = NULL;
+
+   HYPRE_Int isDoublePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double);
+   HYPRE_Int isSinglePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double) / 2;
+
+   // FIXME: There is not in-place version of csr sort in rocSPARSE currently, so we make
+   //        a temporary copy of the data for gthr, sort that, and then copy the sorted values
+   //        back to the array being returned. Where there is an in-place version available,
+   //        we should use it.
+   HYPRE_Complex * d_a_tmp;
+   d_a_tmp  = hypre_TAlloc(HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE);
+
+   HYPRE_ROCSPARSE_CALL( rocsparse_csrsort_buffer_size(handle, n, m, nnzA, d_ia, d_ja_sorted, &pBufferSizeInBytes) );
+
+   pBuffer = hypre_TAlloc(char, pBufferSizeInBytes, HYPRE_MEMORY_DEVICE);
+   P       = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
+
+   HYPRE_ROCSPARSE_CALL( rocsparse_create_identity_permutation(handle, nnzA, P) );
+   HYPRE_ROCSPARSE_CALL( rocsparse_csrsort(handle, n, m, nnzA, descrA, d_ia, d_ja_sorted, P, pBuffer) );
+
+   if (isDoublePrecision)
+   {
+     HYPRE_ROCSPARSE_CALL( rocsparse_dgthr(handle, nnzA, d_a_sorted, d_a_tmp, P, rocsparse_index_base_zero) );
+   }
+   else if (isSinglePrecision)
+   {
+     HYPRE_ROCSPARSE_CALL( rocsparse_sgthr(handle, nnzA, (float *) d_a_sorted, (float *) d_a_tmp, P, rocsparse_index_base_zero) );
+   }
+
+   hypre_TFree(pBuffer, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(P, HYPRE_MEMORY_DEVICE);
+
+   hypre_TMemcpy(d_a_sorted, d_a_tmp, HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+
+   hypre_TFree(d_a_tmp, HYPRE_MEMORY_DEVICE);
+}
+#endif // #if defined(HYPRE_USING_ROCSPARSE)

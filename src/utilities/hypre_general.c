@@ -202,7 +202,7 @@ HYPRE_Init()
    hypre_HandleCublasHandle(_hypre_handle);
 #endif
 
-#if defined(HYPRE_USING_CUSPARSE)
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
    hypre_HandleCusparseHandle(_hypre_handle);
    hypre_HandleCusparseMatDescr(_hypre_handle);
 #endif
@@ -513,4 +513,3 @@ HYPRE_GetExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy)
 
    return hypre_error_flag;
 }
-

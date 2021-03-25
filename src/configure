@@ -8876,13 +8876,15 @@ done
         LINK_CC=${HIPCC}
         LINK_CXX=${HIPCC}
 
-                                        HIPCXXFLAGS="-O2 -x hip -Wall"
+                                        HIPCXXFLAGS="-x hip ${HIPCXXFLAGS}"
 
-        if test x"$hypre_using_debug" == x"yes"; then :
-  HIPCXXFLAGS="-g -ggdb ${HIPCXXFLAGS}"
+                                if test x"$hypre_using_debug" == x"yes"; then :
+  HIPCXXFLAGS="-O0 -Wall -g -ggdb ${HIPCXXFLAGS}"
+elif HIPCXXFLAGS="-O2 ${HIPCXXFLAGS}"; then :
+
 fi
 
-                        CUFLAGS="${HIPCPPFLAGS} ${HIPCXXFLAGS} ${CXXFLAGS}"
+                        CUFLAGS="${HIPCPPFLAGS} ${HIPCXXFLAGS}"
 
                         HYPRE_HIP_INCL="-I${HYPRE_ROCM_PREFIX}/rocthrust/include"
         HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocprim/include"
