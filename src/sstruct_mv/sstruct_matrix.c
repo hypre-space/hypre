@@ -1170,8 +1170,10 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
                hypre_CopyIndex(hypre_BoxIMin(int_box), index);
                hypre_SStructBoxManEntryGetGlobalRank(boxman_entries[ii],
                                                      index, &row_base, matrix_type);
+               hypre_CopyBox(box, map_box);
                hypre_CopyBox(value_box, map_vbox);
 
+               hypre_SStructMatrixMapDataBox(matrix, part, var, vars[entry], map_box);
                hypre_SStructMatrixMapDataBox(matrix, part, var, vars[entry], map_vbox);
                hypre_SStructMatrixMapDataBox(matrix, part, var, vars[entry], int_box);
 
@@ -1182,7 +1184,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi,vi,ci,index,d) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop2Begin(ndim, loop_size,
-                                   int_box,  start, stride, mi,
+                                   map_box,  start, stride, mi,
                                    map_vbox, start, stride, vi);
                {
                   hypre_BoxLoopGetIndex(index);
@@ -1192,7 +1194,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
                   cols[ci] = col_base;
                   for (d = 0; d < ndim; d++)
                   {
-                     rows[mi] += index[d]*rs[d];
+                     rows[mi] += index[d]*rs[d]*dom_stride[d];
                      cols[ci] += index[d]*cs[d];
                   }
                   ijvalues[ci] = values[ei + vi*nentries];
