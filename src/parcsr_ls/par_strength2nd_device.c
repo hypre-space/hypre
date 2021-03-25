@@ -48,7 +48,7 @@ hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
    hypre_TMemcpy(CF_marker, CF_marker_host, HYPRE_Int, S_nr_local, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
    /* 1. Create new matrix with added diagonal */
-   hypre_NvtxPushRangeColor("Setup", 1);
+   hypre_GpuProfilingPushRangeColor("Setup", 1);
 
    /* give S data arrays */
    hypre_CSRMatrixData(S_diag) = hypre_TAlloc(HYPRE_Complex, S_diag_nnz, HYPRE_MEMORY_DEVICE );
@@ -111,17 +111,17 @@ hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(S_CX));
    hypre_ParCSRMatrixDiag(S_CX) = SI_diag;
 
-   hypre_NvtxPopRange();
+   hypre_GpuProfilingPopRange();
 
    /* 2. Perform matrix-matrix multiplication */
-   hypre_NvtxPushRangeColor("Matrix-matrix mult", 3);
+   hypre_GpuProfilingPushRangeColor("Matrix-matrix mult", 3);
 
    S2 = hypre_ParCSRMatMatDevice(S_CX, S_XC);
 
    hypre_ParCSRMatrixDestroy(S_CX);
    hypre_ParCSRMatrixDestroy(S_XC);
 
-   hypre_NvtxPopRange();
+   hypre_GpuProfilingPopRange();
 
    // Clean up matrix before returning it.
    if (num_paths == 2)

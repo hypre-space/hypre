@@ -68,7 +68,7 @@ static std::vector<std::string> hypre_nvtx_range_names;
 
 #endif // defined(HYPRE_USING_NVTX)
 
-void hypre_NvtxPushRangeColor(const char *name, HYPRE_Int color_id)
+void hypre_GpuProfilingPushRangeColor(const char *name, HYPRE_Int color_id)
 {
 #ifdef HYPRE_USING_NVTX
    color_id = color_id % hypre_nvtx_num_colors;
@@ -87,7 +87,7 @@ void hypre_NvtxPushRangeColor(const char *name, HYPRE_Int color_id)
 #endif
 }
 
-void hypre_NvtxPushRange(const char *name)
+void hypre_GpuProfilingPushRange(const char *name)
 {
 #ifdef HYPRE_USING_NVTX
    std::vector<std::string>::iterator p = std::find(hypre_nvtx_range_names.begin(),
@@ -102,7 +102,7 @@ void hypre_NvtxPushRange(const char *name)
 
    HYPRE_Int color = p - hypre_nvtx_range_names.begin();
 
-   hypre_NvtxPushRangeColor(name, color);
+   hypre_GpuProfilingPushRangeColor(name, color);
 #endif
 
 #ifdef HYPRE_USING_ROCTX
@@ -110,10 +110,10 @@ void hypre_NvtxPushRange(const char *name)
 #endif
 }
 
-void hypre_NvtxPopRange()
+void hypre_GpuProfilingPopRange()
 {
 #ifdef HYPRE_USING_NVTX
-   hypre_NvtxPushRangeColor("StreamSync0", Red);
+   hypre_GpuProfilingPushRangeColor("StreamSync0", Red);
    cudaStreamSynchronize(0);
    nvtxRangePop();
    nvtxRangePop();
