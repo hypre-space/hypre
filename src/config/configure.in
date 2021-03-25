@@ -2070,7 +2070,7 @@ AS_IF([test x"$hypre_user_chose_hip" == x"yes"],
         dnl rocSPARSE, for things like dcsrmv on AMD GPUs
         AS_IF([test x"$hypre_using_rocsparse" == x"yes"],
               [AC_DEFINE(HYPRE_USING_ROCSPARSE, 1, [rocSPARSE being used])
-	       HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lrocsparse"
+               HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lrocsparse"
                HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocsparse/include"
                ])
 
