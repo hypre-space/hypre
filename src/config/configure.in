@@ -2085,6 +2085,13 @@ AS_IF([test x"$hypre_user_chose_hip" == x"yes"],
                HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocrand/include"
                ])
 
+        dnl rocTX tracing API
+        AS_IF([test x"$hypre_using_gpu_profiling" == x"yes"],
+              [AC_DEFINE(HYPRE_USING_ROCTX, 1, [Define to 1 if using AMD rocTX profiling])
+               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/roctracer/include"
+               HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lroctx64"
+               ])
+
       ]) dnl AS_IF([test x"$hypre_user_chose_hip" == x"yes"]
 
 
