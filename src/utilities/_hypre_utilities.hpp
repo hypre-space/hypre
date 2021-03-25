@@ -121,12 +121,12 @@ struct hypre_umpire_device_allocator
    } } while(0)
 
 #elif defined(HYPRE_USING_HIP)
-#define HYPRE_HIP_CALL(call) do {                                                           \
-   hipError_t err = call;                                                                   \
-   if (hipSuccess != err) {                                                                 \
-      hypre_printf("HIP ERROR (code = %d, %s) at %s:%d\n", err, hipGetErrorString(err),     \
-                   __FILE__, __LINE__);                                                     \
-      hypre_assert(0); exit(1);                                                             \
+#define HYPRE_HIP_CALL(call) do {                                                            \
+   hipError_t err = call;                                                                    \
+   if (hipSuccess != err) {                                                                  \
+      hypre_printf("HIP ERROR (code = %d, %s) at %s:%d\n", err, hipGetErrorString(err),      \
+                   __FILE__, __LINE__);                                                      \
+      hypre_assert(0); exit(1);                                                              \
    } } while(0)
 
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
@@ -260,20 +260,20 @@ struct hypre_CudaData
 #define hypre_CudaDataSpgemmHashType(data)                 ((data) -> spgemm_hash_type)
 #define hypre_CudaDataUmpireDeviceAllocator(data)          ((data) -> umpire_device_allocator)
 
-hypre_CudaData* hypre_CudaDataCreate();
-void hypre_CudaDataDestroy(hypre_CudaData* data);
+hypre_CudaData*     hypre_CudaDataCreate();
+void                hypre_CudaDataDestroy(hypre_CudaData* data);
 
 #if defined(HYPRE_USING_CURAND)
-curandGenerator_t  hypre_CudaDataCurandGenerator(hypre_CudaData *data);
+curandGenerator_t   hypre_CudaDataCurandGenerator(hypre_CudaData *data);
 #endif
 
 #if defined(HYPRE_USING_CUBLAS)
-cublasHandle_t     hypre_CudaDataCublasHandle(hypre_CudaData *data);
+cublasHandle_t      hypre_CudaDataCublasHandle(hypre_CudaData *data);
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE)
-cusparseHandle_t   hypre_CudaDataCusparseHandle(hypre_CudaData *data);
-cusparseMatDescr_t hypre_CudaDataCusparseMatDescr(hypre_CudaData *data);
+cusparseHandle_t    hypre_CudaDataCusparseHandle(hypre_CudaData *data);
+cusparseMatDescr_t  hypre_CudaDataCusparseMatDescr(hypre_CudaData *data);
 #endif
 
 #if defined(HYPRE_USING_ROCSPARSE)
@@ -283,11 +283,11 @@ rocsparse_mat_info  hypre_CudaDataRocsparseMatInfo(hypre_CudaData *data);
 #endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-cudaStream_t       hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i);
-cudaStream_t       hypre_CudaDataCudaComputeStream(hypre_CudaData *data);
+cudaStream_t        hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i);
+cudaStream_t        hypre_CudaDataCudaComputeStream(hypre_CudaData *data);
 #elif defined(HYPRE_USING_HIP)
-hipStream_t        hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i);
-hipStream_t        hypre_CudaDataCudaComputeStream(hypre_CudaData *data);
+hipStream_t         hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i);
+hipStream_t         hypre_CudaDataCudaComputeStream(hypre_CudaData *data);
 #endif
 
 // Data structure and accessor routines for Cuda Sparse Triangular Matrices
@@ -953,7 +953,6 @@ cudaError_t hypre_CachingFreeDevice(void *ptr);
 cudaError_t hypre_CachingFreeManaged(void *ptr);
 #endif
 
-
 void hypre_CudaDataCubCachingAllocatorDestroy(hypre_CudaData *data);
 
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -967,6 +966,7 @@ cusparseIndexType_t hypre_HYPREIntToCusparseIndexType();
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
 #endif /* #ifndef HYPRE_CUDA_UTILS_H */
+
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
