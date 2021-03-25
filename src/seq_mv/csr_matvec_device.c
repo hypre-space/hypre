@@ -306,16 +306,16 @@ hypre_CSRMatrixMatvecCusparseOldAPI( HYPRE_Int        trans,
 #if defined(HYPRE_USING_ROCSPARSE)
 // We need a stub for this function since it's called elsewhere
 HYPRE_Int
-hypre_CSRMatrixMatvecMaskedDevice( HYPRE_Complex    /*alpha*/,
-                                   hypre_CSRMatrix */*A*/,
-                                   hypre_Vector    */*x*/,
-                                   HYPRE_Complex    /*beta*/,
-                                   hypre_Vector    */*b*/,
-                                   hypre_Vector    */*y*/,
-                                   HYPRE_Int       */*mask*/,
-                                   HYPRE_Int        /*size_of_mask*/ )
+hypre_CSRMatrixMatvecMaskedDevice( HYPRE_Complex     /*alpha*/,
+                                   hypre_CSRMatrix * /*A*/,
+                                   hypre_Vector    * /*x*/,
+                                   HYPRE_Complex     /*beta*/,
+                                   hypre_Vector    * /*b*/,
+                                   hypre_Vector    * /*y*/,
+                                   HYPRE_Int       * /*mask*/,
+                                   HYPRE_Int         /*size_of_mask*/ )
 {
-  hypre_error_w_msg(HYPRE_ERROR_GENERIC, "hypre_CSRMatrixMatvecMaskedDevice not implemented for rocSPARSE!\n");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "hypre_CSRMatrixMatvecMaskedDevice not implemented for rocSPARSE!\n");
 }
 
 HYPRE_Int
@@ -327,11 +327,11 @@ hypre_CSRMatrixMatvecRocsparse( HYPRE_Int        trans,
                                 hypre_Vector    *y,
                                 HYPRE_Int        offset )
 {
-  rocsparse_handle handle = hypre_HandleCusparseHandle(hypre_handle());
-  rocsparse_mat_descr descr = hypre_HandleCusparseMatDescr(hypre_handle());
-  rocsparse_mat_info info = hypre_HandleRocsparseMatInfo(hypre_handle());
+   rocsparse_handle handle = hypre_HandleCusparseHandle(hypre_handle());
+   rocsparse_mat_descr descr = hypre_HandleCusparseMatDescr(hypre_handle());
+   rocsparse_mat_info info = hypre_HandleRocsparseMatInfo(hypre_handle());
 
-  hypre_CSRMatrix *B;
+   hypre_CSRMatrix *B;
 
    if (trans)
    {
@@ -358,12 +358,13 @@ hypre_CSRMatrixMatvecRocsparse( HYPRE_Int        trans,
                                           hypre_VectorData(y) + offset) );
 
    if (trans)
-     {
-       hypre_CSRMatrixDestroy(B);
-     }
+   {
+      hypre_CSRMatrixDestroy(B);
+   }
 
    return hypre_error_flag;
 }
 #endif // #if defined(HYPRE_USING_ROCSPARSE)
 
 #endif // #if defined(HYPRE_USING_GPU)
+
