@@ -10,8 +10,6 @@
 #include "ams.h"
 #include "_hypre_utilities.hpp"
 
-#include <dpct/dpl_utils.hpp> // for dpct::transform_if
-
 /*--------------------------------------------------------------------------
  * hypre_ParCSRRelax
  *
@@ -532,14 +530,12 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
 #elif defined(HYPRE_USING_SYCL)
    if (exec == HYPRE_EXEC_DEVICE)
    {
-     /* HYPRE_ONEDPL_CALL( transform_if, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm, std::negate<HYPRE_Real>(), */
-     /*                    is_negative<HYPRE_Real>() ); */
-
-     // abb NOTE: The above snippet can be activated once dpl supports transform_if API.
-     dpct::transform_if( l1_norm, l1_norm + num_rows, diag_tmp, l1_norm, std::negate<HYPRE_Real>(), is_negative<HYPRE_Real>() );
+     HYPRE_ONEAPI_CALL( transform, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm,
+			[&](const HYPRE_Int& input, const HYPRE_Int& mask){
+			  return (mask < 0) ? std::negate<HYPRE_Int>()(input) : input;} );
 
      //bool any_zero = HYPRE_ONEDPL_CALL( any_of, l1_norm, l1_norm + num_rows, std::not1(std::_Identity<HYPRE_Complex>()) );
-     bool any_zero = 0.0 == HYPRE_ONEDPL_CALL( reduce, l1_norm, l1_norm + num_rows, 1.0, std::minimum<HYPRE_Real>() );
+     bool any_zero = 0.0 == HYPRE_ONEDPL_CALL( reduce, l1_norm, l1_norm + num_rows, 1.0, oneapi::dpl::minimum<HYPRE_Real>() );
      if ( any_zero )
      {
        hypre_error_in_arg(1);
