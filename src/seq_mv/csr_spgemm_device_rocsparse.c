@@ -108,7 +108,7 @@ hypreDevice_CSRSpGemmRocsparse(HYPRE_Int       m,
                                                            infoC, &rs_buffer_size) );
    }
 
-   HYPRE_HIP_CALL(hipMalloc(&rs_buffer, rs_buffer_size));
+   rs_buffer = hypre_TAlloc(char, rs_buffer_size, HYPRE_MEMORY_DEVICE);
 
    // Note that rocsparse csrgemms do: C = \alpha*A*B +\beta*D
    // So we hardcode \alpha=1, D to nothing, and \beta = 0
@@ -161,7 +161,7 @@ hypreDevice_CSRSpGemmRocsparse(HYPRE_Int       m,
    }
 
    // Free up the memory needed by rocsparse
-   HYPRE_HIP_CALL(hipFree(rs_buffer));
+   hypre_TFree(rs_buffer, HYPRE_MEMORY_DEVICE);
 
    *d_ic_out = d_ic;
    *d_jc_out = d_jc;
@@ -177,4 +177,3 @@ hypreDevice_CSRSpGemmRocsparse(HYPRE_Int       m,
 }
 
 #endif // defined(HYPRE_USING_HIP) && defined(HYPRE_USING_ROCSPARSE)
-

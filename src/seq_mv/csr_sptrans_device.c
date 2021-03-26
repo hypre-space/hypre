@@ -121,7 +121,8 @@ hypreDevice_CSRSpTransRocsparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPR
                                                        &buffer_size) );
 
    void * buffer;
-   HYPRE_HIP_CALL( hipMalloc(&buffer, buffer_size) );
+   buffer = hypre_TAlloc(char, buffer_size, HYPRE_MEMORY_DEVICE);
+
    HYPRE_ROCSPARSE_CALL( rocsparse_dcsr2csc(handle,
                                             m, n, nnzA,
                                             d_aa, d_ia, d_ja,
@@ -129,7 +130,7 @@ hypreDevice_CSRSpTransRocsparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPR
                                             action,
                                             rocsparse_index_base_zero,
                                             buffer) );
-   HYPRE_HIP_CALL( hipFree(buffer) );
+   hypre_TFree(buffer, HYPRE_MEMORY_DEVICE);
 
    *d_ic_out = csc_i;
    *d_jc_out = csc_j;
