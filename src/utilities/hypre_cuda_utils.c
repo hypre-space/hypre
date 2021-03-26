@@ -615,6 +615,39 @@ hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, 
 }
 
 __global__ void
+hypreCUDAKernel_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y, HYPRE_Complex *z)
+{
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+
+   if (i < n)
+   {
+      HYPRE_Complex t = x[i] / A_data[A_i[i]];
+      y[i] = t;
+      z[i] += beta*t;
+   }
+}
+
+/* y = diag(A) \ x
+ * z = beta * (diag(A) \ x) + z
+ * Note: Assume A_i[i] points to the ith diagonal entry of A */
+HYPRE_Int
+hypreDevice_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y, HYPRE_Complex *z)
+{
+   /* trivial case */
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
+
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_DiagScaleVector2, gDim, bDim, n, A_i, A_data, x, beta, y, z );
+
+   return hypre_error_flag;
+}
+
+__global__ void
 hypreCUDAKernel_BigToSmallCopy(      HYPRE_Int*    __restrict__ tgt,
                                const HYPRE_BigInt* __restrict__ src,
                                      HYPRE_Int                  size)
@@ -919,7 +952,64 @@ hypre_CudaDataCusparseMatDescr(hypre_CudaData *data)
 
    return mat_descr;
 }
-#endif
+#endif // defined(HYPRE_USING_CUSPARSE)
+
+
+#if defined(HYPRE_USING_ROCSPARSE)
+rocsparse_handle
+hypre_CudaDataCusparseHandle(hypre_CudaData *data)
+{
+   if (data->cusparse_handle)
+   {
+      return data->cusparse_handle;
+   }
+
+   rocsparse_handle handle;
+   HYPRE_ROCSPARSE_CALL( rocsparse_create_handle(&handle) );
+
+   HYPRE_ROCSPARSE_CALL( rocsparse_set_stream(handle, hypre_CudaDataCudaComputeStream(data)) );
+
+   data->cusparse_handle = handle;
+
+   return handle;
+}
+
+rocsparse_mat_descr
+hypre_CudaDataCusparseMatDescr(hypre_CudaData *data)
+{
+   if (data->cusparse_mat_descr)
+   {
+      return data->cusparse_mat_descr;
+   }
+
+   rocsparse_mat_descr mat_descr;
+   HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_descr(&mat_descr) );
+   HYPRE_ROCSPARSE_CALL( rocsparse_set_mat_type(mat_descr, rocsparse_matrix_type_general) );
+   HYPRE_ROCSPARSE_CALL( rocsparse_set_mat_index_base(mat_descr, rocsparse_index_base_zero) );
+
+   data->cusparse_mat_descr = mat_descr;
+
+   return mat_descr;
+}
+
+rocsparse_mat_info
+hypre_CudaDataRocsparseMatInfo(hypre_CudaData *data)
+{
+   if (data->rocsparse_mat_info)
+   {
+      return data->rocsparse_mat_info;
+   }
+
+   rocsparse_mat_info info;
+   HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_info(&info) );
+
+   data->rocsparse_mat_info = info;
+
+   return info;
+}
+#endif // defined(HYPRE_USING_ROCSPARSE)
+
+
 
 hypre_CudaData*
 hypre_CudaDataCreate()
@@ -930,7 +1020,7 @@ hypre_CudaDataCreate()
    hypre_CudaDataCudaComputeStreamNum(data)  = 0;
 
    /* SpGeMM */
-#ifdef HYPRE_USING_CUSPARSE
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
    hypre_CudaDataSpgemmUseCusparse(data) = 1;
 #else
    hypre_CudaDataSpgemmUseCusparse(data) = 0;
@@ -981,17 +1071,35 @@ hypre_CudaDataDestroy(hypre_CudaData *data)
    }
 #endif
 
-#if defined(HYPRE_USING_CUSPARSE)
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
    if (data->cusparse_handle)
    {
+#if defined(HYPRE_USING_CUSPARSE)
       HYPRE_CUSPARSE_CALL( cusparseDestroy(data->cusparse_handle) );
+#elif defined(HYPRE_USING_ROCSPARSE)
+      HYPRE_ROCSPARSE_CALL( rocsparse_destroy_handle(data->cusparse_handle) );
+#endif
+
    }
 
    if (data->cusparse_mat_descr)
    {
+#if defined(HYPRE_USING_CUSPARSE)
       HYPRE_CUSPARSE_CALL( cusparseDestroyMatDescr(data->cusparse_mat_descr) );
+#elif defined(HYPRE_USING_ROCSPARSE)
+      HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_descr(data->cusparse_mat_descr) );
+#endif
+
+   }
+
+#if defined(HYPRE_USING_ROCSPARSE)
+   if (data->rocsparse_mat_info)
+   {
+     HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_info(data->rocsparse_mat_info) );
    }
 #endif
+
+#endif // #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
 
    for (HYPRE_Int i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
    {
