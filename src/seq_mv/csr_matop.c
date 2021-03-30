@@ -336,7 +336,7 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
    HYPRE_Int            *C_j;
 
    HYPRE_Int             ia, ib, ic, ja, jb, num_nonzeros;
-   HYPRE_Int             row_start, counter;
+   HYPRE_Int             counter;
    HYPRE_Complex         a_entry, b_entry;
    HYPRE_Int             allsquare = 0;
    HYPRE_Int             max_num_threads;
@@ -377,7 +377,7 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
    jj_count = hypre_CTAlloc(HYPRE_Int, max_num_threads, HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel private(ia, ib, ic, ja, jb, num_nonzeros, row_start, counter, a_entry, b_entry)
+#pragma omp parallel private(ia, ib, ic, ja, jb, num_nonzeros, counter, a_entry, b_entry)
 #endif
    {
       HYPRE_Int *B_marker = NULL;

@@ -1,35 +1,35 @@
 # Output file: solvers.out.0
-    Cycle 14   7.391011e-05    0.433319     5.504405e-06 
-    Cycle 15   3.204481e-05    0.433565     2.386515e-06 
-    Cycle 16   1.389710e-05    0.433677     1.034977e-06 
-    Cycle 17   6.028819e-06    0.433818     4.489922e-07 
+    Cycle 14   7.391011e-05    0.433319     5.504405e-06
+    Cycle 15   3.204481e-05    0.433565     2.386515e-06
+    Cycle 16   1.389710e-05    0.433677     1.034977e-06
+    Cycle 17   6.028819e-06    0.433818     4.489922e-07
 
 
  Average Convergence Factor = 0.423255
 
 # Output file: solvers.out.1
-    Cycle 14   7.391011e-05    0.433319     5.504405e-06 
-    Cycle 15   3.204481e-05    0.433565     2.386515e-06 
-    Cycle 16   1.389710e-05    0.433677     1.034977e-06 
-    Cycle 17   6.028819e-06    0.433818     4.489922e-07 
+    Cycle 14   7.391011e-05    0.433319     5.504405e-06
+    Cycle 15   3.204481e-05    0.433565     2.386515e-06
+    Cycle 16   1.389710e-05    0.433677     1.034977e-06
+    Cycle 17   6.028819e-06    0.433818     4.489922e-07
 
 
  Average Convergence Factor = 0.423255
 
 # Output file: solvers.out.2
-    Cycle 39   3.556869e-05    0.721136     2.648954e-06 
-    Cycle 40   2.565030e-05    0.721148     1.910288e-06 
-    Cycle 41   1.850064e-05    0.721264     1.377823e-06 
-    Cycle 42   1.334647e-05    0.721406     9.939689e-07 
+    Cycle 39   3.556869e-05    0.721136     2.648954e-06
+    Cycle 40   2.565030e-05    0.721148     1.910288e-06
+    Cycle 41   1.850064e-05    0.721264     1.377823e-06
+    Cycle 42   1.334647e-05    0.721406     9.939689e-07
 
 
  Average Convergence Factor = 0.719582
 
 # Output file: solvers.out.3
-    Cycle 39   3.556869e-05    0.721136     2.648954e-06 
-    Cycle 40   2.565030e-05    0.721148     1.910288e-06 
-    Cycle 41   1.850064e-05    0.721264     1.377823e-06 
-    Cycle 42   1.334647e-05    0.721406     9.939689e-07 
+    Cycle 39   3.556869e-05    0.721136     2.648954e-06
+    Cycle 40   2.565030e-05    0.721148     1.910288e-06
+    Cycle 41   1.850064e-05    0.721264     1.377823e-06
+    Cycle 42   1.334647e-05    0.721406     9.939689e-07
 
 
  Average Convergence Factor = 0.719582
@@ -57,7 +57,7 @@ Final Relative Residual Norm = 9.646786e-07
 # Output file: solvers.out.12
 
 Iterations = 18
-Final Relative Residual Norm = 4.223622e-03
+Final Relative Residual Norm = 4.029918e-03
 
 # Output file: solvers.out.8
 
