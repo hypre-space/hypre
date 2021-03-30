@@ -286,26 +286,26 @@ hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row
 HYPRE_Int
 hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_ind)
 {
-   /* trivial case */
-   if (nrows <= 0 || nnz <= 0)
-   {
-      return hypre_error_flag;
-   }
+  /* trivial case */
+  if (nrows <= 0 || nnz <= 0)
+  {
+    return hypre_error_flag;
+  }
 
-   HYPRE_ONEDPL_CALL( fill, d_row_ind, d_row_ind + nnz, 0 );
+  HYPRE_ONEDPL_CALL( fill, d_row_ind, d_row_ind + nnz, 0 );
 
-   HYPRE_ONEDPL_CALL(
-       scatter_if, oneapi::dpl::counting_iterator<HYPRE_Int>(0),
-       oneapi::dpl::counting_iterator<HYPRE_Int>(nrows), d_row_ptr,
-       oneapi::dpl::make_transform_iterator(
-           oneapi::dpl::make_zip_iterator(d_row_ptr, d_row_ptr + 1),
-           hypre_empty_row_functor()),
-       d_row_ind);
+  d_row_ind = HYPRE_ONEDPL_CALL( copy_if,
+				 oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+				 oneapi::dpl::counting_iterator<HYPRE_Int>(nrows),
+				 d_row_ptr,
+				 oneapi::dpl::make_transform_iterator(
+				   oneapi::dpl::make_zip_iterator(d_row_ptr, d_row_ptr + 1),
+				   hypre_empty_row_functor()) );
 
-   HYPRE_ONEDPL_CALL(inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
-                     oneapi::dpl::maximum<HYPRE_Int>());
+  HYPRE_ONEDPL_CALL( inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
+                     oneapi::dpl::maximum<HYPRE_Int>() );
 
-   return hypre_error_flag;
+  return hypre_error_flag;
 }
 
 template <typename T>
@@ -624,9 +624,6 @@ template <typename T1, typename T2, typename T3>
 HYPRE_Int
 hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt)
 {
-   dpct::device_ext &dev_ct = dpct::get_current_device();
-   sycl::queue &q_ct = dev_ct.default_queue();
-
    auto begin_keys = oneapi::dpl::make_zip_iterator(
        keys1, keys2std::get<0>(std::make_tuple(keys1, keys2)),
        std::get<1>(std::make_tuple(keys1, keys2)));
@@ -787,9 +784,6 @@ hypre_HYPREIntToCusparseIndexType()
 sycl::queue*
 hypre_SyclDataSyclQueue(hypre_SyclData *data, HYPRE_Int i)
 {
-  sycl::queue *stream = nullptr;
-  sycl::device syclDev = data->sycl_device;
-
   auto sycl_asynchandler = [] (sycl::exception_list exceptions) {
     for (std::exception_ptr const& e : exceptions) {
         try {
@@ -800,7 +794,11 @@ hypre_SyclDataSyclQueue(hypre_SyclData *data, HYPRE_Int i)
         }
     }
   };
-  
+
+  sycl::queue *stream = nullptr;
+  sycl::device syclDev = data->sycl_device;
+  sycl::context syclctxt = sycl::context(syclDev, sycl_asynchandler);
+
 #if defined(HYPRE_USING_SYCL_STREAMS)
   if (i >= HYPRE_MAX_NUM_STREAMS)
   {
@@ -815,9 +813,8 @@ hypre_SyclDataSyclQueue(hypre_SyclData *data, HYPRE_Int i)
     return data->sycl_streams[i];
   }
 
-  stream = new sycl::queue(syclDev, sycl_asynchandler,
-			   sycl::property_list{sycl::property::queue::in_order{}});
-  
+  stream = new sycl::queue(syclctxt, syclDev, sycl::property_list{sycl::property::queue::in_order{}});
+
   data->sycl_streams[i] = stream;
 #endif
 

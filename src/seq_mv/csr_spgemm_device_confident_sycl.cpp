@@ -9,7 +9,7 @@
            Perform SpMM with Row Nnz Upper Bound
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
 #include "seq_mv.h"
-#include "csr_spgemm_device.h"
+#include "csr_spgemm_device.hpp"
 #include <cmath>
 
 #include <algorithm>

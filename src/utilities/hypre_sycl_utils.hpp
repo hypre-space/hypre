@@ -235,7 +235,7 @@ struct hypre_CsrsvData
 #endif // HYPRE_DEBUG
 
 #define HYPRE_ONEDPL_CALL(func_name, ...)                                                                            \
-  oneapi::dpl::func_name(oneapi::dpl::execution::make_device_policy(*hypre_HandleSyclComputeQueue(hypre_handle())), __VA_ARGS__);
+  std(oneapi::dpl::execution::make_device_policy(*hypre_HandleSyclComputeQueue(hypre_handle())), __VA_ARGS__);
 
 /* return the number of work-items in current work-group */
 template <hypre_int dim>

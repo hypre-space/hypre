@@ -9,7 +9,7 @@
            Perform SpMM with Row Nnz Estimation
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
 #include "seq_mv.h"
-#include "csr_spgemm_device.h"
+#include "csr_spgemm_device.hpp"
 
 #if defined(HYPRE_USING_SYCL)
 
