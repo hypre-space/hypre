@@ -318,6 +318,7 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
    HYPRE_Int             nrows_A   = hypre_CSRMatrixNumRows(A);
    HYPRE_Int             ncols_A   = hypre_CSRMatrixNumCols(A);
    HYPRE_Int             nnzrows_A = hypre_CSRMatrixNumRownnz(A);
+   HYPRE_Int             num_nnz_A = hypre_CSRMatrixNumNonzeros(A);
 
    HYPRE_Complex        *B_data    = hypre_CSRMatrixData(B);
    HYPRE_Int            *B_i       = hypre_CSRMatrixI(B);
@@ -362,9 +363,10 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
       allsquare = 1;
    }
 
-   if (num_nnz_B == 0)
+   if ((num_nnz_A == 0) || (num_nnz_B == 0))
    {
       C = hypre_CSRMatrixCreate(nrows_A, ncols_B, 0);
+      hypre_CSRMatrixNumRownnz(C) = 0;
       hypre_CSRMatrixInitialize_v2(C, 0, memory_location_C);
 
       return C;
@@ -407,71 +409,34 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
 
       /* First pass: compute sizes of C rows. */
       num_nonzeros = 0;
-      if (rownnz_A == NULL)
+      for (ic = ns; ic < ne; ic++)
       {
-	 if (allsquare)
-         {
-            for (ic = ns; ic < ne; ic++)
-            {
-               C_i[ic] = num_nonzeros;
-               B_marker[ic] = ic;
-               num_nonzeros++;
-
-               for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
-               {
-                  ja = A_j[ia];
-                  for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
-                  {
-                     jb = B_j[ib];
-                     if (B_marker[jb] != ic)
-                     {
-                        B_marker[jb] = ic;
-                        num_nonzeros++;
-                     }
-                  }
-               }
-            }
-         }
-         else
-         {
-            for (ic = ns; ic < ne; ic++)
-            {
-               C_i[ic] = num_nonzeros;
-
-               for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
-               {
-                  ja = A_j[ia];
-                  for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
-                  {
-                     jb = B_j[ib];
-                     if (B_marker[jb] != ic)
-                     {
-                        B_marker[jb] = ic;
-                        num_nonzeros++;
-                     }
-                  }
-               }
-            }
-         }
-      }
-      else
-      {
-         for (ic = ns; ic < ne; ic++)
+         if (rownnz_A)
          {
             iic = rownnz_A[ic];
             C_i[iic] = num_nonzeros;
-
-            for (ia = A_i[iic]; ia < A_i[iic+1]; ia++)
+         }
+         else
+         {
+            iic = ic;
+            C_i[iic] = num_nonzeros;
+            if (allsquare)
             {
-               ja = A_j[ia];
-               for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
+               B_marker[iic] = iic;
+               num_nonzeros++;
+            }
+         }
+
+         for (ia = A_i[iic]; ia < A_i[iic+1]; ia++)
+         {
+            ja = A_j[ia];
+            for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
+            {
+               jb = B_j[ib];
+               if (B_marker[jb] != iic)
                {
-                  jb = B_j[ib];
-                  if (B_marker[jb] != iic)
-                  {
-                     B_marker[jb] = iic;
-                     num_nonzeros++;
-                  }
+                  B_marker[jb] = iic;
+                  num_nonzeros++;
                }
             }
          }
@@ -491,24 +456,13 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
             jj += jj_count[i1];
          }
 
-         if (rownnz_A != NULL)
+         for (i1 = ns; i1 < ne; i1++)
          {
-            for (i1 = ns; i1 < ne; i1++)
-            {
-               iic = rownnz_A[i1];
-               C_i[iic] += jj;
-            }
-         }
-         else
-         {
-            for (i1 = ns; i1 < ne; i1++)
-            {
-               C_i[i1] += jj;
-            }
+            iic = rownnz_A ? rownnz_A[i1] : i1;
+            C_i[iic] += jj;
          }
       }
-
-      if (ii == (num_threads - 1))
+      else
       {
          C_i[nrows_A] = 0;
          for (i1 = 0; i1 < num_threads; i1++)
@@ -564,12 +518,16 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
          B_marker[ib] = -1;
       }
 
-      if (rownnz_A == NULL)
+      counter = rownnz_A ? C_i[rownnz_A[ns]] : C_i[ns];
+      for (ic = ns; ic < ne; ic++)
       {
-         counter = C_i[ns];
-         for (ic = ns; ic < ne; ic++)
+         if (rownnz_A)
          {
-            row_start = C_i[ic];
+            iic = rownnz_A[ic];
+         }
+         else
+         {
+            iic = ic;
             if (allsquare)
             {
                B_marker[ic] = counter;
@@ -577,61 +535,30 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
                C_j[counter] = ic;
                counter++;
             }
+         }
 
-            for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
+         for (ia = A_i[iic]; ia < A_i[iic+1]; ia++)
+         {
+            ja = A_j[ia];
+            a_entry = A_data[ia];
+            for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
             {
-               ja = A_j[ia];
-               a_entry = A_data[ia];
-               for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
+               jb = B_j[ib];
+               b_entry = B_data[ib];
+               if (B_marker[jb] < C_i[iic])
                {
-                  jb = B_j[ib];
-                  b_entry = B_data[ib];
-                  if (B_marker[jb] < row_start)
-                  {
-                     B_marker[jb] = counter;
-                     C_j[B_marker[jb]] = jb;
-                     C_data[B_marker[jb]] = a_entry*b_entry;
-                     counter++;
-                  }
-                  else
-                  {
-                     C_data[B_marker[jb]] += a_entry*b_entry;
-                  }
+                  B_marker[jb] = counter;
+                  C_j[B_marker[jb]] = jb;
+                  C_data[B_marker[jb]] = a_entry*b_entry;
+                  counter++;
+               }
+               else
+               {
+                  C_data[B_marker[jb]] += a_entry*b_entry;
                }
             }
          }
       }
-      else
-      {
-         counter = C_i[rownnz_A[ns]];
-         for (ic = ns; ic < ne; ic++)
-         {
-            iic = rownnz_A[ic];
-            row_start = C_i[iic];
-
-            for (ia = A_i[iic]; ia < A_i[iic+1]; ia++)
-            {
-               ja = A_j[ia];
-               a_entry = A_data[ia];
-               for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
-               {
-                  jb = B_j[ib];
-                  b_entry = B_data[ib];
-                  if (B_marker[jb] < row_start)
-                  {
-                     B_marker[jb] = counter;
-                     C_j[B_marker[jb]] = jb;
-                     C_data[B_marker[jb]] = a_entry*b_entry;
-                     counter++;
-                  }
-                  else
-                  {
-                     C_data[B_marker[jb]] += a_entry*b_entry;
-                  }
-               }
-            }
-         }
-      } /* if (rownnz_A == NULL) */
 
       /* End of Second Pass */
       hypre_TFree(B_marker, HYPRE_MEMORY_HOST);
@@ -949,69 +876,34 @@ hypre_CSRMatrixTransposeHost(hypre_CSRMatrix  *A,
        * Load the data and column numbers of AT
        *----------------------------------------------------------------*/
 
-      if (rownnz_A == NULL)
+      if (data)
       {
-         if (data)
+         for (i = ne - 1; i >= ns; --i)
          {
-            for (i = ne - 1; i >= ns; --i)
+            ir = rownnz_A ? rownnz_A[i] : i;
+            for (j = A_i[ir + 1] - 1; j >= A_i[ir]; --j)
             {
-               for (j = A_i[i + 1] - 1; j >= A_i[i]; --j)
-               {
-                  idx = A_j[j];
-                  --bucket[ii*num_cols_A + idx];
+               idx = A_j[j];
+               --bucket[ii*num_cols_A + idx];
 
-                  offset = bucket[ii*num_cols_A + idx];
-                  AT_data[offset] = A_data[j];
-                  AT_j[offset] = i;
-               }
-            }
-         }
-         else
-         {
-            for (i = ne - 1; i >= ns; --i)
-            {
-               for (j = A_i[i + 1] - 1; j >= A_i[i]; --j)
-               {
-                  idx = A_j[j];
-                  --bucket[ii*num_cols_A + idx];
-
-                  offset = bucket[ii*num_cols_A + idx];
-                  AT_j[offset] = i;
-               }
+               offset = bucket[ii*num_cols_A + idx];
+               AT_data[offset] = A_data[j];
+               AT_j[offset] = ir;
             }
          }
       }
       else
       {
-         if (data)
+         for (i = ne - 1; i >= ns; --i)
          {
-            for (i = ne - 1; i >= ns; --i)
+            ir = rownnz_A ? rownnz_A[i] : i;
+            for (j = A_i[ir + 1] - 1; j >= A_i[ir]; --j)
             {
-               ir = rownnz_A[i];
-               for (j = A_i[ir + 1] - 1; j >= A_i[ir]; --j)
-               {
-                  idx = A_j[j];
-                  --bucket[ii*num_cols_A + idx];
+               idx = A_j[j];
+               --bucket[ii*num_cols_A + idx];
 
-                  offset = bucket[ii*num_cols_A + idx];
-                  AT_data[offset] = A_data[j];
-                  AT_j[offset] = ir;
-               }
-            }
-         }
-         else
-         {
-            for (i = ne - 1; i >= ns; --i)
-            {
-               ir = rownnz_A[i];
-               for (j = A_i[ir + 1] - 1; j >= A_i[ir]; --j)
-               {
-                  idx = A_j[j];
-                  --bucket[ii*num_cols_A + idx];
-
-                  offset = bucket[ii*num_cols_A + idx];
-                  AT_j[offset] = ir;
-               }
+               offset = bucket[ii*num_cols_A + idx];
+               AT_j[offset] = ir;
             }
          }
       }
@@ -1326,46 +1218,22 @@ hypre_CSRMatrixReorder(hypre_CSRMatrix *A)
       return -1;
    }
 
-   if (rownnz_A == NULL)
-   {
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i, j) HYPRE_SMP_SCHEDULE
-#endif
-      for (i = 0; i < num_rows_A; i++)
-      {
-         for (j = A_i[i]; j < A_i[i+1]; j++)
-         {
-            if (A_j[j] == i)
-            {
-               if (j != A_i[i])
-               {
-                  hypre_swap(A_j, A_i[i], j);
-                  hypre_swap_c(A_data, A_i[i], j);
-               }
-               break;
-            }
-         }
-      }
-   }
-   else
-   {
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i, ii, j) HYPRE_SMP_SCHEDULE
 #endif
-      for (i = 0; i < nnzrows_A; i++)
+   for (i = 0; i < nnzrows_A; i++)
+   {
+      ii = rownnz_A ? rownnz_A[i] : i;
+      for (j = A_i[ii]; j < A_i[ii+1]; j++)
       {
-         ii = A_i[rownnz_A[i]];
-         for (j = A_i[ii]; j < A_i[ii+1]; j++)
+         if (A_j[j] == ii)
          {
-            if (A_j[j] == ii)
+            if (j != A_i[ii])
             {
-               if (j != A_i[ii])
-               {
-                  hypre_swap(A_j, A_i[ii], j);
-                  hypre_swap_c(A_data, A_i[ii], j);
-               }
-               break;
+               hypre_swap(A_j, A_i[ii], j);
+               hypre_swap_c(A_data, A_i[ii], j);
             }
+            break;
          }
       }
    }

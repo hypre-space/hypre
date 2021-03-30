@@ -119,196 +119,46 @@ hypre_ParMatmul_RowSizes( HYPRE_MemoryLocation memory_location,
          B_marker[i1] = -1;
       }
 
-      if (rownnz_A == NULL)
+      for (i1 = ns; i1 < ne; i1++)
       {
-         for (i1 = ns; i1 < ne; i1++)
+         jj_row_begin_diag = jj_count_diag;
+         jj_row_begin_offd = jj_count_offd;
+         if (rownnz_A)
          {
+            ii1 = rownnz_A[i1];
+         }
+         else
+         {
+            ii1 = i1;
+
             /*--------------------------------------------------------------------
              *  Set marker for diagonal entry, C_{i1,i1} (for square matrices).
              *--------------------------------------------------------------------*/
 
-            jj_row_begin_diag = jj_count_diag;
-            jj_row_begin_offd = jj_count_offd;
             if (allsquare)
             {
                B_marker[i1] = jj_count_diag;
                jj_count_diag++;
             }
-
-            /*-----------------------------------------------------------------
-             *  Loop over entries in row i1 of A_offd.
-             *-----------------------------------------------------------------*/
-
-            if (num_cols_offd_A)
-            {
-               for (jj2 = A_offd_i[i1]; jj2 < A_offd_i[i1+1]; jj2++)
-               {
-                  i2 = A_offd_j[jj2];
-
-                  /*-----------------------------------------------------------
-                   *  Loop over entries in row i2 of B_ext.
-                   *-----------------------------------------------------------*/
-
-                  for (jj3 = B_ext_offd_i[i2]; jj3 < B_ext_offd_i[i2+1]; jj3++)
-                  {
-                     i3 = num_cols_diag_B+B_ext_offd_j[jj3];
-
-                     /*--------------------------------------------------------
-                      *  Check B_marker to see that C_{i1,i3} has not already
-                      *  been accounted for. If it has not, mark it and increment
-                      *  counter.
-                      *--------------------------------------------------------*/
-
-                     if (B_marker[i3] < jj_row_begin_offd)
-                     {
-                        B_marker[i3] = jj_count_offd;
-                        jj_count_offd++;
-                     }
-                  }
-
-                  for (jj3 = B_ext_diag_i[i2]; jj3 < B_ext_diag_i[i2+1]; jj3++)
-                  {
-                     i3 = B_ext_diag_j[jj3];
-
-                     if (B_marker[i3] < jj_row_begin_diag)
-                     {
-                        B_marker[i3] = jj_count_diag;
-                        jj_count_diag++;
-                     }
-                  }
-               }
-            }
-
-            /*-----------------------------------------------------------------
-             *  Loop over entries in row i1 of A_diag.
-             *-----------------------------------------------------------------*/
-
-            for (jj2 = A_diag_i[i1]; jj2 < A_diag_i[i1+1]; jj2++)
-            {
-               i2 = A_diag_j[jj2];
-
-               /*-----------------------------------------------------------
-                *  Loop over entries in row i2 of B_diag.
-                *-----------------------------------------------------------*/
-
-               for (jj3 = B_diag_i[i2]; jj3 < B_diag_i[i2+1]; jj3++)
-               {
-                  i3 = B_diag_j[jj3];
-
-                  /*--------------------------------------------------------
-                   *  Check B_marker to see that C_{i1,i3} has not already
-                   *  been accounted for. If it has not, mark it and increment
-                   *  counter.
-                   *--------------------------------------------------------*/
-
-                  if (B_marker[i3] < jj_row_begin_diag)
-                  {
-                     B_marker[i3] = jj_count_diag;
-                     jj_count_diag++;
-                  }
-               }
-
-               /*-----------------------------------------------------------
-                *  Loop over entries in row i2 of B_offd.
-                *-----------------------------------------------------------*/
-
-               if (num_cols_offd_B)
-               {
-                  for (jj3 = B_offd_i[i2]; jj3 < B_offd_i[i2+1]; jj3++)
-                  {
-                     i3 = num_cols_diag_B+map_B_to_C[B_offd_j[jj3]];
-
-                     /*--------------------------------------------------------
-                      *  Check B_marker to see that C_{i1,i3} has not already
-                      *  been accounted for. If it has not, mark it and increment
-                      *  counter.
-                      *--------------------------------------------------------*/
-
-                     if (B_marker[i3] < jj_row_begin_offd)
-                     {
-                        B_marker[i3] = jj_count_offd;
-                        jj_count_offd++;
-                     }
-                  }
-               }
-            }
-
-            /*--------------------------------------------------------------------
-             * Set C_diag_i and C_offd_i for this row.
-             *--------------------------------------------------------------------*/
-
-            (*C_diag_i)[i1] = jj_row_begin_diag;
-            (*C_offd_i)[i1] = jj_row_begin_offd;
-
          }
-      }
-      else
-      {
-         for (i1 = ns; i1 < ne; i1++)
+
+         /*-----------------------------------------------------------------
+          *  Loop over entries in row ii1 of A_offd.
+          *-----------------------------------------------------------------*/
+
+         if (num_cols_offd_A)
          {
-            ii1 = rownnz_A[i1];
-            jj_row_begin_diag = jj_count_diag;
-            jj_row_begin_offd = jj_count_offd;
-
-            /*-----------------------------------------------------------------
-             *  Loop over entries in row ii1 of A_offd.
-             *-----------------------------------------------------------------*/
-
-            if (num_cols_offd_A)
+            for (jj2 = A_offd_i[ii1]; jj2 < A_offd_i[ii1+1]; jj2++)
             {
-               for (jj2 = A_offd_i[ii1]; jj2 < A_offd_i[ii1+1]; jj2++)
-               {
-                  i2 = A_offd_j[jj2];
-
-                  /*-----------------------------------------------------------
-                   *  Loop over entries in row i2 of B_ext.
-                   *-----------------------------------------------------------*/
-
-                  for (jj3 = B_ext_offd_i[i2]; jj3 < B_ext_offd_i[i2+1]; jj3++)
-                  {
-                     i3 = num_cols_diag_B+B_ext_offd_j[jj3];
-
-                     /*--------------------------------------------------------
-                      *  Check B_marker to see that C_{ii1,i3} has not already
-                      *  been accounted for. If it has not, mark it and increment
-                      *  counter.
-                      *--------------------------------------------------------*/
-
-                     if (B_marker[i3] < jj_row_begin_offd)
-                     {
-                        B_marker[i3] = jj_count_offd;
-                        jj_count_offd++;
-                     }
-                  }
-
-                  for (jj3 = B_ext_diag_i[i2]; jj3 < B_ext_diag_i[i2+1]; jj3++)
-                  {
-                     i3 = B_ext_diag_j[jj3];
-
-                     if (B_marker[i3] < jj_row_begin_diag)
-                     {
-                        B_marker[i3] = jj_count_diag;
-                        jj_count_diag++;
-                     }
-                  }
-               }
-            }
-
-            /*-----------------------------------------------------------------
-             *  Loop over entries in row ii1 of A_diag.
-             *-----------------------------------------------------------------*/
-
-            for (jj2 = A_diag_i[ii1]; jj2 < A_diag_i[ii1+1]; jj2++)
-            {
-               i2 = A_diag_j[jj2];
+               i2 = A_offd_j[jj2];
 
                /*-----------------------------------------------------------
-                *  Loop over entries in row i2 of B_diag.
+                *  Loop over entries in row i2 of B_ext.
                 *-----------------------------------------------------------*/
 
-               for (jj3 = B_diag_i[i2]; jj3 < B_diag_i[i2+1]; jj3++)
+               for (jj3 = B_ext_offd_i[i2]; jj3 < B_ext_offd_i[i2+1]; jj3++)
                {
-                  i3 = B_diag_j[jj3];
+                  i3 = num_cols_diag_B+B_ext_offd_j[jj3];
 
                   /*--------------------------------------------------------
                    *  Check B_marker to see that C_{ii1,i3} has not already
@@ -316,45 +166,86 @@ hypre_ParMatmul_RowSizes( HYPRE_MemoryLocation memory_location,
                    *  counter.
                    *--------------------------------------------------------*/
 
+                  if (B_marker[i3] < jj_row_begin_offd)
+                  {
+                     B_marker[i3] = jj_count_offd;
+                     jj_count_offd++;
+                  }
+               }
+
+               for (jj3 = B_ext_diag_i[i2]; jj3 < B_ext_diag_i[i2+1]; jj3++)
+               {
+                  i3 = B_ext_diag_j[jj3];
+
                   if (B_marker[i3] < jj_row_begin_diag)
                   {
                      B_marker[i3] = jj_count_diag;
                      jj_count_diag++;
                   }
                }
+            }
+         }
 
-               /*-----------------------------------------------------------
-                *  Loop over entries in row i2 of B_offd.
-                *-----------------------------------------------------------*/
+         /*-----------------------------------------------------------------
+          *  Loop over entries in row ii1 of A_diag.
+          *-----------------------------------------------------------------*/
 
-               if (num_cols_offd_B)
+         for (jj2 = A_diag_i[ii1]; jj2 < A_diag_i[ii1+1]; jj2++)
+         {
+            i2 = A_diag_j[jj2];
+
+            /*-----------------------------------------------------------
+             *  Loop over entries in row i2 of B_diag.
+             *-----------------------------------------------------------*/
+
+            for (jj3 = B_diag_i[i2]; jj3 < B_diag_i[i2+1]; jj3++)
+            {
+               i3 = B_diag_j[jj3];
+
+               /*--------------------------------------------------------
+                *  Check B_marker to see that C_{ii1,i3} has not already
+                *  been accounted for. If it has not, mark it and increment
+                *  counter.
+                *--------------------------------------------------------*/
+
+               if (B_marker[i3] < jj_row_begin_diag)
                {
-                  for (jj3 = B_offd_i[i2]; jj3 < B_offd_i[i2+1]; jj3++)
-                  {
-                     i3 = num_cols_diag_B+map_B_to_C[B_offd_j[jj3]];
-
-                     /*--------------------------------------------------------
-                      *  Check B_marker to see that C_{ii1,i3} has not already
-                      *  been accounted for. If it has not, mark it and increment
-                      *  counter.
-                      *--------------------------------------------------------*/
-
-                     if (B_marker[i3] < jj_row_begin_offd)
-                     {
-                        B_marker[i3] = jj_count_offd;
-                        jj_count_offd++;
-                     }
-                  }
+                  B_marker[i3] = jj_count_diag;
+                  jj_count_diag++;
                }
             }
 
-            /*--------------------------------------------------------------------
-             * Set C_diag_i and C_offd_i for this row.
-             *--------------------------------------------------------------------*/
+            /*-----------------------------------------------------------
+             *  Loop over entries in row i2 of B_offd.
+             *-----------------------------------------------------------*/
 
-            (*C_diag_i)[ii1] = jj_row_begin_diag;
-            (*C_offd_i)[ii1] = jj_row_begin_offd;
+            if (num_cols_offd_B)
+            {
+               for (jj3 = B_offd_i[i2]; jj3 < B_offd_i[i2+1]; jj3++)
+               {
+                  i3 = num_cols_diag_B+map_B_to_C[B_offd_j[jj3]];
+
+                  /*--------------------------------------------------------
+                   *  Check B_marker to see that C_{ii1,i3} has not already
+                   *  been accounted for. If it has not, mark it and increment
+                   *  counter.
+                   *--------------------------------------------------------*/
+
+                  if (B_marker[i3] < jj_row_begin_offd)
+                  {
+                     B_marker[i3] = jj_count_offd;
+                     jj_count_offd++;
+                  }
+               }
+            }
          }
+
+         /*--------------------------------------------------------------------
+          * Set C_diag_i and C_offd_i for this row.
+          *--------------------------------------------------------------------*/
+
+         (*C_diag_i)[ii1] = jj_row_begin_diag;
+         (*C_offd_i)[ii1] = jj_row_begin_offd;
       }
 
       jj_count_diag_array[ii] = jj_count_diag;
@@ -376,26 +267,14 @@ hypre_ParMatmul_RowSizes( HYPRE_MemoryLocation memory_location,
             jj_count_offd += jj_count_offd_array[i1];
          }
 
-         if (rownnz_A != NULL)
+         for (i1 = ns; i1 < ne; i1++)
          {
-            for (i1 = ns; i1 < ne; i1++)
-            {
-               ii1 = rownnz_A[i1];
-               (*C_diag_i)[ii1] += jj_count_diag;
-               (*C_offd_i)[ii1] += jj_count_offd;
-            }
-         }
-         else
-         {
-            for (i1 = ns; i1 < ne; i1++)
-            {
-               (*C_diag_i)[i1] += jj_count_diag;
-               (*C_offd_i)[i1] += jj_count_offd;
-            }
+            ii1 = rownnz_A ? rownnz_A[i1] : i1;
+            (*C_diag_i)[ii1] += jj_count_diag;
+            (*C_offd_i)[ii1] += jj_count_offd;
          }
       }
-
-      if (ii == (num_threads - 1))
+      else
       {
          (*C_diag_i)[num_rows_diag_A] = 0;
          (*C_offd_i)[num_rows_diag_A] = 0;
@@ -1119,16 +998,22 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
       /*-----------------------------------------------------------------------
        *  Loop over interior c-points.
        *-----------------------------------------------------------------------*/
-      if (rownnz_A == NULL)
+      for (i1 = ns; i1 < ne; i1++)
       {
-         for (i1 = ns; i1 < ne; i1++)
+         jj_row_begin_diag = jj_count_diag;
+         jj_row_begin_offd = jj_count_offd;
+         if (rownnz_A)
          {
+            ii1 = rownnz_A[i1];
+         }
+         else
+         {
+            ii1 = i1;
+
             /*--------------------------------------------------------------------
              *  Create diagonal entry, C_{i1,i1}
              *--------------------------------------------------------------------*/
 
-            jj_row_begin_diag = jj_count_diag;
-            jj_row_begin_offd = jj_count_offd;
             if (allsquare)
             {
                B_marker[i1] = jj_count_diag;
@@ -1136,204 +1021,26 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
                C_diag_j[jj_count_diag] = i1;
                jj_count_diag++;
             }
-
-            /*-----------------------------------------------------------------
-             *  Loop over entries in row i1 of A_offd.
-             *-----------------------------------------------------------------*/
-
-            if (num_cols_offd_A)
-            {
-               for (jj2 = A_offd_i[i1]; jj2 < A_offd_i[i1+1]; jj2++)
-               {
-                  i2 = A_offd_j[jj2];
-                  a_entry = A_offd_data[jj2];
-
-                  /*-----------------------------------------------------------
-                   *  Loop over entries in row i2 of B_ext.
-                   *-----------------------------------------------------------*/
-
-                  for (jj3 = B_ext_offd_i[i2]; jj3 < B_ext_offd_i[i2+1]; jj3++)
-                  {
-                     i3 = num_cols_diag_B+B_ext_offd_j[jj3];
-
-                     /*--------------------------------------------------------
-                      *  Check B_marker to see that C_{i1,i3} has not already
-                      *  been accounted for. If it has not, create a new entry.
-                      *  If it has, add new contribution.
-                      *--------------------------------------------------------*/
-
-                     if (B_marker[i3] < jj_row_begin_offd)
-                     {
-                        B_marker[i3] = jj_count_offd;
-                        C_offd_data[jj_count_offd] = a_entry*B_ext_offd_data[jj3];
-                        C_offd_j[jj_count_offd] = i3-num_cols_diag_B;
-                        jj_count_offd++;
-                     }
-                     else
-                     {
-                        C_offd_data[B_marker[i3]] += a_entry*B_ext_offd_data[jj3];
-                     }
-                  }
-                  for (jj3 = B_ext_diag_i[i2]; jj3 < B_ext_diag_i[i2+1]; jj3++)
-                  {
-                     i3 = B_ext_diag_j[jj3];
-                     if (B_marker[i3] < jj_row_begin_diag)
-                     {
-                        B_marker[i3] = jj_count_diag;
-                        C_diag_data[jj_count_diag] = a_entry*B_ext_diag_data[jj3];
-                        C_diag_j[jj_count_diag] = i3;
-                        jj_count_diag++;
-                     }
-                     else
-                     {
-                        C_diag_data[B_marker[i3]] += a_entry*B_ext_diag_data[jj3];
-                     }
-                  }
-               }
-            }
-
-            /*-----------------------------------------------------------------
-             *  Loop over entries in row i1 of A_diag.
-             *-----------------------------------------------------------------*/
-
-            for (jj2 = A_diag_i[i1]; jj2 < A_diag_i[i1+1]; jj2++)
-            {
-               i2 = A_diag_j[jj2];
-               a_entry = A_diag_data[jj2];
-
-               /*-----------------------------------------------------------
-                *  Loop over entries in row i2 of B_diag.
-                *-----------------------------------------------------------*/
-
-               for (jj3 = B_diag_i[i2]; jj3 < B_diag_i[i2+1]; jj3++)
-               {
-                  i3 = B_diag_j[jj3];
-
-                  /*--------------------------------------------------------
-                   *  Check B_marker to see that C_{i1,i3} has not already
-                   *  been accounted for. If it has not, create a new entry.
-                   *  If it has, add new contribution.
-                   *--------------------------------------------------------*/
-
-                  if (B_marker[i3] < jj_row_begin_diag)
-                  {
-                     B_marker[i3] = jj_count_diag;
-                     C_diag_data[jj_count_diag] = a_entry*B_diag_data[jj3];
-                     C_diag_j[jj_count_diag] = i3;
-                     jj_count_diag++;
-                  }
-                  else
-                  {
-                     C_diag_data[B_marker[i3]] += a_entry*B_diag_data[jj3];
-                  }
-               }
-               if (num_cols_offd_B)
-               {
-                  for (jj3 = B_offd_i[i2]; jj3 < B_offd_i[i2+1]; jj3++)
-                  {
-                     i3 = num_cols_diag_B+map_B_to_C[B_offd_j[jj3]];
-
-                     /*--------------------------------------------------------
-                      *  Check B_marker to see that C_{i1,i3} has not already
-                      *  been accounted for. If it has not, create a new entry.
-                      *  If it has, add new contribution.
-                      *--------------------------------------------------------*/
-
-                     if (B_marker[i3] < jj_row_begin_offd)
-                     {
-                        B_marker[i3] = jj_count_offd;
-                        C_offd_data[jj_count_offd] = a_entry*B_offd_data[jj3];
-                        C_offd_j[jj_count_offd] = i3-num_cols_diag_B;
-                        jj_count_offd++;
-                     }
-                     else
-                     {
-                        C_offd_data[B_marker[i3]] += a_entry*B_offd_data[jj3];
-                     }
-                  }
-               }
-            }
          }
-      }
-      else
-      {
-         for (i1 = ns; i1 < ne; i1++)
+
+         /*-----------------------------------------------------------------
+          *  Loop over entries in row i1 of A_offd.
+          *-----------------------------------------------------------------*/
+
+         if (num_cols_offd_A)
          {
-            ii1 = rownnz_A[i1];
-            jj_row_begin_diag = jj_count_diag;
-            jj_row_begin_offd = jj_count_offd;
-
-            /*-----------------------------------------------------------------
-             *  Loop over entries in row i1 of A_offd.
-             *-----------------------------------------------------------------*/
-
-            if (num_cols_offd_A)
+            for (jj2 = A_offd_i[ii1]; jj2 < A_offd_i[ii1+1]; jj2++)
             {
-               for (jj2 = A_offd_i[ii1]; jj2 < A_offd_i[ii1+1]; jj2++)
-               {
-                  i2 = A_offd_j[jj2];
-                  a_entry = A_offd_data[jj2];
-
-                  /*-----------------------------------------------------------
-                   *  Loop over entries in row i2 of B_ext.
-                   *-----------------------------------------------------------*/
-
-                  for (jj3 = B_ext_offd_i[i2]; jj3 < B_ext_offd_i[i2+1]; jj3++)
-                  {
-                     i3 = num_cols_diag_B+B_ext_offd_j[jj3];
-
-                     /*--------------------------------------------------------
-                      *  Check B_marker to see that C_{ii1,i3} has not already
-                      *  been accounted for. If it has not, create a new entry.
-                      *  If it has, add new contribution.
-                      *--------------------------------------------------------*/
-
-                     if (B_marker[i3] < jj_row_begin_offd)
-                     {
-                        B_marker[i3] = jj_count_offd;
-                        C_offd_data[jj_count_offd] = a_entry*B_ext_offd_data[jj3];
-                        C_offd_j[jj_count_offd] = i3-num_cols_diag_B;
-                        jj_count_offd++;
-                     }
-                     else
-                     {
-                        C_offd_data[B_marker[i3]] += a_entry*B_ext_offd_data[jj3];
-                     }
-                  }
-                  for (jj3 = B_ext_diag_i[i2]; jj3 < B_ext_diag_i[i2+1]; jj3++)
-                  {
-                     i3 = B_ext_diag_j[jj3];
-                     if (B_marker[i3] < jj_row_begin_diag)
-                     {
-                        B_marker[i3] = jj_count_diag;
-                        C_diag_data[jj_count_diag] = a_entry*B_ext_diag_data[jj3];
-                        C_diag_j[jj_count_diag] = i3;
-                        jj_count_diag++;
-                     }
-                     else
-                     {
-                        C_diag_data[B_marker[i3]] += a_entry*B_ext_diag_data[jj3];
-                     }
-                  }
-               }
-            }
-
-            /*-----------------------------------------------------------------
-             *  Loop over entries in row ii1 of A_diag.
-             *-----------------------------------------------------------------*/
-
-            for (jj2 = A_diag_i[ii1]; jj2 < A_diag_i[ii1+1]; jj2++)
-            {
-               i2 = A_diag_j[jj2];
-               a_entry = A_diag_data[jj2];
+               i2 = A_offd_j[jj2];
+               a_entry = A_offd_data[jj2];
 
                /*-----------------------------------------------------------
-                *  Loop over entries in row i2 of B_diag.
+                *  Loop over entries in row i2 of B_ext.
                 *-----------------------------------------------------------*/
 
-               for (jj3 = B_diag_i[i2]; jj3 < B_diag_i[i2+1]; jj3++)
+               for (jj3 = B_ext_offd_i[i2]; jj3 < B_ext_offd_i[i2+1]; jj3++)
                {
-                  i3 = B_diag_j[jj3];
+                  i3 = num_cols_diag_B+B_ext_offd_j[jj3];
 
                   /*--------------------------------------------------------
                    *  Check B_marker to see that C_{ii1,i3} has not already
@@ -1341,41 +1048,93 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
                    *  If it has, add new contribution.
                    *--------------------------------------------------------*/
 
+                  if (B_marker[i3] < jj_row_begin_offd)
+                  {
+                     B_marker[i3] = jj_count_offd;
+                     C_offd_data[jj_count_offd] = a_entry*B_ext_offd_data[jj3];
+                     C_offd_j[jj_count_offd] = i3-num_cols_diag_B;
+                     jj_count_offd++;
+                  }
+                  else
+                  {
+                     C_offd_data[B_marker[i3]] += a_entry*B_ext_offd_data[jj3];
+                  }
+               }
+               for (jj3 = B_ext_diag_i[i2]; jj3 < B_ext_diag_i[i2+1]; jj3++)
+               {
+                  i3 = B_ext_diag_j[jj3];
                   if (B_marker[i3] < jj_row_begin_diag)
                   {
                      B_marker[i3] = jj_count_diag;
-                     C_diag_data[jj_count_diag] = a_entry*B_diag_data[jj3];
+                     C_diag_data[jj_count_diag] = a_entry*B_ext_diag_data[jj3];
                      C_diag_j[jj_count_diag] = i3;
                      jj_count_diag++;
                   }
                   else
                   {
-                     C_diag_data[B_marker[i3]] += a_entry*B_diag_data[jj3];
+                     C_diag_data[B_marker[i3]] += a_entry*B_ext_diag_data[jj3];
                   }
                }
-               if (num_cols_offd_B)
+            }
+         }
+
+         /*-----------------------------------------------------------------
+          *  Loop over entries in row ii1 of A_diag.
+          *-----------------------------------------------------------------*/
+
+         for (jj2 = A_diag_i[ii1]; jj2 < A_diag_i[ii1+1]; jj2++)
+         {
+            i2 = A_diag_j[jj2];
+            a_entry = A_diag_data[jj2];
+
+            /*-----------------------------------------------------------
+             *  Loop over entries in row i2 of B_diag.
+             *-----------------------------------------------------------*/
+
+            for (jj3 = B_diag_i[i2]; jj3 < B_diag_i[i2+1]; jj3++)
+            {
+               i3 = B_diag_j[jj3];
+
+               /*--------------------------------------------------------
+                *  Check B_marker to see that C_{ii1,i3} has not already
+                *  been accounted for. If it has not, create a new entry.
+                *  If it has, add new contribution.
+                *--------------------------------------------------------*/
+
+               if (B_marker[i3] < jj_row_begin_diag)
                {
-                  for (jj3 = B_offd_i[i2]; jj3 < B_offd_i[i2+1]; jj3++)
+                  B_marker[i3] = jj_count_diag;
+                  C_diag_data[jj_count_diag] = a_entry*B_diag_data[jj3];
+                  C_diag_j[jj_count_diag] = i3;
+                  jj_count_diag++;
+               }
+               else
+               {
+                  C_diag_data[B_marker[i3]] += a_entry*B_diag_data[jj3];
+               }
+            }
+            if (num_cols_offd_B)
+            {
+               for (jj3 = B_offd_i[i2]; jj3 < B_offd_i[i2+1]; jj3++)
+               {
+                  i3 = num_cols_diag_B+map_B_to_C[B_offd_j[jj3]];
+
+                  /*--------------------------------------------------------
+                   *  Check B_marker to see that C_{ii1,i3} has not already
+                   *  been accounted for. If it has not, create a new entry.
+                   *  If it has, add new contribution.
+                   *--------------------------------------------------------*/
+
+                  if (B_marker[i3] < jj_row_begin_offd)
                   {
-                     i3 = num_cols_diag_B+map_B_to_C[B_offd_j[jj3]];
-
-                     /*--------------------------------------------------------
-                      *  Check B_marker to see that C_{ii1,i3} has not already
-                      *  been accounted for. If it has not, create a new entry.
-                      *  If it has, add new contribution.
-                      *--------------------------------------------------------*/
-
-                     if (B_marker[i3] < jj_row_begin_offd)
-                     {
-                        B_marker[i3] = jj_count_offd;
-                        C_offd_data[jj_count_offd] = a_entry*B_offd_data[jj3];
-                        C_offd_j[jj_count_offd] = i3-num_cols_diag_B;
-                        jj_count_offd++;
-                     }
-                     else
-                     {
-                        C_offd_data[B_marker[i3]] += a_entry*B_offd_data[jj3];
-                     }
+                     B_marker[i3] = jj_count_offd;
+                     C_offd_data[jj_count_offd] = a_entry*B_offd_data[jj3];
+                     C_offd_j[jj_count_offd] = i3-num_cols_diag_B;
+                     jj_count_offd++;
+                  }
+                  else
+                  {
+                     C_offd_data[B_marker[i3]] += a_entry*B_offd_data[jj3];
                   }
                }
             }
@@ -5425,112 +5184,61 @@ hypre_ParcsrAdd( HYPRE_Complex        alpha,
    }
 
    /* Set diag_C */
-   if (rownnz_diag_C == NULL)
+   for (i = 0; i < num_rownnz_diag_C; i++)
    {
-      for (i = 0; i < num_rownnz_diag_C; i++)
+      ii = rownnz_diag_C ? rownnz_diag_C[i] : i;
+
+      HYPRE_Int diag_i_start = nnz_diag_C;
+      for (j = A_diag_i[ii]; j < A_diag_i[ii+1]; j++)
       {
-         HYPRE_Int diag_i_start = nnz_diag_C;
-         for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
+         HYPRE_Int     col = A_diag_j[j];
+         HYPRE_Complex val = A_diag_a[j];
+         if (marker_diag[col] < diag_i_start)
          {
-            HYPRE_Int     col = A_diag_j[j];
-            HYPRE_Complex val = A_diag_a[j];
-            if (marker_diag[col] < diag_i_start)
-            {
-               /* this col has not been seen before, create new entry */
-               marker_diag[col] = nnz_diag_C;
-               C_diag_j[nnz_diag_C] = col;
-               C_diag_a[nnz_diag_C] = alpha * val;
-               nnz_diag_C ++;
-            }
-            else
-            {
-               /* this should not happen */
-               hypre_printf("hypre warning: invalid ParCSR matrix %s %s %d\n",
-                            __FILE__, __func__, __LINE__);
-            }
+            /* this col has not been seen before, create new entry */
+            marker_diag[col] = nnz_diag_C;
+            C_diag_j[nnz_diag_C] = col;
+            C_diag_a[nnz_diag_C] = alpha * val;
+            nnz_diag_C ++;
          }
-
-         for (j = B_diag_i[i]; j < B_diag_i[i+1]; j++)
+         else
          {
-            HYPRE_Int     col = B_diag_j[j];
-            HYPRE_Complex val = B_diag_a[j];
-            if (marker_diag[col] < diag_i_start /*&& hypre_abs(val) > 0.0*/)
-            {
-               /* this col has not been seen before, create new entry */
-               marker_diag[col] = nnz_diag_C;
-               C_diag_j[nnz_diag_C] = col;
-               C_diag_a[nnz_diag_C] = beta * val;
-               nnz_diag_C ++;
-            }
-            else
-            {
-               /* existing entry, update */
-               HYPRE_Int p = marker_diag[col];
-
-               hypre_assert(C_diag_j[p] == col);
-
-               C_diag_a[p] += beta * val;
-            }
+            /* this should not happen */
+            hypre_printf("hypre warning: invalid ParCSR matrix %s %s %d\n",
+                         __FILE__, __func__, __LINE__);
          }
-
-         C_diag_i[i+1] = nnz_diag_C;
       }
+
+      for (j = B_diag_i[ii]; j < B_diag_i[ii+1]; j++)
+      {
+         HYPRE_Int     col = B_diag_j[j];
+         HYPRE_Complex val = B_diag_a[j];
+         if (marker_diag[col] < diag_i_start /*&& hypre_abs(val) > 0.0*/)
+         {
+            /* this col has not been seen before, create new entry */
+            marker_diag[col] = nnz_diag_C;
+            C_diag_j[nnz_diag_C] = col;
+            C_diag_a[nnz_diag_C] = beta * val;
+            nnz_diag_C ++;
+         }
+         else
+         {
+            /* existing entry, update */
+            HYPRE_Int p = marker_diag[col];
+
+            hypre_assert(C_diag_j[p] == col);
+
+            C_diag_a[p] += beta * val;
+         }
+      }
+
+      C_diag_i[ii+1] = nnz_diag_C;
    }
-   else
+   C_diag_i[num_rows_diag_A] = nnz_diag_C;
+
+   /* Correct C_diag_i */
+   if (rownnz_diag_C)
    {
-      for (i = 0; i < num_rownnz_diag_C; i++)
-      {
-         ii = rownnz_diag_C[i];
-
-         HYPRE_Int diag_i_start = nnz_diag_C;
-         for (j = A_diag_i[ii]; j < A_diag_i[ii+1]; j++)
-         {
-            HYPRE_Int     col = A_diag_j[j];
-            HYPRE_Complex val = A_diag_a[j];
-            if (marker_diag[col] < diag_i_start)
-            {
-               /* this col has not been seen before, create new entry */
-               marker_diag[col] = nnz_diag_C;
-               C_diag_j[nnz_diag_C] = col;
-               C_diag_a[nnz_diag_C] = alpha * val;
-               nnz_diag_C ++;
-            }
-            else
-            {
-               /* this should not happen */
-               hypre_printf("hypre warning: invalid ParCSR matrix %s %s %d\n",
-                            __FILE__, __func__, __LINE__);
-            }
-         }
-
-         for (j = B_diag_i[ii]; j < B_diag_i[ii+1]; j++)
-         {
-            HYPRE_Int     col = B_diag_j[j];
-            HYPRE_Complex val = B_diag_a[j];
-            if (marker_diag[col] < diag_i_start /*&& hypre_abs(val) > 0.0*/)
-            {
-               /* this col has not been seen before, create new entry */
-               marker_diag[col] = nnz_diag_C;
-               C_diag_j[nnz_diag_C] = col;
-               C_diag_a[nnz_diag_C] = beta * val;
-               nnz_diag_C ++;
-            }
-            else
-            {
-               /* existing entry, update */
-               HYPRE_Int p = marker_diag[col];
-
-               hypre_assert(C_diag_j[p] == col);
-
-               C_diag_a[p] += beta * val;
-            }
-         }
-
-         C_diag_i[ii+1] = nnz_diag_C;
-      }
-      C_diag_i[num_rows_diag_A] = nnz_diag_C;
-
-      /* Correct C_diag_i */
       for (i = 0; i < num_rownnz_diag_C - 1; i++)
       {
          for (ii = rownnz_diag_C[i] + 1; ii < rownnz_diag_C[i+1]; ii++)
@@ -5558,116 +5266,63 @@ hypre_ParcsrAdd( HYPRE_Complex        alpha,
    }
 
    /* Set offd_C */
-   if (rownnz_offd_C == NULL)
+   for (i = 0; i < num_rownnz_offd_C; i++)
    {
-      for (i = 0; i < num_rownnz_offd_C; i++)
+      ii = rownnz_offd_C ? rownnz_offd_C[i] : i;
+
+      HYPRE_Int offd_i_start = nnz_offd_C;
+      for (j = A_offd_i[ii]; j < A_offd_i[ii+1]; j++)
       {
-         HYPRE_Int offd_i_start = nnz_offd_C;
-         for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
+         HYPRE_Int     colA = A_offd_j[j];
+         HYPRE_Int     colC = A2C_offd[colA];
+         HYPRE_Complex val  = A_offd_a[j];
+         if (marker_offd[colC] < offd_i_start)
          {
-            HYPRE_Int     colA = A_offd_j[j];
-            HYPRE_Int     colC = A2C_offd[colA];
-            HYPRE_Complex val  = A_offd_a[j];
-            if (marker_offd[colC] < offd_i_start)
-            {
-               /* this col has not been seen before, create new entry */
-               marker_offd[colC] = nnz_offd_C;
-               C_offd_j[nnz_offd_C] = colC;
-               C_offd_a[nnz_offd_C] = alpha * val;
-               nnz_offd_C++;
-            }
-            else
-            {
-               /* this should not happen */
-               hypre_printf("hypre warning: invalid ParCSR matrix %s %s %d\n",
-                            __FILE__, __func__, __LINE__);
-            }
+            /* this col has not been seen before, create new entry */
+            marker_offd[colC] = nnz_offd_C;
+            C_offd_j[nnz_offd_C] = colC;
+            C_offd_a[nnz_offd_C] = alpha * val;
+            nnz_offd_C++;
          }
-
-         for (j = B_offd_i[i]; j < B_offd_i[i+1]; j++)
+         else
          {
-            HYPRE_Int     colB = B_offd_j[j];
-            HYPRE_Int     colC = B2C_offd[colB];
-            HYPRE_Complex val  = B_offd_a[j];
-            if (marker_offd[colC] < offd_i_start)
-            {
-               /* this col has not been seen before, create new entry */
-               marker_offd[colC] = nnz_offd_C;
-               C_offd_j[nnz_offd_C] = colC;
-               C_offd_a[nnz_offd_C] = beta * val;
-               nnz_offd_C++;
-            }
-            else
-            {
-               /* existing entry, update */
-               HYPRE_Int p = marker_offd[colC];
-
-               hypre_assert(C_offd_j[p] == colC);
-
-               C_offd_a[p] += beta * val;
-            }
+            /* this should not happen */
+            hypre_printf("hypre warning: invalid ParCSR matrix %s %s %d\n",
+                          __FILE__, __func__, __LINE__);
          }
-
-         C_offd_i[i+1] = nnz_offd_C;
       }
+
+      for (j = B_offd_i[ii]; j < B_offd_i[ii+1]; j++)
+      {
+         HYPRE_Int     colB = B_offd_j[j];
+         HYPRE_Int     colC = B2C_offd[colB];
+         HYPRE_Complex val  = B_offd_a[j];
+         if (marker_offd[colC] < offd_i_start)
+         {
+            /* this col has not been seen before, create new entry */
+            marker_offd[colC] = nnz_offd_C;
+            C_offd_j[nnz_offd_C] = colC;
+            C_offd_a[nnz_offd_C] = beta * val;
+            nnz_offd_C++;
+         }
+         else
+         {
+            /* existing entry, update */
+            HYPRE_Int p = marker_offd[colC];
+
+            hypre_assert(C_offd_j[p] == colC);
+
+            C_offd_a[p] += beta * val;
+         }
+      }
+
+      C_offd_i[ii+1] = nnz_offd_C;
    }
-   else
+   C_offd_i[num_rows_diag_A] = nnz_offd_C;
+
+   /* Correct C_offd_i */
+   if (rownnz_offd_C)
    {
-      for (i = 0; i < num_rownnz_offd_C; i++)
-      {
-         ii = rownnz_offd_C[i];
-
-         HYPRE_Int offd_i_start = nnz_offd_C;
-         for (j = A_offd_i[ii]; j < A_offd_i[ii+1]; j++)
-         {
-            HYPRE_Int     colA = A_offd_j[j];
-            HYPRE_Int     colC = A2C_offd[colA];
-            HYPRE_Complex val  = A_offd_a[j];
-            if (marker_offd[colC] < offd_i_start)
-            {
-               /* this col has not been seen before, create new entry */
-               marker_offd[colC] = nnz_offd_C;
-               C_offd_j[nnz_offd_C] = colC;
-               C_offd_a[nnz_offd_C] = alpha * val;
-               nnz_offd_C++;
-            }
-            else
-            {
-               /* this should not happen */
-               hypre_printf("hypre warning: invalid ParCSR matrix %s %s %d\n",
-                             __FILE__, __func__, __LINE__);
-            }
-         }
-
-         for (j = B_offd_i[ii]; j < B_offd_i[ii+1]; j++)
-         {
-            HYPRE_Int     colB = B_offd_j[j];
-            HYPRE_Int     colC = B2C_offd[colB];
-            HYPRE_Complex val  = B_offd_a[j];
-            if (marker_offd[colC] < offd_i_start)
-            {
-               /* this col has not been seen before, create new entry */
-               marker_offd[colC] = nnz_offd_C;
-               C_offd_j[nnz_offd_C] = colC;
-               C_offd_a[nnz_offd_C] = beta * val;
-               nnz_offd_C++;
-            }
-            else
-            {
-               /* existing entry, update */
-               HYPRE_Int p = marker_offd[colC];
-
-               hypre_assert(C_offd_j[p] == colC);
-
-               C_offd_a[p] += beta * val;
-            }
-         }
-
-         C_offd_i[ii+1] = nnz_offd_C;
-      }
-      C_offd_i[num_rows_diag_A] = nnz_offd_C;
-
-      /* Correct C_offd_i */
       for (i = 0; i < num_rownnz_offd_C - 1; i++)
       {
          for (ii = rownnz_offd_C[i] + 1; ii < rownnz_offd_C[i+1]; ii++)

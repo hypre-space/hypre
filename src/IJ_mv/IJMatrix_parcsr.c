@@ -2576,51 +2576,24 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
             }
 
             i_diag = i_offd = 0;
-            if (rownnz != NULL)
+            for (i = ns; i < ne; i++)
             {
-               for (i = ns; i < ne; i++)
+               ii = rownnz ? rownnz[i] : i;
+               local_j = aux_j[ii];
+               local_data = aux_data[ii];
+               diag_pos[i] = -1;
+               for (j = 0; j < row_length[ii]; j++)
                {
-                  ii = rownnz[i];
-                  local_j = aux_j[ii];
-                  local_data = aux_data[ii];
-                  diag_pos[i] = -1;
-                  for (j = 0; j < row_length[ii]; j++)
+                  if (local_j[j] < col_0 || local_j[j] > col_n)
                   {
-                     if (local_j[j] < col_0 || local_j[j] > col_n)
-                     {
-                        i_offd++;
-                     }
-                     else
-                     {
-                        i_diag++;
-                        if ((HYPRE_Int)(local_j[j] - col_0) == i)
-                        {
-                           diag_pos[i] = j;
-                        }
-                     }
+                     i_offd++;
                   }
-               }
-            }
-            else
-            {
-               for (i = ns; i < ne; i++)
-               {
-                  local_j = aux_j[i];
-                  local_data = aux_data[i];
-                  diag_pos[i] = -1;
-                  for (j = 0; j < row_length[i]; j++)
+                  else
                   {
-                     if (local_j[j] < col_0 || local_j[j] > col_n)
+                     i_diag++;
+                     if ((HYPRE_Int)(local_j[j] - col_0) == i)
                      {
-                        i_offd++;
-                     }
-                     else
-                     {
-                        i_diag++;
-                        if ((HYPRE_Int)(local_j[j] - col_0) == i)
-                        {
-                           diag_pos[i] = j;
-                        }
+                        diag_pos[i] = j;
                      }
                   }
                }
@@ -2669,60 +2642,30 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
                i_diag = 0;
                i_offd = 0;
             }
-            if (rownnz != NULL)
+
+            for (i = ns; i < ne; i++)
             {
-               for (i = ns; i < ne; i++)
+               ii = rownnz ? rownnz[i] : i;
+               diag_i[ii] = i_diag;
+               offd_i[ii] = i_offd;
+               local_j = aux_j[ii];
+               local_data = aux_data[ii];
+               if (diag_pos[i] > -1)
                {
-                  ii = rownnz[i];
-                  diag_i[ii] = i_diag;
-                  offd_i[ii] = i_offd;
-                  local_j = aux_j[ii];
-                  local_data = aux_data[ii];
-                  if (diag_pos[i] > -1)
-                  {
-		     diag_j[i_diag] = (HYPRE_Int)(local_j[diag_pos[i]] - col_0);
-                     diag_data[i_diag++] = local_data[diag_pos[i]];
-                  }
-                  for (j = 0; j < row_length[ii]; j++)
-                  {
-                     if (local_j[j] < col_0 || local_j[j] > col_n)
-                     {
-                        big_offd_j[i_offd] = local_j[j];
-                        offd_data[i_offd++] = local_data[j];
-                     }
-                     else if (j != diag_pos[i])
-                     {
-                        diag_j[i_diag] = local_j[j] - col_0;
-                        diag_data[i_diag++] = local_data[j];
-                     }
-                  }
+	          diag_j[i_diag] = (HYPRE_Int)(local_j[diag_pos[i]] - col_0);
+                  diag_data[i_diag++] = local_data[diag_pos[i]];
                }
-            }
-            else
-            {
-               for (i = ns; i < ne; i++)
+               for (j = 0; j < row_length[ii]; j++)
                {
-                  diag_i[i] = i_diag;
-                  offd_i[i] = i_offd;
-                  local_j = aux_j[i];
-                  local_data = aux_data[i];
-                  if (diag_pos[i] > -1)
+                  if (local_j[j] < col_0 || local_j[j] > col_n)
                   {
-                     diag_j[i_diag] = (HYPRE_Int)(local_j[diag_pos[i]] - col_0);
-                     diag_data[i_diag++] = local_data[diag_pos[i]];
+                     big_offd_j[i_offd] = local_j[j];
+                     offd_data[i_offd++] = local_data[j];
                   }
-                  for (j = 0; j < row_length[i]; j++)
+                  else if (j != diag_pos[i])
                   {
-                     if (local_j[j] < col_0 || local_j[j] > col_n)
-                     {
-                        big_offd_j[i_offd] = local_j[j];
-                        offd_data[i_offd++] = local_data[j];
-                     }
-                     else if (j != diag_pos[i])
-                     {
-                        diag_j[i_diag] = (HYPRE_Int)(local_j[j] - col_0);
-                        diag_data[i_diag++] = local_data[j];
-                     }
+                     diag_j[i_diag] = local_j[j] - col_0;
+                     diag_data[i_diag++] = local_data[j];
                   }
                }
             }
