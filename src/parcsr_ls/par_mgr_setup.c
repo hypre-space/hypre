@@ -111,7 +111,8 @@ hypre_MGRSetup( void               *mgr_vdata,
 
   HYPRE_Int use_air = 0;
   HYPRE_Int truncate_cg_threshold = (mgr_data -> truncate_coarse_grid_threshold);
-//  HYPRE_Real wall_time;
+  HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+  HYPRE_Real wall_time;
 
   /* ----- begin -----*/
   HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -764,19 +765,19 @@ hypre_MGRSetup( void               *mgr_vdata,
     /* Interpolation operator */
     num_interp_sweeps = (mgr_data -> num_interp_sweeps);
 
+    wall_time = time_getWallclockSeconds();
     if (interp_type[lev] == 99)
     {
-      //wall_time = time_getWallclockSeconds();
       hypre_MGRBuildInterp(A_array[lev], CF_marker_array[lev], A_ff_inv, coarse_pnts_global, 1, dof_func_buff,
                           debug_flag, trunc_factor, max_elmts, col_offd_S_to_A, &P, interp_type[lev], num_interp_sweeps);
-      //wall_time = time_getWallclockSeconds() - wall_time;
-      //hypre_printf("Proc = %d     BuildInterp: %f\n", my_id, wall_time);
     }
     else
     {
       hypre_MGRBuildInterp(A_array[lev], CF_marker_array[lev], S, coarse_pnts_global, 1, dof_func_buff,
                           debug_flag, trunc_factor, max_elmts, col_offd_S_to_A, &P, interp_type[lev], num_interp_sweeps);
     }
+    wall_time = time_getWallclockSeconds() - wall_time;
+    hypre_printf("Lev = %d, interp type = %d, proc = %d     BuildInterp: %f\n", lev, interp_type[lev], my_id, wall_time);
 
     P_array[lev] = P;
 
@@ -849,12 +850,16 @@ hypre_MGRSetup( void               *mgr_vdata,
     }
     else
     {
-      hypre_MGRBuildRestrict(A_array[lev], CF_marker_array[lev], coarse_pnts_global, 1, dof_func_buff,
+      wall_time = time_getWallclockSeconds();
+hypre_MGRBuildRestrict(A_array[lev], CF_marker_array[lev], coarse_pnts_global, 1, dof_func_buff,
             debug_flag, trunc_factor, max_elmts, S_commpkg_switch, strong_threshold, max_row_sum, &RT,
             restrict_type[lev], num_restrict_sweeps);
+      wall_time = time_getWallclockSeconds() - wall_time;
+      hypre_printf("Lev = %d, restrict type = %d, proc = %d     BuildRestrict: %f\n", lev, restrict_type[lev], my_id, wall_time);
 
       RT_array[lev] = RT;
 
+      wall_time = time_getWallclockSeconds();
       /* Compute RAP for next level */
       if (use_non_galerkin_cg[lev] != 0)
       {
@@ -867,15 +872,32 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
       else
       {
-        hypre_BoomerAMGBuildCoarseOperator(RT, A_array[lev], P, &RAP_ptr);
+      wall_time = time_getWallclockSeconds();
+        //hypre_BoomerAMGBuildCoarseOperator(RT, A_array[lev], P, &RAP_ptr);
+        RAP_ptr = hypre_ParCSRMatrixRAPKT(RT, A_array[lev], P, 0);
+        //hypre_ParCSRMatrixPrintIJ(RAP_ptr, 0, 0, "RAP");
       }
+      wall_time = time_getWallclockSeconds() - wall_time;
+      hypre_printf("Lev = %d, proc = %d     BuildCoarseGrid: %f\n", lev, my_id, wall_time);
     }
 
     // truncate the coarse grid
-    hypre_ParCSRMatrixTruncate(RAP_ptr, truncate_cg_threshold, 0, 0, 0);
+    if (exec == HYPRE_EXEC_HOST)
+    {
+      hypre_ParCSRMatrixTruncate(RAP_ptr, truncate_cg_threshold, 0, 0, 0);
+    }
+#if defined(HYPRE_USING_CUDA)
+    else
+    {
+      // TODO: add option for using abs value in drop small entries
+      //hypre_ParCSRMatrixDropSmallEntriesDevice(RAP_ptr, 1e-14, 0, 0);
+    }
+#endif
+    //hypre_ParCSRMatrixPrintIJ(RAP_ptr, 0, 0, "RAP_truncated");
 
     if (Frelax_method[lev] == 2) // full AMG
     {
+      wall_time = time_getWallclockSeconds();
       // user provided AMG solver
       // only support AMG at the first level
       // TODO: input check to avoid crashing
@@ -909,8 +931,16 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
       else // construct default AMG solver
       {
-        hypre_MGRBuildAff(A_array[lev], CF_marker_array[lev], debug_flag, &A_ff_ptr);
-
+        if (exec == HYPRE_EXEC_HOST)
+        {
+          hypre_MGRBuildAff(A_array[lev], CF_marker_array[lev], debug_flag, &A_ff_ptr);
+        }
+#if defined(HYPRE_USING_CUDA)
+        else
+        {
+          hypre_MGRBuildAffDevice(A_array[lev], CF_marker_array[lev], coarse_pnts_global, &A_ff_ptr);
+        }
+#endif
         F_fine_array[lev+1] =
         hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
                        hypre_ParCSRMatrixGlobalNumRows(A_ff_ptr),
@@ -929,8 +959,10 @@ hypre_MGRSetup( void               *mgr_vdata,
         aff_solver[lev] = (HYPRE_Solver*) hypre_BoomerAMGCreate();
         hypre_BoomerAMGSetMaxIter(aff_solver[lev], 1);
         hypre_BoomerAMGSetTol(aff_solver[lev], 0.0);
-        hypre_BoomerAMGSetRelaxOrder(aff_solver[lev], 1);
+        //hypre_BoomerAMGSetRelaxOrder(aff_solver[lev], 1);
         //hypre_BoomerAMGSetAggNumLevels(aff_solver[lev], 1);
+        hypre_BoomerAMGSetRelaxType(aff_solver[lev], 18);
+        hypre_BoomerAMGSetCoarsenType(aff_solver[lev], 8);
         hypre_BoomerAMGSetNumSweeps(aff_solver[lev], 3);
         hypre_BoomerAMGSetPrintLevel(aff_solver[lev], print_level);
         hypre_BoomerAMGSetNumFunctions(aff_solver[lev], 1);
@@ -940,7 +972,8 @@ hypre_MGRSetup( void               *mgr_vdata,
         (mgr_data -> use_default_fsolver) = 1;
         use_default_fsolver = (mgr_data -> use_default_fsolver);
       }
-
+      wall_time = time_getWallclockSeconds() - wall_time;
+      hypre_printf("Lev = %d, proc = %d     SetupAFF: %f\n", lev, my_id, wall_time);
     }
 
     /* Update coarse level indexes for next levels */
@@ -1090,11 +1123,11 @@ hypre_MGRSetup( void               *mgr_vdata,
   }
 
   /* setup coarse grid solver */
-  //wall_time = time_getWallclockSeconds();
+  wall_time = time_getWallclockSeconds();
   coarse_grid_solver_setup((mgr_data -> coarse_grid_solver), RAP_ptr, F_array[num_c_levels], U_array[num_c_levels]);
   //hypre_ParCSRMatrixPrintIJ(RAP_ptr,1,1,"RAP");
-  //wall_time = time_getWallclockSeconds() - wall_time;
-  //hypre_printf("Proc = %d   Coarse grid setup: %f\n", my_id, wall_time);
+  wall_time = time_getWallclockSeconds() - wall_time;
+  hypre_printf("Proc = %d   Coarse grid setup: %f\n", my_id, wall_time);
 
   /* Setup smoother for fine grid */
    if ( relax_type == 8 || relax_type == 13 || relax_type == 14 || relax_type == 18 )

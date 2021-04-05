@@ -77,7 +77,6 @@ main( hypre_int argc,
   HYPRE_Int    keepTranspose = 0;
 #endif
   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
-  //HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_HOST;
 
   /* CUB Allocator */
   hypre_uint mempool_bin_growth   = 8,
@@ -104,7 +103,7 @@ main( hypre_int argc,
   HYPRE_Int           time_index;
   MPI_Comm            comm = hypre_MPI_COMM_WORLD;
 
-  HYPRE_Real          *values = NULL;
+  HYPRE_Real          *values_d = NULL, *values_h = NULL;
 
   HYPRE_BigInt first_local_row, last_local_row, local_num_rows;
   HYPRE_BigInt first_local_col, last_local_col, local_num_cols;
@@ -133,7 +132,7 @@ main( hypre_int argc,
   HYPRE_Int     **mgr_cindexes = NULL;
   HYPRE_BigInt  *mgr_reserved_coarse_indexes = NULL;
 
-  HYPRE_Int mgr_relax_type = 0;
+  HYPRE_Int mgr_relax_type = 18;
   HYPRE_Int mgr_num_relax_sweeps = 1;
 
   HYPRE_Int mgr_gsmooth_type = 0;
@@ -152,7 +151,7 @@ main( hypre_int argc,
   //mgr_level_interp_type[1] = 2;
 
   HYPRE_Int *mgr_coarse_grid_method = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
-  mgr_coarse_grid_method[0] = 1;
+  mgr_coarse_grid_method[0] = 0;
   //mgr_coarse_grid_method[1] = 0;
 
   mgr_cindexes = hypre_CTAlloc(HYPRE_Int*, mgr_nlevels, HYPRE_MEMORY_HOST);
@@ -360,19 +359,6 @@ main( hypre_int argc,
     ierr = HYPRE_IJVectorGetObject( ij_b, &object );
     b = (HYPRE_ParVector) object;
 
-    /* Initial guess */
-    HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
-    HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
-    HYPRE_IJVectorInitialize(ij_x);
-
-    values = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_HOST);
-    for (i = 0; i < local_num_cols; i++)
-      values[i] = 0.;
-    HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
-    hypre_TFree(values, HYPRE_MEMORY_HOST);
-
-    ierr = HYPRE_IJVectorGetObject( ij_x, &object );
-    x = (HYPRE_ParVector) object;
   }
   else if ( build_rhs_type == 2 )
   {
@@ -382,35 +368,42 @@ main( hypre_int argc,
       hypre_printf("  Initial guess is 0\n");
     }    
 
+    HYPRE_Real *values_h = hypre_CTAlloc(HYPRE_Real, local_num_rows, HYPRE_MEMORY_HOST);
+    HYPRE_Real *values_d = hypre_CTAlloc(HYPRE_Real, local_num_rows, memory_location);
+    for (i = 0; i < local_num_rows; i++)
+    {
+       values_h[i] = 1.0;
+    }
+    hypre_TMemcpy(values_d, values_h, HYPRE_Real, local_num_rows, memory_location, HYPRE_MEMORY_HOST);
+
     /* RHS */
     HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_row, last_local_row, &ij_b);
     HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
-    HYPRE_IJVectorInitialize(ij_b);
+    HYPRE_IJVectorInitialize_v2(ij_b, memory_location);
 
-    values = hypre_CTAlloc(HYPRE_Real,  local_num_rows, HYPRE_MEMORY_HOST);
-    for (i = 0; i < local_num_rows; i++) 
-      values[i] = 1.0; 
-    HYPRE_IJVectorSetValues(ij_b, local_num_rows, NULL, values);
-    hypre_TFree(values, HYPRE_MEMORY_HOST);
+    HYPRE_IJVectorSetValues(ij_b, local_num_rows, NULL, values_d);
+    hypre_TFree(values_d, memory_location);
+    hypre_TFree(values_h, HYPRE_MEMORY_HOST);
 
     ierr = HYPRE_IJVectorGetObject( ij_b, &object );
     b = (HYPRE_ParVector) object;
-
-    /* Initial guess */
-    HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
-    HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
-    HYPRE_IJVectorInitialize(ij_x);
-
-    values = hypre_CTAlloc(HYPRE_Real,  local_num_cols, HYPRE_MEMORY_HOST);
-    for (i = 0; i < local_num_cols; i++) 
-      values[i] = 0.;
-    HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
-    hypre_TFree(values, HYPRE_MEMORY_HOST);
-
-    ierr = HYPRE_IJVectorGetObject( ij_x, &object );
-    x = (HYPRE_ParVector) object;
   }
 
+  /* Initial guess */
+  values_h = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_HOST);
+  values_d = hypre_CTAlloc(HYPRE_Real, local_num_cols, memory_location);
+  hypre_Memset(values_h, 0, local_num_rows*sizeof(HYPRE_Real), HYPRE_MEMORY_HOST);
+  hypre_TMemcpy(values_d, values_h, HYPRE_Real, local_num_rows, memory_location, HYPRE_MEMORY_HOST);
+
+  HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
+  HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
+  HYPRE_IJVectorInitialize_v2(ij_x, memory_location);
+  HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values_d);
+  HYPRE_IJVectorAssemble(ij_x);
+  ierr = HYPRE_IJVectorGetObject( ij_x, &object );
+  x = (HYPRE_ParVector) object;
+  hypre_TFree(values_d, memory_location);
+  hypre_TFree(values_h, HYPRE_MEMORY_HOST);
 
   if (indexList != NULL) 
   {
@@ -528,28 +521,6 @@ main( hypre_int argc,
 
     HYPRE_MGRCreate(&pcg_precond);
 
-    /*
-    mgr_num_cindexes = hypre_CTAlloc(HYPRE_Int,  mgr_nlevels, HYPRE_MEMORY_HOST);
-    for(i=0; i<mgr_nlevels; i++)
-    { // assume 1 coarse index per level
-      mgr_num_cindexes[i] = 1;
-    }
-    mgr_cindexes = hypre_CTAlloc(HYPRE_Int*,  mgr_nlevels, HYPRE_MEMORY_HOST);
-    for(i=0; i<mgr_nlevels; i++)
-    {
-      mgr_cindexes[i] = hypre_CTAlloc(HYPRE_Int,  mgr_num_cindexes[i], HYPRE_MEMORY_HOST);
-    }
-    for(i=0; i<mgr_nlevels; i++)
-    { // assume coarse point is at index 0 
-      mgr_cindexes[i][0] = 0;
-    }
-    */
-    mgr_reserved_coarse_indexes = hypre_CTAlloc(HYPRE_BigInt,  mgr_num_reserved_nodes, HYPRE_MEMORY_HOST);
-    for(i=0; i<mgr_num_reserved_nodes; i++)
-    { /* generate artificial reserved nodes */
-      mgr_reserved_coarse_indexes[i] = last_local_row - (HYPRE_BigInt) i; //2*i+1;
-    }
-
     /* set MGR data by block */
     if (use_point_marker_array)
     {
@@ -582,58 +553,19 @@ main( hypre_int argc,
 
     HYPRE_MGRSetGlobalsmoothType(pcg_precond, mgr_gsmooth_type);
     HYPRE_MGRSetMaxGlobalsmoothIters( pcg_precond, mgr_num_gsmooth_sweeps );
-
-    /* create AMG coarse grid solver */
-
-    /*
-    HYPRE_Int cgcits = 1;
-    HYPRE_Int post_interp_type = 0;
-    HYPRE_Int cycle_type = 1;
-    HYPRE_Int fcycle = 0;
-    HYPRE_Int num_sweeps = 1;
-    HYPRE_Int relax_down = -1;
-    HYPRE_Int relax_up = -1;
-    HYPRE_Int relax_coarse = -1;
-    HYPRE_Int max_levels = 25;
-    HYPRE_Int smooth_type = 6;
-    HYPRE_Int smooth_num_sweeps = 0;
-
-    HYPRE_BoomerAMGCreate(&amg_solver);
-    // BM Aug 25, 2006
-    HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
-    HYPRE_BoomerAMGSetInterpType(amg_solver, 0);
-    HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
-    HYPRE_BoomerAMGSetCoarsenType(amg_solver, 6);
-    HYPRE_BoomerAMGSetPMaxElmts(amg_solver, 0);
-    // note: log is written to standard output, not to file
-    HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
-    HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
-    HYPRE_BoomerAMGSetFCycle(amg_solver, fcycle);
-    HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
-    HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
-    if (relax_down > -1)
-      HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_down, 1);
-    if (relax_up > -1)
-      HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_up, 2);
-    if (relax_coarse > -1)
-      HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_coarse, 3);
-    HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
-    HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
-    HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
-    HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
-    HYPRE_BoomerAMGSetMaxIter(amg_solver, 1);
-    HYPRE_BoomerAMGSetTol(amg_solver, 0.0);
-    */
+    //hypre_MGRPrintCoarseSystem( pcg_precond, 1 );
 
     HYPRE_BoomerAMGCreate(&amg_solver);
     HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
     //HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
-    //HYPRE_BoomerAMGSetCoarsenType(amg_solver, 8);
+    HYPRE_BoomerAMGSetCoarsenType(amg_solver, 8);
+    //HYPRE_BoomerAMGSetInterpType(amg_solver, 6);
     HYPRE_BoomerAMGSetNumFunctions(amg_solver, 1);
     HYPRE_BoomerAMGSetRelaxType(amg_solver, 18);
-    HYPRE_BoomerAMGSetNumSweeps(amg_solver, 3);
+    HYPRE_BoomerAMGSetNumSweeps(amg_solver, 2);
     HYPRE_BoomerAMGSetMaxIter(amg_solver, 1);
     HYPRE_BoomerAMGSetTol(amg_solver, 0.0);
+    HYPRE_BoomerAMGSetMaxRowSum(amg_solver, 1.0);
 
     /* set the MGR coarse solver. Comment out to use default CG solver in MGR */
     HYPRE_MGRSetCoarseSolver( pcg_precond, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, amg_solver);
@@ -677,6 +609,7 @@ main( hypre_int argc,
     cudaDeviceSynchronize();
 #endif
 
+    /*
     time_index = hypre_InitializeTiming("FlexGMRES Solve");
     hypre_BeginTiming(time_index);
 
@@ -699,6 +632,7 @@ main( hypre_int argc,
     }
 HYPRE_FlexGMRESGetNumIterations(pcg_solver, &num_iterations);
     HYPRE_FlexGMRESGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+    */
 
     // free memory for flex FlexGMRES
     if (pcg_solver) HYPRE_ParCSRFlexGMRESDestroy(pcg_solver);
@@ -809,7 +743,7 @@ HYPRE_FlexGMRESGetNumIterations(pcg_solver, &num_iterations);
     cudaDeviceSynchronize();
 #endif
 
-    hypre_Memcpy(diag_host, diag_device, local_num_rows * sizeof(HYPRE_Real), HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+    hypre_TMemcpy(diag_host, diag_device, HYPRE_Real, local_num_rows, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
     cudaDeviceSynchronize();

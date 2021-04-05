@@ -960,6 +960,14 @@ hypreCUDAKernel_CSRExtractDiag( HYPRE_Int      nrows,
          {
             d[row] = 1.0 / aa[j];
          }
+         else if (type == 3)
+         {
+            d[row] = -aa[j];
+         }
+         else if (type == 4)
+         {
+            d[row] = -1.0 / aa[j];
+         }
       }
 
       if ( __any_sync(HYPRE_WARP_FULL_MASK, find_diag) )
@@ -1094,10 +1102,13 @@ hypre_CSRMatrix *
 hypre_CSRMatrixDiagMatrixFromMatrixDevice(hypre_CSRMatrix *A, HYPRE_Int type)
 {
   HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
-  HYPRE_Complex  *data   = hypre_CTAlloc(HYPRE_Complex, nrows, HYPRE_MEMORY_DEVICE);
-  hypre_CSRMatrixExtractDiagonalDevice(A, data, type);
+  HYPRE_Complex  *diag = hypre_CTAlloc(HYPRE_Complex, nrows, HYPRE_MEMORY_DEVICE);
+  hypre_CSRMatrixExtractDiagonalDevice(A, diag, type);
 
-  return hypre_CSRMatrixDiagMatrixFromVectorDevice(nrows, data);
+  hypre_CSRMatrix *diag_mat = hypre_CSRMatrixDiagMatrixFromVectorDevice(nrows, diag);
+
+  hypre_TFree(diag, HYPRE_MEMORY_DEVICE);
+  return diag_mat;
 }
 
 /* abs    == 1, use absolute values

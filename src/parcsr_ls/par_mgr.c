@@ -110,7 +110,7 @@ hypre_MGRCreate()
 
   (mgr_data -> use_non_galerkin_cg) = NULL;
 
-  (mgr_data -> print_coarse_system) = 0;
+  (mgr_data -> print_coarse_system) = 1;
 
   (mgr_data -> set_c_points_method) = 0;
   (mgr_data -> lvl_to_keep_cpoints) = 0;
@@ -3152,11 +3152,13 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
     if (exec == HYPRE_EXEC_HOST)
     {
       hypre_MGRBuildP( A,CF_marker,num_cpts_global,interp_type,debug_flag,&P_ptr);
+      //hypre_ParCSRMatrixPrintIJ(P_ptr, 0, 0, "P_host");
     }
 #if defined(HYPRE_USING_CUDA)
     else
     {
       hypre_MGRBuildPDevice(A, CF_marker, num_cpts_global, interp_type, &P_ptr);
+      //hypre_ParCSRMatrixPrintIJ(P_ptr, 0, 0, "P_device");
     }
 #endif
     /* Could do a few sweeps of Jacobi to further improve P */
@@ -3222,6 +3224,7 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
   HYPRE_Int             *col_offd_ST_to_AT = NULL;
   //   HYPRE_Real       jac_trunc_threshold = trunc_factor;
   //   HYPRE_Real       jac_trunc_threshold_minus = 0.5*jac_trunc_threshold;
+  HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
   /* Build AT (transpose A) */
   if (restrict_type > 0)
@@ -3240,11 +3243,33 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
   /* Interpolation for each level */
   if (restrict_type == 0)
   {
-    hypre_MGRBuildP(A, CF_marker, num_cpts_global, restrict_type, debug_flag, &R_ptr);
+    if (exec == HYPRE_EXEC_HOST)
+    {
+      hypre_MGRBuildP(A, CF_marker, num_cpts_global, restrict_type, debug_flag, &R_ptr);
+      //hypre_ParCSRMatrixPrintIJ(R_ptr, 0, 0, "R_host");
+    }
+#if defined(HYPRE_USING_CUDA)
+      else
+      {
+        hypre_MGRBuildPDevice(A, CF_marker, num_cpts_global, restrict_type, &R_ptr);
+        //hypre_ParCSRMatrixPrintIJ(R_ptr, 0, 0, "R_device");
+      }
+#endif
   }
   else if (restrict_type == 1 || restrict_type == 2)
   {
-    hypre_MGRBuildP(AT, CF_marker, num_cpts_global, restrict_type, debug_flag, &R_ptr);
+    if (exec == HYPRE_EXEC_HOST)
+    {
+      hypre_MGRBuildP(AT, CF_marker, num_cpts_global, restrict_type, debug_flag, &R_ptr);
+      //hypre_ParCSRMatrixPrintIJ(R_ptr, 0, 0, "R_host");
+    }
+#if defined(HYPRE_USING_CUDA)
+      else
+      {
+        hypre_MGRBuildPDevice(AT, CF_marker, num_cpts_global, restrict_type, &R_ptr);
+        //hypre_ParCSRMatrixPrintIJ(R_ptr, 0, 0, "R_device");
+      }
+#endif
     /* Could do a few sweeps of Jacobi to further improve P */
     //for(i=0; i<numsweeps; i++)
       //    hypre_BoomerAMGJacobiInterp(A, &R_ptr, S,1, NULL, CF_marker, 0, jac_trunc_threshold, jac_trunc_threshold_minus );
@@ -5119,6 +5144,17 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
   return(0);
 }
 
+#if defined(HYPRE_USING_CUDA)
+HYPRE_Int
+hypre_MGRBuildAffDevice( hypre_ParCSRMatrix *A,
+                    HYPRE_Int *CF_marker_host,
+                    HYPRE_BigInt *num_cpts_global,
+                    hypre_ParCSRMatrix **A_ff_ptr)
+{
+  hypre_ParCSRMatrixGenerateFFFCDevice(A, CF_marker_host, num_cpts_global, NULL, NULL, A_ff_ptr);
+  return hypre_error_flag;
+}
+#endif
 
 /* Build A_FF matrix from A given a CF_marker array */
 HYPRE_Int

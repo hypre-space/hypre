@@ -40,17 +40,38 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix *A,
   HYPRE_Complex      *rsFC, *rsWA, *rsW;
   HYPRE_Int          *P_diag_i, *P_diag_j, *P_offd_i;
   HYPRE_Complex      *P_diag_data;
-
+  HYPRE_Complex      *diag;
 
   CF_marker_dev = hypre_TAlloc(HYPRE_Int, A_nr_of_rows, HYPRE_MEMORY_DEVICE);
   hypre_TMemcpy(CF_marker_dev, CF_marker_host, HYPRE_Int, A_nr_of_rows,
                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
   hypre_ParCSRMatrixGenerateFFFCDevice(A, CF_marker_host, num_cpts_global, NULL, &A_FC, &A_FF);
-  D_FF_inv = hypre_CSRMatrixDiagMatrixFromMatrixDevice(hypre_ParCSRMatrixDiag(A_FF), 2);
+  HYPRE_Int local_nrows_wp = hypre_ParCSRMatrixNumRows(A_FF);
+  diag = hypre_CTAlloc(HYPRE_Complex, local_nrows_wp, HYPRE_MEMORY_DEVICE);
+  if (method == 1)
+  {
+    hypre_CSRMatrixExtractDiagonalDevice(hypre_ParCSRMatrixDiag(A_FF), diag, 3);
+  }
+  else if (method == 2)
+  {
+    hypre_CSRMatrixExtractDiagonalDevice(hypre_ParCSRMatrixDiag(A_FF), diag, 4);
+  }
+
+  // Doing extraneous work
+  // TODO: no need to compute W for injection, i.e. W = 0
+  D_FF_inv = hypre_CSRMatrixDiagMatrixFromVectorDevice(local_nrows_wp, diag);
+  hypre_TFree(diag, HYPRE_MEMORY_DEVICE);
+
   W_diag = hypre_CSRMatrixMultiplyDevice(D_FF_inv, hypre_ParCSRMatrixDiag(A_FC));
   W_offd = hypre_CSRMatrixMultiplyDevice(D_FF_inv, hypre_ParCSRMatrixOffd(A_FC));
   W_nr_of_rows = hypre_CSRMatrixNumRows(W_diag);
+
+  if (method == 0)
+  {
+    hypre_CSRMatrixDropSmallEntriesDevice(W_diag, 1e-14, 0, 0);
+    hypre_CSRMatrixDropSmallEntriesDevice(W_offd, 1e-14, 0, 0);
+  }
 
   /* Construct P from matrix product W_diag */
   P_diag_nnz = hypre_CSRMatrixNumNonzeros(W_diag) + hypre_ParCSRMatrixNumCols(A_FC);
@@ -111,6 +132,8 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix *A,
   hypre_ParCSRMatrixNumNonzeros(P)  = hypre_ParCSRMatrixNumNonzeros(A_FC) +
                                      hypre_ParCSRMatrixGlobalNumCols(A_FC);
   hypre_ParCSRMatrixDNumNonzeros(P) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(P);
+
+  hypre_MatvecCommPkgCreate(P);
 
   *P_ptr = P;
 
