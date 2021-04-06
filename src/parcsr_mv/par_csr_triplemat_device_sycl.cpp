@@ -151,7 +151,7 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
       HYPRE_ONEDPL_CALL( transform,
                          C_offd_j,
                          C_offd_j + nnz_C_offd,
-                         thrust::make_constant_iterator(hypre_ParCSRMatrixNumCols(B)),
+                         dpct::make_constant_iterator(hypre_ParCSRMatrixNumCols(B)),
                          C_offd_j,
                          std::minus<HYPRE_Int>() );
 
@@ -268,7 +268,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       HYPRE_ONEDPL_CALL( transform,
                          hypre_CSRMatrixI(Cint),
                          hypre_CSRMatrixI(Cint) + hypre_CSRMatrixNumRows(Cint) + 1,
-                         thrust::make_constant_iterator(local_nnz_Cbar),
+                         dpct::make_constant_iterator(local_nnz_Cbar),
                          hypre_CSRMatrixI(Cint),
                          std::minus<HYPRE_Int>() );
 
@@ -357,7 +357,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       HYPRE_ONEDPL_CALL( transform,
                          tmp_j + local_nnz_Cbar + Cext_diag_nnz,
                          tmp_j + tmp_s,
-                         thrust::make_constant_iterator(hypre_ParCSRMatrixNumCols(B)),
+                         dpct::make_constant_iterator(hypre_ParCSRMatrixNumCols(B)),
                          tmp_j + local_nnz_Cbar + Cext_diag_nnz,
                          std::plus<HYPRE_Int>() );
 
@@ -429,7 +429,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       HYPRE_ONEDPL_CALL( transform,
                          C_offd_j,
                          C_offd_j + nnz_C_offd,
-                         thrust::make_constant_iterator(hypre_ParCSRMatrixNumCols(B)),
+                         dpct::make_constant_iterator(hypre_ParCSRMatrixNumCols(B)),
                          C_offd_j,
                          std::minus<HYPRE_Int>() );
 
@@ -584,7 +584,7 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       HYPRE_ONEDPL_CALL( transform,
                          hypre_CSRMatrixI(Cint),
                          hypre_CSRMatrixI(Cint) + hypre_CSRMatrixNumRows(Cint) + 1,
-                         thrust::make_constant_iterator(local_nnz_Cbar),
+                         dpct::make_constant_iterator(local_nnz_Cbar),
                          hypre_CSRMatrixI(Cint),
                          std::minus<HYPRE_Int>() );
 
@@ -672,7 +672,7 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       HYPRE_ONEDPL_CALL( transform,
                          tmp_j + local_nnz_Cbar + Cext_diag_nnz,
                          tmp_j + tmp_s,
-                         thrust::make_constant_iterator(hypre_ParCSRMatrixNumCols(P)),
+                         dpct::make_constant_iterator(hypre_ParCSRMatrixNumCols(P)),
                          tmp_j + local_nnz_Cbar + Cext_diag_nnz,
                          std::plus<HYPRE_Int>() );
 
@@ -744,7 +744,7 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       HYPRE_ONEDPL_CALL( transform,
                          C_offd_j,
                          C_offd_j + nnz_C_offd,
-                         thrust::make_constant_iterator(hypre_ParCSRMatrixNumCols(P)),
+                         dpct::make_constant_iterator(hypre_ParCSRMatrixNumCols(P)),
                          C_offd_j,
                          std::minus<HYPRE_Int>() );
 

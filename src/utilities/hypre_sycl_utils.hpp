@@ -103,11 +103,22 @@ struct hypre_CsrsvData
 
 #if defined(HYPRE_USING_SYCL)
 
+// for includes of PSTL algorithms
+#define PSTL_USE_PARALLEL_POLICIES 0
+
 #include <oneapi/dpl/execution>
 #include <oneapi/dpl/algorithm>
+#include <oneapi/dpl/iterator>
+#include <oneapi/dpl/functional>
+
+#include <dpct/dpl_extras/algorithm.h> // dpct::remove_if, iota, remove_copy_if, copy_if
+
+#include <algorithm>
+#include <functional>
+#include <iterator>
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * macro for launching SYCL kernels, SYCL, DPL, Cusparse, Curand calls
+ * macro for launching SYCL kernels, DPL, onemkl::blas::sparse, onemkl::rng calls
  *                    NOTE: IN HYPRE'S DEFAULT QUEUE
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
@@ -235,12 +246,37 @@ struct hypre_CsrsvData
 #endif // HYPRE_DEBUG
 
 #define HYPRE_ONEDPL_CALL(func_name, ...)                                                                            \
-  std(oneapi::dpl::execution::make_device_policy(*hypre_HandleSyclComputeQueue(hypre_handle())), __VA_ARGS__);
+  func_name(oneapi::dpl::execution::make_device_policy(*hypre_HandleSyclComputeQueue(hypre_handle())), __VA_ARGS__);
+
+/* function for SYCL parallelized std::iota */
+template <typename T>
+struct iota_sequence_fun {
+  using result_type = T;
+  iota_sequence_fun(T _init, T _step) : init(_init), step(_step) {}
+
+  template <typename _T> result_type operator()(_T &&i) const {
+    return static_cast<T>(init + step * i);
+  }
+
+private:
+  const T init;
+  const T step;
+};
+
+template <class Iter, class T>
+void sycl_iota(Iter first, Iter last, T init=0) {
+  using DiffSize = typename std::iterator_traits<Iter>::difference_type;
+  std::transform( oneapi::dpl::execution::make_device_policy(*hypre_HandleSyclComputeQueue(hypre_handle())),
+		  oneapi::dpl::counting_iterator<DiffSize>(0),
+		  oneapi::dpl::counting_iterator<DiffSize>(std::distance(first, last)),
+		  first,
+		  iota_sequence_fun<T>(init, T(1)) );
+}
 
 /* return the number of work-items in current work-group */
 template <hypre_int dim>
 static __inline__ __attribute__((always_inline))
-hypre_int hypre_Sycl_get_num_workitems(sycl::nd_item<dim>& item)
+hypre_int hypre_sycl_get_num_workitems(sycl::nd_item<dim>& item)
 {
   return item.get_group().get_local_linear_range(); 
 }
@@ -248,7 +284,7 @@ hypre_int hypre_Sycl_get_num_workitems(sycl::nd_item<dim>& item)
 /* return the flattened or linearlized work-item id in current work-group (not global)*/
 template <hypre_int dim>
 static __inline__ __attribute__((always_inline))
-hypre_int hypre_Sycl_get_workitem_id(sycl::nd_item<dim>& item)
+hypre_int hypre_sycl_get_workitem_id(sycl::nd_item<dim>& item)
 {
   return item.get_local_linear_id();
 }
@@ -256,7 +292,7 @@ hypre_int hypre_Sycl_get_workitem_id(sycl::nd_item<dim>& item)
 /* return the number of sub-groups in current work-group */
 template <hypre_int dim>
 static __inline__ __attribute__((always_inline))
-hypre_int hypre_Sycl_get_num_subgroups(sycl::nd_item<dim>& item)
+hypre_int hypre_sycl_get_num_subgroups(sycl::nd_item<dim>& item)
 {
   return item.get_sub_group().get_group_range().get(0);
 }
@@ -264,7 +300,7 @@ hypre_int hypre_Sycl_get_num_subgroups(sycl::nd_item<dim>& item)
 /* return the sub_group id in work-group */
 template <hypre_int dim>
 static __inline__ __attribute__((always_inline))
-hypre_int hypre_Sycl_get_subgroup_id(sycl::nd_item<dim>& item)
+hypre_int hypre_sycl_get_subgroup_id(sycl::nd_item<dim>& item)
 {
   return item.get_sub_group().get_group_linear_id();
 }
@@ -272,16 +308,16 @@ hypre_int hypre_Sycl_get_subgroup_id(sycl::nd_item<dim>& item)
 /* return the work-item lane id in a sub_group */
 template <hypre_int dim>
 static __inline__ __attribute__((always_inline))
-hypre_int hypre_Sycl_get_lane_id(sycl::nd_item<dim>& item)
+hypre_int hypre_sycl_get_lane_id(sycl::nd_item<dim>& item)
 {
-  return hypre_Sycl_get_workitem_id<dim>(item) &
+  return hypre_sycl_get_workitem_id<dim>(item) &
     (item.get_sub_group().get_local_range().get(0)-1);
 }
 
 /* return the num of work_groups in nd_range */
 template <hypre_int dim>
 static __inline__ __attribute__((always_inline))
-hypre_int hypre_Sycl_get_num_workgroups(sycl::nd_item<dim>& item)
+hypre_int hypre_sycl_get_num_workgroups(sycl::nd_item<dim>& item)
 {
   // return item.get_group().get_group_linear_range(); // API available in SYCL 2020
   
@@ -301,7 +337,7 @@ hypre_int hypre_Sycl_get_num_workgroups(sycl::nd_item<dim>& item)
 /* return the flattened or linearlized work-group id in nd_range */
 template <hypre_int dim>
 static __inline__ __attribute__((always_inline))
-hypre_int hypre_Sycl_get_workgroup_id(sycl::nd_item<dim>& item)
+hypre_int hypre_sycl_get_workgroup_id(sycl::nd_item<dim>& item)
 {
   return item.get_group_linear_id();
 }
@@ -309,7 +345,7 @@ hypre_int hypre_Sycl_get_workgroup_id(sycl::nd_item<dim>& item)
 /* return the number of work-items in global iteration space*/
 template <hypre_int dim>
 static __inline__ __attribute__((always_inline))
-hypre_int hypre_Sycl_get_global_num_workitems(sycl::nd_item<dim>& item)
+hypre_int hypre_sycl_get_global_num_workitems(sycl::nd_item<dim>& item)
 {
   switch (dim)
   {
@@ -327,7 +363,7 @@ hypre_int hypre_Sycl_get_global_num_workitems(sycl::nd_item<dim>& item)
 /* return the flattened work-item id in global iteration space */
 template <hypre_int dim>
 static __inline__ __attribute__((always_inline))
-hypre_int hypre_Sycl_get_global_workitem_id(sycl::nd_item<dim>& item)
+hypre_int hypre_sycl_get_global_workitem_id(sycl::nd_item<dim>& item)
 {
   return item.get_global_linear_id();
 }
@@ -335,18 +371,18 @@ hypre_int hypre_Sycl_get_global_workitem_id(sycl::nd_item<dim>& item)
 /* return the number of sub-groups in global iteration space */
 template <hypre_int dim>
 static __inline__ __attribute__((always_inline))
-hypre_int hypre_Sycl_get_global_num_subgroups(sycl::nd_item<dim>& item)
+hypre_int hypre_sycl_get_global_num_subgroups(sycl::nd_item<dim>& item)
 {
-  return hypre_Sycl_get_num_workgroups<dim>(item) * hypre_Sycl_get_num_subgroups<dim>(item);
+  return hypre_sycl_get_num_workgroups<dim>(item) * hypre_sycl_get_num_subgroups<dim>(item);
 }
 
 /* return the flattened sub-group id in global iteration space */
 template <hypre_int dim>
 static __inline__ __attribute__((always_inline))
-hypre_int hypre_Sycl_get_global_subgroup_id(sycl::nd_item<dim>& item)
+hypre_int hypre_sycl_get_global_subgroup_id(sycl::nd_item<dim>& item)
 {
-  return hypre_Sycl_get_workgroup_id<dim>(item) * hypre_Sycl_get_num_subgroups<dim>(item) +
-    hypre_Sycl_get_subgroup_id<dim>(item);
+  return hypre_sycl_get_workgroup_id<dim>(item) * hypre_sycl_get_num_subgroups<dim>(item) +
+    hypre_sycl_get_subgroup_id<dim>(item);
 }
 
 // #if defined(DPCT_COMPATIBILITY_TEMP) && DPCT_COMPATIBILITY_TEMP < 600

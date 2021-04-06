@@ -199,7 +199,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    fine_to_coarse_d = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
    /* The scan will make fine_to_coarse[i] for i a coarse point hold a
     * coarse point index in the range from 0 to n_coarse-1 */
-   HYPRE_ONEDPL_CALL( exclusive_scan,
+   HYPRE_ONEDPL_CALL( std::exclusive_scan,
                       oneapi::dpl::make_transform_iterator(CF_marker_dev,          is_nonnegative<HYPRE_Int>()),
                       oneapi::dpl::make_transform_iterator(CF_marker_dev + n_fine, is_nonnegative<HYPRE_Int>()),
                       fine_to_coarse_d );
@@ -248,7 +248,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    hypre_TFree(hypre_ParCSRMatrixSocOffdJ(S), HYPRE_MEMORY_DEVICE);
    */
 
-   HYPRE_ONEDPL_CALL(replace, CF_marker_dev, CF_marker_dev + n_fine, -3, -1);
+   HYPRE_ONEDPL_CALL(std::replace, CF_marker_dev, CF_marker_dev + n_fine, -3, -1);
 
    /* 5. Construct the result as a ParCSRMatrix. At this point, P's column indices */
    /*    are defined with A's enumeration of columns */
@@ -305,19 +305,19 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
 
       hypre_TMemcpy(P_colids, P_offd_j, HYPRE_Int, P_offd_size, HYPRE_MEMORY_DEVICE, memory_location);
       /* sort and unique */
-      HYPRE_ONEDPL_CALL(sort, P_colids, P_colids + P_offd_size);
-      HYPRE_Int *new_end = HYPRE_ONEDPL_CALL(unique, P_colids, P_colids + P_offd_size);
+      HYPRE_ONEDPL_CALL(std::sort, P_colids, P_colids + P_offd_size);
+      HYPRE_Int *new_end = HYPRE_ONEDPL_CALL(std::unique, P_colids, P_colids + P_offd_size);
 
       num_cols_P_offd = new_end - P_colids;
 
-      HYPRE_ONEDPL_CALL(fill_n, P_marker, num_cols_A_offd, 0);
+      HYPRE_ONEDPL_CALL(std::fill_n, P_marker, num_cols_A_offd, 0);
       hypreDevice_ScatterConstant(P_marker, num_cols_P_offd, P_colids, 1);
 
       /* Because P's columns correspond to P_marker[i]=1 (and =0 otherwise), the scan below will return  */
       /* an enumeration of P's columns 0,1,... at the corresponding locations in P_marker. */
       /* P_marker[num_cols_A_offd] will contain num_cols_P_offd, so sum reduction above could  */
       /* have been replaced by reading the last element of P_marker. */
-      HYPRE_ONEDPL_CALL(exclusive_scan, P_marker, P_marker + num_cols_A_offd, P_colids);
+      HYPRE_ONEDPL_CALL(std::exclusive_scan, P_marker, P_marker + num_cols_A_offd, P_colids);
       /* Example: P_marker becomes [0,0,1,1,1,2] so that P_marker[1]=0, P_marker[4]=1  */
 
       /* Do the re-enumeration, P_offd_j are mapped, using P_marker as map  */
@@ -326,12 +326,12 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
       /* Create and define array tmp_map_offd. This array is the inverse of the P_marker mapping, */
       /* Example: num_cols_P_offd=2, tmp_map_offd[0] = 1, tmp_map_offd[1]=4  */
       /* P_colids is large enough to hold */
-      new_end = HYPRE_ONEDPL_CALL(copy_if,
+      new_end = HYPRE_ONEDPL_CALL(dpct::copy_if,
                                   oneapi::dpl::make_counting_iterator(0),
                                   oneapi::dpl::make_counting_iterator(num_cols_A_offd),
                                   P_marker,
                                   P_colids,
-                                  std::_Identity<HYPRE_Int>());
+                                  oneapi::dpl::identity());
       hypre_assert(new_end - P_colids == num_cols_P_offd);
 
       tmp_map_offd_h = hypre_TAlloc(HYPRE_Int, num_cols_P_offd, HYPRE_MEMORY_HOST);

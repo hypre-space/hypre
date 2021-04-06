@@ -159,11 +159,11 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
                          CF_marker_diag,
                          diag_iwork );
 
-      HYPRE_Int *new_end = HYPRE_ONEDPL_CALL( remove_if,
+      HYPRE_Int *new_end = HYPRE_ONEDPL_CALL( dpct::remove_if,
                                               graph_diag,
                                               graph_diag + graph_diag_size,
                                               diag_iwork,
-                                              std::_Identity<HYPRE_Int>() );
+                                              oneapi::dpl::identity() );
 
       graph_diag_size = new_end - graph_diag;
    }
@@ -333,13 +333,12 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
    /* graph_diag consists points with CF_marker_diag == 0 */
-   new_end =
-   HYPRE_ONEDPL_CALL(remove_copy_if,
-                     oneapi::dpl::make_counting_iterator(0),
-                     oneapi::dpl::make_counting_iterator(num_rows_diag),
-                     CF_marker_diag,
-                     graph_diag,
-                     std::_Identity<HYPRE_Int>());
+   new_end = HYPRE_ONEDPL_CALL(dpct::remove_copy_if,
+                               oneapi::dpl::make_counting_iterator(0),
+                               oneapi::dpl::make_counting_iterator(num_rows_diag),
+                               CF_marker_diag,
+                               graph_diag,
+                               oneapi::dpl::identity());
 
    *graph_diag_size = new_end - graph_diag;
 

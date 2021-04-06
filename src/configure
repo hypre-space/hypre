@@ -818,6 +818,7 @@ with_fei_inc_dir
 with_mli
 with_MPI
 with_cuda
+with_sycl
 with_raja
 with_raja_include
 with_raja_lib
@@ -1612,6 +1613,7 @@ Optional Packages:
                           may affect which compiler is chosen.
   --with-cuda             Use CUDA. Require cuda-8.0 or higher (default is
                           NO).
+  --with-sycl             Use SYCL. Require Intel oneAPI (default is NO).
   --with-raja             Use RAJA. Require RAJA package to be compiled
                           properly (default is NO).
   --with-raja-include=DIR User specifies that RAJA/*.h is in DIR. The options
@@ -2676,6 +2678,7 @@ hypre_using_openmp=no
 hypre_using_device_openmp=no
 hypre_using_insure=no
 hypre_using_cuda=no
+hypre_using_sycl=no
 hypre_using_gpu=no
 hypre_using_um=no
 hypre_gpu_mpi=no
@@ -3820,6 +3823,18 @@ if test "${with_cuda+set}" = set; then :
  esac
 else
   hypre_using_cuda=no
+
+fi
+
+
+
+
+# Check whether --with-sycl was given.
+if test "${with_sycl+set}" = set; then :
+  withval=$with_sycl; case "$withval" in
+    no) hypre_using_sycl=no ;;
+    *)  hypre_using_sycl=yes ;;
+ esac
 
 fi
 

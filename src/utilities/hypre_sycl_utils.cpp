@@ -20,8 +20,8 @@ sycl::range<1> hypre_GetDefaultSYCLWorkgroupDimension()
 }
 
 sycl::range<1> hypre_GetDefaultSYCLGridDimension(HYPRE_Int n,
-						     const char *granularity,
-						     sycl::range<1> wgDim)
+                                                 const char *granularity,
+                                                 sycl::range<1> wgDim)
 {
    HYPRE_Int num_WGs = 0;
    HYPRE_Int num_workitems_per_WG = wgDim[0];
@@ -81,8 +81,8 @@ HYPRE_Int
 hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia, HYPRE_Int *d_offd_ia,
                       HYPRE_Int *d_rownnz)
 {
-   const sycl::range<3> wgDim = hypre_GetDefaultSYCLWorkgroupDimension();
-   const sycl::range<3> gDim = hypre_GetDefaultSYCLGridDimension(nrows, "thread", wgDim);
+   const sycl::range<1> wgDim = hypre_GetDefaultSYCLWorkgroupDimension();
+   const sycl::range<1> gDim = hypre_GetDefaultSYCLGridDimension(nrows, "thread", wgDim);
 
    /* trivial case */
    if (nrows <= 0)
@@ -204,9 +204,8 @@ hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int 
 
    hypre_assert(!(nrows > 1 && d_ib == nullptr));
 
-   const sycl::range<3> wgDim = hypre_GetDefaultSYCLWorkgroupDimension();
-   const sycl::range<3> gDim =
-       hypre_GetDefaultSYCLGridDimension(nrows, "warp", wgDim);
+   const sycl::range<1> wgDim = hypre_GetDefaultSYCLWorkgroupDimension();
+   const sycl::range<1> gDim = hypre_GetDefaultSYCLGridDimension(nrows, "warp", wgDim);
 
    /*
    if (job == 2)
@@ -214,7 +213,7 @@ hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int 
    }
    */
 
-   HYPRE_SYCL_LAUNCH( hypreSYCLKernel_CopyParCSRRows, gDim, wgDim,
+   HYPRE_SYCL_1D_LAUNCH( hypreSYCLKernel_CopyParCSRRows, gDim, wgDim,
                       nrows, d_row_indices, has_offd, first_col, d_col_map_offd_A,
                       d_diag_i, d_diag_j, d_diag_a,
                       d_offd_i, d_offd_j, d_offd_a,
@@ -226,13 +225,13 @@ hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int 
 HYPRE_Int
 hypreDevice_IntegerReduceSum(HYPRE_Int n, HYPRE_Int *d_i)
 {
-   return HYPRE_ONEDPL_CALL(reduce, d_i, d_i + n);
+   return HYPRE_ONEDPL_CALL(std::reduce, d_i, d_i + n);
 }
 
 HYPRE_Int
 hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 {
-   HYPRE_ONEDPL_CALL(inclusive_scan, d_i, d_i + n, d_i);
+   HYPRE_ONEDPL_CALL(std::inclusive_scan, d_i, d_i + n, d_i);
 
    return hypre_error_flag;
 }
@@ -240,7 +239,7 @@ hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 HYPRE_Int
 hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 {
-   HYPRE_ONEDPL_CALL(exclusive_scan, d_i, d_i + n, d_i);
+   HYPRE_ONEDPL_CALL(std::exclusive_scan, d_i, d_i + n, d_i);
 
    return hypre_error_flag;
 }
@@ -248,7 +247,7 @@ hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 HYPRE_Int
 hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v)
 {
-   HYPRE_ONEDPL_CALL( fill_n, d_x, n, v);
+   HYPRE_ONEDPL_CALL( std::fill_n, d_x, n, v);
 
    return hypre_error_flag;
 }
@@ -292,17 +291,22 @@ hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
     return hypre_error_flag;
   }
 
-  HYPRE_ONEDPL_CALL( fill, d_row_ind, d_row_ind + nnz, 0 );
+  HYPRE_ONEDPL_CALL( std::fill, d_row_ind, d_row_ind + nnz, 0 );
 
-  d_row_ind = HYPRE_ONEDPL_CALL( copy_if,
-				 oneapi::dpl::counting_iterator<HYPRE_Int>(0),
-				 oneapi::dpl::counting_iterator<HYPRE_Int>(nrows),
-				 d_row_ptr,
-				 oneapi::dpl::make_transform_iterator(
-				   oneapi::dpl::make_zip_iterator(d_row_ptr, d_row_ptr + 1),
-				   hypre_empty_row_functor()) );
+  d_row_ind = HYPRE_ONEDPL_CALL( dpct::copy_if,
+                                 oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                                 oneapi::dpl::counting_iterator<HYPRE_Int>(nrows),
+                                 d_row_ptr,
+                                 oneapi::dpl::make_transform_iterator(oneapi::dpl::make_zip_iterator(d_row_ptr, d_row_ptr + 1), hypre_empty_row_functor()) );
 
-  HYPRE_ONEDPL_CALL( inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
+   // HYPRE_THRUST_CALL( scatter_if,
+   //                    thrust::counting_iterator<HYPRE_Int>(0),
+   //                    thrust::counting_iterator<HYPRE_Int>(nrows),
+   //                    d_row_ptr,
+   //                    thrust::make_transform_iterator( thrust::make_zip_iterator(thrust::make_tuple(d_row_ptr, d_row_ptr+1)), hypre_empty_row_functor() ),
+   //                 d_row_ind );
+
+  HYPRE_ONEDPL_CALL( std::inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
                      oneapi::dpl::maximum<HYPRE_Int>() );
 
   return hypre_error_flag;
@@ -339,7 +343,9 @@ hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row
 {
    HYPRE_Int *d_row_ptr = hypre_TAlloc(HYPRE_Int, nrows+1, HYPRE_MEMORY_DEVICE);
 
-   HYPRE_ONEDPL_CALL(lower_bound, d_row_ind, d_row_ind + nnz,
+   //NOTE: dpl::lower_bound uses std::lower_bound(C++20)
+   HYPRE_ONEDPL_CALL(oneapi::dpl::lower_bound,
+		     d_row_ind, d_row_ind + nnz,
                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
                      oneapi::dpl::counting_iterator<HYPRE_Int>(nrows + 1),
                      d_row_ptr);
@@ -350,7 +356,8 @@ hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row
 HYPRE_Int
 hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind, HYPRE_Int *d_row_ptr)
 {
-   HYPRE_ONEDPL_CALL(lower_bound, d_row_ind, d_row_ind + nnz,
+   HYPRE_ONEDPL_CALL(oneapi::dpl::lower_bound,
+		     d_row_ind, d_row_ind + nnz,
                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
                      oneapi::dpl::counting_iterator<HYPRE_Int>(nrows + 1),
                      d_row_ptr);
@@ -400,6 +407,8 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
       sycl::range<3> wgDim = sycl::range<3>(1, 1, 1);
       sycl::range<3> gDim = sycl::range<3>(1, 1, 1);
       HYPRE_SYCL_LAUNCH( hypreSYCLKernel_ScatterAddTrivial, wgDim, gDim, ny, x, map, y );
+
+      // todo: launch SYCL singletask
    }
    else
    {
@@ -422,25 +431,27 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
 
       hypre_TMemcpy(map2, map, HYPRE_Int, ny, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-      HYPRE_ONEDPL_CALL(sort_by_key, map2, map2 + ny, y);
+      // Next two lines for: HYPRE_THRUST_CALL(sort_by_key, map2, map2 + ny, y);
+      auto zipped_begin = oneapi::dpl::make_zip_iterator(map2, y);
+      HYPRE_ONEDPL_CALL(std::sort, zipped_begin, zipped_begin + ny,
+                        [](auto lhs, auto rhs) { return get<0>(lhs) < get<0>(rhs); });
 
-      std::pair<HYPRE_Int*, HYPRE_Real*> new_end = HYPRE_ONEDPL_CALL( reduce_by_key,
-                                                                         map2,
-                                                                         map2 + ny,
-                                                                         y,
-                                                                         reduced_map,
-                                                                         reduced_y );
+      std::pair<HYPRE_Int*, HYPRE_Real*> new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
+                                                                      map2,
+                                                                      map2 + ny,
+                                                                      y,
+                                                                      reduced_map,
+                                                                      reduced_y );
 
       reduced_n = new_end.first - reduced_map;
 
       hypre_assert(reduced_n == new_end.second - reduced_y);
 
-      sycl::range<3> wgDim = hypre_GetDefaultSYCLWorkgroupDimension();
-      sycl::range<3> gDim =
-          hypre_GetDefaultSYCLGridDimension(reduced_n, "thread", wgDim);
+      sycl::range<1> wgDim = hypre_GetDefaultSYCLWorkgroupDimension();
+      sycl::range<1> gDim = hypre_GetDefaultSYCLGridDimension(reduced_n, "thread", wgDim);
 
-      HYPRE_SYCL_LAUNCH( hypreSYCLKernel_ScatterAdd, gDim, wgDim,
-                         reduced_n, x, reduced_map, reduced_y );
+      HYPRE_SYCL_1D_LAUNCH( hypreSYCLKernel_ScatterAdd, gDim, wgDim,
+                            reduced_n, x, reduced_map, reduced_y );
 
       if (!work)
       {
@@ -480,10 +491,10 @@ hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v)
       return hypre_error_flag;
    }
 
-   sycl::range<3> wgDim = hypre_GetDefaultSYCLWorkgroupDimension();
-   sycl::range<3> gDim = hypre_GetDefaultSYCLGridDimension(n, "thread", wgDim);
+   sycl::range<1> wgDim = hypre_GetDefaultSYCLWorkgroupDimension();
+   sycl::range<1> gDim = hypre_GetDefaultSYCLGridDimension(n, "thread", wgDim);
 
-   HYPRE_SYCL_LAUNCH( hypreSYCLKernel_ScatterConstant, gDim, wgDim, x, n, map, v );
+   HYPRE_SYCL_1D_LAUNCH( hypreSYCLKernel_ScatterConstant, gDim, wgDim, x, n, map, v );
 
    return hypre_error_flag;
 }
@@ -513,10 +524,10 @@ hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Comple
       return hypre_error_flag;
    }
 
-   sycl::range<3> wgDim = hypre_GetDefaultSYCLWorkgroupDimension();
-   sycl::range<3> gDim = hypre_GetDefaultSYCLGridDimension(n, "thread", wgDim);
+   sycl::range<1> wgDim = hypre_GetDefaultSYCLWorkgroupDimension();
+   sycl::range<1> gDim = hypre_GetDefaultSYCLGridDimension(n, "thread", wgDim);
 
-   HYPRE_SYCL_LAUNCH( hypreSYCLKernel_IVAXPY, gDim, wgDim, n, a, x, y );
+   HYPRE_SYCL_1D_LAUNCH( hypreSYCLKernel_IVAXPY, gDim, wgDim, n, a, x, y );
 
    return hypre_error_flag;
 }
@@ -543,10 +554,10 @@ hypreDevice_MaskedIVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_
       return hypre_error_flag;
    }
 
-   sycl::range<3> wgDim = hypre_GetDefaultSYCLWorkgroupDimension();
-   sycl::range<3> gDim = hypre_GetDefaultSYCLGridDimension(n, "thread", wgDim);
+   sycl::range<1> wgDim = hypre_GetDefaultSYCLWorkgroupDimension();
+   sycl::range<1> gDim = hypre_GetDefaultSYCLGridDimension(n, "thread", wgDim);
 
-   HYPRE_SYCL_LAUNCH( hypreSYCLKernel_MaskedIVAXPY, gDim, wgDim, n, a, x, y, mask );
+   HYPRE_SYCL_1D_LAUNCH( hypreSYCLKernel_MaskedIVAXPY, gDim, wgDim, n, a, x, y, mask );
 
    return hypre_error_flag;
 }
@@ -581,10 +592,10 @@ hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, 
       return hypre_error_flag;
    }
 
-   sycl::range<3> wgDim = hypre_GetDefaultSYCLWorkgroupDimension();
-   sycl::range<3> gDim = hypre_GetDefaultSYCLGridDimension(n, "thread", wgDim);
+   sycl::range<1> wgDim = hypre_GetDefaultSYCLWorkgroupDimension();
+   sycl::range<1> gDim = hypre_GetDefaultSYCLGridDimension(n, "thread", wgDim);
 
-   HYPRE_SYCL_LAUNCH( hypreSYCLKernel_DiagScaleVector, gDim, wgDim, n, A_i, A_data, x, beta, y );
+   HYPRE_SYCL_1D_LAUNCH( hypreSYCLKernel_DiagScaleVector, gDim, wgDim, n, A_i, A_data, x, beta, y );
 
    return hypre_error_flag;
 }
@@ -606,10 +617,10 @@ hypreSYCLKernel_BigToSmallCopy(      HYPRE_Int*    __restrict__ tgt,
 HYPRE_Int
 hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size)
 {
-   sycl::range<3> wgDim = hypre_GetDefaultSYCLWorkgroupDimension();
-   sycl::range<3> gDim = hypre_GetDefaultSYCLGridDimension(size, "thread", wgDim);
+   sycl::range<1> wgDim = hypre_GetDefaultSYCLWorkgroupDimension();
+   sycl::range<1> gDim = hypre_GetDefaultSYCLGridDimension(size, "thread", wgDim);
 
-   HYPRE_SYCL_LAUNCH( hypreSYCLKernel_BigToSmallCopy, gDim, wgDim, tgt, src, size);
+   HYPRE_SYCL_1D_LAUNCH( hypreSYCLKernel_BigToSmallCopy, gDim, wgDim, tgt, src, size);
 
    return hypre_error_flag;
 }
@@ -624,26 +635,20 @@ template <typename T1, typename T2, typename T3>
 HYPRE_Int
 hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt)
 {
-   auto begin_keys = oneapi::dpl::make_zip_iterator(
-       keys1, keys2std::get<0>(std::make_tuple(keys1, keys2)),
-       std::get<1>(std::make_tuple(keys1, keys2)));
-   auto end_keys = oneapi::dpl::make_zip_iterator(
-       keys1 + N,
-       keys2 + Nstd::get<0>(std::make_tuple(keys1 + N, keys2 + N)),
-       std::get<1>(std::make_tuple(keys1 + N, keys2 + N)));
+   auto begin_keys = oneapi::dpl::make_zip_iterator(std::make_tuple(keys1,     keys2));
+   auto end_keys   = oneapi::dpl::make_zip_iterator(std::make_tuple(keys1 + N, keys2 + N));
 
    if (opt == 0)
    {
-      HYPRE_ONEDPL_CALL(stable_sort_by_key, begin_keys, end_keys, vals,
-                        std::less<std::tuple<T1, T2>>());
+      HYPRE_ONEDPL_CALL(std::stable_sort, begin_keys, end_keys, vals, std::less<std::tuple<T1, T2>>());
    }
    else if (opt == 1)
    {
-      HYPRE_ONEDPL_CALL(stable_sort_by_key, begin_keys, end_keys, vals, TupleComp2<T1,T2>());
+      HYPRE_ONEDPL_CALL(std::stable_sort, begin_keys, end_keys, vals, TupleComp2<T1,T2>());
    }
    else if (opt == 2)
    {
-      HYPRE_ONEDPL_CALL(stable_sort_by_key, begin_keys, end_keys, vals, TupleComp3<T1,T2>());
+      HYPRE_ONEDPL_CALL(std::stable_sort, begin_keys, end_keys, vals, TupleComp3<T1,T2>());
    }
 
    return hypre_error_flag;
@@ -661,27 +666,19 @@ template <typename T1, typename T2, typename T3, typename T4>
 HYPRE_Int
 hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals1, T4 *vals2, HYPRE_Int opt)
 {
-   dpct::device_ext &dev_ct = dpct::get_current_device();
-   sycl::queue &q_ct = dev_ct.default_queue();
-   auto begin_keys = oneapi::dpl::make_zip_iterator(
-     keys1, keys2std::get<0>(std::make_tuple(keys1, keys2)),
-     std::get<1>(std::make_tuple(keys1, keys2)));
-   auto end_keys = oneapi::dpl::make_zip_iterator(
-     keys1 + N,
-     keys2 + Nstd::get<0>(std::make_tuple(keys1 + N, keys2 + N)),
-     std::get<1>(std::make_tuple(keys1 + N, keys2 + N)));
-   auto begin_vals = oneapi::dpl::make_zip_iterator(
-     vals1, vals2std::get<0>(std::make_tuple(vals1, vals2)),
-     std::get<1>(std::make_tuple(vals1, vals2)));
+   auto begin_keys = oneapi::dpl::make_zip_iterator(std::make_tuple(keys1,     keys2));
+   auto end_keys   = oneapi::dpl::make_zip_iterator(std::make_tuple(keys1 + N, keys2 + N));
+   auto begin_vals = oneapi::dpl::make_zip_iterator(std::make_tuple(vals1,     vals2));
+
+   auto zipped_begin = oneapi::dpl::make_zip_iterator(keys_begin, vals_begin);
 
    if (opt == 0)
    {
-      HYPRE_ONEDPL_CALL(stable_sort_by_key, begin_keys, end_keys, begin_vals,
-                        std::less<std::tuple<T1, T2>>());
+      HYPRE_ONEDPL_CALL(std::stable_sort, begin_keys, end_keys, begin_vals, std::less<std::tuple<T1, T2>>());
    }
    else if (opt == 2)
    {
-      HYPRE_ONEDPL_CALL(stable_sort_by_key, begin_keys, end_keys, begin_vals, TupleComp3<T1,T2>());
+      HYPRE_ONEDPL_CALL(std::stable_sort, begin_keys, end_keys, begin_vals, TupleComp3<T1,T2>());
    }
 
    return hypre_error_flag;
@@ -697,21 +694,15 @@ HYPRE_Int
 hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in,  T2 *keys2_in,  T3 *vals_in,
                                           T1 *keys1_out, T2 *keys2_out, T3 *vals_out)
 {
-   auto begin_keys_in = oneapi::dpl::make_zip_iterator(
-       keys1_in, keys2_instd::get<0>(std::make_tuple(keys1_in, keys2_in)),
-       std::get<1>(std::make_tuple(keys1_in, keys2_in)));
-   auto end_keys_in = oneapi::dpl::make_zip_iterator(
-       keys1_in + N,
-       keys2_in + Nstd::get<0>(std::make_tuple(keys1_in + N, keys2_in + N)),
-       std::get<1>(std::make_tuple(keys1_in + N, keys2_in + N)));
-   auto begin_keys_out = oneapi::dpl::make_zip_iterator(
-       keys1_out,
-       keys2_outstd::get<0>(std::make_tuple(keys1_out, keys2_out)),
-       std::get<1>(std::make_tuple(keys1_out, keys2_out)));
-   std::equal_to<std::tuple<T1, T2>> pred;
-   std::plus<T3> func;
+   auto begin_keys_in  = oneapi::dpl::make_zip_iterator(std::make_tuple(keys1_in,     keys2_in    ));
+   auto end_keys_in    = oneapi::dpl::make_zip_iterator(std::make_tuple(keys1_in + N, keys2_in + N));
+   auto begin_keys_out = oneapi::dpl::make_zip_iterator(std::make_tuple(keys1_out,    keys2_out   ));
+   std::equal_to<std::tuple<T1, T2>> binary_pred;
+   std::plus<T3> binary_op;
 
-   auto new_end = HYPRE_ONEDPL_CALL(reduce_by_key, begin_keys_in, end_keys_in, vals_in, begin_keys_out, vals_out, pred, func);
+   auto new_end = HYPRE_ONEDPL_CALL(oneapi::dpl::reduce_by_segment,
+                                    begin_keys_in, end_keys_in, vals_in, begin_keys_out, vals_out,
+                                    binary_pred, binary_op);
 
    return new_end.second - vals_out;
 }

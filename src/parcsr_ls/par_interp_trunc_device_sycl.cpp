@@ -11,7 +11,7 @@
 #if defined(HYPRE_USING_SYCL)
 
 void
-hypreSYCLKernel_InterpTruncation( cl::sycl::nd_item<1>& item,
+hypreSYCLKernel_InterpTruncation( sycl::nd_item<1>& item,
 				  HYPRE_Int   nrows,
                                   HYPRE_Real  trunc_factor,
                                   HYPRE_Int   max_elmts,
@@ -19,8 +19,8 @@ hypreSYCLKernel_InterpTruncation( cl::sycl::nd_item<1>& item,
                                   HYPRE_Int  *P_j,
                                   HYPRE_Real *P_a)
 {
-   cl::sycl::group<1> grp = item.get_group();
-   cl::sycl::ONEAPI::sub_group SG = item.get_sub_group();
+   sycl::group<1> grp = item.get_group();
+   sycl::ONEAPI::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    HYPRE_Real row_max = 0.0, row_sum = 0.0, row_scal = 0.0;
@@ -31,7 +31,7 @@ hypreSYCLKernel_InterpTruncation( cl::sycl::nd_item<1>& item,
       return;
    }
 
-   HYPRE_Int lane = hypre_sycl_get_lane_id<1>(item), p, q;
+   HYPRE_Int lane = SG.get_local_linear_id(), p, q;
 
    /* 1. compute row max, rowsum */
    if (lane < 2)
@@ -141,7 +141,7 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
 
    hypre_TMemcpy(P_j, P_diag_j, HYPRE_Int, nnz_diag, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    /* offd col id := -2 - offd col id */
-   HYPRE_ONEDPL_CALL(transform, P_offd_j, P_offd_j + nnz_offd, P_j + nnz_diag, -_1 - 2);
+   HYPRE_ONEDPL_CALL(std::transform, P_offd_j, P_offd_j + nnz_offd, P_j + nnz_diag, -_1 - 2);
 
    hypre_TMemcpy(P_a,            P_diag_a, HYPRE_Real, nnz_diag, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(P_a + nnz_diag, P_offd_a, HYPRE_Real, nnz_offd, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
@@ -162,7 +162,7 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
    if (nnz_diag)
    {
       auto new_end = HYPRE_ONEDPL_CALL(
-            copy_if,
+            dpct::copy_if,
             oneapi::dpl::make_zip_iterator(std::make_tuple(P_i,       P_j,       P_a)),
             oneapi::dpl::make_zip_iterator(std::make_tuple(P_i+nnz_P, P_j+nnz_P, P_a+nnz_P)),
             P_j,
@@ -180,7 +180,7 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
    {
       less_than<HYPRE_Int> pred(-1);
       auto new_end = HYPRE_ONEDPL_CALL(
-            copy_if,
+            dpct::copy_if,
             oneapi::dpl::make_zip_iterator(std::make_tuple(P_i,       P_j,       P_a)),
             oneapi::dpl::make_zip_iterator(std::make_tuple(P_i+nnz_P, P_j+nnz_P, P_a+nnz_P)),
             P_j,
@@ -191,7 +191,7 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
 
       hypre_assert(new_nnz_offd <= nnz_offd);
 
-      HYPRE_ONEDPL_CALL(transform, P_offd_j, P_offd_j + new_nnz_offd, P_offd_j, -_1 - 2);
+      HYPRE_ONEDPL_CALL(std::transform, P_offd_j, P_offd_j + new_nnz_offd, P_offd_j, -_1 - 2);
 
       hypreDevice_CsrRowIndicesToPtrs_v2(nrows, new_nnz_offd, tmp_rowid, P_offd_i);
    }

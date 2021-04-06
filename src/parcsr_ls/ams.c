@@ -314,14 +314,6 @@ struct l1_norm_op1 : public thrust::binary_function<HYPRE_Complex, HYPRE_Complex
       return x <= 4.0/3.0 * y ? y : x;
    }
 };
-#elif defined(HYPRE_USING_SYCL)
-struct l1_norm_op1
-{
-   HYPRE_Complex operator()(HYPRE_Complex &x, HYPRE_Complex &y) const
-   {
-      return x <= 4.0/3.0 * y ? y : x;
-   }
-};
 #endif
 
 HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
@@ -456,7 +448,9 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
 #elif defined(HYPRE_USING_SYCL)
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         HYPRE_ONEDPL_CALL( transform, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm, l1_norm_op1() );
+	 HYPRE_ONEDPL_CALL( std::transform, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm,
+			    [&](HYPRE_Complex& x, HYPRE_Complex& y) -> HYPRE_Complex
+			    { return x <= 4.0/3.0 * y ? y : x; } );
       }
       else
 #endif
@@ -485,8 +479,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
 #elif defined(HYPRE_USING_SYCL)
       if ( exec == HYPRE_EXEC_DEVICE)
       {
-         std::_Identity<HYPRE_Complex> identity;
-         HYPRE_ONEDPL_CALL( replace_if, l1_norm, l1_norm + num_rows, std::not1(identity), 1.0 );
+	 HYPRE_ONEDPL_CALL( std::replace_if, l1_norm, l1_norm + num_rows, std::not1(oneapi::dpl::identity()), 1.0 );
       }
       else
 #endif
@@ -530,12 +523,12 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
 #elif defined(HYPRE_USING_SYCL)
    if (exec == HYPRE_EXEC_DEVICE)
    {
-     HYPRE_ONEAPI_CALL( transform, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm,
-			[&](const HYPRE_Int& input, const HYPRE_Int& mask){
-			  return (mask < 0) ? std::negate<HYPRE_Int>()(input) : input;} );
+     HYPRE_ONEDPL_CALL( std::transform, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm,
+                        [&](const HYPRE_Int& input, const HYPRE_Int& mask){
+                          return (mask < 0) ? std::negate<HYPRE_Int>()(input) : input;} );
 
-     //bool any_zero = HYPRE_ONEDPL_CALL( any_of, l1_norm, l1_norm + num_rows, std::not1(std::_Identity<HYPRE_Complex>()) );
-     bool any_zero = 0.0 == HYPRE_ONEDPL_CALL( reduce, l1_norm, l1_norm + num_rows, 1.0, oneapi::dpl::minimum<HYPRE_Real>() );
+     //bool any_zero = HYPRE_ONEDPL_CALL( any_of, l1_norm, l1_norm + num_rows, std::not1(oneapi::dpl::identity()) );
+     bool any_zero = 0.0 == HYPRE_ONEDPL_CALL( std::reduce, l1_norm, l1_norm + num_rows, 1.0, oneapi::dpl::minimum<HYPRE_Real>() );
      if ( any_zero )
      {
        hypre_error_in_arg(1);
