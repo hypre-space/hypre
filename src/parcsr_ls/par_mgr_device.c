@@ -61,7 +61,6 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix *A,
   // Doing extraneous work
   // TODO: no need to compute W for injection, i.e. W = 0
   D_FF_inv = hypre_CSRMatrixDiagMatrixFromVectorDevice(local_nrows_wp, diag);
-  hypre_TFree(diag, HYPRE_MEMORY_DEVICE);
 
   W_diag = hypre_CSRMatrixMultiplyDevice(D_FF_inv, hypre_ParCSRMatrixDiag(A_FC));
   W_offd = hypre_CSRMatrixMultiplyDevice(D_FF_inv, hypre_ParCSRMatrixOffd(A_FC));
@@ -137,6 +136,7 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix *A,
 
   *P_ptr = P;
 
+  hypre_TFree(diag, HYPRE_MEMORY_DEVICE);
   hypre_ParCSRMatrixDestroy(A_FF);
   hypre_ParCSRMatrixDestroy(A_FC);
   hypre_CSRMatrixDestroy(W_diag);

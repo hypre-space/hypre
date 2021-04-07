@@ -390,20 +390,13 @@ main( hypre_int argc,
   }
 
   /* Initial guess */
-  values_h = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_HOST);
-  values_d = hypre_CTAlloc(HYPRE_Real, local_num_cols, memory_location);
-  hypre_Memset(values_h, 0, local_num_rows*sizeof(HYPRE_Real), HYPRE_MEMORY_HOST);
-  hypre_TMemcpy(values_d, values_h, HYPRE_Real, local_num_rows, memory_location, HYPRE_MEMORY_HOST);
-
   HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
   HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
-  HYPRE_IJVectorInitialize_v2(ij_x, memory_location);
-  HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values_d);
+  HYPRE_IJVectorInitialize(ij_x);
+
   HYPRE_IJVectorAssemble(ij_x);
   ierr = HYPRE_IJVectorGetObject( ij_x, &object );
   x = (HYPRE_ParVector) object;
-  hypre_TFree(values_d, memory_location);
-  hypre_TFree(values_h, HYPRE_MEMORY_HOST);
 
   if (indexList != NULL) 
   {
@@ -502,6 +495,7 @@ main( hypre_int argc,
   HYPRE_ParCSRFlexGMRESCreate(hypre_MPI_COMM_WORLD, &pcg_solver);
   HYPRE_FlexGMRESSetKDim(pcg_solver, k_dim);
   HYPRE_FlexGMRESSetMaxIter(pcg_solver, max_iter);
+  //HYPRE_FlexGMRESSetMaxIter(pcg_solver, 0);
   HYPRE_FlexGMRESSetTol(pcg_solver, tol);
   HYPRE_FlexGMRESSetAbsoluteTol(pcg_solver, atol);
   HYPRE_FlexGMRESSetLogging(pcg_solver, 1);
@@ -608,12 +602,11 @@ main( hypre_int argc,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
     cudaDeviceSynchronize();
 #endif
-
-    /*
+    
     time_index = hypre_InitializeTiming("FlexGMRES Solve");
     hypre_BeginTiming(time_index);
 
-    hypre_ParVectorSetConstantValues(x, 0.0);
+    //hypre_ParVectorSetConstantValues(x, 0.0);
     HYPRE_FlexGMRESSolve
       (pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
 
@@ -626,13 +619,14 @@ main( hypre_int argc,
     cudaDeviceSynchronize();
 #endif
 
-    if (print_system)
-    {
-      HYPRE_IJVectorPrint(ij_x, "x.out");
-    }
-HYPRE_FlexGMRESGetNumIterations(pcg_solver, &num_iterations);
+    //if (print_system)
+    //{
+    //  HYPRE_IJVectorPrint(ij_x, "x.out");
+    //}
+    HYPRE_FlexGMRESGetNumIterations(pcg_solver, &num_iterations);
     HYPRE_FlexGMRESGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
-    */
+
+    return 0;
 
     // free memory for flex FlexGMRES
     if (pcg_solver) HYPRE_ParCSRFlexGMRESDestroy(pcg_solver);
@@ -777,6 +771,8 @@ HYPRE_FlexGMRESGetNumIterations(pcg_solver, &num_iterations);
 #endif
 
   }
+
+  return 0;
 
   /*-----------------------------------------------------------
    * Finalize things

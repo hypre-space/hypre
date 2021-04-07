@@ -36,6 +36,9 @@ hypre_MGRCreate()
   /* general data */
   (mgr_data -> max_num_coarse_levels) = 10;
   (mgr_data -> A_array) = NULL;
+#if defined(HYPRE_USING_CUDA) 
+  (mgr_data -> P_FF_array) = NULL;
+#endif
   (mgr_data -> P_array) = NULL;
   (mgr_data -> RT_array) = NULL;
   (mgr_data -> RAP) = NULL;
@@ -110,7 +113,7 @@ hypre_MGRCreate()
 
   (mgr_data -> use_non_galerkin_cg) = NULL;
 
-  (mgr_data -> print_coarse_system) = 1;
+  (mgr_data -> print_coarse_system) = 0;
 
   (mgr_data -> set_c_points_method) = 0;
   (mgr_data -> lvl_to_keep_cpoints) = 0;
@@ -232,6 +235,22 @@ hypre_MGRDestroy( void *data )
         hypre_ParCSRMatrixDestroy((mgr_data -> A_array)[i]);
     }
   }
+
+#if defined(HYPRE_USING_CUDA)
+  if(mgr_data -> P_FF_array)
+  {
+    for (i=0; i < num_coarse_levels; i++) 
+    {
+      if ((mgr_data -> P_array)[i])
+      {
+        hypre_ParCSRMatrixDestroy((mgr_data -> P_FF_array)[i]);
+      }
+    }
+    //hypre_TFree(P_FF_array, hypre_HandleMemoryLocation(hypre_handle()));
+    hypre_TFree((mgr_data -> P_FF_array), HYPRE_MEMORY_HOST);
+    (mgr_data -> P_FF_array) = NULL;
+  }
+#endif
 
   /* AMG for Frelax */
   if(mgr_data -> A_ff_array || mgr_data -> F_fine_array || mgr_data -> U_fine_array)

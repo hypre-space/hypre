@@ -26,6 +26,9 @@ typedef struct
   //general data
   HYPRE_Int max_num_coarse_levels;
   hypre_ParCSRMatrix **A_array;
+#if defined(HYPRE_USING_CUDA)
+  hypre_ParCSRMatrix **P_FF_array;
+#endif
   hypre_ParCSRMatrix **P_array;
   hypre_ParCSRMatrix **RT_array;
   hypre_ParCSRMatrix *RAP;

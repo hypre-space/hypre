@@ -583,6 +583,9 @@ hypre_MGRCycle( void               *mgr_vdata,
    hypre_ParCSRMatrix   **A_array = (mgr_data -> A_array);
    hypre_ParCSRMatrix   **RT_array  = (mgr_data -> RT_array);
    hypre_ParCSRMatrix   **P_array   = (mgr_data -> P_array);
+#if defined(HYPRE_USING_CUDA)
+   hypre_ParCSRMatrix   **P_FF_array   = (mgr_data -> P_FF_array);
+#endif
    hypre_ParCSRMatrix   *RAP = (mgr_data -> RAP);
    HYPRE_Int  use_default_cgrid_solver = (mgr_data -> use_default_cgrid_solver);
    HYPRE_Solver         cg_solver = (mgr_data -> coarse_grid_solver);
@@ -680,6 +683,7 @@ hypre_MGRCycle( void               *mgr_vdata,
             {
                for(i=0; i<nsweeps; i++)
                {
+                  //relax_points = 0;
                   hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
                         relax_points, relax_weight,
                         relax_l1_norms[fine_grid] ? hypre_VectorData(relax_l1_norms[fine_grid]) : NULL,
@@ -729,11 +733,13 @@ hypre_MGRCycle( void               *mgr_vdata,
          else if (Frelax_method[level] == 2)
          {
             hypre_ParVectorSetConstantValues(F_fine_array[coarse_grid], 0.0);
-            hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, 1.0, F_array[fine_grid], 0.0, &(F_fine_array[coarse_grid]));
+            //hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, 1.0, F_array[fine_grid], 0.0, &(F_fine_array[coarse_grid]));
+            hypre_ParCSRMatrixMatvecT(1.0, P_FF_array[fine_grid], F_array[fine_grid], 0.0, F_fine_array[coarse_grid]);
             hypre_ParVectorSetConstantValues(U_fine_array[coarse_grid], 0.0);
             fine_grid_solver_solve((mgr_data -> aff_solver)[fine_grid], A_ff_array[fine_grid], F_fine_array[coarse_grid],
                   U_fine_array[coarse_grid]);
-            hypre_MGRAddVectorP(CF_marker[fine_grid], FMRK, 1.0, U_fine_array[coarse_grid], 1.0, &(U_array[fine_grid]));
+            //hypre_MGRAddVectorP(CF_marker[fine_grid], FMRK, 1.0, U_fine_array[coarse_grid], 1.0, &(U_array[fine_grid]));
+            hypre_ParCSRMatrixMatvec(1.0, P_FF_array[fine_grid], U_fine_array[coarse_grid], 1.0, U_array[fine_grid]);
          }
          else
          {
