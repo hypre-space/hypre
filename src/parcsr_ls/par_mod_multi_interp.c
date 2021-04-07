@@ -8,8 +8,9 @@
 #include "_hypre_parcsr_ls.h"
 
 /*--------------------------------------------------------------------------
- * hypre_ParAMGBuildMultipass
+ * hypre_ParAMGBuildModMultipass
  * This routine implements Stuben's direct interpolation with multiple passes.
+ * expressed with matrix matrix multiplications
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

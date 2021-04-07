@@ -1573,7 +1573,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                else if (agg_interp_type == 5)
                   hypre_BoomerAMGBuildModExtInterp(A_array[level],
                                                    CF_marker, S, coarse_pnts_global1,
-                                                   debug_flag,
+                                                   num_functions, dof_func_array[level], debug_flag,
                                                    agg_P12_trunc_factor, agg_P12_max_elmts, col_offd_S_to_A, &P1);
                else if (agg_interp_type == 6)
                   hypre_BoomerAMGBuildModExtPIInterp(A_array[level],
@@ -1787,7 +1787,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   {
                      hypre_BoomerAMGBuildModExtInterp(A_array[level],
                                                    CF3_marker, S, coarse_pnts_global1,
-                                                   debug_flag,
+                                                   num_functions, dof_func_array[level], debug_flag,
                                                    agg_P12_trunc_factor, agg_P12_max_elmts, col_offd_S_to_A, &P1);
                   }
                   else if (agg_interp_type == 6)
@@ -2039,7 +2039,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             else if (interp_type == 16) /*Extended classical MM interpolation */
             {
                hypre_BoomerAMGBuildModExtInterp(A_array[level], CF_marker,
-                                             S, coarse_pnts_global,
+                                             S, coarse_pnts_global, num_functions, dof_func_array[level], 
                                              debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
                hypre_TFree(col_offd_S_to_A, HYPRE_MEMORY_HOST);
             }
