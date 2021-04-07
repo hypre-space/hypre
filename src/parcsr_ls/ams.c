@@ -479,7 +479,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
 #elif defined(HYPRE_USING_SYCL)
       if ( exec == HYPRE_EXEC_DEVICE)
       {
-	 HYPRE_ONEDPL_CALL( std::replace_if, l1_norm, l1_norm + num_rows, std::not1(oneapi::dpl::identity()), 1.0 );
+	 HYPRE_ONEDPL_CALL( dpct::replace_if, l1_norm, l1_norm + num_rows, std::not1(oneapi::dpl::identity()), 1.0 );
       }
       else
 #endif
