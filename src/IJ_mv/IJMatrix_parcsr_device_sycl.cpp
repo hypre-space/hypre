@@ -159,12 +159,12 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
       HYPRE_SYCL_1D_LAUNCH( hypreSYCLKernel_IJMatrixValues_dev1, gDim, bDim, len1, indicator, (HYPRE_Int *) row_indexes, ncols, indicator );
 
       auto new_end = HYPRE_ONEDPL_CALL(
-	std::copy_if,
-	oneapi::dpl::make_zip_iterator(std::make_tuple(cols,       values)),
-	oneapi::dpl::make_zip_iterator(std::make_tuple(cols + len, values + len)),
+	dpct::copy_if,
+	oneapi::dpl::make_zip_iterator(cols,       values),
+	oneapi::dpl::make_zip_iterator(cols + len, values + len),
 	indicator,
-	oneapi::dpl::make_zip_iterator(std::make_tuple(stack_j    + stack_elmts_current,
-						     stack_data + stack_elmts_current)),
+	oneapi::dpl::make_zip_iterator(stack_j    + stack_elmts_current,
+				       stack_data + stack_elmts_current),
 	is_nonnegative<HYPRE_Int>() );
 
       HYPRE_Int nnz_tmp = std::get<0>(new_end.get_iterator_tuple()) - (stack_j + stack_elmts_current);
@@ -193,7 +193,7 @@ struct hypre_IJMatrixAssembleFunctor : public thrust::binary_function< std::tupl
 
    Tuple operator()(const Tuple& x, const Tuple& y )
    {
-      return std::make_tuple( hypre_max(std::get<0>(x), std::get<0>(y)), std::get<1>(x) + std::get<1>(y) );
+      return  hypre_max(std::get<0>(x), std::get<0>(y)), std::get<1>(x) + std::get<1>(y) );
    }
 };
 
@@ -225,12 +225,12 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
    /* output X: 0: keep, 1: zero-out */
    HYPRE_ONEDPL_CALL(
      oneapi::dpl::exclusive_scan_by_segment,
-     std::make_reverse_iterator(oneapi::dpl::make_zip_iterator(std::make_tuple(I0+N0, J0+N0))),
-     std::make_reverse_iterator(oneapi::dpl::make_zip_iterator(std::make_tuple(I0,    J0))),
+     std::make_reverse_iterator(oneapi::dpl::make_zip_iterator(I0+N0, J0+N0)),
+     std::make_reverse_iterator(oneapi::dpl::make_zip_iterator(I0,    J0)),
      std::make_reverse_iterator(thrust::device_pointer_cast<char>(X0)+N0),
      std::make_reverse_iterator(thrust::device_pointer_cast<char>(X) +N0),
      0,
-     std::equal_to< std::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
+     std::equal_to< HYPRE_BigInt, HYPRE_BigInt >(),
      oneapi::dpl::maximum<char>() );
 
    HYPRE_ONEDPL_CALL( std::transform, //replace_if
@@ -240,13 +240,13 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
 
    auto new_end = HYPRE_ONEDPL_CALL(
      oneapi::dpl::reduce_by_segment,
-     oneapi::dpl::make_zip_iterator(std::make_tuple(I0,      J0     )), /* keys_first    */
-     oneapi::dpl::make_zip_iterator(std::make_tuple(I0 + N0, J0 + N0)), /* keys_last     */
-     oneapi::dpl::make_zip_iterator(std::make_tuple(X0,      A0     )), /* values_first  */
-     oneapi::dpl::make_zip_iterator(std::make_tuple(I,       J      )), /* keys_output   */
-     oneapi::dpl::make_zip_iterator(std::make_tuple(X,       A      )), /* values_output */
-     std::equal_to< std::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),         /* binary_pred   */
-     hypre_IJMatrixAssembleFunctor<char, HYPRE_Complex>()               /* binary_op     */);
+     oneapi::dpl::make_zip_iterator(I0,      J0     ), /* keys_first    */
+     oneapi::dpl::make_zip_iterator(I0 + N0, J0 + N0), /* keys_last     */
+     oneapi::dpl::make_zip_iterator(X0,      A0     ), /* values_first  */
+     oneapi::dpl::make_zip_iterator(I,       J      ), /* keys_output   */
+     oneapi::dpl::make_zip_iterator(X,       A      ), /* values_output */
+     std::equal_to< HYPRE_BigInt, HYPRE_BigInt >(),    /* binary_pred   */
+     hypre_IJMatrixAssembleFunctor<char, HYPRE_Complex>() /* binary_op     */);
 
    *N1 = std::get<0>(new_end.first.get_iterator_tuple()) - I;
    *I1 = I;
@@ -269,7 +269,7 @@ struct hypre_IJMatrixAssembleFunctor2 : public thrust::binary_function< std::tup
       const HYPRE_Complex vx = std::get<1>(x);
       const HYPRE_Complex vy = std::get<1>(y);
       const HYPRE_Complex vz = tx == 0 && ty == 0 ? vx + vy : tx ? vx : vy;
-      return std::make_tuple(0, vz);
+      return 0, vz);
    }
 };
 
@@ -287,12 +287,12 @@ hypre_IJMatrixAssembleSortAndReduce2(HYPRE_Int  N0, HYPRE_Int  *I0, HYPRE_Int  *
 
    auto new_end = HYPRE_ONEDPL_CALL(
      oneapi::dpl::reduce_by_segment,
-     oneapi::dpl::make_zip_iterator(std::make_tuple(I0,      J0     )), /* keys_first    */
-     oneapi::dpl::make_zip_iterator(std::make_tuple(I0 + N0, J0 + N0)), /* keys_last     */
-     oneapi::dpl::make_zip_iterator(std::make_tuple(X0,      A0     )), /* values_first  */
-     oneapi::dpl::make_zip_iterator(std::make_tuple(I,       J      )), /* keys_output   */
-     oneapi::dpl::make_zip_iterator(std::make_tuple(X,       A      )), /* values_output */
-     std::equal_to< std::tuple<HYPRE_Int, HYPRE_Int> >(),               /* binary_pred   */
+     oneapi::dpl::make_zip_iterator(I0,      J0     ), /* keys_first    */
+     oneapi::dpl::make_zip_iterator(I0 + N0, J0 + N0), /* keys_last     */
+     oneapi::dpl::make_zip_iterator(X0,      A0     ), /* values_first  */
+     oneapi::dpl::make_zip_iterator(I,       J      ), /* keys_output   */
+     oneapi::dpl::make_zip_iterator(X,       A      ), /* values_output */
+     std::equal_to< HYPRE_Int, HYPRE_Int >(),               /* binary_pred   */
      hypre_IJMatrixAssembleFunctor2<char, HYPRE_Complex>()              /* binary_op     */);
 
    *N1 = std::get<0>(new_end.first.get_iterator_tuple()) - I;
@@ -318,11 +318,11 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
    /* output in X0: 0: keep, 1: zero-out */
    HYPRE_ONEDPL_CALL(
      oneapi::dpl::inclusive_scan_by_segment,
-     std::make_reverse_iterator(oneapi::dpl::make_zip_iterator(std::make_tuple(I0+N0, J0+N0))),
-     std::make_reverse_iterator(oneapi::dpl::make_zip_iterator(std::make_tuple(I0,    J0))),
+     std::make_reverse_iterator(oneapi::dpl::make_zip_iterator(I0+N0, J0+N0)),
+     std::make_reverse_iterator(oneapi::dpl::make_zip_iterator(I0,    J0)),
      std::make_reverse_iterator(thrust::device_pointer_cast<char>(X0)+N0),
      std::make_reverse_iterator(thrust::device_pointer_cast<char>(X0)+N0),
-     std::equal_to< std::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
+     std::equal_to< HYPRE_BigInt, HYPRE_BigInt >(),
      oneapi::dpl::maximum<char>() );
 
    HYPRE_ONEDPL_CALL( std::transform, //replace_if
@@ -332,12 +332,12 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
 
    auto new_end = HYPRE_ONEDPL_CALL(
      oneapi::dpl::reduce_by_segment,
-     oneapi::dpl::make_zip_iterator(std::make_tuple(I0,      J0     )), /* keys_first    */
-     oneapi::dpl::make_zip_iterator(std::make_tuple(I0 + N0, J0 + N0)), /* keys_last     */
-     A0,                                                                /* values_first  */
-     oneapi::dpl::make_zip_iterator(std::make_tuple(I,       J      )), /* keys_output   */
-     A,                                                                 /* values_output */
-     std::equal_to< std::tuple<HYPRE_Int, HYPRE_Int> >()                /* binary_pred   */);
+     oneapi::dpl::make_zip_iterator(I0,      J0     ), /* keys_first    */
+     oneapi::dpl::make_zip_iterator(I0 + N0, J0 + N0), /* keys_last     */
+     A0,                                               /* values_first  */
+     oneapi::dpl::make_zip_iterator(I,       J      ), /* keys_output   */
+     A,                                                /* values_output */
+     std::equal_to< HYPRE_Int, HYPRE_Int >()           /* binary_pred   */);
 
    *N1 = new_end.second - A;
    *I1 = I;
@@ -356,17 +356,17 @@ hypre_IJMatrixAssembleSortAndRemove(HYPRE_Int N0, HYPRE_BigInt *I0, HYPRE_BigInt
    /* output in X0: 0: keep, 1: remove */
    HYPRE_ONEDPL_CALL(
      oneapi::dpl::inclusive_scan_by_segment,
-     std::make_reverse_iterator(oneapi::dpl::make_zip_iterator(std::make_tuple(I0+N0, J0+N0))),
-     std::make_reverse_iterator(oneapi::dpl::make_zip_iterator(std::make_tuple(I0,    J0))),
+     std::make_reverse_iterator(oneapi::dpl::make_zip_iterator(I0+N0, J0+N0)),
+     std::make_reverse_iterator(oneapi::dpl::make_zip_iterator(I0,    J0)),
      std::make_reverse_iterator(thrust::device_pointer_cast<char>(X0)+N0),
      std::make_reverse_iterator(thrust::device_pointer_cast<char>(X0)+N0),
-     std::equal_to< std::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
+     std::equal_to< HYPRE_BigInt, HYPRE_BigInt >(),
      oneapi::dpl::maximum<char>() );
 
    auto new_end = HYPRE_ONEDPL_CALL(
      dpct::remove_if,
-     oneapi::dpl::make_zip_iterator(std::make_tuple(I0,    J0,    A0)),
-     oneapi::dpl::make_zip_iterator(std::make_tuple(I0+N0, J0+N0, A0+N0)),
+     oneapi::dpl::make_zip_iterator(I0,    J0,    A0),
+     oneapi::dpl::make_zip_iterator(I0+N0, J0+N0, A0+N0),
      X0,
      oneapi::dpl::identity());
 
@@ -436,11 +436,11 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
          HYPRE_ONEDPL_CALL(std::transform, stack_i, stack_i + nelms, is_on_proc, pred);
 
          auto new_end1 = HYPRE_ONEDPL_CALL(
-	   std::copy_if,
-	   oneapi::dpl::make_zip_iterator(std::make_tuple(stack_i,         stack_j,         stack_data,         stack_sora        )),  /* first */
-	   oneapi::dpl::make_zip_iterator(std::make_tuple(stack_i + nelms, stack_j + nelms, stack_data + nelms, stack_sora + nelms)),  /* last */
-	   is_on_proc,                                                                                                                 /* stencil */
-	   oneapi::dpl::make_zip_iterator(std::make_tuple(off_proc_i,      off_proc_j,      off_proc_data,      off_proc_sora)),       /* result */
+	   dpct::copy_if,
+	   oneapi::dpl::make_zip_iterator(stack_i,         stack_j,         stack_data,         stack_sora        ),  /* first */
+	   oneapi::dpl::make_zip_iterator(stack_i + nelms, stack_j + nelms, stack_data + nelms, stack_sora + nelms),  /* last */
+	   is_on_proc,                                                                                                /* stencil */
+	   oneapi::dpl::make_zip_iterator(off_proc_i,      off_proc_j,      off_proc_data,      off_proc_sora),       /* result */
 	   std::not1(oneapi::dpl::identity()) );
 
          hypre_assert(std::get<0>(new_end1.get_iterator_tuple()) - off_proc_i == nelms_off);
@@ -448,9 +448,9 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
          /* remove off-proc entries from stack */
          auto new_end2 = HYPRE_ONEDPL_CALL(
 	   dpct::remove_if,
-	   oneapi::dpl::make_zip_iterator(std::make_tuple(stack_i,         stack_j,         stack_data,         stack_sora        )),  /* first */
-	   oneapi::dpl::make_zip_iterator(std::make_tuple(stack_i + nelms, stack_j + nelms, stack_data + nelms, stack_sora + nelms)),  /* last */
-	   is_on_proc,                                                                                                                 /* stencil */
+	   oneapi::dpl::make_zip_iterator(stack_i,         stack_j,         stack_data,         stack_sora        ),  /* first */
+	   oneapi::dpl::make_zip_iterator(stack_i + nelms, stack_j + nelms, stack_data + nelms, stack_sora + nelms),  /* last */
+	   is_on_proc,                                                                                                /* stencil */
 	   std::not1(oneapi::dpl::identity()) );
 
          hypre_assert(std::get<0>(new_end2.get_iterator_tuple()) - stack_i == nelms_on);

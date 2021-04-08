@@ -975,10 +975,10 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
 
    // P_diag_j and P_diag_data
    HYPRE_ONEDPL_CALL( scatter,
-                      oneapi::dpl::make_zip_iterator(std::make_tuple(W_diag_j, W_diag_data)),
-                      oneapi::dpl::make_zip_iterator(std::make_tuple(W_diag_j, W_diag_data)) + W_diag_nnz,
+                      oneapi::dpl::make_zip_iterator(W_diag_j, W_diag_data),
+                      oneapi::dpl::make_zip_iterator(W_diag_j, W_diag_data) + W_diag_nnz,
                       shift,
-                      oneapi::dpl::make_zip_iterator(std::make_tuple(P_diag_j, P_diag_data)) );
+                      oneapi::dpl::make_zip_iterator(P_diag_j, P_diag_data) );
 
    hypre_TFree(shift, HYPRE_MEMORY_DEVICE);
 

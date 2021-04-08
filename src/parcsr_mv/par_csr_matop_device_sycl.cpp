@@ -526,7 +526,7 @@ hypre_ParCSRMatrixExtractBExtDevice( hypre_ParCSRMatrix *B,
 #if 1
 void
 hypreSYCLKernel_ConcatDiagAndOffd(sycl::nd_item<1>& item,
-				  HYPRE_Int  nrows,    HYPRE_Int  diag_ncol,
+                                  HYPRE_Int  nrows,    HYPRE_Int  diag_ncol,
                                   HYPRE_Int *d_diag_i, HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a,
                                   HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j, HYPRE_Complex *d_offd_a,
                                   HYPRE_Int *cols_offd_map,
@@ -650,17 +650,17 @@ hypre_ConcatDiagAndOffdDevice(hypre_ParCSRMatrix *A)
    // Adiag
    HYPRE_Int *A_diag_ii = hypreDevice_CsrRowPtrsToIndices(B_nrows, A_diag_nnz, A_diag_i);
    HYPRE_ONEDPL_CALL( std::copy_n,
-                      oneapi::dpl::make_zip_iterator(std::make_tuple(A_diag_ii, A_diag_j, A_diag_a)),
+                      oneapi::dpl::make_zip_iterator(A_diag_ii, A_diag_j, A_diag_a),
                       A_diag_nnz,
-                      oneapi::dpl::make_zip_iterator(std::make_tuple(B_ii, B_j, B_a)) );
+                      oneapi::dpl::make_zip_iterator(B_ii, B_j, B_a) );
    hypre_TFree(A_diag_ii, HYPRE_MEMORY_DEVICE);
 
    // Aoffd
    HYPRE_Int *A_offd_ii = hypreDevice_CsrRowPtrsToIndices(B_nrows, A_offd_nnz, A_offd_i);
    HYPRE_ONEDPL_CALL( std::copy_n,
-                      oneapi::dpl::make_zip_iterator(std::make_tuple(A_offd_ii, A_offd_a)),
+                      oneapi::dpl::make_zip_iterator(A_offd_ii, A_offd_a),
                       A_offd_nnz,
-                      oneapi::dpl::make_zip_iterator(std::make_tuple(B_ii, B_a)) + A_diag_nnz );
+                      oneapi::dpl::make_zip_iterator(B_ii, B_a) + A_diag_nnz );
    hypre_TFree(A_offd_ii, HYPRE_MEMORY_DEVICE);
 
    HYPRE_ONEDPL_CALL( std::transform,
@@ -671,10 +671,10 @@ hypre_ConcatDiagAndOffdDevice(hypre_ParCSRMatrix *A)
                       std::plus<HYPRE_Int>() );
 
    // B
-   HYPRE_ONEDPL_CALL( std::stable_sort, // stable_sort_by_key // todo: check API
-                      B_ii,
-                      B_ii + B_nnz,
-                      oneapi::dpl::make_zip_iterator(std::make_tuple(B_j, B_a)) );
+   auto values_begin = oneapi::dpl::make_zip_iterator(B_j, B_a);
+   auto zipped_begin = oneapi::dpl::make_zip_iterator(B_ii, values_begin);
+   HYPRE_ONEDPL_CALL( std::stable_sort, //stable_sort_by_key
+                      zipped_begin, zipped_begin + B_nnz );
 
    HYPRE_Int *B_i = hypreDevice_CsrRowIndicesToPtrs(B_nrows, B_nnz, B_ii);
    hypre_TFree(B_ii, HYPRE_MEMORY_DEVICE);
@@ -714,7 +714,7 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
    hypre_CSRMatrixInitialize_v2(B, 0, HYPRE_MEMORY_DEVICE);
 
    hypreDevice_GetRowNnz(hypre_ParCSRMatrixNumRows(A), nullptr,
-			 hypre_CSRMatrixI(A_diag), hypre_CSRMatrixI(A_offd), hypre_CSRMatrixI(B));
+                         hypre_CSRMatrixI(A_diag), hypre_CSRMatrixI(A_offd), hypre_CSRMatrixI(B));
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
                       hypre_CSRMatrixI(B),
                       hypre_CSRMatrixI(B) + hypre_ParCSRMatrixNumRows(A) + 1,
@@ -724,19 +724,19 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
    sycl::range<1> gDim = hypre_GetDefaultSYCLGridDimension(hypre_ParCSRMatrixNumRows(A), "warp", bDim);
 
    HYPRE_SYCL_1D_LAUNCH( hypreSYCLKernel_ConcatDiagAndOffd,
-			 gDim, bDim,
-			 hypre_CSRMatrixNumRows(A_diag),
-			 hypre_CSRMatrixNumCols(A_diag),
-			 hypre_CSRMatrixI(A_diag),
-			 hypre_CSRMatrixJ(A_diag),
-			 hypre_CSRMatrixData(A_diag),
-			 hypre_CSRMatrixI(A_offd),
-			 hypre_CSRMatrixJ(A_offd),
-			 hypre_CSRMatrixData(A_offd),
-			 cols_offd_map,
-			 hypre_CSRMatrixI(B),
-			 hypre_CSRMatrixJ(B),
-			 hypre_CSRMatrixData(B) );
+                         gDim, bDim,
+                         hypre_CSRMatrixNumRows(A_diag),
+                         hypre_CSRMatrixNumCols(A_diag),
+                         hypre_CSRMatrixI(A_diag),
+                         hypre_CSRMatrixJ(A_diag),
+                         hypre_CSRMatrixData(A_diag),
+                         hypre_CSRMatrixI(A_offd),
+                         hypre_CSRMatrixJ(A_offd),
+                         hypre_CSRMatrixData(A_offd),
+                         cols_offd_map,
+                         hypre_CSRMatrixI(B),
+                         hypre_CSRMatrixJ(B),
+                         hypre_CSRMatrixData(B) );
 
    hypre_TFree(cols_offd_map, HYPRE_MEMORY_DEVICE);
 
@@ -754,19 +754,19 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
    hypre_assert(hypre_CSRMatrixNumCols(E_diag) == hypre_CSRMatrixNumCols(A_diag));
 
    HYPRE_SYCL_1D_LAUNCH( hypreSYCLKernel_ConcatDiagAndOffd,
-			 gDim, bDim,
-			 hypre_CSRMatrixNumRows(E_diag),
-			 hypre_CSRMatrixNumCols(E_diag),
-			 hypre_CSRMatrixI(E_diag),
-			 hypre_CSRMatrixJ(E_diag),
-			 hypre_CSRMatrixData(E_diag),
-			 hypre_CSRMatrixI(E_offd),
-			 hypre_CSRMatrixJ(E_offd),
-			 hypre_CSRMatrixData(E_offd),
-			 nullptr,
-			 hypre_CSRMatrixI(B) + hypre_ParCSRMatrixNumRows(A),
-			 hypre_CSRMatrixJ(B),
-			 hypre_CSRMatrixData(B) );
+                         gDim, bDim,
+                         hypre_CSRMatrixNumRows(E_diag),
+                         hypre_CSRMatrixNumCols(E_diag),
+                         hypre_CSRMatrixI(E_diag),
+                         hypre_CSRMatrixJ(E_diag),
+                         hypre_CSRMatrixData(E_diag),
+                         hypre_CSRMatrixI(E_offd),
+                         hypre_CSRMatrixJ(E_offd),
+                         hypre_CSRMatrixData(E_offd),
+                         nullptr,
+                         hypre_CSRMatrixI(B) + hypre_ParCSRMatrixNumRows(A),
+                         hypre_CSRMatrixJ(B),
+                         hypre_CSRMatrixData(B) );
 
    hypre_CSRMatrixDestroy(E_diag);
    hypre_CSRMatrixDestroy(E_offd);
@@ -850,17 +850,17 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
    // Adiag
    HYPRE_Int *A_diag_ii = hypreDevice_CsrRowPtrsToIndices(A_nrows, A_diag_nnz, A_diag_i);
    HYPRE_ONEDPL_CALL( std::copy_n,
-                      oneapi::dpl::make_zip_iterator(std::make_tuple(A_diag_ii, A_diag_j, A_diag_a)),
+                      oneapi::dpl::make_zip_iterator(A_diag_ii, A_diag_j, A_diag_a),
                       A_diag_nnz,
-                      oneapi::dpl::make_zip_iterator(std::make_tuple(B_ii, B_j, B_a)) );
+                      oneapi::dpl::make_zip_iterator(B_ii, B_j, B_a) );
    hypre_TFree(A_diag_ii, HYPRE_MEMORY_DEVICE);
 
    // Aoffd
    HYPRE_Int *A_offd_ii = hypreDevice_CsrRowPtrsToIndices(A_nrows, A_offd_nnz, A_offd_i);
    HYPRE_ONEDPL_CALL( std::copy_n,
-                      oneapi::dpl::make_zip_iterator(std::make_tuple(A_offd_ii, A_offd_a)),
+                      oneapi::dpl::make_zip_iterator(A_offd_ii, A_offd_a),
                       A_offd_nnz,
-                      oneapi::dpl::make_zip_iterator(std::make_tuple(B_ii, B_a)) + A_diag_nnz );
+                      oneapi::dpl::make_zip_iterator(B_ii, B_a) + A_diag_nnz );
    hypre_TFree(A_offd_ii, HYPRE_MEMORY_DEVICE);
 
    HYPRE_ONEDPL_CALL( gather,
@@ -886,10 +886,10 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
                       std::plus<HYPRE_Int>() );
 
    // B
+   auto values_begin = oneapi::dpl::make_zip_iterator(B_j, B_a);
+   auto zipped_begin = oneapi::dpl::make_zip_iterator(B_ii, values_begin);
    HYPRE_ONEDPL_CALL( std::stable_sort, //stable_sort_by_key,
-                      B_ii,
-                      B_ii + B_nnz,
-                      oneapi::dpl::make_zip_iterator(std::make_tuple(B_j, B_a)) );
+                      zipped_begin, zipped_begin + B_nnz );
 
    HYPRE_Int *B_i = hypreDevice_CsrRowIndicesToPtrs(A_nrows + E_nrows, B_nnz, B_ii);
    hypre_TFree(B_ii, HYPRE_MEMORY_DEVICE);

@@ -105,7 +105,7 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
 
       // split into diag and offd
       in_range<HYPRE_Int> pred(0, hypre_ParCSRMatrixNumCols(B) - 1);
-      HYPRE_Int nnz_C_diag = HYPRE_ONEDPL_CALL( count_if,
+      HYPRE_Int nnz_C_diag = HYPRE_ONEDPL_CALL( std::count_if,
                                                 hypre_CSRMatrixJ(Cbar),
                                                 hypre_CSRMatrixJ(Cbar) + hypre_CSRMatrixNumNonzeros(Cbar),
                                                 pred );
@@ -122,11 +122,11 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
                                                            hypre_CSRMatrixI(Cbar));
 
       auto new_end = HYPRE_ONEDPL_CALL(
-         copy_if,
-         oneapi::dpl::make_zip_iterator(std::make_tuple(Cbar_ii, hypre_CSRMatrixJ(Cbar), hypre_CSRMatrixData(Cbar))),
-         oneapi::dpl::make_zip_iterator(std::make_tuple(Cbar_ii, hypre_CSRMatrixJ(Cbar), hypre_CSRMatrixData(Cbar))) + hypre_CSRMatrixNumNonzeros(Cbar),
+	 dpct::copy_if,
+         oneapi::dpl::make_zip_iterator(Cbar_ii, hypre_CSRMatrixJ(Cbar), hypre_CSRMatrixData(Cbar)),
+         oneapi::dpl::make_zip_iterator(Cbar_ii, hypre_CSRMatrixJ(Cbar), hypre_CSRMatrixData(Cbar)) + hypre_CSRMatrixNumNonzeros(Cbar),
          hypre_CSRMatrixJ(Cbar),
-         oneapi::dpl::make_zip_iterator(std::make_tuple(C_diag_ii, C_diag_j, C_diag_a)),
+         oneapi::dpl::make_zip_iterator(C_diag_ii, C_diag_j, C_diag_a),
          pred );
       hypre_assert( std::get<0>(new_end.get_iterator_tuple()) == C_diag_ii + nnz_C_diag );
       hypreDevice_CsrRowIndicesToPtrs_v2(hypre_CSRMatrixNumRows(C_diag), nnz_C_diag, C_diag_ii, hypre_CSRMatrixI(C_diag));
@@ -138,17 +138,17 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
       HYPRE_Int     *C_offd_j = hypre_CSRMatrixJ(C_offd);
       HYPRE_Complex *C_offd_a = hypre_CSRMatrixData(C_offd);
       new_end = HYPRE_ONEDPL_CALL(
-         copy_if,
-         oneapi::dpl::make_zip_iterator(std::make_tuple(Cbar_ii, hypre_CSRMatrixJ(Cbar), hypre_CSRMatrixData(Cbar))),
-         oneapi::dpl::make_zip_iterator(std::make_tuple(Cbar_ii, hypre_CSRMatrixJ(Cbar), hypre_CSRMatrixData(Cbar))) + hypre_CSRMatrixNumNonzeros(Cbar),
+	 dpct::copy_if,
+         oneapi::dpl::make_zip_iterator(Cbar_ii, hypre_CSRMatrixJ(Cbar), hypre_CSRMatrixData(Cbar)),
+         oneapi::dpl::make_zip_iterator(Cbar_ii, hypre_CSRMatrixJ(Cbar), hypre_CSRMatrixData(Cbar)) + hypre_CSRMatrixNumNonzeros(Cbar),
          hypre_CSRMatrixJ(Cbar),
-         oneapi::dpl::make_zip_iterator(std::make_tuple(C_offd_ii, C_offd_j, C_offd_a)),
+         oneapi::dpl::make_zip_iterator(C_offd_ii, C_offd_j, C_offd_a),
          std::not1(pred) );
       hypre_assert( std::get<0>(new_end.get_iterator_tuple()) == C_offd_ii + nnz_C_offd );
       hypreDevice_CsrRowIndicesToPtrs_v2(hypre_CSRMatrixNumRows(C_offd), nnz_C_offd, C_offd_ii, hypre_CSRMatrixI(C_offd));
       hypre_TFree(C_offd_ii, HYPRE_MEMORY_DEVICE);
 
-      HYPRE_ONEDPL_CALL( transform,
+      HYPRE_ONEDPL_CALL( std::transform,
                          C_offd_j,
                          C_offd_j + nnz_C_offd,
                          dpct::make_constant_iterator(hypre_ParCSRMatrixNumCols(B)),
@@ -265,7 +265,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       hypre_CSRMatrixOwnsData(Cint) = 0;
 
       hypre_CSRMatrixI(Cint) = hypre_CSRMatrixI(Cbar) + hypre_ParCSRMatrixNumCols(A);
-      HYPRE_ONEDPL_CALL( transform,
+      HYPRE_ONEDPL_CALL( std::transform,
                          hypre_CSRMatrixI(Cint),
                          hypre_CSRMatrixI(Cint) + hypre_CSRMatrixNumRows(Cint) + 1,
                          dpct::make_constant_iterator(local_nnz_Cbar),
@@ -277,7 +277,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       RAP_functor<1, HYPRE_BigInt> func1( hypre_ParCSRMatrixNumCols(B),
                                           hypre_ParCSRMatrixFirstColDiag(B),
                                           hypre_ParCSRMatrixDeviceColMapOffd(B) );
-      HYPRE_ONEDPL_CALL( transform,
+      HYPRE_ONEDPL_CALL( std::transform,
                          hypre_CSRMatrixJ(Cbar) + local_nnz_Cbar,
                          hypre_CSRMatrixJ(Cbar) + hypre_CSRMatrixNumNonzeros(Cbar),
                          hypre_CSRMatrixBigJ(Cint),
@@ -354,7 +354,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
                          hypre_ParCSRCommPkgDeviceSendMapElmts(hypre_ParCSRMatrixCommPkg(A)),
                          tmp_i + local_nnz_Cbar );
 
-      HYPRE_ONEDPL_CALL( transform,
+      HYPRE_ONEDPL_CALL( std::transform,
                          tmp_j + local_nnz_Cbar + Cext_diag_nnz,
                          tmp_j + tmp_s,
                          dpct::make_constant_iterator(hypre_ParCSRMatrixNumCols(B)),
@@ -364,7 +364,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       hypreDevice_CsrRowPtrsToIndices_v2(hypre_ParCSRMatrixNumCols(A), local_nnz_Cbar, hypre_CSRMatrixI(Cbar), tmp_i);
       hypre_TMemcpy(tmp_a, hypre_CSRMatrixData(Cbar), HYPRE_Complex, local_nnz_Cbar, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
       RAP_functor<2, HYPRE_Int> func2(hypre_ParCSRMatrixNumCols(B), 0, offd_map_to_C);
-      HYPRE_ONEDPL_CALL( transform,
+      HYPRE_ONEDPL_CALL( std::transform,
                          hypre_CSRMatrixJ(Cbar),
                          hypre_CSRMatrixJ(Cbar) + local_nnz_Cbar,
                          tmp_j,
@@ -389,7 +389,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       // split into diag and offd
       in_range<HYPRE_Int> pred(0, hypre_ParCSRMatrixNumCols(B) - 1);
 
-      HYPRE_Int nnz_C_diag = HYPRE_ONEDPL_CALL( count_if,
+      HYPRE_Int nnz_C_diag = HYPRE_ONEDPL_CALL( std::count_if,
                                                 zmp_j,
                                                 zmp_j + local_nnz_C,
                                                 pred );
@@ -401,11 +401,11 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       HYPRE_Int     *C_diag_j = hypre_CSRMatrixJ(C_diag);
       HYPRE_Complex *C_diag_a = hypre_CSRMatrixData(C_diag);
 
-      auto new_end = HYPRE_ONEDPL_CALL( copy_if,
-                                        oneapi::dpl::make_zip_iterator(std::make_tuple(zmp_i, zmp_j, zmp_a)),
-                                        oneapi::dpl::make_zip_iterator(std::make_tuple(zmp_i, zmp_j, zmp_a)) + local_nnz_C,
+      auto new_end = HYPRE_ONEDPL_CALL( dpct::copy_if,
+                                        oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a),
+                                        oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a) + local_nnz_C,
                                         zmp_j,
-                                        oneapi::dpl::make_zip_iterator(std::make_tuple(C_diag_ii, C_diag_j, C_diag_a)),
+                                        oneapi::dpl::make_zip_iterator(C_diag_ii, C_diag_j, C_diag_a),
                                         pred );
       hypre_assert( std::get<0>(new_end.get_iterator_tuple()) == C_diag_ii + nnz_C_diag );
       hypreDevice_CsrRowIndicesToPtrs_v2(hypre_CSRMatrixNumRows(C_diag), nnz_C_diag, C_diag_ii, hypre_CSRMatrixI(C_diag));
@@ -416,17 +416,17 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       HYPRE_Int     *C_offd_ii = hypre_TAlloc(HYPRE_Int, nnz_C_offd, HYPRE_MEMORY_DEVICE);
       HYPRE_Int     *C_offd_j = hypre_CSRMatrixJ(C_offd);
       HYPRE_Complex *C_offd_a = hypre_CSRMatrixData(C_offd);
-      new_end = HYPRE_ONEDPL_CALL( copy_if,
-                                   oneapi::dpl::make_zip_iterator(std::make_tuple(zmp_i, zmp_j, zmp_a)),
-                                   oneapi::dpl::make_zip_iterator(std::make_tuple(zmp_i, zmp_j, zmp_a)) + local_nnz_C,
+      new_end = HYPRE_ONEDPL_CALL( dpct::copy_if,
+                                   oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a),
+                                   oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a) + local_nnz_C,
                                    zmp_j,
-                                   oneapi::dpl::make_zip_iterator(std::make_tuple(C_offd_ii, C_offd_j, C_offd_a)),
+                                   oneapi::dpl::make_zip_iterator(C_offd_ii, C_offd_j, C_offd_a),
                                    std::not1(pred) );
       hypre_assert( std::get<0>(new_end.get_iterator_tuple()) == C_offd_ii + nnz_C_offd );
       hypreDevice_CsrRowIndicesToPtrs_v2(hypre_CSRMatrixNumRows(C_offd), nnz_C_offd, C_offd_ii, hypre_CSRMatrixI(C_offd));
       hypre_TFree(C_offd_ii, HYPRE_MEMORY_DEVICE);
 
-      HYPRE_ONEDPL_CALL( transform,
+      HYPRE_ONEDPL_CALL( std::transform,
                          C_offd_j,
                          C_offd_j + nnz_C_offd,
                          dpct::make_constant_iterator(hypre_ParCSRMatrixNumCols(B)),
@@ -581,7 +581,7 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       hypre_CSRMatrixOwnsData(Cint) = 0;
 
       hypre_CSRMatrixI(Cint) = hypre_CSRMatrixI(Cbar) + hypre_ParCSRMatrixNumCols(R);
-      HYPRE_ONEDPL_CALL( transform,
+      HYPRE_ONEDPL_CALL( std::transform,
                          hypre_CSRMatrixI(Cint),
                          hypre_CSRMatrixI(Cint) + hypre_CSRMatrixNumRows(Cint) + 1,
                          dpct::make_constant_iterator(local_nnz_Cbar),
@@ -591,7 +591,7 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       hypre_CSRMatrixBigJ(Cint) = hypre_TAlloc(HYPRE_BigInt, hypre_CSRMatrixNumNonzeros(Cint), HYPRE_MEMORY_DEVICE);
 
       RAP_functor<1, HYPRE_BigInt> func1(hypre_ParCSRMatrixNumCols(P), hypre_ParCSRMatrixFirstColDiag(P), col_map_offd);
-      HYPRE_ONEDPL_CALL( transform,
+      HYPRE_ONEDPL_CALL( std::transform,
                          hypre_CSRMatrixJ(Cbar) + local_nnz_Cbar,
                          hypre_CSRMatrixJ(Cbar) + hypre_CSRMatrixNumNonzeros(Cbar),
                          hypre_CSRMatrixBigJ(Cint),
@@ -669,7 +669,7 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                          hypre_ParCSRCommPkgDeviceSendMapElmts(hypre_ParCSRMatrixCommPkg(R)),
                          tmp_i + local_nnz_Cbar );
 
-      HYPRE_ONEDPL_CALL( transform,
+      HYPRE_ONEDPL_CALL( std::transform,
                          tmp_j + local_nnz_Cbar + Cext_diag_nnz,
                          tmp_j + tmp_s,
                          dpct::make_constant_iterator(hypre_ParCSRMatrixNumCols(P)),
@@ -679,7 +679,7 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       hypreDevice_CsrRowPtrsToIndices_v2(hypre_ParCSRMatrixNumCols(R), local_nnz_Cbar, hypre_CSRMatrixI(Cbar), tmp_i);
       hypre_TMemcpy(tmp_a, hypre_CSRMatrixData(Cbar), HYPRE_Complex, local_nnz_Cbar, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
       RAP_functor<2, HYPRE_Int> func2(hypre_ParCSRMatrixNumCols(P), 0, offd_map_to_C);
-      HYPRE_ONEDPL_CALL( transform,
+      HYPRE_ONEDPL_CALL( std::transform,
                          hypre_CSRMatrixJ(Cbar),
                          hypre_CSRMatrixJ(Cbar) + local_nnz_Cbar,
                          tmp_j,
@@ -704,7 +704,7 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       // split into diag and offd
       in_range<HYPRE_Int> pred(0, hypre_ParCSRMatrixNumCols(P) - 1);
 
-      HYPRE_Int nnz_C_diag = HYPRE_ONEDPL_CALL( count_if,
+      HYPRE_Int nnz_C_diag = HYPRE_ONEDPL_CALL( std::count_if,
                                                 zmp_j,
                                                 zmp_j + local_nnz_C,
                                                 pred );
@@ -716,11 +716,11 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       HYPRE_Int     *C_diag_j = hypre_CSRMatrixJ(C_diag);
       HYPRE_Complex *C_diag_a = hypre_CSRMatrixData(C_diag);
 
-      auto new_end = HYPRE_ONEDPL_CALL( copy_if,
-                                        oneapi::dpl::make_zip_iterator(std::make_tuple(zmp_i, zmp_j, zmp_a)),
-                                        oneapi::dpl::make_zip_iterator(std::make_tuple(zmp_i, zmp_j, zmp_a)) + local_nnz_C,
+      auto new_end = HYPRE_ONEDPL_CALL( dpct::copy_if,
+                                        oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a),
+                                        oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a) + local_nnz_C,
                                         zmp_j,
-                                        oneapi::dpl::make_zip_iterator(std::make_tuple(C_diag_ii, C_diag_j, C_diag_a)),
+                                        oneapi::dpl::make_zip_iterator(C_diag_ii, C_diag_j, C_diag_a),
                                         pred );
       hypre_assert( std::get<0>(new_end.get_iterator_tuple()) == C_diag_ii + nnz_C_diag );
       hypreDevice_CsrRowIndicesToPtrs_v2(hypre_CSRMatrixNumRows(C_diag), nnz_C_diag, C_diag_ii, hypre_CSRMatrixI(C_diag));
@@ -731,17 +731,17 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       HYPRE_Int     *C_offd_ii = hypre_TAlloc(HYPRE_Int, nnz_C_offd, HYPRE_MEMORY_DEVICE);
       HYPRE_Int     *C_offd_j = hypre_CSRMatrixJ(C_offd);
       HYPRE_Complex *C_offd_a = hypre_CSRMatrixData(C_offd);
-      new_end = HYPRE_ONEDPL_CALL( copy_if,
-                                   oneapi::dpl::make_zip_iterator(std::make_tuple(zmp_i, zmp_j, zmp_a)),
-                                   oneapi::dpl::make_zip_iterator(std::make_tuple(zmp_i, zmp_j, zmp_a)) + local_nnz_C,
+      new_end = HYPRE_ONEDPL_CALL( dpct::copy_if,
+                                   oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a),
+                                   oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a) + local_nnz_C,
                                    zmp_j,
-                                   oneapi::dpl::make_zip_iterator(std::make_tuple(C_offd_ii, C_offd_j, C_offd_a)),
+                                   oneapi::dpl::make_zip_iterator(C_offd_ii, C_offd_j, C_offd_a),
                                    std::not1(pred) );
       hypre_assert( std::get<0>(new_end.get_iterator_tuple()) == C_offd_ii + nnz_C_offd );
       hypreDevice_CsrRowIndicesToPtrs_v2(hypre_CSRMatrixNumRows(C_offd), nnz_C_offd, C_offd_ii, hypre_CSRMatrixI(C_offd));
       hypre_TFree(C_offd_ii, HYPRE_MEMORY_DEVICE);
 
-      HYPRE_ONEDPL_CALL( transform,
+      HYPRE_ONEDPL_CALL( std::transform,
                          C_offd_j,
                          C_offd_j + nnz_C_offd,
                          dpct::make_constant_iterator(hypre_ParCSRMatrixNumCols(P)),

@@ -171,11 +171,11 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
          HYPRE_ONEDPL_CALL(std::transform, stack_i, stack_i + nelms, is_on_proc, pred);
 
          auto new_end1 = HYPRE_ONEDPL_CALL(
-	   std::copy_if,
-	   oneapi::dpl::make_zip_iterator(std::make_tuple(stack_i,         stack_data,         stack_sora        )),  /* first */
-	   oneapi::dpl::make_zip_iterator(std::make_tuple(stack_i + nelms, stack_data + nelms, stack_sora + nelms)),  /* last */
-	   is_on_proc,                                                                                                /* stencil */
-	   oneapi::dpl::make_zip_iterator(std::make_tuple(off_proc_i,      off_proc_data,      off_proc_sora)),       /* result */
+	   dpct::copy_if,
+	   oneapi::dpl::make_zip_iterator(stack_i,         stack_data,         stack_sora        ),  /* first */
+	   oneapi::dpl::make_zip_iterator(stack_i + nelms, stack_data + nelms, stack_sora + nelms),  /* last */
+	   is_on_proc,                                                                               /* stencil */
+	   oneapi::dpl::make_zip_iterator(off_proc_i,      off_proc_data,      off_proc_sora),       /* result */
 	   std::not1(oneapi::dpl::identity()) );
 
          hypre_assert(std::get<0>(new_end1.get_iterator_tuple()) - off_proc_i == nelms_off);
@@ -183,9 +183,9 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
          /* remove off-proc entries from stack */
          auto new_end2 = HYPRE_ONEDPL_CALL(
 	   dpct::remove_if,
-	   oneapi::dpl::make_zip_iterator(std::make_tuple(stack_i,         stack_data,         stack_sora        )),  /* first */
-	   oneapi::dpl::make_zip_iterator(std::make_tuple(stack_i + nelms, stack_data + nelms, stack_sora + nelms)),  /* last */
-	   is_on_proc,                                                                                                /* stencil */
+	   oneapi::dpl::make_zip_iterator(stack_i,         stack_data,         stack_sora        ),  /* first */
+	   oneapi::dpl::make_zip_iterator(stack_i + nelms, stack_data + nelms, stack_sora + nelms),  /* last */
+	   is_on_proc,                                                                               /* stencil */
 	   std::not1(oneapi::dpl::identity()) );
 
          hypre_assert(std::get<0>(new_end2.get_iterator_tuple()) - stack_i == nelms_on);
@@ -260,7 +260,7 @@ HYPRE_Int
 hypre_IJVectorAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, char  *X0, HYPRE_Complex  *A0,
                                      HYPRE_Int *N1, HYPRE_BigInt **I1, char **X1, HYPRE_Complex **A1 )
 {
-   auto vals_begin = oneapi::dpl::make_zip_iterator(std::make_tuple(X0, A0));
+   auto vals_begin = oneapi::dpl::make_zip_iterator(X0, A0);
    auto zipped_begin = oneapi::dpl::make_zip_iterator(I0, vals_begin);
    HYPRE_ONEDPL_CALL( std::stable_sort, zipped_begin, zipped_begin + N0 );
 
@@ -286,11 +286,11 @@ hypre_IJVectorAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, char  *X0
 
    auto new_end = HYPRE_ONEDPL_CALL(
      oneapi::dpl::reduce_by_segment,
-     I0,                                                                /* keys_first */
-     I0 + N0,                                                           /* keys_last */
-     oneapi::dpl::make_zip_iterator(std::make_tuple(X0,      A0     )), /* values_first */
-     I,                                                                 /* keys_output */
-     oneapi::dpl::make_zip_iterator(std::make_tuple(X,       A      )), /* values_output */
+     I0,                                               /* keys_first */
+     I0 + N0,                                          /* keys_last */
+     oneapi::dpl::make_zip_iterator(X0,      A0     ), /* values_first */
+     I,                                                /* keys_output */
+     oneapi::dpl::make_zip_iterator(X,       A      ), /* values_output */
      std::equal_to<HYPRE_BigInt>(),                                     /* binary_pred */
      hypre_IJVectorAssembleFunctor<char, HYPRE_Complex>()               /* binary_op */ );
 
@@ -306,7 +306,7 @@ HYPRE_Int
 hypre_IJVectorAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, char *X0, HYPRE_Complex  *A0,
                                      HYPRE_Int *N1, HYPRE_BigInt **I1,           HYPRE_Complex **A1)
 {
-   auto vals_begin = oneapi::dpl::make_zip_iterator(std::make_tuple(X0, A0));
+   auto vals_begin = oneapi::dpl::make_zip_iterator(X0, A0);
    auto zipped_begin = oneapi::dpl::make_zip_iterator(I0, vals_begin);
    HYPRE_ONEDPL_CALL( std::stable_sort, zipped_begin, zipped_begin + N0 );
 

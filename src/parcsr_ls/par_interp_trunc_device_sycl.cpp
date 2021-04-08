@@ -163,10 +163,10 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
    {
       auto new_end = HYPRE_ONEDPL_CALL(
             dpct::copy_if,
-            oneapi::dpl::make_zip_iterator(std::make_tuple(P_i,       P_j,       P_a)),
-            oneapi::dpl::make_zip_iterator(std::make_tuple(P_i+nnz_P, P_j+nnz_P, P_a+nnz_P)),
+            oneapi::dpl::make_zip_iterator(P_i,       P_j,       P_a),
+            oneapi::dpl::make_zip_iterator(P_i+nnz_P, P_j+nnz_P, P_a+nnz_P),
             P_j,
-            oneapi::dpl::make_zip_iterator(std::make_tuple(tmp_rowid, P_diag_j,  P_diag_a)),
+            oneapi::dpl::make_zip_iterator(tmp_rowid, P_diag_j,  P_diag_a),
             is_nonnegative<HYPRE_Int>() );
 
       new_nnz_diag = std::get<0>(new_end.get_iterator_tuple()) - tmp_rowid;
@@ -181,10 +181,10 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
       less_than<HYPRE_Int> pred(-1);
       auto new_end = HYPRE_ONEDPL_CALL(
             dpct::copy_if,
-            oneapi::dpl::make_zip_iterator(std::make_tuple(P_i,       P_j,       P_a)),
-            oneapi::dpl::make_zip_iterator(std::make_tuple(P_i+nnz_P, P_j+nnz_P, P_a+nnz_P)),
+            oneapi::dpl::make_zip_iterator(P_i,       P_j,       P_a),
+            oneapi::dpl::make_zip_iterator(P_i+nnz_P, P_j+nnz_P, P_a+nnz_P),
             P_j,
-            oneapi::dpl::make_zip_iterator(std::make_tuple(tmp_rowid, P_offd_j,  P_offd_a)),
+            oneapi::dpl::make_zip_iterator(tmp_rowid, P_offd_j,  P_offd_a),
             pred );
 
       new_nnz_offd = std::get<0>(new_end.get_iterator_tuple()) - tmp_rowid;

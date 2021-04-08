@@ -563,48 +563,6 @@ struct absolute_value {
   }
 };
 
-template<typename T1, typename T2>
-struct TupleComp2
-{
-  typedef std::tuple<T1, T2> Tuple;
-
-  bool operator()(const Tuple& t1, const Tuple& t2)
-  {
-    if (std::get<0>(t1) < std::get<0>(t2))
-    {
-      return true;
-    }
-    if (std::get<0>(t1) > std::get<0>(t2))
-    {
-      return false;
-    }
-    return hypre_abs(std::get<1>(t1)) > hypre_abs(std::get<1>(t2));
-  }
-};
-
-template<typename T1, typename T2>
-struct TupleComp3
-{
-   typedef std::tuple<T1, T2> Tuple;
-
-   bool operator()(const Tuple& t1, const Tuple& t2)
-   {
-      if (std::get<0>(t1) < std::get<0>(t2))
-      {
-         return true;
-      }
-      if (std::get<0>(t1) > std::get<0>(t2))
-      {
-         return false;
-      }
-      if (std::get<0>(t2) == std::get<1>(t2))
-      {
-         return false;
-      }
-      return std::get<0>(t1) == std::get<1>(t1) || std::get<1>(t1) < std::get<1>(t2);
-   }
-};
-
 template <typename T>
 struct is_negative {
    bool operator()(const T &x)

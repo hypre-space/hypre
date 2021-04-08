@@ -434,7 +434,7 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
       // Next two lines for: HYPRE_THRUST_CALL(sort_by_key, map2, map2 + ny, y);
       auto zipped_begin = oneapi::dpl::make_zip_iterator(map2, y);
       HYPRE_ONEDPL_CALL(std::sort, zipped_begin, zipped_begin + ny,
-                        [](auto lhs, auto rhs) { return get<0>(lhs) < get<0>(rhs); });
+                        [](auto lhs, auto rhs) { return std::get<0>(lhs) < std::get<0>(rhs); });
 
       std::pair<HYPRE_Int*, HYPRE_Real*> new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
                                                                       map2,
@@ -635,20 +635,27 @@ template <typename T1, typename T2, typename T3>
 HYPRE_Int
 hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt)
 {
-   auto begin_keys = oneapi::dpl::make_zip_iterator(std::make_tuple(keys1,     keys2));
-   auto end_keys   = oneapi::dpl::make_zip_iterator(std::make_tuple(keys1 + N, keys2 + N));
+   auto begin_keys = oneapi::dpl::make_zip_iterator(keys1,     keys2,     vals    );
+   auto end_keys   = oneapi::dpl::make_zip_iterator(keys1 + N, keys2 + N, vals + N);
 
    if (opt == 0)
    {
-      HYPRE_ONEDPL_CALL(std::stable_sort, begin_keys, end_keys, vals, std::less<std::tuple<T1, T2>>());
+      HYPRE_ONEDPL_CALL(std::stable_sort, begin_keys, end_keys, std::less<T1, T2>());
    }
    else if (opt == 1)
    {
-      HYPRE_ONEDPL_CALL(std::stable_sort, begin_keys, end_keys, vals, TupleComp2<T1,T2>());
+      HYPRE_ONEDPL_CALL(std::stable_sort, begin_keys, end_keys, [](auto lhs, auto rhs) {
+          if (std::get<0>(lhs) < std::get<0>(rhs)) { return true; }
+          if (std::get<0>(lhs) > std::get<0>(rhs)) { return false; }
+          return hypre_abs(std::get<1>(lhs)) > hypre_abs(std::get<1>(rhs)); } );
    }
    else if (opt == 2)
    {
-      HYPRE_ONEDPL_CALL(std::stable_sort, begin_keys, end_keys, vals, TupleComp3<T1,T2>());
+      HYPRE_ONEDPL_CALL(std::stable_sort, begin_keys, end_keys, [](auto lhs, auto rhs) {
+	  if (std::get<0>(lhs) < std::get<0>(rhs)) { return true; }
+	  if (std::get<0>(lhs) > std::get<0>(rhs)) { return false; }
+	  if (std::get<0>(rhs) == std::get<1>(rhs)) { return false; }
+	  return std::get<0>(lhs) == std::get<1>(lhs) || std::get<1>(lhs) < std::get<1>(rhs); } );
    }
 
    return hypre_error_flag;
@@ -666,19 +673,20 @@ template <typename T1, typename T2, typename T3, typename T4>
 HYPRE_Int
 hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals1, T4 *vals2, HYPRE_Int opt)
 {
-   auto begin_keys = oneapi::dpl::make_zip_iterator(std::make_tuple(keys1,     keys2));
-   auto end_keys   = oneapi::dpl::make_zip_iterator(std::make_tuple(keys1 + N, keys2 + N));
-   auto begin_vals = oneapi::dpl::make_zip_iterator(std::make_tuple(vals1,     vals2));
-
-   auto zipped_begin = oneapi::dpl::make_zip_iterator(keys_begin, vals_begin);
+   auto begin_keys = oneapi::dpl::make_zip_iterator(keys1,     keys2,     vals1,     vals2    );
+   auto end_keys   = oneapi::dpl::make_zip_iterator(keys1 + N, keys2 + N, vals1 + N, vals2 + N);
 
    if (opt == 0)
    {
-      HYPRE_ONEDPL_CALL(std::stable_sort, begin_keys, end_keys, begin_vals, std::less<std::tuple<T1, T2>>());
+      HYPRE_ONEDPL_CALL(std::stable_sort, begin_keys, end_keys, std::less<T1, T2>());
    }
    else if (opt == 2)
    {
-      HYPRE_ONEDPL_CALL(std::stable_sort, begin_keys, end_keys, begin_vals, TupleComp3<T1,T2>());
+      HYPRE_ONEDPL_CALL(std::stable_sort, begin_keys, end_keys, [](auto lhs, auto rhs) {
+          if (std::get<0>(lhs) < std::get<0>(rhs)) { return true; }
+          if (std::get<0>(lhs) > std::get<0>(rhs)) { return false; }
+          if (std::get<0>(rhs) == std::get<1>(rhs)) { return false; }
+          return std::get<0>(lhs) == std::get<1>(lhs) || std::get<1>(lhs) < std::get<1>(rhs); } );
    }
 
    return hypre_error_flag;
@@ -694,10 +702,10 @@ HYPRE_Int
 hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in,  T2 *keys2_in,  T3 *vals_in,
                                           T1 *keys1_out, T2 *keys2_out, T3 *vals_out)
 {
-   auto begin_keys_in  = oneapi::dpl::make_zip_iterator(std::make_tuple(keys1_in,     keys2_in    ));
-   auto end_keys_in    = oneapi::dpl::make_zip_iterator(std::make_tuple(keys1_in + N, keys2_in + N));
-   auto begin_keys_out = oneapi::dpl::make_zip_iterator(std::make_tuple(keys1_out,    keys2_out   ));
-   std::equal_to<std::tuple<T1, T2>> binary_pred;
+   auto begin_keys_in  = oneapi::dpl::make_zip_iterator(keys1_in,     keys2_in    );
+   auto end_keys_in    = oneapi::dpl::make_zip_iterator(keys1_in + N, keys2_in + N);
+   auto begin_keys_out = oneapi::dpl::make_zip_iterator(keys1_out,    keys2_out   );
+   std::equal_to<T1, T2> binary_pred;
    std::plus<T3> binary_op;
 
    auto new_end = HYPRE_ONEDPL_CALL(oneapi::dpl::reduce_by_segment,
