@@ -106,7 +106,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
 			 -1 );
 
    rsW = hypre_TAlloc(HYPRE_Complex, AF2F_nr_local, HYPRE_MEMORY_DEVICE);
-   HYPRE_Complex *new_end = HYPRE_ONEDPL_CALL( copy_if,
+   HYPRE_Complex *new_end = HYPRE_ONEDPL_CALL( dpct::copy_if,
                                                rsWA,
                                                rsWA + A_nr_local,
                                                CF_marker_dev,
@@ -119,13 +119,13 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
 
    /* map from F2 to F */
    HYPRE_Int *map_to_F = hypre_TAlloc(HYPRE_Int, A_nr_local, HYPRE_MEMORY_DEVICE);
-   HYPRE_ONEDPL_CALL( exclusive_scan,
+   HYPRE_ONEDPL_CALL( std::exclusive_scan,
                       oneapi::dpl::make_transform_iterator(CF_marker_dev,              is_negative<HYPRE_Int>()),
                       oneapi::dpl::make_transform_iterator(CF_marker_dev + A_nr_local, is_negative<HYPRE_Int>()),
                       map_to_F );
    HYPRE_Int *map_F2_to_F = hypre_TAlloc(HYPRE_Int, AF2F_nr_local, HYPRE_MEMORY_DEVICE);
 
-   HYPRE_Int *tmp_end = HYPRE_ONEDPL_CALL( copy_if,
+   HYPRE_Int *tmp_end = HYPRE_ONEDPL_CALL( dpct::copy_if,
                                            map_to_F,
                                            map_to_F + A_nr_local,
                                            CF_marker_dev,
@@ -180,7 +180,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    P_offd_i    = hypre_TAlloc(HYPRE_Int,     P_nr_local + 1, HYPRE_MEMORY_DEVICE);
 
    HYPRE_Int *C2F2_marker = hypre_TAlloc(HYPRE_Int, P_nr_local, HYPRE_MEMORY_DEVICE);
-   tmp_end = HYPRE_ONEDPL_CALL( copy_if,
+   tmp_end = HYPRE_ONEDPL_CALL( dpct::copy_if,
                                 CF_marker_dev,
                                 CF_marker_dev + A_nr_local,
                                 CF_marker_dev,
@@ -379,7 +379,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
 			 -1 );
 
    rsW = hypre_TAlloc(HYPRE_Complex, AF2F_nr_local, HYPRE_MEMORY_DEVICE);
-   HYPRE_Complex *new_end = HYPRE_ONEDPL_CALL( copy_if,
+   HYPRE_Complex *new_end = HYPRE_ONEDPL_CALL( dpct::copy_if,
                                                rsWA,
                                                rsWA + A_nr_local,
                                                CF_marker_dev,
@@ -392,13 +392,13 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
 
    /* map from F2 to F */
    HYPRE_Int *map_to_F = hypre_TAlloc(HYPRE_Int, A_nr_local, HYPRE_MEMORY_DEVICE);
-   HYPRE_ONEDPL_CALL( exclusive_scan,
+   HYPRE_ONEDPL_CALL( std::exclusive_scan,
                       oneapi::dpl::make_transform_iterator(CF_marker_dev,              is_negative<HYPRE_Int>()),
                       oneapi::dpl::make_transform_iterator(CF_marker_dev + A_nr_local, is_negative<HYPRE_Int>()),
                       map_to_F );
    HYPRE_Int *map_F2_to_F = hypre_TAlloc(HYPRE_Int, AF2F_nr_local, HYPRE_MEMORY_DEVICE);
 
-   HYPRE_Int *tmp_end = HYPRE_ONEDPL_CALL( copy_if,
+   HYPRE_Int *tmp_end = HYPRE_ONEDPL_CALL( dpct::copy_if,
                                            map_to_F,
                                            map_to_F + A_nr_local,
                                            CF_marker_dev,
@@ -457,7 +457,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    P_offd_i    = hypre_TAlloc(HYPRE_Int,     P_nr_local + 1, HYPRE_MEMORY_DEVICE);
 
    HYPRE_Int *C2F2_marker = hypre_TAlloc(HYPRE_Int, P_nr_local, HYPRE_MEMORY_DEVICE);
-   tmp_end = HYPRE_ONEDPL_CALL( copy_if,
+   tmp_end = HYPRE_ONEDPL_CALL( dpct::copy_if,
                                 CF_marker_dev,
                                 CF_marker_dev + A_nr_local,
                                 CF_marker_dev,

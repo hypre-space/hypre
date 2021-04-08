@@ -92,7 +92,7 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
    hypre_assert(A_nr_of_rows == W_nr_of_rows + hypre_ParCSRMatrixNumCols(AFC));
 
    rsW = hypre_TAlloc(HYPRE_Complex, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
-   HYPRE_Complex *new_end = HYPRE_ONEDPL_CALL( copy_if,
+   HYPRE_Complex *new_end = HYPRE_ONEDPL_CALL( dpct::copy_if,
                                                rsWA,
                                                rsWA + A_nr_of_rows,
                                                CF_marker_dev,
@@ -280,7 +280,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    hypre_assert(A_nr_of_rows == W_nr_of_rows + hypre_ParCSRMatrixNumCols(AFC));
 
    rsW = hypre_TAlloc(HYPRE_Complex, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
-   HYPRE_Complex *new_end = HYPRE_ONEDPL_CALL( copy_if,
+   HYPRE_Complex *new_end = HYPRE_ONEDPL_CALL( dpct::copy_if,
                                                rsWA,
                                                rsWA + A_nr_of_rows,
                                                CF_marker_dev,
@@ -325,7 +325,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    /* 5. Form matrix ~{A_FF}, (return twAFF in AFF data structure ) */
    HYPRE_Complex *AFF_diag_data_old = hypre_TAlloc(HYPRE_Complex, hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(AFF)),
                                                    HYPRE_MEMORY_DEVICE);
-   HYPRE_ONEDPL_CALL( copy,
+   HYPRE_ONEDPL_CALL( std::copy,
                       hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(AFF)),
                       hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(AFF)) + hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(AFF)),
                       AFF_diag_data_old );
@@ -508,7 +508,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    hypre_assert(A_nr_of_rows == W_nr_of_rows + hypre_ParCSRMatrixNumCols(AFC));
 
    rsW = hypre_TAlloc(HYPRE_Complex, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
-   HYPRE_Complex *new_end = HYPRE_ONEDPL_CALL( copy_if,
+   HYPRE_Complex *new_end = HYPRE_ONEDPL_CALL( dpct::copy_if,
                                                rsWA,
                                                rsWA + A_nr_of_rows,
                                                CF_marker_dev,
@@ -901,20 +901,20 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
 {
    // row index shift P --> W
    HYPRE_Int *PWoffset = hypre_TAlloc(HYPRE_Int, P_nr_of_rows + 1, HYPRE_MEMORY_DEVICE);
-   HYPRE_ONEDPL_CALL( transform,
+   HYPRE_ONEDPL_CALL( std::transform,
                       CF_marker,
                       &CF_marker[P_nr_of_rows],
                       PWoffset,
                       is_nonnegative<HYPRE_Int>() );
 
-   HYPRE_ONEDPL_CALL( exclusive_scan,
+   HYPRE_ONEDPL_CALL( std::exclusive_scan,
                       PWoffset,
                       &PWoffset[P_nr_of_rows+1],
                       PWoffset);
 
    // map F+C to (next) F
    HYPRE_Int *map2F = hypre_TAlloc(HYPRE_Int, P_nr_of_rows + 1, HYPRE_MEMORY_DEVICE);
-   HYPRE_ONEDPL_CALL( transform,
+   HYPRE_ONEDPL_CALL( std::transform,
                       oneapi::dpl::counting_iterator<HYPRE_Int>(0),
                       oneapi::dpl::counting_iterator<HYPRE_Int>(P_nr_of_rows + 1),
                       PWoffset,
@@ -928,7 +928,7 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
                       W_diag_i,
                       P_diag_i );
 
-   HYPRE_ONEDPL_CALL( transform,
+   HYPRE_ONEDPL_CALL( std::transform,
                       P_diag_i,
                       P_diag_i + P_nr_of_rows + 1,
                       PWoffset,
@@ -946,7 +946,7 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
 
    // row index shift W --> P
    HYPRE_Int *WPoffset = hypre_TAlloc(HYPRE_Int, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
-   HYPRE_Int *new_end = HYPRE_ONEDPL_CALL( copy_if,
+   HYPRE_Int *new_end = HYPRE_ONEDPL_CALL( dpct::copy_if,
                                            PWoffset,
                                            PWoffset + P_nr_of_rows,
                                            CF_marker,
@@ -966,7 +966,7 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
 
    hypre_TFree(WPoffset, HYPRE_MEMORY_DEVICE);
 
-   HYPRE_ONEDPL_CALL( transform,
+   HYPRE_ONEDPL_CALL( std::transform,
                       shift,
                       shift + W_diag_nnz,
                       oneapi::dpl::counting_iterator<HYPRE_Int>(0),
@@ -984,7 +984,7 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
 
    // fill the gap
    HYPRE_Int *PC_i = hypre_TAlloc(HYPRE_Int, W_nr_of_cols, HYPRE_MEMORY_DEVICE);
-   new_end = HYPRE_ONEDPL_CALL( copy_if,
+   new_end = HYPRE_ONEDPL_CALL( dpct::copy_if,
                                 P_diag_i,
                                 P_diag_i + P_nr_of_rows,
                                 CF_marker,

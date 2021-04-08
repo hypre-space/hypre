@@ -150,11 +150,11 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    S_diag_j = hypre_TAlloc(HYPRE_Int, S_num_nonzeros_diag, memory_location);
    S_offd_j = hypre_TAlloc(HYPRE_Int, S_num_nonzeros_offd, memory_location);
 
-   tmp = HYPRE_ONEDPL_CALL(copy_if, S_temp_diag_j, S_temp_diag_j + num_nonzeros_diag, S_diag_j, is_nonnegative<HYPRE_Int>());
+   tmp = HYPRE_ONEDPL_CALL(dpct::copy_if, S_temp_diag_j, S_temp_diag_j + num_nonzeros_diag, S_diag_j, is_nonnegative<HYPRE_Int>());
 
    hypre_assert(S_num_nonzeros_diag == tmp - S_diag_j);
 
-   tmp = HYPRE_ONEDPL_CALL(copy_if, S_temp_offd_j, S_temp_offd_j + num_nonzeros_offd, S_offd_j, is_nonnegative<HYPRE_Int>());
+   tmp = HYPRE_ONEDPL_CALL(dpct::copy_if, S_temp_offd_j, S_temp_offd_j + num_nonzeros_offd, S_offd_j, is_nonnegative<HYPRE_Int>());
 
    hypre_assert(S_num_nonzeros_offd == tmp - S_offd_j);
 
