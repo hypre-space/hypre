@@ -192,7 +192,7 @@ struct ReduceSum
                                  and partial sum of a work-group */
    T *d_buf;                  /* place to store partial sum within work-groups
                                  in the 1st round, used in the 2nd round */
-   HYPRE_Int num_workgroups;  /* number of blocks used in the 1st round */
+   HYPRE_Int num_workgroups;  /* number of workgroups used in the 1st round */
 
    /* constructor
     * val is the initial value (added to the reduced sum) */
@@ -241,8 +241,9 @@ struct ReduceSum
       T val;
       /* 2nd reduction with only *one* block */
       hypre_assert(num_workgroups >= 0 && num_workgroups <= 1024);
-      const dim3 gDim(1), bDim(1024);
 
+      //abb todo: fix this
+      const dim3 gDim(1), bDim(1024);
       hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (cl::sycl::handler& cgh) {
 
 	  cl::sycl::accessor<T, 1, cl::sycl::access_mode::read_write,

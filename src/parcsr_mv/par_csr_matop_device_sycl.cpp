@@ -535,8 +535,7 @@ hypreSYCLKernel_ConcatDiagAndOffd(sycl::nd_item<1>& item,
    sycl::group<1> grp = item.get_group();
    sycl::ONEAPI::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
-
-   const HYPRE_Int row = hypre_sycl_get_grid_warp_id<1>(item);
+   const HYPRE_Int row = hypre_sycl_get_global_subgroup_id<1>(item);
 
    if (row >= nrows)
    {

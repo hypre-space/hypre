@@ -329,7 +329,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
    hypre_TFree(send_buf, HYPRE_MEMORY_DEVICE);
 
-   oneapi::dpl::zip_iterator<std::tuple<HYPRE_Int *, HYPRE_Int *, HYPRE_Complex *>> new_end;
+   oneapi::dpl::zip_iterator< HYPRE_Int *, HYPRE_Int *, HYPRE_Complex * > new_end;
 
    A_diag_ii = hypre_TAlloc(HYPRE_Int, A_diag_nnz,      HYPRE_MEMORY_DEVICE);
    A_offd_ii = hypre_TAlloc(HYPRE_Int, A_offd_nnz,      HYPRE_MEMORY_DEVICE);
@@ -352,9 +352,10 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
       /* AFF Diag */
       FF_pred<HYPRE_Int> AFF_pred_diag(option, CF_marker, CF_marker);
+      auto zipped_begin = oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j);
       AFF_diag_nnz = HYPRE_ONEDPL_CALL( std::count_if,
-                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
-                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j) + A_diag_nnz,
+                                        zipped_begin,
+                                        zipped_begin + A_diag_nnz,
                                         AFF_pred_diag );
 
       AFF_diag_ii = hypre_TAlloc(HYPRE_Int,     AFF_diag_nnz, HYPRE_MEMORY_DEVICE);
@@ -389,9 +390,10 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
       /* AFF Offd */
       FF_pred<HYPRE_BigInt> AFF_pred_offd(option, CF_marker, recv_buf);
+      auto zipped_begin = oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j);
       AFF_offd_nnz = HYPRE_ONEDPL_CALL( std::count_if,
-                                        oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
-                                        oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j) + A_offd_nnz,
+                                        zipped_begin,
+                                        zipped_begin + A_offd_nnz,
                                         AFF_pred_offd );
 
       AFF_offd_ii = hypre_TAlloc(HYPRE_Int,     AFF_offd_nnz, HYPRE_MEMORY_DEVICE);
@@ -502,9 +504,10 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
       /* AFC Diag */
       FC_pred<HYPRE_Int> AFC_pred_diag(CF_marker, CF_marker);
+      auto zipped_begin = oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j);
       AFC_diag_nnz = HYPRE_ONEDPL_CALL( std::count_if,
-                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
-                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j) + A_diag_nnz,
+                                        zipped_begin,
+                                        zipped_begin + A_diag_nnz,
                                         AFC_pred_diag );
 
       AFC_diag_ii = hypre_TAlloc(HYPRE_Int,     AFC_diag_nnz, HYPRE_MEMORY_DEVICE);
@@ -537,9 +540,10 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
       /* AFC Offd */
       FC_pred<HYPRE_BigInt> AFC_pred_offd(CF_marker, recv_buf);
+      auto zipped_begin = oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j);
       AFC_offd_nnz = HYPRE_ONEDPL_CALL( std::count_if,
-                                        oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
-                                        oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j) + A_offd_nnz,
+                                        zipped_begin,
+                                        zipped_begin + A_offd_nnz,
                                         AFC_pred_offd );
 
       AFC_offd_ii = hypre_TAlloc(HYPRE_Int,     AFC_offd_nnz, HYPRE_MEMORY_DEVICE);
@@ -650,9 +654,10 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
       /* ACF Diag */
       CF_pred<HYPRE_Int> ACF_pred_diag(CF_marker, CF_marker);
+      auto zipped_begin = oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j);
       ACF_diag_nnz = HYPRE_ONEDPL_CALL( std::count_if,
-                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
-                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j) + A_diag_nnz,
+                                        zipped_begin,
+                                        zipped_begin + A_diag_nnz,
                                         ACF_pred_diag );
 
       ACF_diag_ii = hypre_TAlloc(HYPRE_Int,     ACF_diag_nnz, HYPRE_MEMORY_DEVICE);
@@ -666,7 +671,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                    oneapi::dpl::make_zip_iterator(ACF_diag_ii, ACF_diag_j, ACF_diag_a),
                                    ACF_pred_diag );
 
-      hypre_assert( std::get<0>(new_end.get_iterator_tuple() == ACF_diag_ii + ACF_diag_nnz );
+      hypre_assert( std::get<0>(new_end.get_iterator_tuple()) == ACF_diag_ii + ACF_diag_nnz );
 
       HYPRE_ONEDPL_CALL ( gather,
                           ACF_diag_j,
@@ -685,9 +690,10 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
       /* ACF Offd */
       CF_pred<HYPRE_BigInt> ACF_pred_offd(CF_marker, recv_buf);
+      auto zipped_begin = oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j);
       ACF_offd_nnz = HYPRE_ONEDPL_CALL( std::count_if,
-                                        oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
-                                        oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j) + A_offd_nnz,
+                                        zipped_begin,
+                                        zipped_begin + A_offd_nnz,
                                         ACF_pred_offd );
 
       ACF_offd_ii = hypre_TAlloc(HYPRE_Int,     ACF_offd_nnz, HYPRE_MEMORY_DEVICE);
@@ -798,9 +804,10 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
       /* ACC Diag */
       CC_pred<HYPRE_Int> ACC_pred_diag(CF_marker, CF_marker);
+      auto zipped_begin = oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j);
       ACC_diag_nnz = HYPRE_ONEDPL_CALL( std::count_if,
-                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
-                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j) + A_diag_nnz,
+                                        zipped_begin,
+                                        zipped_begin + A_diag_nnz,
                                         ACC_pred_diag );
 
       ACC_diag_ii = hypre_TAlloc(HYPRE_Int,     ACC_diag_nnz, HYPRE_MEMORY_DEVICE);
@@ -815,7 +822,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                    oneapi::dpl::make_zip_iterator(ACC_diag_ii, ACC_diag_j, ACC_diag_a),
                                    ACC_pred_diag );
 
-      hypre_assert( std::get<0>(new_end.get_iterator_tuple() == ACC_diag_ii + ACC_diag_nnz );
+      hypre_assert( std::get<0>(new_end.get_iterator_tuple()) == ACC_diag_ii + ACC_diag_nnz );
 
       HYPRE_ONEDPL_CALL ( gather,
                           ACC_diag_j,
@@ -834,9 +841,10 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
       /* ACC Offd */
       CC_pred<HYPRE_BigInt> ACC_pred_offd(CF_marker, recv_buf);
+      auto zipped_begin = oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j);
       ACC_offd_nnz = HYPRE_ONEDPL_CALL( std::count_if,
-                                        oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
-                                        oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j) + A_offd_nnz,
+                                        zipped_begin,
+                                        zipped_begin + A_offd_nnz,
                                         ACC_pred_offd );
 
       ACC_offd_ii = hypre_TAlloc(HYPRE_Int,     ACC_offd_nnz, HYPRE_MEMORY_DEVICE);
@@ -1103,7 +1111,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
 
    hypre_TFree(send_buf, HYPRE_MEMORY_DEVICE);
 
-   oneapi::dpl::zip_iterator< std::tuple<HYPRE_Int*, HYPRE_Int*, HYPRE_Complex*> > new_end;
+   oneapi::dpl::zip_iterator< HYPRE_Int*, HYPRE_Int*, HYPRE_Complex* > new_end;
 
    A_diag_ii = hypre_TAlloc(HYPRE_Int, A_diag_nnz,      HYPRE_MEMORY_DEVICE);
    A_offd_ii = hypre_TAlloc(HYPRE_Int, A_offd_nnz,      HYPRE_MEMORY_DEVICE);
@@ -1126,9 +1134,10 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
 
       /* ACX Diag */
       CX_pred ACX_pred(CF_marker);
+      auto zipped_begin = oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j);
       ACX_diag_nnz = HYPRE_ONEDPL_CALL( std::count_if,
-                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
-                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j) + A_diag_nnz,
+                                        zipped_begin,
+                                        zipped_begin + A_diag_nnz,
                                         ACX_pred );
 
       ACX_diag_ii = hypre_TAlloc(HYPRE_Int,     ACX_diag_nnz, HYPRE_MEMORY_DEVICE);
@@ -1155,9 +1164,10 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
       hypre_TFree(ACX_diag_ii, HYPRE_MEMORY_DEVICE);
 
       /* ACX Offd */
+      auto zipped_begin = oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j);
       ACX_offd_nnz = HYPRE_ONEDPL_CALL( std::count_if,
-                                        oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
-                                        oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j) + A_offd_nnz,
+                                        zipped_begin,
+                                        zipped_begin + A_offd_nnz,
                                         ACX_pred );
 
       ACX_offd_ii = hypre_TAlloc(HYPRE_Int,     ACX_offd_nnz, HYPRE_MEMORY_DEVICE);
@@ -1268,9 +1278,10 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
 
       /* AXC Diag */
       XC_pred<HYPRE_Int> AXC_pred_diag(CF_marker);
+      auto zipped_begin = oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j);
       AXC_diag_nnz = HYPRE_ONEDPL_CALL( std::count_if,
-                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
-                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j) + A_diag_nnz,
+                                        zipped_begin,
+                                        zipped_begin + A_diag_nnz,
                                         AXC_pred_diag );
 
       AXC_diag_ii = hypre_TAlloc(HYPRE_Int,     AXC_diag_nnz, HYPRE_MEMORY_DEVICE);
@@ -1298,9 +1309,10 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
 
       /* AXC Offd */
       XC_pred<HYPRE_BigInt> AXC_pred_offd(recv_buf);
+      auto zipped_begin = oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j);
       AXC_offd_nnz = HYPRE_ONEDPL_CALL( std::count_if,
-                                        oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
-                                        oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j) + A_offd_nnz,
+                                        zipped_begin,
+                                        zipped_begin + A_offd_nnz,
                                         AXC_pred_offd );
 
       AXC_offd_ii = hypre_TAlloc(HYPRE_Int,     AXC_offd_nnz, HYPRE_MEMORY_DEVICE);

@@ -25,7 +25,7 @@ hypre_ParVectorGetValuesDevice(hypre_ParVector *vector,
       are to be retrieved from block starting at vec_start */
    if (indices)
    {
-      ierr = HYPRE_ONEDPL_CALL( count_if,
+      ierr = HYPRE_ONEDPL_CALL( std::count_if,
                                 indices,
                                 indices + num_values,
                                 out_of_range<HYPRE_BigInt>(first_index, last_index) );

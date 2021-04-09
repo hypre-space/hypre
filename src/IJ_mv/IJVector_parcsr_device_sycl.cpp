@@ -33,8 +33,7 @@ HYPRE_Int hypre_IJVectorAssembleSortAndReduce1(HYPRE_Int N0, HYPRE_BigInt *I0, c
 
 void hypreSYCLKernel_IJVectorAssemblePar(HYPRE_Int n, HYPRE_Complex *x, HYPRE_BigInt *map, HYPRE_BigInt offset, char *SorA, HYPRE_Complex *y);
 
-/*
- */
+
 HYPRE_Int
 hypre_IJVectorSetAddValuesParDevice(hypre_IJVector       *vector,
                                     HYPRE_Int             num_values,
@@ -157,8 +156,8 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
    if (nelms_off_max)
    {
       HYPRE_Int      new_nnz  = 0;
-      HYPRE_BigInt  *new_i    = NULL;
-      HYPRE_Complex *new_data = NULL;
+      HYPRE_BigInt  *new_i    = nullptr;
+      HYPRE_Complex *new_data = nullptr;
 
       if (nelms_off)
       {
@@ -171,22 +170,22 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
          HYPRE_ONEDPL_CALL(std::transform, stack_i, stack_i + nelms, is_on_proc, pred);
 
          auto new_end1 = HYPRE_ONEDPL_CALL(
-	   dpct::copy_if,
-	   oneapi::dpl::make_zip_iterator(stack_i,         stack_data,         stack_sora        ),  /* first */
-	   oneapi::dpl::make_zip_iterator(stack_i + nelms, stack_data + nelms, stack_sora + nelms),  /* last */
-	   is_on_proc,                                                                               /* stencil */
-	   oneapi::dpl::make_zip_iterator(off_proc_i,      off_proc_data,      off_proc_sora),       /* result */
-	   std::not1(oneapi::dpl::identity()) );
+           dpct::copy_if,
+           oneapi::dpl::make_zip_iterator(stack_i,         stack_data,         stack_sora        ),  /* first */
+           oneapi::dpl::make_zip_iterator(stack_i + nelms, stack_data + nelms, stack_sora + nelms),  /* last */
+           is_on_proc,                                                                               /* stencil */
+           oneapi::dpl::make_zip_iterator(off_proc_i,      off_proc_data,      off_proc_sora),       /* result */
+           std::not1(oneapi::dpl::identity()) );
 
          hypre_assert(std::get<0>(new_end1.get_iterator_tuple()) - off_proc_i == nelms_off);
 
          /* remove off-proc entries from stack */
          auto new_end2 = HYPRE_ONEDPL_CALL(
-	   dpct::remove_if,
-	   oneapi::dpl::make_zip_iterator(stack_i,         stack_data,         stack_sora        ),  /* first */
-	   oneapi::dpl::make_zip_iterator(stack_i + nelms, stack_data + nelms, stack_sora + nelms),  /* last */
-	   is_on_proc,                                                                               /* stencil */
-	   std::not1(oneapi::dpl::identity()) );
+           dpct::remove_if,
+           oneapi::dpl::make_zip_iterator(stack_i,         stack_data,         stack_sora        ),  /* first */
+           oneapi::dpl::make_zip_iterator(stack_i + nelms, stack_data + nelms, stack_sora + nelms),  /* last */
+           is_on_proc,                                                                               /* stencil */
+           std::not1(oneapi::dpl::identity()) );
 
          hypre_assert(std::get<0>(new_end2.get_iterator_tuple()) - stack_i == nelms_on);
 
@@ -235,8 +234,9 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
       /* set/add to local vector */
       sycl::range<1> bDim = hypre_GetDefaultSYCLWorkgroupDimension();
       sycl::range<1> gDim = hypre_GetDefaultSYCLGridDimension(new_nnz, "thread", bDim);
-      HYPRE_SYCL_1D_LAUNCH( hypreSYCLKernel_IJVectorAssemblePar, gDim, bDim, new_nnz, new_data, new_i, vec_start, new_sora,
-			    hypre_VectorData(hypre_ParVectorLocalVector(par_vector)) );
+      HYPRE_SYCL_1D_LAUNCH( hypreSYCLKernel_IJVectorAssemblePar,
+			    gDim, bDim, new_nnz, new_data, new_i, vec_start, new_sora,
+                            hypre_VectorData(hypre_ParVectorLocalVector(par_vector)) );
 
       hypre_TFree(new_i,    HYPRE_MEMORY_DEVICE);
       hypre_TFree(new_data, HYPRE_MEMORY_DEVICE);
@@ -244,7 +244,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
    }
 
    hypre_AuxParVectorDestroy(aux_vector);
-   hypre_IJVectorTranslator(vector) = NULL;
+   hypre_IJVectorTranslator(vector) = nullptr;
 
    return hypre_error_flag;
 }
@@ -271,26 +271,26 @@ hypre_IJVectorAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, char  *X0
    /* output X: 0: keep, 1: zero-out */
    HYPRE_ONEDPL_CALL(
      oneapi::dpl::exclusive_scan_by_segment,
-     std::make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)+N0),  /* key begin */
-     std::make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)),     /* key end */
-     std::make_reverse_iterator(thrust::device_pointer_cast<char>(X0)+N0),          /* input value begin */
-     std::make_reverse_iterator(thrust::device_pointer_cast<char>(X) +N0),          /* output value begin */
-     0,                                                                             /* init */
+     std::make_reverse_iterator(I0+N0),  /* key begin */
+     std::make_reverse_iterator(I0),     /* key end */
+     std::make_reverse_iterator(X0+N0),  /* input value begin */
+     std::make_reverse_iterator(X +N0),  /* output value begin */
+     0,                                  /* init */
      std::equal_to<HYPRE_BigInt>(),
      oneapi::dpl::maximum<char>() );
 
    HYPRE_ONEDPL_CALL(std::transform, //replace_if
-                     A0, A0 + N0, X, A0, 
-                     [](HYPRE_Complex input, char mask) { return mask ? 0.0 : input; } );
+                     A0, A0 + N0, X, A0,
+                     [](auto input, auto mask) { return mask ? 0.0 : input; } );
    //HYPRE_ONEDPL_CALL(dpct::replace_if, A0, A0 + N0, X, oneapi::dpl::identity(), 0.0);
 
    auto new_end = HYPRE_ONEDPL_CALL(
      oneapi::dpl::reduce_by_segment,
-     I0,                                               /* keys_first */
-     I0 + N0,                                          /* keys_last */
-     oneapi::dpl::make_zip_iterator(X0,      A0     ), /* values_first */
-     I,                                                /* keys_output */
-     oneapi::dpl::make_zip_iterator(X,       A      ), /* values_output */
+     I0,                                     /* keys_first */
+     I0 + N0,                                /* keys_last */
+     oneapi::dpl::make_zip_iterator(X0, A0), /* values_first */
+     I,                                      /* keys_output */
+     oneapi::dpl::make_zip_iterator(X,  A ), /* values_output */
      std::equal_to<HYPRE_BigInt>(),                                     /* binary_pred */
      hypre_IJVectorAssembleFunctor<char, HYPRE_Complex>()               /* binary_op */ );
 
@@ -316,25 +316,25 @@ hypre_IJVectorAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, char *X0,
    /* output in X0: 0: keep, 1: zero-out */
    HYPRE_ONEDPL_CALL(
      oneapi::dpl::inclusive_scan_by_segment,
-     std::make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)+N0), /* key begin */
-     std::make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)),    /* key end */
-     std::make_reverse_iterator(thrust::device_pointer_cast<char>(X0)+N0),         /* input value begin */
-     std::make_reverse_iterator(thrust::device_pointer_cast<char>(X0)+N0),         /* output value begin */
+     std::make_reverse_iterator(I0+N0), /* key begin */
+     std::make_reverse_iterator(I0   ), /* key end */
+     std::make_reverse_iterator(X0+N0), /* input value begin */
+     std::make_reverse_iterator(X0+N0), /* output value begin */
      std::equal_to<HYPRE_BigInt>(),
      oneapi::dpl::maximum<char>() );
 
    HYPRE_ONEDPL_CALL(std::transform, //replace_if
-                     A0, A0 + N0, X0, A0, 
+                     A0, A0 + N0, X0, A0,
                      [](HYPRE_Complex input, char mask) { return mask ? 0.0 : input; } );
    //HYPRE_ONEDPL_CALL(dpct::replace_if, A0, A0 + N0, X0, oneapi::dpl::identity(), 0.0);
 
    auto new_end = HYPRE_ONEDPL_CALL(
      oneapi::dpl::reduce_by_segment,
-     I0,      /* keys_first */
-     I0 + N0, /* keys_last */
-     A0,      /* values_first */
-     I,       /* keys_output */
-     A        /* values_output */);
+     I0,      /* keys_first    */
+     I0 + N0, /* keys_last     */
+     A0,      /* values_first  */
+     I,       /* keys_output   */
+     A        /* values_output */ );
 
    *N1 = new_end.second - A;
    *I1 = I;
@@ -347,7 +347,7 @@ hypre_IJVectorAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, char *X0,
  * same index cannot appear more than once in map */
 void
 hypreSYCLKernel_IJVectorAssemblePar(sycl::nd_item<1>& item, HYPRE_Int n, HYPRE_Complex *x,
-				    HYPRE_BigInt *map, HYPRE_BigInt offset, char *SorA, HYPRE_Complex *y)
+                                    HYPRE_BigInt *map, HYPRE_BigInt offset, char *SorA, HYPRE_Complex *y)
 {
    HYPRE_Int i = item.get_global_linear_id();
 

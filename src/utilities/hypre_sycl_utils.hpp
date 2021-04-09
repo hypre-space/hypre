@@ -85,11 +85,11 @@ oneapi::mkl::rng::philox4x32x10* hypre_SyclDataonemklrngGenerator(hypre_SyclData
 sycl::queue *hypre_SyclDataSyclQueue(hypre_SyclData *data, HYPRE_Int i);
 sycl::queue *hypre_SyclDataSyclComputeQueue(hypre_SyclData *data);
 
-// Data structure and accessor routines for Cuda Sparse Triangular Matrices
+// Data structure and accessor routines for Sycl Sparse Triangular Matrices
 struct hypre_CsrsvData
 {
-   csrsv2Info_t info_L;
-   csrsv2Info_t info_U;
+   oneapi::mkl::sparse::matrix_handle_t info_L;
+   oneapi::mkl::sparse::matrix_handle_t info_U;
    hypre_int    BufferSize;
    char        *Buffer;
 };
@@ -104,7 +104,7 @@ struct hypre_CsrsvData
 #if defined(HYPRE_USING_SYCL)
 
 // for includes of PSTL algorithms
-#define PSTL_USE_PARALLEL_POLICIES 0
+//#define PSTL_USE_PARALLEL_POLICIES 0
 
 #include <oneapi/dpl/execution>
 #include <oneapi/dpl/algorithm>
@@ -635,7 +635,7 @@ struct equal {
    }
 };
 
-/* hypre_Sycl_utils.cpp */
+/* hypre_sycl_utils.cpp */
 sycl::range<1> hypre_GetDefaultSYCLWorkgroupDimension();
 
 sycl::range<1> hypre_GetDefaultSYCLGridDimension(HYPRE_Int n,
