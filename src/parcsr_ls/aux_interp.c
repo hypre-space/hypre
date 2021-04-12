@@ -9,6 +9,8 @@
 #include "aux_interp.h"
 #include "hypre_hopscotch_hash.h"
 
+#define DEBUG
+
 /*---------------------------------------------------------------------------
  * Auxilary routines for the long range interpolation methods.
  *  Implemented: "standard", "extended", "multipass", "FF"
@@ -102,26 +104,26 @@ HYPRE_Int hypre_alt_insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg,
   return hypre_error_flag;
 }
 
-HYPRE_Int hypre_big_insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg, 
+HYPRE_Int hypre_big_insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg,
                           hypre_ParCSRCommPkg *extend_comm_pkg,
-                          HYPRE_Int *IN_marker, 
+                          HYPRE_Int *IN_marker,
                           HYPRE_Int full_off_procNodes,
                           HYPRE_BigInt offset,
                           HYPRE_BigInt *OUT_marker)
-{   
+{
   hypre_ParCSRCommHandle  *comm_handle;
 
   HYPRE_Int i, index, shift;
 
   HYPRE_Int num_sends, num_recvs;
-  
+
   HYPRE_Int *recv_vec_starts;
 
   HYPRE_Int e_num_sends;
 
   HYPRE_BigInt *int_buf_data;
   HYPRE_BigInt *e_out_marker;
-  
+
 
   num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
   num_recvs =  hypre_ParCSRCommPkgNumRecvs(comm_pkg);
@@ -137,29 +139,29 @@ HYPRE_Int hypre_big_insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg,
 
   /* orig commpkg data*/
   index = 0;
-  
+
   HYPRE_Int begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
   HYPRE_Int end = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for HYPRE_SMP_SCHEDULE
 #endif
   for (i = begin; i < end; ++i) {
-     int_buf_data[i - begin] = offset + 
+     int_buf_data[i - begin] = offset +
            (HYPRE_BigInt) IN_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, i)];
   }
-   
-  comm_handle = hypre_ParCSRCommHandleCreate( 21, comm_pkg, int_buf_data, 
+
+  comm_handle = hypre_ParCSRCommHandleCreate( 21, comm_pkg, int_buf_data,
                                               OUT_marker);
-   
+
   hypre_ParCSRCommHandleDestroy(comm_handle);
   comm_handle = NULL;
-  
+
   /* now do the extend commpkg */
 
   /* first we need to shift our position in the OUT_marker */
   shift = recv_vec_starts[num_recvs];
   e_out_marker = OUT_marker + shift;
-  
+
   index = 0;
 
   begin = hypre_ParCSRCommPkgSendMapStart(extend_comm_pkg, 0);
@@ -171,17 +173,17 @@ HYPRE_Int hypre_big_insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg,
      int_buf_data[i - begin] = offset +
            (HYPRE_BigInt) IN_marker[hypre_ParCSRCommPkgSendMapElmt(extend_comm_pkg, i)];
   }
-   
-  comm_handle = hypre_ParCSRCommHandleCreate( 21, extend_comm_pkg, int_buf_data, 
+
+  comm_handle = hypre_ParCSRCommHandleCreate( 21, extend_comm_pkg, int_buf_data,
                                               e_out_marker);
-   
+
   hypre_ParCSRCommHandleDestroy(comm_handle);
   comm_handle = NULL;
-  
+
   hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
-    
+
   return hypre_error_flag;
-} 
+}
 
 /* sort for non-ordered arrays */
 HYPRE_Int hypre_ssort(HYPRE_BigInt *data, HYPRE_Int n)
@@ -227,7 +229,7 @@ void hypre_swap_int(HYPRE_BigInt *data, HYPRE_Int a, HYPRE_Int b)
 }
 
 /* Initialize CF_marker_offd, CF_marker, P_marker, P_marker_offd, tmp */
-void hypre_initialize_vecs(HYPRE_Int diag_n, HYPRE_Int offd_n, HYPRE_Int *diag_ftc, HYPRE_BigInt *offd_ftc, 
+void hypre_initialize_vecs(HYPRE_Int diag_n, HYPRE_Int offd_n, HYPRE_Int *diag_ftc, HYPRE_BigInt *offd_ftc,
                            HYPRE_Int *diag_pm, HYPRE_Int *offd_pm, HYPRE_Int *tmp_CF)
 {
   HYPRE_Int i;
@@ -289,9 +291,9 @@ void hypre_initialize_vecs(HYPRE_Int diag_n, HYPRE_Int offd_n, HYPRE_Int *diag_f
 
 /* Find nodes that are offd and are not contained in original offd
  * (neighbors of neighbors) */
-static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A_offd, 
-       HYPRE_Int *A_ext_i, HYPRE_BigInt *A_ext_j, 
-       HYPRE_Int num_cols_S_offd, HYPRE_BigInt *col_map_offd, HYPRE_BigInt col_1, 
+static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A_offd,
+       HYPRE_Int *A_ext_i, HYPRE_BigInt *A_ext_j,
+       HYPRE_Int num_cols_S_offd, HYPRE_BigInt *col_map_offd, HYPRE_BigInt col_1,
        HYPRE_BigInt col_n, HYPRE_Int *Sop_i, HYPRE_BigInt *Sop_j,
        HYPRE_Int *CF_marker_offd)
 {
@@ -677,6 +679,18 @@ void hypre_build_interp_colmap(hypre_ParCSRMatrix *P, HYPRE_Int full_off_procNod
 
    HYPRE_Int *P_marker = NULL;
 
+#ifdef DEBUG
+   HYPRE_Int   mypid;
+   FILE       *fp;
+   HYPRE_Real  times;
+   char        filename[255];
+
+   hypre_MPI_Comm_rank(P->comm, &mypid);
+   hypre_sprintf(filename, "interp.%05d", mypid);
+   fp = fopen(filename, "a");
+   times = -hypre_MPI_Wtime();
+#endif
+
    if (full_off_procNodes)
       P_marker = hypre_TAlloc(HYPRE_Int, full_off_procNodes, HYPRE_MEMORY_HOST);
 
@@ -686,66 +700,93 @@ void hypre_build_interp_colmap(hypre_ParCSRMatrix *P, HYPRE_Int full_off_procNod
    for (i=0; i < full_off_procNodes; i++)
      P_marker[i] = 0;
 
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
+#ifdef DEBUG
+   hypre_fprintf(fp, "New level\n");
+   hypre_fprintf(fp, "full_off_procNodes: %d\n", full_off_procNodes);
+   hypre_fprintf(fp, "P_offd_size: %d\n", P_offd_size);
+#endif
+
+#if 1
 
    /* These two loops set P_marker[i] to 1 if it appears in P_offd_j and if
     * tmp_CF_marker_offd has i marked. num_cols_P_offd is then set to the
     * total number of times P_marker is set */
+#ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i,index) HYPRE_SMP_SCHEDULE
-   for (i=0; i < P_offd_size; i++)
+#endif
+   for (i = 0; i < P_offd_size; i++)
    {
-     index = P_offd_j[i];
-     if(tmp_CF_marker_offd[index] >= 0)
-     {  P_marker[index] = 1; }
+      index = P_offd_j[i];
+      if (tmp_CF_marker_offd[index] >= 0)
+      {
+         P_marker[index] = 1;
+      }
    }
 
    HYPRE_Int prefix_sum_workspace[hypre_NumThreads() + 1];
    HYPRE_Int num_cols_P_offd = 0;
 
+#ifdef HYPRE_USING_OPENMP
 #pragma omp parallel private(i)
+#endif
    {
-     HYPRE_Int i_begin, i_end;
-     hypre_GetSimpleThreadPartition(&i_begin, &i_end, full_off_procNodes);
+      HYPRE_Int i_begin, i_end;
+      hypre_GetSimpleThreadPartition(&i_begin, &i_end, full_off_procNodes);
 
-     HYPRE_Int local_num_cols_P_offd = 0;
-     for (i = i_begin; i < i_end; i++)
-     {
-       if (P_marker[i] == 1) local_num_cols_P_offd++;
-     }
+      HYPRE_Int local_num_cols_P_offd = 0;
+      for (i = i_begin; i < i_end; i++)
+      {
+         if (P_marker[i] == 1) local_num_cols_P_offd++;
+      }
 
-     hypre_prefix_sum(&local_num_cols_P_offd, &num_cols_P_offd, prefix_sum_workspace);
+      hypre_prefix_sum(&local_num_cols_P_offd, &num_cols_P_offd, prefix_sum_workspace);
 
+#ifdef HYPRE_USING_OPENMP
 #pragma omp master
-     {
-       if (num_cols_P_offd)
-         col_map_offd_P = hypre_TAlloc(HYPRE_BigInt, num_cols_P_offd, HYPRE_MEMORY_HOST);
-     }
+#endif
+      {
+         if (num_cols_P_offd)
+         {
+            col_map_offd_P = hypre_TAlloc(HYPRE_BigInt, num_cols_P_offd, HYPRE_MEMORY_HOST);
+         }
+      }
+#ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
+#endif
 
-     for (i = i_begin; i < i_end; i++)
-     {
-       if (P_marker[i] == 1)
-       {
-          col_map_offd_P[local_num_cols_P_offd++] = fine_to_coarse_offd[i];
-       }
-     }
+      for (i = i_begin; i < i_end; i++)
+      {
+         if (P_marker[i] == 1)
+         {
+           col_map_offd_P[local_num_cols_P_offd++] = fine_to_coarse_offd[i];
+         }
+      }
    }
 
    hypre_UnorderedBigIntMap col_map_offd_P_inverse;
    hypre_big_sort_and_create_inverse_map(col_map_offd_P, num_cols_P_offd, &col_map_offd_P, &col_map_offd_P_inverse);
 
    // find old idx -> new idx map
+#ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for
+#endif
    for (i = 0; i < full_off_procNodes; i++)
-     P_marker[i] = hypre_UnorderedBigIntMapGet(&col_map_offd_P_inverse, fine_to_coarse_offd[i]);
+   {
+      P_marker[i] = hypre_UnorderedBigIntMapGet(&col_map_offd_P_inverse, fine_to_coarse_offd[i]);
+   }
 
    if (num_cols_P_offd)
    {
-     hypre_UnorderedBigIntMapDestroy(&col_map_offd_P_inverse);
+      hypre_UnorderedBigIntMapDestroy(&col_map_offd_P_inverse);
    }
+
+#ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for
+#endif
    for(i = 0; i < P_offd_size; i++)
-     P_offd_j[i] = P_marker[P_offd_j[i]];
+   {
+      P_offd_j[i] = P_marker[P_offd_j[i]];
+   }
 
 #else /* HYPRE_CONCURRENT_HOPSCOTCH */
      HYPRE_Int num_cols_P_offd = 0;
@@ -763,12 +804,16 @@ void hypre_build_interp_colmap(hypre_ParCSRMatrix *P, HYPRE_Int full_off_procNod
        }
      }
 
+#ifdef DEBUG
+     hypre_fprintf(fp, "num_cols_P_offd: %d\n", num_cols_P_offd);
+#endif
+
      if (num_cols_P_offd)
      {
         HYPRE_Int *tmp_map_offd = hypre_CTAlloc(HYPRE_Int, num_cols_P_offd, HYPRE_MEMORY_HOST);
         HYPRE_BigInt *tmp_marker = hypre_CTAlloc(HYPRE_BigInt, num_cols_P_offd, HYPRE_MEMORY_HOST);
         col_map_offd_P = hypre_CTAlloc(HYPRE_BigInt, num_cols_P_offd, HYPRE_MEMORY_HOST);
-     
+
         index = 0;
         for(i = 0; i < num_cols_P_offd; i++)
         {
@@ -803,10 +848,16 @@ void hypre_build_interp_colmap(hypre_ParCSRMatrix *P, HYPRE_Int full_off_procNod
                     j = num_cols_P_offd;
                  }
         }
-        hypre_TFree(tmp_marker, HYPRE_MEMORY_HOST); 
-        hypre_TFree(tmp_map_offd, HYPRE_MEMORY_HOST); 
+        hypre_TFree(tmp_marker, HYPRE_MEMORY_HOST);
+        hypre_TFree(tmp_map_offd, HYPRE_MEMORY_HOST);
      }
 #endif /* HYPRE_CONCURRENT_HOPSCOTCH */
+
+#ifdef DEBUG
+   times += hypre_MPI_Wtime();
+   hypre_fprintf(fp, "Times: %f\n\n", times);
+   fclose(fp);
+#endif
 
    hypre_TFree(P_marker, HYPRE_MEMORY_HOST);
 
