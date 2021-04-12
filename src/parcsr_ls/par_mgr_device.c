@@ -13,6 +13,7 @@
 
 #include "_hypre_parcsr_ls.h"
 #include "seq_mv/protos.h"
+#include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_CUDA)
 void hypreDevice_extendWtoP( HYPRE_Int P_nr_of_rows, HYPRE_Int W_nr_of_rows, HYPRE_Int W_nr_of_cols, HYPRE_Int *CF_marker, HYPRE_Int W_diag_nnz, HYPRE_Int *W_diag_i, HYPRE_Int *W_diag_j, HYPRE_Complex *W_diag_data, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Complex *P_diag_data, HYPRE_Int *W_offd_i, HYPRE_Int *P_offd_i );
@@ -24,63 +25,56 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix *A,
                       HYPRE_Int          method,
                       hypre_ParCSRMatrix **P_ptr)
 {
+  MPI_Comm            comm = hypre_ParCSRMatrixComm(A);
+  HYPRE_Int           num_procs;
   HYPRE_Int           A_nr_of_rows = hypre_ParCSRMatrixNumRows(A);
-  //hypre_CSRMatrix    *A_diag       = hypre_ParCSRMatrixDiag(A);
-  //HYPRE_Complex      *A_diag_data  = hypre_CSRMatrixData(A_diag);
-  //HYPRE_Int          *A_diag_i     = hypre_CSRMatrixI(A_diag);
-  //hypre_CSRMatrix    *A_offd       = hypre_ParCSRMatrixOffd(A);
-  //HYPRE_Complex      *A_offd_data  = hypre_CSRMatrixData(A_offd);
-  //HYPRE_Int          *A_offd_i     = hypre_CSRMatrixI(A_offd);
-  //HYPRE_Int           A_offd_nnz   = hypre_CSRMatrixNumNonzeros(A_offd);
 
   HYPRE_Int          *CF_marker_dev;
   hypre_ParCSRMatrix *A_FF=NULL, *A_FC=NULL, *P=NULL;
   hypre_CSRMatrix    *D_FF_inv=NULL, *W_diag=NULL, *W_offd=NULL;
-  HYPRE_Int           W_nr_of_rows, P_diag_nnz;
-  HYPRE_Int          *P_diag_i, *P_diag_j, *P_offd_i;
-  HYPRE_Complex      *P_diag_data;
-  HYPRE_Complex      *diag;
+  HYPRE_Int           W_nr_of_rows, P_diag_nnz, nfpoints;
+  HYPRE_Int          *P_diag_i=NULL, *P_diag_j=NULL, *P_offd_i=NULL;
+  HYPRE_Complex      *P_diag_data=NULL, *diag=NULL;
+
+  hypre_MPI_Comm_size(comm, &num_procs);
 
   CF_marker_dev = hypre_TAlloc(HYPRE_Int, A_nr_of_rows, HYPRE_MEMORY_DEVICE);
   hypre_TMemcpy(CF_marker_dev, CF_marker_host, HYPRE_Int, A_nr_of_rows,
                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
-  hypre_ParCSRMatrixGenerateFFFCDevice(A, CF_marker_host, num_cpts_global, NULL, &A_FC, &A_FF);
-  HYPRE_Int local_nrows_wp = hypre_ParCSRMatrixNumRows(A_FF);
-  diag = hypre_CTAlloc(HYPRE_Complex, local_nrows_wp, HYPRE_MEMORY_DEVICE);
-  if (method == 1)
-  {
-    hypre_CSRMatrixExtractDiagonalDevice(hypre_ParCSRMatrixDiag(A_FF), diag, 3);
-  }
-  else if (method == 2)
-  {
-    hypre_CSRMatrixExtractDiagonalDevice(hypre_ParCSRMatrixDiag(A_FF), diag, 4);
-  }
+  nfpoints = HYPRE_THRUST_CALL( count,
+                  CF_marker_dev,
+                  CF_marker_dev + A_nr_of_rows,
+                  -1);
 
-  // Doing extraneous work
-  // TODO: no need to compute W for injection, i.e. W = 0
-  D_FF_inv = hypre_CSRMatrixDiagMatrixFromVectorDevice(local_nrows_wp, diag);
   if (method > 0)
   {
+    hypre_ParCSRMatrixGenerateFFFCDevice(A, CF_marker_host, num_cpts_global, NULL, &A_FC, &A_FF);
+    diag = hypre_CTAlloc(HYPRE_Complex, nfpoints, HYPRE_MEMORY_DEVICE);
+    if (method == 1)
+    {
+      hypre_CSRMatrixExtractDiagonalDevice(hypre_ParCSRMatrixDiag(A_FF), diag, 3);
+    }
+    else if (method == 2)
+    {
+      hypre_CSRMatrixExtractDiagonalDevice(hypre_ParCSRMatrixDiag(A_FF), diag, 4);
+    }
+
+    D_FF_inv = hypre_CSRMatrixDiagMatrixFromVectorDevice(nfpoints, diag);
     W_diag = hypre_CSRMatrixMultiplyDevice(D_FF_inv, hypre_ParCSRMatrixDiag(A_FC));
     W_offd = hypre_CSRMatrixMultiplyDevice(D_FF_inv, hypre_ParCSRMatrixOffd(A_FC));
     hypre_CSRMatrixDestroy(D_FF_inv);
   }
   else
   {
-    W_diag = hypre_CSRMatrixCreate(local_nrows_wp, 0, 0);
+    hypre_ParCSRMatrixGenerateFFFCDevice(A, CF_marker_host, num_cpts_global, NULL, &A_FC, NULL);
+    W_diag = hypre_CSRMatrixCreate(nfpoints, 0, 0);
     hypre_CSRMatrixInitialize_v2(W_diag, 0, HYPRE_MEMORY_DEVICE);
-    //W_diag = D_FF_inv;
-    //hypre_CSRMatrixDropSmallEntriesDevice(W_diag, 1e-14, 0, 0);
-    //W_offd = hypre_CSRMatrixCreate(local_nrows_wp, 0, 0);
-    //hypre_CSRMatrixInitialize_v2(W_offd, 0, HYPRE_MEMORY_DEVICE);
-    //hypre_CSRMatrixInitialize(W_offd);
   }
   W_nr_of_rows = hypre_CSRMatrixNumRows(W_diag);
 
   /* Construct P from matrix product W_diag */
-  P_diag_nnz = hypre_CSRMatrixNumNonzeros(W_diag) + hypre_ParCSRMatrixNumCols(A_FC);
-
+  P_diag_nnz  = hypre_CSRMatrixNumNonzeros(W_diag) + hypre_ParCSRMatrixNumCols(A_FC);
   P_diag_i    = hypre_TAlloc(HYPRE_Int,     A_nr_of_rows+1, HYPRE_MEMORY_DEVICE);
   P_diag_j    = hypre_TAlloc(HYPRE_Int,     P_diag_nnz,     HYPRE_MEMORY_DEVICE);
   P_diag_data = hypre_TAlloc(HYPRE_Complex, P_diag_nnz,     HYPRE_MEMORY_DEVICE);
@@ -144,7 +138,7 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix *A,
   }
   else
   {
-    hypre_ParCSRMatrixNumNonzeros(P)  = hypre_ParCSRMatrixGlobalNumCols(A_FC);
+    hypre_ParCSRMatrixNumNonzeros(P) = hypre_ParCSRMatrixGlobalNumCols(A_FC);
   }
   hypre_ParCSRMatrixDNumNonzeros(P) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(P);
 
@@ -152,9 +146,9 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix *A,
 
   *P_ptr = P;
 
-  hypre_TFree(diag, HYPRE_MEMORY_DEVICE);
-  hypre_ParCSRMatrixDestroy(A_FF);
-  hypre_ParCSRMatrixDestroy(A_FC);
+  if (diag) hypre_TFree(diag, HYPRE_MEMORY_DEVICE);
+  if (A_FF) hypre_ParCSRMatrixDestroy(A_FF);
+  if (A_FC) hypre_ParCSRMatrixDestroy(A_FC);
   if (W_diag) hypre_CSRMatrixDestroy(W_diag);
   if (W_offd) hypre_CSRMatrixDestroy(W_offd);
 
