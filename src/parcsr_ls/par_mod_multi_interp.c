@@ -87,15 +87,11 @@ hypre_BoomerAMGBuildModMultipass( hypre_ParCSRMatrix  *A,
 
    if (num_procs > 1)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
       if (my_id == num_procs - 1)
       {
          total_global_cpts = num_cpts_global[1];
       }
       hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-      total_global_cpts = num_cpts_global[num_procs];
-#endif
    }
    else
    {
@@ -519,7 +515,6 @@ hypre_GenerateMultipassPi( hypre_ParCSRMatrix  *A,
       HYPRE_BigInt big_Fpts;
       big_Fpts = num_points;
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
       f_pts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
       hypre_MPI_Scan(&big_Fpts, f_pts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
       f_pts_starts[0] = f_pts_starts[1] - big_Fpts;
@@ -530,17 +525,6 @@ hypre_GenerateMultipassPi( hypre_ParCSRMatrix  *A,
       }
       hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
       hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-      f_pts_starts = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
-      hypre_MPI_Allgather(&big_Fpts, 1, HYPRE_MPI_BIG_INT, &f_pts_starts[1], 1, HYPRE_MPI_BIG_INT, comm);
-      f_pts_starts[0] = 0;
-      for (i = 2; i < num_procs+1; i++)
-      {
-         f_pts_starts[i] += f_pts_starts[i-1];
-      }
-      total_global_fpts = f_pts_starts[num_procs];
-      total_global_cpts = c_pts_starts[num_procs];
-#endif
    }
    else
    {
@@ -557,11 +541,7 @@ hypre_GenerateMultipassPi( hypre_ParCSRMatrix  *A,
       {
          if (pass_marker[i] == color)
          {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
             big_convert[i] = (HYPRE_BigInt)fine_to_coarse[i] + c_pts_starts[0];
-#else
-            big_convert[i] = (HYPRE_BigInt)fine_to_coarse[i] + c_pts_starts[my_id];
-#endif
          }
       }
      
