@@ -3581,7 +3581,7 @@ main( hypre_int argc,
       //cudaProfilerStart();
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPushRange("AMG-Setup-1");
+      hypre_GpuProfilingPushRange("AMG-Setup-1");
 #endif
       if (solver_id == 0)
       {
@@ -3593,7 +3593,7 @@ main( hypre_int argc,
       }
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPopRange();
+      hypre_GpuProfilingPopRange();
 #endif
 
 #if defined(HYPRE_USING_GPU)
@@ -3616,7 +3616,7 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPushRange("AMG-Solve-1");
+      hypre_GpuProfilingPushRange("AMG-Solve-1");
 #endif
 
       //cudaProfilerStart();
@@ -3631,7 +3631,7 @@ main( hypre_int argc,
       //cudaProfilerStop();
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPopRange();
+      hypre_GpuProfilingPopRange();
 #endif
 
 #if defined(HYPRE_USING_GPU)
@@ -3679,7 +3679,7 @@ main( hypre_int argc,
       tt = hypre_MPI_Wtime();
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPushRange("AMG-Setup-2");
+      hypre_GpuProfilingPushRange("AMG-Setup-2");
 #endif
 
       if (solver_id == 0)
@@ -3692,7 +3692,7 @@ main( hypre_int argc,
       }
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPopRange();
+      hypre_GpuProfilingPopRange();
 #endif
 
 #if defined(HYPRE_USING_GPU)
@@ -3711,7 +3711,7 @@ main( hypre_int argc,
       tt = hypre_MPI_Wtime();
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPushRange("AMG-Solve-2");
+      hypre_GpuProfilingPushRange("AMG-Solve-2");
 #endif
 
       if (solver_id == 0)
@@ -3724,7 +3724,7 @@ main( hypre_int argc,
       }
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPopRange();
+      hypre_GpuProfilingPopRange();
 #endif
 
 #if defined(HYPRE_USING_GPU)

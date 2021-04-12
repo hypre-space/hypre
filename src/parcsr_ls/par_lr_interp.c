@@ -5286,7 +5286,7 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
                               hypre_ParCSRMatrix  **P_ptr)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_NvtxPushRange("ExtInterp");
+   hypre_GpuProfilingPushRange("ExtInterp");
 #endif
 
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
@@ -5307,7 +5307,7 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 #endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_NvtxPopRange();
+   hypre_GpuProfilingPopRange();
 #endif
 
    return ierr;
@@ -5328,7 +5328,7 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix   *A,
                                 hypre_ParCSRMatrix  **P_ptr)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_NvtxPushRange("ExtPIInterp");
+   hypre_GpuProfilingPushRange("ExtPIInterp");
 #endif
 
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
@@ -5349,7 +5349,7 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix   *A,
 #endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_NvtxPopRange();
+   hypre_GpuProfilingPopRange();
 #endif
 
    return ierr;

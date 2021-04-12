@@ -777,7 +777,6 @@ enable_hopscotch
 enable_fortran
 enable_unified_memory
 enable_cuda_streams
-enable_nvtx
 enable_cusparse
 enable_cub
 enable_cublas
@@ -785,6 +784,7 @@ enable_curand
 enable_rocsparse
 enable_rocblas
 enable_rocrand
+enable_gpu_profiling
 enable_gpu_aware_mpi
 with_LD
 with_LDFLAGS
@@ -1497,7 +1497,6 @@ Optional Features:
   --enable-unified-memory Use unified memory for allocating the memory
                           (default is NO).
   --enable-cuda-streams   Use CUDA streams (default is YES).
-  --enable-nvtx           Use NVTX (default is NO).
   --enable-cusparse       Use cuSPARSE (default is YES).
   --enable-cub            Use CUB Allocator (default is NO).
   --enable-cublas         Use cuBLAS (default is NO).
@@ -1505,6 +1504,7 @@ Optional Features:
   --enable-rocsparse      Use rocSPARSE (default is YES).
   --enable-rocblas        Use rocBLAS (default is NO).
   --enable-rocrand        Use rocRAND (default is YES).
+  --enable-gpu-profiling  Use NVTX on CUDA, rocTX on HIP (default is NO).
   --enable-gpu-aware-mpi  Use GPU memory aware MPI
 
 Optional Packages:
@@ -2691,8 +2691,9 @@ hypre_using_cuda=no
 hypre_using_gpu=no
 hypre_using_um=no
 hypre_gpu_mpi=no
+hypre_using_gpu_profiling=no
+
 hypre_using_cuda_streams=no
-hypre_using_nvtx=no
 hypre_using_cusparse=yes
 hypre_using_cublas=no
 hypre_using_curand=yes
@@ -3031,19 +3032,6 @@ else
 fi
 
 
-# Check whether --enable-nvtx was given.
-if test "${enable_nvtx+set}" = set; then :
-  enableval=$enable_nvtx; case "${enableval}" in
-    yes) hypre_using_nvtx=yes ;;
-    no)  hypre_using_nvtx=no ;;
-    *)   hypre_using_nvtx=no ;;
- esac
-else
-  hypre_using_nvtx=no
-
-fi
-
-
 # Check whether --enable-cusparse was given.
 if test "${enable_cusparse+set}" = set; then :
   enableval=$enable_cusparse; case "${enableval}" in
@@ -3136,6 +3124,18 @@ else
 
 fi
 
+
+# Check whether --enable-gpu-profiling was given.
+if test "${enable_gpu_profiling+set}" = set; then :
+  enableval=$enable_gpu_profiling; case "${enableval}" in
+    yes) hypre_using_gpu_profiling=yes ;;
+    no)  hypre_using_gpu_profiling=no ;;
+    *)   hypre_using_gpu_profiling=no ;;
+ esac
+else
+  hypre_using_gpu_profiling=no
+
+fi
 
 
 # Check whether --enable-gpu-aware-mpi was given.
@@ -8693,7 +8693,7 @@ $as_echo "#define HYPRE_USING_CUDA 1" >>confdefs.h
 $as_echo "#define HYPRE_USING_CUSPARSE 1" >>confdefs.h
 
 
-   if test "$hypre_using_nvtx" = "yes"
+   if test "$hypre_using_gpu_profiling" = "yes"
    then
 
 $as_echo "#define HYPRE_USING_NVTX 1" >>confdefs.h
@@ -8799,7 +8799,7 @@ done
       LDFLAGS="-ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -Xcompiler \"${LDFLAGS}\""
    HYPRE_CUDA_INCLUDE="-I${HYPRE_CUDA_PATH}/include"
    HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcudart"
-   if test "$hypre_using_nvtx" = "yes"
+   if test "$hypre_using_gpu_profiling" = "yes"
    then
       HYPRE_CUDA_LIBS+=" -lnvToolsExt"
    fi
@@ -8876,13 +8876,15 @@ done
         LINK_CC=${HIPCC}
         LINK_CXX=${HIPCC}
 
-                                        HIPCXXFLAGS="-O2 -x hip -Wall"
+                                        HIPCXXFLAGS="-x hip ${HIPCXXFLAGS}"
 
-        if test x"$hypre_using_debug" == x"yes"; then :
-  HIPCXXFLAGS="-g -ggdb ${HIPCXXFLAGS}"
+                                if test x"$hypre_using_debug" == x"yes"; then :
+  HIPCXXFLAGS="-O0 -Wall -g -ggdb ${HIPCXXFLAGS}"
+elif HIPCXXFLAGS="-O2 ${HIPCXXFLAGS}"; then :
+
 fi
 
-                        CUFLAGS="${HIPCPPFLAGS} ${HIPCXXFLAGS} ${CXXFLAGS}"
+                        CUFLAGS="${HIPCPPFLAGS} ${HIPCXXFLAGS}"
 
                         HYPRE_HIP_INCL="-I${HYPRE_ROCM_PREFIX}/rocthrust/include"
         HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocprim/include"
@@ -8912,6 +8914,15 @@ $as_echo "#define HYPRE_USING_ROCRAND 1" >>confdefs.h
 
                HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lrocrand"
                HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocrand/include"
+
+fi
+
+                if test x"$hypre_using_gpu_profiling" == x"yes"; then :
+
+$as_echo "#define HYPRE_USING_ROCTX 1" >>confdefs.h
+
+               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/roctracer/include"
+               HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lroctx64"
 
 fi
 
@@ -8976,7 +8987,7 @@ then
 $as_echo "#define HYPRE_USING_CUSPARSE 1" >>confdefs.h
 
 
-   if test "$hypre_using_nvtx" = "yes"
+   if test "$hypre_using_gpu_profiling" = "yes"
    then
 
 $as_echo "#define HYPRE_USING_NVTX 1" >>confdefs.h
@@ -9016,7 +9027,7 @@ $as_echo "#define HYPRE_DEVICE_OPENMP_CHECK 1" >>confdefs.h
 
    HYPRE_CUDA_INCLUDE="-I${HYPRE_CUDA_PATH}/include"
    HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcusparse -lcudart -lcurand"
-   if test "$hypre_using_nvtx" = "yes"
+   if test "$hypre_using_gpu_profiling" = "yes"
    then
       HYPRE_CUDA_LIBS+=" -lnvToolsExt"
    fi
