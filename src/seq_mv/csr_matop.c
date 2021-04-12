@@ -193,40 +193,6 @@ hypre_CSRMatrixAddHost ( hypre_CSRMatrix *A,
       hypre_TFree(marker, HYPRE_MEMORY_HOST);
    } /* end of parallel region */
 
-#if 0
-   for (ia = 0; ia < ncols_A; ia++)
-   {
-      marker[ia] = -1;
-   }
-   pos = 0;
-   for (ic = 0; ic < nrows_A; ic++)
-   {
-      for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
-      {
-         jcol = A_j[ia];
-         C_j[pos] = jcol;
-         C_data[pos] = A_data[ia];
-         marker[jcol] = pos;
-         pos++;
-      }
-      for (ib = B_i[ic]; ib < B_i[ic+1]; ib++)
-      {
-         jcol = B_j[ib];
-         if (marker[jcol] < C_i[ic])
-         {
-            C_j[pos] = jcol;
-            C_data[pos] = B_data[ib];
-            marker[jcol] = pos;
-            pos++;
-         }
-         else
-         {
-            C_data[marker[jcol]] += B_data[ib];
-         }
-      }
-   }
-#endif
-
    return C;
 }
 
