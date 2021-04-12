@@ -104,7 +104,7 @@ struct hypre_CsrsvData
 #if defined(HYPRE_USING_SYCL)
 
 // for includes of PSTL algorithms
-//#define PSTL_USE_PARALLEL_POLICIES 0
+#define PSTL_USE_PARALLEL_POLICIES 0
 
 #include <oneapi/dpl/execution>
 #include <oneapi/dpl/algorithm>

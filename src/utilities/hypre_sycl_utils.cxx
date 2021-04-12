@@ -293,6 +293,7 @@ hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
 
   HYPRE_ONEDPL_CALL( std::fill, d_row_ind, d_row_ind + nnz, 0 );
 
+  // todo: check if this is correct for scatter_if
   d_row_ind = HYPRE_ONEDPL_CALL( dpct::copy_if,
                                  oneapi::dpl::counting_iterator<HYPRE_Int>(0),
                                  oneapi::dpl::counting_iterator<HYPRE_Int>(nrows),
@@ -719,6 +720,7 @@ template HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N, HYPRE_Int *keys1_in
 
 #endif // #if defined(HYPRE_USING_SYCL)
 
+//todo: HYPRE_USING_CUSPARSE
 #if defined(HYPRE_USING_CUSPARSE)
 /*
  * @brief Determines the associated SyclDataType for the HYPRE_Complex typedef
