@@ -822,11 +822,11 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
    hypre_CSRMatrix    *A_diag = hypre_ParCSRMatrixDiag(A);
    HYPRE_Int          *A_diag_i = hypre_CSRMatrixI(A_diag);
    HYPRE_Int          *A_diag_j = hypre_CSRMatrixJ(A_diag);
-   HYPRE_Complex      *A_diag_data = hypre_CSRMatrixData(A_diag);
+   HYPRE_Real         *A_diag_data = hypre_CSRMatrixData(A_diag);
    hypre_CSRMatrix    *A_offd = hypre_ParCSRMatrixOffd(A);
    HYPRE_Int          *A_offd_i = hypre_CSRMatrixI(A_offd);
    HYPRE_Int          *A_offd_j = hypre_CSRMatrixJ(A_offd);
-   HYPRE_Complex      *A_offd_data = hypre_CSRMatrixData(A_offd);
+   HYPRE_Real         *A_offd_data = hypre_CSRMatrixData(A_offd);
    hypre_CSRMatrix    *SN_diag = hypre_ParCSRMatrixDiag(SN);
    HYPRE_Int          *SN_diag_i = hypre_CSRMatrixI(SN_diag);
    HYPRE_Int          *SN_diag_j = hypre_CSRMatrixJ(SN_diag);
@@ -952,11 +952,11 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
          position = A_diag_i[i]-1;
          if (!keep_same_sign)
          {
-            if (A_diag_data[A_diag_i[i]] > 0)
+            if (A_diag_data[A_diag_i[i]] > 0.0)
             {
                for (j=A_diag_i[i]+1; j < A_diag_i[i+1]; j++)
                {
-                  if (A_diag_data[j] < 0)
+                  if (A_diag_data[j] < 0.0)
                      S_marker[A_diag_j[j]] = j;
                }
             }
@@ -964,7 +964,7 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
             {
                for (j=A_diag_i[i]+1; j < A_diag_i[i+1]; j++)
                {
-                  if (A_diag_data[j] > 0)
+                  if (A_diag_data[j] > 0.0)
                      S_marker[A_diag_j[j]] = j;
                }
             }
@@ -1029,11 +1029,11 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
          position = A_offd_i[i]-1;
          if (!keep_same_sign)
          {
-            if (A_diag_data[A_diag_i[i]] > 0)
+            if (A_diag_data[A_diag_i[i]] > 0.0)
             {
                for (j=A_offd_i[i]; j < A_offd_i[i+1]; j++)
                {
-                  if (A_offd_data[j] < 0)
+                  if (A_offd_data[j] < 0.0)
                      S_marker_offd[A_offd_j[j]] = j;
                }
             }
@@ -1041,7 +1041,7 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
             {
                for (j=A_offd_i[i]; j < A_offd_i[i+1]; j++)
                {
-                  if (A_offd_data[j] > 0)
+                  if (A_offd_data[j] > 0.0)
                      S_marker_offd[A_offd_j[j]] = j;
                }
             }
