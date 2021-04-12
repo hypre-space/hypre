@@ -14,23 +14,6 @@
 
 #define COHEN_USE_SHMEM 0
 
-/* these are under the assumptions made in spgemm on block sizes: only use in spmm routines */
-
-// static __inline__ __attribute__((always_inline))
-// hypre_int get_warp_id(sycl::nd_item<3>& item)
-// {
-//    // return get_thread_id() >> HYPRE_WARP_BITSHIFT;        // in general cases
-//    return threadIdx.z;                                      // if blockDim.x * blockDim.y = WARP_SIZE
-// }
-
-// static __inline__ __attribute__((always_inline))
-// hypre_int get_lane_id(sycl::nd_item<3>& item)
-// {
-//    // return get_thread_id() & (WARP_SIZE-1);               // in general cases
-//    return threadIdx.y * blockDim.x + threadIdx.x;           // if blockDim.x * blockDim.y = WARP_SIZE
-// }
-
-
 /* Hash functions */
 static __inline__ __attribute__((always_inline))
 HYPRE_Int Hash2Func(HYPRE_Int key)
