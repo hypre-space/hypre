@@ -130,6 +130,7 @@ main( hypre_int argc,
    HYPRE_Int           mg_max_iter = 100;
    HYPRE_Int           nodal = 0;
    HYPRE_Int           nodal_diag = 0;
+   HYPRE_Int           keep_same_sign = 0;
    HYPRE_Real          cf_tol = 0.9;
    HYPRE_Real          norm;
    HYPRE_Real          final_res_norm;
@@ -1558,6 +1559,11 @@ main( hypre_int argc,
       {
          arg_index++;
          nodal_diag  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-keepSS") == 0 )
+      {
+         arg_index++;
+         keep_same_sign  = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-cheby_order") == 0 )
       {
@@ -3523,6 +3529,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetNumPaths(amg_solver, num_paths);
       HYPRE_BoomerAMGSetNodal(amg_solver, nodal);
       HYPRE_BoomerAMGSetNodalDiag(amg_solver, nodal_diag);
+      HYPRE_BoomerAMGSetKeepSameSign(amg_solver, keep_same_sign);
       HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_coarse, 3);
       if (ns_down > -1)
       {
@@ -4004,6 +4011,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
          HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
+         HYPRE_BoomerAMGSetKeepSameSign(pcg_precond, keep_same_sign);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);

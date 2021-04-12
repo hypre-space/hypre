@@ -25,7 +25,6 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
                               HYPRE_Int            *dof_func,
                               HYPRE_Real            filter_thresholdR,
                               HYPRE_Int             debug_flag,
-                              HYPRE_Int            *col_offd_S_to_A,
                               hypre_ParCSRMatrix  **R_ptr,
                               HYPRE_Int             is_triangular,
                               HYPRE_Int             gmres_switch)
@@ -215,7 +214,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
          /* use this mapping to have offd indices of A */
          for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
          {
-            i1 = col_offd_S_to_A ? col_offd_S_to_A[S_offd_j[j]] : S_offd_j[j];
+            i1 = S_offd_j[j];
             if (CF_marker_offd[i1] < 0)
             {
                cnt_offd ++;
@@ -338,7 +337,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
          for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
          {
             /* use this mapping to have offd indices of A */
-            i1 = col_offd_S_to_A ? col_offd_S_to_A[S_offd_j[j]] : S_offd_j[j];
+            i1 = S_offd_j[j];
             /* F-point */
             if (CF_marker_offd[i1] < 0)
             {
@@ -362,7 +361,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
          printf("\n");
          for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
          {
-            i1 = col_offd_S_to_A ? col_offd_S_to_A[S_offd_j[j]] : S_offd_j[j];
+            i1 = S_offd_j[j];
             printf("%d[o, %d] ", i1, CF_marker_offd[i1]);
          }
 
@@ -435,7 +434,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
          for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
          {
             /* row i1: use this mapping to have offd indices of A */
-            i1 = col_offd_S_to_A ? col_offd_S_to_A[S_offd_j[j]] : S_offd_j[j];
+            i1 = S_offd_j[j];
             /* if this is an F point */
             if (CF_marker_offd[i1] < 0)
             {
@@ -644,7 +643,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
          for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
          {
             /* use this mapping to have offd indices of A */
-            i1 = col_offd_S_to_A ? col_offd_S_to_A[S_offd_j[j]] : S_offd_j[j];
+            i1 = S_offd_j[j];
             /* F-point */
             if (CF_marker_offd[i1] < 0)
             {
@@ -679,7 +678,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
          for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
          {
             /* use this mapping to have offd indices of A */
-            i1 = col_offd_S_to_A ? col_offd_S_to_A[S_offd_j[j]] : S_offd_j[j];
+            i1 = S_offd_j[j];
             /* F-point */
             if (CF_marker_offd[i1] < 0)
             {
