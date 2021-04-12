@@ -925,8 +925,47 @@ hypre_MGRSetup( void               *mgr_vdata,
 #endif
     //hypre_ParCSRMatrixPrintIJ(RAP_ptr, 0, 0, "RAP_truncated");
 
+#if defined(HYPRE_USING_CUDA)
+    if (Frelax_method[lev] == 0)
+    {
+      hypre_MGRBuildAffDevice(A_array[lev], CF_marker_array[lev], coarse_pnts_global, &A_ff_ptr);
+      A_ff_array[lev] = A_ff_ptr;
+
+      HYPRE_Int *CF_marker_copy = hypre_CTAlloc(HYPRE_Int, nloc, HYPRE_MEMORY_HOST);
+      for (j = 0; j < nloc; j++)
+      {
+        CF_marker_copy[j] = -CF_marker_array[lev][j];
+      }
+      HYPRE_BigInt *num_fpts_global;
+      hypre_ParCSRMatrix *P_FF_ptr;
+      hypre_BoomerAMGCoarseParms(comm, nloc, 1, NULL, CF_marker_copy, NULL, &num_fpts_global);
+      hypre_MGRBuildPDevice(A_array[lev], CF_marker_copy, num_fpts_global, 0, &P_FF_ptr);
+      hypre_ParCSRMatrixMigrate(P_FF_ptr, memory_location);
+      P_FF_array[lev] = P_FF_ptr;
+
+      //hypre_ParCSRMatrixPrintIJ(P_FF_array[lev], 0, 0, "P_FF");
+      hypre_TFree(CF_marker_copy, HYPRE_MEMORY_HOST);
+      //hypre_TFree(num_fpts_global, HYPRE_MEMORY_HOST);
+      F_fine_array[lev+1] =
+      hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
+                     hypre_ParCSRMatrixGlobalNumRows(A_ff_ptr),
+                     hypre_ParCSRMatrixRowStarts(A_ff_ptr));
+      hypre_ParVectorInitialize(F_fine_array[lev+1]);
+      hypre_ParVectorSetPartitioningOwner(F_fine_array[lev+1],0);
+
+      U_fine_array[lev+1] =
+      hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
+                     hypre_ParCSRMatrixGlobalNumRows(A_ff_ptr),
+                     hypre_ParCSRMatrixRowStarts(A_ff_ptr));
+      hypre_ParVectorInitialize(U_fine_array[lev+1]);
+      hypre_ParVectorSetPartitioningOwner(U_fine_array[lev+1],0);
+    }
+    else if (Frelax_method[lev] == 2) // full AMG
+    {
+#else
     if (Frelax_method[lev] == 2) // full AMG
     {
+#endif
 
       wall_time = time_getWallclockSeconds();
       // user provided AMG solver
@@ -1199,6 +1238,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
       else if (relax_type == 18)
       {
+#if defined(HYPRE_USING_CUDA)
          if (relax_order)
          {
             hypre_ParCSRComputeL1Norms(A_array[j], 1, CF_marker_array[j], &l1_norm_data);
@@ -1207,13 +1247,23 @@ hypre_MGRSetup( void               *mgr_vdata,
          {
             hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norm_data);
          }
+#else
+         hypre_ParCSRComputeL1Norms(A_ff_array[j], 1, NULL, &l1_norm_data);
+
+#endif
       }
 
       if (l1_norm_data)
       {
+#if defined(HYPRE_USING_CUDA)
          l1_norms[j] = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_array[j]));
          hypre_VectorData(l1_norms[j]) = l1_norm_data;
          hypre_SeqVectorInitialize_v2(l1_norms[j], hypre_ParCSRMatrixMemoryLocation(A_array[j]));
+#else
+         l1_norms[j] = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_ff_array[j]));
+         hypre_VectorData(l1_norms[j]) = l1_norm_data;
+         hypre_SeqVectorInitialize_v2(l1_norms[j], hypre_ParCSRMatrixMemoryLocation(A_ff_array[j]));
+#endif
       }
    }
 

@@ -681,14 +681,27 @@ hypre_MGRCycle( void               *mgr_vdata,
          { /* (single level) relaxation for A_ff */
             if (relax_type == 18)
             {
+#if defined(HYPRE_USING_CUDA)
+              hypre_ParVectorSetConstantValues(F_fine_array[coarse_grid], 0.0);
+              hypre_ParCSRMatrixMatvecT(1.0, P_FF_array[fine_grid], F_array[fine_grid], 0.0, F_fine_array[coarse_grid]);
+              hypre_ParVectorSetConstantValues(U_fine_array[coarse_grid], 0.0);
+              for(i=0; i<nsweeps; i++)
+              {
+                hypre_ParCSRRelax_L1_Jacobi(A_ff_array[fine_grid], F_fine_array[coarse_grid], NULL,
+                      0, relax_weight,
+                      relax_l1_norms[fine_grid] ? hypre_VectorData(relax_l1_norms[fine_grid]) : NULL,
+                      U_fine_array[coarse_grid], Vtemp);
+              }
+              hypre_ParCSRMatrixMatvec(1.0, P_FF_array[fine_grid], U_fine_array[coarse_grid], 1.0, U_array[fine_grid]);
+#else
                for(i=0; i<nsweeps; i++)
                {
-                  relax_points = 0;
                   hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
                         relax_points, relax_weight,
                         relax_l1_norms[fine_grid] ? hypre_VectorData(relax_l1_norms[fine_grid]) : NULL,
                         U_array[fine_grid], Vtemp);
                }
+#endif
             }
             else if(relax_type == 8 || relax_type == 13 || relax_type == 14)
             {
@@ -732,17 +745,14 @@ hypre_MGRCycle( void               *mgr_vdata,
          }
          else if (Frelax_method[level] == 2)
          {
-           for (i=0; i<nsweeps; i++)
-           {
-            hypre_ParVectorSetConstantValues(F_fine_array[coarse_grid], 0.0);
-            //hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, 1.0, F_array[fine_grid], 0.0, &(F_fine_array[coarse_grid]));
-            hypre_ParCSRMatrixMatvecT(1.0, P_FF_array[fine_grid], F_array[fine_grid], 0.0, F_fine_array[coarse_grid]);
-            hypre_ParVectorSetConstantValues(U_fine_array[coarse_grid], 0.0);
-            fine_grid_solver_solve((mgr_data -> aff_solver)[fine_grid], A_ff_array[fine_grid], F_fine_array[coarse_grid],
-                  U_fine_array[coarse_grid]);
-            //hypre_MGRAddVectorP(CF_marker[fine_grid], FMRK, 1.0, U_fine_array[coarse_grid], 1.0, &(U_array[fine_grid]));
-            hypre_ParCSRMatrixMatvec(1.0, P_FF_array[fine_grid], U_fine_array[coarse_grid], 1.0, U_array[fine_grid]);
-           }
+           hypre_ParVectorSetConstantValues(F_fine_array[coarse_grid], 0.0);
+           //hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, 1.0, F_array[fine_grid], 0.0, &(F_fine_array[coarse_grid]));
+           hypre_ParCSRMatrixMatvecT(1.0, P_FF_array[fine_grid], F_array[fine_grid], 0.0, F_fine_array[coarse_grid]);
+           hypre_ParVectorSetConstantValues(U_fine_array[coarse_grid], 0.0);
+           fine_grid_solver_solve((mgr_data -> aff_solver)[fine_grid], A_ff_array[fine_grid], F_fine_array[coarse_grid],
+                 U_fine_array[coarse_grid]);
+           //hypre_MGRAddVectorP(CF_marker[fine_grid], FMRK, 1.0, U_fine_array[coarse_grid], 1.0, &(U_array[fine_grid]));
+           hypre_ParCSRMatrixMatvec(1.0, P_FF_array[fine_grid], U_fine_array[coarse_grid], 1.0, U_array[fine_grid]);
          }
          else
          {

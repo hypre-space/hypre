@@ -153,7 +153,7 @@ main( hypre_int argc,
   mgr_num_cindexes[0] = 1;
   //mgr_num_cindexes[1] = 5;
 
-  HYPRE_Int mgr_frelax_method = 2;
+  HYPRE_Int mgr_frelax_method = 0;
   //HYPRE_Int *mgr_level_frelax_method = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
   //mgr_level_frelax_method[0] = 2;
   //mgr_level_frelax_method[1] = 0;
