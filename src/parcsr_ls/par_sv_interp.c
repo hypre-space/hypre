@@ -1331,22 +1331,12 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
 
       /* assumes that unknowns are together on a procsessor with
        * nodal coarsening  */
-#ifdef HYPRE_NO_GLOBAL_PARTITION
       new_col_starts =  hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
       new_col_starts[0] = (col_starts[0]/(HYPRE_BigInt)num_functions)*(HYPRE_BigInt)new_nf ;
       new_col_starts[1] = (col_starts[1]/(HYPRE_BigInt)num_functions)*(HYPRE_BigInt)new_nf;
 
       if (myid == (num_procs -1)) g_nc = new_col_starts[1];
       hypre_MPI_Bcast(&g_nc, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-      new_col_starts =  hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
-      for (i = 0; i < (num_procs+1); i++)
-      {
-         new_col_starts[i] = (col_starts[i]/(HYPRE_BigInt)num_functions)*(HYPRE_BigInt)new_nf ;
-      }
-      g_nc = new_col_starts[num_procs];
-
-#endif
    }
    else /* not first level */
    {
@@ -1354,17 +1344,9 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
       g_nc = hypre_ParCSRMatrixGlobalNumCols(*P);
 
       /* copy col starts */
-#ifdef HYPRE_NO_GLOBAL_PARTITION
       new_col_starts =  hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
       new_col_starts[0] = col_starts[0];
       new_col_starts[1] = col_starts[1];
-#else
-      new_col_starts =  hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
-      for (i = 0; i< (num_procs+1); i++)
-      {
-         new_col_starts[i] = col_starts[i];
-      }
-#endif
    }
 
 
@@ -1656,11 +1638,7 @@ hypre_BoomerAMGRefineInterp( hypre_ParCSRMatrix *A,
       HYPRE_BigInt my_first_cpt;
       HYPRE_Int tmp_i;
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
       my_first_cpt = num_cpts_global[0];
-#else
-      my_first_cpt = num_cpts_global[myid];
-#endif
 
       /* need a fine-to-coarse mapping (num row P = num rows A)*/
       fine_to_coarse = hypre_CTAlloc(HYPRE_Int,  num_rows_P, HYPRE_MEMORY_HOST);

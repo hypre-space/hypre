@@ -17,10 +17,11 @@
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_SStructKrylovCAlloc( HYPRE_Int count,
-                           HYPRE_Int elt_size )
+hypre_SStructKrylovCAlloc( size_t count,
+                           size_t elt_size,
+                           HYPRE_MemoryLocation location )
 {
-   return( (void*) hypre_CTAlloc( char, count * elt_size , HYPRE_MEMORY_HOST) );
+   return( (void*) hypre_CTAlloc(char, count * elt_size, location) );
 }
 
 /*--------------------------------------------------------------------------
@@ -29,7 +30,7 @@ hypre_SStructKrylovCAlloc( HYPRE_Int count,
 HYPRE_Int
 hypre_SStructKrylovFree( void *ptr )
 {
-   hypre_Free( ptr , HYPRE_MEMORY_HOST);
+   hypre_TFree( ptr , HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -40,7 +41,7 @@ hypre_SStructKrylovFree( void *ptr )
 void *
 hypre_SStructKrylovCreateVector( void *vvector )
 {
-	hypre_SStructVector  *vector = (hypre_SStructVector  *)vvector;	
+   hypre_SStructVector  *vector = (hypre_SStructVector  *)vvector;
    hypre_SStructVector  *new_vector;
    HYPRE_Int             object_type;
 
@@ -50,7 +51,7 @@ hypre_SStructKrylovCreateVector( void *vvector )
    hypre_SStructPVector *new_pvector;
    hypre_StructVector   *new_svector;
    HYPRE_Int            *num_ghost;
-   
+
    HYPRE_Int    part;
    HYPRE_Int    nvars, var;
 
@@ -102,7 +103,7 @@ hypre_SStructKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
    hypre_SStructPVector *new_pvector;
    hypre_StructVector   *new_svector;
    HYPRE_Int            *num_ghost;
-   
+
    HYPRE_Int    part;
    HYPRE_Int    nvars, var;
 
@@ -203,7 +204,7 @@ hypre_SStructKrylovMatvecDestroy( void *matvec_data )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Real
-hypre_SStructKrylovInnerProd( void *x, 
+hypre_SStructKrylovInnerProd( void *x,
                               void *y )
 {
    HYPRE_Real result;
@@ -219,7 +220,7 @@ hypre_SStructKrylovInnerProd( void *x,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructKrylovCopyVector( void *x, 
+hypre_SStructKrylovCopyVector( void *x,
                                void *y )
 {
    return ( hypre_SStructCopy( (hypre_SStructVector *) x,

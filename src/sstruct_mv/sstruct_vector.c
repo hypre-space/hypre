@@ -246,8 +246,8 @@ hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector,
    hypre_StructVectorSetBoxValues(svector, set_box, value_box, values, action, -1, 0);
 
    /* TODO: Why need DeviceSync? */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_CUDA_CALL(cudaDeviceSynchronize());
+#if defined(HYPRE_USING_GPU)
+   hypre_SyncCudaDevice(hypre_handle());
 #endif
    /* set (AddTo/Get) or clear (Set) values outside the grid in ghost zones */
    if (action != 0)

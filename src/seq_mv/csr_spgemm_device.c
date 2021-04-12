@@ -8,7 +8,7 @@
 #include "seq_mv.h"
 #include "csr_spgemm_device.h"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 HYPRE_Int
 hypreDevice_CSRSpGemm(HYPRE_Int   m,        HYPRE_Int   k,        HYPRE_Int       n,
@@ -33,11 +33,18 @@ hypreDevice_CSRSpGemm(HYPRE_Int   m,        HYPRE_Int   k,        HYPRE_Int     
    hypre_profile_times[HYPRE_TIMER_ID_SPMM] -= hypre_MPI_Wtime();
 #endif
 
-   /* use CUSPARSE */
+   /* use CUSPARSE or rocSPARSE*/
    if (hypre_HandleSpgemmUseCusparse(hypre_handle()))
    {
+#if defined(HYPRE_USING_CUSPARSE)
       hypreDevice_CSRSpGemmCusparse(m, k, n, nnza, d_ia, d_ja, d_a, nnzb, d_ib, d_jb, d_b,
                                     nnzC, d_ic_out, d_jc_out, d_c_out);
+#elif defined(HYPRE_USING_ROCSPARSE)
+      hypreDevice_CSRSpGemmRocsparse(m, k, n, nnza, d_ia, d_ja, d_a, nnzb, d_ib, d_jb, d_b,
+                                     nnzC, d_ic_out, d_jc_out, d_c_out);
+#else
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Attempting to use device sparse matrix library for SpGEMM without having compiled support for it!\n");
+#endif
    }
    else
    {
@@ -133,14 +140,13 @@ hypre_CSRMatrixDeviceSpGemmSetHashType( char value )
    return 0;
 }
 
-#endif /* HYPRE_USING_CUDA */
+#endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */
 
 HYPRE_Int
-hypre_CSRMatrixDeviceSpGemmUseCusparse( HYPRE_Int use_cusparse )
+hypre_CSRMatrixDeviceSpGemmSetUseCusparse( HYPRE_Int use_cusparse )
 {
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_GPU)
    hypre_HandleCudaData(hypre_handle())->spgemm_use_cusparse = use_cusparse;
 #endif
    return 0;
 }
-

@@ -128,14 +128,9 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    hypre_MPI_Comm_rank(comm,&my_id);
    num_threads = hypre_NumThreads();
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    //my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   //my_first_cpt = num_cpts_global[my_id];
-   total_global_cpts = num_cpts_global[num_procs];
-#endif
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -1146,14 +1141,9 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
    num_threads = hypre_NumThreads();
 
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    //my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   //my_first_cpt = num_cpts_global[my_id];
-   total_global_cpts = num_cpts_global[num_procs];
-#endif
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -2048,14 +2038,9 @@ hypre_BoomerAMGBuildDirInterpHost( hypre_ParCSRMatrix   *A,
    hypre_MPI_Comm_rank(comm,&my_id);
    num_threads = hypre_NumThreads();
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    //my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   //my_first_cpt = num_cpts_global[my_id];
-   total_global_cpts = num_cpts_global[num_procs];
-#endif
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -2681,13 +2666,13 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
                                HYPRE_Int             interp_type,
                                hypre_ParCSRMatrix  **P_ptr)
 {
-#if defined(HYPRE_USING_CUDA)
-   hypre_NvtxPushRange("DirInterp");
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("DirInterp");
 #endif
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -2703,8 +2688,8 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
                                                debug_flag,trunc_factor,max_elmts,col_offd_S_to_A, P_ptr);
    }
 
-#if defined(HYPRE_USING_CUDA)
-   hypre_NvtxPopRange();
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
 #endif
 
    return ierr;
@@ -2724,7 +2709,7 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
       return 0;
    }
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(P) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -2865,14 +2850,9 @@ hypre_BoomerAMGBuildInterpModUnk( hypre_ParCSRMatrix   *A,
    num_threads = hypre_NumThreads();
 
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    //my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   //my_first_cpt = num_cpts_global[my_id];
-   total_global_cpts = num_cpts_global[num_procs];
-#endif
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -4049,15 +4029,9 @@ hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
 
-
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   my_first_cpt = num_cpts_global[my_id];
-   total_global_cpts = num_cpts_global[num_procs];
-#endif
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -4413,4 +4387,3 @@ hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A,
 
    return hypre_error_flag;
 }
-

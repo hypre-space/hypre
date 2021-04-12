@@ -20,6 +20,7 @@ HOST=`hostname`
 NumThreads=0               # number of OpenMP threads to use if > 0
 Valgrind=""                # string to add to MpirunString when using valgrind
 mpibind=""                 # string to add to MpirunString when using mpibind
+SaveExt="saved"            # saved file extension
 
 function usage
 {
@@ -35,6 +36,7 @@ function usage
    printf "    -nthreads <n>  use 'n' OpenMP threads\n"
    printf "    -rtol <tol>    use relative tolerance 'tol' to compare numeric test values\n"
    printf "    -atol <tol>    use absolute tolerance 'tol' to compare numeric test values\n"
+   printf "    -save <ext>    use '<test>.saved.<ext> for the saved-file extension\n"
    printf "    -valgrind      use valgrind memory checker\n"
    printf "    -mpibind       use mpibind\n"
    printf "    -n|-norun      turn off execute mode, echo what would be run\n"
@@ -106,6 +108,10 @@ function MpirunString
       pascal*)
          shift
          RunString="srun -n$*"
+         ;;
+      rzansel*)
+         shift
+         RunString="lrun -T$*"
          ;;
       ray*)
          shift
@@ -256,7 +262,7 @@ function ExecuteJobs
 {
    StartDir=$1
    WorkingDir=$2
-   InputFile=$3
+   TestName=$3
    ReturnFlag=0              # error return flag
    BatchFlag=0               # #BATCH option detected flag 
    BatchCount=0              # different numbering for #Batch option
@@ -343,7 +349,7 @@ EOF
                   done
                else                          # BatchFlag set
                   if [ "$BatchFile" -eq "" ] ; then
-                     BatchFile=$InputFile.batch.$BatchCount
+                     BatchFile=$TestName.batch.$BatchCount
                      BatchCount=BatchCount+1
                      cat > $BatchFile <<- EOF
 cd `pwd`
@@ -362,13 +368,13 @@ EOF
          *)
             NOTBLANK=`echo $InputLine | sed 's/[ \n\t]//g'`
             if [ "$NOTBLANK" ] ; then
-               echo "Found something unexpected in $WorkingDir/$InputFile.jobs"
+               echo "Found something unexpected in $WorkingDir/$TestName.jobs"
                echo "--> $InputLine"
                exit 1
             fi
             ;;
       esac
-   done < $InputFile.jobs           # done with open *.jobs file for reading
+   done < $TestName.jobs           # done with open *.jobs file for reading
    cd $SavePWD
    return $ReturnFlag
 }
@@ -378,13 +384,20 @@ function ExecuteTest
 {
    StartDir=$1
    WorkingDir=$2
-   InputFile=$3
+   TestName=$3
+   SaveName=$TestName.$SaveExt
    RTOL=$4
    ATOL=$5
    SavePWD=`pwd`
    cd $WorkingDir
-   (cat $InputFile.err.* > $InputFile.err)
-   (./$InputFile.sh $RTOL $ATOL   >> $InputFile.err 2>> $InputFile.err)
+   (cat $TestName.err.* > $TestName.err)
+   (./$TestName.sh $RTOL $ATOL >> $TestName.err 2>&1)
+   if [ -z $HYPRE_NO_SAVED ]; then
+      if [ -f $SaveName ]; then
+         # diff -U3 -bI"time" ${TestName}.saved ${TestName}.out   # old way of diffing
+         (../runcheck.sh $TestName.out $SaveName $RTOL $ATOL >> $TestName.err 2>&1)
+      fi
+   fi
    cd $SavePWD
 }
 
@@ -393,20 +406,20 @@ function PostProcess
 {
    StartDir=$1
    WorkingDir=$2
-   InputFile=$3
+   TestName=$3
    SavePWD=`pwd`
    cd $WorkingDir
    if [ "$BatchMode" -eq 0 ] ; then
       if [ -f purify.log ] ; then
-         mv purify.log $InputFile.purify.log
-         grep -i hypre_ $InputFile.purify.log >> $InputFile.err
+         mv purify.log $TestName.purify.log
+         grep -i hypre_ $TestName.purify.log >> $TestName.err
       elif [ -f insure.log ] ; then
          if [ -f ~/insure.log ] ; then
             cat ~/insure.log >> insure.log
             rm -f ~/insure.log*
          fi
-         mv insure.log $InputFile.insure.log
-         grep -i hypre_ $InputFile.insure.log >> $InputFile.err
+         mv insure.log $TestName.insure.log
+         grep -i hypre_ $TestName.insure.log >> $TestName.err
       fi
    fi
    cd $SavePWD
@@ -474,6 +487,11 @@ do
       -atol)
          shift
          ATOL=$1
+         shift
+         ;;
+      -save)
+         shift
+         SaveExt=$SaveExt.$1
          shift
          ;;
       -valgrind)

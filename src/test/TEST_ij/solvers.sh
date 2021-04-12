@@ -43,8 +43,6 @@ FILES="\
  ${TNAME}.out.3\
  ${TNAME}.out.4\
  ${TNAME}.out.5\
- ${TNAME}.out.6\
- ${TNAME}.out.7\
  ${TNAME}.out.900\
  ${TNAME}.out.901\
  ${TNAME}.out.902\
@@ -62,12 +60,21 @@ FILES="\
  ${TNAME}.out.917\
  ${TNAME}.out.918\
 "
+#${TNAME}.out.6\
+#${TNAME}.out.7\
 
 for i in $FILES
 do
   echo "# Output file: $i"
   tail -3 $i
-done > ${TNAME}.out
+done > ${TNAME}.out.a
+
+# Make sure that the output file is reasonable
+RUNCOUNT=`echo $FILES | wc -w`
+OUTCOUNT=`grep "Iterations" ${TNAME}.out.a | wc -l`
+if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
+   echo "Incorrect number of runs in ${TNAME}.out" >&2
+fi
 
 FILES="\
  ${TNAME}.out.8\
@@ -87,7 +94,14 @@ for i in $FILES
 do
   echo "# Output file: $i"
   tail -5 $i
-done >> ${TNAME}.out
+done > ${TNAME}.out.b
+
+# Make sure that the output file is reasonable
+RUNCOUNT=`echo $FILES | wc -w`
+OUTCOUNT=`grep "Relative" ${TNAME}.out.b | wc -l`
+if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
+   echo "Incorrect number of runs in ${TNAME}.out" >&2
+fi
 
 FILES="\
  ${TNAME}.out.sysh\
@@ -99,7 +113,14 @@ for i in $FILES
 do
   echo "# Output file: $i"
   tail -21 $i | head -6
-done >> ${TNAME}.out
+done > ${TNAME}.out.c
+
+# Make sure that the output file is reasonable
+RUNCOUNT=`echo $FILES | wc -w`
+OUTCOUNT=`grep "Complexity" ${TNAME}.out.c | wc -l`
+if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
+   echo "Incorrect number of runs in ${TNAME}.out" >&2
+fi
 
 FILES="\
  ${TNAME}.out.101\
@@ -128,7 +149,14 @@ for i in $FILES
 do
   echo "# Output file: $i"
   tail -3 $i
-done >> ${TNAME}.out
+done > ${TNAME}.out.d
+
+# Make sure that the output file is reasonable
+RUNCOUNT=`echo $FILES | wc -w`
+OUTCOUNT=`grep "Iterations" ${TNAME}.out.d | wc -l`
+if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
+   echo "Incorrect number of runs in ${TNAME}.out" >&2
+fi
 
 FILES="\
  ${TNAME}.out.200\
@@ -151,7 +179,14 @@ for i in $FILES
 do
   echo "# Output file: $i"
   tail -3 $i
-done >> ${TNAME}.out
+done > ${TNAME}.out.e
+
+# Make sure that the output file is reasonable
+RUNCOUNT=`echo $FILES | wc -w`
+OUTCOUNT=`grep "Iterations" ${TNAME}.out.e | wc -l`
+if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
+   echo "Incorrect number of runs in ${TNAME}.out" >&2
+fi
 
 FILES="\
  ${TNAME}.out.300\
@@ -179,25 +214,24 @@ FILES="\
  ${TNAME}.out.322\
  ${TNAME}.out.323\
  ${TNAME}.out.324\
+ ${TNAME}.out.325\
 "
 
 for i in $FILES
 do
   echo "# Output file: $i"
   tail -3 $i
-done >> ${TNAME}.out
+done > ${TNAME}.out.f
 
-# Make sure that the output files are reasonable
-CHECK_LINE="Complexity"
-OUT_COUNT=`grep "$CHECK_LINE" ${TNAME}.out | wc -l`
-SAVED_COUNT=`grep "$CHECK_LINE" ${TNAME}.saved | wc -l`
-if [ "$OUT_COUNT" != "$SAVED_COUNT" ]; then
-   echo "Incorrect number of \"$CHECK_LINE\" lines in ${TNAME}.out" >&2
+# Make sure that the output file is reasonable
+RUNCOUNT=`echo $FILES | wc -w`
+OUTCOUNT=`grep "Iterations" ${TNAME}.out.f | wc -l`
+if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
+   echo "Incorrect number of runs in ${TNAME}.out" >&2
 fi
 
-if [ -z $HYPRE_NO_SAVED ]; then
-   (../runcheck.sh ${TNAME}.out ${TNAME}.saved $RTOL $ATOL) >&2
-fi
+# put all of the output files together
+cat ${TNAME}.out.[a-z] > ${TNAME}.out
 
 #=============================================================================
 # remove temporary files

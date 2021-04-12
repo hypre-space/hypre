@@ -10,7 +10,7 @@
 
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 #define COHEN_USE_SHMEM 0
 
@@ -32,7 +32,7 @@ hypre_int get_thread_id()
 static __device__ __forceinline__
 hypre_int get_warp_id()
 {
-   // return get_thread_id() >> 5;                          // in general cases
+   // return get_thread_id() >> HYPRE_WARP_BITSHIFT;        // in general cases
    return threadIdx.z;                                      // if blockDim.x * blockDim.y = WARP_SIZE
 }
 
@@ -86,6 +86,5 @@ void csr_spmm_create_ija(HYPRE_Int m, HYPRE_Int *d_c, HYPRE_Int **d_i, HYPRE_Int
 HYPRE_Int csr_spmm_create_hash_table(HYPRE_Int m, HYPRE_Int *d_rc, HYPRE_Int *d_rf, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int num_ghash, HYPRE_Int **d_ghash_i, HYPRE_Int **d_ghash_j, HYPRE_Complex **d_ghash_a, HYPRE_Int *ghash_size);
 
 
-#endif /* HYPRE_USING_CUDA */
+#endif /* HYPRE_USING_CUDA || defined(HYPRE_USING_HIP) */
 #endif
-

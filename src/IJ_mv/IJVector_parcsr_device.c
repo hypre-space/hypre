@@ -14,7 +14,7 @@
 #include "_hypre_IJ_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 template<typename T1, typename T2>
 struct hypre_IJVectorAssembleFunctor : public thrust::binary_function< thrust::tuple<T1, T2>, thrust::tuple<T1, T2>, thrust::tuple<T1, T2> >
@@ -44,16 +44,8 @@ hypre_IJVectorSetAddValuesParDevice(hypre_IJVector       *vector,
 {
    HYPRE_BigInt *IJpartitioning = hypre_IJVectorPartitioning(vector);
    HYPRE_BigInt  vec_start, vec_stop;
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    vec_start = IJpartitioning[0];
    vec_stop  = IJpartitioning[1]-1;
-#else
-   MPI_Comm comm = hypre_IJVectorComm(vector);
-   HYPRE_Int my_id;
-   hypre_MPI_Comm_rank(comm, &my_id);
-   vec_start = IJpartitioning[my_id];
-   vec_stop  = IJpartitioning[my_id+1]-1;
-#endif
    HYPRE_Int nrows = vec_stop - vec_start + 1;
    const char SorA = action[0] == 's' ? 1 : 0;
 
@@ -135,15 +127,8 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
    MPI_Comm comm = hypre_IJVectorComm(vector);
    HYPRE_BigInt *IJpartitioning = hypre_IJVectorPartitioning(vector);
    HYPRE_BigInt  vec_start, vec_stop;
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    vec_start = IJpartitioning[0];
    vec_stop  = IJpartitioning[1]-1;
-#else
-   HYPRE_Int my_id;
-   hypre_MPI_Comm_rank(comm, &my_id);
-   vec_start = IJpartitioning[my_id];
-   vec_stop  = IJpartitioning[my_id+1]-1;
-#endif
    hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
    hypre_AuxParVector *aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
 
@@ -377,5 +362,3 @@ hypreCUDAKernel_IJVectorAssemblePar(HYPRE_Int n, HYPRE_Complex *x, HYPRE_BigInt 
 }
 
 #endif
-
-

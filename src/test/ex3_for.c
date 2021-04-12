@@ -274,7 +274,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       HYPRE_StructMatrixSetBoxValues(&A, ilower, iupper, &nentries,
                                      stencil_indices, values);
 
-      free(values);
+      hypre_TFree(values, HYPRE_MEMORY_HOST);
 #else
       /* Create an empty matrix object */
       HYPRE_StructMatrixCreate(hypre_MPI_COMM_WORLD, grid, stencil, &A);
@@ -299,7 +299,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, nentries,
                                      stencil_indices, values);
 
-      free(values);
+      hypre_TFree(values, HYPRE_MEMORY_HOST);
 #endif
    }
 
@@ -400,7 +400,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 #endif
       }
 
-      free(values);
+      hypre_TFree(values, HYPRE_MEMORY_HOST);
    }
 
    /* This is a collective call finalizing the matrix assembly.
@@ -454,7 +454,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       HYPRE_StructVectorSetBoxValues(x, ilower, iupper, values);
 #endif
 
-      free(values);
+      hypre_TFree(values, HYPRE_MEMORY_HOST);
 
       /* This is a collective call finalizing the vector assembly.
          The vector is now ``ready to be used'' */

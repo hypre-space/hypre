@@ -35,7 +35,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
 
    hypre_BoxManEntry     *entry;
    HYPRE_BigInt           rank, rank2;
-   HYPRE_BigInt           start_rank1, start_rank2; 
+   HYPRE_BigInt           start_rank1, start_rank2;
 
    HYPRE_Int              nedges;
 
@@ -103,21 +103,21 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
     * Find the coarse-fine connection pattern, i.e., the topology
     * needed to create the interpolation operators.
     * These connections are determined using the cell-centred grids.
-    * Note that we are assuming the variable type enumeration 
-    * given in hypre_SStructVariable_enum. 
+    * Note that we are assuming the variable type enumeration
+    * given in hypre_SStructVariable_enum.
     *
     * We consider both 2-d and 3-d cases. In 2-d, the edges are faces.
     * We will continue to call them edges, but use the face variable
     * enumeration.
     *-------------------------------------------------------------------*/
    varoffsets= hypre_CTAlloc(hypre_Index,  tot_vars, HYPRE_MEMORY_HOST);
-   
+
    /* total of 8 variable types. Create a mapping between user enumeration
       to hypre enumeration. Only need for edge grids. */
    vartype_map= hypre_CTAlloc(HYPRE_Int,  tot_vars, HYPRE_MEMORY_HOST);
 
    part= 0;
-   p_cgrid = hypre_SStructGridPGrid(cgrid_edge, part);       
+   p_cgrid = hypre_SStructGridPGrid(cgrid_edge, part);
    nvars   = hypre_SStructPGridNVars(p_cgrid);
    vartypes= hypre_SStructPGridVarTypes(p_cgrid);
 
@@ -145,13 +145,13 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
             vartype_map[5]= i;
             break;
          }
-        
+
          case 6:
          {
             vartype_map[6]= i;
             break;
          }
-        
+
          case 7:
          {
             vartype_map[7]= i;
@@ -266,10 +266,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
    }
 
    /* CREATE IJ_MATRICES- need to find the size of each one. Notice that the row
-      and col ranks of these matrices can be created using only grid information. 
+      and col ranks of these matrices can be created using only grid information.
       Grab the first part, first variable, first box, and lower index (lower rank);
       Grab the last part, last variable, last box, and upper index (upper rank). */
- 
+
    /* edge_Edge. Same for 2-d and 3-d. */
    /* lower rank */
    start_rank1= hypre_SStructGridStartRank(fgrid_edge);
@@ -285,7 +285,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
    fboxes   = hypre_StructGridBoxes(var_fgrid);
    fbox    = hypre_BoxArrayBox(fboxes, hypre_BoxArraySize(fboxes)-1);
 
-   hypre_SStructGridBoxProcFindBoxManEntry(fgrid_edge, part, nvars-1, 
+   hypre_SStructGridBoxProcFindBoxManEntry(fgrid_edge, part, nvars-1,
                                            hypre_BoxArraySize(fboxes)-1, myproc, &entry);
    hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMax(fbox), &iupper);
 
@@ -295,7 +295,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
    cboxes   = hypre_StructGridBoxes(var_cgrid);
    cbox    = hypre_BoxArrayBox(cboxes, hypre_BoxArraySize(cboxes)-1);
 
-   hypre_SStructGridBoxProcFindBoxManEntry(cgrid_edge, part, nvars-1, 
+   hypre_SStructGridBoxProcFindBoxManEntry(cgrid_edge, part, nvars-1,
                                            hypre_BoxArraySize(cboxes)-1, myproc, &entry);
    hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMax(cbox), &jupper);
 
@@ -305,11 +305,11 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
 
    /*-----------------------------------------------------------------------
     * edge_Edge, the actual interpolation matrix.
-    * For each fine edge row, we need to know if it is a edge, 
-    * boundary edge, or face edge. Knowing this allows us to determine the 
-    * structure and weights of the interpolation matrix. 
+    * For each fine edge row, we need to know if it is a edge,
+    * boundary edge, or face edge. Knowing this allows us to determine the
+    * structure and weights of the interpolation matrix.
     * We assume that a coarse edge interpolates only to fine edges in or on
-    * an agglomerate. That is, fine edges with indices that do were 
+    * an agglomerate. That is, fine edges with indices that do were
     * truncated do not get interpolated to.
     * Scheme: Loop over fine edge grid. For each fine edge ijk,
     *     1) map it to a fine cell with the fine edge at the lower end
@@ -488,7 +488,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
          hypre_ForBoxI(i, fboxes)
          {
             cellbox= hypre_BoxArrayBox(fboxes, i);
- 
+
             /* vboxes inside the i'th cellbox */
             num_vboxes= n_CtoVbox[part][i];
             vboxnums  = CtoVboxnums[part][i];
@@ -500,7 +500,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                variable box- variables that are shared may lead to smaller
                variable boxes than the SubtractIndex produces. If the box
                has to be decreased, then we decrease it by (rfactor[j]-1)
-               in the appropriate direction. 
+               in the appropriate direction.
                Check the location of the shifted lower box index. */
             for (k= 0; k< n_boxoffsets; k++)
             {
@@ -537,7 +537,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
             hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                       &copy_box, start, stride, m);
             {
-               hypre_BoxLoopGetIndex(lindex);
+               zypre_BoxLoopGetIndex(lindex);
                hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
                for (k= 0; k< 3; k++)
                {
@@ -654,7 +654,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                                &copy_box, start, rfactor, m);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
                         for (k= 0; k< 3; k++)
                         {
@@ -678,7 +678,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                                                     matrix_type);
 
                               /* still row l may be outside the processor */
-                              if ((l <= upper_ranks[part][t]) && 
+                              if ((l <= upper_ranks[part][t]) &&
                                   (l >= lower_ranks[part][t]))
                               {
                                  iedgeEdge[j]= l;
@@ -728,7 +728,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                                &copy_box, start, rfactor, m);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
                         for (k= 0; k< 3; k++)
                         {
@@ -748,7 +748,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                                                t, &entry);
                               hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &l,
                                                                     matrix_type);
-                              if ((l <= upper_ranks[part][t]) && 
+                              if ((l <= upper_ranks[part][t]) &&
                                   (l >= lower_ranks[part][t]))
                               {
                                  iedgeEdge[j]= l;
@@ -784,7 +784,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      /******************************************************
                       * Check the location of the shifted lower box index:
                       *         y_edge-> X_Face & Z_Face:
-                      *  Z_Face- contract in the z direction only if the 
+                      *  Z_Face- contract in the z direction only if the
                       *          processor interface is in the z direction
                       *  X_Face- contract in the x direction if the processor
                       *          interface is in the x direction.
@@ -824,7 +824,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                                &copy_box, start, rfactor, m);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                         for (k= 0; k< 3; k++)
@@ -846,7 +846,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                                                t, &entry);
                               hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &l,
                                                                     matrix_type);
-                              if ((l <= upper_ranks[part][t]) && 
+                              if ((l <= upper_ranks[part][t]) &&
                                   (l >= lower_ranks[part][t]))
                               {
                                  iedgeEdge[j]= l;
@@ -897,7 +897,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                                &copy_box, start, rfactor, m);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                         for (k= 0; k< 3; k++)
@@ -919,7 +919,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                                                t, &entry);
                               hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &l,
                                                                     matrix_type);
-                              if ((l <= upper_ranks[part][t]) && 
+                              if ((l <= upper_ranks[part][t]) &&
                                   (l >= lower_ranks[part][t]))
                               {
                                  iedgeEdge[j]= l;
@@ -994,7 +994,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                                &copy_box, start, rfactor, m);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                         for (k= 0; k< 3; k++)
@@ -1016,7 +1016,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                                                t, &entry);
                               hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &l,
                                                                     matrix_type);
-                              if ((l <= upper_ranks[part][t]) && 
+                              if ((l <= upper_ranks[part][t]) &&
                                   (l >= lower_ranks[part][t]))
                               {
                                  iedgeEdge[j]= l;
@@ -1065,7 +1065,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                                &copy_box, start, rfactor, m);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                         for (k= 0; k< 3; k++)
@@ -1087,7 +1087,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                                                t, &entry);
                               hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &l,
                                                                     matrix_type);
-                              if ((l <= upper_ranks[part][t]) && 
+                              if ((l <= upper_ranks[part][t]) &&
                                   (l >= lower_ranks[part][t]))
                               {
                                  iedgeEdge[j]= l;
@@ -1152,7 +1152,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                             &copy_box, start, rfactor, m);
                   {
-                     hypre_BoxLoopGetIndex(lindex);
+                     zypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
                      for (k= 0; k< 3; k++)
                      {
@@ -1208,7 +1208,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                             &copy_box, start, rfactor, m);
                   {
-                     hypre_BoxLoopGetIndex(lindex);
+                     zypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                      for (k= 0; k< 3; k++)
@@ -1266,7 +1266,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                             &copy_box, start, rfactor, m);
                   {
-                     hypre_BoxLoopGetIndex(lindex);
+                     zypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
                      for (k= 0; k< 3; k++)
                      {
@@ -1333,7 +1333,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                             &copy_box, start, rfactor, m);
                   {
-                     hypre_BoxLoopGetIndex(lindex);
+                     zypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
                      for (k= 0; k< 3; k++)
                      {
@@ -1401,7 +1401,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                             &copy_box, start, rfactor, m);
                   {
-                     hypre_BoxLoopGetIndex(lindex);
+                     zypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
                      for (k= 0; k< 3; k++)
                      {
@@ -1612,7 +1612,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                {
                   hypre_AddIndexes(hypre_BoxIMin(&copy_box), boxoffset[j], 3,
                                    hypre_BoxIMin(&copy_box));
-                                                                               
+
                   /* also modify cstart */
                   hypre_AddIndexes(boxoffset[j], one_index, 3, boxoffset[j]);
                   hypre_StructMapFineToCoarse(boxoffset[j], zero_index, rfactor,
@@ -1635,7 +1635,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
             hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                       &copy_box, start, stride, m);
             {
-               hypre_BoxLoopGetIndex(lindex);
+               zypre_BoxLoopGetIndex(lindex);
                hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
                for (j= 0; j< 3; j++)
                {
@@ -1771,7 +1771,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                                &copy_box, start, rfactor, m);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                         /* because of rfactor striding, cindex= findex. But adjust
@@ -1822,7 +1822,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                   (l >= lower_ranks[part][t]))
                               {
                                  jedge_Edge[k]= rank;
-                                 vals_edgeEdge[k]= (HYPRE_Real) n/(rfactor[1]*rfactor[0]); 
+                                 vals_edgeEdge[k]= (HYPRE_Real) n/(rfactor[1]*rfactor[0]);
                                  k++;
 
                                  jedge_Edge[k]= rank2;
@@ -1873,7 +1873,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                                &copy_box, start, rfactor, m);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                         /* because of rfactor striding, cindex= findex. But adjust
@@ -1954,7 +1954,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      /******************************************************
                       * Check the location of the shifted lower box index:
                       *         y_edge-> X_Face & Z_Face:
-                      *  Z_Face- contract in the z direction only if the 
+                      *  Z_Face- contract in the z direction only if the
                       *          processor interface is in the z direction
                       *  X_Face- contract in the x direction if the processor
                       *          interface is in the x direction.
@@ -1999,7 +1999,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                                &copy_box, start, rfactor, m);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                         /* because of rfactor striding, cindex= findex. But adjust
@@ -2096,11 +2096,11 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                      loop_size[0]++;
-                     
+
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                                &copy_box, start, rfactor, m);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                         /* because of rfactor striding, cindex= findex. But adjust
@@ -2222,7 +2222,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                                &copy_box, start, rfactor, m);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                         /* because of rfactor striding, cindex= findex. But adjust
@@ -2322,7 +2322,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                                &copy_box, start, rfactor, m);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                         /* because of rfactor striding, cindex= findex. But adjust
@@ -2354,7 +2354,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
 
                         /* loop over the strips of y_edges making up the Y_Face */
                         for (p= 0; p< rfactor[2]; p++)
-                        {                        
+                        {
                            hypre_CopyIndex(findex, var_index);
                            var_index[2]+= p;
                            for (n= 1; n< rfactor[0]; n++)
@@ -2433,7 +2433,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                             &copy_box, start, rfactor, r);
                   {
-                     hypre_BoxLoopGetIndex(lindex);
+                     zypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                      /*****************************************************
@@ -2452,7 +2452,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                            hypre_AddIndexes(cindex, cstart, 3, cindex);
 
                            /*interior of Face. Extract the two coarse Edge
-                             (x_Edge ijk & (i-1,j,k)*/ 
+                             (x_Edge ijk & (i-1,j,k)*/
                            hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex,
                                                             t, &entry);
                            hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
@@ -2501,7 +2501,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                             &copy_box, start, rfactor, r);
                   {
-                     hypre_BoxLoopGetIndex(lindex);
+                     zypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                      /*****************************************************
@@ -2520,7 +2520,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                            hypre_AddIndexes(cindex, cstart, 3, cindex);
 
                            /*lies interior of Face. Extract the two coarse Edge
-                             (y_Edge ijk & (i,j-1,k). */ 
+                             (y_Edge ijk & (i,j-1,k). */
                            hypre_SStructGridFindBoxManEntry(cgrid_edge, part, cindex,
                                                             t, &entry);
                            hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
@@ -2569,7 +2569,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                             &copy_box, start, rfactor, r);
                   {
-                     hypre_BoxLoopGetIndex(lindex);
+                     zypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                      /*****************************************************
@@ -2664,7 +2664,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                             &copy_box, start, rfactor, r);
                   {
-                     hypre_BoxLoopGetIndex(lindex);
+                     zypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                      /*****************************************************
@@ -2759,7 +2759,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                             &copy_box, start, rfactor, r);
                   {
-                     hypre_BoxLoopGetIndex(lindex);
+                     zypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
 
                      /*****************************************************
@@ -2849,7 +2849,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
    /* n_CtoVbox[part][cellboxi][var]  & CtoVboxnums[part][cellboxi][var][nvboxes] */
    for (part= 0; part< nparts; part++)
    {
-      p_fgrid= hypre_SStructGridPGrid(fgrid_edge, part);  
+      p_fgrid= hypre_SStructGridPGrid(fgrid_edge, part);
       Edge_nvars= hypre_SStructPGridNVars(p_fgrid);
 
       var_fgrid= hypre_SStructPGridCellSGrid(p_fgrid);

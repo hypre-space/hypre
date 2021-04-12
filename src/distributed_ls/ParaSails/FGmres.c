@@ -187,10 +187,11 @@ void FGMRES_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,
     if (mype == 0)
         hypre_printf("Iter (%d): computed rrn    : %e\n", iter, rel_resid);
 
-    free(H);
-    free(s);
-    free(cs);
-    free(sn);
-    free(V);
-    free(W);
+    hypre_TFree(H, HYPRE_MEMORY_HOST);
+    hypre_TFree(s, HYPRE_MEMORY_HOST);
+    hypre_TFree(cs, HYPRE_MEMORY_HOST);
+    hypre_TFree(sn, HYPRE_MEMORY_HOST);
+    hypre_TFree(V, HYPRE_MEMORY_HOST);
+    hypre_TFree(W, HYPRE_MEMORY_HOST);
 }
+

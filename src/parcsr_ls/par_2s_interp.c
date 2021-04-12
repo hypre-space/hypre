@@ -115,19 +115,12 @@ hypre_BoomerAMGBuildModPartialExtInterpHost( hypre_ParCSRMatrix  *A,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    if (my_id == (num_procs -1)) total_old_global_cpts = num_old_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
    hypre_MPI_Bcast(&total_old_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
    n_Cpts = num_cpts_global[1]-num_cpts_global[0];
    n_old_Cpts = num_old_cpts_global[1]-num_old_cpts_global[0];
-#else
-   total_global_cpts = num_cpts_global[num_procs];
-   total_old_global_cpts = num_old_cpts_global[num_procs];
-   n_Cpts = num_cpts_global[my_id+1]-num_cpts_global[my_id];
-   n_old_Cpts = num_old_cpts_global[my_id+1]-num_old_cpts_global[my_id];
-#endif
 
    hypre_ParCSRMatrixGenerateFFFC3(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF);
 
@@ -532,8 +525,8 @@ hypre_BoomerAMGBuildModPartialExtInterp( hypre_ParCSRMatrix  *A,
                                          HYPRE_Int           *col_offd_S_to_A,
                                          hypre_ParCSRMatrix **P_ptr )
 {
-#if defined(HYPRE_USING_CUDA)
-   hypre_NvtxPushRange("PartialExtInterp");
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("PartialExtInterp");
 #endif
 
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
@@ -545,7 +538,7 @@ hypre_BoomerAMGBuildModPartialExtInterp( hypre_ParCSRMatrix  *A,
       ierr = hypre_BoomerAMGBuildModPartialExtInterpHost(A, CF_marker, S, num_cpts_global, num_old_cpts_global,
                                                          debug_flag, trunc_factor, max_elmts, col_offd_S_to_A, P_ptr);
    }
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    else
    {
       ierr = hypre_BoomerAMGBuildModPartialExtInterpDevice(A, CF_marker, S, num_cpts_global, num_old_cpts_global,
@@ -553,8 +546,8 @@ hypre_BoomerAMGBuildModPartialExtInterp( hypre_ParCSRMatrix  *A,
    }
 #endif
 
-#if defined(HYPRE_USING_CUDA)
-   hypre_NvtxPopRange();
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
 #endif
 
    return ierr;
@@ -664,19 +657,12 @@ hypre_BoomerAMGBuildModPartialExtPEInterpHost( hypre_ParCSRMatrix  *A,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    if (my_id == (num_procs -1)) total_old_global_cpts = num_old_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
    hypre_MPI_Bcast(&total_old_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
    n_Cpts = num_cpts_global[1]-num_cpts_global[0];
    n_old_Cpts = num_old_cpts_global[1]-num_old_cpts_global[0];
-#else
-   total_global_cpts = num_cpts_global[num_procs];
-   total_old_global_cpts = num_old_cpts_global[num_procs];
-   n_Cpts = num_cpts_global[my_id+1]-num_cpts_global[my_id];
-   n_old_Cpts = num_old_cpts_global[my_id+1]-num_old_cpts_global[my_id];
-#endif
 
    hypre_ParCSRMatrixGenerateFFFCD3(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF, &D_lambda);
 
@@ -1126,8 +1112,8 @@ hypre_BoomerAMGBuildModPartialExtPEInterp( hypre_ParCSRMatrix  *A,
                                            HYPRE_Int           *col_offd_S_to_A,
                                            hypre_ParCSRMatrix **P_ptr )
 {
-#if defined(HYPRE_USING_CUDA)
-   hypre_NvtxPushRange("PartialExtPEInterp");
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("PartialExtPEInterp");
 #endif
 
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
@@ -1139,7 +1125,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterp( hypre_ParCSRMatrix  *A,
       ierr = hypre_BoomerAMGBuildModPartialExtPEInterpHost(A, CF_marker, S, num_cpts_global, num_old_cpts_global,
                                                            debug_flag, trunc_factor, max_elmts, col_offd_S_to_A, P_ptr);
    }
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    else
    {
       ierr = hypre_BoomerAMGBuildModPartialExtPEInterpDevice(A, CF_marker, S, num_cpts_global, num_old_cpts_global,
@@ -1147,10 +1133,9 @@ hypre_BoomerAMGBuildModPartialExtPEInterp( hypre_ParCSRMatrix  *A,
    }
 #endif
 
-#if defined(HYPRE_USING_CUDA)
-   hypre_NvtxPopRange();
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
 #endif
 
    return ierr;
 }
-

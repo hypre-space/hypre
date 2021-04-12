@@ -33,6 +33,7 @@
 #include <fstream>
 #include "_hypre_utilities.h"
 #include "LLNL_FEI_Impl.h"
+#include "ex.h"
 
 using namespace std;
 
@@ -57,6 +58,9 @@ int main(int argc, char *argv[])
 
    /* Initialize HYPRE */
    HYPRE_Init();
+
+   /* Print GPU info */
+   HYPRE_PrintDeviceInfo();
 
    // Set default parameters
    n = 4*nprocs;

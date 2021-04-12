@@ -180,7 +180,6 @@ HYPRE_ParCSRMatrixGetGlobalRowPartitioning( HYPRE_ParCSRMatrix   matrix,
    comm = hypre_ParCSRMatrixComm((hypre_ParCSRMatrix *) matrix);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    HYPRE_Int       num_procs;
    HYPRE_BigInt    row_start;
 
@@ -206,12 +205,6 @@ HYPRE_ParCSRMatrixGetGlobalRowPartitioning( HYPRE_ParCSRMatrix   matrix,
    {
       row_partitioning[num_procs] = hypre_ParCSRMatrixGlobalNumRows((hypre_ParCSRMatrix *) matrix);
    }
-#else
-   if (all_procs || ((!all_procs) && (my_id == 0)))
-   {
-      HYPRE_ParCSRMatrixGetRowPartitioning( matrix, &row_partitioning );
-   }
-#endif
 
    *row_partitioning_ptr = row_partitioning;
 
