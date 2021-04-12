@@ -47,7 +47,7 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
       hypre_BoxGetSize(box, loop_size);
 
       /* TODO: generate on host and copy to device. FIX? */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
       HYPRE_Int loop_n = 1, ii;
       for (ii = 0; ii < hypre_StructVectorNDim(vector); ii++)
       {
@@ -71,7 +71,7 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                           v_data_box, start, unit_stride, vi);
       {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
          vp[vi] = rand_device[idx];
 #else
          vp[vi] = 2.0*hypre_Rand() - 1.0;
@@ -80,7 +80,7 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
       hypre_BoxLoop1End(vi);
 #undef DEVICE_VAR
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
       hypre_TFree(rand_device, HYPRE_MEMORY_DEVICE);
       hypre_TFree(rand_host, HYPRE_MEMORY_HOST);
 #endif

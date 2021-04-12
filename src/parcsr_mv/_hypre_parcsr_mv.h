@@ -86,7 +86,7 @@ typedef struct _hypre_ParCSRCommPkg
 #endif
 
    /* temporary memory for matvec. cudaMalloc is expensive. alloc once and reuse */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_Complex *tmp_data;
    HYPRE_Complex *buf_data;
    char          *work_space;
@@ -117,7 +117,7 @@ typedef struct _hypre_ParCSRCommPkg
 #define hypre_ParCSRCommPkgRecvMPITypes(comm_pkg)        (comm_pkg -> recv_mpi_types)
 #define hypre_ParCSRCommPkgRecvMPIType(comm_pkg,i)       (comm_pkg -> recv_mpi_types[i])
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
 #define hypre_ParCSRCommPkgTmpData(comm_pkg)             ((comm_pkg) -> tmp_data)
 #define hypre_ParCSRCommPkgBufData(comm_pkg)             ((comm_pkg) -> buf_data)
 #define hypre_ParCSRCommPkgWorkSpace(comm_pkg)           ((comm_pkg) -> work_space)
@@ -126,7 +126,7 @@ typedef struct _hypre_ParCSRCommPkg
 static inline void
 hypre_ParCSRCommPkgCopySendMapElmtsToDevice(hypre_ParCSRCommPkg *comm_pkg)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    if (hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) == NULL)
    {
       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) =
@@ -157,7 +157,6 @@ hypre_ParCSRCommPkgCopySendMapElmtsToDevice(hypre_ParCSRCommPkg *comm_pkg)
 #define hypre_ParCSRCommHandleRequest(comm_handle, i)             (comm_handle -> requests[i])
 
 #endif /* HYPRE_PAR_CSR_COMMUNICATION_HEADER */
-
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -363,7 +362,7 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_Complex        *bdiaginv;
    hypre_ParCSRCommPkg  *bdiaginv_comm_pkg;
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    /* these two arrays are reserveed for SoC matrices on GPUs to help build interpolation */
    HYPRE_Int            *soc_diag_j;
    HYPRE_Int            *soc_offd_j;
@@ -403,7 +402,7 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixAssumedPartition(matrix)       ((matrix) -> assumed_partition)
 #define hypre_ParCSRMatrixOwnsAssumedPartition(matrix)   ((matrix) -> owns_assumed_partition)
 #define hypre_ParCSRMatrixProcOrdering(matrix)           ((matrix) -> proc_ordering)
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #define hypre_ParCSRMatrixSocDiagJ(matrix)               ((matrix) -> soc_diag_j)
 #define hypre_ParCSRMatrixSocOffdJ(matrix)               ((matrix) -> soc_offd_j)
 #endif
@@ -483,7 +482,6 @@ typedef struct
 #define hypre_ParCSRBooleanMatrix_Get_Getrowactive(matrix)  ((matrix)->getrowactive)
 
 #endif
-
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.

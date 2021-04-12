@@ -66,7 +66,7 @@ hypre_StructVectorDestroy( hypre_StructVector *vector )
       {
          if (hypre_StructVectorDataAlloced(vector))
          {
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
             hypre_StructGrid     *grid = hypre_StructVectorGrid(vector);
             if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
             {
@@ -195,7 +195,7 @@ hypre_StructVectorInitialize( hypre_StructVector *vector )
    HYPRE_Complex *data;
 
    hypre_StructVectorInitializeShell(vector);
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_StructGrid     *grid = hypre_StructVectorGrid(vector);
    if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
    {
@@ -617,7 +617,7 @@ hypre_StructVectorSetDataSize(hypre_StructVector *vector,
 			      HYPRE_Int          *data_size,
 			      HYPRE_Int          *data_host_size)
 {
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_StructGrid     *grid = hypre_StructVectorGrid(vector);
    if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
    {
@@ -1219,5 +1219,3 @@ hypre_StructVectorClone(
 
    return y;
 }
-
-

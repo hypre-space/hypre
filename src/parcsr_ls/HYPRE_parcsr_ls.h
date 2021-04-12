@@ -263,13 +263,7 @@ HYPRE_Int HYPRE_BoomerAMGSetFilterThresholdR(HYPRE_Solver solver,
                                              HYPRE_Real   filter_threshold);
 
 /**
- * (Optional) Defines the largest strength threshold for which
- * the strength matrix S uses the communication package of the operator A.
- * If the strength threshold is larger than this values,
- * a communication package is generated for S. This can save
- * memory and decrease the amount of data that needs to be communicated,
- * if S is substantially sparser than A.
- * The default is 1.0.
+ * (Optional) Deprecated. This routine now has no effect.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetSCommPkgSwitch(HYPRE_Solver solver,
                                            HYPRE_Real   S_commpkg_switch);
@@ -410,6 +404,13 @@ HYPRE_Int HYPRE_BoomerAMGSetNodal(HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetNodalDiag(HYPRE_Solver solver,
                                       HYPRE_Int    nodal_diag);
 
+
+/*
+ * (Optional) Sets whether to keep same sign in S for nodal > 0
+ * The default is 0, i.e., discard those elements.
+ */
+HYPRE_Int HYPRE_BoomerAMGSetKeepSameSign(HYPRE_Solver solver,
+                                         HYPRE_Int    keep_same_sign);
 
 /**
  * (Optional) Defines which parallel interpolation operator is used.
