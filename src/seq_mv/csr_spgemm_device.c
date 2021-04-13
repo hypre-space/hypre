@@ -7,6 +7,7 @@
 
 #include "seq_mv.h"
 #include "csr_spgemm_device.h"
+#include "seq_mv.hpp"
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
@@ -46,7 +47,8 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix *A, hypre_CSRMatrix *B,
    if (hypre_HandleSpgemmUseCusparse(hypre_handle()))
    {
 #if defined(HYPRE_USING_CUSPARSE)
-      hypreDevice_CSRSpGemmCusparse(m, k, n, nnza, d_ia, d_ja, d_a, nnzb, d_ib, d_jb, d_b,
+      hypreDevice_CSRSpGemmCusparse(m, k, n, hypre_CSRMatrixGPUMatDescr(A), nnza, d_ia, d_ja, d_a,
+                                    hypre_CSRMatrixGPUMatDescr(B), nnzb, d_ib, d_jb, d_b,
                                     nnzC, d_ic_out, d_jc_out, d_c_out);
 #elif defined(HYPRE_USING_ROCSPARSE)
       hypreDevice_CSRSpGemmRocsparse(m, k, n, nnza, d_ia, d_ja, d_a, nnzb, d_ib, d_jb, d_b,
