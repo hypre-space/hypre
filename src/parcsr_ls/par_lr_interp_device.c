@@ -39,7 +39,6 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
                                     HYPRE_Int            debug_flag,
                                     HYPRE_Real           trunc_factor,
                                     HYPRE_Int            max_elmts,
-                                    HYPRE_Int           *col_offd_S_to_A,
                                     hypre_ParCSRMatrix **P_ptr)
 {
    HYPRE_Int           A_nr_of_rows = hypre_ParCSRMatrixNumRows(A);
@@ -475,7 +474,6 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
                                       HYPRE_Int            debug_flag,
                                       HYPRE_Real           trunc_factor,
                                       HYPRE_Int            max_elmts,
-                                      HYPRE_Int           *col_offd_S_to_A,
                                       hypre_ParCSRMatrix **P_ptr)
 {
    HYPRE_Int           A_nr_of_rows = hypre_ParCSRMatrixNumRows(A);
