@@ -51,7 +51,8 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix *A, hypre_CSRMatrix *B,
                                     hypre_CSRMatrixGPUMatDescr(B), nnzb, d_ib, d_jb, d_b,
                                     nnzC, d_ic_out, d_jc_out, d_c_out);
 #elif defined(HYPRE_USING_ROCSPARSE)
-      hypreDevice_CSRSpGemmRocsparse(m, k, n, nnza, d_ia, d_ja, d_a, nnzb, d_ib, d_jb, d_b,
+      hypreDevice_CSRSpGemmRocsparse(m, k, n, hypre_CSRMatrixGPUMatDescr(A), nnza, d_ia, d_ja, d_a,
+                                     hypre_CSRMatrixGPUMatDescr(B), nnzb, d_ib, d_jb, d_b,
                                      nnzC, d_ic_out, d_jc_out, d_c_out);
 #else
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Attempting to use device sparse matrix library for SpGEMM without having compiled support for it!\n");
