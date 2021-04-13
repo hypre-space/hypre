@@ -241,6 +241,21 @@ struct hypre_CsrsvData
 #define hypre_CsrsvDataBufferSize(data) ((data) -> BufferSize)
 #define hypre_CsrsvDataBuffer(data)     ((data) -> Buffer)
 
+struct hypre_GpuMatData
+{
+#if defined(HYPRE_USING_CUSPARSE)
+   cusparseMatDescr_t    mat_descr;
+#endif
+
+#if defined(HYPRE_USING_ROCSPARSE)
+   rocsparse_mat_descr   mat_descr;
+   rocsparse_mat_info    mat_info;
+#endif
+};
+
+#define hypre_GpuMatDataMatDecsr(data) ((data) -> mat_descr)
+#define hypre_GpuMatDataMatInfo(data)  ((data) -> mat_info)
+
 #endif //#if defined(HYPRE_USING_GPU)
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
