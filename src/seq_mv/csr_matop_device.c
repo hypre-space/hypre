@@ -1243,7 +1243,7 @@ hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
    hypre_SortCSRCusparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A), hypre_CSRMatrixNumNonzeros(A), hypre_CSRMatrixGPUMatDescr(A),
                          hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A));
 #elif defined(HYPRE_USING_ROCSPARSE)
-   hypre_SortCSRRocsparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A), hypre_CSRMatrixNumNonzeros(A),
+   hypre_SortCSRRocsparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A), hypre_CSRMatrixNumNonzeros(A), hypre_CSRMatrixGPUMatDescr(A),
                           hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A));
 #else
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,"hypre_CSRMatrixSortRow only implemented for cuSPARSE!\n");
@@ -1488,16 +1488,12 @@ void
 hypre_SortCSRRocsparse(       HYPRE_Int      n,
                               HYPRE_Int      m,
                               HYPRE_Int      nnzA,
+                              rocsparse_mat_descr descrA,
                         const HYPRE_Int     *d_ia,
                               HYPRE_Int     *d_ja_sorted,
                               HYPRE_Complex *d_a_sorted )
 {
    rocsparse_handle handle = hypre_HandleCusparseHandle(hypre_handle());
-
-   // FIXME: This is an abuse. Really, each matrix should have its own
-   //        rocsparse_mat_descr and rocsparse_mat_info and these should
-   //        not be global variables.
-   rocsparse_mat_descr descrA = hypre_HandleCusparseMatDescr(hypre_handle());
 
    size_t pBufferSizeInBytes = 0;
    void *pBuffer = NULL;
