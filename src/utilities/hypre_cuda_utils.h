@@ -128,13 +128,10 @@ struct hypre_CudaData
 
 #if defined(HYPRE_USING_CUSPARSE)
    cusparseHandle_t                  cusparse_handle;
-   cusparseMatDescr_t                cusparse_mat_descr;
 #endif
 
 #if defined(HYPRE_USING_ROCSPARSE)
   rocsparse_handle                   cusparse_handle;
-  rocsparse_mat_descr                cusparse_mat_descr;
-  rocsparse_mat_info                 rocsparse_mat_info;
 #endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
@@ -208,13 +205,10 @@ cublasHandle_t      hypre_CudaDataCublasHandle(hypre_CudaData *data);
 
 #if defined(HYPRE_USING_CUSPARSE)
 cusparseHandle_t    hypre_CudaDataCusparseHandle(hypre_CudaData *data);
-cusparseMatDescr_t  hypre_CudaDataCusparseMatDescr(hypre_CudaData *data);
 #endif
 
 #if defined(HYPRE_USING_ROCSPARSE)
 rocsparse_handle    hypre_CudaDataCusparseHandle(hypre_CudaData *data);
-rocsparse_mat_descr hypre_CudaDataCusparseMatDescr(hypre_CudaData *data);
-rocsparse_mat_info  hypre_CudaDataRocsparseMatInfo(hypre_CudaData *data);
 #endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
@@ -916,4 +910,3 @@ cusparseIndexType_t hypre_HYPREIntToCusparseIndexType();
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
 #endif /* #ifndef HYPRE_CUDA_UTILS_H */
-
