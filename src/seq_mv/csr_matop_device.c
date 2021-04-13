@@ -14,6 +14,7 @@
 #include "seq_mv.h"
 #include "csr_matrix.h"
 #include "_hypre_utilities.hpp"
+#include "seq_mv.hpp"
 
 #if defined(HYPRE_USING_CUSPARSE)
 hypre_CsrsvData*
@@ -1239,7 +1240,7 @@ HYPRE_Int
 hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
 {
 #if defined(HYPRE_USING_CUSPARSE)
-   hypre_SortCSRCusparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A), hypre_CSRMatrixNumNonzeros(A),
+   hypre_SortCSRCusparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A), hypre_CSRMatrixNumNonzeros(A), hypre_CSRMatrixGPUMatDescr(A),
                          hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A));
 #elif defined(HYPRE_USING_ROCSPARSE)
    hypre_SortCSRRocsparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A), hypre_CSRMatrixNumNonzeros(A),
@@ -1264,12 +1265,12 @@ void
 hypre_SortCSRCusparse(       HYPRE_Int      n,
                              HYPRE_Int      m,
                              HYPRE_Int      nnzA,
+                             cusparseMatDescr_t descrA,
                        const HYPRE_Int     *d_ia,
                              HYPRE_Int     *d_ja_sorted,
                              HYPRE_Complex *d_a_sorted )
 {
    cusparseHandle_t cusparsehandle = hypre_HandleCusparseHandle(hypre_handle());
-   cusparseMatDescr_t descrA = hypre_HandleCusparseMatDescr(hypre_handle());
 
    size_t pBufferSizeInBytes = 0;
    void *pBuffer = NULL;
@@ -1348,6 +1349,9 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
       return hypre_error_flag;
    }
 
+   cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
+   cusparseMatDescr_t descr = hypre_CSRMatrixGPUMatDescr(A);
+
    if ( !A_sj && !A_sa )
    {
       hypre_CSRMatrixSortedJ(A) = A_sj = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
@@ -1362,11 +1366,8 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
       hypre_CSRMatrixData(A) = A_a;
 #endif
 
-      hypre_SortCSRCusparse(nrow, ncol, nnzA, A_i, A_sj, A_sa);
+      hypre_SortCSRCusparse(nrow, ncol, nnzA, descr, A_i, A_sj, A_sa);
    }
-
-   cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
-   cusparseMatDescr_t descr = hypre_HandleCusparseMatDescr(hypre_handle());
 
    HYPRE_CUSPARSE_CALL( cusparseSetMatDiagType(descr, CUSPARSE_DIAG_TYPE_NON_UNIT) );
 

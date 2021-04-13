@@ -7,6 +7,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 #include "par_ilu.h"
+#include "seq_mv.hpp"
 
 /* Setup ILU data */
 HYPRE_Int
@@ -1526,7 +1527,7 @@ HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix *A, cusparseSolvePolicy_t ilu_solv
    hypre_assert(isDoublePrecision || isSinglePrecision);
 
    /* 1. Sort columns inside each row first, we can't assume that's sorted */
-   hypre_SortCSRCusparse(n, m, nnz_A, A_i, A_j, A_data);
+   hypre_SortCSRCusparse(n, m, nnz_A, descr, A_i, A_j, A_data);
 
    /* 2. Create info for ilu setup and solve */
    HYPRE_CUSPARSE_CALL(cusparseCreateCsrilu02Info(&matA_info));
