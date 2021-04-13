@@ -1473,6 +1473,8 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char              /*uplo*/,
                                           hypre_Vector    * /*u*/ )
 {
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "hypre_CSRMatrixTriLowerUpperSolveCusparse not implemented for rocSPARSE!\n");
+
+   return 1;
 }
 
 
@@ -1534,4 +1536,3 @@ hypre_SortCSRRocsparse(       HYPRE_Int      n,
    hypre_TFree(d_a_tmp, HYPRE_MEMORY_DEVICE);
 }
 #endif // #if defined(HYPRE_USING_ROCSPARSE)
-
