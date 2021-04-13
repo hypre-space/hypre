@@ -148,18 +148,11 @@ hypre_CSRMatrix*
 hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
                                hypre_CSRMatrix *B)
 {
-   HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
-   HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
-   HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
    HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
    HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
-   HYPRE_Int         nnz_A    = hypre_CSRMatrixNumNonzeros(A);
-   HYPRE_Complex    *B_data   = hypre_CSRMatrixData(B);
-   HYPRE_Int        *B_i      = hypre_CSRMatrixI(B);
-   HYPRE_Int        *B_j      = hypre_CSRMatrixJ(B);
    HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
    HYPRE_Int         ncols_B  = hypre_CSRMatrixNumCols(B);
-   HYPRE_Int         nnz_B    = hypre_CSRMatrixNumNonzeros(B);
+
    HYPRE_Complex    *C_data;
    HYPRE_Int        *C_i;
    HYPRE_Int        *C_j;
@@ -183,8 +176,7 @@ hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
    }
    */
 
-   hypreDevice_CSRSpGemm(nrows_A, ncols_A, ncols_B, nnz_A, nnz_B, A_i, A_j, A_data, B_i, B_j, B_data,
-                         &C_i, &C_j, &C_data, &nnzC);
+   hypreDevice_CSRSpGemm(A, B, &C_i, &C_j, &C_data, &nnzC);
 
    C = hypre_CSRMatrixCreate(nrows_A, ncols_B, nnzC);
    hypre_CSRMatrixI(C) = C_i;
