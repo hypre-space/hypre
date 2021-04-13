@@ -37,8 +37,8 @@ hypreDevice_CSRSpGemmCusparse(HYPRE_Int       m,
                                            nnzC_out, d_ic_out, d_jc_out, d_c_out);
 #else
    hypreDevice_CSRSpGemmCusparseOldAPI(m, k, n,
-                                       nnzA, d_ia, d_ja, d_a,
-                                       nnzB, d_ib, d_jb, d_b,
+                                       descr_A, nnzA, d_ia, d_ja, d_a,
+                                       descr_B, nnzB, d_ib, d_jb, d_b,
                                        nnzC_out, d_ic_out, d_jc_out, d_c_out);
 #endif
    return hypre_error_flag;
@@ -177,10 +177,12 @@ HYPRE_Int
 hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int       m,
                                     HYPRE_Int       k,
                                     HYPRE_Int       n,
+                                    cusparseMatDescr_t descr_A,
                                     HYPRE_Int       nnzA,
                                     HYPRE_Int      *d_ia,
                                     HYPRE_Int      *d_ja,
                                     HYPRE_Complex  *d_a,
+                                    cusparseMatDescr_t descr_B,
                                     HYPRE_Int       nnzB,
                                     HYPRE_Int      *d_ib,
                                     HYPRE_Int      *d_jb,
