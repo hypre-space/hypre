@@ -51,6 +51,54 @@ hypre_CsrsvDataDestroy(hypre_CsrsvData* data)
 }
 #endif /* #if defined(HYPRE_USING_CUSPARSE) */
 
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+void
+hypre_GpuMatDataCreate(hypre_CSRMatrix  *matrix)
+{
+   hypre_CSRMatrixGPUMatData(matrix) = hypre_CTAlloc(hypre_GpuMatData, 1, HYPRE_MEMORY_HOST);
+
+#if defined(HYPRE_USING_CUSPARSE)
+   cusparseMatDescr_t mat_descr;
+   HYPRE_CUSPARSE_CALL( cusparseCreateMatDescr(&mat_descr) );
+   HYPRE_CUSPARSE_CALL( cusparseSetMatType(mat_descr, CUSPARSE_MATRIX_TYPE_GENERAL) );
+   HYPRE_CUSPARSE_CALL( cusparseSetMatIndexBase(mat_descr, CUSPARSE_INDEX_BASE_ZERO) );
+   hypre_GpuMatDataMatDecsr(hypre_CSRMatrixGPUMatData(matrix)) = mat_descr;
+#endif
+
+#if defined(HYPRE_USING_ROCSPARSE)
+   rocsparse_mat_descr mat_descr;
+   HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_descr(&mat_descr) );
+   HYPRE_ROCSPARSE_CALL( rocsparse_set_mat_type(mat_descr, rocsparse_matrix_type_general) );
+   HYPRE_ROCSPARSE_CALL( rocsparse_set_mat_index_base(mat_descr, rocsparse_index_base_zero) );
+   hypre_GpuMatDataMatDecsr(hypre_CSRMatrixGPUMatData(matrix)) = mat_descr;
+
+   rocsparse_mat_info info;
+   HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_info(&info) );
+   hypre_GpuMatDataMatInfo(hypre_CSRMatrixGPUMatData(matrix)) = info;
+#endif
+}
+
+void
+hypre_GpuMatDataDestroy(hypre_CSRMatrix  *matrix)
+{
+   if (hypre_CSRMatrixGPUMatData(matrix))
+   {
+      return;
+   }
+
+#if defined(HYPRE_USING_CUSPARSE)
+   HYPRE_CUSPARSE_CALL( cusparseDestroy(hypre_GpuMatDataMatDecsr(hypre_CSRMatrixGPUMatData(matrix))) );
+#endif
+
+#if defined(HYPRE_USING_ROCSPARSE)
+   HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_descr(hypre_GpuMatDataMatDecsr(hypre_CSRMatrixGPUMatData(matrix))) );
+   HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_info(hypre_GpuMatDataMatInfo(hypre_CSRMatrixGPUMatData(matrix))) );
+#endif
+
+  hypre_TFree(hypre_CSRMatrixGPUMatData(matrix), HYPRE_MEMORY_HOST);
+}
+#endif
+
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 hypre_CSRMatrix*

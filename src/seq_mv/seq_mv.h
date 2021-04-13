@@ -512,6 +512,11 @@ hypre_CsrsvData* hypre_CsrsvDataCreate();
 void hypre_CsrsvDataDestroy(hypre_CsrsvData* data);
 #endif
 
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+void hypre_GpuMatDataCreate(hypre_CSRMatrix  *matrix);
+void hypre_GpuMatDataDestroy(hypre_CSRMatrix  *matrix);
+#endif
+
 #ifdef __cplusplus
 }
 #endif
