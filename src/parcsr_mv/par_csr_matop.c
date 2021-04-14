@@ -5025,16 +5025,16 @@ hypre_ParcsrGetExternalRowsWait(void *vrequest)
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParcsrAdd: performs C = alpha*A + beta*B
+ * hypre_ParCSRMatrixAdd: performs C = alpha*A + beta*B
  *
  * A and B are assumed to have the same row and column partitionings
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_ParcsrAdd( HYPRE_Complex        alpha,
-                 hypre_ParCSRMatrix  *A,
-                 HYPRE_Complex        beta,
-                 hypre_ParCSRMatrix  *B,
-                 hypre_ParCSRMatrix **C_ptr )
+hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
+                       hypre_ParCSRMatrix  *A,
+                       HYPRE_Complex        beta,
+                       hypre_ParCSRMatrix  *B,
+                       hypre_ParCSRMatrix **C_ptr )
 {
    /* ParCSRMatrix data */
    MPI_Comm          comm       = hypre_ParCSRMatrixComm(A);
