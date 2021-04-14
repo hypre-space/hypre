@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#define _GLIBCXX_USE_TBB_PAR_BACKEND 0
+
 #include <CL/sycl.hpp>
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
