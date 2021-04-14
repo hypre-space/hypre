@@ -167,7 +167,6 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
    {
       pvector = hypre_SStructVectorPVector(vector,part);
       pdataindices = hypre_SStructPVectorDataIndices(pvector);
-      /* shift-num   = dataindices[part]; */
       pdata = data + dataindices[part];
       nvars = hypre_SStructPVectorNVars(pvector);
 
@@ -176,14 +175,9 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
       for (var = 0; var < nvars; var++)
       {
          svector = hypre_SStructPVectorSVector(pvector, var);
-         /*  shift-pnum    = pdataindices[var]; */
          sdata   = pdata + pdataindices[var];
-
-         /* GEC1002 initialization of inside data pointer of a svector
-          * because no data is alloced, we make sure the flag is zero. This
-          * affects the destroy */
          hypre_StructVectorInitializeData(svector, sdata);
-         hypre_StructVectorDataAlloced(svector) = 0;
+
          if (vartypes[var] > 0)
          {
             /* needed to get AddTo accumulation correct between processors */
@@ -234,7 +228,7 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
 
    if (vector_type == HYPRE_SSTRUCT || vector_type == HYPRE_STRUCT)
    {
-	   par_vector = (hypre_ParVector        *)hypre_IJVectorObject(ijvector);
+      par_vector = (hypre_ParVector *)hypre_IJVectorObject(ijvector);
       parlocal_vector = hypre_ParVectorLocalVector(par_vector);
       hypre_TFree(hypre_VectorData(parlocal_vector), HYPRE_MEMORY_HOST);
       hypre_VectorData(parlocal_vector) = data ;

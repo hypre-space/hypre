@@ -38,6 +38,11 @@ hypre_StructDataCopy( HYPRE_Complex   *fr_data,        /* from */
    hypre_IndexRef  start;
    hypre_Index     stride, loop_size;
 
+   if (fr_data == NULL || to_data == NULL)
+   {
+      return hypre_error_flag;
+   }
+
    hypre_SetIndex(stride, 1);
    int_box = hypre_BoxCreate(ndim);
 
