@@ -1,4 +1,4 @@
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+c# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -35,27 +35,44 @@ FILES =\
  multiblock_matrix.c\
  vector_batched.c
 
-CUFILES =\
- csr_matop_device.c\
- csr_matrix_cuda_utils.c\
- csr_matvec_device.c\
- csr_matvec_oomp.c\
- csr_spadd_device.c\
- csr_spgemm_device.c\
- csr_spgemm_device_attempt.c\
- csr_spgemm_device_confident.c\
- csr_spgemm_device_cusparse.c\
- csr_spgemm_device_rocsparse.c \
- csr_spgemm_device_rowbound.c\
- csr_spgemm_device_rowest.c\
- csr_spgemm_device_util.c\
- csr_spmv_device.c\
- csr_sptrans_device.c\
- vector.c
+# CUFILES =\
+#  csr_matop_device.c\
+#  csr_matrix_cuda_utils.c\
+#  csr_matvec_device.c\
+#  csr_matvec_oomp.c\
+#  csr_spadd_device.c\
+#  csr_spgemm_device.c\
+#  csr_spgemm_device_attempt.c\
+#  csr_spgemm_device_confident.c\
+#  csr_spgemm_device_cusparse.c\
+#  csr_spgemm_device_rocsparse.c \
+#  csr_spgemm_device_rowbound.c\
+#  csr_spgemm_device_rowest.c\
+#  csr_spgemm_device_util.c\
+#  csr_spmv_device.c\
+#  csr_sptrans_device.c\
+#  vector.c
+
+CXXFILES =\
+ csr_matop_device_sycl.cxx\
+ csr_matrix_sycl_utils.cxx\
+ csr_matvec_device_sycl.cxx\
+ csr_spadd_device_sycl.cxx\
+ csr_spgemm_device_sycl.cxx\
+ csr_spgemm_device_attempt_sycl.cxx\
+ csr_spgemm_device_confident_sycl.cxx\
+ csr_spgemm_device_onemklsparse_sycl.cxx\
+ csr_spgemm_device_rowbound_sycl.cxx\
+ csr_spgemm_device_rowest_sycl.cxx\
+ csr_spgemm_device_util_sycl.cxx\
+ csr_spmv_device_sycl.cxx\
+ csr_sptrans_device_sycl.cxx\
+ vector.cxx
 
 COBJS = ${FILES:.c=.o}
-CUOBJS = ${CUFILES:.c=.obj}
-OBJS = ${COBJS} ${CUOBJS}
+CXXOBJS = ${CXXFILES:.cxx=.o}
+OBJS = ${COBJS} ${CXXOBJS}
+
 
 SONAME = libHYPRE_seq_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 

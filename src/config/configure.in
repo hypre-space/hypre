@@ -179,6 +179,17 @@ hypre_using_rocrand=no
 hypre_found_hip=no
 
 
+dnl *********************************************************************
+dnl * Initialize hypre-SYCL variables
+dnl *********************************************************************
+hypre_user_chose_sycl=no
+hypre_using_sycl=no
+hypre_using_onemklsparse=no
+hypre_using_onemklblas=no
+hypre_using_onemklrand=no
+
+hypre_found_sycl=no
+
 
 dnl *********************************************************************
 dnl * Initialize flag-check variables
@@ -463,6 +474,39 @@ AS_HELP_STRING([--enable-rocrand],
     *)   hypre_using_rocrand=yes ;;
  esac],
 [hypre_using_rocrand=yes]
+)
+
+AC_ARG_ENABLE(onemklsparse,
+AS_HELP_STRING([--enable-onemklsparse],
+               [Use onemklSPARSE (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_onemklsparse=yes ;;
+    no)  hypre_using_onemklsparse=no ;;
+    *)   hypre_using_onemklsparse=no ;;
+ esac],
+[hypre_using_onemklsparse=no]
+)
+
+AC_ARG_ENABLE(onemklblas,
+AS_HELP_STRING([--enable-onemklblas],
+               [Use onemklBLAS (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_onemklblas=yes ;;
+    no)  hypre_using_onemklblas=no ;;
+    *)   hypre_using_onemklblas=no ;;
+ esac],
+[hypre_using_onemklblas=no]
+)
+
+AC_ARG_ENABLE(onemklrand,
+AS_HELP_STRING([--enable-onemklrand],
+               [Use onemklRAND (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_onemklrand=yes ;;
+    no)  hypre_using_onemklrand=no ;;
+    *)   hypre_using_onemklrand=no ;;
+ esac],
+[hypre_using_onemklrand=no]
 )
 
 AC_ARG_ENABLE(gpu-profiling,
@@ -1101,14 +1145,28 @@ AS_HELP_STRING([--with-cuda],
 dnl ***** HIP
 AC_ARG_WITH(hip,
 AS_HELP_STRING([--with-hip],
-               [Use HIP for AMD GPUs. (default is NO).]),
+[Use HIP for AMD GPUs. (default is NO).]),
 [case "$withval" in
-    yes) hypre_user_chose_hip=yes
-         hypre_using_hip=yes ;;
-    no)  hypre_using_hip=no ;;
-    *)   hypre_using_hip=no ;;
- esac],
+yes) hypre_user_chose_hip=yes
+hypre_using_hip=yes ;;
+no)  hypre_using_hip=no ;;
+*)   hypre_using_hip=no ;;
+esac],
 [hypre_using_hip=no]
+)
+
+
+dnl ***** SYCL
+AC_ARG_WITH(sycl,
+AS_HELP_STRING([--with-sycl],
+[Use SYCL for Intel GPUs. (default is NO).]),
+[case "$withval" in
+yes) hypre_user_chose_sycl=yes
+hypre_using_sycl=yes ;;
+no)  hypre_using_sycl=no ;;
+*)   hypre_using_sycl=no ;;
+esac],
+[hypre_using_sycl=no]
 )
 
 
@@ -1844,15 +1902,38 @@ dnl
 dnl TODO: Add an ARG_WITH for rocm so the user can control the ROCm path
 dnl       through the configure line
 AS_IF([ test x"$hypre_using_hip" == x"yes" ],
-      [ AS_IF([ test -n "$ROCM_PATH"],
-              [ HYPRE_ROCM_PREFIX=$ROCM_PATH ],
-              [ HYPRE_ROCM_PREFIX=/opt/rocm ])
+[ AS_IF([ test -n "$ROCM_PATH"],
+[ HYPRE_ROCM_PREFIX=$ROCM_PATH ],
+[ HYPRE_ROCM_PREFIX=/opt/rocm ])
 
-        AC_SUBST(HYPRE_ROCM_PREFIX)
-        AC_CHECK_HEADERS( ["${HYPRE_ROCM_PREFIX}/include/hip/hip_common.h"],
-                          [hypre_found_hip=yes],
-                          [AC_MSG_ERROR([unable to find ${HYPRE_ROCM_PREFIX}/include/hip/hip_common.h ... Ensure ROCm is installed and set ROCM_PATH environment variable to ROCm installation path.])] )],
-      [])
+AC_SUBST(HYPRE_ROCM_PREFIX)
+AC_CHECK_HEADERS( ["${HYPRE_ROCM_PREFIX}/include/hip/hip_common.h"],
+[hypre_found_hip=yes],
+[AC_MSG_ERROR([unable to find ${HYPRE_ROCM_PREFIX}/include/hip/hip_common.h ... Ensure ROCm is installed and set ROCM_PATH environment variable to ROCm installation path.])] )],
+[])
+
+
+
+dnl *********************************************************************
+dnl * Check for SYCL header
+dnl *********************************************************************
+
+dnl If the user has requested to use SYCL, we first check the environment
+dnl for ONEAPI_PATH to point at the oneAPI installation. If that is not found,
+dnl then we default to `/opt/intel/oneapi`.
+dnl
+dnl TODO: Add an ARG_WITH for sycl so the user can control the oneAPI path
+dnl       through the configure line
+dnl AS_IF([ test x"$hypre_using_sycl" == x"yes" ],
+dnl [ AS_IF([ test -n "$ONEAPI_PATH"],
+dnl [ HYPRE_SYCL_PREFIX=$ONEAPI_PATH ],
+dnl [ HYPRE_SYCL_PREFIX=/opt/intel/oneapi ])
+
+dnl AC_SUBST(HYPRE_SYCL_PREFIX)
+dnl AC_CHECK_HEADERS( ["${HYPRE_SYCL_PREFIX}/compiler/latest/linux/include/sycl/CL/sycl.hpp"],
+dnl [hypre_found_sycl=yes],
+dnl [AC_MSG_ERROR([unable to find ${HYPRE_SYCL_PREFIX}/compiler/latest/linux/include/sycl/CL/sycl.hpp ... Ensure oneAPI SDK is installed and set ONEAPI_PATH environment variable to oneAPI installation path.])] )],
+dnl [])
 
 
 
@@ -2100,6 +2181,70 @@ AS_IF([test x"$hypre_user_chose_hip" == x"yes"],
 
 
 
+dnl *********************************************************************
+dnl * Set SYCL options
+dnl *********************************************************************
+AS_IF([test x"$hypre_user_chose_sycl" == x"yes"],
+      [
+        dnl AC_DEFINE(HYPRE_USING_GPU, 1, [Define to 1 if executing on GPU device])
+        AC_DEFINE(HYPRE_USING_SYCL, 1, [SYCL being used])
+
+        dnl The actual invocation of the clang compiler from oneAPI that
+	dnl supports SYCL and all the command line foo needed by the compiler.
+        AC_CHECK_PROGS(CXX, [dpcpp])
+
+        dnl (Ab)Using dpcpp when compiling SYCL
+	LINK_CC=${CXX}
+        LINK_CXX=${CXX}
+
+        dnl The "-x sycl" is necessary to override the detection of .c files which clang
+        dnl interprets as C and therefore invokes the C compiler rather than the SYCL part
+        dnl of clang. Put SYCLCXXFLAGS at the end so the user can override from
+        dnl from the configure line.
+        SYCLCXXFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel "
+
+        dnl If not in debug mode, at least -O2, but the user can override with
+        dnl with SYCLCXXFLAGS on the configure line. If in debug mode, -O0 -Wall
+        dnl plus flags for debugging symbols
+        AS_IF([test x"$hypre_using_debug" == x"yes"],
+              [SYCLCXXFLAGS="-O0 -Wall -g -gdb ${SYCLCXXFLAGS}"],
+              [SYCLCXXFLAGS="-O2 ${SYCLCXXFLAGS}"],)
+
+        dnl (Ab)Use CXXFLAGS to capture SYCL compilation flags
+        dnl Put SYCLCXXFLAGS at the end so the user can override the optimization level.
+        CXXFLAGS="${SYCLCXXFLAGS}"
+
+        dnl dpl, dpct so we need both for Thrust on Intel GPUs.
+        dnl These are header-only so no linking needed.
+        HYPRE_SYCL_INCL="-I${ONEAPI_PATH}/dpl/latest/linux/include"
+        HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${ONEAPI_PATH}/dpcpp-ct/latest/include"
+
+        dnl SYCL library
+        dnl HYPRE_SYCL_LIBS="-L${HYPRE_SYCL_PREFIX}/lib -lamdsycl64"
+
+        AS_IF([test x"$hypre_using_onemklsparse" == x"yes"],
+              [AC_DEFINE(HYPRE_USING_ONEMKLSPARSE, 1, [onemkl::SPARSE being used])
+               HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
+               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/mkl/spblas.hpp"
+               ])
+
+        AS_IF([test x"$hypre_using_onemklblas" == x"yes"],
+              [AC_DEFINE(HYPRE_USING_ONEMKLBLAS, 1, [onemkl::BLAS being used])
+	       HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
+               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/blas.hpp"
+               ])
+
+        dnl onemklrand: random number generation on Intel GPUs
+        AS_IF([test x"$hypre_using_onemklrand" == x"yes"],
+              [AC_DEFINE(HYPRE_USING_ONEMKLRAND, 1, [onemkl::rng being used])
+               HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
+               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/rng.hpp"
+               ])
+
+      ]) dnl AS_IF([test x"$hypre_user_chose_sycl" == x"yes"]
+
+
+
 
 dnl *********************************************************************
 dnl * Set unified memory options
@@ -2119,6 +2264,14 @@ then
    then
       AC_MSG_NOTICE([***********************************************************])
       AC_MSG_NOTICE([Configuring with --with-hip=yes without unified memory.])
+      AC_MSG_NOTICE([It only works for struct interface.])
+      AC_MSG_NOTICE([Use --enable-unified-memory to compile with unified memory.])
+      AC_MSG_NOTICE([***********************************************************])
+   fi
+   if test "$hypre_user_chose_sycl" = "yes"
+   then
+      AC_MSG_NOTICE([***********************************************************])
+      AC_MSG_NOTICE([Configuring with --with-sycl=yes without unified memory.])
       AC_MSG_NOTICE([It only works for struct interface.])
       AC_MSG_NOTICE([Use --enable-unified-memory to compile with unified memory.])
       AC_MSG_NOTICE([***********************************************************])
@@ -2419,6 +2572,12 @@ dnl * HIP stuff
 dnl *********************************************************************
 AC_SUBST(HYPRE_HIP_INCL)
 AC_SUBST(HYPRE_HIP_LIBS)
+
+dnl *********************************************************************
+dnl * SYCL stuff
+dnl *********************************************************************
+AC_SUBST(HYPRE_SYCL_INCL)
+AC_SUBST(HYPRE_SYCL_LIBS)
 
 dnl *********************************************************************
 dnl * Caliper instrumentation

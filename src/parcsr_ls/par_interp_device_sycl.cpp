@@ -10,11 +10,11 @@
 
 #if defined(HYPRE_USING_SYCL)
 
-void hypre_BoomerAMGBuildDirInterp_getnnz( cl::sycl::nd_item<1>& item, HYPRE_Int nr_of_rows, HYPRE_Int *S_diag_i, HYPRE_Int *S_diag_j, HYPRE_Int *S_offd_i, HYPRE_Int *S_offd_j, HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd, HYPRE_Int *P_diag_i, HYPRE_Int *P_offd_i, HYPRE_Int *col_offd_S_to_A);
+void hypre_BoomerAMGBuildDirInterp_getnnz( sycl::nd_item<1>& item, HYPRE_Int nr_of_rows, HYPRE_Int *S_diag_i, HYPRE_Int *S_diag_j, HYPRE_Int *S_offd_i, HYPRE_Int *S_offd_j, HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd, HYPRE_Int *P_diag_i, HYPRE_Int *P_offd_i, HYPRE_Int *col_offd_S_to_A);
 
-void hypre_BoomerAMGBuildDirInterp_getcoef( cl::sycl::nd_item<1>& item, HYPRE_Int nr_of_rows, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Real *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Real *A_offd_data, HYPRE_Int *Soc_diag_j, HYPRE_Int *Soc_offd_j, HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Real *P_diag_data, HYPRE_Int *P_offd_i, HYPRE_Int *P_offd_j, HYPRE_Real *P_offd_data, HYPRE_Int *fine_to_coarse );
+void hypre_BoomerAMGBuildDirInterp_getcoef( sycl::nd_item<1>& item, HYPRE_Int nr_of_rows, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Real *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Real *A_offd_data, HYPRE_Int *Soc_diag_j, HYPRE_Int *Soc_offd_j, HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Real *P_diag_data, HYPRE_Int *P_offd_i, HYPRE_Int *P_offd_j, HYPRE_Real *P_offd_data, HYPRE_Int *fine_to_coarse );
 
-void hypre_BoomerAMGBuildDirInterp_getcoef_v2( cl::sycl::nd_item<1>& item, HYPRE_Int nr_of_rows, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Real *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Real *A_offd_data, HYPRE_Int *Soc_diag_j, HYPRE_Int *Soc_offd_j, HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Real *P_diag_data, HYPRE_Int *P_offd_i, HYPRE_Int *P_offd_j, HYPRE_Real *P_offd_data, HYPRE_Int *fine_to_coarse );
+void hypre_BoomerAMGBuildDirInterp_getcoef_v2( sycl::nd_item<1>& item, HYPRE_Int nr_of_rows, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Real *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Real *A_offd_data, HYPRE_Int *Soc_diag_j, HYPRE_Int *Soc_offd_j, HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Real *P_diag_data, HYPRE_Int *P_offd_i, HYPRE_Int *P_offd_j, HYPRE_Real *P_offd_data, HYPRE_Int *fine_to_coarse );
 
 /*---------------------------------------------------------------------------
  * hypre_BoomerAMGBuildDirInterp
@@ -371,7 +371,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
 
 /*-----------------------------------------------------------------------*/
 void
-hypre_BoomerAMGBuildDirInterp_getnnz( cl::sycl::nd_item<1>& item,
+hypre_BoomerAMGBuildDirInterp_getnnz( sycl::nd_item<1>& item,
 				      HYPRE_Int  nr_of_rows,
                                       HYPRE_Int *S_diag_i,
                                       HYPRE_Int *S_diag_j,
@@ -411,8 +411,8 @@ hypre_BoomerAMGBuildDirInterp_getnnz( cl::sycl::nd_item<1>& item,
    /*-----------------------------------------------------------------------*/
 
    HYPRE_Int i = hypre_sycl_get_global_subgroup_id<1>(item);
-   cl::sycl::group<1> grp = item.get_group();   
-   cl::sycl::ONEAPI::sub_group SG = item.get_sub_group();      
+   sycl::group<1> grp = item.get_group();
+   sycl::ONEAPI::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    if (i >= nr_of_rows)
@@ -509,7 +509,7 @@ hypre_BoomerAMGBuildDirInterp_getnnz( cl::sycl::nd_item<1>& item,
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
 void
-hypre_BoomerAMGBuildDirInterp_getcoef( cl::sycl::nd_item<1>& item,
+hypre_BoomerAMGBuildDirInterp_getcoef( sycl::nd_item<1>& item,
 				       HYPRE_Int   nr_of_rows,
                                        HYPRE_Int  *A_diag_i,
                                        HYPRE_Int  *A_diag_j,
@@ -555,8 +555,8 @@ hypre_BoomerAMGBuildDirInterp_getcoef( cl::sycl::nd_item<1>& item,
    /*-----------------------------------------------------------------------*/
 
    HYPRE_Int i = hypre_sycl_get_global_subgroup_id<1>(item);
-   cl::sycl::group<1> grp = item.get_group();   
-   cl::sycl::ONEAPI::sub_group SG = item.get_sub_group();      
+   sycl::group<1> grp = item.get_group();
+   sycl::ONEAPI::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    if (i >= nr_of_rows)
@@ -781,7 +781,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef( cl::sycl::nd_item<1>& item,
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
 void
-hypre_BoomerAMGBuildDirInterp_getcoef_v2( cl::sycl::nd_item<1>& item,
+hypre_BoomerAMGBuildDirInterp_getcoef_v2( sycl::nd_item<1>& item,
 					  HYPRE_Int   nr_of_rows,
                                           HYPRE_Int  *A_diag_i,
                                           HYPRE_Int  *A_diag_j,
@@ -827,8 +827,8 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( cl::sycl::nd_item<1>& item,
    /*-----------------------------------------------------------------------*/
 
    HYPRE_Int i = hypre_sycl_get_global_subgroup_id<1>(item);
-   cl::sycl::group<1> grp = item.get_group();   
-   cl::sycl::ONEAPI::sub_group SG = item.get_sub_group();      
+   sycl::group<1> grp = item.get_group();
+   sycl::ONEAPI::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    if (i >= nr_of_rows)
@@ -1022,4 +1022,3 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( cl::sycl::nd_item<1>& item,
 }
 
 #endif
-

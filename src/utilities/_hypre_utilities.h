@@ -1206,6 +1206,47 @@ static char hypre__levelname[16];
 #ifndef HYPRE_HANDLE_H
 #define HYPRE_HANDLE_H
 
+#if defined(HYPRE_USING_SYCL)
+
+struct hypre_SyclData;
+typedef struct hypre_SyclData hypre_SyclData;
+
+typedef struct
+{
+   HYPRE_Int              hypre_error;
+   HYPRE_MemoryLocation   memory_location;
+   HYPRE_ExecutionPolicy  default_exec_policy;
+   HYPRE_ExecutionPolicy  struct_exec_policy;
+   hypre_SyclData        *sycl_data;
+} hypre_Handle;
+
+/* accessor macros to hypre_Handle */
+#define hypre_HandleMemoryLocation(hypre_handle)                 ((hypre_handle) -> memory_location)
+#define hypre_HandleDefaultExecPolicy(hypre_handle)              ((hypre_handle) -> default_exec_policy)
+#define hypre_HandleStructExecPolicy(hypre_handle)               ((hypre_handle) -> struct_exec_policy)
+#define hypre_HandleSyclData(hypre_handle)                       ((hypre_handle) -> sycl_data)
+
+#define hypre_HandleonemklrngGenerator(hypre_handle)             hypre_SyclDataonemklrngGenerator(hypre_HandleSyclData(hypre_handle))
+#define hypre_HandleCublasHandle(hypre_handle)                   hypre_SyclDataCublasHandle(hypre_HandleSyclData(hypre_handle))
+#define hypre_HandleOnemklsparseHandle(hypre_handle)             hypre_SyclDataOnemklsparseHandle(hypre_HandleSyclData(hypre_handle))
+#define hypre_HandleOnemklsparseMatDescr(hypre_handle)           hypre_SyclDataOnemklsparseMatDescr(hypre_HandleSyclData(hypre_handle))
+#define hypre_HandleSyclComputeQueue(hypre_handle)               hypre_SyclDataSyclComputeQueue(hypre_HandleSyclData(hypre_handle))
+#define hypre_HandleSyclDevice(hypre_handle)                     hypre_SyclDataSyclDevice(hypre_HandleSyclData(hypre_handle))
+#define hypre_HandleSyclComputeQueueNum(hypre_handle)            hypre_SyclDataSyclComputeQueueNum(hypre_HandleSyclData(hypre_handle))
+#define hypre_HandleSyclReduceBuffer(hypre_handle)               hypre_SyclDataSyclReduceBuffer(hypre_HandleSyclData(hypre_handle))
+#define hypre_HandleStructCommRecvBuffer(hypre_handle)           hypre_SyclDataStructCommRecvBuffer(hypre_HandleSyclData(hypre_handle))
+#define hypre_HandleStructCommSendBuffer(hypre_handle)           hypre_SyclDataStructCommSendBuffer(hypre_HandleSyclData(hypre_handle))
+#define hypre_HandleStructCommRecvBufferSize(hypre_handle)       hypre_SyclDataStructCommRecvBufferSize(hypre_HandleSyclData(hypre_handle))
+#define hypre_HandleStructCommSendBufferSize(hypre_handle)       hypre_SyclDataStructCommSendBufferSize(hypre_HandleSyclData(hypre_handle))
+#define hypre_HandleSpgemmUseOnemklsparse(hypre_handle)          hypre_SyclDataSpgemmUseOnemklsparse(hypre_HandleSyclData(hypre_handle))
+#define hypre_HandleSpgemmNumPasses(hypre_handle)                hypre_SyclDataSpgemmNumPasses(hypre_HandleSyclData(hypre_handle))
+#define hypre_HandleSpgemmRownnzEstimateMethod(hypre_handle)     hypre_SyclDataSpgemmRownnzEstimateMethod(hypre_HandleSyclData(hypre_handle))
+#define hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle)   hypre_SyclDataSpgemmRownnzEstimateNsamples(hypre_HandleSyclData(hypre_handle))
+#define hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle) hypre_SyclDataSpgemmRownnzEstimateMultFactor(hypre_HandleSyclData(hypre_handle))
+#define hypre_HandleSpgemmHashType(hypre_handle)                 hypre_SyclDataSpgemmHashType(hypre_HandleSyclData(hypre_handle))
+
+#else
+
 struct hypre_CudaData;
 typedef struct hypre_CudaData hypre_CudaData;
 
@@ -1284,7 +1325,9 @@ typedef struct
 #define hypre_HandleOwnUmpireHostPool(hypre_handle)              ((hypre_handle) -> own_umpire_host_pool)
 #define hypre_HandleOwnUmpirePinnedPool(hypre_handle)            ((hypre_handle) -> own_umpire_pinned_pool)
 
-#endif
+#endif // HYPRE_USING_SYCL
+
+#endif // HYPRE_HANDLE_H
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.

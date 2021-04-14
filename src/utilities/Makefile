@@ -56,7 +56,7 @@ FILES =\
  timer.c\
  timing.c
 
-CPPFILES=\
+CXXFILES=\
  hypre_sycl_utils.cxx
 
 # CUFILES=\
@@ -67,10 +67,11 @@ CPPFILES=\
 #  hypre_nvtx.c
 
 COBJS = ${FILES:.c=.o}
-CPPOBJS = ${CPPFILES:.cpp=.o}
-CUOBJS = ${CUFILES:.c=.obj}
+CXXOBJS = ${CXXFILES:.cxx=.o}
+#CUOBJS = ${CUFILES:.c=.obj}
 
-OBJS = ${COBJS} ${CPPOBJS} ${CUOBJS}
+OBJS = ${COBJS} ${CXXOBJS}
+#${CUOBJS}
 
 SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
