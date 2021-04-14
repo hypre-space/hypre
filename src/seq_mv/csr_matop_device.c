@@ -12,7 +12,6 @@
  *****************************************************************************/
 
 #include "seq_mv.h"
-#include "csr_matrix.h"
 #include "_hypre_utilities.hpp"
 #include "seq_mv.hpp"
 
@@ -54,7 +53,7 @@ hypre_CsrsvDataDestroy(hypre_CsrsvData* data)
 
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
 void
-hypre_GpuMatDataCreate(hypre_CSRMatrix  *matrix)
+hypre_GpuMatDataCreate(hypre_CSRMatrix *matrix)
 {
    hypre_CSRMatrixGPUMatData(matrix) = hypre_CTAlloc(hypre_GpuMatData, 1, HYPRE_MEMORY_HOST);
 
@@ -63,7 +62,7 @@ hypre_GpuMatDataCreate(hypre_CSRMatrix  *matrix)
    HYPRE_CUSPARSE_CALL( cusparseCreateMatDescr(&mat_descr) );
    HYPRE_CUSPARSE_CALL( cusparseSetMatType(mat_descr, CUSPARSE_MATRIX_TYPE_GENERAL) );
    HYPRE_CUSPARSE_CALL( cusparseSetMatIndexBase(mat_descr, CUSPARSE_INDEX_BASE_ZERO) );
-   hypre_GpuMatDataMatDecsr(hypre_CSRMatrixGPUMatData(matrix)) = mat_descr;
+   hypre_CSRMatrixGPUMatDescr(matrix) = mat_descr;
 #endif
 
 #if defined(HYPRE_USING_ROCSPARSE)
@@ -75,25 +74,25 @@ hypre_GpuMatDataCreate(hypre_CSRMatrix  *matrix)
 
    rocsparse_mat_info info;
    HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_info(&info) );
-   hypre_GpuMatDataMatInfo(hypre_CSRMatrixGPUMatData(matrix)) = info;
+   hypre_CSRMatrixGPUMatInfo(matrix) = info;
 #endif
 }
 
 void
-hypre_GpuMatDataDestroy(hypre_CSRMatrix  *matrix)
+hypre_GpuMatDataDestroy(hypre_CSRMatrix *matrix)
 {
-   if (hypre_CSRMatrixGPUMatData(matrix))
+   if (!hypre_CSRMatrixGPUMatData(matrix))
    {
       return;
    }
 
 #if defined(HYPRE_USING_CUSPARSE)
-   HYPRE_CUSPARSE_CALL( cusparseDestroy(hypre_GpuMatDataMatDecsr(hypre_CSRMatrixGPUMatData(matrix))) );
+   HYPRE_CUSPARSE_CALL( cusparseDestroyMatDescr(hypre_CSRMatrixGPUMatDescr(matrix)) );
 #endif
 
 #if defined(HYPRE_USING_ROCSPARSE)
-   HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_descr(hypre_GpuMatDataMatDecsr(hypre_CSRMatrixGPUMatData(matrix))) );
-   HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_info(hypre_GpuMatDataMatInfo(hypre_CSRMatrixGPUMatData(matrix))) );
+   HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_descr(hypre_CSRMatrixGPUMatDescr(matrix)) );
+   HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_info(hypre_CSRMatrixGPUMatInfo(matrix)) );
 #endif
 
   hypre_TFree(hypre_CSRMatrixGPUMatData(matrix), HYPRE_MEMORY_HOST);
@@ -149,18 +148,9 @@ hypre_CSRMatrix*
 hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
                                hypre_CSRMatrix *B)
 {
-   HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
    HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
    HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
-   HYPRE_Int         ncols_B  = hypre_CSRMatrixNumCols(B);
-
-   HYPRE_Complex    *C_data;
-   HYPRE_Int        *C_i;
-   HYPRE_Int        *C_j;
-   HYPRE_Int         nnzC;
    hypre_CSRMatrix  *C;
-
-   /* HYPRE_Int         allsquare = 0; */
 
    if (ncols_A != nrows_B)
    {
@@ -170,20 +160,7 @@ hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
       return NULL;
    }
 
-   /*
-   if (nrows_A == ncols_B)
-   {
-      allsquare = 1;
-   }
-   */
-
-   hypreDevice_CSRSpGemm(A, B, &C_i, &C_j, &C_data, &nnzC);
-
-   C = hypre_CSRMatrixCreate(nrows_A, ncols_B, nnzC);
-   hypre_CSRMatrixI(C) = C_i;
-   hypre_CSRMatrixJ(C) = C_j;
-   hypre_CSRMatrixData(C) = C_data;
-   hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
+   hypreDevice_CSRSpGemm(A, B, &C);
 
    hypre_SyncCudaComputeStream(hypre_handle());
 

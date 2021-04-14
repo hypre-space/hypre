@@ -13,7 +13,7 @@
 
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
-#include "csr_matrix_cuda_utils.h"
+#include "seq_mv.hpp"
 
 #if defined(HYPRE_USING_GPU)
 

@@ -131,7 +131,7 @@ struct hypre_CudaData
 #endif
 
 #if defined(HYPRE_USING_ROCSPARSE)
-  rocsparse_handle                   cusparse_handle;
+   rocsparse_handle                  cusparse_handle;
 #endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)

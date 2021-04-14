@@ -12,23 +12,25 @@
 #if defined(HYPRE_USING_HIP) && defined(HYPRE_USING_ROCSPARSE)
 
 HYPRE_Int
-hypreDevice_CSRSpGemmRocsparse(HYPRE_Int       m,
-                               HYPRE_Int       k,
-                               HYPRE_Int       n,
+hypreDevice_CSRSpGemmRocsparse(HYPRE_Int           m,
+                               HYPRE_Int           k,
+                               HYPRE_Int           n,
                                rocsparse_mat_descr descrA,
-                               HYPRE_Int       nnzA,
-                               HYPRE_Int      *d_ia,
-                               HYPRE_Int      *d_ja,
-                               HYPRE_Complex  *d_a,
+                               HYPRE_Int           nnzA,
+                               HYPRE_Int          *d_ia,
+                               HYPRE_Int          *d_ja,
+                               HYPRE_Complex      *d_a,
                                rocsparse_mat_descr descrB,
-                               HYPRE_Int       nnzB,
-                               HYPRE_Int      *d_ib,
-                               HYPRE_Int      *d_jb,
-                               HYPRE_Complex  *d_b,
-                               HYPRE_Int      *nnzC_out,
-                               HYPRE_Int     **d_ic_out,
-                               HYPRE_Int     **d_jc_out,
-                               HYPRE_Complex **d_c_out)
+                               HYPRE_Int           nnzB,
+                               HYPRE_Int          *d_ib,
+                               HYPRE_Int          *d_jb,
+                               HYPRE_Complex      *d_b,
+                               rocsparse_mat_descr descrC,
+                               rocsparse_mat_info  infoC,
+                               HYPRE_Int          *nnzC_out,
+                               HYPRE_Int         **d_ic_out,
+                               HYPRE_Int         **d_jc_out,
+                               HYPRE_Complex     **d_c_out)
 {
    HYPRE_Int  *d_ic, *d_jc, baseC, nnzC;
    HYPRE_Int  *d_ja_sorted, *d_jb_sorted;
@@ -40,14 +42,6 @@ hypreDevice_CSRSpGemmRocsparse(HYPRE_Int       m,
    d_jb_sorted = hypre_TAlloc(HYPRE_Int,     nnzB, HYPRE_MEMORY_DEVICE);
 
    rocsparse_handle handle = hypre_HandleCusparseHandle(hypre_handle());
-
-   // CSRMatrix C may not have been created when this is called so we
-   // can't pass in descrC or infoC. However, mat_descr are always created the same way
-   // so we just copy an existing one and we just create a local mat_info (and destroy
-   // at the end).
-   rocsparse_mat_descr descrC = descrA;
-   rocsparse_mat_info infoC;
-   HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_info(&infoC) );
 
    rocsparse_operation transA = rocsparse_operation_none;
    rocsparse_operation transB = rocsparse_operation_none;
@@ -175,8 +169,6 @@ hypreDevice_CSRSpGemmRocsparse(HYPRE_Int       m,
    hypre_TFree(d_b_sorted,  HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_ja_sorted, HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_jb_sorted, HYPRE_MEMORY_DEVICE);
-
-   HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_info(infoC) );
 
    return hypre_error_flag;
 }

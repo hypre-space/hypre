@@ -189,7 +189,7 @@ HYPRE_Int hypreDevice_CSRSpTransCusparse(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnz
 
 HYPRE_Int hypreDevice_CSRSpTransRocsparse(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out, HYPRE_Int want_data);
 
-HYPRE_Int hypreDevice_CSRSpGemm(hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out, HYPRE_Int *nnzC);
+HYPRE_Int hypreDevice_CSRSpGemm(hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix **C_ptr);
 
 HYPRE_Int hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateMethod( HYPRE_Int value );
 
@@ -228,3 +228,4 @@ void hypre_CsrsvDataDestroy(hypre_CsrsvData* data);
 void hypre_GpuMatDataCreate(hypre_CSRMatrix  *matrix);
 void hypre_GpuMatDataDestroy(hypre_CSRMatrix  *matrix);
 #endif
+
