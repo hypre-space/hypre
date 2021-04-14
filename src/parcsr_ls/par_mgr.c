@@ -64,7 +64,6 @@ hypre_MGRCreate()
   (mgr_data -> trunc_factor) = 0.0;
   (mgr_data -> max_row_sum) = 0.9;
   (mgr_data -> strong_threshold) = 0.25;
-  (mgr_data -> S_commpkg_switch) = 1.0;
   (mgr_data -> P_max_elmts) = 0;
 
   (mgr_data -> coarse_grid_solver) = NULL;
@@ -3114,7 +3113,6 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
                      HYPRE_Int             debug_flag,
                      HYPRE_Real            trunc_factor,
                      HYPRE_Int             max_elmts,
-                     HYPRE_Int            *col_offd_S_to_A,
                      hypre_ParCSRMatrix  **P,
          HYPRE_Int         interp_type,
                      HYPRE_Int             numsweeps)
@@ -3147,7 +3145,7 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
   {
     /* Classical modified interpolation */
     hypre_BoomerAMGBuildInterp(A, CF_marker, S, num_cpts_global,1, NULL,debug_flag,
-                      trunc_factor, max_elmts, col_offd_S_to_A, &P_ptr);
+                      trunc_factor, max_elmts, &P_ptr);
 
     /* Do k steps of Jacobi build W for P = [-W I].
      * Note that BoomerAMGJacobiInterp assumes you have some initial P,
@@ -3177,7 +3175,6 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
                      HYPRE_Int              debug_flag,
                      HYPRE_Real             trunc_factor,
                      HYPRE_Int              max_elmts,
-                     HYPRE_Real             S_commpkg_switch,
                      HYPRE_Real             strong_threshold,
                      HYPRE_Real             max_row_sum,
                      hypre_ParCSRMatrix     **R,
@@ -3188,7 +3185,6 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
   hypre_ParCSRMatrix    *R_ptr = NULL;
   hypre_ParCSRMatrix    *AT = NULL;
   hypre_ParCSRMatrix    *ST = NULL;
-  HYPRE_Int             *col_offd_ST_to_AT = NULL;
   //   HYPRE_Real       jac_trunc_threshold = trunc_factor;
   //   HYPRE_Real       jac_trunc_threshold_minus = 0.5*jac_trunc_threshold;
 
@@ -3202,8 +3198,6 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
     /* Build new strength matrix */
     hypre_BoomerAMGCreateS(AT, strong_threshold, max_row_sum, 1, NULL, &ST);
     /* use appropriate communication package for Strength matrix */
-    if (strong_threshold > S_commpkg_switch)
-      hypre_BoomerAMGCreateSCommPkg(AT, ST, &col_offd_ST_to_AT);
   }
 
   /* Interpolation for each level */
@@ -3228,7 +3222,7 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
   {
     /* Classical modified interpolation */
     hypre_BoomerAMGBuildInterp(AT, CF_marker, ST, num_cpts_global,1, NULL,debug_flag,
-                               trunc_factor, max_elmts, col_offd_ST_to_AT, &R_ptr);
+                               trunc_factor, max_elmts, &R_ptr);
 
     /* Do k steps of Jacobi build W for P = [-W I].
     * Note that BoomerAMGJacobiInterp assumes you have some initial P,
@@ -3252,7 +3246,6 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
   if (restrict_type > 5)
   {
     hypre_ParCSRMatrixDestroy(ST);
-    if (col_offd_ST_to_AT) hypre_TFree(col_offd_ST_to_AT, HYPRE_MEMORY_HOST);
   }
 
   return hypre_error_flag;

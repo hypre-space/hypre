@@ -354,7 +354,15 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A
         {
           if (!hypre_UnorderedBigIntSetContains(&set, big_i1))
           {
-            Sop_j[j] = -hypre_UnorderedBigIntMapGet(&col_map_offd_inverse, big_i1) - 1;
+            HYPRE_Int k = hypre_UnorderedBigIntMapGet(&col_map_offd_inverse, big_i1);
+            if (-1 == k)
+            {
+               hypre_UnorderedBigIntSetPut(&set, big_i1);
+            }
+            else
+            {
+               Sop_j[j] = -k - 1;
+            }
           }
         }
       }

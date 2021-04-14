@@ -10,7 +10,7 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
-__global__ void hypre_BoomerAMGBuildDirInterp_getnnz( HYPRE_Int nr_of_rows, HYPRE_Int *S_diag_i, HYPRE_Int *S_diag_j, HYPRE_Int *S_offd_i, HYPRE_Int *S_offd_j, HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd, HYPRE_Int *P_diag_i, HYPRE_Int *P_offd_i, HYPRE_Int *col_offd_S_to_A);
+__global__ void hypre_BoomerAMGBuildDirInterp_getnnz( HYPRE_Int nr_of_rows, HYPRE_Int *S_diag_i, HYPRE_Int *S_diag_j, HYPRE_Int *S_offd_i, HYPRE_Int *S_offd_j, HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd, HYPRE_Int *P_diag_i, HYPRE_Int *P_offd_i);
 
 __global__ void hypre_BoomerAMGBuildDirInterp_getcoef( HYPRE_Int nr_of_rows, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Real *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Real *A_offd_data, HYPRE_Int *Soc_diag_j, HYPRE_Int *Soc_offd_j, HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Real *P_diag_data, HYPRE_Int *P_offd_i, HYPRE_Int *P_offd_j, HYPRE_Real *P_offd_data, HYPRE_Int *fine_to_coarse );
 
@@ -30,7 +30,6 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
                                      HYPRE_Int             debug_flag,
                                      HYPRE_Real            trunc_factor,
                                      HYPRE_Int             max_elmts,
-                                     HYPRE_Int            *col_offd_S_to_A,
                                      HYPRE_Int             interp_type,
                                      hypre_ParCSRMatrix  **P_ptr)
 {
@@ -189,8 +188,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    HYPRE_CUDA_LAUNCH( hypre_BoomerAMGBuildDirInterp_getnnz, gDim, bDim,
                       n_fine, S_diag_i, S_diag_j, S_offd_i, S_offd_j,
                       CF_marker_dev, CF_marker_offd, num_functions,
-                      dof_func_dev, dof_func_offd, P_diag_i, P_offd_i,
-                      col_offd_S_to_A);
+                      dof_func_dev, dof_func_offd, P_diag_i, P_offd_i);
 
    /* The scans will transform P_diag_i and P_offd_i to the CSR I-vectors */
    hypreDevice_IntegerExclusiveScan(n_fine+1, P_diag_i);
@@ -382,8 +380,7 @@ hypre_BoomerAMGBuildDirInterp_getnnz( HYPRE_Int  nr_of_rows,
                                       HYPRE_Int *dof_func,
                                       HYPRE_Int *dof_func_offd,
                                       HYPRE_Int *P_diag_i,
-                                      HYPRE_Int *P_offd_i,
-                                      HYPRE_Int *col_offd_S_to_A )
+                                      HYPRE_Int *P_offd_i)
 {
    /*-----------------------------------------------------------------------*/
    /* Determine size of interpolation matrix, P
@@ -486,7 +483,7 @@ hypre_BoomerAMGBuildDirInterp_getnnz( HYPRE_Int  nr_of_rows,
       if (j < q)
       {
          const HYPRE_Int tmp = read_only_load(&S_offd_j[j]);
-         const HYPRE_Int col = col_offd_S_to_A ? read_only_load(&col_offd_S_to_A[tmp]) : tmp;
+         const HYPRE_Int col = tmp;
          if ( read_only_load(&CF_marker_offd[col]) > 0 && (num_functions == 1 || read_only_load(&dof_func_offd[col]) == dof_func_i) )
          {
             jPo++;

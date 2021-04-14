@@ -55,11 +55,11 @@ DSCG_Iterations = 3
 Final Relative Residual Norm = 1.094045e-17
 
 # Output file: solvers_ij.out.sysh
- Average Convergence Factor = 0.122527
+ Average Convergence Factor = 0.120661
 
-     Complexity:    grid = 1.613750
-                operator = 2.860373
-                   cycle = 5.720578
+     Complexity:    grid = 1.613875
+                operator = 2.860168
+                   cycle = 5.720037
 
 # Output file: solvers_ij.out.sysn
  Average Convergence Factor = 0.222219
