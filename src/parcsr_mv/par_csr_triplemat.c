@@ -206,7 +206,7 @@ hypre_ParCSRMatMat( hypre_ParCSRMatrix  *A,
                     hypre_ParCSRMatrix  *B )
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_NvtxPushRange("Mat-Mat");
+   hypre_GpuProfilingPushRange("Mat-Mat");
 #endif
 
    hypre_ParCSRMatrix *C = NULL;
@@ -226,7 +226,7 @@ hypre_ParCSRMatMat( hypre_ParCSRMatrix  *A,
    }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_NvtxPopRange();
+   hypre_GpuProfilingPopRange();
 #endif
 
    return C;
@@ -465,7 +465,7 @@ hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
                        HYPRE_Int            keep_transpose)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_NvtxPushRange("Mat-T-Mat");
+   hypre_GpuProfilingPushRange("Mat-T-Mat");
 #endif
 
    hypre_ParCSRMatrix *C = NULL;
@@ -485,7 +485,7 @@ hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
    }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_NvtxPopRange();
+   hypre_GpuProfilingPopRange();
 #endif
 
    return C;
@@ -927,7 +927,7 @@ hypre_ParCSRMatrixRAPKT( hypre_ParCSRMatrix  *R,
                          HYPRE_Int            keep_transpose)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_NvtxPushRange("TripleMat-RAP");
+   hypre_GpuProfilingPushRange("TripleMat-RAP");
 #endif
 
    hypre_ParCSRMatrix *C = NULL;
@@ -947,7 +947,7 @@ hypre_ParCSRMatrixRAPKT( hypre_ParCSRMatrix  *R,
    }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_NvtxPopRange();
+   hypre_GpuProfilingPopRange();
 #endif
 
    return C;

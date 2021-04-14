@@ -1215,7 +1215,6 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                                                HYPRE_Real max_row_sum,
                                                HYPRE_Int num_functions,
                                                HYPRE_Int * dof_func_value,
-                                               HYPRE_Real S_commpkg_switch,
                                                HYPRE_Int * CF_marker,
                                                HYPRE_Real droptol, HYPRE_Int sym_collapse,
                                                HYPRE_Real lump_percent, HYPRE_Int collapse_beta )
@@ -1224,7 +1223,6 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
     MPI_Comm            comm                  = hypre_ParCSRMatrixComm(*RAP_ptr);
     hypre_ParCSRMatrix  *S                    = NULL;
     hypre_ParCSRMatrix  *RAP                  = *RAP_ptr;
-    HYPRE_Int           *col_offd_S_to_A      = NULL;
     HYPRE_Int           i, j, k, row_start, row_end, value, num_cols_offd_Sext, num_procs;
     HYPRE_Int           S_ext_diag_size, S_ext_offd_size, last_col_diag_RAP, cnt_offd, cnt_diag, cnt;
     HYPRE_Int           col_indx_Pattern, current_Pattern_j, col_indx_RAP;
@@ -1424,9 +1422,6 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
         hypre_BoomerAMG_MyCreateS(RAP, strong_threshold, max_row_sum,
                                   1, NULL, &S);
     }
-    /*if (0)*/ /*(strong_threshold > S_commpkg_switch)*/
-    /*{    hypre_BoomerAMG_MyCreateSCommPkg(RAP, S, &col_offd_S_to_A); }*/
-
     /* Grab diag and offd parts of S */
     S_diag               = hypre_ParCSRMatrixDiag(S);
     S_diag_i             = hypre_CSRMatrixI(S_diag);
@@ -2306,8 +2301,6 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
     }
     if (num_cols_offd_Sext)
     {   hypre_TFree(col_map_offd_Sext, HYPRE_MEMORY_HOST); }
-    if (0) /*(strong_threshold > S_commpkg_switch)*/
-    {   hypre_TFree(col_offd_S_to_A, HYPRE_MEMORY_HOST); }
 
     ierr += hypre_ParCSRMatrixDestroy(Pattern);
     ierr += hypre_ParCSRMatrixDestroy(RAP);

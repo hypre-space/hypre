@@ -36,13 +36,13 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
    hypre_CSRMatrixBigJ(matrix)           = NULL;
    hypre_CSRMatrixRownnz(matrix)         = NULL;
    hypre_CSRMatrixNumRows(matrix)        = num_rows;
+   hypre_CSRMatrixNumRownnz(matrix)      = num_rows;
    hypre_CSRMatrixNumCols(matrix)        = num_cols;
    hypre_CSRMatrixNumNonzeros(matrix)    = num_nonzeros;
    hypre_CSRMatrixMemoryLocation(matrix) = hypre_HandleMemoryLocation(hypre_handle());
 
    /* set defaults */
    hypre_CSRMatrixOwnsData(matrix)  = 1;
-   hypre_CSRMatrixNumRownnz(matrix) = num_rows;
 
 #if defined(HYPRE_USING_CUSPARSE)
    hypre_CSRMatrixSortedJ(matrix)    = NULL;
@@ -1024,4 +1024,3 @@ hypre_CSRMatrixPrefetch( hypre_CSRMatrix *A, HYPRE_MemoryLocation memory_locatio
 
    return ierr;
 }
-

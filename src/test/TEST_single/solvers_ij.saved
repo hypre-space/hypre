@@ -55,11 +55,11 @@ DSCG_Iterations = 3
 Final Relative Residual Norm = 9.148609e-06
 
 # Output file: solvers_ij.out.sysh
- Average Convergence Factor = 0.122042
+ Average Convergence Factor = 0.119466
 
-     Complexity:    grid = 1.613750
-                operator = 2.860298
-                   cycle = 5.720429
+     Complexity:    grid = 1.613875
+                operator = 2.860317
+                   cycle = 5.720336
 
 # Output file: solvers_ij.out.sysn
  Average Convergence Factor = 0.241065
@@ -141,5 +141,4 @@ Final GMRES Relative Residual Norm = 3.062358e-05
 
 # Output file: solvers_ij.out.117
 GMRES Iterations = 6
-Final GMRES Relative Residual Norm = 3.026567e-05
-
+Final GMRES Relative Residual Norm = 3.001248e-05
