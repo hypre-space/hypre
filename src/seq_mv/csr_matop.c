@@ -311,26 +311,34 @@ hypre_CSRMatrixAddSecondPass( HYPRE_Int          firstrow,
  * Note: The routine does not check for 0-elements which might be generated
  *       through cancellation of elements in A and B or already contained
  *       in A and B. To remove those, use hypre_CSRMatrixDeleteZeros
+ *
+ *       This function is ready to compute C = alpha*A + beta*B if needed.
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix*
 hypre_CSRMatrixAddHost ( hypre_CSRMatrix *A,
                          hypre_CSRMatrix *B )
 {
-   HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
-   HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
-   HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
-   HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
-   HYPRE_Complex    *B_data   = hypre_CSRMatrixData(B);
-   HYPRE_Int        *B_i      = hypre_CSRMatrixI(B);
-   HYPRE_Int        *B_j      = hypre_CSRMatrixJ(B);
-   HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
-   HYPRE_Int         ncols_B  = hypre_CSRMatrixNumCols(B);
+   /* CSRMatrix A */
+   HYPRE_Int        *rownnz_A  = hypre_CSRMatrixRownnz(A);
+   HYPRE_Int         nrows_A   = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int         nnzrows_A = hypre_CSRMatrixNumRownnz(A);
+   HYPRE_Int         ncols_A   = hypre_CSRMatrixNumCols(A);
+
+   /* CSRMatrix B */
+   HYPRE_Int        *rownnz_B  = hypre_CSRMatrixRownnz(B);
+   HYPRE_Int         nrows_B   = hypre_CSRMatrixNumRows(B);
+   HYPRE_Int         nnzrows_B = hypre_CSRMatrixNumRownnz(B);
+   HYPRE_Int         ncols_B   = hypre_CSRMatrixNumCols(B);
+
+   /* CSRMatrix C */
    hypre_CSRMatrix  *C;
-   HYPRE_Complex    *C_data;
    HYPRE_Int        *C_i;
-   HYPRE_Int        *C_j;
+   HYPRE_Int        *rownnz_C;
+   HYPRE_Int         nnzrows_C;
+
+   HYPRE_Complex     alpha = 1.0;
+   HYPRE_Complex     beta = 1.0;
 
    HYPRE_MemoryLocation memory_location_A = hypre_CSRMatrixMemoryLocation(A);
    HYPRE_MemoryLocation memory_location_B = hypre_CSRMatrixMemoryLocation(B);
@@ -353,21 +361,32 @@ hypre_CSRMatrixAddHost ( hypre_CSRMatrix *A,
 
    C_i = hypre_CTAlloc(HYPRE_Int, nrows_A + 1, memory_location_C);
 
+   /* Set nonzero rows data of diag_C */
+   nnzrows_C = nrows_A;
+   if ((nnzrows_A < nrows_A) && (nnzrows_B < nrows_B))
+   {
+      hypre_MergeOrderedArrays(nnzrows_A, rownnz_A,
+                               nnzrows_B, rownnz_B,
+                               &nnzrows_C, &rownnz_C);
+   }
+   else
+   {
+      rownnz_C = NULL;
+   }
+
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel
 #endif
    {
-      HYPRE_Int   ia, ib, ic, jcol, num_nonzeros;
-      HYPRE_Int   ns, ne, pos;
+      HYPRE_Int   ns, ne;
       HYPRE_Int   ii, size, rest, num_threads;
-      HYPRE_Int   jj, jj_count[hypre_NumThreads()];
       HYPRE_Int  *marker = NULL;
 
       ii = hypre_GetThreadNum();
       num_threads = hypre_NumActiveThreads();
 
-      size = nrows_A/num_threads;
-      rest = nrows_A - size*num_threads;
+      size = nnzrows_A/num_threads;
+      rest = nnzrows_A - size*num_threads;
       if (ii < rest)
       {
          ns = ii*size+ii;
@@ -380,107 +399,14 @@ hypre_CSRMatrixAddHost ( hypre_CSRMatrix *A,
       }
 
       marker = hypre_CTAlloc(HYPRE_Int, ncols_A, HYPRE_MEMORY_HOST);
-      for (ia = 0; ia < ncols_A; ia++)
-      {
-         marker[ia] = -1;
-      }
 
-      /* First pass */
-      num_nonzeros = 0;
-      for (ic = ns; ic < ne; ic++)
-      {
-         C_i[ic] = num_nonzeros;
-         for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
-         {
-            jcol = A_j[ia];
-            marker[jcol] = ic;
-            num_nonzeros++;
-         }
+      hypre_CSRMatrixAddFirstPass(ns, ne, marker, NULL, NULL, A, B,
+                                  nrows_A, ncols_A, rownnz_C,
+                                  memory_location_C, C_i, &C);
 
-         for (ib = B_i[ic]; ib < B_i[ic+1]; ib++)
-         {
-            jcol = B_j[ib];
-            if (marker[jcol] != ic)
-            {
-               marker[jcol] = ic;
-               num_nonzeros++;
-            }
-         }
-         C_i[ic+1] = num_nonzeros;
-      }
-      jj_count[ii] = num_nonzeros;
+      hypre_CSRMatrixAddSecondPass(ns, ne, marker, NULL, NULL,
+                                   rownnz_C, alpha, beta, A, B, C);
 
-#ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
-#endif
-
-      /* Correct row pointer */
-      if (ii)
-      {
-         jj = jj_count[0];
-         for (ic = 1; ic < ii; ic++)
-         {
-            jj += jj_count[ia];
-         }
-
-         for (ic = ns; ic < ne; ic++)
-         {
-            C_i[ic] += jj;
-         }
-      }
-      else
-      {
-         C_i[nrows_A] = 0;
-         for (ic = 0; ic < num_threads; ic++)
-         {
-            C_i[nrows_A] += jj_count[ic];
-         }
-
-         C = hypre_CSRMatrixCreate(nrows_A, ncols_A, C_i[nrows_A]);
-         hypre_CSRMatrixI(C) = C_i;
-         hypre_CSRMatrixInitialize_v2(C, 0, memory_location_C);
-         C_j = hypre_CSRMatrixJ(C);
-         C_data = hypre_CSRMatrixData(C);
-      }
-
-#ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
-#endif
-
-      /* Second pass */
-      for (ia = 0; ia < ncols_A; ia++)
-      {
-         marker[ia] = -1;
-      }
-
-      pos = C_i[ns];
-      for (ic = ns; ic < ne; ic++)
-      {
-         for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
-         {
-            jcol = A_j[ia];
-            C_j[pos] = jcol;
-            C_data[pos] = A_data[ia];
-            marker[jcol] = pos;
-            pos++;
-         }
-
-         for (ib = B_i[ic]; ib < B_i[ic+1]; ib++)
-         {
-            jcol = B_j[ib];
-            if (marker[jcol] < C_i[ic])
-            {
-               C_j[pos] = jcol;
-               C_data[pos] = B_data[ib];
-               marker[jcol] = pos;
-               pos++;
-            }
-            else
-            {
-               C_data[marker[jcol]] += B_data[ib];
-            }
-         }
-      }
       hypre_TFree(marker, HYPRE_MEMORY_HOST);
    } /* end of parallel region */
 
@@ -530,11 +456,13 @@ hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
    HYPRE_BigInt     *A_j      = hypre_CSRMatrixBigJ(A);
    HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
    HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
+
    HYPRE_Complex    *B_data   = hypre_CSRMatrixData(B);
    HYPRE_Int        *B_i      = hypre_CSRMatrixI(B);
    HYPRE_BigInt     *B_j      = hypre_CSRMatrixBigJ(B);
    HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
    HYPRE_Int         ncols_B  = hypre_CSRMatrixNumCols(B);
+
    hypre_CSRMatrix  *C;
    HYPRE_Complex    *C_data;
    HYPRE_Int        *C_i;
