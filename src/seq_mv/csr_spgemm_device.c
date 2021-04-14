@@ -7,17 +7,27 @@
 
 #include "seq_mv.h"
 #include "csr_spgemm_device.h"
+#include "seq_mv.hpp"
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 HYPRE_Int
-hypreDevice_CSRSpGemm(HYPRE_Int   m,        HYPRE_Int   k,        HYPRE_Int       n,
-                      HYPRE_Int   nnza,     HYPRE_Int   nnzb,
-                      HYPRE_Int  *d_ia,     HYPRE_Int  *d_ja,     HYPRE_Complex  *d_a,
-                      HYPRE_Int  *d_ib,     HYPRE_Int  *d_jb,     HYPRE_Complex  *d_b,
+hypreDevice_CSRSpGemm(hypre_CSRMatrix *A, hypre_CSRMatrix *B,
                       HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out,
                       HYPRE_Int  *nnzC)
 {
+   HYPRE_Complex    *d_a  = hypre_CSRMatrixData(A);
+   HYPRE_Int        *d_ia = hypre_CSRMatrixI(A);
+   HYPRE_Int        *d_ja = hypre_CSRMatrixJ(A);
+   HYPRE_Int         m    = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int         k    = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int         nnza = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Complex    *d_b  = hypre_CSRMatrixData(B);
+   HYPRE_Int        *d_ib = hypre_CSRMatrixI(B);
+   HYPRE_Int        *d_jb = hypre_CSRMatrixJ(B);
+   HYPRE_Int         n    = hypre_CSRMatrixNumCols(B);
+   HYPRE_Int         nnzb = hypre_CSRMatrixNumNonzeros(B);
+
    /* trivial case */
    if (nnza == 0 || nnzb == 0)
    {
@@ -37,10 +47,12 @@ hypreDevice_CSRSpGemm(HYPRE_Int   m,        HYPRE_Int   k,        HYPRE_Int     
    if (hypre_HandleSpgemmUseCusparse(hypre_handle()))
    {
 #if defined(HYPRE_USING_CUSPARSE)
-      hypreDevice_CSRSpGemmCusparse(m, k, n, nnza, d_ia, d_ja, d_a, nnzb, d_ib, d_jb, d_b,
+      hypreDevice_CSRSpGemmCusparse(m, k, n, hypre_CSRMatrixGPUMatDescr(A), nnza, d_ia, d_ja, d_a,
+                                    hypre_CSRMatrixGPUMatDescr(B), nnzb, d_ib, d_jb, d_b,
                                     nnzC, d_ic_out, d_jc_out, d_c_out);
 #elif defined(HYPRE_USING_ROCSPARSE)
-      hypreDevice_CSRSpGemmRocsparse(m, k, n, nnza, d_ia, d_ja, d_a, nnzb, d_ib, d_jb, d_b,
+      hypreDevice_CSRSpGemmRocsparse(m, k, n, hypre_CSRMatrixGPUMatDescr(A), nnza, d_ia, d_ja, d_a,
+                                     hypre_CSRMatrixGPUMatDescr(B), nnzb, d_ib, d_jb, d_b,
                                      nnzC, d_ic_out, d_jc_out, d_c_out);
 #else
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Attempting to use device sparse matrix library for SpGEMM without having compiled support for it!\n");

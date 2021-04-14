@@ -14,6 +14,7 @@
 #include "seq_mv.h"
 #include "csr_matrix.h"
 #include "_hypre_utilities.hpp"
+#include "seq_mv.hpp"
 
 #if defined(HYPRE_USING_CUSPARSE)
 hypre_CsrsvData*
@@ -50,6 +51,54 @@ hypre_CsrsvDataDestroy(hypre_CsrsvData* data)
    hypre_TFree(data, HYPRE_MEMORY_HOST);
 }
 #endif /* #if defined(HYPRE_USING_CUSPARSE) */
+
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+void
+hypre_GpuMatDataCreate(hypre_CSRMatrix  *matrix)
+{
+   hypre_CSRMatrixGPUMatData(matrix) = hypre_CTAlloc(hypre_GpuMatData, 1, HYPRE_MEMORY_HOST);
+
+#if defined(HYPRE_USING_CUSPARSE)
+   cusparseMatDescr_t mat_descr;
+   HYPRE_CUSPARSE_CALL( cusparseCreateMatDescr(&mat_descr) );
+   HYPRE_CUSPARSE_CALL( cusparseSetMatType(mat_descr, CUSPARSE_MATRIX_TYPE_GENERAL) );
+   HYPRE_CUSPARSE_CALL( cusparseSetMatIndexBase(mat_descr, CUSPARSE_INDEX_BASE_ZERO) );
+   hypre_GpuMatDataMatDecsr(hypre_CSRMatrixGPUMatData(matrix)) = mat_descr;
+#endif
+
+#if defined(HYPRE_USING_ROCSPARSE)
+   rocsparse_mat_descr mat_descr;
+   HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_descr(&mat_descr) );
+   HYPRE_ROCSPARSE_CALL( rocsparse_set_mat_type(mat_descr, rocsparse_matrix_type_general) );
+   HYPRE_ROCSPARSE_CALL( rocsparse_set_mat_index_base(mat_descr, rocsparse_index_base_zero) );
+   hypre_GpuMatDataMatDecsr(hypre_CSRMatrixGPUMatData(matrix)) = mat_descr;
+
+   rocsparse_mat_info info;
+   HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_info(&info) );
+   hypre_GpuMatDataMatInfo(hypre_CSRMatrixGPUMatData(matrix)) = info;
+#endif
+}
+
+void
+hypre_GpuMatDataDestroy(hypre_CSRMatrix  *matrix)
+{
+   if (hypre_CSRMatrixGPUMatData(matrix))
+   {
+      return;
+   }
+
+#if defined(HYPRE_USING_CUSPARSE)
+   HYPRE_CUSPARSE_CALL( cusparseDestroy(hypre_GpuMatDataMatDecsr(hypre_CSRMatrixGPUMatData(matrix))) );
+#endif
+
+#if defined(HYPRE_USING_ROCSPARSE)
+   HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_descr(hypre_GpuMatDataMatDecsr(hypre_CSRMatrixGPUMatData(matrix))) );
+   HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_info(hypre_GpuMatDataMatInfo(hypre_CSRMatrixGPUMatData(matrix))) );
+#endif
+
+  hypre_TFree(hypre_CSRMatrixGPUMatData(matrix), HYPRE_MEMORY_HOST);
+}
+#endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
@@ -100,18 +149,11 @@ hypre_CSRMatrix*
 hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
                                hypre_CSRMatrix *B)
 {
-   HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
-   HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
-   HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
    HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
    HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
-   HYPRE_Int         nnz_A    = hypre_CSRMatrixNumNonzeros(A);
-   HYPRE_Complex    *B_data   = hypre_CSRMatrixData(B);
-   HYPRE_Int        *B_i      = hypre_CSRMatrixI(B);
-   HYPRE_Int        *B_j      = hypre_CSRMatrixJ(B);
    HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
    HYPRE_Int         ncols_B  = hypre_CSRMatrixNumCols(B);
-   HYPRE_Int         nnz_B    = hypre_CSRMatrixNumNonzeros(B);
+
    HYPRE_Complex    *C_data;
    HYPRE_Int        *C_i;
    HYPRE_Int        *C_j;
@@ -135,8 +177,7 @@ hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
    }
    */
 
-   hypreDevice_CSRSpGemm(nrows_A, ncols_A, ncols_B, nnz_A, nnz_B, A_i, A_j, A_data, B_i, B_j, B_data,
-                         &C_i, &C_j, &C_data, &nnzC);
+   hypreDevice_CSRSpGemm(A, B, &C_i, &C_j, &C_data, &nnzC);
 
    C = hypre_CSRMatrixCreate(nrows_A, ncols_B, nnzC);
    hypre_CSRMatrixI(C) = C_i;
@@ -1199,10 +1240,10 @@ HYPRE_Int
 hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
 {
 #if defined(HYPRE_USING_CUSPARSE)
-   hypre_SortCSRCusparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A), hypre_CSRMatrixNumNonzeros(A),
+   hypre_SortCSRCusparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A), hypre_CSRMatrixNumNonzeros(A), hypre_CSRMatrixGPUMatDescr(A),
                          hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A));
 #elif defined(HYPRE_USING_ROCSPARSE)
-   hypre_SortCSRRocsparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A), hypre_CSRMatrixNumNonzeros(A),
+   hypre_SortCSRRocsparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A), hypre_CSRMatrixNumNonzeros(A), hypre_CSRMatrixGPUMatDescr(A),
                           hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A));
 #else
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,"hypre_CSRMatrixSortRow only implemented for cuSPARSE!\n");
@@ -1224,12 +1265,12 @@ void
 hypre_SortCSRCusparse(       HYPRE_Int      n,
                              HYPRE_Int      m,
                              HYPRE_Int      nnzA,
+                             cusparseMatDescr_t descrA,
                        const HYPRE_Int     *d_ia,
                              HYPRE_Int     *d_ja_sorted,
                              HYPRE_Complex *d_a_sorted )
 {
    cusparseHandle_t cusparsehandle = hypre_HandleCusparseHandle(hypre_handle());
-   cusparseMatDescr_t descrA = hypre_HandleCusparseMatDescr(hypre_handle());
 
    size_t pBufferSizeInBytes = 0;
    void *pBuffer = NULL;
@@ -1308,6 +1349,9 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
       return hypre_error_flag;
    }
 
+   cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
+   cusparseMatDescr_t descr = hypre_CSRMatrixGPUMatDescr(A);
+
    if ( !A_sj && !A_sa )
    {
       hypre_CSRMatrixSortedJ(A) = A_sj = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
@@ -1322,11 +1366,8 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
       hypre_CSRMatrixData(A) = A_a;
 #endif
 
-      hypre_SortCSRCusparse(nrow, ncol, nnzA, A_i, A_sj, A_sa);
+      hypre_SortCSRCusparse(nrow, ncol, nnzA, descr, A_i, A_sj, A_sa);
    }
-
-   cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
-   cusparseMatDescr_t descr = hypre_HandleCusparseMatDescr(hypre_handle());
 
    HYPRE_CUSPARSE_CALL( cusparseSetMatDiagType(descr, CUSPARSE_DIAG_TYPE_NON_UNIT) );
 
@@ -1432,6 +1473,8 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char              /*uplo*/,
                                           hypre_Vector    * /*u*/ )
 {
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "hypre_CSRMatrixTriLowerUpperSolveCusparse not implemented for rocSPARSE!\n");
+
+   return 1;
 }
 
 
@@ -1447,16 +1490,12 @@ void
 hypre_SortCSRRocsparse(       HYPRE_Int      n,
                               HYPRE_Int      m,
                               HYPRE_Int      nnzA,
+                              rocsparse_mat_descr descrA,
                         const HYPRE_Int     *d_ia,
                               HYPRE_Int     *d_ja_sorted,
                               HYPRE_Complex *d_a_sorted )
 {
    rocsparse_handle handle = hypre_HandleCusparseHandle(hypre_handle());
-
-   // FIXME: This is an abuse. Really, each matrix should have its own
-   //        rocsparse_mat_descr and rocsparse_mat_info and these should
-   //        not be global variables.
-   rocsparse_mat_descr descrA = hypre_HandleCusparseMatDescr(hypre_handle());
 
    size_t pBufferSizeInBytes = 0;
    void *pBuffer = NULL;
@@ -1497,4 +1536,3 @@ hypre_SortCSRRocsparse(       HYPRE_Int      n,
    hypre_TFree(d_a_tmp, HYPRE_MEMORY_DEVICE);
 }
 #endif // #if defined(HYPRE_USING_ROCSPARSE)
-

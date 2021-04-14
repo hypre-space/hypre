@@ -7,6 +7,7 @@
 
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
+#include "seq_mv.hpp"
 
 #if defined(HYPRE_USING_HIP) && defined(HYPRE_USING_ROCSPARSE)
 
@@ -14,10 +15,12 @@ HYPRE_Int
 hypreDevice_CSRSpGemmRocsparse(HYPRE_Int       m,
                                HYPRE_Int       k,
                                HYPRE_Int       n,
+                               rocsparse_mat_descr descrA,
                                HYPRE_Int       nnzA,
                                HYPRE_Int      *d_ia,
                                HYPRE_Int      *d_ja,
                                HYPRE_Complex  *d_a,
+                               rocsparse_mat_descr descrB,
                                HYPRE_Int       nnzB,
                                HYPRE_Int      *d_ib,
                                HYPRE_Int      *d_jb,
@@ -38,13 +41,13 @@ hypreDevice_CSRSpGemmRocsparse(HYPRE_Int       m,
 
    rocsparse_handle handle = hypre_HandleCusparseHandle(hypre_handle());
 
-   // FIXME: This is an abuse. Really, each matrix should have its own
-   //        rocsparse_mat_descr and rocsparse_mat_info and these should
-   //        not be global variables.
-   rocsparse_mat_descr descrA = hypre_HandleCusparseMatDescr(hypre_handle());
-   rocsparse_mat_descr descrB = hypre_HandleCusparseMatDescr(hypre_handle());
-   rocsparse_mat_descr descrC = hypre_HandleCusparseMatDescr(hypre_handle());
-   rocsparse_mat_info infoC = hypre_HandleRocsparseMatInfo(hypre_handle());
+   // CSRMatrix C may not have been created when this is called so we
+   // can't pass in descrC or infoC. However, mat_descr are always created the same way
+   // so we just copy an existing one and we just create a local mat_info (and destroy
+   // at the end).
+   rocsparse_mat_descr descrC = descrA;
+   rocsparse_mat_info infoC;
+   HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_info(&infoC) );
 
    rocsparse_operation transA = rocsparse_operation_none;
    rocsparse_operation transB = rocsparse_operation_none;
@@ -61,8 +64,8 @@ hypreDevice_CSRSpGemmRocsparse(HYPRE_Int       m,
    hypre_TMemcpy(d_b_sorted,  d_b,  HYPRE_Complex, nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
    /* Sort each of the CSR matrices */
-   hypre_SortCSRRocsparse(m, k, nnzA, d_ia, d_ja_sorted, d_a_sorted);
-   hypre_SortCSRRocsparse(k, n, nnzB, d_ib, d_jb_sorted, d_b_sorted);
+   hypre_SortCSRRocsparse(m, k, nnzA, descrA, d_ia, d_ja_sorted, d_a_sorted);
+   hypre_SortCSRRocsparse(k, n, nnzB, descrB, d_ib, d_jb_sorted, d_b_sorted);
 
    // nnzTotalDevHostPtr points to host memory
    HYPRE_Int *nnzTotalDevHostPtr = &nnzC;
@@ -172,6 +175,8 @@ hypreDevice_CSRSpGemmRocsparse(HYPRE_Int       m,
    hypre_TFree(d_b_sorted,  HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_ja_sorted, HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_jb_sorted, HYPRE_MEMORY_DEVICE);
+
+   HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_info(infoC) );
 
    return hypre_error_flag;
 }
