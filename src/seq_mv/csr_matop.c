@@ -18,17 +18,23 @@
  * hypre_CSRMatrixAddFirstPass:
  *
  * Performs the first pass needed for Matrix/Matrix addition (C = A + B).
- * This function computes the row pointer of the resulting matrix C_i,
- * allocates memory for the resulting matrix C, and returns it to the user
+ * This function:
+ *    1) Computes the row pointer of the resulting matrix C_i
+ *    2) Allocates memory for the matrix C and returns it to the user
  *
  * Notes: 1) It can be used safely inside OpenMP parallel regions.
  *        2) firstrow, lastrow and marker are private variables.
  *        3) The remaining arguments are shared variables.
+ *        4) The mapping arrays map_A2C and map_B2C are used when adding
+ *           off-diagonal matrices. They can be set to NULL pointer when
+ *           adding diagonal matrices.
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
                              HYPRE_Int              lastrow,
                              HYPRE_Int             *marker,
+                             HYPRE_Int             *map_A2C,
+                             HYPRE_Int             *map_B2C,
                              hypre_CSRMatrix       *A,
                              hypre_CSRMatrix       *B,
                              HYPRE_Int              nrows_C,
@@ -61,20 +67,47 @@ hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
       iic = rownnz_C ? rownnz_C[ic] : ic;
 
       C_i[iic] = num_nonzeros;
-      for (ia = A_i[iic]; ia < A_i[iic+1]; ia++)
+      if (map_A2C)
       {
-         jcol = A_j[ia];
-         marker[jcol] = iic;
-         num_nonzeros++;
-      }
-
-      for (ib = B_i[ic]; ib < B_i[ic+1]; ib++)
-      {
-         jcol = B_j[ib];
-         if (marker[jcol] != iic)
+         for (ia = A_i[iic]; ia < A_i[iic+1]; ia++)
          {
+            jcol = map_A2C[A_j[ia]];
             marker[jcol] = iic;
             num_nonzeros++;
+         }
+      }
+      else
+      {
+         for (ia = A_i[iic]; ia < A_i[iic+1]; ia++)
+         {
+            jcol = A_j[ia];
+            marker[jcol] = iic;
+            num_nonzeros++;
+         }
+      }
+
+      if (map_B2C)
+      {
+         for (ib = B_i[ic]; ib < B_i[ic+1]; ib++)
+         {
+            jcol = map_B2C[B_j[ib]];
+            if (marker[jcol] != iic)
+            {
+               marker[jcol] = iic;
+               num_nonzeros++;
+            }
+         }
+      }
+      else
+      {
+         for (ib = B_i[ic]; ib < B_i[ic+1]; ib++)
+         {
+            jcol = B_j[ib];
+            if (marker[jcol] != iic)
+            {
+               marker[jcol] = iic;
+               num_nonzeros++;
+            }
          }
       }
       C_i[iic+1] = num_nonzeros;
@@ -156,12 +189,7 @@ hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
  * Performs the second pass needed for Matrix/Matrix addition (C = A + B).
  * This function computes C_j and C_data.
  *
- * Notes: 1) It can be used safely inside OpenMP parallel regions.
- *        2) firstrow, lastrow and marker are private variables.
- *        3) The remaining arguments are shared variables.
- *        4) The mapping arrays map_A2C and map_B2C are used when adding
- *           off-diagonal matrices. They can be set to NULL pointer when
- *           adding diagonal matrices.
+ * Notes: see notes for hypre_CSRMatrixAddFirstPass
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_CSRMatrixAddSecondPass( HYPRE_Int          firstrow,
@@ -179,7 +207,6 @@ hypre_CSRMatrixAddSecondPass( HYPRE_Int          firstrow,
    HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
    HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
    HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
-   HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
    HYPRE_Int         nnzs_A   = hypre_CSRMatrixNumNonzeros(A);
 
    HYPRE_Int        *B_i      = hypre_CSRMatrixI(B);
@@ -190,23 +217,24 @@ hypre_CSRMatrixAddSecondPass( HYPRE_Int          firstrow,
    HYPRE_Int        *C_i      = hypre_CSRMatrixI(C);
    HYPRE_Int        *C_j      = hypre_CSRMatrixJ(C);
    HYPRE_Complex    *C_data   = hypre_CSRMatrixData(C);
+   HYPRE_Int         ncols_C  = hypre_CSRMatrixNumCols(C);
 
    HYPRE_Int         ia, ib, ic, iic;
    HYPRE_Int         jcol, pos;
 
-   /* hypre_assert(( map_A2C &&  map_B2C) || */
-   /*              (!map_A2C && !map_B2C) || */
-   /*              ( map_A2C && (nnzs_B == 0)) || */
-   /*              ( map_B2C && (nnzs_A == 0))); */
+   hypre_assert(( map_A2C &&  map_B2C) ||
+                (!map_A2C && !map_B2C) ||
+                ( map_A2C && (nnzs_B == 0)) ||
+                ( map_B2C && (nnzs_A == 0)));
 
    /* Initialize marker vector */
-   for (ia = 0; ia < ncols_A; ia++)
+   for (ia = 0; ia < ncols_C; ia++)
    {
       marker[ia] = -1;
    }
 
    pos = C_i[firstrow];
-   if (map_A2C && map_B2C)
+   if ((map_A2C && map_B2C) || ( map_A2C && (nnzs_B == 0)) || ( map_B2C && (nnzs_A == 0)))
    {
       for (ic = firstrow; ic < lastrow; ic++)
       {
