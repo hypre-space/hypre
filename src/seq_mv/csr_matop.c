@@ -180,10 +180,12 @@ hypre_CSRMatrixAddSecondPass( HYPRE_Int          firstrow,
    HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
    HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
    HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int         nnzs_A   = hypre_CSRMatrixNumNonzeros(A);
 
    HYPRE_Int        *B_i      = hypre_CSRMatrixI(B);
    HYPRE_Int        *B_j      = hypre_CSRMatrixJ(B);
    HYPRE_Complex    *B_data   = hypre_CSRMatrixData(B);
+   HYPRE_Int         nnzs_B   = hypre_CSRMatrixNumNonzeros(A);
 
    HYPRE_Int        *C_i      = hypre_CSRMatrixI(C);
    HYPRE_Int        *C_j      = hypre_CSRMatrixJ(C);
@@ -192,7 +194,10 @@ hypre_CSRMatrixAddSecondPass( HYPRE_Int          firstrow,
    HYPRE_Int         ia, ib, ic, iic;
    HYPRE_Int         jcol, pos;
 
-   hypre_assert((map_A2C && map_B2C) || (!map_A2C && !map_B2C));
+   /* hypre_assert(( map_A2C &&  map_B2C) || */
+   /*              (!map_A2C && !map_B2C) || */
+   /*              ( map_A2C && (nnzs_B == 0)) || */
+   /*              ( map_B2C && (nnzs_A == 0))); */
 
    /* Initialize marker vector */
    for (ia = 0; ia < ncols_A; ia++)
@@ -486,9 +491,6 @@ hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
  * Note: The routine does not check for 0-elements which might be generated
  *       through cancellation of elements in A and B or already contained
  *       in A and B. To remove those, use hypre_CSRMatrixDeleteZeros
- *
- * TODO: Add OpenMP support
- *       Use rownnz_A and rownnz_B. Compute rownnz_C
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix *
