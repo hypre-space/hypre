@@ -5198,7 +5198,7 @@ hypre_ParcsrAdd( HYPRE_Complex        alpha,
          ne = (ii+1)*size+rest;
       }
 
-      marker_offd = hypre_TAlloc(HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST);
+      marker_offd = hypre_TAlloc(HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_HOST);
       hypre_CSRMatrixAddFirstPass(ns, ne, marker_offd, A_offd, B_offd,
                                   num_rows_offd_A, num_cols_offd_A, rownnz_offd_C,
                                   memory_location_C, C_offd_i, &C_offd);
