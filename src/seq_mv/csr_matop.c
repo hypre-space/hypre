@@ -28,6 +28,7 @@
  *        4) The mapping arrays map_A2C and map_B2C are used when adding
  *           off-diagonal matrices. They can be set to NULL pointer when
  *           adding diagonal matrices.
+ *        5) Assumes that the elements of C_i are initialized to zero.
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
@@ -66,7 +67,6 @@ hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
    {
       iic = rownnz_C ? rownnz_C[ic] : ic;
 
-      C_i[iic] = num_nonzeros;
       if (map_A2C)
       {
          for (ia = A_i[iic]; ia < A_i[iic+1]; ia++)
@@ -156,7 +156,7 @@ hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
       {
          for (iic = rownnz_C[ic] + 1; iic < rownnz_C[ic+1]; iic++)
          {
-            C_i[iic] = C_i[rownnz_C[ic+1]];
+            C_i[iic+1] = C_i[rownnz_C[ic]+1];
          }
       }
 
@@ -164,7 +164,7 @@ hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
       {
          for (iic = rownnz_C[lastrow-1] + 1; iic < rownnz_C[lastrow]; iic++)
          {
-            C_i[iic] = C_i[rownnz_C[lastrow]];
+            C_i[iic+1] = C_i[rownnz_C[lastrow]+1];
          }
       }
       else
@@ -812,7 +812,7 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
          {
             for (iic = rownnz_A[ic] + 1; iic < rownnz_A[ic+1]; iic++)
             {
-               C_i[iic] = C_i[rownnz_A[ic+1]];
+               C_i[iic+1] = C_i[rownnz_A[ic+1]+1];
             }
          }
 
@@ -820,7 +820,7 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
          {
             for (iic = rownnz_A[ne-1] + 1; iic < rownnz_A[ne]; iic++)
             {
-               C_i[iic] = C_i[rownnz_A[ne]];
+               C_i[iic+1] = C_i[rownnz_A[ne]+1];
             }
          }
          else
