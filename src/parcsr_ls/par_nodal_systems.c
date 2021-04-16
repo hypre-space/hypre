@@ -863,6 +863,7 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
    HYPRE_BigInt        global_num_vars;
    HYPRE_BigInt        global_num_cols;
    HYPRE_BigInt        global_num_nodes;
+   HYPRE_Int           nnz, S_cnt, in;
 
    HYPRE_MemoryLocation memory_locationS = hypre_ParCSRMatrixMemoryLocation(SN);
 
