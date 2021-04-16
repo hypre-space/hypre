@@ -14,7 +14,6 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 #include "par_ilu.h"
-#include <assert.h>
 
 /* Create */
 void *
@@ -2856,7 +2855,6 @@ hypre_ParILUCusparseSchurGMRESMatvec( void   *matvec_data,
    HYPRE_Real              one                  = 1.0;
 
    cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
-   //cusparseMatDescr_t descr = hypre_HandleCusparseMatDescr(hypre_handle());
 
    /* Matvec with
     *         |  O  E_12 E_13|

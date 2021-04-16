@@ -721,7 +721,7 @@ struct ColumnSums
 #define hypre_BasicBoxLoop2Begin hypre_newBasicBoxLoop2Begin
 #endif
 
-#elif defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.

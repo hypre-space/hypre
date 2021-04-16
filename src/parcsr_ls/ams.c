@@ -305,7 +305,7 @@ HYPRE_Int hypre_ParCSRMatrixFixZeroRows(hypre_ParCSRMatrix *A)
  * cf_marker is not NULL.
  *--------------------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 struct l1_norm_op1 : public thrust::binary_function<HYPRE_Complex, HYPRE_Complex, HYPRE_Complex>
 {
    __host__ __device__
@@ -439,7 +439,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       }
 
       /* Truncate according to Remark 6.2 */
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          HYPRE_THRUST_CALL( transform, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm, l1_norm_op1() );
@@ -461,7 +461,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       /* Set the diag element */
       hypre_CSRMatrixExtractDiagonal(A_diag, l1_norm, 0);
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       if ( exec == HYPRE_EXEC_DEVICE)
       {
          thrust::identity<HYPRE_Complex> identity;
@@ -493,7 +493,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
    /* Set the diag element */
    hypre_CSRMatrixExtractDiagonal(A_diag, diag_tmp, 0);
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    if (exec == HYPRE_EXEC_DEVICE)
    {
       HYPRE_THRUST_CALL( transform_if, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm, thrust::negate<HYPRE_Real>(),
@@ -3377,4 +3377,3 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
 
    return hypre_error_flag;
 }
-

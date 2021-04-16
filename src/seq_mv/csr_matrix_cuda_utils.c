@@ -7,6 +7,7 @@
 
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
+#include "seq_mv.hpp"
 
 #if defined(HYPRE_USING_CUSPARSE)
 #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
@@ -37,10 +38,10 @@ hypre_CSRMatrixToCusparseSpMat_core( HYPRE_Int      n,
    cusparseSpMatDescr_t matA;
 
    /*
-   assert( (hypre_CSRMatrixNumRows(A) - offset != 0) &&
-           (hypre_CSRMatrixNumCols(A) != 0) &&
-           (hypre_CSRMatrixNumNonzeros(A) != 0) &&
-           "Matrix has no nonzeros");
+   hypre_assert( (hypre_CSRMatrixNumRows(A) - offset != 0) &&
+                 (hypre_CSRMatrixNumCols(A) != 0) &&
+                 (hypre_CSRMatrixNumNonzeros(A) != 0) &&
+                 "Matrix has no nonzeros");
    */
 
    HYPRE_CUSPARSE_CALL( cusparseCreateCsr(&matA,

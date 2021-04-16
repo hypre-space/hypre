@@ -2435,7 +2435,15 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
-   /* Initialize Hypre */
+   /*-----------------------------------------------------------------
+    * GPU Device binding
+    * Must be done before HYPRE_Init() and should not be changed after
+    *-----------------------------------------------------------------*/
+   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+
+   /*-----------------------------------------------------------
+    * Initialize : must be the first HYPRE function to call
+    *-----------------------------------------------------------*/
    HYPRE_Init();
 
    /*-----------------------------------------------------------
@@ -4970,7 +4978,7 @@ main( hypre_int argc,
 #endif
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPushRange("HybridSolve");
+      hypre_GpuProfilingPushRange("HybridSolve");
 #endif
       //cudaProfilerStart();
 
@@ -5007,7 +5015,7 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridDestroy(par_solver);
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPopRange();
+      hypre_GpuProfilingPopRange();
 #endif
       //cudaProfilerStop();
 

@@ -41,7 +41,6 @@ hypre_CSRMatrix* hypre_CSRMatrixStack2Device(hypre_CSRMatrix *A, hypre_CSRMatrix
 hypre_CSRMatrix* hypre_CSRMatrixIdentityDevice(HYPRE_Int n, HYPRE_Complex alp);
 HYPRE_Int hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A);
 HYPRE_Int hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A, HYPRE_Complex tol, HYPRE_Int abs, HYPRE_Int option);
-void hypre_SortCSRCusparse( HYPRE_Int n, HYPRE_Int m, HYPRE_Int nnzA, const HYPRE_Int *d_ia, HYPRE_Int *d_ja_sorted, HYPRE_Complex *d_a_sorted );
 HYPRE_Int hypre_CSRMatrixSortRow(hypre_CSRMatrix *A);
 HYPRE_Int hypre_CSRMatrixTriLowerUpperSolveCusparse(char uplo, hypre_CSRMatrix *A, hypre_Vector *f, hypre_Vector *u );
 HYPRE_Int hypre_CSRMatrixIntersectPattern(hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int *markA, HYPRE_Int diag_option);
@@ -83,6 +82,7 @@ HYPRE_Int hypre_CSRMatrixMatvecMaskedDevice(HYPRE_Complex alpha, hypre_CSRMatrix
 HYPRE_Int hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int trans, HYPRE_Complex alpha, hypre_CSRMatrix *A, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y, HYPRE_Int offset );
 HYPRE_Int hypre_CSRMatrixMatvecCusparseOldAPI( HYPRE_Int trans, HYPRE_Complex alpha, hypre_CSRMatrix *A, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y, HYPRE_Int offset );
 HYPRE_Int hypre_CSRMatrixMatvecOMPOffload (HYPRE_Int trans, HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *y, HYPRE_Int offset );
+HYPRE_Int hypre_CSRMatrixMatvecRocsparse (HYPRE_Int trans, HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *y, HYPRE_Int offset );
 
 /* genpart.c */
 HYPRE_Int hypre_GeneratePartitioning ( HYPRE_BigInt length , HYPRE_Int num_procs , HYPRE_BigInt **part_ptr );
@@ -188,7 +188,9 @@ HYPRE_Int hypreDevice_CSRSpTrans(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE
 
 HYPRE_Int hypreDevice_CSRSpTransCusparse(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out, HYPRE_Int want_data);
 
-HYPRE_Int hypreDevice_CSRSpGemm(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int nnza, HYPRE_Int nnzb, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out, HYPRE_Int *nnzC);
+HYPRE_Int hypreDevice_CSRSpTransRocsparse(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out, HYPRE_Int want_data);
+
+HYPRE_Int hypreDevice_CSRSpGemm(hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix **C_ptr);
 
 HYPRE_Int hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateMethod( HYPRE_Int value );
 
@@ -212,10 +214,6 @@ HYPRE_Int hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPR
 
 HYPRE_Int hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int nnzB, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out);
 
-HYPRE_Int hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int nnzB, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out);
-
-HYPRE_Int hypreDevice_CSRSpGemmCusparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int nnzB, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out);
-
 HYPRE_Int hypre_SeqVectorElmdivpy( hypre_Vector *x, hypre_Vector *b, hypre_Vector *y );
 
 HYPRE_Int hypre_CSRMatrixSpMVDevice( HYPRE_Complex alpha, hypre_CSRMatrix *A, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y, HYPRE_Int fill );
@@ -223,5 +221,10 @@ HYPRE_Int hypre_CSRMatrixSpMVDevice( HYPRE_Complex alpha, hypre_CSRMatrix *A, hy
 #if defined(HYPRE_USING_CUSPARSE)
 hypre_CsrsvData* hypre_CsrsvDataCreate();
 void hypre_CsrsvDataDestroy(hypre_CsrsvData* data);
+#endif
+
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+void hypre_GpuMatDataCreate(hypre_CSRMatrix  *matrix);
+void hypre_GpuMatDataDestroy(hypre_CSRMatrix  *matrix);
 #endif
 

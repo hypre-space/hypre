@@ -223,6 +223,9 @@
 /* rocSPARSE being used */
 #undef HYPRE_USING_ROCSPARSE
 
+/* Define to 1 if using AMD rocTX profiling */
+#undef HYPRE_USING_ROCTX
+
 /* Define to 1 if using UMPIRE */
 #undef HYPRE_USING_UMPIRE
 

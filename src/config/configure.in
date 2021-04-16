@@ -144,8 +144,8 @@ hypre_using_cuda=no
 hypre_using_gpu=no
 hypre_using_um=no
 hypre_gpu_mpi=no
+hypre_using_gpu_profiling=no
 hypre_using_cuda_streams=no
-hypre_using_nvtx=no
 hypre_using_cusparse=yes
 hypre_using_cublas=no
 hypre_using_curand=yes
@@ -385,17 +385,6 @@ AS_HELP_STRING([--enable-cuda-streams],
 [hypre_using_cuda_streams=yes]
 )
 
-AC_ARG_ENABLE(nvtx,
-AS_HELP_STRING([--enable-nvtx],
-               [Use NVTX (default is NO).]),
-[case "${enableval}" in
-    yes) hypre_using_nvtx=yes ;;
-    no)  hypre_using_nvtx=no ;;
-    *)   hypre_using_nvtx=no ;;
- esac],
-[hypre_using_nvtx=no]
-)
-
 AC_ARG_ENABLE(cusparse,
 AS_HELP_STRING([--enable-cusparse],
                [Use cuSPARSE (default is YES).]),
@@ -475,6 +464,16 @@ AS_HELP_STRING([--enable-rocrand],
 [hypre_using_rocrand=yes]
 )
 
+AC_ARG_ENABLE(gpu-profiling,
+AS_HELP_STRING([--enable-gpu-profiling],
+               [Use NVTX on CUDA, rocTX on HIP (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_gpu_profiling=yes ;;
+    no)  hypre_using_gpu_profiling=no ;;
+    *)   hypre_using_gpu_profiling=no ;;
+ esac],
+[hypre_using_gpu_profiling=no]
+)
 
 AC_ARG_ENABLE(gpu-aware-mpi,
 AS_HELP_STRING([--enable-gpu-aware-mpi],
@@ -1961,7 +1960,7 @@ then
 
    AC_DEFINE(HYPRE_USING_CUSPARSE, 1, [Define to 1 if using cuSPARSE])
 
-   if test "$hypre_using_nvtx" = "yes"
+   if test "$hypre_using_gpu_profiling" = "yes"
    then
       AC_DEFINE(HYPRE_USING_NVTX, 1, [Define to 1 if using NVIDIA Tools Extension (NVTX)])
    fi
@@ -2022,7 +2021,7 @@ then
    LDFLAGS="-ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -Xcompiler \"${LDFLAGS}\""
    HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
    HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64 -lcudart'
-   if test "$hypre_using_nvtx" = "yes"
+   if test "$hypre_using_gpu_profiling" = "yes"
    then
       HYPRE_CUDA_LIBS+=" -lnvToolsExt"
    fi
@@ -2065,18 +2064,22 @@ AS_IF([test x"$hypre_user_chose_hip" == x"yes"],
         LINK_CC=${HIPCC}
         LINK_CXX=${HIPCC}
 
-        dnl At least -O2, but the user can override with CFLAGS/CXXFLAGS on the configure line.
         dnl The "-x hip" is necessary to override the detection of .c files which clang
         dnl interprets as C and therefore invokes the C compiler rather than the HIP part
-        dnl of clang.
-        HIPCXXFLAGS="-O2 -x hip -Wall"
+        dnl of clang. Put HIPCXXFLAGS at the end so the user can override from
+        dnl from the configure line.
+        HIPCXXFLAGS="-x hip ${HIPCXXFLAGS}"
 
+        dnl If not in debug mode, at least -O2, but the user can override with
+        dnl with HIPCXXFLAGS on the configure line. If in debug mode, -O0 -Wall
+        dnl plus flags for debugging symbols
         AS_IF([test x"$hypre_using_debug" == x"yes"],
-              [HIPCXXFLAGS="-g -ggdb ${HIPCXXFLAGS}"])
+              [HIPCXXFLAGS="-O0 -Wall -g -ggdb ${HIPCXXFLAGS}"],
+              [HIPCXXFLAGS="-O2 ${HIPCXXFLAGS}"],)
 
         dnl (Ab)Use CUFLAGS to capture HIP compilation flags
-        dnl Put CXXFLAGS at the end so the user can override the optimization level.
-        CUFLAGS="${HIPCPPFLAGS} ${HIPCXXFLAGS} ${CXXFLAGS}"
+        dnl Put HIPCXXFLAGS at the end so the user can override the optimization level.
+        CUFLAGS="${HIPCPPFLAGS} ${HIPCXXFLAGS}"
 
         dnl rocThrust depends on rocPrim so we need both for Thrust on AMD GPUs.
         dnl These are header-only so no linking needed.
@@ -2089,7 +2092,7 @@ AS_IF([test x"$hypre_user_chose_hip" == x"yes"],
         dnl rocSPARSE, for things like dcsrmv on AMD GPUs
         AS_IF([test x"$hypre_using_rocsparse" == x"yes"],
               [AC_DEFINE(HYPRE_USING_ROCSPARSE, 1, [rocSPARSE being used])
-	       HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lrocsparse"
+               HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lrocsparse"
                HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocsparse/include"
                ])
 
@@ -2106,6 +2109,13 @@ AS_IF([test x"$hypre_user_chose_hip" == x"yes"],
               [AC_DEFINE(HYPRE_USING_ROCRAND, 1, [rocRAND being used])
                HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lrocrand"
                HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocrand/include"
+               ])
+
+        dnl rocTX tracing API
+        AS_IF([test x"$hypre_using_gpu_profiling" == x"yes"],
+              [AC_DEFINE(HYPRE_USING_ROCTX, 1, [Define to 1 if using AMD rocTX profiling])
+               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/roctracer/include"
+               HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lroctx64"
                ])
 
       ]) dnl AS_IF([test x"$hypre_user_chose_hip" == x"yes"]
@@ -2160,7 +2170,7 @@ if test "$hypre_using_device_openmp" = "yes"
 then
    AC_DEFINE(HYPRE_USING_CUSPARSE, 1, [Define to 1 if using cuSPARSE])
 
-   if test "$hypre_using_nvtx" = "yes"
+   if test "$hypre_using_gpu_profiling" = "yes"
    then
       AC_DEFINE(HYPRE_USING_NVTX, 1, [NVTX being used])
    fi
@@ -2194,7 +2204,7 @@ then
 
    HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
    HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64 -lcudart -lcusparse -lcurand'
-   if test "$hypre_using_nvtx" = "yes"
+   if test "$hypre_using_gpu_profiling" = "yes"
    then
       HYPRE_CUDA_LIBS+=" -lnvToolsExt"
    fi
@@ -2239,7 +2249,12 @@ dnl                          LINK_F77="${F77} -brtl"
    FFLAGS="${FFLAGS} ${SHARED_COMPILE_FLAG}"
    CFLAGS="${CFLAGS} ${SHARED_COMPILE_FLAG}"
    CXXFLAGS="${CXXFLAGS} ${SHARED_COMPILE_FLAG}"
-   CUFLAGS="${CUFLAGS} -Xcompiler \"${SHARED_COMPILE_FLAG}\""
+   if [test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes"]; then
+      CUFLAGS="${CUFLAGS} -Xcompiler \"${SHARED_COMPILE_FLAG}\""
+   fi
+   if [test "x$hypre_using_hip" = "xyes"]; then
+      CUFLAGS="${CUFLAGS} ${SHARED_COMPILE_FLAG}"
+   fi
 dnl   BUILD_F77_SHARED="${F77} ${SHARED_BUILD_FLAG}"
    BUILD_FC_SHARED="${FC} ${SHARED_BUILD_FLAG}"
    if test "$hypre_using_fei" = "yes"

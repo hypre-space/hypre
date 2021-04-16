@@ -14,7 +14,7 @@
 #include "_hypre_IJ_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 __global__ void
 hypreCUDAKernel_IJMatrixValues_dev1(HYPRE_Int n, HYPRE_Int *rowind, HYPRE_Int *row_ptr, HYPRE_Int *row_len, HYPRE_Int *mark)
@@ -742,4 +742,3 @@ hypre_IJMatrixSetConstantValuesParCSRDevice( hypre_IJMatrix *matrix,
 }
 
 #endif
-

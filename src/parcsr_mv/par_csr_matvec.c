@@ -227,7 +227,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       HYPRE_Complex *locl_data = x_local_data + jv * vecstride;
 
       /* if on device, no need to Sync: send_data is on device memory */
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       /* pack send data on device */
       HYPRE_THRUST_CALL( gather,
                          hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
@@ -651,7 +651,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       HYPRE_Complex *recv_data = (HYPRE_Complex *) y_buf_data[jv];
       HYPRE_Complex *locl_data = y_local_data + jv * vecstride;
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       /* unpack recv data on device */
       if (!hypre_ParCSRCommPkgWorkSpace(comm_pkg))
       {
