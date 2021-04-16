@@ -88,7 +88,7 @@ hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
 
       if (map_B2C)
       {
-         for (ib = B_i[ic]; ib < B_i[ic+1]; ib++)
+         for (ib = B_i[iic]; ib < B_i[iic+1]; ib++)
          {
             jcol = map_B2C[B_j[ib]];
             if (marker[jcol] != iic)
@@ -100,7 +100,7 @@ hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
       }
       else
       {
-         for (ib = B_i[ic]; ib < B_i[ic+1]; ib++)
+         for (ib = B_i[iic]; ib < B_i[iic+1]; ib++)
          {
             jcol = B_j[ib];
             if (marker[jcol] != iic)
@@ -294,11 +294,13 @@ hypre_CSRMatrixAddSecondPass( HYPRE_Int          firstrow,
             }
             else
             {
+               hypre_assert(C_j[marker[jcol]] == jcol);
                C_data[marker[jcol]] += beta*B_data[ib];
             }
          }
       } /* end for loop */
    }
+   hypre_assert(pos == C_i[lastrow]);
 
    return hypre_error_flag;
 }
