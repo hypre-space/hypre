@@ -934,24 +934,6 @@ hypre_CudaDataCusparseHandle(hypre_CudaData *data)
 
    return handle;
 }
-
-cusparseMatDescr_t
-hypre_CudaDataCusparseMatDescr(hypre_CudaData *data)
-{
-   if (data->cusparse_mat_descr)
-   {
-      return data->cusparse_mat_descr;
-   }
-
-   cusparseMatDescr_t mat_descr;
-   HYPRE_CUSPARSE_CALL( cusparseCreateMatDescr(&mat_descr) );
-   HYPRE_CUSPARSE_CALL( cusparseSetMatType(mat_descr, CUSPARSE_MATRIX_TYPE_GENERAL) );
-   HYPRE_CUSPARSE_CALL( cusparseSetMatIndexBase(mat_descr, CUSPARSE_INDEX_BASE_ZERO) );
-
-   data->cusparse_mat_descr = mat_descr;
-
-   return mat_descr;
-}
 #endif // defined(HYPRE_USING_CUSPARSE)
 
 
@@ -972,40 +954,6 @@ hypre_CudaDataCusparseHandle(hypre_CudaData *data)
    data->cusparse_handle = handle;
 
    return handle;
-}
-
-rocsparse_mat_descr
-hypre_CudaDataCusparseMatDescr(hypre_CudaData *data)
-{
-   if (data->cusparse_mat_descr)
-   {
-      return data->cusparse_mat_descr;
-   }
-
-   rocsparse_mat_descr mat_descr;
-   HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_descr(&mat_descr) );
-   HYPRE_ROCSPARSE_CALL( rocsparse_set_mat_type(mat_descr, rocsparse_matrix_type_general) );
-   HYPRE_ROCSPARSE_CALL( rocsparse_set_mat_index_base(mat_descr, rocsparse_index_base_zero) );
-
-   data->cusparse_mat_descr = mat_descr;
-
-   return mat_descr;
-}
-
-rocsparse_mat_info
-hypre_CudaDataRocsparseMatInfo(hypre_CudaData *data)
-{
-   if (data->rocsparse_mat_info)
-   {
-      return data->rocsparse_mat_info;
-   }
-
-   rocsparse_mat_info info;
-   HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_info(&info) );
-
-   data->rocsparse_mat_info = info;
-
-   return info;
 }
 #endif // defined(HYPRE_USING_ROCSPARSE)
 
@@ -1081,23 +1029,6 @@ hypre_CudaDataDestroy(hypre_CudaData *data)
 #endif
 
    }
-
-   if (data->cusparse_mat_descr)
-   {
-#if defined(HYPRE_USING_CUSPARSE)
-      HYPRE_CUSPARSE_CALL( cusparseDestroyMatDescr(data->cusparse_mat_descr) );
-#elif defined(HYPRE_USING_ROCSPARSE)
-      HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_descr(data->cusparse_mat_descr) );
-#endif
-
-   }
-
-#if defined(HYPRE_USING_ROCSPARSE)
-   if (data->rocsparse_mat_info)
-   {
-     HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_info(data->rocsparse_mat_info) );
-   }
-#endif
 
 #endif // #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
 

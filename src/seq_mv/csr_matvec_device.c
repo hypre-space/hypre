@@ -13,7 +13,7 @@
 
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
-#include "csr_matrix_cuda_utils.h"
+#include "seq_mv.hpp"
 
 #if defined(HYPRE_USING_GPU)
 
@@ -147,7 +147,7 @@ hypre_CSRMatrixMatvecMaskedDevice( HYPRE_Complex    alpha,
    if ( hypre_CSRMatrixNumRows(A) > 0 && hypre_CSRMatrixNumCols(A) > 0 && hypre_CSRMatrixNumNonzeros(A) > 0 )
    {
       cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
-      cusparseMatDescr_t descr = hypre_HandleCusparseMatDescr(hypre_handle());
+      cusparseMatDescr_t descr = hypre_CSRMatrixGPUMatDescr(A);
 
       HYPRE_CUSPARSE_CALL( cusparseDbsrxmv(handle,
                                            CUSPARSE_DIRECTION_ROW,
@@ -265,7 +265,7 @@ hypre_CSRMatrixMatvecCusparseOldAPI( HYPRE_Int        trans,
 #error "ERROR: cusparse old API should not be used when bigint is enabled!"
 #endif
    cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
-   cusparseMatDescr_t descr = hypre_HandleCusparseMatDescr(hypre_handle());
+   cusparseMatDescr_t descr = hypre_CSRMatrixGPUMatDescr(A);
    hypre_CSRMatrix *B;
 
    if (trans)
@@ -328,8 +328,8 @@ hypre_CSRMatrixMatvecRocsparse( HYPRE_Int        trans,
                                 HYPRE_Int        offset )
 {
    rocsparse_handle handle = hypre_HandleCusparseHandle(hypre_handle());
-   rocsparse_mat_descr descr = hypre_HandleCusparseMatDescr(hypre_handle());
-   rocsparse_mat_info info = hypre_HandleRocsparseMatInfo(hypre_handle());
+   rocsparse_mat_descr descr = hypre_CSRMatrixGPUMatDescr(A);
+   rocsparse_mat_info info = hypre_CSRMatrixGPUMatInfo(A);
 
    hypre_CSRMatrix *B;
 
