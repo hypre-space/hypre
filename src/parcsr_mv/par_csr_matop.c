@@ -295,8 +295,8 @@ hypre_ParMatmul_RowSizes( HYPRE_MemoryLocation memory_location,
          {
             for (ii1 = rownnz_A[i1] + 1; ii1 < rownnz_A[i1+1]; ii1++)
             {
-               (*C_diag_i)[ii1] = (*C_diag_i)[rownnz_A[i1+1]];
-               (*C_offd_i)[ii1] = (*C_offd_i)[rownnz_A[i1+1]];
+               (*C_diag_i)[ii1+1] = (*C_diag_i)[rownnz_A[i1+1]+1];
+               (*C_offd_i)[ii1+1] = (*C_offd_i)[rownnz_A[i1+1]+1];
             }
          }
 
@@ -304,8 +304,8 @@ hypre_ParMatmul_RowSizes( HYPRE_MemoryLocation memory_location,
          {
             for (ii1 = rownnz_A[ne-1] + 1; ii1 < rownnz_A[ne]; ii1++)
             {
-               (*C_diag_i)[ii1] = (*C_diag_i)[rownnz_A[ne]];
-               (*C_offd_i)[ii1] = (*C_offd_i)[rownnz_A[ne]];
+               (*C_diag_i)[ii1+1] = (*C_diag_i)[rownnz_A[ne]+1];
+               (*C_offd_i)[ii1+1] = (*C_offd_i)[rownnz_A[ne]+1];
             }
          }
          else
@@ -5093,6 +5093,7 @@ hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
    HYPRE_Int             num_cols_diag_C = num_cols_diag_A;
    HYPRE_Int             num_rows_offd_C = num_rows_offd_A;
    HYPRE_Int             num_cols_offd_C = num_cols_offd_A + num_cols_offd_B;
+   HYPRE_Int             twspace[hypre_NumThreads()];
 
    HYPRE_MemoryLocation  memory_location_A = hypre_ParCSRMatrixMemoryLocation(A);
    HYPRE_MemoryLocation  memory_location_B = hypre_ParCSRMatrixMemoryLocation(B);
@@ -5176,11 +5177,11 @@ hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
       }
 
       marker_diag = hypre_TAlloc(HYPRE_Int, num_cols_diag_A, HYPRE_MEMORY_HOST);
-      hypre_CSRMatrixAddFirstPass(ns, ne, marker_diag,
+      hypre_CSRMatrixAddFirstPass(ns, ne, twspace, marker_diag,
                                   NULL, NULL, A_diag, B_diag,
                                   num_rows_diag_C, num_cols_diag_C, rownnz_diag_C,
                                   memory_location_C, C_diag_i, &C_diag);
-      hypre_CSRMatrixAddSecondPass(ns, ne, marker_diag,
+      hypre_CSRMatrixAddSecondPass(ns, ne, twspace, marker_diag,
                                    NULL, NULL, rownnz_diag_C,
                                    alpha, beta, A_diag, B_diag, C_diag);
       hypre_TFree(marker_diag, HYPRE_MEMORY_HOST);
@@ -5203,11 +5204,11 @@ hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
       }
 
       marker_offd = hypre_TAlloc(HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_HOST);
-      hypre_CSRMatrixAddFirstPass(ns, ne, marker_offd,
+      hypre_CSRMatrixAddFirstPass(ns, ne, twspace, marker_offd,
                                   A2C_offd, B2C_offd, A_offd, B_offd,
                                   num_rows_offd_C, num_cols_offd_C, rownnz_offd_C,
                                   memory_location_C, C_offd_i, &C_offd);
-      hypre_CSRMatrixAddSecondPass(ns, ne, marker_offd,
+      hypre_CSRMatrixAddSecondPass(ns, ne, twspace, marker_offd,
                                    A2C_offd, B2C_offd, rownnz_offd_C,
                                    alpha, beta, A_offd, B_offd, C_offd);
       hypre_TFree(marker_offd, HYPRE_MEMORY_HOST);

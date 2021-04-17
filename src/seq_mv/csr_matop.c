@@ -25,14 +25,17 @@
  * Notes: 1) It can be used safely inside OpenMP parallel regions.
  *        2) firstrow, lastrow and marker are private variables.
  *        3) The remaining arguments are shared variables.
- *        4) The mapping arrays map_A2C and map_B2C are used when adding
+ *        4) twspace (thread workspace) must be allocated outside the
+ *           parallel region.
+ *        5) The mapping arrays map_A2C and map_B2C are used when adding
  *           off-diagonal matrices. They can be set to NULL pointer when
  *           adding diagonal matrices.
- *        5) Assumes that the elements of C_i are initialized to zero.
+ *        6) Assumes that the elements of C_i are initialized to zero.
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
                              HYPRE_Int              lastrow,
+                             HYPRE_Int             *twspace,
                              HYPRE_Int             *marker,
                              HYPRE_Int             *map_A2C,
                              HYPRE_Int             *map_B2C,
@@ -51,7 +54,7 @@ hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
    HYPRE_Int   *B_j = hypre_CSRMatrixJ(B);
 
    HYPRE_Int    i, ia, ib, ic, iic, ii, i1;
-   HYPRE_Int    jcol, jj, jj_count[hypre_NumThreads()];
+   HYPRE_Int    jcol, jj;
    HYPRE_Int    num_threads = hypre_NumActiveThreads();
    HYPRE_Int    num_nonzeros;
 
@@ -112,7 +115,7 @@ hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
       }
       C_i[iic+1] = num_nonzeros;
    }
-   jj_count[ii] = num_nonzeros;
+   twspace[ii] = num_nonzeros;
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
@@ -121,27 +124,27 @@ hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
    /* Correct C_i - phase 1 */
    if (ii)
    {
-      jj = jj_count[0];
+      jj = twspace[0];
       for (i1 = 1; i1 < ii; i1++)
       {
-         jj += jj_count[i1];
+         jj += twspace[i1];
       }
 
       for (ic = firstrow; ic < lastrow; ic++)
       {
          iic = rownnz_C ? rownnz_C[ic] : ic;
-         C_i[iic] += jj;
+         C_i[iic+1] += jj;
       }
    }
    else
    {
-      C_i[nrows_C] = 0;
+      num_nonzeros = 0;
       for (i1 = 0; i1 < num_threads; i1++)
       {
-         C_i[nrows_C] += jj_count[i1];
+         num_nonzeros += twspace[i1];
       }
 
-      *C_ptr = hypre_CSRMatrixCreate(nrows_C, ncols_C, C_i[nrows_C]);
+      *C_ptr = hypre_CSRMatrixCreate(nrows_C, ncols_C, num_nonzeros);
       hypre_CSRMatrixI(*C_ptr) = C_i;
       hypre_CSRMatrixInitialize_v2(*C_ptr, 0, memory_location_C);
    }
@@ -194,6 +197,7 @@ hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
 HYPRE_Int
 hypre_CSRMatrixAddSecondPass( HYPRE_Int          firstrow,
                               HYPRE_Int          lastrow,
+                              HYPRE_Int         *twspace,
                               HYPRE_Int         *marker,
                               HYPRE_Int         *map_A2C,
                               HYPRE_Int         *map_B2C,
@@ -300,7 +304,7 @@ hypre_CSRMatrixAddSecondPass( HYPRE_Int          firstrow,
          }
       } /* end for loop */
    }
-   hypre_assert(pos == C_i[lastrow]);
+   hypre_assert(pos == C_i[rownnz_C ? rownnz_C[lastrow-1] + 1 : lastrow]);
 
    return hypre_error_flag;
 }
@@ -339,6 +343,7 @@ hypre_CSRMatrixAddHost ( hypre_CSRMatrix *A,
    HYPRE_Int        *rownnz_C;
    HYPRE_Int         nnzrows_C;
 
+   HYPRE_Int         twspace[hypre_NumThreads()];
    HYPRE_Complex     alpha = 1.0;
    HYPRE_Complex     beta = 1.0;
 
@@ -402,11 +407,11 @@ hypre_CSRMatrixAddHost ( hypre_CSRMatrix *A,
 
       marker = hypre_CTAlloc(HYPRE_Int, ncols_A, HYPRE_MEMORY_HOST);
 
-      hypre_CSRMatrixAddFirstPass(ns, ne, marker, NULL, NULL, A, B,
-                                  nrows_A, ncols_A, rownnz_C,
+      hypre_CSRMatrixAddFirstPass(ns, ne, twspace, marker, NULL, NULL,
+                                  A, B, nrows_A, ncols_A, rownnz_C,
                                   memory_location_C, C_i, &C);
 
-      hypre_CSRMatrixAddSecondPass(ns, ne, marker, NULL, NULL,
+      hypre_CSRMatrixAddSecondPass(ns, ne, twspace, marker, NULL, NULL,
                                    rownnz_C, alpha, beta, A, B, C);
 
       hypre_TFree(marker, HYPRE_MEMORY_HOST);
@@ -470,6 +475,8 @@ hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
    HYPRE_Int        *C_i;
    HYPRE_BigInt     *C_j;
 
+   HYPRE_Int         twspace[hypre_NumThreads()];
+
    HYPRE_MemoryLocation memory_location_A = hypre_CSRMatrixMemoryLocation(A);
    HYPRE_MemoryLocation memory_location_B = hypre_CSRMatrixMemoryLocation(B);
 
@@ -499,7 +506,7 @@ hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
       HYPRE_Int     ns, ne, pos;
       HYPRE_BigInt  jcol;
       HYPRE_Int     ii, size, rest, num_threads;
-      HYPRE_Int     jj, jj_count[hypre_NumThreads()];
+      HYPRE_Int     jj;
       HYPRE_Int    *marker = NULL;
 
       ii = hypre_GetThreadNum();
@@ -547,7 +554,7 @@ hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
          }
          C_i[ic+1] = num_nonzeros;
       }
-      jj_count[ii] = num_nonzeros;
+      twspace[ii] = num_nonzeros;
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
@@ -556,10 +563,10 @@ hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
       /* Correct row pointer */
       if (ii)
       {
-         jj = jj_count[0];
+         jj = twspace[0];
          for (ic = 1; ic < ii; ic++)
          {
-            jj += jj_count[ia];
+            jj += twspace[ia];
          }
 
          for (ic = ns; ic < ne; ic++)
@@ -572,7 +579,7 @@ hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
          C_i[nrows_A] = 0;
          for (ic = 0; ic < num_threads; ic++)
          {
-            C_i[nrows_A] += jj_count[ic];
+            C_i[nrows_A] += twspace[ic];
          }
 
          C = hypre_CSRMatrixCreate(nrows_A, ncols_A, C_i[nrows_A]);
@@ -664,8 +671,7 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
    HYPRE_Int             counter;
    HYPRE_Complex         a_entry, b_entry;
    HYPRE_Int             allsquare = 0;
-   HYPRE_Int             max_num_threads;
-   HYPRE_Int            *jj_count;
+   HYPRE_Int             twspace[hypre_NumThreads()];
 
    /* RL: TODO cannot guarantee, maybe should never assert
    hypre_assert(memory_location_A == memory_location_B);
@@ -697,9 +703,7 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
       return C;
    }
 
-   max_num_threads = hypre_NumThreads();
    C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1, memory_location_C);
-   jj_count = hypre_CTAlloc(HYPRE_Int, max_num_threads, HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel private(ia, ib, ic, ja, jb, num_nonzeros, counter, a_entry, b_entry)
@@ -766,7 +770,7 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
             }
          }
       }
-      jj_count[ii] = num_nonzeros;
+      twspace[ii] = num_nonzeros;
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
@@ -775,10 +779,10 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
       /* Correct C_i - phase 1 */
       if (ii)
       {
-         jj = jj_count[0];
+         jj = twspace[0];
          for (i1 = 1; i1 < ii; i1++)
          {
-            jj += jj_count[i1];
+            jj += twspace[i1];
          }
 
          for (i1 = ns; i1 < ne; i1++)
@@ -792,7 +796,7 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
          C_i[nrows_A] = 0;
          for (i1 = 0; i1 < num_threads; i1++)
          {
-            C_i[nrows_A] += jj_count[i1];
+            C_i[nrows_A] += twspace[i1];
          }
 
          C = hypre_CSRMatrixCreate(nrows_A, ncols_B, C_i[nrows_A]);
@@ -891,9 +895,6 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
 
    // Set rownnz and num_rownnz
    hypre_CSRMatrixSetRownnz(C);
-
-   // Free memory
-   hypre_TFree(jj_count, HYPRE_MEMORY_HOST);
 
    return C;
 }
