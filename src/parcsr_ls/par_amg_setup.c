@@ -1326,7 +1326,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             {
                hypre_BoomerAMGCreateScalarCFS(SN, A_array[level], CFN_marker, 
                                               num_functions, nodal, keep_same_sign, 
-					      &dof_func,  &CF_marker,
+                                              &dof_func,  &CF_marker,
                                               &S);
                hypre_TFree(CFN_marker, HYPRE_MEMORY_HOST);
                hypre_ParCSRMatrixDestroy(SN);
