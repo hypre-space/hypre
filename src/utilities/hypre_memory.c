@@ -369,7 +369,7 @@ hypre_DeviceFree(void *ptr)
 #endif
 
 #if defined(HYPRE_USING_CUDA)
-#if defined(HYPRE_USING_CUB_ALLOCATOR)
+#if defined(HYPRE_USING_DEVICE_POOL)
    HYPRE_CUDA_CALL( hypre_CachingFreeDevice(ptr) );
 #else
    HYPRE_CUDA_CALL( cudaFree(ptr) );
