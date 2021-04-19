@@ -77,7 +77,7 @@ hypre_PrintBoxArrayData( FILE            *file,
                                 data_box, start, stride, datai);
       {
          /* Print lines of the form: "%d: (%d, %d, %d; %d) %.14e\n" */
-         hypre_BoxLoopGetIndex(index);
+         zypre_BoxLoopGetIndex(index);
          for (j = 0; j < num_values; j++)
          {
             hypre_fprintf(file, "%d: (%d",
@@ -171,10 +171,10 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
       hypre_BoxGetSize(box, loop_size);
 
       hypre_SerialBoxLoop1Begin(dim, loop_size,
-				data_box, start, stride, datai);
+                                data_box, start, stride, datai);
       {
          /* Print line of the form: "%d: (%d, %d, %d; %d) %.14e\n" */
-         hypre_BoxLoopGetIndex(index);
+         zypre_BoxLoopGetIndex(index);
          hypre_fprintf(file, "%d: (%d",
                        i, hypre_IndexD(start, 0) + hypre_IndexD(index, 0));
          for (d = 1; d < dim; d++)

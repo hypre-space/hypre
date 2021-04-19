@@ -8,7 +8,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 __global__ void
 hypreCUDAKernel_InterpTruncation( HYPRE_Int   nrows,
@@ -216,4 +216,4 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
    return ierr;
 }
 
-#endif /* #if defined(HYPRE_USING_CUDA) */
+#endif /* #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */

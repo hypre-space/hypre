@@ -109,9 +109,6 @@
 /* Define to 1 if using long long int for HYPRE_BigInt */
 #undef HYPRE_MIXEDINT
 
-/* No global partitioning being used */
-#undef HYPRE_NO_GLOBAL_PARTITION
-
 /* Print HYPRE errors */
 #undef HYPRE_PRINT_ERRORS
 
@@ -184,6 +181,9 @@
 /* Define to 1 if executing on GPU device */
 #undef HYPRE_USING_GPU
 
+/* HIP being used */
+#undef HYPRE_USING_HIP
+
 /* Define to 1 if using host memory only */
 #undef HYPRE_USING_HOST_MEMORY
 
@@ -195,6 +195,9 @@
 
 /* Define to 1 if executing on host/device with KOKKOS */
 #undef HYPRE_USING_KOKKOS
+
+/* Define to 1 if want to track memory operations in hypre */
+#undef HYPRE_USING_MEMORY_TRACKER
 
 /* Define to 1 if Node Aware MPI library is used */
 #undef HYPRE_USING_NODE_AWARE_MPI
@@ -210,6 +213,18 @@
 
 /* Define to 1 if executing on host/device with RAJA */
 #undef HYPRE_USING_RAJA
+
+/* rocBLAS being used */
+#undef HYPRE_USING_ROCBLAS
+
+/* rocRAND being used */
+#undef HYPRE_USING_ROCRAND
+
+/* rocSPARSE being used */
+#undef HYPRE_USING_ROCSPARSE
+
+/* Define to 1 if using AMD rocTX profiling */
+#undef HYPRE_USING_ROCTX
 
 /* Define to 1 if using UMPIRE */
 #undef HYPRE_USING_UMPIRE

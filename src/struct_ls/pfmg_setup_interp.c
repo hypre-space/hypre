@@ -295,7 +295,7 @@ hypre_PFMGSetupInterpOp_CC0
    HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
    HYPRE_Int              warning_cnt= 0;
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_Int              data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
 #endif
 
@@ -334,7 +334,7 @@ hypre_PFMGSetupInterpOp_CC0
 
       for (si = 0; si < stencil_size; si++)
       {
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          if (data_location != HYPRE_MEMORY_HOST)
          {
             Ap     = matrixA_data + data_indices_boxi_d[si];
@@ -449,7 +449,7 @@ hypre_PFMGSetupInterpOp_CC0
    HYPRE_Int              dim, si, loop_length = 1, Astenc;
    HYPRE_Real            *Ap, *center, *Ap0, *Ap1;
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    //What TODO? HYPRE_Int data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
 #endif
 
@@ -608,12 +608,12 @@ hypre_PFMGSetupInterpOp_CC1
    {
       warning_cnt++;
       Pp0[Pi] = 0.0;
-      Pp1[Pi] = 0.0;  
+      Pp1[Pi] = 0.0;
    }
    else
    {
       Pp0[Pi] /= center;
-      Pp1[Pi] /= center;  
+      Pp1[Pi] /= center;
    }
 
    /*----------------------------------------------
@@ -845,7 +845,7 @@ hypre_PFMGSetupInterpOp_CC0_SS5
 
    /*-----------------------------------------------------------------
     * Extract pointers for 5-point fine grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient
     * a_ce is pointer for east coefficient
@@ -866,7 +866,7 @@ hypre_PFMGSetupInterpOp_CC0_SS5
    a_cs = hypre_StructMatrixExtractPointerByIndex(A, i, index);
 
    hypre_SetIndex3(index,0,1,0);
-   a_cn = hypre_StructMatrixExtractPointerByIndex(A, i, index);   
+   a_cn = hypre_StructMatrixExtractPointerByIndex(A, i, index);
 
 #define DEVICE_VAR is_device_ptr(a_cc,a_cs,a_cn,a_cw,a_ce,Pp0,Pp1,p0,p1)
    hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
@@ -893,7 +893,7 @@ hypre_PFMGSetupInterpOp_CC0_SS5
       {
          //warning_cnt++;
          Pp0[Pi] = 0.0;
-         Pp1[Pi] = 0.0;  
+         Pp1[Pi] = 0.0;
       }
       else
       {
@@ -970,7 +970,7 @@ hypre_PFMGSetupInterpOp_CC0_SS9
    p1 = hypre_StructMatrixExtractPointerByIndex(A, i, P_stencil_shape[1]);
    /*-----------------------------------------------------------------
     * Extract pointers for 5-point grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient
     * a_ce is pointer for east coefficient
@@ -1012,7 +1012,7 @@ hypre_PFMGSetupInterpOp_CC0_SS9
    a_cnw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
 
    hypre_SetIndex3(index, 1, 1, 0);
-   a_cne = hypre_StructMatrixExtractPointerByIndex(A, i, index);   
+   a_cne = hypre_StructMatrixExtractPointerByIndex(A, i, index);
 
 #define DEVICE_VAR is_device_ptr(a_cc,a_cs,a_cn,a_cw,a_csw,a_cnw,a_ce,a_cse,a_cne,Pp0,Pp1,p0,p1)
    hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
@@ -1039,7 +1039,7 @@ hypre_PFMGSetupInterpOp_CC0_SS9
       {
          //warning_cnt++;
          Pp0[Pi] = 0.0;
-         Pp1[Pi] = 0.0;  
+         Pp1[Pi] = 0.0;
       }
       else
       {
@@ -1107,7 +1107,7 @@ hypre_PFMGSetupInterpOp_CC0_SS7
 
    /*-----------------------------------------------------------------
     * Extract pointers for 7-point grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient in same plane
     * a_ce is pointer for east coefficient in same plane
@@ -1167,7 +1167,7 @@ hypre_PFMGSetupInterpOp_CC0_SS7
       if (!center)
       {
          Pp0[Pi] = 0.0;
-         Pp1[Pi] = 0.0;  
+         Pp1[Pi] = 0.0;
       }
       else
       {
@@ -1237,7 +1237,7 @@ hypre_PFMGSetupInterpOp_CC0_SS15
 
    /*-----------------------------------------------------------------
     * Extract pointers for 7-point grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient in same plane
     * a_ce is pointer for east coefficient in same plane
@@ -1357,12 +1357,12 @@ hypre_PFMGSetupInterpOp_CC0_SS15
                break;
             case 1:
                center =  a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] +  a_ac[Ai] +  a_aw[Ai] + a_ae[Ai] +
-                         a_bc[Ai] +  a_bw[Ai] +  a_be[Ai];  
+                         a_bc[Ai] +  a_bw[Ai] +  a_be[Ai];
                left   = -a_cs[Ai] - a_csw[Ai] - a_cse[Ai]; /* front */
                right  = -a_cn[Ai] - a_cnw[Ai] - a_cne[Ai]; /* back */
                break;
             case 2:
-               center =   a_cc[Ai] +  a_cw[Ai] +   a_ce[Ai] +  a_cs[Ai] + a_cn[Ai] + 
+               center =   a_cc[Ai] +  a_cw[Ai] +   a_ce[Ai] +  a_cs[Ai] + a_cn[Ai] +
                          a_csw[Ai] + a_cse[Ai] +  a_cnw[Ai] - a_cne[Ai];
                left   =  -a_bc[Ai] -  a_bw[Ai] -   a_be[Ai]; /* below */
                right  =  -a_ac[Ai] -  a_aw[Ai] -   a_ae[Ai]; /* above */
@@ -1372,7 +1372,7 @@ hypre_PFMGSetupInterpOp_CC0_SS15
          if (!center)
          {
             Pp0[Pi] = 0.0;
-            Pp1[Pi] = 0.0;  
+            Pp1[Pi] = 0.0;
          }
          else
          {
@@ -1393,7 +1393,7 @@ hypre_PFMGSetupInterpOp_CC0_SS15
          {
             Pp0[Pi] = 0.0;
          }
-         if (p1[Ai] == 0.0) 
+         if (p1[Ai] == 0.0)
          {
             Pp1[Pi] = 0.0;
          }
@@ -1417,12 +1417,12 @@ hypre_PFMGSetupInterpOp_CC0_SS15
                right  = -a_ce[Ai] - a_cse[Ai] - a_cne[Ai];
                break;
             case 1:
-               center =  a_cc[Ai] + a_cw[Ai] + a_ce[Ai] +  a_ac[Ai] +  a_bc[Ai];  
+               center =  a_cc[Ai] + a_cw[Ai] + a_ce[Ai] +  a_ac[Ai] +  a_bc[Ai];
                left   = -a_cs[Ai] - a_as[Ai] - a_bs[Ai] - a_csw[Ai] - a_cse[Ai]; /* front */
                right  = -a_cn[Ai] - a_an[Ai] - a_bn[Ai] - a_cnw[Ai] - a_cne[Ai]; /* back */
                break;
             case 2:
-               center =  a_cc[Ai] + a_cw[Ai] + a_ce[Ai] + a_cs[Ai] + a_cn[Ai] + 
+               center =  a_cc[Ai] + a_cw[Ai] + a_ce[Ai] + a_cs[Ai] + a_cn[Ai] +
                          a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai];
                left   = -a_bc[Ai] - a_bs[Ai] - a_bn[Ai]; /* below */
                right  = -a_ac[Ai] - a_as[Ai] - a_an[Ai]; /* above */
@@ -1432,7 +1432,7 @@ hypre_PFMGSetupInterpOp_CC0_SS15
          if (!center)
          {
             Pp0[Pi] = 0.0;
-            Pp1[Pi] = 0.0;  
+            Pp1[Pi] = 0.0;
          }
          else
          {
@@ -1453,7 +1453,7 @@ hypre_PFMGSetupInterpOp_CC0_SS15
          {
             Pp0[Pi] = 0.0;
          }
-         if (p1[Ai] == 0.0) 
+         if (p1[Ai] == 0.0)
          {
             Pp1[Pi] = 0.0;
          }
@@ -1492,7 +1492,7 @@ hypre_PFMGSetupInterpOp_CC0_SS15
          if (!center)
          {
             Pp0[Pi] = 0.0;
-            Pp1[Pi] = 0.0;  
+            Pp1[Pi] = 0.0;
          }
          else
          {
@@ -1513,7 +1513,7 @@ hypre_PFMGSetupInterpOp_CC0_SS15
          {
             Pp0[Pi] = 0.0;
          }
-         if (p1[Ai] == 0.0) 
+         if (p1[Ai] == 0.0)
          {
             Pp1[Pi] = 0.0;
          }
@@ -1561,7 +1561,7 @@ hypre_PFMGSetupInterpOp_CC0_SS19
 
    /*-----------------------------------------------------------------
     * Extract pointers for 7-point grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient in same plane
     * a_ce is pointer for east coefficient in same plane
@@ -1674,7 +1674,7 @@ hypre_PFMGSetupInterpOp_CC0_SS19
       if (!center)
       {
          Pp0[Pi] = 0.0;
-         Pp1[Pi] = 0.0;  
+         Pp1[Pi] = 0.0;
       }
       else
       {
@@ -1746,7 +1746,7 @@ hypre_PFMGSetupInterpOp_CC0_SS27
 
    /*-----------------------------------------------------------------
     * Extract pointers for 7-point grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient in same plane
     * a_ce is pointer for east coefficient in same plane
@@ -1934,4 +1934,3 @@ hypre_PFMGSetupInterpOp_CC0_SS27
 }
 
 #endif
-

@@ -552,7 +552,7 @@ HYPRE_Int HYPRE_CommPkgDestroy(HYPRE_CommPkg comm_pkg);
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 HYPRE_Int
 HYPRE_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_MemoryLocation data_location );
 #endif

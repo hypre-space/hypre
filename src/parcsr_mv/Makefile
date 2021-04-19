@@ -55,7 +55,8 @@ CUFILES =\
  par_csr_matvec.c\
  par_csr_fffc_device.c\
  par_csr_matop_device.c\
- par_csr_triplemat_device.c
+ par_csr_triplemat_device.c\
+ par_vector_device.c
 
 EXTRA_FILES =\
  parchord_to_parcsr.c

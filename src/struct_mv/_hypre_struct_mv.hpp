@@ -696,8 +696,10 @@ struct ColumnSums
 }
 */
 
-#define hypre_newBoxLoopGetIndex(index)\
-  index[0] = hypre_IndexD(local_idx, 0); index[1] = hypre_IndexD(local_idx, 1); index[2] = hypre_IndexD(local_idx, 2);
+#define hypre_BoxLoopGetIndex(index)     \
+  index[0] = hypre_IndexD(local_idx, 0); \
+  index[1] = hypre_IndexD(local_idx, 1); \
+  index[2] = hypre_IndexD(local_idx, 2);
 
 #define hypre_BoxLoopBlock()       0
 #define hypre_BoxLoop0Begin      hypre_newBoxLoop0Begin
@@ -719,7 +721,7 @@ struct ColumnSums
 #define hypre_BasicBoxLoop2Begin hypre_newBasicBoxLoop2Begin
 #endif
 
-#elif defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -766,8 +768,6 @@ typedef struct hypre_Boxloop_struct
   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );                                                                               \
 }
 #endif
-
-/* #define hypre_reduce_policy  cuda_reduce<BLOCKSIZE> */
 
 #ifdef __cplusplus
 extern "C++" {
@@ -1056,8 +1056,8 @@ else                                                            \
         hypre_BoxLoopIncK(2,databox2,i2);                                   \
 
 
-#define hypre_LoopBegin(size,idx)                                    \
-{                                                                    \
+#define hypre_LoopBegin(size,idx)                                                               \
+{                                                                                               \
    BoxLoopforall(hypre_HandleStructExecPolicy(hypre_handle()),size,HYPRE_LAMBDA (HYPRE_Int idx) \
    {
 
@@ -1066,8 +1066,10 @@ else                                                            \
    hypre_fence();       \
 }
 
-#define hypre_newBoxLoopGetIndex(index)                                                                                \
-  index[0] = hypre_IndexD(local_idx, 0); index[1] = hypre_IndexD(local_idx, 1); index[2] = hypre_IndexD(local_idx, 2);
+#define hypre_BoxLoopGetIndex(index)     \
+  index[0] = hypre_IndexD(local_idx, 0); \
+  index[1] = hypre_IndexD(local_idx, 1); \
+  index[2] = hypre_IndexD(local_idx, 2);
 
 #define hypre_BoxLoopBlock()       0
 

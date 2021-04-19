@@ -49,6 +49,11 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
    hypre_CSRMatrixSortedData(matrix) = NULL;
    hypre_CSRMatrixCsrsvData(matrix)  = NULL;
 #endif
+
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+   hypre_GpuMatDataCreate(matrix);
+#endif
+
    return matrix;
 }
 
@@ -77,6 +82,10 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
          hypre_TFree(hypre_CSRMatrixSortedData(matrix), memory_location);
          hypre_TFree(hypre_CSRMatrixSortedJ(matrix), memory_location);
          hypre_CsrsvDataDestroy(hypre_CSRMatrixCsrsvData(matrix));
+#endif
+
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+         hypre_GpuMatDataDestroy(matrix);
 #endif
       }
 

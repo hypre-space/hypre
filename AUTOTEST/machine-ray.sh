@@ -40,8 +40,8 @@ mo="-j test"
 eo=""
 roij="-ij -ams -rt -mpibind -rtol 1e-3 -atol 2e-2"
 ross="-struct -sstruct -rt -mpibind -rtol 1e-6 -atol 1e-6"
-rost="-struct -rt -mpibind -rtol 1e-8 -atol 1e-8"
-rocuda="-cuda_ray -rt -mpibind"
+rost="-struct -rt -mpibind -save cuda"
+rocuda="-cuda_ray -rt -mpibind -save cuda"
 
 # CUDA with UM
 co="--with-cuda --enable-unified-memory --enable-persistent --enable-cub --enable-debug --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"

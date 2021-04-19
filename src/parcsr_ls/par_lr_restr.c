@@ -45,7 +45,6 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
                                    HYPRE_Int            *dof_func,
                                    HYPRE_Real            filter_thresholdR,
                                    HYPRE_Int             debug_flag,
-                                   HYPRE_Int            *col_offd_S_to_A,
                                    hypre_ParCSRMatrix  **R_ptr,
                                    HYPRE_Int             AIR1_5,
                                    HYPRE_Int             is_triangular,
@@ -168,17 +167,12 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    hypre_MPI_Comm_rank(comm, &my_id);
 
    /*-------------- global number of C points and my start position */
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    /*my_first_cpt = num_cpts_global[0];*/
    if (my_id == (num_procs -1))
    {
       total_global_cpts = num_cpts_global[1];
    }
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   /*my_first_cpt = num_cpts_global[my_id];*/
-   total_global_cpts = num_cpts_global[num_procs];
-#endif
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -280,7 +274,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
       /* offd part of row i1 */
       for (j = S_offd_i[i1]; j < S_offd_i[i1+1]; j++)
       {
-         j1 = col_offd_S_to_A ? col_offd_S_to_A[S_offd_j[j]] : S_offd_j[j];
+         j1 = S_offd_j[j];
          if (CF_marker_offd[j1] < 0)
          {
             send_SF_i[i] ++;
@@ -327,7 +321,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
          /* offd part of row j1 */
          for (k = S_offd_i[j1]; k < S_offd_i[j1+1]; k++)
          {
-            k1 = col_offd_S_to_A ? col_offd_S_to_A[S_offd_j[k]] : S_offd_j[k];
+            k1 = S_offd_j[k];
             if (CF_marker_offd[k1] < 0)
             {
                send_SF_j[i1++] = col_map_offd_A[k1];
@@ -459,7 +453,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
             /* go through its offd part */
             for (k = S_offd_i[j1]; k < S_offd_i[j1+1]; k++)
             {
-               k1 = col_offd_S_to_A ? col_offd_S_to_A[S_offd_j[k]] : S_offd_j[k];
+               k1 = S_offd_j[k];
                if (CF_marker_offd[k1] < 0)
                {
                   /* mark F pts */
@@ -479,7 +473,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
        * So, we always check the first marker array */
       for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
       {
-         j1 = col_offd_S_to_A ? col_offd_S_to_A[S_offd_j[j]] : S_offd_j[j];
+         j1 = S_offd_j[j];
          /* offd F pts */
          if (CF_marker_offd[j1] < 0)
          {
@@ -827,7 +821,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
          /* F^2: D1-O2. Open row j1 */
          for (k = S_offd_i[j1]; k < S_offd_i[j1+1]; k++)
          {
-            k1 = col_offd_S_to_A ? col_offd_S_to_A[S_offd_j[k]] : S_offd_j[k];
+            k1 = S_offd_j[k];
 
             if (CF_marker_offd[k1] < 0)
             {
@@ -851,7 +845,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
       /* offd part of row i */
       for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
       {
-         j1 = col_offd_S_to_A ? col_offd_S_to_A[S_offd_j[j]] : S_offd_j[j];
+         j1 = S_offd_j[j];
 
          if (CF_marker_offd[j1] >= 0)
          {
@@ -1061,7 +1055,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
          /* F^2: D1-O2. Open row j1 */
          for (k = S_offd_i[j1]; k < S_offd_i[j1+1]; k++)
          {
-            k1 = col_offd_S_to_A ? col_offd_S_to_A[S_offd_j[k]] : S_offd_j[k];
+            k1 = S_offd_j[k];
 
             if (CF_marker_offd[k1] < 0)
             {
@@ -1089,7 +1083,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
       {
          for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
          {
-            j1 = col_offd_S_to_A ? col_offd_S_to_A[S_offd_j[j]] : S_offd_j[j];
+            j1 = S_offd_j[j];
 
             if (CF_marker_offd[j1] >= 0)
             {
@@ -1676,7 +1670,6 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
                                      HYPRE_Real            strong_thresholdR,
                                      HYPRE_Real            filter_thresholdR,
                                      HYPRE_Int             debug_flag,
-                                     HYPRE_Int            *col_offd_S_to_A,
                                      hypre_ParCSRMatrix  **R_ptr)
 {
    /* HYPRE_Real t0 = hypre_MPI_Wtime(); */
@@ -1716,17 +1709,12 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
    hypre_MPI_Comm_rank(comm, &my_id);
 
    /*-------------- global number of C points and my start position */
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    /*my_first_cpt = num_cpts_global[0];*/
    if (my_id == (num_procs -1))
    {
       total_global_cpts = num_cpts_global[1];
    }
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   /*my_first_cpt = num_cpts_global[my_id];*/
-   total_global_cpts = num_cpts_global[num_procs];
-#endif
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns

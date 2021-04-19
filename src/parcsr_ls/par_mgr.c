@@ -64,7 +64,6 @@ hypre_MGRCreate()
   (mgr_data -> trunc_factor) = 0.0;
   (mgr_data -> max_row_sum) = 0.9;
   (mgr_data -> strong_threshold) = 0.25;
-  (mgr_data -> S_commpkg_switch) = 1.0;
   (mgr_data -> P_max_elmts) = 0;
 
   (mgr_data -> coarse_grid_solver) = NULL;
@@ -902,14 +901,9 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
   // TODO: enable threading
   num_threads = 1;
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
   //my_first_cpt = num_cpts_global[0];
   if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-  //my_first_cpt = num_cpts_global[my_id];
-  total_global_cpts = num_cpts_global[num_procs];
-#endif
 
   /*-------------------------------------------------------------------
   * Get the CF_marker data for the off-processor columns
@@ -1476,14 +1470,9 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
   // TODO: enable threading
   num_threads = 1;
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    //my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   //my_first_cpt = num_cpts_global[my_id];
-   total_global_cpts = num_cpts_global[num_procs];
-#endif
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -2017,7 +2006,7 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
   for (i = 0; i < n_local_fine_grid; i++)
   {
     HYPRE_Int point_type = CF_marker[i];
-    assert(point_type == 1 || point_type == -1);
+    hypre_assert(point_type == 1 || point_type == -1);
     c_marker[i] = point_type;
     f_marker[i] = -point_type;
   }
@@ -2502,14 +2491,9 @@ hypre_MGRBuildInterpApproximateInverseExp(hypre_ParCSRMatrix   *A,
   hypre_MPI_Comm_rank(comm,&my_id);
 //  num_threads = hypre_NumThreads();
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
 //  my_first_cpt = num_cpts_global[0];
   if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-//  my_first_cpt = num_cpts_global[my_id];
-  total_global_cpts = num_cpts_global[num_procs];
-#endif
 
   /*-----------------------------------------------------------------------
    *  First Pass: Determine size of P and fill in fine_to_coarse mapping.
@@ -2786,14 +2770,9 @@ hypre_MGRBuildInterpApproximateInverse(hypre_ParCSRMatrix   *A,
   hypre_MPI_Comm_rank(comm,&my_id);
 //  num_threads = hypre_NumThreads();
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
 //  my_first_cpt = num_cpts_global[0];
   if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-//  my_first_cpt = num_cpts_global[my_id];
-  total_global_cpts = num_cpts_global[num_procs];
-#endif
 
   /*-----------------------------------------------------------------------
    *  First Pass: Determine size of P and fill in fine_to_coarse mapping.
@@ -3134,7 +3113,6 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
                      HYPRE_Int             debug_flag,
                      HYPRE_Real            trunc_factor,
                      HYPRE_Int             max_elmts,
-                     HYPRE_Int            *col_offd_S_to_A,
                      hypre_ParCSRMatrix  **P,
          HYPRE_Int         interp_type,
                      HYPRE_Int             numsweeps)
@@ -3167,7 +3145,7 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
   {
     /* Classical modified interpolation */
     hypre_BoomerAMGBuildInterp(A, CF_marker, S, num_cpts_global,1, NULL,debug_flag,
-                      trunc_factor, max_elmts, col_offd_S_to_A, &P_ptr);
+                      trunc_factor, max_elmts, &P_ptr);
 
     /* Do k steps of Jacobi build W for P = [-W I].
      * Note that BoomerAMGJacobiInterp assumes you have some initial P,
@@ -3197,7 +3175,6 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
                      HYPRE_Int              debug_flag,
                      HYPRE_Real             trunc_factor,
                      HYPRE_Int              max_elmts,
-                     HYPRE_Real             S_commpkg_switch,
                      HYPRE_Real             strong_threshold,
                      HYPRE_Real             max_row_sum,
                      hypre_ParCSRMatrix     **R,
@@ -3208,7 +3185,6 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
   hypre_ParCSRMatrix    *R_ptr = NULL;
   hypre_ParCSRMatrix    *AT = NULL;
   hypre_ParCSRMatrix    *ST = NULL;
-  HYPRE_Int             *col_offd_ST_to_AT = NULL;
   //   HYPRE_Real       jac_trunc_threshold = trunc_factor;
   //   HYPRE_Real       jac_trunc_threshold_minus = 0.5*jac_trunc_threshold;
 
@@ -3222,8 +3198,6 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
     /* Build new strength matrix */
     hypre_BoomerAMGCreateS(AT, strong_threshold, max_row_sum, 1, NULL, &ST);
     /* use appropriate communication package for Strength matrix */
-    if (strong_threshold > S_commpkg_switch)
-      hypre_BoomerAMGCreateSCommPkg(AT, ST, &col_offd_ST_to_AT);
   }
 
   /* Interpolation for each level */
@@ -3248,7 +3222,7 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
   {
     /* Classical modified interpolation */
     hypre_BoomerAMGBuildInterp(AT, CF_marker, ST, num_cpts_global,1, NULL,debug_flag,
-                               trunc_factor, max_elmts, col_offd_ST_to_AT, &R_ptr);
+                               trunc_factor, max_elmts, &R_ptr);
 
     /* Do k steps of Jacobi build W for P = [-W I].
     * Note that BoomerAMGJacobiInterp assumes you have some initial P,
@@ -3272,7 +3246,6 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
   if (restrict_type > 5)
   {
     hypre_ParCSRMatrixDestroy(ST);
-    if (col_offd_ST_to_AT) hypre_TFree(col_offd_ST_to_AT, HYPRE_MEMORY_HOST);
   }
 
   return hypre_error_flag;
@@ -4726,14 +4699,9 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
 
   //hypre_printf("my_id = %d, cpts_this = %d, cpts_next = %d\n", my_id, num_row_cpts_global[0], num_row_cpts_global[1]);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
 //  my_first_row_cpt = num_row_cpts_global[0];
   if (my_id == (num_procs -1)) total_global_row_cpts = num_row_cpts_global[1];
   hypre_MPI_Bcast(&total_global_row_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-//  my_first_row_cpt = num_row_cpts_global[my_id];
-  total_global_row_cpts = num_row_cpts_global[num_procs];
-#endif
 
   /* get the number of coarse rows */
   hypre_BoomerAMGCoarseParms(comm, local_numrows, 1, NULL, col_cf_marker, &coarse_dof_func_ptr, &num_col_cpts_global);
@@ -4742,14 +4710,9 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
 
   //hypre_printf("my_id = %d, cpts_this = %d, cpts_next = %d\n", my_id, num_col_cpts_global[0], num_col_cpts_global[1]);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
 //  my_first_col_cpt = num_col_cpts_global[0];
   if (my_id == (num_procs -1)) total_global_col_cpts = num_col_cpts_global[1];
   hypre_MPI_Bcast(&total_global_col_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-//  my_first_col_cpt = num_col_cpts_global[my_id];
-  total_global_col_cpts = num_col_cpts_global[num_procs];
-#endif
 
   /*-------------------------------------------------------------------
    * Get the CF_marker data for the off-processor columns
@@ -5086,13 +5049,11 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
 
   hypre_GetCommPkgRTFromCommPkgA(Ablock, A, fine_to_coarse, tmp_map_offd);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
   /* Create the assumed partition */
   if (hypre_ParCSRMatrixAssumedPartition(Ablock) == NULL)
   {
     hypre_ParCSRMatrixCreateAssumedPartition(Ablock);
   }
-#endif
 
   *A_block_ptr= Ablock;
 

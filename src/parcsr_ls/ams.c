@@ -305,7 +305,7 @@ HYPRE_Int hypre_ParCSRMatrixFixZeroRows(hypre_ParCSRMatrix *A)
  * cf_marker is not NULL.
  *--------------------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 struct l1_norm_op1 : public thrust::binary_function<HYPRE_Complex, HYPRE_Complex, HYPRE_Complex>
 {
    __host__ __device__
@@ -439,7 +439,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       }
 
       /* Truncate according to Remark 6.2 */
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          HYPRE_THRUST_CALL( transform, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm, l1_norm_op1() );
@@ -461,7 +461,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       /* Set the diag element */
       hypre_CSRMatrixExtractDiagonal(A_diag, l1_norm, 0);
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       if ( exec == HYPRE_EXEC_DEVICE)
       {
          thrust::identity<HYPRE_Complex> identity;
@@ -493,7 +493,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
    /* Set the diag element */
    hypre_CSRMatrixExtractDiagonal(A_diag, diag_tmp, 0);
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    if (exec == HYPRE_EXEC_DEVICE)
    {
       HYPRE_THRUST_CALL( transform_if, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm, thrust::negate<HYPRE_Real>(),
@@ -1192,13 +1192,7 @@ HYPRE_Int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
       HYPRE_Int num_nonzeros_diag = dim*hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(G));
       HYPRE_Int num_nonzeros_offd = dim*hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(G));
       HYPRE_BigInt *col_starts_G = hypre_ParCSRMatrixColStarts(G);
-#ifdef HYPRE_NO_GLOBAL_PARTITION
       col_starts_size = 2;
-#else
-      HYPRE_Int num_procs;
-      hypre_MPI_Comm_size(comm, &num_procs);
-      col_starts_size = num_procs+1;
-#endif
       col_starts = hypre_TAlloc(HYPRE_BigInt, col_starts_size, HYPRE_MEMORY_HOST);
       for (i = 0; i < col_starts_size; i++)
          col_starts[i] = (HYPRE_BigInt)dim * col_starts_G[i];
@@ -1638,13 +1632,7 @@ HYPRE_Int hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
       HYPRE_Int num_nonzeros_diag = dim*hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(G));
       HYPRE_Int num_nonzeros_offd = dim*hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(G));
       HYPRE_BigInt *col_starts_G = hypre_ParCSRMatrixColStarts(G);
-#ifdef HYPRE_NO_GLOBAL_PARTITION
       col_starts_size = 2;
-#else
-      HYPRE_Int num_procs;
-      hypre_MPI_Comm_size(comm, &num_procs);
-      col_starts_size = num_procs+1;
-#endif
       col_starts = hypre_TAlloc(HYPRE_BigInt, col_starts_size, HYPRE_MEMORY_HOST);
       for (i = 0; i < col_starts_size; i++)
          col_starts[i] = (HYPRE_BigInt) dim * col_starts_G[i];
@@ -2901,12 +2889,7 @@ HYPRE_Int hypre_AMSConstructDiscreteGradient(hypre_ParCSRMatrix *A,
       hypre_CSRMatrixNumRownnz(local) = nedges;
 
       /* Copy partitioning from A and x_coord (previously they were re-used) */
-#ifdef HYPRE_NO_GLOBAL_PARTITION
       part_size = 2;
-#else
-      hypre_MPI_Comm_size(hypre_ParCSRMatrixComm(A), &part_size);
-      part_size++;
-#endif
       row_starts = hypre_TAlloc(HYPRE_BigInt, part_size, HYPRE_MEMORY_HOST);
       col_starts = hypre_TAlloc(HYPRE_BigInt, part_size, HYPRE_MEMORY_HOST);
       for (i = 0; i < part_size; i++)
@@ -2994,21 +2977,10 @@ HYPRE_Int hypre_AMSFEISetup(void *solver,
    HYPRE_BigInt big_local_vert = (HYPRE_BigInt) num_local_vert;
 
    /* Find the processor partitioning of the vertices */
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    vert_part = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
    hypre_MPI_Scan(&big_local_vert, &vert_part[1], 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
    vert_part[0] = vert_part[1] - big_local_vert;
    hypre_MPI_Allreduce(&big_local_vert, &num_global_vert, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
-#else
-   HYPRE_Int num_procs;
-   hypre_MPI_Comm_size(comm, &num_procs);
-   vert_part = hypre_TAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
-   hypre_MPI_Allgather(&big_local_vert, 1, HYPRE_MPI_BIG_INT, &vert_part[1], 1, HYPRE_MPI_BIG_INT, comm);
-   vert_part[0] = 0;
-   for (i = 0; i < num_procs; i++)
-      vert_part[i+1] += vert_part[i];
-   num_global_vert = vert_part[num_procs];
-#endif
 
    /* Construct hypre parallel vectors for the vertex coordinates */
    x_coord = hypre_ParVectorCreate(comm, num_global_vert, vert_part);
@@ -3405,4 +3377,3 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
 
    return hypre_error_flag;
 }
-

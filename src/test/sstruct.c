@@ -15,6 +15,7 @@
 #include "HYPRE_struct_ls.h"
 #include "HYPRE_krylov.h"
 #include "_hypre_sstruct_mv.h"
+//#include "_hypre_struct_mv.hpp"
 
 /* begin lobpcg */
 
@@ -133,7 +134,9 @@ typedef struct
    Index                 *graph_index_maps;
    Index                 *graph_index_signs;
    HYPRE_Int             *graph_entries;
+   HYPRE_Int              graph_values_size;
    HYPRE_Real            *graph_values;
+   HYPRE_Real            *d_graph_values;
    HYPRE_Int             *graph_boxsizes;
 
    /* MatrixSetValues */
@@ -209,6 +212,7 @@ typedef struct
    HYPRE_Int        fem_nsparse;  /* number of nonzeros in values_full */
    HYPRE_Int       *fem_sparsity; /* nonzeros in values_full */
    HYPRE_Real      *fem_values;   /* nonzero values in values_full */
+   HYPRE_Real      *d_fem_values;
 
    HYPRE_Int        fem_rhs_true;
    HYPRE_Real      *fem_rhs_values;
@@ -786,6 +790,10 @@ ReadData( char         *filename,
                   hypre_TReAlloc(pdata.graph_entries,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
                pdata.graph_values =
                   hypre_TReAlloc(pdata.graph_values,  HYPRE_Real,  size, HYPRE_MEMORY_HOST);
+               pdata.d_graph_values =
+                  hypre_TReAlloc_v2(pdata.d_graph_values, HYPRE_Real, pdata.graph_values_size,
+                                    HYPRE_Real, size, HYPRE_MEMORY_DEVICE);
+               pdata.graph_values_size = size;
                pdata.graph_boxsizes =
                   hypre_TReAlloc(pdata.graph_boxsizes,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
             }
@@ -1084,10 +1092,11 @@ ReadData( char         *filename,
    {
       HYPRE_Int d;
 
-      data.fem_ivalues_full = hypre_CTAlloc(HYPRE_Int *,  data.fem_nvars, HYPRE_MEMORY_HOST);
-      data.fem_ordering = hypre_CTAlloc(HYPRE_Int,  (1+data.ndim)*data.fem_nvars, HYPRE_MEMORY_HOST);
-      data.fem_sparsity = hypre_CTAlloc(HYPRE_Int,  2*data.fem_nvars*data.fem_nvars, HYPRE_MEMORY_HOST);
-      data.fem_values   = hypre_CTAlloc(HYPRE_Real,  data.fem_nvars*data.fem_nvars, HYPRE_MEMORY_HOST);
+      data.fem_ivalues_full = hypre_CTAlloc(HYPRE_Int *, data.fem_nvars, HYPRE_MEMORY_HOST);
+      data.fem_ordering = hypre_CTAlloc(HYPRE_Int, (1+data.ndim)*data.fem_nvars, HYPRE_MEMORY_HOST);
+      data.fem_sparsity = hypre_CTAlloc(HYPRE_Int, 2*data.fem_nvars*data.fem_nvars, HYPRE_MEMORY_HOST);
+      data.fem_values   = hypre_CTAlloc(HYPRE_Real, data.fem_nvars*data.fem_nvars, HYPRE_MEMORY_HOST);
+      data.d_fem_values = hypre_TAlloc(HYPRE_Real, data.fem_nvars*data.fem_nvars, HYPRE_MEMORY_DEVICE);
 
       for (i = 0; i < data.fem_nvars; i++)
       {
@@ -1852,7 +1861,9 @@ DistributeData( ProblemData   global_data,
          hypre_TFree(pdata.graph_index_maps, HYPRE_MEMORY_HOST);
          hypre_TFree(pdata.graph_index_signs, HYPRE_MEMORY_HOST);
          hypre_TFree(pdata.graph_entries, HYPRE_MEMORY_HOST);
+         pdata.graph_values_size = 0;
          hypre_TFree(pdata.graph_values, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.d_graph_values, HYPRE_MEMORY_DEVICE);
          hypre_TFree(pdata.graph_boxsizes, HYPRE_MEMORY_HOST);
       }
 
@@ -1984,7 +1995,9 @@ DestroyData( ProblemData   data )
          hypre_TFree(pdata.graph_index_maps, HYPRE_MEMORY_HOST);
          hypre_TFree(pdata.graph_index_signs, HYPRE_MEMORY_HOST);
          hypre_TFree(pdata.graph_entries, HYPRE_MEMORY_HOST);
+         pdata.graph_values_size = 0;
          hypre_TFree(pdata.graph_values, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.d_graph_values, HYPRE_MEMORY_DEVICE);
          hypre_TFree(pdata.graph_boxsizes, HYPRE_MEMORY_HOST);
       }
 
@@ -2081,6 +2094,7 @@ DestroyData( ProblemData   data )
       hypre_TFree(data.fem_ordering, HYPRE_MEMORY_HOST);
       hypre_TFree(data.fem_sparsity, HYPRE_MEMORY_HOST);
       hypre_TFree(data.fem_values, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.d_fem_values, HYPRE_MEMORY_DEVICE);
    }
 
    if (data.fem_rhs_true > 0)
@@ -2111,13 +2125,13 @@ DestroyData( ProblemData   data )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-SetCosineVector(   HYPRE_Real  scale,
-                   Index   ilower,
-                   Index   iupper,
-                   HYPRE_Real *values)
+SetCosineVector(HYPRE_Real  scale,
+                Index       ilower,
+                Index       iupper,
+                HYPRE_Real *values)
 {
-   HYPRE_Int    i, j, k;
-   HYPRE_Int    count = 0;
+   HYPRE_Int  i, j, k;
+   HYPRE_Int  count = 0;
 
    for (k = ilower[2]; k <= iupper[2]; k++)
    {
@@ -2130,24 +2144,7 @@ SetCosineVector(   HYPRE_Real  scale,
          }
       }
    }
-   /*
-   hypre_Index loop_size,stride,start;
-   hypre_Box   *dbox;
 
-   dbox = hypre_BoxCreate(3);
-   hypre_BoxSetExtents(dbox,ilower,iupper);
-   hypre_SubtractIndexes(iupper,ilower,3,loop_size);
-   hypre_SetIndex(stride,1);
-   hypre_SetIndex(start,0);
-   ASSERT_MANAGED(values);
-   hypre_BoxLoop1Begin(3,loop_size,dbox,start,stride,count)
-   {
-      hypre_Index id;
-      hypre_newBoxLoopGetIndex(id);
-      values[count] = scale * cos((id[0]+id[1]+id[2])/10.0);
-   }
-   hypre_BoxLoop1End(count)
-   */
    return(0);
 }
 
@@ -2355,7 +2352,10 @@ main( hypre_int argc,
 
    Index                 ilower, iupper;
    Index                 index, to_index;
+
+   HYPRE_Int             values_size;
    HYPRE_Real           *values;
+   HYPRE_Real           *d_values;
 
    HYPRE_Int             num_iterations;
    HYPRE_Real            final_res_norm;
@@ -2420,6 +2420,12 @@ main( hypre_int argc,
 
    /* end lobpcg */
 
+#if defined(HYPRE_USING_GPU)
+   HYPRE_Int spgemm_use_cusparse = 1;
+#endif
+   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
+   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
+
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -2429,13 +2435,16 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
-   /* Initialize Hypre */
-   HYPRE_Init();
+   /*-----------------------------------------------------------------
+    * GPU Device binding
+    * Must be done before HYPRE_Init() and should not be changed after
+    *-----------------------------------------------------------------*/
+   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   //hypre_HandleDefaultExecPolicy(hypre_handle()) = HYPRE_EXEC_DEVICE;
-   //hypre_HandleSpgemmUseCusparse(hypre_handle()) = 1;
-#endif
+   /*-----------------------------------------------------------
+    * Initialize : must be the first HYPRE function to call
+    *-----------------------------------------------------------*/
+   HYPRE_Init();
 
    /*-----------------------------------------------------------
     * Read input file
@@ -2746,7 +2755,8 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-pcgmode") == 0 )
       {
          /* lobpcg: initial guess for inner pcg */
-         arg_index++;      /* 0: zero, otherwise rhs */
+         arg_index++;
+         /* 0: zero, otherwise rhs */
          pcgMode = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-vout") == 0 )
@@ -2755,12 +2765,39 @@ main( hypre_int argc,
          arg_index++;
          printLevel = atoi(argv[arg_index++]);
       }
+#if defined(HYPRE_USING_GPU)
+      else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
+      {
+         arg_index++;
+         default_exec_policy = HYPRE_EXEC_HOST;
+      }
+      else if ( strcmp(argv[arg_index], "-exec_device") == 0 )
+      {
+         arg_index++;
+         default_exec_policy = HYPRE_EXEC_DEVICE;
+      }
+      else if ( strcmp(argv[arg_index], "-mm_cusparse") == 0 )
+      {
+         arg_index++;
+         spgemm_use_cusparse = atoi(argv[arg_index++]);
+      }
+#endif
       else
       {
          arg_index++;
          /*break;*/
       }
    }
+
+   /* default memory location */
+   HYPRE_SetMemoryLocation(memory_location);
+
+   /* default execution policy */
+   HYPRE_SetExecutionPolicy(default_exec_policy);
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_CSRMatrixSetSpGemmUseCusparse(spgemm_use_cusparse);
+#endif
 
    if ( solver_id == 39 && lobpcgFlag )
       solver_id = 10;
@@ -3002,7 +3039,9 @@ main( hypre_int argc,
     * Set up the matrix
     *-----------------------------------------------------------*/
 
-   values = hypre_TAlloc(HYPRE_Real, hypre_max(data.max_boxsize, data.fem_nsparse), HYPRE_MEMORY_DEVICE);
+   values_size = hypre_max(data.max_boxsize, data.fem_nsparse);
+   values   = hypre_TAlloc(HYPRE_Real, values_size, HYPRE_MEMORY_HOST);
+   d_values = hypre_TAlloc(HYPRE_Real, values_size, HYPRE_MEMORY_DEVICE);
 
    HYPRE_SStructMatrixCreate(hypre_MPI_COMM_WORLD, graph, &A);
 
@@ -3039,12 +3078,16 @@ main( hypre_int argc,
                {
                   values[j] = data.stencil_values[s][i];
                }
+
+               hypre_TMemcpy(d_values, values, HYPRE_Real, values_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
                for (box = 0; box < pdata.nboxes; box++)
                {
                   GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
                                  pdata.vartypes[var], ilower, iupper);
+
                   HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
-                                                  var, 1, &i, values);
+                                                  var, 1, &i, d_values);
                }
             }
          }
@@ -3052,6 +3095,9 @@ main( hypre_int argc,
    }
    else if (data.fem_nvars > 0)
    {
+      hypre_TMemcpy(data.d_fem_values, data.fem_values, HYPRE_Real, data.fem_nvars * data.fem_nvars,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
       /* FEMStencilSetRow: add to stencil values */
       for (part = 0; part < data.nparts; part++)
       {
@@ -3068,7 +3114,7 @@ main( hypre_int argc,
                        index[0] <= pdata.iuppers[box][0]; index[0]++)
                   {
                      HYPRE_SStructMatrixAddFEMValues(A, part, index,
-                                                     data.fem_values);
+                                                     data.d_fem_values);
                   }
                }
             }
@@ -3080,6 +3126,10 @@ main( hypre_int argc,
    for (part = 0; part < data.nparts; part++)
    {
       pdata = data.pdata[part];
+
+      hypre_TMemcpy(pdata.d_graph_values, pdata.graph_values, HYPRE_Real, pdata.graph_values_size,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
       for (box = 0; box < pdata.graph_nboxes; box++)
       {
          /*
@@ -3122,7 +3172,7 @@ main( hypre_int argc,
                   HYPRE_SStructMatrixSetValues(A, part, index,
                                                pdata.graph_vars[box],
                                                1, &pdata.graph_entries[box],
-                                               &pdata.graph_values[box]);
+                                               &pdata.d_graph_values[box]);
                }
             }
          }
@@ -3136,22 +3186,25 @@ main( hypre_int argc,
       pdata = data.pdata[part];
       for (box = 0; box < pdata.matset_nboxes; box++)
       {
-         size= 1;
+         size = 1;
          for (j = 0; j < 3; j++)
          {
-            size*= (pdata.matset_iuppers[box][j] -
-                    pdata.matset_ilowers[box][j] + 1);
+            size *= (pdata.matset_iuppers[box][j] -
+                     pdata.matset_ilowers[box][j] + 1);
          }
          for (j = 0; j < size; j++)
          {
             values[j] = pdata.matset_values[box];
          }
+
+         hypre_TMemcpy(d_values, values, HYPRE_Real, values_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
          HYPRE_SStructMatrixSetBoxValues(A, part,
                                          pdata.matset_ilowers[box],
                                          pdata.matset_iuppers[box],
                                          pdata.matset_vars[box],
                                          1, &pdata.matset_entries[box],
-                                         values);
+                                         d_values);
       }
    }
 
@@ -3164,8 +3217,8 @@ main( hypre_int argc,
          size = 1;
          for (j = 0; j < 3; j++)
          {
-            size*= (pdata.matadd_iuppers[box][j] -
-                    pdata.matadd_ilowers[box][j] + 1);
+            size *= (pdata.matadd_iuppers[box][j] -
+                     pdata.matadd_ilowers[box][j] + 1);
          }
 
          for (entry = 0; entry < pdata.matadd_nentries[box]; entry++)
@@ -3175,12 +3228,14 @@ main( hypre_int argc,
                values[j] = pdata.matadd_values[box][entry];
             }
 
+            hypre_TMemcpy(d_values, values, HYPRE_Real, values_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
             HYPRE_SStructMatrixAddToBoxValues(A, part,
                                               pdata.matadd_ilowers[box],
                                               pdata.matadd_iuppers[box],
                                               pdata.matadd_vars[box],
                                               1, &pdata.matadd_entries[box][entry],
-                                              values);
+                                              d_values);
          }
       }
    }
@@ -3207,6 +3262,9 @@ main( hypre_int argc,
                s++;
             }
          }
+
+         hypre_TMemcpy(d_values, values, HYPRE_Real, values_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
          for (index[2] = pdata.fem_matadd_ilowers[box][2];
               index[2] <= pdata.fem_matadd_iuppers[box][2]; index[2]++)
          {
@@ -3216,7 +3274,7 @@ main( hypre_int argc,
                for (index[0] = pdata.fem_matadd_ilowers[box][0];
                     index[0] <= pdata.fem_matadd_iuppers[box][0]; index[0]++)
                {
-                  HYPRE_SStructMatrixAddFEMValues(A, part, index, values);
+                  HYPRE_SStructMatrixAddFEMValues(A, part, index, d_values);
                }
             }
          }
@@ -3261,6 +3319,9 @@ main( hypre_int argc,
          values[j] = 1.0;
       }
    }
+
+   hypre_TMemcpy(d_values, values, HYPRE_Real, values_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
    for (part = 0; part < data.nparts; part++)
    {
       pdata = data.pdata[part];
@@ -3271,7 +3332,7 @@ main( hypre_int argc,
             GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
                            pdata.vartypes[var], ilower, iupper);
             HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper,
-                                            var, values);
+                                            var, d_values);
          }
       }
    }
@@ -3311,8 +3372,8 @@ main( hypre_int argc,
          size = 1;
          for (j = 0; j < 3; j++)
          {
-            size*= (pdata.rhsadd_iuppers[box][j] -
-                    pdata.rhsadd_ilowers[box][j] + 1);
+            size *= (pdata.rhsadd_iuppers[box][j] -
+                     pdata.rhsadd_ilowers[box][j] + 1);
          }
 
          for (j = 0; j < size; j++)
@@ -3320,10 +3381,12 @@ main( hypre_int argc,
             values[j] = pdata.rhsadd_values[box];
          }
 
+         hypre_TMemcpy(d_values, values, HYPRE_Real, values_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
          HYPRE_SStructVectorAddToBoxValues(b, part,
                                            pdata.rhsadd_ilowers[box],
                                            pdata.rhsadd_iuppers[box],
-                                           pdata.rhsadd_vars[box], values);
+                                           pdata.rhsadd_vars[box], d_values);
       }
    }
 
@@ -3380,15 +3443,18 @@ main( hypre_int argc,
             scale = (part+1.0)*(var+1.0);
             for (box = 0; box < pdata.nboxes; box++)
             {
-/*
-  GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
-  pdata.vartypes[var], ilower, iupper);
-*/
+               /*
+                  GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
+                  pdata.vartypes[var], ilower, iupper);
+               */
                GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
                               var, ilower, iupper);
                SetCosineVector(scale, ilower, iupper, values);
+
+               hypre_TMemcpy(d_values, values, HYPRE_Real, values_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
                HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper,
-                                               var, values);
+                                               var, d_values);
             }
          }
       }
@@ -3547,12 +3613,15 @@ main( hypre_int argc,
                {
                   values[j] = stencil_values[i];
                }
+
+               hypre_TMemcpy(d_values, values, HYPRE_Real, values_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
                for (box = 0; box < pdata.nboxes; box++)
                {
                   GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
                                  pdata.vartypes[var], ilower, iupper);
                   HYPRE_SStructMatrixSetBoxValues(G, part, ilower, iupper,
-                                                  var, 1, &i, values);
+                                                  var, 1, &i, d_values);
                }
             }
          }
@@ -3658,7 +3727,8 @@ main( hypre_int argc,
    }
 #endif
 
-   hypre_TFree(values, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(values, HYPRE_MEMORY_HOST);
+   hypre_TFree(d_values, HYPRE_MEMORY_DEVICE);
 
    /*-----------------------------------------------------------
     * Solve the system using SysPFMG or Split
@@ -4906,7 +4976,7 @@ main( hypre_int argc,
 #endif
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPushRange("HybridSolve");
+      hypre_GpuProfilingPushRange("HybridSolve");
 #endif
       //cudaProfilerStart();
 
@@ -4943,7 +5013,7 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridDestroy(par_solver);
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPopRange();
+      hypre_GpuProfilingPopRange();
 #endif
       //cudaProfilerStop();
 

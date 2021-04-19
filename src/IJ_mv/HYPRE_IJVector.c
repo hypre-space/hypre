@@ -29,13 +29,7 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
    HYPRE_Int num_procs, my_id;
    HYPRE_BigInt *partitioning;
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    HYPRE_BigInt  row0, rowN;
-#else
-   HYPRE_BigInt *recv_buf;
-   HYPRE_BigInt *info;
-   HYPRE_Int i, i2;
-#endif
 
    vec = hypre_CTAlloc(hypre_IJVector,  1, HYPRE_MEMORY_HOST);
 
@@ -59,9 +53,6 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
       hypre_error_in_arg(3);
       return hypre_error_flag;
    }
-
-
-#ifdef HYPRE_NO_GLOBAL_PARTITION
 
    partitioning = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
 
@@ -87,48 +78,6 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
 
    hypre_IJVectorGlobalFirstRow(vec) = row0;
    hypre_IJVectorGlobalNumRows(vec) = rowN - row0 + 1;
-
-#else
-
-   info = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   recv_buf = hypre_CTAlloc(HYPRE_BigInt,  2*num_procs, HYPRE_MEMORY_HOST);
-   partitioning = hypre_CTAlloc(HYPRE_BigInt,  num_procs+1, HYPRE_MEMORY_HOST);
-
-   info[0] = jlower;
-   info[1] = jupper;
-
-   hypre_MPI_Allgather(info, 2, HYPRE_MPI_BIG_INT, recv_buf, 2, HYPRE_MPI_BIG_INT, comm);
-
-   partitioning[0] = recv_buf[0];
-   for (i=0; i < num_procs-1; i++)
-   {
-      i2 = i+i;
-      if (recv_buf[i2+1] != (recv_buf[i2+2]-1))
-      {
-         /*hypre_printf("Inconsistent partitioning -- HYPRE_IJVectorCreate\n");  */
-         hypre_error(HYPRE_ERROR_GENERIC);
-         hypre_TFree(info, HYPRE_MEMORY_HOST);
-         hypre_TFree(recv_buf, HYPRE_MEMORY_HOST);
-         hypre_TFree(partitioning, HYPRE_MEMORY_HOST);
-         hypre_TFree(vec, HYPRE_MEMORY_HOST);
-         return hypre_error_flag;
-      }
-      else
-      {
-         partitioning[i+1] = recv_buf[i2+2];
-      }
-   }
-   i2 = (num_procs-1)*2;
-   partitioning[num_procs] = recv_buf[i2+1]+1;
-
-   hypre_TFree(info, HYPRE_MEMORY_HOST);
-   hypre_TFree(recv_buf, HYPRE_MEMORY_HOST);
-
-
-   hypre_IJVectorGlobalFirstRow(vec) = partitioning[0];
-   hypre_IJVectorGlobalNumRows(vec)= partitioning[num_procs]-partitioning[0];
-
-#endif
 
    hypre_IJVectorComm(vec)         = comm;
    hypre_IJVectorPartitioning(vec) = partitioning;
@@ -303,7 +252,7 @@ HYPRE_IJVectorSetValues( HYPRE_IJVector        vector,
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
 
       if (exec == HYPRE_EXEC_DEVICE)
@@ -358,7 +307,7 @@ HYPRE_IJVectorAddToValues( HYPRE_IJVector        vector,
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
 
       if (exec == HYPRE_EXEC_DEVICE)
@@ -396,7 +345,7 @@ HYPRE_IJVectorAssemble( HYPRE_IJVector vector )
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
 
       if (exec == HYPRE_EXEC_DEVICE)
@@ -555,13 +504,8 @@ HYPRE_IJVectorGetLocalRange( HYPRE_IJVector  vector,
    partitioning = hypre_IJVectorPartitioning(vec);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    *jlower = partitioning[0];
    *jupper = partitioning[1]-1;
-#else
-   *jlower = partitioning[my_id];
-   *jupper = partitioning[my_id+1]-1;
-#endif
    return hypre_error_flag;
 }
 
@@ -684,13 +628,8 @@ HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
    }
 
    partitioning = hypre_IJVectorPartitioning(vector);
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    jlower = partitioning[0];
    jupper = partitioning[1] - 1;
-#else
-   jlower = partitioning[myid];
-   jupper = partitioning[myid+1] - 1;
-#endif
    hypre_fprintf(file, "%b %b\n", jlower, jupper);
 
    for (j = jlower; j <= jupper; j++)

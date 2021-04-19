@@ -11,7 +11,7 @@
 #include "seq_mv.h"
 #include "csr_spgemm_device.h"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 template <char HashType, HYPRE_Int attempt>
 static __device__ __forceinline__
@@ -192,11 +192,9 @@ csr_spmm_attempt(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
    __shared__ volatile char s_failed[NUM_WARPS_PER_BLOCK];
    volatile char *warp_s_failed = s_failed + warp_id;
 
-#ifdef HYPRE_DEBUG
-   assert(blockDim.z              == NUM_WARPS_PER_BLOCK);
-   assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
-   assert(NUM_WARPS_PER_BLOCK <= HYPRE_WARP_SIZE);
-#endif
+   hypre_device_assert(blockDim.z              == NUM_WARPS_PER_BLOCK);
+   hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
+   hypre_device_assert(NUM_WARPS_PER_BLOCK <= HYPRE_WARP_SIZE);
 
    for (HYPRE_Int i = blockIdx.x * NUM_WARPS_PER_BLOCK + warp_id;
             i < M;
@@ -250,10 +248,10 @@ csr_spmm_attempt(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
                                                           ghash_size, jg + istart_g, ag + istart_g,
                                                           failed, warp_s_failed);
 
-#ifdef HYPRE_DEBUG
+#if defined(HYPRE_DEBUG)
       if (attempt == 2)
       {
-         assert(failed == 0);
+         hypre_device_assert(failed == 0);
       }
 #endif
 
@@ -358,9 +356,7 @@ copy_from_hash_into_C(HYPRE_Int  M,   HYPRE_Int *js,  HYPRE_Complex *as,
    /* lane id inside the warp */
    volatile const HYPRE_Int lane_id = get_lane_id();
 
-#ifdef HYPRE_DEBUG
-   assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
-#endif
+   hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 
    for (HYPRE_Int i = blockIdx.x * NUM_WARPS_PER_BLOCK + warp_id;
             i < M;
@@ -410,8 +406,8 @@ copy_from_hash_into_C(HYPRE_Int  M,   HYPRE_Int *js,  HYPRE_Complex *as,
          (lane_id, js + i * SHMEM_HASH_SIZE, as + i * SHMEM_HASH_SIZE, g2_size, jg2 + istart_g2,
          ag2 + istart_g2, jc + istart_c, ac + istart_c);
       }
-#ifdef HYPRE_DEBUG
-      assert(istart_c + j == iend_c);
+#if defined(HYPRE_DEBUG)
+      hypre_device_assert(istart_c + j == iend_c);
 #endif
    }
 }
@@ -545,4 +541,4 @@ hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    return hypre_error_flag;
 }
 
-#endif /* HYPRE_USING_CUDA */
+#endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */

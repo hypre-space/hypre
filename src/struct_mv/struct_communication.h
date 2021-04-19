@@ -82,13 +82,16 @@ typedef struct hypre_CommPkg_struct
    MPI_Comm          comm;
 
    HYPRE_Int         first_comm; /* is this the first communication? */
-                   
+
    HYPRE_Int         ndim;
    HYPRE_Int         num_values;
    hypre_Index       send_stride;
    hypre_Index       recv_stride;
-   HYPRE_Int         send_bufsize; /* total send buffer size (in doubles) */
-   HYPRE_Int         recv_bufsize; /* total recv buffer size (in doubles) */
+
+   HYPRE_Int         send_bufsize;            /* total send buffer size (in doubles) */
+   HYPRE_Int         recv_bufsize;            /* total recv buffer size (in doubles) */
+   HYPRE_Int         send_bufsize_first_comm; /* total send buffer size (in doubles) at the first comm. */
+   HYPRE_Int         recv_bufsize_first_comm; /* total recv buffer size (in doubles) at the first comm. */
 
    HYPRE_Int         num_sends;
    HYPRE_Int         num_recvs;
@@ -121,54 +124,55 @@ typedef struct hypre_CommPkg_struct
 
 typedef struct hypre_CommHandle_struct
 {
-   hypre_CommPkg  *comm_pkg;
-   HYPRE_Complex  *send_data;
-   HYPRE_Complex  *recv_data;
+   hypre_CommPkg     *comm_pkg;
+   HYPRE_Complex     *send_data;
+   HYPRE_Complex     *recv_data;
 
-   HYPRE_Int       num_requests;
-   hypre_MPI_Request    *requests;
-   hypre_MPI_Status     *status;
+   HYPRE_Int          num_requests;
+   hypre_MPI_Request *requests;
+   hypre_MPI_Status  *status;
 
-   HYPRE_Complex **send_buffers;
-   HYPRE_Complex **recv_buffers;
+   HYPRE_Complex    **send_buffers;
+   HYPRE_Complex    **recv_buffers;
 
-   HYPRE_Complex      **send_buffers_data;
-   HYPRE_Complex      **recv_buffers_data;
-	
+   /* these are copies of send/recv buffers on device */
+   HYPRE_Complex    **send_buffers_device;
+   HYPRE_Complex    **recv_buffers_device;
+
    /* set = 0, add = 1 */
-   HYPRE_Int       action;
+   HYPRE_Int          action;
 
 } hypre_CommHandle;
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommInto
  *--------------------------------------------------------------------------*/
- 
+
 #define hypre_CommInfoNDim(info)           (info -> ndim)
 #define hypre_CommInfoSendBoxes(info)      (info -> send_boxes)
 #define hypre_CommInfoSendStride(info)     (info -> send_stride)
 #define hypre_CommInfoSendProcesses(info)  (info -> send_processes)
 #define hypre_CommInfoSendRBoxnums(info)   (info -> send_rboxnums)
 #define hypre_CommInfoSendRBoxes(info)     (info -> send_rboxes)
-                                           
+
 #define hypre_CommInfoRecvBoxes(info)      (info -> recv_boxes)
 #define hypre_CommInfoRecvStride(info)     (info -> recv_stride)
 #define hypre_CommInfoRecvProcesses(info)  (info -> recv_processes)
 #define hypre_CommInfoRecvRBoxnums(info)   (info -> recv_rboxnums)
 #define hypre_CommInfoRecvRBoxes(info)     (info -> recv_rboxes)
-                                           
+
 #define hypre_CommInfoNumTransforms(info)  (info -> num_transforms)
 #define hypre_CommInfoCoords(info)         (info -> coords)
 #define hypre_CommInfoDirs(info)           (info -> dirs)
 #define hypre_CommInfoSendTransforms(info) (info -> send_transforms)
 #define hypre_CommInfoRecvTransforms(info) (info -> recv_transforms)
-                                           
+
 #define hypre_CommInfoBoxesMatch(info)     (info -> boxes_match)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommEntryType
  *--------------------------------------------------------------------------*/
- 
+
 #define hypre_CommEntryTypeOffset(entry)       (entry -> offset)
 #define hypre_CommEntryTypeDim(entry)          (entry -> dim)
 #define hypre_CommEntryTypeLengthArray(entry)  (entry -> length_array)
@@ -178,71 +182,73 @@ typedef struct hypre_CommHandle_struct
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommType
  *--------------------------------------------------------------------------*/
- 
+
 #define hypre_CommTypeProc(type)          (type -> proc)
 #define hypre_CommTypeBufsize(type)       (type -> bufsize)
 #define hypre_CommTypeNumEntries(type)    (type -> num_entries)
 #define hypre_CommTypeEntries(type)       (type -> entries)
-#define hypre_CommTypeEntry(type, i)     &(type -> entries[i])
+#define hypre_CommTypeEntry(type, i)    (&(type -> entries[i]))
 
 #define hypre_CommTypeRemBoxnums(type)    (type -> rem_boxnums)
 #define hypre_CommTypeRemBoxnum(type, i)  (type -> rem_boxnums[i])
 #define hypre_CommTypeRemBoxes(type)      (type -> rem_boxes)
-#define hypre_CommTypeRemBox(type, i)    &(type -> rem_boxes[i])
+#define hypre_CommTypeRemBox(type, i)   (&(type -> rem_boxes[i]))
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommPkg
  *--------------------------------------------------------------------------*/
- 
-#define hypre_CommPkgComm(comm_pkg)            (comm_pkg -> comm)
 
-#define hypre_CommPkgFirstComm(comm_pkg)       (comm_pkg -> first_comm)
+#define hypre_CommPkgComm(comm_pkg)                       (comm_pkg -> comm)
 
-#define hypre_CommPkgNDim(comm_pkg)            (comm_pkg -> ndim)
-#define hypre_CommPkgNumValues(comm_pkg)       (comm_pkg -> num_values)
-#define hypre_CommPkgSendStride(comm_pkg)      (comm_pkg -> send_stride)
-#define hypre_CommPkgRecvStride(comm_pkg)      (comm_pkg -> recv_stride)
-#define hypre_CommPkgSendBufsize(comm_pkg)     (comm_pkg -> send_bufsize)
-#define hypre_CommPkgRecvBufsize(comm_pkg)     (comm_pkg -> recv_bufsize)
-                                               
-#define hypre_CommPkgNumSends(comm_pkg)        (comm_pkg -> num_sends)
-#define hypre_CommPkgNumRecvs(comm_pkg)        (comm_pkg -> num_recvs)
-#define hypre_CommPkgSendTypes(comm_pkg)       (comm_pkg -> send_types)
-#define hypre_CommPkgSendType(comm_pkg, i)    &(comm_pkg -> send_types[i])
-#define hypre_CommPkgRecvTypes(comm_pkg)       (comm_pkg -> recv_types)
-#define hypre_CommPkgRecvType(comm_pkg, i)    &(comm_pkg -> recv_types[i])
+#define hypre_CommPkgFirstComm(comm_pkg)                  (comm_pkg -> first_comm)
 
-#define hypre_CommPkgCopyFromType(comm_pkg)    (comm_pkg -> copy_from_type)
-#define hypre_CommPkgCopyToType(comm_pkg)      (comm_pkg -> copy_to_type)
+#define hypre_CommPkgNDim(comm_pkg)                       (comm_pkg -> ndim)
+#define hypre_CommPkgNumValues(comm_pkg)                  (comm_pkg -> num_values)
+#define hypre_CommPkgSendStride(comm_pkg)                 (comm_pkg -> send_stride)
+#define hypre_CommPkgRecvStride(comm_pkg)                 (comm_pkg -> recv_stride)
+#define hypre_CommPkgSendBufsize(comm_pkg)                (comm_pkg -> send_bufsize)
+#define hypre_CommPkgRecvBufsize(comm_pkg)                (comm_pkg -> recv_bufsize)
+#define hypre_CommPkgSendBufsizeFirstComm(comm_pkg)       (comm_pkg -> send_bufsize_first_comm)
+#define hypre_CommPkgRecvBufsizeFirstComm(comm_pkg)       (comm_pkg -> recv_bufsize_first_comm)
 
-#define hypre_CommPkgEntries(comm_pkg)         (comm_pkg -> entries)
-#define hypre_CommPkgRemBoxnums(comm_pkg)      (comm_pkg -> rem_boxnums)
-#define hypre_CommPkgRemBoxes(comm_pkg)        (comm_pkg -> rem_boxes)
+#define hypre_CommPkgNumSends(comm_pkg)                   (comm_pkg -> num_sends)
+#define hypre_CommPkgNumRecvs(comm_pkg)                   (comm_pkg -> num_recvs)
+#define hypre_CommPkgSendTypes(comm_pkg)                  (comm_pkg -> send_types)
+#define hypre_CommPkgSendType(comm_pkg, i)              (&(comm_pkg -> send_types[i]))
+#define hypre_CommPkgRecvTypes(comm_pkg)                  (comm_pkg -> recv_types)
+#define hypre_CommPkgRecvType(comm_pkg, i)              (&(comm_pkg -> recv_types[i]))
 
-#define hypre_CommPkgNumOrders(comm_pkg)       (comm_pkg -> num_orders)
-#define hypre_CommPkgOrders(comm_pkg)          (comm_pkg -> orders)
+#define hypre_CommPkgCopyFromType(comm_pkg)               (comm_pkg -> copy_from_type)
+#define hypre_CommPkgCopyToType(comm_pkg)                 (comm_pkg -> copy_to_type)
 
-#define hypre_CommPkgRecvDataOffsets(comm_pkg) (comm_pkg -> recv_data_offsets)
-#define hypre_CommPkgRecvDataSpace(comm_pkg)   (comm_pkg -> recv_data_space)
+#define hypre_CommPkgEntries(comm_pkg)                    (comm_pkg -> entries)
+#define hypre_CommPkgRemBoxnums(comm_pkg)                 (comm_pkg -> rem_boxnums)
+#define hypre_CommPkgRemBoxes(comm_pkg)                   (comm_pkg -> rem_boxes)
 
-#define hypre_CommPkgIdentityCoord(comm_pkg)   (comm_pkg -> identity_coord)
-#define hypre_CommPkgIdentityDir(comm_pkg)     (comm_pkg -> identity_dir)
-#define hypre_CommPkgIdentityOrder(comm_pkg)   (comm_pkg -> identity_order)
+#define hypre_CommPkgNumOrders(comm_pkg)                  (comm_pkg -> num_orders)
+#define hypre_CommPkgOrders(comm_pkg)                     (comm_pkg -> orders)
+
+#define hypre_CommPkgRecvDataOffsets(comm_pkg)            (comm_pkg -> recv_data_offsets)
+#define hypre_CommPkgRecvDataSpace(comm_pkg)              (comm_pkg -> recv_data_space)
+
+#define hypre_CommPkgIdentityCoord(comm_pkg)              (comm_pkg -> identity_coord)
+#define hypre_CommPkgIdentityDir(comm_pkg)                (comm_pkg -> identity_dir)
+#define hypre_CommPkgIdentityOrder(comm_pkg)              (comm_pkg -> identity_order)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommHandle
  *--------------------------------------------------------------------------*/
- 
-#define hypre_CommHandleCommPkg(comm_handle)     (comm_handle -> comm_pkg)
-#define hypre_CommHandleSendData(comm_handle)    (comm_handle -> send_data)
-#define hypre_CommHandleRecvData(comm_handle)    (comm_handle -> recv_data)
-#define hypre_CommHandleNumRequests(comm_handle) (comm_handle -> num_requests)
-#define hypre_CommHandleRequests(comm_handle)    (comm_handle -> requests)
-#define hypre_CommHandleStatus(comm_handle)      (comm_handle -> status)
-#define hypre_CommHandleSendBuffers(comm_handle) (comm_handle -> send_buffers)
-#define hypre_CommHandleRecvBuffers(comm_handle) (comm_handle -> recv_buffers)
-#define hypre_CommHandleAction(comm_handle)      (comm_handle -> action)
-#define hypre_CommHandleSendBuffersDevice(comm_handle)    (comm_handle -> send_buffers_data)
-#define hypre_CommHandleRecvBuffersDevice(comm_handle)    (comm_handle -> recv_buffers_data)
+
+#define hypre_CommHandleCommPkg(comm_handle)              (comm_handle -> comm_pkg)
+#define hypre_CommHandleSendData(comm_handle)             (comm_handle -> send_data)
+#define hypre_CommHandleRecvData(comm_handle)             (comm_handle -> recv_data)
+#define hypre_CommHandleNumRequests(comm_handle)          (comm_handle -> num_requests)
+#define hypre_CommHandleRequests(comm_handle)             (comm_handle -> requests)
+#define hypre_CommHandleStatus(comm_handle)               (comm_handle -> status)
+#define hypre_CommHandleSendBuffers(comm_handle)          (comm_handle -> send_buffers)
+#define hypre_CommHandleRecvBuffers(comm_handle)          (comm_handle -> recv_buffers)
+#define hypre_CommHandleAction(comm_handle)               (comm_handle -> action)
+#define hypre_CommHandleSendBuffersDevice(comm_handle)    (comm_handle -> send_buffers_device)
+#define hypre_CommHandleRecvBuffersDevice(comm_handle)    (comm_handle -> recv_buffers_device)
 
 #endif

@@ -34,8 +34,6 @@ hypre_MGRSetup( void               *mgr_vdata,
   hypre_ParCSRMatrix  *ST = NULL;
   hypre_ParCSRMatrix  *AT = NULL;
 
-  HYPRE_Int * col_offd_S_to_A = NULL;
-  HYPRE_Int * col_offd_ST_to_AT = NULL;
   HYPRE_Int * dof_func_buff = NULL;
   HYPRE_BigInt * coarse_pnts_global = NULL;
   hypre_Vector       **l1_norms = NULL;
@@ -61,7 +59,6 @@ hypre_MGRSetup( void               *mgr_vdata,
   HYPRE_Real   max_row_sum = (mgr_data -> max_row_sum);
   HYPRE_Real   strong_threshold = (mgr_data -> strong_threshold);
   HYPRE_Real   trunc_factor = (mgr_data -> trunc_factor);
-  HYPRE_Real   S_commpkg_switch = (mgr_data -> S_commpkg_switch);
   HYPRE_Int  old_num_coarse_levels = (mgr_data -> num_coarse_levels);
   HYPRE_Int  max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
   HYPRE_Int * reserved_Cpoint_local_indexes = (mgr_data -> reserved_Cpoint_local_indexes);
@@ -737,10 +734,6 @@ hypre_MGRSetup( void               *mgr_vdata,
     /* Compute strength matrix for interpolation operator - use default parameters, to be modified later */
     hypre_BoomerAMGCreateS(A_array[lev], strong_threshold, max_row_sum, 1, NULL, &S);
 
-    /* use appropriate communication package for Strength matrix */
-    if (strong_threshold > S_commpkg_switch)
-      hypre_BoomerAMGCreateSCommPkg(A_array[lev],S,&col_offd_S_to_A);
-
     /* Coarsen: Build CF_marker array based on rows of A */
                 cflag = ((last_level || setNonCpointToF));
                 hypre_MGRCoarsen(S, A_array[lev], level_coarse_size[lev], level_coarse_indexes[lev],debug_flag, &CF_marker_array[lev], cflag);
@@ -768,14 +761,14 @@ hypre_MGRSetup( void               *mgr_vdata,
     {
       //wall_time = time_getWallclockSeconds();
       hypre_MGRBuildInterp(A_array[lev], CF_marker_array[lev], A_ff_inv, coarse_pnts_global, 1, dof_func_buff,
-                          debug_flag, trunc_factor, max_elmts, col_offd_S_to_A, &P, interp_type[lev], num_interp_sweeps);
+                          debug_flag, trunc_factor, max_elmts, &P, interp_type[lev], num_interp_sweeps);
       //wall_time = time_getWallclockSeconds() - wall_time;
       //hypre_printf("Proc = %d     BuildInterp: %f\n", my_id, wall_time);
     }
     else
     {
       hypre_MGRBuildInterp(A_array[lev], CF_marker_array[lev], S, coarse_pnts_global, 1, dof_func_buff,
-                          debug_flag, trunc_factor, max_elmts, col_offd_S_to_A, &P, interp_type[lev], num_interp_sweeps);
+                          debug_flag, trunc_factor, max_elmts, &P, interp_type[lev], num_interp_sweeps);
     }
 
     P_array[lev] = P;
@@ -797,12 +790,6 @@ hypre_MGRSetup( void               *mgr_vdata,
 
       hypre_BoomerAMGCreateSabs(A_array[lev], strong_threshold, 1.0, 1, NULL, &ST);
 
-      // col_offd_ST_to_AT = NULL;
-      if (strong_threshold > S_commpkg_switch)
-      {
-        hypre_BoomerAMGCreateSCommPkg(A_array[lev], ST, &col_offd_ST_to_AT);
-      }
-
       /* !!! Ensure that CF_marker contains -1 or 1 !!! */
       /*
       for (i = 0; i < hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level])); i++)
@@ -815,7 +802,7 @@ hypre_MGRSetup( void               *mgr_vdata,
         hypre_BoomerAMGBuildRestrAIR(A_array[lev], CF_marker_array[lev],
                           ST, coarse_pnts_global, 1,
                           dof_func_buff, filter_thresholdR,
-                          debug_flag, col_offd_ST_to_AT, &RT,
+                          debug_flag, &RT,
                           is_triangular, gmres_switch);
       }
       else /* distance-1.5 AIR - distance 2 locally and distance 1 across procs. */
@@ -823,7 +810,7 @@ hypre_MGRSetup( void               *mgr_vdata,
         hypre_BoomerAMGBuildRestrDist2AIR(A_array[lev], CF_marker_array[lev],
                             ST, coarse_pnts_global, 1,
                             dof_func_buff, debug_flag, filter_thresholdR,
-                            col_offd_ST_to_AT, &RT,
+                            &RT,
                             1, is_triangular, gmres_switch );
       }
 
@@ -850,7 +837,7 @@ hypre_MGRSetup( void               *mgr_vdata,
     else
     {
       hypre_MGRBuildRestrict(A_array[lev], CF_marker_array[lev], coarse_pnts_global, 1, dof_func_buff,
-            debug_flag, trunc_factor, max_elmts, S_commpkg_switch, strong_threshold, max_row_sum, &RT,
+            debug_flag, trunc_factor, max_elmts, strong_threshold, max_row_sum, &RT,
             restrict_type[lev], num_restrict_sweeps);
 
       RT_array[lev] = RT;
@@ -1017,8 +1004,6 @@ hypre_MGRSetup( void               *mgr_vdata,
     /* free memory before starting next level */
     hypre_ParCSRMatrixDestroy(S);
     S = NULL;
-    hypre_TFree(col_offd_S_to_A, HYPRE_MEMORY_HOST);
-    col_offd_S_to_A = NULL;
 
     if (!use_air)
     {
@@ -1027,8 +1012,6 @@ hypre_MGRSetup( void               *mgr_vdata,
     }
     hypre_ParCSRMatrixDestroy(ST);
     ST = NULL;
-    hypre_TFree(col_offd_ST_to_AT, HYPRE_MEMORY_HOST);
-    col_offd_ST_to_AT = NULL;
 
     /* check if Vcycle smoother setup required */
     if((mgr_data -> max_local_lvls) > 1)
@@ -1236,7 +1219,6 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
 
   HYPRE_BigInt *coarse_pnts_global_lvl = NULL;
   HYPRE_Int *coarse_dof_func_lvl = NULL;
-  HYPRE_Int *col_offd_S_to_A = NULL;
   HYPRE_Int            *dof_func = NULL;
 
   hypre_ParCSRMatrix *RAP_local = NULL;
@@ -1250,7 +1232,6 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
   HYPRE_Int       measure_type = 0;
   HYPRE_Real      strong_threshold = 0.25;
   HYPRE_Real      max_row_sum = 0.9;
-  //HYPRE_Real      S_commpkg_switch = hypre_ParAMGDataSCommPkgSwitch(FrelaxVcycleData[lev]);
 
   HYPRE_Int       old_num_levels = hypre_ParAMGDataNumLevels(FrelaxVcycleData[lev]);
   HYPRE_Int            **CF_marker_array_local = (FrelaxVcycleData[lev] -> CF_marker_array);
@@ -1393,10 +1374,6 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
                    dof_func_array[lev_local], &S_local);
     }
 
-    /*
-    if (strong_threshold > S_commpkg_switch)
-      hypre_BoomerAMGCreateSCommPkg(A_array_local[lev_local],S_local,&col_offd_S_to_A);
-    */
     HYPRE_Int coarsen_cut_factor = 0;
     hypre_BoomerAMGCoarsenHMIS(S_local, A_array_local[lev_local], measure_type, coarsen_cut_factor, debug_flag, &CF_marker_local);
     //hypre_BoomerAMGCoarsen(S_local, A_array_local[lev_local], 0, 0, &CF_marker_local);
@@ -1406,19 +1383,14 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
                         num_functions, dof_func_array[lev_local], CF_marker_local,
                         &coarse_dof_func_lvl, &coarse_pnts_global_lvl);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
     if (my_id == (num_procs -1)) coarse_size = coarse_pnts_global_lvl[1];
       hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-    coarse_size = coarse_pnts_global_lvl[num_procs];
-#endif
     //hypre_printf("Coarse size = %d \n", coarse_size);
     if (coarse_size == 0) // stop coarsening
     {
       if (S_local) hypre_ParCSRMatrixDestroy(S_local);
       hypre_TFree(coarse_pnts_global_lvl, HYPRE_MEMORY_HOST);
       hypre_TFree(coarse_dof_func_lvl, HYPRE_MEMORY_HOST);
-      hypre_TFree(col_offd_S_to_A, HYPRE_MEMORY_HOST);
 
       if (lev_local == 0)
       {
@@ -1454,7 +1426,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
 
     hypre_BoomerAMGBuildExtPIInterp(A_array_local[lev_local], CF_marker_local,
                         S_local, coarse_pnts_global_lvl, num_functions, dof_func_array[lev_local],
-                        debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P_local);
+                        debug_flag, trunc_factor, P_max_elmts, &P_local);
 
 //    hypre_BoomerAMGBuildInterp(A_array_local[lev_local], CF_marker_local,
 //                                   S_local, coarse_pnts_global_lvl, 1, NULL,
@@ -1504,12 +1476,8 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
     hypre_BoomerAMGBuildCoarseOperatorKT(P_local, A_array_local[lev_local],
                                     P_local, 0, &RAP_local);
 /*
-#ifdef HYPRE_NO_GLOBAL_PARTITION
     if (my_id == (num_procs -1)) coarse_size = coarse_pnts_global_lvl[1];
     hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-    coarse_size = coarse_pnts_global_lvl[num_procs];
-#endif
 */
     lev_local++;
 

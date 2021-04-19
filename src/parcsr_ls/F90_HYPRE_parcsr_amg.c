@@ -378,24 +378,6 @@ hypre_F90_IFACE(hypre_boomeramgsetpostinterp, HYPRE_BOOMERAMGSETPOSTINTERP)
 
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetSCommPkgSwitch
- *--------------------------------------------------------------------------*/
-
-void
-hypre_F90_IFACE(hypre_boomeramgsetscommpkgswitc, HYPRE_BOOMERAMGSETSCOMMPKGSWITC)
-   ( hypre_F90_Obj *solver,
-     hypre_F90_Real *S_commpkg_switch,
-     hypre_F90_Int *ierr         )
-
-
-{
-   *ierr = (hypre_F90_Int)
-      ( HYPRE_BoomerAMGSetSCommPkgSwitch(
-           hypre_F90_PassObj (HYPRE_Solver, solver),
-           hypre_F90_PassReal (S_commpkg_switch) ) );
-}
-
-/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetInterpType
  *--------------------------------------------------------------------------*/
 

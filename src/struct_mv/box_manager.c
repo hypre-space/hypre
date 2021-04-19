@@ -573,7 +573,7 @@ hypre_BoxManDestroy( hypre_BoxManager *manager )
 
       hypre_TFree(hypre_BoxManEntries(manager), HYPRE_MEMORY_HOST);
 
-      hypre_Free((char *)hypre_BoxManInfoObjects(manager), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_BoxManInfoObjects(manager), HYPRE_MEMORY_HOST);
       
       hypre_TFree(hypre_BoxManIndexTable(manager), HYPRE_MEMORY_HOST);
       
@@ -1217,11 +1217,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
       /* if AP, use AP to find out who owns the data we need.  In the non-AP,
          then just gather everything for now. */
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
       non_ap_gather = 0;
-#else      
-      non_ap_gather = 1;
-#endif
 
       /* Goal: Gather entries from the relevant processor and add to the entries
        * array.  Also add proc and id to the procs_sort and ids_sort arrays. */
@@ -2109,7 +2105,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
                
             }
             hypre_TFree(entries, HYPRE_MEMORY_HOST);
-            hypre_Free((char*)hypre_BoxManInfoObjects(manager), HYPRE_MEMORY_HOST);
+            hypre_TFree(hypre_BoxManInfoObjects(manager), HYPRE_MEMORY_HOST);
 
             hypre_BoxManEntries(manager) = new_entries;
             hypre_BoxManMaxNEntries(manager) = size;
@@ -2186,7 +2182,6 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
 
    }/* end bracket for all or the sorting stuff */
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    {
       /* for the assumed partition case, we can check to see if all the global
          information is known (is a gather has been done) - this could prevent
@@ -2210,8 +2205,6 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
       }
    }
    
-#endif
-
    /*------------------------------INDEX TABLE ---------------------------*/
 
    /* now build the index_table and indexes array */

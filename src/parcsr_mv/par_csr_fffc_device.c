@@ -9,7 +9,7 @@
 #include "_hypre_parcsr_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 typedef thrust::tuple<HYPRE_Int, HYPRE_Int> Tuple;
 //typedef thrust::tuple<HYPRE_Int, HYPRE_Int, HYPRe_Int> Tuple3;
@@ -250,7 +250,6 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    n_local    = hypre_ParCSRMatrixNumRows(A);
    row_starts = hypre_ParCSRMatrixRowStarts(A);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    if (my_id == (num_procs -1))
    {
       nC_global = cpts_starts[1];
@@ -262,17 +261,6 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    fpts_starts[1] = row_starts[1] - cpts_starts[1];
    F_first = fpts_starts[0];
    C_first = cpts_starts[0];
-#else
-   nC_global = cpts_starts[num_procs];
-   nC_local = (HYPRE_Int)(cpts_starts[my_id+1] - cpts_starts[my_id]);
-   fpts_starts = hypre_TAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
-   for (i = 0; i <= num_procs; i++)
-   {
-      fpts_starts[i] = row_starts[i] - cpts_starts[i];
-   }
-   F_first = fpts_starts[myid];
-   C_first = cpts_starts[myid];
-#endif
    nF_local = n_local - nC_local;
    nF_global = hypre_ParCSRMatrixGlobalNumRows(A) - nC_global;
 
@@ -292,7 +280,6 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
       HYPRE_BigInt nF2_local_big = nF2_local;
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
       f2pts_starts = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
       hypre_MPI_Scan(&nF2_local_big, f2pts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
       f2pts_starts[0] = f2pts_starts[1] - nF2_local_big;
@@ -301,16 +288,6 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
          nF2_global = f2pts_starts[1];
       }
       hypre_MPI_Bcast(&nF2_global, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-      f2pts_starts = hypre_TAlloc(HYPRE_BigInt, num_procs + 1, HYPRE_MEMORY_HOST);
-      hypre_MPI_Allgather(&nF2_local_big, 1, HYPRE_MPI_BIG_INT, f2pts_starts + 1, 1, HYPRE_MPI_BIG_INT, comm);
-      f2pts_starts[0] = 0;
-      for (i = 2; i < num_procs + 1; i++)
-      {
-         f2pts_starts[i] += f2pts_starts[i-1];
-      }
-      nF2_global = f2pts_starts[num_procs];
-#endif
    }
 
    /* map from all points (i.e, F+C) to F/C indices */
@@ -1071,7 +1048,6 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
       hypre_ParCSRMatrixDeviceColMapOffd(A) = col_map_offd_A;
    }
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    if (my_id == (num_procs -1))
    {
       nC_global = cpts_starts[1];
@@ -1083,17 +1059,6 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
    fpts_starts[1] = row_starts[1] - cpts_starts[1];
    F_first = fpts_starts[0];
    C_first = cpts_starts[0];
-#else
-   nC_global = cpts_starts[num_procs];
-   nC_local = (HYPRE_Int)(cpts_starts[my_id+1] - cpts_starts[my_id]);
-   fpts_starts = hypre_TAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
-   for (i = 0; i <= num_procs; i++)
-   {
-      fpts_starts[i] = row_starts[i] - cpts_starts[i];
-   }
-   F_first = fpts_starts[myid];
-   C_first = cpts_starts[myid];
-#endif
    /*
    nF_local = n_local - nC_local;
    nF_global = hypre_ParCSRMatrixGlobalNumRows(A) - nC_global;
@@ -1441,5 +1406,4 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
    return hypre_error_flag;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA)
-
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)

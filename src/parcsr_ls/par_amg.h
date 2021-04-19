@@ -91,6 +91,7 @@ typedef struct
    HYPRE_Int      nodal;
    HYPRE_Int      nodal_levels;
    HYPRE_Int      nodal_diag;
+   HYPRE_Int      keep_same_sign;
    HYPRE_Int      num_points;
    HYPRE_Int     *dof_func;
    HYPRE_Int     *dof_point;
@@ -337,6 +338,7 @@ typedef struct
 #define hypre_ParAMGDataNodal(amg_data) ((amg_data)->nodal)
 #define hypre_ParAMGDataNodalLevels(amg_data) ((amg_data)->nodal_levels)
 #define hypre_ParAMGDataNodalDiag(amg_data) ((amg_data)->nodal_diag)
+#define hypre_ParAMGDataKeepSameSign(amg_data) ((amg_data)->keep_same_sign)
 #define hypre_ParAMGDataNumPoints(amg_data) ((amg_data)->num_points)
 #define hypre_ParAMGDataDofFunc(amg_data) ((amg_data)->dof_func)
 #define hypre_ParAMGDataDofPoint(amg_data) ((amg_data)->dof_point)

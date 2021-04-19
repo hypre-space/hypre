@@ -1,0 +1,27 @@
+# Output file: nonmixedint.out.0
+Iterations = 7
+Final Relative Residual Norm = 2.672054e-07
+
+# Output file: nonmixedint.out.1
+Iterations = 25
+Final Relative Residual Norm = 9.124482e-07
+
+# Output file: nonmixedint.out.2
+Iterations = 7
+Final Relative Residual Norm = 3.319145e-07
+
+# Output file: nonmixedint.out.3
+Iterations = 31
+Final Relative Residual Norm = 7.336388e-07
+
+# Output file: nonmixedint.out.4
+Iterations = 15
+Final Relative Residual Norm = 6.369593e-07
+
+# Output file: nonmixedint.out.5
+Iterations = 17
+Final Relative Residual Norm = 6.043891e-07
+
+# Output file: nonmixedint.out.6
+Iterations = 8
+Final Relative Residual Norm = 7.771825e-07
