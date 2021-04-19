@@ -609,7 +609,7 @@ hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
          C = hypre_CSRMatrixCreate(nrows_A, ncols_A, C_i[nrows_A]);
          hypre_CSRMatrixI(C) = C_i;
          hypre_CSRMatrixInitialize_v2(C, 0, memory_location_C);
-         C_j = hypre_CSRMatrixJ(C);
+         C_j = hypre_CSRMatrixBigJ(C);
          C_data = hypre_CSRMatrixData(C);
       }
 
