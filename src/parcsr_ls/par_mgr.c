@@ -2744,14 +2744,15 @@ hypre_MGRBuildInterpApproximateInverse(hypre_ParCSRMatrix   *A,
 
   // Get A_FF
   hypre_MGRGetSubBlock(A, F_marker, F_marker, 0, &A_ff);
+//  hypre_ParCSRMatrixPrintIJ(A_ff, 1, 1, "A_ff");
   // Get A_FC
   hypre_MGRGetSubBlock(A, F_marker, C_marker, 0, &A_fc);
 
   hypre_MGRApproximateInverse(A_ff, &A_ff_inv);
-  hypre_ParCSRMatrixPrintIJ(A_ff_inv, 1, 1, "A_ff_inv");
-  hypre_ParCSRMatrixPrintIJ(A_fc, 1, 1, "A_fc");
+//  hypre_ParCSRMatrixPrintIJ(A_ff_inv, 1, 1, "A_ff_inv");
+//  hypre_ParCSRMatrixPrintIJ(A_fc, 1, 1, "A_fc");
   minus_Wp = hypre_ParMatmul(A_ff_inv, A_fc);
-  hypre_ParCSRMatrixPrintIJ(minus_Wp, 1, 1, "Wp");
+//  hypre_ParCSRMatrixPrintIJ(minus_Wp, 1, 1, "Wp");
 
   hypre_CSRMatrix *minus_Wp_diag = hypre_ParCSRMatrixDiag(minus_Wp);
   HYPRE_Real      *minus_Wp_diag_data = hypre_CSRMatrixData(minus_Wp_diag);
@@ -3117,19 +3118,25 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
          HYPRE_Int         interp_type,
                      HYPRE_Int             numsweeps)
 {
-  //HYPRE_Int i;
+  HYPRE_Int i;
   hypre_ParCSRMatrix    *P_ptr = NULL;
-  //HYPRE_Real       jac_trunc_threshold = trunc_factor;
-  //HYPRE_Real       jac_trunc_threshold_minus = 0.5*jac_trunc_threshold;
+  HYPRE_Real       jac_trunc_threshold = trunc_factor;
+  HYPRE_Real       jac_trunc_threshold_minus = 0.5*jac_trunc_threshold;
 
   /* Interpolation for each level */
   if (interp_type <3)
   {
     hypre_MGRBuildP( A,CF_marker,num_cpts_global,interp_type,debug_flag,&P_ptr);
-    /* Could do a few sweeps of Jacobi to further improve P */
-    //for(i=0; i<numsweeps; i++)
-    //  hypre_BoomerAMGJacobiInterp(A, &P_ptr, S,1, NULL, CF_marker, 0, jac_trunc_threshold, jac_trunc_threshold_minus );
-    //hypre_BoomerAMGInterpTruncation(P_ptr, trunc_factor, max_elmts);
+    
+    /* Could do a few sweeps of Jacobi to further improve Jacobi interpolation P */
+    if(interp_type == 2)
+    {
+       for(i=0; i<numsweeps; i++)
+       {
+         hypre_BoomerAMGJacobiInterp(A, &P_ptr, S,1, NULL, CF_marker, 0, jac_trunc_threshold, jac_trunc_threshold_minus );
+       }
+       hypre_BoomerAMGInterpTruncation(P_ptr, trunc_factor, max_elmts);
+    }
   }
   else if (interp_type == 4)
   {
@@ -3146,17 +3153,6 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
     /* Classical modified interpolation */
     hypre_BoomerAMGBuildInterp(A, CF_marker, S, num_cpts_global,1, NULL,debug_flag,
                       trunc_factor, max_elmts, &P_ptr);
-
-    /* Do k steps of Jacobi build W for P = [-W I].
-     * Note that BoomerAMGJacobiInterp assumes you have some initial P,
-     * hence we need to initialize P as above, before calling this routine.
-     * If numsweeps = 0, the following step is skipped and P is returned as is.
-     * Looping here is equivalent to improving P by Jacobi interpolation
-    */
-    //for(i=0; i<numsweeps; i++)
-    //  hypre_BoomerAMGJacobiInterp(A, &P_ptr, S,1, NULL, CF_marker,
-    //                                 0, jac_trunc_threshold,
-    //                                 jac_trunc_threshold_minus );
   }
 
   /* set pointer to P */
@@ -3193,14 +3189,8 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
   {
     hypre_ParCSRMatrixTranspose(A, &AT, 1);
   }
-  if (restrict_type > 5)
-  {
-    /* Build new strength matrix */
-    hypre_BoomerAMGCreateS(AT, strong_threshold, max_row_sum, 1, NULL, &ST);
-    /* use appropriate communication package for Strength matrix */
-  }
 
-  /* Interpolation for each level */
+  /* Restriction for each level */
   if (restrict_type == 0)
   {
     hypre_MGRBuildP(A, CF_marker, num_cpts_global, restrict_type, debug_flag, &R_ptr);
@@ -3208,31 +3198,20 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
   else if (restrict_type == 1 || restrict_type == 2)
   {
     hypre_MGRBuildP(AT, CF_marker, num_cpts_global, restrict_type, debug_flag, &R_ptr);
-    /* Could do a few sweeps of Jacobi to further improve P */
-    //for(i=0; i<numsweeps; i++)
-      //    hypre_BoomerAMGJacobiInterp(A, &R_ptr, S,1, NULL, CF_marker, 0, jac_trunc_threshold, jac_trunc_threshold_minus );
-    //hypre_BoomerAMGInterpTruncation(R_ptr, trunc_factor, max_elmts);
   }
-  else if (restrict_type == 4)
+  else if (restrict_type == 3)
   {
-    hypre_MGRBuildInterpApproximateInverse(A, CF_marker, num_cpts_global, debug_flag, &R_ptr);
+    hypre_MGRBuildInterpApproximateInverse(AT, CF_marker, num_cpts_global, debug_flag, &R_ptr);
     hypre_BoomerAMGInterpTruncation(R_ptr, trunc_factor, max_elmts);
   }
   else
   {
+    /* Build new strength matrix */
+    hypre_BoomerAMGCreateS(AT, strong_threshold, max_row_sum, 1, NULL, &ST);
+    
     /* Classical modified interpolation */
     hypre_BoomerAMGBuildInterp(AT, CF_marker, ST, num_cpts_global,1, NULL,debug_flag,
                                trunc_factor, max_elmts, &R_ptr);
-
-    /* Do k steps of Jacobi build W for P = [-W I].
-    * Note that BoomerAMGJacobiInterp assumes you have some initial P,
-    * hence we need to initialize P as above, before calling this routine.
-    * If numsweeps = 0, the following step is skipped and P is returned as is.
-    * Looping here is equivalent to improving P by Jacobi interpolation
-    */
-    // for(i=0; i<numsweeps; i++)
-    //   hypre_BoomerAMGJacobiInterp(A, &R_ptr, S,1, NULL, CF_marker, 0,
-    //                               jac_trunc_threshold, jac_trunc_threshold_minus);
   }
 
   /* set pointer to P */
