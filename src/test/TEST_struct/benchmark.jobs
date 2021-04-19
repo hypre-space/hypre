@@ -15,7 +15,7 @@ mpirun -np 4 ./struct -n 2048 2048 1 -d 2 -solver 10 > benchmark.out.2
 
 mpirun -np 4 ./struct -n 128 128 128      -solver 10 > benchmark.out.3
 
-mpirun -np 4 ./struct -n 256 256 256      -solver 10 > benchmark.out.4
+mpirun -np 4 ./struct -n 200 200 200      -solver 10 > benchmark.out.4
 
 # PFMG CG
 mpirun -np 4 ./struct -n 1024 1024 1 -d 2 -solver 11 > benchmark.out.5
