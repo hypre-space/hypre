@@ -926,13 +926,15 @@ hypre_CudaDataCurandGenerator(hypre_CudaData *data)
    return gen;
 }
 
+/* T = float or double */
+template <typename T>
 HYPRE_Int
-hypre_CurandUniform( HYPRE_Int          n,
-                     HYPRE_Real        *urand,
-                     HYPRE_Int          set_seed,
-                     hypre_ulonglongint seed,
-                     HYPRE_Int          set_offset,
-                     hypre_ulonglongint offset)
+hypre_CurandUniform_core( HYPRE_Int          n,
+                          T                 *urand,
+                          HYPRE_Int          set_seed,
+                          hypre_ulonglongint seed,
+                          HYPRE_Int          set_offset,
+                          hypre_ulonglongint offset)
 {
    curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle());
 
@@ -946,17 +948,40 @@ hypre_CurandUniform( HYPRE_Int          n,
       HYPRE_CURAND_CALL( curandSetGeneratorOffset(gen, offset) );
    }
 
-   if (sizeof(HYPRE_Real) == sizeof(hypre_double))
+   if (sizeof(T) == sizeof(hypre_double))
    {
       HYPRE_CURAND_CALL( curandGenerateUniformDouble(gen, (hypre_double *) urand, n) );
    }
-   else if (sizeof(HYPRE_Real) == sizeof(float))
+   else if (sizeof(T) == sizeof(float))
    {
       HYPRE_CURAND_CALL( curandGenerateUniform(gen, (float *) urand, n) );
    }
 
    return hypre_error_flag;
 }
+
+HYPRE_Int
+hypre_CurandUniform( HYPRE_Int          n,
+                     HYPRE_Real        *urand,
+                     HYPRE_Int          set_seed,
+                     hypre_ulonglongint seed,
+                     HYPRE_Int          set_offset,
+                     hypre_ulonglongint offset)
+{
+   return hypre_CurandUniform_core(n, urand, set_seed, seed, set_offset, offset);
+}
+
+HYPRE_Int
+hypre_CurandUniformSingle( HYPRE_Int          n,
+                           float             *urand,
+                           HYPRE_Int          set_seed,
+                           hypre_ulonglongint seed,
+                           HYPRE_Int          set_offset,
+                           hypre_ulonglongint offset)
+{
+   return hypre_CurandUniform_core(n, urand, set_seed, seed, set_offset, offset);
+}
+
 #endif
 
 #if defined(HYPRE_USING_CUBLAS)
