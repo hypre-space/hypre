@@ -4595,7 +4595,7 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
    /* setup */
    hypre_MPI_Comm_rank(comm, &myid);
 
-   M_offd_i = hypre_TAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_DEVICE);
+   M_offd_i = hypre_CTAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_DEVICE);
 
    if(mr_col_version)
    {
@@ -4608,12 +4608,6 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
     * but we don't want a too dense MR initial guess
     */
    hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(A_diag, &M_diag, droptol[0] * 10.0, mr_tol, eps_tol, mr_max_row_nnz, mr_max_iter, print_level );
-
-   /* create empty offdiagonal */
-   for(i = 0 ; i <= n ; i ++)
-   {
-      M_offd_i[i] = 0;
-   }
 
    /* create parCSR matM */
    matM = hypre_ParCSRMatrixCreate( comm,
@@ -4630,7 +4624,8 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
 
    M_offd = hypre_ParCSRMatrixOffd(matM);
    hypre_CSRMatrixI(M_offd) = M_offd_i;
-   hypre_CSRMatrixOwnsData(M_offd) = 1;
+   hypre_CSRMatrixNumRownnz(M_offd) = 0;
+   hypre_CSRMatrixOwnsData(M_offd)  = 1;
 
    hypre_ParCSRMatrixSetColStartsOwner(matM,0);
    hypre_ParCSRMatrixSetRowStartsOwner(matM,0);
