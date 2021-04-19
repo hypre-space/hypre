@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 #=============================================================================
-# ij: Test BoomerAMG on GPU options
+# ij: BoomerAMG GPU benchmarks
 #=============================================================================
 
 # RAP 1
