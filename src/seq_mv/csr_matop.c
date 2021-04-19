@@ -42,6 +42,7 @@ hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
                              hypre_CSRMatrix       *A,
                              hypre_CSRMatrix       *B,
                              HYPRE_Int              nrows_C,
+                             HYPRE_Int              nnzrows_C,
                              HYPRE_Int              ncols_C,
                              HYPRE_Int             *rownnz_C,
                              HYPRE_MemoryLocation   memory_location_C,
@@ -146,6 +147,8 @@ hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
 
       *C_ptr = hypre_CSRMatrixCreate(nrows_C, ncols_C, num_nonzeros);
       hypre_CSRMatrixI(*C_ptr) = C_i;
+      hypre_CSRMatrixRownnz(*C_ptr) = rownnz_C;
+      hypre_CSRMatrixNumRownnz(*C_ptr) = nnzrows_C;
       hypre_CSRMatrixInitialize_v2(*C_ptr, 0, memory_location_C);
    }
 
@@ -159,6 +162,7 @@ hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
       {
          for (iic = rownnz_C[ic] + 1; iic < rownnz_C[ic+1]; iic++)
          {
+            hypre_assert(C_i[iic+1] == 0);
             C_i[iic+1] = C_i[rownnz_C[ic]+1];
          }
       }
@@ -167,20 +171,38 @@ hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
       {
          for (iic = rownnz_C[lastrow-1] + 1; iic < rownnz_C[lastrow]; iic++)
          {
-            C_i[iic+1] = C_i[rownnz_C[lastrow]+1];
+            hypre_assert(C_i[iic+1] == 0);
+            C_i[iic+1] = C_i[rownnz_C[lastrow-1]+1];
          }
       }
       else
       {
          for (iic = rownnz_C[lastrow-1] + 1; iic < nrows_C; iic++)
          {
-            C_i[iic] = C_i[nrows_C];
+            hypre_assert(C_i[iic+1] == 0);
+            C_i[iic+1] = C_i[rownnz_C[lastrow-1]+1];
          }
       }
    }
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
+#endif
+
+#ifdef HYPRE_DEBUG
+   if (!ii)
+   {
+      for (i = 0; i < nrows_C; i++)
+      {
+         hypre_assert(C_i[i] <= C_i[i+1]);
+         hypre_assert(((A_i[i+1] - A_i[i]) +
+                       (B_i[i+1] - B_i[i])) >=
+                       (C_i[i+1] - C_i[i]));
+         hypre_assert((C_i[i+1] - C_i[i]) >= (A_i[i+1] - A_i[i]));
+         hypre_assert((C_i[i+1] - C_i[i]) >= (B_i[i+1] - B_i[i]));
+      }
+      hypre_assert((C_i[nrows_C] - C_i[0]) == num_nonzeros);
+   }
 #endif
 
    return hypre_error_flag;
@@ -237,7 +259,7 @@ hypre_CSRMatrixAddSecondPass( HYPRE_Int          firstrow,
       marker[ia] = -1;
    }
 
-   pos = C_i[firstrow];
+   pos = C_i[rownnz_C ? rownnz_C[firstrow] : firstrow];
    if ((map_A2C && map_B2C) || ( map_A2C && (nnzs_B == 0)) || ( map_B2C && (nnzs_A == 0)))
    {
       for (ic = firstrow; ic < lastrow; ic++)
@@ -269,6 +291,7 @@ hypre_CSRMatrixAddSecondPass( HYPRE_Int          firstrow,
                C_data[marker[jcol]] += beta*B_data[ib];
             }
          }
+         hypre_assert(pos == C_i[iic+1]);
       } /* end for loop */
    }
    else
@@ -302,6 +325,7 @@ hypre_CSRMatrixAddSecondPass( HYPRE_Int          firstrow,
                C_data[marker[jcol]] += beta*B_data[ib];
             }
          }
+         hypre_assert(pos == C_i[iic+1]);
       } /* end for loop */
    }
    hypre_assert(pos == C_i[rownnz_C ? rownnz_C[lastrow-1] + 1 : lastrow]);
@@ -408,7 +432,7 @@ hypre_CSRMatrixAddHost ( hypre_CSRMatrix *A,
       marker = hypre_CTAlloc(HYPRE_Int, ncols_A, HYPRE_MEMORY_HOST);
 
       hypre_CSRMatrixAddFirstPass(ns, ne, twspace, marker, NULL, NULL,
-                                  A, B, nrows_A, ncols_A, rownnz_C,
+                                  A, B, nrows_A, nnzrows_C, ncols_A, rownnz_C,
                                   memory_location_C, C_i, &C);
 
       hypre_CSRMatrixAddSecondPass(ns, ne, twspace, marker, NULL, NULL,
@@ -709,10 +733,10 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
 #pragma omp parallel private(ia, ib, ic, ja, jb, num_nonzeros, counter, a_entry, b_entry)
 #endif
    {
-      HYPRE_Int *B_marker = NULL;
-      HYPRE_Int ns, ne, ii, jj;
-      HYPRE_Int size, rest, num_threads;
-      HYPRE_Int i1, iic;
+      HYPRE_Int  *B_marker = NULL;
+      HYPRE_Int   ns, ne, ii, jj;
+      HYPRE_Int   size, rest, num_threads;
+      HYPRE_Int   i1, iic;
 
       ii = hypre_GetThreadNum();
       num_threads = hypre_NumActiveThreads();

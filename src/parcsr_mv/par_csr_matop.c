@@ -5083,8 +5083,6 @@ hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
    hypre_CSRMatrix      *C_offd;
    HYPRE_BigInt         *col_map_offd_C;
    HYPRE_Int            *C_diag_i, *C_offd_i;
-   HYPRE_Int            *marker_diag;
-   HYPRE_Int            *marker_offd;
    HYPRE_Int            *rownnz_diag_C = NULL;
    HYPRE_Int            *rownnz_offd_C = NULL;
    HYPRE_Int             num_rownnz_diag_C;
@@ -5153,8 +5151,10 @@ hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
 #pragma omp parallel
 #endif
    {
-      HYPRE_Int  ii, num_threads;
-      HYPRE_Int  size, rest, ns, ne;
+      HYPRE_Int   ii, num_threads;
+      HYPRE_Int   size, rest, ns, ne;
+      HYPRE_Int  *marker_diag;
+      HYPRE_Int  *marker_offd;
 
       ii = hypre_GetThreadNum();
       num_threads = hypre_NumActiveThreads();
@@ -5179,7 +5179,8 @@ hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
       marker_diag = hypre_TAlloc(HYPRE_Int, num_cols_diag_A, HYPRE_MEMORY_HOST);
       hypre_CSRMatrixAddFirstPass(ns, ne, twspace, marker_diag,
                                   NULL, NULL, A_diag, B_diag,
-                                  num_rows_diag_C, num_cols_diag_C, rownnz_diag_C,
+                                  num_rows_diag_C, num_rownnz_diag_C,
+                                  num_cols_diag_C, rownnz_diag_C,
                                   memory_location_C, C_diag_i, &C_diag);
       hypre_CSRMatrixAddSecondPass(ns, ne, twspace, marker_diag,
                                    NULL, NULL, rownnz_diag_C,
@@ -5206,7 +5207,8 @@ hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
       marker_offd = hypre_TAlloc(HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_HOST);
       hypre_CSRMatrixAddFirstPass(ns, ne, twspace, marker_offd,
                                   A2C_offd, B2C_offd, A_offd, B_offd,
-                                  num_rows_offd_C, num_cols_offd_C, rownnz_offd_C,
+                                  num_rows_offd_C, num_rownnz_offd_C,
+                                  num_cols_offd_C, rownnz_offd_C,
                                   memory_location_C, C_offd_i, &C_offd);
       hypre_CSRMatrixAddSecondPass(ns, ne, twspace, marker_offd,
                                    A2C_offd, B2C_offd, rownnz_offd_C,
