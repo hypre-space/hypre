@@ -774,6 +774,11 @@ hypre_CSRMatrixTransposeHost(hypre_CSRMatrix  *A,
 
    hypre_TFree(bucket, HYPRE_MEMORY_HOST);
 
+   /* reorder to put diagonal at first entry (for square matrices only)*/
+   if(num_rowsA == num_colsA)
+   {
+      hypre_CSRMatrixReorder(*AT);
+   }
    return (0);
 }
 
