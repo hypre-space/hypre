@@ -20,6 +20,7 @@ HEADERS =\
  mapped_matrix.h\
  multiblock_matrix.h\
  seq_mv.h\
+ seq_mv.hpp\
  vector.h
 
 FILES =\
