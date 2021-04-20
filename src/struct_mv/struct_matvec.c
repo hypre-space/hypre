@@ -561,8 +561,6 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
             hypre_ForBoxI(j, compute_box_a)
             {
                compute_box = hypre_BoxArrayBox(compute_box_a, j);
-               start = hypre_BoxIMin(compute_box);
-               hypre_BoxGetStrideSize(compute_box, ustride, loop_size);
 
                /* unroll up to depth UNROLL_MAXDEPTH */
                for (si = skip_diag; si < nentries; si += UNROLL_MAXDEPTH)
@@ -674,7 +672,7 @@ hypre_StructMatvecCompute_core_CC( hypre_StructMatrix *A,
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    start = hypre_BoxIMin(compute_box);
-   hypre_BoxGetStrideSize(compute_box, ustride, loop_size);
+   hypre_BoxGetSize(compute_box, loop_size);
    hypre_SetIndex(ustride, 1);
    xp = hypre_StructVectorBoxData(x, box_id);
    yp = hypre_StructVectorBoxData(y, box_id);
@@ -899,7 +897,7 @@ hypre_StructMatvecCompute_core_VC( hypre_StructMatrix *A,
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    start = hypre_BoxIMin(compute_box);
-   hypre_BoxGetStrideSize(compute_box, ustride, loop_size);
+   hypre_BoxGetSize(compute_box, loop_size);
    hypre_SetIndex(ustride, 1);
    xp = hypre_StructVectorBoxData(x, box_id);
    yp = hypre_StructVectorBoxData(y, box_id);
