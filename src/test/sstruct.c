@@ -454,6 +454,8 @@ ReadData( char         *filename,
          /* read the next input line */
          sdata_line = fgets((sdata + sdata_size), maxline, file);
       }
+
+      fclose(file);
    }
 
    /* broadcast the data size */
