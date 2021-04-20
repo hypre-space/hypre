@@ -160,6 +160,7 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
       centries[vi]     = hypre_TAlloc(HYPRE_Int *, nvars, HYPRE_MEMORY_HOST);
       for (vj = 0; vj < nvars; vj++)
       {
+         centries[vi][vj]     = hypre_TAlloc(HYPRE_Int , size, HYPRE_MEMORY_HOST);
          symmetric[vi][vj]    = 0;
          num_centries[vi][vj] = 0;
       }
@@ -679,7 +680,6 @@ hypre_SStructPMatrixSetCEntries( hypre_SStructPMatrix *pmatrix,
    HYPRE_Int     i;
 
    pmnum_centries[var][to_var] = num_centries;
-   pmcentries[var][to_var]     = hypre_CTAlloc(HYPRE_Int, num_centries, HYPRE_MEMORY_HOST);
    for (i = 0; i < num_centries; i++)
    {
       pmcentries[var][to_var][i] = centries[i];

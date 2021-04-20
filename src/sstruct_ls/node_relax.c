@@ -154,15 +154,10 @@ hypre_NodeRelaxDestroy( void *relax_vdata )
       hypre_TFree(relax_data -> x_loc, HYPRE_MEMORY_DEVICE);
       hypre_TFree(relax_data -> A_loc, HYPRE_MEMORY_DEVICE);
       */
+      hypre_TFree(relax_data -> Ap, HYPRE_MEMORY_DEVICE);
       hypre_TFree(relax_data -> bp, HYPRE_MEMORY_DEVICE);
       hypre_TFree(relax_data -> xp, HYPRE_MEMORY_DEVICE);
       hypre_TFree(relax_data -> tp, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(relax_data -> Ap, HYPRE_MEMORY_DEVICE);
-      for (vi = 0; vi < nvars; vi++)
-      {
-         hypre_TFree((relax_data -> Ap)[vi], HYPRE_MEMORY_HOST);
-      }
-      hypre_TFree(relax_data -> Ap, HYPRE_MEMORY_HOST);
 
       hypre_FinalizeTiming(relax_data -> time_index);
       hypre_TFree(relax_data, HYPRE_MEMORY_HOST);
@@ -584,7 +579,7 @@ hypre_NodeRelax( void                 *relax_vdata,
    hypre_Index           *stencil_shape;
    HYPRE_Int              stencil_size;
    HYPRE_Int              stencil_diag_entry;
-                        
+
    HYPRE_Int              iter, p, compute_i, i, j, si;
    HYPRE_Int              nodeset;
 
@@ -1135,4 +1130,3 @@ hypre_NodeRelaxSetTempVec( void                 *relax_vdata,
 
    return hypre_error_flag;
 }
-
