@@ -777,6 +777,10 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       nvars = hypre_SStructPGridNVars(pgrid);
       for (var = 0; var < nvars; var++)
       {
+         for (d = 0; d < ndim; d++)
+         {
+            hypre_TFree(indices[part][var][d], HYPRE_MEMORY_HOST);
+         }
          hypre_TFree(indices[part][var], HYPRE_MEMORY_HOST);
       }
       hypre_TFree(idxcnt[part], HYPRE_MEMORY_HOST);

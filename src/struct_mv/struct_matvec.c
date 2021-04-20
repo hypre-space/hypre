@@ -560,7 +560,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
          {
             hypre_ForBoxI(j, compute_box_a)
             {
-               compute_box = hypre_BoxArrayBox(compute_box_a, j);
+               hypre_CopyBox(hypre_BoxArrayBox(compute_box_a, j), compute_box);
 
                /* unroll up to depth UNROLL_MAXDEPTH */
                for (si = skip_diag; si < nentries; si += UNROLL_MAXDEPTH)

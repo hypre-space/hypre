@@ -170,6 +170,9 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
    HYPRE_Int           ****centries;
    hypre_Index            *dom_stride;
    hypre_Index            *ran_stride;
+   HYPRE_BigInt           *tmp_col_coords;
+   HYPRE_Complex          *tmp_coeffs;
+
    HYPRE_Int               nvars;
    HYPRE_Int               part, vi, vj;
 
@@ -178,15 +181,17 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
       hypre_SStructMatrixRefCount(matrix) --;
       if (hypre_SStructMatrixRefCount(matrix) == 0)
       {
-         graph        = hypre_SStructMatrixGraph(matrix);
-         splits       = hypre_SStructMatrixSplits(matrix);
-         nparts       = hypre_SStructMatrixNParts(matrix);
-         pmatrices    = hypre_SStructMatrixPMatrices(matrix);
-         symmetric    = hypre_SStructMatrixSymmetric(matrix);
-         num_centries = hypre_SStructMatrixNumCEntries(matrix);
-         centries     = hypre_SStructMatrixCEntries(matrix);
-         dom_stride   = hypre_SStructMatrixDomainStride(matrix);
-         ran_stride   = hypre_SStructMatrixRangeStride(matrix);
+         graph          = hypre_SStructMatrixGraph(matrix);
+         splits         = hypre_SStructMatrixSplits(matrix);
+         nparts         = hypre_SStructMatrixNParts(matrix);
+         pmatrices      = hypre_SStructMatrixPMatrices(matrix);
+         symmetric      = hypre_SStructMatrixSymmetric(matrix);
+         num_centries   = hypre_SStructMatrixNumCEntries(matrix);
+         centries       = hypre_SStructMatrixCEntries(matrix);
+         dom_stride     = hypre_SStructMatrixDomainStride(matrix);
+         ran_stride     = hypre_SStructMatrixRangeStride(matrix);
+         tmp_col_coords = hypre_SStructMatrixTmpColCoords(matrix);
+         tmp_coeffs     = hypre_SStructMatrixTmpCoeffs(matrix);
 
          for (part = 0; part < nparts; part++)
          {
@@ -216,6 +221,8 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
          hypre_TFree(centries, HYPRE_MEMORY_HOST);
          hypre_TFree(dom_stride, HYPRE_MEMORY_HOST);
          hypre_TFree(ran_stride, HYPRE_MEMORY_HOST);
+         hypre_TFree(tmp_col_coords, HYPRE_MEMORY_HOST);
+         hypre_TFree(tmp_coeffs, HYPRE_MEMORY_HOST);
          HYPRE_IJMatrixDestroy(hypre_SStructMatrixIJMatrix(matrix));
          hypre_TFree(hypre_SStructMatrixSEntries(matrix), HYPRE_MEMORY_HOST);
          hypre_TFree(hypre_SStructMatrixUEntries(matrix), HYPRE_MEMORY_HOST);

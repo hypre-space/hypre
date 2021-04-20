@@ -6840,6 +6840,9 @@ main( hypre_int argc,
    hypre_TFree(distribute, HYPRE_MEMORY_HOST);
    hypre_TFree(block, HYPRE_MEMORY_HOST);
 
+   /* Finalize Hypre */
+   HYPRE_Finalize();
+
    /* Finalize MPI */
    hypre_MPI_Finalize();
 
