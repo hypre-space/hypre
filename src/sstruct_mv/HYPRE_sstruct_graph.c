@@ -738,10 +738,14 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          /* Eliminate duplicate entries */
          hypre_UniqueIntArrayND(ndim, &idxcnt[part][var], indices[part][var]);
 
-         /* Create array of boxes */
+         /* Create array of boxes
+            Note: we use a threshold of 0.5 to facilitate the construction
+            of boxes when indices are distributed in "every other" fashion
+            for a given direction
+         */
          boxa = NULL;
          hypre_BoxArrayCreateFromIndices(ndim, idxcnt[part][var],
-                                         indices[part][var], 0.8, &boxa);
+                                         indices[part][var], 0.5, &boxa);
 
          /* Intersect newly created BoxArray with grid boxes */
          if (boxa)
