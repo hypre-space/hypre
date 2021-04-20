@@ -3723,6 +3723,17 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
 
    /*if (num_cols_diag_A == num_cols_diag_B) allsquare = 1;*/
 
+   /*---------------------------------------------------------------------
+    * If there exists no CommPkg for A, a CommPkg is generated using
+    * equally load balanced partitionings
+    *--------------------------------------------------------------------*/
+
+   if (!comm_pkg_A)
+   {
+      hypre_MatvecCommPkgCreate(A);
+      comm_pkg_A = hypre_ParCSRMatrixCommPkg(A);
+   }
+
    hypre_CSRMatrixTranspose(A_diag, &AT_diag, 1);
    hypre_CSRMatrixTranspose(A_offd, &AT_offd, 1);
 
