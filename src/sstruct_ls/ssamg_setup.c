@@ -8,7 +8,6 @@
 #include "_hypre_sstruct_ls.h"
 #include "ssamg.h"
 
-#define DEBUG 1
 #define DEBUG_SYMMETRY 1
 #define DEBUG_WITH_GLVIS 0
 
@@ -68,10 +67,8 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    HYPRE_Int              d, l;
    HYPRE_Int              nparts;
    HYPRE_Int              num_levels;
-   HYPRE_Int              myid;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
-   hypre_MPI_Comm_rank(hypre_SStructMatrixComm(A), &myid);
 
    /*-----------------------------------------------------
     * Sanity checks
@@ -262,11 +259,13 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    /* Free memory */
    hypre_TFree(dxyz_flag, HYPRE_MEMORY_HOST);
 
-#if DEBUG
+#ifdef HYPRE_DEBUG
    hypre_SStructVector  **ones_l;
    hypre_SStructVector  **Pones_l;
+   HYPRE_Int              mypid;
    char                   filename[255];
 
+   hypre_MPI_Comm_rank(hypre_SStructMatrixComm(A), &mypid);
    ones_l  = hypre_TAlloc(hypre_SStructVector *, num_levels - 1, HYPRE_MEMORY_HOST);
    Pones_l = hypre_TAlloc(hypre_SStructVector *, num_levels - 1, HYPRE_MEMORY_HOST);
 
@@ -338,7 +337,10 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       HYPRE_IJMatrixTranspose(ij_A, &ij_AT);
       HYPRE_IJMatrixAdd(1.0, ij_A, -1.0, ij_AT, &ij_B);
       HYPRE_IJMatrixNorm(ij_B, &B_norm);
-      hypre_printf("Frobenius norm (A[%02d] - A[%02d]^T) = %20.15e\n", l, l, B_norm);
+      if (!mypid)
+      {
+         hypre_printf("Frobenius norm (A[%02d] - A[%02d]^T) = %20.15e\n", l, l, B_norm);
+      }
 
       /* Print matrices */
       hypre_sprintf(filename, "ssamg_ijA.l%02d", l);
@@ -352,7 +354,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       HYPRE_IJMatrixDestroy(ij_B);
    }
 #endif // if (DEBUG_SYMMETRY)
-#endif // if (DEBUG)
+#endif // if (HYPRE_DEBUG)
 
    HYPRE_ANNOTATE_FUNC_END;
 
