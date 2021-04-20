@@ -611,12 +611,14 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
 
    /* now set up indices, nUventries, iUventries, and Uventries */
    indices = hypre_TAlloc(HYPRE_Int ***, nparts, HYPRE_MEMORY_HOST);
+   idxcnt  = hypre_TAlloc(HYPRE_Int *, nparts, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
       pgrid = hypre_SStructGridPGrid(grid, part);
       nvars = hypre_SStructPGridNVars(pgrid);
 
       indices[part] = hypre_TAlloc(HYPRE_Int **, nvars, HYPRE_MEMORY_HOST);
+      idxcnt[part]  = hypre_CTAlloc(HYPRE_Int, nvars, HYPRE_MEMORY_HOST);
       for (var = 0; var < nvars; var++)
       {
          indices[part][var] = hypre_CTAlloc(HYPRE_Int *, ndim, HYPRE_MEMORY_HOST);
@@ -626,11 +628,6 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
             indices[part][var][d] = hypre_CTAlloc(HYPRE_Int, n_add_entries, HYPRE_MEMORY_HOST);
          }
       }
-   }
-   idxcnt = hypre_TAlloc(HYPRE_Int *, nparts, HYPRE_MEMORY_HOST);
-   for (part = 0; part < nparts; part++)
-   {
-      idxcnt[part] = hypre_CTAlloc(HYPRE_Int, nvars, HYPRE_MEMORY_HOST);
    }
    iUventries = hypre_TAlloc(HYPRE_Int, n_add_entries, HYPRE_MEMORY_HOST);
    Uventries = hypre_CTAlloc(hypre_SStructUVEntry *, Uvesize, HYPRE_MEMORY_HOST);

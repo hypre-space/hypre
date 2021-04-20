@@ -64,7 +64,7 @@ hypre_UniqueIntArrayND( HYPRE_Int    ndim,
    HYPRE_Int i, ii;
 
    /* Trivial case */
-   if (*size < 1)
+   if (!size || *size < 1)
    {
       return hypre_error_flag;
    }
