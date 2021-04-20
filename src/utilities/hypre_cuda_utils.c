@@ -926,7 +926,7 @@ hypre_CudaDataCurandGenerator(hypre_CudaData *data)
    return gen;
 }
 
-/* T = float or double */
+/* T = float or hypre_double */
 template <typename T>
 HYPRE_Int
 hypre_CurandUniform_core( HYPRE_Int          n,
