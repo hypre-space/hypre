@@ -1312,6 +1312,12 @@ hypre_SStructUMatrixAssemble( hypre_SStructMatrix *matrix )
  *==========================================================================*/
 
 /*--------------------------------------------------------------------------
+ * hypre_SStructMatrixMapDataBox
+ *
+ * Maps map_vbox in place to the index space where data is stored for S(vi,vj)
+ *
+ * Note: Since off-diagonal components of the SStructMatrix are being stored
+ *       in the UMatrix, this function does not change map_vbox when vi != vj
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_SStructMatrixMapDataBox( hypre_SStructMatrix  *matrix,
@@ -1328,7 +1334,10 @@ hypre_SStructMatrixMapDataBox( hypre_SStructMatrix  *matrix,
    {
       pmatrix = hypre_SStructMatrixPMatrix(matrix, part);
       smatrix = hypre_SStructPMatrixSMatrix(pmatrix, vi, vj);
-      hypre_StructMatrixMapDataBox(smatrix, map_vbox);
+      if (vi == vj)
+      {
+         hypre_StructMatrixMapDataBox(smatrix, map_vbox);
+      }
    }
 
    return hypre_error_flag;
