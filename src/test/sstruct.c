@@ -2346,7 +2346,6 @@ main( hypre_int argc,
    ProblemData           global_data;
    ProblemData           data;
    ProblemPartData       pdata;
-   HYPRE_Int             read_data_flag;
    HYPRE_Int             nparts;
    HYPRE_Int             pooldist;
    HYPRE_Int            *parts;
@@ -2497,13 +2496,11 @@ main( hypre_int argc,
 
    /* parse command line for input file name */
    infile = infile_default;
-   read_data_flag = 0;
    if (argc > 1)
    {
       if ( strcmp(argv[arg_index], "-in") == 0 )
       {
          arg_index++;
-         read_data_flag = 1;
          infile = argv[arg_index++];
       }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
@@ -2529,12 +2526,11 @@ main( hypre_int argc,
       }
    }
 
-   nparts = 0;
-   if (read_data_flag)
-   {
-      ReadData(infile, &global_data);
-      nparts = global_data.nparts;
-   }
+   /*-----------------------------------------------------------
+    * Read data from input file
+    *-----------------------------------------------------------*/
+
+   ReadData(infile, &global_data);
 
    /*-----------------------------------------------------------
     * Set defaults
