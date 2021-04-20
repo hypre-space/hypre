@@ -130,6 +130,7 @@ main( hypre_int argc,
    HYPRE_Int           mg_max_iter = 100;
    HYPRE_Int           nodal = 0;
    HYPRE_Int           nodal_diag = 0;
+   HYPRE_Int           keep_same_sign = 0;
    HYPRE_Real          cf_tol = 0.9;
    HYPRE_Real          norm;
    HYPRE_Real          final_res_norm;
@@ -1558,6 +1559,11 @@ main( hypre_int argc,
       {
          arg_index++;
          nodal_diag  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-keepSS") == 0 )
+      {
+         arg_index++;
+         keep_same_sign  = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-cheby_order") == 0 )
       {
@@ -3523,6 +3529,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetNumPaths(amg_solver, num_paths);
       HYPRE_BoomerAMGSetNodal(amg_solver, nodal);
       HYPRE_BoomerAMGSetNodalDiag(amg_solver, nodal_diag);
+      HYPRE_BoomerAMGSetKeepSameSign(amg_solver, keep_same_sign);
       HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_coarse, 3);
       if (ns_down > -1)
       {
@@ -3574,7 +3581,7 @@ main( hypre_int argc,
       //cudaProfilerStart();
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPushRange("AMG-Setup-1");
+      hypre_GpuProfilingPushRange("AMG-Setup-1");
 #endif
       if (solver_id == 0)
       {
@@ -3586,7 +3593,7 @@ main( hypre_int argc,
       }
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPopRange();
+      hypre_GpuProfilingPopRange();
 #endif
 
 #if defined(HYPRE_USING_GPU)
@@ -3609,7 +3616,7 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPushRange("AMG-Solve-1");
+      hypre_GpuProfilingPushRange("AMG-Solve-1");
 #endif
 
       //cudaProfilerStart();
@@ -3624,7 +3631,7 @@ main( hypre_int argc,
       //cudaProfilerStop();
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPopRange();
+      hypre_GpuProfilingPopRange();
 #endif
 
 #if defined(HYPRE_USING_GPU)
@@ -3672,7 +3679,7 @@ main( hypre_int argc,
       tt = hypre_MPI_Wtime();
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPushRange("AMG-Setup-2");
+      hypre_GpuProfilingPushRange("AMG-Setup-2");
 #endif
 
       if (solver_id == 0)
@@ -3685,7 +3692,7 @@ main( hypre_int argc,
       }
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPopRange();
+      hypre_GpuProfilingPopRange();
 #endif
 
 #if defined(HYPRE_USING_GPU)
@@ -3704,7 +3711,7 @@ main( hypre_int argc,
       tt = hypre_MPI_Wtime();
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPushRange("AMG-Solve-2");
+      hypre_GpuProfilingPushRange("AMG-Solve-2");
 #endif
 
       if (solver_id == 0)
@@ -3717,7 +3724,7 @@ main( hypre_int argc,
       }
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPopRange();
+      hypre_GpuProfilingPopRange();
 #endif
 
 #if defined(HYPRE_USING_GPU)
@@ -4004,6 +4011,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
          HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
+         HYPRE_BoomerAMGSetKeepSameSign(pcg_precond, keep_same_sign);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
