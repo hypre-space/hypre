@@ -1214,9 +1214,9 @@ HYPRE_IJMatrixTranspose( HYPRE_IJMatrix  matrix_A,
 {
    hypre_IJMatrix   *ij_A = (hypre_IJMatrix *) matrix_A;
    hypre_IJMatrix   *ij_AT;
-   HYPRE_Int        *row_partitioning;
-   HYPRE_Int        *col_partitioning;
-   HYPRE_Int         num_procs, i, size;
+   HYPRE_BigInt     *row_partitioning;
+   HYPRE_BigInt     *col_partitioning;
+   HYPRE_Int         i;
 
    if (!ij_A)
    {
@@ -1224,47 +1224,29 @@ HYPRE_IJMatrixTranspose( HYPRE_IJMatrix  matrix_A,
       return hypre_error_flag;
    }
 
-   hypre_MPI_Comm_size(hypre_IJMatrixComm(ij_A), &num_procs);
    ij_AT = hypre_CTAlloc(hypre_IJMatrix, 1, HYPRE_MEMORY_HOST);
 
-   hypre_IJMatrixComm(ij_AT)         = hypre_IJMatrixComm(ij_A);
-   hypre_IJMatrixObject(ij_AT)       = NULL;
-   hypre_IJMatrixTranslator(ij_AT)   = NULL;
-   hypre_IJMatrixAssumedPart(ij_AT)  = NULL;
-   hypre_IJMatrixObjectType(ij_AT)   = hypre_IJMatrixObjectType(ij_A);
-   hypre_IJMatrixAssembleFlag(ij_AT) = 1;
-   hypre_IJMatrixPrintLevel(ij_AT)   = hypre_IJMatrixPrintLevel(ij_A);
+   hypre_IJMatrixComm(ij_AT)           = hypre_IJMatrixComm(ij_A);
+   hypre_IJMatrixObject(ij_AT)         = NULL;
+   hypre_IJMatrixTranslator(ij_AT)     = NULL;
+   hypre_IJMatrixAssumedPart(ij_AT)    = NULL;
+   hypre_IJMatrixObjectType(ij_AT)     = hypre_IJMatrixObjectType(ij_A);
+   hypre_IJMatrixAssembleFlag(ij_AT)   = 1;
+   hypre_IJMatrixPrintLevel(ij_AT)     = hypre_IJMatrixPrintLevel(ij_A);
+   hypre_IJMatrixGlobalFirstRow(ij_AT) = hypre_IJMatrixGlobalFirstCol(ij_A);
+   hypre_IJMatrixGlobalFirstCol(ij_AT) = hypre_IJMatrixGlobalFirstRow(ij_A);
+   hypre_IJMatrixGlobalNumRows(ij_AT)  = hypre_IJMatrixGlobalNumCols(ij_A);
+   hypre_IJMatrixGlobalNumCols(ij_AT)  = hypre_IJMatrixGlobalNumRows(ij_A);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-   size = 2;
-#else
-   size = num_procs + 1;
-#endif
-   row_partitioning = hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
-   for (i = 0; i < size; i++)
+   row_partitioning = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   col_partitioning = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   for (i = 0; i < 2; i++)
    {
       row_partitioning[i] = hypre_IJMatrixColPartitioning(ij_A)[i];
-   }
-
-   if (hypre_IJMatrixRowPartitioning(ij_A) !=
-       hypre_IJMatrixColPartitioning(ij_A))
-   {
-      col_partitioning = hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
-      for (i = 0; i < size; i++)
-      {
-         col_partitioning[i] = hypre_IJMatrixRowPartitioning(ij_A)[i];
-      }
-   }
-   else
-   {
-      col_partitioning = row_partitioning;
+      col_partitioning[i] = hypre_IJMatrixRowPartitioning(ij_A)[i];
    }
    hypre_IJMatrixRowPartitioning(ij_AT) = row_partitioning;
    hypre_IJMatrixColPartitioning(ij_AT) = col_partitioning;
-   hypre_IJMatrixGlobalFirstRow(ij_AT)  = hypre_IJMatrixGlobalFirstCol(ij_A);
-   hypre_IJMatrixGlobalFirstCol(ij_AT)  = hypre_IJMatrixGlobalFirstRow(ij_A);
-   hypre_IJMatrixGlobalNumRows(ij_AT)   = hypre_IJMatrixGlobalNumCols(ij_A);
-   hypre_IJMatrixGlobalNumCols(ij_AT)   = hypre_IJMatrixGlobalNumRows(ij_A);
 
    if (hypre_IJMatrixObjectType(ij_A) == HYPRE_PARCSR)
    {
@@ -1325,11 +1307,13 @@ HYPRE_IJMatrixAdd( HYPRE_Complex    alpha,
    hypre_IJMatrix   *ij_B = (hypre_IJMatrix *) matrix_B;
    hypre_IJMatrix   *ij_C;
 
-   HYPRE_Int        *partitioning_A;
-   HYPRE_Int        *partitioning_B;
-   HYPRE_Int        *row_partitioning_C;
-   HYPRE_Int        *col_partitioning_C;
-   HYPRE_Int         num_procs, i, size;
+   HYPRE_BigInt     *row_partitioning_A;
+   HYPRE_BigInt     *col_partitioning_A;
+   HYPRE_BigInt     *row_partitioning_B;
+   HYPRE_BigInt     *col_partitioning_B;
+   HYPRE_BigInt     *row_partitioning_C;
+   HYPRE_BigInt     *col_partitioning_C;
+   HYPRE_Int         i;
 
    if (!ij_A)
    {
@@ -1337,72 +1321,48 @@ HYPRE_IJMatrixAdd( HYPRE_Complex    alpha,
       return hypre_error_flag;
    }
 
-   hypre_MPI_Comm_size(hypre_IJMatrixComm(ij_A), &num_procs);
-   ij_C = hypre_CTAlloc(hypre_IJMatrix, 1, HYPRE_MEMORY_HOST);
-
-   hypre_IJMatrixComm(ij_C)         = hypre_IJMatrixComm(ij_A);
-   hypre_IJMatrixObject(ij_C)       = NULL;
-   hypre_IJMatrixTranslator(ij_C)   = NULL;
-   hypre_IJMatrixAssumedPart(ij_C)  = NULL;
-   hypre_IJMatrixObjectType(ij_C)   = hypre_IJMatrixObjectType(ij_A);
-   hypre_IJMatrixAssembleFlag(ij_C) = 1;
-   hypre_IJMatrixPrintLevel(ij_C)   = hypre_IJMatrixPrintLevel(ij_A);
-
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-   size = 2;
-#else
-   size = num_procs + 1;
-#endif
-
-   /* Check if A and B have the same row partitionings */
-   partitioning_A = hypre_IJMatrixRowPartitioning(ij_A);
-   partitioning_B = hypre_IJMatrixRowPartitioning(ij_B);
-   for (i = 0; i < size; i++)
+   /* Check if A and B have the same row/col partitionings */
+   row_partitioning_A = hypre_IJMatrixRowPartitioning(ij_A);
+   row_partitioning_B = hypre_IJMatrixRowPartitioning(ij_B);
+   col_partitioning_A = hypre_IJMatrixColPartitioning(ij_A);
+   col_partitioning_B = hypre_IJMatrixColPartitioning(ij_B);
+   for (i = 0; i < 2; i++)
    {
-      if (partitioning_A[i] != partitioning_B[i])
+      if (row_partitioning_A[i] != row_partitioning_B[i])
       {
          hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                            "Input matrices must have same row partitioning!");
          return hypre_error_flag;
       }
+
+      if (col_partitioning_A[i] != col_partitioning_B[i])
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "Input matrices must have same col partitioning!");
+         return hypre_error_flag;
+      }
    }
 
-   /* Copy row partitioning of A to C */
-   row_partitioning_C = hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
-   for (i = 0; i < size; i++)
+   /* Copy row/col partitioning of A to C */
+   row_partitioning_C = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
+   col_partitioning_C = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
+   for (i = 0; i < 2; i++)
    {
-      row_partitioning_C[i] = partitioning_A[i];
+      row_partitioning_C[i] = row_partitioning_A[i];
+      col_partitioning_C[i] = col_partitioning_A[i];
    }
+
+   ij_C = hypre_CTAlloc(hypre_IJMatrix, 1, HYPRE_MEMORY_HOST);
+
+   hypre_IJMatrixComm(ij_C)            = hypre_IJMatrixComm(ij_A);
+   hypre_IJMatrixObject(ij_C)          = NULL;
+   hypre_IJMatrixTranslator(ij_C)      = NULL;
+   hypre_IJMatrixAssumedPart(ij_C)     = NULL;
+   hypre_IJMatrixObjectType(ij_C)      = hypre_IJMatrixObjectType(ij_A);
+   hypre_IJMatrixAssembleFlag(ij_C)    = 1;
+   hypre_IJMatrixPrintLevel(ij_C)      = hypre_IJMatrixPrintLevel(ij_A);
    hypre_IJMatrixRowPartitioning(ij_C) = row_partitioning_C;
-
-   /* Check if A and B have the same col partitionings */
-   if ((partitioning_A != hypre_IJMatrixColPartitioning(ij_A)) ||
-       (partitioning_B != hypre_IJMatrixColPartitioning(ij_B)))
-   {
-      partitioning_A = hypre_IJMatrixColPartitioning(ij_A);
-      partitioning_B = hypre_IJMatrixColPartitioning(ij_B);
-      for (i = 0; i < size; i++)
-      {
-         if (partitioning_A[i] != partitioning_B[i])
-         {
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                              "Input matrices must have same col partitioning!");
-            return hypre_error_flag;
-         }
-      }
-
-      /* Copy col partitioning of A to C */
-      col_partitioning_C = hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
-      for (i = 0; i < size; i++)
-      {
-         col_partitioning_C[i] = partitioning_A[i];
-      }
-      hypre_IJMatrixColPartitioning(ij_C) = col_partitioning_C;
-   }
-   else
-   {
-      hypre_IJMatrixColPartitioning(ij_C) = hypre_IJMatrixRowPartitioning(ij_A);
-   }
+   hypre_IJMatrixColPartitioning(ij_C) = col_partitioning_C;
 
    if (hypre_IJMatrixObjectType(ij_A) == HYPRE_PARCSR)
    {

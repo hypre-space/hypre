@@ -1711,7 +1711,10 @@ hypre_IJMatrixAddParCSR( HYPRE_Complex    alpha,
    hypre_ParcsrAdd(alpha, par_A, beta, par_B, &par_C);
    hypre_ParCSRMatrixSetNumNonzeros(par_C);
    hypre_ParCSRMatrixSetDNumNonzeros(par_C);
-   hypre_MatvecCommPkgCreate(par_C);
+   if (!hypre_ParCSRMatrixCommPkg(par_C))
+   {
+      hypre_MatvecCommPkgCreate(par_C);
+   }
 
    hypre_IJMatrixObject(matrix_C) = (void *) par_C;
 
