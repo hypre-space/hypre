@@ -105,6 +105,7 @@ hypre_SSAMGDestroy( void *ssamg_vdata )
 
          for (l = num_levels; l < max_levels; l++)
          {
+            hypre_TFree(ssamg_data -> active_l[l], HYPRE_MEMORY_HOST);
             hypre_TFree(ssamg_data -> relax_weights[l], HYPRE_MEMORY_HOST);
          }
 
