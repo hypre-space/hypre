@@ -1335,46 +1335,22 @@ hypre_CSRMatrixReorder(hypre_CSRMatrix *A)
       return -1;
    }
 
-   if (rownnz_A == NULL)
-   {
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i, j) HYPRE_SMP_SCHEDULE
-#endif
-      for (i = 0; i < num_rows_A; i++)
-      {
-         for (j = A_i[i]; j < A_i[i+1]; j++)
-         {
-            if (A_j[j] == i)
-            {
-               if (j != A_i[i])
-               {
-                  hypre_swap(A_j, A_i[i], j);
-                  hypre_swap_c(A_data, A_i[i], j);
-               }
-               break;
-            }
-         }
-      }
-   }
-   else
-   {
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i, ii, j) HYPRE_SMP_SCHEDULE
 #endif
-      for (i = 0; i < nnzrows_A; i++)
+   for (i = 0; i < nnzrows_A; i++)
+   {
+      ii = rownnz_A ? rownnz_A[i] : i;
+      for (j = A_i[ii]; j < A_i[ii+1]; j++)
       {
-         ii = A_i[rownnz_A[i]];
-         for (j = A_i[ii]; j < A_i[ii+1]; j++)
+         if (A_j[j] == ii)
          {
-            if (A_j[j] == ii)
+            if (j != A_i[ii])
             {
-               if (j != A_i[ii])
-               {
-                  hypre_swap(A_j, A_i[ii], j);
-                  hypre_swap_c(A_data, A_i[ii], j);
-               }
-               break;
+               hypre_swap(A_j, A_i[ii], j);
+               hypre_swap_c(A_data, A_i[ii], j);
             }
+            break;
          }
       }
    }

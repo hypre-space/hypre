@@ -1252,6 +1252,9 @@ HYPRE_SStructMatrixToIJMatrix( HYPRE_SStructMatrix  matrix,
          HYPRE_IJMatrixGetObject(ij_s, (void **) &parcsr_s);
 
          hypre_ParcsrAdd(1.0, parcsr_u, 1.0, parcsr_s, &parcsr_ss);
+         hypre_CSRMatrixReorder(hypre_ParCSRMatrixDiag(parcsr_ss));
+         hypre_CSRMatrixReorder(hypre_ParCSRMatrixOffd(parcsr_ss));
+
          HYPRE_IJMatrixDestroy(ij_s);
          HYPRE_IJMatrixCreate(hypre_ParCSRMatrixComm(parcsr_ss),
                               hypre_ParCSRMatrixFirstRowIndex(parcsr_ss),
