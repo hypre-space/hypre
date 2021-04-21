@@ -8,8 +8,8 @@
 #include "_hypre_sstruct_ls.h"
 #include "ssamg.h"
 
-#define DEBUG_SYMMETRY 1
-#define DEBUG_WITH_GLVIS 0
+#define DEBUG_SYMMETRY
+#define DEBUG_WITH_GLVIS
 
 /*--------------------------------------------------------------------------
  *  TODO:
@@ -263,40 +263,49 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    hypre_SStructVector  **ones_l;
    hypre_SStructVector  **Pones_l;
    HYPRE_Int              mypid;
+   HYPRE_Int              print_level;
    char                   filename[255];
 
    hypre_MPI_Comm_rank(hypre_SStructMatrixComm(A), &mypid);
    ones_l  = hypre_TAlloc(hypre_SStructVector *, num_levels - 1, HYPRE_MEMORY_HOST);
    Pones_l = hypre_TAlloc(hypre_SStructVector *, num_levels - 1, HYPRE_MEMORY_HOST);
+   print_level = hypre_SSAMGDataPrintLevel(ssamg_data);
 
    /* Print fine level grid */
    hypre_sprintf(filename, "ssgrid.l%02d", 0);
-#if DEBUG_WITH_GLVIS
+#ifdef DEBUG_WITH_GLVIS
    hypre_SStructGridPrintGLVis(grid_l[0], filename, NULL, NULL);
 #else
    hypre_SStructGridPrint(grid_l[0], filename);
 #endif
 
    /* Print fine level matrix */
-   hypre_sprintf(filename, "ssamg_A.l%02d", 0);
-   HYPRE_SStructMatrixPrint(filename, A_l[0], 0);
+   if (print_level > 0)
+   {
+      hypre_sprintf(filename, "ssamg_A.l%02d", 0);
+      HYPRE_SStructMatrixPrint(filename, A_l[0], 0);
+   }
 
    for (l = 0; l < (num_levels - 1); l++)
    {
-      /* Print coarse grids */
-      hypre_sprintf(filename, "ssgrid.l%02d", l+1);
-#if DEBUG_WITH_GLVIS
-      hypre_SStructGridPrintGLVis(grid_l[l+1], filename, NULL, NULL);
+      /* Print MG hierarchy */
+      if (print_level > 0)
+      {
+         /* Print coarse grids */
+         hypre_sprintf(filename, "ssgrid.l%02d", l+1);
+#ifdef DEBUG_WITH_GLVIS
+         hypre_SStructGridPrintGLVis(grid_l[l+1], filename, NULL, NULL);
 #else
-      hypre_SStructGridPrint(grid_l[l+1], filename);
+         hypre_SStructGridPrint(grid_l[l+1], filename);
 #endif
-      /* Print coarse matrices */
-      hypre_sprintf(filename, "ssamg_A.l%02d", l+1);
-      HYPRE_SStructMatrixPrint(filename, A_l[l+1], 0);
+         /* Print coarse matrices */
+         hypre_sprintf(filename, "ssamg_A.l%02d", l+1);
+         HYPRE_SStructMatrixPrint(filename, A_l[l+1], 0);
 
-      /* Print interpolation matrix */
-      hypre_sprintf(filename, "ssamg_P.l%02d", l);
-      HYPRE_SStructMatrixPrint(filename, P_l[l], 0);
+         /* Print interpolation matrix */
+         hypre_sprintf(filename, "ssamg_P.l%02d", l);
+         HYPRE_SStructMatrixPrint(filename, P_l[l], 0);
+      }
 
       HYPRE_SStructVectorCreate(comm, grid_l[l+1], &ones_l[l]);
       HYPRE_SStructVectorInitialize(ones_l[l]);
@@ -311,11 +320,15 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       hypre_SStructMatvecCompute(interp_data_l[l], 1.0, P_l[l], ones_l[l], 0.0, Pones_l[l]);
       hypre_sprintf(filename, "ssamg_Pones.l%02d", l);
 
-#if DEBUG_WITH_GLVIS
-      HYPRE_SStructVectorPrintGLVis(Pones_l[l], filename);
+      /* Print Pones */
+      if (print_level > 0)
+      {
+#ifdef DEBUG_WITH_GLVIS
+         HYPRE_SStructVectorPrintGLVis(Pones_l[l], filename);
 #else
-      HYPRE_SStructVectorPrint(filename, Pones_l[l], 0);
+         HYPRE_SStructVectorPrint(filename, Pones_l[l], 0);
 #endif
+      }
    }
 
    for (l = 0; l < (num_levels - 1); l++)
@@ -326,7 +339,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    hypre_TFree(ones_l, HYPRE_MEMORY_HOST);
    hypre_TFree(Pones_l, HYPRE_MEMORY_HOST);
 
-#if DEBUG_SYMMETRY
+#ifdef DEBUG_SYMMETRY
    HYPRE_IJMatrix  ij_A, ij_AT, ij_B;
    HYPRE_Real      B_norm;
 
@@ -343,18 +356,22 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       }
 
       /* Print matrices */
-      hypre_sprintf(filename, "ssamg_ijA.l%02d", l);
-      HYPRE_IJMatrixPrint(ij_A, filename);
-      hypre_sprintf(filename, "ssamg_ijB.l%02d", l);
-      HYPRE_IJMatrixPrint(ij_B, filename);
+      if (print_level > 0)
+      {
+         hypre_sprintf(filename, "ssamg_ijA.l%02d", l);
+         HYPRE_IJMatrixPrint(ij_A, filename);
+
+         hypre_sprintf(filename, "ssamg_ijB.l%02d", l);
+         HYPRE_IJMatrixPrint(ij_B, filename);
+      }
 
       /* Free memory */
       HYPRE_IJMatrixDestroy(ij_A);
       HYPRE_IJMatrixDestroy(ij_AT);
       HYPRE_IJMatrixDestroy(ij_B);
    }
-#endif // if (DEBUG_SYMMETRY)
-#endif // if (HYPRE_DEBUG)
+#endif // ifdef (DEBUG_SYMMETRY)
+#endif // ifdef (HYPRE_DEBUG)
 
    HYPRE_ANNOTATE_FUNC_END;
 
