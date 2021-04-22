@@ -632,12 +632,40 @@ HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
    jupper = partitioning[1] - 1;
    hypre_fprintf(file, "%b %b\n", jlower, jupper);
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_Complex * d_values = hypre_TAlloc(HYPRE_Complex, jupper-jlower+1, HYPRE_MEMORY_DEVICE);
+   HYPRE_Complex * h_values = hypre_TAlloc(HYPRE_Complex, jupper-jlower+1, HYPRE_MEMORY_HOST);
+   HYPRE_BigInt * d_indices = hypre_TAlloc(HYPRE_BigInt, jupper-jlower+1, HYPRE_MEMORY_DEVICE);
+   HYPRE_BigInt * h_indices = hypre_TAlloc(HYPRE_BigInt, jupper-jlower+1, HYPRE_MEMORY_HOST);
+   for (j = jlower; j <= jupper; j++)
+   {
+      h_indices[j-jlower] = j;
+   }
+   hypre_TMemcpy(d_indices, h_indices, HYPRE_BigInt, jupper-jlower+1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
+   HYPRE_IJVectorGetValues(vector, jupper-jlower+1, d_indices, d_values);
+
+   hypre_TMemcpy(h_values, d_values, HYPRE_Complex, jupper-jlower+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+   for (j = jlower; j <= jupper; j++)
+   {
+      hypre_fprintf(file, "%b %.14e\n", j, h_values[j-jlower]);
+   }
+
+   hypre_TFree(d_indices, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(h_indices, HYPRE_MEMORY_HOST);
+
+   hypre_TFree(d_values, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(h_values, HYPRE_MEMORY_HOST);
+
+#else
    for (j = jlower; j <= jupper; j++)
    {
       HYPRE_IJVectorGetValues(vector, 1, &j, &value);
 
       hypre_fprintf(file, "%b %.14e\n", j, value);
    }
+#endif
 
    fclose(file);
 
