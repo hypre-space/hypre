@@ -929,6 +929,8 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    HYPRE_Int                i, entry;
    HYPRE_BigInt             Uverank;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    hypre_SStructGridFindBoxManEntry(grid, part, index, var, &boxman_entry);
 
    /* if not local, check neighbors */
@@ -940,6 +942,9 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
       hypre_error_in_arg(1);
       hypre_error_in_arg(2);
       hypre_error_in_arg(3);
+
+      HYPRE_ANNOTATE_FUNC_END;
+
       return hypre_error_flag;
    }
    else
@@ -1021,6 +1026,8 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
                               col_coords, values);
    }
 
+   HYPRE_ANNOTATE_FUNC_END;
+
    return hypre_error_flag;
 }
 
@@ -1089,6 +1096,8 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
    hypre_Index           rs, cs;
    HYPRE_BigInt          row_base, col_base;
    HYPRE_Int             ei, entry, ii, jj, i, d, ci;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /*------------------------------------------
     * all stencil entries
@@ -1180,9 +1189,6 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
                start = hypre_BoxIMin(int_box);
                hypre_BoxGetSize(int_box, loop_size);
 
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi,vi,ci,index,d) HYPRE_SMP_SCHEDULE
-#endif
                hypre_BoxLoop2Begin(ndim, loop_size,
                                    map_box,  start, stride, mi,
                                    map_vbox, start, stride, vi);
@@ -1265,6 +1271,8 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
       hypre_SerialBoxLoop0End();
    }
 
+   HYPRE_ANNOTATE_FUNC_END;
+
    return hypre_error_flag;
 }
 
@@ -1300,9 +1308,13 @@ hypre_SStructUMatrixAssemble( hypre_SStructMatrix *matrix )
 {
    HYPRE_IJMatrix ijmatrix = hypre_SStructMatrixIJMatrix(matrix);
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    HYPRE_IJMatrixAssemble(ijmatrix);
    HYPRE_IJMatrixGetObject(
       ijmatrix, (void **) &hypre_SStructMatrixParCSRMatrix(matrix));
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -1510,6 +1522,7 @@ hypre_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix,
    HYPRE_Int                nUentries;
    hypre_SStructPMatrix    *pmatrix;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    hypre_SStructMatrixSplitEntries(matrix, part, var, nentries, entries,
                                    &nSentries, &Sentries,
@@ -1537,6 +1550,8 @@ hypre_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix,
       hypre_SStructUMatrixSetBoxValues(matrix, part, set_box, var, nUentries, Uentries,
                                        value_box, values, action);
    }
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
