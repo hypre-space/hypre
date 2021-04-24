@@ -28,7 +28,7 @@ hypreSYCLKernel_IndepSetMain(cl::sycl::nd_item<1>& item,
                              HYPRE_Int   IS_offd_temp_mark)
 {
    HYPRE_Int warp_id = hypre_sycl_get_global_subgroup_id<1>(item);
-   cl::sycl::ONEAPI::sub_group SG = item.get_sub_group();      
+   cl::sycl::ONEAPI::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    if (warp_id >= graph_diag_size)
@@ -199,7 +199,7 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
 }
 
 /* Augments measures by some random value between 0 and 1
- * aug_rand: 1: CURAND;   11: SEQ CURAND (TODO)
+ * aug_rand: 1: ONEMKL::RAND;   11: SEQ ONEMKL::RAND (TODO)
  *           2: CPU RAND; 12: CPU SEQ RAND
  */
 HYPRE_Int
@@ -227,22 +227,29 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
    }
    else
    {
-      curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle());
+#if defined(HYPRE_USING_ONEMKLRAND)
+      oneapi::mkl::rng::philox4x32x10* engine = hypre_HandleOnemklrandGenerator(hypre_handle());
 
-      HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, 2747 + my_id) );
+      // todo: abagusetty: seed cant be set here. It needs to be done while creation of engine.
+      //HYPRE_SYCL_CALL( curandSetPseudoRandomGeneratorSeed(*engine, 2747 + my_id) );
 
+      // note: sycl: [0.0, 1.0), 0.0 IS INCLUDED and 1.0 is EXCLUDED
+      // note: cuda(curand): (0.0, 1.0], 0.0 IS EXCLUDED and 1.0 is INCLUDED
       if (sizeof(HYPRE_Real) == sizeof(hypre_double))
       {
-         HYPRE_CURAND_CALL( curandGenerateUniformDouble(gen, (hypre_double *) urand, num_rows_diag) );
+	 HYPRE_SYCL_CALL( oneapi::mkl::rng::uniform<hypre_double> distribution(0.0, 1.0) );
+	 HYPRE_SYCL_CALL( oneapi::mkl::rng::generate(distribution, *engine, num_rows_diag, (hypre_double *) urand) );
       }
       else if (sizeof(HYPRE_Real) == sizeof(float))
       {
-         HYPRE_CURAND_CALL( curandGenerateUniform(gen, (float *) urand, num_rows_diag) );
+	 HYPRE_SYCL_CALL( oneapi::mkl::rng::uniform<float> distribution(0.0, 1.0) );
+	 HYPRE_SYCL_CALL( oneapi::mkl::rng::generate(distribution, *engine, num_rows_diag, (float *) urand) );
       }
+#endif //#if defined(HYPRE_USING_ONEMKLRAND)
    }
 
-   thrust::plus<HYPRE_Real> op;
-   HYPRE_THRUST_CALL(transform, measure_array, measure_array + num_rows_diag,
+   std::plus<HYPRE_Real> op;
+   HYPRE_ONEDPL_CALL(std::transform, measure_array, measure_array + num_rows_diag,
                      urand, measure_array, op);
 
    hypre_TFree(urand, HYPRE_MEMORY_DEVICE);
@@ -250,5 +257,4 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
    return hypre_error_flag;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA)
-
+#endif // #if defined(HYPRE_USING_SYCL)

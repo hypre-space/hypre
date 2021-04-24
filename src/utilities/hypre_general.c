@@ -101,7 +101,7 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
    }
 
    if (device_id > nDevices) {
-      hypre_printf("ERROR: SYCL device-ID exceed the number of devices on-node... \n");     
+      hypre_printf("ERROR: SYCL device-ID exceed the number of devices on-node... \n");
    }
 
    HYPRE_Int local_nDevices=0;
@@ -189,9 +189,9 @@ hypre_GetDeviceCount(hypre_int *device_count)
 	 (*device_count)++;
        }
      }
-   }   
+   }
 #endif
-      
+
 #if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaGetDeviceCount(device_count) );
 #endif
@@ -259,7 +259,6 @@ HYPRE_Init()
    hypre_HandleCudaComputeStream(_hypre_handle);
 #elif defined(HYPRE_USING_SYCL)
    hypre_HandleSyclComputeQueue(_hypre_handle);
-   hypre_HandleonemklrngGenerator(_hypre_handle);
 #endif
 
    /* A separate stream for prefetching */
@@ -277,6 +276,8 @@ HYPRE_Init()
 
 #if defined(HYPRE_USING_CURAND)
    hypre_HandleCurandGenerator(_hypre_handle);
+#elif defined(HYPRE_USING_ONEMKLRAND)
+   hypre_HandleOnemklrandGenerator(_hypre_handle);
 #endif
 
    /* Check if cuda arch flags in compiling match the device */

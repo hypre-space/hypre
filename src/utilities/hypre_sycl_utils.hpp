@@ -21,27 +21,27 @@
   catch (sycl::exception const &ex) {                           \
     hypre_printf("SYCL ERROR (code = %s) at %s:%d\n", ex.what(),    \
                    __FILE__, __LINE__);                             \
-    assert(0); exit(1);						    \
+    assert(0); exit(1);                                             \
   }                                                                 \
   catch(std::runtime_error const& ex) {                             \
     hypre_printf("STD ERROR (code = %s) at %s:%d\n", ex.what(),     \
                    __FILE__, __LINE__);                             \
-    assert(0); exit(1);						    \
+    assert(0); exit(1);                                             \
   }
 
-// HYPRE_WARP_BITSHIFT is just log2 of HYPRE_WARP_SIZE
-#define HYPRE_SUBGROUP_SIZE       32
-//#define HYPRE_WARP_BITSHIFT   5 // abb needs to be removed
+// HYPRE_SUBGROUP_BITSHIFT is just log2 of HYPRE_SUBGROUP_SIZE
+#define HYPRE_SUBGROUP_SIZE   32
+#define HYPRE_SUBGROUP_BITSHIFT   5
 #define HYPRE_MAX_NUM_SUBGROUPS   (64 * 64 * 32)
 #define HYPRE_FLT_LARGE       1e30
 #define HYPRE_1D_BLOCK_SIZE   512
-#define HYPRE_MAX_NUM_STREAMS 10
+#define HYPRE_MAX_NUM_QUEUES 10
 
 struct hypre_SyclData
 {
    oneapi::mkl::rng::philox4x32x10*  onemklrng_generator=nullptr;
    oneapi::mkl::index_base           cusparse_mat_descr;
-   sycl::queue*                      sycl_queues[HYPRE_MAX_NUM_STREAMS] = {};
+   sycl::queue*                      sycl_queues[HYPRE_MAX_NUM_QUEUES] = {};
    sycl::device                      sycl_device;
 
    /* by default, hypre puts GPU computations in this queue
@@ -64,7 +64,7 @@ struct hypre_SyclData
 };
 
 #define hypre_SyclDataSyclDevice(data)                     ((data) -> sycl_device)
-#define hypre_SyclDataSyclComputeQueueNum(data)           ((data) -> sycl_compute_queue_num)
+#define hypre_SyclDataSyclComputeQueueNum(data)            ((data) -> sycl_compute_queue_num)
 #define hypre_SyclDataSyclReduceBuffer(data)               ((data) -> sycl_reduce_buffer)
 #define hypre_SyclDataStructCommRecvBuffer(data)           ((data) -> struct_comm_recv_buffer)
 #define hypre_SyclDataStructCommSendBuffer(data)           ((data) -> struct_comm_send_buffer)
@@ -103,9 +103,6 @@ struct hypre_CsrsvData
 
 #if defined(HYPRE_USING_SYCL)
 
-// for includes of PSTL algorithms
-#define PSTL_USE_PARALLEL_POLICIES 0
-
 #include <oneapi/dpl/execution>
 #include <oneapi/dpl/algorithm>
 #include <oneapi/dpl/iterator>
@@ -114,6 +111,7 @@ struct hypre_CsrsvData
 #include <dpct/dpl_extras/algorithm.h> // dpct::remove_if, iota, remove_copy_if, copy_if
 
 #include <algorithm>
+#include <numeric>
 #include <functional>
 #include <iterator>
 
@@ -131,15 +129,15 @@ struct hypre_CsrsvData
         blocksize[2] == 0 || blocksize[1] == 0 || blocksize[0] == 0 )                                                \
    {                                                                                                                 \
      hypre_printf("Error %s %d: Invalid SYCL 3D launch parameters grid/block (%d, %d, %d) (%d, %d, %d)\n",           \
-		  __FILE__, __LINE__,					                                             \
-		  gridsize[0], gridsize[1], gridsize[2], blocksize[0], blocksize[1], blocksize[2]);                  \
+                  __FILE__, __LINE__,                                                                                \
+                  gridsize[0], gridsize[1], gridsize[2], blocksize[0], blocksize[1], blocksize[2]);                  \
      assert(0); exit(1);                                                                                             \
    }                                                                                                                 \
    else                                                                                                              \
    {                                                                                                                 \
       hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
-	   cgh.parallel_for(sycl::nd_range<3>(gridSize*blocksize, blocksize), [=] (sycl::nd_item<3> item) {  \
-	      (kernel_name)(item, __VA_ARGS__);                                                                      \
+           cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize), [=] (sycl::nd_item<3> item) {  \
+              (kernel_name)(item, __VA_ARGS__);                                                                      \
          });                                                                                                         \
       }).wait_and_throw();                                                                                           \
    }                                                                                                                 \
@@ -150,15 +148,15 @@ struct hypre_CsrsvData
    if ( gridsize[1] == 0 || gridsize[0] == 0 || blocksize[1] == 0 || blocksize[0] == 0 )                             \
    {                                                                                                                 \
      hypre_printf("Error %s %d: Invalid SYCL 2D launch parameters grid/block (%d, %d) (%d, %d)\n",                   \
-		  __FILE__, __LINE__,					                                             \
-		  gridsize[0], gridsize[1], blocksize[0], blocksize[1]);                                             \
+                  __FILE__, __LINE__,                                                                                \
+                  gridsize[0], gridsize[1], blocksize[0], blocksize[1]);                                             \
      assert(0); exit(1);                                                                                             \
    }                                                                                                                 \
    else                                                                                                              \
    {                                                                                                                 \
       hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
-	   cgh.parallel_for(sycl::nd_range<2>(gridSize*blocksize, blocksize), [=] (sycl::nd_item<2> item) {  \
-	      (kernel_name)(item, __VA_ARGS__);                                                                      \
+           cgh.parallel_for(sycl::nd_range<2>(gridsize*blocksize, blocksize), [=] (sycl::nd_item<2> item) {  \
+              (kernel_name)(item, __VA_ARGS__);                                                                      \
          });                                                                                                         \
       }).wait_and_throw();                                                                                           \
    }                                                                                                                 \
@@ -169,18 +167,27 @@ struct hypre_CsrsvData
    if ( gridsize[0] == 0 || blocksize[0] == 0 )                                                                      \
    {                                                                                                                 \
      hypre_printf("Error %s %d: Invalid SYCL 1D launch parameters grid/block (%d) (%d)\n",                           \
-		  __FILE__, __LINE__,					                                             \
-		  gridsize[0], blocksize[0]);                              	      			             \
+                  __FILE__, __LINE__,                                                                                \
+                  gridsize[0], blocksize[0]);                                                                        \
      assert(0); exit(1);                                                                                             \
    }                                                                                                                 \
    else                                                                                                              \
    {                                                                                                                 \
       hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
-	   cgh.parallel_for(sycl::nd_range<1>(gridSize*blocksize, blocksize), [=] (sycl::nd_item<1> item) {  \
-	      (kernel_name)(item, __VA_ARGS__);                                                                      \
+           cgh.parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize), [=] (sycl::nd_item<1> item) {  \
+              (kernel_name)(item, __VA_ARGS__);                                                                      \
          });                                                                                                         \
-      }).wait_and_throw();                                                                                           \      
+      }).wait_and_throw();                                                                                           \
    }                                                                                                                 \
+}
+
+#define HYPRE_SYCL_SERIAL_LAUNCH(kernel_name, ...)                                                                   \
+{                                                                                                                    \
+   hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) {                                   \
+       cgh.single_task([=] () {                                                                                      \
+           (kernel_name)(__VA_ARGS__);                                                                               \
+         });                                                                                                         \
+     }).wait_and_throw();                                                                                            \
 }
 
 #else
@@ -191,15 +198,15 @@ struct hypre_CsrsvData
         blocksize[2] == 0 || blocksize[1] == 0 || blocksize[0] == 0 )                                                \
    {                                                                                                                 \
      hypre_printf("Error %s %d: Invalid SYCL 3D launch parameters grid/block (%d, %d, %d) (%d, %d, %d)\n",           \
-		  __FILE__, __LINE__,					                                             \
-		  gridsize[0], gridsize[1], gridsize[2], blocksize[0], blocksize[1], blocksize[2]);                  \
+                  __FILE__, __LINE__,                                                                                \
+                  gridsize[0], gridsize[1], gridsize[2], blocksize[0], blocksize[1], blocksize[2]);                  \
      assert(0); exit(1);                                                                                             \
    }                                                                                                                 \
    else                                                                                                              \
    {                                                                                                                 \
       hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
-	  cgh.parallel_for(sycl::nd_range<3>(gridSize*blocksize, blocksize), [=] (sycl::nd_item<3> item) { \
-	      (kernel_name)(item, __VA_ARGS__);				\
+          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize), [=] (sycl::nd_item<3> item) { \
+              (kernel_name)(item, __VA_ARGS__);                         \
          });                                                                                                         \
       });                                                                                                            \
    }                                                                                                                 \
@@ -210,15 +217,15 @@ struct hypre_CsrsvData
    if ( gridsize[1] == 0 || gridsize[0] == 0 || blocksize[1] == 0 || blocksize[0] == 0 )                             \
    {                                                                                                                 \
      hypre_printf("Error %s %d: Invalid SYCL 2D launch parameters grid/block (%d, %d) (%d, %d)\n",                   \
-		  __FILE__, __LINE__,					                                             \
-		  gridsize[0], gridsize[1], blocksize[0], blocksize[1]);                                             \
+                  __FILE__, __LINE__,                                                                                \
+                  gridsize[0], gridsize[1], blocksize[0], blocksize[1]);                                             \
      assert(0); exit(1);                                                                                             \
    }                                                                                                                 \
    else                                                                                                              \
    {                                                                                                                 \
       hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
-	   cgh.parallel_for(sycl::nd_range<2>(gridSize*blocksize, blocksize), [=] (sycl::nd_item<2> item) {  \
-	      (kernel_name)(item, __VA_ARGS__);                                                                      \
+           cgh.parallel_for(sycl::nd_range<2>(gridsize*blocksize, blocksize), [=] (sycl::nd_item<2> item) {  \
+              (kernel_name)(item, __VA_ARGS__);                                                                      \
          });                                                                                                         \
       });                                                                                                            \
    }                                                                                                                 \
@@ -229,18 +236,27 @@ struct hypre_CsrsvData
    if ( gridsize[0] == 0 || blocksize[0] == 0 )                                                                      \
    {                                                                                                                 \
      hypre_printf("Error %s %d: Invalid SYCL 1D launch parameters grid/block (%d) (%d)\n",                           \
-		  __FILE__, __LINE__,					                                             \
-		  gridsize[0], blocksize[0]);                              	      			             \
+                  __FILE__, __LINE__,                                                                                \
+                  gridsize[0], blocksize[0]);                                                                        \
      assert(0); exit(1);                                                                                             \
    }                                                                                                                 \
    else                                                                                                              \
    {                                                                                                                 \
       hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
-	   cgh.parallel_for(sycl::nd_range<1>(gridSize*blocksize, blocksize), [=] (sycl::nd_item<1> item) {  \
-	      (kernel_name)(item, __VA_ARGS__);                                                                      \
+           cgh.parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize), [=] (sycl::nd_item<1> item) {  \
+              (kernel_name)(item, __VA_ARGS__);                                                                      \
          });                                                                                                         \
       });                                                                                                            \
    }                                                                                                                 \
+}
+
+#define HYPRE_SYCL_SERIAL_LAUNCH(kernel_name, ...)                                                                   \
+{                                                                                                                    \
+   hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) {                                   \
+       cgh.single_task([=] () {                                                                                      \
+           (kernel_name)(__VA_ARGS__);                                                                               \
+         });                                                                                                         \
+     });                                                                                                             \
 }
 
 #endif // HYPRE_DEBUG
@@ -267,10 +283,10 @@ template <class Iter, class T>
 void sycl_iota(Iter first, Iter last, T init=0) {
   using DiffSize = typename std::iterator_traits<Iter>::difference_type;
   std::transform( oneapi::dpl::execution::make_device_policy(*hypre_HandleSyclComputeQueue(hypre_handle())),
-		  oneapi::dpl::counting_iterator<DiffSize>(0),
-		  oneapi::dpl::counting_iterator<DiffSize>(std::distance(first, last)),
-		  first,
-		  iota_sequence_fun<T>(init, T(1)) );
+                  oneapi::dpl::counting_iterator<DiffSize>(0),
+                  oneapi::dpl::counting_iterator<DiffSize>(std::distance(first, last)),
+                  first,
+                  iota_sequence_fun<T>(init, T(1)) );
 }
 
 /* return the number of work-items in current work-group */
@@ -278,7 +294,7 @@ template <hypre_int dim>
 static __inline__ __attribute__((always_inline))
 hypre_int hypre_sycl_get_num_workitems(sycl::nd_item<dim>& item)
 {
-  return item.get_group().get_local_linear_range(); 
+  return item.get_group().get_local_linear_range();
 }
 
 /* return the flattened or linearlized work-item id in current work-group (not global)*/
@@ -320,7 +336,7 @@ static __inline__ __attribute__((always_inline))
 hypre_int hypre_sycl_get_num_workgroups(sycl::nd_item<dim>& item)
 {
   // return item.get_group().get_group_linear_range(); // API available in SYCL 2020
-  
+
   switch (dim)
   {
   case 1:
@@ -396,7 +412,7 @@ hypre_int hypre_sycl_get_global_subgroup_id(sycl::nd_item<dim>& item)
 //         assumed = old;
 //         old = atomicCAS(address_as_ull, assumed,
 //                         __double_as_longlong(val +
-// 					     __longlong_as_double(assumed)));
+//                                           __longlong_as_double(assumed)));
 
 //     // Note: uses integer comparison to avoid hang in case of NaN (since NaN != NaN)
 //     } while (assumed != old);
@@ -409,7 +425,7 @@ template <typename T>
 static __inline__ __attribute__((always_inline))
 T read_only_load(const T *ptr)
 {
-   return __ldg( ptr );
+   return *ptr;
 }
 
 /* exclusive prefix scan */
@@ -445,11 +461,11 @@ T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum, sycl::nd_item<1>& item)
     {
       if ( (lane_id & ((d << 1) - 1)) == ((d << 1) - 1) )
       {
-	in += t;
+        in += t;
       }
       else
       {
-	in = t;
+        in = t;
       }
     }
   }
@@ -639,8 +655,8 @@ struct equal {
 sycl::range<1> hypre_GetDefaultSYCLWorkgroupDimension();
 
 sycl::range<1> hypre_GetDefaultSYCLGridDimension(HYPRE_Int n,
-						 const char *granularity,
-						 sycl::range<1> bDim);
+                                                 const char *granularity,
+                                                 sycl::range<1> bDim);
 
 template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt);
 

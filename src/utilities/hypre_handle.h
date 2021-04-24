@@ -34,7 +34,7 @@ typedef struct
 #define hypre_HandleStructExecPolicy(hypre_handle)               ((hypre_handle) -> struct_exec_policy)
 #define hypre_HandleSyclData(hypre_handle)                       ((hypre_handle) -> sycl_data)
 
-#define hypre_HandleonemklrngGenerator(hypre_handle)             hypre_SyclDataonemklrngGenerator(hypre_HandleSyclData(hypre_handle))
+#define hypre_HandleOnemklrandGenerator(hypre_handle)            hypre_SyclDataOnemklrandGenerator(hypre_HandleSyclData(hypre_handle))
 #define hypre_HandleCublasHandle(hypre_handle)                   hypre_SyclDataCublasHandle(hypre_HandleSyclData(hypre_handle))
 #define hypre_HandleOnemklsparseHandle(hypre_handle)             hypre_SyclDataOnemklsparseHandle(hypre_HandleSyclData(hypre_handle))
 #define hypre_HandleOnemklsparseMatDescr(hypre_handle)           hypre_SyclDataOnemklsparseMatDescr(hypre_HandleSyclData(hypre_handle))

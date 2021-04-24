@@ -268,7 +268,7 @@ void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N,
    //d_V1 = hypre_TAlloc(T, nsamples*N, HYPRE_MEMORY_DEVICE);
    //d_V2 = hypre_TAlloc(T, nsamples*K, HYPRE_MEMORY_DEVICE);
 
-   oneapi::mkl::rng::philox4x32x10* engine = hypre_HandleonemklrngGenerator(hypre_handle());
+   oneapi::mkl::rng::philox4x32x10* engine = hypre_HandleOnemklrandGenerator(hypre_handle());
    oneapi::mkl::rng::uniform<T, oneapi::mkl::rng::uniform_method::by_default> distr(0.0, 1.0); // distribution object
    /* random V1: uniform --> exp */
    HYPRE_SYCL_CALL( oneapi::mkl::rng::generate(distr, *engine, nsamples * N, d_V1) );
