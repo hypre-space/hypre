@@ -7,6 +7,7 @@
 
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
+#include "seq_mv.hpp"
 
 #if defined(HYPRE_USING_CUSPARSE)
 #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION

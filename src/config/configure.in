@@ -693,7 +693,8 @@ AS_HELP_STRING([--with-strict-checking],
                [Compiles without MPI ('--without-MPI') and tries to
                 find a compiler option that warns of as many non-ISO
                 features as possible.]),
-[
+[case "${withval}" in
+ yes)
  hypre_user_chose_ccompilers=yes
  hypre_user_chose_cflags=yes
  hypre_user_chose_cxxcompilers=yes
@@ -750,7 +751,9 @@ AS_HELP_STRING([--with-strict-checking],
     fi
  fi
 
- AC_DEFINE(HYPRE_SEQUENTIAL,1,[No MPI being used])]
+ AC_DEFINE(HYPRE_SEQUENTIAL,1,[No MPI being used])
+ ;;
+ esac]
 )
 
 dnl ***** MPI
@@ -1406,8 +1409,11 @@ dnl ***** Caliper
 AC_ARG_WITH(caliper,
 AS_HELP_STRING([--with-caliper],
                [Use Caliper instrumentation (default is NO).]),
-               [hypre_using_caliper=yes],
-               [hypre_using_caliper=no])
+[case "$withval" in
+    yes) hypre_using_caliper=yes;;
+    *)   hypre_using_caliper=no ;;
+esac],
+[hypre_using_caliper=no])
 
 AS_IF([test "x$with_caliper" = "xyes"],
       [AC_DEFINE(HYPRE_USING_CALIPER, 1, [Define to 1 if Caliper instrumentation is enabled])],

@@ -193,13 +193,10 @@ struct hypre_CudaData
 
 #if defined(HYPRE_USING_CUSPARSE)
    cusparseHandle_t                  cusparse_handle;
-   cusparseMatDescr_t                cusparse_mat_descr;
 #endif
 
 #if defined(HYPRE_USING_ROCSPARSE)
   rocsparse_handle                   cusparse_handle;
-  rocsparse_mat_descr                cusparse_mat_descr;
-  rocsparse_mat_info                 rocsparse_mat_info;
 #endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
@@ -273,13 +270,10 @@ cublasHandle_t      hypre_CudaDataCublasHandle(hypre_CudaData *data);
 
 #if defined(HYPRE_USING_CUSPARSE)
 cusparseHandle_t    hypre_CudaDataCusparseHandle(hypre_CudaData *data);
-cusparseMatDescr_t  hypre_CudaDataCusparseMatDescr(hypre_CudaData *data);
 #endif
 
 #if defined(HYPRE_USING_ROCSPARSE)
 rocsparse_handle    hypre_CudaDataCusparseHandle(hypre_CudaData *data);
-rocsparse_mat_descr hypre_CudaDataCusparseMatDescr(hypre_CudaData *data);
-rocsparse_mat_info  hypre_CudaDataRocsparseMatInfo(hypre_CudaData *data);
 #endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
@@ -305,6 +299,21 @@ struct hypre_CsrsvData
 #define hypre_CsrsvDataInfoU(data)      ((data) -> info_U)
 #define hypre_CsrsvDataBufferSize(data) ((data) -> BufferSize)
 #define hypre_CsrsvDataBuffer(data)     ((data) -> Buffer)
+
+struct hypre_GpuMatData
+{
+#if defined(HYPRE_USING_CUSPARSE)
+   cusparseMatDescr_t    mat_descr;
+#endif
+
+#if defined(HYPRE_USING_ROCSPARSE)
+   rocsparse_mat_descr   mat_descr;
+   rocsparse_mat_info    mat_info;
+#endif
+};
+
+#define hypre_GpuMatDataMatDecsr(data) ((data) -> mat_descr)
+#define hypre_GpuMatDataMatInfo(data)  ((data) -> mat_info)
 
 #endif //#if defined(HYPRE_USING_GPU)
 
@@ -966,7 +975,6 @@ cusparseIndexType_t hypre_HYPREIntToCusparseIndexType();
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
 #endif /* #ifndef HYPRE_CUDA_UTILS_H */
-
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
