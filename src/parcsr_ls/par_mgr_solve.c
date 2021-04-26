@@ -746,13 +746,19 @@ hypre_MGRCycle( void               *mgr_vdata,
          else if (Frelax_method[level] == 2)
          {
            hypre_ParVectorSetConstantValues(F_fine_array[coarse_grid], 0.0);
-           //hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, 1.0, F_array[fine_grid], 0.0, &(F_fine_array[coarse_grid]));
+#if defined(HYPRE_USING_CUDA)
            hypre_ParCSRMatrixMatvecT(1.0, P_FF_array[fine_grid], F_array[fine_grid], 0.0, F_fine_array[coarse_grid]);
+#else
+           hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, 1.0, F_array[fine_grid], 0.0, &(F_fine_array[coarse_grid]));
+#endif
            hypre_ParVectorSetConstantValues(U_fine_array[coarse_grid], 0.0);
            fine_grid_solver_solve((mgr_data -> aff_solver)[fine_grid], A_ff_array[fine_grid], F_fine_array[coarse_grid],
                  U_fine_array[coarse_grid]);
-           //hypre_MGRAddVectorP(CF_marker[fine_grid], FMRK, 1.0, U_fine_array[coarse_grid], 1.0, &(U_array[fine_grid]));
+#if defined(HYPRE_USING_CUDA)
            hypre_ParCSRMatrixMatvec(1.0, P_FF_array[fine_grid], U_fine_array[coarse_grid], 1.0, U_array[fine_grid]);
+#else
+           hypre_MGRAddVectorP(CF_marker[fine_grid], FMRK, 1.0, U_fine_array[coarse_grid], 1.0, &(U_array[fine_grid]));
+#endif
          }
          else
          {

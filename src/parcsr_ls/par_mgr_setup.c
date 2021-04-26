@@ -1239,6 +1239,8 @@ hypre_MGRSetup( void               *mgr_vdata,
       else if (relax_type == 18)
       {
 #if defined(HYPRE_USING_CUDA)
+         hypre_ParCSRComputeL1Norms(A_ff_array[j], 1, NULL, &l1_norm_data);
+#else
          if (relax_order)
          {
             hypre_ParCSRComputeL1Norms(A_array[j], 1, CF_marker_array[j], &l1_norm_data);
@@ -1247,22 +1249,19 @@ hypre_MGRSetup( void               *mgr_vdata,
          {
             hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norm_data);
          }
-#else
-         hypre_ParCSRComputeL1Norms(A_ff_array[j], 1, NULL, &l1_norm_data);
-
 #endif
       }
 
       if (l1_norm_data)
       {
 #if defined(HYPRE_USING_CUDA)
-         l1_norms[j] = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_array[j]));
-         hypre_VectorData(l1_norms[j]) = l1_norm_data;
-         hypre_SeqVectorInitialize_v2(l1_norms[j], hypre_ParCSRMatrixMemoryLocation(A_array[j]));
-#else
          l1_norms[j] = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_ff_array[j]));
          hypre_VectorData(l1_norms[j]) = l1_norm_data;
          hypre_SeqVectorInitialize_v2(l1_norms[j], hypre_ParCSRMatrixMemoryLocation(A_ff_array[j]));
+#else
+         l1_norms[j] = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_array[j]));
+         hypre_VectorData(l1_norms[j]) = l1_norm_data;
+         hypre_SeqVectorInitialize_v2(l1_norms[j], hypre_ParCSRMatrixMemoryLocation(A_array[j]));
 #endif
       }
    }
