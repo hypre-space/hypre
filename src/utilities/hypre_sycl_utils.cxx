@@ -341,7 +341,8 @@ hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_
 
    hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnz, d_row_ptr, map);
 
-   HYPRE_ONEDPL_CALL(gather, map, map + nnz, d_row_num, d_row_ind);
+   // todo: uncomment this and fix
+   //HYPRE_ONEDPL_CALL(gather, map, map + nnz, d_row_num, d_row_ind);
 
    hypre_TFree(map, HYPRE_MEMORY_DEVICE);
 
@@ -646,24 +647,28 @@ template <typename T1, typename T2, typename T3>
 HYPRE_Int
 hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt)
 {
-   auto begin_keys = oneapi::dpl::make_zip_iterator(keys1,     keys2,     vals    );
-   auto end_keys   = oneapi::dpl::make_zip_iterator(keys1 + N, keys2 + N, vals + N);
+   auto zip_begin = oneapi::dpl::make_zip_iterator(keys1,     keys2,     vals    );
+   auto zip_end   = oneapi::dpl::make_zip_iterator(keys1 + N, keys2 + N, vals + N);
 
    if (opt == 0)
    {
-     // todo: std::less<T1, T2>()
-      HYPRE_ONEDPL_CALL(std::stable_sort, begin_keys, end_keys, std::less<T1, T2>());
+      HYPRE_ONEDPL_CALL(std::stable_sort, zip_begin, zip_end, [](auto lhs, auto rhs) {
+	  if (std::get<0>(lhs) < std::get<0>(rhs)) return true;
+	  if (std::get<0>(rhs) < std::get<0>(lhs)) return false;
+	  if (std::get<1>(lhs) < std::get<1>(rhs)) return true;
+	  if (std::get<1>(rhs) < std::get<1>(lhs)) return false;
+          return std::get<2>(lhs) < std::get<2>(rhs); });
    }
    else if (opt == 1)
    {
-      HYPRE_ONEDPL_CALL(std::stable_sort, begin_keys, end_keys, [](auto lhs, auto rhs) {
+      HYPRE_ONEDPL_CALL(std::stable_sort, zip_begin, zip_end, [](auto lhs, auto rhs) {
           if (std::get<0>(lhs) < std::get<0>(rhs)) { return true; }
           if (std::get<0>(lhs) > std::get<0>(rhs)) { return false; }
           return hypre_abs(std::get<1>(lhs)) > hypre_abs(std::get<1>(rhs)); } );
    }
    else if (opt == 2)
    {
-      HYPRE_ONEDPL_CALL(std::stable_sort, begin_keys, end_keys, [](auto lhs, auto rhs) {
+      HYPRE_ONEDPL_CALL(std::stable_sort, zip_begin, zip_end, [](auto lhs, auto rhs) {
           if (std::get<0>(lhs) < std::get<0>(rhs)) { return true; }
           if (std::get<0>(lhs) > std::get<0>(rhs)) { return false; }
           if (std::get<0>(rhs) == std::get<1>(rhs)) { return false; }
@@ -690,7 +695,12 @@ hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *val
 
    if (opt == 0)
    {
-      HYPRE_ONEDPL_CALL(std::stable_sort, begin_keys, end_keys, std::less<T1, T2>());
+      HYPRE_ONEDPL_CALL(std::stable_sort, begin_keys, end_keys, [](auto lhs, auto rhs) {
+          if (std::get<0>(lhs) < std::get<0>(rhs)) return true;
+          if (std::get<0>(rhs) < std::get<0>(lhs)) return false;
+          if (std::get<1>(lhs) < std::get<1>(rhs)) return true;
+          if (std::get<1>(rhs) < std::get<1>(lhs)) return false;
+          return std::get<2>(lhs) < std::get<2>(rhs); });
    }
    else if (opt == 2)
    {
@@ -718,11 +728,14 @@ hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in,  T2 *keys2_in,  T3 *vals
    auto end_keys_in    = oneapi::dpl::make_zip_iterator(keys1_in + N, keys2_in + N);
    auto begin_keys_out = oneapi::dpl::make_zip_iterator(keys1_out,    keys2_out   );
 
-   auto new_end = HYPRE_ONEDPL_CALL(oneapi::dpl::reduce_by_segment,
-                                    begin_keys_in, end_keys_in, vals_in, begin_keys_out, vals_out,
-                                    std::plus<T3>(), std::equal_to<T1, T2>());
+   // auto new_end = HYPRE_ONEDPL_CALL(oneapi::dpl::reduce_by_segment,
+   //                                  begin_keys_in, end_keys_in + N, vals_in, begin_keys_out, vals_out,
+   // 				    std::equal_to<std::tuple<T1, T2>>(), std::plus<T3>() );
 
-   return new_end.second - vals_out;
+   // HYPRE_ONEDPL_CALL(oneapi::dpl::reduce_by_segment,
+   // 		     begin_keys_in, end_keys_in + N, vals_in, begin_keys_out, vals_out);
+
+   // return new_end.second - vals_out;
 }
 
 template HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N, HYPRE_Int *keys1_in, HYPRE_Int *keys2_in, HYPRE_Complex *vals_in, HYPRE_Int *keys1_out, HYPRE_Int *keys2_out, HYPRE_Complex *vals_out);
@@ -836,25 +849,25 @@ sycl::queue *hypre_SyclDataSyclComputeQueue(hypre_SyclData *data)
   return hypre_SyclDataSyclQueue(data, hypre_SyclDataSyclComputeQueueNum(data));
 }
 
+#if defined(HYPRE_USING_ONEMKLRAND)
 oneapi::mkl::rng::philox4x32x10*
-hypre_SyclDataonemklrngGenerator(hypre_SyclData *data) try {
-   if (data->onemklrng_generator)
+hypre_SyclDataOnemklrandGenerator(hypre_SyclData *data) try {
+   if (data->onemklrand_generator)
    {
-      return data->onemklrng_generator;
+      return data->onemklrand_generator;
    }
 
    sycl::queue* q = hypre_SyclDataSyclComputeQueue(data);
-   data->onemklrng_generator = new oneapi::mkl::rng::philox4x32x10(*q, 1234ULL);
+   data->onemklrand_generator = new oneapi::mkl::rng::philox4x32x10(*q, 1234ULL);
 
-   return data->onemklrng_generator;
+   return data->onemklrand_generator;
 }
 catch (sycl::exception const &exc) {
   std::cerr << exc.what() << "Exception caught at file:" << __FILE__
             << ", line:" << __LINE__ << std::endl;
   std::exit(1);
 }
-
-//#endif
+#endif //#if defined(HYPRE_USING_ONEMKLRAND)
 
 hypre_SyclData*
 hypre_SyclDataCreate()
@@ -890,10 +903,12 @@ void hypre_SyclDataDestroy(hypre_SyclData *data) try {
    hypre_TFree(hypre_SyclDataStructCommRecvBuffer(data), HYPRE_MEMORY_DEVICE);
    hypre_TFree(hypre_SyclDataStructCommSendBuffer(data), HYPRE_MEMORY_DEVICE);
 
-   if (data->onemklrng_generator != nullptr)
+#if defined(HYPRE_USING_ONEMKLRAND)
+   if (data->onemklrand_generator != nullptr)
    {
-     delete data->onemklrng_generator;
+     delete data->onemklrand_generator;
    }
+#endif
 
    for (HYPRE_Int i = 0; i < HYPRE_MAX_NUM_QUEUES; i++)
    {

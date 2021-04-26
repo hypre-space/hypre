@@ -127,16 +127,13 @@ template <typename T>
 __inline__ __attribute__((always_inline))
 T blockReduceSum(T val, cl::sycl::nd_item<1>& item, T* shared)
 {
-   //static __shared__ T shared[HYPRE_WARP_SIZE]; // Shared mem for HYPRE_WARP_SIZE partial sums
-   //__shared__ T shared[HYPRE_WARP_SIZE];        // Shared mem for HYPRE_WARP_SIZE partial sums
-
    //HYPRE_Int lane = threadIdx.x % item.get_sub_group().get_local_range().get(0);
    //HYPRE_Int wid  = threadIdx.x / item.get_sub_group().get_local_range().get(0);
    size_t threadIdx_x = item.get_local_id(0);
    size_t warpSize = item.get_sub_group().get_local_range().get(0);
 
    HYPRE_Int lane = threadIdx_x & (warpSize - 1);
-   HYPRE_Int wid = threadIdx_x >> HYPRE_WARP_BITSHIFT;
+   HYPRE_Int wid = threadIdx_x >> HYPRE_SUBGROUP_BITSHIFT;
 
    val = warpReduceSum(val, item);       // Each warp performs partial reduction
 
@@ -217,16 +214,16 @@ struct ReduceSum
       *this = other;
    }
 
-   /* reduction within blocks */
-  // abb: need to fix this
-   void BlockReduce() const
-   {
-      __thread_sum = blockReduceSum(__thread_sum);
-      if (threadIdx.x == 0)
-      {
-         d_buf[blockIdx.x] = __thread_sum;
-      }
-   }
+  //  /* reduction within blocks */
+  // // abb: need to fix this
+  //  void BlockReduce() const
+  //  {
+  //     __thread_sum = blockReduceSum(__thread_sum);
+  //     if (threadIdx.x == 0)
+  //     {
+  //        d_buf[blockIdx.x] = __thread_sum;
+  //     }
+  //  }
 
 
    void operator+=(T val) const
@@ -235,7 +232,6 @@ struct ReduceSum
    }
 
    /* invoke the 2nd reduction at the time want the sum from the reducer */
-   __host__
    operator T()
    {
       T val;
@@ -243,13 +239,13 @@ struct ReduceSum
       hypre_assert(num_workgroups >= 0 && num_workgroups <= 1024);
 
       //abb todo: fix this
-      const dim3 gDim(1), bDim(1024);
+      const sycl::range<1> gDim(1), bDim(1024);
       hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (cl::sycl::handler& cgh) {
 
 	  cl::sycl::accessor<T, 1, cl::sycl::access_mode::read_write,
-			     cl::sycl::target::local> shared_acc(HYPRE_WARP_SIZE, cgh);
+			     cl::sycl::target::local> shared_acc(HYPRE_SUBGROUP_SIZE, cgh);
 
-	  cgh.parallel_for(cl::sycl::nd_range<1>(gridSize*blocksize, blocksize),
+	  cgh.parallel_for(cl::sycl::nd_range<1>(gDim*bDim, bDim),
 			   [=] (cl::sycl::nd_item<1> item) {
 			     OneWorkgroupReduceKernel(item, shared_acc.get_pointer(), d_buf, num_workgroups);
 			   });

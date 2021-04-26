@@ -10,6 +10,18 @@
 
 #if defined(HYPRE_USING_SYCL)
 
+#include <oneapi/dpl/execution>
+#include <oneapi/dpl/algorithm>
+#include <oneapi/dpl/iterator>
+#include <oneapi/dpl/functional>
+
+#include <dpct/dpl_extras/algorithm.h> // dpct::remove_if, remove_copy_if, copy_if
+
+#include <algorithm>
+#include <numeric>
+#include <functional>
+#include <iterator>
+
 #include <CL/sycl.hpp>
 #include <oneapi/mkl.hpp>
 #include <oneapi/mkl/rng/device.hpp>
@@ -39,8 +51,14 @@
 
 struct hypre_SyclData
 {
-   oneapi::mkl::rng::philox4x32x10*  onemklrng_generator=nullptr;
+#if defined(HYPRE_USING_ONEMKLRAND)
+   oneapi::mkl::rng::philox4x32x10*  onemklrand_generator=nullptr;
+#endif
+
+#if defined(HYPRE_USING_ONEMKLSPARSE)
    oneapi::mkl::index_base           cusparse_mat_descr;
+#endif
+
    sycl::queue*                      sycl_queues[HYPRE_MAX_NUM_QUEUES] = {};
    sycl::device                      sycl_device;
 
@@ -80,7 +98,10 @@ struct hypre_SyclData
 hypre_SyclData* hypre_SyclDataCreate();
 void hypre_SyclDataDestroy(hypre_SyclData* data);
 
-oneapi::mkl::rng::philox4x32x10* hypre_SyclDataonemklrngGenerator(hypre_SyclData *data);
+#if defined(HYPRE_USING_ONEMKLRAND)
+oneapi::mkl::rng::philox4x32x10* hypre_SyclDataOnemklrandGenerator(hypre_SyclData *data);
+#endif
+
 // oneapi::mkl::index_base hypre_SyclDataCusparseMatDescr(hypre_SyclData *data);
 sycl::queue *hypre_SyclDataSyclQueue(hypre_SyclData *data, HYPRE_Int i);
 sycl::queue *hypre_SyclDataSyclComputeQueue(hypre_SyclData *data);
@@ -102,18 +123,6 @@ struct hypre_CsrsvData
 #endif //#if defined(HYPRE_USING_SYCL)
 
 #if defined(HYPRE_USING_SYCL)
-
-#include <oneapi/dpl/execution>
-#include <oneapi/dpl/algorithm>
-#include <oneapi/dpl/iterator>
-#include <oneapi/dpl/functional>
-
-#include <dpct/dpl_extras/algorithm.h> // dpct::remove_if, iota, remove_copy_if, copy_if
-
-#include <algorithm>
-#include <numeric>
-#include <functional>
-#include <iterator>
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * macro for launching SYCL kernels, DPL, onemkl::blas::sparse, onemkl::rng calls
@@ -278,7 +287,6 @@ private:
   const T init;
   const T step;
 };
-
 template <class Iter, class T>
 void sycl_iota(Iter first, Iter last, T init=0) {
   using DiffSize = typename std::iterator_traits<Iter>::difference_type;
