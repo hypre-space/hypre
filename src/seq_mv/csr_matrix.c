@@ -315,12 +315,12 @@ hypre_CSRMatrixSetDataOwner( hypre_CSRMatrix *matrix,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
+hypre_CSRMatrixSetRownnzHost( hypre_CSRMatrix *matrix )
 {
    HYPRE_Int  ierr = 0;
    HYPRE_Int  num_rows = hypre_CSRMatrixNumRows(matrix);
-   HYPRE_Int  *A_i = hypre_CSRMatrixI(matrix);
-   HYPRE_Int  *Arownnz;
+   HYPRE_Int *A_i = hypre_CSRMatrixI(matrix);
+   HYPRE_Int *Arownnz;
 
    HYPRE_Int i, adiag;
    HYPRE_Int irownnz = 0;
@@ -328,7 +328,7 @@ hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
    for (i = 0; i < num_rows; i++)
    {
       adiag = A_i[i+1] - A_i[i];
-      if(adiag > 0)
+      if (adiag > 0)
       {
          irownnz++;
       }
@@ -347,12 +347,33 @@ hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
       for (i = 0; i < num_rows; i++)
       {
          adiag = A_i[i+1] - A_i[i];
-         if(adiag > 0)
+         if (adiag > 0)
          {
             Arownnz[irownnz++] = i;
          }
       }
       hypre_CSRMatrixRownnz(matrix) = Arownnz;
+   }
+
+   return ierr;
+}
+
+HYPRE_Int
+hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
+{
+   HYPRE_Int ierr = 0;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(matrix) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      // TODO RL: there's no need currently for having rownnz on GPUs
+   }
+   else
+#endif
+   {
+      ierr = hypre_CSRMatrixSetRownnzHost(matrix);
    }
 
    return ierr;
