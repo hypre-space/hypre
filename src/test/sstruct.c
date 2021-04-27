@@ -2169,9 +2169,9 @@ PrintUsage( char *progname,
       hypre_printf("  -P <Px> <Py> <Pz>   : refine and distribute part(s)\n");
       hypre_printf("  -b <bx> <by> <bz>   : refine and block part(s)\n");
       hypre_printf("  -solver <ID>        : solver ID (default = 39)\n");
-      hypre_printf("                        -1 - Struct  Matvec\n");
-      hypre_printf("                        -2 - SStruct Matvec\n");
       hypre_printf("                        -3 - ParCSR  Matvec\n");
+      hypre_printf("                        -2 - Struct  Matvec\n");
+      hypre_printf("                        -1 - SStruct Matvec\n");
       hypre_printf("                         0 - SMG split solver\n");
       hypre_printf("                         1 - PFMG split solver\n");
       hypre_printf("                         3 - SysPFMG\n");
@@ -2272,11 +2272,30 @@ PrintUsage( char *progname,
       hypre_printf("                        0 - Galerkin (default)\n");
       hypre_printf("                        1 - non-Galerkin ParFlow operators\n");
       hypre_printf("                        2 - Galerkin, general operators\n");
-      hypre_printf("  -relax <r>         : Struct- relaxation type\n");
+      hypre_printf("  -relax <r>         : (S)Struct - relaxation type\n");
       hypre_printf("                        0 - Jacobi\n");
       hypre_printf("                        1 - Weighted Jacobi (default)\n");
       hypre_printf("                        2 - R/B Gauss-Seidel\n");
       hypre_printf("                        3 - R/B Gauss-Seidel (nonsymmetric)\n");
+      hypre_printf("\n");
+      hypre_printf("                       ParCSR - relaxation type\n");
+      hypre_printf("                        0 - Weighted Jacobi\n");
+      hypre_printf("                        1 - Gauss-Seidel (very slow!)\n");
+      hypre_printf("                        3 - Hybrid Gauss-Seidel\n");
+      hypre_printf("                        4 - Hybrid backward Gauss-Seidel\n");
+      hypre_printf("                        6 - Hybrid symmetric Gauss-Seidel\n");
+      hypre_printf("                        8 - symmetric L1-Gauss-Seidel\n");
+      hypre_printf("                       13 - forward L1-Gauss-Seidel\n");
+      hypre_printf("                       14 - backward L1-Gauss-Seidel\n");
+      hypre_printf("                       15 - CG\n");
+      hypre_printf("                       16 - Chebyshev\n");
+      hypre_printf("                       17 - FCF-Jacobi\n");
+      hypre_printf("                       18 - L1-Jacobi (may be used with -CF)\n");
+      hypre_printf("                        9 - Gauss elimination (coarsest grid only) \n");
+      hypre_printf("                       99 - Gauss elim. with pivoting (coarsest grid)\n");
+      hypre_printf("  -rlx_coarse  <val> : ParCSR - set relaxation type for coarsest grid\n");
+      hypre_printf("  -rlx_down    <val> : ParCSR - set relaxation type for down cycle\n");
+      hypre_printf("  -rlx_up      <val> : ParCSR - set relaxation type for up cycle\n");
       hypre_printf("  -w <jacobi_weight> : jacobi weight\n");
       hypre_printf("  -solver_type <ID>  : Struct- solver type for Hybrid\n");
       hypre_printf("                        1 - PCG (default)\n");
@@ -2373,7 +2392,7 @@ main( hypre_int argc,
    HYPRE_SStructSolver   solver;
    HYPRE_SStructSolver   precond;
 
-//   HYPRE_IJMatrix        ij_A;
+   HYPRE_IJMatrix        ij_A;
    HYPRE_ParCSRMatrix    par_A;
    HYPRE_ParVector       par_b;
    HYPRE_ParVector       par_x;
@@ -2406,9 +2425,9 @@ main( hypre_int argc,
    HYPRE_Int             coarsen_type;
    HYPRE_Int             usr_jacobi_weight;
    HYPRE_Int             rap;
-   HYPRE_Int             relax;
    HYPRE_Int             max_levels;
    HYPRE_Int             n_pre, n_post, n_coarse;
+   HYPRE_Int             relax[4];
    HYPRE_Int             max_coarse_size;
    HYPRE_Int             skip;
 
@@ -2541,7 +2560,10 @@ main( hypre_int argc,
    reps  = 10;
    skip  = 0;
    rap   = 0;
-   relax = 1;
+   relax[0] = 1;
+   relax[1] = -1; /* Relax up */
+   relax[2] = -1; /* Relax down */
+   relax[3] = -1; /* Relax coarse */
    usr_jacobi_weight= 0;
    solver_type = 1;
    recompute_res = 0;   /* What should be the default here? */
@@ -2813,7 +2835,22 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-relax") == 0 )
       {
          arg_index++;
-         relax = atoi(argv[arg_index++]);
+         relax[0] = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-relax_up") == 0 )
+      {
+         arg_index++;
+         relax[1] = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-relax_down") == 0 )
+      {
+         arg_index++;
+         relax[2] = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-relax_coarse") == 0 )
+      {
+         arg_index++;
+         relax[3] = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-w") == 0 )
       {
@@ -3672,6 +3709,20 @@ main( hypre_int argc,
    HYPRE_SStructInnerProd(x, x, &x0_norm);
    x0_norm = sqrt(x0_norm);
 
+   /*-----------------------------------------------------------
+    * Build residual vector
+    *-----------------------------------------------------------*/
+   HYPRE_SStructVectorCreate(hypre_MPI_COMM_WORLD, grid, &r);
+   HYPRE_SStructVectorSetObjectType(r, object_type);
+   HYPRE_SStructVectorInitialize(r);
+   HYPRE_SStructVectorAssemble(r);
+   if (print_system)
+   {
+      HYPRE_SStructVectorCopy(b, r);
+      HYPRE_SStructMatrixMatvec(-1.0, A, x, 1.0, r);
+      HYPRE_SStructVectorPrint("sstruct.out.r0", r, 0);
+   }
+
    hypre_EndTiming(time_index);
    hypre_PrintTiming("SStruct Interface", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
@@ -3813,7 +3864,7 @@ main( hypre_int argc,
 
    if (print_system || check_symmetry)
    {
-//      HYPRE_SStructMatrixToIJMatrix(A, &ij_A);
+      HYPRE_SStructMatrixToIJMatrix(A, &ij_A);
    }
 
    /*-----------------------------------------------------------
@@ -3835,26 +3886,29 @@ main( hypre_int argc,
 
       if (object_type != HYPRE_PARCSR)
       {
-//         HYPRE_IJMatrixPrint(ij_A, "IJ.out.A");
+         HYPRE_IJMatrixPrint(ij_A, "IJ.out.A");
       }
    }
 
-//   if (check_symmetry)
-//   {
-//      HYPRE_IJMatrix  ij_AT, ij_B;
-//      HYPRE_Real      B_norm;
-//
-//      /* Compute Frobenius norm of (A - A^T) */
-//      HYPRE_IJMatrixTranspose(ij_A, &ij_AT);
-//      HYPRE_IJMatrixAdd(1.0, ij_A, -1.0, ij_AT, &ij_B);
-//      HYPRE_IJMatrixNorm(ij_B, &B_norm);
-//      HYPRE_IJMatrixPrint(ij_B, "IJ.out.B");
-//      hypre_printf("Frobenius norm (A - A^T) = %20.15e\n\n", B_norm);
-//
-//      /* Free memory */
-//      HYPRE_IJMatrixDestroy(ij_AT);
-//      HYPRE_IJMatrixDestroy(ij_B);
-//   }
+   if (check_symmetry)
+   {
+      HYPRE_IJMatrix  ij_AT, ij_B;
+      HYPRE_Real      B_norm;
+
+      /* Compute Frobenius norm of (A - A^T) */
+      HYPRE_IJMatrixTranspose(ij_A, &ij_AT);
+      HYPRE_IJMatrixAdd(1.0, ij_A, -1.0, ij_AT, &ij_B);
+      HYPRE_IJMatrixNorm(ij_B, &B_norm);
+      HYPRE_IJMatrixPrint(ij_B, "IJ.out.B");
+      if (!myid)
+      {
+         hypre_printf("Frobenius norm (A - A^T) = %20.15e\n\n", B_norm);
+      }
+
+      /* Free memory */
+      HYPRE_IJMatrixDestroy(ij_AT);
+      HYPRE_IJMatrixDestroy(ij_B);
+   }
 
    if (check_Aones)
    {
@@ -3972,7 +4026,7 @@ main( hypre_int argc,
       HYPRE_SStructSysPFMGSetTol(solver, tol);
       HYPRE_SStructSysPFMGSetRelChange(solver, rel_change);
       /* weighted Jacobi = 1; red-black GS = 2 */
-      HYPRE_SStructSysPFMGSetRelaxType(solver, relax);
+      HYPRE_SStructSysPFMGSetRelaxType(solver, relax[0]);
       if (usr_jacobi_weight)
       {
          HYPRE_SStructSysPFMGSetJacobiWeight(solver, jacobi_weight);
@@ -4018,7 +4072,7 @@ main( hypre_int argc,
       HYPRE_SStructSSAMGSetRelChange(solver, rel_change);
       HYPRE_SStructSSAMGSetSkipRelax(solver, skip);
       /* weighted Jacobi = 1; red-black GS = 2 */
-      HYPRE_SStructSSAMGSetRelaxType(solver, relax);
+      HYPRE_SStructSSAMGSetRelaxType(solver, relax[0]);
       if (usr_jacobi_weight)
       {
          HYPRE_SStructSSAMGSetRelaxWeight(solver, jacobi_weight);
@@ -4074,14 +4128,17 @@ main( hypre_int argc,
       {
          HYPRE_BoomerAMGSetRelaxWt(par_solver, jacobi_weight);
       }
-//      if (relax == 1)
-//      {
-//         HYPRE_BoomerAMGSetRelaxType(par_solver, 0);
-//      }
-//      else
-//      {
-//         HYPRE_BoomerAMGSetRelaxType(par_solver, relax);
-//      }
+      if (relax[0] > -1)
+      {
+         HYPRE_BoomerAMGSetRelaxType(par_solver, relax[0]);
+      }
+      for (i = 1; i < 4; i++)
+      {
+         if (relax[i] > -1)
+         {
+            HYPRE_BoomerAMGSetCycleRelaxType(par_solver, relax[i], i);
+         }
+      }
       if (old_default)
       {
          HYPRE_BoomerAMGSetOldDefault(par_solver);
@@ -4196,7 +4253,7 @@ main( hypre_int argc,
          HYPRE_SStructSysPFMGSetTol(precond, 0.0);
          HYPRE_SStructSysPFMGSetZeroGuess(precond);
          /* weighted Jacobi = 1; red-black GS = 2 */
-         HYPRE_SStructSysPFMGSetRelaxType(precond, relax);
+         HYPRE_SStructSysPFMGSetRelaxType(precond, relax[0]);
          if (usr_jacobi_weight)
          {
             HYPRE_SStructSysPFMGSetJacobiWeight(precond, jacobi_weight);
@@ -4220,7 +4277,7 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetTol(precond, 0.0);
          HYPRE_SStructSSAMGSetZeroGuess(precond);
          HYPRE_SStructSSAMGSetSkipRelax(precond, skip);
-         HYPRE_SStructSSAMGSetRelaxType(precond, relax);
+         HYPRE_SStructSSAMGSetRelaxType(precond, relax[0]);
          if (usr_jacobi_weight)
          {
             HYPRE_SStructSSAMGSetRelaxWeight(precond, jacobi_weight);
@@ -4229,7 +4286,7 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetNumPostRelax(precond, n_post);
          HYPRE_SStructSSAMGSetNumCoarseRelax(precond, n_coarse);
          HYPRE_SStructSSAMGSetNonGalerkinRAP(precond, rap);
-         HYPRE_SStructSSAMGSetPrintLevel(precond, 1);
+         HYPRE_SStructSSAMGSetPrintLevel(precond, print_level);
          HYPRE_SStructSSAMGSetPrintFreq(precond, print_freq);
          HYPRE_SStructSSAMGSetLogging(precond, 0);
 
@@ -4345,7 +4402,7 @@ main( hypre_int argc,
             HYPRE_SStructSysPFMGSetTol(precond, 0.0);
             HYPRE_SStructSysPFMGSetZeroGuess(precond);
             /* weighted Jacobi = 1; red-black GS = 2 */
-            HYPRE_SStructSysPFMGSetRelaxType(precond, 1);
+            HYPRE_SStructSysPFMGSetRelaxType(precond, relax[0]);
             HYPRE_SStructSysPFMGSetNumPreRelax(precond, n_pre);
             HYPRE_SStructSysPFMGSetNumPostRelax(precond, n_post);
             HYPRE_SStructSysPFMGSetSkipRelax(precond, skip);
@@ -4526,7 +4583,7 @@ main( hypre_int argc,
             HYPRE_SStructSysPFMGSetTol(precond, 0.0);
             HYPRE_SStructSysPFMGSetZeroGuess(precond);
             /* weighted Jacobi = 1; red-black GS = 2 */
-            HYPRE_SStructSysPFMGSetRelaxType(precond, 1);
+            HYPRE_SStructSysPFMGSetRelaxType(precond, relax[0]);
             HYPRE_SStructSysPFMGSetNumPreRelax(precond, n_pre);
             HYPRE_SStructSysPFMGSetNumPostRelax(precond, n_post);
             HYPRE_SStructSysPFMGSetSkipRelax(precond, skip);
@@ -4699,14 +4756,17 @@ main( hypre_int argc,
          {
             HYPRE_BoomerAMGSetRelaxWt(par_precond, jacobi_weight);
          }
-//         if (relax == 1)
-//         {
-//            HYPRE_BoomerAMGSetRelaxType(par_precond, 0);
-//         }
-//         else
-//         {
-//            HYPRE_BoomerAMGSetRelaxType(par_precond, relax);
-//         }
+         if (relax[0] > -1)
+         {
+            HYPRE_BoomerAMGSetRelaxType(par_precond, relax[0]);
+         }
+         for (i = 1; i < 4; i++)
+         {
+            if (relax[i] > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType(par_precond, relax[i], i);
+            }
+         }
          if (old_default)
          {
             HYPRE_BoomerAMGSetOldDefault(par_precond);
@@ -4829,7 +4889,7 @@ main( hypre_int argc,
          HYPRE_SStructSysPFMGSetTol(precond, 0.0);
          HYPRE_SStructSysPFMGSetZeroGuess(precond);
          /* weighted Jacobi = 1; red-black GS = 2 */
-         HYPRE_SStructSysPFMGSetRelaxType(precond, 1);
+         HYPRE_SStructSysPFMGSetRelaxType(precond, relax[0]);
          HYPRE_SStructSysPFMGSetNumPreRelax(precond, n_pre);
          HYPRE_SStructSysPFMGSetNumPostRelax(precond, n_post);
          HYPRE_SStructSysPFMGSetSkipRelax(precond, skip);
@@ -4848,7 +4908,7 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetTol(precond, 0.0);
          HYPRE_SStructSSAMGSetZeroGuess(precond);
          HYPRE_SStructSSAMGSetSkipRelax(precond, skip);
-         HYPRE_SStructSSAMGSetRelaxType(precond, relax);
+         HYPRE_SStructSSAMGSetRelaxType(precond, relax[0]);
          HYPRE_SStructSSAMGSetNonGalerkinRAP(precond, rap);
          if (usr_jacobi_weight)
          {
@@ -4947,14 +5007,17 @@ main( hypre_int argc,
          {
             HYPRE_BoomerAMGSetRelaxWt(par_precond, jacobi_weight);
          }
-//         if (relax == 1)
-//         {
-//            HYPRE_BoomerAMGSetRelaxType(par_precond, 0);
-//         }
-//         else
-//         {
-//            HYPRE_BoomerAMGSetRelaxType(par_precond, relax);
-//         }
+         if (relax[0] > -1)
+         {
+            HYPRE_BoomerAMGSetRelaxType(par_precond, relax[0]);
+         }
+         for (i = 1; i < 4; i++)
+         {
+            if (relax[i] > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType(par_precond, relax[i], i);
+            }
+         }
          if (old_default)
          {
             HYPRE_BoomerAMGSetOldDefault(par_precond);
@@ -5066,7 +5129,7 @@ main( hypre_int argc,
          HYPRE_SStructSysPFMGSetTol(precond, 0.0);
          HYPRE_SStructSysPFMGSetZeroGuess(precond);
          /* weighted Jacobi = 1; red-black GS = 2 */
-         HYPRE_SStructSysPFMGSetRelaxType(precond, 1);
+         HYPRE_SStructSysPFMGSetRelaxType(precond, relax[0]);
          HYPRE_SStructSysPFMGSetNumPreRelax(precond, n_pre);
          HYPRE_SStructSysPFMGSetNumPostRelax(precond, n_post);
          HYPRE_SStructSysPFMGSetSkipRelax(precond, skip);
@@ -5085,7 +5148,7 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetTol(precond, 0.0);
          HYPRE_SStructSSAMGSetZeroGuess(precond);
          HYPRE_SStructSSAMGSetSkipRelax(precond, skip);
-         HYPRE_SStructSSAMGSetRelaxType(precond, relax);
+         HYPRE_SStructSSAMGSetRelaxType(precond, relax[0]);
          HYPRE_SStructSSAMGSetNonGalerkinRAP(precond, rap);
          if (usr_jacobi_weight)
          {
@@ -5183,14 +5246,17 @@ main( hypre_int argc,
          {
             HYPRE_BoomerAMGSetRelaxWt(par_precond, jacobi_weight);
          }
-//         if (relax == 1)
-//         {
-//            HYPRE_BoomerAMGSetRelaxType(par_precond, 0);
-//         }
-//         else
-//         {
-//            HYPRE_BoomerAMGSetRelaxType(par_precond, relax);
-//         }
+         if (relax[0] > -1)
+         {
+            HYPRE_BoomerAMGSetRelaxType(par_precond, relax[0]);
+         }
+         for (i = 1; i < 4; i++)
+         {
+            if (relax[i] > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType(par_precond, relax[i], i);
+            }
+         }
          if (old_default)
          {
             HYPRE_BoomerAMGSetOldDefault(par_precond);
@@ -5303,7 +5369,7 @@ main( hypre_int argc,
          HYPRE_SStructSysPFMGSetTol(precond, 0.0);
          HYPRE_SStructSysPFMGSetZeroGuess(precond);
          /* weighted Jacobi = 1; red-black GS = 2 */
-         HYPRE_SStructSysPFMGSetRelaxType(precond, 1);
+         HYPRE_SStructSysPFMGSetRelaxType(precond, relax[0]);
          HYPRE_SStructSysPFMGSetNumPreRelax(precond, n_pre);
          HYPRE_SStructSysPFMGSetNumPostRelax(precond, n_post);
          HYPRE_SStructSysPFMGSetSkipRelax(precond, skip);
@@ -5322,7 +5388,7 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetTol(precond, 0.0);
          HYPRE_SStructSSAMGSetZeroGuess(precond);
          HYPRE_SStructSSAMGSetSkipRelax(precond, skip);
-         HYPRE_SStructSSAMGSetRelaxType(precond, relax);
+         HYPRE_SStructSSAMGSetRelaxType(precond, relax[0]);
          HYPRE_SStructSSAMGSetNonGalerkinRAP(precond, rap);
          if (usr_jacobi_weight)
          {
@@ -5421,14 +5487,17 @@ main( hypre_int argc,
          {
             HYPRE_BoomerAMGSetRelaxWt(par_precond, jacobi_weight);
          }
-//         if (relax == 1)
-//         {
-//            HYPRE_BoomerAMGSetRelaxType(par_precond, 0);
-//         }
-//         else
-//         {
-//            HYPRE_BoomerAMGSetRelaxType(par_precond, relax);
-//         }
+         if (relax[0] > -1)
+         {
+            HYPRE_BoomerAMGSetRelaxType(par_precond, relax[0]);
+         }
+         for (i = 1; i < 4; i++)
+         {
+            if (relax[i] > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType(par_precond, relax[i], i);
+            }
+         }
          if (old_default)
          {
             HYPRE_BoomerAMGSetOldDefault(par_precond);
@@ -5505,14 +5574,17 @@ main( hypre_int argc,
          {
             HYPRE_BoomerAMGSetRelaxWt(par_precond, jacobi_weight);
          }
-//         if (relax == 1)
-//         {
-//            HYPRE_BoomerAMGSetRelaxType(par_precond, 0);
-//         }
-//         else
-//         {
-//            HYPRE_BoomerAMGSetRelaxType(par_precond, relax);
-//         }
+         if (relax[0] > -1)
+         {
+            HYPRE_BoomerAMGSetRelaxType(par_precond, relax[0]);
+         }
+         for (i = 1; i < 4; i++)
+         {
+            if (relax[i] > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType(par_precond, relax[i], i);
+            }
+         }
          if (old_default)
          {
             HYPRE_BoomerAMGSetOldDefault(par_precond);
@@ -5644,7 +5716,7 @@ main( hypre_int argc,
       HYPRE_StructPFMGSetTol(struct_solver, tol);
       HYPRE_StructPFMGSetRelChange(struct_solver, rel_change);
       HYPRE_StructPFMGSetRAPType(struct_solver, rap);
-      HYPRE_StructPFMGSetRelaxType(struct_solver, relax);
+      HYPRE_StructPFMGSetRelaxType(struct_solver, relax[0]);
       if (usr_jacobi_weight)
       {
          HYPRE_StructPFMGSetJacobiWeight(struct_solver, jacobi_weight);
@@ -5806,7 +5878,7 @@ main( hypre_int argc,
          HYPRE_StructPFMGSetTol(struct_precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(struct_precond);
          HYPRE_StructPFMGSetRAPType(struct_precond, rap);
-         HYPRE_StructPFMGSetRelaxType(struct_precond, relax);
+         HYPRE_StructPFMGSetRelaxType(struct_precond, relax[0]);
          if (usr_jacobi_weight)
          {
             HYPRE_StructPFMGSetJacobiWeight(struct_precond, jacobi_weight);
@@ -5939,7 +6011,7 @@ main( hypre_int argc,
          HYPRE_StructPFMGSetTol(struct_precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(struct_precond);
          HYPRE_StructPFMGSetRAPType(struct_precond, rap);
-         HYPRE_StructPFMGSetRelaxType(struct_precond, relax);
+         HYPRE_StructPFMGSetRelaxType(struct_precond, relax[0]);
          if (usr_jacobi_weight)
          {
             HYPRE_StructPFMGSetJacobiWeight(struct_precond, jacobi_weight);
@@ -6031,7 +6103,7 @@ main( hypre_int argc,
          HYPRE_StructPFMGSetTol(struct_precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(struct_precond);
          HYPRE_StructPFMGSetRAPType(struct_precond, rap);
-         HYPRE_StructPFMGSetRelaxType(struct_precond, relax);
+         HYPRE_StructPFMGSetRelaxType(struct_precond, relax[0]);
          if (usr_jacobi_weight)
          {
             HYPRE_StructPFMGSetJacobiWeight(struct_precond, jacobi_weight);
@@ -6151,7 +6223,7 @@ main( hypre_int argc,
          HYPRE_StructPFMGSetTol(struct_precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(struct_precond);
          HYPRE_StructPFMGSetRAPType(struct_precond, rap);
-         HYPRE_StructPFMGSetRelaxType(struct_precond, relax);
+         HYPRE_StructPFMGSetRelaxType(struct_precond, relax[0]);
          if (usr_jacobi_weight)
          {
             HYPRE_StructPFMGSetJacobiWeight(struct_precond, jacobi_weight);
@@ -6309,7 +6381,7 @@ main( hypre_int argc,
                HYPRE_SStructSysPFMGSetTol(precond, 0.0);
                HYPRE_SStructSysPFMGSetZeroGuess(precond);
                /* weighted Jacobi = 1; red-black GS = 2 */
-               HYPRE_SStructSysPFMGSetRelaxType(precond, 1);
+               HYPRE_SStructSysPFMGSetRelaxType(precond, relax[0]);
                HYPRE_SStructSysPFMGSetNumPreRelax(precond, n_pre);
                HYPRE_SStructSysPFMGSetNumPostRelax(precond, n_post);
                HYPRE_SStructSysPFMGSetSkipRelax(precond, skip);
@@ -6328,7 +6400,7 @@ main( hypre_int argc,
                HYPRE_SStructSSAMGSetTol(precond, 0.0);
                HYPRE_SStructSSAMGSetZeroGuess(precond);
                HYPRE_SStructSSAMGSetSkipRelax(precond, skip);
-               HYPRE_SStructSSAMGSetRelaxType(precond, relax);
+               HYPRE_SStructSSAMGSetRelaxType(precond, relax[0]);
                HYPRE_SStructSSAMGSetNonGalerkinRAP(precond, rap);
                if (usr_jacobi_weight)
                {
@@ -6465,7 +6537,7 @@ main( hypre_int argc,
                HYPRE_SStructSSAMGSetTol(precond, 0.0);
                HYPRE_SStructSSAMGSetZeroGuess(precond);
                HYPRE_SStructSSAMGSetSkipRelax(precond, skip);
-               HYPRE_SStructSSAMGSetRelaxType(precond, relax);
+               HYPRE_SStructSSAMGSetRelaxType(precond, relax[0]);
                HYPRE_SStructSSAMGSetNonGalerkinRAP(precond, rap);
                if (usr_jacobi_weight)
                {
@@ -6646,16 +6718,10 @@ main( hypre_int argc,
     * Compute real residual
     *-----------------------------------------------------------*/
 
-   HYPRE_SStructVectorCreate(hypre_MPI_COMM_WORLD, grid, &r);
-   HYPRE_SStructVectorSetObjectType(r, object_type);
-   HYPRE_SStructVectorInitialize(r);
-   HYPRE_SStructVectorAssemble(r);
    HYPRE_SStructVectorCopy(b, r);
    HYPRE_SStructMatrixMatvec(-1.0, A, x, 1.0, r);
-
    HYPRE_SStructInnerProd(r, r, &real_res_norm);
    real_res_norm = sqrt(real_res_norm);
-
    if (rhs_norm > 0)
    {
       real_res_norm = real_res_norm/rhs_norm;
