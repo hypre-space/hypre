@@ -4,8 +4,12 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 set(HDRS
+  aux_parcsr_matrix.h
+  aux_par_vector.h
   HYPRE_IJ_mv.h
   _hypre_IJ_mv.h
+  IJ_matrix.h
+  IJ_vector.h
 )
 
 set(SRCS
@@ -21,12 +25,23 @@ set(SRCS
   IJMatrix_parcsr.c
   IJVector.c
   IJVector_parcsr.c
+  IJMatrix_parcsr_device.c
+  IJVector_parcsr_device.c
 )
 
-target_sources(HYPRE
+target_sources(${PROJECT_NAME}
   PRIVATE ${SRCS}
           ${HDRS}
+)
+
+if (HYPRE_USING_CUDA)
+  set(CUDA_SRCS
+    IJMatrix_parcsr_device.c
+    IJVector_parcsr_device.c
   )
+  convert_filenames_to_full_paths(CUDA_SRCS)
+  set(HYPRE_CUDA_SOURCES ${HYPRE_CUDA_SOURCES} ${CUDA_SRCS} PARENT_SCOPE)
+endif ()
 
 convert_filenames_to_full_paths(HDRS)
 set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HDRS} PARENT_SCOPE)

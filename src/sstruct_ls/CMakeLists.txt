@@ -74,10 +74,23 @@ set(SRCS
   sys_semi_restrict.c
 )
 
-target_sources(HYPRE
+target_sources(${PROJECT_NAME}
   PRIVATE ${SRCS}
           ${HDRS}
+)
+
+if (HYPRE_USING_CUDA)
+  set(CUDA_SRCS
+    fac_amr_fcoarsen.c
+    fac_amr_rap.c
+    fac_restrict2.c
+    fac_setup2.c
+    fac_zero_stencilcoef.c
+    node_relax.c
   )
+  convert_filenames_to_full_paths(CUDA_SRCS)
+  set(HYPRE_CUDA_SOURCES ${HYPRE_CUDA_SOURCES} ${CUDA_SRCS} PARENT_SCOPE)
+endif ()
 
 convert_filenames_to_full_paths(HDRS)
 set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HDRS} PARENT_SCOPE)
