@@ -1134,6 +1134,7 @@ hypre_StructMatvecDiagScale( HYPRE_Complex        alpha,
       xp = hypre_StructVectorBoxData(x, i);
       yp = hypre_StructVectorBoxData(y, i);
 
+#define DEVICE_VAR is_device_ptr(yp,xp,Ap)
       start = hypre_BoxIMin(box);
       hypre_BoxGetSize(box, loop_size);
       if (beta == 0.0)
@@ -1146,7 +1147,7 @@ hypre_StructMatvecDiagScale( HYPRE_Complex        alpha,
                                    x_data_box, start, ustride, xi,
                                    y_data_box, start, ustride, yi);
                {
-                  yp[yi] = xp[yi] / Ap[0];
+                  yp[yi] = xp[xi] / Ap[0];
                }
                hypre_BoxLoop2End(xi, yi);
             }
@@ -1157,7 +1158,7 @@ hypre_StructMatvecDiagScale( HYPRE_Complex        alpha,
                                    x_data_box, start, ustride, xi,
                                    y_data_box, start, ustride, yi);
                {
-                  yp[yi] = xp[yi] / Ap[Ai];
+                  yp[yi] = xp[xi] / Ap[Ai];
                }
                hypre_BoxLoop3End(Ai, xi, yi);
             } /* if constant coefficient*/
@@ -1170,7 +1171,7 @@ hypre_StructMatvecDiagScale( HYPRE_Complex        alpha,
                                    x_data_box, start, ustride, xi,
                                    y_data_box, start, ustride, yi);
                {
-                  yp[yi] = alpha * xp[yi] / Ap[0];
+                  yp[yi] = alpha * xp[xi] / Ap[0];
                }
                hypre_BoxLoop2End(xi, yi);
             }
@@ -1181,7 +1182,7 @@ hypre_StructMatvecDiagScale( HYPRE_Complex        alpha,
                                    x_data_box, start, ustride, xi,
                                    y_data_box, start, ustride, yi);
                {
-                  yp[yi] = alpha * xp[yi] / Ap[Ai];
+                  yp[yi] = alpha * xp[xi] / Ap[Ai];
                }
                hypre_BoxLoop3End(Ai, xi, yi);
             } /* if constant coefficient*/
@@ -1197,7 +1198,7 @@ hypre_StructMatvecDiagScale( HYPRE_Complex        alpha,
                                    x_data_box, start, ustride, xi,
                                    y_data_box, start, ustride, yi);
                {
-                  yp[yi] = xp[yi] / Ap[0] + beta * yp[yi];
+                  yp[yi] = xp[xi] / Ap[0] + beta * yp[yi];
                }
                hypre_BoxLoop2End(xi, yi);
             }
@@ -1208,7 +1209,7 @@ hypre_StructMatvecDiagScale( HYPRE_Complex        alpha,
                                    x_data_box, start, ustride, xi,
                                    y_data_box, start, ustride, yi);
                {
-                  yp[yi] = xp[yi] / Ap[Ai] + beta * yp[yi];
+                  yp[yi] = xp[xi] / Ap[Ai] + beta * yp[yi];
                }
                hypre_BoxLoop3End(Ai, xi, yi);
             } /* if constant coefficient*/
@@ -1221,7 +1222,7 @@ hypre_StructMatvecDiagScale( HYPRE_Complex        alpha,
                                    x_data_box, start, ustride, xi,
                                    y_data_box, start, ustride, yi);
                {
-                  yp[yi] = alpha * xp[yi] / Ap[0] + beta * yp[yi];
+                  yp[yi] = alpha * xp[xi] / Ap[0] + beta * yp[yi];
                }
                hypre_BoxLoop2End(xi, yi);
             }
@@ -1232,12 +1233,13 @@ hypre_StructMatvecDiagScale( HYPRE_Complex        alpha,
                                    x_data_box, start, ustride, xi,
                                    y_data_box, start, ustride, yi);
                {
-                  yp[yi] = alpha * xp[yi] / Ap[Ai] + beta * yp[yi];
+                  yp[yi] = alpha * xp[xi] / Ap[Ai] + beta * yp[yi];
                }
                hypre_BoxLoop3End(Ai, xi, yi);
             } /* if constant coefficient*/
          } /* if (alpha == 1.0) */
       } /* if (beta == 0.0) */
+#undef DEVICE_VAR
    } /* loop on grid boxes */
 
    return hypre_error_flag;
