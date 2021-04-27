@@ -345,24 +345,8 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                      }
                   }
                   hypre_BoxLoop2End(Ai, Pi);
-
-#if 0
-                  /* Adjust weights everywhere */
-                  hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
-                  {
-                     center = Pp1[Pi] + Pp2[Pi];
-                     if (center)
-                     {
-                        Pp1[Pi] /= center;
-                        Pp2[Pi] /= center;
-                     }
-                  }
-                  hypre_BoxLoop1End(Pi);
-
-#endif
                } /* loop on compute_boxes */
 
-#if 1
                /* Adjust weights at part boundaries */
                hypre_ForBoxArrayI(i, pbnd_boxaa)
                {
@@ -385,24 +369,29 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                         Pp2 = hypre_StructMatrixBoxData(P_s, ii, 2);
                         P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P_s), ii);
 
+                        /* Setup loop size */
                         hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+                        if (hypre_IndexD(loop_size, cdir) > 1)
+                        {
+                           hypre_IndexD(loop_size, cdir) = 0;
+                        }
+
                         hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
                         {
+                           hypre_assert((Pp1[Pi] == 0) || (Pp2[Pi] == 0));
+
                            center = Pp1[Pi] + Pp2[Pi];
-                           if (center)
-                           {
-                              Pp1[Pi] /= center;
-                              Pp2[Pi] /= center;
-                           }
+                           Pp1[Pi] /= center;
+                           Pp2[Pi] /= center;
                         }
                         hypre_BoxLoop1End(Pi);
                      } /* loop on pbnd_boxa */
                   }
                } /* loop on pbnd_boxaa */
-#endif
+
                hypre_TFree(ventries, HYPRE_MEMORY_HOST);
                hypre_BoxDestroy(compute_box);
-            } /* if constant variables*/
+            } /* if constant coefficients */
          } /* if (P_stencil_size > 1)*/
 
          hypre_StructMatrixAssemble(P_s);
