@@ -26,13 +26,13 @@ Final Relative Residual Norm = 5.961443e-08
 
 
 Iterations = 7
-Final Relative Residual Norm = 6.309890e-09
+Final Relative Residual Norm = 6.309891e-09
 
 # Output file: default.out.5f
 
 
  Iterations =  7
- Final Relative Residual Norm =   6.30989028E-09
+ Final Relative Residual Norm =   6.30989112E-09
 
 # Output file: default.out.6
     1    3.503257e-02    0.004729    4.728807e-03
@@ -87,4 +87,3 @@ Final Relative Residual Norm = 2.7253e-07
 
 Iterations = 7
 Final Relative Residual Norm = 4.81542e-07
-
