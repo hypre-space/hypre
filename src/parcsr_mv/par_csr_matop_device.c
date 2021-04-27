@@ -9,7 +9,7 @@
 #include "_hypre_parcsr_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 HYPRE_Int
 hypre_ParcsrGetExternalRowsDeviceInit( hypre_ParCSRMatrix   *A,
@@ -930,15 +930,8 @@ hypre_ParCSRMatrixGetRowDevice( hypre_ParCSRMatrix  *mat,
 
    hypre_ParCSRMatrixGetrowactive(mat) = 1;
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    row_start = hypre_ParCSRMatrixFirstRowIndex(mat);
    row_end = hypre_ParCSRMatrixLastRowIndex(mat) + 1;
-#else
-   HYPRE_Int my_id;
-   hypre_MPI_Comm_rank(hypre_ParCSRMatrixComm(mat), &my_id);
-   row_end = hypre_ParCSRMatrixRowStarts(mat)[ my_id + 1 ];
-   row_start = hypre_ParCSRMatrixRowStarts(mat)[ my_id ];
-#endif
    nrows = row_end - row_start;
 
    if (row < row_start || row >= row_end)
@@ -1107,7 +1100,7 @@ hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
    return hypre_error_flag;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA)
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRDiagScale
@@ -1127,10 +1120,10 @@ hypre_ParCSRDiagScale( HYPRE_ParCSRMatrix HA,
    HYPRE_Int *A_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A));
    HYPRE_Int local_size = hypre_VectorSize(hypre_ParVectorLocalVector(x));
    HYPRE_Int ierr = 0;
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypreDevice_DiagScaleVector(local_size, A_i, A_data, y_data, 0.0, x_data);
    //hypre_SyncCudaComputeStream(hypre_handle());
-#else /* #if defined(HYPRE_USING_CUDA) */
+#else /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
 #pragma omp target teams distribute parallel for private(i) is_device_ptr(x_data,y_data,A_data,A_i)
@@ -1145,4 +1138,3 @@ hypre_ParCSRDiagScale( HYPRE_ParCSRMatrix HA,
 
    return ierr;
 }
-

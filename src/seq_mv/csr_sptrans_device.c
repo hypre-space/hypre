@@ -20,16 +20,6 @@ hypreDevice_CSRSpTransCusparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE
    hypre_profile_times[HYPRE_TIMER_ID_SPTRANS] -= hypre_MPI_Wtime();
 #endif
 
-   /* trivial case */
-   if (nnzA == 0)
-   {
-      *d_ic_out = hypre_CTAlloc(HYPRE_Int, n + 1, HYPRE_MEMORY_DEVICE);
-      *d_jc_out = hypre_CTAlloc(HYPRE_Int,     0, HYPRE_MEMORY_DEVICE);
-      *d_ac_out = hypre_CTAlloc(HYPRE_Complex, 0, HYPRE_MEMORY_DEVICE);
-
-      return hypre_error_flag;
-   }
-
    cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
    cusparseAction_t action = want_data ? CUSPARSE_ACTION_NUMERIC : CUSPARSE_ACTION_SYMBOLIC;
    HYPRE_Complex *csc_a;
@@ -96,7 +86,68 @@ hypreDevice_CSRSpTransCusparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_ROCSPARSE)
+HYPRE_Int
+hypreDevice_CSRSpTransRocsparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int       nnzA,
+                                HYPRE_Int  *d_ia,     HYPRE_Int  *d_ja,     HYPRE_Complex  *d_aa,
+                                HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out,
+                                HYPRE_Int   want_data)
+{
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_SPTRANS] -= hypre_MPI_Wtime();
+#endif
+
+   rocsparse_handle handle = hypre_HandleCusparseHandle(hypre_handle());
+   rocsparse_action action = want_data ? rocsparse_action_numeric : rocsparse_action_symbolic;
+
+   HYPRE_Complex *csc_a;
+   if (want_data)
+   {
+      csc_a = hypre_TAlloc(HYPRE_Complex, nnzA,  HYPRE_MEMORY_DEVICE);
+   }
+   else
+   {
+      csc_a = NULL;
+      d_aa = NULL;
+   }
+   HYPRE_Int *csc_j = hypre_TAlloc(HYPRE_Int, nnzA,  HYPRE_MEMORY_DEVICE);
+   HYPRE_Int *csc_i = hypre_TAlloc(HYPRE_Int, n + 1, HYPRE_MEMORY_DEVICE);
+
+   size_t buffer_size = 0;
+   HYPRE_ROCSPARSE_CALL( rocsparse_csr2csc_buffer_size(handle,
+                                                       m, n, nnzA,
+                                                       csc_i, csc_j,
+                                                       action,
+                                                       &buffer_size) );
+
+   void * buffer;
+   buffer = hypre_TAlloc(char, buffer_size, HYPRE_MEMORY_DEVICE);
+
+   HYPRE_ROCSPARSE_CALL( rocsparse_dcsr2csc(handle,
+                                            m, n, nnzA,
+                                            d_aa, d_ia, d_ja,
+                                            csc_a, csc_j, csc_i,
+                                            action,
+                                            rocsparse_index_base_zero,
+                                            buffer) );
+   hypre_TFree(buffer, HYPRE_MEMORY_DEVICE);
+
+   *d_ic_out = csc_i;
+   *d_jc_out = csc_j;
+   *d_ac_out = csc_a;
+
+#ifdef HYPRE_PROFILE
+   hypre_SyncCudaDevice(hypre_handle())
+   hypre_profile_times[HYPRE_TIMER_ID_SPTRANS] += hypre_MPI_Wtime();
+#endif
+
+   return hypre_error_flag;
+}
+
+#endif // #if defined(HYPRE_USING_ROCSPARSE)
+
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 HYPRE_Int
 hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int       nnzA,
@@ -104,16 +155,6 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
                        HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out,
                        HYPRE_Int   want_data)
 {
-   /* trivial case */
-   if (nnzA == 0)
-   {
-      *d_ic_out = hypre_CTAlloc(HYPRE_Int, n + 1, HYPRE_MEMORY_DEVICE);
-      *d_jc_out = hypre_CTAlloc(HYPRE_Int,     0, HYPRE_MEMORY_DEVICE);
-      *d_ac_out = hypre_CTAlloc(HYPRE_Complex, 0, HYPRE_MEMORY_DEVICE);
-
-      return hypre_error_flag;
-   }
-
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_SPTRANS] -= hypre_MPI_Wtime();
 #endif
@@ -180,5 +221,4 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    return hypre_error_flag;
 }
 
-#endif /* HYPRE_USING_CUDA */
-
+#endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */

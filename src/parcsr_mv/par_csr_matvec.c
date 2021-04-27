@@ -54,7 +54,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    HYPRE_Complex *x_tmp_data, **x_buf_data;
    HYPRE_Complex *x_local_data = hypre_VectorData(x_local);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_Int sync_stream;
    hypre_GetSyncCudaCompute(&sync_stream);
    hypre_SetSyncCudaCompute(0);
@@ -140,7 +140,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    }
 
    /* x_tmp */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    /* for GPU and single vector, alloc persistent memory for x_tmp (in comm_pkg) and reuse */
    if (num_vectors == 1)
    {
@@ -170,7 +170,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 
    for (jv = 0; jv < num_vectors; ++jv)
    {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
       if (jv == 0)
       {
          if (!hypre_ParCSRCommPkgBufData(comm_pkg))
@@ -223,7 +223,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       HYPRE_Complex *locl_data = x_local_data + jv * vecstride;
 
       /* if on device, no need to Sync: send_data is on device memory */
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       /* pack send data on device */
       HYPRE_THRUST_CALL( gather,
                          hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
@@ -326,7 +326,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    {
       for ( jv = 0; jv < num_vectors; ++jv )
       {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
          if (jv == 0)
          {
             continue;
@@ -337,7 +337,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       hypre_TFree(x_buf_data, HYPRE_MEMORY_HOST);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    hypre_SetSyncCudaCompute(sync_stream);
    hypre_SyncCudaComputeStream(hypre_handle());
 #endif
@@ -401,7 +401,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    HYPRE_Complex *y_tmp_data, **y_buf_data;
    HYPRE_Complex *y_local_data = hypre_VectorData(y_local);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_Int sync_stream;
    hypre_GetSyncCudaCompute(&sync_stream);
    hypre_SetSyncCudaCompute(0);
@@ -485,7 +485,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    }
 
    /* y_tmp */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    /* for GPU and single vector, alloc persistent memory for y_tmp (in comm_pkg) and reuse */
    if (num_vectors == 1)
    {
@@ -515,7 +515,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
 
    for (jv = 0; jv < num_vectors; ++jv)
    {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
       if (jv == 0)
       {
          if (!hypre_ParCSRCommPkgBufData(comm_pkg))
@@ -643,7 +643,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       HYPRE_Complex *recv_data = (HYPRE_Complex *) y_buf_data[jv];
       HYPRE_Complex *locl_data = y_local_data + jv * vecstride;
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       /* unpack recv data on device */
       if (!hypre_ParCSRCommPkgWorkSpace(comm_pkg))
       {
@@ -689,7 +689,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    {
       for ( jv = 0; jv < num_vectors; ++jv )
       {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
          if (jv == 0)
          {
             continue;
@@ -700,7 +700,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       hypre_TFree(y_buf_data, HYPRE_MEMORY_HOST);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    hypre_SetSyncCudaCompute(sync_stream);
    hypre_SyncCudaComputeStream(hypre_handle());
 #endif
@@ -841,4 +841,3 @@ hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
 
    return ierr;
 }
-

@@ -611,7 +611,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
 #endif
 
-      free(values);
+      hypre_TFree(values, HYPRE_MEMORY_HOST);
 
       /* Assembling is postponed since the vectors will be further modified */
    }
@@ -692,7 +692,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
                                          stencil_indices, values);
 #endif
 
-         free(values);
+         hypre_TFree(values, HYPRE_MEMORY_HOST);
       }
       else /* Symmetric storage */
       {
@@ -722,7 +722,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
                                          stencil_indices, values);
 #endif
 
-         free(values);
+         hypre_TFree(values, HYPRE_MEMORY_HOST);
       }
    }
 
@@ -1082,8 +1082,8 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 #endif
       }
 
-      free(values);
-      free(bvalues);
+      hypre_TFree(values, HYPRE_MEMORY_HOST);
+      hypre_TFree(bvalues, HYPRE_MEMORY_HOST);
    }
 
    /* Finalize the vector and matrix assembly */

@@ -14,7 +14,7 @@
 #define COMMON_C_PT  2
 #define Z_PT -2
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 HYPRE_Int hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix *S, hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int CF_init, HYPRE_Real *measure_diag, HYPRE_Real *measure_offd, HYPRE_Real *real_send_buf, HYPRE_Int *graph_diag_size, HYPRE_Int *graph_diag, HYPRE_Int *CF_marker_diag);
 
@@ -261,7 +261,7 @@ hypreCUDAKernel_PMISCoarseningInit(HYPRE_Int   nrows,
    if (CF_init == 1)
    {
       // TODO
-      assert(0);
+      hypre_device_assert(0);
    }
    else
    {
@@ -389,9 +389,8 @@ hypreCUDAKernel_PMISCoarseningUpdateCF(HYPRE_Int   graph_diag_size,
    }
    else
    {
-#ifdef HYPRE_DEBUG
-      assert(marker_row == 0);
-#endif
+      hypre_device_assert(marker_row == 0);
+
       /*-------------------------------------------------
        * Now treat the case where this node is not in the
        * independent set: loop over
@@ -526,7 +525,7 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
    return hypre_error_flag;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA)
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 
 

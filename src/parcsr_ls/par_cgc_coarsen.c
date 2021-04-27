@@ -675,20 +675,15 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC (hypre_ParCSRMatrix    *S,HYPRE_Int numberof
       hypre_printf ("Starting CGC matrix communication\n");
    }
 #endif
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    {
-      /* classical CGC does not really make sense in combination with HYPRE_NO_GLOBAL_PARTITION,
-         but anyway, here it is:
-         */
+      /* classical CGC does not really make sense with an assumed partition, but
+         anyway, here it is: */
       HYPRE_Int nlocal = vertexrange[1]-vertexrange[0];
       vertexrange_all = hypre_CTAlloc(HYPRE_Int, mpisize+1, HYPRE_MEMORY_HOST);
       hypre_MPI_Allgather (&nlocal,1,HYPRE_MPI_INT,vertexrange_all+1,1,HYPRE_MPI_INT,comm);
       vertexrange_all[0]=0;
       for (j=2;j<=mpisize;j++) vertexrange_all[j]+=vertexrange_all[j-1];
    }
-#else
-   vertexrange_all = vertexrange;
-#endif
    Gseq = hypre_ParCSRMatrixToCSRMatrixAll (G);
 #if 0 /* debugging */
    if (!mpirank) {
@@ -753,9 +748,7 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC (hypre_ParCSRMatrix    *S,HYPRE_Int numberof
 #endif
    HYPRE_IJMatrixDestroy (ijG);
    hypre_TFree(vertexrange, HYPRE_MEMORY_HOST);
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    hypre_TFree(vertexrange_all, HYPRE_MEMORY_HOST);
-#endif
    hypre_TFree(CF_marker_offd, HYPRE_MEMORY_HOST);
 #if 0
    if (!mpirank) {
@@ -803,7 +796,6 @@ HYPRE_Int hypre_AmgCGCPrepare (hypre_ParCSRMatrix *S,HYPRE_Int nlocal,HYPRE_Int 
    num_sends = hypre_ParCSRCommPkgNumSends (comm_pkg);
 
    if (coarsen_type % 2 == 0) nlocal++; /* even coarsen_type means allow_emptygrids */
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    {
       HYPRE_Int scan_recv;
 
@@ -816,15 +808,6 @@ HYPRE_Int hypre_AmgCGCPrepare (hypre_ParCSRMatrix *S,HYPRE_Int nlocal,HYPRE_Int 
       vstart = vertexrange[0];
       /*vend   = vertexrange[1];*/
    }
-#else
-   vertexrange = hypre_CTAlloc(HYPRE_Int, mpisize+1, HYPRE_MEMORY_HOST);
-
-   hypre_MPI_Allgather (&nlocal,1,HYPRE_MPI_INT,vertexrange+1,1,HYPRE_MPI_INT,comm);
-   vertexrange[0]=0;
-   for (i=2;i<=mpisize;i++) vertexrange[i]+=vertexrange[i-1];
-   vstart = vertexrange[mpirank];
-   /*vend   = vertexrange[mpirank+1];*/
-#endif
 
    /* Note: vstart uses 0-based indexing, while CF_marker uses 1-based indexing */
    if (coarsen_type % 2 == 1) { /* see above */
@@ -917,7 +900,6 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
    pointrange = hypre_ParCSRMatrixRowStarts (S);
    pointrange_nonlocal = hypre_CTAlloc(HYPRE_Int,  2*num_recvs, HYPRE_MEMORY_HOST);
    vertexrange_nonlocal = hypre_CTAlloc(HYPRE_Int,  2*num_recvs, HYPRE_MEMORY_HOST);
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    {
       HYPRE_Int num_sends  =  hypre_ParCSRCommPkgNumSends (comm_pkg);
       HYPRE_Int *send_procs =  hypre_ParCSRCommPkgSendProcs (comm_pkg);
@@ -950,19 +932,6 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
       hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
       hypre_TFree(sendrequest, HYPRE_MEMORY_HOST);
    }
-#else
-   nlocal = vertexrange[mpirank+1] - vertexrange[mpirank];
-   /*pointrange_start = pointrange[mpirank];
-     pointrange_end   = pointrange[mpirank+1];*/
-   vertexrange_start = vertexrange[mpirank];
-   vertexrange_end   = vertexrange[mpirank+1];
-   for (i=0;i<num_recvs;i++) {
-      pointrange_nonlocal[2*i] = pointrange[recv_procs[i]];
-      pointrange_nonlocal[2*i+1] = pointrange[recv_procs[i]+1];
-      vertexrange_nonlocal[2*i] = vertexrange[recv_procs[i]];
-      vertexrange_nonlocal[2*i+1] = vertexrange[recv_procs[i]+1];
-   }
-#endif
    /* now we have the array recv_procs. However, it may contain too many entries as it is
       inherited from A. We now have to determine the subset which contains only the
       strongly connected neighbors */

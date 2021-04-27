@@ -115,7 +115,6 @@ HYPRE_Generate2DSystem(HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2,
    n = L_n*(HYPRE_BigInt)dim;
 
    /* global row/col starts */
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    A_row_starts = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
    A_col_starts = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
    for(i = 0; i < 2; i++)
@@ -123,15 +122,6 @@ HYPRE_Generate2DSystem(HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2,
       A_row_starts[i] = L_row_starts[i]*(HYPRE_BigInt)dim;
       A_col_starts[i] = L_row_starts[i]*(HYPRE_BigInt)dim;
    }
-#else
-   A_row_starts = hypre_CTAlloc(HYPRE_BigInt,  num_procs + 1, HYPRE_MEMORY_HOST);
-   A_col_starts = hypre_CTAlloc(HYPRE_BigInt,  num_procs + 1, HYPRE_MEMORY_HOST);
-   for(i = 0; i < num_procs + 1; i++)
-   {
-      A_row_starts[i] = L_row_starts[i]*(HYPRE_BigInt)dim;
-      A_col_starts[i] = L_row_starts[i]*(HYPRE_BigInt)dim;
-   }
-#endif
    
    /***** first we will do the diag part ******/
    {

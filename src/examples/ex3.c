@@ -48,6 +48,7 @@
 #include <string.h>
 #include <math.h>
 #include "HYPRE_struct_ls.h"
+#include "ex.h"
 
 #ifdef HYPRE_EXVIS
 #include "vis.c"
@@ -83,9 +84,6 @@ int main (int argc, char *argv[])
    MPI_Init(&argc, &argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
-
-   /* Initialize HYPRE */
-   HYPRE_Init();
 
    /* Set defaults */
    n = 33;
@@ -153,6 +151,12 @@ int main (int argc, char *argv[])
          return (0);
       }
    }
+
+   /* Initialize HYPRE */
+   HYPRE_Init();
+
+   /* Print GPU info */
+   HYPRE_PrintDeviceInfo();
 
    /* Figure out the processor grid (N x N).  The local problem
       size for the interior nodes is indicated by n (n x n).

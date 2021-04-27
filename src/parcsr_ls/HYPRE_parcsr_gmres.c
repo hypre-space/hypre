@@ -23,7 +23,7 @@ HYPRE_ParCSRGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
    }
    gmres_functions =
       hypre_GMRESFunctionsCreate(
-         hypre_CAlloc, hypre_ParKrylovFree, hypre_ParKrylovCommInfo,
+         hypre_ParKrylovCAlloc, hypre_ParKrylovFree, hypre_ParKrylovCommInfo,
          hypre_ParKrylovCreateVector,
          hypre_ParKrylovCreateVectorArray,
          hypre_ParKrylovDestroyVector, hypre_ParKrylovMatvecCreate,

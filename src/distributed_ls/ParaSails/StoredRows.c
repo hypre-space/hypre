@@ -60,10 +60,10 @@ StoredRows *StoredRowsCreate(Matrix *mat, HYPRE_Int size)
 void StoredRowsDestroy(StoredRows *p)
 {
     MemDestroy(p->mem);
-    free(p->len);
-    free(p->ind);
-    free(p->val);
-    free(p);
+    hypre_TFree(p->len,HYPRE_MEMORY_HOST);
+    hypre_TFree(p->ind,HYPRE_MEMORY_HOST);
+    hypre_TFree(p->val,HYPRE_MEMORY_HOST);
+    hypre_TFree(p,HYPRE_MEMORY_HOST);
 }
 
 /*--------------------------------------------------------------------------

@@ -205,7 +205,7 @@ main( hypre_int argc,
       sum += xp1[xi1];
       if (xp1[xi1] != 1)
       {
-         hypre_BoxLoopGetIndex(index);
+         zypre_BoxLoopGetIndex(index);
          hypre_printf("*(%d,%d,%d) = %d\n",
                       index[0], index[1], index[2], (HYPRE_Int) xp1[xi1]);
          fail = 1;

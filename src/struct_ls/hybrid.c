@@ -454,7 +454,7 @@ hypre_HybridSolveUsePCG( hypre_HybridData  *hybrid_data )
 
    hypre_PCGFunctions  *pcg_functions =
       hypre_PCGFunctionsCreate(
-         hypre_CAlloc, hypre_StructKrylovFree,
+         hypre_StructKrylovCAlloc, hypre_StructKrylovFree,
          hypre_StructKrylovCommInfo,
          hypre_StructKrylovCreateVector,
          hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
@@ -492,7 +492,7 @@ hypre_HybridSolveUseGMRES( hypre_HybridData  *hybrid_data )
 
    hypre_GMRESFunctions  *gmres_functions =
       hypre_GMRESFunctionsCreate(
-         hypre_CAlloc, hypre_StructKrylovFree,
+         hypre_StructKrylovCAlloc, hypre_StructKrylovFree,
          hypre_StructKrylovCommInfo,
          hypre_StructKrylovCreateVector,
          hypre_StructKrylovCreateVectorArray,

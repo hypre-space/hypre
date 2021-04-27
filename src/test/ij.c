@@ -17,7 +17,7 @@
 #include <math.h>
 
 #include "_hypre_utilities.h"
-#include "_hypre_utilities.hpp"
+//#include "_hypre_utilities.hpp"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_mv.h"
 
@@ -27,8 +27,12 @@
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"
 
-#ifdef HYPRE_USING_DSUPERLU
-#include "superlu_ddefs.h"
+#if defined(HYPRE_USING_GPU)
+#include "_hypre_utilities.hpp"
+#endif
+
+#if defined(HYPRE_USING_UMPIRE)
+#include "umpire/interface/umpire.h"
 #endif
 
 /* begin lobpcg */
@@ -126,6 +130,7 @@ main( hypre_int argc,
    HYPRE_Int           mg_max_iter = 100;
    HYPRE_Int           nodal = 0;
    HYPRE_Int           nodal_diag = 0;
+   HYPRE_Int           keep_same_sign = 0;
    HYPRE_Real          cf_tol = 0.9;
    HYPRE_Real          norm;
    HYPRE_Real          final_res_norm;
@@ -236,7 +241,7 @@ main( hypre_int argc,
    HYPRE_Real   add_trunc_factor = 0;
    HYPRE_Int    rap2     = 0;
    HYPRE_Int    mod_rap2 = 0;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_Int    keepTranspose = 1;
 #else
    HYPRE_Int    keepTranspose = 0;
@@ -415,17 +420,19 @@ main( hypre_int argc,
    HYPRE_Int amgdd_fac_cycle_type = 1;
    HYPRE_Int amgdd_num_ghost_layers = 1;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_Int spgemm_use_cusparse = 1;
-   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
 #endif
+   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
    HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
 
+#ifdef HYPRE_USING_CUB_ALLOCATOR
    /* CUB Allocator */
    hypre_uint mempool_bin_growth   = 8,
               mempool_min_bin      = 3,
               mempool_max_bin      = 9;
    size_t mempool_max_cached_bytes = 2000LL * 1024 * 1024;
+#endif
 
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
@@ -1101,7 +1108,7 @@ main( hypre_int argc,
          ilu_nsh_droptol = atof(argv[arg_index++]);
       }
       /* end ilu options */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
       else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
       {
          arg_index++;
@@ -1119,6 +1126,7 @@ main( hypre_int argc,
          spgemm_use_cusparse = atoi(argv[arg_index++]);
       }
 #endif
+#ifdef HYPRE_USING_CUB_ALLOCATOR
       else if ( strcmp(argv[arg_index], "-mempool_growth") == 0 )
       {
          arg_index++;
@@ -1140,6 +1148,7 @@ main( hypre_int argc,
          arg_index++;
          mempool_max_cached_bytes = atoi(argv[arg_index++])*1024LL*1024LL;
       }
+#endif
       else
       {
          arg_index++;
@@ -1205,7 +1214,6 @@ main( hypre_int argc,
    }
 
    /* defaults for Schwarz */
-
    variant = 0;  /* multiplicative */
    overlap = 1;  /* 1 layer overlap */
    domain_type = 2; /* through agglomeration */
@@ -1551,6 +1559,11 @@ main( hypre_int argc,
       {
          arg_index++;
          nodal_diag  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-keepSS") == 0 )
+      {
+         arg_index++;
+         keep_same_sign  = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-cheby_order") == 0 )
       {
@@ -2133,6 +2146,12 @@ main( hypre_int argc,
       hypre_printf("  solver ID    = %d\n\n", solver_id);
    }
 
+   /*-----------------------------------------------------------------
+    * GPU Device binding
+    * Must be done before HYPRE_Init() and should not be changed after
+    *-----------------------------------------------------------------*/
+   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+
    time_index = hypre_InitializeTiming("Hypre init");
    hypre_BeginTiming(time_index);
 
@@ -2146,14 +2165,33 @@ main( hypre_int argc,
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
 
+#ifdef HYPRE_USING_CUB_ALLOCATOR
    /* To be effective, hypre_SetCubMemPoolSize must immediately follow HYPRE_Init */
-   hypre_SetCubMemPoolSize( mempool_bin_growth, mempool_min_bin,
-                            mempool_max_bin, mempool_max_cached_bytes );
+   HYPRE_SetGPUMemoryPoolSize( mempool_bin_growth, mempool_min_bin,
+                               mempool_max_bin, mempool_max_cached_bytes );
+#endif
 
-   hypre_HandleMemoryLocation(hypre_handle())    = memory_location;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   hypre_HandleDefaultExecPolicy(hypre_handle()) = default_exec_policy;
-   hypre_HandleSpgemmUseCusparse(hypre_handle()) = spgemm_use_cusparse;
+#if defined(HYPRE_USING_UMPIRE)
+   /* Setup Umpire pools */
+   HYPRE_SetUmpireDevicePoolName("HYPRE_DEVICE_POOL_TEST");
+   HYPRE_SetUmpireUMPoolName("HYPRE_UM_POOL_TEST");
+   HYPRE_SetUmpireHostPoolName("HYPRE_HOST_POOL_TEST");
+   HYPRE_SetUmpirePinnedPoolName("HYPRE_PINNED_POOL_TEST");
+   HYPRE_SetUmpireDevicePoolSize(4LL * 1024 * 1024 * 1024);
+   HYPRE_SetUmpireUMPoolSize(4LL * 1024 * 1024 * 1024);
+   HYPRE_SetUmpireHostPoolSize(4LL * 1024 * 1024 * 1024);
+   HYPRE_SetUmpirePinnedPoolSize(4LL * 1024 * 1024 * 1024);
+#endif
+
+   /* default memory location */
+   HYPRE_SetMemoryLocation(memory_location);
+
+   /* default execution policy */
+   HYPRE_SetExecutionPolicy(default_exec_policy);
+
+#if defined(HYPRE_USING_GPU)
+   /* use cuSPARSE for SpGEMM */
+   HYPRE_CSRMatrixSetSpGemmUseCusparse(spgemm_use_cusparse);
 #endif
 
    /*-----------------------------------------------------------
@@ -3225,8 +3263,8 @@ main( hypre_int argc,
          HYPRE_ParCSRMatrixMatvec(1., parcsr_A, x, 0., b);
       }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-      cudaDeviceSynchronize();
+#if defined(HYPRE_USING_GPU)
+      hypre_SyncCudaDevice(hypre_handle());
 #endif
 
       hypre_EndTiming(time_index);
@@ -3491,6 +3529,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetNumPaths(amg_solver, num_paths);
       HYPRE_BoomerAMGSetNodal(amg_solver, nodal);
       HYPRE_BoomerAMGSetNodalDiag(amg_solver, nodal_diag);
+      HYPRE_BoomerAMGSetKeepSameSign(amg_solver, keep_same_sign);
       HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_coarse, 3);
       if (ns_down > -1)
       {
@@ -3542,7 +3581,7 @@ main( hypre_int argc,
       //cudaProfilerStart();
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPushRange("AMG-Setup-1");
+      hypre_GpuProfilingPushRange("AMG-Setup-1");
 #endif
       if (solver_id == 0)
       {
@@ -3554,11 +3593,11 @@ main( hypre_int argc,
       }
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPopRange();
+      hypre_GpuProfilingPopRange();
 #endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-      cudaDeviceSynchronize();
+#if defined(HYPRE_USING_GPU)
+      hypre_SyncCudaDevice(hypre_handle());
 #endif
 
       hypre_EndTiming(time_index);
@@ -3577,7 +3616,7 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPushRange("AMG-Solve-1");
+      hypre_GpuProfilingPushRange("AMG-Solve-1");
 #endif
 
       //cudaProfilerStart();
@@ -3592,11 +3631,11 @@ main( hypre_int argc,
       //cudaProfilerStop();
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPopRange();
+      hypre_GpuProfilingPopRange();
 #endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-      cudaDeviceSynchronize();
+#if defined(HYPRE_USING_GPU)
+      hypre_SyncCudaDevice(hypre_handle());
 #endif
 
       hypre_EndTiming(time_index);
@@ -3640,7 +3679,7 @@ main( hypre_int argc,
       tt = hypre_MPI_Wtime();
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPushRange("AMG-Setup-2");
+      hypre_GpuProfilingPushRange("AMG-Setup-2");
 #endif
 
       if (solver_id == 0)
@@ -3653,11 +3692,11 @@ main( hypre_int argc,
       }
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPopRange();
+      hypre_GpuProfilingPopRange();
 #endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-      cudaDeviceSynchronize();
+#if defined(HYPRE_USING_GPU)
+      hypre_SyncCudaDevice(hypre_handle());
 #endif
 
       tt = hypre_MPI_Wtime() - tt;
@@ -3672,7 +3711,7 @@ main( hypre_int argc,
       tt = hypre_MPI_Wtime();
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPushRange("AMG-Solve-2");
+      hypre_GpuProfilingPushRange("AMG-Solve-2");
 #endif
 
       if (solver_id == 0)
@@ -3685,11 +3724,11 @@ main( hypre_int argc,
       }
 
 #if defined(HYPRE_USING_NVTX)
-      hypre_NvtxPopRange();
+      hypre_GpuProfilingPopRange();
 #endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-      cudaDeviceSynchronize();
+#if defined(HYPRE_USING_GPU)
+      hypre_SyncCudaDevice(hypre_handle());
 #endif
 
       tt = hypre_MPI_Wtime() - tt;
@@ -3972,6 +4011,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
          HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
+         HYPRE_BoomerAMGSetKeepSameSign(pcg_precond, keep_same_sign);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
@@ -4879,7 +4919,7 @@ main( hypre_int argc,
             mv_MultiVectorDestroy( constraints );
          if ( lobpcgGen )
             mv_MultiVectorDestroy( workspace );
-         free( eigenvalues );
+         hypre_TFree(eigenvalues, HYPRE_MEMORY_HOST);
 
          HYPRE_ParCSRPCGDestroy(pcg_solver);
 
@@ -5279,8 +5319,7 @@ main( hypre_int argc,
             mv_MultiVectorDestroy( constraints );
          if ( lobpcgGen )
             mv_MultiVectorDestroy( workspace );
-         free( eigenvalues );
-
+         hypre_TFree(eigenvalues, HYPRE_MEMORY_HOST);
       } /* if ( pcgIterations > 0 ) */
 
       hypre_TFree( interpreter , HYPRE_MEMORY_HOST);
@@ -7512,8 +7551,10 @@ main( hypre_int argc,
    hypre_MPI_Finalize();
 
    /* when using cuda-memcheck --leak-check full, uncomment this */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_CUDA)
    cudaDeviceReset();
+#elif defined(HYPRE_USING_HIP)
+   hipDeviceReset();
 #endif
 
    return (0);
@@ -9579,3 +9620,4 @@ BuildParIsoLaplacian( HYPRE_Int argc, char** argv, HYPRE_ParCSRMatrix *A_ptr )
 }
 
 /* end lobpcg */
+

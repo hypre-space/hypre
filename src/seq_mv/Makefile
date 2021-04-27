@@ -20,6 +20,7 @@ HEADERS =\
  mapped_matrix.h\
  multiblock_matrix.h\
  seq_mv.h\
+ seq_mv.hpp\
  vector.h
 
 FILES =\
@@ -45,6 +46,7 @@ CUFILES =\
  csr_spgemm_device_attempt.c\
  csr_spgemm_device_confident.c\
  csr_spgemm_device_cusparse.c\
+ csr_spgemm_device_rocsparse.c \
  csr_spgemm_device_rowbound.c\
  csr_spgemm_device_rowest.c\
  csr_spgemm_device_util.c\

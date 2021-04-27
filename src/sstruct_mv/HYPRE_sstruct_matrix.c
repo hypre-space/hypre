@@ -130,6 +130,9 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
    hypre_SStructMatrixTmpRowCoords(matrix) = NULL;
    hypre_SStructMatrixTmpColCoords(matrix) = NULL;
    hypre_SStructMatrixTmpCoeffs(matrix)    = NULL;
+   hypre_SStructMatrixTmpRowCoordsDevice(matrix) = NULL;
+   hypre_SStructMatrixTmpColCoordsDevice(matrix) = NULL;
+   hypre_SStructMatrixTmpCoeffsDevice(matrix)    = NULL;
 
    hypre_SStructMatrixNSSymmetric(matrix) = 0;
    hypre_SStructMatrixGlobalSize(matrix)  = 0;
@@ -189,9 +192,12 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
          HYPRE_IJMatrixDestroy(hypre_SStructMatrixIJMatrix(matrix));
          hypre_TFree(hypre_SStructMatrixSEntries(matrix), HYPRE_MEMORY_HOST);
          hypre_TFree(hypre_SStructMatrixUEntries(matrix), HYPRE_MEMORY_HOST);
-         hypre_TFree(hypre_SStructMatrixTmpRowCoords(matrix), HYPRE_MEMORY_DEVICE);
-         hypre_TFree(hypre_SStructMatrixTmpColCoords(matrix), HYPRE_MEMORY_DEVICE);
-         hypre_TFree(hypre_SStructMatrixTmpCoeffs(matrix),    HYPRE_MEMORY_DEVICE);
+         hypre_TFree(hypre_SStructMatrixTmpRowCoords(matrix), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_SStructMatrixTmpColCoords(matrix), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_SStructMatrixTmpCoeffs(matrix),    HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_SStructMatrixTmpRowCoordsDevice(matrix), HYPRE_MEMORY_DEVICE);
+         hypre_TFree(hypre_SStructMatrixTmpColCoordsDevice(matrix), HYPRE_MEMORY_DEVICE);
+         hypre_TFree(hypre_SStructMatrixTmpCoeffsDevice(matrix),    HYPRE_MEMORY_DEVICE);
          hypre_TFree(matrix, HYPRE_MEMORY_HOST);
       }
    }

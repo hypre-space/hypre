@@ -22,14 +22,6 @@ Final Relative Residual Norm = 3.723663e-09
 Iterations = 196
 Final Relative Residual Norm = 9.097622e-09
 
-# Output file: solvers.out.6
-GMRES Iterations = 32
-Final GMRES Relative Residual Norm = 6.756785e-09
-
-# Output file: solvers.out.7
-Iterations = 22
-Final Relative Residual Norm = 9.936851e-09
-
 # Output file: solvers.out.900
 BoomerAMG-DD Iterations = 5
 Final Relative Residual Norm = 4.020669e-09
@@ -161,11 +153,11 @@ GMRES Iterations = 93
 Final GMRES Relative Residual Norm = 8.225661e-09
 
 # Output file: solvers.out.sysh
- Average Convergence Factor = 0.122031
+ Average Convergence Factor = 0.119746
 
-     Complexity:    grid = 1.613750
-                operator = 2.860187
-                   cycle = 5.720205
+     Complexity:    grid = 1.613875
+                operator = 2.860205
+                   cycle = 5.720112
 
 # Output file: solvers.out.sysn
  Average Convergence Factor = 0.232267
@@ -420,3 +412,4 @@ Final Relative Residual Norm = 8.380440e-09
 # Output file: solvers.out.325
 BoomerAMG Iterations = 7
 Final Relative Residual Norm = 7.074639e-09
+

@@ -16,7 +16,7 @@ HYPRE_SStructGMRESCreate( MPI_Comm             comm,
 {
    hypre_GMRESFunctions * gmres_functions =
       hypre_GMRESFunctionsCreate(
-         hypre_CAlloc, hypre_SStructKrylovFree, hypre_SStructKrylovCommInfo,
+         hypre_SStructKrylovCAlloc, hypre_SStructKrylovFree, hypre_SStructKrylovCommInfo,
          hypre_SStructKrylovCreateVector,
          hypre_SStructKrylovCreateVectorArray,
          hypre_SStructKrylovDestroyVector, hypre_SStructKrylovMatvecCreate,

@@ -686,7 +686,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
 
                      hypre_SerialBoxLoop0Begin(ndim, loop_size);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(index, lindex[0], lindex[1], lindex[2]);
                         hypre_AddIndexes(index, start, 3, index);
 

@@ -43,12 +43,12 @@ FILES =\
  sstruct_graph.c\
  sstruct_grid.c\
  sstruct_innerprod.c\
- sstruct_matrix.c\
  sstruct_matvec.c\
  sstruct_scale.c\
  sstruct_stencil.c
 
 CUFILES =\
+ sstruct_matrix.c\
  sstruct_vector.c
 
 COBJS = ${FILES:.c=.o}

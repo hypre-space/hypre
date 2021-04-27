@@ -7,24 +7,39 @@
 
 #include "seq_mv.h"
 #include "csr_spgemm_device.h"
+#include "seq_mv.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 HYPRE_Int
-hypreDevice_CSRSpGemm(HYPRE_Int   m,        HYPRE_Int   k,        HYPRE_Int       n,
-                      HYPRE_Int   nnza,     HYPRE_Int   nnzb,
-                      HYPRE_Int  *d_ia,     HYPRE_Int  *d_ja,     HYPRE_Complex  *d_a,
-                      HYPRE_Int  *d_ib,     HYPRE_Int  *d_jb,     HYPRE_Complex  *d_b,
-                      HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out,
-                      HYPRE_Int  *nnzC)
+hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
+                      hypre_CSRMatrix  *B,
+                      hypre_CSRMatrix **C_ptr)
 {
+   HYPRE_Complex    *d_a  = hypre_CSRMatrixData(A);
+   HYPRE_Int        *d_ia = hypre_CSRMatrixI(A);
+   HYPRE_Int        *d_ja = hypre_CSRMatrixJ(A);
+   HYPRE_Int         m    = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int         k    = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int         nnza = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Complex    *d_b  = hypre_CSRMatrixData(B);
+   HYPRE_Int        *d_ib = hypre_CSRMatrixI(B);
+   HYPRE_Int        *d_jb = hypre_CSRMatrixJ(B);
+   HYPRE_Int         n    = hypre_CSRMatrixNumCols(B);
+   HYPRE_Int         nnzb = hypre_CSRMatrixNumNonzeros(B);
+   HYPRE_Complex    *d_c;
+   HYPRE_Int        *d_ic;
+   HYPRE_Int        *d_jc;
+   HYPRE_Int         nnzC;
+   hypre_CSRMatrix  *C;
+
+   *C_ptr = C = hypre_CSRMatrixCreate(m, n, 0);
+   hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
+
    /* trivial case */
    if (nnza == 0 || nnzb == 0)
    {
-      *d_ic_out = hypre_CTAlloc(HYPRE_Int, m + 1, HYPRE_MEMORY_DEVICE);
-      *d_jc_out = hypre_CTAlloc(HYPRE_Int,     0, HYPRE_MEMORY_DEVICE);
-      *d_c_out  = hypre_CTAlloc(HYPRE_Complex, 0, HYPRE_MEMORY_DEVICE);
-      *nnzC = 0;
+      hypre_CSRMatrixI(C) = hypre_CTAlloc(HYPRE_Int, m + 1, HYPRE_MEMORY_DEVICE);
 
       return hypre_error_flag;
    }
@@ -33,11 +48,22 @@ hypreDevice_CSRSpGemm(HYPRE_Int   m,        HYPRE_Int   k,        HYPRE_Int     
    hypre_profile_times[HYPRE_TIMER_ID_SPMM] -= hypre_MPI_Wtime();
 #endif
 
-   /* use CUSPARSE */
+   /* use CUSPARSE or rocSPARSE*/
    if (hypre_HandleSpgemmUseCusparse(hypre_handle()))
    {
-      hypreDevice_CSRSpGemmCusparse(m, k, n, nnza, d_ia, d_ja, d_a, nnzb, d_ib, d_jb, d_b,
-                                    nnzC, d_ic_out, d_jc_out, d_c_out);
+#if defined(HYPRE_USING_CUSPARSE)
+      hypreDevice_CSRSpGemmCusparse(m, k, n,
+                                    hypre_CSRMatrixGPUMatDescr(A), nnza, d_ia, d_ja, d_a,
+                                    hypre_CSRMatrixGPUMatDescr(B), nnzb, d_ib, d_jb, d_b,
+                                    hypre_CSRMatrixGPUMatDescr(C), &nnzC, &d_ic, &d_jc, &d_c);
+#elif defined(HYPRE_USING_ROCSPARSE)
+      hypreDevice_CSRSpGemmRocsparse(m, k, n,
+                                     hypre_CSRMatrixGPUMatDescr(A), nnza, d_ia, d_ja, d_a,
+                                     hypre_CSRMatrixGPUMatDescr(B), nnzb, d_ib, d_jb, d_b,
+                                     hypre_CSRMatrixGPUMatDescr(C), hypre_CSRMatrixGPUMatInfo(C), &nnzC, &d_ic, &d_jc, &d_c);
+#else
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Attempting to use device sparse matrix library for SpGEMM without having compiled support for it!\n");
+#endif
    }
    else
    {
@@ -49,7 +75,7 @@ hypreDevice_CSRSpGemm(HYPRE_Int   m,        HYPRE_Int   k,        HYPRE_Int     
       if (hypre_HandleSpgemmNumPasses(hypre_handle()) < 3)
       {
          hypreDevice_CSRSpGemmWithRownnzEstimate(m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc,
-                                                 d_ic_out, d_jc_out, d_c_out, nnzC);
+                                                 &d_ic, &d_jc, &d_c, &nnzC);
       }
       else
       {
@@ -66,11 +92,16 @@ hypreDevice_CSRSpGemm(HYPRE_Int   m,        HYPRE_Int   k,        HYPRE_Int     
          //hypre_TFree(d_rf, HYPRE_MEMORY_DEVICE);
 
          hypreDevice_CSRSpGemmWithRownnzUpperbound(m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, rownnz_exact,
-                                                   d_ic_out, d_jc_out, d_c_out, nnzC);
+                                                   &d_ic, &d_jc, &d_c, &nnzC);
       }
 
       hypre_TFree(d_rc, HYPRE_MEMORY_DEVICE);
    }
+
+   hypre_CSRMatrixNumNonzeros(C) = nnzC;
+   hypre_CSRMatrixI(C) = d_ic;
+   hypre_CSRMatrixJ(C) = d_jc;
+   hypre_CSRMatrixData(C) = d_c;
 
 #ifdef HYPRE_PROFILE
    cudaThreadSynchronize();
@@ -133,14 +164,13 @@ hypre_CSRMatrixDeviceSpGemmSetHashType( char value )
    return 0;
 }
 
-#endif /* HYPRE_USING_CUDA */
+#endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */
 
 HYPRE_Int
-hypre_CSRMatrixDeviceSpGemmUseCusparse( HYPRE_Int use_cusparse )
+hypre_CSRMatrixDeviceSpGemmSetUseCusparse( HYPRE_Int use_cusparse )
 {
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_GPU)
    hypre_HandleCudaData(hypre_handle())->spgemm_use_cusparse = use_cusparse;
 #endif
    return 0;
 }
-

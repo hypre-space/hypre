@@ -914,7 +914,6 @@ hypre_MatvecCommPkgCreate ( hypre_ParCSRMatrix *A )
    HYPRE_BigInt  first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
    HYPRE_BigInt *col_map_offd   = hypre_ParCSRMatrixColMapOffd(A);
    HYPRE_Int  num_cols_offd   = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    HYPRE_BigInt  global_num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
    /* Create the assumed partition and should own it */
    if  (hypre_ParCSRMatrixAssumedPartition(A) == NULL)
@@ -923,26 +922,15 @@ hypre_MatvecCommPkgCreate ( hypre_ParCSRMatrix *A )
       hypre_ParCSRMatrixOwnsAssumedPartition(A) = 1;
    }
    hypre_IJAssumedPart *apart = hypre_ParCSRMatrixAssumedPartition(A);
-#else
-   HYPRE_BigInt *col_starts   = hypre_ParCSRMatrixColStarts(A);
-   HYPRE_Int  num_cols_diag   = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
-#endif
    /*-----------------------------------------------------------
     * setup commpkg
     *----------------------------------------------------------*/
    hypre_ParCSRCommPkg *comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
    hypre_ParCSRMatrixCommPkg(A) = comm_pkg;
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    hypre_ParCSRCommPkgCreateApart ( comm, col_map_offd, first_col_diag,
                                     num_cols_offd, global_num_cols,
                                     apart,
                                     comm_pkg );
-#else
-   hypre_ParCSRCommPkgCreate      ( comm, col_map_offd, first_col_diag,
-                                    col_starts,
-                                    num_cols_diag, num_cols_offd,
-                                    comm_pkg );
-#endif
 
    return hypre_error_flag;
 }
@@ -979,7 +967,7 @@ hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg )
    /* if (hypre_ParCSRCommPkgRecvMPITypes(comm_pkg))
       hypre_TFree(hypre_ParCSRCommPkgRecvMPITypes(comm_pkg), HYPRE_MEMORY_HOST); */
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_MEMORY)
+#if defined(HYPRE_USING_GPU)
    //hypre_TFree(hypre_ParCSRCommPkgTmpData(comm_pkg),   HYPRE_MEMORY_DEVICE);
    //hypre_TFree(hypre_ParCSRCommPkgBufData(comm_pkg),   HYPRE_MEMORY_DEVICE);
    _hypre_TFree(hypre_ParCSRCommPkgTmpData(comm_pkg), hypre_MEMORY_DEVICE);
@@ -1014,14 +1002,9 @@ hypre_ParCSRFindExtendCommPkg(MPI_Comm              comm,
    hypre_ParCSRCommPkg *new_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
    *extend_comm_pkg = new_comm_pkg;
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    hypre_assert(apart != NULL);
    hypre_ParCSRCommPkgCreateApart ( comm, indices, my_first, indices_len, global_num, apart,
                                     new_comm_pkg );
-#else
-   hypre_ParCSRCommPkgCreate      ( comm, indices, my_first, starts, local_num, indices_len,
-                                    new_comm_pkg );
-#endif
 
    return hypre_error_flag;
 }
@@ -1080,4 +1063,3 @@ hypre_BuildCSRJDataType( HYPRE_Int num_nonzeros,
 
    return hypre_error_flag;
 }
-

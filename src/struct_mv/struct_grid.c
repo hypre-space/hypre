@@ -60,7 +60,7 @@ hypre_StructGridCreate( MPI_Comm           comm,
       hypre_StructGridNumGhost(grid)[i] = 1;
    }
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_StructGridDataLocation(grid) = HYPRE_MEMORY_DEVICE;
 #endif
    *grid_ptr = grid;
@@ -325,7 +325,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
       hypre_SerialBoxLoop0Begin(ndim, loop_size);
       {
          pshift = pshifts[p];
-         hypre_BoxLoopGetIndex(pshift);
+         zypre_BoxLoopGetIndex(pshift);
          hypre_AddIndexes(pshift, hypre_BoxIMin(box), ndim, pshift);
          notcenter = 0;
          for (d = 0; d < ndim; d++)
@@ -856,7 +856,7 @@ hypre_StructGridSetNumGhost( hypre_StructGrid *grid, HYPRE_Int  *num_ghost )
 }
 
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 HYPRE_Int
 hypre_StructGridGetMaxBoxSize(hypre_StructGrid *grid)
 {
