@@ -1,3 +1,8 @@
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
 # A handy function to add the current source directory to a local
 # filename. To be used for creating a list of sources.
 function(convert_filenames_to_full_paths NAMES)
@@ -25,11 +30,11 @@ function(add_hypre_executables EXE_SRCS)
     add_executable(${EXE_NAME} ${SRC_FILE})
 
     # Link libraries
-    set (HYPRE_LIBS "HYPRE")
+    set(HYPRE_LIBS "HYPRE")
 
     # Link libraries for Unix systems
     if (UNIX)
-      list (APPEND HYPRE_LIBS m)
+      list(APPEND HYPRE_LIBS m)
     endif (UNIX)
 
     # Append the additional libraries and options
