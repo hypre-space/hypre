@@ -940,7 +940,7 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
             {
                if (signature[dir][i+1] == 0)
                {
-                  hypre_IndexD(cut, dir) = i + hypre_BoxIMinD(box, d);
+                  hypre_IndexD(cut, dir) = i + hypre_BoxIMinD(box, dir);
                   splitdir = dir;
                   break;
                }
