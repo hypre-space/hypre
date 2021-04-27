@@ -270,13 +270,14 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    char                   filename[255];
 
    hypre_MPI_Comm_rank(hypre_SStructMatrixComm(A), &mypid);
-   ones_l  = hypre_TAlloc(hypre_SStructVector *, num_levels, HYPRE_MEMORY_HOST);
-   Aones_l = hypre_TAlloc(hypre_SStructVector *, num_levels, HYPRE_MEMORY_HOST);
-   Pones_l = hypre_TAlloc(hypre_SStructVector *, num_levels - 1, HYPRE_MEMORY_HOST);
    print_level = hypre_SSAMGDataPrintLevel(ssamg_data);
 
    if (print_level > 2)
    {
+      ones_l  = hypre_TAlloc(hypre_SStructVector *, num_levels, HYPRE_MEMORY_HOST);
+      Aones_l = hypre_TAlloc(hypre_SStructVector *, num_levels, HYPRE_MEMORY_HOST);
+      Pones_l = hypre_TAlloc(hypre_SStructVector *, num_levels - 1, HYPRE_MEMORY_HOST);
+
       /* Print fine level grid */
       hypre_sprintf(filename, "ssgrid.l%02d", 0);
 #ifdef DEBUG_WITH_GLVIS

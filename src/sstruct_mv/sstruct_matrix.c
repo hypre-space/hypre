@@ -1087,7 +1087,6 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
    HYPRE_BigInt         *rows, *cols;
    HYPRE_Complex        *ijvalues;
    hypre_Box            *box;
-   hypre_Box            *rbox;
    hypre_Box            *to_box;
    hypre_Box            *map_box;
    hypre_Box            *int_box;
@@ -1108,7 +1107,6 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
    if (entries[0] < size)
    {
       box      = hypre_BoxCreate(ndim);
-      rbox     = hypre_BoxCreate(ndim);
       to_box   = hypre_BoxCreate(ndim);
       map_box  = hypre_BoxCreate(ndim);
       int_box  = hypre_BoxCreate(ndim);
@@ -1247,7 +1245,6 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
       hypre_TFree(ijvalues, HYPRE_MEMORY_DEVICE);
 
       hypre_BoxDestroy(box);
-      hypre_BoxDestroy(rbox);
       hypre_BoxDestroy(to_box);
       hypre_BoxDestroy(map_box);
       hypre_BoxDestroy(int_box);
@@ -1768,7 +1765,6 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
    HYPRE_IJMatrix           ij_Ahat;
    hypre_SStructPMatrix    *pmatrix;
    hypre_StructMatrix      *smatrix;
-   hypre_StructStencil     *sstencil;
    hypre_StructGrid        *sgrid;
    hypre_BoxArray          *grid_boxes;
    HYPRE_Int               *row_sizes;
@@ -1791,7 +1787,6 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
    hypre_Box               *int_box;
    hypre_Box               *map_box;
    hypre_Box               *to_box;
-   hypre_Box               *rbox;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -1891,8 +1886,10 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
                      }
                      hypre_BoxLoop1End(mi);
                   }
+                  hypre_TFree(boxman_to_entries, HYPRE_MEMORY_HOST);
                }
             }
+            hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
          } /* Loop over grid boxes */
       } /* Loop over vars */
    } /* Loop over parts */
@@ -1943,14 +1940,14 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
          grid_boxes = hypre_StructGridBoxes(sgrid);
          hypre_ForBoxI(i, grid_boxes)
          {
-            box = hypre_BoxArrayBox(grid_boxes,i);
+            hypre_CopyBox(hypre_BoxArrayBox(grid_boxes,i), grid_box);
 
             /* GET values from this box */
-            hypre_SStructPMatrixSetBoxValues(pmatrix, box, var,
+            hypre_SStructPMatrixSetBoxValues(pmatrix, grid_box, var,
                                              nSentries, Sentries, box, values, -1);
 
             /* SET values to ij_Ahat */
-            hypre_SStructUMatrixSetBoxValuesHelper(matrix, part, box,
+            hypre_SStructUMatrixSetBoxValuesHelper(matrix, part, grid_box,
                                                    var, nSentries, Sentries,
                                                    box, values, 0, ij_Ahat);
          } /* Loop over boxes */

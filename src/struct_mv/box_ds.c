@@ -140,15 +140,31 @@ hypre_BoxBinTreeCreate( HYPRE_Int          ndim,
 
 /*--------------------------------------------------------------------------
  * hypre_BoxBinTreeInitialize
+ *
+ * Note: indices_in is copied to indices, which will be freed when
+ *       calling hypre_BoxBinTreeDestroy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_BoxBinTreeInitialize( hypre_BoxBinTree   *boxbt,
                             HYPRE_Int           num_indices,
-                            HYPRE_Int         **indices,
+                            HYPRE_Int         **indices_in,
                             hypre_Box          *box )
 {
    hypre_BoxBTNode   *btroot;
+   HYPRE_Int         *indices[HYPRE_MAXDIM];
+   HYPRE_Int          ndim = hypre_BoxNDim(box);
+
+   HYPRE_Int          d, i;
+
+   for (d = 0; d < ndim; d++)
+   {
+      indices[d] = hypre_CTAlloc(HYPRE_Int, num_indices, HYPRE_MEMORY_HOST);
+      for (i = 0; i < num_indices; i++)
+      {
+         indices[d][i] = indices_in[d][i];
+      }
+   }
 
    btroot = hypre_BoxBinTreeRoot(boxbt);
    hypre_BoxBTNodeInitialize(btroot, num_indices, indices, box);
