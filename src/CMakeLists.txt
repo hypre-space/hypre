@@ -18,17 +18,18 @@ set (HYPRE_TIME    00:00:00)
 set (HYPRE_BUGS    https://github.com/hypre-space/hypre/issues)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
 
-project (hypre
+set (PROJECT_NAME HYPRE)
+project (${PROJECT_NAME}
   VERSION ${HYPRE_VERSION}
   LANGUAGES C)
 
-if (${hypre_SOURCE_DIR} STREQUAL ${hypre_BINARY_DIR})
+if (${HYPRE_SOURCE_DIR} STREQUAL ${HYPRE_BINARY_DIR})
   message(FATAL_ERROR "In-place build not allowed! Please use a separate build directory. See the Users Manual or INSTALL file for details.")
 endif ()
 
 # Set cmake module path
-set(CMAKE_MODULE_PATH "${hypre_SOURCE_DIR}/config/cmake" "${CMAKE_MODULE_PATH}")
-include(hypre_CMakeUtilities)
+set (CMAKE_MODULE_PATH "${HYPRE_SOURCE_DIR}/config/cmake" "${CMAKE_MODULE_PATH}")
+include(HYPRE_CMakeUtilities)
 
 # Set default installation directory, but provide a means for users to change
 set (HYPRE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/hypre" CACHE PATH
@@ -49,7 +50,7 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif ()
 
 # Configuration options
-option(HYPRE_ENABLE_SHARED           "Build a shared library" OFF)
+option(HYPRE_ENABLE_SHARED           "Build a shared library" ON)
 option(HYPRE_ENABLE_BIGINT           "Use long long int for HYPRE_Int" OFF)
 option(HYPRE_ENABLE_MIXEDINT         "Use long long int for HYPRE_BigInt, int for HYPRE_INT" OFF)
 option(HYPRE_ENABLE_SINGLE           "Use float for HYPRE_Real" OFF)
@@ -69,6 +70,16 @@ option(HYPRE_TIMING                  "Use HYPRE timing routines" OFF)
 option(HYPRE_BUILD_EXAMPLES          "Build examples" OFF)
 option(HYPRE_BUILD_TESTS             "Build tests" OFF)
 option(HYPRE_USING_HOST_MEMORY       "Use host memory" ON)
+# CUDA options
+option(HYPRE_WITH_CUDA               "Use CUDA. Require cuda-8.0 or higher" OFF)
+option(HYPRE_ENABLE_UNIFIED_MEMORY   "Use unified memory for allocating the memory" OFF)
+option(HYPRE_ENABLE_CUDA_STREAMS     "Use CUDA streams" ON)
+option(HYPRE_ENABLE_CUSPARSE         "Use cuSPARSE" ON)
+option(HYPRE_ENABLE_CUB              "Use CUB Allocator" OFF) # TODO: Add this cmake feature
+option(HYPRE_ENABLE_CUBLAS           "Use cuBLAS" OFF)
+option(HYPRE_ENABLE_CURAND           "Use cuRAND" ON)
+option(HYPRE_ENABLE_GPU_PROFILING    "Use NVTX on CUDA" OFF)
+set(HYPRE_CUDA_SM "60" CACHE STRING "Target CUDA architecture.")
 
 option(TPL_DSUPERLU_LIBRARIES        "List of absolute paths to SuperLU_Dist link libraries [].")
 option(TPL_DSUPERLU_INCLUDE_DIRS     "List of absolute paths to SuperLU_Dist include directories [].")
@@ -77,45 +88,46 @@ option(TPL_LAPACK_LIBRARIES          "Optional list of absolute paths to LAPACK 
 
 # Set config name values
 if (HYPRE_ENABLE_SHARED)
-  set(HYPRE_SHARED ON CACHE BOOL "" FORCE)
+  set (HYPRE_SHARED ON CACHE BOOL "" FORCE)
 endif()
 
 if (HYPRE_ENABLE_BIGINT)
-  set(HYPRE_BIGINT ON CACHE BOOL "" FORCE)
+  set (HYPRE_BIGINT ON CACHE BOOL "" FORCE)
 endif()
 
 if (HYPRE_ENABLE_MIXEDINT)
-  set(HYPRE_MIXEDINT ON CACHE BOOL "" FORCE)
+  set (HYPRE_MIXEDINT ON CACHE BOOL "" FORCE)
 endif()
 
 if (HYPRE_ENABLE_SINGLE)
-  set(HYPRE_SINGLE ON CACHE BOOL "" FORCE)
+  set (HYPRE_SINGLE ON CACHE BOOL "" FORCE)
 endif()
 
 if (HYPRE_ENABLE_LONG_DOUBLE)
-  set(HYPRE_LONG_DOUBLE ON CACHE BOOL "" FORCE)
+  set (HYPRE_LONG_DOUBLE ON CACHE BOOL "" FORCE)
 endif()
 
 if (HYPRE_ENABLE_COMPLEX)
-  set(HYPRE_COMPLEX ON CACHE BOOL "" FORCE)
+  set (HYPRE_COMPLEX ON CACHE BOOL "" FORCE)
 endif()
 
 if (HYPRE_ENABLE_HYPRE_BLAS)
-  set(HYPRE_USING_HYPRE_BLAS ON CACHE BOOL "" FORCE)
+  set (HYPRE_USING_HYPRE_BLAS ON CACHE BOOL "" FORCE)
 endif()
 
 if (HYPRE_ENABLE_HYPRE_LAPACK)
-  set(HYPRE_USING_HYPRE_LAPACK ON CACHE BOOL "" FORCE)
+  set (HYPRE_USING_HYPRE_LAPACK ON CACHE BOOL "" FORCE)
 endif()
 
 if (HYPRE_ENABLE_PERSISTENT_COMM)
-  set(HYPRE_USING_PERSISTENT_COMM ON CACHE BOOL "" FORCE)
+  set (HYPRE_USING_PERSISTENT_COMM ON CACHE BOOL "" FORCE)
 endif()
 
 if (HYPRE_WITH_MPI)
-  set(HYPRE_SEQUENTIAL OFF CACHE BOOL "" FORCE)
+  set (HYPRE_HAVE_MPI ON CACHE BOOL "" FORCE)
+  set (HYPRE_SEQUENTIAL OFF CACHE BOOL "" FORCE)
 else()
-  set(HYPRE_SEQUENTIAL ON CACHE BOOL "" FORCE)
+  set (HYPRE_SEQUENTIAL ON CACHE BOOL "" FORCE)
 endif()
 
 if (HYPRE_WITH_OPENMP)
@@ -150,7 +162,89 @@ if (HYPRE_SEQUENTIAL)
   set (HYPRE_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 endif ()
 
-add_library (HYPRE)
+# CUDA
+if (HYPRE_WITH_CUDA)
+  enable_language(CXX)
+  message(STATUS "Enabled support for CXX.")
+
+  # Enforce C++11
+  if (NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 11)
+    set (CMAKE_CXX_STANDARD 11)
+  endif ()
+  set (CMAKE_CXX_STANDARD_REQUIRED ON)
+
+  message(STATUS "Using CXX standard: c++${CMAKE_CXX_STANDARD}")
+
+  # Use ${CMAKE_CXX_COMPILER} as the cuda host compiler.
+  if (NOT CMAKE_CUDA_HOST_COMPILER)
+    set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER})
+  endif()
+
+  # Check if CUDA is available
+  include(CheckLanguage)
+  check_language(CUDA)
+  if(CMAKE_CUDA_COMPILER)
+
+    enable_language(CUDA)
+    message(STATUS "Enabled support for CUDA.")
+
+    if (NOT CMAKE_CUDA_STANDARD OR CMAKE_CUDA_STANDARD EQUAL 98)
+      set (CMAKE_CUDA_STANDARD 11)
+    endif ()
+
+    set (CMAKE_CUDA_STANDARD_REQUIRED TRUE)
+
+    set (HYPRE_USING_CUDA ON CACHE BOOL "" FORCE)
+    set (HYPRE_USING_GPU ON CACHE BOOL "" FORCE)
+
+    if (HYPRE_ENABLE_UNIFIED_MEMORY)
+      set (HYPRE_USING_UNIFIED_MEMORY ON CACHE BOOL "" FORCE)
+    else ()
+      set (HYPRE_USING_DEVICE_MEMORY ON CACHE BOOL "" FORCE)
+    endif()
+
+    # Check if examples are enabled, but not unified memory
+    if (HYPRE_BUILD_EXAMPLES AND NOT HYPRE_ENABLE_UNIFIED_MEMORY)
+      message(WARNING "Running the examples on GPUs requires Unified Memory!
+        Examples will not be built!")
+      set (HYPRE_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    endif ()
+
+    set(CUDA_FLAGS "-expt-extended-lambda")
+    if (CMAKE_VERSION VERSION_LESS 3.18.0)
+      set (CUDA_FLAGS "-arch=sm_${HYPRE_CUDA_SM} ${CUDA_FLAGS}")
+    else()
+      set (CMAKE_CUDA_ARCHITECTURES "${HYPRE_CUDA_SM}")
+    endif()
+    message(STATUS "Using CUDA architecture: ${HYPRE_CUDA_SM}")
+
+    set (HYPRE_USING_HOST_MEMORY OFF CACHE BOOL "" FORCE)
+
+    if (HYPRE_ENABLE_CUDA_STREAMS)
+      set (HYPRE_USING_CUDA_STREAMS ON CACHE BOOL "" FORCE)
+    endif (HYPRE_ENABLE_CUDA_STREAMS)
+
+    # FIXME Add this feature
+    #if (HYPRE_ENABLE_CUB)
+    #  set (HYPRE_USING_CUB ON CACHE BOOL "" FORCE)
+    #endif (HYPRE_ENABLE_CUB)
+
+    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} ${CUDA_FLAGS}" CACHE STRING
+         "CUDA flags set for HYPRE" FORCE)
+
+    # TODO Eventually should require cmake>=3.17
+    # and use cmake's FindCUDAToolkit. Now collect
+    # CUDA optional libraries.
+    include(HYPRE_SetupCUDAToolkit)
+
+  else()
+    message(WARNING "No CUDA support!")
+    set (HYPRE_USING_HOST_MEMORY ON CACHE BOOL "" FORCE)
+  endif()
+endif (HYPRE_WITH_CUDA)
+
+# Create the HYPRE library object
+add_library (${PROJECT_NAME})
 
 # Headers and sources
 set (HYPRE_HEADERS "")
@@ -161,9 +255,7 @@ set(HYPRE_MAIN_HEADERS
   HYPREf.h
   HYPRE.h
 )
-target_sources(HYPRE
-  PRIVATE ${HYPRE_MAIN_HEADERS}
-  )
+
 set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HYPRE_MAIN_HEADERS})
 
 # Headers and sources: blas
@@ -172,14 +264,14 @@ if (HYPRE_USING_HYPRE_BLAS)
 else()
   # Use TPL_BLAS_LIBRARIES if set.
   if (TPL_BLAS_LIBRARIES)
-    message("-- Using TPL_BLAS_LIBRARIES='${TPL_BLAS_LIBRARIES}'")
-    target_link_libraries(HYPRE PUBLIC "${TPL_BLAS_LIBRARIES}")
+    message(STATUS "Using TPL_BLAS_LIBRARIES='${TPL_BLAS_LIBRARIES}'")
+    target_link_libraries(${PROJECT_NAME} PUBLIC "${TPL_BLAS_LIBRARIES}")
   else()
     # Find system blas
     find_package(BLAS REQUIRED)
-    target_link_libraries(HYPRE PUBLIC "${BLAS_LIBRARIES}")
+    target_link_libraries(${PROJECT_NAME} PUBLIC "${BLAS_LIBRARIES}")
   endif()
-  target_compile_definitions(HYPRE PUBLIC "USE_VENDOR_BLAS")
+  target_compile_definitions(${PROJECT_NAME} PUBLIC "USE_VENDOR_BLAS")
 endif()
 
 # Headers and sources: lapack
@@ -188,12 +280,12 @@ if (HYPRE_USING_HYPRE_LAPACK)
 else()
   # Use TPL_LAPACK_LIBRARIES if set.
   if (TPL_LAPACK_LIBRARIES)
-    message("-- Using TPL_LAPACK_LIBRARIES='${TPL_BLAS_LIBRARIES}'")
-    target_link_libraries(HYPRE PUBLIC "${TPL_LAPACK_LIBRARIES}")
+    message(STATUS "Using TPL_LAPACK_LIBRARIES='${TPL_BLAS_LIBRARIES}'")
+    target_link_libraries(${PROJECT_NAME} PUBLIC "${TPL_LAPACK_LIBRARIES}")
   else()
     # Find system lapack
     find_package(LAPACK REQUIRED)
-    target_link_libraries(HYPRE PUBLIC "${LAPACK_LIBRARIES}")
+    target_link_libraries(${PROJECT_NAME} PUBLIC "${LAPACK_LIBRARIES}")
   endif()
 endif()
 
@@ -206,15 +298,16 @@ if (HYPRE_USING_DSUPERLU)
   if (NOT TPL_DSUPERLU_INCLUDE_DIRS)
     message(FATAL_ERROR "TPL_DSUPERLU_INCLUDE_DIRS option be set for SuperLU_Dist support.")
   endif()
+
   foreach(dir ${TPL_DSUPERLU_INCLUDE_DIRS})
     if (NOT EXISTS ${dir})
       message(FATAL_ERROR "SuperLU_Dist include directory not found: ${dir}")
     endif()
     set(CMAKE_C_FLAGS "-I${dir} ${CMAKE_C_FLAGS}")
   endforeach()
-  message("-- Enabled support for using DSUPERLU.")
+  message(STATUS "Enabled support for using DSUPERLU.")
   set(DSUPERLU_FOUND TRUE)
-  target_link_libraries(HYPRE PUBLIC ${TPL_DSUPERLU_LIBRARIES} stdc++)
+  target_link_libraries(${PROJECT_NAME} PUBLIC ${TPL_DSUPERLU_LIBRARIES} stdc++)
   target_include_directories(${TPL_DSUPERLU_INCLUDE_DIRS})
 endif()
 
@@ -222,13 +315,14 @@ if(DSUPERLU_FOUND)
   set(HYPRE_USING_DSUPERLU TRUE)
 endif()
 
-# Headers and sources: remaining subdirectories
-set(HYPRE_DIRS utilities multivector krylov seq_mv parcsr_mv parcsr_block_mv distributed_matrix IJ_mv matrix_matrix distributed_ls parcsr_ls struct_mv struct_ls sstruct_mv sstruct_ls)
-foreach(DIR IN LISTS HYPRE_DIRS)
-  add_subdirectory(${DIR})
-  target_include_directories(HYPRE PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${DIR}>)
-endforeach()
+if (HYPRE_USING_CUDA)
+  # FIXME INTERFACE OR PUBLIC
+  target_link_libraries(${PROJECT_NAME} PUBLIC "${EXPORT_INTERFACE_CUDA_LIBS}")
+  if (HYPRE_HAVE_MPI)
+    target_include_directories(${PROJECT_NAME} PUBLIC
+      ${MPI_CXX_INCLUDE_DIRS})
+  endif ()
+endif ()
 
 # Configure a header file to pass CMake settings to the source code
 configure_file (
@@ -236,14 +330,26 @@ configure_file (
   "${CMAKE_CURRENT_BINARY_DIR}/HYPRE_config.h"
   )
 
+# Headers and sources: remaining subdirectories
+set(HYPRE_DIRS utilities multivector krylov seq_mv parcsr_mv parcsr_block_mv distributed_matrix IJ_mv matrix_matrix distributed_ls parcsr_ls struct_mv struct_ls sstruct_mv sstruct_ls)
+foreach(DIR IN LISTS HYPRE_DIRS)
+  add_subdirectory(${DIR})
+  target_include_directories(${PROJECT_NAME} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${DIR}>)
+endforeach()
+
 # BINARY must be first in order to get the correct HYPRE_config.h file
-target_include_directories(HYPRE PUBLIC
-  $<BUILD_INTERFACE:${hypre_BINARY_DIR}>
-  $<BUILD_INTERFACE:${hypre_SOURCE_DIR}>
+target_include_directories(${PROJECT_NAME} PUBLIC
+  $<BUILD_INTERFACE:${HYPRE_BINARY_DIR}>
+  $<BUILD_INTERFACE:${HYPRE_SOURCE_DIR}>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/blas>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lapack>
   $<INSTALL_INTERFACE:include>
   )
+
+if (HYPRE_USING_CUDA)
+  set_source_files_properties(${HYPRE_CUDA_SOURCES} PROPERTIES LANGUAGE CUDA)
+endif ()
 
 # Set library build type
 if (HYPRE_SHARED)
@@ -256,17 +362,17 @@ endif ()
 if (NOT HYPRE_SEQUENTIAL)
   find_program (MPIEXEC_EXECUTABLE NAMES mpiexec mpirun)
   find_package (MPI REQUIRED)
-  target_link_libraries (HYPRE PUBLIC MPI::MPI_C)
+  target_link_libraries (${PROJECT_NAME} PUBLIC MPI::MPI_C)
 endif (NOT HYPRE_SEQUENTIAL)
 
 # Set OpenMP compile flags
 if (HYPRE_USING_OPENMP)
   find_package (OpenMP REQUIRED)
-  target_link_libraries (HYPRE PUBLIC OpenMP::OpenMP_C)
+  target_link_libraries (${PROJECT_NAME} PUBLIC OpenMP::OpenMP_C)
 endif (HYPRE_USING_OPENMP)
 
 if (MSVC)
-  target_compile_definitions(HYPRE PRIVATE _CRT_SECURE_NO_WARNINGS)
+  target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
   # Use the C++ compiler to compile these files to get around lack of C99 support
   set_source_files_properties (utilities/hypre_hopscotch_hash.c PROPERTIES COMPILE_FLAGS /TP)
   set_source_files_properties (utilities/hypre_merge_sort.c     PROPERTIES COMPILE_FLAGS /TP)
@@ -303,7 +409,7 @@ if (HYPRE_BUILD_TESTS)
 endif()
 
 include (GNUInstallDirs)
-install (TARGETS HYPRE
+install (TARGETS ${PROJECT_NAME}
   EXPORT HYPRETargets
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
   ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
@@ -339,4 +445,4 @@ export (EXPORT HYPRETargets
   NAMESPACE HYPRE::
   )
 
-export (PACKAGE HYPRE)
+export (PACKAGE ${PROJECT_NAME})

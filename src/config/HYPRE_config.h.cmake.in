@@ -36,33 +36,71 @@
 #cmakedefine HYPRE_HOPSCOTCH
 
 /* Compile without MPI */
-#cmakedefine HYPRE_SEQUENTIAL
+#cmakedefine HYPRE_SEQUENTIAL 1
 
 /* Use HYPRE timing routines */
 #cmakedefine HYPRE_TIMING
 
 /* Use internal BLAS library */
-#cmakedefine HYPRE_USING_HYPRE_BLAS
+#cmakedefine HYPRE_USING_HYPRE_BLAS 1
 
 /* Use internal LAPACK library */
-#cmakedefine HYPRE_USING_HYPRE_LAPACK
+#cmakedefine HYPRE_USING_HYPRE_LAPACK 1
 
 /* Print HYPRE errors */
 #cmakedefine HYPRE_PRINT_ERRORS
 
 /* Use OpenMP */
-#cmakedefine HYPRE_USING_OPENMP
+#cmakedefine HYPRE_USING_OPENMP 1
 
 /* Use Caliper instrumentation */
-#cmakedefine HYPRE_USING_CALIPER
+#cmakedefine HYPRE_USING_CALIPER 1
+
+/* Use if executing on device with CUDA */
+#cmakedefine HYPRE_USING_CUDA 1
+
+/* Use cuBLAS */
+#cmakedefine HYPRE_USING_CUBLAS 1
+
+/* Use CUDA streams */
+#cmakedefine HYPRE_USING_CUDA_STREAMS 1
+
+/* Use cuRAND */
+#cmakedefine HYPRE_USING_CURAND 1
+
+/* Use cuSPARSE */
+#cmakedefine HYPRE_USING_CUSPARSE 1
+
+/* Use CUB */
+#cmakedefine HYPRE_USING_CUB_ALLOCATOR 1
+
+/* Use unified memory */
+#cmakedefine HYPRE_USING_UNIFIED_MEMORY 1
+
+/* Use device memory without UM */
+#cmakedefine HYPRE_USING_DEVICE_MEMORY 1
+
+/* Use if executing on device with OpenMP */
+#cmakedefine HYPRE_USING_DEVICE_OPENMP 1
+
+/* Use if executing on GPU device */
+#cmakedefine HYPRE_USING_GPU 1
+
+/* Use HIP */
+#cmakedefine HYPRE_USING_HIP 1
+
+/* Use NVTX */
+#cmakedefine HYPRE_USING_NVTX 1
 
 /* Use SuperLU_Dist */
-#cmakedefine HYPRE_USING_DSUPERLU
+#cmakedefine HYPRE_USING_DSUPERLU 1
 
 /* Use SuperLU */
 #cmakedefine HAVE_SUPERLU
 
-/* #undef HYPRE_HAVE_MPI */
+/* Use MPI */
+#cmakedefine HYPRE_HAVE_MPI 1
+
 /* #undef HYPRE_HAVE_MPI_COMM_F2C */
 
 /* Define as follows to set the Fortran name mangling scheme:

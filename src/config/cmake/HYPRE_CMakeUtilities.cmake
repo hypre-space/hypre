@@ -15,18 +15,24 @@ function(add_hypre_executables EXE_SRCS)
   foreach(SRC_FILE IN LISTS ${EXE_SRCS})
     get_filename_component(SRC_FILENAME ${SRC_FILE} NAME)
 
+    if (HYPRE_USING_CUDA)
+      # If CUDA is enabled, tag source files to be compiled with nvcc.
+      set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CUDA)
+    endif (HYPRE_USING_CUDA)
+
     string(REPLACE ".c" "" EXE_NAME ${SRC_FILENAME})
     # Actually add the exe
     add_executable(${EXE_NAME} ${SRC_FILE})
+
     # Link libraries
-    set (HYPRE_LIBS "HYPRE") 
+    set (HYPRE_LIBS "HYPRE")
 
     # Link libraries for Unix systems
     if (UNIX)
       list (APPEND HYPRE_LIBS m)
     endif (UNIX)
-  
+
     # Append the additional libraries and options
-    target_link_libraries(${EXE_NAME} PRIVATE "${HYPRE_LIBS}") 
+    target_link_libraries(${EXE_NAME} PRIVATE "${HYPRE_LIBS}")
   endforeach(SRC_FILE)
 endfunction()
