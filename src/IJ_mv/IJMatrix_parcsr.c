@@ -2664,7 +2664,7 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
                   }
                   else if (j != diag_pos[i])
                   {
-                     diag_j[i_diag] = local_j[j] - col_0;
+                     diag_j[i_diag] = (HYPRE_Int)(local_j[j] - col_0);
                      diag_data[i_diag++] = local_data[j];
                   }
                }
