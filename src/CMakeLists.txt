@@ -229,9 +229,10 @@ if (HYPRE_WITH_CUDA)
     #  set(HYPRE_USING_CUB ON CACHE BOOL "" FORCE)
     #endif (HYPRE_ENABLE_CUB)
 
-    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} ${CUDA_FLAGS}" CACHE STRING
+    set(CMAKE_CUDA_FLAGS "${CUDA_FLAGS} ${CMAKE_CUDA_FLAGS}" CACHE STRING
          "CUDA flags set for HYPRE" FORCE)
-
+    #list(REMOVE_DUPLICATES ${CMAKE_CUDA_FLAGS})
+    message("CMAKE_CUDA_FLAGS ${CMAKE_CUDA_FLAGS}")
     # TODO Eventually should require cmake>=3.17
     # and use cmake's FindCUDAToolkit. Now collect
     # CUDA optional libraries.
