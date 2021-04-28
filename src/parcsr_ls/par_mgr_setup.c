@@ -788,7 +788,7 @@ hypre_MGRSetup( void               *mgr_vdata,
     if (interp_type[lev] == 99)
     {
       hypre_MGRBuildInterp(A_array[lev], CF_marker_array[lev], A_ff_inv, coarse_pnts_global, 1, dof_func_buff,
-                          debug_flag, trunc_factor, max_elmts, col_offd_S_to_A, &P, interp_type[lev], num_interp_sweeps);
+                          debug_flag, trunc_factor, max_elmts, &P, interp_type[lev], num_interp_sweeps);
     }
     else
     {

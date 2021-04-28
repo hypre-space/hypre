@@ -83,7 +83,7 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix *A,
     P_offd_i    = hypre_TAlloc(HYPRE_Int,     A_nr_of_rows+1, HYPRE_MEMORY_DEVICE);
   }
 
-  hypre_NvtxPushRangeColor("Extend matrix", 4);
+  //hypre_NvtxPushRangeColor("Extend matrix", 4);
   hypreDevice_extendWtoP( A_nr_of_rows,
                          W_nr_of_rows,
                          hypre_ParCSRMatrixNumCols(A_FC),
@@ -98,7 +98,7 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix *A,
                          W_offd ? hypre_CSRMatrixI(W_offd) : NULL,
                          P_offd_i );
   hypre_TFree(CF_marker_dev, HYPRE_MEMORY_DEVICE);
-  hypre_NvtxPopRange();
+  //hypre_NvtxPopRange();
 
   // final P
   P = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A),
