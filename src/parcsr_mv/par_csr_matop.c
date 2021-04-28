@@ -322,11 +322,13 @@ hypre_ParMatmul_RowSizes( HYPRE_MemoryLocation memory_location,
    *C_diag_size = (*C_diag_i)[num_rows_diag_A];
    *C_offd_size = (*C_offd_i)[num_rows_diag_A];
 
+#ifdef HYPRE_DEBUG
    for (HYPRE_Int i = 0; i < num_rows_diag_A; i++)
    {
       hypre_assert((*C_diag_i)[i] <= (*C_diag_i)[i+1]);
       hypre_assert((*C_offd_i)[i] <= (*C_offd_i)[i+1]);
    }
+#endif
 
    hypre_TFree(jj_count_diag_array, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count_offd_array, HYPRE_MEMORY_HOST);
