@@ -5099,7 +5099,7 @@ hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
    HYPRE_Int             num_cols_diag_C = num_cols_diag_A;
    HYPRE_Int             num_rows_offd_C = num_rows_offd_A;
    HYPRE_Int             num_cols_offd_C = num_cols_offd_A + num_cols_offd_B;
-   HYPRE_Int             twspace[hypre_NumThreads()];
+   HYPRE_Int            *twspace;
 
    HYPRE_MemoryLocation  memory_location_A = hypre_ParCSRMatrixMemoryLocation(A);
    HYPRE_MemoryLocation  memory_location_B = hypre_ParCSRMatrixMemoryLocation(B);
@@ -5122,6 +5122,7 @@ hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
    hypre_assert(num_cols_diag_A == num_cols_diag_B);
 
    /* Allocate memory */
+   twspace  = hypre_TAlloc(HYPRE_Int, hypre_NumThreads(), HYPRE_MEMORY_HOST);
    C_diag_i = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A + 1, memory_location_C);
    C_offd_i = hypre_CTAlloc(HYPRE_Int, num_rows_offd_A + 1, memory_location_C);
    col_map_offd_C = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_HOST);
@@ -5225,6 +5226,7 @@ hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
    } /* end of omp parallel region */
 
    /* Free memory */
+   hypre_TFree(twspace, HYPRE_MEMORY_HOST);
    hypre_TFree(A2C_offd, HYPRE_MEMORY_HOST);
    hypre_TFree(B2C_offd, HYPRE_MEMORY_HOST);
 

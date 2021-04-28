@@ -367,7 +367,7 @@ hypre_CSRMatrixAddHost ( hypre_CSRMatrix *A,
    HYPRE_Int        *rownnz_C;
    HYPRE_Int         nnzrows_C;
 
-   HYPRE_Int         twspace[hypre_NumThreads()];
+   HYPRE_Int        *twspace;
    HYPRE_Complex     alpha = 1.0;
    HYPRE_Complex     beta = 1.0;
 
@@ -390,6 +390,8 @@ hypre_CSRMatrixAddHost ( hypre_CSRMatrix *A,
       return NULL;
    }
 
+   /* Allocate memory */
+   twspace = hypre_TAlloc(HYPRE_Int, hypre_NumThreads(), HYPRE_MEMORY_HOST);
    C_i = hypre_CTAlloc(HYPRE_Int, nrows_A + 1, memory_location_C);
 
    /* Set nonzero rows data of diag_C */
@@ -440,6 +442,9 @@ hypre_CSRMatrixAddHost ( hypre_CSRMatrix *A,
 
       hypre_TFree(marker, HYPRE_MEMORY_HOST);
    } /* end of parallel region */
+
+   /* Free memory */
+   hypre_TFree(twspace, HYPRE_MEMORY_HOST);
 
    return C;
 }
@@ -498,8 +503,7 @@ hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
    HYPRE_Complex    *C_data;
    HYPRE_Int        *C_i;
    HYPRE_BigInt     *C_j;
-
-   HYPRE_Int         twspace[hypre_NumThreads()];
+   HYPRE_Int        *twspace;
 
    HYPRE_MemoryLocation memory_location_A = hypre_CSRMatrixMemoryLocation(A);
    HYPRE_MemoryLocation memory_location_B = hypre_CSRMatrixMemoryLocation(B);
@@ -520,6 +524,8 @@ hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
       return NULL;
    }
 
+   /* Allocate memory */
+   twspace = hypre_TAlloc(HYPRE_Int, hypre_NumThreads(), HYPRE_MEMORY_HOST);
    C_i = hypre_CTAlloc(HYPRE_Int, nrows_A + 1, memory_location_C);
 
 #ifdef HYPRE_USING_OPENMP
@@ -650,6 +656,9 @@ hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
       hypre_TFree(marker, HYPRE_MEMORY_HOST);
    } /* end of parallel region */
 
+   /* Free memory */
+   hypre_TFree(twspace, HYPRE_MEMORY_HOST);
+
    return C;
 }
 
@@ -695,7 +704,7 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
    HYPRE_Int             counter;
    HYPRE_Complex         a_entry, b_entry;
    HYPRE_Int             allsquare = 0;
-   HYPRE_Int             twspace[hypre_NumThreads()];
+   HYPRE_Int            *twspace;
 
    /* RL: TODO cannot guarantee, maybe should never assert
    hypre_assert(memory_location_A == memory_location_B);
@@ -727,6 +736,8 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
       return C;
    }
 
+   /* Allocate memory */
+   twspace = hypre_TAlloc(HYPRE_Int, hypre_NumThreads(), HYPRE_MEMORY_HOST);
    C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1, memory_location_C);
 
 #ifdef HYPRE_USING_OPENMP
@@ -917,13 +928,18 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
       hypre_TFree(B_marker, HYPRE_MEMORY_HOST);
    } /*end parallel region */
 
+#ifdef HYPRE_DEBUG
    for (ic = 0; ic < nrows_A; ic++)
    {
       hypre_assert(C_i[ic] <= C_i[ic+1]);
    }
+#endif
 
    // Set rownnz and num_rownnz
    hypre_CSRMatrixSetRownnz(C);
+
+   /* Free memory */
+   hypre_TFree(twspace, HYPRE_MEMORY_HOST);
 
    return C;
 }
