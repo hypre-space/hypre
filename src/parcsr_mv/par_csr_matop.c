@@ -295,8 +295,8 @@ hypre_ParMatmul_RowSizes( HYPRE_MemoryLocation memory_location,
          {
             for (ii1 = rownnz_A[i1] + 1; ii1 < rownnz_A[i1+1]; ii1++)
             {
-               (*C_diag_i)[ii1+1] = (*C_diag_i)[rownnz_A[i1+1]+1];
-               (*C_offd_i)[ii1+1] = (*C_offd_i)[rownnz_A[i1+1]+1];
+               (*C_diag_i)[ii1] = (*C_diag_i)[rownnz_A[i1+1]];
+               (*C_offd_i)[ii1] = (*C_offd_i)[rownnz_A[i1+1]];
             }
          }
 
@@ -304,8 +304,8 @@ hypre_ParMatmul_RowSizes( HYPRE_MemoryLocation memory_location,
          {
             for (ii1 = rownnz_A[ne-1] + 1; ii1 < rownnz_A[ne]; ii1++)
             {
-               (*C_diag_i)[ii1+1] = (*C_diag_i)[rownnz_A[ne]+1];
-               (*C_offd_i)[ii1+1] = (*C_offd_i)[rownnz_A[ne]+1];
+               (*C_diag_i)[ii1] = (*C_diag_i)[rownnz_A[ne]];
+               (*C_offd_i)[ii1] = (*C_offd_i)[rownnz_A[ne]];
             }
          }
          else
@@ -321,6 +321,12 @@ hypre_ParMatmul_RowSizes( HYPRE_MemoryLocation memory_location,
 
    *C_diag_size = (*C_diag_i)[num_rows_diag_A];
    *C_offd_size = (*C_offd_i)[num_rows_diag_A];
+
+   for (HYPRE_Int i = 0; i < num_rows_diag_A; i++)
+   {
+      hypre_assert((*C_diag_i)[i] <= (*C_diag_i)[i+1]);
+      hypre_assert((*C_offd_i)[i] <= (*C_offd_i)[i+1]);
+   }
 
    hypre_TFree(jj_count_diag_array, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count_offd_array, HYPRE_MEMORY_HOST);

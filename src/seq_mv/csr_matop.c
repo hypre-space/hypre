@@ -840,7 +840,7 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
          {
             for (iic = rownnz_A[ic] + 1; iic < rownnz_A[ic+1]; iic++)
             {
-               C_i[iic+1] = C_i[rownnz_A[ic+1]+1];
+               C_i[iic] = C_i[rownnz_A[ic+1]];
             }
          }
 
@@ -848,7 +848,7 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
          {
             for (iic = rownnz_A[ne-1] + 1; iic < rownnz_A[ne]; iic++)
             {
-               C_i[iic+1] = C_i[rownnz_A[ne]+1];
+               C_i[iic] = C_i[rownnz_A[ne]];
             }
          }
          else
@@ -916,6 +916,11 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
       /* End of Second Pass */
       hypre_TFree(B_marker, HYPRE_MEMORY_HOST);
    } /*end parallel region */
+
+   for (ic = 0; ic < nrows_A; ic++)
+   {
+      hypre_assert(C_i[ic] <= C_i[ic+1]);
+   }
 
    // Set rownnz and num_rownnz
    hypre_CSRMatrixSetRownnz(C);

@@ -204,7 +204,6 @@ HYPRE_Init()
 
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
    hypre_HandleCusparseHandle(_hypre_handle);
-   hypre_HandleCusparseMatDescr(_hypre_handle);
 #endif
 
 #if defined(HYPRE_USING_CURAND)

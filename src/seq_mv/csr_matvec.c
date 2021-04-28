@@ -564,36 +564,39 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             {
                for (i = iBegin; i < iEnd; i++)
                {
-                  tempx = -b_data[i];
+                  y_data[i] = -b_data[i];
+                  tempx = 0.0;
                   for (jj = A_i[i]; jj < A_i[i+1]; jj++)
                   {
                      tempx += A_data[jj] * x_data[A_j[jj]];
                   }
-                  y_data[i] = tempx;
+                  y_data[i] += tempx;
                }
             } // y = A*x - y
             else if (alpha == -1.0) // JSP: a common path
             {
                for (i = iBegin; i < iEnd; i++)
                {
-                  tempx = b_data[i];
+                  y_data[i] = b_data[i];
+                  tempx = 0.0;
                   for (jj = A_i[i]; jj < A_i[i+1]; jj++)
                   {
                      tempx -= A_data[jj] * x_data[A_j[jj]];
                   }
-                  y_data[i] = tempx;
+                  y_data[i] += tempx;
                }
             } // y = -A*x + y
             else
             {
                for (i = iBegin; i < iEnd; i++)
                {
-                  tempx = -b_data[i];
+                  y_data[i] = -alpha*b_data[i];
+                  tempx = 0.0;
                   for (jj = A_i[i]; jj < A_i[i+1]; jj++)
                   {
                      tempx += A_data[jj] * x_data[A_j[jj]];
                   }
-                  y_data[i] = alpha*tempx;
+                  y_data[i] += alpha*tempx;
                }
             } // y = alpha*(A*x - y)
          } // temp == -1
@@ -603,36 +606,39 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             {
                for (i = iBegin; i < iEnd; i++)
                {
-                  tempx = b_data[i];
+                  y_data[i] = b_data[i];
+                  tempx = 0.0;
                   for (jj = A_i[i]; jj < A_i[i+1]; jj++)
                   {
                      tempx += A_data[jj] * x_data[A_j[jj]];
                   }
-                  y_data[i] = tempx;
+                  y_data[i] += tempx;
                }
             } // y = A*x + y
             else if (alpha == -1.0)
             {
                for (i = iBegin; i < iEnd; i++)
                {
-                  tempx = -b_data[i];
+                  y_data[i] = -b_data[i];
+                  tempx = 0.0;
                   for (jj = A_i[i]; jj < A_i[i+1]; jj++)
                   {
                      tempx -= A_data[jj] * x_data[A_j[jj]];
                   }
-                  y_data[i] = tempx;
+                  y_data[i] += tempx;
                }
             } // y = -A*x - y
             else
             {
                for (i = iBegin; i < iEnd; i++)
                {
-                  tempx = b_data[i];
+                  y_data[i] = alpha * b_data[i];
+                  tempx = 0.0;
                   for (jj = A_i[i]; jj < A_i[i+1]; jj++)
                   {
                      tempx += A_data[jj] * x_data[A_j[jj]];
                   }
-                  y_data[i] = alpha*tempx;
+                  y_data[i] += alpha*tempx;
                }
             } // y = alpha*(A*x + y)
          }
@@ -642,36 +648,39 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             {
                for (i = iBegin; i < iEnd; i++)
                {
-                  tempx = b_data[i]*temp;
+                  y_data[i] = b_data[i]*temp;
+                  tempx = 0.0;
                   for (jj = A_i[i]; jj < A_i[i+1]; jj++)
                   {
                      tempx += A_data[jj] * x_data[A_j[jj]];
                   }
-                  y_data[i] = tempx;
+                  y_data[i] += tempx;
                }
             } // y = A*x + temp*y
             else if (alpha == -1.0)
             {
                for (i = iBegin; i < iEnd; i++)
                {
-                  tempx = -b_data[i]*temp;
+                  y_data[i] = -b_data[i]*temp;
+                  tempx = 0.0;
                   for (jj = A_i[i]; jj < A_i[i+1]; jj++)
                   {
                      tempx -= A_data[jj] * x_data[A_j[jj]];
                   }
-                  y_data[i] = tempx;
+                  y_data[i] += tempx;
                }
             } // y = -A*x - temp*y
             else
             {
                for (i = iBegin; i < iEnd; i++)
                {
-                  tempx = b_data[i]*temp;
+                  y_data[i] = b_data[i]*beta;
+                  tempx = 0.0;
                   for (jj = A_i[i]; jj < A_i[i+1]; jj++)
                   {
                      tempx += A_data[jj] * x_data[A_j[jj]];
                   }
-                  y_data[i] = alpha*tempx;
+                  y_data[i] += alpha*tempx;
                }
             } // y = alpha*(A*x + temp*y)
          } // temp != 0 && temp != -1 && temp != 1

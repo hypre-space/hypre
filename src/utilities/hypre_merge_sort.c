@@ -663,7 +663,7 @@ void hypre_sort_and_create_inverse_map(HYPRE_Int *in, HYPRE_Int len, HYPRE_Int *
    hypre_merge_sort(in, temp, len, out);
    hypre_UnorderedIntMapCreate(inverse_map, 2*len, 16*hypre_NumThreads());
    HYPRE_Int i;
-#ifdef HYPRE_USING_OPENMP
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 #pragma omp parallel for HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < len; i++)
@@ -812,7 +812,7 @@ void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPR
    hypre_big_merge_sort(in, temp, len, out);
    hypre_UnorderedBigIntMapCreate(inverse_map, 2*len, 16*hypre_NumThreads());
    HYPRE_Int i;
-#ifdef HYPRE_USING_OPENMP
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 #pragma omp parallel for HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < len; i++)

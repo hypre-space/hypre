@@ -21,6 +21,11 @@ struct hypre_CsrsvData;
 typedef struct hypre_CsrsvData hypre_CsrsvData;
 #endif
 
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+struct hypre_GpuMatData;
+typedef struct hypre_GpuMatData hypre_GpuMatData;
+#endif
+
 /*--------------------------------------------------------------------------
  * CSR Matrix
  *--------------------------------------------------------------------------*/
@@ -46,6 +51,9 @@ typedef struct
    hypre_CsrsvData      *csrsv_data;
 #endif
 
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+  hypre_GpuMatData      *mat_data;
+#endif
 } hypre_CSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -68,6 +76,12 @@ typedef struct
 #define hypre_CSRMatrixSortedJ(matrix)              ((matrix) -> sorted_j)
 #define hypre_CSRMatrixSortedData(matrix)           ((matrix) -> sorted_data)
 #define hypre_CSRMatrixCsrsvData(matrix)            ((matrix) -> csrsv_data)
+#endif
+
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+#define hypre_CSRMatrixGPUMatData(matrix)           ((matrix) -> mat_data)
+#define hypre_CSRMatrixGPUMatDescr(matrix)          (hypre_GpuMatDataMatDecsr((matrix) -> mat_data))
+#define hypre_CSRMatrixGPUMatInfo(matrix)           (hypre_GpuMatDataMatInfo((matrix) -> mat_data))
 #endif
 
 HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBegin( hypre_CSRMatrix *A );

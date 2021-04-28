@@ -65,3 +65,26 @@ hypre_partition1D(HYPRE_Int  n, /* total number of elements */
       *e = (j + 1) * size + rest;
    }
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_strcpy
+ *
+ * Note: strcpy that allows overlapping in memory
+ *--------------------------------------------------------------------------*/
+
+char *
+hypre_strcpy(char *destination, const char *source)
+{
+   size_t len = strlen(source);
+
+   /* no overlapping */
+   if (source > destination + len || destination > source + len)
+   {
+      return strcpy(destination, source);
+   }
+   else
+   {
+      /* +1: including the terminating null character */
+      return ((char *) memmove(destination, source, len + 1));
+   }
+}
