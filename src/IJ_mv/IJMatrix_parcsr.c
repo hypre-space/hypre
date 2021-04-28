@@ -2652,7 +2652,7 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
                local_data = aux_data[ii];
                if (diag_pos[i] > -1)
                {
-	          diag_j[i_diag] = (HYPRE_Int)(local_j[diag_pos[i]] - col_0);
+                  diag_j[i_diag] = (HYPRE_Int)(local_j[diag_pos[i]] - col_0);
                   diag_data[i_diag++] = local_data[diag_pos[i]];
                }
                for (j = 0; j < row_length[ii]; j++)
