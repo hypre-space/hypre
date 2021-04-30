@@ -449,6 +449,9 @@ hypre_PFMGComputeMaxLevels( hypre_StructGrid   *grid,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_PFMGComputeDxyz
+ *
+ * TODO: Change SerialBoxLoop to BoxLoop
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -532,25 +535,21 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    {
       compute_box = hypre_BoxArrayBox(compute_boxes, i);
       A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+      Ap = hypre_StructMatrixBoxData(A, i, diag_entry);
       start  = hypre_BoxIMin(compute_box);
       hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
       /* all coefficients constant or variable diagonal */
-      if ( constant_coefficient )
+      if (constant_coefficient)
       {
-         Ai = hypre_CCBoxIndexRank( A_dbox, start );
+         Ai = hypre_CCBoxIndexRank(A_dbox, start);
 
          tcx = 0.0;
          tcy = 0.0;
          tcz = 0.0;
 
          /* get sign of diagonal */
-         Ap = hypre_StructMatrixBoxData(A, i, diag_entry);
-         diag = 1.0;
-         if (Ap[Ai] < 0)
-         {
-            diag = -1.0;
-         }
+         diag = (Ap[Ai] < 0) ? -1.0 : 1.0;
 
          for (si = 0; si < stencil_size; si++)
          {
@@ -590,20 +589,15 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       /* constant_coefficient==0, all coefficients vary with space */
       else
       {
-         hypre_BoxLoop1Begin(ndim, loop_size,
-                             A_dbox, start, stride, Ai);
+         hypre_SerialBoxLoop1Begin(ndim, loop_size,
+                                   A_dbox, start, stride, Ai);
          {
             tcx = 0.0;
             tcy = 0.0;
             tcz = 0.0;
 
             /* get sign of diagonal */
-            Ap = hypre_StructMatrixBoxData(A, i, diag_entry);
-            diag = 1.0;
-            if (Ap[Ai] < 0)
-            {
-               diag = -1.0;
-            }
+            diag = (Ap[Ai] < 0) ? -1.0 : 1.0;
 
             for (si = 0; si < stencil_size; si++)
             {
@@ -639,7 +633,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             sqcy += (tcy*tcy);
             sqcz += (tcz*tcz);
          }
-         hypre_BoxLoop1End(Ai);
+         hypre_SerialBoxLoop1End(Ai);
       }
    }
 
@@ -773,12 +767,12 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
       }
       else
       {
-         hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
-                             A_dbox, start, stride, Ai);
+         hypre_SerialBoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
+                                   A_dbox, start, stride, Ai);
          {
             diag_product *= Ap[Ai];
          }
-         hypre_BoxLoop1End(Ai);
+         hypre_SerialBoxLoop1End(Ai);
       }
    }
 
