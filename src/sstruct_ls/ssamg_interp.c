@@ -155,6 +155,11 @@ hypre_SSAMGCreateInterpOp( hypre_SStructMatrix  *A,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SSAMGSetupInterpOp
+ *
+ * Sets up interpolation coefficients
+ *
+ * TODO: Add DEVICE_VAR to boxloops
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -187,7 +192,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
    HYPRE_Int               *ventries, nventries;
 
    HYPRE_Real              *Ap, *Pp0, *Pp1, *Pp2;
-   HYPRE_Real               Pconst[3], center;
+   HYPRE_Real               Pconst[3];
 
    HYPRE_Int                Astenc, Pstenc1, Pstenc2;
    hypre_Index              Astart, Astride, Pstart, Pstride;
@@ -309,14 +314,18 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                                       A_dbox, Astart, Astride, Ai,
                                       P_dbox, Pstart, Pstride, Pi);
                   {
+                     HYPRE_Int   ei, entry;
+                     HYPRE_Int   Astenc;
+                     HYPRE_Real  center;
+
                      center  = Pconst[0];
                      Pp1[Pi] = Pconst[1];
                      Pp2[Pi] = Pconst[2];
-                     for (vi = 0; vi < nventries; vi++)
+                     for (ei = 0; ei < nventries; ei++)
                      {
-                        si = ventries[vi];
-                        Ap = hypre_StructMatrixBoxData(A_s, i, si);
-                        Astenc = hypre_IndexD(A_stencil_shape[si], cdir);
+                        entry = ventries[ei];
+                        Ap = hypre_StructMatrixBoxData(A_s, i, entry);
+                        Astenc = hypre_IndexD(A_stencil_shape[entry], cdir);
 
                         if (Astenc == 0)
                         {
@@ -378,8 +387,9 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
                         hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
                         {
-                           hypre_assert((Pp1[Pi] == 0) || (Pp2[Pi] == 0));
+                           HYPRE_Real center;
 
+                           //hypre_assert((Pp1[Pi] == 0) || (Pp2[Pi] == 0));
                            center = Pp1[Pi] + Pp2[Pi];
                            Pp1[Pi] /= center;
                            Pp2[Pi] /= center;
