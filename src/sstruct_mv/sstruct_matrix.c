@@ -1587,8 +1587,10 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
 
    hypre_SStructVariable    tovartype;
    hypre_StructMatrix      *smatrix;
+   hypre_StructGrid        *sgrid;
    hypre_BoxArray          *pbnd_boxa;
-   hypre_Box               *box, *ibox0, *ibox1, *tobox, *frbox;
+   hypre_BoxArray          *grid_boxes;
+   hypre_Box               *grid_box, *box, *ibox0, *ibox1, *ibox2, *tobox, *frbox;
    hypre_Index              stride, loop_size;
    hypre_IndexRef           offset, start;
    hypre_BoxManEntry      **frentries, **toentries;
@@ -1596,11 +1598,12 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
    HYPRE_Complex           *tvalues = NULL;
    HYPRE_Int                box_id;
    HYPRE_Int                nfrentries, ntoentries, frpart, topart;
-   HYPRE_Int                entry, sentry, ei, fri, toi;
+   HYPRE_Int                entry, sentry, i, ei, fri, toi;
 
    box   = hypre_BoxCreate(ndim);
    ibox0 = hypre_BoxCreate(ndim);
    ibox1 = hypre_BoxCreate(ndim);
+   ibox2 = hypre_BoxCreate(ndim);
    tobox = hypre_BoxCreate(ndim);
    frbox = hypre_BoxCreate(ndim);
 
@@ -1610,8 +1613,10 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
       entry  = entries[ei];
       sentry = smap[entry];
       offset = shape[entry];
-      smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, vars[entry]);
       tovartype = hypre_SStructPGridVarType(pgrid, vars[entry]);
+      smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, vars[entry]);
+      sgrid = hypre_StructMatrixGrid(smatrix);
+      grid_boxes = hypre_StructGridBoxes(sgrid);
 
       /* shift box in the stencil offset direction */
       hypre_CopyBox(set_box, box);
@@ -1673,9 +1678,15 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                   if (action >= 0)
                   {
                      /* Update list of part boundaries */
-                     box_id = hypre_BoxManEntryId(frentries[fri]);
-                     pbnd_boxa = hypre_BoxArrayArrayBoxArray(pbnd_boxaa, box_id);
-                     hypre_AppendBox(ibox1, pbnd_boxa);
+                     hypre_ForBoxI(i, grid_boxes)
+                     {
+                        box_id = hypre_StructGridID(sgrid, i);
+                        grid_box = hypre_BoxArrayBox(grid_boxes, i);
+                        hypre_IntersectBoxes(grid_box, ibox1, ibox2);
+
+                        pbnd_boxa = hypre_BoxArrayArrayBoxArray(pbnd_boxaa, box_id);
+                        hypre_AppendBox(ibox2, pbnd_boxa);
+                     }
 
                      /* set or add */
                      /* copy values into tvalues */
@@ -1727,6 +1738,7 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
    hypre_BoxDestroy(box);
    hypre_BoxDestroy(ibox0);
    hypre_BoxDestroy(ibox1);
+   hypre_BoxDestroy(ibox2);
    hypre_BoxDestroy(tobox);
    hypre_BoxDestroy(frbox);
    hypre_TFree(tvalues, HYPRE_MEMORY_HOST);
