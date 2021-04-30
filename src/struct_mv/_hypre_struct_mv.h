@@ -292,6 +292,46 @@ for (i = 0; i < hypre_BoxArrayArraySize(box_array_array); i++)
    }\
 }
 
+#define hypre_SerialBoxLoop3Begin(ndim, loop_size,\
+                                  dbox1, start1, stride1, i1,\
+                                  dbox2, start2, stride2, i2,\
+                                  dbox3, start3, stride3, i3)\
+{\
+   HYPRE_Int i1,i2,i3;\
+   zypre_BoxLoopDeclare();\
+   zypre_BoxLoopDeclareK(1);\
+   zypre_BoxLoopDeclareK(2);\
+   zypre_BoxLoopDeclareK(3);\
+   zypre_BoxLoopInit(ndim, loop_size);\
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);\
+   zypre_BoxLoopInitK(2, dbox2, start2, stride2, i2);\
+   zypre_BoxLoopInitK(3, dbox3, start3, stride3, i3);\
+   zypre_BoxLoopSetOneBlock();\
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
+   {\
+      zypre_BoxLoopSet();\
+      zypre_BoxLoopSetK(1, i1);\
+      zypre_BoxLoopSetK(2, i2);\
+      zypre_BoxLoopSetK(3, i3);\
+      for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)\
+      {\
+         for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)\
+         {
+
+#define hypre_SerialBoxLoop3End(i1, i2, i3)\
+            i1 += hypre__i0inc1;\
+            i2 += hypre__i0inc2;\
+            i3 += hypre__i0inc3;\
+         }\
+         zypre_BoxLoopInc1();\
+         i1 += hypre__ikinc1[hypre__d];\
+         i2 += hypre__ikinc2[hypre__d];\
+         i3 += hypre__ikinc3[hypre__d];\
+         zypre_BoxLoopInc2();\
+      }\
+   }\
+}
+
 #define ZYPRE_BOX_PRIVATE hypre__IN,hypre__JN,hypre__I,hypre__J,hypre__d,hypre__i
 #define HYPRE_BOX_PRIVATE ZYPRE_BOX_PRIVATE
 
