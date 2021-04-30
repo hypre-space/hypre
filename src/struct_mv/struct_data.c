@@ -17,7 +17,7 @@
  * Copy struct data with possibly different data spaces.
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_StructDataCopy( HYPRE_Complex   *fr_data,        /* from */
                       hypre_BoxArray  *fr_data_space,
                       HYPRE_Int       *fr_ids,
@@ -53,7 +53,7 @@ hypre_StructDataCopy( HYPRE_Complex   *fr_data,        /* from */
    {
       to_data_box = hypre_BoxArrayBox(to_data_space, tb);
       to_data_vol = hypre_BoxVolume(to_data_box);
-      
+
       while ((fb < fr_nboxes) && (fr_ids[fb] < to_ids[tb]))
       {
          fr_data_box = hypre_BoxArrayBox(fr_data_space, fb);
@@ -70,12 +70,13 @@ hypre_StructDataCopy( HYPRE_Complex   *fr_data,        /* from */
 
          start = hypre_BoxIMin(int_box);
          hypre_BoxGetSize(int_box, loop_size);
-                     
+
          for (val = 0; val < nval; val++)
          {
             fr_dp = fr_data + fr_data_off + val * fr_data_vol;
             to_dp = to_data + to_data_off + val * to_data_vol;
 
+#define DEVICE_VAR is_device_ptr(fr_dp, to_dp)
             hypre_BoxLoop2Begin(ndim, loop_size,
                                 fr_data_box, start, stride, fi,
                                 to_data_box, start, stride, ti);
@@ -83,6 +84,7 @@ hypre_StructDataCopy( HYPRE_Complex   *fr_data,        /* from */
                to_dp[ti] = fr_dp[fi];
             }
             hypre_BoxLoop2End(fi, ti);
+#undef DEVICE_VAR
          }
       }
 
@@ -90,7 +92,7 @@ hypre_StructDataCopy( HYPRE_Complex   *fr_data,        /* from */
    }
 
    hypre_BoxDestroy(int_box);
-   
+
    return hypre_error_flag;
 }
 
@@ -98,7 +100,7 @@ hypre_StructDataCopy( HYPRE_Complex   *fr_data,        /* from */
  * Compute num_ghost array from stencil
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_StructNumGhostFromStencil( hypre_StructStencil  *stencil,
                                  HYPRE_Int           **num_ghost_ptr )
 {
@@ -133,4 +135,3 @@ hypre_StructNumGhostFromStencil( hypre_StructStencil  *stencil,
 
    return hypre_error_flag;
 }
-

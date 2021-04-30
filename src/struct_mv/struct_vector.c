@@ -747,6 +747,7 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
 
          hypre_BoxGetSize(int_box, loop_size);
 
+#define DEVICE_VAR is_device_ptr(datap, values)
          if (action > 0)
          {
             hypre_BoxLoop2Begin(hypre_StructVectorNDim(vector), loop_size,
@@ -777,6 +778,7 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
             }
             hypre_BoxLoop2End(datai, dvali);
          }
+#undef DEVICE_VAR
       }
    }
 
@@ -912,12 +914,14 @@ hypre_StructVectorClearBoxValues( hypre_StructVector *vector,
 
          hypre_BoxGetSize(int_box, loop_size);
 
+#define DEVICE_VAR is_device_ptr(datap)
          hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                              data_box,data_start,data_stride,datai);
          {
             datap[datai] = 0.0;
          }
          hypre_BoxLoop1End(datai);
+#undef DEVICE_VAR
       }
    }
 
@@ -1017,12 +1021,14 @@ hypre_StructVectorCopy( hypre_StructVector *x,
 
       hypre_BoxGetSize(box, loop_size);
 
+#define DEVICE_VAR is_device_ptr(xp, yp)
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(x), loop_size,
                           x_data_box, start, unit_stride, vi);
       {
          yp[vi] = xp[vi];
       }
       hypre_BoxLoop1End(vi);
+#undef DEVICE_VAR
    }
 
    return hypre_error_flag;
@@ -1062,11 +1068,13 @@ hypre_StructVectorSetConstantValues( hypre_StructVector *vector,
 
       hypre_BoxGetSize(box, loop_size);
 
+#define DEVICE_VAR is_device_ptr(vp)
       hypre_BoxLoop1Begin(ndim, loop_size, dbox, start, unit_stride, vi);
       {
          vp[vi] = value;
       }
       hypre_BoxLoop1End(vi);
+#undef DEVICE_VAR
    }
 
    return hypre_error_flag;
@@ -1195,11 +1203,13 @@ hypre_StructVectorClearGhostValues( hypre_StructVector *vector )
 
          hypre_BoxGetSize(diff_box, loop_size);
 
+#define DEVICE_VAR is_device_ptr(vp)
          hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                              v_data_box, start, unit_stride, vi);
          {
             vp[vi] = 0.0;
          }
+#undef DEVICE_VAR
          hypre_BoxLoop1End(vi);
       }
    }
@@ -1265,12 +1275,15 @@ hypre_StructVectorClearBoundGhostValues( hypre_StructVector *vector,
             bbox       = hypre_BoxArrayBox(boundary_boxes, i2);
             hypre_BoxGetSize(bbox, loop_size);
             start = hypre_BoxIMin(bbox);
+
+#define DEVICE_VAR is_device_ptr(vp)
             hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                                 v_data_box, start, stride, vi);
             {
                vp[vi] = 0.0;
             }
             hypre_BoxLoop1End(vi);
+#undef DEVICE_VAR
          }
          hypre_BoxArrayDestroy(boundary_boxes);
          hypre_BoxArrayDestroy(work_boxarray);
@@ -1308,12 +1321,14 @@ hypre_StructVectorScaleValues( hypre_StructVector *vector, HYPRE_Complex factor 
    data = hypre_StructVectorData(vector);
    hypre_BoxGetSize(box, loop_size);
 
+#define DEVICE_VAR is_device_ptr(data)
    hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                        box, imin, imin, datai);
    {
       data[datai] *= factor;
    }
    hypre_BoxLoop1End(datai);
+#undef DEVICE_VAR
 
    hypre_BoxDestroy(box);
 
