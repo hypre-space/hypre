@@ -873,8 +873,12 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
          }
       }
 
-      /* TODO: Add DEVICE_VAR */
-      hypre_BoxLoop3Begin(ndim, loop_size,
+      /* TODO:
+               1) Use hypre_BoxLoop3 instead of SerialBoxLoop. Currently, this produces
+                  non-deterministic results when OpenMP is turned on.
+               2) Add DEVICE_VAR
+      */
+      hypre_SerialBoxLoop3Begin(ndim, loop_size,
                           Mdbox, Mdstart, Mdstride, Mi,
                           fdbox, fdstart, fdstride, fi,
                           cdbox, cdstart, cdstride, ci);
@@ -907,7 +911,7 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
             a[i].mptr[Mi] += prod;
          }
       }
-      hypre_BoxLoop3End(Mi,fi,ci);
+      hypre_SerialBoxLoop3End(Mi,fi,ci);
 
    } /* end loop over matrix M range boxes */
 
