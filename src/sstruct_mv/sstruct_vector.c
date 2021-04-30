@@ -1024,11 +1024,11 @@ hypre_SStructVectorPrintGLVis( hypre_SStructVector  *vector,
             switch (vartype)
             {
                case HYPRE_SSTRUCT_VARIABLE_CELL:
-                  hypre_BoxLoop1Begin(ndim, loop_size, dbox, start, stride, datai);
+                  hypre_SerialBoxLoop1Begin(ndim, loop_size, dbox, start, stride, datai);
                   {
                      hypre_fprintf(file[vartype], "%.14e\n", data[datai]);
                   }
-                  hypre_BoxLoop1End(datai);
+                  hypre_SerialBoxLoop1End(datai);
                   break;
 
                case HYPRE_SSTRUCT_VARIABLE_NODE:

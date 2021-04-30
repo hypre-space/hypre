@@ -2203,8 +2203,8 @@ hypre_StructMatrixPrint( const char         *filename,
 
          hypre_BoxGetSize(box, loop_size);
 
-         hypre_BoxLoop1Begin(ndim, loop_size,
-                             data_box, start, stride, datai);
+         hypre_SerialBoxLoop1Begin(ndim, loop_size,
+                                   data_box, start, stride, datai);
          {
             /* Print lines of the form: "%d: (%d, %d, %d; %d) %.14e\n" */
             hypre_BoxLoopGetIndex(index);
@@ -2230,7 +2230,7 @@ hypre_StructMatrixPrint( const char         *filename,
                }
             }
          }
-         hypre_BoxLoop1End(datai);
+         hypre_SerialBoxLoop1End(datai);
 
          vdata += num_values*data_box_volume;
       }
@@ -2542,5 +2542,3 @@ hypre_StructMatrixClearBoundary( hypre_StructMatrix *matrix)
 
    return hypre_error_flag;
 }
-
-
