@@ -397,7 +397,10 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
 }
 
 /* Use this before the For macros below to force only one block */
-#define zypre_BoxLoopSetOneBlock() hypre__num_blocks = 1
+#define zypre_BoxLoopSetOneBlock() \
+hypre__num_blocks = 1;\
+hypre__div = hypre__tot;\
+hypre__mod = 0;
 
 /* Use this to get the block iteration inside a BoxLoop */
 #define zypre_BoxLoopBlock() hypre__block
@@ -1367,7 +1370,7 @@ typedef struct hypre_CommHandle_struct
 
    HYPRE_Complex      **send_buffers_data;
    HYPRE_Complex      **recv_buffers_data;
-	
+
    /* set = 0, add = 1 */
    HYPRE_Int          action;
 
@@ -3215,4 +3218,3 @@ typedef struct hypre_Boxloop_struct
 #endif
 
 #endif
-

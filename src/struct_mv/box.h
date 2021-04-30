@@ -380,7 +380,10 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
 }
 
 /* Use this before the For macros below to force only one block */
-#define zypre_BoxLoopSetOneBlock() hypre__num_blocks = 1
+#define zypre_BoxLoopSetOneBlock() \
+hypre__num_blocks = 1;\
+hypre__div = hypre__tot;\
+hypre__mod = 0;
 
 /* Use this to get the block iteration inside a BoxLoop */
 #define zypre_BoxLoopBlock() hypre__block
