@@ -478,7 +478,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
          hypre_ParCSRMatrixDestroy(par_RAP);
          hypre_ParCSRMatrixDestroy(par_B);
       }
-      HYPRE_IJMatrixDestroy(ij_A[1]);
+      HYPRE_IJMatrixDestroy(ij_A[0]);
    }
 #endif // ifdef (DEBUG_MATMULT)
 #endif // ifdef (HYPRE_DEBUG)
