@@ -6898,7 +6898,7 @@ main( hypre_int argc,
    }
    if ((print_system || check_symmetry) && (object_type == HYPRE_SSTRUCT))
    {
-//      HYPRE_IJMatrixDestroy(ij_A);
+      HYPRE_IJMatrixDestroy(ij_A);
    }
 
    DestroyData(data);
