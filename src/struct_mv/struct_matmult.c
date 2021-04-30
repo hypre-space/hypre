@@ -159,8 +159,6 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
    HYPRE_Int            need_mask;            /* boolean indicating if a bit mask is needed */
    HYPRE_Int            const_term, var_term; /* booleans used to determine 'need_mask' */
 
-   HYPRE_Complex        prod;
-   HYPRE_Complex        pprod;
    HYPRE_Complex       *constp;          /* pointer to constant data */
    HYPRE_Complex       *bitptr;          /* pointer to bit mask data */
    hypre_Index          offset;          /* CommStencil offset */
@@ -676,12 +674,14 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
 
             bitptr = hypre_StructVectorBoxData(mask, b);
 
+#define DEVICE_VAR is_device_ptr(bitptr)
             hypre_BoxLoop1Begin(ndim, loop_size,
                                 fdbox, fdstart, fdstride, fi);
             {
                bitptr[fi] = ((HYPRE_Int) bitptr[fi]) | bitval;
             }
             hypre_BoxLoop1End(fi);
+#undef DEVICE_VAR
          }
       }
    }
@@ -873,11 +873,16 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
          }
       }
 
+      /* TODO: Add DEVICE_VAR */
       hypre_BoxLoop3Begin(ndim, loop_size,
                           Mdbox, Mdstart, Mdstride, Mi,
                           fdbox, fdstart, fdstride, fi,
                           cdbox, cdstart, cdstride, ci);
       {
+         HYPRE_Int      i, t;
+         HYPRE_Complex  prod;
+         HYPRE_Complex  pprod;
+
          for (i = 0; i < na; i++)
          {
             prod = a[i].cprod;

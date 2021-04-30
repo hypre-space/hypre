@@ -1096,7 +1096,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
    hypre_IndexRef        vstart;
    hypre_Index           rs, cs;
    HYPRE_BigInt          row_base, col_base;
-   HYPRE_Int             ei, entry, ii, jj, i, d, ci;
+   HYPRE_Int             ei, entry, ii, jj, i;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -1191,7 +1191,10 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
                                    box, mstart, dom_stride, mi,
                                    map_vbox, vstart, stride, vi);
                {
-                  hypre_BoxLoopGetIndex(index);
+                  hypre_Index loop_index;
+                  HYPRE_Int   ci, d;
+
+                  hypre_BoxLoopGetIndex(loop_index);
                   hypre_assert((mi >= 0) && (vi >= 0));
 
                   ci = mi*nentries + ncols[mi];
@@ -1199,14 +1202,13 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
                   cols[ci] = col_base;
                   for (d = 0; d < ndim; d++)
                   {
-                     rows[mi] += index[d]*rs[d]*dom_stride[d];
-                     cols[ci] += index[d]*cs[d];
+                     rows[mi] += loop_index[d]*rs[d]*dom_stride[d];
+                     cols[ci] += loop_index[d]*cs[d];
                   }
                   ijvalues[ci] = values[ei + vi*nentries];
                   ncols[mi]++;
                }
                hypre_BoxLoop2End(mi, vi);
-
             } /* end loop through boxman to entries */
 
             hypre_TFree(boxman_to_entries, HYPRE_MEMORY_HOST);
@@ -1770,14 +1772,14 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
    HYPRE_Int               *row_sizes;
    HYPRE_Int               *split;
    HYPRE_Int                nSentries;
-   hypre_Index              index, stride, loop_size;
+   hypre_Index              stride, loop_size;
    hypre_Index              rs;
    hypre_Index              start;
    hypre_IndexRef           offset;
    hypre_IndexRef           dom_stride;
 
-   HYPRE_Int                i, ii, ei, d, jj, m, nrows, nvalues, max_size;
-   HYPRE_Int                row, row_base;
+   HYPRE_Int                i, ii, ei, jj, m, nrows, nvalues, max_size;
+   HYPRE_Int                row_base;
    HYPRE_Int                sizes[4];
    HYPRE_Int                part, var, nvars, entry;
    HYPRE_Complex           *values;
@@ -1876,11 +1878,14 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
                      hypre_BoxGetSize(int_box, loop_size);
                      hypre_BoxLoop1Begin(ndim, loop_size, box, start, stride, mi);
                      {
-                        hypre_BoxLoopGetIndex(index);
+                        hypre_Index  loop_index;
+                        HYPRE_Int    row, d;
+
+                        hypre_BoxLoopGetIndex(loop_index);
                         row = row_base;
                         for (d = 0; d < ndim; d++)
                         {
-                           row += index[d]*rs[d]*dom_stride[d];
+                           row += loop_index[d]*rs[d]*dom_stride[d];
                         }
                         row_sizes[row]++;
                      }
@@ -1902,7 +1907,7 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
 
    max_size = 0;
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for(i) reduction(max:max_size)
+#pragma omp parallel for private(i) reduction(max:max_size)
 #endif
    for (i = 0; i < nrows; i++)
    {
