@@ -464,14 +464,9 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    hypre_StructGrid      *grid = hypre_StructMatrixGrid(A);
 
    hypre_Box             *A_dbox;
-
    HYPRE_Int              Ai;
-
    HYPRE_Real            *Ap;
-   HYPRE_Real             cxyz[3], sqcxyz[3], tcxyz[3];
-   HYPRE_Real             cxyz_max;
 
-   HYPRE_Int              tot_size;
 
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
@@ -479,17 +474,18 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 
    HYPRE_Int              constant_coefficient;
 
-   HYPRE_Int              Astenc;
-
    hypre_Index            loop_size;
    hypre_IndexRef         start;
    hypre_Index            stride;
 
    HYPRE_Int              ndim, i, si, d;
    HYPRE_Int              diag_entry;
-   HYPRE_Real             cx, cy, cz;
-   HYPRE_Real             sqcx, sqcy, sqcz;
-   HYPRE_Real             tcx, tcy, tcz, diag;
+   HYPRE_Int              tot_size;
+   HYPRE_Real             val;
+   HYPRE_Real             cxyz_max;
+   HYPRE_Real             cxyz[HYPRE_MAXDIM];
+   HYPRE_Real             sqcxyz[HYPRE_MAXDIM];
+   HYPRE_Real             tcxyz[HYPRE_MAXDIM];
    HYPRE_Real             sqmean[HYPRE_MAXDIM];
    HYPRE_Real             deviation[HYPRE_MAXDIM];
 
@@ -523,19 +519,16 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
     * Compute cxyz (use arithmetic mean)
     *----------------------------------------------------------*/
 
-   cx = 0.0;
-   cy = 0.0;
-   cz = 0.0;
-
-   sqcx = 0.0;
-   sqcy = 0.0;
-   sqcz = 0.0;
+   for (d = 0; d < ndim; d++)
+   {
+      cxyz[d] = 0.0;
+      sqcxyz[d] = 0.0;
+   }
 
    hypre_ForBoxI(i, compute_boxes)
    {
       compute_box = hypre_BoxArrayBox(compute_boxes, i);
       A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-      Ap = hypre_StructMatrixBoxData(A, i, diag_entry);
       start  = hypre_BoxIMin(compute_box);
       hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
@@ -544,47 +537,47 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       {
          Ai = hypre_CCBoxIndexRank(A_dbox, start);
 
-         tcx = 0.0;
-         tcy = 0.0;
-         tcz = 0.0;
+         for (d = 0; d < ndim; d++)
+         {
+            tcxyz[d] = 0.0;
+         }
 
-         /* get sign of diagonal */
-         diag = (Ap[Ai] < 0) ? -1.0 : 1.0;
-
+         /* Compute tcxyz[d] */
          for (si = 0; si < stencil_size; si++)
          {
-            Ap = hypre_StructMatrixBoxData(A, i, si);
+            Ap  = hypre_StructMatrixBoxData(A, i, si);
+            val = Ap[Ai];
 
-            /* x-direction */
-            Astenc = hypre_IndexD(stencil_shape[si], 0);
-            if (Astenc)
+            for (d = 0; d < ndim; d++)
             {
-               tcx -= Ap[Ai]*diag;
-            }
-
-            /* y-direction */
-            Astenc = hypre_IndexD(stencil_shape[si], 1);
-            if (Astenc)
-            {
-               tcy -= Ap[Ai]*diag;
-            }
-
-            /* z-direction */
-            Astenc = hypre_IndexD(stencil_shape[si], 2);
-            if (Astenc)
-            {
-               tcz -= Ap[Ai]*diag;
+               if (hypre_IndexD(stencil_shape[si], d))
+               {
+                  tcxyz[d] += val;
+               }
             }
          }
 
-         cx += tcx;
-         cy += tcy;
-         cz += tcz;
+         /* get sign of diagonal */
+         Ap = hypre_StructMatrixBoxData(A, i, diag_entry);
 
-         sqcx += (tcx*tcx);
-         sqcy += (tcy*tcy);
-         sqcz += (tcz*tcz);
-      }
+         /* Update cxyz[d] */
+         if (Ap[Ai] < 0)
+         {
+            for (d = 0; d < ndim; d++)
+            {
+               cxyz[d]   += tcxyz[d];
+               sqcxyz[d] += tcxyz[d]*tcxyz[d];
+            }
+         }
+         else
+         {
+            for (d = 0; d < ndim; d++)
+            {
+               cxyz[d]   -= tcxyz[d];
+               sqcxyz[d] += tcxyz[d]*tcxyz[d];
+            }
+         }
+       }
 
       /* constant_coefficient==0, all coefficients vary with space */
       else
@@ -592,58 +585,50 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
          hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                    A_dbox, start, stride, Ai);
          {
-            tcx = 0.0;
-            tcy = 0.0;
-            tcz = 0.0;
+            for (d = 0; d < ndim; d++)
+            {
+               tcxyz[d] = 0.0;
+            }
 
-            /* get sign of diagonal */
-            diag = (Ap[Ai] < 0) ? -1.0 : 1.0;
-
+            /* Compute tcxyz[d] */
             for (si = 0; si < stencil_size; si++)
             {
-               Ap = hypre_StructMatrixBoxData(A, i, si);
+               Ap  = hypre_StructMatrixBoxData(A, i, si);
+               val = Ap[Ai];
 
-               /* x-direction */
-               Astenc = hypre_IndexD(stencil_shape[si], 0);
-               if (Astenc)
+               for (d = 0; d < ndim; d++)
                {
-                  tcx -= Ap[Ai]*diag;
-               }
-
-               /* y-direction */
-               Astenc = hypre_IndexD(stencil_shape[si], 1);
-               if (Astenc)
-               {
-                  tcy -= Ap[Ai]*diag;
-               }
-
-               /* z-direction */
-               Astenc = hypre_IndexD(stencil_shape[si], 2);
-               if (Astenc)
-               {
-                  tcz -= Ap[Ai]*diag;
+                  if (hypre_IndexD(stencil_shape[si], d))
+                  {
+                     tcxyz[d] += val;
+                  }
                }
             }
 
-            cx += tcx;
-            cy += tcy;
-            cz += tcz;
+            /* get sign of diagonal */
+            Ap = hypre_StructMatrixBoxData(A, i, diag_entry);
 
-            sqcx += (tcx*tcx);
-            sqcy += (tcy*tcy);
-            sqcz += (tcz*tcz);
+            /* Update cxyz[d] */
+            if (Ap[Ai] < 0)
+            {
+               for (d = 0; d < ndim; d++)
+               {
+                  cxyz[d]   += tcxyz[d];
+                  sqcxyz[d] += tcxyz[d]*tcxyz[d];
+               }
+            }
+            else
+            {
+               for (d = 0; d < ndim; d++)
+               {
+                  cxyz[d]   -= tcxyz[d];
+                  sqcxyz[d] += tcxyz[d]*tcxyz[d];
+               }
+            }
          }
          hypre_SerialBoxLoop1End(Ai);
       }
    }
-
-   cxyz[0] = cx;
-   cxyz[1] = cy;
-   cxyz[2] = cz;
-
-   sqcxyz[0] = sqcx;
-   sqcxyz[1] = sqcy;
-   sqcxyz[2] = sqcz;
 
    /*----------------------------------------------------------
     * Compute dxyz
@@ -661,16 +646,17 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    /* constant_coefficient==0, all coefficients vary with space */
    else
    {
-
-      tcxyz[0] = cxyz[0];
-      tcxyz[1] = cxyz[1];
-      tcxyz[2] = cxyz[2];
+      for (d = 0; d < ndim; d++)
+      {
+         tcxyz[d] = cxyz[d];
+      }
       hypre_MPI_Allreduce(tcxyz, cxyz, 3, HYPRE_MPI_REAL, hypre_MPI_SUM,
                           hypre_StructMatrixComm(A));
 
-      tcxyz[0] = sqcxyz[0];
-      tcxyz[1] = sqcxyz[1];
-      tcxyz[2] = sqcxyz[2];
+      for (d = 0; d < ndim; d++)
+      {
+         tcxyz[d] = sqcxyz[d];
+      }
       hypre_MPI_Allreduce(tcxyz, sqcxyz, 3, HYPRE_MPI_REAL, hypre_MPI_SUM,
                           hypre_StructMatrixComm(A));
 
