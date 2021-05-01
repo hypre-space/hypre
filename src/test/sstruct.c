@@ -6219,7 +6219,7 @@ main( hypre_int argc,
       {
          /* use symmetric PFMG as preconditioner */
          HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
-         HYPRE_StructPFMGSetMaxLevels(struct_solver, max_levels);
+         HYPRE_StructPFMGSetMaxLevels(struct_precond, max_levels);
          HYPRE_StructPFMGSetMaxIter(struct_precond, 1);
          HYPRE_StructPFMGSetTol(struct_precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(struct_precond);
