@@ -3055,6 +3055,7 @@ main( hypre_int argc,
         (solver_id == -3))
    {
       object_type = HYPRE_PARCSR;
+      relax[0] = -1; /* Use default relaxation method for ParCSR solvers */
    }
 
    else if (solver_id >= 200 || solver_id == -2)
