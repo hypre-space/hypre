@@ -164,7 +164,8 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
    hypre_Index             dstride;
    hypre_Index             loop_size;
 
-   HYPRE_Int               iter, i, stencil_diag, bsumsq, rsumsq;
+   HYPRE_Int               iter, i, stencil_diag;
+   HYPRE_Real              bsumsq, rsumsq;
 
    /*----------------------------------------------------------
     * Initialize some things and deal with special cases
