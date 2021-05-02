@@ -9,8 +9,6 @@
 #include "_hypre_struct_mv.hpp"
 #include "pfmg.h"
 
-#define DEBUG 0
-
 #define hypre_PFMGSetCIndex(cdir, cindex)       \
    {                                            \
       hypre_SetIndex(cindex, 0);                \
@@ -46,9 +44,9 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Real            jacobi_weight     = (pfmg_data -> jacobi_weight);
    HYPRE_Int             skip_relax        = (pfmg_data -> skip_relax);
    HYPRE_Real           *dxyz              = (pfmg_data -> dxyz);
+   HYPRE_Int             max_iter          = (pfmg_data -> max_iter);
+   HYPRE_Int             print_level       = (pfmg_data -> print_level);
    HYPRE_Int             rap_type;
-
-   HYPRE_Int             max_iter;
    HYPRE_Int             max_levels;
    HYPRE_Int             num_levels;
 
@@ -72,6 +70,9 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    hypre_StructVector  **tx_l;
    hypre_StructVector  **r_l;
    hypre_StructVector  **e_l;
+   hypre_StructVector   *ones  = NULL;
+   hypre_StructVector   *Pones = NULL;
+   char                  filename[255];
 
    void                **relax_data_l;
    void                **matvec_data_l;
@@ -139,7 +140,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
     *-----------------------------------------------------*/
    if (relax_type == 2 || relax_type == 3)   /* red-black gs */
    {
-      (pfmg_data -> rap_type)= 1;
+      (pfmg_data -> rap_type) = 1;
    }
    rap_type = (pfmg_data -> rap_type);
 
@@ -377,17 +378,12 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    if ((pfmg_data -> logging) > 0)
    {
-      max_iter = (pfmg_data -> max_iter);
       (pfmg_data -> norms)     = hypre_TAlloc(HYPRE_Real, max_iter+1, HYPRE_MEMORY_HOST);
       (pfmg_data -> rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter+1, HYPRE_MEMORY_HOST);
    }
 
-#if DEBUG
+   if (print_level > 1)
    {
-      hypre_StructVector   *ones  = NULL;
-      hypre_StructVector   *Pones = NULL;
-      char                  filename[255];
-
       for (l = 0; l < (num_levels - 1); l++)
       {
          hypre_sprintf(filename, "pfmg_A.%02d", l);
@@ -419,7 +415,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_sprintf(filename, "pfmg_A.%02d", l);
       hypre_StructMatrixPrint(filename, A_l[l], 0);
    }
-#endif
 
    HYPRE_ANNOTATE_FUNC_END;
 

@@ -129,7 +129,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
    }
 
    /* Print initial solution and residual */
-   if (print_level > 1)
+   if (print_level > 2)
    {
       /* Print solution */
       hypre_sprintf(filename, "ssamg_x.i%02d", 0);
@@ -336,9 +336,9 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       }
 #endif
 
-      if ((logging > 0) || (print_level > 1))
+      if ((logging > 0) || (print_level > 2))
       {
-         /* Recompute fine grid residual (b - Ax) after post-smoothing */
+         /* Recompute fine grid residual r_l[0] to account post-smoothing */
          hypre_SStructCopy(b_l[0], r_l[0]);
          hypre_SStructMatvecCompute(matvec_data_l[0], -1.0,
                                     A_l[0], x_l[0], 1.0, r_l[0]);
@@ -351,7 +351,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             rel_norms[i+1] = sqrt(r_dot_r/b_dot_b);
          }
 
-         if (print_level > 1 && !((i + 1)%print_freq))
+         if (print_level > 2 && !((i + 1)%print_freq))
          {
             /* Print solution */
             hypre_sprintf(filename, "ssamg_x.i%02d", (i + 1));
@@ -368,7 +368,6 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          hypre_SStructInnerProd(r_l[0], r_l[0], &r_dot_r);
       }
 
-      (ssamg_data -> num_iterations) = i + 1;
       HYPRE_ANNOTATE_MGLEVEL_END(0);
 
       /* convergence check */
@@ -378,11 +377,12 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          {
             if (((rel_change) && (e_dot_e/x_dot_x) < eps) || (!rel_change))
             {
-               break;
+               i++; break;
             }
          }
       }
    }
+   (ssamg_data -> num_iterations) = i;
 
    /*-----------------------------------------------------
     * Destroy Refs to A_in, x_in, b_in
