@@ -4172,6 +4172,7 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_SStructSplitCreate(hypre_MPI_COMM_WORLD, &solver);
+      HYPRE_SStructSplitSetPrintLevel(solver, print_level);
       HYPRE_SStructSplitSetMaxIter(solver, max_iterations);
       HYPRE_SStructSplitSetTol(solver, tol);
       if (solver_id == 0)
@@ -4231,6 +4232,7 @@ main( hypre_int argc,
          /* use Split solver as preconditioner */
          HYPRE_SStructSplitCreate(hypre_MPI_COMM_WORLD, &precond);
          HYPRE_SStructSplitSetMaxIter(precond, 1);
+         HYPRE_SStructSplitSetPrintLevel(precond, 0);
          HYPRE_SStructSplitSetTol(precond, 0.0);
          HYPRE_SStructSplitSetZeroGuess(precond);
          if (solver_id == 10)
@@ -4381,6 +4383,7 @@ main( hypre_int argc,
             HYPRE_SStructSplitSetMaxIter(precond, 1);
             HYPRE_SStructSplitSetTol(precond, 0.0);
             HYPRE_SStructSplitSetZeroGuess(precond);
+            HYPRE_SStructSplitSetPrintLevel(precond, 0);
             if (solver_id == 10)
             {
                HYPRE_SStructSplitSetStructSolver(precond, HYPRE_SMG);
@@ -4562,6 +4565,7 @@ main( hypre_int argc,
             HYPRE_SStructSplitSetMaxIter(precond, 1);
             HYPRE_SStructSplitSetTol(precond, 0.0);
             HYPRE_SStructSplitSetZeroGuess(precond);
+            HYPRE_SStructSplitSetPrintLevel(precond, 0);
             if (solver_id == 10)
             {
                HYPRE_SStructSplitSetStructSolver(precond, HYPRE_SMG);
@@ -4869,6 +4873,7 @@ main( hypre_int argc,
          HYPRE_SStructSplitSetMaxIter(precond, 1);
          HYPRE_SStructSplitSetTol(precond, 0.0);
          HYPRE_SStructSplitSetZeroGuess(precond);
+         HYPRE_SStructSplitSetPrintLevel(precond, 0);
          if (solver_id == 30)
          {
             HYPRE_SStructSplitSetStructSolver(precond, HYPRE_SMG);
@@ -5109,6 +5114,7 @@ main( hypre_int argc,
          HYPRE_SStructSplitSetMaxIter(precond, 1);
          HYPRE_SStructSplitSetTol(precond, 0.0);
          HYPRE_SStructSplitSetZeroGuess(precond);
+         HYPRE_SStructSplitSetPrintLevel(precond, 0);
          if (solver_id == 50)
          {
             HYPRE_SStructSplitSetStructSolver(precond, HYPRE_SMG);
@@ -5349,6 +5355,7 @@ main( hypre_int argc,
          HYPRE_SStructSplitSetMaxIter(precond, 1);
          HYPRE_SStructSplitSetTol(precond, 0.0);
          HYPRE_SStructSplitSetZeroGuess(precond);
+         HYPRE_SStructSplitSetPrintLevel(precond, 0);
          if (solver_id == 70)
          {
             HYPRE_SStructSplitSetStructSolver(precond, HYPRE_SMG);
@@ -6361,6 +6368,7 @@ main( hypre_int argc,
                HYPRE_SStructSplitSetMaxIter(precond, 1);
                HYPRE_SStructSplitSetTol(precond, 0.0);
                HYPRE_SStructSplitSetZeroGuess(precond);
+               HYPRE_SStructSplitSetPrintLevel(precond, 0);
                if (solver_id == 10)
                {
                   HYPRE_SStructSplitSetStructSolver(precond, HYPRE_SMG);
@@ -6498,6 +6506,7 @@ main( hypre_int argc,
                HYPRE_SStructSplitSetMaxIter(precond, 1);
                HYPRE_SStructSplitSetTol(precond, 0.0);
                HYPRE_SStructSplitSetZeroGuess(precond);
+               HYPRE_SStructSplitSetPrintLevel(precond, 0);
                if (solver_id == 10)
                {
                   HYPRE_SStructSplitSetStructSolver(precond, HYPRE_SMG);

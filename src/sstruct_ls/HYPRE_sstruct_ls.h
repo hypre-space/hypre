@@ -524,6 +524,13 @@ HYPRE_SStructSplitSetMaxIter(HYPRE_SStructSolver solver,
                              HYPRE_Int           max_iter);
 
 /**
+ * (Optional) Set print level
+ **/
+HYPRE_Int
+HYPRE_SStructSplitSetPrintLevel( HYPRE_SStructSolver solver,
+                                 HYPRE_Int           print_level );
+
+/**
  * (Optional) Use a zero initial guess.  This allows the solver to cut corners
  * in the case where a zero initial guess is needed (e.g., for preconditioning)
  * to reduce compuational cost.
@@ -952,7 +959,7 @@ HYPRE_SStructMaxwellGetFinalRelativeResidualNorm(HYPRE_SStructSolver solver,
 
 /**
  * @name SStruct PCG Solver
- * 
+ *
  * These routines should be used in conjunction with the generic interface in
  * \ref KrylovSolvers.
  *
@@ -1485,4 +1492,3 @@ HYPRE_SStructSetupMatvec(HYPRE_MatvecFunctions *mv);
 #endif
 
 #endif
-

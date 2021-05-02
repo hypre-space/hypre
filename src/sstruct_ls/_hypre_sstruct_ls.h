@@ -458,6 +458,7 @@ HYPRE_Int HYPRE_SStructSplitSetup ( HYPRE_SStructSolver solver , HYPRE_SStructMa
 HYPRE_Int HYPRE_SStructSplitSolve ( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
 HYPRE_Int HYPRE_SStructSplitSetTol ( HYPRE_SStructSolver solver , HYPRE_Real tol );
 HYPRE_Int HYPRE_SStructSplitSetMaxIter ( HYPRE_SStructSolver solver , HYPRE_Int max_iter );
+HYPRE_Int HYPRE_SStructSplitSetPrintLevel ( HYPRE_SStructSolver solver , HYPRE_Int print_level );
 HYPRE_Int HYPRE_SStructSplitSetZeroGuess ( HYPRE_SStructSolver solver );
 HYPRE_Int HYPRE_SStructSplitSetNonZeroGuess ( HYPRE_SStructSolver solver );
 HYPRE_Int HYPRE_SStructSplitSetStructSolver ( HYPRE_SStructSolver solver , HYPRE_Int ssolver );
