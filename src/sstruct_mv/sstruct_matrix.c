@@ -1808,7 +1808,6 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
    to_box   = hypre_BoxCreate(ndim);
    int_box  = hypre_BoxCreate(ndim);
    map_box  = hypre_BoxCreate(ndim);
-   grid_box = hypre_BoxCreate(ndim);
 
    /* Set beggining/end of rows and columns that belong to this process */
    HYPRE_IJMatrixGetLocalRange(ij_A, &sizes[0], &sizes[1], &sizes[2], &sizes[3]);
@@ -1846,7 +1845,7 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
 
          hypre_ForBoxI(i, grid_boxes)
          {
-            hypre_CopyBox(hypre_BoxArrayBox(grid_boxes,i), grid_box);
+            grid_box = hypre_BoxArrayBox(grid_boxes,i);
 
             hypre_SStructGridIntersect(grid, part, var, grid_box, -1,
                                        &boxman_entries, &nboxman_entries);
@@ -1957,16 +1956,17 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
          grid_boxes = hypre_StructGridBoxes(sgrid);
          hypre_ForBoxI(i, grid_boxes)
          {
-            hypre_CopyBox(hypre_BoxArrayBox(grid_boxes,i), grid_box);
+            grid_box = hypre_BoxArrayBox(grid_boxes,i);
 
             /* GET values from this box */
             hypre_SStructPMatrixSetBoxValues(pmatrix, grid_box, var,
-                                             nSentries, Sentries, box, values, -1);
+                                             nSentries, Sentries, grid_box,
+                                             values, -1);
 
             /* SET values to ij_Ahat */
             hypre_SStructUMatrixSetBoxValuesHelper(matrix, part, grid_box,
                                                    var, nSentries, Sentries,
-                                                   box, values, 0, ij_Ahat);
+                                                   grid_box, values, 0, ij_Ahat);
          } /* Loop over boxes */
       } /* Loop over vars */
    } /* Loop over parts */
@@ -1980,7 +1980,6 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
    hypre_BoxDestroy(to_box);
    hypre_BoxDestroy(int_box);
    hypre_BoxDestroy(map_box);
-   hypre_BoxDestroy(grid_box);
 
    HYPRE_ANNOTATE_FUNC_END;
 
