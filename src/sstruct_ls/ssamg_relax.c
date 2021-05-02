@@ -579,9 +579,12 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
    {
       pA = hypre_SStructMatrixPMatrix(A, part);
       px = hypre_SStructVectorPVector(x, part);
-      sA = hypre_SStructPMatrixSMatrix(pA, 0, 0);
       nvars = hypre_SStructPMatrixNVars(pA);
-      sgrid = hypre_StructMatrixGrid(sA);
+      if (nvars > 0)
+      {
+         sA = hypre_SStructPMatrixSMatrix(pA, 0, 0);
+         sgrid = hypre_StructMatrixGrid(sA);
+      }
 
       svec_compute_pkgs[part] = hypre_CTAlloc(hypre_ComputePkg **, num_nodesets,
                                               HYPRE_MEMORY_HOST);
@@ -743,19 +746,22 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
 
             hypre_CopyIndex(stride, hypre_ComputeInfoStride(compute_info));
 
-            if (vi == -1)
+            if (nvars > 0)
             {
-               sx = hypre_SStructPVectorSVector(px, 0);
-               hypre_ComputePkgCreate(compute_info,
-                                      hypre_StructVectorDataSpace(sx),
-                                      1, sgrid, &compute_pkgs[part][set]);
-            }
-            else
-            {
-               sx = hypre_SStructPVectorSVector(px, vi);
-               hypre_ComputePkgCreate(compute_info,
-                                      hypre_StructVectorDataSpace(sx),
-                                      1, sgrid, &svec_compute_pkgs[part][set][vi]);
+               if (vi == -1)
+               {
+                  sx = hypre_SStructPVectorSVector(px, 0);
+                  hypre_ComputePkgCreate(compute_info,
+                                         hypre_StructVectorDataSpace(sx),
+                                         1, sgrid, &compute_pkgs[part][set]);
+               }
+               else
+               {
+                  sx = hypre_SStructPVectorSVector(px, vi);
+                  hypre_ComputePkgCreate(compute_info,
+                                         hypre_StructVectorDataSpace(sx),
+                                         1, sgrid, &svec_compute_pkgs[part][set][vi]);
+               }
             }
 
             hypre_BoxArrayArrayDestroy(orig_indt_boxes);

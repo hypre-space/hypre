@@ -7,8 +7,8 @@
 
 #include "_hypre_sstruct_mv.h"
 
-#define DEBUG_MATMULT
-#define DEBUG_MATCONV
+//#define DEBUG_MATMULT
+//#define DEBUG_MATCONV
 
 /*--------------------------------------------------------------------------
  * hypre_SStructMatmult
@@ -92,7 +92,10 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
       for (m = 0; m < nmatrices; m++)
       {
          pmatrix = hypre_SStructMatrixPMatrix(ssmatrices[m], part);
-         smatrices[m] = hypre_SStructPMatrixSMatrix(pmatrix, vi, vj);
+         if (hypre_SStructPMatrixSMatrices(pmatrix))
+         {
+            smatrices[m] = hypre_SStructPMatrixSMatrix(pmatrix, vi, vj);
+         }
       }
 
       /* Multiply StructMatrices (part, vi, vj)-block */
@@ -138,8 +141,11 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    for (part = 0; part < nparts; part++)
    {
       pmatrix = hypre_SStructMatrixPMatrix(M, part);
-      hypre_StructMatrixDestroy(hypre_SStructPMatrixSMatrix(pmatrix, vi, vj));
-      hypre_SStructPMatrixSMatrix(pmatrix, vi, vj) = hypre_StructMatrixRef(smatrices_M[part]);
+      if (hypre_SStructPMatrixSMatrices(pmatrix))
+      {
+         hypre_StructMatrixDestroy(hypre_SStructPMatrixSMatrix(pmatrix, vi, vj));
+         hypre_SStructPMatrixSMatrix(pmatrix, vi, vj) = hypre_StructMatrixRef(smatrices_M[part]);
+      }
    }
 
    ij_M = hypre_SStructMatrixIJMatrix(M);
