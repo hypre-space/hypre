@@ -384,6 +384,7 @@ hypre_SSAMGPrintLogging( void *ssamg_vdata )
    hypre_SSAMGData   *ssamg_data     = (hypre_SSAMGData *) ssamg_vdata;
    MPI_Comm           comm           = (ssamg_data -> comm);
    HYPRE_Int          num_iterations = (ssamg_data -> num_iterations);
+   HYPRE_Int          max_iter       = (ssamg_data -> max_iter);
    HYPRE_Int          logging        = (ssamg_data -> logging);
    HYPRE_Int          print_level    = (ssamg_data -> print_level);
    HYPRE_Int          print_freq     = (ssamg_data -> print_freq);
@@ -415,11 +416,14 @@ hypre_SSAMGPrintLogging( void *ssamg_vdata )
          }
       }
 
-      if ((print_level > 1) && (rel_norms[0] > 0.))
+      if ((print_level > 1) && (max_iter > 1))
       {
-         avg_convr = pow((rel_norms[num_iterations]/rel_norms[0]),
-                         (1.0/(HYPRE_Real) num_iterations));
-         hypre_printf("\nAverage convergence factor = %f\n", avg_convr);
+         if (rel_norms[0] > 0.)
+         {
+            avg_convr = pow((rel_norms[num_iterations]/rel_norms[0]),
+                            (1.0/(HYPRE_Real) num_iterations));
+            hypre_printf("\nAverage convergence factor = %f\n", avg_convr);
+         }
       }
    }
 
