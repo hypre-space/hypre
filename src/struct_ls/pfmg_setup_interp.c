@@ -213,8 +213,9 @@ hypre_zPFMGSetupInterpOp( hypre_StructMatrix *P,
                              A_dbox, Astart, Astride, Ai,
                              P_dbox, Pstart, Pstride, Pi);
          {
-            HYPRE_Int   vi, si, Astenc;
-            HYPRE_Real  center;
+            HYPRE_Int    vi, si, Astenc;
+            HYPRE_Real   center;
+            HYPRE_Real  *Ap;
 
             center  = Pconst0;
             Pp1[Pi] = Pconst1;

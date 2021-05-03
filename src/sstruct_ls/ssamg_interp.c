@@ -314,9 +314,10 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                                       A_dbox, Astart, Astride, Ai,
                                       P_dbox, Pstart, Pstride, Pi);
                   {
-                     HYPRE_Int   ei, entry;
-                     HYPRE_Int   Astenc;
-                     HYPRE_Real  center;
+                     HYPRE_Int    ei, entry;
+                     HYPRE_Int    Astenc;
+                     HYPRE_Real   center;
+                     HYPRE_Real  *Ap;
 
                      center  = Pconst[0];
                      Pp1[Pi] = Pconst[1];

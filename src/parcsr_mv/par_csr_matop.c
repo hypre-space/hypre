@@ -1107,8 +1107,8 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
          ns = ii*size+rest;
          ne = (ii+1)*size+rest;
       }
-      jj_count_diag = C_diag_i[ns];
-      jj_count_offd = C_offd_i[ns];
+      jj_count_diag = C_diag_i[rownnz_A ? rownnz_A[ns] : ns];
+      jj_count_offd = C_offd_i[rownnz_A ? rownnz_A[ns] : ns];
 
       if (num_cols_diag_B || num_cols_offd_C)
       {
