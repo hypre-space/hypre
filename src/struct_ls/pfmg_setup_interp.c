@@ -86,25 +86,25 @@ hypre_zPFMGSetupInterpOp( hypre_StructMatrix *P,
    HYPRE_Int              ndim = hypre_StructMatrixNDim(A);
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
-                        
+
    hypre_Box             *A_dbox;
    hypre_Box             *P_dbox;
-                        
+
    HYPRE_Real            *Ap, *Pp0, *Pp1, *Pp2;
    HYPRE_Real             Pconst0, Pconst1, Pconst2, center;
    HYPRE_Int              constant;
-                        
+
    hypre_StructStencil   *A_stencil;
    hypre_Index           *A_stencil_shape;
    HYPRE_Int              A_stencil_size;
    hypre_StructStencil   *P_stencil;
    hypre_Index           *P_stencil_shape;
    HYPRE_Int             *ventries, nventries;
-                        
+
    HYPRE_Int              Astenc, Pstenc1, Pstenc2;
    hypre_Index            Astart, Astride, Pstart, Pstride;
    hypre_Index            origin, stride, loop_size;
-                        
+
    HYPRE_Int              i, si, vi;
 
    /*----------------------------------------------------------
@@ -163,7 +163,7 @@ hypre_zPFMGSetupInterpOp( hypre_StructMatrix *P,
          {
             Ap = hypre_StructMatrixConstData(A, si);
             Astenc = hypre_IndexD(A_stencil_shape[si], cdir);
-         
+
             if (Astenc == 0)
             {
                Pconst0 += Ap[0];
@@ -213,6 +213,9 @@ hypre_zPFMGSetupInterpOp( hypre_StructMatrix *P,
                              A_dbox, Astart, Astride, Ai,
                              P_dbox, Pstart, Pstride, Pi);
          {
+            HYPRE_Int   vi, si, Astenc;
+            HYPRE_Real  center;
+
             center  = Pconst0;
             Pp1[Pi] = Pconst1;
             Pp2[Pi] = Pconst2;
@@ -283,9 +286,9 @@ hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
    hypre_Index          *stencil_shape;
    HYPRE_Int             stencil_size;
    HYPRE_Int             stencil_dim;
-                       
+
    HYPRE_Int             num_ghost[] = {1, 1, 1, 1, 1, 1};
-                       
+
    HYPRE_Int             i;
    HYPRE_Int             constant_coefficient;
 
@@ -321,7 +324,7 @@ hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
    }
 
    hypre_StructStencilDestroy(stencil);
- 
+
    return P;
 }
 
@@ -338,26 +341,26 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
 {
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
-                        
+
    hypre_Box             *A_dbox;
    hypre_Box             *P_dbox;
-                        
+
    HYPRE_Real            *Pp0, *Pp1;
    HYPRE_Int              constant_coefficient;
-                        
+
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
    HYPRE_Int              stencil_size;
    hypre_StructStencil   *P_stencil;
    hypre_Index           *P_stencil_shape;
-                        
+
    HYPRE_Int              Pstenc0, Pstenc1;
-                        
+
    hypre_Index            loop_size;
    hypre_Index            start;
    hypre_IndexRef         startc;
    hypre_Index            stridec;
-                        
+
    HYPRE_Int              i, si;
 
    HYPRE_Int              si0, si1;
@@ -409,7 +412,7 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
          si1 = si;
       }
    }
-            
+
    hypre_SetIndex3(stridec, 1, 1, 1);
 
    /*----------------------------------------------------------
@@ -429,7 +432,7 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
 
       Pstenc0 = hypre_IndexD(P_stencil_shape[0], cdir);
       Pstenc1 = hypre_IndexD(P_stencil_shape[1], cdir);
- 
+
       startc  = hypre_BoxIMin(compute_box);
       hypre_StructMapCoarseToFine(startc, findex, stride, start);
 
@@ -537,12 +540,12 @@ hypre_PFMGSetupInterpOp_CC0
       {
          warning_cnt++;
          Pp0[Pi] = 0.0;
-         Pp1[Pi] = 0.0;  
+         Pp1[Pi] = 0.0;
       }
       else
       {
          Pp0[Pi] /= center;
-         Pp1[Pi] /= center;  
+         Pp1[Pi] /= center;
       }
 
       /*----------------------------------------------
@@ -635,12 +638,12 @@ hypre_PFMGSetupInterpOp_CC1
    {
       warning_cnt++;
       Pp0[Pi] = 0.0;
-      Pp1[Pi] = 0.0;  
+      Pp1[Pi] = 0.0;
    }
    else
    {
       Pp0[Pi] /= center;
-      Pp1[Pi] /= center;  
+      Pp1[Pi] /= center;
    }
 
    /*----------------------------------------------
@@ -778,12 +781,12 @@ hypre_PFMGSetupInterpOp_CC2
          {
             warning_cnt++;
             Pp0[Pi] = 0.0;
-            Pp1[Pi] = 0.0;  
+            Pp1[Pi] = 0.0;
          }
          else
          {
             Pp0[Pi] /= center;
-            Pp1[Pi] /= center;  
+            Pp1[Pi] /= center;
          }
 
          /*----------------------------------------------
