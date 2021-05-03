@@ -8894,7 +8894,7 @@ done
         LINK_CC=${HIPCC}
         LINK_CXX=${HIPCC}
 
-                                        HIPCXXFLAGS="-x hip ${HIPCXXFLAGS}"
+                                        HIPCXXFLAGS="-x hip -std=c++14 ${HIPCXXFLAGS}"
 
                                 if test x"$hypre_using_debug" == x"yes"; then :
   HIPCXXFLAGS="-O0 -Wall -g -ggdb ${HIPCXXFLAGS}"
