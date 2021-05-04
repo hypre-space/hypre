@@ -1207,6 +1207,12 @@ hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
    *AT_ptr = C;
 
    hypre_SyncCudaComputeStream(hypre_handle());
+   
+   /* Put diagonal at first entry (for square matrices only)*/
+   if(n_rowsA == n_colsA)
+   {
+      hypre_CSRMatrixMoveDiagFirstDevice( *A_ptr )
+   }   
 
    return hypre_error_flag;
 }
