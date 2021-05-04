@@ -2296,6 +2296,7 @@ PrintUsage( char *progname,
       hypre_printf("  -rlx_coarse  <val> : ParCSR - set relaxation type for coarsest grid\n");
       hypre_printf("  -rlx_down    <val> : ParCSR - set relaxation type for down cycle\n");
       hypre_printf("  -rlx_up      <val> : ParCSR - set relaxation type for up cycle\n");
+      hypre_printf("  -agg_nl <val>      : ParCSR - set number of agg. coarsening levels (0)\n");
       hypre_printf("  -w <jacobi_weight> : jacobi weight\n");
       hypre_printf("  -solver_type <ID>  : Struct- solver type for Hybrid\n");
       hypre_printf("                        1 - PCG (default)\n");
@@ -2430,6 +2431,7 @@ main( hypre_int argc,
    HYPRE_Int             relax[4];
    HYPRE_Int             max_coarse_size;
    HYPRE_Int             skip;
+   HYPRE_Int             agg_num_levels;
 
    /* parameters for Solvers */
    HYPRE_Int             rel_change;
@@ -2618,6 +2620,7 @@ main( hypre_int argc,
    n_coarse = 1;
    strong_threshold = 0.25;
    P_max_elmts = 4;
+   agg_num_levels = 0;
    coarsen_type = 10;
    vis = 0;
    seed = 1;
@@ -2857,6 +2860,11 @@ main( hypre_int argc,
          arg_index++;
          jacobi_weight= atof(argv[arg_index++]);
          usr_jacobi_weight= 1; /* flag user weight */
+      }
+      else if ( strcmp(argv[arg_index], "-agg_nl") == 0 )
+      {
+         arg_index++;
+         agg_num_levels  = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-th") == 0 )
       {
@@ -4140,6 +4148,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetCycleRelaxType(par_solver, relax[i], i);
          }
       }
+      HYPRE_BoomerAMGSetAggNumLevels(par_solver, agg_num_levels);
       if (old_default)
       {
          HYPRE_BoomerAMGSetOldDefault(par_solver);
@@ -4772,6 +4781,7 @@ main( hypre_int argc,
                HYPRE_BoomerAMGSetCycleRelaxType(par_precond, relax[i], i);
             }
          }
+         HYPRE_BoomerAMGSetAggNumLevels(par_precond, agg_num_levels);
          if (old_default)
          {
             HYPRE_BoomerAMGSetOldDefault(par_precond);
@@ -5024,6 +5034,7 @@ main( hypre_int argc,
                HYPRE_BoomerAMGSetCycleRelaxType(par_precond, relax[i], i);
             }
          }
+         HYPRE_BoomerAMGSetAggNumLevels(par_precond, agg_num_levels);
          if (old_default)
          {
             HYPRE_BoomerAMGSetOldDefault(par_precond);
@@ -5264,6 +5275,7 @@ main( hypre_int argc,
                HYPRE_BoomerAMGSetCycleRelaxType(par_precond, relax[i], i);
             }
          }
+         HYPRE_BoomerAMGSetAggNumLevels(par_precond, agg_num_levels);
          if (old_default)
          {
             HYPRE_BoomerAMGSetOldDefault(par_precond);
@@ -5506,6 +5518,7 @@ main( hypre_int argc,
                HYPRE_BoomerAMGSetCycleRelaxType(par_precond, relax[i], i);
             }
          }
+         HYPRE_BoomerAMGSetAggNumLevels(par_precond, agg_num_levels);
          if (old_default)
          {
             HYPRE_BoomerAMGSetOldDefault(par_precond);
@@ -5593,6 +5606,7 @@ main( hypre_int argc,
                HYPRE_BoomerAMGSetCycleRelaxType(par_precond, relax[i], i);
             }
          }
+         HYPRE_BoomerAMGSetAggNumLevels(par_precond, agg_num_levels);
          if (old_default)
          {
             HYPRE_BoomerAMGSetOldDefault(par_precond);
