@@ -1,0 +1,140 @@
+###########################################################
+
+# GridCreate: ndim nparts
+GridCreate: 2 2
+
+# GridSetExtents: part ilower(ndim) iupper(ndim)
+GridSetExtents: 0 (0- 0-) (5+ 5+)
+GridSetExtents: 1 (0- 0-) (3+ 3+)
+
+# GridSetVariables: part nvars vartypes[nvars]
+GridSetVariables: 0 1 [0]
+GridSetVariables: 1 1 [0]
+
+###########################################################
+
+# StencilCreate: nstencils sizes[nstencils]
+StencilCreate: 1 [5]
+
+# StencilSetEntry: stencil_num entry offset[ndim] var value
+StencilSetEntry: 0  0 [ 0  0] 0  4.0
+StencilSetEntry: 0  1 [-1  0] 0 -1.0
+StencilSetEntry: 0  2 [ 1  0] 0 -1.0
+StencilSetEntry: 0  3 [ 0 -1] 0 -1.0
+StencilSetEntry: 0  4 [ 0  1] 0 -1.0
+
+###########################################################
+
+# GraphSetStencil: part var stencil_num
+GraphSetStencil: 0 0 0
+GraphSetStencil: 1 0 0
+
+# GraphAddEntries: \
+#   part    ilower(ndim)    iupper(ndim)    stride[ndim]    var \
+#   to_part to_ilower(ndim) to_iupper(ndim) to_stride[ndim] to_var \
+#   index_map[ndim] entry value
+# South
+GraphAddEntries: 0 (2- 1+ : 0 0) (3+ 1+ :  0 0) [1 1] 0 1 (0- 0- : 0 0) (3+ 0- : -1 0) [2 2] 0 [0 1] 5 -0.666666666666666
+GraphAddEntries: 0 (2- 1+ : 0 0) (3+ 1+ :  0 0) [1 1] 0 1 (0- 0- : 1 0) (3+ 0- :  0 0) [2 2] 0 [0 1] 6 -0.666666666666666
+GraphAddEntries: 1 (0- 0- : 0 0) (3+ 0- : -1 0) [2 2] 0 0 (2- 1+ : 0 0) (3+ 1+ :  0 0) [1 1] 0 [0 1] 5 -0.666666666666666
+GraphAddEntries: 1 (0- 0- : 1 0) (3+ 0- :  0 0) [2 2] 0 0 (2- 1+ : 0 0) (3+ 1+ :  0 0) [1 1] 0 [0 1] 5 -0.666666666666666
+
+# North
+GraphAddEntries: 0 (2- 4- : 0 0) (3+ 4- :  0 0) [1 1] 0 1 (0- 3+ : 0 0) (3+ 3+ : -1 0) [2 2] 0 [0 1] 5 -0.666666666666666
+GraphAddEntries: 0 (2- 4- : 0 0) (3+ 4- :  0 0) [1 1] 0 1 (0- 3+ : 1 0) (3+ 3+ :  0 0) [2 2] 0 [0 1] 6 -0.666666666666666
+GraphAddEntries: 1 (0- 3+ : 0 0) (3+ 3+ : -1 0) [2 2] 0 0 (2- 4- : 0 0) (3+ 4- :  0 0) [1 1] 0 [0 1] 5 -0.666666666666666
+GraphAddEntries: 1 (0- 3+ : 1 0) (3+ 3+ :  0 0) [2 2] 0 0 (2- 4- : 0 0) (3+ 4- :  0 0) [1 1] 0 [0 1] 5 -0.666666666666666
+
+# West
+GraphAddEntries: 0 (1+ 2- : 0 0) (1+ 3+ : 0  0) [1 1] 0 1 (0- 0- : 0 0) (0- 3+ : 0 -1) [2 2] 0 [0 1] 5 -0.666666666666666
+GraphAddEntries: 0 (1+ 2- : 0 0) (1+ 3+ : 0  0) [1 1] 0 1 (0- 0- : 0 1) (0- 3+ : 0  0) [2 2] 0 [0 1] 6 -0.666666666666666
+GraphAddEntries: 1 (0- 0- : 0 2) (0- 3+ : 0 -1) [2 2] 0 0 (1+ 2- : 0 1) (1+ 3+ : 0  0) [1 1] 0 [0 1] 5 -0.666666666666666
+GraphAddEntries: 1 (0- 0- : 0 1) (0- 3+ : 0 -1) [2 2] 0 0 (1+ 2- : 0 0) (1+ 3+ : 0  0) [1 1] 0 [0 1] 5 -0.666666666666666
+GraphAddEntries: 1 (0- 0- : 0 0) (0- 0- : 0  0) [1 1] 0 0 (1+ 2- : 0 0) (1+ 2- : 0  0) [1 1] 0 [0 1] 6 -0.666666666666666
+GraphAddEntries: 1 (0- 3+ : 0 0) (0- 3+ : 0  0) [1 1] 0 0 (1+ 3+ : 0 0) (1+ 3+ : 0  0) [1 1] 0 [0 1] 6 -0.666666666666666
+
+# East
+GraphAddEntries: 0 (4- 2- : 0 0) (4- 3+ : 0  0) [1 1] 0 1 (3+ 0- : 0 0) (3+ 3+ : 0 -1) [2 2] 0 [0 1] 5 -0.666666666666666
+GraphAddEntries: 0 (4- 2- : 0 0) (4- 3+ : 0  0) [1 1] 0 1 (3+ 0- : 0 1) (3+ 3+ : 0  0) [2 2] 0 [0 1] 6 -0.666666666666666
+GraphAddEntries: 1 (3+ 0- : 0 2) (3+ 3+ : 0 -1) [2 2] 0 0 (4- 2- : 0 1) (4- 3+ : 0  0) [1 1] 0 [0 1] 5 -0.666666666666666
+GraphAddEntries: 1 (3+ 0- : 0 1) (3+ 3+ : 0 -1) [2 2] 0 0 (4- 2- : 0 0) (4- 2+ : 0  0) [1 1] 0 [0 1] 5 -0.666666666666666
+GraphAddEntries: 1 (3+ 0- : 0 0) (3+ 0- : 0  0) [1 1] 0 0 (4- 2- : 0 0) (4- 2- : 0  0) [1 1] 0 [0 1] 6 -0.666666666666666
+GraphAddEntries: 1 (3+ 3+ : 0 0) (3+ 3+ : 0  0) [1 1] 0 0 (4- 3+ : 0 0) (4- 3+ : 0  0) [1 1] 0 [0 1] 6 -0.666666666666666
+
+############################################################
+
+# MatrixSetValues: Zero out dummy unknowns
+#   part ilower(ndim) iupper(ndim) stride[ndim] var entry value
+MatrixSetValues: 0 (2- 2-) (3+ 3+) [1 1] 0 0 1.0
+MatrixSetValues: 0 (2- 2-) (3+ 3+) [1 1] 0 1 0.0
+MatrixSetValues: 0 (2- 2-) (3+ 3+) [1 1] 0 2 0.0
+MatrixSetValues: 0 (2- 2-) (3+ 3+) [1 1] 0 3 0.0
+MatrixSetValues: 0 (2- 2-) (3+ 3+) [1 1] 0 4 0.0
+
+# MatrixSetValues: Zero out off-diagonal stencil couplings at fine/coarse interface
+#   part ilower(ndim) iupper(ndim) stride[ndim] var entry value
+# North
+MatrixSetValues: 0 (2- 1+) (3+ 1+) [1 1] 0 4 0.0
+
+# South
+MatrixSetValues: 0 (2- 4-) (3+ 4-) [1 1] 0 3 0.0
+
+# East
+MatrixSetValues: 0 (1+ 2-) (1+ 3+) [1 1] 0 2 0.0
+
+# West
+MatrixSetValues: 0 (4- 2-) (4- 3+) [1 1] 0 1 0.0
+
+# MatrixSetValues: Fix diagonal entries at part boundaries
+#   part ilower(ndim) iupper(ndim) stride[ndim] var entry value
+# Coarse part borders
+MatrixSetValues: 0 (1+ 2-) (1+ 3+) [1 1] 0 0 4.333333333333333
+MatrixSetValues: 0 (4- 2-) (4- 3+) [1 1] 0 0 4.333333333333333
+MatrixSetValues: 0 (2- 1+) (3+ 1+) [1 1] 0 0 4.333333333333333
+MatrixSetValues: 0 (2- 4-) (3+ 4-) [1 1] 0 0 4.333333333333333
+
+# Fine part borders
+MatrixSetValues: 1 (0- 0- : 0 1) (0- 3+ : 0 -1) [1 1] 0 0 3.666666666666666
+MatrixSetValues: 1 (3+ 0- : 0 1) (3+ 3+ : 0 -1) [1 1] 0 0 3.666666666666666
+MatrixSetValues: 1 (0- 0- : 1 0) (3+ 0- : -1 0) [1 1] 0 0 3.666666666666666
+MatrixSetValues: 1 (0- 3+ : 1 0) (3+ 3+ : -1 0) [1 1] 0 0 3.666666666666666
+
+# Fine part corners
+MatrixSetValues: 1 (0- 0-) (0- 0-) [1 1] 0 0 3.333333333333333
+MatrixSetValues: 1 (0- 3+) (0- 3+) [1 1] 0 0 3.333333333333333
+MatrixSetValues: 1 (3+ 3+) (3+ 3+) [1 1] 0 0 3.333333333333333
+MatrixSetValues: 1 (3+ 0-) (3+ 0-) [1 1] 0 0 3.333333333333333
+
+# MatrixSetValues: Set boundary conditions
+#   part ilower(ndim) iupper(ndim) stride[ndim] var entry value
+# North
+MatrixSetValues: 0 (0- 5+) (5+ 5+) [1 1] 0 4 0.0
+MatrixSetValues: 1 (0- 3+) (3+ 3+) [1 1] 0 4 0.0
+
+# South
+MatrixSetValues: 0 (0- 0-) (5+ 0-) [1 1] 0 3 0.0
+MatrixSetValues: 1 (0- 0-) (3+ 0-) [1 1] 0 3 0.0
+
+# East
+MatrixSetValues: 0 (5+ 0-) (5+ 5+) [1 1] 0 2 0.0
+MatrixSetValues: 1 (3+ 0-) (3+ 3+) [1 1] 0 2 0.0
+
+# West
+MatrixSetValues: 0 (0- 0-) (0- 5+) [1 1] 0 1 0.0
+MatrixSetValues: 1 (0- 0-) (0- 3+) [1 1] 0 1 0.0
+
+############################################################
+
+# ProcessPoolCreate: num_pools
+ProcessPoolCreate: 1
+
+# ProcessPoolSetPart: pool part
+ProcessPoolSetPart: 0 0
+ProcessPoolSetPart: 0 1
+
+# ProcessPoolCreate: num_pools
+ProcessPoolCreate: 2
+
+# ProcessPoolSetPart: pool part
+ProcessPoolSetPart: 0 0
+ProcessPoolSetPart: 1 1

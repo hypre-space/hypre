@@ -30,3 +30,34 @@ mpirun -np 2  ./sstruct -P 1 1 2 -solver 78 > solvers.out.18
 mpirun -np 2  ./sstruct -P 1 1 2 -solver 80 > solvers.out.19
 mpirun -np 2  ./sstruct -P 1 1 2 -solver 90 > solvers.out.20
 
+# SSAMG
+mpirun -np 1  ./sstruct -in sstruct.in.cube -P 1 1 1 -r 4 4 4 -solver 4 > solvers.out.21
+mpirun -np 8  ./sstruct -in sstruct.in.cube -P 2 2 2 -r 2 2 2 -solver 4 > solvers.out.22
+mpirun -np 1  ./sstruct -in sstruct.in.cube21 -r 2 2 2 -solver 4 > solvers.out.23
+mpirun -np 8  ./sstruct -in sstruct.in.cube21 -P 2 2 2 -r 1 1 1 -solver 4 > solvers.out.24
+mpirun -np 1  ./sstruct -in sstruct.in.cubes4_9pt -r 2 2 2 -solver 4 -pooldist 1 > solvers.out.25
+mpirun -np 4  ./sstruct -in sstruct.in.cubes4_9pt -r 2 2 2 -solver 4 -pooldist 0 > solvers.out.26
+mpirun -np 1  ./sstruct -in sstruct.in.cubes4_27pt -r 2 2 2 -solver 4 -pooldist 1 > solvers.out.27
+mpirun -np 4  ./sstruct -in sstruct.in.cubes4_27pt -r 2 2 2 -solver 4 -pooldist 0 > solvers.out.28
+mpirun -np 1  ./sstruct -in sstruct.in.cubes2_aniso -r 4 4 4 -solver 4 -pooldist 1 > solvers.out.29
+mpirun -np 2  ./sstruct -in sstruct.in.cubes2_aniso -r 4 4 4 -solver 4 -pooldist 0 > solvers.out.30
+mpirun -np 1  ./sstruct -in sstruct.in.marinak -P 1 1 1 -solver 4 -itr 150 > solvers.out.31
+mpirun -np 8  ./sstruct -in sstruct.in.marinak -P 1 1 1 -solver 4 -itr 150 -pooldist 1 > solvers.out.32
+mpirun -np 1  ./sstruct -in sstruct.in.miller_3blk -r 4 4 1 -solver 4 -pooldist 0 > solvers.out.33
+mpirun -np 3  ./sstruct -in sstruct.in.miller_3blk -r 4 4 1 -solver 4 -pooldist 1 > solvers.out.34
+
+# SSAMG-PCG
+mpirun -np 1  ./sstruct -in sstruct.in.cube -P 1 1 1 -r 4 4 4 -solver 14 > solvers.out.121
+mpirun -np 8  ./sstruct -in sstruct.in.cube -P 2 2 2 -r 2 2 2 -solver 14 > solvers.out.122
+mpirun -np 1  ./sstruct -in sstruct.in.cube21 -r 2 2 2 -solver 14 > solvers.out.123
+mpirun -np 8  ./sstruct -in sstruct.in.cube21 -P 2 2 2 -r 1 1 1 -solver 14 > solvers.out.124
+mpirun -np 1  ./sstruct -in sstruct.in.cubes4_9pt -r 2 2 2 -solver 14 -pooldist 1 > solvers.out.125
+mpirun -np 4  ./sstruct -in sstruct.in.cubes4_9pt -r 2 2 2 -solver 14 -pooldist 0 > solvers.out.126
+mpirun -np 1  ./sstruct -in sstruct.in.cubes4_27pt -r 2 2 2 -solver 14 -pooldist 1 > solvers.out.127
+mpirun -np 4  ./sstruct -in sstruct.in.cubes4_27pt -r 2 2 2 -solver 14 -pooldist 0 > solvers.out.128
+mpirun -np 1  ./sstruct -in sstruct.in.cubes2_aniso -r 4 4 4 -solver 14 -pooldist 1 > solvers.out.129
+mpirun -np 2  ./sstruct -in sstruct.in.cubes2_aniso -r 4 4 4 -solver 14 -pooldist 0 > solvers.out.130
+mpirun -np 1  ./sstruct -in sstruct.in.marinak -P 1 1 1 -solver 14 > solvers.out.131
+mpirun -np 8  ./sstruct -in sstruct.in.marinak -P 1 1 1 -solver 14 -pooldist 1 > solvers.out.132
+mpirun -np 1  ./sstruct -in sstruct.in.miller_3blk -r 4 4 1 -solver 14 -pooldist 0 > solvers.out.133
+mpirun -np 3  ./sstruct -in sstruct.in.miller_3blk -r 4 4 1 -solver 14 -pooldist 1 > solvers.out.134

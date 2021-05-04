@@ -30,6 +30,34 @@ FILES="\
  ${TNAME}.out.18\
  ${TNAME}.out.19\
  ${TNAME}.out.20\
+ ${TNAME}.out.21\
+ ${TNAME}.out.22\
+ ${TNAME}.out.23\
+ ${TNAME}.out.24\
+ ${TNAME}.out.25\
+ ${TNAME}.out.26\
+ ${TNAME}.out.27\
+ ${TNAME}.out.28\
+ ${TNAME}.out.29\
+ ${TNAME}.out.30\
+ ${TNAME}.out.31\
+ ${TNAME}.out.32\
+ ${TNAME}.out.33\
+ ${TNAME}.out.34\
+ ${TNAME}.out.121\
+ ${TNAME}.out.122\
+ ${TNAME}.out.123\
+ ${TNAME}.out.124\
+ ${TNAME}.out.125\
+ ${TNAME}.out.126\
+ ${TNAME}.out.127\
+ ${TNAME}.out.128\
+ ${TNAME}.out.129\
+ ${TNAME}.out.130\
+ ${TNAME}.out.131\
+ ${TNAME}.out.132\
+ ${TNAME}.out.133\
+ ${TNAME}.out.134\
 "
 # ${TNAME}.out.5\
 # ${TNAME}.out.6\

@@ -9,13 +9,6 @@ RTOL=$1
 ATOL=$2
 
 #=============================================================================
-#=============================================================================
-
-tail -3 ${TNAME}.out.12 > ${TNAME}.testdata
-tail -3 ${TNAME}.out.13 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
-
-#=============================================================================
 # compare with baseline case
 #=============================================================================
 
@@ -26,19 +19,6 @@ FILES="\
  ${TNAME}.out.3\
  ${TNAME}.out.4\
  ${TNAME}.out.5\
- ${TNAME}.out.6\
- ${TNAME}.out.7\
- ${TNAME}.out.8\
- ${TNAME}.out.10\
- ${TNAME}.out.11\
- ${TNAME}.out.12\
- ${TNAME}.out.13\
- ${TNAME}.out.14\
- ${TNAME}.out.15\
- ${TNAME}.out.16\
- ${TNAME}.out.17\
- ${TNAME}.out.18\
- ${TNAME}.out.19\
 "
 
 for i in $FILES
@@ -53,9 +33,3 @@ OUTCOUNT=`grep "Iterations" ${TNAME}.out | wc -l`
 if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
    echo "Incorrect number of runs in ${TNAME}.out" >&2
 fi
-
-#=============================================================================
-# remove temporary files
-#=============================================================================
-
-rm -f ${TNAME}.testdata*

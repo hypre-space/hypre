@@ -12,19 +12,43 @@ mpirun -np 2  ./sstruct -in sstruct.in.miller_2blk  -r 5 10 1 -P 2 1 1 \
  -solver 11 > miller.out.0
 mpirun -np 2  ./sstruct -in sstruct.in.miller_2blk  -r 5 10 1 -P 2 1 1 \
  -solver 20 -old_default > miller.out.1
+mpirun -np 2  ./sstruct -in sstruct.in.miller_2blk  -r 5 10 1 -P 2 1 1 \
+ -solver 4 > miller.out.2
+mpirun -np 2  ./sstruct -in sstruct.in.miller_2blk  -r 5 10 1 -P 2 1 1 \
+ -solver 14 > miller.out.3
+
 mpirun -np 2  ./sstruct -in sstruct.in.miller_2blk1 -r 5 10 1 -P 2 1 1 \
- -solver 11 > miller.out.2
+ -solver 11 > miller.out.10
 mpirun -np 2  ./sstruct -in sstruct.in.miller_2blk1 -r 5 10 1 -P 2 1 1 \
- -solver 20 > miller.out.3
+ -solver 20 > miller.out.11
+mpirun -np 2  ./sstruct -in sstruct.in.miller_2blk1 -r 5 10 1 -P 2 1 1 \
+ -solver 4 > miller.out.12
+mpirun -np 2  ./sstruct -in sstruct.in.miller_2blk1 -r 5 10 1 -P 2 1 1 \
+ -solver 14 > miller.out.13
+
 mpirun -np 2  ./sstruct -in sstruct.in.miller_2stk  -r 5 10 1 -P 2 1 1 \
- -solver 11 > miller.out.4
+ -solver 11 > miller.out.20
 mpirun -np 2  ./sstruct -in sstruct.in.miller_2stk  -r 5 10 1 -P 2 1 1 \
- -solver 20 -old_default > miller.out.5
+ -solver 20 -old_default > miller.out.21
+mpirun -np 2  ./sstruct -in sstruct.in.miller_2stk  -r 5 10 1 -P 2 1 1 \
+ -solver 4 > miller.out.22
+mpirun -np 2  ./sstruct -in sstruct.in.miller_2stk  -r 5 10 1 -P 2 1 1 \
+ -solver 14 > miller.out.23
+
 mpirun -np 2  ./sstruct -in sstruct.in.miller_3blk  -r 5 10 1 -P 2 1 1 \
- -solver 11 > miller.out.6
+ -solver 11 > miller.out.30
 mpirun -np 2  ./sstruct -in sstruct.in.miller_3blk  -r 5 10 1 -P 2 1 1 \
- -solver 20 -old_default > miller.out.7
+ -solver 20 -old_default > miller.out.31
+mpirun -np 2  ./sstruct -in sstruct.in.miller_3blk  -r 5 10 1 -P 2 1 1 \
+ -solver 4 > miller.out.32
+mpirun -np 2  ./sstruct -in sstruct.in.miller_3blk  -r 5 10 1 -P 2 1 1 \
+ -solver 14 > miller.out.33
+
 mpirun -np 2  ./sstruct -in sstruct.in.miller_diag  -r 10 20 1 -P 2 1 1 \
- -solver 11 > miller.out.8
+ -solver 11 > miller.out.40
 mpirun -np 2  ./sstruct -in sstruct.in.miller_diag  -r 10 20 1 -P 2 1 1 \
- -solver 20 > miller.out.9
+ -solver 20 > miller.out.41
+mpirun -np 2  ./sstruct -in sstruct.in.miller_diag  -r 10 20 1 -P 2 1 1 \
+ -solver 4 > miller.out.42
+mpirun -np 2  ./sstruct -in sstruct.in.miller_diag  -r 10 20 1 -P 2 1 1 \
+ -solver 14 > miller.out.43
