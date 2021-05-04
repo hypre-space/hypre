@@ -390,10 +390,12 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                         {
                            HYPRE_Real center;
 
-                           //hypre_assert((Pp1[Pi] == 0) || (Pp2[Pi] == 0));
                            center = Pp1[Pi] + Pp2[Pi];
-                           Pp1[Pi] /= center;
-                           Pp2[Pi] /= center;
+                           if (center)
+                           {
+                              Pp1[Pi] /= center;
+                              Pp2[Pi] /= center;
+                           }
                         }
                         hypre_BoxLoop1End(Pi);
                      } /* loop on pbnd_boxa */
