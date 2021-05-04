@@ -990,8 +990,8 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
          ns = ii*size+rest;
          ne = (ii+1)*size+rest;
       }
-      jj_count_diag = C_diag_i[ns];
-      jj_count_offd = C_offd_i[ns];
+      jj_count_diag = C_diag_i[rownnz_A ? rownnz_A[ns] : ns];
+      jj_count_offd = C_offd_i[rownnz_A ? rownnz_A[ns] : ns];
 
       if (num_cols_diag_B || num_cols_offd_C)
       {
@@ -4105,9 +4105,10 @@ hypre_ParvecBdiagInvScal( hypre_ParVector     *b,
    HYPRE_Int num_rows_recv = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs);
    hypre_ParCSRCommHandle  *comm_handle;
 
-   j = 2;
-   HYPRE_BigInt *part = hypre_TAlloc(HYPRE_BigInt, j, HYPRE_MEMORY_HOST);
-   memcpy(part, hypre_ParVectorPartitioning(b), j*sizeof(HYPRE_BigInt));
+   HYPRE_BigInt *part = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(part, hypre_ParVectorPartitioning(b), HYPRE_BigInt, 2,
+                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+
    hypre_ParVector *bnew = hypre_ParVectorCreate( hypre_ParVectorComm(b),
                                                   hypre_ParVectorGlobalSize(b), part );
    hypre_ParVectorInitialize(bnew);
@@ -4740,12 +4741,12 @@ hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix   *A,
       A_offd_j_new[i] = j;
    }
 
-   j = 2;
-
    row_starts_new = hypre_CTAlloc(HYPRE_BigInt, j, HYPRE_MEMORY_HOST);
    col_starts_new = hypre_CTAlloc(HYPRE_BigInt, j, HYPRE_MEMORY_HOST);
-   memcpy(row_starts_new, hypre_ParCSRMatrixRowStarts(A), j*sizeof(HYPRE_BigInt));
-   memcpy(col_starts_new, hypre_ParCSRMatrixColStarts(A), j*sizeof(HYPRE_BigInt));
+   hypre_TMemcpy(row_starts_new, hypre_ParCSRMatrixRowStarts(A), HYPRE_BigInt, 2,
+                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(col_starts_new, hypre_ParCSRMatrixColStarts(A), HYPRE_BigInt, 2,
+                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
    /* Now, we should have everything of Parcsr matrix As */
    Anew = hypre_ParCSRMatrixCreate(comm,
@@ -5233,8 +5234,10 @@ hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
    /* Create ParCSRMatrix C */
    row_starts_C = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
    col_starts_C = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   memcpy(row_starts_C, hypre_ParCSRMatrixRowStarts(A), 2*sizeof(HYPRE_BigInt));
-   memcpy(col_starts_C, hypre_ParCSRMatrixColStarts(A), 2*sizeof(HYPRE_BigInt));
+   hypre_TMemcpy(row_starts_C, hypre_ParCSRMatrixRowStarts(A), HYPRE_BigInt, 2,
+                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(col_starts_C, hypre_ParCSRMatrixColStarts(A), HYPRE_BigInt, 2,
+                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
    C = hypre_ParCSRMatrixCreate(comm,
                                 num_rows_A,
@@ -5511,7 +5514,8 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
       HYPRE_Int len;
       len = 2;
       cpts_starts = hypre_TAlloc(HYPRE_BigInt, len, HYPRE_MEMORY_HOST);
-      memcpy(cpts_starts, cpts_starts_in, len*sizeof(HYPRE_BigInt));
+      hypre_TMemcpy(cpts_starts, cpts_starts_in, HYPRE_BigInt, len,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
       if (my_id == (num_procs -1))
       {

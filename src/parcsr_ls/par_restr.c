@@ -867,7 +867,7 @@ void hypre_fgmresT(HYPRE_Int n,
 
    /* XXX: x_0 is all ZERO !!! so r0 = b */
    v = V;
-   memcpy(v, b, n*sizeof(HYPRE_Complex));
+   hypre_TMemcpy(v, b, HYPRE_Complex, n, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
    normr0 = sqrt(hypre_ddot(&n, v, &one, v, &one));
 
    if (normr0 < EPSIMAC)
@@ -993,4 +993,3 @@ void hypre_ordered_GS(const HYPRE_Complex L[],
 
    hypre_TFree(ordering, HYPRE_MEMORY_HOST);
 }
-
