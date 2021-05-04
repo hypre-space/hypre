@@ -129,7 +129,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
    }
 
    /* Print initial solution and residual */
-   if (print_level > 2)
+   if (print_level > 1)
    {
       /* Print solution */
       hypre_sprintf(filename, "ssamg_x.i%02d", 0);
@@ -139,11 +139,6 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       hypre_sprintf(filename, "ssamg_r.i%02d", 0);
       HYPRE_SStructVectorPrint(filename, r_l[0], 0);
    }
-
-#if HYPRE_DEBUG
-   HYPRE_SStructVectorPrint("ssamg_x.i00.l00", x_l[0], 0);
-   HYPRE_SStructVectorPrint("ssamg_b.i00.l00", b_l[0], 0);
-#endif
 
    /*-----------------------------------------------------
     * Do V-cycles:
@@ -162,7 +157,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       hypre_SStructCopy(b_l[0], r_l[0]);
       hypre_SStructMatvecCompute(matvec_data_l[0], -1.0,
                                  A_l[0], x_l[0], 1.0, r_l[0]);
-      if (print_level > 0 && !(i%print_freq))
+      if (print_level > 1 && !(i%print_freq))
       {
          hypre_sprintf(filename, "ssamg_rpre.i%02d.l%02d", i, 0);
          HYPRE_SStructVectorPrint(filename, r_l[0], 0);
@@ -177,7 +172,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       zero_guess = 0;
 
 #if HYPRE_DEBUG
-      if (print_level > 0 && !(i%print_freq))
+      if (print_level > 1 && !(i%print_freq))
       {
          hypre_sprintf(filename, "ssamg_xpref.i%02d.l%02d", i, 0);
          HYPRE_SStructVectorPrint(filename, x_l[0], 0);
@@ -195,7 +190,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          hypre_SStructMatvecCompute(restrict_data_l[0], 1.0,
                                     RT_l[0], r_l[0], 0.0, b_l[1]);
 #if HYPRE_DEBUG
-         if (print_level > 0 && !(i%print_freq))
+         if (print_level > 1 && !(i%print_freq))
          {
             hypre_sprintf(filename, "ssamg_xdown.i%02d.l%02d", i, 0);
             HYPRE_SStructVectorPrint(filename, x_l[0], 0);
@@ -238,7 +233,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             hypre_SStructMatvecCompute(restrict_data_l[l], 1.0,
                                        RT_l[l], r_l[l], 0.0, b_l[l+1]);
 #if HYPRE_DEBUG
-            if (print_level > 0 && !(i%print_freq))
+            if (print_level > 1 && !(i%print_freq))
             {
                hypre_sprintf(filename, "ssamg_xdown.i%02d.l%02d", i, l);
                HYPRE_SStructVectorPrint(filename, x_l[l], 0);
@@ -260,7 +255,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          hypre_SSAMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 
 #if HYPRE_DEBUG
-         if (print_level > 0 && !(i%print_freq))
+         if (print_level > 1 && !(i%print_freq))
          {
             hypre_sprintf(filename, "ssamg_xbottom.i%02d.l%02d", i, l);
             HYPRE_SStructVectorPrint(filename, x_l[l], 0);
@@ -279,7 +274,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             hypre_SStructAxpy(1.0, e_l[l], x_l[l]);
             HYPRE_ANNOTATE_MGLEVEL_END(l + 1);
 #if HYPRE_DEBUG
-            if (print_level > 0 && !(i%print_freq))
+            if (print_level > 1 && !(i%print_freq))
             {
                 hypre_sprintf(filename, "ssamg_eup.i%02d.l%02d", i, l);
                 HYPRE_SStructVectorPrint(filename, e_l[l], 0);
@@ -302,7 +297,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          hypre_SStructAxpy(1.0, e_l[0], x_l[0]);
          HYPRE_ANNOTATE_MGLEVEL_END(1);
 #if HYPRE_DEBUG
-         if (print_level > 0 && !(i%print_freq))
+         if (print_level > 1 && !(i%print_freq))
          {
             hypre_sprintf(filename, "ssamg_eup.i%02d.l%02d", i, 0);
             HYPRE_SStructVectorPrint(filename, e_l[0], 0);
@@ -329,14 +324,14 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       hypre_SSAMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
 
 #if HYPRE_DEBUG
-      if (print_level > 0 && !(i%print_freq))
+      if (print_level > 1 && !(i%print_freq))
       {
          hypre_sprintf(filename, "ssamg_xpostf.i%02d.l%02d", i, 0);
          HYPRE_SStructVectorPrint(filename, x_l[0], 0);
       }
 #endif
 
-      if ((logging > 0) || (print_level > 2))
+      if ((logging > 0) || (print_level > 1))
       {
          /* Recompute fine grid residual r_l[0] to account post-smoothing */
          hypre_SStructCopy(b_l[0], r_l[0]);
@@ -351,7 +346,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             rel_norms[i+1] = sqrt(r_dot_r/b_dot_b);
          }
 
-         if (print_level > 2 && !((i + 1)%print_freq))
+         if (print_level > 1 && !((i + 1)%print_freq))
          {
             /* Print solution */
             hypre_sprintf(filename, "ssamg_x.i%02d", (i + 1));

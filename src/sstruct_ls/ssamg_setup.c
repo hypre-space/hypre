@@ -394,12 +394,13 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       hypre_TFree(Aones_l, HYPRE_MEMORY_HOST);
    }
 
-#ifdef DEBUG_SYMMETRY
-   {
-      HYPRE_IJMatrix  ij_A, ij_AT, ij_B;
-      HYPRE_Real      B_norm;
-
       /* Compute Frobenius norm of (A - A^T) */
+#ifdef DEBUG_SYMMETRY
+   HYPRE_IJMatrix         ij_A, ij_AT, ij_B;
+   HYPRE_Real             B_norm;
+
+   if (print_level > 1)
+   {
       for (l = 0; l < num_levels; l++)
       {
          HYPRE_SStructMatrixToIJMatrix(A_l[l], &ij_A);
@@ -412,14 +413,10 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
          }
 
          /* Print matrices */
-         if (print_level > 0)
-         {
-            hypre_sprintf(filename, "ssamg_ijA.l%02d", l);
-            HYPRE_IJMatrixPrint(ij_A, filename);
-
-            hypre_sprintf(filename, "ssamg_ijB.l%02d", l);
-            HYPRE_IJMatrixPrint(ij_B, filename);
-         }
+         hypre_sprintf(filename, "ssamg_ijA.l%02d", l);
+         HYPRE_IJMatrixPrint(ij_A, filename);
+         hypre_sprintf(filename, "ssamg_ijB.l%02d", l);
+         HYPRE_IJMatrixPrint(ij_B, filename);
 
          /* Free memory */
          HYPRE_IJMatrixDestroy(ij_A);
@@ -427,13 +424,14 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
          HYPRE_IJMatrixDestroy(ij_B);
       }
    }
-#endif // ifdef (DEBUG_SYMMETRY)
+#endif
 
 #ifdef DEBUG_MATMULT
+   if (print_level > 1)
    {
-      HYPRE_IJMatrix      ij_A[2], ij_P;
+      HYPRE_IJMatrix       ij_A[2], ij_P;
       hypre_ParCSRMatrix  *par_A[2], *par_P, *par_AP, *par_RAP, *par_B;
-      HYPRE_Real          norm;
+      HYPRE_Real           norm;
 
       HYPRE_SStructMatrixToIJMatrix(A_l[0], &ij_A[0]);
       HYPRE_IJMatrixGetObject(ij_A[0], (void **) &par_A[0]);
