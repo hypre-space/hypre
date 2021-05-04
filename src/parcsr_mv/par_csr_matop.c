@@ -323,7 +323,9 @@ hypre_ParMatmul_RowSizes( HYPRE_MemoryLocation memory_location,
    *C_offd_size = (*C_offd_i)[num_rows_diag_A];
 
 #ifdef HYPRE_DEBUG
-   for (HYPRE_Int i = 0; i < num_rows_diag_A; i++)
+   HYPRE_Int i;
+
+   for (i = 0; i < num_rows_diag_A; i++)
    {
       hypre_assert((*C_diag_i)[i] <= (*C_diag_i)[i+1]);
       hypre_assert((*C_offd_i)[i] <= (*C_offd_i)[i+1]);
