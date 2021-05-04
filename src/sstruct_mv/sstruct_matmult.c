@@ -679,7 +679,7 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
                convert_box = hypre_BoxArrayBox(convert_boxa, j);
 
                hypre_assert(hypre_BoxVolume(convert_box) > 0);
-               hypre_assert(hypre_BoxVolume(convert_box) < nvalues);
+               hypre_assert(hypre_BoxVolume(convert_box) <= nvalues);
 
 #if defined(HYPRE_DEBUG) && defined(DEBUG_MATCONV)
                if (!myid)
