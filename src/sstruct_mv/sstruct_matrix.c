@@ -1791,9 +1791,9 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
    hypre_IndexRef           dom_stride;
 
    HYPRE_Int                i, ii, ei, jj, m, nrows, nvalues, max_size;
-   HYPRE_Int                row_base;
    HYPRE_Int                sizes[4];
    HYPRE_Int                part, var, nvars, entry;
+   HYPRE_Int                frproc, toproc;
    HYPRE_Complex           *values;
 
    hypre_Box               *box;
@@ -1853,6 +1853,7 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
             for (ii = 0; ii < nboxman_entries; ii++)
             {
                hypre_SStructBoxManEntryGetStrides(boxman_entries[ii], rs, mat_type);
+               hypre_SStructBoxManEntryGetProcess(boxman_entries[ii], &frproc);
 
                hypre_BoxManEntryGetExtents(boxman_entries[ii],
                                            hypre_BoxIMin(map_box),
@@ -1876,14 +1877,17 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
                      hypre_BoxManEntryGetExtents(boxman_to_entries[jj],
                                                  hypre_BoxIMin(map_box),
                                                  hypre_BoxIMax(map_box));
+                     hypre_SStructBoxManEntryGetProcess(boxman_to_entries[jj], &toproc);
+                     if (frproc != toproc)
+                     {
+                        continue;
+                     }
 
                      hypre_IntersectBoxes(to_box, map_box, int_box);
                      hypre_RefineBox(int_box, NULL, dom_stride);
                      hypre_BoxShiftNeg(int_box, offset);
 
                      hypre_CopyIndex(hypre_BoxIMin(int_box), start);
-                     hypre_SStructBoxManEntryGetGlobalRank(boxman_entries[ii],
-                                                           start, &row_base, mat_type);
                      hypre_SStructMatrixMapDataBox(matrix, part, var, vars[ei], int_box);
 
                      hypre_BoxGetSize(int_box, loop_size);
@@ -1893,11 +1897,13 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
                         HYPRE_Int    row, d;
 
                         hypre_BoxLoopGetIndex(loop_index);
-                        row = row_base;
+                        row = 0;
                         for (d = 0; d < ndim; d++)
                         {
                            row += loop_index[d]*rs[d]*dom_stride[d];
                         }
+                        hypre_assert(row < nrows);
+
                         row_sizes[row]++;
                      }
                      hypre_BoxLoop1End(mi);
