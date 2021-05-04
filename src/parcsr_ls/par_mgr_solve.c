@@ -580,6 +580,7 @@ hypre_MGRCycle( void               *mgr_vdata,
    HYPRE_Int       Not_Finished;
    HYPRE_Int       cycle_type;
    HYPRE_Int            print_level = (mgr_data -> print_level);   
+   HYPRE_Int            frelax_print_level = (mgr_data -> frelax_print_level);   
 
    hypre_ParCSRMatrix   **A_array = (mgr_data -> A_array);
    hypre_ParCSRMatrix   **RT_array  = (mgr_data -> RT_array);
@@ -721,10 +722,8 @@ hypre_MGRCycle( void               *mgr_vdata,
             HYPRE_Real rhs_norm, old_resnorm;
             HYPRE_Real rel_resnorm = 1.0;
             HYPRE_Real conv_factor = 1.0;
-            if (my_id == 0 && print_level > 1)
-            {
-                hypre_printf("\nBegin F-relaxation: V-Cycle Smoother \n");
-                                
+            if (frelax_print_level > 1)
+            {                                
                 hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A_array[level],
                                                 U_array[level], 1.0, F_array[level], Vtemp);
                                                 
@@ -744,12 +743,16 @@ hypre_MGRCycle( void               *mgr_vdata,
                    HYPRE_ANNOTATE_FUNC_END;
 
                    return hypre_error_flag;
-                }                                                
-                hypre_printf("                                            relative\n");
-                hypre_printf("               residual        factor       residual\n");
-                hypre_printf("               --------        ------       --------\n");
-                hypre_printf("    Initial    %e                 %e\n",init_resnorm,
-                                  rel_resnorm);
+                }
+                if(my_id == 0)
+                {                                                
+                   hypre_printf("\nBegin F-relaxation: V-Cycle Smoother \n");
+                   hypre_printf("                                            relative\n");
+                   hypre_printf("               residual        factor       residual\n");
+                   hypre_printf("               --------        ------       --------\n");
+                   hypre_printf("    Initial    %e                 %e\n",init_resnorm,
+                                     rel_resnorm);
+               }
             }
 
             for(i=0; i<nsweeps; i++)
@@ -773,13 +776,13 @@ hypre_MGRCycle( void               *mgr_vdata,
                    rel_resnorm = resnorm;
                 }    
 
-               if (my_id == 0 && print_level > 1)
+               if (my_id == 0 && frelax_print_level > 1)
                {
                    hypre_printf("\n    V-Cycle %2d   %e    %f     %e \n", i,
                    resnorm, conv_factor, rel_resnorm);
                }
             }
-            if (my_id == 0 && print_level > 1)       
+            if (my_id == 0 && frelax_print_level > 1)       
             {     
                 hypre_printf("End F-relaxation: V-Cycle Smoother \n\n");
             }

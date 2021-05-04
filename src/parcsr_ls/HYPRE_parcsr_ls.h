@@ -3882,6 +3882,14 @@ HYPRE_Int
 HYPRE_MGRSetPrintLevel( HYPRE_Solver solver,
                         HYPRE_Int print_level );
 
+HYPRE_Int
+HYPRE_MGRSetFrelaxPrintLevel( HYPRE_Solver solver,
+                        HYPRE_Int print_level );
+                        
+HYPRE_Int
+HYPRE_MGRSetCoarseGridPrintLevel( HYPRE_Solver solver,
+                        HYPRE_Int print_level );                        
+
 /**
  * (Optional) Set the threshold to compress the coarse grid at each level
  * Use threshold = 0.0 if no truncation is applied. Otherwise, set the threshold

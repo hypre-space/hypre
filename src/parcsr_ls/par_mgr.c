@@ -86,6 +86,8 @@ hypre_MGRCreate()
 
   (mgr_data -> logging) = 0;
   (mgr_data -> print_level) = 0;
+  (mgr_data -> frelax_print_level) = 0;
+  (mgr_data -> cg_print_level) = 0;
 
   (mgr_data -> l1_norms) = NULL;
 
@@ -3118,10 +3120,10 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
          HYPRE_Int         interp_type,
                      HYPRE_Int             numsweeps)
 {
-  HYPRE_Int i;
+//  HYPRE_Int i;
   hypre_ParCSRMatrix    *P_ptr = NULL;
-  HYPRE_Real       jac_trunc_threshold = trunc_factor;
-  HYPRE_Real       jac_trunc_threshold_minus = 0.5*jac_trunc_threshold;
+//  HYPRE_Real       jac_trunc_threshold = trunc_factor;
+//  HYPRE_Real       jac_trunc_threshold_minus = 0.5*jac_trunc_threshold;
 
   /* Interpolation for each level */
   if (interp_type <3)
@@ -3129,6 +3131,7 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
     hypre_MGRBuildP( A,CF_marker,num_cpts_global,interp_type,debug_flag,&P_ptr);
     
     /* Could do a few sweeps of Jacobi to further improve Jacobi interpolation P */
+/*
     if(interp_type == 2)
     {
        for(i=0; i<numsweeps; i++)
@@ -3137,6 +3140,7 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
        }
        hypre_BoomerAMGInterpTruncation(P_ptr, trunc_factor, max_elmts);
     }
+*/
   }
   else if (interp_type == 4)
   {
@@ -4471,6 +4475,24 @@ hypre_MGRSetTruncateCoarseGridThreshold( void *mgr_vdata, HYPRE_Real threshold)
   return hypre_error_flag;
 }
 
+/* Set print level for F-relaxation solver */
+HYPRE_Int
+hypre_MGRSetFrelaxPrintLevel( void *mgr_vdata, HYPRE_Int print_level )
+{
+  hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+  (mgr_data -> frelax_print_level) = print_level;  
+  return hypre_error_flag;
+}
+
+/* Set print level for coarse grid solver */
+HYPRE_Int
+hypre_MGRSetCoarseGridPrintLevel( void *mgr_vdata, HYPRE_Int print_level )
+{
+  hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+  (mgr_data -> cg_print_level) = print_level;  
+  return hypre_error_flag;
+}
+
 /* Set print level for mgr solver */
 HYPRE_Int
 hypre_MGRSetPrintLevel( void *mgr_vdata, HYPRE_Int print_level )
@@ -4480,7 +4502,7 @@ hypre_MGRSetPrintLevel( void *mgr_vdata, HYPRE_Int print_level )
   return hypre_error_flag;
 }
 
-/* Set print level for mgr solver */
+/* Set logging level for mgr solver */
 HYPRE_Int
 hypre_MGRSetLogging( void *mgr_vdata, HYPRE_Int logging )
 {

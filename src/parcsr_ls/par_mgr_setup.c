@@ -919,7 +919,7 @@ hypre_MGRSetup( void               *mgr_vdata,
         hypre_BoomerAMGSetRelaxOrder(aff_solver[lev], 1);
         //hypre_BoomerAMGSetAggNumLevels(aff_solver[lev], 1);
         hypre_BoomerAMGSetNumSweeps(aff_solver[lev], 3);
-        hypre_BoomerAMGSetPrintLevel(aff_solver[lev], print_level);
+        hypre_BoomerAMGSetPrintLevel(aff_solver[lev], mgr_data -> frelax_print_level);
         hypre_BoomerAMGSetNumFunctions(aff_solver[lev], 1);
 
         fine_grid_solver_setup(aff_solver[lev], A_ff_ptr, F_fine_array[lev+1], U_fine_array[lev+1]);
@@ -1053,7 +1053,7 @@ hypre_MGRSetup( void               *mgr_vdata,
     hypre_BoomerAMGSetMaxIter ( default_cg_solver, 1 );
     hypre_BoomerAMGSetTol ( default_cg_solver, 0.0 );
     hypre_BoomerAMGSetRelaxOrder( default_cg_solver, 1);
-    hypre_BoomerAMGSetPrintLevel(default_cg_solver, print_level);
+    hypre_BoomerAMGSetPrintLevel(default_cg_solver, mgr_data -> cg_print_level);
     /* set setup and solve functions */
     coarse_grid_solver_setup =  (HYPRE_Int (*)(void*, void*, void*, void*)) hypre_BoomerAMGSetup;
     coarse_grid_solver_solve =  (HYPRE_Int (*)(void*, void*, void*, void*)) hypre_BoomerAMGSolve;
