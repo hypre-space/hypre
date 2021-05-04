@@ -7,6 +7,10 @@
 
 #include "_hypre_utilities.h"
 
+/*--------------------------------------------------------------------------
+ * hypre_multmod
+ *--------------------------------------------------------------------------*/
+
 /* This function computes (a*b) % mod, which can avoid overflow in large value of (a*b) */
 HYPRE_Int
 hypre_multmod(HYPRE_Int a,
@@ -30,6 +34,9 @@ hypre_multmod(HYPRE_Int a,
     return res;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_partition1D
+ *--------------------------------------------------------------------------*/
 void
 hypre_partition1D(HYPRE_Int  n, /* total number of elements */
                   HYPRE_Int  p, /* number of partitions */
@@ -59,3 +66,20 @@ hypre_partition1D(HYPRE_Int  n, /* total number of elements */
    }
 }
 
+/* strcpy that allows overlapping in memory */
+char *
+hypre_strcpy(char *destination, const char *source)
+{
+   size_t len = strlen(source);
+
+   /* no overlapping */
+   if (source > destination + len || destination > source + len)
+   {
+      return strcpy(destination, source);
+   }
+   else
+   {
+      /* +1: including the terminating null character */
+      return ((char *) memmove(destination, source, len + 1));
+   }
+}
