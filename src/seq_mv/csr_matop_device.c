@@ -1150,6 +1150,8 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
    HYPRE_Int     *new_j;
    HYPRE_Complex *new_data;
 
+   out_of_range<HYPRE_Real> pred1(-tol, tol);
+
    if (abs == 0)
    {
       if (option == 0)
@@ -1159,6 +1161,16 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
                                       A_data + nnz,
                                       thrust::not1(less_than<HYPRE_Complex>(tol)) );
 
+      }
+   }
+   else if (abs == 1)
+   {
+      if (option == 0)
+      {
+         new_nnz = HYPRE_THRUST_CALL( count_if,
+                                      A_data,
+                                      A_data + nnz,
+                                      pred1 );
       }
    }
 
@@ -1190,7 +1202,19 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
                                       thrust::not1(less_than<HYPRE_Complex>(tol)) );
       }
    }
+   else if (abs == 1)
+   {
+      if (option == 0)
+      {
+         new_end = HYPRE_THRUST_CALL( copy_if,
+                                      thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)),
+                                      thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)) + nnz,
+                                      A_data,
+                                      thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j, new_data)),
+                                      pred1 );
 
+      }
+   }
    hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == new_ii + new_nnz );
 
    hypre_TFree(A_ii,   HYPRE_MEMORY_DEVICE);

@@ -892,12 +892,15 @@ hypre_MGRSetup( void               *mgr_vdata,
         wall_time = time_getWallclockSeconds();
         //hypre_BoomerAMGBuildCoarseOperator(RT, A_array[lev], P, &RAP_ptr);
         RAP_ptr = hypre_ParCSRMatrixRAPKT(RT, A_array[lev], P, 0);
-        //hypre_ParCSRMatrixPrintIJ(RAP_ptr, 0, 0, "RAP");
+        //char fname[256];
+        //sprintf(fname, "RAP_%d", lev);
+        //hypre_ParCSRMatrixPrintIJ(RAP_ptr, 0, 0, fname);
         wall_time = time_getWallclockSeconds() - wall_time;
         hypre_printf("Lev = %d, proc = %d     BuildCoarseGrid: %f\n", lev, my_id, wall_time);
       }
     }
 
+    wall_time = time_getWallclockSeconds();
     // truncate the coarse grid
     if (exec == HYPRE_EXEC_HOST)
     {
@@ -907,10 +910,14 @@ hypre_MGRSetup( void               *mgr_vdata,
     else
     {
       // TODO: add option for using abs value in drop small entries
-      //hypre_ParCSRMatrixDropSmallEntriesDevice(RAP_ptr, 1e-14, 0, 0);
+      hypre_ParCSRMatrixDropSmallEntriesDevice(RAP_ptr, 1e-14, 1, 0);
     }
 #endif
-    //hypre_ParCSRMatrixPrintIJ(RAP_ptr, 0, 0, "RAP_truncated");
+    //char fname[256];
+    //sprintf(fname, "RAP_truncated_%d", lev);
+    //hypre_ParCSRMatrixPrintIJ(RAP_ptr, 0, 0, fname);
+    wall_time = time_getWallclockSeconds() - wall_time;
+    hypre_printf("Lev = %d, proc = %d     Truncate Coarse Grid: %f\n", lev, my_id, wall_time);
 
 #if defined(HYPRE_USING_CUDA)
     if (Frelax_method[lev] == 0)

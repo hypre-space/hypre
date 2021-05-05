@@ -266,9 +266,14 @@ hypre_MGRDestroy( void *data )
       if ((mgr_data -> A_ff_array)[i])
         hypre_ParCSRMatrixDestroy((mgr_data -> A_ff_array)[i]);
     }
+#if defined(HYPRE_USING_CUDA)
+    if (mgr_data -> use_default_fsolver || mgr_data -> relax_type == 18)
+#else
     if (mgr_data -> use_default_fsolver)
+#endif
     {
-      hypre_ParCSRMatrixDestroy((mgr_data -> A_ff_array)[0]);
+      if ((mgr_data -> A_ff_array)[0])
+        hypre_ParCSRMatrixDestroy((mgr_data -> A_ff_array)[0]);
     }
     hypre_TFree(mgr_data -> F_fine_array, HYPRE_MEMORY_HOST);
     (mgr_data -> F_fine_array) = NULL;
