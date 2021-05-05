@@ -598,7 +598,7 @@ hypre_MGRCycle( void               *mgr_vdata,
    hypre_Vector       **relax_l1_norms = (mgr_data -> l1_norms);
    hypre_ParVector      *Vtemp = (mgr_data -> Vtemp);
    hypre_ParVector      *Ztemp = (mgr_data -> Ztemp);
-   hypre_ParVector      *Utemp = (mgr_data -> Utemp);
+//   hypre_ParVector      *Utemp = (mgr_data -> Utemp);
 
    hypre_ParVector      **U_fine_array = (mgr_data -> U_fine_array);
    hypre_ParVector      **F_fine_array = (mgr_data -> F_fine_array);
@@ -646,7 +646,7 @@ hypre_MGRCycle( void               *mgr_vdata,
             HYPRE_Real convergence_factor_cg;
             hypre_BoomerAMGGetRelResidualNorm(cg_solver, &convergence_factor_cg);
             (mgr_data -> cg_convergence_factor) = convergence_factor_cg;
-            if ((mgr_data -> print_level) > 1 && my_id == 0 && convergence_factor_cg > 1.0)
+            if ((print_level) > 1 && my_id == 0 && convergence_factor_cg > 1.0)
             {
                hypre_printf("Warning!!! Coarse grid solve diverges. Factor = %1.2e\n", convergence_factor_cg);
             }
