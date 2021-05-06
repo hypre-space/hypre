@@ -175,9 +175,17 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
       for (d = 0; d < ndim; d++)
       {
+         /* Set 'dxyz_flag' if the matrix-coefficient variation is "too large".
+          * This is used later to set relaxation weights for Jacobi.
+          *
+          * Use the "square of the coefficient of variation" = (sigma/mu)^2,
+          * where sigma is the standard deviation and mu is the mean.  This is
+          * equivalent to computing (d - mu^2)/mu^2 where d is the sum of the
+          * squares of the coefficients stored in 'deviation'.  Care is taken to
+          * avoid dividing by zero when the mean is zero. */
+
          deviation[d] -= mean[d]*mean[d];
-         /* square of coeff. of variation */
-         if (deviation[d]/(mean[d]*mean[d]) > .1)
+         if ( deviation[d] > 0.1*(mean[d]*mean[d]) )
          {
             dxyz_flag = 1;
             break;
