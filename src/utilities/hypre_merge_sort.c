@@ -17,12 +17,62 @@
 #define SWAP(T, a, b) do { T tmp = a; a = b; b = tmp; } while (0)
 
 /*--------------------------------------------------------------------------
+ * hypre_MergeOrderedArrays: merge two ordered arrays
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MergeOrderedArrays( HYPRE_Int  size1,     HYPRE_Int  *array1,
+                          HYPRE_Int  size2,     HYPRE_Int  *array2,
+                          HYPRE_Int *size3_ptr, HYPRE_Int **array3_ptr )
+{
+   HYPRE_Int  *array3;
+   HYPRE_Int   i, j, k;
+
+   array3 = hypre_CTAlloc(HYPRE_Int, (size1 + size2), HYPRE_MEMORY_HOST);
+
+   i = j = k = 0;
+   while (i < size1 && j < size2)
+   {
+      if (array1[i] > array2[j])
+      {
+         array3[k++] = array2[j++];
+      }
+      else if (array1[i] < array2[j])
+      {
+         array3[k++] = array1[i++];
+      }
+      else
+      {
+         array3[k++] = array1[i++];
+         j++;
+      }
+   }
+
+   while (i < size1)
+   {
+      array3[k++] = array1[i++];
+   }
+
+   while (j < size2)
+   {
+      array3[k++] = array2[j++];
+   }
+
+   /* Set pointers */
+   *size3_ptr  = k;
+   *array3_ptr = hypre_TReAlloc(array3, HYPRE_Int, k, HYPRE_MEMORY_HOST);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_union2
  *
  * Union of two sorted (in ascending order) array arr1 and arr2 into arr3
  *
  * Assumptions:
- *              1) no duplicates in arr1 and arr2
+ *              1) no duplicate entries in arr1 and arr2. But an entry is
+ *                 allowed to appear in both arr1 and arr2
  *              2) arr3 should have enough space on entry
  *              3) map1 and map2 map arr1 and arr2 to arr3
  *--------------------------------------------------------------------------*/
@@ -613,7 +663,7 @@ void hypre_sort_and_create_inverse_map(HYPRE_Int *in, HYPRE_Int len, HYPRE_Int *
    hypre_merge_sort(in, temp, len, out);
    hypre_UnorderedIntMapCreate(inverse_map, 2*len, 16*hypre_NumThreads());
    HYPRE_Int i;
-#ifdef HYPRE_USING_OPENMP
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 #pragma omp parallel for HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < len; i++)
@@ -762,7 +812,7 @@ void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPR
    hypre_big_merge_sort(in, temp, len, out);
    hypre_UnorderedBigIntMapCreate(inverse_map, 2*len, 16*hypre_NumThreads());
    HYPRE_Int i;
-#ifdef HYPRE_USING_OPENMP
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 #pragma omp parallel for HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < len; i++)
