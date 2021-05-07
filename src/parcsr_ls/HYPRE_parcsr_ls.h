@@ -3343,6 +3343,23 @@ HYPRE_Int
 HYPRE_ParCSRHybridSetAggNumLevels(HYPRE_Solver solver,
                                   HYPRE_Int    agg_num_levels);
 
+/*
+ * (Optional) Defines the interpolation used on levels of aggressive coarsening
+ * The default is 4, i.e. multipass interpolation.
+ * The following options exist:
+ *
+ *    - 1 : 2-stage extended+i interpolation
+ *    - 2 : 2-stage standard interpolation
+ *    - 3 : 2-stage extended interpolation
+ *    - 4 : multipass interpolation
+ *    - 5 : 2-stage extended interpolation in matrix-matrix form
+ *    - 6 : 2-stage extended+i interpolation in matrix-matrix form
+ *    - 7 : 2-stage extended+e interpolation in matrix-matrix form
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridSetAggInterpType( HYPRE_Solver solver,
+                                    HYPRE_Int    agg_interp_type);
+
 /**
  * (Optional) Defines the degree of aggressive coarsening.
  * The default is 1, which leads to the most aggressive coarsening.
@@ -4054,7 +4071,7 @@ HYPRE_ILUSetDropThreshold( HYPRE_Solver solver, HYPRE_Real threshold );
 
 /**
  * (Optional) Set the array of thresholds for dropping in ILUT.
- * B, E, and F correspond to upper left, lower left and upper right 
+ * B, E, and F correspond to upper left, lower left and upper right
  * of 2 x 2 block decomposition respectively.
  * Any fill-in less than thresholds is dropped in the factorization.
  *    - threshold[0] : threshold for matrix B.
@@ -4109,8 +4126,8 @@ HYPRE_ILUSetSchurMaxIter( HYPRE_Solver solver, HYPRE_Int ss_max_iter );
  *    - 30 : RAS with ILU(k)
  *    - 31 : RAS with ILUT
  *    - 40 : (nonsymmetric permutation) DDPQ-GMRES with ILU(k)
- *    - 41 : (nonsymmetric permutation) DDPQ-GMRES with ILUT  
- *    - 50 : GMRES with RAP-ILU(0) using MILU(0) for P 
+ *    - 41 : (nonsymmetric permutation) DDPQ-GMRES with ILUT
+ *    - 50 : GMRES with RAP-ILU(0) using MILU(0) for P
  **/
 HYPRE_Int
 HYPRE_ILUSetType( HYPRE_Solver solver, HYPRE_Int ilu_type );

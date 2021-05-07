@@ -77,6 +77,7 @@ typedef struct
    HYPRE_Real           *omega;
    HYPRE_Int             num_paths;
    HYPRE_Int             agg_num_levels;
+   HYPRE_Int             agg_interp_type;
    HYPRE_Int             num_functions;
    HYPRE_Int             nodal;
    HYPRE_Int            *dof_func;
@@ -148,6 +149,7 @@ hypre_AMGHybridCreate( )
    (AMGhybrid_data -> relax_weight)  = NULL;
    (AMGhybrid_data -> omega)  = NULL;
    (AMGhybrid_data -> agg_num_levels)  = 0;
+   (AMGhybrid_data -> agg_interp_type)  = 4;
    (AMGhybrid_data -> num_paths)  = 1;
    (AMGhybrid_data -> num_functions)  = 1;
    (AMGhybrid_data -> nodal)  = 0;
@@ -1467,6 +1469,7 @@ hypre_AMGHybridSetDofFunc( void *AMGhybrid_vdata,
 
    return hypre_error_flag;
 }
+
 /*--------------------------------------------------------------------------
  * hypre_AMGHybridSetAggNumLevels
  *--------------------------------------------------------------------------*/
@@ -1488,6 +1491,26 @@ hypre_AMGHybridSetAggNumLevels( void   *AMGhybrid_vdata,
    }
 
    (AMGhybrid_data -> agg_num_levels) = agg_num_levels;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetAggInterpType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridSetAggInterpType( void     *AMGhybrid_vdata,
+                                 HYPRE_Int agg_interp_type      )
+{
+   hypre_AMGHybridData *AMGhybrid_data = (hypre_AMGHybridData *) AMGhybrid_vdata;
+   if (!AMGhybrid_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   (AMGhybrid_data -> agg_interp_type) = agg_interp_type;
 
    return hypre_error_flag;
 }
@@ -1706,6 +1729,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    HYPRE_Int          cycle_type;
    HYPRE_Int          num_paths;
    HYPRE_Int          agg_num_levels;
+   HYPRE_Int          agg_interp_type;
    HYPRE_Int          num_functions;
    HYPRE_Int          nodal;
    HYPRE_Int          relax_order;
@@ -1791,6 +1815,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    cycle_type = (AMGhybrid_data -> cycle_type);
    num_paths = (AMGhybrid_data -> num_paths);
    agg_num_levels = (AMGhybrid_data -> agg_num_levels);
+   agg_interp_type = (AMGhybrid_data -> agg_interp_type);
    num_functions = (AMGhybrid_data -> num_functions);
    nodal = (AMGhybrid_data -> nodal);
    num_grid_sweeps = (AMGhybrid_data -> num_grid_sweeps);
@@ -2095,6 +2120,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          hypre_BoomerAMGSetMinCoarseSize(pcg_precond, min_coarse_size);
          hypre_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
          hypre_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+         hypre_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
          hypre_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          hypre_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          hypre_BoomerAMGSetNodal(pcg_precond, nodal);

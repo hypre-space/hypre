@@ -571,6 +571,17 @@ HYPRE_ParCSRHybridSetAggNumLevels( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetAggInterpType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetAggInterpType( HYPRE_Solver solver,
+                                    HYPRE_Int    agg_interp_type    )
+{
+   return( hypre_AMGHybridSetAggInterpType( (void *) solver, agg_interp_type ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRHybridSetNumPaths
  *--------------------------------------------------------------------------*/
 
