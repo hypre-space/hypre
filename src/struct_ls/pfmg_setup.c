@@ -180,9 +180,9 @@ hypre_PFMGSetup( void               *pfmg_vdata,
           *
           * Use the "square of the coefficient of variation" = (sigma/mu)^2,
           * where sigma is the standard deviation and mu is the mean.  This is
-          * equivalent to computing (d - mu^2)/mu^2 where d is the sum of the
-          * squares of the coefficients stored in 'deviation'.  Care is taken to
-          * avoid dividing by zero when the mean is zero. */
+          * equivalent to computing (d - mu^2)/mu^2 where d is the average of
+          * the squares of the coefficients stored in 'deviation'.  Care is
+          * taken to avoid dividing by zero when the mean is zero. */
 
          deviation[d] -= mean[d]*mean[d];
          if ( deviation[d] > 0.1*(mean[d]*mean[d]) )
