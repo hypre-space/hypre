@@ -872,19 +872,26 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    }
    if (cxyz_max == 0.0)
    {
+      /* Do isotropic coarsening */
+      for (d = 0; d < 3; d++)
+      {
+         cxyz[d] = 1.0;
+      }
       cxyz_max = 1.0;
    }
 
+   /* Set dxyz values that are scaled appropriately the coarsening routine */
    for (d = 0; d < 3; d++)
    {
-      if (cxyz[d] > 0)
+      HYPRE_Real  max_anisotropy = HYPRE_REAL_MAX/1000;
+      if (cxyz[d] > (cxyz_max/max_anisotropy))
       {
          cxyz[d] /= cxyz_max;
          dxyz[d] = sqrt(1.0 / cxyz[d]);
       }
       else
       {
-         dxyz[d] = HYPRE_REAL_MAX/1000;
+         dxyz[d] = sqrt(max_anisotropy);
       }
    }
 
