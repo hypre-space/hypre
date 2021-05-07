@@ -532,6 +532,7 @@ HYPRE_IJVectorGetObject( HYPRE_IJVector   vector,
 
 /*--------------------------------------------------------------------------
  * HYPRE_IJVectorRead
+ * create IJVector on host memory
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -605,8 +606,8 @@ HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
    MPI_Comm        comm;
    HYPRE_BigInt   *partitioning;
    HYPRE_BigInt    jlower, jupper, j;
-   HYPRE_Complex   value;
-   HYPRE_Int       myid;
+   HYPRE_Complex  *h_values = NULL, *d_values = NULL, *values = NULL;
+   HYPRE_Int       myid, n_local;
    char            new_filename[255];
    FILE           *file;
 
@@ -630,44 +631,37 @@ HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
    partitioning = hypre_IJVectorPartitioning(vector);
    jlower = partitioning[0];
    jupper = partitioning[1] - 1;
+   n_local = jupper - jlower + 1;
+
    hypre_fprintf(file, "%b %b\n", jlower, jupper);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_Complex * d_values = hypre_TAlloc(HYPRE_Complex, jupper-jlower+1, HYPRE_MEMORY_DEVICE);
-   HYPRE_Complex * h_values = hypre_TAlloc(HYPRE_Complex, jupper-jlower+1, HYPRE_MEMORY_HOST);
-   HYPRE_BigInt * d_indices = hypre_TAlloc(HYPRE_BigInt, jupper-jlower+1, HYPRE_MEMORY_DEVICE);
-   HYPRE_BigInt * h_indices = hypre_TAlloc(HYPRE_BigInt, jupper-jlower+1, HYPRE_MEMORY_HOST);
-   for (j = jlower; j <= jupper; j++)
+   HYPRE_MemoryLocation memory_location = hypre_IJVectorMemoryLocation(vector);
+
+   d_values = hypre_TAlloc(HYPRE_Complex, n_local, memory_location);
+
+   HYPRE_IJVectorGetValues(vector, n_local, NULL, d_values);
+
+   if ( hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_HOST )
    {
-      h_indices[j-jlower] = j;
+      values = d_values;
    }
-   hypre_TMemcpy(d_indices, h_indices, HYPRE_BigInt, jupper-jlower+1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-
-   HYPRE_IJVectorGetValues(vector, jupper-jlower+1, d_indices, d_values);
-
-   hypre_TMemcpy(h_values, d_values, HYPRE_Complex, jupper-jlower+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-
-   for (j = jlower; j <= jupper; j++)
+   else
    {
-      hypre_fprintf(file, "%b %.14e\n", j, h_values[j-jlower]);
+      h_values = hypre_TAlloc(HYPRE_Complex, n_local, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(h_values, d_values, HYPRE_Complex, n_local, HYPRE_MEMORY_HOST, memory_location);
+      values = h_values;
    }
 
-   hypre_TFree(d_indices, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(h_indices, HYPRE_MEMORY_HOST);
+   for (j = jlower; j <= jupper; j++)
+   {
+      hypre_fprintf(file, "%b %.14e\n", j, values[j-jlower]);
+   }
 
-   hypre_TFree(d_values, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(d_values, memory_location);
    hypre_TFree(h_values, HYPRE_MEMORY_HOST);
-
-#else
-   for (j = jlower; j <= jupper; j++)
-   {
-      HYPRE_IJVectorGetValues(vector, 1, &j, &value);
-
-      hypre_fprintf(file, "%b %.14e\n", j, value);
-   }
-#endif
 
    fclose(file);
 
    return hypre_error_flag;
 }
+

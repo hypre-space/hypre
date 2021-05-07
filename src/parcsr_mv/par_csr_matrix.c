@@ -712,7 +712,8 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
-   comm = hypre_ParCSRMatrixComm(matrix);
+
+   comm            = hypre_ParCSRMatrixComm(matrix);
    first_row_index = hypre_ParCSRMatrixFirstRowIndex(matrix);
    first_col_diag  = hypre_ParCSRMatrixFirstColDiag(matrix);
    diag            = hypre_ParCSRMatrixDiag(matrix);
@@ -732,22 +733,23 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
       return hypre_error_flag;
    }
 
-   num_nonzeros_offd = hypre_CSRMatrixNumNonzeros(offd);
-
    diag_data = hypre_CSRMatrixData(diag);
    diag_i    = hypre_CSRMatrixI(diag);
    diag_j    = hypre_CSRMatrixJ(diag);
-   offd_i    = hypre_CSRMatrixI(offd);
+
+   num_nonzeros_offd = hypre_CSRMatrixNumNonzeros(offd);
    if (num_nonzeros_offd)
    {
       offd_data = hypre_CSRMatrixData(offd);
+      offd_i    = hypre_CSRMatrixI(offd);
       offd_j    = hypre_CSRMatrixJ(offd);
    }
 
-   ilower = row_starts[0]+(HYPRE_BigInt)base_i;
-   iupper = row_starts[1]+(HYPRE_BigInt)base_i - 1;
-   jlower = col_starts[0]+(HYPRE_BigInt)base_j;
-   jupper = col_starts[1]+(HYPRE_BigInt)base_j - 1;
+   ilower = row_starts[0] + (HYPRE_BigInt) base_i;
+   iupper = row_starts[1] + (HYPRE_BigInt) base_i - 1;
+   jlower = col_starts[0] + (HYPRE_BigInt) base_j;
+   jupper = col_starts[1] + (HYPRE_BigInt) base_j - 1;
+
    hypre_fprintf(file, "%b %b %b %b\n", ilower, iupper, jlower, jupper);
 
    for (i = 0; i < num_rows; i++)
@@ -758,7 +760,7 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
       for (j = diag_i[i]; j < diag_i[i+1]; j++)
       {
          J = first_col_diag + (HYPRE_BigInt)(diag_j[j] + base_j);
-         if ( diag_data )
+         if (diag_data)
          {
 #ifdef HYPRE_COMPLEX
             hypre_fprintf(file, "%b %b %.14e , %.14e\n", I, J,
@@ -768,16 +770,18 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
 #endif
          }
          else
+         {
             hypre_fprintf(file, "%b %b\n", I, J);
+         }
       }
 
       /* print offd columns */
-      if ( num_nonzeros_offd )
+      if (num_nonzeros_offd)
       {
          for (j = offd_i[i]; j < offd_i[i+1]; j++)
          {
-            J = col_map_offd[offd_j[j]] + (HYPRE_BigInt)base_j;
-            if ( offd_data )
+            J = col_map_offd[offd_j[j]] + (HYPRE_BigInt) base_j;
+            if (offd_data)
             {
 #ifdef HYPRE_COMPLEX
                hypre_fprintf(file, "%b %b %.14e , %.14e\n", I, J,
@@ -787,7 +791,9 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
 #endif
             }
             else
-               hypre_fprintf(file, "%b %b\n", I, J );
+            {
+               hypre_fprintf(file, "%b %b\n", I, J);
+            }
          }
       }
    }
