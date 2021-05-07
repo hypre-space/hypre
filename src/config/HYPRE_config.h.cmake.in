@@ -12,34 +12,37 @@
 #define HYPRE_RELEASE_BUGS    "@HYPRE_BUGS@"
 
 /* Use long long int for HYPRE_BigInt */
-#cmakedefine HYPRE_MIXEDINT
+#cmakedefine HYPRE_MIXEDINT 1
 
 /* Use long long int for HYPRE_BigInt and HYPRE_Int*/
-#cmakedefine HYPRE_BIGINT
+#cmakedefine HYPRE_BIGINT 1
 
 /* Use single precision values for HYPRE_Real */
-#cmakedefine HYPRE_SINGLE
+#cmakedefine HYPRE_SINGLE 1
 
 /* Use quad precision values for HYPRE_Real */
-#cmakedefine HYPRE_LONG_DOUBLE
+#cmakedefine HYPRE_LONG_DOUBLE 1
 
 /* Use complex values */
-#cmakedefine HYPRE_COMPLEX
+#cmakedefine HYPRE_COMPLEX 1
+
+/* Debug mode */
+#cmakedefine HYPRE_DEBUG 1
 
 /* Define to be the max dimension size (must be at least 3) */
 #define HYPRE_MAXDIM 3
 
 /* Use persistent communication */
-#cmakedefine HYPRE_USING_PERSISTENT_COMM
+#cmakedefine HYPRE_USING_PERSISTENT_COMM 1
 
 /* Use hopscotch hashing */
-#cmakedefine HYPRE_HOPSCOTCH
+#cmakedefine HYPRE_HOPSCOTCH 1
 
 /* Compile without MPI */
 #cmakedefine HYPRE_SEQUENTIAL 1
 
 /* Use HYPRE timing routines */
-#cmakedefine HYPRE_TIMING
+#cmakedefine HYPRE_TIMING 1
 
 /* Use internal BLAS library */
 #cmakedefine HYPRE_USING_HYPRE_BLAS 1
@@ -48,7 +51,7 @@
 #cmakedefine HYPRE_USING_HYPRE_LAPACK 1
 
 /* Print HYPRE errors */
-#cmakedefine HYPRE_PRINT_ERRORS
+#cmakedefine HYPRE_PRINT_ERRORS 1
 
 /* Use OpenMP */
 #cmakedefine HYPRE_USING_OPENMP 1
@@ -96,7 +99,7 @@
 #cmakedefine HYPRE_USING_DSUPERLU 1
 
 /* Use SuperLU */
-#cmakedefine HAVE_SUPERLU
+#cmakedefine HAVE_SUPERLU 1
 
 /* Use MPI */
 #cmakedefine HYPRE_HAVE_MPI 1
