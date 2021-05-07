@@ -339,7 +339,7 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
    HYPRE_Int                myid, iter, part, vi, vj;
    HYPRE_Real               b_dot_b = 0, r_dot_r;
    HYPRE_Real               conv_factor = 1.0;
-   HYPRE_Real               resid_nrm, old_resid, relative_resid;
+   HYPRE_Real               old_resid;
    char                     filename[255];
 
    hypre_MPI_Comm_rank(hypre_SStructMatrixComm(A), &myid);
@@ -374,9 +374,8 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
       {
          old_resid = (solver -> rel_norm);
 
-         /* compute fine grid residual (b - Ax) */
-         hypre_SStructCopy(b, y);
-         hypre_SStructMatvecCompute(matvec_data, -1.0, A, x, 1.0, y);
+         /* compute fine grid residual (r = b - Ax) */
+         hypre_SStructMatvecCompute(matvec_data, -1.0, A, x, 1.0, b, y);
          hypre_SStructInnerProd(y, y, &r_dot_r);
          (solver -> rel_norm) = sqrt(r_dot_r/b_dot_b);
          if (iter > 0)

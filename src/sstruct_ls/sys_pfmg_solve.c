@@ -97,10 +97,9 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
 
    if (((tol > 0.) && (logging > 0)) || (print_level > 1))
    {
-      /* Compute fine grid residual (b - Ax) */
-      hypre_SStructPCopy(b_l[0], r_l[0]);
+      /* Compute fine grid residual (r = b - Ax) */
       hypre_SStructPMatvecCompute(matvec_data_l[0], -1.0,
-                                  A_l[0], x_l[0], 1.0, r_l[0]);
+                                  A_l[0], x_l[0], 1.0, b_l[0], r_l[0]);
    }
 
    /* part of convergence check */
@@ -164,10 +163,9 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
       hypre_SysPFMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
       zero_guess = 0;
 
-      /* compute fine grid residual (b - Ax) */
-      hypre_SStructPCopy(b_l[0], r_l[0]);
-      hypre_SStructPMatvecCompute(matvec_data_l[0],
-                                  -1.0, A_l[0], x_l[0], 1.0, r_l[0]);
+      /* compute fine grid residual (r = b - Ax) */
+      hypre_SStructPMatvecCompute(matvec_data_l[0], -1.0, A_l[0], x_l[0],
+                                  1.0, b_l[0], r_l[0]);
 
       if (num_levels > 1)
       {
@@ -196,9 +194,8 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
                hypre_SysPFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 
                /* compute residual (b - Ax) */
-               hypre_SStructPCopy(b_l[l], r_l[l]);
-               hypre_SStructPMatvecCompute(matvec_data_l[l],
-                                           -1.0, A_l[l], x_l[l], 1.0, r_l[l]);
+               hypre_SStructPMatvecCompute(matvec_data_l[l], -1.0, A_l[l],
+                                           x_l[l], 1.0, b_l[l], r_l[l]);
             }
             else
             {
@@ -291,10 +288,9 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
 
       if ((logging > 0) || (print_level > 1))
       {
-         /* Recompute fine grid residual (b - Ax) after post-smoothing */
-         hypre_SStructPCopy(b_l[0], r_l[0]);
+         /* Recompute fine grid residual (r = b - Ax) after post-smoothing */
          hypre_SStructPMatvecCompute(matvec_data_l[0], -1.0,
-                                     A_l[0], x_l[0], 1.0, r_l[0]);
+                                     A_l[0], x_l[0], 1.0, b_l[0], r_l[0]);
 
          if (logging > 0)
          {

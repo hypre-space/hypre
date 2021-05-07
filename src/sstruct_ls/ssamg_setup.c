@@ -309,7 +309,8 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       HYPRE_SStructVectorCreate(comm, grid_l[0], &Aones_l[0]);
       HYPRE_SStructVectorInitialize(Aones_l[0]);
       HYPRE_SStructVectorAssemble(Aones_l[0]);
-      hypre_SStructMatvecCompute(matvec_data_l[0], 1.0, A_l[0], ones_l[0], 0.0, Aones_l[0]);
+      hypre_SStructMatvecCompute(matvec_data_l[0], 1.0, A_l[0], ones_l[0],
+                                 0.0, Aones_l[0], Aones_l[0]);
 
       /* Print Aones */
       hypre_sprintf(filename, "ssamg_Aones.l%02d", 0);
@@ -356,7 +357,8 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
          HYPRE_SStructVectorCreate(comm, grid_l[l], &Pones_l[l]);
          HYPRE_SStructVectorInitialize(Pones_l[l]);
          HYPRE_SStructVectorAssemble(Pones_l[l]);
-         hypre_SStructMatvecCompute(interp_data_l[l], 1.0, P_l[l], ones_l[l], 0.0, Pones_l[l]);
+         hypre_SStructMatvecCompute(interp_data_l[l], 1.0, P_l[l], ones_l[l],
+                                    0.0, Pones_l[l], Pones_l[l]);
 
          /* Print Pones */
          hypre_sprintf(filename, "ssamg_Pones.l%02d", l);
@@ -370,7 +372,8 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
          HYPRE_SStructVectorCreate(comm, grid_l[l+1], &Aones_l[l+1]);
          HYPRE_SStructVectorInitialize(Aones_l[l+1]);
          HYPRE_SStructVectorAssemble(Aones_l[l+1]);
-         hypre_SStructMatvecCompute(matvec_data_l[l+1], 1.0, A_l[l+1], ones_l[l+1], 0.0, Aones_l[l+1]);
+         hypre_SStructMatvecCompute(matvec_data_l[l+1], 1.0, A_l[l+1], ones_l[l+1],
+                                    0.0, Aones_l[l+1], Aones_l[l+1]);
 
          /* Print Aones */
          hypre_sprintf(filename, "ssamg_Aones.l%02d", l+1);

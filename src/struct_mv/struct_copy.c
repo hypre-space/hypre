@@ -38,6 +38,12 @@ hypre_StructCopy( hypre_StructVector *x,
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
+   /* Return if x and y point to the same hypre_StructVector */
+   if (x == y)
+   {
+      return hypre_error_flag;
+   }
+
    hypre_SetIndex(unit_stride, 1);
 
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));

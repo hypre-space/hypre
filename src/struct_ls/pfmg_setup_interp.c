@@ -80,8 +80,8 @@ hypre_zPFMGCreateInterpOp( hypre_StructMatrix *A,
 
 HYPRE_Int
 hypre_zPFMGSetupInterpOp( hypre_StructMatrix *P,
-                         hypre_StructMatrix *A,
-                         HYPRE_Int           cdir )
+                          hypre_StructMatrix *A,
+                          HYPRE_Int           cdir )
 {
    HYPRE_Int              ndim = hypre_StructMatrixNDim(A);
    hypre_BoxArray        *compute_boxes;
@@ -91,7 +91,7 @@ hypre_zPFMGSetupInterpOp( hypre_StructMatrix *P,
    hypre_Box             *P_dbox;
 
    HYPRE_Real            *Ap, *Pp0, *Pp1, *Pp2;
-   HYPRE_Real             Pconst0, Pconst1, Pconst2, center;
+   HYPRE_Real             Pconst0, Pconst1, Pconst2;
    HYPRE_Int              constant;
 
    hypre_StructStencil   *A_stencil;
@@ -105,7 +105,7 @@ hypre_zPFMGSetupInterpOp( hypre_StructMatrix *P,
    hypre_Index            Astart, Astride, Pstart, Pstride;
    hypre_Index            origin, stride, loop_size;
 
-   HYPRE_Int              i, si, vi;
+   HYPRE_Int              i, si;
 
    /*----------------------------------------------------------
     * Initialize some things

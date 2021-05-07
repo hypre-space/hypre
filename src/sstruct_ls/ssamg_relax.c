@@ -800,8 +800,15 @@ hypre_SSAMGRelax( void                *relax_vdata,
                   hypre_SStructVector *b,
                   hypre_SStructVector *x )
 {
-   hypre_SSAMGRelaxData *relax_data   = (hypre_SSAMGRelaxData *) relax_vdata;
-   HYPRE_Int             num_nodesets = (relax_data -> num_nodesets);
+   hypre_SSAMGRelaxData  *relax_data   = (hypre_SSAMGRelaxData *) relax_vdata;
+   HYPRE_Int              num_nodesets = (relax_data -> num_nodesets);
+   HYPRE_Int              zero_guess   = (relax_data -> zero_guess);
+   HYPRE_Int             *active_p     = (relax_data -> active_p);
+   HYPRE_Int              nparts       = hypre_SStructMatrixNParts(A);
+
+   hypre_SStructPVector  *px;
+   HYPRE_Int              part;
+
    if (num_nodesets == 1)
    {
       hypre_SSAMGRelaxMV(relax_vdata, A, b, x);
@@ -809,6 +816,19 @@ hypre_SSAMGRelax( void                *relax_vdata,
    else
    {
       hypre_SSAMGRelaxGeneric(relax_vdata, A, b, x);
+   }
+
+   /* Set x=0, so r=(b-Ax)=b on inactive parts */
+   if (zero_guess)
+   {
+      for (part = 0; part < nparts; part++)
+      {
+         if (!active_p[part])
+         {
+            px = hypre_SStructVectorPVector(x, part);
+            hypre_SStructPVectorSetConstantValues(px, 0.0);
+         }
+      }
    }
 
    return hypre_error_flag;
@@ -1282,7 +1302,7 @@ hypre_SSAMGRelaxMV( void                *relax_vdata,
    if (zero_guess)
    {
       /* x = w*inv(D)*b */
-      hypre_SStructMatvecDiagScale(weights, A, b, NULL, x);
+      hypre_SStructMatvecDiagScale(matvec_vdata, weights, A, b, NULL, x);
       iter++;
    }
 
@@ -1292,13 +1312,12 @@ hypre_SSAMGRelaxMV( void                *relax_vdata,
    for (; iter < max_iter; iter++)
    {
       /* t = b - (L + U)*x */
-      hypre_SStructCopy(b, t);
       hypre_SStructMatvecSetSkipDiag(matvec_vdata, 1);
-      hypre_SStructMatvecCompute(matvec_vdata, mone, A, x, one, t);
+      hypre_SStructMatvecCompute(matvec_vdata, mone, A, x, one, b, t);
       hypre_SStructMatvecSetSkipDiag(matvec_vdata, 0);
 
       /* x = (1 - w)*x + w*inv(D)*t */
-      hypre_SStructMatvecDiagScale(weights, A, t, mweights, x);
+      hypre_SStructMatvecDiagScale(matvec_vdata, weights, A, t, mweights, x);
    }
 
    (relax_data -> num_iterations) = iter;
