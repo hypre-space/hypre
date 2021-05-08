@@ -196,7 +196,7 @@ struct hypre_CudaData
 #endif
 
 #if defined(HYPRE_USING_ROCSPARSE)
-  rocsparse_handle                   cusparse_handle;
+   rocsparse_handle                  cusparse_handle;
 #endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
@@ -788,6 +788,16 @@ struct absolute_value : public thrust::unary_function<T,T>
   {
     return x < T(0) ? -x : x;
   }
+};
+
+struct relax_point_type
+{
+  const HYPRE_Int relax_points;
+  relax_point_type(HYPRE_Int _relax_points) : relax_points(_relax_points) {}
+  __host__ __device__
+    HYPRE_Int operator()(const HYPRE_Int &CF_marker) const {
+      return CF_marker == relax_points ? 1 : 0;
+    }
 };
 
 template<typename T1, typename T2>

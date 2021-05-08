@@ -919,6 +919,7 @@ hypre_MGRSetup( void               *mgr_vdata,
     wall_time = time_getWallclockSeconds() - wall_time;
     hypre_printf("Lev = %d, proc = %d     Truncate Coarse Grid: %f\n", lev, my_id, wall_time);
 
+/*
 #if defined(HYPRE_USING_CUDA)
     if (Frelax_method[lev] == 0)
     {
@@ -957,10 +958,10 @@ hypre_MGRSetup( void               *mgr_vdata,
     else if (Frelax_method[lev] == 2) // full AMG
     {
 #else
+*/
     if (Frelax_method[lev] == 2) // full AMG
     {
-#endif
-
+//#endif
       wall_time = time_getWallclockSeconds();
       // user provided AMG solver
       // only support AMG at the first level
@@ -1228,9 +1229,9 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
       else if (relax_type == 18)
       {
-#if defined(HYPRE_USING_CUDA)
-         hypre_ParCSRComputeL1Norms(A_ff_array[j], 1, NULL, &l1_norm_data);
-#else
+//#if defined(HYPRE_USING_CUDA)
+//         hypre_ParCSRComputeL1Norms(A_ff_array[j], 1, NULL, &l1_norm_data);
+//#else
          if (relax_order)
          {
             hypre_ParCSRComputeL1Norms(A_array[j], 1, CF_marker_array[j], &l1_norm_data);
@@ -1239,20 +1240,22 @@ hypre_MGRSetup( void               *mgr_vdata,
          {
             hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norm_data);
          }
-#endif
+//#endif
       }
 
       if (l1_norm_data)
       {
+/*
 #if defined(HYPRE_USING_CUDA)
          l1_norms[j] = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_ff_array[j]));
          hypre_VectorData(l1_norms[j]) = l1_norm_data;
          hypre_SeqVectorInitialize_v2(l1_norms[j], hypre_ParCSRMatrixMemoryLocation(A_ff_array[j]));
 #else
+*/
          l1_norms[j] = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_array[j]));
          hypre_VectorData(l1_norms[j]) = l1_norm_data;
          hypre_SeqVectorInitialize_v2(l1_norms[j], hypre_ParCSRMatrixMemoryLocation(A_array[j]));
-#endif
+//#endif
       }
    }
 
