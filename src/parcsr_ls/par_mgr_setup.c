@@ -796,9 +796,9 @@ hypre_MGRSetup( void               *mgr_vdata,
                           debug_flag, trunc_factor, max_elmts, &P, interp_type[lev], num_interp_sweeps);
     }
     wall_time = time_getWallclockSeconds() - wall_time;
-    hypre_printf("Lev = %d, interp type = %d, proc = %d     BuildInterp: %f\n", lev, interp_type[lev], my_id, wall_time);
+    //hypre_printf("Lev = %d, interp type = %d, proc = %d     BuildInterp: %f\n", lev, interp_type[lev], my_id, wall_time);
     //hypre_ParCSRMatrixPrintIJ(P, 0, 0, "P");
-    hypre_ParCSRMatrixMigrate(P, memory_location);
+    //hypre_ParCSRMatrixMigrate(P, memory_location);
 
     P_array[lev] = P;
 
@@ -870,9 +870,9 @@ hypre_MGRSetup( void               *mgr_vdata,
             debug_flag, trunc_factor, max_elmts, strong_threshold, max_row_sum, &RT,
             restrict_type[lev], num_restrict_sweeps);
       wall_time = time_getWallclockSeconds() - wall_time;
-      hypre_printf("Lev = %d, restrict type = %d, proc = %d     BuildRestrict: %f\n", lev, restrict_type[lev], my_id, wall_time);
+      //hypre_printf("Lev = %d, restrict type = %d, proc = %d     BuildRestrict: %f\n", lev, restrict_type[lev], my_id, wall_time);
       //hypre_ParCSRMatrixPrintIJ(RT, 0, 0, "RT");
-      hypre_ParCSRMatrixMigrate(RT, memory_location);
+      //hypre_ParCSRMatrixMigrate(RT, memory_location);
 
       RT_array[lev] = RT;
 
@@ -896,7 +896,7 @@ hypre_MGRSetup( void               *mgr_vdata,
         //sprintf(fname, "RAP_%d", lev);
         //hypre_ParCSRMatrixPrintIJ(RAP_ptr, 0, 0, fname);
         wall_time = time_getWallclockSeconds() - wall_time;
-        hypre_printf("Lev = %d, proc = %d     BuildCoarseGrid: %f\n", lev, my_id, wall_time);
+        //hypre_printf("Lev = %d, proc = %d     BuildCoarseGrid: %f\n", lev, my_id, wall_time);
       }
     }
 
@@ -917,7 +917,7 @@ hypre_MGRSetup( void               *mgr_vdata,
     //sprintf(fname, "RAP_truncated_%d", lev);
     //hypre_ParCSRMatrixPrintIJ(RAP_ptr, 0, 0, fname);
     wall_time = time_getWallclockSeconds() - wall_time;
-    hypre_printf("Lev = %d, proc = %d     Truncate Coarse Grid: %f\n", lev, my_id, wall_time);
+    //hypre_printf("Lev = %d, proc = %d     Truncate Coarse Grid: %f\n", lev, my_id, wall_time);
 
 /*
 #if defined(HYPRE_USING_CUDA)
@@ -1014,8 +1014,8 @@ hypre_MGRSetup( void               *mgr_vdata,
         hypre_ParCSRMatrix *P_FF_ptr;
         hypre_BoomerAMGCoarseParms(comm, nloc, 1, NULL, CF_marker_copy, NULL, &num_fpts_global);
         hypre_MGRBuildPDevice(A_array[lev], CF_marker_copy, num_fpts_global, 0, &P_FF_ptr);
-       hypre_ParCSRMatrixMigrate(P_FF_ptr, memory_location);
-       P_FF_array[lev] = P_FF_ptr;
+        //hypre_ParCSRMatrixMigrate(P_FF_ptr, memory_location);
+        P_FF_array[lev] = P_FF_ptr;
  
         //hypre_ParCSRMatrixPrintIJ(P_FF_array[lev], 0, 0, "P_FF");
         hypre_TFree(CF_marker_copy, HYPRE_MEMORY_HOST);
@@ -1053,7 +1053,7 @@ hypre_MGRSetup( void               *mgr_vdata,
         use_default_fsolver = (mgr_data -> use_default_fsolver);
       }
       wall_time = time_getWallclockSeconds() - wall_time;
-      hypre_printf("Lev = %d, proc = %d     SetupAFF: %f\n", lev, my_id, wall_time);
+      //hypre_printf("Lev = %d, proc = %d     SetupAFF: %f\n", lev, my_id, wall_time);
     }
 
     /* Update coarse level indexes for next levels */
@@ -1203,7 +1203,7 @@ hypre_MGRSetup( void               *mgr_vdata,
   coarse_grid_solver_setup((mgr_data -> coarse_grid_solver), RAP_ptr, F_array[num_c_levels], U_array[num_c_levels]);
   //hypre_ParCSRMatrixPrintIJ(RAP_ptr,1,1,"RAP");
   wall_time = time_getWallclockSeconds() - wall_time;
-  hypre_printf("Proc = %d   Coarse grid setup: %f\n", my_id, wall_time);
+  //hypre_printf("Proc = %d   Coarse grid setup: %f\n", my_id, wall_time);
 
   /* Setup smoother for fine grid */
    if ( relax_type == 8 || relax_type == 13 || relax_type == 14 || relax_type == 18 )

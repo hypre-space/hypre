@@ -108,8 +108,8 @@ main( hypre_int argc,
   HYPRE_Int     max_iter = 400;
 
   /* mgr options */
-  HYPRE_Int mgr_bsize = 2;
-  HYPRE_Int mgr_nlevels = 1;
+  HYPRE_Int mgr_bsize = 3;
+  HYPRE_Int mgr_nlevels = 2;
   HYPRE_Int mgr_num_reserved_nodes = 0;
   HYPRE_Int mgr_non_c_to_f = 1;
   HYPRE_Int P_max_elmts = 0;
@@ -140,18 +140,20 @@ main( hypre_int argc,
 
   HYPRE_Int *mgr_coarse_grid_method = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
   mgr_coarse_grid_method[0] = 0;
-  //mgr_coarse_grid_method[1] = 0;
+  mgr_coarse_grid_method[1] = 0;
 
   mgr_cindexes = hypre_CTAlloc(HYPRE_Int*, mgr_nlevels, HYPRE_MEMORY_HOST);
   HYPRE_Int *lv1 = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
-  //HYPRE_Int *lv2 = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
-  lv1[0] = 1;
+  HYPRE_Int *lv2 = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
+  lv1[0] = 0;
+  lv1[1] = 1;
+  lv2[0] = 0;
   mgr_cindexes[0] = lv1;
-  //mgr_cindexes[1] = lv2;
+  mgr_cindexes[1] = lv2;
 
   mgr_num_cindexes = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
-  mgr_num_cindexes[0] = 1;
-  //mgr_num_cindexes[1] = 5;
+  mgr_num_cindexes[0] = 2;
+  mgr_num_cindexes[1] = 1;
 
   HYPRE_Int mgr_frelax_method = 0;
   //HYPRE_Int *mgr_level_frelax_method = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
@@ -525,6 +527,7 @@ main( hypre_int argc,
     /* set max iterations */
     HYPRE_MGRSetMaxIter(pcg_precond, 1);
     HYPRE_MGRSetTol(pcg_precond, pc_tol);
+    HYPRE_MGRSetTruncateCoarseGridThreshold(pcg_precond, 1e-14);
 
     HYPRE_MGRSetGlobalsmoothType(pcg_precond, mgr_gsmooth_type);
     HYPRE_MGRSetMaxGlobalsmoothIters( pcg_precond, mgr_num_gsmooth_sweeps );
@@ -581,15 +584,6 @@ main( hypre_int argc,
     hypre_FinalizeTiming(time_index);
     hypre_ClearTiming();
 
-/*
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-    cudaDeviceSynchronize();
-#endif
-
-    HYPRE_ParCSRMatrixMatvec(1.0, parcsr_A, x, 0.0, b);
-    return 0;
-
-*/
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
     cudaDeviceSynchronize();
 #endif
@@ -618,12 +612,36 @@ main( hypre_int argc,
     HYPRE_FlexGMRESGetNumIterations(pcg_solver, &num_iterations);
     HYPRE_FlexGMRESGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
 
-    return 0;
+#if SECOND_TIME
+      /* run a second time to check for memory leaks */
+      HYPRE_ParVectorSetRandomValues(x, 775);
+      time_index = hypre_InitializeTiming("FlexGMRES Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_FlexGMRESSetup(pcg_solver, (HYPRE_Matrix)parcsr_A,
+                     (HYPRE_Vector)b, (HYPRE_Vector)x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("FlexGMRES Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_FlexGMRESSolve(pcg_solver, (HYPRE_Matrix)parcsr_A,
+                     (HYPRE_Vector)b, (HYPRE_Vector)x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+#endif
 
     // free memory for flex FlexGMRES
     if (pcg_solver) HYPRE_ParCSRFlexGMRESDestroy(pcg_solver);
-    if (pcg_precond) HYPRE_MGRDestroy(pcg_precond);
     if (amg_solver) HYPRE_BoomerAMGDestroy(amg_solver);
+    if (pcg_precond) HYPRE_MGRDestroy(pcg_precond);
 
     // Print out solver summary
     if (myid == 0)
@@ -674,97 +692,92 @@ main( hypre_int argc,
   }
   else if (solver_id == 99)
   {
-    if (!hypre_ParCSRMatrixCommPkg(parcsr_A))
+    HYPRE_MGRCreate(&pcg_precond);
+
+    /* set MGR data by block */
+    if (use_point_marker_array)
     {
-      hypre_MatvecCommPkgCreate(parcsr_A);
+      HYPRE_MGRSetCpointsByPointMarkerArray( pcg_precond, mgr_bsize, mgr_nlevels, mgr_num_cindexes, mgr_cindexes, mgr_point_marker_array);
     }
-    time_index = hypre_InitializeTiming("Extract sub-matrices");
-    hypre_BeginTiming(time_index);
-
-    // extract A_cc block
-    hypre_ParCSRMatrix *A_cc, *A_cf, *A_ff, *A_fc;
-    HYPRE_Int cpoint = 1;
-    HYPRE_Int *CF_marker_host = hypre_CTAlloc(HYPRE_Int, local_num_rows, HYPRE_MEMORY_HOST);
-    for (i = 0; i < local_num_rows; i++)
+    else
     {
-        CF_marker_host[i] = (i % 2 == 0) ? 1 : -1;
+      HYPRE_MGRSetCpointsByBlock( pcg_precond, mgr_bsize, mgr_nlevels, mgr_num_cindexes, mgr_cindexes);
     }
+    /* set reserved coarse nodes */
+    if(mgr_num_reserved_nodes)HYPRE_MGRSetReservedCoarseNodes(pcg_precond, mgr_num_reserved_nodes, mgr_reserved_coarse_indexes);
 
-    HYPRE_BigInt *cpts_starts;
-    HYPRE_Int    *coarse_dof_func;
-    hypre_BoomerAMGCoarseParms(comm, local_num_rows,
-                              1, NULL, CF_marker_host,
-                              &coarse_dof_func, &cpts_starts);
+    /* set intermediate coarse grid strategy */
+    HYPRE_MGRSetNonCpointsToFpoints(pcg_precond, mgr_non_c_to_f);
+    /* set F relaxation strategy */
+    HYPRE_MGRSetFRelaxMethod(pcg_precond, mgr_frelax_method);
+    //HYPRE_MGRSetLevelFRelaxNumFunctions(pcg_precond, mgr_frelax_num_functions);
+    /* set relax type for single level F-relaxation and post-relaxation */
+    HYPRE_MGRSetRelaxType(pcg_precond, mgr_relax_type);
+    HYPRE_MGRSetNumRelaxSweeps(pcg_precond, mgr_num_relax_sweeps);
+    /* set interpolation type */
+    HYPRE_MGRSetInterpType(pcg_precond, mgr_interp_type);
+    HYPRE_MGRSetNumInterpSweeps(pcg_precond, mgr_num_interp_sweeps);
+    /* set restriction type */
+    HYPRE_MGRSetRestrictType(pcg_precond, mgr_restrict_type);
+    HYPRE_MGRSetNumRestrictSweeps(pcg_precond, mgr_num_restrict_sweeps);
+    /* set coarse grid method */
+    HYPRE_MGRSetCoarseGridMethod(pcg_precond, mgr_coarse_grid_method);
+    /* set print level */
+    HYPRE_MGRSetPrintLevel(pcg_precond, 1);
+    /* set max iterations */
+    HYPRE_MGRSetMaxIter(pcg_precond, 1);
+    HYPRE_MGRSetTol(pcg_precond, pc_tol);
+    HYPRE_MGRSetTruncateCoarseGridThreshold(pcg_precond, 1e-14);
 
-    hypre_CSRMatrixPrint2(hypre_ParCSRMatrixDiag(parcsr_A), "A_diag.mm");
-    // Migrate A to appropriate device
-    hypre_ParCSRMatrixMigrate(parcsr_A, hypre_HandleMemoryLocation(hypre_handle()));
-    hypre_ParCSRMatrixGenerateFFFCDevice(parcsr_A, CF_marker_host, cpts_starts, NULL, &A_fc, &A_ff);
+    HYPRE_MGRSetGlobalsmoothType(pcg_precond, mgr_gsmooth_type);
+    HYPRE_MGRSetMaxGlobalsmoothIters( pcg_precond, mgr_num_gsmooth_sweeps );
+    //hypre_MGRPrintCoarseSystem( pcg_precond, 1 );
 
-    //hypre_ParCSRMatrixMigrate(A_fc, HYPRE_MEMORY_HOST);
-    //hypre_ParCSRMatrixMigrate(A_ff, HYPRE_MEMORY_HOST);
+    /*
+    HYPRE_BoomerAMGCreate(&amg_solver);
+    HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
+    //HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
+    HYPRE_BoomerAMGSetCoarsenType(amg_solver, 8);
+    //HYPRE_BoomerAMGSetInterpType(amg_solver, 6);
+    HYPRE_BoomerAMGSetNumFunctions(amg_solver, 1);
+    HYPRE_BoomerAMGSetRelaxType(amg_solver, 18);
+    HYPRE_BoomerAMGSetNumSweeps(amg_solver, 2);
+    HYPRE_BoomerAMGSetMaxIter(amg_solver, 1);
+    HYPRE_BoomerAMGSetTol(amg_solver, 0.0);
+    HYPRE_BoomerAMGSetMaxRowSum(amg_solver, 1.0);
+    */
 
-    //hypre_ParCSRMatrixPrintIJ(A_fc, 1, 1, "A_fc");
-    //hypre_ParCSRMatrixPrintIJ(A_ff, 1, 1, "A_ff");
-
-    hypre_EndTiming(time_index);
-    hypre_PrintTiming("Extract sub-matrices times", hypre_MPI_COMM_WORLD);
-    hypre_FinalizeTiming(time_index);
-    hypre_ClearTiming();
+    /* set the MGR coarse solver. Comment out to use default CG solver in MGR */
+    //HYPRE_MGRSetCoarseSolver( pcg_precond, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, amg_solver);
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
     cudaDeviceSynchronize();
 #endif
 
-    time_index = hypre_InitializeTiming("Extract sub-matrices");
-    hypre_BeginTiming(time_index);
-
-    HYPRE_Real *diag_device = hypre_CTAlloc(HYPRE_Real, local_num_rows, HYPRE_MEMORY_DEVICE);
-    HYPRE_Real *diag_host = hypre_CTAlloc(HYPRE_Real, local_num_rows, HYPRE_MEMORY_HOST);
-    hypre_CSRMatrixExtractDiagonalDevice(hypre_ParCSRMatrixDiag(parcsr_A), diag_device, 2);
-    hypre_CSRMatrix *DA_inv = hypre_CSRMatrixDiagMatrixFromVectorDevice(local_num_rows, diag_device);
-    hypre_CSRMatrixPrint2(DA_inv, "diag_A_inv");
+    HYPRE_MGRSetup(pcg_precond, parcsr_A, b, x);
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
     cudaDeviceSynchronize();
 #endif
 
-    hypre_TMemcpy(diag_host, diag_device, HYPRE_Real, local_num_rows, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+#if SECOND_TIME
+    HYPRE_MGRSetup(pcg_precond, parcsr_A, b, x);
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
     cudaDeviceSynchronize();
 #endif
 
-    for (i = 0; i < local_num_rows; i++)
-    {
-      hypre_printf("%d, %1.5f\n", i, diag_host[i]);
-    }
-    hypre_CSRMatrix *D_ff_inv, *W_diag, *D_ff_inv_host, *W_diag_host;
-    D_ff_inv = hypre_CSRMatrixDiagMatrixFromMatrixDevice(hypre_ParCSRMatrixDiag(A_ff), 2);
-    W_diag = hypre_CSRMatrixMultiplyDevice(D_ff_inv, hypre_ParCSRMatrixDiag(A_fc));
-    D_ff_inv_host = hypre_CSRMatrixClone_v2(D_ff_inv, 1, HYPRE_MEMORY_HOST);
-    W_diag_host = hypre_CSRMatrixClone_v2(W_diag, 1, HYPRE_MEMORY_HOST);
-    hypre_CSRMatrixPrint(D_ff_inv_host, "D_ff_inv");
-    hypre_CSRMatrixPrint(W_diag_host, "Wp");
+#endif
     
-    hypre_ParCSRMatrix *P;
-    hypre_MGRBuildPDevice(parcsr_A, CF_marker_host, cpts_starts, 2, &P);
-
-    hypre_ParCSRMatrixMigrate(P, HYPRE_MEMORY_HOST);
-    hypre_ParCSRMatrixPrintIJ(P, 1, 1, "P_device");
-
-    hypre_EndTiming(time_index);
-    hypre_PrintTiming("Build P times", hypre_MPI_COMM_WORLD);
-    hypre_FinalizeTiming(time_index);
-    hypre_ClearTiming();
+    //if (amg_solver) HYPRE_BoomerAMGDestroy(amg_solver);
+    if (pcg_precond) HYPRE_MGRDestroy(pcg_precond);
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
     cudaDeviceSynchronize();
 #endif
+   }
 
-  }
-
-  return 0;
+  //return 0;
 
   /*-----------------------------------------------------------
    * Finalize things
@@ -781,7 +794,7 @@ main( hypre_int argc,
   hypre_TFree(mgr_point_marker_array, HYPRE_MEMORY_HOST);
   hypre_TFree(mgr_coarse_grid_method, HYPRE_MEMORY_HOST);
   hypre_TFree(lv1, HYPRE_MEMORY_HOST);
-  //hypre_TFree(lv2, HYPRE_MEMORY_HOST);
+  hypre_TFree(lv2, HYPRE_MEMORY_HOST);
   hypre_TFree(mgr_cindexes, HYPRE_MEMORY_HOST);
   //hypre_TFree(mgr_level_interp_type, HYPRE_MEMORY_HOST);
   //hypre_TFree(mgr_level_restrict_type, HYPRE_MEMORY_HOST);
@@ -791,7 +804,7 @@ main( hypre_int argc,
   hypre_MPI_Finalize();
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-    cudaDeviceReset();
+  //cudaDeviceReset();
 #endif
 
   return (0);
