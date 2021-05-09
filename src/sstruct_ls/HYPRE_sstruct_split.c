@@ -41,6 +41,7 @@ typedef struct hypre_SStructSolver_struct
    HYPRE_Int                zero_guess;
    HYPRE_Int                num_iterations;
    HYPRE_Int                print_level;
+   HYPRE_Int                logging;
    HYPRE_Real               rel_norm;
    HYPRE_Int                ssolver;
 
@@ -495,6 +496,17 @@ HYPRE_SStructSplitSetPrintLevel( HYPRE_SStructSolver solver,
                                  HYPRE_Int           print_level )
 {
    (solver -> print_level) = print_level;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSplitSetLogging( HYPRE_SStructSolver solver,
+                              HYPRE_Int           logging )
+{
+   (solver -> logging) = logging;
    return hypre_error_flag;
 }
 

@@ -260,150 +260,144 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    /* Free memory */
    hypre_TFree(dxyz_flag, HYPRE_MEMORY_HOST);
 
-#ifdef HYPRE_DEBUG
+#ifdef DEBUG_SETUP
    hypre_SStructVector  **ones_l;
    hypre_SStructVector  **Aones_l;
    hypre_SStructVector  **Pones_l;
    hypre_SStructPGrid    *pgrid;
    HYPRE_Int              mypid, part;
-   HYPRE_Int              print_level;
    char                   filename[255];
 
    hypre_MPI_Comm_rank(hypre_SStructMatrixComm(A), &mypid);
-   print_level = hypre_SSAMGDataPrintLevel(ssamg_data);
 
-   if (print_level > 2)
-   {
-      ones_l  = hypre_TAlloc(hypre_SStructVector *, num_levels, HYPRE_MEMORY_HOST);
-      Aones_l = hypre_TAlloc(hypre_SStructVector *, num_levels, HYPRE_MEMORY_HOST);
-      Pones_l = hypre_TAlloc(hypre_SStructVector *, num_levels - 1, HYPRE_MEMORY_HOST);
+   ones_l  = hypre_TAlloc(hypre_SStructVector *, num_levels, HYPRE_MEMORY_HOST);
+   Aones_l = hypre_TAlloc(hypre_SStructVector *, num_levels, HYPRE_MEMORY_HOST);
+   Pones_l = hypre_TAlloc(hypre_SStructVector *, num_levels - 1, HYPRE_MEMORY_HOST);
 
-      /* Print fine level grid */
-      hypre_sprintf(filename, "ssgrid.l%02d", 0);
+   /* Print fine level grid */
+   hypre_sprintf(filename, "ssgrid.l%02d", 0);
 #ifdef DEBUG_WITH_GLVIS
-      hypre_SStructGridPrintGLVis(grid_l[0], filename, NULL, NULL);
+   hypre_SStructGridPrintGLVis(grid_l[0], filename, NULL, NULL);
 #else
-      hypre_SStructGridPrint(grid_l[0], filename);
+   hypre_SStructGridPrint(grid_l[0], filename);
+#endif
+
+   /* Print part boundary data */
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid_l[0], part);
+
+      hypre_sprintf(filename, "pbnd_boxa.l%02d.p%02d", 0, part);
+      hypre_BoxArrayArrayPrint(hypre_SStructGridComm(grid_l[0]),
+                               filename,
+                               hypre_SStructPGridPBndBoxArrayArray(pgrid, 0));
+   }
+
+   /* Print fine level matrix */
+   hypre_sprintf(filename, "ssamg_A.l%02d", 0);
+   HYPRE_SStructMatrixPrint(filename, A_l[0], 0);
+
+   /* compute Aones = A.1 */
+   HYPRE_SStructVectorCreate(comm, grid_l[0], &ones_l[0]);
+   HYPRE_SStructVectorInitialize(ones_l[0]);
+   HYPRE_SStructVectorSetConstantValues(ones_l[0], 1.0);
+   HYPRE_SStructVectorAssemble(ones_l[0]);
+   HYPRE_SStructVectorCreate(comm, grid_l[0], &Aones_l[0]);
+   HYPRE_SStructVectorInitialize(Aones_l[0]);
+   HYPRE_SStructVectorAssemble(Aones_l[0]);
+   hypre_SStructMatvecCompute(matvec_data_l[0], 1.0, A_l[0], ones_l[0],
+                              0.0, Aones_l[0], Aones_l[0]);
+
+   /* Print Aones */
+   hypre_sprintf(filename, "ssamg_Aones.l%02d", 0);
+#ifdef DEBUG_WITH_GLVIS
+   HYPRE_SStructVectorPrintGLVis(Aones_l[0], filename);
+#else
+   HYPRE_SStructVectorPrint(filename, Aones_l[0], 0);
+#endif
+
+   for (l = 0; l < (num_levels - 1); l++)
+   {
+      /* Print coarse grids */
+      hypre_sprintf(filename, "ssgrid.l%02d", l+1);
+#ifdef DEBUG_WITH_GLVIS
+      hypre_SStructGridPrintGLVis(grid_l[l+1], filename, NULL, NULL);
+#else
+      hypre_SStructGridPrint(grid_l[l+1], filename);
 #endif
 
       /* Print part boundary data */
       for (part = 0; part < nparts; part++)
       {
-         pgrid = hypre_SStructGridPGrid(grid_l[0], part);
+         pgrid = hypre_SStructGridPGrid(grid_l[l+1], part);
 
-         hypre_sprintf(filename, "pbnd_boxa.l%02d.p%02d", 0, part);
-         hypre_BoxArrayArrayPrint(hypre_SStructGridComm(grid_l[0]),
+         hypre_sprintf(filename, "pbnd_boxa.l%02d.p%02d", l+1, part);
+         hypre_BoxArrayArrayPrint(hypre_SStructGridComm(grid_l[l+1]),
                                   filename,
                                   hypre_SStructPGridPBndBoxArrayArray(pgrid, 0));
       }
 
-      /* Print fine level matrix */
-      hypre_sprintf(filename, "ssamg_A.l%02d", 0);
-      HYPRE_SStructMatrixPrint(filename, A_l[0], 0);
+      /* Print coarse matrices */
+      hypre_sprintf(filename, "ssamg_A.l%02d", l+1);
+      HYPRE_SStructMatrixPrint(filename, A_l[l+1], 0);
+
+      /* Print interpolation matrix */
+      hypre_sprintf(filename, "ssamg_P.l%02d", l);
+      HYPRE_SStructMatrixPrint(filename, P_l[l], 0);
+
+      /* compute Pones = P.1 */
+      HYPRE_SStructVectorCreate(comm, grid_l[l+1], &ones_l[l+1]);
+      HYPRE_SStructVectorInitialize(ones_l[l+1]);
+      HYPRE_SStructVectorSetConstantValues(ones_l[l+1], 1.0);
+      HYPRE_SStructVectorAssemble(ones_l[l+1]);
+      HYPRE_SStructVectorCreate(comm, grid_l[l], &Pones_l[l]);
+      HYPRE_SStructVectorInitialize(Pones_l[l]);
+      HYPRE_SStructVectorAssemble(Pones_l[l]);
+      hypre_SStructMatvecCompute(interp_data_l[l], 1.0, P_l[l], ones_l[l],
+                                 0.0, Pones_l[l], Pones_l[l]);
+
+      /* Print Pones */
+      hypre_sprintf(filename, "ssamg_Pones.l%02d", l);
+#ifdef DEBUG_WITH_GLVIS
+      HYPRE_SStructVectorPrintGLVis(Pones_l[l], filename);
+#else
+      HYPRE_SStructVectorPrint(filename, Pones_l[l], 0);
+#endif
 
       /* compute Aones = A.1 */
-      HYPRE_SStructVectorCreate(comm, grid_l[0], &ones_l[0]);
-      HYPRE_SStructVectorInitialize(ones_l[0]);
-      HYPRE_SStructVectorSetConstantValues(ones_l[0], 1.0);
-      HYPRE_SStructVectorAssemble(ones_l[0]);
-      HYPRE_SStructVectorCreate(comm, grid_l[0], &Aones_l[0]);
-      HYPRE_SStructVectorInitialize(Aones_l[0]);
-      HYPRE_SStructVectorAssemble(Aones_l[0]);
-      hypre_SStructMatvecCompute(matvec_data_l[0], 1.0, A_l[0], ones_l[0],
-                                 0.0, Aones_l[0], Aones_l[0]);
+      HYPRE_SStructVectorCreate(comm, grid_l[l+1], &Aones_l[l+1]);
+      HYPRE_SStructVectorInitialize(Aones_l[l+1]);
+      HYPRE_SStructVectorAssemble(Aones_l[l+1]);
+      hypre_SStructMatvecCompute(matvec_data_l[l+1], 1.0, A_l[l+1], ones_l[l+1],
+                                 0.0, Aones_l[l+1], Aones_l[l+1]);
 
       /* Print Aones */
-      hypre_sprintf(filename, "ssamg_Aones.l%02d", 0);
+      hypre_sprintf(filename, "ssamg_Aones.l%02d", l+1);
 #ifdef DEBUG_WITH_GLVIS
-      HYPRE_SStructVectorPrintGLVis(Aones_l[0], filename);
+      HYPRE_SStructVectorPrintGLVis(Aones_l[l+1], filename);
 #else
-      HYPRE_SStructVectorPrint(filename, Aones_l[0], 0);
+      HYPRE_SStructVectorPrint(filename, Aones_l[l+1], 0);
 #endif
-
-      for (l = 0; l < (num_levels - 1); l++)
-      {
-         /* Print coarse grids */
-         hypre_sprintf(filename, "ssgrid.l%02d", l+1);
-#ifdef DEBUG_WITH_GLVIS
-         hypre_SStructGridPrintGLVis(grid_l[l+1], filename, NULL, NULL);
-#else
-         hypre_SStructGridPrint(grid_l[l+1], filename);
-#endif
-
-         /* Print part boundary data */
-         for (part = 0; part < nparts; part++)
-         {
-            pgrid = hypre_SStructGridPGrid(grid_l[l+1], part);
-
-            hypre_sprintf(filename, "pbnd_boxa.l%02d.p%02d", l+1, part);
-            hypre_BoxArrayArrayPrint(hypre_SStructGridComm(grid_l[l+1]),
-                                     filename,
-                                     hypre_SStructPGridPBndBoxArrayArray(pgrid, 0));
-         }
-
-         /* Print coarse matrices */
-         hypre_sprintf(filename, "ssamg_A.l%02d", l+1);
-         HYPRE_SStructMatrixPrint(filename, A_l[l+1], 0);
-
-         /* Print interpolation matrix */
-         hypre_sprintf(filename, "ssamg_P.l%02d", l);
-         HYPRE_SStructMatrixPrint(filename, P_l[l], 0);
-
-         /* compute Pones = P.1 */
-         HYPRE_SStructVectorCreate(comm, grid_l[l+1], &ones_l[l+1]);
-         HYPRE_SStructVectorInitialize(ones_l[l+1]);
-         HYPRE_SStructVectorSetConstantValues(ones_l[l+1], 1.0);
-         HYPRE_SStructVectorAssemble(ones_l[l+1]);
-         HYPRE_SStructVectorCreate(comm, grid_l[l], &Pones_l[l]);
-         HYPRE_SStructVectorInitialize(Pones_l[l]);
-         HYPRE_SStructVectorAssemble(Pones_l[l]);
-         hypre_SStructMatvecCompute(interp_data_l[l], 1.0, P_l[l], ones_l[l],
-                                    0.0, Pones_l[l], Pones_l[l]);
-
-         /* Print Pones */
-         hypre_sprintf(filename, "ssamg_Pones.l%02d", l);
-#ifdef DEBUG_WITH_GLVIS
-         HYPRE_SStructVectorPrintGLVis(Pones_l[l], filename);
-#else
-         HYPRE_SStructVectorPrint(filename, Pones_l[l], 0);
-#endif
-
-         /* compute Aones = A.1 */
-         HYPRE_SStructVectorCreate(comm, grid_l[l+1], &Aones_l[l+1]);
-         HYPRE_SStructVectorInitialize(Aones_l[l+1]);
-         HYPRE_SStructVectorAssemble(Aones_l[l+1]);
-         hypre_SStructMatvecCompute(matvec_data_l[l+1], 1.0, A_l[l+1], ones_l[l+1],
-                                    0.0, Aones_l[l+1], Aones_l[l+1]);
-
-         /* Print Aones */
-         hypre_sprintf(filename, "ssamg_Aones.l%02d", l+1);
-#ifdef DEBUG_WITH_GLVIS
-         HYPRE_SStructVectorPrintGLVis(Aones_l[l+1], filename);
-#else
-         HYPRE_SStructVectorPrint(filename, Aones_l[l+1], 0);
-#endif
-      }
-
-      HYPRE_SStructVectorDestroy(ones_l[0]);
-      HYPRE_SStructVectorDestroy(Aones_l[0]);
-      for (l = 0; l < (num_levels - 1); l++)
-      {
-         HYPRE_SStructVectorDestroy(ones_l[l+1]);
-         HYPRE_SStructVectorDestroy(Aones_l[l+1]);
-         HYPRE_SStructVectorDestroy(Pones_l[l]);
-      }
-      hypre_TFree(ones_l, HYPRE_MEMORY_HOST);
-      hypre_TFree(Pones_l, HYPRE_MEMORY_HOST);
-      hypre_TFree(Aones_l, HYPRE_MEMORY_HOST);
    }
 
-      /* Compute Frobenius norm of (A - A^T) */
-#ifdef DEBUG_SYMMETRY
-   HYPRE_IJMatrix         ij_A, ij_AT, ij_B;
-   HYPRE_Real             B_norm;
-
-   if (print_level > 1)
+   HYPRE_SStructVectorDestroy(ones_l[0]);
+   HYPRE_SStructVectorDestroy(Aones_l[0]);
+   for (l = 0; l < (num_levels - 1); l++)
    {
+      HYPRE_SStructVectorDestroy(ones_l[l+1]);
+      HYPRE_SStructVectorDestroy(Aones_l[l+1]);
+      HYPRE_SStructVectorDestroy(Pones_l[l]);
+   }
+   hypre_TFree(ones_l, HYPRE_MEMORY_HOST);
+   hypre_TFree(Pones_l, HYPRE_MEMORY_HOST);
+   hypre_TFree(Aones_l, HYPRE_MEMORY_HOST);
+
+   /* Compute Frobenius norm of (A - A^T) */
+#ifdef DEBUG_SYMMETRY
+   {
+      HYPRE_IJMatrix         ij_A, ij_AT, ij_B;
+      HYPRE_Real             B_norm;
+
       for (l = 0; l < num_levels; l++)
       {
          HYPRE_SStructMatrixToIJMatrix(A_l[l], &ij_A);
@@ -427,10 +421,9 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
          HYPRE_IJMatrixDestroy(ij_B);
       }
    }
-#endif
+#endif /* DEBUG_SYMMETRY */
 
 #ifdef DEBUG_MATMULT
-   if (print_level > 1)
    {
       HYPRE_IJMatrix       ij_A[2], ij_P;
       hypre_ParCSRMatrix  *par_A[2], *par_P, *par_AP, *par_RAP, *par_B;
@@ -459,16 +452,13 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
          }
 
          /* Print matrices */
-         if (print_level > 0)
-         {
-            hypre_sprintf(filename, "ssamg_ijP.l%02d", l);
-            if (!mypid) hypre_printf("Printing %s\n", filename);
-            HYPRE_IJMatrixPrint(ij_P, filename);
+         hypre_sprintf(filename, "ssamg_ijP.l%02d", l);
+         if (!mypid) hypre_printf("Printing %s\n", filename);
+         HYPRE_IJMatrixPrint(ij_P, filename);
 
-            hypre_sprintf(filename, "ssamg_ijRAPdiff.l%02d", l+1);
-            if (!mypid) hypre_printf("Printing %s\n", filename);
-            hypre_ParCSRMatrixPrintIJ(par_B, 0, 0, filename);
-         }
+         hypre_sprintf(filename, "ssamg_ijRAPdiff.l%02d", l+1);
+         if (!mypid) hypre_printf("Printing %s\n", filename);
+         hypre_ParCSRMatrixPrintIJ(par_B, 0, 0, filename);
 
          HYPRE_IJMatrixDestroy(ij_A[0]);
          ij_A[0]  = ij_A[1];
@@ -482,7 +472,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       HYPRE_IJMatrixDestroy(ij_A[0]);
    }
 #endif // ifdef (DEBUG_MATMULT)
-#endif // ifdef (HYPRE_DEBUG)
+#endif // ifdef (DEBUG_SETUP)
 
    HYPRE_ANNOTATE_FUNC_END;
 

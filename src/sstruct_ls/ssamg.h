@@ -8,14 +8,11 @@
 #ifndef hypre_SSAMG_HEADER
 #define hypre_SSAMG_HEADER
 
-#define DEBUG_LVL_TIMES 0
+//#define DEBUG_SETUP
+//#define DEBUG_SOLVE
 
 /*--------------------------------------------------------------------------
  * hypre_SSAMGData
- *
- * Notes:
- *        1) The value of active_l can vary across parts. We are not using it
- *           for load balance reasons.
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_SSAMGData_struct

@@ -14,6 +14,9 @@
 #ifndef hypre_PFMG_HEADER
 #define hypre_PFMG_HEADER
 
+//#define DEBUG_SETUP
+//#define DEBUG_SOLVE
+
 /*--------------------------------------------------------------------------
  * hypre_PFMGData:
  *--------------------------------------------------------------------------*/

@@ -398,7 +398,7 @@ hypre_SSAMGPrintLogging( void *ssamg_vdata )
 
    if (myid == 0)
    {
-      if ((print_level > 0) && (logging > 1))
+      if ((print_level > 1) && (logging > 0))
       {
          hypre_printf("Iters         ||r||_2   conv.rate  ||r||_2/||b||_2\n");
          hypre_printf("% 5d    %e    %f     %e\n", 0, norms[0], convr, rel_norms[0]);

@@ -531,6 +531,13 @@ HYPRE_SStructSplitSetPrintLevel( HYPRE_SStructSolver solver,
                                  HYPRE_Int           print_level );
 
 /**
+ * (Optional) Set the amount of logging to do.
+ **/
+HYPRE_Int
+HYPRE_SStructSplitSetLogging( HYPRE_SStructSolver solver,
+                              HYPRE_Int           logging );
+
+/**
  * (Optional) Use a zero initial guess.  This allows the solver to cut corners
  * in the case where a zero initial guess is needed (e.g., for preconditioning)
  * to reduce compuational cost.

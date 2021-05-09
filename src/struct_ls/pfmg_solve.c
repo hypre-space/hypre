@@ -41,7 +41,6 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    HYPRE_Int             num_pre_relax   = (pfmg_data -> num_pre_relax);
    HYPRE_Int             num_post_relax  = (pfmg_data -> num_post_relax);
    HYPRE_Int             num_levels      = (pfmg_data -> num_levels);
-   HYPRE_Int             print_level     = (pfmg_data -> print_level);
    hypre_StructMatrix  **A_l             = (pfmg_data -> A_l);
    hypre_StructMatrix  **P_l             = (pfmg_data -> P_l);
    hypre_StructMatrix  **RT_l            = (pfmg_data -> RT_l);
@@ -62,7 +61,10 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    HYPRE_Int             constant_coefficient;
    HYPRE_Real            b_dot_b = 0, eps = 0;
    HYPRE_Real            r_dot_r, e_dot_e, x_dot_x;
+
+#ifdef DEBUG_SOLVE
    char                  filename[255];
+#endif
 
    /*-----------------------------------------------------
     * Initialize some things and deal with special cases
@@ -191,15 +193,14 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          /* restrict fine grid residual */
          hypre_StructMatvecCompute(restrict_data_l[0], 1.0, RT_l[0], r_l[0], 0.0, b_l[1]);
 
-         if (print_level > 1)
-         {
-            hypre_sprintf(filename, "pfmg_xdown.%02d.%02d", i, 0);
-            hypre_StructVectorPrint(filename, x_l[0], 0);
-            hypre_sprintf(filename, "pfmg_rdown.%02d.%02d", i, 0);
-            hypre_StructVectorPrint(filename, r_l[0], 0);
-            hypre_sprintf(filename, "pfmg_b.%02d.%02d", i, 1);
-            hypre_StructVectorPrint(filename, b_l[1], 0);
-         }
+#ifdef DEBUG_SOLVE
+         hypre_sprintf(filename, "pfmg_xdown.i%02d.l%02d", i, 0);
+         hypre_StructVectorPrint(filename, x_l[0], 0);
+         hypre_sprintf(filename, "pfmg_rdown.i%02d.l%02d", i, 0);
+         hypre_StructVectorPrint(filename, r_l[0], 0);
+         hypre_sprintf(filename, "pfmg_b.i%02d.l%02d", i, 1);
+         hypre_StructVectorPrint(filename, b_l[1], 0);
+#endif
          HYPRE_ANNOTATE_MGLEVEL_END(0);
 
          for (l = 1; l <= (num_levels - 2); l++)
@@ -233,15 +234,15 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 
             /* restrict residual */
             hypre_StructMatvecCompute(restrict_data_l[l], 1.0, RT_l[l], r_l[l], 0.0, b_l[l+1]);
-            if (print_level > 1)
-            {
-               hypre_sprintf(filename, "pfmg_xdown.%02d.%02d", i, l);
-               hypre_StructVectorPrint(filename, x_l[l], 0);
-               hypre_sprintf(filename, "pfmg_rdown.%02d.%02d", i, l);
-               hypre_StructVectorPrint(filename, r_l[l], 0);
-               hypre_sprintf(filename, "pfmg_b.%02d.%02d", i, l+1);
-               hypre_StructVectorPrint(filename, b_l[l+1], 0);
-            }
+
+#ifdef DEBUG_SOLVE
+            hypre_sprintf(filename, "pfmg_xdown.i%02d.l%02d", i, l);
+            hypre_StructVectorPrint(filename, x_l[l], 0);
+            hypre_sprintf(filename, "pfmg_rdown.i%02d.l%02d", i, l);
+            hypre_StructVectorPrint(filename, r_l[l], 0);
+            hypre_sprintf(filename, "pfmg_b.i%02d.l%02d", i, l+1);
+            hypre_StructVectorPrint(filename, b_l[l+1], 0);
+#endif
             HYPRE_ANNOTATE_MGLEVEL_END(l);
          }
 
@@ -260,11 +261,10 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             hypre_StructVectorSetConstantValues(x_l[l], 0.0);
          }
 
-         if (print_level > 1)
-         {
-            hypre_sprintf(filename, "pfmg_xbottom.%02d.%02d", i, l);
-            hypre_StructVectorPrint(filename, x_l[l], 0);
-         }
+#ifdef DEBUG_SETUP
+         hypre_sprintf(filename, "pfmg_xbottom.i%02d.l%02d", i, l);
+         hypre_StructVectorPrint(filename, x_l[l], 0);
+#endif
 
          /*--------------------------------------------------
           * Up cycle
@@ -282,13 +282,12 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             hypre_StructAxpy(1.0, e_l[l], x_l[l]);
             HYPRE_ANNOTATE_MGLEVEL_END(l + 1);
 
-            if (print_level > 1)
-            {
-               hypre_sprintf(filename, "pfmg_eup.%02d.%02d", i, l);
-               hypre_StructVectorPrint(filename, e_l[l], 0);
-               hypre_sprintf(filename, "pfmg_xup.%02d.%02d", i, l);
-               hypre_StructVectorPrint(filename, x_l[l], 0);
-            }
+#ifdef DEBUG_SETUP
+            hypre_sprintf(filename, "pfmg_eup.i%02d.l%02d", i, l);
+            hypre_StructVectorPrint(filename, e_l[l], 0);
+            hypre_sprintf(filename, "pfmg_xup.i%02d.l%02d", i, l);
+            hypre_StructVectorPrint(filename, x_l[l], 0);
+#endif
 
             HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
             if (active_l[l])
@@ -310,13 +309,12 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          hypre_StructAxpy(1.0, e_l[0], x_l[0]);
          HYPRE_ANNOTATE_MGLEVEL_END(1);
 
-         if (print_level > 2)
-         {
-            hypre_sprintf(filename, "pfmg_eup.%02d.%02d", i, 0);
-            hypre_StructVectorPrint(filename, e_l[0], 0);
-            hypre_sprintf(filename, "pfmg_xup.%02d.%02d", i, 0);
-            hypre_StructVectorPrint(filename, x_l[0], 0);
-         }
+#ifdef DEBUG_SETUP
+         hypre_sprintf(filename, "pfmg_eup.i%02d.l%02d", i, 0);
+         hypre_StructVectorPrint(filename, e_l[0], 0);
+         hypre_sprintf(filename, "pfmg_xup.i%02d.l%02d", i, 0);
+         hypre_StructVectorPrint(filename, x_l[0], 0);
+#endif
          HYPRE_ANNOTATE_MGLEVEL_BEGIN(0);
       }
 

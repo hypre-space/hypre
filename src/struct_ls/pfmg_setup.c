@@ -45,7 +45,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Int             skip_relax        = (pfmg_data -> skip_relax);
    HYPRE_Real           *dxyz              = (pfmg_data -> dxyz);
    HYPRE_Int             max_iter          = (pfmg_data -> max_iter);
-   HYPRE_Int             print_level       = (pfmg_data -> print_level);
    HYPRE_Int             rap_type;
    HYPRE_Int             max_levels;
    HYPRE_Int             num_levels;
@@ -70,9 +69,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    hypre_StructVector  **tx_l;
    hypre_StructVector  **r_l;
    hypre_StructVector  **e_l;
-   hypre_StructVector   *ones  = NULL;
-   hypre_StructVector   *Pones = NULL;
-   char                  filename[255];
 
    void                **relax_data_l;
    void                **matvec_data_l;
@@ -382,16 +378,25 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       (pfmg_data -> rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter+1, HYPRE_MEMORY_HOST);
    }
 
-   if (print_level > 1)
+   HYPRE_ANNOTATE_FUNC_END;
+
+#ifdef DEBUG_SETUP
    {
+      hypre_StructVector   *ones  = NULL;
+      hypre_StructVector   *Pones = NULL;
+      char                  filename[255];
+
+      hypre_sprintf(filename, "pfmg_A.%02d", l);
+      hypre_StructMatrixPrint(filename, A_l[l], 0);
+
       for (l = 0; l < (num_levels - 1); l++)
       {
-         hypre_sprintf(filename, "pfmg_A.%02d", l);
+         hypre_sprintf(filename, "pfmg_A.l%02d", l);
          hypre_StructMatrixPrint(filename, A_l[l], 0);
-         hypre_sprintf(filename, "pfmg_P.%02d", l);
+         hypre_sprintf(filename, "pfmg_P.l%02d", l);
          hypre_StructMatrixPrint(filename, P_l[l], 0);
 
-         // Check if P interpolates vector of ones
+         /* Check if P interpolates vector of ones */
          HYPRE_StructVectorCreate(comm, hypre_StructMatrixGrid(A_l[l+1]), &ones);
          HYPRE_StructVectorInitialize(ones);
          HYPRE_StructVectorSetConstantValues(ones, 1.0);
@@ -401,22 +406,19 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          HYPRE_StructVectorInitialize(Pones);
          HYPRE_StructVectorAssemble(Pones);
 
-         /* interpolate (x = P e_c) */
+         /* interpolate (x = P*e_c) */
          hypre_StructMatvec(1.0, P_l[l], ones, 0.0, Pones);
 
-         hypre_sprintf(filename, "pfmg_ones.%02d", l);
+         hypre_sprintf(filename, "pfmg_ones.l%02d", l);
          HYPRE_StructVectorPrint(filename, ones, 0);
-         hypre_sprintf(filename, "pfmg_Pones.%02d", l);
+         hypre_sprintf(filename, "pfmg_Pones.l%02d", l);
          HYPRE_StructVectorPrint(filename, Pones, 0);
 
          HYPRE_StructVectorDestroy(ones);
          HYPRE_StructVectorDestroy(Pones);
       }
-      hypre_sprintf(filename, "pfmg_A.%02d", l);
-      hypre_StructMatrixPrint(filename, A_l[l], 0);
    }
-
-   HYPRE_ANNOTATE_FUNC_END;
+#endif
 
    return hypre_error_flag;
 }
