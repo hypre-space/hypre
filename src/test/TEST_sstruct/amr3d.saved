@@ -1,10 +1,10 @@
 # Output file: amr3d.out.0
 Iterations = 54
-Final Relative Residual Norm = 9.047832e-07
+Final Relative Residual Norm = 9.217627e-07
 
 # Output file: amr3d.out.1
 Iterations = 54
-Final Relative Residual Norm = 9.047832e-07
+Final Relative Residual Norm = 9.217627e-07
 
 # Output file: amr3d.out.2
 Iterations = 14

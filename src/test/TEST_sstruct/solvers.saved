@@ -84,59 +84,59 @@ Final Relative Residual Norm = 9.340817e-07
 
 # Output file: solvers.out.21
 Iterations = 16
-Final Relative Residual Norm = 8.722171e-07
+Final Relative Residual Norm = 5.860172e-07
 
 # Output file: solvers.out.22
 Iterations = 16
-Final Relative Residual Norm = 8.722171e-07
+Final Relative Residual Norm = 5.860172e-07
 
 # Output file: solvers.out.23
 Iterations = 6
-Final Relative Residual Norm = 1.203338e-07
+Final Relative Residual Norm = 7.996753e-07
 
 # Output file: solvers.out.24
 Iterations = 6
-Final Relative Residual Norm = 1.203338e-07
+Final Relative Residual Norm = 7.996753e-07
 
 # Output file: solvers.out.25
 Iterations = 28
-Final Relative Residual Norm = 7.443706e-07
+Final Relative Residual Norm = 8.715306e-07
 
 # Output file: solvers.out.26
 Iterations = 28
-Final Relative Residual Norm = 7.443706e-07
+Final Relative Residual Norm = 8.715306e-07
 
 # Output file: solvers.out.27
 Iterations = 16
-Final Relative Residual Norm = 5.640366e-07
+Final Relative Residual Norm = 4.601582e-07
 
 # Output file: solvers.out.28
 Iterations = 16
-Final Relative Residual Norm = 5.640366e-07
+Final Relative Residual Norm = 4.601582e-07
 
 # Output file: solvers.out.29
 Iterations = 11
-Final Relative Residual Norm = 4.642244e-07
+Final Relative Residual Norm = 3.831373e-07
 
 # Output file: solvers.out.30
 Iterations = 11
-Final Relative Residual Norm = 4.642244e-07
+Final Relative Residual Norm = 3.831373e-07
 
 # Output file: solvers.out.31
-Iterations = 109
-Final Relative Residual Norm = 9.397548e-07
+Iterations = 107
+Final Relative Residual Norm = 9.516165e-07
 
 # Output file: solvers.out.32
-Iterations = 109
-Final Relative Residual Norm = 9.397548e-07
+Iterations = 107
+Final Relative Residual Norm = 9.516165e-07
 
 # Output file: solvers.out.33
 Iterations = 57
-Final Relative Residual Norm = 8.858421e-07
+Final Relative Residual Norm = 9.256704e-07
 
 # Output file: solvers.out.34
 Iterations = 57
-Final Relative Residual Norm = 8.858421e-07
+Final Relative Residual Norm = 9.256704e-07
 
 # Output file: solvers.out.121
 Iterations = 8

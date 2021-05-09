@@ -109,7 +109,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
       eps = tol*tol;
 
       /* if rhs is zero, return a zero solution */
-      if (b_dot_b == 0.0)
+      if (!(b_dot_b > 0.0))
       {
          hypre_StructVectorSetConstantValues(x, 0.0);
          if (logging > 0)

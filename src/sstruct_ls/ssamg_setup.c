@@ -250,8 +250,8 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    if ((ssamg_data -> logging) > 0)
    {
       max_iter = (ssamg_data -> max_iter);
-      (ssamg_data -> norms)     = hypre_TAlloc(HYPRE_Real, max_iter + 1, HYPRE_MEMORY_HOST);
-      (ssamg_data -> rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter + 1, HYPRE_MEMORY_HOST);
+      (ssamg_data -> norms)     = hypre_CTAlloc(HYPRE_Real, max_iter + 1, HYPRE_MEMORY_HOST);
+      (ssamg_data -> rel_norms) = hypre_CTAlloc(HYPRE_Real, max_iter + 1, HYPRE_MEMORY_HOST);
    }
 
    /* Print statistics */
