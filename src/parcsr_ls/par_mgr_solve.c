@@ -759,30 +759,33 @@ hypre_MGRCycle( void               *mgr_vdata,
             {
                hypre_MGRFrelaxVcycle(FrelaxVcycleData[level], F_array[level], U_array[level]);
                
-               old_resnorm = resnorm;
-               hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A_array[level],
-                                                U_array[level], 1.0, F_array[level], Vtemp);
-               resnorm = hypre_ParVectorInnerProd(Vtemp, Vtemp);                                
-
-               if (old_resnorm) conv_factor = resnorm / old_resnorm;
-               else conv_factor = resnorm;               
-
-                if (rhs_norm > HYPRE_REAL_EPSILON)
-                {
-                   rel_resnorm = resnorm / rhs_norm;
-                }
-                else
-                {
-                   rel_resnorm = resnorm;
-                }    
-
-               if (my_id == 0 && frelax_print_level > 1)
+               if(frelax_print_level > 1)
                {
-                   hypre_printf("\n    V-Cycle %2d   %e    %f     %e \n", i,
-                   resnorm, conv_factor, rel_resnorm);
+                  old_resnorm = resnorm;
+                  hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A_array[level],
+                                                   U_array[level], 1.0, F_array[level], Vtemp);
+                  resnorm = hypre_ParVectorInnerProd(Vtemp, Vtemp);                                
+
+                  if (old_resnorm) conv_factor = resnorm / old_resnorm;
+                  else conv_factor = resnorm;               
+                
+                  if (rhs_norm > HYPRE_REAL_EPSILON)
+                  {
+                     rel_resnorm = resnorm / rhs_norm;
+                  }
+                  else
+                  {
+                     rel_resnorm = resnorm;
+                  }   
+
+                  if (my_id == 0 )
+                  {
+                      hypre_printf("\n    V-Cycle %2d   %e    %f     %e \n", i,
+                      resnorm, conv_factor, rel_resnorm);
+                  }
                }
             }
-            if (my_id == 0 && frelax_print_level > 1)       
+            if (my_id == 0 && frelax_print_level > 1)
             {     
                 hypre_printf("End F-relaxation: V-Cycle Smoother \n\n");
             }
