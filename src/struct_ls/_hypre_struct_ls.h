@@ -479,7 +479,7 @@ HYPRE_Int hypre_SMGGetLogging ( void *smg_vdata , HYPRE_Int *logging );
 HYPRE_Int hypre_SMGSetPrintLevel ( void *smg_vdata , HYPRE_Int print_level );
 HYPRE_Int hypre_SMGGetPrintLevel ( void *smg_vdata , HYPRE_Int *print_level );
 HYPRE_Int hypre_SMGGetNumIterations ( void *smg_vdata , HYPRE_Int *num_iterations );
-HYPRE_Int hypre_SMGPrintLogging ( void *smg_vdata , HYPRE_Int myid );
+HYPRE_Int hypre_SMGPrintLogging ( void *smg_vdata );
 HYPRE_Int hypre_SMGGetFinalRelativeResidualNorm ( void *smg_vdata , HYPRE_Real *relative_residual_norm );
 HYPRE_Int hypre_SMGSetStructVectorConstantValues ( hypre_StructVector *vector , HYPRE_Real values , hypre_BoxArray *box_array , hypre_Index stride );
 
@@ -549,4 +549,3 @@ HYPRE_Int hypre_SMGSolve ( void *smg_vdata , hypre_StructMatrix *A , hypre_Struc
 #endif
 
 #endif
-

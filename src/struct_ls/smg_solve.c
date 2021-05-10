@@ -49,7 +49,7 @@ hypre_SMGSolve( void               *smg_vdata,
                 hypre_StructVector *x         )
 {
 
-   hypre_SMGData        *smg_data = (hypre_SMGData        *)smg_vdata;
+   hypre_SMGData        *smg_data = (hypre_SMGData *) smg_vdata;
 
    HYPRE_Real            tol             = (smg_data -> tol);
    HYPRE_Int             max_iter        = (smg_data -> max_iter);
@@ -172,9 +172,13 @@ hypre_SMGSolve( void               *smg_vdata,
          {
             norms[i] = sqrt(r_dot_r);
             if (b_dot_b > 0)
+            {
                rel_norms[i] = sqrt(r_dot_r/b_dot_b);
+            }
             else
+            {
                rel_norms[i] = 0.0;
+            }
          }
 
          /* always do at least 1 V-cycle */
@@ -318,6 +322,7 @@ hypre_SMGSolve( void               *smg_vdata,
    }
 
    hypre_EndTiming(smg_data -> time_index);
+   hypre_SMGPrintLogging(smg_vdata);
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;

@@ -396,29 +396,40 @@ hypre_SMGGetNumIterations( void *smg_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SMGPrintLogging( void *smg_vdata,
-                       HYPRE_Int   myid)
+hypre_SMGPrintLogging( void *smg_vdata )
 {
-   hypre_SMGData *smg_data = (hypre_SMGData *)smg_vdata;
-   HYPRE_Int    i;
-   HYPRE_Int    num_iterations  = (smg_data -> num_iterations);
-   HYPRE_Int    logging   = (smg_data -> logging);
-   HYPRE_Int    print_level  = (smg_data -> print_level);
-   HYPRE_Real  *norms     = (smg_data -> norms);
-   HYPRE_Real  *rel_norms = (smg_data -> rel_norms);
+   hypre_SMGData *smg_data       = (hypre_SMGData *) smg_vdata;
+   MPI_Comm       comm           = (smg_data -> comm);
+   HYPRE_Int      num_iterations = (smg_data -> num_iterations);
+   HYPRE_Int      max_iter       = (smg_data -> max_iter);
+   HYPRE_Int      logging        = (smg_data -> logging);
+   HYPRE_Int      print_level    = (smg_data -> print_level);
+   HYPRE_Real    *norms          = (smg_data -> norms);
+   HYPRE_Real    *rel_norms      = (smg_data -> rel_norms);
 
+   HYPRE_Int      myid, i;
+   HYPRE_Real     convr = 1.0;
+   HYPRE_Real     avg_convr;
 
-   if (myid == 0)
+   hypre_MPI_Comm_rank(comm, &myid);
+
+   if ((myid == 0) && (logging > 0) && (print_level > 0))
    {
-      if (print_level > 0)
+      hypre_printf("Iters         ||r||_2   conv.rate  ||r||_2/||b||_2\n");
+      hypre_printf("% 5d    %e    %f     %e\n", 0, norms[0], convr, rel_norms[0]);
+      for (i = 1; i <= num_iterations; i++)
       {
-         if (logging > 0)
+         convr = norms[i] / norms[i-1];
+         hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);
+      }
+
+      if (max_iter > 1)
+      {
+         if (rel_norms[0] > 0.)
          {
-            for (i = 0; i < num_iterations; i++)
-            {
-               hypre_printf("Residual norm[%d] = %e   ",i,norms[i]);
-               hypre_printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
-            }
+            avg_convr = pow((rel_norms[num_iterations]/rel_norms[0]),
+                            (1.0/(HYPRE_Real) num_iterations));
+            hypre_printf("\nAverage convergence factor = %f\n", avg_convr);
          }
       }
    }
