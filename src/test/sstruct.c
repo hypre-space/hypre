@@ -2115,6 +2115,8 @@ DestroyData( ProblemData   data )
    hypre_TFree(data.dist_pools, HYPRE_MEMORY_HOST);
    hypre_TFree(data.dist_npools, HYPRE_MEMORY_HOST);
 
+   hypre_TFree(data.numghost, HYPRE_MEMORY_HOST);
+
    return 0;
 }
 
