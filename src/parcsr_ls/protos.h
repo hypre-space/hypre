@@ -102,6 +102,7 @@ HYPRE_Int hypre_AMGHybridSetLevelOuterWt ( void *AMGhybrid_vdata , HYPRE_Real ou
 HYPRE_Int hypre_AMGHybridSetNumPaths ( void *AMGhybrid_vdata , HYPRE_Int num_paths );
 HYPRE_Int hypre_AMGHybridSetDofFunc ( void *AMGhybrid_vdata , HYPRE_Int *dof_func );
 HYPRE_Int hypre_AMGHybridSetAggNumLevels ( void *AMGhybrid_vdata , HYPRE_Int agg_num_levels );
+HYPRE_Int hypre_AMGHybridSetAggInterpType ( void *AMGhybrid_vdata , HYPRE_Int agg_interp_type );
 HYPRE_Int hypre_AMGHybridSetNumFunctions ( void *AMGhybrid_vdata , HYPRE_Int num_functions );
 HYPRE_Int hypre_AMGHybridSetNodal ( void *AMGhybrid_vdata , HYPRE_Int nodal );
 HYPRE_Int hypre_AMGHybridGetSetupSolveTime( void *AMGhybrid_vdata, HYPRE_Real *time );

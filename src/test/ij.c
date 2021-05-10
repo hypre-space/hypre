@@ -3309,6 +3309,7 @@ main( hypre_int argc,
 
       if (relax_type > -1) HYPRE_ParCSRHybridSetRelaxType(amg_solver, relax_type);
       HYPRE_ParCSRHybridSetAggNumLevels(amg_solver, agg_num_levels);
+      HYPRE_ParCSRHybridSetAggInterpType(amg_solver, agg_interp_type);
       HYPRE_ParCSRHybridSetNumPaths(amg_solver, num_paths);
       HYPRE_ParCSRHybridSetNumFunctions(amg_solver, num_functions);
       HYPRE_ParCSRHybridSetNodal(amg_solver, nodal);
