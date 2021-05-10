@@ -880,7 +880,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       cxyz_max = 1.0;
    }
 
-   /* Set dxyz values that are scaled appropriately the coarsening routine */
+   /* Set dxyz values that are scaled appropriately for the coarsening routine */
    for (d = 0; d < 3; d++)
    {
       HYPRE_Real  max_anisotropy = HYPRE_REAL_MAX/1000;
