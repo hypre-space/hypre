@@ -396,34 +396,28 @@ hypre_SSAMGPrintLogging( void *ssamg_vdata )
 
    hypre_MPI_Comm_rank(comm, &myid);
 
-   if (myid == 0)
+   if ((myid == 0) && (print_level > 1) && (logging > 0))
    {
-      if ((print_level > 1) && (logging > 0))
+      hypre_printf("Iters         ||r||_2   conv.rate  ||r||_2/||b||_2\n");
+      hypre_printf("% 5d    %e    %f     %e\n", 0, norms[0], convr, rel_norms[0]);
+      for (i = print_freq; i < num_iterations; i = (i + print_freq))
       {
-         hypre_printf("Iters         ||r||_2   conv.rate  ||r||_2/||b||_2\n");
-         hypre_printf("% 5d    %e    %f     %e\n", 0, norms[0], convr, rel_norms[0]);
-         for (i = print_freq; i < num_iterations; i = (i + print_freq))
-         {
-            convr = norms[i] / norms[i-1];
-            hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);
-         }
-
-         if ((i != num_iterations - 1) && (num_iterations > 0))
-         {
-            i = num_iterations;
-            convr = norms[i] / norms[i-1];
-            hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);
-         }
+         convr = norms[i] / norms[i-1];
+         hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);
       }
 
-      if ((print_level > 1) && (max_iter > 1))
+      if ((i != num_iterations - 1) && (num_iterations > 0))
       {
-         if (rel_norms[0] > 0.)
-         {
-            avg_convr = pow((rel_norms[num_iterations]/rel_norms[0]),
-                            (1.0/(HYPRE_Real) num_iterations));
-            hypre_printf("\nAverage convergence factor = %f\n", avg_convr);
-         }
+         i = num_iterations;
+         convr = norms[i] / norms[i-1];
+         hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);
+      }
+
+      if ((max_iter > 1) && (rel_norms[0] > 0.))
+      {
+         avg_convr = pow((rel_norms[num_iterations]/rel_norms[0]),
+                         (1.0/(HYPRE_Real) num_iterations));
+         hypre_printf("\nAverage convergence factor = %f\n", avg_convr);
       }
    }
 

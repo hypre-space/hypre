@@ -344,7 +344,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    }
 
    hypre_EndTiming(pfmg_data -> time_index);
-   hypre_PFMGPrintLogging(pfmg_data);
+   hypre_PFMGPrintLogging((void *) pfmg_data);
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;

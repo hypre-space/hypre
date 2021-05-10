@@ -323,9 +323,9 @@ hypre_SysPFMGPrintLogging( void *sys_pfmg_vdata )
    hypre_SysPFMGData *sys_pfmg_data  = (hypre_SysPFMGData *)sys_pfmg_vdata;
    MPI_Comm           comm           = (sys_pfmg_data -> comm);
    HYPRE_Int          num_iterations = (sys_pfmg_data -> num_iterations);
+   HYPRE_Int          max_iter       = (sys_pfmg_data -> max_iter);
    HYPRE_Int          logging        = (sys_pfmg_data -> logging);
    HYPRE_Int          print_level    = (sys_pfmg_data -> print_level);
-   HYPRE_Int          print_freq     = (sys_pfmg_data -> print_freq);
    HYPRE_Real        *norms          = (sys_pfmg_data -> norms);
    HYPRE_Real        *rel_norms      = (sys_pfmg_data -> rel_norms);
    HYPRE_Int          myid, i;
@@ -334,31 +334,24 @@ hypre_SysPFMGPrintLogging( void *sys_pfmg_vdata )
 
    hypre_MPI_Comm_rank(comm, &myid);
 
-   if (myid == 0)
+   if ((myid == 0) && (logging > 0) && (print_level > 0))
    {
-      if ((print_level > 0) && (logging > 1))
+      hypre_printf("Iters         ||r||_2   conv.rate  ||r||_2/||b||_2\n");
+      hypre_printf("% 5d    %e    %f     %e\n", 0, norms[0], convr, rel_norms[0]);
+      for (i = 1; i <= num_iterations; i++)
       {
-         hypre_printf("Iters         ||r||_2   conv.rate  ||r||_2/||b||_2\n");
-         hypre_printf("% 5d    %e    %f     %e\n", 0, norms[0], convr, rel_norms[0]);
-         for (i = print_freq; i < num_iterations; i = (i + print_freq))
-         {
-            convr = norms[i] / norms[i-1];
-            hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);
-         }
-
-         if ((i != num_iterations - 1) && (num_iterations > 0))
-         {
-            i = num_iterations;
-            convr = norms[i] / norms[i-1];
-            hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);
-         }
+         convr = norms[i] / norms[i-1];
+         hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);
       }
 
-      if ((print_level > 1) && (rel_norms[0] > 0.))
+      if (max_iter > 1)
       {
-         avg_convr = pow((rel_norms[num_iterations]/rel_norms[0]),
-                         (1.0/(HYPRE_Real) num_iterations));
-         hypre_printf("\nAverage convergence factor = %f\n", avg_convr);
+         if (rel_norms[0] > 0.)
+         {
+            avg_convr = pow((rel_norms[num_iterations]/rel_norms[0]),
+                            (1.0/(HYPRE_Real) num_iterations));
+            hypre_printf("\nAverage convergence factor = %f\n", avg_convr);
+         }
       }
    }
 

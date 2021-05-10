@@ -523,20 +523,17 @@ hypre_PFMGPrintLogging( void *pfmg_vdata )
 
    hypre_MPI_Comm_rank(comm, &myid);
 
-   if (myid == 0)
+   if ((myid == 0) && (logging > 0) && (print_level > 0))
    {
-      if ((print_level > 0) && (logging > 0))
+      hypre_printf("Iters         ||r||_2   conv.rate  ||r||_2/||b||_2\n");
+      hypre_printf("% 5d    %e    %f     %e\n", 0, norms[0], convr, rel_norms[0]);
+      for (i = 1; i <= num_iterations; i++)
       {
-         hypre_printf("Iters         ||r||_2   conv.rate  ||r||_2/||b||_2\n");
-         hypre_printf("% 5d    %e    %f     %e\n", 0, norms[0], convr, rel_norms[0]);
-         for (i = 1; i <= num_iterations; i++)
-         {
-            convr = norms[i] / norms[i-1];
-            hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);
-         }
+         convr = norms[i] / norms[i-1];
+         hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);
       }
 
-      if ((print_level > 1) && (max_iter > 1))
+      if (max_iter > 1)
       {
          if (rel_norms[0] > 0.)
          {

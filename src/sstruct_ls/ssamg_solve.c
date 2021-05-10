@@ -334,7 +334,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
    /* hypre_SStructVectorDestroy(x_l[0]); */
 
    hypre_EndTiming(ssamg_data -> time_index);
-   hypre_SSAMGPrintLogging(ssamg_data);
+   hypre_SSAMGPrintLogging((void *) ssamg_data);
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
