@@ -463,6 +463,7 @@ HYPRE_Int HYPRE_SStructSplitSetZeroGuess ( HYPRE_SStructSolver solver );
 HYPRE_Int HYPRE_SStructSplitSetNonZeroGuess ( HYPRE_SStructSolver solver );
 HYPRE_Int HYPRE_SStructSplitSetStructSolver ( HYPRE_SStructSolver solver , HYPRE_Int ssolver );
 HYPRE_Int HYPRE_SStructSplitGetNumIterations ( HYPRE_SStructSolver solver , HYPRE_Int *num_iterations );
+HYPRE_Int HYPRE_SStructSplitPrintLogging( HYPRE_SStructSolver  solver );
 HYPRE_Int HYPRE_SStructSplitGetFinalRelativeResidualNorm ( HYPRE_SStructSolver solver , HYPRE_Real *norm );
 
 /* HYPRE_sstruct_ssamg.c */
