@@ -218,7 +218,10 @@ HYPRE_SStructSysPFMGSetLogging(HYPRE_SStructSolver solver,
                                HYPRE_Int           logging);
 
 /**
- * (Optional) Set the amount of printing to do to the screen.
+ * (Optional) Control how much information is printed.
+ *
+ *    - 0 : no printout (default)
+ *    - 1 : print convergence history
  **/
 HYPRE_Int
 HYPRE_SStructSysPFMGSetPrintLevel(HYPRE_SStructSolver solver,
@@ -430,7 +433,11 @@ HYPRE_SStructSSAMGSetLogging(HYPRE_SStructSolver solver,
                              HYPRE_Int           logging);
 
 /**
- * (Optional) Set the amount of printing to do to the screen.
+ * (Optional) Control how much information is printed.
+ *
+ *    - 0 : no printout (default)
+ *    - 1 : print setup info
+ *    - 2 : print convergence history
  **/
 HYPRE_Int
 HYPRE_SStructSSAMGSetPrintLevel(HYPRE_SStructSolver solver,
@@ -524,7 +531,10 @@ HYPRE_SStructSplitSetMaxIter(HYPRE_SStructSolver solver,
                              HYPRE_Int           max_iter);
 
 /**
- * (Optional) Set print level
+ * (Optional) Control how much information is printed.
+ *
+ *    - 0 : no printout (default)
+ *    - 1 : print convergence history
  **/
 HYPRE_Int
 HYPRE_SStructSplitSetPrintLevel( HYPRE_SStructSolver solver,
