@@ -70,12 +70,14 @@ option(HYPRE_TIMING                  "Use HYPRE timing routines" OFF)
 option(HYPRE_BUILD_EXAMPLES          "Build examples" OFF)
 option(HYPRE_BUILD_TESTS             "Build tests" OFF)
 option(HYPRE_USING_HOST_MEMORY       "Use host memory" ON)
+set(HYPRE_WITH_EXTRA_CFLAGS       "" CACHE STRING "Define extra C compile flags")
+set(HYPRE_WITH_EXTRA_CXXFLAGS     "" CACHE STRING "Define extra CXX compile flags")
 # CUDA options
 option(HYPRE_WITH_CUDA               "Use CUDA. Require cuda-8.0 or higher" OFF)
 option(HYPRE_ENABLE_UNIFIED_MEMORY   "Use unified memory for allocating the memory" OFF)
 option(HYPRE_ENABLE_CUDA_STREAMS     "Use CUDA streams" ON)
 option(HYPRE_ENABLE_CUSPARSE         "Use cuSPARSE" ON)
-option(HYPRE_ENABLE_CUB              "Use CUB Allocator" OFF) # TODO: Add this cmake feature
+option(HYPRE_ENABLE_CUB              "Use CUB Allocator" OFF)
 option(HYPRE_ENABLE_CUBLAS           "Use cuBLAS" OFF)
 option(HYPRE_ENABLE_CURAND           "Use cuRAND" ON)
 option(HYPRE_ENABLE_GPU_PROFILING    "Use NVTX on CUDA" OFF)
@@ -184,6 +186,12 @@ if (HYPRE_WITH_CUDA)
     set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER})
   endif ()
 
+  # Add any extra CXX compiler flags HYPRE_WITH_EXTRA_CXXFLAGS
+  if (NOT HYPRE_WITH_EXTRA_CXXFLAGS STREQUAL "")
+    string(REPLACE " " ";" HYPRE_WITH_EXTRA_CXXFLAGS "${HYPRE_WITH_EXTRA_CXXFLAGS}")
+    add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:${HYPRE_WITH_EXTRA_CXXFLAGS}>")
+  endif ()
+
   # Check if CUDA is available, then enable it
   include(CheckLanguage)
   check_language(CUDA)
@@ -196,7 +204,7 @@ if (HYPRE_WITH_CUDA)
       set(CMAKE_CUDA_STANDARD 11)
     endif ()
 
-    set(CMAKE_CUDA_STANDARD_REQUIRED TRUE)
+    set(CMAKE_CUDA_STANDARD_REQUIRED ON CACHE BOOL "" FORCE)
 
     set(HYPRE_USING_CUDA ON CACHE BOOL "" FORCE)
     set(HYPRE_USING_GPU ON CACHE BOOL "" FORCE)
@@ -228,25 +236,28 @@ if (HYPRE_WITH_CUDA)
       set(HYPRE_USING_CUDA_STREAMS ON CACHE BOOL "" FORCE)
     endif (HYPRE_ENABLE_CUDA_STREAMS)
 
-    # FIXME Add this feature
-    #if (HYPRE_ENABLE_CUB)
-    #  set(HYPRE_USING_CUB ON CACHE BOOL "" FORCE)
-    #endif (HYPRE_ENABLE_CUB)
+    if (HYPRE_ENABLE_CUB)
+      set(HYPRE_USING_CUB_ALLOCATOR ON CACHE BOOL "" FORCE)
+    endif (HYPRE_ENABLE_CUB)
 
     set(CMAKE_CUDA_FLAGS "${CUDA_FLAGS} ${CMAKE_CUDA_FLAGS}" CACHE STRING
          "CUDA flags set for HYPRE" FORCE)
-    #list(REMOVE_DUPLICATES ${CMAKE_CUDA_FLAGS})
-    message("CMAKE_CUDA_FLAGS ${CMAKE_CUDA_FLAGS}")
+
     # TODO Eventually should require cmake>=3.17
     # and use cmake's FindCUDAToolkit. Now collect
     # CUDA optional libraries.
     include(HYPRE_SetupCUDAToolkit)
-
   else ()
     message(WARNING "No CUDA support!")
     set(HYPRE_USING_HOST_MEMORY ON CACHE BOOL "" FORCE)
   endif (CMAKE_CUDA_COMPILER)
 endif (HYPRE_WITH_CUDA)
+
+# Add any extra C compiler flags HYPRE_WITH_EXTRA_CFLAGS
+if (NOT HYPRE_WITH_EXTRA_CFLAGS STREQUAL "")
+  string(REPLACE " " ";" HYPRE_WITH_EXTRA_CFLAGS "${HYPRE_WITH_EXTRA_CFLAGS}")
+  add_compile_options("$<$<COMPILE_LANGUAGE:C>:${HYPRE_WITH_EXTRA_CFLAGS}>")
+endif ()
 
 # Create the HYPRE library object
 add_library(${PROJECT_NAME})
@@ -285,7 +296,7 @@ if (HYPRE_USING_HYPRE_LAPACK)
 else ()
   # Use TPL_LAPACK_LIBRARIES if set.
   if (TPL_LAPACK_LIBRARIES)
-    message(STATUS "Using TPL_LAPACK_LIBRARIES='${TPL_BLAS_LIBRARIES}'")
+    message(STATUS "Using TPL_LAPACK_LIBRARIES='${TPL_LAPACK_LIBRARIES}'")
     target_link_libraries(${PROJECT_NAME} PUBLIC "${TPL_LAPACK_LIBRARIES}")
   else ()
     # Find system lapack
@@ -313,7 +324,7 @@ if (HYPRE_USING_DSUPERLU)
   message(STATUS "Enabled support for using DSUPERLU.")
   set(DSUPERLU_FOUND TRUE)
   target_link_libraries(${PROJECT_NAME} PUBLIC ${TPL_DSUPERLU_LIBRARIES} stdc++)
-  target_include_directories(${TPL_DSUPERLU_INCLUDE_DIRS})
+  target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_DSUPERLU_INCLUDE_DIRS})
 endif (HYPRE_USING_DSUPERLU)
 
 if (DSUPERLU_FOUND)
@@ -322,6 +333,7 @@ endif ()
 
 if (HYPRE_USING_CUDA)
   target_link_libraries(${PROJECT_NAME} PUBLIC "${EXPORT_INTERFACE_CUDA_LIBS}")
+  target_include_directories(${PROJECT_NAME} PUBLIC "${EXPORT_INTERFACE_CUDA_INCLUDES}")
   if (HYPRE_HAVE_MPI)
     target_include_directories(${PROJECT_NAME} PUBLIC
       ${MPI_CXX_INCLUDE_DIRS})
@@ -421,7 +433,7 @@ install(TARGETS ${PROJECT_NAME}
 install(FILES ${HYPRE_HEADERS} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
 include(CMakePackageConfigHelpers)
-write_basic_package_version_file (
+write_basic_package_version_file(
   HYPREConfigVersion.cmake
   VERSION ${PACKAGE_VERSION}
   COMPATIBILITY SameMajorVersion
