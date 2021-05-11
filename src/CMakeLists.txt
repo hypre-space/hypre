@@ -62,7 +62,7 @@ option(HYPRE_ENABLE_PERSISTENT_COMM  "Use persistent communication" OFF)
 option(HYPRE_ENABLE_FEI              "Use FEI" OFF) # TODO: Add this cmake feature
 option(HYPRE_WITH_MPI                "Compile with MPI" ON)
 option(HYPRE_WITH_OPENMP             "Use OpenMP" OFF)
-option(HYPRE_WITH_HOPSCOTCH          "Use hopscotch hashing with OpenMP" OFF)
+option(HYPRE_ENABLE_HOPSCOTCH        "Use hopscotch hashing with OpenMP" OFF)
 option(HYPRE_WITH_DSUPERLU           "Use TPL SuperLU_Dist" OFF)
 option(HYPRE_WITH_CALIPER            "Use Caliper" OFF)  # TODO: Finish this cmake feature
 option(HYPRE_PRINT_ERRORS            "Print HYPRE errors" OFF)
@@ -140,7 +140,7 @@ if (HYPRE_WITH_OPENMP)
   set(HYPRE_USING_OPENMP ON CACHE BOOL "" FORCE)
 endif ()
 
-if (HYPRE_WITH_HOPSCOTCH)
+if (HYPRE_ENABLE_HOPSCOTCH)
   set(HYPRE_HOPSCOTCH ON CACHE BOOL "" FORCE)
 endif ()
 

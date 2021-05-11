@@ -99,6 +99,23 @@ co="--with-device-openmp --enable-debug --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsup
 #./test.sh basic.sh $src_dir -co: $co -mo: $mo
 #./renametest.sh basic $output_dir/basic-cuda-um-without-MPI
 
+# CUDA + CMake build (only) tests
+mo="-j"
+# CUDA with UM + CMake
+co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_CUDA_COMPILER=$(which nvcc) -DMPI_C_COMPILER=$(which mpicc) -DMPI_CXX_COMPILER=$(which mpicxx) -DHYPRE_WITH_CUDA=ON -DHYPRE_ENABLE_UNIFIED_MEMORY=ON -DCMAKE_BUILD_TYPE=Debug -DHYPRE_ENABLE_PERSISTENT_COMM=ON -DHYPRE_ENABLE_CUB=ON -DHYPRE_WITH_EXTRA_CFLAGS="\'"-qmaxmem=-1 -qsuppress=1500-029"\'" -DHYPRE_WITH_EXTRA_CXXFLAGS="\'"-qmaxmem=-1 -qsuppress=1500-029"\'" -DHYPRE_CUDA_SM=70"
+./test.sh cmake.sh $src_dir -co: $co -mo: $mo
+./renametest.sh cmake $output_dir/cmake-cuda-um-ij
+
+# CUDA with UM [shared library] + CMake
+co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_CUDA_COMPILER=$(which nvcc) -DMPI_C_COMPILER=$(which mpicc) -DMPI_CXX_COMPILER=$(which mpicxx) -DHYPRE_WITH_CUDA=ON -DHYPRE_ENABLE_UNIFIED_MEMORY=ON -DCMAKE_BUILD_TYPE=Debug -DHYPRE_WITH_OPENMP=ON -DHYPRE_ENABLE_HOPSCOTCH=ON -DHYPRE_ENABLE_SHARED=ON -DHYPRE_WITH_EXTRA_CFLAGS="\'"-qmaxmem=-1 -qsuppress=1500-029"\'" -DHYPRE_WITH_EXTRA_CXXFLAGS="\'"-qmaxmem=-1 -qsuppress=1500-029 "\'" -DHYPRE_CUDA_SM=70"
+./test.sh cmake.sh $src_dir -co: $co -mo: $mo
+./renametest.sh cmake $output_dir/cmake-cuda-um-shared
+
+# CUDA w.o UM + CMake
+co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_CUDA_COMPILER=$(which nvcc) -DMPI_C_COMPILER=$(which mpicc) -DMPI_CXX_COMPILER=$(which mpicxx) -DHYPRE_WITH_CUDA=ON -DCMAKE_BUILD_TYPE=Debug -DHYPRE_WITH_EXTRA_CFLAGS="\'"-qmaxmem=-1 -qsuppress=1500-029"\'" -DHYPRE_WITH_EXTRA_CXXFLAGS="\'"-qmaxmem=-1 -qsuppress=1500-029"\'" -DHYPRE_CUDA_SM=70"
+./test.sh cmake.sh $src_dir -co: $co -mo: $mo
+./renametest.sh cmake $output_dir/cmake-cuda-nonum-struct
+
 # Echo to stderr all nonempty error files in $output_dir
 for errfile in $( find $output_dir ! -size 0 -name "*.err" )
 do
