@@ -4801,6 +4801,22 @@ done
    fi
 fi
 
+if test "x$hypre_using_cuda" = "xyes" && test "x$hypre_using_device_openmp" = "xyes"
+then
+   as_fn_error $? "--with-cuda and --with-device-openmp are mutually exclusive" "$LINENO" 5
+fi
+
+if test "x$hypre_using_cuda" = "xyes" && test "x$hypre_using_hip" = "xyes"
+then
+   as_fn_error $? "--with-cuda and --with-hip are mutually exclusive" "$LINENO" 5
+fi
+
+if test "x$hypre_using_hip" = "xyes" && test "x$hypre_using_device_openmp" = "xyes"
+then
+   as_fn_error $? "--with-hip and --with-device-openmp are mutually exclusive" "$LINENO" 5
+fi
+
+
 if test "$hypre_user_chose_cudacompilers" = "no"
 then
    if test "$hypre_using_device_openmp" = "yes"
