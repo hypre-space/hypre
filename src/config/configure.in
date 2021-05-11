@@ -120,9 +120,10 @@ dnl *********************************************************************
 hypre_user_chose_mpi=no
 hypre_user_chose_blas=no
 hypre_user_chose_lapack=no
-hypre_user_chose_cuda=no
 hypre_user_chose_raja=no
+hypre_using_raja=no
 hypre_user_chose_kokkos=no
+hypre_using_kokkos=no
 
 hypre_using_c=yes
 hypre_using_cxx=yes
@@ -141,6 +142,7 @@ hypre_using_openmp=no
 hypre_using_device_openmp=no
 hypre_using_insure=no
 hypre_using_cuda=no
+dnl hypre_user_chose_cuda=no
 hypre_using_gpu=no
 hypre_using_um=no
 hypre_gpu_mpi=no
@@ -169,7 +171,7 @@ hypre_using_memory_tracker=no
 dnl *********************************************************************
 dnl * Initialize hypre-HIP variables
 dnl *********************************************************************
-hypre_user_chose_hip=no
+dnl hypre_user_chose_hip=no
 hypre_using_hip=no
 hypre_using_rocsparse=no
 hypre_using_rocblas=no
@@ -526,6 +528,8 @@ fi
 dnl *********************************************************************
 dnl * Determine if user provided CUDA compiler or flags
 dnl *********************************************************************
+AC_ARG_VAR([CUDA_HOME], [CUDA home directory])
+AC_ARG_VAR([HYPRE_CUDA_SM], [CUDA architecture])
 AC_ARG_VAR([CUCC], [CUDA compiler command])
 AC_ARG_VAR([CUFLAGS], [CUDA compiler flags])
 
@@ -1108,8 +1112,7 @@ AC_ARG_WITH(cuda,
 AS_HELP_STRING([--with-cuda],
                [Use CUDA. Require cuda-8.0 or higher (default is NO).]),
 [case "$withval" in
-    yes) hypre_user_chose_cuda=yes
-         hypre_using_cuda=yes ;;
+    yes) hypre_using_cuda=yes ;;
     no)  hypre_using_cuda=no ;;
     *)   hypre_using_cuda=no ;;
  esac],
@@ -1122,8 +1125,7 @@ AC_ARG_WITH(hip,
 AS_HELP_STRING([--with-hip],
                [Use HIP for AMD GPUs. (default is NO).]),
 [case "$withval" in
-    yes) hypre_user_chose_hip=yes
-         hypre_using_hip=yes ;;
+    yes) hypre_using_hip=yes ;;
     no)  hypre_using_hip=no ;;
     *)   hypre_using_hip=no ;;
  esac],
@@ -1157,9 +1159,9 @@ AC_ARG_WITH(raja,
 AS_HELP_STRING([--with-raja],
                [Use RAJA. Require RAJA package to be compiled properly (default is NO).]),
 [case "$withval" in
-    yes) hypre_user_chose_raja=yes;;
-    no)  hypre_user_chose_raja=no ;;
-    *)   hypre_user_chose_raja=no ;;
+    yes) hypre_using_raja=yes;;
+    no)  hypre_using_raja=no ;;
+    *)   hypre_using_raja=no ;;
  esac],
 [hypre_using_raja=no]
 )
@@ -1215,10 +1217,11 @@ AC_ARG_WITH(kokkos,
 AS_HELP_STRING([--with-kokkos],
                [Use Kokkos. Require kokkos package to be compiled properly(default is NO).]),
 [case "$withval" in
-    yes) hypre_user_chose_kokkos=yes ;;
-    no)  hypre_user_chose_kokkos=no ;;
-    *)   hypre_user_chose_kokkos=no ;;
- esac]
+    yes) hypre_using_kokkos=yes ;;
+    no)  hypre_using_kokkos=no ;;
+    *)   hypre_using_kokkos=no ;;
+ esac],
+[hypre_using_kokkos=no]
 )
 
 AC_ARG_WITH(kokkos-include,
@@ -1496,7 +1499,7 @@ then
       AC_CHECK_PROGS(CUCC, nvcc, [""], ["${CUDA_HOME}/bin"])
    fi
 
-   if test "$hypre_user_chose_hip" = "yes"
+   if test "$hypre_using_hip" = "yes"
    then
       AC_CHECK_PROGS(CUCC, hipcc)
    fi
@@ -1832,7 +1835,7 @@ dnl *********************************************************************
 if test "$hypre_using_shared" = "yes"
 then
    HYPRE_LIBSUFFIX=".so"
-   if test "$hypre_user_chose_cuda" = "yes"
+   if test "$hypre_using_cuda" = "yes"
    then
       SHARED_SET_SONAME="-Xlinker=-soname,"
       SHARED_OPTIONS="-Xlinker=-z,defs"
@@ -1868,7 +1871,7 @@ dnl   BUILD_F77_SHARED="${F77} ${SHARED_BUILD_FLAG}"
       BUILD_CC_SHARED="\${CC} ${SHARED_BUILD_FLAG}"
    fi
    BUILD_CXX_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
-   if test "$hypre_user_chose_cuda" = "yes"
+   if test "$hypre_using_cuda" = "yes"
    then
       BUILD_CC_SHARED="\${CUCC} ${SHARED_BUILD_FLAG} ${HYPRE_CUDA_GENCODE}"
    fi
@@ -1951,7 +1954,7 @@ AS_IF([ test x"$hypre_using_hip" == x"yes" ],
 dnl *********************************************************************
 dnl * Set raja options
 dnl *********************************************************************
-if test "x$hypre_user_chose_raja" = "xyes"
+if test "x$hypre_using_raja" = "xyes"
 then
    AC_DEFINE(HYPRE_USING_RAJA, 1, [Define to 1 if executing on host/device with RAJA])
 
@@ -1972,7 +1975,7 @@ fi
 dnl *********************************************************************
 dnl * Set kokkos options
 dnl *********************************************************************
-if test "x$hypre_user_chose_kokkos" = "xyes"
+if test "x$hypre_using_kokkos" = "xyes"
 then
    AC_DEFINE(HYPRE_USING_KOKKOS, 1, [Define to 1 if executing on host/device with KOKKOS])
 
@@ -2025,7 +2028,7 @@ fi
 dnl *********************************************************************
 dnl * Set cuda options
 dnl *********************************************************************
-if test "$hypre_user_chose_cuda" = "yes"
+if test "$hypre_using_cuda" = "yes"
 then
    AC_DEFINE(HYPRE_USING_GPU, 1, [Define to 1 if executing on GPU device])
 
@@ -2122,7 +2125,7 @@ fi
 dnl *********************************************************************
 dnl * Set HIP options
 dnl *********************************************************************
-AS_IF([test x"$hypre_user_chose_hip" == x"yes"],
+AS_IF([test x"$hypre_using_hip" == x"yes"],
       [
         AC_DEFINE(HYPRE_USING_GPU, 1, [Define to 1 if executing on GPU device])
         AC_DEFINE(HYPRE_USING_HIP, 1, [HIP being used])
@@ -2199,7 +2202,7 @@ AS_IF([test x"$hypre_user_chose_hip" == x"yes"],
                HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lroctx64"
                ])
 
-      ]) dnl AS_IF([test x"$hypre_user_chose_hip" == x"yes"]
+      ]) dnl AS_IF([test x"$hypre_using_hip" == x"yes"]
 
 
 
@@ -2210,19 +2213,19 @@ dnl *********************************************************************
 if test "$hypre_using_um" != "yes"
 then
    dnl Without UM
-   if test "$hypre_user_chose_cuda" = "yes"
+   if test "$hypre_using_cuda" = "yes"
    then
       AC_MSG_NOTICE([***********************************************************************])
       AC_MSG_NOTICE([Configuring with --with-cuda=yes without unified memory.])
-      AC_MSG_NOTICE([It only works for structured solvers and selective unstructured solvers])
+      AC_MSG_NOTICE([It only works for structured solvers and selected unstructured solvers])
       AC_MSG_NOTICE([Use --enable-unified-memory to compile with unified memory.])
       AC_MSG_NOTICE([***********************************************************************])
    fi
-   if test "$hypre_user_chose_hip" = "yes"
+   if test "$hypre_using_hip" = "yes"
    then
       AC_MSG_NOTICE([***********************************************************************])
       AC_MSG_NOTICE([Configuring with --with-hip=yes without unified memory.])
-      AC_MSG_NOTICE([It only works for structured solvers and selective unstructured solvers])
+      AC_MSG_NOTICE([It only works for structured solvers and selected unstructured solvers])
       AC_MSG_NOTICE([Use --enable-unified-memory to compile with unified memory.])
       AC_MSG_NOTICE([***********************************************************************])
    fi
@@ -2230,7 +2233,7 @@ then
    then
       AC_MSG_NOTICE([***********************************************************************])
       AC_MSG_NOTICE([Configuring with --with-device-openmp=yes without unified memory.])
-      AC_MSG_NOTICE([It only works for structured solvers and selective unstructured solvers])
+      AC_MSG_NOTICE([It only works for structured solvers and selected unstructured solvers])
       AC_MSG_NOTICE([Use --enable-unified-memory to compile with unified memory.])
       AC_MSG_NOTICE([***********************************************************************])
    fi
@@ -2313,7 +2316,7 @@ if test "x$hypre_using_um" = "xyes"
 then
    AC_DEFINE([HYPRE_USING_UNIFIED_MEMORY],1,[Define to 1 if using unified memory])
 else
-   if [test "x$hypre_user_chose_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes" || test "x$hypre_user_chose_hip" = "xyes"]
+   if [test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes" || test "x$hypre_using_hip" = "xyes"]
    then
       AC_DEFINE([HYPRE_USING_DEVICE_MEMORY],1,[Define to 1 if using device memory without UM])
    else

@@ -710,6 +710,8 @@ CXX
 CC
 CUFLAGS
 CUCC
+HYPRE_CUDA_SM
+CUDA_HOME
 host_os
 host_vendor
 host_cpu
@@ -857,6 +859,8 @@ with_lapack
       ac_precious_vars='build_alias
 host_alias
 target_alias
+CUDA_HOME
+HYPRE_CUDA_SM
 CUCC
 CUFLAGS
 CC
@@ -1709,6 +1713,9 @@ Optional Packages:
   --with-lapack           Find a system-provided LAPACK library
 
 Some influential environment variables:
+  CUDA_HOME   CUDA home directory
+  HYPRE_CUDA_SM
+              CUDA architecture
   CUCC        CUDA compiler command
   CUFLAGS     CUDA compiler flags
   CC          C compiler command
@@ -2680,9 +2687,10 @@ PACKAGE_BUGREPORT=
 hypre_user_chose_mpi=no
 hypre_user_chose_blas=no
 hypre_user_chose_lapack=no
-hypre_user_chose_cuda=no
 hypre_user_chose_raja=no
+hypre_using_raja=no
 hypre_user_chose_kokkos=no
+hypre_using_kokkos=no
 
 hypre_using_c=yes
 hypre_using_cxx=yes
@@ -2726,7 +2734,6 @@ hypre_using_node_aware_mpi=no
 hypre_using_memory_tracker=no
 
 
-hypre_user_chose_hip=no
 hypre_using_hip=no
 hypre_using_rocsparse=no
 hypre_using_rocblas=no
@@ -3191,6 +3198,8 @@ then
 else
    hypre_user_chose_cxxflags=yes
 fi
+
+
 
 
 
@@ -3907,8 +3916,7 @@ fi
 # Check whether --with-cuda was given.
 if test "${with_cuda+set}" = set; then :
   withval=$with_cuda; case "$withval" in
-    yes) hypre_user_chose_cuda=yes
-         hypre_using_cuda=yes ;;
+    yes) hypre_using_cuda=yes ;;
     no)  hypre_using_cuda=no ;;
     *)   hypre_using_cuda=no ;;
  esac
@@ -3923,8 +3931,7 @@ fi
 # Check whether --with-hip was given.
 if test "${with_hip+set}" = set; then :
   withval=$with_hip; case "$withval" in
-    yes) hypre_user_chose_hip=yes
-         hypre_using_hip=yes ;;
+    yes) hypre_using_hip=yes ;;
     no)  hypre_using_hip=no ;;
     *)   hypre_using_hip=no ;;
  esac
@@ -3963,9 +3970,9 @@ fi
 # Check whether --with-raja was given.
 if test "${with_raja+set}" = set; then :
   withval=$with_raja; case "$withval" in
-    yes) hypre_user_chose_raja=yes;;
-    no)  hypre_user_chose_raja=no ;;
-    *)   hypre_user_chose_raja=no ;;
+    yes) hypre_using_raja=yes;;
+    no)  hypre_using_raja=no ;;
+    *)   hypre_using_raja=no ;;
  esac
 else
   hypre_using_raja=no
@@ -4022,10 +4029,12 @@ fi
 # Check whether --with-kokkos was given.
 if test "${with_kokkos+set}" = set; then :
   withval=$with_kokkos; case "$withval" in
-    yes) hypre_user_chose_kokkos=yes ;;
-    no)  hypre_user_chose_kokkos=no ;;
-    *)   hypre_user_chose_kokkos=no ;;
+    yes) hypre_using_kokkos=yes ;;
+    no)  hypre_using_kokkos=no ;;
+    *)   hypre_using_kokkos=no ;;
  esac
+else
+  hypre_using_kokkos=no
 
 fi
 
@@ -4933,7 +4942,7 @@ test -n "$CUCC" || CUCC=""""
 
    fi
 
-   if test "$hypre_user_chose_hip" = "yes"
+   if test "$hypre_using_hip" = "yes"
    then
       for ac_prog in hipcc
 do
@@ -8416,7 +8425,7 @@ fi
 if test "$hypre_using_shared" = "yes"
 then
    HYPRE_LIBSUFFIX=".so"
-   if test "$hypre_user_chose_cuda" = "yes"
+   if test "$hypre_using_cuda" = "yes"
    then
       SHARED_SET_SONAME="-Xlinker=-soname,"
       SHARED_OPTIONS="-Xlinker=-z,defs"
@@ -8450,7 +8459,7 @@ then
       BUILD_CC_SHARED="\${CC} ${SHARED_BUILD_FLAG}"
    fi
    BUILD_CXX_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
-   if test "$hypre_user_chose_cuda" = "yes"
+   if test "$hypre_using_cuda" = "yes"
    then
       BUILD_CC_SHARED="\${CUCC} ${SHARED_BUILD_FLAG} ${HYPRE_CUDA_GENCODE}"
    fi
@@ -8702,7 +8711,7 @@ fi
 
 
 
-if test "x$hypre_user_chose_raja" = "xyes"
+if test "x$hypre_using_raja" = "xyes"
 then
 
 $as_echo "#define HYPRE_USING_RAJA 1" >>confdefs.h
@@ -8721,7 +8730,7 @@ $as_echo "#define HYPRE_USING_RAJA 1" >>confdefs.h
    CFLAGS=${CXXFLAGS}
 fi
 
-if test "x$hypre_user_chose_kokkos" = "xyes"
+if test "x$hypre_using_kokkos" = "xyes"
 then
 
 $as_echo "#define HYPRE_USING_KOKKOS 1" >>confdefs.h
@@ -8779,7 +8788,7 @@ $as_echo "#define HYPRE_USING_UMPIRE 1" >>confdefs.h
 
 fi
 
-if test "$hypre_user_chose_cuda" = "yes"
+if test "$hypre_using_cuda" = "yes"
 then
 
 $as_echo "#define HYPRE_USING_GPU 1" >>confdefs.h
@@ -8886,7 +8895,7 @@ $as_echo "#define HYPRE_USING_CURAND 1" >>confdefs.h
    fi
 fi
 
-if test x"$hypre_user_chose_hip" == x"yes"; then :
+if test x"$hypre_using_hip" == x"yes"; then :
 
 
 $as_echo "#define HYPRE_USING_GPU 1" >>confdefs.h
@@ -8961,27 +8970,27 @@ fi
 
 if test "$hypre_using_um" != "yes"
 then
-      if test "$hypre_user_chose_cuda" = "yes"
+      if test "$hypre_using_cuda" = "yes"
    then
       { $as_echo "$as_me:${as_lineno-$LINENO}: ***********************************************************************" >&5
 $as_echo "$as_me: ***********************************************************************" >&6;}
       { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring with --with-cuda=yes without unified memory." >&5
 $as_echo "$as_me: Configuring with --with-cuda=yes without unified memory." >&6;}
-      { $as_echo "$as_me:${as_lineno-$LINENO}: It only works for structured solvers and selective unstructured solvers" >&5
-$as_echo "$as_me: It only works for structured solvers and selective unstructured solvers" >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: It only works for structured solvers and selected unstructured solvers" >&5
+$as_echo "$as_me: It only works for structured solvers and selected unstructured solvers" >&6;}
       { $as_echo "$as_me:${as_lineno-$LINENO}: Use --enable-unified-memory to compile with unified memory." >&5
 $as_echo "$as_me: Use --enable-unified-memory to compile with unified memory." >&6;}
       { $as_echo "$as_me:${as_lineno-$LINENO}: ***********************************************************************" >&5
 $as_echo "$as_me: ***********************************************************************" >&6;}
    fi
-   if test "$hypre_user_chose_hip" = "yes"
+   if test "$hypre_using_hip" = "yes"
    then
       { $as_echo "$as_me:${as_lineno-$LINENO}: ***********************************************************************" >&5
 $as_echo "$as_me: ***********************************************************************" >&6;}
       { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring with --with-hip=yes without unified memory." >&5
 $as_echo "$as_me: Configuring with --with-hip=yes without unified memory." >&6;}
-      { $as_echo "$as_me:${as_lineno-$LINENO}: It only works for structured solvers and selective unstructured solvers" >&5
-$as_echo "$as_me: It only works for structured solvers and selective unstructured solvers" >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: It only works for structured solvers and selected unstructured solvers" >&5
+$as_echo "$as_me: It only works for structured solvers and selected unstructured solvers" >&6;}
       { $as_echo "$as_me:${as_lineno-$LINENO}: Use --enable-unified-memory to compile with unified memory." >&5
 $as_echo "$as_me: Use --enable-unified-memory to compile with unified memory." >&6;}
       { $as_echo "$as_me:${as_lineno-$LINENO}: ***********************************************************************" >&5
@@ -8993,8 +9002,8 @@ $as_echo "$as_me: **************************************************************
 $as_echo "$as_me: ***********************************************************************" >&6;}
       { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring with --with-device-openmp=yes without unified memory." >&5
 $as_echo "$as_me: Configuring with --with-device-openmp=yes without unified memory." >&6;}
-      { $as_echo "$as_me:${as_lineno-$LINENO}: It only works for structured solvers and selective unstructured solvers" >&5
-$as_echo "$as_me: It only works for structured solvers and selective unstructured solvers" >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: It only works for structured solvers and selected unstructured solvers" >&5
+$as_echo "$as_me: It only works for structured solvers and selected unstructured solvers" >&6;}
       { $as_echo "$as_me:${as_lineno-$LINENO}: Use --enable-unified-memory to compile with unified memory." >&5
 $as_echo "$as_me: Use --enable-unified-memory to compile with unified memory." >&6;}
       { $as_echo "$as_me:${as_lineno-$LINENO}: ***********************************************************************" >&5
@@ -9083,7 +9092,7 @@ then
 $as_echo "#define HYPRE_USING_UNIFIED_MEMORY 1" >>confdefs.h
 
 else
-   if test "x$hypre_user_chose_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes" || test "x$hypre_user_chose_hip" = "xyes"
+   if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes" || test "x$hypre_using_hip" = "xyes"
    then
 
 $as_echo "#define HYPRE_USING_DEVICE_MEMORY 1" >>confdefs.h
