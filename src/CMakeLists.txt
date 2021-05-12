@@ -222,13 +222,14 @@ if (HYPRE_WITH_CUDA)
       set(HYPRE_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
     endif ()
 
-    set(CUDA_FLAGS "-expt-extended-lambda")
     if (CMAKE_VERSION VERSION_LESS 3.18.0)
-      set(CUDA_FLAGS "-arch=sm_${HYPRE_CUDA_SM} ${CUDA_FLAGS}")
+      add_compile_options("$<$<COMPILE_LANGUAGE:CUDA>:-arch=sm_${HYPRE_CUDA_SM}>")
     else ()
       set(CMAKE_CUDA_ARCHITECTURES "${HYPRE_CUDA_SM}")
     endif ()
     message(STATUS "Using CUDA architecture: ${HYPRE_CUDA_SM}")
+
+    add_compile_options("$<$<COMPILE_LANGUAGE:CUDA>:-expt-extended-lambda>")
 
     set(HYPRE_USING_HOST_MEMORY OFF CACHE BOOL "" FORCE)
 
@@ -239,9 +240,6 @@ if (HYPRE_WITH_CUDA)
     if (HYPRE_ENABLE_CUB)
       set(HYPRE_USING_CUB_ALLOCATOR ON CACHE BOOL "" FORCE)
     endif (HYPRE_ENABLE_CUB)
-
-    set(CMAKE_CUDA_FLAGS "${CUDA_FLAGS} ${CMAKE_CUDA_FLAGS}" CACHE STRING
-         "CUDA flags set for HYPRE" FORCE)
 
     # TODO Eventually should require cmake>=3.17
     # and use cmake's FindCUDAToolkit. Now collect
@@ -333,7 +331,6 @@ endif ()
 
 if (HYPRE_USING_CUDA)
   target_link_libraries(${PROJECT_NAME} PUBLIC "${EXPORT_INTERFACE_CUDA_LIBS}")
-  target_include_directories(${PROJECT_NAME} PUBLIC "${EXPORT_INTERFACE_CUDA_INCLUDES}")
   if (HYPRE_HAVE_MPI)
     target_include_directories(${PROJECT_NAME} PUBLIC
       ${MPI_CXX_INCLUDE_DIRS})
