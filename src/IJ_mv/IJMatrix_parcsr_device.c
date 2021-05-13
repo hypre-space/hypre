@@ -228,7 +228,7 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
          make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0,    J0))),
          make_reverse_iterator(thrust::device_pointer_cast<char>(X0)+N0),
          make_reverse_iterator(thrust::device_pointer_cast<char>(X) +N0),
-         HYPRE_BigInt(0),
+         char(0),
          thrust::equal_to< thrust::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
          thrust::maximum<char>() );
 
