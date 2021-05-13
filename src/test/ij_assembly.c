@@ -913,9 +913,17 @@ test_SetSet(MPI_Comm             comm,
 
    chunk_size = nrows / nchunks;
    new_coefs = hypre_TAlloc(HYPRE_Real, num_nonzeros, memory_location);
-   for (i = 0; i < num_nonzeros; i++)
+
+   if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_HOST)
    {
-      new_coefs[i] = 2.0*coefs[i];
+      for (i = 0; i < num_nonzeros; i++)
+      {
+         new_coefs[i] = 2.0*coefs[i];
+      }
+   }
+   else
+   {
+      HYPRE_THRUST_CALL(transform, coefs, coefs + num_nonzeros, new_coefs, 2.0 * _1);
    }
 
 #if defined(HYPRE_USING_GPU)
@@ -1028,9 +1036,17 @@ test_AddSet(MPI_Comm             comm,
 
    chunk_size = nrows / nchunks;
    new_coefs = hypre_TAlloc(HYPRE_Real, num_nonzeros, memory_location);
-   for (i = 0; i < num_nonzeros; i++)
+
+   if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_HOST)
    {
-      new_coefs[i] = 2.0*coefs[i];
+      for (i = 0; i < num_nonzeros; i++)
+      {
+         new_coefs[i] = 2.0*coefs[i];
+      }
+   }
+   else
+   {
+      HYPRE_THRUST_CALL(transform, coefs, coefs + num_nonzeros, new_coefs, 2.0 * _1);
    }
 
 #if defined(HYPRE_USING_GPU)
