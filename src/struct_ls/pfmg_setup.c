@@ -175,9 +175,17 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
       for (d = 0; d < ndim; d++)
       {
+         /* Set 'dxyz_flag' if the matrix-coefficient variation is "too large".
+          * This is used later to set relaxation weights for Jacobi.
+          *
+          * Use the "square of the coefficient of variation" = (sigma/mu)^2,
+          * where sigma is the standard deviation and mu is the mean.  This is
+          * equivalent to computing (d - mu^2)/mu^2 where d is the average of
+          * the squares of the coefficients stored in 'deviation'.  Care is
+          * taken to avoid dividing by zero when the mean is zero. */
+
          deviation[d] -= mean[d]*mean[d];
-         /* square of coeff. of variation */
-         if (deviation[d]/(mean[d]*mean[d]) > .1)
+         if ( deviation[d] > 0.1*(mean[d]*mean[d]) )
          {
             dxyz_flag = 1;
             break;
@@ -864,19 +872,26 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    }
    if (cxyz_max == 0.0)
    {
+      /* Do isotropic coarsening */
+      for (d = 0; d < 3; d++)
+      {
+         cxyz[d] = 1.0;
+      }
       cxyz_max = 1.0;
    }
 
+   /* Set dxyz values that are scaled appropriately for the coarsening routine */
    for (d = 0; d < 3; d++)
    {
-      if (cxyz[d] > 0)
+      HYPRE_Real  max_anisotropy = HYPRE_REAL_MAX/1000;
+      if (cxyz[d] > (cxyz_max/max_anisotropy))
       {
          cxyz[d] /= cxyz_max;
          dxyz[d] = sqrt(1.0 / cxyz[d]);
       }
       else
       {
-         dxyz[d] = HYPRE_REAL_MAX/1000;
+         dxyz[d] = sqrt(max_anisotropy);
       }
    }
 

@@ -23,6 +23,16 @@ tail -3 ${TNAME}.out.201 > ${TNAME}.testdata.temp
 diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
+
+tail -3 ${TNAME}.out.2D  > ${TNAME}.testdata
+tail -3 ${TNAME}.out.3Dx > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+tail -3 ${TNAME}.out.3Dy > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+tail -3 ${TNAME}.out.3Dz > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+#=============================================================================
 # Compare 19pt, 7pt, positive, and negative definite
 #=============================================================================
 
@@ -51,6 +61,10 @@ FILES="\
  ${TNAME}.out.1\
  ${TNAME}.out.200\
  ${TNAME}.out.201\
+ ${TNAME}.out.2D\
+ ${TNAME}.out.3Dx\
+ ${TNAME}.out.3Dy\
+ ${TNAME}.out.3Dz\
  ${TNAME}.out.10\
  ${TNAME}.out.11\
  ${TNAME}.out.12\
