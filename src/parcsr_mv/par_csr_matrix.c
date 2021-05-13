@@ -410,7 +410,7 @@ hypre_ParCSRMatrixSetNumRownnz( hypre_ParCSRMatrix *matrix )
    hypre_CSRMatrix  *diag = hypre_ParCSRMatrixDiag(matrix);
    hypre_CSRMatrix  *offd = hypre_ParCSRMatrixOffd(matrix);
    HYPRE_Int        *rownnz_diag = hypre_CSRMatrixRownnz(diag);
-   HYPRE_Int        *rownnz_offd = hypre_CSRMatrixRownnz(diag);
+   HYPRE_Int        *rownnz_offd = hypre_CSRMatrixRownnz(offd);
    HYPRE_Int         num_rownnz_diag = hypre_CSRMatrixNumRownnz(diag);
    HYPRE_Int         num_rownnz_offd = hypre_CSRMatrixNumRownnz(offd);
 
