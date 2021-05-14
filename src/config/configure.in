@@ -142,7 +142,6 @@ hypre_using_openmp=no
 hypre_using_device_openmp=no
 hypre_using_insure=no
 hypre_using_cuda=no
-dnl hypre_user_chose_cuda=no
 hypre_using_gpu=no
 hypre_using_um=no
 hypre_gpu_mpi=no
@@ -171,7 +170,6 @@ hypre_using_memory_tracker=no
 dnl *********************************************************************
 dnl * Initialize hypre-HIP variables
 dnl *********************************************************************
-dnl hypre_user_chose_hip=no
 hypre_using_hip=no
 hypre_using_rocsparse=no
 hypre_using_rocblas=no
