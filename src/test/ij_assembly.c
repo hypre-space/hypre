@@ -923,10 +923,12 @@ test_SetSet(MPI_Comm             comm,
          new_coefs[i] = 2.0*coefs[i];
       }
    }
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    else
    {
       HYPRE_THRUST_CALL(transform, coefs, coefs + num_nonzeros, new_coefs, 2.0 * _1);
    }
+#endif
 
 #if defined(HYPRE_USING_GPU)
    hypre_SyncCudaDevice(hypre_handle());
@@ -1046,10 +1048,12 @@ test_AddSet(MPI_Comm             comm,
          new_coefs[i] = 2.0*coefs[i];
       }
    }
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    else
    {
       HYPRE_THRUST_CALL(transform, coefs, coefs + num_nonzeros, new_coefs, 2.0 * _1);
    }
+#endif
 
 #if defined(HYPRE_USING_GPU)
    hypre_SyncCudaDevice(hypre_handle());
