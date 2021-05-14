@@ -430,8 +430,10 @@ main( hypre_int  argc,
    hypre_MPI_Finalize();
 
    /* when using cuda-memcheck --leak-check full, uncomment this */
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_CUDA)
    cudaDeviceReset();
+#elif defined(HYPRE_USING_HIP)
+   hipDeviceReset();
 #endif
 
    return (0);
