@@ -574,6 +574,8 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
     * TODO */
    HYPRE_MemoryLocation memory_location_C = hypre_max(memory_location_A, memory_location_B);
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    max_num_threads = hypre_NumThreads();
    my_diag_array = hypre_CTAlloc(HYPRE_Int, max_num_threads, HYPRE_MEMORY_HOST);
    my_offd_array = hypre_CTAlloc(HYPRE_Int, max_num_threads, HYPRE_MEMORY_HOST);
@@ -581,6 +583,8 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    if (ncols_A != nrows_B || num_cols_diag_A != num_rows_diag_B)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC," Error! Incompatible matrix dimensions!\n");
+
+      HYPRE_ANNOTATE_FUNC_END;
       return NULL;
    }
 
@@ -1388,6 +1392,7 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 
       hypre_TFree(B_marker, HYPRE_MEMORY_HOST);
    } /*end parallel region */
+   HYPRE_ANNOTATE_REGION_END("%s", "Second pass");
 
    C = hypre_ParCSRMatrixCreate(comm, nrows_A, ncols_B, row_starts_A,
                                 col_starts_B, num_cols_offd_C,
@@ -1441,6 +1446,8 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MATMUL] += hypre_MPI_Wtime();
 #endif
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return C;
 }
@@ -3728,6 +3735,8 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
     * equally load balanced partitionings
     *--------------------------------------------------------------------*/
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    if (!comm_pkg_A)
    {
       hypre_MatvecCommPkgCreate(A);
@@ -4306,6 +4315,8 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
       hypre_SyncCudaComputeStream(hypre_handle());
    }
 #endif
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return C;
 }
@@ -5703,6 +5714,7 @@ hypre_ParcsrAdd( HYPRE_Complex        alpha,
          }
       }
    }
+   HYPRE_ANNOTATE_REGION_END("%s", "Set offd_C");
 
    row_starts_C = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
    col_starts_C = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);

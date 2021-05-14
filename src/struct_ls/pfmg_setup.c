@@ -173,6 +173,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_PFMGSetStride(cdir, stride);
 
       /* set up interpolation and restriction operators */
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
       P_l[l] = hypre_zPFMGCreateInterpOp(A_l[l], cdir, stride, rap_type);
       RT_l[l] = P_l[l];
 #if 0 /* TODO: Allow RT != P */
@@ -191,7 +192,9 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          hypre_zPFMGSetupRestrictOp(RT_l[l], A_l[l], cdir);
       }
 #endif
+      HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
 
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "RAP");
       if (rap_type == 0)
       {
          HYPRE_Int           nmatrices   = 3;
@@ -220,6 +223,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          hypre_StructMatrixInitialize(A_l[l+1]);
          hypre_PFMGSetupRAPOp(RT_l[l], A_l[l], P_l[l], cdir, cindex, stride, rap_type, A_l[l+1]);
       }
+      HYPRE_ANNOTATE_REGION_END("%s", "RAP");
 
 //      /* RDF AP Debug */
 //      hypre_StructAssumedPartitionPrint("zAP", hypre_BoxManAssumedPartition(
@@ -486,6 +490,8 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    HYPRE_Real             sqmean[HYPRE_MAXDIM];
    HYPRE_Real             deviation[HYPRE_MAXDIM];
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /*----------------------------------------------------------
     * Exit if user gives dxyz different than zero
     *----------------------------------------------------------*/
@@ -494,6 +500,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    {
       *dxyz_flag = 0;
 
+      HYPRE_ANNOTATE_FUNC_END;
       return hypre_error_flag;
    }
 
@@ -697,6 +704,8 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       }
    }
 
+   HYPRE_ANNOTATE_FUNC_END;
+
    return hypre_error_flag;
 }
 
@@ -791,6 +800,8 @@ hypre_PFMGCoarsen( hypre_Box     *cbox,
 
    HYPRE_Real     alpha, beta, min_dxyz;
    HYPRE_Int      ndim, d, l, cdir;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    ndim = hypre_BoxNDim(cbox);
 
@@ -888,13 +899,14 @@ hypre_PFMGCoarsen( hypre_Box     *cbox,
 
       /* update periodic */
       periodic[cdir] /= 2;
-
    }
    *num_levels = l + 1;
 
    *cdir_l_ptr        = cdir_l;
    *active_l_ptr      = active_l;
    *relax_weights_ptr = relax_weights;
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

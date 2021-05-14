@@ -354,10 +354,14 @@ hypre_StructVectorResize( hypre_StructVector *vector,
    hypre_Box            *data_box;
    HYPRE_Int             i;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    if (hypre_StructVectorSaveDataSpace(vector) != NULL)
    {
       /* Call Restore or Forget first */
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Resize has already been called");
+
+      HYPRE_ANNOTATE_FUNC_END;
       return hypre_error_flag;
    }
 
@@ -420,6 +424,8 @@ hypre_StructVectorResize( hypre_StructVector *vector,
    hypre_StructVectorDataSize(vector)    = data_size;
    hypre_StructVectorDataIndices(vector) = data_indices;
 
+   HYPRE_ANNOTATE_FUNC_END;
+
    return hypre_error_flag;
 }
 
@@ -438,6 +444,8 @@ hypre_StructVectorRestore( hypre_StructVector *vector )
    hypre_IndexRef    stride         = hypre_StructVectorSaveStride(vector);
    hypre_BoxArray   *data_space     = hypre_StructVectorSaveDataSpace(vector);
    HYPRE_Int         data_size      = hypre_StructVectorSaveDataSize(vector);
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    if (data_space != NULL)
    {
@@ -485,6 +493,8 @@ hypre_StructVectorRestore( hypre_StructVector *vector )
       hypre_StructVectorGrid(vector) = grid;
       hypre_StructVectorSetStride(vector, stride);
    }
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

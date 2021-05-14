@@ -644,6 +644,8 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
    HYPRE_Real            min_dxyz;
    HYPRE_Real            alpha, beta;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /* Allocate data */
    grid_l   = hypre_TAlloc(hypre_SStructGrid *, max_levels, HYPRE_MEMORY_HOST);
    active_l = hypre_TAlloc(HYPRE_Int *, max_levels, HYPRE_MEMORY_HOST);
@@ -831,6 +833,8 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
    hypre_SSAMGDataActivel(ssamg_data)      = active_l;
    hypre_SSAMGDataNumLevels(ssamg_data)    = num_levels;
    hypre_SSAMGDataRelaxWeights(ssamg_data) = weights;
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

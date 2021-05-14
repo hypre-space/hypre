@@ -41,6 +41,7 @@ hypre_StructCopy( hypre_StructVector *x,
    /* Return if x and y point to the same hypre_StructVector */
    if (x == y)
    {
+      HYPRE_ANNOTATE_FUNC_END;
       return hypre_error_flag;
    }
 

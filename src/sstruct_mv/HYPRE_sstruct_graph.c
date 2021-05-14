@@ -289,6 +289,8 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
    HYPRE_Int                 n_entries = hypre_SStructNGraphEntries(graph);
    HYPRE_Int                 a_entries = hypre_SStructAGraphEntries(graph);
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /* check storage */
    if (!a_entries)
    {
@@ -326,6 +328,8 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
    /* update count */
    n_entries++;
    hypre_SStructNGraphEntries(graph) = n_entries;
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -399,6 +403,8 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    void                      *info;
    hypre_Box                 *bbox, *new_box, *grow_box;
    HYPRE_Int                 *num_ghost;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /*---------------------------------------------------------
     *  If AP, then may need to redo the box managers
@@ -934,6 +940,8 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       nUventries = j;
       hypre_SStructGraphNUVEntries(graph) = nUventries;
    }
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

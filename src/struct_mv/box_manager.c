@@ -1174,6 +1174,8 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
       return hypre_error_flag;
    }
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /* initilize */
    hypre_MPI_Comm_rank(comm, &myid);
    hypre_MPI_Comm_size(comm, &nprocs);
@@ -2416,6 +2418,8 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
    hypre_BoxManGatherRegions(manager) =  hypre_BoxArrayCreate(0, ndim);
 
    hypre_BoxManIsAssembled(manager) = 1;
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

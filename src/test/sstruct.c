@@ -2432,6 +2432,7 @@ main( hypre_int argc,
    HYPRE_Int             max_levels;
    HYPRE_Int             n_pre, n_post, n_coarse;
    HYPRE_Int             relax[4];
+   HYPRE_Int             relax_is_set;
    HYPRE_Int             max_coarse_size;
    HYPRE_Int             skip;
    HYPRE_Int             agg_num_levels;
@@ -2566,6 +2567,7 @@ main( hypre_int argc,
    reps  = 10;
    skip  = 0;
    rap   = 0;
+   relax_is_set = 0;
    relax[0] = 1;
    relax[1] = -1; /* Relax up */
    relax[2] = -1; /* Relax down */
@@ -2844,6 +2846,7 @@ main( hypre_int argc,
       {
          arg_index++;
          relax[0] = atoi(argv[arg_index++]);
+         relax_is_set = 1;
       }
       else if ( strcmp(argv[arg_index], "-relax_up") == 0 )
       {
@@ -3073,7 +3076,6 @@ main( hypre_int argc,
         (solver_id == -3))
    {
       object_type = HYPRE_PARCSR;
-      relax[0] = -1; /* Use default relaxation method for ParCSR solvers */
    }
 
    else if (solver_id >= 200 || solver_id == -2)
@@ -3097,6 +3099,12 @@ main( hypre_int argc,
             hypre_printf("Setting object type to ParCSR\n");
             break;
       }
+   }
+
+   /* Use default relaxation method for ParCSR solvers */
+   if ((object_type == HYPRE_PARCSR) && (!relax_is_set))
+   {
+      relax[0] = -1;
    }
 
    /*-----------------------------------------------------------

@@ -470,6 +470,8 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
       }
 
       HYPRE_StructMatrixAssemble(M);
+
+      HYPRE_ANNOTATE_FUNC_END;
       return hypre_error_flag;
    }
 
@@ -687,6 +689,7 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
    }
 
    /* Update matrix and bit mask ghost layers in just one communication stage */
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", "Communicate");
    {
       hypre_CommInfo        *comm_info;
       hypre_CommPkg         *comm_pkg_a[MAXTERMS];
@@ -749,6 +752,7 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
       hypre_CommPkgDestroy(comm_pkg);
       hypre_TFree(comm_data, HYPRE_MEMORY_HOST);
    }
+   HYPRE_ANNOTATE_REGION_END("%s", "Communicate");
 
    /* Set a.types[] values */
    for (i = 0; i < na; i++)

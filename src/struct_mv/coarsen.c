@@ -470,6 +470,8 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    hypre_BeginTiming(tindex);
 #endif
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    hypre_SetIndex(ilower, 0);
    hypre_SetIndex(iupper, 0);
 
@@ -698,6 +700,8 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 #if TIME_DEBUG
    hypre_EndTiming(tindex);
 #endif
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

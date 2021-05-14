@@ -115,17 +115,12 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       }
    }
 
-   /* Print initial solution and residual */
 #ifdef DEBUG_SOLVE
-   {
-      /* Print solution */
-      hypre_sprintf(filename, "ssamg_x.i%02d", 0);
-      HYPRE_SStructVectorPrint(filename, x_l[0], 0);
-
-      /* Print residual */
-      hypre_sprintf(filename, "ssamg_r.i%02d", 0);
-      HYPRE_SStructVectorPrint(filename, r_l[0], 0);
-   }
+   /* Print initial solution and residual */
+   hypre_sprintf(filename, "ssamg_x.i%02d", 0);
+   HYPRE_SStructVectorPrint(filename, x_l[0], 0);
+   hypre_sprintf(filename, "ssamg_r.i%02d", 0);
+   HYPRE_SStructVectorPrint(filename, r_l[0], 0);
 #endif
 
    /*-----------------------------------------------------
@@ -141,15 +136,19 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(0);
 
       /* fine grid pre-relaxation */
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
       hypre_SSAMGRelaxSetPreRelax(relax_data_l[0]);
       hypre_SSAMGRelaxSetMaxIter(relax_data_l[0], num_pre_relax);
       hypre_SSAMGRelaxSetZeroGuess(relax_data_l[0], zero_guess);
       hypre_SSAMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
       zero_guess = 0;
+      HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
 
       /* compute fine grid residual (r = b - Ax) */
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Residual");
       hypre_SStructMatvecCompute(matvec_data_l[0], -1.0,
                                  A_l[0], x_l[0], 1.0, b_l[0], r_l[0]);
+      HYPRE_ANNOTATE_REGION_END("%s", "Residual");
 
       /* convergence check */
       if (tol > 0.0)
@@ -182,8 +181,10 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       if (num_levels > 1)
       {
          /* restrict fine grid residual */
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Restriction");
          hypre_SStructMatvecCompute(restrict_data_l[0], 1.0,
                                     RT_l[0], r_l[0], 0.0, b_l[1], b_l[1]);
+         HYPRE_ANNOTATE_REGION_END("%s", "Restriction");
 #if DEBUG_SOLVE
          hypre_sprintf(filename, "ssamg_xdown.i%02d.l%02d", i, 0);
          HYPRE_SStructVectorPrint(filename, x_l[0], 0);
@@ -202,21 +203,27 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             hypre_SStructMatvecSetActiveParts(matvec_data_l[l], active_l[l]);
 
             /* pre-relaxation */
+            HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
             hypre_SSAMGRelaxSetPreRelax(relax_data_l[l]);
             hypre_SSAMGRelaxSetMaxIter(relax_data_l[l], num_pre_relax);
             hypre_SSAMGRelaxSetZeroGuess(relax_data_l[l], 1);
             hypre_SSAMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+            HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
 
             /* compute residual (r = b - Ax) */
+            HYPRE_ANNOTATE_REGION_BEGIN("%s", "Residual");
             hypre_SStructMatvecCompute(matvec_data_l[l], -1.0,
                                        A_l[l], x_l[l], 1.0, b_l[l], r_l[l]);
+            HYPRE_ANNOTATE_REGION_END("%s", "Residual");
 
             /* Set all parts to active */
             hypre_SStructMatvecSetAllPartsActive(matvec_data_l[l]);
 
             /* restrict residual */
+            HYPRE_ANNOTATE_REGION_BEGIN("%s", "Restriction");
             hypre_SStructMatvecCompute(restrict_data_l[l], 1.0,
                                        RT_l[l], r_l[l], 0.0, b_l[l+1], b_l[l+1]);
+            HYPRE_ANNOTATE_REGION_END("%s", "Restriction");
 #if DEBUG_SOLVE
             hypre_sprintf(filename, "ssamg_xdown.i%02d.l%02d", i, l);
             HYPRE_SStructVectorPrint(filename, x_l[l], 0);
@@ -237,8 +244,10 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          hypre_SStructMatvecSetActiveParts(matvec_data_l[l], active_l[l]);
 
          /* Coarsest level solver */
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Coarse solve");
          hypre_SSAMGRelaxSetZeroGuess(relax_data_l[l], 1);
          hypre_SSAMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+         HYPRE_ANNOTATE_REGION_END("%s", "Coarse solve");
 
          /* Set all parts to active */
          hypre_SStructMatvecSetAllPartsActive(matvec_data_l[l]);
@@ -256,9 +265,11 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          {
             /* interpolate error and correct (x = x + Pe_c) */
             /* TODO: Can we simplify the next two calls? */
+            HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
             hypre_SStructMatvecCompute(interp_data_l[l], 1.0,
                                        P_l[l], x_l[l+1], 0.0, e_l[l], e_l[l]);
             hypre_SStructAxpy(1.0, e_l[l], x_l[l]);
+            HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
             HYPRE_ANNOTATE_MGLEVEL_END(l + 1);
 #if DEBUG_SOLVE
             hypre_sprintf(filename, "ssamg_eup.i%02d.l%02d", i, l);
@@ -272,10 +283,12 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             hypre_SStructMatvecSetActiveParts(matvec_data_l[l], active_l[l]);
 
             /* post-relaxation */
+            HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
             hypre_SSAMGRelaxSetPostRelax(relax_data_l[l]);
             hypre_SSAMGRelaxSetMaxIter(relax_data_l[l], num_post_relax);
             hypre_SSAMGRelaxSetZeroGuess(relax_data_l[l], 0);
             hypre_SSAMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+            HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
 
             /* Set all parts to active */
             hypre_SStructMatvecSetAllPartsActive(matvec_data_l[l]);
@@ -283,9 +296,11 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
 
          /* interpolate error and correct on fine grid (x = x + Pe_c) */
          /* TODO: Can we simplify the next two calls? */
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
          hypre_SStructMatvecCompute(interp_data_l[0], 1.0,
                                     P_l[0], x_l[1], 0.0, e_l[0], e_l[0]);
          hypre_SStructAxpy(1.0, e_l[0], x_l[0]);
+         HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
          HYPRE_ANNOTATE_MGLEVEL_END(1);
 #if DEBUG_SOLVE
          hypre_sprintf(filename, "ssamg_eup.i%02d.l%02d", i, 0);
@@ -312,10 +327,12 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       }
 
       /* fine grid post-relaxation */
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
       hypre_SSAMGRelaxSetPostRelax(relax_data_l[0]);
       hypre_SSAMGRelaxSetMaxIter(relax_data_l[0], num_post_relax);
       hypre_SSAMGRelaxSetZeroGuess(relax_data_l[0], 0);
       hypre_SSAMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
+      HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
 
 #if DEBUG_SOLVE
       hypre_sprintf(filename, "ssamg_xpostf.i%02d.l%02d", i, 0);

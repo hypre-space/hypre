@@ -1924,7 +1924,7 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
 
    max_size = 0;
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) reduction(max:max_size)
+#pragma omp parallel for reduction(max:max_size)
 #endif
    for (i = 0; i < nrows; i++)
    {

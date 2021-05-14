@@ -35,6 +35,8 @@ HYPRE_SStructGridCreate( MPI_Comm           comm,
    hypre_Index            **fem_offsets;
    HYPRE_Int                i;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    grid = hypre_TAlloc(hypre_SStructGrid, 1, HYPRE_MEMORY_HOST);
 
    hypre_SStructGridComm(grid)   = comm;
@@ -80,6 +82,8 @@ HYPRE_SStructGridCreate( MPI_Comm           comm,
    hypre_SStructGridGhlocalSize(grid)   = 0;
 
    *grid_ptr = grid;
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -595,6 +599,8 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
    HYPRE_Int                part, var, b, vb, d, i, valid;
    HYPRE_Int                nbor_part, sub_part;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /*-------------------------------------------------------------
     * if I own no data on some part, prune that part's neighbor info
     *-------------------------------------------------------------*/
@@ -835,6 +841,8 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
     *-------------------------------------------------*/
 
    hypre_SStructGridCreateCommInfo(grid);
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

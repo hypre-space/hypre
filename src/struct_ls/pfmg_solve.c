@@ -142,16 +142,20 @@ hypre_PFMGSolve( void               *pfmg_vdata,
       }
 
       /* fine grid pre-relaxation */
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
       hypre_PFMGRelaxSetPreRelax(relax_data_l[0]);
       hypre_PFMGRelaxSetMaxIter(relax_data_l[0], num_pre_relax);
       hypre_PFMGRelaxSetZeroGuess(relax_data_l[0], zero_guess);
       hypre_PFMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
       zero_guess = 0;
+      HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
 
       /* compute fine grid residual (b - Ax) */
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Residual");
       hypre_StructCopy(b_l[0], r_l[0]);
       hypre_StructMatvecCompute(matvec_data_l[0],
                                 -1.0, A_l[0], x_l[0], 1.0, r_l[0]);
+      HYPRE_ANNOTATE_REGION_END("%s", "Residual");
 
       /* convergence check */
       if (tol > 0.0)
@@ -191,7 +195,9 @@ hypre_PFMGSolve( void               *pfmg_vdata,
       if (num_levels > 1)
       {
          /* restrict fine grid residual */
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Restriction");
          hypre_StructMatvecCompute(restrict_data_l[0], 1.0, RT_l[0], r_l[0], 0.0, b_l[1]);
+         HYPRE_ANNOTATE_REGION_END("%s", "Restriction");
 
 #ifdef DEBUG_SOLVE
          hypre_sprintf(filename, "pfmg_xdown.i%02d.l%02d", i, 0);
@@ -215,15 +221,19 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             if (active_l[l])
             {
                /* pre-relaxation */
+               HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
                hypre_PFMGRelaxSetPreRelax(relax_data_l[l]);
                hypre_PFMGRelaxSetMaxIter(relax_data_l[l], num_pre_relax);
                hypre_PFMGRelaxSetZeroGuess(relax_data_l[l], 1);
                hypre_PFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+               HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
 
                /* compute residual (b - Ax) */
+               HYPRE_ANNOTATE_REGION_BEGIN("%s", "Residual");
                hypre_StructCopy(b_l[l], r_l[l]);
                hypre_StructMatvecCompute(matvec_data_l[l],
                                          -1.0, A_l[l], x_l[l], 1.0, r_l[l]);
+               HYPRE_ANNOTATE_REGION_END("%s", "Residual");
             }
             else
             {
@@ -233,7 +243,9 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             }
 
             /* restrict residual */
+            HYPRE_ANNOTATE_REGION_BEGIN("%s", "Restriction");
             hypre_StructMatvecCompute(restrict_data_l[l], 1.0, RT_l[l], r_l[l], 0.0, b_l[l+1]);
+            HYPRE_ANNOTATE_REGION_END("%s", "Restriction");
 
 #ifdef DEBUG_SOLVE
             hypre_sprintf(filename, "pfmg_xdown.i%02d.l%02d", i, l);
@@ -250,7 +262,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
           * Bottom
           *--------------------------------------------------*/
          HYPRE_ANNOTATE_MGLEVEL_BEGIN(num_levels - 1);
-
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Coarse solve");
          if (active_l[l])
          {
             hypre_PFMGRelaxSetZeroGuess(relax_data_l[l], 1);
@@ -260,6 +272,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          {
             hypre_StructVectorSetConstantValues(x_l[l], 0.0);
          }
+         HYPRE_ANNOTATE_REGION_END("%s", "Coarse solve");
 
 #ifdef DEBUG_SETUP
          hypre_sprintf(filename, "pfmg_xbottom.i%02d.l%02d", i, l);
@@ -278,8 +291,10 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             }
 
             /* interpolate error and correct (x = x + Pe_c) */
+            HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
             hypre_StructMatvecCompute(interp_data_l[l], 1.0, P_l[l], x_l[l+1], 0.0, e_l[l]);
             hypre_StructAxpy(1.0, e_l[l], x_l[l]);
+            HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
             HYPRE_ANNOTATE_MGLEVEL_END(l + 1);
 
 #ifdef DEBUG_SETUP
@@ -290,6 +305,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 #endif
 
             HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
+            HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
             if (active_l[l])
             {
                /* post-relaxation */
@@ -298,6 +314,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
                hypre_PFMGRelaxSetZeroGuess(relax_data_l[l], 0);
                hypre_PFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
             }
+            HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
          }
          if (constant_coefficient)
          {
@@ -305,8 +322,10 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          }
 
          /* interpolate error and correct on fine grid (x = x + Pe_c) */
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
          hypre_StructMatvecCompute(interp_data_l[0], 1.0, P_l[0], x_l[1], 0.0, e_l[0]);
          hypre_StructAxpy(1.0, e_l[0], x_l[0]);
+         HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
          HYPRE_ANNOTATE_MGLEVEL_END(1);
 
 #ifdef DEBUG_SETUP
@@ -334,10 +353,12 @@ hypre_PFMGSolve( void               *pfmg_vdata,
       }
 
       /* fine grid post-relaxation */
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
       hypre_PFMGRelaxSetPostRelax(relax_data_l[0]);
       hypre_PFMGRelaxSetMaxIter(relax_data_l[0], num_post_relax);
       hypre_PFMGRelaxSetZeroGuess(relax_data_l[0], 0);
       hypre_PFMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
+      HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
 
       (pfmg_data -> num_iterations) = (i + 1);
       HYPRE_ANNOTATE_MGLEVEL_END(0);

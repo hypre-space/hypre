@@ -745,6 +745,8 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
    hypre_CommHandle       *comm_handle;
    HYPRE_Int               ci, num_comm_pkgs;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /*------------------------------------------------------
     * NOTE: Inter-part couplings were taken care of earlier.
     *------------------------------------------------------*/
@@ -906,6 +908,8 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
 
    /* U-matrix */
    hypre_SStructUMatrixAssemble(matrix);
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
