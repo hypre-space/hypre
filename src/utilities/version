@@ -27,7 +27,7 @@ esac
 VPATH=`dirname $0`
 VFILE="${VPATH}/../configure"
 VERSION=`grep "HYPRE_VERSION=" $VFILE | cut -d= -f 2 | sed 's/"//g'`
-NUMBER=`grep "HYPRE_NUMBER=" $VFILE | cut -d= -f 2 | sed 's/"//g'`
+NUMBER=`grep "HYPRE_NUMBER=" $VFILE | cut -d= -f 2`
 DATE=`grep "HYPRE_DATE=" $VFILE | cut -d= -f 2 | sed 's/"//g'`
 TIME=`grep "HYPRE_TIME=" $VFILE | cut -d= -f 2 | sed 's/"//g'`
 

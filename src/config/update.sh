@@ -13,9 +13,20 @@ fi
 
 source config/version.sh
 
+# Check that the version number is not smaller than before
+currentnum=`grep "HYPRE_NUMBER=" configure | cut -d= -f 2`
+if [ $hypre_number -lt $currentnum ]; then
+  echo "ERROR: HYPRE version number is smaller than the current version!"
+  exit
+elif [ $hypre_number -gt $currentnum ]; then
+  echo "HYPRE version number is greater than the current version"
+else
+  echo "HYPRE version number is the same as the current version"
+fi
+
 ##### Update release information and configure script for Linux build system
 
-# NOTE: Using '#' as delimiter in sed to allow for '/' in vdate
+# NOTE: Using '#' as delimiter in sed to allow for '/' in reldate
 cat config/configure.in |
 sed -e 's#m4_define.*HYPRE_VERS[^)]*#m4_define([M4_HYPRE_VERSION], ['$hypre_version']#' |
 sed -e 's#m4_define.*HYPRE_NUMB[^)]*#m4_define([M4_HYPRE_NUMBER],  ['$hypre_number']#'  |
@@ -39,7 +50,7 @@ EOF
 
 ##### Update release information for CMake build system
 
-# NOTE: Using '#' as delimiter in sed to allow for '/' in vdate
+# NOTE: Using '#' as delimiter in sed to allow for '/' in reldate
 cat CMakeLists.txt |
 sed -e 's#set(HYPRE_VERS[^)]*#set(HYPRE_VERSION '$hypre_version'#' |
 sed -e 's#set(HYPRE_NUMB[^)]*#set(HYPRE_NUMBER  '$hypre_number'#' |
@@ -50,3 +61,4 @@ mv CMakeLists.txt.tmp CMakeLists.txt
 ##### Update release information in documentation
 
 (cd docs; ./update-release.sh)
+
