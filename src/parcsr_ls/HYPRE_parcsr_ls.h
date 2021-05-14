@@ -3347,6 +3347,23 @@ HYPRE_Int
 HYPRE_ParCSRHybridSetAggNumLevels(HYPRE_Solver solver,
                                   HYPRE_Int    agg_num_levels);
 
+/*
+ * (Optional) Defines the interpolation used on levels of aggressive coarsening
+ * The default is 4, i.e. multipass interpolation.
+ * The following options exist:
+ *
+ *    - 1 : 2-stage extended+i interpolation
+ *    - 2 : 2-stage standard interpolation
+ *    - 3 : 2-stage extended interpolation
+ *    - 4 : multipass interpolation
+ *    - 5 : 2-stage extended interpolation in matrix-matrix form
+ *    - 6 : 2-stage extended+i interpolation in matrix-matrix form
+ *    - 7 : 2-stage extended+e interpolation in matrix-matrix form
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridSetAggInterpType( HYPRE_Solver solver,
+                                    HYPRE_Int    agg_interp_type);
+
 /**
  * (Optional) Defines the degree of aggressive coarsening.
  * The default is 1, which leads to the most aggressive coarsening.
@@ -3788,10 +3805,12 @@ HYPRE_MGRSetLevelFRelaxNumFunctions(HYPRE_Solver solver, HYPRE_Int *num_function
  *    - 0    : injection \f$[0  I]\f$
  *    - 1    : unscaled (not recommended)
  *    - 2    : diagonal scaling (Jacobi)
+ *    - 3    : approximate inverse
+ *    - 4    : pAIR distance 1
+ *    - 5    : pAIR distance 2
  *    - else : use classical modified interpolation
  *
- * These options are currently active for the last stage reduction. Intermediate
- * reduction levels use injection. The default is injection.
+ * The default is injection.
  **/
 HYPRE_Int
 HYPRE_MGRSetRestrictType( HYPRE_Solver solver,
@@ -3810,16 +3829,17 @@ HYPRE_MGRSetNumRestrictSweeps( HYPRE_Solver solver,
                                HYPRE_Int nsweeps );
 
 /**
- * (Optional) Set the strategy for computing the MGR restriction operator.
+ * (Optional) Set the strategy for computing the MGR interpolation operator.
  * Options for \e interp_type are:
  *
  *    - 0    : injection \f$[0  I]^{T}\f$
  *    - 1    : unscaled (not recommended)
  *    - 2    : diagonal scaling (Jacobi)
- *    - else : use default (classical modified interpolation)
+ *    - 3    : classical modified interpolation
+ *    - 4    : approximate inverse
+ *    - else : classical modified interpolation
  *
- * These options are currently active for the last stage reduction. Intermediate
- * reduction levels use diagonal scaling.
+ * The default is diagonal scaling.
  **/
 HYPRE_Int
 HYPRE_MGRSetInterpType( HYPRE_Solver solver,
@@ -3882,6 +3902,14 @@ HYPRE_Int HYPRE_MGRSetCoarseSolver(HYPRE_Solver          solver,
 HYPRE_Int
 HYPRE_MGRSetPrintLevel( HYPRE_Solver solver,
                         HYPRE_Int print_level );
+
+HYPRE_Int
+HYPRE_MGRSetFrelaxPrintLevel( HYPRE_Solver solver,
+                        HYPRE_Int print_level );
+                        
+HYPRE_Int
+HYPRE_MGRSetCoarseGridPrintLevel( HYPRE_Solver solver,
+                        HYPRE_Int print_level );                        
 
 /**
  * (Optional) Set the threshold to compress the coarse grid at each level

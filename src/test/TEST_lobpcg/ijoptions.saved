@@ -1,58 +1,58 @@
 # ijoptions.out.default
-Eigenvalue lambda   2.43042158313013e-01
-Residual   4.02732923495552e-08
+Eigenvalue lambda   2.43042158313015e-01
+Residual   4.02732924449811e-08
 
 # ijoptions.out.no_orthchk
-Eigenvalue lambda   2.43042158313013e-01
-Residual   4.02732923495552e-08
+Eigenvalue lambda   2.43042158313015e-01
+Residual   4.02732924449811e-08
 
 # ijoptions.out.pcgitr.0
-Eigenvalue lambda   2.43042158313013e-01
-Residual   4.02732923495552e-08
+Eigenvalue lambda   2.43042158313015e-01
+Residual   4.02732924449811e-08
 
 # ijoptions.out.pcgitr.1
-Eigenvalue lambda   2.43042158313013e-01
-Residual   4.02732923495552e-08
+Eigenvalue lambda   2.43042158313015e-01
+Residual   4.02732924449811e-08
 
 # ijoptions.out.pcgitr.2
-Eigenvalue lambda   2.43042158313018e-01
-Residual   6.96799149848673e-08
+Eigenvalue lambda   2.43042158313017e-01
+Residual   6.96799148131784e-08
 
 # ijoptions.out.pcgtol.01
-Eigenvalue lambda   2.43042158313018e-01
-Residual   7.24629561863067e-08
+Eigenvalue lambda   2.43042158313017e-01
+Residual   7.24629561469076e-08
 
 # ijoptions.out.pcgtol.05
 Eigenvalue lambda   2.43042158313023e-01
-Residual   1.04744967214067e-07
+Residual   1.04744967224891e-07
 
 # ijoptions.out.seed
-Eigenvalue lambda   2.43042158313013e-01
-Residual   4.02732923495552e-08
+Eigenvalue lambda   2.43042158313015e-01
+Residual   4.02732924449811e-08
 
 # ijoptions.out.seed.repeat
-Eigenvalue lambda   2.43042158313013e-01
-Residual   4.02732923495552e-08
+Eigenvalue lambda   2.43042158313015e-01
+Residual   4.02732924449811e-08
 
 # ijoptions.out.solver.none
 Eigenvalue lambda   2.43042158316676e-01
 Residual   2.03104260070223e-06
 
 # ijoptions.out.verb.1
-Eigenvalue lambda   2.43042158313013e-01
-Residual   4.02732923495552e-08
+Eigenvalue lambda   2.43042158313015e-01
+Residual   4.02732924449811e-08
 
 # ijoptions.out.gen.1
 Eigenvalue lambda   1.00000000000000e+00
 Residual   7.54364534145478e-16
 
 # ijoptions.out.gen.2
-Eigenvalue lambda   3.14395676812973e-01
-Residual   2.50125397358489e-07
+Eigenvalue lambda   3.14395676812972e-01
+Residual   2.50125397604763e-07
 
 # ijoptions.out.orthchk
-Eigenvalue lambda   2.43042158313013e-01
-Residual   4.02732923495552e-08
+Eigenvalue lambda   2.43042158313015e-01
+Residual   4.02732924449811e-08
 
 # ijoptions.out.itr.100
 Eigenvalue lambda   2.11917767568658e-01
@@ -66,11 +66,11 @@ Residual   1.58810659347606e+00
 
 # ijoptions.out.vrand.2
 Eigenvalue lambda   4.79521039879676e-01
-Residual   1.22006034989775e-07
-Residual   2.33712989952824e-07
+Residual   1.22006034991590e-07
+Residual   2.33712990248610e-07
 
 # ijoptions.out.verb.2
-Eigenvalue lambda   2.43042158313013e-01
+Eigenvalue lambda   2.43042158313015e-01
 Residual 4.027329e-08
 =============================================
 # ijoptions.out.verb.0

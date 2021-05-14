@@ -124,7 +124,9 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_THRUST_CALL( exclusive_scan,
                       thrust::make_transform_iterator(CF_marker_dev,              is_negative<HYPRE_Int>()),
                       thrust::make_transform_iterator(CF_marker_dev + A_nr_local, is_negative<HYPRE_Int>()),
-                      map_to_F );
+                      map_to_F,
+                      HYPRE_Int(0) );/* *MUST* pass init value since input and output types diff. */
+
    HYPRE_Int *map_F2_to_F = hypre_TAlloc(HYPRE_Int, AF2F_nr_local, HYPRE_MEMORY_DEVICE);
 
    HYPRE_Int *tmp_end = HYPRE_THRUST_CALL( copy_if,
@@ -399,7 +401,8 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_THRUST_CALL( exclusive_scan,
                       thrust::make_transform_iterator(CF_marker_dev,              is_negative<HYPRE_Int>()),
                       thrust::make_transform_iterator(CF_marker_dev + A_nr_local, is_negative<HYPRE_Int>()),
-                      map_to_F );
+                      map_to_F,
+                      HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
    HYPRE_Int *map_F2_to_F = hypre_TAlloc(HYPRE_Int, AF2F_nr_local, HYPRE_MEMORY_DEVICE);
 
    HYPRE_Int *tmp_end = HYPRE_THRUST_CALL( copy_if,

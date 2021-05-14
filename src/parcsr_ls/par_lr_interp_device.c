@@ -89,7 +89,7 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
                       0 );
 
    // AFF AFC
-   hypre_GpuProfilingPushRangeColor("Extract Submatrix", 2);
+   hypre_GpuProfilingPushRange("Extract Submatrix");
    hypre_ParCSRMatrixGenerateFFFCDevice(A, CF_marker, num_cpts_global, S, &AFC, &AFF);
    hypre_GpuProfilingPopRange();
 
@@ -113,7 +113,7 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
 
    /* 5. Form matrix ~{A_FF}, (return twAFF in AFF data structure ) */
    /* 6. Form matrix ~{A_FC}, (return twAFC in AFC data structure) */
-   hypre_GpuProfilingPushRangeColor("Compute interp matrix", 4);
+   hypre_GpuProfilingPushRange("Compute interp matrix");
    gDim = hypre_GetDefaultCUDAGridDimension(W_nr_of_rows, "warp", bDim);
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_aff_afc,
                       gDim, bDim,
@@ -134,7 +134,7 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
    hypre_GpuProfilingPopRange();
 
    /* 7. Perform matrix-matrix multiplication */
-   hypre_GpuProfilingPushRangeColor("Matrix-matrix mult", 3);
+   hypre_GpuProfilingPushRange("Matrix-matrix mult");
    W = hypre_ParCSRMatMatDevice(AFF, AFC);
    hypre_GpuProfilingPopRange();
 
@@ -150,7 +150,7 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
    P_diag_data = hypre_TAlloc(HYPRE_Complex, P_diag_nnz,     HYPRE_MEMORY_DEVICE);
    P_offd_i    = hypre_TAlloc(HYPRE_Int,     A_nr_of_rows+1, HYPRE_MEMORY_DEVICE);
 
-   hypre_GpuProfilingPushRangeColor("Extend matrix", 4);
+   hypre_GpuProfilingPushRange("Extend matrix");
    hypreDevice_extendWtoP( A_nr_of_rows,
                            W_nr_of_rows,
                            hypre_ParCSRMatrixNumCols(W),
@@ -202,7 +202,7 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
                                        hypre_ParCSRMatrixGlobalNumCols(W);
    hypre_ParCSRMatrixDNumNonzeros(P) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(P);
 
-   hypre_GpuProfilingPushRangeColor("Truncation", 4);
+   hypre_GpuProfilingPushRange("Truncation");
    if (trunc_factor != 0.0 || max_elmts > 0)
    {
       hypre_BoomerAMGInterpTruncationDevice(P, trunc_factor, max_elmts );
@@ -290,7 +290,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
                       0 );
 
    // AFF AFC
-   hypre_GpuProfilingPushRangeColor("Extract Submatrix", 2);
+   hypre_GpuProfilingPushRange("Extract Submatrix");
    hypre_ParCSRMatrixGenerateFFFCDevice(A, CF_marker, num_cpts_global, S, &AFC, &AFF);
    hypre_GpuProfilingPopRange();
 
@@ -348,7 +348,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
                       hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(AFF)) + hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(AFF)),
                       AFF_diag_data_old );
 
-   hypre_GpuProfilingPushRangeColor("Compute interp matrix", 4);
+   hypre_GpuProfilingPushRange("Compute interp matrix");
    gDim = hypre_GetDefaultCUDAGridDimension(W_nr_of_rows, "warp", bDim);
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_twiaff_w,
                       gDim, bDim,
@@ -375,7 +375,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    hypre_GpuProfilingPopRange();
 
    /* 7. Perform matrix-matrix multiplication */
-   hypre_GpuProfilingPushRangeColor("Matrix-matrix mult", 3);
+   hypre_GpuProfilingPushRange("Matrix-matrix mult");
    W = hypre_ParCSRMatMatDevice(AFF, AFC);
    hypre_GpuProfilingPopRange();
 
@@ -391,7 +391,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    P_diag_data = hypre_TAlloc(HYPRE_Complex, P_diag_nnz,     HYPRE_MEMORY_DEVICE);
    P_offd_i    = hypre_TAlloc(HYPRE_Int,     A_nr_of_rows+1, HYPRE_MEMORY_DEVICE);
 
-   hypre_GpuProfilingPushRangeColor("Extend matrix", 4);
+   hypre_GpuProfilingPushRange("Extend matrix");
    hypreDevice_extendWtoP( A_nr_of_rows,
                            W_nr_of_rows,
                            hypre_ParCSRMatrixNumCols(W),
@@ -443,7 +443,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
                                        hypre_ParCSRMatrixGlobalNumCols(W);
    hypre_ParCSRMatrixDNumNonzeros(P) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(P);
 
-   hypre_GpuProfilingPushRangeColor("Truncation", 4);
+   hypre_GpuProfilingPushRange("Truncation");
    if (trunc_factor != 0.0 || max_elmts > 0)
    {
       hypre_BoomerAMGInterpTruncationDevice(P, trunc_factor, max_elmts );
@@ -530,7 +530,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
                       0 );
 
    // AFF AFC
-   hypre_GpuProfilingPushRangeColor("Extract Submatrix", 2);
+   hypre_GpuProfilingPushRange("Extract Submatrix");
    hypre_ParCSRMatrixGenerateFFFCDevice(A, CF_marker, num_cpts_global, S, &AFC, &AFF);
    hypre_GpuProfilingPopRange();
 
@@ -556,7 +556,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    /* Generate D_tmp, i.e., D_mu / D_lambda */
    dlam = hypre_TAlloc(HYPRE_Complex, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
    dtmp = hypre_TAlloc(HYPRE_Complex, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
-   hypre_GpuProfilingPushRangeColor("Compute D_tmp", 3);
+   hypre_GpuProfilingPushRange("Compute D_tmp");
    gDim = hypre_GetDefaultCUDAGridDimension(W_nr_of_rows, "warp", bDim);
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_dlam_dtmp,
                       gDim, bDim,
@@ -591,11 +591,12 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    comm_handle = hypre_ParCSRCommHandleCreate_v2(1, comm_pkg, HYPRE_MEMORY_DEVICE, send_buf, HYPRE_MEMORY_DEVICE, dtmp_offd);
    hypre_ParCSRCommHandleDestroy(comm_handle);
    hypre_TFree(send_buf, HYPRE_MEMORY_DEVICE);
+   hypre_GpuProfilingPopRange();
 
    /* 4. Form D_tau */
    /* 5. Form matrix ~{A_FF}, (return twAFF in AFF data structure ) */
    /* 6. Form matrix ~{A_FC}, (return twAFC in AFC data structure) */
-   hypre_GpuProfilingPushRangeColor("Compute interp matrix", 4);
+   hypre_GpuProfilingPushRange("Compute interp matrix");
    gDim = hypre_GetDefaultCUDAGridDimension(W_nr_of_rows, "warp", bDim);
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_aff_afc_epe,
                       gDim, bDim,
@@ -622,7 +623,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    hypre_GpuProfilingPopRange();
 
    /* 7. Perform matrix-matrix multiplication */
-   hypre_GpuProfilingPushRangeColor("Matrix-matrix mult", 3);
+   hypre_GpuProfilingPushRange("Matrix-matrix mult");
    W = hypre_ParCSRMatMatDevice(AFF, AFC);
    hypre_GpuProfilingPopRange();
 
@@ -638,7 +639,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    P_diag_data = hypre_TAlloc(HYPRE_Complex, P_diag_nnz,     HYPRE_MEMORY_DEVICE);
    P_offd_i    = hypre_TAlloc(HYPRE_Int,     A_nr_of_rows+1, HYPRE_MEMORY_DEVICE);
 
-   hypre_GpuProfilingPushRangeColor("Extend matrix", 4);
+   hypre_GpuProfilingPushRange("Extend matrix");
    hypreDevice_extendWtoP( A_nr_of_rows,
                            W_nr_of_rows,
                            hypre_ParCSRMatrixNumCols(W),
@@ -690,7 +691,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
                                        hypre_ParCSRMatrixGlobalNumCols(W);
    hypre_ParCSRMatrixDNumNonzeros(P) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(P);
 
-   hypre_GpuProfilingPushRangeColor("Truncation", 4);
+   hypre_GpuProfilingPushRange("Truncation");
    if (trunc_factor != 0.0 || max_elmts > 0)
    {
       hypre_BoomerAMGInterpTruncationDevice(P, trunc_factor, max_elmts );

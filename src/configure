@@ -3306,7 +3306,8 @@ fi
 
 # Check whether --with-strict-checking was given.
 if test "${with_strict_checking+set}" = set; then :
-  withval=$with_strict_checking;
+  withval=$with_strict_checking; case "${withval}" in
+ yes)
  hypre_user_chose_ccompilers=yes
  hypre_user_chose_cflags=yes
  hypre_user_chose_cxxcompilers=yes
@@ -3492,6 +3493,8 @@ test -n "$FC" || FC=""""
 
 $as_echo "#define HYPRE_SEQUENTIAL 1" >>confdefs.h
 
+ ;;
+ esac
 
 fi
 
@@ -4183,7 +4186,10 @@ fi
 
 # Check whether --with-caliper was given.
 if test "${with_caliper+set}" = set; then :
-  withval=$with_caliper; hypre_using_caliper=yes
+  withval=$with_caliper; case "$withval" in
+    yes) hypre_using_caliper=yes;;
+    *)   hypre_using_caliper=no ;;
+esac
 else
   hypre_using_caliper=no
 fi
@@ -8924,7 +8930,7 @@ done
         LINK_CC=${HIPCC}
         LINK_CXX=${HIPCC}
 
-                                        HIPCXXFLAGS="-x hip ${HIPCXXFLAGS}"
+                                        HIPCXXFLAGS="-x hip -std=c++14 ${HIPCXXFLAGS}"
 
                                 if test x"$hypre_using_debug" == x"yes"; then :
   HIPCXXFLAGS="-O0 -Wall -g -ggdb ${HIPCXXFLAGS}"
