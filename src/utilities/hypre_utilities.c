@@ -66,7 +66,12 @@ hypre_partition1D(HYPRE_Int  n, /* total number of elements */
    }
 }
 
-/* strcpy that allows overlapping in memory */
+/*--------------------------------------------------------------------------
+ * hypre_strcpy
+ *
+ * Note: strcpy that allows overlapping in memory
+ *--------------------------------------------------------------------------*/
+
 char *
 hypre_strcpy(char *destination, const char *source)
 {

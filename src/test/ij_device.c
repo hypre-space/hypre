@@ -2015,7 +2015,7 @@ CompareParCSRDH(HYPRE_ParCSRMatrix hmat, HYPRE_ParCSRMatrix dmat, HYPRE_Real tol
 
    hypre_MPI_Allreduce(&ecode, &ecode_total, 1, HYPRE_MPI_INT, hypre_MPI_SUM, hypre_MPI_COMM_WORLD);
 
-   hypre_ParcsrAdd(1.0, hmat, -1.0, hmat2, &emat);
+   hypre_ParCSRMatrixAdd(1.0, hmat, -1.0, hmat2, &emat);
    enorm = hypre_ParCSRMatrixFnorm(emat);
    fnorm = hypre_ParCSRMatrixFnorm(hmat);
    if ( (fnorm > 0 ? enorm / fnorm : enorm) > tol )
@@ -2028,4 +2028,3 @@ CompareParCSRDH(HYPRE_ParCSRMatrix hmat, HYPRE_ParCSRMatrix dmat, HYPRE_Real tol
 
    return ecode_total;
 }
-

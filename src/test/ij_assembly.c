@@ -620,7 +620,7 @@ checkMatrix(HYPRE_ParCSRMatrix h_parcsr_ref, HYPRE_IJMatrix ij_A)
    h_parcsr_A = hypre_ParCSRMatrixClone_v2(parcsr_A, 1, HYPRE_MEMORY_HOST);
 
    // Check norm of (parcsr_ref - parcsr_A)
-   hypre_ParcsrAdd(1.0, h_parcsr_ref, -1.0, h_parcsr_A, &parcsr_error);
+   hypre_ParCSRMatrixAdd(1.0, h_parcsr_ref, -1.0, h_parcsr_A, &parcsr_error);
    fnorm = hypre_ParCSRMatrixFnorm(parcsr_error);
 
    if (myid == 0)
