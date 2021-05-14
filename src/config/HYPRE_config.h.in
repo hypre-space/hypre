@@ -121,10 +121,13 @@
 /* Release name */
 #undef HYPRE_RELEASE_NAME
 
+/* Release number */
+#undef HYPRE_RELEASE_NUMBER
+
 /* Time of release */
 #undef HYPRE_RELEASE_TIME
 
-/* Version number */
+/* Release version */
 #undef HYPRE_RELEASE_VERSION
 
 /* Define to 1 for RS6000 platforms */
