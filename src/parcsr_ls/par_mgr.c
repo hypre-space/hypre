@@ -2242,7 +2242,7 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
   //hypre_ParCSRMatrixPrintIJ(A_h_correction,1,1,"A_h_correction_filtered");
 
   // coarse grid / schur complement
-  hypre_ParcsrAdd(1.0, A_cc, 1.0, A_h_correction, &A_h);
+  hypre_ParCSRMatrixAdd(1.0, A_cc, 1.0, A_h_correction, &A_h);
   *A_h_ptr = A_h;
   //hypre_ParCSRMatrixPrintIJ(A_h,1,1,"A_h");
 
