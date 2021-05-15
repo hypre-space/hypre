@@ -412,24 +412,9 @@ hypre_CSRMatrixAddHost ( hypre_CSRMatrix *A,
 #endif
    {
       HYPRE_Int   ns, ne;
-      HYPRE_Int   ii, size, rest, num_threads;
       HYPRE_Int  *marker = NULL;
 
-      ii = hypre_GetThreadNum();
-      num_threads = hypre_NumActiveThreads();
-
-      size = nnzrows_A/num_threads;
-      rest = nnzrows_A - size*num_threads;
-      if (ii < rest)
-      {
-         ns = ii*size+ii;
-         ne = (ii+1)*size+ii+1;
-      }
-      else
-      {
-         ns = ii*size+rest;
-         ne = (ii+1)*size+rest;
-      }
+      hypre_partition1D(nnzrows_C, hypre_NumActiveThreads(), hypre_GetThreadNum(), &ns, &ne);
 
       marker = hypre_CTAlloc(HYPRE_Int, ncols_A, HYPRE_MEMORY_HOST);
 
@@ -535,25 +520,13 @@ hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
       HYPRE_Int     ia, ib, ic, num_nonzeros;
       HYPRE_Int     ns, ne, pos;
       HYPRE_BigInt  jcol;
-      HYPRE_Int     ii, size, rest, num_threads;
+      HYPRE_Int     ii, num_threads;
       HYPRE_Int     jj;
       HYPRE_Int    *marker = NULL;
 
       ii = hypre_GetThreadNum();
       num_threads = hypre_NumActiveThreads();
-
-      size = nrows_A/num_threads;
-      rest = nrows_A - size*num_threads;
-      if (ii < rest)
-      {
-         ns = ii*size+ii;
-         ne = (ii+1)*size+ii+1;
-      }
-      else
-      {
-         ns = ii*size+rest;
-         ne = (ii+1)*size+rest;
-      }
+      hypre_partition1D(nrows_A, num_threads, ii, &ns, &ne);
 
       marker = hypre_CTAlloc(HYPRE_Int, ncols_A, HYPRE_MEMORY_HOST);
       for (ia = 0; ia < ncols_A; ia++)
@@ -746,24 +719,12 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
    {
       HYPRE_Int  *B_marker = NULL;
       HYPRE_Int   ns, ne, ii, jj;
-      HYPRE_Int   size, rest, num_threads;
+      HYPRE_Int   num_threads;
       HYPRE_Int   i1, iic;
 
       ii = hypre_GetThreadNum();
       num_threads = hypre_NumActiveThreads();
-
-      size = nnzrows_A/num_threads;
-      rest = nnzrows_A - size*num_threads;
-      if (ii < rest)
-      {
-         ns = ii*size+ii;
-         ne = (ii+1)*size+ii+1;
-      }
-      else
-      {
-         ns = ii*size+rest;
-         ne = (ii+1)*size+rest;
-      }
+      hypre_partition1D(nnzrows_A, num_threads, ii, &ns, &ne);
 
       B_marker = hypre_CTAlloc(HYPRE_Int, ncols_B, HYPRE_MEMORY_HOST);
       for (ib = 0; ib < ncols_B; ib++)
@@ -1144,9 +1105,7 @@ hypre_CSRMatrixTransposeHost(hypre_CSRMatrix  *A,
 #pragma omp parallel
 #endif
    {
-      HYPRE_Int   num_threads = hypre_NumActiveThreads();
-      HYPRE_Int   ii = hypre_GetThreadNum();
-      HYPRE_Int   ns, ne, size, rest;
+      HYPRE_Int   ii, num_threads, ns, ne;
       HYPRE_Int   i, j, j0, j1, ir;
       HYPRE_Int   idx, offset;
       HYPRE_Int   transpose_i;
@@ -1155,18 +1114,9 @@ hypre_CSRMatrixTransposeHost(hypre_CSRMatrix  *A,
       HYPRE_Int   transpose_j0;
       HYPRE_Int   transpose_j1;
 
-      size = nnzrows_A/num_threads;
-      rest = nnzrows_A - size*num_threads;
-      if (ii < rest)
-      {
-         ns = ii*size + ii;
-         ne = (ii + 1)*size + ii + 1;
-      }
-      else
-      {
-         ns = ii*size + rest;
-         ne = (ii + 1)*size + rest;
-      }
+      ii = hypre_GetThreadNum();
+      num_threads = hypre_NumActiveThreads();
+      hypre_partition1D(nnzrows_A, num_threads, ii, &ns, &ne);
 
       /*-----------------------------------------------------------------
        * Count the number of entries that will go into each bucket
@@ -1377,26 +1327,14 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
 #pragma omp parallel
 #endif
    {
-      HYPRE_Int size, rest, ii;
-      HYPRE_Int ns, ne;
+      HYPRE_Int ns, ne, ii, num_threads;
       HYPRE_Int i1, i, j;
       HYPRE_Int my_offd_size, my_diag_size;
       HYPRE_Int cnt_offd, cnt_diag;
-      HYPRE_Int num_threads = hypre_NumActiveThreads();
 
-      size = num_rows_Bext/num_threads;
-      rest = num_rows_Bext - size*num_threads;
       ii = hypre_GetThreadNum();
-      if (ii < rest)
-      {
-         ns = ii*size+ii;
-         ne = (ii+1)*size+ii+1;
-      }
-      else
-      {
-         ns = ii*size+rest;
-         ne = (ii+1)*size+rest;
-      }
+      num_threads = hypre_NumActiveThreads();
+      hypre_partition1D(num_rows_Bext, num_threads, ii, &ns, &ne);
 
       my_diag_size = 0;
       my_offd_size = 0;
