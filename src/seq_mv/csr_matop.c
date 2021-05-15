@@ -412,24 +412,9 @@ hypre_CSRMatrixAddHost ( hypre_CSRMatrix *A,
 #endif
    {
       HYPRE_Int   ns, ne;
-      HYPRE_Int   ii, size, rest, num_threads;
       HYPRE_Int  *marker = NULL;
 
-      ii = hypre_GetThreadNum();
-      num_threads = hypre_NumActiveThreads();
-
-      size = nnzrows_A/num_threads;
-      rest = nnzrows_A - size*num_threads;
-      if (ii < rest)
-      {
-         ns = ii*size+ii;
-         ne = (ii+1)*size+ii+1;
-      }
-      else
-      {
-         ns = ii*size+rest;
-         ne = (ii+1)*size+rest;
-      }
+      hypre_partition1D(nnzrows_C, hypre_NumActiveThreads(), hypre_GetThreadNum(), &ns, &ne);
 
       marker = hypre_CTAlloc(HYPRE_Int, ncols_A, HYPRE_MEMORY_HOST);
 
