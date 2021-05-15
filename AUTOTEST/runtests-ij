@@ -1,2 +1,2 @@
-TEST_ij/[^b]*.sh
+TEST_ij/*.sh
 

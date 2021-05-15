@@ -1,2 +1,1 @@
-TEST_ij/benchmark.sh
-TEST_struct/benchmark.sh
+TEST_bench/*.sh
