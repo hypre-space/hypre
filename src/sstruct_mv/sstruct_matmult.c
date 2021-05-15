@@ -639,8 +639,7 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
 
    /* Create and initialize ij_Ahat */
    HYPRE_ANNOTATE_REGION_BEGIN("%s", "Create Matrix");
-   HYPRE_IJMatrixCreate(comm, sizes[0], sizes[1], sizes[2], sizes[3], &ij_Ahat);
-   HYPRE_IJMatrixSetObjectType(ij_Ahat, HYPRE_PARCSR);
+   HYPRE_IJMatrixPartialClone(ij_A, &ij_Ahat);
    hypre_AuxParCSRMatrixCreate(&aux_matrix, nrows, ncols, row_sizes);
    hypre_IJMatrixTranslator(ij_Ahat) = aux_matrix;
    HYPRE_IJMatrixInitialize(ij_Ahat);
