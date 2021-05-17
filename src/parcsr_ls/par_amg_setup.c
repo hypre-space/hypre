@@ -1477,6 +1477,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                }
                hypre_TFree(col_offd_Sabs_to_A, HYPRE_MEMORY_HOST);
 
+               HYPRE_ANNOTATE_REGION_END("%s", "Coarsening");
                break;
             }
 
@@ -1502,6 +1503,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                }
                hypre_TFree(col_offd_Sabs_to_A, HYPRE_MEMORY_HOST);
 
+               HYPRE_ANNOTATE_REGION_END("%s", "Coarsening");
                break;
             }
          }
