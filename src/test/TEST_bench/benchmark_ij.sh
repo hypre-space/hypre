@@ -43,6 +43,15 @@ do
   tail -3 $i
 done > ${TNAME}.out
 
+for i in $FILES
+do
+  echo "# Output file: $i"
+  setup_time=$(grep -A 1 "PCG Setup" $i | tail -n 1)
+  echo "PCG Setup"${setup_time}
+  solve_time=$(grep -A 1 "PCG Solve" $i | tail -n 1)
+  echo "PCG Solve"${solve_time}
+done > ${TNAME}.perf
+
 # Make sure that the output file is reasonable
 RUNCOUNT=`echo $FILES | wc -w`
 OUTCOUNT=`grep "Complexity" ${TNAME}.out | wc -l`
