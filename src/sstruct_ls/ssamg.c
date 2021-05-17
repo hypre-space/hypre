@@ -34,10 +34,17 @@ hypre_SSAMGCreate( hypre_MPI_Comm comm )
    (ssamg_data -> usr_relax_weight) = 0.0;
    (ssamg_data -> num_pre_relax)    = 1;
    (ssamg_data -> num_post_relax)   = 1;
-   (ssamg_data -> num_coarse_relax) = -1;
    (ssamg_data -> logging)          = 0;
    (ssamg_data -> print_level)      = 0;
    (ssamg_data -> print_freq)       = 1;
+
+   /* Coarse solver defaults */
+   (ssamg_data -> csolver)          = NULL;
+   (ssamg_data -> ij_Ac)            = NULL;
+   (ssamg_data -> par_b)            = NULL;
+   (ssamg_data -> par_x)            = NULL;
+   (ssamg_data -> csolver_type)     = 0;
+   (ssamg_data -> num_coarse_relax) = -1;
 
    /* initialize */
    (ssamg_data -> nparts)           = -1;
@@ -75,17 +82,8 @@ hypre_SSAMGDestroy( void *ssamg_vdata )
          num_levels = hypre_SSAMGDataNumLevels(ssamg_data);
          max_levels = hypre_SSAMGDataMaxLevels(ssamg_data);
 
-         hypre_SSAMGRelaxDestroy(ssamg_data -> relax_data_l[0]);
-         hypre_SStructMatvecDestroy(ssamg_data -> matvec_data_l[0]);
-         HYPRE_SStructVectorDestroy(ssamg_data -> b_l[0]);
-         HYPRE_SStructVectorDestroy(ssamg_data -> x_l[0]);
-         HYPRE_SStructVectorDestroy(ssamg_data -> tx_l[0]);
-         HYPRE_SStructMatrixDestroy(ssamg_data -> A_l[0]);
-         HYPRE_SStructGridDestroy(ssamg_data -> grid_l[0]);
-         hypre_TFree(ssamg_data -> cdir_l[0], HYPRE_MEMORY_HOST);
-         hypre_TFree(ssamg_data -> active_l[0], HYPRE_MEMORY_HOST);
-         hypre_TFree(ssamg_data -> relax_weights[0], HYPRE_MEMORY_HOST);
-         for (l = 1; l < num_levels; l++)
+         /* Destroy data */
+         for (l = 0; l < (num_levels - 1); l++)
          {
             hypre_SSAMGRelaxDestroy(ssamg_data -> relax_data_l[l]);
             hypre_SStructMatvecDestroy(ssamg_data -> matvec_data_l[l]);
@@ -94,14 +92,17 @@ hypre_SSAMGDestroy( void *ssamg_vdata )
             HYPRE_SStructVectorDestroy(ssamg_data -> x_l[l]);
             HYPRE_SStructVectorDestroy(ssamg_data -> tx_l[l]);
             HYPRE_SStructMatrixDestroy(ssamg_data -> A_l[l]);
-            HYPRE_SStructMatrixDestroy(ssamg_data -> P_l[l-1]);
-            HYPRE_SStructMatrixDestroy(ssamg_data -> RT_l[l-1]);
-            hypre_SStructMatvecDestroy(ssamg_data -> restrict_data_l[l-1]);
-            hypre_SStructMatvecDestroy(ssamg_data -> interp_data_l[l-1]);
+            HYPRE_SStructMatrixDestroy(ssamg_data -> P_l[l]);
+            HYPRE_SStructMatrixDestroy(ssamg_data -> RT_l[l]);
+            hypre_SStructMatvecDestroy(ssamg_data -> restrict_data_l[l]);
+            hypre_SStructMatvecDestroy(ssamg_data -> interp_data_l[l]);
             hypre_TFree(ssamg_data -> cdir_l[l], HYPRE_MEMORY_HOST);
             hypre_TFree(ssamg_data -> active_l[l], HYPRE_MEMORY_HOST);
             hypre_TFree(ssamg_data -> relax_weights[l], HYPRE_MEMORY_HOST);
          }
+
+         /* Destroy coarse solver data */
+         hypre_SSAMGCoarseSolverDestroy(ssamg_vdata);
 
          for (l = num_levels; l < max_levels; l++)
          {
@@ -329,6 +330,20 @@ hypre_SSAMGSetNumCoarseRelax( void       *ssamg_vdata,
    hypre_SSAMGData *ssamg_data = (hypre_SSAMGData *) ssamg_vdata;
 
    hypre_SSAMGDataNumCoarseRelax(ssamg_data) = num_coarse_relax;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetCoarseSolverType( void       *ssamg_vdata,
+                                HYPRE_Int   csolver_type)
+{
+   hypre_SSAMGData *ssamg_data = (hypre_SSAMGData *) ssamg_vdata;
+
+   hypre_SSAMGDataCSolverType(ssamg_data) = csolver_type;
 
    return hypre_error_flag;
 }

@@ -41,7 +41,6 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    HYPRE_Int              max_iter     = hypre_SSAMGDataMaxIter(ssamg_data);
    HYPRE_Int              max_levels   = hypre_SSAMGDataMaxLevels(ssamg_data);
    HYPRE_Int              relax_type   = hypre_SSAMGDataRelaxType(ssamg_data);
-   HYPRE_Int              num_crelax   = hypre_SSAMGDataNumCoarseRelax(ssamg_data);
    HYPRE_Real           **dxyz         = hypre_SSAMGDataDxyz(ssamg_data);
    HYPRE_Int            **active_l;
    HYPRE_Int            **cdir_l;
@@ -120,14 +119,10 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    /* Compute coarsening direction and active levels for relaxation */
    hypre_SSAMGCoarsen(ssamg_vdata, grid, dxyz_flag, dxyz);
 
-   /* Compute maximum number of iterations in coarsest grid if requested */
-   hypre_SSAMGComputeNumCoarseRelax(ssamg_vdata);
-
    /* Get info from ssamg_data */
    cdir_l        = hypre_SSAMGDataCdir(ssamg_data);
    grid_l        = hypre_SSAMGDataGridl(ssamg_data);
    active_l      = hypre_SSAMGDataActivel(ssamg_data);
-   num_crelax    = hypre_SSAMGDataNumCoarseRelax(ssamg_data);
    relax_weights = hypre_SSAMGDataRelaxWeights(ssamg_data);
 
    /*-----------------------------------------------------
@@ -158,12 +153,14 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
 
       // Build prolongation matrix
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
       P_l[l]  = hypre_SSAMGCreateInterpOp(A_l[l], grid_l[l+1], cdir_l[l]);
       //HYPRE_SStructMatrixSetTranspose(P_l[l], 1);
       hypre_SSAMGSetupInterpOp(A_l[l], cdir_l[l], P_l[l]);
 
       // Build restriction matrix
       hypre_SStructMatrixRef(P_l[l], &RT_l[l]);
+      HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
 
       // Compute coarse matrix
       hypre_SSAMGComputeRAP(A_l[l], P_l[l], grid_l[l+1], cdir_l[l], non_galerkin, &A_l[l+1]);
@@ -224,24 +221,13 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       hypre_SSAMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
    }
 
-   /* set up remaining operations for the coarse grid */
-   l = (num_levels - 1);
-   hypre_SStructMatvecCreate(&matvec_data_l[l]);
-   hypre_SStructMatvecSetup(matvec_data_l[l], A_l[l], x_l[l]);
-   hypre_SSAMGRelaxCreate(comm, nparts, &relax_data_l[l]);
-   hypre_SSAMGRelaxSetTol(relax_data_l[l], 0.0);
-   hypre_SSAMGRelaxSetWeights(relax_data_l[l], relax_weights[l]);
-   hypre_SSAMGRelaxSetActiveParts(relax_data_l[l], active_l[l]);
-   hypre_SSAMGRelaxSetType(relax_data_l[l], 0);
-   hypre_SSAMGRelaxSetMaxIter(relax_data_l[l], num_crelax);
-   hypre_SSAMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
-   hypre_SSAMGRelaxSetMatvecData(relax_data_l[l], matvec_data_l[l]);
-   hypre_SSAMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
-
    (ssamg_data -> relax_data_l)    = relax_data_l;
    (ssamg_data -> matvec_data_l)   = matvec_data_l;
    (ssamg_data -> restrict_data_l) = restrict_data_l;
    (ssamg_data -> interp_data_l)   = interp_data_l;
+
+   /* set up coarse solve */
+   hypre_SSAMGCoarseSolverSetup(ssamg_vdata);
 
    /*-----------------------------------------------------
     * Allocate space for log info
@@ -475,49 +461,6 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
 #endif // ifdef (DEBUG_SETUP)
 
    HYPRE_ANNOTATE_FUNC_END;
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_SSAMGComputeCoarseMaxIter
- *
- * Computes maximum number of iterations for the coarsest grid
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SSAMGComputeNumCoarseRelax( void *ssamg_vdata )
-{
-   hypre_SSAMGData      *ssamg_data  = (hypre_SSAMGData *) ssamg_vdata;
-   HYPRE_Int             nparts      = hypre_SSAMGDataNParts(ssamg_data);
-   HYPRE_Int             num_levels  = hypre_SSAMGDataNumLevels(ssamg_data);
-   HYPRE_Int             num_crelax  = hypre_SSAMGDataNumCoarseRelax(ssamg_data);
-   hypre_SStructGrid    *cgrid       = hypre_SSAMGDataGridl(ssamg_data)[num_levels - 1];
-
-   hypre_Box            *bbox;
-   hypre_SStructPGrid   *pgrid;
-   hypre_StructGrid     *sgrid;
-
-   HYPRE_Int             part, cmax_size, max_work;
-
-   if (num_crelax < 0)
-   {
-      /* do no more work on the coarsest grid than the cost of a V-cycle
-       * (estimating roughly 4 communications per V-cycle level) */
-      max_work = 4*num_levels;
-
-      /* do sweeps proportional to the coarsest grid size */
-      cmax_size = 0;
-      for (part = 0; part < nparts; part++)
-      {
-         pgrid = hypre_SStructGridPGrid(cgrid, part);
-         sgrid = hypre_SStructPGridCellSGrid(pgrid);
-         bbox  = hypre_StructGridBoundingBox(sgrid);
-
-         cmax_size = hypre_max(cmax_size, hypre_BoxMaxSize(bbox));
-      }
-      hypre_SSAMGDataNumCoarseRelax(ssamg_data) = hypre_min(max_work, cmax_size);
-   }
 
    return hypre_error_flag;
 }

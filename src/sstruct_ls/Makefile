@@ -97,6 +97,7 @@ FILES =\
  sys_semi_interp.c\
  sys_semi_restrict.c\
  ssamg.c\
+ ssamg_csolver.c\
  ssamg_stats.c\
  ssamg_setup.c\
  ssamg_setup_rap.c\

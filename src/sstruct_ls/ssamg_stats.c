@@ -25,6 +25,7 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
    HYPRE_Int               num_pre_relax = hypre_SSAMGDataNumPreRelax(ssamg_data);
    HYPRE_Int               num_pos_relax = hypre_SSAMGDataNumPosRelax(ssamg_data);
    HYPRE_Int               num_crelax    = hypre_SSAMGDataNumCoarseRelax(ssamg_data);
+   HYPRE_Int               csolver_type  = hypre_SSAMGDataCSolverType(ssamg_data);
    HYPRE_Int               nparts        = hypre_SSAMGDataNParts(ssamg_data);
    HYPRE_Int             **cdir_l        = hypre_SSAMGDataCdir(ssamg_data);
    HYPRE_Int             **active_l      = hypre_SSAMGDataActivel(ssamg_data);
@@ -514,6 +515,7 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       {
          hypre_printf("RAP type: galerkin\n");
       }
+
       hypre_printf("Relaxation skip: ");
       if (skip_relax)
       {
@@ -523,6 +525,7 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       {
          hypre_printf("none\n");
       }
+
       hypre_printf("Relaxation type: ");
       if (relax_type == 0)
       {
@@ -536,6 +539,21 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       {
          hypre_printf("Red-Black Gauss-Seidel\n");
       }
+
+      hypre_printf("Coarse solver type: ");
+      if (csolver_type == 0)
+      {
+         hypre_printf("Weighted Jacobi\n");
+      }
+      else if (csolver_type == 1)
+      {
+         hypre_printf("BoomerAMG\n");
+      }
+      else
+      {
+         hypre_printf("Unknown\n");
+      }
+
       hypre_printf("Number of pre-sweeps: %d\n", num_pre_relax);
       hypre_printf("Number of pos-sweeps: %d\n", num_pos_relax);
       hypre_printf("Number of coarse-sweeps: %d\n", num_crelax);

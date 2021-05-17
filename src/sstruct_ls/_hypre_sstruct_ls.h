@@ -467,28 +467,29 @@ HYPRE_Int HYPRE_SStructSplitPrintLogging( HYPRE_SStructSolver  solver );
 HYPRE_Int HYPRE_SStructSplitGetFinalRelativeResidualNorm ( HYPRE_SStructSolver solver , HYPRE_Real *norm );
 
 /* HYPRE_sstruct_ssamg.c */
-HYPRE_Int HYPRE_SStructSSAMGCreate ( MPI_Comm comm, HYPRE_SStructSolver *solver );
+HYPRE_Int HYPRE_SStructSSAMGCreate ( MPI_Comm comm , HYPRE_SStructSolver *solver );
 HYPRE_Int HYPRE_SStructSSAMGDestroy ( HYPRE_SStructSolver solver );
-HYPRE_Int HYPRE_SStructSSAMGSetup ( HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYPRE_SStructVector b, HYPRE_SStructVector x );
-HYPRE_Int HYPRE_SStructSSAMGSolve ( HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYPRE_SStructVector b, HYPRE_SStructVector x);
-HYPRE_Int HYPRE_SStructSSAMGSetTol ( HYPRE_SStructSolver solver, HYPRE_Real tol );
-HYPRE_Int HYPRE_SStructSSAMGSetMaxIter ( HYPRE_SStructSolver solver, HYPRE_Int max_iter );
-HYPRE_Int HYPRE_SStructSSAMGSetMaxLevels ( HYPRE_SStructSolver solver, HYPRE_Int max_levels );
-HYPRE_Int HYPRE_SStructSSAMGSetRelChange ( HYPRE_SStructSolver solver, HYPRE_Int rel_change );
+HYPRE_Int HYPRE_SStructSSAMGSetup ( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
+HYPRE_Int HYPRE_SStructSSAMGSolve ( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x);
+HYPRE_Int HYPRE_SStructSSAMGSetTol ( HYPRE_SStructSolver solver , HYPRE_Real tol );
+HYPRE_Int HYPRE_SStructSSAMGSetMaxIter ( HYPRE_SStructSolver solver , HYPRE_Int max_iter );
+HYPRE_Int HYPRE_SStructSSAMGSetMaxLevels ( HYPRE_SStructSolver solver , HYPRE_Int max_levels );
+HYPRE_Int HYPRE_SStructSSAMGSetRelChange ( HYPRE_SStructSolver solver , HYPRE_Int rel_change );
 HYPRE_Int HYPRE_SStructSSAMGSetZeroGuess ( HYPRE_SStructSolver solver );
 HYPRE_Int HYPRE_SStructSSAMGSetNonZeroGuess ( HYPRE_SStructSolver solver );
-HYPRE_Int HYPRE_SStructSSAMGSetRelaxType ( HYPRE_SStructSolver solver, HYPRE_Int relax_type );
-HYPRE_Int HYPRE_SStructSSAMGSetSkipRelax ( HYPRE_SStructSolver solver, HYPRE_Int skip_relax );
-HYPRE_Int HYPRE_SStructSSAMGSetRelaxWeight ( HYPRE_SStructSolver solver, HYPRE_Real relax_weight );
-HYPRE_Int HYPRE_SStructSSAMGSetNumPreRelax ( HYPRE_SStructSolver solver, HYPRE_Int num_pre_relax );
-HYPRE_Int HYPRE_SStructSSAMGSetNumPostRelax ( HYPRE_SStructSolver solver, HYPRE_Int num_post_relax );
-HYPRE_Int HYPRE_SStructSSAMGSetNumCoarseRelax ( HYPRE_SStructSolver solver, HYPRE_Int num_coarse_relax );
-HYPRE_Int HYPRE_SStructSSAMGSetDxyz ( HYPRE_SStructSolver  solver, HYPRE_Int nparts, HYPRE_Real **dxyz );
-HYPRE_Int HYPRE_SStructSSAMGSetLogging ( HYPRE_SStructSolver solver, HYPRE_Int logging );
-HYPRE_Int HYPRE_SStructSSAMGSetPrintLevel ( HYPRE_SStructSolver solver, HYPRE_Int print_level );
-HYPRE_Int HYPRE_SStructSSAMGSetPrintFreq ( HYPRE_SStructSolver solver, HYPRE_Int print_freq );
-HYPRE_Int HYPRE_SStructSSAMGGetNumIterations ( HYPRE_SStructSolver  solver, HYPRE_Int *num_iterations );
-HYPRE_Int HYPRE_SStructSSAMGGetFinalRelativeResidualNorm ( HYPRE_SStructSolver  solver, HYPRE_Real *norm );
+HYPRE_Int HYPRE_SStructSSAMGSetRelaxType ( HYPRE_SStructSolver solver , HYPRE_Int relax_type );
+HYPRE_Int HYPRE_SStructSSAMGSetSkipRelax ( HYPRE_SStructSolver solver , HYPRE_Int skip_relax );
+HYPRE_Int HYPRE_SStructSSAMGSetRelaxWeight ( HYPRE_SStructSolver solver , HYPRE_Real relax_weight );
+HYPRE_Int HYPRE_SStructSSAMGSetNumPreRelax ( HYPRE_SStructSolver solver , HYPRE_Int num_pre_relax );
+HYPRE_Int HYPRE_SStructSSAMGSetNumPostRelax ( HYPRE_SStructSolver solver , HYPRE_Int num_post_relax );
+HYPRE_Int HYPRE_SStructSSAMGSetNumCoarseRelax ( HYPRE_SStructSolver solver , HYPRE_Int num_coarse_relax );
+HYPRE_Int HYPRE_SStructSSAMGSetCoarseSolverType ( HYPRE_SStructSolver solver , HYPRE_Int csolver_type );
+HYPRE_Int HYPRE_SStructSSAMGSetDxyz ( HYPRE_SStructSolver solver , HYPRE_Int nparts , HYPRE_Real **dxyz );
+HYPRE_Int HYPRE_SStructSSAMGSetLogging ( HYPRE_SStructSolver solver , HYPRE_Int logging );
+HYPRE_Int HYPRE_SStructSSAMGSetPrintLevel ( HYPRE_SStructSolver solver , HYPRE_Int print_level );
+HYPRE_Int HYPRE_SStructSSAMGSetPrintFreq ( HYPRE_SStructSolver solver , HYPRE_Int print_freq );
+HYPRE_Int HYPRE_SStructSSAMGGetNumIterations ( HYPRE_SStructSolver solver , HYPRE_Int *num_iterations );
+HYPRE_Int HYPRE_SStructSSAMGGetFinalRelativeResidualNorm ( HYPRE_SStructSolver solver , HYPRE_Real *norm );
 
 /* HYPRE_sstruct_sys_pfmg.c */
 HYPRE_Int HYPRE_SStructSysPFMGCreate ( MPI_Comm comm , HYPRE_SStructSolver *solver );
@@ -612,6 +613,7 @@ HYPRE_Int hypre_SSAMGSetSkipRelax ( void *ssamg_vdata , HYPRE_Int skip_relax );
 HYPRE_Int hypre_SSAMGSetNumPreRelax ( void *ssamg_vdata , HYPRE_Int num_pre_relax );
 HYPRE_Int hypre_SSAMGSetNumPosRelax ( void *ssamg_vdata , HYPRE_Int num_pos_relax );
 HYPRE_Int hypre_SSAMGSetNumCoarseRelax ( void *ssamg_vdata , HYPRE_Int num_coarse_relax );
+HYPRE_Int hypre_SSAMGSetCoarseSolverType ( void *ssamg_vdata , HYPRE_Int csolver_type );
 HYPRE_Int hypre_SSAMGSetPrintLevel ( void *ssamg_vdata , HYPRE_Int print_level );
 HYPRE_Int hypre_SSAMGSetPrintFreq ( void *ssamg_vdata , HYPRE_Int print_freq );
 HYPRE_Int hypre_SSAMGSetLogging ( void *ssamg_vdata , HYPRE_Int logging );
@@ -619,6 +621,11 @@ HYPRE_Int hypre_SSAMGPrintLogging ( void *ssamg_vdata );
 HYPRE_Int hypre_SSAMGPrintStats ( void *ssamg_vdata );
 HYPRE_Int hypre_SSAMGGetNumIterations ( void *ssamg_vdata , HYPRE_Int *num_iterations );
 HYPRE_Int hypre_SSAMGGetFinalRelativeResidualNorm ( void *ssamg_vdata , HYPRE_Real *relative_residual_norm );
+
+/* ssamg_csolver.c */
+HYPRE_Int hypre_SSAMGCoarseSolverSetup( void *ssamg_vdata );
+HYPRE_Int hypre_SSAMGCoarseSolve( void *ssamg_vdata );
+HYPRE_Int hypre_SSAMGCoarseSolverDestroy( void *ssamg_vdata );
 
 /* ssamg_interp.c */
 hypre_SStructMatrix* hypre_SSAMGCreateInterpOp ( hypre_SStructMatrix *A , hypre_SStructGrid *cgrid, HYPRE_Int *cdir_p );

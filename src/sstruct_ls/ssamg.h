@@ -29,11 +29,18 @@ typedef struct hypre_SSAMGData_struct
    HYPRE_Int               num_levels;       /* number of levels of the multigrid hierarchy */
    HYPRE_Int               num_pre_relax;    /* number of pre relaxation sweeps */
    HYPRE_Int               num_post_relax;   /* number of post relaxation sweeps */
-   HYPRE_Int               num_coarse_relax; /* number of coarse relaxation sweeps */
    HYPRE_Int               skip_relax;       /* skip relaxation flag */
    HYPRE_Int               relax_type;       /* relaxation type flag */
    HYPRE_Real              usr_relax_weight; /* user relax weight */
    HYPRE_Real             *dxyz[3];          /* nparts array used to determine cdir */
+
+   /* Coarse solver data */
+   HYPRE_Solver            csolver;
+   HYPRE_IJMatrix          ij_Ac;
+   hypre_ParVector        *par_b;
+   hypre_ParVector        *par_x;
+   HYPRE_Int               csolver_type;     /* coarse solver type */
+   HYPRE_Int               num_coarse_relax; /* number of coarse relaxation sweeps */
 
    /* (nlevels x nparts) arrays */
    HYPRE_Int             **active_l;         /* active parts for relaxation */
@@ -92,6 +99,7 @@ typedef struct hypre_SSAMGData_struct
 #define hypre_SSAMGDataNumPreRelax(ssamg_data)    ((ssamg_data) -> num_pre_relax)
 #define hypre_SSAMGDataNumPosRelax(ssamg_data)    ((ssamg_data) -> num_post_relax)
 #define hypre_SSAMGDataNumCoarseRelax(ssamg_data) ((ssamg_data) -> num_coarse_relax)
+#define hypre_SSAMGDataCSolverType(ssamg_data)    ((ssamg_data) -> csolver_type)
 #define hypre_SSAMGDataTimeIndex(ssamg_data)      ((ssamg_data) -> time_index)
 #define hypre_SSAMGDataPrintLevel(ssamg_data)     ((ssamg_data) -> print_level)
 #define hypre_SSAMGDataPrintFreq(ssamg_data)      ((ssamg_data) -> print_freq)

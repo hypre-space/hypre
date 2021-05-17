@@ -409,6 +409,17 @@ HYPRE_SStructSSAMGSetNumCoarseRelax(HYPRE_SStructSolver solver,
                                     HYPRE_Int           num_coarse_relax);
 
 /**
+ * (Optional) Set coarse solver type for SSAMG. Current options are
+ * \begin{tabular}{l@{ -- }l}
+ * 0 & Weighted Jacobi (default) \\
+ * 1 & BoomerAMG \\
+ * \end{tabular}
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGSetCoarseSolverType(HYPRE_SStructSolver solver,
+                                      HYPRE_Int           csolver_type);
+
+/**
  * (Optional) Skip relaxation on certain grids for isotropic problems.  This can
  * greatly improve efficiency by eliminating unnecessary relaxations when the
  * underlying problem is isotropic.

@@ -240,17 +240,8 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
           *--------------------------------------------------*/
          HYPRE_ANNOTATE_MGLEVEL_BEGIN(num_levels - 1);
 
-         /* Set active parts */
-         hypre_SStructMatvecSetActiveParts(matvec_data_l[l], active_l[l]);
-
-         /* Coarsest level solver */
-         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Coarse solve");
-         hypre_SSAMGRelaxSetZeroGuess(relax_data_l[l], 1);
-         hypre_SSAMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
-         HYPRE_ANNOTATE_REGION_END("%s", "Coarse solve");
-
-         /* Set all parts to active */
-         hypre_SStructMatvecSetAllPartsActive(matvec_data_l[l]);
+         /* Run coarse solver */
+         hypre_SSAMGCoarseSolve(ssamg_vdata);
 
 #if DEBUG_SOLVE
          hypre_sprintf(filename, "ssamg_xbottom.i%02d.l%02d", i, l);
