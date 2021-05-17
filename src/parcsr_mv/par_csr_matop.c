@@ -6361,3 +6361,28 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixReorder:
+ *
+ * Reorders the column and data arrays of a the diagonal component of a square
+ * ParCSR matrix, such that the first entry in each row is the diagonal one.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixReorder(hypre_ParCSRMatrix *A)
+{
+   HYPRE_BigInt      nrows_A = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_BigInt      ncols_A = hypre_ParCSRMatrixGlobalNumCols(A);
+   hypre_CSRMatrix  *A_diag  = hypre_ParCSRMatrixDiag(A);
+
+   if (nrows_A != ncols_A)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC," Error! Matrix should be square!\n");
+      return hypre_error_flag;
+   }
+
+   hypre_CSRMatrixReorder(A_diag);
+
+   return hypre_error_flag;
+}
