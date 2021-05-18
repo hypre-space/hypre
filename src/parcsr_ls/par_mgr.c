@@ -3205,6 +3205,8 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
   }
   else if (restrict_type == 3)
   {
+    /* move diagonal to first entry */
+    hypre_CSRMatrixReorder(hypre_ParCSRMatrixDiag(AT));  
     hypre_MGRBuildInterpApproximateInverse(AT, CF_marker, num_cpts_global, debug_flag, &R_ptr);
     hypre_BoomerAMGInterpTruncation(R_ptr, trunc_factor, max_elmts);
   }
