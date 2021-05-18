@@ -501,6 +501,9 @@ HYPRE_Int HYPRE_IJMatrixSetMaxOffProcElmts ( HYPRE_IJMatrix matrix , HYPRE_Int m
 HYPRE_Int HYPRE_IJMatrixRead ( const char *filename , MPI_Comm comm , HYPRE_Int type , HYPRE_IJMatrix *matrix_ptr );
 HYPRE_Int HYPRE_IJMatrixPrint ( HYPRE_IJMatrix matrix , const char *filename );
 HYPRE_Int HYPRE_IJMatrixSetOMPFlag ( HYPRE_IJMatrix matrix , HYPRE_Int omp_flag );
+HYPRE_Int HYPRE_IJMatrixTranspose ( HYPRE_IJMatrix  matrix_A , HYPRE_IJMatrix *matrix_AT );
+HYPRE_Int HYPRE_IJMatrixNorm ( HYPRE_IJMatrix matrix , HYPRE_Real *norm );
+HYPRE_Int HYPRE_IJMatrixAdd ( HYPRE_Complex alpha , HYPRE_IJMatrix matrix_A , HYPRE_Complex beta , HYPRE_IJMatrix matrix_B , HYPRE_IJMatrix *matrix_C );
 
 /* HYPRE_IJVector.c */
 HYPRE_Int HYPRE_IJVectorCreate ( MPI_Comm comm , HYPRE_BigInt jlower , HYPRE_BigInt jupper , HYPRE_IJVector *vector );
@@ -524,4 +527,3 @@ HYPRE_Int HYPRE_IJVectorPrint ( HYPRE_IJVector vector , const char *filename );
 #endif
 
 #endif
-
