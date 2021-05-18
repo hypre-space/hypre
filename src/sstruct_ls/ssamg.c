@@ -49,7 +49,7 @@ hypre_SSAMGCreate( hypre_MPI_Comm comm )
    /* initialize */
    (ssamg_data -> nparts)           = -1;
    (ssamg_data -> num_levels)       = -1;
-   for (d = 0; d < 3; d++)
+   for (d = 0; d < HYPRE_MAXDIM; d++)
    {
       (ssamg_data -> dxyz[d])       = NULL;
    }
@@ -67,7 +67,7 @@ hypre_SSAMGDestroy( void *ssamg_vdata )
 
    HYPRE_Int          num_levels;
    HYPRE_Int          max_levels;
-   HYPRE_Int          l, p;
+   HYPRE_Int          l, d;
 
    if (ssamg_data)
    {
@@ -129,13 +129,10 @@ hypre_SSAMGDestroy( void *ssamg_vdata )
          ssamg_data -> r_l = NULL;
       }
 
-      for (p = 0; p < hypre_SSAMGDataNParts(ssamg_data); p++)
+      for (d = 0; d < HYPRE_MAXDIM; d++)
       {
-         hypre_TFree(ssamg_data -> dxyz[p], HYPRE_MEMORY_HOST);
+         hypre_TFree(ssamg_data -> dxyz[d], HYPRE_MEMORY_HOST);
       }
-      hypre_TFree(ssamg_data -> dxyz[0], HYPRE_MEMORY_HOST);
-      hypre_TFree(ssamg_data -> dxyz[1], HYPRE_MEMORY_HOST);
-      hypre_TFree(ssamg_data -> dxyz[2], HYPRE_MEMORY_HOST);
 
       hypre_FinalizeTiming(ssamg_data -> time_index);
       hypre_TFree(ssamg_data, HYPRE_MEMORY_HOST);

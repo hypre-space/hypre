@@ -32,7 +32,7 @@ typedef struct hypre_SSAMGData_struct
    HYPRE_Int               skip_relax;       /* skip relaxation flag */
    HYPRE_Int               relax_type;       /* relaxation type flag */
    HYPRE_Real              usr_relax_weight; /* user relax weight */
-   HYPRE_Real             *dxyz[3];          /* nparts array used to determine cdir */
+   HYPRE_Real             *dxyz[HYPRE_MAXDIM]; /* nparts array used to determine cdir */
 
    /* Coarse solver data */
    HYPRE_Solver            csolver;
