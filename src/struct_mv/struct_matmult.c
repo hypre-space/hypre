@@ -831,6 +831,7 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
 
       /* Set data pointers a.tptrs[] and a.mptr[].  For a.tptrs[], use Mstart to
        * compute an offset from the beginning of the databox data. */
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Computation");
       for (i = 0; i < na; i++)
       {
          Mentry = a[i].mentry;
@@ -912,7 +913,7 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
          }
       }
       hypre_BoxLoop3End(Mi,fi,ci);
-
+      HYPRE_ANNOTATE_REGION_END("%s", "Computation");
    } /* end loop over matrix M range boxes */
 
    /* Restore the matrices */

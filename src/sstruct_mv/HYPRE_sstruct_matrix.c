@@ -1243,6 +1243,8 @@ HYPRE_SStructMatrixToIJMatrix( HYPRE_SStructMatrix  matrix,
       return hypre_error_flag;
    }
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    if (hypre_SStructMatrixObjectType(matrix) != HYPRE_PARCSR)
    {
       ij_s = (HYPRE_IJMatrix)
@@ -1277,6 +1279,8 @@ HYPRE_SStructMatrixToIJMatrix( HYPRE_SStructMatrix  matrix,
    {
       *ijmatrix = hypre_SStructMatrixIJMatrix(matrix);
    }
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
