@@ -31,6 +31,7 @@
 #include "HYPRE.h"
 #include "HYPRE_parcsr_ls.h"
 #include "HYPRE_krylov.h"
+#include "ex.h"
 
 /* lobpcg stuff */
 #include "HYPRE_lobpcg.h"
@@ -74,6 +75,9 @@ int main (int argc, char *argv[])
 
    /* Initialize HYPRE */
    HYPRE_Init();
+
+   /* Print GPU info */
+   HYPRE_PrintDeviceInfo();
 
    /* Default problem parameters */
    n = 33;
@@ -173,8 +177,10 @@ int main (int argc, char *argv[])
    */
    {
       int nnz;
-      double values[5];
-      int cols[5];
+      /* double values[5];
+       * int cols[5]; OK to use constant-length arrays for CPUs */
+      double *values = (double *) malloc(5*sizeof(double));
+      int *cols = (int *) malloc(5*sizeof(int));
 
       for (i = ilower; i <= iupper; i++)
       {
@@ -220,6 +226,9 @@ int main (int argc, char *argv[])
          /* Set the values for row i */
          HYPRE_IJMatrixSetValues(A, 1, &nnz, &i, cols, values);
       }
+
+      free(values);
+      free(cols);
    }
 
    /* Assemble after setting the coefficients */

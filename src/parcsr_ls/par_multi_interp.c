@@ -23,7 +23,6 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                                HYPRE_Real           trunc_factor,
                                HYPRE_Int            P_max_elmts,
                                HYPRE_Int            weight_option,
-                               HYPRE_Int           *col_offd_S_to_A,
                                hypre_ParCSRMatrix **P_ptr )
 {
 #ifdef HYPRE_PROFILE
@@ -44,7 +43,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    HYPRE_Real      *A_offd_data = NULL;
    HYPRE_Int       *A_offd_i = hypre_CSRMatrixI(A_offd);
    HYPRE_Int       *A_offd_j = NULL;
-   HYPRE_BigInt    *col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
+   //HYPRE_BigInt    *col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
    HYPRE_Int        num_cols_offd_A = hypre_CSRMatrixNumCols(A_offd);
 
    hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag(S);
@@ -54,9 +53,9 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrix *S_offd = hypre_ParCSRMatrixOffd(S);
    HYPRE_Int       *S_offd_i = hypre_CSRMatrixI(S_offd);
    HYPRE_Int       *S_offd_j = NULL;
-   HYPRE_BigInt    *col_map_offd_S = hypre_ParCSRMatrixColMapOffd(S);
+   /*HYPRE_BigInt    *col_map_offd_S = hypre_ParCSRMatrixColMapOffd(S);
    HYPRE_Int        num_cols_offd_S = hypre_CSRMatrixNumCols(S_offd);
-   HYPRE_BigInt    *col_map_offd = NULL;
+   HYPRE_BigInt    *col_map_offd = NULL;*/
    HYPRE_Int        num_cols_offd;
 
    hypre_ParCSRMatrix *P;
@@ -113,8 +112,6 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                                                 col ids in P_diag for send_map_elmts */
 
    HYPRE_Int       *map_S_to_new = NULL;
-   /*HYPRE_Int             *map_A_to_new = NULL;*/
-   HYPRE_Int       *map_A_to_S = NULL;
    HYPRE_BigInt    *new_col_map_offd = NULL;
    HYPRE_BigInt    *col_map_offd_P = NULL;
    HYPRE_Int       *permute = NULL;
@@ -207,15 +204,10 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    hypre_MPI_Comm_size(comm,&num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
    /*   total_global_cpts = 0; */
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   my_first_cpt = num_cpts_global[my_id];
-   total_global_cpts = num_cpts_global[num_procs];
-#endif
 
    if (!comm_pkg)
    {
@@ -226,19 +218,10 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
          comm_pkg = hypre_ParCSRMatrixCommPkg(A);
       }
-      col_offd_S_to_A = NULL;
    }
 
-   if (col_offd_S_to_A)
-   {
-      col_map_offd = col_map_offd_S;
-      num_cols_offd = num_cols_offd_S;
-   }
-   else
-   {
-      col_map_offd = col_map_offd_A;
-      num_cols_offd = num_cols_offd_A;
-   }
+   //col_map_offd = col_map_offd_A;
+   num_cols_offd = num_cols_offd_A;
 
    if (num_cols_offd_A)
    {
@@ -453,18 +436,6 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
    cnt = 0;
    hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_HOST);
-
-   if (col_offd_S_to_A)
-   {
-      map_A_to_S = hypre_CTAlloc(HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST);
-      for (i=0; i < num_cols_offd_A; i++)
-      {
-         if (cnt < num_cols_offd && col_map_offd_A[i] == col_map_offd[cnt])
-            map_A_to_S[i] = cnt++;
-         else
-            map_A_to_S[i] = -1;
-      }
-   }
 
    /*-----------------------------------------------------------------------
     *  Mark all local neighbors of C points as 'assigned'.
@@ -1253,10 +1224,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
             cnt_offd = P_offd_i[i1];
             for (j=A_offd_i[i1]; j < A_offd_i[i1+1]; j++)
             {
-               if (col_offd_S_to_A)
-                  j1 = map_A_to_S[A_offd_j[j]];
-               else
-                  j1 = A_offd_j[j];
+               j1 = A_offd_j[j];
                if (CF_marker_offd[j1] != -3 &&
                    (num_functions == 1 || dof_func[i1] == dof_func_offd[j1]))
                {
@@ -1298,7 +1266,6 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
       old_Pext_send_size = 0;
       old_Pext_recv_size = 0;
 
-      /*if (!col_offd_S_to_A) hypre_TFree(map_A_to_new);*/
       if (n_coarse) hypre_TFree(C_array, HYPRE_MEMORY_HOST);
       hypre_TFree(C_array_offd, HYPRE_MEMORY_HOST);
       hypre_TFree(P_diag_pass[1], HYPRE_MEMORY_HOST);
@@ -1492,10 +1459,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                }
                for (j=A_offd_i[i1]; j < A_offd_i[i1+1]; j++)
                {
-                  if (col_offd_S_to_A)
-                     j1 = map_A_to_S[A_offd_j[j]];
-                  else
-                     j1 = A_offd_j[j];
+                  j1 = A_offd_j[j];
 
                   if (j1 > -1 && P_marker_offd[j1] == i1)
                   {
@@ -1636,10 +1600,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
             cnt_offd = P_offd_i[i1];
             for (j=A_offd_i[i1]; j < A_offd_i[i1+1]; j++)
             {
-               if (col_offd_S_to_A)
-                  j1 = map_A_to_S[A_offd_j[j]];
-               else
-                  j1 = A_offd_j[j];
+               j1 = A_offd_j[j];
                if (CF_marker_offd[j1] != -3 &&
                    (num_functions == 1 || dof_func[i1] == dof_func_offd[j1]))
                   sum_N += A_offd_data[j];
@@ -1837,10 +1798,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                }
                for (j=A_offd_i[i1]; j < A_offd_i[i1+1]; j++)
                {
-                  if (col_offd_S_to_A)
-                     j1 = map_A_to_S[A_offd_j[j]];
-                  else
-                     j1 = A_offd_j[j];
+                  j1 = A_offd_j[j];
 
                   if (j1 > -1 && tmp_marker_offd[j1] == i1)
                   {
@@ -1866,7 +1824,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                   }
                }
                diagonal = A_diag_data[A_diag_i[i1]];
-               if (sum_C*diagonal) alfa = -sum_N/(sum_C*diagonal);
+               if (sum_C*diagonal != 0.0) alfa = -sum_N/(sum_C*diagonal);
 
                for (j=P_diag_i[i1]; j < P_diag_i[i1+1]; j++)
                   P_diag_data[j] *= alfa;
@@ -1907,7 +1865,6 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    hypre_TFree(pass_pointer, HYPRE_MEMORY_HOST);
    hypre_TFree(pass_array, HYPRE_MEMORY_HOST);
    hypre_TFree(map_S_to_new, HYPRE_MEMORY_HOST);
-   hypre_TFree(map_A_to_S, HYPRE_MEMORY_HOST);
    if (num_procs > 1) hypre_TFree(tmp_comm_pkg, HYPRE_MEMORY_HOST);
 
    P = hypre_ParCSRMatrixCreate(comm,

@@ -12,11 +12,12 @@ else()
 endif()
 
 # The version number.
-set (HYPRE_VERSION 2.19.0)
-set (HYPRE_DATE    2020/05/26)
-set (HYPRE_TIME    00:00:00)
-set (HYPRE_BUGS    hypre-support@llnl.gov)
-set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
+set(HYPRE_VERSION 2.20.0)
+set(HYPRE_NUMBER  22000)
+set(HYPRE_DATE    2020/09/24)
+set(HYPRE_TIME    00:00:00)
+set(HYPRE_BUGS    https://github.com/hypre-space/hypre/issues)
+set(HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
 
 project (hypre
   VERSION ${HYPRE_VERSION}
@@ -58,7 +59,6 @@ option(HYPRE_ENABLE_COMPLEX          "Use complex values" OFF)
 option(HYPRE_ENABLE_HYPRE_BLAS       "Use internal BLAS library" ON)
 option(HYPRE_ENABLE_HYPRE_LAPACK     "Use internal LAPACK library" ON)
 option(HYPRE_ENABLE_PERSISTENT_COMM  "Use persistent communication" OFF)
-option(HYPRE_ENABLE_GLOBAL_PARTITION "Use global partitioning" OFF)
 option(HYPRE_ENABLE_FEI              "Use FEI" OFF) # TODO: Add this cmake feature
 option(HYPRE_WITH_MPI                "Compile with MPI" ON)
 option(HYPRE_WITH_OPENMP             "Use OpenMP" OFF)
@@ -73,6 +73,8 @@ option(HYPRE_USING_HOST_MEMORY       "Use host memory" ON)
 
 option(TPL_DSUPERLU_LIBRARIES        "List of absolute paths to SuperLU_Dist link libraries [].")
 option(TPL_DSUPERLU_INCLUDE_DIRS     "List of absolute paths to SuperLU_Dist include directories [].")
+option(TPL_BLAS_LIBRARIES            "Optional list of absolute paths to BLAS libraries, otherwise use FindBLAS to locate [].")
+option(TPL_LAPACK_LIBRARIES          "Optional list of absolute paths to LAPACK libraries, otherwise use FindLAPACK to locate [].")
 
 # Set config name values
 if (HYPRE_ENABLE_SHARED)
@@ -111,12 +113,6 @@ if (HYPRE_ENABLE_PERSISTENT_COMM)
   set(HYPRE_USING_PERSISTENT_COMM ON CACHE BOOL "" FORCE)
 endif()
 
-if (HYPRE_ENABLE_GLOBAL_PARTITION)
-  set(HYPRE_NO_GLOBAL_PARTITION OFF CACHE BOOL "" FORCE)
-else()
-  set(HYPRE_NO_GLOBAL_PARTITION ON CACHE BOOL "" FORCE)
-endif()
-
 if (HYPRE_WITH_MPI)
   set(HYPRE_SEQUENTIAL OFF CACHE BOOL "" FORCE)
 else()
@@ -152,7 +148,6 @@ if (HYPRE_SHARED OR HYPRE_BIGINT OR HYPRE_SINGLE OR HYPRE_LONG_DOUBLE)
 endif ()
 
 if (HYPRE_SEQUENTIAL)
-  set (HYPRE_NO_GLOBAL_PARTITION OFF CACHE BOOL "" FORCE)
   set (HYPRE_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 endif ()
 
@@ -176,9 +171,15 @@ set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HYPRE_MAIN_HEADERS})
 if (HYPRE_USING_HYPRE_BLAS)
   add_subdirectory(blas)
 else()
-  # Find system blas
-  find_package(BLAS REQUIRED)
-  target_link_libraries(HYPRE PUBLIC "${BLAS_LIBRARIES}")
+  # Use TPL_BLAS_LIBRARIES if set.
+  if (TPL_BLAS_LIBRARIES)
+    message("-- Using TPL_BLAS_LIBRARIES='${TPL_BLAS_LIBRARIES}'")
+    target_link_libraries(HYPRE PUBLIC "${TPL_BLAS_LIBRARIES}")
+  else()
+    # Find system blas
+    find_package(BLAS REQUIRED)
+    target_link_libraries(HYPRE PUBLIC "${BLAS_LIBRARIES}")
+  endif()
   target_compile_definitions(HYPRE PUBLIC "USE_VENDOR_BLAS")
 endif()
 
@@ -186,9 +187,15 @@ endif()
 if (HYPRE_USING_HYPRE_LAPACK)
   add_subdirectory(lapack)
 else()
-  # Find system lapack
-  find_package(LAPACK REQUIRED)
-  target_link_libraries(HYPRE PUBLIC "${LAPACK_LIBRARIES}")
+  # Use TPL_LAPACK_LIBRARIES if set.
+  if (TPL_LAPACK_LIBRARIES)
+    message("-- Using TPL_LAPACK_LIBRARIES='${TPL_BLAS_LIBRARIES}'")
+    target_link_libraries(HYPRE PUBLIC "${TPL_LAPACK_LIBRARIES}")
+  else()
+    # Find system lapack
+    find_package(LAPACK REQUIRED)
+    target_link_libraries(HYPRE PUBLIC "${LAPACK_LIBRARIES}")
+  endif()
 endif()
 
 # Find DSUPERLU, if requested

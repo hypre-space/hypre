@@ -1,47 +1,16 @@
 # Output file: default.out.1
-<C*b,b>: 1.800000e+01
-
-
-Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
------    ------------    ---------  ------------ 
-    1    2.509980e+00    0.591608    5.916080e-01
-    2    9.888265e-01    0.393958    2.330686e-01
-    3    4.572262e-01    0.462393    1.077693e-01
-    4    1.706474e-01    0.373223    4.022197e-02
-    5    7.473022e-02    0.437922    1.761408e-02
-    6    3.402624e-02    0.455321    8.020061e-03
-    7    1.214929e-02    0.357057    2.863616e-03
-    8    3.533113e-03    0.290808    8.327628e-04
-    9    1.343893e-03    0.380371    3.167586e-04
-   10    2.968745e-04    0.220906    6.997400e-05
    11    5.329671e-05    0.179526    1.256215e-05
    12    7.308483e-06    0.137128    1.722626e-06
    13    7.411552e-07    0.101410    1.746920e-07
 
 
 # Output file: default.out.2
-<C*b,b>: 5.488337e+01
-
-
-Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
------    ------------    ---------  ------------ 
     1    3.503257e-02    0.004729    4.728807e-03
     2    1.386843e-04    0.003959    1.872005e-05
     3    8.429961e-07    0.006079    1.137903e-07
 
 
 # Output file: default.out.3
-<b,b>: 5.568539e-05
-
-
-Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
------    ------------   ---------  ------------ 
-    1    2.168867e-03    0.290645    2.906446e-01
-    2    8.424332e-05    0.038842    1.128924e-02
-    3    1.941992e-06    0.023052    2.602417e-04
-    4    2.447573e-08    0.012603    3.279933e-06
-    5    6.875533e-10    0.028091    9.213736e-08
-
 
 
 Iterations = 5
@@ -49,222 +18,23 @@ Final Relative Residual Norm = 9.21374e-08
 
 # Output file: default.out.4
 
-PCG Setup time = 18.529574 seconds
-
-<b,b>: 5.738541e-05
-
-
-Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
------    ------------   ---------  ------------ 
-    1    2.449562e-03    0.323361    3.233611e-01
-    2    1.589475e-04    0.064888    2.098229e-02
-    3    6.225562e-06    0.039167    8.218220e-04
-    4    2.221278e-07    0.035680    2.932258e-05
-    5    1.094405e-08    0.049269    1.444699e-06
-    6    4.515981e-10    0.041264    5.961443e-08
-
-
-
-PCG Solve time = 18.618895 seconds
-
 
 Iterations = 6
 Final Relative Residual Norm = 5.961443e-08
 
 # Output file: default.out.5
 
-Operator Matrix Information:
-
-             nonzero            entries/row          row sums
-lev    rows  entries sparse   min  max     avg      min         max
-======================================================================
-  0    1089     5313  0.004     3    5     4.9   0.000e+00   2.000e+00
-  1     545     4641  0.016     4    9     8.5   0.000e+00   2.500e+00
-  2     157     1535  0.062     4   14     9.8  -4.233e-16   3.020e+00
-  3      57      773  0.238     4   21    13.6   7.589e-17   3.294e+00
-  4      19      251  0.695     8   18    13.2   9.852e-02   2.814e+00
-  5       6       36  1.000     6    6     6.0   1.232e+00   1.875e+00
-
-
-Interpolation Matrix Information:
-                    entries/row        min        max            row sums
-lev  rows x cols  min  max  avgW     weight      weight       min         max
-================================================================================
-  0  1089 x 545     1    4   3.9   2.500e-01   2.500e-01   7.500e-01   1.000e+00
-  1   545 x 157     1    4   2.8   7.143e-02   5.000e-01   2.857e-01   1.000e+00
-  2   157 x 57      1    6   3.1   2.767e-02   5.489e-01   2.630e-01   1.000e+00
-  3    57 x 19      0    5   2.4   1.892e-02   7.312e-01   0.000e+00   1.000e+00
-  4    19 x 6       0    4   2.2   2.675e-02   4.155e-01   0.000e+00   1.000e+00
-
-
-     Complexity:    grid = 1.719927
-                operator = 2.361942
-                memory = 3.194052
-
-
-
-
-BoomerAMG SOLVER PARAMETERS:
-
-  Maximum number of cycles:         20 
-  Stopping Tolerance:               1.000000e-07 
-  Cycle type (1 = V, 2 = W, etc.):  1
-
-  Relaxation Parameters:
-   Visiting Grid:                     down   up  coarse
-            Number of sweeps:            1    1     1 
-   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
-   Point types, partial sweeps (1=C, -1=F):
-                  Pre-CG relaxation (down):   1  -1
-                   Post-CG relaxation (up):  -1   1
-                             Coarsest grid:   0
-
-
-
-BoomerAMG SOLVER PARAMETERS:
-
-  Maximum number of cycles:         20 
-  Stopping Tolerance:               1.000000e-07 
-  Cycle type (1 = V, 2 = W, etc.):  1
-
-  Relaxation Parameters:
-   Visiting Grid:                     down   up  coarse
-            Number of sweeps:            1    1     1 
-   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
-   Point types, partial sweeps (1=C, -1=F):
-                  Pre-CG relaxation (down):   1  -1
-                   Post-CG relaxation (up):  -1   1
-                             Coarsest grid:   0
-
- Output flag (print_level): 3 
-
-
-AMG SOLUTION INFO:
-                                            relative
-               residual        factor       residual
-               --------        ------       --------
-    Initial    2.854671e-02                 1.000000e+00
-    Cycle  1   2.995663e-03    0.104939     1.049390e-01 
-    Cycle  2   1.941234e-04    0.064801     6.800200e-03 
-    Cycle  3   1.245674e-05    0.064169     4.363634e-04 
-    Cycle  4   7.816537e-07    0.062749     2.738157e-05 
-    Cycle  5   4.829130e-08    0.061781     1.691659e-06 
-    Cycle  6   2.956748e-09    0.061227     1.035758e-07 
-    Cycle  7   1.801266e-10    0.060921     6.309890e-09 
-
-
- Average Convergence Factor = 0.067387
-
-     Complexity:    grid = 1.719927
-                operator = 2.361942
-                   cycle = 4.717109
-
-
-
 
 Iterations = 7
-Final Relative Residual Norm = 6.309890e-09
+Final Relative Residual Norm = 6.309891e-09
 
 # Output file: default.out.5f
 
-Operator Matrix Information:
-
-             nonzero            entries/row          row sums
-lev    rows  entries sparse   min  max     avg      min         max
-======================================================================
-  0    1089     5313  0.004     3    5     4.9   0.000e+00   2.000e+00
-  1     545     4641  0.016     4    9     8.5   0.000e+00   2.500e+00
-  2     157     1535  0.062     4   14     9.8  -4.233e-16   3.020e+00
-  3      57      773  0.238     4   21    13.6   7.589e-17   3.294e+00
-  4      19      251  0.695     8   18    13.2   9.852e-02   2.814e+00
-  5       6       36  1.000     6    6     6.0   1.232e+00   1.875e+00
-
-
-Interpolation Matrix Information:
-                    entries/row        min        max            row sums
-lev  rows x cols  min  max  avgW     weight      weight       min         max
-================================================================================
-  0  1089 x 545     1    4   3.9   2.500e-01   2.500e-01   7.500e-01   1.000e+00
-  1   545 x 157     1    4   2.8   7.143e-02   5.000e-01   2.857e-01   1.000e+00
-  2   157 x 57      1    6   3.1   2.767e-02   5.489e-01   2.630e-01   1.000e+00
-  3    57 x 19      0    5   2.4   1.892e-02   7.312e-01   0.000e+00   1.000e+00
-  4    19 x 6       0    4   2.2   2.675e-02   4.155e-01   0.000e+00   1.000e+00
-
-
-     Complexity:    grid = 1.719927
-                operator = 2.361942
-                memory = 3.194052
-
-
-
-
-BoomerAMG SOLVER PARAMETERS:
-
-  Maximum number of cycles:         20 
-  Stopping Tolerance:               1.000000e-07 
-  Cycle type (1 = V, 2 = W, etc.):  1
-
-  Relaxation Parameters:
-   Visiting Grid:                     down   up  coarse
-            Number of sweeps:            1    1     1 
-   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
-   Point types, partial sweeps (1=C, -1=F):
-                  Pre-CG relaxation (down):   1  -1
-                   Post-CG relaxation (up):  -1   1
-                             Coarsest grid:   0
-
-
-
-BoomerAMG SOLVER PARAMETERS:
-
-  Maximum number of cycles:         20 
-  Stopping Tolerance:               1.000000e-07 
-  Cycle type (1 = V, 2 = W, etc.):  1
-
-  Relaxation Parameters:
-   Visiting Grid:                     down   up  coarse
-            Number of sweeps:            1    1     1 
-   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
-   Point types, partial sweeps (1=C, -1=F):
-                  Pre-CG relaxation (down):   1  -1
-                   Post-CG relaxation (up):  -1   1
-                             Coarsest grid:   0
-
- Output flag (print_level): 3 
-
-
-AMG SOLUTION INFO:
-                                            relative
-               residual        factor       residual
-               --------        ------       --------
-    Initial    2.854671e-02                 1.000000e+00
-    Cycle  1   2.995663e-03    0.104939     1.049390e-01 
-    Cycle  2   1.941234e-04    0.064801     6.800200e-03 
-    Cycle  3   1.245674e-05    0.064169     4.363634e-04 
-    Cycle  4   7.816537e-07    0.062749     2.738157e-05 
-    Cycle  5   4.829130e-08    0.061781     1.691659e-06 
-    Cycle  6   2.956748e-09    0.061227     1.035758e-07 
-    Cycle  7   1.801266e-10    0.060921     6.309890e-09 
-
-
- Average Convergence Factor = 0.067387
-
-     Complexity:    grid = 1.719927
-                operator = 2.361942
-                   cycle = 4.717109
-
-
-
 
  Iterations =  7
- Final Relative Residual Norm =   6.30989028E-09
+ Final Relative Residual Norm =   6.30989112E-09
 
 # Output file: default.out.6
-<C*b,b>: 5.488337e+01
-
-
-Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
------    ------------    ---------  ------------ 
     1    3.503257e-02    0.004729    4.728807e-03
     2    1.386843e-04    0.003959    1.872005e-05
     3    8.429961e-07    0.006079    1.137903e-07
@@ -272,90 +42,29 @@ Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
 
 # Output file: default.out.7
 
-PCG Setup time = 18.965017 seconds
-
-<b,b>: 5.738541e-05
-
-
-Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
------    ------------   ---------  ------------ 
-    1    2.449562e-03    0.323361    3.233611e-01
-    2    1.589475e-04    0.064888    2.098229e-02
-    3    6.225562e-06    0.039167    8.218220e-04
-    4    2.221278e-07    0.035680    2.932258e-05
-    5    1.094405e-08    0.049269    1.444699e-06
-    6    4.515981e-10    0.041264    5.961443e-08
-
-
-
-PCG Solve time = 19.035867 seconds
-
 
 Iterations = 6
 Final Relative Residual Norm = 5.961443e-08
 
 # Output file: default.out.8
-<C*b,b>: 3.469084e+01
-
-
-Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
------    ------------    ---------  ------------ 
-    1    2.197899e+00    0.373165    3.731645e-01
-    2    4.545887e-01    0.206829    7.718115e-02
-    3    1.058488e-01    0.232845    1.797126e-02
-    4    3.101107e-02    0.292975    5.265134e-03
-    5    4.546495e-03    0.146609    7.719147e-04
-    6    1.019943e-03    0.224336    1.731683e-04
     7    1.315332e-04    0.128961    2.233203e-05
     8    1.350294e-05    0.102658    2.292562e-06
     9    4.148659e-06    0.307241    7.043691e-07
 
 
 # Output file: default.out.9
-L2 norm of b: 7.462265e-03
-Initial L2 norm of residual: 7.462265e-03
-=============================================
-
-Iters     resid.norm     conv.rate  rel.res.norm
------    ------------    ---------- ------------
-    1    6.660001e-03    0.892491   8.924906e-01
-    2    2.759090e-03    0.414278   3.697390e-01
-    3    4.353188e-04    0.157776   5.833602e-02
-    4    4.825748e-05    0.110855   6.466868e-03
-    5    6.747336e-06    0.139819   9.041942e-04
-    6    1.360981e-06    0.201706   1.823818e-04
-    7    2.456101e-07    0.180465   3.291361e-05
-    8    2.794506e-08    0.113778   3.744850e-06
-    9    4.903805e-09    0.175480   6.571470e-07
-
-
-Final L2 norm of residual: 4.903805e-09
-
-
 
 
 Iterations = 9
 Final Relative Residual Norm = 6.57147e-07
 
 # Output file: default.out.12
-<C*b,b>: 3.210115e+01
-
-
-Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
------    ------------    ---------  ------------ 
-    1    2.267211e-01    0.040016    4.001582e-02
     2    3.255341e-03    0.014358    5.745609e-04
     3    6.649011e-05    0.020425    1.173537e-05
     4    1.544291e-06    0.023226    2.725642e-07
 
 
 # Output file: default.out.12f
-<C*b,b>: 3.210115e+01
-
-
-Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
------    ------------    ---------  ------------ 
-    1    2.267211e-01    0.040016    4.001582e-02
     2    3.255341e-03    0.014358    5.745609e-04
     3    6.649011e-05    0.020425    1.173537e-05
     4    1.544291e-06    0.023226    2.725642e-07
@@ -364,58 +73,10 @@ Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
 # Output file: default.out.13
 
 
-AMG SOLUTION INFO:
-                                            relative
-               residual        factor       residual
-               --------        ------       --------
-    Initial    2.334657e-01                 1.000000e+00
-    Cycle  1   3.447912e-02    0.147684     1.476839e-01 
-    Cycle  2   5.073235e-03    0.147139     2.173011e-02 
-    Cycle  3   7.530408e-04    0.148434     3.225487e-03 
-    Cycle  4   1.131421e-04    0.150247     4.846199e-04 
-    Cycle  5   1.713572e-05    0.151453     7.339717e-05 
-    Cycle  6   2.620347e-06    0.152917     1.122369e-05 
-    Cycle  7   4.055800e-07    0.154781     1.737214e-06 
-    Cycle  8   6.362639e-08    0.156878     2.725299e-07 
-
-
- Average Convergence Factor = 0.151156
-
-     Complexity:    grid = 1.509834
-                operator = 1.841964
-                   cycle = 3.675148
-
-
-
-
 Iterations = 8
 Final Relative Residual Norm = 2.7253e-07
 
 # Output file: default.out.14
-
-
-AMG SOLUTION INFO:
-                                            relative
-               residual        factor       residual
-               --------        ------       --------
-    Initial    2.334657e-01                 1.000000e+00
-    Cycle  1   3.447912e-02    0.147684     1.476839e-01 
-    Cycle  2   5.073235e-03    0.147139     2.173011e-02 
-    Cycle  3   7.530408e-04    0.148434     3.225487e-03 
-    Cycle  4   1.131421e-04    0.150247     4.846199e-04 
-    Cycle  5   1.713572e-05    0.151453     7.339717e-05 
-    Cycle  6   2.620347e-06    0.152917     1.122369e-05 
-    Cycle  7   4.055800e-07    0.154781     1.737214e-06 
-    Cycle  8   6.362639e-08    0.156878     2.725299e-07 
-
-
- Average Convergence Factor = 0.151156
-
-     Complexity:    grid = 1.509834
-                operator = 1.841964
-                   cycle = 3.675148
-
-
 
 
 Iterations = 8
@@ -423,31 +84,6 @@ Final Relative Residual Norm = 2.7253e-07
 
 # Output file: default.out.15
 
-SStruct Setup time = 0.348600 seconds
-
-Problem size: 26460
-
-
-AMS Setup time = 0.426681 seconds
-
-<C*b,b>: 8.373120e-02
-
-
-Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
------    ------------    ---------  ------------ 
-    1    2.820328e-02    0.097467    9.746663e-02
-    2    1.245772e-03    0.044171    4.305215e-03
-    3    9.147965e-05    0.073432    3.161410e-04
-    4    2.203937e-05    0.240921    7.616500e-05
-    5    4.101633e-06    0.186105    1.417468e-05
-    6    7.804698e-07    0.190283    2.697195e-06
-    7    1.393405e-07    0.178534    4.815415e-07
-
-
-
-AMS Solve time = 0.565226 seconds
-
 
 Iterations = 7
 Final Relative Residual Norm = 4.81542e-07
-

@@ -97,11 +97,7 @@ hypre_GetCommPkgRTFromCommPkgA( hypre_ParCSRMatrix *RT,
    big_buf_data = hypre_CTAlloc(HYPRE_BigInt, send_map_starts_A[num_sends_A], HYPRE_MEMORY_HOST);
    coarse_counter = hypre_CTAlloc(HYPRE_Int, num_threads, HYPRE_MEMORY_HOST);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = hypre_ParCSRMatrixColStarts(RT)[0];
-#else
-   my_first_cpt = hypre_ParCSRMatrixColStarts(RT)[my_id];
-#endif
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i,j,ns,ne,size,rest,coarse_shift) HYPRE_SMP_SCHEDULE

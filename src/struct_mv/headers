@@ -61,7 +61,7 @@ cat boxloop_omp_device.h          >> $INTERNAL_HEADER
 
 cat >> $INTERNAL_HEADER <<@
 
-#elif !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && !defined(HYPRE_USING_CUDA)
+#elif !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP)
 @
 
 cat boxloop_host.h                >> $INTERNAL_HEADER
@@ -130,7 +130,7 @@ cat boxloop_kokkos.h              >> $INTERNAL_HEADER
 
 cat >> $INTERNAL_HEADER <<@
 
-#elif defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 @
 
 cat boxloop_cuda.h                >> $INTERNAL_HEADER

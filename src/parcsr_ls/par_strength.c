@@ -538,13 +538,13 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
                        HYPRE_Int             *dof_func,
                        hypre_ParCSRMatrix   **S_ptr)
 {
-#if defined(HYPRE_USING_CUDA)
-   hypre_NvtxPushRange("CreateS");
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("CreateS");
 #endif
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -557,8 +557,8 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
       ierr = hypre_BoomerAMGCreateSHost(A,strength_threshold,max_row_sum,num_functions,dof_func,S_ptr);
    }
 
-#if defined(HYPRE_USING_CUDA)
-   hypre_NvtxPopRange();
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
 #endif
 
    return ierr;
@@ -1726,11 +1726,11 @@ hypre_BoomerAMGCreateSCommPkg(hypre_ParCSRMatrix *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix  *S,
-                           HYPRE_Int           *CF_marker,
-                           HYPRE_Int            num_paths,
-                           HYPRE_BigInt        *coarse_row_starts,
-                           hypre_ParCSRMatrix **C_ptr)
+hypre_BoomerAMGCreate2ndSHost( hypre_ParCSRMatrix  *S,
+                               HYPRE_Int           *CF_marker,
+                               HYPRE_Int            num_paths,
+                               HYPRE_BigInt        *coarse_row_starts,
+                               hypre_ParCSRMatrix **C_ptr)
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_CREATE_2NDS] -= hypre_MPI_Wtime();
@@ -1833,16 +1833,10 @@ hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix  *S,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = coarse_row_starts[0];
    my_last_cpt = coarse_row_starts[1]-1;
    if (my_id == (num_procs -1)) global_num_coarse = coarse_row_starts[1];
    hypre_MPI_Bcast(&global_num_coarse, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   my_first_cpt = coarse_row_starts[my_id];
-   my_last_cpt = coarse_row_starts[my_id+1]-1;
-   global_num_coarse = coarse_row_starts[num_procs];
-#endif
 
    if (num_cols_offd_S)
    {
@@ -2914,6 +2908,41 @@ hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix  *S,
 
    return 0;
 }
+
+//-----------------------------------------------------------------------
+HYPRE_Int
+hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix  *S,
+                           HYPRE_Int           *CF_marker,
+                           HYPRE_Int            num_paths,
+                           HYPRE_BigInt        *coarse_row_starts,
+                           hypre_ParCSRMatrix **C_ptr)
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("Create2ndS");
+#endif
+
+   HYPRE_Int ierr = 0;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(S)) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      ierr = hypre_BoomerAMGCreate2ndSDevice( S, CF_marker, num_paths, coarse_row_starts, C_ptr );
+   }
+   else
+#endif
+   {
+      ierr = hypre_BoomerAMGCreate2ndSHost( S, CF_marker, num_paths, coarse_row_starts, C_ptr );
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
+   return ierr;
+}
+
 
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGCorrectCFMarker : corrects CF_marker after aggr. coarsening

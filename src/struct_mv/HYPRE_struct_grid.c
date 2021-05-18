@@ -105,9 +105,9 @@ HYPRE_StructGridSetNumGhost( HYPRE_StructGrid grid, HYPRE_Int *num_ghost )
    return ( hypre_StructGridSetNumGhost(grid, num_ghost) );
 }
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 HYPRE_Int
-HYPRE_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_Int data_location )
+HYPRE_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_MemoryLocation data_location )
 {
    return ( hypre_StructGridSetDataLocation(grid, data_location) );
 }

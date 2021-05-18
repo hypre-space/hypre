@@ -27,6 +27,13 @@ FILES="\
  ${TNAME}.out.12\
  ${TNAME}.out.13\
  ${TNAME}.out.14\
+ ${TNAME}.out.15\
+ ${TNAME}.out.16\
+ ${TNAME}.out.17\
+ ${TNAME}.out.18\
+ ${TNAME}.out.19\
+ ${TNAME}.out.20\
+ ${TNAME}.out.21\
 "
 
 for i in $FILES
@@ -36,16 +43,11 @@ do
   tail -3 $i
 done > ${TNAME}.out
 
-# Make sure that the output files are reasonable
-CHECK_LINE="Complexity"
-OUT_COUNT=`grep "$CHECK_LINE" ${TNAME}.out | wc -l`
-SAVED_COUNT=`grep "$CHECK_LINE" ${TNAME}.saved | wc -l`
-if [ "$OUT_COUNT" != "$SAVED_COUNT" ]; then
-   echo "Incorrect number of \"$CHECK_LINE\" lines in ${TNAME}.out" >&2
-fi
-
-if [ -z $HYPRE_NO_SAVED ]; then
-   (../runcheck.sh ${TNAME}.out ${TNAME}.saved $RTOL $ATOL) >&2
+# Make sure that the output file is reasonable
+RUNCOUNT=`echo $FILES | wc -w`
+OUTCOUNT=`grep "Complexity" ${TNAME}.out | wc -l`
+if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
+   echo "Incorrect number of runs in ${TNAME}.out" >&2
 fi
 
 #=============================================================================

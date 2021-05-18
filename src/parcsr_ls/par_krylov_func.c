@@ -12,10 +12,11 @@
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_ParKrylovCAlloc( HYPRE_Int count,
-                       HYPRE_Int elt_size )
+hypre_ParKrylovCAlloc( size_t               count,
+                       size_t               elt_size,
+                       HYPRE_MemoryLocation location )
 {
-   return( (void*) hypre_CTAlloc( char, count * elt_size , HYPRE_MEMORY_HOST) );
+   return( (void*) hypre_CTAlloc(char, count * elt_size, location) );
 }
 
 /*--------------------------------------------------------------------------
@@ -27,7 +28,7 @@ hypre_ParKrylovFree( void *ptr )
 {
    HYPRE_Int ierr = 0;
 
-   hypre_Free( ptr , HYPRE_MEMORY_HOST);
+   hypre_TFree( ptr , HYPRE_MEMORY_HOST);
 
    return ierr;
 }

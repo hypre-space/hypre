@@ -139,6 +139,9 @@ HYPRE_Int HYPRE_ClearAllErrors();
 /* Clears the given error code from the hypre error flag */
 HYPRE_Int HYPRE_ClearError(HYPRE_Int hypre_error_code);
 
+/* Print GPU information */
+HYPRE_Int HYPRE_PrintDeviceInfo();
+
 /*--------------------------------------------------------------------------
  * HYPRE Version routines
  *--------------------------------------------------------------------------*/
@@ -170,6 +173,10 @@ HYPRE_VersionNumber( HYPRE_Int  *major_ptr,
 /*Checks whether the AP is on */
 HYPRE_Int HYPRE_AssumedPartitionCheck();
 
+/*--------------------------------------------------------------------------
+ * HYPRE memory location
+ *--------------------------------------------------------------------------*/
+
 typedef enum _HYPRE_MemoryLocation
 {
    HYPRE_MEMORY_UNDEFINED = -1,
@@ -177,12 +184,43 @@ typedef enum _HYPRE_MemoryLocation
    HYPRE_MEMORY_DEVICE
 } HYPRE_MemoryLocation;
 
+HYPRE_Int HYPRE_SetMemoryLocation(HYPRE_MemoryLocation memory_location);
+HYPRE_Int HYPRE_GetMemoryLocation(HYPRE_MemoryLocation *memory_location);
+
+#include <stdlib.h>
+
+/*--------------------------------------------------------------------------
+ * HYPRE execution policy
+ *--------------------------------------------------------------------------*/
+
 typedef enum _HYPRE_ExecutionPolicy
 {
    HYPRE_EXEC_UNDEFINED = -1,
    HYPRE_EXEC_HOST          ,
    HYPRE_EXEC_DEVICE
 } HYPRE_ExecutionPolicy;
+
+HYPRE_Int HYPRE_SetExecutionPolicy(HYPRE_ExecutionPolicy exec_policy);
+HYPRE_Int HYPRE_GetExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy);
+
+/*--------------------------------------------------------------------------
+ * HYPRE UMPIRE
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_SetUmpireDevicePoolSize(size_t nbytes);
+HYPRE_Int HYPRE_SetUmpireUMPoolSize(size_t nbytes);
+HYPRE_Int HYPRE_SetUmpireHostPoolSize(size_t nbytes);
+HYPRE_Int HYPRE_SetUmpirePinnedPoolSize(size_t nbytes);
+HYPRE_Int HYPRE_SetUmpireDevicePoolName(const char *pool_name);
+HYPRE_Int HYPRE_SetUmpireUMPoolName(const char *pool_name);
+HYPRE_Int HYPRE_SetUmpireHostPoolName(const char *pool_name);
+HYPRE_Int HYPRE_SetUmpirePinnedPoolName(const char *pool_name);
+
+/*--------------------------------------------------------------------------
+ * HYPRE GPU memory pool
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_SetGPUMemoryPoolSize(HYPRE_Int bin_growth, HYPRE_Int min_bin, HYPRE_Int max_bin, size_t max_cached_bytes);
 
 #ifdef __cplusplus
 }

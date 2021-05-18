@@ -62,6 +62,8 @@ typedef struct
   HYPRE_Int     relax_type;
   HYPRE_Int     logging;
   HYPRE_Int     print_level;
+  HYPRE_Int     frelax_print_level;
+  HYPRE_Int     cg_print_level;
   HYPRE_Int     max_iter;
   HYPRE_Int     relax_order;
   HYPRE_Int     num_relax_sweeps;
@@ -72,6 +74,7 @@ typedef struct
 
   HYPRE_Int     use_default_cgrid_solver;
   HYPRE_Int     use_default_fsolver;
+//  HYPRE_Int     fsolver_type;
   HYPRE_Real    omega;
 
   /* temp vectors for solve phase */
@@ -108,11 +111,12 @@ typedef struct
   /* V-cycle F relaxation method */
   hypre_ParAMGData    **FrelaxVcycleData;
   hypre_ParVector   *VcycleRelaxVtemp;
-  hypre_ParVector   *VcycleRelaxZtemp;  
+  hypre_ParVector   *VcycleRelaxZtemp;
 
   HYPRE_Int   max_local_lvls;
 
   HYPRE_Int   print_coarse_system;
+  HYPRE_Real  truncate_coarse_grid_threshold;
 
   /* how to set C points */
   HYPRE_Int   set_c_points_method;

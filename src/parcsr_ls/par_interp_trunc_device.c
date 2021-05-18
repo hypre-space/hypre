@@ -8,7 +8,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 __global__ void
 hypreCUDAKernel_InterpTruncation( HYPRE_Int   nrows,
@@ -60,7 +60,7 @@ hypreCUDAKernel_InterpTruncation( HYPRE_Int   nrows,
       if (i < q)
       {
          HYPRE_Real v;
-         cond = cond_prev && i < p + max_elmts;
+         cond = cond_prev && (max_elmts == 0 || i < p + max_elmts);
          if (cond)
          {
             v = read_only_load(&P_a[i]);
@@ -88,7 +88,9 @@ hypreCUDAKernel_InterpTruncation( HYPRE_Int   nrows,
    }
 }
 
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * RL: To be consistent with the CPU version, max_elmts == 0 means no limit on rownnz
+ */
 HYPRE_Int
 hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_factor, HYPRE_Int max_elmts )
 {
@@ -214,4 +216,4 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
    return ierr;
 }
 
-#endif /* #if defined(HYPRE_USING_CUDA) */
+#endif /* #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */

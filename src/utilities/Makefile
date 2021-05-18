@@ -45,10 +45,10 @@ FILES =\
  hypre_hopscotch_hash.c\
  hypre_merge_sort.c\
  hypre_mpi_comm_f2c.c\
- hypre_nvtx.c\
  hypre_prefix_sum.c\
  hypre_printf.c\
  hypre_qsort.c\
+ hypre_utilities.c\
  mpistubs.c\
  qsplit.c\
  random.c\
@@ -60,7 +60,8 @@ CUFILES=\
  hypre_cuda_utils.c\
  hypre_general.c\
  hypre_memory.c\
- hypre_omp_device.c
+ hypre_omp_device.c \
+ hypre_nvtx.c
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}

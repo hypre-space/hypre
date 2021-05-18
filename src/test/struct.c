@@ -184,8 +184,20 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-   /* Initialize Hypre */
+   /*-----------------------------------------------------------------
+    * GPU Device binding
+    * Must be done before HYPRE_Init() and should not be changed after
+    *-----------------------------------------------------------------*/
+   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+
+   /*-----------------------------------------------------------
+    * Initialize : must be the first HYPRE function to call
+    *-----------------------------------------------------------*/
    HYPRE_Init();
+
+#if defined(HYPRE_USING_KOKKOS)
+   Kokkos::initialize (argc, argv);
+#endif
 
 #ifdef HYPRE_DEBUG
    /*cegdb(&argc, &argv, myid);*/
@@ -1950,8 +1962,7 @@ main( hypre_int argc,
 
             HYPRE_LOBPCGDestroy((HYPRE_Solver)lobpcg_solver);
             mv_MultiVectorDestroy( eigenvectors );
-            free( eigenvalues );
-
+            hypre_TFree(eigenvalues, HYPRE_MEMORY_HOST);
          }
          else
          {
@@ -2172,7 +2183,7 @@ main( hypre_int argc,
             }
 
             mv_MultiVectorDestroy( eigenvectors );
-            free( eigenvalues );
+            hypre_TFree(eigenvalues, HYPRE_MEMORY_HOST);
          }
 
          hypre_TFree( interpreter , HYPRE_MEMORY_HOST);
@@ -2882,6 +2893,10 @@ main( hypre_int argc,
          hypre_TFree(offsets[i], HYPRE_MEMORY_HOST);
       hypre_TFree(offsets, HYPRE_MEMORY_HOST);
    }
+
+#if defined(HYPRE_USING_KOKKOS)
+   Kokkos::finalize ();
+#endif
 
    /* Finalize Hypre */
    HYPRE_Finalize();

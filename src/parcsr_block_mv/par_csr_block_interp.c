@@ -34,7 +34,6 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix *A,
                                  HYPRE_Real            trunc_factor,
                                  HYPRE_Int             max_elmts,
                                  HYPRE_Int             add_weak_to_diag,        
-                                 HYPRE_Int            *col_offd_S_to_A,
                                  hypre_ParCSRBlockMatrix  **P_ptr )
 {
 
@@ -148,14 +147,9 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix *A,
    num_threads = 1;
    
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   my_first_cpt = num_cpts_global[my_id];
-   total_global_cpts = num_cpts_global[num_procs];
-#endif
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -338,26 +332,12 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix *A,
 
             if (num_procs > 1)
             {
-               if (col_offd_S_to_A)
+               for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
                {
-                  for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
+                  i1 = S_offd_j[jj];           
+                  if (CF_marker_offd[i1] >= 0)
                   {
-                     i1 = col_offd_S_to_A[S_offd_j[jj]];           
-                     if (CF_marker_offd[i1] >= 0)
-                     {
-                        jj_count_offd[j]++;
-                     }
-                  }
-               }
-               else
-               {
-                  for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
-                  {
-                     i1 = S_offd_j[jj];           
-                     if (CF_marker_offd[i1] >= 0)
-                     {
-                        jj_count_offd[j]++;
-                     }
+                     jj_count_offd[j]++;
                   }
                }
             }
@@ -585,71 +565,35 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix *A,
 
             if (num_procs > 1)
             {
-               if (col_offd_S_to_A)
+               for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
                {
-                  for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
+                  i1 = S_offd_j[jj];   
+
+                  /*-----------------------------------------------------------
+                   * If neighbor i1 is a C-point, set column number in P_offd_j
+                   * and initialize interpolation weight to zero.
+                   *-----------------------------------------------------------*/
+
+                  if (CF_marker_offd[i1] >= 0)
                   {
-                     i1 = col_offd_S_to_A[S_offd_j[jj]];   
+                     P_marker_offd[i1] = jj_counter_offd;
+                     P_offd_j[jj_counter_offd]  = i1;
+                     /* P_offd_data[jj_counter_offd] = zero; */
+                     hypre_CSRBlockMatrixBlockCopyData(zero_block,  
+                                                       &P_offd_data[jj_counter_offd*bnnz], 
+                                                       1.0, block_size);
 
-                     /*-----------------------------------------------------------
-                      * If neighbor i1 is a C-point, set column number in P_offd_j
-                      * and initialize interpolation weight to zero.
-                      *-----------------------------------------------------------*/
-
-                     if (CF_marker_offd[i1] >= 0)
-                     {
-                        P_marker_offd[i1] = jj_counter_offd;
-                        P_offd_j[jj_counter_offd]  = i1;
-                        /* P_offd_data[jj_counter_offd] = zero; */
-                        hypre_CSRBlockMatrixBlockCopyData(zero_block,  
-                                                          &P_offd_data[jj_counter_offd*bnnz], 
-                                                          1.0, block_size);
-                        jj_counter_offd++;
-                     }
-
-                     /*-----------------------------------------------------------
-                      * If neighbor i1 is an F-point, mark it as a strong F-point
-                      * whose connection needs to be distributed.
-                      *-----------------------------------------------------------*/
-
-                     else if (CF_marker_offd[i1] != -3)
-                     {
-                        P_marker_offd[i1] = strong_f_marker;
-                     }            
+                      jj_counter_offd++;
                   }
-               }
-               else
-               {
-                  for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
+
+                  /*-----------------------------------------------------------
+                   * If neighbor i1 is an F-point, mark it as a strong F-point
+                   * whose connection needs to be distributed.
+                   *-----------------------------------------------------------*/
+
+                  else if (CF_marker_offd[i1] != -3)
                   {
-                     i1 = S_offd_j[jj];   
-
-                     /*-----------------------------------------------------------
-                      * If neighbor i1 is a C-point, set column number in P_offd_j
-                      * and initialize interpolation weight to zero.
-                      *-----------------------------------------------------------*/
-
-                     if (CF_marker_offd[i1] >= 0)
-                     {
-                        P_marker_offd[i1] = jj_counter_offd;
-                        P_offd_j[jj_counter_offd]  = i1;
-                        /* P_offd_data[jj_counter_offd] = zero; */
-                        hypre_CSRBlockMatrixBlockCopyData(zero_block,  
-                                                          &P_offd_data[jj_counter_offd*bnnz], 
-                                                          1.0, block_size);
-
-                        jj_counter_offd++;
-                     }
-
-                     /*-----------------------------------------------------------
-                      * If neighbor i1 is an F-point, mark it as a strong F-point
-                      * whose connection needs to be distributed.
-                      *-----------------------------------------------------------*/
-
-                     else if (CF_marker_offd[i1] != -3)
-                     {
-                        P_marker_offd[i1] = strong_f_marker;
-                     }            
+                     P_marker_offd[i1] = strong_f_marker;
                   }
                }
             }
@@ -1047,19 +991,11 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix *A,
    /* copy row starts since A will be destroyed */
    A_col_starts = hypre_ParCSRBlockMatrixColStarts(A);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    P_row_starts = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST); /* don't free this */
    for (i = 0; i < 2; i++)
    {
       P_row_starts[i] =  A_col_starts[i];
    }
-#else
-   P_row_starts = hypre_CTAlloc(HYPRE_BigInt,  num_procs + 1, HYPRE_MEMORY_HOST); /* don't free this */
-   for (i = 0; i < num_procs + 1; i++)
-   {
-      P_row_starts[i] =  A_col_starts[i];
-   }
-#endif
 
    /* Now create P - as a block matrix */
    P = hypre_ParCSRBlockMatrixCreate(comm, block_size,
@@ -1667,7 +1603,6 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix *A,
                                      HYPRE_Real                trunc_factor,
                                      HYPRE_Int                 max_elmts,
                                      HYPRE_Int                 add_weak_to_diag,
-                                     HYPRE_Int                *col_offd_S_to_A,
                                      hypre_ParCSRBlockMatrix  **P_ptr)
 {
 
@@ -1783,14 +1718,9 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix *A,
    num_threads = hypre_NumThreads();
 
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   my_first_cpt = num_cpts_global[my_id];
-   total_global_cpts = num_cpts_global[num_procs];
-#endif
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -1973,26 +1903,12 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix *A,
 
             if (num_procs > 1)
             {
-               if (col_offd_S_to_A)
+               for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
                {
-                  for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
+                  i1 = S_offd_j[jj];           
+                  if (CF_marker_offd[i1] >= 0)
                   {
-                     i1 = col_offd_S_to_A[S_offd_j[jj]];           
-                     if (CF_marker_offd[i1] >= 0)
-                     {
-                        jj_count_offd[j]++;
-                     }
-                  }
-               }
-               else
-               {
-                  for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
-                  {
-                     i1 = S_offd_j[jj];           
-                     if (CF_marker_offd[i1] >= 0)
-                     {
-                        jj_count_offd[j]++;
-                     }
+                     jj_count_offd[j]++;
                   }
                }
             }
@@ -2225,72 +2141,36 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix *A,
 
             if (num_procs > 1)
             {
-               if (col_offd_S_to_A)
+               for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
                {
-                  for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
+                  i1 = S_offd_j[jj];   
+
+                  /*-----------------------------------------------------------
+                   * If neighbor i1 is a C-point, set column number in P_offd_j
+                   * and initialize interpolation weight to zero.
+                   *-----------------------------------------------------------*/
+
+                  if (CF_marker_offd[i1] >= 0)
                   {
-                     i1 = col_offd_S_to_A[S_offd_j[jj]];   
+                     P_marker_offd[i1] = jj_counter_offd;
+                     P_offd_j[jj_counter_offd]  = i1;
+                     /* P_offd_data[jj_counter_offd] = zero; */
+                     hypre_CSRBlockMatrixBlockCopyData(zero_block,  
+                                                       &P_offd_data[jj_counter_offd*bnnz], 
+                                                       1.0, block_size);
 
-                     /*-----------------------------------------------------------
-                      * If neighbor i1 is a C-point, set column number in P_offd_j
-                      * and initialize interpolation weight to zero.
-                      *-----------------------------------------------------------*/
-
-                     if (CF_marker_offd[i1] >= 0)
-                     {
-                        P_marker_offd[i1] = jj_counter_offd;
-                        P_offd_j[jj_counter_offd]  = i1;
-                        /* P_offd_data[jj_counter_offd] = zero; */
-                        hypre_CSRBlockMatrixBlockCopyData(zero_block,  
-                                                          &P_offd_data[jj_counter_offd*bnnz], 
-                                                          1.0, block_size);
-                        jj_counter_offd++;
-                     }
-
-                     /*-----------------------------------------------------------
-                      * If neighbor i1 is an F-point, mark it as a strong F-point
-                      * whose connection needs to be distributed.
-                      *-----------------------------------------------------------*/
-
-                     else if (CF_marker_offd[i1] != -3)
-                     {
-                        P_marker_offd[i1] = strong_f_marker;
-                     }            
+                     jj_counter_offd++;
                   }
-               }
-               else
-               {
-                  for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
+
+                  /*-----------------------------------------------------------
+                   * If neighbor i1 is an F-point, mark it as a strong F-point
+                   * whose connection needs to be distributed.
+                   *-----------------------------------------------------------*/
+
+                  else if (CF_marker_offd[i1] != -3)
                   {
-                     i1 = S_offd_j[jj];   
-
-                     /*-----------------------------------------------------------
-                      * If neighbor i1 is a C-point, set column number in P_offd_j
-                      * and initialize interpolation weight to zero.
-                      *-----------------------------------------------------------*/
-
-                     if (CF_marker_offd[i1] >= 0)
-                     {
-                        P_marker_offd[i1] = jj_counter_offd;
-                        P_offd_j[jj_counter_offd]  = i1;
-                        /* P_offd_data[jj_counter_offd] = zero; */
-                        hypre_CSRBlockMatrixBlockCopyData(zero_block,  
-                                                          &P_offd_data[jj_counter_offd*bnnz], 
-                                                          1.0, block_size);
-
-                        jj_counter_offd++;
-                     }
-
-                     /*-----------------------------------------------------------
-                      * If neighbor i1 is an F-point, mark it as a strong F-point
-                      * whose connection needs to be distributed.
-                      *-----------------------------------------------------------*/
-
-                     else if (CF_marker_offd[i1] != -3)
-                     {
-                        P_marker_offd[i1] = strong_f_marker;
-                     }            
-                  }
+                     P_marker_offd[i1] = strong_f_marker;
+                  }            
                }
             }
       
@@ -2708,19 +2588,11 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix *A,
    /* copy row starts since A will be destroyed */
    A_col_starts = hypre_ParCSRBlockMatrixColStarts(A);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    P_row_starts = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST); /* don't free this */
    for (i = 0; i < 2; i++)
    {
       P_row_starts[i] =  A_col_starts[i];
    }
-#else
-   P_row_starts = hypre_CTAlloc(HYPRE_BigInt,  num_procs + 1, HYPRE_MEMORY_HOST); /* don't free this */
-   for (i = 0; i < num_procs + 1; i++)
-   {
-      P_row_starts[i] =  A_col_starts[i];
-   }
-#endif
 
    /* Now create P - as a block matrix */
    P = hypre_ParCSRBlockMatrixCreate(comm, block_size,
@@ -2860,7 +2732,6 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix    *A,
                                    HYPRE_Int                   debug_flag,
                                    HYPRE_Real                  trunc_factor,
                                    HYPRE_Int                   max_elmts,
-                                   HYPRE_Int                  *col_offd_S_to_A,
                                    hypre_ParCSRBlockMatrix   **P_ptr)
 {
 
@@ -2975,14 +2846,9 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix    *A,
    num_threads = hypre_NumThreads();
 
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   my_first_cpt = num_cpts_global[my_id];
-   total_global_cpts = num_cpts_global[num_procs];
-#endif
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -3164,26 +3030,12 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix    *A,
 
             if (num_procs > 1)
             {
-               if (col_offd_S_to_A)
+               for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
                {
-                  for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
+                  i1 = S_offd_j[jj];           
+                  if (CF_marker_offd[i1] >= 0)
                   {
-                     i1 = col_offd_S_to_A[S_offd_j[jj]];           
-                     if (CF_marker_offd[i1] >= 0)
-                     {
-                        jj_count_offd[j]++;
-                     }
-                  }
-               }
-               else
-               {
-                  for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
-                  {
-                     i1 = S_offd_j[jj];           
-                     if (CF_marker_offd[i1] >= 0)
-                     {
-                        jj_count_offd[j]++;
-                     }
+                     jj_count_offd[j]++;
                   }
                }
             }
@@ -3413,72 +3265,36 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix    *A,
 
             if (num_procs > 1)
             {
-               if (col_offd_S_to_A)
+               for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
                {
-                  for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
+                  i1 = S_offd_j[jj];   
+
+                  /*-----------------------------------------------------------
+                   * If neighbor i1 is a C-point, set column number in P_offd_j
+                   * and initialize interpolation weight to zero.
+                   *-----------------------------------------------------------*/
+
+                  if (CF_marker_offd[i1] >= 0)
                   {
-                     i1 = col_offd_S_to_A[S_offd_j[jj]];   
+                     P_marker_offd[i1] = jj_counter_offd;
+                     P_offd_j[jj_counter_offd]  = i1;
+                     /* P_offd_data[jj_counter_offd] = zero; */
+                     hypre_CSRBlockMatrixBlockCopyData(zero_block,  
+                                                       &P_offd_data[jj_counter_offd*bnnz], 
+                                                       1.0, block_size);
 
-                     /*-----------------------------------------------------------
-                      * If neighbor i1 is a C-point, set column number in P_offd_j
-                      * and initialize interpolation weight to zero.
-                      *-----------------------------------------------------------*/
-
-                     if (CF_marker_offd[i1] >= 0)
-                     {
-                        P_marker_offd[i1] = jj_counter_offd;
-                        P_offd_j[jj_counter_offd]  = i1;
-                        /* P_offd_data[jj_counter_offd] = zero; */
-                        hypre_CSRBlockMatrixBlockCopyData(zero_block,  
-                                                          &P_offd_data[jj_counter_offd*bnnz], 
-                                                          1.0, block_size);
-                        jj_counter_offd++;
-                     }
-
-                     /*-----------------------------------------------------------
-                      * If neighbor i1 is an F-point, mark it as a strong F-point
-                      * whose connection needs to be distributed.
-                      *-----------------------------------------------------------*/
-
-                     else if (CF_marker_offd[i1] != -3)
-                     {
-                        P_marker_offd[i1] = strong_f_marker;
-                     }            
+                     jj_counter_offd++;
                   }
-               }
-               else
-               {
-                  for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
+
+                  /*-----------------------------------------------------------
+                   * If neighbor i1 is an F-point, mark it as a strong F-point
+                   * whose connection needs to be distributed.
+                   *-----------------------------------------------------------*/
+
+                  else if (CF_marker_offd[i1] != -3)
                   {
-                     i1 = S_offd_j[jj];   
-
-                     /*-----------------------------------------------------------
-                      * If neighbor i1 is a C-point, set column number in P_offd_j
-                      * and initialize interpolation weight to zero.
-                      *-----------------------------------------------------------*/
-
-                     if (CF_marker_offd[i1] >= 0)
-                     {
-                        P_marker_offd[i1] = jj_counter_offd;
-                        P_offd_j[jj_counter_offd]  = i1;
-                        /* P_offd_data[jj_counter_offd] = zero; */
-                        hypre_CSRBlockMatrixBlockCopyData(zero_block,  
-                                                          &P_offd_data[jj_counter_offd*bnnz], 
-                                                          1.0, block_size);
-
-                        jj_counter_offd++;
-                     }
-
-                     /*-----------------------------------------------------------
-                      * If neighbor i1 is an F-point, mark it as a strong F-point
-                      * whose connection needs to be distributed.
-                      *-----------------------------------------------------------*/
-
-                     else if (CF_marker_offd[i1] != -3)
-                     {
-                        P_marker_offd[i1] = strong_f_marker;
-                     }            
-                  }
+                     P_marker_offd[i1] = strong_f_marker;
+                  }            
                }
             }
       
@@ -3835,19 +3651,11 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix    *A,
    /* copy row starts since A will be destroyed */
    A_col_starts = hypre_ParCSRBlockMatrixColStarts(A);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    P_row_starts = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST); /* don't free this */
    for (i = 0; i < 2; i++)
    {
       P_row_starts[i] =  A_col_starts[i];
    }
-#else
-   P_row_starts = hypre_CTAlloc(HYPRE_BigInt,  num_procs + 1, HYPRE_MEMORY_HOST); /* don't free this */
-   for (i = 0; i < num_procs + 1; i++)
-   {
-      P_row_starts[i] =  A_col_starts[i];
-   }
-#endif
 
    /* Now create P - as a block matrix */
    P = hypre_ParCSRBlockMatrixCreate(comm, block_size,
@@ -3986,7 +3794,6 @@ hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix   *A,
                                     HYPRE_Int                  debug_flag,
                                     HYPRE_Real                 trunc_factor,
                                     HYPRE_Int                  max_elmts,
-                                    HYPRE_Int                 *col_offd_S_to_A,
                                     hypre_ParCSRBlockMatrix  **P_ptr)
 {
 
@@ -4102,14 +3909,9 @@ hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix   *A,
    num_threads = hypre_NumThreads();
 
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   my_first_cpt = num_cpts_global[my_id];
-   total_global_cpts = num_cpts_global[num_procs];
-#endif
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -4292,26 +4094,12 @@ hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix   *A,
 
             if (num_procs > 1)
             {
-               if (col_offd_S_to_A)
+               for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
                {
-                  for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
+                  i1 = S_offd_j[jj];           
+                  if (CF_marker_offd[i1] >= 0)
                   {
-                     i1 = col_offd_S_to_A[S_offd_j[jj]];           
-                     if (CF_marker_offd[i1] >= 0)
-                     {
-                        jj_count_offd[j]++;
-                     }
-                  }
-               }
-               else
-               {
-                  for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
-                  {
-                     i1 = S_offd_j[jj];           
-                     if (CF_marker_offd[i1] >= 0)
-                     {
-                        jj_count_offd[j]++;
-                     }
+                     jj_count_offd[j]++;
                   }
                }
             }
@@ -4541,71 +4329,35 @@ hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix   *A,
 
             if (num_procs > 1)
             {
-               if (col_offd_S_to_A)
+               for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
                {
-                  for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
+                  i1 = S_offd_j[jj];   
+
+                  /*-----------------------------------------------------------
+                   * If neighbor i1 is a C-point, set column number in P_offd_j
+                   * and initialize interpolation weight to zero.
+                   *-----------------------------------------------------------*/
+
+                  if (CF_marker_offd[i1] >= 0)
                   {
-                     i1 = col_offd_S_to_A[S_offd_j[jj]];   
+                     P_marker_offd[i1] = jj_counter_offd;
+                     P_offd_j[jj_counter_offd]  = i1;
+                     /* P_offd_data[jj_counter_offd] = zero; */
+                     hypre_CSRBlockMatrixBlockCopyData(zero_block,  
+                                                       &P_offd_data[jj_counter_offd*bnnz], 
+                                                       1.0, block_size);
 
-                     /*-----------------------------------------------------------
-                      * If neighbor i1 is a C-point, set column number in P_offd_j
-                      * and initialize interpolation weight to zero.
-                      *-----------------------------------------------------------*/
-
-                     if (CF_marker_offd[i1] >= 0)
-                     {
-                        P_marker_offd[i1] = jj_counter_offd;
-                        P_offd_j[jj_counter_offd]  = i1;
-                        /* P_offd_data[jj_counter_offd] = zero; */
-                        hypre_CSRBlockMatrixBlockCopyData(zero_block,  
-                                                          &P_offd_data[jj_counter_offd*bnnz], 
-                                                          1.0, block_size);
-                        jj_counter_offd++;
-                     }
-
-                     /*-----------------------------------------------------------
-                      * If neighbor i1 is an F-point, mark it as a strong F-point
-                      * whose connection needs to be distributed.
-                      *-----------------------------------------------------------*/
-
-                     else if (CF_marker_offd[i1] != -3)
-                     {
-                        P_marker_offd[i1] = strong_f_marker;
-                     }            
+                     jj_counter_offd++;
                   }
-               }
-               else
-               {
-                  for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
+
+                  /*-----------------------------------------------------------
+                   * If neighbor i1 is an F-point, mark it as a strong F-point
+                   * whose connection needs to be distributed.
+                   *-----------------------------------------------------------*/
+
+                  else if (CF_marker_offd[i1] != -3)
                   {
-                     i1 = S_offd_j[jj];   
-
-                     /*-----------------------------------------------------------
-                      * If neighbor i1 is a C-point, set column number in P_offd_j
-                      * and initialize interpolation weight to zero.
-                      *-----------------------------------------------------------*/
-
-                     if (CF_marker_offd[i1] >= 0)
-                     {
-                        P_marker_offd[i1] = jj_counter_offd;
-                        P_offd_j[jj_counter_offd]  = i1;
-                        /* P_offd_data[jj_counter_offd] = zero; */
-                        hypre_CSRBlockMatrixBlockCopyData(zero_block,  
-                                                          &P_offd_data[jj_counter_offd*bnnz], 
-                                                          1.0, block_size);
-
-                        jj_counter_offd++;
-                     }
-
-                     /*-----------------------------------------------------------
-                      * If neighbor i1 is an F-point, mark it as a strong F-point
-                      * whose connection needs to be distributed.
-                      *-----------------------------------------------------------*/
-
-                     else if (CF_marker_offd[i1] != -3)
-                     {
-                        P_marker_offd[i1] = strong_f_marker;
-                     }            
+                     P_marker_offd[i1] = strong_f_marker;
                   }
                }
             }
@@ -4951,19 +4703,11 @@ hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix   *A,
    /* copy row starts since A will be destroyed */
    A_col_starts = hypre_ParCSRBlockMatrixColStarts(A);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    P_row_starts = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST); /* don't free this */
    for (i = 0; i < 2; i++)
    {
       P_row_starts[i] =  A_col_starts[i];
    }
-#else
-   P_row_starts = hypre_CTAlloc(HYPRE_BigInt,  num_procs + 1, HYPRE_MEMORY_HOST); /* don't free this */
-   for (i = 0; i < num_procs + 1; i++)
-   {
-      P_row_starts[i] =  A_col_starts[i];
-   }
-#endif
 
    /* Now create P - as a block matrix */
    P = hypre_ParCSRBlockMatrixCreate(comm, block_size,
@@ -5088,7 +4832,6 @@ hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix    *A,
                                     HYPRE_Int                   debug_flag,
                                     HYPRE_Real                  trunc_factor,
                                     HYPRE_Int                   max_elmts,
-                                    HYPRE_Int                  *col_offd_S_to_A,
                                     hypre_ParCSRBlockMatrix   **P_ptr)
 {
 
@@ -5186,14 +4929,9 @@ hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix    *A,
    hypre_MPI_Comm_rank(comm,&my_id);
    num_threads = hypre_NumThreads();
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-#else
-   my_first_cpt = num_cpts_global[my_id];
-   total_global_cpts = num_cpts_global[num_procs];
-#endif
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -5310,26 +5048,12 @@ hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix    *A,
 
             if (num_procs > 1)
             {
-               if (col_offd_S_to_A)
+               for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
                {
-                  for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
+                  i1 = S_offd_j[jj];           
+                  if (CF_marker_offd[i1] > 0)
                   {
-                     i1 = col_offd_S_to_A[S_offd_j[jj]];           
-                     if (CF_marker_offd[i1] > 0)
-                     {
-                        jj_count_offd[j]++;
-                     }
-                  }
-               }
-               else
-               {
-                  for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
-                  {
-                     i1 = S_offd_j[jj];           
-                     if (CF_marker_offd[i1] > 0)
-                     {
-                        jj_count_offd[j]++;
-                     }
+                     jj_count_offd[j]++;
                   }
                }
             }
@@ -5543,50 +5267,24 @@ hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix    *A,
 
             if (num_procs > 1)
             {
-               if (col_offd_S_to_A)
+               for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
                {
-                  for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
-                  {
-                     i1 = col_offd_S_to_A[S_offd_j[jj]];   
-               
-                     /*-----------------------------------------------------------
-                      * If neighbor i1 is a C-point, set column number in P_offd_j
-                      * and initialize interpolation weight to zero.
-                      *-----------------------------------------------------------*/
-               
-                     if (CF_marker_offd[i1] >= 0)
-                     {
-                        P_marker_offd[i1] = jj_counter_offd;
-                        P_offd_j[jj_counter_offd]  = i1;
-                        /*P_offd_data[jj_counter_offd] = zero;*/
-                        hypre_CSRBlockMatrixBlockCopyData(zero_block,  
-                                                          &P_offd_data[jj_counter_offd*bnnz], 
-                                                          1.0, block_size);
-                        jj_counter_offd++;
-                     }
-                  }
-               }
-               else
-               {
-                  for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
-                  {
-                     i1 = S_offd_j[jj];   
+                  i1 = S_offd_j[jj];   
 
-                     /*-----------------------------------------------------------
-                      * If neighbor i1 is a C-point, set column number in P_offd_j
-                      * and initialize interpolation weight to zero.
-                      *-----------------------------------------------------------*/
+                  /*-----------------------------------------------------------
+                   * If neighbor i1 is a C-point, set column number in P_offd_j
+                   * and initialize interpolation weight to zero.
+                   *-----------------------------------------------------------*/
 
-                     if (CF_marker_offd[i1] >= 0)
-                     {
-                        P_marker_offd[i1] = jj_counter_offd;
-                        P_offd_j[jj_counter_offd]  = i1;
-                        /* P_offd_data[jj_counter_offd] = zero; */
-                        hypre_CSRBlockMatrixBlockCopyData(zero_block,  
-                                                          &P_offd_data[jj_counter_offd*bnnz], 
-                                                          1.0, block_size);
-                        jj_counter_offd++;
-                     }
+                  if (CF_marker_offd[i1] >= 0)
+                  {
+                     P_marker_offd[i1] = jj_counter_offd;
+                     P_offd_j[jj_counter_offd]  = i1;
+                     /* P_offd_data[jj_counter_offd] = zero; */
+                     hypre_CSRBlockMatrixBlockCopyData(zero_block,  
+                                                       &P_offd_data[jj_counter_offd*bnnz], 
+                                                       1.0, block_size);
+                     jj_counter_offd++;
 
                   }
                }
@@ -5742,19 +5440,11 @@ hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix    *A,
    /* copy row starts since A will be destroyed */
    A_col_starts = hypre_ParCSRBlockMatrixColStarts(A);
    
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    P_row_starts = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST); /* don't free this */
    for (i = 0; i < 2; i++)
    {
       P_row_starts[i] =  A_col_starts[i];
    }
-#else
-   P_row_starts = hypre_CTAlloc(HYPRE_BigInt,  num_procs + 1, HYPRE_MEMORY_HOST); /* don't free this */
-   for (i = 0; i < num_procs + 1; i++)
-   {
-      P_row_starts[i] =  A_col_starts[i];
-   }
-#endif
 
 
    /* Now create P - as a block matrix */                                                                         
@@ -5885,7 +5575,6 @@ hypre_BoomerAMGBuildBlockStdInterp(hypre_ParCSRBlockMatrix *A,
                                    HYPRE_Real    trunc_factor,
                                    HYPRE_Int max_elmts, 
                                    HYPRE_Int sep_weight,
-                                   HYPRE_Int *col_offd_S_to_A, 
                                    hypre_ParCSRBlockMatrix  **P_ptr)
 {
    /* Communication Variables */
@@ -6010,14 +5699,9 @@ hypre_BoomerAMGBuildBlockStdInterp(hypre_ParCSRBlockMatrix *A,
    hypre_MPI_Comm_size(comm, &num_procs);   
    hypre_MPI_Comm_rank(comm,&my_id);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_INT, num_procs-1, comm);
-#else
-   my_first_cpt = num_cpts_global[my_id];
-   total_global_cpts = num_cpts_global[num_procs];
-#endif
 
    if (!comm_pkg)
    {
@@ -6183,10 +5867,7 @@ hypre_BoomerAMGBuildBlockStdInterp(hypre_ParCSRBlockMatrix *A,
                {
                   for (kk = S_offd_i[i1]; kk < S_offd_i[i1+1]; kk++)
                   {
-                     if(col_offd_S_to_A)
-                        k1 = col_offd_S_to_A[S_offd_j[kk]];
-                     else
-                        k1 = S_offd_j[kk];
+                     k1 = S_offd_j[kk];
                      if (CF_marker_offd[k1] >= 0)
                      {
                         if(P_marker_offd[k1] < P_offd_i[i])
@@ -6206,8 +5887,6 @@ hypre_BoomerAMGBuildBlockStdInterp(hypre_ParCSRBlockMatrix *A,
             for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
             {
                i1 = S_offd_j[jj];           
-               if(col_offd_S_to_A)
-                  i1 = col_offd_S_to_A[i1];
                if (CF_marker_offd[i1] >= 0)
                {
                   if(P_marker_offd[i1] < P_offd_i[i])
@@ -6408,10 +6087,7 @@ hypre_BoomerAMGBuildBlockStdInterp(hypre_ParCSRBlockMatrix *A,
                {
                   for (kk = S_offd_i[i1]; kk < S_offd_i[i1+1]; kk++)
                   {
-                     if(col_offd_S_to_A)
-                        k1 = col_offd_S_to_A[S_offd_j[kk]];
-                     else
-                        k1 = S_offd_j[kk];
+                     k1 = S_offd_j[kk];
                      if(CF_marker_offd[k1] >= 0)
                      {
                         if(P_marker_offd[k1] < jj_begin_row_offd)
@@ -6436,8 +6112,6 @@ hypre_BoomerAMGBuildBlockStdInterp(hypre_ParCSRBlockMatrix *A,
             for (jj=S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
             {
                i1 = S_offd_j[jj];
-               if(col_offd_S_to_A)
-                  i1 = col_offd_S_to_A[i1];
                if ( CF_marker_offd[i1] >= 0)
                {
                   if(P_marker_offd[i1] < jj_begin_row_offd)

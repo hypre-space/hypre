@@ -67,6 +67,7 @@ cat > check-license.remove <<EOF
 ./src/config/config.guess
 ./src/config/config.sub
 ./src/config/depcomp
+./src/config/HYPRE_config.h.in
 ./src/config/install-sh
 ./src/config/missing
 ./src/config/mkinstalldirs

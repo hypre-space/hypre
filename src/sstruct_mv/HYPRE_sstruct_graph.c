@@ -346,8 +346,6 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    hypre_IndexRef            index;
    HYPRE_Int                 i, j;
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-
    /* may need to re-do box managers for the AP*/
    hypre_BoxManager        ***managers = hypre_SStructGridBoxManagers(grid);
    hypre_BoxManager        ***new_managers = NULL;
@@ -553,7 +551,6 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    hypre_BoxDestroy(new_box);
 
    /* end of AP stuff */
-#endif
 
    hypre_MPI_Comm_size(comm, &nprocs);
    hypre_MPI_Comm_rank(comm, &myproc);

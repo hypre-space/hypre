@@ -7,6 +7,7 @@
 
 #define HYPRE_RELEASE_NAME    "@CMAKE_PROJECT_NAME@"
 #define HYPRE_RELEASE_VERSION "@HYPRE_VERSION@"
+#define HYPRE_RELEASE_NUMBER  "@HYPRE_NUMBER@"
 #define HYPRE_RELEASE_DATE    "@HYPRE_DATE@"
 #define HYPRE_RELEASE_TIME    "@HYPRE_TIME@"
 #define HYPRE_RELEASE_BUGS    "@HYPRE_BUGS@"
@@ -46,9 +47,6 @@
 
 /* Use internal LAPACK library */
 #cmakedefine HYPRE_USING_HYPRE_LAPACK
-
-/* Use assumed partition */
-#cmakedefine HYPRE_NO_GLOBAL_PARTITION
 
 /* Print HYPRE errors */
 #cmakedefine HYPRE_PRINT_ERRORS

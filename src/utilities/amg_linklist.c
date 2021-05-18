@@ -20,9 +20,8 @@
 /**************************************************************
  *
  * dispose_elt(): dispose of memory space used by the element
- *                pointed to by element_ptr.  Use the 'free()'
- *                system call to return it to the free memory 
- *                pool.
+ *                pointed to by element_ptr and return it to
+ *                the memory pool.
  *
  **************************************************************/
 void hypre_dispose_elt ( hypre_LinkList element_ptr )

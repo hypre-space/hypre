@@ -54,7 +54,7 @@ if test x = x"$MPILIBS"; then
   $2
   :
 else
-  AC_DEFINE(HYPRE_HAVE_MPI,1,[Found the MPI library.])
+  AC_DEFINE(HYPRE_HAVE_MPI,1,[Define to 1 if an MPI library is found])
   $1
   :
 fi
@@ -98,7 +98,7 @@ AC_DEFUN([AC_HYPRE_OPTIMIZATION_FLAGS],
 
 if test "x${hypre_user_chose_cflags}" = "xno"
 then
-   case "${CC}" in
+   case `basename "${CC}"` in
       gcc|mpigcc|mpicc)
         CFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
@@ -138,7 +138,7 @@ fi
 
 if test "x${hypre_user_chose_cxxflags}" = "xno"
 then
-   case "${CXX}" in
+   case `basename "${CXX}"` in
       g++|gCC|mpig++|mpicxx|mpic++|mpiCC)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
@@ -174,7 +174,7 @@ fi
 
 if test "x${hypre_user_chose_fflags}" = "xno"
 then
-   case "${FC}" in
+   case `basename "${FC}"` in
       g77|gfortran|mpigfortran|mpif77)
         FFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
@@ -218,7 +218,7 @@ AC_DEFUN([AC_HYPRE_DEBUG_FLAGS],
 
 if test "x${hypre_user_chose_cflags}" = "xno"
 then
-   case "${CC}" in
+   case `basename "${CC}"` in
       gcc|mpigcc|mpicc)
         CFLAGS="-g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
@@ -258,7 +258,7 @@ fi
 
 if test "x${hypre_user_chose_cxxflags}" = "xno"
 then
-   case "${CXX}" in
+   case `basename "${CXX}"` in
       g++|gCC|mpig++|mpicxx|mpic++|mpiCC)
         CXXFLAGS="-g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
@@ -294,7 +294,7 @@ fi
 
 if test "x${hypre_user_chose_fflags}" = "xno"
 then
-   case "${FC}" in
+   case `basename "${FC}"` in
       g77|gfortran|mpigfortran|mpif77)
         FFLAGS="-g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
@@ -415,19 +415,19 @@ dnl *
 dnl *    define type of architecture
    case $HYPRE_ARCH in
       alpha)
-         AC_DEFINE(HYPRE_ALPHA)
+         AC_DEFINE(HYPRE_ALPHA,1,[Define to 1 for Alpha platforms])
          ;;
       sun* | solaris*)
-         AC_DEFINE(HYPRE_SOLARIS)
+         AC_DEFINE(HYPRE_SOLARIS,1,[Define to 1 for Solaris.])
          ;;
       hp* | HP*)
-         AC_DEFINE(HYPRE_HPPA)
+         AC_DEFINE(HYPRE_HPPA,1,[Define to 1 for HP platforms])
          ;;
       rs6000 | RS6000 | *bgl* | *BGL* | ppc64*)
-         AC_DEFINE(HYPRE_RS6000)
+         AC_DEFINE(HYPRE_RS6000,1,[Define to 1 for RS6000 platforms])
          ;;
       IRIX64)
-         AC_DEFINE(HYPRE_IRIX64)
+         AC_DEFINE(HYPRE_IRIX64,1,[Define to 1 for IRIX64 platforms])
          ;;
       Linux | linux | LINUX)
          if test -r /etc/home.config
@@ -435,14 +435,14 @@ dnl *    define type of architecture
             systemtype=`grep ^SYS_TYPE /etc/home.config | cut -d" " -f2`
             case $systemtype in
                chaos*)
-                  AC_DEFINE(HYPRE_LINUX_CHAOS)
+                  AC_DEFINE(HYPRE_LINUX_CHAOS,1,[Define to 1 for Linux on platforms running any version of CHAOS])
                   ;;
                *)
-                  AC_DEFINE(HYPRE_LINUX)
+                  AC_DEFINE(HYPRE_LINUX,1,[Define to 1 for Linux platform])
                   ;;
             esac
          else
-            AC_DEFINE(HYPRE_LINUX)
+            AC_DEFINE(HYPRE_LINUX,1,[Define to 1 for Linux platform])
          fi
          ;;
    esac

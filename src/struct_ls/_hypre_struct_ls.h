@@ -299,7 +299,7 @@ HYPRE_Int hypre_JacobiSetTempVec ( void *jacobi_vdata , hypre_StructVector *t );
 HYPRE_Int hypre_JacobiGetFinalRelativeResidualNorm ( void *jacobi_vdata , HYPRE_Real *norm );
 
 /* pcg_struct.c */
-void *hypre_StructKrylovCAlloc ( HYPRE_Int count , HYPRE_Int elt_size );
+void *hypre_StructKrylovCAlloc ( size_t count, size_t elt_size, HYPRE_MemoryLocation location );
 HYPRE_Int hypre_StructKrylovFree ( void *ptr );
 void *hypre_StructKrylovCreateVector ( void *vvector );
 void *hypre_StructKrylovCreateVectorArray ( HYPRE_Int n , void *vvector );

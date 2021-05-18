@@ -114,7 +114,7 @@ hypre_FacSemiInterpDestroy2( void *fac_interp_vdata)
  * hypre_FacSemiInterpSetup2:
  * Note that an intermediate coarse SStruct_PVector is used in interpolating
  * the interlevel communicated data (coarse data). The data in these
- * intermediate vectors will be interpolated to the fine grid. 
+ * intermediate vectors will be interpolated to the fine grid.
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
@@ -216,23 +216,23 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    hypre_CopyIndex(rfactors, (fac_interp_data -> stride));
 
    /*------------------------------------------------------------------------
-    * Interlevel communication structures. 
+    * Interlevel communication structures.
     *
-    * Algorithm for identity_boxes: For each cbox on this processor, refine 
-    * it and intersect it with the fmap. 
+    * Algorithm for identity_boxes: For each cbox on this processor, refine
+    * it and intersect it with the fmap.
     *    (cbox - all coarsened fmap_intersect boxes)= identity chunks
     * for cbox.
     *
     * Algorithm for own_boxes (fullwgted boxes on this processor): For each
-    * fbox, coarsen it and boxmap intersect it with cmap. 
+    * fbox, coarsen it and boxmap intersect it with cmap.
     *   (cmap_intersect boxes on myproc)= ownboxes
     * for this fbox.
     *
-    * Algorithm for recv_box: For each fbox, coarsen it and boxmap intersect 
+    * Algorithm for recv_box: For each fbox, coarsen it and boxmap intersect
     * it with cmap.
     *   (cmap_intersect boxes off_proc)= unstretched recv_boxes.
     * These boxes are stretched by one in each direction so that the ghostlayer
-    * is also communicated. However, the recv_grid will consists of the 
+    * is also communicated. However, the recv_grid will consists of the
     * unstretched boxes so that overlapping does not occur.
     *--------------------------------------------------------------------------*/
    identity_arrayboxes= hypre_CTAlloc(hypre_BoxArrayArray *,  nvars, HYPRE_MEMORY_HOST);
@@ -399,7 +399,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
                hypre_SubtractIndexes(hypre_BoxIMin(&box), index, 3,
                                      hypre_BoxIMin(&box));
                hypre_AddIndexes(hypre_BoxIMax(&box), index, 3, hypre_BoxIMax(&box));
-                  
+
                hypre_AppendBox(&box,
                                hypre_BoxArrayArrayBoxArray(recv_boxes[vars], fi));
                recv_processes[vars][fi][cnt2]= proc;
@@ -440,7 +440,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
          cnt1+= hypre_BoxArraySize(boxarray);
       }
       recv_boxnum_map[vars]= hypre_CTAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
-      
+
       cnt1= 0;
       hypre_ForBoxArrayI(i, recv_boxes[vars])
       {
@@ -465,7 +465,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
             recv_boxnum_map[vars][cnt1]= i; /* record the fbox num. i */
             cnt1++;
             cnt2++;
-         } 
+         }
       }
    }
 
@@ -509,7 +509,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    /*------------------------------------------------------------------------
     * Send_boxes.
     * Algorithm for send_boxes: For each cbox on this processor, box_map
-    * intersect it with temp_grid's map. 
+    * intersect it with temp_grid's map.
     *   (intersection boxes off-proc)= send_boxes for this cbox.
     * Note that the send_boxes will be stretched to include the ghostlayers.
     * This guarantees that all the data required for linear interpolation
@@ -544,7 +544,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
       {
          box= *hypre_BoxArrayBox(boxarray, ci);
          hypre_BoxSetExtents(&scaled_box, hypre_BoxIMin(&box), hypre_BoxIMax(&box));
-      
+
          hypre_BoxManIntersect(boxman1, hypre_BoxIMin(&scaled_box),
                                hypre_BoxIMax(&scaled_box), &boxman_entries, &nboxman_entries);
 
@@ -644,13 +644,13 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
       refine_factors_half[i] = rfactors[i]/2;
       refine_factors_2recp[i]= 1.0/(2.0*rfactors[i]);
    }
- 
+
    for (i= 0; i< ndim; i++)
    {
       for (j= 0; j<= refine_factors_half[i]; j++)
       {
          weights[i][j]= refine_factors_2recp[i]*(rfactors[i] + 2*j - 1.0);
-      }     
+      }
 
       for (j= (refine_factors_half[i]+1); j<= rfactors[i]; j++)
       {
@@ -658,7 +658,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
       }
    }
    (fac_interp_data -> weights)= weights;
- 
+
 
    return ierr;
 }
@@ -669,7 +669,7 @@ hypre_FAC_IdentityInterp2(void                 *  fac_interp_vdata,
                           hypre_SStructVector  *  e)
 {
    hypre_FacSemiInterpData2 *interp_data= (hypre_FacSemiInterpData2 *)fac_interp_vdata;
-   hypre_BoxArrayArray     **identity_boxes= interp_data-> identity_arrayboxes; 
+   hypre_BoxArrayArray     **identity_boxes= interp_data-> identity_arrayboxes;
 
    HYPRE_Int               part_crse= 0;
 
@@ -680,7 +680,7 @@ hypre_FAC_IdentityInterp2(void                 *  fac_interp_vdata,
     * The pgrid of xc is the same as the part_csre pgrid of e.
     *-----------------------------------------------------------------------*/
    hypre_SStructPartialPCopy(xc,
-                             hypre_SStructVectorPVector(e, part_crse), 
+                             hypre_SStructVectorPVector(e, part_crse),
                              identity_boxes);
 
    return ierr;
@@ -723,12 +723,12 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
    hypre_Box              *ownbox;
    HYPRE_Int             **var_boxnums;
    HYPRE_Int              *cboxnums;
-  
+
    hypre_Box              *xc_dbox;
    hypre_Box              *e_dbox;
 
    hypre_Box               refined_box, intersect_box;
-   
+
 
    hypre_StructVector     *xc_var;
    hypre_StructVector     *e_var;
@@ -812,19 +812,19 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
 
    /*-----------------------------------------------------------------------
     * Allocate memory for the data pointers. Assuming linear interpolation.
-    * We stride through the refinement patch by the refinement factors, and 
+    * We stride through the refinement patch by the refinement factors, and
     * so we must have pointers to the intermediate fine nodes=> ep will
-    * be size refine_factors[2]*refine_factors[1]. This holds for all 
+    * be size refine_factors[2]*refine_factors[1]. This holds for all
     * dimensions since refine_factors[i]= 1 for i>= ndim.
-    * Note that we need 3 coarse nodes per coordinate direction for the 
+    * Note that we need 3 coarse nodes per coordinate direction for the
     * interpolating. This is dimensional dependent:
     *   ndim= 3     kplane= 0,1,2 & jplane= 0,1,2    **ptr size [3][3]
     *   ndim= 2     kplane= 0     & jplane= 0,1,2    **ptr size [1][3]
     *   ndim= 1     kplane= 0     & jplane= 0        **ptr size [1][1]
     *-----------------------------------------------------------------------*/
-   ksize= 3; 
+   ksize= 3;
    jsize= 3;
-   if (ndim < 3) 
+   if (ndim < 3)
    {
       ksize= 1;
    }
@@ -832,7 +832,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
    {
       jsize= 1;
    }
-  
+
    xcp  = hypre_TAlloc(HYPRE_Real **,  ksize, HYPRE_MEMORY_HOST);
    ep   = hypre_TAlloc(HYPRE_Real **,  refine_factors[2], HYPRE_MEMORY_HOST);
 
@@ -841,7 +841,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
       ep[k]= hypre_TAlloc(HYPRE_Real *,  refine_factors[1], HYPRE_MEMORY_HOST);
    }
 
-   for (k= 0; k< ksize; k++)  
+   for (k= 0; k< ksize; k++)
    {
       xcp[k]= hypre_TAlloc(HYPRE_Real *,  jsize, HYPRE_MEMORY_HOST);
    }
@@ -896,13 +896,13 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
             hypre_IntersectBoxes(fbox, &refined_box, &intersect_box);
 
             xc_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(xc_var),
-                                        cboxnums[bi]); 
+                                        cboxnums[bi]);
 
             /*-----------------------------------------------------------------
              * Get ptrs for the crse struct_vectors. For linear interpolation
              * and arbitrary refinement factors, we need to point to the correct
-             * coarse grid nodes. Note that the ownboxes were created so that 
-             * only the coarse nodes inside a fbox are contained in ownbox. 
+             * coarse grid nodes. Note that the ownboxes were created so that
+             * only the coarse nodes inside a fbox are contained in ownbox.
              * Since we loop over the fine intersect box, we need to refine
              * ownbox.
              *-----------------------------------------------------------------*/
@@ -915,11 +915,11 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
 
             /*------------------------------------------------------------------
              * The fine intersection box may not be divisible by the refinement
-             * factor. This means that the interpolated coarse nodes and their 
-             * wieghts must be carefully determined. We accomplish this using the 
+             * factor. This means that the interpolated coarse nodes and their
+             * wieghts must be carefully determined. We accomplish this using the
              * offset away from a fine index that is divisible by the factor.
              * Because the ownboxes were created so that only coarse nodes
-             * completely in the fbox are included, start is always divisible 
+             * completely in the fbox are included, start is always divisible
              * by refine_factors. We do the calculation anyways for future changes.
              *------------------------------------------------------------------*/
             hypre_ClearIndex(start_offset);
@@ -935,13 +935,13 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
             }
 
             ptr_jshift= 0;
-            if ( start[1]%refine_factors[1] < refine_factors_half[1] && ndim >= 2 ) 
+            if ( start[1]%refine_factors[1] < refine_factors_half[1] && ndim >= 2 )
             {
                ptr_jshift= -1;
             }
 
             ptr_ishift= 0;
-            if ( start[0]%refine_factors[0] < refine_factors_half[0] ) 
+            if ( start[0]%refine_factors[0] < refine_factors_half[0] )
             {
                ptr_ishift= -1;
             }
@@ -955,7 +955,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                      hypre_BoxOffsetDistance(xc_dbox, temp_index2);
                }
             }
-                 
+
             hypre_CopyIndex(hypre_BoxIMin(ownbox), startc);
             hypre_BoxGetSize(ownbox, loop_size);
 
@@ -965,12 +965,12 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
             {
                /*--------------------------------------------------------
                 * Linear interpolation. Determine the weights and the
-                * correct coarse grid values to be weighted. All fine 
+                * correct coarse grid values to be weighted. All fine
                 * values in an agglomerated coarse cell or in the remainder
-                * agglomerated coarse cells are determined. The upper 
+                * agglomerated coarse cells are determined. The upper
                 * extents are needed.
                 *--------------------------------------------------------*/
-               hypre_BoxLoopGetIndex(lindex);
+               zypre_BoxLoopGetIndex(lindex);
                imax= hypre_min( (intersect_size[0]-lindex[0]*stride[0]),
                                 refine_factors[0] );
                jmax= hypre_min( (intersect_size[1]-lindex[1]*stride[1]),
@@ -994,7 +994,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                         else
                         {
                            kshift= 1;
-                           if (offset_kp1 >  refine_factors_half[2] && 
+                           if (offset_kp1 >  refine_factors_half[2] &&
                                offset_kp1 <= refine_factors[2])
                            {
                               zweight2= weights[2][offset_kp1];
@@ -1009,7 +1009,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
 
                      else
                      {
-                        if (offset_kp1 > refine_factors_half[2] && 
+                        if (offset_kp1 > refine_factors_half[2] &&
                             offset_kp1 <= refine_factors[2])
                         {
                            zweight2= weights[2][offset_kp1];
@@ -1064,7 +1064,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
 
                         else
                         {
-                           if (offset_jp1 > refine_factors_half[1] && 
+                           if (offset_jp1 > refine_factors_half[1] &&
                                offset_jp1 <= refine_factors[1])
                            {
                               yweight2= weights[1][offset_jp1];
@@ -1159,10 +1159,10 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                         }
                         else if (ndim == 2)
                         {
-                           ep[0][j][ei+i] = yweight1*( 
+                           ep[0][j][ei+i] = yweight1*(
                               xweight1*xcp[0][jshift][ishift+xci]+
                               xweight2*xcp[0][jshift][ishift+xci+1]);
-                           ep[0][j][ei+i]+= yweight2*( 
+                           ep[0][j][ei+i]+= yweight2*(
                               xweight1*xcp[0][jshift+1][ishift+xci]+
                               xweight2*xcp[0][jshift+1][ishift+xci+1]);
                         }
@@ -1173,7 +1173,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                         }
                      }      /* for (i= 0; i< imax; i++) */
                   }         /* for (j= 0; j< jmax; j++) */
-               }            /* for (k= 0; k< kmax; k++) */ 
+               }            /* for (k= 0; k< kmax; k++) */
             }
             hypre_SerialBoxLoop2End(ei, xci);
 
@@ -1280,7 +1280,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
             {
                for (j=0; j< jsize; j++)
                {
-                  hypre_SetIndex3(temp_index2, 
+                  hypre_SetIndex3(temp_index2,
                                   ptr_ishift, j+ptr_jshift, k+ptr_kshift);
                   xcp[k][j]= hypre_StructVectorBoxData(recv_var, bi) +
                      hypre_BoxOffsetDistance(xc_dbox, temp_index2);
@@ -1301,7 +1301,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                 * agglomerated coarse cells are determined. The upper
                 * extents are needed.
                 *--------------------------------------------------------*/
-               hypre_BoxLoopGetIndex(lindex);
+               zypre_BoxLoopGetIndex(lindex);
                imax= hypre_min( (intersect_size[0]-lindex[0]*stride[0]),
                                 refine_factors[0] );
                jmax= hypre_min( (intersect_size[1]-lindex[1]*stride[1]),

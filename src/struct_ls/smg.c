@@ -39,7 +39,7 @@ hypre_SMGCreate( MPI_Comm  comm )
 
    /* initialize */
    (smg_data -> num_levels) = -1;
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    (smg_data -> devicelevel) = 200;
 #endif
    return (void *) smg_data;
@@ -55,7 +55,7 @@ hypre_SMGDestroy( void *smg_vdata )
 
    HYPRE_Int l;
 
-   HYPRE_ANNOTATION_BEGIN("SMG.destroy");
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    if (smg_data)
    {
@@ -125,7 +125,7 @@ hypre_SMGDestroy( void *smg_vdata )
       hypre_TFree(smg_data, HYPRE_MEMORY_HOST);
    }
 
-   HYPRE_ANNOTATION_END("SMG.destroy");
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -516,7 +516,7 @@ hypre_StructSMGSetMaxLevel( void   *smg_vdata,
    return hypre_error_flag;
 }
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 HYPRE_Int
 hypre_StructSMGSetDeviceLevel( void   *smg_vdata,
                                HYPRE_Int   device_level  )

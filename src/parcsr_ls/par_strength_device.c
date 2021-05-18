@@ -8,7 +8,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 __global__ void hypre_BoomerAMGCreateS_rowcount( HYPRE_Int nr_of_rows,
                                                  HYPRE_Real max_row_sum, HYPRE_Real strength_threshold,
@@ -228,8 +228,10 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
              dof_func      - vector over nonzero elements of A_diag, indicating the degree of freedom
              dof_func_offd - vector over nonzero elements of A_offd, indicating the degree of freedom
 
-      Output: S_temp_diag_j - S_diag_j vector before compression, i.e.,elements that are -1 should be removed
-              S_temp_offd_j - S_offd_j vector before compression, i.e.,elements that are -1 should be removed
+      Output: S_temp_diag_j - S_diag_j vector before compression, i.e.,elements that are -1, or -2 should be removed
+                              strong connections: same as A_diag_j; weak: -1; diagonal: -2
+              S_temp_offd_j - S_offd_j vector before compression, i.e.,elements that are -1, or -2 should be removed
+                              strong connections: same as A_offd_j; weak: -1;
               jS_diag       - S_diag_i vector for compressed S_diag
               jS_offd       - S_offd_i vector for compressed S_offd
     */
@@ -367,5 +369,4 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    }
 }
 
-#endif /* #if defined(HYPRE_USING_CUDA) */
-
+#endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */

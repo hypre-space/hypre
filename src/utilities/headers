@@ -46,6 +46,7 @@ cat amg_linklist.h             >> $INTERNAL_HEADER
 cat exchange_data.h            >> $INTERNAL_HEADER
 cat caliper_instrumentation.h  >> $INTERNAL_HEADER
 cat hypre_handle.h             >> $INTERNAL_HEADER
+cat gselim.h                   >> $INTERNAL_HEADER
 cat protos.h                   >> $INTERNAL_HEADER
 
 #===========================================================================
@@ -76,12 +77,17 @@ cat > $INTERNAL_HEADER <<@
 #ifndef hypre_UTILITIES_HPP
 #define hypre_UTILITIES_HPP
 
+#ifdef __cplusplus
+extern "C++" {
+#endif
+
 @
 
 #===========================================================================
 # Structures and prototypes
 #===========================================================================
 
+cat hypre_umpire_allocator.h     >> $INTERNAL_HEADER
 cat hypre_cuda_utils.h           >> $INTERNAL_HEADER
 cat hypre_cuda_reducer.h         >> $INTERNAL_HEADER
 cat hypre_cub_allocator.h        >> $INTERNAL_HEADER
@@ -91,6 +97,10 @@ cat hypre_cub_allocator.h        >> $INTERNAL_HEADER
 #===========================================================================
 
 cat >> $INTERNAL_HEADER <<@
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

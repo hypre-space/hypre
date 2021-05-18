@@ -35,13 +35,7 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
 
    hypre_IJMatrix *ijmatrix;
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    HYPRE_BigInt  row0, col0, rowN, colN;
-#else
-   HYPRE_BigInt *recv_buf;
-   HYPRE_Int i, i4;
-   HYPRE_Int square;
-#endif
 
    ijmatrix = hypre_CTAlloc(hypre_IJMatrix,  1, HYPRE_MEMORY_HOST);
 
@@ -86,8 +80,6 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
       return hypre_error_flag;
    }
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-
    info = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
 
    row_partitioning = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
@@ -128,100 +120,6 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
    hypre_IJMatrixGlobalNumCols(ijmatrix) = colN - col0 + 1;
 
    hypre_TFree(info, HYPRE_MEMORY_HOST);
-
-
-#else
-
-   info = hypre_CTAlloc(HYPRE_BigInt, 4, HYPRE_MEMORY_HOST);
-   recv_buf = hypre_CTAlloc(HYPRE_BigInt, 4*num_procs, HYPRE_MEMORY_HOST);
-   row_partitioning = hypre_CTAlloc(HYPRE_BigInt,  num_procs+1, HYPRE_MEMORY_HOST);
-
-   info[0] = ilower;
-   info[1] = iupper;
-   info[2] = jlower;
-   info[3] = jupper;
-
-   /* Generate row- and column-partitioning through information exchange
-      across all processors, check whether the matrix is square, and
-      if the partitionings match. i.e. no overlaps or gaps,
-      if there are overlaps or gaps in the row partitioning or column
-      partitioning , ierr will be set to -9 or -10, respectively */
-
-   hypre_MPI_Allgather(info,4,HYPRE_MPI_BIG_INT,recv_buf,4,HYPRE_MPI_BIG_INT,comm);
-
-   row_partitioning[0] = recv_buf[0];
-   square = 1;
-   for (i=0; i < num_procs-1; i++)
-   {
-      i4 = 4*i;
-      if ( recv_buf[i4+1] != (recv_buf[i4+4]-1) )
-      {
-         hypre_error(HYPRE_ERROR_GENERIC);
-         hypre_TFree(ijmatrix, HYPRE_MEMORY_HOST);
-         hypre_TFree(info, HYPRE_MEMORY_HOST);
-         hypre_TFree(recv_buf, HYPRE_MEMORY_HOST);
-         hypre_TFree(row_partitioning, HYPRE_MEMORY_HOST);
-         return hypre_error_flag;
-      }
-      else
-      {
-         row_partitioning[i+1] = recv_buf[i4+4];
-      }
-
-      if ((square && (recv_buf[i4]   != recv_buf[i4+2])) ||
-          (recv_buf[i4+1] != recv_buf[i4+3])  )
-      {
-         square = 0;
-      }
-   }
-   i4 = (num_procs-1)*4;
-   row_partitioning[num_procs] = recv_buf[i4+1]+1;
-
-   if ((recv_buf[i4] != recv_buf[i4+2]) || (recv_buf[i4+1] != recv_buf[i4+3]))
-   {
-      square = 0;
-   }
-
-   if (square)
-   {
-      col_partitioning = row_partitioning;
-   }
-   else
-   {
-      col_partitioning = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
-      col_partitioning[0] = recv_buf[2];
-      for (i=0; i < num_procs-1; i++)
-      {
-         i4 = 4*i;
-         if (recv_buf[i4+3] != recv_buf[i4+6]-1)
-         {
-            hypre_error(HYPRE_ERROR_GENERIC);
-            hypre_TFree(ijmatrix, HYPRE_MEMORY_HOST);
-            hypre_TFree(info, HYPRE_MEMORY_HOST);
-            hypre_TFree(recv_buf, HYPRE_MEMORY_HOST);
-            hypre_TFree(row_partitioning, HYPRE_MEMORY_HOST);
-            hypre_TFree(col_partitioning, HYPRE_MEMORY_HOST);
-            return hypre_error_flag;
-         }
-         else
-         {
-            col_partitioning[i+1] = recv_buf[i4+6];
-         }
-      }
-      col_partitioning[num_procs] = recv_buf[num_procs*4-1]+1;
-   }
-
-   hypre_IJMatrixGlobalFirstRow(ijmatrix) = row_partitioning[0];
-   hypre_IJMatrixGlobalFirstCol(ijmatrix) = col_partitioning[0];
-   hypre_IJMatrixGlobalNumRows(ijmatrix)  = row_partitioning[num_procs] -
-                                            row_partitioning[0];
-   hypre_IJMatrixGlobalNumCols(ijmatrix)  = col_partitioning[num_procs] -
-                                            col_partitioning[0];
-
-   hypre_TFree(info, HYPRE_MEMORY_HOST);
-   hypre_TFree(recv_buf, HYPRE_MEMORY_HOST);
-
-#endif
 
    hypre_IJMatrixRowPartitioning(ijmatrix) = row_partitioning;
    hypre_IJMatrixColPartitioning(ijmatrix) = col_partitioning;
@@ -535,7 +433,7 @@ HYPRE_IJMatrixSetValues2( HYPRE_IJMatrix       matrix,
       return hypre_error_flag;
    }
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -742,7 +640,7 @@ HYPRE_IJMatrixAddToValues2( HYPRE_IJMatrix       matrix,
       return hypre_error_flag;
    }
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -810,7 +708,7 @@ HYPRE_IJMatrixAssemble( HYPRE_IJMatrix matrix )
 
    if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
    {
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
 
       if (exec == HYPRE_EXEC_DEVICE)
@@ -1012,17 +910,10 @@ HYPRE_IJMatrixGetLocalRange( HYPRE_IJMatrix  matrix,
 
    hypre_MPI_Comm_rank(comm, &my_id);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    *ilower = row_partitioning[0];
    *iupper = row_partitioning[1]-1;
    *jlower = col_partitioning[0];
    *jupper = col_partitioning[1]-1;
-#else
-   *ilower = row_partitioning[my_id];
-   *iupper = row_partitioning[my_id+1]-1;
-   *jlower = col_partitioning[my_id];
-   *jupper = col_partitioning[my_id+1]-1;
-#endif
 
    return hypre_error_flag;
 }
@@ -1251,17 +1142,10 @@ HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
 
    row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
    col_partitioning = hypre_IJMatrixColPartitioning(matrix);
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    ilower = row_partitioning[0];
    iupper = row_partitioning[1] - 1;
    jlower = col_partitioning[0];
    jupper = col_partitioning[1] - 1;
-#else
-   ilower = row_partitioning[myid];
-   iupper = row_partitioning[myid+1] - 1;
-   jlower = col_partitioning[myid];
-   jupper = col_partitioning[myid+1] - 1;
-#endif
    hypre_fprintf(file, "%b %b %b %b\n", ilower, iupper, jlower, jupper);
 
    HYPRE_IJMatrixGetObject(matrix, &object);
@@ -1270,20 +1154,12 @@ HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
    {
       if ( hypre_IJMatrixObjectType(matrix) == HYPRE_PARCSR )
       {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
          ii = i -  hypre_IJMatrixGlobalFirstRow(matrix);
-#else
-         ii = i - row_partitioning[0];
-#endif
          HYPRE_ParCSRMatrixGetRow((HYPRE_ParCSRMatrix) object,
                                   ii, &ncols, &cols, &values);
          for (j = 0; j < ncols; j++)
          {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
             cols[j] +=  hypre_IJMatrixGlobalFirstCol(matrix);
-#else
-            cols[j] += col_partitioning[0];
-#endif
          }
       }
 
@@ -1296,11 +1172,7 @@ HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
       {
          for (j = 0; j < ncols; j++)
          {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
             cols[j] -=  hypre_IJMatrixGlobalFirstCol(matrix);
-#else
-            cols[j] -= col_partitioning[0];
-#endif
          }
          HYPRE_ParCSRMatrixRestoreRow((HYPRE_ParCSRMatrix) object,
                                       ii, &ncols, &cols, &values);
@@ -1331,4 +1203,3 @@ HYPRE_IJMatrixSetOMPFlag( HYPRE_IJMatrix matrix,
 
    return hypre_error_flag;
 }
-

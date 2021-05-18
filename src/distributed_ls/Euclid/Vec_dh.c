@@ -63,7 +63,7 @@ void Vec_dhCopy(Vec_dh x, Vec_dh y)
 void Vec_dhDuplicate(Vec_dh v, Vec_dh *out)
 {
   START_FUNC_DH
-  Vec_dh tmp; 
+  Vec_dh tmp;
   HYPRE_Int size = v->n;
   if (v->vals == NULL) SET_V_ERROR("v->vals is NULL");
   Vec_dhCreate(out); CHECK_V_ERROR;
@@ -102,7 +102,7 @@ void Vec_dhSetRand(Vec_dh v)
    * so all values are in [0.0,1.0]
    */
   for (i=0; i<m; ++i) max = MAX(max, vals[i]);
-  for (i=0; i<m; ++i) vals[i] = vals[i]/max; 
+  for (i=0; i<m; ++i) vals[i] = vals[i]/max;
   END_FUNC_DH
 }
 
@@ -218,7 +218,7 @@ void Vec_dhRead(Vec_dh *vout, HYPRE_Int ignore, char *filename)
   HYPRE_Int items, n, i;
   HYPRE_Real *v, w;
   char junk[MAX_JUNK];
-  
+
   Vec_dhCreate(&tmp); CHECK_V_ERROR;
   *vout = tmp;
 
@@ -233,8 +233,9 @@ void Vec_dhRead(Vec_dh *vout, HYPRE_Int ignore, char *filename)
     hypre_printf("Vec_dhRead:: ignoring following header lines:\n");
     hypre_printf("--------------------------------------------------------------\n");
     for (i=0; i<ignore; ++i) {
-      fgets(junk, MAX_JUNK, fp);
-      hypre_printf("%s", junk);
+      if (fgets(junk, MAX_JUNK, fp) != NULL) {
+        hypre_printf("%s", junk);
+      }
     }
     hypre_printf("--------------------------------------------------------------\n");
   }
@@ -259,7 +260,9 @@ void Vec_dhRead(Vec_dh *vout, HYPRE_Int ignore, char *filename)
   rewind(fp);
   rewind(fp);
   for (i=0; i<ignore; ++i) {
-    fgets(junk, MAX_JUNK, fp);
+    if (fgets(junk, MAX_JUNK, fp) != NULL) {
+      hypre_printf("%s", junk);
+    }
   }
 
   /* read values */

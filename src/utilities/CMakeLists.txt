@@ -22,6 +22,7 @@ set(SRCS
   fortran_matrix.c
   hypre_ap.c
   hypre_complex.c
+  hypre_cuda_utils.c
   hypre_error.c
   hypre_general.c
   hypre_hopscotch_hash.c
@@ -31,6 +32,7 @@ set(SRCS
   hypre_prefix_sum.c
   hypre_printf.c
   hypre_qsort.c
+  hypre_utilities.c
   mpistubs.c
   qsplit.c
   random.c

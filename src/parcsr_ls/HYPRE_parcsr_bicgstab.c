@@ -32,7 +32,7 @@ HYPRE_ParCSRBiCGSTABCreate( MPI_Comm comm, HYPRE_Solver *solver )
          hypre_ParKrylovCommInfo,
          hypre_ParKrylovIdentitySetup, hypre_ParKrylovIdentity );
    *solver = ( (HYPRE_Solver) hypre_BiCGSTABCreate( bicgstab_functions) );
-    
+
    return hypre_error_flag;
 }
 
@@ -40,7 +40,7 @@ HYPRE_ParCSRBiCGSTABCreate( MPI_Comm comm, HYPRE_Solver *solver )
  * HYPRE_ParCSRBiCGSTABDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRBiCGSTABDestroy( HYPRE_Solver solver )
 {
    return( hypre_BiCGSTABDestroy( (void *) solver ) );
@@ -50,7 +50,7 @@ HYPRE_ParCSRBiCGSTABDestroy( HYPRE_Solver solver )
  * HYPRE_ParCSRBiCGSTABSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRBiCGSTABSetup( HYPRE_Solver solver,
                            HYPRE_ParCSRMatrix A,
                            HYPRE_ParVector b,
@@ -66,7 +66,7 @@ HYPRE_ParCSRBiCGSTABSetup( HYPRE_Solver solver,
  * HYPRE_ParCSRBiCGSTABSolve
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRBiCGSTABSolve( HYPRE_Solver solver,
                            HYPRE_ParCSRMatrix A,
                            HYPRE_ParVector b,

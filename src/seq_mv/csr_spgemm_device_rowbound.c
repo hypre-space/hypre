@@ -8,7 +8,7 @@
 #include "seq_mv.h"
 #include "csr_spgemm_device.h"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 /*- - - - - - - - - - - - - - - - - - - - - - - - - -
  *- - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -151,11 +151,9 @@ void csr_spmm_symbolic(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
 
    char failed = 0;
 
-#ifdef HYPRE_DEBUG
-   assert(blockDim.z              == NUM_WARPS_PER_BLOCK);
-   assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
-   assert(NUM_WARPS_PER_BLOCK <= HYPRE_WARP_SIZE);
-#endif
+   hypre_device_assert(blockDim.z              == NUM_WARPS_PER_BLOCK);
+   hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
+   hypre_device_assert(NUM_WARPS_PER_BLOCK <= HYPRE_WARP_SIZE);
 
    for (HYPRE_Int i = grid_warp_id; i < M; i += num_warps)
    {
@@ -205,10 +203,10 @@ void csr_spmm_symbolic(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
                                                SHMEM_HASH_SIZE, warp_s_HashKeys,
                                                ghash_size, jg + istart_g, failed);
 
-#ifdef HYPRE_DEBUG
+#if defined(HYPRE_DEBUG)
       if (ATTEMPT == 2)
       {
-         assert(failed == 0);
+         hypre_device_assert(failed == 0);
       }
 #endif
 
@@ -343,9 +341,7 @@ hypreDevice_CSRSpGemmRownnz(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    {
       gpu_csr_spmm_rownnz_attempt<2> (m, k, n, d_ia, d_ja, d_ib, d_jb, d_rc, d_rf);
 
-#ifdef HYPRE_DEBUG
       hypre_assert(hypreDevice_IntegerReduceSum(m, d_rf) == 0);
-#endif
    }
 
    hypre_TFree(d_rf, HYPRE_MEMORY_DEVICE);
@@ -353,5 +349,4 @@ hypreDevice_CSRSpGemmRownnz(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    return hypre_error_flag;
 }
 
-#endif /* HYPRE_USING_CUDA */
-
+#endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */

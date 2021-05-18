@@ -23,6 +23,16 @@ tail -3 ${TNAME}.out.201 > ${TNAME}.testdata.temp
 diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
+
+tail -3 ${TNAME}.out.2D  > ${TNAME}.testdata
+tail -3 ${TNAME}.out.3Dx > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+tail -3 ${TNAME}.out.3Dy > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+tail -3 ${TNAME}.out.3Dz > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+#=============================================================================
 # Compare 19pt, 7pt, positive, and negative definite
 #=============================================================================
 
@@ -51,6 +61,10 @@ FILES="\
  ${TNAME}.out.1\
  ${TNAME}.out.200\
  ${TNAME}.out.201\
+ ${TNAME}.out.2D\
+ ${TNAME}.out.3Dx\
+ ${TNAME}.out.3Dy\
+ ${TNAME}.out.3Dz\
  ${TNAME}.out.10\
  ${TNAME}.out.11\
  ${TNAME}.out.12\
@@ -67,17 +81,11 @@ do
   tail -3 $i
 done > ${TNAME}.out
 
-# Make sure that the output files are reasonable
-CHECK_LINE="Iterations"
-OUT_COUNT=`grep "$CHECK_LINE" ${TNAME}.out | wc -l`
-SAVED_COUNT=`grep "$CHECK_LINE" ${TNAME}.saved | wc -l`
-if [ "$OUT_COUNT" != "$SAVED_COUNT" ]; then
-   echo "Incorrect number of \"$CHECK_LINE\" lines in ${TNAME}.out" >&2
-fi
-
-if [ -z $HYPRE_NO_SAVED ]; then
-   #diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
-   (../runcheck.sh ${TNAME}.out ${TNAME}.saved $RTOL $ATOL) >&2
+# Make sure that the output file is reasonable
+RUNCOUNT=`echo $FILES | wc -w`
+OUTCOUNT=`grep "Iterations" ${TNAME}.out | wc -l`
+if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
+   echo "Incorrect number of runs in ${TNAME}.out" >&2
 fi
 
 #=============================================================================

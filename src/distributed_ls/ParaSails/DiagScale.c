@@ -192,7 +192,7 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
         requests, replies_list);
 
     num_replies = FindNumReplies(A->comm, replies_list);
-    free(replies_list);
+    hypre_TFree(replies_list,HYPRE_MEMORY_HOST);
 
     mem = MemCreate();
     requests2 = NULL;
@@ -204,7 +204,7 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
 
     /* Wait for all replies */
     hypre_MPI_Waitall(num_requests, requests, statuses);
-    free(requests);
+    hypre_TFree(requests,HYPRE_MEMORY_HOST);
 
     p->offset = A->end_row - A->beg_row + 1;
 
@@ -217,16 +217,16 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
     for (j=0; j<len; j++)
 	temp[ind[j]-p->offset] = p->ext_diags[j];
 
-    free(ind);
-    free(p->ext_diags);
+    hypre_TFree(ind,HYPRE_MEMORY_HOST);
+    hypre_TFree(p->ext_diags,HYPRE_MEMORY_HOST);
     p->ext_diags = temp;
 
     /* Wait for all sends */
     hypre_MPI_Waitall(num_replies, requests2, statuses);
-    free(requests2);
+    hypre_TFree(requests2,HYPRE_MEMORY_HOST);
     MemDestroy(mem);
 
-    free(statuses);
+    hypre_TFree(statuses,HYPRE_MEMORY_HOST);
     return p;
 }
 
@@ -236,10 +236,10 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
 
 void DiagScaleDestroy(DiagScale *p)
 {
-    free(p->local_diags);
-    free(p->ext_diags);
+    hypre_TFree(p->local_diags,HYPRE_MEMORY_HOST);
+    hypre_TFree(p->ext_diags,HYPRE_MEMORY_HOST);
 
-    free(p);
+    hypre_TFree(p,HYPRE_MEMORY_HOST);
 }
 
 /*--------------------------------------------------------------------------

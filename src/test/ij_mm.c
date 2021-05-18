@@ -78,52 +78,41 @@ main( hypre_int argc,
    HYPRE_ParCSRMatrix parcsr_Q   = NULL;
    HYPRE_ParCSRMatrix parcsr_AH  = NULL;
 
-   HYPRE_ParCSRMatrix parcsr_A_device  = NULL;
-   HYPRE_ParCSRMatrix parcsr_P_device  = NULL;
-   HYPRE_ParCSRMatrix parcsr_Q_device  = NULL;
-   HYPRE_ParCSRMatrix parcsr_AH_device = NULL;
-   HYPRE_ParCSRMatrix parcsr_Q_2  = NULL;
-   HYPRE_ParCSRMatrix parcsr_AH_2 = NULL;
-   HYPRE_ParCSRMatrix parcsr_error = NULL;
+   HYPRE_ParCSRMatrix parcsr_A_host  = NULL;
+   HYPRE_ParCSRMatrix parcsr_P_host  = NULL;
+   HYPRE_ParCSRMatrix parcsr_Q_host  = NULL;
+   HYPRE_ParCSRMatrix parcsr_AH_host = NULL;
+   HYPRE_ParCSRMatrix parcsr_AH_host_2 = NULL;
+   HYPRE_ParCSRMatrix parcsr_error_host = NULL;
 
-   HYPRE_Int         *CF_marker = NULL;
-
-   HYPRE_Int       errcode;
+   HYPRE_Int       *CF_marker = NULL;
+   HYPRE_Int       i, errcode;
    HYPRE_Int       num_procs, myid;
    HYPRE_Int       time_index;
    MPI_Comm        comm = hypre_MPI_COMM_WORLD;
-   HYPRE_Int first_local_row, last_local_row, local_num_rows;
-   HYPRE_Int first_local_col, last_local_col, local_num_cols;
+   HYPRE_Int first_local_row, last_local_row;//, local_num_rows;
+   HYPRE_Int first_local_col, last_local_col;//, local_num_cols;
    HYPRE_Int local_num_vars, *coarse_dof_func, *coarse_pnts_global, *col_offd_S_to_A;
 
    /* parameters for BoomerAMG */
+   HYPRE_Int    measure_type = 0;
    HYPRE_Real   trunc_factor = 0.0;
    HYPRE_Int    P_max_elmts = 8;
-   HYPRE_Int    cycle_type;
-   HYPRE_Int    coarsen_type = 10;
-   HYPRE_Int    measure_type = 0;
    HYPRE_Int    debug_flag = 0;
-   HYPRE_Int    num_CR_relax_steps = 2;
-   HYPRE_Int    rap2=0;
+   HYPRE_Int    rap2=1;
    HYPRE_Int    keepTranspose = 0;
    HYPRE_Int    num_functions = 1;
    HYPRE_Real   strong_threshold = 0.25;
    HYPRE_Real   max_row_sum = 1.0;
    HYPRE_Real   fnorm, rfnorm, fnorm0;
 
-   /* interpolation */
-   HYPRE_Int      interp_type  = 6; /* default value */
-   HYPRE_Int      post_interp_type  = 0; /* default value */
-   HYPRE_Int      restri_type = 0;
-
-   HYPRE_Int      print_system = 0;
-
-   HYPRE_Int      mult_order = 0;
-   HYPRE_Int      use_cusparse = 0;
-   HYPRE_Int      rowest_mtd = 3;
-   HYPRE_Int      rowest_nsamples = 32;
-   HYPRE_Real     rowest_mult = 1.0;
-   char           hash_type = 'L';
+   HYPRE_Int    print_system = 0;
+   HYPRE_Int    mult_order = 0;
+   HYPRE_Int    use_cusparse = 0;
+   HYPRE_Int    rowest_mtd = 3;
+   HYPRE_Int    rowest_nsamples = 32;
+   HYPRE_Real   rowest_mult = 1.0;
+   char         hash_type = 'L';
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -134,8 +123,20 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-   /* Initialize Hypre */
+   /*-----------------------------------------------------------------
+    * GPU Device binding
+    * Must be done before HYPRE_Init() and should not be changed after
+    *-----------------------------------------------------------------*/
+   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+
+   /*-----------------------------------------------------------
+    * Initialize : must be the first HYPRE function to call
+    *-----------------------------------------------------------*/
    HYPRE_Init();
+
+#if defined(HYPRE_USING_CUDA)
+   hypre_HandleDefaultExecPolicy(hypre_handle()) = HYPRE_EXEC_DEVICE;
+#endif
 
    //hypre_SetNumThreads(20);
    hypre_printf("CPU #OMP THREADS %d\n", hypre_NumThreads());
@@ -214,110 +215,6 @@ main( hypre_int argc,
          arg_index++;
          build_matrix_arg_index = arg_index;
       }
-      else if ( strcmp(argv[arg_index], "-cljp") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 0;
-      }
-      else if ( strcmp(argv[arg_index], "-cljp1") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 7;
-      }
-      else if ( strcmp(argv[arg_index], "-pmis") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 8;
-      }
-      else if ( strcmp(argv[arg_index], "-pmis1") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 9;
-      }
-      else if ( strcmp(argv[arg_index], "-cr1") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 98;
-      }
-      else if ( strcmp(argv[arg_index], "-cr") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 99;
-      }
-      else if ( strcmp(argv[arg_index], "-hmis") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 10;
-      }
-      else if ( strcmp(argv[arg_index], "-ruge") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 1;
-      }
-      else if ( strcmp(argv[arg_index], "-ruge1p") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 11;
-      }
-      else if ( strcmp(argv[arg_index], "-ruge2b") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 2;
-      }
-      else if ( strcmp(argv[arg_index], "-ruge3") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 3;
-      }
-      else if ( strcmp(argv[arg_index], "-ruge3c") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 4;
-      }
-      else if ( strcmp(argv[arg_index], "-rugerlx") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 5;
-      }
-      else if ( strcmp(argv[arg_index], "-falgout") == 0 )
-      {
-         arg_index++;
-         coarsen_type      = 6;
-      }
-      else if ( strcmp(argv[arg_index], "-gm") == 0 )
-      {
-         arg_index++;
-         measure_type      = 1;
-      }
-      else if ( strcmp(argv[arg_index], "-restritype") == 0 )
-      {
-         arg_index++;
-         restri_type  = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-help") == 0 )
-      {
-         print_usage = 1;
-      }
-      else if ( strcmp(argv[arg_index], "-tr") == 0 )
-      {
-         arg_index++;
-         trunc_factor  = atof(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-th") == 0 )
-      {
-         arg_index++;
-         strong_threshold  = atof(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-Pmx") == 0 )
-      {
-         arg_index++;
-         P_max_elmts  = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-interptype") == 0 )
-      {
-         arg_index++;
-         interp_type  = atoi(argv[arg_index++]);
-      }
       else if ( strcmp(argv[arg_index], "-print") == 0 )
       {
          arg_index++;
@@ -395,53 +292,6 @@ main( hypre_int argc,
          hypre_printf("  -storage_low           : allocates not enough storage for aux struct\n");
          hypre_printf("  -concrete_parcsr       : use parcsr matrix type as concrete type\n");
          hypre_printf("\n");
-         hypre_printf("  -cljp                 : CLJP coarsening \n");
-         hypre_printf("  -cljp1                : CLJP coarsening, fixed random \n");
-         hypre_printf("  -cgc                  : CGC coarsening \n");
-         hypre_printf("  -cgce                 : CGC-E coarsening \n");
-         hypre_printf("  -pmis                 : PMIS coarsening \n");
-         hypre_printf("  -pmis1                : PMIS coarsening, fixed random \n");
-         hypre_printf("  -hmis                 : HMIS coarsening (default)\n");
-         hypre_printf("  -ruge                 : Ruge-Stueben coarsening (local)\n");
-         hypre_printf("  -ruge1p               : Ruge-Stueben coarsening 1st pass only(local)\n");
-         hypre_printf("  -ruge3                : third pass on boundary\n");
-         hypre_printf("  -ruge3c               : third pass on boundary, keep c-points\n");
-         hypre_printf("  -falgout              : local Ruge_Stueben followed by CLJP\n");
-         hypre_printf("  -gm                   : use global measures\n");
-         hypre_printf("\n");
-         hypre_printf("  -interptype  <val>    : set interpolation type\n");
-         hypre_printf("       0=Classical modified interpolation  \n");
-         hypre_printf("       1=least squares interpolation (for GSMG only)  \n");
-         hypre_printf("       0=Classical modified interpolation for hyperbolic PDEs \n");
-         hypre_printf("       3=direct interpolation with separation of weights  \n");
-         hypre_printf("       4=multipass interpolation  \n");
-         hypre_printf("       5=multipass interpolation with separation of weights  \n");
-         hypre_printf("       6=extended classical modified interpolation (default) \n");
-         hypre_printf("       7=extended (only if no common C neighbor) interpolation  \n");
-         hypre_printf("       8=standard interpolation  \n");
-         hypre_printf("       9=standard interpolation with separation of weights  \n");
-         hypre_printf("      12=FF interpolation  \n");
-         hypre_printf("      13=FF1 interpolation  \n");
-
-         hypre_printf("      16=use modified unknown interpolation for a system (w/unknown or hybrid approach) \n");
-         hypre_printf("      17=use non-systems interp = 6 for a system (w/unknown or hybrid approach) \n");
-         hypre_printf("      18=use non-systems interp = 8 for a system (w/unknown or hybrid approach) \n");
-         hypre_printf("      19=use non-systems interp = 0 for a system (w/unknown or hybrid approach) \n");
-
-         hypre_printf("      10=classical block interpolation for nodal systems AMG\n");
-         hypre_printf("      11=classical block interpolation with diagonal blocks for nodal systems AMG\n");
-         hypre_printf("      20=same as 10, but don't add weak connect. to diag \n");
-         hypre_printf("      21=same as 11, but don't add weak connect. to diag \n");
-         hypre_printf("      22=classical block interpolation w/Ruge's variant for nodal systems AMG \n");
-         hypre_printf("      23=same as 22, but use row sums for diag scaling matrices,for nodal systems AMG \n");
-         hypre_printf("      24=direct block interpolation for nodal systems AMG\n");
-         hypre_printf("     100=One point interpolation [a Boolean matrix]\n");
-         hypre_printf("\n");
-
-         hypre_printf("  -restritype  <val>    : set restriction type\n");
-         hypre_printf("       0=transpose of the interpolation  \n");
-         hypre_printf("       1=local approximate ideal restriction (AIR)  \n");
-         hypre_printf("\n");
 
          hypre_printf("  -Pmx  <val>            : set maximal no. of elmts per row for AMG interpolation (default: 4)\n");
       }
@@ -451,20 +301,15 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Print driver parameters
     *-----------------------------------------------------------*/
-
-   if (myid == 0)
-   {
-   }
-
-   errcode = HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateMethod(rowest_mtd);
+   errcode = hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateMethod(rowest_mtd);
    hypre_assert(errcode == 0);
-   errcode = HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateNSamples(rowest_nsamples);
+   errcode = hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateNSamples(rowest_nsamples);
    hypre_assert(errcode == 0);
-   errcode = HYPRE_CSRMatrixDeviceSpGemmSetRownnzEstimateMultFactor(rowest_mult);
+   errcode = hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateMultFactor(rowest_mult);
    hypre_assert(errcode == 0);
-   errcode = HYPRE_CSRMatrixDeviceSpGemmSetHashType(hash_type);
+   errcode = hypre_CSRMatrixDeviceSpGemmSetHashType(hash_type);
    hypre_assert(errcode == 0);
-   errcode = HYPRE_CSRMatrixDeviceSpGemmSetUseCusparse(use_cusparse);
+   errcode = hypre_CSRMatrixDeviceSpGemmUseCusparse(use_cusparse);
    hypre_assert(errcode == 0);
 
    /*-----------------------------------------------------------
@@ -531,22 +376,16 @@ main( hypre_int argc,
                                               &first_local_row, &last_local_row ,
                                               &first_local_col, &last_local_col );
 
-      local_num_rows = last_local_row - first_local_row + 1;
-      local_num_cols = last_local_col - first_local_col + 1;
+      //local_num_rows = last_local_row - first_local_row + 1;
+      //local_num_cols = last_local_col - first_local_col + 1;
    }
 
-   /* generate P */
+   /* coarsening */
+   hypre_BoomerAMGCreateS(parcsr_A, strong_threshold, max_row_sum, num_functions, NULL, &parcsr_S);
 
-   hypre_BoomerAMGCreateS(parcsr_A, strong_threshold, max_row_sum,
-                          num_functions, NULL, &parcsr_S);
-   /*
-   hypre_BoomerAMGCreateSabs(parcsr_A, strong_threshold, max_row_sum,
-                             num_functions, NULL, &parcsr_S);
-   */
-   hypre_BoomerAMGCoarsenHMIS(parcsr_S, parcsr_A, measure_type,
-                              debug_flag, &CF_marker);
+   hypre_BoomerAMGCoarsenPMIS(parcsr_S, parcsr_A, measure_type, debug_flag, &CF_marker);
 
-   local_num_vars = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(parcsr_A));
+   local_num_vars = hypre_ParCSRMatrixNumRows(parcsr_A);
    coarse_dof_func = NULL;
    coarse_pnts_global = NULL;
    col_offd_S_to_A = NULL;
@@ -554,36 +393,48 @@ main( hypre_int argc,
    hypre_BoomerAMGCoarseParms(hypre_ParCSRMatrixComm(parcsr_A), local_num_vars, num_functions, NULL,
                               CF_marker, &coarse_dof_func, &coarse_pnts_global);
 
+   /* generate P */
    hypre_BoomerAMGBuildExtPIInterp(parcsr_A, CF_marker, parcsr_S, coarse_pnts_global,
                                    num_functions, NULL, debug_flag, trunc_factor, P_max_elmts,
                                    col_offd_S_to_A, &parcsr_P);
 
    if (myid == 0)
    {
-      printf("A %d x %d\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_A), hypre_ParCSRMatrixGlobalNumCols(parcsr_A));
-      printf("P %d x %d\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_P), hypre_ParCSRMatrixGlobalNumCols(parcsr_P));
+      hypre_printf("A %d x %d\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_A), hypre_ParCSRMatrixGlobalNumCols(parcsr_A));
+      hypre_printf("P %d x %d\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_P), hypre_ParCSRMatrixGlobalNumCols(parcsr_P));
    }
 
    hypre_EndTiming(time_index);
-   hypre_PrintTiming("Generate Matrix", hypre_MPI_COMM_WORLD);
+   hypre_PrintTiming("Generate Matrix on device", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
+
+   /* !!! */
+   hypre_assert(hypre_ParCSRMatrixMemoryLocation(parcsr_A) == HYPRE_MEMORY_DEVICE);
+   hypre_assert(hypre_ParCSRMatrixMemoryLocation(parcsr_P) == HYPRE_MEMORY_DEVICE);
 
    /*-----------------------------------------------------------
     * Matrix-by-Matrix on host
     *-----------------------------------------------------------*/
+   hypre_printf("Clone matrices to the host\n");
+   parcsr_A_host = hypre_ParCSRMatrixClone_v2(parcsr_A, 1, HYPRE_MEMORY_HOST);
+   parcsr_P_host = hypre_ParCSRMatrixClone_v2(parcsr_P, 1, HYPRE_MEMORY_HOST);
+
+   hypre_MatvecCommPkgCreate(parcsr_A_host);
+   hypre_MatvecCommPkgCreate(parcsr_P_host);
+
    time_index = hypre_InitializeTiming("Host Parcsr Matrix-by-Matrix, RAP2");
    hypre_BeginTiming(time_index);
 
    if (mult_order == 0)
    {
-      parcsr_Q  = hypre_ParCSRMatMat(parcsr_A, parcsr_P);
-      parcsr_AH = hypre_ParCSRTMatMatKT(parcsr_P, parcsr_Q, keepTranspose);
+      parcsr_Q_host  = hypre_ParCSRMatMat(parcsr_A_host, parcsr_P_host);
+      parcsr_AH_host = hypre_ParCSRTMatMatKT(parcsr_P_host, parcsr_Q_host, keepTranspose);
    }
    else
    {
-      parcsr_Q  = hypre_ParCSRTMatMatKT(parcsr_P, parcsr_A, keepTranspose);
-      parcsr_AH = hypre_ParCSRMatMat(parcsr_Q, parcsr_P);
+      parcsr_Q_host  = hypre_ParCSRTMatMatKT(parcsr_P_host, parcsr_A_host, keepTranspose);
+      parcsr_AH_host = hypre_ParCSRMatMat(parcsr_Q_host, parcsr_P_host);
    }
    hypre_EndTiming(time_index);
    hypre_PrintTiming("Host Parcsr Matrix-by-Matrix, RAP2", hypre_MPI_COMM_WORLD);
@@ -595,105 +446,81 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
    if (print_system)
    {
-      /*
-      hypre_ParCSRMatrixPrintIJ(parcsr_A, 1, 1, "IJ.out.A");
-      hypre_ParCSRMatrixPrintIJ(parcsr_P, 1, 1, "IJ.out.P");
-      hypre_ParCSRMatrixPrintIJ(parcsr_Q, 1, 1, "IJ.out.Q");
-      */
-      hypre_CSRMatrixPrintMM(hypre_ParCSRMatrixDiag(parcsr_A), 1, 1, 0, "/p/gpfs1/li50/A.mtx");
-      hypre_CSRMatrixPrintMM(hypre_ParCSRMatrixDiag(parcsr_P), 1, 1, 0, "/p/gpfs1/li50/P.mtx");
-      /*
-      hypre_CSRMatrixPrintMM(hypre_ParCSRMatrixDiag(parcsr_Q), 1, 1, 0, "/p/gscratchr/li50/Q.mtx");
-      hypre_CSRMatrixPrintMM(hypre_ParCSRMatrixDiag(parcsr_P), 1, 1, 1, "/p/gscratchr/li50/PT.mtx");
-      */
-      //hypre_CSRMatrixPrintMM(hypre_ParCSRMatrixDiag(parcsr_A), 1, 1, 0, "A.mtx");
-      //hypre_CSRMatrixPrintMM(hypre_ParCSRMatrixDiag(parcsr_P), 1, 1, 0, "P.mtx");
-      //hypre_CSRMatrixPrintMM(hypre_ParCSRMatrixDiag(parcsr_Q), 1, 1, 0, "Q.mtx");
-      //hypre_CSRMatrixPrintMM(hypre_ParCSRMatrixDiag(parcsr_P), 1, 1, 1, "PT.mtx");
+      hypre_CSRMatrixPrintMM(hypre_ParCSRMatrixDiag(parcsr_A_host), 1, 1, 0, "/p/gpfs1/li50/A.mtx");
+      hypre_CSRMatrixPrintMM(hypre_ParCSRMatrixDiag(parcsr_P_host), 1, 1, 0, "/p/gpfs1/li50/P.mtx");
    }
 
    /*-----------------------------------------------------------
     * Matrix-by-Matrix on device
     *-----------------------------------------------------------*/
-   parcsr_A_device = hypre_ParCSRMatrixClone_v2(parcsr_A, 1, HYPRE_MEMORY_DEVICE);
-   parcsr_P_device = hypre_ParCSRMatrixClone_v2(parcsr_P, 1, HYPRE_MEMORY_DEVICE);
-
-   //printf("done clone to GPU\n");
-
-   hypre_MatvecCommPkgCreate(parcsr_A_device);
-   hypre_MatvecCommPkgCreate(parcsr_P_device);
 
    /* run for the first time without timing [some allocation is done] */
-   if (mult_order == 0)
-   {
-      parcsr_Q_device  = hypre_ParCSRMatMat(parcsr_A_device, parcsr_P_device);
-      parcsr_AH_device = hypre_ParCSRTMatMatKT(parcsr_P_device, parcsr_Q_device, keepTranspose);
-   }
-   else
-   {
-      parcsr_Q_device  = hypre_ParCSRTMatMatKT(parcsr_P_device, parcsr_A_device, keepTranspose);
-      parcsr_AH_device = hypre_ParCSRMatMat(parcsr_Q_device, parcsr_P_device);
-   }
-   hypre_ParCSRMatrixDestroy(parcsr_Q_device);
-   hypre_ParCSRMatrixDestroy(parcsr_AH_device);
-
-   //printf("done 1st GPU run\n");
-
-   time_index = hypre_InitializeTiming("Device Parcsr Matrix-by-Matrix, RAP2");
-   hypre_BeginTiming(time_index);
-
    /* run for a second time for timing */
-   //cudaProfilerStart();
-   if (mult_order == 0)
+   for (i = 0 ; i < 2; i++)
    {
-      parcsr_Q_device  = hypre_ParCSRMatMat(parcsr_A_device, parcsr_P_device);
-      parcsr_AH_device = hypre_ParCSRTMatMatKT(parcsr_P_device, parcsr_Q_device, keepTranspose);
-   }
-   else
-   {
-      parcsr_Q_device  = hypre_ParCSRTMatMatKT(parcsr_P_device, parcsr_A_device, keepTranspose);
-      parcsr_AH_device = hypre_ParCSRMatMat(parcsr_Q_device, parcsr_P_device);
-   }
-   //cudaProfilerStop();
+      if (i == 1)
+      {
+         time_index = hypre_InitializeTiming("Device Parcsr Matrix-by-Matrix, RAP2");
+         hypre_BeginTiming(time_index);
+         //cudaProfilerStart();
+      }
 
-   hypre_EndTiming(time_index);
-   hypre_PrintTiming("Device Parcsr Matrix-by-Matrix, RAP2", hypre_MPI_COMM_WORLD);
-   hypre_FinalizeTiming(time_index);
-   hypre_ClearTiming();
+      if (rap2)
+      {
+         if (mult_order == 0)
+         {
+            parcsr_Q  = hypre_ParCSRMatMat(parcsr_A, parcsr_P);
+            parcsr_AH = hypre_ParCSRTMatMatKT(parcsr_P, parcsr_Q, keepTranspose);
+         }
+         else
+         {
+            parcsr_Q  = hypre_ParCSRTMatMatKT(parcsr_P, parcsr_A, keepTranspose);
+            parcsr_AH = hypre_ParCSRMatMat(parcsr_Q, parcsr_P);
+         }
+      }
+      else
+      {
+         parcsr_AH = hypre_ParCSRMatrixRAPKT(parcsr_P, parcsr_A, parcsr_P, keepTranspose);
+      }
+
+      if (i == 1)
+      {
+         //cudaProfilerStop();
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Device Parcsr Matrix-by-Matrix, RAP2", hypre_MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+      }
+
+      if (i == 0)
+      {
+         hypre_ParCSRMatrixDestroy(parcsr_Q);
+         hypre_ParCSRMatrixDestroy(parcsr_AH);
+      }
+   }
 
    /*-----------------------------------------------------------
     * Verify results
     *-----------------------------------------------------------*/
-   //parcsr_Q_2 = hypre_ParCSRMatrixClone_v2(parcsr_Q_device, 1, HYPRE_MEMORY_HOST);
-   //hypre_ParCSRMatrixPrintIJ(parcsr_Q,   0, 0, "IJ.out.Q");
-   //hypre_ParCSRMatrixPrintIJ(parcsr_Q_2, 0, 0, "IJ.out.Q_2");
-   parcsr_AH_2 = hypre_ParCSRMatrixClone_v2(parcsr_AH_device, 1, HYPRE_MEMORY_HOST);
-   hypre_ParcsrAdd(1.0, parcsr_AH, -1.0, parcsr_AH_2, &parcsr_error);
-   fnorm = hypre_ParCSRMatrixFnorm(parcsr_error);
-   fnorm0 = hypre_ParCSRMatrixFnorm(parcsr_AH);
-   rfnorm = fnorm0 > 0 ? fnorm / fnorm0 : fnorm;
+   parcsr_AH_host_2 = hypre_ParCSRMatrixClone_v2(parcsr_AH, 1, HYPRE_MEMORY_HOST);
+   hypre_ParCSRMatrixSetNumNonzeros(parcsr_AH_host_2);
 
-   hypre_ParCSRMatrixSetNumNonzeros(parcsr_AH_2);
+   hypre_ParCSRMatrixAdd(1.0, parcsr_AH_host, -1.0, parcsr_AH_host_2, &parcsr_error_host);
+   fnorm = hypre_ParCSRMatrixFnorm(parcsr_error_host);
+   fnorm0 = hypre_ParCSRMatrixFnorm(parcsr_AH_host);
+   rfnorm = fnorm0 > 0 ? fnorm / fnorm0 : fnorm;
 
    if (myid == 0)
    {
-      printf("AH: %d x %d, nnz %d, CPU-GPU err %e\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_AH_2),
-                                                      hypre_ParCSRMatrixGlobalNumCols(parcsr_AH_2),
-                                                      hypre_ParCSRMatrixNumNonzeros(parcsr_AH_2),
+      printf("AH: %d x %d, nnz %d, CPU-GPU err %e\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_AH_host_2),
+                                                      hypre_ParCSRMatrixGlobalNumCols(parcsr_AH_host_2),
+                                                      hypre_ParCSRMatrixNumNonzeros(parcsr_AH_host_2),
                                                       rfnorm);
    }
-
-   /*
-   hypre_ParCSRMatrixPrintIJ(parcsr_AH,   0, 0, "IJ.out.AH");
-   hypre_ParCSRMatrixPrintIJ(parcsr_AH_2, 0, 0, "IJ.out.AH_2");
-   */
-
-   hypre_ParCSRMatrixDestroy(parcsr_error);
 
    /*-----------------------------------------------------------
     * Finalize things
     *-----------------------------------------------------------*/
-
    if (build_matrix_type == -1)
    {
       HYPRE_IJMatrixDestroy(ij_A);
@@ -711,10 +538,12 @@ main( hypre_int argc,
    hypre_ParCSRMatrixDestroy(parcsr_Q);
    hypre_ParCSRMatrixDestroy(parcsr_AH);
 
-   hypre_ParCSRMatrixDestroy(parcsr_A_device);
-   hypre_ParCSRMatrixDestroy(parcsr_P_device);
-   hypre_ParCSRMatrixDestroy(parcsr_Q_device);
-   hypre_ParCSRMatrixDestroy(parcsr_AH_device);
+   hypre_ParCSRMatrixDestroy(parcsr_A_host);
+   hypre_ParCSRMatrixDestroy(parcsr_P_host);
+   hypre_ParCSRMatrixDestroy(parcsr_Q_host);
+   hypre_ParCSRMatrixDestroy(parcsr_AH_host);
+   hypre_ParCSRMatrixDestroy(parcsr_AH_host_2);
+   hypre_ParCSRMatrixDestroy(parcsr_error_host);
 
  final:
 
