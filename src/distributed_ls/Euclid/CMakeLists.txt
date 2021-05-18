@@ -3,8 +3,7 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-target_sources(HYPRE
-  PRIVATE
+set(SRCS
   blas_dh.c
   Euclid_apply.c
   Euclid_dh.c
@@ -33,4 +32,8 @@ target_sources(HYPRE
   TimeLog_dh.c
   Timer_dh.c
   Vec_dh.c
+)
+
+target_sources(${PROJECT_NAME}
+  PRIVATE ${SRCS}
 )
