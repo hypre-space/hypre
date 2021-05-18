@@ -45,9 +45,8 @@ hypre_SSAMGCoarseSolverSetup( void *ssamg_vdata )
 
    HYPRE_Int              l, part, cmax_size, max_work;
 
-   HYPRE_ANNOTATE_FUNC_BEGIN;
-
    l = (num_levels - 1);
+   HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
    if (csolver_type == 0)
    {
       /* Compute maximum number of relaxation sweeps in the coarse grid if requested */
@@ -95,18 +94,17 @@ hypre_SSAMGCoarseSolverSetup( void *ssamg_vdata )
       HYPRE_BoomerAMGCreate(&csolver);
       HYPRE_BoomerAMGSetStrongThreshold(csolver, 0.5);
       HYPRE_BoomerAMGSetPMaxElmts(csolver, 4);
-      HYPRE_BoomerAMGSetCoarsenType(csolver, 10); /* HMIS coarsening */
-      HYPRE_BoomerAMGSetRelaxType(csolver, 1); /* Weighted Jacobi */
-      HYPRE_BoomerAMGSetRelaxWt(csolver, 0);
+      HYPRE_BoomerAMGSetInterpType(csolver, 18); /* MM ext-e interpolation */
+      HYPRE_BoomerAMGSetCoarsenType(csolver, 8); /* PMIS coarsening */
       if (num_crelax > 0)
       {
          HYPRE_BoomerAMGSetMaxIter(csolver, num_crelax);
       }
-      HYPRE_BoomerAMGSetMaxCoarseSize(csolver, 100);
+      HYPRE_BoomerAMGSetMaxCoarseSize(csolver, 1000);
       HYPRE_BoomerAMGSetTol(csolver, 0.0);
       HYPRE_BoomerAMGSetPrintLevel(csolver, print_level);
       HYPRE_BoomerAMGSetLogging(csolver, 1);
-      HYPRE_BoomerAMGSetAggNumLevels(csolver, 0);
+      HYPRE_BoomerAMGSetAggNumLevels(csolver, 1);
       HYPRE_BoomerAMGSetup(csolver, par_Ac, par_b, par_x);
 
       (ssamg_data -> csolver) = csolver;
@@ -118,8 +116,7 @@ hypre_SSAMGCoarseSolverSetup( void *ssamg_vdata )
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown coarse solve!\n");
    }
-
-   HYPRE_ANNOTATE_FUNC_END;
+   HYPRE_ANNOTATE_MGLEVEL_END(l);
 
    return hypre_error_flag;
 }
