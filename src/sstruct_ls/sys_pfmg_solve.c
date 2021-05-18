@@ -133,16 +133,13 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
    }
 
    /* Print initial solution and residual */
-   if (print_level > 1)
-   {
-      /* Print solution */
-      hypre_sprintf(filename, "sys_pfmg_x.i%02d", 0);
-      hypre_SStructPVectorPrint(filename, x_l[0], 0);
+#if DEBUG
+   hypre_sprintf(filename, "sys_pfmg_x.i%02d", 0);
+   hypre_SStructPVectorPrint(filename, x_l[0], 0);
 
-      /* Print residual */
-      hypre_sprintf(filename, "sys_pfmg_r.i%02d", 0);
-      hypre_SStructPVectorPrint(filename, r_l[0], 0);
-   }
+   hypre_sprintf(filename, "sys_pfmg_r.i%02d", 0);
+   hypre_SStructPVectorPrint(filename, r_l[0], 0);
+#endif
 
    /*-----------------------------------------------------
     * Do V-cycles:

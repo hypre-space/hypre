@@ -182,11 +182,13 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             {
                if ((e_dot_e/x_dot_x) < eps)
                {
+                  HYPRE_ANNOTATE_MGLEVEL_END(0);
                   break;
                }
             }
             else
             {
+               HYPRE_ANNOTATE_MGLEVEL_END(0);
                break;
             }
          }
