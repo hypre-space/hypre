@@ -7,6 +7,7 @@
 TNAME=`basename $0 .sh`
 RTOL=$1
 ATOL=$2
+PRTOL=$3
 
 #=============================================================================
 # compare with baseline case
@@ -50,13 +51,26 @@ do
   echo "PCG Setup"${setup_time}
   solve_time=$(grep -A 1 "PCG Solve" $i | tail -n 1)
   echo "PCG Solve"${solve_time}
-done > ${TNAME}.perf
+done > ${TNAME}.perf.out
 
 # Make sure that the output file is reasonable
 RUNCOUNT=`echo $FILES | wc -w`
 OUTCOUNT=`grep "Complexity" ${TNAME}.out | wc -l`
 if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
    echo "Incorrect number of runs in ${TNAME}.out" >&2
+fi
+
+# Check performance
+HOST=`hostname`
+case $HOST in
+   lassen*) SavePerfExt="saved.lassen"
+      ;;
+   *) SavePerfExt=""
+      ;;
+esac
+
+if [ -n "$SavePerfExt" ]; then
+   ../runcheck.sh $TNAME.perf.out $TNAME.perf.$SavePerfExt $PRTOL >&2
 fi
 
 #=============================================================================
