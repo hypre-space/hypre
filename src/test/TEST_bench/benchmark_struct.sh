@@ -7,7 +7,6 @@
 TNAME=`basename $0 .sh`
 RTOL=$1
 ATOL=$2
-PRTOL=$3
 
 #=============================================================================
 # compare with baseline case
@@ -49,14 +48,16 @@ fi
 # Check performance
 HOST=`hostname`
 case $HOST in
-   lassen*) SavePerfExt="saved.lassen"
+   lassen*)
+      SavePerfExt="saved.lassen"
+      rtol=0.15
       ;;
    *) SavePerfExt=""
       ;;
 esac
 
 if [ -n "$SavePerfExt" ]; then
-   ../runcheck.sh $TNAME.perf.out $TNAME.perf.$SavePerfExt $PRTOL >&2
+   ../runcheck.sh $TNAME.perf.out $TNAME.perf.$SavePerfExt $rtol >&2
 fi
 
 #=============================================================================

@@ -23,7 +23,6 @@ mpibind=""                 # string to add to MpirunString when using mpibind
 SaveExt="saved"            # saved file extension
 RTOL=0
 ATOL=0
-PRTOL=0
 
 function usage
 {
@@ -39,7 +38,6 @@ function usage
    printf "    -nthreads <n>  use 'n' OpenMP threads\n"
    printf "    -rtol <tol>    use relative tolerance 'tol' to compare numeric test values\n"
    printf "    -atol <tol>    use absolute tolerance 'tol' to compare numeric test values\n"
-   printf "    -prtol <tol>   use relative tolerance 'prtol' to compare running time\n"
    printf "    -save <ext>    use '<test>.saved.<ext> for the saved-file extension\n"
    printf "    -valgrind      use valgrind memory checker\n"
    printf "    -mpibind       use mpibind\n"
@@ -392,11 +390,10 @@ function ExecuteTest
    SaveName=$TestName.$SaveExt
    RTOL=$4
    ATOL=$5
-   PRTOL=$6
    SavePWD=`pwd`
    cd $WorkingDir
    (cat $TestName.err.* > $TestName.err)
-   (./$TestName.sh $RTOL $ATOL $PRTOL >> $TestName.err 2>&1)
+   (./$TestName.sh $RTOL $ATOL >> $TestName.err 2>&1)
    if [ -z $HYPRE_NO_SAVED ]; then
       if [ -f $SaveName ]; then
          # diff -U3 -bI"time" ${TestName}.saved ${TestName}.out   # old way of diffing
@@ -494,11 +491,6 @@ do
          ATOL=$1
          shift
          ;;
-      -prtol)
-         shift
-         PRTOL=$1
-         shift
-         ;;
       -save)
          shift
          SaveExt=$SaveExt.$1
@@ -555,7 +547,7 @@ do
                      RunPrefix=$MPIRunPrefix
                   fi
 
-                  StartCrunch $CurDir $DirPart $FilePart $RTOL $ATOL $PRTOL
+                  StartCrunch $CurDir $DirPart $FilePart $RTOL $ATOL
                else
                   printf "%s: test command file %s/%s.jobs does not exist\n" \
                      $0 $DirPart $FilePart

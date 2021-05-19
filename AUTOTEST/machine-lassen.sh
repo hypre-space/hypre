@@ -61,7 +61,7 @@ co="--with-cuda --enable-unified-memory --with-openmp --enable-hopscotch --enabl
 
 # CUDA without UM with device memory pool [benchmark, struct]
 co="--with-cuda --enable-device-memory-pool --with-cuda-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
-ro="-bench -struct -rt -mpibind -save cuda -prtol 0.15"
+ro="-bench -struct -rt -mpibind -save cuda"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-cuda-nonum
 
