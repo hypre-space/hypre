@@ -1368,6 +1368,20 @@ DistributeData( ProblemData   global_data,
                                         pdata.graph_iuppers[box],
                                         ilower, iupper,
                                         int_ilower, int_iupper);
+
+                  /* Correct intersected box extents */
+                  for (d = 0; d < 3; d++)
+                  {
+                     int_ilower[d] = pdata.graph_ilowers[box][d] +
+                                     pdata.graph_strides[box][d]*
+                                     ((int_ilower[d] - pdata.graph_ilowers[box][d] +
+                                      pdata.graph_strides[box][d]-1)/pdata.graph_strides[box][d]);
+                     int_iupper[d] = pdata.graph_iuppers[box][d] +
+                                     pdata.graph_strides[box][d]*
+                                     ((int_iupper[d] - pdata.graph_iuppers[box][d] +
+                                      pdata.graph_strides[box][d]-1)/pdata.graph_strides[box][d]);
+                  }
+
                   if (size > 0)
                   {
                      /* if there is an intersection, it is the only one */
@@ -1433,6 +1447,20 @@ DistributeData( ProblemData   global_data,
                                         pdata.matset_iuppers[box],
                                         ilower, iupper,
                                         int_ilower, int_iupper);
+
+                  /* Correct intersected box extents */
+                  for (d = 0; d < 3; d++)
+                  {
+                     int_ilower[d] = pdata.matset_ilowers[box][d] +
+                                     pdata.matset_strides[box][d]*
+                                     ((int_ilower[d] - pdata.matset_ilowers[box][d] +
+                                     pdata.matset_strides[box][d]-1)/pdata.matset_strides[box][d]);
+                     int_iupper[d] = pdata.matset_iuppers[box][d] +
+                                     pdata.matset_strides[box][d]*
+                                     ((int_iupper[d] - pdata.matset_iuppers[box][d] +
+                                     pdata.matset_strides[box][d]-1)/pdata.matset_strides[box][d]);
+                  }
+
                   if (size > 0)
                   {
                      /* if there is an intersection, it is the only one */
@@ -1476,6 +1504,7 @@ DistributeData( ProblemData   global_data,
                                         pdata.matadd_iuppers[box],
                                         ilower, iupper,
                                         int_ilower, int_iupper);
+
                   if (size > 0)
                   {
                      /* if there is an intersection, it is the only one */
