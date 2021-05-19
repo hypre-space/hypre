@@ -222,11 +222,14 @@ HYPRE_Int hypre_CSRMatrixSpMVDevice( HYPRE_Complex alpha, hypre_CSRMatrix *A, hy
 
 #if defined(HYPRE_USING_CUSPARSE)
 hypre_CsrsvData* hypre_CsrsvDataCreate();
-void hypre_CsrsvDataDestroy(hypre_CsrsvData* data);
+void hypre_CsrsvDataDestroy(hypre_CsrsvData *data);
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
-void hypre_GpuMatDataCreate(hypre_CSRMatrix  *matrix);
-void hypre_GpuMatDataDestroy(hypre_CSRMatrix  *matrix);
+hypre_GpuMatData* hypre_GpuMatDataCreate();
+void hypre_GpuMatDataDestroy(hypre_GpuMatData *data);
+hypre_GpuMatData* hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix);
+#define hypre_CSRMatrixGPUMatDescr(matrix) ( hypre_GpuMatDataMatDecsr(hypre_CSRMatrixGetGPUMatData(matrix)) )
+#define hypre_CSRMatrixGPUMatInfo(matrix)  ( hypre_GpuMatDataMatInfo (hypre_CSRMatrixGetGPUMatData(matrix)) )
 #endif
 

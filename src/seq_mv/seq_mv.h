@@ -100,8 +100,6 @@ typedef struct
 
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
 #define hypre_CSRMatrixGPUMatData(matrix)           ((matrix) -> mat_data)
-#define hypre_CSRMatrixGPUMatDescr(matrix)          (hypre_GpuMatDataMatDecsr((matrix) -> mat_data))
-#define hypre_CSRMatrixGPUMatInfo(matrix)           (hypre_GpuMatDataMatInfo((matrix) -> mat_data))
 #endif
 
 HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBegin( hypre_CSRMatrix *A );
@@ -502,12 +500,15 @@ HYPRE_Int hypre_CSRMatrixSpMVDevice( HYPRE_Complex alpha, hypre_CSRMatrix *A, hy
 
 #if defined(HYPRE_USING_CUSPARSE)
 hypre_CsrsvData* hypre_CsrsvDataCreate();
-void hypre_CsrsvDataDestroy(hypre_CsrsvData* data);
+void hypre_CsrsvDataDestroy(hypre_CsrsvData *data);
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
-void hypre_GpuMatDataCreate(hypre_CSRMatrix  *matrix);
-void hypre_GpuMatDataDestroy(hypre_CSRMatrix  *matrix);
+hypre_GpuMatData* hypre_GpuMatDataCreate();
+void hypre_GpuMatDataDestroy(hypre_GpuMatData *data);
+hypre_GpuMatData* hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix);
+#define hypre_CSRMatrixGPUMatDescr(matrix) ( hypre_GpuMatDataMatDecsr(hypre_CSRMatrixGetGPUMatData(matrix)) )
+#define hypre_CSRMatrixGPUMatInfo(matrix)  ( hypre_GpuMatDataMatInfo (hypre_CSRMatrixGetGPUMatData(matrix)) )
 #endif
 
 
@@ -516,3 +517,4 @@ void hypre_GpuMatDataDestroy(hypre_CSRMatrix  *matrix);
 #endif
 
 #endif
+
