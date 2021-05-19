@@ -83,7 +83,7 @@ ro="-struct -rt -mpibind -save cuda"
 # CUDA + CMake build (only) tests
 mo="-j"
 # CUDA with UM + CMake
-co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_CUDA_COMPILER=$(which nvcc) -DMPI_C_COMPILER=$(which mpicc) -DMPI_CXX_COMPILER=$(which mpicxx) -DHYPRE_WITH_CUDA=ON -DHYPRE_ENABLE_UNIFIED_MEMORY=ON -DCMAKE_BUILD_TYPE=Debug -DHYPRE_ENABLE_PERSISTENT_COMM=ON -DHYPRE_ENABLE_CUB=ON -DHYPRE_WITH_EXTRA_CFLAGS="\'"-qmaxmem=-1 -qsuppress=1500-029"\'" -DHYPRE_WITH_EXTRA_CXXFLAGS="\'"-qmaxmem=-1 -qsuppress=1500-029"\'" -DHYPRE_CUDA_SM=70"
+co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_CUDA_COMPILER=$(which nvcc) -DMPI_C_COMPILER=$(which mpicc) -DMPI_CXX_COMPILER=$(which mpicxx) -DHYPRE_WITH_CUDA=ON -DHYPRE_ENABLE_UNIFIED_MEMORY=ON -DCMAKE_BUILD_TYPE=Debug -DHYPRE_ENABLE_PERSISTENT_COMM=ON -DHYPRE_ENABLE_DEVICE_POOL=ON -DHYPRE_WITH_EXTRA_CFLAGS="\'"-qmaxmem=-1 -qsuppress=1500-029"\'" -DHYPRE_WITH_EXTRA_CXXFLAGS="\'"-qmaxmem=-1 -qsuppress=1500-029"\'" -DHYPRE_CUDA_SM=70"
 ./test.sh cmake.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-cuda-um-ij
 
