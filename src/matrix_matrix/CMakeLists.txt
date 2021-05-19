@@ -12,10 +12,10 @@ set(SRCS
   HYPRE_ConvertPETScMatrixToDistributedMatrix.c
 )
 
-target_sources(HYPRE
+target_sources(${PROJECT_NAME}
   PRIVATE ${SRCS}
           ${HDRS}
-  )
-  
+)
+
 convert_filenames_to_full_paths(HDRS)
 set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HDRS} PARENT_SCOPE)

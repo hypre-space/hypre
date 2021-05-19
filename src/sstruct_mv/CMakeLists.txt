@@ -31,10 +31,19 @@ set(SRCS
   sstruct_vector.c
 )
 
-target_sources(HYPRE
+target_sources(${PROJECT_NAME}
   PRIVATE ${SRCS}
           ${HDRS}
+)
+
+if (HYPRE_USING_CUDA)
+  set(CUDA_SRCS
+    sstruct_matrix.c
+    sstruct_vector.c
   )
+  convert_filenames_to_full_paths(CUDA_SRCS)
+  set(HYPRE_CUDA_SOURCES ${HYPRE_CUDA_SOURCES} ${CUDA_SRCS} PARENT_SCOPE)
+endif ()
 
 convert_filenames_to_full_paths(HDRS)
 set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HDRS} PARENT_SCOPE)
