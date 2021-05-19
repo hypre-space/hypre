@@ -1953,8 +1953,8 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
       for (i = 0; i < nrows; i++)
       {
          ncols[i]  = 1;
-         rows[i]   = i;
-         cols[i]   = i;
+         rows[i]   = sizes[0] + i;
+         cols[i]   = sizes[2] + i;
          rowidx[i] = i;
          values[i] = 1.0;
       }
