@@ -273,3 +273,28 @@ hypre_SStructKrylovCommInfo( void  *A,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructKrylovMassAxpy( HYPRE_Complex *alpha,
+                             void **x,
+                             void *y,
+                             HYPRE_Int k,
+                             HYPRE_Int unroll )
+{
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int hypre_SStructKrylovMassInnerProd( void *x ,
+                                            void **y,
+                                            HYPRE_Int k,
+                                            HYPRE_Int unroll,
+                                            void *result )
+{
+   return hypre_error_flag;
+}
+

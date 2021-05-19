@@ -24,6 +24,8 @@ HYPRE_SStructGMRESCreate( MPI_Comm             comm,
          hypre_SStructKrylovInnerProd, hypre_SStructKrylovCopyVector,
          hypre_SStructKrylovClearVector,
          hypre_SStructKrylovScaleVector, hypre_SStructKrylovAxpy,
+         hypre_StructKrylovMassInnerProd,
+         hypre_StructKrylovMassAxpy,
          hypre_SStructKrylovIdentitySetup, hypre_SStructKrylovIdentity );
 
    *solver = ( (HYPRE_SStructSolver) hypre_GMRESCreate( gmres_functions ) );

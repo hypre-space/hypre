@@ -619,6 +619,12 @@ HYPRE_Int hypre_CSRMatrixIntSpMVDevice( HYPRE_Int num_rows, HYPRE_Int num_nonzer
                                         HYPRE_Int *d_a, HYPRE_Int *d_x, HYPRE_Int beta,
                                         HYPRE_Int *d_y );
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+HYPRE_Int hypreDevice_MassAxpy(HYPRE_Int k, HYPRE_Int n, HYPRE_Complex *alpha, HYPRE_Complex *x, HYPRE_Complex *y);
+HYPRE_Int hypreDevice_MassInnerProd(HYPRE_Int k, HYPRE_Int n, HYPRE_Complex *x, HYPRE_Complex *y, HYPRE_Complex *result);
+HYPRE_Int hypreDevice_MassDotpTwo(HYPRE_Int k, HYPRE_Int n, HYPRE_Complex *x, HYPRE_Complex *y, HYPRE_Complex *z, HYPRE_Complex *result_x, HYPRE_Complex *result_y);
+#endif
+
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
 hypre_CsrsvData* hypre_CsrsvDataCreate();
 void hypre_CsrsvDataDestroy(hypre_CsrsvData *data);

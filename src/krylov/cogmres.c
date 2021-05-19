@@ -270,6 +270,194 @@ hypre_COGMRESSetup( void *cogmres_vdata,
 
    return hypre_error_flag;
 }
+
+
+void GramSchmidt_Classical(HYPRE_Int my_id,
+                           HYPRE_Int i,
+                           HYPRE_Int k_dim,
+                           HYPRE_Int unroll,
+                           void ** p,
+                           HYPRE_Real * hh,
+                           hypre_COGMRESFunctions *cf)
+{
+    HYPRE_Int j, index;
+    HYPRE_Real t;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+    hypre_GpuProfilingPushRange("COGMRES Classical GramSchmidt");
+#endif
+
+   /* These calls can be done with cublas dgemv calls ... need to be configured properly  */
+   index = (i-1)*(k_dim+1);
+   (*(cf->MassInnerProd))((void *) p[i], p, i, unroll, &hh[index]);
+
+   for (j=0; j<i; j++)
+   {
+      hh[index+j]  = -hh[index+j];
+   }
+
+   (*(cf->MassAxpy))(&hh[index], p, p[i], i, unroll);
+
+   for (j=0; j<i; j++)
+   {
+      hh[index+j]  = -hh[index+j];
+   }
+
+   t = sqrt((*(cf->InnerProd))(p[i], p[i]));
+   hh[index + i] = t;
+
+   if (t != 0)
+   {
+      t = 1.0/t;
+      (*(cf->ScaleVector))(t, p[i]);
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+}
+
+void GramSchmidt_1SyncTriSolveDelayedNorm(HYPRE_Int my_id,
+                                          HYPRE_Int i,
+                                          HYPRE_Int k_dim,
+                                          HYPRE_Int unroll,
+                                          void ** p,
+                                          HYPRE_Real * hh,
+                                          HYPRE_Real * rv,
+                                          HYPRE_Real * temprv,
+                                          HYPRE_Real * L,
+                                          hypre_COGMRESFunctions *cf)
+{
+    HYPRE_Int j, k, index, index_rhs;
+    HYPRE_Real q_im1_norm_inv, RV;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+    hypre_GpuProfilingPushRange("COGMRES GramSchmidt 1 Sync Delayed");
+#endif
+
+   index = (i-1)*(k_dim+1);
+   (*(cf->MassDotpTwo))((void *) p[i-1], p[i], p, i, unroll, temprv, temprv+i);
+
+   q_im1_norm_inv = 1.0;
+   if (i>=2)
+   {
+      q_im1_norm_inv = 1.0/sqrt(temprv[i-1]);
+      for (k=i-1; k<2*i; ++k)
+      {
+         temprv[k] *= (q_im1_norm_inv);
+      }
+      temprv[i-1] *= (q_im1_norm_inv);
+      temprv[2*i-1] *= (q_im1_norm_inv);
+   }
+
+   memcpy(L+index, temprv, i*sizeof(HYPRE_Real));
+   memcpy(rv, temprv+i, i*sizeof(HYPRE_Real));
+
+   /* Scale the vectors */
+   if (i>=2)
+   {
+      (*(cf->ScaleVector))(q_im1_norm_inv, p[i-1]);
+      (*(cf->ScaleVector))(q_im1_norm_inv, p[i]);
+   }
+
+   //triangular solve (I + L)^(-1)
+   for (j=0; j<i; ++j)
+   {
+      index_rhs = j*(k_dim+1);
+      RV = rv[j];
+      for (k=0; k<j; ++k)
+      {
+         hh[index+j] -= L[index_rhs]*RV;
+         index_rhs++;
+      }
+      hh[index+j] = RV;
+   }
+
+   for (j=0; j<i; j++)
+   {
+      hh[index+j]  = -hh[index+j];
+   }
+
+   (*(cf->MassAxpy))(&hh[index], p, p[i], i, unroll);
+
+   for (j=0; j<i; j++)
+   {
+      hh[index+j]  = -hh[index+j];
+   }
+
+   if (i>=2)
+   {
+      hh[(i-2)*(k_dim+1)+i-1] = 1.0/q_im1_norm_inv;
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+}
+
+void GramSchmidt_2SyncTriSolveNoDelayedNorm(HYPRE_Int my_id,
+                                            HYPRE_Int i,
+                                            HYPRE_Int k_dim,
+                                            HYPRE_Int unroll,
+                                            void ** p,
+                                            HYPRE_Real * hh,
+                                            HYPRE_Real * rv,
+                                            HYPRE_Real * temprv,
+                                            HYPRE_Real * L,
+                                            hypre_COGMRESFunctions *cf)
+{
+   HYPRE_Int j, k, index, index_rhs;
+   HYPRE_Real t, RV;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("COGMRES GramSchmidt 2 Sync No Delay");
+#endif
+
+   index = (i-1)*(k_dim+1);
+   (*(cf->MassDotpTwo))((void *) p[i-1], p[i], p, i, unroll, temprv, temprv+i);
+
+   memcpy(L+index, temprv, i*sizeof(HYPRE_Real));
+   memcpy(rv, temprv+i, i*sizeof(HYPRE_Real));
+
+   //triangular solve (I + L)^(-1)
+   for (j=0; j<i; ++j)
+   {
+      index_rhs = j*(k_dim+1);
+      RV = rv[j];
+      for (k=0; k<j; ++k)
+      {
+         hh[index+j] -= L[index_rhs]*RV;
+         index_rhs++;
+      }
+      hh[index+j] = RV;
+   }
+
+   for (j=0; j<i; ++j)
+   {
+      hh[index+j] *= -1.0;
+   }
+
+   (*(cf->MassAxpy))(&hh[index], p, p[i], i, unroll);
+
+   for (j=0; j<i; ++j)
+   {
+      hh[index+j] *= -1.0;
+   }
+
+   t  = sqrt((*(cf->InnerProd))(p[i], p[i]));
+   hh[index+i] = t;
+
+   if (t != 0.0)
+   {
+      t = 1.0/t;
+      (*(cf->ScaleVector))(t, p[i]);
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+}
+
 /*--------------------------------------------------------------------------
  * hypre_COGMRESSolve
  *-------------------------------------------------------------------------*/
@@ -365,7 +553,10 @@ hypre_COGMRESSolve(void  *cogmres_vdata,
    hh = hypre_CTAllocF(HYPRE_Real, (k_dim + 1) * k_dim, cogmres_functions, HYPRE_MEMORY_HOST);
    uu = hypre_CTAllocF(HYPRE_Real, (k_dim + 1) * k_dim, cogmres_functions, HYPRE_MEMORY_HOST);
 
-   (*(cogmres_functions->CopyVector))(b, p[0]);
+   HYPRE_Real * temprv = hypre_CTAllocF(HYPRE_Real, (k_dim+1)*2, cogmres_functions, HYPRE_MEMORY_HOST);
+   HYPRE_Real * L = hypre_CTAllocF(HYPRE_Real, (k_dim+1)*k_dim, cogmres_functions, HYPRE_MEMORY_HOST);
+
+   (*(cogmres_functions->CopyVector))(b,p[0]);
 
    /* compute initial residual */
    (*(cogmres_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, p[0]);
@@ -531,6 +722,12 @@ hypre_COGMRESSolve(void  *cogmres_vdata,
       t = 1.0 / r_norm;
       (*(cogmres_functions->ScaleVector))(t, p[0]);
       i = 0;
+
+      rs[0] = r_norm;
+      rv[0] = 1.0;
+      temprv[0] = 1.0;
+      L[0] = 1.0;
+
       /***RESTART CYCLE (right-preconditioning) ***/
       while (i < k_dim && iter < max_iter)
       {
@@ -542,35 +739,29 @@ hypre_COGMRESSolve(void  *cogmres_vdata,
 
          precond(precond_data, A, p[i - 1], r);
          (*(cogmres_functions->Matvec))(matvec_data, 1.0, A, r, 0.0, p[i]);
-         for (j = 0; j < i; j++)
-         {
-            rv[j]  = 0;
-         }
 
-         if (cgs > 1)
+         if (cgs==0)
          {
-            (*(cogmres_functions->MassDotpTwo))((void *) p[i], p[i - 1], p, i, unroll, &hh[itmp], &uu[itmp]);
-            for (j = 0; j < i - 1; j++) { uu[j * (k_dim + 1) + i - 1] = uu[itmp + j]; }
-            for (j = 0; j < i; j++) { rv[j] = hh[itmp + j]; }
-            for (k = 0; k < i; k++)
+            /* 1 Sync version, triangular solve, with delayed norm*/
+            GramSchmidt_1SyncTriSolveDelayedNorm(my_id, i, k_dim, unroll, p, hh, rv, temprv, L, cogmres_functions);
+            if (i==1)
             {
-               for (j = 0; j < i; j++)
-               {
-                  hh[itmp + j] -= (uu[k * (k_dim + 1) + j] * rv[j]);
-               }
+               iter--;
+               continue;
             }
-            for (j = 0; j < i; j++)
-            {
-               hh[itmp + j]  = -rv[j] - hh[itmp + j];
-            }
+            /* we need to look back at the previous version of the house holder matrix, this change in the indexing needs to be undone later on. */
+            i--;
+            itmp = (i-1)*(k_dim+1);
+         }
+         else if (cgs==1)
+         {
+            /* Classical GramSchmidt */
+            GramSchmidt_Classical(my_id, i, k_dim, unroll, p, hh, cogmres_functions);
          }
          else
          {
-            (*(cogmres_functions->MassInnerProd))((void *) p[i], p, i, unroll, &hh[itmp]);
-            for (j = 0; j < i; j++)
-            {
-               hh[itmp + j]  = -hh[itmp + j];
-            }
+            /* 2 Sync version, triangular solve, no delayed norm*/
+            GramSchmidt_2SyncTriSolveNoDelayedNorm(my_id, i, k_dim, unroll, p, hh, rv, temprv, L, cogmres_functions);
          }
 
          (*(cogmres_functions->MassAxpy))(&hh[itmp], p, p[i], i, unroll);
@@ -740,6 +931,12 @@ hypre_COGMRESSolve(void  *cogmres_vdata,
                break;
             }
          }
+         if (cgs==0)
+         {
+             /* This code works on the delayed norm ... so we need to push the indices forward */
+             i++;
+             itmp = (i-1)*(k_dim+1);
+         }
       } /*** end of restart cycle ***/
 
       /* now compute solution, first solve upper triangular system */
@@ -908,6 +1105,9 @@ hypre_COGMRESSolve(void  *cogmres_vdata,
    }*/
    hypre_TFreeF(hh, cogmres_functions);
    hypre_TFreeF(uu, cogmres_functions);
+
+   hypre_TFreeF(temprv,cogmres_functions);
+   hypre_TFreeF(L,cogmres_functions);
 
    HYPRE_ANNOTATE_FUNC_END;
 

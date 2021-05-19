@@ -120,11 +120,13 @@ HYPRE_Int hypre_StructKrylovMatvecDestroy ( void *matvec_data );
 HYPRE_Real hypre_StructKrylovInnerProd ( void *x, void *y );
 HYPRE_Int hypre_StructKrylovCopyVector ( void *x, void *y );
 HYPRE_Int hypre_StructKrylovClearVector ( void *x );
-HYPRE_Int hypre_StructKrylovScaleVector ( HYPRE_Complex alpha, void *x );
-HYPRE_Int hypre_StructKrylovAxpy ( HYPRE_Complex alpha, void *x, void *y );
-HYPRE_Int hypre_StructKrylovIdentitySetup ( void *vdata, void *A, void *b, void *x );
-HYPRE_Int hypre_StructKrylovIdentity ( void *vdata, void *A, void *b, void *x );
-HYPRE_Int hypre_StructKrylovCommInfo ( void *A, HYPRE_Int *my_id, HYPRE_Int *num_procs );
+HYPRE_Int hypre_StructKrylovScaleVector ( HYPRE_Complex alpha , void *x );
+HYPRE_Int hypre_StructKrylovAxpy ( HYPRE_Complex alpha , void *x , void *y );
+HYPRE_Int hypre_StructKrylovIdentitySetup ( void *vdata , void *A , void *b , void *x );
+HYPRE_Int hypre_StructKrylovIdentity ( void *vdata , void *A , void *b , void *x );
+HYPRE_Int hypre_StructKrylovCommInfo ( void *A , HYPRE_Int *my_id , HYPRE_Int *num_procs );
+HYPRE_Int hypre_StructKrylovMassAxpy ( HYPRE_Complex *alpha, void **x, void *y, HYPRE_Int k, HYPRE_Int unroll );
+HYPRE_Int hypre_StructKrylovMassInnerProd ( void *x , void **y, HYPRE_Int k, HYPRE_Int unroll, void *result );
 
 /* pfmg2_setup_rap.c */
 hypre_StructMatrix *hypre_PFMG2CreateRAPOp ( hypre_StructMatrix *R, hypre_StructMatrix *A,
