@@ -78,11 +78,11 @@ option(HYPRE_WITH_CUDA               "Use CUDA. Require cuda-8.0 or higher" OFF)
 option(HYPRE_ENABLE_UNIFIED_MEMORY   "Use unified memory for allocating the memory" OFF)
 option(HYPRE_ENABLE_CUDA_STREAMS     "Use CUDA streams" ON)
 option(HYPRE_ENABLE_CUSPARSE         "Use cuSPARSE" ON)
-option(HYPRE_ENABLE_CUB              "Use CUB Allocator" OFF)
+option(HYPRE_ENABLE_DEVICE_POOL      "Use device memory pool" OFF)
 option(HYPRE_ENABLE_CUBLAS           "Use cuBLAS" OFF)
 option(HYPRE_ENABLE_CURAND           "Use cuRAND" ON)
 option(HYPRE_ENABLE_GPU_PROFILING    "Use NVTX on CUDA" OFF)
-set(HYPRE_CUDA_SM "60" CACHE STRING "Target CUDA architecture.")
+set(HYPRE_CUDA_SM "70" CACHE STRING  "Target CUDA architecture.")
 
 option(TPL_DSUPERLU_LIBRARIES        "List of absolute paths to SuperLU_Dist link libraries [].")
 option(TPL_DSUPERLU_INCLUDE_DIRS     "List of absolute paths to SuperLU_Dist include directories [].")
@@ -238,9 +238,9 @@ if (HYPRE_WITH_CUDA)
       set(HYPRE_USING_CUDA_STREAMS ON CACHE BOOL "" FORCE)
     endif (HYPRE_ENABLE_CUDA_STREAMS)
 
-    if (HYPRE_ENABLE_CUB)
-      set(HYPRE_USING_CUB_ALLOCATOR ON CACHE BOOL "" FORCE)
-    endif (HYPRE_ENABLE_CUB)
+    if (HYPRE_ENABLE_DEVICE_POOL)
+      set(HYPRE_USING_DEVICE_POOL ON CACHE BOOL "" FORCE)
+    endif (HYPRE_ENABLE_DEVICE_POOL)
 
     # TODO Eventually should require cmake>=3.17
     # and use cmake's FindCUDAToolkit. Now collect
