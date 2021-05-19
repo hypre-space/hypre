@@ -386,7 +386,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
 
       for (l = 0; l < num_levels; l++)
       {
-         HYPRE_SStructMatrixToIJMatrix(A_l[l], &ij_A);
+         HYPRE_SStructMatrixToIJMatrix(A_l[l], 0, &ij_A);
          HYPRE_IJMatrixTranspose(ij_A, &ij_AT);
          HYPRE_IJMatrixAdd(1.0, ij_A, -1.0, ij_AT, &ij_B);
          HYPRE_IJMatrixNorm(ij_B, &B_norm);
@@ -415,14 +415,14 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       hypre_ParCSRMatrix  *par_A[2], *par_P, *par_AP, *par_RAP, *par_B;
       HYPRE_Real           norm;
 
-      HYPRE_SStructMatrixToIJMatrix(A_l[0], &ij_A[0]);
+      HYPRE_SStructMatrixToIJMatrix(A_l[0], 0, &ij_A[0]);
       HYPRE_IJMatrixGetObject(ij_A[0], (void **) &par_A[0]);
       for (l = 0; l < num_levels-1; l++)
       {
          if (!mypid) hypre_printf("Converting A[%02d]\n", l);
-         HYPRE_SStructMatrixToIJMatrix(A_l[l+1], &ij_A[1]);
+         HYPRE_SStructMatrixToIJMatrix(A_l[l+1], 0, &ij_A[1]);
          if (!mypid) hypre_printf("Converting P[%02d]\n", l);
-         HYPRE_SStructMatrixToIJMatrix(P_l[l], &ij_P);
+         HYPRE_SStructMatrixToIJMatrix(P_l[l], 0, &ij_P);
 
          HYPRE_IJMatrixGetObject(ij_A[1], (void **) &par_A[1]);
          HYPRE_IJMatrixGetObject(ij_P, (void **) &par_P);

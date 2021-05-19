@@ -85,7 +85,7 @@ hypre_SSAMGCoarseSolverSetup( void *ssamg_vdata )
    else if (csolver_type == 1)
    {
       /* Convert SStructMatrix to IJMatrix */
-      HYPRE_SStructMatrixToIJMatrix(A_l[l], &ij_Ac);
+      HYPRE_SStructMatrixToIJMatrix(A_l[l], 1, &ij_Ac);
       HYPRE_IJMatrixGetObject(ij_Ac, (void **) &par_Ac);
       par_x = hypre_SStructVectorParVector(x_l[l]);
       par_b = hypre_SStructVectorParVector(b_l[l]);

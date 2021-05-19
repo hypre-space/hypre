@@ -3930,7 +3930,7 @@ main( hypre_int argc,
 
    if (print_system || check_symmetry)
    {
-      HYPRE_SStructMatrixToIJMatrix(A, &ij_A);
+      HYPRE_SStructMatrixToIJMatrix(A, 0, &ij_A);
    }
 
    /*-----------------------------------------------------------

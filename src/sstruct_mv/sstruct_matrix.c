@@ -1757,7 +1757,8 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
  *--------------------------------------------------------------------------*/
 
 hypre_IJMatrix *
-hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
+hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
+                              HYPRE_Int            fill_diagonal )
 {
    MPI_Comm                 comm     = hypre_SStructMatrixComm(matrix);
    HYPRE_Int                ndim     = hypre_SStructMatrixNDim(matrix);
@@ -1794,6 +1795,8 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
    HYPRE_Int                sizes[4];
    HYPRE_Int                part, var, nvars, entry;
    HYPRE_Int                frproc, toproc;
+   HYPRE_Int               *ncols, *rowidx;
+   HYPRE_BigInt            *rows, *cols;
    HYPRE_Complex           *values;
 
    hypre_Box               *box;
@@ -1804,10 +1807,10 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   box      = hypre_BoxCreate(ndim);
-   to_box   = hypre_BoxCreate(ndim);
-   int_box  = hypre_BoxCreate(ndim);
-   map_box  = hypre_BoxCreate(ndim);
+   box       = hypre_BoxCreate(ndim);
+   to_box    = hypre_BoxCreate(ndim);
+   int_box   = hypre_BoxCreate(ndim);
+   map_box   = hypre_BoxCreate(ndim);
 
    /* Set beggining/end of rows and columns that belong to this process */
    HYPRE_IJMatrixGetLocalRange(ij_A, &sizes[0], &sizes[1], &sizes[2], &sizes[3]);
@@ -1935,6 +1938,38 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix )
    /* Free/Allocate memory */
    hypre_TFree(row_sizes, HYPRE_MEMORY_HOST);
    values = hypre_CTAlloc(HYPRE_Complex, nvalues, HYPRE_MEMORY_HOST);
+
+   /* Set all diagonal entries to 1 */
+   if (fill_diagonal)
+   {
+      ncols  = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_DEVICE);
+      rows   = hypre_CTAlloc(HYPRE_BigInt, nrows, HYPRE_MEMORY_DEVICE);
+      rowidx = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_DEVICE);
+      cols   = hypre_CTAlloc(HYPRE_BigInt, nrows, HYPRE_MEMORY_DEVICE);
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < nrows; i++)
+      {
+         ncols[i]  = 1;
+         rows[i]   = i;
+         cols[i]   = i;
+         rowidx[i] = i;
+         values[i] = 1.0;
+      }
+
+      HYPRE_IJMatrixSetValues2(ij_Ahat, nrows, ncols,
+                               (const HYPRE_BigInt *) rows,
+                               (const HYPRE_Int *) rowidx,
+                               (const HYPRE_BigInt *) cols,
+                               (const HYPRE_Complex *) values);
+
+      hypre_TFree(ncols, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(rows, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(rowidx, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(cols, HYPRE_MEMORY_DEVICE);
+   }
 
    /* Set entries of ij_Ahat */
    for (part = 0; part < nparts; part++)

@@ -867,7 +867,7 @@ HYPRE_Int HYPRE_SStructMatrixSetObjectType ( HYPRE_SStructMatrix matrix , HYPRE_
 HYPRE_Int HYPRE_SStructMatrixGetObject ( HYPRE_SStructMatrix matrix , void **object );
 HYPRE_Int HYPRE_SStructMatrixPrint ( const char *filename , HYPRE_SStructMatrix matrix , HYPRE_Int all );
 HYPRE_Int HYPRE_SStructMatrixMatvec ( HYPRE_Complex alpha , HYPRE_SStructMatrix A , HYPRE_SStructVector x , HYPRE_Complex beta , HYPRE_SStructVector y );
-HYPRE_Int HYPRE_SStructMatrixToIJMatrix( HYPRE_SStructMatrix  matrix, HYPRE_IJMatrix *ijmatrix );
+HYPRE_Int HYPRE_SStructMatrixToIJMatrix ( HYPRE_SStructMatrix  matrix , HYPRE_Int fill_diagonal , HYPRE_IJMatrix *ijmatrix );
 
 /* HYPRE_sstruct_stencil.c */
 HYPRE_Int HYPRE_SStructStencilCreate ( HYPRE_Int ndim , HYPRE_Int size , HYPRE_SStructStencil *stencil_ptr );
@@ -983,7 +983,7 @@ HYPRE_Int hypre_SStructMatrixSplitEntries ( hypre_SStructMatrix *matrix , HYPRE_
 HYPRE_Int hypre_SStructMatrixSetValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , HYPRE_Int *index , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , HYPRE_Complex *values , HYPRE_Int action );
 HYPRE_Int hypre_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix , HYPRE_Int part , hypre_Box *set_box , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , hypre_Box *value_box , HYPRE_Complex *values , HYPRE_Int action );
 HYPRE_Int hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix , HYPRE_Int part , hypre_Box *set_box , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , hypre_Box *value_box , HYPRE_Complex *values , HYPRE_Int action );
-hypre_IJMatrix* hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix );
+hypre_IJMatrix* hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix , HYPRE_Int fill_diagonal );
 
 /* sstruct_matvec.c */
 HYPRE_Int hypre_SStructPMatvecCreate ( void **pmatvec_vdata_ptr );

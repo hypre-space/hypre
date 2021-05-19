@@ -1229,6 +1229,7 @@ HYPRE_SStructMatrixMatvec( HYPRE_Complex       alpha,
 
 HYPRE_Int
 HYPRE_SStructMatrixToIJMatrix( HYPRE_SStructMatrix  matrix,
+                               HYPRE_Int            fill_diagonal,
                                HYPRE_IJMatrix      *ijmatrix )
 {
    HYPRE_IJMatrix      ij_s;
@@ -1248,7 +1249,7 @@ HYPRE_SStructMatrixToIJMatrix( HYPRE_SStructMatrix  matrix,
    if (hypre_SStructMatrixObjectType(matrix) != HYPRE_PARCSR)
    {
       ij_s = (HYPRE_IJMatrix)
-             hypre_SStructMatrixToUMatrix( (hypre_SStructMatrix *) matrix );
+             hypre_SStructMatrixToUMatrix((hypre_SStructMatrix *) matrix, fill_diagonal);
 
       /* Add the unstructured part */
       ij_u = hypre_SStructMatrixIJMatrix(matrix);
