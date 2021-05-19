@@ -1847,17 +1847,17 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
    else if (NeumannDeg == 1)
    {
       X = hypre_ParMatmul(ACF, AFF);
-      hypre_ParcsrAdd(1.0, ACF, 1.0, X, &Z);
+      hypre_ParCSRMatrixAdd(1.0, ACF, 1.0, X, &Z);
       hypre_ParCSRMatrixDestroy(X);
    }
    else
    {
       X = hypre_ParMatmul(AFF, AFF);
-      hypre_ParcsrAdd(1.0, AFF, 1.0, X, &Z);
+      hypre_ParCSRMatrixAdd(1.0, AFF, 1.0, X, &Z);
       for (i = 2; i < NeumannDeg; i++)
       {
          X2 = hypre_ParMatmul(X, AFF);
-         hypre_ParcsrAdd(1.0, Z, 1.0, X2, &Z2);
+         hypre_ParCSRMatrixAdd(1.0, Z, 1.0, X2, &Z2);
          hypre_ParCSRMatrixDestroy(X);
          hypre_ParCSRMatrixDestroy(Z);
          Z = Z2;
@@ -1866,7 +1866,7 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
       hypre_ParCSRMatrixDestroy(X);
       X = hypre_ParMatmul(ACF, Z);
       hypre_ParCSRMatrixDestroy(Z);
-      hypre_ParcsrAdd(1.0, ACF, 1.0, X, &Z);
+      hypre_ParCSRMatrixAdd(1.0, ACF, 1.0, X, &Z);
       hypre_ParCSRMatrixDestroy(X);
    }
 
@@ -2017,6 +2017,3 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
 
    return 0;
 }
-
-
-

@@ -505,7 +505,7 @@ main( hypre_int argc,
    parcsr_AH_host_2 = hypre_ParCSRMatrixClone_v2(parcsr_AH, 1, HYPRE_MEMORY_HOST);
    hypre_ParCSRMatrixSetNumNonzeros(parcsr_AH_host_2);
 
-   hypre_ParcsrAdd(1.0, parcsr_AH_host, -1.0, parcsr_AH_host_2, &parcsr_error_host);
+   hypre_ParCSRMatrixAdd(1.0, parcsr_AH_host, -1.0, parcsr_AH_host_2, &parcsr_error_host);
    fnorm = hypre_ParCSRMatrixFnorm(parcsr_error_host);
    fnorm0 = hypre_ParCSRMatrixFnorm(parcsr_AH_host);
    rfnorm = fnorm0 > 0 ? fnorm / fnorm0 : fnorm;

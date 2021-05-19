@@ -49,6 +49,7 @@ dnl *********************************************************************
 
 m4_define([M4_HYPRE_NAME],    [hypre])
 m4_define([M4_HYPRE_VERSION], [2.20.0])
+m4_define([M4_HYPRE_NUMBER],  [22000])
 m4_define([M4_HYPRE_DATE],    [2020/09/24])
 m4_define([M4_HYPRE_TIME],    [00:00:00])
 m4_define([M4_HYPRE_BUGS],    [https://github.com/hypre-space/hypre/issues])
@@ -82,19 +83,22 @@ dnl * of the file, 'm4_define' is used to define m4 macros first.
 dnl *********************************************************************
 HYPRE_NAME="M4_HYPRE_NAME"
 HYPRE_VERSION="M4_HYPRE_VERSION"
+HYPRE_NUMBER=M4_HYPRE_NUMBER
 HYPRE_DATE="M4_HYPRE_DATE"
 HYPRE_TIME="M4_HYPRE_TIME"
 HYPRE_BUGS="M4_HYPRE_BUGS"
 HYPRE_SRCDIR="M4_HYPRE_SRCDIR"
 
 AC_DEFINE_UNQUOTED(HYPRE_RELEASE_NAME,    ["$HYPRE_NAME"],    [Release name])
-AC_DEFINE_UNQUOTED(HYPRE_RELEASE_VERSION, ["$HYPRE_VERSION"], [Version number])
+AC_DEFINE_UNQUOTED(HYPRE_RELEASE_VERSION, ["$HYPRE_VERSION"], [Release version])
+AC_DEFINE_UNQUOTED(HYPRE_RELEASE_NUMBER,  [$HYPRE_NUMBER],    [Release number])
 AC_DEFINE_UNQUOTED(HYPRE_RELEASE_DATE,    ["$HYPRE_DATE"],    [Date of release])
 AC_DEFINE_UNQUOTED(HYPRE_RELEASE_TIME,    ["$HYPRE_TIME"],    [Time of release])
 AC_DEFINE_UNQUOTED(HYPRE_RELEASE_BUGS,    ["$HYPRE_BUGS"],    [Bug reports])
 
 AC_SUBST(HYPRE_NAME)
 AC_SUBST(HYPRE_VERSION)
+AC_SUBST(HYPRE_NUMBER)
 AC_SUBST(HYPRE_DATE)
 AC_SUBST(HYPRE_TIME)
 AC_SUBST(HYPRE_BUGS)
@@ -2052,7 +2056,7 @@ AS_IF([test x"$hypre_user_chose_hip" == x"yes"],
         dnl interprets as C and therefore invokes the C compiler rather than the HIP part
         dnl of clang. Put HIPCXXFLAGS at the end so the user can override from
         dnl from the configure line.
-        HIPCXXFLAGS="-x hip ${HIPCXXFLAGS}"
+        HIPCXXFLAGS="-x hip -std=c++14 ${HIPCXXFLAGS}"
 
         dnl If not in debug mode, at least -O2, but the user can override with
         dnl with HIPCXXFLAGS on the configure line. If in debug mode, -O0 -Wall
