@@ -638,7 +638,7 @@ HYPRE_HIP_INCL
 HYPRE_CUDA_LIBS
 HYPRE_CUDA_INCLUDE
 HYPRE_CUDA_PATH
-CUCC_FULL
+HYPRE_CUDA_GENCODE
 HYPRE_UMPIRE_LIB
 HYPRE_UMPIRE_INCLUDE
 HYPRE_UMPIRE_LIB_DIR
@@ -4970,6 +4970,7 @@ fi
 done
 test -n "$CUCC" || CUCC=""""
 
+      CUCC="\${HYPRE_CUDA_PATH}/bin/${CUCC} -ccbin=\${CXX}"
    fi
 
    if test "$hypre_using_hip" = "yes"
@@ -8491,7 +8492,7 @@ then
    BUILD_CXX_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
    if test "$hypre_using_cuda" = "yes"
    then
-      BUILD_CC_SHARED="\${CUCC} ${SHARED_BUILD_FLAG} ${HYPRE_CUDA_GENCODE}"
+      BUILD_CC_SHARED="\${CUCC} ${SHARED_BUILD_FLAG}"
    fi
    fi
 
@@ -8867,7 +8868,7 @@ $as_echo "#define HYPRE_USING_CURAND 1" >>confdefs.h
 
    fi
 
-      LINK_CC='${CUCC}'
+   LINK_CC='${CUCC}'
    LINK_CXX='${CUCC}'
 
       if test "x$HYPRE_CUDA_SM" = "x"
@@ -8877,12 +8878,12 @@ $as_echo "#define HYPRE_USING_CURAND 1" >>confdefs.h
 
    HYPRE_CUDA_GENCODE=""
    for sm in ${HYPRE_CUDA_SM}; do
-      HYPRE_CUDA_GENCODE="${HYPRE_CUDA_GENCODE} -gencode arch=compute_${sm},code=sm_${sm}"
+      HYPRE_CUDA_GENCODE="${HYPRE_CUDA_GENCODE}-gencode arch=compute_${sm},code=sm_${sm} "
    done
 
    if test "$hypre_user_chose_cuflags" = "no"
    then
-      CUFLAGS="-lineinfo -ccbin=\${CXX} ${HYPRE_CUDA_GENCODE} -expt-extended-lambda -dc -std=c++11 --x cu"
+      CUFLAGS="-lineinfo -expt-extended-lambda -dc -std=c++11 --x cu"
       if test "$hypre_using_debug" = "yes"
       then
          CUFLAGS="-g -O0 ${CUFLAGS}"
@@ -8901,7 +8902,7 @@ $as_echo "#define HYPRE_USING_CURAND 1" >>confdefs.h
 
    CUFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
 
-      LDFLAGS="-ccbin=\${CXX} ${HYPRE_CUDA_GENCODE} -Xcompiler \"${LDFLAGS}\""
+      LDFLAGS="-Xcompiler \"${LDFLAGS}\""
    HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
    HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64 -lcudart'
    if test "$hypre_using_gpu_profiling" = "yes"
@@ -9336,12 +9337,7 @@ $as_echo "#define HYPRE_LINUX 1" >>confdefs.h
 
 
 
-if test "x$CUCC" == "xnvcc"
-then
-   CUCC_FULL='${HYPRE_CUDA_PATH}/bin/nvcc'
-else
-   CUCC_FULL=${CUCC}
-fi
+
 
 
 

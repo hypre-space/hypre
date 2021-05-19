@@ -1521,6 +1521,7 @@ then
    if test "$hypre_using_cuda" = "yes"
    then
       AC_CHECK_PROGS(CUCC, nvcc, [""], ["${CUDA_HOME}/bin"])
+      CUCC="\${HYPRE_CUDA_PATH}/bin/${CUCC} -ccbin=\${CXX}"
    fi
 
    if test "$hypre_using_hip" = "yes"
@@ -1897,7 +1898,7 @@ dnl   BUILD_F77_SHARED="${F77} ${SHARED_BUILD_FLAG}"
    BUILD_CXX_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
    if test "$hypre_using_cuda" = "yes"
    then
-      BUILD_CC_SHARED="\${CUCC} ${SHARED_BUILD_FLAG} ${HYPRE_CUDA_GENCODE}"
+      BUILD_CC_SHARED="\${CUCC} ${SHARED_BUILD_FLAG}"
    fi
    dnl TODO HIP
 fi
@@ -2085,7 +2086,6 @@ then
       AC_DEFINE(HYPRE_USING_CURAND, 1, [Define to 1 if using cuRAND])
    fi
 
-   dnl let CC/CXX and LINK be CUCC and let host compiler be CXX
    LINK_CC='${CUCC}'
    LINK_CXX='${CUCC}'
 
@@ -2097,12 +2097,12 @@ then
 
    HYPRE_CUDA_GENCODE=""
    for sm in ${HYPRE_CUDA_SM}; do
-      HYPRE_CUDA_GENCODE="${HYPRE_CUDA_GENCODE} -gencode arch=compute_${sm},code=sm_${sm}"
+      HYPRE_CUDA_GENCODE="${HYPRE_CUDA_GENCODE}-gencode arch=compute_${sm},code=sm_${sm} "
    done
 
    if test "$hypre_user_chose_cuflags" = "no"
    then
-      CUFLAGS="-lineinfo -ccbin=\${CXX} ${HYPRE_CUDA_GENCODE} -expt-extended-lambda -dc -std=c++11 --x cu"
+      CUFLAGS="-lineinfo -expt-extended-lambda -dc -std=c++11 --x cu"
       if test "$hypre_using_debug" = "yes"
       then
          CUFLAGS="-g -O0 ${CUFLAGS}"
@@ -2122,7 +2122,7 @@ then
    CUFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
 
    dnl CFLAGS=${CXXFLAGS}
-   LDFLAGS="-ccbin=\${CXX} ${HYPRE_CUDA_GENCODE} -Xcompiler \"${LDFLAGS}\""
+   LDFLAGS="-Xcompiler \"${LDFLAGS}\""
    HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
    HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64 -lcudart'
    if test "$hypre_using_gpu_profiling" = "yes"
@@ -2487,14 +2487,9 @@ AC_SUBST(HYPRE_UMPIRE_LIB)
 dnl *********************************************************************
 dnl * CUDA stuff
 dnl *********************************************************************
-if [test "x$CUCC" == "xnvcc"]
-then
-   CUCC_FULL='${HYPRE_CUDA_PATH}/bin/nvcc'
-else
-   CUCC_FULL=${CUCC}
-fi
 AC_SUBST(CUFLAGS)
-AC_SUBST(CUCC_FULL)
+AC_SUBST(CUCC)
+AC_SUBST(HYPRE_CUDA_GENCODE)
 AC_SUBST(HYPRE_CUDA_PATH)
 AC_SUBST(HYPRE_CUDA_INCLUDE)
 AC_SUBST(HYPRE_CUDA_LIBS)
