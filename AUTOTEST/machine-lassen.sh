@@ -46,7 +46,8 @@ eo=""
 # CUDA with UM in debug mode [ij, ams, struct, sstruct]
 co="--with-cuda --enable-unified-memory --enable-persistent --enable-debug --with-cuda-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
 ro="-ij-gpu -ams -struct -sstruct -rt -mpibind -save cuda"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: -gpu
+eo="-gpu -rt -mpibind -save cuda"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
 ./renametest.sh basic $output_dir/basic-cuda-um
 
 # CUDA with UM with shared library [no run]
