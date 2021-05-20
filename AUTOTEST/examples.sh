@@ -52,8 +52,6 @@ do
    esac
 done
 
-echo $tests
-
 # If no tests were specified, run default
 if [ "$tests" = "" ]; then
    tests="default"
@@ -71,7 +69,6 @@ mopt=""
 if [ -n "$spackdir" ]; then
    mopt="HYPRE_DIR=$spackdir"
 fi
-
 for tname in $tests
 do
    if [ "$tname" = "gpu" ]; then
