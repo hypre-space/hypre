@@ -20,7 +20,7 @@ HYPRE_DIR = ../hypre
 ########################################################################
 CUDA_INCL = -I${CUDA_HOME}/include
 CUDA_LIBS = -L${CUDA_HOME}lib64 -lcudart -lcusparse -lcurand
-CUDA_ARCH = -gencode arch=compute_60,"code=sm_60"
+CUDA_ARCH = -gencode arch=compute_60,code=sm_60 -gencode arch=compute_70,code=sm_70
 NVCC_LDFLAGS = -ccbin=${CXX} ${CUDA_ARCH}
 
 ########################################################################
@@ -80,6 +80,8 @@ COMPLEXPROGS = ex18comp
 all: $(ALLPROGS)
 
 default: all
+
+gpu: all
 
 bigint: $(BIGINTPROGS)
 
