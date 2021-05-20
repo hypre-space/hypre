@@ -52,6 +52,8 @@ do
    esac
 done
 
+echo $tests
+
 # If no tests were specified, run default
 if [ "$tests" = "" ]; then
    tests="default"
@@ -69,9 +71,14 @@ mopt=""
 if [ -n "$spackdir" ]; then
    mopt="HYPRE_DIR=$spackdir"
 fi
+
 for tname in $tests
 do
-   make $mopt $tname
+   if [ "$tname" = "gpu" ]; then
+      make -j -f Makefile_gpu $mopt $tname
+   else
+      make $mopt $tname
+   fi
 done
 
 # Run the examples regression test
