@@ -93,7 +93,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Real      alpha;
    hypre_Vector  **l1_norms = NULL;
    hypre_Vector   *l1_norms_level;
-   HYPRE_Real    **ds = hypre_ParAMGDataChebyDS(amg_data);
+   hypre_Vector  **ds = hypre_ParAMGDataChebyDS(amg_data);
    HYPRE_Real    **coefs = hypre_ParAMGDataChebyCoefs(amg_data);
    HYPRE_Int       seq_cg = 0;
    HYPRE_Int       partial_cycle_coarsest_level;
@@ -491,7 +491,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   HYPRE_Int scale = hypre_ParAMGDataChebyScale(amg_data);
                   HYPRE_Int variant = hypre_ParAMGDataChebyVariant(amg_data);
                   hypre_ParCSRRelax_Cheby_Solve(A_array[level], Aux_F,
-                                                ds[level], coefs[level],
+                                                hypre_VectorData(ds[level]), coefs[level],
                                                 cheby_order, scale,
                                                 variant, Aux_U, Vtemp, Ztemp );
                }

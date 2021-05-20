@@ -147,6 +147,7 @@ CUFILES =\
  par_ilu.c\
  par_ilu_setup.c \
  par_ilu_solve.c \
+ par_cheby_device.c\
  par_coarsen_device.c\
  par_indepset_device.c\
  par_interp_device.c\

@@ -644,8 +644,7 @@ hypre_BoomerAMGDestroy( void *data )
    if (hypre_ParAMGDataChebyDS(amg_data))
    {
       for (i=0; i < num_levels; i++)
-         if (hypre_ParAMGDataChebyDS(amg_data)[i])
-            hypre_TFree(hypre_ParAMGDataChebyDS(amg_data)[i], HYPRE_MEMORY_HOST);
+         hypre_SeqVectorDestroy(hypre_ParAMGDataChebyDS(amg_data)[i]);
       hypre_TFree(hypre_ParAMGDataChebyDS(amg_data), HYPRE_MEMORY_HOST);
    }
 
