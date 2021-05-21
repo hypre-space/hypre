@@ -258,7 +258,7 @@ if (NOT HYPRE_WITH_EXTRA_CFLAGS STREQUAL "")
   add_compile_options("$<$<COMPILE_LANGUAGE:C>:${HYPRE_WITH_EXTRA_CFLAGS}>")
 endif ()
 
-# Set library build type
+# Set library build type (must appear before add_library calls)
 if (HYPRE_SHARED)
   set(BUILD_SHARED_LIBS ON CACHE INTERNAL "" FORCE)
 else ()
