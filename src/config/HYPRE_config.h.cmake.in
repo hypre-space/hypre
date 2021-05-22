@@ -7,7 +7,7 @@
 
 #define HYPRE_RELEASE_NAME    "@CMAKE_PROJECT_NAME@"
 #define HYPRE_RELEASE_VERSION "@HYPRE_VERSION@"
-#define HYPRE_RELEASE_NUMBER  "@HYPRE_NUMBER@"
+#define HYPRE_RELEASE_NUMBER  @HYPRE_NUMBER@
 #define HYPRE_RELEASE_DATE    "@HYPRE_DATE@"
 #define HYPRE_RELEASE_TIME    "@HYPRE_TIME@"
 #define HYPRE_RELEASE_BUGS    "@HYPRE_BUGS@"
@@ -75,8 +75,8 @@
 /* Use cuSPARSE */
 #cmakedefine HYPRE_USING_CUSPARSE 1
 
-/* Use CUB */
-#cmakedefine HYPRE_USING_CUB_ALLOCATOR 1
+/* Use device memory pool */
+#cmakedefine HYPRE_USING_DEVICE_POOL 1
 
 /* Use unified memory */
 #cmakedefine HYPRE_USING_UNIFIED_MEMORY 1

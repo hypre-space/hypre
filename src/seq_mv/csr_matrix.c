@@ -42,16 +42,12 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
    hypre_CSRMatrixMemoryLocation(matrix) = hypre_HandleMemoryLocation(hypre_handle());
 
    /* set defaults */
-   hypre_CSRMatrixOwnsData(matrix)  = 1;
+   hypre_CSRMatrixOwnsData(matrix)       = 1;
 
 #if defined(HYPRE_USING_CUSPARSE)
-   hypre_CSRMatrixSortedJ(matrix)    = NULL;
-   hypre_CSRMatrixSortedData(matrix) = NULL;
-   hypre_CSRMatrixCsrsvData(matrix)  = NULL;
-#endif
-
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
-   hypre_GpuMatDataCreate(matrix);
+   hypre_CSRMatrixSortedJ(matrix)        = NULL;
+   hypre_CSRMatrixSortedData(matrix)     = NULL;
+   hypre_CSRMatrixCsrsvData(matrix)      = NULL;
 #endif
 
    return matrix;
@@ -77,17 +73,20 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
       {
          hypre_TFree(hypre_CSRMatrixData(matrix), memory_location);
          hypre_TFree(hypre_CSRMatrixJ(matrix),    memory_location);
+         /* RL: TODO There might be cases BigJ cannot be freed FIXME
+          * Not so clear how to do it */
          hypre_TFree(hypre_CSRMatrixBigJ(matrix), memory_location);
+      }
+
 #if defined(HYPRE_USING_CUSPARSE)
-         hypre_TFree(hypre_CSRMatrixSortedData(matrix), memory_location);
-         hypre_TFree(hypre_CSRMatrixSortedJ(matrix), memory_location);
-         hypre_CsrsvDataDestroy(hypre_CSRMatrixCsrsvData(matrix));
+      hypre_TFree(hypre_CSRMatrixSortedData(matrix), memory_location);
+      hypre_TFree(hypre_CSRMatrixSortedJ(matrix), memory_location);
+      hypre_CsrsvDataDestroy(hypre_CSRMatrixCsrsvData(matrix));
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
-         hypre_GpuMatDataDestroy(matrix);
+      hypre_GpuMatDataDestroy(hypre_CSRMatrixGPUMatData(matrix));
 #endif
-      }
 
       hypre_TFree(matrix, HYPRE_MEMORY_HOST);
    }
@@ -180,6 +179,7 @@ hypre_CSRMatrixResize( hypre_CSRMatrix *matrix, HYPRE_Int new_num_rows, HYPRE_In
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Error: called hypre_CSRMatrixResize on a matrix that doesn't own the data\n");
       return 1;
    }
+
    hypre_CSRMatrixNumCols(matrix) = new_num_cols;
 
    if (new_num_nonzeros != hypre_CSRMatrixNumNonzeros(matrix))
@@ -187,14 +187,22 @@ hypre_CSRMatrixResize( hypre_CSRMatrix *matrix, HYPRE_Int new_num_rows, HYPRE_In
       hypre_CSRMatrixNumNonzeros(matrix) = new_num_nonzeros;
 
       if (!hypre_CSRMatrixData(matrix))
+      {
          hypre_CSRMatrixData(matrix) = hypre_CTAlloc(HYPRE_Complex, new_num_nonzeros, memory_location);
+      }
       else
+      {
          hypre_CSRMatrixData(matrix) = hypre_TReAlloc_v2(hypre_CSRMatrixData(matrix), HYPRE_Complex, old_num_nonzeros, HYPRE_Complex, new_num_nonzeros, memory_location);
+      }
 
       if (!hypre_CSRMatrixJ(matrix))
+      {
          hypre_CSRMatrixJ(matrix) = hypre_CTAlloc(HYPRE_Int, new_num_nonzeros, memory_location);
+      }
       else
+      {
          hypre_CSRMatrixJ(matrix) = hypre_TReAlloc_v2(hypre_CSRMatrixJ(matrix), HYPRE_Int, old_num_nonzeros, HYPRE_Int, new_num_nonzeros, memory_location);
+      }
    }
 
    if (new_num_rows != hypre_CSRMatrixNumRows(matrix))
@@ -202,9 +210,13 @@ hypre_CSRMatrixResize( hypre_CSRMatrix *matrix, HYPRE_Int new_num_rows, HYPRE_In
       hypre_CSRMatrixNumRows(matrix) = new_num_rows;
 
       if (!hypre_CSRMatrixI(matrix))
+      {
          hypre_CSRMatrixI(matrix) = hypre_CTAlloc(HYPRE_Int, new_num_rows + 1, memory_location);
+      }
       else
+      {
          hypre_CSRMatrixI(matrix) = hypre_TReAlloc_v2(hypre_CSRMatrixI(matrix), HYPRE_Int, old_num_rows + 1, HYPRE_Int, new_num_rows + 1, memory_location);
+      }
    }
 
    return 0;
@@ -1054,3 +1066,22 @@ hypre_CSRMatrixPrefetch( hypre_CSRMatrix *A, HYPRE_MemoryLocation memory_locatio
 
    return ierr;
 }
+
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+hypre_GpuMatData *
+hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix)
+{
+   if (!matrix)
+   {
+      return NULL;
+   }
+
+   if (!hypre_CSRMatrixGPUMatData(matrix))
+   {
+      hypre_CSRMatrixGPUMatData(matrix) = hypre_GpuMatDataCreate();
+   }
+
+   return hypre_CSRMatrixGPUMatData(matrix);
+}
+#endif
+

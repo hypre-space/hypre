@@ -52,50 +52,51 @@ hypre_CsrsvDataDestroy(hypre_CsrsvData* data)
 #endif /* #if defined(HYPRE_USING_CUSPARSE) */
 
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
-void
-hypre_GpuMatDataCreate(hypre_CSRMatrix *matrix)
+hypre_GpuMatData *
+hypre_GpuMatDataCreate()
 {
-   hypre_CSRMatrixGPUMatData(matrix) = hypre_CTAlloc(hypre_GpuMatData, 1, HYPRE_MEMORY_HOST);
+   hypre_GpuMatData *data = hypre_CTAlloc(hypre_GpuMatData, 1, HYPRE_MEMORY_HOST);
 
 #if defined(HYPRE_USING_CUSPARSE)
    cusparseMatDescr_t mat_descr;
    HYPRE_CUSPARSE_CALL( cusparseCreateMatDescr(&mat_descr) );
    HYPRE_CUSPARSE_CALL( cusparseSetMatType(mat_descr, CUSPARSE_MATRIX_TYPE_GENERAL) );
    HYPRE_CUSPARSE_CALL( cusparseSetMatIndexBase(mat_descr, CUSPARSE_INDEX_BASE_ZERO) );
-   hypre_CSRMatrixGPUMatDescr(matrix) = mat_descr;
+   hypre_GpuMatDataMatDecsr(data) = mat_descr;
 #endif
 
 #if defined(HYPRE_USING_ROCSPARSE)
    rocsparse_mat_descr mat_descr;
+   rocsparse_mat_info  info;
    HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_descr(&mat_descr) );
    HYPRE_ROCSPARSE_CALL( rocsparse_set_mat_type(mat_descr, rocsparse_matrix_type_general) );
    HYPRE_ROCSPARSE_CALL( rocsparse_set_mat_index_base(mat_descr, rocsparse_index_base_zero) );
-   hypre_GpuMatDataMatDecsr(hypre_CSRMatrixGPUMatData(matrix)) = mat_descr;
-
-   rocsparse_mat_info info;
+   hypre_GpuMatDataMatDecsr(data) = mat_descr;
    HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_info(&info) );
-   hypre_CSRMatrixGPUMatInfo(matrix) = info;
+   hypre_GpuMatDataMatInfo(data) = info;
 #endif
+
+   return data;
 }
 
 void
-hypre_GpuMatDataDestroy(hypre_CSRMatrix *matrix)
+hypre_GpuMatDataDestroy(hypre_GpuMatData *data)
 {
-   if (!hypre_CSRMatrixGPUMatData(matrix))
+   if (!data)
    {
       return;
    }
 
 #if defined(HYPRE_USING_CUSPARSE)
-   HYPRE_CUSPARSE_CALL( cusparseDestroyMatDescr(hypre_CSRMatrixGPUMatDescr(matrix)) );
+   HYPRE_CUSPARSE_CALL( cusparseDestroyMatDescr(hypre_GpuMatDataMatDecsr(data)) );
 #endif
 
 #if defined(HYPRE_USING_ROCSPARSE)
-   HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_descr(hypre_CSRMatrixGPUMatDescr(matrix)) );
-   HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_info(hypre_CSRMatrixGPUMatInfo(matrix)) );
+   HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_descr(hypre_GpuMatDataMatDecsr(data)) );
+   HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_info(hypre_GpuMatDataMatInfo(data)) );
 #endif
 
-  hypre_TFree(hypre_CSRMatrixGPUMatData(matrix), HYPRE_MEMORY_HOST);
+  hypre_TFree(data, HYPRE_MEMORY_HOST);
 }
 #endif
 

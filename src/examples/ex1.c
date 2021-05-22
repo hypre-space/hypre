@@ -68,7 +68,7 @@ int main (int argc, char *argv[])
    HYPRE_Init();
 
    /* Print GPU info */
-   HYPRE_PrintDeviceInfo();
+   /* HYPRE_PrintDeviceInfo(); */
 
    /* Parse command line */
    {
