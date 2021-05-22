@@ -959,6 +959,25 @@ hypre_CurandUniform_core( HYPRE_Int          n,
 
    return hypre_error_flag;
 }
+#endif /* #if defined(HYPRE_USING_CURAND) */
+
+// RL: TODO
+#if defined(HYPRE_USING_ROCRAND)
+template <typename T>
+HYPRE_Int
+hypre_CurandUniform_core( HYPRE_Int          n,
+                          T                 *urand,
+                          HYPRE_Int          set_seed,
+                          hypre_ulonglongint seed,
+                          HYPRE_Int          set_offset,
+                          hypre_ulonglongint offset)
+{
+   hypre_error_w_msg(1, "ROCRand has not been available");
+   exit(0);
+}
+#endif /* #if defined(HYPRE_USING_ROCRAND) */
+
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
 
 HYPRE_Int
 hypre_CurandUniform( HYPRE_Int          n,
@@ -982,7 +1001,7 @@ hypre_CurandUniformSingle( HYPRE_Int          n,
    return hypre_CurandUniform_core(n, urand, set_seed, seed, set_offset, offset);
 }
 
-#endif
+#endif /* #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND) */
 
 #if defined(HYPRE_USING_CUBLAS)
 cublasHandle_t

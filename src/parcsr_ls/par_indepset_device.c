@@ -212,6 +212,12 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
 
    hypre_MPI_Comm_rank(comm, &my_id);
 
+   // RL: TODO
+   #if defined(HYPRE_USING_ROCRAND)
+   if (aug_rand ==  1) { aug_rand =  2; }
+   if (aug_rand == 11) { aug_rand = 12; }
+   #endif
+
    urand = hypre_TAlloc(HYPRE_Real, num_rows_diag, HYPRE_MEMORY_DEVICE);
 
    if (aug_rand == 2 || aug_rand == 12)
