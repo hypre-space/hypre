@@ -2196,6 +2196,9 @@ main( hypre_int argc,
    HYPRE_SetExecutionPolicy(default_exec_policy);
 
 #if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_HIP)
+   spgemm_use_cusparse = 1;
+#endif
    /* use cuSPARSE for SpGEMM */
    HYPRE_SetSpGemmUseCusparse(spgemm_use_cusparse);
    /* use cuRand for PMIS */

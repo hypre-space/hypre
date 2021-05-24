@@ -1153,7 +1153,10 @@ AS_HELP_STRING([--with-gpu-arch=ARG],
 [
  if test "x${withval}" != "x"
  then
-    HYPRE_CUDA_SM="${HYPRE_CUDA_SM} ${withval}"
+    if test "x${HYPRE_CUDA_SM}" = "x"
+    then
+       HYPRE_CUDA_SM="${withval}"
+    fi
  fi
 ]
 )
@@ -2166,11 +2169,15 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
         dnl in device code.
         LINK_CC='${CUCC}'
         LINK_CXX='${CUCC}'
-   
-	if test "x$HYPRE_CUDA_SM" != "x"
-	then
-           HYPRE_CUDA_GENCODE="--amdgpu-target=${HYPRE_CUDA_SM}"
-	fi
+
+        if test "x${HYPRE_CUDA_SM}" != "x"
+        then
+           HYPRE_CUDA_GENCODE="--amdgpu-target="
+           for sm in ${HYPRE_CUDA_SM}; do
+              HYPRE_CUDA_GENCODE="${HYPRE_CUDA_GENCODE}${sm},"
+           done
+           HYPRE_CUDA_GENCODE="`echo ${HYPRE_CUDA_GENCODE}|sed 's/,$//'`"
+        fi
 
         dnl The "-x hip" is necessary to override the detection of .c files which clang
         dnl interprets as C and therefore invokes the C compiler rather than the HIP part

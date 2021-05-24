@@ -123,6 +123,10 @@ function MpirunString
          shift
          RunString="lrun -n$*"
          ;;
+      redwood*)
+         shift
+         RunString="srun -n$*"
+         ;;
       *)
          shift
          if [ $NumThreads -gt 0 ] ; then

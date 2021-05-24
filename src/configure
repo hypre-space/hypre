@@ -831,7 +831,7 @@ with_MPI
 with_cuda
 with_hip
 with_cuda_home
-with_cuda_arch
+with_gpu_arch
 with_raja
 with_raja_include
 with_raja_lib
@@ -1636,7 +1636,7 @@ Optional Packages:
                           NO).
   --with-hip              Use HIP for AMD GPUs. (default is NO).
   --with-cuda-home=DIR    User specifies CUDA_HOME in DIR.
-  --with-cuda-arch=ARG    User specifies NVIDIA GPU architecture that the CUDA
+  --with-gpu-arch=ARG     User specifies NVIDIA GPU architecture that the CUDA
                           files will be compiled for in ARG, where ARG is a
                           space-separated list (enclosed in quotes) of
                           numbers.
@@ -3964,12 +3964,15 @@ fi
 
 
 
-# Check whether --with-cuda-arch was given.
-if test "${with_cuda_arch+set}" = set; then :
-  withval=$with_cuda_arch;
+# Check whether --with-gpu-arch was given.
+if test "${with_gpu_arch+set}" = set; then :
+  withval=$with_gpu_arch;
  if test "x${withval}" != "x"
  then
-    HYPRE_CUDA_SM="${HYPRE_CUDA_SM} ${withval}"
+    if test "x${HYPRE_CUDA_SM}" = "x"
+    then
+       HYPRE_CUDA_SM="${withval}"
+    fi
  fi
 
 
@@ -8938,6 +8941,15 @@ $as_echo "#define HYPRE_USING_HIP 1" >>confdefs.h
 
                                 LINK_CC='${CUCC}'
         LINK_CXX='${CUCC}'
+
+        if test "x${HYPRE_CUDA_SM}" != "x"
+        then
+           HYPRE_CUDA_GENCODE="--amdgpu-target="
+           for sm in ${HYPRE_CUDA_SM}; do
+              HYPRE_CUDA_GENCODE="${HYPRE_CUDA_GENCODE}${sm},"
+           done
+           HYPRE_CUDA_GENCODE="`echo ${HYPRE_CUDA_GENCODE}|sed 's/,$//'`"
+        fi
 
                                         HIPCXXFLAGS="-x hip -std=c++14 ${HIPCXXFLAGS}"
 
