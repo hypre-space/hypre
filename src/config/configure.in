@@ -1146,8 +1146,8 @@ AS_HELP_STRING([--with-cuda-home=DIR],
  hypre_using_cuda=yes]
 )
 
-AC_ARG_WITH(cuda-arch,
-AS_HELP_STRING([--with-cuda-arch=ARG],
+AC_ARG_WITH(gpu-arch,
+AS_HELP_STRING([--with-gpu-arch=ARG],
                [User specifies NVIDIA GPU architecture that the CUDA files will be compiled for in ARG, where ARG is a space-separated
                 list (enclosed in quotes) of numbers.]),
 [
