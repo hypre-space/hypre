@@ -11,15 +11,16 @@
  *
  *****************************************************************************/
 
+
+
+#if defined(HYPRE_USING_CUDA)
+
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_parcsr_mv.h"
 #include "float.h"
-
 #include "_hypre_utilities.hpp"
 #include <thrust/iterator/zip_iterator.h>
 #include <thrust/for_each.h>
-
-#if defined(HYPRE_USING_CUDA)
 
 /**
  * @brief oop_xypz
