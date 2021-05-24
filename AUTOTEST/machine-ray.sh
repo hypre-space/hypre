@@ -40,7 +40,7 @@ mo="-j test"
 eo=""
 
 #save=`echo $(hostname) | sed 's/[0-9]\+$//'`
-save="lassen"
+save="ray"
 
 ##########
 ## CUDA ##
