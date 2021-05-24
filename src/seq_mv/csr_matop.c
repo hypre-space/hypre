@@ -1235,12 +1235,6 @@ hypre_CSRMatrixTransposeHost(hypre_CSRMatrix  *A,
    hypre_CSRMatrixI(*AT)[num_cols_A] = num_nnzs_A;
    hypre_TFree(bucket, HYPRE_MEMORY_HOST);
 
-   /* Move diagonal to first entry (for square matrices only)*/
-   if(num_rows_A == num_cols_A)
-   {
-      hypre_CSRMatrixReorder(*AT);
-   }
-
    // Set rownnz and num_rownnz
    if (hypre_CSRMatrixNumRownnz(A) < num_rows_A)
    {
@@ -1515,7 +1509,7 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRMatrixReorder(hypre_CSRMatrix *A)
+hypre_CSRMatrixReorderHost(hypre_CSRMatrix *A)
 {
    HYPRE_Complex *A_data     = hypre_CSRMatrixData(A);
    HYPRE_Int     *A_i        = hypre_CSRMatrixI(A);
@@ -1554,6 +1548,27 @@ hypre_CSRMatrixReorder(hypre_CSRMatrix *A)
    }
 
    return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_CSRMatrixReorder(hypre_CSRMatrix *A)
+{
+   HYPRE_Int ierr = 0;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      ierr = hypre_CSRMatrixMoveDiagFirstDevice(A);
+   }
+   else
+#endif
+   {
+      ierr = hypre_CSRMatrixReorderHost(A);
+   }
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
