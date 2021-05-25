@@ -140,7 +140,7 @@ struct hypre_CudaData
    hipStream_t                       cuda_streams[HYPRE_MAX_NUM_STREAMS];
 #endif
 
-#ifdef HYPRE_USING_CUB_ALLOCATOR
+#ifdef HYPRE_USING_DEVICE_POOL
    hypre_uint                        cub_bin_growth;
    hypre_uint                        cub_min_bin;
    hypre_uint                        cub_max_bin;
@@ -169,6 +169,8 @@ struct hypre_CudaData
    HYPRE_Int                         spgemm_rownnz_estimate_nsamples;
    float                             spgemm_rownnz_estimate_mult_factor;
    char                              spgemm_hash_type;
+   /* PMIS */
+   HYPRE_Int                         use_gpu_rand;
 };
 
 #define hypre_CudaDataCubBinGrowth(data)                   ((data) -> cub_bin_growth)
@@ -191,6 +193,7 @@ struct hypre_CudaData
 #define hypre_CudaDataSpgemmRownnzEstimateMultFactor(data) ((data) -> spgemm_rownnz_estimate_mult_factor)
 #define hypre_CudaDataSpgemmHashType(data)                 ((data) -> spgemm_hash_type)
 #define hypre_CudaDataUmpireDeviceAllocator(data)          ((data) -> umpire_device_allocator)
+#define hypre_CudaDataUseGpuRand(data)                     ((data) -> use_gpu_rand)
 
 hypre_CudaData*     hypre_CudaDataCreate();
 void                hypre_CudaDataDestroy(hypre_CudaData* data);
@@ -345,6 +348,7 @@ using namespace thrust::placeholders;
 
 /* RL: TODO Want macro HYPRE_THRUST_CALL to return value but I don't know how to do it right
  * The following one works OK for now */
+
 #ifdef HYPRE_USING_UMPIRE_DEVICE
 
 #if defined(HYPRE_USING_CUDA)
@@ -354,6 +358,12 @@ using namespace thrust::placeholders;
 #define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
    thrust::func_name(thrust::hip::par(hypre_HandleUmpireDeviceAllocator(hypre_handle())).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
 #endif // HYPRE_USING_CUDA
+
+#elif HYPRE_USING_DEVICE_POOL
+#if defined(HYPRE_USING_CUDA)
+#define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
+   thrust::func_name(thrust::cuda::par(*(hypre_HandleCubDevAllocator(hypre_handle()))).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
+#endif
 
 #else
 
@@ -896,6 +906,8 @@ cudaError_t hypre_CachingFreeDevice(void *ptr);
 
 cudaError_t hypre_CachingFreeManaged(void *ptr);
 #endif
+
+hypre_cub_CachingDeviceAllocator * hypre_CudaDataCubCachingAllocatorCreate(hypre_uint bin_growth, hypre_uint min_bin, hypre_uint max_bin, size_t max_cached_bytes, bool skip_cleanup, bool debug, bool use_managed_memory);
 
 void hypre_CudaDataCubCachingAllocatorDestroy(hypre_CudaData *data);
 

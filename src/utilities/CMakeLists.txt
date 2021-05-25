@@ -13,6 +13,7 @@ set(HDRS
 )
 
 set(SRCS
+  HYPRE_handle.c
   HYPRE_version.c
   amg_linklist.c
   binsearch.c
@@ -25,6 +26,7 @@ set(SRCS
   hypre_cuda_utils.c
   hypre_error.c
   hypre_general.c
+  hypre_handle.c
   hypre_hopscotch_hash.c
   hypre_memory.c
   hypre_merge_sort.c
@@ -50,7 +52,9 @@ target_sources(${PROJECT_NAME}
 
 if (HYPRE_USING_CUDA)
   set(CUDA_SRCS
+    HYPRE_handle.c
     hypre_cuda_utils.c
+    hypre_handle.c
     hypre_general.c
     hypre_memory.c
     hypre_omp_device.c

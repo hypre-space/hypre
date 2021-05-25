@@ -1844,6 +1844,10 @@ HYPRE_Int HYPRE_ParCSRPilutSetDropTolerance(HYPRE_Solver solver,
 HYPRE_Int HYPRE_ParCSRPilutSetFactorRowSize(HYPRE_Solver solver,
                                             HYPRE_Int    size);
 
+
+HYPRE_Int HYPRE_ParCSRPilutSetLogging(HYPRE_Solver solver,
+                                      HYPRE_Int    logging );
+
 /**@}*/
 
 /*--------------------------------------------------------------------------

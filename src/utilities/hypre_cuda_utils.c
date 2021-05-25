@@ -10,18 +10,26 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
+/*
+ * The architecture identification macro __CUDA_ARCH__ is assigned a three-digit value string xy0
+ * (ending in a literal 0) during each nvcc compilation stage 1 that compiles for compute_xy.
+ * This macro can be used in the implementation of GPU functions for determining the virtual architecture
+ * for which it is currently being compiled. The host code (the non-GPU code) must not depend on it.
+ * Note that compute_XX refers to a PTX version and sm_XX refers to a cubin version.
+*/
 __global__ void
-hypreCUDAKernel_CompileFlagSafetyCheck(HYPRE_Int cuda_arch_actual)
+hypreCUDAKernel_CompileFlagSafetyCheck(hypre_int *cuda_arch_compile)
 {
-#ifdef __CUDA_ARCH__
-   if (cuda_arch_actual != __CUDA_ARCH__)
-   {
-      printf("ERROR: Compile arch flags %d does not match actual device arch = sm_%d\n", __CUDA_ARCH__, cuda_arch_actual);
-      hypre_device_assert(0);
-   }
+#if defined(__CUDA_ARCH__)
+   cuda_arch_compile[0] = __CUDA_ARCH__;
 #endif
 }
 
+/*
+ * Assume this function is called inside HYPRE_Init(), at a place where we do not want to
+ * activate memory pooling, so we do not use hypre's memory model to Alloc and Free.
+ * See commented out code below (and do not delete)
+*/
 void hypre_CudaCompileFlagCheck()
 {
   // This is really only defined for CUDA and not for HIP
@@ -31,12 +39,35 @@ void hypre_CudaCompileFlagCheck()
 
    struct cudaDeviceProp props;
    cudaGetDeviceProperties(&props, device);
-   HYPRE_Int cuda_arch_actual = props.major*100 + props.minor*10;
-
+   hypre_int cuda_arch_actual = props.major*100 + props.minor*10;
+   hypre_int cuda_arch_compile = -1;
    dim3 gDim(1,1,1), bDim(1,1,1);
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CompileFlagSafetyCheck, gDim, bDim, cuda_arch_actual );
 
-   HYPRE_CUDA_CALL(cudaDeviceSynchronize());
+   hypre_int *cuda_arch_compile_d = NULL;
+   //cuda_arch_compile_d = hypre_TAlloc(hypre_int, 1, HYPRE_MEMORY_DEVICE);
+   HYPRE_CUDA_CALL( cudaMalloc(&cuda_arch_compile_d, sizeof(hypre_int)) );
+   hypre_TMemcpy(cuda_arch_compile_d, &cuda_arch_compile, hypre_int, 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CompileFlagSafetyCheck, gDim, bDim, cuda_arch_compile_d );
+   hypre_TMemcpy(&cuda_arch_compile, cuda_arch_compile_d, hypre_int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   //hypre_TFree(cuda_arch_compile_d, HYPRE_MEMORY_DEVICE);
+   HYPRE_CUDA_CALL( cudaFree(cuda_arch_compile_d) );
+
+   /* HYPRE_CUDA_CALL(cudaDeviceSynchronize()); */
+
+   if (-1 == cuda_arch_compile)
+   {
+      hypre_error_w_msg(1, "hypre error: no proper cuda_arch found");
+   }
+   else if (cuda_arch_actual != cuda_arch_compile)
+   {
+      char msg[256];
+      hypre_sprintf(msg, "hypre warning: Compile 'arch=compute_' does not match device arch %d", cuda_arch_actual);
+      hypre_error_w_msg(1, msg);
+      /*
+      hypre_printf("%s\n", msg);
+      hypre_MPI_Abort(hypre_MPI_COMM_WORLD, -1);
+      */
+   }
 
 #endif // defined(HYPRE_USING_CUDA)
 }
@@ -894,7 +925,83 @@ hypre_CudaDataCurandGenerator(hypre_CudaData *data)
 
    return gen;
 }
-#endif
+
+/* T = float or hypre_double */
+template <typename T>
+HYPRE_Int
+hypre_CurandUniform_core( HYPRE_Int          n,
+                          T                 *urand,
+                          HYPRE_Int          set_seed,
+                          hypre_ulonglongint seed,
+                          HYPRE_Int          set_offset,
+                          hypre_ulonglongint offset)
+{
+   curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle());
+
+   if (set_seed)
+   {
+      HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, seed) );
+   }
+
+   if (set_offset)
+   {
+      HYPRE_CURAND_CALL( curandSetGeneratorOffset(gen, offset) );
+   }
+
+   if (sizeof(T) == sizeof(hypre_double))
+   {
+      HYPRE_CURAND_CALL( curandGenerateUniformDouble(gen, (hypre_double *) urand, n) );
+   }
+   else if (sizeof(T) == sizeof(float))
+   {
+      HYPRE_CURAND_CALL( curandGenerateUniform(gen, (float *) urand, n) );
+   }
+
+   return hypre_error_flag;
+}
+#endif /* #if defined(HYPRE_USING_CURAND) */
+
+// RL: TODO
+#if defined(HYPRE_USING_ROCRAND)
+template <typename T>
+HYPRE_Int
+hypre_CurandUniform_core( HYPRE_Int          n,
+                          T                 *urand,
+                          HYPRE_Int          set_seed,
+                          hypre_ulonglongint seed,
+                          HYPRE_Int          set_offset,
+                          hypre_ulonglongint offset)
+{
+   hypre_error_w_msg(1, "ROCRand has not been available");
+   exit(0);
+}
+#endif /* #if defined(HYPRE_USING_ROCRAND) */
+
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
+
+HYPRE_Int
+hypre_CurandUniform( HYPRE_Int          n,
+                     HYPRE_Real        *urand,
+                     HYPRE_Int          set_seed,
+                     hypre_ulonglongint seed,
+                     HYPRE_Int          set_offset,
+                     hypre_ulonglongint offset)
+{
+   return hypre_CurandUniform_core(n, urand, set_seed, seed, set_offset, offset);
+}
+
+HYPRE_Int
+hypre_CurandUniformSingle( HYPRE_Int          n,
+                           float             *urand,
+                           HYPRE_Int          set_seed,
+                           hypre_ulonglongint seed,
+                           HYPRE_Int          set_offset,
+                           hypre_ulonglongint offset)
+{
+   return hypre_CurandUniform_core(n, urand, set_seed, seed, set_offset, offset);
+}
+
+#endif /* #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND) */
 
 #if defined(HYPRE_USING_CUBLAS)
 cublasHandle_t
@@ -980,8 +1087,15 @@ hypre_CudaDataCreate()
    hypre_CudaDataSpgemmRownnzEstimateMultFactor(data) = 1.5;
    hypre_CudaDataSpgemmHashType(data) = 'L';
 
-   /* cub */
-#ifdef HYPRE_USING_CUB_ALLOCATOR
+   /* pmis */
+#ifdef HYPRE_USING_CURAND
+   hypre_CudaDataUseGpuRand(data) = 1;
+#else
+   hypre_CudaDataUseGpuRand(data) = 0;
+#endif
+
+   /* device pool */
+#ifdef HYPRE_USING_DEVICE_POOL
    hypre_CudaDataCubBinGrowth(data)      = 8u;
    hypre_CudaDataCubMinBin(data)         = 1u;
    hypre_CudaDataCubMaxBin(data)         = (hypre_uint) -1;
@@ -1027,9 +1141,7 @@ hypre_CudaDataDestroy(hypre_CudaData *data)
 #elif defined(HYPRE_USING_ROCSPARSE)
       HYPRE_ROCSPARSE_CALL( rocsparse_destroy_handle(data->cusparse_handle) );
 #endif
-
    }
-
 #endif // #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
 
    for (HYPRE_Int i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
@@ -1046,7 +1158,7 @@ hypre_CudaDataDestroy(hypre_CudaData *data)
       }
    }
 
-#ifdef HYPRE_USING_CUB_ALLOCATOR
+#ifdef HYPRE_USING_DEVICE_POOL
    hypre_CudaDataCubCachingAllocatorDestroy(data);
 #endif
 

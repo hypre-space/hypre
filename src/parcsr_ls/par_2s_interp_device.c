@@ -40,11 +40,14 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Complex      *A_offd_data  = hypre_CSRMatrixData(A_offd);
    HYPRE_Int          *A_offd_i     = hypre_CSRMatrixI(A_offd);
    HYPRE_Int           A_offd_nnz   = hypre_CSRMatrixNumNonzeros(A_offd);
-   HYPRE_Int          *Soc_diag_j   = hypre_ParCSRMatrixSocDiagJ(S);
-   HYPRE_Int          *Soc_offd_j   = hypre_ParCSRMatrixSocOffdJ(S);
    HYPRE_Int          *CF_marker_dev;
    HYPRE_Complex      *Dbeta, *Dbeta_offd, *rsWA, *rsW;
    hypre_ParCSRMatrix *As_F2F, *As_FC, *W, *P;
+
+   hypre_BoomerAMGMakeSocFromSDevice(A, S);
+
+   HYPRE_Int          *Soc_diag_j   = hypre_ParCSRMatrixSocDiagJ(S);
+   HYPRE_Int          *Soc_offd_j   = hypre_ParCSRMatrixSocOffdJ(S);
 
    CF_marker_dev = hypre_TAlloc(HYPRE_Int, A_nr_local, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(CF_marker_dev, CF_marker, HYPRE_Int, A_nr_local, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
@@ -275,11 +278,14 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Complex      *A_offd_data  = hypre_CSRMatrixData(A_offd);
    HYPRE_Int          *A_offd_i     = hypre_CSRMatrixI(A_offd);
    HYPRE_Int           A_offd_nnz   = hypre_CSRMatrixNumNonzeros(A_offd);
-   HYPRE_Int          *Soc_diag_j   = hypre_ParCSRMatrixSocDiagJ(S);
-   HYPRE_Int          *Soc_offd_j   = hypre_ParCSRMatrixSocOffdJ(S);
    HYPRE_Int          *CF_marker_dev;
    HYPRE_Complex      *Dbeta, *rsWA, *rsW, *dlam, *dlam_offd, *dtmp, *dtmp_offd;
    hypre_ParCSRMatrix *As_F2F, *As_FF, *As_FC, *W, *P;
+
+   hypre_BoomerAMGMakeSocFromSDevice(A, S);
+
+   HYPRE_Int          *Soc_diag_j   = hypre_ParCSRMatrixSocDiagJ(S);
+   HYPRE_Int          *Soc_offd_j   = hypre_ParCSRMatrixSocOffdJ(S);
 
    CF_marker_dev = hypre_TAlloc(HYPRE_Int, A_nr_local, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(CF_marker_dev, CF_marker, HYPRE_Int, A_nr_local, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);

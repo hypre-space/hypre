@@ -1266,6 +1266,7 @@ typedef struct
 #define hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle) hypre_CudaDataSpgemmRownnzEstimateMultFactor(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleSpgemmHashType(hypre_handle)                 hypre_CudaDataSpgemmHashType(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleUmpireDeviceAllocator(hypre_handle)          hypre_CudaDataUmpireDeviceAllocator(hypre_HandleCudaData(hypre_handle))
+#define hypre_HandleUseGpuRand(hypre_handle)                     hypre_CudaDataUseGpuRand(hypre_HandleCudaData(hypre_handle))
 
 #define hypre_HandleUmpireResourceMan(hypre_handle)              ((hypre_handle) -> umpire_rm)
 #define hypre_HandleUmpireDevicePoolSize(hypre_handle)           ((hypre_handle) -> umpire_device_pool_size)
@@ -1611,6 +1612,9 @@ HYPRE_Int hypreDevice_MaskedIVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex 
 HYPRE_Int hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v);
 #endif
 
+HYPRE_Int hypre_CurandUniform( HYPRE_Int n, HYPRE_Real *urand, HYPRE_Int set_seed, hypre_ulonglongint seed, HYPRE_Int set_offset, hypre_ulonglongint offset);
+HYPRE_Int hypre_CurandUniformSingle( HYPRE_Int n, float *urand, HYPRE_Int set_seed, hypre_ulonglongint seed, HYPRE_Int set_offset, hypre_ulonglongint offset);
+
 HYPRE_Int hypre_bind_device(HYPRE_Int myid, HYPRE_Int nproc, MPI_Comm comm);
 
 /* hypre_nvtx.c */
@@ -1627,6 +1631,10 @@ HYPRE_Int hypre_SetSyncCudaCompute(HYPRE_Int action);
 HYPRE_Int hypre_RestoreSyncCudaCompute();
 HYPRE_Int hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr);
 HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
+
+/* hypre_handle.c */
+HYPRE_Int hypre_SetSpGemmUseCusparse( HYPRE_Int use_cusparse );
+HYPRE_Int hypre_SetUseGpuRand( HYPRE_Int use_gpurand );
 
 #ifdef __cplusplus
 }

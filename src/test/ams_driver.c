@@ -135,6 +135,16 @@ hypre_int main (hypre_int argc, char *argv[])
     *-----------------------------------------------------------*/
    HYPRE_Init();
 
+   /* default execution policy */
+   HYPRE_SetExecutionPolicy(HYPRE_EXEC_DEVICE);
+
+#if defined(HYPRE_USING_GPU)
+   /* use cuSPARSE for SpGEMM */
+   HYPRE_SetSpGemmUseCusparse(0);
+   /* use cuRand for PMIS */
+   HYPRE_SetUseGpuRand(1);
+#endif
+
    /* Set defaults */
    solver_id = 3;
    maxit = 100;

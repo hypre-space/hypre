@@ -166,11 +166,3 @@ hypre_CSRMatrixDeviceSpGemmSetHashType( char value )
 
 #endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */
 
-HYPRE_Int
-hypre_CSRMatrixDeviceSpGemmSetUseCusparse( HYPRE_Int use_cusparse )
-{
-#if defined(HYPRE_USING_GPU)
-   hypre_HandleCudaData(hypre_handle())->spgemm_use_cusparse = use_cusparse;
-#endif
-   return 0;
-}

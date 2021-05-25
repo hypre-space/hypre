@@ -193,6 +193,8 @@ OneBlockReduceKernel(T *arr, HYPRE_Int N)
 template <typename T>
 struct ReduceSum
 {
+   using value_type = T;
+
    T init;                    /* initial value passed in */
    mutable T __thread_sum;    /* place to hold local sum of a thread,
                                  and partial sum of a block */
@@ -249,12 +251,23 @@ struct ReduceSum
    operator T()
    {
       T val;
-      /* 2nd reduction with only *one* block */
-      hypre_assert(nblocks >= 0 && nblocks <= 1024);
-      const dim3 gDim(1), bDim(1024);
-      HYPRE_CUDA_LAUNCH( OneBlockReduceKernel, gDim, bDim, d_buf, nblocks );
-      hypre_TMemcpy(&val, d_buf, T, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-      val += init;
+
+      HYPRE_ExecutionPolicy exec_policy = hypre_HandleStructExecPolicy(hypre_handle());
+
+      if (exec_policy == HYPRE_EXEC_HOST)
+      {
+         val = __thread_sum;
+         val += init;
+      }
+      else
+      {
+         /* 2nd reduction with only *one* block */
+         hypre_assert(nblocks >= 0 && nblocks <= 1024);
+         const dim3 gDim(1), bDim(1024);
+         HYPRE_CUDA_LAUNCH( OneBlockReduceKernel, gDim, bDim, d_buf, nblocks );
+         hypre_TMemcpy(&val, d_buf, T, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+         val += init;
+      }
 
       return val;
    }
