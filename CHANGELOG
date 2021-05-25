@@ -14,6 +14,7 @@ Version 2.21.0 released 2021/05/25
 - Added GPU build options to CMake.
 - Added a new HYPRE_RELEASE_NUMBER macro.
 - Improved support for ParCSR matrices with many zero rows.
+- Improved BoomerAMG setup efficiency when there are many off-diagonal coefficients.
 - Fixed a bug in the strength matrix generation for nodal AMG.
 - Removed unified virtual memory (UVM) requirement from GPU implementation.
 - Removed --enable-global-partition option.
