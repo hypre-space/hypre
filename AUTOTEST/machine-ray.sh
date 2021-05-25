@@ -56,8 +56,7 @@ eo="-gpu -rt -mpibind -save ${save}"
 #CUDA with UM and mixed-int
 co="--with-cuda --enable-unified-memory --enable-mixedint --enable-debug --with-gpu-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
 ro="-ij-mixed -ams -struct -sstruct-mixed -rt -mpibind -save ${save}"
-eo="-gpu -rt -mpibind -save ${save}"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-cuda-um-mixedint
 
 # CUDA with UM with shared library [no run]
