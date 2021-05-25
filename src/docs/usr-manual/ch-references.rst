@@ -31,6 +31,12 @@
    Algebra Appl.*, 17:495--517, 2010.  Also available as LLNL technical report
    LLLNL-JRNL-412928.
 
+.. [BKRHSMTY2021] Luc Berger-Vergiat, Brian Kelley, Sivasankaran Rajamanickam,
+   Jonathan Hu, Katarzyna Swirydowicz, Paul Mullowney, Stephen Thomas, Ichitaro
+   Yamazaki. Two-Stage Gauss--Seidel Preconditioners and Smoothers for Krylov
+   Solvers on a GPU cluster.
+   `https://arxiv.org/abs/2104.01196 <https://arxiv.org/abs/2104.01196>`_.
+
 .. [BLOPEWeb] BLOPEX, parallel preconditioned eigenvalue solvers.
    `http://code.google.com/p/blopex/ <http://code.google.com/p/blopex/>`_.
 
@@ -50,9 +56,6 @@
 
 .. [CMakeWeb] CMake, a cross-platform open-source build system.
    `http://www.cmake.org/ <http://www.cmake.org/>`_.
-
-.. [Umpire] Umpire: Managing Heterogeneous Memory Resources.
-   `https://github.com/LLNL/Umpire <https://github.com/LLNL/Umpire>`_.
 
 .. [DFNY2008] H. De Sterck, R. Falgout, J. Nolting, and U. M. Yang.
    Distance-two interpolation for parallel algebraic multigrid.  *Numer. Linear
@@ -157,6 +160,9 @@
    applications.  In U. Trottenberg, C. Oosterlee, and A. Schüller, editors,
    *Multigrid*. Academic Press, 2001.
 
+.. [Umpire] Umpire: Managing Heterogeneous Memory Resources.
+   `https://github.com/LLNL/Umpire <https://github.com/LLNL/Umpire>`_.
+
 .. [VaMB1996] P. Vaněk, J. Mandel, and M. Brezina.  Algebraic multigrid based on
    smoothed aggregation for second and fourth order problems.  *Computing*,
    56:179--196, 1996.
@@ -183,5 +189,3 @@
    coarsening.  *Numer. Linear Algebra Appl.*, 17:453--472, 2010.  Also
    available as LLNL technical report LLLNL-JRNL-417371.
 
-.. [BKRHSMTY2021] Luc Berger-Vergiat, Brian Kelley, Sivasankaran Rajamanickam, Jonathan Hu, Katarzyna Swirydowicz, Paul Mullowney, Stephen Thomas, Ichitaro Yamazaki. Two-Stage Gauss--Seidel Preconditioners and Smoothers for Krylov Solvers on a GPU cluster.
-   `https://arxiv.org/abs/2104.01196 <https://arxiv.org/abs/2104.01196>`_.
