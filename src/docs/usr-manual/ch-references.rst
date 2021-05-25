@@ -51,6 +51,9 @@
 .. [CMakeWeb] CMake, a cross-platform open-source build system.
    `http://www.cmake.org/ <http://www.cmake.org/>`_.
 
+.. [Umpire] Umpire: Managing Heterogeneous Memory Resources.
+   `https://github.com/LLNL/Umpire <https://github.com/LLNL/Umpire>`_.
+
 .. [DFNY2008] H. De Sterck, R. Falgout, J. Nolting, and U. M. Yang.
    Distance-two interpolation for parallel algebraic multigrid.  *Numer. Linear
    Algebra Appl.*, 15:115--139, 2008.  Also available as LLNL technical report
@@ -179,3 +182,4 @@
 .. [Yang2010] U. M. Yang.  On long range interpolation operators for aggressive
    coarsening.  *Numer. Linear Algebra Appl.*, 17:453--472, 2010.  Also
    available as LLNL technical report LLLNL-JRNL-417371.
+
