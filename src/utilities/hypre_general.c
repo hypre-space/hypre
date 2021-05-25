@@ -99,7 +99,7 @@ hypre_SetDevice(HYPRE_Int use_device, hypre_Handle *hypre_handle_)
    hypre_MPI_Comm_size(node_comm, &NodeSize);
    hypre_MPI_Comm_free(&node_comm);
 
-   HYPRE_Int nDevices;
+   hypre_int nDevices;
 #if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaGetDeviceCount(&nDevices) );
 #else

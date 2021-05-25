@@ -3443,7 +3443,7 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n,
          S_row_starts[1] = global_start;
       }
 
-      S_row_starts = hypre_CTAlloc(HYPRE_Int,2,HYPRE_MEMORY_HOST);
+      S_row_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
       S_row_starts[1] = S_total_rows;
       S_row_starts[0] = S_total_rows - m;
       hypre_MPI_Allreduce(&m, &S_total_rows, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);

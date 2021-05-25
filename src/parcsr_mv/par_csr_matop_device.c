@@ -14,7 +14,7 @@
 HYPRE_Int
 hypre_ParcsrGetExternalRowsDeviceInit( hypre_ParCSRMatrix   *A,
                                        HYPRE_Int             indices_len,
-                                       HYPRE_Int            *indices,
+                                       HYPRE_BigInt         *indices,
                                        hypre_ParCSRCommPkg  *comm_pkg,
                                        HYPRE_Int             want_data,
                                        void                **request_ptr)
