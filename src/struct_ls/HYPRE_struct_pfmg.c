@@ -21,7 +21,7 @@ HYPRE_StructPFMGCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructPFMGDestroy( HYPRE_StructSolver solver )
 {
    return( hypre_PFMGDestroy( (void *) solver ) );
@@ -30,7 +30,7 @@ HYPRE_StructPFMGDestroy( HYPRE_StructSolver solver )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructPFMGSetup( HYPRE_StructSolver solver,
                        HYPRE_StructMatrix A,
                        HYPRE_StructVector b,
@@ -45,7 +45,7 @@ HYPRE_StructPFMGSetup( HYPRE_StructSolver solver,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructPFMGSolve( HYPRE_StructSolver solver,
                        HYPRE_StructMatrix A,
                        HYPRE_StructVector b,
@@ -127,7 +127,7 @@ HYPRE_StructPFMGGetRelChange( HYPRE_StructSolver solver,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 HYPRE_StructPFMGSetZeroGuess( HYPRE_StructSolver solver )
 {
@@ -143,7 +143,7 @@ HYPRE_StructPFMGGetZeroGuess( HYPRE_StructSolver solver,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 HYPRE_StructPFMGSetNonZeroGuess( HYPRE_StructSolver solver )
 {
@@ -314,10 +314,10 @@ HYPRE_StructPFMGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
    return( hypre_PFMGGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }
 
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 HYPRE_Int
 HYPRE_StructPFMGSetDeviceLevel( HYPRE_StructSolver  solver,
-				HYPRE_Int   device_level  )
+                                HYPRE_Int   device_level  )
 {
    return( hypre_PFMGSetDeviceLevel( (void *) solver, device_level ) );
 }

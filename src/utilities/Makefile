@@ -35,6 +35,7 @@ HEADERS =\
 FILES =\
  F90_HYPRE_error.c\
  F90_HYPRE_general.c\
+ HYPRE_handle.c\
  HYPRE_version.c\
  amg_linklist.c\
  binsearch.c\
@@ -60,6 +61,7 @@ FILES =\
 CUFILES=\
  hypre_cuda_utils.c\
  hypre_general.c\
+ hypre_handle.c\
  hypre_memory.c\
  hypre_omp_device.c \
  hypre_nvtx.c

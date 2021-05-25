@@ -1,0 +1,24 @@
+# Output file: benchmark_struct.out.1
+PCG Setup wall clock time = 0.110000 seconds
+PCG Solve wall clock time = 0.500000 seconds
+# Output file: benchmark_struct.out.2
+PCG Setup wall clock time = 0.140000 seconds
+PCG Solve wall clock time = 0.740000 seconds
+# Output file: benchmark_struct.out.3
+PCG Setup wall clock time = 1.010000 seconds
+PCG Solve wall clock time = 4.770000 seconds
+# Output file: benchmark_struct.out.4
+PCG Setup wall clock time = 1.600000 seconds
+PCG Solve wall clock time = 7.770000 seconds
+# Output file: benchmark_struct.out.5
+PCG Setup wall clock time = 0.020000 seconds
+PCG Solve wall clock time = 0.150000 seconds
+# Output file: benchmark_struct.out.6
+PCG Setup wall clock time = 0.050000 seconds
+PCG Solve wall clock time = 0.450000 seconds
+# Output file: benchmark_struct.out.7
+PCG Setup wall clock time = 0.080000 seconds
+PCG Solve wall clock time = 0.580000 seconds
+# Output file: benchmark_struct.out.8
+PCG Setup wall clock time = 0.100000 seconds
+PCG Solve wall clock time = 0.920000 seconds

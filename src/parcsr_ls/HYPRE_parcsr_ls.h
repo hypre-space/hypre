@@ -263,13 +263,7 @@ HYPRE_Int HYPRE_BoomerAMGSetFilterThresholdR(HYPRE_Solver solver,
                                              HYPRE_Real   filter_threshold);
 
 /**
- * (Optional) Defines the largest strength threshold for which
- * the strength matrix S uses the communication package of the operator A.
- * If the strength threshold is larger than this values,
- * a communication package is generated for S. This can save
- * memory and decrease the amount of data that needs to be communicated,
- * if S is substantially sparser than A.
- * The default is 1.0.
+ * (Optional) Deprecated. This routine now has no effect.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetSCommPkgSwitch(HYPRE_Solver solver,
                                            HYPRE_Real   S_commpkg_switch);
@@ -410,6 +404,13 @@ HYPRE_Int HYPRE_BoomerAMGSetNodal(HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetNodalDiag(HYPRE_Solver solver,
                                       HYPRE_Int    nodal_diag);
 
+
+/*
+ * (Optional) Sets whether to keep same sign in S for nodal > 0
+ * The default is 0, i.e., discard those elements.
+ */
+HYPRE_Int HYPRE_BoomerAMGSetKeepSameSign(HYPRE_Solver solver,
+                                         HYPRE_Int    keep_same_sign);
 
 /**
  * (Optional) Defines which parallel interpolation operator is used.
@@ -1842,6 +1843,10 @@ HYPRE_Int HYPRE_ParCSRPilutSetDropTolerance(HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_ParCSRPilutSetFactorRowSize(HYPRE_Solver solver,
                                             HYPRE_Int    size);
+
+
+HYPRE_Int HYPRE_ParCSRPilutSetLogging(HYPRE_Solver solver,
+                                      HYPRE_Int    logging );
 
 /**@}*/
 
@@ -3342,6 +3347,23 @@ HYPRE_Int
 HYPRE_ParCSRHybridSetAggNumLevels(HYPRE_Solver solver,
                                   HYPRE_Int    agg_num_levels);
 
+/*
+ * (Optional) Defines the interpolation used on levels of aggressive coarsening
+ * The default is 4, i.e. multipass interpolation.
+ * The following options exist:
+ *
+ *    - 1 : 2-stage extended+i interpolation
+ *    - 2 : 2-stage standard interpolation
+ *    - 3 : 2-stage extended interpolation
+ *    - 4 : multipass interpolation
+ *    - 5 : 2-stage extended interpolation in matrix-matrix form
+ *    - 6 : 2-stage extended+i interpolation in matrix-matrix form
+ *    - 7 : 2-stage extended+e interpolation in matrix-matrix form
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridSetAggInterpType( HYPRE_Solver solver,
+                                    HYPRE_Int    agg_interp_type);
+
 /**
  * (Optional) Defines the degree of aggressive coarsening.
  * The default is 1, which leads to the most aggressive coarsening.
@@ -3783,10 +3805,12 @@ HYPRE_MGRSetLevelFRelaxNumFunctions(HYPRE_Solver solver, HYPRE_Int *num_function
  *    - 0    : injection \f$[0  I]\f$
  *    - 1    : unscaled (not recommended)
  *    - 2    : diagonal scaling (Jacobi)
+ *    - 3    : approximate inverse
+ *    - 4    : pAIR distance 1
+ *    - 5    : pAIR distance 2
  *    - else : use classical modified interpolation
  *
- * These options are currently active for the last stage reduction. Intermediate
- * reduction levels use injection. The default is injection.
+ * The default is injection.
  **/
 HYPRE_Int
 HYPRE_MGRSetRestrictType( HYPRE_Solver solver,
@@ -3805,16 +3829,17 @@ HYPRE_MGRSetNumRestrictSweeps( HYPRE_Solver solver,
                                HYPRE_Int nsweeps );
 
 /**
- * (Optional) Set the strategy for computing the MGR restriction operator.
+ * (Optional) Set the strategy for computing the MGR interpolation operator.
  * Options for \e interp_type are:
  *
  *    - 0    : injection \f$[0  I]^{T}\f$
  *    - 1    : unscaled (not recommended)
  *    - 2    : diagonal scaling (Jacobi)
- *    - else : use default (classical modified interpolation)
+ *    - 3    : classical modified interpolation
+ *    - 4    : approximate inverse
+ *    - else : classical modified interpolation
  *
- * These options are currently active for the last stage reduction. Intermediate
- * reduction levels use diagonal scaling.
+ * The default is diagonal scaling.
  **/
 HYPRE_Int
 HYPRE_MGRSetInterpType( HYPRE_Solver solver,
@@ -3877,6 +3902,14 @@ HYPRE_Int HYPRE_MGRSetCoarseSolver(HYPRE_Solver          solver,
 HYPRE_Int
 HYPRE_MGRSetPrintLevel( HYPRE_Solver solver,
                         HYPRE_Int print_level );
+
+HYPRE_Int
+HYPRE_MGRSetFrelaxPrintLevel( HYPRE_Solver solver,
+                        HYPRE_Int print_level );
+                        
+HYPRE_Int
+HYPRE_MGRSetCoarseGridPrintLevel( HYPRE_Solver solver,
+                        HYPRE_Int print_level );                        
 
 /**
  * (Optional) Set the threshold to compress the coarse grid at each level
@@ -4053,7 +4086,7 @@ HYPRE_ILUSetDropThreshold( HYPRE_Solver solver, HYPRE_Real threshold );
 
 /**
  * (Optional) Set the array of thresholds for dropping in ILUT.
- * B, E, and F correspond to upper left, lower left and upper right 
+ * B, E, and F correspond to upper left, lower left and upper right
  * of 2 x 2 block decomposition respectively.
  * Any fill-in less than thresholds is dropped in the factorization.
  *    - threshold[0] : threshold for matrix B.
@@ -4108,8 +4141,8 @@ HYPRE_ILUSetSchurMaxIter( HYPRE_Solver solver, HYPRE_Int ss_max_iter );
  *    - 30 : RAS with ILU(k)
  *    - 31 : RAS with ILUT
  *    - 40 : (nonsymmetric permutation) DDPQ-GMRES with ILU(k)
- *    - 41 : (nonsymmetric permutation) DDPQ-GMRES with ILUT  
- *    - 50 : GMRES with RAP-ILU(0) using MILU(0) for P 
+ *    - 41 : (nonsymmetric permutation) DDPQ-GMRES with ILUT
+ *    - 50 : GMRES with RAP-ILU(0) using MILU(0) for P
  **/
 HYPRE_Int
 HYPRE_ILUSetType( HYPRE_Solver solver, HYPRE_Int ilu_type );

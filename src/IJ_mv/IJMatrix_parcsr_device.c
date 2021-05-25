@@ -14,7 +14,7 @@
 #include "_hypre_IJ_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 __global__ void
 hypreCUDAKernel_IJMatrixValues_dev1(HYPRE_Int n, HYPRE_Int *rowind, HYPRE_Int *row_ptr, HYPRE_Int *row_len, HYPRE_Int *mark)
@@ -228,7 +228,7 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
          make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0,    J0))),
          make_reverse_iterator(thrust::device_pointer_cast<char>(X0)+N0),
          make_reverse_iterator(thrust::device_pointer_cast<char>(X) +N0),
-         0,
+         char(0),
          thrust::equal_to< thrust::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
          thrust::maximum<char>() );
 
@@ -742,4 +742,3 @@ hypre_IJMatrixSetConstantValuesParCSRDevice( hypre_IJMatrix *matrix,
 }
 
 #endif
-

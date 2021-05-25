@@ -924,7 +924,7 @@ HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGDDData *amgdd_data )
    HYPRE_Int             num_nonowned_real_c_points;
    HYPRE_Int             real_cnt, ghost_cnt;
    HYPRE_Int             proc, outer_level, level, i, j;
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_Int             c_cnt, f_cnt;
 #endif
 
@@ -1037,7 +1037,7 @@ HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGDDData *amgdd_data )
          hypre_AMGDDCompGridNumOwnedCPoints(compGrid[level])        = num_owned_c_points;
          hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid[level]) = num_nonowned_real_c_points;
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          // Setup owned C and F masks. NOTE: only used in the cuda version of masked matvecs.
          hypre_AMGDDCompGridOwnedCMask(compGrid[level]) = hypre_CTAlloc(HYPRE_Int,
                                                                         num_owned_c_points,
@@ -1092,7 +1092,7 @@ HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGDDData *amgdd_data )
          {
             hypre_AMGDDCompGridNonOwnedFMask(compGrid[level])[i] = i;
          }
-#endif
+#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       }
 
       // Reorder nonowned matrices

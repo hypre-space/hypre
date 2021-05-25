@@ -3,8 +3,7 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-target_sources(HYPRE
-  PRIVATE
+set(SRCS
   ConjGrad.c
   DiagScale.c
   FGmres.c
@@ -19,4 +18,8 @@ target_sources(HYPRE
   PrunedRows.c
   RowPatt.c
   StoredRows.c
+)
+
+target_sources(${PROJECT_NAME}
+  PRIVATE ${SRCS}
 )

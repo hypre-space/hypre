@@ -8,6 +8,7 @@
 /* aux_parcsr_matrix.c */
 HYPRE_Int hypre_AuxParCSRMatrixCreate ( hypre_AuxParCSRMatrix **aux_matrix , HYPRE_Int local_num_rows , HYPRE_Int local_num_cols , HYPRE_Int *sizes );
 HYPRE_Int hypre_AuxParCSRMatrixDestroy ( hypre_AuxParCSRMatrix *matrix );
+HYPRE_Int hypre_AuxParCSRMatrixSetRownnz ( hypre_AuxParCSRMatrix *matrix );
 HYPRE_Int hypre_AuxParCSRMatrixInitialize ( hypre_AuxParCSRMatrix *matrix );
 HYPRE_Int hypre_AuxParCSRMatrixInitialize_v2( hypre_AuxParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location );
 
@@ -141,4 +142,3 @@ HYPRE_Int HYPRE_IJVectorGetLocalRange ( HYPRE_IJVector vector , HYPRE_BigInt *jl
 HYPRE_Int HYPRE_IJVectorGetObject ( HYPRE_IJVector vector , void **object );
 HYPRE_Int HYPRE_IJVectorRead ( const char *filename , MPI_Comm comm , HYPRE_Int type , HYPRE_IJVector *vector_ptr );
 HYPRE_Int HYPRE_IJVectorPrint ( HYPRE_IJVector vector , const char *filename );
-

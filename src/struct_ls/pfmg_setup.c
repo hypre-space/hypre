@@ -129,7 +129,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
    HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
 
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_Int             num_level_GPU = 0;
    HYPRE_MemoryLocation  data_location = HYPRE_MEMORY_DEVICE;
    HYPRE_Int             max_box_size  = 0;
@@ -175,9 +175,17 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
       for (d = 0; d < ndim; d++)
       {
+         /* Set 'dxyz_flag' if the matrix-coefficient variation is "too large".
+          * This is used later to set relaxation weights for Jacobi.
+          *
+          * Use the "square of the coefficient of variation" = (sigma/mu)^2,
+          * where sigma is the standard deviation and mu is the mean.  This is
+          * equivalent to computing (d - mu^2)/mu^2 where d is the average of
+          * the squares of the coefficients stored in 'deviation'.  Care is
+          * taken to avoid dividing by zero when the mean is zero. */
+
          deviation[d] -= mean[d]*mean[d];
-         /* square of coeff. of variation */
-         if (deviation[d]/(mean[d]*mean[d]) > .1)
+         if ( deviation[d] > 0.1*(mean[d]*mean[d]) )
          {
             dxyz_flag = 1;
             break;
@@ -197,7 +205,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    relax_weights = hypre_CTAlloc(HYPRE_Real, max_levels, HYPRE_MEMORY_HOST);
    hypre_SetIndex3(coarsen, 1, 1, 1); /* forces relaxation on finest grid */
 
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    data_location = hypre_StructGridDataLocation(grid);
    if (data_location != HYPRE_MEMORY_HOST)
    {
@@ -329,7 +337,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
       /* build the coarse grid */
       hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       hypre_StructGridDataLocation(P_grid_l[l+1]) = data_location;
       if (device_level == -1 && num_level_GPU > 0)
       {
@@ -449,7 +457,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       tx_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
       hypre_StructVectorSetNumGhost(tx_l[l+1], x_num_ghost);
       hypre_StructVectorInitializeShell(tx_l[l+1]);
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       if (l+1 == num_level_GPU)
       {
          hypre_StructVectorSetDataSize(tx_l[l+1], &data_size, &data_size_const);
@@ -459,14 +467,14 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    data = hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_DEVICE);
    data_const = hypre_CTAlloc(HYPRE_Real, data_size_const, HYPRE_MEMORY_HOST);
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    //hypre_printf("num_level_GPU = %d,device_level = %d / %d\n",num_level_GPU,device_level,num_levels);
 #endif
 
    (pfmg_data -> data) = data;
    (pfmg_data -> data_const) = data_const;
 
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    data_location = hypre_StructGridDataLocation(grid_l[0]);
    if (data_location != HYPRE_MEMORY_HOST)
    {
@@ -502,7 +510,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       }
 #endif
 
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       if (l+1 == num_level_GPU)
       {
          data_location = HYPRE_MEMORY_HOST;
@@ -513,7 +521,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       data += hypre_StructMatrixDataSize(A_l[l+1]);
       data_const += hypre_StructMatrixDataConstSize(A_l[l+1]);
 
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       if (data_location != HYPRE_MEMORY_HOST)
       {
          hypre_StructVectorInitializeData(b_l[l+1], data);
@@ -580,7 +588,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    for (l = 0; l < (num_levels - 1); l++)
    {
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       if (l == num_level_GPU)
       {
          hypre_SetDeviceOff();
@@ -618,7 +626,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
                               cindex, findex, stride);
    }
 
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    if (l == num_level_GPU)
    {
       hypre_SetDeviceOff();
@@ -640,7 +648,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       active_l[l] = 0;
    }
 
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
    {
       hypre_SetDeviceOn();
@@ -864,19 +872,26 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    }
    if (cxyz_max == 0.0)
    {
+      /* Do isotropic coarsening */
+      for (d = 0; d < 3; d++)
+      {
+         cxyz[d] = 1.0;
+      }
       cxyz_max = 1.0;
    }
 
+   /* Set dxyz values that are scaled appropriately for the coarsening routine */
    for (d = 0; d < 3; d++)
    {
-      if (cxyz[d] > 0)
+      HYPRE_Real  max_anisotropy = HYPRE_REAL_MAX/1000;
+      if (cxyz[d] > (cxyz_max/max_anisotropy))
       {
          cxyz[d] /= cxyz_max;
          dxyz[d] = sqrt(1.0 / cxyz[d]);
       }
       else
       {
-         dxyz[d] = HYPRE_REAL_MAX/1000;
+         dxyz[d] = sqrt(max_anisotropy);
       }
    }
 
@@ -999,9 +1014,9 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
    hypre_Index            stride;
    hypre_Index            index;
    HYPRE_Real            *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
-#if defined(HYPRE_USING_CUDA)
-   //HYPRE_Int              data_location = hypre_StructGridDataLocation(
-   //                                       hypre_StructMatrixGrid(A) );
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_Int              data_location = hypre_StructGridDataLocation(
+                                          hypre_StructMatrixGrid(A) );
 #endif
 
    hypre_SetIndex3(stride, 1, 1, 1);
@@ -1083,7 +1098,7 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
 
 #if defined(HYPRE_USING_RAJA)
    ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),sqcxb(sqcxyz[0]),sqcyb(sqcxyz[1]);
-#elif defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_double4 d4(cxyz[0], cxyz[1], sqcxyz[0], sqcxyz[1]);
    ReduceSum<HYPRE_double4> sum4(d4);
 #else
@@ -1114,7 +1129,7 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
       tcx = -diag * (a_cw[Ai] + a_ce[Ai]);
       tcy = -diag * (a_cn[Ai] + a_cs[Ai]);
 
-#if !defined(HYPRE_USING_RAJA) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
       HYPRE_double4 tmp(tcx, tcy, tcx*tcx, tcy*tcy);
       sum4 += tmp;
 #else
@@ -1129,7 +1144,7 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
 
 #endif /* kokkos */
 
-#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
    HYPRE_double4 tmp = (HYPRE_double4) sum4;
    cxyz[0]   = tmp.x;
    cxyz[1]   = tmp.y;
@@ -1167,9 +1182,9 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
    hypre_Index            index;
    HYPRE_Real            *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
    HYPRE_Real            *a_csw, *a_cse, *a_cne, *a_cnw;
-#if defined(HYPRE_USING_CUDA)
-   //HYPRE_Int              data_location = hypre_StructGridDataLocation(
-   //                                       hypre_StructMatrixGrid(A) );
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_Int              data_location = hypre_StructGridDataLocation(
+                                          hypre_StructMatrixGrid(A) );
 #endif
 
    hypre_SetIndex3(stride, 1, 1, 1);
@@ -1272,7 +1287,7 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
 
 #if defined(HYPRE_USING_RAJA)
    ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),sqcxb(sqcxyz[0]),sqcyb(sqcxyz[1]);
-#elif defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_double4 d4(cxyz[0], cxyz[1], sqcxyz[0], sqcxyz[1]);
    ReduceSum<HYPRE_double4> sum4(d4);
 #else
@@ -1304,7 +1319,7 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
        tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
        tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
 
-#if !defined(HYPRE_USING_RAJA) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
        HYPRE_double4 tmp(tcx, tcy, tcx*tcx, tcy*tcy);
        sum4 += tmp;
 #else
@@ -1319,7 +1334,7 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
 
 #endif /* kokkos */
 
-#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
    HYPRE_double4 tmp = (HYPRE_double4) sum4;
    cxyz[0]   = tmp.x;
    cxyz[1]   = tmp.y;
@@ -1355,9 +1370,9 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
    hypre_Index            stride;
    hypre_Index            index;
    HYPRE_Real            *a_cc, *a_cw, *a_ce, *a_cs, *a_cn, *a_ac, *a_bc;
-#if defined(HYPRE_USING_CUDA)
-   //HYPRE_Int              data_location = hypre_StructGridDataLocation(
-   //                                       hypre_StructMatrixGrid(A) );
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_Int              data_location = hypre_StructGridDataLocation(
+                                          hypre_StructMatrixGrid(A) );
 #endif
 
    hypre_SetIndex3(stride, 1, 1, 1);
@@ -1467,7 +1482,7 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
 
 #if defined(HYPRE_USING_RAJA)
    ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),czb(cxyz[2]),sqcxb(sqcxyz[0]),sqcyb(sqcxyz[1]), sqczb(sqcxyz[2]);
-#elif defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_double6 d6(cxyz[0], cxyz[1], cxyz[2], sqcxyz[0], sqcxyz[1], sqcxyz[2]);
    ReduceSum<HYPRE_double6> sum6(d6);
 #else
@@ -1501,7 +1516,7 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
       tcx = -diag * (a_cw[Ai] + a_ce[Ai]);
       tcy = -diag * (a_cs[Ai] + a_cn[Ai]);
       tcz = -diag * (a_ac[Ai] + a_bc[Ai]);
-#if !defined(HYPRE_USING_RAJA) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
       HYPRE_double6 tmp(tcx, tcy, tcz, tcx*tcx, tcy*tcy, tcz*tcz);
       sum6 += tmp;
 #else
@@ -1518,7 +1533,7 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
 
 #endif /* kokkos */
 
-#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
    HYPRE_double6 tmp = (HYPRE_double6) sum6;
    cxyz[0]   = tmp.x;
    cxyz[1]   = tmp.y;
@@ -1557,9 +1572,9 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
    HYPRE_Real            *a_cc, *a_cw, *a_ce, *a_cs, *a_cn, *a_ac, *a_bc;
    HYPRE_Real            *a_csw, *a_cse, *a_cne, *a_cnw;
    HYPRE_Real            *a_aw, *a_ae, *a_as, *a_an, *a_bw, *a_be, *a_bs, *a_bn;
-#if defined(HYPRE_USING_CUDA)
-   //HYPRE_Int              data_location = hypre_StructGridDataLocation(
-   //                                       hypre_StructMatrixGrid(A) );
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_Int              data_location = hypre_StructGridDataLocation(
+                                          hypre_StructMatrixGrid(A) );
 #endif
 
    hypre_SetIndex3(stride, 1, 1, 1);
@@ -1722,7 +1737,7 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
 
 #if defined(HYPRE_USING_RAJA)
    ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),czb(cxyz[2]),sqcxb(sqcxyz[0]),sqcyb(sqcxyz[1]), sqczb(sqcxyz[2]);
-#elif defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_double6 d6(cxyz[0], cxyz[1], cxyz[2], sqcxyz[0], sqcxyz[1], sqcxyz[2]);
    ReduceSum<HYPRE_double6> sum6(d6);
 #else
@@ -1757,7 +1772,7 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
       tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_an[Ai] + a_as[Ai] + a_bn[Ai] + a_bs[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
       tcz = -diag * (a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_an[Ai] + a_as[Ai] +  a_bw[Ai]  + a_be[Ai] +  a_bn[Ai] +  a_bs[Ai]);
 
-#if !defined(HYPRE_USING_RAJA) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
       HYPRE_double6 tmp(tcx, tcy, tcz, tcx*tcx, tcy*tcy, tcz*tcz);
       sum6 += tmp;
 #else
@@ -1774,7 +1789,7 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
 
 #endif /* kokkos */
 
-#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
    HYPRE_double6 tmp = (HYPRE_double6) sum6;
    cxyz[0]   = tmp.x;
    cxyz[1]   = tmp.y;
@@ -1816,9 +1831,9 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
    HYPRE_Real            *a_aw, *a_ae, *a_as, *a_an, *a_bw, *a_be, *a_bs, *a_bn;
    HYPRE_Real            *a_asw, *a_ase, *a_ane, *a_anw,*a_bsw, *a_bse, *a_bne, *a_bnw;
 
-#if defined(HYPRE_USING_CUDA)
-   //HYPRE_Int              data_location = hypre_StructGridDataLocation(
-   //                                       hypre_StructMatrixGrid(A) );
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_Int              data_location = hypre_StructGridDataLocation(
+                                          hypre_StructMatrixGrid(A) );
 #endif
 
    hypre_SetIndex3(stride, 1, 1, 1);
@@ -2030,7 +2045,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
 
 #if defined(HYPRE_USING_RAJA)
    ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),czb(cxyz[2]),sqcxb(sqcxyz[0]),sqcyb(sqcxyz[1]), sqczb(sqcxyz[2]);
-#elif defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_double6 d6(cxyz[0], cxyz[1], cxyz[2], sqcxyz[0], sqcxyz[1], sqcxyz[2]);
    ReduceSum<HYPRE_double6> sum6(d6);
 #else
@@ -2069,7 +2084,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
 
       tcz -= diag * (a_ac[Ai]  +  a_bc[Ai] +  a_aw[Ai] +  a_ae[Ai] +  a_an[Ai] +  a_as[Ai] +  a_bw[Ai] +  a_be[Ai] + a_bn[Ai] + a_bs[Ai]);
       tcz -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
-#if !defined(HYPRE_USING_RAJA) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
       HYPRE_double6 tmp(tcx, tcy, tcz, tcx*tcx, tcy*tcy, tcz*tcz);
       sum6 += tmp;
 #else
@@ -2086,7 +2101,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
 
 #endif /* kokkos */
 
-#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
    HYPRE_double6 tmp = (HYPRE_double6) sum6;
    cxyz[0]   = tmp.x;
    cxyz[1]   = tmp.y;
@@ -2132,8 +2147,8 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
    HYPRE_Int              zero_diag = 0;
 
    HYPRE_Int              constant_coefficient;
-#if defined(HYPRE_USING_CUDA)
-   //HYPRE_Int              data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_Int              data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
 #endif
 
    /*----------------------------------------------------------
@@ -2166,7 +2181,7 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
          HYPRE_Real diag_product_local = diag_product;
 #elif defined(HYPRE_USING_RAJA)
          ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> diag_product_local(diag_product);
-#elif defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          ReduceSum<HYPRE_Real> diag_product_local(diag_product);
 #else
          HYPRE_Real diag_product_local = diag_product;

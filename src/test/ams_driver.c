@@ -124,8 +124,26 @@ hypre_int main (hypre_int argc, char *argv[])
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
-   /* Initialize Hypre */
+   /*-----------------------------------------------------------------
+    * GPU Device binding
+    * Must be done before HYPRE_Init() and should not be changed after
+    *-----------------------------------------------------------------*/
+   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+
+   /*-----------------------------------------------------------
+    * Initialize : must be the first HYPRE function to call
+    *-----------------------------------------------------------*/
    HYPRE_Init();
+
+   /* default execution policy */
+   HYPRE_SetExecutionPolicy(HYPRE_EXEC_DEVICE);
+
+#if defined(HYPRE_USING_GPU)
+   /* use cuSPARSE for SpGEMM */
+   HYPRE_SetSpGemmUseCusparse(0);
+   /* use cuRand for PMIS */
+   HYPRE_SetUseGpuRand(1);
+#endif
 
    /* Set defaults */
    solver_id = 3;

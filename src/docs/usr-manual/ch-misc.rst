@@ -210,7 +210,7 @@ and the RAJA and Kokkos libraries should be built with CUDA or OpenMP 4.5 corres
 The other GPU related options include:
 
 * ``--enable-nvtx``: enable NVTX annotations for CUDA profilers
-* ``--enable-cub`` : enable the caching GPU memory allocator in hypre
+* ``--enable-device-memory-pool`` : enable the caching GPU memory allocator in hypre
 * ``--enable-cusparse`` : choose cuSPARSE for GPU sparse kernels
 * ``--enable-cublas`` : choose cuBLAS for GPU dense kernels
 * ``--enable-curand`` : generating random numbers on GPUs

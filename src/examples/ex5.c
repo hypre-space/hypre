@@ -73,7 +73,7 @@ int main (int argc, char *argv[])
    HYPRE_Init();
 
    /* Print GPU info */
-   HYPRE_PrintDeviceInfo();
+   /* HYPRE_PrintDeviceInfo(); */
 
    /* Default problem parameters */
    n = 33;
@@ -188,8 +188,13 @@ int main (int argc, char *argv[])
    */
    {
       int nnz;
+      /* OK to use constant-length arrays for CPUs
       double values[5];
       int cols[5];
+      */
+      double *values = (double *) malloc(5*sizeof(double));
+      int *cols = (int *) malloc(5*sizeof(int));
+      int *tmp = (int *) malloc(2*sizeof(int));
 
       for (i = ilower; i <= iupper; i++)
       {
@@ -233,8 +238,14 @@ int main (int argc, char *argv[])
          }
 
          /* Set the values for row i */
-         HYPRE_IJMatrixSetValues(A, 1, &nnz, &i, cols, values);
+         tmp[0] = nnz;
+         tmp[1] = i;
+         HYPRE_IJMatrixSetValues(A, 1, &tmp[0], &tmp[1], cols, values);
       }
+
+      free(values);
+      free(cols);
+      free(tmp);
    }
 
    /* Assemble after setting the coefficients */

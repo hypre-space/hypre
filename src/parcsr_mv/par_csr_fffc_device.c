@@ -9,7 +9,7 @@
 #include "_hypre_parcsr_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 typedef thrust::tuple<HYPRE_Int, HYPRE_Int> Tuple;
 //typedef thrust::tuple<HYPRE_Int, HYPRE_Int, HYPRe_Int> Tuple3;
@@ -294,12 +294,14 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    HYPRE_THRUST_CALL( exclusive_scan,
                       thrust::make_transform_iterator(CF_marker,           is_negative<HYPRE_Int>()),
                       thrust::make_transform_iterator(CF_marker + n_local, is_negative<HYPRE_Int>()),
-                      map2FC ); /* F */
+                      map2FC, /* F */
+                      HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
 
    HYPRE_THRUST_CALL( exclusive_scan,
                       thrust::make_transform_iterator(CF_marker,           is_nonnegative<HYPRE_Int>()),
                       thrust::make_transform_iterator(CF_marker + n_local, is_nonnegative<HYPRE_Int>()),
-                      itmp ); /* C */
+                      itmp, /* C */
+                      HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
 
    HYPRE_THRUST_CALL( scatter_if,
                       itmp,
@@ -316,7 +318,8 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
       HYPRE_THRUST_CALL( exclusive_scan,
                          thrust::make_transform_iterator(CF_marker,           equal<HYPRE_Int>(-2)),
                          thrust::make_transform_iterator(CF_marker + n_local, equal<HYPRE_Int>(-2)),
-                         map2F2 ); /* F2 */
+                         map2F2, /* F2 */
+                         HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
    }
 
    /* send_buf: global F/C indices. Note F-pts "x" are saved as "-x-1" */
@@ -1075,12 +1078,14 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
    HYPRE_THRUST_CALL( exclusive_scan,
                       thrust::make_transform_iterator(CF_marker,           is_negative<HYPRE_Int>()),
                       thrust::make_transform_iterator(CF_marker + n_local, is_negative<HYPRE_Int>()),
-                      map2FC ); /* F */
+                      map2FC, /* F */
+                      HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
 
    HYPRE_THRUST_CALL( exclusive_scan,
                       thrust::make_transform_iterator(CF_marker,           is_nonnegative<HYPRE_Int>()),
                       thrust::make_transform_iterator(CF_marker + n_local, is_nonnegative<HYPRE_Int>()),
-                      itmp ); /* C */
+                      itmp, /* C */
+                      HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
 
    HYPRE_THRUST_CALL( scatter_if,
                       itmp,
@@ -1406,5 +1411,4 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
    return hypre_error_flag;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA)
-
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)

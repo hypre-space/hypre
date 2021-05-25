@@ -11,7 +11,7 @@
 #include "seq_mv.h"
 #include "csr_spgemm_device.h"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - *
                 Numerical Multiplication
@@ -128,9 +128,8 @@ csr_spmm_compute_row_numer(HYPRE_Int  rowi,
                pos = hash_insert_numer<HashType, FAILED_SYMBL>
                      (g_HashSize, g_HashKeys, g_HashVals, k_idx, k_val, num_new_insert);
             }
-#ifdef HYPRE_DEBUG
-            assert(pos != -1);
-#endif
+
+            hypre_device_assert(pos != -1);
          }
       }
    }
@@ -214,10 +213,8 @@ csr_spmm_numeric(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
    volatile HYPRE_Int  *warp_s_HashKeys = s_HashKeys + warp_id * SHMEM_HASH_SIZE;
    volatile HYPRE_Complex *warp_s_HashVals = s_HashVals + warp_id * SHMEM_HASH_SIZE;
 
-#ifdef HYPRE_DEBUG
-   assert(blockDim.z              == NUM_WARPS_PER_BLOCK);
-   assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
-#endif
+   hypre_device_assert(blockDim.z              == NUM_WARPS_PER_BLOCK);
+   hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 
    /* a warp working on the ith row */
    for (HYPRE_Int i = grid_warp_id; i < M; i += num_warps)
@@ -289,14 +286,14 @@ csr_spmm_numeric(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
              (lane_id, warp_s_HashKeys, warp_s_HashVals, ghash_size, jg + istart_g,
               ag + istart_g, jc + istart_c, ac + istart_c);
 
-#ifdef HYPRE_DEBUG
+#if defined(HYPRE_DEBUG)
       if (FAILED_SYMBL)
       {
-         assert(istart_c + j <= iend_c);
+         hypre_device_assert(istart_c + j <= iend_c);
       }
       else
       {
-         assert(istart_c + j == iend_c);
+         hypre_device_assert(istart_c + j == iend_c);
       }
 #endif
    }
@@ -315,9 +312,7 @@ copy_from_Cext_into_C(HYPRE_Int  M,
    /* lane id inside the warp */
    volatile const HYPRE_Int lane_id = get_lane_id();
 
-#ifdef HYPRE_DEBUG
-   assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
-#endif
+   hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 
    for (HYPRE_Int i = blockIdx.x * NUM_WARPS_PER_BLOCK + warp_id;
             i < M;
@@ -334,9 +329,9 @@ copy_from_Cext_into_C(HYPRE_Int  M,
       HYPRE_Int istart_c = __shfl_sync(HYPRE_WARP_FULL_MASK, kc, 0);
       HYPRE_Int iend_c   = __shfl_sync(HYPRE_WARP_FULL_MASK, kc, 1);
       HYPRE_Int istart_x = __shfl_sync(HYPRE_WARP_FULL_MASK, kx, 0);
-#ifdef HYPRE_DEBUG
+#if defined(HYPRE_DEBUG)
       HYPRE_Int iend_x   = __shfl_sync(HYPRE_WARP_FULL_MASK, kx, 1);
-      assert(iend_c - istart_c <= iend_x - istart_x);
+      hypre_device_assert(iend_c - istart_c <= iend_x - istart_x);
 #endif
 
       HYPRE_Int p = istart_x - istart_c;
@@ -499,5 +494,4 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
    return hypre_error_flag;
 }
 
-#endif /* HYPRE_USING_CUDA */
-
+#endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */

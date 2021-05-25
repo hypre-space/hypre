@@ -433,7 +433,7 @@ HYPRE_IJMatrixSetValues2( HYPRE_IJMatrix       matrix,
       return hypre_error_flag;
    }
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -640,7 +640,7 @@ HYPRE_IJMatrixAddToValues2( HYPRE_IJMatrix       matrix,
       return hypre_error_flag;
    }
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -708,7 +708,7 @@ HYPRE_IJMatrixAssemble( HYPRE_IJMatrix matrix )
 
    if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
    {
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
 
       if (exec == HYPRE_EXEC_DEVICE)
@@ -1033,6 +1033,8 @@ HYPRE_IJMatrixSetMaxOffProcElmts( HYPRE_IJMatrix matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixRead
+ * create IJMatrix on host memory
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1097,26 +1099,13 @@ HYPRE_IJMatrixRead( const char     *filename,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixPrint
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
                      const char     *filename )
 {
-   MPI_Comm        comm;
-   HYPRE_BigInt   *row_partitioning;
-   HYPRE_BigInt   *col_partitioning;
-   HYPRE_BigInt    ilower, iupper, jlower, jupper;
-   HYPRE_BigInt    i, ii;
-   HYPRE_Int       j;
-   HYPRE_Int       ncols;
-   HYPRE_BigInt   *cols;
-   HYPRE_Complex   *values;
-   HYPRE_Int       myid;
-   char            new_filename[255];
-   FILE           *file;
-   void           *object;
-
    if (!matrix)
    {
       hypre_error_in_arg(1);
@@ -1129,62 +1118,28 @@ HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
       return hypre_error_flag;
    }
 
-   comm = hypre_IJMatrixComm(matrix);
-   hypre_MPI_Comm_rank(comm, &myid);
-
-   hypre_sprintf(new_filename,"%s.%05d", filename, myid);
-
-   if ((file = fopen(new_filename, "w")) == NULL)
-   {
-      hypre_error_in_arg(2);
-      return hypre_error_flag;
-   }
-
-   row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
-   col_partitioning = hypre_IJMatrixColPartitioning(matrix);
-   ilower = row_partitioning[0];
-   iupper = row_partitioning[1] - 1;
-   jlower = col_partitioning[0];
-   jupper = col_partitioning[1] - 1;
-   hypre_fprintf(file, "%b %b %b %b\n", ilower, iupper, jlower, jupper);
-
+   void *object;
    HYPRE_IJMatrixGetObject(matrix, &object);
+   HYPRE_ParCSRMatrix par_csr = (HYPRE_ParCSRMatrix) object;
 
-   for (i = ilower; i <= iupper; i++)
+   HYPRE_MemoryLocation memory_location = hypre_IJMatrixMemoryLocation(matrix);
+
+   if ( hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_HOST )
    {
-      if ( hypre_IJMatrixObjectType(matrix) == HYPRE_PARCSR )
-      {
-         ii = i -  hypre_IJMatrixGlobalFirstRow(matrix);
-         HYPRE_ParCSRMatrixGetRow((HYPRE_ParCSRMatrix) object,
-                                  ii, &ncols, &cols, &values);
-         for (j = 0; j < ncols; j++)
-         {
-            cols[j] +=  hypre_IJMatrixGlobalFirstCol(matrix);
-         }
-      }
-
-      for (j = 0; j < ncols; j++)
-      {
-         hypre_fprintf(file, "%b %b %.14e\n", i, cols[j], values[j]);
-      }
-
-      if ( hypre_IJMatrixObjectType(matrix) == HYPRE_PARCSR )
-      {
-         for (j = 0; j < ncols; j++)
-         {
-            cols[j] -=  hypre_IJMatrixGlobalFirstCol(matrix);
-         }
-         HYPRE_ParCSRMatrixRestoreRow((HYPRE_ParCSRMatrix) object,
-                                      ii, &ncols, &cols, &values);
-      }
+      hypre_ParCSRMatrixPrintIJ(par_csr, 0, 0, filename);
    }
-
-   fclose(file);
+   else
+   {
+      HYPRE_ParCSRMatrix par_csr2 = hypre_ParCSRMatrixClone_v2(par_csr, 1, HYPRE_MEMORY_HOST);
+      hypre_ParCSRMatrixPrintIJ(par_csr2, 0, 0, filename);
+      hypre_ParCSRMatrixDestroy(par_csr2);
+   }
 
    return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixSetOMPFlag
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

@@ -139,7 +139,6 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix    *A,
                                  HYPRE_Real                  trunc_factor,
                                  HYPRE_Int                   max_elmts,
                                  HYPRE_Int                   add_weak_to_diag,    
-                                 HYPRE_Int                  *col_offd_S_to_A,
                                  hypre_ParCSRBlockMatrix   **P_ptr);
    
 
@@ -154,7 +153,6 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix   *A,
                                    HYPRE_Int                  debug_flag,
                                    HYPRE_Real                 trunc_factor,
                                    HYPRE_Int                  max_elmts,
-                                   HYPRE_Int                 *col_offd_S_to_A,
                                    hypre_ParCSRBlockMatrix  **P_ptr);
    
 HYPRE_Int
@@ -167,7 +165,6 @@ hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix    *A,
                                     HYPRE_Int                   debug_flag,
                                     HYPRE_Real                  trunc_factor,
                                     HYPRE_Int                   max_elmts,
-                                    HYPRE_Int                  *col_offd_S_to_A,
                                     hypre_ParCSRBlockMatrix   **P_ptr);
 HYPRE_Int
 hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix  *A,
@@ -180,7 +177,6 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix  *A,
                                      HYPRE_Real                trunc_factor,
                                      HYPRE_Int                 max_elmts,
                                      HYPRE_Int                 add_weak_to_diag,
-                                     HYPRE_Int                *col_offd_S_to_A,
                                      hypre_ParCSRBlockMatrix  **P_ptr);
 
 HYPRE_Int hypre_BoomerAMGBlockInterpTruncation( hypre_ParCSRBlockMatrix *P,
@@ -198,7 +194,6 @@ hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix   *A,
                                     HYPRE_Int                  debug_flag,
                                     HYPRE_Real                 trunc_factor,
                                     HYPRE_Int                  max_elmts,
-                                    HYPRE_Int                 *col_offd_S_to_A,
                                     hypre_ParCSRBlockMatrix  **P_ptr);
    
 

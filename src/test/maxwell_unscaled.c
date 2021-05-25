@@ -1341,7 +1341,7 @@ main( hypre_int argc,
    HYPRE_Int             arg_index, part, box, var, entry, s, i, j, k;
 
 #if defined(HYPRE_USING_GPU)
-   HYPRE_Int spgemm_use_cusparse = 1;
+   HYPRE_Int spgemm_use_cusparse = 0;
 #endif
    HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
    HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
@@ -1355,7 +1355,15 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
-   /* Initialize Hypre */
+   /*-----------------------------------------------------------------
+    * GPU Device binding
+    * Must be done before HYPRE_Init() and should not be changed after
+    *-----------------------------------------------------------------*/
+   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+
+   /*-----------------------------------------------------------
+    * Initialize : must be the first HYPRE function to call
+    *-----------------------------------------------------------*/
    HYPRE_Init();
 
    /*-----------------------------------------------------------
@@ -1503,7 +1511,7 @@ main( hypre_int argc,
    HYPRE_SetExecutionPolicy(default_exec_policy);
 
 #if defined(HYPRE_USING_GPU)
-   HYPRE_CSRMatrixSetSpGemmUseCusparse(spgemm_use_cusparse);
+   HYPRE_SetSpGemmUseCusparse(spgemm_use_cusparse);
 #endif
 
 

@@ -121,10 +121,13 @@
 /* Release name */
 #undef HYPRE_RELEASE_NAME
 
+/* Release number */
+#undef HYPRE_RELEASE_NUMBER
+
 /* Time of release */
 #undef HYPRE_RELEASE_TIME
 
-/* Version number */
+/* Release version */
 #undef HYPRE_RELEASE_VERSION
 
 /* Define to 1 for RS6000 platforms */
@@ -148,9 +151,6 @@
 /* Define to 1 if using cuBLAS */
 #undef HYPRE_USING_CUBLAS
 
-/* Define to 1 if using CUB */
-#undef HYPRE_USING_CUB_ALLOCATOR
-
 /* Define to 1 if executing on device with CUDA */
 #undef HYPRE_USING_CUDA
 
@@ -169,6 +169,9 @@
 /* Define to 1 if executing on device with OpenMP */
 #undef HYPRE_USING_DEVICE_OPENMP
 
+/* Define to 1 if using device pooling allocator */
+#undef HYPRE_USING_DEVICE_POOL
+
 /* Define to 1 if using DSuperLU */
 #undef HYPRE_USING_DSUPERLU
 
@@ -180,6 +183,9 @@
 
 /* Define to 1 if executing on GPU device */
 #undef HYPRE_USING_GPU
+
+/* HIP being used */
+#undef HYPRE_USING_HIP
 
 /* Define to 1 if using host memory only */
 #undef HYPRE_USING_HOST_MEMORY
@@ -210,6 +216,18 @@
 
 /* Define to 1 if executing on host/device with RAJA */
 #undef HYPRE_USING_RAJA
+
+/* rocBLAS being used */
+#undef HYPRE_USING_ROCBLAS
+
+/* rocRAND being used */
+#undef HYPRE_USING_ROCRAND
+
+/* rocSPARSE being used */
+#undef HYPRE_USING_ROCSPARSE
+
+/* Define to 1 if using AMD rocTX profiling */
+#undef HYPRE_USING_ROCTX
 
 /* Define to 1 if using UMPIRE */
 #undef HYPRE_USING_UMPIRE

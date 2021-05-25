@@ -21,16 +21,16 @@
 typedef struct
 {
    MPI_Comm              comm;
-                      
+
    HYPRE_Int             memory_use;
    HYPRE_Real            tol;
    HYPRE_Int             max_iter;
    HYPRE_Int             rel_change;
    HYPRE_Int             zero_guess;
    HYPRE_Int             max_levels;  /* max_level <= 0 means no limit */
-                      
+
    HYPRE_Int             num_levels;
-                      
+
    HYPRE_Int             num_pre_relax;  /* number of pre relaxation sweeps */
    HYPRE_Int             num_post_relax; /* number of post relaxation sweeps */
 
@@ -42,7 +42,7 @@ typedef struct
 
    hypre_StructGrid    **grid_l;
    hypre_StructGrid    **PT_grid_l;
-                    
+
    HYPRE_Real           *data;
    HYPRE_Real           *data_const;
    hypre_StructMatrix  **A_l;
@@ -72,7 +72,7 @@ typedef struct
    HYPRE_Int             logging;
    HYPRE_Real           *norms;
    HYPRE_Real           *rel_norms;
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_Int             devicelevel;
 #endif
 } hypre_SMGData;

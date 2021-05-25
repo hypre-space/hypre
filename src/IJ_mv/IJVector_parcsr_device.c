@@ -14,7 +14,7 @@
 #include "_hypre_IJ_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 template<typename T1, typename T2>
 struct hypre_IJVectorAssembleFunctor : public thrust::binary_function< thrust::tuple<T1, T2>, thrust::tuple<T1, T2>, thrust::tuple<T1, T2> >
@@ -276,7 +276,7 @@ hypre_IJVectorAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, char  *X0
          make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)),     /* key end */
          make_reverse_iterator(thrust::device_pointer_cast<char>(X0)+N0),          /* input value begin */
          make_reverse_iterator(thrust::device_pointer_cast<char>(X) +N0),          /* output value begin */
-         0,                                                                        /* init */
+         char(0),                                                                  /* init */
          thrust::equal_to<HYPRE_BigInt>(),
          thrust::maximum<char>() );
 
@@ -362,4 +362,3 @@ hypreCUDAKernel_IJVectorAssemblePar(HYPRE_Int n, HYPRE_Complex *x, HYPRE_BigInt 
 }
 
 #endif
-

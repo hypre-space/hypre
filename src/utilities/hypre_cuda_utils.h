@@ -8,8 +8,9 @@
 #ifndef HYPRE_CUDA_UTILS_H
 #define HYPRE_CUDA_UTILS_H
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <cuda_profiler_api.h>
@@ -34,20 +35,43 @@
 
 #define CUSPARSE_NEWAPI_VERSION 11000
 
+#elif defined(HYPRE_USING_HIP)
+
+#include <hip/hip_runtime.h>
+
+#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+
+#if defined(HYPRE_USING_ROCSPARSE)
+#include <rocsparse.h>
+#endif
+
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #define HYPRE_CUDA_CALL(call) do {                                                           \
    cudaError_t err = call;                                                                   \
    if (cudaSuccess != err) {                                                                 \
       hypre_printf("CUDA ERROR (code = %d, %s) at %s:%d\n", err, cudaGetErrorString(err),    \
                    __FILE__, __LINE__);                                                      \
-      assert(0); exit(1);                                                                    \
+      hypre_assert(0); exit(1);                                                              \
    } } while(0)
+
+#elif defined(HYPRE_USING_HIP)
+#define HYPRE_HIP_CALL(call) do {                                                            \
+   hipError_t err = call;                                                                    \
+   if (hipSuccess != err) {                                                                  \
+      hypre_printf("HIP ERROR (code = %d, %s) at %s:%d\n", err, hipGetErrorString(err),      \
+                   __FILE__, __LINE__);                                                      \
+      hypre_assert(0); exit(1);                                                              \
+   } } while(0)
+
+#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
 #define HYPRE_CUBLAS_CALL(call) do {                                                         \
    cublasStatus_t err = call;                                                                \
    if (CUBLAS_STATUS_SUCCESS != err) {                                                       \
       hypre_printf("CUBLAS ERROR (code = %d, %d) at %s:%d\n",                                \
             err, err == CUBLAS_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);                 \
-      assert(0); exit(1);                                                                    \
+      hypre_assert(0); exit(1);                                                              \
    } } while(0)
 
 #define HYPRE_CUSPARSE_CALL(call) do {                                                       \
@@ -55,6 +79,14 @@
    if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
       hypre_printf("CUSPARSE ERROR (code = %d, %s) at %s:%d\n",                              \
             err, cusparseGetErrorString(err), __FILE__, __LINE__);                           \
+      hypre_assert(0); exit(1);                                                              \
+   } } while(0)
+
+#define HYPRE_ROCSPARSE_CALL(call) do {                                                      \
+   rocsparse_status err = call;                                                              \
+   if (rocsparse_status_success != err) {                                                    \
+      hypre_printf("rocSPARSE ERROR (code = %d) at %s:%d\n",                                 \
+            err, __FILE__, __LINE__);                                                        \
       assert(0); exit(1);                                                                    \
    } } while(0)
 
@@ -63,15 +95,21 @@
    curandStatus_t err = call;                                                                \
    if (CURAND_STATUS_SUCCESS != err) {                                                       \
       hypre_printf("CURAND ERROR (code = %d) at %s:%d\n", err, __FILE__, __LINE__);          \
-      assert(0); exit(1);                                                                    \
+      hypre_assert(0); exit(1);                                                              \
    } } while(0)
 
 struct hypre_cub_CachingDeviceAllocator;
 typedef struct hypre_cub_CachingDeviceAllocator hypre_cub_CachingDeviceAllocator;
 
 // HYPRE_WARP_BITSHIFT is just log2 of HYPRE_WARP_SIZE
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #define HYPRE_WARP_SIZE       32
 #define HYPRE_WARP_BITSHIFT   5
+#elif defined(HYPRE_USING_HIP)
+#define HYPRE_WARP_SIZE       64
+#define HYPRE_WARP_BITSHIFT   6
+#endif
+
 #define HYPRE_WARP_FULL_MASK  0xFFFFFFFF
 #define HYPRE_MAX_NUM_WARPS   (64 * 64 * 32)
 #define HYPRE_FLT_LARGE       1e30
@@ -80,12 +118,29 @@ typedef struct hypre_cub_CachingDeviceAllocator hypre_cub_CachingDeviceAllocator
 
 struct hypre_CudaData
 {
+#if defined(HYPRE_USING_CURAND)
    curandGenerator_t                 curand_generator;
+#endif
+
+#if defined(HYPRE_USING_CUBLAS)
    cublasHandle_t                    cublas_handle;
+#endif
+
+#if defined(HYPRE_USING_CUSPARSE)
    cusparseHandle_t                  cusparse_handle;
-   cusparseMatDescr_t                cusparse_mat_descr;
+#endif
+
+#if defined(HYPRE_USING_ROCSPARSE)
+   rocsparse_handle                  cusparse_handle;
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    cudaStream_t                      cuda_streams[HYPRE_MAX_NUM_STREAMS];
-#ifdef HYPRE_USING_CUB_ALLOCATOR
+#elif defined(HYPRE_USING_HIP)
+   hipStream_t                       cuda_streams[HYPRE_MAX_NUM_STREAMS];
+#endif
+
+#ifdef HYPRE_USING_DEVICE_POOL
    hypre_uint                        cub_bin_growth;
    hypre_uint                        cub_min_bin;
    hypre_uint                        cub_max_bin;
@@ -114,6 +169,8 @@ struct hypre_CudaData
    HYPRE_Int                         spgemm_rownnz_estimate_nsamples;
    float                             spgemm_rownnz_estimate_mult_factor;
    char                              spgemm_hash_type;
+   /* PMIS */
+   HYPRE_Int                         use_gpu_rand;
 };
 
 #define hypre_CudaDataCubBinGrowth(data)                   ((data) -> cub_bin_growth)
@@ -136,22 +193,42 @@ struct hypre_CudaData
 #define hypre_CudaDataSpgemmRownnzEstimateMultFactor(data) ((data) -> spgemm_rownnz_estimate_mult_factor)
 #define hypre_CudaDataSpgemmHashType(data)                 ((data) -> spgemm_hash_type)
 #define hypre_CudaDataUmpireDeviceAllocator(data)          ((data) -> umpire_device_allocator)
+#define hypre_CudaDataUseGpuRand(data)                     ((data) -> use_gpu_rand)
 
-hypre_CudaData* hypre_CudaDataCreate();
-void hypre_CudaDataDestroy(hypre_CudaData* data);
+hypre_CudaData*     hypre_CudaDataCreate();
+void                hypre_CudaDataDestroy(hypre_CudaData* data);
 
-curandGenerator_t  hypre_CudaDataCurandGenerator(hypre_CudaData *data);
-cublasHandle_t     hypre_CudaDataCublasHandle(hypre_CudaData *data);
-cusparseHandle_t   hypre_CudaDataCusparseHandle(hypre_CudaData *data);
-cusparseMatDescr_t hypre_CudaDataCusparseMatDescr(hypre_CudaData *data);
-cudaStream_t       hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i);
-cudaStream_t       hypre_CudaDataCudaComputeStream(hypre_CudaData *data);
+#if defined(HYPRE_USING_CURAND)
+curandGenerator_t   hypre_CudaDataCurandGenerator(hypre_CudaData *data);
+#endif
+
+#if defined(HYPRE_USING_CUBLAS)
+cublasHandle_t      hypre_CudaDataCublasHandle(hypre_CudaData *data);
+#endif
+
+#if defined(HYPRE_USING_CUSPARSE)
+cusparseHandle_t    hypre_CudaDataCusparseHandle(hypre_CudaData *data);
+#endif
+
+#if defined(HYPRE_USING_ROCSPARSE)
+rocsparse_handle    hypre_CudaDataCusparseHandle(hypre_CudaData *data);
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+cudaStream_t        hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i);
+cudaStream_t        hypre_CudaDataCudaComputeStream(hypre_CudaData *data);
+#elif defined(HYPRE_USING_HIP)
+hipStream_t         hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i);
+hipStream_t         hypre_CudaDataCudaComputeStream(hypre_CudaData *data);
+#endif
 
 // Data structure and accessor routines for Cuda Sparse Triangular Matrices
 struct hypre_CsrsvData
 {
+#if defined(HYPRE_USING_CUSPARSE)
    csrsv2Info_t info_L;
    csrsv2Info_t info_U;
+#endif
    hypre_int    BufferSize;
    char        *Buffer;
 };
@@ -161,12 +238,31 @@ struct hypre_CsrsvData
 #define hypre_CsrsvDataBufferSize(data) ((data) -> BufferSize)
 #define hypre_CsrsvDataBuffer(data)     ((data) -> Buffer)
 
-#endif //#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+struct hypre_GpuMatData
+{
+#if defined(HYPRE_USING_CUSPARSE)
+   cusparseMatDescr_t    mat_descr;
+#endif
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_ROCSPARSE)
+   rocsparse_mat_descr   mat_descr;
+   rocsparse_mat_info    mat_info;
+#endif
+};
+
+#define hypre_GpuMatDataMatDecsr(data) ((data) -> mat_descr)
+#define hypre_GpuMatDataMatInfo(data)  ((data) -> mat_info)
+
+#endif //#if defined(HYPRE_USING_GPU)
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 #include <thrust/execution_policy.h>
+#if defined(HYPRE_USING_CUDA)
 #include <thrust/system/cuda/execution_policy.h>
+#elif defined(HYPRE_USING_HIP)
+#include <thrust/system/hip/execution_policy.h>
+#endif
 #include <thrust/count.h>
 #include <thrust/device_ptr.h>
 #include <thrust/unique.h>
@@ -183,6 +279,7 @@ struct hypre_CsrsvData
 #include <thrust/inner_product.h>
 #include <thrust/logical.h>
 #include <thrust/replace.h>
+#include <thrust/sequence.h>
 
 using namespace thrust::placeholders;
 
@@ -192,8 +289,9 @@ using namespace thrust::placeholders;
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
 
-#ifdef HYPRE_DEBUG                                                                                                   \
+#if defined(HYPRE_DEBUG)
 
+#if defined(HYPRE_USING_CUDA)
 #define HYPRE_CUDA_LAUNCH(kernel_name, gridsize, blocksize, ...)                                                     \
 {                                                                                                                    \
    if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                  \
@@ -210,8 +308,26 @@ using namespace thrust::placeholders;
    hypre_SyncCudaComputeStream(hypre_handle());                                                                      \
    HYPRE_CUDA_CALL( cudaGetLastError() );                                                                            \
 }
+#elif defined(HYPRE_USING_HIP)
+#define HYPRE_CUDA_LAUNCH(kernel_name, gridsize, blocksize, ...)                                                     \
+{                                                                                                                    \
+   if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                  \
+        blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                   \
+   {                                                                                                                 \
+      /* hypre_printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                                 \
+                 __FILE__, __LINE__,                                                                                 \
+                 gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */                      \
+   }                                                                                                                 \
+   else                                                                                                              \
+   {                                                                                                                 \
+      (kernel_name) <<< (gridsize), (blocksize), 0, hypre_HandleCudaComputeStream(hypre_handle()) >>> (__VA_ARGS__); \
+   }                                                                                                                 \
+   hypre_SyncCudaComputeStream(hypre_handle());                                                                      \
+   HYPRE_HIP_CALL( hipGetLastError() );                                                                            \
+}
+#endif //HYPRE_USING_CUDA
 
-#else
+#else // #if defined(HYPRE_DEBUG)
 
 #define HYPRE_CUDA_LAUNCH(kernel_name, gridsize, blocksize, ...)                                                     \
 {                                                                                                                    \
@@ -228,17 +344,39 @@ using namespace thrust::placeholders;
    }                                                                                                                 \
 }
 
-#endif
+#endif // defined(HYPRE_DEBUG)
 
 /* RL: TODO Want macro HYPRE_THRUST_CALL to return value but I don't know how to do it right
  * The following one works OK for now */
+
 #ifdef HYPRE_USING_UMPIRE_DEVICE
+
+#if defined(HYPRE_USING_CUDA)
 #define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
    thrust::func_name(thrust::cuda::par(hypre_HandleUmpireDeviceAllocator(hypre_handle())).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
+#elif defined(HYPRE_USING_HIP)
+#define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
+   thrust::func_name(thrust::hip::par(hypre_HandleUmpireDeviceAllocator(hypre_handle())).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
+#endif // HYPRE_USING_CUDA
+
+#elif HYPRE_USING_DEVICE_POOL
+#if defined(HYPRE_USING_CUDA)
+#define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
+   thrust::func_name(thrust::cuda::par(*(hypre_HandleCubDevAllocator(hypre_handle()))).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
+#endif
+
 #else
+
+#if defined(HYPRE_USING_CUDA)
 #define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
    thrust::func_name(thrust::cuda::par.on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
-#endif
+#elif defined(HYPRE_USING_HIP)
+#define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
+   thrust::func_name(thrust::hip::par.on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
+#endif // HYPRE_USING_CUDA
+
+#endif // HYPRE_USING_UMPIRE_DEVICE
+
 
 /* return the number of threads in block */
 template <hypre_int dim>
@@ -392,7 +530,8 @@ hypre_double atomicAdd(hypre_double* address, hypre_double val)
 }
 #endif
 
-#if CUDA_VERSION < 9000
+// There are no *_sync functions in HIP
+#if defined(HYPRE_USING_HIP) || (CUDA_VERSION < 9000)
 
 template <typename T>
 static __device__ __forceinline__
@@ -427,7 +566,19 @@ void __syncwarp()
 {
 }
 
+#endif // #if defined(HYPRE_USING_HIP) || (CUDA_VERSION < 9000)
+
+
+// __any was technically deprecated in CUDA 7 so we don't bother
+// with this overload for CUDA, just for HIP.
+#if defined(HYPRE_USING_HIP)
+static __device__ __forceinline__
+hypre_int __any_sync(unsigned mask, hypre_int predicate)
+{
+  return __any(predicate);
+}
 #endif
+
 
 template <typename T>
 static __device__ __forceinline__
@@ -746,6 +897,7 @@ HYPRE_Int hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HY
 
 void hypre_CudaCompileFlagCheck();
 
+#if defined(HYPRE_USING_CUDA)
 cudaError_t hypre_CachingMallocDevice(void **ptr, size_t nbytes);
 
 cudaError_t hypre_CachingMallocManaged(void **ptr, size_t nbytes);
@@ -753,10 +905,13 @@ cudaError_t hypre_CachingMallocManaged(void **ptr, size_t nbytes);
 cudaError_t hypre_CachingFreeDevice(void *ptr);
 
 cudaError_t hypre_CachingFreeManaged(void *ptr);
+#endif
+
+hypre_cub_CachingDeviceAllocator * hypre_CudaDataCubCachingAllocatorCreate(hypre_uint bin_growth, hypre_uint min_bin, hypre_uint max_bin, size_t max_cached_bytes, bool skip_cleanup, bool debug, bool use_managed_memory);
 
 void hypre_CudaDataCubCachingAllocatorDestroy(hypre_CudaData *data);
 
-#endif // #if defined(HYPRE_USING_CUDA)
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 #if defined(HYPRE_USING_CUSPARSE)
 

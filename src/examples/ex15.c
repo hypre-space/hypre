@@ -129,7 +129,7 @@ double beta(double x, double y, double z)
 
                         F_j = (1,phi_j) = h^2/4.
 */
-void ComputeFEMND1(double S[12][12], double F[12],
+void ComputeFEMND1(double **S, double F[12],
                    double x, double y, double z, double h)
 {
    int i, j;
@@ -230,7 +230,7 @@ int main (int argc, char *argv[])
    HYPRE_Init();
 
    /* Print GPU info */
-   HYPRE_PrintDeviceInfo();
+   /* HYPRE_PrintDeviceInfo(); */
 
    /* Set default parameters */
    n                = 10;
@@ -529,13 +529,24 @@ int main (int argc, char *argv[])
       /* Set the matrix and vector entries by finite element assembly */
       {
          /* local stiffness matrix and load vector */
-         double S[12][12], F[12];
+         /* OK to use constant-length arrays for CPUs */
+         /* double S[12][12], F[12]; */
+         double *F = (double *) malloc(12*sizeof(double));
+         double *S_flat = (double *) malloc(12*12*sizeof(double));
+         double *S[12];
 
          int i, j, k;
          int index[3];
 
+         for (i = 0; i < 12; i++)
+         {
+            S[i] = &S_flat[i*12];
+         }
+
          for (i = 1; i <= n; i++)
+         {
             for (j = 1; j <= n; j++)
+            {
                for (k = 1; k <= n; k++)
                {
                   /* Compute the FEM matrix and r.h.s. for cell (i,j,k) with
@@ -622,6 +633,10 @@ int main (int argc, char *argv[])
                   /* Assemble the vector */
                   HYPRE_SStructVectorAddFEMValues(b, part, index, F);
                }
+            }
+         }
+         free(F);
+         free(S_flat);
       }
 
       /* Collective calls finalizing the matrix and vector assembly */

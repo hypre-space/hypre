@@ -71,7 +71,11 @@ if [ -n "$spackdir" ]; then
 fi
 for tname in $tests
 do
-   make $mopt $tname
+   if [ "$tname" = "gpu" ]; then
+      make -j -f Makefile_gpu $mopt $tname
+   else
+      make $mopt $tname
+   fi
 done
 
 # Run the examples regression test

@@ -42,22 +42,9 @@ roij="-ij -ams -rt -mpibind -rtol 1e-3 -atol 2e-2"
 ross="-struct -sstruct -rt -mpibind -rtol 1e-6 -atol 1e-6"
 rost="-struct -rt -mpibind -save cuda"
 rocuda="-cuda_ray -rt -mpibind -save cuda"
-roij_mixed="-ij-mixed -ams -rt -mpibind -rtol 1e-3 -atol 2e-2"
-ross_mixed="-struct -sstruct-mixed -rt -mpibind -rtol 1e-6 -atol 1e-6"
 
-# CUDA with UM
-co="--with-cuda --enable-unified-memory --enable-persistent --enable-cub --enable-debug --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
-./renametest.sh basic $output_dir/basic-cuda-um-ij
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ross
-./renametest.sh basic $output_dir/basic-cuda-um-struct-sstruct
-
-#CUDA with UM and mixed-int
-co="--with-cuda --enable-unified-memory --enable-mixedint --enable-debug --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij_mixed
-./renametest.sh basic $output_dir/basic-cuda-um-ij-mixedint
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ross_mixed
-./renametest.sh basic $output_dir/basic-cuda-um-struct-sstruct-mixedint
+#save=`echo $(hostname) | sed 's/[0-9]\+$//'`
+save="ray"
 
 # CUDA with UM [shared library, no run]
 co="--with-cuda --enable-unified-memory --with-openmp --enable-hopscotch --enable-shared --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
