@@ -41,8 +41,8 @@ mpirun -np 1  ./sstruct -in sstruct.in.cubes4_27pt -r 2 2 2 -solver 4 -pooldist 
 mpirun -np 4  ./sstruct -in sstruct.in.cubes4_27pt -r 2 2 2 -solver 4 -pooldist 0 > solvers.out.28
 mpirun -np 1  ./sstruct -in sstruct.in.cubes2_aniso -r 4 4 4 -solver 4 -pooldist 1 > solvers.out.29
 mpirun -np 2  ./sstruct -in sstruct.in.cubes2_aniso -r 4 4 4 -solver 4 -pooldist 0 > solvers.out.30
-mpirun -np 1  ./sstruct -in sstruct.in.marinak -P 1 1 1 -solver 4 -itr 150 > solvers.out.31
-mpirun -np 8  ./sstruct -in sstruct.in.marinak -P 1 1 1 -solver 4 -itr 150 -pooldist 1 > solvers.out.32
+mpirun -np 1  ./sstruct -in sstruct.in.marinak -P 1 1 1 -solver 4 > solvers.out.31
+mpirun -np 8  ./sstruct -in sstruct.in.marinak -P 1 1 1 -solver 4 -pooldist 1 > solvers.out.32
 mpirun -np 1  ./sstruct -in sstruct.in.miller_3blk -r 4 4 1 -solver 4 -pooldist 0 > solvers.out.33
 mpirun -np 3  ./sstruct -in sstruct.in.miller_3blk -r 4 4 1 -solver 4 -pooldist 1 > solvers.out.34
 

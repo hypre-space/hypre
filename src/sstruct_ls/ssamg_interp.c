@@ -180,6 +180,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
    hypre_BoxArray          *pbnd_boxa;
    hypre_BoxArrayArray     *pbnd_boxaa;
    hypre_Box               *compute_box;
+   hypre_Box               *tmp_box;
    hypre_Box               *A_dbox;
    hypre_Box               *P_dbox;
 
@@ -201,11 +202,12 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
    HYPRE_Int                cdir;
    HYPRE_Int                part, nvars;
    HYPRE_Int                box_id;
-   HYPRE_Int                i, ii, j, si, vi;
+   HYPRE_Int                d, i, ii, j, si, vi;
 
    /*-------------------------------------------------------
     * Set prolongation coefficients for each part
     *-------------------------------------------------------*/
+   tmp_box = hypre_BoxCreate(ndim);
    for (part = 0; part < nparts; part++)
    {
       cdir  = cdir_p[part];
@@ -379,25 +381,51 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                         Pp2 = hypre_StructMatrixBoxData(P_s, ii, 2);
                         P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P_s), ii);
 
-                        /* Setup loop size */
+                        /* Update compute_box */
+                        for (d = 0; d < ndim; d++)
+                        {
+                           if ((d != cdir) && (hypre_BoxSizeD(compute_box, d) > 1))
+                           {
+                              hypre_IndexD(hypre_BoxIMin(compute_box), d) -= 1;
+                              hypre_IndexD(hypre_BoxIMax(compute_box), d) += 1;
+                           }
+                        }
+                        hypre_CopyBox(compute_box, tmp_box);
+                        hypre_IntersectBoxes(tmp_box, hypre_BoxArrayBox(compute_boxes, ii), compute_box);
+
                         hypre_BoxGetStrideSize(compute_box, stride, loop_size);
                         if (hypre_IndexD(loop_size, cdir) > 1)
                         {
-                           hypre_IndexD(loop_size, cdir) = 0;
-                        }
-
-                        hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
-                        {
-                           HYPRE_Real center;
-
-                           center = Pp1[Pi] + Pp2[Pi];
-                           if (center)
+                           hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
                            {
-                              Pp1[Pi] /= center;
-                              Pp2[Pi] /= center;
+                              HYPRE_Real center;
+
+                              center = Pp1[Pi] + Pp2[Pi];
+                              if (center)
+                              {
+                                 Pp1[Pi] /= center;
+                                 Pp2[Pi] /= center;
+                              }
                            }
+                           hypre_BoxLoop1End(Pi);
                         }
-                        hypre_BoxLoop1End(Pi);
+                        else
+                        {
+                           hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
+                           {
+                              if (Pp1[Pi] > Pp2[Pi])
+                              {
+                                 Pp1[Pi] = 1.0;
+                                 Pp2[Pi] = 0.0;
+                              }
+                              else if (Pp2[Pi] > Pp1[Pi])
+                              {
+                                 Pp1[Pi] = 0.0;
+                                 Pp2[Pi] = 1.0;
+                              }
+                           }
+                           hypre_BoxLoop1End(Pi);
+                        }
                      } /* loop on pbnd_boxa */
                   }
                } /* loop on pbnd_boxaa */
@@ -413,6 +441,8 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
          hypre_StructMatrixClearBoundary(P_s);
       }
    }
+
+   hypre_BoxDestroy(tmp_box);
 
    return hypre_error_flag;
 }

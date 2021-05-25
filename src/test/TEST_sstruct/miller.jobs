@@ -40,7 +40,7 @@ mpirun -np 2  ./sstruct -in sstruct.in.miller_3blk  -r 5 10 1 -P 2 1 1 \
 mpirun -np 2  ./sstruct -in sstruct.in.miller_3blk  -r 5 10 1 -P 2 1 1 \
  -solver 20 -old_default > miller.out.31
 mpirun -np 2  ./sstruct -in sstruct.in.miller_3blk  -r 5 10 1 -P 2 1 1 \
- -solver 4 -itr 150 > miller.out.32
+ -solver 4 > miller.out.32
 mpirun -np 2  ./sstruct -in sstruct.in.miller_3blk  -r 5 10 1 -P 2 1 1 \
  -solver 14 > miller.out.33
 
