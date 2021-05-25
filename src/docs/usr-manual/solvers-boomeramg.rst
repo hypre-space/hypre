@@ -168,17 +168,16 @@ only be used with weighted Jacobi or l1-Jacobi smoothing.
 GPU-supported Options
 ------------------------------------------------------------------------------
 
-In general, CUDA unified memory is required for running BoomerAMG solvers on GPUs,
-so hypre should be configured with ``--enable-unified-memory``.
-``HYPRE_Init()`` must be called and precede all the other ``HYPRE_`` functions, and
-``HYPRE_Finalize()`` must be called before exiting.
+In general, CUDA unified memory is required for running BoomerAMG solvers on GPUs.
+However, hypre can also be built without ``--enable-unified-memory`` if
+all the selected parameters have GPU-support. 
 The currently available  GPU-supported BoomerAMG options include:
 
-* Coarsening: PMIS
-* Interpolation:  direct, BAMG-direct, extended, extended+i and extended+e
+* Coarsening: PMIS (8)
+* Interpolation:  direct (3), BAMG-direct (15), extended (14), extended+i (6) and extended+e (18)
 * Aggressive coarsening
-* Second-stage interpolation with aggressive coarsening: extended and extended+e
-* Smoother: Jacobi, l1-Jacobi, hybrid Gauss Seidel/SRROR, two-stage Gauss-Seidel [BKRHSMTY2021]_
+* Second-stage interpolation with aggressive coarsening: extended (5) and extended+e (7)
+* Smoother: Jacobi (7), l1-Jacobi (18), hybrid Gauss Seidel/SRROR (3 4 6), two-stage Gauss-Seidel (11,12) [BKRHSMTY2021]_
 * Relaxation order: must be 0, i.e., lexicographic order
 
 A sample code of setting up IJ matrix :math:`A` and solve :math:`Ax=b` using AMG-preconditioned CG
@@ -221,7 +220,7 @@ on GPUs is shown below.
  /* setup AMG */
  HYPRE_ParCSRPCGCreate(comm, &solver);
  HYPRE_BoomerAMGCreate(&precon);
- HYPRE_BoomerAMGSetRelaxType(precon, rlx_type); /* 7, 18, 11, 12, (3, 4, 6) */
+ HYPRE_BoomerAMGSetRelaxType(precon, rlx_type); /* 3, 4, 6, 7, 18, 11, 12 */
  HYPRE_BoomerAMGSetRelaxOrder(precon, FALSE); /* must be false */
  HYPRE_BoomerAMGSetCoarsenType(precon, coarsen_type); /* 8 */
  HYPRE_BoomerAMGSetInterpType(precon, interp_type); /* 3, 15, 6, 14, 18 */
@@ -238,6 +237,9 @@ on GPUs is shown below.
  HYPRE_PCGSolve(solver, parcsr_A, b, x);
  ...
  HYPRE_Finalize(); /* must be the last HYPRE function call */
+
+``HYPRE_Init()`` must be called and precede all the other ``HYPRE_`` functions, and
+``HYPRE_Finalize()`` must be called before exiting.
 
 Miscellaneous
 ------------------------------------------------------------------------------
