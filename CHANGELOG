@@ -9,7 +9,8 @@
 
 Version 2.21.0 released 2021/05/25
 
-- Changed GPU defaults.
+- Changed GPU defaults and changed default CUDA arch to 70.
+- Interface change: HYPRE_CSRMatrixSetSpGemmUseCusparse --> HYPRE_SetSpGemmUseCusparse
 - Added GPU build options to CMake.
 - Added a new HYPRE_RELEASE_NUMBER macro.
 - Improved support for ParCSR matrices with many zero rows.
