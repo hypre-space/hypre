@@ -7,6 +7,25 @@
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
 
+Version 2.21.0 released 2021/05/25
+
+- Changed GPU defaults and changed default CUDA arch to 70.
+- Interface change: HYPRE_CSRMatrixSetSpGemmUseCusparse --> HYPRE_SetSpGemmUseCusparse
+- Added GPU build options to CMake.
+- Added a new HYPRE_RELEASE_NUMBER macro.
+- Improved support for ParCSR matrices with many zero rows.
+- Fixed a bug in the strength matrix generation for nodal AMG.
+- Removed unified virtual memory (UVM) requirement from GPU implementation.
+- Removed --enable-global-partition option.
+- Added UMPIRE support for memory pooling on GPUs.
+- Added HIP/AMD support.
+- New CUDA based triangular smoothers.
+- New parallel ILU solver features and GPU support.
+- Added CUDA 11 support.
+- Various bug fixes.
+
+#====================================
+
 Version 2.20.0 released 2020/09/24
 
 - New matrix-based interpolation routines for AMG (CPU and GPU)
