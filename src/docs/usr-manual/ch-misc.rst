@@ -191,7 +191,7 @@ need to be set properly, which can be also set by
 
 When configured with ``--with-cuda`` or ``--with-device-openmp``, the memory allocated on the GPUs, by default, is the GPU device memory, which is not accessible from the CPUs.
 Hypre's structured solvers can work fine with device memory,
-whereas only selected unstructured solvers can run with device memory. (see [Running on GPUs](https://github.com/hypre-space/hypre/wiki) for details).
+whereas only selected unstructured solvers can run with device memory. See [Running on GPUs](https://github.com/hypre-space/hypre/wiki) for details.
 In general, BoomerAMG and the SStruct
 require  unified (CUDA managed) memory, for which
 the following option should be added
@@ -223,17 +223,27 @@ The other NVIDIA GPU related options include:
 * ``--enable-curand``         Use random numbers generators on GPUs (default is YES)
 
 Allocations and deallocations of GPU memory are expensive. Memory pooling is a common approach to reduce such overhead and improve performance.
-hypre provides caching allocators for GPU device memory and unified memory, and also the support for Umpire [Umpire]_.
-To enable GPU memory pool, include only one of the following options:
+hypre provides caching allocators for GPU device memory and unified memory, 
+enabled by
 
 .. code-block:: none
-  --enable-device-memory-pool  Enable the caching GPU memory allocator in hypre (default is NO)
 
-  --with-umpire --with-umpire-include=/path-of-umpire-install/include
+  --enable-device-memory-pool  Enable the caching GPU memory allocator in hypre
+                               (default is NO)
+
+
+hypre also supports Umpire [Umpire]_. To enable Umpire pool, include the following options:
+
+.. code-block:: none
+
+  --with-umpire                Use Umpire Allocator for device and unified memory
+                               (default is NO)
+  --with-umpire-include=/path-of-umpire-install/include
   --with-umpire-lib-dirs=/path-of-umpire-install/lib
-  --with-umpire-libs=umpire    Use Umpire Allocator for device and unified memory (default is NO)
+  --with-umpire-libs=umpire
 
 For running on AMD GPUs, configure with
+
 .. code-block:: none
 
   --with-hip              Use HIP for AMD GPUs. (default is NO)
