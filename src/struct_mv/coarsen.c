@@ -152,75 +152,64 @@ hypre_CoarsenBox( hypre_Box      *box,
 }
 
 /*--------------------------------------------------------------------------
- * Coarsen a box differently according to its position inside a reference box
+ * hypre_CoarsenBoxNeg
+ *
+ * This functions snaps in place the box extents of 'box' in the negative
+ * direction to the nearest point in the index space given by (origin, stride).
+ * Then, it coarsens 'box' to such index space. Lastly, it intersects the
+ * resulting box with a reference box living in the strided index space and
+ * checks if the volume of the intersected region is positive. If it isn't,
+ * the output box is set to have zero volume.
+ *
+ * 2D Example:
+ *
+ *       *-------*-------*-------*-------*             *-------*-------*
+ *       |       |       |       |       |             |       |       |
+ *       |   *   |   *   |   *   |   X   |             |   *   |   +   |
+ *       |       |       |       |       |             |       |       |
+ *       *-------*-------*-------*-------*     -->     *-------*-------*
+ *       |       |       |       |       |             |       |       |
+ *       | (0,0) |   *   |   *   |   X   |             | (0,0) |   +   |
+ *       |       |       |       |       |             |       |       |
+ *       *-------*-------*-------*-------*             *-------*-------*
+ *
+ *    input box: (3,0) x (3,1) (denoted by X)
+ *    refbox: (0,0) x (1,1)
+ *    origin: (0,0)
+ *    stride: (2,1)
+ *    output box: (1,0) x (1,1) (denoted by +)
+ *
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_AdaptiveCoarsenBox( hypre_Box      *box,
-                          hypre_Box      *refbox,
-                          hypre_IndexRef  origin,
-                          hypre_Index     stride )
+hypre_CoarsenBoxNeg( hypre_Box      *box,
+                     hypre_Box      *refbox,
+                     hypre_IndexRef  origin,
+                     hypre_Index     stride )
 {
    HYPRE_Int   ndim = hypre_BoxNDim(box);
+   hypre_Box  *int_box;
 
-   HYPRE_Int   min_stride;
-   HYPRE_Int   max_stride;
-   HYPRE_Int   d, cdir;
-
-   /* Find minimum and maximum stride*/
-   min_stride = HYPRE_INT_MAX;
-   max_stride = - min_stride;
-   for (d = 0; d < ndim; d++)
-   {
-      min_stride = hypre_min(min_stride, stride[d]);
-      max_stride = hypre_max(max_stride, stride[d]);
-   }
-
-   if (min_stride == max_stride)
-   {
-      return hypre_error_flag;
-   }
-
-   /* Find coarsening direction */
-   cdir = -1;
-   for (d = 0; d < ndim; d++)
-   {
-      if (stride[d] == max_stride)
-      {
-         if (cdir != -1)
-         {
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Multiple coarsening directions!");
-         }
-         else
-         {
-            cdir = d;
-         }
-      }
-   }
-
-   /* Apply appropriate snap to hypre_BoxIMin(box) */
-   if (hypre_BoxIMinD(box, cdir) == hypre_BoxIMinD(refbox, cdir))
-   {
-      hypre_SnapIndexPos(hypre_BoxIMin(box), origin, stride, ndim);
-   }
-   else
-   {
-      hypre_SnapIndexNeg(hypre_BoxIMin(box), origin, stride, ndim);
-   }
-
-   /* Apply appropriate snap to hypre_BoxIMax(box) */
-   if (hypre_BoxIMaxD(box, cdir) == hypre_BoxIMaxD(refbox, cdir))
-   {
-      hypre_SnapIndexNeg(hypre_BoxIMax(box), origin, stride, ndim);
-   }
-   else
-   {
-      hypre_SnapIndexPos(hypre_BoxIMax(box), origin, stride, ndim);
-   }
+   /* Snap indices in negative direction */
+   hypre_SnapIndexNeg(hypre_BoxIMin(box), origin, stride, ndim);
+   hypre_SnapIndexNeg(hypre_BoxIMax(box), origin, stride, ndim);
 
    /* Map to coarse index space */
    hypre_MapToCoarseIndex(hypre_BoxIMin(box), origin, stride, ndim);
    hypre_MapToCoarseIndex(hypre_BoxIMax(box), origin, stride, ndim);
+
+   /* Find box intersection */
+   int_box = hypre_BoxCreate(ndim);
+   hypre_IntersectBoxes(box, refbox, int_box);
+
+   /* If the intersection has zero volume, then box will have zero volume also */
+   if (!hypre_BoxVolume(int_box))
+   {
+      hypre_BoxIMinD(box, 0) = 1;
+      hypre_BoxIMaxD(box, 0) = 0;
+   }
+
+   hypre_BoxDestroy(int_box);
 
    return hypre_error_flag;
 }
@@ -292,7 +281,7 @@ hypre_CoarsenBoxArrayArray( hypre_BoxArrayArray  *box_array_array,
 
 /*--------------------------------------------------------------------------
  * The dimensions of the new BoxArrayArray can be changed.
- * hypre_AdaptiveCoarsenBox is used to coarsen the boxes.
+ * hypre_CoarsenBoxNeg is used to coarsen the boxes.
  * It is not possible to have boxes with volume 0.
  * If 'origin' is NULL, a zero origin is used.
  *
@@ -300,11 +289,11 @@ hypre_CoarsenBoxArrayArray( hypre_BoxArrayArray  *box_array_array,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_AdaptiveCoarsenBoxArrayArray( hypre_BoxArrayArray   *boxaa,
-                                    hypre_BoxArray        *refboxa,
-                                    hypre_IndexRef         origin,
-                                    hypre_Index            stride,
-                                    hypre_BoxArrayArray  **new_boxaa_ptr )
+hypre_CoarsenBoxArrayArrayNeg( hypre_BoxArrayArray   *boxaa,
+                               hypre_BoxArray        *refboxa,
+                               hypre_IndexRef         origin,
+                               hypre_Index            stride,
+                               hypre_BoxArrayArray  **new_boxaa_ptr )
 {
    HYPRE_Int              ndim         = hypre_BoxArrayArrayNDim(boxaa);
    HYPRE_Int              num_refboxes = hypre_BoxArraySize(refboxa);
@@ -338,7 +327,7 @@ hypre_AdaptiveCoarsenBoxArrayArray( hypre_BoxArrayArray   *boxaa,
       hypre_ForBoxI(j, boxa)
       {
          hypre_CopyBox(hypre_BoxArrayBox(boxa, j), box);
-         hypre_AdaptiveCoarsenBox(box, refbox, origin, stride);
+         hypre_CoarsenBoxNeg(box, refbox, origin, stride);
          if (hypre_BoxVolume(box))
          {
             count_boxa++;
@@ -364,7 +353,7 @@ hypre_AdaptiveCoarsenBoxArrayArray( hypre_BoxArrayArray   *boxaa,
       hypre_ForBoxI(j, boxa)
       {
          hypre_CopyBox(hypre_BoxArrayBox(boxa, j), box);
-         hypre_AdaptiveCoarsenBox(box, refbox, origin, stride);
+         hypre_CoarsenBoxNeg(box, refbox, origin, stride);
          if (hypre_BoxVolume(box))
          {
             count_box++;
@@ -380,7 +369,7 @@ hypre_AdaptiveCoarsenBoxArrayArray( hypre_BoxArrayArray   *boxaa,
          hypre_ForBoxI(j, boxa)
          {
             hypre_CopyBox(hypre_BoxArrayBox(boxa, j), box);
-            hypre_AdaptiveCoarsenBox(box, refbox, origin, stride);
+            hypre_CoarsenBoxNeg(box, refbox, origin, stride);
             if (hypre_BoxVolume(box))
             {
                hypre_CopyBox(box, hypre_BoxArrayBox(new_boxa, count_box));

@@ -1817,7 +1817,7 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
    nrows = sizes[1] - sizes[0] + 1;
 
    /* Set row sizes */
-   max_size = m = 0;
+   m = 0;
    hypre_SetIndex(stride, 1);
    row_sizes = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
@@ -1925,7 +1925,7 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
    HYPRE_IJMatrixSetRowSizes(ij_Ahat, (const HYPRE_Int *) row_sizes);
    HYPRE_IJMatrixInitialize(ij_Ahat);
 
-   max_size = 0;
+   max_size = 1;
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for reduction(max:max_size)
 #endif
