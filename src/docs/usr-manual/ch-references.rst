@@ -183,3 +183,5 @@
    coarsening.  *Numer. Linear Algebra Appl.*, 17:453--472, 2010.  Also
    available as LLNL technical report LLLNL-JRNL-417371.
 
+.. [BKRHSMTY2021] Luc Berger-Vergiat, Brian Kelley, Sivasankaran Rajamanickam, Jonathan Hu, Katarzyna Swirydowicz, Paul Mullowney, Stephen Thomas, Ichitaro Yamazaki. Two-Stage Gauss--Seidel Preconditioners and Smoothers for Krylov Solvers on a GPU cluster.
+   `https://arxiv.org/abs/2104.01196 <https://arxiv.org/abs/2104.01196>`_.

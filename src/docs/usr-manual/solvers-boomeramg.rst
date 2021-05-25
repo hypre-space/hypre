@@ -166,20 +166,18 @@ GPU-supported Options
 ------------------------------------------------------------------------------
 In general, CUDA unified memory is required for running BoomerAMG solvers on GPUs,
 so hypre should be configured with ``--enable-unified-memory``.
-``HYPRE_Init()`` must be called and precede all the other hypre functions, and 
+``HYPRE_Init()`` must be called and precede all the other ``HYPRE_`` functions, and
 ``HYPRE_Finalize()`` must be called before exiting.
-To enable the execution of  AMG setup  on GPUs, one needs to explicitly specify the execution policy
-by
-
-.. code-block:: bash
-
- hypre_HandleDefaultExecPolicy(hypre_handle()) = HYPRE_EXEC_DEVICE
-
 The currently available  GPU-supported BoomerAMG options include:
 
-* Coarsening: PMIS. No aggressive coarsening is supported,
-* Interpolation: direct interpolation, extended interpolation and extended+i interpolation,
-* Smoother: weighted Jacobi relaxation and l1-Jacobi.
+* Coarsening: PMIS
+* Interpolation:  direct, BAMG-direct, extended, extended+i and extended+e
+* Aggressive coarsening
+* Second-stage interpolation with aggressive coarsening: extended and extended+e
+* Smoother: Jacobi, l1-Jacobi, hybrid Gauss Seidel/SRROR, two-stage Gauss-Seidel [BKRHSMTY2021]_
+* Relaxation order: must be 0, i.e., lexicographic order
+
+For details, other GPU-related functions and sample code, see [Running on GPUs](https://github.com/hypre-space/hypre/wiki/GPUs).
 
 Miscellaneous
 ------------------------------------------------------------------------------

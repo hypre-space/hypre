@@ -191,7 +191,7 @@ need to be set properly, which can be also set by
 
 When configured with ``--with-cuda`` or ``--with-device-openmp``, the memory allocated on the GPUs, by default, is the GPU device memory, which is not accessible from the CPUs.
 Hypre's structured solvers can work fine with device memory,
-whereas only selected unstructured solvers can run with device memory. See [Running on GPUs](https://github.com/hypre-space/hypre/wiki) for details.
+whereas only selected unstructured solvers can run with device memory. See [Running on GPUs](https://github.com/hypre-space/hypre/wiki/GPUs) for details.
 In general, BoomerAMG and the SStruct
 require  unified (CUDA managed) memory, for which
 the following option should be added
