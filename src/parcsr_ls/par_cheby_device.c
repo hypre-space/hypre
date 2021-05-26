@@ -18,7 +18,9 @@
 #if defined(HYPRE_USING_CUDA)
 #include "_hypre_utilities.hpp"
 #include <thrust/iterator/zip_iterator.h>
+#include <thrust/iterator/counting_iterator.h>
 #include <thrust/for_each.h>
+#include <thrust/transform.h>
 
 #if 0
 
@@ -159,6 +161,49 @@ struct oop_xpyz
    }
 };
 #endif
+
+#if defined(HYPRE_USING_CUDA)
+
+
+/**
+ * @brief Grabs the diagonal, takes the square root of the reciporacl and save
+ *
+ * Performs
+ * o = u
+ * u = r * a
+ * For vectors o and u, with scalar a
+ */
+template<typename T1, typename T2>
+struct grab_diagonal
+{
+   const T1* rowptrs;
+   const T2* vals;
+
+   grab_diagonal(T1* _rowptrs, T2* _vals): rowptrs(_rowptrs), vals(_vals) {}
+
+   __host__ __device__ T2 operator()(T1 v) 
+   {
+      return 1/sqrt(vals[rowptrs[v]]);
+   }
+};
+#endif
+
+int hypre_ParCSRGrabDiagonalDevice(hypre_ParCSRMatrix *A, HYPRE_Real *ds_data) {
+
+   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Real      *A_diag_data  = hypre_CSRMatrixData(A_diag);
+   HYPRE_Int       *A_diag_i     = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag);
+
+   thrust::counting_iterator<HYPRE_Int> a(0);
+
+   HYPRE_THRUST_CALL(transform,
+         a,
+         a+num_rows,
+   ds_data,
+   grab_diagonal<HYPRE_Int, HYPRE_Real>(A_diag_i, A_diag_data));
+   return hypre_error_flag;
+}
 
 HYPRE_Int hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax with */
                             hypre_ParVector *f,    /* right-hand side */

@@ -131,7 +131,6 @@ hypre_ParCSRMaxEigEstimateCGDevice( hypre_ParCSRMatrix *A,     /* matrix to rela
                               hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize_v2(ds, hypre_ParCSRMatrixMemoryLocation(A));
    ds_data = hypre_VectorData(hypre_ParVectorLocalVector(ds));
-   hypre_MemPrefetch(ds_data, sizeof(HYPRE_Real) * local_size, HYPRE_MEMORY_HOST);
    hypre_ParVectorSetPartitioningOwner(ds,0);
 
    u = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
@@ -191,14 +190,8 @@ hypre_ParCSRMaxEigEstimateCGDevice( hypre_ParCSRMatrix *A,     /* matrix to rela
    hypre_GpuProfilingPushRange("ParCSRMaxEigEstimate_Setup_CPUAlloc_Diag");
 #endif
 
-   if (scale)
-   {
-      for (i = 0; i < local_size; i++)
-      {
-         diag = A_diag_data[A_diag_i[i]];
-         ds_data[i] = 1/sqrt(diag);
-      }
-
+   if (scale) {
+      hypre_ParCSRGrabDiagonal(A, ds_data);
    }
    else
    {
