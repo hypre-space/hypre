@@ -60,7 +60,7 @@ FILES =\
 CUFILES=\
  hypre_cuda_utils.c\
  hypre_general.c\
- hypre_handle.c\
+ handle.c\
  hypre_memory.c\
  hypre_omp_device.c \
  hypre_nvtx.c

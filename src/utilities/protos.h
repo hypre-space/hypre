@@ -277,6 +277,6 @@ HYPRE_Int hypre_RestoreSyncCudaCompute();
 HYPRE_Int hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr);
 HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
 
-/* hypre_handle.c */
+/* handle.c */
 HYPRE_Int hypre_SetSpGemmUseCusparse( HYPRE_Int use_cusparse );
 HYPRE_Int hypre_SetUseGpuRand( HYPRE_Int use_gpurand );
