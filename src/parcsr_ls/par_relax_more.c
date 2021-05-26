@@ -53,6 +53,22 @@ hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax with */
 
    pos_diag = neg_diag = 0;
 
+
+   /* For Device Parallelization
+    * Might be a good idea to do something like thrust::transform_reduce_by_key
+    *    Transform each el into
+    *       row
+    *       max
+    *       num_pos
+    *       num_neg
+    *    Then reduce by key over row
+    *    with reductions
+    *       max = max(a,b)
+    *       num_pos = add(a,b)
+    *       num_neg = add(a,b)
+    * However, this increases the memory usage
+    * */
+
    for ( i = 0; i < A_num_rows; i++ )
    {
       start = A_diag_i[i];
@@ -107,6 +123,38 @@ hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax with */
 ******************************************************************************/
 HYPRE_Int
 hypre_ParCSRMaxEigEstimateCG( hypre_ParCSRMatrix *A,     /* matrix to relax with */
+                              HYPRE_Int           scale, /* scale by diagonal?*/
+                              HYPRE_Int           max_iter,
+                              HYPRE_Real         *max_eig,
+                              HYPRE_Real         *min_eig )
+{
+#if defined(HYPRE_USING_CUDA)
+   hypre_GpuProfilingPushRange("ParCSRMaxEigEstimateCG");
+#endif
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+   HYPRE_Int ierr = 0;
+   if (exec == HYPRE_EXEC_HOST) 
+   {
+      ierr = hypre_ParCSRMaxEigEstimateCGHost(A,scale,max_iter,max_eig,min_eig);
+   }
+#if defined(HYPRE_USING_CUDA)
+   else
+   {
+      ierr = hypre_ParCSRMaxEigEstimateCGDevice(A,scale,max_iter,max_eig,min_eig);
+   }
+#endif
+#if defined(HYPRE_USING_CUDA)
+   hypre_GpuProfilingPopRange();
+#endif
+   return ierr;
+}
+
+/******************************************************************************
+   use CG to get the eigenvalue estimate
+  scale means get eig est of  (D^{-1/2} A D^{-1/2}
+******************************************************************************/
+HYPRE_Int
+hypre_ParCSRMaxEigEstimateCGHost( hypre_ParCSRMatrix *A,     /* matrix to relax with */
                               HYPRE_Int           scale, /* scale by diagonal?*/
                               HYPRE_Int           max_iter,
                               HYPRE_Real         *max_eig,
