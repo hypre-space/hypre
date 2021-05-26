@@ -20,6 +20,7 @@
 #include <thrust/iterator/zip_iterator.h>
 #include <thrust/for_each.h>
 
+#if 0
 
 /**
  * @brief oop_xypz
@@ -157,6 +158,7 @@ struct oop_xpyz
 	    thrust::get<0>(t) = thrust::get<1>(t) + thrust::get<2>(t) * thrust::get<0>(t);
    }
 };
+#endif
 
 HYPRE_Int hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax with */
                             hypre_ParVector *f,    /* right-hand side */
