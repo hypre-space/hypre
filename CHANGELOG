@@ -10,7 +10,10 @@
 Version 2.21.0 released 2021/05/25
 
 - Changed GPU defaults and changed default CUDA arch to 70.
-- Interface change: HYPRE_CSRMatrixSetSpGemmUseCusparse --> HYPRE_SetSpGemmUseCusparse
+- Added new interfaces: HYPRE_SetSpGemmUseCusparse(1) to select cuSPARSE SpGeMM or hypre's if 0; HYPRE_SetUseGpuRand(1) to use cuRand for PMIS or CPU RNG if 0; 
+                        HYPRE_SetMemoryLocation to select default memory location; HYPRE_SetExecutionPolicy to select default execution policy.
+- Changed configure option: --enable-cub --> --enable-device-memory-pool; --enable-nvtx --> --enable-gpu-profiling
+- Added new configure options: --with-cuda-home=DIR; --with-gpu-arch=ARG
 - Added GPU build options to CMake.
 - Added a new HYPRE_RELEASE_NUMBER macro.
 - Improved support for ParCSR matrices with many zero rows.
