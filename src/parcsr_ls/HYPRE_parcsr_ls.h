@@ -4088,7 +4088,7 @@ HYPRE_ILUSetDropThreshold( HYPRE_Solver solver, HYPRE_Real threshold );
  * (Optional) Set the array of thresholds for dropping in ILUT.
  * B, E, and F correspond to upper left, lower left and upper right
  * of 2 x 2 block decomposition respectively.
- * Any fill-in less than thresholds is dropped in the factorization.
+ * Any fill-in less than threshold is dropped in the factorization.
  *    - threshold[0] : threshold for matrix B.
  *    - threshold[1] : threshold for matrix E and F.
  *    - threshold[2] : threshold for matrix S (Schur Complement).
