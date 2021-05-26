@@ -772,6 +772,7 @@ hypre_StructAssumedPartitionCreate(
    HYPRE_Int  *contact_boxinfo;
    HYPRE_Int  index;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &myid);
@@ -797,6 +798,8 @@ hypre_StructAssumedPartitionCreate(
       hypre_StructAssumedPartMyPartitionNumDistinctProcs(assumed_part) = 0;
       hypre_StructAssumedPartMyPartitionProcIds(assumed_part) = NULL;
       *p_assumed_partition = assumed_part;
+
+      HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
    }
@@ -1378,6 +1381,8 @@ hypre_StructAssumedPartitionCreate(
 
    /* Return vars */
    *p_assumed_partition = assumed_part;
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -2074,4 +2079,3 @@ hypre_StructCoarsenAP(hypre_StructAssumedPart  *ap,
 
    return hypre_error_flag;
 }
-

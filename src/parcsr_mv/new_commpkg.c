@@ -162,6 +162,7 @@ hypre_ParCSRCommPkgCreateApart_core(
 
 #endif
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /*-----------------------------------------------------------
     *  Everyone knows where their assumed range is located
@@ -266,12 +267,12 @@ hypre_ParCSRCommPkgCreateApart_core(
 
    max_response_size = 6;  /* 6 means we can fit 3 ranges*/
 
-
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", "Exchange_1");
    hypre_DataExchangeList(ex_num_contacts, ex_contact_procs,
                           ex_contact_buf, ex_contact_vec_starts, sizeof(HYPRE_BigInt),
                           sizeof(HYPRE_BigInt), &response_obj1, max_response_size, 1,
                           comm, (void**) &response_buf, &response_buf_starts);
-
+   HYPRE_ANNOTATE_REGION_END("%s", "Exchange_1");
 
 
    /*now create recv_procs[] and recv_vec_starts[] and num_recvs
@@ -341,9 +342,6 @@ hypre_ParCSRCommPkgCreateApart_core(
 
    }
 
-
-
-
 #if mydebug
       for (i=0; i < num_recvs; i++)
       {
@@ -351,7 +349,6 @@ hypre_ParCSRCommPkgCreateApart_core(
                   myid, recv_procs[i], recv_vec_starts[i],recv_vec_starts[i+1]-1);
       }
 #endif
-
 
    /*------------------------------------------------------------
     *  determine the send processors
@@ -387,12 +384,12 @@ hypre_ParCSRCommPkgCreateApart_core(
    max_response_size = 0;
 
 
-
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", "Exchange_2");
    hypre_DataExchangeList(num_recvs, recv_procs,
                           col_map_off_d, recv_vec_starts, sizeof(HYPRE_BigInt),
                           sizeof(HYPRE_BigInt), &response_obj2, max_response_size, 2,
                           comm,  (void **) &response_buf, &response_buf_starts);
-
+   HYPRE_ANNOTATE_REGION_END("%s", "Exchange_2");
 
 
    num_sends = send_proc_obj.length;
@@ -419,9 +416,7 @@ hypre_ParCSRCommPkgCreateApart_core(
     *  the same result as with the standard comm package)
     *   11/07/05
     *-----------------------------------------------------------*/
-
    {
-
       HYPRE_Int *orig_order;
       HYPRE_Int *orig_send_map_starts;
       HYPRE_BigInt *orig_send_elements;
@@ -464,7 +459,6 @@ hypre_ParCSRCommPkgCreateApart_core(
       hypre_TFree(orig_send_map_starts, HYPRE_MEMORY_HOST);
    }
 
-
    /*-----------------------------------------------------------
     *  Return output info for setting up the comm package
     *-----------------------------------------------------------*/
@@ -480,14 +474,12 @@ hypre_ParCSRCommPkgCreateApart_core(
       send_proc_obj.id = NULL;
    }
 
-
    *p_num_recvs = num_recvs;
    *p_recv_procs = recv_procs;
    *p_recv_vec_starts = recv_vec_starts;
    *p_num_sends = num_sends;
    *p_send_procs = send_proc_obj.id;
    *p_send_map_starts = send_proc_obj.vec_starts;
-
 
    /*send map elements have global index - need local instead*/
    /*need to fix this !!! */
@@ -503,7 +495,6 @@ hypre_ParCSRCommPkgCreateApart_core(
       *p_send_map_elements =  tmp_elements;
       hypre_TFree(send_proc_obj.elements, HYPRE_MEMORY_HOST);
       send_proc_obj.elements = NULL;
-
    }
    else
    {
@@ -514,29 +505,24 @@ hypre_ParCSRCommPkgCreateApart_core(
 
    //*p_send_map_elements =  send_proc_obj.elements;
 
-
-
    /*-----------------------------------------------------------
     *  Clean up
     *-----------------------------------------------------------*/
-
 
    if(ex_contact_procs)      hypre_TFree(ex_contact_procs, HYPRE_MEMORY_HOST);
    if(ex_contact_vec_starts) hypre_TFree(ex_contact_vec_starts, HYPRE_MEMORY_HOST);
    hypre_TFree(ex_contact_buf, HYPRE_MEMORY_HOST);
 
-
    if(response_buf)        hypre_TFree(response_buf, HYPRE_MEMORY_HOST);
    if(response_buf_starts) hypre_TFree(response_buf_starts, HYPRE_MEMORY_HOST);
-
 
    /* don't free send_proc_obj.id,send_proc_obj.vec_starts,send_proc_obj.elements;
       recv_procs, recv_vec_starts.  These are aliased to the comm package and
       will be destroyed there */
 
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
-
 }
 
 /*------------------------------------------------------------------
@@ -574,7 +560,6 @@ hypre_ParCSRCommPkgCreateApart
                                         &num_sends, &send_procs, &send_map_starts,
                                         &send_map_elmts, apart);
 
-
    hypre_ParCSRCommPkgComm         (comm_pkg) = comm;
    hypre_ParCSRCommPkgNumRecvs     (comm_pkg) = num_recvs;
    hypre_ParCSRCommPkgRecvProcs    (comm_pkg) = recv_procs;
@@ -585,16 +570,12 @@ hypre_ParCSRCommPkgCreateApart
    hypre_ParCSRCommPkgSendMapElmts (comm_pkg) = send_map_elmts;
 
    return hypre_error_flag;
-
-
 }
-
 
 /*------------------------------------------------------------------
  *  hypre_NewCommPkgDestroy
  *  Destroy the comm package
  *------------------------------------------------------------------*/
-
 
 HYPRE_Int
 hypre_NewCommPkgDestroy(hypre_ParCSRMatrix *parcsr_A)
@@ -800,4 +781,3 @@ hypre_FillResponseIJDetermineSendProcs(void *p_recv_contact_buf,
    return hypre_error_flag;
 
 }
-
