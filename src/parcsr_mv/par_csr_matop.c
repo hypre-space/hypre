@@ -5288,6 +5288,59 @@ hypre_ParCSRMatrixFnorm( hypre_ParCSRMatrix *A )
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixInfNorm
+ *
+ * Computes the infinity norm of A:
+ *
+ *       norm = max_{i} sum_{j} |A_{ij}|
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixInfNorm( hypre_ParCSRMatrix  *A,
+                           HYPRE_Real          *norm )
+{
+   MPI_Comm            comm     = hypre_ParCSRMatrixComm(A);
+
+   /* diag part of A */
+   hypre_CSRMatrix    *A_diag   = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Complex      *A_diag_a = hypre_CSRMatrixData(A_diag);
+   HYPRE_Int          *A_diag_i = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int    num_rows_diag_A = hypre_CSRMatrixNumRows(A_diag);
+
+   /* off-diag part of A */
+   hypre_CSRMatrix    *A_offd   = hypre_ParCSRMatrixOffd(A);
+   HYPRE_Complex      *A_offd_a = hypre_CSRMatrixData(A_offd);
+   HYPRE_Int          *A_offd_i = hypre_CSRMatrixI(A_offd);
+
+   /* Local variables */
+   HYPRE_Int           i, j;
+   HYPRE_Real          maxsum = 0.0;
+   HYPRE_Real          rowsum;
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,j,rowsum) reduction(max:maxsum) HYPRE_SMP_SCHEDULE
+#endif
+   for (i = 0; i < num_rows_diag_A; i++)
+   {
+      rowsum = 0.0;
+      for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
+      {
+         rowsum += hypre_cabs(A_diag_a[j]);
+      }
+      for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
+      {
+         rowsum += hypre_cabs(A_offd_a[j]);
+      }
+
+      maxsum = hypre_max(maxsum, rowsum);
+   }
+
+   hypre_MPI_Allreduce(&maxsum, norm, 1, HYPRE_MPI_REAL, hypre_MPI_MAX, comm);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_ExchangeExternalRowsInit
  *--------------------------------------------------------------------------*/
 
@@ -5803,6 +5856,31 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
    hypre_TFree(send_buf_data, HYPRE_MEMORY_HOST);
    hypre_TFree(sub_idx_diag, HYPRE_MEMORY_HOST);
    hypre_TFree(sub_idx_offd, HYPRE_MEMORY_HOST);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixReorder:
+ *
+ * Reorders the column and data arrays of a the diagonal component of a square
+ * ParCSR matrix, such that the first entry in each row is the diagonal one.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixReorder(hypre_ParCSRMatrix *A)
+{
+   HYPRE_BigInt      nrows_A = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_BigInt      ncols_A = hypre_ParCSRMatrixGlobalNumCols(A);
+   hypre_CSRMatrix  *A_diag  = hypre_ParCSRMatrixDiag(A);
+
+   if (nrows_A != ncols_A)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC," Error! Matrix should be square!\n");
+      return hypre_error_flag;
+   }
+
+   hypre_CSRMatrixReorder(A_diag);
 
    return hypre_error_flag;
 }
