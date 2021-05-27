@@ -55,6 +55,10 @@ mv -f check-mem.??? $output_dir
 ./test.sh check-headers.sh $src_dir
 mv -f check-headers.??? $output_dir
 
+# Check for case-insensitive filename matches
+./test.sh check-case.sh $src_dir/..
+mv -f check-case.??? $output_dir
+
 # Basic build and run tests
 mo="-j test"
 ro="-ams -ij -sstruct -struct -lobpcg"
