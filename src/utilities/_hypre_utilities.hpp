@@ -921,7 +921,7 @@ struct equal : public thrust::unary_function<T,bool>
    }
 };
 
-/* hypre_cuda_utils.c */
+/* cuda_utils.c */
 dim3 hypre_GetDefaultCUDABlockDimension();
 
 dim3 hypre_GetDefaultCUDAGridDimension( HYPRE_Int n, const char *granularity, dim3 bDim );

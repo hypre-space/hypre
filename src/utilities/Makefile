@@ -23,8 +23,8 @@ HEADERS =\
  exchange_data.h\
  fortran.h\
  fortran_matrix.h\
- hypre_general.h\
- hypre_memory.h\
+ general.h\
+ memory.h\
  HYPRE_utilities.h\
  mpistubs.h\
  threading.h\
@@ -41,16 +41,16 @@ FILES =\
  binsearch.c\
  exchange_data.c\
  fortran_matrix.c\
- hypre_ap.c\
- hypre_complex.c\
- hypre_error.c\
- hypre_hopscotch_hash.c\
- hypre_merge_sort.c\
- hypre_mpi_comm_f2c.c\
- hypre_prefix_sum.c\
- hypre_printf.c\
- hypre_qsort.c\
- hypre_utilities.c\
+ ap.c\
+ complex.c\
+ error.c\
+ hopscotch_hash.c\
+ merge_sort.c\
+ mpi_comm_f2c.c\
+ prefix_sum.c\
+ printf.c\
+ qsort.c\
+ utilities.c\
  mpistubs.c\
  qsplit.c\
  random.c\
@@ -59,12 +59,12 @@ FILES =\
  timing.c
 
 CUFILES=\
- hypre_cuda_utils.c\
- hypre_general.c\
- hypre_handle.c\
- hypre_memory.c\
- hypre_omp_device.c \
- hypre_nvtx.c
+ cuda_utils.c\
+ general.c\
+ handle.c\
+ memory.c\
+ omp_device.c \
+ nvtx.c
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}
@@ -80,7 +80,6 @@ all: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_utilities.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_utilities.hpp $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/hypre_hopscotch_hash.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/fortran*.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
