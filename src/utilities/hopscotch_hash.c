@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#include "hypre_hopscotch_hash.h"
+#include "hopscotch_hash.h"
 
 static HYPRE_Int NearestPowerOfTwo( HYPRE_Int value )
 {

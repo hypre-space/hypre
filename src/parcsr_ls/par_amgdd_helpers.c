@@ -7,7 +7,7 @@
 
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.h"
-#include "hypre_hopscotch_hash.h"
+#include "hopscotch_hash.h"
 
 HYPRE_Int
 hypre_BoomerAMGDD_LocalToGlobalIndex( hypre_AMGDDCompGrid *compGrid,

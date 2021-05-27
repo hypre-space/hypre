@@ -253,7 +253,7 @@ typedef struct
  * Prototypes
  *--------------------------------------------------------------------------*/
 
-/* hypre_memory.c */
+/* memory.c */
 void * hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_MemoryLocation location);
 void   hypre_MemPrefetch(void *ptr, size_t size, HYPRE_MemoryLocation location);
 void * hypre_MAlloc(size_t size, HYPRE_MemoryLocation location);
