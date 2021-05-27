@@ -105,7 +105,7 @@ all++: ${HYPRE_DRIVER_CXX_EXECS}
 install:
 
 clean:
-	rm -f *.o*
+	rm -f *.o *.obj
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
