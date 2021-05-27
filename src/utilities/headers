@@ -48,6 +48,7 @@ cat caliper_instrumentation.h  >> $INTERNAL_HEADER
 cat handle.h                   >> $INTERNAL_HEADER
 cat gselim.h                   >> $INTERNAL_HEADER
 cat protos.h                   >> $INTERNAL_HEADER
+cat hopscotch_hash.h           >> $INTERNAL_HEADER
 
 #===========================================================================
 # Include guards

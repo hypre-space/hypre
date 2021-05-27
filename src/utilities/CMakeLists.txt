@@ -6,7 +6,6 @@
 set(HDRS
   HYPRE_utilities.h
   _hypre_utilities.h
-  hopscotch_hash.h
   HYPRE_error_f.h
   fortran.h
   fortran_matrix.h

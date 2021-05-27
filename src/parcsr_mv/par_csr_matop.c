@@ -6,7 +6,6 @@
  ******************************************************************************/
 
 #include "_hypre_utilities.h"
-#include "hopscotch_hash.h"
 #include "_hypre_parcsr_mv.h"
 #include "_hypre_lapack.h"
 #include "_hypre_blas.h"

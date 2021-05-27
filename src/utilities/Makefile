@@ -79,7 +79,6 @@ all: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_utilities.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_utilities.hpp $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/hopscotch_hash.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/fortran*.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
