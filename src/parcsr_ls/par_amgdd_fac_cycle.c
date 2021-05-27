@@ -182,10 +182,10 @@ hypre_BoomerAMGDD_FAC_Relax( void      *amgdd_vdata,
       hypre_AMGDDCompGridVectorScale(-1.0, hypre_AMGDDCompGridTemp(compGrid));
    }
 
-    for (i = 0; i < numRelax; i++)
-    {
-       (*hypre_ParAMGDDDataUserFACRelaxation(amgdd_data))(amgdd_vdata, level, cycle_param);
-    }
+   for (i = 0; i < numRelax; i++)
+   {
+      (*hypre_ParAMGDDDataUserFACRelaxation(amgdd_data))(amgdd_vdata, level, cycle_param);
+   }
 
    if (hypre_AMGDDCompGridT(compGrid) || hypre_AMGDDCompGridQ(compGrid))
    {
