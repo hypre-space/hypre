@@ -4,8 +4,8 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-hypre_version="2.20.0"
-hypre_reldate="2020/09/24"
+hypre_version="2.21.0"
+hypre_reldate="2021/05/25"
 
 hypre_major=`echo $hypre_version | cut -d. -f 1`
 hypre_minor=`echo $hypre_version | cut -d. -f 2`

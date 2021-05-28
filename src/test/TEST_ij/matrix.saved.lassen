@@ -1,0 +1,52 @@
+# Output file: matrix.out.0
+BoomerAMG Iterations = 25
+Final Relative Residual Norm = 5.339520e-09
+
+# Output file: matrix.out.1
+BoomerAMG Iterations = 25
+Final Relative Residual Norm = 5.339520e-09
+
+# Output file: matrix.out.2
+BoomerAMG Iterations = 25
+Final Relative Residual Norm = 5.339520e-09
+
+# Output file: matrix.out.3
+BoomerAMG Iterations = 1
+Final Relative Residual Norm = 0.000000e+00
+
+# Output file: matrix.out.4
+Iterations = 5
+Final Relative Residual Norm = 3.515462e-01
+
+# Output file: matrix.out.5
+Iterations = 5
+Final Relative Residual Norm = 4.233149e-01
+
+# Output file: matrix.out.6
+Iterations = 5
+Final Relative Residual Norm = 3.515462e-01
+
+# Output file: matrix.out.7
+Iterations = 5
+Final Relative Residual Norm = 3.515462e-01
+
+# Output file: matrix.out.8
+Iterations = 5
+Final Relative Residual Norm = 4.233149e-01
+
+# Output file: matrix.out.9
+Iterations = 5
+Final Relative Residual Norm = 3.515462e-01
+
+# Output file: matrix.out.10
+Iterations = 5
+Final Relative Residual Norm = 3.515462e-01
+
+# Output file: matrix.out.11
+BoomerAMG Iterations = 13
+Final Relative Residual Norm = 7.052920e-09
+
+# Output file: matrix.out.12
+Iterations = 5
+Final Relative Residual Norm = 3.515462e-01
+

@@ -116,11 +116,18 @@ HYPRE_Int HYPRE_StructJacobiSolve(HYPRE_StructSolver solver,
 HYPRE_Int HYPRE_StructJacobiSetTol(HYPRE_StructSolver solver,
                              HYPRE_Real         tol);
 
+
+HYPRE_Int HYPRE_StructJacobiGetTol(HYPRE_StructSolver solver,
+                                   HYPRE_Real *tol );
+
 /**
  * (Optional) Set maximum number of iterations.
  **/
 HYPRE_Int HYPRE_StructJacobiSetMaxIter(HYPRE_StructSolver solver,
                                  HYPRE_Int          max_iter);
+
+HYPRE_Int HYPRE_StructJacobiGetMaxIter(HYPRE_StructSolver solver,
+                                       HYPRE_Int *max_iter );
 
 /**
  * (Optional) Use a zero initial guess.  This allows the solver to cut corners
@@ -128,6 +135,9 @@ HYPRE_Int HYPRE_StructJacobiSetMaxIter(HYPRE_StructSolver solver,
  * to reduce compuational cost.
  **/
 HYPRE_Int HYPRE_StructJacobiSetZeroGuess(HYPRE_StructSolver solver);
+
+HYPRE_Int HYPRE_StructJacobiGetZeroGuess(HYPRE_StructSolver solver,
+                                         HYPRE_Int *zeroguess );
 
 /**
  * (Optional) Use a nonzero initial guess.  This is the default behavior, but
@@ -199,17 +209,26 @@ HYPRE_Int HYPRE_StructPFMGSolve(HYPRE_StructSolver solver,
 HYPRE_Int HYPRE_StructPFMGSetTol(HYPRE_StructSolver solver,
                            HYPRE_Real         tol);
 
+HYPRE_Int HYPRE_StructPFMGGetTol (HYPRE_StructSolver solver,
+                                  HYPRE_Real *tol);
+
 /**
  * (Optional) Set maximum number of iterations.
  **/
 HYPRE_Int HYPRE_StructPFMGSetMaxIter(HYPRE_StructSolver solver,
                                HYPRE_Int          max_iter);
 
+HYPRE_Int HYPRE_StructPFMGGetMaxIter(HYPRE_StructSolver solver,
+                                     HYPRE_Int *max_iter);
+
 /**
  * (Optional) Set maximum number of multigrid grid levels.
  **/
 HYPRE_Int HYPRE_StructPFMGSetMaxLevels(HYPRE_StructSolver solver,
                                  HYPRE_Int          max_levels);
+
+HYPRE_Int HYPRE_StructPFMGGetMaxLevels (HYPRE_StructSolver solver,
+                                        HYPRE_Int *max_levels );
 
 /**
  * (Optional) Additionally require that the relative difference in
@@ -218,12 +237,18 @@ HYPRE_Int HYPRE_StructPFMGSetMaxLevels(HYPRE_StructSolver solver,
 HYPRE_Int HYPRE_StructPFMGSetRelChange(HYPRE_StructSolver solver,
                                  HYPRE_Int          rel_change);
 
+HYPRE_Int HYPRE_StructPFMGGetRelChange (HYPRE_StructSolver solver,
+                                        HYPRE_Int *rel_change);
+
 /**
  * (Optional) Use a zero initial guess.  This allows the solver to cut corners
  * in the case where a zero initial guess is needed (e.g., for preconditioning)
  * to reduce compuational cost.
  **/
 HYPRE_Int HYPRE_StructPFMGSetZeroGuess(HYPRE_StructSolver solver);
+
+HYPRE_Int HYPRE_StructPFMGGetZeroGuess(HYPRE_StructSolver solver,
+                                       HYPRE_Int *zeroguess);
 
 /**
  * (Optional) Use a nonzero initial guess.  This is the default behavior, but
@@ -243,6 +268,9 @@ HYPRE_Int HYPRE_StructPFMGSetNonZeroGuess(HYPRE_StructSolver solver);
  **/
 HYPRE_Int HYPRE_StructPFMGSetRelaxType(HYPRE_StructSolver solver,
                                  HYPRE_Int          relax_type);
+
+HYPRE_Int HYPRE_StructPFMGGetRelaxType(HYPRE_StructSolver solver,
+                                       HYPRE_Int *relax_type);
 
 /*
  * (Optional) Set Jacobi weight (this is purposely not documented)
@@ -268,17 +296,26 @@ HYPRE_Int HYPRE_StructPFMGGetJacobiWeight(HYPRE_StructSolver solver,
 HYPRE_Int HYPRE_StructPFMGSetRAPType(HYPRE_StructSolver solver,
                                HYPRE_Int          rap_type);
 
+HYPRE_Int HYPRE_StructPFMGGetRAPType(HYPRE_StructSolver solver,
+                                     HYPRE_Int *rap_type );
+
 /**
  * (Optional) Set number of relaxation sweeps before coarse-grid correction.
  **/
 HYPRE_Int HYPRE_StructPFMGSetNumPreRelax(HYPRE_StructSolver solver,
                                    HYPRE_Int          num_pre_relax);
 
+HYPRE_Int HYPRE_StructPFMGGetNumPreRelax(HYPRE_StructSolver solver,
+                                         HYPRE_Int *num_pre_relax);
+
 /**
  * (Optional) Set number of relaxation sweeps after coarse-grid correction.
  **/
 HYPRE_Int HYPRE_StructPFMGSetNumPostRelax(HYPRE_StructSolver solver,
                                     HYPRE_Int          num_post_relax);
+
+HYPRE_Int HYPRE_StructPFMGGetNumPostRelax(HYPRE_StructSolver solver,
+                                          HYPRE_Int *num_post_relax);
 
 /**
  * (Optional) Skip relaxation on certain grids for isotropic problems.  This can
@@ -287,6 +324,9 @@ HYPRE_Int HYPRE_StructPFMGSetNumPostRelax(HYPRE_StructSolver solver,
  **/
 HYPRE_Int HYPRE_StructPFMGSetSkipRelax(HYPRE_StructSolver solver,
                                  HYPRE_Int          skip_relax);
+
+HYPRE_Int HYPRE_StructPFMGGetSkipRelax(HYPRE_StructSolver solver,
+                                       HYPRE_Int *skip_relax);
 
 /*
  * RE-VISIT
@@ -300,11 +340,17 @@ HYPRE_Int HYPRE_StructPFMGSetDxyz(HYPRE_StructSolver  solver,
 HYPRE_Int HYPRE_StructPFMGSetLogging(HYPRE_StructSolver solver,
                                HYPRE_Int          logging);
 
+HYPRE_Int HYPRE_StructPFMGGetLogging(HYPRE_StructSolver solver,
+                                     HYPRE_Int *logging);
+
 /**
  * (Optional) Set the amount of printing to do to the screen.
  **/
 HYPRE_Int HYPRE_StructPFMGSetPrintLevel(HYPRE_StructSolver solver,
                                   HYPRE_Int          print_level);
+
+HYPRE_Int HYPRE_StructPFMGGetPrintLevel(HYPRE_StructSolver solver,
+                                        HYPRE_Int *print_level);
 
 /**
  * Return the number of iterations taken.
@@ -318,10 +364,10 @@ HYPRE_Int HYPRE_StructPFMGGetNumIterations(HYPRE_StructSolver  solver,
 HYPRE_Int HYPRE_StructPFMGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
                                                  HYPRE_Real         *norm);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 HYPRE_Int
 HYPRE_StructPFMGSetDeviceLevel( HYPRE_StructSolver  solver,
-				HYPRE_Int   device_level  );
+                                HYPRE_Int   device_level  );
 #endif
 /**@}*/
 
@@ -373,17 +419,26 @@ HYPRE_Int HYPRE_StructSMGSolve(HYPRE_StructSolver solver,
 HYPRE_Int HYPRE_StructSMGSetMemoryUse(HYPRE_StructSolver solver,
                                 HYPRE_Int          memory_use);
 
+HYPRE_Int HYPRE_StructSMGGetMemoryUse(HYPRE_StructSolver solver,
+                                      HYPRE_Int *memory_use);
+
 /**
  * (Optional) Set the convergence tolerance.
  **/
 HYPRE_Int HYPRE_StructSMGSetTol(HYPRE_StructSolver solver,
                           HYPRE_Real         tol);
 
+HYPRE_Int HYPRE_StructSMGGetTol(HYPRE_StructSolver solver,
+                                HYPRE_Real *tol);
+
 /**
  * (Optional) Set maximum number of iterations.
  **/
 HYPRE_Int HYPRE_StructSMGSetMaxIter(HYPRE_StructSolver solver,
                               HYPRE_Int          max_iter);
+
+HYPRE_Int HYPRE_StructSMGGetMaxIter(HYPRE_StructSolver solver,
+                                    HYPRE_Int *max_iter);
 
 /**
  * (Optional) Additionally require that the relative difference in
@@ -392,12 +447,18 @@ HYPRE_Int HYPRE_StructSMGSetMaxIter(HYPRE_StructSolver solver,
 HYPRE_Int HYPRE_StructSMGSetRelChange(HYPRE_StructSolver solver,
                                 HYPRE_Int          rel_change);
 
+HYPRE_Int HYPRE_StructSMGGetRelChange(HYPRE_StructSolver solver,
+                                      HYPRE_Int *rel_change);
+
 /**
  * (Optional) Use a zero initial guess.  This allows the solver to cut corners
  * in the case where a zero initial guess is needed (e.g., for preconditioning)
  * to reduce compuational cost.
  **/
 HYPRE_Int HYPRE_StructSMGSetZeroGuess(HYPRE_StructSolver solver);
+
+HYPRE_Int HYPRE_StructSMGGetZeroGuess(HYPRE_StructSolver solver,
+                                      HYPRE_Int *zeroguess);
 
 /**
  * (Optional) Use a nonzero initial guess.  This is the default behavior, but
@@ -411,11 +472,17 @@ HYPRE_Int HYPRE_StructSMGSetNonZeroGuess(HYPRE_StructSolver solver);
 HYPRE_Int HYPRE_StructSMGSetNumPreRelax(HYPRE_StructSolver solver,
                                   HYPRE_Int          num_pre_relax);
 
+HYPRE_Int HYPRE_StructSMGGetNumPreRelax(HYPRE_StructSolver solver,
+                                        HYPRE_Int *num_pre_relax);
+
 /**
  * (Optional) Set number of relaxation sweeps after coarse-grid correction.
  **/
 HYPRE_Int HYPRE_StructSMGSetNumPostRelax(HYPRE_StructSolver solver,
                                    HYPRE_Int          num_post_relax);
+
+HYPRE_Int HYPRE_StructSMGGetNumPostRelax(HYPRE_StructSolver solver,
+                                         HYPRE_Int *num_post_relax);
 
 /**
  * (Optional) Set the amount of logging to do.
@@ -423,11 +490,17 @@ HYPRE_Int HYPRE_StructSMGSetNumPostRelax(HYPRE_StructSolver solver,
 HYPRE_Int HYPRE_StructSMGSetLogging(HYPRE_StructSolver solver,
                               HYPRE_Int          logging);
 
+HYPRE_Int HYPRE_StructSMGGetLogging(HYPRE_StructSolver solver,
+                                    HYPRE_Int *logging);
+
 /**
  * (Optional) Set the amount of printing to do to the screen.
  **/
 HYPRE_Int HYPRE_StructSMGSetPrintLevel(HYPRE_StructSolver solver,
                                   HYPRE_Int          print_level);
+
+HYPRE_Int HYPRE_StructSMGGetPrintLevel(HYPRE_StructSolver solver,
+                                       HYPRE_Int *print_level);
 
 /**
  * Return the number of iterations taken.
@@ -441,10 +514,10 @@ HYPRE_Int HYPRE_StructSMGGetNumIterations(HYPRE_StructSolver  solver,
 HYPRE_Int HYPRE_StructSMGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
                                                 HYPRE_Real         *norm);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 HYPRE_Int
 HYPRE_StructSMGSetDeviceLevel( HYPRE_StructSolver  solver,
-			       HYPRE_Int   device_level  );
+                               HYPRE_Int   device_level  );
 #endif
 
 /**@}*/
@@ -1037,6 +1110,9 @@ HYPRE_Int HYPRE_StructHybridGetPCGNumIterations(HYPRE_StructSolver  solver,
 HYPRE_Int HYPRE_StructHybridGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
                                                    HYPRE_Real         *norm);
 
+HYPRE_Int HYPRE_StructHybridSetPCGAbsoluteTolFactor(HYPRE_StructSolver solver,
+                                                    HYPRE_Real pcg_atolf );
+
 /**@}*/
 
 /*--------------------------------------------------------------------------
@@ -1142,3 +1218,4 @@ HYPRE_StructSetupMatvec(HYPRE_MatvecFunctions *mv);
 #endif
 
 #endif
+

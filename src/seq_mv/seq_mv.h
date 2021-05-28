@@ -100,8 +100,6 @@ typedef struct
 
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
 #define hypre_CSRMatrixGPUMatData(matrix)           ((matrix) -> mat_data)
-#define hypre_CSRMatrixGPUMatDescr(matrix)          (hypre_GpuMatDataMatDecsr((matrix) -> mat_data))
-#define hypre_CSRMatrixGPUMatInfo(matrix)           (hypre_GpuMatDataMatInfo((matrix) -> mat_data))
 #endif
 
 HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBegin( hypre_CSRMatrix *A );
@@ -325,6 +323,7 @@ HYPRE_Int hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A);
 HYPRE_Int hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A, HYPRE_Complex tol, HYPRE_Int abs, HYPRE_Int option);
 HYPRE_Int hypre_CSRMatrixSortRow(hypre_CSRMatrix *A);
 HYPRE_Int hypre_CSRMatrixTriLowerUpperSolveCusparse(char uplo, hypre_CSRMatrix *A, hypre_Vector *f, hypre_Vector *u );
+HYPRE_Int hypre_CSRMatrixIntersectPattern(hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int *markA, HYPRE_Int diag_option);
 
 /* csr_matrix.c */
 hypre_CSRMatrix *hypre_CSRMatrixCreate ( HYPRE_Int num_rows , HYPRE_Int num_cols , HYPRE_Int num_nonzeros );
@@ -483,8 +482,6 @@ HYPRE_Int hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateMultFactor( HYPRE_Real val
 
 HYPRE_Int hypre_CSRMatrixDeviceSpGemmSetHashType( char value );
 
-HYPRE_Int hypre_CSRMatrixDeviceSpGemmSetUseCusparse( HYPRE_Int use_cusparse );
-
 HYPRE_Int hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_rc);
 
 HYPRE_Int hypreDevice_CSRSpGemmRownnzUpperbound(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_rc, HYPRE_Int *d_rf);
@@ -503,12 +500,15 @@ HYPRE_Int hypre_CSRMatrixSpMVDevice( HYPRE_Complex alpha, hypre_CSRMatrix *A, hy
 
 #if defined(HYPRE_USING_CUSPARSE)
 hypre_CsrsvData* hypre_CsrsvDataCreate();
-void hypre_CsrsvDataDestroy(hypre_CsrsvData* data);
+void hypre_CsrsvDataDestroy(hypre_CsrsvData *data);
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
-void hypre_GpuMatDataCreate(hypre_CSRMatrix  *matrix);
-void hypre_GpuMatDataDestroy(hypre_CSRMatrix  *matrix);
+hypre_GpuMatData* hypre_GpuMatDataCreate();
+void hypre_GpuMatDataDestroy(hypre_GpuMatData *data);
+hypre_GpuMatData* hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix);
+#define hypre_CSRMatrixGPUMatDescr(matrix) ( hypre_GpuMatDataMatDecsr(hypre_CSRMatrixGetGPUMatData(matrix)) )
+#define hypre_CSRMatrixGPUMatInfo(matrix)  ( hypre_GpuMatDataMatInfo (hypre_CSRMatrixGetGPUMatData(matrix)) )
 #endif
 
 
@@ -517,3 +517,4 @@ void hypre_GpuMatDataDestroy(hypre_CSRMatrix  *matrix);
 #endif
 
 #endif
+

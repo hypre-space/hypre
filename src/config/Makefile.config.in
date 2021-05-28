@@ -36,17 +36,17 @@ HYPRE_LIB_SUFFIX = @HYPRE_LIBSUFFIX@
 .SUFFIXES:
 .SUFFIXES: .o .obj .f .c .C .cxx .cc
 
-FC       = @FC@
-FFLAGS   = @FFLAGS@ @FCFLAGS@ $(FC_COMPILE_FLAGS)
+FC        = @FC@
+FFLAGS    = @FFLAGS@ @FCFLAGS@ $(FC_COMPILE_FLAGS)
 
-CC       = @CC@
-CFLAGS   = @CFLAGS@ @DEFS@ $(C_COMPILE_FLAGS)
+CC        = @CC@
+CFLAGS    = @CFLAGS@ @DEFS@ $(C_COMPILE_FLAGS)
 
-CXX      = @CXX@
-CXXFLAGS = @CXXFLAGS@ @DEFS@ $(CXX_COMPILE_FLAGS)
+CXX       = @CXX@
+CXXFLAGS  = @CXXFLAGS@ @DEFS@ $(CXX_COMPILE_FLAGS)
 
-CUCC     = @CUCC@
-CUFLAGS  = @CUFLAGS@ @DEFS@ ${C_COMPILE_FLAGS}
+CUCC      = @CUCC@ ${CUDA_ARCH}
+CUFLAGS   = @CUFLAGS@ @DEFS@ ${C_COMPILE_FLAGS}
 
 .f.o:
 	$(FC) $(FFLAGS) -c $<
@@ -120,14 +120,16 @@ HYPRE_NAP_INCLUDE = @HYPRE_NAP_INCLUDE@
 ##################################################################
 ##  CUDA options
 ##################################################################
+HYPRE_CUDA_PATH    = @HYPRE_CUDA_PATH@
 HYPRE_CUDA_INCLUDE = @HYPRE_CUDA_INCLUDE@
-HYPRE_CUDA_LIBS = @HYPRE_CUDA_LIBS@
+HYPRE_CUDA_LIBS    = @HYPRE_CUDA_LIBS@
+CUDA_ARCH          = @HYPRE_CUDA_GENCODE@
 
 ##################################################################
 ##  HIP options
 ##################################################################
-HYPRE_HIP_INCLUDE=@HYPRE_HIP_INCL@
-HYPRE_HIP_LIBS=@HYPRE_HIP_LIBS@
+HYPRE_HIP_INCLUDE = @HYPRE_HIP_INCL@
+HYPRE_HIP_LIBS    = @HYPRE_HIP_LIBS@
 
 ##################################################################
 ##  Caliper options
