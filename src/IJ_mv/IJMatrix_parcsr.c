@@ -1628,6 +1628,101 @@ hypre_IJMatrixDestroyParCSR(hypre_IJMatrix *matrix)
 
 /******************************************************************************
  *
+ * hypre_IJMatrixTransposeParCSR
+ *
+ * Tranposes an IJMatrix of type ParCSRMatrix
+ *
+ *****************************************************************************/
+
+HYPRE_Int
+hypre_IJMatrixTransposeParCSR( hypre_IJMatrix  *matrix_A,
+                               hypre_IJMatrix  *matrix_AT )
+{
+   hypre_ParCSRMatrix *par_A  = (hypre_ParCSRMatrix*) hypre_IJMatrixObject(matrix_A);
+   hypre_ParCSRMatrix *par_AT;
+
+   /* Free old object if existent */
+   if (hypre_IJMatrixObject(matrix_AT))
+   {
+      par_AT = (hypre_ParCSRMatrix*) hypre_IJMatrixObject(matrix_AT);
+      hypre_ParCSRMatrixDestroy(par_AT);
+      hypre_IJMatrixObject(matrix_AT) = NULL;
+   }
+
+   hypre_ParCSRMatrixTranspose(par_A, &par_AT, 1);
+   hypre_ParCSRMatrixSetNumNonzeros(par_AT);
+   hypre_ParCSRMatrixSetDNumNonzeros(par_AT);
+   hypre_MatvecCommPkgCreate(par_AT);
+
+   hypre_IJMatrixObject(matrix_AT) = (void *) par_AT;
+
+   return hypre_error_flag;
+}
+
+/******************************************************************************
+ *
+ * hypre_IJMatrixNormParCSR
+ *
+ * Computes the Infinity norm of an IJMatrix of type ParCSRMatrix
+ *
+ * TODO: Add other norms
+ *
+ *****************************************************************************/
+
+HYPRE_Int
+hypre_IJMatrixNormParCSR( hypre_IJMatrix *matrix,
+                          HYPRE_Real     *norm )
+{
+   hypre_ParCSRMatrix *par_matrix = (hypre_ParCSRMatrix*) hypre_IJMatrixObject(matrix);
+
+   hypre_ParCSRMatrixInfNorm(par_matrix, norm);
+
+   return hypre_error_flag;
+}
+
+/******************************************************************************
+ *
+ * hypre_IJMatrixAddParCSR
+ *
+ * Performs C = alpha*A + beta*B, where A, B and C are IJMatrices of
+ * type ParCSRMatrix.
+ *
+ *****************************************************************************/
+
+HYPRE_Int
+hypre_IJMatrixAddParCSR( HYPRE_Complex    alpha,
+                         hypre_IJMatrix  *matrix_A,
+                         HYPRE_Complex    beta,
+                         hypre_IJMatrix  *matrix_B,
+                         hypre_IJMatrix  *matrix_C )
+{
+   hypre_ParCSRMatrix *par_A  = (hypre_ParCSRMatrix*) hypre_IJMatrixObject(matrix_A);
+   hypre_ParCSRMatrix *par_B  = (hypre_ParCSRMatrix*) hypre_IJMatrixObject(matrix_B);
+   hypre_ParCSRMatrix *par_C;
+
+   /* Free old object if existent */
+   if (hypre_IJMatrixObject(matrix_C))
+   {
+      par_C = (hypre_ParCSRMatrix*) hypre_IJMatrixObject(matrix_C);
+      hypre_ParCSRMatrixDestroy(par_C);
+      hypre_IJMatrixObject(matrix_C) = NULL;
+   }
+
+   hypre_ParCSRMatrixAdd(alpha, par_A, beta, par_B, &par_C);
+   hypre_ParCSRMatrixSetNumNonzeros(par_C);
+   hypre_ParCSRMatrixSetDNumNonzeros(par_C);
+   if (!hypre_ParCSRMatrixCommPkg(par_C))
+   {
+      hypre_MatvecCommPkgCreate(par_C);
+   }
+
+   hypre_IJMatrixObject(matrix_C) = (void *) par_C;
+
+   return hypre_error_flag;
+}
+
+/******************************************************************************
+ *
  * hypre_IJMatrixAssembleOffProcValsParCSR
  *
  * This is for handling set and get values calls to off-proc. entries -
