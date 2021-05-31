@@ -462,6 +462,8 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
     * TODO */
    HYPRE_MemoryLocation memory_location_C = hypre_max(memory_location_A, memory_location_B);
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    max_num_threads = hypre_NumThreads();
    my_diag_array = hypre_CTAlloc(HYPRE_Int, max_num_threads, HYPRE_MEMORY_HOST);
    my_offd_array = hypre_CTAlloc(HYPRE_Int, max_num_threads, HYPRE_MEMORY_HOST);
@@ -930,6 +932,7 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] += hypre_MPI_Wtime();
 #endif
 
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", "First pass");
    hypre_ParMatmul_RowSizes(memory_location_C, &C_diag_i, &C_offd_i,
                             rownnz_A, A_diag_i, A_diag_j,
                             A_offd_i, A_offd_j,
@@ -941,6 +944,7 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
                             num_rownnz_A, num_rows_diag_A, num_cols_offd_A,
                             allsquare, num_cols_diag_B, num_cols_offd_B,
                             num_cols_offd_C);
+   HYPRE_ANNOTATE_REGION_END("%s", "First pass");
 
    /*-----------------------------------------------------------------------
     *  Allocate C_diag_data and C_diag_j arrays.
@@ -961,9 +965,8 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
     *  Second Pass: Fill in C_offd_data and C_offd_j.
     *-----------------------------------------------------------------------*/
 
-   /*-----------------------------------------------------------------------
-    *  Initialize some stuff.
-    *-----------------------------------------------------------------------*/
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", "Second pass");
+
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel
 #endif
@@ -1152,6 +1155,7 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 
       hypre_TFree(B_marker, HYPRE_MEMORY_HOST);
    } /*end parallel region */
+   HYPRE_ANNOTATE_REGION_END("%s", "Second pass");
 
    C = hypre_ParCSRMatrixCreate(comm, nrows_A, ncols_B, row_starts_A,
                                 col_starts_B, num_cols_offd_C,

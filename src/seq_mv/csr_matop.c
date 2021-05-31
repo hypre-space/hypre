@@ -732,6 +732,8 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
          B_marker[ib] = -1;
       }
 
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "First pass");
+
       /* First pass: compute sizes of C rows. */
       num_nonzeros = 0;
       for (ic = ns; ic < ne; ic++)
@@ -832,12 +834,14 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
          }
       }
       /* End of First Pass */
+      HYPRE_ANNOTATE_REGION_END("%s", "First pass");
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #endif
 
       /* Second pass: Fill in C_data and C_j. */
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Second pass");
       for (ib = 0; ib < ncols_B; ib++)
       {
          B_marker[ib] = -1;
@@ -884,6 +888,7 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
             }
          }
       }
+      HYPRE_ANNOTATE_REGION_END("%s", "Second pass");
 
       /* End of Second Pass */
       hypre_TFree(B_marker, HYPRE_MEMORY_HOST);
