@@ -295,14 +295,14 @@ HYPRE_Int hypre_FacZeroCData ( void *fac_vdata , hypre_SStructMatrix *A );
 HYPRE_Int hypre_FacZeroCFSten ( hypre_SStructPMatrix *Af , hypre_SStructPMatrix *Ac , hypre_SStructGrid *grid , HYPRE_Int fine_part , hypre_Index rfactors );
 HYPRE_Int hypre_FacZeroFCSten ( hypre_SStructPMatrix *A , hypre_SStructGrid *grid , HYPRE_Int fine_part );
 
-/* hypre_bsearch.c */
+/* bsearch.c */
 HYPRE_Int hypre_LowerBinarySearch ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int list_length );
 HYPRE_Int hypre_UpperBinarySearch ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int list_length );
 
-/* hypre_MaxwellSolve2.c */
+/* maxwell_solve2.c */
 HYPRE_Int hypre_MaxwellSolve2 ( void *maxwell_vdata , hypre_SStructMatrix *A_in , hypre_SStructVector *f , hypre_SStructVector *u );
 
-/* hypre_MaxwellSolve.c */
+/* maxwell_solve.c */
 HYPRE_Int hypre_MaxwellSolve ( void *maxwell_vdata , hypre_SStructMatrix *A_in , hypre_SStructVector *f , hypre_SStructVector *u );
 
 /* HYPRE_sstruct_bicgstab.c */

@@ -86,6 +86,19 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
    HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
 
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_Int             num_level_GPU = 0;
+   HYPRE_MemoryLocation  data_location = HYPRE_MEMORY_DEVICE;
+   HYPRE_Int             max_box_size  = 0;
+   HYPRE_Int             device_level  = (pfmg_data -> devicelevel);
+   HYPRE_Int             myrank;
+   hypre_MPI_Comm_rank(comm, &myrank );
+#endif
+
+#if DEBUG
+   char                  filename[255];
+#endif
+
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /*-----------------------------------------------------
@@ -268,6 +281,12 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    for (l = 0; l < (num_levels - 1); l++)
    {
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+      if (l == num_level_GPU)
+      {
+         hypre_SetDeviceOff();
+      }
+#endif
       cdir = cdir_l[l];
 
       /* set up the interpolation routine */
@@ -294,6 +313,12 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       active_l[l] = 0;
    }
 
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
+   {
+      hypre_SetDeviceOn();
+   }
+#endif
    /* set up fine grid relaxation */
    relax_data_l[0] = hypre_PFMGRelaxCreate(comm);
    hypre_PFMGRelaxSetTol(relax_data_l[0], 0.0);
@@ -734,7 +759,6 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
 
    HYPRE_Real            *Ap;
    hypre_Box             *A_dbox;
-
    HYPRE_Int              i, si;
 
    hypre_Index            diag_offset;

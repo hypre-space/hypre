@@ -150,7 +150,7 @@ HYPRE_StructGridProjectBox(HYPRE_StructGrid  grid,
 /*---------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 HYPRE_Int
 HYPRE_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_MemoryLocation data_location )
 {

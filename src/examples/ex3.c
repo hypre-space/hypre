@@ -156,7 +156,7 @@ int main (int argc, char *argv[])
    HYPRE_Init();
 
    /* Print GPU info */
-   HYPRE_PrintDeviceInfo();
+   /* HYPRE_PrintDeviceInfo(); */
 
    /* Figure out the processor grid (N x N).  The local problem
       size for the interior nodes is indicated by n (n x n).

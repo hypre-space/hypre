@@ -42,7 +42,7 @@ LAPACKLIBFLAGS = ${LAPACKLIBDIRS} ${LAPACKLIBS}
 BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
 LIBFLAGS = ${LDFLAGS} ${LIBS}
 
-ifeq (${LINK_CC}, nvcc)
+ifeq ($(notdir $(firstword ${LINK_CC})), nvcc)
    XLINK = -Xlinker=-rpath,${HYPRE_BUILD_DIR}/lib
 else
    XLINK = -Wl,-rpath,${HYPRE_BUILD_DIR}/lib
@@ -106,7 +106,7 @@ all++: ${HYPRE_DRIVER_CXX_EXECS}
 install:
 
 clean:
-	rm -f *.o*
+	rm -f *.o *.obj
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean

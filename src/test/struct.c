@@ -1075,7 +1075,7 @@ main( hypre_int argc,
          HYPRE_StructGridSetPeriodic(grid, periodic);
          HYPRE_StructGridAssemble(grid);
 
-#if defined(HYPRE_USING_CUDA)
+#if 0// defined(HYPRE_USING_CUDA)
          HYPRE_StructGridSetDataLocation(grid, HYPRE_MEMORY_DEVICE);
          /*
          if (device_level == 0)
@@ -1451,17 +1451,17 @@ main( hypre_int argc,
          HYPRE_StructSMGSetNumPostRelax(solver, n_post);
          HYPRE_StructSMGSetPrintLevel(solver, print_level);
          HYPRE_StructSMGSetLogging(solver, 1);
-#if defined(HYPRE_USING_CUDA)
-         //HYPRE_StructSMGSetDeviceLevel(solver,device_level);
+#if 0//defined(HYPRE_USING_CUDA)
+         HYPRE_StructSMGSetDeviceLevel(solver,device_level);
 #endif
 
-#if defined(HYPRE_USING_CUDA)
-         //hypre_box_print = 0;
+#if 0//defined(HYPRE_USING_CUDA)
+         hypre_box_print = 0;
 #endif
          HYPRE_StructSMGSetup(solver, A, b, x);
 
-#if defined(HYPRE_USING_CUDA)
-         //hypre_box_print = 0;
+#if 0//defined(HYPRE_USING_CUDA)
+         hypre_box_print = 0;
 #endif
 
          hypre_EndTiming(time_index);
@@ -1528,8 +1528,8 @@ main( hypre_int argc,
          HYPRE_StructPFMGSetPrintLevel(solver, print_level);
          HYPRE_StructPFMGSetLogging(solver, 1);
 
-#if defined(HYPRE_USING_CUDA)
-         //HYPRE_StructPFMGSetDeviceLevel(solver,device_level);
+#if 0//defined(HYPRE_USING_CUDA)
+         HYPRE_StructPFMGSetDeviceLevel(solver,device_level);
 #endif
 
          HYPRE_StructPFMGSetup(solver, A, b, x);
@@ -1634,8 +1634,8 @@ main( hypre_int argc,
             HYPRE_StructSMGSetPrintLevel(precond, 0);
             HYPRE_StructSMGSetLogging(precond, 0);
 
-#if defined(HYPRE_USING_CUDA)
-            //HYPRE_StructSMGSetDeviceLevel(precond, device_level);
+#if 0//defined(HYPRE_USING_CUDA)
+            HYPRE_StructSMGSetDeviceLevel(precond, device_level);
 #endif
             HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
                                  (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
@@ -1663,8 +1663,8 @@ main( hypre_int argc,
             /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
             HYPRE_StructPFMGSetPrintLevel(precond, 0);
             HYPRE_StructPFMGSetLogging(precond, 0);
-#if defined(HYPRE_USING_CUDA)
-            //HYPRE_StructPFMGSetDeviceLevel(precond,device_level);
+#if 0//defined(HYPRE_USING_CUDA)
+            HYPRE_StructPFMGSetDeviceLevel(precond,device_level);
 #endif
             HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
                                  (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
@@ -1773,8 +1773,8 @@ main( hypre_int argc,
                HYPRE_StructSMGSetNumPostRelax(precond, n_post);
                HYPRE_StructSMGSetPrintLevel(precond, 0);
                HYPRE_StructSMGSetLogging(precond, 0);
-#if defined(HYPRE_USING_CUDA)
-               //HYPRE_StructSMGSetDeviceLevel(precond, device_level);
+#if 0 //defined(HYPRE_USING_CUDA)
+               HYPRE_StructSMGSetDeviceLevel(precond, device_level);
 #endif
                HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
                                     (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
@@ -1802,6 +1802,9 @@ main( hypre_int argc,
                /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
                HYPRE_StructPFMGSetPrintLevel(precond, 0);
                HYPRE_StructPFMGSetLogging(precond, 0);
+#if 0 //defined(HYPRE_USING_CUDA)
+               HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
+#endif
                HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
                                     (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
                                     (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup,
@@ -1977,8 +1980,8 @@ main( hypre_int argc,
                HYPRE_StructSMGSetNumPostRelax(precond, n_post);
                HYPRE_StructSMGSetPrintLevel(precond, 0);
                HYPRE_StructSMGSetLogging(precond, 0);
-#if defined(HYPRE_USING_CUDA)
-               //HYPRE_StructSMGSetDeviceLevel(precond, device_level);
+#if 0 //defined(HYPRE_USING_CUDA)
+               HYPRE_StructSMGSetDeviceLevel(precond, device_level);
 #endif
                HYPRE_LOBPCGSetPrecond( (HYPRE_Solver) solver,
                                        (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
@@ -2006,8 +2009,8 @@ main( hypre_int argc,
                /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
                HYPRE_StructPFMGSetPrintLevel(precond, 0);
                HYPRE_StructPFMGSetLogging(precond, 0);
-#if defined(HYPRE_USING_CUDA)
-               //HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
+#if 0 //defined(HYPRE_USING_CUDA)
+               HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
 #endif
                HYPRE_LOBPCGSetPrecond( (HYPRE_Solver) solver,
                                        (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
@@ -2196,8 +2199,8 @@ main( hypre_int argc,
             HYPRE_StructSMGSetNumPostRelax(precond, n_post);
             HYPRE_StructSMGSetPrintLevel(precond, 0);
             HYPRE_StructSMGSetLogging(precond, 0);
-#if defined(HYPRE_USING_CUDA)
-            //HYPRE_StructSMGSetDeviceLevel(precond, device_level);
+#if 0 //defined(HYPRE_USING_CUDA)
+            HYPRE_StructSMGSetDeviceLevel(precond, device_level);
 #endif
             HYPRE_StructHybridSetPrecond(solver,
                                          HYPRE_StructSMGSolve,
@@ -2225,8 +2228,8 @@ main( hypre_int argc,
             /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
             HYPRE_StructPFMGSetPrintLevel(precond, 0);
             HYPRE_StructPFMGSetLogging(precond, 0);
-#if defined(HYPRE_USING_CUDA)
-            //HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
+#if 0 //defined(HYPRE_USING_CUDA)
+            HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
 #endif
             HYPRE_StructHybridSetPrecond(solver,
                                          HYPRE_StructPFMGSolve,
@@ -2294,8 +2297,8 @@ main( hypre_int argc,
             HYPRE_StructSMGSetNumPostRelax(precond, n_post);
             HYPRE_StructSMGSetPrintLevel(precond, 0);
             HYPRE_StructSMGSetLogging(precond, 0);
-#if defined(HYPRE_USING_CUDA)
-            //HYPRE_StructSMGSetDeviceLevel(precond, device_level);
+#if 0 //defined(HYPRE_USING_CUDA)
+            HYPRE_StructSMGSetDeviceLevel(precond, device_level);
 #endif
             HYPRE_GMRESSetPrecond( (HYPRE_Solver)solver,
                                    (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
@@ -2323,8 +2326,8 @@ main( hypre_int argc,
             /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
             HYPRE_StructPFMGSetPrintLevel(precond, 0);
             HYPRE_StructPFMGSetLogging(precond, 0);
-#if defined(HYPRE_USING_CUDA)
-            //HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
+#if 0 //defined(HYPRE_USING_CUDA)
+            HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
 #endif
             HYPRE_GMRESSetPrecond( (HYPRE_Solver)solver,
                                    (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
@@ -2419,8 +2422,8 @@ main( hypre_int argc,
             HYPRE_StructSMGSetNumPostRelax(precond, n_post);
             HYPRE_StructSMGSetPrintLevel(precond, 0);
             HYPRE_StructSMGSetLogging(precond, 0);
-#if defined(HYPRE_USING_CUDA)
-            //HYPRE_StructSMGSetDeviceLevel(precond, device_level);
+#if 0 //defined(HYPRE_USING_CUDA)
+            HYPRE_StructSMGSetDeviceLevel(precond, device_level);
 #endif
             HYPRE_BiCGSTABSetPrecond( (HYPRE_Solver)solver,
                                       (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
@@ -2448,8 +2451,8 @@ main( hypre_int argc,
             /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
             HYPRE_StructPFMGSetPrintLevel(precond, 0);
             HYPRE_StructPFMGSetLogging(precond, 0);
-#if defined(HYPRE_USING_CUDA)
-            //HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
+#if 0 //defined(HYPRE_USING_CUDA)
+            HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
 #endif
             HYPRE_BiCGSTABSetPrecond( (HYPRE_Solver)solver,
                                       (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
@@ -2544,8 +2547,8 @@ main( hypre_int argc,
             HYPRE_StructSMGSetNumPostRelax(precond, n_post);
             HYPRE_StructSMGSetPrintLevel(precond, 0);
             HYPRE_StructSMGSetLogging(precond, 0);
-#if defined(HYPRE_USING_CUDA)
-            //HYPRE_StructSMGSetDeviceLevel(precond, device_level);
+#if 0 //defined(HYPRE_USING_CUDA)
+            HYPRE_StructSMGSetDeviceLevel(precond, device_level);
 #endif
             HYPRE_LGMRESSetPrecond( (HYPRE_Solver)solver,
                                     (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
@@ -2573,8 +2576,8 @@ main( hypre_int argc,
             /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
             HYPRE_StructPFMGSetPrintLevel(precond, 0);
             HYPRE_StructPFMGSetLogging(precond, 0);
-#if defined(HYPRE_USING_CUDA)
-            //HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
+#if 0 //defined(HYPRE_USING_CUDA)
+            HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
 #endif
             HYPRE_LGMRESSetPrecond( (HYPRE_Solver)solver,
                                     (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
@@ -2643,8 +2646,8 @@ main( hypre_int argc,
             HYPRE_StructSMGSetNumPostRelax(precond, n_post);
             HYPRE_StructSMGSetPrintLevel(precond, 0);
             HYPRE_StructSMGSetLogging(precond, 0);
-#if defined(HYPRE_USING_CUDA)
-            //HYPRE_StructSMGSetDeviceLevel(precond, device_level);
+#if 0 //defined(HYPRE_USING_CUDA)
+            HYPRE_StructSMGSetDeviceLevel(precond, device_level);
 #endif
             HYPRE_FlexGMRESSetPrecond( (HYPRE_Solver)solver,
                                        (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
@@ -2672,8 +2675,8 @@ main( hypre_int argc,
             /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
             HYPRE_StructPFMGSetPrintLevel(precond, 0);
             HYPRE_StructPFMGSetLogging(precond, 0);
-#if defined(HYPRE_USING_CUDA)
-            //HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
+#if 0 //defined(HYPRE_USING_CUDA)
+            HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
 #endif
             HYPRE_FlexGMRESSetPrecond( (HYPRE_Solver)solver,
                                        (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
@@ -2844,8 +2847,8 @@ AddValuesVector( hypre_StructGrid   *grid,
    HYPRE_Int           volume, ndim;
    HYPRE_Int           seed = 1;
 
-#if defined(HYPRE_USING_CUDA)
-   HYPRE_Int          data_location = hypre_StructGridDataLocation(hypre_StructVectorGrid(zvector));
+#if 0 //defined(HYPRE_USING_CUDA)
+   HYPRE_Int           data_location = hypre_StructGridDataLocation(hypre_StructVectorGrid(zvector));
 #endif
 
    ndim  = hypre_StructGridNDim(grid);
@@ -2854,9 +2857,9 @@ AddValuesVector( hypre_StructGrid   *grid,
 
    hypre_ForBoxI(ib, boxes)
    {
-      box      = hypre_BoxArrayBox(boxes, ib);
-      volume   =  hypre_BoxVolume(box);
-#if defined(HYPRE_USING_CUDA)
+      box    = hypre_BoxArrayBox(boxes, ib);
+      volume = hypre_BoxVolume(box);
+#if 0 //defined(HYPRE_USING_CUDA)
       if (data_location != HYPRE_MEMORY_HOST)
       {
          values = hypre_CTAlloc(HYPRE_Real, volume, HYPRE_MEMORY_DEVICE);
@@ -2908,7 +2911,7 @@ AddValuesVector( hypre_StructGrid   *grid,
       iupper = hypre_BoxIMax(box);
       HYPRE_StructVectorSetBoxValues(zvector, ilower, iupper, values);
 
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA)
       if (data_location != HYPRE_MEMORY_HOST)
       {
           hypre_TFree(values,HYPRE_MEMORY_DEVICE);
@@ -2958,7 +2961,7 @@ AddValuesMatrix( HYPRE_StructMatrix A,
    HYPRE_Int          *stencil_indices;
    HYPRE_Int           stencil_size;
    HYPRE_Int           constant_coefficient;
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA)
    HYPRE_Int           data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
 #endif
 
@@ -3000,7 +3003,7 @@ AddValuesMatrix( HYPRE_StructMatrix A,
          {
             box      = hypre_BoxArrayBox(boxes, bi);
             volume   =  hypre_BoxVolume(box);
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA)
             if (data_location != HYPRE_MEMORY_HOST)
             {
                values = hypre_CTAlloc(HYPRE_Real, stencil_size*volume, HYPRE_MEMORY_DEVICE);
@@ -3048,7 +3051,7 @@ AddValuesMatrix( HYPRE_StructMatrix A,
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, stencil_size,
                                            stencil_indices, values);
 
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA)
             if (data_location != HYPRE_MEMORY_HOST)
             {
                hypre_TFree(values,HYPRE_MEMORY_DEVICE);
@@ -3126,7 +3129,7 @@ AddValuesMatrix( HYPRE_StructMatrix A,
          {
             box      = hypre_BoxArrayBox(boxes, bi);
             volume   =  hypre_BoxVolume(box);
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA)
             if (data_location != HYPRE_MEMORY_HOST)
             {
                values   = hypre_CTAlloc(HYPRE_Real, volume,HYPRE_MEMORY_DEVICE);
@@ -3151,7 +3154,7 @@ AddValuesMatrix( HYPRE_StructMatrix A,
             iupper = hypre_BoxIMax(box);
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
                                            stencil_indices+ndim, values);
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA)
             if (data_location == HYPRE_MEMORY_DEVICE)
             {
                hypre_TFree(values,HYPRE_MEMORY_DEVICE);
@@ -3205,7 +3208,7 @@ AddValuesMatrix( HYPRE_StructMatrix A,
          {
             box      = hypre_BoxArrayBox(boxes, bi);
             volume   =  hypre_BoxVolume(box);
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA)
             if (data_location == HYPRE_MEMORY_DEVICE)
             {
                values   = hypre_CTAlloc(HYPRE_Real, stencil_size*volume,HYPRE_MEMORY_DEVICE);
@@ -3257,7 +3260,7 @@ AddValuesMatrix( HYPRE_StructMatrix A,
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, stencil_size,
                                            stencil_indices, values);
 
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA)
             if (data_location == HYPRE_MEMORY_DEVICE)
             {
                hypre_TFree(values,HYPRE_MEMORY_DEVICE);
@@ -3364,7 +3367,7 @@ AddValuesMatrix( HYPRE_StructMatrix A,
          {
             box    = hypre_BoxArrayBox(boxes, bi);
             volume = hypre_BoxVolume(box);
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA)
             if (data_location == HYPRE_MEMORY_DEVICE)
             {
                values   = hypre_CTAlloc(HYPRE_Real, volume,HYPRE_MEMORY_DEVICE);
@@ -3390,7 +3393,7 @@ AddValuesMatrix( HYPRE_StructMatrix A,
             iupper = hypre_BoxIMax(box);
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
                                            stencil_indices, values);
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA)
             if (data_location == HYPRE_MEMORY_DEVICE)
             {
                hypre_TFree(values,HYPRE_MEMORY_DEVICE);
@@ -3434,7 +3437,7 @@ SetStencilBndry( HYPRE_StructMatrix  A,
    HYPRE_Int          ndim;
    HYPRE_Int          stencil_indices[1] = {0};
    HYPRE_Int          constant_coefficient;
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA)
    HYPRE_Int          data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
 #endif
    boxes  = hypre_StructGridBoxes(grid);
@@ -3479,7 +3482,7 @@ SetStencilBndry( HYPRE_StructMatrix  A,
       {
          for (ib = 0; ib < size; ib++)
          {
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA)
             if (data_location == HYPRE_MEMORY_DEVICE)
             {
                values = hypre_CTAlloc(HYPRE_Real, vol[ib], HYPRE_MEMORY_DEVICE);
@@ -3521,7 +3524,7 @@ SetStencilBndry( HYPRE_StructMatrix  A,
                ilower[ib][d] = j;
             }
 
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA)
             if (data_location == HYPRE_MEMORY_DEVICE)
             {
                hypre_TFree(values,HYPRE_MEMORY_DEVICE);
@@ -3548,4 +3551,3 @@ SetStencilBndry( HYPRE_StructMatrix  A,
 
    return ierr;
 }
-

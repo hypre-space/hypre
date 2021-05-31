@@ -215,6 +215,12 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          {
             HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
 
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+            if (hypre_StructGridDataLocation(hypre_StructVectorGrid(r_l[l])) == HYPRE_MEMORY_HOST)
+            {
+               hypre_SetDeviceOff();
+            }
+#endif
             if (constant_coefficient)
             {
                hypre_StructVectorClearAllValues(r_l[l]);
@@ -287,6 +293,12 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 
          for (l = (num_levels - 2); l >= 1; l--)
          {
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+            if (hypre_StructGridDataLocation(hypre_StructVectorGrid(e_l[l])) == HYPRE_MEMORY_DEVICE)
+            {
+               hypre_SetDeviceOn();
+            }
+#endif
             if (constant_coefficient)
             {
                hypre_StructVectorClearAllValues(e_l[l]);
@@ -318,6 +330,12 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             }
             HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
          }
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         if (hypre_StructGridDataLocation(hypre_StructVectorGrid(e_l[0])) == HYPRE_MEMORY_DEVICE)
+         {
+            hypre_SetDeviceOn();
+         }
+#endif
          if (constant_coefficient)
          {
             hypre_StructVectorClearAllValues(e_l[0]);

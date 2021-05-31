@@ -42,6 +42,7 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
              ReduceMatType *rmat, HYPRE_Int maxnz, HYPRE_Real tol, 
              hypre_PilutSolverGlobals *globals)
 {
+  HYPRE_Int logging = globals ? globals->logging : 0;
   HYPRE_Int i, ii, j, k, kk, l, m, ierr, diag_present;
   HYPRE_Int *perm, *iperm, 
           *usrowptr, *uerowptr, *ucolind;
@@ -119,7 +120,10 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 
   nbnd = lnrows - nlocal ;
 #ifdef HYPRE_DEBUG
-  hypre_printf("nbnd = %d, lnrows=%d, nlocal=%d\n", nbnd, lnrows, nlocal );
+  if (logging)
+  {
+     hypre_printf("nbnd = %d, lnrows=%d, nlocal=%d\n", nbnd, lnrows, nlocal );
+  }
 #endif
 
   ldu->nnodes[0] = nlocal;

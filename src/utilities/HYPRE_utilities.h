@@ -209,6 +209,8 @@ typedef enum _HYPRE_ExecutionPolicy
 
 HYPRE_Int HYPRE_SetExecutionPolicy(HYPRE_ExecutionPolicy exec_policy);
 HYPRE_Int HYPRE_GetExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy);
+HYPRE_Int HYPRE_SetStructExecutionPolicy(HYPRE_ExecutionPolicy exec_policy);
+HYPRE_Int HYPRE_GetStructExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy);
 
 /*--------------------------------------------------------------------------
  * HYPRE UMPIRE
@@ -228,6 +230,13 @@ HYPRE_Int HYPRE_SetUmpirePinnedPoolName(const char *pool_name);
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_SetGPUMemoryPoolSize(HYPRE_Int bin_growth, HYPRE_Int min_bin, HYPRE_Int max_bin, size_t max_cached_bytes);
+
+/*--------------------------------------------------------------------------
+ * HYPRE handle
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_SetSpGemmUseCusparse( HYPRE_Int use_cusparse );
+HYPRE_Int HYPRE_SetUseGpuRand( HYPRE_Int use_curand );
 
 #ifdef __cplusplus
 }

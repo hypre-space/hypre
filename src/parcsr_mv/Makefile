@@ -118,7 +118,7 @@ install: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o* libHYPRE*
+	rm -f *.o *.obj libHYPRE*
 	rm -f driver driver_matvec driver_matmul
 	rm -rf pchdir tca.map *inslog*
 

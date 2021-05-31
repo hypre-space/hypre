@@ -369,4 +369,32 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    }
 }
 
+HYPRE_Int
+hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A,
+                                   hypre_ParCSRMatrix *S)
+{
+   if (!hypre_ParCSRMatrixSocDiagJ(S))
+   {
+      hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
+      hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag(S);
+      HYPRE_Int nnz_diag = hypre_CSRMatrixNumNonzeros(A_diag);
+      HYPRE_Int *soc_diag = hypre_TAlloc(HYPRE_Int, nnz_diag, HYPRE_MEMORY_DEVICE);
+      hypre_CSRMatrixIntersectPattern(A_diag, S_diag, soc_diag, 1);
+      hypre_ParCSRMatrixSocDiagJ(S) = soc_diag;
+   }
+
+   if (!hypre_ParCSRMatrixSocOffdJ(S))
+   {
+      hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
+      hypre_CSRMatrix *S_offd = hypre_ParCSRMatrixOffd(S);
+      HYPRE_Int nnz_offd = hypre_CSRMatrixNumNonzeros(A_offd);
+      HYPRE_Int *soc_offd = hypre_TAlloc(HYPRE_Int, nnz_offd, HYPRE_MEMORY_DEVICE);
+      hypre_CSRMatrixIntersectPattern(A_offd, S_offd, soc_offd, 0);
+      hypre_ParCSRMatrixSocOffdJ(S) = soc_offd;
+   }
+
+   return hypre_error_flag;
+}
+
 #endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+

@@ -119,7 +119,7 @@
 
                   F_j = (1,phi_j)_R = h^2/4 * sin(gamma)
 */
-void ComputeFEMRhombus (double S[4][4], double F[4], double gamma, double h)
+void ComputeFEMRhombus (double **S, double F[4], double gamma, double h)
 {
    int i, j;
 
@@ -174,7 +174,7 @@ int main (int argc, char *argv[])
    HYPRE_Init();
 
    /* Print GPU info */
-   HYPRE_PrintDeviceInfo();
+   /* HYPRE_PrintDeviceInfo(); */
 
    /* Set default parameters */
    n = 10;
@@ -428,7 +428,12 @@ int main (int argc, char *argv[])
       /* Set the matrix and vector entries by finite element assembly */
       {
          /* local stifness matrix and load vector */
-         double S[4][4], F[4];
+         /* double F[4]; OK to use constant-length arrays for CPUs */
+         double *F = (double *) malloc(4*sizeof(double));
+         /*double S[4][4]; OK to use constant-length arrays for CPUs */
+         double *S_flat = (double *) malloc(16*sizeof(double));
+         double *S[4];
+         S[0] = S_flat; S[1] = S[0] + 4; S[2] = S[1] + 4; S[3] = S[2] + 4;
 
          /* The index of the local nodes 0-3 relative to the cell index,
             i.e. node k in cell (i,j) is in the upper-right corner of the
@@ -556,6 +561,8 @@ int main (int argc, char *argv[])
                      HYPRE_SStructVectorAddToValues(b, part, index, var, &F[k]);
                   }
          }
+         free(F);
+         free(S_flat);
       }
    }
 

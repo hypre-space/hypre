@@ -18,10 +18,10 @@ HYPRE_Int hypre_BinarySearch2 ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int lo
 HYPRE_Int *hypre_LowerBound( HYPRE_Int *first, HYPRE_Int *last, HYPRE_Int value );
 HYPRE_BigInt *hypre_BigLowerBound( HYPRE_BigInt *first, HYPRE_BigInt *last, HYPRE_BigInt value );
 
-/* general.c */
+/* log.c */
 HYPRE_Int hypre_Log2( HYPRE_Int p );
 
-/* hypre_complex.c */
+/* complex.c */
 #ifdef HYPRE_COMPLEX
 HYPRE_Complex hypre_conj( HYPRE_Complex value );
 HYPRE_Real    hypre_cabs( HYPRE_Complex value );
@@ -34,7 +34,7 @@ HYPRE_Real    hypre_cimag( HYPRE_Complex value );
 #define hypre_cimag(value) 0.0
 #endif
 
-/* hypre_general.c */
+/* general.c */
 #ifdef HYPRE_USING_MEMORY_TRACKER
 hypre_MemoryTracker* hypre_memory_tracker();
 #endif
@@ -48,7 +48,7 @@ HYPRE_Int hypre_GetDeviceLastError();
 HYPRE_Int hypre_UmpireInit(hypre_Handle *hypre_handle_);
 HYPRE_Int hypre_UmpireFinalize(hypre_Handle *hypre_handle_);
 
-/* hypre_qsort.c */
+/* qsort.c */
 void hypre_swap ( HYPRE_Int *v , HYPRE_Int i , HYPRE_Int j );
 void hypre_swap_c ( HYPRE_Complex *v , HYPRE_Int i , HYPRE_Int j );
 void hypre_swap2 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int i , HYPRE_Int j );
@@ -85,7 +85,7 @@ void hypre_BigQsort0( HYPRE_BigInt *v, HYPRE_Int  left, HYPRE_Int  right );
 void hypre_topo_sort(const HYPRE_Int *row_ptr, const HYPRE_Int *col_inds, const HYPRE_Complex *data, HYPRE_Int *ordering, HYPRE_Int n);
 void hypre_dense_topo_sort(const HYPRE_Complex *L, HYPRE_Int *ordering, HYPRE_Int n, HYPRE_Int is_col_major);
 
-/* hypre_unique.c */
+/* unique.c */
 HYPRE_Int hypre_UniqueIntArrayND ( HYPRE_Int ndim , HYPRE_Int *size , HYPRE_Int **array );
 
 /* qsplit.c */
@@ -96,7 +96,7 @@ HYPRE_Int hypre_DoubleQuickSplit ( HYPRE_Real *values , HYPRE_Int *indices , HYP
 /* HYPRE_CUDA_GLOBAL */ HYPRE_Int hypre_RandI ( void );
 /* HYPRE_CUDA_GLOBAL */ HYPRE_Real hypre_Rand ( void );
 
-/* hypre_prefix_sum.c */
+/* prefix_sum.c */
 /**
  * Assumed to be called within an omp region.
  * Let x_i be the input of ith thread.
@@ -133,7 +133,7 @@ void hypre_prefix_sum_triple(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_
  */
 void hypre_prefix_sum_multiple(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int n, HYPRE_Int *workspace);
 
-/* hypre_hopscotch_hash.c */
+/* hopscotch_hash.c */
 
 #ifdef HYPRE_USING_OPENMP
 
@@ -241,7 +241,7 @@ typedef struct
    hypre_BigHopscotchBucket* volatile table;
 } hypre_UnorderedBigIntMap;
 
-/* hypre_merge_sort.c */
+/* merge_sort.c */
 /**
  * Why merge sort?
  * 1) Merge sort can take advantage of eliminating duplicates.
@@ -264,14 +264,17 @@ HYPRE_Int hypreDevice_MaskedIVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex 
 HYPRE_Int hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v);
 #endif
 
+HYPRE_Int hypre_CurandUniform( HYPRE_Int n, HYPRE_Real *urand, HYPRE_Int set_seed, hypre_ulonglongint seed, HYPRE_Int set_offset, hypre_ulonglongint offset);
+HYPRE_Int hypre_CurandUniformSingle( HYPRE_Int n, float *urand, HYPRE_Int set_seed, hypre_ulonglongint seed, HYPRE_Int set_offset, hypre_ulonglongint offset);
+
 HYPRE_Int hypre_bind_device(HYPRE_Int myid, HYPRE_Int nproc, MPI_Comm comm);
 
-/* hypre_nvtx.c */
+/* nvtx.c */
 void hypre_GpuProfilingPushRangeColor(const char *name, HYPRE_Int cid);
 void hypre_GpuProfilingPushRange(const char *name);
 void hypre_GpuProfilingPopRange();
 
-/* hypre_utilities.c */
+/* utilities.c */
 HYPRE_Int hypre_multmod(HYPRE_Int a, HYPRE_Int b, HYPRE_Int mod);
 HYPRE_Int hypre_MergeOrderedArrays( HYPRE_Int size1 , HYPRE_Int *array1 , HYPRE_Int size2 , HYPRE_Int *array2 , HYPRE_Int *size3_ptr , HYPRE_Int **array3_ptr);
 void hypre_partition1D(HYPRE_Int n, HYPRE_Int p, HYPRE_Int j, HYPRE_Int *s, HYPRE_Int *e);
@@ -281,3 +284,7 @@ HYPRE_Int hypre_SetSyncCudaCompute(HYPRE_Int action);
 HYPRE_Int hypre_RestoreSyncCudaCompute();
 HYPRE_Int hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr);
 HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
+
+/* handle.c */
+HYPRE_Int hypre_SetSpGemmUseCusparse( HYPRE_Int use_cusparse );
+HYPRE_Int hypre_SetUseGpuRand( HYPRE_Int use_gpurand );

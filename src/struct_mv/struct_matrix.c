@@ -1727,7 +1727,6 @@ HYPRE_Int
 hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
 {
    HYPRE_Int num_values = hypre_StructMatrixNumValues(matrix);
-
    /*-----------------------------------------------------------------------
     * Update the ghost data
     * This takes care of the communication needs of all known functions

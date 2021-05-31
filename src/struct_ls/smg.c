@@ -39,7 +39,7 @@ hypre_SMGCreate( MPI_Comm  comm )
 
    /* initialize */
    (smg_data -> num_levels) = -1;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    (smg_data -> devicelevel) = 200;
 #endif
    return (void *) smg_data;
@@ -516,10 +516,24 @@ hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_CUDA)
 HYPRE_Int
-hypre_StructSMGSetDeviceLevel( void   *smg_vdata,
-                               HYPRE_Int   device_level  )
+hypre_SMGSetMaxLevel( void      *smg_vdata,
+                      HYPRE_Int  max_levels )
+{
+   hypre_SMGData *smg_data = (hypre_SMGData *)smg_vdata;
+
+   (smg_data -> max_levels) = max_levels;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+HYPRE_Int
+hypre_StructSMGSetDeviceLevel( void      *smg_vdata,
+                               HYPRE_Int  device_level )
 {
    hypre_SMGData *smg_data = (hypre_SMGData *)smg_vdata;
 

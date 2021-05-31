@@ -503,6 +503,7 @@ hypre_PFMGSetupInterpOp_CC0
    HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
    HYPRE_Int              warning_cnt= 0;
 
+#define DEVICE_VAR is_device_ptr(Pp0,Pp1,matrixA_data,stencil_shape_d,data_indices_boxi_d)
    hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                        A_dbox, start, stride, Ai,
                        P_dbox, startc, stridec, Pi);

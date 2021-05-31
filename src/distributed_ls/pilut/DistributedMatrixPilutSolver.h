@@ -9,7 +9,6 @@
 #define _DISTRIBUTED_MATRIX_PILUT_SOLVER_HEADER
 
 #include "HYPRE_config.h"
-#include "hypre_general.h"
 #include "_hypre_utilities.h"
 /*
 #ifdef HYPRE_DEBUG
@@ -45,6 +44,8 @@ HYPRE_Int _maxnz;
 HYPRE_Int *_map;			        /* Map used for marking rows in the set */
 
 HYPRE_Int *_vrowdist;
+
+HYPRE_Int logging; /* if 0, turn off all printings */
 
 /* Buffers for point to point communication */
 HYPRE_Int _pilu_recv[MAX_NPES];
