@@ -22,7 +22,7 @@ then
     ATOL=-1.0
 fi
 
-#echo "runcheck rtol = $RTOL, atol = $ATOL"
+#echo "runcheck $1 $2 rtol = $RTOL, atol = $ATOL"
 
 awk -v ofilename="$FNAME" -v sfilename="$SNAME" 'BEGIN{
    FS=" ";
@@ -38,11 +38,12 @@ awk -v ofilename="$FNAME" -v sfilename="$SNAME" 'BEGIN{
          for(id=1; id<=NF; id++)
          {
             # check if field is numeric
-            if($id ~ /^[0-9]+/)
+            if($id ~ /^-?[0-9]+/)
             {
                ln_id[saved_key]=ln;
                saved_line[saved_key]=$0;
-               saved_array[++saved_key]=$id;
+               saved_array[saved_key]=$id;
+               saved_key++;
             }
          }
       }
@@ -54,40 +55,43 @@ awk -v ofilename="$FNAME" -v sfilename="$SNAME" 'BEGIN{
    ln=0;
    while (getline < ofilename)
    {
+      ln++;
       if(NF > 0 && substr($1,1,1) !~ /#/)
       {
          # loop over fields in current line
          for(id=1; id<=NF; id++)
          {
             # check if field is numeric
-            if($id ~ /^[0-9]+/)
+            if($id ~ /^-?[0-9]+/)
             {
+               ln_id_out[out_key]=ln;
                out_line[out_key]=$0;
-               out_array[++out_key]=$id;
+               out_array[out_key]=$id;
+               out_key++;
             }
          }
       }
    }
    close(ofilename);
-   
+
    # compare data arrays
    if(saved_key != out_key)
    {
        printf "Number of numeric entries do not match!!\n"
        printf "Saved file (%d entries)  Output file (%d entries)\n\n", saved_key, out_key
    }
-   
+
    # compare numeric entries
    rtol = "'"$RTOL"'" + 0. # adding zero is necessary to convert from string to number
    atol = "'"$ATOL"'" + 0. # adding zero is necessary to convert from string to number
-   for(id=1; id<=saved_key; id++)
+   for(id=0; id<saved_key; id++)
    {
       # get value from arrays
       saved_val = saved_array[id];
-      out_val = out_array[id];      
+      out_val = out_array[id];
 
       # floating point field comparison
-      if(length(saved_val) != length(int(saved_val)) && length(out_val) != length(int(out_val))) 
+      if(length(saved_val) != length(int(saved_val)) && length(out_val) != length(int(out_val)))
       {
          err = saved_val - out_val;
          # get absolute value of err and saved_val
@@ -101,11 +105,11 @@ awk -v ofilename="$FNAME" -v sfilename="$SNAME" 'BEGIN{
          else
          {
             pass=0;
-            printf "(%d) - %s\n", ln_id[id-1], saved_line[id-1]
-            printf "(%d) + %s      (err %.2e)\n\n", ln_id[id-1], out_line[id-1], err
+            printf "(%d) - %s\n", ln_id[id], saved_line[id]
+            printf "(%d) + %s      (err %.2e)\n\n", ln_id_out[id], out_line[id], err
          }
       }
-      else if(length(saved_val) == length(int(saved_val)) && length(out_val) == length(int(out_val)))# integer comparison
+      else if(length(saved_val) == length(int(saved_val)) && length(out_val) == length(int(out_val))) #integer comparison
       {
          tau = saved_val - out_val;
          # get absolute value of tau
@@ -119,15 +123,16 @@ awk -v ofilename="$FNAME" -v sfilename="$SNAME" 'BEGIN{
          else
          {
             pass=0;
-            printf "(%d) %s <-- %s, err %d\n", ln, $0, saved_val, tau
+            printf "(%d) - %s\n", ln_id[id], saved_line[id]
+            printf "(%d) + %s      (err %d)\n\n", ln_id_out[id], out_line[id], tau
          }
-      }      
+      }
       else # type mismatch
       {
          printf "Numeric type mismatch in floating point or integer comparison!!\n"
-         printf "(%d) - %s \n", ln_id[id-1], saved_line[id-1]
-         printf "(%d) + %s \n\n", ln_id[id-1], out_line[id-1]      
-      }      
+         printf "(%d) - %s \n", ln_id[id], saved_line[id]
+         printf "(%d) + %s \n\n", ln_id_out[id], out_line[id]
+      }
    }
 }'
 

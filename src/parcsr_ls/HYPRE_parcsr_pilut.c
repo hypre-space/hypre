@@ -198,3 +198,19 @@ HYPRE_ParCSRPilutSetFactorRowSize( HYPRE_Solver solver,
 #endif
 }
 
+HYPRE_Int
+HYPRE_ParCSRPilutSetLogging( HYPRE_Solver solver,
+                             HYPRE_Int    logging    )
+{
+#ifdef HYPRE_MIXEDINT
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Pilut cannot be used in mixedint mode!");
+   return hypre_error_flag;
+#else
+
+   HYPRE_DistributedMatrixPilutSolverSetLogging(
+      (HYPRE_DistributedMatrixPilutSolver) solver, logging );
+
+   return hypre_error_flag;
+#endif
+}
+

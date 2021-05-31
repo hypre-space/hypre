@@ -151,9 +151,6 @@
 /* Define to 1 if using cuBLAS */
 #undef HYPRE_USING_CUBLAS
 
-/* Define to 1 if using CUB */
-#undef HYPRE_USING_CUB_ALLOCATOR
-
 /* Define to 1 if executing on device with CUDA */
 #undef HYPRE_USING_CUDA
 
@@ -171,6 +168,9 @@
 
 /* Define to 1 if executing on device with OpenMP */
 #undef HYPRE_USING_DEVICE_OPENMP
+
+/* Define to 1 if using device pooling allocator */
+#undef HYPRE_USING_DEVICE_POOL
 
 /* Define to 1 if using DSuperLU */
 #undef HYPRE_USING_DSUPERLU
