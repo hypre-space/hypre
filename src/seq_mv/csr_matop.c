@@ -1503,9 +1503,7 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixReorder:
- * Reorders the column and data arrays of a square CSR matrix, such that the
- * first entry in each row is the diagonal one.
+ * hypre_CSRMatrixReorderHost
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1549,6 +1547,13 @@ hypre_CSRMatrixReorderHost(hypre_CSRMatrix *A)
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixReorder:
+ *
+ * Reorders the column and data arrays of a square CSR matrix, such that the
+ * first entry in each row is the diagonal one.
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_CSRMatrixReorder(hypre_CSRMatrix *A)
