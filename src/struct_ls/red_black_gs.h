@@ -150,7 +150,7 @@ typedef struct
    hypre_fence();                                                   \
 }
 
-#elif defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 #define hypre_RedBlackLoopInit()
 #define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,      \
@@ -350,4 +350,3 @@ typedef struct
    }\
 }
 #endif
-

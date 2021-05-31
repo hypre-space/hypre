@@ -36,26 +36,24 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
    hypre_CSRMatrixBigJ(matrix)           = NULL;
    hypre_CSRMatrixRownnz(matrix)         = NULL;
    hypre_CSRMatrixNumRows(matrix)        = num_rows;
+   hypre_CSRMatrixNumRownnz(matrix)      = num_rows;
    hypre_CSRMatrixNumCols(matrix)        = num_cols;
    hypre_CSRMatrixNumNonzeros(matrix)    = num_nonzeros;
    hypre_CSRMatrixMemoryLocation(matrix) = hypre_HandleMemoryLocation(hypre_handle());
 
    /* set defaults */
    hypre_CSRMatrixOwnsData(matrix)  = 1;
-   if (num_nonzeros)
-   {
-      hypre_CSRMatrixNumRownnz(matrix) = num_rows;
-   }
-   else
-   {
-      hypre_CSRMatrixNumRownnz(matrix) = 0;
-   }
 
 #if defined(HYPRE_USING_CUSPARSE)
    hypre_CSRMatrixSortedJ(matrix)    = NULL;
    hypre_CSRMatrixSortedData(matrix) = NULL;
    hypre_CSRMatrixCsrsvData(matrix)  = NULL;
 #endif
+
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+   hypre_GpuMatDataCreate(matrix);
+#endif
+
    return matrix;
 }
 
@@ -84,6 +82,10 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
          hypre_TFree(hypre_CSRMatrixSortedData(matrix), memory_location);
          hypre_TFree(hypre_CSRMatrixSortedJ(matrix), memory_location);
          hypre_CsrsvDataDestroy(hypre_CSRMatrixCsrsvData(matrix));
+#endif
+
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+         hypre_GpuMatDataDestroy(matrix);
 #endif
       }
 
@@ -178,6 +180,7 @@ hypre_CSRMatrixResize( hypre_CSRMatrix *matrix, HYPRE_Int new_num_rows, HYPRE_In
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Error: called hypre_CSRMatrixResize on a matrix that doesn't own the data\n");
       return 1;
    }
+
    hypre_CSRMatrixNumCols(matrix) = new_num_cols;
 
    if (new_num_nonzeros != hypre_CSRMatrixNumNonzeros(matrix))
@@ -185,14 +188,22 @@ hypre_CSRMatrixResize( hypre_CSRMatrix *matrix, HYPRE_Int new_num_rows, HYPRE_In
       hypre_CSRMatrixNumNonzeros(matrix) = new_num_nonzeros;
 
       if (!hypre_CSRMatrixData(matrix))
+      {
          hypre_CSRMatrixData(matrix) = hypre_CTAlloc(HYPRE_Complex, new_num_nonzeros, memory_location);
+      }
       else
+      {
          hypre_CSRMatrixData(matrix) = hypre_TReAlloc_v2(hypre_CSRMatrixData(matrix), HYPRE_Complex, old_num_nonzeros, HYPRE_Complex, new_num_nonzeros, memory_location);
+      }
 
       if (!hypre_CSRMatrixJ(matrix))
+      {
          hypre_CSRMatrixJ(matrix) = hypre_CTAlloc(HYPRE_Int, new_num_nonzeros, memory_location);
+      }
       else
+      {
          hypre_CSRMatrixJ(matrix) = hypre_TReAlloc_v2(hypre_CSRMatrixJ(matrix), HYPRE_Int, old_num_nonzeros, HYPRE_Int, new_num_nonzeros, memory_location);
+      }
    }
 
    if (new_num_rows != hypre_CSRMatrixNumRows(matrix))
@@ -200,9 +211,13 @@ hypre_CSRMatrixResize( hypre_CSRMatrix *matrix, HYPRE_Int new_num_rows, HYPRE_In
       hypre_CSRMatrixNumRows(matrix) = new_num_rows;
 
       if (!hypre_CSRMatrixI(matrix))
+      {
          hypre_CSRMatrixI(matrix) = hypre_CTAlloc(HYPRE_Int, new_num_rows + 1, memory_location);
+      }
       else
+      {
          hypre_CSRMatrixI(matrix) = hypre_TReAlloc_v2(hypre_CSRMatrixI(matrix), HYPRE_Int, old_num_rows + 1, HYPRE_Int, new_num_rows + 1, memory_location);
+      }
    }
 
    return 0;
@@ -313,12 +328,12 @@ hypre_CSRMatrixSetDataOwner( hypre_CSRMatrix *matrix,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
+hypre_CSRMatrixSetRownnzHost( hypre_CSRMatrix *matrix )
 {
    HYPRE_Int  ierr = 0;
    HYPRE_Int  num_rows = hypre_CSRMatrixNumRows(matrix);
-   HYPRE_Int  *A_i = hypre_CSRMatrixI(matrix);
-   HYPRE_Int  *Arownnz;
+   HYPRE_Int *A_i = hypre_CSRMatrixI(matrix);
+   HYPRE_Int *Arownnz;
 
    HYPRE_Int i, adiag;
    HYPRE_Int irownnz = 0;
@@ -326,7 +341,7 @@ hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
    for (i = 0; i < num_rows; i++)
    {
       adiag = A_i[i+1] - A_i[i];
-      if(adiag > 0)
+      if (adiag > 0)
       {
          irownnz++;
       }
@@ -345,12 +360,33 @@ hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
       for (i = 0; i < num_rows; i++)
       {
          adiag = A_i[i+1] - A_i[i];
-         if(adiag > 0)
+         if (adiag > 0)
          {
             Arownnz[irownnz++] = i;
          }
       }
       hypre_CSRMatrixRownnz(matrix) = Arownnz;
+   }
+
+   return ierr;
+}
+
+HYPRE_Int
+hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
+{
+   HYPRE_Int ierr = 0;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(matrix) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      // TODO RL: there's no need currently for having rownnz on GPUs
+   }
+   else
+#endif
+   {
+      ierr = hypre_CSRMatrixSetRownnzHost(matrix);
    }
 
    return ierr;

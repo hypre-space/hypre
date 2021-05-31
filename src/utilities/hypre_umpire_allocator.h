@@ -8,7 +8,7 @@
 #ifndef HYPRE_UMPIRE_ALLOCATOR_H
 #define HYPRE_UMPIRE_ALLOCATOR_H
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #if defined(HYPRE_USING_UMPIRE_DEVICE)
 
 /*
@@ -50,7 +50,6 @@ struct hypre_umpire_device_allocator
 };
 
 #endif /* #ifdef HYPRE_USING_UMPIRE_DEVICE */
-#endif /* #if defined(HYPRE_USING_CUDA) */
+#endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
 #endif
-

@@ -140,11 +140,7 @@ endif
 
 # C
 
-structmat: structmat.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
-
-ij: ij.o
+ij: ij.${OBJ_SUFFIX}
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
@@ -157,6 +153,10 @@ sstruct: sstruct.o
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
 struct: struct.${OBJ_SUFFIX}
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+
+structmat: structmat.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 

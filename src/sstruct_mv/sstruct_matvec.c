@@ -225,18 +225,18 @@ hypre_SStructPMatvecCompute( void                 *pmatvec_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPMatvecDiagScale
+ * hypre_SStructPMatrixInvDiagAxpy
  *
  * y = alpha*inv(A_D)*x + beta*y
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructPMatvecDiagScale( void                 *pmatvec_vdata,
-                               HYPRE_Complex         alpha,
-                               hypre_SStructPMatrix *A,
-                               hypre_SStructPVector *x,
-                               HYPRE_Complex         beta,
-                               hypre_SStructPVector *y )
+hypre_SStructPMatrixInvDiagAxpy( void                 *pmatvec_vdata,
+                                 HYPRE_Complex         alpha,
+                                 hypre_SStructPMatrix *A,
+                                 hypre_SStructPVector *x,
+                                 HYPRE_Complex         beta,
+                                 hypre_SStructPVector *y )
 {
    hypre_SStructPMatvecData  *pmatvec_data = (hypre_SStructPMatvecData   *)pmatvec_vdata;
    HYPRE_Int                  nvars        = (pmatvec_data -> nvars);
@@ -252,7 +252,7 @@ hypre_SStructPMatvecDiagScale( void                 *pmatvec_vdata,
       sy = hypre_SStructPVectorSVector(y, vi);
       sdata = (pmatvec_data -> smatvec_data)[vi][vi];
 
-      hypre_StructMatvecDiagScale(sdata, alpha, sA, sx, beta, sy);
+      hypre_StructMatrixInvDiagAxpy(sdata, alpha, sA, sx, beta, sy);
    }
 
    return hypre_error_flag;
@@ -557,19 +557,19 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatvecDiagScale
+ * hypre_SStructMatrixInvDiagAxpy
  *
  * y = alpha*inv(A_D)*x + beta*y
  *
  * TODO: Add UMatrix contribution to inv(A_D)
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_SStructMatvecDiagScale( void                *matvec_vdata,
-                              HYPRE_Complex       *alpha,
-                              hypre_SStructMatrix *A,
-                              hypre_SStructVector *x,
-                              HYPRE_Complex       *beta,
-                              hypre_SStructVector *y )
+hypre_SStructMatrixInvDiagAxpy( void                *matvec_vdata,
+                                HYPRE_Complex       *alpha,
+                                hypre_SStructMatrix *A,
+                                hypre_SStructVector *x,
+                                HYPRE_Complex       *beta,
+                                hypre_SStructVector *y )
 {
    hypre_SStructMatvecData  *matvec_data  = (hypre_SStructMatvecData *) matvec_vdata;
    void                    **pmatvec_data = (matvec_data -> pmatvec_data);
@@ -617,11 +617,11 @@ hypre_SStructMatvecDiagScale( void                *matvec_vdata,
 
          if (beta == NULL)
          {
-            hypre_SStructPMatvecDiagScale(pmatvec_data[part], alpha[part], pA, px, 0.0, py);
+            hypre_SStructPMatrixInvDiagAxpy(pmatvec_data[part], alpha[part], pA, px, 0.0, py);
          }
          else
          {
-            hypre_SStructPMatvecDiagScale(pmatvec_data[part], alpha[part], pA, px, beta[part], py);
+            hypre_SStructPMatrixInvDiagAxpy(pmatvec_data[part], alpha[part], pA, px, beta[part], py);
          }
       } /* loop on parts */
    }
@@ -632,11 +632,11 @@ hypre_SStructMatvecDiagScale( void                *matvec_vdata,
 
       if (beta == NULL)
       {
-         hypre_ParCSRMatrixMatvecDiagScale(alpha[0], parcsrA, parx, 0.0, pary);
+         hypre_ParCSRMatrixInvDiagAxpy(alpha[0], parcsrA, parx, 0.0, pary);
       }
       else
       {
-         hypre_ParCSRMatrixMatvecDiagScale(alpha[0], parcsrA, parx, beta[0], pary);
+         hypre_ParCSRMatrixInvDiagAxpy(alpha[0], parcsrA, parx, beta[0], pary);
       }
 
       hypre_SStructVectorRestore(x, parx);

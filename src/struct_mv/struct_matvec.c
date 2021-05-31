@@ -1123,17 +1123,17 @@ hypre_StructMatvecCompute_core_VC( hypre_StructMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatvecDiagScale
+ * hypre_StructMatrixInvDiagAxpy
  *
  * y = alpha*inv(A_D)*x + beta*y
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_StructMatvecDiagScale( void                *matvec_vdata,
-                             HYPRE_Complex        alpha,
-                             hypre_StructMatrix  *A,
-                             hypre_StructVector  *x,
-                             HYPRE_Complex        beta,
-                             hypre_StructVector  *y )
+hypre_StructMatrixInvDiagAxpy( void                *matvec_vdata,
+                               HYPRE_Complex        alpha,
+                               hypre_StructMatrix  *A,
+                               hypre_StructVector  *x,
+                               HYPRE_Complex        beta,
+                               hypre_StructVector  *y )
 {
    hypre_StructMatvecData  *matvec_data = (hypre_StructMatvecData *) matvec_vdata;
    HYPRE_Int                active = matvec_data -> active;

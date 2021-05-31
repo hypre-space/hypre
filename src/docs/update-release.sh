@@ -8,7 +8,7 @@
 usrconf="usr-manual/conf.py"
 refconf="ref-manual/conf.doxygen"
 
-version=`../utilities/version -number`
+version=`../utilities/version -version`
 reldate=`../utilities/version -date`
 if type -p gdate > /dev/null; then
     usrdate=`gdate --date=$reldate +'%B %d, %Y'`;

@@ -2546,7 +2546,15 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
-   /* Initialize Hypre */
+   /*-----------------------------------------------------------------
+    * GPU Device binding
+    * Must be done before HYPRE_Init() and should not be changed after
+    *-----------------------------------------------------------------*/
+   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+
+   /*-----------------------------------------------------------
+    * Initialize : must be the first HYPRE function to call
+    *-----------------------------------------------------------*/
    HYPRE_Init();
 
    /*-----------------------------------------------------------
@@ -5783,6 +5791,36 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridSetSolverType(par_solver, solver_type);
       HYPRE_ParCSRHybridSetRecomputeResidual(par_solver, recompute_res);
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+      /*
+      HYPRE_ParCSRHybridSetPMaxElmts(par_solver, 8);
+      HYPRE_ParCSRHybridSetRelaxType(par_solver, 18);
+      HYPRE_ParCSRHybridSetCycleRelaxType(par_solver, 9, 3);
+      HYPRE_ParCSRHybridSetCoarsenType(par_solver, 8);
+      HYPRE_ParCSRHybridSetInterpType(par_solver, 3);
+      HYPRE_ParCSRHybridSetMaxCoarseSize(par_solver, 20);
+      */
+#endif
+
+#if SECOND_TIME
+      hypre_ParVector *par_x2 =
+         hypre_ParVectorCreate(hypre_ParVectorComm(par_x), hypre_ParVectorGlobalSize(par_x),
+                               hypre_ParVectorPartitioning(par_x));
+      hypre_ParVectorOwnsPartitioning(par_x2) = 0;
+      hypre_ParVectorInitialize(par_x2);
+      hypre_ParVectorCopy(par_x, par_x2);
+
+      HYPRE_ParCSRHybridSetup(par_solver,par_A,par_b,par_x);
+      HYPRE_ParCSRHybridSolve(par_solver,par_A,par_b,par_x);
+
+      hypre_ParVectorCopy(par_x2, par_x);
+#endif
+
+#if defined(HYPRE_USING_NVTX)
+      hypre_GpuProfilingPushRange("HybridSolve");
+#endif
+      //cudaProfilerStart();
+
       HYPRE_ParCSRHybridSetup(par_solver,par_A,par_b,par_x);
 
       hypre_EndTiming(time_index);
@@ -5804,6 +5842,15 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridGetFinalRelativeResidualNorm(par_solver, &final_res_norm);
 
       HYPRE_ParCSRHybridDestroy(par_solver);
+
+#if defined(HYPRE_USING_NVTX)
+      hypre_GpuProfilingPopRange();
+#endif
+      //cudaProfilerStop();
+
+#if SECOND_TIME
+      hypre_ParVectorDestroy(par_x2);
+#endif
    }
 
    /*-----------------------------------------------------------

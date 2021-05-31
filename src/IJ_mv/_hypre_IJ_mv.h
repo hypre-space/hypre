@@ -80,7 +80,7 @@ typedef struct
 
    HYPRE_MemoryLocation memory_location;
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_Int            max_stack_elmts;
    HYPRE_Int            current_stack_elmts;
    HYPRE_BigInt        *stack_i;
@@ -124,7 +124,7 @@ typedef struct
 
 #define hypre_AuxParCSRMatrixMemoryLocation(matrix)       ((matrix) -> memory_location)
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #define hypre_AuxParCSRMatrixMaxStackElmts(matrix)        ((matrix) -> max_stack_elmts)
 #define hypre_AuxParCSRMatrixCurrentStackElmts(matrix)    ((matrix) -> current_stack_elmts)
 #define hypre_AuxParCSRMatrixStackI(matrix)               ((matrix) -> stack_i)
@@ -138,7 +138,6 @@ typedef struct
 #endif
 
 #endif /* #ifndef hypre_AUX_PARCSR_MATRIX_HEADER */
-
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -171,10 +170,10 @@ typedef struct
 
    HYPRE_MemoryLocation memory_location;
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_Int            max_stack_elmts;      /* length of stash for SetValues and AddToValues*/
    HYPRE_Int            current_stack_elmts;  /* current no. of elements stored in stash */
-   HYPRE_BigInt        *stack_i;              /* contains column indices */
+   HYPRE_BigInt        *stack_i;              /* contains row indices */
    HYPRE_Complex       *stack_data;           /* contains corresponding data */
    char                *stack_sora;
    HYPRE_Int            usr_off_proc_elmts;   /* the num of off-proc elements usr guided */
@@ -194,7 +193,7 @@ typedef struct
 
 #define hypre_AuxParVectorMemoryLocation(vector)       ((vector) -> memory_location)
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #define hypre_AuxParVectorMaxStackElmts(vector)        ((vector) -> max_stack_elmts)
 #define hypre_AuxParVectorCurrentStackElmts(vector)    ((vector) -> current_stack_elmts)
 #define hypre_AuxParVectorStackI(vector)               ((vector) -> stack_i)
@@ -206,7 +205,6 @@ typedef struct
 #endif
 
 #endif /* #ifndef hypre_AUX_PAR_VECTOR_HEADER */
-
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -386,7 +384,7 @@ hypre_IJVectorMemoryLocation(hypre_IJVector *vector)
 /* aux_parcsr_matrix.c */
 HYPRE_Int hypre_AuxParCSRMatrixCreate ( hypre_AuxParCSRMatrix **aux_matrix , HYPRE_Int local_num_rows , HYPRE_Int local_num_cols , HYPRE_Int *sizes );
 HYPRE_Int hypre_AuxParCSRMatrixDestroy ( hypre_AuxParCSRMatrix *matrix );
-HYPRE_Int hypre_AuxParCSRMatrixSetRownnz( hypre_AuxParCSRMatrix *matrix );
+HYPRE_Int hypre_AuxParCSRMatrixSetRownnz ( hypre_AuxParCSRMatrix *matrix );
 HYPRE_Int hypre_AuxParCSRMatrixInitialize ( hypre_AuxParCSRMatrix *matrix );
 HYPRE_Int hypre_AuxParCSRMatrixInitialize_v2( hypre_AuxParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location );
 
@@ -507,6 +505,9 @@ HYPRE_Int HYPRE_IJMatrixSetMaxOffProcElmts ( HYPRE_IJMatrix matrix , HYPRE_Int m
 HYPRE_Int HYPRE_IJMatrixRead ( const char *filename , MPI_Comm comm , HYPRE_Int type , HYPRE_IJMatrix *matrix_ptr );
 HYPRE_Int HYPRE_IJMatrixPrint ( HYPRE_IJMatrix matrix , const char *filename );
 HYPRE_Int HYPRE_IJMatrixSetOMPFlag ( HYPRE_IJMatrix matrix , HYPRE_Int omp_flag );
+HYPRE_Int HYPRE_IJMatrixTranspose ( HYPRE_IJMatrix  matrix_A , HYPRE_IJMatrix *matrix_AT );
+HYPRE_Int HYPRE_IJMatrixNorm ( HYPRE_IJMatrix matrix , HYPRE_Real *norm );
+HYPRE_Int HYPRE_IJMatrixAdd ( HYPRE_Complex alpha , HYPRE_IJMatrix matrix_A , HYPRE_Complex beta , HYPRE_IJMatrix matrix_B , HYPRE_IJMatrix *matrix_C );
 
 /* HYPRE_IJVector.c */
 HYPRE_Int HYPRE_IJVectorCreate ( MPI_Comm comm , HYPRE_BigInt jlower , HYPRE_BigInt jupper , HYPRE_IJVector *vector );
@@ -524,7 +525,6 @@ HYPRE_Int HYPRE_IJVectorGetLocalRange ( HYPRE_IJVector vector , HYPRE_BigInt *jl
 HYPRE_Int HYPRE_IJVectorGetObject ( HYPRE_IJVector vector , void **object );
 HYPRE_Int HYPRE_IJVectorRead ( const char *filename , MPI_Comm comm , HYPRE_Int type , HYPRE_IJVector *vector_ptr );
 HYPRE_Int HYPRE_IJVectorPrint ( HYPRE_IJVector vector , const char *filename );
-
 
 #ifdef __cplusplus
 }

@@ -1222,4 +1222,3 @@ hypre_CyclicReductionDestroy( void *cyc_red_vdata )
 
    return hypre_error_flag;
 }
-

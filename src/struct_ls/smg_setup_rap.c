@@ -172,4 +172,3 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
 
    return hypre_error_flag;
 }
-

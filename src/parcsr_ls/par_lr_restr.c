@@ -45,7 +45,6 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
                                    HYPRE_Int            *dof_func,
                                    HYPRE_Real            filter_thresholdR,
                                    HYPRE_Int             debug_flag,
-                                   HYPRE_Int            *col_offd_S_to_A,
                                    hypre_ParCSRMatrix  **R_ptr,
                                    HYPRE_Int             AIR1_5,
                                    HYPRE_Int             is_triangular,
@@ -275,7 +274,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
       /* offd part of row i1 */
       for (j = S_offd_i[i1]; j < S_offd_i[i1+1]; j++)
       {
-         j1 = col_offd_S_to_A ? col_offd_S_to_A[S_offd_j[j]] : S_offd_j[j];
+         j1 = S_offd_j[j];
          if (CF_marker_offd[j1] < 0)
          {
             send_SF_i[i] ++;
@@ -322,7 +321,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
          /* offd part of row j1 */
          for (k = S_offd_i[j1]; k < S_offd_i[j1+1]; k++)
          {
-            k1 = col_offd_S_to_A ? col_offd_S_to_A[S_offd_j[k]] : S_offd_j[k];
+            k1 = S_offd_j[k];
             if (CF_marker_offd[k1] < 0)
             {
                send_SF_j[i1++] = col_map_offd_A[k1];
@@ -454,7 +453,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
             /* go through its offd part */
             for (k = S_offd_i[j1]; k < S_offd_i[j1+1]; k++)
             {
-               k1 = col_offd_S_to_A ? col_offd_S_to_A[S_offd_j[k]] : S_offd_j[k];
+               k1 = S_offd_j[k];
                if (CF_marker_offd[k1] < 0)
                {
                   /* mark F pts */
@@ -474,7 +473,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
        * So, we always check the first marker array */
       for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
       {
-         j1 = col_offd_S_to_A ? col_offd_S_to_A[S_offd_j[j]] : S_offd_j[j];
+         j1 = S_offd_j[j];
          /* offd F pts */
          if (CF_marker_offd[j1] < 0)
          {
@@ -822,7 +821,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
          /* F^2: D1-O2. Open row j1 */
          for (k = S_offd_i[j1]; k < S_offd_i[j1+1]; k++)
          {
-            k1 = col_offd_S_to_A ? col_offd_S_to_A[S_offd_j[k]] : S_offd_j[k];
+            k1 = S_offd_j[k];
 
             if (CF_marker_offd[k1] < 0)
             {
@@ -846,7 +845,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
       /* offd part of row i */
       for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
       {
-         j1 = col_offd_S_to_A ? col_offd_S_to_A[S_offd_j[j]] : S_offd_j[j];
+         j1 = S_offd_j[j];
 
          if (CF_marker_offd[j1] >= 0)
          {
@@ -1056,7 +1055,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
          /* F^2: D1-O2. Open row j1 */
          for (k = S_offd_i[j1]; k < S_offd_i[j1+1]; k++)
          {
-            k1 = col_offd_S_to_A ? col_offd_S_to_A[S_offd_j[k]] : S_offd_j[k];
+            k1 = S_offd_j[k];
 
             if (CF_marker_offd[k1] < 0)
             {
@@ -1084,7 +1083,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
       {
          for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
          {
-            j1 = col_offd_S_to_A ? col_offd_S_to_A[S_offd_j[j]] : S_offd_j[j];
+            j1 = S_offd_j[j];
 
             if (CF_marker_offd[j1] >= 0)
             {
@@ -1671,7 +1670,6 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
                                      HYPRE_Real            strong_thresholdR,
                                      HYPRE_Real            filter_thresholdR,
                                      HYPRE_Int             debug_flag,
-                                     HYPRE_Int            *col_offd_S_to_A,
                                      hypre_ParCSRMatrix  **R_ptr)
 {
    /* HYPRE_Real t0 = hypre_MPI_Wtime(); */
@@ -1849,17 +1847,17 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
    else if (NeumannDeg == 1)
    {
       X = hypre_ParMatmul(ACF, AFF);
-      hypre_ParcsrAdd(1.0, ACF, 1.0, X, &Z);
+      hypre_ParCSRMatrixAdd(1.0, ACF, 1.0, X, &Z);
       hypre_ParCSRMatrixDestroy(X);
    }
    else
    {
       X = hypre_ParMatmul(AFF, AFF);
-      hypre_ParcsrAdd(1.0, AFF, 1.0, X, &Z);
+      hypre_ParCSRMatrixAdd(1.0, AFF, 1.0, X, &Z);
       for (i = 2; i < NeumannDeg; i++)
       {
          X2 = hypre_ParMatmul(X, AFF);
-         hypre_ParcsrAdd(1.0, Z, 1.0, X2, &Z2);
+         hypre_ParCSRMatrixAdd(1.0, Z, 1.0, X2, &Z2);
          hypre_ParCSRMatrixDestroy(X);
          hypre_ParCSRMatrixDestroy(Z);
          Z = Z2;
@@ -1868,7 +1866,7 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
       hypre_ParCSRMatrixDestroy(X);
       X = hypre_ParMatmul(ACF, Z);
       hypre_ParCSRMatrixDestroy(Z);
-      hypre_ParcsrAdd(1.0, ACF, 1.0, X, &Z);
+      hypre_ParCSRMatrixAdd(1.0, ACF, 1.0, X, &Z);
       hypre_ParCSRMatrixDestroy(X);
    }
 
@@ -2019,6 +2017,3 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
 
    return 0;
 }
-
-
-

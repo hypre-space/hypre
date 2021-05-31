@@ -179,6 +179,7 @@ HYPRE_Int hypre_SStructPMatvecSetup ( void *pmatvec_vdata , hypre_SStructPMatrix
 HYPRE_Int hypre_SStructPMatvecCompute ( void *pmatvec_vdata , HYPRE_Complex alpha , hypre_SStructPMatrix *pA , hypre_SStructPVector *px , HYPRE_Complex beta , hypre_SStructPVector *py , hypre_SStructPVector *py );
 HYPRE_Int hypre_SStructPMatvecDestroy ( void *pmatvec_vdata );
 HYPRE_Int hypre_SStructPMatvec ( HYPRE_Complex alpha , hypre_SStructPMatrix *pA , hypre_SStructPVector *px , HYPRE_Complex beta , hypre_SStructPVector *py );
+HYPRE_Int hypre_SStructPMatrixInvDiagAxpy ( void *pmatvec_vdata , HYPRE_Complex alpha , hypre_SStructPMatrix *A , hypre_SStructPVector *x , HYPRE_Complex beta , hypre_SStructPVector *y );
 HYPRE_Int hypre_SStructMatvecCreate ( void **matvec_vdata_ptr );
 HYPRE_Int hypre_SStructMatvecSetTranspose ( void *matvec_vdata , HYPRE_Int  transpose );
 HYPRE_Int hypre_SStructMatvecSetSkipDiag ( void *matvec_vdata , HYPRE_Int  skip_diag );
@@ -186,7 +187,7 @@ HYPRE_Int hypre_SStructMatvecSetActiveParts ( void *matvec_vdata , HYPRE_Int *ac
 HYPRE_Int hypre_SStructMatvecSetAllPartsActive( void *matvec_vdata );
 HYPRE_Int hypre_SStructMatvecSetup ( void *matvec_vdata , hypre_SStructMatrix *A , hypre_SStructVector *x );
 HYPRE_Int hypre_SStructMatvecCompute ( void *matvec_vdata , HYPRE_Complex alpha , hypre_SStructMatrix *A , hypre_SStructVector *x , HYPRE_Complex beta , hypre_SStructVector *b , hypre_SStructVector *y );
-HYPRE_Int hypre_SStructMatvecDiagScale ( void *matvec_vdata , HYPRE_Complex *alpha , hypre_SStructMatrix *A , hypre_SStructVector *x , HYPRE_Complex *beta , hypre_SStructVector *y );
+HYPRE_Int hypre_SStructMatrixInvDiagAxpy ( void *matvec_vdata , HYPRE_Complex *alpha , hypre_SStructMatrix *A , hypre_SStructVector *x , HYPRE_Complex *beta , hypre_SStructVector *y );
 HYPRE_Int hypre_SStructMatvecDestroy ( void *matvec_vdata );
 HYPRE_Int hypre_SStructMatvec ( HYPRE_Complex alpha , hypre_SStructMatrix *A , hypre_SStructVector *x , HYPRE_Complex beta , hypre_SStructVector *y );
 

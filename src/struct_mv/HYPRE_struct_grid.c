@@ -147,6 +147,9 @@ HYPRE_StructGridProjectBox(HYPRE_StructGrid  grid,
    return hypre_error_flag;
 }
 
+/*---------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 #if defined(HYPRE_USING_CUDA)
 HYPRE_Int
 HYPRE_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_MemoryLocation data_location )
@@ -154,4 +157,3 @@ HYPRE_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_MemoryLocation dat
    return ( hypre_StructGridSetDataLocation(grid, data_location) );
 }
 #endif
-

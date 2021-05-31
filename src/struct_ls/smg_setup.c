@@ -418,18 +418,19 @@ hypre_SMGSetup( void               *smg_vdata,
    {
       for (l = 0; l < (num_levels - 1); l++)
       {
-         hypre_sprintf(filename, "zout_A.%02d", l);
+         hypre_sprintf(filename, "smg_A.%02d", l);
          hypre_StructMatrixPrint(filename, A_l[l], 0);
-         hypre_sprintf(filename, "zout_PT.%02d", l);
+         hypre_sprintf(filename, "smg_PT.%02d", l);
          hypre_StructMatrixPrint(filename, PT_l[l], 0);
       }
-      hypre_sprintf(filename, "zout_A.%02d", l);
+      hypre_sprintf(filename, "smg_A.%02d", l);
       hypre_StructMatrixPrint(filename, A_l[l], 0);
 
       print_debug = 0;
    }
 #endif
 
+   HYPRE_ANNOTATE_FUNC_END;
+
    return hypre_error_flag;
 }
-

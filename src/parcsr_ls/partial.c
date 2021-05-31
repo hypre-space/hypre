@@ -18,7 +18,6 @@ hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_mark
                                        HYPRE_BigInt *num_old_cpts_global,
                                        HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag,
                                        HYPRE_Real trunc_factor, HYPRE_Int max_elmts,
-                                       HYPRE_Int *col_offd_S_to_A,
                                        hypre_ParCSRMatrix  **P_ptr)
 {
 #ifdef HYPRE_PROFILE
@@ -326,10 +325,7 @@ hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_mark
                   {
                      for (kk = S_offd_i[i1]; kk < S_offd_i[i1+1]; kk++)
                      {
-                        if(col_offd_S_to_A)
-                           k1 = col_offd_S_to_A[S_offd_j[kk]];
-                        else
-                           k1 = S_offd_j[kk];
+                        k1 = S_offd_j[kk];
                         if (CF_marker_offd[k1] > 0)
                         {
                            if(P_marker_offd[k1] < jj_begin_row_offd)
@@ -349,8 +345,6 @@ hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_mark
                for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
                {
                   i1 = S_offd_j[jj];
-                  if(col_offd_S_to_A)
-                     i1 = col_offd_S_to_A[i1];
                   if (CF_marker_offd[i1] > 0)
                   {
                      if(P_marker_offd[i1] < jj_begin_row_offd)
@@ -529,10 +523,7 @@ hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_mark
                   {
                      for (kk = S_offd_i[i1]; kk < S_offd_i[i1+1]; kk++)
                      {
-                        if(col_offd_S_to_A)
-                           k1 = col_offd_S_to_A[S_offd_j[kk]];
-                        else
-                           k1 = S_offd_j[kk];
+                        k1 = S_offd_j[kk];
                         if(CF_marker_offd[k1] >= 0)
                         {
                            if(P_marker_offd[k1] < jj_begin_row_offd)
@@ -553,8 +544,6 @@ hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_mark
                for (jj=S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
                {
                   i1 = S_offd_j[jj];
-                  if(col_offd_S_to_A)
-                     i1 = col_offd_S_to_A[i1];
                   if ( CF_marker_offd[i1] >= 0)
                   {
                      if(P_marker_offd[i1] < jj_begin_row_offd)
@@ -852,7 +841,7 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
                                      HYPRE_BigInt *num_old_cpts_global,
                                      HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag,
                                      HYPRE_Real trunc_factor, HYPRE_Int max_elmts,
-                                     HYPRE_Int sep_weight, HYPRE_Int *col_offd_S_to_A,
+                                     HYPRE_Int sep_weight, 
                                      hypre_ParCSRMatrix  **P_ptr)
 {
    /* Communication Variables */
@@ -1114,10 +1103,7 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
                {
                   for (kk = S_offd_i[i1]; kk < S_offd_i[i1+1]; kk++)
                   {
-                     if(col_offd_S_to_A)
-                        k1 = col_offd_S_to_A[S_offd_j[kk]];
-                     else
-                        k1 = S_offd_j[kk];
+                     k1 = S_offd_j[kk];
                      if (CF_marker_offd[k1] > 0)
                      {
                         if(P_marker_offd[k1] < P_offd_i[ii])
@@ -1137,8 +1123,6 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
             for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
             {
                i1 = S_offd_j[jj];
-               if(col_offd_S_to_A)
-                  i1 = col_offd_S_to_A[i1];
                if (CF_marker_offd[i1] > 0)
                {
                   if(P_marker_offd[i1] < P_offd_i[ii])
@@ -1325,10 +1309,7 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
                {
                   for (kk = S_offd_i[i1]; kk < S_offd_i[i1+1]; kk++)
                   {
-                     if(col_offd_S_to_A)
-                        k1 = col_offd_S_to_A[S_offd_j[kk]];
-                     else
-                        k1 = S_offd_j[kk];
+                     k1 = S_offd_j[kk];
                      if(CF_marker_offd[k1] > 0)
                      {
                         if(P_marker_offd[k1] < jj_begin_row_offd)
@@ -1349,8 +1330,6 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
             for (jj=S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
             {
                i1 = S_offd_j[jj];
-               if(col_offd_S_to_A)
-                  i1 = col_offd_S_to_A[i1];
                if ( CF_marker_offd[i1] > 0)
                {
                   if(P_marker_offd[i1] < jj_begin_row_offd)
@@ -1640,8 +1619,8 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
                   ahat_offd[jj] = 0;
                }
             }
-            if (sum_neg_C*diagonal) alfa = sum_neg/sum_neg_C/diagonal;
-            if (sum_pos_C*diagonal) beta = sum_pos/sum_pos_C/diagonal;
+            if (sum_neg_C*diagonal != 0.0) alfa = sum_neg/sum_neg_C/diagonal;
+            if (sum_pos_C*diagonal != 0.0) beta = sum_pos/sum_pos_C/diagonal;
 
             /*-----------------------------------------------------------------
              * Set interpolation weight by dividing by the diagonal.
@@ -1703,7 +1682,7 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
                   ahat_offd[jj] = 0;
                }
             }
-            if (sum_C*diagonal) alfa = sum/sum_C/diagonal;
+            if (sum_C*diagonal != 0.0) alfa = sum/sum_C/diagonal;
 
             /*-----------------------------------------------------------------
              * Set interpolation weight by dividing by the diagonal.
@@ -1839,7 +1818,6 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
                                      HYPRE_BigInt *num_old_cpts_global,
                                      HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag,
                                      HYPRE_Real trunc_factor, HYPRE_Int max_elmts,
-                                     HYPRE_Int *col_offd_S_to_A,
                                      hypre_ParCSRMatrix  **P_ptr)
 {
    /* Communication Variables */
@@ -2091,10 +2069,7 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
                {
                   for (kk = S_offd_i[i1]; kk < S_offd_i[i1+1]; kk++)
                   {
-                     if(col_offd_S_to_A)
-                        k1 = col_offd_S_to_A[S_offd_j[kk]];
-                     else
-                        k1 = S_offd_j[kk];
+                     k1 = S_offd_j[kk];
                      if (CF_marker_offd[k1] > 0)
                      {
                         if(P_marker_offd[k1] < P_offd_i[ii])
@@ -2114,8 +2089,6 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
             for (jj = S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
             {
                i1 = S_offd_j[jj];
-               if(col_offd_S_to_A)
-                  i1 = col_offd_S_to_A[i1];
                if (CF_marker_offd[i1] > 0)
                {
                   if(P_marker_offd[i1] < P_offd_i[ii])
@@ -2272,10 +2245,7 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
                {
                   for (kk = S_offd_i[i1]; kk < S_offd_i[i1+1]; kk++)
                   {
-                     if(col_offd_S_to_A)
-                        k1 = col_offd_S_to_A[S_offd_j[kk]];
-                     else
-                        k1 = S_offd_j[kk];
+                     k1 = S_offd_j[kk];
                      if(CF_marker_offd[k1] >= 0)
                      {
                         if(P_marker_offd[k1] < jj_begin_row_offd)
@@ -2296,8 +2266,6 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
             for (jj=S_offd_i[i]; jj < S_offd_i[i+1]; jj++)
             {
                i1 = S_offd_j[jj];
-               if(col_offd_S_to_A)
-                  i1 = col_offd_S_to_A[i1];
                if ( CF_marker_offd[i1] >= 0)
                {
                   if(P_marker_offd[i1] < jj_begin_row_offd)
@@ -2568,4 +2536,3 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
 
    return hypre_error_flag;
 }
-

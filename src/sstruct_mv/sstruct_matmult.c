@@ -289,7 +289,7 @@ hypre_SStructMatmultU( HYPRE_Int             nmatrices,
       }
 
       /* 3) Compute (sA_n*uMold + uA_n*uMold) */
-      hypre_ParcsrAdd(1.0, parcsr[0], 1.0, parcsr[1], &parcsr[2]);
+      hypre_ParCSRMatrixAdd(1.0, parcsr[0], 1.0, parcsr[1], &parcsr[2]);
 #if defined(HYPRE_DEBUG) && defined(DEBUG_MATMULT)
       hypre_sprintf(matname, "parcsr_2_%d", m);
       hypre_ParCSRMatrixPrintIJ(parcsr[2], 0, 0, matname);
@@ -314,7 +314,7 @@ hypre_SStructMatmultU( HYPRE_Int             nmatrices,
 #endif
 
       /* 5) Compute (uA_n*uMold + sA_n*uMold + uA_n*uMold) */
-      hypre_ParcsrAdd(1.0, parcsr[0], 1.0, parcsr[2], &parcsr_uM);
+      hypre_ParCSRMatrixAdd(1.0, parcsr[0], 1.0, parcsr[2], &parcsr_uM);
 #if defined(HYPRE_DEBUG) && defined(DEBUG_MATMULT)
       hypre_sprintf(matname, "parcsr_uM_%d", m);
       hypre_ParCSRMatrixPrintIJ(parcsr_uM, 0, 0, matname);

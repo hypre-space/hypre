@@ -40,7 +40,6 @@ hypre_BoomerAMGCreate()
    HYPRE_Real   agg_trunc_factor;
    HYPRE_Real   agg_P12_trunc_factor;
    HYPRE_Real   jacobi_trunc_threshold;
-   HYPRE_Real   S_commpkg_switch;
    HYPRE_Real   CR_rate;
    HYPRE_Real   CR_strong_th;
    HYPRE_Real   A_drop_tol;
@@ -53,6 +52,7 @@ hypre_BoomerAMGCreate()
    HYPRE_Int    P_max_elmts;
    HYPRE_Int    num_functions;
    HYPRE_Int    nodal, nodal_levels, nodal_diag;
+   HYPRE_Int    keep_same_sign;
    HYPRE_Int    num_paths;
    HYPRE_Int    agg_num_levels;
    HYPRE_Int    agg_interp_type;
@@ -65,6 +65,9 @@ hypre_BoomerAMGCreate()
    HYPRE_Int    cgc_its;
    HYPRE_Int    seq_threshold;
    HYPRE_Int    redundant;
+   HYPRE_Int    rap2;
+   HYPRE_Int    keepT;
+   HYPRE_Int    modu_rap;
 
    /* solve params */
    HYPRE_Int    min_iter;
@@ -97,7 +100,7 @@ hypre_BoomerAMGCreate()
    HYPRE_Real   eu_sparse_A;
    char    *euclidfile;
    HYPRE_Int    ilu_lfil;
-   HYPRE_Int	 ilu_type;
+   HYPRE_Int    ilu_type;
    HYPRE_Int    ilu_max_row_nnz;
    HYPRE_Int    ilu_max_iter;
    HYPRE_Real   ilu_droptol;
@@ -153,8 +156,6 @@ hypre_BoomerAMGCreate()
    agg_trunc_factor = 0.0;
    agg_P12_trunc_factor = 0.0;
    jacobi_trunc_threshold = 0.01;
-   S_commpkg_switch = 1.0;
-   interp_type = 0;
    sep_weight = 0;
    coarsen_type = 10;
    interp_type = 6;
@@ -167,6 +168,7 @@ hypre_BoomerAMGCreate()
    nodal = 0;
    nodal_levels = max_levels;
    nodal_diag = 0;
+   keep_same_sign = 0;
    num_paths = 1;
    agg_num_levels = 0;
    post_interp_type = 0;
@@ -252,6 +254,19 @@ hypre_BoomerAMGCreate()
 
    nongalerkin_tol = 0.0;
 
+   rap2 = 0;
+   keepT = 0;
+   modu_rap = 0;
+
+#if defined(HYPRE_USING_GPU)
+   keepT           =  1;
+   modu_rap        =  1;
+   coarsen_type    =  8;
+   relax_down      = 18;
+   relax_up        = 18;
+   agg_interp_type =  7;
+#endif
+
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /*-----------------------------------------------------------------------
@@ -282,7 +297,6 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetAggTruncFactor(amg_data, agg_trunc_factor);
    hypre_BoomerAMGSetAggP12TruncFactor(amg_data, agg_P12_trunc_factor);
    hypre_BoomerAMGSetJacobiTruncThreshold(amg_data, jacobi_trunc_threshold);
-   hypre_BoomerAMGSetSCommPkgSwitch(amg_data, S_commpkg_switch);
    hypre_BoomerAMGSetSepWeight(amg_data, sep_weight);
    hypre_BoomerAMGSetMeasureType(amg_data, measure_type);
    hypre_BoomerAMGSetCoarsenType(amg_data, coarsen_type);
@@ -295,6 +309,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetNodal(amg_data, nodal);
    hypre_BoomerAMGSetNodalLevels(amg_data, nodal_levels);
    hypre_BoomerAMGSetNodal(amg_data, nodal_diag);
+   hypre_BoomerAMGSetKeepSameSign(amg_data, keep_same_sign);
    hypre_BoomerAMGSetNumPaths(amg_data, num_paths);
    hypre_BoomerAMGSetAggNumLevels(amg_data, agg_num_levels);
    hypre_BoomerAMGSetAggInterpType(amg_data, agg_interp_type);
@@ -452,15 +467,9 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataNonGalerkinTol(amg_data) = nongalerkin_tol;
    hypre_ParAMGDataNonGalTolArray(amg_data) = NULL;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   hypre_ParAMGDataRAP2(amg_data)              = 1;
-   hypre_ParAMGDataKeepTranspose(amg_data)     = 1;
-   hypre_ParAMGDataModularizedMatMat(amg_data) = 1;
-#else
-   hypre_ParAMGDataRAP2(amg_data)              = 0;
-   hypre_ParAMGDataKeepTranspose(amg_data)     = 0;
-   hypre_ParAMGDataModularizedMatMat(amg_data) = 0;
-#endif
+   hypre_ParAMGDataRAP2(amg_data)              = rap2;
+   hypre_ParAMGDataKeepTranspose(amg_data)     = keepT;
+   hypre_ParAMGDataModularizedMatMat(amg_data) = modu_rap;
 
    /* information for preserving indices as coarse grid points */
    hypre_ParAMGDataCPointsMarker(amg_data)      = NULL;
@@ -733,8 +742,8 @@ hypre_BoomerAMGDestroy( void *data )
       else if (hypre_ParAMGDataSmoothType(amg_data) == 5 || hypre_ParAMGDataSmoothType(amg_data) == 15 )
       {
          for (i=0; i < smooth_num_levels; i++)
-	 {
-	    HYPRE_ILUDestroy(smoother[i]);
+         {
+            HYPRE_ILUDestroy(smoother[i]);
          }
       }
       else if (hypre_ParAMGDataSmoothType(amg_data) == 6 || hypre_ParAMGDataSmoothType(amg_data) == 16)
@@ -1497,40 +1506,6 @@ hypre_BoomerAMGGetPostInterpType( void     *data,
    }
 
    *post_interp_type = hypre_ParAMGDataPostInterpType(amg_data);
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_BoomerAMGSetSCommPkgSwitch( void     *data,
-                                  HYPRE_Real    S_commpkg_switch )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   hypre_ParAMGDataSCommPkgSwitch(amg_data) = S_commpkg_switch;
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_BoomerAMGGetSCommPkgSwitch( void     *data,
-                                  HYPRE_Real *  S_commpkg_switch )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   *S_commpkg_switch = hypre_ParAMGDataSCommPkgSwitch(amg_data);
 
    return hypre_error_flag;
 }
@@ -3132,6 +3107,25 @@ hypre_BoomerAMGSetNodalDiag( void     *data,
    return hypre_error_flag;
 }
 /*--------------------------------------------------------------------------
+ * Indicate whether to discard same sign coefficients in S for nodal>0 
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGSetKeepSameSign( void      *data,
+                                HYPRE_Int  keep_same_sign )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   hypre_ParAMGDataKeepSameSign(amg_data) = keep_same_sign;
+
+   return hypre_error_flag;
+}
+/*--------------------------------------------------------------------------
  * Indicate the degree of aggressive coarsening
  *--------------------------------------------------------------------------*/
 
@@ -4075,7 +4069,7 @@ hypre_BoomerAMGSetILUMaxRowNnz( void     *data,
 
    return hypre_error_flag;
 }
-HYPRE_Int 
+HYPRE_Int
 hypre_BoomerAMGSetILULocalReordering( void     *data,
                         HYPRE_Int       ilu_reordering_type)
 {

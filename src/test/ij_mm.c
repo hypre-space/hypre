@@ -123,7 +123,15 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-   /* Initialize Hypre */
+   /*-----------------------------------------------------------------
+    * GPU Device binding
+    * Must be done before HYPRE_Init() and should not be changed after
+    *-----------------------------------------------------------------*/
+   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+
+   /*-----------------------------------------------------------
+    * Initialize : must be the first HYPRE function to call
+    *-----------------------------------------------------------*/
    HYPRE_Init();
 
 #if defined(HYPRE_USING_CUDA)
@@ -497,7 +505,7 @@ main( hypre_int argc,
    parcsr_AH_host_2 = hypre_ParCSRMatrixClone_v2(parcsr_AH, 1, HYPRE_MEMORY_HOST);
    hypre_ParCSRMatrixSetNumNonzeros(parcsr_AH_host_2);
 
-   hypre_ParcsrAdd(1.0, parcsr_AH_host, -1.0, parcsr_AH_host_2, &parcsr_error_host);
+   hypre_ParCSRMatrixAdd(1.0, parcsr_AH_host, -1.0, parcsr_AH_host_2, &parcsr_error_host);
    fnorm = hypre_ParCSRMatrixFnorm(parcsr_error_host);
    fnorm0 = hypre_ParCSRMatrixFnorm(parcsr_AH_host);
    rfnorm = fnorm0 > 0 ? fnorm / fnorm0 : fnorm;

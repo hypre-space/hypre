@@ -678,19 +678,25 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    }
    if (cxyz_max == 0.0)
    {
+      /* Do isotropic coarsening */
+      for (d = 0; d < ndim; d++)
+      {
+         cxyz[d] = 1.0;
+      }
       cxyz_max = 1.0;
    }
 
    for (d = 0; d < ndim; d++)
    {
-      if (cxyz[d] > 0)
+      HYPRE_Real  max_anisotropy = HYPRE_REAL_MAX/1000;
+      if (cxyz[d] > (cxyz_max/max_anisotropy))
       {
          cxyz[d] /= cxyz_max;
          dxyz[d] = sqrt(1.0 / cxyz[d]);
       }
       else
       {
-         dxyz[d] = HYPRE_REAL_MAX/1000;
+         dxyz[d] = sqrt(max_anisotropy);
       }
    }
 
@@ -790,6 +796,7 @@ hypre_PFMGCoarsen( hypre_Box     *cbox,
                    HYPRE_Real   **relax_weights_ptr,
                    HYPRE_Int     *num_levels)
 {
+   HYPRE_Int      ndim = hypre_BoxNDim(cbox);
    HYPRE_Int     *cdir_l;
    HYPRE_Int     *active_l;
    HYPRE_Real    *relax_weights;
@@ -799,11 +806,9 @@ hypre_PFMGCoarsen( hypre_Box     *cbox,
    hypre_Index    stride;
 
    HYPRE_Real     alpha, beta, min_dxyz;
-   HYPRE_Int      ndim, d, l, cdir;
+   HYPRE_Int      d, l, cdir;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
-
-   ndim = hypre_BoxNDim(cbox);
 
    /* Allocate data */
    cdir_l        = hypre_TAlloc(HYPRE_Int, max_levels, HYPRE_MEMORY_HOST);

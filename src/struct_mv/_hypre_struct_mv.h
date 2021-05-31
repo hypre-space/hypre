@@ -35,7 +35,7 @@ extern "C" {
 #define HYPRE_MAXDIM 3
 #endif
 
-#if defined(HYPRE_USING_RAJA) || defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_RAJA) || defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) || defined(HYPRE_USING_HIP)
 #define hypre_BoxLoopSetOneBlock()
 #else
 #define hypre_BoxLoopSetOneBlock zypre_BoxLoopSetOneBlock
@@ -1168,7 +1168,7 @@ typedef struct hypre_StructGrid_struct
    HYPRE_Int            num_ghost[2*HYPRE_MAXDIM]; /* ghost layer size */
 
    hypre_BoxManager    *boxman;
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_MemoryLocation data_location;
 #endif
 } hypre_StructGrid;
@@ -1199,7 +1199,7 @@ typedef struct hypre_StructGrid_struct
 #define hypre_StructGridNumBoxes(grid)      (hypre_BoxArraySize(hypre_StructGridBoxes(grid)))
 
 #define hypre_StructGridIDPeriod(grid)      hypre_BoxNeighborsIDPeriod(hypre_StructGridNeighbors(grid))
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #define hypre_StructGridDataLocation(grid)  ((grid) -> data_location)
 #endif
 
@@ -1209,7 +1209,7 @@ typedef struct hypre_StructGrid_struct
 
 #define hypre_ForStructGridBoxI(i, grid)    hypre_ForBoxI(i, hypre_StructGridBoxes(grid))
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #define HYPRE_MIN_GPU_SIZE                  (131072)
 #define hypre_SetDeviceOn()                 hypre_HandleStructExecPolicy(hypre_handle()) = HYPRE_EXEC_DEVICE
 #define hypre_SetDeviceOff()                hypre_HandleStructExecPolicy(hypre_handle()) = HYPRE_EXEC_HOST
@@ -1407,9 +1407,6 @@ typedef struct hypre_CommHandle_struct
 
    HYPRE_Complex    **send_buffers;
    HYPRE_Complex    **recv_buffers;
-
-   HYPRE_Complex      **send_buffers_data;
-   HYPRE_Complex      **recv_buffers_data;
 
    /* set = 0, add = 1 */
    HYPRE_Int          action;
@@ -2264,7 +2261,7 @@ HYPRE_Int hypre_StructGridPrintVTK ( const char *filename, hypre_StructGrid *gri
 HYPRE_Int hypre_StructGridPrint ( FILE *file , hypre_StructGrid *grid );
 HYPRE_Int hypre_StructGridRead ( MPI_Comm comm , FILE *file , hypre_StructGrid **grid_ptr );
 HYPRE_Int hypre_StructGridSetNumGhost ( hypre_StructGrid *grid , HYPRE_Int *num_ghost );
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 HYPRE_Int hypre_StructGridGetMaxBoxSize(hypre_StructGrid *grid);
 HYPRE_Int hypre_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_MemoryLocation data_location );
 #endif
@@ -2336,7 +2333,7 @@ HYPRE_Int hypre_StructMatvecSetup ( void *matvec_vdata , hypre_StructMatrix *A ,
 HYPRE_Int hypre_StructMatvecCompute ( void *matvec_vdata , HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );
 HYPRE_Int hypre_StructMatvecCompute_core_CC ( hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , HYPRE_Int box_id , HYPRE_Int nentries , HYPRE_Int *entries , hypre_Box *compute_box , hypre_Box *x_data_box , hypre_Box *y_data_box );
 HYPRE_Int hypre_StructMatvecCompute_core_VC ( hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , HYPRE_Int box_id , HYPRE_Int nentries , HYPRE_Int *entries , hypre_Box *compute_box , hypre_Box *A_data_box , hypre_Box *x_data_box , hypre_Box *y_data_box );
-HYPRE_Int hypre_StructMatvecDiagScale ( void *matvec_vdata , HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector  *y );
+HYPRE_Int hypre_StructMatrixInvDiagAxpy ( void *matvec_vdata , HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector  *y );
 HYPRE_Int hypre_StructMatvecDestroy ( void *matvec_vdata );
 HYPRE_Int hypre_StructMatvec ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );
 HYPRE_Int hypre_StructMatvecT ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );
@@ -2968,7 +2965,7 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
 #endif
 
 
-#elif !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && !defined(HYPRE_USING_CUDA)
+#elif !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP)
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.

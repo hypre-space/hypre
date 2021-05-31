@@ -229,7 +229,7 @@ HYPRE_Int hypre_StructGridPrintVTK ( const char *filename, hypre_StructGrid *gri
 HYPRE_Int hypre_StructGridPrint ( FILE *file , hypre_StructGrid *grid );
 HYPRE_Int hypre_StructGridRead ( MPI_Comm comm , FILE *file , hypre_StructGrid **grid_ptr );
 HYPRE_Int hypre_StructGridSetNumGhost ( hypre_StructGrid *grid , HYPRE_Int *num_ghost );
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 HYPRE_Int hypre_StructGridGetMaxBoxSize(hypre_StructGrid *grid);
 HYPRE_Int hypre_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_MemoryLocation data_location );
 #endif
@@ -301,7 +301,7 @@ HYPRE_Int hypre_StructMatvecSetup ( void *matvec_vdata , hypre_StructMatrix *A ,
 HYPRE_Int hypre_StructMatvecCompute ( void *matvec_vdata , HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );
 HYPRE_Int hypre_StructMatvecCompute_core_CC ( hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , HYPRE_Int box_id , HYPRE_Int nentries , HYPRE_Int *entries , hypre_Box *compute_box , hypre_Box *x_data_box , hypre_Box *y_data_box );
 HYPRE_Int hypre_StructMatvecCompute_core_VC ( hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , HYPRE_Int box_id , HYPRE_Int nentries , HYPRE_Int *entries , hypre_Box *compute_box , hypre_Box *A_data_box , hypre_Box *x_data_box , hypre_Box *y_data_box );
-HYPRE_Int hypre_StructMatvecDiagScale ( void *matvec_vdata , HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector  *y );
+HYPRE_Int hypre_StructMatrixInvDiagAxpy ( void *matvec_vdata , HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector  *y );
 HYPRE_Int hypre_StructMatvecDestroy ( void *matvec_vdata );
 HYPRE_Int hypre_StructMatvec ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );
 HYPRE_Int hypre_StructMatvecT ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );

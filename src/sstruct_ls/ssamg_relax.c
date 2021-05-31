@@ -1302,7 +1302,7 @@ hypre_SSAMGRelaxMV( void                *relax_vdata,
    if (zero_guess)
    {
       /* x = w*inv(D)*b */
-      hypre_SStructMatvecDiagScale(matvec_vdata, weights, A, b, NULL, x);
+      hypre_SStructMatrixInvDiagAxpy(matvec_vdata, weights, A, b, NULL, x);
       iter++;
    }
 
@@ -1317,7 +1317,7 @@ hypre_SSAMGRelaxMV( void                *relax_vdata,
       hypre_SStructMatvecSetSkipDiag(matvec_vdata, 0);
 
       /* x = (1 - w)*x + w*inv(D)*t */
-      hypre_SStructMatvecDiagScale(matvec_vdata, weights, A, t, mweights, x);
+      hypre_SStructMatrixInvDiagAxpy(matvec_vdata, weights, A, t, mweights, x);
    }
 
    (relax_data -> num_iterations) = iter;

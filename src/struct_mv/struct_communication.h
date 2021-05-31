@@ -146,7 +146,7 @@ typedef struct hypre_CommHandle_struct
 
    HYPRE_Complex      **send_buffers_data;
    HYPRE_Complex      **recv_buffers_data;
-	
+
    /* set = 0, add = 1 */
    HYPRE_Int          action;
 

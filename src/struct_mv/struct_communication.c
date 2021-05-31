@@ -1209,6 +1209,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    HYPRE_Int            num_requests;
    hypre_MPI_Request   *requests;
    hypre_MPI_Status    *status;
+
    HYPRE_Complex      **send_buffers;
    HYPRE_Complex      **recv_buffers;
    HYPRE_Int           *send_bufsizes;
@@ -1430,7 +1431,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
     *--------------------------------------------------------------------*/
 
    j = 0;
-   for(i = 0; i < num_recvs; i++)
+   for (i = 0; i < num_recvs; i++)
    {
       comm_type = hypre_CommPkgRecvType(comm_pkg, i);
       hypre_MPI_Irecv(recv_buffers[i], recv_bufsizes[i]*sizeof(HYPRE_Complex),

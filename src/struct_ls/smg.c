@@ -39,7 +39,7 @@ hypre_SMGCreate( MPI_Comm  comm )
 
    /* initialize */
    (smg_data -> num_levels) = -1;
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    (smg_data -> devicelevel) = 200;
 #endif
    return (void *) smg_data;

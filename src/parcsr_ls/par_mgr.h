@@ -62,6 +62,8 @@ typedef struct
   HYPRE_Int     relax_type;
   HYPRE_Int     logging;
   HYPRE_Int     print_level;
+  HYPRE_Int     frelax_print_level;
+  HYPRE_Int     cg_print_level;
   HYPRE_Int     max_iter;
   HYPRE_Int     relax_order;
   HYPRE_Int     num_relax_sweeps;

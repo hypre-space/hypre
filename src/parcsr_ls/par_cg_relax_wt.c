@@ -125,7 +125,7 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
    if (hypre_ParAMGDataL1Norms(amg_data) != NULL)
       l1_norms = hypre_ParAMGDataL1Norms(amg_data)[level];
 
-#if !defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP)
    if (num_threads > 1)
 #endif
    {

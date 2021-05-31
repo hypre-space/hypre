@@ -35,55 +35,6 @@ hypre_multmod(HYPRE_Int a,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_MergeOrderedArrays: merge two ordered arrays
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_MergeOrderedArrays( HYPRE_Int  size1,     HYPRE_Int  *array1,
-                          HYPRE_Int  size2,     HYPRE_Int  *array2,
-                          HYPRE_Int *size3_ptr, HYPRE_Int **array3_ptr )
-{
-   HYPRE_Int  *array3;
-   HYPRE_Int   i, j, k;
-
-   array3 = hypre_CTAlloc(HYPRE_Int, (size1 + size2), HYPRE_MEMORY_HOST);
-
-   i = j = k = 0;
-   while (i < size1 && j < size2)
-   {
-      if (array1[i] > array2[j])
-      {
-         array3[k++] = array2[j++];
-      }
-      else if (array1[i] < array2[j])
-      {
-         array3[k++] = array1[i++];
-      }
-      else
-      {
-         array3[k++] = array1[i++];
-         j++;
-      }
-   }
-
-   while (i < size1)
-   {
-      array3[k++] = array1[i++];
-   }
-
-   while (j < size2)
-   {
-      array3[k++] = array2[j++];
-   }
-
-   /* Set pointers */
-   *size3_ptr  = k;
-   *array3_ptr = hypre_TReAlloc(array3, HYPRE_Int, k, HYPRE_MEMORY_HOST);
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
  * hypre_partition1D
  *--------------------------------------------------------------------------*/
 void
@@ -112,5 +63,28 @@ hypre_partition1D(HYPRE_Int  n, /* total number of elements */
    {
       *s = j * size + rest;
       *e = (j + 1) * size + rest;
+   }
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_strcpy
+ *
+ * Note: strcpy that allows overlapping in memory
+ *--------------------------------------------------------------------------*/
+
+char *
+hypre_strcpy(char *destination, const char *source)
+{
+   size_t len = strlen(source);
+
+   /* no overlapping */
+   if (source > destination + len || destination > source + len)
+   {
+      return strcpy(destination, source);
+   }
+   else
+   {
+      /* +1: including the terminating null character */
+      return ((char *) memmove(destination, source, len + 1));
    }
 }

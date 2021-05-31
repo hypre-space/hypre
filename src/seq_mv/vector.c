@@ -281,7 +281,7 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
 
    //hypre_SeqVectorPrefetch(v, HYPRE_MEMORY_DEVICE);
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    if (size > 0)
    {
       HYPRE_THRUST_CALL( fill_n, vector_data, size, value );
@@ -297,9 +297,9 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
    {
       vector_data[i] = value;
    }
-#endif /* defined(HYPRE_USING_CUDA) */
+#endif /* defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    hypre_SyncCudaComputeStream(hypre_handle());
 #endif
 
@@ -466,7 +466,7 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 
    //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #if defined(HYPRE_USING_CUBLAS)
    HYPRE_CUBLAS_CALL( cublasDscal(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, y_data, 1) );
 #else
@@ -484,9 +484,9 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
       y_data[i] *= alpha;
    }
 
-#endif /* defined(HYPRE_USING_CUDA) */
+#endif /* defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    hypre_SyncCudaComputeStream(hypre_handle());
 #endif
 
@@ -519,7 +519,7 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
    //hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
    //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #if defined(HYPRE_USING_CUBLAS)
    HYPRE_CUBLAS_CALL( cublasDaxpy(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, x_data, 1, y_data, 1) );
 #else
@@ -537,9 +537,9 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
       y_data[i] += alpha * x_data[i];
    }
 
-#endif /* defined(HYPRE_USING_CUDA) */
+#endif /* defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    hypre_SyncCudaComputeStream(hypre_handle());
 #endif
 
@@ -565,7 +565,7 @@ hypre_SeqVectorElmdivpy( hypre_Vector *x,
    HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Int      size   = hypre_VectorSize(b);
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    //HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_VectorMemoryLocation(x), hypre_VectorMemoryLocation(b) );
    //RL: TODO back to hypre_GetExecPolicy2 later
    HYPRE_ExecutionPolicy exec = HYPRE_EXEC_DEVICE;
@@ -593,7 +593,7 @@ hypre_SeqVectorElmdivpy( hypre_Vector *x,
       }
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    hypre_SyncCudaComputeStream(hypre_handle());
 #endif
 
@@ -625,7 +625,7 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
    //hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
    //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #ifndef HYPRE_COMPLEX
 #if defined(HYPRE_USING_CUBLAS)
    HYPRE_CUBLAS_CALL( cublasDdot(hypre_HandleCublasHandle(hypre_handle()), size, x_data, 1, y_data, 1, &result) );
@@ -636,7 +636,7 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
    /* TODO */
 #error "Complex inner product"
 #endif
-#else /* #if defined(HYPRE_USING_CUDA) */
+#else /* #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
 #pragma omp target teams  distribute  parallel for private(i) reduction(+:result) is_device_ptr(y_data,x_data) map(result)
@@ -647,9 +647,9 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
    {
      result += hypre_conj(y_data[i]) * x_data[i];
    }
-#endif /* defined(HYPRE_USING_CUDA) */
+#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    hypre_SyncCudaComputeStream(hypre_handle());
 #endif
 
@@ -731,7 +731,7 @@ hypre_SeqVectorMax( HYPRE_Complex alpha,
 
    thrust::maximum<HYPRE_Complex> mx;
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_THRUST_CALL( transform,
                       thrust::make_transform_iterator(x_data,        alpha * _1),
                       thrust::make_transform_iterator(x_data + size, alpha * _1),
@@ -750,7 +750,7 @@ hypre_SeqVectorMax( HYPRE_Complex alpha,
       y_data[i] += hypre_max(alpha * x_data[i], beta * y_data[i]);
    }
 
-#endif /* defined(HYPRE_USING_CUDA) */
+#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
    hypre_SyncCudaComputeStream(hypre_handle());
 

@@ -4089,72 +4089,72 @@ void HYPRE_LinSysCore::selectSolver(char* name)
 
    if ( !strcmp(name, "cg" ) )
    {
-      strcpy( HYSolverName_, name );
+      hypre_strcpy( HYSolverName_, name );
       HYSolverID_ = HYPCG;
    }
    else if ( !strcmp(name, "lsicg" ) )
    {
-      strcpy( HYSolverName_, name );
+      hypre_strcpy( HYSolverName_, name );
       HYSolverID_ = HYLSICG;
    }
    else if ( !strcmp(name, "hybrid") )
    {
-      strcpy( HYSolverName_, name );
+      hypre_strcpy( HYSolverName_, name );
       HYSolverID_ = HYHYBRID;
    }
    else if ( !strcmp(name, "gmres") )
    {
-      strcpy( HYSolverName_, name );
+      hypre_strcpy( HYSolverName_, name );
       HYSolverID_ = HYGMRES;
    }
    else if ( !strcmp(name, "fgmres") )
    {
-      strcpy( HYSolverName_, name );
+      hypre_strcpy( HYSolverName_, name );
       HYSolverID_ = HYFGMRES;
    }
    else if ( !strcmp(name, "bicgstab") )
    {
-      strcpy( HYSolverName_, name );
+      hypre_strcpy( HYSolverName_, name );
       HYSolverID_ = HYCGSTAB;
    }
    else if ( !strcmp(name, "bicgstabl") )
    {
-      strcpy( HYSolverName_, name );
+      hypre_strcpy( HYSolverName_, name );
       HYSolverID_ = HYCGSTABL;
    }
    else if ( !strcmp(name, "tfqmr") )
    {
-      strcpy( HYSolverName_, name );
+      hypre_strcpy( HYSolverName_, name );
       HYSolverID_ = HYTFQMR;
    }
    else if ( !strcmp(name, "bicgs") )
    {
-      strcpy( HYSolverName_, name );
+      hypre_strcpy( HYSolverName_, name );
       HYSolverID_ = HYBICGS;
    }
    else if ( !strcmp(name, "symqmr") )
    {
-      strcpy( HYSolverName_, name );
+      hypre_strcpy( HYSolverName_, name );
       HYSolverID_ = HYSYMQMR;
    }
    else if ( !strcmp(name, "boomeramg") )
    {
-      strcpy( HYSolverName_, name );
+      hypre_strcpy( HYSolverName_, name );
       HYSolverID_ = HYAMG;
    }
    else if ( !strcmp(name, "superlu") )
    {
-      strcpy( HYSolverName_, name );
+      hypre_strcpy( HYSolverName_, name );
       HYSolverID_ = HYSUPERLU;
    }
    else if ( !strcmp(name, "superlux") )
    {
-      strcpy( HYSolverName_, name );
+      hypre_strcpy( HYSolverName_, name );
       HYSolverID_ = HYSUPERLUX;
    }
    else if ( !strcmp(name, "dsuperlu") )
    {
-      strcpy( HYSolverName_, name );
+      hypre_strcpy( HYSolverName_, name );
 #ifdef HYPRE_USING_DSUPERLU
       HYSolverID_ = HYDSUPERLU;
 #else
@@ -4165,12 +4165,12 @@ void HYPRE_LinSysCore::selectSolver(char* name)
    }
    else if ( !strcmp(name, "y12m") )
    {
-      strcpy( HYSolverName_, name );
+      hypre_strcpy( HYSolverName_, name );
       HYSolverID_ = HYY12M;
    }
    else if ( !strcmp(name, "amge") )
    {
-      strcpy( HYSolverName_, name );
+      hypre_strcpy( HYSolverName_, name );
       HYSolverID_ = HYAMGE;
    }
    else
@@ -4310,63 +4310,63 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 
    if (!strcmp(name, "identity"))
    {
-      strcpy(HYPreconName_, name);
+      hypre_strcpy(HYPreconName_, name);
       HYPreconID_ = HYIDENTITY;
    }
    else if (!strcmp(name, "diagonal"))
    {
-      strcpy(HYPreconName_, name);
+      hypre_strcpy(HYPreconName_, name);
       HYPreconID_ = HYDIAGONAL;
    }
    else if (!strcmp(name, "pilut"))
    {
-      strcpy(HYPreconName_, name);
+      hypre_strcpy(HYPreconName_, name);
       HYPreconID_ = HYPILUT;
    }
    else if (!strcmp(name, "parasails"))
    {
-      strcpy(HYPreconName_, name);
+      hypre_strcpy(HYPreconName_, name);
       HYPreconID_ = HYPARASAILS;
    }
    else if (!strcmp(name, "boomeramg"))
    {
-      strcpy(HYPreconName_, name);
+      hypre_strcpy(HYPreconName_, name);
       HYPreconID_ = HYBOOMERAMG;
    }
    else if (!strcmp(name, "ddilut"))
    {
-      strcpy(HYPreconName_, name);
+      hypre_strcpy(HYPreconName_, name);
       HYPreconID_ = HYDDILUT;
    }
    else if (!strcmp(name, "schwarz"))
    {
-      strcpy(HYPreconName_, name);
+      hypre_strcpy(HYPreconName_, name);
       HYPreconID_ = HYSCHWARZ;
    }
    else if (!strcmp(name, "ddict"))
    {
-      strcpy(HYPreconName_, name);
+      hypre_strcpy(HYPreconName_, name);
       HYPreconID_ = HYDDICT;
    }
    else if (!strcmp(name, "poly"))
    {
-      strcpy(HYPreconName_, name);
+      hypre_strcpy(HYPreconName_, name);
       HYPreconID_ = HYPOLY;
    }
    else if (!strcmp(name, "euclid"))
    {
-      strcpy(HYPreconName_, name);
+      hypre_strcpy(HYPreconName_, name);
       HYPreconID_ = HYEUCLID;
    }
    else if (!strcmp(name, "blockP"))
    {
-      strcpy(HYPreconName_, name);
+      hypre_strcpy(HYPreconName_, name);
       HYPreconID_ = HYBLOCK;
    }
    else if (!strcmp(name, "ml"))
    {
 #ifdef HAVE_ML
-      strcpy(HYPreconName_, name);
+      hypre_strcpy(HYPreconName_, name);
       HYPreconID_ = HYML;
 #else
       if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3)
@@ -4381,7 +4381,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
    else if (!strcmp(name, "mlmaxwell"))
    {
 #ifdef HAVE_MLMAXWELL
-      strcpy(HYPreconName_, name);
+      hypre_strcpy(HYPreconName_, name);
       HYPreconID_ = HYMLMAXWELL;
 #else
       if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3)
@@ -4396,7 +4396,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
    else if (!strcmp(name, "mli"))
    {
 #ifdef HAVE_MLI
-      strcpy(HYPreconName_, name);
+      hypre_strcpy(HYPreconName_, name);
       HYPreconID_ = HYMLI;
 #else
       if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3)
@@ -4410,25 +4410,25 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
    }
    else if (!strcmp(name, "ams"))
    {
-      strcpy(HYPreconName_, name);
+      hypre_strcpy(HYPreconName_, name);
       HYPreconID_ = HYAMS;
    }
    else if (!strcmp(name, "uzawa"))
    {
-      strcpy(HYPreconName_, name);
+      hypre_strcpy(HYPreconName_, name);
       HYPreconID_ = HYUZAWA;
    }
 #ifdef HAVE_SYSPDE
    else if (!strcmp(name, "syspde"))
    {
-      strcpy(HYPreconName_, name);
+      hypre_strcpy(HYPreconName_, name);
       HYPreconID_ = HYSYSPDE;
    }
 #endif
 #ifdef HYPRE_USING_DSUPERLU
    else if (!strcmp(name, "dsuperlu"))
    {
-      strcpy(HYPreconName_, name);
+      hypre_strcpy(HYPreconName_, name);
       HYPreconID_ = HYDSLU;
    }
 #endif
