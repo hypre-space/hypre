@@ -238,7 +238,7 @@ hypre_CSRMatrixAddSecondPass( HYPRE_Int          firstrow,
    HYPRE_Int        *B_i      = hypre_CSRMatrixI(B);
    HYPRE_Int        *B_j      = hypre_CSRMatrixJ(B);
    HYPRE_Complex    *B_data   = hypre_CSRMatrixData(B);
-   HYPRE_Int         nnzs_B   = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Int         nnzs_B   = hypre_CSRMatrixNumNonzeros(B);
 
    HYPRE_Int        *C_i      = hypre_CSRMatrixI(C);
    HYPRE_Int        *C_j      = hypre_CSRMatrixJ(C);
