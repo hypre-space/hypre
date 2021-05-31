@@ -471,6 +471,8 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    if (ncols_A != nrows_B || num_cols_diag_A != num_rows_diag_B)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC," Error! Incompatible matrix dimensions!\n");
+
+      HYPRE_ANNOTATE_FUNC_END;
       return NULL;
    }
 
@@ -1209,6 +1211,8 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MATMUL] += hypre_MPI_Wtime();
 #endif
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return C;
 }
@@ -3491,6 +3495,19 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
 
    /*if (num_cols_diag_A == num_cols_diag_B) allsquare = 1;*/
 
+   /*---------------------------------------------------------------------
+    * If there exists no CommPkg for A, a CommPkg is generated using
+    * equally load balanced partitionings
+    *--------------------------------------------------------------------*/
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   if (!comm_pkg_A)
+   {
+      hypre_MatvecCommPkgCreate(A);
+      comm_pkg_A = hypre_ParCSRMatrixCommPkg(A);
+   }
+
    hypre_CSRMatrixTranspose(A_diag, &AT_diag, 1);
    hypre_CSRMatrixTranspose(A_offd, &AT_offd, 1);
 
@@ -3926,26 +3943,26 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrixFirstColDiag(C) = first_col_diag;
    hypre_ParCSRMatrixLastRowIndex(C) = first_row_index + (HYPRE_BigInt)local_num_rows - 1;
    hypre_ParCSRMatrixLastColDiag(C) = first_col_diag + (HYPRE_BigInt)local_num_cols - 1;
-
    hypre_ParCSRMatrixColMapOffd(C) = NULL;
-
    hypre_ParCSRMatrixAssumedPartition(C) = NULL;
-
-   hypre_ParCSRMatrixRowStarts(C) = col_starts_A;
-   hypre_ParCSRMatrixColStarts(C) = col_starts_B;
-
    hypre_ParCSRMatrixCommPkg(C) = NULL;
    hypre_ParCSRMatrixCommPkgT(C) = NULL;
+
+   /* C owns row/col starts*/
+   hypre_ParCSRMatrixRowStarts(C) = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   hypre_ParCSRMatrixColStarts(C) = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(hypre_ParCSRMatrixRowStarts(C), hypre_ParCSRMatrixColStarts(A),
+                 HYPRE_BigInt, 2, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(hypre_ParCSRMatrixColStarts(C), hypre_ParCSRMatrixColStarts(B),
+                 HYPRE_BigInt, 2, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   hypre_ParCSRMatrixSetRowStartsOwner(C, 1);
+   hypre_ParCSRMatrixSetColStartsOwner(C, 1);
 
    /* set defaults */
    hypre_ParCSRMatrixOwnsData(C) = 1;
    hypre_ParCSRMatrixRowindices(C) = NULL;
    hypre_ParCSRMatrixRowvalues(C) = NULL;
    hypre_ParCSRMatrixGetrowactive(C) = 0;
-
-   /* Note that C does not own the partitionings */
-   hypre_ParCSRMatrixSetRowStartsOwner(C,0);
-   hypre_ParCSRMatrixSetColStartsOwner(C,0);
 
    if (C_diag)
    {
@@ -4065,6 +4082,8 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
       hypre_SyncCudaComputeStream(hypre_handle());
    }
 #endif
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return C;
 }
@@ -4746,8 +4765,8 @@ hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix   *A,
       A_offd_j_new[i] = j;
    }
 
-   row_starts_new = hypre_CTAlloc(HYPRE_BigInt, j, HYPRE_MEMORY_HOST);
-   col_starts_new = hypre_CTAlloc(HYPRE_BigInt, j, HYPRE_MEMORY_HOST);
+   row_starts_new = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   col_starts_new = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
    hypre_TMemcpy(row_starts_new, hypre_ParCSRMatrixRowStarts(A), HYPRE_BigInt, 2,
                  HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
    hypre_TMemcpy(col_starts_new, hypre_ParCSRMatrixColStarts(A), HYPRE_BigInt, 2,
