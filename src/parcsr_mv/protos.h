@@ -100,7 +100,7 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt ( hypre_ParCSRMatrix *A );
 hypre_CSRMatrix *hypre_ParCSRMatrixExtractAExt ( hypre_ParCSRMatrix *A , HYPRE_Int data , HYPRE_BigInt **pA_ext_row_map );
 
 /* par_csr_assumed_part.c */
-HYPRE_Int hypre_LocateAssummedPartition ( MPI_Comm comm , HYPRE_BigInt row_start , HYPRE_BigInt row_end , HYPRE_BigInt global_first_row , HYPRE_BigInt global_num_rows , hypre_IJAssumedPart *part , HYPRE_Int myid );
+HYPRE_Int hypre_LocateAssumedPartition ( MPI_Comm comm , HYPRE_BigInt row_start , HYPRE_BigInt row_end , HYPRE_BigInt global_first_row , HYPRE_BigInt global_num_rows , hypre_IJAssumedPart *part , HYPRE_Int myid );
 hypre_IJAssumedPart *hypre_AssumedPartitionCreate ( MPI_Comm comm , HYPRE_BigInt global_num , HYPRE_BigInt start , HYPRE_BigInt end );
 HYPRE_Int hypre_ParCSRMatrixCreateAssumedPartition ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_AssumedPartitionDestroy ( hypre_IJAssumedPart *apart );
@@ -154,6 +154,7 @@ HYPRE_Int hypre_MatvecCommPkgDestroy ( hypre_ParCSRCommPkg *comm_pkg );
 HYPRE_Int hypre_BuildCSRMatrixMPIDataType ( HYPRE_Int num_nonzeros , HYPRE_Int num_rows , HYPRE_Complex *a_data , HYPRE_Int *a_i , HYPRE_Int *a_j , hypre_MPI_Datatype *csr_matrix_datatype );
 HYPRE_Int hypre_BuildCSRJDataType ( HYPRE_Int num_nonzeros , HYPRE_Complex *a_data , HYPRE_Int *a_j , hypre_MPI_Datatype *csr_jdata_datatype );
 HYPRE_Int hypre_ParCSRFindExtendCommPkg(MPI_Comm comm, HYPRE_BigInt global_num_cols, HYPRE_BigInt first_col_diag, HYPRE_Int num_cols_diag, HYPRE_BigInt *col_starts, hypre_IJAssumedPart *apart, HYPRE_Int indices_len, HYPRE_BigInt *indices, hypre_ParCSRCommPkg **extend_comm_pkg);
+
 /* par_csr_matop.c */
 void hypre_ParMatmul_RowSizes ( HYPRE_MemoryLocation memory_location , HYPRE_Int **C_diag_i , HYPRE_Int **C_offd_i , HYPRE_Int *rownnz_A , HYPRE_Int *A_diag_i , HYPRE_Int *A_diag_j , HYPRE_Int *A_offd_i , HYPRE_Int *A_offd_j , HYPRE_Int *B_diag_i , HYPRE_Int *B_diag_j , HYPRE_Int *B_offd_i , HYPRE_Int *B_offd_j , HYPRE_Int *B_ext_diag_i , HYPRE_Int *B_ext_diag_j , HYPRE_Int *B_ext_offd_i , HYPRE_Int *B_ext_offd_j , HYPRE_Int *map_B_to_C , HYPRE_Int *C_diag_size , HYPRE_Int *C_offd_size , HYPRE_Int num_rownnz_A , HYPRE_Int num_rows_diag_A , HYPRE_Int num_cols_offd_A , HYPRE_Int  allsquare , HYPRE_Int num_cols_diag_B , HYPRE_Int num_cols_offd_B , HYPRE_Int num_cols_offd_C );
 hypre_ParCSRMatrix *hypre_ParMatmul ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B );
@@ -172,6 +173,7 @@ HYPRE_Complex hypre_ParCSRMatrixLocalSumElts ( hypre_ParCSRMatrix *A );
 HYPRE_Int hypre_ParCSRMatrixAminvDB ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B , HYPRE_Complex *d , hypre_ParCSRMatrix **C_ptr );
 hypre_ParCSRMatrix *hypre_ParTMatmul ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B );
 HYPRE_Real hypre_ParCSRMatrixFnorm( hypre_ParCSRMatrix *A );
+HYPRE_Int hypre_ParCSRMatrixInfNorm ( hypre_ParCSRMatrix *A , HYPRE_Real *norm );
 HYPRE_Int hypre_ExchangeExternalRowsInit( hypre_CSRMatrix *B_ext, hypre_ParCSRCommPkg *comm_pkg_A, void **request_ptr);
 hypre_CSRMatrix* hypre_ExchangeExternalRowsWait(void *vequest);
 HYPRE_Int hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix *B_ext, hypre_ParCSRCommPkg *comm_pkg_A, void **request_ptr);
@@ -201,7 +203,6 @@ HYPRE_Int hypre_ParvecBdiagInvScal( hypre_ParVector *b, HYPRE_Int blockSize, hyp
 HYPRE_Int hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix *A, HYPRE_Int blockSize, hypre_ParCSRMatrix **As);
 
 HYPRE_Int hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, HYPRE_BigInt *cpts_starts, const char *job, hypre_ParCSRMatrix **B_ptr, HYPRE_Real strength_thresh);
-HYPRE_Int hypre_ParCSRMatrixInfNorm ( hypre_ParCSRMatrix *A , HYPRE_Real *norm );
 HYPRE_Int hypre_ParCSRMatrixReorder ( hypre_ParCSRMatrix *A );
 HYPRE_Int hypre_ParCSRMatrixAdd( HYPRE_Complex alpha, hypre_ParCSRMatrix *A, HYPRE_Complex beta, hypre_ParCSRMatrix *B, hypre_ParCSRMatrix **Cout);
 
