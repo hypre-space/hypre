@@ -40,6 +40,7 @@ FILES =\
  binsearch.c\
  exchange_data.c\
  fortran_matrix.c\
+ log.c\
  ap.c\
  complex.c\
  error.c\
