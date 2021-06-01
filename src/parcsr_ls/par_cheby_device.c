@@ -23,29 +23,19 @@
 
 
 /**
- * @brief Grabs the diagonal, takes the square root of the reciporacl and save
+ * @brief Solve using a chebyshev polynomial on the device
  *
- * Performs
- * o = u
- * u = r * a
- * For vectors o and u, with scalar a
+ * @param[in] A Matrix to relax with
+ * @param[in] f right-hand side
+ * @param[in] ds_data Diagonal information
+ * @param[in] coefs Polynomial coefficients
+ * @param[in] order Order of the polynomial
+ * @param[in] scale Whether or not to scale by diagonal
+ * @param[in] scale Whether or not to use a variant
+ * @param[in,out] u Initial/updated approximation
+ * @param[out] v Temp vector
+ * @param[out] v Temp Vector
  */
-template<typename T1, typename T2>
-struct grab_diagonal
-{
-   const T1* rowptrs;
-   const T2* vals;
-
-   grab_diagonal(T1* _rowptrs, T2* _vals): rowptrs(_rowptrs), vals(_vals) {}
-
-   __host__ __device__ T2 operator()(T1 v) 
-   {
-      return 1/sqrt(vals[rowptrs[v]]);
-   }
-};
-#endif
-
-
 HYPRE_Int hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax with */
                             hypre_ParVector *f,    /* right-hand side */
                             HYPRE_Real *ds_data,
