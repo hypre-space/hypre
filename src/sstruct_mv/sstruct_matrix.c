@@ -1817,7 +1817,6 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
    nrows = sizes[1] - sizes[0] + 1;
 
    /* Set row sizes */
-   m = 0;
    hypre_SetIndex(stride, 1);
    row_sizes = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
