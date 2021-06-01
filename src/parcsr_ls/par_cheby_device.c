@@ -19,7 +19,6 @@
 #include "_hypre_utilities.hpp"
 
 
-#if defined(HYPRE_USING_CUDA)
 
 
 /**
@@ -54,7 +53,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix t
 
    HYPRE_Real  *r_data = hypre_VectorData(hypre_ParVectorLocalVector(r));
 
-   HYPRE_Int i, j;
+   HYPRE_Int i;
    HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag);
  
    HYPRE_Real mult;
