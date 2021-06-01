@@ -984,11 +984,8 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_Setup ( hypre_ParCSRMatrix *A , HYPRE_Real max
 HYPRE_Int hypre_ParCSRRelax_Cheby_Solve ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Real *ds_data , HYPRE_Real *coefs , HYPRE_Int order , HYPRE_Int scale , HYPRE_Int variant , hypre_ParVector *u , hypre_ParVector *v , hypre_ParVector *r );
 
 HYPRE_Int hypre_ParCSRRelax_Cheby_SolveHost ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Real *ds_data , HYPRE_Real *coefs , HYPRE_Int order , HYPRE_Int scale , HYPRE_Int variant , hypre_ParVector *u , hypre_ParVector *v , hypre_ParVector *r );
-HYPRE_Int hypre_ParCSRGrabDiagonal ( hypre_ParCSRMatrix *A , HYPRE_Real *ds_data );
-HYPRE_Int hypre_ParCSRGrabDiagonalHost ( hypre_ParCSRMatrix *A , HYPRE_Real *ds_data );
 
 /* par_cheby_device.c */
-HYPRE_Int hypre_ParCSRGrabDiagonalDevice ( hypre_ParCSRMatrix *A , HYPRE_Real *ds_data );
 HYPRE_Int hypre_ParCSRRelax_Cheby_SolveDevice ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Real *ds_data , HYPRE_Real *coefs , HYPRE_Int order , HYPRE_Int scale , HYPRE_Int variant , hypre_ParVector *u , hypre_ParVector *v , hypre_ParVector *r );
 
 /* par_coarsen.c */

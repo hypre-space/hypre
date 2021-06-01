@@ -240,7 +240,7 @@ hypre_ParCSRMaxEigEstimateCGHost( hypre_ParCSRMatrix *A,     /* matrix to relax 
 
    if (scale)
    {
-      hypre_ParCSRGrabDiagonal(A, ds_data);
+      hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(A), ds_data, 3);
    }
    else
    {

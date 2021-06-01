@@ -39,50 +39,6 @@ means half, and .1 means 10percent)
 
 *******************************************************************************/
 
-int hypre_ParCSRGrabDiagonalHost(hypre_ParCSRMatrix *A, HYPRE_Real *ds_data) {
-
-   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Real      *A_diag_data  = hypre_CSRMatrixData(A_diag);
-   HYPRE_Int       *A_diag_i     = hypre_CSRMatrixI(A_diag);
-   HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag);
-
-   HYPRE_Real diag;
-   HYPRE_Int j;
-
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j,diag) HYPRE_SMP_SCHEDULE 
-#endif
-   for (j = 0; j < num_rows; j++)
-   {
-      diag = A_diag_data[A_diag_i[j]];
-      ds_data[j] = 1/sqrt(diag);
-   }
-
-   return hypre_error_flag;
-}
-
-int hypre_ParCSRGrabDiagonal(hypre_ParCSRMatrix *A, HYPRE_Real* ds_data) {
-#if defined(HYPRE_USING_CUDA)
-   hypre_GpuProfilingPushRange("GradDiag");
-#endif
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
-   HYPRE_Int ierr = 0;
-   if (exec == HYPRE_EXEC_HOST) 
-   {
-      ierr = hypre_ParCSRGrabDiagonalHost(A,ds_data);
-   }
-#if defined(HYPRE_USING_CUDA)
-   else
-   {
-      ierr = hypre_ParCSRGrabDiagonalDevice(A,ds_data);
-   }
-#endif
-#if defined(HYPRE_USING_CUDA)
-   hypre_GpuProfilingPopRange();
-#endif
-   return ierr;
-}
-
 
 HYPRE_Int hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
                             HYPRE_Real max_eig,      
@@ -218,7 +174,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A, /* matrix to rela
    {
       /*grab 1/sqrt(diagonal) */
       ds_data = hypre_CTAlloc(HYPRE_Real,  num_rows, hypre_ParCSRMatrixMemoryLocation(A));
-      hypre_ParCSRGrabDiagonalHost(A, ds_data);
+      hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(A), ds_data, 0);
    }/* end of scaling code */
    *ds_ptr = ds_data;
 

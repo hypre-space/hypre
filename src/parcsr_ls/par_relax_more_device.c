@@ -74,7 +74,7 @@ hypre_ParCSRMaxEigEstimateCGDevice( hypre_ParCSRMatrix *A,     /* matrix to rela
 #if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPushRange("ParCSRMaxEigEstimate_Setup");
 #endif
-   HYPRE_Int i, j, err;
+   HYPRE_Int i, err;
    hypre_ParVector *p;
    hypre_ParVector *s;
    hypre_ParVector *r;
@@ -86,14 +86,9 @@ hypre_ParCSRMaxEigEstimateCGDevice( hypre_ParCSRMatrix *A,     /* matrix to rela
 
    HYPRE_Real lambda_max ;
    HYPRE_Real beta, gamma = 0.0, alpha, sdotp, gamma_old, alphainv;
-   HYPRE_Real diag;
    HYPRE_Real lambda_min;
    HYPRE_Real *s_data, *p_data, *ds_data, *u_data;
    HYPRE_Int local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
-
-   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Real *A_diag_data = hypre_CSRMatrixData(A_diag);
-   HYPRE_Int *A_diag_i = hypre_CSRMatrixI(A_diag);
 
    /* check the size of A - don't iterate more than the size */
    HYPRE_BigInt size = hypre_ParCSRMatrixGlobalNumRows(A);
@@ -191,7 +186,7 @@ hypre_ParCSRMaxEigEstimateCGDevice( hypre_ParCSRMatrix *A,     /* matrix to rela
 #endif
 
    if (scale) {
-      hypre_ParCSRGrabDiagonal(A, ds_data);
+      hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(A), ds_data, 3);
    }
    else
    {

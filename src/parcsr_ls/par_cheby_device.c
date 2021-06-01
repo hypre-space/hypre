@@ -188,22 +188,6 @@ struct grab_diagonal
 };
 #endif
 
-int hypre_ParCSRGrabDiagonalDevice(hypre_ParCSRMatrix *A, HYPRE_Real *ds_data) {
-
-   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Real      *A_diag_data  = hypre_CSRMatrixData(A_diag);
-   HYPRE_Int       *A_diag_i     = hypre_CSRMatrixI(A_diag);
-   HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag);
-
-   thrust::counting_iterator<HYPRE_Int> a(0);
-
-   HYPRE_THRUST_CALL(transform,
-         a,
-         a+num_rows,
-   ds_data,
-   grab_diagonal<HYPRE_Int, HYPRE_Real>(A_diag_i, A_diag_data));
-   return hypre_error_flag;
-}
 
 HYPRE_Int hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax with */
                             hypre_ParVector *f,    /* right-hand side */
