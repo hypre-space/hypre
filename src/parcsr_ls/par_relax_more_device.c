@@ -60,6 +60,10 @@ struct xy
    }
 };
 
+/**
+ * @brief Calculates row sums and other metrics of a matrix on the device
+ * to be used for the MaxEigEstimate
+ */
 __global__
 void
 hypreCUDAKernel_CSRMaxEigEstimate( HYPRE_Int      nrows,
@@ -151,6 +155,13 @@ hypreCUDAKernel_CSRMaxEigEstimate( HYPRE_Int      nrows,
    }
 }
 
+/**
+ * @brief Estimates the max eigenvalue using infinity norm on the device
+ *
+ * @param[in] A Matrix to relax with
+ * @param[in] to scale by diagonal
+ * @param[out] Maximum eigenvalue
+ */
 HYPRE_Int
 hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix* A,
                                   HYPRE_Int  scale,
@@ -231,10 +242,15 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix* A,
 }
 
 
-/******************************************************************************
-   use CG to get the eigenvalue estimate
-  scale means get eig est of  (D^{-1/2} A D^{-1/2}
-******************************************************************************/
+/**
+ *  @brief Uses CG to get the eigenvalue estimate on the device
+ *
+ *  @param[in] A Matrix to relax with
+ *  @param[in] scale Gets the eigenvalue est of D^{-1/2} A D^{-1/2}
+ *  @param[in] max_iter Maximum number of CG iterations
+ *  @param[out] max_eig Estimated max eigenvalue
+ *  @param[out] min_eig Estimated min eigenvalue
+ */
 HYPRE_Int
 hypre_ParCSRMaxEigEstimateCGDevice( hypre_ParCSRMatrix *A,     /* matrix to relax with */
                               HYPRE_Int           scale, /* scale by diagonal?*/

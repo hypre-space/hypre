@@ -18,11 +18,13 @@
 HYPRE_Int hypre_LINPACKcgtql1(HYPRE_Int*,HYPRE_Real *,HYPRE_Real *,HYPRE_Int *);
 HYPRE_Real hypre_LINPACKcgpthy(HYPRE_Real*, HYPRE_Real*);
 
-/******************************************************************************
+/**
+ * @brief Estimates the max eigenvalue using infinity norm on the host
  *
- *use max norm to estimate largest eigenvalue
- *
- *****************************************************************************/
+ * @param[in] A Matrix to relax with
+ * @param[in] to scale by diagonal
+ * @param[out] Maximum eigenvalue
+ */
 HYPRE_Int
 hypre_ParCSRMaxEigEstimateHost(hypre_ParCSRMatrix *A, /* matrix to relax with */
                            HYPRE_Int scale, /* scale by diagonal?*/
@@ -117,6 +119,14 @@ hypre_ParCSRMaxEigEstimateHost(hypre_ParCSRMatrix *A, /* matrix to relax with */
    return hypre_error_flag;
 }
 
+/**
+ * @brief Estimates the max eigenvalue using infinity norm. Will determine
+ * whether or not to use host or device internally
+ *
+ * @param[in] A Matrix to relax with
+ * @param[in] to scale by diagonal
+ * @param[out] Maximum eigenvalue
+ */
 HYPRE_Int
 hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax with */
                            HYPRE_Int scale, /* scale by diagonal?*/
@@ -143,10 +153,16 @@ hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax with */
    return ierr;
 }
 
-/******************************************************************************
-   use CG to get the eigenvalue estimate
-  scale means get eig est of  (D^{-1/2} A D^{-1/2}
-******************************************************************************/
+/**
+ *  @brief Uses CG to get the eigenvalue estimate. Will determine whether to use
+ *  host or device internally
+ *
+ *  @param[in] A Matrix to relax with
+ *  @param[in] scale Gets the eigenvalue est of D^{-1/2} A D^{-1/2}
+ *  @param[in] max_iter Maximum number of iterations for CG
+ *  @param[out] max_eig Estimated max eigenvalue
+ *  @param[out] min_eig Estimated min eigenvalue
+ */
 HYPRE_Int
 hypre_ParCSRMaxEigEstimateCG( hypre_ParCSRMatrix *A,     /* matrix to relax with */
                               HYPRE_Int           scale, /* scale by diagonal?*/
@@ -175,10 +191,15 @@ hypre_ParCSRMaxEigEstimateCG( hypre_ParCSRMatrix *A,     /* matrix to relax with
    return ierr;
 }
 
-/******************************************************************************
-   use CG to get the eigenvalue estimate
-  scale means get eig est of  (D^{-1/2} A D^{-1/2}
-******************************************************************************/
+/**
+ *  @brief Uses CG to get the eigenvalue estimate on the host
+ *
+ *  @param[in] A Matrix to relax with
+ *  @param[in] scale Gets the eigenvalue est of D^{-1/2} A D^{-1/2}
+ *  @param[in] max_iter Maximum number of iterations for CG
+ *  @param[out] max_eig Estimated max eigenvalue
+ *  @param[out] min_eig Estimated min eigenvalue
+ */
 HYPRE_Int
 hypre_ParCSRMaxEigEstimateCGHost( hypre_ParCSRMatrix *A,     /* matrix to relax with */
                               HYPRE_Int           scale, /* scale by diagonal?*/

@@ -40,6 +40,22 @@ means half, and .1 means 10percent)
 *******************************************************************************/
 
 
+/**
+ * @brief Setups of coefficients (and optional diagonal scaling elements) for
+ * Chebyshev relaxation
+ *
+ * Will calculate ds_ptr on device/host depending on where A is located
+ *
+ * @param[in] A Matrix for which to seteup
+ * @param[in] max_eig Maximum eigenvalue
+ * @param[in] min_eig Maximum eigenvalue
+ * @param[in] fraction Fraction used to calculate lower bound
+ * @param[in] order Polynomial order to use [1,4]
+ * @param[in] scale Whether or not to scale by the diagonal
+ * @param[in] variant Whether or not to use a variant of Chebyshev (0 standard, 1 variant)
+ * @param[out] coefs_ptr *coefs_ptr will be allocated to contain coefficients of the polynomial
+ * @param[out] ds_ptr *ds_ptr will be allocated to allow scaling by the diagonal
+ */
 HYPRE_Int hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
                             HYPRE_Real max_eig,      
                             HYPRE_Real min_eig,     
@@ -181,6 +197,20 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A, /* matrix to rela
    return hypre_error_flag;
 }
 
+/**
+ * @brief Solve using a chebyshev polynomial on the host
+ *
+ * @param[in] A Matrix to relax with
+ * @param[in] f right-hand side
+ * @param[in] ds_data Diagonal information
+ * @param[in] coefs Polynomial coefficients
+ * @param[in] order Order of the polynomial
+ * @param[in] scale Whether or not to scale by diagonal
+ * @param[in] scale Whether or not to use a variant
+ * @param[in,out] u Initial/updated approximation
+ * @param[out] v Temp vector
+ * @param[out] v Temp Vector
+ */
 HYPRE_Int hypre_ParCSRRelax_Cheby_SolveHost(hypre_ParCSRMatrix *A, /* matrix to relax with */
                             hypre_ParVector *f,    /* right-hand side */
                             HYPRE_Real *ds_data,
@@ -345,6 +375,22 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_SolveHost(hypre_ParCSRMatrix *A, /* matrix to 
    return hypre_error_flag;
 }
 
+/**
+ * @brief Solve using a chebyshev polynomial 
+ *
+ * Determines whether to solve on host or device
+ *
+ * @param[in] A Matrix to relax with
+ * @param[in] f right-hand side
+ * @param[in] ds_data Diagonal information
+ * @param[in] coefs Polynomial coefficients
+ * @param[in] order Order of the polynomial
+ * @param[in] scale Whether or not to scale by diagonal
+ * @param[in] scale Whether or not to use a variant
+ * @param[in,out] u Initial/updated approximation
+ * @param[out] v Temp vector
+ * @param[out] v Temp Vector
+ */
 HYPRE_Int hypre_ParCSRRelax_Cheby_Solve(hypre_ParCSRMatrix *A, /* matrix to relax with */
                             hypre_ParVector *f,    /* right-hand side */
                             HYPRE_Real *ds_data,
