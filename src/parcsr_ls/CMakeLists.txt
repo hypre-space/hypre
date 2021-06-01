@@ -65,6 +65,7 @@ set(SRCS
   par_coarsen.c
   par_cgc_coarsen.c
   par_cheby.c
+  par_cheby_device.c
   par_coarse_parms.c
   par_coordinates.c
   par_cr.c
@@ -95,6 +96,7 @@ set(SRCS
   par_vardifconv_rs.c
   par_relax.c
   par_relax_more.c
+  par_relax_more_device.c
   par_relax_interface.c
   par_scaled_matnorm.c
   par_schwarz.c
