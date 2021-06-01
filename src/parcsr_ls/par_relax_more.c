@@ -24,7 +24,7 @@ HYPRE_Real hypre_LINPACKcgpthy(HYPRE_Real*, HYPRE_Real*);
  *
  *****************************************************************************/
 HYPRE_Int
-hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax with */
+hypre_ParCSRMaxEigEstimateHost(hypre_ParCSRMatrix *A, /* matrix to relax with */
                            HYPRE_Int scale, /* scale by diagonal?*/
                            HYPRE_Real *max_eig)
 {
@@ -115,6 +115,32 @@ hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax with */
    *max_eig = e_max;
 
    return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax with */
+                           HYPRE_Int scale, /* scale by diagonal?*/
+                           HYPRE_Real *max_eig)
+{
+#if defined(HYPRE_USING_CUDA)
+   hypre_GpuProfilingPushRange("ParCSRMaxEigEstimate");
+#endif
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+   HYPRE_Int ierr = 0;
+   if (exec == HYPRE_EXEC_HOST) 
+   {
+      ierr = hypre_ParCSRMaxEigEstimateHost(A,scale,max_eig);
+   }
+#if defined(HYPRE_USING_CUDA)
+   else
+   {
+      ierr = hypre_ParCSRMaxEigEstimateDevice(A,scale,max_eig);
+   }
+#endif
+#if defined(HYPRE_USING_CUDA)
+   hypre_GpuProfilingPopRange();
+#endif
+   return ierr;
 }
 
 /******************************************************************************
