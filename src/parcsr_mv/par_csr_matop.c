@@ -1163,10 +1163,6 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
                                 col_starts_B, num_cols_offd_C,
                                 C_diag_size, C_offd_size);
 
-   /* Note that C does not own the partitionings */
-   hypre_ParCSRMatrixSetRowStartsOwner(C, 0);
-   hypre_ParCSRMatrixSetColStartsOwner(C, 0);
-
    C_diag = hypre_ParCSRMatrixDiag(C);
    hypre_CSRMatrixData(C_diag) = C_diag_data;
    hypre_CSRMatrixI(C_diag)    = C_diag_i;
@@ -1186,6 +1182,16 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 
    hypre_CSRMatrixMemoryLocation(C_diag) = memory_location_C;
    hypre_CSRMatrixMemoryLocation(C_offd) = memory_location_C;
+
+   /* C owns row/col starts*/
+   hypre_ParCSRMatrixRowStarts(C) = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   hypre_ParCSRMatrixColStarts(C) = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(hypre_ParCSRMatrixRowStarts(C), row_starts_A, HYPRE_BigInt, 2,
+                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(hypre_ParCSRMatrixColStarts(C), col_starts_B, HYPRE_BigInt, 2,
+                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   hypre_ParCSRMatrixSetRowStartsOwner(C, 1);
+   hypre_ParCSRMatrixSetColStartsOwner(C, 1);
 
    /*-----------------------------------------------------------------------
     *  Free various arrays
@@ -3162,7 +3168,6 @@ hypre_ParCSRMatrixAminvDB( hypre_ParCSRMatrix *A,
    /*C_diag_array = hypre_CTAlloc(HYPRE_Int, num_threads);
      C_offd_array = hypre_CTAlloc(HYPRE_Int,  num_threads, HYPRE_MEMORY_HOST);*/
 
-
    /*---------------------------------------------------------------------
     * If there exists no CommPkg for B, a CommPkg is generated
     *--------------------------------------------------------------------*/
@@ -3188,13 +3193,13 @@ hypre_ParCSRMatrixAminvDB( hypre_ParCSRMatrix *A,
    size = num_rows/num_threads;
    rest = num_rows - size*num_threads;
 
-   D_tmp = hypre_CTAlloc(HYPRE_Complex,  num_rows, HYPRE_MEMORY_HOST);
+   D_tmp = hypre_CTAlloc(HYPRE_Complex, num_rows, HYPRE_MEMORY_HOST);
 
    if (num_cols_offd_A)
    {
-      map_to_B = hypre_CTAlloc(HYPRE_Int,  num_cols_offd_A, HYPRE_MEMORY_HOST);
+      map_to_B = hypre_CTAlloc(HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST);
       cnt = 0;
-      for (i=0; i < num_cols_offd_A; i++)
+      for (i = 0; i < num_cols_offd_A; i++)
       {
          while (col_map_offd_B[cnt] < col_map_offd_A[i])
          {
@@ -3225,7 +3230,7 @@ hypre_ParCSRMatrixAminvDB( hypre_ParCSRMatrix *A,
       nmax = hypre_max(num_rows, num_cols_offd_B);
       A_marker = hypre_CTAlloc(HYPRE_Int,  nmax, HYPRE_MEMORY_HOST);
 
-      for (i=0; i < num_rows; i++)
+      for (i = 0; i < num_rows; i++)
       {
          A_marker[i] = -1;
       }
@@ -3951,10 +3956,10 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    /* C owns row/col starts*/
    hypre_ParCSRMatrixRowStarts(C) = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
    hypre_ParCSRMatrixColStarts(C) = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(hypre_ParCSRMatrixRowStarts(C), hypre_ParCSRMatrixColStarts(A),
-                 HYPRE_BigInt, 2, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(hypre_ParCSRMatrixColStarts(C), hypre_ParCSRMatrixColStarts(B),
-                 HYPRE_BigInt, 2, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(hypre_ParCSRMatrixRowStarts(C), col_starts_A, HYPRE_BigInt, 2,
+                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(hypre_ParCSRMatrixColStarts(C), col_starts_B, HYPRE_BigInt, 2,
+                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
    hypre_ParCSRMatrixSetRowStartsOwner(C, 1);
    hypre_ParCSRMatrixSetColStartsOwner(C, 1);
 

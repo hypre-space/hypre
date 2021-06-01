@@ -54,7 +54,6 @@ hypre_ParCSRMatrixCreate( MPI_Comm comm,
 
    if (!row_starts)
    {
-
       hypre_GenerateLocalPartitioning(global_num_rows, num_procs, my_id,
                                       &row_starts);
    }
@@ -274,9 +273,15 @@ hypre_ParCSRMatrixClone_v2(hypre_ParCSRMatrix *A, HYPRE_Int copy_data, HYPRE_Mem
                                  hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(A)),
                                  hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(A)) );
 
-   /* !!! S does not own Row/Col-Starts */
-   hypre_ParCSRMatrixSetRowStartsOwner(S, 0);
-   hypre_ParCSRMatrixSetColStartsOwner(S, 0);
+   /* C owns row/col starts*/
+   hypre_ParCSRMatrixRowStarts(S) = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   hypre_ParCSRMatrixColStarts(S) = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(hypre_ParCSRMatrixRowStarts(S), hypre_ParCSRMatrixRowStarts(A),
+                 HYPRE_BigInt, 2, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(hypre_ParCSRMatrixColStarts(S), hypre_ParCSRMatrixColStarts(A),
+                 HYPRE_BigInt, 2, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   hypre_ParCSRMatrixSetRowStartsOwner(S, 1);
+   hypre_ParCSRMatrixSetColStartsOwner(S, 1);
 
    hypre_ParCSRMatrixNumNonzeros(S)  = hypre_ParCSRMatrixNumNonzeros(A);
    hypre_ParCSRMatrixDNumNonzeros(S) = hypre_ParCSRMatrixNumNonzeros(A);
