@@ -1299,8 +1299,8 @@ HYPRE_IJMatrixAdd( HYPRE_Complex    alpha,
    }
 
    /* Copy row/col partitioning of A to C */
-   row_partitioning_C = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
-   col_partitioning_C = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
+   row_partitioning_C = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   col_partitioning_C = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
    for (i = 0; i < 2; i++)
    {
       row_partitioning_C[i] = row_partitioning_A[i];
