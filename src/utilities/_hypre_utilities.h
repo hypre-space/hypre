@@ -1645,7 +1645,6 @@ void hypre_GpuProfilingPopRange();
 
 /* utilities.c */
 HYPRE_Int hypre_multmod(HYPRE_Int a, HYPRE_Int b, HYPRE_Int mod);
-HYPRE_Int hypre_MergeOrderedArrays( HYPRE_Int size1 , HYPRE_Int *array1 , HYPRE_Int size2 , HYPRE_Int *array2 , HYPRE_Int *size3_ptr , HYPRE_Int **array3_ptr);
 void hypre_partition1D(HYPRE_Int n, HYPRE_Int p, HYPRE_Int j, HYPRE_Int *s, HYPRE_Int *e);
 char *hypre_strcpy(char *destination, const char *source);
 
