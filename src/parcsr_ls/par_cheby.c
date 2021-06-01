@@ -174,7 +174,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A, /* matrix to rela
    {
       /*grab 1/sqrt(diagonal) */
       ds_data = hypre_CTAlloc(HYPRE_Real,  num_rows, hypre_ParCSRMatrixMemoryLocation(A));
-      hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(A), ds_data, 0);
+      hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(A), ds_data, 3);
    }/* end of scaling code */
    *ds_ptr = ds_data;
 
