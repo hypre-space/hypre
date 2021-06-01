@@ -64,7 +64,6 @@ typedef struct
    HYPRE_Int    (*ClearVector)   ( void *x );
    HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x );
    HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y );
-   HYPRE_Int    (*PrintVector)   ( void *x, const char *filename );
 
    HYPRE_Int    (*precond)       ();
    HYPRE_Int    (*precond_setup) ();
@@ -103,7 +102,7 @@ typedef struct
 
    /* log info (always logged) */
    HYPRE_Int      num_iterations;
- 
+
    HYPRE_Int     print_level; /* printing when print_level>0 */
    HYPRE_Int     logging;  /* extra computations for logging when logging>0 */
    HYPRE_Real  *norms;
