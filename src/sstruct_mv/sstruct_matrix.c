@@ -872,7 +872,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
          max_size = hypre_max(max_size, row_sizes[m]);
       }
    }
-   hypre_SStructMatrixTmpColCoords(matrix) = hypre_CTAlloc(HYPRE_Int, max_size, HYPRE_MEMORY_HOST);
+   hypre_SStructMatrixTmpColCoords(matrix) = hypre_CTAlloc(HYPRE_BigInt, max_size, HYPRE_MEMORY_HOST);
    hypre_SStructMatrixTmpCoeffs(matrix)    = hypre_CTAlloc(HYPRE_Complex, max_size,
                                                            HYPRE_MEMORY_HOST);
 
@@ -1791,8 +1791,8 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
    hypre_IndexRef           offset;
    hypre_IndexRef           dom_stride;
 
+   HYPRE_BigInt             sizes[4];
    HYPRE_Int                i, ii, ei, jj, nrows, nvalues, max_size;
-   HYPRE_Int                sizes[4];
    HYPRE_Int                part, var, nvars, entry;
    HYPRE_Int                frproc, toproc;
    HYPRE_Int               *ncols, *rowidx;
@@ -1814,7 +1814,7 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
 
    /* Set beggining/end of rows and columns that belong to this process */
    HYPRE_IJMatrixGetLocalRange(ij_A, &sizes[0], &sizes[1], &sizes[2], &sizes[3]);
-   nrows = sizes[1] - sizes[0] + 1;
+   nrows = (HYPRE_Int) (sizes[1] - sizes[0] + 1);
 
    /* Set row sizes */
    hypre_SetIndex(stride, 1);

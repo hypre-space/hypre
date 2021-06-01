@@ -431,9 +431,9 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_Int             *row_sizes;
    HYPRE_Complex         *values;
 
+   HYPRE_BigInt           sizes[4];
    HYPRE_Int              entry, part, var, nvars;
    HYPRE_Int              nnzs;
-   HYPRE_Int              sizes[4];
    HYPRE_Int              nvalues, i, j, k, kk, m;
    HYPRE_Int              num_boxes;
    HYPRE_Int              pbnd_boxaa_size;
@@ -454,8 +454,8 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
 
    /* Get row and column ranges */
    HYPRE_IJMatrixGetLocalRange(ij_A, &sizes[0], &sizes[1], &sizes[2], &sizes[3]);
-   nrows = sizes[1] - sizes[0] + 1;
-   ncols = sizes[3] - sizes[2] + 1;
+   nrows = (HYPRE_Int) (sizes[1] - sizes[0] + 1);
+   ncols = (HYPRE_Int) (sizes[3] - sizes[2] + 1);
 
    /* Find boxes to be converted */
    HYPRE_ANNOTATE_REGION_BEGIN("%s", "Find boxes");

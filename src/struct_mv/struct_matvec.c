@@ -75,7 +75,7 @@ HYPRE_Int
 hypre_StructMatvecSetTranspose( void *matvec_vdata,
                                 HYPRE_Int transpose )
 {
-   hypre_StructMatvecData  *matvec_data = matvec_vdata;
+   hypre_StructMatvecData *matvec_data = (hypre_StructMatvecData *)matvec_vdata;
 
    (matvec_data -> transpose) = transpose;
 
@@ -89,7 +89,7 @@ HYPRE_Int
 hypre_StructMatvecSetActive( void *matvec_vdata,
                              HYPRE_Int active )
 {
-   hypre_StructMatvecData  *matvec_data = matvec_vdata;
+   hypre_StructMatvecData *matvec_data = (hypre_StructMatvecData *)matvec_vdata;
 
    if (active != 0)
    {
@@ -110,7 +110,7 @@ HYPRE_Int
 hypre_StructMatvecSetSkipDiag( void     *matvec_vdata,
                                HYPRE_Int skip_diag )
 {
-   hypre_StructMatvecData  *matvec_data = matvec_vdata;
+   hypre_StructMatvecData *matvec_data = (hypre_StructMatvecData *)matvec_vdata;
 
    if (skip_diag != 0)
    {
