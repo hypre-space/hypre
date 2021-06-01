@@ -139,7 +139,6 @@ hypre_SSAMGCoarseSolve( void *ssamg_vdata )
    hypre_SStructMatrix  **A_l     = (ssamg_data -> A_l);
    hypre_SStructVector  **x_l     = (ssamg_data -> x_l);
    hypre_SStructVector  **b_l     = (ssamg_data -> b_l);
-   hypre_SStructVector  **tx_l    = (ssamg_data -> tx_l);
    HYPRE_Solver           csolver = (ssamg_data -> csolver);
    HYPRE_IJMatrix         ij_Ac   = (ssamg_data -> ij_Ac);
    hypre_ParVector       *par_x   = (ssamg_data -> par_x);

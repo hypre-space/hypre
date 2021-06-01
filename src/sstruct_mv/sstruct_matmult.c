@@ -68,7 +68,8 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
 
 #if defined(HYPRE_DEBUG) && defined(DEBUG_MATCONV)
    HYPRE_Int myid;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+
+   hypre_MPI_Comm_rank(comm, &myid);
 #endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -395,7 +396,6 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
                                       hypre_ParCSRMatrix    *B,
                                       hypre_IJMatrix       **ij_Ahat_ptr)
 {
-   MPI_Comm               comm     = hypre_SStructMatrixComm(A);
    HYPRE_Int              ndim     = hypre_SStructMatrixNDim(A);
    HYPRE_Int              nparts   = hypre_SStructMatrixNParts(A);
    HYPRE_Int             *Sentries = hypre_SStructMatrixSEntries(A);
@@ -446,8 +446,10 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
 #if defined(HYPRE_DEBUG) && defined(DEBUG_MATCONV)
+   MPI_Comm  comm = hypre_SStructMatrixComm(A);
    HYPRE_Int myid;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+
+   hypre_MPI_Comm_rank(comm, &myid);
 #endif
 
    /* Get row and column ranges */

@@ -1791,7 +1791,7 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
    hypre_IndexRef           offset;
    hypre_IndexRef           dom_stride;
 
-   HYPRE_Int                i, ii, ei, jj, m, nrows, nvalues, max_size;
+   HYPRE_Int                i, ii, ei, jj, nrows, nvalues, max_size;
    HYPRE_Int                sizes[4];
    HYPRE_Int                part, var, nvars, entry;
    HYPRE_Int                frproc, toproc;
