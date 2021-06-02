@@ -2110,26 +2110,15 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixData(AT_offd) = AT_offd_data;
 
    row_starts_AT = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   col_starts_AT = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
    for (i = 0; i < 2; i++)
    {
       row_starts_AT[i] = col_starts[i];
+      col_starts_AT[i] = row_starts[i];
    }
 
-   if (row_starts != col_starts)
-   {
-      col_starts_AT = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-      for (i = 0; i < 2; i++)
-      {
-         col_starts_AT[i] = row_starts[i];
-      }
-   }
-   else
-   {
-      col_starts_AT = row_starts_AT;
-   }
-
-   first_row_index_AT =  row_starts_AT[0];
-   first_col_diag_AT =  col_starts_AT[0];
+   first_row_index_AT = row_starts_AT[0];
+   first_col_diag_AT  = col_starts_AT[0];
 
    local_num_rows_AT = (HYPRE_Int)(row_starts_AT[1]-first_row_index_AT );
    local_num_cols_AT = (HYPRE_Int)(col_starts_AT[1]-first_col_diag_AT);
@@ -2153,10 +2142,6 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrixOwnsData(AT) = 1;
    hypre_ParCSRMatrixOwnsRowStarts(AT) = 1;
    hypre_ParCSRMatrixOwnsColStarts(AT) = 1;
-   if (row_starts_AT == col_starts_AT)
-   {
-      hypre_ParCSRMatrixOwnsColStarts(AT) = 0;
-   }
    hypre_ParCSRMatrixCommPkg(AT) = NULL;
    hypre_ParCSRMatrixCommPkgT(AT) = NULL;
 
