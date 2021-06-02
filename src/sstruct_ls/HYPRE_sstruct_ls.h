@@ -409,7 +409,8 @@ HYPRE_SStructSSAMGSetNumCoarseRelax(HYPRE_SStructSolver solver,
                                     HYPRE_Int           num_coarse_relax);
 
 /**
- * (Optional) Set maximum size of coarse grid
+ * (Optional) Set maximum size of coarse grid. This option can be disabled
+ * by setting max_coarse_size to zero.
  **/
 HYPRE_Int
 HYPRE_SStructSSAMGSetMaxCoarseSize(HYPRE_SStructSolver solver,

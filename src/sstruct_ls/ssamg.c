@@ -45,7 +45,7 @@ hypre_SSAMGCreate( hypre_MPI_Comm comm )
    (ssamg_data -> par_x)            = NULL;
    (ssamg_data -> csolver_type)     = 0;
    (ssamg_data -> num_coarse_relax) = -1;
-   (ssamg_data -> max_coarse_size)  = 1;
+   (ssamg_data -> max_coarse_size)  = 0;
 
    /* initialize */
    (ssamg_data -> nparts)           = -1;

@@ -2626,7 +2626,6 @@ main( hypre_int argc,
    num_iterations = -1;
    max_iterations = 100;
    max_levels = 25;
-   max_coarse_size = 9;
    csolver_type = 0;
    tol = 1.0e-6;
    rel_change = 0;
@@ -3168,10 +3167,22 @@ main( hypre_int argc,
       }
    }
 
-   /* Use default relaxation method for ParCSR solvers */
-   if ((object_type == HYPRE_PARCSR) && (!relax_is_set))
+   /* Change default input parameters according to the object type */
+   if (object_type == HYPRE_PARCSR)
    {
-      relax[0] = -1;
+      if (!relax_is_set)
+      {
+         relax[0] = -1;
+      }
+      max_coarse_size = 9;
+   }
+   else if (object_type == HYPRE_STRUCT)
+   {
+      max_coarse_size = 0;
+   }
+   else if (object_type == HYPRE_SSTRUCT)
+   {
+      max_coarse_size = 0;
    }
 
    /*-----------------------------------------------------------
