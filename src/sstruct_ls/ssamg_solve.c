@@ -116,6 +116,12 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
    }
 
 #ifdef DEBUG_SOLVE
+   HYPRE_Real x_dot_x;
+
+   hypre_SStructInnerProd(x, x, &x_dot_x);
+   hypre_printf("<x0, x0> = %20.15e\n", x_dot_x);
+   hypre_printf("<b, b> = %20.15e\n", b_dot_b);
+
    /* Print initial solution and residual */
    hypre_sprintf(filename, "ssamg_x.i%02d", 0);
    HYPRE_SStructVectorPrint(filename, x_l[0], 0);
@@ -128,6 +134,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
     *   For each index l, "fine" = l, "coarse" = (l+1)
     *-----------------------------------------------------*/
 
+   HYPRE_Int start_relax = num_levels - 6;
    for (i = 0; i < max_iter; i++)
    {
       /*--------------------------------------------------
@@ -209,7 +216,14 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             hypre_SSAMGRelaxSetPreRelax(relax_data_l[l]);
             hypre_SSAMGRelaxSetMaxIter(relax_data_l[l], num_pre_relax);
             hypre_SSAMGRelaxSetZeroGuess(relax_data_l[l], 1);
-            hypre_SSAMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+            if (l == start_relax)
+            {
+               hypre_SSAMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+            }
+            else
+            {
+               hypre_SStructVectorSetConstantValues(x_l[l], 0.0);
+            }
             HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
 
             /* compute residual (r = b - Ax) */
@@ -280,7 +294,10 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             hypre_SSAMGRelaxSetPostRelax(relax_data_l[l]);
             hypre_SSAMGRelaxSetMaxIter(relax_data_l[l], num_post_relax);
             hypre_SSAMGRelaxSetZeroGuess(relax_data_l[l], 0);
-            hypre_SSAMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+            if (l == start_relax)
+            {
+               hypre_SSAMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+            }
             HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
 
             /* Set all parts to active */
@@ -335,6 +352,26 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       (ssamg_data -> num_iterations) = (i + 1);
       HYPRE_ANNOTATE_MGLEVEL_END(0);
    }
+
+#if DEBUG_SOLVE
+   HYPRE_Real b_dot_x;
+
+   hypre_SStructInnerProd(b, x, &b_dot_x);
+   hypre_SStructInnerProd(b, b, &b_dot_b);
+
+   if (b_dot_x < 0)
+   {
+      hypre_printf("b_dot_x: %e\n", b_dot_x);
+      hypre_printf("b_dot_b: %e\n", b_dot_b);
+      hypre_printf("b_dot_x/b_dot_b: %e\n", b_dot_x/b_dot_b);
+
+      hypre_sprintf(filename, "ssamg_b.negdot");
+      HYPRE_SStructVectorPrint(filename, b, 0);
+
+      hypre_sprintf(filename, "ssamg_x.negdot");
+      HYPRE_SStructVectorPrint(filename, x, 0);
+   }
+#endif
 
    /*-----------------------------------------------------
     * Destroy Refs to A_in, x_in, b_in

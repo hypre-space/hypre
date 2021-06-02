@@ -252,6 +252,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    hypre_SStructVector  **Pones_l;
    hypre_SStructPGrid    *pgrid;
    HYPRE_Int              mypid, part;
+   HYPRE_Int              min_level = hypre_min(12, num_levels-1);
    char                   filename[255];
 
    hypre_MPI_Comm_rank(hypre_SStructMatrixComm(A), &mypid);
@@ -261,11 +262,11 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    Pones_l = hypre_TAlloc(hypre_SStructVector *, num_levels - 1, HYPRE_MEMORY_HOST);
 
    /* Print fine level grid */
-   hypre_sprintf(filename, "ssgrid.l%02d", 0);
+   hypre_sprintf(filename, "ssgrid.l%02d", min_level);
 #ifdef DEBUG_WITH_GLVIS
-   hypre_SStructGridPrintGLVis(grid_l[0], filename, NULL, NULL);
+   hypre_SStructGridPrintGLVis(grid_l[min_level], filename, NULL, NULL);
 #else
-   hypre_SStructGridPrint(grid_l[0], filename);
+   hypre_SStructGridPrint(grid_l[min_level], filename);
 #endif
 
    /* Print part boundary data */
@@ -273,36 +274,37 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    {
       pgrid = hypre_SStructGridPGrid(grid_l[0], part);
 
-      hypre_sprintf(filename, "pbnd_boxa.l%02d.p%02d", 0, part);
-      hypre_BoxArrayArrayPrint(hypre_SStructGridComm(grid_l[0]),
+      hypre_sprintf(filename, "pbnd_boxa.l%02d.p%02d", min_level, part);
+      hypre_BoxArrayArrayPrint(hypre_SStructGridComm(grid_l[min_level]),
                                filename,
                                hypre_SStructPGridPBndBoxArrayArray(pgrid, 0));
    }
 
    /* Print fine level matrix */
-   hypre_sprintf(filename, "ssamg_A.l%02d", 0);
-   HYPRE_SStructMatrixPrint(filename, A_l[0], 0);
+   hypre_sprintf(filename, "ssamg_A.l%02d", min_level);
+   HYPRE_SStructMatrixPrint(filename, A_l[min_level], 0);
 
    /* compute Aones = A.1 */
-   HYPRE_SStructVectorCreate(comm, grid_l[0], &ones_l[0]);
-   HYPRE_SStructVectorInitialize(ones_l[0]);
-   HYPRE_SStructVectorSetConstantValues(ones_l[0], 1.0);
-   HYPRE_SStructVectorAssemble(ones_l[0]);
-   HYPRE_SStructVectorCreate(comm, grid_l[0], &Aones_l[0]);
-   HYPRE_SStructVectorInitialize(Aones_l[0]);
-   HYPRE_SStructVectorAssemble(Aones_l[0]);
-   hypre_SStructMatvecCompute(matvec_data_l[0], 1.0, A_l[0], ones_l[0],
-                              0.0, Aones_l[0], Aones_l[0]);
+   HYPRE_SStructVectorCreate(comm, grid_l[min_level], &ones_l[min_level]);
+   HYPRE_SStructVectorInitialize(ones_l[min_level]);
+   HYPRE_SStructVectorSetConstantValues(ones_l[min_level], 1.0);
+   HYPRE_SStructVectorAssemble(ones_l[min_level]);
+   HYPRE_SStructVectorCreate(comm, grid_l[min_level], &Aones_l[min_level]);
+   HYPRE_SStructVectorInitialize(Aones_l[min_level]);
+   HYPRE_SStructVectorAssemble(Aones_l[min_level]);
+   hypre_SStructMatvecCompute(matvec_data_l[min_level], 1.0, A_l[min_level],
+                              ones_l[min_level], 0.0,
+                              Aones_l[min_level], Aones_l[min_level]);
 
    /* Print Aones */
-   hypre_sprintf(filename, "ssamg_Aones.l%02d", 0);
+   hypre_sprintf(filename, "ssamg_Aones.l%02d", min_level);
 #ifdef DEBUG_WITH_GLVIS
-   HYPRE_SStructVectorPrintGLVis(Aones_l[0], filename);
+   HYPRE_SStructVectorPrintGLVis(Aones_l[min_level], filename);
 #else
-   HYPRE_SStructVectorPrint(filename, Aones_l[0], 0);
+   HYPRE_SStructVectorPrint(filename, Aones_l[min_level], 0);
 #endif
 
-   for (l = 0; l < (num_levels - 1); l++)
+   for (l = min_level; l < (num_levels - 1); l++)
    {
       /* Print coarse grids */
       hypre_sprintf(filename, "ssgrid.l%02d", l+1);
@@ -366,9 +368,9 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
 #endif
    }
 
-   HYPRE_SStructVectorDestroy(ones_l[0]);
-   HYPRE_SStructVectorDestroy(Aones_l[0]);
-   for (l = 0; l < (num_levels - 1); l++)
+   HYPRE_SStructVectorDestroy(ones_l[min_level]);
+   HYPRE_SStructVectorDestroy(Aones_l[min_level]);
+   for (l = min_level; l < (num_levels - 1); l++)
    {
       HYPRE_SStructVectorDestroy(ones_l[l+1]);
       HYPRE_SStructVectorDestroy(Aones_l[l+1]);
@@ -378,13 +380,20 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    hypre_TFree(Pones_l, HYPRE_MEMORY_HOST);
    hypre_TFree(Aones_l, HYPRE_MEMORY_HOST);
 
-   /* Compute Frobenius norm of (A - A^T) */
+   /* Check symmetry */
 #ifdef DEBUG_SYMMETRY
    {
       HYPRE_IJMatrix         ij_A, ij_AT, ij_B;
+      hypre_SStructVector   *randvec[2];
+      hypre_SStructVector   *ssrandvec[2];
       HYPRE_Real             B_norm;
+      HYPRE_Real             x_dot_ssamg_y;
+      HYPRE_Real             y_dot_ssamg_x;
+      HYPRE_Real             x_dot_y;
+      HYPRE_Int              k;
 
-      for (l = 0; l < num_levels; l++)
+      /* Compute Frobenius norm of (A - A^T) */
+      for (l = min_level; l < num_levels; l++)
       {
          HYPRE_SStructMatrixToIJMatrix(A_l[l], 0, &ij_A);
          HYPRE_IJMatrixTranspose(ij_A, &ij_AT);
@@ -406,6 +415,50 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
          HYPRE_IJMatrixDestroy(ij_AT);
          HYPRE_IJMatrixDestroy(ij_B);
       }
+
+      /* Check symmetry of SSAMG operator */
+      for (k = 0; k < 2; k++)
+      {
+         HYPRE_SStructVectorCreate(comm, grid_l[0], &randvec[k]);
+         HYPRE_SStructVectorInitialize(randvec[k]);
+         HYPRE_SStructVectorSetRandomValues(randvec[k], 100*(10*k+5));
+         HYPRE_SStructVectorAssemble(randvec[k]);
+      }
+
+      for (k = 0; k < 2; k++)
+      {
+         HYPRE_SStructVectorCreate(comm, grid_l[0], &ssrandvec[k]);
+         HYPRE_SStructVectorInitialize(ssrandvec[k]);
+         HYPRE_SStructVectorSetConstantValues(ssrandvec[k], 0.0);
+         HYPRE_SStructVectorAssemble(ssrandvec[k]);
+      }
+
+      /* Compute <x, SSAMG(y)> - <y, SSAMG(x)> */
+      hypre_SSAMGSolve(ssamg_vdata, A, randvec[0], ssrandvec[0]);
+      hypre_SSAMGSolve(ssamg_vdata, A, randvec[1], ssrandvec[1]);
+
+      hypre_SStructInnerProd(ssrandvec[1], randvec[0], &x_dot_ssamg_y);
+      hypre_SStructInnerProd(ssrandvec[0], randvec[1], &y_dot_ssamg_x);
+      hypre_SStructInnerProd(randvec[0], randvec[1], &x_dot_y);
+
+      hypre_printf("\n");
+      hypre_printf("<x,y> = %20.15e\n", x_dot_y);
+      hypre_printf("<x, SSAMG(y)> = %20.15e\n", x_dot_ssamg_y);
+      hypre_printf("<x, SSAMG(y)>/<x,y> = %20.15e\n", x_dot_ssamg_y/x_dot_y);
+      hypre_printf("<y, SSAMG(x)> = %20.15e\n", y_dot_ssamg_x);
+      hypre_printf("<y, SSAMG(x)>/<x,y> = %20.15e\n", y_dot_ssamg_x/x_dot_y);
+      hypre_printf("<x, SSAMG(y)> - <y, SSAMG(x)> = %20.15e\n", x_dot_ssamg_y - y_dot_ssamg_x);
+      hypre_printf("<x, SSAMG(y)>/<x,y> - <y, SSAMG(x)>/<x,y> = %20.15e\n",
+                    x_dot_ssamg_y/x_dot_y - y_dot_ssamg_x/x_dot_y);
+      hypre_printf("\n");
+
+      //HYPRE_SStructVectorPrint("randvecX", randvec[0], 0);
+      //HYPRE_SStructVectorPrint("randvecY", randvec[1], 0);
+      for (k = 0; k < 2; k++)
+      {
+         HYPRE_SStructVectorDestroy(randvec[k]);
+         HYPRE_SStructVectorDestroy(ssrandvec[k]);
+      }
    }
 #endif /* DEBUG_SYMMETRY */
 
@@ -415,9 +468,9 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       hypre_ParCSRMatrix  *par_A[2], *par_P, *par_AP, *par_RAP, *par_B;
       HYPRE_Real           norm;
 
-      HYPRE_SStructMatrixToIJMatrix(A_l[0], 0, &ij_A[0]);
+      HYPRE_SStructMatrixToIJMatrix(A_l[min_level], 0, &ij_A[0]);
       HYPRE_IJMatrixGetObject(ij_A[0], (void **) &par_A[0]);
-      for (l = 0; l < num_levels-1; l++)
+      for (l = min_level; l < num_levels-1; l++)
       {
          if (!mypid) hypre_printf("Converting A[%02d]\n", l);
          HYPRE_SStructMatrixToIJMatrix(A_l[l+1], 0, &ij_A[1]);
