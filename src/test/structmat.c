@@ -731,7 +731,7 @@ main( hypre_int  argc,
          for (i = 0; i < nterms; i++)
          {
             transposechar = ' ';
-            sscanf(argv[arg_index++], "%d%c", &terms[i], &transposechar);
+            hypre_sscanf(argv[arg_index++], "%d%c", &terms[i], &transposechar);
             if (transposechar == 'T')
             {
                trans[i] = 1;
