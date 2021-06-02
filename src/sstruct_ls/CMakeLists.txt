@@ -29,6 +29,7 @@ set(SRCS
   HYPRE_sstruct_pcg.c
   HYPRE_sstruct_split.c
   HYPRE_sstruct_sys_pfmg.c
+  HYPRE_sstruct_ssamg.c
   bsearch.c
   fac.c
   fac_amr_rap.c
@@ -72,6 +73,14 @@ set(SRCS
   sys_pfmg_solve.c
   sys_semi_interp.c
   sys_semi_restrict.c
+  ssamg.c
+  ssamg_csolver.c
+  ssamg_stats.c
+  ssamg_setup.c
+  ssamg_setup_rap.c
+  ssamg_relax.c
+  ssamg_solve.c
+  ssamg_interp.c
 )
 
 target_sources(${PROJECT_NAME}

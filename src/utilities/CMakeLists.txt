@@ -21,6 +21,7 @@ set(SRCS
   F90_HYPRE_general.c
   fortran_matrix.c
   ap.c
+  log.c
   complex.c
   cuda_utils.c
   error.c
@@ -35,6 +36,7 @@ set(SRCS
   prefix_sum.c
   printf.c
   qsort.c
+  unique.c
   utilities.c
   mpistubs.c
   qsplit.c

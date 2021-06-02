@@ -13,7 +13,9 @@ set(SRCS
   box_algebra.c
   box_boundary.c
   box.c
+  box_ds.c
   box_manager.c
+  coarsen.c
   communication_info.c
   computation.c
   F90_HYPRE_struct_grid.c
@@ -25,6 +27,7 @@ set(SRCS
   HYPRE_struct_stencil.c
   HYPRE_struct_vector.c
   project.c
+  struct_data.c
   struct_axpy.c
   struct_communication.c
   struct_copy.c
@@ -34,6 +37,8 @@ set(SRCS
   struct_matrix.c
   struct_matrix_mask.c
   struct_matvec.c
+  struct_matmult.c
+  struct_stmatrix.c
   struct_scale.c
   struct_stencil.c
   struct_vector.c
