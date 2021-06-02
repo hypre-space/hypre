@@ -88,7 +88,7 @@ hypreCUDAKernel_CSRMaxEigEstimate( HYPRE_Int      nrows,
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
    HYPRE_Int p, q;
 
-   HYPRE_Real diag_value;
+   HYPRE_Real diag_value = 0.0;
    HYPRE_Complex row_sum_i = 0.0;
 
    if (lane < 2)
@@ -109,13 +109,13 @@ hypreCUDAKernel_CSRMaxEigEstimate( HYPRE_Int      nrows,
       hypre_int find_diag = j < q && diag_ja[j] == row_i;
 
 
-      HYPRE_Complex aii = diag_aa[j];
+      HYPRE_Complex aij = diag_aa[j];
       if (find_diag)
       {
-         diag_value = aii;
+         diag_value = aij;
       }
 
-      row_sum_i += fabs(aii);
+      row_sum_i += fabs(aij);
    }
 
    if (lane < 2)
@@ -206,6 +206,7 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix* A,
          A_offd_i, A_offd_j, A_offd_data,
                       rowsums, scale, pos_diag_d, neg_diag_d);
 
+   hypre_SyncCudaComputeStream(hypre_handle());
    hypre_TMemcpy(&pos_diag, pos_diag_d, HYPRE_Int, 1, HYPRE_MEMORY_HOST, hypre_ParCSRMatrixMemoryLocation(A));
    hypre_TMemcpy(&neg_diag, neg_diag_d, HYPRE_Int, 1, HYPRE_MEMORY_HOST, hypre_ParCSRMatrixMemoryLocation(A));
 
