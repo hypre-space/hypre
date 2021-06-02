@@ -183,12 +183,12 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix* A,
    HYPRE_Int *A_diag_j;
    HYPRE_Int *A_offd_j;
 
-   HYPRE_Int* pos_diag_d = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_DEVICE);
-   HYPRE_Int* neg_diag_d = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int* pos_diag_d = hypre_CTAlloc(HYPRE_Int, 1, hypre_ParCSRMatrixMemoryLocation(A));
+   HYPRE_Int* neg_diag_d = hypre_CTAlloc(HYPRE_Int, 1, hypre_ParCSRMatrixMemoryLocation(A));
 
    A_num_rows  = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
 
-   HYPRE_Real* rowsums = hypre_CTAlloc(HYPRE_Real, A_num_rows, HYPRE_MEMORY_DEVICE);
+   HYPRE_Real* rowsums = hypre_CTAlloc(HYPRE_Real, A_num_rows, hypre_ParCSRMatrixMemoryLocation(A));
 
 
    A_diag_i    = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A));
@@ -206,8 +206,8 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix* A,
          A_offd_i, A_offd_j, A_offd_data,
                       rowsums, scale, pos_diag_d, neg_diag_d);
 
-   hypre_TMemcpy(&pos_diag, pos_diag_d, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(&neg_diag, neg_diag_d, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(&pos_diag, pos_diag_d, HYPRE_Int, 1, HYPRE_MEMORY_HOST, hypre_ParCSRMatrixMemoryLocation(A));
+   hypre_TMemcpy(&neg_diag, neg_diag_d, HYPRE_Int, 1, HYPRE_MEMORY_HOST, hypre_ParCSRMatrixMemoryLocation(A));
 
 
 
@@ -234,9 +234,9 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix* A,
    /* return */
    *max_eig = e_max;
 
-   hypre_TFree(rowsums, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(pos_diag_d, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(neg_diag_d, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(rowsums,    hypre_ParCSRMatrixMemoryLocation(A));
+   hypre_TFree(pos_diag_d, hypre_ParCSRMatrixMemoryLocation(A));
+   hypre_TFree(neg_diag_d, hypre_ParCSRMatrixMemoryLocation(A));
 
    return hypre_error_flag;
 }
@@ -394,7 +394,6 @@ hypre_ParCSRMaxEigEstimateCGDevice( hypre_ParCSRMatrix *A,     /* matrix to rela
 #if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPushRange("ParCSRMaxEigEstimate_Iter");
 #endif
-   hypre_MemPrefetch(ds_data, sizeof(HYPRE_Real) * local_size, hypre_ParCSRMatrixMemoryLocation(A));
 
    /* gamma = <r,Cr> */
    gamma = hypre_ParVectorInnerProd(r,p);

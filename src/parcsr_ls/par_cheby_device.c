@@ -75,7 +75,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix t
    /* we are using the order of p(A) */
    cheby_order = order -1;
    
-   orig_u = hypre_CTAlloc(HYPRE_Real,  num_rows, HYPRE_MEMORY_DEVICE);
+   orig_u = hypre_CTAlloc(HYPRE_Real,  num_rows, hypre_CSRMatrixMemoryLocation(A_diag));
 
    if (!scale)
    {
@@ -115,7 +115,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix t
       tmp_vec = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                       hypre_ParCSRMatrixGlobalNumRows(A),
                                       hypre_ParCSRMatrixRowStarts(A));
-      hypre_ParVectorInitialize_v2(tmp_vec, HYPRE_MEMORY_DEVICE);
+      hypre_ParVectorInitialize_v2(tmp_vec, hypre_CSRMatrixMemoryLocation(A_diag));
       hypre_ParVectorSetPartitioningOwner(tmp_vec,0);
       tmp_data = hypre_VectorData(hypre_ParVectorLocalVector(tmp_vec));
 
@@ -173,7 +173,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix t
 
    }/* end of scaling code */
 
-   hypre_TFree(orig_u, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(orig_u, hypre_CSRMatrixMemoryLocation(A_diag));
   
    return hypre_error_flag;
 }
