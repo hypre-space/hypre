@@ -930,9 +930,6 @@ template<typename T>
 struct xpy
 {
    typedef thrust::tuple<T, T, T> Tuple;
-   const T scale;
-
-   xpy(T _scale): scale(_scale) {}
 
    __host__ __device__ T operator()(const T& x, const T& y) const
    {
