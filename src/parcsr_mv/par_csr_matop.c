@@ -1824,9 +1824,9 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix  *A,
-                             hypre_ParCSRMatrix **AT_ptr,
-                             HYPRE_Int            data )
+hypre_ParCSRMatrixTransposeHost( hypre_ParCSRMatrix  *A,
+                                 hypre_ParCSRMatrix **AT_ptr,
+                                 HYPRE_Int            data )
 {
    hypre_ParCSRCommHandle *comm_handle;
    MPI_Comm comm = hypre_ParCSRMatrixComm(A);
@@ -2155,6 +2155,35 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix  *A,
    *AT_ptr = AT;
 
    return ierr;
+}
+
+HYPRE_Int
+hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix  *A,
+                             hypre_ParCSRMatrix **AT_ptr,
+                             HYPRE_Int            data )
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("ParCSRMatrixTranspose");
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_ParCSRMatrixTransposeDevice(A, AT_ptr, data);
+   }
+   else
+#endif
+   {
+      hypre_ParCSRMatrixTransposeHost(A, AT_ptr, data);
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
+   return hypre_error_flag;
 }
 
 /* -----------------------------------------------------------------------------

@@ -1937,3 +1937,35 @@ hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A,
       hypre_CSRMatrixExtractDiagonalHost(A, d, type);
    }
 }
+
+HYPRE_Int
+hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A,
+                                  HYPRE_Complex    value)
+{
+   HYPRE_Int i;
+   HYPRE_Int nnz = hypre_CSRMatrixNumNonzeros(A);
+
+   if (!hypre_CSRMatrixData(A))
+   {
+      hypre_CSRMatrixData(A) = hypre_TAlloc(HYPRE_Complex, nnz, hypre_CSRMatrixMemoryLocation(A));
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypreDevice_Filln(hypre_CSRMatrixData(A), nnz, value);
+   }
+   else
+#endif
+   {
+      for (i = 0; i < nnz; i++)
+      {
+         hypre_CSRMatrixData(A)[i] = value;
+      }
+   }
+
+   return hypre_error_flag;
+}
+

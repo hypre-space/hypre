@@ -165,6 +165,8 @@ HYPRE_Int hypre_ParCSRMatrixExtractBExtDeviceInit( hypre_ParCSRMatrix *B, hypre_
 hypre_CSRMatrix* hypre_ParCSRMatrixExtractBExtDeviceWait(void *request);
 hypre_CSRMatrix* hypre_ParCSRMatrixExtractBExtDevice( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, HYPRE_Int want_data );
 HYPRE_Int hypre_ParCSRMatrixTranspose ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **AT_ptr , HYPRE_Int data );
+HYPRE_Int hypre_ParCSRMatrixTransposeHost ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **AT_ptr , HYPRE_Int data );
+HYPRE_Int hypre_ParCSRMatrixTransposeDevice ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **AT_ptr , HYPRE_Int data );
 void hypre_ParCSRMatrixGenSpanningTree ( hypre_ParCSRMatrix *G_csr , HYPRE_Int **indices , HYPRE_Int G_type );
 void hypre_ParCSRMatrixExtractSubmatrices ( hypre_ParCSRMatrix *A_csr , HYPRE_Int *indices2 , hypre_ParCSRMatrix ***submatrices );
 void hypre_ParCSRMatrixExtractRowSubmatrices ( hypre_ParCSRMatrix *A_csr , HYPRE_Int *indices2 , hypre_ParCSRMatrix ***submatrices );
@@ -174,7 +176,7 @@ hypre_ParCSRMatrix *hypre_ParTMatmul ( hypre_ParCSRMatrix *A , hypre_ParCSRMatri
 HYPRE_Real hypre_ParCSRMatrixFnorm( hypre_ParCSRMatrix *A );
 HYPRE_Int hypre_ExchangeExternalRowsInit( hypre_CSRMatrix *B_ext, hypre_ParCSRCommPkg *comm_pkg_A, void **request_ptr);
 hypre_CSRMatrix* hypre_ExchangeExternalRowsWait(void *vequest);
-HYPRE_Int hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix *B_ext, hypre_ParCSRCommPkg *comm_pkg_A, void **request_ptr);
+HYPRE_Int hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix *B_ext, hypre_ParCSRCommPkg *comm_pkg_A, HYPRE_Int want_data, void **request_ptr);
 hypre_CSRMatrix* hypre_ExchangeExternalRowsDeviceWait(void *vrequest);
 HYPRE_Int hypre_ParCSRMatrixGenerateFFFCDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker_host, HYPRE_BigInt *cpts_starts, hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **A_FC_ptr, hypre_ParCSRMatrix **A_FF_ptr );
 hypre_CSRMatrix* hypre_ConcatDiagAndOffdDevice(hypre_ParCSRMatrix *A);
@@ -244,6 +246,7 @@ hypre_ParCSRMatrix* hypre_ParCSRMatrixClone ( hypre_ParCSRMatrix *A, HYPRE_Int c
 hypre_ParCSRMatrix* hypre_ParCSRMatrixClone_v2 ( hypre_ParCSRMatrix *A, HYPRE_Int copy_data, HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_ParCSRMatrixMigrate(hypre_ParCSRMatrix *A, HYPRE_MemoryLocation memory_location);
 HYPRE_Int hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A, HYPRE_Real tol, HYPRE_Int type);
+HYPRE_Int hypre_ParCSRMatrixSetConstantValues( hypre_ParCSRMatrix *A, HYPRE_Complex value );
 
 /* par_csr_matvec.c */
 // y = alpha*A*x + beta*b

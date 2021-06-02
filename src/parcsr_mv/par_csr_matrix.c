@@ -3039,3 +3039,13 @@ hypre_ParCSRMatrixTruncate(hypre_ParCSRMatrix *A,
 
    return ierr;
 }
+
+HYPRE_Int
+hypre_ParCSRMatrixSetConstantValues( hypre_ParCSRMatrix *A,
+                                     HYPRE_Complex       value )
+{
+   hypre_CSRMatrixSetConstantValues(hypre_ParCSRMatrixDiag(A), value);
+   hypre_CSRMatrixSetConstantValues(hypre_ParCSRMatrixOffd(A), value);
+
+   return hypre_error_flag;
+}
