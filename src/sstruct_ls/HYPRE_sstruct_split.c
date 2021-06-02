@@ -120,6 +120,12 @@ HYPRE_SStructSplitDestroy( HYPRE_SStructSolver solver )
       ssolver_destroy = (solver -> ssolver_destroy);
       ssolver_data    = (solver -> ssolver_data);
 
+      if ((solver -> logging) > 0)
+      {
+         hypre_TFree(solver -> norms, HYPRE_MEMORY_HOST);
+         hypre_TFree(solver -> rel_norms, HYPRE_MEMORY_HOST);
+      }
+
       HYPRE_SStructVectorDestroy(y);
       for (part = 0; part < nparts; part++)
       {
