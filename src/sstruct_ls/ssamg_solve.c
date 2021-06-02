@@ -134,7 +134,6 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
     *   For each index l, "fine" = l, "coarse" = (l+1)
     *-----------------------------------------------------*/
 
-   HYPRE_Int start_relax = num_levels - 6;
    for (i = 0; i < max_iter; i++)
    {
       /*--------------------------------------------------
@@ -216,14 +215,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             hypre_SSAMGRelaxSetPreRelax(relax_data_l[l]);
             hypre_SSAMGRelaxSetMaxIter(relax_data_l[l], num_pre_relax);
             hypre_SSAMGRelaxSetZeroGuess(relax_data_l[l], 1);
-            if (l == start_relax)
-            {
-               hypre_SSAMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
-            }
-            else
-            {
-               hypre_SStructVectorSetConstantValues(x_l[l], 0.0);
-            }
+            hypre_SSAMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
             HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
 
             /* compute residual (r = b - Ax) */
@@ -294,10 +286,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             hypre_SSAMGRelaxSetPostRelax(relax_data_l[l]);
             hypre_SSAMGRelaxSetMaxIter(relax_data_l[l], num_post_relax);
             hypre_SSAMGRelaxSetZeroGuess(relax_data_l[l], 0);
-            if (l == start_relax)
-            {
-               hypre_SSAMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
-            }
+            hypre_SSAMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
             HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
 
             /* Set all parts to active */
