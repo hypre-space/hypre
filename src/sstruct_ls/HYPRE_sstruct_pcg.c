@@ -25,7 +25,6 @@ HYPRE_SStructPCGCreate( MPI_Comm             comm,
          hypre_SStructKrylovScaleVector, hypre_SStructKrylovAxpy,
          hypre_SStructKrylovIdentitySetup, hypre_SStructKrylovIdentity );
 
-   pcg_functions->PrintVector = hypre_SStructKrylovPrintVector;
    *solver = ( (HYPRE_SStructSolver) hypre_PCGCreate( pcg_functions ) );
 
    return hypre_error_flag;
@@ -34,7 +33,7 @@ HYPRE_SStructPCGCreate( MPI_Comm             comm,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_SStructPCGDestroy( HYPRE_SStructSolver solver )
 {
    return( hypre_PCGDestroy( (void *) solver ) );
@@ -43,7 +42,7 @@ HYPRE_SStructPCGDestroy( HYPRE_SStructSolver solver )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_SStructPCGSetup( HYPRE_SStructSolver solver,
                        HYPRE_SStructMatrix A,
                        HYPRE_SStructVector b,
@@ -58,7 +57,7 @@ HYPRE_SStructPCGSetup( HYPRE_SStructSolver solver,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_SStructPCGSolve( HYPRE_SStructSolver solver,
                        HYPRE_SStructMatrix A,
                        HYPRE_SStructVector b,
@@ -194,7 +193,7 @@ HYPRE_SStructDiagScaleSetup( HYPRE_SStructSolver solver,
                              HYPRE_SStructVector y,
                              HYPRE_SStructVector x      )
 {
-  
+
    return( HYPRE_StructDiagScaleSetup( (HYPRE_StructSolver) solver,
                                        (HYPRE_StructMatrix) A,
                                        (HYPRE_StructVector) y,
@@ -233,7 +232,7 @@ HYPRE_SStructDiagScale( HYPRE_SStructSolver solver,
          sA = hypre_SStructPMatrixSMatrix(pA, vi, vi);
          sx = hypre_SStructPVectorSVector(px, vi);
          sy = hypre_SStructPVectorSVector(py, vi);
-         
+
          HYPRE_StructDiagScale( (HYPRE_StructSolver) solver,
                                 (HYPRE_StructMatrix) sA,
                                 (HYPRE_StructVector) sy,
@@ -243,6 +242,3 @@ HYPRE_SStructDiagScale( HYPRE_SStructSolver solver,
 
    return hypre_error_flag;
 }
-
-
-
