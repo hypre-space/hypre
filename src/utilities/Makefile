@@ -40,8 +40,8 @@ FILES =\
  binsearch.c\
  exchange_data.c\
  fortran_matrix.c\
- log.c\
  ap.c\
+ log.c\
  complex.c\
  error.c\
  hopscotch_hash.c\
