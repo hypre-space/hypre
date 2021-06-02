@@ -19,6 +19,7 @@ set(SRCS
   F90_HYPRE_sstruct_pcg.c
   F90_HYPRE_sstruct_split.c
   F90_HYPRE_sstruct_sys_pfmg.c
+  F90_HYPRE_sstruct_ssamg.c
   HYPRE_sstruct_bicgstab.c
   HYPRE_sstruct_gmres.c
   HYPRE_sstruct_flexgmres.c

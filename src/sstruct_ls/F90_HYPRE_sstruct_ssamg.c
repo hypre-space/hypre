@@ -181,17 +181,17 @@ hypre_F90_IFACE(hypre_sstructssamgsetrelaxtyp, HYPRE_SSTRUCTSSAMGSETRELAXTYP)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructSSAMGSetWeight
+ * HYPRE_SStructSSAMGSetRelaxWeight
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_sstructssamgsetweight, HYPRE_SSTRUCTSSAMGSETWEIGHT)
+hypre_F90_IFACE(hypre_sstructssamgsetrelaxwei, HYPRE_SSTRUCTSSAMGSETRELAXWEI)
    (hypre_F90_Obj  *solver,
     hypre_F90_Real *weight,
     hypre_F90_Int  *ierr)
 {
    *ierr = (hypre_F90_Int)
-      (HYPRE_SStructSSAMGSetWeight(
+      (HYPRE_SStructSSAMGSetRelaxWeight(
           hypre_F90_PassObj  (HYPRE_SStructSolver, solver),
           hypre_F90_PassReal (weight) ) );
 }
@@ -252,16 +252,16 @@ hypre_F90_IFACE(hypre_sstructssamgsetskiprela, HYPRE_SSTRUCTSSAMGSETSKIPRELA)
 
 void
 hypre_F90_IFACE(hypre_sstructssamgsetdxyz, HYPRE_SSTRUCTSSAMGSETDXYZ)
-   (hypre_F90_Obj        *solver,
-    hypre_F90_Int         nparts,
-    hypre_F90_RealArray **dxyz,
-    hypre_F90_Int        *ierr)
+   (hypre_F90_Obj          *solver,
+    hypre_F90_Int          *nparts,
+    hypre_F90_RealArray2D **dxyz,
+    hypre_F90_Int          *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_SStructSSAMGSetDxyz(
           hypre_F90_PassObj (HYPRE_SStructSolver, solver),
-          hypre_F90_PassInt (skip_relax),
-          hypre_F90_PassRealArray (dxyz)   ));
+          hypre_F90_PassInt (nparts),
+          hypre_F90_PassRealArray2D (dxyz) ));
 }
 
 /*--------------------------------------------------------------------------
