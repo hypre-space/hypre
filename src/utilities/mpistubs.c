@@ -663,6 +663,16 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info )
 }
 #endif
 
+HYPRE_Int
+hypre_MPI_CheckCommMatrix( hypre_MPI_Comm   comm,
+                           HYPRE_Int        num_recvs,
+                           HYPRE_Int       *recvs,
+                           HYPRE_Int        num_sends,
+                           HYPRE_Int       *sends )
+{
+   return(0);
+}
+
 /******************************************************************************
  * MPI stubs to do casting of HYPRE_Int and hypre_int correctly
  *****************************************************************************/
@@ -1322,5 +1332,119 @@ hypre_MPI_Info_free( hypre_MPI_Info *info )
    return (HYPRE_Int) MPI_Info_free(info);
 }
 #endif
+
+HYPRE_Int
+hypre_MPI_CheckCommMatrix( hypre_MPI_Comm   comm,
+                           HYPRE_Int        num_recvs,
+                           HYPRE_Int       *recvs,
+                           HYPRE_Int        num_sends,
+                           HYPRE_Int       *sends )
+{
+   HYPRE_Int    nprocs, myid;
+
+   HYPRE_Int   *displs         = NULL;
+   HYPRE_Int   *num_recvs_proc = NULL;
+   HYPRE_Int   *num_sends_proc = NULL;
+   HYPRE_Int   *global_recvs   = NULL;
+   HYPRE_Int   *global_sends   = NULL;
+
+   HYPRE_Int    global_num_recvs;
+   HYPRE_Int    global_num_sends;
+   HYPRE_Int    from_proc, to_proc;
+   HYPRE_Int    i, entry, proc, cnt;
+
+   hypre_MPI_Comm_rank(comm, &myid);
+   hypre_MPI_Comm_size(comm, &nprocs);
+
+   if (myid == 0)
+   {
+      num_recvs_proc = hypre_CTAlloc(HYPRE_Int, nprocs, HYPRE_MEMORY_HOST);
+      num_sends_proc = hypre_CTAlloc(HYPRE_Int, nprocs, HYPRE_MEMORY_HOST);
+      displs = hypre_CTAlloc(HYPRE_Int, nprocs + 1, HYPRE_MEMORY_HOST);
+   }
+
+   /* Gather receives */
+   hypre_MPI_Gather(&num_recvs, 1, HYPRE_MPI_INT,
+                    num_recvs_proc, 1, HYPRE_MPI_INT,
+                    0, comm);
+   if (myid == 0)
+   {
+      global_num_recvs = displs[0] = 0;
+      for (proc = 0; proc < nprocs; proc++)
+      {
+         global_num_recvs += num_recvs_proc[proc];
+         displs[proc + 1] = displs[proc] + num_recvs_proc[proc];
+      }
+      global_recvs = hypre_CTAlloc(HYPRE_Int, global_num_recvs, HYPRE_MEMORY_HOST);
+   }
+   hypre_MPI_Gatherv(recvs, num_recvs, HYPRE_MPI_INT,
+                     global_recvs, num_recvs_proc, displs, HYPRE_MPI_INT,
+                     0, comm);
+
+   /* Gather sends */
+   hypre_MPI_Gather(&num_sends, 1, HYPRE_MPI_INT,
+                    num_sends_proc, 1, HYPRE_MPI_INT,
+                    0, comm);
+   if (myid == 0)
+   {
+      global_num_sends = displs[0] = 0;
+      for (proc = 0; proc < nprocs; proc++)
+      {
+         global_num_sends += num_sends_proc[proc];
+         displs[proc + 1] = displs[proc] + num_sends_proc[proc];
+      }
+      global_sends = hypre_CTAlloc(HYPRE_Int, global_num_sends, HYPRE_MEMORY_HOST);
+   }
+   hypre_MPI_Gatherv(sends, num_sends, HYPRE_MPI_INT,
+                     global_sends, num_sends_proc, displs, HYPRE_MPI_INT,
+                     0, comm);
+
+   /* Check for matching send/recv. */
+   if (myid == 0)
+   {
+      cnt = 0;
+      for (from_proc = 0; from_proc < nprocs; from_proc++)
+      {
+         for (i = 0; i < num_sends_proc[from_proc]; i++)
+         {
+            to_proc = global_sends[cnt++];
+            entry = hypre_BinarySearch(&global_recvs[to_proc], from_proc,
+                                       num_recvs_proc[to_proc]);
+            if (entry == -1)
+            {
+               hypre_printf("Proc %d posts a send to proc %d without a matching recv!\n",
+                            from_proc, to_proc);
+            }
+         }
+      }
+
+      cnt = 0;
+      for (from_proc = 0; from_proc < nprocs; from_proc++)
+      {
+         for (i = 0; i < num_recvs_proc[from_proc]; i++)
+         {
+            to_proc = global_recvs[cnt++];
+            entry = hypre_BinarySearch(&global_sends[to_proc], from_proc,
+                                       num_sends_proc[to_proc]);
+            if (entry == -1)
+            {
+               hypre_printf("Proc %d posts a recv to proc %d without a matching send!\n",
+                            from_proc, to_proc);
+            }
+         }
+      }
+   }
+
+   if (myid == 0)
+   {
+      hypre_TFree(displs, HYPRE_MEMORY_HOST);
+      hypre_TFree(num_recvs_proc, HYPRE_MEMORY_HOST);
+      hypre_TFree(num_sends_proc, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_recvs, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_sends, HYPRE_MEMORY_HOST);
+   }
+
+   return hypre_error_flag;
+}
 
 #endif
