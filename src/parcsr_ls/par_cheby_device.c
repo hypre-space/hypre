@@ -103,8 +103,8 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix t
 
       /* u = o + u */
       HYPRE_THRUST_CALL(transform,
-      orig_u, u_data,
-      orig_u + num_rows, u_data + num_rows,
+      orig_u, orig_u + num_rows,
+      u_data, u_data,
       xpy<HYPRE_Real>());
    }
    else /* scaling! */
