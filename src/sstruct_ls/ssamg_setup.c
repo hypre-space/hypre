@@ -603,6 +603,9 @@ hypre_SSAMGComputeDxyz( hypre_SStructMatrix  *A,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SSAMGCoarsen
+ *
+ * TODO: extend to multiple variables
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -615,6 +618,7 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
    HYPRE_Int             ndim        = hypre_SStructGridNDim(grid);
    HYPRE_Int             skip_relax  = hypre_SSAMGDataSkipRelax(ssamg_data);
    HYPRE_Int             max_levels  = hypre_SSAMGDataMaxLevels(ssamg_data);
+   HYPRE_Int             max_csize   = hypre_SSAMGDataMaxCoarseSize(ssamg_data);
    HYPRE_Int             nparts      = hypre_SSAMGDataNParts(ssamg_data);
    HYPRE_Real            usr_relax   = hypre_SSAMGDataUsrRelaxWeight(ssamg_data);
 
@@ -637,6 +641,7 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
    HYPRE_Int             l, d, cdir;
    HYPRE_Int             coarse_flag;
    HYPRE_Int             cbox_imin, cbox_imax;
+   HYPRE_BigInt          coarse_size;
    HYPRE_Real            min_dxyz;
    HYPRE_Real            alpha, beta;
 
@@ -802,15 +807,25 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
          }
       } /* loop on parts */
 
-      // If there's no part to be coarsened, exit loop
+      /* If there's no part to be coarsened, exit loop */
       if (!coarse_flag)
       {
          num_levels = l + 1;
          break;
       }
 
-      // Compute the coarsened SStructGrid object
+      /* Compute the coarsened SStructGrid object */
       hypre_SStructGridCoarsen(grid_l[l], zero, strides, periodic, &grid_l[l+1]);
+
+      /* Check coarse grid size */
+      coarse_size = hypre_SStructGridGlobalSize(grid_l[l+1]);
+      if (coarse_size < max_csize)
+      {
+         num_levels = l + 1;
+         HYPRE_SStructGridDestroy(grid_l[l+1]);
+
+         break;
+      }
    } /* loop on levels */
 
    /* Free memory */

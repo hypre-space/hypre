@@ -220,6 +220,24 @@ hypre_StructGridSetMaxDistance( hypre_StructGrid *grid,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_StructGridComputeGlobalSize
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructGridComputeGlobalSize( hypre_StructGrid *grid )
+{
+   MPI_Comm       comm       = hypre_StructGridComm(grid);
+   HYPRE_BigInt   local_size = (HYPRE_BigInt) hypre_StructGridLocalSize(grid);
+   HYPRE_BigInt   global_size;
+
+   hypre_MPI_Allreduce(&local_size, &global_size, 1, HYPRE_MPI_BIG_INT,
+                        hypre_MPI_SUM, comm);
+   hypre_StructGridGlobalSize(grid) = global_size;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * New - hypre_StructGridAssemble
  * AHB 9/06
  * New assemble routine that uses the BoxManager structure
@@ -241,7 +259,6 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    HYPRE_Int            size, ghost_size;
    HYPRE_Int            num_local_boxes;
    HYPRE_Int            box_volume;
-   HYPRE_BigInt         global_size;
    HYPRE_Int            max_nentries;
    HYPRE_Int            info_size;
    HYPRE_Int            num_periods;
@@ -381,23 +398,14 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
 
    hypre_StructGridLocalSize(grid)   = size;
    hypre_StructGridGhlocalSize(grid) = ghost_size;
+   hypre_StructGridComputeGlobalSize(grid);
    hypre_BoxDestroy(ghost_box);
 
    /* if the box manager has been created then we don't need to do the
     * following (because it was done through the coarsening routine) */
    if (!is_boxman)
    {
-      /*************** set the global size *****************/
-
-      HYPRE_BigInt big_size = (HYPRE_BigInt)size;
-      hypre_MPI_Allreduce(&big_size, &global_size, 1, HYPRE_MPI_BIG_INT,
-                          hypre_MPI_SUM, comm);
-      hypre_StructGridGlobalSize(grid) = global_size; /* TO DO: this HYPRE_Int
-                                                       * could overflow! (used
-                                                       * to calc flops) */
-
       /*************** set bounding box ***********/
-
       bounding_box = hypre_BoxCreate(ndim);
 
       if (num_local_boxes)
@@ -426,7 +434,6 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
          }
          /*set bounding box (this is still based on local info only) */
          hypre_BoxSetExtents(bounding_box, min_index, max_index);
-
       }
       else /* no boxes owned*/
       {

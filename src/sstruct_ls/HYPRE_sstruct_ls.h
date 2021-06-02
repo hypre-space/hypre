@@ -409,6 +409,13 @@ HYPRE_SStructSSAMGSetNumCoarseRelax(HYPRE_SStructSolver solver,
                                     HYPRE_Int           num_coarse_relax);
 
 /**
+ * (Optional) Set maximum size of coarse grid
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGSetMaxCoarseSize(HYPRE_SStructSolver solver,
+                                   HYPRE_Int           max_coarse_size);
+
+/**
  * (Optional) Set coarse solver type for SSAMG. Current options are
  * \begin{tabular}{l@{ -- }l}
  * 0 & Weighted Jacobi (default) \\

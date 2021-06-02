@@ -199,6 +199,16 @@ HYPRE_SStructSSAMGSetNumCoarseRelax( HYPRE_SStructSolver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructSSAMGSetMaxCoarseSize( HYPRE_SStructSolver solver,
+                                    HYPRE_Int           max_coarse_size )
+{
+   return( hypre_SSAMGSetMaxCoarseSize( (void *) solver, max_coarse_size ) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructSSAMGSetDxyz( HYPRE_SStructSolver  solver,
                            HYPRE_Int            nparts,
                            HYPRE_Real         **dxyz   )

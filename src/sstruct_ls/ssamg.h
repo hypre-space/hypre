@@ -41,6 +41,7 @@ typedef struct hypre_SSAMGData_struct
    hypre_ParVector        *par_x;
    HYPRE_Int               csolver_type;     /* coarse solver type */
    HYPRE_Int               num_coarse_relax; /* number of coarse relaxation sweeps */
+   HYPRE_Int               max_coarse_size;  /* maximum size for the coarse grid */
 
    /* (nlevels x nparts) arrays */
    HYPRE_Int             **active_l;         /* active parts for relaxation */
@@ -99,6 +100,7 @@ typedef struct hypre_SSAMGData_struct
 #define hypre_SSAMGDataNumPreRelax(ssamg_data)    ((ssamg_data) -> num_pre_relax)
 #define hypre_SSAMGDataNumPosRelax(ssamg_data)    ((ssamg_data) -> num_post_relax)
 #define hypre_SSAMGDataNumCoarseRelax(ssamg_data) ((ssamg_data) -> num_coarse_relax)
+#define hypre_SSAMGDataMaxCoarseSize(ssamg_data)  ((ssamg_data) -> max_coarse_size)
 #define hypre_SSAMGDataCSolverType(ssamg_data)    ((ssamg_data) -> csolver_type)
 #define hypre_SSAMGDataTimeIndex(ssamg_data)      ((ssamg_data) -> time_index)
 #define hypre_SSAMGDataPrintLevel(ssamg_data)     ((ssamg_data) -> print_level)

@@ -45,6 +45,7 @@ hypre_SSAMGCreate( hypre_MPI_Comm comm )
    (ssamg_data -> par_x)            = NULL;
    (ssamg_data -> csolver_type)     = 0;
    (ssamg_data -> num_coarse_relax) = -1;
+   (ssamg_data -> max_coarse_size)  = 1;
 
    /* initialize */
    (ssamg_data -> nparts)           = -1;
@@ -327,6 +328,20 @@ hypre_SSAMGSetNumCoarseRelax( void       *ssamg_vdata,
    hypre_SSAMGData *ssamg_data = (hypre_SSAMGData *) ssamg_vdata;
 
    hypre_SSAMGDataNumCoarseRelax(ssamg_data) = num_coarse_relax;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetMaxCoarseSize( void       *ssamg_vdata,
+                             HYPRE_Int   max_coarse_size)
+{
+   hypre_SSAMGData *ssamg_data = (hypre_SSAMGData *) ssamg_vdata;
+
+   hypre_SSAMGDataMaxCoarseSize(ssamg_data) = max_coarse_size;
 
    return hypre_error_flag;
 }

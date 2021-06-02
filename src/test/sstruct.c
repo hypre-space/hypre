@@ -4174,6 +4174,7 @@ main( hypre_int argc,
       HYPRE_SStructSSAMGSetNumPreRelax(solver, n_pre);
       HYPRE_SStructSSAMGSetNumPostRelax(solver, n_post);
       HYPRE_SStructSSAMGSetNumCoarseRelax(solver, n_coarse);
+      HYPRE_SStructSSAMGSetMaxCoarseSize(solver, max_coarse_size);
       HYPRE_SStructSSAMGSetCoarseSolverType(solver, csolver_type);
       HYPRE_SStructSSAMGSetNonGalerkinRAP(solver, rap);
       HYPRE_SStructSSAMGSetPrintLevel(solver, print_level);
@@ -4388,6 +4389,7 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetNumPreRelax(precond, n_pre);
          HYPRE_SStructSSAMGSetNumPostRelax(precond, n_post);
          HYPRE_SStructSSAMGSetNumCoarseRelax(precond, n_coarse);
+         HYPRE_SStructSSAMGSetMaxCoarseSize(precond, max_coarse_size);
          HYPRE_SStructSSAMGSetCoarseSolverType(precond, csolver_type);
          HYPRE_SStructSSAMGSetNonGalerkinRAP(precond, rap);
          HYPRE_SStructSSAMGSetPrintLevel(precond, print_level);
@@ -5062,6 +5064,7 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetNumPreRelax(precond, n_pre);
          HYPRE_SStructSSAMGSetNumPostRelax(precond, n_post);
          HYPRE_SStructSSAMGSetNumCoarseRelax(precond, n_coarse);
+         HYPRE_SStructSSAMGSetMaxCoarseSize(precond, max_coarse_size);
          HYPRE_SStructSSAMGSetCoarseSolverType(precond, csolver_type);
          HYPRE_SStructSSAMGSetPrintLevel(precond, print_level);
          HYPRE_SStructSSAMGSetLogging(precond, 0);
@@ -5311,6 +5314,7 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetNumPreRelax(precond, n_pre);
          HYPRE_SStructSSAMGSetNumPostRelax(precond, n_post);
          HYPRE_SStructSSAMGSetNumCoarseRelax(precond, n_coarse);
+         HYPRE_SStructSSAMGSetMaxCoarseSize(precond, max_coarse_size);
          HYPRE_SStructSSAMGSetCoarseSolverType(precond, csolver_type);
          HYPRE_SStructSSAMGSetPrintLevel(precond, print_level);
          HYPRE_SStructSSAMGSetLogging(precond, 0);
@@ -5560,6 +5564,7 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetNumPreRelax(precond, n_pre);
          HYPRE_SStructSSAMGSetNumPostRelax(precond, n_post);
          HYPRE_SStructSSAMGSetNumCoarseRelax(precond, n_coarse);
+         HYPRE_SStructSSAMGSetMaxCoarseSize(precond, max_coarse_size);
          HYPRE_SStructSSAMGSetCoarseSolverType(precond, csolver_type);
          HYPRE_SStructSSAMGSetPrintLevel(precond, print_level);
          HYPRE_SStructSSAMGSetLogging(precond, 0);
@@ -6623,6 +6628,7 @@ main( hypre_int argc,
                HYPRE_SStructSSAMGSetNumPreRelax(precond, n_pre);
                HYPRE_SStructSSAMGSetNumPostRelax(precond, n_post);
                HYPRE_SStructSSAMGSetNumCoarseRelax(precond, n_coarse);
+               HYPRE_SStructSSAMGSetMaxCoarseSize(precond, max_coarse_size);
                HYPRE_SStructSSAMGSetCoarseSolverType(precond, csolver_type);
                HYPRE_SStructSSAMGSetPrintLevel(precond, print_level);
                HYPRE_SStructSSAMGSetLogging(precond, 0);
@@ -6767,6 +6773,7 @@ main( hypre_int argc,
                HYPRE_SStructSSAMGSetNumPreRelax(precond, n_pre);
                HYPRE_SStructSSAMGSetNumPostRelax(precond, n_post);
                HYPRE_SStructSSAMGSetNumCoarseRelax(precond, n_coarse);
+               HYPRE_SStructSSAMGSetMaxCoarseSize(precond, max_coarse_size);
                HYPRE_SStructSSAMGSetCoarseSolverType(precond, csolver_type);
                HYPRE_SStructSSAMGSetPrintLevel(precond, print_level);
                HYPRE_SStructSSAMGSetLogging(precond, 0);

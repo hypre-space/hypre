@@ -2253,6 +2253,7 @@ HYPRE_Int hypre_StructGridSetBoundingBox ( hypre_StructGrid *grid , hypre_Box *n
 HYPRE_Int hypre_StructGridSetIDs ( hypre_StructGrid *grid , HYPRE_Int *ids );
 HYPRE_Int hypre_StructGridSetBoxManager ( hypre_StructGrid *grid , hypre_BoxManager *boxman );
 HYPRE_Int hypre_StructGridSetMaxDistance ( hypre_StructGrid *grid , hypre_Index dist );
+HYPRE_Int hypre_StructGridComputeGlobalSize ( hypre_StructGrid *grid );
 HYPRE_Int hypre_StructGridAssemble ( hypre_StructGrid *grid );
 HYPRE_Int hypre_StructGridComputeBoxnums ( hypre_StructGrid *grid , HYPRE_Int nboxes , HYPRE_Int *boxnums , hypre_Index stride , HYPRE_Int *new_nboxes_ptr , HYPRE_Int **new_boxnums_ptr );
 HYPRE_Int hypre_GatherAllBoxes ( MPI_Comm comm , hypre_BoxArray *boxes , HYPRE_Int dim , hypre_BoxArray **all_boxes_ptr , HYPRE_Int **all_procs_ptr , HYPRE_Int *first_local_ptr );
