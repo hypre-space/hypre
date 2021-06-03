@@ -303,7 +303,7 @@ hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
 
             F_seq = hypre_ParVectorCreate(seq_comm, size, row_starts);
             U_seq = hypre_ParVectorCreate(seq_comm, size, row_starts);
-            hypre_ParVectorOwnsPartitioning(F_seq) = 0;
+            hypre_ParVectorOwnsPartitioning(F_seq) = 1;
             hypre_ParVectorOwnsPartitioning(U_seq) = 0;
             hypre_ParVectorInitialize(F_seq);
             hypre_ParVectorInitialize(U_seq);
@@ -320,8 +320,6 @@ hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
    }
    return 0;
 }
-
-
 
 /*--------------------------------------------------------------------------
  * hypre_seqAMGCycle
@@ -600,4 +598,3 @@ void hypre_merge_lists (HYPRE_Int *list1, HYPRE_Int* list2, hypre_int *np1, hypr
       }
    }
 }
-

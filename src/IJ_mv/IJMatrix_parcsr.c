@@ -52,27 +52,20 @@ hypre_IJMatrixCreateParCSR(hypre_IJMatrix *matrix)
       }
    }
 
-   if (row_partitioning != col_partitioning)
+   col_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   if (hypre_IJMatrixGlobalFirstCol(matrix))
    {
-      col_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-      if (hypre_IJMatrixGlobalFirstCol(matrix))
+      for (i = 0; i < 2; i++)
       {
-         for (i = 0; i < 2; i++)
-         {
-            col_starts[i] = col_partitioning[i]-hypre_IJMatrixGlobalFirstCol(matrix);
-         }
-      }
-      else
-      {
-         for (i = 0; i < 2; i++)
-         {
-            col_starts[i] = col_partitioning[i];
-         }
+         col_starts[i] = col_partitioning[i] - hypre_IJMatrixGlobalFirstCol(matrix);
       }
    }
    else
    {
-      col_starts = row_starts;
+      for (i = 0; i < 2; i++)
+      {
+         col_starts[i] = col_partitioning[i];
+      }
    }
 
    par_matrix = hypre_ParCSRMatrixCreate(comm, hypre_IJMatrixGlobalNumRows(matrix),
@@ -80,6 +73,8 @@ hypre_IJMatrixCreateParCSR(hypre_IJMatrix *matrix)
                                          row_starts, col_starts, 0, 0, 0);
 
    hypre_IJMatrixObject(matrix) = par_matrix;
+   hypre_TFree(row_starts, HYPRE_MEMORY_HOST);
+   hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }

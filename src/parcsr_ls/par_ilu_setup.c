@@ -1913,10 +1913,6 @@ hypre_ILUSetupILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qper
                            S_diag_nnz,
                            S_offd_nnz);
 
-      /* S owns different start/end */
-      hypre_ParCSRMatrixSetColStartsOwner(matS,1);
-      hypre_ParCSRMatrixSetRowStartsOwner(matS,0);/* square matrix, use same row and col start */
-
       /* first put diagonal data in */
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(matS));
       hypre_ParCSRMatrixDiag(matS) = SLU;
@@ -1983,8 +1979,8 @@ hypre_ILUSetupILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qper
 
       /* free */
       hypre_TFree(send_buf, HYPRE_MEMORY_HOST);
-
-   }/* end of forming S */
+      hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
+   } /* end of forming S */
 
    *matSptr       = matS;
    *bufferp       = buffer;
@@ -2209,10 +2205,6 @@ hypre_ILUSetupILUKDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm,
                            S_diag_nnz,
                            S_offd_nnz);
 
-      /* S owns different start/end */
-      hypre_ParCSRMatrixSetColStartsOwner(matS,1);
-      hypre_ParCSRMatrixSetRowStartsOwner(matS,0);/* square matrix, use same row and col start */
-
       /* first put diagonal data in */
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(matS));
       hypre_ParCSRMatrixDiag(matS) = SLU;
@@ -2279,8 +2271,8 @@ hypre_ILUSetupILUKDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm,
 
       /* free */
       hypre_TFree(send_buf, HYPRE_MEMORY_HOST);
-
-   }/* end of forming S */
+      hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
+   } /* end of forming S */
 
    *matSptr       = matS;
    *bufferp       = buffer;
@@ -2506,10 +2498,6 @@ hypre_ILUSetupILUTDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
                            S_diag_nnz,
                            S_offd_nnz);
 
-      /* S owns different start/end */
-      hypre_ParCSRMatrixSetColStartsOwner(matS,1);
-      hypre_ParCSRMatrixSetRowStartsOwner(matS,0);/* square matrix, use same row and col start */
-
       /* first put diagonal data in */
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(matS));
       hypre_ParCSRMatrixDiag(matS) = SLU;
@@ -2576,8 +2564,8 @@ hypre_ILUSetupILUTDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
 
       /* free */
       hypre_TFree(send_buf, HYPRE_MEMORY_HOST);
-
-   }/* end of forming S */
+      hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
+   } /* end of forming S */
 
    *matSptr       = matS;
    *bufferp       = buffer;
@@ -2647,11 +2635,6 @@ hypre_ParILURAPReorder(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *rqperm
                            0,
                            n,
                            0);
-
-   hypre_ParCSRMatrixSetColStartsOwner(P,0);
-   hypre_ParCSRMatrixSetRowStartsOwner(P,0);
-   hypre_ParCSRMatrixSetColStartsOwner(Q,0);
-   hypre_ParCSRMatrixSetRowStartsOwner(Q,0);
 
    P_diag = hypre_ParCSRMatrixDiag(P);
    Q_diag = hypre_ParCSRMatrixDiag(Q);
@@ -3113,9 +3096,6 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
                         ctrR,
                         0);
 
-   hypre_ParCSRMatrixSetColStartsOwner(R,0);
-   hypre_ParCSRMatrixSetRowStartsOwner(R,0);
-
    P = hypre_ParCSRMatrixCreate( hypre_ParCSRMatrixComm(A),
                         hypre_ParCSRMatrixGlobalNumRows(A),
                         hypre_ParCSRMatrixGlobalNumCols(F),
@@ -3124,9 +3104,6 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
                         0,
                         ctrP,
                         0);
-
-   hypre_ParCSRMatrixSetColStartsOwner(R,0);
-   hypre_ParCSRMatrixSetRowStartsOwner(P,0);
 
    /* Assign value to diagonal data */
 
@@ -3208,10 +3185,6 @@ hypre_ILUSetupLDUtoCusparse(hypre_ParCSRMatrix *L, HYPRE_Real *D, hypre_ParCSRMa
                                     0,
                                     nnz_LDU,
                                     0);
-
-   /* L and U also doesn't hold data, A is holding the data */
-   hypre_ParCSRMatrixSetColStartsOwner(LDU,0);
-   hypre_ParCSRMatrixSetRowStartsOwner(LDU,0);
 
    LDU_diag = hypre_ParCSRMatrixDiag(LDU);
    LDU_diag_i = hypre_TAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_DEVICE);
@@ -3457,10 +3430,11 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n,
                            0,
                            0);
 
-      hypre_ParCSRMatrixSetColStartsOwner(S,1);
-      hypre_ParCSRMatrixSetRowStartsOwner(S,0);
       /* memroy leak here */
       hypre_ParCSRMatrixDiag(S) = SLU;
+
+      /* free memory */
+      hypre_TFree(S_row_starts, HYPRE_MEMORY_HOST);
    }
 
    *matSptr       = S;
@@ -4108,10 +4082,6 @@ hypre_ILUSetupMILU0(hypre_ParCSRMatrix *A, HYPRE_Int *permp, HYPRE_Int *qpermp, 
             ctrS,
             S_offd_nnz);
 
-      /* S owns different start/end */
-      hypre_ParCSRMatrixSetColStartsOwner(matS,1);
-      hypre_ParCSRMatrixSetRowStartsOwner(matS,0);/* square matrix, use same row and col start */
-
       /* first put diagonal data in */
       S_diag = hypre_ParCSRMatrixDiag(matS);
 
@@ -4174,7 +4144,8 @@ hypre_ILUSetupMILU0(hypre_ParCSRMatrix *A, HYPRE_Int *permp, HYPRE_Int *qpermp, 
 
       /* free */
       hypre_TFree(send_buf, HYPRE_MEMORY_HOST);
-   }/* end of forming S */
+      hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
+   } /* end of forming S */
 
    /* create S finished */
 
@@ -4187,9 +4158,6 @@ hypre_ILUSetupMILU0(hypre_ParCSRMatrix *A, HYPRE_Int *permp, HYPRE_Int *qpermp, 
          ctrL,
          0 );
 
-   /* Have A own row/col partitioning instead of L */
-   hypre_ParCSRMatrixSetColStartsOwner(matL,0);
-   hypre_ParCSRMatrixSetRowStartsOwner(matL,0);
    L_diag = hypre_ParCSRMatrixDiag(matL);
    hypre_CSRMatrixI(L_diag) = L_diag_i;
    if (ctrL)
@@ -4217,9 +4185,6 @@ hypre_ILUSetupMILU0(hypre_ParCSRMatrix *A, HYPRE_Int *permp, HYPRE_Int *qpermp, 
          ctrU,
          0 );
 
-   /* Have A own row/col partitioning instead of U */
-   hypre_ParCSRMatrixSetColStartsOwner(matU,0);
-   hypre_ParCSRMatrixSetRowStartsOwner(matU,0);
    U_diag = hypre_ParCSRMatrixDiag(matU);
    hypre_CSRMatrixI(U_diag) = U_diag_i;
    if (ctrU)
@@ -5070,10 +5035,6 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *permp, HYPR
             S_diag_i[m],
             S_offd_nnz);
 
-      /* S owns different start/end */
-      hypre_ParCSRMatrixSetColStartsOwner(matS,1);
-      hypre_ParCSRMatrixSetRowStartsOwner(matS,0);/* square matrix, use same row and col start */
-
       /* first put diagonal data in */
       S_diag = hypre_ParCSRMatrixDiag(matS);
 
@@ -5137,7 +5098,8 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *permp, HYPR
 
       /* free */
       hypre_TFree(send_buf, HYPRE_MEMORY_HOST);
-   }/* end of forming S */
+      hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
+   } /* end of forming S */
 
    /* Assemble LDU matrices */
    /* zero out unfactored rows */
@@ -5155,9 +5117,6 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *permp, HYPR
          L_diag_i[n],
          0 /* num_nonzeros_offd */);
 
-   /* Have A own coarse_partitioning instead of L */
-   hypre_ParCSRMatrixSetColStartsOwner(matL,0);
-   hypre_ParCSRMatrixSetRowStartsOwner(matL,0);
    L_diag = hypre_ParCSRMatrixDiag(matL);
    hypre_CSRMatrixI(L_diag) = L_diag_i;
    if (L_diag_i[n]>0)
@@ -5183,10 +5142,6 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *permp, HYPR
          0,
          U_diag_i[n],
          0 );
-
-   /* Have A own coarse_partitioning instead of U */
-   hypre_ParCSRMatrixSetColStartsOwner(matU,0);
-   hypre_ParCSRMatrixSetRowStartsOwner(matU,0);
 
    U_diag = hypre_ParCSRMatrixDiag(matU);
    hypre_CSRMatrixI(U_diag) = U_diag_i;
@@ -5923,10 +5878,6 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
             S_diag_i[m],
             S_offd_nnz);
 
-      /* S owns different start/end */
-      hypre_ParCSRMatrixSetColStartsOwner(matS,1);
-      hypre_ParCSRMatrixSetRowStartsOwner(matS,0);/* square matrix, use same row and col start */
-
       /* first put diagonal data in */
       S_diag = hypre_ParCSRMatrixDiag(matS);
 
@@ -5991,7 +5942,8 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
 
       /* free */
       hypre_TFree(send_buf, HYPRE_MEMORY_HOST);
-   }/* end of forming S */
+      hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
+   } /* end of forming S */
 
    /* now start to construct L and U */
    for (k = nLU; k < n; k++)
@@ -6011,9 +5963,6 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          L_diag_i[n],
          0 );
 
-   /* Have A own coarse_partitioning instead of L */
-   hypre_ParCSRMatrixSetColStartsOwner(matL,0);
-   hypre_ParCSRMatrixSetRowStartsOwner(matL,0);
    L_diag = hypre_ParCSRMatrixDiag(matL);
    hypre_CSRMatrixI(L_diag) = L_diag_i;
    if (L_diag_i[n] > 0)
@@ -6040,10 +5989,6 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          0,
          U_diag_i[n],
          0 );
-
-   /* Have A own coarse_partitioning instead of U */
-   hypre_ParCSRMatrixSetColStartsOwner(matU,0);
-   hypre_ParCSRMatrixSetRowStartsOwner(matU,0);
 
    U_diag = hypre_ParCSRMatrixDiag(matU);
    hypre_CSRMatrixI(U_diag) = U_diag_i;
@@ -6836,9 +6781,6 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
          ctrL,
          0 );
 
-   /* Have A own row/col partitioning instead of L */
-   hypre_ParCSRMatrixSetColStartsOwner(matL,1);
-   hypre_ParCSRMatrixSetRowStartsOwner(matL,0);
    L_diag = hypre_ParCSRMatrixDiag(matL);
    hypre_CSRMatrixI(L_diag) = L_diag_i;
    if (ctrL)
@@ -6866,9 +6808,6 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
          ctrU,
          0 );
 
-   /* Have A own row/col partitioning instead of U */
-   hypre_ParCSRMatrixSetColStartsOwner(matU,0);
-   hypre_ParCSRMatrixSetRowStartsOwner(matU,0);
    U_diag = hypre_ParCSRMatrixDiag(matU);
    hypre_CSRMatrixI(U_diag) = U_diag_i;
    if (ctrU)
@@ -6900,6 +6839,7 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
       hypre_TFree(E_j, HYPRE_MEMORY_HOST);
       hypre_TFree(E_data, HYPRE_MEMORY_HOST);
    }
+   hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
 
    /* set matrix pointers */
    *Lptr = matL;
@@ -7932,9 +7872,6 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
          L_diag_i[total_rows],
          0 /* num_nonzeros_offd */);
 
-   /* Have A own coarse_partitioning instead of L */
-   hypre_ParCSRMatrixSetColStartsOwner(matL,1);
-   hypre_ParCSRMatrixSetRowStartsOwner(matL,0);
    L_diag = hypre_ParCSRMatrixDiag(matL);
    hypre_CSRMatrixI(L_diag) = L_diag_i;
    if (L_diag_i[total_rows]>0)
@@ -7961,10 +7898,6 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
          U_diag_i[total_rows],
          0 );
 
-   /* Have A own coarse_partitioning instead of U */
-   hypre_ParCSRMatrixSetColStartsOwner(matU,0);
-   hypre_ParCSRMatrixSetRowStartsOwner(matU,0);
-
    U_diag = hypre_ParCSRMatrixDiag(matU);
    hypre_CSRMatrixI(U_diag) = U_diag_i;
    if (U_diag_i[n]>0)
@@ -7984,6 +7917,7 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
 
    /* free */
    hypre_TFree(iw,HYPRE_MEMORY_HOST);
+   hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
 
    /* free external data */
    if (E_i)
@@ -8857,9 +8791,6 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          L_diag_i[total_rows],
          0 );
 
-   /* Have A own coarse_partitioning instead of L */
-   hypre_ParCSRMatrixSetColStartsOwner(matL,1);
-   hypre_ParCSRMatrixSetRowStartsOwner(matL,0);
    L_diag = hypre_ParCSRMatrixDiag(matL);
    hypre_CSRMatrixI(L_diag) = L_diag_i;
    if (L_diag_i[total_rows] > 0)
@@ -8887,10 +8818,6 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          U_diag_i[total_rows],
          0 );
 
-   /* Have A own coarse_partitioning instead of U */
-   hypre_ParCSRMatrixSetColStartsOwner(matU,0);
-   hypre_ParCSRMatrixSetRowStartsOwner(matU,0);
-
    U_diag = hypre_ParCSRMatrixDiag(matU);
    hypre_CSRMatrixI(U_diag) = U_diag_i;
    if (U_diag_i[total_rows] > 0)
@@ -8912,6 +8839,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    /* free working array */
    hypre_TFree(iw,HYPRE_MEMORY_HOST);
    hypre_TFree(w,HYPRE_MEMORY_HOST);
+   hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
 
    /* free external data */
    if (E_i)

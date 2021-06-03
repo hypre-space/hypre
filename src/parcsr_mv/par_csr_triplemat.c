@@ -178,16 +178,6 @@ hypre_ParCSRMatMatHost( hypre_ParCSRMatrix  *A,
                                 col_starts_B, num_cols_offd_C,
                                 C_diag->num_nonzeros, C_offd->num_nonzeros);
 
-   /* C owns row/col starts*/
-   hypre_ParCSRMatrixRowStarts(C) = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   hypre_ParCSRMatrixColStarts(C) = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(hypre_ParCSRMatrixRowStarts(C), row_starts_A, HYPRE_BigInt, 2,
-                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(hypre_ParCSRMatrixColStarts(C), col_starts_B, HYPRE_BigInt, 2,
-                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   hypre_ParCSRMatrixSetRowStartsOwner(C, 1);
-   hypre_ParCSRMatrixSetColStartsOwner(C, 1);
-
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
    hypre_ParCSRMatrixDiag(C) = C_diag;
 
@@ -419,7 +409,7 @@ hypre_ParCSRTMatMatKTHost( hypre_ParCSRMatrix  *A,
                }
             }
          }
-         for (i = 0; i < C_tmp_offd_i[hypre_CSRMatrixNumRows(C_tmp_offd)]; i++)
+         for (i=0; i < C_tmp_offd_i[hypre_CSRMatrixNumRows(C_tmp_offd)]; i++)
          {
             j_indx = C_tmp_offd_j[i];
             C_tmp_offd_j[i] = map_B_to_C[j_indx];
@@ -444,16 +434,6 @@ hypre_ParCSRTMatMatKTHost( hypre_ParCSRMatrix  *A,
 
    C = hypre_ParCSRMatrixCreate(comm, n_cols_A, n_cols_B, col_starts_A, col_starts_B,
                                 num_cols_offd_C, C_diag->num_nonzeros, C_offd->num_nonzeros);
-
-   /* C owns row/col starts*/
-   hypre_ParCSRMatrixRowStarts(C) = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   hypre_ParCSRMatrixColStarts(C) = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(hypre_ParCSRMatrixRowStarts(C), col_starts_A, HYPRE_BigInt, 2,
-                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(hypre_ParCSRMatrixColStarts(C), col_starts_B, HYPRE_BigInt, 2,
-                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   hypre_ParCSRMatrixSetRowStartsOwner(C, 1);
-   hypre_ParCSRMatrixSetColStartsOwner(C, 1);
 
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
    hypre_ParCSRMatrixDiag(C) = C_diag;
@@ -726,16 +706,6 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
                                    col_starts_P, num_cols_offd_Q,
                                    Q_diag->num_nonzeros, Q_offd->num_nonzeros);
 
-      /* Q owns row/col starts*/
-      hypre_ParCSRMatrixRowStarts(Q) = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-      hypre_ParCSRMatrixColStarts(Q) = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(hypre_ParCSRMatrixRowStarts(Q), row_starts_A, HYPRE_BigInt, 2,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(hypre_ParCSRMatrixColStarts(Q), col_starts_P, HYPRE_BigInt, 2,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-      hypre_ParCSRMatrixSetRowStartsOwner(Q, 1);
-      hypre_ParCSRMatrixSetColStartsOwner(Q, 1);
-
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(Q));
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(Q));
       hypre_ParCSRMatrixDiag(Q) = Q_diag;
@@ -903,16 +873,6 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
 
    C = hypre_ParCSRMatrixCreate(comm, n_cols_R, n_cols_P, col_starts_R,
                                 col_starts_P, num_cols_offd_C, 0, 0);
-
-   /* C owns row/col starts*/
-   hypre_ParCSRMatrixRowStarts(C) = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   hypre_ParCSRMatrixColStarts(C) = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(hypre_ParCSRMatrixRowStarts(C), col_starts_R, HYPRE_BigInt, 2,
-                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(hypre_ParCSRMatrixColStarts(C), col_starts_P, HYPRE_BigInt, 2,
-                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   hypre_ParCSRMatrixSetRowStartsOwner(C, 1);
-   hypre_ParCSRMatrixSetColStartsOwner(C, 1);
 
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(C));

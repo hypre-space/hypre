@@ -820,13 +820,6 @@ hypre_MGRSetup( void               *mgr_vdata,
       hypre_ParCSRMatrix *AP = NULL;
       AP  = hypre_ParMatmul(A_array[lev], P_array[lev]);
       RAP_ptr = hypre_ParMatmul(RT, AP);
-      /* RL: XXX NEED TO CHECK THIS WITH UMY */
-      hypre_ParCSRMatrixOwnsRowStarts(RAP_ptr) = 1;
-      hypre_ParCSRMatrixOwnsColStarts(RAP_ptr) = 0;
-      /* P gives up her ColStarts */
-      hypre_ParCSRMatrixOwnsColStarts(P_array[lev]) = 0;
-      /* R gives up her RowStarts */
-      hypre_ParCSRMatrixOwnsRowStarts(RT) = 0;
       if (num_procs > 1)
       {
         hypre_MatvecCommPkgCreate(RAP_ptr);
@@ -848,9 +841,6 @@ hypre_MGRSetup( void               *mgr_vdata,
         HYPRE_Int block_num_f_points = (lev == 0 ? block_size : block_num_coarse_indexes[lev-1]) - block_num_coarse_indexes[lev];
         hypre_MGRComputeNonGalerkinCoarseGrid(A_array[lev], P, RT, block_num_f_points,
           /* ordering */set_c_points_method, /* method (approx. inverse or not) */ 0, max_elmts, /* keep_stencil */ 0, CF_marker_array[lev], &RAP_ptr);
-        hypre_ParCSRMatrixOwnsColStarts(RAP_ptr) = 0;
-        hypre_ParCSRMatrixOwnsColStarts(P_array[lev]) = 0;
-        hypre_ParCSRMatrixOwnsRowStarts(RT) = 0;
       }
       else
       {
@@ -1189,6 +1179,7 @@ hypre_MGRSetup( void               *mgr_vdata,
     hypre_TFree(level_coarse_size, HYPRE_MEMORY_HOST);
     level_coarse_size = NULL;
   }
+  hypre_TFree(coarse_pnts_global, HYPRE_MEMORY_HOST);
 
   HYPRE_ANNOTATE_FUNC_END;
 
@@ -1389,7 +1380,6 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
     if (coarse_size == 0) // stop coarsening
     {
       if (S_local) hypre_ParCSRMatrixDestroy(S_local);
-      hypre_TFree(coarse_pnts_global_lvl, HYPRE_MEMORY_HOST);
       hypre_TFree(coarse_dof_func_lvl, HYPRE_MEMORY_HOST);
 
       if (lev_local == 0)
@@ -1421,6 +1411,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
       {
         hypre_TFree(CF_marker_local, HYPRE_MEMORY_HOST);
       }
+      hypre_TFree(coarse_pnts_global_lvl, HYPRE_MEMORY_HOST);
       break;
     }
 
@@ -1485,6 +1476,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
     S_local = NULL;
     if ( (lev_local == max_local_lvls-1) || (coarse_size <= max_local_coarse_size) )
     {
+      hypre_TFree(coarse_pnts_global_lvl, HYPRE_MEMORY_HOST);
       not_finished = 0;
     }
 

@@ -327,7 +327,6 @@ GenerateVarDifConv( MPI_Comm         comm,
    }
 
    par_rhs = hypre_ParVectorCreate(comm, grid_size, global_part);
-   hypre_ParVectorOwnsPartitioning(par_rhs) = 0;
    rhs = hypre_ParVectorLocalVector(par_rhs);
    hypre_VectorData(rhs) = rhs_data;
    hypre_VectorMemoryLocation(rhs) = HYPRE_MEMORY_HOST;

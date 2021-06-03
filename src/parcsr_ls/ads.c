@@ -530,9 +530,6 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
                                        num_nonzeros_offd);
 
          hypre_ParCSRMatrixOwnsData(Pi) = 1;
-         hypre_ParCSRMatrixOwnsRowStarts(Pi) = 0;
-         hypre_ParCSRMatrixOwnsColStarts(Pi) = 1;
-
          hypre_ParCSRMatrixInitialize(Pi);
       }
 

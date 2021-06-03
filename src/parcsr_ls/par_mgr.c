@@ -1314,7 +1314,6 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
   hypre_CSRMatrixData(P_offd) = P_offd_data;
   hypre_CSRMatrixI(P_offd) = P_offd_i;
   hypre_CSRMatrixJ(P_offd) = P_offd_j;
-  hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
   num_cols_P_offd = 0;
 
@@ -1862,7 +1861,6 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    num_cols_P_offd = 0;
 
@@ -2255,9 +2253,9 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
 }
 
 HYPRE_Int
-hypre_MGRComputeAlgebraicFixedStress(hypre_ParCSRMatrix    *A,
-                                     HYPRE_BigInt             *mgr_idx_array,
-                                     HYPRE_Solver          A_ff_solver)
+hypre_MGRComputeAlgebraicFixedStress(hypre_ParCSRMatrix  *A,
+                                     HYPRE_BigInt        *mgr_idx_array,
+                                     HYPRE_Solver         A_ff_solver)
 {
   HYPRE_Int *U_marker, *S_marker, *P_marker;
   HYPRE_Int n_fine, i;
@@ -2647,7 +2645,6 @@ hypre_MGRBuildInterpApproximateInverseExp(hypre_ParCSRMatrix   *A,
   hypre_CSRMatrixData(P_offd) = P_offd_data;
   hypre_CSRMatrixI(P_offd) = P_offd_i;
   hypre_CSRMatrixJ(P_offd) = P_offd_j;
-  hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
   num_cols_P_offd = hypre_CSRMatrixNumCols(minus_Wp_offd);
   HYPRE_BigInt *col_map_offd_tmp = hypre_ParCSRMatrixColMapOffd(minus_Wp);
@@ -3018,7 +3015,6 @@ hypre_MGRBuildInterpApproximateInverse(hypre_ParCSRMatrix   *A,
   hypre_CSRMatrixData(P_offd) = P_offd_data;
   hypre_CSRMatrixI(P_offd) = P_offd_i;
   hypre_CSRMatrixJ(P_offd) = P_offd_j;
-  hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
   num_cols_P_offd = hypre_CSRMatrixNumCols(minus_Wp_offd);
   HYPRE_BigInt *col_map_offd_tmp = hypre_ParCSRMatrixColMapOffd(minus_Wp);
@@ -3129,7 +3125,7 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
   if (interp_type <3)
   {
     hypre_MGRBuildP( A,CF_marker,num_cpts_global,interp_type,debug_flag,&P_ptr);
-    
+
     /* Could do a few sweeps of Jacobi to further improve Jacobi interpolation P */
 /*
     if(interp_type == 2)
@@ -3206,7 +3202,7 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
   else if (restrict_type == 3)
   {
     /* move diagonal to first entry */
-    hypre_CSRMatrixReorder(hypre_ParCSRMatrixDiag(AT));  
+    hypre_CSRMatrixReorder(hypre_ParCSRMatrixDiag(AT));
     hypre_MGRBuildInterpApproximateInverse(AT, CF_marker, num_cpts_global, debug_flag, &R_ptr);
     hypre_BoomerAMGInterpTruncation(R_ptr, trunc_factor, max_elmts);
   }
@@ -3214,7 +3210,7 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
   {
     /* Build new strength matrix */
     hypre_BoomerAMGCreateS(AT, strong_threshold, max_row_sum, 1, NULL, &ST);
-    
+
     /* Classical modified interpolation */
     hypre_BoomerAMGBuildInterp(AT, CF_marker, ST, num_cpts_global,1, NULL,debug_flag,
                                trunc_factor, max_elmts, &R_ptr);
@@ -3495,7 +3491,6 @@ HYPRE_Int hypre_block_jacobi_scaling(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *
   hypre_CSRMatrixData(B_offd) = NULL;
   hypre_CSRMatrixI(B_offd) = NULL;
   hypre_CSRMatrixJ(B_offd) = NULL;
-  /* hypre_ParCSRMatrixOwnsRowStarts(B) = 0; */
 
   *B_ptr = B;
 
@@ -4482,7 +4477,7 @@ HYPRE_Int
 hypre_MGRSetFrelaxPrintLevel( void *mgr_vdata, HYPRE_Int print_level )
 {
   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
-  (mgr_data -> frelax_print_level) = print_level;  
+  (mgr_data -> frelax_print_level) = print_level;
   return hypre_error_flag;
 }
 
@@ -4491,7 +4486,7 @@ HYPRE_Int
 hypre_MGRSetCoarseGridPrintLevel( void *mgr_vdata, HYPRE_Int print_level )
 {
   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
-  (mgr_data -> cg_print_level) = print_level;  
+  (mgr_data -> cg_print_level) = print_level;
   return hypre_error_flag;
 }
 
