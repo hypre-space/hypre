@@ -6,7 +6,7 @@
  ******************************************************************************/
 
 #include "seq_mv.h"
- 
+
 /*--------------------------------------------------------------------------
  * hypre_GeneratePartitioning:
  * generates load balanced partitioning of a 1-d array
@@ -38,17 +38,19 @@ hypre_GeneratePartitioning(HYPRE_BigInt length, HYPRE_Int num_procs, HYPRE_BigIn
 
 
 /* This function differs from the above in that it only returns
-   the portion of the partition belonging to the individual process - 
-   to do this it requires the processor id as well AHB 6/05*/
+   the portion of the partition belonging to the individual process -
+   to do this it requires the processor id as well AHB 6/05
+*/
 
 HYPRE_Int
-hypre_GenerateLocalPartitioning(HYPRE_BigInt length, HYPRE_Int num_procs, HYPRE_Int myid, HYPRE_BigInt **part_ptr)
+hypre_GenerateLocalPartitioning(HYPRE_BigInt   length,
+                                HYPRE_Int      num_procs,
+                                HYPRE_Int      myid,
+                                HYPRE_BigInt **part_ptr)
 {
-
-
-   HYPRE_Int ierr = 0;
+   HYPRE_Int     ierr = 0;
+   HYPRE_Int     size, rest;
    HYPRE_BigInt *part;
-   HYPRE_Int size, rest;
 
    part = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
    size = (HYPRE_Int)(length / (HYPRE_BigInt)num_procs);
@@ -57,7 +59,7 @@ hypre_GenerateLocalPartitioning(HYPRE_BigInt length, HYPRE_Int num_procs, HYPRE_
    /* first row I own */
    part[0] = (HYPRE_BigInt)(size*myid);
    part[0] += (HYPRE_BigInt)(hypre_min(myid, rest));
-   
+
    /* last row I own */
    part[1] =  (HYPRE_BigInt)(size*(myid+1));
    part[1] += (HYPRE_BigInt)(hypre_min(myid+1, rest));
@@ -65,8 +67,8 @@ hypre_GenerateLocalPartitioning(HYPRE_BigInt length, HYPRE_Int num_procs, HYPRE_
 
    /* add 1 to last row since this is for "starts" vector */
    part[1] = part[1] + 1;
-   
 
    *part_ptr = part;
+
    return ierr;
 }

@@ -79,8 +79,6 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
 
    HYPRE_Int            i;
 
-   HYPRE_Int            ierr = 0;
-
    HYPRE_Int            num_procs;
    HYPRE_Int            cnt;
    HYPRE_Int            norm_type;
@@ -103,12 +101,9 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
 
    norm_type = hypre_abs(option);
 
-
-/* Set up the new matrix AN */
-
-
+   /* Set up the new matrix AN */
    row_starts_AN = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
-   for (i=0; i < 2; i++)
+   for (i = 0; i < 2; i++)
    {
       row_starts_AN[i] = row_starts[i];
    }
@@ -121,7 +116,7 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
    num_nonzeros_diag = A_diag_i[num_nodes];
    AN_diag_i = hypre_CTAlloc(HYPRE_Int,  num_nodes+1, HYPRE_MEMORY_HOST);
 
-   for (i=0; i <= num_nodes; i++)
+   for (i = 0; i <= num_nodes; i++)
    {
       AN_diag_i[i] = A_diag_i[i];
    }
@@ -129,13 +124,12 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
    AN_diag_j = hypre_CTAlloc(HYPRE_Int,  num_nonzeros_diag, HYPRE_MEMORY_HOST);
    AN_diag_data = hypre_CTAlloc(HYPRE_Real,  num_nonzeros_diag, HYPRE_MEMORY_HOST);
 
-
    AN_diag = hypre_CSRMatrixCreate(num_nodes, num_nodes, num_nonzeros_diag);
    hypre_CSRMatrixI(AN_diag) = AN_diag_i;
    hypre_CSRMatrixJ(AN_diag) = AN_diag_j;
    hypre_CSRMatrixData(AN_diag) = AN_diag_data;
 
-   for (i=0; i< num_nonzeros_diag; i++)
+   for (i = 0; i < num_nonzeros_diag; i++)
    {
       AN_diag_j[i]  = A_diag_j[i];
       hypre_CSRBlockMatrixBlockNorm(norm_type, &A_diag_data[i*bnnz],
@@ -144,12 +138,12 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
    }
 
 
-   if (diag_option ==1 )
+   if (diag_option == 1)
    {
       /* make the diag entry the negative of the sum of off-diag entries (NEED
        * to get more below!)*/
       /* the diagonal is the first element listed in each row - */
-      for (i=0; i < num_nodes; i++)
+      for (i = 0; i < num_nodes; i++)
       {
          index = AN_diag_i[i];
          sum = 0.0;
@@ -161,15 +155,13 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
 
          AN_diag_data[index] = -sum;
       }
-
    }
    else if (diag_option == 2)
    {
-
       /*  make all diagonal entries negative */
       /* the diagonal is the first element listed in each row - */
 
-      for (i=0; i < num_nodes; i++)
+      for (i = 0; i < num_nodes; i++)
       {
          index = AN_diag_i[i];
          AN_diag_data[index] = -AN_diag_data[index];
@@ -198,13 +190,13 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
       }
       send_map_starts_AN = hypre_CTAlloc(HYPRE_Int,  num_sends+1, HYPRE_MEMORY_HOST);
       send_map_starts_AN[0] = 0;
-      for (i=0; i < num_sends; i++)
+      for (i = 0; i < num_sends; i++)
       {
          send_procs_AN[i] = send_procs[i];
          send_map_starts_AN[i+1] = send_map_starts[i+1];
       }
       cnt = send_map_starts_AN[num_sends];
-      for (i=0; i< cnt; i++)
+      for (i = 0; i < cnt; i++)
       {
          send_map_elmts_AN[i] = send_map_elmts[i];
       }
@@ -218,7 +210,7 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
       if (num_recvs) recv_procs_AN = hypre_CTAlloc(HYPRE_Int,  num_recvs, HYPRE_MEMORY_HOST);
 
       recv_vec_starts_AN[0] = recv_vec_starts[0];
-      for (i=0; i < num_recvs; i++)
+      for (i = 0; i < num_recvs; i++)
       {
          recv_procs_AN[i] = recv_procs[i];
          recv_vec_starts_AN[i+1] = recv_vec_starts[i+1];
@@ -233,14 +225,14 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
 
    num_cols_offd = hypre_CSRBlockMatrixNumCols(A_offd);
    col_map_offd_AN = hypre_CTAlloc(HYPRE_BigInt,  num_cols_offd, HYPRE_MEMORY_HOST);
-   for (i=0; i < num_cols_offd; i++)
+   for (i = 0; i < num_cols_offd; i++)
    {
       col_map_offd_AN[i] = col_map_offd[i];
    }
 
    num_nonzeros_offd = A_offd_i[num_nodes];
    AN_offd_i = hypre_CTAlloc(HYPRE_Int,  num_nodes+1, HYPRE_MEMORY_HOST);
-   for (i=0; i <= num_nodes; i++)
+   for (i = 0; i <= num_nodes; i++)
    {
       AN_offd_i[i] = A_offd_i[i];
    }
@@ -248,7 +240,7 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
    AN_offd_j = hypre_CTAlloc(HYPRE_Int,  num_nonzeros_offd, HYPRE_MEMORY_HOST);
    AN_offd_data = hypre_CTAlloc(HYPRE_Real,  num_nonzeros_offd, HYPRE_MEMORY_HOST);
 
-   for (i=0; i< num_nonzeros_offd; i++)
+   for (i = 0; i < num_nonzeros_offd; i++)
    {
       AN_offd_j[i]  = A_offd_j[i];
       hypre_CSRBlockMatrixBlockNorm(norm_type, &A_offd_data[i*bnnz],
@@ -262,27 +254,24 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
    hypre_CSRMatrixJ(AN_offd) = AN_offd_j;
    hypre_CSRMatrixData(AN_offd) = AN_offd_data;
 
-   if (diag_option ==1 )
+   if (diag_option == 1)
    {
       /* make the diag entry the negative of the sum of off-diag entries (here
          we are adding the off_diag contribution)*/
       /* the diagonal is the first element listed in each row of AN_diag_data - */
-      for (i=0; i < num_nodes; i++)
+      for (i = 0; i < num_nodes; i++)
       {
          sum = 0.0;
          for (k = AN_offd_i[i]; k < AN_offd_i[i+1]; k++)
          {
             sum += AN_offd_data[k];
-
          }
          index = AN_diag_i[i];/* location of diag entry in data */
          AN_diag_data[index] -= sum; /* subtract from current value */
       }
-
    }
 
    /* now create AN */
-
    AN = hypre_ParCSRMatrixCreate(comm, global_num_nodes, global_num_nodes,
                                  row_starts_AN, row_starts_AN, num_cols_offd,
                                  num_nonzeros_diag, num_nonzeros_offd);
@@ -299,9 +288,9 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
 
    hypre_ParCSRMatrixColMapOffd(AN) = col_map_offd_AN;
    hypre_ParCSRMatrixCommPkg(AN) = comm_pkg_AN;
+   hypre_TFree(row_starts_AN, HYPRE_MEMORY_HOST);
 
-   *AN_ptr        = AN;
+   *AN_ptr = AN;
 
-   return (ierr);
+   return hypre_error_flag;
 }
-

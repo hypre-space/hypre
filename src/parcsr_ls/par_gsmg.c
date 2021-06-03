@@ -1159,7 +1159,6 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
 
@@ -1963,7 +1962,6 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
 

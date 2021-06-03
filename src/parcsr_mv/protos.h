@@ -224,8 +224,6 @@ HYPRE_Int hypre_ParCSRMatrixSetNumNonzeros ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_ParCSRMatrixSetDNumNonzeros ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_ParCSRMatrixSetNumRownnz ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_ParCSRMatrixSetDataOwner ( hypre_ParCSRMatrix *matrix , HYPRE_Int owns_data );
-HYPRE_Int hypre_ParCSRMatrixSetRowStartsOwner ( hypre_ParCSRMatrix *matrix , HYPRE_Int owns_row_starts );
-HYPRE_Int hypre_ParCSRMatrixSetColStartsOwner ( hypre_ParCSRMatrix *matrix , HYPRE_Int owns_col_starts );
 hypre_ParCSRMatrix *hypre_ParCSRMatrixRead ( MPI_Comm comm , const char *file_name );
 HYPRE_Int hypre_ParCSRMatrixPrint ( hypre_ParCSRMatrix *matrix , const char *file_name );
 HYPRE_Int hypre_ParCSRMatrixPrintIJ ( const hypre_ParCSRMatrix *matrix , const HYPRE_Int base_i , const HYPRE_Int base_j , const char *filename );

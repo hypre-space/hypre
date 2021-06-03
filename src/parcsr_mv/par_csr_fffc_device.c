@@ -468,9 +468,6 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                      AFF_diag_nnz,
                                      AFF_offd_nnz);
 
-      hypre_ParCSRMatrixOwnsRowStarts(AFF) = 1;
-      hypre_ParCSRMatrixOwnsColStarts(AFF) = option == 1 ? 0 : 1;
-
       AFF_diag = hypre_ParCSRMatrixDiag(AFF);
       hypre_CSRMatrixData(AFF_diag) = AFF_diag_a;
       hypre_CSRMatrixI(AFF_diag)    = AFF_diag_i;
@@ -615,9 +612,6 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                      num_cols_AFC_offd,
                                      AFC_diag_nnz,
                                      AFC_offd_nnz);
-
-      hypre_ParCSRMatrixOwnsRowStarts(AFC) = AFF_ptr ? 0 : 1;
-      hypre_ParCSRMatrixOwnsColStarts(AFC) = 0;
 
       AFC_diag = hypre_ParCSRMatrixDiag(AFC);
       hypre_CSRMatrixData(AFC_diag) = AFC_diag_a;
@@ -764,9 +758,6 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                      ACF_diag_nnz,
                                      ACF_offd_nnz);
 
-      hypre_ParCSRMatrixOwnsRowStarts(ACF) = 0;
-      hypre_ParCSRMatrixOwnsColStarts(ACF) = (AFF_ptr || AFC_ptr) ? 0 : 1;
-
       ACF_diag = hypre_ParCSRMatrixDiag(ACF);
       hypre_CSRMatrixData(ACF_diag) = ACF_diag_a;
       hypre_CSRMatrixI(ACF_diag)    = ACF_diag_i;
@@ -912,9 +903,6 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                      num_cols_ACC_offd,
                                      ACC_diag_nnz,
                                      ACC_offd_nnz);
-
-      hypre_ParCSRMatrixOwnsRowStarts(ACC) = 0;
-      hypre_ParCSRMatrixOwnsColStarts(ACC) = 0;
 
       ACC_diag = hypre_ParCSRMatrixDiag(ACC);
       hypre_CSRMatrixData(ACC_diag) = ACC_diag_a;
@@ -1236,9 +1224,6 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                                      ACX_diag_nnz,
                                      ACX_offd_nnz);
 
-      hypre_ParCSRMatrixOwnsRowStarts(ACX) = 0;
-      hypre_ParCSRMatrixOwnsColStarts(ACX) = 0;
-
       ACX_diag = hypre_ParCSRMatrixDiag(ACX);
       hypre_CSRMatrixData(ACX_diag) = ACX_diag_a;
       hypre_CSRMatrixI(ACX_diag)    = ACX_diag_i;
@@ -1372,9 +1357,6 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                                      num_cols_AXC_offd,
                                      AXC_diag_nnz,
                                      AXC_offd_nnz);
-
-      hypre_ParCSRMatrixOwnsRowStarts(AXC) = 0;
-      hypre_ParCSRMatrixOwnsColStarts(AXC) = 0;
 
       AXC_diag = hypre_ParCSRMatrixDiag(AXC);
       hypre_CSRMatrixData(AXC_diag) = AXC_diag_a;

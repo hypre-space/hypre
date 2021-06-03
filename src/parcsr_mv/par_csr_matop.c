@@ -342,9 +342,6 @@ hypre_ParMatmul_RowSizes( HYPRE_MemoryLocation memory_location,
  *
  * Multiplies two ParCSRMatrices A and B and returns the product in
  * ParCSRMatrix C.
- *
- * Note: C does not own the partitionings since its row_starts
- * is owned by A and col_starts by B.
  *--------------------------------------------------------------------------*/
 
 hypre_ParCSRMatrix*
@@ -1182,16 +1179,6 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 
    hypre_CSRMatrixMemoryLocation(C_diag) = memory_location_C;
    hypre_CSRMatrixMemoryLocation(C_offd) = memory_location_C;
-
-   /* C owns row/col starts*/
-   hypre_ParCSRMatrixRowStarts(C) = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   hypre_ParCSRMatrixColStarts(C) = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(hypre_ParCSRMatrixRowStarts(C), row_starts_A, HYPRE_BigInt, 2,
-                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(hypre_ParCSRMatrixColStarts(C), col_starts_B, HYPRE_BigInt, 2,
-                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   hypre_ParCSRMatrixSetRowStartsOwner(C, 1);
-   hypre_ParCSRMatrixSetColStartsOwner(C, 1);
 
    /*-----------------------------------------------------------------------
     *  Free various arrays
@@ -2140,8 +2127,6 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrixLastColDiag(AT) = first_col_diag_AT + local_num_cols_AT - 1;
 
    hypre_ParCSRMatrixOwnsData(AT) = 1;
-   hypre_ParCSRMatrixOwnsRowStarts(AT) = 1;
-   hypre_ParCSRMatrixOwnsColStarts(AT) = 1;
    hypre_ParCSRMatrixCommPkg(AT) = NULL;
    hypre_ParCSRMatrixCommPkgT(AT) = NULL;
 
@@ -2669,6 +2654,8 @@ void hypre_ParCSRMatrixExtractSubmatrices( hypre_ParCSRMatrix *A_csr,
    hypre_CSRMatrixI(offd) = offd_i;
    hypre_CSRMatrixJ(offd) = NULL;
    hypre_CSRMatrixData(offd) = NULL;
+   hypre_TFree(row_starts, HYPRE_MEMORY_HOST);
+   hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
 
    /* -----------------------------------------------------
     * create A21 matrix (assume sequential for the moment)
@@ -2724,6 +2711,8 @@ void hypre_ParCSRMatrixExtractSubmatrices( hypre_ParCSRMatrix *A_csr,
    hypre_CSRMatrixI(offd) = offd_i;
    hypre_CSRMatrixJ(offd) = NULL;
    hypre_CSRMatrixData(offd) = NULL;
+   hypre_TFree(row_starts, HYPRE_MEMORY_HOST);
+   hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
 
    /* -----------------------------------------------------
     * create A22 matrix (assume sequential for the moment)
@@ -2779,6 +2768,8 @@ void hypre_ParCSRMatrixExtractSubmatrices( hypre_ParCSRMatrix *A_csr,
    hypre_CSRMatrixI(offd) = offd_i;
    hypre_CSRMatrixJ(offd) = NULL;
    hypre_CSRMatrixData(offd) = NULL;
+   hypre_TFree(row_starts, HYPRE_MEMORY_HOST);
+   hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
 
    /* -----------------------------------------------------
     * hand the matrices back to the caller and clean up
@@ -2982,6 +2973,8 @@ void hypre_ParCSRMatrixExtractRowSubmatrices( hypre_ParCSRMatrix *A_csr,
    hypre_CSRMatrixI(offd) = offd_i;
    hypre_CSRMatrixJ(offd) = offd_j;
    hypre_CSRMatrixData(offd) = offd_a;
+   hypre_TFree(row_starts, HYPRE_MEMORY_HOST);
+   hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
 
    /* -----------------------------------------------------
     * create A21 matrix
@@ -3051,6 +3044,8 @@ void hypre_ParCSRMatrixExtractRowSubmatrices( hypre_ParCSRMatrix *A_csr,
    hypre_CSRMatrixI(offd) = offd_i;
    hypre_CSRMatrixJ(offd) = offd_j;
    hypre_CSRMatrixData(offd) = offd_a;
+   hypre_TFree(row_starts, HYPRE_MEMORY_HOST);
+   hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
 
    /* -----------------------------------------------------
     * hand the matrices back to the caller and clean up
@@ -3945,8 +3940,6 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
                  HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
    hypre_TMemcpy(hypre_ParCSRMatrixColStarts(C), col_starts_B, HYPRE_BigInt, 2,
                  HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   hypre_ParCSRMatrixSetRowStartsOwner(C, 1);
-   hypre_ParCSRMatrixSetColStartsOwner(C, 1);
 
    /* set defaults */
    hypre_ParCSRMatrixOwnsData(C) = 1;
@@ -4308,7 +4301,6 @@ hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrix *Anew;
    hypre_CSRMatrix    *Anew_diag;
    hypre_CSRMatrix    *Anew_offd;
-   HYPRE_BigInt *row_starts_new, *col_starts_new;
 
    HYPRE_Real eps = 2.2e-16;
 
@@ -4755,19 +4747,12 @@ hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix   *A,
       A_offd_j_new[i] = j;
    }
 
-   row_starts_new = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   col_starts_new = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(row_starts_new, hypre_ParCSRMatrixRowStarts(A), HYPRE_BigInt, 2,
-                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(col_starts_new, hypre_ParCSRMatrixColStarts(A), HYPRE_BigInt, 2,
-                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-
    /* Now, we should have everything of Parcsr matrix As */
    Anew = hypre_ParCSRMatrixCreate(comm,
                                    nrow_global,
                                    ncol_global,
-                                   row_starts_new,
-                                   col_starts_new,
+                                   hypre_ParCSRMatrixRowStarts(A),
+                                   hypre_ParCSRMatrixColStarts(A),
                                    num_cols_A_offd_new,
                                    nnz_diag_new,
                                    nnz_offd_new);
@@ -5100,8 +5085,6 @@ hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
 
    /* C data */
    hypre_ParCSRMatrix   *C;
-   HYPRE_BigInt         *row_starts_C;
-   HYPRE_BigInt         *col_starts_C;
    hypre_CSRMatrix      *C_diag;
    hypre_CSRMatrix      *C_offd;
    HYPRE_BigInt         *col_map_offd_C;
@@ -5246,18 +5229,11 @@ hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
    hypre_TFree(B2C_offd, HYPRE_MEMORY_HOST);
 
    /* Create ParCSRMatrix C */
-   row_starts_C = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   col_starts_C = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(row_starts_C, hypre_ParCSRMatrixRowStarts(A), HYPRE_BigInt, 2,
-                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(col_starts_C, hypre_ParCSRMatrixColStarts(A), HYPRE_BigInt, 2,
-                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-
    C = hypre_ParCSRMatrixCreate(comm,
                                 num_rows_A,
                                 num_cols_A,
-                                row_starts_C,
-                                col_starts_C,
+                                hypre_ParCSRMatrixRowStarts(A),
+                                hypre_ParCSRMatrixColStarts(A),
                                 num_cols_offd_C,
                                 hypre_CSRMatrixNumNonzeros(C_diag),
                                 hypre_CSRMatrixNumNonzeros(C_offd));
@@ -5864,6 +5840,8 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
 
    *B_ptr = B;
 
+   hypre_TFree(B_row_starts, HYPRE_MEMORY_HOST);
+   hypre_TFree(B_col_starts, HYPRE_MEMORY_HOST);
    hypre_TFree(B_maxel_row, HYPRE_MEMORY_HOST);
    hypre_TFree(send_buf_data, HYPRE_MEMORY_HOST);
    hypre_TFree(sub_idx_diag, HYPRE_MEMORY_HOST);
