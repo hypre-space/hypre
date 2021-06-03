@@ -1,2 +1,2 @@
-TEST_struct/*.sh
+TEST_struct/[^b]*.sh
 

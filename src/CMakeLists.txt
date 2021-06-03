@@ -12,9 +12,9 @@ else ()
 endif ()
 
 # The version number.
-set(HYPRE_VERSION 2.20.0)
-set(HYPRE_NUMBER  22000)
-set(HYPRE_DATE    2020/09/24)
+set(HYPRE_VERSION 2.21.0)
+set(HYPRE_NUMBER  22100)
+set(HYPRE_DATE    2021/05/25)
 set(HYPRE_TIME    00:00:00)
 set(HYPRE_BUGS    https://github.com/hypre-space/hypre/issues)
 set(HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -78,11 +78,11 @@ option(HYPRE_WITH_CUDA               "Use CUDA. Require cuda-8.0 or higher" OFF)
 option(HYPRE_ENABLE_UNIFIED_MEMORY   "Use unified memory for allocating the memory" OFF)
 option(HYPRE_ENABLE_CUDA_STREAMS     "Use CUDA streams" ON)
 option(HYPRE_ENABLE_CUSPARSE         "Use cuSPARSE" ON)
-option(HYPRE_ENABLE_CUB              "Use CUB Allocator" OFF)
+option(HYPRE_ENABLE_DEVICE_POOL      "Use device memory pool" OFF)
 option(HYPRE_ENABLE_CUBLAS           "Use cuBLAS" OFF)
 option(HYPRE_ENABLE_CURAND           "Use cuRAND" ON)
 option(HYPRE_ENABLE_GPU_PROFILING    "Use NVTX on CUDA" OFF)
-set(HYPRE_CUDA_SM "60" CACHE STRING "Target CUDA architecture.")
+set(HYPRE_CUDA_SM "70" CACHE STRING  "Target CUDA architecture.")
 
 option(TPL_DSUPERLU_LIBRARIES        "List of absolute paths to SuperLU_Dist link libraries [].")
 option(TPL_DSUPERLU_INCLUDE_DIRS     "List of absolute paths to SuperLU_Dist include directories [].")
@@ -238,9 +238,9 @@ if (HYPRE_WITH_CUDA)
       set(HYPRE_USING_CUDA_STREAMS ON CACHE BOOL "" FORCE)
     endif (HYPRE_ENABLE_CUDA_STREAMS)
 
-    if (HYPRE_ENABLE_CUB)
-      set(HYPRE_USING_CUB_ALLOCATOR ON CACHE BOOL "" FORCE)
-    endif (HYPRE_ENABLE_CUB)
+    if (HYPRE_ENABLE_DEVICE_POOL)
+      set(HYPRE_USING_DEVICE_POOL ON CACHE BOOL "" FORCE)
+    endif (HYPRE_ENABLE_DEVICE_POOL)
 
     # TODO Eventually should require cmake>=3.17
     # and use cmake's FindCUDAToolkit. Now collect
@@ -256,6 +256,13 @@ endif (HYPRE_WITH_CUDA)
 if (NOT HYPRE_WITH_EXTRA_CFLAGS STREQUAL "")
   string(REPLACE " " ";" HYPRE_WITH_EXTRA_CFLAGS "${HYPRE_WITH_EXTRA_CFLAGS}")
   add_compile_options("$<$<COMPILE_LANGUAGE:C>:${HYPRE_WITH_EXTRA_CFLAGS}>")
+endif ()
+
+# Set library build type (must appear before add_library calls)
+if (HYPRE_SHARED)
+  set(BUILD_SHARED_LIBS ON CACHE INTERNAL "" FORCE)
+else ()
+  set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "" FORCE)
 endif ()
 
 # Create the HYPRE library object
@@ -365,13 +372,6 @@ if (HYPRE_USING_CUDA)
   set_source_files_properties(${HYPRE_CUDA_SOURCES} PROPERTIES LANGUAGE CUDA)
 endif ()
 
-# Set library build type
-if (HYPRE_SHARED)
-  set(BUILD_SHARED_LIBS ON CACHE INTERNAL "" FORCE)
-else ()
-  set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "" FORCE)
-endif ()
-
 # Set MPI compile flags
 if (NOT HYPRE_SEQUENTIAL)
   find_program(MPIEXEC_EXECUTABLE NAMES mpiexec mpirun)
@@ -388,8 +388,8 @@ endif (HYPRE_USING_OPENMP)
 if (MSVC)
   target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
   # Use the C++ compiler to compile these files to get around lack of C99 support
-  set_source_files_properties(utilities/hypre_hopscotch_hash.c PROPERTIES COMPILE_FLAGS /TP)
-  set_source_files_properties(utilities/hypre_merge_sort.c     PROPERTIES COMPILE_FLAGS /TP)
+  set_source_files_properties(utilities/hopscotch_hash.c       PROPERTIES COMPILE_FLAGS /TP)
+  set_source_files_properties(utilities/merge_sort.c           PROPERTIES COMPILE_FLAGS /TP)
   set_source_files_properties(seq_mv/csr_matop.c               PROPERTIES COMPILE_FLAGS /TP)
   set_source_files_properties(parcsr_mv/par_csr_matop.c        PROPERTIES COMPILE_FLAGS /TP)
   set_source_files_properties(parcsr_mv/par_csr_matvec.c       PROPERTIES COMPILE_FLAGS /TP)
@@ -427,6 +427,7 @@ install(TARGETS ${PROJECT_NAME}
   EXPORT HYPRETargets
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
   ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+  RUNTIME DESTINATION "${CMAKE_INSTALL_LIBDIR}"
   INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 install(FILES ${HYPRE_HEADERS} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 

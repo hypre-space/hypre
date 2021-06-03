@@ -40,8 +40,8 @@ hypre_StructInnerProd( hypre_StructVector *x,
    HYPRE_Int        ndim = hypre_StructVectorNDim(x);
    HYPRE_Int        i;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   //const HYPRE_Int  data_location = hypre_StructGridDataLocation(hypre_StructVectorGrid(y));
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   const HYPRE_Int  data_location = hypre_StructGridDataLocation(hypre_StructVectorGrid(y));
 #endif
 
    HYPRE_Real       local_result = 0.0;

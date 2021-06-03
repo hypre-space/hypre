@@ -80,8 +80,6 @@ typedef struct
 
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
 #define hypre_CSRMatrixGPUMatData(matrix)           ((matrix) -> mat_data)
-#define hypre_CSRMatrixGPUMatDescr(matrix)          (hypre_GpuMatDataMatDecsr((matrix) -> mat_data))
-#define hypre_CSRMatrixGPUMatInfo(matrix)           (hypre_GpuMatDataMatInfo((matrix) -> mat_data))
 #endif
 
 HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBegin( hypre_CSRMatrix *A );

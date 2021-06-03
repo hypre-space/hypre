@@ -75,8 +75,8 @@
 /* Use cuSPARSE */
 #cmakedefine HYPRE_USING_CUSPARSE 1
 
-/* Use CUB */
-#cmakedefine HYPRE_USING_CUB_ALLOCATOR 1
+/* Use device memory pool */
+#cmakedefine HYPRE_USING_DEVICE_POOL 1
 
 /* Use unified memory */
 #cmakedefine HYPRE_USING_UNIFIED_MEMORY 1

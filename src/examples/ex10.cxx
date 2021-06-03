@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
    HYPRE_Init();
 
    /* Print GPU info */
-   HYPRE_PrintDeviceInfo();
+   /* HYPRE_PrintDeviceInfo(); */
 
    // Set default parameters
    n = 4*nprocs;

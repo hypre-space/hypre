@@ -51,6 +51,8 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
 
    HYPRE_Int        n_fine = hypre_CSRMatrixNumRows(A_diag);
 
+   hypre_BoomerAMGMakeSocFromSDevice(A, S);
+
    hypre_CSRMatrix *S_diag   = hypre_ParCSRMatrixDiag(S);
    HYPRE_Int       *S_diag_i = hypre_CSRMatrixI(S_diag);
    HYPRE_Int       *S_diag_j = hypre_CSRMatrixJ(S_diag);

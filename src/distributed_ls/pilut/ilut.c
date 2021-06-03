@@ -25,13 +25,17 @@
 HYPRE_Int hypre_ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatType *ldu, 
           HYPRE_Int maxnz, HYPRE_Real tol, hypre_PilutSolverGlobals *globals )
 {
+  HYPRE_Int logging = globals ? globals->logging : 0;
   HYPRE_Int i, ierr;
   ReduceMatType rmat;
   HYPRE_Int dummy_row_ptr[2], size;
   HYPRE_Real *values;
 
 #ifdef HYPRE_DEBUG
-  hypre_printf("hypre_ILUT, maxnz = %d\n ", maxnz);
+  if (logging)
+  {
+     hypre_printf("hypre_ILUT, maxnz = %d\n ", maxnz);
+  }
 #endif
 
   /* Allocate memory for ldu */
