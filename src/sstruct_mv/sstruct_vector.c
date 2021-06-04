@@ -866,6 +866,9 @@ hypre_SStructVectorInitializeShell( hypre_SStructVector *vector)
    return hypre_error_flag;
 }
 
+/*------------------------------------------------------------------
+ *  hypre_SStructVectorClearGhostValues
+ *----------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SStructVectorClearGhostValues(hypre_SStructVector *vector)
