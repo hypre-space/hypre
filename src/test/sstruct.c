@@ -3575,11 +3575,6 @@ main( hypre_int argc,
 
    HYPRE_SStructMatrixAssemble(A);
 
-   hypre_SStructVector *l1_norms;
-   hypre_SStructMatrixComputeL1Norms(A, 1, &l1_norms);
-   HYPRE_SStructVectorPrint("sstruct.out.l1norms", l1_norms, 0);
-   HYPRE_SStructVectorDestroy(l1_norms);
-
    /*-----------------------------------------------------------
     * Set up the linear system
     *-----------------------------------------------------------*/
