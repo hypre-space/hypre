@@ -644,6 +644,7 @@ HYPRE_Int hypre_SSAMGRelaxSetup ( void *relax_vdata , hypre_SStructMatrix *A , h
 HYPRE_Int hypre_SSAMGRelax ( void *relax_vdata , hypre_SStructMatrix *A , hypre_SStructVector *b , hypre_SStructVector *x );
 HYPRE_Int hypre_SSAMGRelaxGeneric ( void *relax_vdata , hypre_SStructMatrix *A , hypre_SStructVector *b , hypre_SStructVector *x );
 HYPRE_Int hypre_SSAMGRelaxMV ( void *relax_vdata , hypre_SStructMatrix *A , hypre_SStructVector *b , hypre_SStructVector *x );
+HYPRE_Int hypre_SSAMGRelaxL1Jac ( void *relax_vdata , hypre_SStructMatrix *A , hypre_SStructVector *b , hypre_SStructVector *x );
 HYPRE_Int hypre_SSAMGRelaxSetPreRelax ( void  *relax_vdata );
 HYPRE_Int hypre_SSAMGRelaxSetPostRelax ( void  *relax_vdata );
 HYPRE_Int hypre_SSAMGRelaxSetTol ( void *relax_vdata , HYPRE_Real tol );

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #

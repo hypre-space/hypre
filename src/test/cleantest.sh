@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -27,7 +27,7 @@ EOF
 esac
 
 RESET=`shopt -p nullglob`  # Save current nullglob setting
-shopt -s nullglob          # Return an empty string for failed wildcard matches 
+shopt -s nullglob          # Return an empty string for failed wildcard matches
 if [ "x$1" = "x" ]
 then
    testdirs=`echo TEST*`   # All TEST directories

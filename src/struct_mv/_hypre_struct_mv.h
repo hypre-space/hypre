@@ -2222,6 +2222,7 @@ HYPRE_Int hypre_ProjectBoxArrayArray ( hypre_BoxArrayArray *box_array_array , hy
 
 /* struct_axpy.c */
 HYPRE_Int hypre_StructAxpy ( HYPRE_Complex alpha , hypre_StructVector *x , hypre_StructVector *y );
+HYPRE_Int hypre_StructVectorElmdivpy ( HYPRE_Complex alpha , hypre_StructVector *x , hypre_StructVector *z , HYPRE_Complex beta , hypre_StructVector *y );
 
 /* struct_communication.c */
 HYPRE_Int hypre_CommPkgCreate ( hypre_CommInfo *comm_info , hypre_BoxArray *send_data_space , hypre_BoxArray *recv_data_space , HYPRE_Int num_values , HYPRE_Int **orders , HYPRE_Int reverse , MPI_Comm comm , hypre_CommPkg **comm_pkg_ptr );

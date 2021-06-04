@@ -27,6 +27,9 @@ typedef struct hypre_SSAMGRelaxData_struct
    hypre_SStructVector    *x;
    hypre_SStructVector    *t;
 
+   /* info for L1-Jacobi */
+   hypre_SStructVector    *l1_norms;
+
    /* defines set of nodes to apply relaxation */
    HYPRE_Int               num_nodesets;
    HYPRE_Int              *nodeset_sizes;   /* (num_nodeset) */
@@ -88,6 +91,7 @@ hypre_SSAMGRelaxCreate( MPI_Comm    comm,
    (relax_data -> b)                 = NULL;
    (relax_data -> x)                 = NULL;
    (relax_data -> t)                 = NULL;
+   (relax_data -> l1_norms)          = NULL;
    (relax_data -> num_nodesets)      = 0;
    (relax_data -> nodeset_sizes)     = NULL;
    (relax_data -> nodeset_ranks)     = NULL;
@@ -137,6 +141,7 @@ hypre_SSAMGRelaxDestroy( void *relax_vdata )
       HYPRE_SStructVectorDestroy(relax_data -> b);
       HYPRE_SStructVectorDestroy(relax_data -> x);
       HYPRE_SStructVectorDestroy(relax_data -> t);
+      HYPRE_SStructVectorDestroy(relax_data -> l1_norms);
 
       hypre_TFree(relax_data -> nodeset_sizes, HYPRE_MEMORY_HOST);
       hypre_TFree(relax_data -> nodeset_ranks, HYPRE_MEMORY_HOST);
@@ -463,6 +468,7 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
                        hypre_SStructVector *x )
 {
    hypre_SSAMGRelaxData   *relax_data      = (hypre_SSAMGRelaxData *) relax_vdata;
+   HYPRE_Int               relax_type      = (relax_data -> type);
    HYPRE_Int               num_nodesets    = (relax_data -> num_nodesets);
    HYPRE_Int              *nodeset_sizes   = (relax_data -> nodeset_sizes);
    hypre_Index            *nodeset_strides = (relax_data -> nodeset_strides);
@@ -479,6 +485,7 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
    hypre_StructVector     *sx;
    hypre_SStructPMatrix   *pA;
    hypre_StructMatrix     *sA;
+   hypre_SStructVector    *l1_norms;
 
    hypre_ComputePkg    ****svec_compute_pkgs;
    hypre_CommHandle     ***comm_handle;
@@ -771,6 +778,16 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
       } /* loop on nodesets */
    } /* loop on parts */
 
+
+   /*----------------------------------------------------------
+    * Compute l1_norms of the rows of A
+    *----------------------------------------------------------*/
+   if (relax_type == 3)
+   {
+      hypre_SStructMatrixComputeL1Norms(A, 1, &l1_norms);
+      (relax_data -> l1_norms) = l1_norms;
+   }
+
    /*----------------------------------------------------------
     * Set up the relax data structure
     *----------------------------------------------------------*/
@@ -801,6 +818,7 @@ hypre_SSAMGRelax( void                *relax_vdata,
                   hypre_SStructVector *x )
 {
    hypre_SSAMGRelaxData  *relax_data   = (hypre_SSAMGRelaxData *) relax_vdata;
+   HYPRE_Int              relax_type   = (relax_data -> type);
    HYPRE_Int              num_nodesets = (relax_data -> num_nodesets);
    HYPRE_Int              zero_guess   = (relax_data -> zero_guess);
    HYPRE_Int             *active_p     = (relax_data -> active_p);
@@ -811,7 +829,14 @@ hypre_SSAMGRelax( void                *relax_vdata,
 
    if (num_nodesets == 1)
    {
-      hypre_SSAMGRelaxMV(relax_vdata, A, b, x);
+      if ((relax_type == 0) || (relax_type == 1) || (relax_type == 2))
+      {
+         hypre_SSAMGRelaxMV(relax_vdata, A, b, x);
+      }
+      else if (relax_type == 3)
+      {
+         hypre_SSAMGRelaxL1Jac(relax_vdata, A, b, x);
+      }
    }
    else
    {
@@ -1243,6 +1268,7 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SSAMGRelaxMV
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1318,6 +1344,90 @@ hypre_SSAMGRelaxMV( void                *relax_vdata,
 
       /* x = (1 - w)*x + w*inv(D)*t */
       hypre_SStructMatrixInvDiagAxpy(matvec_vdata, weights, A, t, mweights, x);
+   }
+
+   (relax_data -> num_iterations) = iter;
+   hypre_EndTiming(relax_data -> time_index);
+   HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SSAMGRelaxL1Jac
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGRelaxL1Jac( void                *relax_vdata,
+                       hypre_SStructMatrix *A,
+                       hypre_SStructVector *b,
+                       hypre_SStructVector *x )
+{
+   hypre_SSAMGRelaxData    *relax_data        = (hypre_SSAMGRelaxData *) relax_vdata;
+   HYPRE_Int                max_iter          = (relax_data -> max_iter);
+   HYPRE_Int                zero_guess        = (relax_data -> zero_guess);
+   HYPRE_Int                num_nodesets      = (relax_data -> num_nodesets);
+   void                    *matvec_vdata      = (relax_data -> matvec_vdata);
+   hypre_SStructVector     *t                 = (relax_data -> t);
+   hypre_SStructVector     *l1_norms          = (relax_data -> l1_norms);
+
+   HYPRE_Int                iter = 0;
+   HYPRE_Complex            zero = 0.0;
+   HYPRE_Complex            one  = 1.0;
+   HYPRE_Complex            mone = -1.0;
+   HYPRE_Complex            weight = one;
+
+   /*----------------------------------------------------------
+    * Initialize some things and deal with special cases
+    *----------------------------------------------------------*/
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_BeginTiming(relax_data -> time_index);
+
+   (relax_data -> num_iterations) = 0;
+   /* if max_iter is zero, return */
+   if (max_iter == 0)
+   {
+      /* if using a zero initial guess, return zero */
+      if (zero_guess)
+      {
+         hypre_SStructVectorSetConstantValues(x, zero);
+      }
+
+      hypre_EndTiming(relax_data -> time_index);
+      HYPRE_ANNOTATE_FUNC_END;
+
+      return hypre_error_flag;
+   }
+
+   if (num_nodesets > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "num_nodesets > 1 not supported!");
+      hypre_EndTiming(relax_data -> time_index);
+      HYPRE_ANNOTATE_FUNC_END;
+
+      return hypre_error_flag;
+   }
+
+   /*----------------------------------------------------------
+    * Do zero_guess iteration
+    *----------------------------------------------------------*/
+   if (zero_guess)
+   {
+      /* x = (w/l1_norms)*b */
+      hypre_SStructVectorElmdivpy(weight, b, l1_norms, zero, x);
+      iter++;
+   }
+
+   /*----------------------------------------------------------
+    * Do regular iterations
+    *----------------------------------------------------------*/
+   for (; iter < max_iter; iter++)
+   {
+      /* t = b - A*x */
+      hypre_SStructMatvecCompute(matvec_vdata, mone, A, x, one, b, t);
+
+      /* x = x + (w/l1_norms)*t */
+      hypre_SStructVectorElmdivpy(weight, t, l1_norms, one, x);
    }
 
    (relax_data -> num_iterations) = iter;

@@ -51,9 +51,9 @@ hypre_SStructPVectorElmdivpy( HYPRE_Complex         alpha,
    HYPRE_Int nvars = hypre_SStructPVectorNVars(px);
    HYPRE_Int var;
 
-   hypre_SStructPVector *sx;
-   hypre_SStructPVector *sy;
-   hypre_SStructPVector *sz;
+   hypre_StructVector *sx;
+   hypre_StructVector *sy;
+   hypre_StructVector *sz;
 
    for (var = 0; var < nvars; var++)
    {
