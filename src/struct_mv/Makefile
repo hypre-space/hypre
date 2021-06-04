@@ -52,6 +52,7 @@ FILES =\
  struct_grid.c\
  struct_io.c\
  struct_matmult.c\
+ struct_matop.c\
  struct_matrix_mask.c\
  struct_stencil.c\
  struct_stmatrix.c

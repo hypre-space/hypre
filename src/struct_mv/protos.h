@@ -248,6 +248,11 @@ HYPRE_Int hypre_ReadBoxArrayData_CC ( FILE *file , hypre_BoxArray *box_array , h
 /* struct_matmult.c */
 HYPRE_Int hypre_StructMatmult ( HYPRE_Int nmatrices , hypre_StructMatrix **matrices , HYPRE_Int nterms , HYPRE_Int *terms , HYPRE_Int *transposes , hypre_StructMatrix **M_ptr );
 
+/* struct_matop.c */
+HYPRE_Int hypre_StructMatrixComputeRowSum ( hypre_StructMatrix *A , HYPRE_Int type , hypre_StructVector *rowsum );
+HYPRE_Int hypre_StructMatrixComputeRowSum_core_CC ( hypre_StructMatrix *A , hypre_StructVector *rowsum , HYPRE_Int box_id , HYPRE_Int nentries , HYPRE_Int *entries , hypre_Box *box , hypre_Box *Adbox , hypre_Box *rdbox , HYPRE_Int type );
+HYPRE_Int hypre_StructMatrixComputeRowSum_core_VC ( hypre_StructMatrix *A , hypre_StructVector *rowsum , HYPRE_Int box_id , HYPRE_Int nentries , HYPRE_Int *entries , hypre_Box *box , hypre_Box *Adbox , hypre_Box *rdbox , HYPRE_Int type );
+
 /* struct_matrix.c */
 HYPRE_Int hypre_StructMatrixGetDataMapStride ( hypre_StructMatrix *matrix , hypre_IndexRef *stride );
 HYPRE_Int hypre_StructMatrixMapDataIndex ( hypre_StructMatrix *matrix , hypre_Index dindex );
