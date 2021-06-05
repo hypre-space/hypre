@@ -1661,7 +1661,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
 }
 
 HYPRE_Int
-hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
+hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
                                      HYPRE_Int            *CF_marker,
                                      HYPRE_BigInt         *num_cpts_global,
                                      HYPRE_Int             num_functions,
@@ -2016,4 +2016,46 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
    hypre_TFree(send_buf_Z, HYPRE_MEMORY_HOST);
 
    return 0;
+}
+
+HYPRE_Int
+hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
+                                     HYPRE_Int            *CF_marker,
+                                     HYPRE_BigInt         *num_cpts_global,
+                                     HYPRE_Int             num_functions,
+                                     HYPRE_Int            *dof_func,
+                                     HYPRE_Int             NeumannDeg,
+                                     HYPRE_Real            strong_thresholdR,
+                                     HYPRE_Real            filter_thresholdR,
+                                     HYPRE_Int             debug_flag,
+                                     hypre_ParCSRMatrix  **R_ptr)
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("RestrNeumannAIR");
+#endif
+
+   HYPRE_Int ierr = 0;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      ierr = hypre_BoomerAMGBuildRestrNeumannAIRDevice(A,CF_marker,num_cpts_global,num_functions,dof_func,
+                                                 NeumannDeg, strong_thresholdR, filter_thresholdR,
+                                                 debug_flag, R_ptr);
+   }
+   else
+#endif
+   {
+      ierr = hypre_BoomerAMGBuildRestrNeumannAIRHost(A,CF_marker,num_cpts_global,num_functions,dof_func,
+                                                 NeumannDeg, strong_thresholdR, filter_thresholdR,
+                                                 debug_flag, R_ptr);
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
+   return ierr;
 }

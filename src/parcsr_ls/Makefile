@@ -150,6 +150,7 @@ CUFILES =\
  par_coarsen_device.c\
  par_indepset_device.c\
  par_interp_device.c\
+ par_lr_restr_device.c\
  par_interp_trunc_device.c\
  par_lr_interp_device.c\
  par_strength_device.c\
