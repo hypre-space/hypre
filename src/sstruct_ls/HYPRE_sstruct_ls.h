@@ -362,9 +362,10 @@ HYPRE_SStructSSAMGSetNonZeroGuess(HYPRE_SStructSolver solver);
  * Current relaxation methods set by {\tt relax\_type} are:
  *
  * \begin{tabular}{l@{ -- }l}
- * 0 & Jacobi \\
- * 1 & Weighted Jacobi (default) \\
- * 2 & Red/Black Gauss-Seidel (symmetric: RB pre-relaxation, BR post-relaxation) \\
+ * 0  & Jacobi \\
+ * 1  & Weighted Jacobi (default) \\
+ * 2  & L1-Jacobi \\
+ * 10 & Red/Black Gauss-Seidel (symmetric: RB pre-relaxation, BR post-relaxation) \\
  * \end{tabular}
  **/
 HYPRE_Int

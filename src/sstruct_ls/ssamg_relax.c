@@ -349,6 +349,7 @@ hypre_SSAMGRelaxSetType( void      *relax_vdata,
    (relax_data -> type) = type;
    switch (type)
    {
+      case 2: /* L1-Jacobi*/
       case 1: /* Weighted Jacobi */
       case 0: /* Jacobi */
       {
@@ -361,7 +362,7 @@ hypre_SSAMGRelaxSetType( void      *relax_vdata,
       }
       break;
 
-      case 2: /* Red-Black Gauss-Seidel */
+      case 10: /* Red-Black Gauss-Seidel */
       {
          /* TODO: extend this to 3D */
 
@@ -402,11 +403,12 @@ hypre_SSAMGRelaxSetPreRelax( void  *relax_vdata )
 
    switch (type)
    {
+      case 2: /* L1-Jacobi */
       case 1: /* Weighted Jacobi */
       case 0: /* Jacobi */
          break;
 
-      case 2: /* Red-Black Gauss-Seidel */
+      case 10: /* Red-Black Gauss-Seidel */
       {
          hypre_SSAMGRelaxSetNodesetRank(relax_data, 0, 0);
          hypre_SSAMGRelaxSetNodesetRank(relax_data, 1, 1);
@@ -782,7 +784,7 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
    /*----------------------------------------------------------
     * Compute l1_norms of the rows of A
     *----------------------------------------------------------*/
-   if (relax_type == 3)
+   if (relax_type == 2)
    {
       hypre_SStructMatrixComputeL1Norms(A, 1, &l1_norms);
       (relax_data -> l1_norms) = l1_norms;
@@ -829,11 +831,11 @@ hypre_SSAMGRelax( void                *relax_vdata,
 
    if (num_nodesets == 1)
    {
-      if ((relax_type == 0) || (relax_type == 1) || (relax_type == 2))
+      if ((relax_type == 0) || (relax_type == 1))
       {
          hypre_SSAMGRelaxMV(relax_vdata, A, b, x);
       }
-      else if (relax_type == 3)
+      else if (relax_type == 2)
       {
          hypre_SSAMGRelaxL1Jac(relax_vdata, A, b, x);
       }
@@ -1375,7 +1377,7 @@ hypre_SSAMGRelaxL1Jac( void                *relax_vdata,
    HYPRE_Complex            zero = 0.0;
    HYPRE_Complex            one  = 1.0;
    HYPRE_Complex            mone = -1.0;
-   HYPRE_Complex            weight = one;
+   HYPRE_Complex            weight = 1.0;
 
    /*----------------------------------------------------------
     * Initialize some things and deal with special cases

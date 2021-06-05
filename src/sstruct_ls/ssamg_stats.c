@@ -356,8 +356,8 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
             }
          }
 
-         /* Print relaxation weights */
-         if (relax_type > 0)
+         /* Print relaxation weights for each part*/
+         if ((relax_type == 0) || (relax_type == 1))
          {
             hypre_printf("Relaxation weights:\n\n");
             chunk_size = hypre_min(nparts, nparts_per_line);
@@ -537,7 +537,15 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       }
       else if (relax_type == 2)
       {
+         hypre_printf("L1-Jacobi\n");
+      }
+      else if (relax_type == 10)
+      {
          hypre_printf("Red-Black Gauss-Seidel\n");
+      }
+      else
+      {
+         hypre_printf("Unknown\n");
       }
 
       hypre_printf("Coarse solver type: ");
