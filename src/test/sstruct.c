@@ -2626,6 +2626,7 @@ main( hypre_int argc,
    num_iterations = -1;
    max_iterations = 100;
    max_levels = 25;
+   max_coarse_size = -1; /* depends on object_type */
    csolver_type = 0;
    tol = 1.0e-6;
    rel_change = 0;
@@ -3174,15 +3175,25 @@ main( hypre_int argc,
       {
          relax[0] = -1;
       }
-      max_coarse_size = 9;
+
+      if (max_coarse_size == -1)
+      {
+         max_coarse_size = 9;
+      }
    }
    else if (object_type == HYPRE_STRUCT)
    {
-      max_coarse_size = 0;
+      if (max_coarse_size == -1)
+      {
+         max_coarse_size = 0;
+      }
    }
    else if (object_type == HYPRE_SSTRUCT)
    {
-      max_coarse_size = 0;
+      if (max_coarse_size == -1)
+      {
+         max_coarse_size = 0;
+      }
    }
 
    /*-----------------------------------------------------------
