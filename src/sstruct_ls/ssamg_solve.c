@@ -33,6 +33,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
    HYPRE_Int            **active_l        =  hypre_SSAMGDataActivel(ssamg_data);
 
    /* Work data structures */
+   hypre_SStructGrid    **grid_l          = (ssamg_data -> grid_l);
    hypre_SStructMatrix  **A_l             = (ssamg_data -> A_l);
    hypre_SStructMatrix  **P_l             = (ssamg_data -> P_l);
    hypre_SStructMatrix  **RT_l            = (ssamg_data -> RT_l);
@@ -207,8 +208,8 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          {
             HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
 
-            /* Set active parts */
-            hypre_SStructMatvecSetActiveParts(matvec_data_l[l], active_l[l]);
+            /* Set active parts on current grid */
+            hypre_SStructGridSetActiveParts(grid_l[l], active_l[l]);
 
             /* pre-relaxation */
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
@@ -224,8 +225,8 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
                                        A_l[l], x_l[l], 1.0, b_l[l], r_l[l]);
             HYPRE_ANNOTATE_REGION_END("%s", "Residual");
 
-            /* Set all parts to active */
-            hypre_SStructMatvecSetAllPartsActive(matvec_data_l[l]);
+            /* Set all parts on current grid to active */
+            hypre_SStructGridSetAllPartsActive(grid_l[l]);
 
             /* restrict residual */
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Restriction");
@@ -278,8 +279,8 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
 #endif
             HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
 
-            /* Set active parts */
-            hypre_SStructMatvecSetActiveParts(matvec_data_l[l], active_l[l]);
+            /* Set active parts on current grid */
+            hypre_SStructGridSetActiveParts(grid_l[l], active_l[l]);
 
             /* post-relaxation */
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
@@ -290,7 +291,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
 
             /* Set all parts to active */
-            hypre_SStructMatvecSetAllPartsActive(matvec_data_l[l]);
+            hypre_SStructGridSetAllPartsActive(grid_l[l]);
          }
 
          /* interpolate error and correct on fine grid (x = x + Pe_c) */

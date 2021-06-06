@@ -38,7 +38,11 @@ hypre_SStructPAxpy( HYPRE_Complex         alpha,
 /*------------------------------------------------------------------
  * hypre_SStructPVectorElmdivpy
  *
- * y = alpha*x./z + beta*y
+ * This function computes
+ *
+ *   y = alpha*x./z + beta*y
+ *
+ * for a part if it is active.
  *----------------------------------------------------------------*/
 
 HYPRE_Int
@@ -48,20 +52,27 @@ hypre_SStructPVectorElmdivpy( HYPRE_Complex         alpha,
                               HYPRE_Complex         beta,
                               hypre_SStructPVector *py )
 {
-   HYPRE_Int nvars = hypre_SStructPVectorNVars(px);
-   HYPRE_Int var;
+   HYPRE_Int   nvars = hypre_SStructPVectorNVars(px);
+   HYPRE_Int   var, active;
 
+   hypre_SStructPGrid *pgrid;
    hypre_StructVector *sx;
    hypre_StructVector *sy;
    hypre_StructVector *sz;
 
    for (var = 0; var < nvars; var++)
    {
-      sx = hypre_SStructPVectorSVector(px, var);
-      sy = hypre_SStructPVectorSVector(py, var);
-      sz = hypre_SStructPVectorSVector(pz, var);
+      pgrid  = hypre_SStructPVectorPGrid(px);
+      active = hypre_SStructPGridActive(pgrid, var);
 
-      hypre_StructVectorElmdivpy(alpha, sx, sz, beta, sy);
+      if (active)
+      {
+         sx = hypre_SStructPVectorSVector(px, var);
+         sy = hypre_SStructPVectorSVector(py, var);
+         sz = hypre_SStructPVectorSVector(pz, var);
+
+         hypre_StructVectorElmdivpy(alpha, sx, sz, beta, sy);
+      }
    }
 
    return hypre_error_flag;

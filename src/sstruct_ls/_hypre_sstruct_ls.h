@@ -614,7 +614,7 @@ HYPRE_Int hypre_SSAMGSetSkipRelax ( void *ssamg_vdata , HYPRE_Int skip_relax );
 HYPRE_Int hypre_SSAMGSetNumPreRelax ( void *ssamg_vdata , HYPRE_Int num_pre_relax );
 HYPRE_Int hypre_SSAMGSetNumPosRelax ( void *ssamg_vdata , HYPRE_Int num_pos_relax );
 HYPRE_Int hypre_SSAMGSetNumCoarseRelax ( void *ssamg_vdata , HYPRE_Int num_coarse_relax );
-HYPRE_Int hypre_SStructSSAMGSetMaxCoarseSize ( void *ssamg_vdata , HYPRE_Int max_coarse_size );
+HYPRE_Int hypre_SSAMGSetMaxCoarseSize ( void *ssamg_vdata , HYPRE_Int max_coarse_size );
 HYPRE_Int hypre_SSAMGSetCoarseSolverType ( void *ssamg_vdata , HYPRE_Int csolver_type );
 HYPRE_Int hypre_SSAMGSetPrintLevel ( void *ssamg_vdata , HYPRE_Int print_level );
 HYPRE_Int hypre_SSAMGSetPrintFreq ( void *ssamg_vdata , HYPRE_Int print_freq );

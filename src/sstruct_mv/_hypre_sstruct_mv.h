@@ -72,6 +72,8 @@ typedef struct
    hypre_BoxArrayArray    *pbnd_boxaa[8];    /* arrays of box arrays for part boundaries
                                                 each BoxArrayArray entry has size equal to
                                                 the number of boxes in a sgrid */
+   HYPRE_Int               active[8];        /* flag indicating if grid is active for mat/vec
+                                                operations purposes */
    hypre_BoxArray         *pneighbors;
    hypre_Index            *pnbor_offsets;
 
@@ -260,6 +262,9 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructPGridVTPBndBoxArrayArray(pgrid, vartype) \
 ((pgrid) -> pbnd_boxaa[vartype])
 
+#define hypre_SStructPGridActive(pgrid, var) \
+((pgrid) -> active[hypre_SStructPGridVarType(pgrid, var)])
+#define hypre_SStructPGridVTActive(pgrid, vart)   ((pgrid) -> active[vart])
 #define hypre_SStructPGridPNeighbors(pgrid)       ((pgrid) -> pneighbors)
 #define hypre_SStructPGridPNborOffsets(pgrid)     ((pgrid) -> pnbor_offsets)
 #define hypre_SStructPGridLocalSize(pgrid)        ((pgrid) -> local_size)
@@ -956,6 +961,8 @@ HYPRE_Int hypre_SStructCellBoxToVarBox ( hypre_Box *box , hypre_Index offset , h
 HYPRE_Int hypre_SStructGridIntersect ( hypre_SStructGrid *grid , HYPRE_Int part , HYPRE_Int var , hypre_Box *box , HYPRE_Int action , hypre_BoxManEntry ***entries_ptr , HYPRE_Int *nentries_ptr );
 HYPRE_Int hypre_SStructGridPrintGLVis ( hypre_SStructGrid *grid, const char *meshprefix, HYPRE_Real *trans, HYPRE_Real *origin );
 HYPRE_Int hypre_SStructGridCoarsen ( hypre_SStructGrid *fgrid, hypre_IndexRef origin, hypre_Index *strides, hypre_Index *periodic, hypre_SStructGrid **cgrid_ptr );
+HYPRE_Int hypre_SStructGridSetActiveParts ( hypre_SStructGrid *grid , HYPRE_Int *active );
+HYPRE_Int hypre_SStructGridSetAllPartsActive ( hypre_SStructGrid *grid );
 
 /* sstruct_innerprod.c */
 HYPRE_Int hypre_SStructPInnerProd ( hypre_SStructPVector *px , hypre_SStructPVector *py , HYPRE_Real *presult_ptr );
@@ -996,12 +1003,10 @@ HYPRE_Int hypre_SStructPMatvecSetup ( void *pmatvec_vdata , hypre_SStructPMatrix
 HYPRE_Int hypre_SStructPMatvecCompute ( void *pmatvec_vdata , HYPRE_Complex alpha , hypre_SStructPMatrix *pA , hypre_SStructPVector *px , HYPRE_Complex beta , hypre_SStructPVector *pb , hypre_SStructPVector *py );
 HYPRE_Int hypre_SStructPMatvecDestroy ( void *pmatvec_vdata );
 HYPRE_Int hypre_SStructPMatvec ( HYPRE_Complex alpha , hypre_SStructPMatrix *pA , hypre_SStructPVector *px , HYPRE_Complex beta , hypre_SStructPVector *py );
-HYPRE_Int hypre_SStructPMatrixInvDiagAxpy ( void *pmatvec_vdata , HYPRE_Complex alpha , hypre_SStructPMatrix *A , hypre_SStructPVector *x , HYPRE_Complex beta , hypre_SStructPVector *y );
+HYPRE_Int hypre_SStructPMatrixInvDiagAxpy ( void *pmatvec_vdata , HYPRE_Complex alpha , hypre_SStructPMatrix *pA , hypre_SStructPVector *px , HYPRE_Complex beta , hypre_SStructPVector *py );
 HYPRE_Int hypre_SStructMatvecCreate ( void **matvec_vdata_ptr );
 HYPRE_Int hypre_SStructMatvecSetTranspose ( void *matvec_vdata , HYPRE_Int  transpose );
 HYPRE_Int hypre_SStructMatvecSetSkipDiag ( void *matvec_vdata , HYPRE_Int  skip_diag );
-HYPRE_Int hypre_SStructMatvecSetActiveParts ( void *matvec_vdata , HYPRE_Int *active );
-HYPRE_Int hypre_SStructMatvecSetAllPartsActive( void *matvec_vdata );
 HYPRE_Int hypre_SStructMatvecSetup ( void *matvec_vdata , hypre_SStructMatrix *A , hypre_SStructVector *x );
 HYPRE_Int hypre_SStructMatvecCompute ( void *matvec_vdata , HYPRE_Complex alpha , hypre_SStructMatrix *A , hypre_SStructVector *x , HYPRE_Complex beta , hypre_SStructVector *b , hypre_SStructVector *y );
 HYPRE_Int hypre_SStructMatrixInvDiagAxpy ( void *matvec_vdata , HYPRE_Complex *alpha , hypre_SStructMatrix *A , hypre_SStructVector *x , HYPRE_Complex *beta , hypre_SStructVector *y );
@@ -1058,3 +1063,4 @@ HYPRE_Int hypre_SStructVectorPrintGLVis ( hypre_SStructVector *vector, const cha
 #endif
 
 #endif
+

@@ -27,7 +27,7 @@ hypre_SSAMGCoarseSolverSetup( void *ssamg_vdata )
 
    void                 **relax_data_l  = (ssamg_data -> relax_data_l);
    void                 **matvec_data_l = (ssamg_data -> matvec_data_l);
-   HYPRE_Int            **active_l = hypre_SSAMGDataActivel(ssamg_data);
+   HYPRE_Int            **active_l      = hypre_SSAMGDataActivel(ssamg_data);
    HYPRE_Real           **relax_weights = hypre_SSAMGDataRelaxWeights(ssamg_data);
    hypre_SStructMatrix  **A_l  = (ssamg_data -> A_l);
    hypre_SStructVector  **x_l  = (ssamg_data -> x_l);
@@ -132,8 +132,6 @@ hypre_SSAMGCoarseSolve( void *ssamg_vdata )
    hypre_SSAMGData       *ssamg_data    = (hypre_SSAMGData *) ssamg_vdata;
    HYPRE_Int              csolver_type  = hypre_SSAMGDataCSolverType(ssamg_data);
    HYPRE_Int              num_levels    = hypre_SSAMGDataNumLevels(ssamg_data);
-   HYPRE_Int            **active_l      = hypre_SSAMGDataActivel(ssamg_data);
-   void                 **matvec_data_l = (ssamg_data -> matvec_data_l);
    void                 **relax_data_l  = (ssamg_data -> relax_data_l);
 
    hypre_SStructMatrix  **A_l     = (ssamg_data -> A_l);
@@ -149,18 +147,12 @@ hypre_SSAMGCoarseSolve( void *ssamg_vdata )
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
+   /* Coarsest level solver */
    l = (num_levels - 1);
    if (csolver_type == 0)
    {
-      /* Set active parts */
-      hypre_SStructMatvecSetActiveParts(matvec_data_l[l], active_l[l]);
-
-      /* Coarsest level solver */
       hypre_SSAMGRelaxSetZeroGuess(relax_data_l[l], 1);
       hypre_SSAMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
-
-      /* Set all parts to active */
-      hypre_SStructMatvecSetAllPartsActive(matvec_data_l[l]);
    }
    else if (csolver_type == 1)
    {

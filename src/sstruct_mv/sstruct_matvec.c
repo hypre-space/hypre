@@ -175,12 +175,13 @@ hypre_SStructPMatvecCompute( void                 *pmatvec_vdata,
    HYPRE_Int                   nvars        = (pmatvec_data -> nvars);
    void                     ***smatvec_data = (pmatvec_data -> smatvec_data);
 
-   void                       *sdata;
+   hypre_SStructPGrid         *pgrid;
    hypre_StructMatrix         *sA;
    hypre_StructVector         *sx;
    hypre_StructVector         *sb;
    hypre_StructVector         *sy;
-   HYPRE_Int                   vi, vj;
+   HYPRE_Int                   vi, vj, active;
+   void                       *sdata;
 
    /* Copy b to y */
    for (vi = 0; vi < nvars; vi++)
@@ -193,30 +194,36 @@ hypre_SStructPMatvecCompute( void                 *pmatvec_vdata,
 
    for (vi = 0; vi < nvars; vi++)
    {
-      sy = hypre_SStructPVectorSVector(py, vi);
+      pgrid  = hypre_SStructPMatrixPGrid(pA);
+      active = hypre_SStructPGridActive(pgrid, vi);
 
-      /* diagonal block computation */
-      if (smatvec_data[vi][vi] != NULL)
+      if (active)
       {
-         sdata = smatvec_data[vi][vi];
-         sA = hypre_SStructPMatrixSMatrix(pA, vi, vi);
-         sx = hypre_SStructPVectorSVector(px, vi);
-         hypre_StructMatvecCompute(sdata, alpha, sA, sx, beta, sy);
-      }
-      else
-      {
-         hypre_StructScale(beta, sy);
-      }
+         sy = hypre_SStructPVectorSVector(py, vi);
 
-      /* off-diagonal block computation */
-      for (vj = 0; vj < nvars; vj++)
-      {
-         if ((smatvec_data[vi][vj] != NULL) && (vj != vi))
+         /* diagonal block computation */
+         if (smatvec_data[vi][vi] != NULL)
          {
-            sdata = smatvec_data[vi][vj];
-            sA = hypre_SStructPMatrixSMatrix(pA, vi, vj);
-            sx = hypre_SStructPVectorSVector(px, vj);
-            hypre_StructMatvecCompute(sdata, alpha, sA, sx, 1.0, sy);
+            sdata = smatvec_data[vi][vi];
+            sA = hypre_SStructPMatrixSMatrix(pA, vi, vi);
+            sx = hypre_SStructPVectorSVector(px, vi);
+            hypre_StructMatvecCompute(sdata, alpha, sA, sx, beta, sy);
+         }
+         else
+         {
+            hypre_StructScale(beta, sy);
+         }
+
+         /* off-diagonal block computation */
+         for (vj = 0; vj < nvars; vj++)
+         {
+            if ((smatvec_data[vi][vj] != NULL) && (vj != vi))
+            {
+               sdata = smatvec_data[vi][vj];
+               sA = hypre_SStructPMatrixSMatrix(pA, vi, vj);
+               sx = hypre_SStructPVectorSVector(px, vj);
+               hypre_StructMatvecCompute(sdata, alpha, sA, sx, 1.0, sy);
+            }
          }
       }
    }
@@ -227,32 +234,43 @@ hypre_SStructPMatvecCompute( void                 *pmatvec_vdata,
 /*--------------------------------------------------------------------------
  * hypre_SStructPMatrixInvDiagAxpy
  *
- * y = alpha*inv(A_D)*x + beta*y
+ * This function computes
+ *
+ *    y = alpha*inv(A_D)*x + beta*y
+ *
+ * for a part if it is active.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructPMatrixInvDiagAxpy( void                 *pmatvec_vdata,
-                                 HYPRE_Complex         alpha,
-                                 hypre_SStructPMatrix *A,
-                                 hypre_SStructPVector *x,
-                                 HYPRE_Complex         beta,
-                                 hypre_SStructPVector *y )
+hypre_SStructPMatrixInvDiagAxpy( void                  *pmatvec_vdata,
+                                 HYPRE_Complex          alpha,
+                                 hypre_SStructPMatrix  *pA,
+                                 hypre_SStructPVector  *px,
+                                 HYPRE_Complex          beta,
+                                 hypre_SStructPVector  *py )
 {
    hypre_SStructPMatvecData  *pmatvec_data = (hypre_SStructPMatvecData   *)pmatvec_vdata;
    HYPRE_Int                  nvars        = (pmatvec_data -> nvars);
-   void                      *sdata;
+   hypre_SStructPGrid        *pgrid;
    hypre_StructMatrix        *sA;
    hypre_StructVector        *sx, *sy;
-   HYPRE_Int                  vi;
+   HYPRE_Int                  vi, active;
+   void                      *sdata;
 
    for (vi = 0; vi < nvars; vi++)
    {
-      sA = hypre_SStructPMatrixSMatrix(A, vi, vi);
-      sx = hypre_SStructPVectorSVector(x, vi);
-      sy = hypre_SStructPVectorSVector(y, vi);
-      sdata = (pmatvec_data -> smatvec_data)[vi][vi];
+      pgrid  = hypre_SStructPMatrixPGrid(pA);
+      active = hypre_SStructPGridActive(pgrid, vi);
 
-      hypre_StructMatrixInvDiagAxpy(sdata, alpha, sA, sx, beta, sy);
+      if (active)
+      {
+         sA = hypre_SStructPMatrixSMatrix(pA, vi, vi);
+         sx = hypre_SStructPVectorSVector(px, vi);
+         sy = hypre_SStructPVectorSVector(py, vi);
+         sdata = (pmatvec_data -> smatvec_data)[vi][vi];
+
+         hypre_StructMatrixInvDiagAxpy(sdata, alpha, sA, sx, beta, sy);
+      }
    }
 
    return hypre_error_flag;
@@ -343,67 +361,6 @@ hypre_SStructMatvecSetSkipDiag( void      *matvec_vdata,
    {
       hypre_SStructPMatvecSetSkipDiag(matvec_data -> pmatvec_data[part],
                                       skip_diag);
-   }
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_SStructMatvecSetActiveParts
- *--------------------------------------------------------------------------*/
-HYPRE_Int
-hypre_SStructMatvecSetActiveParts( void      *matvec_vdata,
-                                   HYPRE_Int *active )
-{
-   hypre_SStructMatvecData  *matvec_data = (hypre_SStructMatvecData *) matvec_vdata;
-   HYPRE_Int                 nparts      = (matvec_data -> nparts);
-   hypre_SStructPMatvecData *pmatvec_data;
-   void                     *sdata;
-
-   HYPRE_Int                 vi, vj, part, nvars;
-
-   for (part = 0; part < nparts; part++)
-   {
-      pmatvec_data = (hypre_SStructPMatvecData *)(matvec_data -> pmatvec_data[part]);
-      nvars = (pmatvec_data -> nvars);
-      for (vi = 0; vi < nvars; vi++)
-      {
-         for (vj = 0; vj < nvars; vj++)
-         {
-            sdata = (pmatvec_data -> smatvec_data)[vi][vj];
-            hypre_StructMatvecSetActive(sdata, active[part]);
-         }
-      }
-   }
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_SStructMatvecSetAllPartsActive
- *--------------------------------------------------------------------------*/
-HYPRE_Int
-hypre_SStructMatvecSetAllPartsActive( void *matvec_vdata )
-{
-   hypre_SStructMatvecData  *matvec_data = (hypre_SStructMatvecData *) matvec_vdata;
-   HYPRE_Int                 nparts      = (matvec_data -> nparts);
-   hypre_SStructPMatvecData *pmatvec_data;
-   void                     *sdata;
-
-   HYPRE_Int                 vi, vj, part, nvars;
-
-   for (part = 0; part < nparts; part++)
-   {
-      pmatvec_data = (hypre_SStructPMatvecData *)(matvec_data -> pmatvec_data[part]);
-      nvars = (pmatvec_data -> nvars);
-      for (vi = 0; vi < nvars; vi++)
-      {
-         for (vj = 0; vj < nvars; vj++)
-         {
-            sdata = (pmatvec_data -> smatvec_data)[vi][vj];
-            hypre_StructMatvecSetActive(sdata, 1);
-         }
-      }
    }
 
    return hypre_error_flag;
@@ -559,9 +516,11 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
 /*--------------------------------------------------------------------------
  * hypre_SStructMatrixInvDiagAxpy
  *
- * y = alpha*inv(A_D)*x + beta*y
+ * This function computes:
  *
- * TODO: Add UMatrix contribution to inv(A_D)
+ *    y = alpha*inv(A_D)*x + beta*y.
+ *
+ * Note: This does not consider the UMatrix contribution to inv(A_D)
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_SStructMatrixInvDiagAxpy( void                *matvec_vdata,

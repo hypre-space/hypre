@@ -52,6 +52,8 @@ typedef struct
    hypre_BoxArrayArray    *pbnd_boxaa[8];    /* arrays of box arrays for part boundaries
                                                 each BoxArrayArray entry has size equal to
                                                 the number of boxes in a sgrid */
+   HYPRE_Int               active[8];        /* flag indicating if grid is active for mat/vec
+                                                operations purposes */
    hypre_BoxArray         *pneighbors;
    hypre_Index            *pnbor_offsets;
 
@@ -164,7 +166,7 @@ typedef struct hypre_SStructGrid_struct
    // TODO: deprecate these ones. SStructMatrix should hold these data instead
    HYPRE_Int               ghlocal_size;  /* GEC0902 Number of vars including ghosts */
    HYPRE_Int               ghstart_rank;  /* GEC0902 start rank including ghosts  */
-   
+
 } hypre_SStructGrid;
 
 /*--------------------------------------------------------------------------
@@ -240,6 +242,9 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructPGridVTPBndBoxArrayArray(pgrid, vartype) \
 ((pgrid) -> pbnd_boxaa[vartype])
 
+#define hypre_SStructPGridActive(pgrid, var) \
+((pgrid) -> active[hypre_SStructPGridVarType(pgrid, var)])
+#define hypre_SStructPGridVTActive(pgrid, vart)   ((pgrid) -> active[vart])
 #define hypre_SStructPGridPNeighbors(pgrid)       ((pgrid) -> pneighbors)
 #define hypre_SStructPGridPNborOffsets(pgrid)     ((pgrid) -> pnbor_offsets)
 #define hypre_SStructPGridLocalSize(pgrid)        ((pgrid) -> local_size)

@@ -26,7 +26,6 @@ typedef struct
    hypre_ComputePkg    *compute_pkg;
    hypre_BoxArray      *data_space;
    HYPRE_Int            transpose;
-   HYPRE_Int            active; /* Flag indicating if the product A*x should be computed */
 
    HYPRE_Int            skip_diag;
    HYPRE_Int            nentries;
@@ -78,27 +77,6 @@ hypre_StructMatvecSetTranspose( void *matvec_vdata,
    hypre_StructMatvecData *matvec_data = (hypre_StructMatvecData *)matvec_vdata;
 
    (matvec_data -> transpose) = transpose;
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructMatvecSetActive( void *matvec_vdata,
-                             HYPRE_Int active )
-{
-   hypre_StructMatvecData *matvec_data = (hypre_StructMatvecData *)matvec_vdata;
-
-   if (active != 0)
-   {
-      (matvec_data -> active) = 1;
-   }
-   else
-   {
-      (matvec_data -> active) = 0;
-   }
 
    return hypre_error_flag;
 }
@@ -212,9 +190,6 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
    /* Set number of stencil entries used in StructMatvecCompute*/
    (matvec_data -> nentries) = stencil_size;
 
-   /* A*x should be computed by default */
-   (matvec_data) -> active = 1;
-
    /*----------------------------------------------------------
     * Set up the matvec data structure
     *----------------------------------------------------------*/
@@ -280,7 +255,6 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    HYPRE_Int                skip_diag   = (matvec_data -> skip_diag);
    HYPRE_Int                nentries    = (matvec_data -> nentries);
    HYPRE_Int               *stentries   = (matvec_data -> stentries);
-   HYPRE_Int                active      = (matvec_data -> active);
    HYPRE_Int                ndim        = hypre_StructMatrixNDim(A);
 
    hypre_BoxArray          *data_space;
@@ -315,12 +289,6 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    HYPRE_Int                depth, cdepth, vdepth;
 
    hypre_StructVector      *x_tmp = NULL;
-
-   /* Return if grid is inactive */
-   if (!active)
-   {
-      return hypre_error_flag;
-   }
 
    /*-----------------------------------------------------------------------
     * Initialize some things
@@ -1136,7 +1104,7 @@ hypre_StructMatrixInvDiagAxpy( void                *matvec_vdata,
                                hypre_StructVector  *y )
 {
    hypre_StructMatvecData  *matvec_data = (hypre_StructMatvecData *) matvec_vdata;
-   HYPRE_Int                active = matvec_data -> active;
+   HYPRE_Int                skip_diag = (matvec_data -> skip_diag);
    HYPRE_Int                ndim = hypre_StructMatrixNDim(A);
 
    hypre_BoxArray          *boxes;
@@ -1152,9 +1120,11 @@ hypre_StructMatrixInvDiagAxpy( void                *matvec_vdata,
    HYPRE_Int                diag, i;
    HYPRE_Real               scale;
 
-   /* Return if grid is inactive */
-   if (!active)
+   /* Sanity check */
+   if (skip_diag)
    {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Error! Skip diagonal option not available!\n");
+
       return hypre_error_flag;
    }
 

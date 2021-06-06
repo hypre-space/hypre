@@ -709,6 +709,8 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
       coarse_flag = 0;
       for (part = 0; part < nparts; part++)
       {
+         pgrid = hypre_SStructGridPGrid(grid_l[l], part);
+
          /* Initialize min_dxyz */
          min_dxyz = 1;
          for (d = 0; d < ndim; d++)
@@ -778,6 +780,7 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
                if (skip_relax)
                {
                   active_l[l][part] = 0;
+                  (pgrid -> active[0]) = 0;
                }
             }
             hypre_IndexD(coarsen[part], cdir) = 1;

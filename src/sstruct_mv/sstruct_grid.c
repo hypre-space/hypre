@@ -84,17 +84,18 @@ hypre_SStructPGridCreate( MPI_Comm             comm,
 
    pgrid = hypre_TAlloc(hypre_SStructPGrid, 1, HYPRE_MEMORY_HOST);
 
-   hypre_SStructPGridComm(pgrid)             = comm;
-   hypre_SStructPGridNDim(pgrid)             = ndim;
-   hypre_SStructPGridNVars(pgrid)            = 0;
-   hypre_SStructPGridCellSGridDone(pgrid)    = 0;
-   hypre_SStructPGridVarTypes(pgrid)         = NULL;
+   hypre_SStructPGridComm(pgrid)          = comm;
+   hypre_SStructPGridNDim(pgrid)          = ndim;
+   hypre_SStructPGridNVars(pgrid)         = 0;
+   hypre_SStructPGridCellSGridDone(pgrid) = 0;
+   hypre_SStructPGridVarTypes(pgrid)      = NULL;
 
    for (t = 0; t < 8; t++)
    {
       hypre_SStructPGridVTPBndBoxArrayArray(pgrid, t) = NULL;
-      hypre_SStructPGridVTSGrid(pgrid, t)             = NULL;
-      hypre_SStructPGridVTIBoxArray(pgrid, t)         = NULL;
+      hypre_SStructPGridVTSGrid(pgrid, t)     = NULL;
+      hypre_SStructPGridVTIBoxArray(pgrid, t) = NULL;
+      hypre_SStructPGridVTActive(pgrid, t)    = 1;
    }
    hypre_StructGridCreate(comm, ndim, &sgrid);
    hypre_SStructPGridCellSGrid(pgrid) = sgrid;
@@ -2567,6 +2568,53 @@ hypre_SStructGridCoarsen( hypre_SStructGrid   *fgrid,
 
    /* Set pointer to coarse SStructGrid */
    *cgrid_ptr = cgrid;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructGridSetActiveParts
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridSetActiveParts( hypre_SStructGrid *grid,
+                                 HYPRE_Int         *active )
+{
+   HYPRE_Int            nparts = hypre_SStructGridNParts(grid);
+   hypre_SStructPGrid  *pgrid;
+   HYPRE_Int            part, var;
+
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      for (var = 0; var < 8; var++)
+      {
+         hypre_SStructPGridVTActive(pgrid, var) = active[part];
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructGridSetAllPartsActive
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridSetAllPartsActive( hypre_SStructGrid *grid )
+{
+   HYPRE_Int            nparts = hypre_SStructGridNParts(grid);
+   hypre_SStructPGrid  *pgrid;
+   HYPRE_Int            part, var;
+
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      for (var = 0; var < 8; var++)
+      {
+         hypre_SStructPGridVTActive(pgrid, var) = 1;
+      }
+   }
 
    return hypre_error_flag;
 }
