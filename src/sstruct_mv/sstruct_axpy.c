@@ -116,14 +116,14 @@ hypre_SStructAxpy( HYPRE_Complex        alpha,
 /*------------------------------------------------------------------
  * hypre_SStructVectorElmdivpy
  *
- * y = alpha*x./z + beta*y
+ * y = alpha[part]*x./z + beta[part]*y
  *----------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructVectorElmdivpy( HYPRE_Complex        alpha,
+hypre_SStructVectorElmdivpy( HYPRE_Complex       *alpha,
                              hypre_SStructVector *x,
                              hypre_SStructVector *z,
-                             HYPRE_Complex        beta,
+                             HYPRE_Complex       *beta,
                              hypre_SStructVector *y )
 {
    HYPRE_Int  nparts = hypre_SStructVectorNParts(x);
@@ -158,7 +158,7 @@ hypre_SStructVectorElmdivpy( HYPRE_Complex        alpha,
          py = hypre_SStructVectorPVector(y, part);
          pz = hypre_SStructVectorPVector(z, part);
 
-         hypre_SStructPVectorElmdivpy(alpha, px, pz, beta, py);
+         hypre_SStructPVectorElmdivpy(alpha[part], px, pz, beta[part], py);
       }
    }
    else if (x_object_type == HYPRE_PARCSR)
@@ -166,6 +166,12 @@ hypre_SStructVectorElmdivpy( HYPRE_Complex        alpha,
       hypre_SStructVectorConvert(x, &x_par);
       hypre_SStructVectorConvert(y, &y_par);
       hypre_SStructVectorConvert(z, &z_par);
+
+      if ((alpha[0] != 1.0) || (beta[0] != 1.0))
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"{alpha, beta} != 1.0 not implemented!");
+         return hypre_error_flag;
+      }
 
       hypre_ParVectorElmdivpy(x_par, z_par, y_par);
    }

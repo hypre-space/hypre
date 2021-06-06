@@ -1365,19 +1365,23 @@ hypre_SSAMGRelaxL1Jac( void                *relax_vdata,
                        hypre_SStructVector *b,
                        hypre_SStructVector *x )
 {
-   hypre_SSAMGRelaxData    *relax_data        = (hypre_SSAMGRelaxData *) relax_vdata;
-   HYPRE_Int                max_iter          = (relax_data -> max_iter);
-   HYPRE_Int                zero_guess        = (relax_data -> zero_guess);
-   HYPRE_Int                num_nodesets      = (relax_data -> num_nodesets);
-   void                    *matvec_vdata      = (relax_data -> matvec_vdata);
-   hypre_SStructVector     *t                 = (relax_data -> t);
-   hypre_SStructVector     *l1_norms          = (relax_data -> l1_norms);
+   HYPRE_Int                nparts        = hypre_SStructMatrixNParts(A);
+   hypre_SSAMGRelaxData    *relax_data    = (hypre_SSAMGRelaxData *) relax_vdata;
+   HYPRE_Int                max_iter      = (relax_data -> max_iter);
+   HYPRE_Int                zero_guess    = (relax_data -> zero_guess);
+   HYPRE_Int                num_nodesets  = (relax_data -> num_nodesets);
+   HYPRE_Complex           *weights       = (relax_data -> weights);
+   void                    *matvec_vdata  = (relax_data -> matvec_vdata);
+   hypre_SStructVector     *t             = (relax_data -> t);
+   hypre_SStructVector     *l1_norms      = (relax_data -> l1_norms);
 
    HYPRE_Int                iter = 0;
    HYPRE_Complex            zero = 0.0;
    HYPRE_Complex            one  = 1.0;
    HYPRE_Complex            mone = -1.0;
-   HYPRE_Complex            weight = 1.0;
+   HYPRE_Int                part;
+   HYPRE_Complex           *zeros;
+   HYPRE_Complex           *ones;
 
    /*----------------------------------------------------------
     * Initialize some things and deal with special cases
@@ -1410,13 +1414,20 @@ hypre_SSAMGRelaxL1Jac( void                *relax_vdata,
       return hypre_error_flag;
    }
 
+   zeros = hypre_CTAlloc(HYPRE_Complex, nparts, HYPRE_MEMORY_HOST);
+   ones  = hypre_CTAlloc(HYPRE_Complex, nparts, HYPRE_MEMORY_HOST);
+   for (part = 0; part < nparts; part++)
+   {
+      ones[part] = 1.0;
+   }
+
    /*----------------------------------------------------------
     * Do zero_guess iteration
     *----------------------------------------------------------*/
    if (zero_guess)
    {
       /* x = (w/l1_norms)*b */
-      hypre_SStructVectorElmdivpy(weight, b, l1_norms, zero, x);
+      hypre_SStructVectorElmdivpy(weights, b, l1_norms, zeros, x);
       iter++;
    }
 
@@ -1429,11 +1440,13 @@ hypre_SSAMGRelaxL1Jac( void                *relax_vdata,
       hypre_SStructMatvecCompute(matvec_vdata, mone, A, x, one, b, t);
 
       /* x = x + (w/l1_norms)*t */
-      hypre_SStructVectorElmdivpy(weight, t, l1_norms, one, x);
+      hypre_SStructVectorElmdivpy(weights, t, l1_norms, ones, x);
    }
 
    (relax_data -> num_iterations) = iter;
    hypre_EndTiming(relax_data -> time_index);
+   hypre_TFree(ones, HYPRE_MEMORY_HOST);
+   hypre_TFree(zeros, HYPRE_MEMORY_HOST);
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;

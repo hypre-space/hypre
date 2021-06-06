@@ -621,6 +621,7 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
    HYPRE_Int             max_csize   = hypre_SSAMGDataMaxCoarseSize(ssamg_data);
    HYPRE_Int             nparts      = hypre_SSAMGDataNParts(ssamg_data);
    HYPRE_Real            usr_relax   = hypre_SSAMGDataUsrRelaxWeight(ssamg_data);
+   HYPRE_Int             usr_set_rweight = hypre_SSAMGDataUsrSetRWeight(ssamg_data);
 
    HYPRE_Int           **active_l;
    hypre_SStructGrid   **grid_l;
@@ -663,7 +664,7 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
    for (l = 0; l < max_levels; l++)
    {
       weights[l]  = hypre_CTAlloc(HYPRE_Real, nparts, HYPRE_MEMORY_HOST);
-      if (usr_relax > 0.0)
+      if (usr_set_rweight)
       {
          for (part = 0; part < nparts; part++)
          {
@@ -731,7 +732,7 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
          }
 
          /* Change relax_weights */
-         if (usr_relax <= 0.0)
+         if (!usr_set_rweight)
          {
             beta = 0.0;
             if (dxyz_flag[part] || (ndim == 1))

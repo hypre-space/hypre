@@ -90,7 +90,7 @@ HYPRE_Int HYPRE_SStructAxpy ( HYPRE_Complex alpha , HYPRE_SStructVector x , HYPR
 HYPRE_Int hypre_SStructPAxpy ( HYPRE_Complex alpha , hypre_SStructPVector *px , hypre_SStructPVector *py );
 HYPRE_Int hypre_SStructPVectorElmdivpy ( HYPRE_Complex alpha , hypre_SStructPVector *px , hypre_SStructPVector *pz , HYPRE_Complex beta , hypre_SStructPVector *py );
 HYPRE_Int hypre_SStructAxpy ( HYPRE_Complex alpha , hypre_SStructVector *x , hypre_SStructVector *y );
-HYPRE_Int hypre_SStructVectorElmdivpy ( HYPRE_Complex alpha , hypre_SStructVector *x , hypre_SStructVector *z , HYPRE_Complex beta , hypre_SStructVector *y );
+HYPRE_Int hypre_SStructVectorElmdivpy ( HYPRE_Complex *alpha , hypre_SStructVector *x , hypre_SStructVector *z , HYPRE_Complex *beta , hypre_SStructVector *y );
 
 /* sstruct_copy.c */
 HYPRE_Int hypre_SStructPCopy ( hypre_SStructPVector *px , hypre_SStructPVector *py );
