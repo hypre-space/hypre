@@ -59,7 +59,6 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
    HYPRE_Real             *global_avg_entries;
    HYPRE_Complex          *global_min_rowsum;
    HYPRE_Complex          *global_max_rowsum;
-   HYPRE_Int              *global_num_parts;
    HYPRE_Int              *global_num_boxes;
    HYPRE_Int              *global_num_dofs;
    HYPRE_Int              *global_num_ghrows;
@@ -115,7 +114,6 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       global_avg_entries  = hypre_CTAlloc(HYPRE_Real, num_levels, HYPRE_MEMORY_HOST);
       global_min_rowsum   = hypre_CTAlloc(HYPRE_Complex, num_levels, HYPRE_MEMORY_HOST);
       global_max_rowsum   = hypre_CTAlloc(HYPRE_Complex, num_levels, HYPRE_MEMORY_HOST);
-      global_num_parts    = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
       global_num_boxes    = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
       global_num_dofs     = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
       global_num_ghrows   = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
@@ -261,21 +259,19 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
          }
       }
 
-      send_buffer[0] = (HYPRE_Real) num_parts;
-      send_buffer[1] = (HYPRE_Real) num_boxes;
-      send_buffer[2] = (HYPRE_Real) num_dofs;
-      send_buffer[3] = (HYPRE_Real) num_ghrows;
-      send_buffer[4] = (HYPRE_Real) avg_stsize;
+      send_buffer[0] = (HYPRE_Real) num_boxes;
+      send_buffer[1] = (HYPRE_Real) num_dofs;
+      send_buffer[2] = (HYPRE_Real) num_ghrows;
+      send_buffer[3] = (HYPRE_Real) avg_stsize;
 
-      hypre_MPI_Reduce(send_buffer, recv_buffer, 5, HYPRE_MPI_REAL, hypre_MPI_SUM, 0, comm);
+      hypre_MPI_Reduce(send_buffer, recv_buffer, 4, HYPRE_MPI_REAL, hypre_MPI_SUM, 0, comm);
 
       if (myid == 0)
       {
-         global_num_parts[l]  = (HYPRE_Int) recv_buffer[0];
-         global_num_boxes[l]  = (HYPRE_Int) recv_buffer[1];
-         global_num_dofs[l]   = (HYPRE_Int) recv_buffer[2];
-         global_num_ghrows[l] = (HYPRE_Int) recv_buffer[3];
-         global_avg_stsize[l] = recv_buffer[4] / global_num_dofs[l];
+         global_num_boxes[l]  = (HYPRE_Int) recv_buffer[0];
+         global_num_dofs[l]   = (HYPRE_Int) recv_buffer[1];
+         global_num_ghrows[l] = (HYPRE_Int) recv_buffer[2];
+         global_avg_stsize[l] = recv_buffer[3] / global_num_dofs[l];
       }
 
       send_buffer[0] = - (HYPRE_Real) min_stsize;
@@ -295,7 +291,7 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
    {
       hypre_printf("\nSSAMG Setup Parameters:\n\n");
 
-      if (print_level > -1)
+      if (print_level > 0)
       {
          /* Print coarsening direction */
          hypre_printf("Coarsening direction:\n\n");
@@ -391,7 +387,8 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       /* Print SMatrix info */
       for (l = 0; l < num_levels; l++)
       {
-         ndigits_S[0] = hypre_max(hypre_ndigits(global_num_parts[l]) + offset, ndigits_S[0]);
+         nparts = hypre_SStructMatrixNParts(A_l[l]);
+         ndigits_S[0] = hypre_max(hypre_ndigits(nparts) + offset, ndigits_S[0]);
          ndigits_S[1] = hypre_max(hypre_ndigits(global_num_boxes[l]) + offset, ndigits_S[1]);
          ndigits_S[2] = hypre_max(hypre_ndigits(global_num_dofs[l]) + offset, ndigits_S[2]);
          ndigits_S[3] = hypre_max(hypre_ndigits(global_min_stsize[l]) + offset, ndigits_S[3]);
@@ -433,8 +430,9 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       /* Print info */
       for (l = 0; l < num_levels; l++)
       {
+         nparts = hypre_SStructMatrixNParts(A_l[l]);
          hypre_printf("%3d", l);
-         hypre_printf("%*d", ndigits_S[0], global_num_parts[l]);
+         hypre_printf("%*d", ndigits_S[0], nparts);
          hypre_printf("%*d", ndigits_S[1], global_num_boxes[l]);
          hypre_printf("%*d", ndigits_S[2], global_num_dofs[l]);
          hypre_printf("%*d", ndigits_S[3], global_min_stsize[l]);
@@ -566,7 +564,17 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       hypre_printf("Number of pos-sweeps: %d\n", num_pos_relax);
       hypre_printf("Number of coarse-sweeps: %d\n", num_crelax);
       hypre_printf("Number of levels: %d\n", num_levels);
+   }
 
+   /* Print coarse solver data */
+   if ((csolver_type == 1) && (print_level > 0))
+   {
+      hypre_BoomerAMGSetupStats((void*) (ssamg_data -> csolver),
+                                hypre_SStructMatrixParCSRMatrix(A_l[0]));
+   }
+
+   if ((myid == 0) && (print_level > 0))
+   {
       hypre_printf("\n\n");
    }
 
@@ -580,7 +588,6 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       hypre_TFree(global_avg_entries, HYPRE_MEMORY_HOST);
       hypre_TFree(global_min_rowsum, HYPRE_MEMORY_HOST);
       hypre_TFree(global_max_rowsum, HYPRE_MEMORY_HOST);
-      hypre_TFree(global_num_parts, HYPRE_MEMORY_HOST);
       hypre_TFree(global_num_boxes, HYPRE_MEMORY_HOST);
       hypre_TFree(global_num_dofs, HYPRE_MEMORY_HOST);
       hypre_TFree(global_num_ghrows, HYPRE_MEMORY_HOST);

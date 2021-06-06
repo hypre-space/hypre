@@ -22,7 +22,6 @@ hypre_SSAMGCoarseSolverSetup( void *ssamg_vdata )
    HYPRE_Int              num_levels   = hypre_SSAMGDataNumLevels(ssamg_data);
    HYPRE_Int              num_crelax   = hypre_SSAMGDataNumCoarseRelax(ssamg_data);
    HYPRE_Int              csolver_type = hypre_SSAMGDataCSolverType(ssamg_data);
-   HYPRE_Int              print_level  = hypre_SSAMGDataPrintLevel(ssamg_data);
    hypre_SStructGrid     *cgrid        = hypre_SSAMGDataGridl(ssamg_data)[num_levels - 1];
 
    void                 **relax_data_l  = (ssamg_data -> relax_data_l);
@@ -103,7 +102,7 @@ hypre_SSAMGCoarseSolverSetup( void *ssamg_vdata )
       HYPRE_BoomerAMGSetMaxCoarseSize(csolver, 1000);
       HYPRE_BoomerAMGSetCycleRelaxType(csolver, 0, 3); /* Coarse solver - Jacobi */
       HYPRE_BoomerAMGSetTol(csolver, 0.0);
-      HYPRE_BoomerAMGSetPrintLevel(csolver, print_level);
+      HYPRE_BoomerAMGSetPrintLevel(csolver, 0);
       HYPRE_BoomerAMGSetLogging(csolver, 1);
       HYPRE_BoomerAMGSetAggNumLevels(csolver, 1);
       HYPRE_BoomerAMGSetup(csolver, par_Ac, par_b, par_x);
