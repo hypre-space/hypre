@@ -1677,6 +1677,17 @@ HYPRE_BoomerAMGSetChebyOrder( HYPRE_Solver  solver,
 {
    return( hypre_BoomerAMGSetChebyOrder( (void *) solver, order ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetGMRESOrder
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetGMRESOrder( HYPRE_Solver  solver,
+                              HYPRE_Int        order )
+{
+   return( hypre_BoomerAMGSetGMRESOrder( (void *) solver, order ) );
+}
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetChebyFraction
  *--------------------------------------------------------------------------*/

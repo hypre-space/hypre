@@ -112,6 +112,8 @@ hypre_BoomerAMGCreate()
    HYPRE_Int cheby_scale;
    HYPRE_Real cheby_eig_ratio;
 
+   HYPRE_Int gmres_order;
+
    HYPRE_Int block_mode;
 
    HYPRE_Int    additive;
@@ -229,6 +231,8 @@ hypre_BoomerAMGCreate()
    cheby_scale = 1;
    cheby_eig_est = 10;
    cheby_eig_ratio = .3;
+
+   gmres_order = 2;
 
    block_mode = 0;
 
@@ -367,6 +371,8 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetChebyVariant(amg_data, cheby_variant);
    hypre_BoomerAMGSetChebyScale(amg_data, cheby_scale);
 
+   hypre_BoomerAMGSetGMRESOrder(amg_data, gmres_order);
+
    hypre_BoomerAMGSetNumIterations(amg_data, num_iterations);
 
    hypre_BoomerAMGSetAdditive(amg_data, additive);
@@ -426,6 +432,9 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataMinEigEst(amg_data) = NULL;
    hypre_ParAMGDataChebyDS(amg_data) = NULL;
    hypre_ParAMGDataChebyCoefs(amg_data) = NULL;
+
+   /* Stuff for GMRES smoothing */
+   hypre_ParAMGDataGMRESCoefs(amg_data) = NULL;
 
    /* BM Oct 22, 2006 */
    hypre_ParAMGDataPlotGrids(amg_data) = 0;
@@ -656,6 +665,14 @@ hypre_BoomerAMGDestroy( void *data )
          if (hypre_ParAMGDataChebyDS(amg_data)[i])
             hypre_TFree(hypre_ParAMGDataChebyDS(amg_data)[i], HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParAMGDataChebyDS(amg_data), HYPRE_MEMORY_HOST);
+   }
+
+   if (hypre_ParAMGDataGMRESCoefs(amg_data))
+   {
+      for (i=0; i < num_levels; i++)
+         if (hypre_ParAMGDataGMRESCoefs(amg_data)[i])
+            hypre_TFree(hypre_ParAMGDataGMRESCoefs(amg_data)[i], HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParAMGDataGMRESCoefs(amg_data), HYPRE_MEMORY_HOST);
    }
 
    if (hypre_ParAMGDataDinv(amg_data))
@@ -4101,6 +4118,27 @@ hypre_BoomerAMGSetChebyOrder( void     *data,
       return hypre_error_flag;
    }
    hypre_ParAMGDataChebyOrder(amg_data) = order;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetGMRESOrder( void     *data,
+                              HYPRE_Int       order)
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (order < 1)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+   hypre_ParAMGDataGMRESOrder(amg_data) = order;
 
    return hypre_error_flag;
 }

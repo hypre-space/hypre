@@ -154,6 +154,9 @@ typedef struct
    HYPRE_Real         **cheby_ds;
    HYPRE_Real         **cheby_coefs;
 
+   HYPRE_Int            gmres_order;
+   HYPRE_Real         **gmres_coefs;
+
    /* data needed for non-Galerkin option */
    HYPRE_Int           nongalerk_num_tol;
    HYPRE_Real         *nongalerk_tol;
@@ -395,6 +398,9 @@ typedef struct
 #define hypre_ParAMGDataChebyScale(amg_data) ((amg_data)->cheby_scale)
 #define hypre_ParAMGDataChebyDS(amg_data) ((amg_data)->cheby_ds)
 #define hypre_ParAMGDataChebyCoefs(amg_data) ((amg_data)->cheby_coefs)
+
+#define hypre_ParAMGDataGMRESOrder(amg_data) ((amg_data)->gmres_order)
+#define hypre_ParAMGDataGMRESCoefs(amg_data) ((amg_data)->gmres_coefs)
 
 /* block */
 #define hypre_ParAMGDataABlockArray(amg_data) ((amg_data)->A_block_array)

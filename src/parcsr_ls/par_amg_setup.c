@@ -106,6 +106,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_Vector       **l1_norms = NULL;
    HYPRE_Real         **cheby_ds = NULL;
    HYPRE_Real         **cheby_coefs = NULL;
+   HYPRE_Real         **gmres_coefs = NULL;
 
    HYPRE_Int       old_num_levels, num_levels;
    HYPRE_Int       level;
@@ -2883,6 +2884,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       hypre_ParAMGDataChebyCoefs(amg_data) = cheby_coefs;
    }
 
+   if (grid_relax_type[0] == 42 || grid_relax_type[1] == 42 ||
+       grid_relax_type[2] == 42 || grid_relax_type[3] == 42)
+   {
+      gmres_coefs = hypre_CTAlloc(HYPRE_Real *, num_levels, HYPRE_MEMORY_HOST);
+      hypre_ParAMGDataGMRESCoefs(amg_data) = gmres_coefs;
+   }
+
    /* CG */
    if (grid_relax_type[0] == 15 || grid_relax_type[1] == 15 ||
        grid_relax_type[2] == 15 || grid_relax_type[3] == 15)
@@ -3038,6 +3046,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                        cheby_fraction, cheby_order, scale, variant, &coefs, &ds);
          cheby_coefs[j] = coefs;
          cheby_ds[j] = ds;
+      }
+      else if (grid_relax_type[1] == 42 || grid_relax_type[2] == 42 || (grid_relax_type[3] == 42 && j== (num_levels-1)))
+      {
+         HYPRE_Real *coefs = NULL;
+         HYPRE_Int gmres_order = hypre_ParAMGDataGMRESOrder(amg_data);
+         hypre_ParCSRRelax_GMRES_Setup(A_array[j], gmres_order, &coefs);
+         gmres_coefs[j] = coefs;
       }
       else if (grid_relax_type[1] == 15 || (grid_relax_type[3] == 15 && j == (num_levels-1))  )
       {

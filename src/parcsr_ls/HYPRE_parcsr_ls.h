@@ -891,6 +891,14 @@ HYPRE_Int HYPRE_BoomerAMGSetChebyEigEst (HYPRE_Solver solver,
                                            HYPRE_Int   eig_est);
 
 /**
+ * (Optional) Defines the Order for GMRES smoother.
+ *  The default is 2.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetGMRESOrder(HYPRE_Solver solver,
+                                       HYPRE_Int    order);
+
+
+/**
  * (Optional) Enables the use of more complex smoothers.
  * The following options exist for \e smooth_type:
  *

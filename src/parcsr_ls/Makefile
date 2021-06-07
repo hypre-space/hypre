@@ -96,6 +96,7 @@ FILES =\
  par_coarsen.c\
  par_cgc_coarsen.c\
  par_cheby.c\
+ par_gmres.c\
  par_coarse_parms.c\
  par_coordinates.c\
  par_cr.c\
