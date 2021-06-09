@@ -196,8 +196,8 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
 }
 
 /* Augments measures by some random value between 0 and 1
- * aug_rand: 1: CURAND;   11: SEQ CURAND (TODO)
- *           2: CPU RAND; 12: CPU SEQ RAND
+ * aug_rand: 1: GPU CURAND; 11: GPU SEQ CURAND
+ *           2: CPU RAND;   12: CPU SEQ RAND
  */
 HYPRE_Int
 hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
@@ -212,6 +212,12 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
 
    hypre_MPI_Comm_rank(comm, &my_id);
 
+   // RL: TODO
+   #if defined(HYPRE_USING_ROCRAND)
+   if (aug_rand ==  1) { aug_rand =  2; }
+   if (aug_rand == 11) { aug_rand = 12; }
+   #endif
+
    urand = hypre_TAlloc(HYPRE_Real, num_rows_diag, HYPRE_MEMORY_DEVICE);
 
    if (aug_rand == 2 || aug_rand == 12)
@@ -222,22 +228,20 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
       hypre_TMemcpy(urand, h_urand, HYPRE_Real, num_rows_diag, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       hypre_TFree(h_urand, HYPRE_MEMORY_HOST);
    }
+   else if (aug_rand == 11)
+   {
+      HYPRE_BigInt n_global     = hypre_ParCSRMatrixGlobalNumRows(S);
+      HYPRE_BigInt n_first      = hypre_ParCSRMatrixFirstRowIndex(S);
+      HYPRE_Real  *urand_global = hypre_TAlloc(HYPRE_Real, n_global, HYPRE_MEMORY_DEVICE);
+      // To make sure all rank generate the same sequence
+      hypre_CurandUniform(n_global, urand_global, 0, 0, 1, 0);
+      hypre_TMemcpy(urand, urand_global + n_first, HYPRE_Real, num_rows_diag, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(urand_global, HYPRE_MEMORY_DEVICE);
+   }
    else
    {
-#if defined(HYPRE_USING_CURAND)
-      curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle());
-
-      HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, 2747 + my_id) );
-
-      if (sizeof(HYPRE_Real) == sizeof(hypre_double))
-      {
-         HYPRE_CURAND_CALL( curandGenerateUniformDouble(gen, (hypre_double *) urand, num_rows_diag) );
-      }
-      else if (sizeof(HYPRE_Real) == sizeof(float))
-      {
-         HYPRE_CURAND_CALL( curandGenerateUniform(gen, (float *) urand, num_rows_diag) );
-      }
-#endif
+      hypre_assert(aug_rand == 1);
+      hypre_CurandUniform(num_rows_diag, urand, 0, 0, 0, 0);
    }
 
    thrust::plus<HYPRE_Real> op;

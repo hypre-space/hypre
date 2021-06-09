@@ -359,6 +359,24 @@ HYPRE_MGRSetTruncateCoarseGridThreshold( HYPRE_Solver solver, HYPRE_Real thresho
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_MGRSetFrelaxPrintLevel
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_MGRSetFrelaxPrintLevel( HYPRE_Solver solver, HYPRE_Int print_level )
+{
+   return hypre_MGRSetFrelaxPrintLevel( solver, print_level );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetCoarseGridPrintLevel
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_MGRSetCoarseGridPrintLevel( HYPRE_Solver solver, HYPRE_Int print_level )
+{
+   return hypre_MGRSetCoarseGridPrintLevel( solver, print_level );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_MGRSetPrintLevel
  *--------------------------------------------------------------------------*/
 HYPRE_Int

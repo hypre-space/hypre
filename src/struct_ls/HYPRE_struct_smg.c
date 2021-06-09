@@ -239,10 +239,10 @@ HYPRE_StructSMGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
    return( hypre_SMGGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 HYPRE_Int
 HYPRE_StructSMGSetDeviceLevel( HYPRE_StructSolver  solver,
-			       HYPRE_Int   device_level  )
+                               HYPRE_Int   device_level  )
 {
    return (hypre_StructSMGSetDeviceLevel( (void *) solver, device_level ));
 }

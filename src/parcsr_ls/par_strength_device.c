@@ -105,7 +105,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-   if (num_functions > 1 )
+   if (num_functions > 1)
    {
       HYPRE_Int *int_buf_data = hypre_TAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
       index = 0;
@@ -228,12 +228,12 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
              dof_func      - vector over nonzero elements of A_diag, indicating the degree of freedom
              dof_func_offd - vector over nonzero elements of A_offd, indicating the degree of freedom
 
-      Output: S_temp_diag_j - S_diag_j vector before compression, i.e.,elements that are -1, or -2 should be removed
+      Output: S_temp_diag_j - S_diag_j vector before compression, i.e.,elements that are < 0 should be removed
                               strong connections: same as A_diag_j; weak: -1; diagonal: -2
-              S_temp_offd_j - S_offd_j vector before compression, i.e.,elements that are -1, or -2 should be removed
+              S_temp_offd_j - S_offd_j vector before compression, i.e.,elements that are < 0 should be removed
                               strong connections: same as A_offd_j; weak: -1;
-              jS_diag       - S_diag_i vector for compressed S_diag
-              jS_offd       - S_offd_i vector for compressed S_offd
+              jS_diag       - row nnz vector for compressed S_diag
+              jS_offd       - row nnz vector for compressed S_offd
     */
    /*-----------------------------------------------------------------------*/
 
@@ -369,4 +369,32 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    }
 }
 
+HYPRE_Int
+hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A,
+                                   hypre_ParCSRMatrix *S)
+{
+   if (!hypre_ParCSRMatrixSocDiagJ(S))
+   {
+      hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
+      hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag(S);
+      HYPRE_Int nnz_diag = hypre_CSRMatrixNumNonzeros(A_diag);
+      HYPRE_Int *soc_diag = hypre_TAlloc(HYPRE_Int, nnz_diag, HYPRE_MEMORY_DEVICE);
+      hypre_CSRMatrixIntersectPattern(A_diag, S_diag, soc_diag, 1);
+      hypre_ParCSRMatrixSocDiagJ(S) = soc_diag;
+   }
+
+   if (!hypre_ParCSRMatrixSocOffdJ(S))
+   {
+      hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
+      hypre_CSRMatrix *S_offd = hypre_ParCSRMatrixOffd(S);
+      HYPRE_Int nnz_offd = hypre_CSRMatrixNumNonzeros(A_offd);
+      HYPRE_Int *soc_offd = hypre_TAlloc(HYPRE_Int, nnz_offd, HYPRE_MEMORY_DEVICE);
+      hypre_CSRMatrixIntersectPattern(A_offd, S_offd, soc_offd, 0);
+      hypre_ParCSRMatrixSocOffdJ(S) = soc_offd;
+   }
+
+   return hypre_error_flag;
+}
+
 #endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+

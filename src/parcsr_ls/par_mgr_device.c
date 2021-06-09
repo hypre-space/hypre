@@ -191,8 +191,8 @@ hypre_MGRRelaxL1JacobiDevice( hypre_ParCSRMatrix *A,
 
      HYPRE_THRUST_CALL( transform,
                         CF_marker_dev, CF_marker_dev + num_rows,
-                        CF_marker_dev, relax_point_type(relax_points) );
-      //                  point_type_scale, relax_point_type(relax_points) );
+                        CF_marker_dev, is_relax_point(relax_points) );
+      //                  point_type_scale, is_relax_point(relax_points) );
       //hypre_TFree(CF_marker_dev, HYPRE_MEMORY_DEVICE);
    }
 

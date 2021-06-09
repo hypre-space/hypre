@@ -15,18 +15,18 @@ typedef struct
    HYPRE_Int               setup_temp_vec;
    HYPRE_Int               setup_a_rem;
    HYPRE_Int               setup_a_sol;
-                       
+
    MPI_Comm                comm;
-                       
+
    HYPRE_Int               memory_use;
    HYPRE_Real              tol;
    HYPRE_Int               max_iter;
    HYPRE_Int               zero_guess;
-                         
+
    HYPRE_Int               num_spaces;
    HYPRE_Int              *space_indices;
    HYPRE_Int              *space_strides;
-                       
+
    HYPRE_Int               num_pre_spaces;
    HYPRE_Int               num_reg_spaces;
    HYPRE_Int              *pre_space_ranks;
@@ -37,7 +37,7 @@ typedef struct
    hypre_BoxArray         *base_box_array;
 
    HYPRE_Int               stencil_dim;
-                       
+
    hypre_StructMatrix     *A;
    hypre_StructVector     *b;
    hypre_StructVector     *x;
@@ -53,7 +53,7 @@ typedef struct
    /* log info (always logged) */
    HYPRE_Int               num_iterations;
    HYPRE_Int               time_index;
-                         
+
    HYPRE_Int               num_pre_relax;
    HYPRE_Int               num_post_relax;
 
@@ -123,7 +123,7 @@ hypre_SMGRelaxDestroyTempVec( void *relax_vdata )
 HYPRE_Int
 hypre_SMGRelaxDestroyARem( void *relax_vdata )
 {
-	hypre_SMGRelaxData  *relax_data = (hypre_SMGRelaxData  *)relax_vdata;
+   hypre_SMGRelaxData  *relax_data = (hypre_SMGRelaxData  *)relax_vdata;
    HYPRE_Int            i;
 
    if (relax_data -> A_rem)
@@ -227,9 +227,9 @@ hypre_SMGRelax( void               *relax_vdata,
    HYPRE_Int             max_iter;
    HYPRE_Int             num_spaces;
    HYPRE_Int            *space_ranks;
-                    
+
    HYPRE_Int             i, j, k, is;
-                    
+
    /*----------------------------------------------------------
     * Note: The zero_guess stuff is not handled correctly
     * for general relaxation parameters.  It is correct when
@@ -302,19 +302,19 @@ hypre_SMGRelax( void               *relax_vdata,
             hypre_SMGResidual(residual_data[is], A_rem, x, b, temp_vec);
 
             if (stencil_dim > 2)
-	    {
+            {
                hypre_SMGSolve(solve_data[is], A_sol, temp_vec, x);
-	    }
+            }
             else
-	    {
+            {
                hypre_CyclicReduction(solve_data[is], A_sol, temp_vec, x);
-	    }
+            }
          }
 
          (relax_data -> num_iterations) = (i + 1);
       }
    }
-   
+
    /*----------------------------------------------------------
     * Free up memory according to memory_use parameter
     *----------------------------------------------------------*/
@@ -391,7 +391,7 @@ hypre_SMGRelaxSetup( void               *relax_vdata,
    {
       hypre_SMGRelaxSetupBaseBoxArray(relax_vdata, A, b, x);
    }
-   
+
 
    return hypre_error_flag;
 }
@@ -443,11 +443,11 @@ hypre_SMGRelaxSetupARem( void               *relax_vdata,
    HYPRE_Int            *space_strides = (relax_data -> space_strides);
    hypre_StructVector   *temp_vec      = (relax_data -> temp_vec);
 
-   hypre_StructStencil  *stencil       = hypre_StructMatrixStencil(A);     
+   hypre_StructStencil  *stencil       = hypre_StructMatrixStencil(A);
    hypre_Index          *stencil_shape = hypre_StructStencilShape(stencil);
-   HYPRE_Int             stencil_size  = hypre_StructStencilSize(stencil); 
+   HYPRE_Int             stencil_size  = hypre_StructStencilSize(stencil);
    HYPRE_Int             stencil_dim   = hypre_StructStencilNDim(stencil);
-                       
+
    hypre_StructMatrix   *A_rem;
    void                **residual_data;
 
@@ -456,7 +456,7 @@ hypre_SMGRelaxSetupARem( void               *relax_vdata,
 
    HYPRE_Int             num_stencil_indices;
    HYPRE_Int            *stencil_indices;
-                       
+
    HYPRE_Int             i;
 
    /*----------------------------------------------------------
@@ -525,11 +525,11 @@ hypre_SMGRelaxSetupASol( void               *relax_vdata,
    HYPRE_Int             num_pre_relax   = (relax_data -> num_pre_relax);
    HYPRE_Int             num_post_relax  = (relax_data -> num_post_relax);
 
-   hypre_StructStencil  *stencil       = hypre_StructMatrixStencil(A);     
+   hypre_StructStencil  *stencil       = hypre_StructMatrixStencil(A);
    hypre_Index          *stencil_shape = hypre_StructStencilShape(stencil);
-   HYPRE_Int             stencil_size  = hypre_StructStencilSize(stencil); 
+   HYPRE_Int             stencil_size  = hypre_StructStencilSize(stencil);
    HYPRE_Int             stencil_dim   = hypre_StructStencilNDim(stencil);
-                       
+
    hypre_StructMatrix   *A_sol;
    void                **solve_data;
 
@@ -538,7 +538,7 @@ hypre_SMGRelaxSetupASol( void               *relax_vdata,
 
    HYPRE_Int             num_stencil_indices;
    HYPRE_Int            *stencil_indices;
-                       
+
    HYPRE_Int             i;
 
    /*----------------------------------------------------------
@@ -586,7 +586,7 @@ hypre_SMGRelaxSetupASol( void               *relax_vdata,
          hypre_SMGSetMemoryUse(solve_data[i], (relax_data -> memory_use));
          hypre_SMGSetTol(solve_data[i], 0.0);
          hypre_SMGSetMaxIter(solve_data[i], 1);
-         hypre_StructSMGSetMaxLevel(solve_data[i], (relax_data -> max_level));	 
+         hypre_StructSMGSetMaxLevel(solve_data[i], (relax_data -> max_level));
          hypre_SMGSetup(solve_data[i], A_sol, temp_vec, x);
       }
       else
@@ -813,7 +813,7 @@ hypre_SMGRelaxSetPreSpaceRank( void *relax_vdata,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 hypre_SMGRelaxSetBase( void        *relax_vdata,
                        hypre_Index  base_index,
@@ -821,7 +821,7 @@ hypre_SMGRelaxSetBase( void        *relax_vdata,
 {
    hypre_SMGRelaxData *relax_data = (hypre_SMGRelaxData  *)relax_vdata;
    HYPRE_Int           d;
- 
+
    for (d = 0; d < 3; d++)
    {
       hypre_IndexD((relax_data -> base_index),  d) =
@@ -829,7 +829,7 @@ hypre_SMGRelaxSetBase( void        *relax_vdata,
       hypre_IndexD((relax_data -> base_stride), d) =
          hypre_IndexD(base_stride, d);
    }
- 
+
    if ((relax_data -> base_box_array) != NULL)
    {
       hypre_BoxArrayDestroy((relax_data -> base_box_array));
@@ -874,7 +874,7 @@ hypre_SMGRelaxSetNumPostRelax( void *relax_vdata,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 hypre_SMGRelaxSetNewMatrixStencil( void                *relax_vdata,
                                    hypre_StructStencil *diff_stencil )
@@ -882,11 +882,11 @@ hypre_SMGRelaxSetNewMatrixStencil( void                *relax_vdata,
    hypre_SMGRelaxData *relax_data = (hypre_SMGRelaxData  *)relax_vdata;
 
    hypre_Index        *stencil_shape = hypre_StructStencilShape(diff_stencil);
-   HYPRE_Int           stencil_size  = hypre_StructStencilSize(diff_stencil); 
+   HYPRE_Int           stencil_size  = hypre_StructStencilSize(diff_stencil);
    HYPRE_Int           stencil_dim   = hypre_StructStencilNDim(diff_stencil);
-                         
+
    HYPRE_Int           i;
-                     
+
    for (i = 0; i < stencil_size; i++)
    {
       if (hypre_IndexD(stencil_shape[i], (stencil_dim - 1)) != 0)
@@ -914,16 +914,16 @@ hypre_SMGRelaxSetupBaseBoxArray( void               *relax_vdata,
                                  hypre_StructVector *x           )
 {
    hypre_SMGRelaxData  *relax_data = (hypre_SMGRelaxData  *)relax_vdata;
-                       
+
    hypre_StructGrid    *grid;
    hypre_BoxArray      *boxes;
    hypre_BoxArray      *base_box_array;
-                       
+
    grid  = hypre_StructVectorGrid(x);
    boxes = hypre_StructGridBoxes(grid);
 
    base_box_array = hypre_BoxArrayDuplicate(boxes);
-   hypre_ProjectBoxArray(base_box_array, 
+   hypre_ProjectBoxArray(base_box_array,
                          (relax_data -> base_index),
                          (relax_data -> base_stride));
 
@@ -937,7 +937,7 @@ hypre_SMGRelaxSetupBaseBoxArray( void               *relax_vdata,
 
 HYPRE_Int
 hypre_SMGRelaxSetMaxLevel( void *relax_vdata,
-			   HYPRE_Int   num_max_level )
+                           HYPRE_Int   num_max_level )
 {
    hypre_SMGRelaxData *relax_data = (hypre_SMGRelaxData  *)relax_vdata;
 

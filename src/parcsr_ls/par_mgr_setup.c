@@ -110,10 +110,10 @@ hypre_MGRSetup( void               *mgr_vdata,
   hypre_ParCSRMatrix *A_ff_inv = (mgr_data -> A_ff_inv);
 
   HYPRE_Int use_air = 0;
-  HYPRE_Int truncate_cg_threshold = (mgr_data -> truncate_coarse_grid_threshold);
   HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( memory_location );
-  HYPRE_Real wall_time;
+  HYPRE_Real truncate_cg_threshold = (mgr_data -> truncate_coarse_grid_threshold);
+//  HYPRE_Real wall_time;
 
   /* ----- begin -----*/
   HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -882,7 +882,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       {
         HYPRE_Int block_num_f_points = (lev == 0 ? block_size : block_num_coarse_indexes[lev-1]) - block_num_coarse_indexes[lev];
         hypre_MGRComputeNonGalerkinCoarseGrid(A_array[lev], P, RT, block_num_f_points,
-          /* ordering */0, /* method */ 0, max_elmts, /* keep_stencil */ 0, CF_marker_array[lev], &RAP_ptr);
+          /* ordering */set_c_points_method, /* method (approx. inverse or not) */ 0, max_elmts, /* keep_stencil */ 0, CF_marker_array[lev], &RAP_ptr);
         hypre_ParCSRMatrixOwnsColStarts(RAP_ptr) = 0;
         hypre_ParCSRMatrixOwnsColStarts(P_array[lev]) = 0;
         hypre_ParCSRMatrixOwnsRowStarts(RT) = 0;
@@ -1037,14 +1037,14 @@ hypre_MGRSetup( void               *mgr_vdata,
         A_ff_array[lev] = A_ff_ptr;
 
         aff_solver[lev] = (HYPRE_Solver*) hypre_BoomerAMGCreate();
-        hypre_BoomerAMGSetMaxIter(aff_solver[lev], 1);
+        hypre_BoomerAMGSetMaxIter(aff_solver[lev], mgr_data -> num_relax_sweeps);
         hypre_BoomerAMGSetTol(aff_solver[lev], 0.0);
         //hypre_BoomerAMGSetRelaxOrder(aff_solver[lev], 1);
         //hypre_BoomerAMGSetAggNumLevels(aff_solver[lev], 1);
         hypre_BoomerAMGSetRelaxType(aff_solver[lev], 18);
         hypre_BoomerAMGSetCoarsenType(aff_solver[lev], 8);
         hypre_BoomerAMGSetNumSweeps(aff_solver[lev], 3);
-        hypre_BoomerAMGSetPrintLevel(aff_solver[lev], print_level);
+        hypre_BoomerAMGSetPrintLevel(aff_solver[lev], mgr_data -> frelax_print_level);
         hypre_BoomerAMGSetNumFunctions(aff_solver[lev], 1);
 
         fine_grid_solver_setup(aff_solver[lev], A_ff_ptr, F_fine_array[lev+1], U_fine_array[lev+1]);
@@ -1179,7 +1179,7 @@ hypre_MGRSetup( void               *mgr_vdata,
     hypre_BoomerAMGSetMaxIter ( default_cg_solver, 1 );
     hypre_BoomerAMGSetTol ( default_cg_solver, 0.0 );
     hypre_BoomerAMGSetRelaxOrder( default_cg_solver, 1);
-    hypre_BoomerAMGSetPrintLevel(default_cg_solver, print_level);
+    hypre_BoomerAMGSetPrintLevel(default_cg_solver, mgr_data -> cg_print_level);
     /* set setup and solve functions */
     coarse_grid_solver_setup =  (HYPRE_Int (*)(void*, void*, void*, void*)) hypre_BoomerAMGSetup;
     coarse_grid_solver_solve =  (HYPRE_Int (*)(void*, void*, void*, void*)) hypre_BoomerAMGSolve;
@@ -1562,7 +1562,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
       break;
     }
 
-    hypre_BoomerAMGBuildExtPIInterp(A_array_local[lev_local], CF_marker_local,
+    hypre_BoomerAMGBuildExtPIInterpHost(A_array_local[lev_local], CF_marker_local,
                         S_local, coarse_pnts_global_lvl, num_functions, dof_func_array[lev_local],
                         debug_flag, trunc_factor, P_max_elmts, &P_local);
 

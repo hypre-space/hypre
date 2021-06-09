@@ -51,6 +51,8 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
 
    HYPRE_Int        n_fine = hypre_CSRMatrixNumRows(A_diag);
 
+   hypre_BoomerAMGMakeSocFromSDevice(A, S);
+
    hypre_CSRMatrix *S_diag   = hypre_ParCSRMatrixDiag(S);
    HYPRE_Int       *S_diag_i = hypre_CSRMatrixI(S_diag);
    HYPRE_Int       *S_diag_j = hypre_CSRMatrixJ(S_diag);
@@ -200,7 +202,8 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    HYPRE_THRUST_CALL( exclusive_scan,
                       thrust::make_transform_iterator(CF_marker_dev,          is_nonnegative<HYPRE_Int>()),
                       thrust::make_transform_iterator(CF_marker_dev + n_fine, is_nonnegative<HYPRE_Int>()),
-                      fine_to_coarse_d );
+                      fine_to_coarse_d,
+                      HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
 
    /* 4. Compute the CSR arrays P_diag_j, P_diag_data, P_offd_j, and P_offd_data */
    /*    P_diag_i and P_offd_i are now known, first allocate the remaining CSR arrays of P */

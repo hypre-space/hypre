@@ -198,7 +198,7 @@ struct hypre_IJMatrixAssembleFunctor : public thrust::binary_function< thrust::t
 
 /* helper routine used in hypre_IJMatrixAssembleParCSRDevice:
  * 1. sort (X0, A0) with key (I0, J0)
- *    [put the diagonal first; see the comments in hypre_cuda_utils.c]
+ *    [put the diagonal first; see the comments in cuda_utils.c]
  * 2. for each segment in (I0, J0), zero out in A0 all before the last `set'
  * 3. reduce A0 [with sum] and reduce X0 [with max]
  * N0: input size; N1: size after reduction (<= N0)
@@ -228,7 +228,7 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
          make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0,    J0))),
          make_reverse_iterator(thrust::device_pointer_cast<char>(X0)+N0),
          make_reverse_iterator(thrust::device_pointer_cast<char>(X) +N0),
-         0,
+         char(0),
          thrust::equal_to< thrust::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
          thrust::maximum<char>() );
 
