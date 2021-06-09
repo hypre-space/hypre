@@ -60,6 +60,7 @@ void testPMIS(HYPRE_ParCSRMatrix parcsr_A);
 void testPMIS2(HYPRE_ParCSRMatrix parcsr_A);
 void testPMIS3(HYPRE_ParCSRMatrix parcsr_A);
 void testTranspose(HYPRE_ParCSRMatrix parcsr_A);
+void testAdd(HYPRE_ParCSRMatrix parcsr_A);
 void testFFFC(HYPRE_ParCSRMatrix parcsr_A);
 
 HYPRE_Int CompareParCSRDH(HYPRE_ParCSRMatrix hmat, HYPRE_ParCSRMatrix dmat, HYPRE_Real tol);
@@ -290,6 +291,10 @@ main( hypre_int argc,
    else if (test == 4)
    {
       testTranspose(parcsr_A);
+   }
+   else if (test == 5)
+   {
+      testAdd(parcsr_A);
    }
 
    //testFFFC(parcsr_A);
@@ -2156,6 +2161,73 @@ testTranspose(HYPRE_ParCSRMatrix parcsr_A)
 }
 
 void
+testAdd(HYPRE_ParCSRMatrix parcsr_A)
+{
+   HYPRE_Int    myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+
+   HYPRE_Real tol = 1e-14;
+   HYPRE_Int  ierr = 0;
+   HYPRE_Real alpha = 3.141592654, beta = 2.718281828*9.9;
+
+   HYPRE_ParCSRMatrix parcsr_A2 = hypre_ParCSRMatMatDevice(parcsr_A, parcsr_A);
+   HYPRE_ParCSRMatrix parcsr_C;
+   hypre_ParCSRMatrixAddDevice(alpha, parcsr_A, beta, parcsr_A2, &parcsr_C);
+
+   HYPRE_ParCSRMatrix parcsr_A_h = hypre_ParCSRMatrixClone_v2(parcsr_A, 1, HYPRE_MEMORY_HOST);
+   HYPRE_ParCSRMatrix parcsr_A2_h = hypre_ParCSRMatrixClone_v2(parcsr_A2, 1, HYPRE_MEMORY_HOST);
+   HYPRE_ParCSRMatrix parcsr_C_h;
+   hypre_ParCSRMatrixAddHost(alpha, parcsr_A_h, beta, parcsr_A2_h, &parcsr_C_h);
+   ierr += CompareParCSRDH(parcsr_C_h, parcsr_C, tol); hypre_assert(!ierr);
+
+   hypre_ParCSRMatrixDestroy(parcsr_A2);
+   hypre_ParCSRMatrixDestroy(parcsr_C);
+   hypre_ParCSRMatrixDestroy(parcsr_A_h);
+   hypre_ParCSRMatrixDestroy(parcsr_A2_h);
+   hypre_ParCSRMatrixDestroy(parcsr_C_h);
+
+   //
+   HYPRE_Int    first_local_row, last_local_row;
+   HYPRE_Int    first_local_col, last_local_col;
+   HYPRE_ParCSRMatrixGetLocalRange( parcsr_A,
+                                    &first_local_row, &last_local_row ,
+                                    &first_local_col, &last_local_col );
+   HYPRE_Int local_num_rows = last_local_row - first_local_row + 1;
+   HYPRE_ParCSRMatrix parcsr_S_device  = NULL;
+   hypre_BoomerAMGCreateSDevice(parcsr_A, 0.25, 1.0, 1, NULL, &parcsr_S_device);
+   HYPRE_Int *h_CF_marker = hypre_TAlloc(HYPRE_Int, local_num_rows, HYPRE_MEMORY_HOST);
+   hypre_BoomerAMGCoarsenPMISDevice(parcsr_S_device, parcsr_A, 2, 0, &h_CF_marker);
+   hypre_ParCSRMatrix *P, *AP, *P_h, *AP_h;
+   HYPRE_Int *coarse_pnts_global = NULL;
+   MPI_Comm comm = hypre_ParCSRMatrixComm(parcsr_A);
+   hypre_BoomerAMGCoarseParms(comm, local_num_rows, 1, NULL, h_CF_marker, NULL, &coarse_pnts_global);
+   hypre_BoomerAMGBuildDirInterpDevice(parcsr_A, h_CF_marker, parcsr_S_device,
+                                       coarse_pnts_global, 1, NULL,
+                                       0, 0.0, 0, 3, &P);
+   AP = hypre_ParCSRMatMatDevice(parcsr_A, P);
+   P_h = hypre_ParCSRMatrixClone_v2(P, 1, HYPRE_MEMORY_HOST);
+   AP_h = hypre_ParCSRMatrixClone_v2(AP, 1, HYPRE_MEMORY_HOST);
+   hypre_ParCSRMatrixAddDevice(alpha, P, beta, AP, &parcsr_C);
+   hypre_ParCSRMatrixAddHost(alpha, P_h, beta, AP_h, &parcsr_C_h);
+
+   ierr += CompareParCSRDH(parcsr_C_h, parcsr_C, tol); hypre_assert(!ierr);
+
+   hypre_ParCSRMatrixDestroy(P);
+   hypre_ParCSRMatrixDestroy(AP);
+   hypre_ParCSRMatrixDestroy(P_h);
+   hypre_ParCSRMatrixDestroy(AP_h);
+   hypre_ParCSRMatrixDestroy(parcsr_C);
+   hypre_ParCSRMatrixDestroy(parcsr_C_h);
+   hypre_ParCSRMatrixDestroy(parcsr_S_device);
+   hypre_TFree(h_CF_marker, HYPRE_MEMORY_HOST);
+
+   if (myid == 0 && !ierr)
+   {
+      printf("[hypre_ParCSRMatrixAdd] All Tests were OK ...\n");
+   }
+}
+
+void
 testFFFC(HYPRE_ParCSRMatrix parcsr_A)
 {
    HYPRE_Real   max_row_sum = 1.0;
@@ -2229,7 +2301,7 @@ HYPRE_Int
 CompareParCSRDH(HYPRE_ParCSRMatrix hmat, HYPRE_ParCSRMatrix dmat, HYPRE_Real tol)
 {
    HYPRE_ParCSRMatrix hmat2, emat;
-   HYPRE_Real enorm, fnorm;
+   HYPRE_Real enorm, fnorm, rnorm;
    HYPRE_Int i, ecode = 0, ecode_total = 0;
 
    hmat2 = hypre_ParCSRMatrixClone_v2(dmat, 1, HYPRE_MEMORY_HOST);
@@ -2272,13 +2344,14 @@ CompareParCSRDH(HYPRE_ParCSRMatrix hmat, HYPRE_ParCSRMatrix dmat, HYPRE_Real tol
    hypre_ParCSRMatrixAdd(1.0, hmat, -1.0, hmat2, &emat);
    enorm = hypre_ParCSRMatrixFnorm(emat);
 
-   //printf("error %e\n", enorm);
-
    fnorm = hypre_ParCSRMatrixFnorm(hmat);
-   if ( (fnorm > 0 ? enorm / fnorm : enorm) > tol )
+   rnorm = fnorm > 0 ? enorm / fnorm : enorm;
+   if ( rnorm > tol )
    {
       ecode_total ++;
    }
+
+   printf("relative error %e = %e / %e\n", rnorm, enorm, fnorm);
 
    hypre_ParCSRMatrixDestroy(hmat2);
    hypre_ParCSRMatrixDestroy(emat);

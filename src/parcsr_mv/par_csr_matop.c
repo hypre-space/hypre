@@ -5069,11 +5069,11 @@ hypre_ParcsrGetExternalRowsWait(void *vrequest)
  * A and B are assumed to have the same row and column partitionings
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
-                       hypre_ParCSRMatrix  *A,
-                       HYPRE_Complex        beta,
-                       hypre_ParCSRMatrix  *B,
-                       hypre_ParCSRMatrix **C_ptr )
+hypre_ParCSRMatrixAddHost( HYPRE_Complex        alpha,
+                           hypre_ParCSRMatrix  *A,
+                           HYPRE_Complex        beta,
+                           hypre_ParCSRMatrix  *B,
+                           hypre_ParCSRMatrix **C_ptr )
 {
    /* ParCSRMatrix data */
    MPI_Comm          comm       = hypre_ParCSRMatrixComm(A);
@@ -5146,11 +5146,6 @@ hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
    HYPRE_MemoryLocation  memory_location_C = hypre_max(memory_location_A, memory_location_B);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
-
-   hypre_assert(num_rows_A == num_rows_B);
-   hypre_assert(num_cols_A == num_cols_B);
-   hypre_assert(num_rows_diag_A == num_rows_diag_B);
-   hypre_assert(num_cols_diag_A == num_cols_diag_B);
 
    /* Allocate memory */
    twspace  = hypre_TAlloc(HYPRE_Int, hypre_NumThreads(), HYPRE_MEMORY_HOST);
@@ -5292,6 +5287,35 @@ hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
    *C_ptr = C;
 
    HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
+                       hypre_ParCSRMatrix  *A,
+                       HYPRE_Complex        beta,
+                       hypre_ParCSRMatrix  *B,
+                       hypre_ParCSRMatrix **C_ptr )
+{
+   HYPRE_MemoryLocation memory_location_A = hypre_ParCSRMatrixMemoryLocation(A);
+   HYPRE_MemoryLocation memory_location_B = hypre_ParCSRMatrixMemoryLocation(B);
+
+   hypre_assert(hypre_ParCSRMatrixGlobalNumRows(A) == hypre_ParCSRMatrixGlobalNumRows(B));
+   hypre_assert(hypre_ParCSRMatrixGlobalNumCols(A) == hypre_ParCSRMatrixGlobalNumCols(B));
+   hypre_assert(hypre_ParCSRMatrixNumRows(A) == hypre_ParCSRMatrixNumRows(B));
+   hypre_assert(hypre_ParCSRMatrixNumCols(A) == hypre_ParCSRMatrixNumCols(B));
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   if ( hypre_GetExecPolicy2(memory_location_A, memory_location_B) == HYPRE_EXEC_DEVICE )
+   {
+      hypre_ParCSRMatrixAddDevice(alpha, A, beta, B, C_ptr);
+   }
+   else
+#endif
+   {
+      hypre_ParCSRMatrixAddHost(alpha, A, beta, B, C_ptr);
+   }
 
    return hypre_error_flag;
 }

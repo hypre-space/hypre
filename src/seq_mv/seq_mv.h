@@ -286,8 +286,8 @@ typedef struct
 /* csr_matop.c */
 HYPRE_Int hypre_CSRMatrixAddFirstPass ( HYPRE_Int firstrow , HYPRE_Int lastrow , HYPRE_Int *marker , HYPRE_Int *twspace , HYPRE_Int *map_A2C , HYPRE_Int *map_B2C , hypre_CSRMatrix *A , hypre_CSRMatrix *B , HYPRE_Int nnzrows_C , HYPRE_Int nrows_C , HYPRE_Int ncols_C , HYPRE_Int *rownnz_C , HYPRE_MemoryLocation memory_location_C , HYPRE_Int *C_i , hypre_CSRMatrix **C_ptr );
 HYPRE_Int hypre_CSRMatrixAddSecondPass ( HYPRE_Int firstrow , HYPRE_Int lastrow , HYPRE_Int *marker, HYPRE_Int *twspace , HYPRE_Int *map_A2C , HYPRE_Int *map_B2C , HYPRE_Int *rownnz_C , HYPRE_Complex alpha , HYPRE_Complex beta , hypre_CSRMatrix *A , hypre_CSRMatrix *B , hypre_CSRMatrix *C);
-hypre_CSRMatrix *hypre_CSRMatrixAddHost ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
-hypre_CSRMatrix *hypre_CSRMatrixAdd ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
+hypre_CSRMatrix *hypre_CSRMatrixAddHost ( HYPRE_Complex alpha, hypre_CSRMatrix *A, HYPRE_Complex beta, hypre_CSRMatrix *B );
+hypre_CSRMatrix *hypre_CSRMatrixAdd ( HYPRE_Complex alpha, hypre_CSRMatrix *A, HYPRE_Complex beta, hypre_CSRMatrix *B );
 hypre_CSRMatrix *hypre_CSRMatrixBigAdd ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
 hypre_CSRMatrix *hypre_CSRMatrixMultiplyHost ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
 hypre_CSRMatrix *hypre_CSRMatrixMultiply ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
@@ -305,7 +305,7 @@ void hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A, HYPRE_Complex *d, H
 HYPRE_Int hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A, HYPRE_Complex value);
 
 /* csr_matop_device.c */
-hypre_CSRMatrix *hypre_CSRMatrixAddDevice ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
+hypre_CSRMatrix *hypre_CSRMatrixAddDevice ( HYPRE_Complex alpha, hypre_CSRMatrix *A, HYPRE_Complex beta, hypre_CSRMatrix *B );
 hypre_CSRMatrix *hypre_CSRMatrixMultiplyDevice ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
 hypre_CSRMatrix *hypre_CSRMatrixTripleMultiplyDevice ( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix *C );
 HYPRE_Int hypre_CSRMatrixSplitDevice_core( HYPRE_Int job, HYPRE_Int num_rows, HYPRE_Int B_ext_nnz, HYPRE_Int *B_ext_ii, HYPRE_BigInt *B_ext_bigj, HYPRE_Complex *B_ext_data, char *B_ext_xata, HYPRE_BigInt first_col_diag_B, HYPRE_BigInt last_col_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_BigInt *col_map_offd_B, HYPRE_Int **map_B_to_C_ptr, HYPRE_Int *num_cols_offd_C_ptr, HYPRE_BigInt **col_map_offd_C_ptr, HYPRE_Int *B_ext_diag_nnz_ptr, HYPRE_Int *B_ext_diag_ii, HYPRE_Int *B_ext_diag_j, HYPRE_Complex *B_ext_diag_data, char *B_ext_diag_xata, HYPRE_Int *B_ext_offd_nnz_ptr, HYPRE_Int *B_ext_offd_ii, HYPRE_Int *B_ext_offd_j, HYPRE_Complex *B_ext_offd_data, char *B_ext_offd_xata );
@@ -315,7 +315,7 @@ hypre_CSRMatrix* hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A, hypre_CSRM
 HYPRE_Int hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix *A, HYPRE_Real *colnnz);
 HYPRE_Int hypre_CSRMatrixMoveDiagFirstDevice( hypre_CSRMatrix  *A );
 HYPRE_Int hypre_CSRMatrixCheckDiagFirstDevice( hypre_CSRMatrix  *A );
-HYPRE_Int hypre_CSRMatrixCheckDiagFirstSetValueZeroDevice( hypre_CSRMatrix *A, HYPRE_Complex v );
+HYPRE_Int hypre_CSRMatrixFixZeroDiagDevice( hypre_CSRMatrix *A, HYPRE_Complex v, HYPRE_Real tol );
 void hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A, HYPRE_Int *CF_i, HYPRE_Int *CF_j, HYPRE_Complex *row_sum, HYPRE_Int type, HYPRE_Complex scal, const char *set_or_add);
 void hypre_CSRMatrixExtractDiagonalDevice( hypre_CSRMatrix *A, HYPRE_Complex *d, HYPRE_Int type);
 hypre_CSRMatrix* hypre_CSRMatrixStack2Device(hypre_CSRMatrix *A, hypre_CSRMatrix *B);
@@ -463,7 +463,7 @@ HYPRE_Complex hypre_SeqVectorSumElts ( hypre_Vector *vector );
 HYPRE_Int hypre_SeqVectorPrefetch(hypre_Vector *x, HYPRE_MemoryLocation memory_location);
 //HYPRE_Int hypre_SeqVectorMax( HYPRE_Complex alpha, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y );
 
-HYPRE_Int hypreDevice_CSRSpAdd(HYPRE_Int ma, HYPRE_Int mb, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int nnzB, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_ab, HYPRE_Int *d_num_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out);
+HYPRE_Int hypreDevice_CSRSpAdd(HYPRE_Int ma, HYPRE_Int mb, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int nnzB, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex alpha, HYPRE_Complex *d_aa, HYPRE_Int *d_ja_map, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex beta, HYPRE_Complex *d_ab, HYPRE_Int *d_jb_map, HYPRE_Int *d_num_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out);
 
 HYPRE_Int hypreDevice_CSRSpTrans(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out, HYPRE_Int want_data);
 
