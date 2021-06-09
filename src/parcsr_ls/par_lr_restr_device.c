@@ -9,7 +9,6 @@
 #include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-/* #if 0 */
 
 /*---------------------------------------------------------------------------
  * hypre_BoomerAMGBuildRestrNeumannAIR
@@ -36,20 +35,18 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    /* Restriction matrix R and CSR's */
    hypre_ParCSRMatrix *R;
    hypre_CSRMatrix *R_diag;
-   hypre_CSRMatrix *R_offd;
 
    /* arrays */
    HYPRE_Complex      *R_diag_a;
    HYPRE_Int          *R_diag_i;
    HYPRE_Int          *R_diag_j;
    HYPRE_BigInt       *col_map_offd_R;
-
-   HYPRE_Int           i, j, j1, i1, ic,
-                       num_cols_offd_R;
+   HYPRE_Int           num_cols_offd_R;
    HYPRE_Int           my_id, num_procs;
    HYPRE_BigInt        total_global_cpts;
-   HYPRE_Int           nnz_diag, nnz_offd, cnt_diag, cnt_offd;
+   HYPRE_Int           nnz_diag, nnz_offd;
    HYPRE_BigInt       *send_buf_i;
+   HYPRE_Int           i;
 
    /* local size */
    HYPRE_Int n_fine = hypre_CSRMatrixNumRows(A_diag);
@@ -67,23 +64,29 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
 
    /* get AFF and ACF */
-   hypre_ParCSRMatrix *AFF, *ACF, Dinv, *X, *X2, *Z, *Z2;
-   // WM: TODO: Is the SoC matrix S what we want here, or does strong_thresholdR express something else?
-   // That is, do we want this SoC used here to be independent of the regular S? Construct new SoC here for R?
+   hypre_ParCSRMatrix *AFF, *ACF, *Dinv, *N, *X, *X2, *Z, *Z2;
+   // WM: TODO: Is what I do below a reasonable option (i.e. creating a SoC matrix)? 
+   // Also, is this calculating SoC in the same way as the previous CPU code? 
+   // That is, does this yield the same results as the previous CPU code across different matrices and strong_thresholdR values?
+   hypre_ParCSRMatrix *S;
+   hypre_BoomerAMGCreateS(A,
+                          strong_thresholdR,
+                          0.9, // WM: TODO: default for max_row_sum... is this what we want?
+                          num_functions,
+                          dof_func,
+                          &S);
    hypre_ParCSRMatrixGenerateFFCFDevice(A, CF_marker, num_cpts_global, S, &ACF, &AFF);
-   /* WM: TODO: delete old code commented below */
-   /* hypre_ParCSRMatrixExtractSubmatrixFC(A, CF_marker, num_cpts_global, "FF", &AFF, strong_thresholdR); */
-   /* hypre_ParCSRMatrixExtractSubmatrixFC(A, CF_marker, num_cpts_global, "CF", &ACF, strong_thresholdR); */
+   hypre_ParCSRMatrixDestroy(S);
 
-   hypre_CSRMatrix *AFF_diag = hypre_ParCSRMatrixDiag(AFF);
-   hypre_CSRMatrix *AFF_offd = hypre_ParCSRMatrixOffd(AFF);
-   HYPRE_Complex   *AFF_diag_a = hypre_CSRMatrixData(AFF_diag);
-   HYPRE_Int       *AFF_diag_i = hypre_CSRMatrixI(AFF_diag);
-   HYPRE_Int       *AFF_diag_j = hypre_CSRMatrixJ(AFF_diag);
-   HYPRE_Complex   *AFF_offd_a = hypre_CSRMatrixData(AFF_offd);
-   HYPRE_Int       *AFF_offd_i = hypre_CSRMatrixI(AFF_offd);
-   HYPRE_Int       *AFF_offd_j = hypre_CSRMatrixJ(AFF_offd);
-   HYPRE_Int        n_fpts = hypre_CSRMatrixNumRows(AFF_diag);
+   /* hypre_CSRMatrix *AFF_diag = hypre_ParCSRMatrixDiag(AFF); */
+   /* hypre_CSRMatrix *AFF_offd = hypre_ParCSRMatrixOffd(AFF); */
+   /* HYPRE_Complex   *AFF_diag_a = hypre_CSRMatrixData(AFF_diag); */
+   /* HYPRE_Int       *AFF_diag_i = hypre_CSRMatrixI(AFF_diag); */
+   /* HYPRE_Int       *AFF_diag_j = hypre_CSRMatrixJ(AFF_diag); */
+   /* HYPRE_Complex   *AFF_offd_a = hypre_CSRMatrixData(AFF_offd); */
+   /* HYPRE_Int       *AFF_offd_i = hypre_CSRMatrixI(AFF_offd); */
+   /* HYPRE_Int       *AFF_offd_j = hypre_CSRMatrixJ(AFF_offd); */
+   HYPRE_Int        n_fpts = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(AFF));
    HYPRE_Int        n_cpts = n_fine - n_fpts;
    hypre_assert(n_cpts == hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(ACF)));
 
@@ -126,16 +129,19 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
                         thrust::make_counting_iterator(0),
                         thrust::make_counting_iterator(hypre_CSRMatrixNumRows(Dinv_diag)),
                         hypre_CSRMatrixJ(Dinv_diag) );
-   hypre_CSRMatrixExtractDiagonalDevice(AFF, hypre_CSRMatrixData(Dinv_diag), 2);
+   hypre_CSRMatrixExtractDiagonalDevice(hypre_ParCSRMatrixDiag(AFF), hypre_CSRMatrixData(Dinv_diag), 2);
 
    /* N = I - D^{-1}*A_FF */
-   N = hypre_ParCSRMatMat(Dinv, AFF);
-   hypre_CSRMatrixRemoveDiagonalDevice(hypre_ParCSRMatrixDiag(N));
-   HYPRE_THRUST_CALL( transform,
-                        hypre_CSRMatrixData(Dinv_diag),
-                        hypre_CSRMatrixData(Dinv_diag)[ hypre_CSRMatrixNumRows(Dinv_diag) ],
-                        hypre_CSRMatrixData(Dinv_diag),
-                        thrust::negate<HYPRE_Int>() );
+   if (NeumannDeg >= 1)
+   {
+      N = hypre_ParCSRMatMat(Dinv, AFF);
+      hypre_CSRMatrixRemoveDiagonalDevice(hypre_ParCSRMatrixDiag(N));
+      HYPRE_THRUST_CALL( transform,
+                           hypre_CSRMatrixData(Dinv_diag),
+                           hypre_CSRMatrixData(Dinv_diag) + hypre_CSRMatrixNumRows(Dinv_diag),
+                           hypre_CSRMatrixData(Dinv_diag),
+                           thrust::negate<HYPRE_Int>() );
+   }
 
    /* Z = Acf * (I + N + N^2 + ... + N^k) * D^{-1} */
    if (NeumannDeg < 1)
@@ -172,10 +178,10 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrixDestroy(X);
    hypre_ParCSRMatrixDestroy(Dinv);
    hypre_ParCSRMatrixDestroy(AFF);
-   hypre_ParCSRMatrixDestroy(N);
    if (NeumannDeg >= 1)
    {
       hypre_ParCSRMatrixDestroy(ACF);
+      hypre_ParCSRMatrixDestroy(N);
    }
 
    hypre_CSRMatrix *Z_diag = hypre_ParCSRMatrixDiag(Z);
@@ -183,9 +189,6 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    HYPRE_Complex   *Z_diag_a = hypre_CSRMatrixData(Z_diag);
    HYPRE_Int       *Z_diag_i = hypre_CSRMatrixI(Z_diag);
    HYPRE_Int       *Z_diag_j = hypre_CSRMatrixJ(Z_diag);
-   HYPRE_Complex   *Z_offd_a = hypre_CSRMatrixData(Z_offd);
-   HYPRE_Int       *Z_offd_i = hypre_CSRMatrixI(Z_offd);
-   HYPRE_Int       *Z_offd_j = hypre_CSRMatrixJ(Z_offd);
    HYPRE_Int        num_cols_offd_Z = hypre_CSRMatrixNumCols(Z_offd);
    HYPRE_Int        nnz_diag_Z = hypre_CSRMatrixNumNonzeros(Z_diag);
 
@@ -200,12 +203,12 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    HYPRE_THRUST_CALL( gather,
                         hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg_Z),
                         hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg_Z) +
-                        hypre_ParCSRCommPkgSendMapStart(comm_pkg_Z, num_sends),
+                        hypre_ParCSRCommPkgSendMapStart(comm_pkg_Z, num_sends_Z),
                         Fmap,
                         send_buf_i );
    HYPRE_THRUST_CALL( transform,
                         send_buf_i,
-                        send_buf_i[num_elems_send_Z],
+                        send_buf_i + num_elems_send_Z,
                         thrust::make_constant_iterator(col_start),
                         send_buf_i,
                         thrust::plus<HYPRE_Int>() );
@@ -225,19 +228,19 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    R_diag_a = hypre_CTAlloc(HYPRE_Complex, nnz_diag, HYPRE_MEMORY_DEVICE);
 
    /* setup a mapping to scatter the data and column indices of Z to their locations in R */
-   HYPRE_Int scatter_z = hypre_CTAlloc(HYPRE_Int, nnz_diag_Z, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int *scatter_z = hypre_CTAlloc(HYPRE_Int, nnz_diag_Z, HYPRE_MEMORY_DEVICE);
    HYPRE_THRUST_CALL( scatter,
                         thrust::make_constant_iterator(1),
-                        thrust::make_constant_iterator(1, hypre_CSRMatrixNumRows(Z_diag)),
+                        thrust::make_constant_iterator(1) + hypre_CSRMatrixNumRows(Z_diag),
                         Z_diag_i,
                         scatter_z);
    HYPRE_THRUST_CALL( inclusive_scan,
                         scatter_z,
-                        scatter_z[nnz_diag_Z],
+                        scatter_z + nnz_diag_Z,
                         scatter_z);
    HYPRE_THRUST_CALL( transform,
                         scatter_z,
-                        scatter_z[nnz_diag_Z],
+                        scatter_z + nnz_diag_Z,
                         thrust::make_counting_iterator(-1),
                         scatter_z,
                         thrust::plus<HYPRE_Int>() );
@@ -245,21 +248,21 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    /* scatter Z col indices and data into R */
    HYPRE_THRUST_CALL( scatter,
                         Z_diag_j,
-                        Z_diag_j[nnz_diag_Z],
+                        Z_diag_j + nnz_diag_Z,
                         scatter_z,
                         R_diag_j);
    HYPRE_THRUST_CALL( scatter,
                         Z_diag_a,
-                        Z_diag_a[nnz_diag_Z],
+                        Z_diag_a + nnz_diag_Z,
                         scatter_z,
                         R_diag_a);
    hypre_TFree(scatter_z, HYPRE_MEMORY_DEVICE);
 
    /* setup a mapping to scatter the data and column indices of the identity over the C-points to their locations in R */
-   HYPRE_Int scatter_iden = hypre_CTAlloc(HYPRE_Int, n_cpts, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int *scatter_iden = hypre_CTAlloc(HYPRE_Int, n_cpts, HYPRE_MEMORY_DEVICE);
    HYPRE_THRUST_CALL( transform,
-                        R_diag_i[1],
-                        R_diag_i[n_cpts],
+                        R_diag_i + 1,
+                        R_diag_i + n_cpts,
                         thrust::make_constant_iterator(-1),
                         scatter_iden,
                         thrust::plus<HYPRE_Int>() );
@@ -268,12 +271,12 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    HYPRE_Complex const_one = 1.0;
    HYPRE_THRUST_CALL( scatter,
                         Cmap,
-                        Cmap[n_cpts],
+                        Cmap + n_cpts,
                         scatter_iden,
                         R_diag_j);
    HYPRE_THRUST_CALL( scatter,
                         thrust::make_constant_iterator(const_one),
-                        thrust::make_counting_iterator(const_one, n_cpts),
+                        thrust::make_constant_iterator(const_one) + n_cpts,
                         scatter_iden,
                         R_diag_a);
    hypre_TFree(scatter_iden, HYPRE_MEMORY_DEVICE);
@@ -314,6 +317,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    if (filter_thresholdR > 0)
    {
       hypre_ParCSRMatrixDropSmallEntries(R, filter_thresholdR, -1); /* -1 = infinity norm, not implented on the device */
+      // WM: TODO: implement infinity norm filtering on device
       /* hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A, HYPRE_Complex tol, HYPRE_Int abs, HYPRE_Int option ); */
    }
 
