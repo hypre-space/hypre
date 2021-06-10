@@ -2435,6 +2435,74 @@ hypreCUDAKernel_FixInterNodes( HYPRE_Int      nrows,
       G0t_offd_data[j] = 0.0;
    }
 }
+
+__global__ void
+hypreCUDAKernel_AMSSetupScaleGGt( HYPRE_Int   Gt_num_rows,
+                                  HYPRE_Int  *Gt_diag_i,
+                                  HYPRE_Int  *Gt_diag_j,
+                                  HYPRE_Real *Gt_diag_data,
+                                  HYPRE_Int  *Gt_offd_i,
+                                  HYPRE_Real *Gt_offd_data,
+                                  HYPRE_Real *Gx_data,
+                                  HYPRE_Real *Gy_data,
+                                  HYPRE_Real *Gz_data )
+{
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
+
+   if (row_i >= Gt_num_rows)
+   {
+      return;
+   }
+
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Real h2 = 0.0;
+   HYPRE_Int ne, p1, q1, p2 = 0, q2 = 0;
+
+   if (lane < 2)
+   {
+      p1 = read_only_load(Gt_diag_i + row_i + lane);
+   }
+   q1 = __shfl_sync(HYPRE_WARP_FULL_MASK, p1, 1);
+   p1 = __shfl_sync(HYPRE_WARP_FULL_MASK, p1, 0);
+   ne = q1 - p1;
+
+   if (ne == 0)
+   {
+      return;
+   }
+
+   if (Gt_offd_data != NULL)
+   {
+      if (lane < 2)
+      {
+         p2 = read_only_load(Gt_offd_i + row_i + lane);
+      }
+      q2 = __shfl_sync(HYPRE_WARP_FULL_MASK, p2, 1);
+      p2 = __shfl_sync(HYPRE_WARP_FULL_MASK, p2, 0);
+   }
+
+   for (HYPRE_Int j = p1 + lane; j < q1; j += HYPRE_WARP_SIZE)
+   {
+      const HYPRE_Int k = read_only_load(&Gt_diag_j[j]);
+      const HYPRE_Real Gx = read_only_load(&Gx_data[k]);
+      const HYPRE_Real Gy = read_only_load(&Gy_data[k]);
+      const HYPRE_Real Gz = read_only_load(&Gz_data[k]);
+
+      h2 += Gx*Gx + Gy*Gy + Gz*Gz;
+   }
+
+   h2 = warp_allreduce_sum(h2) / ne;
+
+   for (HYPRE_Int j = p1 + lane; j < q1; j += HYPRE_WARP_SIZE)
+   {
+      Gt_diag_data[j] *= h2;
+   }
+
+   for (HYPRE_Int j = p2 + lane; j < q2; j += HYPRE_WARP_SIZE)
+   {
+      Gt_offd_data[j] *= h2;
+   }
+}
 #endif
 
 HYPRE_Int hypre_AMSSetup(void *solver,
@@ -3050,25 +3118,38 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                   HYPRE_Real *Gy_data = hypre_VectorData(hypre_ParVectorLocalVector(ams_data -> Gy));
                   HYPRE_Real *Gz_data = hypre_VectorData(hypre_ParVectorLocalVector(ams_data -> Gz));
 
-                  for (i = 0; i < Gt_num_rows; i++)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+                  if (exec == HYPRE_EXEC_DEVICE)
                   {
-                     /* determine the characteristic mesh size for vertex i */
-                     h2 = 0.0;
-                     ne = 0;
-                     for (j = Gt_diag_I[i]; j < Gt_diag_I[i+1]; j++)
+                     dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+                     dim3 gDim = hypre_GetDefaultCUDAGridDimension(Gt_num_rows, "warp", bDim);
+                     HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSSetupScaleGGt, gDim, bDim,
+                           Gt_num_rows, Gt_diag_I, Gt_diag_J, Gt_diag_data, Gt_offd_I, Gt_offd_data,
+                           Gx_data, Gy_data, Gz_data );
+                  }
+                  else
+#endif
+                  {
+                     for (i = 0; i < Gt_num_rows; i++)
                      {
-                        k = Gt_diag_J[j];
-                        h2 += Gx_data[k]*Gx_data[k]+Gy_data[k]*Gy_data[k]+Gz_data[k]*Gz_data[k];
-                        ne++;
-                     }
-
-                     if (ne != 0)
-                     {
-                        h2 /= ne;
+                        /* determine the characteristic mesh size for vertex i */
+                        h2 = 0.0;
+                        ne = 0;
                         for (j = Gt_diag_I[i]; j < Gt_diag_I[i+1]; j++)
-                           Gt_diag_data[j] *= h2;
-                        for (j = Gt_offd_I[i]; j < Gt_offd_I[i+1]; j++)
-                           Gt_offd_data[j] *= h2;
+                        {
+                           k = Gt_diag_J[j];
+                           h2 += Gx_data[k]*Gx_data[k]+Gy_data[k]*Gy_data[k]+Gz_data[k]*Gz_data[k];
+                           ne++;
+                        }
+
+                        if (ne != 0)
+                        {
+                           h2 /= ne;
+                           for (j = Gt_diag_I[i]; j < Gt_diag_I[i+1]; j++)
+                              Gt_diag_data[j] *= h2;
+                           for (j = Gt_offd_I[i]; j < Gt_offd_I[i+1]; j++)
+                              Gt_offd_data[j] *= h2;
+                        }
                      }
                   }
                }
@@ -3082,7 +3163,16 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                      hypre_ParVectorDestroy(ams_data -> Gz);
                }
 
-               GGt = hypre_ParMatmul(ams_data -> G, Gt);
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+               if (exec == HYPRE_EXEC_DEVICE)
+               {
+                  GGt = hypre_ParCSRMatMat(ams_data -> G, Gt);
+               }
+#endif
+               else
+               {
+                  GGt = hypre_ParMatmul(ams_data -> G, Gt);
+               }
                hypre_ParCSRMatrixDestroy(Gt);
 
                /* hypre_ParCSRMatrixAdd(GGt, A, &ams_data -> A); */
@@ -3666,10 +3756,10 @@ HYPRE_Int hypre_AMSConstructDiscreteGradient(hypre_ParCSRMatrix *A,
    /* Construct the local part of G based on edge_vertex and the edge
       and vertex partitionings from A and x_coord */
    {
-      HYPRE_Int i, *I = hypre_CTAlloc(HYPRE_Int,  nedges+1, HYPRE_MEMORY_HOST);
+      HYPRE_Int i, *I = hypre_CTAlloc(HYPRE_Int, nedges+1, HYPRE_MEMORY_HOST);
       HYPRE_Int part_size;
       HYPRE_BigInt *row_starts, *col_starts;
-      HYPRE_Real *data = hypre_CTAlloc(HYPRE_Real,  2*nedges, HYPRE_MEMORY_HOST);
+      HYPRE_Real *data = hypre_CTAlloc(HYPRE_Real, 2*nedges, HYPRE_MEMORY_HOST);
       hypre_CSRMatrix *local = hypre_CSRMatrixCreate (nedges,
                                                       hypre_ParVectorGlobalSize(x_coord),
                                                       2*nedges);
