@@ -527,7 +527,7 @@ main( hypre_int argc,
     /* set max iterations */
     HYPRE_MGRSetMaxIter(pcg_precond, 1);
     HYPRE_MGRSetTol(pcg_precond, pc_tol);
-    HYPRE_MGRSetTruncateCoarseGridThreshold(pcg_precond, 1e-14);
+    HYPRE_MGRSetTruncateCoarseGridThreshold(pcg_precond, 1e-20);
 
     HYPRE_MGRSetGlobalsmoothType(pcg_precond, mgr_gsmooth_type);
     HYPRE_MGRSetMaxGlobalsmoothIters( pcg_precond, mgr_num_gsmooth_sweeps );

@@ -784,7 +784,7 @@ hypre_MGRSetup( void               *mgr_vdata,
     /* Interpolation operator */
     num_interp_sweeps = (mgr_data -> num_interp_sweeps);
 
-    wall_time = time_getWallclockSeconds();
+    //wall_time = time_getWallclockSeconds();
     if (interp_type[lev] == 99)
     {
       hypre_MGRBuildInterp(A_array[lev], CF_marker_array[lev], A_ff_inv, coarse_pnts_global, 1, dof_func_buff,
@@ -795,7 +795,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       hypre_MGRBuildInterp(A_array[lev], CF_marker_array[lev], S, coarse_pnts_global, 1, dof_func_buff,
                           debug_flag, trunc_factor, max_elmts, &P, interp_type[lev], num_interp_sweeps);
     }
-    wall_time = time_getWallclockSeconds() - wall_time;
+    //wall_time = time_getWallclockSeconds() - wall_time;
     //hypre_printf("Lev = %d, interp type = %d, proc = %d     BuildInterp: %f\n", lev, interp_type[lev], my_id, wall_time);
     //hypre_ParCSRMatrixPrintIJ(P, 0, 0, "P");
     //hypre_ParCSRMatrixMigrate(P, memory_location);
@@ -865,18 +865,18 @@ hypre_MGRSetup( void               *mgr_vdata,
     }
     else
     {
-      wall_time = time_getWallclockSeconds();
+      //wall_time = time_getWallclockSeconds();
       hypre_MGRBuildRestrict(A_array[lev], CF_marker_array[lev], coarse_pnts_global, 1, dof_func_buff,
             debug_flag, trunc_factor, max_elmts, strong_threshold, max_row_sum, &RT,
             restrict_type[lev], num_restrict_sweeps);
-      wall_time = time_getWallclockSeconds() - wall_time;
+      //wall_time = time_getWallclockSeconds() - wall_time;
       //hypre_printf("Lev = %d, restrict type = %d, proc = %d     BuildRestrict: %f\n", lev, restrict_type[lev], my_id, wall_time);
       //hypre_ParCSRMatrixPrintIJ(RT, 0, 0, "RT");
       //hypre_ParCSRMatrixMigrate(RT, memory_location);
 
       RT_array[lev] = RT;
 
-      wall_time = time_getWallclockSeconds();
+      //wall_time = time_getWallclockSeconds();
       /* Compute RAP for next level */
       if (use_non_galerkin_cg[lev] != 0)
       {
@@ -889,18 +889,18 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
       else
       {
-        wall_time = time_getWallclockSeconds();
+        //wall_time = time_getWallclockSeconds();
         //hypre_BoomerAMGBuildCoarseOperator(RT, A_array[lev], P, &RAP_ptr);
-        RAP_ptr = hypre_ParCSRMatrixRAPKT(RT, A_array[lev], P, 0);
+        RAP_ptr = hypre_ParCSRMatrixRAPKT(RT, A_array[lev], P, 1);
         //char fname[256];
         //sprintf(fname, "RAP_%d", lev);
         //hypre_ParCSRMatrixPrintIJ(RAP_ptr, 0, 0, fname);
-        wall_time = time_getWallclockSeconds() - wall_time;
+        //wall_time = time_getWallclockSeconds() - wall_time;
         //hypre_printf("Lev = %d, proc = %d     BuildCoarseGrid: %f\n", lev, my_id, wall_time);
       }
     }
 
-    wall_time = time_getWallclockSeconds();
+    //wall_time = time_getWallclockSeconds();
     // truncate the coarse grid
     if (exec == HYPRE_EXEC_HOST)
     {
@@ -910,13 +910,13 @@ hypre_MGRSetup( void               *mgr_vdata,
     else
     {
       // TODO: add option for using abs value in drop small entries
-      hypre_ParCSRMatrixDropSmallEntriesDevice(RAP_ptr, 1e-14, 1, 0);
+      hypre_ParCSRMatrixDropSmallEntriesDevice(RAP_ptr, truncate_cg_threshold, 1, 0);
     }
 #endif
     //char fname[256];
     //sprintf(fname, "RAP_truncated_%d", lev);
     //hypre_ParCSRMatrixPrintIJ(RAP_ptr, 0, 0, fname);
-    wall_time = time_getWallclockSeconds() - wall_time;
+    //wall_time = time_getWallclockSeconds() - wall_time;
     //hypre_printf("Lev = %d, proc = %d     Truncate Coarse Grid: %f\n", lev, my_id, wall_time);
 
 /*
@@ -962,7 +962,7 @@ hypre_MGRSetup( void               *mgr_vdata,
     if (Frelax_method[lev] == 2) // full AMG
     {
 //#endif
-      wall_time = time_getWallclockSeconds();
+      //wall_time = time_getWallclockSeconds();
       // user provided AMG solver
       // only support AMG at the first level
       // TODO: input check to avoid crashing
@@ -1052,7 +1052,7 @@ hypre_MGRSetup( void               *mgr_vdata,
         (mgr_data -> use_default_fsolver) = 1;
         use_default_fsolver = (mgr_data -> use_default_fsolver);
       }
-      wall_time = time_getWallclockSeconds() - wall_time;
+      //wall_time = time_getWallclockSeconds() - wall_time;
       //hypre_printf("Lev = %d, proc = %d     SetupAFF: %f\n", lev, my_id, wall_time);
     }
 
@@ -1199,10 +1199,10 @@ hypre_MGRSetup( void               *mgr_vdata,
   }
 
   /* setup coarse grid solver */
-  wall_time = time_getWallclockSeconds();
+  //wall_time = time_getWallclockSeconds();
   coarse_grid_solver_setup((mgr_data -> coarse_grid_solver), RAP_ptr, F_array[num_c_levels], U_array[num_c_levels]);
   //hypre_ParCSRMatrixPrintIJ(RAP_ptr,1,1,"RAP");
-  wall_time = time_getWallclockSeconds() - wall_time;
+  //wall_time = time_getWallclockSeconds() - wall_time;
   //hypre_printf("Proc = %d   Coarse grid setup: %f\n", my_id, wall_time);
 
   /* Setup smoother for fine grid */
