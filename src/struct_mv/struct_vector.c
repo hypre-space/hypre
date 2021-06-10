@@ -269,17 +269,42 @@ hypre_StructVectorSetValues( hypre_StructVector *vector,
       if (hypre_IndexInBox(grid_index, grid_box))
       {
          vecp = hypre_StructVectorBoxDataValue(vector, i, grid_index);
-         if (action > 0)
+
+         if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
          {
-            *vecp += *values;
+            if (action > 0)
+            {
+#define DEVICE_VAR is_device_ptr(matp,values)
+               hypre_LoopBegin(1, k)
+               {
+                  *vecp += *values;
+               }
+               hypre_LoopEnd()
+#undef DEVICE_VAR
+            }
+            else if (action > -1)
+            {
+               hypre_TMemcpy(vecp, values, HYPRE_Complex, 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+            }
+            else /* action < 0 */
+            {
+               hypre_TMemcpy(values, vecp, HYPRE_Complex, 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+            }
          }
-         else if (action > -1)
+         else
          {
-            *vecp = *values;
-         }
-         else /* action < 0 */
-         {
-            *values = *vecp;
+            if (action > 0)
+            {
+               *vecp += *values;
+            }
+            else if (action > -1)
+            {
+               *vecp = *values;
+            }
+            else /* action < 0 */
+            {
+               *values = *vecp;
+            }
          }
       }
    }
