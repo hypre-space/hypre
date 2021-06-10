@@ -137,13 +137,13 @@ FILES =\
  schwarz.c\
  block_tridiag.c\
  ads.c\
- ame.c\
  par_restr.c\
  par_lr_restr.c\
  dsuperlu.c
 
 CUFILES =\
  ams.c\
+ ame.c\
  par_ilu.c\
  par_ilu_setup.c \
  par_ilu_solve.c \
