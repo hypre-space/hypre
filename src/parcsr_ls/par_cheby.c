@@ -56,15 +56,16 @@ means half, and .1 means 10percent)
  * @param[out] coefs_ptr *coefs_ptr will be allocated to contain coefficients of the polynomial
  * @param[out] ds_ptr *ds_ptr will be allocated to allow scaling by the diagonal
  */
-HYPRE_Int hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
-                            HYPRE_Real max_eig,      
-                            HYPRE_Real min_eig,     
-                            HYPRE_Real fraction,   
-                            HYPRE_Int order,            /* polynomial order */
-                            HYPRE_Int scale,            /* scale by diagonal?*/
-                            HYPRE_Int variant,           
-                            HYPRE_Real **coefs_ptr,
-                            HYPRE_Real **ds_ptr)   /* initial/updated approximation */
+HYPRE_Int
+hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
+                              HYPRE_Real          max_eig,
+                              HYPRE_Real          min_eig,
+                              HYPRE_Real          fraction,
+                              HYPRE_Int           order, /* polynomial order */
+                              HYPRE_Int           scale, /* scale by diagonal?*/
+                              HYPRE_Int           variant,
+                              HYPRE_Real        **coefs_ptr,
+                              HYPRE_Real        **ds_ptr) /* initial/updated approximation */
 {
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real      *A_diag_data  = hypre_CSRMatrixData(A_diag);
@@ -189,9 +190,9 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A, /* matrix to rela
    if (scale)
    {
       /*grab 1/sqrt(diagonal) */
-      ds_data = hypre_CTAlloc(HYPRE_Real,  num_rows, hypre_ParCSRMatrixMemoryLocation(A));
+      ds_data = hypre_CTAlloc(HYPRE_Real, num_rows, hypre_ParCSRMatrixMemoryLocation(A));
       hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(A), ds_data, 3);
-   }/* end of scaling code */
+   } /* end of scaling code */
    *ds_ptr = ds_data;
 
    return hypre_error_flag;
@@ -211,16 +212,17 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A, /* matrix to rela
  * @param[out] v Temp vector
  * @param[out] v Temp Vector
  */
-HYPRE_Int hypre_ParCSRRelax_Cheby_SolveHost(hypre_ParCSRMatrix *A, /* matrix to relax with */
-                            hypre_ParVector *f,    /* right-hand side */
-                            HYPRE_Real *ds_data,
-                            HYPRE_Real *coefs,
-                            HYPRE_Int order,            /* polynomial order */
-                            HYPRE_Int scale,            /* scale by diagonal?*/
-                            HYPRE_Int variant,           
-                            hypre_ParVector *u,   /* initial/updated approximation */
-                            hypre_ParVector *v    /* temporary vector */,
-                            hypre_ParVector *r    /*another temp vector */  )
+HYPRE_Int
+hypre_ParCSRRelax_Cheby_SolveHost(hypre_ParCSRMatrix *A, /* matrix to relax with */
+                                  hypre_ParVector    *f, /* right-hand side */
+                                  HYPRE_Real         *ds_data,
+                                  HYPRE_Real         *coefs,
+                                  HYPRE_Int           order, /* polynomial order */
+                                  HYPRE_Int           scale, /* scale by diagonal?*/
+                                  HYPRE_Int           variant,
+                                  hypre_ParVector    *u, /* initial/updated approximation */
+                                  hypre_ParVector    *v /* temporary vector */,
+                                  hypre_ParVector    *r /*another temp vector */)
 {
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real *u_data = hypre_VectorData(hypre_ParVectorLocalVector(u));
@@ -376,7 +378,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_SolveHost(hypre_ParCSRMatrix *A, /* matrix to 
 }
 
 /**
- * @brief Solve using a chebyshev polynomial 
+ * @brief Solve using a chebyshev polynomial
  *
  * Determines whether to solve on host or device
  *
@@ -391,30 +393,31 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_SolveHost(hypre_ParCSRMatrix *A, /* matrix to 
  * @param[out] v Temp vector
  * @param[out] v Temp Vector
  */
-HYPRE_Int hypre_ParCSRRelax_Cheby_Solve(hypre_ParCSRMatrix *A, /* matrix to relax with */
-                            hypre_ParVector *f,    /* right-hand side */
-                            HYPRE_Real *ds_data,
-                            HYPRE_Real *coefs,
-                            HYPRE_Int order,            /* polynomial order */
-                            HYPRE_Int scale,            /* scale by diagonal?*/
-                            HYPRE_Int variant,           
-                            hypre_ParVector *u,   /* initial/updated approximation */
-                            hypre_ParVector *v    /* temporary vector */,
-                            hypre_ParVector *r    /*another temp vector */  )
+HYPRE_Int
+hypre_ParCSRRelax_Cheby_Solve(hypre_ParCSRMatrix *A, /* matrix to relax with */
+                              hypre_ParVector    *f, /* right-hand side */
+                              HYPRE_Real         *ds_data,
+                              HYPRE_Real         *coefs,
+                              HYPRE_Int           order, /* polynomial order */
+                              HYPRE_Int           scale, /* scale by diagonal?*/
+                              HYPRE_Int           variant,
+                              hypre_ParVector    *u, /* initial/updated approximation */
+                              hypre_ParVector    *v /* temporary vector */,
+                              hypre_ParVector    *r /*another temp vector */)
 {
 #if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPushRange("ParCSRRelaxChebySolve");
 #endif
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
-   HYPRE_Int ierr = 0;
-   if (exec == HYPRE_EXEC_HOST) 
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));
+   HYPRE_Int             ierr = 0;
+   if (exec == HYPRE_EXEC_HOST)
    {
-      ierr = hypre_ParCSRRelax_Cheby_SolveHost(A,f,ds_data,coefs,order,scale,variant,u,v,r);
+      ierr = hypre_ParCSRRelax_Cheby_SolveHost(A, f, ds_data, coefs, order, scale, variant, u, v, r);
    }
 #if defined(HYPRE_USING_CUDA)
    else
    {
-      ierr = hypre_ParCSRRelax_Cheby_SolveDevice(A,f,ds_data,coefs,order,scale,variant,u,v,r);
+      ierr = hypre_ParCSRRelax_Cheby_SolveDevice(A, f, ds_data, coefs, order, scale, variant, u, v, r);
    }
 #endif
 #if defined(HYPRE_USING_CUDA)
@@ -422,4 +425,3 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_Solve(hypre_ParCSRMatrix *A, /* matrix to rela
 #endif
    return ierr;
 }
-

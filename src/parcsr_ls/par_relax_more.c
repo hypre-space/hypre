@@ -26,9 +26,9 @@ HYPRE_Real hypre_LINPACKcgpthy(HYPRE_Real*, HYPRE_Real*);
  * @param[out] Maximum eigenvalue
  */
 HYPRE_Int
-hypre_ParCSRMaxEigEstimateHost(hypre_ParCSRMatrix *A, /* matrix to relax with */
-                           HYPRE_Int scale, /* scale by diagonal?*/
-                           HYPRE_Real *max_eig)
+hypre_ParCSRMaxEigEstimateHost(hypre_ParCSRMatrix *A,     /* matrix to relax with */
+                               HYPRE_Int           scale, /* scale by diagonal?*/
+                               HYPRE_Real         *max_eig)
 {
    HYPRE_Real e_max;
    HYPRE_Real row_sum, max_norm;
@@ -164,25 +164,25 @@ hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax with */
  *  @param[out] min_eig Estimated min eigenvalue
  */
 HYPRE_Int
-hypre_ParCSRMaxEigEstimateCG( hypre_ParCSRMatrix *A,     /* matrix to relax with */
-                              HYPRE_Int           scale, /* scale by diagonal?*/
-                              HYPRE_Int           max_iter,
-                              HYPRE_Real         *max_eig,
-                              HYPRE_Real         *min_eig )
+hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A,     /* matrix to relax with */
+                             HYPRE_Int           scale, /* scale by diagonal?*/
+                             HYPRE_Int           max_iter,
+                             HYPRE_Real         *max_eig,
+                             HYPRE_Real         *min_eig)
 {
 #if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPushRange("ParCSRMaxEigEstimateCG");
 #endif
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
-   HYPRE_Int ierr = 0;
-   if (exec == HYPRE_EXEC_HOST) 
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));
+   HYPRE_Int             ierr = 0;
+   if (exec == HYPRE_EXEC_HOST)
    {
-      ierr = hypre_ParCSRMaxEigEstimateCGHost(A,scale,max_iter,max_eig,min_eig);
+      ierr = hypre_ParCSRMaxEigEstimateCGHost(A, scale, max_iter, max_eig, min_eig);
    }
 #if defined(HYPRE_USING_CUDA)
    else
    {
-      ierr = hypre_ParCSRMaxEigEstimateCGDevice(A,scale,max_iter,max_eig,min_eig);
+      ierr = hypre_ParCSRMaxEigEstimateCGDevice(A, scale, max_iter, max_eig, min_eig);
    }
 #endif
 #if defined(HYPRE_USING_CUDA)
@@ -201,11 +201,11 @@ hypre_ParCSRMaxEigEstimateCG( hypre_ParCSRMatrix *A,     /* matrix to relax with
  *  @param[out] min_eig Estimated min eigenvalue
  */
 HYPRE_Int
-hypre_ParCSRMaxEigEstimateCGHost( hypre_ParCSRMatrix *A,     /* matrix to relax with */
-                              HYPRE_Int           scale, /* scale by diagonal?*/
-                              HYPRE_Int           max_iter,
-                              HYPRE_Real         *max_eig,
-                              HYPRE_Real         *min_eig )
+hypre_ParCSRMaxEigEstimateCGHost(hypre_ParCSRMatrix *A,     /* matrix to relax with */
+                                 HYPRE_Int           scale, /* scale by diagonal?*/
+                                 HYPRE_Int           max_iter,
+                                 HYPRE_Real         *max_eig,
+                                 HYPRE_Real         *min_eig)
 {
    HYPRE_Int i, j, err;
    hypre_ParVector *p;
@@ -418,24 +418,23 @@ means half, and .1 means 10percent)
 *******************************************************************************/
 
 HYPRE_Int
-hypre_ParCSRRelax_Cheby( hypre_ParCSRMatrix *A,                /* matrix to relax with */
-                         hypre_ParVector    *f,                /* right-hand side */
-                         HYPRE_Real          max_eig,
-                         HYPRE_Real          min_eig,
-                         HYPRE_Real          fraction,
-                         HYPRE_Int           order,            /* polynomial order */
-                         HYPRE_Int           scale,            /* scale by diagonal?*/
-                         HYPRE_Int           variant,
-                         hypre_ParVector    *u,                /* initial/updated approximation */
-                         hypre_ParVector    *v,                /* temporary vector */
-                         hypre_ParVector    *r                 /*another temp vector */ )
+hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with */
+                        hypre_ParVector    *f, /* right-hand side */
+                        HYPRE_Real          max_eig,
+                        HYPRE_Real          min_eig,
+                        HYPRE_Real          fraction,
+                        HYPRE_Int           order, /* polynomial order */
+                        HYPRE_Int           scale, /* scale by diagonal?*/
+                        HYPRE_Int           variant,
+                        hypre_ParVector    *u, /* initial/updated approximation */
+                        hypre_ParVector    *v, /* temporary vector */
+                        hypre_ParVector    *r /*another temp vector */)
 {
-   HYPRE_Real* coefs = NULL;
-   HYPRE_Real* ds_data = NULL;
+   HYPRE_Real *coefs   = NULL;
+   HYPRE_Real *ds_data = NULL;
 
    hypre_ParCSRRelax_Cheby_Setup(A, max_eig, min_eig, fraction, order, scale, variant, &coefs, &ds_data);
    hypre_ParCSRRelax_Cheby_Solve(A, f, ds_data, coefs, order, scale, variant, u, v, r);
-
 
    hypre_TFree(ds_data, hypre_ParCSRMatrixMemoryLocation(A));
    hypre_TFree(coefs, HYPRE_MEMORY_HOST);

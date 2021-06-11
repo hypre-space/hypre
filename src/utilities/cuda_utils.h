@@ -866,13 +866,13 @@ struct equal : public thrust::unary_function<T,bool>
  * o = x * (y .+ z)
  * For vectors o,x,y,z
  */
-template<typename T>
+template <typename T>
 struct oop_xypz
 {
-   typedef thrust::tuple<T&, T, T, T> Tuple;
-   __host__ __device__ void operator()(Tuple t)
+   typedef thrust::tuple<T &, T, T, T> Tuple;
+   __host__ __device__ void            operator()(Tuple t)
    {
-	    thrust::get<0>(t) = thrust::get<1>(t) * (thrust::get<2>(t) + thrust::get<3>(t));
+      thrust::get<0>(t) = thrust::get<1>(t) * (thrust::get<2>(t) + thrust::get<3>(t));
    }
 };
 /**
@@ -883,17 +883,17 @@ struct oop_xypz
  * u = r * a
  * For vectors o and u, with scalar a
  */
-template<typename T>
+template <typename T>
 struct save_and_scale
 {
-   typedef thrust::tuple<T&, T&, T> Tuple;
-   const T scale;
+   typedef thrust::tuple<T &, T &, T> Tuple;
+   const T                            scale;
 
-   save_and_scale(T _scale): scale(_scale) {}
+   save_and_scale(T _scale) : scale(_scale) {}
 
-   __host__ __device__ void operator()(Tuple t) 
+   __host__ __device__ void operator()(Tuple t)
    {
-	    thrust::get<0>(t) = thrust::get<1>(t);
+      thrust::get<0>(t) = thrust::get<1>(t);
       thrust::get<1>(t) = thrust::get<2>(t) * scale;
    }
 };
@@ -905,18 +905,15 @@ struct save_and_scale
  * u = alpha * r + v
  * For vectors u and r, v,  with scalar alpha
  */
-template<typename T>
+template <typename T>
 struct oop_axpy
 {
-   typedef thrust::tuple<T&, T, T> Tuple;
-   const T scale;
+   typedef thrust::tuple<T &, T, T> Tuple;
+   const T                          scale;
 
-   oop_axpy(T _scale): scale(_scale) {}
+   oop_axpy(T _scale) : scale(_scale) {}
 
-   __host__ __device__ void operator()(Tuple t)
-   {
-	    thrust::get<0>(t) = scale * thrust::get<1>(t) + thrust::get<2>(t);
-   }
+   __host__ __device__ void operator()(Tuple t) { thrust::get<0>(t) = scale * thrust::get<1>(t) + thrust::get<2>(t); }
 };
 
 /**
@@ -926,17 +923,13 @@ struct oop_axpy
  * x += y
  * for vectors x,y
  */
-template<typename T>
+template <typename T>
 struct xpy
 {
    typedef thrust::tuple<T, T, T> Tuple;
 
-   __host__ __device__ T operator()(const T& x, const T& y) const
-   {
-	    return x + y;
-   }
+   __host__ __device__ T operator()(const T &x, const T &y) const { return x + y; }
 };
-
 
 /**
  * @brief oop_xy
@@ -945,15 +938,12 @@ struct xpy
  * o = x .* y
  * For vectors o,x,y,z
  */
-template<typename T>
+template <typename T>
 struct oop_xy
 {
-   typedef thrust::tuple<T&, T, T> Tuple;
+   typedef thrust::tuple<T &, T, T> Tuple;
 
-   __host__ __device__ void operator()(Tuple t)
-   {
-	    thrust::get<0>(t) = thrust::get<1>(t) * thrust::get<2>(t);
-   }
+   __host__ __device__ void operator()(Tuple t) { thrust::get<0>(t) = thrust::get<1>(t) * thrust::get<2>(t); }
 };
 
 /**
@@ -963,17 +953,17 @@ struct oop_xy
  * o = a*x+y.*z
  * For vectors x,y,z and scalar a
  */
-template<typename T>
+template <typename T>
 struct oop_axpyz
 {
-   typedef thrust::tuple<T&, T, T, T> Tuple;
+   typedef thrust::tuple<T &, T, T, T> Tuple;
 
    const T scale;
-   oop_axpyz(T _scale): scale(_scale) {}
+   oop_axpyz(T _scale) : scale(_scale) {}
 
    __host__ __device__ void operator()(Tuple t)
    {
-	    thrust::get<0>(t) = scale * thrust::get<1>(t) + thrust::get<2>(t) * thrust::get<3>(t);
+      thrust::get<0>(t) = scale * thrust::get<1>(t) + thrust::get<2>(t) * thrust::get<3>(t);
    }
 };
 
@@ -984,12 +974,14 @@ struct oop_axpyz
  * y = x + y .* z
  * For vectors x,y,z
  */
-template<typename T>
+template <typename T>
 struct oop_xpyz
 {
-   typedef thrust::tuple<T&, T, T> Tuple;
-   __host__ __device__ void operator()(Tuple t) {
-	    thrust::get<0>(t) = thrust::get<1>(t) + thrust::get<2>(t) * thrust::get<0>(t);
+   typedef thrust::tuple<T &, T, T> Tuple;
+
+   __host__ __device__ void operator()(Tuple t)
+   {
+      thrust::get<0>(t) = thrust::get<1>(t) + thrust::get<2>(t) * thrust::get<0>(t);
    }
 };
 

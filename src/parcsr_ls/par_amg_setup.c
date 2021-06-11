@@ -3034,12 +3034,19 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          max_eig_est[j] = max_eig;
          min_eig_est[j] = min_eig;
 
-         cheby_ds[j] = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_array[j]));
-         hypre_VectorVectorStride(cheby_ds[j]) = hypre_ParCSRMatrixNumRows(A_array[j]);
+         cheby_ds[j]                             = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_array[j]));
+         hypre_VectorVectorStride(cheby_ds[j])   = hypre_ParCSRMatrixNumRows(A_array[j]);
          hypre_VectorMemoryLocation(cheby_ds[j]) = hypre_ParCSRMatrixMemoryLocation(A_array[j]);
 
-         hypre_ParCSRRelax_Cheby_Setup(A_array[j],max_eig, min_eig,
-                                       cheby_fraction, cheby_order, scale, variant, &coefs,  &hypre_VectorData(cheby_ds[j]));
+         hypre_ParCSRRelax_Cheby_Setup(A_array[j],
+                                       max_eig,
+                                       min_eig,
+                                       cheby_fraction,
+                                       cheby_order,
+                                       scale,
+                                       variant,
+                                       &coefs,
+                                       &hypre_VectorData(cheby_ds[j]));
          cheby_coefs[j] = coefs;
       }
       else if (grid_relax_type[1] == 15 || (grid_relax_type[3] == 15 && j == (num_levels-1))  )

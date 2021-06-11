@@ -17,11 +17,11 @@
 
 #if defined(HYPRE_USING_CUDA)
 #include "_hypre_utilities.hpp"
-#include <thrust/iterator/zip_iterator.h>
 #include <thrust/for_each.h>
+#include <thrust/iterator/zip_iterator.h>
 
-HYPRE_Int hypre_LINPACKcgtql1(HYPRE_Int*,HYPRE_Real *,HYPRE_Real *,HYPRE_Int *);
-HYPRE_Real hypre_LINPACKcgpthy(HYPRE_Real*, HYPRE_Real*);
+HYPRE_Int  hypre_LINPACKcgtql1(HYPRE_Int *, HYPRE_Real *, HYPRE_Real *, HYPRE_Int *);
+HYPRE_Real hypre_LINPACKcgpthy(HYPRE_Real *, HYPRE_Real *);
 
 /**
  * @brief xpay
@@ -30,17 +30,15 @@ HYPRE_Real hypre_LINPACKcgpthy(HYPRE_Real*, HYPRE_Real*);
  * y = x + a*y
  * For vectors x,y, scalar a
  */
-template<typename T>
+template <typename T>
 struct xpay
 {
-   typedef thrust::tuple<T&, T> Tuple;
+   typedef thrust::tuple<T &, T> Tuple;
 
    const T scale;
-   xpay(T _scale): scale(_scale) {}
+   xpay(T _scale) : scale(_scale) {}
 
-   __host__ __device__ void operator()(Tuple t) {
-	    thrust::get<0>(t) = thrust::get<1>(t) + scale * thrust::get<0>(t);
-   }
+   __host__ __device__ void operator()(Tuple t) { thrust::get<0>(t) = thrust::get<1>(t) + scale * thrust::get<0>(t); }
 };
 
 /**
@@ -50,35 +48,32 @@ struct xpay
  * y = x .* y
  * For vectors x,y
  */
-template<typename T>
+template <typename T>
 struct xy
 {
-   typedef thrust::tuple<T&, T> Tuple;
+   typedef thrust::tuple<T &, T> Tuple;
 
-   __host__ __device__ void operator()(Tuple t) {
-	    thrust::get<0>(t) = thrust::get<1>(t) * thrust::get<0>(t);
-   }
+   __host__ __device__ void operator()(Tuple t) { thrust::get<0>(t) = thrust::get<1>(t) * thrust::get<0>(t); }
 };
 
 /**
  * @brief Calculates row sums and other metrics of a matrix on the device
  * to be used for the MaxEigEstimate
  */
-__global__
-void
-hypreCUDAKernel_CSRMaxEigEstimate( HYPRE_Int      nrows,
-                                   HYPRE_Int     *diag_ia,
-                                   HYPRE_Int     *diag_ja,
-                                   HYPRE_Complex *diag_aa,
-                                   HYPRE_Int     *offd_ia,
-                                   HYPRE_Int     *offd_ja,
-                                   HYPRE_Complex *offd_aa,
-                                   HYPRE_Complex *row_sum,
-                                   HYPRE_Int      scale,
-                                   HYPRE_Int     *pos_diag,
-                                   HYPRE_Int     *neg_diag )
+__global__ void
+hypreCUDAKernel_CSRMaxEigEstimate(HYPRE_Int      nrows,
+                                  HYPRE_Int     *diag_ia,
+                                  HYPRE_Int     *diag_ja,
+                                  HYPRE_Complex *diag_aa,
+                                  HYPRE_Int     *offd_ia,
+                                  HYPRE_Int     *offd_ja,
+                                  HYPRE_Complex *offd_aa,
+                                  HYPRE_Complex *row_sum,
+                                  HYPRE_Int      scale,
+                                  HYPRE_Int     *pos_diag,
+                                  HYPRE_Int     *neg_diag)
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (row_i >= nrows)
    {
@@ -88,8 +83,8 @@ hypreCUDAKernel_CSRMaxEigEstimate( HYPRE_Int      nrows,
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
    HYPRE_Int p, q;
 
-   HYPRE_Real diag_value = 0.0;
-   HYPRE_Complex row_sum_i = 0.0;
+   HYPRE_Real    diag_value = 0.0;
+   HYPRE_Complex row_sum_i  = 0.0;
 
    if (lane < 2)
    {
@@ -98,16 +93,14 @@ hypreCUDAKernel_CSRMaxEigEstimate( HYPRE_Int      nrows,
    q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
    p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
 
-
    for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
    {
-      if ( j >= q )
+      if (j >= q)
       {
          continue;
       }
 
       hypre_int find_diag = j < q && diag_ja[j] == row_i;
-
 
       HYPRE_Complex aij = diag_aa[j];
       if (find_diag)
@@ -125,10 +118,9 @@ hypreCUDAKernel_CSRMaxEigEstimate( HYPRE_Int      nrows,
    q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
    p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
 
-
    for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
    {
-      if ( j >= q )
+      if (j >= q)
       {
          continue;
       }
@@ -142,16 +134,16 @@ hypreCUDAKernel_CSRMaxEigEstimate( HYPRE_Int      nrows,
 
    if (lane == 0)
    {
-      if(diag_value > 0)
+      if (diag_value > 0)
       {
          atomicAdd(pos_diag, 1);
       }
-      else if(diag_value < 0)
+      else if (diag_value < 0)
       {
          atomicAdd(neg_diag, 1);
       }
 
-      row_sum[row_i] = (scale && diag_value!=0.0)?row_sum_i/diag_value:row_sum_i;
+      row_sum[row_i] = (scale && diag_value != 0.0) ? row_sum_i / diag_value : row_sum_i;
    }
 }
 
@@ -163,9 +155,7 @@ hypreCUDAKernel_CSRMaxEigEstimate( HYPRE_Int      nrows,
  * @param[out] Maximum eigenvalue
  */
 HYPRE_Int
-hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix* A,
-                                  HYPRE_Int  scale,
-                                  HYPRE_Real *max_eig )
+hypre_ParCSRMaxEigEstimateDevice(hypre_ParCSRMatrix *A, HYPRE_Int scale, HYPRE_Real *max_eig)
 {
    HYPRE_Real e_max;
    HYPRE_Real max_norm;
@@ -178,18 +168,17 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix* A,
 
    HYPRE_Real *A_diag_data;
    HYPRE_Real *A_offd_data;
-   HYPRE_Int *A_diag_i;
-   HYPRE_Int *A_offd_i;
-   HYPRE_Int *A_diag_j;
-   HYPRE_Int *A_offd_j;
+   HYPRE_Int  *A_diag_i;
+   HYPRE_Int  *A_offd_i;
+   HYPRE_Int  *A_diag_j;
+   HYPRE_Int  *A_offd_j;
 
-   HYPRE_Int* pos_diag_d = hypre_CTAlloc(HYPRE_Int, 1, hypre_ParCSRMatrixMemoryLocation(A));
-   HYPRE_Int* neg_diag_d = hypre_CTAlloc(HYPRE_Int, 1, hypre_ParCSRMatrixMemoryLocation(A));
+   HYPRE_Int *pos_diag_d = hypre_CTAlloc(HYPRE_Int, 1, hypre_ParCSRMatrixMemoryLocation(A));
+   HYPRE_Int *neg_diag_d = hypre_CTAlloc(HYPRE_Int, 1, hypre_ParCSRMatrixMemoryLocation(A));
 
-   A_num_rows  = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+   A_num_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
 
-   HYPRE_Real* rowsums = hypre_CTAlloc(HYPRE_Real, A_num_rows, hypre_ParCSRMatrixMemoryLocation(A));
-
+   HYPRE_Real *rowsums = hypre_CTAlloc(HYPRE_Real, A_num_rows, hypre_ParCSRMatrixMemoryLocation(A));
 
    A_diag_i    = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A));
    A_diag_j    = hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(A));
@@ -198,36 +187,40 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix* A,
    A_offd_j    = hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(A));
    A_offd_data = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(A));
 
-   dim3           bDim, gDim;
+   dim3 bDim, gDim;
 
    bDim = hypre_GetDefaultCUDABlockDimension();
    gDim = hypre_GetDefaultCUDAGridDimension(A_num_rows, "warp", bDim);
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CSRMaxEigEstimate, gDim, bDim, A_num_rows, A_diag_i, A_diag_j, A_diag_data, 
-         A_offd_i, A_offd_j, A_offd_data,
-                      rowsums, scale, pos_diag_d, neg_diag_d);
+   HYPRE_CUDA_LAUNCH(hypreCUDAKernel_CSRMaxEigEstimate,
+                     gDim,
+                     bDim,
+                     A_num_rows,
+                     A_diag_i,
+                     A_diag_j,
+                     A_diag_data,
+                     A_offd_i,
+                     A_offd_j,
+                     A_offd_data,
+                     rowsums,
+                     scale,
+                     pos_diag_d,
+                     neg_diag_d);
 
    hypre_SyncCudaComputeStream(hypre_handle());
    hypre_TMemcpy(&pos_diag, pos_diag_d, HYPRE_Int, 1, HYPRE_MEMORY_HOST, hypre_ParCSRMatrixMemoryLocation(A));
    hypre_TMemcpy(&neg_diag, neg_diag_d, HYPRE_Int, 1, HYPRE_MEMORY_HOST, hypre_ParCSRMatrixMemoryLocation(A));
 
-
-
    hypre_SyncCudaComputeStream(hypre_handle());
-   //Max over rows
-   //Probably can do this without the extra memory/pass
-   max_norm = HYPRE_THRUST_CALL(reduce,
-         rowsums,
-         rowsums + A_num_rows,
-         (HYPRE_Real) 0,
-         thrust::maximum<HYPRE_Real>());
-
+   // Max over rows
+   // Probably can do this without the extra memory/pass
+   max_norm = HYPRE_THRUST_CALL(reduce, rowsums, rowsums + A_num_rows, (HYPRE_Real)0, thrust::maximum<HYPRE_Real>());
 
    /* get max across procs */
    hypre_MPI_Allreduce(&max_norm, &temp, 1, HYPRE_MPI_REAL, hypre_MPI_MAX, hypre_ParCSRMatrixComm(A));
    max_norm = temp;
 
    /* from Charles */
-   if ( pos_diag == 0 && neg_diag > 0 ) max_norm = - max_norm;
+   if (pos_diag == 0 && neg_diag > 0) max_norm = -max_norm;
 
    /* eig estimates */
    e_max = max_norm;
@@ -235,13 +228,12 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix* A,
    /* return */
    *max_eig = e_max;
 
-   hypre_TFree(rowsums,    hypre_ParCSRMatrixMemoryLocation(A));
+   hypre_TFree(rowsums, hypre_ParCSRMatrixMemoryLocation(A));
    hypre_TFree(pos_diag_d, hypre_ParCSRMatrixMemoryLocation(A));
    hypre_TFree(neg_diag_d, hypre_ParCSRMatrixMemoryLocation(A));
 
    return hypre_error_flag;
 }
-
 
 /**
  *  @brief Uses CG to get the eigenvalue estimate on the device
@@ -253,16 +245,16 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix* A,
  *  @param[out] min_eig Estimated min eigenvalue
  */
 HYPRE_Int
-hypre_ParCSRMaxEigEstimateCGDevice( hypre_ParCSRMatrix *A,     /* matrix to relax with */
-                              HYPRE_Int           scale, /* scale by diagonal?*/
-                              HYPRE_Int           max_iter,
-                              HYPRE_Real         *max_eig,
-                              HYPRE_Real         *min_eig )
+hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax with */
+                                   HYPRE_Int           scale, /* scale by diagonal?*/
+                                   HYPRE_Int           max_iter,
+                                   HYPRE_Real         *max_eig,
+                                   HYPRE_Real         *min_eig)
 {
 #if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPushRange("ParCSRMaxEigEstimate_Setup");
 #endif
-   HYPRE_Int i, err;
+   HYPRE_Int        i, err;
    hypre_ParVector *p;
    hypre_ParVector *s;
    hypre_ParVector *r;
@@ -272,18 +264,18 @@ hypre_ParCSRMaxEigEstimateCGDevice( hypre_ParCSRMatrix *A,     /* matrix to rela
    HYPRE_Real *tridiag = NULL;
    HYPRE_Real *trioffd = NULL;
 
-   HYPRE_Real lambda_max ;
-   HYPRE_Real beta, gamma = 0.0, alpha, sdotp, gamma_old, alphainv;
-   HYPRE_Real lambda_min;
+   HYPRE_Real  lambda_max;
+   HYPRE_Real  beta, gamma = 0.0, alpha, sdotp, gamma_old, alphainv;
+   HYPRE_Real  lambda_min;
    HYPRE_Real *s_data, *p_data, *ds_data, *u_data;
-   HYPRE_Int local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+   HYPRE_Int   local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
 
    /* check the size of A - don't iterate more than the size */
    HYPRE_BigInt size = hypre_ParCSRMatrixGlobalNumRows(A);
 
-   if (size < (HYPRE_BigInt) max_iter)
+   if (size < (HYPRE_BigInt)max_iter)
    {
-      max_iter = (HYPRE_Int) size;
+      max_iter = (HYPRE_Int)size;
    }
 
 #if defined(HYPRE_USING_CUDA)
@@ -294,19 +286,19 @@ hypre_ParCSRMaxEigEstimateCGDevice( hypre_ParCSRMatrix *A,     /* matrix to rela
                              hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize_v2(r, hypre_ParCSRMatrixMemoryLocation(A));
-   hypre_ParVectorSetPartitioningOwner(r,0);
+   hypre_ParVectorSetPartitioningOwner(r, 0);
 
    p = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                              hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize_v2(p, hypre_ParCSRMatrixMemoryLocation(A));
-   hypre_ParVectorSetPartitioningOwner(p,0);
+   hypre_ParVectorSetPartitioningOwner(p, 0);
 
    s = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                              hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize_v2(s, hypre_ParCSRMatrixMemoryLocation(A));
-   hypre_ParVectorSetPartitioningOwner(s,0);
+   hypre_ParVectorSetPartitioningOwner(s, 0);
 
    /* DS Starts on host to be populated, then transferred to device */
    ds = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
@@ -314,13 +306,13 @@ hypre_ParCSRMaxEigEstimateCGDevice( hypre_ParCSRMatrix *A,     /* matrix to rela
                               hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize_v2(ds, hypre_ParCSRMatrixMemoryLocation(A));
    ds_data = hypre_VectorData(hypre_ParVectorLocalVector(ds));
-   hypre_ParVectorSetPartitioningOwner(ds,0);
+   hypre_ParVectorSetPartitioningOwner(ds, 0);
 
    u = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                              hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize_v2(u, hypre_ParCSRMatrixMemoryLocation(A));
-   hypre_ParVectorSetPartitioningOwner(u,0);
+   hypre_ParVectorSetPartitioningOwner(u, 0);
 
    /* point to local data */
    s_data = hypre_VectorData(hypre_ParVectorLocalVector(s));
@@ -340,8 +332,8 @@ hypre_ParCSRMaxEigEstimateCGDevice( hypre_ParCSRMatrix *A,     /* matrix to rela
 #endif
 
    /* make room for tri-diag matrix */
-   tridiag = hypre_CTAlloc(HYPRE_Real, max_iter+1, HYPRE_MEMORY_HOST);
-   trioffd = hypre_CTAlloc(HYPRE_Real, max_iter+1, HYPRE_MEMORY_HOST);
+   tridiag = hypre_CTAlloc(HYPRE_Real, max_iter + 1, HYPRE_MEMORY_HOST);
+   trioffd = hypre_CTAlloc(HYPRE_Real, max_iter + 1, HYPRE_MEMORY_HOST);
 #if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPopRange();
 #endif
@@ -349,7 +341,7 @@ hypre_ParCSRMaxEigEstimateCGDevice( hypre_ParCSRMatrix *A,     /* matrix to rela
 #if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPushRange("ParCSRMaxEigEstimate_Setup_CPUAlloc_Zeroing");
 #endif
-   for (i=0; i < max_iter + 1; i++)
+   for (i = 0; i < max_iter + 1; i++)
    {
       tridiag[i] = 0;
       trioffd[i] = 0;
@@ -363,7 +355,7 @@ hypre_ParCSRMaxEigEstimateCGDevice( hypre_ParCSRMatrix *A,     /* matrix to rela
 #endif
 
    /* set residual to random */
-   hypre_ParVectorSetRandomValues(r,1);
+   hypre_ParVectorSetRandomValues(r, 1);
 
 #if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPopRange();
@@ -373,13 +365,14 @@ hypre_ParCSRMaxEigEstimateCGDevice( hypre_ParCSRMatrix *A,     /* matrix to rela
    hypre_GpuProfilingPushRange("ParCSRMaxEigEstimate_Setup_CPUAlloc_Diag");
 #endif
 
-   if (scale) {
+   if (scale)
+   {
       hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(A), ds_data, 3);
    }
    else
    {
       /* set ds to 1 */
-      hypre_ParVectorSetConstantValues(ds,1.0);
+      hypre_ParVectorSetConstantValues(ds, 1.0);
    }
 
 #if defined(HYPRE_USING_CUDA)
@@ -397,7 +390,7 @@ hypre_ParCSRMaxEigEstimateCGDevice( hypre_ParCSRMatrix *A,     /* matrix to rela
 #endif
 
    /* gamma = <r,Cr> */
-   gamma = hypre_ParVectorInnerProd(r,p);
+   gamma = hypre_ParVectorInnerProd(r, p);
 
    /* for the initial filling of the tridiag matrix */
    beta = 1.0;
@@ -411,9 +404,9 @@ hypre_ParCSRMaxEigEstimateCGDevice( hypre_ParCSRMatrix *A,     /* matrix to rela
 
       /*gamma = <r,Cr> */
       gamma_old = gamma;
-      gamma = hypre_ParVectorInnerProd(r,s);
+      gamma     = hypre_ParVectorInnerProd(r, s);
 
-      if (i==0)
+      if (i == 0)
       {
          beta = 1.0;
          /* p_0 = C*r */
@@ -426,26 +419,25 @@ hypre_ParCSRMaxEigEstimateCGDevice( hypre_ParCSRMatrix *A,     /* matrix to rela
 
          /* p = s + beta p */
          HYPRE_THRUST_CALL(for_each,
-         thrust::make_zip_iterator(thrust::make_tuple(p_data, s_data)),
-         thrust::make_zip_iterator(thrust::make_tuple(p_data, s_data))+local_size,
-         xpay<HYPRE_Real>(beta));
-
+                           thrust::make_zip_iterator(thrust::make_tuple(p_data, s_data)),
+                           thrust::make_zip_iterator(thrust::make_tuple(p_data, s_data)) + local_size,
+                           xpay<HYPRE_Real>(beta));
       }
 
       if (scale)
       {
          /* s = D^{-1/2}A*D^{-1/2}*p */
          HYPRE_THRUST_CALL(for_each,
-         thrust::make_zip_iterator(thrust::make_tuple(u_data, ds_data, p_data)),
-         thrust::make_zip_iterator(thrust::make_tuple(u_data , ds_data, p_data ))+local_size,
-         oop_xy<HYPRE_Real>());
+                           thrust::make_zip_iterator(thrust::make_tuple(u_data, ds_data, p_data)),
+                           thrust::make_zip_iterator(thrust::make_tuple(u_data, ds_data, p_data)) + local_size,
+                           oop_xy<HYPRE_Real>());
 
          hypre_ParCSRMatrixMatvec(1.0, A, u, 0.0, s);
 
          HYPRE_THRUST_CALL(for_each,
-         thrust::make_zip_iterator(thrust::make_tuple(s_data, ds_data)),
-         thrust::make_zip_iterator(thrust::make_tuple(s_data , ds_data))+local_size,
-         xy<HYPRE_Real>());
+                           thrust::make_zip_iterator(thrust::make_tuple(s_data, ds_data)),
+                           thrust::make_zip_iterator(thrust::make_tuple(s_data, ds_data)) + local_size,
+                           xy<HYPRE_Real>());
       }
       else
       {
@@ -454,33 +446,33 @@ hypre_ParCSRMaxEigEstimateCGDevice( hypre_ParCSRMatrix *A,     /* matrix to rela
       }
 
       /* <s,p> */
-      sdotp =  hypre_ParVectorInnerProd(s,p);
+      sdotp = hypre_ParVectorInnerProd(s, p);
 
       /* alpha = gamma / <s,p> */
-      alpha = gamma/sdotp;
+      alpha = gamma / sdotp;
 
       /* get tridiagonal matrix */
-      alphainv = 1.0/alpha;
+      alphainv = 1.0 / alpha;
 
-      tridiag[i+1] = alphainv;
+      tridiag[i + 1] = alphainv;
       tridiag[i] *= beta;
       tridiag[i] += alphainv;
 
-      trioffd[i+1] = alphainv;
+      trioffd[i + 1] = alphainv;
       trioffd[i] *= sqrt(beta);
 
       /* x = x + alpha*p */
       /* don't need */
 
       /* r = r - alpha*s */
-      hypre_ParVectorAxpy( -alpha, s, r);
+      hypre_ParVectorAxpy(-alpha, s, r);
 
       i++;
    }
 
    /* GPU NOTE:
     * There is a CUDA whitepaper on calculating the eigenvalues of a symmetric
-    * tridiagonal matrix via bisection 
+    * tridiagonal matrix via bisection
     * https://docs.nvidia.com/cuda/samples/6_Advanced/eigenvalues/doc/eigenvalues.pdf
     * As well as code in their sample code
     * https://docs.nvidia.com/cuda/cuda-samples/index.html#eigenvalues
@@ -488,7 +480,7 @@ hypre_ParCSRMaxEigEstimateCGDevice( hypre_ParCSRMatrix *A,     /* matrix to rela
     * https://developer.nvidia.com/cuda-code-samples
     * I believe the applicable license is available at
     * https://docs.nvidia.com/cuda/eula/index.html#license-driver
-    * but I am not certain, nor do I have the legal knowledge to know if the 
+    * but I am not certain, nor do I have the legal knowledge to know if the
     * license is compatible with that which HYPRE is released under.
     */
 #if defined(HYPRE_USING_CUDA)
@@ -499,9 +491,9 @@ hypre_ParCSRMaxEigEstimateCGDevice( hypre_ParCSRMatrix *A,     /* matrix to rela
 #endif
 
    /* eispack routine - eigenvalues return in tridiag and ordered*/
-   hypre_LINPACKcgtql1(&i,tridiag,trioffd,&err);
+   hypre_LINPACKcgtql1(&i, tridiag, trioffd, &err);
 
-   lambda_max = tridiag[i-1];
+   lambda_max = tridiag[i - 1];
    lambda_min = tridiag[0];
 #if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPopRange();
