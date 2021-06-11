@@ -105,7 +105,7 @@ main( hypre_int argc,
   HYPRE_Real    tol = 1e-6;
   HYPRE_Real    atol = 1e-14;
   HYPRE_Real    pc_tol = 0.0;
-  HYPRE_Int     max_iter = 400;
+  HYPRE_Int     max_iter = 1;
 
   /* mgr options */
   HYPRE_Int mgr_bsize = 3;
@@ -690,94 +690,6 @@ main( hypre_int argc,
     }
 #endif
   }
-  else if (solver_id == 99)
-  {
-    HYPRE_MGRCreate(&pcg_precond);
-
-    /* set MGR data by block */
-    if (use_point_marker_array)
-    {
-      HYPRE_MGRSetCpointsByPointMarkerArray( pcg_precond, mgr_bsize, mgr_nlevels, mgr_num_cindexes, mgr_cindexes, mgr_point_marker_array);
-    }
-    else
-    {
-      HYPRE_MGRSetCpointsByBlock( pcg_precond, mgr_bsize, mgr_nlevels, mgr_num_cindexes, mgr_cindexes);
-    }
-    /* set reserved coarse nodes */
-    if(mgr_num_reserved_nodes)HYPRE_MGRSetReservedCoarseNodes(pcg_precond, mgr_num_reserved_nodes, mgr_reserved_coarse_indexes);
-
-    /* set intermediate coarse grid strategy */
-    HYPRE_MGRSetNonCpointsToFpoints(pcg_precond, mgr_non_c_to_f);
-    /* set F relaxation strategy */
-    HYPRE_MGRSetFRelaxMethod(pcg_precond, mgr_frelax_method);
-    //HYPRE_MGRSetLevelFRelaxNumFunctions(pcg_precond, mgr_frelax_num_functions);
-    /* set relax type for single level F-relaxation and post-relaxation */
-    HYPRE_MGRSetRelaxType(pcg_precond, mgr_relax_type);
-    HYPRE_MGRSetNumRelaxSweeps(pcg_precond, mgr_num_relax_sweeps);
-    /* set interpolation type */
-    HYPRE_MGRSetInterpType(pcg_precond, mgr_interp_type);
-    HYPRE_MGRSetNumInterpSweeps(pcg_precond, mgr_num_interp_sweeps);
-    /* set restriction type */
-    HYPRE_MGRSetRestrictType(pcg_precond, mgr_restrict_type);
-    HYPRE_MGRSetNumRestrictSweeps(pcg_precond, mgr_num_restrict_sweeps);
-    /* set coarse grid method */
-    HYPRE_MGRSetCoarseGridMethod(pcg_precond, mgr_coarse_grid_method);
-    /* set print level */
-    HYPRE_MGRSetPrintLevel(pcg_precond, 1);
-    /* set max iterations */
-    HYPRE_MGRSetMaxIter(pcg_precond, 1);
-    HYPRE_MGRSetTol(pcg_precond, pc_tol);
-    HYPRE_MGRSetTruncateCoarseGridThreshold(pcg_precond, 1e-14);
-
-    HYPRE_MGRSetGlobalsmoothType(pcg_precond, mgr_gsmooth_type);
-    HYPRE_MGRSetMaxGlobalsmoothIters( pcg_precond, mgr_num_gsmooth_sweeps );
-    //hypre_MGRPrintCoarseSystem( pcg_precond, 1 );
-
-    /*
-    HYPRE_BoomerAMGCreate(&amg_solver);
-    HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
-    //HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
-    HYPRE_BoomerAMGSetCoarsenType(amg_solver, 8);
-    //HYPRE_BoomerAMGSetInterpType(amg_solver, 6);
-    HYPRE_BoomerAMGSetNumFunctions(amg_solver, 1);
-    HYPRE_BoomerAMGSetRelaxType(amg_solver, 18);
-    HYPRE_BoomerAMGSetNumSweeps(amg_solver, 2);
-    HYPRE_BoomerAMGSetMaxIter(amg_solver, 1);
-    HYPRE_BoomerAMGSetTol(amg_solver, 0.0);
-    HYPRE_BoomerAMGSetMaxRowSum(amg_solver, 1.0);
-    */
-
-    /* set the MGR coarse solver. Comment out to use default CG solver in MGR */
-    //HYPRE_MGRSetCoarseSolver( pcg_precond, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, amg_solver);
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-    cudaDeviceSynchronize();
-#endif
-
-    HYPRE_MGRSetup(pcg_precond, parcsr_A, b, x);
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-    cudaDeviceSynchronize();
-#endif
-
-#if SECOND_TIME
-    HYPRE_MGRSetup(pcg_precond, parcsr_A, b, x);
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-    cudaDeviceSynchronize();
-#endif
-
-#endif
-    
-    //if (amg_solver) HYPRE_BoomerAMGDestroy(amg_solver);
-    if (pcg_precond) HYPRE_MGRDestroy(pcg_precond);
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-    cudaDeviceSynchronize();
-#endif
-   }
-
-  //return 0;
 
   /*-----------------------------------------------------------
    * Finalize things
@@ -804,7 +716,7 @@ main( hypre_int argc,
   hypre_MPI_Finalize();
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-  //cudaDeviceReset();
+  cudaDeviceReset();
 #endif
 
   return (0);

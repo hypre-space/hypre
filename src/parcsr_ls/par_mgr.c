@@ -5130,18 +5130,6 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
   return(0);
 }
 
-#if defined(HYPRE_USING_CUDA)
-HYPRE_Int
-hypre_MGRBuildAffDevice( hypre_ParCSRMatrix *A,
-                    HYPRE_Int *CF_marker_host,
-                    HYPRE_BigInt *num_cpts_global,
-                    hypre_ParCSRMatrix **A_ff_ptr)
-{
-  hypre_ParCSRMatrixGenerateFFFCDevice(A, CF_marker_host, num_cpts_global, NULL, NULL, A_ff_ptr);
-  return hypre_error_flag;
-}
-#endif
-
 /* Build A_FF matrix from A given a CF_marker array */
 HYPRE_Int
 hypre_MGRBuildAff( hypre_ParCSRMatrix   *A,

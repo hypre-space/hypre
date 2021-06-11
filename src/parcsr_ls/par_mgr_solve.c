@@ -660,9 +660,6 @@ hypre_MGRCycle( void               *mgr_vdata,
          // DEBUG: print the coarse system indicated by mgr_data ->print_coarse_system
          if(mgr_data -> print_coarse_system)
          {
-            //HYPRE_ParCSRMatrixPrint(RAP, "RAP_mat");
-            //HYPRE_ParVectorPrint(F_array[level], "RAP_rhs");
-            //HYPRE_ParVectorPrint(U_array[level], "RAP_sol");
             hypre_ParCSRMatrixPrintIJ(RAP, 1, 1, "RAP_mat");
             hypre_ParVectorPrintIJ(F_array[level], 1, "RAP_rhs");
             hypre_ParVectorPrintIJ(U_array[level], 1, "RAP_sol");
@@ -740,7 +737,7 @@ hypre_MGRCycle( void               *mgr_vdata,
             /* v-cycle smoother for A_ff */
             //HYPRE_Real convergence_factor_frelax;
             // compute residual before solve
-            //  hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A_array[level],
+            // hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A_array[level],
             //                                    U_array[level], 1.0, F_array[level], Vtemp);
             //  convergence_factor_frelax = hypre_ParVectorInnerProd(Vtemp, Vtemp);
 
