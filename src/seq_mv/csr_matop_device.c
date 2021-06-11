@@ -1090,15 +1090,12 @@ hypre_CSRMatrixIdentityDevice(HYPRE_Int n, HYPRE_Complex alp)
    return A;
 }
 
-/* abs    == 1, use absolute values
- * option == 0, drop all the entries that are smaller than tol
- * TODO more options
- */
+/* drop the entries that are smaller than
+ * type 0: tol, type 1: tol[row_i] */
 HYPRE_Int
 hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
                                        HYPRE_Complex    tol,
-                                       HYPRE_Int        abs,
-                                       HYPRE_Int        option)
+                                       HYPRE_Complex   *row_tol)
 {
    HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
    HYPRE_Int      nnz    = hypre_CSRMatrixNumNonzeros(A);
@@ -1111,16 +1108,17 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
    HYPRE_Int     *new_j;
    HYPRE_Complex *new_data;
 
-   if (abs == 0)
+   if (row_tol != NULL)
    {
-      if (option == 0)
-      {
-         new_nnz = HYPRE_THRUST_CALL( count_if,
-                                      A_data,
-                                      A_data + nnz,
-                                      thrust::not1(less_than<HYPRE_Complex>(tol)) );
+      // WM: TODO
+   }
+   else
+   {
+      new_nnz = HYPRE_THRUST_CALL( count_if,
+                                   A_data,
+                                   A_data + nnz,
+                                   thrust::not1(less_than<HYPRE_Complex>(tol)) );
 
-      }
    }
 
    if (new_nnz == nnz)
@@ -1139,17 +1137,18 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
 
    thrust::zip_iterator< thrust::tuple<HYPRE_Int*, HYPRE_Int*, HYPRE_Complex*> > new_end;
 
-   if (abs == 0)
+   if (row_tol != NULL)
    {
-      if (option == 0)
-      {
-         new_end = HYPRE_THRUST_CALL( copy_if,
-                                      thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)),
-                                      thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)) + nnz,
-                                      A_data,
-                                      thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j, new_data)),
-                                      thrust::not1(less_than<HYPRE_Complex>(tol)) );
-      }
+      // WM: TODO
+   }
+   else
+   {
+      new_end = HYPRE_THRUST_CALL( copy_if,
+                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)),
+                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)) + nnz,
+                                   A_data,
+                                   thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j, new_data)),
+                                   thrust::not1(less_than<HYPRE_Complex>(tol)) );
    }
 
    hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == new_ii + new_nnz );

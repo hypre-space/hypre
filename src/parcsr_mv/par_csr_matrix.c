@@ -2286,7 +2286,7 @@ hypre_ParCSRMatrix * hypre_ParCSRMatrixUnion( hypre_ParCSRMatrix * A,
 /* drop the entries that are not on the diagonal and smaller than
  * its row norm: type 1: 1-norm, 2: 2-norm, -1: infinity norm */
 HYPRE_Int
-hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A,
+hypre_ParCSRMatrixDropSmallEntriesHost( hypre_ParCSRMatrix *A,
                                     HYPRE_Real tol,
                                     HYPRE_Int type)
 {
@@ -2435,6 +2435,25 @@ hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A,
    hypre_TFree(marker_offd, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A,
+                                    HYPRE_Real tol,
+                                    HYPRE_Int type)
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      return hypre_ParCSRMatrixDropSmallEntriesDevice(A, tol, type);
+   }
+   else
+#endif
+   {
+      return hypre_ParCSRMatrixDropSmallEntriesHost(A, tol, type);
+   }
 }
 
 /* Perform dual truncation of ParCSR matrix.

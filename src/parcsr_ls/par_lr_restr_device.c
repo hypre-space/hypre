@@ -174,7 +174,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
       hypre_ParCSRMatrixDestroy(X);
    }
    X = Z;
-   Z = hypre_ParCSRMatMat(Z, Dinv);
+   Z = hypre_ParCSRMatMat(X, Dinv);
    hypre_ParCSRMatrixDestroy(X);
    hypre_ParCSRMatrixDestroy(Dinv);
    hypre_ParCSRMatrixDestroy(AFF);
@@ -191,36 +191,44 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    HYPRE_Int       *Z_diag_j = hypre_CSRMatrixJ(Z_diag);
    HYPRE_Int        num_cols_offd_Z = hypre_CSRMatrixNumCols(Z_offd);
    HYPRE_Int        nnz_diag_Z = hypre_CSRMatrixNumNonzeros(Z_diag);
+   HYPRE_BigInt    *Fmap_offd_global = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_Z, HYPRE_MEMORY_DEVICE);
 
    /* send and recv Fmap (wrt Z): global */
-   hypre_ParCSRCommPkg *comm_pkg_Z = hypre_ParCSRMatrixCommPkg(Z);
-   HYPRE_Int num_sends_Z = hypre_ParCSRCommPkgNumSends(comm_pkg_Z);
-   HYPRE_Int num_elems_send_Z = hypre_ParCSRCommPkgSendMapStart(comm_pkg_Z, num_sends_Z);
-   HYPRE_BigInt *Fmap_offd_global = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_Z, HYPRE_MEMORY_DEVICE);
-   send_buf_i = hypre_TAlloc(HYPRE_BigInt, num_elems_send_Z, HYPRE_MEMORY_DEVICE);
+   if (num_procs > 1)
+   {
+      hypre_MatvecCommPkgCreate(Z);
+      // !!! Debug
+      printf("Created commpkg\n");
+      hypre_ParCSRCommPkg *comm_pkg_Z = hypre_ParCSRMatrixCommPkg(Z);
+      HYPRE_Int num_sends_Z = hypre_ParCSRCommPkgNumSends(comm_pkg_Z);
+      HYPRE_Int num_elems_send_Z = hypre_ParCSRCommPkgSendMapStart(comm_pkg_Z, num_sends_Z);
+      send_buf_i = hypre_TAlloc(HYPRE_BigInt, num_elems_send_Z, HYPRE_MEMORY_DEVICE);
 
-   /* WM: TODO: pack on the device. Does commPkg info live on the device? That is, send map elmts used below? */
-   HYPRE_THRUST_CALL( gather,
-                        hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg_Z),
-                        hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg_Z) +
-                        hypre_ParCSRCommPkgSendMapStart(comm_pkg_Z, num_sends_Z),
-                        Fmap,
-                        send_buf_i );
-   HYPRE_THRUST_CALL( transform,
-                        send_buf_i,
-                        send_buf_i + num_elems_send_Z,
-                        thrust::make_constant_iterator(col_start),
-                        send_buf_i,
-                        thrust::plus<HYPRE_Int>() );
-   /* WM: is this the preferred way to do MPI comm between GPUs? */
-   comm_handle = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg_Z, HYPRE_MEMORY_DEVICE, send_buf_i, HYPRE_MEMORY_DEVICE, Fmap_offd_global);
-   hypre_ParCSRCommHandleDestroy(comm_handle);
-   hypre_TFree(send_buf_i, HYPRE_MEMORY_DEVICE);
+      /* WM: TODO: pack on the device. Does commPkg info live on the device? That is, send map elmts used below? */
+      HYPRE_THRUST_CALL( gather,
+                           hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg_Z),
+                           hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg_Z) +
+                           hypre_ParCSRCommPkgSendMapStart(comm_pkg_Z, num_sends_Z),
+                           Fmap,
+                           send_buf_i );
+      HYPRE_THRUST_CALL( transform,
+                           send_buf_i,
+                           send_buf_i + num_elems_send_Z,
+                           thrust::make_constant_iterator(col_start),
+                           send_buf_i,
+                           thrust::plus<HYPRE_Int>() );
+      /* WM: is this the preferred way to do MPI comm between GPUs? */
+      comm_handle = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg_Z, HYPRE_MEMORY_DEVICE, send_buf_i, HYPRE_MEMORY_DEVICE, Fmap_offd_global);
+      hypre_ParCSRCommHandleDestroy(comm_handle);
+      // !!! Debug
+      printf("Did comm handle\n");
+      hypre_TFree(send_buf_i, HYPRE_MEMORY_DEVICE);
+   }
 
-   nnz_diag = nnz_diag_Z + n_cpts;
-   nnz_offd = hypre_CSRMatrixNumNonzeros(Z_offd);
 
    /* Assemble R = [Z I] */
+   nnz_diag = nnz_diag_Z + n_cpts;
+   nnz_offd = hypre_CSRMatrixNumNonzeros(Z_offd);
 
    /* allocate arrays for R diag */
    R_diag_i = hypre_CTAlloc(HYPRE_Int,  n_cpts+1, HYPRE_MEMORY_DEVICE);
@@ -316,7 +324,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    /* Filter small entries from R */
    if (filter_thresholdR > 0)
    {
-      hypre_ParCSRMatrixDropSmallEntries(R, filter_thresholdR, -1); /* -1 = infinity norm, not implented on the device */
+      /* hypre_ParCSRMatrixDropSmallEntries(R, filter_thresholdR, -1); /1* -1 = infinity norm, not implented on the device *1/ */
       // WM: TODO: implement infinity norm filtering on device
       /* hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A, HYPRE_Complex tol, HYPRE_Int abs, HYPRE_Int option ); */
    }
