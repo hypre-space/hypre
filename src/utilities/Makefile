@@ -29,7 +29,8 @@ HEADERS =\
  mpistubs.h\
  threading.h\
  timing.h\
- _hypre_utilities.h
+ _hypre_utilities.h\
+ _hypre_utilities.hpp
 
 FILES =\
  F90_HYPRE_error.c\

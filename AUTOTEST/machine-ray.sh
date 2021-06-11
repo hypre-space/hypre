@@ -11,7 +11,7 @@ case $1 in
    -h|-help)
       cat <<EOF
 
-   **** Only run this script on the lassen/ray cluster ****
+   **** Only run this script on the ray cluster ****
 
    $0 [-h|-help] {src_dir}
 
@@ -52,6 +52,12 @@ ro="-ij-gpu -ams -struct -sstruct -rt -mpibind -save ${save}"
 eo="-gpu -rt -mpibind -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
 ./renametest.sh basic $output_dir/basic-cuda-um
+
+#CUDA with UM and mixed-int
+co="--with-cuda --enable-unified-memory --enable-mixedint --enable-debug --with-gpu-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
+ro="-ij-mixed -ams -struct -sstruct-mixed -rt -mpibind -save ${save}"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./renametest.sh basic $output_dir/basic-cuda-um-mixedint
 
 # CUDA with UM with shared library [no run]
 co="--with-cuda --enable-unified-memory --with-openmp --enable-hopscotch --enable-shared --with-gpu-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
