@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 
-/* hypre_printf.c */
+/* printf.c */
 // #ifdef HYPRE_BIGINT
 HYPRE_Int hypre_ndigits( HYPRE_BigInt number );
 HYPRE_Int hypre_printf( const char *format , ... );
