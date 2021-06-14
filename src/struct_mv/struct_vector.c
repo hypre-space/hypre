@@ -274,7 +274,7 @@ hypre_StructVectorSetValues( hypre_StructVector *vector,
          {
             if (action > 0)
             {
-#define DEVICE_VAR is_device_ptr(matp,values)
+#define DEVICE_VAR is_device_ptr(vecp,values)
                hypre_LoopBegin(1, k)
                {
                   *vecp += *values;
@@ -489,7 +489,21 @@ hypre_StructVectorClearValues( hypre_StructVector *vector,
       if (hypre_IndexInBox(grid_index, grid_box))
       {
          vecp = hypre_StructVectorBoxDataValue(vector, i, grid_index);
-         *vecp = 0.0;
+
+         if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+         {
+#define DEVICE_VAR is_device_ptr(vecp)
+            hypre_LoopBegin(1, k)
+            {
+               *vecp = 0.0;
+            }
+            hypre_LoopEnd()
+#undef DEVICE_VAR
+         }
+         else
+         {
+            *vecp = 0.0;
+         }
       }
    }
 
