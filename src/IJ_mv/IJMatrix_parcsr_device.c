@@ -178,6 +178,18 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
       hypre_TMemcpy(stack_data + stack_elmts_current, values, HYPRE_Complex, nelms, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    }
 
+#if HYPRE_DEBUG
+   HYPRE_BigInt row0 = hypre_IJMatrixGlobalFirstRow(matrix);
+   HYPRE_BigInt row1 = row0 + hypre_IJMatrixGlobalNumRows(matrix) - 1;
+   HYPRE_BigInt col0 = hypre_IJMatrixGlobalFirstCol(matrix);
+   HYPRE_BigInt col1 = col0 + hypre_IJMatrixGlobalNumCols(matrix) - 1;
+   bool test1 = HYPRE_THRUST_CALL(all_of, stack_i + stack_elmts_current, stack_i + stack_elmts_current + nelms, in_range<HYPRE_BigInt>(row0, row1));
+   hypre_assert(test1);
+   bool test2 = HYPRE_THRUST_CALL(all_of, stack_j + stack_elmts_current, stack_j + stack_elmts_current + nelms, in_range<HYPRE_BigInt>(col0, col1));
+   hypre_assert(test2);
+   hypre_assert(row0 == 0 && col0 == 0);
+#endif
+
    hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix) += nelms;
 
    hypre_TFree(row_ptr, HYPRE_MEMORY_DEVICE);
@@ -303,7 +315,7 @@ hypre_IJMatrixAssembleSortAndReduce2(HYPRE_Int  N0, HYPRE_Int  *I0, HYPRE_Int  *
 
 HYPRE_Int
 hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_BigInt  *J0,  char *X0, HYPRE_Complex  *A0,
-                                     HYPRE_Int *N1, HYPRE_BigInt **I1, HYPRE_BigInt **J1,            HYPRE_Complex **A1)
+                                     HYPRE_Int *N1)
 {
    hypreDevice_StableSortTupleByTupleKey(N0, I0, J0, X0, A0, 0);
 
@@ -332,11 +344,25 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
          A,                                                               /* values_output */
          thrust::equal_to< thrust::tuple<HYPRE_Int, HYPRE_Int> >()        /* binary_pred */);
 
+   HYPRE_Int Nt = new_end.second - A;
 
-   *N1 = new_end.second - A;
-   *I1 = I;
-   *J1 = J;
-   *A1 = A;
+   hypre_assert(Nt <= N0);
+
+   /* remove numrical zeros */
+   auto new_end2 = HYPRE_THRUST_CALL( copy_if,
+                                      thrust::make_zip_iterator(thrust::make_tuple(I,    J,    A)),
+                                      thrust::make_zip_iterator(thrust::make_tuple(I+Nt, J+Nt, A+Nt)),
+                                      A,
+                                      thrust::make_zip_iterator(thrust::make_tuple(I0, J0, A0)),
+                                      thrust::identity<HYPRE_Complex>() );
+
+   *N1 = thrust::get<0>(new_end2.get_iterator_tuple()) - I0;
+
+   hypre_assert(*N1 <= Nt);
+
+   hypre_TFree(I, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(J, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(A, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
 }
@@ -413,19 +439,19 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
    /* communicate for aux off-proc and add to remote aux on-proc */
    if (nelms_off_max)
    {
-      HYPRE_Int      new_nnz  = 0;
-      HYPRE_BigInt  *new_i    = NULL;
-      HYPRE_BigInt  *new_j    = NULL;
-      HYPRE_Complex *new_data = NULL;
+      HYPRE_Int      new_nnz       = 0;
+      HYPRE_BigInt  *off_proc_i    = NULL;
+      HYPRE_BigInt  *off_proc_j    = NULL;
+      HYPRE_Complex *off_proc_data = NULL;
 
       if (nelms_off)
       {
          /* copy off-proc entries out of stack and remove from stack */
-         HYPRE_BigInt  *off_proc_i    = hypre_TAlloc(HYPRE_BigInt,  nelms_off, HYPRE_MEMORY_DEVICE);
-         HYPRE_BigInt  *off_proc_j    = hypre_TAlloc(HYPRE_BigInt,  nelms_off, HYPRE_MEMORY_DEVICE);
-         HYPRE_Complex *off_proc_data = hypre_TAlloc(HYPRE_Complex, nelms_off, HYPRE_MEMORY_DEVICE);
-         char          *off_proc_sora = hypre_TAlloc(char,          nelms_off, HYPRE_MEMORY_DEVICE);
-         char          *is_on_proc    = hypre_TAlloc(char,          nelms,     HYPRE_MEMORY_DEVICE);
+         off_proc_i          = hypre_TAlloc(HYPRE_BigInt,  nelms_off, HYPRE_MEMORY_DEVICE);
+         off_proc_j          = hypre_TAlloc(HYPRE_BigInt,  nelms_off, HYPRE_MEMORY_DEVICE);
+         off_proc_data       = hypre_TAlloc(HYPRE_Complex, nelms_off, HYPRE_MEMORY_DEVICE);
+         char *off_proc_sora = hypre_TAlloc(char,          nelms_off, HYPRE_MEMORY_DEVICE);
+         char *is_on_proc    = hypre_TAlloc(char,          nelms,     HYPRE_MEMORY_DEVICE);
 
          HYPRE_THRUST_CALL(transform, stack_i, stack_i + nelms, is_on_proc, pred);
 
@@ -454,21 +480,18 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
          hypre_TFree(is_on_proc, HYPRE_MEMORY_DEVICE);
 
          /* sort and reduce */
-         hypre_IJMatrixAssembleSortAndReduce3(nelms_off, off_proc_i, off_proc_j, off_proc_sora, off_proc_data, &new_nnz, &new_i, &new_j, &new_data);
+         hypre_IJMatrixAssembleSortAndReduce3(nelms_off, off_proc_i, off_proc_j, off_proc_sora, off_proc_data, &new_nnz);
          // new_nnz = hypre_IJMatrixAssembleSortAndRemove(nelms_off, off_proc_i, off_proc_j, off_proc_sora, off_proc_data);
 
-         hypre_TFree(off_proc_i,    HYPRE_MEMORY_DEVICE);
-         hypre_TFree(off_proc_j,    HYPRE_MEMORY_DEVICE);
-         hypre_TFree(off_proc_data, HYPRE_MEMORY_DEVICE);
          hypre_TFree(off_proc_sora, HYPRE_MEMORY_DEVICE);
       }
 
       /* send new_i/j/data to remote processes and the receivers call addtovalues */
-      hypre_IJMatrixAssembleOffProcValsParCSR(matrix, -1, -1, new_nnz, HYPRE_MEMORY_DEVICE, new_i, new_j, new_data);
+      hypre_IJMatrixAssembleOffProcValsParCSR(matrix, -1, -1, new_nnz, HYPRE_MEMORY_DEVICE, off_proc_i, off_proc_j, off_proc_data);
 
-      hypre_TFree(new_i,       HYPRE_MEMORY_DEVICE);
-      hypre_TFree(new_j,       HYPRE_MEMORY_DEVICE);
-      hypre_TFree(new_data,    HYPRE_MEMORY_DEVICE);
+      hypre_TFree(off_proc_i,    HYPRE_MEMORY_DEVICE);
+      hypre_TFree(off_proc_j,    HYPRE_MEMORY_DEVICE);
+      hypre_TFree(off_proc_data, HYPRE_MEMORY_DEVICE);
    }
 
    /* Note: the stack might have been changed in hypre_IJMatrixAssembleOffProcValsParCSR,
