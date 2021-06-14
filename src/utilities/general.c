@@ -26,7 +26,7 @@ hypre_memory_tracker()
 
 /* global variable _hypre_handle:
  * Outside this file, do NOT access it directly,
- * but use hypre_handle() instead (see hypre_handle.h) */
+ * but use hypre_handle() instead (see handle.h) */
 hypre_Handle *_hypre_handle = NULL;
 
 /* accessor to the global ``_hypre_handle'' */

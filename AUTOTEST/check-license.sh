@@ -79,7 +79,7 @@ cat > check-license.remove <<EOF
 ./src/docs/usr-manual/conf.py
 ./src/docs/usr-manual/zREADME
 ./src/examples/vis.c
-./src/utilities/hypre_cub_allocator.h
+./src/utilities/cub_allocator.h
 ./src/lapack/COPYING
 ./src/nopoe
 ./src/tarch

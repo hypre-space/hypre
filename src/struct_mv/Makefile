@@ -17,6 +17,7 @@ C_COMPILE_FLAGS = \
 HEADERS =\
  HYPRE_struct_mv.h\
  _hypre_struct_mv.h\
+ _hypre_struct_mv.hpp\
  assumed_part.h\
  box.h\
  box_manager.h\
@@ -81,7 +82,7 @@ install: libHYPRE_struct_mv${HYPRE_LIB_SUFFIX}
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o* libHYPRE*
+	rm -f *.o *.obj libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean

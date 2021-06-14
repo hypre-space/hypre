@@ -43,7 +43,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    HYPRE_Real              *A_offd_data     = hypre_CSRMatrixData(A_offd);
    HYPRE_Int               *A_diag_j        = hypre_CSRMatrixJ(A_diag);
    HYPRE_Int               *A_offd_j        = hypre_CSRMatrixJ(A_offd);
-   HYPRE_Int               *row_starts      = hypre_ParCSRMatrixRowStarts(A);
+   HYPRE_BigInt            *row_starts      = hypre_ParCSRMatrixRowStarts(A);
    HYPRE_Int                num_variables   = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_Int                global_num_vars = hypre_ParCSRMatrixGlobalNumRows(A);
    HYPRE_Int                num_nonzeros_diag;
@@ -178,9 +178,9 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 
    hypre_ParCSRMatrixCommPkg(S) = NULL;
 
-   hypre_ParCSRMatrixColMapOffd(S) = hypre_TAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_HOST);
+   hypre_ParCSRMatrixColMapOffd(S) = hypre_TAlloc(HYPRE_BigInt, num_cols_offd, HYPRE_MEMORY_HOST);
    hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(S), hypre_ParCSRMatrixColMapOffd(A),
-                 HYPRE_Int, num_cols_offd, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                 HYPRE_BigInt, num_cols_offd, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
    hypre_ParCSRMatrixSocDiagJ(S) = S_temp_diag_j;
    hypre_ParCSRMatrixSocOffdJ(S) = S_temp_offd_j;

@@ -17,8 +17,6 @@
 
 #include <HYPRE_config.h>
 
-#include "hypre_general.h"
-
 #include "_hypre_utilities.h"
 #include "HYPRE.h"
 
