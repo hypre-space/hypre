@@ -1708,6 +1708,9 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
+   // !!! Debug
+   printf("In hypre_BoomerAMGBuildRestrNeumannAIRHost()\n");
+
    /*-------------- global number of C points and my start position */
    /*my_first_cpt = num_cpts_global[0];*/
    if (my_id == (num_procs -1))
@@ -1715,6 +1718,9 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
       total_global_cpts = num_cpts_global[1];
    }
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
+
+   // !!! Debug
+   printf("done with broadcast\n");
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -1780,6 +1786,8 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrix *AFF, *ACF, *X, *X2, *Z, *Z2;
    hypre_ParCSRMatrixExtractSubmatrixFC(A, CF_marker, num_cpts_global, "FF", &AFF, strong_thresholdR);
    hypre_ParCSRMatrixExtractSubmatrixFC(A, CF_marker, num_cpts_global, "CF", &ACF, strong_thresholdR);
+   // !!! Debug
+   printf("Done with matrix extraction\n");
 
    /* A_FF := I - D^{-1}*A_FF */
    hypre_CSRMatrix *AFF_diag = hypre_ParCSRMatrixDiag(AFF);
@@ -1793,6 +1801,9 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    HYPRE_Int        n_fpts = hypre_CSRMatrixNumRows(AFF_diag);
    HYPRE_Int        n_cpts = n_fine - n_fpts;
    hypre_assert(n_cpts == hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(ACF)));
+   // !!! Debug
+   printf("n_fpts = %d\n", n_fpts);
+
    HYPRE_Int       *Fmap = hypre_TAlloc(HYPRE_Int, n_fpts, HYPRE_MEMORY_HOST);
 
    /* map from F-pts to all points */
@@ -1835,6 +1846,8 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
          }
       }
    }
+   // !!! Debug
+   printf("In done with A_FF = I - D^-1AFF\n");
 
    /* Z = Acf * (I + N + N^2 + ... + N^k] * D^{-1}
     * N = I - D^{-1} * A_FF (computed above)
@@ -1875,6 +1888,8 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    {
       hypre_ParCSRMatrixDestroy(ACF);
    }
+   // !!! Debug
+   printf("In done with make Z\n");
 
    hypre_CSRMatrix *Z_diag = hypre_ParCSRMatrixDiag(Z);
    hypre_CSRMatrix *Z_offd = hypre_ParCSRMatrixOffd(Z);
@@ -1910,6 +1925,8 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    }
    comm_handle = hypre_ParCSRCommHandleCreate(21, comm_pkg_Z, send_buf_i, Fmap_offd_global);
    hypre_ParCSRCommHandleDestroy(comm_handle);
+   // !!! Debug
+   printf("In done with comm\n");
 
    nnz_diag = hypre_CSRMatrixNumNonzeros(Z_diag) + n_cpts;
    nnz_offd = hypre_CSRMatrixNumNonzeros(Z_offd);
@@ -1971,6 +1988,9 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
 
    num_cols_offd_R = num_cols_offd_Z;
    col_map_offd_R = Fmap_offd_global;
+
+   // !!! Debug
+   printf("creating R\n");
 
    /* Now, we should have everything of Parcsr matrix R */
    R = hypre_ParCSRMatrixCreate(comm,
@@ -2044,6 +2064,89 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
       ierr = hypre_BoomerAMGBuildRestrNeumannAIRDevice(A,CF_marker,num_cpts_global,num_functions,dof_func,
                                                  NeumannDeg, strong_thresholdR, filter_thresholdR,
                                                  debug_flag, R_ptr);
+      // !!! Debug
+      hypre_ParCSRMatrixMigrate(*R_ptr, HYPRE_MEMORY_HOST);
+      hypre_CSRMatrix *R_diag = hypre_ParCSRMatrixDiag(*R_ptr);
+      hypre_CSRMatrix *R_offd = hypre_ParCSRMatrixOffd(*R_ptr);
+      printf("\nDevice construction of R:\n");
+      printf("R_diag: num row, num col, nnz = %d, %d, %d\n", hypre_CSRMatrixNumRows(R_diag), hypre_CSRMatrixNumCols(R_diag), hypre_CSRMatrixNumNonzeros(R_diag));
+      printf("R_offd: num row, num col, nnz = %d, %d, %d\n", hypre_CSRMatrixNumRows(R_offd), hypre_CSRMatrixNumCols(R_offd), hypre_CSRMatrixNumNonzeros(R_offd));
+      printf("R_diag_j = %d, %d, %d, %d, %d, %d... \n", hypre_CSRMatrixJ(R_diag)[0],
+                                                         hypre_CSRMatrixJ(R_diag)[1],
+                                                         hypre_CSRMatrixJ(R_diag)[2],
+                                                         hypre_CSRMatrixJ(R_diag)[3],
+                                                         hypre_CSRMatrixJ(R_diag)[4],
+                                                         hypre_CSRMatrixJ(R_diag)[5]);
+      printf("R_diag_a = %e, %e, %e, %e, %e, %e... \n", hypre_CSRMatrixData(R_diag)[0],
+                                                         hypre_CSRMatrixData(R_diag)[1],
+                                                         hypre_CSRMatrixData(R_diag)[2],
+                                                         hypre_CSRMatrixData(R_diag)[3],
+                                                         hypre_CSRMatrixData(R_diag)[4],
+                                                         hypre_CSRMatrixData(R_diag)[5]);
+
+      // !!! WM: debug, todo remove
+      /* hypre_ParCSRMatrixDestroy(*R_ptr); */
+      hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_HOST);
+      HYPRE_Int num_rows = hypre_ParCSRMatrixNumRows(A);
+      /* HYPRE_Int *CF_marker_host = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST); */
+
+      /* hypre_MemoryLocation tmp; */
+      /* hypre_GetPointerLocation(CF_marker_host, &tmp); */
+      /* switch (tmp) */
+      /* { */
+      /*    case hypre_MEMORY_HOST : */
+      /*       printf("CF_marker_host is on the host\n"); */
+      /*       break; */
+      /*    case hypre_MEMORY_DEVICE : */
+      /*       printf("CF_marker_host is on the device\n"); */
+      /*       break; */
+      /*    case hypre_MEMORY_UNIFIED : */
+      /*       printf("CF_marker_host is on unified\n"); */
+      /*       break; */
+      /*    case hypre_MEMORY_HOST_PINNED : */
+      /*       printf("CF_marker_host is on pinned\n"); */
+      /*       break; */
+      /* } */
+      /* hypre_GetPointerLocation(CF_marker, &tmp); */
+      /* switch (tmp) */
+      /* { */
+      /*    case hypre_MEMORY_HOST : */
+      /*       printf("CF_markeris on the host\n"); */
+      /*       break; */
+      /*    case hypre_MEMORY_DEVICE : */
+      /*       printf("CF_marker is on the device\n"); */
+      /*       break; */
+      /*    case hypre_MEMORY_UNIFIED : */
+      /*       printf("CF_marker is on unified\n"); */
+      /*       break; */
+      /*    case hypre_MEMORY_HOST_PINNED : */
+      /*       printf("CF_marker is on pinned\n"); */
+      /*       break; */
+      /* } */
+
+/*       printf("\nCopy CF marker to host\n"); */
+/*       hypre_Memcpy(CF_marker_host, CF_marker, num_rows, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE); */
+      printf("\nHost construction of R:\n");
+      ierr = hypre_BoomerAMGBuildRestrNeumannAIRHost(A,CF_marker,num_cpts_global,num_functions,dof_func,
+                                                 NeumannDeg, strong_thresholdR, filter_thresholdR,
+                                                 debug_flag, R_ptr);
+      printf("R_diag: num row, num col, nnz = %d, %d, %d\n", hypre_CSRMatrixNumRows(R_diag), hypre_CSRMatrixNumCols(R_diag), hypre_CSRMatrixNumNonzeros(R_diag));
+      printf("R_offd: num row, num col, nnz = %d, %d, %d\n", hypre_CSRMatrixNumRows(R_offd), hypre_CSRMatrixNumCols(R_offd), hypre_CSRMatrixNumNonzeros(R_offd));
+      printf("R_diag_j = %d, %d, %d, %d, %d, %d... \n", hypre_CSRMatrixJ(R_diag)[0],
+                                                         hypre_CSRMatrixJ(R_diag)[1],
+                                                         hypre_CSRMatrixJ(R_diag)[2],
+                                                         hypre_CSRMatrixJ(R_diag)[3],
+                                                         hypre_CSRMatrixJ(R_diag)[4],
+                                                         hypre_CSRMatrixJ(R_diag)[5]);
+      printf("R_diag_a = %e, %e, %e, %e, %e, %e... \n", hypre_CSRMatrixData(R_diag)[0],
+                                                         hypre_CSRMatrixData(R_diag)[1],
+                                                         hypre_CSRMatrixData(R_diag)[2],
+                                                         hypre_CSRMatrixData(R_diag)[3],
+                                                         hypre_CSRMatrixData(R_diag)[4],
+                                                         hypre_CSRMatrixData(R_diag)[5]);
+      hypre_ParCSRMatrixMigrate(*R_ptr, HYPRE_MEMORY_DEVICE);
+      hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_DEVICE);
+
    }
    else
 #endif
