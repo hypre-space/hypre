@@ -432,9 +432,9 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int         job,                 /* 0: qu
                       col_map_offd_C,
                       col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
 
-   HYPRE_Int *new_end = HYPRE_THRUST_CALL( unique,
-                                           col_map_offd_C,
-                                           col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
+   HYPRE_BigInt *new_end = HYPRE_THRUST_CALL( unique,
+                                              col_map_offd_C,
+                                              col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
 
    num_cols_offd_C = new_end - col_map_offd_C;
 
