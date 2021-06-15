@@ -117,11 +117,11 @@ function MpirunString
          ;;
       ray*)
          shift
-         RunString="lrun -n$*"
+         RunString="mpirun -n $*"
          ;;
       lassen*)
          shift
-         RunString="lrun -n$*"
+         RunString="mpirun -n $*"
          ;;
       redwood*)
          shift
