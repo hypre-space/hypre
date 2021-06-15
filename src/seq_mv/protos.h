@@ -80,7 +80,6 @@ HYPRE_Int hypre_CSRMatrixMatvec_FF ( HYPRE_Complex alpha , hypre_CSRMatrix *A , 
 
 /* csr_matvec_device.c */
 HYPRE_Int hypre_CSRMatrixMatvecDevice(HYPRE_Int trans, HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset );
-HYPRE_Int hypre_CSRMatrixMatvecMaskedDevice(HYPRE_Complex alpha, hypre_CSRMatrix *A, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *b, hypre_Vector *y, HYPRE_Int *mask, HYPRE_Int size_of_mask);
 HYPRE_Int hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int trans, HYPRE_Complex alpha, hypre_CSRMatrix *A, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y, HYPRE_Int offset );
 HYPRE_Int hypre_CSRMatrixMatvecCusparseOldAPI( HYPRE_Int trans, HYPRE_Complex alpha, hypre_CSRMatrix *A, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y, HYPRE_Int offset );
 HYPRE_Int hypre_CSRMatrixMatvecOMPOffload (HYPRE_Int trans, HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *y, HYPRE_Int offset );
