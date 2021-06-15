@@ -22,19 +22,20 @@ typedef struct
    hypre_ParCSRMatrix   *A_mat;
    HYPRE_Int            max_steps;           /* Maximum iterations run per row */
    HYPRE_Int            max_step_size;       /* Maximum number of nonzero elements added to a row of G per step */
-   HYPRE_Real           tolerance;           /* Minimum amount of change between two iterations */ 
+   HYPRE_Real           tolerance;           /* Minimum amount of change between two steps */ 
 
    /* Solver Problem Data */
+   HYPRE_Int            min_iterations;      /* Minimum iterations run for the solver */
    HYPRE_Int            max_iterations;      /* Maximum iterations run for the solver */
    HYPRE_Real           S_tolerance;         /* Tolerance for the solver */
     
    
    /* Data generated in the setup phase */
-   hypre_ParCSRMatrix   *G_mat;               /* Matrix holding FSAI factor. M^(-1) = G'G */
+   hypre_ParCSRMatrix   *G_mat;              /* Matrix holding FSAI factor. M^(-1) = G'G */
    hypre_ParCSRMatrix   *S_Pattern;          /* Sparsity Pattern */
    hypre_ParVector      *kaporin_gradient;
-   hypre_ParVector      *num_elements;      /* How many nonzeros each row has (for CUDA Gather) */
-   hypre_ParVector      *cum_sum;           /* Cumulative sum of number of elements per row (for CUDA Gather) */
+   hypre_ParVector      *nnz_per_row;        /* How many nonzeros each row has (for CUDA Gather) */
+   hypre_ParVector      *nnz_cum_sum;        /* Cumulative sum of number of elements per row (for CUDA Gather) */
 
    /* log info */
    HYPRE_Int            logging;
@@ -61,6 +62,7 @@ typedef struct
 #define hypre_ParFSAIDataMaxSteps(fsai_data)                ((fsai_data) -> max_steps)
 #define hypre_ParFSAIDataMaxStepSize(fsai_data)             ((fsai_data) -> max_step_size)
 
+#define hypre_ParFSAIDataMinIterations(fsai_data)           ((fsai_data) -> min_iterations)
 #define hypre_ParFSAIDataMaxIterations(fsai_data)           ((fsai_data) -> max_iterations)
 #define hypre_ParFSAIDataSTolerance(fsai_data)              ((fsai_data) -> S_tolerance)
    
@@ -68,8 +70,8 @@ typedef struct
 #define hypre_ParFSAIDataGmat(fsai_data)                    ((fsai_data) -> G_mat)
 #define hypre_ParFSAIDataSPattern(fsai_data)                ((fsai_data) -> S_Pattern)
 #define hypre_ParFSAIDataKaporinGradient(fsai_data)         ((fsai_data) -> kaporin_gradient)
-#define hypre_ParFSAIDataNumElements(fsai_data)             ((fsai_data) -> num_elements)
-#define hypre_ParFSAIDataCumSum(fsai_data)                  ((fsai_data) -> cum_sum)
+#define hypre_ParFSAIDataNnzPerRow(fsai_data)               ((fsai_data) -> nnz_per_row)
+#define hypre_ParFSAIDataNnzCumSum(fsai_data)               ((fsai_data) -> nnz_cum_sum)
 
 /* log info data */
 #define hypre_ParFSAIDataLogging(fsai_data)                 ((fsai_data) -> logging)
