@@ -1443,7 +1443,7 @@ hypreCUDAKernel_AMSComputePi_copy2(HYPRE_Int   nrows,
 
    for (j = istart + lane_id; j < iend; j += HYPRE_WARP_SIZE)
    {
-      const HYPRE_Real v = fabs(read_only_load(&data_in[j])) * 0.5;
+      const HYPRE_Real v = data_in ? fabs(read_only_load(&data_in[j])) * 0.5 : 1.0;
       const HYPRE_Int k = j * dim;
 
       for (HYPRE_Int d = 0; d < dim; d++)
@@ -1705,7 +1705,7 @@ hypreCUDAKernel_AMSComputePixyz_copy(HYPRE_Int   nrows,
 
    for (j = istart + lane_id; j < iend; j += HYPRE_WARP_SIZE)
    {
-      const HYPRE_Real v = fabs(read_only_load(&data_in[j])) * 0.5;
+      const HYPRE_Real v = data_in ? fabs(read_only_load(&data_in[j])) * 0.5 : 1.0;
 
       for (HYPRE_Int d = 0; d < dim; d++)
       {

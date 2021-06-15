@@ -136,12 +136,12 @@ FILES =\
  partial.c\
  schwarz.c\
  block_tridiag.c\
- ads.c\
  par_restr.c\
  par_lr_restr.c\
  dsuperlu.c
 
 CUFILES =\
+ ads.c\
  ams.c\
  ame.c\
  par_ilu.c\
