@@ -1023,8 +1023,10 @@ hypre_ParCSRMatrixGetRowDevice( hypre_ParCSRMatrix  *mat,
    return hypre_error_flag;
 }
 
-/* drop the entries that are not on the diagonal and smaller than
- * type 0: tol, 1: tol*(row 1-norm), 2: tol*(row 2-norm), -1: tol*(row infinity norm) */
+/* abs    == 1, use absolute values
+ * option == 0, drop all the entries that are smaller than tol
+ * TODO more options
+ */
 HYPRE_Int
 hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
                                           HYPRE_Complex       tol,
@@ -1035,7 +1037,6 @@ hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
    HYPRE_Int        num_cols_A_offd  = hypre_CSRMatrixNumCols(A_offd);
    HYPRE_BigInt    *h_col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
    HYPRE_BigInt    *col_map_offd_A = hypre_ParCSRMatrixDeviceColMapOffd(A);
-   HYPRE_Complex   *row_tol;
 
    if (col_map_offd_A == NULL)
    {
@@ -1045,28 +1046,8 @@ hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
       hypre_ParCSRMatrixDeviceColMapOffd(A) = col_map_offd_A;
    }
 
-   // WM: note that this does not necessarily keep the diagonal
-   if (type == 0)
-   {
-      hypre_CSRMatrixDropSmallEntriesDevice(A_diag, tol, NULL);
-      hypre_CSRMatrixDropSmallEntriesDevice(A_offd, tol, NULL);
-   }
-   else
-   {
-      row_tol = hypre_CTAlloc(HYPRE_Complex, hypre_CSRMatrixNumRows(A_diag), HYPRE_MEMORY_DEVICE);
-      if (type == 2)
-      {
-         tol = tol * tol;
-      }
-      hypre_CSRMatrixComputeRowSumDevice(A_diag, NULL, NULL, row_tol, type, tol, "set");
-      hypre_CSRMatrixComputeRowSumDevice(A_offd, NULL, NULL, row_tol, type, tol, "add");
-      if (type == 2)
-      {
-         // WM: TODO: take sqrt of row_tol
-      }
-      hypre_CSRMatrixDropSmallEntriesDevice(A_diag, tol, row_tol);
-      hypre_CSRMatrixDropSmallEntriesDevice(A_offd, tol, row_tol);
-   }
+   hypre_CSRMatrixDropSmallEntriesDevice(A_diag, tol, type);
+   hypre_CSRMatrixDropSmallEntriesDevice(A_offd, tol, type);
 
    hypre_ParCSRMatrixSetNumNonzeros(A);
    hypre_ParCSRMatrixDNumNonzeros(A) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(A);

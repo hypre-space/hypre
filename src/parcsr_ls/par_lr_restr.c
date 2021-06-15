@@ -1708,9 +1708,6 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-   // !!! Debug
-   printf("In hypre_BoomerAMGBuildRestrNeumannAIRHost()\n");
-
    /*-------------- global number of C points and my start position */
    /*my_first_cpt = num_cpts_global[0];*/
    if (my_id == (num_procs -1))
@@ -1718,9 +1715,6 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
       total_global_cpts = num_cpts_global[1];
    }
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-
-   // !!! Debug
-   printf("done with broadcast\n");
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -1786,8 +1780,6 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrix *AFF, *ACF, *X, *X2, *Z, *Z2;
    hypre_ParCSRMatrixExtractSubmatrixFC(A, CF_marker, num_cpts_global, "FF", &AFF, strong_thresholdR);
    hypre_ParCSRMatrixExtractSubmatrixFC(A, CF_marker, num_cpts_global, "CF", &ACF, strong_thresholdR);
-   // !!! Debug
-   printf("Done with matrix extraction\n");
 
    /* A_FF := I - D^{-1}*A_FF */
    hypre_CSRMatrix *AFF_diag = hypre_ParCSRMatrixDiag(AFF);
@@ -1801,8 +1793,6 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    HYPRE_Int        n_fpts = hypre_CSRMatrixNumRows(AFF_diag);
    HYPRE_Int        n_cpts = n_fine - n_fpts;
    hypre_assert(n_cpts == hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(ACF)));
-   // !!! Debug
-   printf("n_fpts = %d\n", n_fpts);
 
    HYPRE_Int       *Fmap = hypre_TAlloc(HYPRE_Int, n_fpts, HYPRE_MEMORY_HOST);
 
@@ -1821,19 +1811,20 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
 
    for (i = 0; i < n_fpts; i++)
    {
-      i1 = AFF_diag_i[i];
-
-      /* make sure the first entry is diagonal */
-      hypre_assert(AFF_diag_j[i1] == i);
-
-      /* !!! store the inverse */
-      HYPRE_Complex di = 1.0 / AFF_diag_a[i1];
-      diag_entries[i] = di;
-      di = -di;
-      AFF_diag_a[i1] = 0.0;
-      for (j = i1+1; j < AFF_diag_i[i+1]; j++)
+      /* find the diagonal element and store inverse */
+      for (j = AFF_diag_i[i]; j < AFF_diag_i[i+1]; j++)
       {
-         AFF_diag_a[j] *= di;
+         if (AFF_diag_j[j] == i)
+         {
+            diag_entries[i] = 1.0 / AFF_diag_a[j];
+            AFF_diag_a[j] = 0.0;
+            break;
+         }
+      }
+
+      for (j = AFF_diag_i[i]; j < AFF_diag_i[i+1]; j++)
+      {
+         AFF_diag_a[j] *= -diag_entries[i];
       }
       if (num_procs > 1)
       {
@@ -1842,12 +1833,10 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
             hypre_assert( hypre_ParCSRMatrixColMapOffd(AFF)[AFF_offd_j[j]] != \
                           i + hypre_ParCSRMatrixFirstRowIndex(AFF) );
 
-            AFF_offd_a[j] *= di;
+            AFF_diag_a[j] *= -diag_entries[i];
          }
       }
    }
-   // !!! Debug
-   printf("In done with A_FF = I - D^-1AFF\n");
 
    /* Z = Acf * (I + N + N^2 + ... + N^k] * D^{-1}
     * N = I - D^{-1} * A_FF (computed above)
@@ -1888,8 +1877,6 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    {
       hypre_ParCSRMatrixDestroy(ACF);
    }
-   // !!! Debug
-   printf("In done with make Z\n");
 
    hypre_CSRMatrix *Z_diag = hypre_ParCSRMatrixDiag(Z);
    hypre_CSRMatrix *Z_offd = hypre_ParCSRMatrixOffd(Z);
@@ -1925,8 +1912,6 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    }
    comm_handle = hypre_ParCSRCommHandleCreate(21, comm_pkg_Z, send_buf_i, Fmap_offd_global);
    hypre_ParCSRCommHandleDestroy(comm_handle);
-   // !!! Debug
-   printf("In done with comm\n");
 
    nnz_diag = hypre_CSRMatrixNumNonzeros(Z_diag) + n_cpts;
    nnz_offd = hypre_CSRMatrixNumNonzeros(Z_offd);
@@ -1988,9 +1973,6 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
 
    num_cols_offd_R = num_cols_offd_Z;
    col_map_offd_R = Fmap_offd_global;
-
-   // !!! Debug
-   printf("creating R\n");
 
    /* Now, we should have everything of Parcsr matrix R */
    R = hypre_ParCSRMatrixCreate(comm,

@@ -1090,12 +1090,12 @@ hypre_CSRMatrixIdentityDevice(HYPRE_Int n, HYPRE_Complex alp)
    return A;
 }
 
-/* drop the entries that are smaller than
- * type 0: tol, type 1: tol[row_i] */
+/* drop the entries that are not on the diagonal and smaller than
+ * its row norm: type 1: 1-norm, 2: 2-norm, -1: infinity norm */
 HYPRE_Int
 hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
-                                       HYPRE_Complex    tol,
-                                       HYPRE_Complex   *row_tol)
+                                       HYPRE_Real          tol,
+                                       HYPRE_Int           type)
 {
    HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
    HYPRE_Int      nnz    = hypre_CSRMatrixNumNonzeros(A);
@@ -1108,11 +1108,7 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
    HYPRE_Int     *new_j;
    HYPRE_Complex *new_data;
 
-   if (row_tol != NULL)
-   {
-      // WM: TODO
-   }
-   else
+   if (type == 0)
    {
       new_nnz = HYPRE_THRUST_CALL( count_if,
                                    A_data,
@@ -1137,11 +1133,7 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
 
    thrust::zip_iterator< thrust::tuple<HYPRE_Int*, HYPRE_Int*, HYPRE_Complex*> > new_end;
 
-   if (row_tol != NULL)
-   {
-      // WM: TODO
-   }
-   else
+   if (type == 0)
    {
       new_end = HYPRE_THRUST_CALL( copy_if,
                                    thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)),
