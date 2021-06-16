@@ -471,7 +471,9 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
                              hypre_ParCSRMatrix *PiNDz,
                              hypre_ParCSRMatrix **Pi_ptr)
 {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+#endif
 
    hypre_ParCSRMatrix *Pi;
 
@@ -714,7 +716,9 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
 {
    hypre_ParCSRMatrix *Pix, *Piy, *Piz;
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+#endif
 
    /* Compute the representations of the coordinate vectors, RT100, RT010 and
       RT001, in the Raviart-Thomas space, by observing that the RT coordinates
@@ -1003,7 +1007,9 @@ HYPRE_Int hypre_ADSSetup(void *solver,
                          hypre_ParVector *b,
                          hypre_ParVector *x)
 {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+#endif
 
    hypre_ADSData *ads_data = (hypre_ADSData *) solver;
    hypre_AMSData *ams_data;
@@ -1394,7 +1400,9 @@ HYPRE_Int hypre_ADSSolve(void *solver,
    ri[3] = ads_data -> r2;     gi[3] = ads_data -> g2;
    ri[4] = ads_data -> r2;     gi[4] = ads_data -> g2;
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+#endif
 
    /* may need to create an additional temporary vector for relaxation */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)

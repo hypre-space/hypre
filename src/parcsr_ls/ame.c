@@ -325,7 +325,9 @@ HYPRE_Int hypre_AMESetup(void *esolver)
    ame_data -> t3 = ams_data -> r0;
 
    HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(ams_data -> A);
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
+#endif
 
    /* Eliminate boundary conditions in G = [Gii, Gib; 0, Gbb], i.e.,
       compute [Gii, 0; 0, 0] */

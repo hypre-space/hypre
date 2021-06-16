@@ -52,9 +52,9 @@ hypre_ParCSRRelax( hypre_ParCSRMatrix *A,              /* matrix to relax with *
       }
       else if (relax_type == 2 || relax_type == 4) /* offd-l1-scaled block GS */
       {
-         HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
-         /* !!! relax_weight and omega flipped !!! */
+         /* !!! Note: relax_weight and omega flipped !!! */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
          if (exec == HYPRE_EXEC_DEVICE)
          {
             hypre_BoomerAMGRelaxHybridGaussSeidelDevice(A, f, NULL, 0, omega, relax_weight, l1_norms, u, v, z,
@@ -179,7 +179,9 @@ HYPRE_Int hypre_ParVectorBlockSplit(hypre_ParVector *x,
    HYPRE_Int i, d, size_;
    HYPRE_Real *x_data, *x_data_[3];
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParVectorMemoryLocation(x) );
+#endif
 
    size_ = hypre_VectorSize(hypre_ParVectorLocalVector(x_[0]));
 
@@ -220,7 +222,9 @@ HYPRE_Int hypre_ParVectorBlockGather(hypre_ParVector *x,
    HYPRE_Int i, d, size_;
    HYPRE_Real *x_data, *x_data_[3];
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParVectorMemoryLocation(x) );
+#endif
 
    size_ = hypre_VectorSize(hypre_ParVectorLocalVector(x_[0]));
 
@@ -445,8 +449,8 @@ HYPRE_Int hypre_ParCSRMatrixFixZeroRowsDevice(hypre_ParCSRMatrix *A)
 
 HYPRE_Int hypre_ParCSRMatrixFixZeroRows(hypre_ParCSRMatrix *A)
 {
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
    if (exec == HYPRE_EXEC_DEVICE)
    {
       return hypre_ParCSRMatrixFixZeroRowsDevice(A);
@@ -755,9 +759,8 @@ HYPRE_Int hypre_ParCSRMatrixSetDiagRows(hypre_ParCSRMatrix *A, HYPRE_Real d)
    HYPRE_Int *A_offd_I = hypre_CSRMatrixI(A_offd);
    HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
-
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
    if (exec == HYPRE_EXEC_DEVICE)
    {
       dim3 bDim = hypre_GetDefaultCUDABlockDimension();
@@ -1506,8 +1509,10 @@ HYPRE_Int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
       if (dim == 3)
          Gz_data = hypre_VectorData(hypre_ParVectorLocalVector(Gz));
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(G),
                                                          hypre_ParCSRMatrixMemoryLocation(Pi) );
+#endif
 
       /* Fill-in the diagonal part */
       {
@@ -1727,7 +1732,9 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
 {
    hypre_ParCSRMatrix *Pix, *Piy, *Piz;
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(G) );
+#endif
 
    /* Compute Pix, Piy, Piz  */
    {
@@ -2227,8 +2234,10 @@ HYPRE_Int hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
       if (dim == 4)
          Gz_data = hypre_VectorData(hypre_ParVectorLocalVector(Gz));
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(G),
                                                          hypre_ParCSRMatrixMemoryLocation(GPi) );
+#endif
 
       /* Fill-in the diagonal part */
       {
@@ -2510,7 +2519,9 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                          hypre_ParVector *b,
                          hypre_ParVector *x)
 {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+#endif
 
    hypre_AMSData *ams_data = (hypre_AMSData *) solver;
 
@@ -3346,10 +3357,10 @@ HYPRE_Int hypre_AMSSolve(void *solver,
    ri[3] = ams_data -> r1;     gi[3] = ams_data -> g1;
    ri[4] = ams_data -> r1;     gi[4] = ams_data -> g1;
 
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
-
    /* may need to create an additional temporary vector for relaxation */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+
    if (exec == HYPRE_EXEC_DEVICE)
    {
       needZ = ams_data -> A_relax_type == 2 || ams_data -> A_relax_type == 4 || ams_data -> A_relax_type == 16;

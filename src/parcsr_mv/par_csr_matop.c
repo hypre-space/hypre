@@ -5079,8 +5079,8 @@ hypre_ParCSRMatrixAddHost( HYPRE_Complex        alpha,
    MPI_Comm          comm       = hypre_ParCSRMatrixComm(A);
    HYPRE_BigInt      num_rows_A = hypre_ParCSRMatrixGlobalNumRows(A);
    HYPRE_BigInt      num_cols_A = hypre_ParCSRMatrixGlobalNumCols(A);
-   HYPRE_BigInt      num_rows_B = hypre_ParCSRMatrixGlobalNumRows(B);
-   HYPRE_BigInt      num_cols_B = hypre_ParCSRMatrixGlobalNumCols(B);
+   /* HYPRE_BigInt      num_rows_B = hypre_ParCSRMatrixGlobalNumRows(B); */
+   /* HYPRE_BigInt      num_cols_B = hypre_ParCSRMatrixGlobalNumCols(B); */
 
    /* diag part of A */
    hypre_CSRMatrix    *A_diag   = hypre_ParCSRMatrixDiag(A);
@@ -5103,7 +5103,7 @@ hypre_ParCSRMatrixAddHost( HYPRE_Complex        alpha,
    HYPRE_Int     *rownnz_diag_B = hypre_CSRMatrixRownnz(B_diag);
    HYPRE_Int  num_rownnz_diag_B = hypre_CSRMatrixNumRownnz(B_diag);
    HYPRE_Int    num_rows_diag_B = hypre_CSRMatrixNumRows(B_diag);
-   HYPRE_Int    num_cols_diag_B = hypre_CSRMatrixNumCols(B_diag);
+   /* HYPRE_Int    num_cols_diag_B = hypre_CSRMatrixNumCols(B_diag); */
 
    /* off-diag part of B */
    hypre_CSRMatrix    *B_offd   = hypre_ParCSRMatrixOffd(B);
@@ -5298,16 +5298,14 @@ hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
                        hypre_ParCSRMatrix  *B,
                        hypre_ParCSRMatrix **C_ptr )
 {
-   HYPRE_MemoryLocation memory_location_A = hypre_ParCSRMatrixMemoryLocation(A);
-   HYPRE_MemoryLocation memory_location_B = hypre_ParCSRMatrixMemoryLocation(B);
-
    hypre_assert(hypre_ParCSRMatrixGlobalNumRows(A) == hypre_ParCSRMatrixGlobalNumRows(B));
    hypre_assert(hypre_ParCSRMatrixGlobalNumCols(A) == hypre_ParCSRMatrixGlobalNumCols(B));
    hypre_assert(hypre_ParCSRMatrixNumRows(A) == hypre_ParCSRMatrixNumRows(B));
    hypre_assert(hypre_ParCSRMatrixNumCols(A) == hypre_ParCSRMatrixNumCols(B));
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   if ( hypre_GetExecPolicy2(memory_location_A, memory_location_B) == HYPRE_EXEC_DEVICE )
+   if ( hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+                              hypre_ParCSRMatrixMemoryLocation(B) ) == HYPRE_EXEC_DEVICE )
    {
       hypre_ParCSRMatrixAddDevice(alpha, A, beta, B, C_ptr);
    }
