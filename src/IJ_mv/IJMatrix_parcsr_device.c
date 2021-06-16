@@ -178,18 +178,6 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
       hypre_TMemcpy(stack_data + stack_elmts_current, values, HYPRE_Complex, nelms, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    }
 
-#if HYPRE_DEBUG
-   HYPRE_BigInt row0 = hypre_IJMatrixGlobalFirstRow(matrix);
-   HYPRE_BigInt row1 = row0 + hypre_IJMatrixGlobalNumRows(matrix) - 1;
-   HYPRE_BigInt col0 = hypre_IJMatrixGlobalFirstCol(matrix);
-   HYPRE_BigInt col1 = col0 + hypre_IJMatrixGlobalNumCols(matrix) - 1;
-   bool test1 = HYPRE_THRUST_CALL(all_of, stack_i + stack_elmts_current, stack_i + stack_elmts_current + nelms, in_range<HYPRE_BigInt>(row0, row1));
-   hypre_assert(test1);
-   bool test2 = HYPRE_THRUST_CALL(all_of, stack_j + stack_elmts_current, stack_j + stack_elmts_current + nelms, in_range<HYPRE_BigInt>(col0, col1));
-   hypre_assert(test2);
-   hypre_assert(row0 == 0 && col0 == 0);
-#endif
-
    hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix) += nelms;
 
    hypre_TFree(row_ptr, HYPRE_MEMORY_DEVICE);

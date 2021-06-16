@@ -1639,6 +1639,7 @@ HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
 /* handle.c */
 HYPRE_Int hypre_SetSpGemmUseCusparse( HYPRE_Int use_cusparse );
 HYPRE_Int hypre_SetUseGpuRand( HYPRE_Int use_gpurand );
+HYPRE_Int hypre_SetGaussSeidelMethod( HYPRE_Int gs_method );
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
