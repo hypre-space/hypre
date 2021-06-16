@@ -122,8 +122,8 @@ function MpirunString
          ;;
       lassen*)
          shift
-         RunString="mpirun -n $*"
-         #RunString="lrun -n$*"
+         #RunString="mpirun -n $*"
+         RunString="lrun -n$*"
          ;;
       redwood*)
          shift
