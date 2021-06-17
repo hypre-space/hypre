@@ -22,7 +22,7 @@ typedef struct
    HYPRE_Int            num_variables;
    HYPRE_Int            max_steps;           /* Maximum iterations run per row */
    HYPRE_Int            max_step_size;       /* Maximum number of nonzero elements added to a row of G per step */
-   HYPRE_Real           tolerance;           /* Minimum amount of change between two steps */ 
+   HYPRE_Real           kap_tolerance;           /* Minimum amount of change between two steps */ 
    hypre_ParCSRMatrix   *G_mat;              /* Matrix holding FSAI factor. M^(-1) = G'G */
    hypre_ParCSRMatrix   *S_Pattern;          /* Sparsity Pattern */
    hypre_ParVector      *kaporin_gradient;
@@ -33,9 +33,8 @@ typedef struct
    /* Solver Problem Data */
    hypre_ParCSRMatrix   *M_inv;              /* Hold final smoother - G'G */
    hypre_ParVector      *b_vec;              /* For Ax=b */
-   HYPRE_Int            min_iterations;      /* Minimum iterations run for the solver */
    HYPRE_Int            max_iterations;      /* Maximum iterations run for the solver */
-   HYPRE_Real           solver_tolerance;    /* Tolerance for the solver */
+   HYPRE_Real           tolerance;    /* Tolerance for the solver */
    HYPRE_Int            *comm_info;  
     
    
@@ -66,7 +65,7 @@ typedef struct
 
 /* FSAI problem data */
 #define hypre_ParFSAIDataAmat(fsai_data)                    ((fsai_data) -> A_mat)
-#define hypre_ParFSAIDataTolerance(fsai_data)               ((fsai_data) -> tolerance)
+#define hypre_ParFSAIKapTolerance(fsai_data)                ((fsai_data) -> kap_tolerance)
 #define hypre_ParFSAIDataMaxSteps(fsai_data)                ((fsai_data) -> max_steps)
 #define hypre_ParFSAIDataMaxStepSize(fsai_data)             ((fsai_data) -> max_step_size)
 #define hypre_ParFSAIDataGmat(fsai_data)                    ((fsai_data) -> G_mat)
@@ -78,9 +77,8 @@ typedef struct
 /* Solver problem data */
 #define hypre_ParFSAIDataMinv(fsai_data)                    ((fsai_data) -> M_inv)
 #define hypre_ParFSAIDatabvec(fsai_data)                    ((fsai_data) -> b_vec)
-#define hypre_ParFSAIDataMinIterations(fsai_data)           ((fsai_data) -> min_iterations)
 #define hypre_ParFSAIDataMaxIterations(fsai_data)           ((fsai_data) -> max_iterations)
-#define hypre_ParFSAIDataSolverTolerance(fsai_data)         ((fsai_data) -> solver_tolerance)
+#define hypre_ParFSAIDataTolerance(fsai_data)               ((fsai_data) -> tolerance)
 #define hypre_ParFSAIDataCommInfo(fsai_data)                ((fsai_data) -> comm_info)
 #define hypre_ParFSAIDataNumVariables(fsai_data)            ((fsai_data) -> num_variables)
    
