@@ -26,7 +26,7 @@ hypre_FSAICreate()
    /* solver params */
    HYPRE_Int            min_iterations;
    HYPRE_Int            max_iterations;
-   HYPRE_Real           S_tolerance;
+   HYPRE_Real           solver_tolerance;
 
    /* log info */
    HYPRE_Int            logging;
@@ -49,7 +49,7 @@ hypre_FSAICreate()
    /* solver params */
    min_iterations = 0;
    max_iterations = 20;
-   S_tolerance = 1.0e-6;
+   solver_tolerance = 1.0e-6;
 
    /* log info */
    logging = 0;
@@ -75,9 +75,12 @@ hypre_FSAICreate()
  
    hypre_ParFSAIDataAmat(fsai_data)             = NULL;
    hypre_ParFSAIDataAinv(fsai_data)             = NULL;
+   hypre_ParFSAIDataSPattern(fsai_data)         = NULL;
+   hypre_ParFSAIDataAArray(fsai_data)           = NULL;
+   hypre_ParFSAIDataGArray(fsai_data)           = NULL;
+   hypre_ParFSAIDataPArray(fsai_data)           = NULL;
    hypre_ParFSAIDatabvec(fsai_data)             = NULL;
    hypre_ParFSAIDataGmat(fsai_data)             = NULL;
-   hypre_ParFSAIDataSPattern(fsai_data);        = NULL;
    hypre_ParFSAIDataKaporinGradient(fsai_data)  = NULL; 
    hypre_ParFSAIDataNnzPerRow(fsai_data)        = NULL;
    hypre_ParFSAIDataNnzCumSum(fsai_data)        = NULL;
@@ -90,7 +93,7 @@ hypre_FSAICreate()
 
    hypre_FSAISetMinIterations(fsai_data, min_iterations);
    hypre_FSAISetMaxIterations(fsai_data, max_iterations);
-   hypre_FSAISetSTolerance(fsai_data, S_tolerance);
+   hypre_FSAISetSolverTolerance(fsai_data, solver_tolerance);
 
    hypre_FSAISetLogging(fsai_data, logging);
    hypre_FSAISetNumIterations(fsai_data, num_iterations);
@@ -120,10 +123,13 @@ hypre_FSAIDestroy( void *data )
    if (hypre_ParFSAIDataCommInfo(fsai_data)) hypre_TFree(hypre_ParFSAIDataCommInfo(fsai_data), HYPRE_MEMORY_HOST);
    if (hypre_ParFSAIDataAmat(fsai_data)) hypre_TFree(hypre_ParFSAIDataAmat(fsai_data), HYPRE_MEMORY_HOST);
    if (hypre_ParFSAIDataMinv(fsai_data)) hypre_TFree(hypre_ParFSAIDataMinv(fsai_data), HYPRE_MEMORY_HOST);
+   if (hypre_ParFSAIDataSPattern(fsai_data)) hypre_TFree(hypre_ParFSAIDataSPattern(fsai_data), HYPRE_MEMORY_HOST);
    if (hypre_ParFSAIDatabvec(fsai_data)) hypre_TFree(hypre_ParFSAIDatabvec(fsai_data), HYPRE_MEMORY_HOST);
    if (hypre_ParFSAIDataGmat(fsai_data)) hypre_TFree(hypre_ParFSAIDataAinv(fsai_data), HYPRE_MEMORY_HOST);
-   if (hypre_ParFSAIDataSPattern(fsai_data)) hypre_TFree(hypre_ParFSAIDataSPattern(fsai_data), HYPRE_MEMORY_HOST);
-   if (hypre_ParFSAIDataCommInfor(fsai_data)) hypre_TFree(hypre_ParFSAIDataCommInfo(fsai_data), HYPRE_MEMORY_HOST);
+   if (hypre_ParFSAIDataCommInfo(fsai_data)) hypre_TFree(hypre_ParFSAIDataCommInfo(fsai_data), HYPRE_MEMORY_HOST);
+   if (hypre_ParFSAIDataAArray(fsai_data)) hypre_TFree(hypre_ParFSAIDataAArray(fsai_data), HYPRE_MEMORY_HOST);
+   if (hypre_ParFSAIDataGArray(fsai_data)) hypre_TFree(hypre_ParFSAIDataGArray(fsai_data), HYPRE_MEMORY_HOST);
+   if (hypre_ParFSAIDataPArray(fsai_data)) hypre_TFree(hypre_ParFSAIDataPArray(fsai_data), HYPRE_MEMORY_HOST);
 
    if( hypre_ParFSAIDataResidual(fsai_data) )
    {
@@ -276,8 +282,8 @@ hypre_FSAISetMaxIterations( void *data,
 }
 
 HYPRE_Int
-hypre_FSAISetSTolerance( void *data,
-                          HYPRE_Real S_tolerance   )
+hypre_FSAISetSolverTolerance( void *data,
+                          HYPRE_Real solver_tolerance   )
 {
    hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
 
@@ -287,13 +293,13 @@ hypre_FSAISetSTolerance( void *data,
       return hypre_error_flag;
    }
 
-   if (S_tolerance < 0)
+   if (solver_tolerance < 0)
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;
    }
 
-   hypre_ParFSAIDataSTolerance(fsai_data) = S_tolerance;
+   hypre_ParFSAIDataSTolerance(fsai_data) = solver_tolerance;
 
    return hypre_error_flag;
 }
@@ -507,8 +513,8 @@ hypre_FSAIGetMaxIterations( void     *data,
 }
 
 HYPRE_Int
-hypre_FSAIGetSTolerance( void     *data,
-                          HYPRE_Real     *S_tolerance )
+hypre_FSAIGetSolverTolerance( void     *data,
+                          HYPRE_Real     *solver_tolerance )
 {
    hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
 
@@ -518,7 +524,7 @@ hypre_FSAIGetSTolerance( void     *data,
       return hypre_error_flag;
    }
 
-   *S_tolerance = hypre_ParFSAIDataSTolerance(fsai_data);
+   *solver_tolerance = hypre_ParFSAIDataSolverTolerance(fsai_data);
 
    return hypre_error_flag;
 }
