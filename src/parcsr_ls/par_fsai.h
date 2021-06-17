@@ -16,35 +16,39 @@ typedef struct
    
    HYPRE_MemoryLocation memory_location;     /* memory location of matrices/vectors in FSAIData */
    MPI_Comm             new_comm;
-   // HYPRE_Int            global_solver;
 
    /* FSAI Problem data */
    hypre_ParCSRMatrix   *A_mat;
+   HYPRE_Int            num_variables;
    HYPRE_Int            max_steps;           /* Maximum iterations run per row */
    HYPRE_Int            max_step_size;       /* Maximum number of nonzero elements added to a row of G per step */
    HYPRE_Real           tolerance;           /* Minimum amount of change between two steps */ 
-
-   /* Solver Problem Data */
-   hypre_ParCSRMatrix   *M_inv;              /* Hold final smoother - G'G */
-   hypre_ParVector      *b_vec;              /* For Ax=b */
-   HYPRE_Int            min_iterations;      /* Minimum iterations run for the solver */
-   HYPRE_Int            max_iterations;      /* Maximum iterations run for the solver */
-   HYPRE_Real           S_tolerance;         /* Tolerance for the solver */
-   HYPRE_Int            *comm_info;  
-    
-   
-   /* Data generated in the setup phase */
    hypre_ParCSRMatrix   *G_mat;              /* Matrix holding FSAI factor. M^(-1) = G'G */
    hypre_ParCSRMatrix   *S_Pattern;          /* Sparsity Pattern */
    hypre_ParVector      *kaporin_gradient;
    hypre_ParVector      *nnz_per_row;        /* How many nonzeros each row has (for CUDA Gather) */
    hypre_ParVector      *nnz_cum_sum;        /* Cumulative sum of number of elements per row (for CUDA Gather) */
 
+
+   /* Solver Problem Data */
+   hypre_ParCSRMatrix   *M_inv;              /* Hold final smoother - G'G */
+   hypre_ParVector      *b_vec;              /* For Ax=b */
+   HYPRE_Int            min_iterations;      /* Minimum iterations run for the solver */
+   HYPRE_Int            max_iterations;      /* Maximum iterations run for the solver */
+   HYPRE_Real           solver_tolerance;    /* Tolerance for the solver */
+   HYPRE_Int            *comm_info;  
+    
+   
+   /* Data generated in the setup phase */
+   hypre_ParCSRMatrix   *A_array;
+   hypre_ParVector      *G_Array;
+   hypre_ParVector      *P_Array;         
+
    /* log info */
    HYPRE_Int            logging;
    HYPRE_Int            num_iterations;
    HYPRE_Real           rel_resid_norm;
-   hypre_ParVector      *residual;        /* available if logging > 1 */
+   hypre_ParVector      *residual;           /* available if logging > 1 */
 
    /* output params */
    HYPRE_Int            print_level;
@@ -65,21 +69,25 @@ typedef struct
 #define hypre_ParFSAIDataTolerance(fsai_data)               ((fsai_data) -> tolerance)
 #define hypre_ParFSAIDataMaxSteps(fsai_data)                ((fsai_data) -> max_steps)
 #define hypre_ParFSAIDataMaxStepSize(fsai_data)             ((fsai_data) -> max_step_size)
+#define hypre_ParFSAIDataGmat(fsai_data)                    ((fsai_data) -> G_mat)
+#define hypre_ParFSAIDataSPattern(fsai_data)                ((fsai_data) -> S_Pattern)
+#define hypre_ParFSAIDataKaporinGradient(fsai_data)         ((fsai_data) -> kaporin_gradient)
+#define hypre_ParFSAIDataNnzPerRow(fsai_data)               ((fsai_data) -> nnz_per_row)
+#define hypre_ParFSAIDataNnzCumSum(fsai_data)               ((fsai_data) -> nnz_cum_sum)
 
 /* Solver problem data */
 #define hypre_ParFSAIDataMinv(fsai_data)                    ((fsai_data) -> M_inv)
 #define hypre_ParFSAIDatabvec(fsai_data)                    ((fsai_data) -> b_vec)
 #define hypre_ParFSAIDataMinIterations(fsai_data)           ((fsai_data) -> min_iterations)
 #define hypre_ParFSAIDataMaxIterations(fsai_data)           ((fsai_data) -> max_iterations)
-#define hypre_ParFSAIDataSTolerance(fsai_data)              ((fsai_data) -> S_tolerance)
+#define hypre_ParFSAIDataSolverTolerance(fsai_data)         ((fsai_data) -> solver_tolerance)
 #define hypre_ParFSAIDataCommInfo(fsai_data)                ((fsai_data) -> comm_info)
+#define hypre_ParFSAIDataNumVariables(fsai_data)            ((fsai_data) -> num_variables)
    
 /* Data generated in the setup phase */
-#define hypre_ParFSAIDataGmat(fsai_data)                    ((fsai_data) -> G_mat)
-#define hypre_ParFSAIDataSPattern(fsai_data)                ((fsai_data) -> S_Pattern)
-#define hypre_ParFSAIDataKaporinGradient(fsai_data)         ((fsai_data) -> kaporin_gradient)
-#define hypre_ParFSAIDataNnzPerRow(fsai_data)               ((fsai_data) -> nnz_per_row)
-#define hypre_ParFSAIDataNnzCumSum(fsai_data)               ((fsai_data) -> nnz_cum_sum)
+#define hypre_ParFSAIDataAArray(fsai_data)                  ((fsai_data) -> A_array)
+#define hypre_ParFSAIDataGArray(fsai_data)                  ((fsai_data) -> G_array)
+#define hypre_ParFSAIDataPArray(fsai_data)                  ((fsai_data) -> P_array)
 
 /* log info data */
 #define hypre_ParFSAIDataLogging(fsai_data)                 ((fsai_data) -> logging)
