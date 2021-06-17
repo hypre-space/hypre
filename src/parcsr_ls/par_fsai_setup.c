@@ -32,9 +32,10 @@ hypre_FSAISetup( void               *fsai_vdata,
 
    /* Data structure variables */
 
-   hypre_ParCSRMatrix      *M_inv_array;
-   hypre_ParCSRMatrix      *G_mat_array;
-   hypre_ParCSRMatrix      *S_Pattern_array;
+   hypre_ParCSRMatrix      *A_array;
+   hypre_ParCSRMatrix      *G_array;
+   hypre_ParCSRMatrix      *P_array;
+   hypre_ParCSRMatrix      *S_Pattern;
    hypre_ParVector         *Residual_array;
    hypre_ParVector         *fsai_kaporin_gradient;
    hypre_ParVector         *fsai_nnz_per_row;
@@ -51,6 +52,7 @@ hypre_FSAISetup( void               *fsai_vdata,
    /* Local variables */
 
    HYPRE_Int               num_procs, my_id, num_threads;
+   hypre_ParCSRMatrix      *Gtemp;
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -66,5 +68,15 @@ hypre_FSAISetup( void               *fsai_vdata,
 
    hypre_ParCSRMatrixSetNumNonzeros(A);
    hypre_ParCSRMatrixSetDNumNonzeros(A);
+
+   A_array = hypre_ParFSAIDataAArray(fsai_data);
+   G_array = hypre_ParFSAIDataGArray(fsai_data);
+   P_array = hypre_ParFSAIDataPArray(fsai_data);
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   HYPRE_FUNC_ANNOTATE_END;
+
+   
 
 }
