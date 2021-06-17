@@ -1113,5 +1113,6 @@ hypre_ParVectorGetValues(hypre_ParVector *vector,
                          HYPRE_BigInt    *indices,
                          HYPRE_Complex   *values)
 {
-   hypre_ParVectorGetValues2(vector, num_values, indices, 0, values);
+   return hypre_ParVectorGetValues2(vector, num_values, indices, 0, values);
 }
+
