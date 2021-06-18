@@ -29,54 +29,72 @@ hypre_FSAISetup( void               *fsai_vdata,
 {
    MPI_Comm                comm = hypre_ParCSRMatrixComm(A);
    hypre_ParFSAIData       *fsai_data = (hypre_ParFSAIData*) fsai_vdata;
+   hypre_MemoryLocation    memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
    /* Data structure variables */
 
-   hypre_ParCSRMatrix      *A_array;
    hypre_ParCSRMatrix      *G_array;
-   hypre_ParCSRMatrix      *P_array;
-   hypre_ParCSRMatrix      *S_Pattern;
-   hypre_ParVector         *Residual_array;
-   hypre_ParVector         *fsai_kaporin_gradient;
-   hypre_ParVector         *fsai_nnz_per_row;
-   hypre_ParVector         *fsai_nnz_cum_sum;
-   HYPRE_Real              fsai_tolerance;
-   HYPRE_Int               fsai_max_steps;
-   HYPRE_Int               fsai_max_step_size;
-   HYPRE_Int               fsai_logging;
-   HYPRE_Int               fsai_print_level;
-   HYPRE_Int               debug_flag;
+   hypre_ParCSRMatrix      *P_array;                
+   hypre_ParCSRMatrix      *S_Pattern;              
+   hypre_ParVector         *kaporin_gradient;       
+   hypre_ParVector         *nnz_per_row;            
+   hypre_ParVector         *nnz_cum_sum;            
+   HYPRE_Real              kap_tolerance           = hypre_ParFSAIDataKapTolerance(fsai_data);
+   HYPRE_Int               max_steps               = hypre_ParFSAIDataMaxSteps(fsai_data);
+   HYPRE_Int               max_step_size           = hypre_ParFSAIDataMaxStepSize(fsai_data);
+   HYPRE_Int               logging                 = hypre_ParFSAIDataLogging(fsai_data);
+   HYPRE_Int               print_level             = hypre_ParFSAIDataPrintLevel(fsai_data);
+   HYPRE_Int               debug_flag;             = hypre_ParFSAIDataDebugFlag(fsai_data);
 
-   hypre_MemoryLocation    memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
    /* Local variables */
 
+   HYPRE_Int num_rows      = hypre_ParCSRMatrixGlobalNumRows(A);
+
    HYPRE_Int               num_procs, my_id, num_threads;
-   hypre_ParCSRMatrix      *Gtemp;
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
    num_threads = hypre_NumThreads;
 
-   fsai_tolerance       = hypre_ParFSAIDataTolerance(fsai_data);
-   fsai_max_steps       = hypre_ParFSAIDataMaxSteps(fsai_data);
-   fsai_max_steps_size  = hypre_ParFSAIDataMaxStepSize(fsai_data);
-   fsai_logging         = hypre_ParFSAIDataLogging(fsai_data);
-   fsai_print_level     = hypre_ParFSAIDataPrintLevel(fsai_data);
-   debug_flag           = hypre_ParFSAIDataDebugFlag(fsai_data);
+   G_array           = hypre_ParFSAIDataGArray(fsai_data);
+   P_array           = hypre_ParFSAIDataPArray(fsai_data);
+   S_Pattern         = hypre_ParFSAIDataSPattern(fsai_data);
+   kaporin_gradient  = hypre_ParFSAIDataKaporinGradient(fsai_data);
+   nnz_per_row       = hypre_ParFSAIDataNnzPerRow(fsai_data);
+   nnz_cum_sum       = hypre_ParFSAIDataNnzCumSum(fsai_data);
 
-   hypre_ParCSRMatrixSetNumNonzeros(A);
-   hypre_ParCSRMatrixSetDNumNonzeros(A);
+   /* free up storage in case of new setup without previous destroy */
 
-   A_array = hypre_ParFSAIDataAArray(fsai_data);
-   G_array = hypre_ParFSAIDataGArray(fsai_data);
-   P_array = hypre_ParFSAIDataPArray(fsai_data);
+   if( G_array || P_array || S_Pattern || kaporin_gradient || nnz_per_row || nnz_cum_sum )
+   {
+      if( G_array != NULL )
+         hypre_ParCSRMatrixDestroy(G_array);
+      
+      if( P_array != NULL )
+         hypre_ParCSRMatrixDestroy(P_array);
+      
+      if( S_Pattern != NULL )
+         hypre_ParCSRMatrixDestroy(S_Pattern);
+       
+      if( kaporin_gradient != NULL )
+         hypre_ParCSRVectorDestroy(kaporin_gradient);
+      
+      if( nnz_per_row != NULL )
+         hypre_ParCSRVectorDestroy(nnz_per_row);
+      
+      if( nnz_cum_sum != NULL )
+         hypre_ParCSRVectorDestroy(nnz_cum_sum);
+   }
 
-   HYPRE_ANNOTATE_FUNC_BEGIN;
+   G_array = hypre_CTAlloc(hypreCSRMatrix*, num_rows, HYPRE_MEMORY_HOST); 
+   P_array = hypre_CTAlloc(hypreCSRMatrix*, num_rows, HYPRE_MEMORY_HOST);     //XXX: Can probably delete P_array, store new nonzero space in temp vector, then do a row merge with S_Pattern - will change later 
+   S_Pattern = hypre_CTAlloc(hypreCSRMatrix*, num_rows, HYPRE_MEMORY_HOST); 
+   kaporin_gradient = hypre_CTAlloc(hypreCSRVector*, num_rows, HYPRE_MEMORY_HOST); 
+   nnz_per_row = hypre_CTAlloc(hypreCSRVector*, num_rows, HYPRE_MEMORY_HOST); 
+   nnz_cum_sum = hypre_CTAlloc(hypreCSRVector*, num_rows, HYPRE_MEMORY_HOST); 
 
-   HYPRE_FUNC_ANNOTATE_END;
-
-   
+   return(hypre_error_flag);
 
 }

@@ -74,7 +74,6 @@ hypre_FSAICreate()
    hypre_ParFSAIDataAmat(fsai_data)             = NULL;
    hypre_ParFSAIDataAinv(fsai_data)             = NULL;
    hypre_ParFSAIDataSPattern(fsai_data)         = NULL;
-   hypre_ParFSAIDataAArray(fsai_data)           = NULL;
    hypre_ParFSAIDataGArray(fsai_data)           = NULL;
    hypre_ParFSAIDataPArray(fsai_data)           = NULL;
    hypre_ParFSAIDatabvec(fsai_data)             = NULL;
@@ -124,7 +123,6 @@ hypre_FSAIDestroy( void *data )
    if (hypre_ParFSAIDatabvec(fsai_data)) hypre_TFree(hypre_ParFSAIDatabvec(fsai_data), HYPRE_MEMORY_HOST);
    if (hypre_ParFSAIDataGmat(fsai_data)) hypre_TFree(hypre_ParFSAIDataAinv(fsai_data), HYPRE_MEMORY_HOST);
    if (hypre_ParFSAIDataCommInfo(fsai_data)) hypre_TFree(hypre_ParFSAIDataCommInfo(fsai_data), HYPRE_MEMORY_HOST);
-   if (hypre_ParFSAIDataAArray(fsai_data)) hypre_TFree(hypre_ParFSAIDataAArray(fsai_data), HYPRE_MEMORY_HOST);
    if (hypre_ParFSAIDataGArray(fsai_data)) hypre_TFree(hypre_ParFSAIDataGArray(fsai_data), HYPRE_MEMORY_HOST);
    if (hypre_ParFSAIDataPArray(fsai_data)) hypre_TFree(hypre_ParFSAIDataPArray(fsai_data), HYPRE_MEMORY_HOST);
 

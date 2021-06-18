@@ -39,7 +39,6 @@ typedef struct
     
    
    /* Data generated in the setup phase */
-   hypre_ParCSRMatrix   *A_array;
    hypre_ParVector      *G_Array;
    hypre_ParVector      *P_Array;         
 
@@ -83,7 +82,6 @@ typedef struct
 #define hypre_ParFSAIDataNumVariables(fsai_data)            ((fsai_data) -> num_variables)
    
 /* Data generated in the setup phase */
-#define hypre_ParFSAIDataAArray(fsai_data)                  ((fsai_data) -> A_array)
 #define hypre_ParFSAIDataGArray(fsai_data)                  ((fsai_data) -> G_array)
 #define hypre_ParFSAIDataPArray(fsai_data)                  ((fsai_data) -> P_array)
 
