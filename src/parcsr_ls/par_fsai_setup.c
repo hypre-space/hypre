@@ -49,7 +49,7 @@ hypre_FSAISetup( void               *fsai_vdata,
 
    /* Local variables */
 
-   HYPRE_Int num_rows      = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_Int num_rows      = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
 
    HYPRE_Int               num_procs, my_id, num_threads;
 
@@ -94,6 +94,8 @@ hypre_FSAISetup( void               *fsai_vdata,
    kaporin_gradient = hypre_CTAlloc(hypreCSRVector*, num_rows, HYPRE_MEMORY_HOST); 
    nnz_per_row = hypre_CTAlloc(hypreCSRVector*, num_rows, HYPRE_MEMORY_HOST); 
    nnz_cum_sum = hypre_CTAlloc(hypreCSRVector*, num_rows, HYPRE_MEMORY_HOST); 
+
+   hypre_ParFSAISetNumRows(fsai_data, num_rows);
 
    return(hypre_error_flag);
 

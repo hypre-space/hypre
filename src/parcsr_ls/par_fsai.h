@@ -19,10 +19,10 @@ typedef struct
 
    /* FSAI Problem data */
    hypre_ParCSRMatrix   *A_mat;
-   HYPRE_Int            num_variables;
+   HYPRE_Int            num_rows;
    HYPRE_Int            max_steps;           /* Maximum iterations run per row */
    HYPRE_Int            max_step_size;       /* Maximum number of nonzero elements added to a row of G per step */
-   HYPRE_Real           kap_tolerance;           /* Minimum amount of change between two steps */ 
+   HYPRE_Real           kap_tolerance;       /* Minimum amount of change between two steps */ 
    hypre_ParCSRMatrix   *G_mat;              /* Matrix holding FSAI factor. M^(-1) = G'G */
    hypre_ParCSRMatrix   *S_Pattern;          /* Sparsity Pattern */
    hypre_ParVector      *kaporin_gradient;
@@ -79,7 +79,7 @@ typedef struct
 #define hypre_ParFSAIDataMaxIterations(fsai_data)           ((fsai_data) -> max_iterations)
 #define hypre_ParFSAIDataTolerance(fsai_data)               ((fsai_data) -> tolerance)
 #define hypre_ParFSAIDataCommInfo(fsai_data)                ((fsai_data) -> comm_info)
-#define hypre_ParFSAIDataNumVariables(fsai_data)            ((fsai_data) -> num_variables)
+#define hypre_ParFSAIDataNumRows(fsai_data)                 ((fsai_data) -> num_rows)
    
 /* Data generated in the setup phase */
 #define hypre_ParFSAIDataGArray(fsai_data)                  ((fsai_data) -> G_array)
