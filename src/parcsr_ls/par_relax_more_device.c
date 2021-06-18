@@ -15,7 +15,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "float.h"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #include "_hypre_utilities.hpp"
 #include <thrust/for_each.h>
 #include <thrust/iterator/zip_iterator.h>

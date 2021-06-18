@@ -15,7 +15,7 @@
 #include "_hypre_parcsr_mv.h"
 #include "float.h"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #include "_hypre_utilities.hpp"
 
 /**
@@ -163,11 +163,8 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
           thrust::make_zip_iterator(thrust::make_tuple(u_data + num_rows, orig_u + num_rows, ds_data + num_rows)),
           oop_xpyz<HYPRE_Real>());
 
-      hypre_ParVectorDestroy(tmp_vec);
 
    } /* end of scaling code */
-
-   hypre_TFree(orig_u, hypre_CSRMatrixMemoryLocation(A_diag));
 
    return hypre_error_flag;
 }
