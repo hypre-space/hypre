@@ -18,7 +18,6 @@
 #include <cublas_v2.h>
 #include <cusparse.h>
 
-
 #ifndef CUDART_VERSION
 #error CUDART_VERSION Undefined!
 #endif

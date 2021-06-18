@@ -67,7 +67,8 @@ template <typename T>
 struct save_and_scale
 {
    typedef thrust::tuple<T &, T &, T> Tuple;
-   const T                            scale;
+
+   const T scale;
 
    save_and_scale(T _scale) : scale(_scale) {}
 
@@ -77,8 +78,6 @@ struct save_and_scale
       thrust::get<1>(t) = thrust::get<2>(t) * scale;
    }
 };
-
-
 
 /**
  * @brief xpyz
