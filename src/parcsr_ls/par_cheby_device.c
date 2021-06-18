@@ -40,9 +40,11 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
                                     HYPRE_Int           order, /* polynomial order */
                                     HYPRE_Int           scale, /* scale by diagonal?*/
                                     HYPRE_Int           variant,
-                                    hypre_ParVector    *u, /* initial/updated approximation */
-                                    hypre_ParVector    *v /* temporary vector */,
-                                    hypre_ParVector    *r /*another temp vector */)
+                                    hypre_ParVector    *u,          /* initial/updated approximation */
+                                    hypre_ParVector    *v,          /* temporary vector */
+                                    hypre_ParVector    *r,          /*another temp vector */
+                                    hypre_ParVector    *orig_u_vec, /*another temp vector */
+                                    hypre_ParVector    *tmp_vec)       /*a potential temp vector */
 {
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real      *u_data = hypre_VectorData(hypre_ParVectorLocalVector(u));
@@ -61,8 +63,6 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
 
    HYPRE_Real *tmp_data;
 
-   hypre_ParVector *tmp_vec;
-
    /* u = u + p(A)r */
 
    if (order > 4) order = 4;
@@ -71,7 +71,8 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
    /* we are using the order of p(A) */
    cheby_order = order - 1;
 
-   orig_u = hypre_CTAlloc(HYPRE_Real, num_rows, hypre_CSRMatrixMemoryLocation(A_diag));
+   hypre_assert(hypre_VectorSize(hypre_ParVectorLocalVector(orig_u_v)) >= num_rows);
+   HYPRE_Real *orig_u = hypre_VectorData(hypre_ParVectorLocalVector(orig_u_v));
 
    if (!scale)
    {
@@ -107,11 +108,6 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
 
       /*grab 1/sqrt(diagonal) */
 
-      tmp_vec = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
-                                      hypre_ParCSRMatrixGlobalNumRows(A),
-                                      hypre_ParCSRMatrixRowStarts(A));
-      hypre_ParVectorInitialize_v2(tmp_vec, hypre_CSRMatrixMemoryLocation(A_diag));
-      hypre_ParVectorSetPartitioningOwner(tmp_vec, 0);
       tmp_data = hypre_VectorData(hypre_ParVectorLocalVector(tmp_vec));
 
       /* get ds_data and get scaled residual: r = D^(-1/2)f -
@@ -120,6 +116,8 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
       hypre_ParCSRMatrixMatvec(-1.0, A, u, 0.0, tmp_vec);
       /* r = ds .* (f + tmp) */
 
+      /* TODO: It might be possible to merge this and the next call to:
+       * r[j] = ds_data[j] * (f_data[j] + tmp_data[j]); o[j] = u[j]; u[j] = r[j] * coef */
       HYPRE_THRUST_CALL(for_each,
                         thrust::make_zip_iterator(thrust::make_tuple(r_data, ds_data, f_data, tmp_data)),
                         thrust::make_zip_iterator(thrust::make_tuple(r_data, ds_data, f_data, tmp_data)) + num_rows,

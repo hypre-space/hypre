@@ -219,14 +219,9 @@ hypre_ParCSRMaxEigEstimateCGHost(hypre_ParCSRMatrix *A,     /* matrix to relax w
 
    HYPRE_Real lambda_max ;
    HYPRE_Real beta, gamma = 0.0, alpha, sdotp, gamma_old, alphainv;
-   HYPRE_Real diag;
    HYPRE_Real lambda_min;
    HYPRE_Real *s_data, *p_data, *ds_data, *u_data;
    HYPRE_Int local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
-
-   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Real *A_diag_data = hypre_CSRMatrixData(A_diag);
-   HYPRE_Int *A_diag_i = hypre_CSRMatrixI(A_diag);
 
    /* check the size of A - don't iterate more than the size */
    HYPRE_BigInt size = hypre_ParCSRMatrixGlobalNumRows(A);
@@ -433,11 +428,31 @@ hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with */
    HYPRE_Real *coefs   = NULL;
    HYPRE_Real *ds_data = NULL;
 
+   hypre_ParVector *tmp_vec    = NULL;
+   hypre_ParVector *orig_u_vec = NULL;
+
    hypre_ParCSRRelax_Cheby_Setup(A, max_eig, min_eig, fraction, order, scale, variant, &coefs, &ds_data);
-   hypre_ParCSRRelax_Cheby_Solve(A, f, ds_data, coefs, order, scale, variant, u, v, r);
+
+   orig_u_vec = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+                                      hypre_ParCSRMatrixGlobalNumRows(A),
+                                      hypre_ParCSRMatrixRowStarts(A));
+   hypre_ParVectorInitialize_v2(orig_u_vec, hypre_ParCSRMatrixMemoryLocation(A));
+   hypre_ParVectorSetPartitioningOwner(orig_u_vec, 0);
+
+   if (scale)
+   {
+      tmp_vec = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+                                      hypre_ParCSRMatrixGlobalNumRows(A),
+                                      hypre_ParCSRMatrixRowStarts(A));
+      hypre_ParVectorInitialize_v2(tmp_vec, hypre_ParCSRMatrixMemoryLocation(A));
+      hypre_ParVectorSetPartitioningOwner(tmp_vec, 0);
+   }
+   hypre_ParCSRRelax_Cheby_Solve(A, f, ds_data, coefs, order, scale, variant, u, v, r, orig_u_vec, tmp_vec);
 
    hypre_TFree(ds_data, hypre_ParCSRMatrixMemoryLocation(A));
    hypre_TFree(coefs, HYPRE_MEMORY_HOST);
+   hypre_ParVectorDestroy(orig_u_vec);
+   hypre_ParVectorDestroy(tmp_vec);
 
    return hypre_error_flag;
 }
