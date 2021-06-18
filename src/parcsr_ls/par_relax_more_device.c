@@ -23,38 +23,6 @@
 HYPRE_Int  hypre_LINPACKcgtql1(HYPRE_Int *, HYPRE_Real *, HYPRE_Real *, HYPRE_Int *);
 HYPRE_Real hypre_LINPACKcgpthy(HYPRE_Real *, HYPRE_Real *);
 
-/**
- * @brief xpay
- *
- * Performs
- * y = x + a*y
- * For vectors x,y, scalar a
- */
-template <typename T>
-struct xpay
-{
-   typedef thrust::tuple<T &, T> Tuple;
-
-   const T scale;
-   xpay(T _scale) : scale(_scale) {}
-
-   __host__ __device__ void operator()(Tuple t) { thrust::get<0>(t) = thrust::get<1>(t) + scale * thrust::get<0>(t); }
-};
-
-/**
- * @brief xy
- *
- * Performs
- * y = x .* y
- * For vectors x,y
- */
-template <typename T>
-struct xy
-{
-   typedef thrust::tuple<T &, T> Tuple;
-
-   __host__ __device__ void operator()(Tuple t) { thrust::get<0>(t) = thrust::get<1>(t) * thrust::get<0>(t); }
-};
 
 /**
  * @brief Calculates row sums and other metrics of a matrix on the device
@@ -418,26 +386,22 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
          beta = gamma / gamma_old;
 
          /* p = s + beta p */
-         HYPRE_THRUST_CALL(for_each,
-                           thrust::make_zip_iterator(thrust::make_tuple(p_data, s_data)),
-                           thrust::make_zip_iterator(thrust::make_tuple(p_data, s_data)) + local_size,
-                           xpay<HYPRE_Real>(beta));
+         HYPRE_THRUST_CALL(transform,
+                           s_data, s_data + local_size, p_data, p_data,
+                           _1 + beta * _2);
       }
 
       if (scale)
       {
          /* s = D^{-1/2}A*D^{-1/2}*p */
-         HYPRE_THRUST_CALL(for_each,
-                           thrust::make_zip_iterator(thrust::make_tuple(u_data, ds_data, p_data)),
-                           thrust::make_zip_iterator(thrust::make_tuple(u_data, ds_data, p_data)) + local_size,
-                           oop_xy<HYPRE_Real>());
+
+         /* u = ds .* p */
+         HYPRE_THRUST_CALL( transform, ds_data, ds_data + local_size, p_data, u_data, _1 * _2 );
 
          hypre_ParCSRMatrixMatvec(1.0, A, u, 0.0, s);
 
-         HYPRE_THRUST_CALL(for_each,
-                           thrust::make_zip_iterator(thrust::make_tuple(s_data, ds_data)),
-                           thrust::make_zip_iterator(thrust::make_tuple(s_data, ds_data)) + local_size,
-                           xy<HYPRE_Real>());
+         /* s = ds .* s */
+         HYPRE_THRUST_CALL( transform, ds_data, ds_data + local_size, s_data, s_data, _1 * _2 );
       }
       else
       {

@@ -19,6 +19,86 @@
 #include "_hypre_utilities.hpp"
 
 /**
+ * @brief waxpyz
+ *
+ * Performs
+ * w = a*x+y.*z
+ * For scalars w,x,y,z and constant a (indices 0, 1, 2, 3 respectively)
+ */
+template <typename T>
+struct waxpyz
+{
+   typedef thrust::tuple<T &, T, T, T> Tuple;
+
+   const T scale;
+   oop_axpyz(T _scale) : scale(_scale) {}
+
+   __host__ __device__ void operator()(Tuple t)
+   {
+      thrust::get<0>(t) = scale * thrust::get<1>(t) + thrust::get<2>(t) * thrust::get<3>(t);
+   }
+};
+
+/**
+ * @brief wxypz
+ *
+ * Performs
+ * o = x * (y .+ z)
+ * For scalars o,x,y,z (indices 0, 1, 2, 3 respectively)
+ */
+template <typename T>
+struct wxypz
+{
+   typedef thrust::tuple<T &, T, T, T> Tuple;
+   __host__ __device__ void            operator()(Tuple t)
+   {
+      thrust::get<0>(t) = thrust::get<1>(t) * (thrust::get<2>(t) + thrust::get<3>(t));
+   }
+};
+/**
+ * @brief Saves u into o, then scales r placing the result in u
+ *
+ * Performs
+ * o = u
+ * u = r * a
+ * For scalars o and u, with constant a
+ */
+template <typename T>
+struct save_and_scale
+{
+   typedef thrust::tuple<T &, T &, T> Tuple;
+   const T                            scale;
+
+   save_and_scale(T _scale) : scale(_scale) {}
+
+   __host__ __device__ void operator()(Tuple t)
+   {
+      thrust::get<0>(t) = thrust::get<1>(t);
+      thrust::get<1>(t) = thrust::get<2>(t) * scale;
+   }
+};
+
+
+
+/**
+ * @brief xpyz
+ *
+ * Performs
+ * y = x + y .* z
+ * For scalars x,y,z (indices 1,0,2 respectively)
+ */
+template <typename T>
+struct oop_xpyz
+{
+   typedef thrust::tuple<T &, T, T> Tuple;
+
+   __host__ __device__ void operator()(Tuple t)
+   {
+      thrust::get<0>(t) = thrust::get<1>(t) + thrust::get<2>(t) * thrust::get<0>(t);
+   }
+};
+
+/**
  * @brief Solve using a chebyshev polynomial on the device
  *
  * @param[in] A Matrix to relax with
@@ -93,15 +173,11 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
          mult = coefs[i];
          /* u = mult * r + v */
 
-         HYPRE_THRUST_CALL(
-             for_each,
-             thrust::make_zip_iterator(thrust::make_tuple(u_data, r_data, v_data)),
-             thrust::make_zip_iterator(thrust::make_tuple(u_data + num_rows, r_data + num_rows, v_data + num_rows)),
-             oop_axpy<HYPRE_Real>(mult));
+         HYPRE_THRUST_CALL( transform, x_data, x_data + size, r_data, u_data, alpha * _1 + _2 );
       }
 
       /* u = o + u */
-      HYPRE_THRUST_CALL(transform, orig_u, orig_u + num_rows, u_data, u_data, xpy<HYPRE_Real>());
+      HYPRE_THRUST_CALL(transform, orig_u, orig_u + num_rows, u_data, u_data, _1 + _2);
    }
    else /* scaling! */
    {
@@ -137,10 +213,7 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
       {
          /* v = D^(-1/2)AD^(-1/2)u */
          /* tmp = ds .* u */
-         HYPRE_THRUST_CALL(for_each,
-                           thrust::make_zip_iterator(thrust::make_tuple(tmp_data, ds_data, u_data)),
-                           thrust::make_zip_iterator(thrust::make_tuple(tmp_data, ds_data, u_data)) + num_rows,
-                           oop_xy<HYPRE_Real>());
+         HYPRE_THRUST_CALL( transform, ds_data, ds_data + size, u_data, tmp_data, _1 * _2 );
 
          hypre_ParCSRMatrixMatvec(1.0, A, tmp_vec, 0.0, v);
 
