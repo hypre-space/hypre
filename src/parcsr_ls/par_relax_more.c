@@ -89,6 +89,12 @@ hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax with */
    hypre_MPI_Allreduce(&max_norm, &temp, 1, HYPRE_MPI_REAL, hypre_MPI_MAX, hypre_ParCSRMatrixComm(A));
    max_norm = temp;
 
+   hypre_MPI_Allreduce(&pos_diag, &temp, 1, HYPRE_MPI_INT, hypre_MPI_SUM, hypre_ParCSRMatrixComm(A));
+   pos_diag = temp;
+
+   hypre_MPI_Allreduce(&neg_diag, &temp, 1, HYPRE_MPI_INT, hypre_MPI_SUM, hypre_ParCSRMatrixComm(A));
+   neg_diag = temp;
+
    /* from Charles */
    if ( pos_diag == 0 && neg_diag > 0 ) max_norm = - max_norm;
 
