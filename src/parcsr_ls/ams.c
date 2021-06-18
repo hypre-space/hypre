@@ -1916,7 +1916,6 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
             HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePixyz_copy, gDim, bDim,
                                G_diag_nrows, dim, G_diag_I, G_diag_data, Gx_data, Gy_data, NULL,
                                Pix_diag_data, Piy_diag_data, NULL );
-
          }
          else
 #endif
@@ -1956,21 +1955,45 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
          HYPRE_Int *Pix_diag_J = hypre_CSRMatrixJ(Pix_diag);
          HYPRE_Real *Pix_diag_data = hypre_CSRMatrixData(Pix_diag);
 
-         for (i = 0; i < G_diag_nrows+1; i++)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         if (exec == HYPRE_EXEC_DEVICE)
          {
-            Pix_diag_I[i] = G_diag_I[i];
-         }
+            HYPRE_THRUST_CALL( copy_n,
+                               G_diag_I,
+                               G_diag_nrows + 1,
+                               Pix_diag_I );
 
-         for (i = 0; i < G_diag_nnz; i++)
+            HYPRE_THRUST_CALL( copy_n,
+                               G_diag_J,
+                               G_diag_nnz,
+                               Pix_diag_J );
+
+            dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+            dim3 gDim = hypre_GetDefaultCUDAGridDimension(G_diag_nrows, "warp", bDim);
+
+            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePixyz_copy, gDim, bDim,
+                               G_diag_nrows, dim, G_diag_I, G_diag_data, Gx_data, NULL, NULL,
+                               Pix_diag_data, NULL, NULL );
+         }
+         else
+#endif
          {
-            Pix_diag_J[i] = G_diag_J[i];
-         }
-
-         for (i = 0; i < G_diag_nrows; i++)
-            for (j = G_diag_I[i]; j < G_diag_I[i+1]; j++)
+            for (i = 0; i < G_diag_nrows+1; i++)
             {
-               *Pix_diag_data++ = fabs(G_diag_data[j]) * 0.5 * Gx_data[i];
+               Pix_diag_I[i] = G_diag_I[i];
             }
+
+            for (i = 0; i < G_diag_nnz; i++)
+            {
+               Pix_diag_J[i] = G_diag_J[i];
+            }
+
+            for (i = 0; i < G_diag_nrows; i++)
+               for (j = G_diag_I[i]; j < G_diag_I[i+1]; j++)
+               {
+                  *Pix_diag_data++ = fabs(G_diag_data[j]) * 0.5 * Gx_data[i];
+               }
+         }
       }
 
 
@@ -2160,22 +2183,49 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
          HYPRE_BigInt *G_cmap = hypre_ParCSRMatrixColMapOffd(G);
          HYPRE_BigInt *Pix_cmap = hypre_ParCSRMatrixColMapOffd(Pix);
 
-         if (G_offd_ncols)
-            for (i = 0; i < G_offd_nrows+1; i++)
-            {
-               Pix_offd_I[i] = G_offd_I[i];
-            }
-
-         for (i = 0; i < G_offd_nnz; i++)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         if (exec == HYPRE_EXEC_DEVICE)
          {
-            Pix_offd_J[i] = G_offd_J[i];
-         }
-
-         for (i = 0; i < G_offd_nrows; i++)
-            for (j = G_offd_I[i]; j < G_offd_I[i+1]; j++)
+            if (G_offd_ncols)
             {
-               *Pix_offd_data++ = fabs(G_offd_data[j]) * 0.5 * Gx_data[i];
+               HYPRE_THRUST_CALL( copy_n,
+                                  G_offd_I,
+                                  G_offd_nrows + 1,
+                                  Pix_offd_I );
             }
+
+            HYPRE_THRUST_CALL( copy_n,
+                               G_offd_J,
+                               G_offd_nnz,
+                               Pix_offd_J );
+
+            dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+            dim3 gDim = hypre_GetDefaultCUDAGridDimension(G_offd_nrows, "warp", bDim);
+
+            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePixyz_copy, gDim, bDim,
+                               G_offd_nrows, dim, G_offd_I, G_offd_data, Gx_data, NULL, NULL,
+                               Pix_offd_data, NULL, NULL );
+         }
+         else
+#endif
+         {
+            if (G_offd_ncols)
+               for (i = 0; i < G_offd_nrows+1; i++)
+               {
+                  Pix_offd_I[i] = G_offd_I[i];
+               }
+
+            for (i = 0; i < G_offd_nnz; i++)
+            {
+               Pix_offd_J[i] = G_offd_J[i];
+            }
+
+            for (i = 0; i < G_offd_nrows; i++)
+               for (j = G_offd_I[i]; j < G_offd_I[i+1]; j++)
+               {
+                  *Pix_offd_data++ = fabs(G_offd_data[j]) * 0.5 * Gx_data[i];
+               }
+         }
 
          for (i = 0; i < G_offd_ncols; i++)
          {
