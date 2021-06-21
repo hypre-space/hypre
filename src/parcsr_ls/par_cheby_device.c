@@ -31,7 +31,7 @@ struct waxpyz
    typedef thrust::tuple<T &, T, T, T> Tuple;
 
    const T scale;
-   oop_axpyz(T _scale) : scale(_scale) {}
+   waxpyz(T _scale) : scale(_scale) {}
 
    __host__ __device__ void operator()(Tuple t)
    {
@@ -87,7 +87,7 @@ struct save_and_scale
  * For scalars x,y,z (indices 1,0,2 respectively)
  */
 template <typename T>
-struct oop_xpyz
+struct xpyz
 {
    typedef thrust::tuple<T &, T, T> Tuple;
 
@@ -136,7 +136,6 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
    HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag);
 
    HYPRE_Real  mult;
-   HYPRE_Real *orig_u;
 
    HYPRE_Int cheby_order;
 
@@ -150,8 +149,8 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
    /* we are using the order of p(A) */
    cheby_order = order - 1;
 
-   hypre_assert(hypre_VectorSize(hypre_ParVectorLocalVector(orig_u_v)) >= num_rows);
-   HYPRE_Real *orig_u = hypre_VectorData(hypre_ParVectorLocalVector(orig_u_v));
+   hypre_assert(hypre_VectorSize(hypre_ParVectorLocalVector(orig_u_vec)) >= num_rows);
+   HYPRE_Real *orig_u = hypre_VectorData(hypre_ParVectorLocalVector(orig_u_vec));
 
    if (!scale)
    {
@@ -172,7 +171,7 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
          mult = coefs[i];
          /* u = mult * r + v */
 
-         HYPRE_THRUST_CALL( transform, x_data, x_data + size, r_data, u_data, alpha * _1 + _2 );
+         HYPRE_THRUST_CALL( transform, r_data, r_data + num_rows, v_data, u_data, mult * _1 + _2 );
       }
 
       /* u = o + u */
@@ -196,7 +195,7 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
       HYPRE_THRUST_CALL(for_each,
                         thrust::make_zip_iterator(thrust::make_tuple(r_data, ds_data, f_data, tmp_data)),
                         thrust::make_zip_iterator(thrust::make_tuple(r_data, ds_data, f_data, tmp_data)) + num_rows,
-                        oop_xypz<HYPRE_Real>());
+                        wxypz<HYPRE_Real>());
 
       /* save original u, then start
          the iteration by multiplying r by the cheby coef.*/
@@ -212,7 +211,7 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
       {
          /* v = D^(-1/2)AD^(-1/2)u */
          /* tmp = ds .* u */
-         HYPRE_THRUST_CALL( transform, ds_data, ds_data + size, u_data, tmp_data, _1 * _2 );
+         HYPRE_THRUST_CALL( transform, ds_data, ds_data + num_rows, u_data, tmp_data, _1 * _2 );
 
          hypre_ParCSRMatrixMatvec(1.0, A, tmp_vec, 0.0, v);
 
@@ -223,7 +222,7 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
          HYPRE_THRUST_CALL(for_each,
                            thrust::make_zip_iterator(thrust::make_tuple(u_data, r_data, ds_data, v_data)),
                            thrust::make_zip_iterator(thrust::make_tuple(u_data, r_data, ds_data, v_data)) + num_rows,
-                           oop_axpyz<HYPRE_Real>(mult));
+                           waxpyz<HYPRE_Real>(mult));
       } /* end of cheby_order loop */
 
       /* now we have to scale u_data before adding it to u_orig*/
@@ -233,7 +232,7 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
           for_each,
           thrust::make_zip_iterator(thrust::make_tuple(u_data, orig_u, ds_data)),
           thrust::make_zip_iterator(thrust::make_tuple(u_data + num_rows, orig_u + num_rows, ds_data + num_rows)),
-          oop_xpyz<HYPRE_Real>());
+          xpyz<HYPRE_Real>());
 
 
    } /* end of scaling code */
