@@ -717,7 +717,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParVectorSetPartitioningOwner(Vtemp, 0);
    hypre_ParAMGDataVtemp(amg_data) = Vtemp;
 
-   if ( (smooth_num_levels > 0 && smooth_type > 9) || relax_weight[0] < 0 || omega[0] < 0 || hypre_ParAMGDataSchwarzRlxWeight(amg_data) < 0 )
+   /* If we are doing Cheby relaxation, we also need up two more temp vectors.
+    * If cheby_scale is false, only need one, otherwise need two */
+   if ((smooth_num_levels > 0 && smooth_type > 9) || relax_weight[0] < 0 || omega[0] < 0 ||
+       hypre_ParAMGDataSchwarzRlxWeight(amg_data) < 0 ||
+       (grid_relax_type[0] == 16 || grid_relax_type[1] == 16 || grid_relax_type[2] == 16 || grid_relax_type[3] == 16))
    {
       Ptemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
                                     hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
@@ -726,12 +730,18 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       hypre_ParVectorSetPartitioningOwner(Ptemp, 0);
       hypre_ParAMGDataPtemp(amg_data) = Ptemp;
 
-      Rtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
-                                    hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
-                                    hypre_ParCSRMatrixRowStarts(A_array[0]));
-      hypre_ParVectorInitialize_v2(Rtemp, memory_location);
-      hypre_ParVectorSetPartitioningOwner(Rtemp, 0);
-      hypre_ParAMGDataRtemp(amg_data) = Rtemp;
+      /* If not doing chebyshev relaxation, or (doing chebyshev relaxation and scaling) */
+      if (!(grid_relax_type[0] == 16 || grid_relax_type[1] == 16 || grid_relax_type[2] == 16 ||
+            grid_relax_type[3] == 16) ||
+          (hypre_ParAMGDataChebyScale(amg_data)))
+      {
+         Rtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
+                                       hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
+                                       hypre_ParCSRMatrixRowStarts(A_array[0]));
+         hypre_ParVectorInitialize_v2(Rtemp, memory_location);
+         hypre_ParVectorSetPartitioningOwner(Rtemp, 0);
+         hypre_ParAMGDataRtemp(amg_data) = Rtemp;
+      }
    }
 
    /* See if we need the Ztemp vector */
@@ -3016,6 +3026,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       else if (grid_relax_type[1] == 16 || grid_relax_type[2] == 16 || (grid_relax_type[3] == 16 && j== (num_levels-1)))
       {
          HYPRE_Int scale = hypre_ParAMGDataChebyScale(amg_data);
+         /* If the full array is being considered, create the relevant temp vectors */
+
          HYPRE_Int variant = hypre_ParAMGDataChebyVariant(amg_data);
          HYPRE_Real max_eig, min_eig = 0;
          HYPRE_Real *coefs = NULL;
@@ -3036,6 +3048,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
          cheby_ds[j]                             = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_array[j]));
          hypre_VectorVectorStride(cheby_ds[j])   = hypre_ParCSRMatrixNumRows(A_array[j]);
+         hypre_VectorIndexStride(cheby_ds[j])    = 1;
          hypre_VectorMemoryLocation(cheby_ds[j]) = hypre_ParCSRMatrixMemoryLocation(A_array[j]);
 
          hypre_ParCSRRelax_Cheby_Setup(A_array[j],

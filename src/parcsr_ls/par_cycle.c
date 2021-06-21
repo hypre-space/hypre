@@ -493,7 +493,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   hypre_ParCSRRelax_Cheby_Solve(A_array[level], Aux_F,
                                                 hypre_VectorData(ds[level]), coefs[level],
                                                 cheby_order, scale,
-                                                variant, Aux_U, Vtemp, Ztemp );
+                                                variant, Aux_U, Vtemp, Ztemp, Ptemp, Rtemp );
                }
                else if (relax_type == 17)
                {

@@ -18,7 +18,6 @@
 #include <cublas_v2.h>
 #include <cusparse.h>
 
-
 #ifndef CUDART_VERSION
 #error CUDART_VERSION Undefined!
 #endif
@@ -859,131 +858,7 @@ struct equal : public thrust::unary_function<T,bool>
    }
 };
 
-/**
- * @brief oop_xypz
- *
- * Performs
- * o = x * (y .+ z)
- * For vectors o,x,y,z
- */
-template <typename T>
-struct oop_xypz
-{
-   typedef thrust::tuple<T &, T, T, T> Tuple;
-   __host__ __device__ void            operator()(Tuple t)
-   {
-      thrust::get<0>(t) = thrust::get<1>(t) * (thrust::get<2>(t) + thrust::get<3>(t));
-   }
-};
-/**
- * @brief Saves u into o, then scales r placing the result in u
- *
- * Performs
- * o = u
- * u = r * a
- * For vectors o and u, with scalar a
- */
-template <typename T>
-struct save_and_scale
-{
-   typedef thrust::tuple<T &, T &, T> Tuple;
-   const T                            scale;
 
-   save_and_scale(T _scale) : scale(_scale) {}
-
-   __host__ __device__ void operator()(Tuple t)
-   {
-      thrust::get<0>(t) = thrust::get<1>(t);
-      thrust::get<1>(t) = thrust::get<2>(t) * scale;
-   }
-};
-
-/**
- * @brief Out of place axpy
- *
- * Performs
- * u = alpha * r + v
- * For vectors u and r, v,  with scalar alpha
- */
-template <typename T>
-struct oop_axpy
-{
-   typedef thrust::tuple<T &, T, T> Tuple;
-   const T                          scale;
-
-   oop_axpy(T _scale) : scale(_scale) {}
-
-   __host__ __device__ void operator()(Tuple t) { thrust::get<0>(t) = scale * thrust::get<1>(t) + thrust::get<2>(t); }
-};
-
-/**
- * @brief Add vectors
- *
- * Performs
- * x += y
- * for vectors x,y
- */
-template <typename T>
-struct xpy
-{
-   typedef thrust::tuple<T, T, T> Tuple;
-
-   __host__ __device__ T operator()(const T &x, const T &y) const { return x + y; }
-};
-
-/**
- * @brief oop_xy
- *
- * Performs
- * o = x .* y
- * For vectors o,x,y,z
- */
-template <typename T>
-struct oop_xy
-{
-   typedef thrust::tuple<T &, T, T> Tuple;
-
-   __host__ __device__ void operator()(Tuple t) { thrust::get<0>(t) = thrust::get<1>(t) * thrust::get<2>(t); }
-};
-
-/**
- * @brief oop_axpyz
- *
- * Performs
- * o = a*x+y.*z
- * For vectors x,y,z and scalar a
- */
-template <typename T>
-struct oop_axpyz
-{
-   typedef thrust::tuple<T &, T, T, T> Tuple;
-
-   const T scale;
-   oop_axpyz(T _scale) : scale(_scale) {}
-
-   __host__ __device__ void operator()(Tuple t)
-   {
-      thrust::get<0>(t) = scale * thrust::get<1>(t) + thrust::get<2>(t) * thrust::get<3>(t);
-   }
-};
-
-/**
- * @brief xpyz
- *
- * Performs
- * y = x + y .* z
- * For vectors x,y,z
- */
-template <typename T>
-struct oop_xpyz
-{
-   typedef thrust::tuple<T &, T, T> Tuple;
-
-   __host__ __device__ void operator()(Tuple t)
-   {
-      thrust::get<0>(t) = thrust::get<1>(t) + thrust::get<2>(t) * thrust::get<0>(t);
-   }
-};
 
 /* cuda_utils.c */
 dim3 hypre_GetDefaultCUDABlockDimension();
