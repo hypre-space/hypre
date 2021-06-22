@@ -471,3 +471,49 @@ HYPRE_Int hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to rela
 
   return hypre_error_flag;
 }
+
+HYPRE_Int hypre_ParCSRRelax_GMRES_Solve(hypre_ParCSRMatrix *A, /* matrix to relax with */
+                            hypre_ParVector *f,    /* right-hand side */
+                            HYPRE_Real *coefs_real,
+                            HYPRE_Real *coefs_imag,
+                            HYPRE_Int order,            /* polynomial order */
+                            hypre_ParVector *prod,
+                            hypre_ParVector *p,
+                            hypre_ParVector *tmp)
+
+{
+   // Topy prod <- x
+   HYPRE_ParVectorCopy(f, prod);
+   int i = 0;
+   while (i < order)
+   {
+      if (coefs_imag[i] == 0)
+      {
+         HYPRE_Real alpha = 1 / coefs_real[i];
+         hypre_ParVectorAxpy(alpha, prod, p);
+         /* prod <- prod - alpha*mv(prod) */
+         hypre_ParCSRMatrixMatvec(-alpha, A, prod, 1.0, prod);
+         i++;
+      }
+      else
+      {
+         HYPRE_Real a = coefs_real[i];
+         HYPRE_Real b = coefs_imag[i];
+
+         hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A, prod, 2 * a, prod, tmp);
+         HYPRE_Real alpha = 1 / (a * a + b * b);
+
+         hypre_ParVectorAxpy(alpha, tmp, p);
+         if (i < order - 2)
+         {
+            hypre_ParCSRMatrixMatvec(-alpha, A, tmp, 1.0, prod);
+         }
+         i += 2;
+      }
+   }
+   if (coefs_imag[order-1] == 0)
+   {
+      hypre_ParVectorAxpy(1.0 / coefs_real[order-1], prod, p);
+   }
+   return hypre_error_flag;
+}

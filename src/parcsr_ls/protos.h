@@ -987,6 +987,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_Solve ( hypre_ParCSRMatrix *A , hypre_ParVecto
 
 /* par_gmres.c */
 HYPRE_Int hypre_ParCSRRelax_GMRES_Setup ( hypre_ParCSRMatrix *A , HYPRE_Int degree , HYPRE_Real **coefs_real_ptr, HYPRE_Real **coefs_imag_ptr);
+HYPRE_Int hypre_ParCSRRelax_GMRES_Solve(hypre_ParCSRMatrix *A, /* matrix to relax with */ hypre_ParVector *f,    /* right-hand side */ HYPRE_Real *coefs_real, HYPRE_Real *coefs_imag, HYPRE_Int order,            /* polynomial order */ hypre_ParVector *prod, hypre_ParVector *p, hypre_ParVector *tmp);
 
 /* par_coarsen.c */
 HYPRE_Int hypre_BoomerAMGCoarsen ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int CF_init , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );

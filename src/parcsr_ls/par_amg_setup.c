@@ -748,6 +748,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       needZ = hypre_max(needZ, 1);
    }
 
+   if ( grid_relax_type[0] == 19 || grid_relax_type[1] == 19 || grid_relax_type[2] == 19 || grid_relax_type[3] == 19 )
+   {
+      /* Chebyshev */
+      needZ = hypre_max(needZ, 1);
+   }
+
 #if !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP)
    /* GPU impl. needs Z */
    if (num_threads > 1)

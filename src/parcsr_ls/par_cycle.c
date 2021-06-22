@@ -62,6 +62,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Int     **grid_relax_points;
    HYPRE_Int       block_mode;
    HYPRE_Int       cheby_order;
+   HYPRE_Int       gmres_order;
 
    /* Local variables  */
    HYPRE_Int      *lev_counter;
@@ -95,6 +96,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    hypre_Vector   *l1_norms_level;
    HYPRE_Real    **ds = hypre_ParAMGDataChebyDS(amg_data);
    HYPRE_Real    **coefs = hypre_ParAMGDataChebyCoefs(amg_data);
+   HYPRE_Real    **gmres_coefs_real = hypre_ParAMGDataGMRESCoefsReal(amg_data);
+   HYPRE_Real    **gmres_coefs_imag = hypre_ParAMGDataGMRESCoefsImag(amg_data);
    HYPRE_Int       seq_cg = 0;
    HYPRE_Int       partial_cycle_coarsest_level;
    HYPRE_Int       partial_cycle_control;
@@ -146,6 +149,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    min_eig_est = hypre_ParAMGDataMinEigEst(amg_data);
    cheby_fraction = hypre_ParAMGDataChebyFraction(amg_data);*/
    cheby_order = hypre_ParAMGDataChebyOrder(amg_data);
+   gmres_order = hypre_ParAMGDataGMRESOrder(amg_data);
 
    cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
 
@@ -510,6 +514,15 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                      hypre_BoomerAMGRelax_FCFJacobi(A_array[level], Aux_F, CF_marker_array[level], relax_weight[level],
                                                     Aux_U, Vtemp);
                   }
+               }
+               else if (relax_type == 19)
+               { /* GMRES Polynomial */
+                  hypre_ParCSRRelax_GMRES_Solve(A_array[level], Aux_F,
+                                                gmres_coefs_real[level],
+                                                gmres_coefs_real[level],
+                                                gmres_order,
+                                                Aux_U, Vtemp, Ztemp
+                                                );
                }
                else if (old_version)
                {
