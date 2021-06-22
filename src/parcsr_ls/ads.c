@@ -9,6 +9,13 @@
 #include "float.h"
 #include "ams.h"
 #include "ads.h"
+#include "_hypre_utilities.hpp"
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+__global__ void hypreCUDAKernel_AMSComputePi_copy1(HYPRE_Int nnz, HYPRE_Int dim, HYPRE_Int *j_in, HYPRE_Int *j_out);
+__global__ void hypreCUDAKernel_AMSComputePi_copy2(HYPRE_Int nrows, HYPRE_Int dim, HYPRE_Int *i_in, HYPRE_Real *data_in, HYPRE_Real *Gx_data, HYPRE_Real *Gy_data, HYPRE_Real *Gz_data, HYPRE_Real *data_out);
+__global__ void hypreCUDAKernel_AMSComputePixyz_copy(HYPRE_Int nrows, HYPRE_Int dim, HYPRE_Int *i_in, HYPRE_Real *data_in, HYPRE_Real *Gx_data, HYPRE_Real *Gy_data, HYPRE_Real *Gz_data, HYPRE_Real *data_x_out, HYPRE_Real *data_y_out, HYPRE_Real *data_z_out );
+#endif
 
 /*--------------------------------------------------------------------------
  * hypre_ADSCreate
@@ -20,7 +27,7 @@ void * hypre_ADSCreate()
 {
    hypre_ADSData *ads_data;
 
-   ads_data = hypre_CTAlloc(hypre_ADSData,  1, HYPRE_MEMORY_HOST);
+   ads_data = hypre_CTAlloc(hypre_ADSData, 1, HYPRE_MEMORY_HOST);
 
    /* Default parameters */
 
@@ -71,6 +78,7 @@ void * hypre_ADSCreate()
    ads_data -> x     = NULL;
    ads_data -> y     = NULL;
    ads_data -> z     = NULL;
+   ads_data -> zz  = NULL;
 
    ads_data -> r0  = NULL;
    ads_data -> g0  = NULL;
@@ -101,7 +109,7 @@ void * hypre_ADSCreate()
 
 HYPRE_Int hypre_ADSDestroy(void *solver)
 {
-	hypre_ADSData *ads_data = (hypre_ADSData *) solver;
+   hypre_ADSData *ads_data = (hypre_ADSData *) solver;
 
    if (!ads_data)
    {
@@ -152,6 +160,8 @@ HYPRE_Int hypre_ADSDestroy(void *solver)
       hypre_ParVectorDestroy(ads_data -> r2);
    if (ads_data -> g2)
       hypre_ParVectorDestroy(ads_data -> g2);
+   if (ads_data -> zz)
+      hypre_ParVectorDestroy(ads_data -> zz);
 
    hypre_SeqVectorDestroy(ads_data -> A_l1_norms);
 
@@ -461,6 +471,10 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
                              hypre_ParCSRMatrix *PiNDz,
                              hypre_ParCSRMatrix **Pi_ptr)
 {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+#endif
+
    hypre_ParCSRMatrix *Pi;
 
    /* Compute the representations of the coordinate vectors, RT100, RT010 and
@@ -495,13 +509,16 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
       /* Each component of Pi has the sparsity pattern of the topological
          face-to-vertex matrix. */
       hypre_ParCSRMatrix *F2V;
-      if (HYPRE_AssumedPartitionCheck())
-         F2V = hypre_ParMatmul(C, G);
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+         F2V = hypre_ParCSRMatMat(C, G);
+      }
       else
-         /* With global partitioning we can use the object structure in hypre to
-            consider ParCSR matrices as Boolean matrices and vice versa. */
-         F2V = (hypre_ParCSRMatrix*) hypre_ParBooleanMatmul(
-            (hypre_ParCSRBooleanMatrix*)C, (hypre_ParCSRBooleanMatrix*)G);
+#endif
+      {
+         F2V = hypre_ParMatmul(C, G);
+      }
 
       /* Create the parallel interpolation matrix */
       {
@@ -550,20 +567,45 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
          HYPRE_Int *Pi_diag_J = hypre_CSRMatrixJ(Pi_diag);
          HYPRE_Real *Pi_diag_data = hypre_CSRMatrixData(Pi_diag);
 
-         for (i = 0; i < F2V_diag_nrows+1; i++)
-            Pi_diag_I[i] = 3 * F2V_diag_I[i];
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         if (exec == HYPRE_EXEC_DEVICE)
+         {
+            HYPRE_THRUST_CALL( transform,
+                               F2V_diag_I,
+                               F2V_diag_I + F2V_diag_nrows + 1,
+                               Pi_diag_I,
+                               3 * _1 );
 
-         for (i = 0; i < F2V_diag_nnz; i++)
-            for (d = 0; d < 3; d++)
-               Pi_diag_J[3*i+d] = 3*F2V_diag_J[i]+d;
+            dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+            dim3 gDim = hypre_GetDefaultCUDAGridDimension(F2V_diag_nnz, "thread", bDim);
 
-         for (i = 0; i < F2V_diag_nrows; i++)
-            for (j = F2V_diag_I[i]; j < F2V_diag_I[i+1]; j++)
-            {
-               *Pi_diag_data++ = RT100_data[i];
-               *Pi_diag_data++ = RT010_data[i];
-               *Pi_diag_data++ = RT001_data[i];
-            }
+            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePi_copy1, gDim, bDim,
+                               F2V_diag_nnz, 3, F2V_diag_J, Pi_diag_J );
+
+            gDim = hypre_GetDefaultCUDAGridDimension(F2V_diag_nrows, "warp", bDim);
+
+            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePi_copy2, gDim, bDim,
+                               F2V_diag_nrows, 3, F2V_diag_I, NULL, RT100_data, RT010_data, RT001_data,
+                               Pi_diag_data );
+         }
+         else
+#endif
+         {
+            for (i = 0; i < F2V_diag_nrows+1; i++)
+               Pi_diag_I[i] = 3 * F2V_diag_I[i];
+
+            for (i = 0; i < F2V_diag_nnz; i++)
+               for (d = 0; d < 3; d++)
+                  Pi_diag_J[3*i+d] = 3*F2V_diag_J[i]+d;
+
+            for (i = 0; i < F2V_diag_nrows; i++)
+               for (j = F2V_diag_I[i]; j < F2V_diag_I[i+1]; j++)
+               {
+                  *Pi_diag_data++ = RT100_data[i];
+                  *Pi_diag_data++ = RT010_data[i];
+                  *Pi_diag_data++ = RT001_data[i];
+               }
+         }
       }
 
       /* Fill-in the off-diagonal part */
@@ -584,31 +626,56 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
          HYPRE_BigInt *F2V_cmap = hypre_ParCSRMatrixColMapOffd(F2V);
          HYPRE_BigInt *Pi_cmap = hypre_ParCSRMatrixColMapOffd(Pi);
 
-         if (F2V_offd_ncols)
-            for (i = 0; i < F2V_offd_nrows+1; i++)
-               Pi_offd_I[i] = 3 * F2V_offd_I[i];
-
-         for (i = 0; i < F2V_offd_nnz; i++)
-            for (d = 0; d < 3; d++)
-               Pi_offd_J[3*i+d] = 3*F2V_offd_J[i]+d;
-
-         for (i = 0; i < F2V_offd_nrows; i++)
-            for (j = F2V_offd_I[i]; j < F2V_offd_I[i+1]; j++)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         if (exec == HYPRE_EXEC_DEVICE)
+         {
+            if (F2V_offd_ncols)
             {
-               *Pi_offd_data++ = RT100_data[i];
-               *Pi_offd_data++ = RT010_data[i];
-               *Pi_offd_data++ = RT001_data[i];
+               HYPRE_THRUST_CALL( transform,
+                                  F2V_offd_I,
+                                  F2V_offd_I + F2V_offd_nrows + 1,
+                                  Pi_offd_I,
+                                  3 * _1 );
             }
+
+            dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+            dim3 gDim = hypre_GetDefaultCUDAGridDimension(F2V_offd_nnz, "thread", bDim);
+
+            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePi_copy1, gDim, bDim,
+                               F2V_offd_nnz, 3, F2V_offd_J, Pi_offd_J );
+
+            gDim = hypre_GetDefaultCUDAGridDimension(F2V_offd_nrows, "warp", bDim);
+
+            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePi_copy2, gDim, bDim,
+                               F2V_offd_nrows, 3, F2V_offd_I, NULL, RT100_data, RT010_data, RT001_data,
+                               Pi_offd_data );
+         }
+         else
+#endif
+         {
+            if (F2V_offd_ncols)
+               for (i = 0; i < F2V_offd_nrows+1; i++)
+                  Pi_offd_I[i] = 3 * F2V_offd_I[i];
+
+            for (i = 0; i < F2V_offd_nnz; i++)
+               for (d = 0; d < 3; d++)
+                  Pi_offd_J[3*i+d] = 3*F2V_offd_J[i]+d;
+
+            for (i = 0; i < F2V_offd_nrows; i++)
+               for (j = F2V_offd_I[i]; j < F2V_offd_I[i+1]; j++)
+               {
+                  *Pi_offd_data++ = RT100_data[i];
+                  *Pi_offd_data++ = RT010_data[i];
+                  *Pi_offd_data++ = RT001_data[i];
+               }
+         }
 
          for (i = 0; i < F2V_offd_ncols; i++)
             for (d = 0; d < 3; d++)
                Pi_cmap[3*i+d] = 3*F2V_cmap[i]+(HYPRE_BigInt)d;
       }
 
-      if (HYPRE_AssumedPartitionCheck())
-         hypre_ParCSRMatrixDestroy(F2V);
-      else
-         hypre_ParCSRBooleanMatrixDestroy((hypre_ParCSRBooleanMatrix*)F2V);
+      hypre_ParCSRMatrixDestroy(F2V);
    }
 
    hypre_ParVectorDestroy(RT100);
@@ -649,6 +716,10 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
 {
    hypre_ParCSRMatrix *Pix, *Piy, *Piz;
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+#endif
+
    /* Compute the representations of the coordinate vectors, RT100, RT010 and
       RT001, in the Raviart-Thomas space, by observing that the RT coordinates
       of (1,0,0) = -curl (0,z,0) are given by C*PiNDy*z, etc. (We ignore the
@@ -681,13 +752,17 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
       /* Each component of Pi has the sparsity pattern of the topological
          face-to-vertex matrix. */
       hypre_ParCSRMatrix *F2V;
-      if (HYPRE_AssumedPartitionCheck())
-         F2V = hypre_ParMatmul(C, G);
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+         F2V = hypre_ParCSRMatMat(C, G);
+      }
       else
-         /* With global partitioning we can use the object structure in hypre to
-            consider ParCSR matrices as Boolean matrices and vice versa. */
-         F2V = (hypre_ParCSRMatrix*) hypre_ParBooleanMatmul(
-            (hypre_ParCSRBooleanMatrix*)C, (hypre_ParCSRBooleanMatrix*)G);
+#endif
+      {
+         F2V = hypre_ParMatmul(C, G);
+      }
 
       /* Create the components of the parallel interpolation matrix */
       {
@@ -764,27 +839,51 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
          HYPRE_Int *Piz_diag_J = hypre_CSRMatrixJ(Piz_diag);
          HYPRE_Real *Piz_diag_data = hypre_CSRMatrixData(Piz_diag);
 
-         for (i = 0; i < F2V_diag_nrows+1; i++)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         if (exec == HYPRE_EXEC_DEVICE)
          {
-            Pix_diag_I[i] = F2V_diag_I[i];
-            Piy_diag_I[i] = F2V_diag_I[i];
-            Piz_diag_I[i] = F2V_diag_I[i];
-         }
+            HYPRE_THRUST_CALL( copy_n,
+                               thrust::make_zip_iterator(thrust::make_tuple(F2V_diag_I, F2V_diag_I, F2V_diag_I)),
+                               F2V_diag_nrows + 1,
+                               thrust::make_zip_iterator(thrust::make_tuple(Pix_diag_I, Piy_diag_I, Piz_diag_I)) );
 
-         for (i = 0; i < F2V_diag_nnz; i++)
+            HYPRE_THRUST_CALL( copy_n,
+                               thrust::make_zip_iterator(thrust::make_tuple(F2V_diag_J, F2V_diag_J, F2V_diag_J)),
+                               F2V_diag_nnz,
+                               thrust::make_zip_iterator(thrust::make_tuple(Pix_diag_J, Piy_diag_J, Piz_diag_J)) );
+
+            dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+            dim3 gDim = hypre_GetDefaultCUDAGridDimension(F2V_diag_nrows, "warp", bDim);
+
+            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePixyz_copy, gDim, bDim,
+                               F2V_diag_nrows, 3, F2V_diag_I, NULL, RT100_data, RT010_data, RT001_data,
+                               Pix_diag_data, Piy_diag_data, Piz_diag_data );
+         }
+         else
+#endif
          {
-            Pix_diag_J[i] = F2V_diag_J[i];
-            Piy_diag_J[i] = F2V_diag_J[i];
-            Piz_diag_J[i] = F2V_diag_J[i];
-         }
-
-         for (i = 0; i < F2V_diag_nrows; i++)
-            for (j = F2V_diag_I[i]; j < F2V_diag_I[i+1]; j++)
+            for (i = 0; i < F2V_diag_nrows+1; i++)
             {
-               *Pix_diag_data++ = RT100_data[i];
-               *Piy_diag_data++ = RT010_data[i];
-               *Piz_diag_data++ = RT001_data[i];
+               Pix_diag_I[i] = F2V_diag_I[i];
+               Piy_diag_I[i] = F2V_diag_I[i];
+               Piz_diag_I[i] = F2V_diag_I[i];
             }
+
+            for (i = 0; i < F2V_diag_nnz; i++)
+            {
+               Pix_diag_J[i] = F2V_diag_J[i];
+               Piy_diag_J[i] = F2V_diag_J[i];
+               Piz_diag_J[i] = F2V_diag_J[i];
+            }
+
+            for (i = 0; i < F2V_diag_nrows; i++)
+               for (j = F2V_diag_I[i]; j < F2V_diag_I[i+1]; j++)
+               {
+                  *Pix_diag_data++ = RT100_data[i];
+                  *Piy_diag_data++ = RT010_data[i];
+                  *Piz_diag_data++ = RT001_data[i];
+               }
+         }
       }
 
       /* Fill-in the off-diagonal part */
@@ -817,28 +916,55 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
          HYPRE_BigInt *Piy_cmap = hypre_ParCSRMatrixColMapOffd(Piy);
          HYPRE_BigInt *Piz_cmap = hypre_ParCSRMatrixColMapOffd(Piz);
 
-         if (F2V_offd_ncols)
-            for (i = 0; i < F2V_offd_nrows+1; i++)
-            {
-               Pix_offd_I[i] = F2V_offd_I[i];
-               Piy_offd_I[i] = F2V_offd_I[i];
-               Piz_offd_I[i] = F2V_offd_I[i];
-            }
-
-         for (i = 0; i < F2V_offd_nnz; i++)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         if (exec == HYPRE_EXEC_DEVICE)
          {
-            Pix_offd_J[i] = F2V_offd_J[i];
-            Piy_offd_J[i] = F2V_offd_J[i];
-            Piz_offd_J[i] = F2V_offd_J[i];
-         }
-
-         for (i = 0; i < F2V_offd_nrows; i++)
-            for (j = F2V_offd_I[i]; j < F2V_offd_I[i+1]; j++)
+            if (F2V_offd_ncols)
             {
-               *Pix_offd_data++ = RT100_data[i];
-               *Piy_offd_data++ = RT010_data[i];
-               *Piz_offd_data++ = RT001_data[i];
+               HYPRE_THRUST_CALL( copy_n,
+                                  thrust::make_zip_iterator(thrust::make_tuple(F2V_offd_I, F2V_offd_I, F2V_offd_I)),
+                                  F2V_offd_nrows + 1,
+                                  thrust::make_zip_iterator(thrust::make_tuple(Pix_offd_I, Piy_offd_I, Piz_offd_I)) );
             }
+
+            HYPRE_THRUST_CALL( copy_n,
+                               thrust::make_zip_iterator(thrust::make_tuple(F2V_offd_J, F2V_offd_J, F2V_offd_J)),
+                               F2V_offd_nnz,
+                               thrust::make_zip_iterator(thrust::make_tuple(Pix_offd_J, Piy_offd_J, Piz_offd_J)) );
+
+            dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+            dim3 gDim = hypre_GetDefaultCUDAGridDimension(F2V_offd_nrows, "warp", bDim);
+
+            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePixyz_copy, gDim, bDim,
+                               F2V_offd_nrows, 3, F2V_offd_I, NULL, RT100_data, RT010_data, RT001_data,
+                               Pix_offd_data, Piy_offd_data, Piz_offd_data );
+         }
+         else
+#endif
+         {
+            if (F2V_offd_ncols)
+               for (i = 0; i < F2V_offd_nrows+1; i++)
+               {
+                  Pix_offd_I[i] = F2V_offd_I[i];
+                  Piy_offd_I[i] = F2V_offd_I[i];
+                  Piz_offd_I[i] = F2V_offd_I[i];
+               }
+
+            for (i = 0; i < F2V_offd_nnz; i++)
+            {
+               Pix_offd_J[i] = F2V_offd_J[i];
+               Piy_offd_J[i] = F2V_offd_J[i];
+               Piz_offd_J[i] = F2V_offd_J[i];
+            }
+
+            for (i = 0; i < F2V_offd_nrows; i++)
+               for (j = F2V_offd_I[i]; j < F2V_offd_I[i+1]; j++)
+               {
+                  *Pix_offd_data++ = RT100_data[i];
+                  *Piy_offd_data++ = RT010_data[i];
+                  *Piz_offd_data++ = RT001_data[i];
+               }
+         }
 
          for (i = 0; i < F2V_offd_ncols; i++)
          {
@@ -881,6 +1007,10 @@ HYPRE_Int hypre_ADSSetup(void *solver,
                          hypre_ParVector *b,
                          hypre_ParVector *x)
 {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+#endif
+
    hypre_ADSData *ads_data = (hypre_ADSData *) solver;
    hypre_AMSData *ams_data;
 
@@ -975,10 +1105,19 @@ HYPRE_Int hypre_ADSSetup(void *solver,
 
          C_owned_col_starts = hypre_ParCSRMatrixOwnsColStarts(ads_data -> C);
 
-         hypre_BoomerAMGBuildCoarseOperator(ads_data -> C,
-                                            ads_data -> A,
-                                            ads_data -> C,
-                                            &ads_data -> A_C);
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         if (exec == HYPRE_EXEC_DEVICE)
+         {
+            ads_data -> A_C = hypre_ParCSRMatrixRAPKT(ads_data -> C, ads_data -> A, ads_data -> C, 1);
+         }
+         else
+#endif
+         {
+            hypre_BoomerAMGBuildCoarseOperator(ads_data -> C,
+                                               ads_data -> A,
+                                               ads_data -> C,
+                                               &ads_data -> A_C);
+         }
 
          /* Make sure that A_C has no zero rows (this can happen if beta is zero
             in part of the domain). */
@@ -1092,10 +1231,21 @@ HYPRE_Int hypre_ADSSetup(void *solver,
       if (!hypre_ParCSRMatrixCommPkg(ads_data -> Piy))
          hypre_MatvecCommPkgCreate(ads_data -> Piy);
       P_owned_col_starts = hypre_ParCSRMatrixOwnsRowStarts(ads_data -> Piy);
-      hypre_BoomerAMGBuildCoarseOperator(ads_data -> Piy,
-                                         ads_data -> A,
-                                         ads_data -> Piy,
-                                         &ads_data -> A_Piy);
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+         ads_data -> A_Piy = hypre_ParCSRMatrixRAPKT(ads_data -> Piy, ads_data -> A, ads_data -> Piy, 1);
+      }
+      else
+#endif
+      {
+         hypre_BoomerAMGBuildCoarseOperator(ads_data -> Piy,
+                                            ads_data -> A,
+                                            ads_data -> Piy,
+                                            &ads_data -> A_Piy);
+      }
+
       if (!P_owned_col_starts)
       {
          hypre_ParCSRMatrixOwnsRowStarts(ads_data -> A_Piy) = 0;
@@ -1108,10 +1258,21 @@ HYPRE_Int hypre_ADSSetup(void *solver,
       if (!hypre_ParCSRMatrixCommPkg(ads_data -> Piz))
          hypre_MatvecCommPkgCreate(ads_data -> Piz);
       P_owned_col_starts = hypre_ParCSRMatrixOwnsRowStarts(ads_data -> Piz);
-      hypre_BoomerAMGBuildCoarseOperator(ads_data -> Piz,
-                                         ads_data -> A,
-                                         ads_data -> Piz,
-                                         &ads_data -> A_Piz);
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+         ads_data -> A_Piz = hypre_ParCSRMatrixRAPKT(ads_data -> Piz, ads_data -> A, ads_data -> Piz, 1);
+      }
+      else
+#endif
+      {
+         hypre_BoomerAMGBuildCoarseOperator(ads_data -> Piz,
+                                            ads_data -> A,
+                                            ads_data -> Piz,
+                                            &ads_data -> A_Piz);
+      }
+
       if (!P_owned_col_starts)
       {
          hypre_ParCSRMatrixOwnsRowStarts(ads_data -> A_Piz) = 0;
@@ -1151,10 +1312,19 @@ HYPRE_Int hypre_ADSSetup(void *solver,
          if (!hypre_ParCSRMatrixCommPkg(ads_data -> A))
             hypre_MatvecCommPkgCreate(ads_data -> A);
 
-         hypre_BoomerAMGBuildCoarseOperator(ads_data -> Pi,
-                                            ads_data -> A,
-                                            ads_data -> Pi,
-                                            &ads_data -> A_Pi);
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         if (exec == HYPRE_EXEC_DEVICE)
+         {
+            ads_data -> A_Pi = hypre_ParCSRMatrixRAPKT(ads_data -> Pi, ads_data -> A, ads_data -> Pi, 1);
+         }
+         else
+#endif
+         {
+            hypre_BoomerAMGBuildCoarseOperator(ads_data -> Pi,
+                                               ads_data -> A,
+                                               ads_data -> Pi,
+                                               &ads_data -> A_Pi);
+         }
 
          HYPRE_BoomerAMGSetNumFunctions(ads_data -> B_Pi, 3);
          /* HYPRE_BoomerAMGSetNodal(ads_data -> B_Pi, 1); */
@@ -1208,8 +1378,9 @@ HYPRE_Int hypre_ADSSolve(void *solver,
    HYPRE_Solver Bi[5];
    HYPRE_PtrToSolverFcn HBi[5];
    hypre_ParVector *ri[5], *gi[5];
+   HYPRE_Int needZ = 0;
 
-   hypre_ParVector *z = NULL;
+   hypre_ParVector *z = ads_data -> zz;
 
    Ai[0] = ads_data -> A_C;    Pi[0] = ads_data -> C;
    Ai[1] = ads_data -> A_Pi;   Pi[1] = ads_data -> Pi;
@@ -1229,14 +1400,30 @@ HYPRE_Int hypre_ADSSolve(void *solver,
    ri[3] = ads_data -> r2;     gi[3] = ads_data -> g2;
    ri[4] = ads_data -> r2;     gi[4] = ads_data -> g2;
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+#endif
+
    /* may need to create an additional temporary vector for relaxation */
-   if (hypre_NumThreads() > 1 ||  ads_data -> A_relax_type == 16)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      needZ = ads_data -> A_relax_type == 2 || ads_data -> A_relax_type == 4 || ads_data -> A_relax_type == 16;
+   }
+   else
+#endif
+   {
+      needZ = hypre_NumThreads() > 1 || ads_data -> A_relax_type == 16;
+   }
+
+   if (needZ && !z)
    {
       z = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                 hypre_ParCSRMatrixGlobalNumRows(A),
                                 hypre_ParCSRMatrixRowStarts(A));
       hypre_ParVectorInitialize(z);
       hypre_ParVectorSetPartitioningOwner(z,0);
+      ads_data -> zz = z;
    }
 
    if (ads_data -> print_level > 0)
@@ -1360,9 +1547,6 @@ HYPRE_Int hypre_ADSSolve(void *solver,
 
    if (ads_data -> num_iterations == ads_data -> maxit && ads_data -> tol > 0.0)
       hypre_error(HYPRE_ERROR_CONV);
-
-   if (z)
-      hypre_ParVectorDestroy(z);
 
    return hypre_error_flag;
 }
