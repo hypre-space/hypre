@@ -22,15 +22,17 @@ hypre_FSAICreate()
    HYPRE_Int            max_steps;
    HYPRE_Int            max_step_size;
    HYPRE_Real           kap_tolerance;
-   HYPRE_Int            num_rows;
 
    /* solver params */
    HYPRE_Int            max_iterations;
    HYPRE_Real           tolerance;
+   HYPRE_Int		*comm_info;
 
    /* log info */
    HYPRE_Int            logging;
    HYPRE_Int            num_iterations;
+   HYPRE_Real           rel_resid_norm;
+   hypre_ParVector      *residual;   
 
    /* output params */
    HYPRE_Int            print_level;
@@ -45,7 +47,6 @@ hypre_FSAICreate()
    max_steps = 10;
    max_step_size = 3;
    kap_tolerance = 1.0e-3;
-   num_rows = hypre_ParCSRNumRows(A);
 
    /* solver params */
    max_iterations = 20;
@@ -73,23 +74,13 @@ hypre_FSAICreate()
 
    hypre_ParFSAIDataMemoryLocation(fsai_data)   = HYPRE_MEMORY_UNDEFINED;
  
-   hypre_ParFSAIDataAmat(fsai_data)             = NULL;
-   hypre_ParFSAIDataAinv(fsai_data)             = NULL;
-   hypre_ParFSAIDataSPattern(fsai_data)         = NULL;
-   hypre_ParFSAIDataGArray(fsai_data)           = NULL;
-   hypre_ParFSAIDataPArray(fsai_data)           = NULL;
-   hypre_ParFSAIDatabvec(fsai_data)             = NULL;
    hypre_ParFSAIDataGmat(fsai_data)             = NULL;
-   hypre_ParFSAIDataKaporinGradient(fsai_data)  = NULL; 
-   hypre_ParFSAIDataNnzPerRow(fsai_data)        = NULL;
-   hypre_ParFSAIDataNnzCumSum(fsai_data)        = NULL;
    hypre_ParFSAIDataCommInfo(fsai_data)         = NULL;
    hypre_ParFSAIDataNewComm(fsai_data)          = hypre_MPI_COMM_NULL;
 
-   hypre_FSAISetKapTolerance(fsai_data, kap_tolerance);
    hypre_FSAISetMaxSteps(fsai_data, max_steps);
    hypre_FSAISetMaxStepSize(fsai_data, max_step_size);
-   hypre_FSAISetMaxNumRows(fsai_data, num_rows);
+   hypre_FSAISetKapTolerance(fsai_data, kap_tolerance);
 
    hypre_FSAISetMaxIterations(fsai_data, max_iterations);
    hypre_FSAISetTolerance(fsai_data, tolerance);
@@ -120,36 +111,14 @@ hypre_FSAIDestroy( void *data )
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    if (hypre_ParFSAIDataCommInfo(fsai_data)) hypre_TFree(hypre_ParFSAIDataCommInfo(fsai_data), HYPRE_MEMORY_HOST);
-   if (hypre_ParFSAIDataAmat(fsai_data)) hypre_TFree(hypre_ParFSAIDataAmat(fsai_data), HYPRE_MEMORY_HOST);
-   if (hypre_ParFSAIDataMinv(fsai_data)) hypre_TFree(hypre_ParFSAIDataMinv(fsai_data), HYPRE_MEMORY_HOST);
-   if (hypre_ParFSAIDataSPattern(fsai_data)) hypre_TFree(hypre_ParFSAIDataSPattern(fsai_data), HYPRE_MEMORY_HOST);
-   if (hypre_ParFSAIDatabvec(fsai_data)) hypre_TFree(hypre_ParFSAIDatabvec(fsai_data), HYPRE_MEMORY_HOST);
    if (hypre_ParFSAIDataGmat(fsai_data)) hypre_TFree(hypre_ParFSAIDataAinv(fsai_data), HYPRE_MEMORY_HOST);
    if (hypre_ParFSAIDataCommInfo(fsai_data)) hypre_TFree(hypre_ParFSAIDataCommInfo(fsai_data), HYPRE_MEMORY_HOST);
-   if (hypre_ParFSAIDataGArray(fsai_data)) hypre_TFree(hypre_ParFSAIDataGArray(fsai_data), HYPRE_MEMORY_HOST);
-   if (hypre_ParFSAIDataPArray(fsai_data)) hypre_TFree(hypre_ParFSAIDataPArray(fsai_data), HYPRE_MEMORY_HOST);
 
    if( hypre_ParFSAIDataResidual(fsai_data) )
    {
       hypre_ParVectorDestroy( hypre_ParFSAIDataResidual(fsai_data) );
       hypre_ParFSAIDataResidual(fsai_data) = NULL; 
    }
-   if( hypre_ParFSAIDataKaporinGradient(fsai_data) )
-   {
-      hypre_ParVectorDestroy( hypre_ParFSAIDataKaporinGradient(fsai_data) );
-      hypre_ParFSAIDataKaporinGradient(fsai_data) = NULL; 
-   }
-   if( hypre_ParFSAIDataNnzPerRow(fsai_data) )
-   {
-      hypre_ParVectorDestroy( hypre_ParFSAIDataNnzPerRow(fsai_data) );
-      hypre_ParFSAIDataNnzPerRow(fsai_data) = NULL; 
-   }
-   if( hypre_ParFSAIDataNnzCumSum(fsai_data) )
-   {
-      hypre_ParVectorDestroy( hypre_ParFSAIDataNnzCumSum(fsai_data) );
-      hypre_ParFSAIDataNnzCumSum(fsai_data) = NULL; 
-   }
-
    if( new_comm != hypre_MPI_COMM_NULL )
       hypre_MPI_Comm_free(&new_comm);
 
@@ -164,28 +133,6 @@ hypre_FSAIDestroy( void *data )
  * Routines to SET the setup phase parameters
  ******************************************************************************/
 
-HYPRE_Int
-hypre_FSAISetTolerance( void *data,
-                          HYPRE_Real tolerance   )
-{
-   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
-
-   if (!fsai_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   if (tolerance < 0)
-   {
-      hypre_error_in_arg(2);
-      return hypre_error_flag;
-   }
-
-   hypre_ParFSAIDataTolerance(fsai_data) = tolerance;
-
-   return hypre_error_flag;
-}
 
 HYPRE_Int
 hypre_FSAISetMaxSteps( void *data,
@@ -234,8 +181,8 @@ hypre_FSAISetMaxStepSize( void *data,
 }
 
 HYPRE_Int
-hypre_FSAISetNumRows( void *data,
-                          HYPRE_Int num_rows   )
+hypre_FSAISetKapTolerance( void *data,
+                          HYPRE_Real kap_tolerance   )
 {
    hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
 
@@ -245,13 +192,13 @@ hypre_FSAISetNumRows( void *data,
       return hypre_error_flag;
    }
 
-   if (num_rows < 1)
+   if (kap_tolerance < 0)
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;
    }
 
-   hypre_ParFSAIDataNumRows(fsai_data) = num_rows;
+   hypre_ParFSAIDataKapTolerance(fsai_data) = kap_tolerance;
 
    return hypre_error_flag;
 }
@@ -280,8 +227,8 @@ hypre_FSAISetMaxIterations( void *data,
 }
 
 HYPRE_Int
-hypre_FSAISetKapTolerance( void *data,
-                          HYPRE_Real kap_tolerance   )
+hypre_FSAISetTolerance( void *data,
+                          HYPRE_Real tolerance   )
 {
    hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
 
@@ -291,13 +238,13 @@ hypre_FSAISetKapTolerance( void *data,
       return hypre_error_flag;
    }
 
-   if (kap_tolerance < 0)
+   if (tolerance < 0)
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;
    }
 
-   hypre_ParFSAIDataKapTolerance(fsai_data) = kap_tolerance;
+   hypre_ParFSAIDataTolerance(fsai_data) = tolerance;
 
    return hypre_error_flag;
 }
@@ -426,23 +373,6 @@ hypre_FSAISetDebugFlag( void *data,
  ******************************************************************************/
 
 HYPRE_Int
-hypre_FSAIGetTolerance( void     *data,
-                          HYPRE_Int     *tolerance )
-{
-   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
-
-   if (!fsai_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   *tolerance = hypre_ParFSAIDataTolerance(fsai_data);
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
 hypre_FSAIGetMaxSteps( void     *data,
                           HYPRE_Int     *max_steps )
 {
@@ -477,8 +407,8 @@ hypre_FSAIGetMaxStepSize( void     *data,
 }
 
 HYPRE_Int
-hypre_FSAIGetNumRows( void     *data,
-                          HYPRE_Int     *num_rows )
+hypre_FSAIGetKapTolerance( void     *data,
+                          HYPRE_Int     *kap_tolerance )
 {
    hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
 
@@ -488,7 +418,7 @@ hypre_FSAIGetNumRows( void     *data,
       return hypre_error_flag;
    }
 
-   *num_rows = hypre_ParFSAIDataNumRows(fsai_data);
+   *kap_tolerance = hypre_ParFSAIDataKapTolerance(fsai_data);
 
    return hypre_error_flag;
 }
@@ -511,8 +441,8 @@ hypre_FSAIGetMaxIterations( void     *data,
 }
 
 HYPRE_Int
-hypre_FSAIGetKapTolerance( void     *data,
-                          HYPRE_Real     *kap_tolerance )
+hypre_FSAIGetTolerance( void     *data,
+                          HYPRE_Real     *tolerance )
 {
    hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
 
@@ -522,7 +452,7 @@ hypre_FSAIGetKapTolerance( void     *data,
       return hypre_error_flag;
    }
 
-   *kap_tolerance = hypre_ParFSAIDataKapTolerance(fsai_data);
+   *tolerance = hypre_ParFSAIDataTolerance(fsai_data);
 
    return hypre_error_flag;
 }
