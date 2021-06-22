@@ -723,7 +723,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
     * If cheby_scale is false, only need one, otherwise need two */
    if ((smooth_num_levels > 0 && smooth_type > 9) || relax_weight[0] < 0 || omega[0] < 0 ||
        hypre_ParAMGDataSchwarzRlxWeight(amg_data) < 0 ||
-       (grid_relax_type[0] == 16 || grid_relax_type[1] == 16 || grid_relax_type[2] == 16 || grid_relax_type[3] == 16))
+       (grid_relax_type[0] == 16 || grid_relax_type[1] == 16 || grid_relax_type[2] == 16 || grid_relax_type[3] == 16) ||
+       (grid_relax_type[0] == 19 || grid_relax_type[1] == 19 || grid_relax_type[2] == 19 || grid_relax_type[3] == 19)
+       )
    {
       Ptemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
                                     hypre_ParCSRMatrixGlobalNumRows(A_array[0]),

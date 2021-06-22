@@ -19,6 +19,7 @@
 #include "cblas.h"
 //
 #include "lapack.h"
+//#include "mkl.h"
 
 /* GMRES_DEVELOPMENT will be removed by the time development is finished/merged*/
 
@@ -363,7 +364,12 @@ HYPRE_Int hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to rela
 
   //hypre_Memcpy(Hcpy, Hm, sizeof(HYPRE_Real)*degree*degree, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
   /* Transpose and copy */
-  cblas_domatcopy(CblasColMajor, CblasTrans, degree, degree, 1.0f, Hm, degree, Htrans, degree);
+  //cblas_domatcopy(CblasColMajor, CblasTrans, degree, degree, 1.0f, Hm, degree, Htrans, degree);
+  for(k=0; k < degree; k++) {
+    for(j=0; j < degree; j++) {
+      Htrans[k*degree+j] = H[k][j];
+    }
+  }
 
   HYPRE_Real* f = hypre_CTAlloc(HYPRE_Real,  degree, HYPRE_MEMORY_HOST);
   HYPRE_Real* ed = hypre_CTAlloc(HYPRE_Real,  degree, HYPRE_MEMORY_HOST);
@@ -477,13 +483,27 @@ HYPRE_Int hypre_ParCSRRelax_GMRES_Solve(hypre_ParCSRMatrix *A, /* matrix to rela
                             HYPRE_Real *coefs_real,
                             HYPRE_Real *coefs_imag,
                             HYPRE_Int order,            /* polynomial order */
+                            hypre_ParVector *u,
+                            hypre_ParVector *tmp,
+                            hypre_ParVector *r,
                             hypre_ParVector *prod,
-                            hypre_ParVector *p,
-                            hypre_ParVector *tmp)
+                            hypre_ParVector *p
+                            )
 
 {
+  
+   HYPRE_Int num_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+   HYPRE_Real *p_data = hypre_VectorData(hypre_ParVectorLocalVector(p));
+   for(int i = 0; i < num_rows; i++) {
+     p_data[i] = 0;
+   }
    // Topy prod <- x
-   HYPRE_ParVectorCopy(f, prod);
+   hypre_ParVectorCopy(f, r); 
+   hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, r);
+
+   HYPRE_ParVectorCopy(r, prod);
+   //HYPRE_ParVectorCopy(u, orig_u);
+
    int i = 0;
    while (i < order)
    {
@@ -515,5 +535,7 @@ HYPRE_Int hypre_ParCSRRelax_GMRES_Solve(hypre_ParCSRMatrix *A, /* matrix to rela
    {
       hypre_ParVectorAxpy(1.0 / coefs_real[order-1], prod, p);
    }
+
+   hypre_ParVectorAxpy(1.0, p, u);
    return hypre_error_flag;
 }

@@ -519,9 +519,13 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                { /* GMRES Polynomial */
                   hypre_ParCSRRelax_GMRES_Solve(A_array[level], Aux_F,
                                                 gmres_coefs_real[level],
-                                                gmres_coefs_real[level],
+                                                gmres_coefs_imag[level],
                                                 gmres_order,
-                                                Aux_U, Vtemp, Ztemp
+                                                Aux_U, 
+                                                Vtemp, 
+                                                Ztemp,
+                                                Ptemp,
+                                                Rtemp
                                                 );
                }
                else if (old_version)
