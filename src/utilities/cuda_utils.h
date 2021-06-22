@@ -270,6 +270,7 @@ struct hypre_GpuMatData
 #include <thrust/binary_search.h>
 #include <thrust/iterator/constant_iterator.h>
 #include <thrust/iterator/counting_iterator.h>
+#include <thrust/iterator/zip_iterator.h>
 #include <thrust/transform.h>
 #include <thrust/functional.h>
 #include <thrust/gather.h>
@@ -280,6 +281,7 @@ struct hypre_GpuMatData
 #include <thrust/logical.h>
 #include <thrust/replace.h>
 #include <thrust/sequence.h>
+#include <thrust/for_each.h>
 
 using namespace thrust::placeholders;
 
@@ -855,6 +857,8 @@ struct equal : public thrust::unary_function<T,bool>
       return (x == val);
    }
 };
+
+
 
 /* cuda_utils.c */
 dim3 hypre_GetDefaultCUDABlockDimension();

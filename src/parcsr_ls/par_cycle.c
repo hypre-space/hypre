@@ -94,7 +94,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Real      alpha;
    hypre_Vector  **l1_norms = NULL;
    hypre_Vector   *l1_norms_level;
-   HYPRE_Real    **ds = hypre_ParAMGDataChebyDS(amg_data);
+   hypre_Vector  **ds = hypre_ParAMGDataChebyDS(amg_data);
    HYPRE_Real    **coefs = hypre_ParAMGDataChebyCoefs(amg_data);
    HYPRE_Real    **gmres_coefs_real = hypre_ParAMGDataGMRESCoefsReal(amg_data);
    HYPRE_Real    **gmres_coefs_imag = hypre_ParAMGDataGMRESCoefsImag(amg_data);
@@ -495,9 +495,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   HYPRE_Int scale = hypre_ParAMGDataChebyScale(amg_data);
                   HYPRE_Int variant = hypre_ParAMGDataChebyVariant(amg_data);
                   hypre_ParCSRRelax_Cheby_Solve(A_array[level], Aux_F,
-                                                ds[level], coefs[level],
+                                                hypre_VectorData(ds[level]), coefs[level],
                                                 cheby_order, scale,
-                                                variant, Aux_U, Vtemp, Ztemp );
+                                                variant, Aux_U, Vtemp, Ztemp, Ptemp, Rtemp );
                }
                else if (relax_type == 17)
                {
