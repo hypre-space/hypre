@@ -173,7 +173,8 @@ typedef struct
    HYPRE_Real         **cheby_coefs;
 
    HYPRE_Int            gmres_order;
-   HYPRE_Real         **gmres_coefs;
+   HYPRE_Real         **gmres_coefs_real;
+   HYPRE_Real         **gmres_coefs_imag;
 
    /* data needed for non-Galerkin option */
    HYPRE_Int           nongalerk_num_tol;
@@ -418,7 +419,8 @@ typedef struct
 #define hypre_ParAMGDataChebyCoefs(amg_data) ((amg_data)->cheby_coefs)
 
 #define hypre_ParAMGDataGMRESOrder(amg_data) ((amg_data)->gmres_order)
-#define hypre_ParAMGDataGMRESCoefs(amg_data) ((amg_data)->gmres_coefs)
+#define hypre_ParAMGDataGMRESCoefsReal(amg_data) ((amg_data)->gmres_coefs_real)
+#define hypre_ParAMGDataGMRESCoefsImag(amg_data) ((amg_data)->gmres_coefs_imag)
 
 /* block */
 #define hypre_ParAMGDataABlockArray(amg_data) ((amg_data)->A_block_array)
@@ -1781,7 +1783,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_Setup ( hypre_ParCSRMatrix *A , HYPRE_Real max
 HYPRE_Int hypre_ParCSRRelax_Cheby_Solve ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Real *ds_data , HYPRE_Real *coefs , HYPRE_Int order , HYPRE_Int scale , HYPRE_Int variant , hypre_ParVector *u , hypre_ParVector *v , hypre_ParVector *r );
 
 /* par_gmres.c */
-HYPRE_Int hypre_ParCSRRelax_GMRES_Setup ( hypre_ParCSRMatrix *A , HYPRE_Int degree , HYPRE_Real **coefs_ptr);
+HYPRE_Int hypre_ParCSRRelax_GMRES_Setup ( hypre_ParCSRMatrix *A , HYPRE_Int degree , HYPRE_Real **coefs_real_ptr, HYPRE_Real **coefs_imag_ptr);
 
 /* par_coarsen.c */
 HYPRE_Int hypre_BoomerAMGCoarsen ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int CF_init , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
