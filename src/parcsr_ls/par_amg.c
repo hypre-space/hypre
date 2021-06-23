@@ -434,7 +434,8 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataChebyCoefs(amg_data) = NULL;
 
    /* Stuff for GMRES smoothing */
-   hypre_ParAMGDataGMRESCoefs(amg_data) = NULL;
+   hypre_ParAMGDataGMRESCoefsReal(amg_data) = NULL;
+   hypre_ParAMGDataGMRESCoefsImag(amg_data) = NULL;
 
    /* BM Oct 22, 2006 */
    hypre_ParAMGDataPlotGrids(amg_data) = 0;
@@ -662,17 +663,24 @@ hypre_BoomerAMGDestroy( void *data )
    if (hypre_ParAMGDataChebyDS(amg_data))
    {
       for (i=0; i < num_levels; i++)
-         if (hypre_ParAMGDataChebyDS(amg_data)[i])
-            hypre_TFree(hypre_ParAMGDataChebyDS(amg_data)[i], HYPRE_MEMORY_HOST);
+         hypre_SeqVectorDestroy(hypre_ParAMGDataChebyDS(amg_data)[i]);
       hypre_TFree(hypre_ParAMGDataChebyDS(amg_data), HYPRE_MEMORY_HOST);
    }
 
-   if (hypre_ParAMGDataGMRESCoefs(amg_data))
+   if (hypre_ParAMGDataGMRESCoefsReal(amg_data))
    {
       for (i=0; i < num_levels; i++)
-         if (hypre_ParAMGDataGMRESCoefs(amg_data)[i])
-            hypre_TFree(hypre_ParAMGDataGMRESCoefs(amg_data)[i], HYPRE_MEMORY_HOST);
-      hypre_TFree(hypre_ParAMGDataGMRESCoefs(amg_data), HYPRE_MEMORY_HOST);
+         if (hypre_ParAMGDataGMRESCoefsReal(amg_data)[i])
+            hypre_TFree(hypre_ParAMGDataGMRESCoefsReal(amg_data)[i], HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParAMGDataGMRESCoefsReal(amg_data), HYPRE_MEMORY_HOST);
+   }
+
+   if (hypre_ParAMGDataGMRESCoefsImag(amg_data))
+   {
+      for (i=0; i < num_levels; i++)
+         if (hypre_ParAMGDataGMRESCoefsImag(amg_data)[i])
+            hypre_TFree(hypre_ParAMGDataGMRESCoefsImag(amg_data)[i], HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParAMGDataGMRESCoefsImag(amg_data), HYPRE_MEMORY_HOST);
    }
 
    if (hypre_ParAMGDataDinv(amg_data))

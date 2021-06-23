@@ -255,6 +255,7 @@ main( hypre_int argc,
    HYPRE_Real   max_row_sum = 1.;
    HYPRE_Int    converge_type = 0;
 
+   HYPRE_Int  gmres_order = 2;
    HYPRE_Int  cheby_order = 2;
    HYPRE_Int  cheby_eig_est = 10;
    HYPRE_Int  cheby_variant = 0;
@@ -1576,6 +1577,11 @@ main( hypre_int argc,
          arg_index++;
          cheby_order = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-gmres_order") == 0 )
+      {
+         arg_index++;
+         gmres_order = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-cheby_eig_est") == 0 )
       {
          arg_index++;
@@ -1926,6 +1932,7 @@ main( hypre_int argc,
          hypre_printf("       16=Chebyshev  \n");
          hypre_printf("       17=FCF-Jacobi  \n");
          hypre_printf("       18=L1-Jacobi (may be used with -CF) \n");
+         hypre_printf("       19=GMRES  \n");
          hypre_printf("       9=Gauss elimination (use for coarsest grid only)  \n");
          hypre_printf("       99=Gauss elimination with pivoting (use for coarsest grid only)  \n");
          hypre_printf("       20= Nodal Weighted Jacobi (for systems only) \n");
@@ -1936,6 +1943,7 @@ main( hypre_int argc,
          hypre_printf("  -rlx_down    <val>       : set relaxation type for down cycle\n");
          hypre_printf("  -rlx_up      <val>       : set relaxation type for up cycle\n");
          hypre_printf("  -cheby_order  <val> : set order (1-4) for Chebyshev poly. smoother (default is 2)\n");
+         hypre_printf("  -gmres_order  <val> : set order (1-4) for GMRES poly. smoother (default is 2)\n");
          hypre_printf("  -cheby_fraction <val> : fraction of the spectrum for Chebyshev poly. smoother (default is .3)\n");
          hypre_printf("  -nodal  <val>            : nodal system type\n");
          hypre_printf("       0 = Unknown approach \n");
@@ -3497,6 +3505,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_coarse, 3);
       HYPRE_BoomerAMGSetAddRelaxType(amg_solver, add_relax_type);
       HYPRE_BoomerAMGSetAddRelaxWt(amg_solver, add_relax_wt);
+      HYPRE_BoomerAMGSetGMRESOrder(amg_solver, gmres_order);
       HYPRE_BoomerAMGSetChebyOrder(amg_solver, cheby_order);
       HYPRE_BoomerAMGSetChebyFraction(amg_solver, cheby_fraction);
       HYPRE_BoomerAMGSetChebyEigEst(amg_solver, cheby_eig_est);
@@ -3820,6 +3829,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_coarse, 3);
       HYPRE_BoomerAMGSetAddRelaxType(amg_solver, add_relax_type);
       HYPRE_BoomerAMGSetAddRelaxWt(amg_solver, add_relax_wt);
+      HYPRE_BoomerAMGSetGMRESOrder(amg_solver, gmres_order);
       HYPRE_BoomerAMGSetChebyOrder(amg_solver, cheby_order);
       HYPRE_BoomerAMGSetChebyFraction(amg_solver, cheby_fraction);
       HYPRE_BoomerAMGSetChebyEigEst(amg_solver, cheby_eig_est);
@@ -3995,6 +4005,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_coarse, 3);
          HYPRE_BoomerAMGSetAddRelaxType(pcg_precond, add_relax_type);
          HYPRE_BoomerAMGSetAddRelaxWt(pcg_precond, add_relax_wt);
+         HYPRE_BoomerAMGSetGMRESOrder(pcg_precond, gmres_order);
          HYPRE_BoomerAMGSetChebyOrder(pcg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(pcg_precond, cheby_fraction);
          HYPRE_BoomerAMGSetChebyEigEst(pcg_precond, cheby_eig_est);
@@ -4164,6 +4175,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAddRelaxType(pcg_precond, add_relax_type);
          HYPRE_BoomerAMGSetAddRelaxWt(pcg_precond, add_relax_wt);
          HYPRE_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
+         HYPRE_BoomerAMGSetGMRESOrder(pcg_precond, gmres_order);
          HYPRE_BoomerAMGSetChebyOrder(pcg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(pcg_precond, cheby_fraction);
          HYPRE_BoomerAMGSetChebyEigEst(pcg_precond, cheby_eig_est);
@@ -5439,6 +5451,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetCycleRelaxType(amg_precond, relax_coarse, 3);
          HYPRE_BoomerAMGSetAddRelaxType(amg_precond, add_relax_type);
          HYPRE_BoomerAMGSetAddRelaxWt(amg_precond, add_relax_wt);
+         HYPRE_BoomerAMGSetGMRESOrder(amg_precond, gmres_order);
          HYPRE_BoomerAMGSetChebyOrder(amg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(amg_precond, cheby_fraction);
          HYPRE_BoomerAMGSetChebyEigEst(amg_precond, cheby_eig_est);
@@ -5615,6 +5628,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_coarse, 3);
          HYPRE_BoomerAMGSetAddRelaxType(pcg_precond, add_relax_type);
          HYPRE_BoomerAMGSetAddRelaxWt(pcg_precond, add_relax_wt);
+         HYPRE_BoomerAMGSetGMRESOrder(pcg_precond, gmres_order);
          HYPRE_BoomerAMGSetChebyOrder(pcg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(pcg_precond, cheby_fraction);
          HYPRE_BoomerAMGSetChebyEigEst(pcg_precond, cheby_eig_est);
@@ -5935,6 +5949,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_coarse, 3);
          HYPRE_BoomerAMGSetAddRelaxType(pcg_precond, add_relax_type);
          HYPRE_BoomerAMGSetAddRelaxWt(pcg_precond, add_relax_wt);
+         HYPRE_BoomerAMGSetGMRESOrder(pcg_precond, gmres_order);
          HYPRE_BoomerAMGSetChebyOrder(pcg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(pcg_precond, cheby_fraction);
          HYPRE_BoomerAMGSetChebyEigEst(pcg_precond, cheby_eig_est);
@@ -6121,6 +6136,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_coarse, 3);
          HYPRE_BoomerAMGSetAddRelaxType(pcg_precond, add_relax_type);
          HYPRE_BoomerAMGSetAddRelaxWt(pcg_precond, add_relax_wt);
+         HYPRE_BoomerAMGSetGMRESOrder(pcg_precond, gmres_order);
          HYPRE_BoomerAMGSetChebyOrder(pcg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(pcg_precond, cheby_fraction);
          HYPRE_BoomerAMGSetChebyEigEst(pcg_precond, cheby_eig_est);
@@ -6485,6 +6501,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_coarse, 3);
          HYPRE_BoomerAMGSetAddRelaxType(pcg_precond, add_relax_type);
          HYPRE_BoomerAMGSetAddRelaxWt(pcg_precond, add_relax_wt);
+         HYPRE_BoomerAMGSetGMRESOrder(pcg_precond, gmres_order);
          HYPRE_BoomerAMGSetChebyOrder(pcg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(pcg_precond, cheby_fraction);
          HYPRE_BoomerAMGSetChebyEigEst(pcg_precond, cheby_eig_est);
@@ -6836,6 +6853,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_coarse, 3);
          HYPRE_BoomerAMGSetAddRelaxType(pcg_precond, add_relax_type);
          HYPRE_BoomerAMGSetAddRelaxWt(pcg_precond, add_relax_wt);
+         HYPRE_BoomerAMGSetGMRESOrder(pcg_precond, gmres_order);
          HYPRE_BoomerAMGSetChebyOrder(pcg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(pcg_precond, cheby_fraction);
          HYPRE_BoomerAMGSetChebyEigEst(pcg_precond, cheby_eig_est);
@@ -7146,6 +7164,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_coarse, 3);
          HYPRE_BoomerAMGSetAddRelaxType(pcg_precond, add_relax_type);
          HYPRE_BoomerAMGSetAddRelaxWt(pcg_precond, add_relax_wt);
+         HYPRE_BoomerAMGSetGMRESOrder(pcg_precond, gmres_order);
          HYPRE_BoomerAMGSetChebyOrder(pcg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(pcg_precond, cheby_fraction);
          HYPRE_BoomerAMGSetChebyEigEst(pcg_precond, cheby_eig_est);

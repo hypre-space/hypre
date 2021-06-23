@@ -511,7 +511,9 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 
    HYPRE_Complex *x_data = hypre_VectorData(x);
    HYPRE_Complex *y_data = hypre_VectorData(y);
-   HYPRE_Int      size   = hypre_VectorSize(x);
+   HYPRE_Int      size   = hypre_VectorSize(y);
+   HYPRE_Int      size0   = hypre_VectorSize(y);
+   assert(size0 >= size);
    HYPRE_Int      ierr = 0;
 
    size *= hypre_VectorNumVectors(x);

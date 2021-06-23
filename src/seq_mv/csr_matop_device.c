@@ -432,9 +432,9 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int         job,                 /* 0: qu
                       col_map_offd_C,
                       col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
 
-   HYPRE_Int *new_end = HYPRE_THRUST_CALL( unique,
-                                           col_map_offd_C,
-                                           col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
+   HYPRE_BigInt *new_end = HYPRE_THRUST_CALL( unique,
+                                              col_map_offd_C,
+                                              col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
 
    num_cols_offd_C = new_end - col_map_offd_C;
 
@@ -941,6 +941,7 @@ hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A,
 /* type 0: diag
  *      1: abs diag
  *      2: diag inverse
+ *      3: diag inverse sqrt
  */
 __global__ void
 hypreCUDAKernel_CSRExtractDiag( HYPRE_Int      nrows,
@@ -986,6 +987,10 @@ hypreCUDAKernel_CSRExtractDiag( HYPRE_Int      nrows,
          else if (type == 2)
          {
             d[row] = 1.0 / aa[j];
+         }
+         else if (type == 3)
+         {
+            d[row] = 1.0 / sqrt(aa[j]);
          }
       }
 
