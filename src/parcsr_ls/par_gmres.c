@@ -158,6 +158,17 @@ HYPRE_Int hypre_ParCSRConstructArnoldi(hypre_ParCSRMatrix *A,
                                       )
 {
    HYPRE_Int num_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+   hypre_CSRMatrix* A_diag = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Real* A_diag_data = hypre_CSRMatrixData(A_diag);
+#if GMRES_DEBUG
+   for(int i = 0; i < num_rows; i++) {
+   for(int j = 0; j < num_rows; j++) {
+      printf("%f ", A_diag_data[j*num_rows + i]);
+   }
+   printf("\n");
+   }
+   printf("Num rows: %i\n", num_rows);
+#endif
    HYPRE_Int i = 0;
    HYPRE_Int j = 0;
    HYPRE_Int k = 0;
@@ -174,16 +185,19 @@ HYPRE_Int hypre_ParCSRConstructArnoldi(hypre_ParCSRMatrix *A,
 
    hypre_ParVectorCopy(b, Q[0]); 
 #if GMRES_DEBUG
+   printf("Q0\n");
    PrintVector(Q[0]);
 #endif
    while(i < d)
    {
      i++;
 #if GMRES_DEBUG
+     printf("Q i-1\n");
      PrintVector(Q[i-1]);
 #endif
      hypre_ParCSRMatrixMatvec(1, A, Q[i-1], 0, Q[i]);
 #if GMRES_DEBUG
+     printf("Q i\n");
      PrintVector(Q[i]);
 #endif
      for(j = 0; j < i; j++)
@@ -192,6 +206,7 @@ HYPRE_Int hypre_ParCSRConstructArnoldi(hypre_ParCSRMatrix *A,
        HYPRE_ParVectorAxpy(-H[j][i-1], Q[j], Q[i]);
      }
      HYPRE_ParVectorInnerProd(Q[i],Q[i],&norm);
+     norm = sqrt(norm);
      H[i][i-1] = norm;
      if (norm != 0.0)
      {
@@ -199,6 +214,7 @@ HYPRE_Int hypre_ParCSRConstructArnoldi(hypre_ParCSRMatrix *A,
        ierr = HYPRE_ParVectorScale(norm, Q[i]);
 
 #if GMRES_DEBUG
+     printf("Q i\n");
       PrintVector(Q[i]);
 #endif
      }
@@ -264,6 +280,10 @@ HYPRE_Int hypre_ParCSRVerifyArnoldi(hypre_ParCSRMatrix *A,
   HYPRE_Real* QH = hypre_CTAlloc(HYPRE_Real, (d)*(num_rows), HYPRE_MEMORY_HOST);
   HYPRE_Real done = 1.0;
   HYPRE_Real dzero = 0.0;
+#if GMRES_DEBUG
+  printf("Num rows: %i\n", num_rows);
+  printf("H: %p ", Hm);
+#endif
   hypre_dgemm("N","N", &num_rows, &d, &dpo, &done, Qm, &num_rows, Hm, &dpo, &dzero, QH, &num_rows);
 
 #if GMRES_DEBUG
@@ -307,9 +327,6 @@ HYPRE_Int hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to rela
     )
 {
   assert(A != NULL);
-  hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-  HYPRE_Real      *A_diag_data  = hypre_CSRMatrixData(A_diag);
-  HYPRE_Int       *A_diag_i     = hypre_CSRMatrixI(A_diag);
 
   HYPRE_Int ierr;
 
@@ -337,7 +354,7 @@ HYPRE_Int hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to rela
         hypre_ParCSRMatrixRowStarts(A));
   hypre_ParVectorInitialize(b);
   hypre_ParVectorSetPartitioningOwner(b,0);
-  HYPRE_ParVectorSetRandomValues(b, 22775);
+  HYPRE_ParVectorSetRandomValues(b, 1);
 
   hypre_ParCSRConstructArnoldi(A, b, degree, Q, H);
   hypre_ParCSRVerifyArnoldi(A,b,degree,Q,H);
@@ -478,6 +495,70 @@ HYPRE_Int hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to rela
   return hypre_error_flag;
 }
 
+/* p = p(A)*x */
+HYPRE_Int apply_GMRES_poly(hypre_ParCSRMatrix *A,
+                            HYPRE_Real *coefs_real,
+                            HYPRE_Real *coefs_imag,
+                            HYPRE_Int order,            /* polynomial order */
+                            hypre_ParVector *x,
+                            hypre_ParVector *tmp,
+                            hypre_ParVector *prod,
+                            hypre_ParVector *p)
+{
+   HYPRE_ParVectorCopy(x, prod);
+#if GMRES_DEBUG
+   PrintVector(x);
+#endif
+
+   int i = 0;
+   while (i < order)
+   {
+      if (coefs_imag[i] == 0)
+      {
+         HYPRE_Real alpha = 1 / coefs_real[i];
+#if GMRES_DEBUG
+         printf("Alpha: :%f\n", alpha);
+#endif
+         hypre_ParVectorAxpy(alpha, prod, p);
+#if GMRES_DEBUG
+         printf("P\n");
+         PrintVector(p);
+#endif
+         /* prod <- prod - alpha*mv(prod) */
+         hypre_ParCSRMatrixMatvec(-alpha, A, prod, 1.0, prod);
+#if GMRES_DEBUG
+         printf("Prod\n");
+         PrintVector(prod);
+#endif
+         i++;
+      }
+      else
+      {
+         HYPRE_Real a = coefs_real[i];
+         HYPRE_Real b = coefs_imag[i];
+
+         hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A, prod, 2 * a, prod, tmp);
+         HYPRE_Real alpha = 1 / (a * a + b * b);
+
+         hypre_ParVectorAxpy(alpha, tmp, p);
+         if (i < order - 2)
+         {
+            hypre_ParCSRMatrixMatvec(-alpha, A, tmp, 1.0, prod);
+         }
+         i += 2;
+      }
+   }
+   if (coefs_imag[order-1] == 0)
+   {
+#if GMRES_DEBUG
+      printf("Extra\n");
+      printf("%f \n", 1.0/coefs_real[order-1]);
+#endif
+      hypre_ParVectorAxpy(1.0 / coefs_real[order-1], prod, p);
+   }
+  return hypre_error_flag;
+}
+
 HYPRE_Int hypre_ParCSRRelax_GMRES_Solve(hypre_ParCSRMatrix *A, /* matrix to relax with */
                             hypre_ParVector *f,    /* right-hand side */
                             HYPRE_Real *coefs_real,
@@ -501,40 +582,7 @@ HYPRE_Int hypre_ParCSRRelax_GMRES_Solve(hypre_ParCSRMatrix *A, /* matrix to rela
    hypre_ParVectorCopy(f, r); 
    hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, r);
 
-   HYPRE_ParVectorCopy(r, prod);
-   //HYPRE_ParVectorCopy(u, orig_u);
-
-   int i = 0;
-   while (i < order)
-   {
-      if (coefs_imag[i] == 0)
-      {
-         HYPRE_Real alpha = 1 / coefs_real[i];
-         hypre_ParVectorAxpy(alpha, prod, p);
-         /* prod <- prod - alpha*mv(prod) */
-         hypre_ParCSRMatrixMatvec(-alpha, A, prod, 1.0, prod);
-         i++;
-      }
-      else
-      {
-         HYPRE_Real a = coefs_real[i];
-         HYPRE_Real b = coefs_imag[i];
-
-         hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A, prod, 2 * a, prod, tmp);
-         HYPRE_Real alpha = 1 / (a * a + b * b);
-
-         hypre_ParVectorAxpy(alpha, tmp, p);
-         if (i < order - 2)
-         {
-            hypre_ParCSRMatrixMatvec(-alpha, A, tmp, 1.0, prod);
-         }
-         i += 2;
-      }
-   }
-   if (coefs_imag[order-1] == 0)
-   {
-      hypre_ParVectorAxpy(1.0 / coefs_real[order-1], prod, p);
-   }
+   apply_GMRES_poly(A, coefs_real, coefs_imag, order, r, tmp, prod, p);
 
    hypre_ParVectorAxpy(1.0, p, u);
    return hypre_error_flag;
