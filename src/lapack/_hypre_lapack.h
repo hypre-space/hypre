@@ -30,6 +30,9 @@ extern "C" {
 #define hypre_dbdsqr  hypre_F90_NAME_LAPACK(dbdsqr,DBDSQR)
 #define hypre_dgebd2  hypre_F90_NAME_LAPACK(dgebd2,DGEBD2)
 #define hypre_dgebrd  hypre_F90_NAME_LAPACK(dgebrd,DGEBRD)
+#define hypre_dgeev   hypre_F90_NAME_LAPACK(dgeev,DGEEV
+#define hypre_dgehd2  hypre_F90_NAME_LAPACK(dgehd2,DGEHD2)
+#define hypre_dgehrd  hypre_F90_NAME_LAPACK(dgehrd,DGEHRD)
 #define hypre_dgelq2  hypre_F90_NAME_LAPACK(dgelq2,DGELQ2)
 #define hypre_dgelqf  hypre_F90_NAME_LAPACK(dgelqf,DGELQF)
 #define hypre_dgels   hypre_F90_NAME_LAPACK(dgels ,DGELS )
@@ -40,9 +43,20 @@ extern "C" {
 #define hypre_dgetrf  hypre_F90_NAME_LAPACK(dgetrf,DGETRF)
 #define hypre_dgetri  hypre_F90_NAME_LAPACK(dgetri,DGETRI)
 #define hypre_dgetrs  hypre_F90_NAME_LAPACK(dgetrs,DGETRS)
+#define hypre_dhseqr  hypre_F90_NAME_LAPACK(dhseqr,DHSEQR
+#define hypre_dlaexc  hypre_F90_NAME_LAPACK(dlaexc,DLAEXC)
+#define hypre_dlahr2  hypre_F90_NAME_LAPACK(dlahr2,DLAHR2)
+#define hypre_dlaqr0  hypre_F90_NAME_LAPACK(dlaqr0,DLAQR0)
+#define hypre_dlaqr1  hypre_F91_NAME_LAPACK(dlaqr1,DLAQR1)
+#define hypre_dlaqr2  hypre_F92_NAME_LAPACK(dlaqr2,DLAQR2)
+#define hypre_dlaqr3  hypre_F93_NAME_LAPACK(dlaqr3,DLAQR3)
+#define hypre_dlaqr4  hypre_F94_NAME_LAPACK(dlaqr4,DLAQR4)
+#define hypre_dlaqr5  hypre_F95_NAME_LAPACK(dlaqr5,DLAQR5)
+#define hypre_dlarfx  hypre_F90_NAME_LAPACK(dlarfx,DLARFX)
 #define hypre_dlasq1  hypre_F90_NAME_LAPACK(dlasq1,DLASQ1)
 #define hypre_dlasq2  hypre_F90_NAME_LAPACK(dlasq2,DLASQ2)
 #define hypre_dlasrt  hypre_F90_NAME_LAPACK(dlasrt,DLASRT)
+#define hypre_dlasy2  hypre_F90_NAME_LAPACK(dlasy2,DLASY2)
 #define hypre_dorg2l  hypre_F90_NAME_LAPACK(dorg2l,DORG2L)
 #define hypre_dorg2r  hypre_F90_NAME_LAPACK(dorg2r,DORG2R)
 #define hypre_dorgbr  hypre_F90_NAME_LAPACK(dorgbr,DORGBR)
@@ -53,6 +67,7 @@ extern "C" {
 #define hypre_dorgtr  hypre_F90_NAME_LAPACK(dorgtr,DORGTR)
 #define hypre_dorm2r  hypre_F90_NAME_LAPACK(dorm2r,DORM2R)
 #define hypre_dormbr  hypre_F90_NAME_LAPACK(dormbr,DORMBR)
+#define hypre_dormhr  hypre_F90_NAME_LAPACK(dormhr,DORMHR)
 #define hypre_dorml2  hypre_F90_NAME_LAPACK(dorml2,DORML2)
 #define hypre_dormlq  hypre_F90_NAME_LAPACK(dormlq,DORMLQ)
 #define hypre_dormqr  hypre_F90_NAME_LAPACK(dormqr,DORMQR)
@@ -67,6 +82,7 @@ extern "C" {
 #define hypre_dsygv   hypre_F90_NAME_LAPACK(dsygv ,DSYGV )
 #define hypre_dsytd2  hypre_F90_NAME_LAPACK(dsytd2,DSYTD2)
 #define hypre_dsytrd  hypre_F90_NAME_LAPACK(dsytrd,DSYTRD)
+#define hypre_dtrexc  hypre_F90_NAME_LAPACK(dtrexc,DTREXC)
 #define hypre_dtrti2  hypre_F90_NAME_LAPACK(dtrtri,DTRTI2)
 #define hypre_dtrtri  hypre_F90_NAME_LAPACK(dtrtri,DTRTRI)
 
@@ -114,6 +130,12 @@ HYPRE_Int hypre_dgetri ( HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Int 
 
 /* dgetrs.c */
 HYPRE_Int hypre_dgetrs ( const char *trans , HYPRE_Int *n , HYPRE_Int *nrhs , HYPRE_Real *a , HYPRE_Int *lda , HYPRE_Int *ipiv , HYPRE_Real *b , HYPRE_Int *ldb , HYPRE_Int *info );
+
+/* dhseqr.c */
+HYPRE_Int hypre_dhseqr (const char *job, const char *compz, HYPRE_Int *n, HYPRE_Int *ilo, 
+	HYPRE_Int *ihi, HYPRE_Real *h__, HYPRE_Int *ldh, HYPRE_Real *wr, 
+	HYPRE_Real *wi, HYPRE_Real *z__, HYPRE_Int *ldz, HYPRE_Real *work, 
+	HYPRE_Int *lwork, HYPRE_Int *info);
 
 /* dlasq1.c */
 HYPRE_Int hypre_dlasq1 ( HYPRE_Int *n , HYPRE_Real *d__ , HYPRE_Real *e , HYPRE_Real *work , HYPRE_Int *info );

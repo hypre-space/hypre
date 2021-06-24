@@ -14,6 +14,8 @@ LAPACK_FILES = \
  dbdsqr.c\
  dgebd2.c\
  dgebrd.c\
+ dgehrd.c\
+ dgehd2.c\
  dgelq2.c\
  dgelqf.c\
  dgels.c\
@@ -24,16 +26,28 @@ LAPACK_FILES = \
  dgetri.c\
  dgetrs.c\
  dgetf2.c\
+ dhseqr.c\
  dlabad.c\
  dlabrd.c\
  dlacpy.c\
  dlae2.c\
  dlaev2.c\
+ dlaexc.c\
+ dlahr2.c\
+ dlahqr.c\
  dlange.c\
  dlanst.c\
  dlansy.c\
+ dlanv2.c\
  dlapy2.c\
+ dlaqr0.c\
+ dlaqr1.c\
+ dlaqr2.c\
+ dlaqr3.c\
+ dlaqr4.c\
+ dlaqr5.c\
  dlarfb.c\
+ dlarfx.c\
  dlarf.c\
  dlarfg.c\
  dlarft.c\
@@ -52,6 +66,7 @@ LAPACK_FILES = \
  dlassq.c\
  dlaswp.c\
  dlasv2.c\
+ dlasy2.c\
  dlatrd.c\
  dorg2l.c\
  dorg2r.c\
@@ -63,6 +78,7 @@ LAPACK_FILES = \
  dorgtr.c\
  dorm2r.c\
  dormbr.c\
+ dormhr.c\
  dorml2.c\
  dormlq.c\
  dormqr.c\
@@ -77,6 +93,7 @@ LAPACK_FILES = \
  dsygv.c\
  dsytd2.c\
  dsytrd.c\
+ dtrexc.c\
  dtrtri.c\
  dtrti2.c\
  ieeeck.c\

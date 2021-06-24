@@ -47,6 +47,8 @@
 #define dbdsqr_  hypre_dbdsqr
 #define dgebd2_  hypre_dgebd2
 #define dgebrd_  hypre_dgebrd
+#define dgeev_   hypre_dgeev
+#define dgehd2_  hypre_dgehd2_
 #define dgelq2_  hypre_dgelq2
 #define dgelqf_  hypre_dgelqf
 #define dgels_   hypre_dgels
@@ -57,6 +59,14 @@
 #define dgetrf_  hypre_dgetrf
 #define dgetri_  hypre_dgetri
 #define dgetrs_  hypre_dgetrs
+#define dhseqr_  hypre_dhseqr
+#define dlahr2_  hypre_dlahr2
+#define dlaqr0_  hypre_dlaqr0
+#define dlaqr1_  hypre_dlaqr1
+#define dlaqr2_  hypre_dlaqr2
+#define dlaqr3_  hypre_dlaqr3
+#define dlaqr4_  hypre_dlaqr4
+#define dlaqr5_  hypre_dlaqr5
 #define dlasq1_  hypre_dlasq1
 #define dlasq2_  hypre_dlasq2
 #define dlasrt_  hypre_dlasrt
@@ -92,6 +102,7 @@
 #define dlabrd_  hypre_dlabrd
 #define dlacpy_  hypre_dlacpy
 #define dlae2_   hypre_dlae2
+#define dlaexc_  hypre_dlaexc_
 #define dlaev2_  hypre_dlaev2
 #define dlamch_  hypre_dlamch
 #define dlamc1_  hypre_dlamc1
@@ -104,6 +115,7 @@
 #define dlansy_  hypre_dlansy
 #define dlapy2_  hypre_dlapy2
 #define dlarf_   hypre_dlarf
+#define dlarfx_  hypre_dlarfx
 #define dlarfb_  hypre_dlarfb
 #define dlarfg_  hypre_dlarfg
 #define dlarft_  hypre_dlarft
@@ -117,6 +129,7 @@
 #define dlasq6_  hypre_dlasq6
 #define dlasr_   hypre_dlasr
 #define dlassq_  hypre_dlassq
+#define dlasy2_  hypre_dlasy2
 #define dlasv2_  hypre_dlasv2
 #define dlaswp_  hypre_dlaswp
 #define dlatrd_  hypre_dlatrd
