@@ -2319,8 +2319,6 @@ HYPRE_Int hypre_CSRMatrixResNormFro(hypre_CSRMatrix *A, HYPRE_Real *norm_io);
 HYPRE_Int hypre_ParCSRMatrixNormFro(hypre_ParCSRMatrix *A, HYPRE_Real *norm_io);
 HYPRE_Int hypre_ParCSRMatrixResNormFro(hypre_ParCSRMatrix *A, HYPRE_Real *norm_io);
 HYPRE_Int hypre_CSRMatrixTrace(hypre_CSRMatrix *A, HYPRE_Real *trace_io);
-HYPRE_Int hypre_CSRMatrixScale(hypre_CSRMatrix *A, HYPRE_Real scalar);
-HYPRE_Int hypre_ParCSRMatrixScale(hypre_ParCSRMatrix *A, HYPRE_Real scalar);
 HYPRE_Int hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max_row_nnz);
 HYPRE_Int hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMatrix **M, HYPRE_Real droptol, HYPRE_Real tol, HYPRE_Real eps_tol, HYPRE_Int max_row_nnz, HYPRE_Int max_iter, HYPRE_Int print_level );
 HYPRE_Int hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_Real *droptol, HYPRE_Real mr_tol, HYPRE_Real nsh_tol, HYPRE_Real eps_tol, HYPRE_Int mr_max_row_nnz, HYPRE_Int nsh_max_row_nnz, HYPRE_Int mr_max_iter, HYPRE_Int nsh_max_iter, HYPRE_Int mr_col_version, HYPRE_Int print_level);

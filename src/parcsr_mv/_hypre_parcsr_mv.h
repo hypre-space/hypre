@@ -797,6 +797,7 @@ HYPRE_Int hypre_BuildCSRMatrixMPIDataType ( HYPRE_Int num_nonzeros , HYPRE_Int n
 HYPRE_Int hypre_BuildCSRJDataType ( HYPRE_Int num_nonzeros , HYPRE_Complex *a_data , HYPRE_Int *a_j , hypre_MPI_Datatype *csr_jdata_datatype );
 HYPRE_Int hypre_ParCSRFindExtendCommPkg(MPI_Comm comm, HYPRE_BigInt global_num_cols, HYPRE_BigInt first_col_diag, HYPRE_Int num_cols_diag, HYPRE_BigInt *col_starts, hypre_IJAssumedPart *apart, HYPRE_Int indices_len, HYPRE_BigInt *indices, hypre_ParCSRCommPkg **extend_comm_pkg);
 /* par_csr_matop.c */
+HYPRE_Int hypre_ParCSRMatrixScale(hypre_ParCSRMatrix *A, HYPRE_Real scalar);
 void hypre_ParMatmul_RowSizes ( HYPRE_MemoryLocation memory_location , HYPRE_Int **C_diag_i , HYPRE_Int **C_offd_i , HYPRE_Int *rownnz_A , HYPRE_Int *A_diag_i , HYPRE_Int *A_diag_j , HYPRE_Int *A_offd_i , HYPRE_Int *A_offd_j , HYPRE_Int *B_diag_i , HYPRE_Int *B_diag_j , HYPRE_Int *B_offd_i , HYPRE_Int *B_offd_j , HYPRE_Int *B_ext_diag_i , HYPRE_Int *B_ext_diag_j , HYPRE_Int *B_ext_offd_i , HYPRE_Int *B_ext_offd_j , HYPRE_Int *map_B_to_C , HYPRE_Int *C_diag_size , HYPRE_Int *C_offd_size , HYPRE_Int num_rownnz_A , HYPRE_Int num_rows_diag_A , HYPRE_Int num_cols_offd_A , HYPRE_Int  allsquare , HYPRE_Int num_cols_diag_B , HYPRE_Int num_cols_offd_B , HYPRE_Int num_cols_offd_C );
 hypre_ParCSRMatrix *hypre_ParMatmul ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B );
 void hypre_ParCSRMatrixExtractBExt_Arrays ( HYPRE_Int **pB_ext_i , HYPRE_BigInt **pB_ext_j , HYPRE_Complex **pB_ext_data , HYPRE_BigInt **pB_ext_row_map , HYPRE_Int *num_nonzeros , HYPRE_Int data , HYPRE_Int find_row_map , MPI_Comm comm , hypre_ParCSRCommPkg *comm_pkg , HYPRE_Int num_cols_B , HYPRE_Int num_recvs , HYPRE_Int num_sends , HYPRE_BigInt first_col_diag , HYPRE_BigInt *row_starts , HYPRE_Int *recv_vec_starts , HYPRE_Int *send_map_starts , HYPRE_Int *send_map_elmts , HYPRE_Int *diag_i , HYPRE_Int *diag_j , HYPRE_Int *offd_i , HYPRE_Int *offd_j , HYPRE_BigInt *col_map_offd , HYPRE_Real *diag_data , HYPRE_Real *offd_data );
@@ -952,3 +953,4 @@ HYPRE_Int hypre_ParVectorGetValuesDevice(hypre_ParVector *vector, HYPRE_Int num_
 #endif
 
 #endif
+

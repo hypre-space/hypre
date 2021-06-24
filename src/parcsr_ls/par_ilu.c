@@ -4164,38 +4164,6 @@ hypre_CSRMatrixTrace(hypre_CSRMatrix *A, HYPRE_Real *trace_io)
 
 }
 
-/* Scale CSR matrix A = scalar * A
- * A: the target CSR matrix
- * scalar: real number
- */
-HYPRE_Int
-hypre_CSRMatrixScale(hypre_CSRMatrix *A, HYPRE_Real scalar)
-{
-   HYPRE_Real  *data = hypre_CSRMatrixData(A);
-   HYPRE_Int   i,k;
-   k = hypre_CSRMatrixNumNonzeros(A);
-   for(i = 0 ; i < k ; i ++)
-   {
-      data[i] *= scalar;
-   }
-   return hypre_error_flag;
-}
-
-/* Scale ParCSR matrix A = scalar * A
- * A: the target CSR matrix
- * scalar: real number
- */
-HYPRE_Int
-hypre_ParCSRMatrixScale(hypre_ParCSRMatrix *A, HYPRE_Real scalar)
-{
-   hypre_CSRMatrix   *A_diag = hypre_ParCSRMatrixDiag(A);
-   hypre_CSRMatrix   *A_offd = hypre_ParCSRMatrixOffd(A);
-   /* each thread scale local diag and offd */
-   hypre_CSRMatrixScale(A_diag, scalar);
-   hypre_CSRMatrixScale(A_offd, scalar);
-   return hypre_error_flag;
-}
-
 /* Apply dropping to CSR matrix
  * A: the target CSR matrix
  * droptol: all entries have smaller absolute value than this will be dropped

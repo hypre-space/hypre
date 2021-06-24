@@ -1937,3 +1937,24 @@ hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A,
       hypre_CSRMatrixExtractDiagonalHost(A, d, type);
    }
 }
+
+/* Scale CSR matrix A = scalar * A
+ * A: the target CSR matrix
+ * scalar: real number
+ */
+HYPRE_Int
+hypre_CSRMatrixScale( hypre_CSRMatrix *A,
+                      HYPRE_Complex    scalar)
+{
+   HYPRE_Complex *data = hypre_CSRMatrixData(A);
+   HYPRE_Int      i;
+   HYPRE_Int      k = hypre_CSRMatrixNumNonzeros(A);
+
+   for (i = 0; i < k ; i++)
+   {
+      data[i] *= scalar;
+   }
+
+   return hypre_error_flag;
+}
+

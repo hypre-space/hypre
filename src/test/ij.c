@@ -84,7 +84,6 @@ extern HYPRE_Int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, HYPRE_Int
 
 extern HYPRE_Int hypre_FlexGMRESModifyPCDefault(void *precond_data, HYPRE_Int iteration,
                                                 HYPRE_Real rel_residual_norm);
-
 #ifdef __cplusplus
 }
 #endif
@@ -3214,6 +3213,8 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Print out the system and initial guess
     *-----------------------------------------------------------*/
+
+   hypre_ParCSRMatrixScale(parcsr_A, -1);
 
    if (print_system)
    {
