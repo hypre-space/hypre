@@ -1710,6 +1710,7 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
 HYPRE_Int
 hypre_CSRMatrixTriLowerUpperSolveCusparse(char              /*uplo*/,
                                           hypre_CSRMatrix * /*A*/,
+                                          HYPRE_Real      * /*l1_norms*/,
                                           hypre_Vector    * /*f*/,
                                           hypre_Vector    * /*u*/ )
 {
