@@ -953,7 +953,10 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    hypre_TFree(A_diag_ii, HYPRE_MEMORY_DEVICE);
    hypre_TFree(A_offd_ii, HYPRE_MEMORY_DEVICE);
    hypre_TFree(offd_mark, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(CF_marker, HYPRE_MEMORY_DEVICE);
+   if (cf_memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_HOST))
+   {
+      hypre_TFree(CF_marker, HYPRE_MEMORY_DEVICE);
+   }
    hypre_TFree(map2FC,    HYPRE_MEMORY_DEVICE);
    hypre_TFree(map2F2,    HYPRE_MEMORY_DEVICE);
    hypre_TFree(recv_buf,  HYPRE_MEMORY_DEVICE);

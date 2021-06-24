@@ -24,6 +24,149 @@ HYPRE_Int AIR_MAX_SOL_SIZE = 0;
 #define EPSILON 1e-18
 #define EPSIMAC 1e-16
 
+// WM: debug
+HYPRE_Int
+hypre_DisplayInt(HYPRE_Int *array, HYPRE_Int size, HYPRE_Int display_size, const char *name)
+{
+
+   HYPRE_Int *disp_array;
+   hypre_MemoryLocation memory_location;
+   hypre_GetPointerLocation(array, &memory_location);
+   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
+   {
+      disp_array = hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(disp_array, array, HYPRE_Int, size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   }
+   else
+   {
+      disp_array = array;
+   }
+   hypre_printf("%s = ", name);
+   HYPRE_Int i;
+   for (i = 0; i < hypre_min(size, display_size); i++)
+   {
+      hypre_printf("%d ", disp_array[i]);
+   }
+   hypre_printf("\n");
+
+   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
+   {
+      hypre_TFree(disp_array, HYPRE_MEMORY_HOST);
+   }
+
+   return 0;
+}
+
+HYPRE_Int
+hypre_DisplayComplex(HYPRE_Complex *array, HYPRE_Int size, HYPRE_Int display_size, const char *name)
+{
+
+   HYPRE_Complex *disp_array;
+   hypre_MemoryLocation memory_location;
+   hypre_GetPointerLocation(array, &memory_location);
+   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
+   {
+      disp_array = hypre_TAlloc(HYPRE_Complex, size, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(disp_array, array, HYPRE_Int, size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   }
+   else
+   {
+      disp_array = array;
+   }
+   hypre_printf("%s = ", name);
+   HYPRE_Int i;
+   for (i = 0; i < hypre_min(size, display_size); i++)
+   {
+      hypre_printf("%.2e ", disp_array[i]);
+   }
+   hypre_printf("\n");
+
+   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
+   {
+      hypre_TFree(disp_array, HYPRE_MEMORY_HOST);
+   }
+
+   return 0;
+}
+
+HYPRE_Int
+hypre_DisplayParCSRMatrix(hypre_ParCSRMatrix *A, HYPRE_Int max_display_size, const char *name)
+{
+
+   HYPRE_Int i;
+   hypre_CSRMatrix *disp_mat;
+   hypre_MemoryLocation memory_location;
+
+   hypre_GetPointerLocation(hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A)), &memory_location);
+   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
+   {
+      disp_mat = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixDiag(A), 1, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      disp_mat = hypre_ParCSRMatrixDiag(A);
+   }
+   hypre_printf("\n");
+   hypre_printf("%s_diag: num row, num col, nnz = %d, %d, %d\n", name, hypre_CSRMatrixNumRows(disp_mat), hypre_CSRMatrixNumCols(disp_mat), hypre_CSRMatrixNumNonzeros(disp_mat));
+   hypre_printf("%s_diag_i = ", name);
+   for (i = 0; i < hypre_min(max_display_size, hypre_CSRMatrixNumRows(disp_mat) + 1); i++)
+   {
+      hypre_printf("%d ", hypre_CSRMatrixI(disp_mat)[i]);
+   }
+   hypre_printf("\n");
+   hypre_printf("%s_diag_j = ", name);
+   for (i = 0; i < hypre_min(max_display_size, hypre_CSRMatrixNumNonzeros(disp_mat)); i++)
+   {
+      hypre_printf("%d ", hypre_CSRMatrixJ(disp_mat)[i]);
+   }
+   hypre_printf("\n");
+   hypre_printf("%s_diag_data = ", name);
+   for (i = 0; i < hypre_min(max_display_size, hypre_CSRMatrixNumNonzeros(disp_mat)); i++)
+   {
+      hypre_printf("%.2e ", hypre_CSRMatrixData(disp_mat)[i]);
+   }
+   hypre_printf("\n");
+   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
+   {
+      hypre_CSRMatrixDestroy(disp_mat);
+   }
+
+   hypre_GetPointerLocation(hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(A)), &memory_location);
+   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
+   {
+      disp_mat = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixOffd(A), 1, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      disp_mat = hypre_ParCSRMatrixOffd(A);
+   }
+   hypre_printf("%s_offd: num row, num col, nnz = %d, %d, %d\n", name, hypre_CSRMatrixNumRows(disp_mat), hypre_CSRMatrixNumCols(disp_mat), hypre_CSRMatrixNumNonzeros(disp_mat));
+   hypre_printf("%s_diag_i = ", name);
+   for (i = 0; i < hypre_min(max_display_size, hypre_CSRMatrixNumRows(disp_mat) + 1); i++)
+   {
+      hypre_printf("%d ", hypre_CSRMatrixI(disp_mat)[i]);
+   }
+   hypre_printf("\n");
+   hypre_printf("%s_diag_j = ", name);
+   for (i = 0; i < hypre_min(max_display_size, hypre_CSRMatrixNumNonzeros(disp_mat)); i++)
+   {
+      hypre_printf("%d ", hypre_CSRMatrixJ(disp_mat)[i]);
+   }
+   hypre_printf("\n");
+   hypre_printf("%s_diag_data = ", name);
+   for (i = 0; i < hypre_min(max_display_size, hypre_CSRMatrixNumNonzeros(disp_mat)); i++)
+   {
+      hypre_printf("%.2e ", hypre_CSRMatrixData(disp_mat)[i]);
+   }
+   hypre_printf("\n");
+   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
+   {
+      hypre_CSRMatrixDestroy(disp_mat);
+   }
+
+   return 0;
+}
+
 void hypre_fgmresT(HYPRE_Int n, HYPRE_Complex *A, HYPRE_Complex *b, HYPRE_Real tol, HYPRE_Int kdim, HYPRE_Complex *x, HYPRE_Real *relres, HYPRE_Int *iter, HYPRE_Int job);
 void hypre_ordered_GS(const HYPRE_Complex L[], const HYPRE_Complex rhs[], HYPRE_Complex x[], const HYPRE_Int n);
 
@@ -1780,6 +1923,9 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrix *AFF, *ACF, *X, *X2, *Z, *Z2;
    hypre_ParCSRMatrixExtractSubmatrixFC(A, CF_marker, num_cpts_global, "FF", &AFF, strong_thresholdR);
    hypre_ParCSRMatrixExtractSubmatrixFC(A, CF_marker, num_cpts_global, "CF", &ACF, strong_thresholdR);
+   // !!! Debug
+   hypre_DisplayParCSRMatrix(A, 5, "A");
+   hypre_DisplayParCSRMatrix(ACF, 5, "ACF");
 
    /* A_FF := I - D^{-1}*A_FF */
    hypre_CSRMatrix *AFF_diag = hypre_ParCSRMatrixDiag(AFF);
@@ -1804,6 +1950,8 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
          Fmap[j++] = i;
       }
    }
+   // !!! WM: Debug
+   hypre_DisplayInt(Fmap, n_fpts, 10, "Fmap");
 
    hypre_assert(j == n_fpts);
 
@@ -1887,6 +2035,8 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    HYPRE_Int       *Z_offd_i = hypre_CSRMatrixI(Z_offd);
    HYPRE_Int       *Z_offd_j = hypre_CSRMatrixJ(Z_offd);
    HYPRE_Int        num_cols_offd_Z = hypre_CSRMatrixNumCols(Z_offd);
+   // !!! WM: debug
+   hypre_DisplayParCSRMatrix(Z, 5, "Z");
    /*
    HYPRE_BigInt       *col_map_offd_Z  = hypre_ParCSRMatrixColMapOffd(Z);
    */
@@ -2043,92 +2193,23 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      ierr = hypre_BoomerAMGBuildRestrNeumannAIRDevice(A,CF_marker,num_cpts_global,num_functions,dof_func,
-                                                 NeumannDeg, strong_thresholdR, filter_thresholdR,
-                                                 debug_flag, R_ptr);
-      // !!! Debug
-      hypre_ParCSRMatrixMigrate(*R_ptr, HYPRE_MEMORY_HOST);
-      hypre_CSRMatrix *R_diag = hypre_ParCSRMatrixDiag(*R_ptr);
-      hypre_CSRMatrix *R_offd = hypre_ParCSRMatrixOffd(*R_ptr);
-      printf("\nDevice construction of R:\n");
-      printf("R_diag: num row, num col, nnz = %d, %d, %d\n", hypre_CSRMatrixNumRows(R_diag), hypre_CSRMatrixNumCols(R_diag), hypre_CSRMatrixNumNonzeros(R_diag));
-      printf("R_offd: num row, num col, nnz = %d, %d, %d\n", hypre_CSRMatrixNumRows(R_offd), hypre_CSRMatrixNumCols(R_offd), hypre_CSRMatrixNumNonzeros(R_offd));
-      printf("R_diag_j = %d, %d, %d, %d, %d, %d... \n", hypre_CSRMatrixJ(R_diag)[0],
-                                                         hypre_CSRMatrixJ(R_diag)[1],
-                                                         hypre_CSRMatrixJ(R_diag)[2],
-                                                         hypre_CSRMatrixJ(R_diag)[3],
-                                                         hypre_CSRMatrixJ(R_diag)[4],
-                                                         hypre_CSRMatrixJ(R_diag)[5]);
-      printf("R_diag_a = %e, %e, %e, %e, %e, %e... \n", hypre_CSRMatrixData(R_diag)[0],
-                                                         hypre_CSRMatrixData(R_diag)[1],
-                                                         hypre_CSRMatrixData(R_diag)[2],
-                                                         hypre_CSRMatrixData(R_diag)[3],
-                                                         hypre_CSRMatrixData(R_diag)[4],
-                                                         hypre_CSRMatrixData(R_diag)[5]);
-
       // !!! WM: debug, todo remove
-      /* hypre_ParCSRMatrixDestroy(*R_ptr); */
       hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_HOST);
-      HYPRE_Int num_rows = hypre_ParCSRMatrixNumRows(A);
-      /* HYPRE_Int *CF_marker_host = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST); */
-
-      /* hypre_MemoryLocation tmp; */
-      /* hypre_GetPointerLocation(CF_marker_host, &tmp); */
-      /* switch (tmp) */
-      /* { */
-      /*    case hypre_MEMORY_HOST : */
-      /*       printf("CF_marker_host is on the host\n"); */
-      /*       break; */
-      /*    case hypre_MEMORY_DEVICE : */
-      /*       printf("CF_marker_host is on the device\n"); */
-      /*       break; */
-      /*    case hypre_MEMORY_UNIFIED : */
-      /*       printf("CF_marker_host is on unified\n"); */
-      /*       break; */
-      /*    case hypre_MEMORY_HOST_PINNED : */
-      /*       printf("CF_marker_host is on pinned\n"); */
-      /*       break; */
-      /* } */
-      /* hypre_GetPointerLocation(CF_marker, &tmp); */
-      /* switch (tmp) */
-      /* { */
-      /*    case hypre_MEMORY_HOST : */
-      /*       printf("CF_markeris on the host\n"); */
-      /*       break; */
-      /*    case hypre_MEMORY_DEVICE : */
-      /*       printf("CF_marker is on the device\n"); */
-      /*       break; */
-      /*    case hypre_MEMORY_UNIFIED : */
-      /*       printf("CF_marker is on unified\n"); */
-      /*       break; */
-      /*    case hypre_MEMORY_HOST_PINNED : */
-      /*       printf("CF_marker is on pinned\n"); */
-      /*       break; */
-      /* } */
-
-/*       printf("\nCopy CF marker to host\n"); */
-/*       hypre_Memcpy(CF_marker_host, CF_marker, num_rows, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE); */
       printf("\nHost construction of R:\n");
       ierr = hypre_BoomerAMGBuildRestrNeumannAIRHost(A,CF_marker,num_cpts_global,num_functions,dof_func,
                                                  NeumannDeg, strong_thresholdR, filter_thresholdR,
                                                  debug_flag, R_ptr);
-      printf("R_diag: num row, num col, nnz = %d, %d, %d\n", hypre_CSRMatrixNumRows(R_diag), hypre_CSRMatrixNumCols(R_diag), hypre_CSRMatrixNumNonzeros(R_diag));
-      printf("R_offd: num row, num col, nnz = %d, %d, %d\n", hypre_CSRMatrixNumRows(R_offd), hypre_CSRMatrixNumCols(R_offd), hypre_CSRMatrixNumNonzeros(R_offd));
-      printf("R_diag_j = %d, %d, %d, %d, %d, %d... \n", hypre_CSRMatrixJ(R_diag)[0],
-                                                         hypre_CSRMatrixJ(R_diag)[1],
-                                                         hypre_CSRMatrixJ(R_diag)[2],
-                                                         hypre_CSRMatrixJ(R_diag)[3],
-                                                         hypre_CSRMatrixJ(R_diag)[4],
-                                                         hypre_CSRMatrixJ(R_diag)[5]);
-      printf("R_diag_a = %e, %e, %e, %e, %e, %e... \n", hypre_CSRMatrixData(R_diag)[0],
-                                                         hypre_CSRMatrixData(R_diag)[1],
-                                                         hypre_CSRMatrixData(R_diag)[2],
-                                                         hypre_CSRMatrixData(R_diag)[3],
-                                                         hypre_CSRMatrixData(R_diag)[4],
-                                                         hypre_CSRMatrixData(R_diag)[5]);
-      hypre_ParCSRMatrixMigrate(*R_ptr, HYPRE_MEMORY_DEVICE);
+      hypre_DisplayParCSRMatrix(*R_ptr, 5, "R");
       hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_DEVICE);
 
+      // !!! Debug
+      printf("\nDevice construction of R:\n");
+
+      ierr = hypre_BoomerAMGBuildRestrNeumannAIRDevice(A,CF_marker,num_cpts_global,num_functions,dof_func,
+                                                 NeumannDeg, strong_thresholdR, filter_thresholdR,
+                                                 debug_flag, R_ptr);
+      // !!! Debug
+      hypre_DisplayParCSRMatrix(*R_ptr, 5, "R");
    }
    else
 #endif
