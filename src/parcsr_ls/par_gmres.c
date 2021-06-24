@@ -248,9 +248,6 @@ hypre_ParCSRVerifyArnoldi(hypre_ParCSRMatrix *A, hypre_ParVector *b, HYPRE_Int d
 #if GMRES_DEBUG
    printf("Hm\n");
    PrintMatrix(d + 1, d, Hm);
-
-   printf("Qm\n");
-   PrintMatrix(num_rows, d + 1, Qm);
 #endif
 
    HYPRE_Int   dpo   = d + 1;
@@ -327,7 +324,7 @@ hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
    HYPRE_Real **H = hypre_CTAlloc(HYPRE_Real *, degree + 1, HYPRE_MEMORY_HOST);
 
    /* Alloc on same memory as A */
-   hypre_ParVector **Q = hypre_CTAlloc(hypre_ParVector *, degree + 1, memory_location);
+   hypre_ParVector **Q = hypre_CTAlloc(hypre_ParVector *, degree + 1, HYPRE_MEMORY_HOST);
    for (HYPRE_Int i = 0; i < degree + 1; i++)
    {
       Q[i] = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
@@ -354,11 +351,11 @@ hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
    hypre_ParCSRConstructArnoldi(A, b, degree, Q, H);
 
 #if GMRES_DEBUG
-   hypre_ParCSRVerifyArnoldi(A, b, degree, Q, H);
+   //hypre_ParCSRVerifyArnoldi(A, b, degree, Q, H);
 #endif
 
    /* Take the row major 2D H and construct a column major linear Hm */
-   HYPRE_Real *Hm = hypre_CTAlloc(HYPRE_Real, (degree) * (degree), memory_location);
+   HYPRE_Real *Hm = hypre_CTAlloc(HYPRE_Real, (degree) * (degree), HYPRE_MEMORY_HOST);
    HYPRE_Int   k  = 0;
    HYPRE_Int   j  = 0;
 
@@ -370,7 +367,7 @@ hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
       }
    }
 
-   HYPRE_Real *Htrans = hypre_CTAlloc(HYPRE_Real, degree * degree, memory_location);
+   HYPRE_Real *Htrans = hypre_CTAlloc(HYPRE_Real, degree * degree, HYPRE_MEMORY_HOST);
 
    /* Construct a column major Htranspose */
    /* Transpose and copy */
@@ -546,7 +543,7 @@ apply_GMRES_poly(hypre_ParCSRMatrix *A,
 {
    HYPRE_ParVectorCopy(x, prod);
 #if GMRES_DEBUG
-   PrintVector(x);
+   //PrintVector(x);
 #endif
 
    HYPRE_Int i = 0;
@@ -561,13 +558,13 @@ apply_GMRES_poly(hypre_ParCSRMatrix *A,
          hypre_ParVectorAxpy(alpha, prod, p);
 #if GMRES_DEBUG
          printf("P\n");
-         PrintVector(p);
+         //PrintVector(p);
 #endif
          /* prod <- prod - alpha*mv(prod) */
          hypre_ParCSRMatrixMatvec(-alpha, A, prod, 1.0, prod);
 #if GMRES_DEBUG
          printf("Prod\n");
-         PrintVector(prod);
+         //PrintVector(prod);
 #endif
          i++;
       }
