@@ -38,57 +38,68 @@ means half, and .1 means 10percent)
 
 *******************************************************************************/
 
-HYPRE_Int hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
-                            HYPRE_Real max_eig,
-                            HYPRE_Real min_eig,
-                            HYPRE_Real fraction,
-                            HYPRE_Int order,            /* polynomial order */
-                            HYPRE_Int scale,            /* scale by diagonal?*/
-                            HYPRE_Int variant,
-                            HYPRE_Real **coefs_ptr,
-                            HYPRE_Real **ds_ptr)   /* initial/updated approximation */
+HYPRE_Int
+hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A,         /* matrix to relax with */
+                              HYPRE_Real          max_eig,
+                              HYPRE_Real          min_eig,
+                              HYPRE_Real          fraction,
+                              HYPRE_Int           order,     /* polynomial order */
+                              HYPRE_Int           scale,     /* scale by diagonal?*/
+                              HYPRE_Int           variant,
+                              HYPRE_Real        **coefs_ptr,
+                              HYPRE_Real        **ds_ptr)    /* initial/updated approximation */
 {
-   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrix *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real      *A_diag_data  = hypre_CSRMatrixData(A_diag);
    HYPRE_Int       *A_diag_i     = hypre_CSRMatrixI(A_diag);
-
-   HYPRE_Real theta, delta;
-
-   HYPRE_Real den;
-   HYPRE_Real upper_bound, lower_bound;
-
-   HYPRE_Int j;
-   HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag);
-
-   HYPRE_Real *coefs = NULL;
-
-   HYPRE_Int cheby_order;
-
-   HYPRE_Real *ds_data = NULL;
-   HYPRE_Real  diag;
+   HYPRE_Real       theta, delta;
+   HYPRE_Real       den;
+   HYPRE_Real       upper_bound = 0.0, lower_bound = 0.0;
+   HYPRE_Int        j;
+   HYPRE_Int        num_rows     = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Real      *coefs        = NULL;
+   HYPRE_Int        cheby_order;
+   HYPRE_Real      *ds_data = NULL;
+   HYPRE_Real       diag;
 
    /* u = u + p(A)r */
-
    if (order > 4)
+   {
       order = 4;
+   }
+
    if (order < 1)
+   {
       order = 1;
+   }
 
-   coefs = hypre_CTAlloc(HYPRE_Real,  order+1, HYPRE_MEMORY_HOST);
+   coefs = hypre_CTAlloc(HYPRE_Real, order+1, HYPRE_MEMORY_HOST);
    /* we are using the order of p(A) */
-   cheby_order = order -1;
+   cheby_order = order - 1;
 
-    /* make sure we are large enough -  Adams et al. 2003 */
-   upper_bound = max_eig * 1.1;
-   /* lower_bound = max_eig/fraction; */
-   lower_bound = (upper_bound - min_eig)* fraction + min_eig;
+   if (min_eig >= 0.0)
+   {
+      /* make sure we are large enough - Adams et al. 2003 */
+      upper_bound = max_eig * 1.1;
+      /* lower_bound = max_eig/fraction; */
+      lower_bound = (upper_bound - min_eig) * fraction + min_eig;
+   }
+   else if (max_eig <= 0.0)
+   {
+      lower_bound = min_eig * 1.1;
+      upper_bound = max_eig - (max_eig - lower_bound) * fraction;
+   }
 
+   /*
+   printf("[%e %e]\n", min_eig, max_eig);
+   printf("[%e %e]\n", lower_bound, upper_bound);
+   */
 
    /* theta and delta */
    theta = (upper_bound + lower_bound)/2;
    delta = (upper_bound - lower_bound)/2;
 
-   if (variant == 1 )
+   if (variant == 1)
    {
       switch ( cheby_order ) /* these are the corresponding cheby polynomials: u = u_o + s(A)r_0  - so order is
                                 one less that  resid poly: r(t) = 1 - t*s(t) */
@@ -170,7 +181,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A, /* matrix to rela
    if (scale)
    {
       /*grab 1/sqrt(diagonal) */
-      ds_data = hypre_CTAlloc(HYPRE_Real,  num_rows, HYPRE_MEMORY_HOST);
+      ds_data = hypre_CTAlloc(HYPRE_Real, num_rows, HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(j,diag) HYPRE_SMP_SCHEDULE
@@ -178,10 +189,11 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A, /* matrix to rela
       for (j = 0; j < num_rows; j++)
       {
          diag = A_diag_data[A_diag_i[j]];
-         ds_data[j] = 1/sqrt(diag);
+         diag = hypre_abs(diag);
+         ds_data[j] = 1.0 / sqrt(diag);
       }
+   } /* end of scaling code */
 
-   }/* end of scaling code */
    *ds_ptr = ds_data;
 
    return hypre_error_flag;

@@ -3030,11 +3030,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
          else
          {
-            hypre_ParCSRMaxEigEstimate(A_array[j], scale, &max_eig);
+            hypre_ParCSRMaxEigEstimate(A_array[j], scale, &max_eig, &min_eig);
          }
          max_eig_est[j] = max_eig;
          min_eig_est[j] = min_eig;
-         hypre_ParCSRRelax_Cheby_Setup(A_array[j],max_eig, min_eig,
+         hypre_ParCSRRelax_Cheby_Setup(A_array[j], max_eig, min_eig,
                                        cheby_fraction, cheby_order, scale, variant, &coefs, &ds);
          cheby_coefs[j] = coefs;
          cheby_ds[j] = ds;

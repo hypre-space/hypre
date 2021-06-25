@@ -20,89 +20,108 @@ HYPRE_Real hypre_LINPACKcgpthy(HYPRE_Real*, HYPRE_Real*);
 
 /******************************************************************************
  *
- *use max norm to estimate largest eigenvalue
+ * use Gershgorin discs to estimate smallest and largest eigenvalues
+ * A is assumed to be symmetric
+ * For SPD matrix, it returns [0, max_eig = max (aii + ri)],
+ *                 ri is radius of disc centered at a_ii
+ * For SND matrix, it returns [min_eig = min (aii - ri), 0]
+ *
+ * scale > 0: compute eigen estimate of D^{-1/2}*A*D^{-1/2}, where
+ *            D = diag(A) for SPD matrix, D = -diag(A) for SND
+ *
+ * scale = 1: The algorithm is performed on D^{-1}*A, since it
+ *            has the same eigenvalues as D^{-1/2}*A*D^{-1/2}
+ * scale = 2: The algorithm is performed on D^{-1/2}*A*D^{-1/2} (TODO)
  *
  *****************************************************************************/
 HYPRE_Int
-hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax with */
-                           HYPRE_Int scale, /* scale by diagonal?*/
-                           HYPRE_Real *max_eig)
+hypre_ParCSRMaxEigEstimate( hypre_ParCSRMatrix *A,       /* matrix to relax with */
+                            HYPRE_Int           scale,   /* scale by diagonal?   */
+                            HYPRE_Real         *max_eig,
+                            HYPRE_Real         *min_eig )
 {
-   HYPRE_Real e_max;
-   HYPRE_Real row_sum, max_norm;
-   HYPRE_Real *A_diag_data;
-   HYPRE_Real *A_offd_data;
-   HYPRE_Real temp;
-   HYPRE_Real diag_value;
+   HYPRE_Int   A_num_rows  = hypre_ParCSRMatrixNumRows(A);
+   HYPRE_Int  *A_diag_i    = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A));
+   HYPRE_Int  *A_diag_j    = hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(A));
+   HYPRE_Int  *A_offd_i    = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(A));
+   HYPRE_Real *A_diag_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A));
+   HYPRE_Real *A_offd_data = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(A));
+   HYPRE_Real *diag        = NULL;
+   HYPRE_Int   i, j;
+   HYPRE_Real  e_max, e_min;
+   HYPRE_Real  send_buf[2], recv_buf[2];
 
-   HYPRE_Int  pos_diag, neg_diag;
-   HYPRE_Int  A_num_rows;
-   HYPRE_Int *A_diag_i;
-   HYPRE_Int *A_offd_i;
-   HYPRE_Int  j;
-   HYPRE_Int  i, start;
+   HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
-   /* estimate with the inf-norm of A - should be ok for SPD matrices */
-   A_num_rows  = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
-   A_diag_i    = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A));
-   A_diag_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A));
-   A_offd_i    = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(A));
-   A_offd_data = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(A));
-
-   max_norm = 0.0;
-
-   pos_diag = neg_diag = 0;
-
-   for ( i = 0; i < A_num_rows; i++ )
+   if (scale > 1)
    {
-      start = A_diag_i[i];
-      diag_value = A_diag_data[start];
-      if (diag_value > 0)
-      {
-         pos_diag++;
-      }
-      if (diag_value < 0)
-      {
-         neg_diag++;
-         diag_value = -diag_value;
-      }
-      row_sum = diag_value;
-
-      /*for (j = 0; j < row_length; j++)*/
-      for (j = start+1; j < A_diag_i[i+1]; j++)
-      {
-         row_sum += fabs(A_diag_data[j]);
-      }
-      for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
-      {
-         row_sum += fabs(A_offd_data[j]);
-      }
-      if (scale)
-      {
-         if (diag_value != 0.0)
-            row_sum = row_sum/diag_value;
-      }
-      if ( row_sum > max_norm ) max_norm = row_sum;
+      diag = hypre_TAlloc(HYPRE_Real, A_num_rows, memory_location);
    }
 
-   /* get max across procs */
-   hypre_MPI_Allreduce(&max_norm, &temp, 1, HYPRE_MPI_REAL, hypre_MPI_MAX, hypre_ParCSRMatrixComm(A));
-   max_norm = temp;
+   for (i = 0; i < A_num_rows; i++)
+   {
+      HYPRE_Real a_ii = 0.0, r_i = 0.0, lower, upper;
 
-   hypre_MPI_Allreduce(&pos_diag, &temp, 1, HYPRE_MPI_INT, hypre_MPI_SUM, hypre_ParCSRMatrixComm(A));
-   pos_diag = temp;
+      for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
+      {
+         if (A_diag_j[j] == i)
+         {
+            a_ii = A_diag_data[j];
+         }
+         else
+         {
+            r_i += hypre_abs(A_diag_data[j]);
+         }
+      }
 
-   hypre_MPI_Allreduce(&neg_diag, &temp, 1, HYPRE_MPI_INT, hypre_MPI_SUM, hypre_ParCSRMatrixComm(A));
-   neg_diag = temp;
+      for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
+      {
+         r_i += hypre_abs(A_offd_data[j]);
+      }
 
-   /* from Charles */
-   if ( pos_diag == 0 && neg_diag > 0 ) max_norm = - max_norm;
+      lower = a_ii - r_i;
+      upper = a_ii + r_i;
 
-   /* eig estimates */
-   e_max = max_norm;
+      if (scale == 1)
+      {
+         lower /= hypre_abs(a_ii);
+         upper /= hypre_abs(a_ii);
+      }
+
+      if (i)
+      {
+         e_max = hypre_max(e_max, upper);
+         e_min = hypre_min(e_min, lower);
+      }
+      else
+      {
+         e_max = upper;
+         e_min = lower;
+      }
+   }
+
+   send_buf[0] = -e_min;
+   send_buf[1] =  e_max;
+
+   /* get e_min e_max across procs */
+   hypre_MPI_Allreduce(send_buf, recv_buf, 2, HYPRE_MPI_REAL, hypre_MPI_MAX, hypre_ParCSRMatrixComm(A));
+
+   e_min = -recv_buf[0];
+   e_max =  recv_buf[1];
 
    /* return */
-   *max_eig = e_max;
+   if ( hypre_abs(e_min) > hypre_abs(e_max) )
+   {
+      *min_eig = e_min;
+      *max_eig = hypre_min(0.0, e_max);
+   }
+   else
+   {
+      *min_eig = hypre_max(e_min, 0.0);
+      *max_eig = e_max;
+   }
+
+   hypre_TFree(diag, memory_location);
 
    return hypre_error_flag;
 }
@@ -203,7 +222,6 @@ hypre_ParCSRMaxEigEstimateCG( hypre_ParCSRMatrix *A,     /* matrix to relax with
          diag = A_diag_data[A_diag_i[i]];
          ds_data[i] = 1/sqrt(diag);
       }
-
    }
    else
    {

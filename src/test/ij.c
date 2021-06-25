@@ -3214,7 +3214,7 @@ main( hypre_int argc,
     * Print out the system and initial guess
     *-----------------------------------------------------------*/
 
-   hypre_ParCSRMatrixScale(parcsr_A, -1);
+   //hypre_ParCSRMatrixScale(parcsr_A, -1);
 
    if (print_system)
    {
