@@ -609,19 +609,22 @@ hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Comple
 }
 
 __global__ void
-hypreCUDAKernel_MaskedIVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y, HYPRE_Int *mask)
+hypreCUDAKernel_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y, HYPRE_Int *marker, HYPRE_Int marker_val)
 {
    HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
 
    if (i < n)
    {
-      y[mask[i]] += x[mask[i]] / a[mask[i]];
+      if (marker[i] == marker_val)
+      {
+         y[i] += x[i] / a[i];
+      }         
    }
 }
 
 /* Inverse Vector AXPY: y[i] = x[i] / a[i] + y[i] */
 HYPRE_Int
-hypreDevice_MaskedIVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y, HYPRE_Int *mask)
+hypreDevice_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y, HYPRE_Int *marker, HYPRE_Int marker_val)
 {
    /* trivial case */
    if (n <= 0)
@@ -632,7 +635,7 @@ hypreDevice_MaskedIVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_
    dim3 bDim = hypre_GetDefaultCUDABlockDimension();
    dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_MaskedIVAXPY, gDim, bDim, n, a, x, y, mask );
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IVAXPYMarked, gDim, bDim, n, a, x, y, marker, marker_val );
 
    return hypre_error_flag;
 }

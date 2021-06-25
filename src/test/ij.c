@@ -1735,7 +1735,7 @@ main( hypre_int argc,
    {
       restri_type = air;    /* Set Restriction to be AIR */
       interp_type = 100;    /* 1-pt Interp */
-      relax_type = 0;
+      relax_type = 18;
       ns_down = 0;
       ns_up = 3;
       /* this is a 2-D 4-by-k array using Double pointers */

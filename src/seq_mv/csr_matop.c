@@ -1911,6 +1911,10 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
             {
                d_i = fabs(A_data[j]);
             }
+            else if (type == 2)
+            {
+               d_i = 1.0 / A_data[j];
+            }
             break;
          }
       }
@@ -1923,6 +1927,7 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
  *
  * type 0: diag
  *      1: abs diag
+ *      2: diag inverse
  *--------------------------------------------------------------------------*/
 
 void

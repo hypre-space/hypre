@@ -4231,13 +4231,13 @@ hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      ierr = hypre_BoomerAMGBuildInterpOnePntHost(A,CF_marker,S,num_cpts_global,num_functions,
+      ierr = hypre_BoomerAMGBuildInterpOnePntDevice(A,CF_marker,S,num_cpts_global,num_functions,
                                                    dof_func,debug_flag,P_ptr);
    }
    else
 #endif
    {
-      ierr = hypre_BoomerAMGBuildInterpOnePntDevice(A,CF_marker,S,num_cpts_global,num_functions,
+      ierr = hypre_BoomerAMGBuildInterpOnePntHost(A,CF_marker,S,num_cpts_global,num_functions,
                                                    dof_func,debug_flag,P_ptr);
    }
 
