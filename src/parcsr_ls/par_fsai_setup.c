@@ -19,14 +19,37 @@
  *
  ******************************************************************************/
 
-/* TODO */
-
-/* Extract A[P, P] */
+/* TODO - Extract A[P, P] into an IJMatrix
+ * This is incredibly inefficient. I'm just trying to visualize the general algorithm
+ */
 void
-hypre_ParCSRMatrixExtractIJMatrix(hypre_CSRMatrix *A, hypre_IJMatrix *A_sub, HYPRE_Int *rows, HYPRE_Int nrows){
+hypre_ParCSRMatrixExtractIJMatrix(hypre_IJMatrix *A_sub, HYPRE_Int *A_rows, HYPRE_Int *A_cols, HYPRE *A_vals, HYPRE_Int *rows, HYPRE_Int nrows){
    
-   hypre_qsort0(rows, 0, nrows-1);     /* Ensure rows are in order */   
+   HYPRE_Int A_num_elem = sizeof(A_rows) - sizeof(HYPRE_Int);
 
+   HYPRE_Int *IJrows = CTAlloc(nrows, sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+   HYPRE_Int *IJcols = CTAlloc(nrows*nrows, sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+   HYPRE_Real *IJvals = CTAlloc(nrows*nrows, sizeof(HYPRE_Real), HYPRE_MEMORY_HOST);
+
+   HYPRE_Int i, j, k;      /* Loop variables */
+   HYPRE_Int count = 0;
+
+   for(i = 0; i < nrows; i++)
+      for(j = 0; j < A_num_elem; j++)
+         if(rows[i] == A_rows[j])
+            for(k = 0; k < nrows; k++)
+               if(rows[k] == A_cols[j]){
+                  IJrows[count] = A_rows[j];
+                  IJcols[count] = A_cols[j];
+                  IJvals[count] = A_vals[j];
+                  count++;
+               }
+   
+   HYPRE_IJMatrixSetValues(A_sub, nrows, nrows, IJrows, IJcols, IJvals);
+
+   TFree(IJrows);
+   TFree(IJcols);
+   TFree(IJvals);
 }
 
 /* TODO */
