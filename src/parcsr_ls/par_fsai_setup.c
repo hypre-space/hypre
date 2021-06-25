@@ -19,6 +19,24 @@
  *
  ******************************************************************************/
 
+/* TODO */
+
+/* Extract A[P, P] */
+void
+hypre_ParCSRMatrixExtractIJMatrix(hypre_CSRMatrix *A, hypre_IJMatrix *A_sub, HYPRE_Int *rows, HYPRE_Int nrows){
+   
+   hypre_qsort0(rows, 0, nrows-1);     /* Ensure rows are in order */   
+
+}
+
+/* TODO */
+
+/* Extract A[P, i] */
+void
+hypre_ParCSRMatrixExtractCol(hypre_CSRMatrix *A, HYPRE_Real *A_col, HYPRE_Int *rows, HYPRE_Int nrows, HYPRE_int col){
+   
+}
+
 /*****************************************************************************
  * hypre_FSAISetup
  ******************************************************************************/
@@ -52,37 +70,33 @@ hypre_FSAISetup( void               *fsai_vdata,
    HYPRE_Int               local_size;
    HYPRE_Real              psi_old, psi_new;
    HYPRE_Real              row_scale;
- 
-   HYPRE_Int               row_size;
-   HYPRE_BigInt            *col_ind;
-   HYPRE_BigInt            *values;
-   
    HYPRE_Int               i, j, k;       /* Loop variables */
+ 
+   hypre_CSRMatrix         *A_diag = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Int               *A_i = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int               *A_j = hypre_CSRMatrixJ(A_diag);
+   HYPRE_Real              *A_data = hypre_CSRMatrixData(A_diag);
 
    HYPRE_ParCSRMatrixGetRowPartitioning(A, &row_partition);
    global_start = row_partition[my_id];
-   local_size = row_partition[my_id+1] - row_partition[my_id];
+   global_end   = row_partition[my_id+1];
+   local_num_rows = global_end - global_start;
    hypre_TFree(row_partition, HYPRE_MEMORY_HOST);
 
+   /* kaporin_gradient has to be of longer length because this determines which indices get added to S_Pattern */
+   HYPRE_Real              *kaporin_gradient = (HYPRE_Real*) HYPRE_CTAlloc(local_num_rows-1, sizeof(HYPRE_Real), HYPRE_MEMORY_HOST);
+   HYPRE_Real              *G_temp           = (HYPRE_Real*) HYPRE_CTAlloc(min(max_steps*max_step_size, local_num_rows-1), sizeof(HYPRE_Real), HYPRE_MEMORY_HOST);
+   HYPRE_Int               *S_Pattern        = (HYPRE_Int*) HYPRE_CTAlloc(min(max_steps*max_step_size, local_num_rows-1), sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
 
    for( i = 0; i < local_size; i++ ){    /* Cycle through each of the local rows */
-
-      HYPRE_Real           *kaporin_gradient = (HYPRE_Real*) calloc(global_start+i-1, sizeof(HYPRE_Real));
-      HYPRE_Real           *G_temp           = (HYPRE_Real*) calloc(global_start+i, sizeof(HYPRE_Real));
-      HYPRE_BigInt         *S_Pattern        = (HYPRE_BigInt*) calloc(min(max_steps*max_step_size, row_start+i-1), sizeof(HYPRE_BigInt));
-
-      G_temp[global_start+i-1] = 1.0;
-
-      HYPRE_ParCSRMatrixGetRow(A, i, &row_size, &col_ind, &values);
 
       for( k = 0; k < max_steps; k++ ){      /* Cycle through each iteration for that row */
          
          /* Steps:
          * Compute Kaporin Gradient
-         *  1) How to get a row of A not owned by current process? HYPRE_ParCSRMatrixGetRow only uses local indexing, correct?
-         *  2) kaporin_gradient[j] = 2*( InnerProd(A[j], G_temp[i]) + A[j][i])
-         *     kaporin_gradient = 2 * MatVec(A[0:j], G_temp[i]') + 2*A[i] simplified right?
-         *  3) To use hypre_ParCSRMatrixMatVec, does G_temp need to be a ParVector?
+         *  1) kaporin_gradient[j] = 2*( InnerProd(A[j], G_temp[i]) + A[j][i])
+         *     kaporin_gradient = 2 * MatVec(A[0:j], G_temp[i]') + 2*A[i] simplified
+         *  2) Need a kernel to compute A[P, :]*G_temp - TODO
          
          * Grab max_step_size UNIQUE positions from kaporian gradient
          *  - Need to write my own function. A binary array can be used to mark with locations have already been added to the pattern.
@@ -105,11 +119,11 @@ hypre_FSAISetup( void               *fsai_vdata,
       *  G[i] = row_scale * G_temp  
       */
 
-      free(kaporin_gradient);
-      free(G_temp);
-      free(S_Pattern);
-
    }
+
+   hypre_TFree(kaporin_gradient);
+   hypre_TFree(G_temp);
+   hypre_TFree(S_Pattern);
 
    return(hypre_error_flag);
 
