@@ -1940,7 +1940,6 @@ hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A,
 
 /* Scale CSR matrix A = scalar * A
  * A: the target CSR matrix
- * scalar: real number
  */
 HYPRE_Int
 hypre_CSRMatrixScale( hypre_CSRMatrix *A,
