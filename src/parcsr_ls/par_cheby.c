@@ -90,11 +90,6 @@ hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A,         /* matrix to relax 
       upper_bound = max_eig - (max_eig - lower_bound) * fraction;
    }
 
-   /*
-   printf("[%e %e]\n", min_eig, max_eig);
-   printf("[%e %e]\n", lower_bound, upper_bound);
-   */
-
    /* theta and delta */
    theta = (upper_bound + lower_bound)/2;
    delta = (upper_bound - lower_bound)/2;
