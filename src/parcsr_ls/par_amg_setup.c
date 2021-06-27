@@ -2498,6 +2498,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                      Q = hypre_ParMatmul(A_array[level], P);
                      A_H = hypre_ParTMatmul(P, Q);
                   }
+
                   hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
                   hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
                   hypre_ParCSRMatrixOwnsColStarts(P)   = 0;
@@ -2521,6 +2522,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                      hypre_BoomerAMGBuildCoarseOperatorKT(P, A_array[level] , P,
                                                           keepTranspose, &A_H);
                   }
+
+                  hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
+                  hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
+                  hypre_ParCSRMatrixOwnsColStarts(P)   = 0;
                }
 
                if (add_rlx == 18)
