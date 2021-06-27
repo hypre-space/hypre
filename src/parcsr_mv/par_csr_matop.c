@@ -1824,9 +1824,9 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix  *A,
-                             hypre_ParCSRMatrix **AT_ptr,
-                             HYPRE_Int            data )
+hypre_ParCSRMatrixTransposeHost( hypre_ParCSRMatrix  *A,
+                                 hypre_ParCSRMatrix **AT_ptr,
+                                 HYPRE_Int            data )
 {
    hypre_ParCSRCommHandle *comm_handle;
    MPI_Comm comm = hypre_ParCSRMatrixComm(A);
@@ -2155,6 +2155,35 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix  *A,
    *AT_ptr = AT;
 
    return ierr;
+}
+
+HYPRE_Int
+hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix  *A,
+                             hypre_ParCSRMatrix **AT_ptr,
+                             HYPRE_Int            data )
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("ParCSRMatrixTranspose");
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_ParCSRMatrixTransposeDevice(A, AT_ptr, data);
+   }
+   else
+#endif
+   {
+      hypre_ParCSRMatrixTransposeHost(A, AT_ptr, data);
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
+   return hypre_error_flag;
 }
 
 /* -----------------------------------------------------------------------------
@@ -5040,18 +5069,18 @@ hypre_ParcsrGetExternalRowsWait(void *vrequest)
  * A and B are assumed to have the same row and column partitionings
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
-                       hypre_ParCSRMatrix  *A,
-                       HYPRE_Complex        beta,
-                       hypre_ParCSRMatrix  *B,
-                       hypre_ParCSRMatrix **C_ptr )
+hypre_ParCSRMatrixAddHost( HYPRE_Complex        alpha,
+                           hypre_ParCSRMatrix  *A,
+                           HYPRE_Complex        beta,
+                           hypre_ParCSRMatrix  *B,
+                           hypre_ParCSRMatrix **C_ptr )
 {
    /* ParCSRMatrix data */
    MPI_Comm          comm       = hypre_ParCSRMatrixComm(A);
    HYPRE_BigInt      num_rows_A = hypre_ParCSRMatrixGlobalNumRows(A);
    HYPRE_BigInt      num_cols_A = hypre_ParCSRMatrixGlobalNumCols(A);
-   HYPRE_BigInt      num_rows_B = hypre_ParCSRMatrixGlobalNumRows(B);
-   HYPRE_BigInt      num_cols_B = hypre_ParCSRMatrixGlobalNumCols(B);
+   /* HYPRE_BigInt      num_rows_B = hypre_ParCSRMatrixGlobalNumRows(B); */
+   /* HYPRE_BigInt      num_cols_B = hypre_ParCSRMatrixGlobalNumCols(B); */
 
    /* diag part of A */
    hypre_CSRMatrix    *A_diag   = hypre_ParCSRMatrixDiag(A);
@@ -5074,7 +5103,7 @@ hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
    HYPRE_Int     *rownnz_diag_B = hypre_CSRMatrixRownnz(B_diag);
    HYPRE_Int  num_rownnz_diag_B = hypre_CSRMatrixNumRownnz(B_diag);
    HYPRE_Int    num_rows_diag_B = hypre_CSRMatrixNumRows(B_diag);
-   HYPRE_Int    num_cols_diag_B = hypre_CSRMatrixNumCols(B_diag);
+   /* HYPRE_Int    num_cols_diag_B = hypre_CSRMatrixNumCols(B_diag); */
 
    /* off-diag part of B */
    hypre_CSRMatrix    *B_offd   = hypre_ParCSRMatrixOffd(B);
@@ -5117,11 +5146,6 @@ hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
    HYPRE_MemoryLocation  memory_location_C = hypre_max(memory_location_A, memory_location_B);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
-
-   hypre_assert(num_rows_A == num_rows_B);
-   hypre_assert(num_cols_A == num_cols_B);
-   hypre_assert(num_rows_diag_A == num_rows_diag_B);
-   hypre_assert(num_cols_diag_A == num_cols_diag_B);
 
    /* Allocate memory */
    twspace  = hypre_TAlloc(HYPRE_Int, hypre_NumThreads(), HYPRE_MEMORY_HOST);
@@ -5263,6 +5287,33 @@ hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
    *C_ptr = C;
 
    HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
+                       hypre_ParCSRMatrix  *A,
+                       HYPRE_Complex        beta,
+                       hypre_ParCSRMatrix  *B,
+                       hypre_ParCSRMatrix **C_ptr )
+{
+   hypre_assert(hypre_ParCSRMatrixGlobalNumRows(A) == hypre_ParCSRMatrixGlobalNumRows(B));
+   hypre_assert(hypre_ParCSRMatrixGlobalNumCols(A) == hypre_ParCSRMatrixGlobalNumCols(B));
+   hypre_assert(hypre_ParCSRMatrixNumRows(A) == hypre_ParCSRMatrixNumRows(B));
+   hypre_assert(hypre_ParCSRMatrixNumCols(A) == hypre_ParCSRMatrixNumCols(B));
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   if ( hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+                              hypre_ParCSRMatrixMemoryLocation(B) ) == HYPRE_EXEC_DEVICE )
+   {
+      hypre_ParCSRMatrixAddDevice(alpha, A, beta, B, C_ptr);
+   }
+   else
+#endif
+   {
+      hypre_ParCSRMatrixAddHost(alpha, A, beta, B, C_ptr);
+   }
 
    return hypre_error_flag;
 }
