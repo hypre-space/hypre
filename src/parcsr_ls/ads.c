@@ -1215,10 +1215,21 @@ HYPRE_Int hypre_ADSSetup(void *solver,
       if (!hypre_ParCSRMatrixCommPkg(ads_data -> Pix))
          hypre_MatvecCommPkgCreate(ads_data -> Pix);
       P_owned_col_starts = hypre_ParCSRMatrixOwnsRowStarts(ads_data -> Pix);
-      hypre_BoomerAMGBuildCoarseOperator(ads_data -> Pix,
-                                         ads_data -> A,
-                                         ads_data -> Pix,
-                                         &ads_data -> A_Pix);
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+         ads_data -> A_Pix = hypre_ParCSRMatrixRAPKT(ads_data -> Pix, ads_data -> A, ads_data -> Pix, 1);
+      }
+      else
+#endif
+      {
+         hypre_BoomerAMGBuildCoarseOperator(ads_data -> Pix,
+                                            ads_data -> A,
+                                            ads_data -> Pix,
+                                            &ads_data -> A_Pix);
+      }
+
       if (!P_owned_col_starts)
       {
          hypre_ParCSRMatrixOwnsRowStarts(ads_data -> A_Pix) = 0;
