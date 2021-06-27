@@ -890,7 +890,7 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
    C = hypre_ParCSRMatrixCreate(comm, n_cols_R, n_cols_P, col_starts_R,
                                 col_starts_P, num_cols_offd_C, 0, 0);
 
-   /* Note that C does not own the partitionings */
+   /* Note that C owns the partitionings */
    hypre_ParCSRMatrixSetColStartsOwner(P,0);
    hypre_ParCSRMatrixSetColStartsOwner(R,0);
 
