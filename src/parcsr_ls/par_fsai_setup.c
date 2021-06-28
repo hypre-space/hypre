@@ -19,6 +19,56 @@
  *
  ******************************************************************************/
 
+/******************************************************************************
+ * Helper functions. Will move later.
+ ******************************************************************************/
+
+/* Sort v based on absolute values, move w */
+void hypre_qsort2i_abs( HYPRE_Int *v,
+                    HYPRE_Int *w,
+                    HYPRE_Int  left,
+                    HYPRE_Int  right )
+{
+   HYPRE_Int i, last;
+
+   if (left >= right)
+   {
+      return;
+   }
+   hypre_swap2i( v, w, left, (left+right)/2);
+   last = left;
+   for (i = left+1; i <= right; i++)
+   {
+      if (fabs(v[i]) < fabs(v[left]))
+      {
+         hypre_swap2i(v, w, ++last, i);
+      }
+   }
+   hypre_swap2i(v, w, left, last);
+   hypre_qsort2i_abs(v, w, left, last-1);
+   hypre_qsort2i_abs(v, w, last+1, right);
+}
+
+/* Count the number of nonzeros each rows has in the CSR matrix */
+void hypre_Count_Row_Nnz( HYPRE_Int *nnz_per_row, HYPRE_Int *v, HYPRE_Int numrows)
+{
+   HYPRE_Int i;
+   for(i = 0; i < numrows; i++)
+      ++nnz_per_row[v[i]];
+
+   return
+}
+
+/* Cumulative sum for the number of nonzeros per row */
+void hypre_Count_Cum_Sum(HYPRE_Int *x, HYPRE_Int *cum_sum, HYPRE_Int num_elem)
+{
+   HYPRE_Int i;
+
+   cum_sum[0] = 0;
+   for(i = 0; i < num_elem; i++)
+      cum_sum[i+1] = cum_sum[i] + x[i];
+}
+
 /* TODO - Extract A[P, P] into an IJMatrix
  * This is incredibly inefficient. I'm just trying to visualize the general algorithm
  */
@@ -52,8 +102,6 @@ hypre_ParCSRMatrixExtractIJMatrix(hypre_IJMatrix *A_sub, HYPRE_Int *A_rows, HYPR
    TFree(IJvals);
 }
 
-/* TODO */
-
 /* Extract A[P, i] */
 void
 hypre_ParCSRMatrixExtractCol(hypre_CSRMatrix *A, HYPRE_Real *A_col, HYPRE_Int *rows, HYPRE_Int nrows, HYPRE_int col){
@@ -81,37 +129,64 @@ hypre_FSAISetup( void               *fsai_vdata,
    HYPRE_Int               print_level             = hypre_ParFSAIDataPrintLevel(fsai_data);
    HYPRE_Int               debug_flag;             = hypre_ParFSAIDataDebugFlag(fsai_data);
 
-   /* Local variables */
+   /* Declare Local variables */
 
    HYPRE_Int               num_procs, my_id;
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-   HYPRE_Int               *row_partition
-   HYPRE_Int               global_start;
-   HYPRE_Int               local_size;
-   HYPRE_Real              psi_old, psi_new;
+   HYPRE_CSRMatrix         *A_diag;
+   HYPRE_CSRMatrix         *G;
+   HYPRE_Real              *G_temp;
+   HYPRE_Real              *kaporin_gradient;
+   HYPRE_Real              *A_data;
+   HYPRE_Int               *A_i;
+   HYPRE_Int               *A_j;
+   HYPRE_Int               *row_partition;
+   HYPRE_Int               *nnz_per_row;
+   HYPRE_Int               *nnz_cum_sum;
+   HYPRE_Int               *S_Pattern;
+   HYPRE_Real              old_psi, new_psi;
    HYPRE_Real              row_scale;
+   HYPRE_Int               global_start, global_end, local_num_rows;
+   HYPRE_Int               max_nnz;
    HYPRE_Int               i, j, k;       /* Loop variables */
- 
-   hypre_CSRMatrix         *A_diag = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Int               *A_i = hypre_CSRMatrixI(A_diag);
-   HYPRE_Int               *A_j = hypre_CSRMatrixJ(A_diag);
-   HYPRE_Real              *A_data = hypre_CSRMatrixData(A_diag);
-
+   
    HYPRE_ParCSRMatrixGetRowPartitioning(A, &row_partition);
-   global_start = row_partition[my_id];
-   global_end   = row_partition[my_id+1];
+   global_start   = row_partition[my_id];
+   global_end     = row_partition[my_id+1];
    local_num_rows = global_end - global_start;
    hypre_TFree(row_partition, HYPRE_MEMORY_HOST);
+   
+   /* Allocating local variables */
+   
+   nnz_per_row       = (HYPRE_Int*) CTAlloc(local_num_rows, sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+   nnz_cum_sum       = (HYPRE_Int*) CTAlloc(local_num_rows+1, sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+ 
+   min_row_size      = min(max_steps*max_step_size, local_num_rows-1);
+   kaporin_gradient  = (HYPRE_Real*) HYPRE_CTAlloc(min_row_size, sizeof(HYPRE_Real), HYPRE_MEMORY_HOST);
+   G_temp            = (HYPRE_Real*) HYPRE_CTAlloc(min_row_size, sizeof(HYPRE_Real), HYPRE_MEMORY_HOST);
+   S_Pattern         = (HYPRE_Int*) HYPRE_CTAlloc(min_row_size, sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
 
-   /* kaporin_gradient has to be of longer length because this determines which indices get added to S_Pattern */
-   HYPRE_Real              *kaporin_gradient = (HYPRE_Real*) HYPRE_CTAlloc(local_num_rows-1, sizeof(HYPRE_Real), HYPRE_MEMORY_HOST);
-   HYPRE_Real              *G_temp           = (HYPRE_Real*) HYPRE_CTAlloc(min(max_steps*max_step_size, local_num_rows-1), sizeof(HYPRE_Real), HYPRE_MEMORY_HOST);
-   HYPRE_Int               *S_Pattern        = (HYPRE_Int*) HYPRE_CTAlloc(min(max_steps*max_step_size, local_num_rows-1), sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+   /* Setting local variables */
 
-   for( i = 0; i < local_size; i++ ){    /* Cycle through each of the local rows */
+   A_diag   = hypre_ParCSRMatrixDiag(A);
+   A_i      = hypre_CSRMatrixI(A_diag);
+   A_j      = hypre_CSRMatrixJ(A_diag);
+   A_data   = hypre_CSRMatrixData(A_diag);
+
+
+   hypre_Count_Row_Nnz(nnz_per_row, A_i, local_num_rows);
+   hypre_Count_Cum_Sum(nnz_per_row, nnz_cum_sum, local_num_rows)
+  
+   /* Sort the rows indices first, then sort the column indices for each row. This is to help with the Gather functions. */ 
+   hypre_qsort3ir(A_i, A_data, A_j, 0, local_num_rows-1);
+   for(i = 0; i < local_num_rows)
+      hypre_qsort3ir(A_j, A_data, A_i, cum_nnz_sum[i], cum_nnz_sum[i+1]-1);
+
+ 
+   for( i = 0; i < local_num_rows; i++ ){    /* Cycle through each of the local rows */
 
       for( k = 0; k < max_steps; k++ ){      /* Cycle through each iteration for that row */
          
