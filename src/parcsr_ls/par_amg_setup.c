@@ -2640,6 +2640,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             {
                AP  = hypre_ParCSRMatMat(A_array[level], P_array[level]);
                A_H = hypre_ParCSRMatMat(R_array[level], AP);
+               hypre_CSRMatrixReorder(hypre_ParCSRMatrixDiag(A_H));
             }
             else
             {

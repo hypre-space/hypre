@@ -2358,7 +2358,7 @@ hypre_ILULocalRCM( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end,
 
       /* now sum G with G' */
       hypre_CSRMatrixTranspose(G, &GT, 1);
-      GGT = hypre_CSRMatrixAdd(G, GT);
+      GGT = hypre_CSRMatrixAdd(1.0, G, 1.0, GT);
       hypre_CSRMatrixDestroy(G);
       hypre_CSRMatrixDestroy(GT);
       G = GGT;
@@ -4448,7 +4448,7 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMat
 
       hypre_CSRMatrixScale(matR_temp, -1.0);
 
-      matR = hypre_CSRMatrixAdd(matI,matR_temp);
+      matR = hypre_CSRMatrixAdd(1.0, matI, 1.0, matR_temp);
       hypre_CSRMatrixDestroy(matR_temp);
 
       /* r_norm */
@@ -4486,7 +4486,7 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMat
       hypre_CSRMatrixScale(matZ, alpha);
 
       hypre_CSRMatrixDestroy(matR);
-      matR = hypre_CSRMatrixAdd(matM, matZ);
+      matR = hypre_CSRMatrixAdd(1.0, matM, 1.0, matZ);
       hypre_CSRMatrixDestroy(matM);
       matM = matR;
 

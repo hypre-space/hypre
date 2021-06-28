@@ -655,6 +655,7 @@ hypre_IJVectorGetValuesPar(hypre_IJVector *vector,
    HYPRE_BigInt    *IJpartitioning = hypre_IJVectorPartitioning(vector);
    HYPRE_BigInt     vec_start;
    HYPRE_BigInt     vec_stop;
+   HYPRE_BigInt     jmin           = hypre_IJVectorGlobalFirstRow(vector);
    hypre_ParVector *par_vector     = (hypre_ParVector*) hypre_IJVectorObject(vector);
    HYPRE_Int        print_level    = hypre_IJVectorPrintLevel(vector);
 
@@ -721,10 +722,7 @@ hypre_IJVectorGetValuesPar(hypre_IJVector *vector,
       return hypre_error_flag;
    }
 
-   hypre_assert(vec_start == hypre_ParVectorFirstIndex(par_vector));
-   hypre_assert(vec_stop  == hypre_ParVectorLastIndex(par_vector) + 1);
-
-   hypre_ParVectorGetValues(par_vector, num_values, (HYPRE_BigInt *) indices, values);
+   hypre_ParVectorGetValues2(par_vector, num_values, (HYPRE_BigInt *) indices, jmin, values);
 
    return hypre_error_flag;
 }
