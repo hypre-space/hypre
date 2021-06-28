@@ -102,10 +102,30 @@ hypre_ParCSRMatrixExtractIJMatrix(hypre_IJMatrix *A_sub, HYPRE_Int *A_rows, HYPR
    TFree(IJvals);
 }
 
-/* Extract A[P, i] */
+/* Extract the data from A[i, P] */
 void
-hypre_ParCSRMatrixExtractCol(hypre_CSRMatrix *A, HYPRE_Real *A_col, HYPRE_Int *rows, HYPRE_Int nrows, HYPRE_int col){
-   
+hypre_ParCSRMatrixExtractRowData(HYPRE_Int *A_j, HYPRE_Real *A_data, HYPRE_Real *A_sub_j, HYPRE_Real *A_sub_data, HYPRE_Int start_i, HYPRE_Int end_i, HYPRE_Int *needed_cols, HYPRE_Int ncols, HYPRE_Int row){
+
+   HYPRE_Int i, j;
+   HYPRE_Int count = 0;
+
+   for(i = start_index; i < end_index; i++)
+   {
+      for(j = 0; j < ncols; ++j)
+      {
+         if(A_j[i] == needed_cols[j])
+         {
+            A_sub_j[count]    = A_j[i];      /* This should return the intersection between the non-zero elements of A and needed_cols */
+            A_sub_data[count] = A_data[i];
+            ++count;
+         }
+         else if(A_j[i] < needed_cols[j])
+         {
+            break;
+         }
+      }    
+   }   
+   return;  
 }
 
 /*****************************************************************************
