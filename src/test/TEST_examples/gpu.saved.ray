@@ -70,3 +70,9 @@ Final Relative Residual Norm = 7.02512e-07
 Iterations = 11
 Final Relative Residual Norm = 7.02512e-07
 
+# Output file: gpu.out.15
+
+
+#Iterations = 6
+#Final Relative Residual Norm = 7.75826e-07
+
