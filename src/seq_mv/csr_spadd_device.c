@@ -10,19 +10,38 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
-/* in Matlab notation: if num_b != NULL, C = A, and
- *                                       for each num_b[i], A(num_b[i], :) += B(i,:).
- *                                       A is ma x n and B is mb x n. len(num_b) == mb.
- *                                       NOTE: all numbers in num_b must be in [0,...,ma-1]
- *                     if num_b == NULL, C = A + B. ma == mb
- *                     C is ma x n in both cases
+/* This function effectively does (in Matlab notation)
+ *              C := alpha * A(:, a_colmap)
+ *              C(num_b, :) += beta * B(:, b_colmap)
+ *
+ * if num_b != NULL: A is ma x n and B is mb x n. len(num_b) == mb. 
+ *                   All numbers in num_b must be in [0,...,ma-1]
+ *
+ * if num_b == NULL: C = alpha * A + beta * B. ma == mb
+ *
+ * if d_ja_map/d_jb_map == NULL, it is [0:n)
  */
 HYPRE_Int
-hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
-                     HYPRE_Int  nnzA,     HYPRE_Int   nnzB,
-                     HYPRE_Int *d_ia,     HYPRE_Int  *d_ja,      HYPRE_Complex *d_aa,
-                     HYPRE_Int *d_ib,     HYPRE_Int  *d_jb,      HYPRE_Complex *d_ab,  HYPRE_Int      *d_num_b,
-                     HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out,  HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out)
+hypreDevice_CSRSpAdd( HYPRE_Int       ma, /* num of rows of A */
+                      HYPRE_Int       mb, /* num of rows of B */
+                      HYPRE_Int       n,  /* not used actually */
+                      HYPRE_Int       nnzA,
+                      HYPRE_Int       nnzB,
+                      HYPRE_Int      *d_ia,
+                      HYPRE_Int      *d_ja,
+                      HYPRE_Complex   alpha,
+                      HYPRE_Complex  *d_aa,
+                      HYPRE_Int      *d_ja_map,
+                      HYPRE_Int      *d_ib,
+                      HYPRE_Int      *d_jb,
+                      HYPRE_Complex   beta,
+                      HYPRE_Complex  *d_ab,
+                      HYPRE_Int      *d_jb_map,
+                      HYPRE_Int      *d_num_b,
+                      HYPRE_Int      *nnzC_out,
+                      HYPRE_Int     **d_ic_out,
+                      HYPRE_Int     **d_jc_out,
+                      HYPRE_Complex **d_ac_out)
 {
    /* trivial case */
    if (nnzA == 0 && nnzB == 0)
@@ -39,7 +58,7 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
    hypre_profile_times[HYPRE_TIMER_ID_SPADD] -= hypre_MPI_Wtime();
 #endif
 
-   /* expand */
+   /* expansion size */
    HYPRE_Int nnzT = nnzA + nnzB, nnzC;
    HYPRE_Int *d_it, *d_jt, *d_it_cp, *d_jt_cp, *d_ic, *d_jc;
    HYPRE_Complex *d_at, *d_at_cp, *d_ac;
@@ -60,12 +79,44 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
    d_at = (HYPRE_Complex *) work_mem;
    work_mem += sizeof(HYPRE_Complex) * nnzT2;
 
-   /* expansion */
-   hypre_TMemcpy(d_jt,        d_ja, HYPRE_Int,     nnzA,  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(d_jt + nnzA, d_jb, HYPRE_Int,     nnzB,  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(d_at,        d_aa, HYPRE_Complex, nnzA,  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(d_at + nnzA, d_ab, HYPRE_Complex, nnzB,  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   /* expansion: j */
+   if (d_ja_map)
+   {
+      HYPRE_THRUST_CALL(gather, d_ja, d_ja + nnzA, d_ja_map, d_jt);
+   }
+   else
+   {
+      hypre_TMemcpy(d_jt, d_ja, HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   }
+   if (d_jb_map)
+   {
+      HYPRE_THRUST_CALL(gather, d_jb, d_jb + nnzB, d_jb_map, d_jt + nnzA);
+   }
+   else
+   {
+      hypre_TMemcpy(d_jt + nnzA, d_jb, HYPRE_Int, nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   }
 
+   /* expansion: a */
+   if (alpha == 1.0)
+   {
+      hypre_TMemcpy(d_at, d_aa, HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   }
+   else
+   {
+      HYPRE_THRUST_CALL( transform, d_aa, d_aa + nnzA, d_at, alpha * _1 );
+   }
+
+   if (beta == 1.0)
+   {
+      hypre_TMemcpy(d_at + nnzA, d_ab, HYPRE_Complex, nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   }
+   else
+   {
+      HYPRE_THRUST_CALL( transform, d_ab, d_ab + nnzB, d_at + nnzA, beta * _1 );
+   }
+
+   /* expansion: i */
    hypreDevice_CsrRowPtrsToIndices_v2(ma, nnzA, d_ia, d_it);
    if (d_num_b || mb <= 0)
    {
@@ -77,7 +128,7 @@ hypreDevice_CSRSpAdd(HYPRE_Int  ma,       HYPRE_Int   mb,        HYPRE_Int   n,
       hypreDevice_CsrRowPtrsToIndices_v2(mb, nnzB, d_ib, d_it + nnzA);
    }
 
-   /* make copy of (it, jt, at), since gather cannot be done in-place */
+   /* make copy of (it, jt, at), since reduce cannot be done in-place */
    //d_it_cp = hypre_TAlloc(HYPRE_Int,     nnzT, HYPRE_MEMORY_DEVICE);
    //d_jt_cp = hypre_TAlloc(HYPRE_Int,     nnzT, HYPRE_MEMORY_DEVICE);
    //d_at_cp = hypre_TAlloc(HYPRE_Complex, nnzT, HYPRE_MEMORY_DEVICE);
