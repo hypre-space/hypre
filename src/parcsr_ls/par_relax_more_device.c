@@ -23,7 +23,6 @@
 HYPRE_Int  hypre_LINPACKcgtql1(HYPRE_Int *, HYPRE_Real *, HYPRE_Real *, HYPRE_Int *);
 HYPRE_Real hypre_LINPACKcgpthy(HYPRE_Real *, HYPRE_Real *);
 
-
 /**
  * @brief Calculates row sums and other metrics of a matrix on the device
  * to be used for the MaxEigEstimate
@@ -202,6 +201,14 @@ hypre_ParCSRMaxEigEstimateDevice(hypre_ParCSRMatrix *A, HYPRE_Int scale, HYPRE_R
 
    return hypre_error_flag;
 }
+struct print_functor
+{
+   __host__ __device__
+      void operator()(HYPRE_Real val)
+      {
+         printf("%f\n", val);
+      }
+};
 
 /**
  *  @brief Uses CG to get the eigenvalue estimate on the device
@@ -235,7 +242,7 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
    HYPRE_Real  lambda_max;
    HYPRE_Real  beta, gamma = 0.0, alpha, sdotp, gamma_old, alphainv;
    HYPRE_Real  lambda_min;
-   HYPRE_Real *s_data, *p_data, *ds_data, *u_data;
+   HYPRE_Real *s_data, *p_data, *ds_data, *u_data, *r_data;
    HYPRE_Int   local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
 
    /* check the size of A - don't iterate more than the size */
@@ -286,9 +293,10 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
    s_data = hypre_VectorData(hypre_ParVectorLocalVector(s));
    p_data = hypre_VectorData(hypre_ParVectorLocalVector(p));
    u_data = hypre_VectorData(hypre_ParVectorLocalVector(u));
+   r_data = hypre_VectorData(hypre_ParVectorLocalVector(r));
 
 #if defined(HYPRE_USING_CUDA)
-   hypre_GpuProfilingPopRange();
+   hypre_GpuProfilingPopRange(); /*Setup Data Alloc*/
 #endif
 
 #if defined(HYPRE_USING_CUDA)
@@ -303,7 +311,7 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
    tridiag = hypre_CTAlloc(HYPRE_Real, max_iter + 1, HYPRE_MEMORY_HOST);
    trioffd = hypre_CTAlloc(HYPRE_Real, max_iter + 1, HYPRE_MEMORY_HOST);
 #if defined(HYPRE_USING_CUDA)
-   hypre_GpuProfilingPopRange();
+   hypre_GpuProfilingPopRange(); /*SETUP_Alloc*/
 #endif
 
 #if defined(HYPRE_USING_CUDA)
@@ -315,7 +323,7 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
       trioffd[i] = 0;
    }
 #if defined(HYPRE_USING_CUDA)
-   hypre_GpuProfilingPopRange();
+   hypre_GpuProfilingPopRange(); /*Zeroing */
 #endif
 
 #if defined(HYPRE_USING_CUDA)
@@ -323,10 +331,16 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
 #endif
 
    /* set residual to random */
-   hypre_ParVectorSetRandomValues(r, 1);
+  hypre_CurandUniform(local_size, r_data, 0, 0, 0, 0);
+
+  hypre_SyncCudaComputeStream(hypre_handle());
+
+  HYPRE_THRUST_CALL(transform,
+                    r_data, r_data + local_size, r_data,
+                    2.0 * _1 - 1.0);
 
 #if defined(HYPRE_USING_CUDA)
-   hypre_GpuProfilingPopRange();
+   hypre_GpuProfilingPopRange(); /*CPUAlloc_Random*/
 #endif
 
 #if defined(HYPRE_USING_CUDA)
@@ -344,14 +358,14 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
    }
 
 #if defined(HYPRE_USING_CUDA)
-   hypre_GpuProfilingPopRange();
+   hypre_GpuProfilingPopRange(); /*Setup_CPUAlloc__Diag */
 #endif
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) /*CPUAlloc_Setup */
    hypre_GpuProfilingPopRange();
 #endif
 
 #if defined(HYPRE_USING_CUDA)
-   hypre_GpuProfilingPopRange();
+   hypre_GpuProfilingPopRange(); /* Setup */
 #endif
 #if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPushRange("ParCSRMaxEigEstimate_Iter");
