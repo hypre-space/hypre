@@ -23,25 +23,54 @@
  * Helper functions. Will move later.
  ******************************************************************************/
 
-/* TODO - Extract A[P, P] into an IJMatrix */
+/* TODO - Extract A[P, P] into dense matrix */
 void
-hypre_ParCSRMatrixExtractIJMatrix(hypre_IJMatrix *A_sub, HYPRE_Int *A_rows, HYPRE_Int *A_cols, HYPRE *A_vals, HYPRE_Int *rows, HYPRE_Int nrows){
-   
-/*
- * Reference par_restr.c ~ line 398-408. (Marker = indices list)
- */
+hypre_CSRMatrixExtractDenseMatrix(HYPRE_Real *A_sub, HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Int *A_data, HYPRE_Int *marker, HYPRE_Int *needed_rows, HYPRE_Int nrows_needed)
+{
 
+   HYPRE_Int rr, cc;    /* Local dense matrix row and column counter */ 
+   HYPRE_Int i, j;      /* Loop variables */
+   HYPRE_Int count = 0;
+
+   for(i = 0; i < nrows_needed; i++)
+     marker[needed_rows[i]] = count++;    /* Since A[P, P] is symmetric, we mark the same columns as we do rows */  
+
+   for(i = 0; i < nrows_needed; i++)
+   {
+      rr = needed_rows[i];
+      for(j = A_i[rr]; j < A_i[rr+1]; j++)
+      {
+         if((cc = marker[A_j[j]]) >= 0)
+            A_sub[rr + cc*nrows_needed] = A_data[j];
+      }
+   }
+
+   for(i = 0; i < nrows_needed; i++)
+     marker[needed_rows[i]] = -1;    /* Reset marker work array for future use */  
+
+   return;
 
 }
 
-/* Extract the data from A[i, P] */
+/* Extract the dense sub-row from a matrix (A[i, P]) */
 void
-hypre_ParCSRMatrixExtractRowData(HYPRE_Int *A_j, HYPRE_Real *A_data, HYPRE_Real *A_sub_j, HYPRE_Real *A_sub_data, HYPRE_Int start_i, HYPRE_Int end_i, HYPRE_Int *needed_cols, HYPRE_Int ncols, HYPRE_Int row){
+hypre_ParCSRMatrixExtractDenseRowFromMatrix(HYPRE_Real *sub_row, HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Real *A_data, HYPRE_Int *marker, HYPRE_Int needed_row, HYPRE_Int *needed_cols, HYPRE_Int ncols_needed)
+{
 
-/*
- * Base on previous function
- */
+   HYPRE_Int i, cc;
+   HYPRE_Int count = 0;
 
+   for(i = 0; i < ncols_needed; i++)
+      marker[needed_cols[i]] = count++;
+
+   for(i = A_i[needed_row]; i < A_i[needed_row+1]; i++)
+      if((cc = marker[A_j[i]]) >= 0)
+         sub_row[cc] = A_data[i];
+
+   for(i = 0; i < ncols_needed; i++)
+      marker[needed_cols[i]] = -1;
+
+   return;
 }
 
 /*****************************************************************************
@@ -75,39 +104,45 @@ hypre_FSAISetup( void               *fsai_vdata,
    HYPRE_CSRMatrix         *A_diag;
    HYPRE_CSRMatrix         *G;
    HYPRE_Real              *G_temp;
+   HYPRE_Real              *A_sub;
    HYPRE_Real              *kaporin_gradient;
    HYPRE_Real              *A_data;
    HYPRE_Int               *A_i;
    HYPRE_Int               *A_j;
    HYPRE_Int               *row_partition;
    HYPRE_Int               *S_Pattern;
+   HYPRE_Int               *markers;
    HYPRE_Real              old_psi, new_psi;
    HYPRE_Real              row_scale;
-   HYPRE_Int               global_start, global_end, local_num_rows;
-   HYPRE_Int               max_nnz;
+   HYPRE_Int               num_rows;
+   HYPRE_Int               min_row_size;
    HYPRE_Int               i, j, k;       /* Loop variables */
    
-   HYPRE_ParCSRMatrixGetRowPartitioning(A, &row_partition);
-   global_start   = row_partition[my_id];
-   global_end     = row_partition[my_id+1];
-   local_num_rows = global_end - global_start;
-   hypre_TFree(row_partition, HYPRE_MEMORY_HOST);
-   
-   /* Allocating local variables */
-   
-   min_row_size      = min(max_steps*max_step_size, local_num_rows-1);
-   kaporin_gradient  = (HYPRE_Real*) HYPRE_CTAlloc(min_row_size, sizeof(HYPRE_Real), HYPRE_MEMORY_HOST);
-   G_temp            = (HYPRE_Real*) HYPRE_CTAlloc(min_row_size, sizeof(HYPRE_Real), HYPRE_MEMORY_HOST);
-   S_Pattern         = (HYPRE_Int*) HYPRE_CTAlloc(min_row_size, sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
-
    /* Setting local variables */
 
-   A_diag   = hypre_ParCSRMatrixDiag(A);
-   A_i      = hypre_CSRMatrixI(A_diag);
-   A_j      = hypre_CSRMatrixJ(A_diag);
-   A_data   = hypre_CSRMatrixData(A_diag);
+   A_diag                  = hypre_ParCSRMatrixDiag(A);
+   A_i                     = hypre_CSRMatrixI(A_diag);
+   A_j                     = hypre_CSRMatrixJ(A_diag);
+   A_data                  = hypre_CSRMatrixData(A_diag);
+   num_rows                = hypre_CSRMatrixNumRows(A_diag);
+   num_cols                = hypre_CSRMatrixNumCols(A_diag);
+                          
+   /* Allocating local variables */
+   
+   min_row_size            = min(max_steps*max_step_size, num_rows-1);
+   kaporin_gradient        = hypre_CTAlloc(HYPRE_Real, min_row_size, HYPRE_MEMORY_HOST);
+   G_temp                  = hypre_CTAlloc(HYPRE_Real, min_row_size, HYPRE_MEMORY_HOST);
+   S_Pattern               = hypre_CTAlloc(HYPRE_Int, min_row_size, HYPRE_MEMORY_HOST);
+   markers                 = hypre_CTAlloc(HYPRE_Int, num_cols, HYPRE_MEMORY_HOST);       /* For gather functions - don't want to reinitialize */
+   for( i = 0; i < num_cols; i++ )
+      markers[i] = -1;
 
-   for( i = 0; i < local_num_rows; i++ ){    /* Cycle through each of the local rows */
+
+   /**********************************************************************
+   * Start of Adaptive FSAI algorithm  
+   ***********************************************************************/
+
+   for( i = 0; i < num_rows; i++ ){    /* Cycle through each of the local rows */
 
       for( k = 0; k < max_steps; k++ ){      /* Cycle through each iteration for that row */
          
@@ -140,9 +175,9 @@ hypre_FSAISetup( void               *fsai_vdata,
 
    }
 
-   hypre_TFree(kaporin_gradient);
-   hypre_TFree(G_temp);
-   hypre_TFree(S_Pattern);
+   hypre_TFree(kaporin_gradient, HYPRE_MEMORY_HOST);
+   hypre_TFree(G_temp, HYPRE_MEMORY_HOST);
+   hypre_TFree(S_Pattern, HYPRE_MEMORY_HOST);
 
    return(hypre_error_flag);
 
