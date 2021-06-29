@@ -1670,18 +1670,13 @@ GenerateDiagAndOffd(hypre_CSRMatrix    *A,
       diag_i = hypre_CSRMatrixI(diag);
       diag_j = hypre_CSRMatrixJ(diag);
 
-      for (i=0; i < num_nonzeros; i++)
-      {
-         diag_data[i] = a_data[i];
-         diag_j[i] = a_j[i];
-      }
-      offd_i = hypre_CTAlloc(HYPRE_Int,  num_rows+1, HYPRE_MEMORY_HOST);
+      hypre_Memcpy(diag_data, a_data, sizeof(HYPRE_Int) * num_nonzeros,hypre_CSRMatrixMemoryLocation(A), hypre_CSRMatrixMemoryLocation(A));
+      hypre_Memcpy(diag_j, a_j, sizeof(HYPRE_Int) * num_nonzeros,hypre_CSRMatrixMemoryLocation(A), hypre_CSRMatrixMemoryLocation(A));
 
-      for (i=0; i < num_rows+1; i++)
-      {
-         diag_i[i] = a_i[i];
-         offd_i[i] = 0;
-      }
+      offd_i = hypre_CTAlloc(HYPRE_Int,  num_rows+1, hypre_CSRMatrixMemoryLocation(A));
+
+      hypre_Memcpy(diag_i, a_i, sizeof(HYPRE_Real)  * (num_rows+1), hypre_CSRMatrixMemoryLocation(A), hypre_CSRMatrixMemoryLocation(A));
+      hypre_Memset(offd_i, 0, num_rows+1, hypre_CSRMatrixMemoryLocation(A));
 
       hypre_CSRMatrixNumCols(offd) = 0;
       hypre_CSRMatrixI(offd) = offd_i;
