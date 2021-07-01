@@ -220,6 +220,7 @@ hypre_ParCSRMaxEigEstimateCG( hypre_ParCSRMatrix *A,     /* matrix to relax with
       for (i = 0; i < local_size; i++)
       {
          diag = A_diag_data[A_diag_i[i]];
+         diag = hypre_abs(diag);
          ds_data[i] = 1/sqrt(diag);
       }
    }

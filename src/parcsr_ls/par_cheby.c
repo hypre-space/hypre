@@ -86,8 +86,8 @@ hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A,         /* matrix to relax 
    }
    else if (max_eig <= 0.0)
    {
-      lower_bound = min_eig * 1.1;
-      upper_bound = max_eig - (max_eig - lower_bound) * fraction;
+      upper_bound = min_eig * 1.1;
+      lower_bound = max_eig - (max_eig - upper_bound) * fraction;
    }
 
    /* theta and delta */
