@@ -193,6 +193,9 @@ main( hypre_int argc,
    const HYPRE_Real    dt_inf = DT_INF;
    HYPRE_Real          dt = dt_inf;
 
+   /* solve -Ax = b, for testing SND matrices */
+   HYPRE_Int           negA = 0;
+
    /* parameters for BoomerAMG */
    HYPRE_Real     A_drop_tol = 0.0;
    HYPRE_Int      A_drop_type = -1;
@@ -1154,6 +1157,11 @@ main( hypre_int argc,
          mempool_max_cached_bytes = atoi(argv[arg_index++])*1024LL*1024LL;
       }
 #endif
+      else if ( strcmp(argv[arg_index], "-negA") == 0 )
+      {
+         arg_index++;
+         negA = atoi(argv[arg_index++]);
+      }
       else
       {
          arg_index++;
@@ -3214,7 +3222,10 @@ main( hypre_int argc,
     * Print out the system and initial guess
     *-----------------------------------------------------------*/
 
-   //hypre_ParCSRMatrixScale(parcsr_A, -1);
+   if (negA)
+   {
+      hypre_ParCSRMatrixScale(parcsr_A, -1);
+   }
 
    if (print_system)
    {

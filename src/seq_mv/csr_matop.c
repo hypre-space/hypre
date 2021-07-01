@@ -1945,7 +1945,6 @@ hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A,
 }
 
 /* Scale CSR matrix A = scalar * A
- * A: the target CSR matrix
  */
 HYPRE_Int
 hypre_CSRMatrixScale( hypre_CSRMatrix *A,
@@ -1955,9 +1954,20 @@ hypre_CSRMatrixScale( hypre_CSRMatrix *A,
    HYPRE_Int      i;
    HYPRE_Int      k = hypre_CSRMatrixNumNonzeros(A);
 
-   for (i = 0; i < k ; i++)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
    {
-      data[i] *= scalar;
+      hypreDevice_Scalen(data, k, scalar);
+   }
+   else
+#endif
+   {
+      for (i = 0; i < k; i++)
+      {
+         data[i] *= scalar;
+      }
    }
 
    return hypre_error_flag;
