@@ -51,7 +51,8 @@ if(HYPRE_USING_DSUPERLU)
 endif()
 
 if(HYPRE_WITH_MPI)
-  find_dependency(MPI @MPI_C_VERSION@ EXACT)
+  enable_language(C)
+  find_dependency(MPI @MPI_C_VERSION@ EXACT COMPONENTS C)
 endif()
 
 if(HYPRE_WITH_OPENMP)
