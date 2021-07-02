@@ -82,58 +82,49 @@ hypre_ExtractDenseRowFromCSRMatrix(HYPRE_CSRMatrix *A_diag, HYPRE_Int *marker, H
 /* Extract a subset of a row from a row (G[i, P]) 
  * - row:            Array holding the elements of G_temp in the main function
  * - ncols:          Length of row
- * - marker:         A work array of length equal to the number of rows in A_diag specifying 
- *   which column indices should be added to sub_row and in what order (all values should be 
- *   set to -1 if they are not needed and and a number between 0:(ncols_needed-1) otherwise)
+ * - marker:         A work array of length equal to row_length specifying which column indices 
+ *   should be added to sub_row and in what order (all values should be set to -1 if they are 
+ *   not needed and and a number between 0:(ncols_needed-1) otherwise)
  * - ncols_needed:   Number of columns G[i, P] needs.
  */
 HYPRE_Vector
-hypre_ExtractDenseRowFromRow(HYPRE_Real *row, HYPRE_Int nrows, HYPRE_Int *marker, HYPRE_Int ncols_needed)
+hypre_ExtractDenseRowFromRow(HYPRE_Real *row, HYPRE_Int row_length, HYPRE_Int *marker, HYPRE_Int ncols_needed)
 {
  
-   HYPRE_Int i;
-   hypre_assert(ncols_needed <= ncols);   
+   HYPRE_Int i, j;
+   hypre_assert(ncols_needed <= row_length);   
 
    HYPRE_Vector *sub_row = hypre_VectorCreate(ncols_needed);
    hypre_VectorInitialize(sub_row);
    HYPRE_Complex *sub_row_data = hypre_VectorData(sub_row);
  
-   for(i = 0; i < ncols_needed; ++)   
-      sub_row_data[i] = row[cols_needed[i]];
+   for(i = 0; i < row_length; ++i)
+      if((j = marker[i]) >= 0)   
+         sub_row_data[j] = row[i];
       
    return sub_row;
 
 }
 
-/* Find the intersection between vectors x and y, put it in z 
+/* Find the intersection between arrays x and y, put it in z 
  * XXX: I saw the function 'IntersectTwoArrays' in protos.h, but it doesn't do what I want
  */
-HYPRE_Vector hypre_IntersectTwoVectors(HYPRE_Vector *x, HYPRE_Vector *y)
+HYPRE_Vector hypre_IntersectTwoArrays2(HYPRE_Int *x, HYPRE_Int *y, HYPRE_Int *z, HYPRE_Int x_size, HYPRE_Int y_size, HYPRE_Int *z_size)
 {
  
    HYPRE_Int i, j;
 
-   HYPRE_Int      x_size = HYPRE_VectorSize(x);
-   HYPRE_Int      y_size = HYPRE_VectorSize(y);
-   HYPRE_Complex *x_data = hypre_VectorData(x);
-   HYPRE_Complex *y_data = hypre_VectorData(y);
-
-   HYPRE_Complex *z_data = CTAlloc(HYPRE_Complex, max(x_size, y_size), HYPRE_MEMORY_HOST);
-   HYPRE_Int      z_size = 0;
+   z_size = 0;
 
    for(i = 0; i < x_size; i++)
       for(j = 0; j < y_size; j++)
-         if(x_data[i] == y_data[j])
+         if(x[i] == y[j])
          {
-            z_data[(*z_size)++] = x_data[i];
+            z[(*z_size)++] = x[i];
             break;
          }
 
-   HYPRE_Vector *z = hypre_VectorCreate(z_size);
-   hypre_VectorInitialize(z);
-   HYPRE_VectorData(z) = z_data;                /* Unsure if this will actually work */
-
-   return z;                                    /* Can't create this HYPRE_Vector outside of function because I don't know the size */
+   return;                                    /* Can't create this HYPRE_Vector outside of function because I don't know the size */
 
 }
 
@@ -155,39 +146,33 @@ void hypre_FindKapGrad(HYPRE_Real *kaporin_gradient, HYPRE_Int *KapGrad_Nonzero_
    HYPRE_Int  *A_i      = hypre_CSRMatrixI(A_diag);
    HYPRE_Int  *A_j      = hypre_CSRMatrixJ(A_diag);
    HYPRE_Real *A_data   = hypre_CSRMatrixData(A_diag);
-   HYPRE_Real *A_i_sub  = hypre_CTAlloc(HYPRE_Int, A_i[row_num+1] - A_i[row_num], HYPRE_MEMORY_HOST);
-   HYPRE_Int  i, j;
-   HYPRE_Int count;
-   (*KapGrad_nnz) = 0;
+   HYPRE_Int count	= 0;
+   HYPRE_Int  i, j, intersect_nnz;
+   HYPRE_Vector *G_sub;
+   HYPRE_Vector *A_sub;
+   HYPRE_Int *intersect = CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A_diag), HYPRE_MEMORY_HOST);
+   HYPRE_Int *A_nonzeros = CTAlloc(HYPRE_Int, hypre_CSRMatrixNumCols(A_diag), HYPRE_MEMORY_HOST);
 
-   HYPRE_Vector *G_sub  = hypre_VectorCreate(S_Pattern_nnz);
-   hypre_VectorInitialize(G_sub);
-   hypre_ExtractDenseRowFromRow(G_sub, G_temp, row_length, S_Pattern, S_Pattern_nnz);
-
-   HYPRE_Vector *A_sub  = hypre_VectorCreate(A_i[row_num+1] - A_i[row_num]);
-   hypre_VectorInitialize(A_sub);
    HYPRE_Int *marker = CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A_diag), HYPRE_MEMORY_HOST);
    for(i = 0; i < hypre_CSRMatrixNumRows(A_diag); i++)
       marker[i] = -1;
 
    for(i = 0; i < num_row-1; i++)
    {
+      /* Getting A[i, P] */
       count = 0;
       for(j = A_i[i]; j < A_i[i+1]; j++)
-         marker[A_j[i]] = count++;
- 
-      hypre_ExtractDenseRowFromCSRMatrix(A_sub, A_diag, marker, i, HYPRE_Int *needed_cols, count);
+	 A_nonzeros[count++] = A_i[j];
+      hypre_IntersectTwoArrays2(A_nonzeros, S_Pattern, intersect, count, S_Pattern_nnz, &intersect_nnz);  
+
    }   
 
    /* TODO
-   for( i = 0; i < (*KapGrad_nnz); i++ )
-   {
       * kaporin_gradient[i] = 2*( InnerProd(A[i], G_temp[row_num]) + A[i][row_num]) 
       *  How I did this in Matlab is I took the intersection of the nonzero columns of A[i] and G_temp[row_num]
       *  before doing the inner product between the two subsets. However, finding this intersection each iteration
       *  is expensive and won't provide any benefit over multiplying by a bunch of zeros I think.
       *  Really all this is is a matvec between G_temp and A(1:i, :). Is there a MatVec function that is efficient?
-   }
    */
 
    return;
