@@ -23,109 +23,118 @@
  * Helper functions. Will move later.
  ******************************************************************************/
 
-/* TODO - Extract A[P, P] into dense matrix */
+/* Extract A[P, P] into dense matrix 
+ * Parameters:
+ * - A_sub:          A (nrows_needed)^2 sized array to hold the submatrix A[P, P]. 
+ * - A_diag:         CSR Matrix diagonal of A
+ * - marker:         A work array of length equal to the number of rows in A_diag specifying 
+ *   which column indices should be added to sub_row and in what order (all values should be 
+ *   set to -1 if they are not needed and and a number between 0:(ncols_needed-1) otherwise)
+ * - nrows_needed:   Number of rows/columns A[P, P] needs.
+ */
 void
-hypre_CSRMatrixExtractDenseMatrix(HYPRE_Real *A_sub, HYPRE_CSRMatrix *A_diag, HYPRE_Int *marker, HYPRE_Int *needed_rows, HYPRE_Int nrows_needed)
+hypre_CSRMatrixExtractDenseMatrix(HYPRE_Real *A_sub, HYPRE_CSRMatrix *A_diag, HYPRE_Int *marker, HYPRE_Int nrows_needed)
 {
    HYPRE_Int *A_i       = hypre_CSRMatrixI(A_diag);
    HYPRE_Int *A_j       = hypre_CSRMatrixJ(A_diag);
    HYPRE_Real *A_data   = hypre_CSRMatrixData(A_diag);
-   HYPRE_Int rr, cc;    /* Local dense matrix row and column counter */ 
+   HYPRE_Int cc;        /* Local dense matrix column counter */ 
    HYPRE_Int i, j;      /* Loop variables */
-   HYPRE_Int count = 0;
 
-   hypre_qsort0(rows_needed, 0, nrows_needed-1);   /* the rows needed to be in order from least to greatest so matrix functions can be used */
-
-   for(i = 0; i < nrows_needed; i++)
-     marker[needed_rows[i]] = count++;    /* Since A[P, P] is symmetric, we mark the same columns as we do rows */  
-
-   for(i = 0; i < nrows_needed; i++)
-   {
-      rr = needed_rows[i];
-      for(j = A_i[rr]; j < A_i[rr+1]; j++)
-      {
-         if((cc = marker[A_j[j]]) >= 0)
-            A_sub[rr + cc*nrows_needed] = A_data[j];
-      }
-   }
-
-   for(i = 0; i < nrows_needed; i++)
-     marker[needed_rows[i]] = -1;    /* Reset marker work array for future use */  
+   for(i = 0; i < hypre_CSRMatrixNumRows(A_diag); i++)
+      if(marker[i] >= 0)
+         for(j = A_i[i]; j < A_i[i+1]; j++)
+            if((cc = marker[A_j[j]]) >= 0)
+               A_sub[i + cc*nrows_needed] = A_data[j];
 
    return;
 
 }
 
-/* Extract the dense sub-row from a matrix (A[i, P]) */
-void
-hypre_ExtractDenseRowFromCSRMatrix(HYPRE_Real *sub_row, HYPRE_CSRMatrix *A_diag, HYPRE_Int *marker, HYPRE_Int needed_row, HYPRE_Int *needed_cols, HYPRE_Int ncols_needed)
+/* Extract the dense sub-row from a matrix (A[i, P]) 
+ * Parameters:
+ * - A_diag:         CSR Matrix diagonal of A
+ * - marker:         A work array of length equal to the number of rows in A_diag specifying 
+ *   which column indices should be added to sub_row and in what order (all values should be 
+ *   set to -1 if they are not needed and and a number between 0:(ncols_needed-1) otherwise)
+ * - needed_row:     Which row of A we are extracting from
+ * - ncols_needed:   Number of columns A[i, P] needs.
+ */
+HYPRE_Vector
+hypre_ExtractDenseRowFromCSRMatrix(HYPRE_CSRMatrix *A_diag, HYPRE_Int *marker, HYPRE_Int needed_row, HYPRE_Int ncols_needed)
 {
    HYPRE_Int *A_i       = hypre_CSRMatrixI(A_diag);
    HYPRE_Int *A_j       = hypre_CSRMatrixJ(A_diag);
    HYPRE_Real *A_data   = hypre_CSRMatrixData(A_diag);
    HYPRE_Int i, cc;
-   HYPRE_Int count = 0;
 
-   hypre_qsort0(cols_needed, 0, ncols_needed-1);   /* the columns needed to be in order from least to greatest so matrix functions can be used */
-
-   for(i = 0; i < ncols_needed; i++)
-      marker[needed_cols[i]] = count++;
+   HYPRE_Vector *sub_row = hypre_VectorCreate(ncols_needed);
+   hypre_VectorInitialize(sub_row);
+   HYPRE_Complex *sub_row_data = hypre_VectorData(sub_row);
 
    for(i = A_i[needed_row]; i < A_i[needed_row+1]; i++)
       if((cc = marker[A_j[i]]) >= 0)
-         sub_row[cc] = A_data[i];
+         sub_row_data[cc] = A_data[i];
 
-   for(i = 0; i < ncols_needed; i++)
-      marker[needed_cols[i]] = -1;
-
-   return;
+   return sub_row;
 }
 
-/* Extract a subset of a row from a row (G[i, P]) */
-void
-hypre_ExtractDenseRowFromRow(HYPRE_Real *sub_row, HYPRE_Real *row, HYPRE_Int ncols, HYPRE_Int *cols_needed, HYPRE_Int ncols_needed)
+/* Extract a subset of a row from a row (G[i, P]) 
+ * - row:            Array holding the elements of G_temp in the main function
+ * - ncols:          Length of row
+ * - marker:         A work array of length equal to the number of rows in A_diag specifying 
+ *   which column indices should be added to sub_row and in what order (all values should be 
+ *   set to -1 if they are not needed and and a number between 0:(ncols_needed-1) otherwise)
+ * - ncols_needed:   Number of columns G[i, P] needs.
+ */
+HYPRE_Vector
+hypre_ExtractDenseRowFromRow(HYPRE_Real *row, HYPRE_Int nrows, HYPRE_Int *marker, HYPRE_Int ncols_needed)
 {
  
    HYPRE_Int i;
    hypre_assert(ncols_needed <= ncols);   
 
-   hypre_qsort0(cols_needed, 0, ncols_needed-1);   /* the columns needed to be in order from least to greatest so matrix functions can be used */
-
+   HYPRE_Vector *sub_row = hypre_VectorCreate(ncols_needed);
+   hypre_VectorInitialize(sub_row);
+   HYPRE_Complex *sub_row_data = hypre_VectorData(sub_row);
+ 
    for(i = 0; i < ncols_needed; ++)   
-      sub_row[i] = row[cols_needed[i]];
+      sub_row_data[i] = row[cols_needed[i]];
       
-   return;
+   return sub_row;
 
 }
 
-/* Find the intersection between arrays x and y, put it in z 
- * XXX: I saw the function 'IntersectTwoArrays in protos.h, but it doesn't do what I want
+/* Find the intersection between vectors x and y, put it in z 
+ * XXX: I saw the function 'IntersectTwoArrays' in protos.h, but it doesn't do what I want
  */
-/*void hypre_IntersectTwoArrays2(HYPRE_Int *x, HYPRE_Int x_len, HYPRE_Int *y, HYPRE_Int *y_len, HYPRE_Int *z, HYPRE_Int *z_len)
+HYPRE_Vector hypre_IntersectTwoVectors(HYPRE_Vector *x, HYPRE_Vector *y)
 {
-   
+ 
    HYPRE_Int i, j;
 
-   for(i = 0; i < x_len; i++)
-      for(j = 0; j < y_len; j++)
-         if(x[i] == y[j])
+   HYPRE_Int      x_size = HYPRE_VectorSize(x);
+   HYPRE_Int      y_size = HYPRE_VectorSize(y);
+   HYPRE_Complex *x_data = hypre_VectorData(x);
+   HYPRE_Complex *y_data = hypre_VectorData(y);
+
+   HYPRE_Complex *z_data = CTAlloc(HYPRE_Complex, max(x_size, y_size), HYPRE_MEMORY_HOST);
+   HYPRE_Int      z_size = 0;
+
+   for(i = 0; i < x_size; i++)
+      for(j = 0; j < y_size; j++)
+         if(x_data[i] == y_data[j])
          {
-            z[(*z_len)++] = x[i];
+            z_data[(*z_size)++] = x_data[i];
             break;
          }
 
-}*/
+   HYPRE_Vector *z = hypre_VectorCreate(z_size);
+   hypre_VectorInitialize(z);
+   HYPRE_VectorData(z) = z_data;                /* Unsure if this will actually work */
 
-/* Finds the inner product between x and y, put it in IP */
-void hypre_InnerProductTwoArrays(HYPRE_Real *x, HYPRE_Real *y, HYPRE_Int num_elems, HYPRE_Real *IP)
-{
-   HYPRE_Int i;
-   (*IP) = 0.0;
+   return z;                                    /* Can't create this HYPRE_Vector outside of function because I don't know the size */
 
-   for(i = 0; i < num_elems; i++)
-      (*IP) += x[i]*y[i];
-   
-   return;
 }
 
 /* Finding the Kaporin Gradient
@@ -136,21 +145,39 @@ void hypre_InnerProductTwoArrays(HYPRE_Real *x, HYPRE_Real *y, HYPRE_Int num_ele
  *  - A_diag:                 CSR matrix diagonal of A.
  *  - row_num:                Which row of G are we computing ('i' in main function)
  *  - G_temp:                 Work array of G for row i
+ *  - row_length:             Length of G_temp
  *  - S_pattern:              Array of column indices of the nonzero elements of G_temp
  *  - S_Pattern_nnz:          Number of non-zero elements in G_temp
  */
-void hypre_FindKapGrad(HYPRE_Real *kaporin_gradient, HYPRE_Int *KapGrad_Nonzero_Cols, Hypre_Int *KapGrad_nnz, HYPRE_CSRMatrix *A_diag, HYPRE_Int row_num, HYPRE_Real *G_temp, HYPRE_Int *S_Pattern, HYPRE_Int S_Pattern_nnz)
+void hypre_FindKapGrad(HYPRE_Real *kaporin_gradient, HYPRE_Int *KapGrad_Nonzero_Cols, Hypre_Int *KapGrad_nnz, HYPRE_CSRMatrix *A_diag, HYPRE_Int row_num, HYPRE_Real *G_temp, HYPRE_Int row_length, HYPRE_Int *S_Pattern, HYPRE_Int S_Pattern_nnz)
 {
 
    HYPRE_Int  *A_i      = hypre_CSRMatrixI(A_diag);
    HYPRE_Int  *A_j      = hypre_CSRMatrixJ(A_diag);
    HYPRE_Real *A_data   = hypre_CSRMatrixData(A_diag);
    HYPRE_Real *A_i_sub  = hypre_CTAlloc(HYPRE_Int, A_i[row_num+1] - A_i[row_num], HYPRE_MEMORY_HOST);
-   HYPRE_Int  i;
+   HYPRE_Int  i, j;
+   HYPRE_Int count;
    (*KapGrad_nnz) = 0;
 
-   for(i = A_i[row_num]; i < A_i[row_num+1]; i++)
-      A_i_sub[count++] = A_j[i];
+   HYPRE_Vector *G_sub  = hypre_VectorCreate(S_Pattern_nnz);
+   hypre_VectorInitialize(G_sub);
+   hypre_ExtractDenseRowFromRow(G_sub, G_temp, row_length, S_Pattern, S_Pattern_nnz);
+
+   HYPRE_Vector *A_sub  = hypre_VectorCreate(A_i[row_num+1] - A_i[row_num]);
+   hypre_VectorInitialize(A_sub);
+   HYPRE_Int *marker = CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A_diag), HYPRE_MEMORY_HOST);
+   for(i = 0; i < hypre_CSRMatrixNumRows(A_diag); i++)
+      marker[i] = -1;
+
+   for(i = 0; i < num_row-1; i++)
+   {
+      count = 0;
+      for(j = A_i[i]; j < A_i[i+1]; j++)
+         marker[A_j[i]] = count++;
+ 
+      hypre_ExtractDenseRowFromCSRMatrix(A_sub, A_diag, marker, i, HYPRE_Int *needed_cols, count);
+   }   
 
    /* TODO
    for( i = 0; i < (*KapGrad_nnz); i++ )
