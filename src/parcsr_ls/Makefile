@@ -40,6 +40,7 @@ HEADERS =\
  schwarz.h
 
 FILES =\
+ debug_display.c\
  amg_hybrid.c\
  aux_interp.c\
  F90_hypre_laplace.c\

@@ -1735,7 +1735,11 @@ main( hypre_int argc,
    {
       restri_type = air;    /* Set Restriction to be AIR */
       interp_type = 100;    /* 1-pt Interp */
-      relax_type = 18;
+#if defined(HYPRE_USING_GPU)
+      relax_type = 7;
+#else
+      relax_type = 0;
+#endif
       ns_down = 0;
       ns_up = 3;
       /* this is a 2-D 4-by-k array using Double pointers */
@@ -3417,6 +3421,8 @@ main( hypre_int argc,
       if (solver_id == 0)
       {
          if (myid == 0) hypre_printf("Solver:  AMG\n");
+         // !!! Debug
+         if (myid == 0) hypre_printf("relax_type = %d\n", relax_type);
          time_index = hypre_InitializeTiming("BoomerAMG Setup");
          hypre_BeginTiming(time_index);
 

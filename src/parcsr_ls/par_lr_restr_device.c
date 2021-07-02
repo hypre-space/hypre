@@ -10,149 +10,6 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
-// WM: debug
-HYPRE_Int
-hypre_DisplayInt(HYPRE_Int *array, HYPRE_Int size, HYPRE_Int display_size, const char *name)
-{
-
-   HYPRE_Int *disp_array;
-   hypre_MemoryLocation memory_location;
-   hypre_GetPointerLocation(array, &memory_location);
-   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
-   {
-      disp_array = hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(disp_array, array, HYPRE_Int, size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   }
-   else
-   {
-      disp_array = array;
-   }
-   hypre_printf("%s = ", name);
-   HYPRE_Int i;
-   for (i = 0; i < hypre_min(size, display_size); i++)
-   {
-      hypre_printf("%d ", disp_array[i]);
-   }
-   hypre_printf("\n");
-
-   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
-   {
-      hypre_TFree(disp_array, HYPRE_MEMORY_HOST);
-   }
-
-   return 0;
-}
-
-HYPRE_Int
-hypre_DisplayComplex(HYPRE_Complex *array, HYPRE_Int size, HYPRE_Int display_size, const char *name)
-{
-
-   HYPRE_Complex *disp_array;
-   hypre_MemoryLocation memory_location;
-   hypre_GetPointerLocation(array, &memory_location);
-   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
-   {
-      disp_array = hypre_TAlloc(HYPRE_Complex, size, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(disp_array, array, HYPRE_Int, size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   }
-   else
-   {
-      disp_array = array;
-   }
-   hypre_printf("%s = ", name);
-   HYPRE_Int i;
-   for (i = 0; i < hypre_min(size, display_size); i++)
-   {
-      hypre_printf("%.2e ", disp_array[i]);
-   }
-   hypre_printf("\n");
-
-   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
-   {
-      hypre_TFree(disp_array, HYPRE_MEMORY_HOST);
-   }
-
-   return 0;
-}
-
-HYPRE_Int
-hypre_DisplayParCSRMatrix(hypre_ParCSRMatrix *A, HYPRE_Int max_display_size, const char *name)
-{
-
-   HYPRE_Int i;
-   hypre_CSRMatrix *disp_mat;
-   hypre_MemoryLocation memory_location;
-
-   hypre_GetPointerLocation(hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A)), &memory_location);
-   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
-   {
-      disp_mat = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixDiag(A), 1, HYPRE_MEMORY_HOST);
-   }
-   else
-   {
-      disp_mat = hypre_ParCSRMatrixDiag(A);
-   }
-   hypre_printf("\n");
-   hypre_printf("%s_diag: num row, num col, nnz = %d, %d, %d\n", name, hypre_CSRMatrixNumRows(disp_mat), hypre_CSRMatrixNumCols(disp_mat), hypre_CSRMatrixNumNonzeros(disp_mat));
-   hypre_printf("%s_diag_i = ", name);
-   for (i = 0; i < hypre_min(max_display_size, hypre_CSRMatrixNumRows(disp_mat) + 1); i++)
-   {
-      hypre_printf("%d ", hypre_CSRMatrixI(disp_mat)[i]);
-   }
-   hypre_printf("\n");
-   hypre_printf("%s_diag_j = ", name);
-   for (i = 0; i < hypre_min(max_display_size, hypre_CSRMatrixNumNonzeros(disp_mat)); i++)
-   {
-      hypre_printf("%d ", hypre_CSRMatrixJ(disp_mat)[i]);
-   }
-   hypre_printf("\n");
-   hypre_printf("%s_diag_data = ", name);
-   for (i = 0; i < hypre_min(max_display_size, hypre_CSRMatrixNumNonzeros(disp_mat)); i++)
-   {
-      hypre_printf("%.2e ", hypre_CSRMatrixData(disp_mat)[i]);
-   }
-   hypre_printf("\n");
-   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
-   {
-      hypre_CSRMatrixDestroy(disp_mat);
-   }
-
-   hypre_GetPointerLocation(hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(A)), &memory_location);
-   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
-   {
-      disp_mat = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixOffd(A), 1, HYPRE_MEMORY_HOST);
-   }
-   else
-   {
-      disp_mat = hypre_ParCSRMatrixOffd(A);
-   }
-   hypre_printf("%s_offd: num row, num col, nnz = %d, %d, %d\n", name, hypre_CSRMatrixNumRows(disp_mat), hypre_CSRMatrixNumCols(disp_mat), hypre_CSRMatrixNumNonzeros(disp_mat));
-   hypre_printf("%s_diag_i = ", name);
-   for (i = 0; i < hypre_min(max_display_size, hypre_CSRMatrixNumRows(disp_mat) + 1); i++)
-   {
-      hypre_printf("%d ", hypre_CSRMatrixI(disp_mat)[i]);
-   }
-   hypre_printf("\n");
-   hypre_printf("%s_diag_j = ", name);
-   for (i = 0; i < hypre_min(max_display_size, hypre_CSRMatrixNumNonzeros(disp_mat)); i++)
-   {
-      hypre_printf("%d ", hypre_CSRMatrixJ(disp_mat)[i]);
-   }
-   hypre_printf("\n");
-   hypre_printf("%s_diag_data = ", name);
-   for (i = 0; i < hypre_min(max_display_size, hypre_CSRMatrixNumNonzeros(disp_mat)); i++)
-   {
-      hypre_printf("%.2e ", hypre_CSRMatrixData(disp_mat)[i]);
-   }
-   hypre_printf("\n");
-   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
-   {
-      hypre_CSRMatrixDestroy(disp_mat);
-   }
-
-   return 0;
-}
-
 /*---------------------------------------------------------------------------
  * hypre_BoomerAMGBuildRestrNeumannAIR
  *--------------------------------------------------------------------------*/
@@ -164,10 +21,6 @@ hypre_MatvecCommPkgCreateCustom ( hypre_ParCSRMatrix *A )
    HYPRE_BigInt *col_map_offd   = hypre_ParCSRMatrixColMapOffd(A);
    HYPRE_Int  num_cols_offd   = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
    HYPRE_BigInt  global_num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
-   // !!! WM: Debug
-   printf("About to create assumed partition\n");
-   MPI_Finalize();
-   exit(0);
    /* Create the assumed partition and should own it */
    if  (hypre_ParCSRMatrixAssumedPartition(A) == NULL)
    {
@@ -175,8 +28,6 @@ hypre_MatvecCommPkgCreateCustom ( hypre_ParCSRMatrix *A )
       hypre_ParCSRMatrixOwnsAssumedPartition(A) = 1;
    }
    hypre_IJAssumedPart *apart = hypre_ParCSRMatrixAssumedPartition(A);
-   // !!! WM: Debug
-   printf("Created assumed partition\n");
    /*-----------------------------------------------------------
     * setup commpkg
     *----------------------------------------------------------*/
@@ -202,6 +53,10 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
                                      HYPRE_Int             debug_flag,
                                      hypre_ParCSRMatrix  **R_ptr)
 {
+   // WM: !!! Debug
+   HYPRE_Int myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommHandle  *comm_handle;
 
@@ -258,18 +113,34 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    // WM: TODO: Is what I do below a reasonable option (i.e. creating a SoC matrix)? 
    // Also, is this calculating SoC in the same way as the previous CPU code? 
    // That is, does this yield the same results as the previous CPU code across different matrices and strong_thresholdR values?
-   hypre_ParCSRMatrix *S;
-   hypre_BoomerAMGCreateS(A,
-                          strong_thresholdR,
-                          0.9, // WM: TODO: default for max_row_sum... is this what we want?
-                          num_functions,
-                          dof_func,
-                          &S);
-   hypre_ParCSRMatrixGenerateFFCFDevice(A, CF_marker, num_cpts_global, S, &ACF, &AFF);
-   hypre_ParCSRMatrixDestroy(S);
-   // !!! debug
-   hypre_DisplayParCSRMatrix(A, 5, "A");
-   hypre_DisplayParCSRMatrix(ACF, 5, "ACF");
+   if (strong_thresholdR > 0)
+   {
+      hypre_ParCSRMatrix *S;
+      hypre_BoomerAMGCreateS(A,
+                             strong_thresholdR,
+                             0.9, // WM: TODO: default for max_row_sum... is this what we want?
+                             num_functions,
+                             dof_func,
+                             &S);
+      hypre_ParCSRMatrixGenerateFFCFDevice(A, CF_marker, num_cpts_global, S, &ACF, &AFF);
+      hypre_ParCSRMatrixDestroy(S);
+   }
+   else
+   {
+      hypre_ParCSRMatrixGenerateFFCFDevice(A, CF_marker, num_cpts_global, NULL, &ACF, &AFF);
+   }
+   // WM: !!! Debug
+   /* if (myid == 0) hypre_printf("Rank %d: ACF offd nnz = %d\n", myid, hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(ACF))); */
+   /* if (myid == 0) hypre_printf("ACF offd num cols = %d, \n", */
+   /*       hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(ACF))); */
+   /* if (myid == 0) */
+   /* { */
+   /*    hypre_CSRMatrix *ACF_offd = hypre_ParCSRMatrixOffd(ACF); */
+   /*    hypre_printf("ACF offd col indices = "); */
+   /*    for (i = 0; i < hypre_CSRMatrixNumNonzeros(ACF_offd); i++) */
+   /*       hypre_printf("%d ", hypre_CSRMatrixJ(ACF_offd)[i]); */
+   /*    hypre_printf("\n"); */
+   /* } */
 
    HYPRE_Int        n_fpts = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(AFF));
    HYPRE_Int        n_cpts = n_fine - n_fpts;
@@ -290,17 +161,15 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
                       CF_marker,
                       Cmap,
                       is_positive<HYPRE_Int>());
-   // !!! WM: Debug
-   hypre_DisplayInt(Fmap, n_fpts, 10, "Fmap");
 
    /* setup Dinv = 1/(diagonal of AFF) */
    Dinv = hypre_ParCSRMatrixCreate(comm,
                                 hypre_ParCSRMatrixGlobalNumRows(AFF),
                                 hypre_ParCSRMatrixGlobalNumCols(AFF),
                                 hypre_ParCSRMatrixRowStarts(AFF),
-                                hypre_ParCSRMatrixColStarts(A),
+                                hypre_ParCSRMatrixColStarts(AFF),
                                 0,
-                                hypre_ParCSRMatrixGlobalNumRows(AFF),
+                                hypre_ParCSRMatrixNumRows(AFF),
                                 0);
    hypre_ParCSRMatrixAssumedPartition(Dinv) = hypre_ParCSRMatrixAssumedPartition(AFF);
    hypre_ParCSRMatrixOwnsAssumedPartition(Dinv) = 0;
@@ -322,12 +191,25 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    if (NeumannDeg >= 1)
    {
       N = hypre_ParCSRMatMat(Dinv, AFF);
+      // WM: !!! Debug
+      /* hypre_DisplayParCSRMatrixRow(N, 2, "N1"); */
+
       hypre_CSRMatrixRemoveDiagonalDevice(hypre_ParCSRMatrixDiag(N));
+      // WM: !!! Debug
+      /* hypre_DisplayParCSRMatrixRow(N, 2, "N2"); */
+
       HYPRE_THRUST_CALL( transform,
-                           hypre_CSRMatrixData(Dinv_diag),
-                           hypre_CSRMatrixData(Dinv_diag) + hypre_CSRMatrixNumRows(Dinv_diag),
-                           hypre_CSRMatrixData(Dinv_diag),
-                           thrust::negate<HYPRE_Int>() );
+                           hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(N)),
+                           hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(N)) + hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(N)),
+                           hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(N)),
+                           thrust::negate<HYPRE_Complex>() );
+      HYPRE_THRUST_CALL( transform,
+                           hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(N)),
+                           hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(N)) + hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(N)),
+                           hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(N)),
+                           thrust::negate<HYPRE_Complex>() );
+      // WM: !!! Debug
+      /* hypre_DisplayParCSRMatrixRow(N, 2, "N3"); */
    }
 
    /* Z = Acf * (I + N + N^2 + ... + N^k) * D^{-1} */
@@ -337,8 +219,18 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    }
    else if (NeumannDeg == 1)
    {
+      // WM: !!! Debug
+      /* if (myid == 0) hypre_DisplayParCSRMatrix(ACF, 5, "ACF"); */
+      /* if (myid == 0) hypre_DisplayParCSRMatrix(N, 5, "N"); */
+
       X = hypre_ParCSRMatMat(ACF, N);
+      // WM: !!! Debug
+      /* if (myid == 0) hypre_DisplayParCSRMatrix(X, 5, "X"); */
+
       hypre_ParCSRMatrixAdd(1.0, ACF, 1.0, X, &Z);
+      // WM: !!! Debug
+      /* if (myid == 0) hypre_DisplayParCSRMatrix(Z, 5, "Z"); */
+
       hypre_ParCSRMatrixDestroy(X);
    }
    else
@@ -360,11 +252,15 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
       hypre_ParCSRMatrixAdd(1.0, ACF, 1.0, X, &Z);
       hypre_ParCSRMatrixDestroy(X);
    }
-   // !!! WM: debug
-   hypre_DisplayParCSRMatrix(Z, 5, "Z");
 
    X = Z;
+   // WM: !!! Debug
+   /* if (myid == 0) hypre_printf("Z offd num cols before = %d, \n", */
+   /*       hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(Z))); */
    Z = hypre_ParCSRMatMat(X, Dinv);
+   // WM: !!! Debug
+   /* if (myid == 0) hypre_printf("Z offd num cols after = %d, \n", */
+   /*       hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(Z))); */
 
    hypre_ParCSRMatrixDestroy(X);
    hypre_ParCSRMatrixDestroy(Dinv);
@@ -394,7 +290,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
       HYPRE_Int num_elems_send_Z = hypre_ParCSRCommPkgSendMapStart(comm_pkg_Z, num_sends_Z);
       send_buf_i = hypre_TAlloc(HYPRE_BigInt, num_elems_send_Z, HYPRE_MEMORY_DEVICE);
 
-      /* WM: TODO: pack on the device. Does commPkg info live on the device? That is, send map elmts used below? */
+      hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg_Z);
       HYPRE_THRUST_CALL( gather,
                            hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg_Z),
                            hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg_Z) +
@@ -407,14 +303,15 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
                            thrust::make_constant_iterator(col_start),
                            send_buf_i,
                            thrust::plus<HYPRE_Int>() );
-      /* WM: is this the preferred way to do MPI comm between GPUs? */
+      
       comm_handle = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg_Z, HYPRE_MEMORY_DEVICE, send_buf_i, HYPRE_MEMORY_DEVICE, Fmap_offd_global);
       hypre_ParCSRCommHandleDestroy(comm_handle);
       hypre_TFree(send_buf_i, HYPRE_MEMORY_DEVICE);
    }
 
-
-   /* Assemble R = [Z I] */
+   /* Assemble R = [-Z I] */
+   // WM: !!! Debug
+   /* if (myid == 0) hypre_printf("Rank %d: Z nnz = %d, n_cpts = %d\n", myid, nnz_diag_Z, n_cpts); */
    nnz_diag = nnz_diag_Z + n_cpts;
    nnz_offd = hypre_CSRMatrixNumNonzeros(Z_offd);
 
@@ -440,8 +337,6 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
                         thrust::make_counting_iterator(-1),
                         scatter_z,
                         thrust::plus<HYPRE_Int>() );
-   // !!! Debug
-   hypre_DisplayInt(scatter_z, nnz_diag_Z, 10, "scatter_z");
 
    /* setup R row indices (just Z row indices plus one extra entry for each C-pt)*/
    HYPRE_THRUST_CALL( transform,
@@ -479,8 +374,6 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
                         thrust::make_constant_iterator(-1),
                         scatter_iden,
                         thrust::plus<HYPRE_Int>() );
-   // !!! Debug
-   hypre_DisplayInt(scatter_iden, n_cpts, 10, "scatter_iden");
 
    /* scatter identity over C-pts into R */
    HYPRE_Complex const_one = 1.0;
@@ -497,8 +390,9 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    hypre_TFree(scatter_iden, HYPRE_MEMORY_DEVICE);
 
    num_cols_offd_R = num_cols_offd_Z;
-   col_map_offd_R = Fmap_offd_global;
-
+   col_map_offd_R = hypre_TAlloc(HYPRE_Int, num_cols_offd_Z, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(col_map_offd_R, Fmap_offd_global, HYPRE_Int, num_cols_offd_Z, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   
    /* Now, we should have everything of Parcsr matrix R */
    R = hypre_ParCSRMatrixCreate(comm,
                                 total_global_cpts, /* global num of rows */
@@ -514,9 +408,14 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrixI(R_diag)    = R_diag_i;
    hypre_CSRMatrixJ(R_diag)    = R_diag_j;
 
-   /* R_offd is simply a clone of Z_offd */
+   /* R_offd is simply a clone of -Z_offd */
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(R));
    hypre_ParCSRMatrixOffd(R) = hypre_CSRMatrixClone(Z_offd, 1);
+   HYPRE_THRUST_CALL( transform,
+                      hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(R)),
+                      hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(R)) + hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(R)),
+                      hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(R)),
+                      thrust::negate<HYPRE_Complex>() );
 
    /* R does not own ColStarts, since A does */
    hypre_ParCSRMatrixOwnsColStarts(R) = 0;
@@ -533,11 +432,28 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    {
       /* hypre_ParCSRMatrixDropSmallEntries(R, filter_thresholdR, -1); /1* -1 = infinity norm, not implented on the device *1/ */
       // WM: TODO: implement infinity norm filtering on device
-      hypre_printf("WARNING: filtering of R not implemented on the GPU\n");
+      /* hypre_printf("WARNING: filtering of R not implemented on the GPU\n"); */
       /* hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A, HYPRE_Complex tol, HYPRE_Int abs, HYPRE_Int option ); */
    }
 
    *R_ptr = R;
+
+   // WM: !!! Debug
+   /* if (myid == 0) hypre_printf("Rank %d: R offd nnz = %d\n", myid, hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(R))); */
+   /* if (myid == 0) hypre_printf("R offd num cols = %d, \n", */
+   /*       hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(R))); */
+   /* if (myid == 0) */
+   /* { */
+   /*    hypre_CSRMatrix *R_offd = hypre_ParCSRMatrixOffd(R); */
+   /*    hypre_printf("R offd col indices = "); */
+   /*    for (i = 0; i < hypre_CSRMatrixNumNonzeros(R_offd); i++) */
+   /*       hypre_printf("%d ", hypre_CSRMatrixJ(R_offd)[i]); */
+   /*    hypre_printf("\n"); */
+   /*    hypre_printf("R offd data = "); */
+   /*    for (i = 0; i < hypre_CSRMatrixNumNonzeros(R_offd); i++) */
+   /*       hypre_printf("%.2e ", hypre_CSRMatrixData(R_offd)[i]); */
+   /*    hypre_printf("\n"); */
+   /* } */
 
    hypre_ParCSRMatrixDestroy(Z);
    hypre_TFree(Fmap, HYPRE_MEMORY_DEVICE);

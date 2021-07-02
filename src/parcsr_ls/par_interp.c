@@ -4231,8 +4231,63 @@ hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
+      // !!! WM: debug, todo remove
+      /* HYPRE_Int myid; */
+      /* hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD,&myid); */
+      /* hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_HOST); */
+      /* if (myid == 1) printf("\nHost construction of P:\n"); */
+      /* ierr = hypre_BoomerAMGBuildInterpOnePntHost(A,CF_marker,S,num_cpts_global,num_functions, */
+      /*                                              dof_func,debug_flag,P_ptr); */
+      /* if (myid == 1) hypre_DisplayParCSRMatrix(*P_ptr, 5, "P"); */
+      /* if (myid == 1) hypre_DisplayParCSRMatrixRow(*P_ptr, 0, "P"); */
+      /* if (myid == 1) hypre_DisplayParCSRMatrixRow(*P_ptr, 3, "P"); */
+      /* if (myid == 1) hypre_DisplayParCSRMatrixRow(A, 3, "A"); */
+      /* if (myid == 1) */
+      /* { */
+      /*    HYPRE_Int i; */ 
+      /*    hypre_printf("CF marker at cols of A diag: "); */
+      /*    hypre_CSRMatrix *mat = hypre_ParCSRMatrixDiag(A); */
+      /*    for (i = hypre_CSRMatrixI(mat)[3]; i < hypre_CSRMatrixI(mat)[4]; i++) */
+      /*    { */
+      /*       hypre_printf("%d ", CF_marker[hypre_CSRMatrixJ(mat)[i]]); */
+      /*    } */
+      /*    hypre_printf("\n"); */
+      /*    hypre_printf("CF marker at cols of A offd: "); */
+      /*    mat = hypre_ParCSRMatrixOffd(A); */
+      /*    for (i = hypre_CSRMatrixI(mat)[3]; i < hypre_CSRMatrixI(mat)[4]; i++) */
+      /*    { */
+      /*       hypre_printf("%d ", CF_marker[hypre_CSRMatrixJ(mat)[i]]); */
+      /*    } */
+      /*    hypre_printf("\n"); */
+      /* } */
+      /* hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_DEVICE); */
+
+      /* // !!! Debug */
+      /* if (myid == 1) printf("\nDevice construction of P:\n"); */
+
       ierr = hypre_BoomerAMGBuildInterpOnePntDevice(A,CF_marker,S,num_cpts_global,num_functions,
                                                    dof_func,debug_flag,P_ptr);
+      // !!! Debug
+      /* if (myid == 1) hypre_DisplayParCSRMatrix(*P_ptr, 5, "P"); */
+      /* if (myid == 1) hypre_DisplayParCSRMatrixRow(*P_ptr, 0, "P"); */
+      /* if (myid == 1) hypre_DisplayParCSRMatrixRow(*P_ptr, 3, "P"); */
+      /* if (myid == 1) */
+      /* { */
+      /*    HYPRE_Int i; */ 
+      /*    hypre_printf("P_diag nonzero rows: "); */
+      /*    hypre_CSRMatrix *mat = hypre_ParCSRMatrixDiag(*P_ptr); */
+      /*    for (i = 0; i < hypre_CSRMatrixNumRows(mat); i++) */
+      /*    { */
+      /*       if (hypre_CSRMatrixI(mat)[i+1] > hypre_CSRMatrixI(mat)[i]) hypre_printf("%d ", i); */
+      /*    } */
+      /*    hypre_printf("\nP_offd nonzero rows: "); */
+      /*    mat = hypre_ParCSRMatrixOffd(*P_ptr); */
+      /*    for (i = 0; i < hypre_CSRMatrixNumRows(mat); i++) */
+      /*    { */
+      /*       if (hypre_CSRMatrixI(mat)[i+1] > hypre_CSRMatrixI(mat)[i]) hypre_printf("%d ", i); */
+      /*    } */
+      /*    hypre_printf("\n"); */
+      /* } */
    }
    else
 #endif

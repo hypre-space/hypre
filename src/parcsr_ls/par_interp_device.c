@@ -17,7 +17,7 @@ __global__ void hypre_BoomerAMGBuildDirInterp_getcoef( HYPRE_Int nr_of_rows, HYP
 __global__ void hypre_BoomerAMGBuildDirInterp_getcoef_v2( HYPRE_Int nr_of_rows, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Real *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Real *A_offd_data, HYPRE_Int *Soc_diag_j, HYPRE_Int *Soc_offd_j, HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Real *P_diag_data, HYPRE_Int *P_offd_i, HYPRE_Int *P_offd_j, HYPRE_Real *P_offd_data, HYPRE_Int *fine_to_coarse );
 
 __global__ void
-hypre_BoomerAMGBuildInterpOnePnt_getnnz( HYPRE_Int nr_of_rows, HYPRE_Int *S_diag_i, HYPRE_Int *S_diag_j, HYPRE_Complex *S_diag_a, HYPRE_Int *S_offd_i, HYPRE_Int *S_offd_j, HYPRE_Complex *S_offd_a, HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int *diag_compress_marker, HYPRE_Int *offd_compress_marker, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Int *P_offd_i, HYPRE_Int *P_offd_j);
+hypre_BoomerAMGBuildInterpOnePnt_getnnz( HYPRE_Int nr_of_rows, HYPRE_Int *A_diag_i, HYPRE_Int *A_strong_diag_j, HYPRE_Complex *A_diag_a, HYPRE_Int *A_offd_i, HYPRE_Int *A_strong_offd_j, HYPRE_Complex *A_offd_a, HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int *diag_compress_marker, HYPRE_Int *offd_compress_marker, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Int *P_offd_i, HYPRE_Int *P_offd_j);
 
 /*---------------------------------------------------------------------------
  * hypre_BoomerAMGBuildDirInterp
@@ -1026,28 +1026,18 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
 
-   hypre_CSRMatrix         *A_diag      = hypre_ParCSRMatrixDiag(A);
-   hypre_CSRMatrix         *A_offd      = hypre_ParCSRMatrixOffd(A);
+   hypre_CSRMatrix         *A_diag          = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Int               *A_diag_i        = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int               *A_strong_diag_j = hypre_ParCSRMatrixSocDiagJ(S);
+   HYPRE_Complex           *A_diag_a        = hypre_CSRMatrixData(A_diag);
+
+   hypre_CSRMatrix         *A_offd          = hypre_ParCSRMatrixOffd(A);
+   HYPRE_Int               *A_offd_i        = hypre_CSRMatrixI(A_offd);
+   HYPRE_Int               *A_strong_offd_j = hypre_ParCSRMatrixSocOffdJ(S);
+   HYPRE_Complex           *A_offd_a        = hypre_CSRMatrixData(A_offd);
 
    HYPRE_Int                num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
-   //HYPRE_Int               *col_map_offd_A    = hypre_ParCSRMatrixColMapOffd(A);
-
-   hypre_CSRMatrix         *S_diag   = hypre_ParCSRMatrixDiag(S);
-   HYPRE_Int               *S_diag_i = hypre_CSRMatrixI(S_diag);
-   HYPRE_Int               *S_diag_j = hypre_CSRMatrixJ(S_diag);
-   HYPRE_Complex           *S_diag_a = hypre_CSRMatrixData(S_diag);
-
-   hypre_CSRMatrix         *S_offd   = hypre_ParCSRMatrixOffd(S);
-   HYPRE_Int               *S_offd_i = hypre_CSRMatrixI(S_offd);
-   HYPRE_Int               *S_offd_j = hypre_CSRMatrixJ(S_offd);
-   HYPRE_Complex           *S_offd_a = hypre_CSRMatrixData(S_offd);
-
-   /* make sure that S was constructed with data */
-   if (S_diag_a == NULL)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"hypre_BoomerAMGBuildInterpOnePnt() requires SoC matrix S be constructed with data\n");
-   }
-
+   
    /* Interpolation matrix P */
    hypre_ParCSRMatrix      *P;
    /* csr's */
@@ -1167,8 +1157,8 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    dim3 gDim = hypre_GetDefaultCUDAGridDimension(n_fine, "warp", bDim);
 
    HYPRE_CUDA_LAUNCH( hypre_BoomerAMGBuildInterpOnePnt_getnnz, gDim, bDim,
-                      n_fine, S_diag_i, S_diag_j, S_diag_a, S_offd_i, S_offd_j, 
-                      S_offd_a, CF_marker, CF_marker_offd, diag_compress_marker,
+                      n_fine, A_diag_i, A_strong_diag_j, A_diag_a, A_offd_i, A_strong_offd_j, 
+                      A_offd_a, CF_marker, CF_marker_offd, diag_compress_marker,
                       offd_compress_marker, P_diag_i, P_diag_j_temp, P_offd_i, P_offd_j_temp);
 
    /*-----------------------------------------------------------------------
@@ -1207,6 +1197,7 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    P_diag_j    = hypre_TAlloc(HYPRE_Int,  nnz_diag, HYPRE_MEMORY_DEVICE);
    P_diag_data = hypre_TAlloc(HYPRE_Real, nnz_diag, HYPRE_MEMORY_DEVICE);
 
+
    P_offd_j    = hypre_TAlloc(HYPRE_Int,  nnz_offd, HYPRE_MEMORY_DEVICE);
    P_offd_data = hypre_TAlloc(HYPRE_Real, nnz_offd, HYPRE_MEMORY_DEVICE);
 
@@ -1217,12 +1208,13 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                       1.0 );
    HYPRE_THRUST_CALL( fill_n,
                       P_offd_data,
-                      nnz_diag,
+                      nnz_offd,
                       1.0 );
 
    /* compress temporary column indices */
    P_diag_j_temp_compressed = hypre_TAlloc(HYPRE_Int, nnz_diag, HYPRE_MEMORY_DEVICE);
    P_offd_j_temp_compressed = hypre_TAlloc(HYPRE_Int, nnz_offd, HYPRE_MEMORY_DEVICE);
+
    HYPRE_THRUST_CALL( copy_if,
                       P_diag_j_temp,
                       P_diag_j_temp + n_fine,
@@ -1235,7 +1227,7 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                       offd_compress_marker,
                       P_offd_j_temp_compressed,
                       equal<HYPRE_Int>(1) );
-
+   
    /* map the diag column indices */
    HYPRE_THRUST_CALL( gather,
                       P_diag_j_temp_compressed,
@@ -1253,7 +1245,6 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                       P_offd_j_temp_compressed,
                       mark_P_offd_idx );
    num_cols_P_offd = HYPRE_THRUST_CALL(reduce, mark_P_offd_idx, mark_P_offd_idx + num_cols_A_offd); 
-
 
    /* get a mapping from P offd indices to A offd indices */
    /* offd_map_P_to_A[ P offd idx ] = A offd idx */
@@ -1344,12 +1335,12 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
 /*-----------------------------------------------------------------------*/
 __global__ void
 hypre_BoomerAMGBuildInterpOnePnt_getnnz( HYPRE_Int     nr_of_rows, 
-                                         HYPRE_Int     *S_diag_i, 
-                                         HYPRE_Int     *S_diag_j, 
-                                         HYPRE_Complex *S_diag_a,
-                                         HYPRE_Int     *S_offd_i, 
-                                         HYPRE_Int     *S_offd_j, 
-                                         HYPRE_Complex *S_offd_a,
+                                         HYPRE_Int     *A_diag_i, 
+                                         HYPRE_Int     *A_strong_diag_j, 
+                                         HYPRE_Complex *A_diag_a,
+                                         HYPRE_Int     *A_offd_i, 
+                                         HYPRE_Int     *A_strong_offd_j, 
+                                         HYPRE_Complex *A_offd_a,
                                          HYPRE_Int     *CF_marker, 
                                          HYPRE_Int     *CF_marker_offd, 
                                          HYPRE_Int     *diag_compress_marker,
@@ -1368,8 +1359,9 @@ hypre_BoomerAMGBuildInterpOnePnt_getnnz( HYPRE_Int     nr_of_rows,
       It is assumed that S have the same global column enumeration as A
 
       Input: nr_of_rows                  - Number of rows in matrix (local in processor)
-             S_diag_i, S_diag_j S_diag_a - CSR representation of S_diag
-             S_offd_i, S_offd_j S_offd_a - CSR representation of S_offd
+             A_diag_i, A_strong_diag_j,  - Arrays associated with ParCSRMatrix A
+             A_diag_a, A_offd_i,           where the column indices are taken from S
+             A_strong_offd_j, A_offd_a     and mark weak connections with negative indices
              CF_maker                    - coarse/fine marker for on-processor points
              CF_maker_offd               - coarse/fine marker for off-processor connections
 
@@ -1423,19 +1415,23 @@ hypre_BoomerAMGBuildInterpOnePnt_getnnz( HYPRE_Int     nr_of_rows,
    /* diag part */
    if (lane < 2)
    {
-      p = read_only_load(S_diag_i + i + lane);
+      p = read_only_load(A_diag_i + i + lane);
    }
    q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
    p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
 
    for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
    {
-      const HYPRE_Int col = read_only_load(&S_diag_j[j]);
-      const HYPRE_Complex val = fabs( read_only_load(&S_diag_a[j]) );
-      if ( read_only_load(&CF_marker[col]) > 0 && val > max_diag )
+      /* column indices are negative for weak connections */
+      const HYPRE_Int col = read_only_load(&A_strong_diag_j[j]);
+      if (col >= 0)
       {
-         max_diag = val;
-         max_j_diag = col;
+         const HYPRE_Complex val = fabs( read_only_load(&A_diag_a[j]) );
+         if ( read_only_load(&CF_marker[col]) > 0 && val > max_diag )
+         {
+            max_diag = val;
+            max_j_diag = col;
+         }
       }
    }
    warp_max_diag = warp_allreduce_max(max_diag);
@@ -1443,19 +1439,23 @@ hypre_BoomerAMGBuildInterpOnePnt_getnnz( HYPRE_Int     nr_of_rows,
    /* offd part */
    if (lane < 2)
    {
-      p = read_only_load(S_offd_i + i + lane);
+      p = read_only_load(A_offd_i + i + lane);
    }
    q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
    p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
 
    for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
    {
-      const HYPRE_Int col = read_only_load(&S_offd_j[j]);
-      const HYPRE_Complex val = fabs( read_only_load(&S_offd_a[j]) );
-      if ( read_only_load(&CF_marker_offd[col]) > 0 && val > max_offd )
+      const HYPRE_Int col = read_only_load(&A_strong_offd_j[j]);
+      /* column indices are negative for weak connections */
+      if (col >= 0)
       {
-         max_offd = val;
-         max_j_offd = col;
+         const HYPRE_Complex val = fabs( read_only_load(&A_offd_a[j]) );
+         if ( read_only_load(&CF_marker_offd[col]) > 0 && val > max_offd )
+         {
+            max_offd = val;
+            max_j_offd = col;
+         }
       }
    }
    warp_max_offd = warp_allreduce_max(max_offd);
@@ -1474,7 +1474,7 @@ hypre_BoomerAMGBuildInterpOnePnt_getnnz( HYPRE_Int     nr_of_rows,
     *  Otherwise, find the column index in either diag or offd
     *--------------------------------------------------------------------*/
 
-   if (max_offd > max_diag)
+   if (warp_max_offd > warp_max_diag)
    {
       if (warp_max_offd != max_offd)
       {
