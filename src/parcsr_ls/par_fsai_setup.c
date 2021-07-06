@@ -33,7 +33,10 @@
  * - nrows_needed:   Number of rows/columns A[P, P] needs.
  */
 void
-hypre_CSRMatrixExtractDenseMatrix(HYPRE_Vector *A_sub, HYPRE_CSRMatrix *A_diag, HYPRE_Int *marker, HYPRE_Int nrows_needed)
+hypre_CSRMatrixExtractDenseMatrix( HYPRE_Vector    *A_sub, 
+                                   HYPRE_CSRMatrix *A_diag, 
+                                   HYPRE_Int       *marker, 
+                                   HYPRE_Int       nrows_needed)
 {
    HYPRE_Int      *A_i        = hypre_CSRMatrixI(A_diag);
    HYPRE_Int      *A_j        = hypre_CSRMatrixJ(A_diag);
@@ -64,7 +67,11 @@ hypre_CSRMatrixExtractDenseMatrix(HYPRE_Vector *A_sub, HYPRE_CSRMatrix *A_diag, 
  * - ncols_needed:   Number of columns A[i, P] needs.
  */
 void
-hypre_ExtractDenseRowFromCSRMatrix(HYPRE_CSRMatrix *A_diag, HYPRE_Vector *A_subrow, HYPRE_Int *marker, HYPRE_Int needed_row, HYPRE_Int ncols_needed)
+hypre_ExtractDenseRowFromCSRMatrix( HYPRE_CSRMatrix *A_diag, 
+                                    HYPRE_Vector    *A_subrow, 
+                                    HYPRE_Int       *marker, 
+                                    HYPRE_Int       needed_row, 
+                                    HYPRE_Int       ncols_needed )
 {
    HYPRE_Int *A_i       = hypre_CSRMatrixI(A_diag);
    HYPRE_Int *A_j       = hypre_CSRMatrixJ(A_diag);
@@ -82,14 +89,17 @@ hypre_ExtractDenseRowFromCSRMatrix(HYPRE_CSRMatrix *A_diag, HYPRE_Vector *A_subr
 
 /* Extract a subset of a row from a row (G[i, P]) 
  * - row:            Vector holding the elements of G_temp in the main function
- * - ncols:          Length of row
+ * - subrow:         Array extracted from row
  * - marker:         A work array of length equal to row_length specifying which column indices 
  *   should be added to sub_row and in what order (all values should be set to -1 if they are 
  *   not needed and and a number between 0:(ncols_needed-1) otherwise)
  * - ncols_needed:   Number of columns G[i, P] needs.
  */
 void
-hypre_ExtractDenseRowFromRow(HYPRE_Vector *row, HYPRE_Vector *sub_row, HYPRE_Int *marker, HYPRE_Int ncols_needed)
+hypre_ExtractDenseRowFromRow( HYPRE_Vector *row, 
+                              HYPRE_Vector *sub_row, 
+                              HYPRE_Int    *marker, 
+                              HYPRE_Int    ncols_needed )
 {
  
    HYPRE_Int i, j;
@@ -106,16 +116,18 @@ hypre_ExtractDenseRowFromRow(HYPRE_Vector *row, HYPRE_Vector *sub_row, HYPRE_Int
 
 }
 
-/* Find the intersection between arrays x and y, put it in z 
+/*
+ Find the intersection between arrays x and y, put it in z 
  * XXX: I saw the function 'IntersectTwoArrays' in protos.h, but it doesn't do what I want
- */
+
 void 
-hypre_IntersectTwoVectors(HYPRE_Vector *x, HYPRE_Vector *y, HYPRE_Vector *z, HYPRE_Int x_size, HYPRE_Int y_size, HYPRE_Int *z_size)
+hypre_IntersectTwoVectors( HYPRE_Vector *x, 
+                           HYPRE_Vector *y, 
+                           HYPRE_Vector *z, 
+                           HYPRE_Int x_size, 
+                           HYPRE_Int y_size, HYPRE_Int *z_size)
 {
 
-   /* Since x, y, and z are all pre-initialized and allocated (and may have been used before), I want to specify 
-   * exactly how many spots in x, y, and z refer to this current call, which is why the sizes are input arguments */
- 
    HYPRE_Complex *x_data = hypre_VectorData(x);
    HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Complex *z_data = hypre_VectorData(z);
@@ -134,6 +146,7 @@ hypre_IntersectTwoVectors(HYPRE_Vector *x, HYPRE_Vector *y, HYPRE_Vector *z, HYP
 
    return;
 }
+*/
 
 /* Finding the Kaporin Gradient
  * Input Arguments:
@@ -150,7 +163,19 @@ hypre_IntersectTwoVectors(HYPRE_Vector *x, HYPRE_Vector *y, HYPRE_Vector *z, HYP
  *  - row_num:                Which row of G we are working on
  *  - marker:                 Array of length equal to the number of rows in A. Assume to be all -1's when passed in.
  */
-void hypre_FindKapGrad(hypre_CSRMatrix *A_diag, HYPRE_Vector *kaporin_gradient, HYPRE_Int *kap_grad_nnz, HYPRE_Vector *kap_grad_nonzeros, HYPRE_Vector *A_kg, HYPRE_Vector *G_kg, HYPRE_Vector *G_temp, HYPRE_Vector *S_Pattern, HYPRE_Int S_Pattern_nnz, HYPRE_Int max_row_size, HYPRE_Int row_num, HYPER_Int *marker)
+void 
+hypre_FindKapGrad( hypre_CSRMatrix  *A_diag, 
+                   HYPRE_Vector     *kaporin_gradient, 
+                   HYPRE_Int        *kap_grad_nnz, 
+                   HYPRE_Vector     *kap_grad_nonzeros, 
+                   HYPRE_Vector     *A_kg, 
+                   HYPRE_Vector     *G_kg, 
+                   HYPRE_Vector     *G_temp, 
+                   HYPRE_Vector     *S_Pattern, 
+                   HYPRE_Int        S_Pattern_nnz, 
+                   HYPRE_Int        max_row_size, 
+                   HYPRE_Int        row_num, 
+                   HYPER_Int        *marker )
 {
 
    HYPRE_Int      *A_i      = hypre_CSRMatrixI(A_diag);
@@ -201,10 +226,10 @@ void hypre_FindKapGrad(hypre_CSRMatrix *A_diag, HYPRE_Vector *kaporin_gradient, 
       temp = abs(2 * (hypre_SeqVectorInnerProd(A_kg, G_kg) + A_j_i));
       if(temp > 0)
       {
-         kap_grad_data[kap_grad_nnz] = temp;
-         kap_grad_nonzero_data[kap_grad_nnz] = i;
-         kap_grad_nnz++;
-         if(kap_grad_nnz == max_row_size)
+         kap_grad_data[(*kap_grad_nnz)] = temp;
+         kap_grad_nonzero_data[(*kap_grad_nnz)] = i;
+         (*kap_grad_nnz)++;
+         if((*kap_grad_nnz) == max_row_size)
             return;
       }
       
@@ -214,12 +239,83 @@ void hypre_FindKapGrad(hypre_CSRMatrix *A_diag, HYPRE_Vector *kaporin_gradient, 
 
 }
 
+void 
+hypre_swap2C( HYPRE_Complex  *v,
+              HYPRE_Complex  *w,
+              HYPRE_Int      i,
+              HYPRE_Int      j )
+{
+   HYPRE_Complex  temp;
+   HYPRE_Complex  temp2;
+
+   temp = v[i];
+   v[i] = v[j];
+   v[j] = temp;
+   temp2 = w[i];
+   w[i] = w[j];
+   w[j] = temp2;
+}
+
+/* Quick Sort (largest to smallest) for complex arrays - hypre/utilities/qsort.c did not have what I wanted */
+/* sort on w (HYPRE_Complex), move v */
+
+void 
+hypre_qsort2C( HYPRE_Complex  *v,
+               HYPRE_Complex  *w,
+               HYPRE_Int      left,
+               HYPRE_Int      right )
+{
+   HYPRE_Int i, last;
+
+   if (left >= right)
+   {
+      return;
+   }
+   hypre_swap2C( v, w, left, (left+right)/2);
+   last = left;
+   for (i = left+1; i <= right; i++)
+   {
+      if (w[i] > w[left])
+      {
+         hypre_swap2C(v, w, ++last, i);
+      }
+   }
+   hypre_swap2C(v, w, left, last);
+   hypre_qsort2C(v, w, left, last-1);
+   hypre_qsort2C(v, w, last+1, right);
+}
+
+/* Take the largest kap_grad_nnz = min(max_step_size, row_num-1) elements from the kaporin gradient and add their locations to S_Pattern */
+void
+hypre_AddToPattern( HYPRE_Vector *kaporin_gradient, 
+                    HYPRE_Vector *kap_grad_nonzeros, 
+                    HYPRE_Int    kap_grad_nnz, 
+                    HYPRE_Vector *S_Pattern, 
+                    HYPRE_Int    *S_Pattern_nnz, 
+                    HYPRE_Int    max_step_size )
+{
+   
+   HYPRE_Complex *kap_grad_data           = hypre_VectorData(kaporin_gradient);
+   HYPRE_Complex *kap_grad_nonzero_data   = hypre_VectorData(kap_grad_nonzeros);
+   HYPRE_Complex *S_Pattern_data          = hypre_VectorData(S_Pattern);
+ 
+   HYPRE_Int     i;
+
+   hypre_qsort2C(kap_grad_data, kap_grad_nonzero_data, 0, kap_grad_nnz-1);
+
+   for(i = 0; i < min(max_step_size, kap_grad_nnz); i++)
+      S_Pattern_data[(*S_Pattern_nnz)++] = kap_grad_nonzero_data[i];
+
+   return;
+  
+}
+
 /*****************************************************************************
  * hypre_FSAISetup
  ******************************************************************************/
 
 HYPRE_Int
-hypre_FSAISetup( void               *fsai_vdata,
+hypre_FSAISetup( void *fsai_vdata,
                       hypre_ParCSRMatrix *A  )
 {
    MPI_Comm                comm              = hypre_ParCSRMatrixComm(A);
@@ -312,17 +408,15 @@ hypre_FSAISetup( void               *fsai_vdata,
       
       for( k = 0; k < max_steps; k++ ) /* Cycle through each iteration for that row */
       {
-         /*
-         * Compute Kaporin Gradient
-         *  1) kaporin_gradient[j] = 2*( InnerProd(A[j], G_temp[i]) + A[j][i])
-         *     kaporin_gradient = 2 * MatVec(A[0:j], G_temp[i]') + 2*A[i] simplified
-         *  2) Need a kernel to compute A[P, :]*G_temp - TODO
-         */      
-         /* Steps:
-         * Grab max_step_size UNIQUE positions from kaporian gradient
-         *  - Need to write my own function. A binary array can be used to mark with locations have already been added to the pattern.
-         *
-         * Gather A[P, P], G[i, P], and -A[P, i]
+
+         /* Compute Kaporin Gradient */
+         hypre_FindKapGrad(A_diag, kaporin_gradient, &kap_grad_nnz, kap_grad_nonzeros, A_kg, G_kg, G_temp, S_Pattern, S_Pattern_nnz, max_row_size, i, marker);
+
+         /* Find max_step_size largest values of the kaporin gradient, find their column indices, and add it to S_Pattern */
+         hypre_AddToPattern(kaporin_gradient, kap_grad_nonzeros, kap_grad_nnz, S_Pattern, &S_Pattern_nnz, max_step_size);
+
+
+         /* Gather A[P, P], G[i, P], and -A[P, i]
          *  - Adapt the hypre_ParCSRMatrixExtractBExt function. Don't want to return a CSR matrix because we're looking for a dense matrix.
          *
          * Determine psi_{k} = G_temp[i]*A*G_temp[i]'
@@ -342,6 +436,14 @@ hypre_FSAISetup( void               *fsai_vdata,
 
    }
 
+   hypre_SeqVectorDestroy(G_temp);                   
+   hypre_SeqVectorDestroy(A_kg);                     
+   hypre_SeqVectorDestroy(G_kg);                     
+   hypre_SeqVectorDestroy(kaporin_gradient);         
+   hypre_SeqVectorDestroy(kaporin_gradient_nonzeros);
+   hypre_SeqVectorDestroy(S_Pattern);                
+   hypre_SeqVectorDestroy(A_sub);                 
+   TFree(marker);                   
 
    return(hypre_error_flag);
 
