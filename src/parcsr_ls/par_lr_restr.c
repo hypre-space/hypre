@@ -1672,10 +1672,6 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
                                      HYPRE_Int             debug_flag,
                                      hypre_ParCSRMatrix  **R_ptr)
 {
-   // WM: !!! Debug
-   HYPRE_Int myid;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
-
    /* HYPRE_Real t0 = hypre_MPI_Wtime(); */
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommHandle  *comm_handle;
@@ -1784,20 +1780,6 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrix *AFF, *ACF, *X, *X2, *Z, *Z2;
    hypre_ParCSRMatrixExtractSubmatrixFC(A, CF_marker, num_cpts_global, "FF", &AFF, strong_thresholdR);
    hypre_ParCSRMatrixExtractSubmatrixFC(A, CF_marker, num_cpts_global, "CF", &ACF, strong_thresholdR);
-   // WM: !!! Debug
-   if (myid == 0) hypre_DisplayParCSRMatrix(ACF, 5, "ACF_host");
-   /* if (myid == 0) hypre_DisplayParCSRMatrixRow(ACF, 52, "ACF_host"); */
-   /* if (myid == 0) hypre_printf("Rank %d: ACF diag nnz = %d\n", myid, hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(ACF))); */
-   /* if (myid == 0) hypre_printf("ACF offd num cols = %d, \n", */
-   /*       hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(ACF))); */
-   /* if (myid == 0) */
-   /* { */
-   /*    hypre_CSRMatrix *ACF_offd = hypre_ParCSRMatrixOffd(ACF); */
-   /*    hypre_printf("ACF offd col indices = "); */
-   /*    for (i = 0; i < hypre_CSRMatrixNumNonzeros(ACF_offd); i++) */
-   /*       hypre_printf("%d ", hypre_CSRMatrixJ(ACF_offd)[i]); */
-   /*    hypre_printf("\n"); */
-   /* } */
 
    /* A_FF := I - D^{-1}*A_FF */
    hypre_CSRMatrix *AFF_diag = hypre_ParCSRMatrixDiag(AFF);
@@ -1866,18 +1848,8 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    }
    else if (NeumannDeg == 1)
    {
-      // WM: !!! Debug
-      /* if (myid == 0) hypre_DisplayParCSRMatrix(ACF, 5, "ACF"); */
-      /* if (myid == 0) hypre_DisplayParCSRMatrix(AFF, 5, "N"); */
-
       X = hypre_ParMatmul(ACF, AFF);
-      // WM: !!! Debug
-      /* if (myid == 0) hypre_DisplayParCSRMatrix(X, 5, "X"); */
-
       hypre_ParCSRMatrixAdd(1.0, ACF, 1.0, X, &Z);
-      // WM: !!! Debug
-      /* if (myid == 0) hypre_DisplayParCSRMatrix(Z, 5, "Z"); */
-
       hypre_ParCSRMatrixDestroy(X);
    }
    else
@@ -1899,10 +1871,6 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
       hypre_ParCSRMatrixAdd(1.0, ACF, 1.0, X, &Z);
       hypre_ParCSRMatrixDestroy(X);
    }
-
-   // WM: !!! Debug
-   /* if (myid == 0) hypre_printf("Z offd num cols before = %d, \n", */
-   /*       hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(Z))); */
 
    hypre_ParCSRMatrixDestroy(AFF);
    if (NeumannDeg >= 1)
@@ -1945,8 +1913,6 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    comm_handle = hypre_ParCSRCommHandleCreate(21, comm_pkg_Z, send_buf_i, Fmap_offd_global);
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
-   // WM: !!! Debug
-   /* if (myid == 0) hypre_printf("Rank %d: Z nnz = %d, n_cpts = %d\n", myid, hypre_CSRMatrixNumNonzeros(Z_diag), n_cpts); */
    nnz_diag = hypre_CSRMatrixNumNonzeros(Z_diag) + n_cpts;
    nnz_offd = hypre_CSRMatrixNumNonzeros(Z_offd);
 
@@ -2044,23 +2010,6 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
 
    *R_ptr = R;
 
-   // WM: !!! Debug
-   /* if (myid == 0) hypre_printf("Rank %d: R offd nnz = %d\n", myid, hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(R))); */
-   /* if (myid == 0) hypre_printf("R offd num cols = %d, \n", */
-   /*       hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(R))); */
-   /* if (myid == 0) */
-   /* { */
-   /*    hypre_CSRMatrix *R_offd = hypre_ParCSRMatrixOffd(R); */
-   /*    hypre_printf("R offd col indices = "); */
-   /*    for (i = 0; i < hypre_CSRMatrixNumNonzeros(R_offd); i++) */
-   /*       hypre_printf("%d ", hypre_CSRMatrixJ(R_offd)[i]); */
-   /*    hypre_printf("\n"); */
-   /*    hypre_printf("R offd data = "); */
-   /*    for (i = 0; i < hypre_CSRMatrixNumNonzeros(R_offd); i++) */
-   /*       hypre_printf("%.2e ", hypre_CSRMatrixData(R_offd)[i]); */
-   /*    hypre_printf("\n"); */
-   /* } */
-
    hypre_ParCSRMatrixDestroy(Z);
    hypre_TFree(Fmap, HYPRE_MEMORY_HOST);
    hypre_TFree(diag_entries, HYPRE_MEMORY_HOST);
@@ -2094,43 +2043,9 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      /* // !!! WM: debug, todo remove */
-      HYPRE_Int myid;
-      hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
-      hypre_ParCSRMatrix *R_host;
-      hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_HOST);
-      /* if (myid == 0) printf("\nHost construction of R:\n"); */
-      ierr = hypre_BoomerAMGBuildRestrNeumannAIRHost(A,CF_marker,num_cpts_global,num_functions,dof_func,
-                                                 NeumannDeg, strong_thresholdR, filter_thresholdR,
-                                                 debug_flag, &R_host);
-      hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_DEVICE);
-      hypre_ParCSRMatrixMigrate(R_host, HYPRE_MEMORY_DEVICE);
-      *R_ptr = R_host;
-
-      // !!! Debug
-      /* if (myid == 0) printf("\nDevice construction of R:\n"); */
-
       ierr = hypre_BoomerAMGBuildRestrNeumannAIRDevice(A,CF_marker,num_cpts_global,num_functions,dof_func,
                                                  NeumannDeg, strong_thresholdR, filter_thresholdR,
                                                  debug_flag, R_ptr);
-      // !!! Debug
-      /* if (myid == 0) */
-      if (1)
-      {
-         HYPRE_Int matrices_equal = hypre_CompareParCSRMatrix(R_host, *R_ptr, "R_host", "R_device");
-         if (matrices_equal)
-         {
-            hypre_printf("Rank %d, matrices agree\n", myid);
-         }
-         else
-         {
-            hypre_printf("Rank %d, matrices DO NOT agree\n", myid);
-            /* hypre_DisplayParCSRMatrix(R_host, 5, "R_host"); */
-            /* hypre_DisplayParCSRMatrix(*R_ptr, 5, "R_device"); */
-         }
-      }
-      /* MPI_Finalize(); */
-      /* exit(0); */
    }
    else
 #endif
