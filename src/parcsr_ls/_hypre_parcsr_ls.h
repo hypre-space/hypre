@@ -14,17 +14,13 @@
 extern "C" {
 #endif
 
-// WM: debug
-HYPRE_Int
-hypre_DisplayInt(HYPRE_Int *array, HYPRE_Int size, HYPRE_Int display_size, const char *name);
-HYPRE_Int
-hypre_DisplayComplex(HYPRE_Complex *array, HYPRE_Int size, HYPRE_Int display_size, const char *name);
-HYPRE_Int
-hypre_DisplayParCSRMatrix(hypre_ParCSRMatrix *A, HYPRE_Int max_display_size, const char *name);
-HYPRE_Int
-hypre_DisplayParCSRMatrixRow(hypre_ParCSRMatrix *A, HYPRE_Int row, const char *name);
-HYPRE_Int
-hypre_CompareParCSRMatrix(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, const char *nameA, const char *nameB);
+HYPRE_Int hypre_DisplayCSRMatrixRow(hypre_CSRMatrix *A, HYPRE_Int row, const char *name);
+HYPRE_Int hypre_DisplayParCSRMatrixRow(hypre_ParCSRMatrix *A, HYPRE_Int row, const char *name);
+HYPRE_Int hypre_DisplayInt(HYPRE_Int *array, HYPRE_Int size, HYPRE_Int display_size, const char *name);
+HYPRE_Int hypre_DisplayComplex(HYPRE_Complex *array, HYPRE_Int size, HYPRE_Int display_size, const char *name);
+HYPRE_Int hypre_DisplayParCSRMatrix(hypre_ParCSRMatrix *A, HYPRE_Int max_display_size, const char *name);
+HYPRE_Int hypre_CompareCSRMatrix(hypre_CSRMatrix *A, hypre_CSRMatrix *B, const char *nameA, const char *nameB, HYPRE_BigInt *col_map_offd_A, HYPRE_BigInt *col_map_offd_B);
+HYPRE_Int hypre_CompareParCSRMatrix(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, const char *nameA, const char *nameB);
 
 typedef struct { HYPRE_Int prev; HYPRE_Int next; } Link;
 
@@ -2027,7 +2023,8 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS ( hypre_ParCSRMatrix *S , HYPRE_Int *CF_mark
 HYPRE_Int hypre_BoomerAMGCorrectCFMarker ( HYPRE_Int *CF_marker , HYPRE_Int num_var , HYPRE_Int *new_CF_marker );
 HYPRE_Int hypre_BoomerAMGCorrectCFMarker2 ( HYPRE_Int *CF_marker , HYPRE_Int num_var , HYPRE_Int *new_CF_marker );
 HYPRE_Int hypre_BoomerAMGCreateSHost(hypre_ParCSRMatrix *A, HYPRE_Real strength_threshold, HYPRE_Real max_row_sum, HYPRE_Int num_functions, HYPRE_Int *dof_func, hypre_ParCSRMatrix **S_ptr);
-HYPRE_Int hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix *A, HYPRE_Real strength_threshold, HYPRE_Real max_row_sum, HYPRE_Int num_functions, HYPRE_Int *dof_func, hypre_ParCSRMatrix **S_ptr);
+HYPRE_Int hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix *A, HYPRE_Int abs_soc, HYPRE_Real strength_threshold, HYPRE_Real max_row_sum, HYPRE_Int num_functions, HYPRE_Int *dof_func, hypre_ParCSRMatrix **S_ptr);
+HYPRE_Int hypre_BoomerAMGCreateSabsHost ( hypre_ParCSRMatrix *A , HYPRE_Real strength_threshold , HYPRE_Real max_row_sum , HYPRE_Int num_functions , HYPRE_Int *dof_func , hypre_ParCSRMatrix **S_ptr );
 HYPRE_Int hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker, HYPRE_Int num_paths, HYPRE_BigInt *coarse_row_starts, hypre_ParCSRMatrix **C_ptr);
 HYPRE_Int hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *S);
 

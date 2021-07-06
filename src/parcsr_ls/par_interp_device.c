@@ -1334,7 +1334,7 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
 
 /*-----------------------------------------------------------------------*/
 __global__ void
-hypre_BoomerAMGBuildInterpOnePnt_getnnz( HYPRE_Int     nr_of_rows, 
+hypre_BoomerAMGBuildInterpOnePnt_getnnz( HYPRE_Int      nr_of_rows, 
                                          HYPRE_Int     *A_diag_i, 
                                          HYPRE_Int     *A_strong_diag_j, 
                                          HYPRE_Complex *A_diag_a,

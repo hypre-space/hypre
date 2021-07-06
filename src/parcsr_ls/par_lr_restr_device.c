@@ -10,6 +10,8 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
+__global__ void hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( HYPRE_Int nr_of_rows, HYPRE_Int *Fmap, HYPRE_Int *Cmap, HYPRE_Int *Z_diag_i, HYPRE_Int *Z_diag_j, HYPRE_Complex *Z_diag_a, HYPRE_Int *R_diag_i, HYPRE_Int *R_diag_j, HYPRE_Complex *R_diag_a);
+
 /*---------------------------------------------------------------------------
  * hypre_BoomerAMGBuildRestrNeumannAIR
  *--------------------------------------------------------------------------*/
@@ -110,18 +112,15 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
 
    /* get AFF and ACF */
    hypre_ParCSRMatrix *AFF, *ACF, *Dinv, *N, *X, *X2, *Z, *Z2;
-   // WM: TODO: Is what I do below a reasonable option (i.e. creating a SoC matrix)? 
-   // Also, is this calculating SoC in the same way as the previous CPU code? 
-   // That is, does this yield the same results as the previous CPU code across different matrices and strong_thresholdR values?
    if (strong_thresholdR > 0)
    {
       hypre_ParCSRMatrix *S;
-      hypre_BoomerAMGCreateS(A,
-                             strong_thresholdR,
-                             0.9, // WM: TODO: default for max_row_sum... is this what we want?
-                             num_functions,
-                             dof_func,
-                             &S);
+      hypre_BoomerAMGCreateSabs(A,
+                                strong_thresholdR,
+                                0.9,
+                                num_functions,
+                                dof_func,
+                                &S);
       hypre_ParCSRMatrixGenerateFFCFDevice(A, CF_marker, num_cpts_global, S, &ACF, &AFF);
       hypre_ParCSRMatrixDestroy(S);
    }
@@ -130,7 +129,9 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
       hypre_ParCSRMatrixGenerateFFCFDevice(A, CF_marker, num_cpts_global, NULL, &ACF, &AFF);
    }
    // WM: !!! Debug
-   /* if (myid == 0) hypre_printf("Rank %d: ACF offd nnz = %d\n", myid, hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(ACF))); */
+   if (myid == 0) hypre_DisplayParCSRMatrix(ACF, 5, "ACF_device");
+   /* if (myid == 0) hypre_DisplayParCSRMatrixRow(ACF, 52, "ACF_device"); */
+   /* if (myid == 0) hypre_printf("Rank %d: ACF diag nnz = %d\n", myid, hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(ACF))); */
    /* if (myid == 0) hypre_printf("ACF offd num cols = %d, \n", */
    /*       hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(ACF))); */
    /* if (myid == 0) */
@@ -261,6 +262,9 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    // WM: !!! Debug
    /* if (myid == 0) hypre_printf("Z offd num cols after = %d, \n", */
    /*       hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(Z))); */
+   // WM: !!! Debug
+   /* if (myid == 0) hypre_DisplayParCSRMatrix(Z, 5, "Z_device"); */
+   /* if (myid == 0) hypre_DisplayParCSRMatrixRow(Z, 52, "Z_device"); */
 
    hypre_ParCSRMatrixDestroy(X);
    hypre_ParCSRMatrixDestroy(Dinv);
@@ -311,7 +315,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
 
    /* Assemble R = [-Z I] */
    // WM: !!! Debug
-   /* if (myid == 0) hypre_printf("Rank %d: Z nnz = %d, n_cpts = %d\n", myid, nnz_diag_Z, n_cpts); */
+   /* if (myid == 0) hypre_printf("Rank %d: Z num rows = %d, n_cpts = %d\n", myid, hypre_CSRMatrixNumRows(Z_diag), n_cpts); */
    nnz_diag = nnz_diag_Z + n_cpts;
    nnz_offd = hypre_CSRMatrixNumNonzeros(Z_offd);
 
@@ -319,24 +323,6 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    R_diag_i = hypre_CTAlloc(HYPRE_Int,  n_cpts+1, HYPRE_MEMORY_DEVICE);
    R_diag_j = hypre_CTAlloc(HYPRE_Int,  nnz_diag, HYPRE_MEMORY_DEVICE);
    R_diag_a = hypre_CTAlloc(HYPRE_Complex, nnz_diag, HYPRE_MEMORY_DEVICE);
-
-   /* setup a mapping to scatter the data and column indices of Z to their locations in R */
-   HYPRE_Int *scatter_z = hypre_CTAlloc(HYPRE_Int, nnz_diag_Z, HYPRE_MEMORY_DEVICE);
-   HYPRE_THRUST_CALL( scatter,
-                        thrust::make_constant_iterator(1),
-                        thrust::make_constant_iterator(1) + hypre_CSRMatrixNumRows(Z_diag),
-                        Z_diag_i,
-                        scatter_z);
-   HYPRE_THRUST_CALL( inclusive_scan,
-                        scatter_z,
-                        scatter_z + nnz_diag_Z,
-                        scatter_z);
-   HYPRE_THRUST_CALL( transform,
-                        scatter_z,
-                        scatter_z + nnz_diag_Z,
-                        thrust::make_counting_iterator(-1),
-                        scatter_z,
-                        thrust::plus<HYPRE_Int>() );
 
    /* setup R row indices (just Z row indices plus one extra entry for each C-pt)*/
    HYPRE_THRUST_CALL( transform,
@@ -346,48 +332,11 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
                         R_diag_i,
                         thrust::plus<HYPRE_Int>() );
 
-   /* scatter Z col indices and data into R */
-   HYPRE_Int *Fmapped_Zj = hypre_TAlloc(HYPRE_Int, nnz_diag_Z, HYPRE_MEMORY_DEVICE);
-   HYPRE_THRUST_CALL( gather,
-                        Z_diag_j,
-                        Z_diag_j + nnz_diag_Z,
-                        Fmap,
-                        Fmapped_Zj );
-   HYPRE_THRUST_CALL( scatter,
-                        Fmapped_Zj,
-                        Fmapped_Zj + nnz_diag_Z,
-                        scatter_z,
-                        R_diag_j);
-   HYPRE_THRUST_CALL( scatter,
-                        thrust::make_transform_iterator(Z_diag_a, thrust::negate<HYPRE_Complex>() ),
-                        thrust::make_transform_iterator(Z_diag_a, thrust::negate<HYPRE_Complex>() ) + nnz_diag_Z,
-                        scatter_z,
-                        R_diag_a);
-   hypre_TFree(Fmapped_Zj, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(scatter_z, HYPRE_MEMORY_DEVICE);
-
-   /* setup a mapping to scatter the data and column indices of the identity over the C-points to their locations in R */
-   HYPRE_Int *scatter_iden = hypre_CTAlloc(HYPRE_Int, n_cpts, HYPRE_MEMORY_DEVICE);
-   HYPRE_THRUST_CALL( transform,
-                        R_diag_i + 1,
-                        R_diag_i + n_cpts + 1,
-                        thrust::make_constant_iterator(-1),
-                        scatter_iden,
-                        thrust::plus<HYPRE_Int>() );
-
-   /* scatter identity over C-pts into R */
-   HYPRE_Complex const_one = 1.0;
-   HYPRE_THRUST_CALL( scatter,
-                        Cmap,
-                        Cmap + n_cpts,
-                        scatter_iden,
-                        R_diag_j);
-   HYPRE_THRUST_CALL( scatter,
-                        thrust::make_constant_iterator(const_one),
-                        thrust::make_constant_iterator(const_one) + n_cpts,
-                        scatter_iden,
-                        R_diag_a);
-   hypre_TFree(scatter_iden, HYPRE_MEMORY_DEVICE);
+   /* assemble the diagonal part of R from Z */
+   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n_fine, "warp", bDim);
+   HYPRE_CUDA_LAUNCH( hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag, gDim, bDim,
+                      n_cpts, Fmap, Cmap, Z_diag_i, Z_diag_j, Z_diag_a, R_diag_i, R_diag_j, R_diag_a);
 
    num_cols_offd_R = num_cols_offd_Z;
    col_map_offd_R = hypre_TAlloc(HYPRE_Int, num_cols_offd_Z, HYPRE_MEMORY_HOST);
@@ -439,6 +388,8 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    *R_ptr = R;
 
    // WM: !!! Debug
+   /* hypre_printf("R_diag_i[52] = %d\n", R_diag_i[52]); */
+   // WM: !!! Debug
    /* if (myid == 0) hypre_printf("Rank %d: R offd nnz = %d\n", myid, hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(R))); */
    /* if (myid == 0) hypre_printf("R offd num cols = %d, \n", */
    /*       hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(R))); */
@@ -460,6 +411,68 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    hypre_TFree(Cmap, HYPRE_MEMORY_DEVICE);
 
    return 0;
+}
+
+/*-----------------------------------------------------------------------*/
+__global__ void
+hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( HYPRE_Int      nr_of_rows, 
+                                                   HYPRE_Int     *Fmap,
+                                                   HYPRE_Int     *Cmap,
+                                                   HYPRE_Int     *Z_diag_i, 
+                                                   HYPRE_Int     *Z_diag_j, 
+                                                   HYPRE_Complex *Z_diag_a,
+                                                   HYPRE_Int     *R_diag_i, 
+                                                   HYPRE_Int     *R_diag_j, 
+                                                   HYPRE_Complex *R_diag_a)
+{
+   /*-----------------------------------------------------------------------*/
+   /* Assemble diag part of R = [-Z I]
+
+      Input: nr_of_rows - Number of rows in matrix (local in processor)
+             CSR represetnation of Z diag, assuming column indices of Z are
+             already mapped appropriately
+
+      Output: CSR representation of R diag
+    */
+   /*-----------------------------------------------------------------------*/
+
+   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1,1>();
+
+   if (i >= nr_of_rows)
+   {
+      return;
+   }
+
+   HYPRE_Int p, q, pZ;
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+
+   /* diag part */
+   if (lane < 2)
+   {
+      p = read_only_load(R_diag_i + i + lane);
+   }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   if (lane < 1)
+   {
+      pZ = read_only_load(Z_diag_i + i + lane);
+   }
+   pZ = __shfl_sync(HYPRE_WARP_FULL_MASK, pZ, 0);
+
+   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
+   {
+      if (j == q - 1)
+      {
+         R_diag_j[j] = Cmap[i];
+         R_diag_a[j] = 1.0;
+      }
+      else
+      {
+         HYPRE_Int jZ = pZ + lane;
+         R_diag_j[j] = Fmap[ Z_diag_j[jZ] ];
+         R_diag_a[j] = -Z_diag_a[jZ];
+      }
+   }
 }
 
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)

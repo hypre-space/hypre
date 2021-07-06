@@ -1785,7 +1785,9 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrixExtractSubmatrixFC(A, CF_marker, num_cpts_global, "FF", &AFF, strong_thresholdR);
    hypre_ParCSRMatrixExtractSubmatrixFC(A, CF_marker, num_cpts_global, "CF", &ACF, strong_thresholdR);
    // WM: !!! Debug
-   /* if (myid == 0) hypre_printf("Rank %d: ACF offd nnz = %d\n", myid, hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(ACF))); */
+   if (myid == 0) hypre_DisplayParCSRMatrix(ACF, 5, "ACF_host");
+   /* if (myid == 0) hypre_DisplayParCSRMatrixRow(ACF, 52, "ACF_host"); */
+   /* if (myid == 0) hypre_printf("Rank %d: ACF diag nnz = %d\n", myid, hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(ACF))); */
    /* if (myid == 0) hypre_printf("ACF offd num cols = %d, \n", */
    /*       hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(ACF))); */
    /* if (myid == 0) */
@@ -2099,7 +2101,7 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
       hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_HOST);
       /* if (myid == 0) printf("\nHost construction of R:\n"); */
       ierr = hypre_BoomerAMGBuildRestrNeumannAIRHost(A,CF_marker,num_cpts_global,num_functions,dof_func,
-                                                 NeumannDeg, 0.0, filter_thresholdR,
+                                                 NeumannDeg, strong_thresholdR, filter_thresholdR,
                                                  debug_flag, &R_host);
       hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_DEVICE);
       hypre_ParCSRMatrixMigrate(R_host, HYPRE_MEMORY_DEVICE);
@@ -2109,7 +2111,7 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
       /* if (myid == 0) printf("\nDevice construction of R:\n"); */
 
       ierr = hypre_BoomerAMGBuildRestrNeumannAIRDevice(A,CF_marker,num_cpts_global,num_functions,dof_func,
-                                                 NeumannDeg, 0.0, filter_thresholdR,
+                                                 NeumannDeg, strong_thresholdR, filter_thresholdR,
                                                  debug_flag, R_ptr);
       // !!! Debug
       /* if (myid == 0) */

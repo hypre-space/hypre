@@ -17,11 +17,19 @@ __global__ void hypre_BoomerAMGCreateS_rowcount( HYPRE_Int nr_of_rows,
                                                  HYPRE_Int* S_temp_diag_j, HYPRE_Int* S_temp_offd_j,
                                                  HYPRE_Int num_functions, HYPRE_Int* dof_func, HYPRE_Int* dof_func_offd,
                                                  HYPRE_Int* jS_diag, HYPRE_Int* jS_offd );
+__global__ void hypre_BoomerAMGCreateSabs_rowcount( HYPRE_Int nr_of_rows,
+                                                    HYPRE_Real max_row_sum, HYPRE_Real strength_threshold,
+                                                    HYPRE_Real* A_diag_data, HYPRE_Int* A_diag_i, HYPRE_Int* A_diag_j,
+                                                    HYPRE_Real* A_offd_data, HYPRE_Int* A_offd_i, HYPRE_Int* A_offd_j,
+                                                    HYPRE_Int* S_temp_diag_j, HYPRE_Int* S_temp_offd_j,
+                                                    HYPRE_Int num_functions, HYPRE_Int* dof_func, HYPRE_Int* dof_func_offd,
+                                                    HYPRE_Int* jS_diag, HYPRE_Int* jS_offd );
 
 
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
 HYPRE_Int
 hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
+                             HYPRE_Int              abs_soc,
                              HYPRE_Real             strength_threshold,
                              HYPRE_Real             max_row_sum,
                              HYPRE_Int              num_functions,
@@ -70,12 +78,16 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    /*--------------------------------------------------------------
     * Compute a  ParCSR strength matrix, S.
     *
-    * For now, the "strength" of dependence/influence is defined in
+    * Default "strength" of dependence/influence is defined in
     * the following way: i depends on j if
     *     aij > hypre_max (k != i) aik,    aii < 0
     * or
     *     aij < hypre_min (k != i) aik,    aii >= 0
     * Then S_ij = 1, else S_ij = 0.
+    *
+    * If abs_soc != 0, then use an absolute strength of connection:
+    * i depends on j if
+    *     abs(aij) > hypre_max (k != i) abs(aik)
     *
     * NOTE: the entries are negative initially, corresponding
     * to "unaccounted-for" dependence.
@@ -131,13 +143,26 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    dim3 bDim = hypre_GetDefaultCUDABlockDimension();
    dim3 gDim = hypre_GetDefaultCUDAGridDimension(num_variables, "warp", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypre_BoomerAMGCreateS_rowcount, gDim, bDim,
-                      num_variables, max_row_sum, strength_threshold,
-                      A_diag_data, A_diag_i, A_diag_j,
-                      A_offd_data, A_offd_i, A_offd_j,
-                      S_temp_diag_j, S_temp_offd_j,
-                      num_functions, dof_func_dev, dof_func_offd_dev,
-                      S_diag_i, S_offd_i );
+   if (abs_soc)
+   {
+      HYPRE_CUDA_LAUNCH( hypre_BoomerAMGCreateSabs_rowcount, gDim, bDim,
+                         num_variables, max_row_sum, strength_threshold,
+                         A_diag_data, A_diag_i, A_diag_j,
+                         A_offd_data, A_offd_i, A_offd_j,
+                         S_temp_diag_j, S_temp_offd_j,
+                         num_functions, dof_func_dev, dof_func_offd_dev,
+                         S_diag_i, S_offd_i );
+   }
+   else
+   {
+      HYPRE_CUDA_LAUNCH( hypre_BoomerAMGCreateS_rowcount, gDim, bDim,
+                         num_variables, max_row_sum, strength_threshold,
+                         A_diag_data, A_diag_i, A_diag_j,
+                         A_offd_data, A_offd_i, A_offd_j,
+                         S_temp_diag_j, S_temp_offd_j,
+                         num_functions, dof_func_dev, dof_func_offd_dev,
+                         S_diag_i, S_offd_i );
+   }
 
    hypreDevice_IntegerExclusiveScan(num_variables + 1, S_diag_i);
    hypreDevice_IntegerExclusiveScan(num_variables + 1, S_offd_i);
@@ -394,6 +419,161 @@ hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A,
    }
 
    return hypre_error_flag;
+}
+
+/*-----------------------------------------------------------------------*/
+ __global__ void hypre_BoomerAMGCreateSabs_rowcount( HYPRE_Int   nr_of_rows,
+                                                     HYPRE_Real  max_row_sum,
+                                                     HYPRE_Real  strength_threshold,
+                                                     HYPRE_Real *A_diag_data,
+                                                     HYPRE_Int  *A_diag_i,
+                                                     HYPRE_Int  *A_diag_j,
+                                                     HYPRE_Real *A_offd_data,
+                                                     HYPRE_Int  *A_offd_i,
+                                                     HYPRE_Int  *A_offd_j,
+                                                     HYPRE_Int  *S_temp_diag_j,
+                                                     HYPRE_Int  *S_temp_offd_j,
+                                                     HYPRE_Int   num_functions,
+                                                     HYPRE_Int  *dof_func,
+                                                     HYPRE_Int  *dof_func_offd,
+                                                     HYPRE_Int  *jS_diag,
+                                                     HYPRE_Int  *jS_offd )
+{
+   /*-----------------------------------------------------------------------*/
+   /*
+      Input: nr_of_rows - Number of rows in matrix (local in processor)
+             A_diag_data, A_diag_i, A_diag_j - CSR representation of A_diag
+             A_offd_data, A_offd_i, A_offd_j - CSR representation of A_offd
+             num_function  - Number of degrees of freedom per grid point
+             dof_func      - vector over nonzero elements of A_diag, indicating the degree of freedom
+             dof_func_offd - vector over nonzero elements of A_offd, indicating the degree of freedom
+
+      Output: S_temp_diag_j - S_diag_j vector before compression, i.e.,elements that are < 0 should be removed
+                              strong connections: same as A_diag_j; weak: -1; diagonal: -2
+              S_temp_offd_j - S_offd_j vector before compression, i.e.,elements that are < 0 should be removed
+                              strong connections: same as A_offd_j; weak: -1;
+              jS_diag       - row nnz vector for compressed S_diag
+              jS_offd       - row nnz vector for compressed S_offd
+    */
+   /*-----------------------------------------------------------------------*/
+
+   HYPRE_Real row_scale = 0.0, row_sum = 0.0, diag = 0.0;
+   HYPRE_Int row_nnz_diag = 0, row_nnz_offd = 0, diag_pos = -1;
+
+   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
+
+   if (row >= nr_of_rows)
+   {
+      return;
+   }
+
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int p_diag, q_diag, p_offd, q_offd;
+
+   /* diag part */
+   if (lane < 2)
+   {
+      p_diag = read_only_load(A_diag_i + row + lane);
+   }
+   q_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 1);
+   p_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 0);
+
+   for (HYPRE_Int i = p_diag + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_diag); i += HYPRE_WARP_SIZE)
+   {
+      if (i < q_diag)
+      {
+         const HYPRE_Int col = read_only_load(&A_diag_j[i]);
+
+         if ( num_functions == 1 || row == col ||
+              read_only_load(&dof_func[row]) == read_only_load(&dof_func[col]) )
+         {
+            const HYPRE_Real v = hypre_cabs( read_only_load(&A_diag_data[i]) );
+            row_sum += v;
+            if (row == col)
+            {
+               diag = v;
+               diag_pos = i;
+            }
+            else
+            {
+               row_scale = hypre_max(row_scale, v);
+            }
+         }
+      }
+   }
+
+   /* offd part */
+   if (lane < 2)
+   {
+      p_offd = read_only_load(A_offd_i + row + lane);
+   }
+   q_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 1);
+   p_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 0);
+
+   for (HYPRE_Int i = p_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_offd); i += HYPRE_WARP_SIZE)
+   {
+      if (i < q_offd)
+      {
+         if ( num_functions == 1 ||
+              read_only_load(&dof_func[row]) == read_only_load(&dof_func_offd[read_only_load(&A_offd_j[i])]) )
+         {
+            const HYPRE_Real v = hypre_cabs( read_only_load(&A_offd_data[i]) );
+            row_sum += v;
+            row_scale = hypre_max(row_scale, v);
+         }
+      }
+   }
+
+   diag = warp_allreduce_sum(diag);
+
+   /* compute scaling factor and row sum */
+   row_sum = warp_allreduce_sum(row_sum);
+   row_scale = warp_allreduce_max(row_scale);
+
+   /* compute row of S */
+   HYPRE_Int all_weak = max_row_sum < 1.0 && fabs(row_sum) < fabs(diag) * (2.0 - max_row_sum);
+   const HYPRE_Real thresh = strength_threshold * row_scale;
+
+   for (HYPRE_Int i = p_diag + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_diag); i += HYPRE_WARP_SIZE)
+   {
+      if (i < q_diag)
+      {
+         const HYPRE_Int cond = all_weak == 0 && diag_pos != i &&
+                                ( num_functions == 1 || read_only_load(&dof_func[row]) ==
+                                                        read_only_load(&dof_func[read_only_load(&A_diag_j[i])]) ) &&
+                                hypre_cabs( read_only_load(&A_diag_data[i]) ) > thresh;
+         S_temp_diag_j[i] = cond * (1 + read_only_load(&A_diag_j[i])) - 1;
+         row_nnz_diag += cond;
+      }
+   }
+
+   /* !!! mark diagonal as -2 !!! */
+   if (diag_pos >= 0)
+   {
+      S_temp_diag_j[diag_pos] = -2;
+   }
+
+   for (HYPRE_Int i = p_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_offd); i += HYPRE_WARP_SIZE)
+   {
+      if (i < q_offd)
+      {
+         const HYPRE_Int cond = all_weak == 0 &&
+                                ( num_functions == 1 || read_only_load(&dof_func[row]) ==
+                                                        read_only_load(&dof_func_offd[read_only_load(&A_offd_j[i])]) ) &&
+                                hypre_cabs( read_only_load(&A_offd_data[i]) ) > thresh;
+         S_temp_offd_j[i] = cond * (1 + read_only_load(&A_offd_j[i])) - 1;
+         row_nnz_offd += cond;
+      }
+   }
+
+   row_nnz_diag = warp_reduce_sum(row_nnz_diag);
+   row_nnz_offd = warp_reduce_sum(row_nnz_offd);
+
+   if (0 == lane)
+   {
+      jS_diag[row] = row_nnz_diag;
+      jS_offd[row] = row_nnz_offd;
+   }
 }
 
 #endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
