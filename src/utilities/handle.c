@@ -32,3 +32,12 @@ hypre_SetUseGpuRand( HYPRE_Int use_gpurand )
    return hypre_error_flag;
 }
 
+HYPRE_Int
+hypre_SetGaussSeidelMethod( HYPRE_Int gs_method )
+{
+#if defined(HYPRE_USING_GPU)
+   hypre_HandleDeviceGSMethod(hypre_handle()) = gs_method;
+#endif
+   return hypre_error_flag;
+}
+

@@ -1579,15 +1579,21 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       hypre_CSRMatrixData(A) = A_sa;
+      HYPRE_Int err = 0;
       if (l1_norms)
       {
-         HYPRE_Int err = hypre_CSRMatrixReplaceDiagDevice(A, l1_norms, INFINITY, 0.0);  hypre_assert(err == 0);
+         err = hypre_CSRMatrixReplaceDiagDevice(A, l1_norms, INFINITY, 0.0);
       }
       else
       {
-         HYPRE_Int err = hypre_CSRMatrixFixZeroDiagDevice(A, INFINITY, 0.0);  hypre_assert(err == 0);
+         err = hypre_CSRMatrixFixZeroDiagDevice(A, INFINITY, 0.0);
       }
       hypre_CSRMatrixData(A) = A_a;
+      if (err)
+      {
+         hypre_error_w_msg(1, "structural zero in hypre_CSRMatrixTriLowerUpperSolveCusparse");
+         //hypre_assert(0);
+      }
 #endif
 
       hypre_SortCSRCusparse(nrow, ncol, nnzA, descr, A_i, A_sj, A_sa);
@@ -1695,6 +1701,7 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
 HYPRE_Int
 hypre_CSRMatrixTriLowerUpperSolveCusparse(char              /*uplo*/,
                                           hypre_CSRMatrix * /*A*/,
+                                          HYPRE_Real      * /*l1_norms*/,
                                           hypre_Vector    * /*f*/,
                                           hypre_Vector    * /*u*/ )
 {

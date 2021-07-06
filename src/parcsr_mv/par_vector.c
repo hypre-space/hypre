@@ -1042,6 +1042,7 @@ HYPRE_Int
 hypre_ParVectorGetValuesHost(hypre_ParVector *vector,
                              HYPRE_Int        num_values,
                              HYPRE_BigInt    *indices,
+                             HYPRE_BigInt     base,
                              HYPRE_Complex   *values)
 {
    HYPRE_Int     i, ierr = 0;
@@ -1065,7 +1066,7 @@ hypre_ParVectorGetValuesHost(hypre_ParVector *vector,
 #endif
       for (i = 0; i < num_values; i++)
       {
-         HYPRE_BigInt index = indices[i];
+         HYPRE_BigInt index = indices[i] - base;
          if (index < first_index || index > last_index)
          {
             ierr ++;
@@ -1105,21 +1106,32 @@ hypre_ParVectorGetValuesHost(hypre_ParVector *vector,
 }
 
 HYPRE_Int
+hypre_ParVectorGetValues2(hypre_ParVector *vector,
+                          HYPRE_Int        num_values,
+                          HYPRE_BigInt    *indices,
+                          HYPRE_BigInt     base,
+                          HYPRE_Complex   *values)
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   if (HYPRE_EXEC_DEVICE == hypre_GetExecPolicy1( hypre_ParVectorMemoryLocation(vector) ))
+   {
+      hypre_ParVectorGetValuesDevice(vector, num_values, indices, base, values);
+   }
+   else
+#endif
+   {
+      hypre_ParVectorGetValuesHost(vector, num_values, indices, base, values);
+   }
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
 hypre_ParVectorGetValues(hypre_ParVector *vector,
                          HYPRE_Int        num_values,
                          HYPRE_BigInt    *indices,
                          HYPRE_Complex   *values)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   if (HYPRE_EXEC_DEVICE == hypre_GetExecPolicy1( hypre_ParVectorMemoryLocation(vector) ))
-   {
-      hypre_ParVectorGetValuesDevice(vector, num_values, indices, values);
-   }
-   else
-#endif
-   {
-      hypre_ParVectorGetValuesHost(vector, num_values, indices, values);
-   }
-
-   return hypre_error_flag;
+   return hypre_ParVectorGetValues2(vector, num_values, indices, 0, values);
 }
+

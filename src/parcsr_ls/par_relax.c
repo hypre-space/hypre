@@ -867,6 +867,13 @@ hypre_BoomerAMGRelax3HybridGaussSeidel( hypre_ParCSRMatrix *A,
       exec = HYPRE_EXEC_HOST;
    }
 
+#if defined(HYPRE_USING_GPU)
+   if (hypre_HandleDeviceGSMethod(hypre_handle()) == 0)
+   {
+      exec = HYPRE_EXEC_HOST;
+   }
+#endif
+
    if (exec == HYPRE_EXEC_DEVICE)
    {
       return hypre_BoomerAMGRelaxHybridGaussSeidelDevice(A, f, cf_marker, relax_points, relax_weight, omega, NULL, u, Vtemp, Ztemp,
@@ -901,6 +908,13 @@ hypre_BoomerAMGRelax4HybridGaussSeidel( hypre_ParCSRMatrix *A,
    {
       exec = HYPRE_EXEC_HOST;
    }
+
+#if defined(HYPRE_USING_GPU)
+   if (hypre_HandleDeviceGSMethod(hypre_handle()) == 0)
+   {
+      exec = HYPRE_EXEC_HOST;
+   }
+#endif
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
@@ -1034,6 +1048,13 @@ hypre_BoomerAMGRelax6HybridSSOR( hypre_ParCSRMatrix *A,
       exec = HYPRE_EXEC_HOST;
    }
 
+#if defined(HYPRE_USING_GPU)
+   if (hypre_HandleDeviceGSMethod(hypre_handle()) == 0)
+   {
+      exec = HYPRE_EXEC_HOST;
+   }
+#endif
+
    if (exec == HYPRE_EXEC_DEVICE)
    {
       return hypre_BoomerAMGRelaxHybridGaussSeidelDevice(A, f, cf_marker, relax_points, relax_weight, omega, NULL, u, Vtemp, Ztemp,
@@ -1132,6 +1153,13 @@ hypre_BoomerAMGRelax8HybridL1SSOR( hypre_ParCSRMatrix *A,
       exec = HYPRE_EXEC_HOST;
    }
 
+#if defined(HYPRE_USING_GPU)
+   if (hypre_HandleDeviceGSMethod(hypre_handle()) == 0)
+   {
+      exec = HYPRE_EXEC_HOST;
+   }
+#endif
+
    if (exec == HYPRE_EXEC_DEVICE)
    {
       return hypre_BoomerAMGRelaxHybridGaussSeidelDevice(A, f, cf_marker, relax_points, relax_weight, omega, l1_norms, u, Vtemp, Ztemp,
@@ -1186,6 +1214,13 @@ hypre_BoomerAMGRelax13HybridL1GaussSeidel( hypre_ParCSRMatrix *A,
       exec = HYPRE_EXEC_HOST;
    }
 
+#if defined(HYPRE_USING_GPU)
+   if (hypre_HandleDeviceGSMethod(hypre_handle()) == 0)
+   {
+      exec = HYPRE_EXEC_HOST;
+   }
+#endif
+
    if (exec == HYPRE_EXEC_DEVICE)
    {
       return hypre_BoomerAMGRelaxHybridGaussSeidelDevice(A, f, cf_marker, relax_points, relax_weight, omega, l1_norms, u, Vtemp, Ztemp,
@@ -1223,6 +1258,13 @@ hypre_BoomerAMGRelax14HybridL1GaussSeidel( hypre_ParCSRMatrix *A,
    {
       exec = HYPRE_EXEC_HOST;
    }
+
+#if defined(HYPRE_USING_GPU)
+   if (hypre_HandleDeviceGSMethod(hypre_handle()) == 0)
+   {
+      exec = HYPRE_EXEC_HOST;
+   }
+#endif
 
    if (exec == HYPRE_EXEC_DEVICE)
    {

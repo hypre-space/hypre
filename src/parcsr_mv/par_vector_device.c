@@ -13,6 +13,7 @@ HYPRE_Int
 hypre_ParVectorGetValuesDevice(hypre_ParVector *vector,
                                HYPRE_Int        num_values,
                                HYPRE_BigInt    *indices,
+                               HYPRE_BigInt     base,
                                HYPRE_Complex   *values)
 {
    HYPRE_Int     ierr = 0;
@@ -28,7 +29,7 @@ hypre_ParVectorGetValuesDevice(hypre_ParVector *vector,
       ierr = HYPRE_THRUST_CALL( count_if,
                                 indices,
                                 indices + num_values,
-                                out_of_range<HYPRE_BigInt>(first_index, last_index) );
+                                out_of_range<HYPRE_BigInt>(first_index + base, last_index + base) );
       if (ierr)
       {
          hypre_error_in_arg(3);
@@ -36,18 +37,18 @@ hypre_ParVectorGetValuesDevice(hypre_ParVector *vector,
          hypre_printf(" error: %d indices out of range! -- hypre_ParVectorGetValues\n", ierr);
 
          HYPRE_THRUST_CALL( gather_if,
-                            thrust::make_transform_iterator(indices, _1 - first_index),
-                            thrust::make_transform_iterator(indices, _1 - first_index) + num_values,
+                            thrust::make_transform_iterator(indices, _1 - base - first_index),
+                            thrust::make_transform_iterator(indices, _1 - base - first_index) + num_values,
                             indices,
                             data,
                             values,
-                            in_range<HYPRE_BigInt>(first_index, last_index) );
+                            in_range<HYPRE_BigInt>(first_index + base, last_index + base) );
       }
       else
       {
          HYPRE_THRUST_CALL( gather,
-                            thrust::make_transform_iterator(indices, _1 - first_index),
-                            thrust::make_transform_iterator(indices, _1 - first_index) + num_values,
+                            thrust::make_transform_iterator(indices, _1 - base - first_index),
+                            thrust::make_transform_iterator(indices, _1 - base - first_index) + num_values,
                             data,
                             values);
       }
