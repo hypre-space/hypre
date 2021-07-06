@@ -32,7 +32,6 @@ do
   echo "# Output file: $i"
   tail -3 $i
 done > ${TNAME}.out
-"
 
 for i in $FILES
 do

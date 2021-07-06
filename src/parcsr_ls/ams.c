@@ -3500,8 +3500,6 @@ HYPRE_Int hypre_AMSSolve(void *solver,
    ri[3] = ams_data -> r1;     gi[3] = ams_data -> g1;
    ri[4] = ams_data -> r1;     gi[4] = ams_data -> g1;
 
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
-
    /* may need to create an additional temporary vector for relaxation */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
