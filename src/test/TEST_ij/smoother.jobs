@@ -109,7 +109,7 @@ mpirun -np 1  ./test_gmres A.27.csr 3 > smoother.out.25
 mpirun -np 1  ./test_gmres B.27.csr 3 > smoother.out.26
 
 #Sym
-mpirun -np 1  ./test_gmres sym.csr >3  smoother.out.27
+mpirun -np 1  ./test_gmres sym.csr 3  > smoother.out.27
 
 #Rand
 mpirun -np 1  ./test_gmres rand.csr 3 > smoother.out.28

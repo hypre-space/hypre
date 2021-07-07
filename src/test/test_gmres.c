@@ -6,6 +6,7 @@
 //#include "_hypre_utilities.hpp"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_mv.h"
+#include "HYPRE_seq_mv.h"
 
 #include "HYPRE_IJ_mv.h"
 #include "_hypre_IJ_mv.h"
@@ -139,8 +140,9 @@ int main(int argc, char** argv) {
    HYPRE_Int           num_procs, myid;
    HYPRE_Int           ierr;
    HYPRE_Int           i;
-   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
-   HYPRE_MemoryLocation  memory_location     = HYPRE_MEMORY_DEVICE;
+   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
+   HYPRE_MemoryLocation  memory_location     = HYPRE_MEMORY_HOST;
+   printf("Mem loc: %i/ %i\n", memory_location, HYPRE_MEMORY_HOST);
 
 
 
@@ -247,25 +249,46 @@ int main(int argc, char** argv) {
    PrintVector(b, num_rows);
 #endif
    apply_GMRES_poly(A, coefs_real_ptr, coefs_imag_ptr, order, b, tmp, prod, p);
+#if defined(HYPRE_USING_GPU)
+      hypre_SyncCudaDevice(hypre_handle());
+#endif
    MPI_Barrier(hypre_MPI_COMM_WORLD);
-   HYPRE_Int j;
+   HYPRE_Real* global_p = NULL;
+
+   HYPRE_Int global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_Int* counts = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
+   HYPRE_Int* displs = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
+   MPI_Allgather(&num_rows, 1, HYPRE_MPI_INT, counts, 1, HYPRE_MPI_INT, hypre_MPI_COMM_WORLD);
+   for(i = 1; i < num_procs; i++) {
+      displs[i] = displs[i-1]+counts[i-1];
+   }
+   MPI_Barrier(hypre_MPI_COMM_WORLD);
+   fflush(NULL);
+   MPI_Barrier(hypre_MPI_COMM_WORLD);
+
    if(0 == myid) {
-     hypre_printf("Fin:\n");
+      global_p = hypre_CTAlloc(HYPRE_Real,global_num_rows, HYPRE_MEMORY_HOST);
    }
+
+   MPI_Gatherv(hypre_VectorData(hypre_ParVectorLocalVector(p)), num_rows, HYPRE_MPI_REAL, global_p, counts, displs, HYPRE_MPI_REAL, 0, hypre_MPI_COMM_WORLD);
+
+   hypre_TFree(displs, HYPRE_MEMORY_HOST);
+   hypre_TFree(counts, HYPRE_MEMORY_HOST);
+
    MPI_Barrier(hypre_MPI_COMM_WORLD);
-   for(i = 0; i < num_procs; i++) {
-     if(i == myid) {
-       for(j = 0; j < num_rows; j++) {
-         hypre_printf("%.15f\n", hypre_VectorData(hypre_ParVectorLocalVector(p))[j]);
-       }
-     }
-     MPI_Barrier(hypre_MPI_COMM_WORLD);
+   fflush(NULL);
+   MPI_Barrier(hypre_MPI_COMM_WORLD);
+
+
+   if(0 == myid) {
+      hypre_printf("Fin\n");
+      for(i = 0; i < global_num_rows; i++) {
+         hypre_printf("%.15f\n", global_p[i]);
+      }
+      hypre_printf("\n");
+      hypre_TFree(global_p, HYPRE_MEMORY_HOST);
    }
-   MPI_Barrier(hypre_MPI_COMM_WORLD);
-   if(myid == 0) {
-     printf("\n");
-   }
-   MPI_Barrier(hypre_MPI_COMM_WORLD);
+
    MPI_Finalize();
 }
 
