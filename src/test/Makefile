@@ -143,6 +143,10 @@ ij: ij.${OBJ_SUFFIX}
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
+test_gmres: test_gmres.${OBJ_SUFFIX}
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS} -lblas
+
 ij_assembly: ij_assembly.${OBJ_SUFFIX}
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}

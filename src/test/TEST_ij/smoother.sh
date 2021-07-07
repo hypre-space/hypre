@@ -55,6 +55,33 @@ do
   tail -3 $i
 done >> ${TNAME}.out
 
+FILES="\
+ ${TNAME}.out.25\
+ ${TNAME}.out.26\
+ ${TNAME}.out.27\
+ ${TNAME}.out.28\
+ ${TNAME}.out.29\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -28 $i
+done >> ${TNAME}.out
+
+FILES="\
+ ${TNAME}.out.30\
+ ${TNAME}.out.31\
+ ${TNAME}.out.32\
+ ${TNAME}.out.33\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done >> ${TNAME}.out
+
 # Make sure that the output file is reasonable
 RUNCOUNT=`echo $FILES | wc -w`
 OUTCOUNT=`grep "Iterations" ${TNAME}.out | wc -l`

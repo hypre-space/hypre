@@ -3096,7 +3096,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          HYPRE_Real *coefs_real = NULL;
          HYPRE_Real *coefs_imag = NULL;
          HYPRE_Int gmres_order = hypre_ParAMGDataGMRESOrder(amg_data);
-         hypre_ParCSRRelax_GMRES_Setup(A_array[j], gmres_order, &coefs_real, &coefs_imag);
+         hypre_ParCSRRelax_GMRES_Setup(A_array[j], gmres_order, NULL, &coefs_real, &coefs_imag);
          gmres_coefs_real[j] = coefs_real;
          gmres_coefs_imag[j] = coefs_imag;
       }

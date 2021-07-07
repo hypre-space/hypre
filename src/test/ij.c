@@ -2243,6 +2243,7 @@ main( hypre_int argc,
    {
       BuildParFromOneFile(argc, argv, build_matrix_arg_index, num_functions,
                           &parcsr_A);
+      hypre_ParCSRMatrixMigrate(parcsr_A, memory_location);
    }
    else if ( build_matrix_type == 2 )
    {
@@ -2316,6 +2317,25 @@ main( hypre_int argc,
    hypre_PrintTiming("Generate Matrix", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
+
+#if GMRES_DEBUG
+   char buffer[256];
+   sprintf(buffer, "mat.%i.csv", local_num_rows);
+   fPrintCSRMatrixDense(stdout, hypre_ParCSRMatrixDiag(A));
+   FILE* fd = fopen(buffer,"w");
+   fPrintCSRMatrixDense(fd, hypre_ParCSRMatrixDiag(A));
+   fclose(fd);
+
+   sprintf(buffer, "mat.%i.coo", local_num_rows);
+   fd = fopen(buffer,"w");
+   fPrintCSRMatrixCOO(fd, hypre_ParCSRMatrixDiag(A));
+   fclose(fd);
+
+   sprintf(buffer, "mat.%i.csr", local_num_rows);
+   fd = fopen(buffer,"w");
+   fPrintCSRMatrixCSR(fd, hypre_ParCSRMatrixDiag(A));
+   fclose(fd);
+#endif
 
    /* Check the ij interface - not necessary if one just wants to test solvers */
    if (test_ij && build_matrix_type > -1)
