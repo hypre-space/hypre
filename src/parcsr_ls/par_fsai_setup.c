@@ -332,6 +332,7 @@ hypre_FSAISetup( void *fsai_vdata,
    HYPRE_Int               max_row_size;
    HYPRE_Int               S_Pattern_nnz;
    HYPRE_Int               kap_grad_nnz;
+   HYPRE_Int               info;
    HYPRE_Int               i, j, k;       /* Loop variables */
    
    /* Setting local variables */
@@ -383,17 +384,8 @@ hypre_FSAISetup( void *fsai_vdata,
       S_Pattern_data[0]       = i;
       G_temp_data[0]          = 1;
 
-      /* Set old_psi up front so we don't have to compute GAG' twice in the inner for loop */
-      if(old_psi != 0)
-      {     
-         old_psi = 0;
-         for(j = A_i[i]; j < A_i[i+1]; j++)  /* I just want to set old_psi = A[i][i], is there an easier way to do this? */
-            if(A_j[j] == i)
-            {
-               old_psi = A_data[j];
-               break;
-            }
-      }
+      /* Set old_psi up front so we don't have to compute GAG' twice in the inner for-loop */
+      old_psi = A_data[A_i[i]];
 
       for( k = 0; k < max_steps; k++ ) /* Cycle through each iteration for that row */
       {
@@ -405,7 +397,7 @@ hypre_FSAISetup( void *fsai_vdata,
          hypre_AddToPattern(kaporin_gradient, kap_grad_nonzeros, kap_grad_nnz, S_Pattern, &S_Pattern_nnz, max_step_size);
 
          /* Gather A[P, P], G[i, P], and -A[P, i] */
-         for( j = 0; j < S_Pattern_nnz; ++j )
+         for(j = 0; j < S_Pattern_nnz; j++)
             marker[S_Pattern_data[j]] = j;
          
          hypre_CSRMatrixExtractDenseMatrix(A_diag, A_sub, marker, S_Pattern_nnz);         /* A[P, P] */
@@ -414,9 +406,17 @@ hypre_FSAISetup( void *fsai_vdata,
          hypre_ExtractDenseRowFromRow( G_temp, G_subrow, marker, S_Pattern_nnz);          /* G_temp[i, P] */
          
          /* Solve A[P, P]G[i, P]' = -A[P, i] */
+         hypre_dpotrf('L', S_Pattern_nnz, A_sub_data, S_Pattern_nnz, &info);
+         hypre_dpotrs('L', S_Pattern_nnz, S_Pattern_nnz, A_sub_data, S_Pattern_nnz, A_subrow_data, 1, &info); /* A_subrow becomes the solution vector... */
+   
+         G_temp = hypre_SeqVectorCloneDeep(A_subrow);  /* Put the solution vector back into G_temp */
 
-         /* Determine psi_{k+1} = G_temp[i]*A*G_temp[i]' */
-         
+         /* Determine psi_{k+1} = G_temp[i]*A*G_temp[i]' 
+         *  A_sub should now contain the lower cholesky factor of A[P, P]   
+         *  So I should be able to replace G_temp*A*G_temp' with (G_temp*A_sub)*(G_temp*A_sub)^T, right?  
+         */
+
+ 
          if(abs( new_psi - old_psi )/old_psi < kaporin_tol)
             break;
 
