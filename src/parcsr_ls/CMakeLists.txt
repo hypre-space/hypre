@@ -64,6 +64,7 @@ set(SRCS
   par_cg_relax_wt.c
   par_coarsen.c
   par_cgc_coarsen.c
+  par_gmres.c
   par_cheby.c
   par_cheby_device.c
   par_coarse_parms.c

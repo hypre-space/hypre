@@ -102,5 +102,29 @@ mpirun -np 4  ./ij -solver 1 -rlx 16 -cheby_eig_est 0 -cheby_scale 1 -n 40 40 20
 mpirun -np 4  ./ij -solver 1 -rlx 16 -cheby_eig_est 0 -cheby_scale 0 -n 40 40 20 -P 2 2 1 \
 > smoother.out.24
 
+#SPD
+mpirun -np 1  ./test_gmres A.27.csr 3 > smoother.out.25
 
+#SND
+mpirun -np 1  ./test_gmres B.27.csr 3 > smoother.out.26
 
+#Sym
+mpirun -np 1  ./test_gmres sym.csr >3  smoother.out.27
+
+#Rand
+mpirun -np 1  ./test_gmres rand.csr 3 > smoother.out.28
+
+#Rand
+mpirun -np 4  ./test_gmres rand.csr 3 > smoother.out.29
+
+mpirun -np 1  ./ij -solver 3 -rlx 19 -n 10 10 10  -gmres_order 3 > smoother.out.30
+
+mpirun -np 4  ./ij -solver 3 -rlx 19 -n 10 10 10  -gmres_order 3 > smoother.out.31
+
+#Broken 
+#mpirun -np 4  ./ij -solver 3 -rlx 19 -n 10 10 10  -gmres_order 2 > smoother.out.32
+
+#Broken cause the lapack implementation has a bug
+#mpirun -np 4  ./ij -solver 3 -rlx 19 -n 10 10 10  -gmres_order 20 > smoother.out.33
+
+mpirun -np 4  ./ij -solver 3 -rlx 19 -n 10 10 10  -gmres_order 5 -vardifconv -a 10 10 10 > smoother.out.34

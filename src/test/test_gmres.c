@@ -41,6 +41,7 @@ HYPRE_Int apply_GMRES_poly(hypre_ParCSRMatrix *A,
 
 extern HYPRE_Int hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
     HYPRE_Int degree,
+    hypre_ParVector* b,
     HYPRE_Real **coefs_real_ptr,
     HYPRE_Real **coefs_imag_ptr
     );
@@ -225,24 +226,47 @@ int main(int argc, char** argv) {
 
    HYPRE_Real* coefs_real_ptr = NULL;
    HYPRE_Real* coefs_imag_ptr = NULL;
-   HYPRE_Int order = 2;
+   HYPRE_Int order = atoi(argv[2]);;
 
    HYPRE_Int num_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
-   printf("Num rows: %i\n", num_rows);
+   HYPRE_Int num_cols = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
+#if GMRES_DEBUG
+   printf("Num rows: %i | %i\n", num_rows, num_cols);
+#endif
 
-   hypre_ParCSRRelax_GMRES_Setup(A, order, &coefs_real_ptr, &coefs_imag_ptr);
-   printf("B\n");
+   HYPRE_ParVectorSetConstantValues(b, 1);
+   hypre_ParCSRRelax_GMRES_Setup(A, order, b, &coefs_real_ptr, &coefs_imag_ptr);
    HYPRE_ParVectorSetConstantValues(b, 1);
    HYPRE_Real norm;
    HYPRE_ParVectorInnerProd(b,b,&norm);
    norm = 1./sqrt(norm);
    ierr = HYPRE_ParVectorScale(norm, b);
+
 #if GMRES_DEBUG
+   printf("B\n");
    PrintVector(b, num_rows);
 #endif
    apply_GMRES_poly(A, coefs_real_ptr, coefs_imag_ptr, order, b, tmp, prod, p);
-   printf("p\n");
-   PrintVector(p, num_rows);
+   MPI_Barrier(hypre_MPI_COMM_WORLD);
+   HYPRE_Int j;
+   if(0 == myid) {
+     hypre_printf("Fin:\n");
+   }
+   MPI_Barrier(hypre_MPI_COMM_WORLD);
+   for(i = 0; i < num_procs; i++) {
+     if(i == myid) {
+       for(j = 0; j < num_rows; j++) {
+         hypre_printf("%.15f\n", hypre_VectorData(hypre_ParVectorLocalVector(p))[j]);
+       }
+     }
+     MPI_Barrier(hypre_MPI_COMM_WORLD);
+   }
+   MPI_Barrier(hypre_MPI_COMM_WORLD);
+   if(myid == 0) {
+     printf("\n");
+   }
+   MPI_Barrier(hypre_MPI_COMM_WORLD);
+   MPI_Finalize();
 }
 
 
