@@ -334,10 +334,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    /* Filter small entries from R */
    if (filter_thresholdR > 0)
    {
-      /* hypre_ParCSRMatrixDropSmallEntries(R, filter_thresholdR, -1); /1* -1 = infinity norm, not implented on the device *1/ */
-      // WM: TODO: implement infinity norm filtering on device
-      /* hypre_printf("WARNING: filtering of R not implemented on the GPU\n"); */
-      /* hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A, HYPRE_Complex tol, HYPRE_Int abs, HYPRE_Int option ); */
+      hypre_ParCSRMatrixDropSmallEntries(R, filter_thresholdR, -1);
    }
 
    *R_ptr = R;

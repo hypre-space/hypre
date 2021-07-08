@@ -200,6 +200,7 @@ main( hypre_int argc,
    HYPRE_Int      coarsen_cut_factor = 0;
    HYPRE_Real     strong_threshold;
    HYPRE_Real     strong_thresholdR;
+   HYPRE_Real     filter_thresholdR;
    HYPRE_Real     trunc_factor;
    HYPRE_Real     jacobi_trunc_threshold;
    HYPRE_Real     S_commpkg_switch = 1.0;
@@ -1202,6 +1203,7 @@ main( hypre_int argc,
    {
       strong_threshold = 0.25;
       strong_thresholdR = 0.25;
+      filter_thresholdR = 0.00;
       trunc_factor = 0.;
       jacobi_trunc_threshold = 0.01;
       cycle_type = 1;
@@ -1332,6 +1334,11 @@ main( hypre_int argc,
       {
          arg_index++;
          strong_thresholdR  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-fltr_thR") == 0 )
+      {
+         arg_index++;
+         filter_thresholdR  = atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-CF") == 0 )
       {
@@ -3421,8 +3428,6 @@ main( hypre_int argc,
       if (solver_id == 0)
       {
          if (myid == 0) hypre_printf("Solver:  AMG\n");
-         // !!! Debug
-         if (myid == 0) hypre_printf("relax_type = %d\n", relax_type);
          time_index = hypre_InitializeTiming("BoomerAMG Setup");
          hypre_BeginTiming(time_index);
 
@@ -3454,6 +3459,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetRestriction(amg_solver, restri_type); /* 0: P^T, 1: AIR, 2: AIR-2 */
          HYPRE_BoomerAMGSetGridRelaxPoints(amg_solver, grid_relax_points);
          HYPRE_BoomerAMGSetStrongThresholdR(amg_solver, strong_thresholdR);
+         HYPRE_BoomerAMGSetFilterThresholdR(amg_solver, filter_thresholdR);
       }
 
       /* RL */
@@ -5402,6 +5408,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetRestriction(amg_precond, restri_type); /* 0: P^T, 1: AIR, 2: AIR-2 */
             HYPRE_BoomerAMGSetGridRelaxPoints(amg_precond, grid_relax_points);
             HYPRE_BoomerAMGSetStrongThresholdR(amg_precond, strong_thresholdR);
+            HYPRE_BoomerAMGSetFilterThresholdR(amg_precond, filter_thresholdR);
          }
 
          HYPRE_BoomerAMGSetCGCIts(amg_precond, cgcits);

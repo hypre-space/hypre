@@ -1222,12 +1222,27 @@ hypre_CSRMatrixIdentityDevice(HYPRE_Int n, HYPRE_Complex alp)
    return A;
 }
 
-/* drop the entries that are not on the diagonal and smaller than
- * its row norm: type 1: 1-norm, 2: 2-norm, -1: infinity norm */
+/* this predicate compares first and second element in a tuple in absolute value */
+/* first is assumed to be complex, second to be real > 0 */
+struct cabsfirst_greaterthan_second_pred : public thrust::unary_function<thrust::tuple<HYPRE_Complex, HYPRE_Real>,bool>
+{
+   __host__ __device__
+   bool operator()(const thrust::tuple<HYPRE_Complex, HYPRE_Real>& t) const
+   {
+      const HYPRE_Complex i = thrust::get<0>(t);
+      const HYPRE_Real j = thrust::get<1>(t);
+
+      return hypre_cabs(i) > j;
+   }
+};
+
+/* drop the entries that are smaller than:
+ *    tol if elmt_tols == null,
+ *    elmt_tols[j] otherwise where j = 0...NumNonzeros(A) */
 HYPRE_Int
 hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
-                                       HYPRE_Real          tol,
-                                       HYPRE_Int           type)
+                                       HYPRE_Real       tol,
+                                       HYPRE_Real      *elmt_tols)
 {
    HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
    HYPRE_Int      nnz    = hypre_CSRMatrixNumNonzeros(A);
@@ -1240,13 +1255,19 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
    HYPRE_Int     *new_j;
    HYPRE_Complex *new_data;
 
-   if (type == 0)
+   if (elmt_tols == NULL)
    {
       new_nnz = HYPRE_THRUST_CALL( count_if,
                                    A_data,
                                    A_data + nnz,
                                    thrust::not1(less_than<HYPRE_Complex>(tol)) );
-
+   }
+   else
+   {
+      new_nnz = HYPRE_THRUST_CALL( count_if,
+                                   thrust::make_zip_iterator(thrust::make_tuple(A_data, elmt_tols)),
+                                   thrust::make_zip_iterator(thrust::make_tuple(A_data, elmt_tols)) + nnz,
+                                   cabsfirst_greaterthan_second_pred() );
    }
 
    if (new_nnz == nnz)
@@ -1265,7 +1286,7 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
 
    thrust::zip_iterator< thrust::tuple<HYPRE_Int*, HYPRE_Int*, HYPRE_Complex*> > new_end;
 
-   if (type == 0)
+   if (elmt_tols == NULL)
    {
       new_end = HYPRE_THRUST_CALL( copy_if,
                                    thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)),
@@ -1273,6 +1294,15 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
                                    A_data,
                                    thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j, new_data)),
                                    thrust::not1(less_than<HYPRE_Complex>(tol)) );
+   }
+   else
+   {
+      new_end = HYPRE_THRUST_CALL( copy_if,
+                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)),
+                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)) + nnz,
+                                   thrust::make_zip_iterator(thrust::make_tuple(A_data, elmt_tols)),
+                                   thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j, new_data)),
+                                   cabsfirst_greaterthan_second_pred() );
    }
 
    hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == new_ii + new_nnz );

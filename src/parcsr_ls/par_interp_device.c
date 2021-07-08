@@ -1237,7 +1237,7 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
 
    /* mark the offd indices for P as a subset of offd indices of A */
    HYPRE_Int *mark_P_offd_idx = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
-   // WM: note that scatter is usually not safe if the same index appears more than once in the map,
+   // note that scatter is usually not safe if the same index appears more than once in the map,
    // but here we are just scattering constant values, so this is safe
    HYPRE_THRUST_CALL( scatter,
                       thrust::make_constant_iterator(1),
