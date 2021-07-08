@@ -293,7 +293,8 @@ hypre_AddToPattern( HYPRE_Vector *kaporin_gradient,
 
 HYPRE_Int
 hypre_FSAISetup( void *fsai_vdata,
-                      hypre_ParCSRMatrix *A  )
+                      hypre_ParCSRMatrix *A
+                      hypre_CSRMatrix *G  )     /* Will create, allocate, and handle G in this function */
 {
    MPI_Comm                comm              = hypre_ParCSRMatrixComm(A);
    hypre_ParFSAIData       *fsai_data        = (hypre_ParFSAIData*) fsai_vdata;
@@ -316,10 +317,10 @@ hypre_FSAISetup( void *fsai_vdata,
    hypre_MPI_Comm_rank(comm, &my_id);
 
    HYPRE_CSRMatrix         *A_diag;
-   HYPRE_CSRMatrix         *G;                           /* Final FSAI factor for this block */
    HYPRE_Vector            *G_temp;                      /* A vector to hold a single row of G while it's being calculated */
    HYPRE_Vector            *A_sub;                       /* A vector to hold a the A[P, P] submatrix of A */
    HYPRE_Vector            *A_subrow;                    /* Vector to hold A[i, P] for the kaporin gradient */
+   HYPRE_Vector            *sol_vec;                     /* Vector to hold solution of hypre_dpetrs */
    HYPRE_Vector            *G_subrow;                    /* Vector to hold A[i, P] for the kaporin gradient */
    HYPRE_Vector            *kaporin_gradient;            /* A vector to hold the Kaporin Gradient for each iteration of aFSAI */
    HYPRE_Vector            *kaporin_gradient_nonzeros;   /* A vector to hold the kaporin_gradient nonzero indices for each iteration of aFSAI */
@@ -343,9 +344,11 @@ hypre_FSAISetup( void *fsai_vdata,
    max_row_size            = min(max_steps*max_step_size, num_rows-1);
                           
    /* Allocating local vector variables */
-
+  
+   G                             = hypre_CSRMatrixCreate(num_rows, num_cols, max_row_size*(max_row_size+1)/2); /* This is a lower triangular matrix */ 
    G_temp                        = hypre_SeqVectorCreate(max_row_size);
    A_subrow                      = hypre_SeqVectorCreate(max_row_size);
+   sol_vec                       = hypre_SeqVectorCreate(max_row_size);
    G_subrow                      = hypre_SeqVectorCreate(max_row_size);
    kaporin_gradient              = hypre_SeqVectorCreate(max_row_size);
    kaporin_gradient_nonzeros     = hypre_SeqVectorCreate(max_row_size);
@@ -354,9 +357,11 @@ hypre_FSAISetup( void *fsai_vdata,
    marker                        = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);       /* For gather functions - don't want to reinitialize */
 
    /* Initializing local variables */
-
+   
+   hypre_CSRMatrixInitialize_v2(G, 0, hypre_CSRMatrixMemoryLocation(G));
    hypre_SeqVectorInitialize(G_temp);
    hypre_SeqVectorInitialize(A_subrow);
+   hypre_SeqVectorInitialize(sol_vec);
    hypre_SeqVectorInitialize(G_subrow);
    hypre_SeqVectorInitialize(kaporin_gradient);
    hypre_SeqVectorInitialize(kaporin_gradient_nonzeros);
@@ -368,6 +373,7 @@ hypre_FSAISetup( void *fsai_vdata,
    /* Setting data variables for vectors */
    HYPRE_Complex *G_temp_data             = hypre_VectorData(G_temp);
    HYPRE_Complex *A_subrow_data           = hypre_VectorData(A_subrow);
+   HYPRE_Complex *sol_vec_data            = hypre_VectorData(sol_vec);
    HYPRE_Complex *G_subrow_data           = hypre_VectorData(G_subrow);
    HYPRE_Complex *kaporin_gradient_data   = hypre_VectorData(kaporin_gradient);
    HYPRE_Complex *kap_grad_nonzero_data   = hypre_VectorData(kaporin_gradient_nonzeros);
@@ -404,18 +410,20 @@ hypre_FSAISetup( void *fsai_vdata,
          hypre_ExtractDenseRowFromCSRMatrix(A_diag, A_subrow, marker, S_Pattern_nnz, i);  /* A[P, i] */
          hypre_SeqVectorScale(-1, A_subrow);                                              /* -A[P, i] */
          hypre_ExtractDenseRowFromRow( G_temp, G_subrow, marker, S_Pattern_nnz);          /* G_temp[i, P] */
+
+         hypre_SeqVectorCopy(A_subrow, sol_vec);
          
          /* Solve A[P, P]G[i, P]' = -A[P, i] */
          hypre_dpotrf('L', S_Pattern_nnz, A_sub_data, S_Pattern_nnz, &info);
          hypre_dpotrs('L', S_Pattern_nnz, S_Pattern_nnz, A_sub_data, S_Pattern_nnz, A_subrow_data, 1, &info); /* A_subrow becomes the solution vector... */
    
-         G_temp = hypre_SeqVectorCloneDeep(A_subrow);  /* Put the solution vector back into G_temp */
+         hypre_SeqVectorCopy(sol_vec, G_temp);  /* Put the solution vector back into G_temp */
 
-         /* Determine psi_{k+1} = G_temp[i]*A*G_temp[i]' 
-         *  A_sub should now contain the lower cholesky factor of A[P, P]   
-         *  So I should be able to replace G_temp*A*G_temp' with (G_temp*A_sub)*(G_temp*A_sub)^T, right?  
+         /* Determine psi_{k+1} = G_temp[i]*A*G_temp[i]'
+         *  A_subrow should currently equal -A[i, P], so does new_psi = G_temp*A[i, P] or new_psi = G_temp*(-A[i,P])? 
          */
-
+         hypre_SeqVectorScale(-1, A_subrow);                         /* A[P, i] */
+         new_psi = hypre_SeqVectorInnerProd(G_temp, A_subrow); 
  
          if(abs( new_psi - old_psi )/old_psi < kaporin_tol)
             break;
@@ -424,20 +432,21 @@ hypre_FSAISetup( void *fsai_vdata,
 
       }
 
-      /* row_scale = 1/sqrt(A[i, i] -  abs( InnerProd(G_temp, A[i])) )
-      *  G[i] = row_scale * G_temp  
-      */
+      /* Scale G_temp and add to CSR matrix - Unclear in how to set values in a CSR matrix. Currently looking at csr_block_matop.c for guidance */
+      row_scale = 1/(sqrt(A_data[A_i[i]] - abs(hypre_SeqVectorInnerProd(G_temp, A_subrow))));
+      hypre_SeqVectorScale(row_scale, G_temp);                 
 
    }
 
    hypre_SeqVectorDestroy(G_temp);                   
    hypre_SeqVectorDestroy(A_subrow);                     
+   hypre_SeqVectorDestroy(sol_vec);                     
    hypre_SeqVectorDestroy(G_subrow);                     
    hypre_SeqVectorDestroy(kaporin_gradient);         
    hypre_SeqVectorDestroy(kaporin_gradient_nonzeros);
    hypre_SeqVectorDestroy(S_Pattern);                
    hypre_SeqVectorDestroy(A_sub);                 
-   TFree(marker);                   
+   TFree(marker, HYPRE_MEMORY_HOST);                   
 
    return(hypre_error_flag);
 
