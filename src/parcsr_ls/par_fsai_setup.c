@@ -346,9 +346,10 @@ hypre_FSAISetup( void *fsai_vdata,
    num_cols                = hypre_CSRMatrixNumCols(A_diag);
    max_row_size            = min(max_steps*max_step_size, num_rows-1);
 
-   HYPRE_Int               *G_i      = hypre_CSRMatrixI(G);
-   HYPRE_Int               *G_j      = hypre_CSRMatrixJ(G);
-   HYPRE_Real              *G_data   = hypre_CSRMatrixData(G);
+   HYPRE_CSRMatrix         *G_diag   = hypre_ParCSRMatrixDiag(G);
+   HYPRE_Int               *G_i      = hypre_CSRMatrixI(G_diag);
+   HYPRE_Int               *G_j      = hypre_CSRMatrixJ(G_diag);
+   HYPRE_Real              *G_data   = hypre_CSRMatrixData(G_diag);
                           
    /* Allocating local vector variables */
   
@@ -444,11 +445,11 @@ hypre_FSAISetup( void *fsai_vdata,
 
       for(k = 0; k < S_Pattern_nnz; k++)
       {
-         j           = k + G_i[row_start+i-1];
+         j           = k + G_i[i-1];
          G_j[j]      = S_Pattern_data[k];
          G_data[j]   = G_temp_data[k];
       }           
-      G_i[row_start+i] = G_i[row_start+i-1] + S_Pattern_nnz;
+      G_i[i] = G_i[i-1] + S_Pattern_nnz;
 
    }
 
