@@ -19,6 +19,7 @@ hypre_FSAICreate()
    hypre_ParFSAIData    *fsai_data;
 
    /* setup params */
+   hypre_ParCSRMatrix   *G_mat;
    HYPRE_Int            max_steps;
    HYPRE_Int            max_step_size;
    HYPRE_Real           kap_tolerance;
@@ -94,12 +95,16 @@ hypre_FSAICreate()
 
    /* Create and initialize G_mat */
 
-   HYPRE_Int       num_rows                     = hypre_ParCSRMatrixGlobalNumRows(A);
-   HYPRE_Int       num_cols                     = hypre_ParCSRMatrixGlobalNumCols(A);
-
-   hypre_ParCSRMatrix *G_mat                    = hypre_ParFSAIDataGmat(fsai_data);
-   G_mat                                        = hypre_ParCSRMatrixCreate (comm_info, num_rows, num_cols, 0, 0, 0, 0, 0); /* Just want to create an empty ParCSRMatrix */
+   G_mat                                        = hypre_ParCSRMatrixCreate (comm_info, 
+                                                  hypre_ParCSRMatrixGlobalNumRows(A),   
+                                                  hypre_ParCSRMatrixGlobalNumCols(A),  
+                                                  hypre_ParCSRMatrixRowStarts(A),
+                                                  hypre_ParCSRMatrixColStarts(A),
+                                                  0, 
+                                                  hypre_ParCSRMatrixGlobalNumRows(A)*min(max_steps*max_step_size, hypre_ParCSRMatrixGlobalNumRows(A)),
+                                                  0 )
    hypre_ParCSRMatrixInitialize(G);
+   hypre_ParFSAIDataGmat(*fsai_data)            = G_mat;
 
    HYPRE_ANNOTATE_FUNC_END;
 
