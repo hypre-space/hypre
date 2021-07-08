@@ -101,7 +101,7 @@ hypre_FSAICreate()
                                                   hypre_ParCSRMatrixRowStarts(A),
                                                   hypre_ParCSRMatrixColStarts(A),
                                                   0, 
-                                                  hypre_ParCSRMatrixGlobalNumRows(A)*max_steps*max_step_size,
+                                                  hypre_ParCSRMatrixNumRows(hypre_ParCSRMatrixDiag(A))*max_steps*max_step_size,
                                                   0 )
    hypre_ParCSRMatrixInitialize(G);
    hypre_ParFSAIDataGmat(fsai_data)             = G_mat;
