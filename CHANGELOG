@@ -7,6 +7,41 @@
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
 
+Version 2.22.0 released 2021/06/22
+
+- Added GPU support for AMS, ADS, and AME solvers.
+- Added mixedint support for GPUs.
+- Fixed GPU issues with AMG-DD solver.
+- Various bug fixes.
+
+#====================================
+
+Version 2.21.0 released 2021/05/25
+
+- Changed GPU defaults and changed default CUDA arch to 70.
+- Added new interfaces: HYPRE_SetSpGemmUseCusparse(1) to select cuSPARSE SpGeMM
+  or hypre's MM (if 0); HYPRE_SetUseGpuRand(1) to use cuRand for PMIS or CPU RNG
+  (if 0); HYPRE_SetMemoryLocation to select default memory location;
+  HYPRE_SetExecutionPolicy to select default execution policy.
+- Changed configure option: --enable-cub --> --enable-device-memory-pool;
+  --enable-nvtx --> --enable-gpu-profiling
+- Added new configure options: --with-cuda-home=DIR; --with-gpu-arch=ARG
+- Added GPU build options to CMake.
+- Added a new HYPRE_RELEASE_NUMBER macro.
+- Improved support for ParCSR matrices with many zero rows.
+- Improved BoomerAMG setup efficiency when there are many off-diagonal coefficients.
+- Fixed a bug in the strength matrix generation for nodal AMG.
+- Removed unified virtual memory (UVM) requirement from GPU implementation.
+- Removed --enable-global-partition option.
+- Added UMPIRE support for memory pooling on GPUs.
+- Added HIP/AMD support.
+- New CUDA based triangular smoothers.
+- New parallel ILU solver features and GPU support.
+- Added CUDA 11 support.
+- Various bug fixes.
+
+#====================================
+
 Version 2.20.0 released 2020/09/24
 
 - New matrix-based interpolation routines for AMG (CPU and GPU)

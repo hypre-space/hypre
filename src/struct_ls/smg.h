@@ -72,7 +72,7 @@ typedef struct
    HYPRE_Int             logging;
    HYPRE_Real           *norms;
    HYPRE_Real           *rel_norms;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_Int             devicelevel;
 #endif
 } hypre_SMGData;

@@ -13,7 +13,7 @@
 
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
-#include "csr_matrix_cuda_utils.h"
+#include "seq_mv.hpp"
 
 #if defined(HYPRE_USING_GPU)
 
@@ -122,58 +122,6 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
 }
 
 #if defined(HYPRE_USING_CUSPARSE)
-HYPRE_Int
-hypre_CSRMatrixMatvecMaskedDevice( HYPRE_Complex    alpha,
-                                   hypre_CSRMatrix *A,
-                                   hypre_Vector    *x,
-                                   HYPRE_Complex    beta,
-                                   hypre_Vector    *b,
-                                   hypre_Vector    *y,
-                                   HYPRE_Int       *mask,
-                                   HYPRE_Int        size_of_mask )
-{
-   if (hypre_VectorData(b) != hypre_VectorData(y))
-   {
-      hypre_TMemcpy( hypre_VectorData(y),
-                     hypre_VectorData(b),
-                     HYPRE_Complex,
-                     hypre_CSRMatrixNumRows(A),
-                     hypre_VectorMemoryLocation(y),
-                     hypre_VectorMemoryLocation(b) );
-   }
-
-   hypre_CSRMatrixMatvecDevice2(0, alpha, A, x, beta, y, 0);
-
-   if ( hypre_CSRMatrixNumRows(A) > 0 && hypre_CSRMatrixNumCols(A) > 0 && hypre_CSRMatrixNumNonzeros(A) > 0 )
-   {
-      cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
-      cusparseMatDescr_t descr = hypre_HandleCusparseMatDescr(hypre_handle());
-
-      HYPRE_CUSPARSE_CALL( cusparseDbsrxmv(handle,
-                                           CUSPARSE_DIRECTION_ROW,
-                                           CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                           size_of_mask,
-                                           hypre_CSRMatrixNumRows(A),
-                                           hypre_CSRMatrixNumCols(A),
-                                           hypre_CSRMatrixNumNonzeros(A),
-                                           &alpha,
-                                           descr,
-                                           hypre_CSRMatrixData(A),
-                                           mask,
-                                           hypre_CSRMatrixI(A),
-                                           hypre_CSRMatrixI(A) + 1,
-                                           hypre_CSRMatrixJ(A),
-                                           1,
-                                           hypre_VectorData(x),
-                                           &beta,
-                                           hypre_VectorData(y)) );
-   }
-
-   hypre_SyncCudaComputeStream(hypre_handle());
-
-   return hypre_error_flag;
-}
-
 #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
 
 HYPRE_Int
@@ -265,7 +213,7 @@ hypre_CSRMatrixMatvecCusparseOldAPI( HYPRE_Int        trans,
 #error "ERROR: cusparse old API should not be used when bigint is enabled!"
 #endif
    cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
-   cusparseMatDescr_t descr = hypre_HandleCusparseMatDescr(hypre_handle());
+   cusparseMatDescr_t descr = hypre_CSRMatrixGPUMatDescr(A);
    hypre_CSRMatrix *B;
 
    if (trans)
@@ -304,20 +252,6 @@ hypre_CSRMatrixMatvecCusparseOldAPI( HYPRE_Int        trans,
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
 #if defined(HYPRE_USING_ROCSPARSE)
-// We need a stub for this function since it's called elsewhere
-HYPRE_Int
-hypre_CSRMatrixMatvecMaskedDevice( HYPRE_Complex     /*alpha*/,
-                                   hypre_CSRMatrix * /*A*/,
-                                   hypre_Vector    * /*x*/,
-                                   HYPRE_Complex     /*beta*/,
-                                   hypre_Vector    * /*b*/,
-                                   hypre_Vector    * /*y*/,
-                                   HYPRE_Int       * /*mask*/,
-                                   HYPRE_Int         /*size_of_mask*/ )
-{
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "hypre_CSRMatrixMatvecMaskedDevice not implemented for rocSPARSE!\n");
-}
-
 HYPRE_Int
 hypre_CSRMatrixMatvecRocsparse( HYPRE_Int        trans,
                                 HYPRE_Complex    alpha,
@@ -328,8 +262,8 @@ hypre_CSRMatrixMatvecRocsparse( HYPRE_Int        trans,
                                 HYPRE_Int        offset )
 {
    rocsparse_handle handle = hypre_HandleCusparseHandle(hypre_handle());
-   rocsparse_mat_descr descr = hypre_HandleCusparseMatDescr(hypre_handle());
-   rocsparse_mat_info info = hypre_HandleRocsparseMatInfo(hypre_handle());
+   rocsparse_mat_descr descr = hypre_CSRMatrixGPUMatDescr(A);
+   rocsparse_mat_info info = hypre_CSRMatrixGPUMatInfo(A);
 
    hypre_CSRMatrix *B;
 

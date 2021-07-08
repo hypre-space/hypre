@@ -430,8 +430,10 @@ main( hypre_int  argc,
    hypre_MPI_Finalize();
 
    /* when using cuda-memcheck --leak-check full, uncomment this */
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_CUDA)
    cudaDeviceReset();
+#elif defined(HYPRE_USING_HIP)
+   hipDeviceReset();
 #endif
 
    return (0);
@@ -620,7 +622,7 @@ checkMatrix(HYPRE_ParCSRMatrix h_parcsr_ref, HYPRE_IJMatrix ij_A)
    h_parcsr_A = hypre_ParCSRMatrixClone_v2(parcsr_A, 1, HYPRE_MEMORY_HOST);
 
    // Check norm of (parcsr_ref - parcsr_A)
-   hypre_ParcsrAdd(1.0, h_parcsr_ref, -1.0, h_parcsr_A, &parcsr_error);
+   hypre_ParCSRMatrixAdd(1.0, h_parcsr_ref, -1.0, h_parcsr_A, &parcsr_error);
    fnorm = hypre_ParCSRMatrixFnorm(parcsr_error);
 
    if (myid == 0)
@@ -913,10 +915,20 @@ test_SetSet(MPI_Comm             comm,
 
    chunk_size = nrows / nchunks;
    new_coefs = hypre_TAlloc(HYPRE_Real, num_nonzeros, memory_location);
-   for (i = 0; i < num_nonzeros; i++)
+
+   if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_HOST)
    {
-      new_coefs[i] = 2.0*coefs[i];
+      for (i = 0; i < num_nonzeros; i++)
+      {
+         new_coefs[i] = 2.0*coefs[i];
+      }
    }
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   else
+   {
+      HYPRE_THRUST_CALL(transform, coefs, coefs + num_nonzeros, new_coefs, 2.0 * _1);
+   }
+#endif
 
 #if defined(HYPRE_USING_GPU)
    hypre_SyncCudaDevice(hypre_handle());
@@ -1028,10 +1040,20 @@ test_AddSet(MPI_Comm             comm,
 
    chunk_size = nrows / nchunks;
    new_coefs = hypre_TAlloc(HYPRE_Real, num_nonzeros, memory_location);
-   for (i = 0; i < num_nonzeros; i++)
+
+   if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_HOST)
    {
-      new_coefs[i] = 2.0*coefs[i];
+      for (i = 0; i < num_nonzeros; i++)
+      {
+         new_coefs[i] = 2.0*coefs[i];
+      }
    }
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   else
+   {
+      HYPRE_THRUST_CALL(transform, coefs, coefs + num_nonzeros, new_coefs, 2.0 * _1);
+   }
+#endif
 
 #if defined(HYPRE_USING_GPU)
    hypre_SyncCudaDevice(hypre_handle());

@@ -1847,17 +1847,17 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
    else if (NeumannDeg == 1)
    {
       X = hypre_ParMatmul(ACF, AFF);
-      hypre_ParcsrAdd(1.0, ACF, 1.0, X, &Z);
+      hypre_ParCSRMatrixAdd(1.0, ACF, 1.0, X, &Z);
       hypre_ParCSRMatrixDestroy(X);
    }
    else
    {
       X = hypre_ParMatmul(AFF, AFF);
-      hypre_ParcsrAdd(1.0, AFF, 1.0, X, &Z);
+      hypre_ParCSRMatrixAdd(1.0, AFF, 1.0, X, &Z);
       for (i = 2; i < NeumannDeg; i++)
       {
          X2 = hypre_ParMatmul(X, AFF);
-         hypre_ParcsrAdd(1.0, Z, 1.0, X2, &Z2);
+         hypre_ParCSRMatrixAdd(1.0, Z, 1.0, X2, &Z2);
          hypre_ParCSRMatrixDestroy(X);
          hypre_ParCSRMatrixDestroy(Z);
          Z = Z2;
@@ -1866,7 +1866,7 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
       hypre_ParCSRMatrixDestroy(X);
       X = hypre_ParMatmul(ACF, Z);
       hypre_ParCSRMatrixDestroy(Z);
-      hypre_ParcsrAdd(1.0, ACF, 1.0, X, &Z);
+      hypre_ParCSRMatrixAdd(1.0, ACF, 1.0, X, &Z);
       hypre_ParCSRMatrixDestroy(X);
    }
 
@@ -1915,15 +1915,15 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
    nnz_offd = hypre_CSRMatrixNumNonzeros(Z_offd);
 
    /*------------- allocate arrays */
-   R_diag_i = hypre_CTAlloc(HYPRE_Int,  n_cpts+1, HYPRE_MEMORY_HOST);
-   R_diag_j = hypre_CTAlloc(HYPRE_Int,  nnz_diag, HYPRE_MEMORY_HOST);
-   R_diag_a = hypre_CTAlloc(HYPRE_Complex, nnz_diag, HYPRE_MEMORY_HOST);
+   R_diag_i = hypre_CTAlloc(HYPRE_Int,  n_cpts+1, HYPRE_MEMORY_DEVICE);
+   R_diag_j = hypre_CTAlloc(HYPRE_Int,  nnz_diag, HYPRE_MEMORY_DEVICE);
+   R_diag_a = hypre_CTAlloc(HYPRE_Complex, nnz_diag, HYPRE_MEMORY_DEVICE);
 
    /* not in ``if num_procs > 1'',
     * allocation needed even for empty CSR */
-   R_offd_i = hypre_CTAlloc(HYPRE_Int,  n_cpts+1, HYPRE_MEMORY_HOST);
-   R_offd_j = hypre_CTAlloc(HYPRE_Int,  nnz_offd, HYPRE_MEMORY_HOST);
-   R_offd_a = hypre_CTAlloc(HYPRE_Complex, nnz_offd, HYPRE_MEMORY_HOST);
+   R_offd_i = hypre_CTAlloc(HYPRE_Int,  n_cpts+1, HYPRE_MEMORY_DEVICE);
+   R_offd_j = hypre_CTAlloc(HYPRE_Int,  nnz_offd, HYPRE_MEMORY_DEVICE);
+   R_offd_a = hypre_CTAlloc(HYPRE_Complex, nnz_offd, HYPRE_MEMORY_DEVICE);
 
    /* redundant */
    R_diag_i[0] = 0;
@@ -2017,6 +2017,3 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
 
    return 0;
 }
-
-
-

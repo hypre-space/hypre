@@ -216,6 +216,7 @@ typedef struct
 
    HYPRE_Int        fem_rhs_true;
    HYPRE_Real      *fem_rhs_values;
+   HYPRE_Real      *d_fem_rhs_values;
 
    HYPRE_Int        symmetric_num;
    HYPRE_Int       *symmetric_parts;
@@ -739,7 +740,8 @@ ReadData( char         *filename,
             if (data.fem_rhs_true == 0)
             {
                data.fem_rhs_true = 1;
-               data.fem_rhs_values = hypre_CTAlloc(HYPRE_Real,  data.fem_nvars, HYPRE_MEMORY_HOST);
+               data.fem_rhs_values = hypre_CTAlloc(HYPRE_Real, data.fem_nvars, HYPRE_MEMORY_HOST);
+               data.d_fem_rhs_values = hypre_CTAlloc(HYPRE_Real, data.fem_nvars, HYPRE_MEMORY_DEVICE);
             }
             SScanDblArray(sdata_ptr, &sdata_ptr,
                           data.fem_nvars, data.fem_rhs_values);
@@ -2100,6 +2102,7 @@ DestroyData( ProblemData   data )
    if (data.fem_rhs_true > 0)
    {
       hypre_TFree(data.fem_rhs_values, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.d_fem_rhs_values, HYPRE_MEMORY_DEVICE);
    }
 
    if (data.symmetric_num > 0)
@@ -2421,9 +2424,9 @@ main( hypre_int argc,
    /* end lobpcg */
 
 #if defined(HYPRE_USING_GPU)
-   HYPRE_Int spgemm_use_cusparse = 1;
+   HYPRE_Int spgemm_use_cusparse = 0;
 #endif
-   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
+   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
    HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
 
    /*-----------------------------------------------------------
@@ -2795,8 +2798,10 @@ main( hypre_int argc,
    /* default execution policy */
    HYPRE_SetExecutionPolicy(default_exec_policy);
 
+   HYPRE_SetStructExecutionPolicy(HYPRE_EXEC_DEVICE);
+
 #if defined(HYPRE_USING_GPU)
-   HYPRE_CSRMatrixSetSpGemmUseCusparse(spgemm_use_cusparse);
+   HYPRE_SetSpGemmUseCusparse(spgemm_use_cusparse);
 #endif
 
    if ( solver_id == 39 && lobpcgFlag )
@@ -3340,6 +3345,9 @@ main( hypre_int argc,
    /* Add values for FEMRhsSet */
    if (data.fem_rhs_true)
    {
+      hypre_TMemcpy(data.d_fem_rhs_values, data.fem_rhs_values, HYPRE_Real, data.fem_nvars,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
       for (part = 0; part < data.nparts; part++)
       {
          pdata = data.pdata[part];
@@ -3355,7 +3363,7 @@ main( hypre_int argc,
                        index[0] <= pdata.iuppers[box][0]; index[0]++)
                   {
                      HYPRE_SStructVectorAddFEMValues(b, part, index,
-                                                     data.fem_rhs_values);
+                                                     data.d_fem_rhs_values);
                   }
                }
             }

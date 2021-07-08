@@ -41,13 +41,12 @@ set(SRCS
   HYPRE_parcsr_lgmres.c
   HYPRE_parcsr_hybrid.c
   HYPRE_parcsr_int.c
+  HYPRE_parcsr_ilu.c
   HYPRE_parcsr_mgr.c
   HYPRE_parcsr_ParaSails.c
   HYPRE_parcsr_pcg.c
   HYPRE_parcsr_pilut.c
   HYPRE_parcsr_schwarz.c
-  HYPRE_parcsr_mgr.c
-  HYPRE_parcsr_ilu.c
   HYPRE_ams.c
   HYPRE_ads.c
   HYPRE_ame.c
@@ -118,16 +117,49 @@ set(SRCS
   par_ilu.c
   par_ilu_setup.c
   par_ilu_solve.c
+  par_coarsen_device.c
+  par_indepset_device.c
+  par_interp_device.c
+  par_interp_trunc_device.c
+  par_lr_interp_device.c
+  par_strength_device.c
+  par_strength2nd_device.c
+  par_amgdd_fac_cycle_device.c
+  par_2s_interp_device.c
+  par_relax_device.c
 )
 
 if (HYPRE_USING_DSUPERLU)
   list(APPEND SRCS dsuperlu.c)
 endif()
 
-target_sources(HYPRE
+target_sources(${PROJECT_NAME}
   PRIVATE ${SRCS}
           ${HDRS}
+)
+
+if (HYPRE_USING_CUDA)
+  set(CUDA_SRCS
+    ams.c
+    ads.c
+    ame.c
+    par_ilu.c
+    par_ilu_setup.c
+    par_ilu_solve.c
+    par_coarsen_device.c
+    par_indepset_device.c
+    par_interp_device.c
+    par_interp_trunc_device.c
+    par_lr_interp_device.c
+    par_strength_device.c
+    par_strength2nd_device.c
+    par_amgdd_fac_cycle_device.c
+    par_2s_interp_device.c
+    par_relax_device.c
   )
+  convert_filenames_to_full_paths(CUDA_SRCS)
+  set(HYPRE_CUDA_SOURCES ${HYPRE_CUDA_SOURCES} ${CUDA_SRCS} PARENT_SCOPE)
+endif ()
 
 convert_filenames_to_full_paths(HDRS)
 set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HDRS} PARENT_SCOPE)
