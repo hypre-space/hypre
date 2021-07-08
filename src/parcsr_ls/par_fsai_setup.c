@@ -293,15 +293,15 @@ hypre_AddToPattern( HYPRE_Vector *kaporin_gradient,
 
 HYPRE_Int
 hypre_FSAISetup( void *fsai_vdata,
-                      hypre_ParCSRMatrix *A
-                      hypre_CSRMatrix *G  )     /* Will create, allocate, and handle G in this function */
-{
+                      hypre_ParCSRMatrix *A ){
+
    MPI_Comm                comm              = hypre_ParCSRMatrixComm(A);
    hypre_ParFSAIData       *fsai_data        = (hypre_ParFSAIData*) fsai_vdata;
    hypre_MemoryLocation    memory_location   = hypre_ParCSRMatrixMemoryLocation(A);
 
    /* Data structure variables */
 
+   HYPRE_CSRMatrix         G                 = hypre_ParFSAIDataGmat(fsai_data);
    HYPRE_Real              kap_tolerance     = hypre_ParFSAIDataKapTolerance(fsai_data);
    HYPRE_Int               max_steps         = hypre_ParFSAIDataMaxSteps(fsai_data);
    HYPRE_Int               max_step_size     = hypre_ParFSAIDataMaxStepSize(fsai_data);
@@ -334,18 +334,24 @@ hypre_FSAISetup( void *fsai_vdata,
    HYPRE_Int               S_Pattern_nnz;
    HYPRE_Int               kap_grad_nnz;
    HYPRE_Int               info;
-   HYPRE_Int               i, j, k;       /* Loop variables */
-   
+   HYPRE_Int               row_start, row_end, col_start, col_end;   /* Used for putting G_temp results into G */
+   HYPRE_Int               i, j, k;                                  /* Loop variables */
+
    /* Setting local variables */
+
+   hypre_ParCSRMatrixGetLocalRange(A, &row_start, &row_end, &col_start, &col_end);
 
    A_diag                  = hypre_ParCSRMatrixDiag(A);
    num_rows                = hypre_CSRMatrixNumRows(A_diag);
    num_cols                = hypre_CSRMatrixNumCols(A_diag);
    max_row_size            = min(max_steps*max_step_size, num_rows-1);
+
+   HYPRE_Int               *G_i      = hypre_CSRMatrixI(G);
+   HYPRE_Int               *G_j      = hypre_CSRMatrixJ(G);
+   HYPRE_Real              *G_data   = hypre_CSRMatrixData(G);
                           
    /* Allocating local vector variables */
   
-   G                             = hypre_CSRMatrixCreate(num_rows, num_cols, max_row_size*(max_row_size+1)/2); /* This is a lower triangular matrix */ 
    G_temp                        = hypre_SeqVectorCreate(max_row_size);
    A_subrow                      = hypre_SeqVectorCreate(max_row_size);
    sol_vec                       = hypre_SeqVectorCreate(max_row_size);
@@ -434,7 +440,15 @@ hypre_FSAISetup( void *fsai_vdata,
 
       /* Scale G_temp and add to CSR matrix - Unclear in how to set values in a CSR matrix. Currently looking at csr_block_matop.c for guidance */
       row_scale = 1/(sqrt(A_data[A_i[i]] - abs(hypre_SeqVectorInnerProd(G_temp, A_subrow))));
-      hypre_SeqVectorScale(row_scale, G_temp);                 
+      hypre_SeqVectorScale(row_scale, G_temp);          
+
+      for(k = 0; k < S_Pattern_nnz; k++)
+      {
+         j           = k + G_i[row_start+i-1];
+         G_j[j]      = S_Pattern_data[k];
+         G_data[j]   = G_temp_data[k];
+      }           
+      G_i[row_start+i] = G_i[row_start+i-1] + S_Pattern_nnz;
 
    }
 

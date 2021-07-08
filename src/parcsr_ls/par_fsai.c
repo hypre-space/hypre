@@ -26,7 +26,7 @@ hypre_FSAICreate()
    /* solver params */
    HYPRE_Int            max_iterations;
    HYPRE_Real           tolerance;
-   HYPRE_Int		*comm_info;
+   HYPRE_Int		      *comm_info;
 
    /* log info */
    HYPRE_Int            logging;
@@ -91,6 +91,14 @@ hypre_FSAICreate()
    hypre_FSAISetPrintLevel(fsai_data, print_level);
    hypre_FSAISetPrintFileName(fsai_data, log_file_name);
    hypre_FSAISetDebugFlag(fsai_data, debug_flag);
+
+   /* Create and initialize G_mat */
+
+   hypre_CSRMatrix *G_mat                       = hypre_ParFSAIDataGmat(fsai_data);
+   HYPRE_Int       num_rows                     = hypre_ParCSRMatrixGlobalNumRows(A);
+   G_mat                                        = hypre_CSRMatrixCreate(num_rows, num_rows, num_rows*max_steps*max_step_size);
+
+   hypre_CSRMatrixInitialize_v2(G, 0, hypre_CSRMatrixMemoryLocation(G));
 
    HYPRE_ANNOTATE_FUNC_END;
 
