@@ -427,7 +427,11 @@ main( hypre_int argc,
 
    /* default execution policy and memory space */
    HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
+#if defined(HYPRE_USING_GPU)
    HYPRE_MemoryLocation  memory_location     = HYPRE_MEMORY_DEVICE;
+#else
+   HYPRE_MemoryLocation  memory_location     = HYPRE_MEMORY_HOST;
+#endif
 
 #ifdef HYPRE_USING_DEVICE_POOL
    /* device pool allocator */

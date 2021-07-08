@@ -24,7 +24,7 @@
 /* GMRES_DEVELOPMENT will be removed by the time development is finished/merged*/
 
 #define GMRES_DEVELOPMENT 1
-#define GMRES_DEBUG 0
+#define GMRES_DEBUG 1
 
 #if GMRES_DEVELOPMENT
 void
@@ -136,7 +136,8 @@ PrintVector(hypre_ParVector *x)
 
    HYPRE_Real *tmp_data = hypre_VectorData(hypre_ParVectorLocalVector(x));
    HYPRE_Int   n        = hypre_VectorSize(hypre_ParVectorLocalVector(x));
-   for (HYPRE_Int k = 0; k < n; k++)
+   HYPRE_Int k;
+   for (k = 0; k < n; k++)
    {
       printf("%.15f\n", tmp_data[k]);
    }
@@ -145,7 +146,8 @@ PrintVector(hypre_ParVector *x)
 void
 Printvector(HYPRE_Int n, HYPRE_Real *x)
 {
-   for (HYPRE_Int i = 0; i < n; i++)
+   HYPRE_Int i;
+   for (i = 0; i < n; i++)
    {
       printf("%f\n", x[i]);
    }
@@ -154,9 +156,10 @@ Printvector(HYPRE_Int n, HYPRE_Real *x)
 void
 PrintMatrix(HYPRE_Int m, HYPRE_Int n, HYPRE_Real *x)
 {
-   for (HYPRE_Int i = 0; i < m; i++)
+   HYPRE_Int i,j;
+   for (i = 0; i < m; i++)
    {
-      for (HYPRE_Int j = 0; j < n; j++)
+      for (j = 0; j < n; j++)
       {
          printf("%.15f ", x[i + j * m]);
       }
@@ -176,11 +179,12 @@ find_next_lambda(HYPRE_Int   neigs,
    HYPRE_Real maxval   = -DBL_MAX;
    HYPRE_Real res_real = -1;
    HYPRE_Real res_imag = -1;
-   for (HYPRE_Int i = 0; i < neigs; i++)
+   HYPRE_Int i,j;
+   for (i = 0; i < neigs; i++)
    {
       HYPRE_Real pd = 0;
 
-      for (HYPRE_Int j = 0; j <= d; j++)
+      for (j = 0; j <= d; j++)
       {
          HYPRE_Real diff = sqrt(pow(eig_real[i] - out_real[j], 2) + pow(eig_imag[i] - out_imag[j], 2));
          pd              = pd + log(diff);
@@ -204,9 +208,8 @@ leja_ordering(HYPRE_Int neigs, HYPRE_Real *eig_real, HYPRE_Real *eig_imag, HYPRE
 {
    HYPRE_Real maxabs     = 0;
    HYPRE_Int  ind_maxabs = -1;
-   //printf("Leja ordering: %i\n", neigs);
-
-   for (HYPRE_Int i = 0; i < neigs; i++)
+   HYPRE_Int i;
+   for (i = 0; i < neigs; i++)
    {
       HYPRE_Real absval = sqrt(eig_real[i] * eig_real[i] + eig_imag[i] * eig_imag[i]);
       if ((absval > maxabs) && (eig_imag[i] >= 0))
@@ -218,7 +221,7 @@ leja_ordering(HYPRE_Int neigs, HYPRE_Real *eig_real, HYPRE_Real *eig_imag, HYPRE
    out_real[0] = eig_real[ind_maxabs];
    out_imag[0] = eig_imag[ind_maxabs];
 
-   for (HYPRE_Int i = 0; i < neigs - 1; i++)
+   for (i = 0; i < neigs - 1; i++)
    {
       if (out_imag[i] > 0)
       {
@@ -296,6 +299,7 @@ hypre_ParCSRVerifyArnoldi(hypre_ParCSRMatrix *A, hypre_ParVector *b, HYPRE_Int d
 
 
    HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
+   fprintf(stderr, "MEMORY LOCATION: %i / %i\n", memory_location, HYPRE_MEMORY_HOST);
    assert(memory_location == HYPRE_MEMORY_HOST);
 
    /* Allocate space for linear arrays of Hm and Qm */
@@ -448,13 +452,14 @@ hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
 #endif
 
    HYPRE_Int ierr;
+   HYPRE_Int i;
 
    /* H will be the same on every rank, Q is split between all ranks */
    HYPRE_Real **H = hypre_CTAlloc(HYPRE_Real *, degree + 1, HYPRE_MEMORY_HOST);
 
    /* Alloc on same memory as A */
    hypre_ParVector **Q = hypre_CTAlloc(hypre_ParVector *, degree + 1, HYPRE_MEMORY_HOST);
-   for (HYPRE_Int i = 0; i < degree + 1; i++)
+   for (i = 0; i < degree + 1; i++)
    {
       Q[i] = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                    hypre_ParCSRMatrixGlobalNumRows(A),
@@ -463,7 +468,7 @@ hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
       hypre_ParVectorSetPartitioningOwner(Q[i], 0);
    }
 
-   for (HYPRE_Int i = 0; i < degree + 1; i++)
+   for (i = 0; i < degree + 1; i++)
    {
       H[i] = hypre_CTAlloc(HYPRE_Real, degree, HYPRE_MEMORY_HOST);
    }
@@ -483,7 +488,9 @@ hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
    hypre_ParCSRConstructArnoldi(A, b, degree, Q, H);
 
 #if GMRES_DEBUG
+#if !HYPRE_USING_GPU
    //hypre_ParCSRVerifyArnoldi(A, b, degree, Q, H);
+#endif
 #endif
 
    /* Take the row major 2D H and construct a column major linear Hm */
@@ -567,7 +574,7 @@ hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
    PrintMatrix(degree, degree, Hm);
 
    /* Hm should still be upper hessenberg */
-   for (HYPRE_Int i = 0; i < degree; i++)
+   for (i = 0; i < degree; i++)
    {
       for (j = 0; j < degree; j++)
       {
@@ -627,8 +634,7 @@ hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
    }
 
 #if GMRES_DEBUG
-   printf("Unordered\n");
-   for (HYPRE_Int i = 0; i < degree; i++)
+   for (i = 0; i < degree; i++)
    {
       printf("%.18f, %.18f\n", harmonics_real[i], harmonics_imag[i]);
    }
@@ -644,7 +650,7 @@ hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
 #if GMRES_DEBUG
    printf("Leja Ordered\n");
 
-   for (HYPRE_Int i = 0; i < degree; i++)
+   for (i = 0; i < degree; i++)
    {
       printf("%.16f, %.16f\n", ordered_real[i], ordered_imag[i]);
    }
