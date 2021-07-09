@@ -168,6 +168,7 @@ int main(int argc, char** argv) {
 
    local_num_rows = (HYPRE_Int)(last_local_row - first_local_row + 1);
    local_num_cols = (HYPRE_Int)(last_local_col - first_local_col + 1);
+   printf("Num rows: %i, num cols: %i\n", local_num_rows, local_num_cols);
 
 
 
@@ -278,15 +279,28 @@ int main(int argc, char** argv) {
    MPI_Barrier(hypre_MPI_COMM_WORLD);
    fflush(NULL);
    MPI_Barrier(hypre_MPI_COMM_WORLD);
+   FILE* output_file = NULL;
+
+   if(argc > 3) {
+       char buffer[255];
+       snprintf(buffer, sizeof(buffer), "%s.%i.C.csv", argv[3], atoi(argv[2]));
+       output_file = fopen(buffer, "w");
+   }
 
 
    if(0 == myid) {
       hypre_printf("Fin\n");
       for(i = 0; i < global_num_rows; i++) {
+         if(output_file != NULL) {
+           fprintf(output_file, "%.15f\n", global_p[i]);
+         }
          hypre_printf("%.15f\n", global_p[i]);
       }
       hypre_printf("\n");
       hypre_TFree(global_p, HYPRE_MEMORY_HOST);
+   }
+   if(output_file != NULL) {
+    fclose(output_file);
    }
 
    MPI_Finalize();
