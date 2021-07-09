@@ -117,14 +117,20 @@ mpirun -np 1  ./test_gmres rand.csr 3 > smoother.out.28
 #Rand
 mpirun -np 4  ./test_gmres rand.csr 3 > smoother.out.29
 
+
 mpirun -np 1  ./ij -solver 3 -rlx 19 -n 10 10 10  -gmres_order 3 > smoother.out.30
 
 mpirun -np 4  ./ij -solver 3 -rlx 19 -n 10 10 10  -gmres_order 3 > smoother.out.31
 
+mpirun -np 4  ./test_gmres deg2.csr 2 > smoother.out.32a
+
+mpirun -np 4  ./test_gmres deg2_171.csr 2 > smoother.out.32b
 #Broken 
-#mpirun -np 4  ./ij -solver 3 -rlx 19 -n 10 10 10  -gmres_order 2 > smoother.out.32
+mpirun -np 4  ./ij -solver 3 -rlx 19 -n 10 10 10  -gmres_order 2 > smoother.out.32
 
 #Broken cause the lapack implementation has a bug
 #mpirun -np 4  ./ij -solver 3 -rlx 19 -n 10 10 10  -gmres_order 20 > smoother.out.33
 
-mpirun -np 4  ./ij -solver 3 -rlx 19 -n 10 10 10  -gmres_order 5 -vardifconv -a 10 10 10 > smoother.out.34
+mpirun -np 1  ./test_gmres vardifconv.csr 3 > smoother.out.34
+
+mpirun -np 4  ./ij -solver 3 -rlx 19 -n 10 10 10  -gmres_order 5 -vardifconv -a 10 10 10 > smoother.out.35

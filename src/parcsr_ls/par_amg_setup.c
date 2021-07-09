@@ -3090,9 +3090,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       //else if ((grid_relax_type[1] == 19 || grid_relax_type[2] == 19 || (grid_relax_type[3] == 19)) && (j== (num_levels-1)))
       else if (grid_relax_type[1] == 19 || grid_relax_type[2] == 19 || (grid_relax_type[3] == 19 && j== (num_levels-1)))
       {
-        printf("Relax: %i %i %i %i\n", grid_relax_type[0], grid_relax_type[1],grid_relax_type[2],grid_relax_type[3]);
-          printf("j: %i, num_levels: %i, num_levels-1: %i \n", j, num_levels, num_levels-1);
-          printf("SETUP\n");
+        //printf("Relax: %i %i %i %i\n", grid_relax_type[0], grid_relax_type[1],grid_relax_type[2],grid_relax_type[3]);
+        //  printf("j: %i, num_levels: %i, num_levels-1: %i \n", j, num_levels, num_levels-1);
+        //  printf("SETUP\n");
          HYPRE_Real *coefs_real = NULL;
          HYPRE_Real *coefs_imag = NULL;
          HYPRE_Int gmres_order = hypre_ParAMGDataGMRESOrder(amg_data);

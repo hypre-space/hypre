@@ -70,6 +70,26 @@ do
 done >> ${TNAME}.out
 
 FILES="\
+ ${TNAME}.out.32a\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -344 $i
+done >> ${TNAME}.out
+
+FILES="\
+ ${TNAME}.out.32b\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -172 $i
+done >> ${TNAME}.out
+
+FILES="\
  ${TNAME}.out.30\
  ${TNAME}.out.31\
  ${TNAME}.out.32\
