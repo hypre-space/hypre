@@ -199,7 +199,7 @@ hypre_BoomerAMGBuildModMultipass( hypre_ParCSRMatrix  *A,
       num_passes++;
       if (num_passes > 9) 
       {
-         printf(" Warning!!! outside memory!\n");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC," Warning!!! too many passes! out of range!\n");
          break;
       }
       pass_starts[num_passes] = cnt;
