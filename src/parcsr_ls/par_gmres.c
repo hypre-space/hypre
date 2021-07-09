@@ -24,7 +24,26 @@
 /* GMRES_DEVELOPMENT will be removed by the time development is finished/merged*/
 
 #define GMRES_DEVELOPMENT 1
-#define GMRES_DEBUG 1
+
+typedef enum {
+   DEBUG_CRITICAL=50,
+   DEBUG_INFO=20,
+   DEBUG_VERBOSE=15,
+   DEBUG_DEBUG=10,
+   DEBUG_TRACE=5
+} GMRES_DEBUG_LEVEL;
+
+int GMRES_DEBUG(int lvl) {
+   static int flag = 0;
+   static int level = DEBUG_INFO;
+   if(!flag) {
+      const char* s_level = getenv("GMRES_DEBUG");
+      if(s_level != NULL) {
+         level = atoi(s_level);
+      }
+   }
+   return lvl>=level;
+}
 
 #if GMRES_DEVELOPMENT
 void
@@ -37,18 +56,18 @@ fPrintCSRMatrixCOO(FILE* fd, hypre_CSRMatrix *A)
   HYPRE_Real* values = hypre_CSRMatrixData(A);
   HYPRE_Int nnz = hypre_CSRMatrixNumNonzeros(A);
   fprintf(fd, "%i %i %i %i\n", 0, num_rows, 0, num_cols);
-  for(HYPRE_Int i = 0; i < num_rows; i++) {
-    printf("%i ", I[i]);
-  }
-  printf("\n");
-  for(HYPRE_Int i = 0; i < nnz; i++) {
-    printf("%i ", J[i]);
-  }
-  printf("\n");
-  for(HYPRE_Int i = 0; i < nnz; i++) {
-    printf("%f ", values[i]);
-  }
-  printf("\n");
+  //for(HYPRE_Int i = 0; i < num_rows; i++) {
+  //  printf("%i ", I[i]);
+  //}
+  //printf("\n");
+  //for(HYPRE_Int i = 0; i < nnz; i++) {
+  //  printf("%i ", J[i]);
+  //}
+  //printf("\n");
+  //for(HYPRE_Int i = 0; i < nnz; i++) {
+  //  printf("%f ", values[i]);
+  //}
+  //printf("\n");
 
   for(HYPRE_Int i = 0; i <num_rows; i++) {
     HYPRE_Int num_nnz_in_row = I[i+1]-I[i];
@@ -91,18 +110,18 @@ fPrintCSRMatrixDense(FILE* fd, hypre_CSRMatrix *A)
   HYPRE_Int* J = hypre_CSRMatrixJ(A);
   HYPRE_Real* values = hypre_CSRMatrixData(A);
   HYPRE_Int nnz = hypre_CSRMatrixNumNonzeros(A);
-  for(HYPRE_Int i = 0; i < num_rows; i++) {
-    printf("%i ", I[i]);
-  }
-  printf("\n");
-  for(HYPRE_Int i = 0; i < nnz; i++) {
-    printf("%i ", J[i]);
-  }
-  printf("\n");
-  for(HYPRE_Int i = 0; i < nnz; i++) {
-    printf("%f ", values[i]);
-  }
-  printf("\n");
+  //for(HYPRE_Int i = 0; i < num_rows; i++) {
+  //  printf("%i ", I[i]);
+  //}
+  //printf("\n");
+  //for(HYPRE_Int i = 0; i < nnz; i++) {
+  //  printf("%i ", J[i]);
+  //}
+  //printf("\n");
+  //for(HYPRE_Int i = 0; i < nnz; i++) {
+  //  printf("%f ", values[i]);
+  //}
+  //printf("\n");
   for(HYPRE_Int i = 0; i <num_rows; i++) {
     HYPRE_Int num_nnz_in_row = I[i+1]-I[i];
 
@@ -111,14 +130,14 @@ fPrintCSRMatrixDense(FILE* fd, hypre_CSRMatrix *A)
 
       for(HYPRE_Int k = 0; k <num_nnz_in_row; k++) {
         if(j == J[I[i]+k]) {
-          fprintf(fd, "%.2e", (values[I[i] + k]));
+          fprintf(fd, "%e", (values[I[i] + k]));
           found = 1;
           break;
         }
       }
 
       if(!found) {
-        fprintf(fd, "%.2e",0.0);
+        fprintf(fd, "%e",0.0);
       }
 
       if(j < num_cols-1)
@@ -251,6 +270,30 @@ HYPRE_Int
 hypre_ParCSRConstructArnoldi(
     hypre_ParCSRMatrix *A, hypre_ParVector *b, HYPRE_Int d, hypre_ParVector **Q, HYPRE_Real **H)
 {
+
+if(GMRES_DEBUG(10)) {
+   printf("Arnoldi Input b:\n");
+   PrintVector(b);
+
+   HYPRE_Int num_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+   char buffer[256];
+   sprintf(buffer, "arnoldi.%i.csv", num_rows);
+   FILE* fd = fopen(buffer,"w");
+   fPrintCSRMatrixDense(fd, hypre_ParCSRMatrixDiag(A));
+   fclose(fd);
+
+   sprintf(buffer, "arnoldi.%i.coo", num_rows);
+   fd = fopen(buffer,"w");
+   fPrintCSRMatrixCOO(fd, hypre_ParCSRMatrixDiag(A));
+   fclose(fd);
+
+   sprintf(buffer, "arnoldi.%i.csr", num_rows);
+   fd = fopen(buffer,"w");
+   fPrintCSRMatrixCSR(fd, hypre_ParCSRMatrixDiag(A));
+   fclose(fd);
+}
+
+
    HYPRE_Int  i = 0;
    HYPRE_Int  j = 0;
    HYPRE_Real norm;
@@ -263,10 +306,19 @@ hypre_ParCSRConstructArnoldi(
    norm = 1. / sqrt(norm);
    HYPRE_ParVectorScale(norm, Q[0]);
 
+if(GMRES_DEBUG(10)) {
+   printf("Arnoldi Input q0:\n");
+   PrintVector(Q[0]);
+}
+
    while (i < d)
    {
       i++;
       hypre_ParCSRMatrixMatvec(1, A, Q[i - 1], 0, Q[i]);
+if(GMRES_DEBUG(10)) {
+      printf("Qi q0:\n");
+      PrintVector(Q[i]);
+}
       for (j = 0; j < i; j++)
       {
          HYPRE_ParVectorInnerProd(Q[j], Q[i], &H[j][i - 1]);
@@ -274,6 +326,7 @@ hypre_ParCSRConstructArnoldi(
       }
       HYPRE_ParVectorInnerProd(Q[i], Q[i], &norm);
       norm        = sqrt(norm);
+      printf("norm: %f\n", norm);
       H[i][i - 1] = norm;
       if (norm != 0.0)
       {
@@ -354,49 +407,56 @@ hypre_ParCSRVerifyArnoldi(hypre_ParCSRMatrix *A, hypre_ParVector *b, HYPRE_Int d
       }
    }
 
-#if GMRES_DEBUG
+if(GMRES_DEBUG(DEBUG_VERBOSE))
+{
    printf("Hm\n");
    PrintMatrix(d + 1, d, Hm);
-#endif
+}
 
    HYPRE_Int   dpo   = d + 1;
    HYPRE_Real *QH    = hypre_CTAlloc(HYPRE_Real, (d) * (num_rows), HYPRE_MEMORY_HOST);
    HYPRE_Real  done  = 1.0;
    HYPRE_Real  dzero = 0.0;
 
-#if GMRES_DEBUG
+if(GMRES_DEBUG(DEBUG_VERBOSE))
+{
    printf("Num rows: %i\n", num_rows);
    printf("H: %p ", Hm);
-#endif
+}
 
    hypre_dgemm("N", "N", &num_rows, &d, &dpo, &done, Qm, &num_rows, Hm, &dpo, &dzero, QH, &num_rows);
 
-#if GMRES_DEBUG
+if(GMRES_DEBUG(DEBUG_VERBOSE))
+{
    printf("QH - AQ: %f\n", QH[0] - AQ[0]);
    PrintMatrix(num_rows, d, AQ);
    printf("\n\n\n");
 
    PrintMatrix(num_rows, d, QH);
    printf("\n\n\n");
-#endif
+}
 
-#if GMRES_DEBUG
+if(GMRES_DEBUG(25))
+{
    HYPRE_Int errs = 0;
+   HYPRE_Real eps = 1e-9 * num_rows;
+   printf("Eps: %e\n", eps);
    for (k = 0; k < num_rows; k++)
    {
       for (j = 0; j < d; j++)
       {
-         printf("%e ", fabs(QH[j * num_rows + k] - AQ[j * num_rows + k]));
-         if (fabs(QH[j * num_rows + k] - AQ[j * num_rows + k]) > 1e-13)
+         if (fabs(QH[j * num_rows + k] - AQ[j * num_rows + k]) > eps)
          {
+            printf("%e ", fabs(QH[j * num_rows + k] - AQ[j * num_rows + k]));
             errs++;
          }
       }
-      printf("\n");
    }
-   assert(fabs(QH[0] - AQ[0]) < 1e-13);
+   fflush(NULL);
+   printf("%f\n",QH[0] - AQ[0]);
+   assert(fabs(QH[0] - AQ[0]) < eps);
    assert(errs == 0);
-#endif
+}
    hypre_ParVectorDestroy(Qtmp);
 
    hypre_Free(Hm, HYPRE_MEMORY_HOST);
@@ -431,11 +491,11 @@ hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
    HYPRE_Int num_cols = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
    //printf("Num rows: %i cols: %i\n",num_rows,num_cols);
    assert(num_rows == num_cols);
-   assert(degree != 2); //Currently there is a bug in the degree = 2 case
-#if 0
+   printf("Pre print\n");
+   //assert(degree != 2); //Currently there is a bug in the degree = 2 case
+if(GMRES_DEBUG(10)) {
    char buffer[256];
    sprintf(buffer, "mat.%i.csv", num_rows);
-   fPrintCSRMatrixDense(stdout, hypre_ParCSRMatrixDiag(A));
    FILE* fd = fopen(buffer,"w");
    fPrintCSRMatrixDense(fd, hypre_ParCSRMatrixDiag(A));
    fclose(fd);
@@ -449,8 +509,9 @@ hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
    fd = fopen(buffer,"w");
    fPrintCSRMatrixCSR(fd, hypre_ParCSRMatrixDiag(A));
    fclose(fd);
-#endif
+}
 
+   printf("Post print\n");
    HYPRE_Int ierr;
    HYPRE_Int i;
 
@@ -481,17 +542,16 @@ hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
                                               hypre_ParCSRMatrixRowStarts(A));
     hypre_ParVectorInitialize(b);
     hypre_ParVectorSetPartitioningOwner(b, 0);
-    HYPRE_ParVectorSetRandomValues(b, 1);
+    HYPRE_ParVectorSetRandomValues(b, num_rows);
    }
 
    /* Construct the Arnoldi Basis (we only use H) */
    hypre_ParCSRConstructArnoldi(A, b, degree, Q, H);
 
-#if GMRES_DEBUG
-#if !HYPRE_USING_GPU
-   //hypre_ParCSRVerifyArnoldi(A, b, degree, Q, H);
-#endif
-#endif
+if(GMRES_DEBUG(25))
+{
+   hypre_ParCSRVerifyArnoldi(A, b, degree, Q, H);
+}
 
    /* Take the row major 2D H and construct a column major linear Hm */
    HYPRE_Real *Hm = hypre_CTAlloc(HYPRE_Real, (degree) * (degree), HYPRE_MEMORY_HOST);
@@ -539,10 +599,11 @@ hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
    hypre_dgetrf(&degree, &degree, Htrans, &degree, piv, &ierr);
    hypre_dgetrs("N", &degree, &ione, Htrans, &degree, piv, f, &degree, &ierr);
 
-#if GMRES_DEBUG
+if(GMRES_DEBUG(25))
+{
    printf("F: \n");
    Printvector(degree, f);
-#endif
+}
 
    // hypre_dgesv(&degree, &ione, Hcpy, &degree, piv, f, &degree, &ierr);
    if (ierr != 0)
@@ -559,10 +620,11 @@ hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
 
    /* Now we want to find the harmonic eigenvalues to use as coefficients */
 
-#if GMRES_DEBUG
+if(GMRES_DEBUG(5))
+{
    printf("Blah: \n");
    PrintMatrix(degree, degree, Hm);
-#endif
+}
 
    HYPRE_Real *harmonics_real = hypre_CTAlloc(HYPRE_Real, degree, HYPRE_MEMORY_HOST);
    HYPRE_Real *harmonics_imag = hypre_CTAlloc(HYPRE_Real, degree, HYPRE_MEMORY_HOST);
@@ -570,8 +632,10 @@ hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
    HYPRE_Int  lwork;
    HYPRE_Real wkopt;
 
-#if GMRES_DEBUG
+if(GMRES_DEBUG(5))
+{
    PrintMatrix(degree, degree, Hm);
+}
 
    /* Hm should still be upper hessenberg */
    for (i = 0; i < degree; i++)
@@ -584,7 +648,6 @@ hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
          }
       }
    }
-#endif
 
    char cN = 'N';
    char cE = 'E';
@@ -633,12 +696,12 @@ hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
       hypre_assert(ierr);
    }
 
-#if GMRES_DEBUG
+if(GMRES_DEBUG(DEBUG_VERBOSE)) {
    for (i = 0; i < degree; i++)
    {
       printf("%.18f, %.18f\n", harmonics_real[i], harmonics_imag[i]);
    }
-#endif
+}
 
    /* Now that the have the eigenvalues, reorder them according to Leja ordering */
 
@@ -647,7 +710,7 @@ hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
 
    leja_ordering(degree, harmonics_real, harmonics_imag, ordered_real, ordered_imag);
 
-#if GMRES_DEBUG
+if(GMRES_DEBUG(DEBUG_VERBOSE)) {
    printf("Leja Ordered\n");
 
    for (i = 0; i < degree; i++)
@@ -667,7 +730,7 @@ hypre_ParCSRRelax_GMRES_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
         exit(-1);
       }
    }
-#endif
+}
 
    *coefs_real_ptr = ordered_real;
    *coefs_imag_ptr = ordered_imag;
@@ -694,10 +757,10 @@ apply_GMRES_poly(hypre_ParCSRMatrix *A,
                  hypre_ParVector    *p)
 {
    HYPRE_ParVectorCopy(x, prod);
-#if GMRES_DEBUG
+if(GMRES_DEBUG(DEBUG_VERBOSE)) {
    printf("Prod\n");
    PrintVector(prod);
-#endif
+}
 
    HYPRE_Int i = 0;
    while (i < order)
@@ -705,79 +768,97 @@ apply_GMRES_poly(hypre_ParCSRMatrix *A,
       if (coefs_imag[i] == 0)
       {
          HYPRE_Real alpha = 1 / coefs_real[i];
-#if GMRES_DEBUG
+if(GMRES_DEBUG(DEBUG_VERBOSE)) {
          printf("Alpha: :%f\n", alpha);
-#endif
+}
          hypre_ParVectorAxpy(alpha, prod, p);
-#if GMRES_DEBUG
+if(GMRES_DEBUG(DEBUG_VERBOSE)) {
          printf("P\n");
          PrintVector(p);
-#endif
+
+         //printf("A\n");
+         //fPrintCSRMatrixDense(stdout, hypre_ParCSRMatrixDiag(A));
          /* prod <- prod - alpha*mv(prod) */
-         hypre_ParCSRMatrixMatvec(-alpha, A, prod, 1.0, prod);
-#if GMRES_DEBUG
+         //hypre_ParCSRMatrixMatvec(-alpha, A, prod, 1.0, prod);
+         printf("pre prod (prod)\n");
+         PrintVector(prod);
+}
+         hypre_ParCSRMatrixMatvecOutOfPlace(-alpha, A, prod, 0.0, prod, tmp);
+if(GMRES_DEBUG(DEBUG_VERBOSE)) {
+         printf("alpha mv(prod)\n");
+         PrintVector(tmp);
+}
+         hypre_ParVectorAxpy(1, tmp, prod);
+if(GMRES_DEBUG(DEBUG_VERBOSE)) {
          printf("Prod\n");
          PrintVector(prod);
-#endif
+}
          i++;
       }
       else
       {
+if(GMRES_DEBUG(DEBUG_VERBOSE)) {
+         printf("Doing copmlexing\n");
+}
          HYPRE_Real a = coefs_real[i];
          HYPRE_Real b = coefs_imag[i];
-#if GMRES_DEBUG
+if(GMRES_DEBUG(DEBUG_VERBOSE)) {
          printf("a b: :%f %f\n", a, b);
-#endif
+}
 
          hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A, prod, 2 * a, prod, tmp);
-#if GMRES_DEBUG
+if(GMRES_DEBUG(DEBUG_VERBOSE)) {
          printf("tmp\n");
          PrintVector(tmp);
-#endif
+}
 
          HYPRE_Real alpha = 1 / (a * a + b * b);
-#if GMRES_DEBUG
+if(GMRES_DEBUG(DEBUG_VERBOSE)) {
          printf("alpha: :%f \n", alpha);
-#endif
+}
 
          hypre_ParVectorAxpy(alpha, tmp, p);
-#if GMRES_DEBUG
+if(GMRES_DEBUG(DEBUG_VERBOSE)) {
          printf("p\n");
          PrintVector(p);
-#endif
+}
 
          if (i <= order - 2)
          {
-#if GMRES_DEBUG
+if(GMRES_DEBUG(DEBUG_VERBOSE)) {
+            printf("Doing dual or something idk\n");
+}
+if(GMRES_DEBUG(DEBUG_VERBOSE)) {
          printf("theta: :%f \n", alpha);
          printf("pre prod:\n");
          PrintVector(prod);
          printf("tmp");
          PrintVector(tmp);
-#endif
+}
             hypre_ParCSRMatrixMatvec(-alpha, A, tmp, 1.0, prod);
-#if GMRES_DEBUG
+if(GMRES_DEBUG(DEBUG_VERBOSE)) {
          printf("prod:\n");
          PrintVector(prod);
-#endif
+}
          }
          i += 2;
       }
    }
    if (coefs_imag[order - 1] == 0)
    {
-#if GMRES_DEBUG
+if(GMRES_DEBUG(DEBUG_VERBOSE)) {
+            printf("Doing extra or something idk\n");
       printf("Extra\n");
       printf("%f \n", 1.0 / coefs_real[order - 1]);
       printf("Prod\n");
       PrintVector(prod);
-#endif
+}
       hypre_ParVectorAxpy(1.0 / coefs_real[order - 1], prod, p);
 
-#if GMRES_DEBUG
+if(GMRES_DEBUG(DEBUG_VERBOSE)) {
       printf("p\n");
       PrintVector(p);
-#endif
+}
    }
    return hypre_error_flag;
 }
