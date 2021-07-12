@@ -34,6 +34,8 @@ void * hypre_ADSCreate()
    ads_data -> A_omega = 1.0;          /* SSOR coefficient */
    ads_data -> A_cheby_order = 2;      /* Cheby: order (1 -4 are vaild) */
    ads_data -> A_cheby_fraction = 0.3; /* Cheby: fraction of spectrum to smooth */
+   ads_data -> A_poly_coefs = NULL;    /* Cheby: Coefficienst of polynomial */
+   ads_data -> A_diags = NULL;         /* Cheby: Diagonal elements */
 
    ads_data -> B_C_cycle_type = 11;    /* a 5-level multiplicative solver */
    ads_data -> B_C_coarsen_type = 10;  /* HMIS coarsening */
@@ -152,6 +154,11 @@ HYPRE_Int hypre_ADSDestroy(void *solver)
       hypre_ParVectorDestroy(ads_data -> r2);
    if (ads_data -> g2)
       hypre_ParVectorDestroy(ads_data -> g2);
+
+   if (ads_data -> A_poly_coefs)
+      hypre_TFree(ads_data -> A_poly_coefs, HYPRE_MEMORY_HOST);
+   if (ads_data -> A_diags)
+      hypre_TFree(ads_data -> A_diags, hypre_ParCSRMatrixMemoryLocation(ads_data->A));
 
    hypre_SeqVectorDestroy(ads_data -> A_l1_norms);
 
@@ -907,6 +914,16 @@ HYPRE_Int hypre_ADSSetup(void *solver,
       hypre_ParCSRMaxEigEstimateCG(ads_data->A, 1, 10,
                                    &ads_data->A_max_eig_est,
                                    &ads_data->A_min_eig_est);
+
+      hypre_ParCSRRelax_Cheby_Setup(ads_data->A,
+          ads_data->A_max_eig_est,
+          ads_data->A_min_eig_est,
+          ads_data->A_cheby_fraction,
+          ads_data->A_cheby_order,
+          1,
+          0,
+          &ads_data->A_poly_coefs,
+          &ads_data->A_diags);
    }
 
    /* Create the AMS solver on the range of C^T */
@@ -1210,6 +1227,8 @@ HYPRE_Int hypre_ADSSolve(void *solver,
    hypre_ParVector *ri[5], *gi[5];
 
    hypre_ParVector *z = NULL;
+   hypre_ParVector *r = NULL;
+   hypre_ParVector *p = NULL;
 
    Ai[0] = ads_data -> A_C;    Pi[0] = ads_data -> C;
    Ai[1] = ads_data -> A_Pi;   Pi[1] = ads_data -> Pi;
@@ -1237,6 +1256,18 @@ HYPRE_Int hypre_ADSSolve(void *solver,
                                 hypre_ParCSRMatrixRowStarts(A));
       hypre_ParVectorInitialize(z);
       hypre_ParVectorSetPartitioningOwner(z,0);
+
+      r = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+                                hypre_ParCSRMatrixGlobalNumRows(A),
+                                hypre_ParCSRMatrixRowStarts(A));
+      hypre_ParVectorInitialize(r);
+      hypre_ParVectorSetPartitioningOwner(r,0);
+
+      p = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+                                hypre_ParCSRMatrixGlobalNumRows(A),
+                                hypre_ParCSRMatrixRowStarts(A));
+      hypre_ParVectorInitialize(p);
+      hypre_ParVectorSetPartitioningOwner(p,0);
    }
 
    if (ads_data -> print_level > 0)
@@ -1326,7 +1357,11 @@ HYPRE_Int hypre_ADSSolve(void *solver,
                                ads_data -> r0,
                                ads_data -> g0,
                                cycle,
-                               z);
+                               z,
+                               r,
+                               p,
+                               ads_data -> A_poly_coefs,
+                               ads_data -> A_diags);
 
       /* Compute new residual norms */
       if (ads_data -> maxit > 1)
@@ -1363,6 +1398,13 @@ HYPRE_Int hypre_ADSSolve(void *solver,
 
    if (z)
       hypre_ParVectorDestroy(z);
+
+   if (r)
+      hypre_ParVectorDestroy(r);
+
+   if (p)
+      hypre_ParVectorDestroy(p);
+
 
    return hypre_error_flag;
 }

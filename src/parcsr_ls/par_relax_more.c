@@ -412,6 +412,11 @@ ratio indicates the percentage of the whole spectrum to use (so .5
 means half, and .1 means 10percent)
 *******************************************************************************/
 
+/**
+ * @deprecated This function has been deprecated. Please use 
+ * hypre_ParCSRRelax_Cheby_Setup and hypre_ParCSRRelax_Cheby_Solve instead,
+ * which reduces redundant allocs and setups for each call.
+ */
 HYPRE_Int
 hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with */
                         hypre_ParVector    *f, /* right-hand side */
