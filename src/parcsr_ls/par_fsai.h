@@ -31,7 +31,7 @@ typedef struct
    /* log info */
    HYPRE_Int            logging;
    HYPRE_Int            num_iterations;
-   HYPRE_Vector         residual;           /* available if logging > 1 */
+   HYPRE_ParVector      *residual;           /* available if logging > 1 */
    HYPRE_Real           rel_resnorm;
 
    /* output params */

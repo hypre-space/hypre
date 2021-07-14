@@ -30,7 +30,8 @@ hypre_FSAISolve( void   *fsai_vdata,
 
    /* Data structure variables */
    hypre_ParCSRMatrix   *G                   = hypre_ParFSAIDataGmat(fsai_data);
-   hypre_Vector         *r                   = hypre_ParFSAIResidual(fsai_data);
+   /* XXX: Only want the values of r for this process - how? */
+   hypre_ParVector      *r                   = hypre_ParFSAIResidual(fsai_data);
    HYPRE_Int            tol                  = hypre_ParFSAITolerance(fsai_data);
    HYPRE_Int            max_iter             = hypre_ParFSAIMaxIterations(fsai_data);
    HYPRE_Int            print_level          = hypre_ParFSAIDataPrintLevel(fsai_data);
@@ -52,6 +53,11 @@ hypre_FSAISolve( void   *fsai_vdata,
    HYPRE_Vector         *Ap                = hypre_SeqVectorCreate(n);
    HYPRE_Vector         *LinvAp            = hypre_SeqVectorCreate(n);
    HYPRE_Real           alpha, beta, IP_z_old, IP_z_new;
+
+   hypre_SeqVectorInitialize(z);
+   hypre_SeqVectorInitialize(p);
+   hypre_SeqVectorInitialize(Ap);
+   hypre_SeqVectorInitialize(LinvAp);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -104,5 +110,10 @@ hypre_FSAISolve( void   *fsai_vdata,
    hypre_SeqVectorCopy(z, r);   
  
    HYPRE_ANNOTATE_FUNC_END;
+
+   hypre_SeqVectorDestroy(z);
+   hypre_SeqVectorDestroy(p);
+   hypre_SeqVectorDestroy(Ap);
+   hypre_SeqVectorDestroy(LinvAp);
 
 }

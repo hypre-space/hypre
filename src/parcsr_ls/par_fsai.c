@@ -93,7 +93,7 @@ hypre_FSAICreate()
    hypre_FSAISetPrintFileName(fsai_data, log_file_name);
    hypre_FSAISetDebugFlag(fsai_data, debug_flag);
 
-   /* Create and initialize G_mat */
+   /* Create and initialize G_mat and residual  */
 
    G_mat                                        = hypre_ParCSRMatrixCreate (comm_info, 
                                                   hypre_ParCSRMatrixGlobalNumRows(A),   
@@ -106,6 +106,10 @@ hypre_FSAICreate()
    hypre_ParCSRMatrixInitialize(G);
    hypre_ParFSAIDataGmat(fsai_data)             = G_mat;
 
+   residual                                     = hypre_ParVectorCreate(comm_info, hypre_ParCSRMatrixGlobalNumRows(A), NULL);
+   hypre_ParVectorInitialize(residual);
+   hypre_ParFSAIDataResidual(fsai_data)         = residual;
+   
    HYPRE_ANNOTATE_FUNC_END;
 
    return (void *) fsai_data;
