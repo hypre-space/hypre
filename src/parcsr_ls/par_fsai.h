@@ -27,30 +27,17 @@ typedef struct
    HYPRE_Int            max_iterations;      /* Maximum iterations run for the solver */
    HYPRE_Real           tolerance;    	      /* Tolerance for the solver */
    HYPRE_Int            *comm_info; 
-   HYPRE_ParVector      *F;
-   HYPRE_ParVector      *U; 
-   hypre_ParCSRMatrix   *Amat;               
     
    /* log info */
    HYPRE_Int            logging;
    HYPRE_Int            num_iterations;
-   HYPRE_Real           *rel_res_norms;
-   HYPRE_Real           final_rel_res_norm;
-   HYPRE_ParVector      *residual;           /* available if logging > 1 */
+   HYPRE_Vector         residual;           /* available if logging > 1 */
+   HYPRE_Real           rel_resnorm;
 
    /* output params */
    HYPRE_Int            print_level;
    char                 log_file_name[256];
    HYPRE_Int            debug_flag;   
-
-   /* Temporary vectors for the solve phase */
-   /* XXX: Unsure why these have to go in the FSAI data structure, but ILU has them */
-   hypre_ParVector      *Utemp; 
-   hypre_ParVector      *Ftemp; 
-   hypre_ParVector      *Xtemp; 
-   hypre_ParVector      *Ytemp; 
-   HYPRE_Real           *uext;
-   HYPRE_Real           *fext;
 
 } hypre_ParFSAIData;
 
@@ -71,21 +58,11 @@ typedef struct
 #define hypre_ParFSAIDataMaxIterations(fsai_data)           ((fsai_data) -> max_iterations)
 #define hypre_ParFSAIDataTolerance(fsai_data)               ((fsai_data) -> tolerance)
 #define hypre_ParFSAIDataCommInfo(fsai_data)                ((fsai_data) -> comm_info)
-#define hypre_ParFSAIDataUTemp(fsai_data)                   ((fsai_data) -> UTemp)
-#define hypre_ParFSAIDataFTemp(fsai_data)                   ((fsai_data) -> FTemp)
-#define hypre_ParFSAIDataXTemp(fsai_data)                   ((fsai_data) -> XTemp)
-#define hypre_ParFSAIDataYTemp(fsai_data)                   ((fsai_data) -> YTemp)
-#define hypre_ParFSAIDataUExt(fsai_data)                    ((fsai_data) -> UExt)
-#define hypre_ParFSAIDataFExt(fsai_data)                    ((fsai_data) -> FExt)
-#define hypre_ParFSAIDataF(fsai_data)                       ((fsai_data) -> F)
-#define hypre_ParFSAIDataU(fsai_data)                       ((fsai_data) -> U)
-#define hypre_ParFSAIDataAmat(fsai_data)                    ((fsai_data) -> Amat)
    
 /* log info data */
 #define hypre_ParFSAIDataLogging(fsai_data)                 ((fsai_data) -> logging)
 #define hypre_ParFSAIDataNumIterations(fsai_data)           ((fsai_data) -> num_iterations)
-#define hypre_ParFSAIDataRelativeResidualNorms(fsai_data)   ((fsai_data) -> rel_res_norms)
-#define hypre_ParFSAIDataFinalRelResidualNorm(fsai_data)    ((fsai_data) -> final_rel_res_norm)
+#define hypre_ParFSAIDataRelResNorm(fsai_data)              ((fsai_data) -> rel_resnorm)
 #define hypre_ParFSAIDataResidual(fsai_data)                ((fsai_data) -> residual)
 
 /* output parameters */
