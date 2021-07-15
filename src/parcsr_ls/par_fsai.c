@@ -27,6 +27,7 @@ hypre_FSAICreate()
    /* solver params */
    HYPRE_Int            max_iterations;
    HYPRE_Real           tolerance;
+   HYPRE_Real           omega;
    HYPRE_Int		      *comm_info;
 
    /* log info */
@@ -85,6 +86,7 @@ hypre_FSAICreate()
 
    hypre_FSAISetMaxIterations(fsai_data, max_iterations);
    hypre_FSAISetTolerance(fsai_data, tolerance);
+   hypre_FSAISetOmega(fsai_data, omega);
 
    hypre_FSAISetLogging(fsai_data, logging);
    hypre_FSAISetNumIterations(fsai_data, num_iterations);
@@ -263,6 +265,29 @@ hypre_FSAISetTolerance( void *data,
    }
 
    hypre_ParFSAIDataTolerance(fsai_data) = tolerance;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_FSAISetOmega( void *data,
+                          HYPRE_Real omega   )
+{
+   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
+
+   if (!fsai_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (omega < 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   hypre_ParFSAIDataOmega(fsai_data) = omega;
 
    return hypre_error_flag;
 }
@@ -471,6 +496,23 @@ hypre_FSAIGetTolerance( void     *data,
    }
 
    *tolerance = hypre_ParFSAIDataTolerance(fsai_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_FSAIGetOmega( void     *data,
+                    HYPRE_Real     *omega )
+{
+   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
+
+   if (!fsai_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   *omega = hypre_ParFSAIDataOmega(fsai_data);
 
    return hypre_error_flag;
 }

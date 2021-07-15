@@ -26,8 +26,9 @@ typedef struct
    /* Solver Problem Data */
    HYPRE_Int            max_iterations;      /* Maximum iterations run for the solver */
    HYPRE_Real           tolerance;    	      /* Tolerance for the solver */
+   HYPRE_Real           omega;               /* Step size for Preconditioned Richardson Solver */
    HYPRE_Int            *comm_info; 
-    
+      
    /* log info */
    HYPRE_Int            logging;
    HYPRE_Int            num_iterations;
@@ -58,6 +59,7 @@ typedef struct
 #define hypre_ParFSAIDataMaxIterations(fsai_data)           ((fsai_data) -> max_iterations)
 #define hypre_ParFSAIDataTolerance(fsai_data)               ((fsai_data) -> tolerance)
 #define hypre_ParFSAIDataCommInfo(fsai_data)                ((fsai_data) -> comm_info)
+#define hypre_ParFSAIDataOmega(fsai_data)                   ((fsai_data) -> omega)
    
 /* log info data */
 #define hypre_ParFSAIDataLogging(fsai_data)                 ((fsai_data) -> logging)

@@ -36,11 +36,11 @@ hypre_FSAISolve( void   *fsai_vdata,
    HYPRE_Int            max_iter             = hypre_ParFSAIMaxIterations(fsai_data);
    HYPRE_Int            print_level          = hypre_ParFSAIDataPrintLevel(fsai_data);
    HYPRE_Int            logging              = hypre_ParFSAIDataLogging(fsai_data);
-   HYPRE_Real           rel_resnorm          = hypre_ParFSAIDataRelResNorm(fsai_data);
 
    /* Local variables */
 
    HYPRE_Int            iter, num_procs, my_id;
+   HYPRE_Real           old_rn, new_rn, rel_resnorm;
    HYPRE_CSRMatrix      *A_diag     = hypre_ParCSRMatrixDiag(A);
    HYPRE_CSRMatrix      *G_diag     = hypre_ParCSRMatrixDiag(G);
    HYPRE_CSRMatrix      *G_diag_T;
@@ -48,16 +48,13 @@ hypre_FSAISolve( void   *fsai_vdata,
    HYPRE_Int            n = hypre_CSRMatrixNumRows(A_diag);
 
    hypre_CSRMatrixTranspose(G_diag, &G_diag_T, 1);
-   HYPRE_Vector         *z                 = hypre_SeqVectorCreate(n);
-   HYPRE_Vector         *p                 = hypre_SeqVectorCreate(n);
-   HYPRE_Vector         *Ap                = hypre_SeqVectorCreate(n);
-   HYPRE_Vector         *LinvAp            = hypre_SeqVectorCreate(n);
-   HYPRE_Real           alpha, beta, IP_z_old, IP_z_new;
+   HYPRE_Vector         *x_work            = hypre_SeqVectorCreate(n);
+   HYPRE_Vector         *r_work            = hypre_SeqVectorCreate(n);
+   HYPRE_Vector         *r_old             = hypre_SeqVectorCreate(n);
 
-   hypre_SeqVectorInitialize(z);
-   hypre_SeqVectorInitialize(p);
-   hypre_SeqVectorInitialize(Ap);
-   hypre_SeqVectorInitialize(LinvAp);
+   hypre_SeqVectorInitialize(x_work);
+   hypre_SeqVectorInitialize(r_work);
+   hypre_SeqVectorInitialize(r_old);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -68,52 +65,57 @@ hypre_FSAISolve( void   *fsai_vdata,
 
 
    /*----------------------------------------------------------------- 
-    * Split PCG Main solver loop - Do 1 iteration at least 
-    * Reference: "Interative Methods for Sparse Linear Systems"
-    * By Yousef Saad. Page 298, Algorithm 9.2 
+    * Preconditioned Richardson - Main solver loop 
+    * x(k+1) = x(k) + omega * (G^T*G) * (b - A*x(k))
     * ----------------------------------------------------------------*/
-   iter = 0;
+
+   if(my_id == 0 && print_level > 1)
+      hypre_printf("\n\n FSAI SOLVER SOLUTION INFO:\n");
+
+   iter               = 0;
    rel_resnorm        = 1.0;
    hypre_SeqVectorSetConstantValues(x, 0.0);             /* Set initial guess x_0 */
    hypre_ParCSRMatvec(-1.0, A_diag, x, 1.0, b, r);       /* r_0 = b - Ax_0 */
-   hypre_ParCSRMatvec(1.0, G_diag, r, 0.0, NULL, z);     /* z_0 = Gr_0 */
-   hypre_ParCSRMatvec(1.0, G_diag_T, z, 0.0, NULL, p);   /* p_0 = G^T*z_0 */
-   IP_z_old = hypre_SeqVectorInnerProd(z, z);
-
+   if(my_id == 0 && print_level > 1)
+   {
+      hypre_printf("                old         new         relative\n");
+      hypre_printf("    iter #      res norm    res norm    res norm\n");
+      hypre_printf("    --------    --------    --------    --------\n");
+   }
    while(rel_resnorm >= tol && iter < max_iter)
    {
-   
-      /* alpha(j) = (z, z)/(Ap, p) */
-      hypre_ParCSRMatvec(1.0, A_diag, p, 0.0, NULL, Ap);
-      alpha = IP_z_old/hypre_SeqVectorInnerProd(Ap, p);
+    
+      /* Update solution vector */  
+      hypre_ParCSRMatvec(-1.0, A_diag, x, 1.0, b, x_work);           /* x_work = b - A*x(k) */     
+      hypre_ParCSRMatvec(1.0, G_diag, x_work, 0.0, NULL, x_work);    /* x_work = G*x_work */
+      hypre_ParCSRMatvec(1.0, G_diag_T, x_work, 0.0, NULL, x_work);  /* x_work = G^T*x_work */
+      hypre_SeqVectorAxpy(omega, x_work, x);                         /* x(k+1) = x(k) = omega*x_work */
 
-      /* x(j+1) = x(j) + alpha(j)*p(j) */
-      hypre_SeqVectorAxpy(alpha, x, p);
+      /* Compute residual */
+      old_rn             = hypre_SeqVectorInnerProd(r, r);
+      hypre_ParCSRMatVec(1.0, G_diag, r, 0.0, NULL, r_work);
+      hypre_ParCSRMatVec(1.0, G_diag_T, r_work, 0.0, NULL, r_work);
+      hypre_ParCSRMatVec(1.0, A_diag, r_work, 0.0, NULL, r_work);
+      hypre_SeqVectorAxpy(-1.0, r_work, r);
+      new_rn             = hypre_SeqVectorInnerProd(r, r);
 
-      /* z(j+1) = z(j) - alpha(j)*G*A*p(j) */
-      hypre_ParCSRMatvec(alpha, G_diag, Ap, 0.0, NULL, LinvAp);
-      hypre_SeqVectorAxpy(-1.0, z, LinvAp);
+      /* Compute rel_resnorm */
+      rel_resnorm = new_rn/old_rn;
 
-      /* rel_resnorm(j) = (z(j+1), z(j+1))/(z(j), z(j)) */
-      IP_z_new = hypre_SeqVectorInnerProd(z, z);
-      rel_resnorm = IP_z_new/IP_z_old;
-      IP_z_old = IP_z_new; 
-
-      /* p(j+1) = G^T*z(j+1) + rel_resnorm(j)*p(j) */
-      hypre_ParCSRMatvec(1.0, G_diag_T, z, rel_resnorm, p, p);
+      if(my_id == 0 && print_level > 1)
+         hypre_printf("    %e          %e          %e          %e\n", iter, old_rn, new_rn, rel_resnorm);
 
       iter++;
 
    }
 
    hypre_ParFSAIDataNumIterations(fsai_data) = iter;
-   hypre_SeqVectorCopy(z, r);   
+   hypre_ParFSAIDataRelResNorm(fsai_data)    = rel_resnorm;
  
    HYPRE_ANNOTATE_FUNC_END;
 
-   hypre_SeqVectorDestroy(z);
-   hypre_SeqVectorDestroy(p);
-   hypre_SeqVectorDestroy(Ap);
-   hypre_SeqVectorDestroy(LinvAp);
+   hypre_SeqVectorDestroy(x_work);
+   hypre_SeqVectorDestroy(r_work);
+   hypre_SeqVectorDestroy(r_old);
 
 }
