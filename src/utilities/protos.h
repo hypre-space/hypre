@@ -282,3 +282,13 @@ HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_SetSpGemmUseCusparse( HYPRE_Int use_cusparse );
 HYPRE_Int hypre_SetUseGpuRand( HYPRE_Int use_gpurand );
 HYPRE_Int hypre_SetGaussSeidelMethod( HYPRE_Int gs_method );
+
+/* int_array.c */
+hypre_IntArray* hypre_IntArrayCreate( HYPRE_Int size );
+HYPRE_Int hypre_IntArrayDestroy( hypre_IntArray *array );
+HYPRE_Int hypre_IntArrayInitialize_v2( hypre_IntArray *array, HYPRE_MemoryLocation memory_location );
+HYPRE_Int hypre_IntArrayInitialize( hypre_IntArray *array );
+HYPRE_Int hypre_IntArrayCopy( hypre_IntArray *x, hypre_IntArray *y );
+hypre_IntArray* hypre_IntArrayCloneDeep_v2( hypre_IntArray *x, HYPRE_MemoryLocation memory_location );
+hypre_IntArray* hypre_IntArrayCloneDeep( hypre_IntArray *x );
+HYPRE_Int hypre_IntArraySetConstantValues( hypre_IntArray *v, HYPRE_Int value );

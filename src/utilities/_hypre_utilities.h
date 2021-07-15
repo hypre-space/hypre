@@ -1363,6 +1363,45 @@ typedef struct
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+/******************************************************************************
+ *
+ * Header file for hypre_IntArray struct for holding an array of integers
+ *
+ *****************************************************************************/
+
+#ifndef hypre_INTARRAY_HEADER
+#define hypre_INTARRAY_HEADER
+
+/*--------------------------------------------------------------------------
+ * hypre_IntArray
+ *--------------------------------------------------------------------------*/
+
+typedef struct 
+{
+   /* pointer to data and size of data */ 
+   HYPRE_Int            *data;
+   HYPRE_Int             size;
+
+   /* memory location of array data */
+   HYPRE_MemoryLocation  memory_location;
+} hypre_IntArray;
+
+/*--------------------------------------------------------------------------
+ * Accessor functions for the IntArray structure
+ *--------------------------------------------------------------------------*/
+
+#define hypre_IntArrayData(array)                  ((array) -> data)
+#define hypre_IntArraySize(array)                  ((array) -> size)
+#define hypre_IntArrayMemoryLocation(array)        ((array) -> memory_location)
+
+#endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 /* amg_linklist.c */
 void hypre_dispose_elt ( hypre_LinkList element_ptr );
 void hypre_remove_point ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , HYPRE_Int measure , HYPRE_Int index , HYPRE_Int *lists , HYPRE_Int *where );
@@ -1640,6 +1679,16 @@ HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_SetSpGemmUseCusparse( HYPRE_Int use_cusparse );
 HYPRE_Int hypre_SetUseGpuRand( HYPRE_Int use_gpurand );
 HYPRE_Int hypre_SetGaussSeidelMethod( HYPRE_Int gs_method );
+
+/* int_array.c */
+hypre_IntArray* hypre_IntArrayCreate( HYPRE_Int size );
+HYPRE_Int hypre_IntArrayDestroy( hypre_IntArray *array );
+HYPRE_Int hypre_IntArrayInitialize_v2( hypre_IntArray *array, HYPRE_MemoryLocation memory_location );
+HYPRE_Int hypre_IntArrayInitialize( hypre_IntArray *array );
+HYPRE_Int hypre_IntArrayCopy( hypre_IntArray *x, hypre_IntArray *y );
+hypre_IntArray* hypre_IntArrayCloneDeep_v2( hypre_IntArray *x, HYPRE_MemoryLocation memory_location );
+hypre_IntArray* hypre_IntArrayCloneDeep( hypre_IntArray *x );
+HYPRE_Int hypre_IntArraySetConstantValues( hypre_IntArray *v, HYPRE_Int value );
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
