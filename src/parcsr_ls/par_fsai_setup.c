@@ -33,8 +33,8 @@
  * - nrows_needed:   Number of rows/columns A[P, P] needs.
  */
 void
-hypre_CSRMatrixExtractDenseMatrix( HYPRE_CSRMatrix *A_diag,
-                                   HYPRE_Vector    *A_sub,  
+hypre_CSRMatrixExtractDenseMatrix( hypre_CSRMatrix *A_diag,
+                                   hypre_Vector    *A_sub,  
                                    HYPRE_Int       *marker, 
                                    HYPRE_Int       nrows_needed)
 {
@@ -67,8 +67,8 @@ hypre_CSRMatrixExtractDenseMatrix( HYPRE_CSRMatrix *A_diag,
  * - ncols_needed:   Number of columns A[i, P] needs.
  */
 void
-hypre_ExtractDenseRowFromCSRMatrix( HYPRE_CSRMatrix *A_diag, 
-                                    HYPRE_Vector    *A_subrow, 
+hypre_ExtractDenseRowFromCSRMatrix( hypre_CSRMatrix *A_diag, 
+                                    hypre_Vector    *A_subrow, 
                                     HYPRE_Int       *marker, 
                                     HYPRE_Int       ncols_needed,
                                     HYPRE_Int       needed_row ) 
@@ -102,15 +102,15 @@ hypre_ExtractDenseRowFromCSRMatrix( HYPRE_CSRMatrix *A_diag,
  */
 void 
 hypre_FindKapGrad( hypre_CSRMatrix  *A_diag, 
-                   HYPRE_Vector     *kaporin_gradient, 
-                   HYPRE_Vector     *kap_grad_nonzeros, 
-                   HYPRE_Vector     *A_kg, 
-                   HYPRE_Vector     *G_kg, 
-                   HYPRE_Vector     *G_temp, 
-                   HYPRE_Vector     *S_Pattern, 
+                   hypre_Vector     *kaporin_gradient, 
+                   hypre_Vector     *kap_grad_nonzeros, 
+                   hypre_Vector     *A_kg, 
+                   hypre_Vector     *G_kg, 
+                   hypre_Vector     *G_temp, 
+                   hypre_Vector     *S_Pattern, 
                    HYPRE_Int        max_row_size, 
                    HYPRE_Int        row_num, 
-                   HYPER_Int        *marker )
+                   HYPRE_Int        *marker )
 {
 
    HYPRE_Int      *A_i      = hypre_CSRMatrixI(A_diag);
@@ -135,7 +135,7 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
    for(i = 0; i < row_num; ++i)
       marker[i] = 0;
    for(i = 0; i < hypre_VectorSize(S_Pattern); i++)
-      marker[S_Pattern_Data[i]] = 1;
+      marker[(HYPRE_Int)S_Pattern_data[i]] = 1;
 
    for(i = 0; i < row_num-1; i++)
    {
@@ -180,7 +180,7 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
    hypre_VectorSize(kap_grad_nonzeros) = count;
 
    for(i = 0; i < hypre_VectorSize(S_Pattern); i++)     /* Reset marker array for future use */
-      marker[S_Pattern[i]] = -1;
+      marker[(HYPRE_Int)S_Pattern_data[i]] = -1;
 
    return;
 
@@ -234,9 +234,9 @@ hypre_qsort2C( HYPRE_Complex  *v,
 
 /* Take the largest elements from the kaporin gradient and add their locations to S_Pattern */
 void
-hypre_AddToPattern( HYPRE_Vector *kaporin_gradient, 
-                    HYPRE_Vector *kap_grad_nonzeros, 
-                    HYPRE_Vector *S_Pattern 
+hypre_AddToPattern( hypre_Vector *kaporin_gradient, 
+                    hypre_Vector *kap_grad_nonzeros, 
+                    hypre_Vector *S_Pattern, 
                     HYPRE_Int    max_step_size )
 {
    
@@ -272,13 +272,13 @@ hypre_FSAISetup( void *fsai_vdata,
 
    /* Data structure variables */
 
-   HYPRE_CSRMatrix         G                 = hypre_ParFSAIDataGmat(fsai_data);
+   hypre_ParCSRMatrix      *G                = hypre_ParFSAIDataGmat(fsai_data);
    HYPRE_Real              kap_tolerance     = hypre_ParFSAIDataKapTolerance(fsai_data);
    HYPRE_Int               max_steps         = hypre_ParFSAIDataMaxSteps(fsai_data);
    HYPRE_Int               max_step_size     = hypre_ParFSAIDataMaxStepSize(fsai_data);
    HYPRE_Int               logging           = hypre_ParFSAIDataLogging(fsai_data);
    HYPRE_Int               print_level       = hypre_ParFSAIDataPrintLevel(fsai_data);
-   HYPRE_Int               debug_flag;       = hypre_ParFSAIDataDebugFlag(fsai_data);
+   HYPRE_Int               debug_flag        = hypre_ParFSAIDataDebugFlag(fsai_data);
 
    /* Declare Local variables */
 
@@ -287,34 +287,47 @@ hypre_FSAISetup( void *fsai_vdata,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-   HYPRE_CSRMatrix         *A_diag;
-   HYPRE_Vector            *G_temp;                      /* A vector to hold a single row of G while it's being calculated */
-   HYPRE_Vector            *A_sub;                       /* A vector to hold a the A[P, P] submatrix of A */
-   HYPRE_Vector            *A_subrow;                    /* Vector to hold A[i, P] for the kaporin gradient */
-   HYPRE_Vector            *sol_vec;                     /* Vector to hold solution of hypre_dpetrs */
-   HYPRE_Vector            *G_subrow;                    /* Vector to hold A[i, P] for the kaporin gradient */
-   HYPRE_Vector            *kaporin_gradient;            /* A vector to hold the Kaporin Gradient for each iteration of aFSAI */
-   HYPRE_Vector            *kaporin_gradient_nonzeros;   /* A vector to hold the kaporin_gradient nonzero indices for each iteration of aFSAI */
-   HYPRE_Vector            *S_Pattern;
+   hypre_Vector            *G_temp;                      /* A vector to hold a single row of G while it's being calculated */
+   hypre_Vector            *A_sub;                       /* A vector to hold a the A[P, P] submatrix of A */
+   hypre_Vector            *A_subrow;                    /* Vector to hold A[i, P] for the kaporin gradient */
+   hypre_Vector            *sol_vec;                     /* Vector to hold solution of hypre_dpetrs */
+   hypre_Vector            *G_subrow;                    /* Vector to hold A[i, P] for the kaporin gradient */
+   hypre_Vector            *kaporin_gradient;            /* A vector to hold the Kaporin Gradient for each iteration of aFSAI */
+   hypre_Vector            *kap_grad_nonzeros;   /* A vector to hold the kaporin_gradient nonzero indices for each iteration of aFSAI */
+   hypre_Vector            *S_Pattern;
    HYPRE_Int               *marker;                      /* An array that holds which values need to be gathered when finding a sub-row or submatrix */
    HYPRE_Real              old_psi, new_psi;             /* GAG' before and after the k-th interation of aFSAI */   
    HYPRE_Real              row_scale;                    /* The value to scale G_temp by before adding it to G */
-   HYPRE_Int               num_rows;
-   HYPRE_Int               max_row_size;
    HYPRE_Int               info;
-   HYPRE_Int               i, j, k;                                  /* Loop variables */
+   HYPRE_Int               i, j, k;                      /* Loop variables */
+
+   /* Create and initialize G_mat */
+   G                                = hypre_ParCSRMatrixCreate (comm, 
+                                      hypre_ParCSRMatrixGlobalNumRows(A),   
+                                      hypre_ParCSRMatrixGlobalNumCols(A),  
+                                      hypre_ParCSRMatrixRowStarts(A),
+                                      hypre_ParCSRMatrixColStarts(A),
+                                      0, 
+                                      hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A))*max_steps*max_step_size,
+                                      0 );
+   hypre_ParCSRMatrixInitialize(G);
+   hypre_ParFSAIDataGmat(fsai_data) = G;
 
    /* Setting local variables */
 
-   A_diag                  = hypre_ParCSRMatrixDiag(A);
-   num_rows                = hypre_CSRMatrixNumRows(A_diag);
-   max_row_size            = min(max_steps*max_step_size, num_rows-1);
+   hypre_CSRMatrix         *A_diag        = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Int               *A_i           = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int               *A_j           = hypre_CSRMatrixJ(A_diag);
+   HYPRE_Real              *A_data        = hypre_CSRMatrixData(A_diag);
 
-   HYPRE_CSRMatrix         *G_diag   = hypre_ParCSRMatrixDiag(G);
-   HYPRE_Int               *G_i      = hypre_CSRMatrixI(G_diag);
-   HYPRE_Int               *G_j      = hypre_CSRMatrixJ(G_diag);
-   HYPRE_Real              *G_data   = hypre_CSRMatrixData(G_diag);
+   hypre_CSRMatrix         *G_diag        = hypre_ParCSRMatrixDiag(G);
+   HYPRE_Int               *G_i           = hypre_CSRMatrixI(G_diag);
+   HYPRE_Int               *G_j           = hypre_CSRMatrixJ(G_diag);
+   HYPRE_Real              *G_data        = hypre_CSRMatrixData(G_diag);
                           
+   HYPRE_Int               num_rows       = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int               max_row_size   = min(max_steps*max_step_size, num_rows-1);
+
    /* Allocating local vector variables */
   
    G_temp                        = hypre_SeqVectorCreate(max_row_size);
@@ -322,20 +335,22 @@ hypre_FSAISetup( void *fsai_vdata,
    sol_vec                       = hypre_SeqVectorCreate(max_row_size);
    G_subrow                      = hypre_SeqVectorCreate(max_row_size);
    kaporin_gradient              = hypre_SeqVectorCreate(max_row_size);
-   kaporin_gradient_nonzeros     = hypre_SeqVectorCreate(max_row_size);
+   kap_grad_nonzeros             = hypre_SeqVectorCreate(max_row_size);
    S_Pattern                     = hypre_SeqVectorCreate(max_row_size);
    A_sub                         = hypre_SeqVectorCreate(max_row_size*max_row_size);
    marker                        = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);       /* For gather functions - don't want to reinitialize */
 
+
+
+
    /* Initializing local variables */
    
-   hypre_CSRMatrixInitialize_v2(G, 0, hypre_CSRMatrixMemoryLocation(G));
    hypre_SeqVectorInitialize(G_temp);
    hypre_SeqVectorInitialize(A_subrow);
    hypre_SeqVectorInitialize(sol_vec);
    hypre_SeqVectorInitialize(G_subrow);
    hypre_SeqVectorInitialize(kaporin_gradient);
-   hypre_SeqVectorInitialize(kaporin_gradient_nonzeros);
+   hypre_SeqVectorInitialize(kap_grad_nonzeros);
    hypre_SeqVectorInitialize(S_Pattern);
    hypre_SeqVectorInitialize(A_sub);
    for( i = 0; i < num_rows; i++ )
@@ -346,9 +361,9 @@ hypre_FSAISetup( void *fsai_vdata,
    HYPRE_Complex *A_subrow_data           = hypre_VectorData(A_subrow);
    HYPRE_Complex *G_subrow_data           = hypre_VectorData(G_subrow);
    HYPRE_Complex *kaporin_gradient_data   = hypre_VectorData(kaporin_gradient);
-   HYPRE_Complex *kap_grad_nonzero_data   = hypre_VectorData(kaporin_gradient_nonzeros);
+   HYPRE_Complex *kap_grad_nonzero_data   = hypre_VectorData(kap_grad_nonzeros);
    HYPRE_Complex *S_Pattern_data          = hypre_VectorData(S_Pattern);
-   HYPRE_Complex *A_sub_data              = hypre_VectorData(A_sub_data);
+   HYPRE_Complex *A_sub_data              = hypre_VectorData(A_sub);
 
    /**********************************************************************
    * Start of Adaptive FSAI algorithm  
@@ -372,7 +387,7 @@ hypre_FSAISetup( void *fsai_vdata,
 
          /* Gather A[P, P] and -A[P, i] */
          for(j = 0; j < hypre_VectorSize(S_Pattern); j++)
-            marker[S_Pattern_data[j]] = j;
+            marker[(HYPRE_Int)S_Pattern_data[j]] = j;
 
          hypre_VectorSize(A_sub)    = hypre_VectorSize(S_Pattern) * hypre_VectorSize(S_Pattern);
          hypre_VectorSize(A_subrow) = hypre_VectorSize(S_Pattern);
@@ -395,7 +410,7 @@ hypre_FSAISetup( void *fsai_vdata,
          hypre_SeqVectorScale(-1, A_subrow);                         /* A[P, i] */
          new_psi = hypre_SeqVectorInnerProd(G_temp, A_subrow) + A_data[A_i[i]]; 
  
-         if(abs( new_psi - old_psi )/old_psi < kaporin_tol)
+         if(abs( new_psi - old_psi )/old_psi < kap_tolerance)
             break;
 
          old_psi = new_psi; 
@@ -429,7 +444,7 @@ hypre_FSAISetup( void *fsai_vdata,
    hypre_SeqVectorDestroy(sol_vec);                     
    hypre_SeqVectorDestroy(G_subrow);                     
    hypre_SeqVectorDestroy(kaporin_gradient);         
-   hypre_SeqVectorDestroy(kaporin_gradient_nonzeros);
+   hypre_SeqVectorDestroy(kap_grad_nonzeros);
    hypre_SeqVectorDestroy(S_Pattern);                
    hypre_SeqVectorDestroy(A_sub);                 
    TFree(marker, HYPRE_MEMORY_HOST);                   
