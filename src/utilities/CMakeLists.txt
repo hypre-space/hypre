@@ -44,6 +44,7 @@ set(SRCS
   threading.c
   timer.c
   timing.c
+  caliper_instrumentation.c
 )
 
 target_sources(${PROJECT_NAME}

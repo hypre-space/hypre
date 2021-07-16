@@ -57,7 +57,8 @@ FILES =\
  random.c\
  threading.c\
  timer.c\
- timing.c
+ timing.c\
+ caliper_instrumentation.c
 
 CUFILES=\
  cuda_utils.c\

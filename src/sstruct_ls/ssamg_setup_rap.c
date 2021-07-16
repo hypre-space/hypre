@@ -30,8 +30,6 @@ hypre_SSAMGComputeRAP( hypre_SStructMatrix   *A,
 {
    hypre_SStructMatrix *Ac;
 
-   HYPRE_ANNOTATE_FUNC_BEGIN;
-
    if (non_galerkin)
    {
       hypre_SSAMGComputeRAPNonGlk(A, P, cdir_p, &Ac);
@@ -42,8 +40,6 @@ hypre_SSAMGComputeRAP( hypre_SStructMatrix   *A,
    }
 
    *Ac_ptr = Ac;
-
-   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
