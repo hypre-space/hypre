@@ -13,7 +13,7 @@
 
 #include "_hypre_struct_mv.h"
 
-#define UNROLL_MAXDEPTH 9
+#define UNROLL_MAXDEPTH 4
 
 /*--------------------------------------------------------------------------
  * Matvec data structure
@@ -396,7 +396,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
             temp = -(beta/alpha);
             if (temp != 1.0)
             {
-               HYPRE_ANNOTATE_REGION_BEGIN("%s", "Computation");
+               HYPRE_ANNOTATE_REGION_BEGIN("%s", "Computation-Init");
                boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
                hypre_ForBoxI(i, boxes)
                {
@@ -428,7 +428,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                   }
 #undef DEVICE_VAR
                }
-               HYPRE_ANNOTATE_REGION_END("%s", "Computation");
+               HYPRE_ANNOTATE_REGION_END("%s", "Computation-Init");
             }
          }
          break;
@@ -454,7 +454,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
       hypre_MapToCoarseIndex(ydstride, NULL, ran_stride, ndim);
 
       yb = 0;
-      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Computation");
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Computation-Ax");
       for (i = 0; i < ran_nboxes; i++)
       {
          hypre_Index  Adstart;
@@ -586,13 +586,13 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
             } /* hypre_ForBoxI */
          } /* rectangular/square matrix branch */
       } /* loop on ran_nboxes */
-      HYPRE_ANNOTATE_REGION_END("%s", "Computation");
+      HYPRE_ANNOTATE_REGION_END("%s", "Computation-Ax");
    }
 
    temp = -alpha;
    if (temp != 1.0)
    {
-      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Computation");
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Computation-Scale");
       boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
       hypre_ForBoxI(i, boxes)
       {
@@ -612,7 +612,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
          hypre_BoxLoop1End(yi);
 #undef DEVICE_VAR
       }
-      HYPRE_ANNOTATE_REGION_END("%s", "Computation");
+      HYPRE_ANNOTATE_REGION_END("%s", "Computation-Scale");
    }
 
    if (x_tmp)
