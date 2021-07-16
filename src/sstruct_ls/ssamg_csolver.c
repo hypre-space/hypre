@@ -94,7 +94,7 @@ hypre_SSAMGCoarseSolverSetup( void *ssamg_vdata )
       HYPRE_BoomerAMGSetStrongThreshold(csolver, 0.5);
       HYPRE_BoomerAMGSetPMaxElmts(csolver, 4);
       HYPRE_BoomerAMGSetInterpType(csolver, 18); /* MM ext-e interpolation */
-      HYPRE_BoomerAMGSetCoarsenType(csolver, 10); /* HMIS coarsening */
+      HYPRE_BoomerAMGSetCoarsenType(csolver, 8); /* PMIS coarsening */
       if (num_crelax > 0)
       {
          HYPRE_BoomerAMGSetMaxIter(csolver, num_crelax);
@@ -104,7 +104,7 @@ hypre_SSAMGCoarseSolverSetup( void *ssamg_vdata )
       HYPRE_BoomerAMGSetTol(csolver, 0.0);
       HYPRE_BoomerAMGSetPrintLevel(csolver, 0);
       HYPRE_BoomerAMGSetLogging(csolver, 1);
-      HYPRE_BoomerAMGSetAggNumLevels(csolver, 1);
+      //HYPRE_BoomerAMGSetAggNumLevels(csolver, 1);
       HYPRE_BoomerAMGSetup(csolver, par_Ac, par_b, par_x);
 
       (ssamg_data -> csolver) = csolver;
