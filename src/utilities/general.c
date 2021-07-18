@@ -81,7 +81,6 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
 {
 
 #if defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_CUDA_CALL( cudaSetDevice(device_id) );
    omp_set_default_device(device_id);
 #endif
 
@@ -145,10 +144,6 @@ hypre_GetDeviceCount(hypre_int *device_count)
 HYPRE_Int
 hypre_GetDeviceLastError()
 {
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_CUDA_CALL( cudaGetLastError() );
-#endif
-
 #if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaGetLastError() );
 #endif
@@ -194,7 +189,9 @@ HYPRE_Init()
 
    /* To include the cost of creating streams/cudahandles in HYPRE_Init */
    /* If not here, will be done at the first use */
+#if defined(HYPRE_USING_CUDA_STREAMS)
    hypre_HandleCudaComputeStream(_hypre_handle);
+#endif
 
    /* A separate stream for prefetching */
    //hypre_HandleCudaPrefetchStream(_hypre_handle);
@@ -273,15 +270,6 @@ HYPRE_Finalize()
 HYPRE_Int
 HYPRE_PrintDeviceInfo()
 {
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-  hypre_int dev;
-  struct cudaDeviceProp deviceProp;
-
-  HYPRE_CUDA_CALL( cudaGetDevice(&dev) );
-  HYPRE_CUDA_CALL( cudaGetDeviceProperties(&deviceProp, dev) );
-  hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GB\n", deviceProp.name, deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem/1e9);
-#endif
-
 #if defined(HYPRE_USING_CUDA)
   hypre_int dev;
   struct cudaDeviceProp deviceProp;

@@ -75,7 +75,7 @@ void hypre_CudaCompileFlagCheck()
 dim3
 hypre_GetDefaultCUDABlockDimension()
 {
-   dim3 bDim(512, 1, 1);
+   dim3 bDim(HYPRE_1D_BLOCK_SIZE, 1, 1);
 
    return bDim;
 }
@@ -873,20 +873,18 @@ hypre_HYPREIntToCusparseIndexType()
 }
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
-#if defined(HYPRE_USING_GPU)
 
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-cudaStream_t
-#elif defined(HYPRE_USING_CUDA)
+/* CUDA/HIP stream */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+#if defined(HYPRE_USING_CUDA)
 cudaStream_t
 #elif defined(HYPRE_USING_HIP)
 hipStream_t
 #endif
 hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i)
 {
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-   cudaStream_t stream = 0;
-#elif defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA)
    cudaStream_t stream = 0;
 #elif defined(HYPRE_USING_HIP)
    hipStream_t stream = 0;
@@ -908,9 +906,7 @@ hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i)
       return data->cuda_streams[i];
    }
 
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream, cudaStreamDefault));
-#elif defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA)
    //HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream,cudaStreamNonBlocking));
    HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream, cudaStreamDefault));
 #elif defined(HYPRE_USING_HIP)
@@ -923,9 +919,7 @@ hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i)
    return stream;
 }
 
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-cudaStream_t
-#elif defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA)
 cudaStream_t
 #elif defined(HYPRE_USING_HIP)
 hipStream_t
@@ -935,6 +929,98 @@ hypre_CudaDataCudaComputeStream(hypre_CudaData *data)
    return hypre_CudaDataCudaStream(data,
                                    hypre_CudaDataCudaComputeStreamNum(data));
 }
+
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+/* synchronize the Hypre compute stream
+ * action: 0: set sync stream to false
+ *         1: set sync stream to true
+ *         2: restore sync stream to default
+ *         3: return the current value of cuda_compute_stream_sync
+ *         4: sync stream based on cuda_compute_stream_sync
+ */
+HYPRE_Int
+hypre_SyncCudaComputeStream_core(HYPRE_Int     action,
+                                 hypre_Handle *hypre_handle,
+                                 HYPRE_Int    *cuda_compute_stream_sync_ptr)
+{
+   /* with UVM the default is to sync at kernel completions, since host is also able to
+    * touch GPU memory */
+#if defined(HYPRE_USING_UNIFIED_MEMORY)
+   static const HYPRE_Int cuda_compute_stream_sync_default = 1;
+#else
+   static const HYPRE_Int cuda_compute_stream_sync_default = 0;
+#endif
+
+   /* this controls if synchronize the stream after computations */
+   static HYPRE_Int cuda_compute_stream_sync = cuda_compute_stream_sync_default;
+
+   switch (action)
+   {
+      case 0:
+         cuda_compute_stream_sync = 0;
+         break;
+      case 1:
+         cuda_compute_stream_sync = 1;
+         break;
+      case 2:
+         cuda_compute_stream_sync = cuda_compute_stream_sync_default;
+         break;
+      case 3:
+         *cuda_compute_stream_sync_ptr = cuda_compute_stream_sync;
+         break;
+      case 4:
+         if (cuda_compute_stream_sync)
+         {
+#if defined(HYPRE_USING_CUDA)
+            HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle)) );
+#elif defined(HYPRE_USING_HIP)
+            HYPRE_HIP_CALL( hipStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle)) );
+#endif
+         }
+         break;
+      default:
+         hypre_printf("hypre_SyncCudaComputeStream_core invalid action\n");
+         hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_SetSyncCudaCompute(HYPRE_Int action)
+{
+   /* convert to 1/0 */
+   action = action != 0;
+   hypre_SyncCudaComputeStream_core(action, NULL, NULL);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_RestoreSyncCudaCompute()
+{
+   hypre_SyncCudaComputeStream_core(2, NULL, NULL);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr)
+{
+   hypre_SyncCudaComputeStream_core(3, NULL, cuda_compute_stream_sync_ptr);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle)
+{
+   hypre_SyncCudaComputeStream_core(4, hypre_handle, NULL);
+
+   return hypre_error_flag;
+}
+
 
 #if defined(HYPRE_USING_CURAND)
 curandGenerator_t
@@ -1094,6 +1180,7 @@ hypre_CudaDataCusparseHandle(hypre_CudaData *data)
 #endif // defined(HYPRE_USING_ROCSPARSE)
 
 
+#if defined(HYPRE_USING_GPU)
 
 hypre_CudaData*
 hypre_CudaDataCreate()
@@ -1173,19 +1260,19 @@ hypre_CudaDataDestroy(hypre_CudaData *data)
    }
 #endif // #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
 
+#if defined(HYPRE_USING_CUDA_STREAMS)
    for (HYPRE_Int i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
    {
       if (data->cuda_streams[i])
       {
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-         HYPRE_CUDA_CALL( cudaStreamDestroy(data->cuda_streams[i]) );
-#elif defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA)
          HYPRE_CUDA_CALL( cudaStreamDestroy(data->cuda_streams[i]) );
 #elif defined(HYPRE_USING_HIP)
          HYPRE_HIP_CALL( hipStreamDestroy(data->cuda_streams[i]) );
 #endif
       }
    }
+#endif
 
 #ifdef HYPRE_USING_DEVICE_POOL
    hypre_CudaDataCubCachingAllocatorDestroy(data);
@@ -1197,106 +1284,11 @@ hypre_CudaDataDestroy(hypre_CudaData *data)
 HYPRE_Int
 hypre_SyncCudaDevice(hypre_Handle *hypre_handle)
 {
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
-#elif defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
 #elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipDeviceSynchronize() );
 #endif
-   return hypre_error_flag;
-}
-
-/* synchronize the Hypre compute stream
- * action: 0: set sync stream to false
- *         1: set sync stream to true
- *         2: restore sync stream to default
- *         3: return the current value of cuda_compute_stream_sync
- *         4: sync stream based on cuda_compute_stream_sync
- */
-HYPRE_Int
-hypre_SyncCudaComputeStream_core(HYPRE_Int     action,
-                                 hypre_Handle *hypre_handle,
-                                 HYPRE_Int    *cuda_compute_stream_sync_ptr)
-{
-   /* with UVM the default is to sync at kernel completions, since host is also able to
-    * touch GPU memory */
-#if defined(HYPRE_USING_UNIFIED_MEMORY)
-   static const HYPRE_Int cuda_compute_stream_sync_default = 1;
-#else
-   static const HYPRE_Int cuda_compute_stream_sync_default = 0;
-#endif
-
-   /* this controls if synchronize the stream after computations */
-   static HYPRE_Int cuda_compute_stream_sync = cuda_compute_stream_sync_default;
-
-   switch (action)
-   {
-      case 0:
-         cuda_compute_stream_sync = 0;
-         break;
-      case 1:
-         cuda_compute_stream_sync = 1;
-         break;
-      case 2:
-         cuda_compute_stream_sync = cuda_compute_stream_sync_default;
-         break;
-      case 3:
-         *cuda_compute_stream_sync_ptr = cuda_compute_stream_sync;
-         break;
-      case 4:
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-         HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
-#else
-         if (cuda_compute_stream_sync)
-         {
-#if defined(HYPRE_USING_CUDA)
-            HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle)) );
-#elif defined(HYPRE_USING_HIP)
-            HYPRE_HIP_CALL( hipStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle)) );
-#endif
-         }
-#endif
-         break;
-      default:
-         hypre_printf("hypre_SyncCudaComputeStream_core invalid action\n");
-         hypre_error_in_arg(1);
-   }
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_SetSyncCudaCompute(HYPRE_Int action)
-{
-   /* convert to 1/0 */
-   action = action != 0;
-   hypre_SyncCudaComputeStream_core(action, NULL, NULL);
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_RestoreSyncCudaCompute()
-{
-   hypre_SyncCudaComputeStream_core(2, NULL, NULL);
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr)
-{
-   hypre_SyncCudaComputeStream_core(3, NULL, cuda_compute_stream_sync_ptr);
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle)
-{
-   hypre_SyncCudaComputeStream_core(4, hypre_handle, NULL);
-
    return hypre_error_flag;
 }
 

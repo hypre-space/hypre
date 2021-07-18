@@ -54,8 +54,8 @@ typedef struct hypre_Boxloop_struct
 
 #if defined(HYPRE_USING_CUDA) /* RAJA with CUDA, running on device */
 
-#define BLOCKSIZE 256
-#define hypre_RAJA_DEVICE   RAJA_DEVICE
+#define BLOCKSIZE                HYPRE_1D_BLOCK_SIZE
+#define hypre_RAJA_DEVICE        RAJA_DEVICE
 #define hypre_raja_exec_policy   cuda_exec<BLOCKSIZE>
 /* #define hypre_raja_reduce_policy cuda_reduce_atomic<BLOCKSIZE> */
 #define hypre_raja_reduce_policy cuda_reduce //<BLOCKSIZE>
@@ -71,7 +71,10 @@ hypre_CheckErrorDevice(cudaDeviceSynchronize());
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP) /* RAJA with OpenMP (>4.5), running on device */
 
-//TODO
+#define hypre_RAJA_DEVICE
+#define hypre_raja_exec_policy   omp_target_parallel_for_exec<BLOCKSIZE>
+#define hypre_raja_reduce_policy omp_target_reduce
+#define hypre_fence()
 
 #elif defined(HYPRE_USING_OPENMP) /* RAJA with OpenMP, running on host (CPU) */
 

@@ -2722,9 +2722,10 @@ hypre_using_um=no
 hypre_gpu_mpi=no
 hypre_using_gpu_profiling=no
 hypre_using_cuda_streams=no
-hypre_using_cusparse=yes
+hypre_using_cusparse=no
 hypre_using_cublas=no
-hypre_using_curand=yes
+hypre_using_curand=no
+hypre_using_nvtx=no
 hypre_using_device_pool=no
 hypre_using_umpire=no
 hypre_using_umpire_host=no
@@ -3051,10 +3052,10 @@ if test "${enable_cuda_streams+set}" = set; then :
   enableval=$enable_cuda_streams; case "${enableval}" in
     yes) hypre_using_cuda_streams=yes ;;
     no)  hypre_using_cuda_streams=no ;;
-    *)   hypre_using_cuda_streams=yes ;;
+    *)   hypre_using_cuda_streams=no ;;
  esac
 else
-  hypre_using_cuda_streams=yes
+  hypre_using_cuda_streams=no
 
 fi
 
@@ -3064,10 +3065,10 @@ if test "${enable_cusparse+set}" = set; then :
   enableval=$enable_cusparse; case "${enableval}" in
     yes) hypre_using_cusparse=yes ;;
     no)  hypre_using_cusparse=no ;;
-    *)   hypre_using_cusparse=yes ;;
+    *)   hypre_using_cusparse=no ;;
  esac
 else
-  hypre_using_cusparse=yes
+  hypre_using_cusparse=no
 
 fi
 
@@ -3103,10 +3104,10 @@ if test "${enable_curand+set}" = set; then :
   enableval=$enable_curand; case "${enableval}" in
     yes) hypre_using_curand=yes ;;
     no)  hypre_using_curand=no ;;
-    *)   hypre_using_curand=yes ;;
+    *)   hypre_using_curand=no ;;
  esac
 else
-  hypre_using_curand=yes
+  hypre_using_curand=no
 
 fi
 
@@ -3118,7 +3119,7 @@ if test "${enable_rocsparse+set}" = set; then :
   enableval=$enable_rocsparse; case "${enableval}" in
     yes) hypre_using_rocsparse=yes ;;
     no)  hypre_using_rocsparse=no ;;
-    *)   hypre_using_rocsparse=yes ;;
+    *)   hypre_using_rocsparse=no ;;
  esac
 else
   hypre_using_rocsparse=yes
@@ -3144,7 +3145,7 @@ if test "${enable_rocrand+set}" = set; then :
   enableval=$enable_rocrand; case "${enableval}" in
     yes) hypre_using_rocrand=yes ;;
     no)  hypre_using_rocrand=no ;;
-    *)   hypre_using_rocrand=yes ;;
+    *)   hypre_using_rocrand=no ;;
  esac
 else
   hypre_using_rocrand=yes
@@ -8541,7 +8542,7 @@ then
       as_fn_error $? "Asked for unified memory, but not using CUDA, HIP, or device OpenMP!" "$LINENO" 5
    fi
 fi
-if test "$hypre_using_cuda" = "yes" || test "$hypre_using_device_openmp" = "yes"
+if test "$hypre_using_cuda" = "yes"
 then
    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ANSI C header files" >&5
 $as_echo_n "checking for ANSI C header files... " >&6; }
@@ -8832,44 +8833,9 @@ $as_echo "#define HYPRE_USING_GPU 1" >>confdefs.h
 $as_echo "#define HYPRE_USING_CUDA 1" >>confdefs.h
 
 
-
-$as_echo "#define HYPRE_USING_CUSPARSE 1" >>confdefs.h
-
-
-   if test "$hypre_using_gpu_profiling" = "yes"
-   then
-
-$as_echo "#define HYPRE_USING_NVTX 1" >>confdefs.h
-
-   fi
-
-   if test "$hypre_using_cusparse" = "yes"
-   then
-
-$as_echo "#define HYPRE_USING_CUSPARSE 1" >>confdefs.h
-
-   fi
-
-   if test "$hypre_using_device_pool" = "yes"
-   then
-
-$as_echo "#define HYPRE_USING_DEVICE_POOL 1" >>confdefs.h
-
-   fi
-
-   if test "$hypre_using_cublas" = "yes"
-   then
-
-$as_echo "#define HYPRE_USING_CUBLAS 1" >>confdefs.h
-
-   fi
-
-   if test "$hypre_using_curand" = "yes"
-   then
-
-$as_echo "#define HYPRE_USING_CURAND 1" >>confdefs.h
-
-   fi
+   hypre_using_cusparse=yes
+   hypre_using_curand=yes
+   hypre_using_nvtx='${hypre_using_gpu_profiling}'
 
    LINK_CC='${CUCC}'
    LINK_CXX='${CUCC}'
@@ -8908,25 +8874,6 @@ $as_echo "#define HYPRE_USING_CURAND 1" >>confdefs.h
       LDFLAGS="-Xcompiler \"${LDFLAGS}\""
    HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
    HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64 -lcudart'
-   if test "$hypre_using_gpu_profiling" = "yes"
-   then
-      HYPRE_CUDA_LIBS+=" -lnvToolsExt"
-   fi
-
-   if test "$hypre_using_cusparse" = "yes"
-   then
-      HYPRE_CUDA_LIBS+=" -lcusparse"
-   fi
-
-   if test "$hypre_using_cublas" = "yes"
-   then
-      HYPRE_CUDA_LIBS+=" -lcublas"
-   fi
-
-   if test "$hypre_using_curand" = "yes"
-   then
-      HYPRE_CUDA_LIBS+=" -lcurand"
-   fi
 fi
 
 if test x"$hypre_using_hip" == x"yes"; then :
@@ -9064,17 +9011,6 @@ fi
 if test "$hypre_using_device_openmp" = "yes"
 then
 
-$as_echo "#define HYPRE_USING_CUSPARSE 1" >>confdefs.h
-
-
-   if test "$hypre_using_gpu_profiling" = "yes"
-   then
-
-$as_echo "#define HYPRE_USING_NVTX 1" >>confdefs.h
-
-   fi
-
-
 $as_echo "#define HYPRE_USING_DEVICE_OPENMP 1" >>confdefs.h
 
 
@@ -9108,25 +9044,54 @@ $as_echo "#define HYPRE_DEVICE_OPENMP_CHECK 1" >>confdefs.h
 
    fi
 
-   HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
-   HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64 -lcudart -lcusparse -lcurand'
-   if test "$hypre_using_gpu_profiling" = "yes"
-   then
-      HYPRE_CUDA_LIBS+=" -lnvToolsExt"
-   fi
-
          LINK_CC='${CUCC}'
    LINK_CXX='${CUCC}'
       fi
 
-if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes"
+if test "$hypre_using_nvtx" = "yes"
 then
-   if test "x$hypre_using_cuda_streams" = "xyes"]
-   then
+
+$as_echo "#define HYPRE_USING_NVTX 1" >>confdefs.h
+
+   HYPRE_CUDA_LIBS+=" -lnvToolsExt"
+fi
+
+if test "$hypre_using_cusparse" = "yes"
+then
+
+$as_echo "#define HYPRE_USING_CUSPARSE 1" >>confdefs.h
+
+   HYPRE_CUDA_LIBS+=" -lcusparse"
+fi
+
+if test "$hypre_using_cublas" = "yes"
+then
+
+$as_echo "#define HYPRE_USING_CUBLAS 1" >>confdefs.h
+
+   HYPRE_CUDA_LIBS+=" -lcublas"
+fi
+
+if test "$hypre_using_curand" = "yes"
+then
+
+$as_echo "#define HYPRE_USING_CURAND 1" >>confdefs.h
+
+   HYPRE_CUDA_LIBS+=" -lcurand"
+fi
+
+if test "$hypre_using_device_pool" = "yes"
+then
+
+$as_echo "#define HYPRE_USING_DEVICE_POOL 1" >>confdefs.h
+
+fi
+
+if test "x$hypre_using_cuda_streams" = "xyes"]
+then
 
 $as_echo "#define HYPRE_USING_CUDA_STREAMS 1" >>confdefs.h
 
-   fi
 fi
 
 if test "x$hypre_using_um" = "xyes"

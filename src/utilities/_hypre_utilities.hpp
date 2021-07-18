@@ -75,7 +75,7 @@ struct hypre_umpire_device_allocator
 
 #if defined(HYPRE_USING_GPU)
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_CUDA)
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <cuda_profiler_api.h>
@@ -104,7 +104,7 @@ struct hypre_umpire_device_allocator
 
 #include <hip/hip_runtime.h>
 
-#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#endif // defined(HYPRE_USING_CUDA)
 
 #if defined(HYPRE_USING_ROCSPARSE)
 #include <rocsparse.h>
@@ -199,10 +199,12 @@ struct hypre_CudaData
    rocsparse_handle                  cusparse_handle;
 #endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_CUDA_STREAMS)
+#if defined(HYPRE_USING_CUDA)
    cudaStream_t                      cuda_streams[HYPRE_MAX_NUM_STREAMS];
 #elif defined(HYPRE_USING_HIP)
    hipStream_t                       cuda_streams[HYPRE_MAX_NUM_STREAMS];
+#endif
 #endif
 
 #ifdef HYPRE_USING_DEVICE_POOL
@@ -279,12 +281,14 @@ cusparseHandle_t    hypre_CudaDataCusparseHandle(hypre_CudaData *data);
 rocsparse_handle    hypre_CudaDataCusparseHandle(hypre_CudaData *data);
 #endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_CUDA_STREAMS)
+#if defined(HYPRE_USING_CUDA)
 cudaStream_t        hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i);
 cudaStream_t        hypre_CudaDataCudaComputeStream(hypre_CudaData *data);
 #elif defined(HYPRE_USING_HIP)
 hipStream_t         hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i);
 hipStream_t         hypre_CudaDataCudaComputeStream(hypre_CudaData *data);
+#endif
 #endif
 
 // Data structure and accessor routines for Cuda Sparse Triangular Matrices

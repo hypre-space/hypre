@@ -33,7 +33,7 @@
 
 #ifndef AUTO_OMP_TEAM
 /* omp team size (aka. gpu block size) */
-#define hypre_gpu_block_size 512
+#define hypre_gpu_block_size HYPRE_1D_BLOCK_SIZE
 /* the max number of omp teams */
 #define hypre_max_num_blocks 1000000
 #endif
