@@ -4256,7 +4256,7 @@ main( hypre_int argc,
                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
                              pcg_precond);
       }
-      else if (solver_id == 43)
+      else if (solver_id == 31)
       {
          /* use FSAI preconditioning */
          if (myid == 0) hypre_printf("Solver: FSAI-PCG\n");
