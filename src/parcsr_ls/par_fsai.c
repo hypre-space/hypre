@@ -1,7 +1,7 @@
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
- * 
+ *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  *******************************************************************************/
 
@@ -41,7 +41,7 @@ hypre_FSAICreate()
 
    /*-----------------------------------------------------------------------
     * Setup default values for parameters
-    *-----------------------------------------------------------------------*/ 
+    *-----------------------------------------------------------------------*/
 
    /* setup params */
    max_steps = 10;
@@ -56,24 +56,24 @@ hypre_FSAICreate()
    logging = 0;
    num_iterations = 0;
 
-   /* output params */  
+   /* output params */
    print_level = 0;
    debug_flag = 0;
    hypre_sprintf(log_file_name, "%s", "fsai.out.log");
- 
+
    #if defined(HYPRE_USING_GPU)
    #endif
 
-   HYPRE_ANNOTATE_FUNC_BEGIN; 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /*-----------------------------------------------------------------------
     * Create the hypre_ParFSAIData structure and return
-    *-----------------------------------------------------------------------*/ 
+    *-----------------------------------------------------------------------*/
 
    fsai_data = hypre_CTAlloc(hypre_ParFSAIData, 1, HYPRE_MEMORY_HOST);
 
    hypre_ParFSAIDataMemoryLocation(fsai_data)   = HYPRE_MEMORY_UNDEFINED;
- 
+
    hypre_ParFSAIDataGmat(fsai_data)             = NULL;
    hypre_ParFSAIDataResidual(fsai_data)         = NULL;
    hypre_ParFSAIDataCommInfo(fsai_data)         = NULL;
@@ -115,6 +115,7 @@ hypre_FSAIDestroy( void *data )
 
    if(hypre_ParFSAIDataCommInfo(fsai_data)) hypre_TFree(hypre_ParFSAIDataCommInfo(fsai_data), HYPRE_MEMORY_HOST);
    if(hypre_ParFSAIDataGmat(fsai_data))     hypre_ParCSRMatrixDestroy(hypre_ParFSAIDataGmat(fsai_data));
+   if(hypre_ParFSAIDataGTmat(fsai_data))    hypre_ParCSRMatrixDestroy(hypre_ParFSAIDataGTmat(fsai_data));
    if(hypre_ParFSAIDataResidual(fsai_data)) HYPRE_ParVectorDestroy(hypre_ParFSAIDataResidual(fsai_data));
 
    if( new_comm != hypre_MPI_COMM_NULL )
@@ -124,7 +125,7 @@ hypre_FSAIDestroy( void *data )
 
    HYPRE_ANNOTATE_FUNC_END;
 
-   return hypre_error_flag; 
+   return hypre_error_flag;
 }
 
 /******************************************************************************
@@ -429,7 +430,7 @@ hypre_FSAIGetMaxStepSize( void *data,
 
 HYPRE_Int
 hypre_FSAIGetKapTolerance( void *data,
-                           HYPRE_Int *kap_tolerance )
+                           HYPRE_Real *kap_tolerance )
 {
    hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
 

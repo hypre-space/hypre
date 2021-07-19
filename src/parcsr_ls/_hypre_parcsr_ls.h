@@ -794,6 +794,83 @@ typedef struct
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#ifndef hypre_ParFSAI_DATA_HEADER
+#define hypre_ParFSAI_DATA_HEADER
+
+/*--------------------------------------------------------------------------
+ * hypre_ParFSAIData
+ *--------------------------------------------------------------------------*/
+typedef struct
+{
+
+   HYPRE_MemoryLocation memory_location;     /* memory location of matrices/vectors in FSAIData */
+   MPI_Comm             new_comm;
+   HYPRE_Int            *comm_info;
+
+   /* FSAI Setup data */
+   HYPRE_Int            max_steps;           /* Maximum iterations run per row */
+   HYPRE_Int            max_step_size;       /* Maximum number of nonzero elements added to a row of G per step */
+   HYPRE_Real           kap_tolerance;       /* Minimum amount of change between two steps */
+   hypre_ParCSRMatrix  *Gmat;                /* Matrix holding FSAI factor. M^(-1) = G'G */
+   hypre_ParCSRMatrix  *GTmat;               /* Matrix holding the transpose of the FSAI factor */
+
+   /* Solver Problem Data */
+   HYPRE_Int            max_iterations;      /* Maximum iterations run for the solver */
+   HYPRE_Int            num_iterations;      /* Number of iterations the solver ran */
+   HYPRE_Real           omega;               /* Step size for Preconditioned Richardson Solver */
+   HYPRE_Real           tolerance;    	      /* Tolerance for the solver */
+   HYPRE_Real           rel_resnorm;         /* available if logging > 1 */
+   HYPRE_ParVector      residual;            /* available if logging > 1 */
+
+   /* log info */
+   HYPRE_Int            logging;
+
+   /* output params */
+   char                 log_file_name[256];
+   HYPRE_Int            print_level;
+   HYPRE_Int            debug_flag;
+
+} hypre_ParFSAIData;
+
+/*--------------------------------------------------------------------------
+ *  Accessor functions for the hypre_ParFSAIData structure
+ *--------------------------------------------------------------------------*/
+
+#define hypre_ParFSAIDataMemoryLocation(fsai_data)          ((fsai_data) -> memory_location)
+#define hypre_ParFSAIDataNewComm(fsai_data)                 ((fsai_data) -> new_comm)
+#define hypre_ParFSAIDataCommInfo(fsai_data)                ((fsai_data) -> comm_info)
+
+/* FSAI Setup data */
+#define hypre_ParFSAIDataMaxSteps(fsai_data)                ((fsai_data) -> max_steps)
+#define hypre_ParFSAIDataMaxStepSize(fsai_data)             ((fsai_data) -> max_step_size)
+#define hypre_ParFSAIDataKapTolerance(fsai_data)            ((fsai_data) -> kap_tolerance)
+#define hypre_ParFSAIDataGmat(fsai_data)                    ((fsai_data) -> Gmat)
+#define hypre_ParFSAIDataGTmat(fsai_data)                   ((fsai_data) -> GTmat)
+
+/* Solver problem data */
+#define hypre_ParFSAIDataMaxIterations(fsai_data)           ((fsai_data) -> max_iterations)
+#define hypre_ParFSAIDataNumIterations(fsai_data)           ((fsai_data) -> num_iterations)
+#define hypre_ParFSAIDataOmega(fsai_data)                   ((fsai_data) -> omega)
+#define hypre_ParFSAIDataRelResNorm(fsai_data)              ((fsai_data) -> rel_resnorm)
+#define hypre_ParFSAIDataTolerance(fsai_data)               ((fsai_data) -> tolerance)
+#define hypre_ParFSAIDataResidual(fsai_data)                ((fsai_data) -> residual)
+
+/* log info data */
+#define hypre_ParFSAIDataLogging(fsai_data)                 ((fsai_data) -> logging)
+
+/* output parameters */
+#define hypre_ParFSAIDataLogFileName(fsai_data)             ((fsai_data) -> log_file_name)
+#define hypre_ParFSAIDataPrintLevel(fsai_data)              ((fsai_data) -> print_level)
+#define hypre_ParFSAIDataDebugFlag(fsai_data)               ((fsai_data) -> debug_flag)
+
+#endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 /* ads.c */
 void *hypre_ADSCreate ( void );
 HYPRE_Int hypre_ADSDestroy ( void *solver );
@@ -2424,6 +2501,44 @@ HYPRE_Int hypre_BoomerAMGDD_PackRecvMapSendBuffer ( HYPRE_Int *recv_map_send_buf
 HYPRE_Int hypre_BoomerAMGDD_UnpackSendFlagBuffer ( hypre_AMGDDCompGrid **compGrid, HYPRE_Int *send_flag_buffer, HYPRE_Int **send_flag, HYPRE_Int *num_send_nodes, HYPRE_Int *send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels );
 HYPRE_Int hypre_BoomerAMGDD_CommunicateRemainingMatrixInfo ( hypre_ParAMGDDData* amgdd_data );
 HYPRE_Int hypre_BoomerAMGDD_FixUpRecvMaps ( hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int start_level, HYPRE_Int num_levels );
+
+/* par_fsai.c */
+void* hypre_FSAICreate();
+HYPRE_Int hypre_FSAIDestroy ( void *data );
+HYPRE_Int hypre_FSAISetMaxSteps ( void *data, HYPRE_Int max_steps );
+HYPRE_Int hypre_FSAISetMaxStepSize ( void *data, HYPRE_Int max_step_size );
+HYPRE_Int hypre_FSAISetKapTolerance ( void *data, HYPRE_Real kap_tolerance );
+HYPRE_Int hypre_FSAISetMaxIterations ( void *data, HYPRE_Int max_iterations );
+HYPRE_Int hypre_FSAISetTolerance ( void *data, HYPRE_Real tolerance );
+HYPRE_Int hypre_FSAISetOmega ( void *data, HYPRE_Real omega );
+HYPRE_Int hypre_FSAISetLogging ( void *data, HYPRE_Int logging );
+HYPRE_Int hypre_FSAISetNumIterations ( void *data, HYPRE_Int num_iterations );
+HYPRE_Int hypre_FSAISetPrintLevel ( void *data, HYPRE_Int print_level );
+HYPRE_Int hypre_FSAISetPrintFileName ( void *data, const char *print_file_name );
+HYPRE_Int hypre_FSAISetDebugFlag ( void *data, HYPRE_Int debug_flag );
+HYPRE_Int hypre_FSAIGetMaxSteps ( void *data, HYPRE_Int *max_steps );
+HYPRE_Int hypre_FSAIGetMaxStepSize ( void *data, HYPRE_Int *max_step_size );
+HYPRE_Int hypre_FSAIGetKapTolerance ( void *data, HYPRE_Real *kap_tolerance );
+HYPRE_Int hypre_FSAIGetMaxIterations ( void *data, HYPRE_Int *max_iterations );
+HYPRE_Int hypre_FSAIGetTolerance ( void *data, HYPRE_Real *tolerance );
+HYPRE_Int hypre_FSAIGetOmega ( void *data, HYPRE_Real *omega );
+HYPRE_Int hypre_FSAIGetLogging ( void *data, HYPRE_Int *logging );
+HYPRE_Int hypre_FSAIGetNumIterations ( void *data, HYPRE_Int *num_iterations );
+HYPRE_Int hypre_FSAIGetPrintLevel ( void *data, HYPRE_Int *print_level );
+HYPRE_Int hypre_FSAIGetPrintFileName ( void *data, char **print_file_name );
+HYPRE_Int hypre_FSAIGetDebugFlag ( void *data, HYPRE_Int *debug_flag );
+
+/* par_fsai_setup.c */
+HYPRE_Int hypre_CSRMatrixExtractDenseMatrix ( hypre_CSRMatrix *A_diag , hypre_Vector *A_sub , HYPRE_Int *marker , HYPRE_Int nrows_needed);
+HYPRE_Int hypre_ExtractDenseRowFromCSRMatrix ( hypre_CSRMatrix *A_diag , hypre_Vector *A_subrow , HYPRE_Int *marker , HYPRE_Int ncols_needed , HYPRE_Int needed_row );
+HYPRE_Int hypre_FindKapGrad ( hypre_CSRMatrix *A_diag , hypre_Vector *kaporin_gradient, hypre_Vector *kap_grad_nonzeros , hypre_Vector *A_kg , hypre_Vector *G_kg , hypre_Vector *G_temp , hypre_Vector *S_Pattern , HYPRE_Int max_row_size , HYPRE_Int row_num , HYPRE_Int *marker );
+HYPRE_Int hypre_AddToPattern ( hypre_Vector *kaporin_gradient , hypre_Vector *kap_grad_nonzeros , hypre_Vector *S_Pattern , HYPRE_Int  max_step_size );
+HYPRE_Int hypre_FSAISetup ( void *fsai_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u );
+void hypre_swap2C ( HYPRE_Complex *v , HYPRE_Complex *w , HYPRE_Int i , HYPRE_Int j );
+void hypre_qsort2C ( HYPRE_Complex *v , HYPRE_Complex *w , HYPRE_Int left , HYPRE_Int right );
+
+/* par_fsai_solve.c */
+HYPRE_Int hypre_FSAISolve ( void *fsai_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x );
 
 #ifdef __cplusplus
 }

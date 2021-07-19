@@ -75,6 +75,7 @@ FILES =\
  HYPRE_parcsr_int.c\
  HYPRE_parcsr_mgr.c\
  HYPRE_parcsr_ilu.c \
+ HYPRE_parcsr_fsai.c \
  HYPRE_parcsr_ParaSails.c\
  HYPRE_parcsr_pcg.c\
  HYPRE_parcsr_pilut.c\

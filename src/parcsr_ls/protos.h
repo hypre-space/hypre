@@ -1635,3 +1635,41 @@ HYPRE_Int hypre_BoomerAMGDD_PackRecvMapSendBuffer ( HYPRE_Int *recv_map_send_buf
 HYPRE_Int hypre_BoomerAMGDD_UnpackSendFlagBuffer ( hypre_AMGDDCompGrid **compGrid, HYPRE_Int *send_flag_buffer, HYPRE_Int **send_flag, HYPRE_Int *num_send_nodes, HYPRE_Int *send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels );
 HYPRE_Int hypre_BoomerAMGDD_CommunicateRemainingMatrixInfo ( hypre_ParAMGDDData* amgdd_data );
 HYPRE_Int hypre_BoomerAMGDD_FixUpRecvMaps ( hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int start_level, HYPRE_Int num_levels );
+
+/* par_fsai.c */
+void* hypre_FSAICreate();
+HYPRE_Int hypre_FSAIDestroy ( void *data );
+HYPRE_Int hypre_FSAISetMaxSteps ( void *data, HYPRE_Int max_steps );
+HYPRE_Int hypre_FSAISetMaxStepSize ( void *data, HYPRE_Int max_step_size );
+HYPRE_Int hypre_FSAISetKapTolerance ( void *data, HYPRE_Real kap_tolerance );
+HYPRE_Int hypre_FSAISetMaxIterations ( void *data, HYPRE_Int max_iterations );
+HYPRE_Int hypre_FSAISetTolerance ( void *data, HYPRE_Real tolerance );
+HYPRE_Int hypre_FSAISetOmega ( void *data, HYPRE_Real omega );
+HYPRE_Int hypre_FSAISetLogging ( void *data, HYPRE_Int logging );
+HYPRE_Int hypre_FSAISetNumIterations ( void *data, HYPRE_Int num_iterations );
+HYPRE_Int hypre_FSAISetPrintLevel ( void *data, HYPRE_Int print_level );
+HYPRE_Int hypre_FSAISetPrintFileName ( void *data, const char *print_file_name );
+HYPRE_Int hypre_FSAISetDebugFlag ( void *data, HYPRE_Int debug_flag );
+HYPRE_Int hypre_FSAIGetMaxSteps ( void *data, HYPRE_Int *max_steps );
+HYPRE_Int hypre_FSAIGetMaxStepSize ( void *data, HYPRE_Int *max_step_size );
+HYPRE_Int hypre_FSAIGetKapTolerance ( void *data, HYPRE_Real *kap_tolerance );
+HYPRE_Int hypre_FSAIGetMaxIterations ( void *data, HYPRE_Int *max_iterations );
+HYPRE_Int hypre_FSAIGetTolerance ( void *data, HYPRE_Real *tolerance );
+HYPRE_Int hypre_FSAIGetOmega ( void *data, HYPRE_Real *omega );
+HYPRE_Int hypre_FSAIGetLogging ( void *data, HYPRE_Int *logging );
+HYPRE_Int hypre_FSAIGetNumIterations ( void *data, HYPRE_Int *num_iterations );
+HYPRE_Int hypre_FSAIGetPrintLevel ( void *data, HYPRE_Int *print_level );
+HYPRE_Int hypre_FSAIGetPrintFileName ( void *data, char **print_file_name );
+HYPRE_Int hypre_FSAIGetDebugFlag ( void *data, HYPRE_Int *debug_flag );
+
+/* par_fsai_setup.c */
+HYPRE_Int hypre_CSRMatrixExtractDenseMatrix ( hypre_CSRMatrix *A_diag , hypre_Vector *A_sub , HYPRE_Int *marker , HYPRE_Int nrows_needed);
+HYPRE_Int hypre_ExtractDenseRowFromCSRMatrix ( hypre_CSRMatrix *A_diag , hypre_Vector *A_subrow , HYPRE_Int *marker , HYPRE_Int ncols_needed , HYPRE_Int needed_row );
+HYPRE_Int hypre_FindKapGrad ( hypre_CSRMatrix *A_diag , hypre_Vector *kaporin_gradient, hypre_Vector *kap_grad_nonzeros , hypre_Vector *A_kg , hypre_Vector *G_kg , hypre_Vector *G_temp , hypre_Vector *S_Pattern , HYPRE_Int max_row_size , HYPRE_Int row_num , HYPRE_Int *marker );
+HYPRE_Int hypre_AddToPattern ( hypre_Vector *kaporin_gradient , hypre_Vector *kap_grad_nonzeros , hypre_Vector *S_Pattern , HYPRE_Int  max_step_size );
+HYPRE_Int hypre_FSAISetup ( void *fsai_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u );
+void hypre_swap2C ( HYPRE_Complex *v , HYPRE_Complex *w , HYPRE_Int i , HYPRE_Int j );
+void hypre_qsort2C ( HYPRE_Complex *v , HYPRE_Complex *w , HYPRE_Int left , HYPRE_Int right );
+
+/* par_fsai_solve.c */
+HYPRE_Int hypre_FSAISolve ( void *fsai_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x );

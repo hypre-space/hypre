@@ -1,35 +1,35 @@
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
- *    
+ *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  *******************************************************************************/
 
 /******************************************************************************
- *  
+ *
  * FSAI solve routine
- * 
+ *
  ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
-#include "par_fsai.h"
 
 /*--------------------------------------------------------------------
  * hypre_FSAISolve
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_FSAISolve( void   *fsai_vdata,
-                        hypre_ParCSRMatrix *A,
-                        hypre_ParVector    *b,
-                        hypre_ParVector    *x )
+hypre_FSAISolve( void               *fsai_vdata,
+                 hypre_ParCSRMatrix *A,
+                 hypre_ParVector    *b,
+                 hypre_ParVector    *x )
 {
    MPI_Comm             comm = hypre_ParCSRMatrixComm(A);
 
    hypre_ParFSAIData    *fsai_data = (hypre_ParFSAIData*) fsai_vdata;
 
    /* Data structure variables */
-   hypre_ParCSRMatrix   *G                   = hypre_ParFSAIDataGmat(fsai_data);
+   hypre_ParCSRMatrix  *G                    = hypre_ParFSAIDataGmat(fsai_data);
+   hypre_ParCSRMatrix  *GT                   = hypre_ParFSAIDataGTmat(fsai_data);
    HYPRE_Int            tol                  = hypre_ParFSAIDataTolerance(fsai_data);
    HYPRE_Int            max_iter             = hypre_ParFSAIDataMaxIterations(fsai_data);
    HYPRE_Int            print_level          = hypre_ParFSAIDataPrintLevel(fsai_data);
@@ -46,13 +46,9 @@ hypre_FSAISolve( void   *fsai_vdata,
 
    HYPRE_Int            iter, num_procs, my_id;
    HYPRE_Real           old_rn, new_rn, rel_resnorm;
-   hypre_CSRMatrix      *A_diag     = hypre_ParCSRMatrixDiag(A);
-   hypre_CSRMatrix      *G_diag     = hypre_ParCSRMatrixDiag(G);
-   hypre_CSRMatrix      *G_diag_T;
 
-   HYPRE_Int            n = hypre_CSRMatrixNumRows(A_diag);
+   //HYPRE_Int            n = hypre_CSRMatrixNumRows(A_diag);
 
-   hypre_CSRMatrixTranspose(G_diag, &G_diag_T, 1);
    hypre_ParVector         *x_work            = hypre_ParVectorCreate(comm, hypre_ParCSRMatrixGlobalNumRows(A), hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVector         *r_work            = hypre_ParVectorCreate(comm, hypre_ParCSRMatrixGlobalNumRows(A), hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVector         *r_old             = hypre_ParVectorCreate(comm, hypre_ParCSRMatrixGlobalNumRows(A), hypre_ParCSRMatrixRowStarts(A));
@@ -69,8 +65,8 @@ hypre_FSAISolve( void   *fsai_vdata,
    hypre_MPI_Comm_rank(comm, &my_id);
 
 
-   /*----------------------------------------------------------------- 
-    * Preconditioned Richardson - Main solver loop 
+   /*-----------------------------------------------------------------
+    * Preconditioned Richardson - Main solver loop
     * x(k+1) = x(k) + omega * (G^T*G) * (b - A*x(k))
     * ----------------------------------------------------------------*/
 
@@ -79,8 +75,8 @@ hypre_FSAISolve( void   *fsai_vdata,
 
    iter               = 0;
    rel_resnorm        = 1.0;
-   hypre_ParVectorSetConstantValues(x, 0.0);             /* Set initial guess x_0 */
-   hypre_ParCSRMatvec(-1.0, A_diag, x, 1.0, b, r);       /* r_0 = b - Ax_0 */
+   hypre_ParVectorSetConstantValues(x, 0.0);        /* Set initial guess x_0 */
+   hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A, x, 1.0, b, r); /* r_0 = b - Ax_0 */
    if(my_id == 0 && print_level > 1)
    {
       hypre_printf("                old         new         relative\n");
@@ -89,18 +85,24 @@ hypre_FSAISolve( void   *fsai_vdata,
    }
    while(rel_resnorm >= tol && iter < max_iter)
    {
-    
-      /* Update solution vector */  
-      hypre_ParCSRMatvec(-1.0, A_diag, x, 1.0, b, x_work);           /* x_work = b - A*x(k) */     
-      hypre_ParCSRMatvec(1.0, G_diag, x_work, 0.0, NULL, x_work);    /* x_work = G*x_work */
-      hypre_ParCSRMatvec(1.0, G_diag_T, x_work, 0.0, NULL, x_work);  /* x_work = G^T*x_work */
-      hypre_ParVectorAxpy(omega, x_work, x);                         /* x(k+1) = x(k) = omega*x_work */
+
+      /* Update solution vector */
+      hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A, x, 1.0, b, x_work); /* x_work = b - A*x(k) */
+
+      /* VPM: In y = A*x + b, y cannot be the same vector as x */
+      //hypre_ParCSRMatrixMatvec(1.0, G, x_work, 0.0, NULL, x_work);    /* x_work = G*x_work */
+      //hypre_ParCSRMatrixMatvec(1.0, GT, x_work, 0.0, NULL, x_work);   /* x_work = G^T*x_work */
+
+      hypre_ParVectorAxpy(omega, x_work, x);                          /* x(k+1) = x(k) = omega*x_work */
 
       /* Compute residual */
       old_rn             = hypre_ParVectorInnerProd(r, r);
-      hypre_ParCSRMatVec(1.0, G_diag, r, 0.0, NULL, r_work);
-      hypre_ParCSRMatVec(1.0, G_diag_T, r_work, 0.0, NULL, r_work);
-      hypre_ParCSRMatVec(1.0, A_diag, r_work, 0.0, NULL, r_work);
+      hypre_ParCSRMatrixMatvecOutOfPlace(1.0, G, r, 0.0, NULL, r_work);
+
+      /* VPM: In y = A*x + b, y cannot be the same vector as x */
+      //hypre_ParCSRMatrixMatvec(1.0, GT, r_work, 0.0, NULL, r_work);
+      //hypre_ParCSRMatrixMatvec(1.0, A, r_work, 0.0, NULL, r_work);
+
       hypre_ParVectorAxpy(-1.0, r_work, r);
       new_rn             = hypre_ParVectorInnerProd(r, r);
 
@@ -126,4 +128,5 @@ hypre_FSAISolve( void   *fsai_vdata,
    hypre_ParVectorDestroy(r_work);
    hypre_ParVectorDestroy(r_old);
 
+   return hypre_error_flag;
 }
