@@ -95,7 +95,7 @@ FILES =\
  par_amg_solveT.c\
  par_fsai.c\
  par_fsai_setup.c\
- par_fsai_solve.h\
+ par_fsai_solve.c\
  par_cg_relax_wt.c\
  par_coarsen.c\
  par_cgc_coarsen.c\
