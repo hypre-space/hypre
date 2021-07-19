@@ -160,11 +160,20 @@ hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_di
 }
 
 __global__ void
-hypreCUDAKernel_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int has_offd,
-                               HYPRE_BigInt first_col, HYPRE_Int *d_col_map_offd_A,
-                               HYPRE_Int *d_diag_i, HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a,
-                               HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j, HYPRE_Complex *d_offd_a,
-                               HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab)
+hypreCUDAKernel_CopyParCSRRows(HYPRE_Int      nrows,
+                               HYPRE_Int     *d_row_indices,
+                               HYPRE_Int      has_offd,
+                               HYPRE_BigInt   first_col,
+                               HYPRE_BigInt  *d_col_map_offd_A,
+                               HYPRE_Int     *d_diag_i,
+                               HYPRE_Int     *d_diag_j,
+                               HYPRE_Complex *d_diag_a,
+                               HYPRE_Int     *d_offd_i,
+                               HYPRE_Int     *d_offd_j,
+                               HYPRE_Complex *d_offd_a,
+                               HYPRE_Int     *d_ib,
+                               HYPRE_BigInt  *d_jb,
+                               HYPRE_Complex *d_ab)
 {
    const HYPRE_Int global_warp_id = hypre_cuda_get_grid_warp_id<1,1>();
 
@@ -251,11 +260,21 @@ hypreCUDAKernel_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_
  *    If col_map_offd_A == NULL, use (-1 - d_offd_j) as column id
  *    If nrows == 1 and d_ib == NULL, it means d_ib[0] = 0 */
 HYPRE_Int
-hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job, HYPRE_Int has_offd,
-                           HYPRE_BigInt first_col, HYPRE_BigInt *d_col_map_offd_A,
-                           HYPRE_Int *d_diag_i, HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a,
-                           HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j, HYPRE_Complex *d_offd_a,
-                           HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab)
+hypreDevice_CopyParCSRRows(HYPRE_Int      nrows,
+                           HYPRE_Int     *d_row_indices,
+                           HYPRE_Int      job,
+                           HYPRE_Int      has_offd,
+                           HYPRE_BigInt   first_col,
+                           HYPRE_BigInt  *d_col_map_offd_A,
+                           HYPRE_Int     *d_diag_i,
+                           HYPRE_Int     *d_diag_j,
+                           HYPRE_Complex *d_diag_a,
+                           HYPRE_Int     *d_offd_i,
+                           HYPRE_Int     *d_offd_j,
+                           HYPRE_Complex *d_offd_a,
+                           HYPRE_Int     *d_ib,
+                           HYPRE_BigInt  *d_jb,
+                           HYPRE_Complex *d_ab)
 {
    /* trivial case */
    if (nrows <= 0)
@@ -301,6 +320,14 @@ HYPRE_Int
 hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 {
    HYPRE_THRUST_CALL(exclusive_scan, d_i, d_i + n, d_i);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypreDevice_Filln(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v)
+{
+   HYPRE_THRUST_CALL( fill_n, d_x, n, v);
 
    return hypre_error_flag;
 }
@@ -368,6 +395,8 @@ hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
    return hypre_error_flag;
 }
 
+/* Input: d_row_num, of size nrows, contains the rows indices that can be BigInt or Int
+ * Output: d_row_ind */
 template <typename T>
 HYPRE_Int
 hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind)
@@ -390,7 +419,7 @@ hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_
 }
 
 template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_num, HYPRE_Int *d_row_ind);
-#if defined(HYPRE_MIXEDINT) || defined(HYPRE_BIGINT)
+#if defined(HYPRE_MIXEDINT)
 template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr, HYPRE_BigInt *d_row_num, HYPRE_BigInt *d_row_ind);
 #endif
 
@@ -731,9 +760,9 @@ hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HY
    return hypre_error_flag;
 }
 
-template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_Int *keys1, HYPRE_Int  *keys2, HYPRE_Int *vals, HYPRE_Int opt);
-template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_Int *keys1, HYPRE_Real *keys2, HYPRE_Int *vals, HYPRE_Int opt);
-template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_BigInt *keys1, HYPRE_BigInt *keys2, HYPRE_Complex *vals, HYPRE_Int opt);
+template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_Int *keys1, HYPRE_Int  *keys2, HYPRE_Int     *vals, HYPRE_Int opt);
+template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_Int *keys1, HYPRE_Real *keys2, HYPRE_Int     *vals, HYPRE_Int opt);
+template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_Int *keys1, HYPRE_Int  *keys2, HYPRE_Complex *vals, HYPRE_Int opt);
 
 /* opt:
  *      0, (a,b) < (a',b') iff a < a' or (a = a' and  b  <  b')                       [normal tupe comp]
@@ -759,10 +788,10 @@ hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *val
    return hypre_error_flag;
 }
 
-#if defined(HYPRE_MIXEDINT) || defined(HYPRE_BIGINT)
+template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_Int *keys1, HYPRE_Int *keys2, char *vals1, HYPRE_Complex *vals2, HYPRE_Int opt);
+#if defined(HYPRE_MIXEDINT)
 template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_BigInt *keys1, HYPRE_BigInt *keys2, char *vals1, HYPRE_Complex *vals2, HYPRE_Int opt);
 #endif
-template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_Int *keys1, HYPRE_Int *keys2, char *vals1, HYPRE_Complex *vals2, HYPRE_Int opt);
 
 template <typename T1, typename T2, typename T3>
 HYPRE_Int

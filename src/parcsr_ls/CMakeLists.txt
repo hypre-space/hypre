@@ -140,6 +140,8 @@ target_sources(${PROJECT_NAME}
 if (HYPRE_USING_CUDA)
   set(CUDA_SRCS
     ams.c
+    ads.c
+    ame.c
     par_ilu.c
     par_ilu_setup.c
     par_ilu_solve.c

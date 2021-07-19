@@ -1810,6 +1810,11 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
 
       for (i = 0; i < current_num_elmts; i++)
       {
+#if defined(HYPRE_DEBUG)
+         hypre_assert(tmp[i] < hypre_IJMatrixRowPartitioning(matrix)[0] || tmp[i] >= hypre_IJMatrixRowPartitioning(matrix)[1]);
+         hypre_assert(tmp[i] >= global_first_row && tmp[i] < global_first_row + hypre_IJMatrixGlobalNumRows(matrix));
+         hypre_assert(off_proc_j_h[i] >= global_first_col && off_proc_j_h[i] < global_first_col + global_num_cols);
+#endif
          off_proc_i_h[2*i]   = tmp[i];
          off_proc_i_h[2*i+1] = 1;
       }

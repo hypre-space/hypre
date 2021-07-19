@@ -767,7 +767,7 @@ int main (int argc, char *argv[])
       int part = 0;
       int var = 0; /* the node variable */
       int index[3];
-      double xval, yval, zval;
+      double *xyzval = (double *) malloc(3*sizeof(double));
 
       /* Create empty vector objects */
       HYPRE_SStructVectorCreate(MPI_COMM_WORLD, node_grid, &xcoord);
@@ -789,19 +789,20 @@ int main (int argc, char *argv[])
             {
                index[0] = i + pi*n; index[1] = j + pj*n; index[2] = k + pk*n;
 
-               xval = index[0]*h;
-               yval = index[1]*h;
-               zval = index[2]*h;
+               xyzval[0] = index[0]*h;
+               xyzval[1] = index[1]*h;
+               xyzval[2] = index[2]*h;
 
-               HYPRE_SStructVectorSetValues(xcoord, part, index, var, &xval);
-               HYPRE_SStructVectorSetValues(ycoord, part, index, var, &yval);
-               HYPRE_SStructVectorSetValues(zcoord, part, index, var, &zval);
+               HYPRE_SStructVectorSetValues(xcoord, part, index, var, &xyzval[0]);
+               HYPRE_SStructVectorSetValues(ycoord, part, index, var, &xyzval[1]);
+               HYPRE_SStructVectorSetValues(zcoord, part, index, var, &xyzval[2]);
             }
 
       /* Finalize the vector assembly */
       HYPRE_SStructVectorAssemble(xcoord);
       HYPRE_SStructVectorAssemble(ycoord);
       HYPRE_SStructVectorAssemble(zcoord);
+      free(xyzval);
    }
 
    /* 5. Set up a SStruct Vector for the solution vector x */

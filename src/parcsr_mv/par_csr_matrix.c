@@ -2990,3 +2990,28 @@ hypre_ParCSRMatrixTruncate(hypre_ParCSRMatrix *A,
 
    return ierr;
 }
+
+HYPRE_Int
+hypre_ParCSRMatrixSetConstantValues( hypre_ParCSRMatrix *A,
+                                     HYPRE_Complex       value )
+{
+   hypre_CSRMatrixSetConstantValues(hypre_ParCSRMatrixDiag(A), value);
+   hypre_CSRMatrixSetConstantValues(hypre_ParCSRMatrixOffd(A), value);
+
+   return hypre_error_flag;
+}
+
+void
+hypre_ParCSRMatrixCopyColMapOffdToDevice(hypre_ParCSRMatrix *A)
+{
+#if defined(HYPRE_USING_GPU)
+   if (hypre_ParCSRMatrixDeviceColMapOffd(A) == NULL)
+   {
+      const HYPRE_Int num_cols_A_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
+      hypre_ParCSRMatrixDeviceColMapOffd(A) = hypre_TAlloc(HYPRE_BigInt, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(hypre_ParCSRMatrixDeviceColMapOffd(A), hypre_ParCSRMatrixColMapOffd(A), HYPRE_BigInt, num_cols_A_offd,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+   }
+#endif
+}
+

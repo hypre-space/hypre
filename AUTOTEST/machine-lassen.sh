@@ -11,7 +11,7 @@ case $1 in
    -h|-help)
       cat <<EOF
 
-   **** Only run this script on the lassen/ray cluster ****
+   **** Only run this script on the lassen cluster ****
 
    $0 [-h|-help] {src_dir}
 
@@ -39,6 +39,9 @@ shift
 mo="-j test"
 eo=""
 
+rtol="0.0"
+atol="3e-15"
+
 #save=`echo $(hostname) | sed 's/[0-9]\+$//'`
 save="lassen"
 
@@ -48,10 +51,16 @@ save="lassen"
 
 # CUDA with UM in debug mode [ij, ams, struct, sstruct]
 co="--with-cuda --enable-unified-memory --enable-persistent --enable-debug --with-gpu-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
-ro="-ij-gpu -ams -struct -sstruct -rt -mpibind -save ${save}"
-eo="-gpu -rt -mpibind -save ${save}"
+ro="-ij-gpu -ams -struct -sstruct -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
+eo="-gpu -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
 ./renametest.sh basic $output_dir/basic-cuda-um
+
+#CUDA with UM and mixed-int
+co="--with-cuda --enable-unified-memory --enable-mixedint --enable-debug --with-gpu-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
+ro="-ij-mixed -ams -struct -sstruct-mixed -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./renametest.sh basic $output_dir/basic-cuda-um-mixedint
 
 # CUDA with UM with shared library [no run]
 co="--with-cuda --enable-unified-memory --with-openmp --enable-hopscotch --enable-shared --with-gpu-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
