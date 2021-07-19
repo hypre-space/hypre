@@ -30,32 +30,20 @@ hypre_FSAISolve( void               *fsai_vdata,
    /* Data structure variables */
    hypre_ParCSRMatrix  *G                    = hypre_ParFSAIDataGmat(fsai_data);
    hypre_ParCSRMatrix  *GT                   = hypre_ParFSAIDataGTmat(fsai_data);
+   hypre_ParVector     *x_work               = hypre_ParFSAIDataXWork(fsai_data);
+   hypre_ParVector     *r_work               = hypre_ParFSAIDataRWork(fsai_data);
+   hypre_ParVector     *z_work               = hypre_ParFSAIDataZWork(fsai_data);
+   hypre_ParVector     *r                    = hypre_ParFSAIDataResidual(fsai_data);
    HYPRE_Int            tol                  = hypre_ParFSAIDataTolerance(fsai_data);
    HYPRE_Int            max_iter             = hypre_ParFSAIDataMaxIterations(fsai_data);
    HYPRE_Int            print_level          = hypre_ParFSAIDataPrintLevel(fsai_data);
    HYPRE_Int            logging              = hypre_ParFSAIDataLogging(fsai_data);
    HYPRE_Real           omega                = hypre_ParFSAIDataOmega(fsai_data);
 
-   /* Initilaize residual */
-   hypre_ParVector      *r;
-   hypre_ParVectorCreate(comm, hypre_ParCSRMatrixGlobalNumRows(A), hypre_ParCSRMatrixRowStarts(A));
-   hypre_ParVectorInitialize(r);
-   hypre_ParFSAIDataResidual(fsai_data)      = r;
-
    /* Local variables */
 
    HYPRE_Int            iter, num_procs, my_id;
    HYPRE_Real           old_rn, new_rn, rel_resnorm;
-
-   //HYPRE_Int            n = hypre_CSRMatrixNumRows(A_diag);
-
-   hypre_ParVector         *x_work            = hypre_ParVectorCreate(comm, hypre_ParCSRMatrixGlobalNumRows(A), hypre_ParCSRMatrixRowStarts(A));
-   hypre_ParVector         *r_work            = hypre_ParVectorCreate(comm, hypre_ParCSRMatrixGlobalNumRows(A), hypre_ParCSRMatrixRowStarts(A));
-   hypre_ParVector         *r_old             = hypre_ParVectorCreate(comm, hypre_ParCSRMatrixGlobalNumRows(A), hypre_ParCSRMatrixRowStarts(A));
-
-   hypre_ParVectorInitialize(x_work);
-   hypre_ParVectorInitialize(r_work);
-   hypre_ParVectorInitialize(r_old);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -90,18 +78,18 @@ hypre_FSAISolve( void               *fsai_vdata,
       hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A, x, 1.0, b, x_work); /* x_work = b - A*x(k) */
 
       /* VPM: In y = A*x + b, y cannot be the same vector as x */
-      //hypre_ParCSRMatrixMatvec(1.0, G, x_work, 0.0, NULL, x_work);    /* x_work = G*x_work */
-      //hypre_ParCSRMatrixMatvec(1.0, GT, x_work, 0.0, NULL, x_work);   /* x_work = G^T*x_work */
+      hypre_ParCSRMatrixMatvecOutOfPlace(1.0, G, x_work, 0.0, NULL, z_work);    /* z_work = G*x_work */
+      hypre_ParCSRMatrixMatvecOutOfPlace(1.0, GT, z_work, 0.0, NULL, x_work);   /* x_work = G^T*z_work */
 
-      hypre_ParVectorAxpy(omega, x_work, x);                          /* x(k+1) = x(k) = omega*x_work */
+      hypre_ParVectorAxpy(omega, x_work, x);                                    /* x(k+1) = x(k) = omega*x_work */
 
       /* Compute residual */
       old_rn             = hypre_ParVectorInnerProd(r, r);
       hypre_ParCSRMatrixMatvecOutOfPlace(1.0, G, r, 0.0, NULL, r_work);
 
       /* VPM: In y = A*x + b, y cannot be the same vector as x */
-      //hypre_ParCSRMatrixMatvec(1.0, GT, r_work, 0.0, NULL, r_work);
-      //hypre_ParCSRMatrixMatvec(1.0, A, r_work, 0.0, NULL, r_work);
+      hypre_ParCSRMatrixMatvecOutOfPlace(1.0, GT, r_work, 0.0, NULL, z_work);
+      hypre_ParCSRMatrixMatvecOutOfPlace(1.0, A, z_work, 0.0, NULL, r_work);
 
       hypre_ParVectorAxpy(-1.0, r_work, r);
       new_rn             = hypre_ParVectorInnerProd(r, r);
@@ -123,10 +111,6 @@ hypre_FSAISolve( void               *fsai_vdata,
    }
 
    HYPRE_ANNOTATE_FUNC_END;
-
-   hypre_ParVectorDestroy(x_work);
-   hypre_ParVectorDestroy(r_work);
-   hypre_ParVectorDestroy(r_old);
 
    return hypre_error_flag;
 }

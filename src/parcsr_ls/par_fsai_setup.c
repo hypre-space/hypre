@@ -164,7 +164,7 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
 
       count = 0;
 
-      temp = abs(2 * (hypre_SeqVectorInnerProd(A_kg, G_kg) + A_j_i));
+      temp = hypre_abs(2 * (hypre_SeqVectorInnerProd(A_kg, G_kg) + A_j_i));
       if(temp > 0)
       {
          kap_grad_data[count] = temp;
@@ -307,7 +307,7 @@ hypre_FSAISetup( void               *fsai_vdata,
    /* Local variables */
    char uplo = 'L';
 
-   /* Create and initialize G_mat */
+   /* Create and initialize G_mat and work vectors */
    G = hypre_ParCSRMatrixCreate (comm,
        hypre_ParCSRMatrixGlobalNumRows(A),
        hypre_ParCSRMatrixGlobalNumCols(A),
@@ -318,6 +318,21 @@ hypre_FSAISetup( void               *fsai_vdata,
        0);
    hypre_ParCSRMatrixInitialize(G);
    hypre_ParFSAIDataGmat(fsai_data) = G;
+
+   hypre_ParVector         *residual = hypre_ParVectorCreate(comm, hypre_ParCSRMatrixGlobalNumRows(A), hypre_ParCSRMatrixRowStarts(A));      
+   hypre_ParVector         *x_work   = hypre_ParVectorCreate(comm, hypre_ParCSRMatrixGlobalNumRows(A), hypre_ParCSRMatrixRowStarts(A));      
+   hypre_ParVector         *r_work   = hypre_ParVectorCreate(comm, hypre_ParCSRMatrixGlobalNumRows(A), hypre_ParCSRMatrixRowStarts(A));    
+   hypre_ParVector         *z_work   = hypre_ParVectorCreate(comm, hypre_ParCSRMatrixGlobalNumRows(A), hypre_ParCSRMatrixRowStarts(A));      
+
+   hypre_ParVectorInitialize(residual);
+   hypre_ParVectorInitialize(x_work);
+   hypre_ParVectorInitialize(r_work);
+   hypre_ParVectorInitialize(z_work);
+   
+   hypre_ParFSAIDataResidual(fsai_data)      = residual;
+   hypre_ParFSAIDataXWork(fsai_data)         = x_work;
+   hypre_ParFSAIDataRWork(fsai_data)         = r_work;
+   hypre_ParFSAIDataZWork(fsai_data)         = z_work;
 
    /* Setting local variables */
 
@@ -413,7 +428,7 @@ hypre_FSAISetup( void               *fsai_vdata,
          hypre_SeqVectorScale(-1, A_subrow);                         /* A[P, i] */
          new_psi = hypre_SeqVectorInnerProd(G_temp, A_subrow) + A_data[A_i[i]];
 
-         if(abs( new_psi - old_psi )/old_psi < kap_tolerance)
+         if(hypre_abs( new_psi - old_psi )/old_psi < kap_tolerance)
             break;
 
          old_psi = new_psi;
@@ -421,7 +436,7 @@ hypre_FSAISetup( void               *fsai_vdata,
       }
 
       /* Calculate value to scale G_temp */
-      row_scale = 1/(sqrt(A_data[A_i[i]] - abs(hypre_SeqVectorInnerProd(G_temp, A_subrow))));
+      row_scale = 1/(sqrt(A_data[A_i[i]] - hypre_abs(hypre_SeqVectorInnerProd(G_temp, A_subrow))));
 
       /* Re-add diagonal component of G_temp before scaling */
       hypre_VectorSize(G_temp)++;
