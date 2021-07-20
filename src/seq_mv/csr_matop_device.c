@@ -1778,3 +1778,21 @@ hypre_SortCSRRocsparse(       HYPRE_Int      n,
    hypre_TFree(d_a_tmp, HYPRE_MEMORY_DEVICE);
 }
 #endif // #if defined(HYPRE_USING_ROCSPARSE)
+
+void hypre_CSRMatrixGpuSpMVAnalysis(hypre_CSRMatrix *matrix)
+{
+#if defined(HYPRE_USING_ROCSPARSE)
+
+  HYPRE_ROCSPARSE_CALL( rocsparse_dcsrmv_analysis(hypre_HandleCusparseHandle(hypre_handle()),
+                                                  rocsparse_operation_none,
+                                                  hypre_CSRMatrixNumRows(matrix),
+                                                  hypre_CSRMatrixNumCols(matrix),
+                                                  hypre_CSRMatrixNumNonzeros(matrix),
+                                                  hypre_CSRMatrixGPUMatDescr(matrix),
+                                                  hypre_CSRMatrixData(matrix),
+                                                  hypre_CSRMatrixI(matrix),
+                                                  hypre_CSRMatrixJ(matrix),
+                                                  hypre_CSRMatrixGPUMatInfo(matrix)) );
+
+#endif // #if defined(HYPRE_USING_ROCSPARSE)
+}
