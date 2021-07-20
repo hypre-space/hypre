@@ -195,9 +195,9 @@ HYPRE_Int hypreDevice_CSRSpTransRocsparse(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nn
 
 HYPRE_Int hypreDevice_CSRSpGemm(hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix **C_ptr);
 
-HYPRE_Int hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateMethod( HYPRE_Int value );
+HYPRE_Int hypre_CSRMatrixDeviceSpGemmSetNumPasses( HYPRE_Int value );
 
-HYPRE_Int hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateNSamples( HYPRE_Int value );
+HYPRE_Int hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateMethod( HYPRE_Int value );
 
 HYPRE_Int hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateNSamples( HYPRE_Int value );
 

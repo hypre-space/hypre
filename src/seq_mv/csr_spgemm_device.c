@@ -112,11 +112,26 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
 }
 
 HYPRE_Int
+hypre_CSRMatrixDeviceSpGemmSetNumPasses( HYPRE_Int value )
+{
+   if (value == 2 || value == 3)
+   {
+      hypre_HandleSpgemmNumPasses(hypre_handle()) = value;
+   }
+   else
+   {
+      return -1;
+   }
+
+   return 0;
+}
+
+HYPRE_Int
 hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateMethod( HYPRE_Int value )
 {
    if (value == 1 || value == 2 || value == 3)
    {
-      hypre_HandleCudaData(hypre_handle())->spgemm_rownnz_estimate_method = value;
+      hypre_HandleSpgemmRownnzEstimateMethod(hypre_handle()) = value;
    }
    else
    {
@@ -129,7 +144,7 @@ hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateMethod( HYPRE_Int value )
 HYPRE_Int
 hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateNSamples( HYPRE_Int value )
 {
-   hypre_HandleCudaData(hypre_handle())->spgemm_rownnz_estimate_nsamples = value;
+   hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle()) = value;
 
    return 0;
 }
@@ -139,7 +154,7 @@ hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateMultFactor( HYPRE_Real value )
 {
    if (value > 0.0)
    {
-      hypre_HandleCudaData(hypre_handle())->spgemm_rownnz_estimate_mult_factor = value;
+      hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle()) = value;
    }
    else
    {
@@ -154,7 +169,7 @@ hypre_CSRMatrixDeviceSpGemmSetHashType( char value )
 {
    if (value == 'L' || value == 'Q' || value == 'D')
    {
-      hypre_HandleCudaData(hypre_handle())->spgemm_hash_type = value;
+      hypre_HandleSpgemmHashType(hypre_handle()) = value;
    }
    else
    {

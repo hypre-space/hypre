@@ -270,6 +270,11 @@ main( hypre_int argc,
 #if defined(HYPRE_USING_HIP)
    spgemm_use_cusparse = 1;
 #endif
+   HYPRE_Int  spgemm_npass = 3;
+   HYPRE_Int  spgemm_rowest_mtd = 3;
+   HYPRE_Int  spgemm_rowest_nsamples = 32;
+   HYPRE_Real spgemm_rowest_mult = 1.5;
+   char       spgemm_hash_type = 'L';
 #endif
 
    /* for CGC BM Aug 25, 2006 */
@@ -1128,6 +1133,31 @@ main( hypre_int argc,
       {
          arg_index++;
          spgemm_use_cusparse = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-spgemm_npass") == 0 )
+      {
+         arg_index++;
+         spgemm_npass  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-spgemm_rowest") == 0 )
+      {
+         arg_index++;
+         spgemm_rowest_mtd  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-spgemm_rowestmult") == 0 )
+      {
+         arg_index++;
+         spgemm_rowest_mult  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-spgemm_rowestnsamples") == 0 )
+      {
+         arg_index++;
+         spgemm_rowest_nsamples  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-spgemm_hash") == 0 )
+      {
+         arg_index++;
+         spgemm_hash_type  = argv[arg_index++][0];
       }
       else if ( strcmp(argv[arg_index], "-use_curand") == 0 )
       {
@@ -2200,7 +2230,11 @@ main( hypre_int argc,
 
 #if defined(HYPRE_USING_GPU)
    /* use cuSPARSE for SpGEMM */
-   HYPRE_SetSpGemmUseCusparse(spgemm_use_cusparse);
+   ierr = HYPRE_SetSpGemmUseCusparse(spgemm_use_cusparse); hypre_assert(ierr == 0);
+   ierr = hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateMethod(spgemm_rowest_mtd); hypre_assert(ierr == 0);
+   ierr = hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateNSamples(spgemm_rowest_nsamples); hypre_assert(ierr == 0);
+   ierr = hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateMultFactor(spgemm_rowest_mult); hypre_assert(ierr == 0);
+   ierr = hypre_CSRMatrixDeviceSpGemmSetHashType(spgemm_hash_type); hypre_assert(ierr == 0);
    /* use cuRand for PMIS */
    HYPRE_SetUseGpuRand(use_curand);
 #endif
