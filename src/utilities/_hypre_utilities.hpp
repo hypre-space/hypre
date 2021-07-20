@@ -167,6 +167,13 @@ struct hypre_umpire_device_allocator
       hypre_assert(0); exit(1);                                                              \
    } } while(0)
 
+#define HYPRE_ROCRAND_CALL(call) do {                                                        \
+   rocrand_status err = call;                                                                \
+   if (ROCRAND_STATUS_SUCCESS != err) {                                                      \
+      hypre_printf("ROCRAND ERROR (code = %d) at %s:%d\n", err, __FILE__, __LINE__);         \
+      hypre_assert(0); exit(1);                                                              \
+   } } while(0)
+
 struct hypre_cub_CachingDeviceAllocator;
 typedef struct hypre_cub_CachingDeviceAllocator hypre_cub_CachingDeviceAllocator;
 
