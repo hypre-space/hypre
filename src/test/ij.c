@@ -2247,6 +2247,8 @@ main( hypre_int argc,
    else if ( build_matrix_type == 4 )
    {
       BuildParLaplacian27pt(argc, argv, build_matrix_arg_index, &parcsr_A);
+
+      hypre_CSRMatrixGpuSpMVAnalysis(hypre_ParCSRMatrixDiag(parcsr_A));
    }
    else if ( build_matrix_type == 5 )
    {
