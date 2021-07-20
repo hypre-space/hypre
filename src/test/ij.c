@@ -267,6 +267,9 @@ main( hypre_int argc,
    mod_rap2      = 1;
    HYPRE_Int spgemm_use_cusparse = 0;
    HYPRE_Int use_curand = 1;
+#if defined(HYPRE_USING_HIP)
+   spgemm_use_cusparse = 1;
+#endif
 #endif
 
    /* for CGC BM Aug 25, 2006 */
@@ -2196,9 +2199,6 @@ main( hypre_int argc,
    HYPRE_SetExecutionPolicy(default_exec_policy);
 
 #if defined(HYPRE_USING_GPU)
-#if defined(HYPRE_USING_HIP)
-   spgemm_use_cusparse = 1;
-#endif
    /* use cuSPARSE for SpGEMM */
    HYPRE_SetSpGemmUseCusparse(spgemm_use_cusparse);
    /* use cuRand for PMIS */

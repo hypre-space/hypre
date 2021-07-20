@@ -25,10 +25,11 @@ hash_insert_attempt(         HYPRE_Int      HashSize,      /* capacity of the ha
                              char           failed,
                     volatile char          *warp_failed)
 {
+   HYPRE_Int j = 0;
+
 #pragma unroll
    for (HYPRE_Int i = 0; i < HashSize; i++)
    {
-      HYPRE_Int j;
       /* compute the hash value of key */
       if (i == 0)
       {
@@ -228,13 +229,13 @@ csr_spmm_attempt(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
          *warp_s_failed = 0;
       }
       /* initialize warp's shared and global memory hash table */
-#pragma unrolll
+#pragma unroll
       for (HYPRE_Int k = lane_id; k < SHMEM_HASH_SIZE; k += HYPRE_WARP_SIZE)
       {
          warp_s_HashKeys[k] = -1;
          warp_s_HashVals[k] = 0.0;
       }
-#pragma unrolll
+#pragma unroll
       for (HYPRE_Int k = lane_id; k < ghash_size; k += HYPRE_WARP_SIZE)
       {
          jg[istart_g+k] = -1;
@@ -305,7 +306,7 @@ copy_from_hash_into_C_row(         HYPRE_Int      lane_id,
    HYPRE_Int j = 0;
 
    /* copy shared memory hash table into C */
-#pragma unrolll
+#pragma unroll
    for (HYPRE_Int k = lane_id; k < SHMEM_HASH_SIZE; k += HYPRE_WARP_SIZE)
    {
       HYPRE_Int key, sum, pos;
@@ -321,7 +322,7 @@ copy_from_hash_into_C_row(         HYPRE_Int      lane_id,
    }
 
    /* copy global memory hash table into C */
-#pragma unrolll
+#pragma unroll
    for (HYPRE_Int k = 0; k < ghash_size; k += HYPRE_WARP_SIZE)
    {
       HYPRE_Int key = -1, sum, pos;
@@ -359,10 +360,10 @@ copy_from_hash_into_C(HYPRE_Int  M,   HYPRE_Int *js,  HYPRE_Complex *as,
    hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 
    for (HYPRE_Int i = blockIdx.x * NUM_WARPS_PER_BLOCK + warp_id;
-            i < M;
-            i += num_warps)
+                  i < M;
+                  i += num_warps)
    {
-      HYPRE_Int kc, kg1, kg2;
+      HYPRE_Int kc = 0, kg1 = 0, kg2 = 0;
 
       /* start/end position in C */
       if (lane_id < 2)
@@ -406,7 +407,8 @@ copy_from_hash_into_C(HYPRE_Int  M,   HYPRE_Int *js,  HYPRE_Complex *as,
          (lane_id, js + i * SHMEM_HASH_SIZE, as + i * SHMEM_HASH_SIZE, g2_size, jg2 + istart_g2,
          ag2 + istart_g2, jc + istart_c, ac + istart_c);
       }
-#if defined(HYPRE_DEBUG)
+
+#ifdef HYPRE_DEBUG
       hypre_device_assert(istart_c + j == iend_c);
 #endif
    }
@@ -421,10 +423,14 @@ hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
                                         HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out,
                                         HYPRE_Int *nnzC)
 {
-   const HYPRE_Int num_warps_per_block =  20;
+#if defined(HYPRE_USING_CUDA)
+   const HYPRE_Int num_warps_per_block = 20;
+#elif defined(HYPRE_USING_HIP)
+   const HYPRE_Int num_warps_per_block = 10;
+#endif
    const HYPRE_Int shmem_hash_size     = 128;
    const HYPRE_Int BDIMX               =   2;
-   const HYPRE_Int BDIMY               =  16;
+   const HYPRE_Int BDIMY               = HYPRE_WARP_SIZE / BDIMX;
 
    /* CUDA kernel configurations */
    dim3 bDim(BDIMX, BDIMY, num_warps_per_block);

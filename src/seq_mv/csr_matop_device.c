@@ -591,7 +591,7 @@ hypreCUDAKernel_CSRMoveDiagFirst( HYPRE_Int      nrows,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p, q;
+   HYPRE_Int p = 0, q = 0;
 
    if (lane < 2)
    {
@@ -701,7 +701,7 @@ hypreCUDAKernel_CSRMatrixFixZeroDiagDevice( HYPRE_Complex  v,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p, q;
+   HYPRE_Int p = 0, q = 0;
    bool has_diag = false;
 
    if (lane < 2)
@@ -799,7 +799,7 @@ hypreCUDAKernel_CSRMatrixReplaceDiagDevice( HYPRE_Complex *new_diag,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p, q;
+   HYPRE_Int p = 0, q = 0;
    bool has_diag = false;
 
    if (lane < 2)
@@ -984,7 +984,7 @@ hypreCUDAKernel_CSRRowSum( HYPRE_Int      nrows,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p, q;
+   HYPRE_Int p = 0, q = 0;
 
    if (lane < 2)
    {
@@ -1090,7 +1090,7 @@ hypreCUDAKernel_CSRExtractDiag( HYPRE_Int      nrows,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p, q;
+   HYPRE_Int p = 0, q = 0;
 
    if (lane < 2)
    {

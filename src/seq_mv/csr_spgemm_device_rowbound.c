@@ -24,10 +24,11 @@ hash_insert_symbl(HYPRE_Int            HashSize,      /* capacity of the hash ta
                   HYPRE_Int            key,           /* assumed to be nonnegative */
                   HYPRE_Int           &count          /* increase by 1 if is a new entry */)
 {
+   HYPRE_Int j = 0;
+
 #pragma unroll
    for (HYPRE_Int i = 0; i < HashSize; i++)
    {
-      HYPRE_Int j;
       /* compute the hash value of key */
       if (i == 0)
       {
@@ -157,7 +158,7 @@ void csr_spmm_symbolic(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
 
    for (HYPRE_Int i = grid_warp_id; i < M; i += num_warps)
    {
-      HYPRE_Int j;
+      HYPRE_Int j = 0;
 
       if (ATTEMPT == 2)
       {
@@ -186,12 +187,12 @@ void csr_spmm_symbolic(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
       ghash_size = iend_g - istart_g;
 
       /* initialize warp's shared and global memory hash table */
-#pragma unrolll
+#pragma unroll
       for (HYPRE_Int k = lane_id; k < SHMEM_HASH_SIZE; k += HYPRE_WARP_SIZE)
       {
          warp_s_HashKeys[k] = -1;
       }
-#pragma unrolll
+#pragma unroll
       for (HYPRE_Int k = lane_id; k < ghash_size; k += HYPRE_WARP_SIZE)
       {
          jg[istart_g+k] = -1;
@@ -245,10 +246,15 @@ void gpu_csr_spmm_rownnz_attempt(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    hypre_profile_times[HYPRE_TIMER_ID_SPMM_SYMBOLIC] -= hypre_MPI_Wtime();
 #endif
 
-   const HYPRE_Int num_warps_per_block =  20;
+#if defined(HYPRE_USING_CUDA)
+   const HYPRE_Int num_warps_per_block = 20;
+#elif defined(HYPRE_USING_HIP)
+   const HYPRE_Int num_warps_per_block = 10;
+#endif
+
    const HYPRE_Int shmem_hash_size     = 256;//512;
    const HYPRE_Int BDIMX               =   2;
-   const HYPRE_Int BDIMY               =  16;
+   const HYPRE_Int BDIMY               = HYPRE_WARP_SIZE / BDIMX;
 
    /* CUDA kernel configurations */
    dim3 bDim(BDIMX, BDIMY, num_warps_per_block);

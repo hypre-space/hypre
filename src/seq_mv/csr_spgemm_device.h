@@ -14,19 +14,21 @@
 
 #define COHEN_USE_SHMEM 0
 
-/* these are under the assumptions made in spgemm on block sizes: only use in spmm routines */
+/* these are under the assumptions made in spgemm on block sizes: only use in spmm routines
+ * where we assume CUDA block is 3D and blockDim.x * blockDim.y = WARP_SIZE
+ */
 static __device__ __forceinline__
 hypre_int get_block_size()
 {
    //return (blockDim.x * blockDim.y * blockDim.z);           // in general cases
-   return (HYPRE_WARP_SIZE * blockDim.z);                           // if blockDim.x * blockDim.y = WARP_SIZE
+   return (HYPRE_WARP_SIZE * blockDim.z);                     // if blockDim.x * blockDim.y = WARP_SIZE
 }
 
 static __device__ __forceinline__
 hypre_int get_thread_id()
 {
    //return (threadIdx.z * blockDim.x * blockDim.y + threadIdx.y * blockDim.x + threadIdx.x); // in general cases
-   return (threadIdx.z * HYPRE_WARP_SIZE + threadIdx.y * blockDim.x + threadIdx.x);                 // if blockDim.x * blockDim.y = WARP_SIZE
+   return (threadIdx.z * HYPRE_WARP_SIZE + threadIdx.y * blockDim.x + threadIdx.x);           // if blockDim.x * blockDim.y = WARP_SIZE
 }
 
 static __device__ __forceinline__

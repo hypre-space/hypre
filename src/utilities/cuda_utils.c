@@ -1002,7 +1002,18 @@ hypre_CurandUniform_core( HYPRE_Int          n,
                           hypre_ulonglongint offset)
 {
    hypre_error_w_msg(1, "ROCRand has not been available");
-   exit(0);
+
+   T *urand_host = hypre_TAlloc(T, n, HYPRE_MEMORY_HOST);
+   HYPRE_Int i;
+   for (i = 0; i < n; i++)
+   {
+      urand_host[i] = hypre_Rand();
+   }
+
+   hypre_TMemcpy(urand, urand_host, T, n, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+   hypre_TFree(urand_host, HYPRE_MEMORY_HOST);
+
+   return hypre_error_flag;
 }
 #endif /* #if defined(HYPRE_USING_ROCRAND) */
 
