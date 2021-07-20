@@ -990,8 +990,25 @@ hypre_CurandUniform_core( HYPRE_Int          n,
 }
 #endif /* #if defined(HYPRE_USING_CURAND) */
 
-// RL: TODO
 #if defined(HYPRE_USING_ROCRAND)
+rocrand_generator
+hypre_CudaDataCurandGenerator(hypre_CudaData *data)
+{
+   if (data->curand_generator)
+   {
+      return data->curand_generator;
+   }
+
+   rocrand_generator gen;
+   HYPRE_ROCRAND_CALL( rocrand_create_generator(&gen, ROCRAND_RNG_PSEUDO_DEFAULT) );
+   HYPRE_ROCRAND_CALL( rocrand_set_seed(gen, 1234ULL) );
+   HYPRE_ROCRAND_CALL( rocrand_set_stream(gen, hypre_CudaDataCudaComputeStream(data)) );
+
+   data->curand_generator = gen;
+
+   return gen;
+}
+
 template <typename T>
 HYPRE_Int
 hypre_CurandUniform_core( HYPRE_Int          n,
