@@ -45,6 +45,10 @@
 #include <rocsparse.h>
 #endif
 
+#if defined(HYPRE_USING_ROCRAND)
+#include <rocrand.h>
+#endif
+
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #define HYPRE_CUDA_CALL(call) do {                                                           \
