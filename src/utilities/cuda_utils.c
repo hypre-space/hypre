@@ -1158,7 +1158,7 @@ hypre_CudaDataCreate()
    hypre_CudaDataSpgemmHashType(data) = 'L';
 
    /* pmis */
-#ifdef HYPRE_USING_CURAND
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
    hypre_CudaDataUseGpuRand(data) = 1;
 #else
    hypre_CudaDataUseGpuRand(data) = 0;
@@ -1193,6 +1193,13 @@ hypre_CudaDataDestroy(hypre_CudaData *data)
    if (data->curand_generator)
    {
       HYPRE_CURAND_CALL( curandDestroyGenerator(data->curand_generator) );
+   }
+#endif
+
+#if defined(HYPRE_USING_ROCRAND)
+   if (data->curand_generator)
+   {
+      HYPRE_ROCRAND_CALL( rocrand_destroy_generator(data->curand_generator) );
    }
 #endif
 

@@ -208,7 +208,7 @@ HYPRE_Init()
    hypre_HandleCusparseHandle(_hypre_handle);
 #endif
 
-#if defined(HYPRE_USING_CURAND)
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
    hypre_HandleCurandGenerator(_hypre_handle);
 #endif
 
