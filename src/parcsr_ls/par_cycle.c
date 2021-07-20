@@ -232,7 +232,6 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          HYPRE_Int actual_local_size = hypre_ParVectorActualLocalSize(Vtemp);
          Utemp = hypre_ParVectorCreate(comm,hypre_ParVectorGlobalSize(Vtemp),
                                        hypre_ParVectorPartitioning(Vtemp));
-         hypre_ParVectorOwnsPartitioning(Utemp) = 0;
          local_size
             = hypre_VectorSize(hypre_ParVectorLocalVector(Vtemp));
          if (local_size < actual_local_size)

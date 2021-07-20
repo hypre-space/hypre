@@ -465,21 +465,18 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
    /* generate par vectors */
 
    Zero = hypre_ParVectorCreate(comm, n, starts);
-   hypre_ParVectorSetPartitioningOwner(Zero,0);
    hypre_ParVectorInitialize(Zero);
    datax = hypre_VectorData(hypre_ParVectorLocalVector(Zero));
    for (i=0; i<n_local; i++)
       datax[i] = 0.;
 
    Temp = hypre_ParVectorCreate(comm, n, starts);
-   hypre_ParVectorSetPartitioningOwner(Temp,0);
    hypre_ParVectorInitialize(Temp);
    datax = hypre_VectorData(hypre_ParVectorLocalVector(Temp));
    for (i=0; i<n_local; i++)
       datax[i] = 0.;
 
    U = hypre_ParVectorCreate(comm, n, starts);
-   hypre_ParVectorSetPartitioningOwner(U,0);
    hypre_ParVectorInitialize(U);
    datax = hypre_VectorData(hypre_ParVectorLocalVector(U));
 
@@ -487,7 +484,6 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
    {
       Qtemp = hypre_ParVectorCreate(comm, n, starts);
       hypre_ParVectorInitialize(Qtemp);
-      hypre_ParVectorSetPartitioningOwner(Qtemp,0);
    }
 
    /* allocate space for the vectors */

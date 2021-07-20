@@ -56,7 +56,6 @@ hypre_ParVectorCreate( MPI_Comm      comm,
 
    /* set defaults */
    hypre_ParVectorOwnsData(vector)         = 1;
-   hypre_ParVectorOwnsPartitioning(vector) = 1;
    hypre_ParVectorActualLocalSize(vector)  = 0;
 
    return vector;
@@ -91,16 +90,13 @@ hypre_ParVectorDestroy( hypre_ParVector *vector )
       {
          hypre_SeqVectorDestroy(hypre_ParVectorLocalVector(vector));
       }
-      if ( hypre_ParVectorOwnsPartitioning(vector) )
-      {
-         hypre_TFree(hypre_ParVectorPartitioning(vector), HYPRE_MEMORY_HOST);
-      }
 
       if (hypre_ParVectorAssumedPartition(vector))
       {
          hypre_AssumedPartitionDestroy(hypre_ParVectorAssumedPartition(vector));
       }
 
+      hypre_TFree(hypre_ParVectorPartitioning(vector), HYPRE_MEMORY_HOST);
       hypre_TFree(vector, HYPRE_MEMORY_HOST);
    }
 
@@ -146,25 +142,6 @@ hypre_ParVectorSetDataOwner( hypre_ParVector *vector,
       return hypre_error_flag;
    }
    hypre_ParVectorOwnsData(vector) = owns_data;
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_ParVectorSetPartitioningOwner
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_ParVectorSetPartitioningOwner( hypre_ParVector *vector,
-                                     HYPRE_Int        owns_partitioning )
-{
-   if (!vector)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   hypre_ParVectorOwnsPartitioning(vector) = owns_partitioning;
 
    return hypre_error_flag;
 }
@@ -226,7 +203,6 @@ hypre_ParVector
    hypre_ParVectorPartitioning(par_vector) = partitioning;
 
    hypre_ParVectorOwnsData(par_vector) = 1;
-   hypre_ParVectorOwnsPartitioning(par_vector) = 1;
 
    hypre_sprintf(new_file_name,"%s.%d",file_name,my_id);
    hypre_ParVectorLocalVector(par_vector) = hypre_SeqVectorRead(new_file_name);
@@ -337,7 +313,6 @@ hypre_ParVectorCloneShallow( hypre_ParVector *x )
    hypre_ParVectorOwnsData(y) = 1;
    /* ...This vector owns its local vector, although the local vector doesn't
     * own _its_ data */
-   hypre_ParVectorOwnsPartitioning(y) = 0;
    hypre_SeqVectorDestroy( hypre_ParVectorLocalVector(y) );
    hypre_ParVectorLocalVector(y) = hypre_SeqVectorCloneShallow(hypre_ParVectorLocalVector(x) );
    hypre_ParVectorFirstIndex(y) = hypre_ParVectorFirstIndex(x);
@@ -353,7 +328,6 @@ hypre_ParVectorCloneDeep_v2( hypre_ParVector *x, HYPRE_MemoryLocation memory_loc
                             hypre_ParVectorPartitioning(x));
 
    hypre_ParVectorOwnsData(y) = 1;
-   hypre_ParVectorOwnsPartitioning(y) = 0;
    hypre_SeqVectorDestroy( hypre_ParVectorLocalVector(y) );
    hypre_ParVectorLocalVector(y) = hypre_SeqVectorCloneDeep_v2( hypre_ParVectorLocalVector(x),
                                                                 memory_location );
@@ -1115,4 +1089,3 @@ hypre_ParVectorGetValues(hypre_ParVector *vector,
 {
    return hypre_ParVectorGetValues2(vector, num_values, indices, 0, values);
 }
-

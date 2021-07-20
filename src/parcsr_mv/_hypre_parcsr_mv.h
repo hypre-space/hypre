@@ -242,11 +242,8 @@ typedef struct hypre_ParVector_struct
 
    /* Does the Vector create/destroy `data'? */
    HYPRE_Int             owns_data;
-   HYPRE_Int             owns_partitioning;
 
-   hypre_IJAssumedPart  *assumed_partition; /* only populated if no_global_partition option
-                                              is used (compile-time option) AND this partition
-                                              needed
+   hypre_IJAssumedPart  *assumed_partition; /* only populated if this partition needed
                                               (for setting off-proc elements, for example)*/
 } hypre_ParVector;
 
@@ -262,7 +259,6 @@ typedef struct hypre_ParVector_struct
 #define hypre_ParVectorActualLocalSize(vector)  ((vector) -> actual_local_size)
 #define hypre_ParVectorLocalVector(vector)      ((vector) -> local_vector)
 #define hypre_ParVectorOwnsData(vector)         ((vector) -> owns_data)
-#define hypre_ParVectorOwnsPartitioning(vector) ((vector) -> owns_partitioning)
 #define hypre_ParVectorNumVectors(vector)       (hypre_VectorNumVectors(hypre_ParVectorLocalVector(vector)))
 
 #define hypre_ParVectorAssumedPartition(vector) ((vector) -> assumed_partition)
@@ -274,7 +270,6 @@ hypre_ParVectorMemoryLocation(hypre_ParVector *vector)
 }
 
 #endif
-
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -916,7 +911,6 @@ HYPRE_Int hypre_ParVectorDestroy ( hypre_ParVector *vector );
 HYPRE_Int hypre_ParVectorInitialize ( hypre_ParVector *vector );
 HYPRE_Int hypre_ParVectorInitialize_v2( hypre_ParVector *vector, HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_ParVectorSetDataOwner ( hypre_ParVector *vector , HYPRE_Int owns_data );
-HYPRE_Int hypre_ParVectorSetPartitioningOwner ( hypre_ParVector *vector , HYPRE_Int owns_partitioning );
 HYPRE_Int hypre_ParVectorSetNumVectors ( hypre_ParVector *vector , HYPRE_Int num_vectors );
 hypre_ParVector *hypre_ParVectorRead ( MPI_Comm comm , const char *file_name );
 HYPRE_Int hypre_ParVectorPrint ( hypre_ParVector *vector , const char *file_name );

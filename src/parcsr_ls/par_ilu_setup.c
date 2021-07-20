@@ -380,14 +380,12 @@ hypre_ILUSetup( void               *ilu_vdata,
          hypre_ParCSRMatrixGlobalNumRows(A),
          hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(Utemp);
-   hypre_ParVectorSetPartitioningOwner(Utemp,0);
    hypre_ParILUDataUTemp(ilu_data) = Utemp;
 
    Ftemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
          hypre_ParCSRMatrixGlobalNumRows(A),
          hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(Ftemp);
-   hypre_ParVectorSetPartitioningOwner(Ftemp,0);
    hypre_ParILUDataFTemp(ilu_data) = Ftemp;
    /* set matrix, solution and rhs pointers */
    matA = A;
@@ -518,13 +516,11 @@ hypre_ILUSetup( void               *ilu_vdata,
                                    hypre_ParCSRMatrixGlobalNumRows(matS),
                                    hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(Xtemp);
-            hypre_ParVectorSetPartitioningOwner(Xtemp,0);
 
             Ytemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(matS),
                                    hypre_ParCSRMatrixGlobalNumRows(matS),
                                    hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(Ytemp);
-            hypre_ParVectorSetPartitioningOwner(Ytemp,0);
 
             Ftemp_upper = hypre_SeqVectorCreate(nLU);
             hypre_VectorOwnsData(Ftemp_upper)   = 0;
@@ -590,12 +586,10 @@ hypre_ILUSetup( void               *ilu_vdata,
                                     hypre_ParCSRMatrixGlobalNumRows(matS),
                                     hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(rhs);
-            hypre_ParVectorSetPartitioningOwner(rhs,0);
             x = hypre_ParVectorCreate(comm,
                                     hypre_ParCSRMatrixGlobalNumRows(matS),
                                     hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(x);
-            hypre_ParVectorSetPartitioningOwner(x,0);
 
             /* setup solver */
             HYPRE_GMRESSetup(schur_solver,(HYPRE_Matrix)ilu_vdata,(HYPRE_Vector)rhs,(HYPRE_Vector)x);
@@ -652,12 +646,10 @@ hypre_ILUSetup( void               *ilu_vdata,
                                     hypre_ParCSRMatrixGlobalNumRows(matS),
                                     hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(rhs);
-            hypre_ParVectorSetPartitioningOwner(rhs,0);
             x = hypre_ParVectorCreate(comm,
                                     hypre_ParCSRMatrixGlobalNumRows(matS),
                                     hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(x);
-            hypre_ParVectorSetPartitioningOwner(x,0);
 
             /* setup solver */
             HYPRE_GMRESSetup(schur_solver,(HYPRE_Matrix)matS,(HYPRE_Vector)rhs,(HYPRE_Vector)x);
@@ -697,12 +689,10 @@ hypre_ILUSetup( void               *ilu_vdata,
                   hypre_ParCSRMatrixGlobalNumRows(matS),
                   hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(rhs);
-            hypre_ParVectorSetPartitioningOwner(rhs,0);
             x = hypre_ParVectorCreate(comm,
                   hypre_ParCSRMatrixGlobalNumRows(matS),
                   hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(x);
-            hypre_ParVectorSetPartitioningOwner(x,0);
 
             /* setup solver */
             hypre_NSHSetup(schur_solver,matS,rhs,x);
@@ -771,12 +761,10 @@ hypre_ILUSetup( void               *ilu_vdata,
                                     hypre_ParCSRMatrixGlobalNumRows(matS),
                                     hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(rhs);
-            hypre_ParVectorSetPartitioningOwner(rhs,0);
             x = hypre_ParVectorCreate(comm,
                                     hypre_ParCSRMatrixGlobalNumRows(matS),
                                     hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(x);
-            hypre_ParVectorSetPartitioningOwner(x,0);
 
             /* setup solver */
             HYPRE_GMRESSetup(schur_solver,(HYPRE_Matrix)matS,(HYPRE_Vector)rhs,(HYPRE_Vector)x);
@@ -798,13 +786,11 @@ hypre_ILUSetup( void               *ilu_vdata,
                                    hypre_ParCSRMatrixGlobalNumRows(matA),
                                    hypre_ParCSRMatrixRowStarts(matA));
             hypre_ParVectorInitialize(Xtemp);
-            hypre_ParVectorSetPartitioningOwner(Xtemp,0);
 
             Ytemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(matA),
                                    hypre_ParCSRMatrixGlobalNumRows(matA),
                                    hypre_ParCSRMatrixRowStarts(matA));
             hypre_ParVectorInitialize(Ytemp);
-            hypre_ParVectorSetPartitioningOwner(Ytemp,0);
 
             Ftemp_upper = hypre_SeqVectorCreate(nLU);
             hypre_VectorOwnsData(Ftemp_upper)   = 0;
@@ -876,12 +862,10 @@ hypre_ILUSetup( void               *ilu_vdata,
                                     hypre_ParCSRMatrixGlobalNumRows(matS),
                                     hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(rhs);
-            hypre_ParVectorSetPartitioningOwner(rhs,0);
             x = hypre_ParVectorCreate(comm,
                                     hypre_ParCSRMatrixGlobalNumRows(matS),
                                     hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(x);
-            hypre_ParVectorSetPartitioningOwner(x,0);
 
             /* setup solver */
             HYPRE_GMRESSetup(schur_solver,(HYPRE_Matrix)ilu_vdata,(HYPRE_Vector)rhs,(HYPRE_Vector)x);
@@ -911,13 +895,11 @@ hypre_ILUSetup( void               *ilu_vdata,
                                       hypre_ParCSRMatrixGlobalNumRows(matA),
                                       hypre_ParCSRMatrixRowStarts(matA));
             hypre_ParVectorInitialize(Xtemp);
-            hypre_ParVectorSetPartitioningOwner(Xtemp,0);
 
             Ytemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(matA),
                                       hypre_ParCSRMatrixGlobalNumRows(matA),
                                       hypre_ParCSRMatrixRowStarts(matA));
             hypre_ParVectorInitialize(Ytemp);
-            hypre_ParVectorSetPartitioningOwner(Ytemp,0);
 
             /* only do so when we hae the Schur Complement */
             {
@@ -932,13 +914,11 @@ hypre_ILUSetup( void               *ilu_vdata,
                                     S_total_rows,
                                     S_row_starts);
             hypre_ParVectorInitialize(rhs);
-            hypre_ParVectorSetPartitioningOwner(rhs,1);
 
             x = hypre_ParVectorCreate(comm,
                                     S_total_rows,
                                     S_row_starts);
             hypre_ParVectorInitialize(x);
-            hypre_ParVectorSetPartitioningOwner(x,0);
 
             /* add when necessary */
             /* create GMRES */
@@ -1174,7 +1154,6 @@ hypre_ILUSetup( void               *ilu_vdata,
                hypre_ParCSRMatrixGlobalNumRows(matA),
                hypre_ParCSRMatrixRowStarts(matA) );
       hypre_ParVectorInitialize(residual);
-      hypre_ParVectorSetPartitioningOwner(residual,0);
       hypre_ParILUDataResidual(ilu_data) = residual;
    }
    else{
@@ -6131,14 +6110,12 @@ hypre_NSHSetup( void               *nsh_vdata,
          hypre_ParCSRMatrixGlobalNumRows(A),
          hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(Utemp);
-   hypre_ParVectorSetPartitioningOwner(Utemp,0);
    hypre_ParNSHDataUTemp(nsh_data) = Utemp;
 
    Ftemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
          hypre_ParCSRMatrixGlobalNumRows(A),
          hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(Ftemp);
-   hypre_ParVectorSetPartitioningOwner(Ftemp,0);
    hypre_ParNSHDataFTemp(nsh_data) = Ftemp;
    /* set matrix, solution and rhs pointers */
    matA = A;
@@ -6171,7 +6148,6 @@ hypre_NSHSetup( void               *nsh_vdata,
                hypre_ParCSRMatrixGlobalNumRows(matA),
                hypre_ParCSRMatrixRowStarts(matA) );
       hypre_ParVectorInitialize(residual);
-      hypre_ParVectorSetPartitioningOwner(residual,0);
       hypre_ParNSHDataResidual(nsh_data)= residual;
    }
    else{

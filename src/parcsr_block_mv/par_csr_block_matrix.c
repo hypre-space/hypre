@@ -965,7 +965,6 @@ hypre_ParVectorCreateFromBlock(  MPI_Comm comm,
 
    /* set defaults */
    hypre_ParVectorOwnsData(vector) = 1;
-   hypre_ParVectorOwnsPartitioning(vector) = 1;
 
    return vector;
 }

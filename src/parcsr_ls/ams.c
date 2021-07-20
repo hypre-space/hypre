@@ -104,7 +104,6 @@ hypre_ParVector *hypre_ParVectorInRangeOf(hypre_ParCSRMatrix *A)
                              hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(x);
    hypre_ParVectorOwnsData(x) = 1;
-   hypre_ParVectorOwnsPartitioning(x) = 0;
 
    return x;
 }
@@ -124,7 +123,6 @@ hypre_ParVector *hypre_ParVectorInDomainOf(hypre_ParCSRMatrix *A)
                              hypre_ParCSRMatrixColStarts(A));
    hypre_ParVectorInitialize(x);
    hypre_ParVectorOwnsData(x) = 1;
-   hypre_ParVectorOwnsPartitioning(x) = 0;
 
    return x;
 }
@@ -3484,7 +3482,6 @@ HYPRE_Int hypre_AMSSolve(void *solver,
                                 hypre_ParCSRMatrixGlobalNumRows(A),
                                 hypre_ParCSRMatrixRowStarts(A));
       hypre_ParVectorInitialize(z);
-      hypre_ParVectorSetPartitioningOwner(z,0);
       ams_data -> zz = z;
    }
 
@@ -4009,19 +4006,16 @@ HYPRE_Int hypre_AMSFEISetup(void *solver,
    x_coord = hypre_ParVectorCreate(comm, num_global_vert, vert_part);
    hypre_ParVectorInitialize(x_coord);
    hypre_ParVectorOwnsData(x_coord) = 1;
-   hypre_ParVectorOwnsPartitioning(x_coord) = 0;
    x_data = hypre_VectorData(hypre_ParVectorLocalVector(x_coord));
 
    y_coord = hypre_ParVectorCreate(comm, num_global_vert, vert_part);
    hypre_ParVectorInitialize(y_coord);
    hypre_ParVectorOwnsData(y_coord) = 1;
-   hypre_ParVectorOwnsPartitioning(y_coord) = 0;
    y_data = hypre_VectorData(hypre_ParVectorLocalVector(y_coord));
 
    z_coord = hypre_ParVectorCreate(comm, num_global_vert, vert_part);
    hypre_ParVectorInitialize(z_coord);
    hypre_ParVectorOwnsData(z_coord) = 1;
-   hypre_ParVectorOwnsPartitioning(z_coord) = 0;
    z_data = hypre_VectorData(hypre_ParVectorLocalVector(z_coord));
 
    vert_start = hypre_ParVectorFirstIndex(x_coord);

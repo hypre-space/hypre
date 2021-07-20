@@ -1425,7 +1425,6 @@ HYPRE_Int hypre_ADSSolve(void *solver,
                                 hypre_ParCSRMatrixGlobalNumRows(A),
                                 hypre_ParCSRMatrixRowStarts(A));
       hypre_ParVectorInitialize(z);
-      hypre_ParVectorSetPartitioningOwner(z,0);
       ads_data -> zz = z;
    }
 

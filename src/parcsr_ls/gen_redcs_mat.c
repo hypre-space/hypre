@@ -303,8 +303,6 @@ hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
 
             F_seq = hypre_ParVectorCreate(seq_comm, size, row_starts);
             U_seq = hypre_ParVectorCreate(seq_comm, size, row_starts);
-            hypre_ParVectorOwnsPartitioning(F_seq) = 1;
-            hypre_ParVectorOwnsPartitioning(U_seq) = 0;
             hypre_ParVectorInitialize(F_seq);
             hypre_ParVectorInitialize(U_seq);
 

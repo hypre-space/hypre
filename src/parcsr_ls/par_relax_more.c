@@ -146,31 +146,26 @@ hypre_ParCSRMaxEigEstimateCG( hypre_ParCSRMatrix *A,     /* matrix to relax with
                              hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(r);
-   hypre_ParVectorSetPartitioningOwner(r,0);
 
    p = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                              hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(p);
-   hypre_ParVectorSetPartitioningOwner(p,0);
 
    s = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                              hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(s);
-   hypre_ParVectorSetPartitioningOwner(s,0);
 
    ds = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                               hypre_ParCSRMatrixGlobalNumRows(A),
                               hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(ds);
-   hypre_ParVectorSetPartitioningOwner(ds,0);
 
    u = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                              hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(u);
-   hypre_ParVectorSetPartitioningOwner(u,0);
 
    /* point to local data */
    s_data = hypre_VectorData(hypre_ParVectorLocalVector(s));
@@ -508,14 +503,12 @@ hypre_ParCSRRelax_Cheby( hypre_ParCSRMatrix *A,                /* matrix to rela
                                  hypre_ParCSRMatrixGlobalNumRows(A),
                                  hypre_ParCSRMatrixRowStarts(A));
       hypre_ParVectorInitialize(ds);
-      hypre_ParVectorSetPartitioningOwner(ds,0);
       ds_data = hypre_VectorData(hypre_ParVectorLocalVector(ds));
 
       tmp_vec = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                       hypre_ParCSRMatrixGlobalNumRows(A),
                                       hypre_ParCSRMatrixRowStarts(A));
       hypre_ParVectorInitialize(tmp_vec);
-      hypre_ParVectorSetPartitioningOwner(tmp_vec,0);
       tmp_data = hypre_VectorData(hypre_ParVectorLocalVector(tmp_vec));
 
       /* get ds_data and get scaled residual: r = D^(-1/2)f -
@@ -891,4 +884,3 @@ L20:
 
    return ret_val;
 } /* cgpthy_ */
-
