@@ -1018,8 +1018,32 @@ hypre_CurandUniform_core( HYPRE_Int          n,
                           HYPRE_Int          set_offset,
                           hypre_ulonglongint offset)
 {
-   hypre_error_w_msg(1, "ROCRand has not been available");
-   exit(0);
+  hypre_GpuProfilingPushRange("hypre_CurandUniform_core");
+
+   rocrand_generator gen = hypre_HandleCurandGenerator(hypre_handle());
+
+   if (set_seed)
+   {
+      HYPRE_ROCRAND_CALL( rocrand_set_seed(gen, seed) );
+   }
+
+   if (set_offset)
+   {
+      HYPRE_ROCRAND_CALL( rocrand_set_offset(gen, offset) );
+   }
+
+   if (sizeof(T) == sizeof(hypre_double))
+   {
+      HYPRE_ROCRAND_CALL( rocrand_generate_uniform_double(gen, (hypre_double *) urand, n) );
+   }
+   else if (sizeof(T) == sizeof(float))
+   {
+      HYPRE_ROCRAND_CALL( rocrand_generate_uniform(gen, (float *) urand, n) );
+   }
+
+   hypre_GpuProfilingPopRange();
+
+   return hypre_error_flag;
 }
 #endif /* #if defined(HYPRE_USING_ROCRAND) */
 
