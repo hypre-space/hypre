@@ -198,6 +198,10 @@ struct hypre_CudaData
    curandGenerator_t                 curand_generator;
 #endif
 
+#if defined(HYPRE_USING_ROCRAND)
+   rocrand_generator                 curand_generator;
+#endif
+
 #if defined(HYPRE_USING_CUBLAS)
    cublasHandle_t                    cublas_handle;
 #endif
@@ -276,6 +280,10 @@ void                hypre_CudaDataDestroy(hypre_CudaData* data);
 
 #if defined(HYPRE_USING_CURAND)
 curandGenerator_t   hypre_CudaDataCurandGenerator(hypre_CudaData *data);
+#endif
+
+#if defined(HYPRE_USING_ROCRAND)
+rocrand_generator   hypre_CudaDataCurandGenerator(hypre_CudaData *data);
 #endif
 
 #if defined(HYPRE_USING_CUBLAS)
