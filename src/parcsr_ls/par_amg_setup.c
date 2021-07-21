@@ -2405,7 +2405,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                     /* nongalerk_tol, sym_collapse, lump_percent, beta );*/
                       nongalerk_tol_l,      1,            0.5,    1.0 );
 
-                  hypre_ParCSRMatrixColStarts(P_array[level]) = hypre_ParCSRMatrixRowStarts(A_H);
+                  hypre_ParCSRMatrixColStarts(P_array[level])[0] = hypre_ParCSRMatrixRowStarts(A_H)[0];
+                  hypre_ParCSRMatrixColStarts(P_array[level])[1] = hypre_ParCSRMatrixRowStarts(A_H)[1];
                   if (!hypre_ParCSRMatrixCommPkg(A_H))
                      hypre_MatvecCommPkgCreate(A_H);
                }

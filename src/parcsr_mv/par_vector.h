@@ -29,7 +29,7 @@ typedef struct hypre_ParVector_struct
    HYPRE_BigInt          global_size;
    HYPRE_BigInt          first_index;
    HYPRE_BigInt          last_index;
-   HYPRE_BigInt         *partitioning;
+   HYPRE_BigInt          partitioning[2];
    /* stores actual length of data in local vector to allow memory
     * manipulations for temporary vectors*/
    HYPRE_Int             actual_local_size;

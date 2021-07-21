@@ -89,7 +89,7 @@ HYPRE_Int hypre_CSRMatrixMatvecRocsparse (HYPRE_Int trans, HYPRE_Complex alpha ,
 
 /* genpart.c */
 HYPRE_Int hypre_GeneratePartitioning ( HYPRE_BigInt length , HYPRE_Int num_procs , HYPRE_BigInt **part_ptr );
-HYPRE_Int hypre_GenerateLocalPartitioning ( HYPRE_BigInt length , HYPRE_Int num_procs , HYPRE_Int myid , HYPRE_BigInt **part_ptr );
+HYPRE_Int hypre_GenerateLocalPartitioning ( HYPRE_BigInt length , HYPRE_Int num_procs , HYPRE_Int myid , HYPRE_BigInt *part );
 
 /* HYPRE_csr_matrix.c */
 HYPRE_CSRMatrix HYPRE_CSRMatrixCreate ( HYPRE_Int num_rows , HYPRE_Int num_cols , HYPRE_Int *row_sizes );

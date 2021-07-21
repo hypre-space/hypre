@@ -39,20 +39,20 @@ hypre_GeneratePartitioning(HYPRE_BigInt length, HYPRE_Int num_procs, HYPRE_BigIn
 
 /* This function differs from the above in that it only returns
    the portion of the partition belonging to the individual process -
-   to do this it requires the processor id as well AHB 6/05
+   to do this it requires the processor id as well AHB 6/05.
+
+   This functions assumes that part is on the stack memory
+   and has size equal to 2.
 */
 
 HYPRE_Int
 hypre_GenerateLocalPartitioning(HYPRE_BigInt   length,
                                 HYPRE_Int      num_procs,
                                 HYPRE_Int      myid,
-                                HYPRE_BigInt **part_ptr)
+                                HYPRE_BigInt  *part)
 {
-   HYPRE_Int     ierr = 0;
-   HYPRE_Int     size, rest;
-   HYPRE_BigInt *part;
+   HYPRE_Int  size, rest;
 
-   part = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
    size = (HYPRE_Int)(length / (HYPRE_BigInt)num_procs);
    rest = (HYPRE_Int)(length - (HYPRE_BigInt)(size*num_procs));
 
@@ -68,7 +68,5 @@ hypre_GenerateLocalPartitioning(HYPRE_BigInt   length,
    /* add 1 to last row since this is for "starts" vector */
    part[1] = part[1] + 1;
 
-   *part_ptr = part;
-
-   return ierr;
+   return hypre_error_flag;
 }

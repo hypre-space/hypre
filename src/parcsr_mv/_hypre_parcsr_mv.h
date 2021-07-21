@@ -234,7 +234,7 @@ typedef struct hypre_ParVector_struct
    HYPRE_BigInt          global_size;
    HYPRE_BigInt          first_index;
    HYPRE_BigInt          last_index;
-   HYPRE_BigInt         *partitioning;
+   HYPRE_BigInt          partitioning[2];
    /* stores actual length of data in local vector to allow memory
     * manipulations for temporary vectors*/
    HYPRE_Int             actual_local_size;
@@ -317,10 +317,10 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_BigInt         *col_map_offd;
    HYPRE_BigInt         *device_col_map_offd;
    /* maps columns of offd to global columns */
-   HYPRE_BigInt         *row_starts;
+   HYPRE_BigInt          row_starts[2];
    /* row_starts[0] is start of local rows
       row_starts[1] is start of next processor's rows */
-   HYPRE_BigInt         *col_starts;
+   HYPRE_BigInt          col_starts[2];
    /* col_starts[0] is start of local columns
       col_starts[1] is start of next processor's columns */
 
@@ -846,7 +846,7 @@ void hypre_ParCSRMatrixCopy_C ( hypre_ParCSRMatrix *P , hypre_ParCSRMatrix *C , 
 void hypre_ParCSRMatrixDropEntries ( hypre_ParCSRMatrix *C , hypre_ParCSRMatrix *P , HYPRE_Int *CF_marker );
 
 /* par_csr_matrix.c */
-hypre_ParCSRMatrix *hypre_ParCSRMatrixCreate ( MPI_Comm comm , HYPRE_BigInt global_num_rows , HYPRE_BigInt global_num_cols , HYPRE_BigInt *row_starts , HYPRE_BigInt *col_starts , HYPRE_Int num_cols_offd , HYPRE_Int num_nonzeros_diag , HYPRE_Int num_nonzeros_offd );
+hypre_ParCSRMatrix *hypre_ParCSRMatrixCreate ( MPI_Comm comm , HYPRE_BigInt global_num_rows , HYPRE_BigInt global_num_cols , HYPRE_BigInt *row_starts_in , HYPRE_BigInt *col_starts_in , HYPRE_Int num_cols_offd , HYPRE_Int num_nonzeros_diag , HYPRE_Int num_nonzeros_offd );
 HYPRE_Int hypre_ParCSRMatrixDestroy ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_ParCSRMatrixInitialize_v2( hypre_ParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_ParCSRMatrixInitialize ( hypre_ParCSRMatrix *matrix );
@@ -904,7 +904,7 @@ HYPRE_ParCSR_System_Problem *HYPRE_Generate2DSystem ( HYPRE_ParCSRMatrix H_L1 , 
 HYPRE_Int HYPRE_Destroy2DSystem ( HYPRE_ParCSR_System_Problem *sys_prob );
 
 /* par_vector.c */
-hypre_ParVector *hypre_ParVectorCreate ( MPI_Comm comm , HYPRE_BigInt global_size , HYPRE_BigInt *partitioning );
+hypre_ParVector *hypre_ParVectorCreate ( MPI_Comm comm , HYPRE_BigInt global_size , HYPRE_BigInt *partitioning_in );
 hypre_ParVector *hypre_ParMultiVectorCreate ( MPI_Comm comm , HYPRE_BigInt global_size , HYPRE_BigInt *partitioning , HYPRE_Int num_vectors );
 HYPRE_Int hypre_ParVectorDestroy ( hypre_ParVector *vector );
 HYPRE_Int hypre_ParVectorInitialize ( hypre_ParVector *vector );
