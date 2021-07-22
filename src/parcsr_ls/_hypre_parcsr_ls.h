@@ -820,7 +820,10 @@ typedef struct
    HYPRE_Real           omega;               /* Step size for Preconditioned Richardson Solver */
    HYPRE_Real           tolerance;    	      /* Tolerance for the solver */
    HYPRE_Real           rel_resnorm;         /* available if logging > 1 */
-   HYPRE_ParVector      residual;            /* available if logging > 1 */
+   hypre_ParVector      *residual;           /* available if logging > 1 */
+   hypre_ParVector      *r_work;           
+   hypre_ParVector      *x_work;           
+   hypre_ParVector      *z_work;           
 
    /* log info */
    HYPRE_Int            logging;
@@ -854,6 +857,9 @@ typedef struct
 #define hypre_ParFSAIDataRelResNorm(fsai_data)              ((fsai_data) -> rel_resnorm)
 #define hypre_ParFSAIDataTolerance(fsai_data)               ((fsai_data) -> tolerance)
 #define hypre_ParFSAIDataResidual(fsai_data)                ((fsai_data) -> residual)
+#define hypre_ParFSAIDataRWork(fsai_data)                   ((fsai_data) -> r_work)
+#define hypre_ParFSAIDataXWork(fsai_data)                   ((fsai_data) -> x_work)
+#define hypre_ParFSAIDataZWork(fsai_data)                   ((fsai_data) -> z_work)
 
 /* log info data */
 #define hypre_ParFSAIDataLogging(fsai_data)                 ((fsai_data) -> logging)
