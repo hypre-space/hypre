@@ -55,6 +55,7 @@ hypre_FSAICreate()
    /* solver params */
    max_iterations = 20;
    tolerance = 1.0e-6;
+   omega = 1.0;
 
    /* log info */
    logging = 0;
@@ -80,7 +81,7 @@ hypre_FSAICreate()
    hypre_ParFSAIDataGmat(fsai_data)             = NULL;
    hypre_ParFSAIDataResidual(fsai_data)         = NULL;
    hypre_ParFSAIDataRWork(fsai_data)            = NULL;
-   hypre_ParFSAIDataXWork(fsai_data)            = NULL; 
+   hypre_ParFSAIDataXWork(fsai_data)            = NULL;
    hypre_ParFSAIDataZWork(fsai_data)            = NULL;
    hypre_ParFSAIDataCommInfo(fsai_data)         = NULL;
    hypre_ParFSAIDataNewComm(fsai_data)          = hypre_MPI_COMM_NULL;
@@ -129,7 +130,7 @@ hypre_FSAIDestroy( void *data )
 
    if( new_comm != hypre_MPI_COMM_NULL )
       hypre_MPI_Comm_free(&new_comm);
-   
+
    hypre_TFree(fsai_data, HYPRE_MEMORY_HOST);
 
    HYPRE_ANNOTATE_FUNC_END;
