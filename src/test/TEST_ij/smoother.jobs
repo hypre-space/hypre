@@ -90,6 +90,17 @@ mpirun -np 4  ./ij -rhsrand -solver 1 -rlx 16 -rotate -alpha 60 -eps 0.1 -cheby_
 mpirun -np 4  ./ij -solver 1 -rlx 16 -cheby_eig_est 5 -n 40 40 20 \
 -P 2 2 1 -vardifconv -eps 0.1  > smoother.out.20
 
+mpirun -np 4  ./ij -solver 1 -rlx 16 -cheby_eig_est 10 -cheby_scale 0 -n 40 40 20 -P 2 2 1 \
+> smoother.out.21
+
+mpirun -np 4  ./ij -solver 1 -rlx 16 -cheby_eig_est 10 -cheby_scale 1 -n 40 40 20 -P 2 2 1 \
+> smoother.out.22
+
+mpirun -np 4  ./ij -solver 1 -rlx 16 -cheby_eig_est 0 -cheby_scale 1 -n 40 40 20 -P 2 2 1 \
+> smoother.out.23
+
+mpirun -np 4  ./ij -solver 1 -rlx 16 -cheby_eig_est 0 -cheby_scale 0 -n 40 40 20 -P 2 2 1 \
+> smoother.out.24
 
 
 
