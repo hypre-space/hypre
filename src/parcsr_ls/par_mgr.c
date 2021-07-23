@@ -441,16 +441,10 @@ hypre_MGRDestroyFrelaxVcycleData( void *data )
     if (hypre_ParAMGDataPArray(vdata)[i-1])
       hypre_ParCSRMatrixDestroy(hypre_ParAMGDataPArray(vdata)[i-1]);
 
-    hypre_TFree(hypre_ParAMGDataCFMarkerArray(vdata)[i-1], HYPRE_MEMORY_HOST);
+    hypre_IntArrayDestroy(hypre_ParAMGDataCFMarkerArray(vdata)[i-1]);
     hypre_ParVectorDestroy(hypre_ParAMGDataFArray(vdata)[i]);
     hypre_ParVectorDestroy(hypre_ParAMGDataUArray(vdata)[i]);
     hypre_TFree(hypre_ParAMGDataDofFuncArray(vdata)[i], HYPRE_MEMORY_HOST);
-  }
-
-  /* see comments in par_coarsen.c regarding special case for CF_marker */
-  if (num_levels <= 1)
-  {
-    hypre_TFree(hypre_ParAMGDataCFMarkerArray(vdata)[0], HYPRE_MEMORY_HOST);
   }
 
   /* Points to VcycleRelaxVtemp of mgr_data, which is already destroyed */

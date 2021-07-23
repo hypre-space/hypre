@@ -595,7 +595,7 @@ hypre_BoomerAMGDestroy( void *data )
          }
       }
 
-      hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data)[i-1], HYPRE_MEMORY_HOST);
+      hypre_IntArrayDestroy(hypre_ParAMGDataCFMarkerArray(amg_data)[i-1]);
 
       /* get rid of any block structures */
       if (hypre_ParAMGDataABlockArray(amg_data)[i])
@@ -670,7 +670,7 @@ hypre_BoomerAMGDestroy( void *data )
    /* see comments in par_coarsen.c regarding special case for CF_marker */
    if (num_levels == 1)
    {
-      hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data)[0], HYPRE_MEMORY_HOST);
+      hypre_IntArrayDestroy(hypre_ParAMGDataCFMarkerArray(amg_data)[0]);
    }
    hypre_ParVectorDestroy(hypre_ParAMGDataVtemp(amg_data));
    hypre_TFree(hypre_ParAMGDataFArray(amg_data), HYPRE_MEMORY_HOST);
@@ -2880,7 +2880,9 @@ hypre_BoomerAMGGetGridHierarchy( void       *data,
    HYPRE_Int *ibuff = NULL;
    HYPRE_Int *wbuff, *cbuff, *tmp;
    HYPRE_Int local_size, lev_size, i, j, level, num_levels, block_mode;
-   HYPRE_Int          **CF_marker_array;
+   hypre_IntArray          *CF_marker_array;
+   hypre_IntArray          *CF_marker_array_host;
+   HYPRE_Int               *CF_marker;
 
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
    if (!amg_data)
@@ -2906,8 +2908,6 @@ hypre_BoomerAMGGetGridHierarchy( void       *data,
          return hypre_error_flag;
       }
 
-      CF_marker_array = hypre_ParAMGDataCFMarkerArray(amg_data);
-
       // get local size and allocate some memory
       local_size = hypre_CSRMatrixNumRows(hypre_ParCSRBlockMatrixDiag(A_block_array[0]));
       ibuff  = hypre_CTAlloc(HYPRE_Int, (2 * local_size), HYPRE_MEMORY_HOST);
@@ -2917,6 +2917,18 @@ hypre_BoomerAMGGetGridHierarchy( void       *data,
       num_levels = hypre_ParAMGDataNumLevels(amg_data);
       for (level = (num_levels - 2); level >= 0; level--)
       {
+         /* get the CF marker array on the host */
+         CF_marker_array = hypre_ParAMGDataCFMarkerArray(amg_data)[level];
+         if (hypre_GetActualMemLocation(hypre_IntArrayMemoryLocation(CF_marker_array)) == hypre_MEMORY_DEVICE)
+         {
+            CF_marker_array_host = hypre_IntArrayCloneDeep_v2(CF_marker_array, HYPRE_MEMORY_HOST);
+         }
+         else
+         {
+            CF_marker_array_host = CF_marker_array;
+         }
+         CF_marker = hypre_IntArrayData(CF_marker_array_host);
+
          /* swap pointers */
          tmp = wbuff;
          wbuff = cbuff;
@@ -2928,11 +2940,17 @@ hypre_BoomerAMGGetGridHierarchy( void       *data,
          {
             /* if a C-point */
             cbuff[i] = 0;
-            if (CF_marker_array[level][i] > -1)
+            if (CF_marker[i] > -1)
             {
                cbuff[i] = wbuff[j] + 1;
                j++;
             }
+         }
+
+         /* destroy copy host copy if necessary */
+         if (hypre_GetActualMemLocation(hypre_IntArrayMemoryLocation(CF_marker_array)) == hypre_MEMORY_DEVICE)
+         {
+            hypre_IntArrayDestroy(CF_marker_array_host);
          }
       }
    }
@@ -2946,8 +2964,6 @@ hypre_BoomerAMGGetGridHierarchy( void       *data,
          return hypre_error_flag;
       }
 
-      CF_marker_array = hypre_ParAMGDataCFMarkerArray(amg_data);
-
       // get local size and allocate some memory
       local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[0]));
       wbuff  = hypre_CTAlloc(HYPRE_Int, (2 * local_size), HYPRE_MEMORY_HOST);
@@ -2956,6 +2972,17 @@ hypre_BoomerAMGGetGridHierarchy( void       *data,
       num_levels = hypre_ParAMGDataNumLevels(amg_data);
       for (level = (num_levels - 2); level >= 0; level--)
       {
+         /* get the CF marker array on the host */
+         CF_marker_array = hypre_ParAMGDataCFMarkerArray(amg_data)[level];
+         if (hypre_GetActualMemLocation(hypre_IntArrayMemoryLocation(CF_marker_array)) == hypre_MEMORY_DEVICE)
+         {
+            CF_marker_array_host = hypre_IntArrayCloneDeep_v2(CF_marker_array, HYPRE_MEMORY_HOST);
+         }
+         else
+         {
+            CF_marker_array_host = CF_marker_array;
+         }
+         CF_marker = hypre_IntArrayData(CF_marker_array_host);
          /* swap pointers */
          tmp = wbuff;
          wbuff = cbuff;
@@ -2967,11 +2994,16 @@ hypre_BoomerAMGGetGridHierarchy( void       *data,
          {
             /* if a C-point */
             cbuff[i] = 0;
-            if (CF_marker_array[level][i] > -1)
+            if (CF_marker[i] > -1)
             {
                cbuff[i] = wbuff[j] + 1;
                j++;
             }
+         }
+         /* destroy copy host copy if necessary */
+         if (hypre_GetActualMemLocation(hypre_IntArrayMemoryLocation(CF_marker_array)) == hypre_MEMORY_DEVICE)
+         {
+            hypre_IntArrayDestroy(CF_marker_array_host);
          }
       }
    }

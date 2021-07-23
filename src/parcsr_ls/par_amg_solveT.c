@@ -312,7 +312,8 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
    hypre_ParCSRMatrix    **R_array;
    hypre_ParVector    *Vtemp;
 
-   HYPRE_Int     **CF_marker_array;
+   hypre_IntArray   **CF_marker_array;
+   HYPRE_Int         *CF_marker;
    /* HYPRE_Int     **unknown_map_array; */
    /* HYPRE_Int     **point_map_array; */
    /* HYPRE_Int     **v_at_point_array; */
@@ -472,9 +473,17 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
          /* note: this does not use relax_points, so it doesn't matter if
             its the "old version" */
 
+         if (CF_marker_array[level] == NULL)
+         {
+            CF_marker = NULL;
+         }
+         else
+         {
+            CF_marker = hypre_IntArrayData(CF_marker_array[level]);
+         }
          Solve_err_flag = hypre_BoomerAMGRelaxT(A_array[level],
                                                 F_array[level],
-                                                CF_marker_array[level],
+                                                CF_marker,
                                                 relax_type,
                                                 relax_points,
                                                 relax_weight[level],

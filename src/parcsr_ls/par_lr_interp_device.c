@@ -26,6 +26,22 @@ __global__ void hypreCUDAKernel_compute_aff_afc_epe( HYPRE_Int nr_of_rows, HYPRE
 
 __global__ void hypreCUDAKernel_compute_dlam_dtmp( HYPRE_Int nr_of_rows, HYPRE_Int *AFF_diag_i, HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Int *AFF_offd_i, HYPRE_Complex *AFF_offd_data, HYPRE_Complex *rsFC, HYPRE_Complex *dlam, HYPRE_Complex *dtmp );
 
+struct equal_pred : public thrust::unary_function<HYPRE_Int, bool>
+{
+   HYPRE_Int  val;
+
+   equal_pred(HYPRE_Int val_)
+   {
+      val = val_;
+   }
+
+   __host__ __device__
+   bool operator()(const HYPRE_Int& val_in) const
+   {
+      return val_in == val;
+   }
+};
+
 /*---------------------------------------------------------------------
  * Extended Interpolation in the form of Mat-Mat
  *---------------------------------------------------------------------*/
@@ -50,10 +66,9 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
    HYPRE_Int          *A_offd_i     = hypre_CSRMatrixI(A_offd);
    HYPRE_Int           A_offd_nnz   = hypre_CSRMatrixNumNonzeros(A_offd);
 
-   HYPRE_Int          *CF_marker_dev;
    hypre_ParCSRMatrix *AFF, *AFC;
    hypre_ParCSRMatrix *W, *P;
-   HYPRE_Int           W_nr_of_rows, P_diag_nnz, i;
+   HYPRE_Int           W_nr_of_rows, P_diag_nnz;
    HYPRE_Complex      *rsFC, *rsWA, *rsW;
    HYPRE_Int          *P_diag_i, *P_diag_j, *P_offd_i;
    HYPRE_Complex      *P_diag_data;
@@ -62,10 +77,6 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
 
    HYPRE_Int          *Soc_diag_j   = hypre_ParCSRMatrixSocDiagJ(S);
    HYPRE_Int          *Soc_offd_j   = hypre_ParCSRMatrixSocOffdJ(S);
-
-   CF_marker_dev = hypre_TAlloc(HYPRE_Int, A_nr_of_rows, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(CF_marker_dev, CF_marker, HYPRE_Int, A_nr_of_rows,
-                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
    /* 0. Find row sums of weak elements */
    /* row sum of A-weak + Diag(A), i.e., (D_gamma + D_alpha) in the notes, only for F-pts */
@@ -78,7 +89,7 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
                       gDim, bDim,
                       A_nr_of_rows,
                       A_offd_nnz > 0,
-                      CF_marker_dev,
+                      CF_marker,
                       A_diag_i,
                       A_diag_data,
                       Soc_diag_j,
@@ -100,7 +111,7 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
                                                rsWA,
                                                rsWA + A_nr_of_rows,
-                                               CF_marker_dev,
+                                               CF_marker,
                                                rsW,
                                                is_negative<HYPRE_Int>() );
    hypre_assert(new_end - rsW == W_nr_of_rows);
@@ -154,7 +165,7 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
    hypreDevice_extendWtoP( A_nr_of_rows,
                            W_nr_of_rows,
                            hypre_ParCSRMatrixNumCols(W),
-                           CF_marker_dev,
+                           CF_marker,
                            hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(W)),
                            hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(W)),
                            hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(W)),
@@ -164,7 +175,6 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
                            P_diag_data,
                            hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(W)),
                            P_offd_i );
-   hypre_TFree(CF_marker_dev, HYPRE_MEMORY_DEVICE);
    hypre_GpuProfilingPopRange();
 
    // final P
@@ -211,13 +221,7 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
 
    hypre_MatvecCommPkgCreate(P);
 
-   for (i = 0; i < A_nr_of_rows; i++)
-   {
-      if (CF_marker[i] == -3)
-      {
-         CF_marker[i] = -1;
-      }
-   }
+   HYPRE_THRUST_CALL( replace_if, CF_marker, CF_marker + A_nr_of_rows, equal_pred(-3), -1);  
 
    *P_ptr = P;
 
@@ -248,11 +252,10 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Complex      *A_offd_data  = hypre_CSRMatrixData(A_offd);
    HYPRE_Int          *A_offd_i     = hypre_CSRMatrixI(A_offd);
    HYPRE_Int           A_offd_nnz   = hypre_CSRMatrixNumNonzeros(A_offd);
-   HYPRE_Int          *CF_marker_dev;
    hypre_CSRMatrix    *AFF_ext = NULL;
    hypre_ParCSRMatrix *AFF, *AFC;
    hypre_ParCSRMatrix *W, *P;
-   HYPRE_Int           W_nr_of_rows, P_diag_nnz, i;
+   HYPRE_Int           W_nr_of_rows, P_diag_nnz;
    HYPRE_Complex      *rsFC, *rsFC_offd, *rsWA, *rsW;
    HYPRE_Int          *P_diag_i, *P_diag_j, *P_offd_i, num_procs;
    HYPRE_Complex      *P_diag_data;
@@ -263,10 +266,6 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int          *Soc_offd_j   = hypre_ParCSRMatrixSocOffdJ(S);
 
    hypre_MPI_Comm_size(hypre_ParCSRMatrixComm(A), &num_procs);
-
-   CF_marker_dev = hypre_TAlloc(HYPRE_Int, A_nr_of_rows, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(CF_marker_dev, CF_marker, HYPRE_Int, A_nr_of_rows,
-                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
    /* 0.Find row sums of weak elements */
    /* row sum of A-weak + Diag(A), i.e., (D_gamma + D_alpha) in the notes, only for F-pts */
@@ -279,7 +278,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
                       gDim, bDim,
                       A_nr_of_rows,
                       A_offd_nnz > 0,
-                      CF_marker_dev,
+                      CF_marker,
                       A_diag_i,
                       A_diag_data,
                       Soc_diag_j,
@@ -301,7 +300,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
                                                rsWA,
                                                rsWA + A_nr_of_rows,
-                                               CF_marker_dev,
+                                               CF_marker,
                                                rsW,
                                                is_negative<HYPRE_Int>() );
    hypre_assert(new_end - rsW == W_nr_of_rows);
@@ -395,7 +394,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    hypreDevice_extendWtoP( A_nr_of_rows,
                            W_nr_of_rows,
                            hypre_ParCSRMatrixNumCols(W),
-                           CF_marker_dev,
+                           CF_marker,
                            hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(W)),
                            hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(W)),
                            hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(W)),
@@ -405,7 +404,6 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
                            P_diag_data,
                            hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(W)),
                            P_offd_i );
-   hypre_TFree(CF_marker_dev, HYPRE_MEMORY_DEVICE);
    hypre_GpuProfilingPopRange();
 
    // final P
@@ -452,13 +450,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
 
    hypre_MatvecCommPkgCreate(P);
 
-   for (i = 0; i < A_nr_of_rows; i++)
-   {
-      if (CF_marker[i] == -3)
-      {
-         CF_marker[i] = -1;
-      }
-   }
+   HYPRE_THRUST_CALL( replace_if, CF_marker, CF_marker + A_nr_of_rows, equal_pred(-3), -1);  
 
    *P_ptr = P;
 
@@ -496,17 +488,12 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
 
    HYPRE_Int          *Soc_diag_j   = hypre_ParCSRMatrixSocDiagJ(S);
    HYPRE_Int          *Soc_offd_j   = hypre_ParCSRMatrixSocOffdJ(S);
-   HYPRE_Int          *CF_marker_dev;
    hypre_ParCSRMatrix *AFF, *AFC;
    hypre_ParCSRMatrix *W, *P;
-   HYPRE_Int           W_nr_of_rows, P_diag_nnz, i;
+   HYPRE_Int           W_nr_of_rows, P_diag_nnz;
    HYPRE_Complex      *dlam, *dtmp, *dtmp_offd, *rsFC, *rsWA, *rsW;
    HYPRE_Int          *P_diag_i, *P_diag_j, *P_offd_i;
    HYPRE_Complex      *P_diag_data;
-
-   CF_marker_dev = hypre_TAlloc(HYPRE_Int, A_nr_of_rows, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(CF_marker_dev, CF_marker, HYPRE_Int, A_nr_of_rows,
-                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
    /* 0. Find row sums of weak elements */
    /* row sum of A-weak + Diag(A), i.e., (D_gamma + D_FF) in the notes, only for F-pts */
@@ -519,7 +506,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
                       gDim, bDim,
                       A_nr_of_rows,
                       A_offd_nnz > 0,
-                      CF_marker_dev,
+                      CF_marker,
                       A_diag_i,
                       A_diag_data,
                       Soc_diag_j,
@@ -541,7 +528,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
                                                rsWA,
                                                rsWA + A_nr_of_rows,
-                                               CF_marker_dev,
+                                               CF_marker,
                                                rsW,
                                                is_negative<HYPRE_Int>() );
    hypre_assert(new_end - rsW == W_nr_of_rows);
@@ -643,7 +630,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    hypreDevice_extendWtoP( A_nr_of_rows,
                            W_nr_of_rows,
                            hypre_ParCSRMatrixNumCols(W),
-                           CF_marker_dev,
+                           CF_marker,
                            hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(W)),
                            hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(W)),
                            hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(W)),
@@ -653,7 +640,6 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
                            P_diag_data,
                            hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(W)),
                            P_offd_i );
-   hypre_TFree(CF_marker_dev, HYPRE_MEMORY_DEVICE);
    hypre_GpuProfilingPopRange();
 
    // final P
@@ -700,13 +686,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
 
    hypre_MatvecCommPkgCreate(P);
 
-   for (i = 0; i < A_nr_of_rows; i++)
-   {
-      if (CF_marker[i] == -3)
-      {
-         CF_marker[i] = -1;
-      }
-   }
+   HYPRE_THRUST_CALL( replace_if, CF_marker, CF_marker + A_nr_of_rows, equal_pred(-3), -1);  
 
    *P_ptr = P;
 

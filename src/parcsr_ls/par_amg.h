@@ -103,7 +103,7 @@ typedef struct
    hypre_ParVector    **U_array;
    hypre_ParCSRMatrix **P_array;
    hypre_ParCSRMatrix **R_array;
-   HYPRE_Int          **CF_marker_array;
+   hypre_IntArray     **CF_marker_array;
    HYPRE_Int          **dof_func_array;
    HYPRE_Int          **dof_point_array;
    HYPRE_Int          **point_dof_map_array;

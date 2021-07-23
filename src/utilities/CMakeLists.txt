@@ -54,6 +54,7 @@ if (HYPRE_USING_CUDA)
     HYPRE_handle.c
     cuda_utils.c
     handle.c
+    int_array.c
     general.c
     memory.c
     omp_device.c

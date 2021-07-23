@@ -555,7 +555,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
          hypre_ParVectorInitialize(nVtemp2_l[i]);
          hypre_ParVectorSetPartitioningOwner(nVtemp2_l[i], 0);
 
-         nCF_marker_l[i] = hypre_ParAMGDataCFMarkerArray(amg_data)[i];
+         nCF_marker_l[i] = hypre_IntArrayData(hypre_ParAMGDataCFMarkerArray(amg_data)[i]);
          nrelax_weight[i]= hypre_ParAMGDataRelaxWeight(amg_data)[i];
          nomega[i]       = hypre_ParAMGDataOmega(amg_data)[i];
       }
