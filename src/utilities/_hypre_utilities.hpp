@@ -110,6 +110,10 @@ struct hypre_umpire_device_allocator
 #include <rocsparse.h>
 #endif
 
+#if defined(HYPRE_USING_ROCRAND)
+#include <rocrand.h>
+#endif
+
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #define HYPRE_CUDA_CALL(call) do {                                                           \
@@ -163,6 +167,13 @@ struct hypre_umpire_device_allocator
       hypre_assert(0); exit(1);                                                              \
    } } while(0)
 
+#define HYPRE_ROCRAND_CALL(call) do {                                                        \
+   rocrand_status err = call;                                                                \
+   if (ROCRAND_STATUS_SUCCESS != err) {                                                      \
+      hypre_printf("ROCRAND ERROR (code = %d) at %s:%d\n", err, __FILE__, __LINE__);         \
+      hypre_assert(0); exit(1);                                                              \
+   } } while(0)
+
 struct hypre_cub_CachingDeviceAllocator;
 typedef struct hypre_cub_CachingDeviceAllocator hypre_cub_CachingDeviceAllocator;
 
@@ -185,6 +196,10 @@ struct hypre_CudaData
 {
 #if defined(HYPRE_USING_CURAND)
    curandGenerator_t                 curand_generator;
+#endif
+
+#if defined(HYPRE_USING_ROCRAND)
+   rocrand_generator                 curand_generator;
 #endif
 
 #if defined(HYPRE_USING_CUBLAS)
@@ -265,6 +280,10 @@ void                hypre_CudaDataDestroy(hypre_CudaData* data);
 
 #if defined(HYPRE_USING_CURAND)
 curandGenerator_t   hypre_CudaDataCurandGenerator(hypre_CudaData *data);
+#endif
+
+#if defined(HYPRE_USING_ROCRAND)
+rocrand_generator   hypre_CudaDataCurandGenerator(hypre_CudaData *data);
 #endif
 
 #if defined(HYPRE_USING_CUBLAS)
