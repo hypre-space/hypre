@@ -64,6 +64,7 @@ LFLAGS =\
 
 HYPRE_DRIVERS =\
  ij.c\
+ simple.c\
  ij_assembly.c\
  sstruct.c\
  struct.c\
@@ -140,6 +141,10 @@ endif
 # C
 
 ij: ij.${OBJ_SUFFIX}
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+
+simple: simple.${OBJ_SUFFIX}
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 

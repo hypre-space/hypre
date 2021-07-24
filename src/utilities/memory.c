@@ -76,6 +76,10 @@ hypre_DeviceMemset(void *ptr, HYPRE_Int value, size_t num)
 #if defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipMemset(ptr, value, num) );
 #endif
+
+#if defined(HYPRE_USING_SYCL)
+   (hypre_HandleSyclComputeQueue(hypre_handle()))->memset(ptr, value, num).wait();
+#endif
 }
 
 static inline void
@@ -92,6 +96,10 @@ hypre_UnifiedMemset(void *ptr, HYPRE_Int value, size_t num)
 
 #if defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipMemset(ptr, value, num) );
+#endif
+
+#if defined(HYPRE_USING_SYCL)
+   (hypre_HandleSyclComputeQueue(hypre_handle()))->memset(ptr, value, num).wait();
 #endif
 }
 
@@ -151,6 +159,10 @@ hypre_UnifiedMemPrefetch(void *ptr, size_t size, hypre_MemoryLocation location)
     *                    hypre_HandleCudaComputeStream(hypre_handle())) );
     *}
     */
+#endif
+
+#if defined(HYPRE_USING_SYCL)
+   // WM: TODO
 #endif
 }
 
@@ -215,6 +227,10 @@ hypre_DeviceMalloc(size_t size, HYPRE_Int zeroinit)
    HYPRE_HIP_CALL( hipMalloc(&ptr, size) );
 #endif
 
+#if defined(HYPRE_USING_SYCL)
+   ptr = (void *)sycl::malloc_device(size, *(hypre_HandleSyclComputeQueue(hypre_handle())));
+#endif
+
 #endif /* #if defined(HYPRE_USING_UMPIRE_DEVICE) */
 
    if (ptr && zeroinit)
@@ -248,6 +264,10 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
 
 #if defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipMallocManaged(&ptr, size, hipMemAttachGlobal) );
+#endif
+
+#if defined(HYPRE_USING_SYCL)
+   ptr = (void *)sycl::malloc_shared(size, *(hypre_HandleSyclComputeQueue(hypre_handle())));
 #endif
 
 #endif /* #if defined(HYPRE_USING_UMPIRE_UM) */
@@ -285,6 +305,10 @@ hypre_HostPinnedMalloc(size_t size, HYPRE_Int zeroinit)
 
 #if defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipHostMalloc(&ptr, size) );
+#endif
+
+#if defined(HYPRE_USING_SYCL)
+   ptr = (void *)sycl::malloc_host(size, *(hypre_HandleSyclComputeQueue(hypre_handle())));
 #endif
 
 #endif /* #if defined(HYPRE_USING_UMPIRE_PINNED) */
@@ -380,6 +404,10 @@ hypre_DeviceFree(void *ptr)
    HYPRE_HIP_CALL( hipFree(ptr) );
 #endif
 
+#if defined(HYPRE_USING_SYCL)
+   sycl::free(ptr, *(hypre_HandleSyclComputeQueue(hypre_handle())));
+#endif
+
 #endif /* #if defined(HYPRE_USING_UMPIRE_DEVICE) */
 }
 
@@ -406,6 +434,10 @@ hypre_UnifiedFree(void *ptr)
    HYPRE_HIP_CALL( hipFree(ptr) );
 #endif
 
+#if defined(HYPRE_USING_SYCL)
+   sycl::free(ptr, *(hypre_HandleSyclComputeQueue(hypre_handle())));
+#endif
+
 #endif /* #if defined(HYPRE_USING_UMPIRE_UM) */
 }
 
@@ -426,6 +458,10 @@ hypre_HostPinnedFree(void *ptr)
 
 #if defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipHostFree(ptr) );
+#endif
+
+#if defined(HYPRE_USING_SYCL)
+   sycl::free(ptr, *(hypre_HandleSyclComputeQueue(hypre_handle())));
 #endif
 
 #endif /* #if defined(HYPRE_USING_UMPIRE_PINNED) */
@@ -479,6 +515,10 @@ _hypre_Free(void *ptr, hypre_MemoryLocation location)
 static inline void
 hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_dst, hypre_MemoryLocation loc_src)
 {
+#if defined(HYPRE_USING_SYCL)
+   sycl::queue* q = hypre_HandleSyclComputeQueue(hypre_handle());
+#endif
+
    if (dst == NULL || src == NULL)
    {
       if (size)
@@ -524,6 +564,10 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
 #if defined(HYPRE_USING_HIP)
       HYPRE_HIP_CALL( hipMemcpy(dst, src, size, hipMemcpyDeviceToDevice) );
 #endif
+
+#if defined(HYPRE_USING_SYCL)
+      q->memcpy(dst, src, size).wait();
+#endif
       return;
    }
 
@@ -542,6 +586,10 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
 #if defined(HYPRE_USING_HIP)
       HYPRE_HIP_CALL( hipMemcpy(dst, src, size, hipMemcpyHostToDevice) );
 #endif
+
+#if defined(HYPRE_USING_SYCL)
+      q->memcpy(dst, src, size).wait();
+#endif
       return;
    }
 
@@ -559,6 +607,10 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
 
 #if defined(HYPRE_USING_HIP)
       HYPRE_HIP_CALL( hipMemcpy(dst, src, size, hipMemcpyDeviceToHost) );
+#endif
+
+#if defined(HYPRE_USING_SYCL)
+      q->memcpy(dst, src, size).wait();
 #endif
       return;
    }
@@ -583,6 +635,10 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
 #if defined(HYPRE_USING_HIP)
       HYPRE_HIP_CALL( hipMemcpy(dst, src, size, hipMemcpyHostToDevice) );
 #endif
+
+#if defined(HYPRE_USING_SYCL)
+      q->memcpy(dst, src, size).wait();
+#endif
       return;
    }
 
@@ -605,6 +661,10 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
 
 #if defined(HYPRE_USING_HIP)
       HYPRE_HIP_CALL( hipMemcpy(dst, src, size, hipMemcpyDeviceToHost) );
+#endif
+
+#if defined(HYPRE_USING_SYCL)
+      q->memcpy(dst, src, size).wait();
 #endif
       return;
    }
@@ -630,6 +690,10 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
 #if defined(HYPRE_USING_HIP)
       HYPRE_HIP_CALL( hipMemcpy(dst, src, size, hipMemcpyDeviceToDevice) );
 #endif
+
+#if defined(HYPRE_USING_SYCL)
+      q->memcpy(dst, src, size).wait();
+#endif
       return;
    }
 
@@ -654,7 +718,7 @@ hypre_GetExecPolicy1_core(hypre_MemoryLocation location)
          exec = HYPRE_EXEC_DEVICE;
          break;
       case hypre_MEMORY_UNIFIED :
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_SYCL)
          exec = hypre_HandleDefaultExecPolicy(hypre_handle());
 #endif
          break;
@@ -701,7 +765,7 @@ hypre_GetExecPolicy2_core(hypre_MemoryLocation location1,
 
    if (location1 == hypre_MEMORY_UNIFIED && location2 == hypre_MEMORY_UNIFIED)
    {
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_SYCL)
       exec = hypre_HandleDefaultExecPolicy(hypre_handle());
 #endif
    }
@@ -907,7 +971,7 @@ hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
 {
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_SYCL)
    *memory_location = hypre_MEMORY_UNDEFINED;
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
@@ -1002,7 +1066,30 @@ hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
    }
 #endif // defined(HYPRE_USING_HIP)
 
-#else /* #if defined(HYPRE_USING_GPU) */
+#if defined(HYPRE_USING_SYCL)
+   *memory_location = hypre_MEMORY_UNDEFINED;
+   sycl::usm::alloc allocType;
+   allocType = sycl::get_pointer_type(ptr, (hypre_HandleSyclComputeQueue(hypre_handle()))->get_context());
+
+   if (allocType == sycl::usm::alloc::unknown)
+   {
+      *memory_location = hypre_MEMORY_HOST;
+   }
+   else if (allocType == sycl::usm::alloc::host)
+   {
+      *memory_location = hypre_MEMORY_HOST_PINNED;
+   }
+   else if (allocType == sycl::usm::alloc::device)
+   {
+      *memory_location = hypre_MEMORY_DEVICE;
+   }
+   else if (allocType == sycl::usm::alloc::shared)
+   {
+      *memory_location = hypre_MEMORY_UNIFIED;
+   }
+#endif //HYPRE_USING_SYCL
+
+#else /* #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_SYCL) */
    *memory_location = hypre_MEMORY_HOST;
 #endif
 

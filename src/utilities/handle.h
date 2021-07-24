@@ -17,6 +17,9 @@
 struct hypre_CudaData;
 typedef struct hypre_CudaData hypre_CudaData;
 
+struct hypre_SyclData;
+typedef struct hypre_SyclData hypre_SyclData;
+
 typedef struct
 {
    HYPRE_Int              hypre_error;
@@ -42,6 +45,9 @@ typedef struct
    HYPRE_Int              own_umpire_pinned_pool;
    umpire_resourcemanager umpire_rm;
 #endif
+#if defined(HYPRE_USING_SYCL)
+   hypre_SyclData        *sycl_data;
+#endif
 } hypre_Handle;
 
 /* accessor macros to hypre_Handle */
@@ -49,6 +55,7 @@ typedef struct
 #define hypre_HandleDefaultExecPolicy(hypre_handle)              ((hypre_handle) -> default_exec_policy)
 #define hypre_HandleStructExecPolicy(hypre_handle)               ((hypre_handle) -> struct_exec_policy)
 #define hypre_HandleCudaData(hypre_handle)                       ((hypre_handle) -> cuda_data)
+#define hypre_HandleSyclData(hypre_handle)                       ((hypre_handle) -> sycl_data)
 
 #define hypre_HandleCurandGenerator(hypre_handle)                hypre_CudaDataCurandGenerator(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleCublasHandle(hypre_handle)                   hypre_CudaDataCublasHandle(hypre_HandleCudaData(hypre_handle))
@@ -91,4 +98,7 @@ typedef struct
 #define hypre_HandleOwnUmpireHostPool(hypre_handle)              ((hypre_handle) -> own_umpire_host_pool)
 #define hypre_HandleOwnUmpirePinnedPool(hypre_handle)            ((hypre_handle) -> own_umpire_pinned_pool)
 
+#define hypre_HandleSyclComputeQueue(hypre_handle)               hypre_SyclDataSyclComputeQueue(hypre_HandleSyclData(hypre_handle))
+#define hypre_HandleSyclDevice(hypre_handle)                     hypre_SyclDataSyclDevice(hypre_HandleSyclData(hypre_handle))
+#define hypre_HandleSyclComputeQueueNum(hypre_handle)            hypre_SyclDataSyclComputeQueueNum(hypre_HandleSyclData(hypre_handle))
 #endif

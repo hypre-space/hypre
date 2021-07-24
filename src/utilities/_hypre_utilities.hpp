@@ -2111,6 +2111,81 @@ struct hypre_cub_CachingDeviceAllocator
 #endif // #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_DEVICE_POOL)
 #endif // #ifndef HYPRE_CUB_ALLOCATOR_HEADER
 
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+#ifndef HYPRE_SYCL_UTILS_HPP
+#define HYPRE_SYCL_UTILS_HPP
+
+#if defined(HYPRE_USING_SYCL)
+
+/* #include <oneapi/dpl/execution> */
+/* #include <oneapi/dpl/algorithm> */
+/* #include <oneapi/dpl/iterator> */
+/* #include <oneapi/dpl/functional> */
+
+/* #include <dpct/dpl_extras/algorithm.h> // dpct::remove_if, remove_copy_if, copy_if */
+
+/* #include <algorithm> */
+/* #include <numeric> */
+/* #include <functional> */
+/* #include <iterator> */
+
+#include <CL/sycl.hpp>
+/* #include <oneapi/mkl.hpp> */
+/* #include <oneapi/mkl/rng/device.hpp> */
+
+#define HYPRE_SYCL_CALL( EXPR )                                       \
+   try                                                                \
+   {                                                                  \
+      EXPR;                                                           \
+   }                                                                  \
+   catch (sycl::exception const &ex)                                  \
+   {                                                                  \
+      hypre_printf("SYCL ERROR (code = %s) at %s:%d\n", ex.what(),    \
+                     __FILE__, __LINE__);                             \
+      assert(0); exit(1);                                             \
+   }                                                                  \
+   catch(std::runtime_error const& ex) {                              \
+      hypre_printf("STD ERROR (code = %s) at %s:%d\n", ex.what(),     \
+                   __FILE__, __LINE__);                               \
+      assert(0); exit(1);                                             \
+   }
+
+// HYPRE_SUBGROUP_BITSHIFT is just log2 of HYPRE_SUBGROUP_SIZE
+#define HYPRE_SUBGROUP_SIZE       32
+#define HYPRE_SUBGROUP_BITSHIFT   5
+#define HYPRE_MAX_NUM_SUBGROUPS   (64 * 64 * 32)
+#define HYPRE_FLT_LARGE           1e30
+#define HYPRE_1D_BLOCK_SIZE       512
+#define HYPRE_MAX_NUM_QUEUES      10
+
+struct hypre_SyclData
+{
+   sycl::queue*                      sycl_queues[HYPRE_MAX_NUM_QUEUES] = {};
+   sycl::device                      sycl_device;
+
+   /* by default, hypre puts GPU computations in this queue
+    * Do not be confused with the default (null) SYCL queue */
+   HYPRE_Int                         sycl_compute_queue_num;
+};
+
+#define hypre_SyclDataSyclDevice(data)                     ((data) -> sycl_device)
+#define hypre_SyclDataSyclComputeQueueNum(data)            ((data) -> sycl_compute_queue_num)
+
+hypre_SyclData* hypre_SyclDataCreate();
+void hypre_SyclDataDestroy(hypre_SyclData* data);
+
+sycl::queue *hypre_SyclDataSyclQueue(hypre_SyclData *data, HYPRE_Int i);
+sycl::queue *hypre_SyclDataSyclComputeQueue(hypre_SyclData *data);
+
+#endif // #if defined(HYPRE_USING_SYCL)
+
+#endif /* #ifndef HYPRE_SYCL_UTILS_HPP */
 
 #ifdef __cplusplus
 }

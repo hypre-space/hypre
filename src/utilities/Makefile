@@ -62,8 +62,9 @@ CUFILES=\
  general.c\
  handle.c\
  memory.c\
- omp_device.c \
- nvtx.c
+ omp_device.c\
+ nvtx.c\
+ sycl_utils.c
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}
