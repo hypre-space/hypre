@@ -229,8 +229,8 @@ typedef struct hypre_IJMatrix_struct
 {
    MPI_Comm      comm;
 
-   HYPRE_BigInt *row_partitioning;    /* distribution of rows across processors */
-   HYPRE_BigInt *col_partitioning;    /* distribution of columns */
+   HYPRE_BigInt  row_partitioning[2]; /* distribution of rows across processors */
+   HYPRE_BigInt  col_partitioning[2]; /* distribution of columns */
 
    HYPRE_Int     object_type;         /* Indicates the type of "object" */
    void         *object;              /* Structure for storing local portion */
@@ -299,7 +299,6 @@ hypre_GetIJMatrixISISMatrix( HYPRE_IJMatrix IJmatrix, RowMatrix *reference )
 #endif
 
 #endif /* #ifndef hypre_IJ_MATRIX_HEADER */
-
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -324,7 +323,7 @@ typedef struct hypre_IJVector_struct
 {
    MPI_Comm      comm;
 
-   HYPRE_BigInt *partitioning;      /* Indicates partitioning over tasks */
+   HYPRE_BigInt  partitioning[2];   /* Indicates partitioning over tasks */
 
    HYPRE_Int     object_type;       /* Indicates the type of "local storage" */
 
@@ -373,7 +372,6 @@ hypre_IJVectorMemoryLocation(hypre_IJVector *vector)
 /* #include "./internal_protos.h" */
 
 #endif /* #ifndef hypre_IJ_VECTOR_HEADER */
-
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -530,3 +528,4 @@ HYPRE_Int HYPRE_IJVectorPrint ( HYPRE_IJVector vector , const char *filename );
 #endif
 
 #endif
+

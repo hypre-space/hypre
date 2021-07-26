@@ -85,7 +85,7 @@ hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
       HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag);
       HYPRE_BigInt first_row_index = hypre_ParCSRMatrixFirstRowIndex(A);
       HYPRE_Int new_num_procs;
-      HYPRE_BigInt *row_starts;
+      HYPRE_BigInt  row_starts[2];
 
       hypre_GenerateSubComm(comm, num_rows, &new_comm);
 
@@ -282,7 +282,6 @@ hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
          {
             hypre_TFree(displs2, HYPRE_MEMORY_HOST);
 
-            row_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
             row_starts[0] = 0;
             row_starts[1] = size;
 

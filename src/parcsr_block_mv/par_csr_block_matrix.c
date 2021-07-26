@@ -49,7 +49,7 @@ hypre_ParCSRBlockMatrixCreate( MPI_Comm      comm,
    else
    {
       row_starts[0] = row_starts_in[0];
-      row_starts[0] = row_starts_in[1];
+      row_starts[1] = row_starts_in[1];
    }
 
    if (!col_starts_in)
@@ -60,7 +60,7 @@ hypre_ParCSRBlockMatrixCreate( MPI_Comm      comm,
    else
    {
       col_starts[0] = col_starts_in[0];
-      col_starts[0] = col_starts_in[1];
+      col_starts[1] = col_starts_in[1];
    }
 
    /* row_starts[0] is start of local rows.
@@ -84,10 +84,10 @@ hypre_ParCSRBlockMatrixCreate( MPI_Comm      comm,
    hypre_ParCSRBlockMatrixFirstColDiag(matrix)  = first_col_diag;
    hypre_ParCSRBlockMatrixLastRowIndex(matrix)  = first_row_index + (HYPRE_BigInt)local_num_rows - 1;
    hypre_ParCSRBlockMatrixLastColDiag(matrix)   = first_col_diag  + (HYPRE_BigInt)local_num_cols - 1;
-   hypre_ParCSRMatrixRowStarts(matrix)[0]       = row_starts[0];
-   hypre_ParCSRMatrixRowStarts(matrix)[1]       = row_starts[1];
-   hypre_ParCSRMatrixColStarts(matrix)[0]       = col_starts[0];
-   hypre_ParCSRMatrixColStarts(matrix)[1]       = col_starts[1];
+   hypre_ParCSRBlockMatrixRowStarts(matrix)[0]  = row_starts[0];
+   hypre_ParCSRBlockMatrixRowStarts(matrix)[1]  = row_starts[1];
+   hypre_ParCSRBlockMatrixColStarts(matrix)[0]  = col_starts[0];
+   hypre_ParCSRBlockMatrixColStarts(matrix)[1]  = col_starts[1];
    hypre_ParCSRBlockMatrixColMapOffd(matrix)    = NULL;
    hypre_ParCSRBlockMatrixCommPkg(matrix)       = NULL;
    hypre_ParCSRBlockMatrixCommPkgT(matrix)      = NULL;
@@ -916,7 +916,7 @@ hypre_ParVectorCreateFromBlock(  MPI_Comm comm,
                                  HYPRE_BigInt *p_partitioning, HYPRE_Int block_size)
 {
    hypre_ParVector  *vector;
-   HYPRE_Int num_procs, my_id, i;
+   HYPRE_Int num_procs, my_id;
    HYPRE_BigInt global_size;
    HYPRE_BigInt new_partitioning[2]; /* need to create a new partitioning - son't want to write over
                                      what is passed in */

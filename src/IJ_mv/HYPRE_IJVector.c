@@ -26,10 +26,8 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
                       HYPRE_IJVector *vector )
 {
    hypre_IJVector *vec;
-   HYPRE_Int num_procs, my_id;
-   HYPRE_BigInt *partitioning;
-
-   HYPRE_BigInt  row0, rowN;
+   HYPRE_Int       num_procs, my_id;
+   HYPRE_BigInt    row0, rowN;
 
    vec = hypre_CTAlloc(hypre_IJVector,  1, HYPRE_MEMORY_HOST);
 
@@ -54,12 +52,6 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
       return hypre_error_flag;
    }
 
-   partitioning = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
-
-   partitioning[0] = jlower;
-   partitioning[1] = jupper+1;
-
-
    /* now we need the global number of rows as well
       as the global first row index */
 
@@ -79,13 +71,14 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
    hypre_IJVectorGlobalFirstRow(vec) = row0;
    hypre_IJVectorGlobalNumRows(vec) = rowN - row0 + 1;
 
-   hypre_IJVectorComm(vec)         = comm;
-   hypre_IJVectorPartitioning(vec) = partitioning;
-   hypre_IJVectorObjectType(vec)   = HYPRE_UNITIALIZED;
-   hypre_IJVectorObject(vec)       = NULL;
-   hypre_IJVectorTranslator(vec)   = NULL;
-   hypre_IJVectorAssumedPart(vec)   = NULL;
-   hypre_IJVectorPrintLevel(vec)   = 0;
+   hypre_IJVectorComm(vec)            = comm;
+   hypre_IJVectorObjectType(vec)      = HYPRE_UNITIALIZED;
+   hypre_IJVectorObject(vec)          = NULL;
+   hypre_IJVectorTranslator(vec)      = NULL;
+   hypre_IJVectorAssumedPart(vec)     = NULL;
+   hypre_IJVectorPrintLevel(vec)      = 0;
+   hypre_IJVectorPartitioning(vec)[0] = jlower;
+   hypre_IJVectorPartitioning(vec)[1] = jupper+1;
 
    *vector = (HYPRE_IJVector) vec;
 
@@ -105,11 +98,6 @@ HYPRE_IJVectorDestroy( HYPRE_IJVector vector )
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
-   }
-
-   if (hypre_IJVectorPartitioning(vec))
-   {
-      hypre_TFree(hypre_IJVectorPartitioning(vec), HYPRE_MEMORY_HOST);
    }
 
    if (hypre_IJVectorAssumedPart(vec))
@@ -490,9 +478,6 @@ HYPRE_IJVectorGetLocalRange( HYPRE_IJVector  vector,
                              HYPRE_BigInt   *jupper )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
-   MPI_Comm comm;
-   HYPRE_BigInt *partitioning;
-   HYPRE_Int my_id;
 
    if (!vec)
    {
@@ -500,12 +485,9 @@ HYPRE_IJVectorGetLocalRange( HYPRE_IJVector  vector,
       return hypre_error_flag;
    }
 
-   comm = hypre_IJVectorComm(vec);
-   partitioning = hypre_IJVectorPartitioning(vec);
-   hypre_MPI_Comm_rank(comm, &my_id);
+   *jlower = hypre_IJVectorPartitioning(vec)[0];
+   *jupper = hypre_IJVectorPartitioning(vec)[1]-1;
 
-   *jlower = partitioning[0];
-   *jupper = partitioning[1]-1;
    return hypre_error_flag;
 }
 
@@ -664,4 +646,3 @@ HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
 
    return hypre_error_flag;
 }
-
