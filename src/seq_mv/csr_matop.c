@@ -1892,6 +1892,10 @@ hypre_CSRMatrixComputeRowSum( hypre_CSRMatrix *A,
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixExtractDiagonalHost
+ * type 0: diag
+ *      1: abs diag
+ *      2: diag inverse
+ *      3: diag inverse sqrt
  *--------------------------------------------------------------------------*/
 
 void
@@ -1921,6 +1925,14 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
             {
                d_i = fabs(A_data[j]);
             }
+            else if (type == 2)
+            {
+               d_i = 1.0 /(A_data[j]);
+            }
+            else if (type == 3)
+            {
+               d_i = 1.0 /(sqrt(A_data[j]));
+            }
             break;
          }
       }
@@ -1933,6 +1945,8 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
  *
  * type 0: diag
  *      1: abs diag
+ *      2: diag inverse
+ *      3: diag inverse sqrt
  *--------------------------------------------------------------------------*/
 
 void
