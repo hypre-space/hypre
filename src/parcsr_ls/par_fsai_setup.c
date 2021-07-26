@@ -145,20 +145,26 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
    for(i = 0; i < row_num; i++)
    {
 
-      if(marker[i]) /* If this spot is already part of S_Pattern, we don't need to compute it because it doesn't need to be re-added */
+      if(marker[i] == 1) /* If this spot is already part of S_Pattern, we don't need to compute it because it doesn't need to be re-added */
          continue;
 
-      count = 0;
-      temp  = 0;
+      temp = 0;
 
       for(j = A_i[i]; j < A_i[i+1]; j++)  /* Intersection + Gather */
       {
+         
+         if(A_j[j] == row_num){
+            temp += 2*A_data[j]; 
+            break;  
+         }
+
          /* Skip the upper triangular part of A */
          if (A_j[j] > i)
             continue;
 
-         if(A_j[j] == row_num)
-            temp += 2 * A_data[j];
+         if(A_j[j] == row_num){
+            
+         }
 
          for(k = 0; k < hypre_VectorSize(S_Pattern); k++)
             if(S_Pattern_data[k] == A_j[j])
@@ -175,7 +181,6 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
          break;
 
    }
-
    hypre_VectorSize(kaporin_gradient)  = count;
    hypre_VectorSize(kap_grad_nonzeros) = count;
 
@@ -313,7 +318,7 @@ hypre_FSAISetup( void               *fsai_vdata,
        hypre_ParCSRMatrixRowStarts(A),
        hypre_ParCSRMatrixColStarts(A),
        0,
-       hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A))*(max_steps*max_step_size+1),
+       hypre_ParCSRMatrixGlobalNumRows(A)*(max_steps*max_step_size+1),
        0);
    hypre_ParCSRMatrixInitialize(G);
    hypre_ParFSAIDataGmat(fsai_data) = G;
@@ -386,7 +391,7 @@ hypre_FSAISetup( void               *fsai_vdata,
 
    for( i = 0; i < num_rows; i++ )    /* Cycle through each of the local rows */
    {
-       
+      
       hypre_VectorSize(A_subrow)  = 0;
       hypre_VectorSize(G_temp)    = 0;
       hypre_VectorSize(S_Pattern) = 0;
@@ -401,10 +406,9 @@ hypre_FSAISetup( void               *fsai_vdata,
 
          /* Compute Kaporin Gradient */
          hypre_FindKapGrad(A_diag, kaporin_gradient, kap_grad_nonzeros, G_temp, S_Pattern, max_row_size, i, marker);
-         
-         if(hypre_VectorSize(kaporin_gradient) <= 0)
+ 
+         if(hypre_VectorSize(kaporin_gradient) == 0)
             break;
-         hypre_printf("%d\n", hypre_VectorSize(kaporin_gradient));
 
          /* Find max_step_size largest values of the kaporin gradient, find their column indices, and add it to S_Pattern */
          hypre_AddToPattern(kaporin_gradient, kap_grad_nonzeros, S_Pattern, max_step_size);
@@ -441,28 +445,19 @@ hypre_FSAISetup( void               *fsai_vdata,
 
          old_psi = new_psi;
       }
+
+      G_i[i+1] = G_i[i] + hypre_VectorSize(S_Pattern) + 1;
       
-      if(hypre_VectorSize(G_temp) > 0){
-         /* Calculate value to scale G_temp */
-         row_scale = 1/(sqrt(A_data[A_i[i]] - hypre_abs(hypre_SeqVectorInnerProd(G_temp, A_subrow))));
+      row_scale = 1/(sqrt(hypre_abs(A_data[A_i[i]] + hypre_SeqVectorInnerProd(G_temp, A_subrow))));  
+      G_j[G_i[i]] = i;
+      G_data[G_i[i]] = row_scale;
 
-         hypre_SeqVectorScale(row_scale, G_temp);
-
-         /* Pass values of G_temp into G */
-         G_j[G_i[i]] = i;
-         G_data[G_i[i]] = row_scale;
-         for(k = 1; k <= hypre_VectorSize(S_Pattern); k++)
-         {
-            j           = k + G_i[i];
-            G_j[j]      = S_Pattern_data[k-1];
-            G_data[j]   = G_temp_data[k-1];
-         }
-         G_i[i+1] = G_i[i] + hypre_VectorSize(S_Pattern) + 1;
-      }
-      else
+      /* Pass values of G_temp into G */
+      for(k = 0; k < hypre_VectorSize(G_temp); k++)
       {
-         G_j[G_i[i]]    = i;
-         G_data[G_i[i]] = 1/sqrt(A_data[A_i[i]]);
+         j           = G_i[i] + k + 1;
+         G_j[j]      = S_Pattern_data[k];
+         G_data[j]   = G_temp_data[k] * row_scale;
       }
    }
 
