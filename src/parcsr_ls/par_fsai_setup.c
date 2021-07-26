@@ -55,7 +55,7 @@ hypre_CSRMatrixExtractDenseMatrix( hypre_CSRMatrix *A_diag,
             break;
          
          if((cc = marker[A_j[j]]) >= 0){
-            A_sub_data[(HYPRE_Int)(cc*nrows_needed + A_j[j])] = A_data[j];      
+            A_sub_data[(HYPRE_Int)(cc*nrows_needed + i)] = A_data[j];      
          }
       
       }
@@ -168,7 +168,7 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
 
          for(k = 0; k < hypre_VectorSize(S_Pattern); k++)
             if(S_Pattern_data[k] == A_j[j])
-               temp += 2 * G_temp_data[(HYPRE_Int)S_Pattern_data[k]] * A_data[j];
+               temp += 2 * G_temp_data[k] * A_data[j];
       }
 
       if(temp != 0)
@@ -431,8 +431,10 @@ hypre_FSAISetup( void               *fsai_vdata,
 
          /* Solve A[P, P]G[i, P]' = -A[P, i] */
          hypre_dpotrf(&uplo, &hypre_VectorSize(S_Pattern), A_sub_data, &hypre_VectorSize(S_Pattern), &info);
+         
+         j = 1;
 
-         hypre_dpotrs(&uplo, &hypre_VectorSize(S_Pattern), &hypre_VectorSize(S_Pattern), A_sub_data, &hypre_VectorSize(S_Pattern), sol_vec_data, &hypre_VectorSize(S_Pattern), &info); /* A_subrow becomes the solution vector... */
+         hypre_dpotrs(&uplo, &hypre_VectorSize(S_Pattern), &j, A_sub_data, &hypre_VectorSize(S_Pattern), sol_vec_data, &hypre_VectorSize(S_Pattern), &info); /* A_subrow becomes the solution vector... */
 
          for(j = 0; j < hypre_VectorSize(sol_vec); j++)
             G_temp_data[j] = sol_vec_data[j];
@@ -448,7 +450,7 @@ hypre_FSAISetup( void               *fsai_vdata,
 
       G_i[i+1] = G_i[i] + hypre_VectorSize(S_Pattern) + 1;
       
-      row_scale = 1/(sqrt(hypre_abs(A_data[A_i[i]] + hypre_SeqVectorInnerProd(G_temp, A_subrow))));  
+      row_scale = 1/(sqrt(A_data[A_i[i]] - hypre_abs(hypre_SeqVectorInnerProd(G_temp, A_subrow))));  
       G_j[G_i[i]] = i;
       G_data[G_i[i]] = row_scale;
 
