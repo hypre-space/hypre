@@ -1111,6 +1111,10 @@ HYPRE_Int hypre_BoomerAMGBuildModPartialExtPEInterp ( hypre_ParCSRMatrix *A , HY
 HYPRE_Int hypre_BoomerAMGBuildModMultipass ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_Real trunc_factor , HYPRE_Int P_max_elmts , hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_GenerateMultipassPi ( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *S , HYPRE_BigInt *c_pts_starts , HYPRE_Int *pass_order , HYPRE_Int *pass_marker , HYPRE_Int *pass_marker_offd , HYPRE_Int num_points , HYPRE_Int color , hypre_ParCSRMatrix **P_ptr );
 
+/* par_mod_multi_interp2.c */
+HYPRE_Int hypre_BoomerAMGBuildModMultipass2 ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_Real trunc_factor , HYPRE_Int P_max_elmts , hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_GenerateMultiPi ( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *P , HYPRE_BigInt *c_pts_starts , HYPRE_Int *pass_order , HYPRE_Int *pass_marker , HYPRE_Int *pass_marker_offd , HYPRE_Int num_points , HYPRE_Int color , hypre_ParCSRMatrix **Pi_ptr );
+
 /* par_multi_interp.c */
 HYPRE_Int hypre_BoomerAMGBuildMultipass ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_BigInt *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int P_max_elmts , HYPRE_Int weight_option , hypre_ParCSRMatrix **P_ptr );
 

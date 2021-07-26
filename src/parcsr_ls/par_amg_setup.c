@@ -1545,6 +1545,21 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                 CF_marker, S, coarse_pnts_global,
                                                 agg_trunc_factor, agg_P_max_elmts, &P);
                }
+               else if (agg_interp_type == 9)
+               {
+                  hypre_BoomerAMGCorrectCFMarker (CF_marker, local_num_vars,
+                                                  CFN_marker);
+                  hypre_TFree(coarse_pnts_global1, HYPRE_MEMORY_HOST);
+                  /*hypre_TFree(coarse_dof_func);
+                  coarse_dof_func = NULL;*/
+                  hypre_TFree(CFN_marker, HYPRE_MEMORY_HOST);
+                  hypre_BoomerAMGCoarseParms(comm, local_num_vars,
+                                             num_functions, dof_func_array[level], CF_marker,
+                                             &coarse_dof_func,&coarse_pnts_global);
+                  hypre_BoomerAMGBuildModMultipass2(A_array[level],
+                                                CF_marker, S, coarse_pnts_global,
+                                                agg_trunc_factor, agg_P_max_elmts, &P);
+               }
                else
                {
                   hypre_BoomerAMGCorrectCFMarker2 (CF_marker, local_num_vars,
@@ -1656,6 +1671,24 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                              num_functions, dof_func_array[level], CF_marker,
                                              &coarse_dof_func,&coarse_pnts_global);
                   hypre_BoomerAMGBuildModMultipass(A_array[level],
+                                                   CF_marker, S, coarse_pnts_global,
+                                                   agg_trunc_factor, agg_P_max_elmts, &P);
+               }
+               else if (agg_interp_type == 9)
+               {
+                  hypre_BoomerAMGCorrectCFMarker (CFN_marker,
+                                                  local_num_vars/num_functions, CF2_marker);
+                  hypre_TFree(CF2_marker, HYPRE_MEMORY_HOST);
+                  hypre_TFree(coarse_pnts_global1, HYPRE_MEMORY_HOST);
+
+                  hypre_BoomerAMGCreateScalarCFS(SN, A_array[level], CFN_marker,
+                                                 num_functions, nodal, keep_same_sign,
+                                                 &dof_func, &CF_marker, &S);
+                  hypre_TFree(CFN_marker, HYPRE_MEMORY_HOST);
+                  hypre_BoomerAMGCoarseParms(comm, local_num_vars,
+                                             num_functions, dof_func_array[level], CF_marker,
+                                             &coarse_dof_func,&coarse_pnts_global);
+                  hypre_BoomerAMGBuildModMultipass2(A_array[level],
                                                    CF_marker, S, coarse_pnts_global,
                                                    agg_trunc_factor, agg_P_max_elmts, &P);
                }
