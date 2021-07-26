@@ -929,21 +929,6 @@ hypre_MGRSetup( void               *mgr_vdata,
           }
         }
         A_ff_ptr = ((hypre_ParAMGData*)aff_solver[0])->A_array[0];
-
-        F_fine_array[lev+1] =
-        hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
-                       hypre_ParCSRMatrixGlobalNumRows(A_ff_ptr),
-                       hypre_ParCSRMatrixRowStarts(A_ff_ptr));
-        hypre_ParVectorInitialize(F_fine_array[lev+1]);
-        hypre_ParVectorSetPartitioningOwner(F_fine_array[lev+1],0);
-
-        U_fine_array[lev+1] =
-        hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
-                       hypre_ParCSRMatrixGlobalNumRows(A_ff_ptr),
-                       hypre_ParCSRMatrixRowStarts(A_ff_ptr));
-        hypre_ParVectorInitialize(U_fine_array[lev+1]);
-        hypre_ParVectorSetPartitioningOwner(U_fine_array[lev+1],0);
-        A_ff_array[lev] = A_ff_ptr;
       }
       else // construct default AMG solver
       {
@@ -956,34 +941,7 @@ hypre_MGRSetup( void               *mgr_vdata,
         {
           hypre_ParCSRMatrixGenerateFFFCDevice(A_array[lev], CF_marker_array[lev], coarse_pnts_global, NULL, NULL, &A_ff_ptr);
         }
-        HYPRE_Int *CF_marker_copy = hypre_CTAlloc(HYPRE_Int, nloc, HYPRE_MEMORY_HOST);
-        for (j = 0; j < nloc; j++)
-        {
-          CF_marker_copy[j] = -CF_marker_array[lev][j];
-        }
-        HYPRE_BigInt *num_fpts_global;
-        hypre_ParCSRMatrix *P_FF_ptr;
-        hypre_BoomerAMGCoarseParms(comm, nloc, 1, NULL, CF_marker_copy, NULL, &num_fpts_global);
-        hypre_MGRBuildPDevice(A_array[lev], CF_marker_copy, num_fpts_global, 0, &P_FF_ptr);
-        P_FF_array[lev] = P_FF_ptr;
- 
-        hypre_TFree(CF_marker_copy, HYPRE_MEMORY_HOST);
-        hypre_TFree(num_fpts_global, HYPRE_MEMORY_HOST);
 #endif
-        F_fine_array[lev+1] =
-        hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
-                       hypre_ParCSRMatrixGlobalNumRows(A_ff_ptr),
-                       hypre_ParCSRMatrixRowStarts(A_ff_ptr));
-        hypre_ParVectorInitialize(F_fine_array[lev+1]);
-        hypre_ParVectorSetPartitioningOwner(F_fine_array[lev+1],0);
-
-        U_fine_array[lev+1] =
-        hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
-                       hypre_ParCSRMatrixGlobalNumRows(A_ff_ptr),
-                       hypre_ParCSRMatrixRowStarts(A_ff_ptr));
-        hypre_ParVectorInitialize(U_fine_array[lev+1]);
-        hypre_ParVectorSetPartitioningOwner(U_fine_array[lev+1],0);
-        A_ff_array[lev] = A_ff_ptr;
 
         aff_solver[lev] = (HYPRE_Solver*) hypre_BoomerAMGCreate();
         hypre_BoomerAMGSetMaxIter(aff_solver[lev], mgr_data -> num_relax_sweeps);
@@ -1006,6 +964,35 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
       //wall_time = time_getWallclockSeconds() - wall_time;
       //hypre_printf("Lev = %d, proc = %d     SetupAFF: %f\n", lev, my_id, wall_time);
+#if defined(HYPRE_USING_CUDA)
+      HYPRE_Int *CF_marker_copy = hypre_CTAlloc(HYPRE_Int, nloc, HYPRE_MEMORY_HOST);
+      for (j = 0; j < nloc; j++)
+      {
+        CF_marker_copy[j] = -CF_marker_array[lev][j];
+      }
+      HYPRE_BigInt *num_fpts_global;
+      hypre_ParCSRMatrix *P_FF_ptr;
+      hypre_BoomerAMGCoarseParms(comm, nloc, 1, NULL, CF_marker_copy, NULL, &num_fpts_global);
+      hypre_MGRBuildPDevice(A_array[lev], CF_marker_copy, num_fpts_global, 0, &P_FF_ptr);
+      P_FF_array[lev] = P_FF_ptr;
+
+      hypre_TFree(CF_marker_copy, HYPRE_MEMORY_HOST);
+      hypre_TFree(num_fpts_global, HYPRE_MEMORY_HOST);
+#endif
+      F_fine_array[lev+1] =
+      hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
+                     hypre_ParCSRMatrixGlobalNumRows(A_ff_ptr),
+                     hypre_ParCSRMatrixRowStarts(A_ff_ptr));
+      hypre_ParVectorInitialize(F_fine_array[lev+1]);
+      hypre_ParVectorSetPartitioningOwner(F_fine_array[lev+1],0);
+
+      U_fine_array[lev+1] =
+      hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
+                     hypre_ParCSRMatrixGlobalNumRows(A_ff_ptr),
+                     hypre_ParCSRMatrixRowStarts(A_ff_ptr));
+      hypre_ParVectorInitialize(U_fine_array[lev+1]);
+      hypre_ParVectorSetPartitioningOwner(U_fine_array[lev+1],0);
+      A_ff_array[lev] = A_ff_ptr;
     }
 
     /* Update coarse level indexes for next levels */
