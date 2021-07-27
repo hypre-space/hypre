@@ -2541,3 +2541,57 @@ hypre_StructMatrixClearBoundary( hypre_StructMatrix *matrix)
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_StructMatrixGetDiagonal
+ *
+ * Returns the diagonal of a StructMatrix as a StructVector
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixGetDiagonal( hypre_StructMatrix  *matrix,
+                               hypre_StructVector  *diag )
+{
+   HYPRE_Int               ndim    = hypre_StructMatrixNDim(matrix);
+   hypre_StructGrid       *grid    = hypre_StructMatrixGrid(matrix);
+   hypre_BoxArray         *boxes   = hypre_StructGridBoxes(grid);
+   hypre_StructStencil    *stencil = hypre_StructMatrixStencil(matrix);
+   hypre_BoxArray         *A_data_space = hypre_StructMatrixDataSpace(matrix);
+   hypre_BoxArray         *x_data_space = hypre_StructVectorDataSpace(diag);
+
+   hypre_IndexRef          start;
+   hypre_Index             ustride;
+   hypre_Index             loop_size;
+   hypre_Box              *box;
+   hypre_Box              *A_data_box;
+   hypre_Box              *d_data_box;
+   HYPRE_Int               stencil_diag;
+   HYPRE_Int               i;
+   HYPRE_Real             *Ap, *dp;
+
+   hypre_SetIndex(ustride, 1);
+   hypre_ForBoxArrayI(i, boxes)
+   {
+      box = hypre_BoxArrayBox(boxes, i);
+      stencil_diag = hypre_StructStencilDiagEntry(stencil);
+
+      A_data_box = hypre_BoxArrayBox(A_data_space, i);
+      d_data_box = hypre_BoxArrayBox(x_data_space, i);
+
+      Ap = hypre_StructMatrixBoxData(matrix, i, stencil_diag);
+      dp = hypre_StructVectorBoxData(diag, i);
+
+      start = hypre_BoxIMin(box);
+      hypre_BoxGetStrideSize(box, ustride, loop_size);
+
+      hypre_BoxLoop2Begin(ndim, loop_size,
+                          A_data_box, start, ustride, Ai,
+                          d_data_box, start, ustride, di)
+      {
+         dp[di] = Ap[Ai];
+      }
+      hypre_BoxLoop2End(Ai, di)
+   }
+
+   return hypre_error_flag;
+}

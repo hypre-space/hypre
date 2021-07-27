@@ -59,6 +59,7 @@ typedef struct hypre_ParVector_struct
 #define hypre_ParVectorOwnsData(vector)         ((vector) -> owns_data)
 #define hypre_ParVectorOwnsPartitioning(vector) ((vector) -> owns_partitioning)
 #define hypre_ParVectorNumVectors(vector)       (hypre_VectorNumVectors(hypre_ParVectorLocalVector(vector)))
+#define hypre_ParVectorLocalData(vector)        (hypre_VectorData(hypre_ParVectorLocalVector(vector)))
 
 #define hypre_ParVectorAssumedPartition(vector) ((vector) -> assumed_partition)
 
@@ -69,4 +70,3 @@ hypre_ParVectorMemoryLocation(hypre_ParVector *vector)
 }
 
 #endif
-

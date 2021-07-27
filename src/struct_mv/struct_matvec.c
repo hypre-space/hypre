@@ -27,7 +27,6 @@ typedef struct
    hypre_BoxArray      *data_space;
    HYPRE_Int            transpose;
 
-   HYPRE_Int            skip_diag;
    HYPRE_Int            nentries;
    HYPRE_Int           *stentries;
 } hypre_StructMatvecData;
@@ -77,27 +76,6 @@ hypre_StructMatvecSetTranspose( void *matvec_vdata,
    hypre_StructMatvecData *matvec_data = (hypre_StructMatvecData *)matvec_vdata;
 
    (matvec_data -> transpose) = transpose;
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructMatvecSetSkipDiag( void     *matvec_vdata,
-                               HYPRE_Int skip_diag )
-{
-   hypre_StructMatvecData *matvec_data = (hypre_StructMatvecData *)matvec_vdata;
-
-   if (skip_diag != 0)
-   {
-      (matvec_data -> skip_diag) = 1;
-   }
-   else
-   {
-      (matvec_data -> skip_diag) = 0;
-   }
 
    return hypre_error_flag;
 }
@@ -252,7 +230,6 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    hypre_CommHandle        *comm_handle;
    hypre_ComputePkg        *compute_pkg = (matvec_data -> compute_pkg);
    HYPRE_Int                transpose   = (matvec_data -> transpose);
-   HYPRE_Int                skip_diag   = (matvec_data -> skip_diag);
    HYPRE_Int                nentries    = (matvec_data -> nentries);
    HYPRE_Int               *stentries   = (matvec_data -> stentries);
    HYPRE_Int                ndim        = hypre_StructMatrixNDim(A);
@@ -325,7 +302,6 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
    compute_box = hypre_BoxCreate(ndim);
    hypre_SetIndex(ustride, 1);
-   hypre_assert(skip_diag == 0 || skip_diag == 1);
 
    /*-----------------------------------------------------------------------
     * Do (alpha == 0.0) computation
@@ -480,7 +456,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
             hypre_ForBoxI(j, compute_box_a)
             {
                /* TODO optimization: Unroll these loops in a separate kernel */
-               for (si = skip_diag; si < nentries; si++)
+               for (si = 0; si < nentries; si++)
                {
                   /* If the domain grid is coarse, the compute box will change
                    * based on the stencil entry.  Otherwise, the next code block
@@ -490,7 +466,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                    * places depending on the value of transpose. */
 
                   ssi = stentries[si];
-                  if ((si == skip_diag) || dom_is_coarse)
+                  if ((si == 0) || dom_is_coarse)
                   {
                      hypre_CopyBox(hypre_BoxArrayBox(compute_box_a, j), compute_box);
                      hypre_StructMatrixGetStencilSpace(A, ssi, transpose, origin, stride);
@@ -558,7 +534,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                hypre_CopyBox(hypre_BoxArrayBox(compute_box_a, j), compute_box);
 
                /* unroll up to depth UNROLL_MAXDEPTH */
-               for (si = skip_diag; si < nentries; si += UNROLL_MAXDEPTH)
+               for (si = 0; si < nentries; si += UNROLL_MAXDEPTH)
                {
                   depth = hypre_min(UNROLL_MAXDEPTH, (stencil_size - si));
 
@@ -1084,177 +1060,6 @@ hypre_StructMatvecCompute_core_VC( hypre_StructMatrix *A,
          break;
    } /* switch (nentries) */
 #undef DEVICE_VAR
-
-   HYPRE_ANNOTATE_FUNC_END;
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_StructMatrixInvDiagAxpy
- *
- * y = alpha*inv(A_D)*x + beta*y
- *--------------------------------------------------------------------------*/
-HYPRE_Int
-hypre_StructMatrixInvDiagAxpy( void                *matvec_vdata,
-                               HYPRE_Complex        alpha,
-                               hypre_StructMatrix  *A,
-                               hypre_StructVector  *x,
-                               HYPRE_Complex        beta,
-                               hypre_StructVector  *y )
-{
-   hypre_StructMatvecData  *matvec_data = (hypre_StructMatvecData *) matvec_vdata;
-   HYPRE_Int                skip_diag = (matvec_data -> skip_diag);
-   HYPRE_Int                ndim = hypre_StructMatrixNDim(A);
-
-   hypre_BoxArray          *boxes;
-   hypre_Box               *box;
-   hypre_Box               *A_data_box;
-   hypre_Box               *x_data_box;
-   hypre_Box               *y_data_box;
-
-   HYPRE_Complex           *Ap, *xp, *yp;
-   hypre_Index              ustride, loop_size;
-   hypre_IndexRef           start;
-
-   HYPRE_Int                diag, i;
-   HYPRE_Real               scale;
-
-   /* Sanity check */
-   if (skip_diag)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Error! Skip diagonal option not available!\n");
-
-      return hypre_error_flag;
-   }
-
-   HYPRE_ANNOTATE_FUNC_BEGIN;
-
-   hypre_SetIndex(ustride, 1);
-
-   diag  = hypre_StructStencilDiagEntry(hypre_StructMatrixStencil(A));
-   boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
-   hypre_ForBoxI(i, boxes)
-   {
-      box = hypre_BoxArrayBox(boxes, i);
-
-      A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-      x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-      y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
-
-      Ap = hypre_StructMatrixBoxData(A, i, diag);
-      xp = hypre_StructVectorBoxData(x, i);
-      yp = hypre_StructVectorBoxData(y, i);
-
-#define DEVICE_VAR is_device_ptr(yp,xp,Ap)
-      start = hypre_BoxIMin(box);
-      hypre_BoxGetSize(box, loop_size);
-      if (beta == 0.0)
-      {
-         if (alpha == 1.0)
-         {
-            if (hypre_StructMatrixConstEntry(A, diag))
-            {
-               hypre_BoxLoop2Begin(ndim, loop_size,
-                                   x_data_box, start, ustride, xi,
-                                   y_data_box, start, ustride, yi);
-               {
-                  yp[yi] = xp[xi] / Ap[0];
-               }
-               hypre_BoxLoop2End(xi, yi);
-            }
-            else
-            {
-               hypre_BoxLoop3Begin(ndim, loop_size,
-                                   A_data_box, start, ustride, Ai,
-                                   x_data_box, start, ustride, xi,
-                                   y_data_box, start, ustride, yi);
-               {
-                  yp[yi] = xp[xi] / Ap[Ai];
-               }
-               hypre_BoxLoop3End(Ai, xi, yi);
-            } /* if constant coefficient*/
-         }
-         else
-         {
-            if (hypre_StructMatrixConstEntry(A, diag))
-            {
-               scale = alpha / Ap[0];
-               hypre_BoxLoop2Begin(ndim, loop_size,
-                                   x_data_box, start, ustride, xi,
-                                   y_data_box, start, ustride, yi);
-               {
-                  yp[yi] = scale * xp[xi];
-               }
-               hypre_BoxLoop2End(xi, yi);
-            }
-            else
-            {
-               hypre_BoxLoop3Begin(ndim, loop_size,
-                                   A_data_box, start, ustride, Ai,
-                                   x_data_box, start, ustride, xi,
-                                   y_data_box, start, ustride, yi);
-               {
-                  yp[yi] = alpha * xp[xi] / Ap[Ai];
-               }
-               hypre_BoxLoop3End(Ai, xi, yi);
-            } /* if constant coefficient*/
-         } /* if (alpha == 1.0) */
-      }
-      else
-      {
-         if (alpha == 1.0)
-         {
-            if (hypre_StructMatrixConstEntry(A, diag))
-            {
-               hypre_BoxLoop2Begin(ndim, loop_size,
-                                   x_data_box, start, ustride, xi,
-                                   y_data_box, start, ustride, yi);
-               {
-                  yp[yi] = xp[xi] / Ap[0] + beta * yp[yi];
-               }
-               hypre_BoxLoop2End(xi, yi);
-            }
-            else
-            {
-               hypre_BoxLoop3Begin(ndim, loop_size,
-                                   A_data_box, start, ustride, Ai,
-                                   x_data_box, start, ustride, xi,
-                                   y_data_box, start, ustride, yi);
-               {
-                  yp[yi] = xp[xi] / Ap[Ai] + beta * yp[yi];
-               }
-               hypre_BoxLoop3End(Ai, xi, yi);
-            } /* if constant coefficient*/
-         }
-         else
-         {
-            if (hypre_StructMatrixConstEntry(A, diag))
-            {
-               scale = alpha / Ap[0];
-               hypre_BoxLoop2Begin(ndim, loop_size,
-                                   x_data_box, start, ustride, xi,
-                                   y_data_box, start, ustride, yi);
-               {
-                  yp[yi] = scale * xp[xi] + beta * yp[yi];
-               }
-               hypre_BoxLoop2End(xi, yi);
-            }
-            else
-            {
-               hypre_BoxLoop3Begin(ndim, loop_size,
-                                   A_data_box, start, ustride, Ai,
-                                   x_data_box, start, ustride, xi,
-                                   y_data_box, start, ustride, yi);
-               {
-                  yp[yi] = alpha * xp[xi] / Ap[Ai] + beta * yp[yi];
-               }
-               hypre_BoxLoop3End(Ai, xi, yi);
-            } /* if constant coefficient*/
-         } /* if (alpha == 1.0) */
-      } /* if (beta == 0.0) */
-#undef DEVICE_VAR
-   } /* loop on grid boxes */
 
    HYPRE_ANNOTATE_FUNC_END;
 

@@ -62,27 +62,6 @@ hypre_SStructPMatvecSetTranspose( void      *pmatvec_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPMatvecSetSkipDiag
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SStructPMatvecSetSkipDiag( void      *pmatvec_vdata,
-                                 HYPRE_Int  skip_diag )
-{
-   hypre_SStructPMatvecData *pmatvec_data = (hypre_SStructPMatvecData *) pmatvec_vdata;
-   HYPRE_Int                 nvars        = (pmatvec_data -> nvars);
-   HYPRE_Int                 var;
-
-   for (var = 0; var < nvars; var++)
-   {
-      hypre_StructMatvecSetSkipDiag(pmatvec_data -> smatvec_data[var][var],
-                                    skip_diag);
-   }
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
  * hypre_SStructPMatvecDestroy
  *--------------------------------------------------------------------------*/
 
@@ -232,51 +211,6 @@ hypre_SStructPMatvecCompute( void                 *pmatvec_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPMatrixInvDiagAxpy
- *
- * This function computes
- *
- *    y = alpha*inv(A_D)*x + beta*y
- *
- * for a part if it is active.
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SStructPMatrixInvDiagAxpy( void                  *pmatvec_vdata,
-                                 HYPRE_Complex          alpha,
-                                 hypre_SStructPMatrix  *pA,
-                                 hypre_SStructPVector  *px,
-                                 HYPRE_Complex          beta,
-                                 hypre_SStructPVector  *py )
-{
-   hypre_SStructPMatvecData  *pmatvec_data = (hypre_SStructPMatvecData   *)pmatvec_vdata;
-   HYPRE_Int                  nvars        = (pmatvec_data -> nvars);
-   hypre_SStructPGrid        *pgrid;
-   hypre_StructMatrix        *sA;
-   hypre_StructVector        *sx, *sy;
-   HYPRE_Int                  vi, active;
-   void                      *sdata;
-
-   for (vi = 0; vi < nvars; vi++)
-   {
-      pgrid  = hypre_SStructPMatrixPGrid(pA);
-      active = hypre_SStructPGridActive(pgrid, vi);
-
-      if (active)
-      {
-         sA = hypre_SStructPMatrixSMatrix(pA, vi, vi);
-         sx = hypre_SStructPVectorSVector(px, vi);
-         sy = hypre_SStructPVectorSVector(py, vi);
-         sdata = (pmatvec_data -> smatvec_data)[vi][vi];
-
-         hypre_StructMatrixInvDiagAxpy(sdata, alpha, sA, sx, beta, sy);
-      }
-   }
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
  * hypre_SStructPMatvec
  *
  * NOTE: This does not seem to be used anywhere.
@@ -342,26 +276,6 @@ hypre_SStructMatvecSetTranspose( void      *matvec_vdata,
    hypre_SStructMatvecData  *matvec_data = (hypre_SStructMatvecData *) matvec_vdata;
 
    (matvec_data -> transpose) = transpose;
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_SStructMatvecSetSkipDiag
- *--------------------------------------------------------------------------*/
-HYPRE_Int
-hypre_SStructMatvecSetSkipDiag( void      *matvec_vdata,
-                                HYPRE_Int  skip_diag )
-{
-   hypre_SStructMatvecData  *matvec_data = (hypre_SStructMatvecData *) matvec_vdata;
-   HYPRE_Int                 nparts      = (matvec_data -> nparts);
-   HYPRE_Int                 part;
-
-   for (part = 0; part < nparts; part++)
-   {
-      hypre_SStructPMatvecSetSkipDiag(matvec_data -> pmatvec_data[part],
-                                      skip_diag);
-   }
 
    return hypre_error_flag;
 }
@@ -508,99 +422,6 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
       parx = NULL;
    }
 
-   HYPRE_ANNOTATE_FUNC_END;
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_SStructMatrixInvDiagAxpy
- *
- * This function computes:
- *
- *    y = alpha*inv(A_D)*x + beta*y.
- *
- * Note: This does not consider the UMatrix contribution to inv(A_D)
- *--------------------------------------------------------------------------*/
-HYPRE_Int
-hypre_SStructMatrixInvDiagAxpy( void                *matvec_vdata,
-                                HYPRE_Complex       *alpha,
-                                hypre_SStructMatrix *A,
-                                hypre_SStructVector *x,
-                                HYPRE_Complex       *beta,
-                                hypre_SStructVector *y )
-{
-   hypre_SStructMatvecData  *matvec_data  = (hypre_SStructMatvecData *) matvec_vdata;
-   void                    **pmatvec_data = (matvec_data -> pmatvec_data);
-   HYPRE_Int                 nparts = hypre_SStructMatrixNParts(A);
-
-   hypre_SStructPMatrix     *pA;
-   hypre_SStructPVector     *px, *py;
-
-   hypre_ParCSRMatrix       *parcsrA = hypre_SStructMatrixParCSRMatrix(A);
-   hypre_ParVector          *parx;
-   hypre_ParVector          *pary;
-
-   HYPRE_Int                 A_object_type= hypre_SStructMatrixObjectType(A);
-   HYPRE_Int                 x_object_type= hypre_SStructVectorObjectType(x);
-   HYPRE_Int                 y_object_type= hypre_SStructVectorObjectType(y);
-   HYPRE_Int                 part;
-
-   HYPRE_ANNOTATE_FUNC_BEGIN;
-
-   /* Safety checks */
-   if (x_object_type != A_object_type)
-   {
-      hypre_error_in_arg(1);
-      hypre_error_in_arg(2);
-
-      HYPRE_ANNOTATE_FUNC_END;
-      return hypre_error_flag;
-   }
-   if (x_object_type != y_object_type)
-   {
-      hypre_error_in_arg(2);
-      hypre_error_in_arg(4);
-
-      HYPRE_ANNOTATE_FUNC_END;
-      return hypre_error_flag;
-   }
-
-   if (x_object_type == HYPRE_SSTRUCT || x_object_type == HYPRE_STRUCT)
-   {
-      for (part = 0; part < nparts; part++)
-      {
-         pA = hypre_SStructMatrixPMatrix(A, part);
-         px = hypre_SStructVectorPVector(x, part);
-         py = hypre_SStructVectorPVector(y, part);
-
-         if (beta == NULL)
-         {
-            hypre_SStructPMatrixInvDiagAxpy(pmatvec_data[part], alpha[part], pA, px, 0.0, py);
-         }
-         else
-         {
-            hypre_SStructPMatrixInvDiagAxpy(pmatvec_data[part], alpha[part], pA, px, beta[part], py);
-         }
-      } /* loop on parts */
-   }
-   else  /* x_object_type == HYPRE_PARCSR */
-   {
-      hypre_SStructVectorConvert(x, &parx);
-      hypre_SStructVectorConvert(y, &pary);
-
-      if (beta == NULL)
-      {
-         hypre_ParCSRMatrixInvDiagAxpy(alpha[0], parcsrA, parx, 0.0, pary);
-      }
-      else
-      {
-         hypre_ParCSRMatrixInvDiagAxpy(alpha[0], parcsrA, parx, beta[0], pary);
-      }
-
-      hypre_SStructVectorRestore(x, parx);
-      hypre_SStructVectorRestore(y, pary);
-   }
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;

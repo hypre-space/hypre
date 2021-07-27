@@ -1408,6 +1408,9 @@ typedef struct hypre_CommHandle_struct
    HYPRE_Complex    **send_buffers;
    HYPRE_Complex    **recv_buffers;
 
+   HYPRE_Complex      **send_buffers_data;
+   HYPRE_Complex      **recv_buffers_data;
+
    /* set = 0, add = 1 */
    HYPRE_Int          action;
 
@@ -2327,6 +2330,7 @@ HYPRE_Int hypre_StructMatrixPrint ( const char *filename , hypre_StructMatrix *m
 HYPRE_Int hypre_StructMatrixMigrate ( hypre_StructMatrix *from_matrix , hypre_StructMatrix *to_matrix );
 hypre_StructMatrix *hypre_StructMatrixRead ( MPI_Comm comm , const char *filename , HYPRE_Int *num_ghost );
 HYPRE_Int hypre_StructMatrixClearBoundary ( hypre_StructMatrix *matrix);
+HYPRE_Int hypre_StructMatrixGetDiagonal ( hypre_StructMatrix *matrix , hypre_StructVector *diag );
 
 /* struct_matrix_mask.c */
 hypre_StructMatrix *hypre_StructMatrixCreateMask ( hypre_StructMatrix *matrix , HYPRE_Int num_stencil_indices , HYPRE_Int *stencil_indices );
@@ -2334,13 +2338,11 @@ hypre_StructMatrix *hypre_StructMatrixCreateMask ( hypre_StructMatrix *matrix , 
 /* struct_matvec.c */
 void *hypre_StructMatvecCreate ( void );
 HYPRE_Int hypre_StructMatvecSetTranspose ( void *matvec_vdata , HYPRE_Int transpose );
-HYPRE_Int hypre_StructMatvecSetSkipDiag ( void *matvec_vdata , HYPRE_Int skip_diag );
 HYPRE_Int hypre_StructMatvecSetActive ( void *matvec_vdata , HYPRE_Int active );
 HYPRE_Int hypre_StructMatvecSetup ( void *matvec_vdata , hypre_StructMatrix *A , hypre_StructVector *x );
 HYPRE_Int hypre_StructMatvecCompute ( void *matvec_vdata , HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );
 HYPRE_Int hypre_StructMatvecCompute_core_CC ( hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , HYPRE_Int box_id , HYPRE_Int nentries , HYPRE_Int *entries , hypre_Box *compute_box , hypre_Box *x_data_box , hypre_Box *y_data_box );
 HYPRE_Int hypre_StructMatvecCompute_core_VC ( hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , HYPRE_Int box_id , HYPRE_Int nentries , HYPRE_Int *entries , hypre_Box *compute_box , hypre_Box *A_data_box , hypre_Box *x_data_box , hypre_Box *y_data_box );
-HYPRE_Int hypre_StructMatrixInvDiagAxpy ( void *matvec_vdata , HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector  *y );
 HYPRE_Int hypre_StructMatvecDestroy ( void *matvec_vdata );
 HYPRE_Int hypre_StructMatvec ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );
 HYPRE_Int hypre_StructMatvecT ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );

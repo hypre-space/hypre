@@ -746,6 +746,33 @@ hypre_SStructPMatrixPrint( const char           *filename,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_SStructPMatrixGetDiagonal
+ *
+ * Returns the diagonal of a SStructPMatrix as a SStructPVector
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatrixGetDiagonal( hypre_SStructPMatrix  *pmatrix,
+                                 hypre_SStructPVector  *pdiag )
+{
+   HYPRE_Int               nvars  = hypre_SStructPMatrixNVars(pmatrix);
+   hypre_StructMatrix     *smatrix;
+   hypre_StructVector     *sdiag;
+
+   HYPRE_Int               var;
+
+   for (var = 0; var < nvars; var++)
+   {
+      smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, var);
+      sdiag   = hypre_SStructPVectorSVector(pdiag, var);
+
+      hypre_StructMatrixGetDiagonal(smatrix, sdiag);
+   }
+
+   return hypre_error_flag;
+}
+
 /*==========================================================================
  * SStructUMatrix routines
  *==========================================================================*/
@@ -2024,4 +2051,81 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
    HYPRE_ANNOTATE_FUNC_END;
 
    return (hypre_IJMatrix *) ij_Ahat;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructMatrixGetDiagonal
+ *
+ * Returns the diagonal of a SStructMatrix as a SStructVector
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixGetDiagonal( hypre_SStructMatrix   *matrix,
+                                hypre_SStructVector  **diag_ptr )
+{
+   MPI_Comm                comm   = hypre_SStructMatrixComm(matrix);
+   hypre_SStructGraph     *graph  = hypre_SStructMatrixGraph(matrix);
+   hypre_SStructGrid      *grid   = hypre_SStructGraphGrid(graph);
+   HYPRE_Int               nparts = hypre_SStructMatrixNParts(matrix);
+   HYPRE_Int               object_type = hypre_SStructMatrixObjectType(matrix);
+
+   hypre_SStructVector    *diag;
+   hypre_ParVector        *par_d;
+   hypre_SStructPMatrix   *pmatrix;
+   hypre_SStructPVector   *pdiag;
+   HYPRE_Int               i, ii, part;
+
+   hypre_ParCSRMatrix     *A;
+   hypre_CSRMatrix        *A_diag;
+   HYPRE_Complex          *A_data;
+   HYPRE_Complex          *d_data;
+   HYPRE_Int              *A_i, *A_j;
+   HYPRE_Int              *A_rownnz;
+   HYPRE_Int               A_num_rownnz;
+
+   /* Create vector */
+   HYPRE_SStructVectorCreate(comm, grid, &diag);
+   HYPRE_SStructVectorInitialize(diag);
+   HYPRE_SStructVectorAssemble(diag);
+
+   /* Fill vector with the diagonal of the matrix */
+   if (object_type == HYPRE_SSTRUCT || object_type == HYPRE_STRUCT)
+   {
+      for (part = 0; part < nparts; part++)
+      {
+         pmatrix = hypre_SStructMatrixPMatrix(matrix, part);
+         pdiag   = hypre_SStructVectorPVector(diag, part);
+
+         hypre_SStructPMatrixGetDiagonal(pmatrix, pdiag);
+      }
+   }
+
+   if (object_type == HYPRE_SSTRUCT || object_type == HYPRE_PARCSR)
+   {
+      A = hypre_SStructMatrixParCSRMatrix(matrix);
+      A_diag = hypre_ParCSRMatrixDiag(A);
+      A_data = hypre_CSRMatrixData(A_diag);
+      A_i = hypre_CSRMatrixI(A_diag);
+      A_j = hypre_CSRMatrixJ(A_diag);
+      A_num_rownnz = hypre_CSRMatrixNumRownnz(A_diag);
+      A_rownnz = hypre_CSRMatrixRownnz(A_diag);
+
+      hypre_SStructVectorConvert(diag, &par_d);
+      d_data = hypre_ParVectorLocalData(par_d);
+
+      for (i = 0; i < A_num_rownnz; i++)
+      {
+         ii = A_rownnz[i];
+         if (A_j[A_i[ii]] == ii)
+         {
+            d_data[A_rownnz[i]] += A_data[A_i[ii]];
+         }
+      }
+
+      hypre_SStructVectorRestore(diag, par_d);
+   }
+
+   *diag_ptr = diag;
+
+   return hypre_error_flag;
 }
