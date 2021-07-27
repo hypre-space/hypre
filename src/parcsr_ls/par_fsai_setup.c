@@ -479,10 +479,6 @@ hypre_FSAISetup( void               *fsai_vdata,
 
       /* Pass values of G_temp into G */
       hypre_SeqVectorScale(row_scale, G_temp);
-      hypre_printf("Row %d, row_scale %f\n", i+1, row_scale); 
-      for(k = 0; k < hypre_VectorSize(G_temp); k++)
-         hypre_printf("%f, ", G_temp_data[k]);
-      hypre_printf("\n");
       for(k = 0; k < hypre_VectorSize(G_temp); k++)
          if(G_temp_data[k] > 0)                       /* Some values of G_temp_data were -0.00000000000000 */
          {
