@@ -126,7 +126,7 @@ hypre_FSAIDestroy( void *data )
 
    hypre_ParVectorDestroy(hypre_ParFSAIDataResidual(fsai_data));
    hypre_ParVectorDestroy(hypre_ParFSAIDataXWork(fsai_data));
-   hypre_ParVectorDestroy(hypre_ParFSAIDataXWork(fsai_data));
+   hypre_ParVectorDestroy(hypre_ParFSAIDataRWork(fsai_data));
    hypre_ParVectorDestroy(hypre_ParFSAIDataZWork(fsai_data));
 
    if( new_comm != hypre_MPI_COMM_NULL )
