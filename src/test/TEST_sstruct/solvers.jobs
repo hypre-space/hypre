@@ -1,3 +1,4 @@
+
 #!/bin/sh
 # Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -35,8 +36,8 @@ mpirun -np 1  ./sstruct -in sstruct.in.cube -P 1 1 1 -r 4 4 4 -solver 4 > solver
 mpirun -np 8  ./sstruct -in sstruct.in.cube -P 2 2 2 -r 2 2 2 -solver 4 > solvers.out.22
 mpirun -np 1  ./sstruct -in sstruct.in.cube21 -r 2 2 2 -solver 4 > solvers.out.23
 mpirun -np 8  ./sstruct -in sstruct.in.cube21 -P 2 2 2 -r 1 1 1 -solver 4 > solvers.out.24
-mpirun -np 1  ./sstruct -in sstruct.in.cubes4_9pt -r 2 2 2 -solver 4 -pooldist 1 > solvers.out.25
-mpirun -np 4  ./sstruct -in sstruct.in.cubes4_9pt -r 2 2 2 -solver 4 -pooldist 0 > solvers.out.26
+mpirun -np 1  ./sstruct -in sstruct.in.cubes4_7pt -r 2 2 2 -solver 4 -pooldist 1 > solvers.out.25
+mpirun -np 4  ./sstruct -in sstruct.in.cubes4_7pt -r 2 2 2 -solver 4 -pooldist 0 > solvers.out.26
 mpirun -np 1  ./sstruct -in sstruct.in.cubes4_27pt -r 2 2 2 -solver 4 -pooldist 1 > solvers.out.27
 mpirun -np 4  ./sstruct -in sstruct.in.cubes4_27pt -r 2 2 2 -solver 4 -pooldist 0 > solvers.out.28
 mpirun -np 1  ./sstruct -in sstruct.in.cubes2_aniso -r 4 4 4 -solver 4 -pooldist 1 > solvers.out.29
@@ -51,8 +52,8 @@ mpirun -np 1  ./sstruct -in sstruct.in.cube -P 1 1 1 -r 4 4 4 -solver 14 > solve
 mpirun -np 8  ./sstruct -in sstruct.in.cube -P 2 2 2 -r 2 2 2 -solver 14 > solvers.out.122
 mpirun -np 1  ./sstruct -in sstruct.in.cube21 -r 2 2 2 -solver 14 > solvers.out.123
 mpirun -np 8  ./sstruct -in sstruct.in.cube21 -P 2 2 2 -r 1 1 1 -solver 14 > solvers.out.124
-mpirun -np 1  ./sstruct -in sstruct.in.cubes4_9pt -r 2 2 2 -solver 14 -pooldist 1 > solvers.out.125
-mpirun -np 4  ./sstruct -in sstruct.in.cubes4_9pt -r 2 2 2 -solver 14 -pooldist 0 > solvers.out.126
+mpirun -np 1  ./sstruct -in sstruct.in.cubes4_7pt -r 2 2 2 -solver 14 -pooldist 1 > solvers.out.125
+mpirun -np 4  ./sstruct -in sstruct.in.cubes4_7pt -r 2 2 2 -solver 14 -pooldist 0 > solvers.out.126
 mpirun -np 1  ./sstruct -in sstruct.in.cubes4_27pt -r 2 2 2 -solver 14 -pooldist 1 > solvers.out.127
 mpirun -np 4  ./sstruct -in sstruct.in.cubes4_27pt -r 2 2 2 -solver 14 -pooldist 0 > solvers.out.128
 mpirun -np 1  ./sstruct -in sstruct.in.cubes2_aniso -r 4 4 4 -solver 14 -pooldist 1 > solvers.out.129
