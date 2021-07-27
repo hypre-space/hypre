@@ -328,7 +328,7 @@ hypre_FSAISetup( void               *fsai_vdata,
    HYPRE_Real              old_psi, new_psi;  /* GAG' before and after the k-th interation of aFSAI */
    HYPRE_Real              row_scale;         /* The value to scale G_temp by before adding it to G */
    HYPRE_Int               info;
-   HYPRE_Int               i, j, k, l;        /* Loop variables */
+   HYPRE_Int               i, j, k;           /* Loop variables */
 
    char uplo = 'L';
    /* Create and initialize G_mat and work vectors */
@@ -482,19 +482,15 @@ hypre_FSAISetup( void               *fsai_vdata,
       G_j[G_i[i]] = i;
       G_data[G_i[i]] = row_scale;
 
-      l = 0;
-
       /* Pass values of G_temp into G */
       hypre_SeqVectorScale(row_scale, G_temp);
       for(k = 0; k < hypre_VectorSize(G_temp); k++)
-         if(G_temp_data[k] > 0)                       /* Some values of G_temp_data were -0.00000000000000 */
-         {
-            j           = G_i[i] + l + 1;
-            G_j[j]      = S_Pattern_data[k];
-            G_data[j]   = G_temp_data[k];
-            l++;
-         }
-      G_i[i+1] = G_i[i] + l + 1;
+      {
+         j           = G_i[i] + k + 1;
+         G_j[j]      = S_Pattern_data[k];
+         G_data[j]   = G_temp_data[k];
+      }
+      G_i[i+1] = G_i[i] + k + 1;
    }
 
    /* Compute G^T */
