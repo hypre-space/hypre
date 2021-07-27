@@ -473,16 +473,6 @@ HYPRE_Int hypreDevice_CSRSpTransRocsparse(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nn
 
 HYPRE_Int hypreDevice_CSRSpGemm(hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix **C_ptr);
 
-HYPRE_Int hypre_CSRMatrixDeviceSpGemmSetNumPasses( HYPRE_Int value );
-
-HYPRE_Int hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateMethod( HYPRE_Int value );
-
-HYPRE_Int hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateNSamples( HYPRE_Int value );
-
-HYPRE_Int hypre_CSRMatrixDeviceSpGemmSetRownnzEstimateMultFactor( HYPRE_Real value );
-
-HYPRE_Int hypre_CSRMatrixDeviceSpGemmSetHashType( char value );
-
 HYPRE_Int hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_rc);
 
 HYPRE_Int hypreDevice_CSRSpGemmRownnzUpperbound(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_rc, HYPRE_Int *d_rf);

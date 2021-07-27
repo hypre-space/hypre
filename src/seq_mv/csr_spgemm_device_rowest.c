@@ -139,8 +139,8 @@ void cohen_rowest_kernel(HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T
    hypre_device_assert(sizeof(T) == sizeof(float));
 
    for (HYPRE_Int i = blockIdx.x * NUM_WARPS_PER_BLOCK + warp_id;
-            i < nrow;
-            i += num_warps)
+                  i < nrow;
+                  i += num_warps)
    {
       /* load the start and end position of row i */
       HYPRE_Int tmp = -1;

@@ -1263,7 +1263,7 @@ typedef struct
 #define hypre_HandleStructCommRecvBufferSize(hypre_handle)       hypre_CudaDataStructCommRecvBufferSize(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleStructCommSendBufferSize(hypre_handle)       hypre_CudaDataStructCommSendBufferSize(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleSpgemmUseCusparse(hypre_handle)              hypre_CudaDataSpgemmUseCusparse(hypre_HandleCudaData(hypre_handle))
-#define hypre_HandleSpgemmNumPasses(hypre_handle)                hypre_CudaDataSpgemmNumPasses(hypre_HandleCudaData(hypre_handle))
+#define hypre_HandleSpgemmAlgorithm(hypre_handle)                hypre_CudaDataSpgemmAlgorithm(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateMethod(hypre_handle)     hypre_CudaDataSpgemmRownnzEstimateMethod(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle)   hypre_CudaDataSpgemmRownnzEstimateNsamples(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle) hypre_CudaDataSpgemmRownnzEstimateMultFactor(hypre_HandleCudaData(hypre_handle))
@@ -1638,6 +1638,11 @@ HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
 
 /* handle.c */
 HYPRE_Int hypre_SetSpGemmUseCusparse( HYPRE_Int use_cusparse );
+HYPRE_Int hypre_SetSpGemmAlgorithm( HYPRE_Int value );
+HYPRE_Int hypre_SetSpGemmRownnzEstimateMethod( HYPRE_Int value );
+HYPRE_Int hypre_SetSpGemmRownnzEstimateNSamples( HYPRE_Int value );
+HYPRE_Int hypre_SetSpGemmRownnzEstimateMultFactor( HYPRE_Real value );
+HYPRE_Int hypre_SetSpGemmHashType( char value );
 HYPRE_Int hypre_SetUseGpuRand( HYPRE_Int use_gpurand );
 HYPRE_Int hypre_SetGaussSeidelMethod( HYPRE_Int gs_method );
 /******************************************************************************

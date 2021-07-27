@@ -1150,7 +1150,7 @@ hypre_CudaDataCreate()
 #else
    hypre_CudaDataSpgemmUseCusparse(data) = 0;
 #endif
-   hypre_CudaDataSpgemmNumPasses(data) = 3;
+   hypre_CudaDataSpgemmAlgorithm(data) = 1;
    /* 1: naive overestimate, 2: naive underestimate, 3: Cohen's algorithm */
    hypre_CudaDataSpgemmRownnzEstimateMethod(data) = 3;
    hypre_CudaDataSpgemmRownnzEstimateNsamples(data) = 32;
