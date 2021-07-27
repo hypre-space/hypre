@@ -54,9 +54,8 @@ hypre_CSRMatrixExtractDenseMatrix( hypre_CSRMatrix *A_diag,
          if(A_j[j] > S_Pattern_data[i])
             break;
          
-         if((cc = marker[A_j[j]]) >= 0){
-            A_sub_data[(HYPRE_Int)(cc*nrows_needed + i)] = A_data[j];      
-         }
+         if((cc = marker[A_j[j]]) >= 0)
+            A_sub_data[(HYPRE_Int)(i*nrows_needed + cc)] = A_data[j];      
       
       }
    }
@@ -162,10 +161,6 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
          if (A_j[j] > i)
             continue;
 
-         if(A_j[j] == row_num){
-            
-         }
-
          for(k = 0; k < hypre_VectorSize(S_Pattern); k++)
             if(S_Pattern_data[k] == A_j[j])
                temp += 2 * G_temp_data[k] * A_data[j];
@@ -235,6 +230,31 @@ hypre_qsort2C( HYPRE_Complex  *v,
    hypre_swap2C(v, w, left, last);
    hypre_qsort2C(v, w, left, last-1);
    hypre_qsort2C(v, w, last+1, right);
+}
+
+/* Quick Sort (smallest to largest) for complex arrays - hypre/utilities/qsort.c did not have what I wanted */
+
+void
+hypre_qsort_c( HYPRE_Complex  *v,
+               HYPRE_Int      left,
+               HYPRE_Int      right )
+{
+   HYPRE_Int i, last;
+
+   if (left >= right)
+      return;
+   
+   hypre_swap_c( v, left, (left+right)/2);
+   last = left;
+   for (i = left+1; i <= right; i++)
+   {
+      if (v[i] < v[left])
+      {
+         hypre_swap_c(v, ++last, i);
+      }
+   }
+   hypre_swap_c(v, left, last);
+   hypre_qsort_c(v, left, last-1);
 }
 
 /* Take the largest elements from the kaporin gradient and add their locations to S_Pattern */
@@ -308,7 +328,7 @@ hypre_FSAISetup( void               *fsai_vdata,
    HYPRE_Real              old_psi, new_psi;  /* GAG' before and after the k-th interation of aFSAI */
    HYPRE_Real              row_scale;         /* The value to scale G_temp by before adding it to G */
    HYPRE_Int               info;
-   HYPRE_Int               i, j, k;           /* Loop variables */
+   HYPRE_Int               i, j, k, l;        /* Loop variables */
 
    char uplo = 'L';
    /* Create and initialize G_mat and work vectors */
@@ -414,13 +434,15 @@ hypre_FSAISetup( void               *fsai_vdata,
          hypre_AddToPattern(kaporin_gradient, kap_grad_nonzeros, S_Pattern, max_step_size);
 
          /* Gather A[P, P] and -A[P, i] */
-         //for(j = 0; j < hypre_VectorSize(S_Pattern); j++)
-           // marker[(HYPRE_Int)S_Pattern_data[j]] = j;
+         hypre_qsort_c(S_Pattern_data, 0, hypre_VectorSize(S_Pattern)-1);
 
          hypre_VectorSize(A_sub)    = hypre_VectorSize(S_Pattern) * hypre_VectorSize(S_Pattern);
          hypre_VectorSize(A_subrow) = hypre_VectorSize(S_Pattern);
          hypre_VectorSize(G_temp)   = hypre_VectorSize(S_Pattern);
          hypre_VectorSize(sol_vec)  = hypre_VectorSize(S_Pattern);
+         
+         hypre_SeqVectorSetConstantValues(A_sub, 0.0);
+         hypre_SeqVectorSetConstantValues(A_subrow, 0.0);
 
          hypre_CSRMatrixExtractDenseMatrix(A_diag, A_sub, S_Pattern, marker);                           /* A[P, P] */
          hypre_ExtractDenseRowFromCSRMatrix(A_diag, A_subrow, S_Pattern, marker, i);                    /* A[i, P] */
@@ -448,19 +470,28 @@ hypre_FSAISetup( void               *fsai_vdata,
          old_psi = new_psi;
       }
 
-      G_i[i+1] = G_i[i] + hypre_VectorSize(S_Pattern) + 1;
       
       row_scale = 1/(sqrt(A_data[A_i[i]] - hypre_abs(hypre_SeqVectorInnerProd(G_temp, A_subrow))));  
       G_j[G_i[i]] = i;
       G_data[G_i[i]] = row_scale;
 
+      l = 0;
+
       /* Pass values of G_temp into G */
+      hypre_SeqVectorScale(row_scale, G_temp);
+      hypre_printf("Row %d, row_scale %f\n", i+1, row_scale); 
       for(k = 0; k < hypre_VectorSize(G_temp); k++)
-      {
-         j           = G_i[i] + k + 1;
-         G_j[j]      = S_Pattern_data[k];
-         G_data[j]   = G_temp_data[k] * row_scale;
-      }
+         hypre_printf("%f, ", G_temp_data[k]);
+      hypre_printf("\n");
+      for(k = 0; k < hypre_VectorSize(G_temp); k++)
+         if(G_temp_data[k] > 0)                       /* Some values of G_temp_data were -0.00000000000000 */
+         {
+            j           = G_i[i] + l + 1;
+            G_j[j]      = S_Pattern_data[k];
+            G_data[j]   = G_temp_data[k];
+            l++;
+         }
+      G_i[i+1] = G_i[i] + l + 1;
    }
 
    /* Compute G^T */

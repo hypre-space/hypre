@@ -2542,6 +2542,7 @@ HYPRE_Int hypre_AddToPattern ( hypre_Vector *kaporin_gradient , hypre_Vector *ka
 HYPRE_Int hypre_FSAISetup ( void *fsai_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u );
 void hypre_swap2C ( HYPRE_Complex *v , HYPRE_Complex *w , HYPRE_Int i , HYPRE_Int j );
 void hypre_qsort2C ( HYPRE_Complex *v , HYPRE_Complex *w , HYPRE_Int left , HYPRE_Int right );
+void hypre_qsort_c ( HYPRE_Complex *v , HYPRE_Int left , HYPRE_Int right );
 
 /* par_fsai_solve.c */
 HYPRE_Int hypre_FSAISolve ( void *fsai_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x );
