@@ -55,7 +55,7 @@ hypre_CSRMatrixExtractDenseMatrix( hypre_CSRMatrix *A_diag,
             break;
          
          if((cc = marker[A_j[j]]) >= 0)
-            A_sub_data[(HYPRE_Int)(i*nrows_needed + cc)] = A_data[j];      
+            A_sub_data[cc*nrows_needed + i] = A_data[j];      
       
       }
    }

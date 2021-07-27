@@ -63,8 +63,7 @@ hypre_FSAISolve( void               *fsai_vdata,
 
    iter               = 0;
    rel_resnorm        = 1.0;
-   hypre_ParVectorSetConstantValues(x, 0.0);        /* Set initial guess x_0 */
-   hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A, x, 1.0, b, r); /* r_0 = b - Ax_0 */
+
    if(my_id == 0 && print_level > 1)
    {
       hypre_printf("                old         new         relative\n");
@@ -72,28 +71,26 @@ hypre_FSAISolve( void               *fsai_vdata,
       hypre_printf("    --------    --------    --------    --------\n");
    }
 
+   /* Compute initial reisdual. r(0) = b - Ax */
+   hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A, x, 1.0, b, r); /* residual */
+
    while(rel_resnorm >= tol && iter < max_iter)
    {
 
-      /* Update solution vector */
-      hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A, x, 1.0, b, x_work); /* x_work = b - A*x(k) */
+      /* Compute Preconditoned Residual. z_temp = G^T*G*r(k) */      
+      hypre_ParCSRMatrixMatvecOutOfPlace(1.0, G, r, 0.0, x_work, r_work);         /* r_work = G*r */
+      hypre_ParCSRMatrixMatvecOutOfPlace(1.0, GT, r_work, 0.0, x_work, z_work);   /* z_work = G^T*r_work */
 
-      
-      hypre_ParCSRMatrixMatvecOutOfPlace(1.0, G, x_work, 0.0, r_work, z_work);    /* z_work = G*x_work */
-      hypre_ParCSRMatrixMatvecOutOfPlace(1.0, GT, z_work, 0.0, r_work, x_work);   /* x_work = G^T*z_work */
+      /* Compute updated solution vector. x(k+1) = x(k) + omega*z(k) */
+      hypre_ParVectorAxpy(omega, z_work, x); 
 
-      hypre_ParVectorAxpy(omega, x_work, x);                                    /* x(k+1) = x(k) = omega*x_work */
-
-      /* Compute residual */
+      /* Compute residual norm */
       old_rn             = hypre_ParVectorInnerProd(r, r);
-      hypre_ParCSRMatrixMatvecOutOfPlace(1.0, G, r, 0.0, z_work, r_work);
+      
+      /* Update residual: r(k+1) = r(k) - Az_work(k) */
+      hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A, z_work, 1.0, r, r_work);
 
-      /* VPM: In y = A*x + b, y cannot be the same vector as x */
-      hypre_ParCSRMatrixMatvecOutOfPlace(1.0, GT, r_work, 0.0, x_work, z_work);
-      hypre_ParCSRMatrixMatvecOutOfPlace(1.0, A, z_work, 0.0, x_work, r_work);
-
-      hypre_ParVectorAxpy(-1.0, r_work, r);
-      new_rn             = hypre_ParVectorInnerProd(r, r);
+      new_rn             = hypre_ParVectorInnerProd(r_work, r_work);
 
       /* Compute rel_resnorm */
       rel_resnorm = new_rn/old_rn;
@@ -107,6 +104,7 @@ hypre_FSAISolve( void               *fsai_vdata,
 
    if(logging > 1)
    {
+      hypre_ParVectorCopy(r_work, r);
       hypre_ParFSAIDataNumIterations(fsai_data) = iter;
       hypre_ParFSAIDataRelResNorm(fsai_data)    = rel_resnorm;
    }
