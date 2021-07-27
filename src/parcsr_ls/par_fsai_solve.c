@@ -71,25 +71,26 @@ hypre_FSAISolve( void               *fsai_vdata,
       hypre_printf("    iter #      res norm    res norm    res norm\n");
       hypre_printf("    --------    --------    --------    --------\n");
    }
+
    while(rel_resnorm >= tol && iter < max_iter)
    {
 
       /* Update solution vector */
       hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A, x, 1.0, b, x_work); /* x_work = b - A*x(k) */
 
-      /* VPM: In y = A*x + b, y cannot be the same vector as x */
-      hypre_ParCSRMatrixMatvecOutOfPlace(1.0, G, x_work, 0.0, NULL, z_work);    /* z_work = G*x_work */
-      hypre_ParCSRMatrixMatvecOutOfPlace(1.0, GT, z_work, 0.0, NULL, x_work);   /* x_work = G^T*z_work */
+      
+      hypre_ParCSRMatrixMatvecOutOfPlace(1.0, G, x_work, 0.0, r_work, z_work);    /* z_work = G*x_work */
+      hypre_ParCSRMatrixMatvecOutOfPlace(1.0, GT, z_work, 0.0, r_work, x_work);   /* x_work = G^T*z_work */
 
       hypre_ParVectorAxpy(omega, x_work, x);                                    /* x(k+1) = x(k) = omega*x_work */
 
       /* Compute residual */
       old_rn             = hypre_ParVectorInnerProd(r, r);
-      hypre_ParCSRMatrixMatvecOutOfPlace(1.0, G, r, 0.0, NULL, r_work);
+      hypre_ParCSRMatrixMatvecOutOfPlace(1.0, G, r, 0.0, z_work, r_work);
 
       /* VPM: In y = A*x + b, y cannot be the same vector as x */
-      hypre_ParCSRMatrixMatvecOutOfPlace(1.0, GT, r_work, 0.0, NULL, z_work);
-      hypre_ParCSRMatrixMatvecOutOfPlace(1.0, A, z_work, 0.0, NULL, r_work);
+      hypre_ParCSRMatrixMatvecOutOfPlace(1.0, GT, r_work, 0.0, x_work, z_work);
+      hypre_ParCSRMatrixMatvecOutOfPlace(1.0, A, z_work, 0.0, x_work, r_work);
 
       hypre_ParVectorAxpy(-1.0, r_work, r);
       new_rn             = hypre_ParVectorInnerProd(r, r);
