@@ -71,7 +71,9 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                           v_data_box, start, unit_stride, vi);
       {
-#if defined(HYPRE_USING_GPU)
+// WM: TODO: temporary fix... remove after sycl implementation is done
+#if defined(HYPRE_USING_SYCL)
+#elif defined(HYPRE_USING_GPU)
          vp[vi] = rand_device[idx];
 #else
          vp[vi] = 2.0*hypre_Rand() - 1.0;

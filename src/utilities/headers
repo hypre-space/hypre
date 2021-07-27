@@ -89,10 +89,9 @@ extern "C++" {
 #===========================================================================
 
 cat umpire_allocator.h     >> $INTERNAL_HEADER
-cat cuda_utils.h           >> $INTERNAL_HEADER
-cat cuda_reducer.h         >> $INTERNAL_HEADER
+cat device_utils.h         >> $INTERNAL_HEADER
+cat device_reducer.h       >> $INTERNAL_HEADER
 cat cub_allocator.h        >> $INTERNAL_HEADER
-cat sycl_utils.h           >> $INTERNAL_HEADER
 
 #===========================================================================
 # Include guards

@@ -22,7 +22,7 @@ set(SRCS
   fortran_matrix.c
   ap.c
   complex.c
-  cuda_utils.c
+  device_utils.c
   error.c
   general.c
   handle.c
@@ -52,7 +52,7 @@ target_sources(${PROJECT_NAME}
 if (HYPRE_USING_CUDA)
   set(CUDA_SRCS
     HYPRE_handle.c
-    cuda_utils.c
+    device_utils.c
     handle.c
     general.c
     memory.c

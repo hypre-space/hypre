@@ -51,7 +51,8 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
 #elif defined(HYPRE_USING_ROCSPARSE)
    hypre_CSRMatrixMatvecRocsparse(trans, alpha, A, x, beta, y, offset);
 #else // #ifdef HYPRE_USING_CUSPARSE
-#error HYPRE SPMV TODO
+// WM: TODO: commenting this out for now, but put it back after sycl impelentation is done
+/* #error HYPRE SPMV TODO */
 #endif
 
    return hypre_error_flag;

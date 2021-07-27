@@ -211,13 +211,13 @@ struct ReduceSum
       __thread_sum = 0.0;
       nblocks = -1;
 
-      if (hypre_HandleCudaReduceBuffer(hypre_handle()) == NULL)
+      if (hypre_HandleReduceBuffer(hypre_handle()) == NULL)
       {
          /* allocate for the max size for reducing double6 type */
-         hypre_HandleCudaReduceBuffer(hypre_handle()) = hypre_TAlloc(HYPRE_double6, 1024, HYPRE_MEMORY_DEVICE);
+         hypre_HandleReduceBuffer(hypre_handle()) = hypre_TAlloc(HYPRE_double6, 1024, HYPRE_MEMORY_DEVICE);
       }
 
-      d_buf = (T*) hypre_HandleCudaReduceBuffer(hypre_handle());
+      d_buf = (T*) hypre_HandleReduceBuffer(hypre_handle());
    }
 
    /* copy constructor */

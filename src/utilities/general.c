@@ -51,13 +51,14 @@ hypre_HandleCreate()
 #if defined(HYPRE_USING_GPU)
    hypre_HandleDefaultExecPolicy(hypre_handle_) = HYPRE_EXEC_DEVICE;
    hypre_HandleStructExecPolicy(hypre_handle_) = HYPRE_EXEC_DEVICE;
-   hypre_HandleCudaData(hypre_handle_) = hypre_CudaDataCreate();
+   hypre_HandleDeviceData(hypre_handle_) = hypre_DeviceDataCreate();
 #endif
 
+// WM: temporarily set the default exec policy to host for sycl until more functionality is available
 #if defined(HYPRE_USING_SYCL)
    hypre_HandleDefaultExecPolicy(hypre_handle_) = HYPRE_EXEC_HOST;
    hypre_HandleStructExecPolicy(hypre_handle_) = HYPRE_EXEC_HOST;
-   hypre_HandleSyclData(hypre_handle_) = hypre_SyclDataCreate();
+   hypre_HandleDeviceData(hypre_handle_) = hypre_DeviceDataCreate();
 #endif
 
    return hypre_handle_;
@@ -72,11 +73,7 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
    }
 
 #if defined(HYPRE_USING_GPU)
-   hypre_CudaDataDestroy(hypre_HandleCudaData(hypre_handle_));
-#endif
-
-#if defined(HYPRE_USING_SYCL)
-   hypre_SyclDataDestroy(hypre_HandleSyclData(hypre_handle_));
+   hypre_DeviceDataDestroy(hypre_HandleDeviceData(hypre_handle_));
 #endif
 
    hypre_TFree(hypre_handle_, HYPRE_MEMORY_HOST);
@@ -101,78 +98,19 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
    HYPRE_HIP_CALL( hipSetDevice(device_id) );
 #endif
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_SYCL)
+   /* sycl device set at construction of hypre_DeviceData object */
+#elif defined(HYPRE_USING_GPU)
    if (hypre_handle_)
    {
-      hypre_HandleCudaDevice(hypre_handle_) = device_id;
-   }
-#endif
-
-#if defined(HYPRE_USING_SYCL)
-   // WM: TODO - this ain't it...
-   hypre_int nDevices=0;
-   sycl::platform platform(sycl::gpu_selector{});
-   auto const& gpu_devices = platform.get_devices();
-   for (int i = 0; i < gpu_devices.size(); i++)
-   {
-      if (gpu_devices[i].is_gpu())
-      {
-         if(gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0)
-         {
-	         auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>(
-	                                     sycl::info::partition_affinity_domain::numa);
-	         nDevices += subDevicesDomainNuma.size();
-         }
-         else
-         {
-	         nDevices++;
-         }
-      }
-   }
-
-   if (device_id > nDevices)
-   {
-      // WM: debug
-      hypre_printf("device_id = %d, nDevices = %d\n", device_id, nDevices);
-      hypre_printf("ERROR: SYCL device-ID exceed the number of devices on-node... \n");
-   }
-
-   HYPRE_Int local_nDevices=0;
-   for (int i = 0; i < gpu_devices.size(); i++)
-   {
-      if (gpu_devices[i].is_gpu())
-      {
-         // multi-tile GPUs
-         if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0)
-         {
-            auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>(
-                                        sycl::info::partition_affinity_domain::numa);
-            for (const auto &tile : subDevicesDomainNuma)
-            {
-               if (local_nDevices == device_id)
-               {
-                  hypre_HandleSyclDevice(hypre_handle_) = tile;
-               }
-               local_nDevices++;
-            }
-         }
-         // single-tile GPUs
-         else
-         {
-            if (local_nDevices == device_id)
-            {
-               hypre_HandleSyclDevice(hypre_handle_) = gpu_devices[i];
-            }
-            local_nDevices++;
-         }
-      }
+      hypre_HandleDevice(hypre_handle_) = device_id;
    }
 #endif
 
    return hypre_error_flag;
 }
 
-/* Note: it doesn't return device_id in hypre_Handle->hypre_CudaData,
+/* Note: it doesn't return device_id in hypre_Handle->hypre_DeviceData,
  *       calls API instead. But these two should match at all times
  */
 HYPRE_Int
@@ -191,7 +129,7 @@ hypre_GetDevice(hypre_int *device_id)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   // WM: TODO
+   /* sycl device set at construction of hypre_DeviceData object */
 #endif
 
    return hypre_error_flag;
@@ -253,7 +191,15 @@ hypre_GetDeviceLastError()
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   // WM: TODO
+   try
+   {
+      hypre_HandleComputeStream(hypre_handle())->wait_and_throw();
+   }
+   catch (sycl::exception const& e)
+   {
+      std::cout << "Caught synchronous SYCL exception:\n"
+                << e.what() << std::endl;
+   }
 #endif
 
    return hypre_error_flag;
@@ -280,7 +226,7 @@ HYPRE_Init()
       _hypre_handle = hypre_HandleCreate();
    }
 
-#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    hypre_GetDeviceLastError();
 
    /* Notice: the cudaStream created is specific to the device
@@ -293,12 +239,7 @@ HYPRE_Init()
 
    /* To include the cost of creating streams/cudahandles in HYPRE_Init */
    /* If not here, will be done at the first use */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_HandleCudaComputeStream(_hypre_handle);
-#endif
-#if defined(HYPRE_USING_SYCL)
-   hypre_HandleSyclComputeQueue(_hypre_handle);
-#endif
+   hypre_HandleComputeStream(_hypre_handle);
 
    /* A separate stream for prefetching */
    //hypre_HandleCudaPrefetchStream(_hypre_handle);
