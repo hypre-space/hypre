@@ -1079,6 +1079,14 @@ hypre_GenerateMultiPi( hypre_ParCSRMatrix  *A,
                j2++;
             }
          }
+         while (j2 < A_diag_i[i1+1])
+         {
+            if (dof_func[i1] == dof_func[A_diag_j[j2]])
+            {
+               w_row_sum[i] += A_diag_data[j2];
+            }
+            j2++;
+         }
          j2 = A_offd_i[i1];
          for (j = S_offd_i[i1]; j < S_offd_i[i1+1]; j++)
          {
@@ -1104,6 +1112,14 @@ hypre_GenerateMultiPi( hypre_ParCSRMatrix  *A,
                }
                j2++;
             }
+         }
+         while (j2 < A_offd_i[i1+1])
+         {
+            if (dof_func[i1] == dof_func_offd[A_offd_j[j2]])
+            {
+               w_row_sum[i] += A_offd_data[j2];
+            }
+            j2++;
          }
       }
    }
@@ -1132,6 +1148,11 @@ hypre_GenerateMultiPi( hypre_ParCSRMatrix  *A,
                j2++;
             }
          }
+         while (j2 < A_diag_i[i1+1])
+         {
+            w_row_sum[i] += A_diag_data[j2];
+            j2++;
+         }
          j2 = A_offd_i[i1];
          for (j = S_offd_i[i1]; j < S_offd_i[i1+1]; j++)
          {
@@ -1151,6 +1172,11 @@ hypre_GenerateMultiPi( hypre_ParCSRMatrix  *A,
                w_row_sum[i] += A_offd_data[j2];
                j2++;
             }
+         }
+         while (j2 < A_offd_i[i1+1])
+         {
+            w_row_sum[i] += A_offd_data[j2];
+            j2++;
          }
       }
    }
