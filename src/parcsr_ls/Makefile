@@ -158,6 +158,7 @@ CUFILES =\
  par_amgdd_fac_cycle_device.c\
  par_2s_interp_device.c\
  par_relax_device.c\
+ par_multi_interp_device.c\
  par_mod_multi_interp_device.c
 
 COBJS = ${FILES:.c=.o}

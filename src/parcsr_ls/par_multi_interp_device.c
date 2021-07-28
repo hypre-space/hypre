@@ -13,17 +13,17 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
-                                   HYPRE_Int           *CF_marker,
-                                   hypre_ParCSRMatrix  *S,
-                                   HYPRE_BigInt        *num_cpts_global,
-                                   HYPRE_Int            num_functions,
-                                   HYPRE_Int           *dof_func,
-                                   HYPRE_Int            debug_flag,
-                                   HYPRE_Real           trunc_factor,
-                                   HYPRE_Int            P_max_elmts,
-                                   HYPRE_Int            weight_option,
-                                   hypre_ParCSRMatrix **P_ptr )
+hypre_BoomerAMGBuildMultipassDevice( hypre_ParCSRMatrix  *A,
+                                     HYPRE_Int           *CF_marker,
+                                     hypre_ParCSRMatrix  *S,
+                                     HYPRE_BigInt        *num_cpts_global,
+                                     HYPRE_Int            num_functions,
+                                     HYPRE_Int           *dof_func,
+                                     HYPRE_Int            debug_flag,
+                                     HYPRE_Real           trunc_factor,
+                                     HYPRE_Int            P_max_elmts,
+                                     HYPRE_Int            weight_option,
+                                     hypre_ParCSRMatrix **P_ptr )
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MULTIPASS_INTERP] -= hypre_MPI_Wtime();
@@ -2015,51 +2015,4 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
 #endif
 
    return(0);
-}
-
-HYPRE_Int
-hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
-                               HYPRE_Int           *CF_marker,
-                               hypre_ParCSRMatrix  *S,
-                               HYPRE_BigInt        *num_cpts_global,
-                               HYPRE_Int            num_functions,
-                               HYPRE_Int           *dof_func,
-                               HYPRE_Int            debug_flag,
-                               HYPRE_Real           trunc_factor,
-                               HYPRE_Int            P_max_elmts,
-                               HYPRE_Int            weight_option,
-                               hypre_ParCSRMatrix **P_ptr )
-{
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_GpuProfilingPushRange("BuildMultipass");
-#endif
-
-   hypre_assert( hypre_ParCSRMatrixMemoryLocation(A) == hypre_ParCSRMatrixMemoryLocation(S) );
-
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
-
-   HYPRE_Int ierr = 0;
-
-   if (exec == HYPRE_EXEC_HOST)
-   {
-     ierr = hypre_BoomerAMGBuildMultipassHost( A, CF_marker, S, num_cpts_global,
-                                               num_functions, dof_func, debug_flag,
-                                               trunc_factor, P_max_elmts, weight_option,
-                                               P_ptr );
-   }
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   else
-   {
-     ierr = hypre_BoomerAMGBuildMultipassDevice( A, CF_marker, S, num_cpts_global,
-                                                 num_functions, dof_func, debug_flag,
-                                                 trunc_factor, P_max_elmts, weight_option,
-                                                 P_ptr );
-   }
-#endif
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_GpuProfilingPopRange();
-#endif
-
-   return ierr;
 }
