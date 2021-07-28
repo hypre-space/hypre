@@ -514,7 +514,7 @@ hypre_spgemm_numerical_with_rowest( HYPRE_Int       m,
     * ---------------------------------------------------------------------------*/
    if (num_failed_rows)
    {
-      hypre_printf("[%s, %d]: num of failed rows %d (%.2f)\n", __FILE__, __LINE__, num_failed_rows, num_failed_rows / (m + 0.0) );
+      //hypre_printf("[%s, %d]: num of failed rows %d (%.2f)\n", __FILE__, __LINE__, num_failed_rows, num_failed_rows / (m + 0.0) );
 
       rf_ind = hypre_TAlloc(HYPRE_Int, num_failed_rows, HYPRE_MEMORY_DEVICE);
 
@@ -584,20 +584,20 @@ hypre_spgemm_numerical_with_rowest( HYPRE_Int       m,
 }
 
 HYPRE_Int
-hypreDevice_CSRSpGemmWithRownnzEstimate( HYPRE_Int       m,
-                                         HYPRE_Int       k,
-                                         HYPRE_Int       n,
-                                         HYPRE_Int      *d_ia,
-                                         HYPRE_Int      *d_ja,
-                                         HYPRE_Complex  *d_a,
-                                         HYPRE_Int      *d_ib,
-                                         HYPRE_Int      *d_jb,
-                                         HYPRE_Complex  *d_b,
-                                         HYPRE_Int      *d_rc,
-                                         HYPRE_Int     **d_ic_out,
-                                         HYPRE_Int     **d_jc_out,
-                                         HYPRE_Complex **d_c_out,
-                                         HYPRE_Int      *nnzC )
+hypreDevice_CSRSpGemmNumerWithRownnzEstimate( HYPRE_Int       m,
+                                              HYPRE_Int       k,
+                                              HYPRE_Int       n,
+                                              HYPRE_Int      *d_ia,
+                                              HYPRE_Int      *d_ja,
+                                              HYPRE_Complex  *d_a,
+                                              HYPRE_Int      *d_ib,
+                                              HYPRE_Int      *d_jb,
+                                              HYPRE_Complex  *d_b,
+                                              HYPRE_Int      *d_rc,
+                                              HYPRE_Int     **d_ic_out,
+                                              HYPRE_Int     **d_jc_out,
+                                              HYPRE_Complex **d_c_out,
+                                              HYPRE_Int      *nnzC )
 {
    const HYPRE_Int shmem_hash_size = HYPRE_SPGEMM_NUMER_HASH_SIZE;
    const char      hash_type       = hypre_HandleSpgemmHashType(hypre_handle());

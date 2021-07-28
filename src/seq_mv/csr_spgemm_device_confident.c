@@ -440,6 +440,7 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int       m,
    HYPRE_Int     *d_ghash_j = NULL;
    HYPRE_Complex *d_ghash_a = NULL;
 
+   /* RL Note: even with exact_rownnz, still may need global hash, since shared hash has different size from symbol. */
    hypre_SpGemmCreateGlobalHashTable(m, NULL, num_act_warps, d_rc, shmem_hash_size,
                                      &d_ghash_i, &d_ghash_j, &d_ghash_a, NULL, 1);
 
@@ -512,21 +513,21 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int       m,
 }
 
 HYPRE_Int
-hypreDevice_CSRSpGemmWithRownnzUpperbound( HYPRE_Int       m,
-                                           HYPRE_Int       k,
-                                           HYPRE_Int       n,
-                                           HYPRE_Int      *d_ia,
-                                           HYPRE_Int      *d_ja,
-                                           HYPRE_Complex  *d_a,
-                                           HYPRE_Int      *d_ib,
-                                           HYPRE_Int      *d_jb,
-                                           HYPRE_Complex  *d_b,
-                                           HYPRE_Int      *d_rc,         /* input: nnz of each row */
-                                           HYPRE_Int       exact_rownnz, /* if d_rc is exact       */
-                                           HYPRE_Int     **d_ic_out,
-                                           HYPRE_Int     **d_jc_out,
-                                           HYPRE_Complex **d_c_out,
-                                           HYPRE_Int      *nnzC )
+hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
+                                                HYPRE_Int       k,
+                                                HYPRE_Int       n,
+                                                HYPRE_Int      *d_ia,
+                                                HYPRE_Int      *d_ja,
+                                                HYPRE_Complex  *d_a,
+                                                HYPRE_Int      *d_ib,
+                                                HYPRE_Int      *d_jb,
+                                                HYPRE_Complex  *d_b,
+                                                HYPRE_Int      *d_rc,         /* input: nnz (upper bound) of each row */
+                                                HYPRE_Int       exact_rownnz, /* if d_rc is exact       */
+                                                HYPRE_Int     **d_ic_out,
+                                                HYPRE_Int     **d_jc_out,
+                                                HYPRE_Complex **d_c_out,
+                                                HYPRE_Int      *nnzC )
 {
    const HYPRE_Int shmem_hash_size = HYPRE_SPGEMM_NUMER_HASH_SIZE;
    const char      hash_type       = hypre_HandleSpgemmHashType(hypre_handle());
@@ -537,10 +538,8 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound( HYPRE_Int       m,
       exit(0);
    }
 
-   /*
-   HYPRE_Int max_rc = HYPRE_THRUST_CALL(reduce, d_rc, d_rc + m, 0, thrust::maximum<HYPRE_Int>());
-   hypre_printf("max_rc numerical %d\n", max_rc);
-   */
+   //HYPRE_Int max_rc = HYPRE_THRUST_CALL(reduce, d_rc, d_rc + m, 0, thrust::maximum<HYPRE_Int>());
+   //hypre_printf("max_rc numerical %d\n", max_rc);
 
    if (exact_rownnz)
    {

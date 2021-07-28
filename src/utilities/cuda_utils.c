@@ -1150,12 +1150,13 @@ hypre_CudaDataCreate()
 #else
    hypre_CudaDataSpgemmUseCusparse(data) = 0;
 #endif
-   hypre_CudaDataSpgemmAlgorithm(data) = 1;
+
+   hypre_CudaDataSpgemmAlgorithm(data)                = 1;
    /* 1: naive overestimate, 2: naive underestimate, 3: Cohen's algorithm */
-   hypre_CudaDataSpgemmRownnzEstimateMethod(data) = 3;
-   hypre_CudaDataSpgemmRownnzEstimateNsamples(data) = 32;
+   hypre_CudaDataSpgemmRownnzEstimateMethod(data)     = 3;
+   hypre_CudaDataSpgemmRownnzEstimateNsamples(data)   = 32;
    hypre_CudaDataSpgemmRownnzEstimateMultFactor(data) = 1.5;
-   hypre_CudaDataSpgemmHashType(data) = 'L';
+   hypre_CudaDataSpgemmHashType(data)                 = 'Q';
 
    /* pmis */
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)

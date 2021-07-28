@@ -261,7 +261,8 @@ hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
                             HYPRE_Int *d_ja,
                             HYPRE_Int *d_ib,
                             HYPRE_Int *d_jb,
-                            HYPRE_Int *d_rc, /* ATTEMPT = 1, output: rownnz bound;
+                            HYPRE_Int  in_rc,
+                            HYPRE_Int *d_rc, /* ATTEMPT = 1,  input: rownnz est (if in_rc), output: rownnz bound;
                                                 ATTEMPT = 2,  input: rownnz bound, output: rownnz (exact) */
                             HYPRE_Int *d_rf  /* ATTEMPT = 1, output: if symbolic mult. failed  */ )
 {
@@ -293,7 +294,7 @@ hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
     * ---------------------------------------------------------------------------*/
    HYPRE_Int *d_ghash_i = NULL, *d_ghash_j = NULL;
 
-   if (ATTEMPT == 2)
+   if (in_rc)
    {
       hypre_SpGemmCreateGlobalHashTable(m, rf_ind, num_act_warps, d_rc, shmem_hash_size,
                                         &d_ghash_i, &d_ghash_j, NULL, NULL, 1);
@@ -341,12 +342,13 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
                                        HYPRE_Int *d_ja,
                                        HYPRE_Int *d_ib,
                                        HYPRE_Int *d_jb,
+                                       HYPRE_Int  in_rc,
                                        HYPRE_Int *d_rc,
                                        HYPRE_Int *d_rf)
 {
    const HYPRE_Int shmem_hash_size = HYPRE_SPGEMM_SYMBL_HASH_SIZE;
 
-   hypre_spgemm_rownnz_attempt<shmem_hash_size, 1> (m, NULL, k, n, d_ia, d_ja, d_ib, d_jb, d_rc, d_rf);
+   hypre_spgemm_rownnz_attempt<shmem_hash_size, 1> (m, NULL, k, n, d_ia, d_ja, d_ib, d_jb, in_rc, d_rc, d_rf);
 
    return hypre_error_flag;
 }
@@ -359,6 +361,7 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
                              HYPRE_Int *d_ja,
                              HYPRE_Int *d_ib,
                              HYPRE_Int *d_jb,
+                             HYPRE_Int  in_rc,
                              HYPRE_Int *d_rc )
 {
    const HYPRE_Int shmem_hash_size = HYPRE_SPGEMM_SYMBL_HASH_SIZE;
@@ -366,14 +369,14 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
    /* a binary array to indicate if row nnz counting is failed for a row */
    HYPRE_Int *d_rf  = d_rc + m;
 
-   hypre_spgemm_rownnz_attempt<shmem_hash_size, 1> (m, NULL, k, n, d_ia, d_ja, d_ib, d_jb, d_rc, d_rf);
+   hypre_spgemm_rownnz_attempt<shmem_hash_size, 1> (m, NULL, k, n, d_ia, d_ja, d_ib, d_jb, in_rc, d_rc, d_rf);
 
    /* row nnz is exact if no row failed */
    HYPRE_Int num_failed_rows = hypreDevice_IntegerReduceSum(m, d_rf);
 
    if (num_failed_rows)
    {
-      hypre_printf("[%s, %d]: num of failed rows %d (%.2f)\n", __FILE__, __LINE__, num_failed_rows, num_failed_rows / (m + 0.0) );
+      //hypre_printf("[%s, %d]: num of failed rows %d (%.2f)\n", __FILE__, __LINE__, num_failed_rows, num_failed_rows / (m + 0.0) );
 
       HYPRE_Int *rf_ind = hypre_TAlloc(HYPRE_Int, num_failed_rows, HYPRE_MEMORY_DEVICE);
 
@@ -387,7 +390,7 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
 
       hypre_assert(new_end - rf_ind == num_failed_rows);
 
-      hypre_spgemm_rownnz_attempt<shmem_hash_size, 2> (num_failed_rows, rf_ind, k, n, d_ia, d_ja, d_ib, d_jb, d_rc, NULL);
+      hypre_spgemm_rownnz_attempt<shmem_hash_size, 2> (num_failed_rows, rf_ind, k, n, d_ia, d_ja, d_ib, d_jb, 1, d_rc, NULL);
 
       hypre_TFree(rf_ind, HYPRE_MEMORY_DEVICE);
    }
