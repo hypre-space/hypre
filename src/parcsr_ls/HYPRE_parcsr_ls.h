@@ -1457,8 +1457,8 @@ HYPRE_BoomerAMGDDGetNumIterations( HYPRE_Solver   solver,
  * @name ParCSR FSAI Solver and Preconditioner
  *
  * An adaptive factorized sparse approximate inverse solver/preconditioner/smoother
- * that computes a sparse approximation G to the lower cholesky factor of A such
- * that M^{-1} \approx G^T * G.
+ * that computes a sparse approximation G to the inverse of the lower cholesky
+ * factor of A such that M^{-1} \approx G^T * G.
  *
  * @{
  **/
@@ -1522,6 +1522,26 @@ HYPRE_Int HYPRE_FSAISetMaxStepSize( HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_FSAISetKapTolerance( HYPRE_Solver solver,
                                      HYPRE_Real   kap_tolerance  );
+
+/**
+ * (Optional) Sets the relaxation factor for FSAI
+ **/
+HYPRE_Int HYPRE_FSAISetOmega( HYPRE_Solver solver,
+                              HYPRE_Real   omega );
+
+/**
+ * (Optional) Sets the maximum number of iterations (sweeps) for FSAI
+ **/
+HYPRE_Int HYPRE_FSAISetMaxIterations( HYPRE_Solver solver,
+                                      HYPRE_Int    max_iterations );
+
+/**
+ * (Optional) Set the convergence tolerance, if FSAI is used
+ * as a solver. When using FSAI as a preconditioner, set the tolerance
+ * to 0.0. The default is \f$10^{-6}\f$.
+ **/
+HYPRE_Int HYPRE_FSAISetTolerance( HYPRE_Solver solver,
+                                  HYPRE_Real   tolerance );
 
 
 /**@}*/

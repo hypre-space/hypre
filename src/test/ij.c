@@ -396,8 +396,8 @@ main( hypre_int argc,
    /* end hypre ILU options */
 
    /* hypre_FSAI options */
-   HYPRE_Int fsai_max_steps = 10;
-   HYPRE_Int fsai_max_step_size = 1;
+   HYPRE_Int  fsai_max_steps = 10;
+   HYPRE_Int  fsai_max_step_size = 1;
    HYPRE_Real fsai_kap_tolerance = 1.0e-03;
    /* end hypre FSAI options */
 
@@ -1116,7 +1116,7 @@ main( hypre_int argc,
          ilu_nsh_droptol = atof(argv[arg_index++]);
       }
       /* end ilu options */
-      /* begin ilu options*/
+      /* begin FSAI options*/
       else if ( strcmp(argv[arg_index], "-fs_max_steps") == 0 )
       {
          arg_index++;
@@ -1132,7 +1132,7 @@ main( hypre_int argc,
          arg_index++;
          fsai_kap_tolerance = atof(argv[arg_index++]);
       }
-      /* end ilu options */
+      /* end FSAI options */
 #if defined(HYPRE_USING_GPU)
       else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
       {
@@ -4266,6 +4266,8 @@ main( hypre_int argc,
          HYPRE_FSAISetMaxSteps(pcg_precond, fsai_max_steps);
          HYPRE_FSAISetMaxStepSize(pcg_precond, fsai_max_step_size);
          HYPRE_FSAISetKapTolerance(pcg_precond, fsai_kap_tolerance);
+         HYPRE_FSAISetMaxIterations(pcg_precond, 1);
+         HYPRE_FSAISetTolerance(pcg_precond, 0.0);
 
          HYPRE_PCGSetPrecond(pcg_solver,
                              (HYPRE_PtrToSolverFcn) HYPRE_FSAISolve,
