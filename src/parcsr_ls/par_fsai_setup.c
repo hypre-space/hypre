@@ -149,10 +149,8 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
       for(j = A_i[i]; j < A_i[i+1]; j++)  /* Intersection + Gather */
       {
 
-         if(A_j[j] == row_num){
+         if(A_j[j] == row_num)
             temp += 2*A_data[j];
-            break;
-         }
 
          /* Skip the upper triangular part of A */
          if (A_j[j] > i)
@@ -160,7 +158,10 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
 
          for(k = 0; k < S_nnz; k++)
             if(S_Pattern[k] == A_j[j])
+            {
                temp += 2 * G_temp_data[k] * A_data[j];
+               break;
+            }
       }
 
       if(temp != 0)
@@ -394,7 +395,6 @@ hypre_FSAISetup( void               *fsai_vdata,
 
             /* Compute Kaporin Gradient */
             hypre_FindKapGrad(A_diag, kaporin_gradient, kap_grad_nonzeros, G_temp, S_Pattern, S_nnz, max_row_size, i, marker);
-
             if(hypre_VectorSize(kaporin_gradient) == 0)
                break;
 
@@ -432,7 +432,7 @@ hypre_FSAISetup( void               *fsai_vdata,
             /* Determine psi_{k+1} = G_temp[i]*A*G_temp[i]' */
             hypre_SeqVectorScale(-1, A_subrow);                         /* A[P, i] */
             new_psi = hypre_SeqVectorInnerProd(G_temp, A_subrow) + A_data[A_i[i]];
-            if(hypre_abs( new_psi - old_psi )/old_psi < kap_tolerance)
+            if(hypre_abs( new_psi - old_psi ) < kap_tolerance*old_psi)
                break;
 
             old_psi = new_psi;
