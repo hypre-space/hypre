@@ -27,7 +27,9 @@
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"
 
+#ifdef HYPRE_USING_CUDA
 #include "cuda_profiler_api.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -138,7 +140,7 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
 
       if (i == rep-1)
       {
-         HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+         hypre_SyncCudaDevice(hypre_handle());
          //cudaProfilerStop();
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Device Parcsr Matrix-by-Matrix, A*A", hypre_MPI_COMM_WORLD);
@@ -310,7 +312,7 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
 
       if (i == 1)
       {
-         HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+         hypre_SyncCudaDevice(hypre_handle());
          //cudaProfilerStop();
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Device Parcsr Matrix-by-Matrix, RAP2", hypre_MPI_COMM_WORLD);
@@ -560,10 +562,17 @@ main( hypre_int argc,
 
    if (zero_mem_cost)
    {
+#ifdef HYPRE_USING_CUDA
       total_size = 15LL * 1024 * 1024 * 1024;
       HYPRE_CUDA_CALL( cudaMalloc(&gpu_ptr, total_size) );
       hypre_SetUserDeviceMalloc(gpu_alloc);
       hypre_SetUserDeviceMfree(gpu_free);
+#elif defined(HYPRE_USING_HIP)
+      total_size = 31LL * 1024 * 1024 * 1024;
+      HYPRE_HIP_CALL( hipMalloc(&gpu_ptr, total_size) );
+      hypre_SetUserDeviceMalloc(gpu_alloc);
+      hypre_SetUserDeviceMfree(gpu_free);
+#endif
    }
 
 
@@ -730,7 +739,11 @@ main( hypre_int argc,
 
    if (gpu_ptr)
    {
-      cudaFree(gpu_ptr);
+#ifdef HYPRE_USING_CUDA
+      HYPRE_CUDA_CALL(cudaFree(gpu_ptr));
+#elif defined(HYPRE_USING_HIP)
+      HYPRE_HIP_CALL(hipFree(gpu_ptr));
+#endif
    }
 
    return (0);
