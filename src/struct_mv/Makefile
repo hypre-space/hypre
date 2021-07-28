@@ -17,6 +17,7 @@ C_COMPILE_FLAGS = \
 HEADERS =\
  HYPRE_struct_mv.h\
  _hypre_struct_mv.h\
+ _hypre_struct_mv.hpp\
  assumed_part.h\
  box.h\
  box_ds.h\

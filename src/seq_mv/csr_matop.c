@@ -336,17 +336,17 @@ hypre_CSRMatrixAddSecondPass( HYPRE_Int          firstrow,
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixAdd:
  *
- * Adds two CSR Matrices A and B and returns a CSR Matrix C;
+ * Adds two CSR Matrices A and B and returns a CSR Matrix C = alpha*A + beta*B;
  *
  * Note: The routine does not check for 0-elements which might be generated
  *       through cancellation of elements in A and B or already contained
  *       in A and B. To remove those, use hypre_CSRMatrixDeleteZeros
- *
- *       This function is ready to compute C = alpha*A + beta*B if needed.
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix*
-hypre_CSRMatrixAddHost ( hypre_CSRMatrix *A,
+hypre_CSRMatrixAddHost ( HYPRE_Complex    alpha,
+                         hypre_CSRMatrix *A,
+                         HYPRE_Complex    beta,
                          hypre_CSRMatrix *B )
 {
    /* CSRMatrix A */
@@ -368,8 +368,6 @@ hypre_CSRMatrixAddHost ( hypre_CSRMatrix *A,
    HYPRE_Int         nnzrows_C;
 
    HYPRE_Int        *twspace;
-   HYPRE_Complex     alpha = 1.0;
-   HYPRE_Complex     beta = 1.0;
 
    HYPRE_MemoryLocation memory_location_A = hypre_CSRMatrixMemoryLocation(A);
    HYPRE_MemoryLocation memory_location_B = hypre_CSRMatrixMemoryLocation(B);
@@ -435,7 +433,9 @@ hypre_CSRMatrixAddHost ( hypre_CSRMatrix *A,
 }
 
 hypre_CSRMatrix*
-hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
+hypre_CSRMatrixAdd( HYPRE_Complex    alpha,
+                    hypre_CSRMatrix *A,
+                    HYPRE_Complex    beta,
                     hypre_CSRMatrix *B)
 {
    hypre_CSRMatrix *C = NULL;
@@ -446,19 +446,23 @@ hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      C = hypre_CSRMatrixAddDevice(A, B);
+      C = hypre_CSRMatrixAddDevice(alpha, A, beta, B);
    }
    else
 #endif
    {
-      C = hypre_CSRMatrixAddHost(A, B);
+      C = hypre_CSRMatrixAddHost(alpha, A, beta, B);
    }
 
    return C;
 }
 
+#if 0
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixBigAdd:
+ *
+ * RL: comment it out which was used in ams.c. Should be combined with
+ *     above hypre_CSRMatrixAddHost whenever it is needed again
  *
  * Adds two CSR Matrices A and B with column indices stored as HYPRE_BigInt
  * and returns a CSR Matrix C;
@@ -634,6 +638,8 @@ hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
 
    return C;
 }
+
+#endif
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMultiplyHost
@@ -1886,6 +1892,10 @@ hypre_CSRMatrixComputeRowSum( hypre_CSRMatrix *A,
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixExtractDiagonalHost
+ * type 0: diag
+ *      1: abs diag
+ *      2: diag inverse
+ *      3: diag inverse sqrt
  *--------------------------------------------------------------------------*/
 
 void
@@ -1915,6 +1925,14 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
             {
                d_i = fabs(A_data[j]);
             }
+            else if (type == 2)
+            {
+               d_i = 1.0 /(A_data[j]);
+            }
+            else if (type == 3)
+            {
+               d_i = 1.0 /(sqrt(A_data[j]));
+            }
             break;
          }
       }
@@ -1927,6 +1945,8 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
  *
  * type 0: diag
  *      1: abs diag
+ *      2: diag inverse
+ *      3: diag inverse sqrt
  *--------------------------------------------------------------------------*/
 
 void
@@ -1947,3 +1967,35 @@ hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A,
       hypre_CSRMatrixExtractDiagonalHost(A, d, type);
    }
 }
+
+HYPRE_Int
+hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A,
+                                  HYPRE_Complex    value)
+{
+   HYPRE_Int i;
+   HYPRE_Int nnz = hypre_CSRMatrixNumNonzeros(A);
+
+   if (!hypre_CSRMatrixData(A))
+   {
+      hypre_CSRMatrixData(A) = hypre_TAlloc(HYPRE_Complex, nnz, hypre_CSRMatrixMemoryLocation(A));
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypreDevice_Filln(hypre_CSRMatrixData(A), nnz, value);
+   }
+   else
+#endif
+   {
+      for (i = 0; i < nnz; i++)
+      {
+         hypre_CSRMatrixData(A)[i] = value;
+      }
+   }
+
+   return hypre_error_flag;
+}
+

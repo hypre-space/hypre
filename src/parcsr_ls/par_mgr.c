@@ -2314,35 +2314,30 @@ hypre_MGRComputeAlgebraicFixedStress(hypre_ParCSRMatrix  *A,
                   hypre_ParCSRMatrixGlobalNumCols(A_up),
                   hypre_ParCSRMatrixColStarts(A_up));
   hypre_ParVectorInitialize(e1_vector);
-  hypre_ParVectorSetPartitioningOwner(e1_vector,0);
   hypre_ParVectorSetConstantValues(e1_vector, 1.0);
 
   e2_vector = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_uu),
                   hypre_ParCSRMatrixGlobalNumRows(A_uu),
                   hypre_ParCSRMatrixRowStarts(A_uu));
   hypre_ParVectorInitialize(e2_vector);
-  hypre_ParVectorSetPartitioningOwner(e2_vector,0);
   hypre_ParVectorSetConstantValues(e2_vector, 0.0);
 
   e3_vector = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_uu),
                   hypre_ParCSRMatrixGlobalNumRows(A_uu),
                   hypre_ParCSRMatrixRowStarts(A_uu));
   hypre_ParVectorInitialize(e3_vector);
-  hypre_ParVectorSetPartitioningOwner(e3_vector,0);
   hypre_ParVectorSetConstantValues(e3_vector, 0.0);
 
   e4_vector = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_su),
                   hypre_ParCSRMatrixGlobalNumRows(A_su),
                   hypre_ParCSRMatrixRowStarts(A_su));
   hypre_ParVectorInitialize(e4_vector);
-  hypre_ParVectorSetPartitioningOwner(e4_vector,0);
   hypre_ParVectorSetConstantValues(e4_vector, 0.0);
 
   e5_vector = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_pu),
                   hypre_ParCSRMatrixGlobalNumRows(A_pu),
                   hypre_ParCSRMatrixRowStarts(A_pu));
   hypre_ParVectorInitialize(e5_vector);
-  hypre_ParVectorSetPartitioningOwner(e5_vector,0);
   hypre_ParVectorSetConstantValues(e5_vector, 0.0);
 
   // compute e2 = A_up * e1
@@ -2381,8 +2376,8 @@ hypre_MGRComputeAlgebraicFixedStress(hypre_ParCSRMatrix  *A,
 
 
 HYPRE_Int
-hypre_MGRApproximateInverse(hypre_ParCSRMatrix     *A,
-                                  hypre_ParCSRMatrix     **A_inv)
+hypre_MGRApproximateInverse(hypre_ParCSRMatrix      *A,
+                            hypre_ParCSRMatrix     **A_inv)
 {
   HYPRE_Int print_level, mr_max_row_nnz, mr_max_iter, nsh_max_row_nnz, nsh_max_iter, mr_col_version;
   HYPRE_Real mr_tol, nsh_tol;
@@ -2410,12 +2405,12 @@ hypre_MGRApproximateInverse(hypre_ParCSRMatrix     *A,
 }
 
 HYPRE_Int
-hypre_MGRBuildInterpApproximateInverseExp(hypre_ParCSRMatrix   *A,
-                                       hypre_ParCSRMatrix   *S,
-                                       HYPRE_Int            *CF_marker,
-                                       HYPRE_BigInt            *num_cpts_global,
-                                       HYPRE_Int            debug_flag,
-                                       hypre_ParCSRMatrix   **P_ptr)
+hypre_MGRBuildInterpApproximateInverseExp(hypre_ParCSRMatrix  *A,
+                                          hypre_ParCSRMatrix  *S,
+                                          HYPRE_Int           *CF_marker,
+                                          HYPRE_BigInt        *num_cpts_global,
+                                          HYPRE_Int            debug_flag,
+                                          hypre_ParCSRMatrix **P_ptr)
 {
   HYPRE_Int            *C_marker;
   HYPRE_Int            *F_marker;

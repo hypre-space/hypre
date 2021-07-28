@@ -58,8 +58,6 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
    HYPRE_Int          *AN_offd_j = NULL;
    HYPRE_Real         *AN_offd_data = NULL;
    HYPRE_BigInt       *col_map_offd_AN = NULL;
-   HYPRE_BigInt       *row_starts_AN;
-
 
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A);
    HYPRE_Int            num_sends;
@@ -102,11 +100,6 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
    norm_type = hypre_abs(option);
 
    /* Set up the new matrix AN */
-   row_starts_AN = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
-   for (i = 0; i < 2; i++)
-   {
-      row_starts_AN[i] = row_starts[i];
-   }
 
    global_num_nodes = hypre_ParCSRBlockMatrixGlobalNumRows(A);
    num_nodes = hypre_CSRBlockMatrixNumRows(A_diag);
@@ -273,7 +266,7 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
 
    /* now create AN */
    AN = hypre_ParCSRMatrixCreate(comm, global_num_nodes, global_num_nodes,
-                                 row_starts_AN, row_starts_AN, num_cols_offd,
+                                 row_starts, row_starts, num_cols_offd,
                                  num_nonzeros_diag, num_nonzeros_offd);
 
    /* we already created the diag and offd matrices - so we don't need the ones
@@ -288,7 +281,6 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
 
    hypre_ParCSRMatrixColMapOffd(AN) = col_map_offd_AN;
    hypre_ParCSRMatrixCommPkg(AN) = comm_pkg_AN;
-   hypre_TFree(row_starts_AN, HYPRE_MEMORY_HOST);
 
    *AN_ptr = AN;
 

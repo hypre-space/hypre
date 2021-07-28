@@ -98,7 +98,7 @@ hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
                       hypre_CSRMatrixData(Id) + hypre_ParCSRMatrixNumRows(S_CX),
                       coeff );
 
-   SI_diag = hypre_CSRMatrixAddDevice(hypre_ParCSRMatrixDiag(S_CX), Id);
+   SI_diag = hypre_CSRMatrixAddDevice(1.0, hypre_ParCSRMatrixDiag(S_CX), 1.0, Id);
 
    hypre_CSRMatrixDestroy(Id);
 

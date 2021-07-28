@@ -380,14 +380,12 @@ hypre_ILUSetup( void               *ilu_vdata,
          hypre_ParCSRMatrixGlobalNumRows(A),
          hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(Utemp);
-   hypre_ParVectorSetPartitioningOwner(Utemp,0);
    hypre_ParILUDataUTemp(ilu_data) = Utemp;
 
    Ftemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
          hypre_ParCSRMatrixGlobalNumRows(A),
          hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(Ftemp);
-   hypre_ParVectorSetPartitioningOwner(Ftemp,0);
    hypre_ParILUDataFTemp(ilu_data) = Ftemp;
    /* set matrix, solution and rhs pointers */
    matA = A;
@@ -518,13 +516,11 @@ hypre_ILUSetup( void               *ilu_vdata,
                                    hypre_ParCSRMatrixGlobalNumRows(matS),
                                    hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(Xtemp);
-            hypre_ParVectorSetPartitioningOwner(Xtemp,0);
 
             Ytemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(matS),
                                    hypre_ParCSRMatrixGlobalNumRows(matS),
                                    hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(Ytemp);
-            hypre_ParVectorSetPartitioningOwner(Ytemp,0);
 
             Ftemp_upper = hypre_SeqVectorCreate(nLU);
             hypre_VectorOwnsData(Ftemp_upper)   = 0;
@@ -590,12 +586,10 @@ hypre_ILUSetup( void               *ilu_vdata,
                                     hypre_ParCSRMatrixGlobalNumRows(matS),
                                     hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(rhs);
-            hypre_ParVectorSetPartitioningOwner(rhs,0);
             x = hypre_ParVectorCreate(comm,
                                     hypre_ParCSRMatrixGlobalNumRows(matS),
                                     hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(x);
-            hypre_ParVectorSetPartitioningOwner(x,0);
 
             /* setup solver */
             HYPRE_GMRESSetup(schur_solver,(HYPRE_Matrix)ilu_vdata,(HYPRE_Vector)rhs,(HYPRE_Vector)x);
@@ -652,12 +646,10 @@ hypre_ILUSetup( void               *ilu_vdata,
                                     hypre_ParCSRMatrixGlobalNumRows(matS),
                                     hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(rhs);
-            hypre_ParVectorSetPartitioningOwner(rhs,0);
             x = hypre_ParVectorCreate(comm,
                                     hypre_ParCSRMatrixGlobalNumRows(matS),
                                     hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(x);
-            hypre_ParVectorSetPartitioningOwner(x,0);
 
             /* setup solver */
             HYPRE_GMRESSetup(schur_solver,(HYPRE_Matrix)matS,(HYPRE_Vector)rhs,(HYPRE_Vector)x);
@@ -697,12 +689,10 @@ hypre_ILUSetup( void               *ilu_vdata,
                   hypre_ParCSRMatrixGlobalNumRows(matS),
                   hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(rhs);
-            hypre_ParVectorSetPartitioningOwner(rhs,0);
             x = hypre_ParVectorCreate(comm,
                   hypre_ParCSRMatrixGlobalNumRows(matS),
                   hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(x);
-            hypre_ParVectorSetPartitioningOwner(x,0);
 
             /* setup solver */
             hypre_NSHSetup(schur_solver,matS,rhs,x);
@@ -771,12 +761,10 @@ hypre_ILUSetup( void               *ilu_vdata,
                                     hypre_ParCSRMatrixGlobalNumRows(matS),
                                     hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(rhs);
-            hypre_ParVectorSetPartitioningOwner(rhs,0);
             x = hypre_ParVectorCreate(comm,
                                     hypre_ParCSRMatrixGlobalNumRows(matS),
                                     hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(x);
-            hypre_ParVectorSetPartitioningOwner(x,0);
 
             /* setup solver */
             HYPRE_GMRESSetup(schur_solver,(HYPRE_Matrix)matS,(HYPRE_Vector)rhs,(HYPRE_Vector)x);
@@ -798,13 +786,11 @@ hypre_ILUSetup( void               *ilu_vdata,
                                    hypre_ParCSRMatrixGlobalNumRows(matA),
                                    hypre_ParCSRMatrixRowStarts(matA));
             hypre_ParVectorInitialize(Xtemp);
-            hypre_ParVectorSetPartitioningOwner(Xtemp,0);
 
             Ytemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(matA),
                                    hypre_ParCSRMatrixGlobalNumRows(matA),
                                    hypre_ParCSRMatrixRowStarts(matA));
             hypre_ParVectorInitialize(Ytemp);
-            hypre_ParVectorSetPartitioningOwner(Ytemp,0);
 
             Ftemp_upper = hypre_SeqVectorCreate(nLU);
             hypre_VectorOwnsData(Ftemp_upper)   = 0;
@@ -876,12 +862,10 @@ hypre_ILUSetup( void               *ilu_vdata,
                                     hypre_ParCSRMatrixGlobalNumRows(matS),
                                     hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(rhs);
-            hypre_ParVectorSetPartitioningOwner(rhs,0);
             x = hypre_ParVectorCreate(comm,
                                     hypre_ParCSRMatrixGlobalNumRows(matS),
                                     hypre_ParCSRMatrixRowStarts(matS));
             hypre_ParVectorInitialize(x);
-            hypre_ParVectorSetPartitioningOwner(x,0);
 
             /* setup solver */
             HYPRE_GMRESSetup(schur_solver,(HYPRE_Matrix)ilu_vdata,(HYPRE_Vector)rhs,(HYPRE_Vector)x);
@@ -900,7 +884,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 #else
          /* need to create working vector rhs and x for Schur System */
          HYPRE_Int      m = n - nLU;
-         HYPRE_BigInt   S_total_rows, *S_row_starts;
+         HYPRE_BigInt   S_total_rows, S_row_starts[2];
          HYPRE_BigInt   big_m = (HYPRE_BigInt)m;
          hypre_MPI_Allreduce( &big_m, &S_total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
 
@@ -911,18 +895,15 @@ hypre_ILUSetup( void               *ilu_vdata,
                                       hypre_ParCSRMatrixGlobalNumRows(matA),
                                       hypre_ParCSRMatrixRowStarts(matA));
             hypre_ParVectorInitialize(Xtemp);
-            hypre_ParVectorSetPartitioningOwner(Xtemp,0);
 
             Ytemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(matA),
                                       hypre_ParCSRMatrixGlobalNumRows(matA),
                                       hypre_ParCSRMatrixRowStarts(matA));
             hypre_ParVectorInitialize(Ytemp);
-            hypre_ParVectorSetPartitioningOwner(Ytemp,0);
 
             /* only do so when we hae the Schur Complement */
             {
                HYPRE_BigInt global_start;
-               S_row_starts = hypre_CTAlloc(HYPRE_BigInt,2,HYPRE_MEMORY_HOST);
                hypre_MPI_Scan( &big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
                S_row_starts[0] = global_start - m;
                S_row_starts[1] = global_start;
@@ -932,13 +913,11 @@ hypre_ILUSetup( void               *ilu_vdata,
                                     S_total_rows,
                                     S_row_starts);
             hypre_ParVectorInitialize(rhs);
-            hypre_ParVectorSetPartitioningOwner(rhs,1);
 
             x = hypre_ParVectorCreate(comm,
                                     S_total_rows,
                                     S_row_starts);
             hypre_ParVectorInitialize(x);
-            hypre_ParVectorSetPartitioningOwner(x,0);
 
             /* add when necessary */
             /* create GMRES */
@@ -1174,7 +1153,6 @@ hypre_ILUSetup( void               *ilu_vdata,
                hypre_ParCSRMatrixGlobalNumRows(matA),
                hypre_ParCSRMatrixRowStarts(matA) );
       hypre_ParVectorInitialize(residual);
-      hypre_ParVectorSetPartitioningOwner(residual,0);
       hypre_ParILUDataResidual(ilu_data) = residual;
    }
    else{
@@ -1796,7 +1774,7 @@ hypre_ILUSetupILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qper
    HYPRE_Int               e                    = 0;
    HYPRE_Int               m_e                  = m;
    HYPRE_BigInt            total_rows;
-   HYPRE_BigInt            *col_starts          = NULL;
+   HYPRE_BigInt            col_starts[2];
    HYPRE_Int               *S_diag_i            = NULL;
    HYPRE_Int               S_diag_nnz;
    hypre_CSRMatrix         *S_offd              = NULL;
@@ -1868,7 +1846,6 @@ hypre_ILUSetupILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qper
       /* need to get new column start */
       {
          HYPRE_BigInt global_start;
-         col_starts = hypre_CTAlloc(HYPRE_BigInt,2,HYPRE_MEMORY_HOST);
          hypre_MPI_Scan( &big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
          col_starts[0] = global_start - m;
          col_starts[1] = global_start;
@@ -1979,7 +1956,6 @@ hypre_ILUSetupILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qper
 
       /* free */
       hypre_TFree(send_buf, HYPRE_MEMORY_HOST);
-      hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
    } /* end of forming S */
 
    *matSptr       = matS;
@@ -2049,7 +2025,7 @@ hypre_ILUSetupILUKDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm,
    HYPRE_Int               e                    = 0;
    HYPRE_Int               m_e                  = m;
    HYPRE_BigInt            total_rows;
-   HYPRE_BigInt            *col_starts          = NULL;
+   HYPRE_BigInt            col_starts[2];
    HYPRE_Int               *S_diag_i            = NULL;
    HYPRE_Int               S_diag_nnz;
    hypre_CSRMatrix         *S_offd              = NULL;
@@ -2160,7 +2136,6 @@ hypre_ILUSetupILUKDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm,
       /* need to get new column start */
       {
          HYPRE_BigInt global_start;
-         col_starts = hypre_CTAlloc(HYPRE_BigInt,2,HYPRE_MEMORY_HOST);
          hypre_MPI_Scan( &big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
          col_starts[0] = global_start - m;
          col_starts[1] = global_start;
@@ -2271,7 +2246,6 @@ hypre_ILUSetupILUKDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm,
 
       /* free */
       hypre_TFree(send_buf, HYPRE_MEMORY_HOST);
-      hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
    } /* end of forming S */
 
    *matSptr       = matS;
@@ -2342,7 +2316,7 @@ hypre_ILUSetupILUTDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    HYPRE_Int               e                    = 0;
    HYPRE_Int               m_e                  = m;
    HYPRE_BigInt            total_rows;
-   HYPRE_BigInt            *col_starts          = NULL;
+   HYPRE_BigInt            col_starts[2];
    HYPRE_Int               *S_diag_i            = NULL;
    HYPRE_Int               S_diag_nnz;
    hypre_CSRMatrix         *S_offd              = NULL;
@@ -2453,7 +2427,6 @@ hypre_ILUSetupILUTDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
       /* need to get new column start */
       {
          HYPRE_BigInt global_start;
-         col_starts = hypre_CTAlloc(HYPRE_BigInt,2,HYPRE_MEMORY_HOST);
          hypre_MPI_Scan( &big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
          col_starts[0] = global_start - m;
          col_starts[1] = global_start;
@@ -2564,7 +2537,6 @@ hypre_ILUSetupILUTDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
 
       /* free */
       hypre_TFree(send_buf, HYPRE_MEMORY_HOST);
-      hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
    } /* end of forming S */
 
    *matSptr       = matS;
@@ -3417,7 +3389,7 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n,
          S_row_starts[1] = global_start;
       }
 
-      S_row_starts = hypre_CTAlloc(HYPRE_Int,2,HYPRE_MEMORY_HOST);
+      S_row_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
       S_row_starts[1] = S_total_rows;
       S_row_starts[0] = S_total_rows - m;
       hypre_MPI_Allreduce(&m, &S_total_rows, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
@@ -3620,7 +3592,7 @@ hypre_ILUSetupMILU0(hypre_ParCSRMatrix *A, HYPRE_Int *permp, HYPRE_Int *qpermp, 
    HYPRE_Int                *S_offd_j        = NULL;
    HYPRE_BigInt             *S_offd_colmap   = NULL;
    HYPRE_Real               *S_offd_data;
-   HYPRE_BigInt             *col_starts;
+   HYPRE_BigInt             col_starts[2];
    HYPRE_BigInt             total_rows;
 
    /* memory management */
@@ -4060,7 +4032,6 @@ hypre_ILUSetupMILU0(hypre_ParCSRMatrix *A, HYPRE_Int *permp, HYPRE_Int *qpermp, 
       /* need to get new column start */
       {
          HYPRE_BigInt global_start;
-         col_starts = hypre_CTAlloc(HYPRE_BigInt,2,HYPRE_MEMORY_HOST);
          hypre_MPI_Scan( &big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
          col_starts[0] = global_start - m;
          col_starts[1] = global_start;
@@ -4144,7 +4115,6 @@ hypre_ILUSetupMILU0(hypre_ParCSRMatrix *A, HYPRE_Int *permp, HYPRE_Int *qpermp, 
 
       /* free */
       hypre_TFree(send_buf, HYPRE_MEMORY_HOST);
-      hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
    } /* end of forming S */
 
    /* create S finished */
@@ -4209,7 +4179,6 @@ hypre_ILUSetupMILU0(hypre_ParCSRMatrix *A, HYPRE_Int *permp, HYPRE_Int *qpermp, 
    {
       /* we allocate some memory for S, need to free if unused */
       hypre_TFree(S_diag_i,HYPRE_MEMORY_DEVICE);
-      //      hypre_TFree(col_starts,HYPRE_MEMORY_HOST);
    }
 
    if (!permp)
@@ -4702,21 +4671,23 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *permp, HYPR
    HYPRE_Int               *S_diag_j      = NULL;
    HYPRE_Int               *S_offd_i      = NULL;
    HYPRE_Int               *S_offd_j      = NULL;
-   HYPRE_BigInt               *S_offd_colmap = NULL;
+   HYPRE_BigInt            *S_offd_colmap = NULL;
    HYPRE_Real              *S_offd_data;
    HYPRE_Int               S_offd_nnz, S_offd_ncols;
-   HYPRE_BigInt               *col_starts;
-   HYPRE_BigInt               total_rows;
+   HYPRE_BigInt            col_starts[2];
+   HYPRE_BigInt            total_rows;
+
    /* communication */
    hypre_ParCSRCommPkg     *comm_pkg;
    hypre_ParCSRCommHandle  *comm_handle;
-   HYPRE_BigInt               *send_buf      = NULL;
+   HYPRE_BigInt            *send_buf      = NULL;
 
    /* problem size */
    HYPRE_Int               n;
    HYPRE_Int               m;
    HYPRE_Int               e;
    HYPRE_Int               m_e;
+
    /* reverse permutation array */
    HYPRE_Int               *rperm;
    HYPRE_Int               *perm, *qperm;
@@ -5013,7 +4984,6 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *permp, HYPR
       /* need to get new column start */
       {
          HYPRE_BigInt global_start;
-         col_starts = hypre_CTAlloc(HYPRE_BigInt,2,HYPRE_MEMORY_HOST);
          hypre_MPI_Scan( &big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
          col_starts[0] = global_start - m;
          col_starts[1] = global_start;
@@ -5098,7 +5068,6 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *permp, HYPR
 
       /* free */
       hypre_TFree(send_buf, HYPRE_MEMORY_HOST);
-      hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
    } /* end of forming S */
 
    /* Assemble LDU matrices */
@@ -5166,7 +5135,6 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *permp, HYPR
    {
       /* we allocate some memory for S, need to free if unused */
       hypre_TFree(S_diag_i,HYPRE_MEMORY_DEVICE);
-      //      hypre_TFree(col_starts,HYPRE_MEMORY_HOST);
    }
 
    if (!permp)
@@ -5243,8 +5211,8 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    hypre_ParCSRCommPkg      *comm_pkg;
    hypre_ParCSRCommHandle   *comm_handle;
    HYPRE_Int                num_procs, my_id;
-   HYPRE_BigInt                *col_starts;
-   HYPRE_BigInt                total_rows;
+   HYPRE_BigInt             col_starts[2];
+   HYPRE_BigInt             total_rows;
    HYPRE_Int                num_sends;
    HYPRE_Int                begin, end;
 
@@ -5857,7 +5825,6 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
       /* need to get new column start */
       {
          HYPRE_BigInt global_start;
-         col_starts = hypre_CTAlloc(HYPRE_BigInt,2,HYPRE_MEMORY_HOST);
          hypre_MPI_Scan( &big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
          col_starts[0] = global_start - m;
          col_starts[1] = global_start;
@@ -5942,7 +5909,6 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
 
       /* free */
       hypre_TFree(send_buf, HYPRE_MEMORY_HOST);
-      hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
    } /* end of forming S */
 
    /* now start to construct L and U */
@@ -6015,7 +5981,6 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    if (!matS)
    {
       hypre_TFree(S_diag_i,HYPRE_MEMORY_DEVICE);
-      //      hypre_TFree(col_starts,HYPRE_MEMORY_HOST);
    }
 
    if (!permp)
@@ -6131,14 +6096,12 @@ hypre_NSHSetup( void               *nsh_vdata,
          hypre_ParCSRMatrixGlobalNumRows(A),
          hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(Utemp);
-   hypre_ParVectorSetPartitioningOwner(Utemp,0);
    hypre_ParNSHDataUTemp(nsh_data) = Utemp;
 
    Ftemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
          hypre_ParCSRMatrixGlobalNumRows(A),
          hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(Ftemp);
-   hypre_ParVectorSetPartitioningOwner(Ftemp,0);
    hypre_ParNSHDataFTemp(nsh_data) = Ftemp;
    /* set matrix, solution and rhs pointers */
    matA = A;
@@ -6171,7 +6134,6 @@ hypre_NSHSetup( void               *nsh_vdata,
                hypre_ParCSRMatrixGlobalNumRows(matA),
                hypre_ParCSRMatrixRowStarts(matA) );
       hypre_ParVectorInitialize(residual);
-      hypre_ParVectorSetPartitioningOwner(residual,0);
       hypre_ParNSHDataResidual(nsh_data)= residual;
    }
    else{
@@ -6224,7 +6186,7 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
    //   HYPRE_Int                m             = n - nLU;
    HYPRE_Int                ext           = hypre_CSRMatrixNumCols(A_offd);
    HYPRE_Int                total_rows    = n + ext;
-   HYPRE_BigInt             *col_starts;
+   HYPRE_BigInt             col_starts[2];
    HYPRE_BigInt             global_num_rows;
    HYPRE_Real               local_nnz, total_nnz;
 
@@ -6766,7 +6728,6 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
    /* need to get new column start */
    {
       HYPRE_BigInt global_start;
-      col_starts = hypre_CTAlloc(HYPRE_BigInt,2,HYPRE_MEMORY_HOST);
       hypre_MPI_Scan( &big_total_rows, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
       col_starts[0] = global_start - total_rows;
       col_starts[1] = global_start;
@@ -6839,7 +6800,6 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
       hypre_TFree(E_j, HYPRE_MEMORY_HOST);
       hypre_TFree(E_data, HYPRE_MEMORY_HOST);
    }
-   hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
 
    /* set matrix pointers */
    *Lptr = matL;
@@ -7455,7 +7415,7 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
    HYPRE_Int               ext            = hypre_CSRMatrixNumCols(A_offd);
    HYPRE_Int               total_rows     = n + ext;
    HYPRE_BigInt            global_num_rows;
-   HYPRE_BigInt               *col_starts;
+   HYPRE_BigInt            col_starts[2];
    HYPRE_Real              local_nnz, total_nnz;
 
    /* data objects for E, external matrix */
@@ -7857,7 +7817,6 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
    /* need to get new column start */
    {
       HYPRE_BigInt global_start;
-      col_starts = hypre_CTAlloc(HYPRE_BigInt,2,HYPRE_MEMORY_HOST);
       hypre_MPI_Scan( &big_total_rows, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
       col_starts[0] = global_start - total_rows;
       col_starts[1] = global_start;
@@ -7917,7 +7876,6 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
 
    /* free */
    hypre_TFree(iw,HYPRE_MEMORY_HOST);
-   hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
 
    /* free external data */
    if (E_i)
@@ -7988,7 +7946,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    HYPRE_Int                num_procs;
    hypre_ParCSRCommPkg      *comm_pkg;
    //   hypre_ParCSRCommHandle   *comm_handle;
-   HYPRE_BigInt                *col_starts;
+   HYPRE_BigInt             col_starts[2];
    //   HYPRE_Int                num_sends;
    //   HYPRE_Int                begin, end;
 
@@ -8775,7 +8733,6 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    /* need to get new column start */
    {
       HYPRE_BigInt global_start;
-      col_starts = hypre_CTAlloc(HYPRE_BigInt,2,HYPRE_MEMORY_HOST);
       hypre_MPI_Scan( &big_total_rows, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
       col_starts[0] = global_start - total_rows;
       col_starts[1] = global_start;
@@ -8839,7 +8796,6 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    /* free working array */
    hypre_TFree(iw,HYPRE_MEMORY_HOST);
    hypre_TFree(w,HYPRE_MEMORY_HOST);
-   hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
 
    /* free external data */
    if (E_i)

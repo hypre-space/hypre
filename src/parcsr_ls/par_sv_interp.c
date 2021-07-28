@@ -118,7 +118,6 @@ hypre_BoomerAMGCoarsenInterpVectors( hypre_ParCSRMatrix *P,
    for (i = 0; i < num_smooth_vecs; i++)
    {
       new_vector = hypre_ParVectorCreate(comm, n_new, starts);
-      hypre_ParVectorSetPartitioningOwner(new_vector, 0);
       hypre_ParVectorInitialize(new_vector);
       new_vector_data = hypre_VectorData(hypre_ParVectorLocalVector(new_vector));
 

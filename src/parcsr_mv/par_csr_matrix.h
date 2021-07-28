@@ -45,10 +45,10 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_BigInt         *col_map_offd;
    HYPRE_BigInt         *device_col_map_offd;
    /* maps columns of offd to global columns */
-   HYPRE_BigInt         *row_starts;
+   HYPRE_BigInt          row_starts[2];
    /* row_starts[0] is start of local rows
       row_starts[1] is start of next processor's rows */
-   HYPRE_BigInt         *col_starts;
+   HYPRE_BigInt          col_starts[2];
    /* col_starts[0] is start of local columns
       col_starts[1] is start of next processor's columns */
 

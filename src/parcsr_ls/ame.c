@@ -8,10 +8,10 @@
 #include "_hypre_parcsr_ls.h"
 #include "float.h"
 #include "ams.h"
-
 #include "temp_multivector.h"
 #include "lobpcg.h"
 #include "ame.h"
+#include "_hypre_utilities.hpp"
 
 /*--------------------------------------------------------------------------
  * hypre_AMECreate
@@ -227,6 +227,83 @@ HYPRE_Int hypre_AMESetPrintLevel(void *esolver,
  * - hypre_AMESetAMSSolver()
  * - hypre_AMESetMassMatrix()
  *--------------------------------------------------------------------------*/
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+__global__ void
+hypreCUDAKernel_GtEliminateBoundary( HYPRE_Int      nrows,
+                                     HYPRE_Int     *Gt_diag_i,
+                                     HYPRE_Int     *Gt_diag_j,
+                                     HYPRE_Complex *Gt_diag_data,
+                                     HYPRE_Int     *Gt_offd_i,
+                                     HYPRE_Int     *Gt_offd_j,
+                                     HYPRE_Complex *Gt_offd_data,
+                                     HYPRE_Int     *edge_bc,
+                                     HYPRE_Int     *edge_bc_offd)
+{
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
+
+   if (row_i >= nrows)
+   {
+      return;
+   }
+
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int p1, q1, p2 = 0, q2 = 0;
+   bool nonempty_offd = Gt_offd_j != NULL;
+   bool bdr = false;
+
+   if (lane < 2)
+   {
+      p1 = read_only_load(Gt_diag_i + row_i + lane);
+      if (nonempty_offd)
+      {
+         p2 = read_only_load(Gt_offd_i + row_i + lane);
+      }
+   }
+
+   q1 = __shfl_sync(HYPRE_WARP_FULL_MASK, p1, 1);
+   p1 = __shfl_sync(HYPRE_WARP_FULL_MASK, p1, 0);
+   if (nonempty_offd)
+   {
+      q2 = __shfl_sync(HYPRE_WARP_FULL_MASK, p2, 1);
+      p2 = __shfl_sync(HYPRE_WARP_FULL_MASK, p2, 0);
+   }
+
+   for (HYPRE_Int j = p1 + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q1); j += HYPRE_WARP_SIZE)
+   {
+      const hypre_int k = j < q1 && read_only_load(&edge_bc[read_only_load(&Gt_diag_j[j])]) != 0;
+      if ( __any_sync(HYPRE_WARP_FULL_MASK, k) )
+      {
+         bdr = true;
+         break;
+      }
+   }
+
+   if (!bdr)
+   {
+      for (HYPRE_Int j = p2 + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q2); j += HYPRE_WARP_SIZE)
+      {
+         const hypre_int k = j < q2 && read_only_load(&edge_bc_offd[read_only_load(&Gt_offd_j[j])]) != 0;
+         if ( __any_sync(HYPRE_WARP_FULL_MASK, k) )
+         {
+            bdr = true;
+            break;
+         }
+      }
+   }
+
+   if (bdr)
+   {
+      for (HYPRE_Int j = p1 + lane; j < q1; j += HYPRE_WARP_SIZE)
+      {
+         Gt_diag_data[j] = 0.0;
+      }
+      for (HYPRE_Int j = p2 + lane; j < q2; j += HYPRE_WARP_SIZE)
+      {
+         Gt_offd_data[j] = 0.0;
+      }
+   }
+}
+#endif
 
 HYPRE_Int hypre_AMESetup(void *esolver)
 {
@@ -247,6 +324,11 @@ HYPRE_Int hypre_AMESetup(void *esolver)
    }
    ame_data -> t3 = ams_data -> r0;
 
+   HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(ams_data -> A);
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
+#endif
+
    /* Eliminate boundary conditions in G = [Gii, Gib; 0, Gbb], i.e.,
       compute [Gii, 0; 0, 0] */
    {
@@ -258,9 +340,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
       nv = hypre_ParCSRMatrixNumCols(ams_data -> G);
       ne = hypre_ParCSRMatrixNumRows(ams_data -> G);
 
-      edge_bc = hypre_TAlloc(HYPRE_Int,  ne, HYPRE_MEMORY_HOST);
-      for (i = 0; i < ne; i++)
-         edge_bc[i] = 0;
+      edge_bc = hypre_CTAlloc(HYPRE_Int, ne, memory_location);
 
       /* Find boundary (eliminated) edges */
       {
@@ -271,26 +351,55 @@ HYPRE_Int hypre_AMESetup(void *esolver)
          hypre_CSRMatrix *Ao = hypre_ParCSRMatrixOffd(ams_data -> A);
          HYPRE_Int *AoI = hypre_CSRMatrixI(Ao);
          HYPRE_Real *AoA = hypre_CSRMatrixData(Ao);
-         HYPRE_Real l1_norm;
 
          /* A row (edge) is boundary if its off-diag l1 norm is less than eps */
          HYPRE_Real eps = DBL_EPSILON * 1e+4;
 
-         for (i = 0; i < ne; i++)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         if (exec == HYPRE_EXEC_DEVICE)
          {
-            l1_norm = 0.0;
-            for (j = AdI[i]; j < AdI[i+1]; j++)
-               if (AdJ[j] != i)
-                  l1_norm += fabs(AdA[j]);
-            if (AoI)
-               for (j = AoI[i]; j < AoI[i+1]; j++)
-                  l1_norm += fabs(AoA[j]);
-            if (l1_norm < eps)
-               edge_bc[i] = 1;
+            HYPRE_Real *l1norm_arr = hypre_TAlloc(HYPRE_Real, ne, memory_location);
+            hypre_CSRMatrixExtractDiagonalDevice(Ad, l1norm_arr, 1);
+            HYPRE_THRUST_CALL( transform,
+                               l1norm_arr,
+                               l1norm_arr + ne,
+                               l1norm_arr,
+                               thrust::negate<HYPRE_Real>() );
+            hypre_CSRMatrixComputeRowSumDevice(Ad, NULL, NULL, l1norm_arr, 1, 1.0, "add");
+            if (AoA)
+            {
+               hypre_CSRMatrixComputeRowSumDevice(Ao, NULL, NULL, l1norm_arr, 1, 1.0, "add");
+            }
+            HYPRE_THRUST_CALL( replace_if,
+                               edge_bc,
+                               edge_bc + ne,
+                               l1norm_arr,
+                               less_than<HYPRE_Real>(eps),
+                               1 );
+            hypre_TFree(l1norm_arr, memory_location);
+         }
+         else
+#endif
+         {
+            HYPRE_Real l1_norm;
+            for (i = 0; i < ne; i++)
+            {
+               l1_norm = 0.0;
+               for (j = AdI[i]; j < AdI[i+1]; j++)
+                  if (AdJ[j] != i)
+                     l1_norm += fabs(AdA[j]);
+               if (AoI)
+                  for (j = AoI[i]; j < AoI[i+1]; j++)
+                     l1_norm += fabs(AoA[j]);
+               if (l1_norm < eps)
+                  edge_bc[i] = 1;
+            }
          }
       }
 
       hypre_ParCSRMatrixTranspose(ams_data->G, &Gt, 1);
+
+      hypre_assert( hypre_ParCSRMatrixMemoryLocation(ams_data->G) == memory_location);
 
       /* Use a Matvec communication to find which of the edges
          connected to local vertices are on the boundary */
@@ -300,30 +409,44 @@ HYPRE_Int hypre_AMESetup(void *esolver)
          HYPRE_Int num_sends, *int_buf_data;
          HYPRE_Int index, start;
 
-         offd_edge_bc = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(Gt)), HYPRE_MEMORY_HOST);
+         offd_edge_bc = hypre_TAlloc(HYPRE_Int, hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(Gt)), memory_location);
 
          hypre_MatvecCommPkgCreate(Gt);
          comm_pkg = hypre_ParCSRMatrixCommPkg(Gt);
 
          num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-         int_buf_data = hypre_CTAlloc(
-               HYPRE_Int,
-               hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
-               HYPRE_MEMORY_HOST );
-         index = 0;
-         for (i = 0; i < num_sends; i++)
+         int_buf_data = hypre_TAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), memory_location );
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         if (exec == HYPRE_EXEC_DEVICE)
          {
-            start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-            for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+            hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
+
+            HYPRE_THRUST_CALL( gather,
+                               hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                               hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                               edge_bc,
+                               int_buf_data );
+         }
+         else
+#endif
+         {
+            index = 0;
+            for (i = 0; i < num_sends; i++)
             {
-               k = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j);
-               int_buf_data[index++] = edge_bc[k];
+               start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+               for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+               {
+                  k = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j);
+                  int_buf_data[index++] = edge_bc[k];
+               }
             }
          }
-         comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg,
-                                                    int_buf_data, offd_edge_bc);
+         comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg,
+                                                       memory_location, int_buf_data,
+                                                       memory_location, offd_edge_bc);
          hypre_ParCSRCommHandleDestroy(comm_handle);
-         hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
+         hypre_TFree(int_buf_data, memory_location);
       }
 
       /* Eliminate boundary vertex entries in G^t */
@@ -339,25 +462,37 @@ HYPRE_Int hypre_AMESetup(void *esolver)
 
          HYPRE_Int bdr;
 
-         for (i = 0; i < nv; i++)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         if (exec == HYPRE_EXEC_DEVICE)
          {
-            bdr = 0;
-            /* A vertex is boundary if it belongs to a boundary edge */
-            for (j = GtdI[i]; j < GtdI[i+1]; j++)
-               if (edge_bc[GtdJ[j]]) { bdr = 1; break; }
-            if (!bdr && GtoI)
-               for (j = GtoI[i]; j < GtoI[i+1]; j++)
-                  if (offd_edge_bc[GtoJ[j]]) { bdr = 1; break; }
-
-            if (bdr)
+            dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+            dim3 gDim = hypre_GetDefaultCUDAGridDimension(nv, "warp", bDim);
+            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_GtEliminateBoundary, gDim, bDim,
+                               nv, GtdI, GtdJ, GtdA, GtoI, GtoJ, GtoA, edge_bc, offd_edge_bc );
+         }
+         else
+#endif
+         {
+            for (i = 0; i < nv; i++)
             {
+               bdr = 0;
+               /* A vertex is boundary if it belongs to a boundary edge */
                for (j = GtdI[i]; j < GtdI[i+1]; j++)
-                  /* if (!edge_bc[GtdJ[j]]) */
-                  GtdA[j] = 0.0;
-               if (GtoI)
+                  if (edge_bc[GtdJ[j]]) { bdr = 1; break; }
+               if (!bdr && GtoI)
                   for (j = GtoI[i]; j < GtoI[i+1]; j++)
-                     /* if (!offd_edge_bc[GtoJ[j]]) */
-                     GtoA[j] = 0.0;
+                     if (offd_edge_bc[GtoJ[j]]) { bdr = 1; break; }
+
+               if (bdr)
+               {
+                  for (j = GtdI[i]; j < GtdI[i+1]; j++)
+                     /* if (!edge_bc[GtdJ[j]]) */
+                     GtdA[j] = 0.0;
+                  if (GtoI)
+                     for (j = GtoI[i]; j < GtoI[i+1]; j++)
+                        /* if (!offd_edge_bc[GtoJ[j]]) */
+                        GtoA[j] = 0.0;
+               }
             }
          }
       }
@@ -365,7 +500,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
       hypre_ParCSRMatrixTranspose(Gt, &ame_data -> G, 1);
 
       hypre_ParCSRMatrixDestroy(Gt);
-      hypre_TFree(offd_edge_bc, HYPRE_MEMORY_HOST);
+      hypre_TFree(offd_edge_bc, memory_location);
    }
 
    /* Compute G^t M G */
@@ -376,10 +511,19 @@ HYPRE_Int hypre_AMESetup(void *esolver)
       if (!hypre_ParCSRMatrixCommPkg(ame_data -> M))
          hypre_MatvecCommPkgCreate(ame_data -> M);
 
-      hypre_BoomerAMGBuildCoarseOperator(ame_data -> G,
-                                         ame_data -> M,
-                                         ame_data -> G,
-                                         &ame_data -> A_G);
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         if (exec == HYPRE_EXEC_DEVICE)
+         {
+            ame_data -> A_G = hypre_ParCSRMatrixRAPKT(ame_data -> G, ame_data -> M, ame_data -> G, 1);
+         }
+         else
+#endif
+         {
+            hypre_BoomerAMGBuildCoarseOperator(ame_data -> G,
+                                               ame_data -> M,
+                                               ame_data -> G,
+                                               &ame_data -> A_G);
+         }
 
       hypre_ParCSRMatrixFixZeroRows(ame_data -> A_G);
    }
@@ -450,15 +594,29 @@ HYPRE_Int hypre_AMESetup(void *esolver)
          {
             vi = (hypre_ParVector*) v[i];
             data = hypre_VectorData(hypre_ParVectorLocalVector(vi));
-            for (j = 0; j < ne; j++)
-               if (edge_bc[j])
-                  data[j] = 0.0;
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+            if (exec == HYPRE_EXEC_DEVICE)
+            {
+               HYPRE_THRUST_CALL( replace_if,
+                                  data,
+                                  data + ne,
+                                  edge_bc,
+                                  thrust::identity<HYPRE_Int>(),
+                                  0.0 );
+            }
+            else
+#endif
+            {
+               for (j = 0; j < ne; j++)
+                  if (edge_bc[j])
+                     data[j] = 0.0;
+            }
             hypre_AMEDiscrDivFreeComponent(esolver, vi);
          }
       }
    }
 
-   hypre_TFree(edge_bc, HYPRE_MEMORY_HOST);
+   hypre_TFree(edge_bc, memory_location);
 
    return hypre_error_flag;
 }

@@ -154,8 +154,8 @@ hypre_ParCSRMatMatHost( hypre_ParCSRMatrix  *A,
       hypre_CSRMatrixNumCols(ABext_diag) = num_cols_diag_B;
       hypre_CSRMatrixNumCols(AB_offd) = num_cols_offd_C;
       hypre_CSRMatrixNumCols(ABext_offd) = num_cols_offd_C;
-      C_diag = hypre_CSRMatrixAdd(AB_diag, ABext_diag);
-      C_offd = hypre_CSRMatrixAdd(AB_offd, ABext_offd);
+      C_diag = hypre_CSRMatrixAdd(1.0, AB_diag, 1.0, ABext_diag);
+      C_offd = hypre_CSRMatrixAdd(1.0, AB_offd, 1.0, ABext_offd);
 
       hypre_CSRMatrixDestroy(AB_diag);
       hypre_CSRMatrixDestroy(ABext_diag);
@@ -674,7 +674,7 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
 
       if (num_cols_offd_A) /* number of rows for Pext_diag */
       {
-         Q_diag = hypre_CSRMatrixAdd(AP_diag, APext_diag);
+         Q_diag = hypre_CSRMatrixAdd(1.0, AP_diag, 1.0, APext_diag);
          hypre_CSRMatrixDestroy(AP_diag);
          hypre_CSRMatrixDestroy(APext_diag);
       }
@@ -685,7 +685,7 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
 
       if (num_cols_offd_P && num_cols_offd_A)
       {
-         Q_offd = hypre_CSRMatrixAdd(AP_offd, APext_offd);
+         Q_offd = hypre_CSRMatrixAdd(1.0, AP_offd, 1.0, APext_offd);
          hypre_CSRMatrixDestroy(APext_offd);
          hypre_CSRMatrixDestroy(AP_offd);
       }

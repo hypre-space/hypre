@@ -27,8 +27,6 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
                       HYPRE_BigInt    jupper,
                       HYPRE_IJMatrix *matrix )
 {
-   HYPRE_BigInt *row_partitioning;
-   HYPRE_BigInt *col_partitioning;
    HYPRE_BigInt *info;
    HYPRE_Int num_procs;
    HYPRE_Int myid;
@@ -82,13 +80,10 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
 
    info = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
 
-   row_partitioning = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   col_partitioning = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-
-   row_partitioning[0] = ilower;
-   row_partitioning[1] = iupper+1;
-   col_partitioning[0] = jlower;
-   col_partitioning[1] = jupper+1;
+   hypre_IJMatrixRowPartitioning(ijmatrix)[0] = ilower;
+   hypre_IJMatrixRowPartitioning(ijmatrix)[1] = iupper+1;
+   hypre_IJMatrixColPartitioning(ijmatrix)[0] = jlower;
+   hypre_IJMatrixColPartitioning(ijmatrix)[1] = jupper+1;
 
    /* now we need the global number of rows and columns as well
       as the global first row and column index */
@@ -120,9 +115,6 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
    hypre_IJMatrixGlobalNumCols(ijmatrix) = colN - col0 + 1;
 
    hypre_TFree(info, HYPRE_MEMORY_HOST);
-
-   hypre_IJMatrixRowPartitioning(ijmatrix) = row_partitioning;
-   hypre_IJMatrixColPartitioning(ijmatrix) = col_partitioning;
 
    *matrix = (HYPRE_IJMatrix) ijmatrix;
 
@@ -160,21 +152,18 @@ HYPRE_IJMatrixPartialClone( HYPRE_IJMatrix  matrix_in,
 
    ijmatrix_out = hypre_CTAlloc(hypre_IJMatrix, 1, HYPRE_MEMORY_HOST);
 
-   hypre_IJMatrixComm(ijmatrix_out)           = hypre_IJMatrixComm(ijmatrix_in);
-   hypre_IJMatrixObject(ijmatrix_out)         = NULL;
-   hypre_IJMatrixTranslator(ijmatrix_out)     = NULL;
-   hypre_IJMatrixAssumedPart(ijmatrix_out)    = NULL;
-   hypre_IJMatrixObjectType(ijmatrix_out)     = hypre_IJMatrixObjectType(ijmatrix_in);
-   hypre_IJMatrixAssembleFlag(ijmatrix_out)   = 0;
-   hypre_IJMatrixPrintLevel(ijmatrix_out)     = hypre_IJMatrixPrintLevel(ijmatrix_in);
-   hypre_IJMatrixOMPFlag(ijmatrix_out)        = hypre_IJMatrixOMPFlag(ijmatrix_in);
-   hypre_IJMatrixGlobalFirstRow(ijmatrix_out) = hypre_IJMatrixGlobalFirstRow(ijmatrix_in);
-   hypre_IJMatrixGlobalFirstCol(ijmatrix_out) = hypre_IJMatrixGlobalFirstCol(ijmatrix_in);
-   hypre_IJMatrixGlobalNumRows(ijmatrix_out)  = hypre_IJMatrixGlobalNumRows(ijmatrix_in);
-   hypre_IJMatrixGlobalNumCols(ijmatrix_out)  = hypre_IJMatrixGlobalNumCols(ijmatrix_in);
-
-   hypre_IJMatrixRowPartitioning(ijmatrix_out) = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);;
-   hypre_IJMatrixColPartitioning(ijmatrix_out) = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
+   hypre_IJMatrixComm(ijmatrix_out)               = hypre_IJMatrixComm(ijmatrix_in);
+   hypre_IJMatrixObject(ijmatrix_out)             = NULL;
+   hypre_IJMatrixTranslator(ijmatrix_out)         = NULL;
+   hypre_IJMatrixAssumedPart(ijmatrix_out)        = NULL;
+   hypre_IJMatrixObjectType(ijmatrix_out)         = hypre_IJMatrixObjectType(ijmatrix_in);
+   hypre_IJMatrixAssembleFlag(ijmatrix_out)       = 0;
+   hypre_IJMatrixPrintLevel(ijmatrix_out)         = hypre_IJMatrixPrintLevel(ijmatrix_in);
+   hypre_IJMatrixOMPFlag(ijmatrix_out)            = hypre_IJMatrixOMPFlag(ijmatrix_in);
+   hypre_IJMatrixGlobalFirstRow(ijmatrix_out)     = hypre_IJMatrixGlobalFirstRow(ijmatrix_in);
+   hypre_IJMatrixGlobalFirstCol(ijmatrix_out)     = hypre_IJMatrixGlobalFirstCol(ijmatrix_in);
+   hypre_IJMatrixGlobalNumRows(ijmatrix_out)      = hypre_IJMatrixGlobalNumRows(ijmatrix_in);
+   hypre_IJMatrixGlobalNumCols(ijmatrix_out)      = hypre_IJMatrixGlobalNumCols(ijmatrix_in);
    hypre_IJMatrixRowPartitioning(ijmatrix_out)[0] = ilower;
    hypre_IJMatrixRowPartitioning(ijmatrix_out)[1] = iupper+1;
    hypre_IJMatrixColPartitioning(ijmatrix_out)[0] = jlower;
@@ -201,16 +190,6 @@ HYPRE_IJMatrixDestroy( HYPRE_IJMatrix matrix )
 
    if (ijmatrix)
    {
-      if (hypre_IJMatrixRowPartitioning(ijmatrix) ==
-          hypre_IJMatrixColPartitioning(ijmatrix))
-      {
-         hypre_TFree(hypre_IJMatrixRowPartitioning(ijmatrix), HYPRE_MEMORY_HOST);
-      }
-      else
-      {
-         hypre_TFree(hypre_IJMatrixRowPartitioning(ijmatrix), HYPRE_MEMORY_HOST);
-         hypre_TFree(hypre_IJMatrixColPartitioning(ijmatrix), HYPRE_MEMORY_HOST);
-      }
       if hypre_IJMatrixAssumedPart(ijmatrix)
       {
          hypre_AssumedPartitionDestroy((hypre_IJAssumedPart*)hypre_IJMatrixAssumedPart(ijmatrix));
@@ -948,11 +927,9 @@ HYPRE_IJMatrixGetLocalRange( HYPRE_IJMatrix  matrix,
                              HYPRE_BigInt   *jlower,
                              HYPRE_BigInt   *jupper )
 {
-   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
-   MPI_Comm comm;
-   HYPRE_BigInt *row_partitioning;
-   HYPRE_BigInt *col_partitioning;
-   HYPRE_Int my_id;
+   hypre_IJMatrix  *ijmatrix = (hypre_IJMatrix *) matrix;
+   HYPRE_BigInt    *row_partitioning;
+   HYPRE_BigInt    *col_partitioning;
 
    if (!ijmatrix)
    {
@@ -960,11 +937,8 @@ HYPRE_IJMatrixGetLocalRange( HYPRE_IJMatrix  matrix,
       return hypre_error_flag;
    }
 
-   comm = hypre_IJMatrixComm(ijmatrix);
    row_partitioning = hypre_IJMatrixRowPartitioning(ijmatrix);
    col_partitioning = hypre_IJMatrixColPartitioning(ijmatrix);
-
-   hypre_MPI_Comm_rank(comm, &my_id);
 
    *ilower = row_partitioning[0];
    *iupper = row_partitioning[1]-1;
@@ -1225,8 +1199,6 @@ HYPRE_IJMatrixTranspose( HYPRE_IJMatrix  matrix_A,
 {
    hypre_IJMatrix   *ij_A = (hypre_IJMatrix *) matrix_A;
    hypre_IJMatrix   *ij_AT;
-   HYPRE_BigInt     *row_partitioning;
-   HYPRE_BigInt     *col_partitioning;
    HYPRE_Int         i;
 
    if (!ij_A)
@@ -1249,15 +1221,11 @@ HYPRE_IJMatrixTranspose( HYPRE_IJMatrix  matrix_A,
    hypre_IJMatrixGlobalNumRows(ij_AT)  = hypre_IJMatrixGlobalNumCols(ij_A);
    hypre_IJMatrixGlobalNumCols(ij_AT)  = hypre_IJMatrixGlobalNumRows(ij_A);
 
-   row_partitioning = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   col_partitioning = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
    for (i = 0; i < 2; i++)
    {
-      row_partitioning[i] = hypre_IJMatrixColPartitioning(ij_A)[i];
-      col_partitioning[i] = hypre_IJMatrixRowPartitioning(ij_A)[i];
+      hypre_IJMatrixRowPartitioning(ij_AT)[i] = hypre_IJMatrixColPartitioning(ij_A)[i];
+      hypre_IJMatrixColPartitioning(ij_AT)[i] = hypre_IJMatrixRowPartitioning(ij_A)[i];
    }
-   hypre_IJMatrixRowPartitioning(ij_AT) = row_partitioning;
-   hypre_IJMatrixColPartitioning(ij_AT) = col_partitioning;
 
    if (hypre_IJMatrixObjectType(ij_A) == HYPRE_PARCSR)
    {
@@ -1322,8 +1290,6 @@ HYPRE_IJMatrixAdd( HYPRE_Complex    alpha,
    HYPRE_BigInt     *col_partitioning_A;
    HYPRE_BigInt     *row_partitioning_B;
    HYPRE_BigInt     *col_partitioning_B;
-   HYPRE_BigInt     *row_partitioning_C;
-   HYPRE_BigInt     *col_partitioning_C;
    HYPRE_Int         i;
 
    if (!ij_A)
@@ -1354,15 +1320,6 @@ HYPRE_IJMatrixAdd( HYPRE_Complex    alpha,
       }
    }
 
-   /* Copy row/col partitioning of A to C */
-   row_partitioning_C = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   col_partitioning_C = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   for (i = 0; i < 2; i++)
-   {
-      row_partitioning_C[i] = row_partitioning_A[i];
-      col_partitioning_C[i] = col_partitioning_A[i];
-   }
-
    ij_C = hypre_CTAlloc(hypre_IJMatrix, 1, HYPRE_MEMORY_HOST);
 
    hypre_IJMatrixComm(ij_C)            = hypre_IJMatrixComm(ij_A);
@@ -1372,8 +1329,13 @@ HYPRE_IJMatrixAdd( HYPRE_Complex    alpha,
    hypre_IJMatrixObjectType(ij_C)      = hypre_IJMatrixObjectType(ij_A);
    hypre_IJMatrixAssembleFlag(ij_C)    = 1;
    hypre_IJMatrixPrintLevel(ij_C)      = hypre_IJMatrixPrintLevel(ij_A);
-   hypre_IJMatrixRowPartitioning(ij_C) = row_partitioning_C;
-   hypre_IJMatrixColPartitioning(ij_C) = col_partitioning_C;
+
+   /* Copy row/col partitioning of A to C */
+   for (i = 0; i < 2; i++)
+   {
+      hypre_IJMatrixRowPartitioning(ij_C)[i] = row_partitioning_A[i];
+      hypre_IJMatrixColPartitioning(ij_C)[i] = col_partitioning_A[i];
+   }
 
    if (hypre_IJMatrixObjectType(ij_A) == HYPRE_PARCSR)
    {

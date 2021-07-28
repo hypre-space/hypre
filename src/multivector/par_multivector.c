@@ -108,18 +108,6 @@ hypre_ParMultiVectorSetDataOwner( hypre_ParMultiVector *pm_vector,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParMultiVectorSetPartitioningOwner
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_ParMultiVectorSetPartitioningOwner( hypre_ParMultiVector *pm_vector,
-                             	          HYPRE_Int owns_partitioning)
-{
-   hypre_ParMultiVectorOwnsPartitioning(pm_vector) = owns_partitioning;
-   return 0;
-}
-
-/*--------------------------------------------------------------------------
  * hypre_ParMultiVectorSetMask
  *--------------------------------------------------------------------------*/
 
@@ -331,7 +319,6 @@ hypre_ParMultiVectorEval(void (*f)( void*, void*, void* ), void* par,
 
    temp_x=hypre_ParVectorCreate(x->comm,x->global_size, x->partitioning);
    hypre_assert(temp_x!=NULL);
-   temp_x->owns_partitioning=0;
    temp_x->local_vector->owns_data=0;
    temp_x->local_vector->vecstride = temp_x->local_vector->size;
    temp_x->local_vector->idxstride = 1;
@@ -339,7 +326,6 @@ hypre_ParMultiVectorEval(void (*f)( void*, void*, void* ), void* par,
 
    temp_y=hypre_ParVectorCreate(y->comm,y->global_size, y->partitioning);
    hypre_assert(temp_y!=NULL);
-   temp_y->owns_partitioning=0;
    temp_y->local_vector->owns_data=0;
    temp_y->local_vector->vecstride = temp_y->local_vector->size;
    temp_y->local_vector->idxstride = 1;
@@ -399,16 +385,10 @@ hypre_ParMultiVectorTempRead(MPI_Comm comm, const char *fileName)
    hypre_sprintf(temp_string,"%s.%d",fileName,0);
    temp_vec = hypre_ParVectorRead(comm, temp_string);
 
-   /* this vector WON'T own partitioning */
-   hypre_ParVectorSetPartitioningOwner(temp_vec,0);
-
    /* now create multivector using temp_vec as a sample */
 
    x = hypre_ParMultiVectorCreate(hypre_ParVectorComm(temp_vec),
         hypre_ParVectorGlobalSize(temp_vec),hypre_ParVectorPartitioning(temp_vec),n);
-
-   /* this vector WILL own the partitioning */
-   hypre_ParMultiVectorSetPartitioningOwner(x,1);
 
    hypre_ParMultiVectorInitialize(x);
 
@@ -449,7 +429,6 @@ hypre_ParMultiVectorTempPrint(hypre_ParMultiVector *vector, const char *fileName
 
    temp_vec=hypre_ParVectorCreate(vector->comm,vector->global_size, vector->partitioning);
    hypre_assert(temp_vec!=NULL);
-   temp_vec->owns_partitioning=0;
    temp_vec->local_vector->owns_data=0;
 
    /* no initialization for temp_vec needed! */
@@ -470,4 +449,3 @@ hypre_ParMultiVectorTempPrint(hypre_ParMultiVector *vector, const char *fileName
 
    return ierr;
 }
-

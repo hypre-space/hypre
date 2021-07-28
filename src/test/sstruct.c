@@ -214,6 +214,7 @@ typedef struct
 
    HYPRE_Int        fem_rhs_true;
    HYPRE_Real      *fem_rhs_values;
+   HYPRE_Real      *d_fem_rhs_values;
 
    HYPRE_Int        symmetric_num;
    HYPRE_Int       *symmetric_parts;
@@ -742,6 +743,7 @@ ReadData( char         *filename,
             {
                data.fem_rhs_true = 1;
                data.fem_rhs_values = hypre_CTAlloc(HYPRE_Real, data.fem_nvars, HYPRE_MEMORY_HOST);
+               data.d_fem_rhs_values = hypre_CTAlloc(HYPRE_Real, data.fem_nvars, HYPRE_MEMORY_DEVICE);
             }
             SScanDblArray(sdata_ptr, &sdata_ptr,
                           data.fem_nvars, data.fem_rhs_values);
@@ -2127,6 +2129,7 @@ DestroyData( ProblemData   data )
    if (data.fem_rhs_true > 0)
    {
       hypre_TFree(data.fem_rhs_values, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.d_fem_rhs_values, HYPRE_MEMORY_DEVICE);
    }
 
    if (data.symmetric_num > 0)
@@ -3635,6 +3638,9 @@ main( hypre_int argc,
    /* Add values for FEMRhsSet */
    if (data.fem_rhs_true)
    {
+      hypre_TMemcpy(data.d_fem_rhs_values, data.fem_rhs_values, HYPRE_Real, data.fem_nvars,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
       for (part = 0; part < data.nparts; part++)
       {
          pdata = data.pdata[part];
@@ -3650,7 +3656,7 @@ main( hypre_int argc,
                        index[0] <= pdata.iuppers[box][0]; index[0]++)
                   {
                      HYPRE_SStructVectorAddFEMValues(b, part, index,
-                                                     data.fem_rhs_values);
+                                                     data.d_fem_rhs_values);
                   }
                }
             }
@@ -5853,7 +5859,6 @@ main( hypre_int argc,
       hypre_ParVector *par_x2 =
          hypre_ParVectorCreate(hypre_ParVectorComm(par_x), hypre_ParVectorGlobalSize(par_x),
                                hypre_ParVectorPartitioning(par_x));
-      hypre_ParVectorOwnsPartitioning(par_x2) = 0;
       hypre_ParVectorInitialize(par_x2);
       hypre_ParVectorCopy(par_x, par_x2);
 
