@@ -78,7 +78,7 @@ hypre_DeviceMemset(void *ptr, HYPRE_Int value, size_t num)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   (hypre_HandleComputeStream(hypre_handle()))->memset(ptr, value, num).wait();
+   HYPRE_SYCL_CALL( (hypre_HandleComputeStream(hypre_handle()))->memset(ptr, value, num).wait() );
 #endif
 }
 
@@ -99,7 +99,7 @@ hypre_UnifiedMemset(void *ptr, HYPRE_Int value, size_t num)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   (hypre_HandleComputeStream(hypre_handle()))->memset(ptr, value, num).wait();
+   HYPRE_SYCL_CALL( (hypre_HandleComputeStream(hypre_handle()))->memset(ptr, value, num).wait() );
 #endif
 }
 
@@ -267,7 +267,7 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   ptr = (void *)sycl::malloc_shared(size, *(hypre_HandleComputeStream(hypre_handle())));
+   HYPRE_SYCL_CALL( ptr = (void *)sycl::malloc_shared(size, *(hypre_HandleComputeStream(hypre_handle()))) );
 #endif
 
 #endif /* #if defined(HYPRE_USING_UMPIRE_UM) */
@@ -308,7 +308,7 @@ hypre_HostPinnedMalloc(size_t size, HYPRE_Int zeroinit)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   ptr = (void *)sycl::malloc_host(size, *(hypre_HandleComputeStream(hypre_handle())));
+   HYPRE_SYCL_CALL( ptr = (void *)sycl::malloc_host(size, *(hypre_HandleComputeStream(hypre_handle()))) );
 #endif
 
 #endif /* #if defined(HYPRE_USING_UMPIRE_PINNED) */
@@ -405,7 +405,7 @@ hypre_DeviceFree(void *ptr)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   sycl::free(ptr, *(hypre_HandleComputeStream(hypre_handle())));
+   HYPRE_SYCL_CALL( sycl::free(ptr, *(hypre_HandleComputeStream(hypre_handle()))) );
 #endif
 
 #endif /* #if defined(HYPRE_USING_UMPIRE_DEVICE) */
@@ -435,7 +435,7 @@ hypre_UnifiedFree(void *ptr)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   sycl::free(ptr, *(hypre_HandleComputeStream(hypre_handle())));
+   HYPRE_SYCL_CALL( sycl::free(ptr, *(hypre_HandleComputeStream(hypre_handle()))) );
 #endif
 
 #endif /* #if defined(HYPRE_USING_UMPIRE_UM) */
@@ -461,7 +461,7 @@ hypre_HostPinnedFree(void *ptr)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   sycl::free(ptr, *(hypre_HandleComputeStream(hypre_handle())));
+   HYPRE_SYCL_CALL( sycl::free(ptr, *(hypre_HandleComputeStream(hypre_handle()))) );
 #endif
 
 #endif /* #if defined(HYPRE_USING_UMPIRE_PINNED) */
@@ -566,7 +566,7 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-      q->memcpy(dst, src, size).wait();
+      HYPRE_SYCL_CALL( q->memcpy(dst, src, size).wait() );
 #endif
       return;
    }
@@ -588,7 +588,7 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-      q->memcpy(dst, src, size).wait();
+      HYPRE_SYCL_CALL( q->memcpy(dst, src, size).wait() );
 #endif
       return;
    }
@@ -610,7 +610,7 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-      q->memcpy(dst, src, size).wait();
+      HYPRE_SYCL_CALL( q->memcpy(dst, src, size).wait() );
 #endif
       return;
    }
@@ -637,7 +637,7 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-      q->memcpy(dst, src, size).wait();
+      HYPRE_SYCL_CALL( q->memcpy(dst, src, size).wait() );
 #endif
       return;
    }
@@ -664,7 +664,7 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-      q->memcpy(dst, src, size).wait();
+      HYPRE_SYCL_CALL( q->memcpy(dst, src, size).wait() );
 #endif
       return;
    }
@@ -692,7 +692,7 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-      q->memcpy(dst, src, size).wait();
+      HYPRE_SYCL_CALL( q->memcpy(dst, src, size).wait() );
 #endif
       return;
    }
