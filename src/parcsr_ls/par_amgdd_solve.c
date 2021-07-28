@@ -79,7 +79,6 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
                                     hypre_ParCSRMatrixGlobalNumRows(A_array[amgdd_start_level]),
                                     hypre_ParCSRMatrixRowStarts(A_array[amgdd_start_level]));
       hypre_ParVectorInitialize(Ztemp);
-      hypre_ParVectorSetPartitioningOwner(Ztemp, 0);
       hypre_ParAMGDDDataZtemp(amg_data) = Ztemp;
    }
 

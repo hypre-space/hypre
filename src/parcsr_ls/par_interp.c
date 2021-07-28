@@ -877,7 +877,6 @@ for (i = 0; i < n_fine; i++) fine_to_coarse[i] -= my_first_cpt; */
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
 
@@ -1758,7 +1757,6 @@ for (i = 0; i < n_fine; i++) fine_to_coarse[i] -= my_first_cpt;*/
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
 
@@ -2439,7 +2437,6 @@ for (i = 0; i < n_fine; i++) fine_to_coarse[i] -= my_first_cpt;*/
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
 
@@ -3481,7 +3478,6 @@ for (i = 0; i < n_fine; i++) fine_to_coarse[i] -= my_first_cpt;*/
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
 
@@ -3729,13 +3725,12 @@ hypre_ParCSRMatrix *hypre_CreateC( hypre_ParCSRMatrix  *A,
 
    col_map_offd_C = hypre_ParCSRMatrixColMapOffd(C);
 
-   hypre_ParCSRMatrixOwnsRowStarts(C) = 0;
-   hypre_ParCSRMatrixOwnsColStarts(C) = 0;
-
-   for (i=0; i < num_cols_offd; i++)
+   for (i = 0; i < num_cols_offd; i++)
+   {
       col_map_offd_C[i] = col_map_offd_A[i];
+   }
 
-   for (i=0; i < num_rows; i++)
+   for (i = 0; i < num_rows; i++)
    {
       index = A_diag_i[i];
       invdiag = -w/A_diag_data[index];
@@ -4039,15 +4034,15 @@ hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A,
    nnz_offd = cnt_offd;
 
    /*------------- allocate arrays */
-   P_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1,HYPRE_MEMORY_HOST);
-   P_diag_j    = hypre_CTAlloc(HYPRE_Int,  nnz_diag,HYPRE_MEMORY_HOST);
-   P_diag_data = hypre_CTAlloc(HYPRE_Real, nnz_diag,HYPRE_MEMORY_HOST);
+   P_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1,HYPRE_MEMORY_DEVICE);
+   P_diag_j    = hypre_CTAlloc(HYPRE_Int,  nnz_diag,HYPRE_MEMORY_DEVICE);
+   P_diag_data = hypre_CTAlloc(HYPRE_Real, nnz_diag,HYPRE_MEMORY_DEVICE);
 
    /* not in ``if num_procs > 1'',
     * allocation needed even for empty CSR */
-   P_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1,HYPRE_MEMORY_HOST);
-   P_offd_j    = hypre_CTAlloc(HYPRE_Int,  nnz_offd,HYPRE_MEMORY_HOST);
-   P_offd_data = hypre_CTAlloc(HYPRE_Real, nnz_offd,HYPRE_MEMORY_HOST);
+   P_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1,HYPRE_MEMORY_DEVICE);
+   P_offd_j    = hypre_CTAlloc(HYPRE_Int,  nnz_offd,HYPRE_MEMORY_DEVICE);
+   P_offd_data = hypre_CTAlloc(HYPRE_Real, nnz_offd,HYPRE_MEMORY_DEVICE);
 
    /* redundant */
    P_diag_i[0] = 0;
@@ -4185,8 +4180,6 @@ hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd)    = P_offd_i;
    hypre_CSRMatrixJ(P_offd)    = P_offd_j;
-   /* P does not own ColStarts, since A does */
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
 

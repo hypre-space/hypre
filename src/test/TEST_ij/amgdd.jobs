@@ -13,8 +13,8 @@
 mpirun -np 1 ./ij -solver 90 -rhsrand > amgdd.out.900
 mpirun -np 2 ./ij -solver 90 -rhsrand > amgdd.out.901
 mpirun -np 4 ./ij -solver 90 -rhsrand > amgdd.out.902
-mpirun -np 4 ./ij -solver 90 -rhsrand -amgdd_start_level 3 > amgdd.out.903
-mpirun -np 4 ./ij -solver 90 -rhsrand -amgdd_start_level 4 > amgdd.out.904
+mpirun -np 4 ./ij -solver 90 -rhsrand -amgdd_start_level 2 > amgdd.out.903
+mpirun -np 4 ./ij -solver 90 -rhsrand -amgdd_start_level 3 > amgdd.out.904
 mpirun -np 4 ./ij -solver 90 -rhsrand -amgdd_padding 4 > amgdd.out.905
 mpirun -np 4 ./ij -solver 90 -rhsrand -amgdd_padding 4 -amgdd_num_ghost_layers 4 > amgdd.out.906
 mpirun -np 1 ./ij -solver 91 -rhsrand > amgdd.out.910

@@ -26,43 +26,43 @@ GenerateVarDifConv( MPI_Comm         comm,
                     HYPRE_ParVector *rhs_ptr)
 {
    hypre_ParCSRMatrix *A;
-   hypre_CSRMatrix *diag;
-   hypre_CSRMatrix *offd;
-   hypre_ParVector *par_rhs;
-   hypre_Vector *rhs;
-   HYPRE_Real *rhs_data;
+   hypre_CSRMatrix    *diag;
+   hypre_CSRMatrix    *offd;
+   hypre_ParVector    *par_rhs;
+   hypre_Vector       *rhs;
+   HYPRE_Real         *rhs_data;
 
-   HYPRE_Int    *diag_i;
-   HYPRE_Int    *diag_j;
-   HYPRE_Real *diag_data;
+   HYPRE_Int          *diag_i;
+   HYPRE_Int          *diag_j;
+   HYPRE_Real         *diag_data;
 
-   HYPRE_Int    *offd_i;
-   HYPRE_Int    *offd_j;
-   HYPRE_BigInt *big_offd_j;
-   HYPRE_Real *offd_data;
+   HYPRE_Int          *offd_i;
+   HYPRE_Int          *offd_j;
+   HYPRE_BigInt       *big_offd_j;
+   HYPRE_Real         *offd_data;
 
-   HYPRE_BigInt *global_part;
-   HYPRE_BigInt ix, iy, iz;
-   HYPRE_Int cnt, o_cnt;
-   HYPRE_Int local_num_rows;
-   HYPRE_BigInt *col_map_offd;
-   HYPRE_Int row_index;
-   HYPRE_Int i,j;
+   HYPRE_BigInt        global_part[2];
+   HYPRE_BigInt        ix, iy, iz;
+   HYPRE_Int           cnt, o_cnt;
+   HYPRE_Int           local_num_rows;
+   HYPRE_BigInt       *col_map_offd;
+   HYPRE_Int           row_index;
+   HYPRE_Int           i,j;
 
-   HYPRE_Int nx_local, ny_local, nz_local;
-   HYPRE_Int num_cols_offd;
-   HYPRE_BigInt grid_size;
+   HYPRE_Int           nx_local, ny_local, nz_local;
+   HYPRE_Int           num_cols_offd;
+   HYPRE_BigInt        grid_size;
 
-   HYPRE_BigInt *nx_part;
-   HYPRE_BigInt *ny_part;
-   HYPRE_BigInt *nz_part;
+   HYPRE_BigInt       *nx_part;
+   HYPRE_BigInt       *ny_part;
+   HYPRE_BigInt       *nz_part;
 
-   HYPRE_Int num_procs;
-   HYPRE_Int P_busy, Q_busy, R_busy;
+   HYPRE_Int           num_procs;
+   HYPRE_Int           P_busy, Q_busy, R_busy;
 
-   HYPRE_Real hhx, hhy, hhz;
-   HYPRE_Real xx, yy, zz;
-   HYPRE_Real afp, afm, bfp, bfm, cfp, cfm, df, ef, ff, gf;
+   HYPRE_Real          hhx, hhy, hhz;
+   HYPRE_Real          xx, yy, zz;
+   HYPRE_Real          afp, afm, bfp, bfm, cfp, cfm, df, ef, ff, gf;
 
    hypre_MPI_Comm_size(comm,&num_procs);
 
@@ -78,7 +78,6 @@ GenerateVarDifConv( MPI_Comm         comm,
 
    local_num_rows = nx_local*ny_local*nz_local;
 
-   global_part = hypre_CTAlloc(HYPRE_BigInt,2,HYPRE_MEMORY_HOST);
    global_part[0] = nz_part[r]*nx*ny+(ny_part[q]*nx+nx_part[p]*ny_local)*nz_local;
    global_part[1] = global_part[0] + (HYPRE_BigInt)local_num_rows;
 
@@ -327,7 +326,6 @@ GenerateVarDifConv( MPI_Comm         comm,
    }
 
    par_rhs = hypre_ParVectorCreate(comm, grid_size, global_part);
-   hypre_ParVectorOwnsPartitioning(par_rhs) = 0;
    rhs = hypre_ParVectorLocalVector(par_rhs);
    hypre_VectorData(rhs) = rhs_data;
    hypre_VectorMemoryLocation(rhs) = HYPRE_MEMORY_HOST;

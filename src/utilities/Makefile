@@ -29,7 +29,8 @@ HEADERS =\
  mpistubs.h\
  threading.h\
  timing.h\
- _hypre_utilities.h
+ _hypre_utilities.h\
+ _hypre_utilities.hpp
 
 FILES =\
  F90_HYPRE_error.c\
@@ -41,6 +42,7 @@ FILES =\
  exchange_data.c\
  fortran_matrix.c\
  ap.c\
+ log.c\
  complex.c\
  error.c\
  hopscotch_hash.c\

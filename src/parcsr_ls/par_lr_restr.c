@@ -1572,8 +1572,6 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrixData(R_offd) = R_offd_data;
    hypre_CSRMatrixI(R_offd)    = R_offd_i;
    hypre_CSRMatrixJ(R_offd)    = R_offd_j;
-   /* R does not own ColStarts, since A does */
-   hypre_ParCSRMatrixOwnsColStarts(R) = 0;
 
    hypre_ParCSRMatrixColMapOffd(R) = col_map_offd_R;
 
@@ -1915,15 +1913,15 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
    nnz_offd = hypre_CSRMatrixNumNonzeros(Z_offd);
 
    /*------------- allocate arrays */
-   R_diag_i = hypre_CTAlloc(HYPRE_Int,  n_cpts+1, HYPRE_MEMORY_HOST);
-   R_diag_j = hypre_CTAlloc(HYPRE_Int,  nnz_diag, HYPRE_MEMORY_HOST);
-   R_diag_a = hypre_CTAlloc(HYPRE_Complex, nnz_diag, HYPRE_MEMORY_HOST);
+   R_diag_i = hypre_CTAlloc(HYPRE_Int,  n_cpts+1, HYPRE_MEMORY_DEVICE);
+   R_diag_j = hypre_CTAlloc(HYPRE_Int,  nnz_diag, HYPRE_MEMORY_DEVICE);
+   R_diag_a = hypre_CTAlloc(HYPRE_Complex, nnz_diag, HYPRE_MEMORY_DEVICE);
 
    /* not in ``if num_procs > 1'',
     * allocation needed even for empty CSR */
-   R_offd_i = hypre_CTAlloc(HYPRE_Int,  n_cpts+1, HYPRE_MEMORY_HOST);
-   R_offd_j = hypre_CTAlloc(HYPRE_Int,  nnz_offd, HYPRE_MEMORY_HOST);
-   R_offd_a = hypre_CTAlloc(HYPRE_Complex, nnz_offd, HYPRE_MEMORY_HOST);
+   R_offd_i = hypre_CTAlloc(HYPRE_Int,  n_cpts+1, HYPRE_MEMORY_DEVICE);
+   R_offd_j = hypre_CTAlloc(HYPRE_Int,  nnz_offd, HYPRE_MEMORY_DEVICE);
+   R_offd_a = hypre_CTAlloc(HYPRE_Complex, nnz_offd, HYPRE_MEMORY_DEVICE);
 
    /* redundant */
    R_diag_i[0] = 0;
@@ -1991,8 +1989,6 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrixData(R_offd) = R_offd_a;
    hypre_CSRMatrixI(R_offd)    = R_offd_i;
    hypre_CSRMatrixJ(R_offd)    = R_offd_j;
-   /* R does not own ColStarts, since A does */
-   hypre_ParCSRMatrixOwnsColStarts(R) = 0;
 
    hypre_ParCSRMatrixColMapOffd(R) = col_map_offd_R;
 

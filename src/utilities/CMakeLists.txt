@@ -21,6 +21,7 @@ set(SRCS
   F90_HYPRE_general.c
   fortran_matrix.c
   ap.c
+  log.c
   complex.c
   device_utils.c
   error.c

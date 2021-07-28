@@ -1158,6 +1158,7 @@ extern "C++" {
 #endif
 
 static char hypre__levelname[16];
+static char hypre__markname[1024];
 
 #define HYPRE_ANNOTATE_FUNC_BEGIN          CALI_MARK_FUNCTION_BEGIN
 #define HYPRE_ANNOTATE_FUNC_END            CALI_MARK_FUNCTION_END
@@ -1165,6 +1166,16 @@ static char hypre__levelname[16];
 #define HYPRE_ANNOTATE_LOOP_END(id)        CALI_MARK_LOOP_END(id)
 #define HYPRE_ANNOTATE_ITER_BEGIN(id, it)  CALI_MARK_ITERATION_BEGIN(id, it)
 #define HYPRE_ANNOTATE_ITER_END(id)        CALI_MARK_ITERATION_END(id)
+#define HYPRE_ANNOTATE_REGION_BEGIN(...)\
+{\
+   hypre_sprintf(hypre__markname, __VA_ARGS__);\
+   CALI_MARK_BEGIN(hypre__markname);\
+}
+#define HYPRE_ANNOTATE_REGION_END(...)\
+{\
+   hypre_sprintf(hypre__markname, __VA_ARGS__);\
+   CALI_MARK_END(hypre__markname);\
+}
 #define HYPRE_ANNOTATE_MGLEVEL_BEGIN(lvl)\
 {\
    hypre_sprintf(hypre__levelname, "MG level %d", lvl);\
@@ -1184,6 +1195,9 @@ static char hypre__levelname[16];
 #define HYPRE_ANNOTATE_LOOP_END(id)
 #define HYPRE_ANNOTATE_ITER_BEGIN(id, it)
 #define HYPRE_ANNOTATE_ITER_END(id)
+#define HYPRE_ANNOTATE_REGION_BEGIN(...)
+#define HYPRE_ANNOTATE_REGION_END(...)
+#define HYPRE_ANNOTATE_MAX_MGLEVEL(lvl)
 #define HYPRE_ANNOTATE_MGLEVEL_BEGIN(lvl)
 #define HYPRE_ANNOTATE_MGLEVEL_END(lvl)
 
@@ -1217,6 +1231,8 @@ typedef struct
    HYPRE_ExecutionPolicy  struct_exec_policy;
 #if defined(HYPRE_USING_GPU)
    hypre_DeviceData        *device_data;
+   /* device G-S options */
+   HYPRE_Int              device_gs_method;
 #endif
 #if defined(HYPRE_USING_UMPIRE)
    char                   umpire_device_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
@@ -1241,6 +1257,7 @@ typedef struct
 #define hypre_HandleDefaultExecPolicy(hypre_handle)              ((hypre_handle) -> default_exec_policy)
 #define hypre_HandleStructExecPolicy(hypre_handle)               ((hypre_handle) -> struct_exec_policy)
 #define hypre_HandleDeviceData(hypre_handle)                     ((hypre_handle) -> device_data)
+#define hypre_HandleDeviceGSMethod(hypre_handle)                 ((hypre_handle) -> device_gs_method)
 
 #define hypre_HandleCurandGenerator(hypre_handle)                hypre_DeviceDataCurandGenerator(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleCublasHandle(hypre_handle)                   hypre_DeviceDataCublasHandle(hypre_HandleDeviceData(hypre_handle))
@@ -1372,6 +1389,9 @@ HYPRE_Int hypre_BigBinarySearch ( HYPRE_BigInt *list , HYPRE_BigInt value , HYPR
 HYPRE_Int hypre_BinarySearch2 ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int low , HYPRE_Int high , HYPRE_Int *spot );
 HYPRE_Int *hypre_LowerBound( HYPRE_Int *first, HYPRE_Int *last, HYPRE_Int value );
 HYPRE_BigInt *hypre_BigLowerBound( HYPRE_BigInt *first, HYPRE_BigInt *last, HYPRE_BigInt value );
+
+/* log.c */
+HYPRE_Int hypre_Log2( HYPRE_Int p );
 
 /* complex.c */
 #ifdef HYPRE_COMPLEX
@@ -1610,6 +1630,7 @@ HYPRE_Int hypreDevice_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Comple
 HYPRE_Int hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y);
 HYPRE_Int hypreDevice_MaskedIVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y, HYPRE_Int *mask);
 HYPRE_Int hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v);
+HYPRE_Int hypreDevice_Filln(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v);
 #endif
 
 HYPRE_Int hypre_CurandUniform( HYPRE_Int n, HYPRE_Real *urand, HYPRE_Int set_seed, hypre_ulonglongint seed, HYPRE_Int set_offset, hypre_ulonglongint offset);
@@ -1635,6 +1656,7 @@ HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
 /* handle.c */
 HYPRE_Int hypre_SetSpGemmUseCusparse( HYPRE_Int use_cusparse );
 HYPRE_Int hypre_SetUseGpuRand( HYPRE_Int use_gpurand );
+HYPRE_Int hypre_SetGaussSeidelMethod( HYPRE_Int gs_method );
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.

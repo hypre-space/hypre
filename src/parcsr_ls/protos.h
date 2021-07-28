@@ -981,7 +981,12 @@ HYPRE_Int hypre_Bisection ( HYPRE_Int n , HYPRE_Real *diag , HYPRE_Real *offd , 
 
 /* par_cheby.c */
 HYPRE_Int hypre_ParCSRRelax_Cheby_Setup ( hypre_ParCSRMatrix *A , HYPRE_Real max_eig , HYPRE_Real min_eig , HYPRE_Real fraction , HYPRE_Int order , HYPRE_Int scale , HYPRE_Int variant , HYPRE_Real **coefs_ptr , HYPRE_Real **ds_ptr );
-HYPRE_Int hypre_ParCSRRelax_Cheby_Solve ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Real *ds_data , HYPRE_Real *coefs , HYPRE_Int order , HYPRE_Int scale , HYPRE_Int variant , hypre_ParVector *u , hypre_ParVector *v , hypre_ParVector *r );
+HYPRE_Int hypre_ParCSRRelax_Cheby_Solve ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Real *ds_data , HYPRE_Real *coefs , HYPRE_Int order , HYPRE_Int scale , HYPRE_Int variant , hypre_ParVector *u , hypre_ParVector *v , hypre_ParVector *r , hypre_ParVector *orig_u_vec, hypre_ParVector *tmp_vec);
+
+HYPRE_Int hypre_ParCSRRelax_Cheby_SolveHost ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Real *ds_data , HYPRE_Real *coefs , HYPRE_Int order , HYPRE_Int scale , HYPRE_Int variant , hypre_ParVector *u , hypre_ParVector *v , hypre_ParVector *r, hypre_ParVector *orig_u_vec, hypre_ParVector *tmp_vec);
+
+/* par_cheby_device.c */
+HYPRE_Int hypre_ParCSRRelax_Cheby_SolveDevice ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Real *ds_data , HYPRE_Real *coefs , HYPRE_Int order , HYPRE_Int scale , HYPRE_Int variant , hypre_ParVector *u , hypre_ParVector *v , hypre_ParVector *r, hypre_ParVector *orig_u_vec, hypre_ParVector *tmp_vec);
 
 /* par_coarsen.c */
 HYPRE_Int hypre_BoomerAMGCoarsen ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int CF_init , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
@@ -989,6 +994,7 @@ HYPRE_Int hypre_BoomerAMGCoarsenRuge ( hypre_ParCSRMatrix *S , hypre_ParCSRMatri
 HYPRE_Int hypre_BoomerAMGCoarsenFalgout ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int measure_type , HYPRE_Int cut_factor , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
 HYPRE_Int hypre_BoomerAMGCoarsenHMIS ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int measure_type , HYPRE_Int cut_factor , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
 HYPRE_Int hypre_BoomerAMGCoarsenPMIS ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int CF_init , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
+HYPRE_Int hypre_BoomerAMGCoarsenPMISHost ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int CF_init , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
 
 HYPRE_Int hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A, HYPRE_Int CF_init, HYPRE_Int debug_flag, HYPRE_Int **CF_marker_ptr );
 
@@ -1192,13 +1198,19 @@ HYPRE_Int hypre_BoomerAMGRelaxIF ( hypre_ParCSRMatrix *A , hypre_ParVector *f , 
 
 /* par_relax_more.c */
 HYPRE_Int hypre_ParCSRMaxEigEstimate ( hypre_ParCSRMatrix *A , HYPRE_Int scale , HYPRE_Real *max_eig );
+HYPRE_Int hypre_ParCSRMaxEigEstimateHost ( hypre_ParCSRMatrix *A , HYPRE_Int scale , HYPRE_Real *max_eig );
 HYPRE_Int hypre_ParCSRMaxEigEstimateCG ( hypre_ParCSRMatrix *A , HYPRE_Int scale , HYPRE_Int max_iter , HYPRE_Real *max_eig , HYPRE_Real *min_eig );
+HYPRE_Int hypre_ParCSRMaxEigEstimateCGHost ( hypre_ParCSRMatrix *A , HYPRE_Int scale , HYPRE_Int max_iter , HYPRE_Real *max_eig , HYPRE_Real *min_eig );
 HYPRE_Int hypre_ParCSRRelax_Cheby ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Real max_eig , HYPRE_Real min_eig , HYPRE_Real fraction , HYPRE_Int order , HYPRE_Int scale , HYPRE_Int variant , hypre_ParVector *u , hypre_ParVector *v , hypre_ParVector *r );
 HYPRE_Int hypre_BoomerAMGRelax_FCFJacobi ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Int *cf_marker , HYPRE_Real relax_weight , hypre_ParVector *u , hypre_ParVector *Vtemp );
 HYPRE_Int hypre_ParCSRRelax_CG ( HYPRE_Solver solver , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u , HYPRE_Int num_its );
 HYPRE_Int hypre_LINPACKcgtql1 ( HYPRE_Int *n , HYPRE_Real *d , HYPRE_Real *e , HYPRE_Int *ierr );
 HYPRE_Real hypre_LINPACKcgpthy ( HYPRE_Real *a , HYPRE_Real *b );
 HYPRE_Int hypre_ParCSRRelax_L1_Jacobi ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Int *cf_marker , HYPRE_Int relax_points , HYPRE_Real relax_weight , HYPRE_Real *l1_norms , hypre_ParVector *u , hypre_ParVector *Vtemp );
+
+/* par_relax_more_device.c */
+HYPRE_Int hypre_ParCSRMaxEigEstimateDevice ( hypre_ParCSRMatrix *A , HYPRE_Int scale , HYPRE_Real *max_eig );
+HYPRE_Int hypre_ParCSRMaxEigEstimateCGDevice ( hypre_ParCSRMatrix *A , HYPRE_Int scale , HYPRE_Int max_iter , HYPRE_Real *max_eig , HYPRE_Real *min_eig );
 
 /* par_rotate_7pt.c */
 HYPRE_ParCSRMatrix GenerateRotate7pt ( MPI_Comm comm , HYPRE_BigInt nx , HYPRE_BigInt ny , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int p , HYPRE_Int q , HYPRE_Real alpha , HYPRE_Real eps );
@@ -1234,6 +1246,7 @@ HYPRE_Int hypre_BoomerAMGCreateSCommPkg ( hypre_ParCSRMatrix *A , hypre_ParCSRMa
 HYPRE_Int hypre_BoomerAMGCreate2ndS ( hypre_ParCSRMatrix *S , HYPRE_Int *CF_marker , HYPRE_Int num_paths , HYPRE_BigInt *coarse_row_starts , hypre_ParCSRMatrix **C_ptr );
 HYPRE_Int hypre_BoomerAMGCorrectCFMarker ( HYPRE_Int *CF_marker , HYPRE_Int num_var , HYPRE_Int *new_CF_marker );
 HYPRE_Int hypre_BoomerAMGCorrectCFMarker2 ( HYPRE_Int *CF_marker , HYPRE_Int num_var , HYPRE_Int *new_CF_marker );
+HYPRE_Int hypre_BoomerAMGCreateSHost(hypre_ParCSRMatrix *A, HYPRE_Real strength_threshold, HYPRE_Real max_row_sum, HYPRE_Int num_functions, HYPRE_Int *dof_func, hypre_ParCSRMatrix **S_ptr);
 HYPRE_Int hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix *A, HYPRE_Real strength_threshold, HYPRE_Real max_row_sum, HYPRE_Int num_functions, HYPRE_Int *dof_func, hypre_ParCSRMatrix **S_ptr);
 HYPRE_Int hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker, HYPRE_Int num_paths, HYPRE_BigInt *coarse_row_starts, hypre_ParCSRMatrix **C_ptr);
 HYPRE_Int hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *S);
