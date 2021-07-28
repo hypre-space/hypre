@@ -287,3 +287,6 @@ HYPRE_Int hypre_SetSpGemmRownnzEstimateMultFactor( HYPRE_Real value );
 HYPRE_Int hypre_SetSpGemmHashType( char value );
 HYPRE_Int hypre_SetUseGpuRand( HYPRE_Int use_gpurand );
 HYPRE_Int hypre_SetGaussSeidelMethod( HYPRE_Int gs_method );
+HYPRE_Int hypre_SetUserDeviceMalloc(GPUMallocFunc func);
+HYPRE_Int hypre_SetUserDeviceMfree(GPUMfreeFunc func);
+

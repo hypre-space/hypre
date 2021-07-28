@@ -9,6 +9,8 @@
 #include "csr_spgemm_device.h"
 #include "seq_mv.hpp"
 
+#define HYPRE_SPGEMM_TIMING 0
+
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 HYPRE_Int
@@ -32,8 +34,10 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
    HYPRE_Int        *d_jc;
    HYPRE_Int         nnzC;
    hypre_CSRMatrix  *C;
+#ifdef HYPRE_SPGEMM_TIMING
    HYPRE_Real        t1, t2;
    HYPRE_Real        ta, tb;
+#endif
 
    *C_ptr = C = hypre_CSRMatrixCreate(m, n, 0);
    hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
@@ -50,7 +54,9 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
    hypre_profile_times[HYPRE_TIMER_ID_SPMM] -= hypre_MPI_Wtime();
 #endif
 
+#ifdef HYPRE_SPGEMM_TIMING
    ta = hypre_MPI_Wtime();
+#endif
 
    /* use CUSPARSE or rocSPARSE*/
    if (hypre_HandleSpgemmUseCusparse(hypre_handle()))
@@ -75,82 +81,107 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
 
       if (hypre_HandleSpgemmAlgorithm(hypre_handle()) == 1)
       {
-         t1 = hypre_MPI_Wtime();
          d_rc = hypre_TAlloc(HYPRE_Int, 2*m, HYPRE_MEMORY_DEVICE);
-         t2 = hypre_MPI_Wtime() - t1;
-         hypre_printf("Malloc rc %f\n", t2);
 
+#ifdef HYPRE_SPGEMM_TIMING
          t1 = hypre_MPI_Wtime();
+#endif
          hypreDevice_CSRSpGemmRownnz(m, k, n, d_ia, d_ja, d_ib, d_jb, d_rc);
+#ifdef HYPRE_SPGEMM_TIMING
          hypre_SyncCudaComputeStream(hypre_handle());
          t2 = hypre_MPI_Wtime() - t1;
          hypre_printf("Rownnz time %f\n", t2);
+#endif
 
+#ifdef HYPRE_SPGEMM_TIMING
          t1 = hypre_MPI_Wtime();
+#endif
          hypreDevice_CSRSpGemmWithRownnzUpperbound(m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, 1,
                                                    &d_ic, &d_jc, &d_c, &nnzC);
+#ifdef HYPRE_SPGEMM_TIMING
          hypre_SyncCudaComputeStream(hypre_handle());
          t2 = hypre_MPI_Wtime() - t1;
          hypre_printf("SpGemmNumerical time %f\n", t2);
+#endif
       }
       else if (hypre_HandleSpgemmAlgorithm(hypre_handle()) == 2)
       {
-         t1 = hypre_MPI_Wtime();
          d_rc = hypre_TAlloc(HYPRE_Int, 2*m, HYPRE_MEMORY_DEVICE);
-         t2 = hypre_MPI_Wtime() - t1;
-         hypre_printf("Malloc rc %f\n", t2);
 
+#ifdef HYPRE_SPGEMM_TIMING
          t1 = hypre_MPI_Wtime();
+#endif
          hypreDevice_CSRSpGemmRownnzEstimate(m, k, n, d_ia, d_ja, d_ib, d_jb, d_rc);
+#ifdef HYPRE_SPGEMM_TIMING
          hypre_SyncCudaComputeStream(hypre_handle());
          t2 = hypre_MPI_Wtime() - t1;
          hypre_printf("RownnzEst time %f\n", t2);
+#endif
 
+#ifdef HYPRE_SPGEMM_TIMING
          t1 = hypre_MPI_Wtime();
+#endif
          hypreDevice_CSRSpGemmWithRownnzEstimate(m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc,
                                                  &d_ic, &d_jc, &d_c, &nnzC);
+#ifdef HYPRE_SPGEMM_TIMING
          hypre_SyncCudaComputeStream(hypre_handle());
          t2 = hypre_MPI_Wtime() - t1;
          hypre_printf("SpGemmNumerical time %f\n", t2);
+#endif
       }
       else
       {
          d_rc = hypre_TAlloc(HYPRE_Int, 2*m, HYPRE_MEMORY_DEVICE);
 
+#ifdef HYPRE_SPGEMM_TIMING
          t1 = hypre_MPI_Wtime();
+#endif
          hypreDevice_CSRSpGemmRownnzEstimate(m, k, n, d_ia, d_ja, d_ib, d_jb, d_rc);
+#ifdef HYPRE_SPGEMM_TIMING
+         hypre_SyncCudaComputeStream(hypre_handle());
          t2 = hypre_MPI_Wtime() - t1;
          hypre_printf("RownnzEst time %f\n", t2);
+#endif
 
+#ifdef HYPRE_SPGEMM_TIMING
          t1 = hypre_MPI_Wtime();
+#endif
          hypreDevice_CSRSpGemmRownnzUpperbound(m, k, n, d_ia, d_ja, d_ib, d_jb, d_rc, d_rc + m);
+         /* row nnz is exact if no row failed */
+         HYPRE_Int rownnz_exact = !HYPRE_THRUST_CALL( any_of,
+                                                      d_rc + m,
+                                                      d_rc + 2*m,
+                                                      thrust::identity<HYPRE_Int>() );
+#ifdef HYPRE_SPGEMM_TIMING
+         hypre_SyncCudaComputeStream(hypre_handle());
          t2 = hypre_MPI_Wtime() - t1;
          hypre_printf("RownnzBound time %f\n", t2);
+#endif
 
-         /* row nnz is exact if no row failed */
-         HYPRE_Int rownnz_exact = hypreDevice_IntegerReduceSum(m, d_rc + m) == 0;
-
+#ifdef HYPRE_SPGEMM_TIMING
          t1 = hypre_MPI_Wtime();
+#endif
          hypreDevice_CSRSpGemmWithRownnzUpperbound(m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, rownnz_exact,
                                                    &d_ic, &d_jc, &d_c, &nnzC);
+#ifdef HYPRE_SPGEMM_TIMING
          hypre_SyncCudaComputeStream(hypre_handle());
          t2 = hypre_MPI_Wtime() - t1;
          hypre_printf("SpGemmNumerical time %f\n", t2);
+#endif
       }
 
-      t1 = hypre_MPI_Wtime();
       hypre_TFree(d_rc, HYPRE_MEMORY_DEVICE);
-      t2 = hypre_MPI_Wtime() - t1;
-      hypre_printf("Free rc %f\n", t2);
    }
 
+#ifdef HYPRE_SPGEMM_TIMING
    tb = hypre_MPI_Wtime() - ta;
    hypre_printf("SpGemm time %f\n", tb);
+#endif
 
    hypre_CSRMatrixNumNonzeros(C) = nnzC;
-   hypre_CSRMatrixI(C) = d_ic;
-   hypre_CSRMatrixJ(C) = d_jc;
-   hypre_CSRMatrixData(C) = d_c;
+   hypre_CSRMatrixI(C)           = d_ic;
+   hypre_CSRMatrixJ(C)           = d_jc;
+   hypre_CSRMatrixData(C)        = d_c;
 
 #ifdef HYPRE_PROFILE
    cudaThreadSynchronize();

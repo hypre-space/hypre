@@ -116,3 +116,20 @@ hypre_SetGaussSeidelMethod( HYPRE_Int gs_method )
    return hypre_error_flag;
 }
 
+HYPRE_Int
+hypre_SetUserDeviceMalloc(GPUMallocFunc func)
+{
+#if defined(HYPRE_USING_GPU)
+   hypre_HandleUserDeviceMalloc(hypre_handle()) = func;
+#endif
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_SetUserDeviceMfree(GPUMfreeFunc func)
+{
+#if defined(HYPRE_USING_GPU)
+   hypre_HandleUserDeviceMfree(hypre_handle()) = func;
+#endif
+   return hypre_error_flag;
+}

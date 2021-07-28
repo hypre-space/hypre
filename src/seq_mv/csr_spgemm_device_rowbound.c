@@ -176,7 +176,7 @@ hypre_spgemm_symbolic( HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
       {
          if (lane_id == 0)
          {
-            j = rind[i];
+            j = read_only_load(&rind[i]);
          }
          ii = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
       }
@@ -270,9 +270,9 @@ hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
 #endif
 
 #if defined(HYPRE_USING_CUDA)
-   const HYPRE_Int num_warps_per_block = 20;
+   const HYPRE_Int num_warps_per_block = 16;
 #elif defined(HYPRE_USING_HIP)
-   const HYPRE_Int num_warps_per_block = 10;
+   const HYPRE_Int num_warps_per_block = 16;
 #endif
    const HYPRE_Int BDIMX               =  2;
    const HYPRE_Int BDIMY               = HYPRE_WARP_SIZE / BDIMX;

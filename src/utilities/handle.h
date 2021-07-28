@@ -79,6 +79,9 @@ typedef struct
 #define hypre_HandleUmpireDeviceAllocator(hypre_handle)          hypre_CudaDataUmpireDeviceAllocator(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleUseGpuRand(hypre_handle)                     hypre_CudaDataUseGpuRand(hypre_HandleCudaData(hypre_handle))
 
+#define hypre_HandleUserDeviceMalloc(hypre_handle)               hypre_CudaDataUserDeviceMalloc(hypre_HandleCudaData(hypre_handle))
+#define hypre_HandleUserDeviceMfree(hypre_handle)                hypre_CudaDataUserDeviceMfree(hypre_HandleCudaData(hypre_handle))
+
 #define hypre_HandleUmpireResourceMan(hypre_handle)              ((hypre_handle) -> umpire_rm)
 #define hypre_HandleUmpireDevicePoolSize(hypre_handle)           ((hypre_handle) -> umpire_device_pool_size)
 #define hypre_HandleUmpireUMPoolSize(hypre_handle)               ((hypre_handle) -> umpire_um_pool_size)

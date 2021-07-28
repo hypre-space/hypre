@@ -297,6 +297,10 @@ char *hypre_CAllocDML( HYPRE_Int count , HYPRE_Int elt_size , char *file , HYPRE
 char *hypre_ReAllocDML( char *ptr , HYPRE_Int size , char *file , HYPRE_Int line );
 void hypre_FreeDML( char *ptr , char *file , HYPRE_Int line );
 
+/* GPU malloc prototype */
+typedef void (*GPUMallocFunc)(void **, size_t);
+typedef void (*GPUMfreeFunc)(void *);
+
 #ifdef __cplusplus
 }
 #endif

@@ -770,6 +770,10 @@ char *hypre_CAllocDML( HYPRE_Int count , HYPRE_Int elt_size , char *file , HYPRE
 char *hypre_ReAllocDML( char *ptr , HYPRE_Int size , char *file , HYPRE_Int line );
 void hypre_FreeDML( char *ptr , char *file , HYPRE_Int line );
 
+/* GPU malloc prototype */
+typedef void (*GPUMallocFunc)(void **, size_t);
+typedef void (*GPUMfreeFunc)(void *);
+
 #ifdef __cplusplus
 }
 #endif
@@ -1271,6 +1275,9 @@ typedef struct
 #define hypre_HandleUmpireDeviceAllocator(hypre_handle)          hypre_CudaDataUmpireDeviceAllocator(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleUseGpuRand(hypre_handle)                     hypre_CudaDataUseGpuRand(hypre_HandleCudaData(hypre_handle))
 
+#define hypre_HandleUserDeviceMalloc(hypre_handle)               hypre_CudaDataUserDeviceMalloc(hypre_HandleCudaData(hypre_handle))
+#define hypre_HandleUserDeviceMfree(hypre_handle)                hypre_CudaDataUserDeviceMfree(hypre_HandleCudaData(hypre_handle))
+
 #define hypre_HandleUmpireResourceMan(hypre_handle)              ((hypre_handle) -> umpire_rm)
 #define hypre_HandleUmpireDevicePoolSize(hypre_handle)           ((hypre_handle) -> umpire_device_pool_size)
 #define hypre_HandleUmpireUMPoolSize(hypre_handle)               ((hypre_handle) -> umpire_um_pool_size)
@@ -1645,6 +1652,9 @@ HYPRE_Int hypre_SetSpGemmRownnzEstimateMultFactor( HYPRE_Real value );
 HYPRE_Int hypre_SetSpGemmHashType( char value );
 HYPRE_Int hypre_SetUseGpuRand( HYPRE_Int use_gpurand );
 HYPRE_Int hypre_SetGaussSeidelMethod( HYPRE_Int gs_method );
+HYPRE_Int hypre_SetUserDeviceMalloc(GPUMallocFunc func);
+HYPRE_Int hypre_SetUserDeviceMfree(GPUMfreeFunc func);
+
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.

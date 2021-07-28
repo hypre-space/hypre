@@ -155,6 +155,9 @@ struct hypre_CudaData
    hipStream_t                       cuda_streams[HYPRE_MAX_NUM_STREAMS];
 #endif
 
+   GPUMallocFunc                     user_device_malloc;
+   GPUMfreeFunc                      user_device_free;
+
 #ifdef HYPRE_USING_DEVICE_POOL
    hypre_uint                        cub_bin_growth;
    hypre_uint                        cub_min_bin;
@@ -188,6 +191,8 @@ struct hypre_CudaData
    HYPRE_Int                         use_gpu_rand;
 };
 
+#define hypre_CudaDataUserDeviceMalloc(data)               ((data) -> user_device_malloc)
+#define hypre_CudaDataUserDeviceMfree(data)                ((data) -> user_device_free)
 #define hypre_CudaDataCubBinGrowth(data)                   ((data) -> cub_bin_growth)
 #define hypre_CudaDataCubMinBin(data)                      ((data) -> cub_min_bin)
 #define hypre_CudaDataCubMaxBin(data)                      ((data) -> cub_max_bin)

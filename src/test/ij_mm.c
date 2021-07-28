@@ -17,6 +17,7 @@
 #include <math.h>
 
 #include "_hypre_utilities.h"
+#include "_hypre_utilities.hpp"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_mv.h"
 
@@ -57,6 +58,26 @@ HYPRE_Int BuildParCoordinates (HYPRE_Int argc , char *argv [], HYPRE_Int arg_ind
 #ifdef __cplusplus
 }
 #endif
+
+char *gpu_ptr = NULL;
+size_t total_size = 0, current_size = 0;
+
+void gpu_alloc(void **ptr, size_t size)
+{
+   size = ((size + 128 - 1) / 128) * 128;
+   *ptr = (void *) &gpu_ptr[current_size];
+   current_size += size;
+   if (current_size > total_size)
+   {
+      hypre_printf("Out of GPU memory\n");
+      exit(0);
+   }
+}
+
+void gpu_free(void *ptr)
+{
+   return;
+}
 
 
 void runjob1( HYPRE_ParCSRMatrix parcsr_A,
@@ -117,6 +138,7 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
 
       if (i == rep-1)
       {
+         HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
          //cudaProfilerStop();
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Device Parcsr Matrix-by-Matrix, A*A", hypre_MPI_COMM_WORLD);
@@ -154,7 +176,8 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
 
 void runjob2( HYPRE_ParCSRMatrix parcsr_A,
               HYPRE_Int          print_system,
-              HYPRE_Int          mult_order)
+              HYPRE_Int          mult_order,
+              HYPRE_Int          verify)
 {
    HYPRE_Int    measure_type = 0;
    HYPRE_Real   trunc_factor = 0.0;
@@ -215,30 +238,33 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
    /*-----------------------------------------------------------
     * Matrix-by-Matrix on host
     *-----------------------------------------------------------*/
-   hypre_printf("Clone matrices to the host\n");
-   parcsr_A_host = hypre_ParCSRMatrixClone_v2(parcsr_A, 1, HYPRE_MEMORY_HOST);
-   parcsr_P_host = hypre_ParCSRMatrixClone_v2(parcsr_P, 1, HYPRE_MEMORY_HOST);
-
-   hypre_MatvecCommPkgCreate(parcsr_A_host);
-   hypre_MatvecCommPkgCreate(parcsr_P_host);
-
-   time_index = hypre_InitializeTiming("Host Parcsr Matrix-by-Matrix, RAP2");
-   hypre_BeginTiming(time_index);
-
-   if (mult_order == 0)
+   if (verify)
    {
-      parcsr_Q_host  = hypre_ParCSRMatMat(parcsr_A_host, parcsr_P_host);
-      parcsr_AH_host = hypre_ParCSRTMatMatKT(parcsr_P_host, parcsr_Q_host, keepTranspose);
+      hypre_printf("Clone matrices to the host\n");
+      parcsr_A_host = hypre_ParCSRMatrixClone_v2(parcsr_A, 1, HYPRE_MEMORY_HOST);
+      parcsr_P_host = hypre_ParCSRMatrixClone_v2(parcsr_P, 1, HYPRE_MEMORY_HOST);
+
+      hypre_MatvecCommPkgCreate(parcsr_A_host);
+      hypre_MatvecCommPkgCreate(parcsr_P_host);
+
+      time_index = hypre_InitializeTiming("Host Parcsr Matrix-by-Matrix, RAP2");
+      hypre_BeginTiming(time_index);
+
+      if (mult_order == 0)
+      {
+         parcsr_Q_host  = hypre_ParCSRMatMat(parcsr_A_host, parcsr_P_host);
+         parcsr_AH_host = hypre_ParCSRTMatMatKT(parcsr_P_host, parcsr_Q_host, keepTranspose);
+      }
+      else
+      {
+         parcsr_Q_host  = hypre_ParCSRTMatMatKT(parcsr_P_host, parcsr_A_host, keepTranspose);
+         parcsr_AH_host = hypre_ParCSRMatMat(parcsr_Q_host, parcsr_P_host);
+      }
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Host Parcsr Matrix-by-Matrix, RAP2", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
    }
-   else
-   {
-      parcsr_Q_host  = hypre_ParCSRTMatMatKT(parcsr_P_host, parcsr_A_host, keepTranspose);
-      parcsr_AH_host = hypre_ParCSRMatMat(parcsr_Q_host, parcsr_P_host);
-   }
-   hypre_EndTiming(time_index);
-   hypre_PrintTiming("Host Parcsr Matrix-by-Matrix, RAP2", hypre_MPI_COMM_WORLD);
-   hypre_FinalizeTiming(time_index);
-   hypre_ClearTiming();
 
    /*-----------------------------------------------------------
     * Print out the matrices
@@ -298,23 +324,26 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
       }
    }
 
-   /*-----------------------------------------------------------
-    * Verify results
-    *-----------------------------------------------------------*/
-   parcsr_AH_host_2 = hypre_ParCSRMatrixClone_v2(parcsr_AH, 1, HYPRE_MEMORY_HOST);
-   hypre_ParCSRMatrixSetNumNonzeros(parcsr_AH_host_2);
-
-   hypre_ParCSRMatrixAdd(1.0, parcsr_AH_host, -1.0, parcsr_AH_host_2, &parcsr_error_host);
-   fnorm = hypre_ParCSRMatrixFnorm(parcsr_error_host);
-   fnorm0 = hypre_ParCSRMatrixFnorm(parcsr_AH_host);
-   rfnorm = fnorm0 > 0 ? fnorm / fnorm0 : fnorm;
-
-   if (myid == 0)
+   if (verify)
    {
-      printf("AH: %d x %d, nnz %d, CPU-GPU err %e\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_AH_host_2),
-                                                      hypre_ParCSRMatrixGlobalNumCols(parcsr_AH_host_2),
-                                                      hypre_ParCSRMatrixNumNonzeros(parcsr_AH_host_2),
-                                                      rfnorm);
+      /*-----------------------------------------------------------
+       * Verify results
+       *-----------------------------------------------------------*/
+      parcsr_AH_host_2 = hypre_ParCSRMatrixClone_v2(parcsr_AH, 1, HYPRE_MEMORY_HOST);
+      hypre_ParCSRMatrixSetNumNonzeros(parcsr_AH_host_2);
+
+      hypre_ParCSRMatrixAdd(1.0, parcsr_AH_host, -1.0, parcsr_AH_host_2, &parcsr_error_host);
+      fnorm = hypre_ParCSRMatrixFnorm(parcsr_error_host);
+      fnorm0 = hypre_ParCSRMatrixFnorm(parcsr_AH_host);
+      rfnorm = fnorm0 > 0 ? fnorm / fnorm0 : fnorm;
+
+      if (myid == 0)
+      {
+         printf("AH: %d x %d, nnz %d, CPU-GPU err %e\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_AH_host_2),
+                                                         hypre_ParCSRMatrixGlobalNumCols(parcsr_AH_host_2),
+                                                         hypre_ParCSRMatrixNumNonzeros(parcsr_AH_host_2),
+                                                         rfnorm);
+      }
    }
 
    hypre_TFree(CF_marker, HYPRE_MEMORY_HOST);
@@ -353,15 +382,15 @@ main( hypre_int argc,
    HYPRE_Int          first_local_col, last_local_col;//, local_num_cols;
    HYPRE_Int          mult_order = 0;
 
-   HYPRE_Int    print_system = 0;
-   HYPRE_Int    verify       = 0;
-   /* parameters for BoomerAMG */
-   HYPRE_Int    use_cusparse = 0;
-   HYPRE_Int    spgemm_alg = 1;
-   HYPRE_Int    rowest_mtd = 3;
-   HYPRE_Int    rowest_nsamples = 32;
-   HYPRE_Real   rowest_mult = 1.0;
-   char         hash_type = 'L';
+   HYPRE_Int          print_system = 0;
+   HYPRE_Int          verify       = 0;
+   HYPRE_Int          use_cusparse = 0;
+   HYPRE_Int          spgemm_alg = 1;
+   HYPRE_Int          rowest_mtd = 3;
+   HYPRE_Int          rowest_nsamples = 32;
+   HYPRE_Real         rowest_mult = 1.0;
+   HYPRE_Int          zero_mem_cost = 1;
+   char               hash_type = 'L';
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -382,6 +411,9 @@ main( hypre_int argc,
     * Initialize : must be the first HYPRE function to call
     *-----------------------------------------------------------*/
    HYPRE_Init();
+
+   /* for timing, sync after kernels */
+   hypre_SetSyncCudaCompute(1);
 
 #if defined(HYPRE_USING_CUDA)
    hypre_HandleDefaultExecPolicy(hypre_handle()) = HYPRE_EXEC_DEVICE;
@@ -514,10 +546,23 @@ main( hypre_int argc,
          arg_index++;
          hash_type = argv[arg_index++][0];
       }
+      else if ( strcmp(argv[arg_index], "-zeromemcost") == 0 )
+      {
+         arg_index++;
+         zero_mem_cost = atoi(argv[arg_index++]);
+      }
       else
       {
          arg_index++;
       }
+   }
+
+   if (zero_mem_cost)
+   {
+      total_size = 15LL * 1024 * 1024 * 1024;
+      HYPRE_CUDA_CALL( cudaMalloc(&gpu_ptr, total_size) );
+      hypre_SetUserDeviceMalloc(gpu_alloc);
+      hypre_SetUserDeviceMfree(gpu_free);
    }
 
 
@@ -657,7 +702,7 @@ main( hypre_int argc,
    }
    else if (job == 2)
    {
-      runjob2(parcsr_A, print_system, mult_order);
+      runjob2(parcsr_A, print_system, mult_order, verify);
    }
 
    /*-----------------------------------------------------------
@@ -679,6 +724,13 @@ main( hypre_int argc,
 
    /* Finalize MPI */
    hypre_MPI_Finalize();
+
+   hypre_printf("Done ...\n");
+
+   if (gpu_ptr)
+   {
+      cudaFree(gpu_ptr);
+   }
 
    return (0);
 }
