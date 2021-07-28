@@ -14,16 +14,16 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGBuildModMultipass( hypre_ParCSRMatrix  *A,
-                                  HYPRE_Int           *CF_marker,
-                                  hypre_ParCSRMatrix  *S,
-                                  HYPRE_BigInt        *num_cpts_global,
-                                  HYPRE_Real           trunc_factor,
-                                  HYPRE_Int            P_max_elmts,
-                                  HYPRE_Int            interp_type,
-                                  HYPRE_Int            num_functions,
-                                  HYPRE_Int           *dof_func,
-                                  hypre_ParCSRMatrix **P_ptr )
+hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
+                                      HYPRE_Int           *CF_marker,
+                                      hypre_ParCSRMatrix  *S,
+                                      HYPRE_BigInt        *num_cpts_global,
+                                      HYPRE_Real           trunc_factor,
+                                      HYPRE_Int            P_max_elmts,
+                                      HYPRE_Int            interp_type,
+                                      HYPRE_Int            num_functions,
+                                      HYPRE_Int           *dof_func,
+                                      hypre_ParCSRMatrix **P_ptr )
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MULTIPASS_INTERP] -= hypre_MPI_Wtime();
@@ -1263,4 +1263,32 @@ hypre_GenerateMultiPi( hypre_ParCSRMatrix  *A,
    *Pi_ptr = Pi;
 
    return hypre_error_flag;
+}
+
+
+HYPRE_Int
+hypre_BoomerAMGBuildModMultipass( hypre_ParCSRMatrix  *A,
+                                  HYPRE_Int           *CF_marker,
+                                  hypre_ParCSRMatrix  *S,
+                                  HYPRE_BigInt        *num_cpts_global,
+                                  HYPRE_Real           trunc_factor,
+                                  HYPRE_Int            P_max_elmts,
+                                  HYPRE_Int            interp_type,
+                                  HYPRE_Int            num_functions,
+                                  HYPRE_Int           *dof_func,
+                                  hypre_ParCSRMatrix **P_ptr )
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("BuildModMultipass");
+#endif
+
+   HYPRE_Int ierr = 0;
+
+   ierr = hypre_BoomerAMGBuildModMultipassHost( A, CF_marker, S, num_cpts_global, trunc_factor, P_max_elmts, interp_type, num_functions, dof_func, P_ptr);
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
+   return ierr;
 }
