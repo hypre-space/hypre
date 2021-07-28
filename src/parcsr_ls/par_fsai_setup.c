@@ -24,44 +24,41 @@
 /* Extract A[P, P] into dense matrix
  * Parameters:
  * - A_diag:         CSR Matrix diagonal of A
- * - A_sub:          A hypre_VectorSize(S_Pattern)^2 - sized array to hold the lower triangular of the symmetric submatrix A[P, P].
- * - S_Pattern:      A hypre_VectorSize(S_Pattern)^2 - sized array to hold the lower triangular of the symmetric submatrix A[P, P].
+ * - A_sub:          A S_nnz^2 - sized array to hold the lower triangular of the symmetric submatrix A[P, P].
+ * - S_Pattern:      A S_nnz - sized array to hold the wanted rows/cols.
  * - marker:         A work array of length equal to the number of columns in A_diag - all values should be -1
  */
 HYPRE_Int
 hypre_CSRMatrixExtractDenseMatrix( hypre_CSRMatrix *A_diag,
                                    hypre_Vector    *A_sub,
-                                   hypre_Vector    *S_Pattern,
+                                   HYPRE_Int       *S_Pattern,
+                                   HYPRE_Int        S_nnz,
                                    HYPRE_Int       *marker )
 {
    HYPRE_Int      *A_i              = hypre_CSRMatrixI(A_diag);
    HYPRE_Int      *A_j              = hypre_CSRMatrixJ(A_diag);
    HYPRE_Real     *A_data           = hypre_CSRMatrixData(A_diag);
-   HYPRE_Complex  *S_Pattern_data   = hypre_VectorData(S_Pattern);
    HYPRE_Complex  *A_sub_data       = hypre_VectorData(A_sub);
-   HYPRE_Int      nrows_needed      = hypre_VectorSize(S_Pattern);
    HYPRE_Int      cc;               /* Local dense matrix column counter */
    HYPRE_Int      i;                /* Loop variables */
    HYPRE_Int      j;
 
-   for(i = 0; i < nrows_needed; i++)
-      marker[(HYPRE_Int)S_Pattern_data[i]] = i;
+   for(i = 0; i < S_nnz; i++)
+      marker[S_Pattern[i]] = i;
 
-   for(i = 0; i < nrows_needed; i++)
-   {
-      for(j = A_i[(HYPRE_Int)S_Pattern_data[i]]; j < A_i[(HYPRE_Int)S_Pattern_data[i]+1]; j++)
+   for(i = 0; i < S_nnz; i++)
+      for(j = A_i[S_Pattern[i]]; j < A_i[S_Pattern[i]+1]; j++)
       {
-         if(A_j[j] > S_Pattern_data[i])
+         if(A_j[j] > S_Pattern[i])
             break;
 
          if((cc = marker[A_j[j]]) >= 0)
-            A_sub_data[cc*nrows_needed + i] = A_data[j];
+            A_sub_data[cc*S_nnz + i] = A_data[j];
 
       }
-   }
 
-   for(i = 0; i < nrows_needed; i++)
-      marker[(HYPRE_Int)S_Pattern_data[i]] = -1;
+   for(i = 0; i < S_nnz; i++)
+      marker[S_Pattern[i]] = -1;
 
    return hypre_error_flag;
 
@@ -72,33 +69,33 @@ hypre_CSRMatrixExtractDenseMatrix( hypre_CSRMatrix *A_diag,
  * - A_diag:         CSR Matrix diagonal of A
  * - A_subrow:       The extracted sub-row of A[i, P]
  * - S_Pattern:      Indices of wanted spots
+ * - S_nnz:          Number of wanted spots
  * - marker:         A work array of length equal to the number of row in A_diag. Assumed to be set to all -1
  * - row_num:        which row we want
  */
 HYPRE_Int
 hypre_ExtractDenseRowFromCSRMatrix( hypre_CSRMatrix *A_diag,
                                     hypre_Vector    *A_subrow,
-                                    hypre_Vector    *S_Pattern,
+                                    HYPRE_Int       *S_Pattern,
+                                    HYPRE_Int        S_nnz,
                                     HYPRE_Int       *marker,
-                                    HYPRE_Int       row_num )
+                                    HYPRE_Int        row_num )
 {
    HYPRE_Int      *A_i              = hypre_CSRMatrixI(A_diag);
    HYPRE_Int      *A_j              = hypre_CSRMatrixJ(A_diag);
    HYPRE_Real     *A_data           = hypre_CSRMatrixData(A_diag);
-   HYPRE_Complex  *S_Pattern_data   = hypre_VectorData(S_Pattern);
    HYPRE_Complex  *sub_row_data     = hypre_VectorData(A_subrow);
    HYPRE_Int i, cc;
 
-
-   for(i = 0; i < hypre_VectorSize(S_Pattern); i++)
-      marker[(HYPRE_Int)S_Pattern_data[i]] = i;
+   for(i = 0; i < S_nnz; i++)
+      marker[S_Pattern[i]] = i;
 
    for(i = A_i[row_num]; i < A_i[row_num+1]; i++)
       if((cc = marker[A_j[i]]) >= 0)
          sub_row_data[cc] = A_data[i];
 
-   for(i = 0; i < hypre_VectorSize(S_Pattern); i++)
-      marker[(HYPRE_Int)S_Pattern_data[i]] = -1;
+   for(i = 0; i < S_nnz; i++)
+      marker[S_Pattern[i]] = -1;
 
    return hypre_error_flag;
 }
@@ -110,6 +107,7 @@ hypre_ExtractDenseRowFromCSRMatrix( hypre_CSRMatrix *A_diag,
  *  - kap_grad_nonzeros:      Array of the nonzero columns of kaporin_gradient. To be modified.
  *  - G_temp:                 Work array of G for row i
  *  - S_pattern:              Array of column indices of the nonzero elements of G_temp
+ *  - S_nnz:                  Number of column indices of the nonzero elements of G_temp
  *  - max_row_size:           To ensure we don't overfill the kaporin_gradient vector
  *  - row_num:                Which row of G we are working on
  *  - marker:                 Array of length equal to the number of rows in A - assumed to all be set to -1.
@@ -119,7 +117,8 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
                    hypre_Vector     *kaporin_gradient,
                    hypre_Vector     *kap_grad_nonzeros,
                    hypre_Vector     *G_temp,
-                   hypre_Vector     *S_Pattern,
+                   HYPRE_Int        *S_Pattern,
+                   HYPRE_Int        S_nnz,
                    HYPRE_Int        max_row_size,
                    HYPRE_Int        row_num,
                    HYPRE_Int        *marker )
@@ -131,13 +130,12 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
    HYPRE_Int      i, j, k, count;
    HYPRE_Complex  temp;
 
-   HYPRE_Complex *S_Pattern_data          = hypre_VectorData(S_Pattern);
    HYPRE_Complex *G_temp_data             = hypre_VectorData(G_temp);
    HYPRE_Complex *kap_grad_data           = hypre_VectorData(kaporin_gradient);
    HYPRE_Complex *kap_grad_nonzero_data   = hypre_VectorData(kap_grad_nonzeros);
 
-   for(i = 0; i < hypre_VectorSize(S_Pattern); i++)
-      marker[(HYPRE_Int)S_Pattern_data[i]] = 1;
+   for(i = 0; i < S_nnz; i++)
+      marker[S_Pattern[i]] = 1;
 
    count = 0;
 
@@ -161,8 +159,8 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
          if (A_j[j] > i)
             continue;
 
-         for(k = 0; k < hypre_VectorSize(S_Pattern); k++)
-            if(S_Pattern_data[k] == A_j[j])
+         for(k = 0; k < S_nnz; k++)
+            if(S_Pattern[k] == A_j[j])
                temp += 2 * G_temp_data[k] * A_data[j];
       }
 
@@ -179,8 +177,8 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
    hypre_VectorSize(kaporin_gradient)  = count;
    hypre_VectorSize(kap_grad_nonzeros) = count;
 
-   for(i = 0; i < hypre_VectorSize(S_Pattern); i++)     /* Reset marker array for future use */
-      marker[(HYPRE_Int)S_Pattern_data[i]] = -1;
+   for(i = 0; i < S_nnz; i++)     /* Reset marker array for future use */
+      marker[S_Pattern[i]] = -1;
 
    return hypre_error_flag;
 
@@ -232,53 +230,26 @@ hypre_qsort2C( HYPRE_Complex  *v,
    hypre_qsort2C(v, w, last+1, right);
 }
 
-/* Quick Sort (smallest to largest) for complex arrays - hypre/utilities/qsort.c did not have what I wanted */
-
-void
-hypre_qsort_c( HYPRE_Complex  *v,
-               HYPRE_Int      left,
-               HYPRE_Int      right )
-{
-   HYPRE_Int i, last;
-
-   if (left >= right)
-      return;
-
-   hypre_swap_c( v, left, (left+right)/2);
-   last = left;
-   for (i = left+1; i <= right; i++)
-   {
-      if (v[i] < v[left])
-      {
-         hypre_swap_c(v, ++last, i);
-      }
-   }
-   hypre_swap_c(v, left, last);
-   hypre_qsort_c(v, left, last-1);
-}
-
 /* Take the largest elements from the kaporin gradient and add their locations to S_Pattern */
 HYPRE_Int
 hypre_AddToPattern( hypre_Vector *kaporin_gradient,
                     hypre_Vector *kap_grad_nonzeros,
-                    hypre_Vector *S_Pattern,
-                    HYPRE_Int    max_step_size )
+                    HYPRE_Int    *S_Pattern,
+                    HYPRE_Int    *S_nnz,
+                    HYPRE_Int     max_step_size )
 {
 
    HYPRE_Complex *kap_grad_data           = hypre_VectorData(kaporin_gradient);
    HYPRE_Complex *kap_grad_nonzero_data   = hypre_VectorData(kap_grad_nonzeros);
-   HYPRE_Complex *S_Pattern_data          = hypre_VectorData(S_Pattern);
 
-   HYPRE_Int     i, count;
+   HYPRE_Int     i;
+
    hypre_qsort2C(kap_grad_data, kap_grad_nonzero_data, 0, hypre_VectorSize(kaporin_gradient)-1);
-
-   count = hypre_VectorSize(S_Pattern);
-   hypre_VectorSize(S_Pattern) = count + hypre_min(hypre_VectorSize(kaporin_gradient), max_step_size);
 
    for(i = 0; i < hypre_min(hypre_VectorSize(kaporin_gradient), max_step_size); i++)
    {
-      S_Pattern_data[count] = kap_grad_nonzero_data[i];
-      count++;
+      S_Pattern[(*S_nnz)] = kap_grad_nonzero_data[i];
+      (*S_nnz)++;
    }
 
    return hypre_error_flag;
@@ -323,10 +294,11 @@ hypre_FSAISetup( void               *fsai_vdata,
    hypre_Vector           *sol_vec;           /* Vector to hold solution of hypre_dpetrs */
    hypre_Vector           *kaporin_gradient;  /* A vector to hold the Kaporin Gradient for each iteration of aFSAI */
    hypre_Vector           *kap_grad_nonzeros; /* A vector to hold the kaporin_gradient nonzero indices for each iteration of aFSAI */
-   hypre_Vector           *S_Pattern;
+   HYPRE_Int              *S_Pattern;
    HYPRE_Int              *marker;            /* An array that holds which values need to be gathered when finding a sub-row or submatrix */
    HYPRE_Real              old_psi, new_psi;  /* GAG' before and after the k-th interation of aFSAI */
    HYPRE_Real              row_scale;         /* The value to scale G_temp by before adding it to G */
+   HYPRE_Int               S_nnz;
    HYPRE_Int               info;
    HYPRE_Int               i, j, k;           /* Loop variables */
 
@@ -387,8 +359,8 @@ hypre_FSAISetup( void               *fsai_vdata,
    sol_vec           = hypre_SeqVectorCreate(max_row_size);
    kaporin_gradient  = hypre_SeqVectorCreate(max_row_size);
    kap_grad_nonzeros = hypre_SeqVectorCreate(max_row_size);
-   S_Pattern         = hypre_SeqVectorCreate(max_row_size);
    A_sub             = hypre_SeqVectorCreate(max_row_size*max_row_size);
+   S_Pattern         = hypre_CTAlloc(HYPRE_Int, max_row_size, HYPRE_MEMORY_HOST); 
    marker            = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);       /* For gather functions - don't want to reinitialize */
 
    /* Initializing local variables */
@@ -398,7 +370,6 @@ hypre_FSAISetup( void               *fsai_vdata,
    hypre_SeqVectorInitialize(sol_vec);
    hypre_SeqVectorInitialize(kaporin_gradient);
    hypre_SeqVectorInitialize(kap_grad_nonzeros);
-   hypre_SeqVectorInitialize(S_Pattern);
    hypre_SeqVectorInitialize(A_sub);
    for( i = 0; i < num_rows; i++ )
       marker[i] = -1;
@@ -408,7 +379,6 @@ hypre_FSAISetup( void               *fsai_vdata,
    HYPRE_Complex *A_subrow_data           = hypre_VectorData(A_subrow);
    HYPRE_Complex *kaporin_gradient_data   = hypre_VectorData(kaporin_gradient);
    HYPRE_Complex *kap_grad_nonzero_data   = hypre_VectorData(kap_grad_nonzeros);
-   HYPRE_Complex *S_Pattern_data          = hypre_VectorData(S_Pattern);
    HYPRE_Complex *A_sub_data              = hypre_VectorData(A_sub);
    HYPRE_Complex *sol_vec_data            = hypre_VectorData(sol_vec);
 
@@ -421,61 +391,63 @@ hypre_FSAISetup( void               *fsai_vdata,
 
       hypre_VectorSize(A_subrow)  = 0;
       hypre_VectorSize(G_temp)    = 0;
-      hypre_VectorSize(S_Pattern) = 0;
       hypre_VectorSize(kaporin_gradient)  = 0;
       hypre_VectorSize(kap_grad_nonzeros) = 0;
 
+      S_nnz = 0;
+
       /* Set old_psi up front so we don't have to compute GAG' twice in the inner for-loop */
       old_psi = A_data[A_i[i]];
+      
+      if(max_step_size > 0)
+         for( k = 0; k < max_steps; k++ ) /* Cycle through each iteration for that row */
+         {
 
-      for( k = 0; k < max_steps; k++ ) /* Cycle through each iteration for that row */
-      {
+            /* Compute Kaporin Gradient */
+            hypre_FindKapGrad(A_diag, kaporin_gradient, kap_grad_nonzeros, G_temp, S_Pattern, S_nnz, max_row_size, i, marker);
 
-         /* Compute Kaporin Gradient */
-         hypre_FindKapGrad(A_diag, kaporin_gradient, kap_grad_nonzeros, G_temp, S_Pattern, max_row_size, i, marker);
+            if(hypre_VectorSize(kaporin_gradient) == 0)
+               break;
 
-         if(hypre_VectorSize(kaporin_gradient) == 0)
-            break;
+            /* Find max_step_size largest values of the kaporin gradient, find their column indices, and add it to S_Pattern */
+            hypre_AddToPattern(kaporin_gradient, kap_grad_nonzeros, S_Pattern, &S_nnz, max_step_size);
 
-         /* Find max_step_size largest values of the kaporin gradient, find their column indices, and add it to S_Pattern */
-         hypre_AddToPattern(kaporin_gradient, kap_grad_nonzeros, S_Pattern, max_step_size);
+            /* Gather A[P, P] and -A[P, i] */
+            hypre_qsort0(S_Pattern, 0, S_nnz-1);
 
-         /* Gather A[P, P] and -A[P, i] */
-         hypre_qsort_c(S_Pattern_data, 0, hypre_VectorSize(S_Pattern)-1);
+            hypre_VectorSize(A_sub)    = S_nnz * S_nnz;
+            hypre_VectorSize(A_subrow) = S_nnz;
+            hypre_VectorSize(G_temp)   = S_nnz;
+            hypre_VectorSize(sol_vec)  = S_nnz;
 
-         hypre_VectorSize(A_sub)    = hypre_VectorSize(S_Pattern) * hypre_VectorSize(S_Pattern);
-         hypre_VectorSize(A_subrow) = hypre_VectorSize(S_Pattern);
-         hypre_VectorSize(G_temp)   = hypre_VectorSize(S_Pattern);
-         hypre_VectorSize(sol_vec)  = hypre_VectorSize(S_Pattern);
+            hypre_SeqVectorSetConstantValues(A_sub, 0.0);
+            hypre_SeqVectorSetConstantValues(A_subrow, 0.0);
 
-         hypre_SeqVectorSetConstantValues(A_sub, 0.0);
-         hypre_SeqVectorSetConstantValues(A_subrow, 0.0);
+            hypre_CSRMatrixExtractDenseMatrix(A_diag, A_sub, S_Pattern, S_nnz, marker);                           /* A[P, P] */
+            hypre_ExtractDenseRowFromCSRMatrix(A_diag, A_subrow, S_Pattern, S_nnz, marker, i);                    /* A[i, P] */
 
-         hypre_CSRMatrixExtractDenseMatrix(A_diag, A_sub, S_Pattern, marker);                           /* A[P, P] */
-         hypre_ExtractDenseRowFromCSRMatrix(A_diag, A_subrow, S_Pattern, marker, i);                    /* A[i, P] */
+            hypre_SeqVectorScale(-1, A_subrow);                                                            /* -A[P, i] */
+            for(j = 0; j < S_nnz; j++)
+               sol_vec_data[j] = A_subrow_data[j];
 
-         hypre_SeqVectorScale(-1, A_subrow);                                                            /* -A[P, i] */
-         for(j = 0; j < hypre_VectorSize(A_subrow); j++)
-            sol_vec_data[j] = A_subrow_data[j];
+            /* Solve A[P, P]G[i, P]' = -A[P, i] */
+            hypre_dpotrf(&uplo, &S_nnz, A_sub_data, &S_nnz, &info);
 
-         /* Solve A[P, P]G[i, P]' = -A[P, i] */
-         hypre_dpotrf(&uplo, &hypre_VectorSize(S_Pattern), A_sub_data, &hypre_VectorSize(S_Pattern), &info);
+            j = 1;
 
-         j = 1;
+            hypre_dpotrs(&uplo, &S_nnz, &j, A_sub_data, &S_nnz, sol_vec_data, &S_nnz, &info); /* A_subrow becomes the solution vector... */
 
-         hypre_dpotrs(&uplo, &hypre_VectorSize(S_Pattern), &j, A_sub_data, &hypre_VectorSize(S_Pattern), sol_vec_data, &hypre_VectorSize(S_Pattern), &info); /* A_subrow becomes the solution vector... */
+            for(j = 0; j < hypre_VectorSize(sol_vec); j++)
+               G_temp_data[j] = sol_vec_data[j];
 
-         for(j = 0; j < hypre_VectorSize(sol_vec); j++)
-            G_temp_data[j] = sol_vec_data[j];
+            /* Determine psi_{k+1} = G_temp[i]*A*G_temp[i]' */
+            hypre_SeqVectorScale(-1, A_subrow);                         /* A[P, i] */
+            new_psi = hypre_SeqVectorInnerProd(G_temp, A_subrow) + A_data[A_i[i]];
+            if(hypre_abs( new_psi - old_psi )/old_psi < kap_tolerance)
+               break;
 
-         /* Determine psi_{k+1} = G_temp[i]*A*G_temp[i]' */
-         hypre_SeqVectorScale(-1, A_subrow);                         /* A[P, i] */
-         new_psi = hypre_SeqVectorInnerProd(G_temp, A_subrow) + A_data[A_i[i]];
-         if(hypre_abs( new_psi - old_psi )/old_psi < kap_tolerance)
-            break;
-
-         old_psi = new_psi;
-      }
+            old_psi = new_psi;
+         }
 
 
       row_scale = 1/(sqrt(A_data[A_i[i]] - hypre_abs(hypre_SeqVectorInnerProd(G_temp, A_subrow))));
@@ -487,7 +459,7 @@ hypre_FSAISetup( void               *fsai_vdata,
       for(k = 0; k < hypre_VectorSize(G_temp); k++)
       {
          j           = G_i[i] + k + 1;
-         G_j[j]      = S_Pattern_data[k];
+         G_j[j]      = S_Pattern[k];
          G_data[j]   = G_temp_data[k];
       }
       G_i[i+1] = G_i[i] + k + 1;
@@ -506,8 +478,8 @@ hypre_FSAISetup( void               *fsai_vdata,
    hypre_SeqVectorDestroy(sol_vec);
    hypre_SeqVectorDestroy(kaporin_gradient);
    hypre_SeqVectorDestroy(kap_grad_nonzeros);
-   hypre_SeqVectorDestroy(S_Pattern);
    hypre_SeqVectorDestroy(A_sub);
+   hypre_TFree(S_Pattern, HYPRE_MEMORY_HOST);
    hypre_TFree(marker, HYPRE_MEMORY_HOST);
 
    return(hypre_error_flag);
