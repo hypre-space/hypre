@@ -310,6 +310,7 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
 
       if (i == 1)
       {
+         HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
          //cudaProfilerStop();
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Device Parcsr Matrix-by-Matrix, RAP2", hypre_MPI_COMM_WORLD);
