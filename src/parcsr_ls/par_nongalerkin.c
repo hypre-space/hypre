@@ -294,8 +294,6 @@ hypre_BoomerAMG_MyCreateS(hypre_ParCSRMatrix  *A,
     S = hypre_ParCSRMatrixCreate(comm, global_num_vars, global_num_vars,
                                  row_starts, row_starts,
                                  num_cols_offd, num_nonzeros_diag, num_nonzeros_offd);
-    /* row_starts is owned by A, col_starts = row_starts */
-    hypre_ParCSRMatrixSetRowStartsOwner(S,0);
     S_diag = hypre_ParCSRMatrixDiag(S);
     hypre_CSRMatrixI(S_diag) = hypre_CTAlloc(HYPRE_Int,  num_variables+1, HYPRE_MEMORY_HOST);
     hypre_CSRMatrixJ(S_diag) = hypre_CTAlloc(HYPRE_Int,  num_nonzeros_diag, HYPRE_MEMORY_HOST);
@@ -2314,5 +2312,3 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
 
     return ierr;
 }
-
-

@@ -232,7 +232,6 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          HYPRE_Int actual_local_size = hypre_ParVectorActualLocalSize(Vtemp);
          Utemp = hypre_ParVectorCreate(comm,hypre_ParVectorGlobalSize(Vtemp),
                                        hypre_ParVectorPartitioning(Vtemp));
-         hypre_ParVectorOwnsPartitioning(Utemp) = 0;
          local_size
             = hypre_VectorSize(hypre_ParVectorLocalVector(Vtemp));
          if (local_size < actual_local_size)
@@ -347,12 +346,16 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
       if (cycle_param == 3 && seq_cg)
       {
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Coarse solve");
          hypre_seqAMGCycle(amg_data, level, F_array, U_array);
+         HYPRE_ANNOTATE_REGION_END("%s", "Coarse solve");
       }
 #ifdef HYPRE_USING_DSUPERLU
       else if (cycle_param == 3 && hypre_ParAMGDataDSLUSolver(amg_data) != NULL)
       {
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Coarse solve");
          hypre_SLUDistSolve(hypre_ParAMGDataDSLUSolver(amg_data), Aux_F, Aux_U);
+         HYPRE_ANNOTATE_REGION_END("%s", "Coarse solve");
       }
 #endif
       else
@@ -360,6 +363,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          /*------------------------------------------------------------------
          * Do the relaxation num_sweep times
          *-----------------------------------------------------------------*/
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
          for (jj = 0; jj < cg_num_sweep; jj++)
          {
             if (smooth_num_levels > level && smooth_type > 9)
@@ -560,6 +564,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
                if (Solve_err_flag != 0)
                {
+                  HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
                   HYPRE_ANNOTATE_MGLEVEL_END(level);
                   HYPRE_ANNOTATE_FUNC_END;
 
@@ -589,6 +594,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                hypre_ParVectorAxpy(-alfa,Vtemp,Rtemp);
             }
          }
+         HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
       }
 
       /*------------------------------------------------------------------
@@ -615,6 +621,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          alpha = -1.0;
          beta = 1.0;
 
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Residual");
          if (block_mode)
          {
             hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
@@ -627,10 +634,12 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
             hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[fine_grid], U_array[fine_grid],
                                                beta, F_array[fine_grid], Vtemp);
          }
+         HYPRE_ANNOTATE_REGION_END("%s", "Residual");
 
          alpha = 1.0;
          beta = 0.0;
 
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Restriction");
          if (block_mode)
          {
             hypre_ParCSRBlockMatrixMatvecT(alpha, R_block_array[fine_grid], Vtemp,
@@ -650,7 +659,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                          beta, F_array[coarse_grid]);
             }
          }
-
+         HYPRE_ANNOTATE_REGION_END("%s", "Restriction");
          HYPRE_ANNOTATE_MGLEVEL_END(level);
 
          ++level;
@@ -678,6 +687,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          coarse_grid = level;
          alpha = 1.0;
          beta = 1.0;
+
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
          if (block_mode)
          {
             hypre_ParCSRBlockMatrixMatvec(alpha, P_block_array[fine_grid],
@@ -692,7 +703,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                      beta, U_array[fine_grid]);
             /* printf("Proc %d: level %d, n %d, Interpolation done\n", my_id, level, local_size); */
          }
-
+         HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
          HYPRE_ANNOTATE_MGLEVEL_END(level);
 
          --level;

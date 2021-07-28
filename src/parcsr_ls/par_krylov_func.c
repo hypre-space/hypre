@@ -46,7 +46,6 @@ hypre_ParKrylovCreateVector( void *vvector )
    new_vector = hypre_ParVectorCreate( hypre_ParVectorComm(vector),
                                        hypre_ParVectorGlobalSize(vector),
                                        hypre_ParVectorPartitioning(vector) );
-   hypre_ParVectorSetPartitioningOwner(new_vector,0);
 
    hypre_ParVectorInitialize_v2(new_vector, hypre_ParVectorMemoryLocation(vector));
 
@@ -78,7 +77,6 @@ hypre_ParKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
       new_vector[i] = hypre_ParVectorCreate( hypre_ParVectorComm(vector),
                                              hypre_ParVectorGlobalSize(vector),
                                              hypre_ParVectorPartitioning(vector) );
-      hypre_ParVectorSetPartitioningOwner(new_vector[i], 0);
       hypre_VectorData(hypre_ParVectorLocalVector(new_vector[i])) = &array_data[i*size];
       hypre_ParVectorInitialize_v2(new_vector[i], memory_location);
       if (i)
@@ -304,4 +302,3 @@ hypre_ParKrylovIdentity( void *vdata,
 {
    return( hypre_ParKrylovCopyVector( b, x ) );
 }
-
