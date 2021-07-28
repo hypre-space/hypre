@@ -42,6 +42,7 @@ FILES =\
  exchange_data.c\
  fortran_matrix.c\
  ap.c\
+ log.c\
  complex.c\
  error.c\
  hopscotch_hash.c\

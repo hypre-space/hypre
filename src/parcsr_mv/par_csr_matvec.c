@@ -60,6 +60,8 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    hypre_SetSyncCudaCompute(0);
 #endif
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  ParMatvec returns ierr = 11 if
     *  length of X doesn't equal the number of columns of A,
@@ -350,6 +352,8 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
 #endif
 
+   HYPRE_ANNOTATE_FUNC_END;
+
    return ierr;
 }
 
@@ -410,6 +414,8 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    hypre_GetSyncCudaCompute(&sync_stream);
    hypre_SetSyncCudaCompute(0);
 #endif
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  MatvecT returns ierr = 1 if
@@ -716,6 +722,8 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
 #endif
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return ierr;
 }
