@@ -80,7 +80,7 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
    HYPRE_Int       *pass_order;
    HYPRE_Int       *pass_starts;
 
-   HYPRE_Int        i, j, i1, i2, j1, j2;
+   HYPRE_Int        i, j, i1, i2, j1;
    HYPRE_Int        num_passes, p, remaining;
    HYPRE_Int        global_remaining;
    HYPRE_Int        cnt, cnt_old, cnt_rem, current_pass;
