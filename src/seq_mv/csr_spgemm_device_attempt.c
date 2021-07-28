@@ -193,7 +193,7 @@ hypre_spgemm_attempt( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
    /* lane id inside the warp */
    volatile HYPRE_Int lane_id = get_lane_id();
    /* shared memory hash table */
-#if 0
+#if 1
    __shared__ volatile HYPRE_Int s_HashKeys[NUM_WARPS_PER_BLOCK * SHMEM_HASH_SIZE];
    __shared__ volatile HYPRE_Complex s_HashVals[NUM_WARPS_PER_BLOCK * SHMEM_HASH_SIZE];
 #else
@@ -451,19 +451,18 @@ hypre_spgemm_numerical_with_rowest( HYPRE_Int       m,
                                     HYPRE_Int      *nnzC_out )
 {
 #if defined(HYPRE_USING_CUDA)
-   const HYPRE_Int num_warps_per_block = 20;
+   const HYPRE_Int num_warps_per_block = 16;
 #elif defined(HYPRE_USING_HIP)
-   const HYPRE_Int num_warps_per_block = 10;
+   const HYPRE_Int num_warps_per_block = 16;
 #endif
    const HYPRE_Int BDIMX               = 2;
    const HYPRE_Int BDIMY               = HYPRE_WARP_SIZE / BDIMX;
-
-   const size_t    shmem_size          = num_warps_per_block * shmem_hash_size * (sizeof(HYPRE_Complex) + sizeof(HYPRE_Int));
-   const HYPRE_Int shmem_maxbytes      = 65536;
    const size_t    shash_size          = shmem_hash_size * (size_t) m;
 
+#if 0
+   const size_t    shmem_size          = num_warps_per_block * shmem_hash_size * (sizeof(HYPRE_Complex) + sizeof(HYPRE_Int));
+   const HYPRE_Int shmem_maxbytes      = 65536;
    hypre_assert(shmem_size <= shmem_maxbytes);
-
    /* CUDA V100 */
    if (shmem_maxbytes > 49152)
    {
@@ -473,6 +472,7 @@ hypre_spgemm_numerical_with_rowest( HYPRE_Int       m,
       HYPRE_CUDA_CALL( cudaFuncSetAttribute(hypre_spgemm_attempt<num_warps_per_block, shmem_hash_size, 2, hash_type>,
                        cudaFuncAttributeMaxDynamicSharedMemorySize, shmem_maxbytes) );
    }
+#endif
 
    /* CUDA kernel configurations */
    dim3 bDim(BDIMX, BDIMY, num_warps_per_block);
@@ -501,8 +501,8 @@ hypre_spgemm_numerical_with_rowest( HYPRE_Int       m,
       // for cases where one WARP works on a row
       dim3 gDim( (m + bDim.z - 1) / bDim.z );
 
-      HYPRE_CUDA_LAUNCH2( (hypre_spgemm_attempt<num_warps_per_block, shmem_hash_size, 1, hash_type>),
-                          gDim, bDim, shmem_size,
+      HYPRE_CUDA_LAUNCH ( (hypre_spgemm_attempt<num_warps_per_block, shmem_hash_size, 1, hash_type>),
+                          gDim, bDim, /* shmem_size, */
                           m, NULL, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash1_i, d_ghash1_j, d_ghash1_a,
                           d_rc, d_rf );
    }
@@ -537,8 +537,8 @@ hypre_spgemm_numerical_with_rowest( HYPRE_Int       m,
       // for cases where one WARP works on a row
       dim3 gDim( (num_failed_rows + bDim.z - 1) / bDim.z );
 
-      HYPRE_CUDA_LAUNCH2( (hypre_spgemm_attempt<num_warps_per_block, shmem_hash_size, 2, hash_type>),
-                          gDim, bDim, shmem_size,
+      HYPRE_CUDA_LAUNCH ( (hypre_spgemm_attempt<num_warps_per_block, shmem_hash_size, 2, hash_type>),
+                          gDim, bDim, /* shmem_size, */
                           num_failed_rows, rf_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash2_i, d_ghash2_j, d_ghash2_a,
                           d_rc, NULL );
    }
