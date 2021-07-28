@@ -163,6 +163,8 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
       comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, dof_func_offd);
 
       hypre_ParCSRCommHandleDestroy(comm_handle);
+
+      hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
    }
 
    if (num_cols_offd_A)
