@@ -1073,6 +1073,8 @@ hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A,
 /* type 0: diag
  *      1: abs diag
  *      2: diag inverse
+ *      3: diag inverse sqrt
+ *      4: abs diag inverse sqrt
  */
 __global__ void
 hypreCUDAKernel_CSRExtractDiag( HYPRE_Int      nrows,
@@ -1118,6 +1120,14 @@ hypreCUDAKernel_CSRExtractDiag( HYPRE_Int      nrows,
          else if (type == 2)
          {
             d[row] = 1.0 / aa[j];
+         }
+         else if (type == 3)
+         {
+            d[row] = 1.0 / sqrt(aa[j]);
+         }
+         else if (type == 4)
+         {
+            d[row] = 1.0 / sqrt(fabs(aa[j]));
          }
       }
 

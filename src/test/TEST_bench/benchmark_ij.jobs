@@ -73,3 +73,16 @@ mpirun -np 2 ./ij -n 200 128 128 -P 2 1 1       -pmis -keepT 1 -rlx 7 -w 0.7    
 
 mpirun -np 4 ./ij -n 200 200 200 -P 2 2 1       -pmis -keepT 1 -rlx 18 -ns 2        -exec_device -mm_cusparse 0 -agg_nl 3 -agg_interp 7 -agg_P12_mx 6 -interptype 6 -solver 1 \
  >> benchmark_ij.out.21
+
+
+mpirun -np 4 ./ij -n 256 256 128 -P 2 2 1       -rlx 16 -cheby_scale 1 -cheby_eig_est 10        -exec_device -solver 1 \
+ >> benchmark_ij.out.22
+
+mpirun -np 4 ./ij -n 256 256 128 -P 2 2 1       -rlx 16 -cheby_scale 0 -cheby_eig_est 10        -exec_device -solver 1 \
+ >> benchmark_ij.out.23
+
+mpirun -np 4 ./ij -n 256 256 128 -P 2 2 1       -rlx 16 -cheby_scale 1 -cheby_eig_est 0        -exec_device -solver 1 \
+ >> benchmark_ij.out.24
+
+mpirun -np 4 ./ij -n 256 256 128 -P 2 2 1       -rlx 16 -cheby_scale 0 -cheby_eig_est 0        -exec_device -solver 1 \
+ >> benchmark_ij.out.25
