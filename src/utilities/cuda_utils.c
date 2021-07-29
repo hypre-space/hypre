@@ -1165,9 +1165,6 @@ hypre_CudaDataCreate()
    hypre_CudaDataUseGpuRand(data) = 0;
 #endif
 
-   hypre_CudaDataUserDeviceMalloc(data)  = NULL;
-   hypre_CudaDataUserDeviceMfree(data)   = NULL;
-
    /* device pool */
 #ifdef HYPRE_USING_DEVICE_POOL
    hypre_CudaDataCubBinGrowth(data)      = 8u;
