@@ -384,8 +384,10 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       }
       hypre_MPI_Allreduce(&remaining, &global_remaining, 1, HYPRE_MPI_INT, hypre_MPI_MAX, comm);
    }
+
    hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
-   hypre_TFree(points_left, HYPRE_MEMORY_HOST);
+   hypre_TFree(points_left, HYPRE_MEMORY_HOST); // FIXME: Clean up when done
+   hypre_TFree(points_left_dev, HYPRE_MEMORY_DEVICE);// FIXME: Clean up when done
 
    /* generate row sum of weak points and C-points to be ignored */
 
@@ -648,13 +650,18 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       hypre_ParCSRMatrixDestroy(Pi[i]);
    }
    hypre_TFree (Pi, HYPRE_MEMORY_HOST);
-   hypre_TFree (pass_marker, HYPRE_MEMORY_HOST);
-   hypre_TFree (pass_marker_offd, HYPRE_MEMORY_HOST);
-   hypre_TFree (pass_order, HYPRE_MEMORY_HOST);
-   hypre_TFree (pass_starts, HYPRE_MEMORY_HOST);
-   hypre_TFree (fine_to_coarse, HYPRE_MEMORY_HOST);
+   hypre_TFree (pass_marker_offd, HYPRE_MEMORY_HOST);// FIXME: Clean up when done
    hypre_TFree (dof_func_offd, HYPRE_MEMORY_HOST);
    hypre_TFree (row_sums, HYPRE_MEMORY_HOST);
+   hypre_TFree (pass_starts, HYPRE_MEMORY_HOST);
+
+   hypre_TFree (pass_marker, HYPRE_MEMORY_HOST);// FIXME: Clean up when done
+   hypre_TFree (pass_order, HYPRE_MEMORY_HOST);
+   hypre_TFree (fine_to_coarse, HYPRE_MEMORY_HOST);
+
+    hypre_TFree (pass_marker_dev, HYPRE_MEMORY_DEVICE);// FIXME: Clean up when done
+    hypre_TFree (pass_order_dev, HYPRE_MEMORY_DEVICE);
+    hypre_TFree (fine_to_coarse_dev, HYPRE_MEMORY_DEVICE);
 
 
     HYPRE_THRUST_CALL( replace_if,
