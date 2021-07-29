@@ -187,7 +187,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    /* contains pass numbers for each variable according to original order */
    pass_order = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
    /* contains row numbers according to new order, pass 1 followed by pass 2 etc */
-   fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
+   fine_to_coarse = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
    /* reverse of pass_order, keeps track where original numbers go */
    points_left = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
    /* contains row numbers of remaining points, auxiliary */
