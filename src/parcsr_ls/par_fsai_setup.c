@@ -398,6 +398,7 @@ hypre_FSAISetup( void               *fsai_vdata,
             if(hypre_VectorSize(kaporin_gradient) == 0)
                break;
 
+
             /* Find max_step_size largest values of the kaporin gradient, find their column indices, and add it to S_Pattern */
             hypre_AddToPattern(kaporin_gradient, kap_grad_nonzeros, S_Pattern, &S_nnz, max_step_size);
 
