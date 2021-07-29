@@ -115,7 +115,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int       *pass_marker_dev;
    HYPRE_Int       *pass_marker_offd_dev = NULL;
    HYPRE_Int       *pass_order_dev;
-   HYPRE_Int       *pass_starts_dev;
    HYPRE_Int       *CF_marker_dev;
 
    HYPRE_Int        i, j, i1, i2, j1;
