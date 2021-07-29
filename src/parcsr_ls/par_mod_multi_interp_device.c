@@ -8,6 +8,16 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
+__global__
+void hypreCUDAKernel_cfmarker_masked_rowsum( HYPRE_Int nrows,
+                                             HYPRE_Int *A_diag_i,
+                                             HYPRE_Complex *A_diag_data,
+                                             HYPRE_Int *A_offd_i,
+                                             HYPRE_Complex *A_offd_data,
+                                             HYPRE_Int *CF_marker,
+                                             HYPRE_Complex *row_sum);
+
+
 /*--------------------------------------------------------------------------
  * hypre_ParAMGBuildModMultipass
  * This routine implements Stuben's direct interpolation with multiple passes.
@@ -1574,4 +1584,73 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    *Pi_ptr = Pi;
 
    return hypre_error_flag;
+}
+
+__global__
+void hypreCUDAKernel_cfmarker_masked_rowsum( HYPRE_Int nrows,
+                                             HYPRE_Int *A_diag_i,
+                                             HYPRE_Complex *A_diag_data,
+                                             HYPRE_Int *A_offd_i,
+                                             HYPRE_Complex *A_offd_data,
+                                             HYPRE_Int *CF_marker,
+                                             HYPRE_Complex *row_sum)
+{
+  HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
+
+  if (row_i >= nrows || CF_marker[row_i] >= 0)
+   {
+      return;
+   }
+
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int p = 0;
+   HYPRE_Int q = 0;
+
+   // A_diag part
+   if (lane < 2)
+   {
+      p = read_only_load(A_diag_i + row_i + lane);
+   }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   HYPRE_Complex row_sum_i = 0.0;
+
+   // j = A_diag_1[i]+1 ==> p+1
+   for (HYPRE_Int j = p+1 + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   {
+      if ( j >= q )
+      {
+         continue;
+      }
+
+      HYPRE_Complex value = A_diag_data[j];
+
+      row_sum_i += value;
+   }
+
+   // A_offd part
+   if (lane < 2)
+   {
+      p = read_only_load(A_offd_i + row_i + lane);
+   }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   {
+      if ( j >= q )
+      {
+         continue;
+      }
+
+      HYPRE_Complex value = A_offd_data[j];
+
+      row_sum_i += value;
+   }
+
+   row_sum_i = warp_reduce_sum(row_sum_i);
+
+   if(lane == 0)
+     row_sum[row_i] += row_sum_i;
 }
