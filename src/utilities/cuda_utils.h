@@ -856,6 +856,19 @@ struct equal : public thrust::unary_function<T,bool>
    }
 };
 
+template<typename T>
+struct not_equal : public thrust::unary_function<T,bool>
+{
+   T val;
+
+   not_equal(T val_) { val = val_; }
+
+   __host__ __device__ bool operator()(const T &x)
+   {
+      return (x != val);
+   }
+};
+
 /* cuda_utils.c */
 dim3 hypre_GetDefaultCUDABlockDimension();
 
