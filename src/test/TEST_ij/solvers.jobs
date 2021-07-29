@@ -30,44 +30,44 @@
 #
 #=============================================================================
 
-#mpirun -np 2 ./ij -solver 1 -rhsrand > solvers.out.0
-#mpirun -np 2 ./ij -solver 2 -rhsrand > solvers.out.1
-#mpirun -np 2 ./ij -solver 3 -rhsrand > solvers.out.2
-#mpirun -np 2 ./ij -solver 4 -rhsrand > solvers.out.3
-#mpirun -np 2 ./ij -solver 5 -rhsrand -w 0.67 -ns 2 > solvers.out.4
-#mpirun -np 2 ./ij -solver 6 -rhsrand > solvers.out.5
-##mpirun -np 2 ./ij -solver 7 -rhsrand > solvers.out.6
-##mpirun -np 2 ./ij -solver 8 -rhsrand > solvers.out.7
-#mpirun -np 2 ./ij -solver 20 -rhsrand > solvers.out.8
-#mpirun -np 2 ./ij -solver 20 -cf 0.5 -rhsrand > solvers.out.9
-#mpirun -np 2 ./ij -solver 20 -cf 0.5 -rhsrand -solver_type 2 > solvers.out.10
-#mpirun -np 2 ./ij -solver 20 -cf 0.5 -rhsrand -solver_type 3 > solvers.out.11
-#mpirun -np 2 ./ij -solver 16 -rhsrand > solvers.out.12
-#mpirun -np 2 ./ij -solver 17 -rhsrand > solvers.out.13
-#mpirun -np 2 ./ij -solver 17 -rhsrand -cgs 2 > solvers.out.14
-#mpirun -np 2 ./ij -solver 17 -rhsrand -cgs 2 -unroll 8 > solvers.out.15
-#mpirun -np 2 ./ij -solver 17 -rhsrand -unroll 4 > solvers.out.16
-#mpirun -np 2 ./ij -solver 3 -rhsrand -check_residual > solvers.out.17
-#mpirun -np 2 ./ij -solver 4 -rhsrand -check_residual > solvers.out.18
+mpirun -np 2 ./ij -solver 1 -rhsrand > solvers.out.0
+mpirun -np 2 ./ij -solver 2 -rhsrand > solvers.out.1
+mpirun -np 2 ./ij -solver 3 -rhsrand > solvers.out.2
+mpirun -np 2 ./ij -solver 4 -rhsrand > solvers.out.3
+mpirun -np 2 ./ij -solver 5 -rhsrand -w 0.67 -ns 2 > solvers.out.4
+mpirun -np 2 ./ij -solver 6 -rhsrand > solvers.out.5
+#mpirun -np 2 ./ij -solver 7 -rhsrand > solvers.out.6
+#mpirun -np 2 ./ij -solver 8 -rhsrand > solvers.out.7
+mpirun -np 2 ./ij -solver 20 -rhsrand > solvers.out.8
+mpirun -np 2 ./ij -solver 20 -cf 0.5 -rhsrand > solvers.out.9
+mpirun -np 2 ./ij -solver 20 -cf 0.5 -rhsrand -solver_type 2 > solvers.out.10
+mpirun -np 2 ./ij -solver 20 -cf 0.5 -rhsrand -solver_type 3 > solvers.out.11
+mpirun -np 2 ./ij -solver 16 -rhsrand > solvers.out.12
+mpirun -np 2 ./ij -solver 17 -rhsrand > solvers.out.13
+mpirun -np 2 ./ij -solver 17 -rhsrand -cgs 2 > solvers.out.14
+mpirun -np 2 ./ij -solver 17 -rhsrand -cgs 2 -unroll 8 > solvers.out.15
+mpirun -np 2 ./ij -solver 17 -rhsrand -unroll 4 > solvers.out.16
+mpirun -np 2 ./ij -solver 3 -rhsrand -check_residual > solvers.out.17
+mpirun -np 2 ./ij -solver 4 -rhsrand -check_residual > solvers.out.18
 
-##systems AMG run ...unknown approach, hybrid approach, nodal approach
-#mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 > solvers.out.sysu
-#mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 -nodal 1 -smtype 6 -smlv 10 -dom 1 -ov 0 > solvers.out.sysh
-#mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 -interptype 10 -Pmx 6 > solvers.out.sysn
+#systems AMG run ...unknown approach, hybrid approach, nodal approach
+mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 > solvers.out.sysu
+mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 -nodal 1 -smtype 6 -smlv 10 -dom 1 -ov 0 > solvers.out.sysh
+mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 -interptype 10 -Pmx 6 > solvers.out.sysn
 
-##LGMRS and FlexGMRES
-#mpirun -np 2 ./ij -solver 50 -rhsrand > solvers.out.101
-#mpirun -np 2 ./ij -solver 51 -rhsrand > solvers.out.102
-#mpirun -np 2 ./ij -solver 60 -rhsrand > solvers.out.103
-#mpirun -np 2 ./ij -solver 61 -rhsrand > solvers.out.104
+#LGMRS and FlexGMRES
+mpirun -np 2 ./ij -solver 50 -rhsrand > solvers.out.101
+mpirun -np 2 ./ij -solver 51 -rhsrand > solvers.out.102
+mpirun -np 2 ./ij -solver 60 -rhsrand > solvers.out.103
+mpirun -np 2 ./ij -solver 61 -rhsrand > solvers.out.104
 
-##agglomerated coarse grid solve
-#mpirun -np 8 ./ij -n 80 80 80 -P 2 2 2 -agg_nl 1 -seq_th 100 -solver 1 -rlx 6 > solvers.out.105
-#mpirun -np 8 ./ij -n 40 40 40 -P 2 2 2 -agg_nl 1 -seq_th 100 -solver 1 -rlx 6 -sysL 3 -nf 3 > solvers.out.107
+#agglomerated coarse grid solve
+mpirun -np 8 ./ij -n 80 80 80 -P 2 2 2 -agg_nl 1 -seq_th 100 -solver 1 -rlx 6 > solvers.out.105
+mpirun -np 8 ./ij -n 40 40 40 -P 2 2 2 -agg_nl 1 -seq_th 100 -solver 1 -rlx 6 -sysL 3 -nf 3 > solvers.out.107
 
-##redundant coarse grid solve
-#mpirun -np 8 ./ij -n 80 80 80 -P 2 2 2 -agg_nl 1 -seq_th 100 -solver 1 -rlx 6 -red 1 > solvers.out.106
-#mpirun -np 8 ./ij -n 40 40 40 -P 2 2 2 -agg_nl 1 -seq_th 100 -solver 1 -rlx 6 -sysL 3 -nf 3 -red 1 > solvers.out.108
+#redundant coarse grid solve
+mpirun -np 8 ./ij -n 80 80 80 -P 2 2 2 -agg_nl 1 -seq_th 100 -solver 1 -rlx 6 -red 1 > solvers.out.106
+mpirun -np 8 ./ij -n 40 40 40 -P 2 2 2 -agg_nl 1 -seq_th 100 -solver 1 -rlx 6 -sysL 3 -nf 3 -red 1 > solvers.out.108
 
 #additive cycles
 mpirun -np 2 ./ij -n 20 20 20 -P 2 1 1 -agg_nl 1 -solver 1 -CF 0 -rlx 0 -w 0.7 -rlx_coarse 0 -ns_coarse 2 > solvers.out.109
