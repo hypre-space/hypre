@@ -93,7 +93,7 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
    HYPRE_ParCSRMatrix parcsr_B       = NULL;
    HYPRE_ParCSRMatrix parcsr_error_host = NULL;
    HYPRE_Real         fnorm, rfnorm, fnorm0;
-   HYPRE_Int          time_index, rep = 1;
+   HYPRE_Int          time_index, rep = 2;
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -392,7 +392,7 @@ main( hypre_int argc,
    HYPRE_Int          rowest_mtd = 3;
    HYPRE_Int          rowest_nsamples = 32;
    HYPRE_Real         rowest_mult = 1.0;
-   HYPRE_Int          zero_mem_cost = 1;
+   HYPRE_Int          zero_mem_cost = 0;
    char               hash_type = 'L';
 
    /*-----------------------------------------------------------
