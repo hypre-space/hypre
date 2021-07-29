@@ -106,6 +106,8 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int       *pass_order;
    HYPRE_Int       *pass_starts;
 
+   HYPRE_Int       *CF_marker_dev;
+
    HYPRE_Int        i, j, i1, i2, j1;
    HYPRE_Int        num_passes, p, remaining;
    HYPRE_Int        global_remaining;
@@ -196,6 +198,11 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
    P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_HOST);
    P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_HOST);
+
+   // Copy CF_marker to dev
+   //FIXME: Assuming this is on the host, we should do something better
+   CF_marker_dev = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy( CF_marker_dev, CF_marker, HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
    cnt = 0;
    remaining = 0;
@@ -599,10 +606,15 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    hypre_TFree (dof_func_offd, HYPRE_MEMORY_HOST);
    hypre_TFree (row_sums, HYPRE_MEMORY_HOST);
 
-   for (i=0; i < n_fine; i++)
-   {
-      if (CF_marker[i] == -3) CF_marker[i] = -1;
-   }
+
+    HYPRE_THRUST_CALL( replace_if,
+                       CF_marker_dev,
+                       CF_marker_dev+n_fine,
+                       equal<int>(-3),
+                       static_cast<int>(-1) );
+
+   hypre_TMemcpy( CF_marker, CF_marker_dev, HYPRE_Int, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(CF_marker_dev, HYPRE_MEMORY_DEVICE);
 
    hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
    hypre_CSRMatrixNumCols(P_offd) = num_cols_offd_P;
