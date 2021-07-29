@@ -14,8 +14,12 @@
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - *
                 Numerical Multiplication
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
-
+#if defined(HYPRE_USING_CUDA)
 #define HYPRE_SPGEMM_NUMER_HASH_SIZE 256
+#elif defined(HYPRE_USING_HIP)
+#define HYPRE_SPGEMM_NUMER_HASH_SIZE 256
+#endif
+
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
@@ -402,10 +406,11 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int       m,
 
 #if defined(HYPRE_USING_CUDA)
    const HYPRE_Int num_warps_per_block = 16;
+   const HYPRE_Int BDIMX               =  2;
 #elif defined(HYPRE_USING_HIP)
    const HYPRE_Int num_warps_per_block = 16;
+   const HYPRE_Int BDIMX               =  4;
 #endif
-   const HYPRE_Int BDIMX               =  2;
    const HYPRE_Int BDIMY               = HYPRE_WARP_SIZE / BDIMX;
 
 #if 0

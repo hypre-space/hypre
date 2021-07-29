@@ -12,7 +12,11 @@
                 Symbolic Multiplication
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+#if defined(HYPRE_USING_CUDA)
 #define HYPRE_SPGEMM_SYMBL_HASH_SIZE 512
+#elif defined(HYPRE_USING_HIP)
+#define HYPRE_SPGEMM_SYMBL_HASH_SIZE 512
+#endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
@@ -272,10 +276,11 @@ hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
 
 #if defined(HYPRE_USING_CUDA)
    const HYPRE_Int num_warps_per_block = 16;
+   const HYPRE_Int BDIMX               =  2;
 #elif defined(HYPRE_USING_HIP)
    const HYPRE_Int num_warps_per_block = 16;
+   const HYPRE_Int BDIMX               =  4;
 #endif
-   const HYPRE_Int BDIMX               =  2;
    const HYPRE_Int BDIMY               = HYPRE_WARP_SIZE / BDIMX;
 
    /* CUDA kernel configurations */
