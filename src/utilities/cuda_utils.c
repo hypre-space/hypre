@@ -1156,7 +1156,7 @@ hypre_CudaDataCreate()
    hypre_CudaDataSpgemmRownnzEstimateMethod(data)     = 3;
    hypre_CudaDataSpgemmRownnzEstimateNsamples(data)   = 32;
    hypre_CudaDataSpgemmRownnzEstimateMultFactor(data) = 1.5;
-   hypre_CudaDataSpgemmHashType(data)                 = 'Q';
+   hypre_CudaDataSpgemmHashType(data)                 = 'D';
 
    /* pmis */
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
