@@ -153,7 +153,7 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
             temp += 2*A_data[j];
 
          /* Skip the upper triangular part of A */
-         if (A_j[j] > i)
+         if (A_j[j] > row_num)
             continue;
 
          for(k = 0; k < S_nnz; k++)
@@ -164,7 +164,7 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
             }
       }
 
-      if(temp != 0)
+      if(temp != 0.0)
       {
          kap_grad_data[count] = hypre_abs(temp);
          kap_grad_nonzeros[count] = i;
