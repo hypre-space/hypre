@@ -113,6 +113,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int       *fine_to_coarse_dev;
    HYPRE_Int       *points_left_dev;
    HYPRE_Int       *pass_marker_dev;
+   HYPRE_Int       *pass_marker_offd_dev = NULL;
    HYPRE_Int       *pass_order_dev;
    HYPRE_Int       *pass_starts_dev;
    HYPRE_Int       *CF_marker_dev;
@@ -298,23 +299,30 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
    if (num_cols_offd_A)
    {
-      pass_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd_A, HYPRE_MEMORY_HOST);
-      index = 0;
-      num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-      int_buf_data = hypre_CTAlloc(HYPRE_Int,  hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_sends; i++)
-      {
-         startc = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-         for (j = startc; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
-         {
-            int_buf_data[index++] = pass_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
-         }
-      }
+     num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-      comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, pass_marker_offd);
+     int_buf_data = hypre_CTAlloc(HYPRE_Int,  hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_DEVICE);
 
+     HYPRE_THRUST_CALL( gather,
+                        hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                        hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
+                        hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                        pass_marker_dev,
+                        int_buf_data );
+
+      pass_marker_offd_dev = hypre_CTAlloc(HYPRE_Int,  num_cols_offd_A, HYPRE_MEMORY_DEVICE);
+
+      /* create a handle to start communication. 11: for integer */
+      comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_DEVICE, int_buf_data, HYPRE_MEMORY_DEVICE, pass_marker_offd_dev);
+
+      /* destroy the handle to finish communication */
       hypre_ParCSRCommHandleDestroy(comm_handle);
+
+      // FIXME: Remove this when pass_marker_offd usage completely moved to the GPU
+      pass_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd_A, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy( pass_marker_offd, pass_marker_offd_dev, HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
+
    current_pass = 1;
    num_passes = 1;
    /* color points according to pass number */
@@ -366,26 +374,36 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
          break;
       }
       pass_starts[num_passes] = cnt;
+
       /* update pass_marker_offd */
-      index = 0;
       if (num_cols_offd_A)
       {
-         for (i = 0; i < num_sends; i++)
-         {
-            startc = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-            for (j = startc; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
-            {
-               int_buf_data[index++] = pass_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
-            }
-         }
-         comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, pass_marker_offd);
+        // Update pass_marker on the device
+        // FIXME: Remove this when the pass_marker updates above have been moved to the GPU
+        hypre_TMemcpy( pass_marker_dev, pass_marker, HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
-         hypre_ParCSRCommHandleDestroy(comm_handle);
+        HYPRE_THRUST_CALL( gather,
+                           hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                           hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
+                           hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                           pass_marker_dev,
+                           int_buf_data );
+
+        /* create a handle to start communication. 11: for integer */
+        comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_DEVICE, int_buf_data, HYPRE_MEMORY_DEVICE, pass_marker_offd_dev);
+
+        /* destroy the handle to finish communication */
+        hypre_ParCSRCommHandleDestroy(comm_handle);
+
+        // FIXME: Remove this when pass_marker_offd usage completely moved to the GPU
+        hypre_TMemcpy( pass_marker_offd, pass_marker_offd_dev, HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
       }
-      hypre_MPI_Allreduce(&remaining, &global_remaining, 1, HYPRE_MPI_INT, hypre_MPI_MAX, comm);
-   }
 
-   hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
+      hypre_MPI_Allreduce(&remaining, &global_remaining, 1, HYPRE_MPI_INT, hypre_MPI_MAX, comm);
+
+   } // while (global_remaining > 0)
+
+   hypre_TFree(int_buf_data, HYPRE_MEMORY_DEVICE);
    hypre_TFree(points_left, HYPRE_MEMORY_HOST); // FIXME: Clean up when done
    hypre_TFree(points_left_dev, HYPRE_MEMORY_DEVICE);// FIXME: Clean up when done
 
@@ -651,6 +669,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    }
    hypre_TFree (Pi, HYPRE_MEMORY_HOST);
    hypre_TFree (pass_marker_offd, HYPRE_MEMORY_HOST);// FIXME: Clean up when done
+   hypre_TFree (pass_marker_offd_dev, HYPRE_MEMORY_DEVICE);
    hypre_TFree (dof_func_offd, HYPRE_MEMORY_HOST);
    hypre_TFree (row_sums, HYPRE_MEMORY_HOST);
    hypre_TFree (pass_starts, HYPRE_MEMORY_HOST);
