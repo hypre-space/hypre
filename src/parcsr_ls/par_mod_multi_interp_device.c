@@ -447,20 +447,16 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    }
    else
    {
-      for (i=0; i < n_fine; i++)
-      {
-         if (CF_marker[i] < 0)
-         {
-            for (j = A_diag_i[i]+1; j < A_diag_i[i+1]; j++)
-            {
-               row_sums[i] += A_diag_data[j];
-            }
-            for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
-            {
-               row_sums[i] += A_offd_data[j];
-            }
-         }
-      }
+     dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+     dim3 gDim = hypre_GetDefaultCUDAGridDimension(n_fine, "warp", bDim);
+
+     HYPRE_CUDA_LAUNCH( hypreCUDAKernel_cfmarker_masked_rowsum, gDim, bDim,
+                        n_fine, A_diag_i_dev, A_diag_data_dev, A_offd_i_dev, A_offd_data_dev,
+                        CF_marker_dev, row_sums_dev );
+
+     // Copy row sums back to host
+     // FIXME: Clean this up when host row_sums no longer needed
+     hypre_TMemcpy( row_sums, row_sums_dev, HYPRE_Real, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
 
    Pi = hypre_CTAlloc(hypre_ParCSRMatrix*, num_passes, HYPRE_MEMORY_HOST);
