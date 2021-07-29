@@ -917,6 +917,18 @@ hypre_MGRSetup( void               *mgr_vdata,
       // user provided AMG solver
       // only support AMG at the first level
       // TODO: input check to avoid crashing
+      if (exec == HYPRE_EXEC_HOST)
+      {
+        hypre_MGRBuildAff(A_array[lev], CF_marker_array[lev], debug_flag, &A_ff_ptr);
+      }
+#if defined(HYPRE_USING_CUDA)
+      else
+      {
+        hypre_ParCSRMatrixGenerateFFFCDevice(A_array[lev], CF_marker_array[lev], coarse_pnts_global, NULL, NULL, &A_ff_ptr);
+      }
+#endif
+
+      /*
       if (lev == 0 && use_default_fsolver == 0)
       {
         if (((hypre_ParAMGData*)aff_solver[0])->A_array[0] == NULL)
@@ -930,32 +942,22 @@ hypre_MGRSetup( void               *mgr_vdata,
         }
         A_ff_ptr = ((hypre_ParAMGData*)aff_solver[0])->A_array[0];
       }
-      else // construct default AMG solver
+      */
+      if (lev > 0 || use_default_fsolver == 1)  // construct default AMG solver
       {
-        if (exec == HYPRE_EXEC_HOST)
-        {
-          hypre_MGRBuildAff(A_array[lev], CF_marker_array[lev], debug_flag, &A_ff_ptr);
-        }
-#if defined(HYPRE_USING_CUDA)
-        else
-        {
-          hypre_ParCSRMatrixGenerateFFFCDevice(A_array[lev], CF_marker_array[lev], coarse_pnts_global, NULL, NULL, &A_ff_ptr);
-        }
-#endif
-
         aff_solver[lev] = (HYPRE_Solver*) hypre_BoomerAMGCreate();
         hypre_BoomerAMGSetMaxIter(aff_solver[lev], mgr_data -> num_relax_sweeps);
         hypre_BoomerAMGSetTol(aff_solver[lev], 0.0);
 #if defined(HYPRE_USING_CUDA)
         hypre_BoomerAMGSetRelaxType(aff_solver[lev], 18);
         hypre_BoomerAMGSetCoarsenType(aff_solver[lev], 8);
-        hypre_BoomerAMGSetNumSweeps(aff_solver[lev], 3);
+        hypre_BoomerAMGSetNumSweeps(aff_solver[lev], 2);
 #else
         hypre_BoomerAMGSetRelaxOrder(aff_solver[lev], 1);
 #endif
-        hypre_BoomerAMGSetAggNumLevels(aff_solver[lev], 1);
+        //hypre_BoomerAMGSetAggNumLevels(aff_solver[lev], 1);
         hypre_BoomerAMGSetPrintLevel(aff_solver[lev], mgr_data -> frelax_print_level);
-        hypre_BoomerAMGSetNumFunctions(aff_solver[lev], 1);
+        //hypre_BoomerAMGSetNumFunctions(aff_solver[lev], 1);
 
         fine_grid_solver_setup(aff_solver[lev], A_ff_ptr, F_fine_array[lev+1], U_fine_array[lev+1]);
 
