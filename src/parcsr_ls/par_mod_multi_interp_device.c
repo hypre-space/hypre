@@ -1077,7 +1077,6 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_HOST); // FIXME: Clean up
    hypre_TFree(fine_to_coarse_offd_dev, HYPRE_MEMORY_DEVICE);
 
-   //row_sums = hypre_CTAlloc(HYPRE_Real, num_points, HYPRE_MEMORY_HOST);
    row_sum_C = hypre_CTAlloc(HYPRE_Real, num_points, HYPRE_MEMORY_HOST);
    for (i=0; i < num_points; i++)
    {
