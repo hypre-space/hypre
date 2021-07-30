@@ -474,7 +474,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                    A_diag_data,A_diag_i,A_diag_j, // Hacked in host pointers
                                    A_offd_data,A_offd_i,A_offd_j, // Remove when done porting
                                    S_diag_i,S_diag_j,S_offd_i,S_offd_j,
-                                   pass_marker_dev);
+                                   pass_marker_dev, pass_marker_offd_dev);
    if (interp_type == 8)
    {
       for (i=1; i<num_passes-1; i++)
@@ -486,7 +486,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                    A_diag_data,A_diag_i,A_diag_j, // Hacked in host pointers
                                    A_offd_data,A_offd_i,A_offd_j, // Remove when done porting
                                    S_diag_i,S_diag_j,S_offd_i,S_offd_j,
-                                   pass_marker_dev);
+                                   pass_marker_dev, pass_marker_offd_dev);
 
 
          Pi[i] = hypre_ParMatmul(Q, Pi[i-1]);
@@ -507,7 +507,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                      A_diag_data,A_diag_i,A_diag_j, // Hacked in host pointers
                                      A_offd_data,A_offd_i,A_offd_j, // Remove when done porting
                                      S_diag_i,S_diag_j,S_offd_i,S_offd_j,
-                                   pass_marker_dev);
+                                   pass_marker_dev, pass_marker_offd_dev);
       }
    }
 
@@ -821,7 +821,8 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
                                  HYPRE_Int * S_offd_j,
                                  // The below are the computed/mapped device pointers
                                  // Clean this up when we are done
-                                 HYPRE_Int * pass_marker_dev )
+                                 HYPRE_Int * pass_marker_dev,
+                                 HYPRE_Int * pass_marker_offd_dev )
 {
    MPI_Comm                comm = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg    *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -1156,7 +1157,8 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
                              HYPRE_Int * S_offd_j,
                              // The below are the computed/mapped device pointers
                              // Clean this up when we are done
-                             HYPRE_Int * pass_marker_dev )
+                             HYPRE_Int * pass_marker_dev,
+                             HYPRE_Int * pass_marker_offd_dev )
 {
    MPI_Comm                comm = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg    *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
