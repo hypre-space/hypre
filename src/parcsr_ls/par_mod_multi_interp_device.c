@@ -905,8 +905,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
 
    /* define P matrices */
 
-   P_diag_i = hypre_CTAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_HOST);
-   P_offd_i = hypre_CTAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_HOST);
+
 
    fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST); // FIXME: Clean up
    fine_to_coarse_dev = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
@@ -1007,6 +1006,9 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    }
 
    /* generate P_diag_i and P_offd_i */
+   P_diag_i = hypre_CTAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_HOST);
+   P_offd_i = hypre_CTAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_HOST);
+
    nnz_diag = 0;
    nnz_offd = 0;
    for (i=0; i < num_points; i++)
@@ -1038,9 +1040,11 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
       P_offd_i[i] += P_offd_i[i-1];
    }
 
-   P_diag_j = hypre_CTAlloc(HYPRE_Int, nnz_diag, HYPRE_MEMORY_HOST);
+
+
+   P_diag_j    = hypre_CTAlloc(HYPRE_Int, nnz_diag, HYPRE_MEMORY_HOST);
    P_diag_data = hypre_CTAlloc(HYPRE_Real, nnz_diag, HYPRE_MEMORY_HOST);
-   P_offd_j = hypre_CTAlloc(HYPRE_Int, nnz_offd, HYPRE_MEMORY_HOST);
+   P_offd_j    = hypre_CTAlloc(HYPRE_Int, nnz_offd, HYPRE_MEMORY_HOST);
    P_offd_data = hypre_CTAlloc(HYPRE_Real, nnz_offd, HYPRE_MEMORY_HOST);
 
    cnt_diag = 0;
