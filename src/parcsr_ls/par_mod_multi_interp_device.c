@@ -408,6 +408,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       // Update pass_marker on the device
       // FIXME: Remove this when the pass_marker updates above have been moved to the GPU
       hypre_TMemcpy( pass_marker_dev, pass_marker, HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy( pass_order_dev,  pass_order,  HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
 
       /* update pass_marker_offd */
