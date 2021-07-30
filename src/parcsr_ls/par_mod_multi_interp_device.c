@@ -8,6 +8,9 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
+void init_fine_to_coarse( HYPRE_Int n_fine, HYPRE_Int * pass_marker_dev, HYPRE_Int color,
+                          HYPRE_Int * fine_to_coarse_dev, HYPRE_Int & n_cpts );
+
 __global__
 void hypreCUDAKernel_cfmarker_masked_rowsum( HYPRE_Int nrows,
                                              HYPRE_Int *A_diag_i,
@@ -1584,6 +1587,46 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    *Pi_ptr = Pi;
 
    return hypre_error_flag;
+}
+
+void init_fine_to_coarse( HYPRE_Int n_fine, HYPRE_Int * pass_marker_dev, HYPRE_Int color,
+                          HYPRE_Int * fine_to_coarse_dev, HYPRE_Int & n_cpts )
+{
+  // Host code this is replacing:
+  // n_cpts = 0;
+  // for (int i=0; i < pass_marker.size(); i++)
+  //  {
+  //    if (pass_marker[i] == color)
+  //      fine_to_coarse[i] = n_cpts++;
+  //    else
+  //      fine_to_coarse[i] = -1;
+  //  }
+
+  // TODO: Is there any way we can do this without three Thrust calls?
+  //       On AMD devices that support large BAR, we could just directly
+  //       reference the last entry of fine_to_coasre after the scan in
+  //       device memory from the host. This
+  //       will almost certainly be faster than the thrust::count call.
+  //       Maybe it's faster to copy the last entry of fine_to_coarse after
+  //       the scan rather than thrust::count? I haven't measured it.
+  // As it is, this is still a net win by a factor of 2 or so... :-/
+  n_cpts = HYPRE_THRUST_CALL( count,
+                              pass_marker_dev,
+                              pass_marker_dev + n_fine,
+                              color );
+
+  HYPRE_THRUST_CALL( exclusive_scan,
+                     thrust::make_transform_iterator(pass_marker_dev,equal<int>(color)),
+                     thrust::make_transform_iterator(pass_marker_dev+n_fine,equal<int>(color)),
+                     fine_to_coarse_dev,
+                     (int)0 );
+
+  HYPRE_THRUST_CALL( replace_if,
+                     fine_to_coarse_dev,
+                     fine_to_coarse_dev+n_fine,
+                     pass_marker_dev,
+                     not_equal<int>(color),
+                     (int) -1 );
 }
 
 __global__
