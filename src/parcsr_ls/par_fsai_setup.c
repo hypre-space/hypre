@@ -134,7 +134,7 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
    HYPRE_Complex *kap_grad_data           = hypre_VectorData(kaporin_gradient);
 
    for(i = 0; i < S_nnz; i++)
-      marker[S_Pattern[i]] = 1;
+      marker[S_Pattern[i]] = i;
 
    count = 0;
 
@@ -156,12 +156,9 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
          if (A_j[j] > row_num)
             continue;
 
-         for(k = 0; k < S_nnz; k++)
-            if(S_Pattern[k] == A_j[j])
-            {
-               temp += 2 * G_temp_data[k] * A_data[j];
-               break;
-            }
+         if(marker[A_j[j]] > -1)
+            temp += 2 * G_temp_data[marker[A_j[j]]] * A_data[j];
+            
       }
 
       if(temp != 0.0)
