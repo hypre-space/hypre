@@ -1101,6 +1101,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
       }
    }
 
+   hypre_TFree(row_sum_C, HYPRE_MEMORY_HOST);
 
    P = hypre_ParCSRMatrixCreate(comm,
                                 total_global_fpts,
@@ -1125,10 +1126,6 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
 
    hypre_CSRMatrixMemoryLocation(P_diag) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixMemoryLocation(P_offd) = HYPRE_MEMORY_HOST;
-
-/* free stuff */
-   hypre_TFree(row_sum_C, HYPRE_MEMORY_HOST);
-
 
    hypre_MatvecCommPkgCreate(P);
    *P_ptr = P;
