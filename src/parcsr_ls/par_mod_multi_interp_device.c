@@ -1633,36 +1633,37 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    Pi_offd_data = hypre_CSRMatrixData(Pi_offd);
    Pi_offd_i = hypre_CSRMatrixI(Pi_offd);
 
-   for (i=0; i < num_points; i++)
+   // FIXME: Clean up when done with host code
    {
-      HYPRE_Real row_sums_C = 0.0;
+     HYPRE_Real * w_row_sum_dev    = hypre_CTAlloc(HYPRE_Real, num_points,                          HYPRE_MEMORY_DEVICE);
+     HYPRE_Int  * Pi_diag_i_dev    = hypre_CTAlloc(HYPRE_Int,  hypre_CSRMatrixNumRows(Pi_diag)+1,   HYPRE_MEMORY_DEVICE);
+     HYPRE_Real * Pi_diag_data_dev = hypre_CTAlloc(HYPRE_Real, hypre_CSRMatrixNumNonzeros(Pi_diag), HYPRE_MEMORY_DEVICE);
+     HYPRE_Int  * Pi_offd_i_dev    = hypre_CTAlloc(HYPRE_Int,  hypre_CSRMatrixNumRows(Pi_offd)+1,   HYPRE_MEMORY_DEVICE);
+     HYPRE_Real * Pi_offd_data_dev = hypre_CTAlloc(HYPRE_Real, hypre_CSRMatrixNumNonzeros(Pi_offd), HYPRE_MEMORY_DEVICE);
 
-      HYPRE_Real diagonal, value;
-      i1 = pass_order[i];
-      diagonal = A_diag_data[A_diag_i[i1]];
+     hypre_TMemcpy( Pi_diag_i_dev,    Pi_diag_i,    HYPRE_Int,  hypre_CSRMatrixNumRows(Pi_diag)+1,   HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+     hypre_TMemcpy( Pi_diag_data_dev, Pi_diag_data, HYPRE_Real, hypre_CSRMatrixNumNonzeros(Pi_diag), HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+     hypre_TMemcpy( Pi_offd_i_dev,    Pi_offd_i,    HYPRE_Int,  hypre_CSRMatrixNumRows(Pi_offd)+1,   HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+     hypre_TMemcpy( Pi_offd_data_dev, Pi_offd_data, HYPRE_Real, hypre_CSRMatrixNumNonzeros(Pi_offd), HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+     hypre_TMemcpy( w_row_sum_dev,    w_row_sum,    HYPRE_Real, num_points,                          HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
-      for (j=Pi_diag_i[i]; j < Pi_diag_i[i+1]; j++)
-      {
-         row_sums_C += Pi_diag_data[j];
-      }
-      for (j=Pi_offd_i[i]; j < Pi_offd_i[i+1]; j++)
-      {
-         row_sums_C += Pi_offd_data[j];
-      }
-      value = row_sums_C*diagonal;
-      row_sums_C += w_row_sum[i];
-      if (value != 0)
-      {
-         row_sums_C /= value;
-      }
-      for (j = Pi_diag_i[i]; j < Pi_diag_i[i+1]; j++)
-      {
-         Pi_diag_data[j] = -Pi_diag_data[j]*row_sums_C;
-      }
-      for (j = Pi_offd_i[i]; j < Pi_offd_i[i+1]; j++)
-      {
-         Pi_offd_data[j] = -Pi_offd_data[j]*row_sums_C;
-      }
+     dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+     dim3 gDim = hypre_GetDefaultCUDAGridDimension(num_points, "warp", bDim);
+
+     HYPRE_CUDA_LAUNCH( hypreCUDAKernel_mutli_pi_rowsum, gDim, bDim,
+                        num_points, pass_order_dev, A_diag_i_dev, A_diag_data_dev,
+                        Pi_diag_i_dev, Pi_diag_data_dev, Pi_offd_i_dev, Pi_offd_data_dev,
+                        w_row_sum_dev );
+
+     // FIXME: Clean up when done with host code
+     hypre_TMemcpy( Pi_diag_data, Pi_diag_data_dev, HYPRE_Real, hypre_CSRMatrixNumNonzeros(Pi_diag), HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+     hypre_TMemcpy( Pi_offd_data, Pi_offd_data_dev, HYPRE_Real, hypre_CSRMatrixNumNonzeros(Pi_offd), HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+     hypre_TFree( Pi_diag_i_dev,    HYPRE_MEMORY_DEVICE);
+     hypre_TFree( Pi_diag_data_dev, HYPRE_MEMORY_DEVICE);
+     hypre_TFree( Pi_offd_i_dev,    HYPRE_MEMORY_DEVICE);
+     hypre_TFree( Pi_offd_data_dev, HYPRE_MEMORY_DEVICE);
+     hypre_TFree( w_row_sum_dev,    HYPRE_MEMORY_DEVICE);
    }
 
    hypre_ParCSRMatrixOwnsRowStarts(Q)=0;
