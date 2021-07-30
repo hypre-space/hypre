@@ -11,6 +11,9 @@
 void init_fine_to_coarse( HYPRE_Int n_fine, HYPRE_Int * pass_marker_dev, HYPRE_Int color,
                           HYPRE_Int * fine_to_coarse_dev, HYPRE_Int & n_cpts );
 
+void init_big_convert( HYPRE_Int n_fine, HYPRE_Int * pass_marker, HYPRE_Int color,
+                       HYPRE_Int * fine_to_coarse, HYPRE_BigInt cpts, HYPRE_BigInt * big_convert );
+
 __global__
 void hypreCUDAKernel_cfmarker_masked_rowsum( HYPRE_Int nrows,
                                              HYPRE_Int *A_diag_i,
@@ -1618,6 +1621,44 @@ void init_fine_to_coarse( HYPRE_Int n_fine, HYPRE_Int * pass_marker_dev, HYPRE_I
                      pass_marker_dev,
                      not_equal<int>(color),
                      (int) -1 );
+}
+
+struct local_equal_plus_constant :
+    public thrust::binary_function<HYPRE_BigInt,HYPRE_BigInt,HYPRE_BigInt>
+  {
+    HYPRE_BigInt _value;
+
+    local_equal_plus_constant(HYPRE_BigInt value) : _value(value) {}
+
+     __host__ __device__
+     HYPRE_BigInt operator()(HYPRE_BigInt /*x*/, HYPRE_BigInt y)
+     { return y + _value; }
+  };
+
+void init_big_convert( HYPRE_Int n_fine, HYPRE_Int * pass_marker, HYPRE_Int color,
+                       HYPRE_Int * fine_to_coarse, HYPRE_BigInt cpts,
+                       HYPRE_BigInt * big_convert )
+{
+  // Host code this function is replacing
+  //
+  // for (i=0; i < n_fine; i++)
+  // {
+  //    if (pass_marker[i] == color)
+  //    {
+  //       big_convert[i] = (HYPRE_BigInt)fine_to_coarse[i] + c_pts_starts[0];
+  //    }
+  // }
+
+  local_equal_plus_constant op(cpts);
+
+  HYPRE_THRUST_CALL( transform_if,
+                     big_convert,
+                     big_convert + n_fine,
+                     (HYPRE_BigInt*)fine_to_coarse,
+                     pass_marker,
+                     big_convert,
+                     op,
+                     equal<int>(color) );
 }
 
 __global__
