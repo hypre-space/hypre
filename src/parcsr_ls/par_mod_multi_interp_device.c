@@ -1775,7 +1775,7 @@ void hypreCUDAKernel_cfmarker_masked_rowsum( HYPRE_Int nrows,
                                              HYPRE_Int *A_offd_i,
                                              HYPRE_Complex *A_offd_data,
                                              HYPRE_Int *CF_marker,
-                                             HYPRE_Complex *row_sum)
+                                             HYPRE_Complex *row_sums )
 {
   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
 
@@ -1834,7 +1834,7 @@ void hypreCUDAKernel_cfmarker_masked_rowsum( HYPRE_Int nrows,
    row_sum_i = warp_reduce_sum(row_sum_i);
 
    if(lane == 0)
-     row_sum[row_i] += row_sum_i;
+     row_sums[row_i] += row_sum_i;
 }
 
 __global__
@@ -1846,7 +1846,7 @@ void hypreCUDAKernel_mutlipass_pi_rowsum( HYPRE_Int      num_points,
                                           HYPRE_Complex *P_diag_data,
                                           HYPRE_Int     *P_offd_i,
                                           HYPRE_Complex *P_offd_data,
-                                          HYPRE_Complex *row_sum )
+                                          HYPRE_Complex *row_sums )
 {
   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
 
@@ -1912,12 +1912,12 @@ void hypreCUDAKernel_mutlipass_pi_rowsum( HYPRE_Int      num_points,
    HYPRE_Real row_sum_i = 0.0;
    if(lane == 0)
      {
-       row_sum_i = row_sum[i1];
+       row_sum_i = row_sums[i1];
 
        if( value != 0 )
          {
            row_sum_i /= value;
-           row_sum[i1] = row_sum_i;
+           row_sums[i1] = row_sum_i;
          }
      }
 
