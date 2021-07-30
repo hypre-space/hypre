@@ -52,6 +52,8 @@ hypre_HandleCreate()
    hypre_HandleDefaultExecPolicy(hypre_handle_) = HYPRE_EXEC_DEVICE;
    hypre_HandleStructExecPolicy(hypre_handle_) = HYPRE_EXEC_DEVICE;
    hypre_HandleCudaData(hypre_handle_) = hypre_CudaDataCreate();
+   /* Gauss-Seidel: SpTrSV */
+   hypre_HandleDeviceGSMethod(hypre_handle_) = 1; /* CPU: 0; Cusparse: 1 */
 #endif
 
    return hypre_handle_;
@@ -206,7 +208,7 @@ HYPRE_Init()
    hypre_HandleCusparseHandle(_hypre_handle);
 #endif
 
-#if defined(HYPRE_USING_CURAND)
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
    hypre_HandleCurandGenerator(_hypre_handle);
 #endif
 

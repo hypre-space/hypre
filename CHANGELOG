@@ -7,6 +7,15 @@
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
 
+Version 2.22.0 released 2021/06/22
+
+- Added GPU support for AMS, ADS, and AME solvers.
+- Added mixedint support for GPUs.
+- Fixed GPU issues with AMG-DD solver.
+- Various bug fixes.
+
+#====================================
+
 Version 2.21.0 released 2021/05/25
 
 - Changed GPU defaults and changed default CUDA arch to 70.
