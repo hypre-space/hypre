@@ -1288,7 +1288,6 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    HYPRE_BigInt    *big_buf_data = NULL;
    HYPRE_Int        num_sends;
 
-   HYPRE_Real      *row_sums_C;
    HYPRE_Real      *w_row_sum;
 
    /* MPI size and rank*/
@@ -1622,33 +1621,35 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    Pi_offd_data = hypre_CSRMatrixData(Pi_offd);
    Pi_offd_i = hypre_CSRMatrixI(Pi_offd);
 
-   row_sums_C = hypre_CTAlloc(HYPRE_Real, num_points, HYPRE_MEMORY_HOST);
    for (i=0; i < num_points; i++)
    {
+      HYPRE_Real row_sums_C = 0.0;
+
       HYPRE_Real diagonal, value;
       i1 = pass_order[i];
       diagonal = A_diag_data[A_diag_i[i1]];
+
       for (j=Pi_diag_i[i]; j < Pi_diag_i[i+1]; j++)
       {
-         row_sums_C[i] += Pi_diag_data[j];
+         row_sums_C += Pi_diag_data[j];
       }
       for (j=Pi_offd_i[i]; j < Pi_offd_i[i+1]; j++)
       {
-         row_sums_C[i] += Pi_offd_data[j];
+         row_sums_C += Pi_offd_data[j];
       }
-      value = row_sums_C[i]*diagonal;
-      row_sums_C[i] += w_row_sum[i];
+      value = row_sums_C*diagonal;
+      row_sums_C += w_row_sum[i];
       if (value != 0)
       {
-         row_sums_C[i] /= value;
+         row_sums_C /= value;
       }
       for (j = Pi_diag_i[i]; j < Pi_diag_i[i+1]; j++)
       {
-         Pi_diag_data[j] = -Pi_diag_data[j]*row_sums_C[i];
+         Pi_diag_data[j] = -Pi_diag_data[j]*row_sums_C;
       }
       for (j = Pi_offd_i[i]; j < Pi_offd_i[i+1]; j++)
       {
-         Pi_offd_data[j] = -Pi_offd_data[j]*row_sums_C[i];
+         Pi_offd_data[j] = -Pi_offd_data[j]*row_sums_C;
       }
    }
 
@@ -1656,7 +1657,6 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrixOwnsRowStarts(Pi)=1;
    hypre_ParCSRMatrixDestroy(Q);
 
-   hypre_TFree(row_sums_C, HYPRE_MEMORY_HOST);
    hypre_TFree(w_row_sum, HYPRE_MEMORY_HOST);
 
    *Pi_ptr = Pi;
