@@ -1053,14 +1053,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
       HYPRE_Real diagonal, value;
       i1 = pass_order[i];
       diagonal = A_diag_data[A_diag_i[i1]];
-      /*for (j=A_diag_i[i1]+1; j < A_diag_i[i1+1]; j++)
-      {
-         row_sums[i] += A_diag_data[j];
-      }
-      for (j=A_offd_i[i1]; j < A_offd_i[i1+1]; j++)
-      {
-         row_sums[i] += A_offd_data[j];
-      }*/
+
       for (j = P_diag_i[i]; j < P_diag_i[i+1]; j++)
       {
           row_sum_C[i] += P_diag_data[j];
@@ -1112,7 +1105,6 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
 /* free stuff */
    hypre_TFree(fine_to_coarse, HYPRE_MEMORY_HOST);
    hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_HOST);
-   //hypre_TFree(row_sums, HYPRE_MEMORY_HOST);
    hypre_TFree(row_sum_C, HYPRE_MEMORY_HOST);
    hypre_TFree(big_convert, HYPRE_MEMORY_HOST);
    hypre_TFree(big_convert_offd, HYPRE_MEMORY_HOST);
