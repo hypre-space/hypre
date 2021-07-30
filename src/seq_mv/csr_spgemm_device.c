@@ -9,7 +9,7 @@
 #include "csr_spgemm_device.h"
 #include "seq_mv.hpp"
 
-#define HYPRE_SPGEMM_TIMING
+//#define HYPRE_SPGEMM_TIMING
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
