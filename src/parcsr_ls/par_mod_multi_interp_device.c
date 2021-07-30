@@ -352,7 +352,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
             {
                pass_marker[i1] = current_pass + 1;
                pass_order[cnt++] = i1;
-               remaining--;
                break;
             }
          }
@@ -365,7 +364,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                {
                   pass_marker[i1] = current_pass + 1;
                   pass_order[cnt++] = i1;
-                  remaining--;
                   break;
                }
             }
