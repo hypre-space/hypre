@@ -864,6 +864,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
 
 
    HYPRE_BigInt    *col_map_offd_P = NULL;
+   HYPRE_BigInt    *col_map_offd_P_dev = NULL;
    HYPRE_Int        num_cols_offd_P;
    HYPRE_Int        nnz_diag, nnz_offd;
    HYPRE_Int        n_cpts, i, j, i1, j1, j2;
@@ -980,16 +981,21 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
          hypre_TMemcpy( fine_to_coarse_offd, fine_to_coarse_offd_dev, HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
 
+         //FIXME: Clean this up when we don't need the host pointer anymore
          col_map_offd_P = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd_P, HYPRE_MEMORY_HOST);
+         col_map_offd_P_dev = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd_P, HYPRE_MEMORY_DEVICE);
 
          cpt = 0;
-         for (i=0; i < num_cols_offd_A; i++)
-         {
-            if (pass_marker_offd[i] == color)
-            {
-               col_map_offd_P[cpt++] = big_convert_offd[i];
-            }
-         }
+         HYPRE_BigInt * col_map_end = HYPRE_THRUST_CALL( copy_if,
+                                                         big_convert_offd_dev,
+                                                         big_convert_offd_dev + num_cols_offd_A,
+                                                         pass_marker_offd_dev,
+                                                         col_map_offd_P_dev,
+                                                         equal<int>(color) );
+         cpt = col_map_end - col_map_offd_P_dev;
+
+         //FIXME: Clean this up when we don't need th host pointer anymore
+         hypre_TMemcpy( col_map_offd_P, col_map_offd_P_dev, HYPRE_Int, num_cols_offd_P, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
          hypre_TFree(big_convert, HYPRE_MEMORY_DEVICE);
          hypre_TFree(big_convert_offd, HYPRE_MEMORY_HOST);
@@ -1199,6 +1205,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int       *S_offd_j_dev = hypre_CSRMatrixJ(S_offd);
 
    HYPRE_BigInt    *col_map_offd_Q = NULL;
+   HYPRE_BigInt    *col_map_offd_Q_dev = NULL;
    HYPRE_Int        num_cols_offd_Q;
 
    hypre_ParCSRMatrix *Pi;
@@ -1324,16 +1331,22 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
          //FIXME: Clean this up when we don't need th host pointer anymore
          hypre_TMemcpy( fine_to_coarse_offd, fine_to_coarse_offd_dev, HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
+
+         //FIXME: Clean this up when we don't need the host pointer anymore
          col_map_offd_Q = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd_Q, HYPRE_MEMORY_HOST);
+         col_map_offd_Q_dev = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd_Q, HYPRE_MEMORY_DEVICE);
 
          cpt = 0;
-         for (i=0; i < num_cols_offd_A; i++)
-         {
-            if (pass_marker_offd[i] == color)
-            {
-               col_map_offd_Q[cpt++] = big_convert_offd[i];
-            }
-         }
+         HYPRE_BigInt * col_map_end = HYPRE_THRUST_CALL( copy_if,
+                                                         big_convert_offd_dev,
+                                                         big_convert_offd_dev + num_cols_offd_A,
+                                                         pass_marker_offd_dev,
+                                                         col_map_offd_Q_dev,
+                                                         equal<int>(color) );
+         cpt = col_map_end - col_map_offd_Q_dev;
+
+         //FIXME: Clean this up when we don't need th host pointer anymore
+         hypre_TMemcpy( col_map_offd_Q, col_map_offd_Q_dev, HYPRE_Int, num_cols_offd_Q, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
          hypre_TFree(big_convert, HYPRE_MEMORY_DEVICE);
          hypre_TFree(big_convert_offd, HYPRE_MEMORY_HOST);
