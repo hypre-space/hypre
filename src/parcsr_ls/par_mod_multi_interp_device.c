@@ -462,12 +462,16 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
      hypre_TMemcpy( row_sums, row_sums_dev, HYPRE_Real, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
 
+
+
+
    Pi = hypre_CTAlloc(hypre_ParCSRMatrix*, num_passes, HYPRE_MEMORY_HOST);
    hypre_GenerateMultipassPiDevice(A, S, num_cpts_global, &pass_order[pass_starts[1]], pass_marker,
                                    pass_marker_offd, pass_starts[2]-pass_starts[1], 1, row_sums, &Pi[0],
                                    A_diag_data,A_diag_i,A_diag_j, // Hacked in host pointers
                                    A_offd_data,A_offd_i,A_offd_j, // Remove when done porting
-                                   S_diag_i,S_diag_j,S_offd_i,S_offd_j);
+                                   S_diag_i,S_diag_j,S_offd_i,S_offd_j,
+                                   pass_marker_dev);
    if (interp_type == 8)
    {
       for (i=1; i<num_passes-1; i++)
@@ -478,7 +482,8 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                              pass_marker_offd, pass_starts[i+2]-pass_starts[i+1], i+1, row_sums, &Q,
                                    A_diag_data,A_diag_i,A_diag_j, // Hacked in host pointers
                                    A_offd_data,A_offd_i,A_offd_j, // Remove when done porting
-                                   S_diag_i,S_diag_j,S_offd_i,S_offd_j);
+                                   S_diag_i,S_diag_j,S_offd_i,S_offd_j,
+                                   pass_marker_dev);
 
 
          Pi[i] = hypre_ParMatmul(Q, Pi[i-1]);
@@ -498,7 +503,8 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                              num_functions, dof_func, dof_func_offd, &Pi[i],
                                      A_diag_data,A_diag_i,A_diag_j, // Hacked in host pointers
                                      A_offd_data,A_offd_i,A_offd_j, // Remove when done porting
-                                     S_diag_i,S_diag_j,S_offd_i,S_offd_j);
+                                     S_diag_i,S_diag_j,S_offd_i,S_offd_j,
+                                   pass_marker_dev);
       }
    }
 
@@ -809,7 +815,10 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
                                  HYPRE_Int * S_diag_i,
                                  HYPRE_Int * S_diag_j,
                                  HYPRE_Int * S_offd_i,
-                                 HYPRE_Int * S_offd_j )
+                                 HYPRE_Int * S_offd_j,
+                                 // The below are the computed/mapped device pointers
+                                 // Clean this up when we are done
+                                 HYPRE_Int * pass_marker_dev )
 {
    MPI_Comm                comm = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg    *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -866,6 +875,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
                                       finally will be pointer to start of row */
    HYPRE_Int       *P_offd_j = NULL;
    HYPRE_Int       *fine_to_coarse;
+   HYPRE_Int       *fine_to_coarse_dev;
    HYPRE_Int       *fine_to_coarse_offd = NULL;
    HYPRE_BigInt    *f_pts_starts = NULL;
    HYPRE_Int        my_id, num_procs;
@@ -885,22 +895,14 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
 
    P_diag_i = hypre_CTAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_HOST);
    P_offd_i = hypre_CTAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_HOST);
-   fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
+
+   fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST); // FIXME: Clean up
+   fine_to_coarse_dev = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
 
    /* fill P */
+   init_fine_to_coarse( n_fine, pass_marker_dev, color, fine_to_coarse_dev, n_cpts );
 
-   n_cpts = 0;
-   for (i=0; i < n_fine; i++)
-   {
-      if (pass_marker[i] == color)
-      {
-         fine_to_coarse[i] = n_cpts++;
-      }
-      else
-      {
-         fine_to_coarse[i] = -1;
-      }
-   }
+   hypre_TMemcpy( fine_to_coarse, fine_to_coarse_dev, HYPRE_Int, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE); // FIXME: Clean this up when we don't need pass_marker on the host
 
    if (num_procs > 1)
    {
@@ -1103,7 +1105,8 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixMemoryLocation(P_offd) = HYPRE_MEMORY_HOST;
 
 /* free stuff */
-   hypre_TFree(fine_to_coarse, HYPRE_MEMORY_HOST);
+   hypre_TFree(fine_to_coarse, HYPRE_MEMORY_HOST); // FIXME: Clean up
+   hypre_TFree(fine_to_coarse_dev, HYPRE_MEMORY_DEVICE);
    hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_HOST);
    hypre_TFree(row_sum_C, HYPRE_MEMORY_HOST);
    hypre_TFree(big_convert, HYPRE_MEMORY_HOST);
@@ -1141,7 +1144,10 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
                              HYPRE_Int * S_diag_i,
                              HYPRE_Int * S_diag_j,
                              HYPRE_Int * S_offd_i,
-                             HYPRE_Int * S_offd_j )
+                             HYPRE_Int * S_offd_j,
+                             // The below are the computed/mapped device pointers
+                             // Clean this up when we are done
+                             HYPRE_Int * pass_marker_dev )
 {
    MPI_Comm                comm = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg    *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -1207,6 +1213,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
                                       finally will be pointer to start of row */
    HYPRE_Int       *Q_offd_j = NULL;
    HYPRE_Int       *fine_to_coarse;
+   HYPRE_Int       *fine_to_coarse_dev;
    HYPRE_Int       *fine_to_coarse_offd = NULL;
    HYPRE_BigInt    *f_pts_starts = NULL;
    HYPRE_Int        my_id, num_procs;
@@ -1228,22 +1235,14 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
 
    Q_diag_i = hypre_CTAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_HOST);
    Q_offd_i = hypre_CTAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_HOST);
-   fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
+
+   fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST); // FIXME: Clean up
+   fine_to_coarse_dev = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
 
    /* fill P */
+   init_fine_to_coarse( n_fine, pass_marker_dev, color, fine_to_coarse_dev, n_cpts );
 
-   n_cpts = 0;
-   for (i=0; i < n_fine; i++)
-   {
-      if (pass_marker[i] == color)
-      {
-         fine_to_coarse[i] = n_cpts++;
-      }
-      else
-      {
-         fine_to_coarse[i] = -1;
-      }
-   }
+   hypre_TMemcpy( fine_to_coarse, fine_to_coarse_dev, HYPRE_Int, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE); // FIXME: Clean this up when we don't need pass_marker on the host
 
    if (num_procs > 1)
    {
