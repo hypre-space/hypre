@@ -881,6 +881,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int       *fine_to_coarse;
    HYPRE_Int       *fine_to_coarse_dev;
    HYPRE_Int       *fine_to_coarse_offd = NULL;
+   HYPRE_Int       *fine_to_coarse_offd_dev = NULL;
    HYPRE_BigInt    *f_pts_starts = NULL;
    HYPRE_Int        my_id, num_procs;
    HYPRE_BigInt     total_global_fpts;
@@ -962,18 +963,25 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
 
          hypre_ParCSRCommHandleDestroy(comm_handle);
 
+         // FIXME: Clean this up when done with host ptr
          hypre_TMemcpy( big_convert_offd, big_convert_offd_dev, HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
-         // Check if we need to re-zero after this scan (i.e. turn off C in CTalloc)
-         fine_to_coarse_offd = hypre_TAlloc(HYPRE_Int,  num_cols_offd_A, HYPRE_MEMORY_HOST);
+         fine_to_coarse_offd = hypre_TAlloc(HYPRE_Int,  num_cols_offd_A, HYPRE_MEMORY_HOST); // FIXME: Clean this up when done with host ptr
+         fine_to_coarse_offd_dev = hypre_TAlloc(HYPRE_Int,  num_cols_offd_A, HYPRE_MEMORY_DEVICE);
+
          num_cols_offd_P = 0;
-         for (i=0; i < num_cols_offd_A; i++)
-         {
-            if (pass_marker_offd[i] == color)
-            {
-               fine_to_coarse_offd[i] = num_cols_offd_P++;
-            }
-         }
+         HYPRE_THRUST_CALL( exclusive_scan,
+                            thrust::make_transform_iterator(pass_marker_offd_dev,equal<int>(color)),
+                            thrust::make_transform_iterator(pass_marker_offd_dev + num_cols_offd_A,equal<int>(color)),
+                            fine_to_coarse_offd_dev,
+                            (HYPRE_Int)0 );
+
+         HYPRE_Int * num_cols_offd_P_dev = &fine_to_coarse_offd_dev[num_cols_offd_A-1];
+         hypre_TMemcpy( &num_cols_offd_P, num_cols_offd_P_dev, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+         //FIXME: Clean this up when we don't need th host pointer anymore
+         hypre_TMemcpy( fine_to_coarse_offd, fine_to_coarse_offd_dev, HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
 
          col_map_offd_P = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd_P, HYPRE_MEMORY_HOST);
 
@@ -1060,6 +1068,11 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
       }
    }
 
+   hypre_TFree(fine_to_coarse, HYPRE_MEMORY_HOST); // FIXME: Clean up
+   hypre_TFree(fine_to_coarse_dev, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_HOST); // FIXME: Clean up
+   hypre_TFree(fine_to_coarse_offd_dev, HYPRE_MEMORY_DEVICE);
+
    //row_sums = hypre_CTAlloc(HYPRE_Real, num_points, HYPRE_MEMORY_HOST);
    row_sum_C = hypre_CTAlloc(HYPRE_Real, num_points, HYPRE_MEMORY_HOST);
    for (i=0; i < num_points; i++)
@@ -1117,9 +1130,6 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixMemoryLocation(P_offd) = HYPRE_MEMORY_HOST;
 
 /* free stuff */
-   hypre_TFree(fine_to_coarse, HYPRE_MEMORY_HOST); // FIXME: Clean up
-   hypre_TFree(fine_to_coarse_dev, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_HOST);
    hypre_TFree(row_sum_C, HYPRE_MEMORY_HOST);
 
 
@@ -1226,6 +1236,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int       *fine_to_coarse;
    HYPRE_Int       *fine_to_coarse_dev;
    HYPRE_Int       *fine_to_coarse_offd = NULL;
+   HYPRE_Int       *fine_to_coarse_offd_dev = NULL;
    HYPRE_BigInt    *f_pts_starts = NULL;
    HYPRE_Int        my_id, num_procs;
    HYPRE_BigInt     total_global_fpts;
@@ -1307,18 +1318,24 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
 
          hypre_ParCSRCommHandleDestroy(comm_handle);
 
+         // FIXME: Clean this up when done with host ptr
          hypre_TMemcpy( big_convert_offd, big_convert_offd_dev, HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
-         // Check if we need to re-zero after this scan (i.e. turn off C in CTalloc)
-         fine_to_coarse_offd = hypre_TAlloc(HYPRE_Int,  num_cols_offd_A, HYPRE_MEMORY_HOST);
+         fine_to_coarse_offd = hypre_TAlloc(HYPRE_Int,  num_cols_offd_A, HYPRE_MEMORY_HOST); // FIXME: Clean this up when done with host ptr
+         fine_to_coarse_offd_dev = hypre_TAlloc(HYPRE_Int,  num_cols_offd_A, HYPRE_MEMORY_DEVICE);
+
          num_cols_offd_Q = 0;
-         for (i=0; i < num_cols_offd_A; i++)
-         {
-            if (pass_marker_offd[i] == color)
-            {
-               fine_to_coarse_offd[i] = num_cols_offd_Q++;
-            }
-         }
+         HYPRE_THRUST_CALL( exclusive_scan,
+                            thrust::make_transform_iterator(pass_marker_offd_dev,equal<int>(color)),
+                            thrust::make_transform_iterator(pass_marker_offd_dev + num_cols_offd_A,equal<int>(color)),
+                            fine_to_coarse_offd_dev,
+                            (HYPRE_Int)0 );
+
+         HYPRE_Int * num_cols_offd_Q_dev = &fine_to_coarse_offd_dev[num_cols_offd_A-1];
+         hypre_TMemcpy( &num_cols_offd_Q, num_cols_offd_Q_dev, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+         //FIXME: Clean this up when we don't need th host pointer anymore
+         hypre_TMemcpy( fine_to_coarse_offd, fine_to_coarse_offd_dev, HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
          col_map_offd_Q = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd_Q, HYPRE_MEMORY_HOST);
 
@@ -1513,6 +1530,11 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
       }
    }
 
+   hypre_TFree(fine_to_coarse, HYPRE_MEMORY_HOST); // FIXME: Clean up
+   hypre_TFree(fine_to_coarse_dev, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_HOST); // FIXME: Clean up
+   hypre_TFree(fine_to_coarse_offd_dev, HYPRE_MEMORY_DEVICE);
+
    Q = hypre_ParCSRMatrixCreate(comm,
                                 total_global_fpts,
                                 total_global_cpts,
@@ -1536,10 +1558,6 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
 
    hypre_CSRMatrixMemoryLocation(Q_diag) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixMemoryLocation(Q_offd) = HYPRE_MEMORY_HOST;
-
-/* free stuff */
-   hypre_TFree(fine_to_coarse, HYPRE_MEMORY_HOST);
-   hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_HOST);
 
 
    hypre_MatvecCommPkgCreate(Q);
