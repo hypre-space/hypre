@@ -171,7 +171,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
    HYPRE_Int       *dof_func_offd = NULL;
    HYPRE_Real      *row_sums = NULL;
-   HYPRE_Real      *row_sums_dev = NULL;
+
 
    /* MPI size and rank*/
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -451,12 +451,12 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    hypre_TFree(points_left_dev, HYPRE_MEMORY_DEVICE);// FIXME: Clean up when done
 
    /* generate row sum of weak points and C-points to be ignored */
-
-   row_sums = hypre_CTAlloc(HYPRE_Real, n_fine, HYPRE_MEMORY_HOST);
-   row_sums_dev = hypre_CTAlloc(HYPRE_Real, n_fine, HYPRE_MEMORY_DEVICE);
+   row_sums = hypre_CTAlloc(HYPRE_Real, n_fine, HYPRE_MEMORY_DEVICE);
 
    if (num_functions >  1)
    {
+     HYPRE_Real *row_sums_host = hypre_CTAlloc(HYPRE_Real, n_fine, HYPRE_MEMORY_HOST);
+     hypre_TMemcpy( row_sums_host, row_sums, HYPRE_Real, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
       for (i=0; i < n_fine; i++)
       {
          if (CF_marker[i] < 0)
@@ -465,18 +465,20 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
             {
                if (dof_func[i] == dof_func[A_diag_j[j]])
                {
-                  row_sums[i] += A_diag_data[j];
+                  row_sums_host[i] += A_diag_data[j];
                }
             }
             for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
             {
                if (dof_func[i] == dof_func_offd[A_offd_j[j]])
                {
-                   row_sums[i] += A_offd_data[j];
+                   row_sums_host[i] += A_offd_data[j];
                }
             }
          }
       }
+      hypre_TMemcpy( row_sums, row_sums_host, HYPRE_Real, n_fine, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TFree(row_sums_host, HYPRE_MEMORY_HOST);
    }
    else
    {
@@ -485,19 +487,13 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_cfmarker_masked_rowsum, gDim, bDim,
                         n_fine, A_diag_i_dev, A_diag_data_dev, A_offd_i_dev, A_offd_data_dev,
-                        CF_marker_dev, row_sums_dev );
-
-     // Copy row sums back to host
-     // FIXME: Clean this up when host row_sums no longer needed
-     hypre_TMemcpy( row_sums, row_sums_dev, HYPRE_Real, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+                        CF_marker_dev, row_sums );
    }
-
-
 
 
    Pi = hypre_CTAlloc(hypre_ParCSRMatrix*, num_passes, HYPRE_MEMORY_HOST);
    hypre_GenerateMultipassPiDevice(A, S, num_cpts_global, &pass_order[pass_starts[1]], pass_marker,
-                                   pass_marker_offd, pass_starts[2]-pass_starts[1], 1, row_sums_dev, &Pi[0],
+                                   pass_marker_offd, pass_starts[2]-pass_starts[1], 1, row_sums, &Pi[0],
                                    A_diag_data,A_diag_i,A_diag_j, // Hacked in host pointers
                                    A_offd_data,A_offd_i,A_offd_j, // Remove when done porting
                                    S_diag_i,S_diag_j,S_offd_i,S_offd_j,
@@ -509,7 +505,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
          hypre_ParCSRMatrix *Q;
          HYPRE_BigInt *c_pts_starts = hypre_ParCSRMatrixRowStarts(Pi[i-1]);
          hypre_GenerateMultipassPiDevice(A, S, c_pts_starts, &pass_order[pass_starts[i+1]], pass_marker,
-                             pass_marker_offd, pass_starts[i+2]-pass_starts[i+1], i+1, row_sums_dev, &Q,
+                             pass_marker_offd, pass_starts[i+2]-pass_starts[i+1], i+1, row_sums, &Q,
                                    A_diag_data,A_diag_i,A_diag_j, // Hacked in host pointers
                                    A_offd_data,A_offd_i,A_offd_j, // Remove when done porting
                                    S_diag_i,S_diag_j,S_offd_i,S_offd_j,
@@ -539,8 +535,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    }
 
    // We don't need the row sums anymore
-   hypre_TFree (row_sums, HYPRE_MEMORY_HOST);// FIXME: Clean up when done
-   hypre_TFree (row_sums_dev, HYPRE_MEMORY_DEVICE);
+   hypre_TFree (row_sums, HYPRE_MEMORY_DEVICE);
 
    // FIXME: Temporary hack!
    // Free up the memory we allocated for the manual copying of A and S data
@@ -1292,7 +1287,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    HYPRE_BigInt    *big_convert_offd_dev = NULL;
    HYPRE_BigInt    *big_buf_data = NULL;
    HYPRE_Int        num_sends;
-   //HYPRE_Real      *row_sums;
+
    HYPRE_Real      *row_sums_C;
    HYPRE_Real      *w_row_sum;
 
