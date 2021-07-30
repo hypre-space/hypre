@@ -1542,8 +1542,6 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_HOST);
 
 
-   hypre_TFree(big_buf_data, HYPRE_MEMORY_HOST);
-
    hypre_MatvecCommPkgCreate(Q);
 
    Pi = hypre_ParMatmul(Q, P);
@@ -1588,7 +1586,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrixOwnsRowStarts(Q)=0;
    hypre_ParCSRMatrixOwnsRowStarts(Pi)=1;
    hypre_ParCSRMatrixDestroy(Q);
-   //hypre_TFree(row_sums, HYPRE_MEMORY_HOST);
+
    hypre_TFree(row_sums_C, HYPRE_MEMORY_HOST);
    hypre_TFree(w_row_sum, HYPRE_MEMORY_HOST);
 
