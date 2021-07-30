@@ -171,11 +171,7 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
          mult = coefs[i];
          /* u = mult * r + v */
 
-<<<<<<< HEAD
-         HYPRE_THRUST_CALL( transform, x_data, x_data + size, r_data, u_data, alpha * _1 + _2 );
-=======
          HYPRE_THRUST_CALL( transform, r_data, r_data + num_rows, v_data, u_data, mult * _1 + _2 );
->>>>>>> master
       }
 
       /* u = o + u */
