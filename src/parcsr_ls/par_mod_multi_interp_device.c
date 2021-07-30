@@ -523,7 +523,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                    pass_marker_dev, pass_marker_offd_dev, &pass_order_dev[pass_starts[i+1]]);
 
 
-         Pi[i] = hypre_ParMatmul(Q, Pi[i-1]);
+         Pi[i] = hypre_ParCSRMatMat(Q, Pi[i-1]);
 
          hypre_ParCSRMatrixOwnsRowStarts(Q)=0;
          hypre_ParCSRMatrixOwnsRowStarts(Pi[i])=1;
@@ -1624,7 +1624,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
 
    hypre_MatvecCommPkgCreate(Q);
 
-   Pi = hypre_ParMatmul(Q, P);
+   Pi = hypre_ParCSRMatMat(Q, P);
 
    Pi_diag = hypre_ParCSRMatrixDiag(Pi);
    Pi_diag_data = hypre_CSRMatrixData(Pi_diag);
