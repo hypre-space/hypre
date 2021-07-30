@@ -148,7 +148,7 @@ hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax with */
 #endif
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
    HYPRE_Int ierr = 0;
-   if (exec == HYPRE_EXEC_HOST) 
+   if (exec == HYPRE_EXEC_HOST)
    {
       ierr = hypre_ParCSRMaxEigEstimateHost(A,scale,max_eig,min_eig);
    }
@@ -248,31 +248,26 @@ hypre_ParCSRMaxEigEstimateCGHost( hypre_ParCSRMatrix *A,     /* matrix to relax 
                              hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(r);
-   hypre_ParVectorSetPartitioningOwner(r,0);
 
    p = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                              hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(p);
-   hypre_ParVectorSetPartitioningOwner(p,0);
 
    s = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                              hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(s);
-   hypre_ParVectorSetPartitioningOwner(s,0);
 
    ds = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                               hypre_ParCSRMatrixGlobalNumRows(A),
                               hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(ds);
-   hypre_ParVectorSetPartitioningOwner(ds,0);
 
    u = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                              hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(u);
-   hypre_ParVectorSetPartitioningOwner(u,0);
 
    /* point to local data */
    s_data = hypre_VectorData(hypre_ParVectorLocalVector(s));
@@ -449,7 +444,6 @@ hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with */
                                       hypre_ParCSRMatrixGlobalNumRows(A),
                                       hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize_v2(orig_u_vec, hypre_ParCSRMatrixMemoryLocation(A));
-   hypre_ParVectorSetPartitioningOwner(orig_u_vec, 0);
 
    if (scale)
    {
@@ -457,7 +451,6 @@ hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with */
                                       hypre_ParCSRMatrixGlobalNumRows(A),
                                       hypre_ParCSRMatrixRowStarts(A));
       hypre_ParVectorInitialize_v2(tmp_vec, hypre_ParCSRMatrixMemoryLocation(A));
-      hypre_ParVectorSetPartitioningOwner(tmp_vec, 0);
    }
    hypre_ParCSRRelax_Cheby_Solve(A, f, ds_data, coefs, order, scale, variant, u, v, r, orig_u_vec, tmp_vec);
 
@@ -759,4 +752,3 @@ L20:
 
    return ret_val;
 } /* cgpthy_ */
-

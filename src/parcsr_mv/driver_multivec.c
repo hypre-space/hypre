@@ -6,11 +6,11 @@
  ******************************************************************************/
 
 #include "_hypre_parcsr_mv.h"
- 
+
 /*--------------------------------------------------------------------------
  * Test driver for PAR multivectors (under construction)
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 main( HYPRE_Int   argc,
       char *argv[] )
@@ -28,10 +28,10 @@ main( HYPRE_Int   argc,
    HYPRE_BigInt         *partitioning;
    HYPRE_Real           prod;
    HYPRE_Complex        *data, *data2;
-   hypre_Vector *vector; 
-   hypre_Vector *local_vector; 
+   hypre_Vector *vector;
+   hypre_Vector *local_vector;
    hypre_Vector *local_vector2;
- 
+
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
 
@@ -39,7 +39,7 @@ main( HYPRE_Int   argc,
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id );
 
    hypre_printf(" my_id: %d num_procs: %d\n", my_id, num_procs);
- 
+
    partitioning = NULL;
    num_vectors = 3;
    vector1 = hypre_ParMultiVectorCreate
@@ -81,7 +81,6 @@ main( HYPRE_Int   argc,
    hypre_GeneratePartitioning( global_size, num_procs, &partitioning );
 
    vector2 = hypre_VectorToParVector(hypre_MPI_COMM_WORLD,local_vector2,partitioning);
-   hypre_ParVectorSetPartitioningOwner(vector2,0);
 
    hypre_ParVectorPrint(vector2, "Convert");
 
@@ -99,7 +98,6 @@ main( HYPRE_Int   argc,
    hypre_ParVectorCopy( vector2, tmp_vector );
 /*
    tmp_vector = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,global_size,partitioning);
-   hypre_ParVectorSetPartitioningOwner(tmp_vector,0);
    hypre_ParVectorInitialize(tmp_vector);
    hypre_ParVectorCopy(vector1, tmp_vector);
 
@@ -132,14 +130,13 @@ main( HYPRE_Int   argc,
     *-----------------------------------------------------------*/
 
    hypre_ParVectorDestroy(vector1);
-   hypre_ParVectorDestroy(vector2); 
+   hypre_ParVectorDestroy(vector2);
    hypre_ParVectorDestroy(tmp_vector);
-   hypre_SeqVectorDestroy(local_vector2); 
-   if (vector) hypre_SeqVectorDestroy(vector); 
+   hypre_SeqVectorDestroy(local_vector2);
+   if (vector) hypre_SeqVectorDestroy(vector);
 
    /* Finalize MPI */
    hypre_MPI_Finalize();
 
    return 0;
 }
-

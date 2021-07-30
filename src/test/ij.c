@@ -8778,7 +8778,6 @@ BuildRhsParFromOneFile( HYPRE_Int                  argc,
       b_CSR = HYPRE_VectorRead(filename);
    }
    HYPRE_VectorToParVector(hypre_MPI_COMM_WORLD, b_CSR, partitioning,&b);
-   hypre_ParVectorSetPartitioningOwner(b, 0);
 
    *b_ptr = b;
 
@@ -9666,4 +9665,3 @@ BuildParIsoLaplacian( HYPRE_Int argc, char** argv, HYPRE_ParCSRMatrix *A_ptr )
 }
 
 /* end lobpcg */
-
