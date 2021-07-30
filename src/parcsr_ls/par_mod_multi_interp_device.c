@@ -18,6 +18,17 @@ void compute_num_cols_offd_fine_to_coarse( HYPRE_Int * pass_marker_offd, HYPRE_I
                                            HYPRE_Int num_cols_offd_A, HYPRE_Int & num_cols_offd,
                                            HYPRE_Int ** fine_to_coarse_offd );
 
+template<typename T>
+struct tuple_plus : public thrust::binary_function<thrust::tuple<T,T>, thrust::tuple<T,T>, thrust::tuple<T,T> >
+{
+  __host__ __device__
+  thrust::tuple<T,T> operator()( const thrust::tuple<T,T> & x1, const thrust::tuple<T,T> & x2)
+  {
+    return thrust::make_tuple( thrust::get<0>(x1)+thrust::get<0>(x2), thrust::get<1>(x1)+thrust::get<1>(x2) );
+  }
+};
+
+
 __global__
 void hypreCUDAKernel_cfmarker_masked_rowsum( HYPRE_Int nrows,
                                              HYPRE_Int *A_diag_i,
@@ -879,11 +890,16 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
                                       finally will be pointer to start of row */
    HYPRE_Int       *P_diag_j;
 
+   HYPRE_Int       *P_diag_i_dev;
+
    hypre_CSRMatrix *P_offd;
    HYPRE_Real      *P_offd_data = NULL;
    HYPRE_Int       *P_offd_i; /*at first counter of nonzero cols for each row,
                                       finally will be pointer to start of row */
    HYPRE_Int       *P_offd_j = NULL;
+
+   HYPRE_Int       *P_offd_i_dev;
+
    HYPRE_Int       *fine_to_coarse;
    HYPRE_Int       *fine_to_coarse_dev;
    HYPRE_Int       *fine_to_coarse_offd = NULL;
@@ -1008,6 +1024,9 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    /* generate P_diag_i and P_offd_i */
    P_diag_i = hypre_CTAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_HOST);
    P_offd_i = hypre_CTAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_HOST);
+   // FIXME: Clean up when done with host code
+   P_diag_i_dev  = hypre_CTAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_DEVICE);
+   P_offd_i_dev  = hypre_CTAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_DEVICE);
 
    nnz_diag = 0;
    nnz_offd = 0;
@@ -1034,13 +1053,19 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
       }
    }
 
-   for (i=1; i < num_points+1; i++)
-   {
-      P_diag_i[i] += P_diag_i[i-1];
-      P_offd_i[i] += P_offd_i[i-1];
-   }
+   // FIXME: Clean up when done with host code
+   hypre_TMemcpy( P_diag_i_dev, P_diag_i, HYPRE_Int, num_points+1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy( P_offd_i_dev, P_offd_i, HYPRE_Int, num_points+1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
+   HYPRE_THRUST_CALL( inclusive_scan,
+                      thrust::make_zip_iterator( thrust::make_tuple( P_diag_i_dev, P_offd_i_dev) ),
+                      thrust::make_zip_iterator( thrust::make_tuple( P_diag_i_dev + num_points+1, P_offd_i_dev + num_points+1) ),
+                      thrust::make_zip_iterator( thrust::make_tuple( P_diag_i_dev, P_offd_i_dev) ),
+                      tuple_plus<HYPRE_Int>() );
 
+   // FIXME: Clean up when done with host code
+   hypre_TMemcpy( P_diag_i, P_diag_i_dev, HYPRE_Int, num_points+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy( P_offd_i, P_offd_i_dev, HYPRE_Int, num_points+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
    P_diag_j    = hypre_CTAlloc(HYPRE_Int, nnz_diag, HYPRE_MEMORY_HOST);
    P_diag_data = hypre_CTAlloc(HYPRE_Real, nnz_diag, HYPRE_MEMORY_HOST);
