@@ -4973,7 +4973,6 @@ main( hypre_int argc,
       hypre_ParVector *par_x2 =
          hypre_ParVectorCreate(hypre_ParVectorComm(par_x), hypre_ParVectorGlobalSize(par_x),
                                hypre_ParVectorPartitioning(par_x));
-      hypre_ParVectorOwnsPartitioning(par_x2) = 0;
       hypre_ParVectorInitialize(par_x2);
       hypre_ParVectorCopy(par_x, par_x2);
 
@@ -5992,4 +5991,3 @@ main( hypre_int argc,
 
    return (0);
 }
-

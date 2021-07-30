@@ -1209,7 +1209,7 @@ HYPRE_Real hypre_LINPACKcgpthy ( HYPRE_Real *a , HYPRE_Real *b );
 HYPRE_Int hypre_ParCSRRelax_L1_Jacobi ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Int *cf_marker , HYPRE_Int relax_points , HYPRE_Real relax_weight , HYPRE_Real *l1_norms , hypre_ParVector *u , hypre_ParVector *Vtemp );
 
 /* par_relax_more_device.c */
-HYPRE_Int hypre_ParCSRMaxEigEstimateDevice ( hypre_ParCSRMatrix *A , HYPRE_Int scale , HYPRE_Real *max_eig, HYPRE_Real *min_eig );
+HYPRE_Int hypre_ParCSRMaxEigEstimateDevice ( hypre_ParCSRMatrix *A , HYPRE_Int scale , HYPRE_Real *max_eig , HYPRE_Real *min_eig );
 HYPRE_Int hypre_ParCSRMaxEigEstimateCGDevice ( hypre_ParCSRMatrix *A , HYPRE_Int scale , HYPRE_Int max_iter , HYPRE_Real *max_eig , HYPRE_Real *min_eig );
 
 /* par_rotate_7pt.c */

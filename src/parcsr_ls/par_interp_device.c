@@ -273,8 +273,6 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrixI(P_offd)    = P_offd_i;
    hypre_CSRMatrixJ(P_offd)    = P_offd_j;
 
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
-
    hypre_CSRMatrixMemoryLocation(P_diag) = memory_location;
    hypre_CSRMatrixMemoryLocation(P_offd) = memory_location;
 

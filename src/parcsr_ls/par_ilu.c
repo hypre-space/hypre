@@ -4594,9 +4594,6 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
    hypre_CSRMatrixNumRownnz(M_offd) = 0;
    hypre_CSRMatrixOwnsData(M_offd)  = 1;
 
-   hypre_ParCSRMatrixSetColStartsOwner(matM,0);
-   hypre_ParCSRMatrixSetRowStartsOwner(matM,0);
-
    /* now start NSH
     * Mj+1 = 2Mj - MjAMj
     */
