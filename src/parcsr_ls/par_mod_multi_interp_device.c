@@ -8,8 +8,8 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-void init_fine_to_coarse( HYPRE_Int n_fine, HYPRE_Int * pass_marker_dev, HYPRE_Int color,
-                          HYPRE_Int * fine_to_coarse_dev, HYPRE_Int & n_cpts );
+void init_fine_to_coarse( HYPRE_Int n_fine, HYPRE_Int * pass_marker, HYPRE_Int color,
+                          HYPRE_Int * fine_to_coarse, HYPRE_Int & n_cpts );
 
 void init_big_convert( HYPRE_Int n_fine, HYPRE_Int * pass_marker, HYPRE_Int color,
                        HYPRE_Int * fine_to_coarse, HYPRE_BigInt cpts, HYPRE_BigInt * big_convert );
@@ -1595,8 +1595,8 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    return hypre_error_flag;
 }
 
-void init_fine_to_coarse( HYPRE_Int n_fine, HYPRE_Int * pass_marker_dev, HYPRE_Int color,
-                          HYPRE_Int * fine_to_coarse_dev, HYPRE_Int & n_cpts )
+void init_fine_to_coarse( HYPRE_Int n_fine, HYPRE_Int * pass_marker, HYPRE_Int color,
+                          HYPRE_Int * fine_to_coarse, HYPRE_Int & n_cpts )
 {
   // Host code this is replacing:
   // n_cpts = 0;
@@ -1608,29 +1608,22 @@ void init_fine_to_coarse( HYPRE_Int n_fine, HYPRE_Int * pass_marker_dev, HYPRE_I
   //      fine_to_coarse[i] = -1;
   //  }
 
-  // TODO: Is there any way we can do this without three Thrust calls?
-  //       On AMD devices that support large BAR, we could just directly
-  //       reference the last entry of fine_to_coasre after the scan in
-  //       device memory from the host. This
-  //       will almost certainly be faster than the thrust::count call.
-  //       Maybe it's faster to copy the last entry of fine_to_coarse after
-  //       the scan rather than thrust::count? I haven't measured it.
-  // As it is, this is still a net win by a factor of 2 or so... :-/
-  n_cpts = HYPRE_THRUST_CALL( count,
-                              pass_marker_dev,
-                              pass_marker_dev + n_fine,
-                              color );
-
+  // It is substantially faster (I measured) to just copy the end of the fine_to_coarse_dev
+  // array to the host get the value of n_cpts than to do a thrust::count_if on
+  // pass_marker
   HYPRE_THRUST_CALL( exclusive_scan,
-                     thrust::make_transform_iterator(pass_marker_dev,equal<int>(color)),
-                     thrust::make_transform_iterator(pass_marker_dev+n_fine,equal<int>(color)),
-                     fine_to_coarse_dev,
+                     thrust::make_transform_iterator(pass_marker,equal<int>(color)),
+                     thrust::make_transform_iterator(pass_marker+n_fine,equal<int>(color)),
+                     fine_to_coarse,
                      (int)0 );
 
+  HYPRE_Int * n_cpts_dev = &fine_to_coarse[n_fine-1];
+  hypre_TMemcpy( &n_cpts, n_cpts_dev, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
   HYPRE_THRUST_CALL( replace_if,
-                     fine_to_coarse_dev,
-                     fine_to_coarse_dev+n_fine,
-                     pass_marker_dev,
+                     fine_to_coarse,
+                     fine_to_coarse+n_fine,
+                     pass_marker,
                      not_equal<int>(color),
                      (int) -1 );
 }
