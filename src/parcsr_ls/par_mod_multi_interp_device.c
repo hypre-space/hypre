@@ -49,6 +49,17 @@ void hypreCUDAKernel_mutlipass_pi_rowsum( HYPRE_Int      num_points,
                                           HYPRE_Complex *P_offd_data,
                                           HYPRE_Complex *row_sum );
 
+__global__
+void hypreCUDAKernel_mutli_pi_rowsum( HYPRE_Int      num_points,
+                                      HYPRE_Int     *pass_order,
+                                      HYPRE_Int     *A_diag_i,
+                                      HYPRE_Complex *A_diag_data,
+                                      HYPRE_Int     *Pi_diag_i,
+                                      HYPRE_Complex *Pi_diag_data,
+                                      HYPRE_Int     *Pi_offd_i,
+                                      HYPRE_Complex *Pi_offd_data,
+                                      HYPRE_Complex *w_row_sum );
+
 
 /*--------------------------------------------------------------------------
  * hypre_ParAMGBuildModMultipass
@@ -1958,5 +1969,126 @@ void hypreCUDAKernel_mutlipass_pi_rowsum( HYPRE_Int      num_points,
       }
 
        P_offd_data[j] = -P_offd_data[j]*row_sum_i;
+   }
+}
+
+__global__
+void hypreCUDAKernel_mutli_pi_rowsum( HYPRE_Int      num_points,
+                                      HYPRE_Int     *pass_order,
+                                      HYPRE_Int     *A_diag_i,
+                                      HYPRE_Complex *A_diag_data,
+                                      HYPRE_Int     *Pi_diag_i,
+                                      HYPRE_Complex *Pi_diag_data,
+                                      HYPRE_Int     *Pi_offd_i,
+                                      HYPRE_Complex *Pi_offd_data,
+                                      HYPRE_Complex *w_row_sum )
+{
+  HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
+
+  if (row_i >= num_points)
+   {
+      return;
+   }
+
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int p = 0;
+   HYPRE_Int q = 0;
+
+   HYPRE_Real row_sum_C = 0.0;
+
+   // Pi_diag
+   if (lane < 2)
+   {
+      p = read_only_load(Pi_diag_i + row_i + lane);
+   }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   {
+      if ( j >= q )
+      {
+         continue;
+      }
+
+      HYPRE_Complex value = Pi_diag_data[j];
+
+      row_sum_C += value;
+   }
+
+   // Pi_offd
+   if (lane < 2)
+   {
+      p = read_only_load(Pi_offd_i + row_i + lane);
+   }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   {
+      if ( j >= q )
+      {
+         continue;
+      }
+
+      HYPRE_Complex value = Pi_offd_data[j];
+
+      row_sum_C += value;
+   }
+
+   row_sum_C = warp_reduce_sum(row_sum_C);
+
+   HYPRE_Int i1 = pass_order[row_i];
+
+   HYPRE_Real diagonal = A_diag_data[A_diag_i[i1]];
+
+   HYPRE_Real value = row_sum_C*diagonal;
+
+   if( lane == 0 )
+     {
+       row_sum_C += w_row_sum[row_i];
+
+       if( value != 0 )
+         {
+           row_sum_C /= value;
+         }
+     }
+
+   row_sum_C = __shfl_sync(HYPRE_WARP_FULL_MASK, row_sum_C, 0);
+
+   // Pi_diag
+   if (lane < 2)
+   {
+      p = read_only_load(Pi_diag_i + row_i + lane);
+   }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   {
+      if ( j >= q )
+      {
+         continue;
+      }
+
+      Pi_diag_data[j] = -Pi_diag_data[j]*row_sum_C;
+   }
+
+   // Pi_offd
+   if (lane < 2)
+   {
+      p = read_only_load(Pi_offd_i + row_i + lane);
+   }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   {
+      if ( j >= q )
+      {
+         continue;
+      }
+
+      Pi_offd_data[j] = -Pi_offd_data[j]*row_sum_C;
    }
 }
