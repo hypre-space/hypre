@@ -885,6 +885,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    HYPRE_BigInt     total_global_fpts;
    HYPRE_BigInt     total_global_cpts;
    HYPRE_BigInt    *big_convert;
+   HYPRE_BigInt    *big_convert_dev;
    HYPRE_BigInt    *big_convert_offd = NULL;
    HYPRE_BigInt    *big_buf_data = NULL;
    HYPRE_Int        num_sends;
@@ -934,13 +935,12 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
 
    {
       big_convert = hypre_CTAlloc(HYPRE_BigInt, n_fine, HYPRE_MEMORY_HOST);
-      for (i=0; i < n_fine; i++)
-      {
-         if (pass_marker[i] == color)
-         {
-            big_convert[i] = (HYPRE_BigInt)fine_to_coarse[i] + c_pts_starts[0];
-         }
-      }
+      big_convert_dev = hypre_CTAlloc(HYPRE_BigInt, n_fine, HYPRE_MEMORY_DEVICE);
+
+      init_big_convert(n_fine, pass_marker_dev, color,
+                       fine_to_coarse_dev, c_pts_starts[0], big_convert_dev );
+
+      hypre_TMemcpy( big_convert, big_convert_dev, HYPRE_BigInt, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE); // FIXME: Clean this up when we don't need pass_marker on the host
 
       num_cols_offd_P = 0;
       if (num_cols_offd_A)
@@ -982,7 +982,12 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
                col_map_offd_P[cpt++] = big_convert_offd[i];
             }
          }
-      }
+
+         hypre_TFree(big_convert, HYPRE_MEMORY_HOST);
+         hypre_TFree(big_convert_dev, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(big_convert_offd, HYPRE_MEMORY_HOST);
+
+      } // if (num_cols_offd_A)
    }
 
    /* generate P_diag_i and P_offd_i */
@@ -1112,8 +1117,8 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    hypre_TFree(fine_to_coarse_dev, HYPRE_MEMORY_DEVICE);
    hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_HOST);
    hypre_TFree(row_sum_C, HYPRE_MEMORY_HOST);
-   hypre_TFree(big_convert, HYPRE_MEMORY_HOST);
-   hypre_TFree(big_convert_offd, HYPRE_MEMORY_HOST);
+
+
    hypre_TFree(big_buf_data, HYPRE_MEMORY_HOST);
 
    hypre_MatvecCommPkgCreate(P);
@@ -1223,6 +1228,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    HYPRE_BigInt     total_global_fpts;
    HYPRE_BigInt     total_global_cpts;
    HYPRE_BigInt    *big_convert;
+   HYPRE_BigInt    *big_convert_dev;
    HYPRE_BigInt    *big_convert_offd = NULL;
    HYPRE_BigInt    *big_buf_data = NULL;
    HYPRE_Int        num_sends;
@@ -1274,13 +1280,12 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
 
    {
       big_convert = hypre_CTAlloc(HYPRE_BigInt, n_fine, HYPRE_MEMORY_HOST);
-      for (i=0; i < n_fine; i++)
-      {
-         if (pass_marker[i] == color)
-         {
-            big_convert[i] = (HYPRE_BigInt)fine_to_coarse[i] + c_pts_starts[0];
-         }
-      }
+      big_convert_dev = hypre_CTAlloc(HYPRE_BigInt, n_fine, HYPRE_MEMORY_DEVICE);
+
+      init_big_convert(n_fine, pass_marker_dev, color,
+                       fine_to_coarse_dev, c_pts_starts[0], big_convert_dev );
+
+      hypre_TMemcpy( big_convert, big_convert_dev, HYPRE_BigInt, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE); // FIXME: Clean this up when we don't need pass_marker on the host
 
       num_cols_offd_Q = 0;
       if (num_cols_offd_A)
@@ -1322,7 +1327,12 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
                col_map_offd_Q[cpt++] = big_convert_offd[i];
             }
          }
-      }
+
+         hypre_TFree(big_convert, HYPRE_MEMORY_HOST);
+         hypre_TFree(big_convert_dev, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(big_convert_offd, HYPRE_MEMORY_HOST);
+
+      } // if (num_cols_offd_A)
    }
 
    /* generate Q_diag_i and Q_offd_i */
@@ -1526,8 +1536,8 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
 /* free stuff */
    hypre_TFree(fine_to_coarse, HYPRE_MEMORY_HOST);
    hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_HOST);
-   hypre_TFree(big_convert, HYPRE_MEMORY_HOST);
-   hypre_TFree(big_convert_offd, HYPRE_MEMORY_HOST);
+
+
    hypre_TFree(big_buf_data, HYPRE_MEMORY_HOST);
 
    hypre_MatvecCommPkgCreate(Q);
