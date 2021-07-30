@@ -515,6 +515,9 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       }
    }
 
+   // We don't need the row sums anymore
+   hypre_TFree (row_sums, HYPRE_MEMORY_HOST);// FIXME: Clean up when done
+   hypre_TFree (row_sums_dev, HYPRE_MEMORY_DEVICE);
 
    // FIXME: Temporary hack!
    // Free up the memory we allocated for the manual copying of A and S data
@@ -700,13 +703,11 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    hypre_TFree (pass_marker_offd, HYPRE_MEMORY_HOST);
    hypre_TFree (pass_order, HYPRE_MEMORY_HOST);
    hypre_TFree (fine_to_coarse, HYPRE_MEMORY_HOST);
-   hypre_TFree (row_sums, HYPRE_MEMORY_HOST);
 
     hypre_TFree (pass_marker_dev, HYPRE_MEMORY_DEVICE);// FIXME: Clean up when done
     hypre_TFree (pass_marker_offd_dev, HYPRE_MEMORY_DEVICE);
     hypre_TFree (pass_order_dev, HYPRE_MEMORY_DEVICE);
     hypre_TFree (fine_to_coarse_dev, HYPRE_MEMORY_DEVICE);
-    hypre_TFree (row_sums_dev, HYPRE_MEMORY_DEVICE);
 
     HYPRE_THRUST_CALL( replace_if,
                        CF_marker_dev,
