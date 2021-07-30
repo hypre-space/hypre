@@ -903,7 +903,9 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
                                       finally will be pointer to start of row */
    HYPRE_Int       *P_diag_j;
 
+   HYPRE_Real      *P_diag_data_dev;
    HYPRE_Int       *P_diag_i_dev;
+   HYPRE_Int       *P_diag_j_dev;
 
    hypre_CSRMatrix *P_offd;
    HYPRE_Real      *P_offd_data = NULL;
@@ -911,7 +913,9 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
                                       finally will be pointer to start of row */
    HYPRE_Int       *P_offd_j = NULL;
 
+   HYPRE_Real      *P_offd_data_dev = NULL;
    HYPRE_Int       *P_offd_i_dev;
+   HYPRE_Int       *P_offd_j_dev = NULL;
 
    HYPRE_Int       *fine_to_coarse;
    HYPRE_Int       *fine_to_coarse_dev;
@@ -1085,6 +1089,11 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    P_offd_j    = hypre_CTAlloc(HYPRE_Int, nnz_offd, HYPRE_MEMORY_HOST);
    P_offd_data = hypre_CTAlloc(HYPRE_Real, nnz_offd, HYPRE_MEMORY_HOST);
 
+   P_diag_j_dev    = hypre_CTAlloc(HYPRE_Int, nnz_diag, HYPRE_MEMORY_DEVICE);
+   P_diag_data_dev = hypre_CTAlloc(HYPRE_Real, nnz_diag, HYPRE_MEMORY_DEVICE);
+   P_offd_j_dev    = hypre_CTAlloc(HYPRE_Int, nnz_offd, HYPRE_MEMORY_DEVICE);
+   P_offd_data_dev = hypre_CTAlloc(HYPRE_Real, nnz_offd, HYPRE_MEMORY_DEVICE);
+
    cnt_diag = 0;
    cnt_offd = 0;
    for (i=0; i < num_points; i++)
@@ -1148,8 +1157,19 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
          P_offd_data[j] = -P_offd_data[j]*row_sums[i1];
       }
    }
+   // FIXME: Clean up when done with host code
+   hypre_TMemcpy( P_diag_j_dev,    P_diag_j,    HYPRE_Int, nnz_diag, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy( P_diag_data_dev, P_diag_data, HYPRE_Real, nnz_diag, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy( P_offd_j_dev,    P_offd_j,    HYPRE_Int, nnz_offd, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy( P_offd_data_dev, P_offd_data, HYPRE_Real, nnz_offd, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
    hypre_TFree(row_sum_C, HYPRE_MEMORY_HOST);
+
+   // FIXME: Clean up when done with host code
+   hypre_TMemcpy( P_diag_j,    P_diag_j_dev,    HYPRE_Int, nnz_diag, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy( P_diag_data, P_diag_data_dev, HYPRE_Real, nnz_diag, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy( P_offd_j,    P_offd_j_dev,    HYPRE_Int, nnz_offd, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy( P_offd_data, P_offd_data_dev, HYPRE_Real, nnz_offd, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
    P = hypre_ParCSRMatrixCreate(comm,
                                 total_global_fpts,
