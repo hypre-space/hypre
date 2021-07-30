@@ -1258,11 +1258,16 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
                                       finally will be pointer to start of row */
    HYPRE_Int       *Q_diag_j;
 
+   HYPRE_Int       *Q_diag_i_dev;
+
    hypre_CSRMatrix *Q_offd;
    HYPRE_Real      *Q_offd_data = NULL;
    HYPRE_Int       *Q_offd_i; /*at first counter of nonzero cols for each row,
                                       finally will be pointer to start of row */
    HYPRE_Int       *Q_offd_j = NULL;
+
+   HYPRE_Int       *Q_offd_i_dev = NULL;
+
    HYPRE_Int       *fine_to_coarse;
    HYPRE_Int       *fine_to_coarse_dev;
    HYPRE_Int       *fine_to_coarse_offd = NULL;
@@ -1285,9 +1290,6 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    hypre_MPI_Comm_rank(comm, &my_id);
 
    /* define P matrices */
-
-   Q_diag_i = hypre_CTAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_HOST);
-   Q_offd_i = hypre_CTAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_HOST);
 
    fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST); // FIXME: Clean up
    fine_to_coarse_dev = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
@@ -1386,6 +1388,12 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    }
 
    /* generate Q_diag_i and Q_offd_i */
+   Q_diag_i = hypre_CTAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_HOST);
+   Q_offd_i = hypre_CTAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_HOST);
+   // FIXME: Clean up when done with host code
+   Q_diag_i_dev = hypre_CTAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_DEVICE);
+   Q_offd_i_dev = hypre_CTAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_DEVICE);
+
    nnz_diag = 0;
    nnz_offd = 0;
    for (i=0; i < num_points; i++)
@@ -1411,11 +1419,19 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
       }
    }
 
-   for (i=1; i < num_points+1; i++)
-   {
-      Q_diag_i[i] += Q_diag_i[i-1];
-      Q_offd_i[i] += Q_offd_i[i-1];
-   }
+   // FIXME: Clean up when done with host code
+   hypre_TMemcpy( Q_diag_i_dev, Q_diag_i, HYPRE_Int, num_points+1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy( Q_offd_i_dev, Q_offd_i, HYPRE_Int, num_points+1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
+   HYPRE_THRUST_CALL( inclusive_scan,
+                      thrust::make_zip_iterator( thrust::make_tuple( Q_diag_i_dev, Q_offd_i_dev) ),
+                      thrust::make_zip_iterator( thrust::make_tuple( Q_diag_i_dev + num_points+1, Q_offd_i_dev + num_points+1) ),
+                      thrust::make_zip_iterator( thrust::make_tuple( Q_diag_i_dev, Q_offd_i_dev) ),
+                      tuple_plus<HYPRE_Int>() );
+
+   // FIXME: Clean up when done with host code
+   hypre_TMemcpy( Q_diag_i, Q_diag_i_dev, HYPRE_Int, num_points+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy( Q_offd_i, Q_offd_i_dev, HYPRE_Int, num_points+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
    Q_diag_j = hypre_CTAlloc(HYPRE_Int, nnz_diag, HYPRE_MEMORY_HOST);
    Q_diag_data = hypre_CTAlloc(HYPRE_Real, nnz_diag, HYPRE_MEMORY_HOST);
