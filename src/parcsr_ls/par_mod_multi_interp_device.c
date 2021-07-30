@@ -497,7 +497,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
    Pi = hypre_CTAlloc(hypre_ParCSRMatrix*, num_passes, HYPRE_MEMORY_HOST);
    hypre_GenerateMultipassPiDevice(A, S, num_cpts_global, &pass_order[pass_starts[1]], pass_marker,
-                                   pass_marker_offd, pass_starts[2]-pass_starts[1], 1, row_sums, &Pi[0],
+                                   pass_marker_offd, pass_starts[2]-pass_starts[1], 1, row_sums_dev, &Pi[0],
                                    A_diag_data,A_diag_i,A_diag_j, // Hacked in host pointers
                                    A_offd_data,A_offd_i,A_offd_j, // Remove when done porting
                                    S_diag_i,S_diag_j,S_offd_i,S_offd_j,
@@ -509,7 +509,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
          hypre_ParCSRMatrix *Q;
          HYPRE_BigInt *c_pts_starts = hypre_ParCSRMatrixRowStarts(Pi[i-1]);
          hypre_GenerateMultipassPiDevice(A, S, c_pts_starts, &pass_order[pass_starts[i+1]], pass_marker,
-                             pass_marker_offd, pass_starts[i+2]-pass_starts[i+1], i+1, row_sums, &Q,
+                             pass_marker_offd, pass_starts[i+2]-pass_starts[i+1], i+1, row_sums_dev, &Q,
                                    A_diag_data,A_diag_i,A_diag_j, // Hacked in host pointers
                                    A_offd_data,A_offd_i,A_offd_j, // Remove when done porting
                                    S_diag_i,S_diag_j,S_offd_i,S_offd_j,
@@ -930,7 +930,6 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    HYPRE_BigInt    *big_convert_offd_dev = NULL;
    HYPRE_BigInt    *big_buf_data = NULL;
    HYPRE_Int        num_sends;
-   HYPRE_Real      *row_sum_C;
 
    /* MPI size and rank*/
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -1128,42 +1127,21 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_HOST); // FIXME: Clean up
    hypre_TFree(fine_to_coarse_offd_dev, HYPRE_MEMORY_DEVICE);
 
-   row_sum_C = hypre_CTAlloc(HYPRE_Real, num_points, HYPRE_MEMORY_HOST);
-   for (i=0; i < num_points; i++)
-   {
-      HYPRE_Real diagonal, value;
-      i1 = pass_order[i];
-      diagonal = A_diag_data[A_diag_i[i1]];
 
-      for (j = P_diag_i[i]; j < P_diag_i[i+1]; j++)
-      {
-          row_sum_C[i] += P_diag_data[j];
-      }
-      for (j = P_offd_i[i]; j < P_offd_i[i+1]; j++)
-      {
-           row_sum_C[i] += P_offd_data[j];
-      }
-      value = row_sum_C[i]*diagonal;
-      if (value != 0)
-      {
-         row_sums[i1] /= value;
-      }
-      for (j = P_diag_i[i]; j < P_diag_i[i+1]; j++)
-      {
-         P_diag_data[j] = -P_diag_data[j]*row_sums[i1];
-      }
-      for (j = P_offd_i[i]; j < P_offd_i[i+1]; j++)
-      {
-         P_offd_data[j] = -P_offd_data[j]*row_sums[i1];
-      }
-   }
    // FIXME: Clean up when done with host code
    hypre_TMemcpy( P_diag_j_dev,    P_diag_j,    HYPRE_Int, nnz_diag, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
    hypre_TMemcpy( P_diag_data_dev, P_diag_data, HYPRE_Real, nnz_diag, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
    hypre_TMemcpy( P_offd_j_dev,    P_offd_j,    HYPRE_Int, nnz_offd, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
    hypre_TMemcpy( P_offd_data_dev, P_offd_data, HYPRE_Real, nnz_offd, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
-   hypre_TFree(row_sum_C, HYPRE_MEMORY_HOST);
+   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   dim3 gDim = hypre_GetDefaultCUDAGridDimension(num_points, "warp", bDim);
+
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_mutlipass_pi_rowsum, gDim, bDim,
+                      num_points, pass_order_dev, A_diag_i_dev, A_diag_data_dev,
+                      P_diag_i_dev, P_diag_data_dev, P_offd_i_dev, P_offd_data_dev,
+                      row_sums );
+
 
    // FIXME: Clean up when done with host code
    hypre_TMemcpy( P_diag_j,    P_diag_j_dev,    HYPRE_Int, nnz_diag, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
