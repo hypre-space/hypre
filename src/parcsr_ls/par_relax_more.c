@@ -161,7 +161,6 @@ hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax with */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
 #endif
-   printf("max eig est: %f, min eig est: %f\n", *max_eig, *min_eig);
    return ierr;
 }
 
