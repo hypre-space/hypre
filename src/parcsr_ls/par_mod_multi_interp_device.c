@@ -914,7 +914,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int        num_cols_offd_P;
    HYPRE_Int        nnz_diag, nnz_offd;
    HYPRE_Int        n_cpts, i, j, i1, j1, j2;
-   HYPRE_Int        startc, index;
+
    HYPRE_Int        cpt, cnt_diag, cnt_offd;
 
    hypre_ParCSRMatrix *P;
@@ -1281,7 +1281,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
 
    HYPRE_Int        nnz_diag, nnz_offd;
    HYPRE_Int        n_cpts, i, j, i1, j1, j2;
-   HYPRE_Int        startc, index;
+
    HYPRE_Int        cpt, cnt_diag, cnt_offd;
 
    hypre_ParCSRMatrix *Q;
