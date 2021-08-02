@@ -157,3 +157,14 @@ mpirun -np 2  ./ij -solver 82 -ilu_type 50 -ilu_lfil 0 > solvers.out.323
 ## ILU smoother for AMG
 mpirun -np 2  ./ij -solver 0 -smtype 5  -smlv 1 -ilu_type 30 > solvers.out.324
 mpirun -np 2  ./ij -solver 0 -smtype 15 -smlv 1 -ilu_type 30 > solvers.out.325
+
+## Solve Ax=b and -Ax=b, convergence should be the same
+mpirun -np 2 ./ij -solver 0 -rhsrand -negA 0 > solvers.out.400.p
+mpirun -np 2 ./ij -solver 0 -rhsrand -negA 1 > solvers.out.400.n
+mpirun -np 3 ./ij -solver 3 -rhsrand -negA 0 > solvers.out.401.p
+mpirun -np 3 ./ij -solver 3 -rhsrand -negA 1 > solvers.out.401.n
+mpirun -np 4 ./ij -cheby_eig_est 10 -cheby_order 4 -cheby_variant 0 -cheby_scale 1 -rlx 16 -negA 0 > solvers.out.402.p
+mpirun -np 4 ./ij -cheby_eig_est 10 -cheby_order 4 -cheby_variant 0 -cheby_scale 1 -rlx 16 -negA 1 > solvers.out.402.n
+mpirun -np 4 ./ij -solver 3 -cheby_eig_est 0 -cheby_order 3 -cheby_variant 1 -cheby_scale 1 -rlx 16 -negA 0 > solvers.out.403.p
+mpirun -np 4 ./ij -solver 3 -cheby_eig_est 0 -cheby_order 3 -cheby_variant 1 -cheby_scale 1 -rlx 16 -negA 1 > solvers.out.403.n
+

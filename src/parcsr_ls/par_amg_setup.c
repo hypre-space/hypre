@@ -3037,7 +3037,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
          else
          {
-            hypre_ParCSRMaxEigEstimate(A_array[j], scale, &max_eig);
+            hypre_ParCSRMaxEigEstimate(A_array[j], scale, &max_eig, &min_eig);
          }
          max_eig_est[j] = max_eig;
          min_eig_est[j] = min_eig;

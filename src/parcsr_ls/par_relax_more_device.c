@@ -35,10 +35,9 @@ hypreCUDAKernel_CSRMaxEigEstimate(HYPRE_Int      nrows,
                                   HYPRE_Int     *offd_ia,
                                   HYPRE_Int     *offd_ja,
                                   HYPRE_Complex *offd_aa,
-                                  HYPRE_Complex *row_sum,
-                                  HYPRE_Int      scale,
-                                  HYPRE_Int     *pos_diag,
-                                  HYPRE_Int     *neg_diag)
+                                  HYPRE_Complex *row_sum_lower,
+                                  HYPRE_Complex *row_sum_upper,
+                                  HYPRE_Int      scale)
 {
    HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
 
@@ -60,8 +59,10 @@ hypreCUDAKernel_CSRMaxEigEstimate(HYPRE_Int      nrows,
    q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
    p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
 
+   HYPRE_Real lower, upper;
    for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
    {
+
       if (j >= q)
       {
          continue;
@@ -73,9 +74,9 @@ hypreCUDAKernel_CSRMaxEigEstimate(HYPRE_Int      nrows,
       if (find_diag)
       {
          diag_value = aij;
+      } else {
+         row_sum_i += fabs(aij);
       }
-
-      row_sum_i += fabs(aij);
    }
 
    if (lane < 2)
@@ -101,16 +102,17 @@ hypreCUDAKernel_CSRMaxEigEstimate(HYPRE_Int      nrows,
 
    if (lane == 0)
    {
-      if (diag_value > 0)
+      lower = diag_value - row_sum_i;
+      upper = diag_value + row_sum_i;
+
+      if(scale)
       {
-         atomicAdd(pos_diag, 1);
-      }
-      else if (diag_value < 0)
-      {
-         atomicAdd(neg_diag, 1);
+        lower /= hypre_abs(diag_value);
+        upper /= hypre_abs(diag_value);
       }
 
-      row_sum[row_i] = (scale && diag_value != 0.0) ? row_sum_i / diag_value : row_sum_i;
+      row_sum_upper[row_i] = upper;
+      row_sum_lower[row_i] = lower;
    }
 }
 
@@ -122,16 +124,12 @@ hypreCUDAKernel_CSRMaxEigEstimate(HYPRE_Int      nrows,
  * @param[out] Maximum eigenvalue
  */
 HYPRE_Int
-hypre_ParCSRMaxEigEstimateDevice(hypre_ParCSRMatrix *A, HYPRE_Int scale, HYPRE_Real *max_eig)
+hypre_ParCSRMaxEigEstimateDevice(hypre_ParCSRMatrix *A, HYPRE_Int scale, HYPRE_Real *max_eig, HYPRE_Real *min_eig)
 {
    HYPRE_Real e_max;
-   HYPRE_Real max_norm;
+   HYPRE_Real e_min;
    HYPRE_Int  A_num_rows;
 
-   HYPRE_Real temp;
-
-   HYPRE_Int pos_diag;
-   HYPRE_Int neg_diag;
 
    HYPRE_Real *A_diag_data;
    HYPRE_Real *A_offd_data;
@@ -140,12 +138,11 @@ hypre_ParCSRMaxEigEstimateDevice(hypre_ParCSRMatrix *A, HYPRE_Int scale, HYPRE_R
    HYPRE_Int  *A_diag_j;
    HYPRE_Int  *A_offd_j;
 
-   HYPRE_Int *pos_diag_d = hypre_CTAlloc(HYPRE_Int, 1, hypre_ParCSRMatrixMemoryLocation(A));
-   HYPRE_Int *neg_diag_d = hypre_CTAlloc(HYPRE_Int, 1, hypre_ParCSRMatrixMemoryLocation(A));
 
    A_num_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
 
-   HYPRE_Real *rowsums = hypre_CTAlloc(HYPRE_Real, A_num_rows, hypre_ParCSRMatrixMemoryLocation(A));
+   HYPRE_Real *rowsums_lower = hypre_CTAlloc(HYPRE_Real, A_num_rows, hypre_ParCSRMatrixMemoryLocation(A));
+   HYPRE_Real *rowsums_upper = hypre_CTAlloc(HYPRE_Real, A_num_rows, hypre_ParCSRMatrixMemoryLocation(A));
 
    A_diag_i    = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A));
    A_diag_j    = hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(A));
@@ -168,36 +165,40 @@ hypre_ParCSRMaxEigEstimateDevice(hypre_ParCSRMatrix *A, HYPRE_Int scale, HYPRE_R
                      A_offd_i,
                      A_offd_j,
                      A_offd_data,
-                     rowsums,
-                     scale,
-                     pos_diag_d,
-                     neg_diag_d);
+                     rowsums_lower,
+                     rowsums_upper,
+                     scale);
 
    hypre_SyncCudaComputeStream(hypre_handle());
-   hypre_TMemcpy(&pos_diag, pos_diag_d, HYPRE_Int, 1, HYPRE_MEMORY_HOST, hypre_ParCSRMatrixMemoryLocation(A));
-   hypre_TMemcpy(&neg_diag, neg_diag_d, HYPRE_Int, 1, HYPRE_MEMORY_HOST, hypre_ParCSRMatrixMemoryLocation(A));
 
-   hypre_SyncCudaComputeStream(hypre_handle());
-   // Max over rows
-   // Probably can do this without the extra memory/pass
-   max_norm = HYPRE_THRUST_CALL(reduce, rowsums, rowsums + A_num_rows, (HYPRE_Real)0, thrust::maximum<HYPRE_Real>());
+   e_min = HYPRE_THRUST_CALL(reduce, rowsums_lower, rowsums_lower + A_num_rows, (HYPRE_Real)0, thrust::minimum<HYPRE_Real>());
+   e_max = HYPRE_THRUST_CALL(reduce, rowsums_upper, rowsums_upper + A_num_rows, (HYPRE_Real)0, thrust::maximum<HYPRE_Real>());
+   printf("e_min : %f, e_max est: %f\n", e_min, e_max);
 
-   /* get max across procs */
-   hypre_MPI_Allreduce(&max_norm, &temp, 1, HYPRE_MPI_REAL, hypre_MPI_MAX, hypre_ParCSRMatrixComm(A));
-   max_norm = temp;
+   /* Same as hypre_ParCSRMaxEigEstimateHost */
 
-   /* from Charles */
-   if (pos_diag == 0 && neg_diag > 0) max_norm = -max_norm;
+   HYPRE_Real send_buf[2];
+   HYPRE_Real recv_buf[2];
 
-   /* eig estimates */
-   e_max = max_norm;
+   send_buf[0] = -e_min;
+   send_buf[1] = e_max;
+
+   hypre_MPI_Allreduce(send_buf, recv_buf, 2, HYPRE_MPI_REAL, hypre_MPI_MAX, hypre_ParCSRMatrixComm(A));
 
    /* return */
-   *max_eig = e_max;
+   if ( hypre_abs(e_min) > hypre_abs(e_max) )
+   {
+      *min_eig = e_min;
+      *max_eig = hypre_min(0.0, e_max);
+   }
+   else
+   {
+      *min_eig = hypre_max(e_min, 0.0);
+      *max_eig = e_max;
+   }
 
-   hypre_TFree(rowsums, hypre_ParCSRMatrixMemoryLocation(A));
-   hypre_TFree(pos_diag_d, hypre_ParCSRMatrixMemoryLocation(A));
-   hypre_TFree(neg_diag_d, hypre_ParCSRMatrixMemoryLocation(A));
+   hypre_TFree(rowsums_lower, hypre_ParCSRMatrixMemoryLocation(A));
+   hypre_TFree(rowsums_upper, hypre_ParCSRMatrixMemoryLocation(A));
 
    return hypre_error_flag;
 }
@@ -344,7 +345,7 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
 
    if (scale)
    {
-      hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(A), ds_data, 3);
+      hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(A), ds_data, 4);
    }
    else
    {

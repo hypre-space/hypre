@@ -1896,6 +1896,7 @@ hypre_CSRMatrixComputeRowSum( hypre_CSRMatrix *A,
  *      1: abs diag
  *      2: diag inverse
  *      3: diag inverse sqrt
+ *      4: abs diag inverse sqrt
  *--------------------------------------------------------------------------*/
 
 void
@@ -1933,6 +1934,10 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
             {
                d_i = 1.0 /(sqrt(A_data[j]));
             }
+            else if (type == 4)
+            {
+               d_i = 1.0 /(sqrt(fabs(A_data[j])));
+            }
             break;
          }
       }
@@ -1966,6 +1971,35 @@ hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A,
    {
       hypre_CSRMatrixExtractDiagonalHost(A, d, type);
    }
+}
+
+/* Scale CSR matrix A = scalar * A
+ */
+HYPRE_Int
+hypre_CSRMatrixScale( hypre_CSRMatrix *A,
+                      HYPRE_Complex    scalar)
+{
+   HYPRE_Complex *data = hypre_CSRMatrixData(A);
+   HYPRE_Int      i;
+   HYPRE_Int      k = hypre_CSRMatrixNumNonzeros(A);
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypreDevice_Scalen(data, k, scalar);
+   }
+   else
+#endif
+   {
+      for (i = 0; i < k; i++)
+      {
+         data[i] *= scalar;
+      }
+   }
+
+   return hypre_error_flag;
 }
 
 HYPRE_Int
