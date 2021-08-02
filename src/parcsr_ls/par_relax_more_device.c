@@ -261,19 +261,16 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
                              hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize_v2(r, hypre_ParCSRMatrixMemoryLocation(A));
-   hypre_ParVectorSetPartitioningOwner(r, 0);
 
    p = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                              hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize_v2(p, hypre_ParCSRMatrixMemoryLocation(A));
-   hypre_ParVectorSetPartitioningOwner(p, 0);
 
    s = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                              hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize_v2(s, hypre_ParCSRMatrixMemoryLocation(A));
-   hypre_ParVectorSetPartitioningOwner(s, 0);
 
    /* DS Starts on host to be populated, then transferred to device */
    ds = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
@@ -281,13 +278,11 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
                               hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize_v2(ds, hypre_ParCSRMatrixMemoryLocation(A));
    ds_data = hypre_VectorData(hypre_ParVectorLocalVector(ds));
-   hypre_ParVectorSetPartitioningOwner(ds, 0);
 
    u = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                              hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize_v2(u, hypre_ParCSRMatrixMemoryLocation(A));
-   hypre_ParVectorSetPartitioningOwner(u, 0);
 
    /* point to local data */
    s_data = hypre_VectorData(hypre_ParVectorLocalVector(s));

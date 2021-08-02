@@ -21,7 +21,6 @@ set(SRCS
   F90_HYPRE_struct_pfmg.c
   F90_HYPRE_struct_smg.c
   F90_HYPRE_struct_sparse_msg.c
-  general.c
   hybrid.c
   HYPRE_struct_bicgstab.c
   HYPRE_struct_cycred.c
