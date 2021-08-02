@@ -61,19 +61,19 @@ void hypreCUDAKernel_mutli_pi_rowsum( HYPRE_Int      num_points,
                                       HYPRE_Complex *w_row_sum );
 
 __global__
-void hypreCUDAKernel_generate_Pdiag_Poffd( HYPRE_Int  num_points,
-                                           HYPRE_Int  color,
-                                           HYPRE_Int *pass_order,
-                                           HYPRE_Int *pass_marker,
-                                           HYPRE_Int *pass_marker_offd,
-                                           HYPRE_Int *S_diag_i,
-                                           HYPRE_Int *S_diag_j,
-                                           HYPRE_Int *S_offd_i,
-                                           HYPRE_Int *S_offd_j,
-                                           HYPRE_Int *P_diag_i,
-                                           HYPRE_Int *P_offd_i,
-                                           HYPRE_Int * nnz_diag,
-                                           HYPRE_Int * nnz_offd );
+void hypreCUDAKernel_generate_Pdiag_i_Poffd_i( HYPRE_Int  num_points,
+                                               HYPRE_Int  color,
+                                               HYPRE_Int *pass_order,
+                                               HYPRE_Int *pass_marker,
+                                               HYPRE_Int *pass_marker_offd,
+                                               HYPRE_Int *S_diag_i,
+                                               HYPRE_Int *S_diag_j,
+                                               HYPRE_Int *S_offd_i,
+                                               HYPRE_Int *S_offd_j,
+                                               HYPRE_Int *P_diag_i,
+                                               HYPRE_Int *P_offd_i,
+                                               HYPRE_Int * nnz_diag,
+                                               HYPRE_Int * nnz_offd );
 
 
 /*--------------------------------------------------------------------------
@@ -1074,7 +1074,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
      HYPRE_Int * nnz_diag_array = hypre_CTAlloc(HYPRE_Int, num_points, HYPRE_MEMORY_DEVICE);
      HYPRE_Int * nnz_offd_array = hypre_CTAlloc(HYPRE_Int, num_points, HYPRE_MEMORY_DEVICE);
 
-     HYPRE_CUDA_LAUNCH( hypreCUDAKernel_generate_Pdiag_Poffd, gDim, bDim,
+     HYPRE_CUDA_LAUNCH( hypreCUDAKernel_generate_Pdiag_i_Poffd_i, gDim, bDim,
                         num_points, color, pass_order_dev, pass_marker_dev, pass_marker_offd_dev,
                         S_diag_i_dev, S_diag_j_dev, S_offd_i_dev, S_offd_j_dev,
                         P_diag_i_dev, P_offd_i_dev,
@@ -1435,7 +1435,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
      HYPRE_Int * nnz_diag_array = hypre_CTAlloc(HYPRE_Int, num_points, HYPRE_MEMORY_DEVICE);
      HYPRE_Int * nnz_offd_array = hypre_CTAlloc(HYPRE_Int, num_points, HYPRE_MEMORY_DEVICE);
 
-     HYPRE_CUDA_LAUNCH( hypreCUDAKernel_generate_Pdiag_Poffd, gDim, bDim,
+     HYPRE_CUDA_LAUNCH( hypreCUDAKernel_generate_Pdiag_i_Poffd_i, gDim, bDim,
                         num_points, color, pass_order_dev, pass_marker_dev, pass_marker_offd_dev,
                         S_diag_i_dev, S_diag_j_dev, S_offd_i_dev, S_offd_j_dev,
                         Q_diag_i_dev, Q_offd_i_dev,
@@ -2109,19 +2109,19 @@ void hypreCUDAKernel_mutli_pi_rowsum( HYPRE_Int      num_points,
 }
 
 __global__
-void hypreCUDAKernel_generate_Pdiag_Poffd( HYPRE_Int  num_points,
-                                           HYPRE_Int  color,
-                                           HYPRE_Int *pass_order,
-                                           HYPRE_Int *pass_marker,
-                                           HYPRE_Int *pass_marker_offd,
-                                           HYPRE_Int *S_diag_i,
-                                           HYPRE_Int *S_diag_j,
-                                           HYPRE_Int *S_offd_i,
-                                           HYPRE_Int *S_offd_j,
-                                           HYPRE_Int *P_diag_i,
-                                           HYPRE_Int *P_offd_i,
-                                           HYPRE_Int * nnz_diag,
-                                           HYPRE_Int * nnz_offd )
+void hypreCUDAKernel_generate_Pdiag_i_Poffd_i( HYPRE_Int  num_points,
+                                               HYPRE_Int  color,
+                                               HYPRE_Int *pass_order,
+                                               HYPRE_Int *pass_marker,
+                                               HYPRE_Int *pass_marker_offd,
+                                               HYPRE_Int *S_diag_i,
+                                               HYPRE_Int *S_diag_j,
+                                               HYPRE_Int *S_offd_i,
+                                               HYPRE_Int *S_offd_j,
+                                               HYPRE_Int *P_diag_i,
+                                               HYPRE_Int *P_offd_i,
+                                               HYPRE_Int * nnz_diag,
+                                               HYPRE_Int * nnz_offd )
 {
   /*
     nnz_diag = 0;
