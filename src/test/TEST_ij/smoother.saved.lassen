@@ -110,19 +110,3 @@ Final Relative Residual Norm = 1.283535e-09
 Iterations = 9
 Final Relative Residual Norm = 4.977727e-09
 
-# Output file: smoother.out.21
-Iterations = 8
-Final Relative Residual Norm = 5.892007e-09
-
-# Output file: smoother.out.22
-Iterations = 8
-Final Relative Residual Norm = 4.144569e-09
-
-# Output file: smoother.out.23
-Iterations = 9
-Final Relative Residual Norm = 1.337964e-09
-
-# Output file: smoother.out.24
-Iterations = 9
-Final Relative Residual Norm = 5.138316e-09
-
