@@ -1428,32 +1428,31 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
 
    nnz_diag = 0;
    nnz_offd = 0;
-   for (i=0; i < num_points; i++)
    {
-      i1 = pass_order[i];
-      for (j=S_diag_i[i1]; j < S_diag_i[i1+1]; j++)
-      {
-         j1 = S_diag_j[j];
-         if (pass_marker[j1] == color)
-         {
-             Q_diag_i[i+1]++;
-             nnz_diag++;
-         }
-      }
-      for (j=S_offd_i[i1]; j < S_offd_i[i1+1]; j++)
-      {
-         j1 = S_offd_j[j];
-         if (pass_marker_offd[j1] == color)
-         {
-             Q_offd_i[i+1]++;
-             nnz_offd++;
-         }
-      }
-   }
+     dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+     dim3 gDim = hypre_GetDefaultCUDAGridDimension(num_points, "warp", bDim);
 
-   // FIXME: Clean up when done with host code
-   hypre_TMemcpy( Q_diag_i_dev, Q_diag_i, HYPRE_Int, num_points+1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy( Q_offd_i_dev, Q_offd_i, HYPRE_Int, num_points+1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+     HYPRE_Int * nnz_diag_array = hypre_CTAlloc(HYPRE_Int, num_points, HYPRE_MEMORY_DEVICE);
+     HYPRE_Int * nnz_offd_array = hypre_CTAlloc(HYPRE_Int, num_points, HYPRE_MEMORY_DEVICE);
+
+     HYPRE_CUDA_LAUNCH( hypreCUDAKernel_generate_Pdiag_Poffd, gDim, bDim,
+                        num_points, color, pass_order_dev, pass_marker_dev, pass_marker_offd_dev,
+                        S_diag_i_dev, S_diag_j_dev, S_offd_i_dev, S_offd_j_dev,
+                        Q_diag_i_dev, Q_offd_i_dev,
+                        nnz_diag_array, nnz_offd_array );
+
+     auto nnz_reduce = HYPRE_THRUST_CALL( reduce,
+                                          thrust::make_zip_iterator(thrust::make_tuple(nnz_diag_array,nnz_offd_array)),
+                                          thrust::make_zip_iterator(thrust::make_tuple(nnz_diag_array+num_points,nnz_offd_array+num_points)),
+                                          thrust::tuple<HYPRE_Int,HYPRE_Int>(0,0),
+                                          tuple_plus<HYPRE_Int>() );
+
+     nnz_diag = thrust::get<0>(nnz_reduce);
+     nnz_offd = thrust::get<1>(nnz_reduce);
+
+     hypre_TFree(nnz_diag_array, HYPRE_MEMORY_DEVICE);
+     hypre_TFree(nnz_offd_array, HYPRE_MEMORY_DEVICE);
+   }
 
    HYPRE_THRUST_CALL( inclusive_scan,
                       thrust::make_zip_iterator( thrust::make_tuple( Q_diag_i_dev, Q_offd_i_dev) ),
