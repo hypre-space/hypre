@@ -1084,7 +1084,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
      auto nnz_reduce = HYPRE_THRUST_CALL( reduce,
                                           thrust::make_zip_iterator(thrust::make_tuple(nnz_diag_array,nnz_offd_array)),
                                           thrust::make_zip_iterator(thrust::make_tuple(nnz_diag_array+num_points,nnz_offd_array+num_points)),
-                                          thrust::tuple<HYPRE_Int,HYPRE_Int>((HYPRE_Int)0,(HYPRE_Int)0),
+                                          thrust::tuple<HYPRE_Int,HYPRE_Int>(0,0),
                                           tuple_plus<HYPRE_Int>() );
 
      nnz_diag = thrust::get<0>(nnz_reduce);
