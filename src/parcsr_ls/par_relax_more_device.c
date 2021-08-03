@@ -173,7 +173,6 @@ hypre_ParCSRMaxEigEstimateDevice(hypre_ParCSRMatrix *A, HYPRE_Int scale, HYPRE_R
 
    e_min = HYPRE_THRUST_CALL(reduce, rowsums_lower, rowsums_lower + A_num_rows, (HYPRE_Real)0, thrust::minimum<HYPRE_Real>());
    e_max = HYPRE_THRUST_CALL(reduce, rowsums_upper, rowsums_upper + A_num_rows, (HYPRE_Real)0, thrust::maximum<HYPRE_Real>());
-   printf("e_min : %f, e_max est: %f\n", e_min, e_max);
 
    /* Same as hypre_ParCSRMaxEigEstimateHost */
 
