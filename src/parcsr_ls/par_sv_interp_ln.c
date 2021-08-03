@@ -2421,8 +2421,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
    hypre_CSRMatrixI(P_offd) = P_offd_i_new;
    hypre_CSRMatrixJ(P_offd) = P_offd_j_new;
 
-   hypre_ParCSRMatrixOwnsRowStarts(new_P) = 0;
-   hypre_ParCSRMatrixOwnsColStarts(new_P) = 0;  /* we allocate new_col_starts*/
+   hypre_TFree(new_col_starts, HYPRE_MEMORY_HOST);
 
    /* If parallel we need to do the col map offd! */
    if (num_procs > 1)
@@ -2521,6 +2520,3 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
 
    return hypre_error_flag;
 }
-
-
-

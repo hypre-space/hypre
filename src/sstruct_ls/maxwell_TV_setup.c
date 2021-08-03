@@ -535,25 +535,21 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                                           hypre_ParCSRMatrixGlobalNumRows(Ann_l[i]),
                                           hypre_ParCSRMatrixRowStarts(Ann_l[i]));
          hypre_ParVectorInitialize(resn_l[i]);
-         hypre_ParVectorSetPartitioningOwner(resn_l[i], 0);
 
          en_l[i]= hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Ann_l[i]),
                                         hypre_ParCSRMatrixGlobalNumRows(Ann_l[i]),
                                         hypre_ParCSRMatrixRowStarts(Ann_l[i]));
          hypre_ParVectorInitialize(en_l[i]);
-         hypre_ParVectorSetPartitioningOwner(en_l[i], 0);
 
          nVtemp_l[i]= hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Ann_l[i]),
                                             hypre_ParCSRMatrixGlobalNumRows(Ann_l[i]),
                                             hypre_ParCSRMatrixRowStarts(Ann_l[i]));
          hypre_ParVectorInitialize(nVtemp_l[i]);
-         hypre_ParVectorSetPartitioningOwner(nVtemp_l[i], 0);
 
          nVtemp2_l[i]= hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Ann_l[i]),
                                              hypre_ParCSRMatrixGlobalNumRows(Ann_l[i]),
                                              hypre_ParCSRMatrixRowStarts(Ann_l[i]));
          hypre_ParVectorInitialize(nVtemp2_l[i]);
-         hypre_ParVectorSetPartitioningOwner(nVtemp2_l[i], 0);
 
          nCF_marker_l[i] = hypre_ParAMGDataCFMarkerArray(amg_data)[i];
          nrelax_weight[i]= hypre_ParAMGDataRelaxWeight(amg_data)[i];
@@ -958,28 +954,24 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                             hypre_ParCSRMatrixGlobalNumRows(Aee_l[0]),
                             hypre_ParCSRMatrixRowStarts(Aee_l[0]));
    hypre_ParVectorInitialize(rese_l[0]);
-   hypre_ParVectorSetPartitioningOwner(rese_l[0], 0);
 
    ee_l[0]=
       hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[0]),
                             hypre_ParCSRMatrixGlobalNumRows(Aee_l[0]),
                             hypre_ParCSRMatrixRowStarts(Aee_l[0]));
    hypre_ParVectorInitialize(ee_l[0]);
-   hypre_ParVectorSetPartitioningOwner(ee_l[0], 0);
 
    eVtemp_l[0]=
       hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[0]),
                             hypre_ParCSRMatrixGlobalNumRows(Aee_l[0]),
                             hypre_ParCSRMatrixRowStarts(Aee_l[0]));
    hypre_ParVectorInitialize(eVtemp_l[0]);
-   hypre_ParVectorSetPartitioningOwner(eVtemp_l[0], 0);
 
    eVtemp2_l[0]=
       hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[0]),
                             hypre_ParCSRMatrixGlobalNumRows(Aee_l[0]),
                             hypre_ParCSRMatrixRowStarts(Aee_l[0]));
    hypre_ParVectorInitialize(eVtemp2_l[0]);
-   hypre_ParVectorSetPartitioningOwner(eVtemp2_l[0], 0);
 
    for (l = 0; l < (en_numlevels - 1); l++)
    {
@@ -1086,8 +1078,6 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
             &transpose, 1);
          parcsr_mat= hypre_ParMatmul(transpose, Aen_l[l]);
          Aen_l[l+1]= hypre_ParMatmul(parcsr_mat, Pn_l[l]);
-         hypre_ParCSRMatrixSetRowStartsOwner(transpose,0);
-         hypre_ParCSRMatrixSetRowStartsOwner(Aen_l[l+1],1);
          hypre_ParCSRMatrixDestroy(parcsr_mat);
          hypre_ParCSRMatrixDestroy(transpose);
 
@@ -1096,42 +1086,36 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                                   hypre_ParCSRMatrixGlobalNumRows(Aee_l[l+1]),
                                   hypre_ParCSRMatrixRowStarts(Aee_l[l+1]));
          hypre_ParVectorInitialize(xe_l[l+1]);
-         hypre_ParVectorSetPartitioningOwner(xe_l[l+1], 0);
 
          be_l[l+1] =
             hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[l+1]),
                                   hypre_ParCSRMatrixGlobalNumRows(Aee_l[l+1]),
                                   hypre_ParCSRMatrixRowStarts(Aee_l[l+1]));
          hypre_ParVectorInitialize(be_l[l+1]);
-         hypre_ParVectorSetPartitioningOwner(be_l[l+1],0);
 
          rese_l[l+1] =
             hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[l+1]),
                                   hypre_ParCSRMatrixGlobalNumRows(Aee_l[l+1]),
                                   hypre_ParCSRMatrixRowStarts(Aee_l[l+1]));
          hypre_ParVectorInitialize(rese_l[l+1]);
-         hypre_ParVectorSetPartitioningOwner(rese_l[l+1],0);
 
          ee_l[l+1] =
             hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[l+1]),
                                   hypre_ParCSRMatrixGlobalNumRows(Aee_l[l+1]),
                                   hypre_ParCSRMatrixRowStarts(Aee_l[l+1]));
          hypre_ParVectorInitialize(ee_l[l+1]);
-         hypre_ParVectorSetPartitioningOwner(ee_l[l+1],0);
 
          eVtemp_l[l+1] =
             hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[l+1]),
                                   hypre_ParCSRMatrixGlobalNumRows(Aee_l[l+1]),
                                   hypre_ParCSRMatrixRowStarts(Aee_l[l+1]));
          hypre_ParVectorInitialize(eVtemp_l[l+1]);
-         hypre_ParVectorSetPartitioningOwner(eVtemp_l[l+1],0);
 
          eVtemp2_l[l+1] =
             hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[l+1]),
                                   hypre_ParCSRMatrixGlobalNumRows(Aee_l[l+1]),
                                   hypre_ParCSRMatrixRowStarts(Aee_l[l+1]));
          hypre_ParVectorInitialize(eVtemp2_l[l+1]);
-         hypre_ParVectorSetPartitioningOwner(eVtemp2_l[l+1],0);
 
       }  /* if (l < edge_numlevels) */
    }     /* for (l = 0; l < (en_numlevels - 1); l++) */
@@ -1234,42 +1218,36 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                                hypre_ParCSRMatrixGlobalNumRows(Aee_l[l+1]),
                                hypre_ParCSRMatrixRowStarts(Aee_l[l+1]));
       hypre_ParVectorInitialize(xe_l[l+1]);
-      hypre_ParVectorSetPartitioningOwner(xe_l[l+1], 0);
 
       be_l[l+1] =
          hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[l+1]),
                                hypre_ParCSRMatrixGlobalNumRows(Aee_l[l+1]),
                                hypre_ParCSRMatrixRowStarts(Aee_l[l+1]));
       hypre_ParVectorInitialize(be_l[l+1]);
-      hypre_ParVectorSetPartitioningOwner(be_l[l+1],0);
 
       ee_l[l+1] =
          hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[l+1]),
                                hypre_ParCSRMatrixGlobalNumRows(Aee_l[l+1]),
                                hypre_ParCSRMatrixRowStarts(Aee_l[l+1]));
       hypre_ParVectorInitialize(ee_l[l+1]);
-      hypre_ParVectorSetPartitioningOwner(ee_l[l+1],0);
 
       rese_l[l+1] =
          hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[l+1]),
                                hypre_ParCSRMatrixGlobalNumRows(Aee_l[l+1]),
                                hypre_ParCSRMatrixRowStarts(Aee_l[l+1]));
       hypre_ParVectorInitialize(rese_l[l+1]);
-      hypre_ParVectorSetPartitioningOwner(rese_l[l+1],0);
 
       eVtemp_l[l+1] =
          hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[l+1]),
                                hypre_ParCSRMatrixGlobalNumRows(Aee_l[l+1]),
                                hypre_ParCSRMatrixRowStarts(Aee_l[l+1]));
       hypre_ParVectorInitialize(eVtemp_l[l+1]);
-      hypre_ParVectorSetPartitioningOwner(eVtemp_l[l+1],0);
 
       eVtemp2_l[l+1] =
          hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[l+1]),
                                hypre_ParCSRMatrixGlobalNumRows(Aee_l[l+1]),
                                hypre_ParCSRMatrixRowStarts(Aee_l[l+1]));
       hypre_ParVectorInitialize(eVtemp2_l[l+1]);
-      hypre_ParVectorSetPartitioningOwner(eVtemp2_l[l+1],0);
    }
 
    /* Can delete all topological grids. Not even referenced in IJMatrices. */
@@ -1545,5 +1523,3 @@ hypre_BoxContraction( hypre_Box           *box,
 
    return contracted_box;
 }
-
-

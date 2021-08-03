@@ -29,7 +29,7 @@ typedef struct hypre_ParVector_struct
    HYPRE_BigInt          global_size;
    HYPRE_BigInt          first_index;
    HYPRE_BigInt          last_index;
-   HYPRE_BigInt         *partitioning;
+   HYPRE_BigInt          partitioning[2];
    /* stores actual length of data in local vector to allow memory
     * manipulations for temporary vectors*/
    HYPRE_Int             actual_local_size;
@@ -37,11 +37,8 @@ typedef struct hypre_ParVector_struct
 
    /* Does the Vector create/destroy `data'? */
    HYPRE_Int             owns_data;
-   HYPRE_Int             owns_partitioning;
 
-   hypre_IJAssumedPart  *assumed_partition; /* only populated if no_global_partition option
-                                              is used (compile-time option) AND this partition
-                                              needed
+   hypre_IJAssumedPart  *assumed_partition; /* only populated if this partition needed
                                               (for setting off-proc elements, for example)*/
 } hypre_ParVector;
 
@@ -57,7 +54,6 @@ typedef struct hypre_ParVector_struct
 #define hypre_ParVectorActualLocalSize(vector)  ((vector) -> actual_local_size)
 #define hypre_ParVectorLocalVector(vector)      ((vector) -> local_vector)
 #define hypre_ParVectorOwnsData(vector)         ((vector) -> owns_data)
-#define hypre_ParVectorOwnsPartitioning(vector) ((vector) -> owns_partitioning)
 #define hypre_ParVectorNumVectors(vector)       (hypre_VectorNumVectors(hypre_ParVectorLocalVector(vector)))
 
 #define hypre_ParVectorAssumedPartition(vector) ((vector) -> assumed_partition)
@@ -69,4 +65,3 @@ hypre_ParVectorMemoryLocation(hypre_ParVector *vector)
 }
 
 #endif
-

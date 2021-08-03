@@ -6,11 +6,11 @@
  ******************************************************************************/
 
 #include "_hypre_parcsr_mv.h"
- 
+
 /*--------------------------------------------------------------------------
- * Test driver for unstructured matrix interface 
+ * Test driver for unstructured matrix interface
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 main( HYPRE_Int   argc,
       char *argv[] )
@@ -44,8 +44,6 @@ main( HYPRE_Int   argc,
    col_starts = hypre_ParCSRMatrixColStarts(A);
    B = hypre_CSRMatrixToParCSRMatrix(hypre_MPI_COMM_WORLD, Bs, col_starts,
 	row_starts);
-   hypre_ParCSRMatrixSetRowStartsOwner(B,0);
-   hypre_ParCSRMatrixSetColStartsOwner(B,0);
    C = hypre_ParMatmul(B,A);
    hypre_ParCSRMatrixPrint(B, "echo_B" );
    hypre_ParCSRMatrixPrint(A, "echo_A" );
@@ -64,4 +62,3 @@ main( HYPRE_Int   argc,
 
    return 0;
 }
-

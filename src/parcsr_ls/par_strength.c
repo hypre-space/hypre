@@ -152,8 +152,6 @@ hypre_BoomerAMGCreateSHost(hypre_ParCSRMatrix    *A,
                                 row_starts, row_starts,
                                 num_cols_offd, num_nonzeros_diag, num_nonzeros_offd);
 
-   /* row_starts is owned by A, col_starts = row_starts */
-   hypre_ParCSRMatrixSetRowStartsOwner(S,0);
    S_diag = hypre_ParCSRMatrixDiag(S);
    hypre_CSRMatrixI(S_diag) = hypre_CTAlloc(HYPRE_Int, num_variables+1, memory_location);
    hypre_CSRMatrixJ(S_diag) = hypre_CTAlloc(HYPRE_Int, num_nonzeros_diag, HYPRE_MEMORY_HOST);
@@ -212,7 +210,7 @@ hypre_BoomerAMGCreateSHost(hypre_ParCSRMatrix    *A,
       for (i = 0; i < num_sends; i++)
       {
          start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-         for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
          {
             int_buf_data[index++] = dof_func[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
          }
@@ -652,10 +650,9 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix   *A,
    num_nonzeros_offd = A_offd_i[num_variables];
 
    S = hypre_ParCSRMatrixCreate(comm, global_num_vars, global_num_vars,
-         row_starts, row_starts,
-         num_cols_offd, num_nonzeros_diag, num_nonzeros_offd);
-   /* row_starts is owned by A, col_starts = row_starts */
-   hypre_ParCSRMatrixSetRowStartsOwner(S,0);
+                                row_starts, row_starts,
+                                num_cols_offd, num_nonzeros_diag, num_nonzeros_offd);
+
    S_diag = hypre_ParCSRMatrixDiag(S);
    hypre_CSRMatrixI(S_diag) = hypre_CTAlloc(HYPRE_Int,  num_variables+1, HYPRE_MEMORY_HOST);
    hypre_CSRMatrixJ(S_diag) = hypre_CTAlloc(HYPRE_Int,  num_nonzeros_diag, HYPRE_MEMORY_HOST);
@@ -1274,8 +1271,6 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
                                 row_starts, row_starts,
                                 num_cols_offd, num_nonzeros_diag, num_nonzeros_offd);
 
-   /* row_starts is owned by A, col_starts = row_starts */
-   hypre_ParCSRMatrixSetRowStartsOwner(S,0);
    S_diag = hypre_ParCSRMatrixDiag(S);
    hypre_CSRMatrixI(S_diag) = hypre_CTAlloc(HYPRE_Int, num_variables+1, memory_location);
    hypre_CSRMatrixJ(S_diag) = hypre_CTAlloc(HYPRE_Int, num_nonzeros_diag, memory_location);
@@ -2845,8 +2840,6 @@ hypre_BoomerAMGCreate2ndSHost( hypre_ParCSRMatrix  *S,
    S2 = hypre_ParCSRMatrixCreate(comm, global_num_coarse,
          global_num_coarse, coarse_row_starts,
          coarse_row_starts, num_cols_offd_C, C_diag_i[num_coarse], C_offd_i[num_coarse]);
-
-   hypre_ParCSRMatrixOwnsRowStarts(S2) = 0;
 
    C_diag = hypre_ParCSRMatrixDiag(S2);
    hypre_CSRMatrixI(C_diag) = C_diag_i;

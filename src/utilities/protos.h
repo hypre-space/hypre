@@ -18,6 +18,9 @@ HYPRE_Int hypre_BinarySearch2 ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int lo
 HYPRE_Int *hypre_LowerBound( HYPRE_Int *first, HYPRE_Int *last, HYPRE_Int value );
 HYPRE_BigInt *hypre_BigLowerBound( HYPRE_BigInt *first, HYPRE_BigInt *last, HYPRE_BigInt value );
 
+/* log.c */
+HYPRE_Int hypre_Log2( HYPRE_Int p );
+
 /* complex.c */
 #ifdef HYPRE_COMPLEX
 HYPRE_Complex hypre_conj( HYPRE_Complex value );
