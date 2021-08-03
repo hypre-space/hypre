@@ -8,6 +8,47 @@
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
+#if defined(HYPRE_USING_SYCL)
+#include <CL/sycl.hpp>
+// WM: TODO: verify
+sycl::range<1> hypre_GetDefaultCUDABlockDimension()
+{
+  // 256 - max work group size for Gen9
+  // 512 - max work group size for ATS
+  sycl::range<1> wgDim(64);
+  return wgDim;
+}
+
+// WM: TODO: verify
+sycl::range<1> hypre_GetDefaultCUDAGridDimension(HYPRE_Int n,
+                                                 const char *granularity,
+                                                 sycl::range<1> wgDim)
+{
+   HYPRE_Int num_WGs = 0;
+   HYPRE_Int num_workitems_per_WG = wgDim[0];
+
+   if (granularity[0] == 't')
+   {
+      num_WGs = (n + num_workitems_per_WG - 1) / num_workitems_per_WG;
+   }
+   else if (granularity[0] == 'w')
+   {
+      HYPRE_Int num_subgroups_per_block = num_workitems_per_WG >> HYPRE_WARP_BITSHIFT;
+      hypre_assert(num_subgroups_per_block * HYPRE_WARP_SIZE == num_workitems_per_WG);
+      num_WGs = (n + num_subgroups_per_block - 1) / num_subgroups_per_block;
+   }
+   else
+   {
+      hypre_printf("Error %s %d: Unknown granularity !\n", __FILE__, __LINE__);
+      hypre_assert(0);
+   }
+
+   sycl::range<1> gDim(num_WGs);
+
+   return gDim;
+}
+#endif
+
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 /*

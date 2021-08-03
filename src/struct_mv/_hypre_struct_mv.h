@@ -2484,7 +2484,7 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
 #endif
 
 
-#elif !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP)
+#elif !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP) && !defined(HYPRE_USING_SYCL)
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.

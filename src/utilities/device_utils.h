@@ -5,8 +5,8 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#ifndef HYPRE_CUDA_UTILS_H
-#define HYPRE_CUDA_UTILS_H
+#ifndef HYPRE_DEVICE_UTILS_H
+#define HYPRE_DEVICE_UTILS_H
 
 #if defined(HYPRE_USING_GPU)
 
@@ -343,6 +343,125 @@ struct hypre_GpuMatData
 
 #endif //#if defined(HYPRE_USING_GPU)
 
+#if defined(HYPRE_USING_SYCL)
+/* return the number of work-items in current work-group */
+template <hypre_int dim>
+static __inline__ __attribute__((always_inline))
+hypre_int hypre_cuda_get_num_threads(sycl::nd_item<dim>& item)
+{
+  return item.get_group().get_local_linear_range();
+}
+
+/* return the flattened or linearlized work-item id in current work-group (not global)*/
+template <hypre_int dim>
+static __inline__ __attribute__((always_inline))
+hypre_int hypre_cuda_get_thread_id(sycl::nd_item<dim>& item)
+{
+  return item.get_local_linear_id();
+}
+
+/* return the number of sub-groups in current work-group */
+template <hypre_int dim>
+static __inline__ __attribute__((always_inline))
+hypre_int hypre_cuda_get_num_warps(sycl::nd_item<dim>& item)
+{
+  return item.get_sub_group().get_group_range().get(0);
+}
+
+/* return the sub_group id in work-group */
+template <hypre_int dim>
+static __inline__ __attribute__((always_inline))
+hypre_int hypre_cuda_get_warp_id(sycl::nd_item<dim>& item)
+{
+  return item.get_sub_group().get_group_linear_id();
+}
+
+/* return the work-item lane id in a sub_group */
+template <hypre_int dim>
+static __inline__ __attribute__((always_inline))
+hypre_int hypre_cuda_get_lane_id(sycl::nd_item<dim>& item)
+{
+  return hypre_cuda_get_thread_id<dim>(item) & (item.get_sub_group().get_local_range().get(0)-1);
+}
+
+/* return the num of work_groups in nd_range */
+template <hypre_int dim>
+static __inline__ __attribute__((always_inline))
+hypre_int hypre_cuda_get_num_blocks(sycl::nd_item<dim>& item)
+{
+  // return item.get_group().get_group_linear_range(); // API available in SYCL 2020
+
+  switch (dim)
+  {
+  case 1:
+    return (item.get_group_range(0));
+  case 2:
+    return (item.get_group_range(0) * item.get_group_range(1));
+  case 3:
+    return (item.get_group_range(0) * item.get_group_range(1) * item.get_group_range(2));
+  }
+
+  return -1;
+}
+
+/* return the flattened or linearlized work-group id in nd_range */
+template <hypre_int dim>
+static __inline__ __attribute__((always_inline))
+hypre_int hypre_cuda_get_block_id(sycl::nd_item<dim>& item)
+{
+  return item.get_group_linear_id();
+}
+
+/* return the number of work-items in global iteration space*/
+template <hypre_int dim>
+static __inline__ __attribute__((always_inline))
+hypre_int hypre_cuda_get_grid_num_threads(sycl::nd_item<dim>& item)
+{
+  switch (dim)
+  {
+  case 1:
+    return (item.get_global_range(0));
+  case 2:
+    return (item.get_global_range(0) * item.get_global_range(1));
+  case 3:
+    return (item.get_global_range(0) * item.get_global_range(1) * item.get_global_range(2));
+  }
+
+  return -1;
+}
+
+/* return the flattened work-item id in global iteration space */
+template <hypre_int dim>
+static __inline__ __attribute__((always_inline))
+hypre_int hypre_cuda_get_grid_thread_id(sycl::nd_item<dim>& item)
+{
+  return item.get_global_linear_id();
+}
+
+/* return the number of sub-groups in global iteration space */
+template <hypre_int dim>
+static __inline__ __attribute__((always_inline))
+hypre_int hypre_cuda_get_grid_num_warps(sycl::nd_item<dim>& item)
+{
+  return hypre_cuda_get_num_blocks<dim>(item) * hypre_cuda_get_num_warps<dim>(item);
+}
+
+/* return the flattened sub-group id in global iteration space */
+template <hypre_int dim>
+static __inline__ __attribute__((always_inline))
+hypre_int hypre_cuda_get_grid_warp_id(sycl::nd_item<dim>& item)
+{
+  return hypre_cuda_get_block_id<dim>(item) * hypre_cuda_get_num_warps<dim>(item) +
+    hypre_cuda_get_warp_id<dim>(item);
+}
+
+/* device_utils.c */
+sycl::range<1> hypre_GetDefaultCUDABlockDimension();
+
+sycl::range<1> hypre_GetDefaultCUDAGridDimension( HYPRE_Int n, const char *granularity, sycl::range<1> bDim );
+
+#endif // #if defined(HYPRE_USING_SYCL)
+
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 #include <thrust/execution_policy.h>
@@ -466,7 +585,6 @@ using namespace thrust::placeholders;
 #endif // HYPRE_USING_CUDA
 
 #endif // HYPRE_USING_UMPIRE_DEVICE
-
 
 /* return the number of threads in block */
 template <hypre_int dim>
@@ -948,7 +1066,7 @@ struct equal : public thrust::unary_function<T,bool>
 
 
 
-/* cuda_utils.c */
+/* device_utils.c */
 dim3 hypre_GetDefaultCUDABlockDimension();
 
 dim3 hypre_GetDefaultCUDAGridDimension( HYPRE_Int n, const char *granularity, dim3 bDim );
