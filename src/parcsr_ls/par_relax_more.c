@@ -15,12 +15,6 @@
 #include "_hypre_parcsr_ls.h"
 #include "float.h"
 
-HYPRE_Int hypre_LINPACKcgtql1(HYPRE_Int*,HYPRE_Real *,HYPRE_Real *,HYPRE_Int *);
-HYPRE_Real hypre_LINPACKcgpthy(HYPRE_Real*, HYPRE_Real*);
-
-HYPRE_Int hypre_LINPACKcgtql1(HYPRE_Int*,HYPRE_Real *,HYPRE_Real *,HYPRE_Int *);
-HYPRE_Real hypre_LINPACKcgpthy(HYPRE_Real*, HYPRE_Real*);
-
 /******************************************************************************
  *
  * use Gershgorin discs to estimate smallest and largest eigenvalues

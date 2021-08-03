@@ -13,15 +13,9 @@
  *****************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
-#include "float.h"
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #include "_hypre_utilities.hpp"
-#include <thrust/for_each.h>
-#include <thrust/iterator/zip_iterator.h>
-
-HYPRE_Int  hypre_LINPACKcgtql1(HYPRE_Int *, HYPRE_Real *, HYPRE_Real *, HYPRE_Int *);
-HYPRE_Real hypre_LINPACKcgpthy(HYPRE_Real *, HYPRE_Real *);
 
 /**
  * @brief Calculates row sums and other metrics of a matrix on the device
@@ -49,8 +43,9 @@ hypreCUDAKernel_CSRMaxEigEstimate(HYPRE_Int      nrows,
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
    HYPRE_Int p, q;
 
-   HYPRE_Real    diag_value = 0.0;
+   HYPRE_Complex diag_value = 0.0;
    HYPRE_Complex row_sum_i  = 0.0;
+   HYPRE_Complex lower, upper;
 
    if (lane < 2)
    {
@@ -59,22 +54,20 @@ hypreCUDAKernel_CSRMaxEigEstimate(HYPRE_Int      nrows,
    q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
    p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
 
-   HYPRE_Real lower, upper;
    for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
    {
-
       if (j >= q)
       {
          continue;
       }
 
-      hypre_int find_diag = j < q && diag_ja[j] == row_i;
-
-      HYPRE_Complex aij = diag_aa[j];
-      if (find_diag)
+      HYPRE_Complex aij = read_only_load(&diag_aa[j]);
+      if ( read_only_load(&diag_ja[j]) == row_i )
       {
          diag_value = aij;
-      } else {
+      }
+      else
+      {
          row_sum_i += fabs(aij);
       }
    }
@@ -92,12 +85,14 @@ hypreCUDAKernel_CSRMaxEigEstimate(HYPRE_Int      nrows,
       {
          continue;
       }
-      row_sum_i += fabs(offd_aa[j]);
+
+      HYPRE_Complex aij = read_only_load(&offd_aa[j]);
+      row_sum_i += fabs(aij);
    }
 
+   // Get the row_sum and diagonal value on lane 0
    row_sum_i = warp_reduce_sum(row_sum_i);
 
-   // Get the diagonal value on lane 0
    diag_value = warp_reduce_sum(diag_value);
 
    if (lane == 0)
@@ -105,7 +100,7 @@ hypreCUDAKernel_CSRMaxEigEstimate(HYPRE_Int      nrows,
       lower = diag_value - row_sum_i;
       upper = diag_value + row_sum_i;
 
-      if(scale)
+      if (scale)
       {
         lower /= hypre_abs(diag_value);
         upper /= hypre_abs(diag_value);
@@ -124,7 +119,10 @@ hypreCUDAKernel_CSRMaxEigEstimate(HYPRE_Int      nrows,
  * @param[out] Maximum eigenvalue
  */
 HYPRE_Int
-hypre_ParCSRMaxEigEstimateDevice(hypre_ParCSRMatrix *A, HYPRE_Int scale, HYPRE_Real *max_eig, HYPRE_Real *min_eig)
+hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix *A,
+                                  HYPRE_Int           scale,
+                                  HYPRE_Real         *max_eig,
+                                  HYPRE_Real         *min_eig )
 {
    HYPRE_Real e_max;
    HYPRE_Real e_min;
@@ -141,8 +139,8 @@ hypre_ParCSRMaxEigEstimateDevice(hypre_ParCSRMatrix *A, HYPRE_Int scale, HYPRE_R
 
    A_num_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
 
-   HYPRE_Real *rowsums_lower = hypre_CTAlloc(HYPRE_Real, A_num_rows, hypre_ParCSRMatrixMemoryLocation(A));
-   HYPRE_Real *rowsums_upper = hypre_CTAlloc(HYPRE_Real, A_num_rows, hypre_ParCSRMatrixMemoryLocation(A));
+   HYPRE_Real *rowsums_lower = hypre_TAlloc(HYPRE_Real, A_num_rows, hypre_ParCSRMatrixMemoryLocation(A));
+   HYPRE_Real *rowsums_upper = hypre_TAlloc(HYPRE_Real, A_num_rows, hypre_ParCSRMatrixMemoryLocation(A));
 
    A_diag_i    = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A));
    A_diag_j    = hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(A));
@@ -201,14 +199,6 @@ hypre_ParCSRMaxEigEstimateDevice(hypre_ParCSRMatrix *A, HYPRE_Int scale, HYPRE_R
 
    return hypre_error_flag;
 }
-struct print_functor
-{
-   __host__ __device__
-      void operator()(HYPRE_Real val)
-      {
-         printf("%f\n", val);
-      }
-};
 
 /**
  *  @brief Uses CG to get the eigenvalue estimate on the device
