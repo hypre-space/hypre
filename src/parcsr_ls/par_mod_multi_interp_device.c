@@ -976,9 +976,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int       *P_offd_j_dev = NULL;
 
    HYPRE_Int       *fine_to_coarse;
-   HYPRE_Int       *fine_to_coarse_dev;
    HYPRE_Int       *fine_to_coarse_offd = NULL;
-   HYPRE_Int       *fine_to_coarse_offd_dev = NULL;
    HYPRE_BigInt    *f_pts_starts = NULL;
    HYPRE_Int        my_id, num_procs;
    HYPRE_BigInt     total_global_fpts;
@@ -995,15 +993,10 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
 
    /* define P matrices */
 
-
-
-   fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST); // FIXME: Clean up
-   fine_to_coarse_dev = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
+   fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
 
    /* fill P */
-   init_fine_to_coarse( n_fine, pass_marker_dev, color, fine_to_coarse_dev, n_cpts );
-
-   hypre_TMemcpy( fine_to_coarse, fine_to_coarse_dev, HYPRE_Int, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE); // FIXME: Clean this up when we don't need pass_marker on the host
+   init_fine_to_coarse( n_fine, pass_marker_dev, color, fine_to_coarse, n_cpts );
 
    if (num_procs > 1)
    {
@@ -1035,7 +1028,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
       big_convert = hypre_CTAlloc(HYPRE_BigInt, n_fine, HYPRE_MEMORY_DEVICE);
 
       init_big_convert(n_fine, pass_marker_dev, color,
-                       fine_to_coarse_dev, c_pts_starts[0], big_convert );
+                       fine_to_coarse, c_pts_starts[0], big_convert );
 
       num_cols_offd_P = 0;
 
@@ -1061,14 +1054,9 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
          // FIXME: Clean this up when done with host ptr
          hypre_TMemcpy( big_convert_offd, big_convert_offd_dev, HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
-         fine_to_coarse_offd = hypre_TAlloc(HYPRE_Int,  num_cols_offd_A, HYPRE_MEMORY_HOST); // FIXME: Clean this up when done with host ptr
-
-         // This will allocate fine_to_coarse_offd_dev
+         // This will allocate fine_to_coarse_offd
          compute_num_cols_offd_fine_to_coarse( pass_marker_offd_dev, color, num_cols_offd_A,
-                                               num_cols_offd_P, &fine_to_coarse_offd_dev );
-
-         //FIXME: Clean this up when we don't need th host pointer anymore
-         hypre_TMemcpy( fine_to_coarse_offd, fine_to_coarse_offd_dev, HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+                                               num_cols_offd_P, &fine_to_coarse_offd );
 
 
          //FIXME: Clean this up when we don't need the host pointer anymore
@@ -1193,8 +1181,8 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
                                                               pass_order_dev,
                                                               pass_marker_dev,
                                                               pass_marker_offd_dev,
-                                                              fine_to_coarse_dev,
-                                                              fine_to_coarse_offd_dev,
+                                                              fine_to_coarse,
+                                                              fine_to_coarse_offd,
                                                               A_diag_i_dev,
                                                               A_diag_j_dev,
                                                               A_diag_data_dev,
@@ -1212,10 +1200,8 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
 
    }
 
-   hypre_TFree(fine_to_coarse, HYPRE_MEMORY_HOST); // FIXME: Clean up
-   hypre_TFree(fine_to_coarse_dev, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_HOST); // FIXME: Clean up
-   hypre_TFree(fine_to_coarse_offd_dev, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(fine_to_coarse, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_DEVICE);
 
    dim3 bDim = hypre_GetDefaultCUDABlockDimension();
    dim3 gDim = hypre_GetDefaultCUDAGridDimension(num_points, "warp", bDim);
