@@ -66,17 +66,13 @@ hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A,         /* matrix to relax 
                               HYPRE_Real        **ds_ptr)    /* initial/updated approximation */
 {
    hypre_CSRMatrix *A_diag       = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Real      *A_diag_data  = hypre_CSRMatrixData(A_diag);
-   HYPRE_Int       *A_diag_i     = hypre_CSRMatrixI(A_diag);
    HYPRE_Real       theta, delta;
    HYPRE_Real       den;
    HYPRE_Real       upper_bound = 0.0, lower_bound = 0.0;
-   HYPRE_Int        j;
    HYPRE_Int        num_rows     = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_Real      *coefs        = NULL;
    HYPRE_Int        cheby_order;
    HYPRE_Real      *ds_data = NULL;
-   HYPRE_Real       diag;
 
    /* u = u + p(A)r */
    if (order > 4)
