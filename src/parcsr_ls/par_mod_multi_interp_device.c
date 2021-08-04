@@ -75,6 +75,19 @@ void hypreCUDAKernel_generate_Pdiag_i_Poffd_i( HYPRE_Int  num_points,
                                                HYPRE_Int * nnz_diag,
                                                HYPRE_Int * nnz_offd );
 
+__global__
+void hypreCUDAKernel_generate_Pdiag_j_Poffd_j_count( int num_points,
+                                                     int color,
+                                                     int  *pass_order,
+                                                     int  *pass_marker,
+                                                     int  *pass_marker_offd,
+                                                     int  *S_diag_i,
+                                                     int  *S_diag_j,
+                                                     int  *S_offd_i,
+                                                     int  *S_offd_j,
+                                                     int  *diag_shifts,
+                                                     int  *offd_shifts );
+
 
 /*--------------------------------------------------------------------------
  * hypre_ParAMGBuildModMultipass
@@ -2233,4 +2246,143 @@ void hypreCUDAKernel_generate_Pdiag_i_Poffd_i( HYPRE_Int  num_points,
        P_offd_i[row_i+1] += offd_increment;
        nnz_offd[row_i] = offd_increment;
      }
+}
+
+__global__
+void hypreCUDAKernel_generate_Pdiag_j_Poffd_j_count( int num_points,
+                                                     int color,
+                                                     int  *pass_order,
+                                                     int  *pass_marker,
+                                                     int  *pass_marker_offd,
+                                                     int  *S_diag_i,
+                                                     int  *S_diag_j,
+                                                     int  *S_offd_i,
+                                                     int  *S_offd_j,
+                                                     int  *diag_shifts,
+                                                     int  *offd_shifts )
+{
+  int row_i = hypre_cuda_get_grid_warp_id<1,1>();
+
+  if (row_i >= num_points)
+    {
+      return;
+    }
+
+  int i1 = pass_order[row_i];
+
+
+  int lane = hypre_cuda_get_lane_id<1>();
+
+  int p = 0;
+  int q = 0;
+
+   // S_diag
+   if (lane < 2)
+   {
+      p = read_only_load(S_diag_i + i1 + lane);
+   }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   int equal = 0;
+   for (int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   {
+      if ( j >= q )
+      {
+         continue;
+      }
+
+      int j1 =  S_diag_j[j];
+      if( j1 > -1 && pass_marker[j1] == color )
+        equal++;
+   }
+
+   equal = warp_reduce_sum(equal);
+   if(lane == 0)
+     diag_shifts[row_i] = equal;
+
+  // S_diag
+  // PB: I leave an alternative implementation here that mimics the code in the subsequent
+  //     hypreCUDAKernel_generate_Pdiag_j_Poffd_j kernel. I didn't use this version since
+  //     it would iterate over more entries (A_diag_i vs. S_diag_i) so I anticipated it
+  //     would perform worse. But I did not measure it. I did however verify it is correct.
+  /*
+  if (lane < 2)
+   {
+      p = read_only_load(A_diag_i + i1 + lane);
+   }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   int equal = 0;
+   for (int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   {
+      if ( j >= q )
+      {
+         continue;
+      }
+
+      int j1 =  Soc_diag_j[j];
+      if( j1 > -1 && pass_marker[j1] == color )
+        equal++;
+   }
+
+   equal = warp_reduce_sum(equal);
+   if(lane == 0)
+     diag_shifts[row_i] = equal;
+  */
+
+   // S_offd
+   if (lane < 2)
+   {
+      p = read_only_load(S_offd_i + i1 + lane);
+   }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   equal = 0;
+   for (int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   {
+      if ( j >= q )
+      {
+         continue;
+      }
+
+      int j1 = S_offd_j[j];
+      if (j1 > -1 && pass_marker_offd[j1] == color )
+        equal++;
+   }
+   equal = warp_reduce_sum(equal);
+   if(lane == 0)
+     offd_shifts[row_i] = equal;
+
+  // S_offd
+  // PB: I leave an alternative implementation here that mimics the code in the subsequent
+  //     hypreCUDAKernel_generate_Pdiag_j_Poffd_j kernel. I didn't use this version since
+  //     it would iterate over more entries (A_offd_i vs. S_offd_i) so I anticipated it
+  //     would perform worse. But I did not measure it. I did however verify it is correct.
+  /*
+   if (lane < 2)
+   {
+      p = read_only_load(A_offd_i + i1 + lane);
+   }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   equal = 0;
+   for (int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   {
+      if ( j >= q )
+      {
+         continue;
+      }
+
+      int j1 = Soc_offd_j[j];
+      if (j1 > -1 && pass_marker_offd[j1] == color )
+        equal++;
+   }
+   equal = warp_reduce_sum(equal);
+   if(lane == 0)
+     offd_shifts[row_i] = equal;
+   */
 }
