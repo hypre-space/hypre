@@ -166,6 +166,10 @@ HYPRE_Int hypre_ADSDestroy(void *solver)
       hypre_ParVectorDestroy(ads_data -> g2);
    if (ads_data -> zz)
       hypre_ParVectorDestroy(ads_data -> zz);
+   if (ads_data -> p)
+      hypre_ParVectorDestroy(ads_data -> p);
+   if (ads_data -> r)
+      hypre_ParVectorDestroy(ads_data -> r);
 
    if (ads_data -> A_poly_coefs)
       hypre_TFree(ads_data -> A_poly_coefs, HYPRE_MEMORY_HOST);
@@ -1596,12 +1600,6 @@ HYPRE_Int hypre_ADSSolve(void *solver,
 
    if (ads_data -> num_iterations == ads_data -> maxit && ads_data -> tol > 0.0)
       hypre_error(HYPRE_ERROR_CONV);
-
-   if (r)
-      hypre_ParVectorDestroy(r);
-
-   if (p)
-      hypre_ParVectorDestroy(p);
 
 
    return hypre_error_flag;
