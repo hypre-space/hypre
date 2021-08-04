@@ -795,6 +795,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                        equal<int>(-3),
                        static_cast<int>(-1) );
 
+   // FIXME: We're assuming we need to hand CF_marker back to the host
    hypre_TMemcpy( CF_marker, CF_marker_dev, HYPRE_Int, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    hypre_TFree(CF_marker_dev, HYPRE_MEMORY_DEVICE);
 
@@ -1152,44 +1153,69 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
 
    cnt_diag = 0;
    cnt_offd = 0;
-   for (i=0; i < num_points; i++)
    {
-      i1 = pass_order[i];
-      j2 = A_diag_i[i1];
-      for (j = S_diag_i[i1]; j < S_diag_i[i1+1]; j++)
-      {
-         j1 = S_diag_j[j];
-         while (A_diag_j[j2] != j1) j2++;
-         if (pass_marker[j1] == color && A_diag_j[j2] == j1)
-         {
-            P_diag_j[cnt_diag] = fine_to_coarse[j1];
-            P_diag_data[cnt_diag++] = A_diag_data[j2];
-         }
-      }
-      j2 = A_offd_i[i1];
-      for (j = S_offd_i[i1]; j < S_offd_i[i1+1]; j++)
-      {
-         j1 = S_offd_j[j];
-         while (A_offd_j[j2] != j1) j2++;
-         if (pass_marker_offd[j1] == color && A_offd_j[j2] == j1)
-         {
-            P_offd_j[cnt_offd] = fine_to_coarse_offd[j1];
-            P_offd_data[cnt_offd++] = A_offd_data[j2];
-         }
-      }
+     dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+     dim3 gDim = hypre_GetDefaultCUDAGridDimension(num_points, "warp", bDim);
+
+     HYPRE_Int * diag_shifts = hypre_CTAlloc(HYPRE_Int, num_points, HYPRE_MEMORY_DEVICE);
+     HYPRE_Int * offd_shifts = hypre_CTAlloc(HYPRE_Int, num_points, HYPRE_MEMORY_DEVICE);
+
+     hypreCUDAKernel_generate_Pdiag_j_Poffd_j_count<<<gDim,bDim>>>( num_points,
+                                                                    color,
+                                                                    pass_order_dev,
+                                                                    pass_marker_dev,
+                                                                    pass_marker_offd_dev,
+                                                                    S_diag_i_dev,
+                                                                    S_diag_j_dev,
+                                                                    S_offd_i_dev,
+                                                                    S_offd_j_dev,
+                                                                    diag_shifts,
+                                                                    offd_shifts );
+
+     auto cnt_reduce = HYPRE_THRUST_CALL( reduce,
+
+                                          thrust::make_zip_iterator(thrust::make_tuple(diag_shifts, offd_shifts)),
+                                          thrust::make_zip_iterator(thrust::make_tuple(diag_shifts+num_points, offd_shifts+num_points)),
+                                          thrust::tuple<int,int>(0,0),
+                                          tuple_plus<int>() );
+
+     cnt_diag = thrust::get<0>(cnt_reduce);
+     cnt_offd = thrust::get<1>(cnt_reduce);
+
+     HYPRE_THRUST_CALL( inclusive_scan,
+                        thrust::make_zip_iterator(thrust::make_tuple(diag_shifts, offd_shifts)),
+                        thrust::make_zip_iterator(thrust::make_tuple(diag_shifts+num_points, offd_shifts+num_points)),
+                        thrust::make_zip_iterator(thrust::make_tuple(diag_shifts, offd_shifts)),
+                        tuple_plus<int>() );
+
+     hypreCUDAKernel_generate_Pdiag_j_Poffd_j<<<gDim,bDim>>>( num_points,
+                                                              color,
+                                                              pass_order_dev,
+                                                              pass_marker_dev,
+                                                              pass_marker_offd_dev,
+                                                              fine_to_coarse_dev,
+                                                              fine_to_coarse_offd_dev,
+                                                              A_diag_i_dev,
+                                                              A_diag_j_dev,
+                                                              A_diag_data_dev,
+                                                              A_offd_i_dev,
+                                                              A_offd_j_dev,
+                                                              A_offd_data_dev,
+                                                              hypre_ParCSRMatrixSocDiagJ(S),
+                                                              hypre_ParCSRMatrixSocOffdJ(S),
+                                                              diag_shifts,
+                                                              offd_shifts,
+                                                              P_diag_j_dev,
+                                                              P_diag_data_dev,
+                                                              P_offd_j_dev,
+                                                              P_offd_data_dev );
+
    }
 
    hypre_TFree(fine_to_coarse, HYPRE_MEMORY_HOST); // FIXME: Clean up
    hypre_TFree(fine_to_coarse_dev, HYPRE_MEMORY_DEVICE);
    hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_HOST); // FIXME: Clean up
    hypre_TFree(fine_to_coarse_offd_dev, HYPRE_MEMORY_DEVICE);
-
-
-   // FIXME: Clean up when done with host code
-   hypre_TMemcpy( P_diag_j_dev,    P_diag_j,    HYPRE_Int, nnz_diag, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy( P_diag_data_dev, P_diag_data, HYPRE_Real, nnz_diag, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy( P_offd_j_dev,    P_offd_j,    HYPRE_Int, nnz_offd, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy( P_offd_data_dev, P_offd_data, HYPRE_Real, nnz_offd, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
    dim3 bDim = hypre_GetDefaultCUDABlockDimension();
    dim3 gDim = hypre_GetDefaultCUDAGridDimension(num_points, "warp", bDim);
