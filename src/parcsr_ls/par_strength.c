@@ -541,7 +541,7 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
    HYPRE_Int ierr = 0;
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)) );
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
@@ -1494,7 +1494,7 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
    HYPRE_Int ierr = 0;
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)) );
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
@@ -2949,7 +2949,7 @@ hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix  *S,
    HYPRE_Int ierr = 0;
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(S)) );
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(S) );
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
