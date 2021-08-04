@@ -595,7 +595,15 @@ hypre_BoomerAMGDestroy( void *data )
          }
       }
 
-      hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data)[i-1], HYPRE_MEMORY_HOST);
+      /* WM: temporary fix - if using CF relaxation, CF marker is moved to the device */
+      if (hypre_ParAMGDataRelaxOrder(amg_data))
+      {
+         hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data)[i-1], HYPRE_MEMORY_DEVICE);
+      }
+      else
+      {
+         hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data)[i-1], HYPRE_MEMORY_HOST);
+      }
 
       /* get rid of any block structures */
       if (hypre_ParAMGDataABlockArray(amg_data)[i])

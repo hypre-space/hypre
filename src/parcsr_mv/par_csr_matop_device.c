@@ -1197,21 +1197,21 @@ hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
 
    if (type == -1)
    {
-      HYPRE_CUDA_LAUNCH( hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols<-1>, bDim, gDim, 
+      HYPRE_CUDA_LAUNCH( hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols<-1>, gDim, bDim, 
                          hypre_CSRMatrixNumRows(A_diag), tol, hypre_CSRMatrixI(A_diag), 
                          hypre_CSRMatrixJ(A_diag), hypre_CSRMatrixData(A_diag), hypre_CSRMatrixI(A_offd), 
                          hypre_CSRMatrixData(A_offd), elmt_tols_diag, elmt_tols_offd);
    }
    if (type == 1)
    {
-      HYPRE_CUDA_LAUNCH( hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols<1>, bDim, gDim, 
+      HYPRE_CUDA_LAUNCH( hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols<1>, gDim, bDim, 
                          hypre_CSRMatrixNumRows(A_diag), tol, hypre_CSRMatrixI(A_diag), 
                          hypre_CSRMatrixJ(A_diag), hypre_CSRMatrixData(A_diag), hypre_CSRMatrixI(A_offd), 
                          hypre_CSRMatrixData(A_offd), elmt_tols_diag, elmt_tols_offd);
    }
    if (type == 2)
    {
-      HYPRE_CUDA_LAUNCH( hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols<2>, bDim, gDim, 
+      HYPRE_CUDA_LAUNCH( hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols<2>, gDim, bDim, 
                          hypre_CSRMatrixNumRows(A_diag), tol, hypre_CSRMatrixI(A_diag), 
                          hypre_CSRMatrixJ(A_diag), hypre_CSRMatrixData(A_diag), hypre_CSRMatrixI(A_offd), 
                          hypre_CSRMatrixData(A_offd), elmt_tols_diag, elmt_tols_offd);

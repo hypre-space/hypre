@@ -183,6 +183,15 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          num_coeffs[j] = hypre_ParCSRMatrixDNumNonzeros(A_array[j]);
       }
    }
+   
+   /* WM: temporary fix - if using CF relaxation, make sure the CF marker is on the device */
+   for (k = 0; k < num_levels-1; k++)
+   {
+      HYPRE_Int *cf_marker_dev = hypre_TAlloc(HYPRE_Int, hypre_ParCSRMatrixNumRows(A_array[k]), HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(cf_marker_dev, CF_marker_array[k], HYPRE_Int, hypre_ParCSRMatrixNumRows(A_array[k]), HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TFree(CF_marker_array[k], HYPRE_MEMORY_HOST); 
+      CF_marker_array[k] = cf_marker_dev;
+   }
 
    /*---------------------------------------------------------------------
     *    Initialize cycling control counter
