@@ -1308,8 +1308,6 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd)    = P_offd_i;
    hypre_CSRMatrixJ(P_offd)    = P_offd_j;
-   /* P does not own ColStarts, since A does */
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
 

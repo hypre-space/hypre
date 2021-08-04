@@ -1064,19 +1064,19 @@ hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols( HYPRE_Int      nrows,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p, q;
+   HYPRE_Int p_diag, p_offd, q_diag, q_offd;
 
    /* sum row norm over diag part */
    if (lane < 2)
    {
-      p = read_only_load(A_diag_i + row_i + lane);
+      p_diag = read_only_load(A_diag_i + row_i + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 1);
+   p_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 0);
 
    HYPRE_Real row_norm_i = 0.0;
 
-   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p_diag + lane; j < q_diag; j += HYPRE_WARP_SIZE)
    {
       HYPRE_Complex val = A_diag_a[j];
 
@@ -1097,12 +1097,12 @@ hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols( HYPRE_Int      nrows,
    /* sum row norm over offd part */
    if (lane < 2)
    {
-      p = read_only_load(A_offd_i + row_i + lane);
+      p_offd = read_only_load(A_offd_i + row_i + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 1);
+   p_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 0);
 
-   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p_offd + lane; j < q_offd; j += HYPRE_WARP_SIZE)
    {
       HYPRE_Complex val = A_offd_a[j];
 
@@ -1121,21 +1121,21 @@ hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols( HYPRE_Int      nrows,
    }
 
    /* allreduce to get the row norm on all threads */
-   row_norm_i = warp_allreduce_sum(row_norm_i);
+   if (type == -1)
+   {
+      row_norm_i = warp_allreduce_max(row_norm_i);
+   }
+   else
+   {
+      row_norm_i = warp_allreduce_sum(row_norm_i);
+   }
    if (type == 2)
    {
       row_norm_i = sqrt(row_norm_i);
    }
 
    /* set elmt_tols_diag */
-   if (lane < 2)
-   {
-      p = read_only_load(A_diag_i + row_i + lane);
-   }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
-
-   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p_diag + lane; j < q_diag; j += HYPRE_WARP_SIZE)
    {
       HYPRE_Int col = A_diag_j[j];
 
@@ -1151,14 +1151,7 @@ hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols( HYPRE_Int      nrows,
    }
 
    /* set elmt_tols_offd */
-   if (lane < 2)
-   {
-      p = read_only_load(A_offd_i + row_i + lane);
-   }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
-
-   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p_offd + lane; j < q_offd; j += HYPRE_WARP_SIZE)
    {
       elmt_tols_offd[j] = tol * row_norm_i;
    }
@@ -1279,6 +1272,11 @@ hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
 
+   if (type != 0)
+   {
+      hypre_TFree(elmt_tols_diag, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(elmt_tols_offd, HYPRE_MEMORY_DEVICE);
+   }
    hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;

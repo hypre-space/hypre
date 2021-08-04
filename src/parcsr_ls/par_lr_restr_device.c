@@ -15,33 +15,6 @@ __global__ void hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( HYPRE_Int nr_
 /*---------------------------------------------------------------------------
  * hypre_BoomerAMGBuildRestrNeumannAIR
  *--------------------------------------------------------------------------*/
-HYPRE_Int
-hypre_MatvecCommPkgCreateCustom ( hypre_ParCSRMatrix *A )
-{
-   MPI_Comm   comm            = hypre_ParCSRMatrixComm(A);
-   HYPRE_BigInt  first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
-   HYPRE_BigInt *col_map_offd   = hypre_ParCSRMatrixColMapOffd(A);
-   HYPRE_Int  num_cols_offd   = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
-   HYPRE_BigInt  global_num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
-   /* Create the assumed partition and should own it */
-   if  (hypre_ParCSRMatrixAssumedPartition(A) == NULL)
-   {
-      hypre_ParCSRMatrixCreateAssumedPartition(A);
-      hypre_ParCSRMatrixOwnsAssumedPartition(A) = 1;
-   }
-   hypre_IJAssumedPart *apart = hypre_ParCSRMatrixAssumedPartition(A);
-   /*-----------------------------------------------------------
-    * setup commpkg
-    *----------------------------------------------------------*/
-   hypre_ParCSRCommPkg *comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
-   hypre_ParCSRMatrixCommPkg(A) = comm_pkg;
-   hypre_ParCSRCommPkgCreateApart ( comm, col_map_offd, first_col_diag,
-                                    num_cols_offd, global_num_cols,
-                                    apart,
-                                    comm_pkg );
-
-   return hypre_error_flag;
-}
 
 HYPRE_Int
 hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
@@ -156,8 +129,6 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
                                 0);
    hypre_ParCSRMatrixAssumedPartition(Dinv) = hypre_ParCSRMatrixAssumedPartition(AFF);
    hypre_ParCSRMatrixOwnsAssumedPartition(Dinv) = 0;
-   hypre_ParCSRMatrixOwnsRowStarts(Dinv) = 0;
-   hypre_ParCSRMatrixOwnsColStarts(Dinv) = 0;
    hypre_ParCSRMatrixInitialize(Dinv);
    hypre_CSRMatrix *Dinv_diag = hypre_ParCSRMatrixDiag(Dinv);
    HYPRE_THRUST_CALL( copy,
@@ -244,7 +215,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    /* send and recv Fmap (wrt Z): global */
    if (num_procs > 1)
    {
-      hypre_MatvecCommPkgCreateCustom(Z);
+      hypre_MatvecCommPkgCreate(Z);
 
       hypre_ParCSRCommPkg *comm_pkg_Z = hypre_ParCSRMatrixCommPkg(Z);
       HYPRE_Int num_sends_Z = hypre_ParCSRCommPkgNumSends(comm_pkg_Z);
@@ -320,9 +291,6 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
                       hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(R)) + hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(R)),
                       hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(R)),
                       thrust::negate<HYPRE_Complex>() );
-
-   /* R does not own ColStarts, since A does */
-   hypre_ParCSRMatrixOwnsColStarts(R) = 0;
 
    hypre_ParCSRMatrixColMapOffd(R) = col_map_offd_R;
 
