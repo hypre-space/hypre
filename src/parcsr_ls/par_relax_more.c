@@ -15,12 +15,6 @@
 #include "_hypre_parcsr_ls.h"
 #include "float.h"
 
-HYPRE_Int hypre_LINPACKcgtql1(HYPRE_Int*,HYPRE_Real *,HYPRE_Real *,HYPRE_Int *);
-HYPRE_Real hypre_LINPACKcgpthy(HYPRE_Real*, HYPRE_Real*);
-
-HYPRE_Int hypre_LINPACKcgtql1(HYPRE_Int*,HYPRE_Real *,HYPRE_Real *,HYPRE_Int *);
-HYPRE_Real hypre_LINPACKcgpthy(HYPRE_Real*, HYPRE_Real*);
-
 /******************************************************************************
  *
  * use Gershgorin discs to estimate smallest and largest eigenvalues
@@ -161,7 +155,6 @@ hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax with */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
 #endif
-   printf("max eig est: %f, min eig est: %f\n", *max_eig, *min_eig);
    return ierr;
 }
 
