@@ -175,10 +175,6 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
                                 hypre_CSRMatrixNumNonzeros(C_diag),
                                 hypre_CSRMatrixNumNonzeros(C_offd));
 
-   /* Note that C does not own the partitionings */
-   hypre_ParCSRMatrixSetRowStartsOwner(C, 0);
-   hypre_ParCSRMatrixSetColStartsOwner(C, 0);
-
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
    hypre_ParCSRMatrixDiag(C) = C_diag;
 
@@ -466,10 +462,6 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
                                 num_cols_offd_C,
                                 hypre_CSRMatrixNumNonzeros(C_diag),
                                 hypre_CSRMatrixNumNonzeros(C_offd));
-
-   /* Note that C does not own the partitionings */
-   hypre_ParCSRMatrixSetRowStartsOwner(C, 0);
-   hypre_ParCSRMatrixSetColStartsOwner(C, 0);
 
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
    hypre_ParCSRMatrixDiag(C) = C_diag;
@@ -780,10 +772,6 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                                 num_cols_offd_C,
                                 hypre_CSRMatrixNumNonzeros(C_diag),
                                 hypre_CSRMatrixNumNonzeros(C_offd));
-
-   /* Note that C does not own the partitionings */
-   hypre_ParCSRMatrixSetRowStartsOwner(C, 0);
-   hypre_ParCSRMatrixSetColStartsOwner(C, 0);
 
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
    hypre_ParCSRMatrixDiag(C) = C_diag;

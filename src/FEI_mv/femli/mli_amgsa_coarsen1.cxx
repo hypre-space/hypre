@@ -733,8 +733,6 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
       delete [] colInd;
       delete [] colVal;
       Pmat = hypre_ParMatmul( Jmat, Pmat2);
-      hypre_ParCSRMatrixOwnsRowStarts(Jmat) = 0;
-      hypre_ParCSRMatrixOwnsColStarts(Pmat2) = 0;
       hypre_ParCSRMatrixDestroy(Pmat2);
       delete mli_Jmat;
    }

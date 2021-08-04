@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#include "_hypre_struct_ls.h"
+#include "_hypre_utilities.h"
 
 /*--------------------------------------------------------------------------
  * hypre_Log2:
@@ -14,12 +14,14 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_Log2(HYPRE_Int p)
+hypre_Log2( HYPRE_Int p )
 {
    HYPRE_Int  e;
 
    if (p <= 0)
+   {
       return -1;
+   }
 
    e = 0;
    while (p > 1)
@@ -27,6 +29,6 @@ hypre_Log2(HYPRE_Int p)
       e += 1;
       p /= 2;
    }
- 
+
    return e;
 }

@@ -238,7 +238,7 @@ hypre_CSRMatrixAddSecondPass( HYPRE_Int          firstrow,
    HYPRE_Int        *B_i      = hypre_CSRMatrixI(B);
    HYPRE_Int        *B_j      = hypre_CSRMatrixJ(B);
    HYPRE_Complex    *B_data   = hypre_CSRMatrixData(B);
-   HYPRE_Int         nnzs_B   = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Int         nnzs_B   = hypre_CSRMatrixNumNonzeros(B);
 
    HYPRE_Int        *C_i      = hypre_CSRMatrixI(C);
    HYPRE_Int        *C_j      = hypre_CSRMatrixJ(C);
@@ -738,6 +738,8 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
          B_marker[ib] = -1;
       }
 
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "First pass");
+
       /* First pass: compute sizes of C rows. */
       num_nonzeros = 0;
       for (ic = ns; ic < ne; ic++)
@@ -838,12 +840,14 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
          }
       }
       /* End of First Pass */
+      HYPRE_ANNOTATE_REGION_END("%s", "First pass");
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #endif
 
       /* Second pass: Fill in C_data and C_j. */
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Second pass");
       for (ib = 0; ib < ncols_B; ib++)
       {
          B_marker[ib] = -1;
@@ -890,6 +894,7 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
             }
          }
       }
+      HYPRE_ANNOTATE_REGION_END("%s", "Second pass");
 
       /* End of Second Pass */
       hypre_TFree(B_marker, HYPRE_MEMORY_HOST);
@@ -1509,9 +1514,7 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixReorder:
- * Reorders the column and data arrays of a square CSR matrix, such that the
- * first entry in each row is the diagonal one.
+ * hypre_CSRMatrixReorderHost
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1555,6 +1558,13 @@ hypre_CSRMatrixReorderHost(hypre_CSRMatrix *A)
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixReorder:
+ *
+ * Reorders the column and data arrays of a square CSR matrix, such that the
+ * first entry in each row is the diagonal one.
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_CSRMatrixReorder(hypre_CSRMatrix *A)
@@ -1886,6 +1896,7 @@ hypre_CSRMatrixComputeRowSum( hypre_CSRMatrix *A,
  *      1: abs diag
  *      2: diag inverse
  *      3: diag inverse sqrt
+ *      4: abs diag inverse sqrt
  *--------------------------------------------------------------------------*/
 
 void
@@ -1923,6 +1934,10 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
             {
                d_i = 1.0 /(sqrt(A_data[j]));
             }
+            else if (type == 4)
+            {
+               d_i = 1.0 /(sqrt(fabs(A_data[j])));
+            }
             break;
          }
       }
@@ -1956,6 +1971,35 @@ hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A,
    {
       hypre_CSRMatrixExtractDiagonalHost(A, d, type);
    }
+}
+
+/* Scale CSR matrix A = scalar * A
+ */
+HYPRE_Int
+hypre_CSRMatrixScale( hypre_CSRMatrix *A,
+                      HYPRE_Complex    scalar)
+{
+   HYPRE_Complex *data = hypre_CSRMatrixData(A);
+   HYPRE_Int      i;
+   HYPRE_Int      k = hypre_CSRMatrixNumNonzeros(A);
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypreDevice_Scalen(data, k, scalar);
+   }
+   else
+#endif
+   {
+      for (i = 0; i < k; i++)
+      {
+         data[i] *= scalar;
+      }
+   }
+
+   return hypre_error_flag;
 }
 
 HYPRE_Int

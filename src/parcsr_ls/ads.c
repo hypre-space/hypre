@@ -81,6 +81,8 @@ void * hypre_ADSCreate()
    ads_data -> y     = NULL;
    ads_data -> z     = NULL;
    ads_data -> zz  = NULL;
+   ads_data -> p  = NULL;
+   ads_data -> r  = NULL;
 
    ads_data -> r0  = NULL;
    ads_data -> g0  = NULL;
@@ -554,9 +556,6 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
                                        num_nonzeros_offd);
 
          hypre_ParCSRMatrixOwnsData(Pi) = 1;
-         hypre_ParCSRMatrixOwnsRowStarts(Pi) = 0;
-         hypre_ParCSRMatrixOwnsColStarts(Pi) = 1;
-
          hypre_ParCSRMatrixInitialize(Pi);
       }
 
@@ -791,8 +790,6 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
                                         num_nonzeros_diag,
                                         num_nonzeros_offd);
          hypre_ParCSRMatrixOwnsData(Pix) = 1;
-         hypre_ParCSRMatrixOwnsRowStarts(Pix) = 0;
-         hypre_ParCSRMatrixOwnsColStarts(Pix) = 0;
          hypre_ParCSRMatrixInitialize(Pix);
 
          Piy = hypre_ParCSRMatrixCreate(comm,
@@ -804,8 +801,6 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
                                         num_nonzeros_diag,
                                         num_nonzeros_offd);
          hypre_ParCSRMatrixOwnsData(Piy) = 1;
-         hypre_ParCSRMatrixOwnsRowStarts(Piy) = 0;
-         hypre_ParCSRMatrixOwnsColStarts(Piy) = 0;
          hypre_ParCSRMatrixInitialize(Piy);
 
          Piz = hypre_ParCSRMatrixCreate(comm,
@@ -817,8 +812,6 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
                                         num_nonzeros_diag,
                                         num_nonzeros_offd);
          hypre_ParCSRMatrixOwnsData(Piz) = 1;
-         hypre_ParCSRMatrixOwnsRowStarts(Piz) = 0;
-         hypre_ParCSRMatrixOwnsColStarts(Piz) = 0;
          hypre_ParCSRMatrixInitialize(Piz);
       }
 
@@ -1073,8 +1066,10 @@ HYPRE_Int hypre_ADSSetup(void *solver,
       if (ads_data -> ND_Pi == NULL && ads_data -> ND_Pix == NULL)
       {
          if (ads_data -> B_C_cycle_type < 10)
+         {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "Unsupported AMS cycle type in ADS!");
+         }
          HYPRE_AMSSetCoordinateVectors(ads_data -> B_C,
                                        (HYPRE_ParVector) ads_data -> x,
                                        (HYPRE_ParVector) ads_data -> y,
@@ -1084,8 +1079,10 @@ HYPRE_Int hypre_ADSSetup(void *solver,
       {
          if ((ads_data -> B_C_cycle_type < 10 && ads_data -> ND_Pi == NULL) ||
              (ads_data -> B_C_cycle_type > 10 && ads_data -> ND_Pix == NULL))
+         {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "Unsupported AMS cycle type in ADS!");
+         }
          HYPRE_AMSSetInterpolations(ads_data -> B_C,
                                     (HYPRE_ParCSRMatrix) ads_data -> ND_Pi,
                                     (HYPRE_ParCSRMatrix) ads_data -> ND_Pix,
@@ -1112,20 +1109,22 @@ HYPRE_Int hypre_ADSSetup(void *solver,
       /* Construct the coarse space matrix by RAP */
       if (!ads_data -> A_C)
       {
-         HYPRE_Int C_owned_col_starts;
-
          if (!hypre_ParCSRMatrixCommPkg(ads_data -> C))
+         {
             hypre_MatvecCommPkgCreate(ads_data -> C);
+         }
 
          if (!hypre_ParCSRMatrixCommPkg(ads_data -> A))
+         {
             hypre_MatvecCommPkgCreate(ads_data -> A);
-
-         C_owned_col_starts = hypre_ParCSRMatrixOwnsColStarts(ads_data -> C);
+         }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          if (exec == HYPRE_EXEC_DEVICE)
          {
-            ads_data -> A_C = hypre_ParCSRMatrixRAPKT(ads_data -> C, ads_data -> A, ads_data -> C, 1);
+            ads_data -> A_C = hypre_ParCSRMatrixRAPKT(ads_data -> C,
+                                                      ads_data -> A,
+                                                      ads_data -> C, 1);
          }
          else
 #endif
@@ -1139,9 +1138,6 @@ HYPRE_Int hypre_ADSSetup(void *solver,
          /* Make sure that A_C has no zero rows (this can happen if beta is zero
             in part of the domain). */
          hypre_ParCSRMatrixFixZeroRows(ads_data -> A_C);
-
-         hypre_ParCSRMatrixOwnsColStarts(ads_data -> C) = C_owned_col_starts;
-         hypre_ParCSRMatrixOwnsRowStarts(ads_data -> A_C) = 0;
       }
 
       HYPRE_AMSSetup(ads_data -> B_C, (HYPRE_ParCSRMatrix)ads_data -> A_C, 0, 0);
@@ -1182,8 +1178,6 @@ HYPRE_Int hypre_ADSSetup(void *solver,
    if (ads_data -> cycle_type > 10)
    /* Create the AMG solvers on the range of Pi{x,y,z}^T */
    {
-      HYPRE_Int P_owned_col_starts;
-
       HYPRE_BoomerAMGCreate(&ads_data -> B_Pix);
       HYPRE_BoomerAMGSetCoarsenType(ads_data -> B_Pix, ads_data -> B_Pi_coarsen_type);
       HYPRE_BoomerAMGSetAggNumLevels(ads_data -> B_Pix, ads_data -> B_Pi_agg_levels);
@@ -1230,13 +1224,16 @@ HYPRE_Int hypre_ADSSetup(void *solver,
 
       /* Construct the coarse space matrices by RAP */
       if (!hypre_ParCSRMatrixCommPkg(ads_data -> Pix))
+      {
          hypre_MatvecCommPkgCreate(ads_data -> Pix);
-      P_owned_col_starts = hypre_ParCSRMatrixOwnsRowStarts(ads_data -> Pix);
+      }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         ads_data -> A_Pix = hypre_ParCSRMatrixRAPKT(ads_data -> Pix, ads_data -> A, ads_data -> Pix, 1);
+         ads_data -> A_Pix = hypre_ParCSRMatrixRAPKT(ads_data -> Pix,
+                                                     ads_data -> A,
+                                                     ads_data -> Pix, 1);
       }
       else
 #endif
@@ -1247,23 +1244,21 @@ HYPRE_Int hypre_ADSSetup(void *solver,
                                             &ads_data -> A_Pix);
       }
 
-      if (!P_owned_col_starts)
-      {
-         hypre_ParCSRMatrixOwnsRowStarts(ads_data -> A_Pix) = 0;
-         hypre_ParCSRMatrixOwnsColStarts(ads_data -> A_Pix) = 0;
-      }
       HYPRE_BoomerAMGSetup(ads_data -> B_Pix,
                            (HYPRE_ParCSRMatrix)ads_data -> A_Pix,
-                           0, 0);
+                           NULL, NULL);
 
       if (!hypre_ParCSRMatrixCommPkg(ads_data -> Piy))
+      {
          hypre_MatvecCommPkgCreate(ads_data -> Piy);
-      P_owned_col_starts = hypre_ParCSRMatrixOwnsRowStarts(ads_data -> Piy);
+      }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         ads_data -> A_Piy = hypre_ParCSRMatrixRAPKT(ads_data -> Piy, ads_data -> A, ads_data -> Piy, 1);
+         ads_data -> A_Piy = hypre_ParCSRMatrixRAPKT(ads_data -> Piy,
+                                                     ads_data -> A,
+                                                     ads_data -> Piy, 1);
       }
       else
 #endif
@@ -1274,23 +1269,21 @@ HYPRE_Int hypre_ADSSetup(void *solver,
                                             &ads_data -> A_Piy);
       }
 
-      if (!P_owned_col_starts)
-      {
-         hypre_ParCSRMatrixOwnsRowStarts(ads_data -> A_Piy) = 0;
-         hypre_ParCSRMatrixOwnsColStarts(ads_data -> A_Piy) = 0;
-      }
       HYPRE_BoomerAMGSetup(ads_data -> B_Piy,
                            (HYPRE_ParCSRMatrix)ads_data -> A_Piy,
-                           0, 0);
+                           NULL, NULL);
 
       if (!hypre_ParCSRMatrixCommPkg(ads_data -> Piz))
+      {
          hypre_MatvecCommPkgCreate(ads_data -> Piz);
-      P_owned_col_starts = hypre_ParCSRMatrixOwnsRowStarts(ads_data -> Piz);
+      }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         ads_data -> A_Piz = hypre_ParCSRMatrixRAPKT(ads_data -> Piz, ads_data -> A, ads_data -> Piz, 1);
+         ads_data -> A_Piz = hypre_ParCSRMatrixRAPKT(ads_data -> Piz,
+                                                     ads_data -> A,
+                                                     ads_data -> Piz, 1);
       }
       else
 #endif
@@ -1301,14 +1294,9 @@ HYPRE_Int hypre_ADSSetup(void *solver,
                                             &ads_data -> A_Piz);
       }
 
-      if (!P_owned_col_starts)
-      {
-         hypre_ParCSRMatrixOwnsRowStarts(ads_data -> A_Piz) = 0;
-         hypre_ParCSRMatrixOwnsColStarts(ads_data -> A_Piz) = 0;
-      }
       HYPRE_BoomerAMGSetup(ads_data -> B_Piz,
                            (HYPRE_ParCSRMatrix)ads_data -> A_Piz,
-                           0, 0);
+                           NULL, NULL);
    }
    else
    /* Create the AMG solver on the range of Pi^T */
@@ -1335,15 +1323,21 @@ HYPRE_Int hypre_ADSSetup(void *solver,
       if (!ads_data -> A_Pi)
       {
          if (!hypre_ParCSRMatrixCommPkg(ads_data -> Pi))
+         {
             hypre_MatvecCommPkgCreate(ads_data -> Pi);
+         }
 
          if (!hypre_ParCSRMatrixCommPkg(ads_data -> A))
+         {
             hypre_MatvecCommPkgCreate(ads_data -> A);
+         }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          if (exec == HYPRE_EXEC_DEVICE)
          {
-            ads_data -> A_Pi = hypre_ParCSRMatrixRAPKT(ads_data -> Pi, ads_data -> A, ads_data -> Pi, 1);
+            ads_data -> A_Pi = hypre_ParCSRMatrixRAPKT(ads_data -> Pi,
+                                                       ads_data -> A,
+                                                       ads_data -> Pi, 1);
          }
          else
 #endif
@@ -1360,7 +1354,7 @@ HYPRE_Int hypre_ADSSetup(void *solver,
 
       HYPRE_BoomerAMGSetup(ads_data -> B_Pi,
                            (HYPRE_ParCSRMatrix)ads_data -> A_Pi,
-                           0, 0);
+                           NULL, NULL);
    }
 
    /* Allocate temporary vectors */
@@ -1407,10 +1401,12 @@ HYPRE_Int hypre_ADSSolve(void *solver,
    HYPRE_PtrToSolverFcn HBi[5];
    hypre_ParVector *ri[5], *gi[5];
    HYPRE_Int needZ = 0;
+   HYPRE_Int needR = 0;
+   HYPRE_Int needP = 0;
 
    hypre_ParVector *z = ads_data -> zz;
-   hypre_ParVector *r = NULL;
-   hypre_ParVector *p = NULL;
+   hypre_ParVector *r = ads_data -> r;
+   hypre_ParVector *p = ads_data -> p;
 
    Ai[0] = ads_data -> A_C;    Pi[0] = ads_data -> C;
    Ai[1] = ads_data -> A_Pi;   Pi[1] = ads_data -> Pi;
@@ -1446,26 +1442,33 @@ HYPRE_Int hypre_ADSSolve(void *solver,
       needZ = hypre_NumThreads() > 1 || ads_data -> A_relax_type == 16;
    }
 
+   needR = ads_data -> A_relax_type == 16;
+   needP = ads_data -> A_relax_type == 16;
+
    if (needZ && !z)
    {
       z = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                 hypre_ParCSRMatrixGlobalNumRows(A),
                                 hypre_ParCSRMatrixRowStarts(A));
       hypre_ParVectorInitialize(z);
-      hypre_ParVectorSetPartitioningOwner(z,0);
+      ads_data -> zz = z;
+   } 
 
+   if (needR && !r)
+   {
       r = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                 hypre_ParCSRMatrixGlobalNumRows(A),
                                 hypre_ParCSRMatrixRowStarts(A));
       hypre_ParVectorInitialize(r);
-      hypre_ParVectorSetPartitioningOwner(r,0);
-
+      ads_data -> r = r;
+   }
+   if (needP && !p)
+   {
       p = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                 hypre_ParCSRMatrixGlobalNumRows(A),
                                 hypre_ParCSRMatrixRowStarts(A));
       hypre_ParVectorInitialize(p);
-      hypre_ParVectorSetPartitioningOwner(p,0);
-      ads_data -> zz = z;
+      ads_data -> p = p;
    }
 
    if (ads_data -> print_level > 0)

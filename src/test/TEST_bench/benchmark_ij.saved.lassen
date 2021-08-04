@@ -188,7 +188,7 @@ Final Relative Residual Norm = 5.974908e-09
                 memory = 3.403651
 
 Iterations = 14
-Final Relative Residual Norm = 2.261192e-09
+Final Relative Residual Norm = 2.029943e-09
 
 # Output file: benchmark_ij.out.25
      Complexity:    grid = 1.354681
@@ -196,5 +196,5 @@ Final Relative Residual Norm = 2.261192e-09
                 memory = 3.403651
 
 Iterations = 15
-Final Relative Residual Norm = 5.485889e-09
+Final Relative Residual Norm = 4.096949e-09
 
