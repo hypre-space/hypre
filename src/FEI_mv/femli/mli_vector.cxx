@@ -17,7 +17,7 @@
 #include "mli_utils.h"
 
 /******************************************************************************
- * constructor 
+ * constructor
  *---------------------------------------------------------------------------*/
 
 MLI_Vector::MLI_Vector( void *invec,const char *inName, MLI_Function *funcPtr )
@@ -29,7 +29,7 @@ MLI_Vector::MLI_Vector( void *invec,const char *inName, MLI_Function *funcPtr )
 }
 
 /******************************************************************************
- * destructor 
+ * destructor
  *---------------------------------------------------------------------------*/
 
 MLI_Vector::~MLI_Vector()
@@ -49,7 +49,7 @@ char *MLI_Vector::getName()
 }
 
 /******************************************************************************
- * get vector 
+ * get vector
  *---------------------------------------------------------------------------*/
 
 void *MLI_Vector::getVector()
@@ -58,7 +58,7 @@ void *MLI_Vector::getVector()
 }
 
 /******************************************************************************
- * set vector to a constant 
+ * set vector to a constant
  *---------------------------------------------------------------------------*/
 
 int MLI_Vector::setConstantValue(double value)
@@ -69,11 +69,11 @@ int MLI_Vector::setConstantValue(double value)
       exit(1);
    }
    hypre_ParVector *vec = (hypre_ParVector *) vector_;
-   return (hypre_ParVectorSetConstantValues( vec, value )); 
+   return (hypre_ParVectorSetConstantValues( vec, value ));
 }
 
 /******************************************************************************
- * inner product 
+ * inner product
  *---------------------------------------------------------------------------*/
 
 int MLI_Vector::copy(MLI_Vector *vec2)
@@ -112,7 +112,7 @@ int MLI_Vector::print(char *filename)
 }
 
 /******************************************************************************
- * inner product 
+ * inner product
  *---------------------------------------------------------------------------*/
 
 double MLI_Vector::norm2()
@@ -127,7 +127,7 @@ double MLI_Vector::norm2()
 }
 
 /******************************************************************************
- * clone a hypre vector 
+ * clone a hypre vector
  *---------------------------------------------------------------------------*/
 
 MLI_Vector *MLI_Vector::clone()
@@ -160,7 +160,6 @@ MLI_Vector *MLI_Vector::clone()
    hypre_ParVectorFirstIndex(newVec) = partitioning[mypid];
    hypre_ParVectorPartitioning(newVec) = partitioning;
    hypre_ParVectorOwnsData(newVec) = 1;
-   hypre_ParVectorOwnsPartitioning(newVec) = 1;
    nlocals = partitioning[mypid+1] - partitioning[mypid];
    seqVec = hypre_SeqVectorCreate(nlocals);
    hypre_SeqVectorInitialize(seqVec);
@@ -174,4 +173,3 @@ MLI_Vector *MLI_Vector::clone()
    delete funcPtr;
    return mliVec;
 }
-

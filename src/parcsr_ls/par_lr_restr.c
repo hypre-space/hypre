@@ -1572,8 +1572,6 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrixData(R_offd) = R_offd_data;
    hypre_CSRMatrixI(R_offd)    = R_offd_i;
    hypre_CSRMatrixJ(R_offd)    = R_offd_j;
-   /* R does not own ColStarts, since A does */
-   hypre_ParCSRMatrixOwnsColStarts(R) = 0;
 
    hypre_ParCSRMatrixColMapOffd(R) = col_map_offd_R;
 
@@ -1993,8 +1991,6 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrixData(R_offd) = R_offd_a;
    hypre_CSRMatrixI(R_offd)    = R_offd_i;
    hypre_CSRMatrixJ(R_offd)    = R_offd_j;
-   /* R does not own ColStarts, since A does */
-   hypre_ParCSRMatrixOwnsColStarts(R) = 0;
 
    hypre_ParCSRMatrixColMapOffd(R) = col_map_offd_R;
 

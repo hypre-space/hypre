@@ -1411,9 +1411,6 @@ hypre_ParCSRMatrixTransposeDevice( hypre_ParCSRMatrix  *A,
                                  hypre_CSRMatrixNumNonzeros(A_diagT),
                                  hypre_CSRMatrixNumNonzeros(AT_offd));
 
-   hypre_ParCSRMatrixSetRowStartsOwner(AT, 0);
-   hypre_ParCSRMatrixSetColStartsOwner(AT, 0);
-
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(AT));
    hypre_ParCSRMatrixDiag(AT) = A_diagT;
 
@@ -1552,7 +1549,7 @@ hypre_ParCSRMatrixAddDevice( HYPRE_Complex        alpha,
       hypre_ParCSRMatrixDeviceColMapOffd(C) = d_col_map_offd_C;
 
       hypre_ParCSRMatrixColMapOffd(C) = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(C), d_col_map_offd_C, HYPRE_BigInt, num_cols_offd_C, 
+      hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(C), d_col_map_offd_C, HYPRE_BigInt, num_cols_offd_C,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
 

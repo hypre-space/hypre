@@ -993,8 +993,25 @@ hypre_CurandUniform_core( HYPRE_Int          n,
 }
 #endif /* #if defined(HYPRE_USING_CURAND) */
 
-// RL: TODO
 #if defined(HYPRE_USING_ROCRAND)
+rocrand_generator
+hypre_CudaDataCurandGenerator(hypre_CudaData *data)
+{
+   if (data->curand_generator)
+   {
+      return data->curand_generator;
+   }
+
+   rocrand_generator gen;
+   HYPRE_ROCRAND_CALL( rocrand_create_generator(&gen, ROCRAND_RNG_PSEUDO_DEFAULT) );
+   HYPRE_ROCRAND_CALL( rocrand_set_seed(gen, 1234ULL) );
+   HYPRE_ROCRAND_CALL( rocrand_set_stream(gen, hypre_CudaDataCudaComputeStream(data)) );
+
+   data->curand_generator = gen;
+
+   return gen;
+}
+
 template <typename T>
 HYPRE_Int
 hypre_CurandUniform_core( HYPRE_Int          n,
@@ -1004,8 +1021,32 @@ hypre_CurandUniform_core( HYPRE_Int          n,
                           HYPRE_Int          set_offset,
                           hypre_ulonglongint offset)
 {
-   hypre_error_w_msg(1, "ROCRand has not been available");
-   exit(0);
+  hypre_GpuProfilingPushRange("hypre_CurandUniform_core");
+
+   rocrand_generator gen = hypre_HandleCurandGenerator(hypre_handle());
+
+   if (set_seed)
+   {
+      HYPRE_ROCRAND_CALL( rocrand_set_seed(gen, seed) );
+   }
+
+   if (set_offset)
+   {
+      HYPRE_ROCRAND_CALL( rocrand_set_offset(gen, offset) );
+   }
+
+   if (sizeof(T) == sizeof(hypre_double))
+   {
+      HYPRE_ROCRAND_CALL( rocrand_generate_uniform_double(gen, (hypre_double *) urand, n) );
+   }
+   else if (sizeof(T) == sizeof(float))
+   {
+      HYPRE_ROCRAND_CALL( rocrand_generate_uniform(gen, (float *) urand, n) );
+   }
+
+   hypre_GpuProfilingPopRange();
+
+   return hypre_error_flag;
 }
 #endif /* #if defined(HYPRE_USING_ROCRAND) */
 
@@ -1120,7 +1161,7 @@ hypre_CudaDataCreate()
    hypre_CudaDataSpgemmHashType(data) = 'L';
 
    /* pmis */
-#ifdef HYPRE_USING_CURAND
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
    hypre_CudaDataUseGpuRand(data) = 1;
 #else
    hypre_CudaDataUseGpuRand(data) = 0;
@@ -1155,6 +1196,13 @@ hypre_CudaDataDestroy(hypre_CudaData *data)
    if (data->curand_generator)
    {
       HYPRE_CURAND_CALL( curandDestroyGenerator(data->curand_generator) );
+   }
+#endif
+
+#if defined(HYPRE_USING_ROCRAND)
+   if (data->curand_generator)
+   {
+      HYPRE_ROCRAND_CALL( rocrand_destroy_generator(data->curand_generator) );
    }
 #endif
 

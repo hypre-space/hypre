@@ -186,9 +186,6 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    S = hypre_ParCSRMatrixCreate(comm, global_num_vars, global_num_vars, row_starts, row_starts,
                                 num_cols_offd, num_nonzeros_diag, num_nonzeros_offd);
 
-   /* row_starts is owned by A, col_starts = row_starts */
-   hypre_ParCSRMatrixSetRowStartsOwner(S,0);
-
    S_diag = hypre_ParCSRMatrixDiag(S);
    S_offd = hypre_ParCSRMatrixOffd(S);
 
@@ -577,4 +574,3 @@ hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A,
 }
 
 #endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
-
