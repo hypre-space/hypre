@@ -1177,7 +1177,7 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                       big_int_buf_data + hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                       thrust::make_constant_iterator(my_first_cpt),
                       big_int_buf_data,
-                      thrust::plus<HYPRE_Int>() );
+                      thrust::plus<HYPRE_BigInt>() );
    comm_handle = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg, HYPRE_MEMORY_DEVICE, big_int_buf_data, HYPRE_MEMORY_DEVICE, fine_to_coarse_offd);
    hypre_ParCSRCommHandleDestroy(comm_handle);
    hypre_TFree(big_int_buf_data, HYPRE_MEMORY_DEVICE);
