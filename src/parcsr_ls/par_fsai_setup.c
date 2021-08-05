@@ -9,7 +9,7 @@
 #include "_hypre_blas.h"
 #include "_hypre_lapack.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 /*****************************************************************************
  *
@@ -105,7 +105,7 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
                    HYPRE_Int        S_nnz,
                    HYPRE_Int        max_row_size,
                    HYPRE_Int        row_num,
-                   HYPRE_Int        *S_marker, 
+                   HYPRE_Int        *S_marker,
                    HYPRE_Int        *kg_marker )
 {
 
@@ -136,7 +136,7 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
             kap_grad_data[count] = G_temp_data[i]*A_data[j];
             kap_grad_nonzeros[count] = A_j[j];
             count++;
-         }           
+         }
       }
 
    for(j = A_i[row_num]; j < A_i[row_num+1]; j++){
@@ -254,6 +254,7 @@ hypre_FSAISetup( void               *fsai_vdata,
    HYPRE_Int               logging           = hypre_ParFSAIDataLogging(fsai_data);
    HYPRE_Int               print_level       = hypre_ParFSAIDataPrintLevel(fsai_data);
    HYPRE_Int               debug_flag        = hypre_ParFSAIDataDebugFlag(fsai_data);
+   HYPRE_Real              density;
 
    /* Declare Local variables */
 
@@ -270,7 +271,7 @@ hypre_FSAISetup( void               *fsai_vdata,
    HYPRE_Int              *kap_grad_nonzeros; /* An array to hold the kaporin_gradient nonzero indices for each iteration of aFSAI */
    HYPRE_Int              *S_Pattern;
    HYPRE_Int              *marker;            /* An array that holds which values need to be gathered when finding a sub-row or submatrix */
-   HYPRE_Int              *kg_marker;        
+   HYPRE_Int              *kg_marker;
    HYPRE_Real              old_psi, new_psi;  /* GAG' before and after the k-th interation of aFSAI */
    HYPRE_Real              row_scale;         /* The value to scale G_temp by before adding it to G */
    HYPRE_Int               S_nnz;
@@ -333,8 +334,8 @@ hypre_FSAISetup( void               *fsai_vdata,
    sol_vec           = hypre_SeqVectorCreate(max_row_size);
    kaporin_gradient  = hypre_SeqVectorCreate(max_row_size);
    A_sub             = hypre_SeqVectorCreate(max_row_size*max_row_size);
-   S_Pattern         = hypre_CTAlloc(HYPRE_Int, max_row_size, HYPRE_MEMORY_HOST); 
-   kap_grad_nonzeros = hypre_CTAlloc(HYPRE_Int, max_row_size, HYPRE_MEMORY_HOST); 
+   S_Pattern         = hypre_CTAlloc(HYPRE_Int, max_row_size, HYPRE_MEMORY_HOST);
+   kap_grad_nonzeros = hypre_CTAlloc(HYPRE_Int, max_row_size, HYPRE_MEMORY_HOST);
    marker            = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);       /* For gather functions - don't want to reinitialize */
    kg_marker         = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);       /* For kaporin gradient functions */
 
@@ -373,7 +374,7 @@ hypre_FSAISetup( void               *fsai_vdata,
 
       /* Set old_psi up front so we don't have to compute GAG' twice in the inner for-loop */
       old_psi = A_data[A_i[i]];
-      
+
       if(max_step_size > 0)
          for( k = 0; k < max_steps; k++ ) /* Cycle through each iteration for that row */
          {
@@ -395,7 +396,7 @@ hypre_FSAISetup( void               *fsai_vdata,
 
             /* Gather A[P, P] and -A[P, i] */
             hypre_qsort0(S_Pattern, 0, S_nnz-1);
-            
+
             for(j = 0; j < S_nnz; ++j)
                marker[S_Pattern[j]] = j;
 
@@ -423,7 +424,7 @@ hypre_FSAISetup( void               *fsai_vdata,
 
             for(j = 0; j < hypre_VectorSize(sol_vec); j++)
                G_temp_data[j] = sol_vec_data[j];
-            
+
 
             /* Determine psi_{k+1} = G_temp[i]*A*G_temp[i]' */
             hypre_SeqVectorScale(-1, A_subrow);                         /* A[P, i] */
@@ -452,6 +453,9 @@ hypre_FSAISetup( void               *fsai_vdata,
       G_i[i+1] = G_i[i] + k + 1;
    }
 
+   /* Update local number of nonzeros of G */
+   hypre_CSRMatrixNumNonzeros(G_diag) = G_i[num_rows];
+
    /* Compute G^T */
    hypre_ParCSRMatrixTranspose(G, &hypre_ParFSAIDataGTmat(fsai_data), 1);
 
@@ -459,6 +463,36 @@ hypre_FSAISetup( void               *fsai_vdata,
    char filename[] = "FSAI.out.G.ij";
    hypre_ParCSRMatrixPrintIJ(G, 0, 0, filename);
 #endif
+
+   /* Print Setup info*/
+   if (print_level == 1)
+   {
+      hypre_MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &my_id);
+
+      /* Compute density */
+      hypre_ParCSRMatrixSetDNumNonzeros(G);
+      hypre_ParCSRMatrixSetDNumNonzeros(A);
+      density = hypre_ParCSRMatrixDNumNonzeros(G)/
+                hypre_ParCSRMatrixDNumNonzeros(A);
+      hypre_ParFSAIDataDensity(fsai_data) = density;
+
+      if (!my_id)
+      {
+         hypre_printf("*************************\n");
+         hypre_printf("* HYPRE FSAI Setup Info *\n");
+         hypre_printf("*************************\n\n");
+
+         hypre_printf("+--------------------------+\n");
+         hypre_printf("| Max no. steps:    %6d |\n", max_steps);
+         hypre_printf("| Max step size:    %6d |\n", max_step_size);
+         hypre_printf("| Kap grad tol:   %8.1e |\n", kap_tolerance);
+         hypre_printf("| Prec. density:  %8.3f |\n", density);
+         hypre_printf("| Omega factor:   %8.3f |\n", hypre_ParFSAIDataOmega(fsai_data));
+         hypre_printf("+--------------------------+\n");
+
+         hypre_printf("\n\n");
+      }
+   }
 
    hypre_SeqVectorDestroy(G_temp);
    hypre_SeqVectorDestroy(A_subrow);

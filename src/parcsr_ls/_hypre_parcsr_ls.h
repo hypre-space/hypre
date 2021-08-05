@@ -814,6 +814,9 @@ typedef struct
    hypre_ParCSRMatrix  *Gmat;                /* Matrix holding FSAI factor. M^(-1) = G'G */
    hypre_ParCSRMatrix  *GTmat;               /* Matrix holding the transpose of the FSAI factor */
 
+   /* FSAI Setup info */
+   HYPRE_Real           density;             /* Density of matrix G wrt A */
+
    /* Solver Problem Data */
    HYPRE_Int            max_iterations;      /* Maximum iterations run for the solver */
    HYPRE_Int            num_iterations;      /* Number of iterations the solver ran */
@@ -821,9 +824,9 @@ typedef struct
    HYPRE_Real           tolerance;    	      /* Tolerance for the solver */
    HYPRE_Real           rel_resnorm;         /* available if logging > 1 */
    hypre_ParVector      *residual;           /* available if logging > 1 */
-   hypre_ParVector      *r_work;           
-   hypre_ParVector      *x_work;           
-   hypre_ParVector      *z_work;           
+   hypre_ParVector      *r_work;
+   hypre_ParVector      *x_work;
+   hypre_ParVector      *z_work;
 
    /* log info */
    HYPRE_Int            logging;
@@ -849,6 +852,7 @@ typedef struct
 #define hypre_ParFSAIDataKapTolerance(fsai_data)            ((fsai_data) -> kap_tolerance)
 #define hypre_ParFSAIDataGmat(fsai_data)                    ((fsai_data) -> Gmat)
 #define hypre_ParFSAIDataGTmat(fsai_data)                   ((fsai_data) -> GTmat)
+#define hypre_ParFSAIDataDensity(fsai_data)                 ((fsai_data) -> density)
 
 /* Solver problem data */
 #define hypre_ParFSAIDataMaxIterations(fsai_data)           ((fsai_data) -> max_iterations)

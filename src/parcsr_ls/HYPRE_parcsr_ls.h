@@ -1543,6 +1543,15 @@ HYPRE_Int HYPRE_FSAISetMaxIterations( HYPRE_Solver solver,
 HYPRE_Int HYPRE_FSAISetTolerance( HYPRE_Solver solver,
                                   HYPRE_Real   tolerance );
 
+/**
+ * (Optional) Requests automatic printing of setup information.
+ *
+ *    - 0 : no printout (default)
+ *    - 1 : print setup information
+ **/
+HYPRE_Int HYPRE_FSAISetPrintLevel(HYPRE_Solver solver,
+                                  HYPRE_Int    print_level);
+
 
 /**@}*/
 
