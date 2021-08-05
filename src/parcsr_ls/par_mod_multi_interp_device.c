@@ -28,6 +28,26 @@ struct tuple_plus : public thrust::binary_function<thrust::tuple<T,T>, thrust::t
   }
 };
 
+struct TupleMinus : public thrust::unary_function<thrust::tuple<int,int>,int>
+  {
+    __host__ __device__
+    int operator()(thrust::tuple<int,int> & x) const
+    {
+      int x1 = thrust::get<0>(x);
+      int x2 = thrust::get<1>(x);
+      return x1-x2;
+    };
+  };
+
+struct plus_one : public thrust::unary_function<int,int>
+  {
+    __host__ __device__
+    int operator()(int x) const
+    {
+      return x+1;
+    };
+  };
+
 
 __global__
 void hypreCUDAKernel_cfmarker_masked_rowsum( HYPRE_Int nrows,
@@ -608,6 +628,63 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
      hypre_TFree(A_offd_data, HYPRE_MEMORY_HOST);
    }
 
+
+   /* populate P_diag_i[i+1] with nnz of i-th row */
+   for (i = 0; i < num_passes-1; i++)
+   {
+     /* Old host code:
+      j1 = 0;
+      for (j=pass_starts[i+1]; j < pass_starts[i+2]; j++)
+      {
+         i1 = pass_order[j];
+         P_diag_i[i1+1] = Pi_diag_i[j1+1]-Pi_diag_i[j1];
+         P_offd_i[i1+1] = Pi_offd_i[j1+1]-Pi_offd_i[j1];
+         j1++;
+      }
+     */
+
+      HYPRE_Int *Pi_diag_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(Pi[i]));
+      HYPRE_Int *Pi_offd_i = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(Pi[i]));
+
+      HYPRE_Int start = pass_starts[i+1];
+      HYPRE_Int stop  = pass_starts[i+2];
+
+      //PB: Thrust doesn't like having a zip_iterator for the output here
+      //    It wants it to be a RandomAccessIterator "model" (for which
+      //    I'm having a hard time finding documentation). If we could
+      //    overcome that, then we ought to be able to "zip" (i.e. fuse)
+      //    these two scatters together.
+      HYPRE_THRUST_CALL( scatter,
+                         thrust::make_transform_iterator( thrust::make_zip_iterator(thrust::make_tuple(Pi_diag_i+1, Pi_diag_i) ), TupleMinus()),
+                         thrust::make_transform_iterator( thrust::make_zip_iterator(thrust::make_tuple(Pi_diag_i+1+(stop-start), Pi_diag_i+(stop-start)) ), TupleMinus()),
+                         thrust::make_transform_iterator(pass_order_dev+start, plus_one()),
+                         P_diag_i_dev );
+
+      HYPRE_THRUST_CALL( scatter,
+                         thrust::make_transform_iterator( thrust::make_zip_iterator(thrust::make_tuple(Pi_offd_i+1, Pi_offd_i) ), TupleMinus()),
+                         thrust::make_transform_iterator( thrust::make_zip_iterator(thrust::make_tuple(Pi_offd_i+1+(stop-start), Pi_offd_i+(stop-start)) ), TupleMinus()),
+                         thrust::make_transform_iterator(pass_order_dev+start, plus_one()),
+                         P_offd_i_dev );
+   }
+
+
+   /*
+   for (i=0; i < n_fine; i++)
+   {
+      P_diag_i[i+1] += P_diag_i[i];
+      P_offd_i[i+1] += P_offd_i[i];
+   }
+   */
+   HYPRE_THRUST_CALL( inclusive_scan,
+                      thrust::make_zip_iterator( thrust::make_tuple(P_diag_i_dev,P_offd_i_dev) ),
+                      thrust::make_zip_iterator( thrust::make_tuple(P_diag_i_dev+n_fine+1,P_offd_i_dev+n_fine+1) ),
+                      thrust::make_zip_iterator( thrust::make_tuple(P_diag_i_dev,P_offd_i_dev) ),
+                      tuple_plus<int>());
+
+
+   hypre_TMemcpy( P_diag_i, P_diag_i_dev, HYPRE_Int, n_fine+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy( P_offd_i, P_offd_i_dev, HYPRE_Int, n_fine+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
    // Copy Pi back to the host
    // FIXME: Clean this up when we're done
    for (i = 0; i < num_passes-1; i++)
@@ -657,27 +734,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       }
    }
 
-
-   /* populate P_diag_i[i+1] with nnz of i-th row */
-   for (i = 0; i < num_passes-1; i++)
-   {
-      HYPRE_Int *Pi_diag_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(Pi[i]));
-      HYPRE_Int *Pi_offd_i = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(Pi[i]));
-      j1 = 0;
-      for (j=pass_starts[i+1]; j < pass_starts[i+2]; j++)
-      {
-         i1 = pass_order[j];
-         P_diag_i[i1+1] = Pi_diag_i[j1+1]-Pi_diag_i[j1];
-         P_offd_i[i1+1] = Pi_offd_i[j1+1]-Pi_offd_i[j1];
-         j1++;
-      }
-   }
-
-   for (i=0; i < n_fine; i++)
-   {
-      P_diag_i[i+1] += P_diag_i[i];
-      P_offd_i[i+1] += P_offd_i[i];
-   }
 
    P_diag_j = hypre_CTAlloc(HYPRE_Int, P_diag_i[n_fine], HYPRE_MEMORY_HOST);
    P_diag_data = hypre_CTAlloc(HYPRE_Real, P_diag_i[n_fine], HYPRE_MEMORY_HOST);
