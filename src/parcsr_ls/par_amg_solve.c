@@ -115,7 +115,6 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
         hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
         hypre_ParCSRMatrixRowStarts(A_array[0]));
         hypre_ParVectorInitialize(Vtemp);
-        hypre_ParVectorSetPartitioningOwner(Vtemp,0);
         hypre_ParAMGDataVtemp(amg_data) = Vtemp;
         */
    Vtemp = hypre_ParAMGDataVtemp(amg_data);

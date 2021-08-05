@@ -1158,6 +1158,7 @@ extern "C++" {
 #endif
 
 static char hypre__levelname[16];
+static char hypre__markname[1024];
 
 #define HYPRE_ANNOTATE_FUNC_BEGIN          CALI_MARK_FUNCTION_BEGIN
 #define HYPRE_ANNOTATE_FUNC_END            CALI_MARK_FUNCTION_END
@@ -1165,6 +1166,16 @@ static char hypre__levelname[16];
 #define HYPRE_ANNOTATE_LOOP_END(id)        CALI_MARK_LOOP_END(id)
 #define HYPRE_ANNOTATE_ITER_BEGIN(id, it)  CALI_MARK_ITERATION_BEGIN(id, it)
 #define HYPRE_ANNOTATE_ITER_END(id)        CALI_MARK_ITERATION_END(id)
+#define HYPRE_ANNOTATE_REGION_BEGIN(...)\
+{\
+   hypre_sprintf(hypre__markname, __VA_ARGS__);\
+   CALI_MARK_BEGIN(hypre__markname);\
+}
+#define HYPRE_ANNOTATE_REGION_END(...)\
+{\
+   hypre_sprintf(hypre__markname, __VA_ARGS__);\
+   CALI_MARK_END(hypre__markname);\
+}
 #define HYPRE_ANNOTATE_MGLEVEL_BEGIN(lvl)\
 {\
    hypre_sprintf(hypre__levelname, "MG level %d", lvl);\
@@ -1184,6 +1195,9 @@ static char hypre__levelname[16];
 #define HYPRE_ANNOTATE_LOOP_END(id)
 #define HYPRE_ANNOTATE_ITER_BEGIN(id, it)
 #define HYPRE_ANNOTATE_ITER_END(id)
+#define HYPRE_ANNOTATE_REGION_BEGIN(...)
+#define HYPRE_ANNOTATE_REGION_END(...)
+#define HYPRE_ANNOTATE_MAX_MGLEVEL(lvl)
 #define HYPRE_ANNOTATE_MGLEVEL_BEGIN(lvl)
 #define HYPRE_ANNOTATE_MGLEVEL_END(lvl)
 
@@ -1375,6 +1389,9 @@ HYPRE_Int hypre_BigBinarySearch ( HYPRE_BigInt *list , HYPRE_BigInt value , HYPR
 HYPRE_Int hypre_BinarySearch2 ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int low , HYPRE_Int high , HYPRE_Int *spot );
 HYPRE_Int *hypre_LowerBound( HYPRE_Int *first, HYPRE_Int *last, HYPRE_Int value );
 HYPRE_BigInt *hypre_BigLowerBound( HYPRE_BigInt *first, HYPRE_BigInt *last, HYPRE_BigInt value );
+
+/* log.c */
+HYPRE_Int hypre_Log2( HYPRE_Int p );
 
 /* complex.c */
 #ifdef HYPRE_COMPLEX
@@ -1614,6 +1631,7 @@ HYPRE_Int hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HY
 HYPRE_Int hypreDevice_MaskedIVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y, HYPRE_Int *mask);
 HYPRE_Int hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v);
 HYPRE_Int hypreDevice_Filln(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v);
+HYPRE_Int hypreDevice_Scalen(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v);
 #endif
 
 HYPRE_Int hypre_CurandUniform( HYPRE_Int n, HYPRE_Real *urand, HYPRE_Int set_seed, hypre_ulonglongint seed, HYPRE_Int set_offset, hypre_ulonglongint offset);
@@ -1775,7 +1793,7 @@ static inline HYPRE_Int
 first_lsb_bit_indx( hypre_uint x )
 {
    HYPRE_Int pos;
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || defined(__MINGW64__)
    if (x == 0)
    {
       pos = 0;
