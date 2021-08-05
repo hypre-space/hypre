@@ -983,7 +983,6 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    HYPRE_BigInt     total_global_cpts;
    HYPRE_BigInt    *big_convert;
    HYPRE_BigInt    *big_convert_offd = NULL;
-   HYPRE_BigInt    *big_convert_offd_dev = NULL;
    HYPRE_BigInt    *big_buf_data = NULL;
    HYPRE_Int        num_sends;
 
@@ -1036,8 +1035,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
       {
          num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-         big_convert_offd = hypre_CTAlloc(HYPRE_BigInt,  num_cols_offd_A, HYPRE_MEMORY_HOST);
-         big_convert_offd_dev = hypre_CTAlloc(HYPRE_BigInt,  num_cols_offd_A, HYPRE_MEMORY_DEVICE);
+         big_convert_offd = hypre_CTAlloc(HYPRE_BigInt,  num_cols_offd_A, HYPRE_MEMORY_DEVICE);
          big_buf_data = hypre_CTAlloc(HYPRE_BigInt,  hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_DEVICE);
 
          HYPRE_THRUST_CALL( gather,
@@ -1047,12 +1045,9 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
                             big_convert,
                             big_buf_data );
 
-         comm_handle = hypre_ParCSRCommHandleCreate_v2( 21, comm_pkg, HYPRE_MEMORY_DEVICE, big_buf_data, HYPRE_MEMORY_DEVICE, big_convert_offd_dev);
+         comm_handle = hypre_ParCSRCommHandleCreate_v2( 21, comm_pkg, HYPRE_MEMORY_DEVICE, big_buf_data, HYPRE_MEMORY_DEVICE, big_convert_offd);
 
          hypre_ParCSRCommHandleDestroy(comm_handle);
-
-         // FIXME: Clean this up when done with host ptr
-         hypre_TMemcpy( big_convert_offd, big_convert_offd_dev, HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
          // This will allocate fine_to_coarse_offd
          compute_num_cols_offd_fine_to_coarse( pass_marker_offd_dev, color, num_cols_offd_A,
@@ -1065,19 +1060,18 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
 
          cpt = 0;
          HYPRE_BigInt * col_map_end = HYPRE_THRUST_CALL( copy_if,
-                                                         big_convert_offd_dev,
-                                                         big_convert_offd_dev + num_cols_offd_A,
+                                                         big_convert_offd,
+                                                         big_convert_offd + num_cols_offd_A,
                                                          pass_marker_offd_dev,
                                                          col_map_offd_P_dev,
                                                          equal<int>(color) );
          cpt = col_map_end - col_map_offd_P_dev;
 
-         //FIXME: Clean this up when we don't need th host pointer anymore
+         //FIXME: Clean this up when we don't need the host pointer anymore
          hypre_TMemcpy( col_map_offd_P, col_map_offd_P_dev, HYPRE_Int, num_cols_offd_P, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
          hypre_TFree(big_convert, HYPRE_MEMORY_DEVICE);
-         hypre_TFree(big_convert_offd, HYPRE_MEMORY_HOST);
-         hypre_TFree(big_convert_offd_dev, HYPRE_MEMORY_DEVICE );
+         hypre_TFree(big_convert_offd, HYPRE_MEMORY_DEVICE );
          hypre_TFree(big_buf_data, HYPRE_MEMORY_DEVICE);
 
       } // if (num_cols_offd_A)
@@ -1359,7 +1353,6 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    HYPRE_BigInt     total_global_cpts;
    HYPRE_BigInt    *big_convert;
    HYPRE_BigInt    *big_convert_offd = NULL;
-   HYPRE_BigInt    *big_convert_offd_dev = NULL;
    HYPRE_BigInt    *big_buf_data = NULL;
    HYPRE_Int        num_sends;
 
@@ -1415,8 +1408,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
       {
          num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-         big_convert_offd = hypre_CTAlloc(HYPRE_BigInt,  num_cols_offd_A, HYPRE_MEMORY_HOST);
-         big_convert_offd_dev = hypre_CTAlloc(HYPRE_BigInt,  num_cols_offd_A, HYPRE_MEMORY_DEVICE);
+         big_convert_offd = hypre_CTAlloc(HYPRE_BigInt,  num_cols_offd_A, HYPRE_MEMORY_DEVICE);
          big_buf_data = hypre_CTAlloc(HYPRE_BigInt,  hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_DEVICE);
 
          HYPRE_THRUST_CALL( gather,
@@ -1426,12 +1418,9 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
                             big_convert,
                             big_buf_data );
 
-         comm_handle = hypre_ParCSRCommHandleCreate_v2( 21, comm_pkg, HYPRE_MEMORY_DEVICE, big_buf_data, HYPRE_MEMORY_DEVICE, big_convert_offd_dev);
+         comm_handle = hypre_ParCSRCommHandleCreate_v2( 21, comm_pkg, HYPRE_MEMORY_DEVICE, big_buf_data, HYPRE_MEMORY_DEVICE, big_convert_offd);
 
          hypre_ParCSRCommHandleDestroy(comm_handle);
-
-         // FIXME: Clean this up when done with host ptr
-         hypre_TMemcpy( big_convert_offd, big_convert_offd_dev, HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
          fine_to_coarse_offd = hypre_TAlloc(HYPRE_Int,  num_cols_offd_A, HYPRE_MEMORY_HOST); // FIXME: Clean this up when done with host ptr
 
@@ -1449,19 +1438,18 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
 
          cpt = 0;
          HYPRE_BigInt * col_map_end = HYPRE_THRUST_CALL( copy_if,
-                                                         big_convert_offd_dev,
-                                                         big_convert_offd_dev + num_cols_offd_A,
+                                                         big_convert_offd,
+                                                         big_convert_offd + num_cols_offd_A,
                                                          pass_marker_offd_dev,
                                                          col_map_offd_Q_dev,
                                                          equal<int>(color) );
          cpt = col_map_end - col_map_offd_Q_dev;
 
-         //FIXME: Clean this up when we don't need th host pointer anymore
+         //FIXME: PB: It seems like we're required to have a host version of this??
          hypre_TMemcpy( col_map_offd_Q, col_map_offd_Q_dev, HYPRE_Int, num_cols_offd_Q, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
          hypre_TFree(big_convert, HYPRE_MEMORY_DEVICE);
-         hypre_TFree(big_convert_offd, HYPRE_MEMORY_HOST);
-         hypre_TFree(big_convert_offd_dev, HYPRE_MEMORY_DEVICE );
+         hypre_TFree(big_convert_offd, HYPRE_MEMORY_DEVICE );
          hypre_TFree(big_buf_data, HYPRE_MEMORY_DEVICE);
 
       } // if (num_cols_offd_A)
