@@ -213,6 +213,9 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                       finally will be pointer to start of row */
    HYPRE_Int       *P_diag_j;
 
+   HYPRE_Int       *P_diag_j_dev;
+   HYPRE_Real      *P_diag_data_dev;
+
    hypre_CSRMatrix *P_offd;
    HYPRE_Real      *P_offd_data = NULL;
    HYPRE_Int       *P_offd_i; /*at first counter of nonzero cols for each row,
@@ -220,6 +223,9 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int       *P_offd_j = NULL;
    HYPRE_BigInt    *col_map_offd_P = NULL;
    HYPRE_Int        num_cols_offd_P = 0;
+
+   HYPRE_Int       *P_offd_j_dev = NULL;
+   HYPRE_Real      *P_offd_data_dev = NULL;
 
    HYPRE_Int       *P_diag_i_dev;
    HYPRE_Int       *P_offd_i_dev;
@@ -733,21 +739,50 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
         hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(Pi[i])) = HYPRE_MEMORY_HOST;
       }
    }
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
 
 
+   // FIXME: Clean this up
    P_diag_j = hypre_CTAlloc(HYPRE_Int, P_diag_i[n_fine], HYPRE_MEMORY_HOST);
    P_diag_data = hypre_CTAlloc(HYPRE_Real, P_diag_i[n_fine], HYPRE_MEMORY_HOST);
    P_offd_j = hypre_CTAlloc(HYPRE_Int, P_offd_i[n_fine], HYPRE_MEMORY_HOST);
    P_offd_data = hypre_CTAlloc(HYPRE_Real, P_offd_i[n_fine], HYPRE_MEMORY_HOST);
 
+   P_diag_j_dev = hypre_CTAlloc(HYPRE_Int, P_diag_i[n_fine], HYPRE_MEMORY_DEVICE);
+   P_diag_data_dev = hypre_CTAlloc(HYPRE_Real, P_diag_i[n_fine], HYPRE_MEMORY_DEVICE);
+   P_offd_j_dev = hypre_CTAlloc(HYPRE_Int, P_offd_i[n_fine], HYPRE_MEMORY_DEVICE);
+   P_offd_data_dev = hypre_CTAlloc(HYPRE_Real, P_offd_i[n_fine], HYPRE_MEMORY_DEVICE);
+
    /* insert weights for coarse points */
-   for (i=0; i < pass_starts[1]; i++)
    {
-      i1 = pass_order[i];
-      j = P_diag_i[i1];
-      P_diag_j[j] = fine_to_coarse[i1];
-      P_diag_data[j] = 1.0;
+     /* Old Host code:
+        for (i=0; i < pass_starts[1]; i++)
+        {
+        i1 = pass_order[i];
+        j = P_diag_i[i1];
+        P_diag_j[j] = fine_to_coarse[i1];
+        P_diag_data[j] = 1.0;
+        }
+     */
+     HYPRE_THRUST_CALL( scatter,
+                        thrust::make_permutation_iterator( fine_to_coarse_dev, pass_order_dev ),
+                        thrust::make_permutation_iterator( fine_to_coarse_dev+pass_starts[1], pass_order_dev+pass_starts[1] ),
+                        thrust::make_permutation_iterator( P_diag_i_dev, pass_order_dev ),
+                        P_diag_j_dev );
+
+     HYPRE_THRUST_CALL( scatter,
+                        thrust::make_constant_iterator<HYPRE_Real>(1.0),
+                        thrust::make_constant_iterator<HYPRE_Real>(1.0)+pass_starts[1],
+                        thrust::make_permutation_iterator( P_diag_i_dev, pass_order_dev ),
+                        P_diag_data_dev );
+
+     // FIXME: Clean this up
+     hypre_TMemcpy( P_diag_j, P_diag_j_dev, HYPRE_Int, P_diag_i[n_fine], HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+     hypre_TMemcpy( P_diag_data, P_diag_data_dev, HYPRE_Real, P_diag_i[n_fine], HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
+
 
    /* generate col_map_offd_P by combining all col_map_offd_Pi
     * and reompute indices if needed */
