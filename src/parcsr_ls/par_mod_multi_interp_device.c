@@ -614,8 +614,54 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
      hypre_TFree(A_offd_data, HYPRE_MEMORY_HOST);
    }
 
+   // Copy Pi back to the host
+   // FIXME: Clean this up when we're done
+   for (i = 0; i < num_passes-1; i++)
+   {
+      {
+        HYPRE_Int  *Pi_diag_i_dev    = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(Pi[i]));
+        HYPRE_Int  *Pi_diag_j_dev    = hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(Pi[i]));
+        HYPRE_Real *Pi_diag_data_dev = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(Pi[i]));
 
+        HYPRE_Int nrows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(Pi[i]));
+        HYPRE_Int nnz = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(Pi[i]));
 
+        HYPRE_Int * Pi_diag_i = hypre_CTAlloc(HYPRE_Int, nrows+1, HYPRE_MEMORY_HOST);
+        HYPRE_Int * Pi_diag_j = hypre_CTAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_HOST);
+        HYPRE_Real * Pi_diag_data = hypre_CTAlloc(HYPRE_Real, nnz, HYPRE_MEMORY_HOST);
+
+        hypre_TMemcpy( Pi_diag_i, Pi_diag_i_dev, HYPRE_Int, nrows+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+        hypre_TMemcpy( Pi_diag_j, Pi_diag_j_dev, HYPRE_Int, nnz, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+        hypre_TMemcpy( Pi_diag_data, Pi_diag_data_dev, HYPRE_Real, nnz, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+        hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(Pi[i])) = Pi_diag_i;
+        hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(Pi[i])) = Pi_diag_j;
+        hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(Pi[i])) = Pi_diag_data;
+        hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(Pi[i])) = HYPRE_MEMORY_HOST;
+      }
+
+      {
+        HYPRE_Int  *Pi_offd_i_dev    = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(Pi[i]));
+        HYPRE_Int  *Pi_offd_j_dev    = hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(Pi[i]));
+        HYPRE_Real *Pi_offd_data_dev = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(Pi[i]));
+
+        HYPRE_Int nrows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixOffd(Pi[i]));
+        HYPRE_Int nnz = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(Pi[i]));
+
+        HYPRE_Int * Pi_offd_i = hypre_CTAlloc(HYPRE_Int, nrows+1, HYPRE_MEMORY_HOST);
+        HYPRE_Int * Pi_offd_j = hypre_CTAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_HOST);
+        HYPRE_Real * Pi_offd_data = hypre_CTAlloc(HYPRE_Real, nnz, HYPRE_MEMORY_HOST);
+
+        hypre_TMemcpy( Pi_offd_i, Pi_offd_i_dev, HYPRE_Int, nrows+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+        hypre_TMemcpy( Pi_offd_j, Pi_offd_j_dev, HYPRE_Int, nnz, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+        hypre_TMemcpy( Pi_offd_data, Pi_offd_data_dev, HYPRE_Real, nnz, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+        hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(Pi[i])) = Pi_offd_i;
+        hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(Pi[i])) = Pi_offd_j;
+        hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(Pi[i])) = Pi_offd_data;
+        hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(Pi[i])) = HYPRE_MEMORY_HOST;
+      }
+   }
 
 
    /* populate P_diag_i[i+1] with nnz of i-th row */
@@ -1077,9 +1123,6 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
       } // if (num_cols_offd_A)
    }
 
-   /* generate P_diag_i and P_offd_i */
-   P_diag_i = hypre_CTAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_HOST);
-   P_offd_i = hypre_CTAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_HOST);
    // FIXME: Clean up when done with host code
    P_diag_i_dev  = hypre_CTAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_DEVICE);
    P_offd_i_dev  = hypre_CTAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_DEVICE);
@@ -1118,15 +1161,6 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
                       thrust::make_zip_iterator( thrust::make_tuple( P_diag_i_dev + num_points+1, P_offd_i_dev + num_points+1) ),
                       thrust::make_zip_iterator( thrust::make_tuple( P_diag_i_dev, P_offd_i_dev) ),
                       tuple_plus<HYPRE_Int>() );
-
-   // FIXME: Clean up when done with host code
-   hypre_TMemcpy( P_diag_i, P_diag_i_dev, HYPRE_Int, num_points+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy( P_offd_i, P_offd_i_dev, HYPRE_Int, num_points+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-
-   P_diag_j    = hypre_CTAlloc(HYPRE_Int, nnz_diag, HYPRE_MEMORY_HOST);
-   P_diag_data = hypre_CTAlloc(HYPRE_Real, nnz_diag, HYPRE_MEMORY_HOST);
-   P_offd_j    = hypre_CTAlloc(HYPRE_Int, nnz_offd, HYPRE_MEMORY_HOST);
-   P_offd_data = hypre_CTAlloc(HYPRE_Real, nnz_offd, HYPRE_MEMORY_HOST);
 
    P_diag_j_dev    = hypre_CTAlloc(HYPRE_Int, nnz_diag, HYPRE_MEMORY_DEVICE);
    P_diag_data_dev = hypre_CTAlloc(HYPRE_Real, nnz_diag, HYPRE_MEMORY_DEVICE);
@@ -1192,10 +1226,11 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
                                                               P_offd_j_dev,
                                                               P_offd_data_dev );
 
+     hypre_TFree(fine_to_coarse, HYPRE_MEMORY_DEVICE);
+     hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_DEVICE);
    }
 
-   hypre_TFree(fine_to_coarse, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_DEVICE);
+
 
    dim3 bDim = hypre_GetDefaultCUDABlockDimension();
    dim3 gDim = hypre_GetDefaultCUDAGridDimension(num_points, "warp", bDim);
@@ -1205,12 +1240,11 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
                       P_diag_i_dev, P_diag_data_dev, P_offd_i_dev, P_offd_data_dev,
                       row_sums );
 
+   HYPRE_Int P_diag_nnz;
+   HYPRE_Int P_offd_nnz;
 
-   // FIXME: Clean up when done with host code
-   hypre_TMemcpy( P_diag_j,    P_diag_j_dev,    HYPRE_Int, nnz_diag, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy( P_diag_data, P_diag_data_dev, HYPRE_Real, nnz_diag, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy( P_offd_j,    P_offd_j_dev,    HYPRE_Int, nnz_offd, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy( P_offd_data, P_offd_data_dev, HYPRE_Real, nnz_offd, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy( &P_diag_nnz, &P_diag_i_dev[num_points], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy( &P_offd_nnz, &P_offd_i_dev[num_points], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
    P = hypre_ParCSRMatrixCreate(comm,
                                 total_global_fpts,
@@ -1218,25 +1252,27 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
                                 f_pts_starts,
                                 c_pts_starts,
                                 num_cols_offd_P,
-                                P_diag_i[num_points],
-                                P_offd_i[num_points]);
+                                P_diag_nnz,
+                                P_offd_nnz);
 
    P_diag = hypre_ParCSRMatrixDiag(P);
-   hypre_CSRMatrixData(P_diag) = P_diag_data;
-   hypre_CSRMatrixI(P_diag) = P_diag_i;
-   hypre_CSRMatrixJ(P_diag) = P_diag_j;
+   hypre_CSRMatrixData(P_diag) = P_diag_data_dev;
+   hypre_CSRMatrixI(P_diag) = P_diag_i_dev;
+   hypre_CSRMatrixJ(P_diag) = P_diag_j_dev;
    P_offd = hypre_ParCSRMatrixOffd(P);
-   hypre_CSRMatrixData(P_offd) = P_offd_data;
-   hypre_CSRMatrixI(P_offd) = P_offd_i;
-   hypre_CSRMatrixJ(P_offd) = P_offd_j;
+   hypre_CSRMatrixData(P_offd) = P_offd_data_dev;
+   hypre_CSRMatrixI(P_offd) = P_offd_i_dev;
+   hypre_CSRMatrixJ(P_offd) = P_offd_j_dev;
    hypre_ParCSRMatrixOwnsRowStarts(P) = 1;
    hypre_ParCSRMatrixOwnsColStarts(P) = 0;
    hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
+   hypre_ParCSRMatrixDeviceColMapOffd(P) = col_map_offd_P_dev;
 
-   hypre_CSRMatrixMemoryLocation(P_diag) = HYPRE_MEMORY_HOST;
-   hypre_CSRMatrixMemoryLocation(P_offd) = HYPRE_MEMORY_HOST;
+   hypre_CSRMatrixMemoryLocation(P_diag) = HYPRE_MEMORY_DEVICE;
+   hypre_CSRMatrixMemoryLocation(P_offd) = HYPRE_MEMORY_DEVICE;
 
    hypre_MatvecCommPkgCreate(P);
+
    *P_ptr = P;
 
    return hypre_error_flag;
@@ -1329,17 +1365,22 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrix *Q;
    hypre_CSRMatrix *Q_diag;
    HYPRE_Real      *Q_diag_data;
+   HYPRE_Real      *Q_diag_data_dev;
    HYPRE_Int       *Q_diag_i; /*at first counter of nonzero cols for each row,
                                       finally will be pointer to start of row */
    HYPRE_Int       *Q_diag_j;
+   HYPRE_Int       *Q_diag_j_dev;
 
    HYPRE_Int       *Q_diag_i_dev;
 
    hypre_CSRMatrix *Q_offd;
    HYPRE_Real      *Q_offd_data = NULL;
+   HYPRE_Real      *Q_offd_data_dev = NULL;
+
    HYPRE_Int       *Q_offd_i; /*at first counter of nonzero cols for each row,
                                       finally will be pointer to start of row */
    HYPRE_Int       *Q_offd_j = NULL;
+   HYPRE_Int       *Q_offd_j_dev = NULL;
 
    HYPRE_Int       *Q_offd_i_dev = NULL;
 
@@ -1656,26 +1697,50 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
                                 Q_diag_i[num_points],
                                 Q_offd_i[num_points]);
 
+   // Copy Q to the device
+   // FIXME: Clean this up when we're done
+   HYPRE_Real * w_row_sum_dev    = hypre_CTAlloc(HYPRE_Real, num_points,                          HYPRE_MEMORY_DEVICE);
+
+   {
+     Q_diag_j_dev = hypre_CTAlloc(HYPRE_Int, nnz_diag, HYPRE_MEMORY_DEVICE);
+     Q_diag_data_dev = hypre_CTAlloc(HYPRE_Real, nnz_diag, HYPRE_MEMORY_DEVICE);
+     Q_offd_j_dev = hypre_CTAlloc(HYPRE_Int, nnz_offd, HYPRE_MEMORY_DEVICE);
+     Q_offd_data_dev = hypre_CTAlloc(HYPRE_Real, nnz_offd, HYPRE_MEMORY_DEVICE);
+
+     hypre_TMemcpy( Q_diag_i_dev, Q_diag_i, HYPRE_Int, num_points+1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+     hypre_TMemcpy( Q_diag_j_dev, Q_diag_j, HYPRE_Int, nnz_diag, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+     hypre_TMemcpy( Q_diag_data_dev, Q_diag_data, HYPRE_Real, nnz_diag, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+     hypre_TMemcpy( Q_offd_i_dev, Q_offd_i, HYPRE_Int, num_points+1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+     hypre_TMemcpy( Q_offd_j_dev, Q_offd_j, HYPRE_Int, nnz_offd, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+     hypre_TMemcpy( Q_offd_data_dev, Q_offd_data, HYPRE_Real, nnz_offd, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+     hypre_TMemcpy( w_row_sum_dev,    w_row_sum,    HYPRE_Real, num_points,                          HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+     hypre_TFree(w_row_sum, HYPRE_MEMORY_HOST);
+   }
+
    Q_diag = hypre_ParCSRMatrixDiag(Q);
-   hypre_CSRMatrixData(Q_diag) = Q_diag_data;
-   hypre_CSRMatrixI(Q_diag) = Q_diag_i;
-   hypre_CSRMatrixJ(Q_diag) = Q_diag_j;
+   hypre_CSRMatrixData(Q_diag) = Q_diag_data_dev;
+   hypre_CSRMatrixI(Q_diag) = Q_diag_i_dev;
+   hypre_CSRMatrixJ(Q_diag) = Q_diag_j_dev;
    Q_offd = hypre_ParCSRMatrixOffd(Q);
-   hypre_CSRMatrixData(Q_offd) = Q_offd_data;
-   hypre_CSRMatrixI(Q_offd) = Q_offd_i;
-   hypre_CSRMatrixJ(Q_offd) = Q_offd_j;
+   hypre_CSRMatrixData(Q_offd) = Q_offd_data_dev;
+   hypre_CSRMatrixI(Q_offd) = Q_offd_i_dev;
+   hypre_CSRMatrixJ(Q_offd) = Q_offd_j_dev;
    hypre_ParCSRMatrixOwnsRowStarts(Q) = 1;
    hypre_ParCSRMatrixOwnsColStarts(Q) = 0;
    hypre_ParCSRMatrixColMapOffd(Q) = col_map_offd_Q;
+   hypre_ParCSRMatrixDeviceColMapOffd(Q) = col_map_offd_Q_dev;
 
-   hypre_CSRMatrixMemoryLocation(Q_diag) = HYPRE_MEMORY_HOST;
-   hypre_CSRMatrixMemoryLocation(Q_offd) = HYPRE_MEMORY_HOST;
+   hypre_CSRMatrixMemoryLocation(Q_diag) = HYPRE_MEMORY_DEVICE;
+   hypre_CSRMatrixMemoryLocation(Q_offd) = HYPRE_MEMORY_DEVICE;
 
 
    hypre_MatvecCommPkgCreate(Q);
 
    Pi = hypre_ParCSRMatMat(Q, P);
 
+
+   // Once Q is on the device, P is coming in on the device
+   // So Pi should be on the device then
    Pi_diag = hypre_ParCSRMatrixDiag(Pi);
    Pi_diag_data = hypre_CSRMatrixData(Pi_diag);
    Pi_diag_i = hypre_CSRMatrixI(Pi_diag);
@@ -1683,44 +1748,21 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    Pi_offd_data = hypre_CSRMatrixData(Pi_offd);
    Pi_offd_i = hypre_CSRMatrixI(Pi_offd);
 
-   // FIXME: Clean up when done with host code
    {
-     HYPRE_Real * w_row_sum_dev    = hypre_CTAlloc(HYPRE_Real, num_points,                          HYPRE_MEMORY_DEVICE);
-     HYPRE_Int  * Pi_diag_i_dev    = hypre_CTAlloc(HYPRE_Int,  hypre_CSRMatrixNumRows(Pi_diag)+1,   HYPRE_MEMORY_DEVICE);
-     HYPRE_Real * Pi_diag_data_dev = hypre_CTAlloc(HYPRE_Real, hypre_CSRMatrixNumNonzeros(Pi_diag), HYPRE_MEMORY_DEVICE);
-     HYPRE_Int  * Pi_offd_i_dev    = hypre_CTAlloc(HYPRE_Int,  hypre_CSRMatrixNumRows(Pi_offd)+1,   HYPRE_MEMORY_DEVICE);
-     HYPRE_Real * Pi_offd_data_dev = hypre_CTAlloc(HYPRE_Real, hypre_CSRMatrixNumNonzeros(Pi_offd), HYPRE_MEMORY_DEVICE);
-
-     hypre_TMemcpy( Pi_diag_i_dev,    Pi_diag_i,    HYPRE_Int,  hypre_CSRMatrixNumRows(Pi_diag)+1,   HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-     hypre_TMemcpy( Pi_diag_data_dev, Pi_diag_data, HYPRE_Real, hypre_CSRMatrixNumNonzeros(Pi_diag), HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-     hypre_TMemcpy( Pi_offd_i_dev,    Pi_offd_i,    HYPRE_Int,  hypre_CSRMatrixNumRows(Pi_offd)+1,   HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-     hypre_TMemcpy( Pi_offd_data_dev, Pi_offd_data, HYPRE_Real, hypre_CSRMatrixNumNonzeros(Pi_offd), HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-     hypre_TMemcpy( w_row_sum_dev,    w_row_sum,    HYPRE_Real, num_points,                          HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-
      dim3 bDim = hypre_GetDefaultCUDABlockDimension();
      dim3 gDim = hypre_GetDefaultCUDAGridDimension(num_points, "warp", bDim);
 
      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_mutli_pi_rowsum, gDim, bDim,
                         num_points, pass_order_dev, A_diag_i_dev, A_diag_data_dev,
-                        Pi_diag_i_dev, Pi_diag_data_dev, Pi_offd_i_dev, Pi_offd_data_dev,
+                        Pi_diag_i, Pi_diag_data, Pi_offd_i, Pi_offd_data,
                         w_row_sum_dev );
 
-     // FIXME: Clean up when done with host code
-     hypre_TMemcpy( Pi_diag_data, Pi_diag_data_dev, HYPRE_Real, hypre_CSRMatrixNumNonzeros(Pi_diag), HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-     hypre_TMemcpy( Pi_offd_data, Pi_offd_data_dev, HYPRE_Real, hypre_CSRMatrixNumNonzeros(Pi_offd), HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-
-     hypre_TFree( Pi_diag_i_dev,    HYPRE_MEMORY_DEVICE);
-     hypre_TFree( Pi_diag_data_dev, HYPRE_MEMORY_DEVICE);
-     hypre_TFree( Pi_offd_i_dev,    HYPRE_MEMORY_DEVICE);
-     hypre_TFree( Pi_offd_data_dev, HYPRE_MEMORY_DEVICE);
-     hypre_TFree( w_row_sum_dev,    HYPRE_MEMORY_DEVICE);
+     hypre_TFree( w_row_sum_dev, HYPRE_MEMORY_DEVICE);
    }
 
    hypre_ParCSRMatrixOwnsRowStarts(Q)=0;
    hypre_ParCSRMatrixOwnsRowStarts(Pi)=1;
    hypre_ParCSRMatrixDestroy(Q);
-
-   hypre_TFree(w_row_sum, HYPRE_MEMORY_HOST);
 
    *Pi_ptr = Pi;
 
