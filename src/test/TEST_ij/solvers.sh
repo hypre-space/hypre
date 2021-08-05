@@ -143,6 +143,8 @@ FILES="\
  ${TNAME}.out.117\
  ${TNAME}.out.118\
  ${TNAME}.out.119\
+ ${TNAME}.out.121\
+ ${TNAME}.out.122\
  ${TNAME}.out.120\
 "
 
