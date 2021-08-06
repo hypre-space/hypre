@@ -321,11 +321,7 @@ main( hypre_int argc,
    hypre_MPI_Finalize();
 
    /* when using cuda-memcheck --leak-check full, uncomment this */
-#if defined(HYPRE_USING_CUDA)
-   cudaDeviceReset();
-#elif defined(HYPRE_USING_HIP)
-   hipDeviceReset();
-#endif
+   hypre_ResetCudaDevice(hypre_handle());
 
    return (0);
 }

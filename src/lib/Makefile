@@ -76,6 +76,7 @@ SONAME = libHYPRE-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 SOLIBS = ${DSUPERLU_LIBS} ${MPILIBDIRS} ${MPILIBS} ${LAPACKLIBDIRS} ${LAPACKLIBS}\
  ${BLASLIBDIRS} ${BLASLIBS} ${LIBS} ${FLIBS}
 
+
 ##################################################################
 # Targets
 ##################################################################
