@@ -8871,8 +8871,7 @@ $as_echo "#define HYPRE_USING_CURAND 1" >>confdefs.h
 
    fi
 
-   LINK_CC='${CUCC}'
-   LINK_CXX='${CUCC}'
+   LINK_CC=${LINK_CXX}
 
       if test "x$HYPRE_CUDA_SM" = "x"
    then

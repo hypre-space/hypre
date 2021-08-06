@@ -7,25 +7,46 @@ include ../config/Makefile.config
 
 FEIHYPREFILES = ${HYPRE_FEI_HYPRE_FILES}
 FEMLIFILES = ${HYPRE_FEI_FEMLI_FILES}
-IJMVFILES = ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o*
+IJMVFILES = ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o
 EUCLIDFILES = ${HYPRE_EUCLID_FILES}
 PARASAILSFILES = ${HYPRE_PARASAILS_FILES}
 PILUTFILES = ${HYPRE_PILUT_FILES}
-DISTMATRIXFILES = ${HYPRE_SRC_TOP_DIR}/distributed_matrix/*.o*
-KRYLOVFILES = ${HYPRE_SRC_TOP_DIR}/krylov/*.o*
-MATMATFILES = ${HYPRE_SRC_TOP_DIR}/matrix_matrix/*.o*
-MULTIVECFILES = ${HYPRE_SRC_TOP_DIR}/multivector/*.o*
-PARCSRLSFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.o*
-PARCSRMVFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.o*
-PARCSRBLOCKMVFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_block_mv/*.o*
-SEQMVFILES = ${HYPRE_SRC_TOP_DIR}/seq_mv/*.o*
-SSTRUCTLSFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.o*
-SSTRUCTMVFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.o*
-STRUCTLSFILES = ${HYPRE_SRC_TOP_DIR}/struct_ls/*.o*
-STRUCTMVFILES = ${HYPRE_SRC_TOP_DIR}/struct_mv/*.o*
-UTILITIESFILES = ${HYPRE_SRC_TOP_DIR}/utilities/*.o*
-BLASFILES = ${HYPRE_SRC_TOP_DIR}/blas/*.o*
-LAPACKFILES = ${HYPRE_SRC_TOP_DIR}/lapack/*.o*
+DISTMATRIXFILES = ${HYPRE_SRC_TOP_DIR}/distributed_matrix/*.o
+KRYLOVFILES = ${HYPRE_SRC_TOP_DIR}/krylov/*.o
+MATMATFILES = ${HYPRE_SRC_TOP_DIR}/matrix_matrix/*.o
+MULTIVECFILES = ${HYPRE_SRC_TOP_DIR}/multivector/*.o
+PARCSRLSFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.o
+PARCSRMVFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.o
+PARCSRBLOCKMVFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_block_mv/*.o
+SEQMVFILES = ${HYPRE_SRC_TOP_DIR}/seq_mv/*.o
+SSTRUCTLSFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.o
+SSTRUCTMVFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.o
+STRUCTLSFILES = ${HYPRE_SRC_TOP_DIR}/struct_ls/*.o
+STRUCTMVFILES = ${HYPRE_SRC_TOP_DIR}/struct_mv/*.o
+UTILITIESFILES = ${HYPRE_SRC_TOP_DIR}/utilities/*.o
+BLASFILES = ${HYPRE_SRC_TOP_DIR}/blas/*.o
+LAPACKFILES = ${HYPRE_SRC_TOP_DIR}/lapack/*.o
+
+IJMVOBJFILES = ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.obj
+PARCSRLSOBJFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.obj
+PARCSRMVOBJFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.obj
+SEQMVOBJFILES = ${HYPRE_SRC_TOP_DIR}/seq_mv/*.obj
+SSTRUCTLSOBJFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.obj
+SSTRUCTMVOBJFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.obj
+STRUCTLSOBJFILES = ${HYPRE_SRC_TOP_DIR}/struct_ls/*.obj
+STRUCTMVOBJFILES = ${HYPRE_SRC_TOP_DIR}/struct_mv/*.obj
+UTILITIESOBJFILES = ${HYPRE_SRC_TOP_DIR}/utilities/*.obj
+
+OBJFILES_HYPRE = \
+$(IJMVOBJFILES)\
+$(PARCSRLSOBJFILES)\
+$(PARCSRMVOBJFILES)\
+$(SEQMVOBJFILES)\
+$(SSTRUCTLSOBJFILES)\
+$(SSTRUCTMVOBJFILES)\
+$(STRUCTLSOBJFILES)\
+$(STRUCTMVOBJFILES)\
+$(UTILITIESOBJFILES)
 
 FILES_HYPRE = \
 $(FEIHYPREFILES)\
@@ -48,14 +69,15 @@ $(STRUCTLSFILES)\
 $(STRUCTMVFILES)\
 $(UTILITIESFILES)\
 $(BLASFILES)\
-$(LAPACKFILES)
+$(LAPACKFILES)\
+$(OBJFILES_HYPRE)
 
 SONAME = libHYPRE-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 SOLIBS = ${DSUPERLU_LIBS} ${MPILIBDIRS} ${MPILIBS} ${LAPACKLIBDIRS} ${LAPACKLIBS}\
  ${BLASLIBDIRS} ${BLASLIBS} ${LIBS} ${FLIBS}
 
+DLINK_HYPRE = hypre.dlink
 
-##################################################################
 # Targets
 ##################################################################
 
@@ -65,8 +87,11 @@ all: libHYPRE${HYPRE_LIB_SUFFIX}
 install: all
 	cp -fR libHYPRE* ${HYPRE_LIB_INSTALL}
 
+${DLINK_HYPRE}: ${OBJFILES_HYPRE}
+	${CUCC} -dlink ${OBJFILES_HYPRE} -o $@
+
 clean:
-	rm -f *.o libHYPRE*
+	rm -f *.o libHYPRE* hypre.dlink
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
@@ -77,23 +102,10 @@ distclean: clean
 
 # NOTE: Some of the FILES symbols below can be empty, so they are listed on an
 # AR line with at least one nonempty symbol
-libHYPRE.a: ${FILES_HYPRE}
+libHYPRE.a: ${FILES_HYPRE} ${DLINK_HYPRE}
 	@echo  "Building libHYPRE ... "
 	rm -f $@
-	${AR} $@ $(FEIHYPREFILES) $(FEMLIFILES) $(IJMVFILES)
-	${AR} $@ $(EUCLIDFILES) $(PARASAILSFILES) $(PILUTFILES) $(DISTMATRIXFILES)
-	${AR} $@ $(KRYLOVFILES)
-	${AR} $@ $(MATMATFILES)
-	${AR} $@ $(MULTIVECFILES)
-	${AR} $@ $(PARCSRLSFILES)
-	${AR} $@ $(PARCSRMVFILES)
-	${AR} $@ $(PARCSRBLOCKMVFILES)
-	${AR} $@ $(SEQMVFILES)
-	${AR} $@ $(SSTRUCTLSFILES)
-	${AR} $@ $(SSTRUCTMVFILES)
-	${AR} $@ $(STRUCTLSFILES)
-	${AR} $@ $(STRUCTMVFILES)
-	${AR} $@ $(UTILITIESFILES) $(BLASFILES) $(LAPACKFILES)
+	${AR} $@ $(FILES_HYPRE) $(DLINK_HYPRE)
 	${RANLIB} $@
 
 libHYPRE.so libHYPRE.dylib: ${FILES_HYPRE}
