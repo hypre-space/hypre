@@ -131,6 +131,22 @@ void hypreCUDAKernel_generate_Pdiag_j_Poffd_j( int    num_points,
                                                int    *P_offd_j,
                                                double *P_offd_data );
 
+__global__
+void hypreCUDAKernel_insert_remaining_weights( HYPRE_Int start,
+                                               HYPRE_Int stop,
+                                               HYPRE_Int  * pass_order,
+                                               HYPRE_Int  * Pi_diag_i,
+                                               HYPRE_Int  * Pi_diag_j,
+                                               HYPRE_Real * Pi_diag_data,
+                                               HYPRE_Int  * P_diag_i,
+                                               HYPRE_Int  * P_diag_j,
+                                               HYPRE_Real * P_diag_data,
+                                               HYPRE_Int  * Pi_offd_i,
+                                               HYPRE_Int  * Pi_offd_j,
+                                               HYPRE_Real * Pi_offd_data,
+                                               HYPRE_Int  * P_offd_i,
+                                               HYPRE_Int  * P_offd_j,
+                                               HYPRE_Real * P_offd_data );
 
 /*--------------------------------------------------------------------------
  * hypre_ParAMGBuildModMultipass
@@ -2659,4 +2675,112 @@ void hypreCUDAKernel_generate_Pdiag_j_Poffd_j( int    num_points,
 
      offd_shift += sum;
    }
+}
+
+__global__
+void hypreCUDAKernel_insert_remaining_weights( HYPRE_Int start,
+                                               HYPRE_Int stop,
+                                               HYPRE_Int  * pass_order,
+                                               HYPRE_Int  * Pi_diag_i,
+                                               HYPRE_Int  * Pi_diag_j,
+                                               HYPRE_Real * Pi_diag_data,
+                                               HYPRE_Int  * P_diag_i,
+                                               HYPRE_Int  * P_diag_j,
+                                               HYPRE_Real * P_diag_data,
+                                               HYPRE_Int  * Pi_offd_i,
+                                               HYPRE_Int  * Pi_offd_j,
+                                               HYPRE_Real * Pi_offd_data,
+                                               HYPRE_Int  * P_offd_i,
+                                               HYPRE_Int  * P_offd_j,
+                                               HYPRE_Real * P_offd_data )
+{
+  /*
+    j1 = 0;
+    for (i = pass_starts[p+1]; i < pass_starts[p+2]; i++)
+      {
+         i1 = pass_order[i];
+         i2 = Pi_diag_i[j1];
+         for (j = P_diag_i[i1]; j < P_diag_i[i1+1]; j++)
+         {
+            P_diag_j[j] = Pi_diag_j[i2];
+            P_diag_data[j] = Pi_diag_data[i2++];
+         }
+         i2 = Pi_offd_i[j1];
+         for (j = P_offd_i[i1]; j < P_offd_i[i1+1]; j++)
+         {
+            P_offd_j[j] = Pi_offd_j[i2];
+            P_offd_data[j] = Pi_offd_data[i2++];
+         }
+         j1++;
+
+     }
+  */
+
+  HYPRE_Int num_points = stop-start;
+
+  HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
+
+  if (row_i >= num_points)
+   {
+      return;
+   }
+
+  HYPRE_Int i = row_i + start;
+  HYPRE_Int i1 = pass_order[i];
+
+  HYPRE_Int j1 = row_i;
+
+  int lane = hypre_cuda_get_lane_id<1>();
+  int p = 0;
+  int q = 0;
+
+  // P_diag
+  if (lane < 2)
+    {
+      p = read_only_load(P_diag_i + i1 + lane);
+    }
+  q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+  p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+  HYPRE_Int loop_cnt = 0;
+  HYPRE_Int i2 = Pi_diag_i[j1];
+  for (int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+    {
+      if ( j >= q )
+        {
+          continue;
+        }
+
+      HYPRE_Int idx = i2 + lane + loop_cnt*HYPRE_WARP_SIZE;
+
+      P_diag_j[j] = Pi_diag_j[idx];
+      P_diag_data[j] = Pi_diag_data[idx];
+
+      loop_cnt++;
+    }
+
+  // P_offd
+  if (lane < 2)
+    {
+      p = read_only_load(P_offd_i + i1 + lane);
+    }
+  q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+  p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+  loop_cnt = 0;
+  i2 = Pi_offd_i[j1];
+  for (int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+    {
+      if ( j >= q )
+        {
+          continue;
+        }
+
+      HYPRE_Int idx = i2 + lane + loop_cnt*HYPRE_WARP_SIZE;
+
+      P_offd_j[j] = Pi_offd_j[idx];
+      P_offd_data[j] = Pi_offd_data[idx];
+
+      loop_cnt++;
+    }
 }
