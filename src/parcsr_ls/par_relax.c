@@ -47,7 +47,7 @@ hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
     *     relax_type =  5 -> hybrid: GS-J mix off-processor, chaotic GS on-node
     *     relax_type =  6 -> hybrid: SSOR-J mix off-processor, SSOR on-processor
     *                               with outer relaxation parameters
-    *     relax_type =  7 -> Jacobi (uses Matvec), only needed in CGNR [GPU-supported]
+    *     relax_type =  7 -> Jacobi (uses Matvec), only needed in CGNR [GPU-supported, CF supported with redundant computation]
     *     relax_type =  8 -> hybrid L1 Symm. Gauss-Seidel
     *     relax_type =  9 -> Direct solve, Gaussian elimination
     *     relax_type = 10 -> On-processor direct forward solve for matrices with
@@ -63,7 +63,7 @@ hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
     *     relax_type = 15 -> CG
     *     relax_type = 16 -> Scaled Chebyshev
     *     relax_type = 17 -> FCF-Jacobi
-    *     relax_type = 18 -> L1-Jacobi [GPU-supported]
+    *     relax_type = 18 -> L1-Jacobi [GPU-supported through call to relax7Jacobi]
     *     relax_type = 19 -> Direct Solve, (old version)
     *     relax_type = 20 -> Kaczmarz
     *     relax_type = 29 -> Direct solve: use gaussian elimination & BLAS
@@ -105,7 +105,7 @@ hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          break;
 
       case 7: /* Jacobi (uses ParMatvec) */
-         hypre_BoomerAMGRelax7Jacobi(A, f, relax_points, relax_weight, l1_norms, u, Vtemp);
+         hypre_BoomerAMGRelax7Jacobi(A, f, cf_marker, relax_points, relax_weight, l1_norms, u, Vtemp);
          break;
 
       case 8: /* hybrid L1 Symm. Gauss-Seidel */
@@ -304,19 +304,13 @@ hypre_BoomerAMGRelax18WeightedL1Jacobi( hypre_ParCSRMatrix *A,
                                         hypre_ParVector    *Vtemp )
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   //HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_VectorMemoryLocation(x), hypre_VectorMemoryLocation(b) );
+   //HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A), hypre_VectorMemoryLocation(f) );
    //RL: TODO back to hypre_GetExecPolicy2 later
    HYPRE_ExecutionPolicy exec = HYPRE_EXEC_DEVICE;
-   // TODO implement CF relax on GPUs
-   if (relax_points != 0)
-   {
-      exec = HYPRE_EXEC_HOST;
-   }
-
    if (exec == HYPRE_EXEC_DEVICE)
    {
       // XXX GPU calls Relax7 XXX
-      return hypre_BoomerAMGRelax7Jacobi(A, f, relax_points, relax_weight, l1_norms, u, Vtemp);
+      return hypre_BoomerAMGRelax7Jacobi(A, f, cf_marker, relax_points, relax_weight, l1_norms, u, Vtemp);
    }
    else
 #endif
@@ -324,7 +318,7 @@ hypre_BoomerAMGRelax18WeightedL1Jacobi( hypre_ParCSRMatrix *A,
       /* in the case of non-CF, use relax-7 which is faster */
       if (relax_points == 0)
       {
-         return hypre_BoomerAMGRelax7Jacobi(A, f, relax_points, relax_weight, l1_norms, u, Vtemp);
+         return hypre_BoomerAMGRelax7Jacobi(A, f, cf_marker, relax_points, relax_weight, l1_norms, u, Vtemp);
       }
       else
       {
@@ -1077,6 +1071,7 @@ hypre_BoomerAMGRelax6HybridSSOR( hypre_ParCSRMatrix *A,
 HYPRE_Int
 hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
                              hypre_ParVector    *f,
+                             HYPRE_Int          *cf_marker,
                              HYPRE_Int           relax_points,
                              HYPRE_Real          relax_weight,
                              HYPRE_Real         *l1_norms,
@@ -1116,7 +1111,14 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
    /*-----------------------------------------------------------------
     * u += D^{-1} * Vtemp, where D_ii = ||A(i,:)||_1
     *-----------------------------------------------------------------*/
-   hypre_ParVectorElmdivpy(Vtemp, &l1_norms_parvec, u);
+   if (relax_points)
+   {
+      hypre_ParVectorElmdivpyMarked(Vtemp, &l1_norms_parvec, u, cf_marker, relax_points);
+   }
+   else
+   {
+      hypre_ParVectorElmdivpy(Vtemp, &l1_norms_parvec, u);
+   }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_SetSyncCudaCompute(sync_stream);

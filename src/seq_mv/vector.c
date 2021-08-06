@@ -604,6 +604,56 @@ hypre_SeqVectorElmdivpy( hypre_Vector *x,
    return hypre_error_flag;
 }
 
+/* y[i] += x[i] / b[i] where marker[i] == marker_val */
+HYPRE_Int
+hypre_SeqVectorElmdivpyMarked( hypre_Vector *x,
+                               hypre_Vector *b,
+                               hypre_Vector *y,
+                               HYPRE_Int    *marker,
+                               HYPRE_Int     marker_val)
+{
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
+#endif
+
+   HYPRE_Complex *x_data = hypre_VectorData(x);
+   HYPRE_Complex *b_data = hypre_VectorData(b);
+   HYPRE_Complex *y_data = hypre_VectorData(y);
+   HYPRE_Int      size   = hypre_VectorSize(b);
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_VectorMemoryLocation(x), hypre_VectorMemoryLocation(b) );
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypreDevice_IVAXPYMarked(size, b_data, x_data, y_data, marker, marker_val);
+   }
+   else
+#endif
+   {
+      HYPRE_Int i;
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < size; i++)
+      {
+         if (marker[i] == marker_val)
+         {
+            y_data[i] += x_data[i] / b_data[i];
+         }
+      }
+   }
+
+#if defined(HYPRE_USING_GPU)
+   hypre_SyncCudaComputeStream(hypre_handle());
+#endif
+
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
+#endif
+
+   return hypre_error_flag;
+}
+
 /*--------------------------------------------------------------------------
  * hypre_SeqVectorInnerProd
  *--------------------------------------------------------------------------*/

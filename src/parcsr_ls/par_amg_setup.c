@@ -997,7 +997,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
 
             /* for AIR, need absolute value SOC: use a different threshold */
-            if (restri_type)
+            if (restri_type == 1 || restri_type == 2 || restri_type == 15)
             {
                HYPRE_Real           strong_thresholdR;
                strong_thresholdR = hypre_ParAMGDataStrongThresholdR(amg_data);
