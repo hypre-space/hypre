@@ -990,8 +990,8 @@ HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGDDData *amgdd_data )
          }
       }
 
-      // Setup CF marker array and C and F masks
-      hypre_AMGDDCompGridCFMarkerArray(compGrid[level]) = hypre_CTAlloc(HYPRE_Int, num_owned + num_nonowned_real_nodes, memory_location);
+      // Setup CF marker array
+      hypre_AMGDDCompGridCFMarkerArray(compGrid[level]) = hypre_CTAlloc(HYPRE_Int, num_owned + num_nonowned, memory_location);
       if (level != num_levels-1)
       {
          // Setup CF marker array
@@ -1006,7 +1006,7 @@ HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGDDData *amgdd_data )
                hypre_AMGDDCompGridCFMarkerArray(compGrid[level])[i] = -1;
             }
          }
-         for (i = 0; i < num_nonowned_real_nodes; i++)
+         for (i = 0; i < num_nonowned; i++)
          {
             if (hypre_AMGDDCompGridNonOwnedCoarseIndices(compGrid[level])[i] >= 0)
             {
