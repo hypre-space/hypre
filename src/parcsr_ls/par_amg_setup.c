@@ -1497,25 +1497,31 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                 num_functions, dof_func_array[level], debug_flag,
                                                 agg_P12_trunc_factor, agg_P12_max_elmts, &P1);
                }
-
                else if (agg_interp_type == 5)
+               {
                   hypre_BoomerAMGBuildModExtInterp(A_array[level],
                                                    CF_marker, S, coarse_pnts_global1,
                                                    num_functions, dof_func_array[level],
                                                    debug_flag,
                                                    agg_P12_trunc_factor, agg_P12_max_elmts, &P1);
+               }
                else if (agg_interp_type == 6)
+               {
                   hypre_BoomerAMGBuildModExtPIInterp(A_array[level],
                                                    CF_marker, S, coarse_pnts_global1,
                                                    num_functions, dof_func_array[level],
                                                    debug_flag,
                                                    agg_P12_trunc_factor, agg_P12_max_elmts, &P1);
+               }
                else if (agg_interp_type == 7)
+               {
                   hypre_BoomerAMGBuildModExtPEInterp(A_array[level],
                                                    CF_marker, S, coarse_pnts_global1,
                                                    num_functions, dof_func_array[level],
                                                    debug_flag,
                                                    agg_P12_trunc_factor, agg_P12_max_elmts, &P1);
+               }
+
                if (agg_interp_type == 4)
                {
                   hypre_BoomerAMGCorrectCFMarker (CF_marker, local_num_vars,
