@@ -706,60 +706,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
    hypre_TMemcpy( P_diag_i, P_diag_i_dev, HYPRE_Int, n_fine+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy( P_offd_i, P_offd_i_dev, HYPRE_Int, n_fine+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-
-   // Copy Pi back to the host
-   // FIXME: Clean this up when we're done
-   for (i = 0; i < num_passes-1; i++)
-   {
-      {
-        HYPRE_Int  *Pi_diag_i_dev    = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(Pi[i]));
-        HYPRE_Int  *Pi_diag_j_dev    = hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(Pi[i]));
-        HYPRE_Real *Pi_diag_data_dev = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(Pi[i]));
-
-        HYPRE_Int nrows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(Pi[i]));
-        HYPRE_Int nnz = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(Pi[i]));
-
-        HYPRE_Int * Pi_diag_i = hypre_CTAlloc(HYPRE_Int, nrows+1, HYPRE_MEMORY_HOST);
-        HYPRE_Int * Pi_diag_j = hypre_CTAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_HOST);
-        HYPRE_Real * Pi_diag_data = hypre_CTAlloc(HYPRE_Real, nnz, HYPRE_MEMORY_HOST);
-
-        hypre_TMemcpy( Pi_diag_i, Pi_diag_i_dev, HYPRE_Int, nrows+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-        hypre_TMemcpy( Pi_diag_j, Pi_diag_j_dev, HYPRE_Int, nnz, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-        hypre_TMemcpy( Pi_diag_data, Pi_diag_data_dev, HYPRE_Real, nnz, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-
-        hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(Pi[i])) = Pi_diag_i;
-        hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(Pi[i])) = Pi_diag_j;
-        hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(Pi[i])) = Pi_diag_data;
-        hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(Pi[i])) = HYPRE_MEMORY_HOST;
-      }
-
-      {
-        HYPRE_Int  *Pi_offd_i_dev    = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(Pi[i]));
-        HYPRE_Int  *Pi_offd_j_dev    = hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(Pi[i]));
-        HYPRE_Real *Pi_offd_data_dev = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(Pi[i]));
-
-        HYPRE_Int nrows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixOffd(Pi[i]));
-        HYPRE_Int nnz = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(Pi[i]));
-
-        HYPRE_Int * Pi_offd_i = hypre_CTAlloc(HYPRE_Int, nrows+1, HYPRE_MEMORY_HOST);
-        HYPRE_Int * Pi_offd_j = hypre_CTAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_HOST);
-        HYPRE_Real * Pi_offd_data = hypre_CTAlloc(HYPRE_Real, nnz, HYPRE_MEMORY_HOST);
-
-        hypre_TMemcpy( Pi_offd_i, Pi_offd_i_dev, HYPRE_Int, nrows+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-        hypre_TMemcpy( Pi_offd_j, Pi_offd_j_dev, HYPRE_Int, nnz, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-        hypre_TMemcpy( Pi_offd_data, Pi_offd_data_dev, HYPRE_Real, nnz, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-
-        hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(Pi[i])) = Pi_offd_i;
-        hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(Pi[i])) = Pi_offd_j;
-        hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(Pi[i])) = Pi_offd_data;
-        hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(Pi[i])) = HYPRE_MEMORY_HOST;
-      }
-   }
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_GpuProfilingPopRange();
-#endif
-
-
    // FIXME: Clean this up
    P_diag_j = hypre_CTAlloc(HYPRE_Int, P_diag_i[n_fine], HYPRE_MEMORY_HOST);
    P_diag_data = hypre_CTAlloc(HYPRE_Real, P_diag_i[n_fine], HYPRE_MEMORY_HOST);
