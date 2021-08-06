@@ -793,10 +793,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                         thrust::make_constant_iterator<HYPRE_Real>(1.0)+pass_starts[1],
                         thrust::make_permutation_iterator( P_diag_i_dev, pass_order_dev ),
                         P_diag_data_dev );
-
-     // FIXME: Clean this up
-     hypre_TMemcpy( P_diag_j, P_diag_j_dev, HYPRE_Int, P_diag_i[n_fine], HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-     hypre_TMemcpy( P_diag_data, P_diag_data_dev, HYPRE_Real, P_diag_i[n_fine], HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
 
 
@@ -812,25 +808,28 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       HYPRE_Int *Pi_offd_j = hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(Pi[p]));
       HYPRE_Real *Pi_diag_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(Pi[p]));
       HYPRE_Real *Pi_offd_data = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(Pi[p]));
-      j1 = 0;
-      for (i = pass_starts[p+1]; i < pass_starts[p+2]; i++)
-      {
-         i1 = pass_order[i];
-         i2 = Pi_diag_i[j1];
-         for (j = P_diag_i[i1]; j < P_diag_i[i1+1]; j++)
-         {
-            P_diag_j[j] = Pi_diag_j[i2];
-            P_diag_data[j] = Pi_diag_data[i2++];
-         }
-         i2 = Pi_offd_i[j1];
-         for (j = P_offd_i[i1]; j < P_offd_i[i1+1]; j++)
-         {
-            P_offd_j[j] = Pi_offd_j[i2];
-            P_offd_data[j] = Pi_offd_data[i2++];
-         }
-         j1++;
-      }
+
+      HYPRE_Int num_points = pass_starts[p+2] - pass_starts[p+1];
+
+      dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+      dim3 gDim = hypre_GetDefaultCUDAGridDimension(num_points, "warp", bDim);
+
+      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_insert_remaining_weights, gDim, bDim,
+                         pass_starts[p+1],  pass_starts[p+2],
+                         pass_order_dev, Pi_diag_i, Pi_diag_j, Pi_diag_data,
+                         P_diag_i_dev, P_diag_j_dev, P_diag_data_dev,
+                         Pi_offd_i, Pi_offd_j, Pi_offd_data,
+                         P_offd_i_dev, P_offd_j_dev, P_offd_data_dev );
    }
+
+   // FIXME: Clean this up
+     hypre_TMemcpy( P_diag_j, P_diag_j_dev, HYPRE_Int, P_diag_i[n_fine], HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+     hypre_TMemcpy( P_diag_data, P_diag_data_dev, HYPRE_Real, P_diag_i[n_fine], HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+     hypre_TMemcpy( P_offd_j, P_offd_j_dev, HYPRE_Int, P_offd_i[n_fine], HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+     hypre_TMemcpy( P_offd_data, P_offd_data_dev, HYPRE_Real, P_offd_i[n_fine], HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+
    /* Note that col indices in P_offd_j probably not consistent,
       this gets fixed after truncation */
 
