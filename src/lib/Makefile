@@ -76,6 +76,7 @@ SONAME = libHYPRE-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 SOLIBS = ${DSUPERLU_LIBS} ${MPILIBDIRS} ${MPILIBS} ${LAPACKLIBDIRS} ${LAPACKLIBS}\
  ${BLASLIBDIRS} ${BLASLIBS} ${LIBS} ${FLIBS}
 
+##################################################################
 # Targets
 ##################################################################
 
@@ -97,7 +98,7 @@ distclean: clean
 
 # NOTE: Some of the FILES symbols below can be empty, so they are listed on an
 # AR line with at least one nonempty symbol
-libHYPRE.a: ${FILES_HYPRE} 
+libHYPRE.a: ${FILES_HYPRE}
 	@echo  "Building libHYPRE ... "
 	rm -f $@
 	${AR} $@ $(FILES_HYPRE)
