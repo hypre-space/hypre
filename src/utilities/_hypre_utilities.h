@@ -1793,7 +1793,7 @@ static inline HYPRE_Int
 first_lsb_bit_indx( hypre_uint x )
 {
    HYPRE_Int pos;
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || defined(__MINGW64__)
    if (x == 0)
    {
       pos = 0;
@@ -2881,3 +2881,4 @@ hypre_UnorderedBigIntMapPutIfAbsent( hypre_UnorderedBigIntMap *m,
 #endif
 
 #endif
+
