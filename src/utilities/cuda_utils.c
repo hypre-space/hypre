@@ -1263,6 +1263,17 @@ hypre_SyncCudaDevice(hypre_Handle *hypre_handle)
    return hypre_error_flag;
 }
 
+HYPRE_Int
+hypre_ResetCudaDevice(hypre_Handle *hypre_handle)
+{
+#if defined(HYPRE_USING_CUDA)
+   cudaDeviceReset();
+#elif defined(HYPRE_USING_HIP)
+   hipDeviceReset();
+#endif
+   return hypre_error_flag;
+}
+
 /* synchronize the Hypre compute stream
  * action: 0: set sync stream to false
  *         1: set sync stream to true

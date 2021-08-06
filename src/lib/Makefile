@@ -76,8 +76,6 @@ SONAME = libHYPRE-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 SOLIBS = ${DSUPERLU_LIBS} ${MPILIBDIRS} ${MPILIBS} ${LAPACKLIBDIRS} ${LAPACKLIBS}\
  ${BLASLIBDIRS} ${BLASLIBS} ${LIBS} ${FLIBS}
 
-DLINK_HYPRE = hypre.dlink
-
 # Targets
 ##################################################################
 
@@ -87,11 +85,8 @@ all: libHYPRE${HYPRE_LIB_SUFFIX}
 install: all
 	cp -fR libHYPRE* ${HYPRE_LIB_INSTALL}
 
-${DLINK_HYPRE}: ${OBJFILES_HYPRE}
-	${CUCC} -dlink ${OBJFILES_HYPRE} -o $@
-
 clean:
-	rm -f *.o libHYPRE* hypre.dlink
+	rm -f *.o libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
@@ -102,10 +97,10 @@ distclean: clean
 
 # NOTE: Some of the FILES symbols below can be empty, so they are listed on an
 # AR line with at least one nonempty symbol
-libHYPRE.a: ${FILES_HYPRE} ${DLINK_HYPRE}
+libHYPRE.a: ${FILES_HYPRE} 
 	@echo  "Building libHYPRE ... "
 	rm -f $@
-	${AR} $@ $(FILES_HYPRE) $(DLINK_HYPRE)
+	${AR} $@ $(FILES_HYPRE)
 	${RANLIB} $@
 
 libHYPRE.so libHYPRE.dylib: ${FILES_HYPRE}

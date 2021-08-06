@@ -139,7 +139,7 @@ endif
 
 # C
 
-ij: ij.${OBJ_SUFFIX}
+ij: ij.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 

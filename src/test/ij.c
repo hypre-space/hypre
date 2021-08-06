@@ -17,7 +17,6 @@
 #include <math.h>
 
 #include "_hypre_utilities.h"
-//#include "_hypre_utilities.hpp"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_mv.h"
 
@@ -26,10 +25,6 @@
 #include "HYPRE_parcsr_ls.h"
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"
-
-#if defined(HYPRE_USING_GPU)
-#include "_hypre_utilities.hpp"
-#endif
 
 #if defined(HYPRE_USING_UMPIRE)
 #include "umpire/interface/umpire.h"
@@ -7597,11 +7592,7 @@ main( hypre_int argc,
    hypre_MPI_Finalize();
 
    /* when using cuda-memcheck --leak-check full, uncomment this */
-#if defined(HYPRE_USING_CUDA)
-   cudaDeviceReset();
-#elif defined(HYPRE_USING_HIP)
-   hipDeviceReset();
-#endif
+   hypre_ResetCudaDevice(hypre_handle());
 
    return (0);
 }
