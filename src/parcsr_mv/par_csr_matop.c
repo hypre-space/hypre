@@ -5898,8 +5898,15 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
 
    *B_ptr = B;
 
-   hypre_TFree(B_row_starts, HYPRE_MEMORY_HOST);
-   hypre_TFree(B_col_starts, HYPRE_MEMORY_HOST);
+   if (B_row_starts == B_col_starts)
+   {
+      hypre_TFree(B_row_starts, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      hypre_TFree(B_row_starts, HYPRE_MEMORY_HOST);
+      hypre_TFree(B_col_starts, HYPRE_MEMORY_HOST);
+   }
    hypre_TFree(B_maxel_row, HYPRE_MEMORY_HOST);
    hypre_TFree(send_buf_data, HYPRE_MEMORY_HOST);
    hypre_TFree(sub_idx_diag, HYPRE_MEMORY_HOST);
