@@ -189,6 +189,12 @@ HYPRE_Int hypre_ParCSRDiagScale( HYPRE_ParCSRMatrix HA, HYPRE_ParVector Hy, HYPR
 HYPRE_Int hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A, HYPRE_Real tol, HYPRE_Int type);
 HYPRE_Int hypre_ParCSRMatrixDropSmallEntriesHost( hypre_ParCSRMatrix *A, HYPRE_Real tol, HYPRE_Int type);
 HYPRE_Int hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A, HYPRE_Complex tol, HYPRE_Int type);
+HYPRE_Int hypre_ParCSRMatrixRowScaling( hypre_ParCSRMatrix *A, hypre_Vector *d );
+HYPRE_Int hypre_ParCSRMatrixRowScalingHost( hypre_ParCSRMatrix *A, hypre_Vector *d );
+HYPRE_Int hypre_ParCSRMatrixRowScalingDevice( hypre_ParCSRMatrix *A, hypre_Vector *d );
+HYPRE_Int hypre_ParCSRMatrixColScaling( hypre_ParCSRMatrix *A, hypre_Vector *d );
+HYPRE_Int hypre_ParCSRMatrixColScalingHost( hypre_ParCSRMatrix *A, hypre_Vector *d );
+HYPRE_Int hypre_ParCSRMatrixColScalingDevice( hypre_ParCSRMatrix *A, hypre_Vector *d );
 
 #ifdef HYPRE_USING_PERSISTENT_COMM
 hypre_ParCSRPersistentCommHandle* hypre_ParCSRPersistentCommHandleCreate(HYPRE_Int job, hypre_ParCSRCommPkg *comm_pkg);

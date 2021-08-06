@@ -6126,3 +6126,45 @@ hypre_ParCSRMatrixReorder(hypre_ParCSRMatrix *A)
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixRowScaling:
+ *
+ * Given matrix, A, and vector, d, scale the rows of matrix, A, by the elements
+ * in vector, d.
+ * 
+ * A <- [A1*d1;
+ *       A2*d2;
+ *       ...
+ *       An*dn]
+ *
+ * where Ai is the i'th row of A and di is the i'th element of d.
+ * This corresponds to matrix multiplication D*A if D = diag(d).
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixRowScaling( hypre_ParCSRMatrix *A, hypre_Vector *d )
+{
+
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixColScaling:
+ *
+ * Given matrix, A, and vector, d, scale the rows of matrix, A, by the elements
+ * in vector, d.
+ * 
+ * A <- [A1*d1;
+ *       A2*d2;
+ *       ...
+ *       An*dn]
+ *
+ * where Ai is the i'th row of A and di is the i'th element of d.
+ * This corresponds to matrix multiplication D*A if D = diag(d).
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixRowScaling( hypre_ParCSRMatrix *A, hypre_Vector *d )
+{
+
+}
