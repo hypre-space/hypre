@@ -43,7 +43,7 @@ hypre_FSAISolve( void               *fsai_vdata,
    /* Local variables */
 
    HYPRE_Int            iter, num_procs, my_id;
-   HYPRE_Real           old_rn, new_rn, rel_resnorm;
+   HYPRE_Real           old_resnorm, resnorm, rel_resnorm;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -66,40 +66,47 @@ hypre_FSAISolve( void               *fsai_vdata,
 
    if(my_id == 0 && print_level > 1)
    {
-      hypre_printf("                old         new         relative\n");
-      hypre_printf("    iter #      res norm    res norm    res norm\n");
-      hypre_printf("    --------    --------    --------    --------\n");
+      hypre_printf("                new         relative\n");
+      hypre_printf("    iter #      res norm    res norm\n");
+      hypre_printf("    --------    --------    --------\n");
    }
 
-   /* Compute initial reisdual. r(0) = b - Ax */
-   hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A, x, 1.0, b, r); /* residual */
-
-   while(rel_resnorm >= tol && iter < max_iter)
+   while (rel_resnorm >= tol && iter < max_iter)
    {
+      /* Update residual */
+      if (iter)
+      {
+         /* r_work = b - A*x(k) */
+         hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A, x, 1.0, b, r_work);
+      }
+      else
+      {
+         /* r_work = b - A*x_0 = b */
+         hypre_ParVectorCopy(b, r_work);
+      }
+      hypre_ParVectorCopy(x, x_work);
 
-      /* Compute Preconditoned Residual. z_temp = G^T*G*r(k) */      
-      hypre_ParCSRMatrixMatvecOutOfPlace(1.0, G, r, 0.0, x_work, r_work);         /* r_work = G*r */
-      hypre_ParCSRMatrixMatvecOutOfPlace(1.0, GT, r_work, 0.0, x_work, z_work);   /* z_work = G^T*r_work */
+      /* Apply FSAI */
+      hypre_ParCSRMatrixMatvec(1.0, G, r_work, 0.0, z_work);                 /* z_work = G*r_work */
+      hypre_ParCSRMatrixMatvecOutOfPlace(omega, GT, z_work, 1.0, x_work, x); /* x(k+1) = omega*G^T*z_work + x(k) */
 
-      /* Compute updated solution vector. x(k+1) = x(k) + omega*z(k) */
-      hypre_ParVectorAxpy(omega, z_work, x); 
+      /* Compute residual */
+      if (tol > 0.0)
+      {
+         old_resnorm = resnorm;
+         hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A, x, 1.0, b, r);
+         resnorm = hypre_ParVectorInnerProd(r, r);
 
-      /* Compute residual norm */
-      old_rn             = hypre_ParVectorInnerProd(r, r);
-      
-      /* Update residual: r(k+1) = r(k) - Az_work(k) */
-      hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A, z_work, 1.0, r, r_work);
+         /* Compute rel_resnorm */
+         rel_resnorm = resnorm/old_resnorm;
 
-      new_rn             = hypre_ParVectorInnerProd(r_work, r_work);
-
-      /* Compute rel_resnorm */
-      rel_resnorm = new_rn/old_rn;
-
-      if(my_id == 0 && print_level > 1)
-         hypre_printf("    %e          %e          %e          %e\n", iter, old_rn, new_rn, rel_resnorm);
+         if (my_id == 0 && print_level > 1)
+         {
+            hypre_printf("    %e          %e          %e\n", iter, resnorm, rel_resnorm);
+         }
+      }
 
       iter++;
-
    }
 
    if(logging > 1)
