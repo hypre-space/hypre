@@ -497,7 +497,7 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
       /* trivial cases, n = 1, 2 */
       dim3 bDim = 1;
       dim3 gDim = 1;
-      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_ScatterAddTrivial, bDim, gDim, ny, x, map, y );
+      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_ScatterAddTrivial, gDim, bDim, ny, x, map, y );
    }
    else
    {
