@@ -352,9 +352,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    points_left = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
    /* contains row numbers of remaining points, auxiliary */
 
-   P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_HOST);
-   P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_HOST);
-
    //FIXME: Remove _dev suffix when we're done.
    pass_marker_dev = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
    pass_order_dev = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
@@ -408,8 +405,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
   hypre_TMemcpy( points_left, points_left_dev, HYPRE_Int, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
   hypre_TMemcpy( pass_order, pass_order_dev, HYPRE_Int, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
   hypre_TMemcpy( pass_marker, pass_marker_dev, HYPRE_Int, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-  hypre_TMemcpy( P_diag_i, P_diag_i_dev, HYPRE_Int, n_fine+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-  hypre_TMemcpy( P_offd_i, P_offd_i_dev, HYPRE_Int, n_fine+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
    pass_starts = hypre_CTAlloc(HYPRE_Int, 10, HYPRE_MEMORY_HOST);
    /* contains beginning for each pass in pass_order field, assume no more than 10 passes */
@@ -699,19 +694,18 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                       thrust::make_zip_iterator( thrust::make_tuple(P_diag_i_dev,P_offd_i_dev) ),
                       tuple_plus<int>());
 
-
-   hypre_TMemcpy( P_diag_i, P_diag_i_dev, HYPRE_Int, n_fine+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy( P_offd_i, P_offd_i_dev, HYPRE_Int, n_fine+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    // FIXME: Clean this up
-   P_diag_j = hypre_CTAlloc(HYPRE_Int, P_diag_i[n_fine], HYPRE_MEMORY_HOST);
-   P_diag_data = hypre_CTAlloc(HYPRE_Real, P_diag_i[n_fine], HYPRE_MEMORY_HOST);
-   P_offd_j = hypre_CTAlloc(HYPRE_Int, P_offd_i[n_fine], HYPRE_MEMORY_HOST);
-   P_offd_data = hypre_CTAlloc(HYPRE_Real, P_offd_i[n_fine], HYPRE_MEMORY_HOST);
 
-   P_diag_j_dev = hypre_CTAlloc(HYPRE_Int, P_diag_i[n_fine], HYPRE_MEMORY_DEVICE);
-   P_diag_data_dev = hypre_CTAlloc(HYPRE_Real, P_diag_i[n_fine], HYPRE_MEMORY_DEVICE);
-   P_offd_j_dev = hypre_CTAlloc(HYPRE_Int, P_offd_i[n_fine], HYPRE_MEMORY_DEVICE);
-   P_offd_data_dev = hypre_CTAlloc(HYPRE_Real, P_offd_i[n_fine], HYPRE_MEMORY_DEVICE);
+   HYPRE_Int P_diag_size;
+   hypre_TMemcpy( &P_diag_size, &P_diag_i_dev[n_fine], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+   hypre_TMemcpy( &P_offd_size, &P_offd_i_dev[n_fine], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+
+   P_diag_j_dev = hypre_CTAlloc(HYPRE_Int, P_diag_size, HYPRE_MEMORY_DEVICE);
+   P_diag_data_dev = hypre_CTAlloc(HYPRE_Real, P_diag_size, HYPRE_MEMORY_DEVICE);
+   P_offd_j_dev = hypre_CTAlloc(HYPRE_Int, P_offd_size, HYPRE_MEMORY_DEVICE);
+   P_offd_data_dev = hypre_CTAlloc(HYPRE_Real, P_offd_size, HYPRE_MEMORY_DEVICE);
 
    /* insert weights for coarse points */
    {
@@ -764,13 +758,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                          P_offd_i_dev, P_offd_j_dev, P_offd_data_dev );
    }
 
-   // FIXME: Clean this up
-     hypre_TMemcpy( P_diag_j, P_diag_j_dev, HYPRE_Int, P_diag_i[n_fine], HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-     hypre_TMemcpy( P_diag_data, P_diag_data_dev, HYPRE_Real, P_diag_i[n_fine], HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-
-     hypre_TMemcpy( P_offd_j, P_offd_j_dev, HYPRE_Int, P_offd_i[n_fine], HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-     hypre_TMemcpy( P_offd_data, P_offd_data_dev, HYPRE_Real, P_offd_i[n_fine], HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-
 
    /* Note that col indices in P_offd_j probably not consistent,
       this gets fixed after truncation */
@@ -781,35 +768,41 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                 hypre_ParCSRMatrixRowStarts(A),
                                 num_cpts_global,
                                 num_cols_offd_P,
-                                P_diag_i[n_fine],
-                                P_offd_i[n_fine]);
+                                P_diag_size,
+                                P_offd_size);
    P_diag = hypre_ParCSRMatrixDiag(P);
-   hypre_CSRMatrixData(P_diag) = P_diag_data;
-   hypre_CSRMatrixI(P_diag) = P_diag_i;
-   hypre_CSRMatrixJ(P_diag) = P_diag_j;
+   hypre_CSRMatrixData(P_diag) = P_diag_data_dev;
+   hypre_CSRMatrixI(P_diag) = P_diag_i_dev;
+   hypre_CSRMatrixJ(P_diag) = P_diag_j_dev;
    P_offd = hypre_ParCSRMatrixOffd(P);
-   hypre_CSRMatrixData(P_offd) = P_offd_data;
-   hypre_CSRMatrixI(P_offd) = P_offd_i;
-   hypre_CSRMatrixJ(P_offd) = P_offd_j;
+   hypre_CSRMatrixData(P_offd) = P_offd_data_dev;
+   hypre_CSRMatrixI(P_offd) = P_offd_i_dev;
+   hypre_CSRMatrixJ(P_offd) = P_offd_j_dev;
    hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
 
    if (trunc_factor != 0.0 || P_max_elmts > 0)
    {
-      hypre_BoomerAMGInterpTruncation(P, trunc_factor, P_max_elmts);
-      P_diag_data = hypre_CSRMatrixData(P_diag);
-      P_diag_i = hypre_CSRMatrixI(P_diag);
-      P_diag_j = hypre_CSRMatrixJ(P_diag);
-      P_offd_data = hypre_CSRMatrixData(P_offd);
-      P_offd_i = hypre_CSRMatrixI(P_offd);
-      P_offd_j = hypre_CSRMatrixJ(P_offd);
+      hypre_BoomerAMGInterpTruncationDevice(P, trunc_factor, P_max_elmts);
+      P_diag_data_dev = hypre_CSRMatrixData(P_diag);
+      P_diag_i_dev = hypre_CSRMatrixI(P_diag);
+      P_diag_j_dev = hypre_CSRMatrixJ(P_diag);
+      P_offd_data_dev = hypre_CSRMatrixData(P_offd);
+      P_offd_i_dev = hypre_CSRMatrixI(P_offd);
+      P_offd_j_dev = hypre_CSRMatrixJ(P_offd);
    }
 
    num_cols_offd_P = 0;
-   P_offd_size = P_offd_i[n_fine];
+
    if (P_offd_size)
-   {
+     {
+       // FIXME: Clean this up
+       P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy( P_offd_i, P_offd_i_dev, HYPRE_Int, n_fine+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      P_offd_j = hypre_CTAlloc(HYPRE_Int, P_offd_size, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy( P_offd_j, P_offd_j_dev, HYPRE_Int, P_offd_size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
       HYPRE_BigInt *tmp_P_offd_j = hypre_CTAlloc(HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_HOST);
       HYPRE_BigInt *big_P_offd_j = hypre_CTAlloc(HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_HOST);
       for (p=0; p < num_passes-1; p++)
@@ -856,7 +849,21 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       }
       hypre_TFree(tmp_P_offd_j, HYPRE_MEMORY_HOST);
       hypre_TFree(big_P_offd_j, HYPRE_MEMORY_HOST);
-   }
+
+      // FIXME: Clean this up
+      hypre_TMemcpy( P_offd_j_dev, P_offd_j, HYPRE_Int, P_offd_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TFree(P_offd_j,HYPRE_MEMORY_HOST);
+      hypre_TFree(P_offd_i,HYPRE_MEMORY_HOST);
+
+   } // if (P_offd_size)
+
+   hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
+   hypre_CSRMatrixNumCols(P_offd) = num_cols_offd_P;
+
+   hypre_CSRMatrixMemoryLocation(P_diag) = HYPRE_MEMORY_DEVICE;
+   hypre_CSRMatrixMemoryLocation(P_offd) = HYPRE_MEMORY_DEVICE;
+
+   hypre_MatvecCommPkgCreate(P);
 
    for (i=0; i < num_passes-1; i++)
    {
@@ -885,82 +892,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    // FIXME: We're assuming we need to hand CF_marker back to the host
    hypre_TMemcpy( CF_marker, CF_marker_dev, HYPRE_Int, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    hypre_TFree(CF_marker_dev, HYPRE_MEMORY_DEVICE);
-
-   hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
-   hypre_CSRMatrixNumCols(P_offd) = num_cols_offd_P;
-
-   hypre_MatvecCommPkgCreate(P);
-
-
-   // FIXME: Temporary hack!
-   // Copy P from host to device
-   {
-     // Diag part
-     {
-       hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(P);
-
-       HYPRE_Int * P_diag_i_h = hypre_CSRMatrixI(P_diag);
-       HYPRE_Int * P_diag_j_h = hypre_CSRMatrixJ(P_diag);
-       HYPRE_Real * P_diag_data_h = hypre_CSRMatrixData(P_diag);
-
-       HYPRE_Int num_rows = hypre_CSRMatrixNumRows(P_diag);
-       HYPRE_Int num_nonzeros = hypre_CSRMatrixNumNonzeros(P_diag);
-
-       HYPRE_Int * P_diag_i_dev = hypre_TAlloc(HYPRE_Int, num_rows+1, HYPRE_MEMORY_DEVICE);
-       HYPRE_Int * P_diag_j_dev = hypre_TAlloc(HYPRE_Int, num_nonzeros, HYPRE_MEMORY_DEVICE);
-       HYPRE_Real * P_diag_data_dev = hypre_TAlloc(HYPRE_Real, num_nonzeros, HYPRE_MEMORY_DEVICE);
-
-       hypre_TMemcpy( P_diag_i_dev, P_diag_i_h, HYPRE_Int, num_rows+1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-       hypre_TMemcpy( P_diag_j_dev, P_diag_j_h, HYPRE_Int, num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-       hypre_TMemcpy( P_diag_data_dev, P_diag_data_h, HYPRE_Real, num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-
-       hypre_CSRMatrixData(P_diag) = P_diag_data_dev;
-       hypre_CSRMatrixI(P_diag) = P_diag_i_dev;
-       hypre_CSRMatrixJ(P_diag) = P_diag_j_dev;
-
-       hypre_TFree(P_diag_i_h, HYPRE_MEMORY_HOST);
-       hypre_TFree(P_diag_j_h, HYPRE_MEMORY_HOST);
-       hypre_TFree(P_diag_data_h, HYPRE_MEMORY_HOST);
-     } // Diag
-
-     // Offd part
-     {
-       hypre_CSRMatrix *P_offd = hypre_ParCSRMatrixOffd(P);
-
-       HYPRE_Int num_rows = hypre_CSRMatrixNumRows(P_offd);
-       HYPRE_Int num_nonzeros = hypre_CSRMatrixNumNonzeros(P_offd);
-
-       if(num_rows)
-         {
-           HYPRE_Int * P_offd_i_h = hypre_CSRMatrixI(P_offd);
-           HYPRE_Int * P_offd_i_dev = hypre_TAlloc(HYPRE_Int, num_rows+1, HYPRE_MEMORY_DEVICE);
-           hypre_TMemcpy( P_offd_i_dev, P_offd_i_h, HYPRE_Int, num_rows+1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-
-           hypre_CSRMatrixI(P_offd) = P_offd_i_dev;
-
-           hypre_TFree(P_offd_i_h, HYPRE_MEMORY_HOST);
-
-           if(num_nonzeros)
-             {
-               HYPRE_Int * P_offd_j_h = hypre_CSRMatrixJ(P_offd);
-               HYPRE_Real * P_offd_data_h = hypre_CSRMatrixData(P_offd);
-
-               HYPRE_Int * P_offd_j_dev = hypre_TAlloc(HYPRE_Int, num_nonzeros, HYPRE_MEMORY_DEVICE);
-               HYPRE_Real * P_offd_data_dev = hypre_TAlloc(HYPRE_Real, num_nonzeros, HYPRE_MEMORY_DEVICE);
-               hypre_TMemcpy( P_offd_j_dev, P_offd_j_h, HYPRE_Int, num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-               hypre_TMemcpy( P_offd_data_dev, P_offd_data_h, HYPRE_Real, num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-
-               hypre_CSRMatrixData(P_offd) = P_offd_data_dev;
-               hypre_CSRMatrixJ(P_offd) = P_offd_j_dev;
-
-               hypre_TFree(P_offd_j_h, HYPRE_MEMORY_HOST);
-               hypre_TFree(P_offd_data_h, HYPRE_MEMORY_HOST);
-             }
-         }
-     } // Offd
-
-   } // Copy P from host to device
-
 
    *P_ptr = P;
 
