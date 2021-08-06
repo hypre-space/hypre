@@ -6109,6 +6109,23 @@ hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A,
    return hypre_error_flag;
 }
 
+/* Scale ParCSR matrix A = scalar * A
+ * A: the target CSR matrix
+ * scalar: real number
+ */
+HYPRE_Int
+hypre_ParCSRMatrixScale(hypre_ParCSRMatrix *A,
+                        HYPRE_Complex       scalar)
+{
+   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
+
+   hypre_CSRMatrixScale(A_diag, scalar);
+   hypre_CSRMatrixScale(A_offd, scalar);
+
+   return hypre_error_flag;
+}
+
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixReorder:
  *

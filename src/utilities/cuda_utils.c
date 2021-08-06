@@ -325,6 +325,14 @@ hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 }
 
 HYPRE_Int
+hypreDevice_Scalen(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v)
+{
+   HYPRE_THRUST_CALL( transform, d_x, d_x + n, d_x, v * _1 );
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
 hypreDevice_Filln(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v)
 {
    HYPRE_THRUST_CALL( fill_n, d_x, n, v);

@@ -84,7 +84,6 @@ extern HYPRE_Int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, HYPRE_Int
 
 extern HYPRE_Int hypre_FlexGMRESModifyPCDefault(void *precond_data, HYPRE_Int iteration,
                                                 HYPRE_Real rel_residual_norm);
-
 #ifdef __cplusplus
 }
 #endif
@@ -193,6 +192,9 @@ main( hypre_int argc,
 
    const HYPRE_Real    dt_inf = DT_INF;
    HYPRE_Real          dt = dt_inf;
+
+   /* solve -Ax = b, for testing SND matrices */
+   HYPRE_Int           negA = 0;
 
    /* parameters for BoomerAMG */
    HYPRE_Real     A_drop_tol = 0.0;
@@ -1156,6 +1158,11 @@ main( hypre_int argc,
          mempool_max_cached_bytes = atoi(argv[arg_index++])*1024LL*1024LL;
       }
 #endif
+      else if ( strcmp(argv[arg_index], "-negA") == 0 )
+      {
+         arg_index++;
+         negA = atoi(argv[arg_index++]);
+      }
       else
       {
          arg_index++;
@@ -3225,6 +3232,11 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Print out the system and initial guess
     *-----------------------------------------------------------*/
+
+   if (negA)
+   {
+      hypre_ParCSRMatrixScale(parcsr_A, -1);
+   }
 
    if (print_system)
    {
