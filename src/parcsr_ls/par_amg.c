@@ -569,13 +569,6 @@ hypre_BoomerAMGDestroy( void *data )
       hypre_TFree(hypre_ParAMGDataDofFunc(amg_data), HYPRE_MEMORY_HOST);
       hypre_ParAMGDataDofFunc(amg_data) = NULL;
    }
-   if (hypre_ParAMGDataGridRelaxPoints(amg_data))
-   {
-      for (i=0; i < 4; i++)
-         hypre_TFree(hypre_ParAMGDataGridRelaxPoints(amg_data)[i], HYPRE_MEMORY_HOST);
-      hypre_TFree(hypre_ParAMGDataGridRelaxPoints(amg_data), HYPRE_MEMORY_HOST);
-      hypre_ParAMGDataGridRelaxPoints(amg_data) = NULL;
-   }
    for (i=1; i < num_levels; i++)
    {
       hypre_ParVectorDestroy(hypre_ParAMGDataFArray(amg_data)[i]);
@@ -595,12 +588,14 @@ hypre_BoomerAMGDestroy( void *data )
          }
       }
 
+#if defined(HYPRE_USING_GPU)
       /* WM: temporary fix - if using CF relaxation, CF marker is moved to the device */
-      if (hypre_ParAMGDataRelaxOrder(amg_data))
+      if (hypre_ParAMGDataRelaxOrder(amg_data) || hypre_ParAMGDataGridRelaxPoints(amg_data))
       {
          hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data)[i-1], HYPRE_MEMORY_DEVICE);
       }
       else
+#endif
       {
          hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data)[i-1], HYPRE_MEMORY_HOST);
       }
@@ -620,6 +615,13 @@ hypre_BoomerAMGDestroy( void *data )
             hypre_ParCSRBlockMatrixDestroy(hypre_ParAMGDataRBlockArray(amg_data)[i-1]);
          }
       }
+   }
+   if (hypre_ParAMGDataGridRelaxPoints(amg_data))
+   {
+      for (i=0; i < 4; i++)
+         hypre_TFree(hypre_ParAMGDataGridRelaxPoints(amg_data)[i], HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParAMGDataGridRelaxPoints(amg_data), HYPRE_MEMORY_HOST);
+      hypre_ParAMGDataGridRelaxPoints(amg_data) = NULL;
    }
 
    if (hypre_ParAMGDataLambda(amg_data))
