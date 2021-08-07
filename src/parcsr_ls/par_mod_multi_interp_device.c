@@ -1532,6 +1532,8 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    cnt_offd = 0;
    if (num_functions > 1)
    {
+     hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Sorry, this code not yet ported to the GPU!");
+     /*
       for (i=0; i < num_points; i++)
       {
          i1 = pass_order[i];
@@ -1605,6 +1607,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
             j2++;
          }
       }
+     */
    }
    else
    {
