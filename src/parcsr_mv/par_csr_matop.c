@@ -6106,7 +6106,7 @@ hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A,
    hypre_GpuProfilingPopRange();
 #endif
 
-   return hypre_error_flag;
+   return ierr;
 }
 
 /* Scale ParCSR matrix A = scalar * A
