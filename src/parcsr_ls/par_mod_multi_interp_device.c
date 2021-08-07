@@ -565,6 +565,22 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
    } // while (global_remaining > 0)
 
+
+   // FIXME: Temporary hack!
+   // Free up the memory we allocated for the manual copying of A and S data
+   {
+     hypre_TFree(S_diag_i, HYPRE_MEMORY_HOST);
+     hypre_TFree(S_diag_j, HYPRE_MEMORY_HOST);
+     hypre_TFree(S_offd_i, HYPRE_MEMORY_HOST);
+     hypre_TFree(S_offd_j, HYPRE_MEMORY_HOST);
+     hypre_TFree(A_diag_i, HYPRE_MEMORY_HOST);
+     hypre_TFree(A_diag_j, HYPRE_MEMORY_HOST);
+     hypre_TFree(A_diag_data, HYPRE_MEMORY_HOST);
+     hypre_TFree(A_offd_i, HYPRE_MEMORY_HOST);
+     hypre_TFree(A_offd_j, HYPRE_MEMORY_HOST);
+     hypre_TFree(A_offd_data, HYPRE_MEMORY_HOST);
+   }
+
    hypre_TFree(int_buf_data, HYPRE_MEMORY_DEVICE);
    hypre_TFree(points_left, HYPRE_MEMORY_HOST); // FIXME: Clean up when done
    hypre_TFree(points_left_dev, HYPRE_MEMORY_DEVICE);// FIXME: Clean up when done
@@ -652,22 +668,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
    // We don't need the row sums anymore
    hypre_TFree (row_sums, HYPRE_MEMORY_DEVICE);
-
-   // FIXME: Temporary hack!
-   // Free up the memory we allocated for the manual copying of A and S data
-   {
-     hypre_TFree(S_diag_i, HYPRE_MEMORY_HOST);
-     hypre_TFree(S_diag_j, HYPRE_MEMORY_HOST);
-     hypre_TFree(S_offd_i, HYPRE_MEMORY_HOST);
-     hypre_TFree(S_offd_j, HYPRE_MEMORY_HOST);
-     hypre_TFree(A_diag_i, HYPRE_MEMORY_HOST);
-     hypre_TFree(A_diag_j, HYPRE_MEMORY_HOST);
-     hypre_TFree(A_diag_data, HYPRE_MEMORY_HOST);
-     hypre_TFree(A_offd_i, HYPRE_MEMORY_HOST);
-     hypre_TFree(A_offd_j, HYPRE_MEMORY_HOST);
-     hypre_TFree(A_offd_data, HYPRE_MEMORY_HOST);
-   }
-
 
    /* populate P_diag_i[i+1] with nnz of i-th row */
    for (i = 0; i < num_passes-1; i++)
