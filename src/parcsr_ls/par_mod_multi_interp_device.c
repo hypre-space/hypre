@@ -148,6 +148,30 @@ void hypreCUDAKernel_insert_remaining_weights( HYPRE_Int start,
                                                HYPRE_Int  * P_offd_j,
                                                HYPRE_Real * P_offd_data );
 
+__global__
+void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( int    num_points,
+                                               int    color,
+                                               int    *pass_order,
+                                               int    *pass_marker,
+                                               int    *pass_marker_offd,
+                                               int    *fine_to_coarse,
+                                               int    *fine_to_coarse_offd,
+                                               int    *A_diag_i,
+                                               int    *A_diag_j,
+                                               double *A_diag_data,
+                                               int    *A_offd_i,
+                                               int    *A_offd_j,
+                                               double *A_offd_data,
+                                               int    *Soc_diag_j,
+                                               int    *Soc_offd_j,
+                                               int    *diag_shifts,
+                                               int    *offd_shifts,
+                                               int    *Q_diag_j,
+                                               double *Q_diag_data,
+                                               int    *Q_offd_j,
+                                               double *Q_offd_data,
+                                               double *w_row_sum );
+
 /*--------------------------------------------------------------------------
  * hypre_ParAMGBuildModMultipass
  * This routine implements Stuben's direct interpolation with multiple passes.
@@ -2657,4 +2681,192 @@ void hypreCUDAKernel_insert_remaining_weights( HYPRE_Int start,
 
       loop_cnt++;
     }
+}
+
+
+__global__
+void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( int    num_points,
+                                               int    color,
+                                               int    *pass_order,
+                                               int    *pass_marker,
+                                               int    *pass_marker_offd,
+                                               int    *fine_to_coarse,
+                                               int    *fine_to_coarse_offd,
+                                               int    *A_diag_i,
+                                               int    *A_diag_j,
+                                               double *A_diag_data,
+                                               int    *A_offd_i,
+                                               int    *A_offd_j,
+                                               double *A_offd_data,
+                                               int    *Soc_diag_j,
+                                               int    *Soc_offd_j,
+                                               int    *diag_shifts,
+                                               int    *offd_shifts,
+                                               int    *Q_diag_j,
+                                               double *Q_diag_data,
+                                               int    *Q_offd_j,
+                                               double *Q_offd_data,
+                                               double *w_row_sum )
+{
+  /* Original host code:
+    for (i=0; i < num_points; i++)
+      {
+         i1 = pass_order[i];
+         j2 = A_diag_i[i1]+1;
+         for (j = S_diag_i[i1]; j < S_diag_i[i1+1]; j++)
+         {
+            j1 = S_diag_j[j];
+            while (A_diag_j[j2] != j1)
+            {
+               w_row_sum[i] += A_diag_data[j2];
+               j2++;
+            }
+            if (pass_marker[j1] == color && A_diag_j[j2] == j1)
+            {
+               Q_diag_j[cnt_diag] = fine_to_coarse[j1];
+               Q_diag_data[cnt_diag++] = A_diag_data[j2++];
+            }
+            else
+            {
+               w_row_sum[i] += A_diag_data[j2];
+               j2++;
+            }
+         }
+         while (j2 < A_diag_i[i1+1])
+         {
+            w_row_sum[i] += A_diag_data[j2];
+            j2++;
+         }
+         j2 = A_offd_i[i1];
+         for (j = S_offd_i[i1]; j < S_offd_i[i1+1]; j++)
+         {
+            j1 = S_offd_j[j];
+            while (A_offd_j[j2] != j1)
+            {
+               w_row_sum[i] += A_offd_data[j2];
+               j2++;
+            }
+            if (pass_marker_offd[j1] == color && A_offd_j[j2] == j1)
+            {
+               Q_offd_j[cnt_offd] = fine_to_coarse_offd[j1];
+               Q_offd_data[cnt_offd++] = A_offd_data[j2++];
+            }
+            else
+            {
+               w_row_sum[i] += A_offd_data[j2];
+               j2++;
+            }
+         }
+         while (j2 < A_offd_i[i1+1])
+         {
+            w_row_sum[i] += A_offd_data[j2];
+            j2++;
+         }
+      }
+  */
+
+  int row_i = hypre_cuda_get_grid_warp_id<1,1>();
+
+   if (row_i >= num_points)
+    {
+       return;
+    }
+
+   int i1 = pass_order[row_i];
+
+   int lane = hypre_cuda_get_lane_id<1>();
+
+   // Read how far we have to shift for the scan into Q_[diag/offd]_j
+   int diag_shift = row_i == 0 ? 0 : diag_shifts[row_i-1];
+   int offd_shift = row_i == 0 ? 0 : offd_shifts[row_i-1];
+
+   int sum = 0;
+
+   int p = 0;
+   int q = 0;
+
+   double w_row_sum_i = 0.0;
+
+   // S_diag
+   if (lane < 2)
+   {
+      p = read_only_load(A_diag_i + i1 + lane);
+   }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0)+1;
+
+   for (int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   {
+      int equal = 0;
+      int j1 = -1;
+      if( j < q )
+        {
+          j1 =  Soc_diag_j[j];
+
+          if( j1 > -1 && pass_marker[j1] == color )
+            equal = 1;
+        }
+
+      int pos = warp_prefix_sum(lane, equal, sum);
+
+      if ( j >= q )
+      {
+         continue;
+      }
+
+      if(equal)
+        {
+          Q_diag_j[diag_shift+pos] = fine_to_coarse[j1];
+          Q_diag_data[diag_shift+pos] = A_diag_data[j];
+        }
+      else
+        {
+          w_row_sum_i += A_diag_data[j];
+        }
+
+      diag_shift += sum;
+   }
+
+   // S_offd
+   if (lane < 2)
+   {
+      p = read_only_load(A_offd_i + i1 + lane);
+   }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   for (int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   {
+      int equal = 0;
+      int j1 = -1;
+      if( j < q )
+        {
+          j1 = Soc_offd_j[j];
+
+          if (j1 > -1 && pass_marker_offd[j1] == color )
+            equal = 1;
+        }
+
+      int pos = warp_prefix_sum(lane, equal, sum);
+
+      if ( j >= q )
+        {
+          continue;
+        }
+
+      if(equal)
+        {
+          Q_offd_j[offd_shift+pos] = fine_to_coarse_offd[j1];
+          Q_offd_data[offd_shift+pos] = A_offd_data[j];
+        }
+      else
+        w_row_sum_i += A_offd_data[j];
+
+      offd_shift += sum;
+   }
+
+   w_row_sum_i = warp_reduce_sum(w_row_sum_i);
+
+   if(lane == 0)
+     w_row_sum[row_i] = w_row_sum_i;
 }
