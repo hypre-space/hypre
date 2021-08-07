@@ -248,27 +248,22 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrix **Pi;
    hypre_ParCSRMatrix *P;
    hypre_CSRMatrix *P_diag;
-   HYPRE_Real      *P_diag_data;
-   HYPRE_Int       *P_diag_i; /*at first counter of nonzero cols for each row,
-                                      finally will be pointer to start of row */
-   HYPRE_Int       *P_diag_j;
-
-   HYPRE_Int       *P_diag_j_dev;
    HYPRE_Real      *P_diag_data_dev;
+   HYPRE_Int       *P_diag_i_dev; /*at first counter of nonzero cols for each row,
+                                      finally will be pointer to start of row */
+   HYPRE_Int       *P_diag_j_dev;
 
    hypre_CSRMatrix *P_offd;
-   HYPRE_Real      *P_offd_data = NULL;
-   HYPRE_Int       *P_offd_i; /*at first counter of nonzero cols for each row,
+   HYPRE_Real      *P_offd_data_dev = NULL;
+   HYPRE_Int       *P_offd_i_dev; /*at first counter of nonzero cols for each row,
                                       finally will be pointer to start of row */
-   HYPRE_Int       *P_offd_j = NULL;
-   HYPRE_BigInt    *col_map_offd_P = NULL;
-   HYPRE_Int        num_cols_offd_P = 0;
+
+   HYPRE_Int       *P_offd_i;
+   HYPRE_Int       *P_offd_j;
 
    HYPRE_Int       *P_offd_j_dev = NULL;
-   HYPRE_Real      *P_offd_data_dev = NULL;
-
-   HYPRE_Int       *P_diag_i_dev;
-   HYPRE_Int       *P_offd_i_dev;
+   HYPRE_BigInt    *col_map_offd_P = NULL;
+   HYPRE_Int        num_cols_offd_P = 0;
 
    HYPRE_Int        num_sends = 0;
    HYPRE_Int       *int_buf_data = NULL;
@@ -286,7 +281,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int       *pass_order_dev;
    HYPRE_Int       *CF_marker_dev;
 
-   HYPRE_Int        i, j, i1, i2, j1;
+   HYPRE_Int        i, j, i1, j1;
    HYPRE_Int        num_passes, p, remaining;
    HYPRE_Int        global_remaining;
    HYPRE_Int        cnt, cnt_old, cnt_rem, current_pass;
@@ -978,7 +973,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    HYPRE_BigInt    *col_map_offd_P_dev = NULL;
    HYPRE_Int        num_cols_offd_P;
    HYPRE_Int        nnz_diag, nnz_offd;
-   HYPRE_Int        n_cpts, i, j, i1, j1, j2;
+   HYPRE_Int        n_cpts;
 
    HYPRE_Int        cpt, cnt_diag, cnt_offd;
 
@@ -1317,7 +1312,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Real      *Pi_offd_data;
 
    HYPRE_Int        nnz_diag, nnz_offd;
-   HYPRE_Int        n_cpts, i, j, i1, j1, j2;
+   HYPRE_Int        n_cpts;
 
    HYPRE_Int        cpt, cnt_diag, cnt_offd;
 
