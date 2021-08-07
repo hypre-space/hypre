@@ -585,6 +585,9 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
    if (num_functions >  1)
    {
+     hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Sorry, this code not yet ported to the GPU!");
+
+     /*
      HYPRE_Real *row_sums_host = hypre_CTAlloc(HYPRE_Real, n_fine, HYPRE_MEMORY_HOST);
      hypre_TMemcpy( row_sums_host, row_sums, HYPRE_Real, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
       for (i=0; i < n_fine; i++)
@@ -609,6 +612,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       }
       hypre_TMemcpy( row_sums, row_sums_host, HYPRE_Real, n_fine, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       hypre_TFree(row_sums_host, HYPRE_MEMORY_HOST);
+     */
    }
    else
    {
