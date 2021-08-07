@@ -637,13 +637,16 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       for (i=1; i<num_passes-1; i++)
       {
          HYPRE_BigInt *c_pts_starts = hypre_ParCSRMatrixRowStarts(Pi[i-1]);
-         hypre_GenerateMultiPiDevice(A, S, Pi[i-1], c_pts_starts, &pass_order[pass_starts[i+1]], pass_marker,
-                             pass_marker_offd, pass_starts[i+2]-pass_starts[i+1], i+1,
-                             num_functions, dof_func, dof_func_offd, &Pi[i],
-                                     A_diag_data,A_diag_i,A_diag_j, // Hacked in host pointers
-                                     A_offd_data,A_offd_i,A_offd_j, // Remove when done porting
-                                     S_diag_i,S_diag_j,S_offd_i,S_offd_j,
-                                     pass_marker_dev, pass_marker_offd_dev, &pass_order_dev[pass_starts[i+1]]);
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         hypre_GpuProfilingPushRange(std::string("MultiPiDevice Loop"+std::to_string(i)).c_str());
+#endif
+         hypre_GenerateMultiPiDevice(A, S, Pi[i-1], c_pts_starts, &pass_order_dev[pass_starts[i+1]],
+                                     pass_marker_dev, pass_marker_offd_dev,
+                                     pass_starts[i+2]-pass_starts[i+1], i+1,
+                                     num_functions, dof_func, dof_func_offd, &Pi[i] );
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
       }
    }
 
@@ -1256,32 +1259,15 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
                              hypre_ParCSRMatrix  *S,
                              hypre_ParCSRMatrix  *P,
                              HYPRE_Int           *c_pts_starts,
-                             HYPRE_Int           *pass_order, /* array containing row numbers of rows in A and S to be considered */
-                             HYPRE_Int           *pass_marker,
-                             HYPRE_Int           *pass_marker_offd,
+                             HYPRE_Int           *pass_order_dev, /* array containing row numbers of rows in A and S to be considered */
+                             HYPRE_Int           *pass_marker_dev,
+                             HYPRE_Int           *pass_marker_offd_dev,
                              HYPRE_Int            num_points,
                              HYPRE_Int            color,
                              HYPRE_Int            num_functions,
                              HYPRE_Int           *dof_func,
                              HYPRE_Int           *dof_func_offd,
-                             hypre_ParCSRMatrix **Pi_ptr,
-                             // The below are hacked in for now
-                             // These are the host versions
-                             HYPRE_Real * A_diag_data,
-                             HYPRE_Int * A_diag_i,
-                             HYPRE_Int * A_diag_j,
-                             HYPRE_Real * A_offd_data,
-                             HYPRE_Int * A_offd_i,
-                             HYPRE_Int * A_offd_j,
-                             HYPRE_Int * S_diag_i,
-                             HYPRE_Int * S_diag_j,
-                             HYPRE_Int * S_offd_i,
-                             HYPRE_Int * S_offd_j,
-                             // The below are the computed/mapped device pointers
-                             // Clean this up when we are done
-                             HYPRE_Int * pass_marker_dev,
-                             HYPRE_Int * pass_marker_offd_dev,
-                             HYPRE_Int * pass_order_dev )
+                             hypre_ParCSRMatrix **Pi_ptr )
 {
    MPI_Comm                comm = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg    *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
