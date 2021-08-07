@@ -206,11 +206,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
    HYPRE_Real      *A_diag_data_dev = hypre_CSRMatrixData(A_diag);
    HYPRE_Int       *A_diag_i_dev = hypre_CSRMatrixI(A_diag);
-   HYPRE_Int       *A_diag_j_dev = hypre_CSRMatrixJ(A_diag);
-
-   HYPRE_Real      *A_diag_data = NULL;
-   HYPRE_Int       *A_diag_i = NULL;
-   HYPRE_Int       *A_diag_j = NULL;
+   //HYPRE_Int       *A_diag_j_dev = hypre_CSRMatrixJ(A_diag);
 
    HYPRE_Int        n_fine = hypre_CSRMatrixNumRows(A_diag);
 
@@ -218,12 +214,8 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    hypre_assert( hypre_CSRMatrixMemoryLocation(A_offd) == HYPRE_MEMORY_DEVICE );
 
    HYPRE_Int       *A_offd_i_dev = hypre_CSRMatrixI(A_offd);
-   HYPRE_Int       *A_offd_j_dev = hypre_CSRMatrixJ(A_offd);
+   //HYPRE_Int       *A_offd_j_dev = hypre_CSRMatrixJ(A_offd);
    HYPRE_Real      *A_offd_data_dev = hypre_CSRMatrixData(A_offd);
-
-   HYPRE_Real      *A_offd_data = NULL;
-   HYPRE_Int       *A_offd_i = NULL;
-   HYPRE_Int       *A_offd_j = NULL;
 
    HYPRE_Int        num_cols_offd_A = hypre_CSRMatrixNumCols(A_offd);
 
@@ -301,27 +293,17 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
 
    // FIXME: Temporary hack!
-   // Copy A,S data D->H
+   // Copy S data D->H
    {
      HYPRE_Int num_rows_Sdiag = hypre_CSRMatrixNumRows(S_diag);
      HYPRE_Int num_nonzeros_Sdiag = hypre_CSRMatrixNumNonzeros(S_diag);
      HYPRE_Int num_rows_Soffd = hypre_CSRMatrixNumRows(S_offd);
      HYPRE_Int num_nonzeros_Soffd = hypre_CSRMatrixNumNonzeros(S_offd);
-     HYPRE_Int num_rows_Adiag = hypre_CSRMatrixNumRows(A_diag);
-     HYPRE_Int num_nonzeros_Adiag = hypre_CSRMatrixNumNonzeros(A_diag);
-     HYPRE_Int num_rows_Aoffd = hypre_CSRMatrixNumRows(A_offd);
-     HYPRE_Int num_nonzeros_Aoffd = hypre_CSRMatrixNumNonzeros(A_offd);
 
      S_diag_i = hypre_TAlloc(HYPRE_Int, num_rows_Sdiag+1, HYPRE_MEMORY_HOST);
      S_diag_j = hypre_TAlloc(HYPRE_Int, num_nonzeros_Sdiag, HYPRE_MEMORY_HOST);
      S_offd_i = hypre_TAlloc(HYPRE_Int, num_rows_Soffd+1, HYPRE_MEMORY_HOST);
      S_offd_j = hypre_TAlloc(HYPRE_Int, num_nonzeros_Soffd, HYPRE_MEMORY_HOST);
-     A_diag_i = hypre_TAlloc(HYPRE_Int, num_rows_Adiag+1, HYPRE_MEMORY_HOST);
-     A_diag_j = hypre_TAlloc(HYPRE_Int, num_nonzeros_Adiag, HYPRE_MEMORY_HOST);
-     A_diag_data = hypre_TAlloc(HYPRE_Real, num_nonzeros_Adiag, HYPRE_MEMORY_HOST);
-     A_offd_i = hypre_TAlloc(HYPRE_Int, num_rows_Aoffd+1, HYPRE_MEMORY_HOST);
-     A_offd_j = hypre_TAlloc(HYPRE_Int, num_nonzeros_Aoffd, HYPRE_MEMORY_HOST);
-     A_offd_data = hypre_TAlloc(HYPRE_Real, num_nonzeros_Aoffd, HYPRE_MEMORY_HOST);
 
      hypre_TMemcpy( S_diag_i, S_diag_i_dev, HYPRE_Int, num_rows_Sdiag+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
@@ -329,19 +311,8 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
      hypre_TMemcpy( S_offd_i, S_offd_i_dev, HYPRE_Int, num_rows_Soffd+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
-     hypre_TMemcpy( A_diag_i, A_diag_i_dev, HYPRE_Int, num_rows_Adiag+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-
-     hypre_TMemcpy( A_diag_j, A_diag_j_dev, HYPRE_Int, num_nonzeros_Adiag, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-
-     hypre_TMemcpy( A_diag_data, A_diag_data_dev, HYPRE_Real, num_nonzeros_Adiag, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-
-     hypre_TMemcpy( A_offd_i, A_offd_i_dev, HYPRE_Int, num_rows_Aoffd+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-
      hypre_TMemcpy( S_offd_j, S_offd_j_dev, HYPRE_Int, num_nonzeros_Soffd, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
-     hypre_TMemcpy( A_offd_j, A_offd_j_dev, HYPRE_Int, num_nonzeros_Aoffd, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-
-     hypre_TMemcpy( A_offd_data, A_offd_data_dev, HYPRE_Real, num_nonzeros_Aoffd, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }// Copy A,S data D->H
 
 
@@ -568,12 +539,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
      hypre_TFree(S_diag_j, HYPRE_MEMORY_HOST);
      hypre_TFree(S_offd_i, HYPRE_MEMORY_HOST);
      hypre_TFree(S_offd_j, HYPRE_MEMORY_HOST);
-     hypre_TFree(A_diag_i, HYPRE_MEMORY_HOST);
-     hypre_TFree(A_diag_j, HYPRE_MEMORY_HOST);
-     hypre_TFree(A_diag_data, HYPRE_MEMORY_HOST);
-     hypre_TFree(A_offd_i, HYPRE_MEMORY_HOST);
-     hypre_TFree(A_offd_j, HYPRE_MEMORY_HOST);
-     hypre_TFree(A_offd_data, HYPRE_MEMORY_HOST);
    }
 
    hypre_TFree(int_buf_data, HYPRE_MEMORY_DEVICE);
