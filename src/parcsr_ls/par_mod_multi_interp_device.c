@@ -1175,6 +1175,9 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
 
      hypre_TFree(fine_to_coarse, HYPRE_MEMORY_DEVICE);
      hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_DEVICE);
+
+     hypre_TFree(diag_shifts, HYPRE_MEMORY_DEVICE);
+     hypre_TFree(offd_shifts, HYPRE_MEMORY_DEVICE);
    }
 
 
