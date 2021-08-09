@@ -358,24 +358,18 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
 
    /* Generate pass marker array */
-   // FIXME: Going to leave host arrays in for now while developing
-   //        code. Device arrays will have _dev suffix until we're done.
-   pass_marker = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
+   //FIXME: Remove _dev suffix when we're done.
+   pass_marker_dev = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
    /* contains pass numbers for each variable according to original order */
-   pass_order = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
+   pass_order_dev = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
    /* contains row numbers according to new order, pass 1 followed by pass 2 etc */
    fine_to_coarse_dev = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
    /* reverse of pass_order, keeps track where original numbers go */
-   points_left = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
+   points_left_dev = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
    /* contains row numbers of remaining points, auxiliary */
 
-   //FIXME: Remove _dev suffix when we're done.
-   pass_marker_dev = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
-   pass_order_dev = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
-   points_left_dev = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
    P_diag_i_dev = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_DEVICE);
    P_offd_i_dev = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_DEVICE);
-
 
    // Copy CF_marker to dev
    //FIXME: Assuming this is on the host, we should do something better
@@ -415,13 +409,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                       thrust::make_transform_iterator(CF_marker_dev + n_fine,equal<HYPRE_Int>(1)),
                       fine_to_coarse_dev,
                       (HYPRE_Int)0 );
-
-
-  //FIXME: Copying back to host for now
-  //MOVE THIS DOWN AS WE MOVE MORE FUNCTIONALITY TO GPU
-  hypre_TMemcpy( points_left, points_left_dev, HYPRE_Int, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-  hypre_TMemcpy( pass_order, pass_order_dev, HYPRE_Int, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-  hypre_TMemcpy( pass_marker, pass_marker_dev, HYPRE_Int, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
    pass_starts = hypre_CTAlloc(HYPRE_Int, 10, HYPRE_MEMORY_HOST);
    /* contains beginning for each pass in pass_order field, assume no more than 10 passes */
@@ -549,13 +536,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       }
       pass_starts[num_passes] = cnt;
 
-
-      // Update pass_marker on the device
-      // FIXME: Remove this when the pass_marker updates above have been moved to the GPU
-      hypre_TMemcpy( pass_marker_dev, pass_marker, HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy( pass_order_dev,  pass_order,  HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-
-
       /* update pass_marker_offd */
       if (num_cols_offd_A)
       {
@@ -591,7 +571,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    }
 
    hypre_TFree(int_buf_data, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(points_left, HYPRE_MEMORY_HOST); // FIXME: Clean up when done
    hypre_TFree(points_left_dev, HYPRE_MEMORY_DEVICE);// FIXME: Clean up when done
 
    /* generate row sum of weak points and C-points to be ignored */
@@ -843,6 +822,9 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       P_offd_j = hypre_CTAlloc(HYPRE_Int, P_offd_size, HYPRE_MEMORY_HOST);
       hypre_TMemcpy( P_offd_j, P_offd_j_dev, HYPRE_Int, P_offd_size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
+      pass_order = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy( pass_order, pass_order_dev, HYPRE_Int, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
       HYPRE_BigInt *tmp_P_offd_j = hypre_CTAlloc(HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_HOST);
       HYPRE_BigInt *big_P_offd_j = hypre_CTAlloc(HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_HOST);
       for (p=0; p < num_passes-1; p++)
@@ -895,6 +877,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       hypre_TFree(P_offd_j,HYPRE_MEMORY_HOST);
       hypre_TFree(P_offd_i,HYPRE_MEMORY_HOST);
 
+      hypre_TFree (pass_order, HYPRE_MEMORY_HOST);
    } // if (P_offd_size)
 
    hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
@@ -914,9 +897,9 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    hypre_TFree (dof_func_offd, HYPRE_MEMORY_HOST);
    hypre_TFree (pass_starts, HYPRE_MEMORY_HOST);
 
-   hypre_TFree (pass_marker, HYPRE_MEMORY_HOST);// FIXME: Clean up when done
+   //hypre_TFree (pass_marker, HYPRE_MEMORY_HOST);// FIXME: Clean up when done
    hypre_TFree (pass_marker_offd, HYPRE_MEMORY_HOST);
-   hypre_TFree (pass_order, HYPRE_MEMORY_HOST);
+
 
     hypre_TFree (pass_marker_dev, HYPRE_MEMORY_DEVICE);// FIXME: Clean up when done
     hypre_TFree (pass_marker_offd_dev, HYPRE_MEMORY_DEVICE);
