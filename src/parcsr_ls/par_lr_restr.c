@@ -1691,7 +1691,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    HYPRE_Int       *R_offd_j;
    HYPRE_BigInt    *col_map_offd_R;
 
-   HYPRE_Int        i, j, j1, i1, ic,
+   HYPRE_Int        i, j, j1, ic,
                     num_cols_offd_R;
    HYPRE_Int        my_id, num_procs;
    HYPRE_BigInt     total_global_cpts/*, my_first_cpt*/;

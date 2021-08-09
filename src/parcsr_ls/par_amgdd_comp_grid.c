@@ -910,8 +910,6 @@ HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGDDData *amgdd_data )
    HYPRE_Int             num_recv_procs;
    HYPRE_Int             new_num_recv_nodes;
    HYPRE_Int             new_num_recv_procs;
-   HYPRE_Int             num_owned_c_points;
-   HYPRE_Int             num_nonowned_real_c_points;
    HYPRE_Int             real_cnt, ghost_cnt;
    HYPRE_Int             proc, outer_level, level, i, j;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
