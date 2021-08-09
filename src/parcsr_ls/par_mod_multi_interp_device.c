@@ -484,39 +484,61 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    while (global_remaining > 0)
    {
       HYPRE_Int remaining_pts = remaining;
+
       cnt_rem = 0;
-      for (i=0; i < remaining_pts; i++)
+      cnt_old = cnt;
       {
-         i1 = points_left[i];
-         cnt_old = cnt;
-         for (j=S_diag_i[i1]; j < S_diag_i[i1+1]; j++)
-         {
-            j1 = S_diag_j[j];
-            if (pass_marker[j1] == current_pass)
-            {
-               pass_marker[i1] = current_pass + 1;
-               pass_order[cnt++] = i1;
-               break;
-            }
-         }
-         if (cnt == cnt_old)
-         {
-            for (j=S_offd_i[i1]; j < S_offd_i[i1+1]; j++)
-            {
-               j1 = S_offd_j[j];
-               if (pass_marker_offd[j1] == current_pass)
-               {
-                  pass_marker[i1] = current_pass + 1;
-                  pass_order[cnt++] = i1;
-                  break;
-               }
-            }
-         }
-         if (cnt == cnt_old)
-         {
-            points_left[cnt_rem++] = i1;
-         }
+        dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+        dim3 gDim = hypre_GetDefaultCUDAGridDimension(remaining_pts, "warp", bDim);
+
+        HYPRE_Int * diag_shifts        = hypre_CTAlloc(HYPRE_Int, remaining_pts, HYPRE_MEMORY_DEVICE);
+        HYPRE_Int * points_left_shifts = hypre_CTAlloc(HYPRE_Int, remaining_pts, HYPRE_MEMORY_DEVICE);
+
+        hypreCUDAKernel_pass_order_count<<<gDim,bDim>>>( remaining_pts,
+                                                         current_pass,
+                                                         points_left_dev,
+                                                         pass_marker_dev,
+                                                         pass_marker_offd_dev,
+                                                         S_diag_i_dev,
+                                                         S_diag_j_dev,
+                                                         S_offd_i_dev,
+                                                         S_offd_j_dev,
+                                                         diag_shifts,
+                                                         points_left_shifts );
+
+        auto cnt_reduce = HYPRE_THRUST_CALL( reduce,
+                                             thrust::make_zip_iterator( thrust::make_tuple(diag_shifts, points_left_shifts) ),
+                                             thrust::make_zip_iterator( thrust::make_tuple(diag_shifts+remaining_pts, points_left_shifts+remaining_pts) ),
+                                             thrust::tuple<HYPRE_Int,HYPRE_Int>(cnt_old,0),
+                                             tuple_plus<HYPRE_Int>() );
+
+        cnt     = thrust::get<0>(cnt_reduce);
+        cnt_rem = thrust::get<1>(cnt_reduce);
+
+        HYPRE_THRUST_CALL( exclusive_scan,
+                           thrust::make_zip_iterator(thrust::make_tuple(diag_shifts, points_left_shifts) ),
+                           thrust::make_zip_iterator(thrust::make_tuple(diag_shifts+remaining_pts, points_left_shifts+remaining_pts) ),
+                           thrust::make_zip_iterator(thrust::make_tuple(diag_shifts, points_left_shifts) ),
+                           thrust::tuple<HYPRE_Int,HYPRE_Int>(cnt_old,0),
+                           tuple_plus<HYPRE_Int>() );
+
+        hypreCUDAKernel_pass_order_pass_marker_update<<<gDim,bDim>>>( remaining_pts,
+                                                                      current_pass,
+                                                                      points_left_dev,
+                                                                      S_diag_i_dev,
+                                                                      S_diag_j_dev,
+                                                                      S_offd_i_dev,
+                                                                      S_offd_j_dev,
+                                                                      pass_marker_offd_dev,
+                                                                      diag_shifts,
+                                                                      points_left_shifts,
+                                                                      pass_marker_dev,
+                                                                      pass_order_dev );
+
+        hypre_TFree(diag_shifts, HYPRE_MEMORY_DEVICE);
+        hypre_TFree(points_left_shifts, HYPRE_MEMORY_DEVICE);
       }
+
       remaining = cnt_rem;
       current_pass++;
       num_passes++;
