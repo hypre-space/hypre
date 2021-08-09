@@ -172,6 +172,19 @@ void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( int    num_points,
                                                double *Q_offd_data,
                                                double *w_row_sum );
 
+__global__
+void hypreCUDAKernel_pass_order_count( int num_points,
+                                       int color,
+                                       int  *points_left,
+                                       int  *pass_marker,
+                                       int  *pass_marker_offd,
+                                       int  *S_diag_i,
+                                       int  *S_diag_j,
+                                       int  *S_offd_i,
+                                       int  *S_offd_j,
+                                       int  *diag_shifts,
+                                       int  *points_left_shifts );
+
 /*--------------------------------------------------------------------------
  * hypre_ParAMGBuildModMultipass
  * This routine implements Stuben's direct interpolation with multiple passes.
@@ -2787,4 +2800,120 @@ void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( int    num_points,
 
    if(lane == 0)
      w_row_sum[row_i] = w_row_sum_i;
+}
+
+__global__
+void hypreCUDAKernel_pass_order_count( HYPRE_Int num_points,
+                                       HYPRE_Int color,
+                                       HYPRE_Int  *points_left,
+                                       HYPRE_Int  *pass_marker,
+                                       HYPRE_Int  *pass_marker_offd,
+                                       HYPRE_Int  *S_diag_i,
+                                       HYPRE_Int  *S_diag_j,
+                                       HYPRE_Int  *S_offd_i,
+                                       HYPRE_Int  *S_offd_j,
+                                       HYPRE_Int  *diag_shifts,
+                                       HYPRE_Int  *points_left_shifts )
+{
+  HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
+
+  if (row_i >= num_points)
+    {
+      return;
+    }
+
+  HYPRE_Int i1 = points_left[row_i];
+
+  HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+
+  HYPRE_Int p = 0;
+  HYPRE_Int q = 0;
+
+   // S_diag
+   if (lane < 2)
+   {
+      p = read_only_load(S_diag_i + i1 + lane);
+   }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   HYPRE_Int equal = 0;
+   HYPRE_Int brk = 0;
+   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   {
+     if(!brk)
+       {
+         if( j < q )
+           {
+             HYPRE_Int j1 =  S_diag_j[j];
+             if( pass_marker[j1] == color )
+               equal++;
+           }
+
+         if(equal)
+           brk=1;
+
+         brk = __any_sync(HYPRE_WARP_FULL_MASK, brk);
+       }
+   }
+
+   if(brk)
+     {
+       // Only one warp can increment because of the break
+       // so we just need to increment by 1
+       if(lane == 0 )
+         diag_shifts[row_i] += 1;
+
+       return;
+     }
+
+   // S_offd
+   // We shouldn't get here if brk got set
+   hypre_device_assert(!brk);
+
+   if(!brk)
+     {
+
+   if (lane < 2)
+     {
+       p = read_only_load(S_offd_i + i1 + lane);
+     }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   equal = 0;
+   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+     {
+       if(!brk)
+         {
+           if( j < q )
+             {
+               HYPRE_Int j1 = S_offd_j[j];
+               if (pass_marker_offd[j1] == color )
+                 equal++;
+             }
+
+           if(equal)
+             brk=1;
+
+           brk = __any_sync(HYPRE_WARP_FULL_MASK, brk);
+         }
+     }
+
+   if(brk)
+     {
+       // Only one warp can increment because of the break
+       // so we just need to increment by 1
+       if(lane == 0 )
+         diag_shifts[row_i] += 1;
+
+       return;
+     }
+
+     }
+   // We shouldn't get here if brk got set
+   hypre_device_assert(!brk);
+
+   if(!brk && lane == 0 )
+     points_left_shifts[row_i] += 1;
 }
