@@ -185,6 +185,20 @@ void hypreCUDAKernel_pass_order_count( int num_points,
                                        int  *diag_shifts,
                                        int  *points_left_shifts );
 
+__global__
+void hypreCUDAKernel_pass_order_pass_marker_update( int remaining_pts,
+                                                    int current_pass,
+                                                    int * points_left,
+                                                    int * S_diag_i,
+                                                    int * S_diag_j,
+                                                    int * S_offd_i,
+                                                    int * S_offd_j,
+                                                    int * pass_marker_offd,
+                                                    int * diag_shifts,
+                                                    int * points_left_shifts,
+                                                    int * pass_marker,
+                                                    int * pass_order );
+
 /*--------------------------------------------------------------------------
  * hypre_ParAMGBuildModMultipass
  * This routine implements Stuben's direct interpolation with multiple passes.
@@ -2916,4 +2930,141 @@ void hypreCUDAKernel_pass_order_count( HYPRE_Int num_points,
 
    if(!brk && lane == 0 )
      points_left_shifts[row_i] += 1;
+}
+
+__global__
+void hypreCUDAKernel_pass_order_pass_marker_update( HYPRE_Int remaining_pts,
+                                                    HYPRE_Int current_pass,
+                                                    HYPRE_Int * points_left,
+                                                    HYPRE_Int * S_diag_i,
+                                                    HYPRE_Int * S_diag_j,
+                                                    HYPRE_Int * S_offd_i,
+                                                    HYPRE_Int * S_offd_j,
+                                                    HYPRE_Int * pass_marker_offd,
+                                                    HYPRE_Int * diag_shifts,
+                                                    HYPRE_Int * points_left_shifts,
+                                                    HYPRE_Int * pass_marker,
+                                                    HYPRE_Int * pass_order )
+{
+  HYPRE_Int i = hypre_cuda_get_grid_warp_id<1,1>();
+
+   if (i >= remaining_pts)
+    {
+       return;
+    }
+
+   HYPRE_Int i1 = points_left[i];
+
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+
+   HYPRE_Int p = 0;
+   HYPRE_Int q = 0;
+
+   // S_diag
+   if (lane < 2)
+     {
+       p = read_only_load(S_diag_i + i1 + lane);
+     }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   HYPRE_Int brk = 0;
+   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+     {
+       if(!brk)
+         {
+           HYPRE_Int cond = 0;
+
+           if( j < q )
+             {
+               HYPRE_Int j1 =  S_diag_j[j];
+               cond = (pass_marker[j1] == current_pass);
+             }
+
+           uint64_t equal = __ballot_sync(HYPRE_WARP_FULL_MASK,cond);
+
+           if(equal)
+             {
+               uint64_t lowest_lane_mask = equal & -equal;
+
+               // Figure out what the lane index is
+               HYPRE_Int bscount = 1;
+               for( HYPRE_Int bs = 0; bs < HYPRE_WARP_SIZE; bs++ )
+                 {
+                   if(lowest_lane_mask != 1)
+                     {
+                       lowest_lane_mask = lowest_lane_mask >> 1;
+                       bscount++;
+                     }
+                 }
+
+               if(lane == bscount+1)
+                 {
+                   pass_marker[i1] = current_pass + 1;
+                   pass_order[diag_shifts[i]] = i1;
+                 }
+
+               brk=1;
+             }
+
+           brk = __any_sync(HYPRE_WARP_FULL_MASK,brk);
+         }
+     }
+
+   // S_offd
+   if (lane < 2)
+     {
+       p = read_only_load(S_offd_i + i1 + lane);
+     }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   if(!brk)
+     {
+       for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+         {
+           if(!brk)
+             {
+               HYPRE_Int cond = 0;
+
+               if( j < q )
+                 {
+                   HYPRE_Int j1 =  S_offd_j[j];
+                   cond = (pass_marker_offd[j1] == current_pass);
+                 }
+
+               uint64_t equal = __ballot_sync(HYPRE_WARP_FULL_MASK,cond);
+
+               if(equal)
+                 {
+                   uint64_t lowest_lane_mask = equal & -equal;
+
+                   // Figure out what the lane index is
+                   HYPRE_Int bscount = 1;
+                   for( HYPRE_Int bs = 0; bs < HYPRE_WARP_SIZE; bs++ )
+                     {
+                       if(lowest_lane_mask != 1)
+                         {
+                           lowest_lane_mask = lowest_lane_mask >> 1;
+                           bscount++;
+                         }
+                     }
+
+                   if(lane == bscount+1)
+                     {
+                       pass_marker[i1] = current_pass + 1;
+                       pass_order[diag_shifts[i]] = i1;
+                     }
+
+                   brk=1;
+                 }
+
+               brk = __any_sync(HYPRE_WARP_FULL_MASK,brk);
+             }
+         }
+     }
+
+   if(!brk)
+     {
+       points_left[points_left_shifts[i]] = i1;
+     }
 }
