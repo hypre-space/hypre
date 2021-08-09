@@ -318,31 +318,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-
-   // FIXME: Temporary hack!
-   // Copy S data D->H
-   {
-     HYPRE_Int num_rows_Sdiag = hypre_CSRMatrixNumRows(S_diag);
-     HYPRE_Int num_nonzeros_Sdiag = hypre_CSRMatrixNumNonzeros(S_diag);
-     HYPRE_Int num_rows_Soffd = hypre_CSRMatrixNumRows(S_offd);
-     HYPRE_Int num_nonzeros_Soffd = hypre_CSRMatrixNumNonzeros(S_offd);
-
-     S_diag_i = hypre_TAlloc(HYPRE_Int, num_rows_Sdiag+1, HYPRE_MEMORY_HOST);
-     S_diag_j = hypre_TAlloc(HYPRE_Int, num_nonzeros_Sdiag, HYPRE_MEMORY_HOST);
-     S_offd_i = hypre_TAlloc(HYPRE_Int, num_rows_Soffd+1, HYPRE_MEMORY_HOST);
-     S_offd_j = hypre_TAlloc(HYPRE_Int, num_nonzeros_Soffd, HYPRE_MEMORY_HOST);
-
-     hypre_TMemcpy( S_diag_i, S_diag_i_dev, HYPRE_Int, num_rows_Sdiag+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-
-     hypre_TMemcpy( S_diag_j, S_diag_j_dev, HYPRE_Int, num_nonzeros_Sdiag, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-
-     hypre_TMemcpy( S_offd_i, S_offd_i_dev, HYPRE_Int, num_rows_Soffd+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-
-     hypre_TMemcpy( S_offd_j, S_offd_j_dev, HYPRE_Int, num_nonzeros_Soffd, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-
-   }// Copy A,S data D->H
-
-
    if (num_procs > 1)
    {
       if (my_id == num_procs - 1)
@@ -560,15 +535,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
    } // while (global_remaining > 0)
 
-
-   // FIXME: Temporary hack!
-   // Free up the memory we allocated for the manual copying of A and S data
-   {
-     hypre_TFree(S_diag_i, HYPRE_MEMORY_HOST);
-     hypre_TFree(S_diag_j, HYPRE_MEMORY_HOST);
-     hypre_TFree(S_offd_i, HYPRE_MEMORY_HOST);
-     hypre_TFree(S_offd_j, HYPRE_MEMORY_HOST);
-   }
 
    hypre_TFree(int_buf_data, HYPRE_MEMORY_DEVICE);
    hypre_TFree(points_left_dev, HYPRE_MEMORY_DEVICE);// FIXME: Clean up when done
