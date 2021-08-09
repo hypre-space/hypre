@@ -188,7 +188,8 @@ void hypreCUDAKernel_pass_order_count( int num_points,
 __global__
 void hypreCUDAKernel_pass_order_pass_marker_update( int remaining_pts,
                                                     int current_pass,
-                                                    int * points_left,
+                                                    int * points_left_old,
+                                                    int * pass_marker_old,
                                                     int * S_diag_i,
                                                     int * S_diag_j,
                                                     int * S_offd_i,
@@ -197,7 +198,8 @@ void hypreCUDAKernel_pass_order_pass_marker_update( int remaining_pts,
                                                     int * diag_shifts,
                                                     int * points_left_shifts,
                                                     int * pass_marker,
-                                                    int * pass_order );
+                                                    int * pass_order,
+                                                    int * points_left );
 
 /*--------------------------------------------------------------------------
  * hypre_ParAMGBuildModMultipass
@@ -443,6 +445,10 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    num_passes = 1;
    /* color points according to pass number */
    hypre_MPI_Allreduce(&remaining, &global_remaining, 1, HYPRE_MPI_INT, hypre_MPI_MAX, comm);
+
+   HYPRE_Int * points_left_old = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int * pass_marker_old = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
+
    while (global_remaining > 0)
    {
       HYPRE_Int remaining_pts = remaining;
@@ -484,9 +490,14 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                            thrust::tuple<HYPRE_Int,HYPRE_Int>(cnt_old,0),
                            tuple_plus<HYPRE_Int>() );
 
+
+        hypre_TMemcpy( points_left_old, points_left_dev, HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+        hypre_TMemcpy( pass_marker_old, pass_marker_dev, HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+
         hypreCUDAKernel_pass_order_pass_marker_update<<<gDim,bDim>>>( remaining_pts,
                                                                       current_pass,
-                                                                      points_left_dev,
+                                                                      points_left_old,
+                                                                      pass_marker_old,
                                                                       S_diag_i_dev,
                                                                       S_diag_j_dev,
                                                                       S_offd_i_dev,
@@ -495,7 +506,8 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                                                       diag_shifts,
                                                                       points_left_shifts,
                                                                       pass_marker_dev,
-                                                                      pass_order_dev );
+                                                                      pass_order_dev,
+                                                                      points_left_dev );
 
         hypre_TFree(diag_shifts, HYPRE_MEMORY_DEVICE);
         hypre_TFree(points_left_shifts, HYPRE_MEMORY_DEVICE);
@@ -535,6 +547,8 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
    } // while (global_remaining > 0)
 
+   hypre_TFree(points_left_old,HYPRE_MEMORY_DEVICE);
+   hypre_TFree(pass_marker_old,HYPRE_MEMORY_DEVICE);
 
    hypre_TFree(int_buf_data, HYPRE_MEMORY_DEVICE);
    hypre_TFree(points_left_dev, HYPRE_MEMORY_DEVICE);// FIXME: Clean up when done
@@ -2917,7 +2931,8 @@ void hypreCUDAKernel_pass_order_count( HYPRE_Int num_points,
 __global__
 void hypreCUDAKernel_pass_order_pass_marker_update( HYPRE_Int remaining_pts,
                                                     HYPRE_Int current_pass,
-                                                    HYPRE_Int * points_left,
+                                                    HYPRE_Int * points_left_old,
+                                                    HYPRE_Int * pass_marker_old,
                                                     HYPRE_Int * S_diag_i,
                                                     HYPRE_Int * S_diag_j,
                                                     HYPRE_Int * S_offd_i,
@@ -2926,7 +2941,8 @@ void hypreCUDAKernel_pass_order_pass_marker_update( HYPRE_Int remaining_pts,
                                                     HYPRE_Int * diag_shifts,
                                                     HYPRE_Int * points_left_shifts,
                                                     HYPRE_Int * pass_marker,
-                                                    HYPRE_Int * pass_order )
+                                                    HYPRE_Int * pass_order,
+                                                    HYPRE_Int * points_left )
 {
   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1,1>();
 
@@ -2935,7 +2951,7 @@ void hypreCUDAKernel_pass_order_pass_marker_update( HYPRE_Int remaining_pts,
        return;
     }
 
-   HYPRE_Int i1 = points_left[i];
+   HYPRE_Int i1 = points_left_old[i];
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
 
@@ -2960,7 +2976,7 @@ void hypreCUDAKernel_pass_order_pass_marker_update( HYPRE_Int remaining_pts,
            if( j < q )
              {
                HYPRE_Int j1 =  S_diag_j[j];
-               cond = (pass_marker[j1] == current_pass);
+               cond = (pass_marker_old[j1] == current_pass);
              }
 
            uint64_t equal = __ballot_sync(HYPRE_WARP_FULL_MASK,cond);
