@@ -584,21 +584,32 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    }
 
 
-   Pi = hypre_CTAlloc(hypre_ParCSRMatrix*, num_passes, HYPRE_MEMORY_HOST);
+     Pi = hypre_CTAlloc(hypre_ParCSRMatrix*, num_passes, HYPRE_MEMORY_HOST);
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("MultipassPiDevice");
+#endif
    hypre_GenerateMultipassPiDevice(A, S, num_cpts_global, &pass_order_dev[pass_starts[1]],
                                    pass_marker_dev, pass_marker_offd_dev,
                                    pass_starts[2]-pass_starts[1], 1, row_sums, &Pi[0]);
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
    if (interp_type == 8)
    {
       for (i=1; i<num_passes-1; i++)
       {
          hypre_ParCSRMatrix *Q;
          HYPRE_BigInt *c_pts_starts = hypre_ParCSRMatrixRowStarts(Pi[i-1]);
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         hypre_GpuProfilingPushRange(std::string("MultipassPiDevice Loop"+std::to_string(i)).c_str());
+#endif
          hypre_GenerateMultipassPiDevice(A, S, c_pts_starts, &pass_order_dev[pass_starts[i+1]],
                                          pass_marker_dev, pass_marker_offd_dev,
                                          pass_starts[i+2]-pass_starts[i+1], i+1, row_sums, &Q);
-
-
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
          Pi[i] = hypre_ParCSRMatMat(Q, Pi[i-1]);
 
          hypre_ParCSRMatrixOwnsRowStarts(Q)=0;
