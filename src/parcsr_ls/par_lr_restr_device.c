@@ -235,7 +235,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
                            thrust::make_constant_iterator(col_start),
                            send_buf_i,
                            thrust::plus<HYPRE_BigInt>() );
-      
+
       comm_handle = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg_Z, HYPRE_MEMORY_DEVICE, send_buf_i, HYPRE_MEMORY_DEVICE, Fmap_offd_global);
       hypre_ParCSRCommHandleDestroy(comm_handle);
       hypre_TFree(send_buf_i, HYPRE_MEMORY_DEVICE);
@@ -265,9 +265,9 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
                       n_cpts, Fmap, Cmap, Z_diag_i, Z_diag_j, Z_diag_a, R_diag_i, R_diag_j, R_diag_a);
 
    num_cols_offd_R = num_cols_offd_Z;
-   col_map_offd_R = hypre_TAlloc(HYPRE_Int, num_cols_offd_Z, HYPRE_MEMORY_HOST);
+   col_map_offd_R = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_Z, HYPRE_MEMORY_HOST);
    hypre_TMemcpy(col_map_offd_R, Fmap_offd_global, HYPRE_Int, num_cols_offd_Z, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   
+
    /* Now, we should have everything of Parcsr matrix R */
    R = hypre_ParCSRMatrixCreate(comm,
                                 total_global_cpts, /* global num of rows */
@@ -316,14 +316,14 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
 
 /*-----------------------------------------------------------------------*/
 __global__ void
-hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( HYPRE_Int      nr_of_rows, 
+hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( HYPRE_Int      nr_of_rows,
                                                    HYPRE_Int     *Fmap,
                                                    HYPRE_Int     *Cmap,
-                                                   HYPRE_Int     *Z_diag_i, 
-                                                   HYPRE_Int     *Z_diag_j, 
+                                                   HYPRE_Int     *Z_diag_i,
+                                                   HYPRE_Int     *Z_diag_j,
                                                    HYPRE_Complex *Z_diag_a,
-                                                   HYPRE_Int     *R_diag_i, 
-                                                   HYPRE_Int     *R_diag_j, 
+                                                   HYPRE_Int     *R_diag_i,
+                                                   HYPRE_Int     *R_diag_j,
                                                    HYPRE_Complex *R_diag_a)
 {
    /*-----------------------------------------------------------------------*/

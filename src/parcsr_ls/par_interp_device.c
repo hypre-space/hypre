@@ -1035,7 +1035,7 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Complex           *A_offd_a        = hypre_CSRMatrixData(A_offd);
 
    HYPRE_Int                num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
-   
+
    /* Interpolation matrix P */
    hypre_ParCSRMatrix      *P;
    /* csr's */
@@ -1155,7 +1155,7 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    dim3 gDim = hypre_GetDefaultCUDAGridDimension(n_fine, "warp", bDim);
 
    HYPRE_CUDA_LAUNCH( hypre_BoomerAMGBuildInterpOnePnt_getnnz, gDim, bDim,
-                      n_fine, A_diag_i, A_strong_diag_j, A_diag_a, A_offd_i, A_strong_offd_j, 
+                      n_fine, A_diag_i, A_strong_diag_j, A_diag_a, A_offd_i, A_strong_offd_j,
                       A_offd_a, CF_marker, CF_marker_offd, diag_compress_marker,
                       offd_compress_marker, P_diag_i, P_diag_j_temp, P_offd_i, P_offd_j_temp);
 
@@ -1225,7 +1225,7 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                       offd_compress_marker,
                       P_offd_j_temp_compressed,
                       equal<HYPRE_Int>(1) );
-   
+
    /* map the diag column indices */
    HYPRE_THRUST_CALL( gather,
                       P_diag_j_temp_compressed,
@@ -1242,11 +1242,11 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                       thrust::make_constant_iterator(1) + nnz_offd,
                       P_offd_j_temp_compressed,
                       mark_P_offd_idx );
-   num_cols_P_offd = HYPRE_THRUST_CALL(reduce, mark_P_offd_idx, mark_P_offd_idx + num_cols_A_offd); 
+   num_cols_P_offd = HYPRE_THRUST_CALL(reduce, mark_P_offd_idx, mark_P_offd_idx + num_cols_A_offd);
 
    /* get a mapping from P offd indices to A offd indices */
    /* offd_map_P_to_A[ P offd idx ] = A offd idx */
-   HYPRE_Int *offd_map_P_to_A = hypre_CTAlloc(HYPRE_BigInt, num_cols_P_offd, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int *offd_map_P_to_A = hypre_CTAlloc(HYPRE_Int, num_cols_P_offd, HYPRE_MEMORY_DEVICE);
    HYPRE_THRUST_CALL( copy_if,
                       thrust::make_counting_iterator(0),
                       thrust::make_counting_iterator(num_cols_A_offd),
@@ -1255,7 +1255,7 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                       equal<HYPRE_Int>(1) );
    hypre_TFree(mark_P_offd_idx, HYPRE_MEMORY_DEVICE);
 
-   /* also get an inverse mapping from A offd indices to P offd indices */ 
+   /* also get an inverse mapping from A offd indices to P offd indices */
    /* offd_map_A_to_P[ A offd idx ] = -1 if not a P idx, else P offd idx */
    HYPRE_Int *offd_map_A_to_P = hypre_TAlloc(HYPRE_Int, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
    HYPRE_THRUST_CALL( fill_n,
@@ -1330,20 +1330,20 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
 
 /*-----------------------------------------------------------------------*/
 __global__ void
-hypre_BoomerAMGBuildInterpOnePnt_getnnz( HYPRE_Int      nr_of_rows, 
-                                         HYPRE_Int     *A_diag_i, 
-                                         HYPRE_Int     *A_strong_diag_j, 
+hypre_BoomerAMGBuildInterpOnePnt_getnnz( HYPRE_Int      nr_of_rows,
+                                         HYPRE_Int     *A_diag_i,
+                                         HYPRE_Int     *A_strong_diag_j,
                                          HYPRE_Complex *A_diag_a,
-                                         HYPRE_Int     *A_offd_i, 
-                                         HYPRE_Int     *A_strong_offd_j, 
+                                         HYPRE_Int     *A_offd_i,
+                                         HYPRE_Int     *A_strong_offd_j,
                                          HYPRE_Complex *A_offd_a,
-                                         HYPRE_Int     *CF_marker, 
-                                         HYPRE_Int     *CF_marker_offd, 
+                                         HYPRE_Int     *CF_marker,
+                                         HYPRE_Int     *CF_marker_offd,
                                          HYPRE_Int     *diag_compress_marker,
                                          HYPRE_Int     *offd_compress_marker,
-                                         HYPRE_Int     *P_diag_i, 
-                                         HYPRE_Int     *P_diag_j, 
-                                         HYPRE_Int     *P_offd_i, 
+                                         HYPRE_Int     *P_diag_i,
+                                         HYPRE_Int     *P_diag_j,
+                                         HYPRE_Int     *P_offd_i,
                                          HYPRE_Int     *P_offd_j)
 {
    /*-----------------------------------------------------------------------*/
