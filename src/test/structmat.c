@@ -1026,7 +1026,8 @@ main( hypre_int  argc,
       time_index = hypre_InitializeTiming("Matrix-matrix multiply");
       hypre_BeginTiming(time_index);
 
-      hypre_StructMatmult(data.nmatrices, matrices, nterms, terms, trans, &M);
+      //hypre_StructMatmult(data.nmatrices, matrices, nterms, terms, trans, &M);
+      hypre_StructMatrixMultGroup(data.nmatrices, matrices, nterms, terms, trans, &M);
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Matrix-matrix multiply", hypre_MPI_COMM_WORLD);

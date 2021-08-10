@@ -28,7 +28,8 @@ HEADERS =\
  struct_matrix.h\
  struct_stencil.h\
  struct_stmatrix.h\
- struct_vector.h
+ struct_vector.h\
+ struct_matmult_wip.h
 
 FILES =\
  assumed_part.c\
@@ -53,6 +54,7 @@ FILES =\
  struct_grid.c\
  struct_io.c\
  struct_matmult.c\
+ struct_matmult_wip.c\
  struct_matop.c\
  struct_matrix_mask.c\
  struct_stencil.c\

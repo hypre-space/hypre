@@ -249,6 +249,18 @@ HYPRE_Int hypre_ReadBoxArrayData_CC ( FILE *file , hypre_BoxArray *box_array , h
 /* struct_matmult.c */
 HYPRE_Int hypre_StructMatmult ( HYPRE_Int nmatrices , hypre_StructMatrix **matrices , HYPRE_Int nterms , HYPRE_Int *terms , HYPRE_Int *transposes , hypre_StructMatrix **M_ptr );
 
+/* struct_matmult_wip.c */
+hypre_StructMMData* hypre_StructMatrixMultCreate ( HYPRE_Int nmatrices_in , hypre_StructMatrix **matrices_in , HYPRE_Int nterms , HYPRE_Int *terms_in , HYPRE_Int *transposes_in );
+HYPRE_Int hypre_StructMatrixMultDestroy ( hypre_StructMMData *mmdata );
+HYPRE_Int hypre_StructMatrixMultSetup ( hypre_StructMMData  *mmdata , hypre_StructMatrix **M_ptr );
+HYPRE_Int hypre_StructMatrixMultCommunicate ( hypre_StructMMData *mmdata );
+HYPRE_Int hypre_StructMatrixMultCompute ( hypre_StructMMData *mmdata , hypre_StructMatrix *M );
+HYPRE_Int hypre_StructMatrixMultGroup ( HYPRE_Int nmatrices , hypre_StructMatrix **matrices , HYPRE_Int nterms , HYPRE_Int *terms , HYPRE_Int *trans , hypre_StructMatrix **M_ptr );
+HYPRE_Int hypre_StructMatrixMult ( hypre_StructMatrix *A , hypre_StructMatrix *B , hypre_StructMatrix **M_ptr );
+HYPRE_Int hypre_StructMatrixPtAP ( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix **M_ptr );
+HYPRE_Int hypre_StructMatrixRAP ( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix **M_ptr );
+HYPRE_Int hypre_StructMatrixRTtAP ( hypre_StructMatrix *RT , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix **M_ptr );
+
 /* struct_matop.c */
 HYPRE_Int hypre_StructMatrixComputeRowSum ( hypre_StructMatrix *A , HYPRE_Int type , hypre_StructVector *rowsum );
 HYPRE_Int hypre_StructMatrixComputeRowSum_core_CC ( hypre_StructMatrix *A , hypre_StructVector *rowsum , HYPRE_Int box_id , HYPRE_Int nentries , HYPRE_Int *entries , hypre_Box *box , hypre_Box *Adbox , hypre_Box *rdbox , HYPRE_Int type );

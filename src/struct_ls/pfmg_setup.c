@@ -210,19 +210,15 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "RAP");
       if (rap_type == 0)
       {
-         HYPRE_Int           nmatrices   = 3;
-         HYPRE_StructMatrix  matrices[3] = {A_l[l], P_l[l], RT_l[l]};
-         HYPRE_Int           nterms      = 3;
-         HYPRE_Int           terms[3]    = {1,0,1};
-         HYPRE_Int           trans[3]    = {1,0,0};
-
-         /* If restriction is not the same as interpolation, point to matrices[2] */
          if (RT_l[l] != P_l[l])
          {
-            terms[0] = 2;
+            /* If restriction is not the same as interpolation, compute RAP */
+            hypre_StructMatrixRTtAP(RT_l[l], A_l[l], P_l[l], &A_l[l+1]);
          }
-
-         hypre_StructMatmult(nmatrices, matrices, nterms, terms, trans, &A_l[l+1]);
+         else
+         {
+            hypre_StructMatrixPtAP(A_l[l], P_l[l], &A_l[l+1]);
+         }
          hypre_StructGridRef(hypre_StructMatrixGrid(A_l[l+1]), &grid_l[l+1]);
       }
       else
