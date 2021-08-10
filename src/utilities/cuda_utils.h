@@ -857,7 +857,13 @@ struct equal : public thrust::unary_function<T,bool>
    }
 };
 
-
+struct print_functor
+{
+   __host__ __device__ void operator()(HYPRE_Real val)
+   {
+      printf("%f\n", val);
+   }
+};
 
 /* cuda_utils.c */
 dim3 hypre_GetDefaultCUDABlockDimension();

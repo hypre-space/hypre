@@ -79,7 +79,16 @@ hypreCUDAKernel_InterpTruncation( HYPRE_Int   nrows,
       }
    }
 
-   row_scal = row_sum / warp_allreduce_sum(row_scal);
+   row_scal = warp_allreduce_sum(row_scal);
+
+   if (row_scal)
+   {
+      row_scal = row_sum / row_scal;
+   }
+   else
+   {
+      row_scal = 1.0;
+   }
 
    /* 3. scale the row */
    for (HYPRE_Int i = p + lane; i <= last_pos; i += HYPRE_WARP_SIZE)
