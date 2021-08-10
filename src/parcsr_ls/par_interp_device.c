@@ -1285,7 +1285,7 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                       offd_map_P_to_A + num_cols_P_offd,
                       fine_to_coarse_offd,
                       col_map_offd_P_device);
-   hypre_TMemcpy(col_map_offd_P, col_map_offd_P_device, HYPRE_Int, num_cols_P_offd, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(col_map_offd_P, col_map_offd_P_device, HYPRE_BigInt, num_cols_P_offd, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    hypre_TFree(offd_map_P_to_A, HYPRE_MEMORY_DEVICE);
    hypre_TFree(col_map_offd_P_device, HYPRE_MEMORY_DEVICE);
 
