@@ -266,7 +266,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
 
    num_cols_offd_R = num_cols_offd_Z;
    col_map_offd_R = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_Z, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(col_map_offd_R, Fmap_offd_global, HYPRE_Int, num_cols_offd_Z, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(col_map_offd_R, Fmap_offd_global, HYPRE_BigInt, num_cols_offd_Z, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
    /* Now, we should have everything of Parcsr matrix R */
    R = hypre_ParCSRMatrixCreate(comm,
