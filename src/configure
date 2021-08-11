@@ -8461,7 +8461,8 @@ then
    HYPRE_LIBSUFFIX=".so"
    SHARED_SET_SONAME="-Wl,-soname,"
    SHARED_OPTIONS="-Wl,-z,defs"
-                        dnlfi
+
+
    SHARED_COMPILE_FLAG="-fPIC"
    case $hypre_platform in
       AIX* | aix* | Aix*) SHARED_COMPILE_FLAG="-qmkshrobj"
@@ -8887,17 +8888,11 @@ $as_echo "#define HYPRE_USING_CURAND 1" >>confdefs.h
       else
          CUFLAGS="-O2 ${CUFLAGS}"
       fi
-   fi
-
-   if test "$hypre_user_chose_cxxflags" = "no"
-   then
       if test "${CXX}" = "mpixlC" || test "${CXX}" = "xlC_r" || test "${CXX}" = "xlC"
       then
-         CXXFLAGS+=" -Wno-deprecated-register -Wenum-compare"
+         CUFLAGS="${CUFLAGS} -Xcompiler \"-Wno-deprecated-register -Wenum-compare\""
       fi
    fi
-
-   CUFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
 
          HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
    HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64 -lcudart'
@@ -8956,8 +8951,6 @@ fi
         then
            CUFLAGS="${HIPCPPFLAGS} ${HIPCXXFLAGS}"
         fi
-
-        CUFLAGS="${CUFLAGS} ${CXXFLAGS}"
 
                         HYPRE_HIP_INCL="-I${HYPRE_ROCM_PREFIX}/rocthrust/include"
         HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocprim/include"

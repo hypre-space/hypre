@@ -1865,6 +1865,7 @@ then
    HYPRE_LIBSUFFIX=".so"
    SHARED_SET_SONAME="-Wl,-soname,"
    SHARED_OPTIONS="-Wl,-z,defs"
+
    dnl if test "$hypre_using_cuda" = "yes"
    dnl then
    dnl   SHARED_SET_SONAME="-Xlinker=-soname,"
@@ -1872,7 +1873,8 @@ then
    dnl else
    dnl   SHARED_SET_SONAME="-Wl,-soname,"
    dnl   SHARED_OPTIONS="-Wl,-z,defs"
-   dnlfi
+   dnl fi
+
    SHARED_COMPILE_FLAG="-fPIC"
    case $hypre_platform in
       AIX* | aix* | Aix*) SHARED_COMPILE_FLAG="-qmkshrobj"
@@ -2116,17 +2118,11 @@ then
       else
          CUFLAGS="-O2 ${CUFLAGS}"
       fi
-   fi
-
-   if test "$hypre_user_chose_cxxflags" = "no"
-   then
       if [test "${CXX}" = "mpixlC" || test "${CXX}" = "xlC_r" || test "${CXX}" = "xlC"]
       then
-         CXXFLAGS+=" -Wno-deprecated-register -Wenum-compare"
+         CUFLAGS="${CUFLAGS} -Xcompiler \"-Wno-deprecated-register -Wenum-compare\""
       fi
    fi
-
-   CUFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
 
    dnl CFLAGS=${CXXFLAGS}
    dnl LDFLAGS="-Xcompiler \"${LDFLAGS}\""
@@ -2202,8 +2198,6 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
         then
            CUFLAGS="${HIPCPPFLAGS} ${HIPCXXFLAGS}"
         fi
-
-        CUFLAGS="${CUFLAGS} ${CXXFLAGS}"
 
         dnl rocThrust depends on rocPrim so we need both for Thrust on AMD GPUs.
         dnl These are header-only so no linking needed.
