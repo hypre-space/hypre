@@ -16,7 +16,7 @@
 #include "_hypre_IJ_mv.h"
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_parcsr_ls.h"
-#include "_hypre_utilities.hpp"
+//#include "_hypre_utilities.hpp"
 
 HYPRE_Int buildMatrixEntries(MPI_Comm comm,
                              HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
@@ -430,11 +430,7 @@ main( hypre_int  argc,
    hypre_MPI_Finalize();
 
    /* when using cuda-memcheck --leak-check full, uncomment this */
-#if defined(HYPRE_USING_CUDA)
-   cudaDeviceReset();
-#elif defined(HYPRE_USING_HIP)
-   hipDeviceReset();
-#endif
+   hypre_ResetCudaDevice(hypre_handle());
 
    return (0);
 }
@@ -926,7 +922,8 @@ test_SetSet(MPI_Comm             comm,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    else
    {
-      HYPRE_THRUST_CALL(transform, coefs, coefs + num_nonzeros, new_coefs, 2.0 * _1);
+      hypre_TMemcpy(new_coefs, coefs, HYPRE_Real, num_nonzeros, memory_location, memory_location);
+      hypreDevice_Scalen(new_coefs, num_nonzeros, 2.0);
    }
 #endif
 
@@ -1051,7 +1048,8 @@ test_AddSet(MPI_Comm             comm,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    else
    {
-      HYPRE_THRUST_CALL(transform, coefs, coefs + num_nonzeros, new_coefs, 2.0 * _1);
+      hypre_TMemcpy(new_coefs, coefs, HYPRE_Real, num_nonzeros, memory_location, memory_location);
+      hypreDevice_Scalen(new_coefs, num_nonzeros, 2.0);
    }
 #endif
 

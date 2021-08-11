@@ -325,6 +325,14 @@ hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 }
 
 HYPRE_Int
+hypreDevice_Scalen(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v)
+{
+   HYPRE_THRUST_CALL( transform, d_x, d_x + n, d_x, v * _1 );
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
 hypreDevice_Filln(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v)
 {
    HYPRE_THRUST_CALL( fill_n, d_x, n, v);
@@ -1251,6 +1259,17 @@ hypre_SyncCudaDevice(hypre_Handle *hypre_handle)
    HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
 #elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipDeviceSynchronize() );
+#endif
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_ResetCudaDevice(hypre_Handle *hypre_handle)
+{
+#if defined(HYPRE_USING_CUDA)
+   cudaDeviceReset();
+#elif defined(HYPRE_USING_HIP)
+   hipDeviceReset();
 #endif
    return hypre_error_flag;
 }

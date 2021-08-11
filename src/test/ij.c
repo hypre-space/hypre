@@ -17,7 +17,6 @@
 #include <math.h>
 
 #include "_hypre_utilities.h"
-//#include "_hypre_utilities.hpp"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_mv.h"
 
@@ -26,10 +25,6 @@
 #include "HYPRE_parcsr_ls.h"
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"
-
-#if defined(HYPRE_USING_GPU)
-#include "_hypre_utilities.hpp"
-#endif
 
 #if defined(HYPRE_USING_UMPIRE)
 #include "umpire/interface/umpire.h"
@@ -84,7 +79,6 @@ extern HYPRE_Int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, HYPRE_Int
 
 extern HYPRE_Int hypre_FlexGMRESModifyPCDefault(void *precond_data, HYPRE_Int iteration,
                                                 HYPRE_Real rel_residual_norm);
-
 #ifdef __cplusplus
 }
 #endif
@@ -193,6 +187,9 @@ main( hypre_int argc,
 
    const HYPRE_Real    dt_inf = DT_INF;
    HYPRE_Real          dt = dt_inf;
+
+   /* solve -Ax = b, for testing SND matrices */
+   HYPRE_Int           negA = 0;
 
    /* parameters for BoomerAMG */
    HYPRE_Real     A_drop_tol = 0.0;
@@ -1155,6 +1152,11 @@ main( hypre_int argc,
          mempool_max_cached_bytes = atoi(argv[arg_index++])*1024LL*1024LL;
       }
 #endif
+      else if ( strcmp(argv[arg_index], "-negA") == 0 )
+      {
+         arg_index++;
+         negA = atoi(argv[arg_index++]);
+      }
       else
       {
          arg_index++;
@@ -3214,6 +3216,11 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Print out the system and initial guess
     *-----------------------------------------------------------*/
+
+   if (negA)
+   {
+      hypre_ParCSRMatrixScale(parcsr_A, -1);
+   }
 
    if (print_system)
    {
@@ -7585,11 +7592,7 @@ main( hypre_int argc,
    hypre_MPI_Finalize();
 
    /* when using cuda-memcheck --leak-check full, uncomment this */
-#if defined(HYPRE_USING_CUDA)
-   cudaDeviceReset();
-#elif defined(HYPRE_USING_HIP)
-   hipDeviceReset();
-#endif
+   hypre_ResetCudaDevice(hypre_handle());
 
    return (0);
 }

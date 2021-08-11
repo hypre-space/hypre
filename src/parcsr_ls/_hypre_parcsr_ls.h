@@ -1986,8 +1986,8 @@ HYPRE_Int hypre_BoomerAMGRelaxHybridGaussSeidelDevice( hypre_ParCSRMatrix *A, hy
 HYPRE_Int hypre_BoomerAMGRelaxIF ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Int *cf_marker , HYPRE_Int relax_type , HYPRE_Int relax_order , HYPRE_Int cycle_type , HYPRE_Real relax_weight , HYPRE_Real omega , HYPRE_Real *l1_norms , hypre_ParVector *u , hypre_ParVector *Vtemp , hypre_ParVector *Ztemp );
 
 /* par_relax_more.c */
-HYPRE_Int hypre_ParCSRMaxEigEstimate ( hypre_ParCSRMatrix *A , HYPRE_Int scale , HYPRE_Real *max_eig );
-HYPRE_Int hypre_ParCSRMaxEigEstimateHost ( hypre_ParCSRMatrix *A , HYPRE_Int scale , HYPRE_Real *max_eig );
+HYPRE_Int hypre_ParCSRMaxEigEstimate ( hypre_ParCSRMatrix *A , HYPRE_Int scale , HYPRE_Real *max_eig, HYPRE_Real *min_eig );
+HYPRE_Int hypre_ParCSRMaxEigEstimateHost ( hypre_ParCSRMatrix *A , HYPRE_Int scale , HYPRE_Real *max_eig, HYPRE_Real *min_eig );
 HYPRE_Int hypre_ParCSRMaxEigEstimateCG ( hypre_ParCSRMatrix *A , HYPRE_Int scale , HYPRE_Int max_iter , HYPRE_Real *max_eig , HYPRE_Real *min_eig );
 HYPRE_Int hypre_ParCSRMaxEigEstimateCGHost ( hypre_ParCSRMatrix *A , HYPRE_Int scale , HYPRE_Int max_iter , HYPRE_Real *max_eig , HYPRE_Real *min_eig );
 HYPRE_Int hypre_ParCSRRelax_Cheby ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Real max_eig , HYPRE_Real min_eig , HYPRE_Real fraction , HYPRE_Int order , HYPRE_Int scale , HYPRE_Int variant , hypre_ParVector *u , hypre_ParVector *v , hypre_ParVector *r );
@@ -1996,9 +1996,11 @@ HYPRE_Int hypre_ParCSRRelax_CG ( HYPRE_Solver solver , hypre_ParCSRMatrix *A , h
 HYPRE_Int hypre_LINPACKcgtql1 ( HYPRE_Int *n , HYPRE_Real *d , HYPRE_Real *e , HYPRE_Int *ierr );
 HYPRE_Real hypre_LINPACKcgpthy ( HYPRE_Real *a , HYPRE_Real *b );
 HYPRE_Int hypre_ParCSRRelax_L1_Jacobi ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Int *cf_marker , HYPRE_Int relax_points , HYPRE_Real relax_weight , HYPRE_Real *l1_norms , hypre_ParVector *u , hypre_ParVector *Vtemp );
+HYPRE_Int hypre_LINPACKcgtql1(HYPRE_Int*,HYPRE_Real *,HYPRE_Real *,HYPRE_Int *);
+HYPRE_Real hypre_LINPACKcgpthy(HYPRE_Real*, HYPRE_Real*);
 
 /* par_relax_more_device.c */
-HYPRE_Int hypre_ParCSRMaxEigEstimateDevice ( hypre_ParCSRMatrix *A , HYPRE_Int scale , HYPRE_Real *max_eig );
+HYPRE_Int hypre_ParCSRMaxEigEstimateDevice ( hypre_ParCSRMatrix *A , HYPRE_Int scale , HYPRE_Real *max_eig , HYPRE_Real *min_eig );
 HYPRE_Int hypre_ParCSRMaxEigEstimateCGDevice ( hypre_ParCSRMatrix *A , HYPRE_Int scale , HYPRE_Int max_iter , HYPRE_Real *max_eig , HYPRE_Real *min_eig );
 
 /* par_rotate_7pt.c */
@@ -2332,8 +2334,6 @@ HYPRE_Int hypre_CSRMatrixResNormFro(hypre_CSRMatrix *A, HYPRE_Real *norm_io);
 HYPRE_Int hypre_ParCSRMatrixNormFro(hypre_ParCSRMatrix *A, HYPRE_Real *norm_io);
 HYPRE_Int hypre_ParCSRMatrixResNormFro(hypre_ParCSRMatrix *A, HYPRE_Real *norm_io);
 HYPRE_Int hypre_CSRMatrixTrace(hypre_CSRMatrix *A, HYPRE_Real *trace_io);
-HYPRE_Int hypre_CSRMatrixScale(hypre_CSRMatrix *A, HYPRE_Real scalar);
-HYPRE_Int hypre_ParCSRMatrixScale(hypre_ParCSRMatrix *A, HYPRE_Real scalar);
 HYPRE_Int hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max_row_nnz);
 HYPRE_Int hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMatrix **M, HYPRE_Real droptol, HYPRE_Real tol, HYPRE_Real eps_tol, HYPRE_Int max_row_nnz, HYPRE_Int max_iter, HYPRE_Int print_level );
 HYPRE_Int hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_Real *droptol, HYPRE_Real mr_tol, HYPRE_Real nsh_tol, HYPRE_Real eps_tol, HYPRE_Int mr_max_row_nnz, HYPRE_Int nsh_max_row_nnz, HYPRE_Int mr_max_iter, HYPRE_Int nsh_max_iter, HYPRE_Int mr_col_version, HYPRE_Int print_level);
