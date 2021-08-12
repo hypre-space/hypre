@@ -163,9 +163,11 @@ struct hypre_CudaData
    hypre_cub_CachingDeviceAllocator *cub_dev_allocator;
    hypre_cub_CachingDeviceAllocator *cub_uvm_allocator;
 #endif
-#ifdef HYPRE_USING_UMPIRE_DEVICE
-   hypre_umpire_device_allocator     umpire_device_allocator;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_device_allocator            device_allocator;
 #endif
+
    HYPRE_Int                         cuda_device;
    /* by default, hypre puts GPU computations in this stream
     * Do not be confused with the default (null) CUDA stream */
@@ -207,7 +209,7 @@ struct hypre_CudaData
 #define hypre_CudaDataSpgemmRownnzEstimateNsamples(data)   ((data) -> spgemm_rownnz_estimate_nsamples)
 #define hypre_CudaDataSpgemmRownnzEstimateMultFactor(data) ((data) -> spgemm_rownnz_estimate_mult_factor)
 #define hypre_CudaDataSpgemmHashType(data)                 ((data) -> spgemm_hash_type)
-#define hypre_CudaDataUmpireDeviceAllocator(data)          ((data) -> umpire_device_allocator)
+#define hypre_CudaDataDeviceAllocator(data)                ((data) -> device_allocator)
 #define hypre_CudaDataUseGpuRand(data)                     ((data) -> use_gpu_rand)
 
 hypre_CudaData*     hypre_CudaDataCreate();
@@ -370,34 +372,12 @@ using namespace thrust::placeholders;
 /* RL: TODO Want macro HYPRE_THRUST_CALL to return value but I don't know how to do it right
  * The following one works OK for now */
 
-#ifdef HYPRE_USING_UMPIRE_DEVICE
-
 #if defined(HYPRE_USING_CUDA)
-#define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
-   thrust::func_name(thrust::cuda::par(hypre_HandleUmpireDeviceAllocator(hypre_handle())).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
-#elif defined(HYPRE_USING_HIP)
-#define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
-   thrust::func_name(thrust::hip::par(hypre_HandleUmpireDeviceAllocator(hypre_handle())).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
-#endif // HYPRE_USING_CUDA
-
-#elif HYPRE_USING_DEVICE_POOL
-#if defined(HYPRE_USING_CUDA)
-#define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
-   thrust::func_name(thrust::cuda::par(*(hypre_HandleCubDevAllocator(hypre_handle()))).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
+#define HYPRE_THRUST_CALL(func_name, ...)                                                                                                            \
+   thrust::func_name(thrust::cuda::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
+#elif defined(HYPRE_USING_HIP)                                                                                                                        \
+   thrust::func_name(thrust::hip::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
 #endif
-
-#else
-
-#if defined(HYPRE_USING_CUDA)
-#define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
-   thrust::func_name(thrust::cuda::par.on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
-#elif defined(HYPRE_USING_HIP)
-#define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
-   thrust::func_name(thrust::hip::par.on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
-#endif // HYPRE_USING_CUDA
-
-#endif // HYPRE_USING_UMPIRE_DEVICE
-
 
 /* return the number of threads in block */
 template <hypre_int dim>
@@ -877,7 +857,13 @@ struct equal : public thrust::unary_function<T,bool>
    }
 };
 
-
+struct print_functor
+{
+   __host__ __device__ void operator()(HYPRE_Real val)
+   {
+      printf("%f\n", val);
+   }
+};
 
 /* cuda_utils.c */
 dim3 hypre_GetDefaultCUDABlockDimension();

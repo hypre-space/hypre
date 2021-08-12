@@ -38,55 +38,75 @@ means half, and .1 means 10percent)
 
 *******************************************************************************/
 
+/**
+ * @brief Setups of coefficients (and optional diagonal scaling elements) for
+ * Chebyshev relaxation
+ *
+ * Will calculate ds_ptr on device/host depending on where A is located
+ *
+ * @param[in] A Matrix for which to seteup
+ * @param[in] max_eig Maximum eigenvalue
+ * @param[in] min_eig Maximum eigenvalue
+ * @param[in] fraction Fraction used to calculate lower bound
+ * @param[in] order Polynomial order to use [1,4]
+ * @param[in] scale Whether or not to scale by the diagonal
+ * @param[in] variant Whether or not to use a variant of Chebyshev (0 standard, 1 variant)
+ * @param[out] coefs_ptr *coefs_ptr will be allocated to contain coefficients of the polynomial
+ * @param[out] ds_ptr *ds_ptr will be allocated to allow scaling by the diagonal
+ */
 HYPRE_Int
-hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
+hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A,         /* matrix to relax with */
                               HYPRE_Real          max_eig,
                               HYPRE_Real          min_eig,
                               HYPRE_Real          fraction,
-                              HYPRE_Int           order, /* polynomial order */
-                              HYPRE_Int           scale, /* scale by diagonal?*/
+                              HYPRE_Int           order,     /* polynomial order */
+                              HYPRE_Int           scale,     /* scale by diagonal?*/
                               HYPRE_Int           variant,
                               HYPRE_Real        **coefs_ptr,
-                              HYPRE_Real        **ds_ptr) /* initial/updated approximation */
+                              HYPRE_Real        **ds_ptr)    /* initial/updated approximation */
 {
-   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-
-   HYPRE_Real theta, delta;
-
-   HYPRE_Real den;
-   HYPRE_Real upper_bound, lower_bound;
-
-   HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag);
-
-   HYPRE_Real *coefs = NULL;
-
-   HYPRE_Int cheby_order;
-
-   HYPRE_Real *ds_data = NULL;
-
+   hypre_CSRMatrix *A_diag       = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Real       theta, delta;
+   HYPRE_Real       den;
+   HYPRE_Real       upper_bound = 0.0, lower_bound = 0.0;
+   HYPRE_Int        num_rows     = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Real      *coefs        = NULL;
+   HYPRE_Int        cheby_order;
+   HYPRE_Real      *ds_data = NULL;
 
    /* u = u + p(A)r */
-
    if (order > 4)
+   {
       order = 4;
+   }
+
    if (order < 1)
+   {
       order = 1;
+   }
 
-   coefs = hypre_CTAlloc(HYPRE_Real,  order+1, HYPRE_MEMORY_HOST);
+   coefs = hypre_CTAlloc(HYPRE_Real, order+1, HYPRE_MEMORY_HOST);
    /* we are using the order of p(A) */
-   cheby_order = order -1;
+   cheby_order = order - 1;
 
-    /* make sure we are large enough -  Adams et al. 2003 */
-   upper_bound = max_eig * 1.1;
-   /* lower_bound = max_eig/fraction; */
-   lower_bound = (upper_bound - min_eig)* fraction + min_eig;
-
+   if (min_eig >= 0.0)
+   {
+      /* make sure we are large enough - Adams et al. 2003 */
+      upper_bound = max_eig * 1.1;
+      /* lower_bound = max_eig/fraction; */
+      lower_bound = (upper_bound - min_eig) * fraction + min_eig;
+   }
+   else if (max_eig <= 0.0)
+   {
+      upper_bound = min_eig * 1.1;
+      lower_bound = max_eig - (max_eig - upper_bound) * fraction;
+   }
 
    /* theta and delta */
    theta = (upper_bound + lower_bound)/2;
    delta = (upper_bound - lower_bound)/2;
 
-   if (variant == 1 )
+   if (variant == 1)
    {
       switch ( cheby_order ) /* these are the corresponding cheby polynomials: u = u_o + s(A)r_0  - so order is
                                 one less that  resid poly: r(t) = 1 - t*s(t) */
@@ -167,9 +187,9 @@ hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A, /* matrix to relax with */
 
    if (scale)
    {
-      /*grab 1/sqrt(diagonal) */
+      /*grab 1/sqrt(abs(diagonal)) */
       ds_data = hypre_CTAlloc(HYPRE_Real, num_rows, hypre_ParCSRMatrixMemoryLocation(A));
-      hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(A), ds_data, 3);
+      hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(A), ds_data, 4);
    } /* end of scaling code */
    *ds_ptr = ds_data;
 
@@ -278,7 +298,7 @@ hypre_ParCSRRelax_Cheby_SolveHost(hypre_ParCSRMatrix *A, /* matrix to relax with
       /*grab 1/sqrt(diagonal) */
       tmp_data = hypre_VectorData(hypre_ParVectorLocalVector(tmp_vec));
 
-      /* get ds_data and get scaled residual: r = D^(-1/2)f -
+    /* get ds_data and get scaled residual: r = D^(-1/2)f -
        * D^(-1/2)A*u */
 
       hypre_ParCSRMatrixMatvec(-1.0, A, u, 0.0, tmp_vec);
@@ -345,7 +365,6 @@ hypre_ParCSRRelax_Cheby_SolveHost(hypre_ParCSRMatrix *A, /* matrix to relax with
       }
 
    }/* end of scaling code */
-
 
    return hypre_error_flag;
 }
