@@ -5,11 +5,6 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-/* coarsen.c */
-HYPRE_Int hypre_StructMapFineToCoarse ( hypre_Index findex , hypre_Index index , hypre_Index stride , hypre_Index cindex );
-HYPRE_Int hypre_StructMapCoarseToFine ( hypre_Index cindex , hypre_Index index , hypre_Index stride , hypre_Index findex );
-HYPRE_Int hypre_StructCoarsen ( hypre_StructGrid *fgrid , hypre_Index index , hypre_Index stride , HYPRE_Int prune , hypre_StructGrid **cgrid_ptr );
-
 /* cyclic_reduction.c */
 void *hypre_CyclicReductionCreate ( MPI_Comm comm );
 hypre_StructMatrix *hypre_CycRedCreateCoarseOp ( hypre_StructMatrix *A , hypre_StructGrid *coarse_grid , HYPRE_Int cdir );
@@ -174,7 +169,7 @@ HYPRE_Int hypre_PFMGSetup ( void *pfmg_vdata , hypre_StructMatrix *A , hypre_Str
 HYPRE_Int hypre_PFMGComputeDxyz ( hypre_StructMatrix *A , HYPRE_Real *dxyz , HYPRE_Real *mean, HYPRE_Real *deviation);
 HYPRE_Int hypre_PFMGComputeDxyz_CS  ( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz, HYPRE_Real *sqcxyz);
 HYPRE_Int hypre_PFMGComputeDxyz_SS5 ( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz, HYPRE_Real *sqcxyz);
-HYPRE_Int hypre_PFMGComputeDxyz_SS9 ( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz, HYPRE_Real *sqcxyz);  
+HYPRE_Int hypre_PFMGComputeDxyz_SS9 ( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz, HYPRE_Real *sqcxyz);
 HYPRE_Int hypre_PFMGComputeDxyz_SS7 ( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz, HYPRE_Real *sqcxyz);
 HYPRE_Int hypre_PFMGComputeDxyz_SS19( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz, HYPRE_Real *sqcxyz);
 HYPRE_Int hypre_PFMGComputeDxyz_SS27( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz, HYPRE_Real *sqcxyz);
@@ -186,7 +181,7 @@ HYPRE_Int hypre_PFMGSetupInterpOp ( hypre_StructMatrix *A , HYPRE_Int cdir , hyp
 HYPRE_Int hypre_PFMGSetupInterpOp_CC0 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int rap_type , HYPRE_Int si0 , HYPRE_Int si1 );
 HYPRE_Int hypre_PFMGSetupInterpOp_CC1 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int rap_type , HYPRE_Int si0 , HYPRE_Int si1 );
 HYPRE_Int hypre_PFMGSetupInterpOp_CC2 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int rap_type , HYPRE_Int si0 , HYPRE_Int si1 );
-HYPRE_Int hypre_PFMGSetupInterpOp_CC0_SS5 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int rap_type , hypre_Index *P_stencil_shape );  
+HYPRE_Int hypre_PFMGSetupInterpOp_CC0_SS5 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int rap_type , hypre_Index *P_stencil_shape );
 HYPRE_Int hypre_PFMGSetupInterpOp_CC0_SS9 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int rap_type , hypre_Index *P_stencil_shape );
 HYPRE_Int hypre_PFMGSetupInterpOp_CC0_SS7 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int rap_type , hypre_Index *P_stencil_shape );
 
@@ -380,13 +375,6 @@ hypre_StructMatrix *hypre_SparseMSG2CreateRAPOp ( hypre_StructMatrix *R , hypre_
 HYPRE_Int hypre_SparseMSG2BuildRAPSym ( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , HYPRE_Int cdir , hypre_Index cindex , hypre_Index cstride , hypre_Index stridePR , hypre_StructMatrix *RAP );
 HYPRE_Int hypre_SparseMSG2BuildRAPNoSym ( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , HYPRE_Int cdir , hypre_Index cindex , hypre_Index cstride , hypre_Index stridePR , hypre_StructMatrix *RAP );
 
-/******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
- * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
- *
- * SPDX-License-Identifier: (Apache-2.0 OR MIT)
- ******************************************************************************/
-
 /* sparse_msg3_setup_rap.c */
 hypre_StructMatrix *hypre_SparseMSG3CreateRAPOp ( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , HYPRE_Int cdir );
 HYPRE_Int hypre_SparseMSG3BuildRAPSym ( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , HYPRE_Int cdir , hypre_Index cindex , hypre_Index cstride , hypre_Index stridePR , hypre_StructMatrix *RAP );
@@ -436,4 +424,3 @@ HYPRE_Int hypre_SparseMSGSetupRAPOp ( hypre_StructMatrix *R , hypre_StructMatrix
 
 /* sparse_msg_solve.c */
 HYPRE_Int hypre_SparseMSGSolve ( void *smsg_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
-

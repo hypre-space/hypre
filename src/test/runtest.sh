@@ -117,8 +117,8 @@ function MpirunString
          ;;
       ray*)
          shift
-         RunString="mpirun -n $*"
-         #RunString="lrun -n$*"
+         #RunString="mpirun -n $*"
+         RunString="lrun -n$*"
          ;;
       lassen*)
          shift
@@ -548,7 +548,7 @@ do
                if [ -r $DirPart/$FilePart.jobs ] ; then
 
                   # Check for an mpirun routine
-                  if [ x$MPIRunprefix != "x" ]
+                  if [ "x$MPIRunPrefix" != "x" ]
                   then
                      RunPrefix=$MPIRunPrefix
                   fi

@@ -152,8 +152,6 @@ hypre_BoomerAMGCreateSHost(hypre_ParCSRMatrix    *A,
                                 row_starts, row_starts,
                                 num_cols_offd, num_nonzeros_diag, num_nonzeros_offd);
 
-   /* row_starts is owned by A, col_starts = row_starts */
-   hypre_ParCSRMatrixSetRowStartsOwner(S,0);
    S_diag = hypre_ParCSRMatrixDiag(S);
    hypre_CSRMatrixI(S_diag) = hypre_CTAlloc(HYPRE_Int, num_variables+1, memory_location);
    hypre_CSRMatrixJ(S_diag) = hypre_CTAlloc(HYPRE_Int, num_nonzeros_diag, HYPRE_MEMORY_HOST);
@@ -212,7 +210,7 @@ hypre_BoomerAMGCreateSHost(hypre_ParCSRMatrix    *A,
       for (i = 0; i < num_sends; i++)
       {
          start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-         for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
          {
             int_buf_data[index++] = dof_func[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
          }
@@ -543,11 +541,11 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
    HYPRE_Int ierr = 0;
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)) );
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      ierr = hypre_BoomerAMGCreateSDevice(A,strength_threshold,max_row_sum,num_functions,dof_func,S_ptr);
+      ierr = hypre_BoomerAMGCreateSDevice(A,0,strength_threshold,max_row_sum,num_functions,dof_func,S_ptr);
    }
    else
 #endif
@@ -652,10 +650,9 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix   *A,
    num_nonzeros_offd = A_offd_i[num_variables];
 
    S = hypre_ParCSRMatrixCreate(comm, global_num_vars, global_num_vars,
-         row_starts, row_starts,
-         num_cols_offd, num_nonzeros_diag, num_nonzeros_offd);
-   /* row_starts is owned by A, col_starts = row_starts */
-   hypre_ParCSRMatrixSetRowStartsOwner(S,0);
+                                row_starts, row_starts,
+                                num_cols_offd, num_nonzeros_diag, num_nonzeros_offd);
+
    S_diag = hypre_ParCSRMatrixDiag(S);
    hypre_CSRMatrixI(S_diag) = hypre_CTAlloc(HYPRE_Int,  num_variables+1, HYPRE_MEMORY_HOST);
    hypre_CSRMatrixJ(S_diag) = hypre_CTAlloc(HYPRE_Int,  num_nonzeros_diag, HYPRE_MEMORY_HOST);
@@ -1200,12 +1197,12 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix   *A,
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
-                          HYPRE_Real             strength_threshold,
-                          HYPRE_Real             max_row_sum,
-                          HYPRE_Int              num_functions,
-                          HYPRE_Int             *dof_func,
-                          hypre_ParCSRMatrix   **S_ptr)
+hypre_BoomerAMGCreateSabsHost(hypre_ParCSRMatrix    *A,
+                              HYPRE_Real             strength_threshold,
+                              HYPRE_Real             max_row_sum,
+                              HYPRE_Int              num_functions,
+                              HYPRE_Int             *dof_func,
+                              hypre_ParCSRMatrix   **S_ptr)
 {
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -1253,12 +1250,9 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
    /*--------------------------------------------------------------
     * Compute a  ParCSR strength matrix, S.
     *
-    * For now, the "strength" of dependence/influence is defined in
+    * Absolute "strength" of dependence/influence is defined in
     * the following way: i depends on j if
-    *     aij > hypre_max (k != i) aik,    aii < 0
-    * or
-    *     aij < hypre_min (k != i) aik,    aii >= 0
-    * Then S_ij = 1, else S_ij = 0.
+    *     abs(aij) > hypre_max (k != i) abs(aik)
     *
     * NOTE: the entries are negative initially, corresponding
     * to "unaccounted-for" dependence.
@@ -1274,8 +1268,6 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
                                 row_starts, row_starts,
                                 num_cols_offd, num_nonzeros_diag, num_nonzeros_offd);
 
-   /* row_starts is owned by A, col_starts = row_starts */
-   hypre_ParCSRMatrixSetRowStartsOwner(S,0);
    S_diag = hypre_ParCSRMatrixDiag(S);
    hypre_CSRMatrixI(S_diag) = hypre_CTAlloc(HYPRE_Int, num_variables+1, memory_location);
    hypre_CSRMatrixJ(S_diag) = hypre_CTAlloc(HYPRE_Int, num_nonzeros_diag, memory_location);
@@ -1485,6 +1477,40 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
    hypre_TFree(dof_func_offd, HYPRE_MEMORY_HOST);
 
    return (ierr);
+}
+
+HYPRE_Int
+hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
+                          HYPRE_Real             strength_threshold,
+                          HYPRE_Real             max_row_sum,
+                          HYPRE_Int              num_functions,
+                          HYPRE_Int             *dof_func,
+                          hypre_ParCSRMatrix   **S_ptr)
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("CreateSabs");
+#endif
+
+   HYPRE_Int ierr = 0;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      ierr = hypre_BoomerAMGCreateSDevice(A,1,strength_threshold,max_row_sum,num_functions,dof_func,S_ptr);
+   }
+   else
+#endif
+   {
+      ierr = hypre_BoomerAMGCreateSabsHost(A,strength_threshold,max_row_sum,num_functions,dof_func,S_ptr);
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -2846,8 +2872,6 @@ hypre_BoomerAMGCreate2ndSHost( hypre_ParCSRMatrix  *S,
          global_num_coarse, coarse_row_starts,
          coarse_row_starts, num_cols_offd_C, C_diag_i[num_coarse], C_offd_i[num_coarse]);
 
-   hypre_ParCSRMatrixOwnsRowStarts(S2) = 0;
-
    C_diag = hypre_ParCSRMatrixDiag(S2);
    hypre_CSRMatrixI(C_diag) = C_diag_i;
    if (C_diag_i[num_coarse]) hypre_CSRMatrixJ(C_diag) = C_diag_j;
@@ -2925,7 +2949,7 @@ hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix  *S,
    HYPRE_Int ierr = 0;
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(S)) );
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(S) );
 
    if (exec == HYPRE_EXEC_DEVICE)
    {

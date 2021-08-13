@@ -84,7 +84,6 @@ extern HYPRE_Int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, HYPRE_Int
 
 extern HYPRE_Int hypre_FlexGMRESModifyPCDefault(void *precond_data, HYPRE_Int iteration,
                                                 HYPRE_Real rel_residual_norm);
-
 #ifdef __cplusplus
 }
 #endif
@@ -194,12 +193,16 @@ main( hypre_int argc,
    const HYPRE_Real    dt_inf = DT_INF;
    HYPRE_Real          dt = dt_inf;
 
+   /* solve -Ax = b, for testing SND matrices */
+   HYPRE_Int           negA = 0;
+
    /* parameters for BoomerAMG */
    HYPRE_Real     A_drop_tol = 0.0;
    HYPRE_Int      A_drop_type = -1;
    HYPRE_Int      coarsen_cut_factor = 0;
    HYPRE_Real     strong_threshold;
    HYPRE_Real     strong_thresholdR;
+   HYPRE_Real     filter_thresholdR;
    HYPRE_Real     trunc_factor;
    HYPRE_Real     jacobi_trunc_threshold;
    HYPRE_Real     S_commpkg_switch = 1.0;
@@ -1178,6 +1181,11 @@ main( hypre_int argc,
          mempool_max_cached_bytes = atoi(argv[arg_index++])*1024LL*1024LL;
       }
 #endif
+      else if ( strcmp(argv[arg_index], "-negA") == 0 )
+      {
+         arg_index++;
+         negA = atoi(argv[arg_index++]);
+      }
       else
       {
          arg_index++;
@@ -1225,6 +1233,7 @@ main( hypre_int argc,
    {
       strong_threshold = 0.25;
       strong_thresholdR = 0.25;
+      filter_thresholdR = 0.00;
       trunc_factor = 0.;
       jacobi_trunc_threshold = 0.01;
       cycle_type = 1;
@@ -1355,6 +1364,11 @@ main( hypre_int argc,
       {
          arg_index++;
          strong_thresholdR  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-fltr_thR") == 0 )
+      {
+         arg_index++;
+         filter_thresholdR  = atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-CF") == 0 )
       {
@@ -1758,7 +1772,11 @@ main( hypre_int argc,
    {
       restri_type = air;    /* Set Restriction to be AIR */
       interp_type = 100;    /* 1-pt Interp */
+#if defined(HYPRE_USING_GPU)
+      relax_type = 7;
+#else
       relax_type = 0;
+#endif
       ns_down = 0;
       ns_up = 3;
       /* this is a 2-D 4-by-k array using Double pointers */
@@ -3244,6 +3262,11 @@ main( hypre_int argc,
     * Print out the system and initial guess
     *-----------------------------------------------------------*/
 
+   if (negA)
+   {
+      hypre_ParCSRMatrixScale(parcsr_A, -1);
+   }
+
    if (print_system)
    {
       if (ij_A)
@@ -3477,6 +3500,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetRestriction(amg_solver, restri_type); /* 0: P^T, 1: AIR, 2: AIR-2 */
          HYPRE_BoomerAMGSetGridRelaxPoints(amg_solver, grid_relax_points);
          HYPRE_BoomerAMGSetStrongThresholdR(amg_solver, strong_thresholdR);
+         HYPRE_BoomerAMGSetFilterThresholdR(amg_solver, filter_thresholdR);
       }
 
       /* RL */
@@ -5449,6 +5473,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetRestriction(amg_precond, restri_type); /* 0: P^T, 1: AIR, 2: AIR-2 */
             HYPRE_BoomerAMGSetGridRelaxPoints(amg_precond, grid_relax_points);
             HYPRE_BoomerAMGSetStrongThresholdR(amg_precond, strong_thresholdR);
+            HYPRE_BoomerAMGSetFilterThresholdR(amg_precond, filter_thresholdR);
          }
 
          HYPRE_BoomerAMGSetCGCIts(amg_precond, cgcits);
@@ -8819,7 +8844,6 @@ BuildRhsParFromOneFile( HYPRE_Int                  argc,
       b_CSR = HYPRE_VectorRead(filename);
    }
    HYPRE_VectorToParVector(hypre_MPI_COMM_WORLD, b_CSR, partitioning,&b);
-   hypre_ParVectorSetPartitioningOwner(b, 0);
 
    *b_ptr = b;
 
