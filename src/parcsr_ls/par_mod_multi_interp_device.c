@@ -971,17 +971,10 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
          hypre_TMemcpy( big_convert_offd, big_convert_offd_dev, HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
          fine_to_coarse_offd = hypre_TAlloc(HYPRE_Int,  num_cols_offd_A, HYPRE_MEMORY_HOST); // FIXME: Clean this up when done with host ptr
-         fine_to_coarse_offd_dev = hypre_TAlloc(HYPRE_Int,  num_cols_offd_A, HYPRE_MEMORY_DEVICE);
 
-         num_cols_offd_P = 0;
-         HYPRE_THRUST_CALL( exclusive_scan,
-                            thrust::make_transform_iterator(pass_marker_offd_dev,equal<int>(color)),
-                            thrust::make_transform_iterator(pass_marker_offd_dev + num_cols_offd_A,equal<int>(color)),
-                            fine_to_coarse_offd_dev,
-                            (HYPRE_Int)0 );
-
-         HYPRE_Int * num_cols_offd_P_dev = &fine_to_coarse_offd_dev[num_cols_offd_A-1];
-         hypre_TMemcpy( &num_cols_offd_P, num_cols_offd_P_dev, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+         // This will allocate fine_to_coarse_offd_dev
+         compute_num_cols_offd_fine_to_coarse( pass_marker_offd_dev, color, num_cols_offd_A,
+                                               num_cols_offd_P, &fine_to_coarse_offd_dev );
 
          //FIXME: Clean this up when we don't need th host pointer anymore
          hypre_TMemcpy( fine_to_coarse_offd, fine_to_coarse_offd_dev, HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
@@ -1326,17 +1319,10 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
          hypre_TMemcpy( big_convert_offd, big_convert_offd_dev, HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
          fine_to_coarse_offd = hypre_TAlloc(HYPRE_Int,  num_cols_offd_A, HYPRE_MEMORY_HOST); // FIXME: Clean this up when done with host ptr
-         fine_to_coarse_offd_dev = hypre_TAlloc(HYPRE_Int,  num_cols_offd_A, HYPRE_MEMORY_DEVICE);
 
-         num_cols_offd_Q = 0;
-         HYPRE_THRUST_CALL( exclusive_scan,
-                            thrust::make_transform_iterator(pass_marker_offd_dev,equal<int>(color)),
-                            thrust::make_transform_iterator(pass_marker_offd_dev + num_cols_offd_A,equal<int>(color)),
-                            fine_to_coarse_offd_dev,
-                            (HYPRE_Int)0 );
-
-         HYPRE_Int * num_cols_offd_Q_dev = &fine_to_coarse_offd_dev[num_cols_offd_A-1];
-         hypre_TMemcpy( &num_cols_offd_Q, num_cols_offd_Q_dev, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+         // This will allocate fine_to_coarse_offd_dev
+         compute_num_cols_offd_fine_to_coarse( pass_marker_offd_dev, color, num_cols_offd_A,
+                                               num_cols_offd_Q, &fine_to_coarse_offd_dev );
 
          //FIXME: Clean this up when we don't need th host pointer anymore
          hypre_TMemcpy( fine_to_coarse_offd, fine_to_coarse_offd_dev, HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
