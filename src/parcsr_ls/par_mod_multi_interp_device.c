@@ -16,7 +16,7 @@ void init_big_convert( HYPRE_Int n_fine, HYPRE_Int * pass_marker, HYPRE_Int colo
 
 void compute_num_cols_offd_fine_to_coarse( HYPRE_Int * pass_marker_offd, HYPRE_Int color,
                                            HYPRE_Int num_cols_offd_A, HYPRE_Int & num_cols_offd,
-                                           HYPRE_Int * fine_to_coarse_offd );
+                                           HYPRE_Int ** fine_to_coarse_offd );
 
 __global__
 void hypreCUDAKernel_cfmarker_masked_rowsum( HYPRE_Int nrows,
@@ -1690,7 +1690,7 @@ void init_big_convert( HYPRE_Int n_fine, HYPRE_Int * pass_marker, HYPRE_Int colo
 
 void compute_num_cols_offd_fine_to_coarse( HYPRE_Int * pass_marker_offd, HYPRE_Int color,
                                            HYPRE_Int num_cols_offd_A, HYPRE_Int & num_cols_offd,
-                                           HYPRE_Int * fine_to_coarse_offd )
+                                           HYPRE_Int ** fine_to_coarse_offd )
 {
   /* Original host code
 
@@ -1708,17 +1708,17 @@ void compute_num_cols_offd_fine_to_coarse( HYPRE_Int * pass_marker_offd, HYPRE_I
   // We allocate with a "+1" because the host version of this code incremented the counter
   // even on the last match, so we create an extra entry the exclusive_scan will reflect this
   // and we can read off the last entry and only do 1 kernel call and 1 memcpy
-  fine_to_coarse_offd = hypre_TAlloc(HYPRE_Int,  num_cols_offd_A+1, HYPRE_MEMORY_DEVICE);
+  *fine_to_coarse_offd = hypre_TAlloc(HYPRE_Int,  num_cols_offd_A+1, HYPRE_MEMORY_DEVICE);
 
   num_cols_offd = 0;
 
   HYPRE_THRUST_CALL( exclusive_scan,
                      thrust::make_transform_iterator(pass_marker_offd,equal<HYPRE_Int>(color)),
                      thrust::make_transform_iterator(pass_marker_offd + num_cols_offd_A+1,equal<HYPRE_Int>(color)),
-                     fine_to_coarse_offd,
+                     *fine_to_coarse_offd,
                      (HYPRE_Int)0 );
 
-  hypre_TMemcpy( &num_cols_offd, fine_to_coarse_offd + num_cols_offd_A, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+  hypre_TMemcpy( &num_cols_offd, *fine_to_coarse_offd + num_cols_offd_A, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 }
 
 __global__
