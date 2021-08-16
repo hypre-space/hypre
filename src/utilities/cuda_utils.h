@@ -373,9 +373,10 @@ using namespace thrust::placeholders;
  * The following one works OK for now */
 
 #if defined(HYPRE_USING_CUDA)
-#define HYPRE_THRUST_CALL(func_name, ...)                                                                                                            \
+#define HYPRE_THRUST_CALL(func_name, ...) \
    thrust::func_name(thrust::cuda::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
-#elif defined(HYPRE_USING_HIP)                                                                                                                        \
+#elif defined(HYPRE_USING_HIP)
+#define HYPRE_THRUST_CALL(func_name, ...) \
    thrust::func_name(thrust::hip::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
 #endif
 
