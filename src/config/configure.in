@@ -2167,8 +2167,10 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
         dnl (Ab)Using CUCC when compiling HIP
         dnl At this time, we need the linker to be hipcc in order to link
         dnl in device code.
-        LINK_CC='${CUCC}'
-        LINK_CXX='${CUCC}'
+        LINK_CC=${LINK_CXX}
+        dnl LINK_CC='${CUCC}'
+        dnl LINK_CXX='${CUCC}'
+
 
         if test "x${HYPRE_CUDA_SM}" != "x"
         then
