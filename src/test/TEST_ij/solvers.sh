@@ -33,6 +33,23 @@ tail -17 ${TNAME}.out.202 | head -6 > ${TNAME}.mgr_testdata.temp
 diff ${TNAME}.mgr_testdata ${TNAME}.mgr_testdata.temp >&2
 
 #=============================================================================
+tail -3 ${TNAME}.out.400.p | head -2 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.400.n | head -2 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+tail -3 ${TNAME}.out.401.p | head -2 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.401.n | head -2 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+tail -3 ${TNAME}.out.402.p | head -2 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.402.n | head -2 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+tail -3 ${TNAME}.out.403.p | head -2 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.403.n | head -2 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+#=============================================================================
 # compare with baseline case
 #=============================================================================
 
@@ -126,6 +143,8 @@ FILES="\
  ${TNAME}.out.117\
  ${TNAME}.out.118\
  ${TNAME}.out.119\
+ ${TNAME}.out.121\
+ ${TNAME}.out.122\
  ${TNAME}.out.120\
 "
 

@@ -1919,10 +1919,6 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
          num_cols_offd_RAP, RAP_diag_size,
          RAP_offd_size);
 
-   /* Have RAP own coarse_partitioning instead of P */
-   hypre_ParCSRMatrixSetColStartsOwner(P,0);
-   hypre_ParCSRMatrixSetColStartsOwner(RT,0);
-
    RAP_diag = hypre_ParCSRMatrixDiag(RAP);
    hypre_CSRMatrixI(RAP_diag) = RAP_diag_i;
    if (RAP_diag_size)
@@ -2028,4 +2024,3 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
 
    return(0);
 }
-

@@ -45,25 +45,18 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_BigInt         *col_map_offd;
    HYPRE_BigInt         *device_col_map_offd;
    /* maps columns of offd to global columns */
-   HYPRE_BigInt         *row_starts;
-   /* array of length num_procs+1, row_starts[i] contains the
-      global number of the first row on proc i,
-      first_row_index = row_starts[my_id],
-      row_starts[num_procs] = global_num_rows */
-   HYPRE_BigInt         *col_starts;
-   /* array of length num_procs+1, col_starts[i] contains the
-      global number of the first column of diag on proc i,
-      first_col_diag = col_starts[my_id],
-      col_starts[num_procs] = global_num_cols */
+   HYPRE_BigInt          row_starts[2];
+   /* row_starts[0] is start of local rows
+      row_starts[1] is start of next processor's rows */
+   HYPRE_BigInt          col_starts[2];
+   /* col_starts[0] is start of local columns
+      col_starts[1] is start of next processor's columns */
 
    hypre_ParCSRCommPkg  *comm_pkg;
    hypre_ParCSRCommPkg  *comm_pkgT;
 
    /* Does the ParCSRMatrix create/destroy `diag', `offd', `col_map_offd'? */
    HYPRE_Int             owns_data;
-   /* Does the ParCSRMatrix create/destroy `row_starts', `col_starts'? */
-   HYPRE_Int             owns_row_starts;
-   HYPRE_Int             owns_col_starts;
 
    HYPRE_BigInt          num_nonzeros;
    HYPRE_Real            d_num_nonzeros;
@@ -73,9 +66,7 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_Complex        *rowvalues;
    HYPRE_Int             getrowactive;
 
-   hypre_IJAssumedPart  *assumed_partition; /* only populated if
-                                              no_global_partition option is used
-                                              (compile-time option)*/
+   hypre_IJAssumedPart  *assumed_partition;
    HYPRE_Int             owns_assumed_partition;
    /* Array to store ordering of local diagonal block to relax. In particular,
    used for triangulr matrices that are not ordered to be triangular. */
@@ -117,8 +108,6 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixCommPkg(matrix)                ((matrix) -> comm_pkg)
 #define hypre_ParCSRMatrixCommPkgT(matrix)               ((matrix) -> comm_pkgT)
 #define hypre_ParCSRMatrixOwnsData(matrix)               ((matrix) -> owns_data)
-#define hypre_ParCSRMatrixOwnsRowStarts(matrix)          ((matrix) -> owns_row_starts)
-#define hypre_ParCSRMatrixOwnsColStarts(matrix)          ((matrix) -> owns_col_starts)
 #define hypre_ParCSRMatrixNumNonzeros(matrix)            ((matrix) -> num_nonzeros)
 #define hypre_ParCSRMatrixDNumNonzeros(matrix)           ((matrix) -> d_num_nonzeros)
 #define hypre_ParCSRMatrixRowindices(matrix)             ((matrix) -> rowindices)

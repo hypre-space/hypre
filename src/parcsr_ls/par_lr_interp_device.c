@@ -187,9 +187,6 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
                                 P_diag_nnz,
                                 hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(W)));
 
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
-   hypre_ParCSRMatrixOwnsColStarts(P) = 0;
-
    hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(P))    = P_diag_i;
    hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(P))    = P_diag_j;
    hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(P)) = P_diag_data;
@@ -415,9 +412,6 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
                                 hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(W)),
                                 P_diag_nnz,
                                 hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(W)));
-
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
-   hypre_ParCSRMatrixOwnsColStarts(P) = 0;
 
    hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(P))    = P_diag_i;
    hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(P))    = P_diag_j;
@@ -651,9 +645,6 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
                                 hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(W)),
                                 P_diag_nnz,
                                 hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(W)));
-
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
-   hypre_ParCSRMatrixOwnsColStarts(P) = 0;
 
    hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(P))    = P_diag_i;
    hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(P))    = P_diag_j;

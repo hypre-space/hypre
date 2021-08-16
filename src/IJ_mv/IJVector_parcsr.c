@@ -27,16 +27,13 @@ HYPRE_Int
 hypre_IJVectorCreatePar(hypre_IJVector *vector,
                         HYPRE_BigInt   *IJpartitioning)
 {
-   MPI_Comm comm = hypre_IJVectorComm(vector);
+   MPI_Comm      comm = hypre_IJVectorComm(vector);
 
-   HYPRE_Int num_procs, j;
-   HYPRE_BigInt global_n, *partitioning, jmin;
-   hypre_MPI_Comm_size(comm, &num_procs);
+   HYPRE_BigInt  global_n, partitioning[2], jmin;
+   HYPRE_Int     j;
 
    jmin = hypre_IJVectorGlobalFirstRow(vector);
    global_n = hypre_IJVectorGlobalNumRows(vector);
-
-   partitioning = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
 
    /* Shift to zero-based partitioning for ParVector object */
    for (j = 0; j < 2; j++)
@@ -44,8 +41,7 @@ hypre_IJVectorCreatePar(hypre_IJVector *vector,
       partitioning[j] = IJpartitioning[j] - jmin;
    }
 
-   hypre_IJVectorObject(vector) =
-      hypre_ParVectorCreate(comm, global_n, (HYPRE_BigInt *) partitioning);
+   hypre_IJVectorObject(vector) = hypre_ParVectorCreate(comm, global_n, partitioning);
 
    return hypre_error_flag;
 }
@@ -234,17 +230,6 @@ hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
    }
    partitioning = hypre_ParVectorPartitioning(par_vector);
    local_vector = hypre_ParVectorLocalVector(par_vector);
-   if (!partitioning)
-   {
-      if (print_level)
-      {
-         hypre_printf("partitioning == NULL -- ");
-         hypre_printf("hypre_IJVectorZeroValuesPar\n");
-         hypre_printf("**** Vector partitioning is either unallocated or orphaned ****\n");
-      }
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
    if (!local_vector)
    {
       if (print_level)
@@ -324,17 +309,6 @@ hypre_IJVectorSetValuesPar(hypre_IJVector       *vector,
       return hypre_error_flag;
    }
    local_vector = hypre_ParVectorLocalVector(par_vector);
-   if (!IJpartitioning)
-   {
-      if (print_level)
-      {
-         hypre_printf("IJpartitioning == NULL -- ");
-         hypre_printf("hypre_IJVectorSetValuesPar\n");
-         hypre_printf("**** IJVector partitioning is either unallocated or orphaned ****\n");
-      }
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
    if (!local_vector)
    {
       if (print_level)
@@ -447,17 +421,6 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector       *vector,
       return hypre_error_flag;
    }
    local_vector = hypre_ParVectorLocalVector(par_vector);
-   if (!IJpartitioning)
-   {
-      if (print_level)
-      {
-         hypre_printf("IJpartitioning == NULL -- ");
-         hypre_printf("hypre_IJVectorAddToValuesPar\n");
-         hypre_printf("**** IJVector partitioning is either unallocated or orphaned ****\n");
-      }
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
    if (!local_vector)
    {
       if (print_level)
@@ -570,12 +533,10 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector       *vector,
 HYPRE_Int
 hypre_IJVectorAssemblePar(hypre_IJVector *vector)
 {
-   HYPRE_BigInt *IJpartitioning = hypre_IJVectorPartitioning(vector);
-   hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
-   hypre_AuxParVector *aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
-   HYPRE_BigInt *partitioning;
-   MPI_Comm comm = hypre_IJVectorComm(vector);
-   HYPRE_Int print_level = hypre_IJVectorPrintLevel(vector);
+   hypre_ParVector     *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
+   hypre_AuxParVector  *aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
+   MPI_Comm             comm = hypre_IJVectorComm(vector);
+   HYPRE_Int            print_level = hypre_IJVectorPrintLevel(vector);
 
    if (!par_vector)
    {
@@ -584,27 +545,6 @@ hypre_IJVectorAssemblePar(hypre_IJVector *vector)
          hypre_printf("par_vector == NULL -- ");
          hypre_printf("hypre_IJVectorAssemblePar\n");
          hypre_printf("**** Vector storage is either unallocated or orphaned ****\n");
-      }
-      hypre_error_in_arg(1);
-   }
-   partitioning = hypre_ParVectorPartitioning(par_vector);
-   if (!IJpartitioning)
-   {
-      if (print_level)
-      {
-         hypre_printf("IJpartitioning == NULL -- ");
-         hypre_printf("hypre_IJVectorAssemblePar\n");
-         hypre_printf("**** IJVector partitioning is either unallocated or orphaned ****\n");
-      }
-      hypre_error_in_arg(1);
-   }
-   if (!partitioning)
-   {
-      if (print_level)
-      {
-         hypre_printf("partitioning == NULL -- ");
-         hypre_printf("hypre_IJVectorAssemblePar\n");
-         hypre_printf("**** ParVector partitioning is either unallocated or orphaned ****\n");
       }
       hypre_error_in_arg(1);
    }
@@ -677,18 +617,6 @@ hypre_IJVectorGetValuesPar(hypre_IJVector *vector,
          hypre_printf("par_vector == NULL -- ");
          hypre_printf("hypre_IJVectorGetValuesPar\n");
          hypre_printf("**** Vector storage is either unallocated or orphaned ****\n");
-      }
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   if (!IJpartitioning)
-   {
-      if (print_level)
-      {
-         hypre_printf("IJpartitioning == NULL -- ");
-         hypre_printf("hypre_IJVectorGetValuesPar\n");
-         hypre_printf("**** IJVector partitioning is either unallocated or orphaned ****\n");
       }
       hypre_error_in_arg(1);
       return hypre_error_flag;

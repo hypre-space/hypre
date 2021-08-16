@@ -1572,8 +1572,6 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrixData(R_offd) = R_offd_data;
    hypre_CSRMatrixI(R_offd)    = R_offd_i;
    hypre_CSRMatrixJ(R_offd)    = R_offd_j;
-   /* R does not own ColStarts, since A does */
-   hypre_ParCSRMatrixOwnsColStarts(R) = 0;
 
    hypre_ParCSRMatrixColMapOffd(R) = col_map_offd_R;
 
@@ -1661,7 +1659,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
 }
 
 HYPRE_Int
-hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
+hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
                                      HYPRE_Int            *CF_marker,
                                      HYPRE_BigInt         *num_cpts_global,
                                      HYPRE_Int             num_functions,
@@ -1693,7 +1691,7 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
    HYPRE_Int       *R_offd_j;
    HYPRE_BigInt    *col_map_offd_R;
 
-   HYPRE_Int        i, j, j1, i1, ic,
+   HYPRE_Int        i, j, j1, ic,
                     num_cols_offd_R;
    HYPRE_Int        my_id, num_procs;
    HYPRE_BigInt     total_global_cpts/*, my_first_cpt*/;
@@ -1793,6 +1791,7 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
    HYPRE_Int        n_fpts = hypre_CSRMatrixNumRows(AFF_diag);
    HYPRE_Int        n_cpts = n_fine - n_fpts;
    hypre_assert(n_cpts == hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(ACF)));
+
    HYPRE_Int       *Fmap = hypre_TAlloc(HYPRE_Int, n_fpts, HYPRE_MEMORY_HOST);
 
    /* map from F-pts to all points */
@@ -1810,19 +1809,20 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
 
    for (i = 0; i < n_fpts; i++)
    {
-      i1 = AFF_diag_i[i];
-
-      /* make sure the first entry is diagonal */
-      hypre_assert(AFF_diag_j[i1] == i);
-
-      /* !!! store the inverse */
-      HYPRE_Complex di = 1.0 / AFF_diag_a[i1];
-      diag_entries[i] = di;
-      di = -di;
-      AFF_diag_a[i1] = 0.0;
-      for (j = i1+1; j < AFF_diag_i[i+1]; j++)
+      /* find the diagonal element and store inverse */
+      for (j = AFF_diag_i[i]; j < AFF_diag_i[i+1]; j++)
       {
-         AFF_diag_a[j] *= di;
+         if (AFF_diag_j[j] == i)
+         {
+            diag_entries[i] = 1.0 / AFF_diag_a[j];
+            AFF_diag_a[j] = 0.0;
+            break;
+         }
+      }
+
+      for (j = AFF_diag_i[i]; j < AFF_diag_i[i+1]; j++)
+      {
+         AFF_diag_a[j] *= -diag_entries[i];
       }
       if (num_procs > 1)
       {
@@ -1831,7 +1831,7 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
             hypre_assert( hypre_ParCSRMatrixColMapOffd(AFF)[AFF_offd_j[j]] != \
                           i + hypre_ParCSRMatrixFirstRowIndex(AFF) );
 
-            AFF_offd_a[j] *= di;
+            AFF_offd_a[j] *= -diag_entries[i];
          }
       }
    }
@@ -1991,8 +1991,6 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrixData(R_offd) = R_offd_a;
    hypre_CSRMatrixI(R_offd)    = R_offd_i;
    hypre_CSRMatrixJ(R_offd)    = R_offd_j;
-   /* R does not own ColStarts, since A does */
-   hypre_ParCSRMatrixOwnsColStarts(R) = 0;
 
    hypre_ParCSRMatrixColMapOffd(R) = col_map_offd_R;
 
@@ -2016,4 +2014,46 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
    hypre_TFree(send_buf_Z, HYPRE_MEMORY_HOST);
 
    return 0;
+}
+
+HYPRE_Int
+hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
+                                     HYPRE_Int            *CF_marker,
+                                     HYPRE_BigInt         *num_cpts_global,
+                                     HYPRE_Int             num_functions,
+                                     HYPRE_Int            *dof_func,
+                                     HYPRE_Int             NeumannDeg,
+                                     HYPRE_Real            strong_thresholdR,
+                                     HYPRE_Real            filter_thresholdR,
+                                     HYPRE_Int             debug_flag,
+                                     hypre_ParCSRMatrix  **R_ptr)
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("RestrNeumannAIR");
+#endif
+
+   HYPRE_Int ierr = 0;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      ierr = hypre_BoomerAMGBuildRestrNeumannAIRDevice(A,CF_marker,num_cpts_global,num_functions,dof_func,
+                                                 NeumannDeg, strong_thresholdR, filter_thresholdR,
+                                                 debug_flag, R_ptr);
+   }
+   else
+#endif
+   {
+      ierr = hypre_BoomerAMGBuildRestrNeumannAIRHost(A,CF_marker,num_cpts_global,num_functions,dof_func,
+                                                 NeumannDeg, strong_thresholdR, filter_thresholdR,
+                                                 debug_flag, R_ptr);
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
+   return ierr;
 }

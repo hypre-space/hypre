@@ -108,19 +108,16 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
                                  hypre_ParCSRMatrixGlobalNumRows(A),
                                  hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(Rtemp);
-   hypre_ParVectorSetPartitioningOwner(Rtemp,0);
 
    Ptemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                  hypre_ParCSRMatrixGlobalNumRows(A),
                                  hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(Ptemp);
-   hypre_ParVectorSetPartitioningOwner(Ptemp,0);
 
    Ztemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                  hypre_ParCSRMatrixGlobalNumRows(A),
                                  hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(Ztemp);
-   hypre_ParVectorSetPartitioningOwner(Ztemp,0);
 
    if (hypre_ParAMGDataL1Norms(amg_data) != NULL)
       l1_norms = hypre_ParAMGDataL1Norms(amg_data)[level];
@@ -152,7 +149,6 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
          Utemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                  hypre_ParCSRMatrixGlobalNumRows(A),
                                  hypre_ParCSRMatrixRowStarts(A));
-         hypre_ParVectorOwnsPartitioning(Utemp) = 0;
          hypre_ParVectorInitialize(Utemp);
       }
    }
@@ -196,7 +192,6 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
                                          hypre_ParCSRMatrixRowStarts(A),
                                          needQ);
       hypre_ParVectorInitialize(Qtemp);
-      hypre_ParVectorSetPartitioningOwner(Qtemp, 0);
    }
 
    /*------------------------------------------------------------------

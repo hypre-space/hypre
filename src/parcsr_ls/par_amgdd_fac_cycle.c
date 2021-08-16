@@ -551,16 +551,16 @@ hypre_BoomerAMGDD_FAC_CFL1Jacobi( void      *amgdd_vdata,
       if (cycle_param == 1)
       {
          hypre_BoomerAMGDD_FAC_CFL1JacobiDevice(amgdd_vdata, level, 1);
-         hypre_BoomerAMGDD_FAC_CFL1JacobiDevice(amgdd_vdata, level, 0);
+         hypre_BoomerAMGDD_FAC_CFL1JacobiDevice(amgdd_vdata, level, -1);
       }
       else if (cycle_param == 2)
       {
-         hypre_BoomerAMGDD_FAC_CFL1JacobiDevice(amgdd_vdata, level, 0);
+         hypre_BoomerAMGDD_FAC_CFL1JacobiDevice(amgdd_vdata, level, -1);
          hypre_BoomerAMGDD_FAC_CFL1JacobiDevice(amgdd_vdata, level, 1);
       }
       else
       {
-         hypre_BoomerAMGDD_FAC_CFL1JacobiDevice(amgdd_vdata, level, 0);
+         hypre_BoomerAMGDD_FAC_CFL1JacobiDevice(amgdd_vdata, level, -1);
       }
    }
    else
@@ -569,16 +569,16 @@ hypre_BoomerAMGDD_FAC_CFL1Jacobi( void      *amgdd_vdata,
       if (cycle_param == 1)
       {
          hypre_BoomerAMGDD_FAC_CFL1JacobiHost(amgdd_vdata, level, 1);
-         hypre_BoomerAMGDD_FAC_CFL1JacobiHost(amgdd_vdata, level, 0);
+         hypre_BoomerAMGDD_FAC_CFL1JacobiHost(amgdd_vdata, level, -1);
       }
       else if (cycle_param == 2)
       {
-         hypre_BoomerAMGDD_FAC_CFL1JacobiHost(amgdd_vdata, level, 0);
+         hypre_BoomerAMGDD_FAC_CFL1JacobiHost(amgdd_vdata, level, -1);
          hypre_BoomerAMGDD_FAC_CFL1JacobiHost(amgdd_vdata, level, 1);
       }
       else
       {
-         hypre_BoomerAMGDD_FAC_CFL1JacobiHost(amgdd_vdata, level, 0);
+         hypre_BoomerAMGDD_FAC_CFL1JacobiHost(amgdd_vdata, level, -1);
       }
    }
 

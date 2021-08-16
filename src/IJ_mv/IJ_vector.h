@@ -22,7 +22,7 @@ typedef struct hypre_IJVector_struct
 {
    MPI_Comm      comm;
 
-   HYPRE_BigInt *partitioning;      /* Indicates partitioning over tasks */
+   HYPRE_BigInt  partitioning[2];   /* Indicates partitioning over tasks */
 
    HYPRE_Int     object_type;       /* Indicates the type of "local storage" */
 
@@ -71,4 +71,3 @@ hypre_IJVectorMemoryLocation(hypre_IJVector *vector)
 /* #include "./internal_protos.h" */
 
 #endif /* #ifndef hypre_IJ_VECTOR_HEADER */
-

@@ -491,8 +491,6 @@ hypre_AMGDDCompGrid *hypre_AMGDDCompGridCreate ()
    hypre_AMGDDCompGridNumOwnedNodes(compGrid)          = 0;
    hypre_AMGDDCompGridNumNonOwnedNodes(compGrid)       = 0;
    hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid)   = 0;
-   hypre_AMGDDCompGridNumOwnedCPoints(compGrid)        = 0;
-   hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid) = 0;
    hypre_AMGDDCompGridNumMissingColIndices(compGrid)   = 0;
 
    hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid)         = NULL;
@@ -519,10 +517,6 @@ hypre_AMGDDCompGrid *hypre_AMGDDCompGridCreate ()
 
    hypre_AMGDDCompGridL1Norms(compGrid)               = NULL;
    hypre_AMGDDCompGridCFMarkerArray(compGrid)         = NULL;
-   hypre_AMGDDCompGridOwnedCMask(compGrid)            = NULL;
-   hypre_AMGDDCompGridOwnedFMask(compGrid)            = NULL;
-   hypre_AMGDDCompGridNonOwnedCMask(compGrid)         = NULL;
-   hypre_AMGDDCompGridNonOwnedFMask(compGrid)         = NULL;
    hypre_AMGDDCompGridOwnedRelaxOrdering(compGrid)    = NULL;
    hypre_AMGDDCompGridNonOwnedRelaxOrdering(compGrid) = NULL;
 
@@ -547,10 +541,6 @@ hypre_AMGDDCompGridDestroy( hypre_AMGDDCompGrid *compGrid )
       hypre_TFree(hypre_AMGDDCompGridOwnedCoarseIndices(compGrid), memory_location);
       hypre_TFree(hypre_AMGDDCompGridL1Norms(compGrid), memory_location);
       hypre_TFree(hypre_AMGDDCompGridCFMarkerArray(compGrid), memory_location);
-      hypre_TFree(hypre_AMGDDCompGridOwnedCMask(compGrid), memory_location);
-      hypre_TFree(hypre_AMGDDCompGridOwnedFMask(compGrid), memory_location);
-      hypre_TFree(hypre_AMGDDCompGridNonOwnedCMask(compGrid), memory_location);
-      hypre_TFree(hypre_AMGDDCompGridNonOwnedFMask(compGrid), memory_location);
       hypre_TFree(hypre_AMGDDCompGridOwnedRelaxOrdering(compGrid), memory_location);
       hypre_TFree(hypre_AMGDDCompGridNonOwnedRelaxOrdering(compGrid), memory_location);
 
@@ -927,8 +917,6 @@ HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGDDData *amgdd_data )
    HYPRE_Int             num_recv_procs;
    HYPRE_Int             new_num_recv_nodes;
    HYPRE_Int             new_num_recv_procs;
-   HYPRE_Int             num_owned_c_points;
-   HYPRE_Int             num_nonowned_real_c_points;
    HYPRE_Int             real_cnt, ghost_cnt;
    HYPRE_Int             proc, outer_level, level, i, j;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -1007,23 +995,20 @@ HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGDDData *amgdd_data )
          }
       }
 
-      // Setup CF marker array and C and F masks
+      // Setup CF marker array
       hypre_AMGDDCompGridCFMarkerArray(compGrid[level]) = hypre_CTAlloc(HYPRE_Int, num_owned + num_nonowned, memory_location);
       if (level != num_levels-1)
       {
          // Setup CF marker array
-         num_owned_c_points = 0;
-         num_nonowned_real_c_points = 0;
          for (i = 0; i < num_owned; i++)
          {
             if (hypre_AMGDDCompGridOwnedCoarseIndices(compGrid[level])[i] >= 0)
             {
                hypre_AMGDDCompGridCFMarkerArray(compGrid[level])[i] = 1;
-               num_owned_c_points++;
             }
             else
             {
-               hypre_AMGDDCompGridCFMarkerArray(compGrid[level])[i] = 0;
+               hypre_AMGDDCompGridCFMarkerArray(compGrid[level])[i] = -1;
             }
          }
          for (i = 0; i < num_nonowned; i++)
@@ -1031,75 +1016,19 @@ HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGDDData *amgdd_data )
             if (hypre_AMGDDCompGridNonOwnedCoarseIndices(compGrid[level])[i] >= 0)
             {
                hypre_AMGDDCompGridCFMarkerArray(compGrid[level])[new_indices[i] + num_owned] = 1;
-               if (new_indices[i] < num_nonowned_real_nodes)
-               {
-                  num_nonowned_real_c_points++;
-               }
             }
             else
             {
-               hypre_AMGDDCompGridCFMarkerArray(compGrid[level])[new_indices[i] + num_owned] = 0;
-            }
-         }
-         hypre_AMGDDCompGridNumOwnedCPoints(compGrid[level])        = num_owned_c_points;
-         hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid[level]) = num_nonowned_real_c_points;
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-         // Setup owned C and F masks. NOTE: only used in the cuda version of masked matvecs.
-         hypre_AMGDDCompGridOwnedCMask(compGrid[level]) = hypre_CTAlloc(HYPRE_Int,
-                                                                        num_owned_c_points,
-                                                                        memory_location);
-         hypre_AMGDDCompGridOwnedFMask(compGrid[level]) = hypre_CTAlloc(HYPRE_Int,
-                                                                        num_owned - num_owned_c_points,
-                                                                        memory_location);
-         c_cnt = f_cnt = 0;
-         for (i = 0; i < num_owned; i++)
-         {
-            if (hypre_AMGDDCompGridCFMarkerArray(compGrid[level])[i])
-            {
-               hypre_AMGDDCompGridOwnedCMask(compGrid[level])[c_cnt++] = i;
-            }
-            else
-            {
-               hypre_AMGDDCompGridOwnedFMask(compGrid[level])[f_cnt++] = i;
-            }
-         }
-         hypre_AMGDDCompGridNonOwnedCMask(compGrid[level]) = hypre_CTAlloc(HYPRE_Int,
-                                                                           num_nonowned_real_c_points,
-                                                                           memory_location);
-         hypre_AMGDDCompGridNonOwnedFMask(compGrid[level]) = hypre_CTAlloc(HYPRE_Int,
-                                                                           num_nonowned_real_nodes - num_nonowned_real_c_points,
-                                                                           memory_location);
-         c_cnt = f_cnt = 0;
-         for (i = 0; i < num_nonowned_real_nodes; i++)
-         {
-            if (hypre_AMGDDCompGridCFMarkerArray(compGrid[level])[i + num_owned])
-            {
-               hypre_AMGDDCompGridNonOwnedCMask(compGrid[level])[c_cnt++] = i;
-            }
-            else
-            {
-               hypre_AMGDDCompGridNonOwnedFMask(compGrid[level])[f_cnt++] = i;
+               hypre_AMGDDCompGridCFMarkerArray(compGrid[level])[new_indices[i] + num_owned] = -1;
             }
          }
       }
       else
       {
-         hypre_AMGDDCompGridNumOwnedCPoints(compGrid[level]) = 0;
-         hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid[level]) = 0;
-         hypre_AMGDDCompGridOwnedCMask(compGrid[level]) = NULL;
-         hypre_AMGDDCompGridOwnedFMask(compGrid[level]) = hypre_CTAlloc(HYPRE_Int, num_owned, memory_location);
-         for (i = 0; i < num_owned; i++)
+         for (i = 0; i < num_owned + num_nonowned; i++)
          {
-            hypre_AMGDDCompGridOwnedFMask(compGrid[level])[i] = i;
+            hypre_AMGDDCompGridCFMarkerArray(compGrid[level])[i] = -1;
          }
-         hypre_AMGDDCompGridNonOwnedCMask(compGrid[level]) = NULL;
-         hypre_AMGDDCompGridNonOwnedFMask(compGrid[level]) = hypre_CTAlloc(HYPRE_Int, num_nonowned_real_nodes, memory_location);
-         for (i = 0; i < num_nonowned_real_nodes; i++)
-         {
-            hypre_AMGDDCompGridNonOwnedFMask(compGrid[level])[i] = i;
-         }
-#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       }
 
       // Reorder nonowned matrices

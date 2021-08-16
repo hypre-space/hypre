@@ -196,8 +196,8 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
 }
 
 /* Augments measures by some random value between 0 and 1
- * aug_rand: 1: GPU CURAND; 11: GPU SEQ CURAND
- *           2: CPU RAND;   12: CPU SEQ RAND
+ * aug_rand: 1: GPU CURAND/ROCRAND; 11: GPU SEQ CURAND/ROCRAND
+ *           2: CPU RAND;           12: CPU SEQ RAND
  */
 HYPRE_Int
 hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
@@ -211,12 +211,6 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
    HYPRE_Real      *urand;
 
    hypre_MPI_Comm_rank(comm, &my_id);
-
-   // RL: TODO
-   #if defined(HYPRE_USING_ROCRAND)
-   if (aug_rand ==  1) { aug_rand =  2; }
-   if (aug_rand == 11) { aug_rand = 12; }
-   #endif
 
    urand = hypre_TAlloc(HYPRE_Real, num_rows_diag, HYPRE_MEMORY_DEVICE);
 

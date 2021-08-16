@@ -118,7 +118,6 @@ hypre_BoomerAMGCoarsenInterpVectors( hypre_ParCSRMatrix *P,
    for (i = 0; i < num_smooth_vecs; i++)
    {
       new_vector = hypre_ParVectorCreate(comm, n_new, starts);
-      hypre_ParVectorSetPartitioningOwner(new_vector, 0);
       hypre_ParVectorInitialize(new_vector);
       new_vector_data = hypre_VectorData(hypre_ParVectorLocalVector(new_vector));
 
@@ -1372,8 +1371,8 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
    P_offd = hypre_ParCSRMatrixOffd(new_P);
    hypre_CSRMatrixData(P_offd) = P_offd_data_new;
    hypre_CSRMatrixI(P_offd) = P_offd_i_new;
-   hypre_ParCSRMatrixOwnsRowStarts(new_P) = 0;
-   hypre_ParCSRMatrixOwnsColStarts(new_P) = 1;
+
+   hypre_TFree(new_col_starts, HYPRE_MEMORY_HOST);
 
    /* If parallel we need to do the col map offd! */
    if (num_procs > 1)
@@ -2339,4 +2338,3 @@ hypre_BoomerAMGRefineInterp( hypre_ParCSRMatrix *A,
 
     return hypre_error_flag;
 }
-

@@ -322,10 +322,11 @@ GenerateLaplacian( MPI_Comm       comm,
 
    hypre_ParCSRMatrixMigrate(A, hypre_HandleMemoryLocation(hypre_handle()));
 
-   hypre_TFree(nx_part,    HYPRE_MEMORY_HOST);
-   hypre_TFree(ny_part,    HYPRE_MEMORY_HOST);
-   hypre_TFree(nz_part,    HYPRE_MEMORY_HOST);
-   hypre_TFree(big_offd_j, HYPRE_MEMORY_HOST);
+   hypre_TFree(nx_part,     HYPRE_MEMORY_HOST);
+   hypre_TFree(ny_part,     HYPRE_MEMORY_HOST);
+   hypre_TFree(nz_part,     HYPRE_MEMORY_HOST);
+   hypre_TFree(big_offd_j,  HYPRE_MEMORY_HOST);
+   hypre_TFree(global_part, HYPRE_MEMORY_HOST);
 
    return (HYPRE_ParCSRMatrix) A;
 }
@@ -831,14 +832,14 @@ GenerateSysLaplacian( MPI_Comm comm,
 
    hypre_ParCSRMatrixMigrate(A, hypre_HandleMemoryLocation(hypre_handle()));
 
-   hypre_TFree(nx_part,    HYPRE_MEMORY_HOST);
-   hypre_TFree(ny_part,    HYPRE_MEMORY_HOST);
-   hypre_TFree(nz_part,    HYPRE_MEMORY_HOST);
-   hypre_TFree(big_offd_j, HYPRE_MEMORY_HOST);
+   hypre_TFree(nx_part,     HYPRE_MEMORY_HOST);
+   hypre_TFree(ny_part,     HYPRE_MEMORY_HOST);
+   hypre_TFree(nz_part,     HYPRE_MEMORY_HOST);
+   hypre_TFree(big_offd_j,  HYPRE_MEMORY_HOST);
+   hypre_TFree(global_part, HYPRE_MEMORY_HOST);
 
    return (HYPRE_ParCSRMatrix) A;
 }
-
 
 /*--------------------------------------------------------------------------
  * hypre_GenerateVectorLaplacian - this is also a systems version and we can
@@ -1314,10 +1315,11 @@ GenerateSysLaplacianVCoef( MPI_Comm       comm,
 
    hypre_ParCSRMatrixMigrate(A, hypre_HandleMemoryLocation(hypre_handle()));
 
-   hypre_TFree(nx_part,    HYPRE_MEMORY_HOST);
-   hypre_TFree(ny_part,    HYPRE_MEMORY_HOST);
-   hypre_TFree(nz_part,    HYPRE_MEMORY_HOST);
-   hypre_TFree(big_offd_j, HYPRE_MEMORY_HOST);
+   hypre_TFree(nx_part,     HYPRE_MEMORY_HOST);
+   hypre_TFree(ny_part,     HYPRE_MEMORY_HOST);
+   hypre_TFree(nz_part,     HYPRE_MEMORY_HOST);
+   hypre_TFree(big_offd_j,  HYPRE_MEMORY_HOST);
+   hypre_TFree(global_part, HYPRE_MEMORY_HOST);
 
    return (HYPRE_ParCSRMatrix) A;
 }

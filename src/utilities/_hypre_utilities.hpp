@@ -15,51 +15,38 @@ extern "C++" {
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#ifndef HYPRE_UMPIRE_ALLOCATOR_H
-#define HYPRE_UMPIRE_ALLOCATOR_H
+#ifndef DEVICE_ALLOCATOR_H
+#define DEVICE_ALLOCATOR_H
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-#if defined(HYPRE_USING_UMPIRE_DEVICE)
 
-/*
-#include "umpire/Allocator.hpp"
-#include "umpire/ResourceManager.hpp"
-
-#include "umpire/strategy/DynamicPool.hpp"
-#include "umpire/strategy/AllocationAdvisor.hpp"
-#include "umpire/strategy/MonotonicAllocationStrategy.hpp"
-#include "umpire/util/Macros.hpp"
-*/
-
-struct hypre_umpire_device_allocator
+/* C++ style memory allocator for GPU **device** memory
+ * Just wraps _hypre_TAlloc and _hypre_TFree */
+struct hypre_device_allocator
 {
    typedef char value_type;
 
-   hypre_umpire_device_allocator()
+   hypre_device_allocator()
    {
       // constructor
    }
 
-   ~hypre_umpire_device_allocator()
+   ~hypre_device_allocator()
    {
       // destructor
    }
 
    char *allocate(std::ptrdiff_t num_bytes)
    {
-      char *ptr = NULL;
-      hypre_umpire_device_pooled_allocate((void**) &ptr, num_bytes);
-
-      return ptr;
+      return _hypre_TAlloc(char, num_bytes, hypre_MEMORY_DEVICE);
    }
 
    void deallocate(char *ptr, size_t n)
    {
-      hypre_umpire_device_pooled_free(ptr);
+      _hypre_TFree(ptr, hypre_MEMORY_DEVICE);
    }
 };
 
-#endif /* #ifdef HYPRE_USING_UMPIRE_DEVICE */
 #endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
 #endif
@@ -108,6 +95,10 @@ struct hypre_umpire_device_allocator
 
 #if defined(HYPRE_USING_ROCSPARSE)
 #include <rocsparse.h>
+#endif
+
+#if defined(HYPRE_USING_ROCRAND)
+#include <rocrand.h>
 #endif
 
 
@@ -163,6 +154,13 @@ struct hypre_umpire_device_allocator
       hypre_assert(0); exit(1);                                                              \
    } } while(0)
 
+#define HYPRE_ROCRAND_CALL(call) do {                                                        \
+   rocrand_status err = call;                                                                \
+   if (ROCRAND_STATUS_SUCCESS != err) {                                                      \
+      hypre_printf("ROCRAND ERROR (code = %d) at %s:%d\n", err, __FILE__, __LINE__);         \
+      hypre_assert(0); exit(1);                                                              \
+   } } while(0)
+
 struct hypre_cub_CachingDeviceAllocator;
 typedef struct hypre_cub_CachingDeviceAllocator hypre_cub_CachingDeviceAllocator;
 
@@ -185,6 +183,10 @@ struct hypre_CudaData
 {
 #if defined(HYPRE_USING_CURAND)
    curandGenerator_t                 curand_generator;
+#endif
+
+#if defined(HYPRE_USING_ROCRAND)
+   rocrand_generator                 curand_generator;
 #endif
 
 #if defined(HYPRE_USING_CUBLAS)
@@ -213,9 +215,11 @@ struct hypre_CudaData
    hypre_cub_CachingDeviceAllocator *cub_dev_allocator;
    hypre_cub_CachingDeviceAllocator *cub_uvm_allocator;
 #endif
-#ifdef HYPRE_USING_UMPIRE_DEVICE
-   hypre_umpire_device_allocator     umpire_device_allocator;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_device_allocator            device_allocator;
 #endif
+
    HYPRE_Int                         cuda_device;
    /* by default, hypre puts GPU computations in this stream
     * Do not be confused with the default (null) CUDA stream */
@@ -257,7 +261,7 @@ struct hypre_CudaData
 #define hypre_CudaDataSpgemmRownnzEstimateNsamples(data)   ((data) -> spgemm_rownnz_estimate_nsamples)
 #define hypre_CudaDataSpgemmRownnzEstimateMultFactor(data) ((data) -> spgemm_rownnz_estimate_mult_factor)
 #define hypre_CudaDataSpgemmHashType(data)                 ((data) -> spgemm_hash_type)
-#define hypre_CudaDataUmpireDeviceAllocator(data)          ((data) -> umpire_device_allocator)
+#define hypre_CudaDataDeviceAllocator(data)                ((data) -> device_allocator)
 #define hypre_CudaDataUseGpuRand(data)                     ((data) -> use_gpu_rand)
 
 hypre_CudaData*     hypre_CudaDataCreate();
@@ -265,6 +269,10 @@ void                hypre_CudaDataDestroy(hypre_CudaData* data);
 
 #if defined(HYPRE_USING_CURAND)
 curandGenerator_t   hypre_CudaDataCurandGenerator(hypre_CudaData *data);
+#endif
+
+#if defined(HYPRE_USING_ROCRAND)
+rocrand_generator   hypre_CudaDataCurandGenerator(hypre_CudaData *data);
 #endif
 
 #if defined(HYPRE_USING_CUBLAS)
@@ -335,6 +343,7 @@ struct hypre_GpuMatData
 #include <thrust/binary_search.h>
 #include <thrust/iterator/constant_iterator.h>
 #include <thrust/iterator/counting_iterator.h>
+#include <thrust/iterator/zip_iterator.h>
 #include <thrust/transform.h>
 #include <thrust/functional.h>
 #include <thrust/gather.h>
@@ -345,6 +354,7 @@ struct hypre_GpuMatData
 #include <thrust/logical.h>
 #include <thrust/replace.h>
 #include <thrust/sequence.h>
+#include <thrust/for_each.h>
 
 using namespace thrust::placeholders;
 
@@ -414,34 +424,12 @@ using namespace thrust::placeholders;
 /* RL: TODO Want macro HYPRE_THRUST_CALL to return value but I don't know how to do it right
  * The following one works OK for now */
 
-#ifdef HYPRE_USING_UMPIRE_DEVICE
-
 #if defined(HYPRE_USING_CUDA)
-#define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
-   thrust::func_name(thrust::cuda::par(hypre_HandleUmpireDeviceAllocator(hypre_handle())).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
-#elif defined(HYPRE_USING_HIP)
-#define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
-   thrust::func_name(thrust::hip::par(hypre_HandleUmpireDeviceAllocator(hypre_handle())).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
-#endif // HYPRE_USING_CUDA
-
-#elif HYPRE_USING_DEVICE_POOL
-#if defined(HYPRE_USING_CUDA)
-#define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
-   thrust::func_name(thrust::cuda::par(*(hypre_HandleCubDevAllocator(hypre_handle()))).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
+#define HYPRE_THRUST_CALL(func_name, ...)                                                                                                            \
+   thrust::func_name(thrust::cuda::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
+#elif defined(HYPRE_USING_HIP)                                                                                                                        \
+   thrust::func_name(thrust::hip::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
 #endif
-
-#else
-
-#if defined(HYPRE_USING_CUDA)
-#define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
-   thrust::func_name(thrust::cuda::par.on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
-#elif defined(HYPRE_USING_HIP)
-#define HYPRE_THRUST_CALL(func_name, ...)                                                                            \
-   thrust::func_name(thrust::hip::par.on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
-#endif // HYPRE_USING_CUDA
-
-#endif // HYPRE_USING_UMPIRE_DEVICE
-
 
 /* return the number of threads in block */
 template <hypre_int dim>
@@ -918,6 +906,14 @@ struct equal : public thrust::unary_function<T,bool>
    __host__ __device__ bool operator()(const T &x)
    {
       return (x == val);
+   }
+};
+
+struct print_functor
+{
+   __host__ __device__ void operator()(HYPRE_Real val)
+   {
+      printf("%f\n", val);
    }
 };
 

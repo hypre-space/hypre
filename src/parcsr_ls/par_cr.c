@@ -2698,40 +2698,29 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
 
    e0_vec = hypre_ParVectorCreate(comm,global_num_rows,row_starts);
    hypre_ParVectorInitialize(e0_vec);
-   hypre_ParVectorSetPartitioningOwner(e0_vec,0);
    e1_vec = hypre_ParVectorCreate(comm,global_num_rows,row_starts);
    hypre_ParVectorInitialize(e1_vec);
-   hypre_ParVectorSetPartitioningOwner(e1_vec,0);
    e2_vec = hypre_ParVectorCreate(comm,global_num_rows,row_starts);
    hypre_ParVectorInitialize(e2_vec);
-   hypre_ParVectorSetPartitioningOwner(e2_vec,0);
    Vtemp = hypre_ParVectorCreate(comm,global_num_rows,row_starts);
    hypre_ParVectorInitialize(Vtemp);
-   hypre_ParVectorSetPartitioningOwner(Vtemp,0);
    Vtemp_data = hypre_VectorData(hypre_ParVectorLocalVector(Vtemp));
    Ptemp = hypre_ParVectorCreate(comm,global_num_rows,row_starts);
    hypre_ParVectorInitialize(Ptemp);
-   hypre_ParVectorSetPartitioningOwner(Ptemp,0);
    Ptemp_data = hypre_VectorData(hypre_ParVectorLocalVector(Ptemp));
    Qtemp = hypre_ParVectorCreate(comm,global_num_rows,row_starts);
    hypre_ParVectorInitialize(Qtemp);
-   hypre_ParVectorSetPartitioningOwner(Qtemp,0);
    Ztemp = hypre_ParVectorCreate(comm,global_num_rows,row_starts);
    hypre_ParVectorInitialize(Ztemp);
-   hypre_ParVectorSetPartitioningOwner(Ztemp,0);
    Ztemp_data = hypre_VectorData(hypre_ParVectorLocalVector(Ztemp));
    Rtemp = hypre_ParVectorCreate(comm,global_num_rows,row_starts);
    hypre_ParVectorInitialize(Rtemp);
-   hypre_ParVectorSetPartitioningOwner(Rtemp,0);
 
    if (num_threads > 1)
    {
       Relax_temp = hypre_ParVectorCreate(comm,global_num_rows,row_starts);
       hypre_ParVectorInitialize(Relax_temp);
-      hypre_ParVectorSetPartitioningOwner(Relax_temp,0);
    }
-
-
 
    e0 = hypre_VectorData(hypre_ParVectorLocalVector(e0_vec));
    e1 = hypre_VectorData(hypre_ParVectorLocalVector(e1_vec));
@@ -3095,4 +3084,3 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
    hypre_TFree(sum, HYPRE_MEMORY_HOST);
    return hypre_error_flag;
 }
-

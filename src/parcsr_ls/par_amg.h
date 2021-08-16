@@ -151,7 +151,7 @@ typedef struct
    HYPRE_Int            cheby_variant;
    HYPRE_Int            cheby_scale;
    HYPRE_Real           cheby_fraction;
-   HYPRE_Real         **cheby_ds;
+   hypre_Vector       **cheby_ds;
    HYPRE_Real         **cheby_coefs;
 
    /* data needed for non-Galerkin option */
