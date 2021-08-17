@@ -1438,6 +1438,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   /* note special case treatment of CF_marker is necessary
                    * to do CF relaxation correctly when num_levels = 1 */
                   hypre_IntArrayDestroy(CF_marker_array[level]);
+                  CF_marker_array[level] = NULL;
                   hypre_ParVectorDestroy(F_array[level]);
                   hypre_ParVectorDestroy(U_array[level]);
                }

@@ -185,25 +185,6 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
       }
    }
    
-#if defined(HYPRE_USING_GPU)
-   /* WM: temporary fix - if using CF relaxation, make sure the CF marker is on the device */
-   if (relax_order || grid_relax_points)
-   {
-      for (k = 0; k < num_levels-1; k++)
-      {
-         hypre_MemoryLocation cf_memory_location;
-         hypre_GetPointerLocation(CF_marker_array[k], &cf_memory_location);
-         if (cf_memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_HOST))
-         {
-            HYPRE_Int *cf_marker_dev = hypre_TAlloc(HYPRE_Int, hypre_ParCSRMatrixNumRows(A_array[k]), HYPRE_MEMORY_DEVICE);
-            hypre_TMemcpy(cf_marker_dev, CF_marker_array[k], HYPRE_Int, hypre_ParCSRMatrixNumRows(A_array[k]), HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-            hypre_TFree(CF_marker_array[k], HYPRE_MEMORY_HOST);
-            CF_marker_array[k] = cf_marker_dev;
-         }
-      }
-   }
-#endif
-
    /*---------------------------------------------------------------------
     *    Initialize cycling control counter
     *

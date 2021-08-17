@@ -1383,6 +1383,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
             }
           }
           CF_marker_array_local[lev_local] = hypre_IntArrayCreate(local_size);
+          // WM: temporary - explicitly set memory location to device
           hypre_IntArrayMemoryLocation(CF_marker_array_local[lev_local]) = HYPRE_MEMORY_HOST;
           hypre_IntArrayData(CF_marker_array_local[lev_local]) = CF_marker_local;
         }
@@ -1394,13 +1395,23 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
             CF_marker_local[i] = CF_marker_array[lev][i];
           }
           CF_marker_array_local[lev_local] = hypre_IntArrayCreate(local_size);
+          // WM: temporary - explicitly set memory location to device
           hypre_IntArrayMemoryLocation(CF_marker_array_local[lev_local]) = HYPRE_MEMORY_HOST;
           hypre_IntArrayData(CF_marker_array_local[lev_local]) = CF_marker_local;
         }
       }
       else
       {
-        hypre_TFree(CF_marker_local, HYPRE_MEMORY_HOST);
+        hypre_MemoryLocation cf_memory_location;
+        hypre_GetPointerLocation(CF_marker_local, &cf_memory_location);
+        if (cf_memory_location == hypre_MEMORY_HOST)
+        {
+           hypre_TFree(CF_marker_local, HYPRE_MEMORY_HOST);
+        }
+        else
+        {
+           hypre_TFree(CF_marker_local, HYPRE_MEMORY_DEVICE);
+        }
       }
       hypre_TFree(coarse_pnts_global_lvl, HYPRE_MEMORY_HOST);
       break;
@@ -1430,6 +1441,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
           }
         }
         CF_marker_array_local[lev_local] = hypre_IntArrayCreate(local_size);
+        // WM: temporary - explicitly set memory location to device
         hypre_IntArrayMemoryLocation(CF_marker_array_local[lev_local]) = HYPRE_MEMORY_HOST;
         hypre_IntArrayData(CF_marker_array_local[lev_local]) = CF_marker_local;
       }
@@ -1441,6 +1453,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
           CF_marker_local[i] = CF_marker_array[lev][i];
         }
         CF_marker_array_local[lev_local] = hypre_IntArrayCreate(local_size);
+        // WM: temporary - explicitly set memory location to device
         hypre_IntArrayMemoryLocation(CF_marker_array_local[lev_local]) = HYPRE_MEMORY_HOST;
         hypre_IntArrayData(CF_marker_array_local[lev_local]) = CF_marker_local;
       }
@@ -1448,6 +1461,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
     else
     {
       CF_marker_array_local[lev_local] = hypre_IntArrayCreate(local_size);
+      // WM: temporary - explicitly set memory location to device
       hypre_IntArrayMemoryLocation(CF_marker_array_local[lev_local]) = HYPRE_MEMORY_HOST;
       hypre_IntArrayData(CF_marker_array_local[lev_local]) = CF_marker_local;
     }
