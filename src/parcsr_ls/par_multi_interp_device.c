@@ -2004,6 +2004,10 @@ hypre_BoomerAMGBuildMultipassDevice( hypre_ParCSRMatrix  *A,
    num_cols_offd_P = 0;
    if (P_offd_size)
    {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("Section4");
+#endif
+
       if (new_num_cols_offd > num_cols_offd)
       {   P_marker_offd = hypre_CTAlloc(HYPRE_Int, new_num_cols_offd, HYPRE_MEMORY_HOST); }
       else
@@ -2067,6 +2071,10 @@ hypre_BoomerAMGBuildMultipassDevice( hypre_ParCSRMatrix  *A,
       {   P_offd_j[i] = permute[P_offd_j[i]]; }
 
       hypre_TFree(P_marker_offd, HYPRE_MEMORY_HOST);
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
    }
    if (num_procs > 1)
    {

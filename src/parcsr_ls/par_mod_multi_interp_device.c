@@ -337,6 +337,10 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int       *dof_func_offd = NULL;
    HYPRE_Real      *row_sums = NULL;
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("Section1");
+#endif
+
 
    /* MPI size and rank*/
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -464,6 +468,13 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    /* color points according to pass number */
    hypre_MPI_Allreduce(&remaining, &global_remaining, 1, HYPRE_MPI_INT, hypre_MPI_MAX, comm);
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("Section2");
+#endif
    HYPRE_Int * points_left_old = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
    HYPRE_Int * pass_marker_old = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
 
@@ -613,10 +624,16 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    }
 
 
-     Pi = hypre_CTAlloc(hypre_ParCSRMatrix*, num_passes, HYPRE_MEMORY_HOST);
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
+
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("MultipassPiDevice");
 #endif
+   Pi = hypre_CTAlloc(hypre_ParCSRMatrix*, num_passes, HYPRE_MEMORY_HOST);
+
    hypre_GenerateMultipassPiDevice(A, S, num_cpts_global, &pass_order_dev[pass_starts[1]],
                                    pass_marker_dev, pass_marker_offd_dev,
                                    pass_starts[2]-pass_starts[1], 1, row_sums, &Pi[0]);
@@ -628,11 +645,13 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    {
       for (i=1; i<num_passes-1; i++)
       {
-         hypre_ParCSRMatrix *Q;
-         HYPRE_BigInt *c_pts_starts = hypre_ParCSRMatrixRowStarts(Pi[i-1]);
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          hypre_GpuProfilingPushRange(std::string("MultipassPiDevice Loop"+std::to_string(i)).c_str());
 #endif
+
+         hypre_ParCSRMatrix *Q;
+         HYPRE_BigInt *c_pts_starts = hypre_ParCSRMatrixRowStarts(Pi[i-1]);
+
          hypre_GenerateMultipassPiDevice(A, S, c_pts_starts, &pass_order_dev[pass_starts[i+1]],
                                          pass_marker_dev, pass_marker_offd_dev,
                                          pass_starts[i+2]-pass_starts[i+1], i+1, row_sums, &Q);
@@ -650,10 +669,11 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    {
       for (i=1; i<num_passes-1; i++)
       {
-         HYPRE_BigInt *c_pts_starts = hypre_ParCSRMatrixRowStarts(Pi[i-1]);
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          hypre_GpuProfilingPushRange(std::string("MultiPiDevice Loop"+std::to_string(i)).c_str());
 #endif
+         HYPRE_BigInt *c_pts_starts = hypre_ParCSRMatrixRowStarts(Pi[i-1]);
+
          hypre_GenerateMultiPiDevice(A, S, Pi[i-1], c_pts_starts, &pass_order_dev[pass_starts[i+1]],
                                      pass_marker_dev, pass_marker_offd_dev,
                                      pass_starts[i+2]-pass_starts[i+1], i+1,
@@ -664,6 +684,9 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       }
    }
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("Section3");
+#endif
    // We don't need the row sums anymore
    hypre_TFree (row_sums, HYPRE_MEMORY_DEVICE);
 
@@ -817,13 +840,20 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       P_offd_i_dev = hypre_CSRMatrixI(P_offd);
       P_offd_j_dev = hypre_CSRMatrixJ(P_offd);
    }
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
 
    num_cols_offd_P = 0;
 
    if (P_offd_size)
      {
-      HYPRE_BigInt *tmp_P_offd_j_dev = hypre_TAlloc(HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_DEVICE);
-      HYPRE_BigInt *big_P_offd_j_dev = hypre_TAlloc(HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("Section4");
+#endif
+
+       HYPRE_BigInt *big_P_offd_j_dev = hypre_CTAlloc(HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_DEVICE);
+       HYPRE_BigInt *tmp_P_offd_j_dev = hypre_TAlloc(HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_DEVICE);
 
       for (p=0; p < num_passes-1; p++)
       {
@@ -927,10 +957,16 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       hypre_TFree(big_P_offd_j, HYPRE_MEMORY_HOST);
       hypre_TFree(big_P_offd_j_dev, HYPRE_MEMORY_DEVICE);
 
-      // FIXME: Clean this up
-      hypre_TMemcpy( P_offd_j_dev, P_offd_j, HYPRE_Int, P_offd_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       hypre_TFree(P_offd_j,HYPRE_MEMORY_HOST);
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
    } // if (P_offd_size)
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("Section5");
+#endif
 
    hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
    hypre_ParCSRMatrixDeviceColMapOffd(P) = col_map_offd_P_dev;
@@ -967,6 +1003,10 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    hypre_TFree(CF_marker_dev, HYPRE_MEMORY_DEVICE);
 
    *P_ptr = P;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
 
    return hypre_error_flag;
 
