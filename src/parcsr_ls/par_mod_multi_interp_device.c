@@ -73,14 +73,37 @@ struct set_to_one : public thrust::unary_function<HYPRE_Int,HYPRE_Int>
    __host__ __device__ HYPRE_Int operator()(HYPRE_Int x) { return 1; }
 };
 
-__global__
-void hypreCUDAKernel_cfmarker_masked_rowsum( HYPRE_Int nrows,
-                                             HYPRE_Int *A_diag_i,
-                                             HYPRE_Complex *A_diag_data,
-                                             HYPRE_Int *A_offd_i,
-                                             HYPRE_Complex *A_offd_data,
-                                             HYPRE_Int *CF_marker,
-                                             HYPRE_Complex *row_sum);
+struct equal_big_P
+{
+   HYPRE_BigInt * _big_P_offd_j_dev;
+
+   equal_big_P(HYPRE_BigInt * big_p_offd_j_dev) : _big_P_offd_j_dev(big_p_offd_j_dev){}
+
+   __host__ __device__
+      bool operator()(HYPRE_BigInt x)
+      { return x == *_big_P_offd_j_dev; }
+};
+
+struct set_P_offd_j : thrust::unary_function<HYPRE_BigInt*,HYPRE_Int>
+{
+   HYPRE_BigInt * _col_map_offd_P_dev;
+   HYPRE_BigInt * _end;
+   set_P_offd_j(HYPRE_BigInt * col_map_offd_P_dev,HYPRE_Int P_offd_size)
+      : _col_map_offd_P_dev(col_map_offd_P_dev),
+      _end(col_map_offd_P_dev+P_offd_size)
+   {}
+
+   __host__ __device__ HYPRE_Int operator() (HYPRE_BigInt * loc)
+   {
+      if(loc == _end)
+         return -1;
+      else
+         return loc-_col_map_offd_P_dev;
+   }
+};
+
+
+__global__ void hypreCUDAKernel_cfmarker_masked_rowsum( HYPRE_Int nrows, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Complex *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Complex *A_offd_data, HYPRE_Int *CF_marker, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd, HYPRE_Complex *row_sums );
 
 __global__
 void hypreCUDAKernel_mutlipass_pi_rowsum( HYPRE_Int      num_points,
@@ -206,24 +229,7 @@ void hypreCUDAKernel_pass_order_count( int num_points,
                                        int  *S_diag_j,
                                        int  *S_offd_i,
                                        int  *S_offd_j,
-                                       int  *diag_shifts,
-                                       int  *points_left_shifts );
-
-__global__
-void hypreCUDAKernel_pass_order_pass_marker_update( int remaining_pts,
-                                                    int current_pass,
-                                                    int * points_left_old,
-                                                    int * pass_marker_old,
-                                                    int * S_diag_i,
-                                                    int * S_diag_j,
-                                                    int * S_offd_i,
-                                                    int * S_offd_j,
-                                                    int * pass_marker_offd,
-                                                    int * diag_shifts,
-                                                    int * points_left_shifts,
-                                                    int * pass_marker,
-                                                    int * pass_order,
-                                                    int * points_left );
+                                       int  *diag_shifts );
 
 __global__
 void hypreCUDAKernel_populate_big_P_offd_j( HYPRE_Int start, HYPRE_Int stop,
@@ -258,62 +264,47 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    hypre_assert( hypre_ParCSRMatrixMemoryLocation(A) == HYPRE_MEMORY_DEVICE );
    hypre_assert( hypre_ParCSRMatrixMemoryLocation(S) == HYPRE_MEMORY_DEVICE );
 
-   MPI_Comm                comm = hypre_ParCSRMatrixComm(A);
+   MPI_Comm                comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg    *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle *comm_handle;
 
-   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-   hypre_assert( hypre_CSRMatrixMemoryLocation(A_diag) == HYPRE_MEMORY_DEVICE );
-
-   HYPRE_Real      *A_diag_data = hypre_CSRMatrixData(A_diag);
-   HYPRE_Int       *A_diag_i = hypre_CSRMatrixI(A_diag);
-
-   HYPRE_Int        n_fine = hypre_CSRMatrixNumRows(A_diag);
-
-   hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
-   hypre_assert( hypre_CSRMatrixMemoryLocation(A_offd) == HYPRE_MEMORY_DEVICE );
-
-   HYPRE_Int       *A_offd_i = hypre_CSRMatrixI(A_offd);
-   HYPRE_Real      *A_offd_data = hypre_CSRMatrixData(A_offd);
-
+   HYPRE_Int        n_fine          = hypre_ParCSRMatrixNumRows(A);
+   hypre_CSRMatrix *A_diag          = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Real      *A_diag_data     = hypre_CSRMatrixData(A_diag);
+   HYPRE_Int       *A_diag_i        = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int       *A_diag_j        = hypre_CSRMatrixJ(A_diag);
+   hypre_CSRMatrix *A_offd          = hypre_ParCSRMatrixOffd(A);
+   HYPRE_Int       *A_offd_i        = hypre_CSRMatrixI(A_offd);
+   HYPRE_Int       *A_offd_j        = hypre_CSRMatrixJ(A_offd);
+   HYPRE_Real      *A_offd_data     = hypre_CSRMatrixData(A_offd);
    HYPRE_Int        num_cols_offd_A = hypre_CSRMatrixNumCols(A_offd);
 
-   hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag(S);
-   hypre_assert( hypre_CSRMatrixMemoryLocation(S_diag) == HYPRE_MEMORY_DEVICE );
-
-   HYPRE_Int       *S_diag_i = hypre_CSRMatrixI(S_diag);
-   HYPRE_Int       *S_diag_j = hypre_CSRMatrixJ(S_diag);
-
-   hypre_CSRMatrix *S_offd = hypre_ParCSRMatrixOffd(S);
-   hypre_assert( hypre_CSRMatrixMemoryLocation(S_offd) == HYPRE_MEMORY_DEVICE );
-
-   HYPRE_Int       *S_offd_i = hypre_CSRMatrixI(S_offd);
-   HYPRE_Int       *S_offd_j = hypre_CSRMatrixJ(S_offd);
+   hypre_CSRMatrix *S_diag       = hypre_ParCSRMatrixDiag(S);
+   HYPRE_Int       *S_diag_i     = hypre_CSRMatrixI(S_diag);
+   HYPRE_Int       *S_diag_j     = hypre_CSRMatrixJ(S_diag);
+   hypre_CSRMatrix *S_offd       = hypre_ParCSRMatrixOffd(S);
+   HYPRE_Int       *S_offd_i     = hypre_CSRMatrixI(S_offd);
+   HYPRE_Int       *S_offd_j     = hypre_CSRMatrixJ(S_offd);
 
    hypre_ParCSRMatrix **Pi;
-   hypre_ParCSRMatrix *P;
-   hypre_CSRMatrix *P_diag;
-   HYPRE_Real      *P_diag_data;
-   HYPRE_Int       *P_diag_i; /*at first counter of nonzero cols for each row,
-                                      finally will be pointer to start of row */
-   HYPRE_Int       *P_diag_j;
-
-   hypre_CSRMatrix *P_offd;
-   HYPRE_Real      *P_offd_data = NULL;
-   HYPRE_Int       *P_offd_i; /*at first counter of nonzero cols for each row,
-                                      finally will be pointer to start of row */
-
-   HYPRE_Int       *P_offd_j = NULL;
-
-   HYPRE_BigInt    *col_map_offd_P = NULL;
-   HYPRE_BigInt    *col_map_offd_P_dev = NULL;
-   HYPRE_Int        num_cols_offd_P = 0;
-
-   HYPRE_Int        num_sends = 0;
-   HYPRE_Int       *int_buf_data = NULL;
+   hypre_ParCSRMatrix  *P;
+   hypre_CSRMatrix     *P_diag;
+   HYPRE_Real          *P_diag_data;
+   HYPRE_Int           *P_diag_i; /*at first counter of nonzero cols for each row,
+                                        finally will be pointer to start of row */
+   HYPRE_Int           *P_diag_j;
+   hypre_CSRMatrix     *P_offd;
+   HYPRE_Real          *P_offd_data = NULL;
+   HYPRE_Int           *P_offd_i; /*at first counter of nonzero cols for each row,
+                                        finally will be pointer to start of row */
+   HYPRE_Int           *P_offd_j = NULL;
+   HYPRE_BigInt        *col_map_offd_P = NULL;
+   HYPRE_BigInt        *col_map_offd_P_host = NULL;
+   HYPRE_Int            num_cols_offd_P = 0;
+   HYPRE_Int            num_sends = 0;
+   HYPRE_Int           *int_buf_data = NULL;
 
    HYPRE_Int       *pass_starts;
-
    HYPRE_Int       *fine_to_coarse;
    HYPRE_Int       *points_left;
    HYPRE_Int       *pass_marker;
@@ -338,7 +329,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    hypre_GpuProfilingPushRange("Section1");
 #endif
 
-
    /* MPI size and rank*/
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -356,72 +346,68 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       total_global_cpts = num_cpts_global[1];
    }
 
-
    /* Generate pass marker array */
-   //FIXME: Remove _dev suffix when we're done.
-   pass_marker = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
    /* contains pass numbers for each variable according to original order */
-   pass_order = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
+   pass_marker = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
    /* contains row numbers according to new order, pass 1 followed by pass 2 etc */
-   fine_to_coarse = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
+   pass_order = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
+   /* F2C mapping */
    /* reverse of pass_order, keeps track where original numbers go */
-   points_left = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
+   fine_to_coarse = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
    /* contains row numbers of remaining points, auxiliary */
-
-   P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_DEVICE);
-   P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_DEVICE);
+   points_left = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
+   P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
+   P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
 
    // Copy CF_marker to dev
    //FIXME: Assuming this is on the host, we should do something better
    CF_marker = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy( CF_marker, CF_marker_host, HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
-   cnt = 0;
-   remaining = 0;
-
-   HYPRE_Int * points_end = HYPRE_THRUST_CALL( copy_if,
-                                               thrust::make_counting_iterator(0),
-                                               thrust::make_counting_iterator(n_fine),
-                                               CF_marker,
-                                               points_left,
-                                               not_equal<HYPRE_Int>(1) );
-
-   HYPRE_Int * pass_end = HYPRE_THRUST_CALL( copy_if,
-                                             thrust::make_counting_iterator(0),
-                                             thrust::make_counting_iterator(n_fine),
-                                             CF_marker,
-                                             pass_order,
-                                             equal<HYPRE_Int>(1) );
-
+   /* Fpts; number of F pts */
+   HYPRE_Int *points_end = HYPRE_THRUST_CALL( copy_if,
+                                              thrust::make_counting_iterator(0),
+                                              thrust::make_counting_iterator(n_fine),
+                                              CF_marker,
+                                              points_left,
+                                              thrust::not1(equal<HYPRE_Int>(1)) );
    remaining = points_end - points_left;
+
+   /* Cpts; number of C pts */
+   HYPRE_Int *pass_end = HYPRE_THRUST_CALL( copy_if,
+                                            thrust::make_counting_iterator(0),
+                                            thrust::make_counting_iterator(n_fine),
+                                            CF_marker,
+                                            pass_order,
+                                            equal<HYPRE_Int>(1) );
    cnt = pass_end - pass_order;
 
-
    HYPRE_THRUST_CALL( replace_if,
-                      thrust::make_zip_iterator( thrust::make_tuple(pass_marker, P_diag_i+1, P_offd_i+1) ),
-                      thrust::make_zip_iterator( thrust::make_tuple(pass_marker+n_fine, P_diag_i+n_fine+1, P_offd_i+n_fine+1) ),
-                      thrust::make_zip_iterator( thrust::make_tuple(CF_marker,CF_marker,CF_marker) ),
-                      equal<thrust::tuple<HYPRE_Int,HYPRE_Int,HYPRE_Int>>(thrust::make_tuple(1,1,1)),
-                      thrust::make_tuple((HYPRE_Int)1,(HYPRE_Int)1,(HYPRE_Int)0) );
+                      thrust::make_zip_iterator( thrust::make_tuple(pass_marker, P_diag_i + 1, P_offd_i + 1) ),
+                      thrust::make_zip_iterator( thrust::make_tuple(pass_marker, P_diag_i + 1, P_offd_i + 1) ) + n_fine,
+                      CF_marker,
+                      equal<HYPRE_Int>(1),
+                      thrust::make_tuple(HYPRE_Int(1), HYPRE_Int(1), HYPRE_Int(0)) );
 
    HYPRE_THRUST_CALL( exclusive_scan,
-                      thrust::make_transform_iterator(CF_marker,equal<HYPRE_Int>(1)),
-                      thrust::make_transform_iterator(CF_marker + n_fine,equal<HYPRE_Int>(1)),
+                      thrust::make_transform_iterator(CF_marker,          equal<HYPRE_Int>(1)),
+                      thrust::make_transform_iterator(CF_marker + n_fine, equal<HYPRE_Int>(1)),
                       fine_to_coarse,
-                      (HYPRE_Int)0 );
+                      HYPRE_Int(0) );
 
-   pass_starts = hypre_CTAlloc(HYPRE_Int, 10, HYPRE_MEMORY_HOST);
    /* contains beginning for each pass in pass_order field, assume no more than 10 passes */
-
+   pass_starts = hypre_CTAlloc(HYPRE_Int, 10, HYPRE_MEMORY_HOST);
+   /* first pass is C */
    pass_starts[0] = 0;
    pass_starts[1] = cnt;
 
+   /* RL: TODO */
    if (num_functions > 1)
    {
-      dof_func_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd_A, HYPRE_MEMORY_HOST);
+      dof_func_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST);
       index = 0;
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-      int_buf_data = hypre_CTAlloc(HYPRE_Int,  hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
+      int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
       for (i = 0; i < num_sends; i++)
       {
          startc = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
@@ -440,21 +426,22 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
    if (num_cols_offd_A)
    {
-     num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+      num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-     int_buf_data = hypre_CTAlloc(HYPRE_Int,  hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_DEVICE);
+      int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_DEVICE);
 
-     HYPRE_THRUST_CALL( gather,
-                        hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
-                        hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
-                        hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
-                        pass_marker,
-                        int_buf_data );
+      HYPRE_THRUST_CALL( gather,
+                         hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                         hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
+                         hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                         pass_marker,
+                         int_buf_data );
 
       pass_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd_A, HYPRE_MEMORY_DEVICE);
 
       /* create a handle to start communication. 11: for integer */
-      comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_DEVICE, int_buf_data, HYPRE_MEMORY_DEVICE, pass_marker_offd);
+      comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_DEVICE, int_buf_data,
+                                                    HYPRE_MEMORY_DEVICE, pass_marker_offd);
 
       /* destroy the handle to finish communication */
       hypre_ParCSRCommHandleDestroy(comm_handle);
@@ -472,154 +459,123 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("Section2");
 #endif
-   HYPRE_Int * points_left_old = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
-   HYPRE_Int * pass_marker_old = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
+
+   HYPRE_Int *points_left_old = hypre_TAlloc(HYPRE_Int, remaining, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int *diag_shifts     = hypre_TAlloc(HYPRE_Int, remaining, HYPRE_MEMORY_DEVICE);
 
    while (global_remaining > 0)
    {
-      HYPRE_Int remaining_pts = remaining;
-
       cnt_rem = 0;
       cnt_old = cnt;
+
       {
-        dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-        dim3 gDim = hypre_GetDefaultCUDAGridDimension(remaining_pts, "warp", bDim);
+         dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+         dim3 gDim = hypre_GetDefaultCUDAGridDimension(remaining, "warp", bDim);
 
-        HYPRE_Int * diag_shifts        = hypre_CTAlloc(HYPRE_Int, remaining_pts, HYPRE_MEMORY_DEVICE);
-        HYPRE_Int * points_left_shifts = hypre_CTAlloc(HYPRE_Int, remaining_pts, HYPRE_MEMORY_DEVICE);
+         /* diag_shifts is 0/1 indicating if points_left_dev[i] is picked in this pass */
+         HYPRE_CUDA_LAUNCH( hypreCUDAKernel_pass_order_count,
+                            gDim, bDim,
+                            remaining,
+                            current_pass,
+                            points_left,
+                            pass_marker,
+                            pass_marker_offd,
+                            S_diag_i,
+                            S_diag_j,
+                            S_offd_i,
+                            S_offd_j,
+                            diag_shifts );
 
-        hypreCUDAKernel_pass_order_count<<<gDim,bDim>>>( remaining_pts,
-                                                         current_pass,
-                                                         points_left,
-                                                         pass_marker,
-                                                         pass_marker_offd,
-                                                         S_diag_i,
-                                                         S_diag_j,
-                                                         S_offd_i,
-                                                         S_offd_j,
-                                                         diag_shifts,
-                                                         points_left_shifts );
+         cnt = HYPRE_THRUST_CALL( reduce,
+                                  diag_shifts,
+                                  diag_shifts + remaining,
+                                  cnt_old,
+                                  thrust::plus<HYPRE_Int>() );
 
-        auto cnt_reduce = HYPRE_THRUST_CALL( reduce,
-                                             thrust::make_zip_iterator( thrust::make_tuple(diag_shifts, points_left_shifts) ),
-                                             thrust::make_zip_iterator( thrust::make_tuple(diag_shifts+remaining_pts, points_left_shifts+remaining_pts) ),
-                                             thrust::tuple<HYPRE_Int,HYPRE_Int>(cnt_old,0),
-                                             tuple_plus<HYPRE_Int>() );
+         cnt_rem = remaining - (cnt - cnt_old);
 
-        cnt     = thrust::get<0>(cnt_reduce);
-        cnt_rem = thrust::get<1>(cnt_reduce);
+         HYPRE_THRUST_CALL( replace_if,
+                            thrust::make_permutation_iterator(pass_marker, points_left),
+                            thrust::make_permutation_iterator(pass_marker, points_left + remaining),
+                            diag_shifts,
+                            thrust::identity<HYPRE_Int>(),
+                            current_pass + 1 );
 
-        HYPRE_THRUST_CALL( exclusive_scan,
-                           thrust::make_zip_iterator(thrust::make_tuple(diag_shifts, points_left_shifts) ),
-                           thrust::make_zip_iterator(thrust::make_tuple(diag_shifts+remaining_pts, points_left_shifts+remaining_pts) ),
-                           thrust::make_zip_iterator(thrust::make_tuple(diag_shifts, points_left_shifts) ),
-                           thrust::tuple<HYPRE_Int,HYPRE_Int>(cnt_old,0),
-                           tuple_plus<HYPRE_Int>() );
+         hypre_TMemcpy( points_left_old, points_left, HYPRE_Int, remaining, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
+         HYPRE_Int *new_end;
+         new_end = HYPRE_THRUST_CALL( copy_if,
+                                      points_left_old,
+                                      points_left_old + remaining,
+                                      diag_shifts,
+                                      pass_order + cnt_old,
+                                      thrust::identity<HYPRE_Int>() );
 
-        hypre_TMemcpy( points_left_old, points_left, HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-        hypre_TMemcpy( pass_marker_old, pass_marker, HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+         hypre_assert(new_end - pass_order == cnt);
 
-        hypreCUDAKernel_pass_order_pass_marker_update<<<gDim,bDim>>>( remaining_pts,
-                                                                      current_pass,
-                                                                      points_left_old,
-                                                                      pass_marker_old,
-                                                                      S_diag_i,
-                                                                      S_diag_j,
-                                                                      S_offd_i,
-                                                                      S_offd_j,
-                                                                      pass_marker_offd,
-                                                                      diag_shifts,
-                                                                      points_left_shifts,
-                                                                      pass_marker,
-                                                                      pass_order,
-                                                                      points_left );
+         new_end = HYPRE_THRUST_CALL( copy_if,
+                                      points_left_old,
+                                      points_left_old + remaining,
+                                      diag_shifts,
+                                      points_left,
+                                      thrust::not1(thrust::identity<HYPRE_Int>()) );
 
-        hypre_TFree(diag_shifts, HYPRE_MEMORY_DEVICE);
-        hypre_TFree(points_left_shifts, HYPRE_MEMORY_DEVICE);
+         hypre_assert(new_end - points_left == cnt_rem);
       }
 
       remaining = cnt_rem;
       current_pass++;
       num_passes++;
+
       if (num_passes > 9)
       {
          hypre_error_w_msg(HYPRE_ERROR_GENERIC," Warning!!! too many passes! out of range!\n");
          break;
       }
+
       pass_starts[num_passes] = cnt;
 
       /* update pass_marker_offd */
       if (num_cols_offd_A)
       {
-        HYPRE_THRUST_CALL( gather,
-                           hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
-                           hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
-                           hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
-                           pass_marker,
-                           int_buf_data );
+         HYPRE_THRUST_CALL( gather,
+                            hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                            hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
+                            hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                            pass_marker,
+                            int_buf_data );
 
-        /* create a handle to start communication. 11: for integer */
-        comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_DEVICE, int_buf_data, HYPRE_MEMORY_DEVICE, pass_marker_offd);
+         /* create a handle to start communication. 11: for integer */
+         comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_DEVICE, int_buf_data,
+                                                       HYPRE_MEMORY_DEVICE, pass_marker_offd);
 
-        /* destroy the handle to finish communication */
-        hypre_ParCSRCommHandleDestroy(comm_handle);
+         /* destroy the handle to finish communication */
+         hypre_ParCSRCommHandleDestroy(comm_handle);
       }
 
       hypre_MPI_Allreduce(&remaining, &global_remaining, 1, HYPRE_MPI_INT, hypre_MPI_MAX, comm);
-
    } // while (global_remaining > 0)
 
-   hypre_TFree(points_left_old,HYPRE_MEMORY_DEVICE);
-   hypre_TFree(pass_marker_old,HYPRE_MEMORY_DEVICE);
-
-   hypre_TFree(int_buf_data, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(points_left, HYPRE_MEMORY_DEVICE);// FIXME: Clean up when done
+   hypre_TFree(diag_shifts,     HYPRE_MEMORY_DEVICE);
+   hypre_TFree(points_left_old, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(int_buf_data,    HYPRE_MEMORY_DEVICE);
+   hypre_TFree(points_left,     HYPRE_MEMORY_DEVICE);
 
    /* generate row sum of weak points and C-points to be ignored */
    row_sums = hypre_CTAlloc(HYPRE_Real, n_fine, HYPRE_MEMORY_DEVICE);
 
-   if (num_functions >  1)
    {
-     hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Sorry, this code not yet ported to the GPU!");
+      dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+      dim3 gDim = hypre_GetDefaultCUDAGridDimension(n_fine, "warp", bDim);
 
-     /*
-     HYPRE_Real *row_sums_host = hypre_CTAlloc(HYPRE_Real, n_fine, HYPRE_MEMORY_HOST);
-     hypre_TMemcpy( row_sums_host, row_sums, HYPRE_Real, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-      for (i=0; i < n_fine; i++)
-      {
-         if (CF_marker[i] < 0)
-         {
-            for (j = A_diag_i[i]+1; j < A_diag_i[i+1]; j++)
-            {
-               if (dof_func[i] == dof_func[A_diag_j[j]])
-               {
-                  row_sums_host[i] += A_diag_data[j];
-               }
-            }
-            for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
-            {
-               if (dof_func[i] == dof_func_offd[A_offd_j[j]])
-               {
-                   row_sums_host[i] += A_offd_data[j];
-               }
-            }
-         }
-      }
-      hypre_TMemcpy( row_sums, row_sums_host, HYPRE_Real, n_fine, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-      hypre_TFree(row_sums_host, HYPRE_MEMORY_HOST);
-     */
+      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_cfmarker_masked_rowsum, gDim, bDim,
+                         n_fine, A_diag_i, A_diag_j, A_diag_data,
+                         A_offd_i, A_offd_j, A_offd_data,
+                         CF_marker,
+                         num_functions > 1 ? dof_func : NULL,
+                         num_functions > 1 ? dof_func_offd : NULL,
+                         row_sums );
    }
-   else
-   {
-     dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-     dim3 gDim = hypre_GetDefaultCUDAGridDimension(n_fine, "warp", bDim);
-
-     HYPRE_CUDA_LAUNCH( hypreCUDAKernel_cfmarker_masked_rowsum, gDim, bDim,
-                        n_fine, A_diag_i, A_diag_data, A_offd_i, A_offd_data,
-                        CF_marker, row_sums );
-   }
-
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
@@ -916,20 +872,20 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                            (HYPRE_Int) 0 );
 
 
-      col_map_offd_P_dev = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_P, HYPRE_MEMORY_DEVICE);
+      col_map_offd_P = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_P, HYPRE_MEMORY_DEVICE);
 
       HYPRE_Int * newend = HYPRE_THRUST_CALL( copy_if,
                                               tmp_P_offd_j,
                                               tmp_P_offd_j+P_offd_size,
                                               stencil,
-                                              col_map_offd_P_dev,
+                                              col_map_offd_P,
                                               equal<HYPRE_Int>(1) );
 
-      hypre_assert( (newend-col_map_offd_P_dev) == num_cols_offd_P );
+      hypre_assert( (newend-col_map_offd_P) == num_cols_offd_P );
 
       // PB: It seems we still need this on the host??
-      col_map_offd_P = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_P, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy( col_map_offd_P, col_map_offd_P_dev, HYPRE_BigInt, num_cols_offd_P, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      col_map_offd_P_host = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_P, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy( col_map_offd_P_host, col_map_offd_P, HYPRE_BigInt, num_cols_offd_P, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
       // FIXME: clean this up
       HYPRE_BigInt *big_P_offd_j_host = hypre_TAlloc(HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_HOST);
@@ -939,7 +895,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
       for (i=0; i < P_offd_size; i++)
       {
-         P_offd_j_host[i] = hypre_BigBinarySearch(col_map_offd_P,
+         P_offd_j_host[i] = hypre_BigBinarySearch(col_map_offd_P_host,
                big_P_offd_j_host[i],
                num_cols_offd_P);
       }
@@ -963,8 +919,8 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    hypre_GpuProfilingPushRange("Section5");
 #endif
 
-   hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
-   hypre_ParCSRMatrixDeviceColMapOffd(P) = col_map_offd_P_dev;
+   hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P_host;
+   hypre_ParCSRMatrixDeviceColMapOffd(P) = col_map_offd_P;
    hypre_CSRMatrixNumCols(P_offd) = num_cols_offd_P;
 
    hypre_CSRMatrixMemoryLocation(P_diag) = HYPRE_MEMORY_DEVICE;
@@ -1883,17 +1839,21 @@ void compute_num_cols_offd_fine_to_coarse( HYPRE_Int * pass_marker_offd, HYPRE_I
 }
 
 __global__
-void hypreCUDAKernel_cfmarker_masked_rowsum( HYPRE_Int nrows,
-                                             HYPRE_Int *A_diag_i,
+void hypreCUDAKernel_cfmarker_masked_rowsum( HYPRE_Int      nrows,
+                                             HYPRE_Int     *A_diag_i,
+                                             HYPRE_Int     *A_diag_j,
                                              HYPRE_Complex *A_diag_data,
-                                             HYPRE_Int *A_offd_i,
+                                             HYPRE_Int     *A_offd_i,
+                                             HYPRE_Int     *A_offd_j,
                                              HYPRE_Complex *A_offd_data,
-                                             HYPRE_Int *CF_marker,
+                                             HYPRE_Int     *CF_marker,
+                                             HYPRE_Int     *dof_func,
+                                             HYPRE_Int     *dof_func_offd,
                                              HYPRE_Complex *row_sums )
 {
-  HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
 
-  if (row_i >= nrows || CF_marker[row_i] >= 0)
+   if (row_i >= nrows || read_only_load(&CF_marker[row_i]) >= 0)
    {
       return;
    }
@@ -1901,6 +1861,7 @@ void hypreCUDAKernel_cfmarker_masked_rowsum( HYPRE_Int nrows,
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
    HYPRE_Int p = 0;
    HYPRE_Int q = 0;
+   HYPRE_Int func_i = dof_func ? read_only_load(&dof_func[row_i]) : 0;
 
    // A_diag part
    if (lane < 2)
@@ -1912,17 +1873,26 @@ void hypreCUDAKernel_cfmarker_masked_rowsum( HYPRE_Int nrows,
 
    HYPRE_Complex row_sum_i = 0.0;
 
-   // j = A_diag_1[i]+1 ==> p+1
-   for (HYPRE_Int j = p+1 + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   // exclude diagonal: do not assume it is the first entry
+   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
    {
       if ( j >= q )
       {
          continue;
       }
 
-      HYPRE_Complex value = A_diag_data[j];
+      HYPRE_Int col = read_only_load(&A_diag_j[j]);
 
-      row_sum_i += value;
+      if (row_i != col)
+      {
+         HYPRE_Int func_j = dof_func ? read_only_load(&dof_func[col]) : 0;
+
+         if (func_i == func_j)
+         {
+            HYPRE_Complex value = read_only_load(&A_diag_data[j]);
+            row_sum_i += value;
+         }
+      }
    }
 
    // A_offd part
@@ -1940,15 +1910,26 @@ void hypreCUDAKernel_cfmarker_masked_rowsum( HYPRE_Int nrows,
          continue;
       }
 
-      HYPRE_Complex value = A_offd_data[j];
+      HYPRE_Int func_j = 0;
+      if (dof_func_offd)
+      {
+         HYPRE_Int col = read_only_load(&A_offd_j[j]);
+         func_j = read_only_load(&dof_func_offd[col]);
+      }
 
-      row_sum_i += value;
+      if (func_i == func_j)
+      {
+         HYPRE_Complex value = read_only_load(&A_offd_data[j]);
+         row_sum_i += value;
+      }
    }
 
    row_sum_i = warp_reduce_sum(row_sum_i);
 
-   if(lane == 0)
-     row_sums[row_i] += row_sum_i;
+   if (lane == 0)
+   {
+      row_sums[row_i] = row_sum_i;
+   }
 }
 
 __global__
@@ -2907,31 +2888,29 @@ void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( int    num_points,
 }
 
 __global__
-void hypreCUDAKernel_pass_order_count( HYPRE_Int num_points,
-                                       HYPRE_Int color,
-                                       HYPRE_Int  *points_left,
-                                       HYPRE_Int  *pass_marker,
-                                       HYPRE_Int  *pass_marker_offd,
-                                       HYPRE_Int  *S_diag_i,
-                                       HYPRE_Int  *S_diag_j,
-                                       HYPRE_Int  *S_offd_i,
-                                       HYPRE_Int  *S_offd_j,
-                                       HYPRE_Int  *diag_shifts,
-                                       HYPRE_Int  *points_left_shifts )
+void hypreCUDAKernel_pass_order_count( HYPRE_Int  num_points,
+                                       HYPRE_Int  color,
+                                       HYPRE_Int *points_left,
+                                       HYPRE_Int *pass_marker,
+                                       HYPRE_Int *pass_marker_offd,
+                                       HYPRE_Int *S_diag_i,
+                                       HYPRE_Int *S_diag_j,
+                                       HYPRE_Int *S_offd_i,
+                                       HYPRE_Int *S_offd_j,
+                                       HYPRE_Int *diag_shifts )
 {
-  HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
 
-  if (row_i >= num_points)
-    {
+   if (row_i >= num_points)
+   {
       return;
-    }
+   }
 
-  HYPRE_Int i1 = points_left[row_i];
-
-  HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-
-  HYPRE_Int p = 0;
-  HYPRE_Int q = 0;
+   HYPRE_Int i1 = read_only_load(&points_left[row_i]);
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int p = 0;
+   HYPRE_Int q = 0;
+   hypre_int brk = 0;
 
    // S_diag
    if (lane < 2)
@@ -2941,224 +2920,70 @@ void hypreCUDAKernel_pass_order_count( HYPRE_Int num_points,
    q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
    p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
 
-   HYPRE_Int equal = 0;
-   HYPRE_Int brk = 0;
    for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
    {
-     if(!brk)
-       {
-         if( j < q )
-           {
-             HYPRE_Int j1 =  S_diag_j[j];
-             if( pass_marker[j1] == color )
-               equal++;
-           }
+      if (j < q)
+      {
+         HYPRE_Int j1 = read_only_load(&S_diag_j[j]);
+         if ( read_only_load(&pass_marker[j1]) == color )
+         {
+            brk = 1;
+         }
+      }
 
-         if(equal)
-           brk=1;
+      brk = __any_sync(HYPRE_WARP_FULL_MASK, brk);
 
-         brk = __any_sync(HYPRE_WARP_FULL_MASK, brk);
-       }
+      if (brk)
+      {
+         break;
+      }
    }
 
-   if(brk)
-     {
-       // Only one warp can increment because of the break
-       // so we just need to increment by 1
-       if(lane == 0 )
-         diag_shifts[row_i] += 1;
+   if (brk)
+   {
+      // Only one thread can increment because of the break
+      // so we just need to increment by 1
+      if (lane == 0)
+      {
+         diag_shifts[row_i] = 1;
+      }
 
-       return;
-     }
-
-   // S_offd
-   // We shouldn't get here if brk got set
-   hypre_device_assert(!brk);
-
-   if(!brk)
-     {
-
-   if (lane < 2)
-     {
-       p = read_only_load(S_offd_i + i1 + lane);
-     }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
-
-   equal = 0;
-   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
-     {
-       if(!brk)
-         {
-           if( j < q )
-             {
-               HYPRE_Int j1 = S_offd_j[j];
-               if (pass_marker_offd[j1] == color )
-                 equal++;
-             }
-
-           if(equal)
-             brk=1;
-
-           brk = __any_sync(HYPRE_WARP_FULL_MASK, brk);
-         }
-     }
-
-   if(brk)
-     {
-       // Only one warp can increment because of the break
-       // so we just need to increment by 1
-       if(lane == 0 )
-         diag_shifts[row_i] += 1;
-
-       return;
-     }
-
-     }
-   // We shouldn't get here if brk got set
-   hypre_device_assert(!brk);
-
-   if(!brk && lane == 0 )
-     points_left_shifts[row_i] += 1;
-}
-
-__global__
-void hypreCUDAKernel_pass_order_pass_marker_update( HYPRE_Int remaining_pts,
-                                                    HYPRE_Int current_pass,
-                                                    HYPRE_Int * points_left_old,
-                                                    HYPRE_Int * pass_marker_old,
-                                                    HYPRE_Int * S_diag_i,
-                                                    HYPRE_Int * S_diag_j,
-                                                    HYPRE_Int * S_offd_i,
-                                                    HYPRE_Int * S_offd_j,
-                                                    HYPRE_Int * pass_marker_offd,
-                                                    HYPRE_Int * diag_shifts,
-                                                    HYPRE_Int * points_left_shifts,
-                                                    HYPRE_Int * pass_marker,
-                                                    HYPRE_Int * pass_order,
-                                                    HYPRE_Int * points_left )
-{
-  HYPRE_Int i = hypre_cuda_get_grid_warp_id<1,1>();
-
-   if (i >= remaining_pts)
-    {
-       return;
-    }
-
-   HYPRE_Int i1 = points_left_old[i];
-
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-
-   HYPRE_Int p = 0;
-   HYPRE_Int q = 0;
-
-   // S_diag
-   if (lane < 2)
-     {
-       p = read_only_load(S_diag_i + i1 + lane);
-     }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
-
-   HYPRE_Int brk = 0;
-   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
-     {
-       if(!brk)
-         {
-           HYPRE_Int cond = 0;
-
-           if( j < q )
-             {
-               HYPRE_Int j1 =  S_diag_j[j];
-               cond = (pass_marker_old[j1] == current_pass);
-             }
-
-           uint64_t equal = __ballot_sync(HYPRE_WARP_FULL_MASK,cond);
-
-           if(equal)
-             {
-               uint64_t lowest_lane_mask = equal & -equal;
-
-               // Figure out what the lane index is
-               HYPRE_Int bscount = 1;
-               for( HYPRE_Int bs = 0; bs < HYPRE_WARP_SIZE; bs++ )
-                 {
-                   if(lowest_lane_mask != 1)
-                     {
-                       lowest_lane_mask = lowest_lane_mask >> 1;
-                       bscount++;
-                     }
-                 }
-
-               if(lane == bscount+1)
-                 {
-                   pass_marker[i1] = current_pass + 1;
-                   pass_order[diag_shifts[i]] = i1;
-                 }
-
-               brk=1;
-             }
-
-           brk = __any_sync(HYPRE_WARP_FULL_MASK,brk);
-         }
-     }
+      return;
+   }
 
    // S_offd
    if (lane < 2)
-     {
-       p = read_only_load(S_offd_i + i1 + lane);
-     }
+   {
+      p = read_only_load(S_offd_i + i1 + lane);
+   }
    q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
    p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
-   if(!brk)
-     {
-       for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+
+   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   {
+      if (j < q)
+      {
+         HYPRE_Int j1 = read_only_load(&S_offd_j[j]);
+         if ( read_only_load(&pass_marker_offd[j1]) == color )
          {
-           if(!brk)
-             {
-               HYPRE_Int cond = 0;
-
-               if( j < q )
-                 {
-                   HYPRE_Int j1 =  S_offd_j[j];
-                   cond = (pass_marker_offd[j1] == current_pass);
-                 }
-
-               uint64_t equal = __ballot_sync(HYPRE_WARP_FULL_MASK,cond);
-
-               if(equal)
-                 {
-                   uint64_t lowest_lane_mask = equal & -equal;
-
-                   // Figure out what the lane index is
-                   HYPRE_Int bscount = 1;
-                   for( HYPRE_Int bs = 0; bs < HYPRE_WARP_SIZE; bs++ )
-                     {
-                       if(lowest_lane_mask != 1)
-                         {
-                           lowest_lane_mask = lowest_lane_mask >> 1;
-                           bscount++;
-                         }
-                     }
-
-                   if(lane == bscount+1)
-                     {
-                       pass_marker[i1] = current_pass + 1;
-                       pass_order[diag_shifts[i]] = i1;
-                     }
-
-                   brk=1;
-                 }
-
-               brk = __any_sync(HYPRE_WARP_FULL_MASK,brk);
-             }
+            brk = 1;
          }
-     }
+      }
 
-   if(!brk)
-     {
-       points_left[points_left_shifts[i]] = i1;
-     }
+      brk = __any_sync(HYPRE_WARP_FULL_MASK, brk);
+
+      if (brk)
+      {
+         break;
+      }
+   }
+
+   // Only one thread can increment because of the break
+   // so we just need to increment by 1
+   if (lane == 0)
+   {
+      diag_shifts[row_i] = (brk != 0);
+   }
 }
 
 __global__
