@@ -15,6 +15,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 
 /*==========================================================================*/
@@ -131,3 +132,6 @@ hypre_BoomerAMGCoarseParmsDevice(MPI_Comm       comm,
 
    return (ierr);
 }
+
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
