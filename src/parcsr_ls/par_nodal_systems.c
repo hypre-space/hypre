@@ -813,7 +813,7 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
                                HYPRE_Int            nodal,
                                HYPRE_Int            keep_same_sign,
                                HYPRE_Int          **dof_func_ptr,
-                               HYPRE_Int          **CF_marker_ptr,
+                               hypre_IntArray     **CF_marker_ptr,
                                hypre_ParCSRMatrix **S_ptr)
 {
    MPI_Comm            comm = hypre_ParCSRMatrixComm(SN);
@@ -875,9 +875,10 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
    /* Allocate CF_marker if not done before */
    if (*CF_marker_ptr == NULL)
    {
-      *CF_marker_ptr = hypre_CTAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_HOST);
+      *CF_marker_ptr = hypre_IntArrayCreate(num_variables);
+      hypre_IntArrayInitialize(*CF_marker_ptr);
    }
-   CF_marker = *CF_marker_ptr;
+   CF_marker = hypre_IntArrayData(*CF_marker_ptr);
 
    if (nodal < 0)
    {
@@ -1144,7 +1145,7 @@ hypre_BoomerAMGCreateScalarCF(HYPRE_Int                   *CFN_marker,
                               HYPRE_Int                    num_functions,
                               HYPRE_Int                    num_nodes,
                               HYPRE_Int                  **dof_func_ptr,
-                              HYPRE_Int                  **CF_marker_ptr)
+                              hypre_IntArray             **CF_marker_ptr)
 
 {
    HYPRE_Int      *CF_marker;
@@ -1159,9 +1160,10 @@ hypre_BoomerAMGCreateScalarCF(HYPRE_Int                   *CFN_marker,
    /* Allocate CF_marker if not done before */
    if (*CF_marker_ptr == NULL)
    {
-      *CF_marker_ptr = hypre_CTAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_HOST);
+      *CF_marker_ptr = hypre_IntArrayCreate(num_variables);
+      hypre_IntArrayInitialize(*CF_marker_ptr);
    }
-   CF_marker = *CF_marker_ptr;
+   CF_marker = hypre_IntArrayData(*CF_marker_ptr);
 
    cnt = 0;
    num_coarse_nodes = 0;

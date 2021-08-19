@@ -603,7 +603,7 @@ hypre_MGRCycle( void               *mgr_vdata,
    HYPRE_Solver         cg_solver = (mgr_data -> coarse_grid_solver);
    HYPRE_Int            (*coarse_grid_solver_solve)(void*, void*, void*, void*) = (mgr_data -> coarse_grid_solver_solve);
 
-   HYPRE_Int            **CF_marker = (mgr_data -> CF_marker_array);
+   hypre_IntArray     **CF_marker = (mgr_data -> CF_marker_array);
    HYPRE_Int            nsweeps = (mgr_data -> num_relax_sweeps);
    HYPRE_Int            relax_type = (mgr_data -> relax_type);
    HYPRE_Real           relax_weight = (mgr_data -> relax_weight);
@@ -696,7 +696,7 @@ hypre_MGRCycle( void               *mgr_vdata,
             {
                for(i=0; i<nsweeps; i++)
                {
-                  hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
+                  hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid], F_array[fine_grid], hypre_IntArrayData(CF_marker[fine_grid]),
                         relax_points, relax_weight,
                         relax_l1_norms[fine_grid] ? hypre_VectorData(relax_l1_norms[fine_grid]) : NULL,
                         U_array[fine_grid], Vtemp);
@@ -706,7 +706,7 @@ hypre_MGRCycle( void               *mgr_vdata,
             {
                for(i=0; i<nsweeps; i++)
                {
-                  hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
+                  hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], hypre_IntArrayData(CF_marker[fine_grid]),
                         relax_type, relax_points, relax_weight,
                         omega,
                         relax_l1_norms[fine_grid] ? hypre_VectorData(relax_l1_norms[fine_grid]) : NULL,
@@ -717,7 +717,7 @@ hypre_MGRCycle( void               *mgr_vdata,
             {
                for(i=0; i<nsweeps; i++)
                {
-                  Solve_err_flag = hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
+                  Solve_err_flag = hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], hypre_IntArrayData(CF_marker[fine_grid]),
                         relax_type,relax_points,relax_weight,omega,NULL, U_array[fine_grid], Vtemp, Ztemp);
                }
             }
@@ -819,20 +819,20 @@ hypre_MGRCycle( void               *mgr_vdata,
                
             // restrict to F points
 //            hypre_ParVectorSetConstantValues(F_fine_array[coarse_grid], 0.0);
-            hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, 1.0, Vtemp, 0.0, &(F_fine_array[coarse_grid]));
+            hypre_MGRAddVectorR(hypre_IntArrayData(CF_marker[fine_grid]), FMRK, 1.0, Vtemp, 0.0, &(F_fine_array[coarse_grid]));
             // initialize solution array
             hypre_ParVectorSetConstantValues(U_fine_array[coarse_grid], 0.0);            
             // solve
             fine_grid_solver_solve((mgr_data -> aff_solver)[fine_grid], A_ff_array[fine_grid], F_fine_array[coarse_grid],
                   U_fine_array[coarse_grid]);
             // update solution      
-            hypre_MGRAddVectorP(CF_marker[fine_grid], FMRK, 1.0, U_fine_array[coarse_grid], 1.0, &(U_array[fine_grid]));
+            hypre_MGRAddVectorP(hypre_IntArrayData(CF_marker[fine_grid]), FMRK, 1.0, U_fine_array[coarse_grid], 1.0, &(U_array[fine_grid]));
          }
          else
          {
             for (i=0; i<nsweeps; i++)
             {
-               Solve_err_flag = hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
+               Solve_err_flag = hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], hypre_IntArrayData(CF_marker[fine_grid]),
                      relax_type, relax_points, relax_weight, omega, NULL, U_array[fine_grid], Vtemp, Ztemp);
             }
          }

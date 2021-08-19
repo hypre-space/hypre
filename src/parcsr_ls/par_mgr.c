@@ -226,7 +226,7 @@ hypre_MGRDestroy( void *data )
       if ((mgr_data -> RT_array)[i-1])
         hypre_ParCSRMatrixDestroy((mgr_data -> RT_array)[i-1]);
 
-      hypre_TFree((mgr_data -> CF_marker_array)[i-1], HYPRE_MEMORY_HOST);
+      hypre_IntArrayDestroy(mgr_data -> CF_marker_array[i-1]);
     }
     for (i=1; i < (num_coarse_levels); i++) {
       if ((mgr_data -> A_array)[i])
@@ -720,7 +720,7 @@ hypre_MGRCoarsen(hypre_ParCSRMatrix *S,
                HYPRE_Int fixed_coarse_size,
                HYPRE_Int *fixed_coarse_indexes,
                HYPRE_Int debug_flag,
-                 HYPRE_Int **CF_marker_ptr,
+               hypre_IntArray **CF_marker_ptr,
                HYPRE_Int cflag)
 {
   HYPRE_Int   *CF_marker = NULL;
@@ -733,10 +733,12 @@ hypre_MGRCoarsen(hypre_ParCSRMatrix *S,
   {
     if(*CF_marker_ptr != NULL)
     {
-      hypre_TFree(*CF_marker_ptr, HYPRE_MEMORY_HOST);
+      hypre_IntArrayDestroy(*CF_marker_ptr);
     }
-    CF_marker = hypre_CTAlloc(HYPRE_Int, nloc, HYPRE_MEMORY_HOST);
-    memset(CF_marker, FMRK, nloc*sizeof(HYPRE_Int));
+    *CF_marker_ptr = hypre_IntArrayCreate(nloc);
+    hypre_IntArrayInitialize(*CF_marker_ptr);
+    hypre_IntArraySetConstantValues(*CF_marker_ptr, FMRK);
+    CF_marker = hypre_IntArrayData(*CF_marker_ptr);
 
     /* first mark fixed coarse set */
     nc = fixed_coarse_size;
@@ -756,7 +758,8 @@ hypre_MGRCoarsen(hypre_ParCSRMatrix *S,
      * CF_marker first and then coarsening on subgraph which excludes
      * the initialized coarse nodes.
     */
-    hypre_BoomerAMGCoarsen(S, A, 0, debug_flag, &CF_marker);
+    hypre_BoomerAMGCoarsen(S, A, 0, debug_flag, CF_marker_ptr);
+    CF_marker = hypre_IntArrayData(*CF_marker_ptr);
 
     /* Update CF_marker to correct Cpoints marked as Fpoints. */
     nc = fixed_coarse_size;
@@ -804,9 +807,6 @@ hypre_MGRCoarsen(hypre_ParCSRMatrix *S,
     //printf(" nc = %d and fixed coarse size = %d \n", nc, fixed_coarse_size);
 #endif
   }
-
-  /* set CF_marker */
-  *CF_marker_ptr = CF_marker;
 
   return hypre_error_flag;
 }

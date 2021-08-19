@@ -967,7 +967,7 @@ HYPRE_Int hypre_BoomerAMGCycleT ( void *amg_vdata , hypre_ParVector **F_array , 
 HYPRE_Int hypre_BoomerAMGRelaxT ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Int *cf_marker , HYPRE_Int relax_type , HYPRE_Int relax_points , HYPRE_Real relax_weight , hypre_ParVector *u , hypre_ParVector *Vtemp );
 
 /* par_cgc_coarsen.c */
-HYPRE_Int hypre_BoomerAMGCoarsenCGCb ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int measure_type , HYPRE_Int coarsen_type , HYPRE_Int cgc_its , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
+HYPRE_Int hypre_BoomerAMGCoarsenCGCb ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int measure_type , HYPRE_Int coarsen_type , HYPRE_Int cgc_its , HYPRE_Int debug_flag , hypre_IntArray **CF_marker_ptr );
 HYPRE_Int hypre_BoomerAMGCoarsenCGC ( hypre_ParCSRMatrix *S , HYPRE_Int numberofgrids , HYPRE_Int coarsen_type , HYPRE_Int *CF_marker );
 HYPRE_Int hypre_AmgCGCPrepare ( hypre_ParCSRMatrix *S , HYPRE_Int nlocal , HYPRE_Int *CF_marker , HYPRE_Int **CF_marker_offd , HYPRE_Int coarsen_type , HYPRE_Int **vrange );
 //HYPRE_Int hypre_AmgCGCPrepare ( hypre_ParCSRMatrix *S , HYPRE_Int nlocal , HYPRE_Int *CF_marker , HYPRE_BigInt **CF_marker_offd , HYPRE_Int coarsen_type , HYPRE_BigInt **vrange );
@@ -989,14 +989,14 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_SolveHost ( hypre_ParCSRMatrix *A , hypre_ParV
 HYPRE_Int hypre_ParCSRRelax_Cheby_SolveDevice ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Real *ds_data , HYPRE_Real *coefs , HYPRE_Int order , HYPRE_Int scale , HYPRE_Int variant , hypre_ParVector *u , hypre_ParVector *v , hypre_ParVector *r, hypre_ParVector *orig_u_vec, hypre_ParVector *tmp_vec);
 
 /* par_coarsen.c */
-HYPRE_Int hypre_BoomerAMGCoarsen ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int CF_init , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
-HYPRE_Int hypre_BoomerAMGCoarsenRuge ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int measure_type , HYPRE_Int coarsen_type , HYPRE_Int cut_factor , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
-HYPRE_Int hypre_BoomerAMGCoarsenFalgout ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int measure_type , HYPRE_Int cut_factor , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
-HYPRE_Int hypre_BoomerAMGCoarsenHMIS ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int measure_type , HYPRE_Int cut_factor , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
-HYPRE_Int hypre_BoomerAMGCoarsenPMIS ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int CF_init , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
-HYPRE_Int hypre_BoomerAMGCoarsenPMISHost ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int CF_init , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
+HYPRE_Int hypre_BoomerAMGCoarsen ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int CF_init , HYPRE_Int debug_flag , hypre_IntArray **CF_marker_ptr );
+HYPRE_Int hypre_BoomerAMGCoarsenRuge ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int measure_type , HYPRE_Int coarsen_type , HYPRE_Int cut_factor , HYPRE_Int debug_flag , hypre_IntArray **CF_marker_ptr );
+HYPRE_Int hypre_BoomerAMGCoarsenFalgout ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int measure_type , HYPRE_Int cut_factor , HYPRE_Int debug_flag , hypre_IntArray **CF_marker_ptr );
+HYPRE_Int hypre_BoomerAMGCoarsenHMIS ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int measure_type , HYPRE_Int cut_factor , HYPRE_Int debug_flag , hypre_IntArray **CF_marker_ptr );
+HYPRE_Int hypre_BoomerAMGCoarsenPMIS ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int CF_init , HYPRE_Int debug_flag , hypre_IntArray **CF_marker_ptr );
+HYPRE_Int hypre_BoomerAMGCoarsenPMISHost ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int CF_init , HYPRE_Int debug_flag , hypre_IntArray **CF_marker_ptr );
 
-HYPRE_Int hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A, HYPRE_Int CF_init, HYPRE_Int debug_flag, HYPRE_Int **CF_marker_ptr );
+HYPRE_Int hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A, HYPRE_Int CF_init, HYPRE_Int debug_flag, hypre_IntArray **CF_marker_ptr );
 
 /* par_coarsen_device.c */
 HYPRE_Int hypre_GetGlobalMeasureDevice( hypre_ParCSRMatrix *S, hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int CF_init, HYPRE_Int aug_rand, HYPRE_Real *measure_diag, HYPRE_Real *measure_offd, HYPRE_Real *real_send_buf );
@@ -1010,7 +1010,7 @@ HYPRE_Int hypre_BoomerAMGCoarseParmsDevice ( MPI_Comm comm , HYPRE_Int local_num
 float *GenerateCoordinates ( MPI_Comm comm , HYPRE_BigInt nx , HYPRE_BigInt ny , HYPRE_BigInt nz , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Int coorddim );
 
 /* par_cr.c */
-HYPRE_Int hypre_BoomerAMGCoarsenCR1 ( hypre_ParCSRMatrix *A , HYPRE_Int **CF_marker_ptr , HYPRE_BigInt *coarse_size_ptr , HYPRE_Int num_CR_relax_steps , HYPRE_Int IS_type , HYPRE_Int CRaddCpoints );
+HYPRE_Int hypre_BoomerAMGCoarsenCR1 ( hypre_ParCSRMatrix *A , hypre_IntArray **CF_marker_ptr , HYPRE_BigInt *coarse_size_ptr , HYPRE_Int num_CR_relax_steps , HYPRE_Int IS_type , HYPRE_Int CRaddCpoints );
 HYPRE_Int hypre_cr ( HYPRE_Int *A_i , HYPRE_Int *A_j , HYPRE_Real *A_data , HYPRE_Int n , HYPRE_Int *cf , HYPRE_Int rlx , HYPRE_Real omega , HYPRE_Real tg , HYPRE_Int mu );
 HYPRE_Int hypre_GraphAdd ( Link *list , HYPRE_Int *head , HYPRE_Int *tail , HYPRE_Int index , HYPRE_Int istack );
 HYPRE_Int hypre_GraphRemove ( Link *list , HYPRE_Int *head , HYPRE_Int *tail , HYPRE_Int index );
@@ -1025,7 +1025,7 @@ HYPRE_Int hypre_BoomerAMGIndepHMIS ( hypre_ParCSRMatrix *S , HYPRE_Int measure_t
 HYPRE_Int hypre_BoomerAMGIndepHMISa ( hypre_ParCSRMatrix *S , HYPRE_Int measure_type , HYPRE_Int debug_flag , HYPRE_Int *CF_marker );
 HYPRE_Int hypre_BoomerAMGIndepPMIS ( hypre_ParCSRMatrix *S , HYPRE_Int CF_init , HYPRE_Int debug_flag , HYPRE_Int *CF_marker );
 HYPRE_Int hypre_BoomerAMGIndepPMISa ( hypre_ParCSRMatrix *S , HYPRE_Int CF_init , HYPRE_Int debug_flag , HYPRE_Int *CF_marker );
-HYPRE_Int hypre_BoomerAMGCoarsenCR ( hypre_ParCSRMatrix *A , HYPRE_Int **CF_marker_ptr , HYPRE_BigInt *coarse_size_ptr , HYPRE_Int num_CR_relax_steps , HYPRE_Int IS_type , HYPRE_Int num_functions , HYPRE_Int rlx_type , HYPRE_Real relax_weight , HYPRE_Real omega , HYPRE_Real theta , HYPRE_Solver smoother , hypre_ParCSRMatrix *AN , HYPRE_Int useCG , hypre_ParCSRMatrix *S );
+HYPRE_Int hypre_BoomerAMGCoarsenCR ( hypre_ParCSRMatrix *A , hypre_IntArray **CF_marker_ptr , HYPRE_BigInt *coarse_size_ptr , HYPRE_Int num_CR_relax_steps , HYPRE_Int IS_type , HYPRE_Int num_functions , HYPRE_Int rlx_type , HYPRE_Real relax_weight , HYPRE_Real omega , HYPRE_Real theta , HYPRE_Solver smoother , hypre_ParCSRMatrix *AN , HYPRE_Int useCG , hypre_ParCSRMatrix *S );
 
 /* par_cycle.c */
 HYPRE_Int hypre_BoomerAMGCycle ( void *amg_vdata , hypre_ParVector **F_array , hypre_ParVector **U_array );
@@ -1121,8 +1121,8 @@ HYPRE_Int hypre_BoomerAMGBuildMultipass ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_
 
 /* par_nodal_systems.c */
 HYPRE_Int hypre_BoomerAMGCreateNodalA ( hypre_ParCSRMatrix *A , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int option , HYPRE_Int diag_option , hypre_ParCSRMatrix **AN_ptr );
-HYPRE_Int hypre_BoomerAMGCreateScalarCFS ( hypre_ParCSRMatrix *SN , hypre_ParCSRMatrix *A , HYPRE_Int *CFN_marker , HYPRE_Int num_functions , HYPRE_Int nodal , HYPRE_Int keep_same_sign , HYPRE_Int **dof_func_ptr , HYPRE_Int **CF_marker_ptr , hypre_ParCSRMatrix **S_ptr );
-HYPRE_Int hypre_BoomerAMGCreateScalarCF ( HYPRE_Int *CFN_marker , HYPRE_Int num_functions , HYPRE_Int num_nodes , HYPRE_Int **dof_func_ptr , HYPRE_Int **CF_marker_ptr );
+HYPRE_Int hypre_BoomerAMGCreateScalarCFS ( hypre_ParCSRMatrix *SN , hypre_ParCSRMatrix *A , HYPRE_Int *CFN_marker , HYPRE_Int num_functions , HYPRE_Int nodal , HYPRE_Int keep_same_sign , HYPRE_Int **dof_func_ptr , hypre_IntArray **CF_marker_ptr , hypre_ParCSRMatrix **S_ptr );
+HYPRE_Int hypre_BoomerAMGCreateScalarCF ( HYPRE_Int *CFN_marker , HYPRE_Int num_functions , HYPRE_Int num_nodes , HYPRE_Int **dof_func_ptr , hypre_IntArray **CF_marker_ptr );
 
 /* par_nongalerkin.c */
 HYPRE_Int hypre_GrabSubArray ( HYPRE_Int *indices , HYPRE_Int start , HYPRE_Int end , HYPRE_BigInt *array , HYPRE_BigInt *output );
@@ -1371,7 +1371,7 @@ HYPRE_Int hypre_MGRFrelaxVcycle ( void *mgr_vdata, hypre_ParVector *f, hypre_Par
 HYPRE_Int hypre_MGRSetCpointsByBlock( void *mgr_vdata, HYPRE_Int  block_size, HYPRE_Int  max_num_levels, HYPRE_Int *block_num_coarse_points, HYPRE_Int  **block_coarse_indexes);
 HYPRE_Int hypre_MGRSetCpointsByContiguousBlock( void *mgr_vdata, HYPRE_Int  block_size, HYPRE_Int  max_num_levels, HYPRE_BigInt *begin_idx_array, HYPRE_Int *block_num_coarse_points, HYPRE_Int  **block_coarse_indexes);
 HYPRE_Int hypre_MGRSetCpointsByPointMarkerArray( void *mgr_vdata, HYPRE_Int  block_size, HYPRE_Int  max_num_levels, HYPRE_Int *block_num_coarse_points, HYPRE_Int  **block_coarse_indexes, HYPRE_Int *point_marker_array);
-HYPRE_Int hypre_MGRCoarsen(hypre_ParCSRMatrix *S,  hypre_ParCSRMatrix *A,HYPRE_Int final_coarse_size,HYPRE_Int *final_coarse_indexes,HYPRE_Int debug_flag,HYPRE_Int **CF_marker,HYPRE_Int last_level);
+HYPRE_Int hypre_MGRCoarsen(hypre_ParCSRMatrix *S,  hypre_ParCSRMatrix *A,HYPRE_Int final_coarse_size,HYPRE_Int *final_coarse_indexes,HYPRE_Int debug_flag,hypre_IntArray **CF_marker,HYPRE_Int last_level);
 HYPRE_Int hypre_MGRSetReservedCoarseNodes(void      *mgr_vdata, HYPRE_Int reserved_coarse_size, HYPRE_BigInt *reserved_coarse_nodes);
 HYPRE_Int hypre_MGRSetReservedCpointsLevelToKeep( void      *mgr_vdata, HYPRE_Int level);
 HYPRE_Int hypre_MGRSetMaxGlobalsmoothIters( void *mgr_vdata, HYPRE_Int max_iter );
