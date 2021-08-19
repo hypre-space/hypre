@@ -1531,7 +1531,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                   hypre_IntArrayData(CFN_marker));
                   /*hypre_TFree(coarse_dof_func);
                   coarse_dof_func = NULL;*/
-                  hypre_MemoryLocation cfn_memory_location;
                   hypre_IntArrayDestroy(CFN_marker);
                   CFN_marker = NULL;
                   hypre_BoomerAMGCoarseParms(comm, local_num_vars,
@@ -1622,7 +1621,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                {
                   hypre_BoomerAMGCorrectCFMarker (hypre_IntArrayData(CFN_marker),
                                                   local_num_vars/num_functions, hypre_IntArrayData(CF2_marker));
-                  hypre_MemoryLocation cf2_memory_location;
                   hypre_IntArrayDestroy(CF2_marker);
                   CF2_marker = NULL;
                   hypre_TFree(coarse_pnts_global1, HYPRE_MEMORY_HOST);
@@ -1630,7 +1628,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_BoomerAMGCreateScalarCFS(SN, A_array[level], hypre_IntArrayData(CFN_marker),
                                                  num_functions, nodal, keep_same_sign,
                                                  &dof_func, &(CF_marker_array[level]), &S);
-                  hypre_MemoryLocation cfn_memory_location;
                   hypre_IntArrayDestroy(CFN_marker);
                   CFN_marker = NULL;
                   hypre_BoomerAMGCoarseParms(comm, local_num_vars,
@@ -1699,10 +1696,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
                   hypre_BoomerAMGCorrectCFMarker2 (hypre_IntArrayData(CFN_marker),
                                                    local_num_vars/num_functions, hypre_IntArrayData(CF2_marker));
-                  hypre_MemoryLocation cf2_memory_location;
                   hypre_IntArrayDestroy(CF2_marker);
                   CF2_marker = NULL;
-                  hypre_MemoryLocation cf3_memory_location;
                   hypre_IntArrayDestroy(CF3_marker);
                   CF3_marker = NULL;
                   hypre_ParCSRMatrixDestroy(S);
@@ -1710,7 +1705,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                  num_functions, nodal, keep_same_sign,
                                                  &dof_func, &(CF_marker_array[level]), &S);
 
-                  hypre_MemoryLocation cfn_memory_location;
                   hypre_IntArrayDestroy(CFN_marker);
                   CFN_marker = NULL;
                   hypre_BoomerAMGCoarseParms(comm, local_num_vars,
