@@ -9,7 +9,7 @@
 
 Version 2.22.1 released 2021/08/20
 
-- Ported Neuman version of AIR to the GPU.
+- Ported Neumann version of AIR to the GPU.
 - Re-implemented ParCSR eigenvalue estimation used in Chebyshev relaxation.
 - Added IJMatrix Add, Norm, and Transpose functions.
 - Simplified the ParCSRMatrix/Vector code by removing ownership info.
