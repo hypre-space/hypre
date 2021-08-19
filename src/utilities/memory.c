@@ -207,7 +207,11 @@ hypre_DeviceMalloc(size_t size, HYPRE_Int zeroinit)
 #if defined(HYPRE_USING_DEVICE_POOL)
    HYPRE_CUDA_CALL( hypre_CachingMallocDevice(&ptr, size) );
 #else
+   #if __CUDACC_VER_MAJOR__ >= 11 && __CUDACC_VER_MINOR__ >= 2
+   HYPRE_CUDA_CALL( cudaMallocAsync(&ptr, size, NULL) );
+   #else
    HYPRE_CUDA_CALL( cudaMalloc(&ptr, size) );
+   #endif
 #endif
 #endif
 
@@ -372,7 +376,11 @@ hypre_DeviceFree(void *ptr)
 #if defined(HYPRE_USING_DEVICE_POOL)
    HYPRE_CUDA_CALL( hypre_CachingFreeDevice(ptr) );
 #else
-   HYPRE_CUDA_CALL( cudaFree(ptr) );
+   #if __CUDACC_VER_MAJOR__ >= 11 && __CUDACC_VER_MINOR__ >= 2   
+   HYPRE_CUDA_CALL( cudaFreeAsync(ptr, NULL) );
+   #else
+   HYPRE_CUDA_CALL( cudaFree(ptr) );   
+   #endif
 #endif
 #endif
 
