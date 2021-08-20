@@ -398,6 +398,12 @@ main( hypre_int argc,
    HYPRE_Real ilu_nsh_droptol = 1.0e-02;
    /* end hypre ILU options */
 
+   /* hypre_FSAI options */
+   HYPRE_Int  fsai_max_steps = 10;
+   HYPRE_Int  fsai_max_step_size = 1;
+   HYPRE_Real fsai_kap_tolerance = 1.0e-03;
+   /* end hypre FSAI options */
+
    HYPRE_Real     *nongalerk_tol = NULL;
    HYPRE_Int       nongalerk_num_tol = 0;
 
@@ -1113,6 +1119,23 @@ main( hypre_int argc,
          ilu_nsh_droptol = atof(argv[arg_index++]);
       }
       /* end ilu options */
+      /* begin FSAI options*/
+      else if ( strcmp(argv[arg_index], "-fs_max_steps") == 0 )
+      {
+         arg_index++;
+         fsai_max_steps = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-fs_max_step_size") == 0 )
+      {
+         arg_index++;
+         fsai_max_step_size = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-fs_kap_tol") == 0 )
+      {
+         arg_index++;
+         fsai_kap_tolerance = atof(argv[arg_index++]);
+      }
+      /* end FSAI options */
 #if defined(HYPRE_USING_GPU)
       else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
       {
@@ -1869,6 +1892,7 @@ main( hypre_int argc,
          hypre_printf("       16=AMG-COGMRES     17=DIAG-COGMRES\n");
          hypre_printf("       18=ParaSails-GMRES\n");
          hypre_printf("       20=Hybrid solver/ DiagScale, AMG \n");
+         hypre_printf("       31=FSAI-PCG \n");
          hypre_printf("       43=Euclid-PCG      44=Euclid-GMRES   \n");
          hypre_printf("       45=Euclid-BICGSTAB 46=Euclid-COGMRES\n");
          hypre_printf("       47=Euclid-FlexGMRES\n");
@@ -1877,7 +1901,7 @@ main( hypre_int argc,
          hypre_printf("       70=MGR             71=MGR-PCG  \n");
          hypre_printf("       72=MGR-FlexGMRES   73=MGR-BICGSTAB  \n");
          hypre_printf("       74=MGR-COGMRES  \n");
-         hypre_printf("       80=ILU      81=ILU-GMRES  \n");
+         hypre_printf("       80=ILU             81=ILU-GMRES  \n");
          hypre_printf("       82=ILU-FlexGMRES  \n");
          hypre_printf("       90=AMG-DD          91=AMG-DD-GMRES  \n");
          hypre_printf("\n");
@@ -2139,6 +2163,11 @@ main( hypre_int argc,
          hypre_printf("  -ilu_nsh_droptol   <val>         : set drop tolerance threshold for NSH = val \n");
          hypre_printf("  -ilu_sm_max_iter   <val>         : set number of iterations when applied as a smmother in AMG = val \n");
          /* end ILU options */
+         /* hypre FSAI options */
+         hypre_printf("  -fs_max_steps <val>              : Maximum number of steps for FSAI \n");
+         hypre_printf("  -fs_max_step_size <val>          : Maximum step size for FSAI \n");
+         hypre_printf("  -fs_kap_tol <val>                : Kap. grad. reduction theshold for FSAI \n");
+         /* end FSAI options */
          /* hypre AMG-DD options */
          hypre_printf("  -amgdd_start_level   <val>       : set AMG-DD start level = val\n");
          hypre_printf("  -amgdd_padding   <val>           : set AMG-DD padding = val\n");
@@ -3958,7 +3987,8 @@ main( hypre_int argc,
 
    /* begin lobpcg */
    if (!lobpcgFlag && (solver_id == 1 || solver_id == 2 || solver_id == 8 ||
-                       solver_id == 12 || solver_id == 14 || solver_id == 43 || solver_id == 71))
+                       solver_id == 12 || solver_id == 14 || solver_id == 31 ||
+                       solver_id == 43 || solver_id == 71))
       /*end lobpcg */
    {
       time_index = hypre_InitializeTiming("PCG Setup");
@@ -4250,6 +4280,25 @@ main( hypre_int argc,
                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
                              pcg_precond);
       }
+      else if (solver_id == 31)
+      {
+         /* use FSAI preconditioning */
+         if (myid == 0) hypre_printf("Solver: FSAI-PCG\n");
+
+         HYPRE_FSAICreate(&pcg_precond);
+
+         HYPRE_FSAISetMaxSteps(pcg_precond, fsai_max_steps);
+         HYPRE_FSAISetMaxStepSize(pcg_precond, fsai_max_step_size);
+         HYPRE_FSAISetKapTolerance(pcg_precond, fsai_kap_tolerance);
+         HYPRE_FSAISetMaxIterations(pcg_precond, 1);
+         HYPRE_FSAISetTolerance(pcg_precond, 0.0);
+         HYPRE_FSAISetPrintLevel(pcg_precond, poutdat);
+
+         HYPRE_PCGSetPrecond(pcg_solver,
+                             (HYPRE_PtrToSolverFcn) HYPRE_FSAISolve,
+                             (HYPRE_PtrToSolverFcn) HYPRE_FSAISetup,
+                             pcg_precond);
+      }
       else if (solver_id == 43)
       {
          /* use Euclid preconditioning */
@@ -4438,6 +4487,10 @@ main( hypre_int argc,
       else if (solver_id == 14)
       {
          HYPRE_BoomerAMGDestroy(pcg_precond);
+      }
+      else if (solver_id == 31)
+      {
+         HYPRE_FSAIDestroy(pcg_precond);
       }
       else if (solver_id == 43)
       {

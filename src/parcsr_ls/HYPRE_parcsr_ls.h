@@ -1454,6 +1454,112 @@ HYPRE_BoomerAMGDDGetNumIterations( HYPRE_Solver   solver,
  *--------------------------------------------------------------------------*/
 
 /**
+ * @name ParCSR FSAI Solver and Preconditioner
+ *
+ * An adaptive factorized sparse approximate inverse solver/preconditioner/smoother
+ * that computes a sparse approximation G to the inverse of the lower cholesky
+ * factor of A such that M^{-1} \approx G^T * G.
+ *
+ * @{
+ **/
+
+/**
+ * Create a solver object.
+ **/
+HYPRE_Int HYPRE_FSAICreate( HYPRE_Solver *solver );
+
+/**
+ * Destroy a solver object.
+ **/
+HYPRE_Int HYPRE_FSAIDestroy( HYPRE_Solver solver );
+
+/**
+ * Set up the FSAI solver or preconditioner.
+ * If used as a preconditioner, this function should be passed
+ * to the iterative solver \e SetPrecond function.
+ *
+ * @param solver [IN] object to be set up.
+ * @param A [IN] ParCSR matrix used to construct the solver/preconditioner.
+ * @param b Ignored by this function.
+ * @param x Ignored by this function.
+ **/
+HYPRE_Int HYPRE_FSAISetup( HYPRE_Solver       solver,
+                           HYPRE_ParCSRMatrix A,
+                           HYPRE_ParVector    b,
+                           HYPRE_ParVector    x );
+
+/**
+ * Solve the system or apply FSAI as a preconditioner.
+ * If used as a preconditioner, this function should be passed
+ * to the iterative solver \e SetPrecond function.
+ *
+ * @param solver [IN] solver or preconditioner object to be applied.
+ * @param A [IN] ParCSR matrix, matrix of the linear system to be solved
+ * @param b [IN] right hand side of the linear system to be solved
+ * @param x [OUT] approximated solution of the linear system to be solved
+ **/
+HYPRE_Int HYPRE_FSAISolve( HYPRE_Solver       solver,
+                           HYPRE_ParCSRMatrix A,
+                           HYPRE_ParVector    b,
+                           HYPRE_ParVector    x );
+
+/**
+ * (Optional) Sets the maximum number of steps for computing the sparsity
+ * pattern of G
+ **/
+HYPRE_Int HYPRE_FSAISetMaxSteps( HYPRE_Solver solver,
+                                 HYPRE_Int    max_steps  );
+
+/**
+ * (Optional) Sets the maximum step size for computing the sparsity pattern of G
+ **/
+HYPRE_Int HYPRE_FSAISetMaxStepSize( HYPRE_Solver solver,
+                                    HYPRE_Int    max_step_size  );
+
+/**
+ * (Optional) Sets the kaporin gradient reduction factor for computing the
+ *  sparsity pattern of G
+ **/
+HYPRE_Int HYPRE_FSAISetKapTolerance( HYPRE_Solver solver,
+                                     HYPRE_Real   kap_tolerance  );
+
+/**
+ * (Optional) Sets the relaxation factor for FSAI
+ **/
+HYPRE_Int HYPRE_FSAISetOmega( HYPRE_Solver solver,
+                              HYPRE_Real   omega );
+
+/**
+ * (Optional) Sets the maximum number of iterations (sweeps) for FSAI
+ **/
+HYPRE_Int HYPRE_FSAISetMaxIterations( HYPRE_Solver solver,
+                                      HYPRE_Int    max_iterations );
+
+/**
+ * (Optional) Set the convergence tolerance, if FSAI is used
+ * as a solver. When using FSAI as a preconditioner, set the tolerance
+ * to 0.0. The default is \f$10^{-6}\f$.
+ **/
+HYPRE_Int HYPRE_FSAISetTolerance( HYPRE_Solver solver,
+                                  HYPRE_Real   tolerance );
+
+/**
+ * (Optional) Requests automatic printing of setup information.
+ *
+ *    - 0 : no printout (default)
+ *    - 1 : print setup information
+ **/
+HYPRE_Int HYPRE_FSAISetPrintLevel(HYPRE_Solver solver,
+                                  HYPRE_Int    print_level);
+
+
+/**@}*/
+
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
  * @name ParCSR ParaSails Preconditioner
  *
  * Parallel sparse approximate inverse preconditioner for the
@@ -3906,10 +4012,10 @@ HYPRE_MGRSetPrintLevel( HYPRE_Solver solver,
 HYPRE_Int
 HYPRE_MGRSetFrelaxPrintLevel( HYPRE_Solver solver,
                         HYPRE_Int print_level );
-                        
+
 HYPRE_Int
 HYPRE_MGRSetCoarseGridPrintLevel( HYPRE_Solver solver,
-                        HYPRE_Int print_level );                        
+                        HYPRE_Int print_level );
 
 /**
  * (Optional) Set the threshold to compress the coarse grid at each level
