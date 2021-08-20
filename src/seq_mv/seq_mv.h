@@ -514,6 +514,7 @@ hypre_GpuMatData* hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix);
 #define hypre_CSRMatrixGPUMatInfo(matrix)  ( hypre_GpuMatDataMatInfo (hypre_CSRMatrixGetGPUMatData(matrix)) )
 #endif
 void hypre_CSRMatrixGpuSpMVAnalysis(hypre_CSRMatrix *matrix);
+
 #ifdef __cplusplus
 }
 #endif
