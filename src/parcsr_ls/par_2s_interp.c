@@ -520,7 +520,6 @@ hypre_BoomerAMGBuildModPartialExtInterpHost( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
    hypre_ParCSRMatrixColMapOffd(P) = hypre_ParCSRMatrixColMapOffd(W);
    hypre_ParCSRMatrixColMapOffd(W) = NULL;
 
@@ -1192,7 +1191,6 @@ hypre_BoomerAMGBuildModPartialExtPEInterpHost( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
    hypre_ParCSRMatrixColMapOffd(P) = hypre_ParCSRMatrixColMapOffd(W);
    hypre_ParCSRMatrixColMapOffd(W) = NULL;
 

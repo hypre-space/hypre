@@ -436,8 +436,6 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixData(A_FC_offd) = A_FC_offd_data;
    hypre_CSRMatrixI(A_FC_offd) = A_FC_offd_i;
    hypre_CSRMatrixJ(A_FC_offd) = A_FC_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(A_FC) = 1;
-   hypre_ParCSRMatrixOwnsColStarts(A_FC) = 0;
    hypre_ParCSRMatrixColMapOffd(A_FC) = col_map_offd_A_FC;
 
    hypre_CSRMatrixMemoryLocation(A_FC_diag) = memory_location_P;
@@ -451,8 +449,6 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixData(A_FF_offd) = A_FF_offd_data;
    hypre_CSRMatrixI(A_FF_offd) = A_FF_offd_i;
    hypre_CSRMatrixJ(A_FF_offd) = A_FF_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(A_FF) = 0;
-   hypre_ParCSRMatrixOwnsColStarts(A_FF) = 0;
    hypre_ParCSRMatrixColMapOffd(A_FF) = col_map_offd_A_FF;
 
    hypre_CSRMatrixMemoryLocation(A_FF_diag) = memory_location_P;
@@ -470,6 +466,7 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
    hypre_TFree(marker_offd, HYPRE_MEMORY_HOST);
    hypre_TFree(cpt_array, HYPRE_MEMORY_HOST);
    hypre_TFree(fpt_array, HYPRE_MEMORY_HOST);
+   hypre_TFree(fpts_starts, HYPRE_MEMORY_HOST);
 
    *A_FC_ptr = A_FC;
    *A_FF_ptr = A_FF;
@@ -820,12 +817,12 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
             new_fpt = new_fpt_array[i];
             fpt2 = fpt_array[i-1];
             new_fpt2 = new_fpt_array[i-1];
-            if (new_fpt != new_fpt2) 
+            if (new_fpt != new_fpt2)
             {
                A_FF_diag_i[new_fpt] += A_FF_diag_i[new_fpt2];
                A_FF_offd_i[new_fpt] += A_FF_offd_i[new_fpt2];
             }
-            if (fpt != fpt2) 
+            if (fpt != fpt2)
             {
                A_FC_diag_i[fpt] += A_FC_diag_i[fpt2];
                A_FC_offd_i[fpt] += A_FC_offd_i[fpt2];
@@ -961,8 +958,6 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixData(A_FC_offd) = A_FC_offd_data;
    hypre_CSRMatrixI(A_FC_offd) = A_FC_offd_i;
    hypre_CSRMatrixJ(A_FC_offd) = A_FC_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(A_FC) = 1;
-   hypre_ParCSRMatrixOwnsColStarts(A_FC) = 0;
    hypre_ParCSRMatrixColMapOffd(A_FC) = col_map_offd_A_FC;
 
    hypre_CSRMatrixMemoryLocation(A_FC_diag) = memory_location_P;
@@ -976,8 +971,6 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixData(A_FF_offd) = A_FF_offd_data;
    hypre_CSRMatrixI(A_FF_offd) = A_FF_offd_i;
    hypre_CSRMatrixJ(A_FF_offd) = A_FF_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(A_FF) = 1;
-   hypre_ParCSRMatrixOwnsColStarts(A_FF) = 0;
    hypre_ParCSRMatrixColMapOffd(A_FF) = col_map_offd_A_FF;
 
    hypre_CSRMatrixMemoryLocation(A_FF_diag) = memory_location_P;
@@ -996,6 +989,8 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
    hypre_TFree(cpt_array, HYPRE_MEMORY_HOST);
    hypre_TFree(fpt_array, HYPRE_MEMORY_HOST);
    hypre_TFree(new_fpt_array, HYPRE_MEMORY_HOST);
+   hypre_TFree(fpts_starts, HYPRE_MEMORY_HOST);
+   hypre_TFree(new_fpts_starts, HYPRE_MEMORY_HOST);
 
    *A_FC_ptr = A_FC;
    *A_FF_ptr = A_FF;
@@ -1507,8 +1502,6 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
    hypre_CSRMatrixData(A_FC_offd) = A_FC_offd_data;
    hypre_CSRMatrixI(A_FC_offd) = A_FC_offd_i;
    hypre_CSRMatrixJ(A_FC_offd) = A_FC_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(A_FC) = 1;
-   hypre_ParCSRMatrixOwnsColStarts(A_FC) = 0;
    hypre_ParCSRMatrixColMapOffd(A_FC) = col_map_offd_A_FC;
 
    hypre_CSRMatrixMemoryLocation(A_FC_diag) = memory_location_P;
@@ -1522,8 +1515,6 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
    hypre_CSRMatrixData(A_FF_offd) = A_FF_offd_data;
    hypre_CSRMatrixI(A_FF_offd) = A_FF_offd_i;
    hypre_CSRMatrixJ(A_FF_offd) = A_FF_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(A_FF) = 1;
-   hypre_ParCSRMatrixOwnsColStarts(A_FF) = 0;
    hypre_ParCSRMatrixColMapOffd(A_FF) = col_map_offd_A_FF;
 
    hypre_CSRMatrixMemoryLocation(A_FF_diag) = memory_location_P;
@@ -1542,6 +1533,8 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
    hypre_TFree(cpt_array, HYPRE_MEMORY_HOST);
    hypre_TFree(fpt_array, HYPRE_MEMORY_HOST);
    hypre_TFree(new_fpt_array, HYPRE_MEMORY_HOST);
+   hypre_TFree(fpts_starts, HYPRE_MEMORY_HOST);
+   hypre_TFree(new_fpts_starts, HYPRE_MEMORY_HOST);
 
    *A_FC_ptr = A_FC;
    *A_FF_ptr = A_FF;

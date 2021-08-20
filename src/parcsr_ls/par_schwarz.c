@@ -116,7 +116,6 @@ hypre_SchwarzSetup(void               *schwarz_vdata,
    Vtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
          hypre_ParCSRMatrixGlobalNumRows(A),
          hypre_ParCSRMatrixRowStarts(A));
-   hypre_ParVectorSetPartitioningOwner(Vtemp,0);
    hypre_ParVectorInitialize(Vtemp);
    hypre_SchwarzDataVtemp(schwarz_data) = Vtemp;
 
@@ -392,4 +391,3 @@ hypre_SchwarzSetDofFunc( void *data, HYPRE_Int *dof_func)
 
    return hypre_error_flag;
 }
-

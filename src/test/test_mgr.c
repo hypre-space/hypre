@@ -1204,13 +1204,11 @@ main( hypre_int argc,
                     hypre_ParCSRMatrixGlobalNumRows(A_ff),
                     hypre_ParCSRMatrixRowStarts(A_ff));
     hypre_ParVectorInitialize(F_vector);
-    hypre_ParVectorSetPartitioningOwner(F_vector,0);
 
     U_vector = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff),
                     hypre_ParCSRMatrixGlobalNumRows(A_ff),
                     hypre_ParCSRMatrixRowStarts(A_ff));
     hypre_ParVectorInitialize(U_vector);
-    hypre_ParVectorSetPartitioningOwner(U_vector,0);
 
     time_index = hypre_InitializeTiming("AMG for UU block");
     hypre_BeginTiming(time_index);
@@ -1234,7 +1232,6 @@ main( hypre_int argc,
                     hypre_ParCSRMatrixGlobalNumRows(parcsr_A),
                     hypre_ParCSRMatrixRowStarts(parcsr_A));
     hypre_ParVectorInitialize(diag);
-    hypre_ParVectorSetPartitioningOwner(diag,0);
     hypre_ParVectorSetConstantValues(diag, 1.0);
 
     hypre_MGRAddDiagonalCorrection(parcsr_A, diag);

@@ -108,7 +108,7 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
    HYPRE_Int sample_rows[50], n_sample_rows=0, isamp;
 #endif
 
-   hypre_MPI_Comm_size(comm, &num_procs);   
+   hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
 
 
@@ -265,17 +265,6 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
           hypre_ParCSRMatrixLocalSumElts(Pnew) );
 #endif
 
-   /* Transfer ownership of col_starts from P to Pnew  ... */
-   if ( hypre_ParCSRMatrixColStarts(*P) &&
-        hypre_ParCSRMatrixColStarts(*P)==hypre_ParCSRMatrixColStarts(Pnew) )
-   {
-      if ( hypre_ParCSRMatrixOwnsColStarts(*P) && !hypre_ParCSRMatrixOwnsColStarts(Pnew) )
-      {
-         hypre_ParCSRMatrixSetColStartsOwner(*P,0);
-         hypre_ParCSRMatrixSetColStartsOwner(Pnew,1);
-      }
-   }
-
    hypre_ParCSRMatrixDestroy( C );
    hypre_ParCSRMatrixDestroy( *P );
 
@@ -283,7 +272,7 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
 #if 0
    if ( Pnew_num_nonzeros < 10000 )  /* a fixed number like this makes it no.procs.-depdendent */
    {  /* ad-hoc attempt to reduce zero-matrix problems seen in testing..*/
-      truncation_threshold = 1.0e-6 * truncation_threshold; 
+      truncation_threshold = 1.0e-6 * truncation_threshold;
       truncation_threshold_minus = 1.0e-6 * truncation_threshold_minus;
   }
 #endif
@@ -370,7 +359,7 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
 #endif
 
    hypre_TFree( J_marker , HYPRE_MEMORY_HOST);
-      
+
 }
 
 void hypre_BoomerAMGTruncateInterp( hypre_ParCSRMatrix *P,
@@ -567,27 +556,27 @@ hypre_ParCSRMatrix_dof_func_offd(
    if (!comm_pkg)
    {
 	hypre_MatvecCommPkgCreate(A);
-	comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
+	comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    if (num_functions > 1)
    {
-      int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, 
+      int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
 						num_sends), HYPRE_MEMORY_HOST);
       index = 0;
       for (i = 0; i < num_sends; i++)
       {
 	 start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
 	 for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
-		int_buf_data[index++] 
+		int_buf_data[index++]
 		 = dof_func[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
       }
-	
-      comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, 
+
+      comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data,
 	*dof_func_offd);
 
-      hypre_ParCSRCommHandleDestroy(comm_handle);   
+      hypre_ParCSRCommHandleDestroy(comm_handle);
       hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
    }
 

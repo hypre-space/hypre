@@ -24,6 +24,7 @@ hypre_CSRMatrix * hypre_CSRMatrixAddPartial( hypre_CSRMatrix *A, hypre_CSRMatrix
 void hypre_CSRMatrixComputeRowSum( hypre_CSRMatrix *A, HYPRE_Int *CF_i, HYPRE_Int *CF_j, HYPRE_Complex *row_sum, HYPRE_Int type, HYPRE_Complex scal, const char *set_or_add);
 void hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A, HYPRE_Complex *d, HYPRE_Int type);
 void hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A, HYPRE_Complex *d, HYPRE_Int type);
+HYPRE_Int hypre_CSRMatrixScale(hypre_CSRMatrix *A, HYPRE_Complex scalar);
 HYPRE_Int hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A, HYPRE_Complex value);
 
 /* csr_matop_device.c */
@@ -44,7 +45,7 @@ void hypre_CSRMatrixExtractDiagonalDevice( hypre_CSRMatrix *A, HYPRE_Complex *d,
 hypre_CSRMatrix* hypre_CSRMatrixStack2Device(hypre_CSRMatrix *A, hypre_CSRMatrix *B);
 hypre_CSRMatrix* hypre_CSRMatrixIdentityDevice(HYPRE_Int n, HYPRE_Complex alp);
 HYPRE_Int hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A);
-HYPRE_Int hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A, HYPRE_Complex tol, HYPRE_Int abs, HYPRE_Int option);
+HYPRE_Int hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A, HYPRE_Real tol, HYPRE_Real *elmt_tols);
 HYPRE_Int hypre_CSRMatrixSortRow(hypre_CSRMatrix *A);
 HYPRE_Int hypre_CSRMatrixTriLowerUpperSolveCusparse(char uplo, hypre_CSRMatrix *A, HYPRE_Real *l1_norms, hypre_Vector *f, hypre_Vector *u );
 HYPRE_Int hypre_CSRMatrixIntersectPattern(hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int *markA, HYPRE_Int diag_option);
@@ -89,7 +90,7 @@ HYPRE_Int hypre_CSRMatrixMatvecRocsparse (HYPRE_Int trans, HYPRE_Complex alpha ,
 
 /* genpart.c */
 HYPRE_Int hypre_GeneratePartitioning ( HYPRE_BigInt length , HYPRE_Int num_procs , HYPRE_BigInt **part_ptr );
-HYPRE_Int hypre_GenerateLocalPartitioning ( HYPRE_BigInt length , HYPRE_Int num_procs , HYPRE_Int myid , HYPRE_BigInt **part_ptr );
+HYPRE_Int hypre_GenerateLocalPartitioning ( HYPRE_BigInt length , HYPRE_Int num_procs , HYPRE_Int myid , HYPRE_BigInt *part );
 
 /* HYPRE_csr_matrix.c */
 HYPRE_CSRMatrix HYPRE_CSRMatrixCreate ( HYPRE_Int num_rows , HYPRE_Int num_cols , HYPRE_Int *row_sizes );
@@ -218,6 +219,7 @@ HYPRE_Int hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPR
 HYPRE_Int hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int nnzB, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out);
 
 HYPRE_Int hypre_SeqVectorElmdivpy( hypre_Vector *x, hypre_Vector *b, hypre_Vector *y );
+HYPRE_Int hypre_SeqVectorElmdivpyMarked( hypre_Vector *x, hypre_Vector *b, hypre_Vector *y, HYPRE_Int *marker, HYPRE_Int marker_val );
 
 HYPRE_Int hypre_CSRMatrixSpMVDevice( HYPRE_Complex alpha, hypre_CSRMatrix *A, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y, HYPRE_Int fill );
 
@@ -233,5 +235,4 @@ hypre_GpuMatData* hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix);
 #define hypre_CSRMatrixGPUMatDescr(matrix) ( hypre_GpuMatDataMatDecsr(hypre_CSRMatrixGetGPUMatData(matrix)) )
 #define hypre_CSRMatrixGPUMatInfo(matrix)  ( hypre_GpuMatDataMatInfo (hypre_CSRMatrixGetGPUMatData(matrix)) )
 #endif
-
 void hypre_CSRMatrixGpuSpMVAnalysis(hypre_CSRMatrix *matrix);
