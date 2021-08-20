@@ -161,7 +161,7 @@ typedef struct
    HYPRE_Int            ilu_max_iter;
    HYPRE_Real           ilu_droptol;
    HYPRE_Int            ilu_reordering_type;
-   
+
    HYPRE_Real          *max_eig_est;
    HYPRE_Real          *min_eig_est;
    HYPRE_Int            cheby_eig_est;
@@ -2541,8 +2541,8 @@ HYPRE_Int hypre_FSAIGetPrintFileName ( void *data, char **print_file_name );
 HYPRE_Int hypre_FSAIGetDebugFlag ( void *data, HYPRE_Int *debug_flag );
 
 /* par_fsai_setup.c */
-HYPRE_Int hypre_CSRMatrixExtractDenseMatrix( hypre_CSRMatrix *A_diag, hypre_Vector *A_sub, HYPRE_Int *S_Pattern, HYPRE_Int S_nnz, HYPRE_Int *marker );
-HYPRE_Int hypre_ExtractDenseRowFromCSRMatrix( hypre_CSRMatrix *A_diag, hypre_Vector *A_subrow, HYPRE_Int *marker, HYPRE_Int row_num );
+HYPRE_Int hypre_CSRMatrixExtractDenseMat( hypre_CSRMatrix *A_diag, hypre_Vector *A_sub, HYPRE_Int *S_Pattern, HYPRE_Int S_nnz, HYPRE_Int *marker );
+HYPRE_Int hypre_CSRMatrixExtractDenseRow( hypre_CSRMatrix *A_diag, hypre_Vector *A_subrow, HYPRE_Int *marker, HYPRE_Int row_num );
 HYPRE_Int hypre_FindKapGrad( hypre_CSRMatrix *A_diag, hypre_Vector *kaporin_gradient, HYPRE_Int *kap_grad_nonzeros, hypre_Vector *G_temp, HYPRE_Int *S_Pattern, HYPRE_Int S_nnz, HYPRE_Int max_row_size, HYPRE_Int row_num, HYPRE_Int *marker, HYPRE_Int *kg_marker );
 HYPRE_Int hypre_AddToPattern ( hypre_Vector *kaporin_gradient, HYPRE_Int *kap_grad_nonzeros, HYPRE_Int *S_Pattern, HYPRE_Int *S_nnz, HYPRE_Int max_step_size );
 HYPRE_Int hypre_FSAISetup ( void *fsai_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u );
@@ -2557,4 +2557,3 @@ HYPRE_Int hypre_FSAISolve ( void *fsai_vdata , hypre_ParCSRMatrix *A , hypre_Par
 #endif
 
 #endif
-
