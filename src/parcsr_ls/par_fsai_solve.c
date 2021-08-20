@@ -41,30 +41,27 @@ hypre_FSAISolve( void               *fsai_vdata,
    HYPRE_Real           omega                = hypre_ParFSAIDataOmega(fsai_data);
 
    /* Local variables */
-
-   HYPRE_Int            iter, num_procs, my_id;
+   HYPRE_Int            iter, my_id;
    HYPRE_Real           old_resnorm, resnorm, rel_resnorm;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   hypre_ParFSAIDataNumIterations(fsai_data) = 0;
-
-   hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-
 
    /*-----------------------------------------------------------------
     * Preconditioned Richardson - Main solver loop
     * x(k+1) = x(k) + omega * (G^T*G) * (b - A*x(k))
     * ----------------------------------------------------------------*/
 
-   if(my_id == 0 && print_level > 1)
+   if (my_id == 0 && print_level > 1)
+   {
       hypre_printf("\n\n FSAI SOLVER SOLUTION INFO:\n");
+   }
 
-   iter               = 0;
-   rel_resnorm        = 1.0;
+   iter        = 0;
+   rel_resnorm = 1.0;
 
-   if(my_id == 0 && print_level > 1)
+   if (my_id == 0 && print_level > 1)
    {
       hypre_printf("                new         relative\n");
       hypre_printf("    iter #      res norm    res norm\n");
@@ -109,11 +106,15 @@ hypre_FSAISolve( void               *fsai_vdata,
       iter++;
    }
 
-   if(logging > 1)
+   if (logging > 1)
    {
-      hypre_ParVectorCopy(r_work, r);
       hypre_ParFSAIDataNumIterations(fsai_data) = iter;
       hypre_ParFSAIDataRelResNorm(fsai_data)    = rel_resnorm;
+   }
+   else
+   {
+      hypre_ParFSAIDataNumIterations(fsai_data) = 0;
+      hypre_ParFSAIDataRelResNorm(fsai_data)    = 0.0;
    }
 
    HYPRE_ANNOTATE_FUNC_END;

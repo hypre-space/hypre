@@ -16,12 +16,9 @@
 void *
 hypre_FSAICreate()
 {
-
    hypre_ParFSAIData    *fsai_data;
 
-   fsai_data = hypre_CTAlloc(hypre_ParFSAIData, 1, HYPRE_MEMORY_HOST);
-
-   HYPRE_Int		      *comm_info;
+   HYPRE_Int		*comm_info;
 
    /* setup params */
    HYPRE_Int            max_steps;
@@ -46,6 +43,7 @@ hypre_FSAICreate()
    /*-----------------------------------------------------------------------
     * Setup default values for parameters
     *-----------------------------------------------------------------------*/
+   fsai_data = hypre_CTAlloc(hypre_ParFSAIData, 1, HYPRE_MEMORY_HOST);
 
    /* setup params */
    max_steps = 10;
@@ -66,15 +64,11 @@ hypre_FSAICreate()
    debug_flag = 0;
    hypre_sprintf(log_file_name, "%s", "fsai.out.log");
 
-   #if defined(HYPRE_USING_GPU)
-   #endif
-
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /*-----------------------------------------------------------------------
     * Create the hypre_ParFSAIData structure and return
     *-----------------------------------------------------------------------*/
-
 
    hypre_ParFSAIDataMemoryLocation(fsai_data)   = HYPRE_MEMORY_UNDEFINED;
 
@@ -104,7 +98,6 @@ hypre_FSAICreate()
    HYPRE_ANNOTATE_FUNC_END;
 
    return (void *) fsai_data;
-
 }
 
 
@@ -120,17 +113,30 @@ hypre_FSAIDestroy( void *data )
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   if(hypre_ParFSAIDataCommInfo(fsai_data)) hypre_TFree(hypre_ParFSAIDataCommInfo(fsai_data), HYPRE_MEMORY_HOST);
-   if(hypre_ParFSAIDataGmat(fsai_data))     hypre_ParCSRMatrixDestroy(hypre_ParFSAIDataGmat(fsai_data));
-   if(hypre_ParFSAIDataGTmat(fsai_data))    hypre_ParCSRMatrixDestroy(hypre_ParFSAIDataGTmat(fsai_data));
+   if (hypre_ParFSAIDataCommInfo(fsai_data))
+   {
+      hypre_TFree(hypre_ParFSAIDataCommInfo(fsai_data), HYPRE_MEMORY_HOST);
+   }
+
+   if (hypre_ParFSAIDataGmat(fsai_data))
+   {
+      hypre_ParCSRMatrixDestroy(hypre_ParFSAIDataGmat(fsai_data));
+   }
+
+   if (hypre_ParFSAIDataGTmat(fsai_data))
+   {
+      hypre_ParCSRMatrixDestroy(hypre_ParFSAIDataGTmat(fsai_data));
+   }
 
    hypre_ParVectorDestroy(hypre_ParFSAIDataResidual(fsai_data));
    hypre_ParVectorDestroy(hypre_ParFSAIDataXWork(fsai_data));
    hypre_ParVectorDestroy(hypre_ParFSAIDataRWork(fsai_data));
    hypre_ParVectorDestroy(hypre_ParFSAIDataZWork(fsai_data));
 
-   if( new_comm != hypre_MPI_COMM_NULL )
+   if (new_comm != hypre_MPI_COMM_NULL)
+   {
       hypre_MPI_Comm_free(&new_comm);
+   }
 
    hypre_TFree(fsai_data, HYPRE_MEMORY_HOST);
 
