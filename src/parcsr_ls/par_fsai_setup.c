@@ -287,8 +287,6 @@ hypre_FSAISetup( void               *fsai_vdata,
        0,
        hypre_ParCSRMatrixGlobalNumRows(A)*(max_steps*max_step_size+1),
        0);
-   hypre_ParCSRMatrixSetRowStartsOwner(G, 0);
-   hypre_ParCSRMatrixSetColStartsOwner(G, 0);
    hypre_ParCSRMatrixInitialize(G);
    hypre_ParFSAIDataGmat(fsai_data) = G;
 
@@ -301,11 +299,6 @@ hypre_FSAISetup( void               *fsai_vdata,
    hypre_ParVectorInitialize(x_work);
    hypre_ParVectorInitialize(r_work);
    hypre_ParVectorInitialize(z_work);
-
-   hypre_ParVectorSetPartitioningOwner(residual, 0);
-   hypre_ParVectorSetPartitioningOwner(x_work, 0);
-   hypre_ParVectorSetPartitioningOwner(r_work, 0);
-   hypre_ParVectorSetPartitioningOwner(z_work, 0);
 
    hypre_ParFSAIDataResidual(fsai_data)      = residual;
    hypre_ParFSAIDataXWork(fsai_data)         = x_work;
