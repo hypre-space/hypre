@@ -79,6 +79,7 @@ hypre_FSAICreate()
    hypre_ParFSAIDataZWork(fsai_data)            = NULL;
    hypre_ParFSAIDataCommInfo(fsai_data)         = NULL;
    hypre_ParFSAIDataNewComm(fsai_data)          = hypre_MPI_COMM_NULL;
+   hypre_ParFSAIDataZeroGuess(fsai_data)        = 0;
 
    hypre_FSAISetMaxSteps(fsai_data, max_steps);
    hypre_FSAISetMaxStepSize(fsai_data, max_step_size);
@@ -238,6 +239,30 @@ hypre_FSAISetMaxIterations( void *data,
    }
 
    hypre_ParFSAIDataMaxIterations(fsai_data) = max_iterations;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_FSAISetZeroGuess( void     *data,
+                        HYPRE_Int zero_guess )
+{
+   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
+
+   if (!fsai_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (zero_guess != 0)
+   {
+      hypre_ParFSAIDataZeroGuess(fsai_data) = 1;
+   }
+   else
+   {
+      hypre_ParFSAIDataZeroGuess(fsai_data) = 0;
+   }
 
    return hypre_error_flag;
 }
@@ -475,6 +500,23 @@ hypre_FSAIGetMaxIterations( void *data,
    }
 
    *max_iterations = hypre_ParFSAIDataMaxIterations(fsai_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_FSAIGetZeroGuess( void      *data,
+                        HYPRE_Int *zero_guess )
+{
+   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
+
+   if (!fsai_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   *zero_guess = hypre_ParFSAIDataZeroGuess(fsai_data);
 
    return hypre_error_flag;
 }

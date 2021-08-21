@@ -111,6 +111,28 @@ HYPRE_FSAIGetMaxStepSize( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_FSAISetZeroGuess
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_FSAISetZeroGuess( HYPRE_Solver solver,
+                        HYPRE_Int    zero_guess )
+{
+   return( hypre_FSAISetZeroGuess( (void *) solver, zero_guess ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_FSAIGetZeroGuess
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_FSAIGetZeroGuess( HYPRE_Solver  solver,
+                        HYPRE_Int    *zero_guess )
+{
+   return( hypre_FSAIGetZeroGuess( (void *) solver, zero_guess ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_FSAISetKapTolerance
  *--------------------------------------------------------------------------*/
 

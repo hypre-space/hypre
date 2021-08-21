@@ -4292,6 +4292,7 @@ main( hypre_int argc,
          HYPRE_FSAISetKapTolerance(pcg_precond, fsai_kap_tolerance);
          HYPRE_FSAISetMaxIterations(pcg_precond, 1);
          HYPRE_FSAISetTolerance(pcg_precond, 0.0);
+         HYPRE_FSAISetZeroGuess(pcg_precond, 1);
          HYPRE_FSAISetPrintLevel(pcg_precond, poutdat);
 
          HYPRE_PCGSetPrecond(pcg_solver,

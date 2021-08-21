@@ -1552,6 +1552,14 @@ HYPRE_Int HYPRE_FSAISetTolerance( HYPRE_Solver solver,
 HYPRE_Int HYPRE_FSAISetPrintLevel(HYPRE_Solver solver,
                                   HYPRE_Int    print_level);
 
+/**
+ * (Optional) Use a zero initial guess. This allows the solver to cut corners
+ * in the case where a zero initial guess is needed (e.g., for preconditioning)
+ * to reduce compuational cost.
+ **/
+HYPRE_Int HYPRE_FSAISetZeroGuess(HYPRE_Solver solver,
+                                 HYPRE_Int    zero_guess);
+
 
 /**@}*/
 

@@ -29,6 +29,7 @@ typedef struct
    HYPRE_Real           density;             /* Density of matrix G wrt A */
 
    /* Solver Problem Data */
+   HYPRE_Int            zero_guess;          /* Flag indicating x0 = 0 */
    HYPRE_Int            max_iterations;      /* Maximum iterations run for the solver */
    HYPRE_Int            num_iterations;      /* Number of iterations the solver ran */
    HYPRE_Real           omega;               /* Step size for Preconditioned Richardson Solver */
@@ -66,6 +67,7 @@ typedef struct
 #define hypre_ParFSAIDataDensity(fsai_data)                 ((fsai_data) -> density)
 
 /* Solver problem data */
+#define hypre_ParFSAIDataZeroGuess(fsai_data)               ((fsai_data) -> zero_guess)
 #define hypre_ParFSAIDataMaxIterations(fsai_data)           ((fsai_data) -> max_iterations)
 #define hypre_ParFSAIDataNumIterations(fsai_data)           ((fsai_data) -> num_iterations)
 #define hypre_ParFSAIDataOmega(fsai_data)                   ((fsai_data) -> omega)

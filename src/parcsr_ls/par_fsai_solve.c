@@ -24,21 +24,21 @@ hypre_FSAISolve( void               *fsai_vdata,
                  hypre_ParVector    *x )
 {
    MPI_Comm             comm = hypre_ParCSRMatrixComm(A);
-
-   hypre_ParFSAIData    *fsai_data = (hypre_ParFSAIData*) fsai_vdata;
+   hypre_ParFSAIData   *fsai_data   = (hypre_ParFSAIData*) fsai_vdata;
 
    /* Data structure variables */
-   hypre_ParCSRMatrix  *G                    = hypre_ParFSAIDataGmat(fsai_data);
-   hypre_ParCSRMatrix  *GT                   = hypre_ParFSAIDataGTmat(fsai_data);
-   hypre_ParVector     *x_work               = hypre_ParFSAIDataXWork(fsai_data);
-   hypre_ParVector     *r_work               = hypre_ParFSAIDataRWork(fsai_data);
-   hypre_ParVector     *z_work               = hypre_ParFSAIDataZWork(fsai_data);
-   hypre_ParVector     *r                    = hypre_ParFSAIDataResidual(fsai_data);
-   HYPRE_Int            tol                  = hypre_ParFSAIDataTolerance(fsai_data);
-   HYPRE_Int            max_iter             = hypre_ParFSAIDataMaxIterations(fsai_data);
-   HYPRE_Int            print_level          = hypre_ParFSAIDataPrintLevel(fsai_data);
-   HYPRE_Int            logging              = hypre_ParFSAIDataLogging(fsai_data);
-   HYPRE_Real           omega                = hypre_ParFSAIDataOmega(fsai_data);
+   hypre_ParCSRMatrix  *G           = hypre_ParFSAIDataGmat(fsai_data);
+   hypre_ParCSRMatrix  *GT          = hypre_ParFSAIDataGTmat(fsai_data);
+   hypre_ParVector     *x_work      = hypre_ParFSAIDataXWork(fsai_data);
+   hypre_ParVector     *r_work      = hypre_ParFSAIDataRWork(fsai_data);
+   hypre_ParVector     *z_work      = hypre_ParFSAIDataZWork(fsai_data);
+   hypre_ParVector     *r           = hypre_ParFSAIDataResidual(fsai_data);
+   HYPRE_Int            tol         = hypre_ParFSAIDataTolerance(fsai_data);
+   HYPRE_Int            zero_guess  = hypre_ParFSAIDataZeroGuess(fsai_data);
+   HYPRE_Int            max_iter    = hypre_ParFSAIDataMaxIterations(fsai_data);
+   HYPRE_Int            print_level = hypre_ParFSAIDataPrintLevel(fsai_data);
+   HYPRE_Int            logging     = hypre_ParFSAIDataLogging(fsai_data);
+   HYPRE_Real           omega       = hypre_ParFSAIDataOmega(fsai_data);
 
    /* Local variables */
    HYPRE_Int            iter, my_id;
@@ -68,30 +68,36 @@ hypre_FSAISolve( void               *fsai_vdata,
       hypre_printf("    --------    --------    --------\n");
    }
 
-   while (rel_resnorm >= tol && iter < max_iter)
+   if (max_iter > 0)
    {
-      /* Update residual */
-      if (iter)
+      /* First iteration - residual computation */
+      if (zero_guess)
       {
-         /* r_work = b - A*x(k) */
-         hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A, x, 1.0, b, r_work);
+         hypre_ParVectorCopy(b, r);
       }
       else
       {
-         /* r_work = b - A*x_0 = b */
-         hypre_ParVectorCopy(b, r_work);
+         hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A, x, 1.0, b, r); /* r = b - A*x(k) */
       }
+
+      /* Compute: x(k+1) = omega*G^T*G*r + x(k) */
       hypre_ParVectorCopy(x, x_work);
+      hypre_ParCSRMatrixMatvec(1.0, G, r, 0.0, z_work);
+      hypre_ParCSRMatrixMatvecOutOfPlace(omega, GT, z_work, 1.0, x_work, x);
 
-      /* Apply FSAI */
-      hypre_ParCSRMatrixMatvec(1.0, G, r_work, 0.0, z_work);                 /* z_work = G*r_work */
-      hypre_ParCSRMatrixMatvecOutOfPlace(omega, GT, z_work, 1.0, x_work, x); /* x(k+1) = omega*G^T*z_work + x(k) */
+      /* Update iteration count */
+      iter++;
+   }
 
-      /* Compute residual */
+   /* Apply remaining iterations */
+   for (; iter < max_iter; iter++)
+   {
+      /* Update residual */
+      hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A, x, 1.0, b, r);
+
       if (tol > 0.0)
       {
          old_resnorm = resnorm;
-         hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A, x, 1.0, b, r);
          resnorm = hypre_ParVectorInnerProd(r, r);
 
          /* Compute rel_resnorm */
@@ -101,9 +107,18 @@ hypre_FSAISolve( void               *fsai_vdata,
          {
             hypre_printf("    %e          %e          %e\n", iter, resnorm, rel_resnorm);
          }
+
+         /* Exit if convergence tolerance has been achieved */
+         if (rel_resnorm >= tol)
+         {
+            break;
+         }
       }
 
-      iter++;
+      /* Compute: x(k+1) = omega*G^T*G*r + x(k) */
+      hypre_ParVectorCopy(x, x_work);
+      hypre_ParCSRMatrixMatvec(1.0, G, r, 0.0, z_work);
+      hypre_ParCSRMatrixMatvecOutOfPlace(omega, GT, z_work, 1.0, x_work, x);
    }
 
    if (logging > 1)
