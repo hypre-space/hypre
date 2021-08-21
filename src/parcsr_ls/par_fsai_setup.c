@@ -257,6 +257,36 @@ hypre_qsort2_ci( HYPRE_Complex  *v,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_PartialSelectSortCI
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_PartialSelectSortCI( HYPRE_Complex  *v,
+                           HYPRE_Int      *w,
+                           HYPRE_Int       size,
+                           HYPRE_Int       nentries )
+{
+   HYPRE_Int  i, k, pos;
+
+   for (k = 0; k < nentries; k++)
+   {
+      /* Find largest kth entry */
+      pos = k;
+      for (i = k + 1; i < size; i++)
+      {
+         if (v[i] > v[pos])
+         {
+            pos = i;
+         }
+      }
+
+      /* Move entry to beggining of the array */
+      hypre_swap2_ci(v, w, k, pos);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_AddToPattern
  *
  * Take the largest elements from the kaporin gradient and add their
@@ -281,7 +311,8 @@ hypre_AddToPattern( hypre_Vector *kap_grad,
    nentries = hypre_min(kap_grad_size, max_step_size);
 
    /* Reorder candidates according to larger weights */
-   hypre_qsort2_ci(kap_grad_data, &kap_grad_pos[*S_nnz], 0, kap_grad_size-1);
+   //hypre_qsort2_ci(kap_grad_data, &kap_grad_pos[*S_nnz], 0, kap_grad_size-1);
+   hypre_PartialSelectSortCI(kap_grad_data, &kap_grad_pos[*S_nnz], kap_grad_size, nentries);
 
    /* Update S_Pattern with new entries */
    S_nnz_old = *S_nnz;
