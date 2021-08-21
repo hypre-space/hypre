@@ -129,7 +129,6 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
                    HYPRE_Int         S_nnz,
                    HYPRE_Int         max_row_size,
                    HYPRE_Int         row_num,
-                   HYPRE_Int        *S_marker,
                    HYPRE_Int        *kg_marker )
 {
 
@@ -140,70 +139,61 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
    HYPRE_Complex  *kap_grad_data = hypre_VectorData(kap_grad);
 
    /* Local Variables */
-   HYPRE_Int       i, j, count;
+   HYPRE_Int       i, ii, j, k, count, col;
 
    count = 0;
 
-   // A[0:(row_num-2), P]*G_temp[i, P]
-   for (i = 0; i < S_nnz; i++)
+   /* Compute A[row_num, 0:(row_num-1)]*G_temp[i,i] */
+   for (j = A_i[row_num]; j < A_i[row_num+1]; j++)
    {
-      for (j = A_i[S_Pattern[i]]; j < A_i[S_Pattern[i]+1]; j++)
+      col = A_j[j];
+      if (col < row_num)
       {
-         // Position can't be added to the Kaporin Gradient
-         if (S_marker[A_j[j]] > -1)
+         if (kg_marker[col] > -1)
          {
-            continue;
-         }
-         else if (A_j[j] >= row_num)
-         {
-            break;
-         }
-
-         // Position can be added - Check if it already has been
-         if (kg_marker[A_j[j]] > -1)
-         {
-            kap_grad_data[kg_marker[A_j[j]]] += G_temp_data[i]*A_data[j];
-         }
-         else if (count < max_row_size)
-         {
-            kg_marker[A_j[j]] = count;
-            kap_grad_data[count] = G_temp_data[i]*A_data[j];
-            kap_grad_pos[count]  = A_j[j];
+            /* Add A[row_num, col] to the tentative pattern */
+            kg_marker[col] = count + 1;
+            kap_grad_pos[S_nnz + count] = col;
+            kap_grad_data[count] = A_data[j];
             count++;
          }
       }
    }
 
-   // + A[0:(row_num-2), row_num]
-   for (j = A_i[row_num] + 1; j < A_i[row_num+1]; j++)
+   /* Compute A[0:(row_num-1), P]*G_temp[P, i] */
+   for (i = 0; i < S_nnz; i++)
    {
-      // Position cna't be added to the Kaporin Gradient
-      if (S_marker[A_j[j]] > -1)
+      ii = S_Pattern[i];
+      for (j = A_i[ii]; j < A_i[ii+1]; j++)
       {
-         continue;
-      }
-      else if (A_j[j] >= row_num)
-      {
-         break;
-      }
-
-      // Position can be added - Check if it already has been
-      if (kg_marker[A_j[j]] > -1)
-      {
-         kap_grad_data[kg_marker[A_j[j]]] += A_data[j];
-      }
-      else if (count < max_row_size)
-      {
-         kap_grad_data[count] = A_data[j];
-         kap_grad_pos[count]  = A_j[j];
-         count++;
+         col = A_j[j];
+         if (col < row_num)
+         {
+            k = kg_marker[col];
+            if (k == 0)
+            {
+               /* New entry in the tentative pattern */
+               kg_marker[col] = count + 1;
+               kap_grad_pos[S_nnz + count] = col;
+               kap_grad_data[count] = G_temp_data[i]*A_data[j];
+               count++;
+            }
+            else if (k > 0)
+            {
+               /* Already existing entry in the tentative pattern */
+               kap_grad_data[k-1] += G_temp_data[i]*A_data[j];
+            }
+         }
       }
    }
 
+   /* Update number of nonzero coefficients held in kap_grad */
    hypre_VectorSize(kap_grad) = count;
+
+   /* Update to absolute values */
    for (i = 0; i < count; i++)
    {
-      kg_marker[kap_grad_pos[i]] = -1;
+      //kg_marker[kap_grad_pos[i]] = -1;
       kap_grad_data[i] = hypre_abs(kap_grad_data[i]);
    }
 
@@ -278,22 +268,41 @@ hypre_AddToPattern( hypre_Vector *kap_grad,
                     HYPRE_Int    *kap_grad_pos,
                     HYPRE_Int    *S_Pattern,
                     HYPRE_Int    *S_nnz,
+                    HYPRE_Int    *kg_marker,
                     HYPRE_Int     max_step_size )
 {
-
+   HYPRE_Int       kap_grad_size = hypre_VectorSize(kap_grad);
    HYPRE_Complex  *kap_grad_data = hypre_VectorData(kap_grad);
+
    HYPRE_Int       i, nentries;
+   HYPRE_Int       S_nnz_old;
 
-   hypre_qsort2_ci(kap_grad_data, kap_grad_pos, 0, hypre_VectorSize(kap_grad)-1);
+   /* Number of entries that can be added */
+   nentries = hypre_min(kap_grad_size, max_step_size);
 
-   nentries = hypre_min(hypre_VectorSize(kap_grad), max_step_size);
+   /* Reorder candidates according to larger weights */
+   hypre_qsort2_ci(kap_grad_data, &kap_grad_pos[*S_nnz], 0, kap_grad_size-1);
+
+   /* Update S_Pattern with new entries */
+   S_nnz_old = *S_nnz;
    for (i = 0; i < nentries; i++)
    {
-      S_Pattern[(*S_nnz)++] = kap_grad_pos[i];
+      S_Pattern[*S_nnz + i] = kap_grad_pos[*S_nnz + i];
    }
+   *S_nnz += nentries;
 
    /* Put S_Pattern in ascending order */
    hypre_qsort0(S_Pattern, 0, (*S_nnz)-1);
+
+   /* Reset marked entries that are added to S_Pattern */
+   for (i = S_nnz_old; i < *S_nnz; i++)
+   {
+      kg_marker[kap_grad_pos[i]] = -1;
+   }
+   for (i = *S_nnz; i < S_nnz_old + kap_grad_size; i++)
+   {
+      kg_marker[kap_grad_pos[i]] = 0;
+   }
 
    return hypre_error_flag;
 }
@@ -416,7 +425,7 @@ hypre_FSAISetup( void               *fsai_vdata,
    HYPRE_Int               *marker;             /* Array holding which values need to be gathered
                                                    when finding a subrow or submatrix of A */
    HYPRE_Int               *kg_marker;
-   HYPRE_Int                S_nnz;
+   HYPRE_Int                S_nnz, S_nnz_old;
    HYPRE_Int                i, j, k, l;         /* Loop variables */
    HYPRE_Real               old_psi, new_psi;   /* GAG' before and after the k-th
                                                    interation of aFSAI */
@@ -461,22 +470,18 @@ hypre_FSAISetup( void               *fsai_vdata,
    /* Allocate and initialize local vector variables */
    G_temp       = hypre_SeqVectorCreate(max_nnzrow_diag_G);
    A_subrow     = hypre_SeqVectorCreate(max_nnzrow_diag_G);
-   kap_grad     = hypre_SeqVectorCreate(max_nnzrow_diag_G);
+   kap_grad     = hypre_SeqVectorCreate(num_rows_diag_A); // TODO: size
    A_sub        = hypre_SeqVectorCreate(max_nnzrow_diag_G*max_nnzrow_diag_G);
    S_Pattern    = hypre_CTAlloc(HYPRE_Int, max_nnzrow_diag_G, HYPRE_MEMORY_HOST);
-   kap_grad_pos = hypre_CTAlloc(HYPRE_Int, max_nnzrow_diag_G, HYPRE_MEMORY_HOST);
-   marker       = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A, HYPRE_MEMORY_HOST); /* For gather functions - don't want to reinitialize */
+   kap_grad_pos = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A, HYPRE_MEMORY_HOST); // TODO: size
+   marker       = hypre_TAlloc(HYPRE_Int, num_rows_diag_A, HYPRE_MEMORY_HOST); /* For gather functions - don't want to reinitialize */
    kg_marker    = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A, HYPRE_MEMORY_HOST); /* For kaporin gradient functions */
 
    hypre_SeqVectorInitialize(G_temp);
    hypre_SeqVectorInitialize(A_subrow);
    hypre_SeqVectorInitialize(kap_grad);
    hypre_SeqVectorInitialize(A_sub);
-   for (i = 0; i < num_rows_diag_A; i++)
-   {
-      marker[i] = -1;
-      kg_marker[i] = -1;
-   }
+   hypre_Memset(marker, -1, num_rows_diag_A*sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
 
    /* Setting data variables for vectors */
    G_temp_data     = hypre_VectorData(G_temp);
@@ -501,18 +506,20 @@ hypre_FSAISetup( void               *fsai_vdata,
       {
          /* Compute Kaporin Gradient */
          hypre_FindKapGrad(A_diag, kap_grad, kap_grad_pos, G_temp, S_Pattern,
-                           S_nnz, max_nnzrow_diag_G, i, marker, kg_marker);
-
-         if (hypre_VectorSize(kap_grad) == 0)
-         {
-            new_psi = old_psi;
-            break;
-         }
+                           S_nnz, max_nnzrow_diag_G, i, kg_marker);
 
          /* Find max_step_size largest values of the kaporin gradient,
             find their column indices, and add it to S_Pattern */
+         S_nnz_old = S_nnz;
          hypre_AddToPattern(kap_grad, kap_grad_pos, S_Pattern,
-                            &S_nnz, max_step_size);
+                            &S_nnz, kg_marker, max_step_size);
+
+         if (S_nnz == S_nnz_old)
+         {
+            new_psi = old_psi;
+            hypre_VectorSize(G_temp) = S_nnz;
+            break;
+         }
 
          /* Gather A[P, P] and -A[i, P] */
          for (j = 0; j < S_nnz; j++)
@@ -559,6 +566,7 @@ hypre_FSAISetup( void               *fsai_vdata,
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
 
          row_scale = 1.0/A_data[A_i[i]];
+         hypre_VectorSize(G_temp) = 0;
       }
 
       /* Pass values of G_temp into G */
@@ -569,6 +577,7 @@ hypre_FSAISetup( void               *fsai_vdata,
          j         = G_i[i] + k + 1;
          G_j[j]    = S_Pattern[k];
          G_data[j] = row_scale*G_temp_data[k];
+         kg_marker[S_Pattern[k]] = 0;
       }
       G_i[i+1] = G_i[i] + k + 1;
    }

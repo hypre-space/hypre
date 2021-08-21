@@ -2543,8 +2543,8 @@ HYPRE_Int hypre_FSAIGetDebugFlag ( void *data, HYPRE_Int *debug_flag );
 /* par_fsai_setup.c */
 HYPRE_Int hypre_CSRMatrixExtractDenseMat( hypre_CSRMatrix *A_diag, hypre_Vector *A_sub, HYPRE_Int *S_Pattern, HYPRE_Int S_nnz, HYPRE_Int *marker );
 HYPRE_Int hypre_CSRMatrixExtractDenseRow( hypre_CSRMatrix *A_diag, hypre_Vector *A_subrow, HYPRE_Int *marker, HYPRE_Int row_num );
-HYPRE_Int hypre_FindKapGrad( hypre_CSRMatrix *A_diag, hypre_Vector *kaporin_gradient, HYPRE_Int *kap_grad_nonzeros, hypre_Vector *G_temp, HYPRE_Int *S_Pattern, HYPRE_Int S_nnz, HYPRE_Int max_row_size, HYPRE_Int row_num, HYPRE_Int *marker, HYPRE_Int *kg_marker );
-HYPRE_Int hypre_AddToPattern ( hypre_Vector *kaporin_gradient, HYPRE_Int *kap_grad_nonzeros, HYPRE_Int *S_Pattern, HYPRE_Int *S_nnz, HYPRE_Int max_step_size );
+HYPRE_Int hypre_FindKapGrad( hypre_CSRMatrix *A_diag, hypre_Vector *kaporin_gradient, HYPRE_Int *kap_grad_nonzeros, hypre_Vector *G_temp, HYPRE_Int *S_Pattern, HYPRE_Int S_nnz, HYPRE_Int max_row_size, HYPRE_Int row_num, HYPRE_Int *kg_marker );
+HYPRE_Int hypre_AddToPattern ( hypre_Vector *kaporin_gradient, HYPRE_Int *kap_grad_nonzeros, HYPRE_Int *S_Pattern, HYPRE_Int *S_nnz , HYPRE_Int *kg_marker , HYPRE_Int max_step_size );
 HYPRE_Int hypre_FSAISetup ( void *fsai_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u );
 void hypre_swap2_ci ( HYPRE_Complex *v , HYPRE_Int *w , HYPRE_Int i , HYPRE_Int j );
 void hypre_qsort2_ci ( HYPRE_Complex *v , HYPRE_Int *w , HYPRE_Int left , HYPRE_Int right );
