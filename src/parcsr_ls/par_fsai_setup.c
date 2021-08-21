@@ -299,6 +299,59 @@ hypre_AddToPattern( hypre_Vector *kap_grad,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_DenseSPDSystemSolve
+ *
+ * Solve the dense SPD linear system with LAPACK:
+ *
+ *    mat*lhs = -rhs
+ *
+ * Note: the contents of A change to its Cholesky factor.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_DenseSPDSystemSolve( hypre_Vector *mat,
+                           hypre_Vector *rhs,
+                           hypre_Vector *lhs )
+{
+   HYPRE_Int      size = hypre_VectorSize(rhs);
+   HYPRE_Complex *mat_data = hypre_VectorData(mat);
+   HYPRE_Complex *rhs_data = hypre_VectorData(rhs);
+   HYPRE_Complex *lhs_data = hypre_VectorData(lhs);
+
+   /* Local variables */
+   HYPRE_Int      num_rhs = 1;
+   char           uplo = 'L';
+   char           msg[512];
+   HYPRE_Int      i, info;
+
+   /* Copy RHS into LHS */
+   for (i = 0; i < size; i++)
+   {
+      lhs_data[i] = -rhs_data[i];
+   }
+
+   /* Compute Cholesky factor */
+   hypre_dpotrf(&uplo, &size, mat_data, &size, &info);
+   if (info)
+   {
+      hypre_sprintf(msg, "Error: dpotrf failed with code %d\n", info);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+      return hypre_error_flag;
+   }
+
+   /* Solve dense linear system */
+   hypre_dpotrs(&uplo, &size, &num_rhs, mat_data, &size, lhs_data, &size, &info);
+   if (info)
+   {
+      hypre_sprintf(msg, "Error: dpotrs failed with code %d\n", info);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+      return hypre_error_flag;
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_FSAISetup
  *--------------------------------------------------------------------------*/
 
@@ -353,7 +406,6 @@ hypre_FSAISetup( void               *fsai_vdata,
    hypre_Vector           *G_temp;             /* A vector to hold a single row of G while it's being calculated */
    hypre_Vector           *A_sub;              /* A vector to hold a the A[P, P] submatrix of A */
    hypre_Vector           *A_subrow;           /* Vector to hold A[i, P] for the kaporin gradient */
-   hypre_Vector           *sol_vec;            /* Vector to hold solution of hypre_dpetrs */
    hypre_Vector           *kap_grad;           /* A vector to hold the Kaporin Gradient for each iteration of aFSAI */
    HYPRE_Int              *kap_grad_pos;       /* An array to hold the kap_grad nonzero indices for each iteration of aFSAI */
    HYPRE_Int              *S_Pattern;
@@ -367,11 +419,6 @@ hypre_FSAISetup( void               *fsai_vdata,
    HYPRE_Complex          *A_subrow_data;
    HYPRE_Complex          *kap_grad_data;
    HYPRE_Complex          *A_sub_data;
-   HYPRE_Complex          *sol_vec_data;
-
-   /* Dense linear system variables */
-   HYPRE_Int               num_rhs = 1;
-   char                    uplo = 'L';
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -408,7 +455,6 @@ hypre_FSAISetup( void               *fsai_vdata,
    /* Allocate and initialize local vector variables */
    G_temp       = hypre_SeqVectorCreate(max_nnzrow_diag_G);
    A_subrow     = hypre_SeqVectorCreate(max_nnzrow_diag_G);
-   sol_vec      = hypre_SeqVectorCreate(max_nnzrow_diag_G);
    kap_grad     = hypre_SeqVectorCreate(max_nnzrow_diag_G);
    A_sub        = hypre_SeqVectorCreate(max_nnzrow_diag_G*max_nnzrow_diag_G);
    S_Pattern    = hypre_CTAlloc(HYPRE_Int, max_nnzrow_diag_G, HYPRE_MEMORY_HOST);
@@ -418,7 +464,6 @@ hypre_FSAISetup( void               *fsai_vdata,
 
    hypre_SeqVectorInitialize(G_temp);
    hypre_SeqVectorInitialize(A_subrow);
-   hypre_SeqVectorInitialize(sol_vec);
    hypre_SeqVectorInitialize(kap_grad);
    hypre_SeqVectorInitialize(A_sub);
    for (i = 0; i < num_rows_diag_A; i++)
@@ -432,7 +477,6 @@ hypre_FSAISetup( void               *fsai_vdata,
    A_subrow_data   = hypre_VectorData(A_subrow);
    kap_grad_data   = hypre_VectorData(kap_grad);
    A_sub_data      = hypre_VectorData(A_sub);
-   sol_vec_data    = hypre_VectorData(sol_vec);
 
    /**********************************************************************
    * Start of Adaptive FSAI algorithm
@@ -455,6 +499,7 @@ hypre_FSAISetup( void               *fsai_vdata,
 
          if (hypre_VectorSize(kap_grad) == 0)
          {
+            new_psi = old_psi;
             break;
          }
 
@@ -463,7 +508,7 @@ hypre_FSAISetup( void               *fsai_vdata,
          hypre_AddToPattern(kap_grad, kap_grad_pos, S_Pattern,
                             &S_nnz, max_step_size);
 
-         /* Gather A[P, P] and -A[P, i] */
+         /* Gather A[P, P] and -A[i, P] */
          hypre_qsort0(S_Pattern, 0, S_nnz-1);
 
          for (j = 0; j < S_nnz; j++)
@@ -479,32 +524,18 @@ hypre_FSAISetup( void               *fsai_vdata,
          hypre_SeqVectorSetConstantValues(A_subrow, 0.0);
 
          hypre_CSRMatrixExtractDenseMat(A_diag, A_sub, S_Pattern, S_nnz, marker); /* A[P, P] */
-         hypre_CSRMatrixExtractDenseRow(A_diag, A_subrow, marker, i);            /* A[i, P] */
+         hypre_CSRMatrixExtractDenseRow(A_diag, A_subrow, marker, i);             /* A[i, P] */
 
-         hypre_SeqVectorScale(-1, A_subrow);                                         /* -A[P, i] */
-         for (j = 0; j < S_nnz; j++)
-         {
-            sol_vec_data[j] = A_subrow_data[j];
-         }
-
-         /* Solve A[P, P]G[i, P]' = -A[P, i] */
-         hypre_dpotrf(&uplo, &S_nnz, A_sub_data, &S_nnz, &l);
-         hypre_dpotrs(&uplo, &S_nnz, &num_rhs, A_sub_data, &S_nnz, sol_vec_data, &S_nnz, &l);
-
-         for (j = 0; j < hypre_VectorSize(sol_vec); j++)
-         {
-            G_temp_data[j] = sol_vec_data[j];
-         }
-
+         /* Solve A[P, P] G[i, P]' = -A[i, P] */
+         hypre_DenseSPDSystemSolve(A_sub, A_subrow, G_temp);
 
          /* Determine psi_{k+1} = G_temp[i]*A*G_temp[i]' */
-         new_psi = hypre_SeqVectorInnerProd(G_temp, A_subrow) - A_data[A_i[i]];
-         if (hypre_abs(new_psi + old_psi) < kap_tolerance*old_psi)
+         new_psi = hypre_SeqVectorInnerProd(G_temp, A_subrow) + A_data[A_i[i]];
+         if (hypre_abs(new_psi - old_psi) < kap_tolerance*old_psi)
          {
             break;
          }
-
-         old_psi = -new_psi;
+         old_psi = new_psi;
       }
 
       for (j = 0; j < S_nnz; j++)
@@ -512,17 +543,16 @@ hypre_FSAISetup( void               *fsai_vdata,
          marker[S_Pattern[j]] = -1;
       }
 
-      row_scale = 1.0/(sqrt(A_data[A_i[i]] - hypre_abs(hypre_SeqVectorInnerProd(G_temp, A_subrow))));
+      row_scale = 1.0/sqrt(new_psi);
 
       /* Pass values of G_temp into G */
       G_j[G_i[i]] = i;
       G_data[G_i[i]] = row_scale;
-      hypre_SeqVectorScale(row_scale, G_temp);
       for (k = 0; k < hypre_VectorSize(G_temp); k++)
       {
          j         = G_i[i] + k + 1;
          G_j[j]    = S_Pattern[k];
-         G_data[j] = G_temp_data[k];
+         G_data[j] = row_scale*G_temp_data[k];
       }
       G_i[i+1] = G_i[i] + k + 1;
    }
@@ -571,7 +601,6 @@ hypre_FSAISetup( void               *fsai_vdata,
    /* Free memory */
    hypre_SeqVectorDestroy(G_temp);
    hypre_SeqVectorDestroy(A_subrow);
-   hypre_SeqVectorDestroy(sol_vec);
    hypre_SeqVectorDestroy(kap_grad);
    hypre_SeqVectorDestroy(A_sub);
    hypre_TFree(kap_grad_pos, HYPRE_MEMORY_HOST);
