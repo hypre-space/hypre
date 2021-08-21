@@ -466,6 +466,8 @@ hypre_FSAISetup( void               *fsai_vdata,
    HYPRE_Complex           *kap_grad_data;
    HYPRE_Complex           *A_sub_data;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
@@ -525,6 +527,7 @@ hypre_FSAISetup( void               *fsai_vdata,
    ***********************************************************************/
 
    /* Cycle through each of the local rows */
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", "MainLoop");
    for (i = 0; i < num_rows_diag_A; i++)
    {
       S_nnz = 0;
@@ -612,6 +615,7 @@ hypre_FSAISetup( void               *fsai_vdata,
       }
       G_i[i+1] = G_i[i] + k + 1;
    }
+   HYPRE_ANNOTATE_REGION_END("%s", "MainLoop");
 
    /* Update local number of nonzeros of G */
    hypre_CSRMatrixNumNonzeros(G_diag) = G_i[num_rows_diag_A];
@@ -663,6 +667,8 @@ hypre_FSAISetup( void               *fsai_vdata,
    hypre_TFree(S_Pattern, HYPRE_MEMORY_HOST);
    hypre_TFree(marker, HYPRE_MEMORY_HOST);
    hypre_TFree(kg_marker, HYPRE_MEMORY_HOST);
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
