@@ -44,18 +44,15 @@ hypre_CSRMatrixExtractDenseMat( hypre_CSRMatrix *A,
    HYPRE_Complex *A_sub_data = hypre_VectorData(A_sub);
 
    /* Local variables */
-   HYPRE_Int      cc, i, j;
+   HYPRE_Int      cc, i, ii, j;
 
    for (i = 0; i < S_nnz; i++)
    {
-      for (j = A_i[S_Pattern[i]]; j < A_i[S_Pattern[i]+1]; j++)
+      ii = S_Pattern[i];
+      for (j = A_i[ii]; j < A_i[ii+1]; j++)
       {
-         if (A_j[j] > S_Pattern[i])
-         {
-            break;
-         }
-
-         if ((cc = marker[A_j[j]]) >= 0)
+         if ((A_j[j] <= ii) &&
+             (cc = marker[A_j[j]]) >= 0)
          {
             A_sub_data[cc*S_nnz + i] = A_data[j];
          }
@@ -90,13 +87,13 @@ hypre_CSRMatrixExtractDenseRow( hypre_CSRMatrix *A,
    HYPRE_Complex  *sub_row_data = hypre_VectorData(A_subrow);
 
    /* Local variables */
-   HYPRE_Int       i, cc;
+   HYPRE_Int       j, cc;
 
-   for (i = A_i[row_num]; i < A_i[row_num+1]; i++)
+   for (j = A_i[row_num]; j < A_i[row_num+1]; j++)
    {
-      if ((cc = marker[A_j[i]]) >= 0)
+      if ((cc = marker[A_j[j]]) >= 0)
       {
-         sub_row_data[cc] = A_data[i];
+         sub_row_data[cc] = A_data[j];
       }
    }
 
@@ -295,6 +292,9 @@ hypre_AddToPattern( hypre_Vector *kap_grad,
       S_Pattern[(*S_nnz)++] = kap_grad_pos[i];
    }
 
+   /* Put S_Pattern in ascending order */
+   hypre_qsort0(S_Pattern, 0, (*S_nnz)-1);
+
    return hypre_error_flag;
 }
 
@@ -402,23 +402,29 @@ hypre_FSAISetup( void               *fsai_vdata,
    hypre_ParVector         *z_work;
 
    /* Local variables */
-   HYPRE_Int               num_procs, my_id;   /* MPI variables */
-   hypre_Vector           *G_temp;             /* A vector to hold a single row of G while it's being calculated */
-   hypre_Vector           *A_sub;              /* A vector to hold a the A[P, P] submatrix of A */
-   hypre_Vector           *A_subrow;           /* Vector to hold A[i, P] for the kaporin gradient */
-   hypre_Vector           *kap_grad;           /* A vector to hold the Kaporin Gradient for each iteration of aFSAI */
-   HYPRE_Int              *kap_grad_pos;       /* An array to hold the kap_grad nonzero indices for each iteration of aFSAI */
-   HYPRE_Int              *S_Pattern;
-   HYPRE_Int              *marker;             /* An array that holds which values need to be gathered when finding a sub-row or submatrix */
-   HYPRE_Int              *kg_marker;
-   HYPRE_Int               S_nnz;
-   HYPRE_Int               i, j, k, l;         /* Loop variables */
-   HYPRE_Real              old_psi, new_psi;   /* GAG' before and after the k-th interation of aFSAI */
-   HYPRE_Real              row_scale;          /* The value to scale G_temp by before adding it to G */
-   HYPRE_Complex          *G_temp_data;
-   HYPRE_Complex          *A_subrow_data;
-   HYPRE_Complex          *kap_grad_data;
-   HYPRE_Complex          *A_sub_data;
+   char                     msg[512];           /* Warning message */
+   HYPRE_Int                num_procs, my_id;   /* MPI variables */
+   hypre_Vector            *G_temp;             /* Vector holding a single row of G while
+                                                   it's being calculated */
+   hypre_Vector            *A_sub;              /* Vector holding the A[P, P] submatrix of A */
+   hypre_Vector            *A_subrow;           /* Vector holding A[i, P] */
+   hypre_Vector            *kap_grad;           /* Vector holding the Kaporin Gradient for
+                                                   each iteration of aFSAI */
+   HYPRE_Int               *kap_grad_pos;       /* Array holding the kap_grad nonzero indices
+                                                   for each iteration of aFSAI */
+   HYPRE_Int               *S_Pattern;
+   HYPRE_Int               *marker;             /* Array holding which values need to be gathered
+                                                   when finding a subrow or submatrix of A */
+   HYPRE_Int               *kg_marker;
+   HYPRE_Int                S_nnz;
+   HYPRE_Int                i, j, k, l;         /* Loop variables */
+   HYPRE_Real               old_psi, new_psi;   /* GAG' before and after the k-th
+                                                   interation of aFSAI */
+   HYPRE_Real               row_scale;          /* Scaling factor for G_temp */
+   HYPRE_Complex           *G_temp_data;
+   HYPRE_Complex           *A_subrow_data;
+   HYPRE_Complex           *kap_grad_data;
+   HYPRE_Complex           *A_sub_data;
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -509,8 +515,6 @@ hypre_FSAISetup( void               *fsai_vdata,
                             &S_nnz, max_step_size);
 
          /* Gather A[P, P] and -A[i, P] */
-         hypre_qsort0(S_Pattern, 0, S_nnz-1);
-
          for (j = 0; j < S_nnz; j++)
          {
             marker[S_Pattern[j]] = j;
@@ -538,12 +542,24 @@ hypre_FSAISetup( void               *fsai_vdata,
          old_psi = new_psi;
       }
 
+      /* Reset marker for building dense linear system */
       for (j = 0; j < S_nnz; j++)
       {
          marker[S_Pattern[j]] = -1;
       }
 
-      row_scale = 1.0/sqrt(new_psi);
+      /* Compute scaling factor */
+      if (new_psi > 0)
+      {
+         row_scale = 1.0/sqrt(new_psi);
+      }
+      else
+      {
+         hypre_sprintf(msg, "Warning: complex scaling factor found in row %d\n", i);
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+
+         row_scale = 1.0/A_data[A_i[i]];
+      }
 
       /* Pass values of G_temp into G */
       G_j[G_i[i]] = i;
