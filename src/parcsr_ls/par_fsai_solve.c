@@ -70,20 +70,21 @@ hypre_FSAISolve( void               *fsai_vdata,
 
    if (max_iter > 0)
    {
-      /* First iteration - residual computation */
+      /* First iteration */
       if (zero_guess)
       {
-         hypre_ParVectorCopy(b, r);
+         /* Compute: x(k+1) = omega*G^T*G*b */
+         hypre_ParCSRMatrixMatvec(1.0, G, b, 0.0, z_work);
+         hypre_ParCSRMatrixMatvec(omega, GT, z_work, 0.0, x);
       }
       else
       {
-         hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A, x, 1.0, b, r); /* r = b - A*x(k) */
+         /* Compute: x(k+1) = omega*G^T*G*(b - A*x(k)) + x(k) */
+         hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A, x, 1.0, b, r);
+         hypre_ParVectorCopy(x, x_work);
+         hypre_ParCSRMatrixMatvec(1.0, G, r, 0.0, z_work);
+         hypre_ParCSRMatrixMatvecOutOfPlace(omega, GT, z_work, 1.0, x_work, x);
       }
-
-      /* Compute: x(k+1) = omega*G^T*G*r + x(k) */
-      hypre_ParVectorCopy(x, x_work);
-      hypre_ParCSRMatrixMatvec(1.0, G, r, 0.0, z_work);
-      hypre_ParCSRMatrixMatvecOutOfPlace(omega, GT, z_work, 1.0, x_work, x);
 
       /* Update iteration count */
       iter++;
