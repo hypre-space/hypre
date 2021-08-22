@@ -804,6 +804,8 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       hypre_TMemcpy( P_offd_j, P_offd_j_dev, HYPRE_Int, P_offd_size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
       HYPRE_BigInt *tmp_P_offd_j = hypre_CTAlloc(HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_HOST);
+
+      HYPRE_BigInt *tmp_P_offd_j_dev = hypre_TAlloc(HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_DEVICE);
       HYPRE_BigInt *big_P_offd_j_dev = hypre_TAlloc(HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_DEVICE);
 
       for (p=0; p < num_passes-1; p++)
@@ -822,9 +824,15 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                                                big_P_offd_j_dev );
       }
 
-      hypre_TMemcpy( tmp_P_offd_j, big_P_offd_j_dev, HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
-      hypre_BigQsort0(tmp_P_offd_j, 0, P_offd_size-1);
+
+      hypre_TMemcpy( tmp_P_offd_j_dev, big_P_offd_j_dev, HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+
+      HYPRE_THRUST_CALL( sort,
+                         tmp_P_offd_j_dev,
+                         tmp_P_offd_j_dev+P_offd_size );
+
+      hypre_TMemcpy( tmp_P_offd_j, tmp_P_offd_j_dev, HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
       num_cols_offd_P = 1;
       for (i=0; i < P_offd_size-1; i++)
@@ -854,6 +862,8 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       }
 
       hypre_TFree(tmp_P_offd_j, HYPRE_MEMORY_HOST);
+      hypre_TFree(tmp_P_offd_j_dev, HYPRE_MEMORY_DEVICE);
+
       hypre_TFree(big_P_offd_j, HYPRE_MEMORY_HOST);
       hypre_TFree(big_P_offd_j_dev, HYPRE_MEMORY_DEVICE);
 
