@@ -1087,6 +1087,35 @@ HYPRE_Int HYPRE_BoomerAMGSetILUDroptol( HYPRE_Solver  solver,
                         HYPRE_Real	      ilu_droptol);
 
 /**
+ * (Optional) Defines maximum number of steps for FSAI.
+ * For further explanation see description of FSAI.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxSteps(HYPRE_Solver solver,
+                                         HYPRE_Int    max_steps);
+
+/**
+ * (Optional) Defines maximum step size for FSAI.
+ * For further explanation see description of FSAI.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxStepSize(HYPRE_Solver solver,
+                                            HYPRE_Int    max_step_size);
+
+/**
+ * (Optional) Defines maximum number of iterations for estimating the
+ * largest eigenvalue of the FSAI preconditioned matrix (G^T * G * A).
+ * For further explanation see description of FSAI.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetFSAIEigMaxIters(HYPRE_Solver solver,
+                                            HYPRE_Int    eig_max_iters);
+
+/**
+ * (Optional) Defines the kaporin dropping tolerance.
+ * For further explanation see description of FSAI.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetFSAIKapTolerance(HYPRE_Solver solver,
+                                             HYPRE_Real   kap_tolerance);
+
+/**
  * (Optional) Defines which parallel restriction operator is used.
  * There are the following options for restr_type:
  *

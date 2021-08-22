@@ -401,6 +401,7 @@ main( hypre_int argc,
    /* hypre_FSAI options */
    HYPRE_Int  fsai_max_steps = 10;
    HYPRE_Int  fsai_max_step_size = 1;
+   HYPRE_Int  fsai_eig_max_iters = 5;
    HYPRE_Real fsai_kap_tolerance = 1.0e-03;
    /* end hypre FSAI options */
 
@@ -1129,6 +1130,11 @@ main( hypre_int argc,
       {
          arg_index++;
          fsai_max_step_size = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-fs_eig_max_iters") == 0 )
+      {
+         arg_index++;
+         fsai_eig_max_iters = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-fs_kap_tol") == 0 )
       {
@@ -2166,6 +2172,7 @@ main( hypre_int argc,
          /* hypre FSAI options */
          hypre_printf("  -fs_max_steps <val>              : Maximum number of steps for FSAI \n");
          hypre_printf("  -fs_max_step_size <val>          : Maximum step size for FSAI \n");
+         hypre_printf("  -fs_eig_max_iters <val>          : Number of iterations for computing maximum eigenvalue of preconditioned operator \n");
          hypre_printf("  -fs_kap_tol <val>                : Kap. grad. reduction theshold for FSAI \n");
          /* end FSAI options */
          /* hypre AMG-DD options */
@@ -3583,6 +3590,10 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetILUDroptol(amg_solver, ilu_droptol);
       HYPRE_BoomerAMGSetILUMaxRowNnz(amg_solver, ilu_max_row_nnz);
       HYPRE_BoomerAMGSetILUMaxIter(amg_solver, ilu_sm_max_iter);
+      HYPRE_BoomerAMGSetFSAIMaxSteps(amg_solver, fsai_max_steps);
+      HYPRE_BoomerAMGSetFSAIMaxStepSize(amg_solver, fsai_max_step_size);
+      HYPRE_BoomerAMGSetFSAIEigMaxIters(amg_solver, fsai_eig_max_iters);
+      HYPRE_BoomerAMGSetFSAIKapTolerance(amg_solver, fsai_kap_tolerance);
 
       HYPRE_BoomerAMGSetNumFunctions(amg_solver, num_functions);
       HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
@@ -3900,6 +3911,10 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetEuLevel(amg_solver, eu_level);
       HYPRE_BoomerAMGSetEuBJ(amg_solver, eu_bj);
       HYPRE_BoomerAMGSetEuSparseA(amg_solver, eu_sparse_A);
+      HYPRE_BoomerAMGSetFSAIMaxSteps(amg_solver, fsai_max_steps);
+      HYPRE_BoomerAMGSetFSAIMaxStepSize(amg_solver, fsai_max_step_size);
+      HYPRE_BoomerAMGSetFSAIEigMaxIters(amg_solver, fsai_eig_max_iters);
+      HYPRE_BoomerAMGSetFSAIKapTolerance(amg_solver, fsai_kap_tolerance);
       HYPRE_BoomerAMGSetNumFunctions(amg_solver, num_functions);
       HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
       HYPRE_BoomerAMGSetAggInterpType(amg_solver, agg_interp_type);
@@ -4087,6 +4102,10 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetEuLevel(pcg_precond, eu_level);
          HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
          HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
+         HYPRE_BoomerAMGSetFSAIMaxSteps(pcg_precond, fsai_max_steps);
+         HYPRE_BoomerAMGSetFSAIMaxStepSize(pcg_precond, fsai_max_step_size);
+         HYPRE_BoomerAMGSetFSAIEigMaxIters(pcg_precond, fsai_eig_max_iters);
+         HYPRE_BoomerAMGSetFSAIKapTolerance(pcg_precond, fsai_kap_tolerance);
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);

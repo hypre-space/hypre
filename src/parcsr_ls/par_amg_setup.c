@@ -159,6 +159,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int     ilu_max_iter;
    HYPRE_Real    ilu_droptol;
    HYPRE_Int     ilu_reordering_type;
+   HYPRE_Int     fsai_max_steps;
+   HYPRE_Int     fsai_max_step_size;
+   HYPRE_Int     fsai_eig_max_iters;
+   HYPRE_Real    fsai_kap_tolerance;
    HYPRE_Int     needZ = 0;
 
    HYPRE_Int interp_type, restri_type;
@@ -247,6 +251,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    ilu_droptol = hypre_ParAMGDataILUDroptol(amg_data);
    ilu_max_iter = hypre_ParAMGDataILUMaxIter(amg_data);
    ilu_reordering_type = hypre_ParAMGDataILULocalReordering(amg_data);
+   fsai_max_steps = hypre_ParAMGDataFSAIMaxSteps(amg_data);
+   fsai_max_step_size = hypre_ParAMGDataFSAIMaxStepSize(amg_data);
+   fsai_eig_max_iters = hypre_ParAMGDataFSAIEigMaxIters(amg_data);
+   fsai_kap_tolerance = hypre_ParAMGDataFSAIKapTolerance(amg_data);
    interp_type = hypre_ParAMGDataInterpType(amg_data);
    restri_type = hypre_ParAMGDataRestriction(amg_data); /* RL */
    post_interp_type = hypre_ParAMGDataPostInterpType(amg_data);
@@ -345,7 +353,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          hypre_ParAMGDataNodal(amg_data) = 1;
          nodal = hypre_ParAMGDataNodal(amg_data);
       }
-      for (i=0; i < 3; i++)
+      for (i = 0; i < 3; i++)
       {
          if (grid_relax_type[i] < 20)
             grid_relax_type[i] = 23;
@@ -494,7 +502,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
          if (hypre_ParAMGDataSmoothType(amg_data) == 7)
          {
-            for (i=0; i < smooth_num_levels; i++)
+            for (i = 0; i < smooth_num_levels; i++)
             {
                if (smoother[i])
                {
@@ -505,7 +513,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
          else if (hypre_ParAMGDataSmoothType(amg_data) == 8)
          {
-            for (i=0; i < smooth_num_levels; i++)
+            for (i = 0; i < smooth_num_levels; i++)
             {
                if (smoother[i])
                {
@@ -516,7 +524,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
          else if (hypre_ParAMGDataSmoothType(amg_data) == 9)
          {
-            for (i=0; i < smooth_num_levels; i++)
+            for (i = 0; i < smooth_num_levels; i++)
             {
                if (smoother[i])
                {
@@ -525,9 +533,20 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                }
             }
          }
+         else if (hypre_ParAMGDataSmoothType(amg_data) == 4)
+         {
+            for (i = 0; i < smooth_num_levels; i++)
+            {
+               if (smoother[i])
+               {
+                  HYPRE_FSAIDestroy(smoother[i]);
+                  smoother[i] = NULL;
+               }
+            }
+         }
          else if (hypre_ParAMGDataSmoothType(amg_data) == 5)
          {
-            for (i=0; i < smooth_num_levels; i++)
+            for (i = 0; i < smooth_num_levels; i++)
             {
                if (smoother[i])
                {
@@ -538,7 +557,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
          else if (hypre_ParAMGDataSmoothType(amg_data) == 6)
          {
-            for (i=0; i < smooth_num_levels; i++)
+            for (i = 0; i < smooth_num_levels; i++)
             {
                if (smoother[i])
                {
@@ -1103,7 +1122,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   exit(0);
                }
                HYPRE_Int i;
-               for (i=0; i<first_local_row; i++)
+               for (i = 0; i<first_local_row; i++)
                {
                   if (fgets(line, 1024, fp) == NULL)
                   {
@@ -1111,7 +1130,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   }
                   /*HYPRE_Real tmp; fscanf(fp, "%le\n", &tmp);*/
                }
-               for (i=0; i<local_size; i++)
+               for (i = 0; i<local_size; i++)
                {
                   HYPRE_Real dj;
                   HYPRE_Int j;
@@ -1150,7 +1169,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   char CFfile[256];
                   hypre_sprintf(CFfile, "hypreCF_%d.txt.%d", level, my_id);
                   FILE *fp = fopen(CFfile, "w");
-                  for (i=0; i<local_size; i++)
+                  for (i = 0; i<local_size; i++)
                   {
                      HYPRE_Int k = CF_marker[i];
                      HYPRE_Real j;
@@ -2375,7 +2394,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   HYPRE_Real w_inv = 1.0 / add_rlx_wt;
                   /*HYPRE_Real w_inv = 1.0/hypre_ParAMGDataRelaxWeight(amg_data)[level];*/
                   hypre_SeqVectorInitialize_v2(d_diag, HYPRE_MEMORY_HOST);
-                  for (i=0; i < lvl_nrows; i++)
+                  for (i = 0; i < lvl_nrows; i++)
                   {
                      hypre_VectorData(d_diag)[i] = lvl_data[lvl_i[i]] * w_inv;
                   }
@@ -3158,6 +3177,22 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                            (HYPRE_ParCSRMatrix) A_array[j],
                            (HYPRE_ParVector) F_array[j],
                            (HYPRE_ParVector) U_array[j]);
+      }
+      else if ((smooth_type == 4 || smooth_type == 14) && smooth_num_levels > j)
+      {
+         HYPRE_FSAICreate(&smoother[j]);
+         HYPRE_FSAISetMaxSteps(smoother[j], fsai_max_steps);
+         HYPRE_FSAISetMaxStepSize(smoother[j], fsai_max_step_size);
+         HYPRE_FSAISetKapTolerance(smoother[j], fsai_kap_tolerance);
+         HYPRE_FSAISetTolerance(smoother[j], 0.0);
+         HYPRE_FSAISetOmega(smoother[j], schwarz_relax_wt);
+         HYPRE_FSAISetEigMaxIters(smoother[j], fsai_eig_max_iters);
+         HYPRE_FSAISetPrintLevel(smoother[j], 1);
+
+         HYPRE_FSAISetup(smoother[j],
+                         (HYPRE_ParCSRMatrix) A_array[j],
+                         (HYPRE_ParVector) F_array[j],
+                         (HYPRE_ParVector) U_array[j]);
       }
       else if ((smooth_type == 5 || smooth_type == 15) && smooth_num_levels > j)
       {

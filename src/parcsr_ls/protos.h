@@ -380,6 +380,10 @@ HYPRE_Int HYPRE_BoomerAMGSetILUMaxRowNnz( HYPRE_Solver  solver, HYPRE_Int ilu_ma
 HYPRE_Int HYPRE_BoomerAMGSetILUMaxIter( HYPRE_Solver solver, HYPRE_Int ilu_max_iter);
 HYPRE_Int HYPRE_BoomerAMGSetILUDroptol( HYPRE_Solver solver, HYPRE_Real ilu_droptol);
 HYPRE_Int HYPRE_BoomerAMGSetILULocalReordering( HYPRE_Solver solver, HYPRE_Int ilu_reordering_type);
+HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxSteps ( HYPRE_Solver solver , HYPRE_Int max_steps );
+HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxStepSize ( HYPRE_Solver solver , HYPRE_Int max_step_size );
+HYPRE_Int HYPRE_BoomerAMGSetFSAIEigMaxIters ( HYPRE_Solver solver , HYPRE_Int eig_max_iters );
+HYPRE_Int HYPRE_BoomerAMGSetFSAIKapTolerance ( HYPRE_Solver solver , HYPRE_Real kap_tolerance );
 HYPRE_Int HYPRE_BoomerAMGSetNumFunctions ( HYPRE_Solver solver , HYPRE_Int num_functions );
 HYPRE_Int HYPRE_BoomerAMGGetNumFunctions ( HYPRE_Solver solver , HYPRE_Int *num_functions );
 HYPRE_Int HYPRE_BoomerAMGSetNodal ( HYPRE_Solver solver , HYPRE_Int nodal );
@@ -713,6 +717,30 @@ HYPRE_Int HYPRE_ParaSailsSetLogging ( HYPRE_Solver solver , HYPRE_Int logging );
 HYPRE_Int HYPRE_ParaSailsGetLogging ( HYPRE_Solver solver , HYPRE_Int *logging );
 HYPRE_Int HYPRE_ParaSailsBuildIJMatrix ( HYPRE_Solver solver , HYPRE_IJMatrix *pij_A );
 
+/* HYPRE_parcsr_fsai.c */
+HYPRE_Int HYPRE_FSAICreate ( HYPRE_Solver *solver);
+HYPRE_Int HYPRE_FSAIDestroy ( HYPRE_Solver solver );
+HYPRE_Int HYPRE_FSAISetup ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+HYPRE_Int HYPRE_FSAISolve ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+HYPRE_Int HYPRE_FSAISetMaxSteps ( HYPRE_Solver solver , HYPRE_Int max_steps );
+HYPRE_Int HYPRE_FSAIGetMaxSteps ( HYPRE_Solver solver , HYPRE_Int *max_steps  );
+HYPRE_Int HYPRE_FSAISetMaxStepSize ( HYPRE_Solver solver , HYPRE_Int max_step_size );
+HYPRE_Int HYPRE_FSAIGetMaxStepSize ( HYPRE_Solver solver , HYPRE_Int *max_step_size );
+HYPRE_Int HYPRE_FSAISetKapTolerance ( HYPRE_Solver solver , HYPRE_Real  kap_tolerance );
+HYPRE_Int HYPRE_FSAIGetKapTolerance ( HYPRE_Solver solver , HYPRE_Real *kap_tolerance );
+HYPRE_Int HYPRE_FSAISetTolerance ( HYPRE_Solver solver , HYPRE_Real tolerance );
+HYPRE_Int HYPRE_FSAIGetTolerance ( HYPRE_Solver solver , HYPRE_Real *tolerance );
+HYPRE_Int HYPRE_FSAISetOmega ( HYPRE_Solver solver , HYPRE_Real omega );
+HYPRE_Int HYPRE_FSAIGetOmega ( HYPRE_Solver solver , HYPRE_Real *omega );
+HYPRE_Int HYPRE_FSAISetMaxIterations ( HYPRE_Solver solver , HYPRE_Int max_iterations );
+HYPRE_Int HYPRE_FSAIGetMaxIterations ( HYPRE_Solver solver , HYPRE_Int *max_iterations );
+HYPRE_Int HYPRE_FSAISetEigMaxIters ( HYPRE_Solver solver , HYPRE_Int eig_max_iters );
+HYPRE_Int HYPRE_FSAIGetEigMaxIters ( HYPRE_Solver solver , HYPRE_Int *eig_max_iters );
+HYPRE_Int HYPRE_FSAISetZeroGuess ( HYPRE_Solver solver , HYPRE_Int zero_guess );
+HYPRE_Int HYPRE_FSAIGetZeroGuess ( HYPRE_Solver solver , HYPRE_Int *zero_guess );
+HYPRE_Int HYPRE_FSAISetPrintLevel ( HYPRE_Solver solver , HYPRE_Int print_level );
+HYPRE_Int HYPRE_FSAIGetPrintLevel ( HYPRE_Solver solver , HYPRE_Int *print_level );
+
 /* HYPRE_parcsr_pcg.c */
 HYPRE_Int HYPRE_ParCSRPCGCreate ( MPI_Comm comm , HYPRE_Solver *solver );
 HYPRE_Int HYPRE_ParCSRPCGDestroy ( HYPRE_Solver solver );
@@ -924,6 +952,10 @@ HYPRE_Int hypre_BoomerAMGSetILUDroptol( void *data, HYPRE_Real ilu_droptol);
 HYPRE_Int hypre_BoomerAMGSetILUMaxIter( void *data, HYPRE_Int ilu_max_iter);
 HYPRE_Int hypre_BoomerAMGSetILUMaxRowNnz( void *data, HYPRE_Int ilu_max_row_nnz);
 HYPRE_Int hypre_BoomerAMGSetILULocalReordering( void *data, HYPRE_Int ilu_reordering_type);
+HYPRE_Int hypre_BoomerAMGSetFSAIMaxSteps ( void *data , HYPRE_Int fsai_max_steps);
+HYPRE_Int hypre_BoomerAMGSetFSAIMaxStepSize ( void *data , HYPRE_Int fsai_max_step_size);
+HYPRE_Int hypre_BoomerAMGSetFSAIEigMaxIters ( void *data , HYPRE_Int fsai_eig_max_iters);
+HYPRE_Int hypre_BoomerAMGSetFSAIKapTolerance ( void *data , HYPRE_Real fsai_kap_tolerance);
 HYPRE_Int hypre_BoomerAMGSetChebyOrder ( void *data , HYPRE_Int order );
 HYPRE_Int hypre_BoomerAMGSetChebyFraction ( void *data , HYPRE_Real ratio );
 HYPRE_Int hypre_BoomerAMGSetChebyEigEst ( void *data , HYPRE_Int eig_est );
