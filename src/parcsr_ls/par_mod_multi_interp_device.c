@@ -803,28 +803,26 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       P_offd_j = hypre_CTAlloc(HYPRE_Int, P_offd_size, HYPRE_MEMORY_HOST);
       hypre_TMemcpy( P_offd_j, P_offd_j_dev, HYPRE_Int, P_offd_size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
-      pass_order = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy( pass_order, pass_order_dev, HYPRE_Int, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-
       HYPRE_BigInt *tmp_P_offd_j = hypre_CTAlloc(HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_HOST);
-      HYPRE_BigInt *big_P_offd_j = hypre_CTAlloc(HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_HOST);
+      HYPRE_BigInt *big_P_offd_j_dev = hypre_TAlloc(HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_DEVICE);
+
       for (p=0; p < num_passes-1; p++)
       {
-         HYPRE_BigInt *col_map_offd_Pi = hypre_ParCSRMatrixColMapOffd(Pi[p]);
-         for (i = pass_starts[p+1]; i < pass_starts[p+2]; i++)
-         {
-            i1 = pass_order[i];
-            for (j = P_offd_i[i1]; j < P_offd_i[i1+1]; j++)
-            {
-               big_P_offd_j[j] = col_map_offd_Pi[P_offd_j[j]];
-            }
-         }
+         HYPRE_BigInt *col_map_offd_Pi_dev = hypre_ParCSRMatrixDeviceColMapOffd(Pi[p]);
+         HYPRE_Int npoints = pass_starts[p+2] - pass_starts[p+1];
+         dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+         dim3 gDim = hypre_GetDefaultCUDAGridDimension(npoints, "warp", bDim);
+
+         hypreCUDAKernel_populate_big_P_offd_j<<<gDim,bDim>>>( pass_starts[p+1],
+                                                               pass_starts[p+2],
+                                                               pass_order_dev,
+                                                               P_offd_i_dev,
+                                                               P_offd_j_dev,
+                                                               col_map_offd_Pi_dev,
+                                                               big_P_offd_j_dev );
       }
 
-      for (i=0; i < P_offd_size; i++)
-      {
-         tmp_P_offd_j[i] = big_P_offd_j[i];
-      }
+      hypre_TMemcpy( tmp_P_offd_j, big_P_offd_j_dev, HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
       hypre_BigQsort0(tmp_P_offd_j, 0, P_offd_size-1);
 
@@ -844,21 +842,25 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
          col_map_offd_P[i] = tmp_P_offd_j[i];
       }
 
+      // FIXME: clean this up
+      HYPRE_BigInt *big_P_offd_j = hypre_CTAlloc(HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy( big_P_offd_j, big_P_offd_j_dev, HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
       for (i=0; i < P_offd_size; i++)
       {
          P_offd_j[i] = hypre_BigBinarySearch(col_map_offd_P,
                big_P_offd_j[i],
                num_cols_offd_P);
       }
+
       hypre_TFree(tmp_P_offd_j, HYPRE_MEMORY_HOST);
       hypre_TFree(big_P_offd_j, HYPRE_MEMORY_HOST);
+      hypre_TFree(big_P_offd_j_dev, HYPRE_MEMORY_DEVICE);
 
       // FIXME: Clean this up
       hypre_TMemcpy( P_offd_j_dev, P_offd_j, HYPRE_Int, P_offd_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       hypre_TFree(P_offd_j,HYPRE_MEMORY_HOST);
       hypre_TFree(P_offd_i,HYPRE_MEMORY_HOST);
-
-      hypre_TFree (pass_order, HYPRE_MEMORY_HOST);
    } // if (P_offd_size)
 
    hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
