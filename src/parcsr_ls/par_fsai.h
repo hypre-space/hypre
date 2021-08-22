@@ -26,6 +26,7 @@ typedef struct hypre_ParFSAIData_struct
 
    /* Solver Problem Data */
    HYPRE_Int             zero_guess;      /* Flag indicating x0 = 0 */
+   HYPRE_Int             eig_max_iters;   /* Iters for computing max. eigenvalue of G^T*G*A */
    HYPRE_Int             max_iterations;  /* Maximum iterations run for the solver */
    HYPRE_Int             num_iterations;  /* Number of iterations the solver ran */
    HYPRE_Real            omega;           /* Step size for Preconditioned Richardson Solver */
@@ -53,6 +54,7 @@ typedef struct hypre_ParFSAIData_struct
 
 /* Solver problem data */
 #define hypre_ParFSAIDataZeroGuess(fsai_data)               ((fsai_data) -> zero_guess)
+#define hypre_ParFSAIDataEigMaxIters(fsai_data)             ((fsai_data) -> eig_max_iters)
 #define hypre_ParFSAIDataMaxIterations(fsai_data)           ((fsai_data) -> max_iterations)
 #define hypre_ParFSAIDataNumIterations(fsai_data)           ((fsai_data) -> num_iterations)
 #define hypre_ParFSAIDataOmega(fsai_data)                   ((fsai_data) -> omega)

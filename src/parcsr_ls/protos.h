@@ -1653,28 +1653,28 @@ HYPRE_Int hypre_BoomerAMGDD_FixUpRecvMaps ( hypre_AMGDDCompGrid **compGrid, hypr
 /* par_fsai.c */
 void* hypre_FSAICreate();
 HYPRE_Int hypre_FSAIDestroy ( void *data );
-HYPRE_Int hypre_FSAISetMaxSteps ( void *data, HYPRE_Int max_steps );
-HYPRE_Int hypre_FSAISetMaxStepSize ( void *data, HYPRE_Int max_step_size );
-HYPRE_Int hypre_FSAISetKapTolerance ( void *data, HYPRE_Real kap_tolerance );
-HYPRE_Int hypre_FSAISetMaxIterations ( void *data, HYPRE_Int max_iterations );
-HYPRE_Int hypre_FSAISetTolerance ( void *data, HYPRE_Real tolerance );
-HYPRE_Int hypre_FSAISetOmega ( void *data, HYPRE_Real omega );
-HYPRE_Int hypre_FSAISetLogging ( void *data, HYPRE_Int logging );
-HYPRE_Int hypre_FSAISetNumIterations ( void *data, HYPRE_Int num_iterations );
-HYPRE_Int hypre_FSAISetPrintLevel ( void *data, HYPRE_Int print_level );
-HYPRE_Int hypre_FSAISetPrintFileName ( void *data, const char *print_file_name );
-HYPRE_Int hypre_FSAISetDebugFlag ( void *data, HYPRE_Int debug_flag );
-HYPRE_Int hypre_FSAIGetMaxSteps ( void *data, HYPRE_Int *max_steps );
-HYPRE_Int hypre_FSAIGetMaxStepSize ( void *data, HYPRE_Int *max_step_size );
-HYPRE_Int hypre_FSAIGetKapTolerance ( void *data, HYPRE_Real *kap_tolerance );
-HYPRE_Int hypre_FSAIGetMaxIterations ( void *data, HYPRE_Int *max_iterations );
-HYPRE_Int hypre_FSAIGetTolerance ( void *data, HYPRE_Real *tolerance );
-HYPRE_Int hypre_FSAIGetOmega ( void *data, HYPRE_Real *omega );
-HYPRE_Int hypre_FSAIGetLogging ( void *data, HYPRE_Int *logging );
-HYPRE_Int hypre_FSAIGetNumIterations ( void *data, HYPRE_Int *num_iterations );
-HYPRE_Int hypre_FSAIGetPrintLevel ( void *data, HYPRE_Int *print_level );
-HYPRE_Int hypre_FSAIGetPrintFileName ( void *data, char **print_file_name );
-HYPRE_Int hypre_FSAIGetDebugFlag ( void *data, HYPRE_Int *debug_flag );
+HYPRE_Int hypre_FSAISetMaxSteps ( void *data , HYPRE_Int max_steps );
+HYPRE_Int hypre_FSAISetMaxStepSize ( void *data , HYPRE_Int max_step_size );
+HYPRE_Int hypre_FSAISetKapTolerance ( void *data , HYPRE_Real kap_tolerance );
+HYPRE_Int hypre_FSAISetMaxIterations ( void *data , HYPRE_Int max_iterations );
+HYPRE_Int hypre_FSAISetEigMaxIters ( void *data , HYPRE_Int eig_max_iters );
+HYPRE_Int hypre_FSAISetZeroGuess ( void *data , HYPRE_Int zero_guess );
+HYPRE_Int hypre_FSAISetTolerance ( void *data , HYPRE_Real tolerance );
+HYPRE_Int hypre_FSAISetOmega ( void *data , HYPRE_Real omega );
+HYPRE_Int hypre_FSAISetLogging ( void *data , HYPRE_Int logging );
+HYPRE_Int hypre_FSAISetNumIterations ( void *data , HYPRE_Int num_iterations );
+HYPRE_Int hypre_FSAISetPrintLevel ( void *data , HYPRE_Int print_level );
+HYPRE_Int hypre_FSAIGetMaxSteps ( void *data , HYPRE_Int *max_steps );
+HYPRE_Int hypre_FSAIGetMaxStepSize ( void *data , HYPRE_Int *max_step_size );
+HYPRE_Int hypre_FSAIGetKapTolerance ( void *data , HYPRE_Real *kap_tolerance );
+HYPRE_Int hypre_FSAIGetMaxIterations ( void *data , HYPRE_Int *max_iterations );
+HYPRE_Int hypre_FSAIGetEigMaxIters ( void *data , HYPRE_Int *eig_max_iters );
+HYPRE_Int hypre_FSAIGetZeroGuess ( void *data , HYPRE_Int *zero_guess );
+HYPRE_Int hypre_FSAIGetTolerance ( void *data , HYPRE_Real *tolerance );
+HYPRE_Int hypre_FSAIGetOmega ( void *data , HYPRE_Real *omega );
+HYPRE_Int hypre_FSAIGetLogging ( void *data , HYPRE_Int *logging );
+HYPRE_Int hypre_FSAIGetNumIterations ( void *data , HYPRE_Int *num_iterations );
+HYPRE_Int hypre_FSAIGetPrintLevel ( void *data , HYPRE_Int *print_level );
 
 /* par_fsai_setup.c */
 HYPRE_Int hypre_CSRMatrixExtractDenseMat( hypre_CSRMatrix *A, hypre_Vector *A_sub, HYPRE_Int *S_Pattern, HYPRE_Int S_nnz, HYPRE_Int *marker );
@@ -1682,6 +1682,7 @@ HYPRE_Int hypre_CSRMatrixExtractDenseRow( hypre_CSRMatrix *A, hypre_Vector *A_su
 HYPRE_Int hypre_FindKapGrad( hypre_CSRMatrix *A_diag, hypre_Vector *kaporin_gradient, HYPRE_Int *kap_grad_nonzeros, hypre_Vector *G_temp, HYPRE_Int *S_Pattern, HYPRE_Int S_nnz, HYPRE_Int max_row_size, HYPRE_Int row_num, HYPRE_Int *kg_marker );
 HYPRE_Int hypre_AddToPattern ( hypre_Vector *kaporin_gradient, HYPRE_Int *kap_grad_nonzeros, HYPRE_Int *S_Pattern, HYPRE_Int *S_nnz , HYPRE_Int *kg_marker , HYPRE_Int max_step_size );
 HYPRE_Int hypre_FSAISetup ( void *fsai_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u );
+HYPRE_Int hypre_FSAIComputeOmega ( void *fsai_vdata , hypre_ParCSRMatrix *A );
 void hypre_swap2_ci ( HYPRE_Complex *v , HYPRE_Int *w , HYPRE_Int i , HYPRE_Int j );
 void hypre_qsort2_ci ( HYPRE_Complex *v , HYPRE_Int *w , HYPRE_Int left , HYPRE_Int right );
 

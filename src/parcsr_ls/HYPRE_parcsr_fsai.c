@@ -221,6 +221,28 @@ HYPRE_FSAIGetMaxIterations( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_FSAISetEigMaxIters
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_FSAISetEigMaxIters( HYPRE_Solver solver,
+                          HYPRE_Int    eig_max_iters )
+{
+   return( hypre_FSAISetEigMaxIters( (void *) solver, eig_max_iters ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_FSAIGetEigMaxIters
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_FSAIGetEigMaxIters( HYPRE_Solver  solver,
+                          HYPRE_Int    *eig_max_iters )
+{
+   return( hypre_FSAIGetEigMaxIters( (void *) solver, eig_max_iters ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_FSAISetPrintLevel
  *--------------------------------------------------------------------------*/
 

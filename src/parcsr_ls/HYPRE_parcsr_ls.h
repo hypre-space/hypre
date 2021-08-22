@@ -1536,6 +1536,13 @@ HYPRE_Int HYPRE_FSAISetMaxIterations( HYPRE_Solver solver,
                                       HYPRE_Int    max_iterations );
 
 /**
+ * (Optional) Set number of iterations for computing maximum
+ * eigenvalue of the preconditioned operator.
+ **/
+HYPRE_Int HYPRE_FSAISetEigMaxIters( HYPRE_Solver solver,
+                                    HYPRE_Int    eig_max_iters );
+
+/**
  * (Optional) Set the convergence tolerance, if FSAI is used
  * as a solver. When using FSAI as a preconditioner, set the tolerance
  * to 0.0. The default is \f$10^{-6}\f$.
