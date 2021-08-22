@@ -406,9 +406,7 @@ hypre_FSAISetup( void               *fsai_vdata,
    HYPRE_Real              kap_tolerance    = hypre_ParFSAIDataKapTolerance(fsai_data);
    HYPRE_Int               max_steps        = hypre_ParFSAIDataMaxSteps(fsai_data);
    HYPRE_Int               max_step_size    = hypre_ParFSAIDataMaxStepSize(fsai_data);
-   HYPRE_Int               logging          = hypre_ParFSAIDataLogging(fsai_data);
    HYPRE_Int               print_level      = hypre_ParFSAIDataPrintLevel(fsai_data);
-   HYPRE_Int               debug_flag       = hypre_ParFSAIDataDebugFlag(fsai_data);
    HYPRE_Real              density;
 
    /* ParCSRMatrix A variables */
@@ -436,8 +434,6 @@ hypre_FSAISetup( void               *fsai_vdata,
    HYPRE_Int               max_nonzeros_diag_G; /* Maximum number of nonzeros in G_diag */
 
    /* Work vectors*/
-   hypre_ParVector         *residual;
-   hypre_ParVector         *x_work;
    hypre_ParVector         *r_work;
    hypre_ParVector         *z_work;
 
@@ -485,20 +481,14 @@ hypre_FSAISetup( void               *fsai_vdata,
    hypre_ParFSAIDataGmat(fsai_data) = G;
 
    /* Create and initialize work vectors used in the solve phase */
-   residual = hypre_ParVectorCreate(comm, num_rows_A, row_starts_A);
-   x_work   = hypre_ParVectorCreate(comm, num_rows_A, row_starts_A);
-   r_work   = hypre_ParVectorCreate(comm, num_rows_A, row_starts_A);
-   z_work   = hypre_ParVectorCreate(comm, num_rows_A, row_starts_A);
+   r_work = hypre_ParVectorCreate(comm, num_rows_A, row_starts_A);
+   z_work = hypre_ParVectorCreate(comm, num_rows_A, row_starts_A);
 
-   hypre_ParVectorInitialize(residual);
-   hypre_ParVectorInitialize(x_work);
    hypre_ParVectorInitialize(r_work);
    hypre_ParVectorInitialize(z_work);
 
-   hypre_ParFSAIDataResidual(fsai_data) = residual;
-   hypre_ParFSAIDataXWork(fsai_data)    = x_work;
-   hypre_ParFSAIDataRWork(fsai_data)    = r_work;
-   hypre_ParFSAIDataZWork(fsai_data)    = z_work;
+   hypre_ParFSAIDataRWork(fsai_data) = r_work;
+   hypre_ParFSAIDataZWork(fsai_data) = z_work;
 
    /* Allocate and initialize local vector variables */
    G_temp       = hypre_SeqVectorCreate(max_nnzrow_diag_G);

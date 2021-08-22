@@ -18,8 +18,6 @@ hypre_FSAICreate()
 {
    hypre_ParFSAIData    *fsai_data;
 
-   HYPRE_Int		*comm_info;
-
    /* setup params */
    HYPRE_Int            max_steps;
    HYPRE_Int            max_step_size;
@@ -70,16 +68,11 @@ hypre_FSAICreate()
     * Create the hypre_ParFSAIData structure and return
     *-----------------------------------------------------------------------*/
 
-   hypre_ParFSAIDataMemoryLocation(fsai_data)   = HYPRE_MEMORY_UNDEFINED;
-
-   hypre_ParFSAIDataGmat(fsai_data)             = NULL;
-   hypre_ParFSAIDataResidual(fsai_data)         = NULL;
-   hypre_ParFSAIDataRWork(fsai_data)            = NULL;
-   hypre_ParFSAIDataXWork(fsai_data)            = NULL;
-   hypre_ParFSAIDataZWork(fsai_data)            = NULL;
-   hypre_ParFSAIDataCommInfo(fsai_data)         = NULL;
-   hypre_ParFSAIDataNewComm(fsai_data)          = hypre_MPI_COMM_NULL;
-   hypre_ParFSAIDataZeroGuess(fsai_data)        = 0;
+   hypre_ParFSAIDataGmat(fsai_data)      = NULL;
+   hypre_ParFSAIDataGTmat(fsai_data)     = NULL;
+   hypre_ParFSAIDataRWork(fsai_data)     = NULL;
+   hypre_ParFSAIDataZWork(fsai_data)     = NULL;
+   hypre_ParFSAIDataZeroGuess(fsai_data) = 0;
 
    hypre_FSAISetMaxSteps(fsai_data, max_steps);
    hypre_FSAISetMaxStepSize(fsai_data, max_step_size);
@@ -93,14 +86,11 @@ hypre_FSAICreate()
    hypre_FSAISetNumIterations(fsai_data, num_iterations);
 
    hypre_FSAISetPrintLevel(fsai_data, print_level);
-   hypre_FSAISetPrintFileName(fsai_data, log_file_name);
-   hypre_FSAISetDebugFlag(fsai_data, debug_flag);
 
    HYPRE_ANNOTATE_FUNC_END;
 
    return (void *) fsai_data;
 }
-
 
 /******************************************************************************
  * HYPRE_FSAIDestroy
@@ -110,36 +100,26 @@ HYPRE_Int
 hypre_FSAIDestroy( void *data )
 {
    hypre_ParFSAIData *fsai_data = (hypre_ParFSAIData*)data;
-   MPI_Comm new_comm = hypre_ParFSAIDataNewComm(fsai_data);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   if (hypre_ParFSAIDataCommInfo(fsai_data))
+   if (fsai_data)
    {
-      hypre_TFree(hypre_ParFSAIDataCommInfo(fsai_data), HYPRE_MEMORY_HOST);
+      if (hypre_ParFSAIDataGmat(fsai_data))
+      {
+         hypre_ParCSRMatrixDestroy(hypre_ParFSAIDataGmat(fsai_data));
+      }
+
+      if (hypre_ParFSAIDataGTmat(fsai_data))
+      {
+         hypre_ParCSRMatrixDestroy(hypre_ParFSAIDataGTmat(fsai_data));
+      }
+
+      hypre_ParVectorDestroy(hypre_ParFSAIDataRWork(fsai_data));
+      hypre_ParVectorDestroy(hypre_ParFSAIDataZWork(fsai_data));
+
+      hypre_TFree(fsai_data, HYPRE_MEMORY_HOST);
    }
-
-   if (hypre_ParFSAIDataGmat(fsai_data))
-   {
-      hypre_ParCSRMatrixDestroy(hypre_ParFSAIDataGmat(fsai_data));
-   }
-
-   if (hypre_ParFSAIDataGTmat(fsai_data))
-   {
-      hypre_ParCSRMatrixDestroy(hypre_ParFSAIDataGTmat(fsai_data));
-   }
-
-   hypre_ParVectorDestroy(hypre_ParFSAIDataResidual(fsai_data));
-   hypre_ParVectorDestroy(hypre_ParFSAIDataXWork(fsai_data));
-   hypre_ParVectorDestroy(hypre_ParFSAIDataRWork(fsai_data));
-   hypre_ParVectorDestroy(hypre_ParFSAIDataZWork(fsai_data));
-
-   if (new_comm != hypre_MPI_COMM_NULL)
-   {
-      hypre_MPI_Comm_free(&new_comm);
-   }
-
-   hypre_TFree(fsai_data, HYPRE_MEMORY_HOST);
 
    HYPRE_ANNOTATE_FUNC_END;
 
@@ -388,50 +368,6 @@ hypre_FSAISetPrintLevel( void *data,
    return hypre_error_flag;
 }
 
-HYPRE_Int
-hypre_FSAISetPrintFileName( void *data,
-                            const char *print_file_name )
-{
-   hypre_ParFSAIData  *fsai_data =  (hypre_ParFSAIData*) data;
-   if (!fsai_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-   if ( strlen(print_file_name) > 256 )
-   {
-      hypre_error_in_arg(2);
-      return hypre_error_flag;
-   }
-
-   hypre_sprintf(hypre_ParFSAIDataLogFileName(fsai_data), "%s", print_file_name);
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_FSAISetDebugFlag( void *data,
-                        HYPRE_Int debug_flag )
-{
-   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
-
-   if (!fsai_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   if (debug_flag < 0)
-   {
-      hypre_error_in_arg(2);
-      return hypre_error_flag;
-   }
-
-   hypre_ParFSAIDataDebugFlag(fsai_data) = debug_flag;
-
-   return hypre_error_flag;
-}
-
 /******************************************************************************
  * Routines to GET the setup phase parameters
  ******************************************************************************/
@@ -602,39 +538,6 @@ hypre_FSAIGetPrintLevel( void *data,
    }
 
    *print_level = hypre_ParFSAIDataPrintLevel(fsai_data);
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_FSAIGetPrintFileName( void *data,
-                            char **print_file_name )
-{
-   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
-
-   if (!fsai_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-   hypre_sprintf( *print_file_name, "%s", hypre_ParFSAIDataLogFileName(fsai_data) );
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_FSAIGetDebugFlag( void *data,
-                        HYPRE_Int *debug_flag )
-{
-   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
-
-   if (!fsai_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   *debug_flag = hypre_ParFSAIDataDebugFlag(fsai_data);
 
    return hypre_error_flag;
 }
