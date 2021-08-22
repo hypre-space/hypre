@@ -742,9 +742,8 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
 
    HYPRE_Int P_diag_size;
-   hypre_TMemcpy( &P_diag_size, &P_diag_i_dev[n_fine], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-
-   hypre_TMemcpy( &P_offd_size, &P_offd_i_dev[n_fine], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy( &P_diag_size, P_diag_i + n_fine, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy( &P_offd_size, P_offd_i + n_fine, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
 
    P_diag_j = hypre_CTAlloc(HYPRE_Int, P_diag_size, HYPRE_MEMORY_DEVICE);
