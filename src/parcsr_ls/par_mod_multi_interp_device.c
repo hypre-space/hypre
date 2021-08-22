@@ -48,6 +48,30 @@ struct plus_one : public thrust::unary_function<int,int>
     };
   };
 
+struct tmp_P_compare_functor
+{
+   HYPRE_BigInt * _tmp_P_offd_j;
+
+   tmp_P_compare_functor(HYPRE_BigInt * tmp_P_offd_j):
+      _tmp_P_offd_j(tmp_P_offd_j) {}
+
+   __host__ __device__ bool operator()(int i)
+   {
+     // We return true for i=0 since the host code that this is replacing
+     // initializes num_cols_offd_P = 1. We're using a reduction to
+     // compute num_cols_offd_P so setting the first entry to true
+     // here is equivalent.
+      if( i == 0 )
+         return true;
+      else
+         return _tmp_P_offd_j[i] > _tmp_P_offd_j[i-1];
+   }
+};
+
+struct set_to_one : public thrust::unary_function<HYPRE_Int,HYPRE_Int>
+{
+   __host__ __device__ HYPRE_Int operator()(HYPRE_Int x) { return 1; }
+};
 
 __global__
 void hypreCUDAKernel_cfmarker_masked_rowsum( HYPRE_Int nrows,
@@ -284,6 +308,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
    HYPRE_Int       *P_offd_j_dev = NULL;
    HYPRE_BigInt    *col_map_offd_P = NULL;
+   HYPRE_BigInt    *col_map_offd_P_dev = NULL;
    HYPRE_Int        num_cols_offd_P = 0;
 
    HYPRE_Int        num_sends = 0;
@@ -797,14 +822,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
    if (P_offd_size)
      {
-       // FIXME: Clean this up
-       P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy( P_offd_i, P_offd_i_dev, HYPRE_Int, n_fine+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-      P_offd_j = hypre_CTAlloc(HYPRE_Int, P_offd_size, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy( P_offd_j, P_offd_j_dev, HYPRE_Int, P_offd_size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-
-      HYPRE_BigInt *tmp_P_offd_j = hypre_CTAlloc(HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_HOST);
-
       HYPRE_BigInt *tmp_P_offd_j_dev = hypre_TAlloc(HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_DEVICE);
       HYPRE_BigInt *big_P_offd_j_dev = hypre_TAlloc(HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_DEVICE);
 
@@ -824,35 +841,76 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                                                big_P_offd_j_dev );
       }
 
-
-
       hypre_TMemcpy( tmp_P_offd_j_dev, big_P_offd_j_dev, HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
       HYPRE_THRUST_CALL( sort,
                          tmp_P_offd_j_dev,
                          tmp_P_offd_j_dev+P_offd_size );
 
-      hypre_TMemcpy( tmp_P_offd_j, tmp_P_offd_j_dev, HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
-      num_cols_offd_P = 1;
-      for (i=0; i < P_offd_size-1; i++)
-      {
+      /*
+        //Original host code:
+        num_cols_offd_P = 1;
+        for (i=0; i < P_offd_size-1; i++)
+        {
           if (tmp_P_offd_j[i+1] > tmp_P_offd_j[i])
           {
-             tmp_P_offd_j[num_cols_offd_P++] = tmp_P_offd_j[i+1];
+            tmp_P_offd_j[num_cols_offd_P++] = tmp_P_offd_j[i+1];
           }
-      }
+        }
 
-      col_map_offd_P = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd_P, HYPRE_MEMORY_HOST);
+        col_map_offd_P = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd_P, HYPRE_MEMORY_HOST);
+        for (i=0; i < num_cols_offd_P; i++)
+        {
+          col_map_offd_P[i] = tmp_P_offd_j[i];
+        }
 
-      for (i=0; i < num_cols_offd_P; i++)
-      {
-         col_map_offd_P[i] = tmp_P_offd_j[i];
-      }
+      We do this in three passes:
+       1. Create a stencil array marking where the tmp_P_offd_j[i+1] > tmp_P_offd_j[i]
+          condition is satisfied. Note that we shift to running over [1,P_offd_size)
+          and test tmp_P_offd_j[i] > tmp_P_offd_j[i-1]. We do this using transform_if.
+       2. Do a reduce on the stencil to get the count.
+          Note for i=0, we set stencil[0] = 1 (true) which is equivalent to initializing
+          num_cols_offd_P = 1 since we're using the reduce to compute num_cols_offd_P.
+       3. Use copy_if to copy into col_map_offd_P
+
+       PB: I couldn't figure out a different was to do this.
+      */
+
+      HYPRE_Int * stencil = hypre_CTAlloc(HYPRE_Int, P_offd_size, HYPRE_MEMORY_DEVICE);
+      HYPRE_THRUST_CALL( transform_if,
+                         thrust::make_counting_iterator(0),
+                         thrust::make_counting_iterator(P_offd_size),
+                         stencil,
+                         set_to_one(),
+                         tmp_P_compare_functor(tmp_P_offd_j_dev) );
+
+      num_cols_offd_P = HYPRE_THRUST_CALL( reduce,
+                                           stencil,
+                                           stencil + P_offd_size,
+                                           (HYPRE_Int) 0 );
+
+
+      col_map_offd_P_dev = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_P, HYPRE_MEMORY_DEVICE);
+
+      HYPRE_Int * newend = HYPRE_THRUST_CALL( copy_if,
+                                              tmp_P_offd_j_dev,
+                                              tmp_P_offd_j_dev+P_offd_size,
+                                              stencil,
+                                              col_map_offd_P_dev,
+                                              equal<HYPRE_Int>(1) );
+
+      hypre_assert( (newend-col_map_offd_P_dev) == num_cols_offd_P );
+
+      // PB: It seems we still need this on the host??
+      col_map_offd_P = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_P, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy( col_map_offd_P, col_map_offd_P_dev, HYPRE_BigInt, num_cols_offd_P, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
       // FIXME: clean this up
-      HYPRE_BigInt *big_P_offd_j = hypre_CTAlloc(HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_HOST);
+      HYPRE_BigInt *big_P_offd_j = hypre_TAlloc(HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_HOST);
       hypre_TMemcpy( big_P_offd_j, big_P_offd_j_dev, HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+       P_offd_j = hypre_TAlloc(HYPRE_Int, P_offd_size, HYPRE_MEMORY_HOST);
 
       for (i=0; i < P_offd_size; i++)
       {
@@ -861,7 +919,9 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                num_cols_offd_P);
       }
 
-      hypre_TFree(tmp_P_offd_j, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy( P_offd_j_dev, P_offd_j, HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
+      hypre_TFree(stencil, HYPRE_MEMORY_DEVICE);
       hypre_TFree(tmp_P_offd_j_dev, HYPRE_MEMORY_DEVICE);
 
       hypre_TFree(big_P_offd_j, HYPRE_MEMORY_HOST);
@@ -870,10 +930,10 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       // FIXME: Clean this up
       hypre_TMemcpy( P_offd_j_dev, P_offd_j, HYPRE_Int, P_offd_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       hypre_TFree(P_offd_j,HYPRE_MEMORY_HOST);
-      hypre_TFree(P_offd_i,HYPRE_MEMORY_HOST);
    } // if (P_offd_size)
 
    hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
+   hypre_ParCSRMatrixDeviceColMapOffd(P) = col_map_offd_P_dev;
    hypre_CSRMatrixNumCols(P_offd) = num_cols_offd_P;
 
    hypre_CSRMatrixMemoryLocation(P_diag) = HYPRE_MEMORY_DEVICE;
