@@ -265,30 +265,30 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    hypre_assert( hypre_CSRMatrixMemoryLocation(A_diag) == HYPRE_MEMORY_DEVICE );
 
-   HYPRE_Real      *A_diag_data_dev = hypre_CSRMatrixData(A_diag);
-   HYPRE_Int       *A_diag_i_dev = hypre_CSRMatrixI(A_diag);
+   HYPRE_Real      *A_diag_data = hypre_CSRMatrixData(A_diag);
+   HYPRE_Int       *A_diag_i = hypre_CSRMatrixI(A_diag);
 
    HYPRE_Int        n_fine = hypre_CSRMatrixNumRows(A_diag);
 
    hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
    hypre_assert( hypre_CSRMatrixMemoryLocation(A_offd) == HYPRE_MEMORY_DEVICE );
 
-   HYPRE_Int       *A_offd_i_dev = hypre_CSRMatrixI(A_offd);
-   HYPRE_Real      *A_offd_data_dev = hypre_CSRMatrixData(A_offd);
+   HYPRE_Int       *A_offd_i = hypre_CSRMatrixI(A_offd);
+   HYPRE_Real      *A_offd_data = hypre_CSRMatrixData(A_offd);
 
    HYPRE_Int        num_cols_offd_A = hypre_CSRMatrixNumCols(A_offd);
 
    hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag(S);
    hypre_assert( hypre_CSRMatrixMemoryLocation(S_diag) == HYPRE_MEMORY_DEVICE );
 
-   HYPRE_Int       *S_diag_i_dev = hypre_CSRMatrixI(S_diag);
-   HYPRE_Int       *S_diag_j_dev = hypre_CSRMatrixJ(S_diag);
+   HYPRE_Int       *S_diag_i = hypre_CSRMatrixI(S_diag);
+   HYPRE_Int       *S_diag_j = hypre_CSRMatrixJ(S_diag);
 
    hypre_CSRMatrix *S_offd = hypre_ParCSRMatrixOffd(S);
    hypre_assert( hypre_CSRMatrixMemoryLocation(S_offd) == HYPRE_MEMORY_DEVICE );
 
-   HYPRE_Int       *S_offd_i_dev = hypre_CSRMatrixI(S_offd);
-   HYPRE_Int       *S_offd_j_dev = hypre_CSRMatrixJ(S_offd);
+   HYPRE_Int       *S_offd_i = hypre_CSRMatrixI(S_offd);
+   HYPRE_Int       *S_offd_j = hypre_CSRMatrixJ(S_offd);
 
    hypre_ParCSRMatrix **Pi;
    hypre_ParCSRMatrix *P;
@@ -496,10 +496,10 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                                          points_left_dev,
                                                          pass_marker_dev,
                                                          pass_marker_offd_dev,
-                                                         S_diag_i_dev,
-                                                         S_diag_j_dev,
-                                                         S_offd_i_dev,
-                                                         S_offd_j_dev,
+                                                         S_diag_i,
+                                                         S_diag_j,
+                                                         S_offd_i,
+                                                         S_offd_j,
                                                          diag_shifts,
                                                          points_left_shifts );
 
@@ -527,10 +527,10 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                                                       current_pass,
                                                                       points_left_old,
                                                                       pass_marker_old,
-                                                                      S_diag_i_dev,
-                                                                      S_diag_j_dev,
-                                                                      S_offd_i_dev,
-                                                                      S_offd_j_dev,
+                                                                      S_diag_i,
+                                                                      S_diag_j,
+                                                                      S_offd_i,
+                                                                      S_offd_j,
                                                                       pass_marker_offd_dev,
                                                                       diag_shifts,
                                                                       points_left_shifts,
@@ -619,7 +619,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
      dim3 gDim = hypre_GetDefaultCUDAGridDimension(n_fine, "warp", bDim);
 
      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_cfmarker_masked_rowsum, gDim, bDim,
-                        n_fine, A_diag_i_dev, A_diag_data_dev, A_offd_i_dev, A_offd_data_dev,
+                        n_fine, A_diag_i, A_diag_data, A_offd_i, A_offd_data,
                         CF_marker_dev, row_sums );
    }
 
