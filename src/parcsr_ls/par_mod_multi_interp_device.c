@@ -201,6 +201,14 @@ void hypreCUDAKernel_pass_order_pass_marker_update( int remaining_pts,
                                                     int * pass_order,
                                                     int * points_left );
 
+__global__
+void hypreCUDAKernel_populate_big_P_offd_j( HYPRE_Int start, HYPRE_Int stop,
+                                            HYPRE_Int * pass_order,
+                                            HYPRE_Int * P_offd_i,
+                                            HYPRE_Int * P_offd_j,
+                                            HYPRE_BigInt * col_map_offd_Pi,
+                                            HYPRE_BigInt * big_P_offd_j );
+
 /*--------------------------------------------------------------------------
  * hypre_ParAMGBuildModMultipass
  * This routine implements Stuben's direct interpolation with multiple passes.
@@ -3044,4 +3052,40 @@ void hypreCUDAKernel_pass_order_pass_marker_update( HYPRE_Int remaining_pts,
      {
        points_left[points_left_shifts[i]] = i1;
      }
+}
+
+__global__
+void hypreCUDAKernel_populate_big_P_offd_j( HYPRE_Int start, HYPRE_Int stop,
+                                            HYPRE_Int * pass_order,
+                                            HYPRE_Int * P_offd_i,
+                                            HYPRE_Int * P_offd_j,
+                                            HYPRE_BigInt * col_map_offd_Pi,
+                                            HYPRE_BigInt * big_P_offd_j )
+{
+
+  HYPRE_Int i = hypre_cuda_get_grid_warp_id<1,1>();
+  i += start;
+
+  if (i >= stop)
+    return;
+
+  HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+
+  HYPRE_Int i1 = pass_order[i];
+
+  HYPRE_Int p = 0;
+  HYPRE_Int q = 0;
+
+   if (lane < 2)
+   {
+      p = read_only_load(P_offd_i + i1 + lane);
+   }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   {
+      if( j < q )
+        big_P_offd_j[j] = col_map_offd_Pi[P_offd_j[j]];
+   }
 }
