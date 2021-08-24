@@ -4616,7 +4616,7 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
   HYPRE_Int              num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
   //HYPRE_Int             *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
 
-  HYPRE_Int            *coarse_dof_func_ptr = NULL;
+  hypre_IntArray          *coarse_dof_func_ptr = NULL;
   HYPRE_BigInt            *num_row_cpts_global = NULL;
   HYPRE_BigInt            *num_col_cpts_global = NULL;
 
@@ -4670,6 +4670,8 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
   HYPRE_Int             *int_buf_data;
   HYPRE_Int              local_numrows = hypre_CSRMatrixNumRows(A_diag);
 
+  hypre_IntArray        *wrap_cf;
+
 //  HYPRE_Real       wall_time;  /* for debugging instrumentation  */
 
   hypre_MPI_Comm_size(comm, &num_procs);
@@ -4680,8 +4682,11 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
   num_threads = 1;
 
   /* get the number of coarse rows */
-  hypre_BoomerAMGCoarseParms(comm, local_numrows, 1, NULL, row_cf_marker, &coarse_dof_func_ptr, &num_row_cpts_global);
-  hypre_TFree(coarse_dof_func_ptr, HYPRE_MEMORY_HOST);
+  wrap_cf = hypre_IntArrayCreate(local_numrows);
+  hypre_IntArrayMemoryLocation(wrap_cf) = HYPRE_MEMORY_HOST;
+  hypre_IntArrayData(wrap_cf) = row_cf_marker;
+  hypre_BoomerAMGCoarseParms(comm, local_numrows, 1, NULL, wrap_cf, &coarse_dof_func_ptr, &num_row_cpts_global);
+  hypre_IntArrayDestroy(coarse_dof_func_ptr);
   coarse_dof_func_ptr = NULL;
 
   //hypre_printf("my_id = %d, cpts_this = %d, cpts_next = %d\n", my_id, num_row_cpts_global[0], num_row_cpts_global[1]);
@@ -4691,8 +4696,9 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
   hypre_MPI_Bcast(&total_global_row_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
 
   /* get the number of coarse rows */
-  hypre_BoomerAMGCoarseParms(comm, local_numrows, 1, NULL, col_cf_marker, &coarse_dof_func_ptr, &num_col_cpts_global);
-  hypre_TFree(coarse_dof_func_ptr, HYPRE_MEMORY_HOST);
+  hypre_IntArrayData(wrap_cf) = col_cf_marker;
+  hypre_BoomerAMGCoarseParms(comm, local_numrows, 1, NULL, wrap_cf, &coarse_dof_func_ptr, &num_col_cpts_global);
+  hypre_IntArrayDestroy(coarse_dof_func_ptr);
   coarse_dof_func_ptr = NULL;
 
   //hypre_printf("my_id = %d, cpts_this = %d, cpts_next = %d\n", my_id, num_col_cpts_global[0], num_col_cpts_global[1]);

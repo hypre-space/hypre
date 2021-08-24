@@ -999,7 +999,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( HYPRE_Int   nr_of_rows,
 
 HYPRE_Int
 hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
-                                        HYPRE_Int           *CF_marker_host,
+                                        HYPRE_Int           *CF_marker,
                                         hypre_ParCSRMatrix  *S,
                                         HYPRE_BigInt        *num_cpts_global,
                                         HYPRE_Int            num_functions,
@@ -1042,7 +1042,6 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int           num_cols_P_offd;
    HYPRE_BigInt       *col_map_offd_P = NULL;
    HYPRE_BigInt       *col_map_offd_P_device = NULL;
-   HYPRE_Int          *CF_marker;
    /* CF marker off-diag part */
    HYPRE_Int          *CF_marker_offd = NULL;
    /* nnz */
@@ -1069,19 +1068,6 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-
-   /* copy CF_marker to the device if necessary */
-   hypre_MemoryLocation cf_memory_location;
-   hypre_GetPointerLocation(CF_marker_host, &cf_memory_location);
-   if (cf_memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_HOST))
-   {
-      CF_marker = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(CF_marker, CF_marker_host, HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-   }
-   else
-   {
-      CF_marker = CF_marker_host;
-   }
 
    /* fine to coarse mapping */
    fine_to_coarse = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
@@ -1304,10 +1290,6 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    *P_ptr = P;
 
    /* free workspace */
-   if (cf_memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_HOST))
-   {
-      hypre_TFree(CF_marker, HYPRE_MEMORY_DEVICE);
-   }
    hypre_TFree(CF_marker_offd, HYPRE_MEMORY_DEVICE);
    hypre_TFree(fine_to_coarse, HYPRE_MEMORY_DEVICE);
    hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_DEVICE);

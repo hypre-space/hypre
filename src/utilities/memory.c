@@ -444,8 +444,7 @@ hypre_Free_core(void *ptr, hypre_MemoryLocation location)
    hypre_GetPointerLocation(ptr, &tmp);
    /* do not use hypre_assert, which has alloc and free;
     * will create an endless loop otherwise */
-   // WM: debug
-   /* assert(location == tmp); */
+   assert(location == tmp);
 #endif
 
    switch (location)

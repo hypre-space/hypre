@@ -1308,7 +1308,7 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
    {
       HYPRE_Int spot;
 
-      c_dof_func = hypre_TReAlloc(c_dof_func,  HYPRE_Int,  new_ncv, hypre_IntArrayMemoryLocation(*coarse_dof_func));
+      c_dof_func = hypre_TReAlloc_v2(c_dof_func,  HYPRE_Int, hypre_IntArraySize(*coarse_dof_func), HYPRE_Int,  new_ncv, hypre_IntArrayMemoryLocation(*coarse_dof_func));
       spot = 0;
 
       for (i = 0; i < ncv_peru; i++)

@@ -138,9 +138,14 @@ hypre_BoomerAMGCoarseParms(MPI_Comm          comm,
    HYPRE_Int ierr = 0;
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_Int use_device = hypre_IntArrayMemoryLocation(CF_marker) != hypre_MEMORY_HOST;
+   if (num_functions > 1)
+   {
+      use_device = (hypre_IntArrayMemoryLocation(dof_func) != hypre_MEMORY_HOST &&
+                    hypre_IntArrayMemoryLocation(CF_marker) != hypre_MEMORY_HOST );
+   }
 
-   if (hypre_IntArrayMemoryLocation(dof_func) != hypre_MEMORY_HOST &&
-       hypre_IntArrayMemoryLocation(CF_marker) != hypre_MEMORY_HOST )
+   if (use_device)
    {
       ierr = hypre_BoomerAMGCoarseParmsDevice(comm, local_num_variables, num_functions, dof_func, 
                                               CF_marker, coarse_dof_func_ptr, coarse_pnts_global_ptr);
