@@ -5,6 +5,9 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#define PSTL_USE_PARALLEL_POLICIES 0 // for libstdc++ 9
+#define _GLIBCXX_USE_TBB_PAR_BACKEND 0 // for libstdc++ 10
+
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
 

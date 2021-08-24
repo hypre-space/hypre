@@ -9078,7 +9078,7 @@ done
         	LINK_CC=${CXX}
         LINK_CXX=${CXX}
 
-                                        SYCLCXXFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel "
+                                        SYCLCXXFLAGS="-std=c++17 -fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel "
 
                                 if test x"$hypre_using_debug" == x"yes"; then :
   SYCLCXXFLAGS="-O0 -Wall -g -gdb ${SYCLCXXFLAGS}"

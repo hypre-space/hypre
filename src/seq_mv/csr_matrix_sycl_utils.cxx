@@ -5,10 +5,10 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-//#define PSTL_USE_PARALLEL_POLICIES 0 // for GCC 9
+#define PSTL_USE_PARALLEL_POLICIES 0 // for GCC 9
 #define _GLIBCXX_USE_TBB_PAR_BACKEND 0 // for GCC 10
 
-#include "seq_mv.h"
+#include "seq_mv.hpp"
 #include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_ONEMKLSPARSE)

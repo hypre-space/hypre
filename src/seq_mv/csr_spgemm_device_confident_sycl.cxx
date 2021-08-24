@@ -455,7 +455,7 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
         if (hash_type == 'L')
         {
           cgh.parallel_for(sycl::nd_range<3>(gDim*bDim, bDim),
-                           [=] (sycl::nd_item<3> item) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
+                           [=] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
                              csr_spmm_numeric<num_subgroups_per_WG, shmem_hash_size, 0, 'L'>(
                                m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_ic_new + 1,
                                d_ghash_i, d_ghash_j, d_ghash_a,
@@ -465,7 +465,7 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
         else if (hash_type == 'Q')
         {
           cgh.parallel_for(sycl::nd_range<3>(gDim*bDim, bDim),
-                           [=] (sycl::nd_item<3> item) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
+                           [=] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
                              csr_spmm_numeric<num_subgroups_per_WG, shmem_hash_size, 0, 'Q'>(
                                m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_ic_new + 1,
                                d_ghash_i, d_ghash_j, d_ghash_a,
@@ -475,7 +475,7 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
         else if (hash_type == 'D')
         {
           cgh.parallel_for(sycl::nd_range<3>(gDim*bDim, bDim),
-                           [=] (sycl::nd_item<3> item) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
+                           [=] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
                              csr_spmm_numeric<num_subgroups_per_WG, shmem_hash_size, 0, 'D'>(
                                m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_ic_new + 1,
                                d_ghash_i, d_ghash_j, d_ghash_a,
@@ -488,7 +488,7 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
         if (hash_type == 'L')
         {
           cgh.parallel_for(sycl::nd_range<3>(gDim*bDim, bDim),
-                           [=] (sycl::nd_item<3> item) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
+                           [=] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
                              csr_spmm_numeric<num_subgroups_per_WG, shmem_hash_size, 1, 'L'>(
                                m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_ic_new + 1,
                                d_ghash_i, d_ghash_j, d_ghash_a,
@@ -498,7 +498,7 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
         else if (hash_type == 'Q')
         {
           cgh.parallel_for(sycl::nd_range<3>(gDim*bDim, bDim),
-                           [=] (sycl::nd_item<3> item) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
+                           [=] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
                              csr_spmm_numeric<num_subgroups_per_WG, shmem_hash_size, 1, 'Q'>(
                                m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_ic_new + 1,
                                d_ghash_i, d_ghash_j, d_ghash_a,
@@ -508,7 +508,7 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
         else if (hash_type == 'D')
         {
           cgh.parallel_for(sycl::nd_range<3>(gDim*bDim, bDim),
-                           [=] (sycl::nd_item<3> item) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
+                           [=] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
                              csr_spmm_numeric<num_subgroups_per_WG, shmem_hash_size, 1, 'D'>(
                                m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_ic_new + 1,
                                d_ghash_i, d_ghash_j, d_ghash_a,

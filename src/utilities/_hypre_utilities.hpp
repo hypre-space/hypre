@@ -196,7 +196,7 @@ struct hypre_CudaData
 #endif
 
 #if defined(HYPRE_USING_ROCSPARSE)
-  rocsparse_handle                   cusparse_handle;
+   rocsparse_handle                  cusparse_handle;
 #endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
@@ -2074,6 +2074,11 @@ struct hypre_cub_CachingDeviceAllocator
 #endif // #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUB_ALLOCATOR)
 #endif // #ifndef HYPRE_CUB_ALLOCATOR_HEADER
 
+
+#ifdef __cplusplus
+}
+#endif
+
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -2085,6 +2090,9 @@ struct hypre_cub_CachingDeviceAllocator
 #define HYPRE_SYCL_UTILS_HPP
 
 #if defined(HYPRE_USING_SYCL)
+
+#define PSTL_USE_PARALLEL_POLICIES 0 // for libstdc++ 9
+#define _GLIBCXX_USE_TBB_PAR_BACKEND 0 // for libstdc++ 10
 
 #include <oneapi/dpl/execution>
 #include <oneapi/dpl/algorithm>
@@ -2220,7 +2228,7 @@ struct hypre_CsrsvData
    }                                                                                                                 \
    else                                                                                                              \
    {                                                                                                                 \
-      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
+      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
            cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize), [=] (sycl::nd_item<3> item) {  \
               (kernel_name)(item, __VA_ARGS__);                                                                      \
          });                                                                                                         \
@@ -2239,7 +2247,7 @@ struct hypre_CsrsvData
    }                                                                                                                 \
    else                                                                                                              \
    {                                                                                                                 \
-      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
+      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
            cgh.parallel_for(sycl::nd_range<2>(gridsize*blocksize, blocksize), [=] (sycl::nd_item<2> item) {  \
               (kernel_name)(item, __VA_ARGS__);                                                                      \
          });                                                                                                         \
@@ -2258,7 +2266,7 @@ struct hypre_CsrsvData
    }                                                                                                                 \
    else                                                                                                              \
    {                                                                                                                 \
-      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
+      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
            cgh.parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize), [=] (sycl::nd_item<1> item) {  \
               (kernel_name)(item, __VA_ARGS__);                                                                      \
          });                                                                                                         \
@@ -2289,7 +2297,7 @@ struct hypre_CsrsvData
    }                                                                                                                 \
    else                                                                                                              \
    {                                                                                                                 \
-      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
+      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
           cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize), [=] (sycl::nd_item<3> item) { \
               (kernel_name)(item, __VA_ARGS__);                         \
          });                                                                                                         \
@@ -2308,7 +2316,7 @@ struct hypre_CsrsvData
    }                                                                                                                 \
    else                                                                                                              \
    {                                                                                                                 \
-      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
+      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
            cgh.parallel_for(sycl::nd_range<2>(gridsize*blocksize, blocksize), [=] (sycl::nd_item<2> item) {  \
               (kernel_name)(item, __VA_ARGS__);                                                                      \
          });                                                                                                         \
@@ -2327,7 +2335,7 @@ struct hypre_CsrsvData
    }                                                                                                                 \
    else                                                                                                              \
    {                                                                                                                 \
-      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
+      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
            cgh.parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize), [=] (sycl::nd_item<1> item) {  \
               (kernel_name)(item, __VA_ARGS__);                                                                      \
          });                                                                                                         \
@@ -3066,9 +3074,5 @@ struct ReduceSum
 #endif /* #if defined(HYPRE_USING_SYCL) */
 #endif /* #ifndef HYPRE_SYCL_REDUCER_H */
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif
+#endif //hypre_UTILITIES_HPP
 

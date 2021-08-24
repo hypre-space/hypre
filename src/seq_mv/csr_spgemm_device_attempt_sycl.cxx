@@ -8,6 +8,9 @@
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - *
            Perform SpMM with Row Nnz Estimation
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
+#define PSTL_USE_PARALLEL_POLICIES 0 // for libstdc++ 9
+#define _GLIBCXX_USE_TBB_PAR_BACKEND 0 // for libstdc++ 10
+
 #include "seq_mv.h"
 #include "csr_spgemm_device.hpp"
 
@@ -17,18 +20,20 @@ template <typename T>
 using relaxed_atomic_ref =
   sycl::ONEAPI::atomic_ref< T, sycl::ONEAPI::memory_order::relaxed,
 			    sycl::ONEAPI::memory_scope::device,
-			    sycl::access::address_space::local_space>;
+			    sycl::access::address_space::local_space >;
 
 template <char HashType, HYPRE_Int attempt>
 static __inline__ __attribute__((always_inline))
 HYPRE_Int
 hash_insert_attempt(
     HYPRE_Int HashSize,           /* capacity of the hash table */
-    volatile HYPRE_Int *HashKeys, /* assumed to be initialized as all -1's */
-    volatile HYPRE_Complex *HashVals, /* assumed to be initialized as all 0's */
+    HYPRE_Int *HashKeys, /* assumed to be initialized as all -1's */
+    HYPRE_Complex *HashVals, /* assumed to be initialized as all 0's */
+    // HYPRE_Int *HashKeys, /* assumed to be initialized as all -1's */
+    // HYPRE_Complex *HashVals, /* assumed to be initialized as all 0's */
     HYPRE_Int key,                    /* assumed to be nonnegative */
     HYPRE_Complex val, HYPRE_Int &count, /* increase by 1 if is a new entry */
-    char failed, volatile char *warp_failed)
+    char failed, char *warp_failed)
 {
 #pragma unroll
    for (HYPRE_Int i = 0; i < HashSize; i++)
@@ -45,12 +50,8 @@ hash_insert_attempt(
       }
 
       /* try to insert key+1 into slot j */
-      sycl::atomic<HYPRE_Int, sycl::access::address_space::local_space>
-        obj(sycl::multi_ptr<HYPRE_Int, sycl::access::address_space::local_space>((HYPRE_Int*)(HashKeys + j)));
-      HYPRE_Int old = obj.compare_exchange_strong(-1, key, sycl::memory_order::relaxed,
-                                                  sycl::memory_order::relaxed);
-      // enable the following for SYCL 2020:
-      //relaxed_atomic_ref<HYPRE_Int*>((HYPRE_Int *)(HashKeys + j)).compare_exchange_strong(-1, key);
+      HYPRE_Int expectedVal = -1;
+      HYPRE_Int old = relaxed_atomic_ref<HYPRE_Int>( HashKeys[j] ).compare_exchange_strong(expectedVal, key);
 
       if (old == -1)
       {
@@ -59,11 +60,7 @@ hash_insert_attempt(
          /* this slot was open, insert value */
          if (attempt == 2 || failed == 0 || *warp_failed == 0)
          {
-	   sycl::atomic<HYPRE_Complex, sycl::access::address_space::local_space>
-	     obj(sycl::multi_ptr<HYPRE_Complex, sycl::access::address_space::local_space>((HYPRE_Complex*)(HashVals + j)));
-	   sycl::atomic_fetch_add(obj, val, sycl::memory_order::relaxed);
-	   // enable the following for SYCL 2020:
-	   // relaxed_atomic_ref<HYPRE_Complex*>( HashVals + j ).fetch_add( val );
+	   relaxed_atomic_ref<HYPRE_Complex>( HashVals[j] ).fetch_add( val );
          }
          return j;
       }
@@ -73,11 +70,7 @@ hash_insert_attempt(
          /* this slot contains 'key', update value */
          if (attempt == 2 || failed == 0 || *warp_failed == 0)
          {
-	   sycl::atomic<HYPRE_Complex, sycl::access::address_space::local_space>
-	     obj(sycl::multi_ptr<HYPRE_Complex, sycl::access::address_space::local_space>((HYPRE_Complex*)(HashVals + j)));
-	   sycl::atomic_fetch_add(obj, val, sycl::memory_order::relaxed);
-	   // enable the following for SYCL 2020:
-	   //relaxed_atomic_ref<HYPRE_Complex *>((HYPRE_Complex *)(HashVals + j)).fetch_add(val);
+	   relaxed_atomic_ref<HYPRE_Complex>( HashVals[j] ).fetch_add( val );
          }
          return j;
       }
@@ -90,12 +83,12 @@ template <HYPRE_Int attempt, char HashType>
 static __inline__ __attribute__((always_inline))
 HYPRE_Int
 csr_spmm_compute_row_attempt(
-    HYPRE_Int rowi, volatile HYPRE_Int lane_id, HYPRE_Int *ia, HYPRE_Int *ja,
+    HYPRE_Int rowi, HYPRE_Int lane_id, HYPRE_Int *ia, HYPRE_Int *ja,
     HYPRE_Complex *aa, HYPRE_Int *ib, HYPRE_Int *jb, HYPRE_Complex *ab,
-    HYPRE_Int s_HashSize, volatile HYPRE_Int *s_HashKeys,
-    volatile HYPRE_Complex *s_HashVals, HYPRE_Int g_HashSize,
+    HYPRE_Int s_HashSize, HYPRE_Int *s_HashKeys,
+    HYPRE_Complex *s_HashVals, HYPRE_Int g_HashSize,
     HYPRE_Int *g_HashKeys, HYPRE_Complex *g_HashVals, char &failed,
-    volatile char *warp_s_failed, sycl::nd_item<3>& item)
+    char *warp_s_failed, sycl::nd_item<3>& item)
 {
    /* load the start and end position of row i of A */
    HYPRE_Int j = -1;
@@ -187,9 +180,9 @@ csr_spmm_attempt(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
                  HYPRE_Int *ig, HYPRE_Int *jg, HYPRE_Complex *ag,
                  HYPRE_Int *rc, HYPRE_Int *rg,
 		 sycl::nd_item<3>& item,
-                 volatile HYPRE_Int *s_HashKeys, // shared
-                 volatile HYPRE_Complex *s_HashVals, // shared
-		 volatile char *s_failed) // shared
+                 HYPRE_Int *s_HashKeys, // shared memory
+                 HYPRE_Complex *s_HashVals, // shared memory
+		 char *s_failed) // shared memory
 {
    sycl::ONEAPI::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
@@ -197,18 +190,17 @@ csr_spmm_attempt(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
    HYPRE_Int blockDim_y = item.get_local_range().get(1);
    HYPRE_Int blockDim_z = item.get_local_range().get(0);
 
-   volatile const HYPRE_Int num_subgroups =
-       NUM_SUBGROUPS_PER_WG * item.get_group_range(2);
+   const HYPRE_Int num_subgroups = NUM_SUBGROUPS_PER_WG * item.get_group_range(2);
    /* subgroup id inside the WG */
-   volatile const HYPRE_Int subgroup_id = SG.get_group_linear_id();
+   const HYPRE_Int subgroup_id = SG.get_group_linear_id();
    /* lane id inside the subgroup */
-   volatile HYPRE_Int lane_id = SG.get_local_linear_id();
+   HYPRE_Int lane_id = SG.get_local_linear_id();
 
    /* shared memory hash table for this warp */
-   volatile HYPRE_Int  *warp_s_HashKeys = s_HashKeys + subgroup_id * SHMEM_HASH_SIZE;
-   volatile HYPRE_Complex *warp_s_HashVals = s_HashVals + subgroup_id * SHMEM_HASH_SIZE;
+   HYPRE_Int  *warp_s_HashKeys = s_HashKeys + subgroup_id * SHMEM_HASH_SIZE;
+   HYPRE_Complex *warp_s_HashVals = s_HashVals + subgroup_id * SHMEM_HASH_SIZE;
    /* shared memory failed flag for warps */
-   volatile char *warp_s_failed = s_failed + subgroup_id;
+   char *warp_s_failed = s_failed + subgroup_id;
 
 #ifdef HYPRE_DEBUG
    assert(blockDim_z              == NUM_SUBGROUPS_PER_WG);
@@ -315,8 +307,8 @@ template <HYPRE_Int NUM_SUBGROUPS_PER_WG, HYPRE_Int SHMEM_HASH_SIZE>
 static __inline__ __attribute__((always_inline))
 HYPRE_Int
 copy_from_hash_into_C_row(
-    HYPRE_Int lane_id, volatile HYPRE_Int *s_HashKeys,
-    volatile HYPRE_Complex *s_HashVals, HYPRE_Int ghash_size,
+    HYPRE_Int lane_id, HYPRE_Int *s_HashKeys,
+    HYPRE_Complex *s_HashVals, HYPRE_Int ghash_size,
     HYPRE_Int *jg_start, HYPRE_Complex *ag_start, HYPRE_Int *jc_start,
     HYPRE_Complex *ac_start, sycl::nd_item<3>& item)
 {
@@ -380,7 +372,7 @@ copy_from_hash_into_C(sycl::nd_item<3>& item,
    /* subgroup id inside the WG */
    const HYPRE_Int subgroup_id = SG.get_group_linear_id();
    /* lane id inside the subgroup */
-   volatile const HYPRE_Int lane_id = SG.get_local_linear_id();
+   const HYPRE_Int lane_id = SG.get_local_linear_id();
 
 #ifdef HYPRE_DEBUG
    assert(blockDim_x * blockDim_y == sub_group_size);
@@ -492,7 +484,7 @@ hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
        if (hash_type == 'L')
        {
          cgh.parallel_for(sycl::nd_range<3>(gDim*bDim, bDim),
-                          [=] (sycl::nd_item<3> item) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
+                          [=] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
                             csr_spmm_attempt<num_subgroups_per_WG, shmem_hash_size, 1, 'L'>(
                               m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash_i, d_ghash_j, d_ghash_a,
                               d_ic + 1, d_ghash2_i + 1,
@@ -502,7 +494,7 @@ hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
        else if (hash_type == 'Q')
        {
          cgh.parallel_for(sycl::nd_range<3>(gDim*bDim, bDim),
-                          [=] (sycl::nd_item<3> item) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
+                          [=] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
                             csr_spmm_attempt<num_subgroups_per_WG, shmem_hash_size, 1, 'Q'>(
                               m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash_i, d_ghash_j, d_ghash_a,
                               d_ic + 1, d_ghash2_i + 1,
@@ -512,7 +504,7 @@ hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
        else if (hash_type == 'D')
        {
          cgh.parallel_for(sycl::nd_range<3>(gDim*bDim, bDim),
-                          [=] (sycl::nd_item<3> item) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
+                          [=] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
                             csr_spmm_attempt<num_subgroups_per_WG, shmem_hash_size, 1, 'D'>(
                               m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash_i, d_ghash_j, d_ghash_a,
                               d_ic + 1, d_ghash2_i + 1,
@@ -551,7 +543,7 @@ hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
          if (hash_type == 'L')
          {
            cgh.parallel_for(sycl::nd_range<3>(gDim*bDim, bDim),
-                            [=] (sycl::nd_item<3> item) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
+                            [=] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
                               csr_spmm_attempt<num_subgroups_per_WG, shmem_hash_size, 2, 'L'>(
                                 m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash2_i, d_ghash2_j, d_ghash2_a,
                                 d_ic + 1, nullptr,
@@ -561,7 +553,7 @@ hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
          else if (hash_type == 'Q')
          {
            cgh.parallel_for(sycl::nd_range<3>(gDim*bDim, bDim),
-                            [=] (sycl::nd_item<3> item) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
+                            [=] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
                               csr_spmm_attempt<num_subgroups_per_WG, shmem_hash_size, 2, 'Q'>(
                                 m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash2_i, d_ghash2_j, d_ghash2_a,
                                 d_ic + 1, nullptr,
@@ -571,7 +563,7 @@ hypreDevice_CSRSpGemmWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
          else if (hash_type == 'D')
          {
            cgh.parallel_for(sycl::nd_range<3>(gDim*bDim, bDim),
-                            [=] (sycl::nd_item<3> item) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
+                            [=] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
                               csr_spmm_attempt<num_subgroups_per_WG, shmem_hash_size, 2, 'D'>(
                                 m, /*k, n,*/ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash2_i, d_ghash2_j, d_ghash2_a,
                                 d_ic + 1, nullptr,

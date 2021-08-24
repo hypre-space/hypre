@@ -7,9 +7,9 @@
 
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
-#include "csr_matrix_sycl_utils.hpp"
+#include "seq_mv.hpp"
 
-#if defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_SYCL) && defined(HYPRE_USING_ONEMKLSPARSE)
 
 /*
  * @brief Uses oneMKL to calculate a sparse-matrix x sparse-matrix product in CSRS format.
@@ -48,7 +48,7 @@ hypreDevice_CSRSpGemmOneMKL(HYPRE_Int       m,
 			    HYPRE_Int     **d_jc_out,
 			    HYPRE_Complex **d_c_out)
 {
-   return hypre_error_flag;
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "hypreDevice_CSRSpGemmOneMKL not implemented for onemkl::SPARSE!\n");
 }
 
-#endif // #if defined(HYPRE_USING_SYCL)
+#endif // #if defined(HYPRE_USING_SYCL) && defined(HYPRE_USING_ONEMKLSPARSE)

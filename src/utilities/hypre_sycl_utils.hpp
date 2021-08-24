@@ -10,6 +10,9 @@
 
 #if defined(HYPRE_USING_SYCL)
 
+#define PSTL_USE_PARALLEL_POLICIES 0 // for libstdc++ 9
+#define _GLIBCXX_USE_TBB_PAR_BACKEND 0 // for libstdc++ 10
+
 #include <oneapi/dpl/execution>
 #include <oneapi/dpl/algorithm>
 #include <oneapi/dpl/iterator>
@@ -144,7 +147,7 @@ struct hypre_CsrsvData
    }                                                                                                                 \
    else                                                                                                              \
    {                                                                                                                 \
-      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
+      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
            cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize), [=] (sycl::nd_item<3> item) {  \
               (kernel_name)(item, __VA_ARGS__);                                                                      \
          });                                                                                                         \
@@ -163,7 +166,7 @@ struct hypre_CsrsvData
    }                                                                                                                 \
    else                                                                                                              \
    {                                                                                                                 \
-      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
+      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
            cgh.parallel_for(sycl::nd_range<2>(gridsize*blocksize, blocksize), [=] (sycl::nd_item<2> item) {  \
               (kernel_name)(item, __VA_ARGS__);                                                                      \
          });                                                                                                         \
@@ -182,7 +185,7 @@ struct hypre_CsrsvData
    }                                                                                                                 \
    else                                                                                                              \
    {                                                                                                                 \
-      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
+      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
            cgh.parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize), [=] (sycl::nd_item<1> item) {  \
               (kernel_name)(item, __VA_ARGS__);                                                                      \
          });                                                                                                         \
@@ -213,7 +216,7 @@ struct hypre_CsrsvData
    }                                                                                                                 \
    else                                                                                                              \
    {                                                                                                                 \
-      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
+      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
           cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize), [=] (sycl::nd_item<3> item) { \
               (kernel_name)(item, __VA_ARGS__);                         \
          });                                                                                                         \
@@ -232,7 +235,7 @@ struct hypre_CsrsvData
    }                                                                                                                 \
    else                                                                                                              \
    {                                                                                                                 \
-      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
+      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
            cgh.parallel_for(sycl::nd_range<2>(gridsize*blocksize, blocksize), [=] (sycl::nd_item<2> item) {  \
               (kernel_name)(item, __VA_ARGS__);                                                                      \
          });                                                                                                         \
@@ -251,7 +254,7 @@ struct hypre_CsrsvData
    }                                                                                                                 \
    else                                                                                                              \
    {                                                                                                                 \
-      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
+      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] { \
            cgh.parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize), [=] (sycl::nd_item<1> item) {  \
               (kernel_name)(item, __VA_ARGS__);                                                                      \
          });                                                                                                         \

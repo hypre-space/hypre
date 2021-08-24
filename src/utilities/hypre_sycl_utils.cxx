@@ -236,7 +236,7 @@ hypreDevice_IntegerReduceSum(HYPRE_Int n, HYPRE_Int *d_i)
 HYPRE_Int
 hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 {
-   HYPRE_ONEDPL_CALL(std::inclusive_scan, d_i, d_i + n, d_i);
+   HYPRE_ONEDPL_CALL(dpl::inclusive_scan, d_i, d_i + n, d_i);
 
    return hypre_error_flag;
 }
@@ -321,7 +321,7 @@ hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
   //                     thrust::make_transform_iterator( thrust::make_zip_iterator(thrust::make_tuple(d_row_ptr, d_row_ptr+1)), hypre_empty_row_functor() ),
   // 		      d_row_ind );
 
-  HYPRE_ONEDPL_CALL( std::inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
+  HYPRE_ONEDPL_CALL( dpl::inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
                      oneapi::dpl::maximum<HYPRE_Int>() );
 
   return hypre_error_flag;

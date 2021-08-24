@@ -11,9 +11,12 @@
  *
  *****************************************************************************/
 
+#define PSTL_USE_PARALLEL_POLICIES 0 // for libstdc++ 9
+#define _GLIBCXX_USE_TBB_PAR_BACKEND 0 // for libstdc++ 10
+
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
-#include "csr_matrix_sycl_utils.hpp"
+#include "seq_mv.hpp"
 
 #if defined(HYPRE_USING_SYCL)
 
@@ -37,7 +40,7 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
 #ifdef HYPRE_USING_ONEMKLSPARSE
    hypre_CSRMatrixMatvecOnemklsparse(trans, alpha, A, x, beta, y, offset);
 #else // #ifdef HYPRE_USING_ONEMKLSPARSE
-#error HYPRE SPMV TODO
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ERROR::TODO SPMV hypre_CSRMatrixMatvecDevice2");
 #endif
 
    return hypre_error_flag;

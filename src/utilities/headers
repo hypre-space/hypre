@@ -91,8 +91,6 @@ cat hypre_umpire_allocator.h     >> $INTERNAL_HEADER
 cat hypre_cuda_utils.h           >> $INTERNAL_HEADER
 cat hypre_cuda_reducer.h         >> $INTERNAL_HEADER
 cat hypre_cub_allocator.h        >> $INTERNAL_HEADER
-cat hypre_sycl_utils.hpp         >> $INTERNAL_HEADER
-cat hypre_sycl_reducer.hpp       >> $INTERNAL_HEADER
 
 #===========================================================================
 # Include guards
@@ -104,7 +102,14 @@ cat >> $INTERNAL_HEADER <<@
 }
 #endif
 
-#endif
+@
+
+cat hypre_sycl_utils.hpp         >> $INTERNAL_HEADER
+cat hypre_sycl_reducer.hpp       >> $INTERNAL_HEADER
+
+cat >> $INTERNAL_HEADER <<@
+
+#endif //hypre_UTILITIES_HPP
 
 @
 

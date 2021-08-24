@@ -309,7 +309,7 @@ void gpu_csr_spmm_rownnz_attempt(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
        if (hash_type == 'L')
        {
          cgh.parallel_for(sycl::nd_range<3>(gDim*bDim, bDim),
-                          [=] (sycl::nd_item<3> item) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
+                          [=] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
                             csr_spmm_symbolic<num_subgroups_per_WG, shmem_hash_size, ATTEMPT, 'L'>(
                               m, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf,
                               item, s_HashKeys_acc.get_pointer());
@@ -318,7 +318,7 @@ void gpu_csr_spmm_rownnz_attempt(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
        else if (hash_type == 'Q')
        {
          cgh.parallel_for(sycl::nd_range<3>(gDim*bDim, bDim),
-                          [=] (sycl::nd_item<3> item) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
+                          [=] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
                             csr_spmm_symbolic<num_subgroups_per_WG, shmem_hash_size, ATTEMPT, 'Q'>(
                               m, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf,
                               item, s_HashKeys_acc.get_pointer());
@@ -327,7 +327,7 @@ void gpu_csr_spmm_rownnz_attempt(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
        else if (hash_type == 'D')
        {
          cgh.parallel_for(sycl::nd_range<3>(gDim*bDim, bDim),
-                          [=] (sycl::nd_item<3> item) [[cl::intel_reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
+                          [=] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_SUBGROUP_SIZE)]] {
                             csr_spmm_symbolic<num_subgroups_per_WG, shmem_hash_size, ATTEMPT, 'D'>(
                               m, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf,
                               item, s_HashKeys_acc.get_pointer());

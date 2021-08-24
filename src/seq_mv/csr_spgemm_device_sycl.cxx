@@ -5,8 +5,12 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#define PSTL_USE_PARALLEL_POLICIES 0 // for libstdc++ 9
+#define _GLIBCXX_USE_TBB_PAR_BACKEND 0 // for libstdc++ 10
+
 #include "seq_mv.h"
 #include "csr_spgemm_device.hpp"
+#include "seq_mv.hpp"
 
 #if defined(HYPRE_USING_SYCL)
 
@@ -36,8 +40,12 @@ hypreDevice_CSRSpGemm(HYPRE_Int   m,        HYPRE_Int   k,        HYPRE_Int     
    /* use ONEMKLSPARSE */
    if (hypre_HandleSpgemmUseOnemklsparse(hypre_handle()))
    {
+#if defined(HYPRE_USING_ONEMKLSPARSE)
       hypreDevice_CSRSpGemmOnemklsparse(m, k, n, nnza, d_ia, d_ja, d_a, nnzb, d_ib, d_jb, d_b,
 					nnzC, d_ic_out, d_jc_out, d_c_out);
+#else
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Attempting to use device sparse matrix library for SpGEMM without having compiled support for it!\n");
+#endif
    }
    else
    {
@@ -141,5 +149,3 @@ hypre_CSRMatrixDeviceSpGemmSetUseOnemklsparse( HYPRE_Int use_onemklsparse )
 }
 
 #endif /* HYPRE_USING_SYCL */
-
-
