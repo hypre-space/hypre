@@ -34,8 +34,9 @@ hypre_MGRSetup( void               *mgr_vdata,
   hypre_ParCSRMatrix  *ST = NULL;
   hypre_ParCSRMatrix  *AT = NULL;
 
-  HYPRE_Int * dof_func_buff = NULL;
-  HYPRE_BigInt * coarse_pnts_global = NULL;
+  hypre_IntArray      *dof_func_buff = NULL;
+  HYPRE_Int           *dof_func_buff_data = NULL;
+  HYPRE_BigInt        *coarse_pnts_global = NULL;
   hypre_Vector       **l1_norms = NULL;
 
   hypre_ParVector     *Ztemp;
@@ -750,7 +751,11 @@ hypre_MGRSetup( void               *mgr_vdata,
 
     /* Get global coarse sizes. Note that we assume num_functions = 1
      * so dof_func arrays are NULL */
-    hypre_BoomerAMGCoarseParms(comm, nloc, 1, NULL, CF_marker, &dof_func_buff,&coarse_pnts_global);
+    hypre_BoomerAMGCoarseParms(comm, nloc, 1, NULL, CF_marker_array[lev], &dof_func_buff, &coarse_pnts_global);
+    if (dof_func_buff)
+    {
+       dof_func_buff_data = hypre_IntArrayData(dof_func_buff);
+    }
     /* Compute Petrov-Galerkin operators */
     /* Interpolation operator */
     num_interp_sweeps = (mgr_data -> num_interp_sweeps);
@@ -758,14 +763,14 @@ hypre_MGRSetup( void               *mgr_vdata,
     if (interp_type[lev] == 99)
     {
       //wall_time = time_getWallclockSeconds();
-      hypre_MGRBuildInterp(A_array[lev], CF_marker, A_ff_inv, coarse_pnts_global, 1, dof_func_buff,
+      hypre_MGRBuildInterp(A_array[lev], CF_marker, A_ff_inv, coarse_pnts_global, 1, dof_func_buff_data,
                           debug_flag, trunc_factor, max_elmts, &P, interp_type[lev], num_interp_sweeps);
       //wall_time = time_getWallclockSeconds() - wall_time;
       //hypre_printf("Proc = %d     BuildInterp: %f\n", my_id, wall_time);
     }
     else
     {
-      hypre_MGRBuildInterp(A_array[lev], CF_marker, S, coarse_pnts_global, 1, dof_func_buff,
+      hypre_MGRBuildInterp(A_array[lev], CF_marker, S, coarse_pnts_global, 1, dof_func_buff_data,
                           debug_flag, trunc_factor, max_elmts, &P, interp_type[lev], num_interp_sweeps);
     }
 
@@ -799,7 +804,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       {
         hypre_BoomerAMGBuildRestrAIR(A_array[lev], CF_marker,
                           ST, coarse_pnts_global, 1,
-                          dof_func_buff, filter_thresholdR,
+                          dof_func_buff_data, filter_thresholdR,
                           debug_flag, &RT,
                           is_triangular, gmres_switch);
       }
@@ -807,7 +812,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       {
         hypre_BoomerAMGBuildRestrDist2AIR(A_array[lev], CF_marker,
                             ST, coarse_pnts_global, 1,
-                            dof_func_buff, debug_flag, filter_thresholdR,
+                            dof_func_buff_data, debug_flag, filter_thresholdR,
                             &RT,
                             1, is_triangular, gmres_switch );
       }
@@ -827,7 +832,7 @@ hypre_MGRSetup( void               *mgr_vdata,
     }
     else
     {
-      hypre_MGRBuildRestrict(A_array[lev], CF_marker, coarse_pnts_global, 1, dof_func_buff,
+      hypre_MGRBuildRestrict(A_array[lev], CF_marker, coarse_pnts_global, 1, dof_func_buff_data,
             debug_flag, trunc_factor, max_elmts, strong_threshold, max_row_sum, &RT,
             restrict_type[lev], num_restrict_sweeps);
 
@@ -1198,9 +1203,10 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
   HYPRE_Int local_size;
   HYPRE_BigInt coarse_size;
 
-  HYPRE_BigInt *coarse_pnts_global_lvl = NULL;
-  HYPRE_Int *coarse_dof_func_lvl = NULL;
-  HYPRE_Int            *dof_func = NULL;
+  HYPRE_BigInt    *coarse_pnts_global_lvl = NULL;
+  hypre_IntArray  *coarse_dof_func_lvl    = NULL;
+  hypre_IntArray  *dof_func               = NULL;
+  HYPRE_Int       *dof_func_data          = NULL;
 
   hypre_ParCSRMatrix *RAP_local = NULL;
   hypre_ParCSRMatrix *P_local = NULL;
@@ -1221,7 +1227,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
   hypre_ParCSRMatrix   **P_array_local = (FrelaxVcycleData[lev] -> P_array);
   hypre_ParVector      **F_array_local = (FrelaxVcycleData[lev] -> F_array);
   hypre_ParVector      **U_array_local = (FrelaxVcycleData[lev] -> U_array);
-  HYPRE_Int            **dof_func_array = (FrelaxVcycleData[lev] -> dof_func_array);
+  hypre_IntArray       **dof_func_array = (FrelaxVcycleData[lev] -> dof_func_array);
   HYPRE_Int            relax_type = 3;
   HYPRE_Int            indx, k, tms;
   HYPRE_Int            num_fine_points = 0;
@@ -1306,7 +1312,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
   if(CF_marker_array_local == NULL)
     CF_marker_array_local = hypre_CTAlloc(hypre_IntArray*,  max_local_lvls, HYPRE_MEMORY_HOST);
   if(dof_func_array == NULL)
-    dof_func_array = hypre_CTAlloc(HYPRE_Int*, max_local_lvls, HYPRE_MEMORY_HOST);
+    dof_func_array = hypre_CTAlloc(hypre_IntArray*, max_local_lvls, HYPRE_MEMORY_HOST);
 
   A_array_local[0] = A;
   F_array_local[0] = f;
@@ -1321,18 +1327,19 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
 
   if (num_functions > 1 && dof_func == NULL)
   {
-    dof_func = hypre_CTAlloc(HYPRE_Int, num_fine_points, HYPRE_MEMORY_HOST);
+    dof_func = hypre_IntArrayCreate(num_fine_points);
+    hypre_IntArrayInitialize(dof_func);
     indx = 0;
     tms = num_fine_points/num_functions;
     if (tms*num_functions+indx > num_fine_points) tms--;
     for (j=0; j < tms; j++)
     {
       for (k=0; k < num_functions; k++)
-        dof_func[indx++] = k;
+        hypre_IntArrayData(dof_func)[indx++] = k;
     }
     k = 0;
     while (indx < num_fine_points)
-      dof_func[indx++] = k++;
+      hypre_IntArrayData(dof_func)[indx++] = k++;
     FrelaxVcycleData[lev] -> dof_func = dof_func;
   }
   dof_func_array[0] = dof_func;
@@ -1341,18 +1348,23 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
   while (not_finished)
   {
     local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array_local[lev_local]));
+    dof_func_data = NULL;
+    if (dof_func_array[lev_local])
+    {
+       dof_func_data = hypre_IntArrayData(dof_func_array[lev_local]);
+    }
 
     if (lev_local == 0)
     {
       /* use the CF_marker from the outer MGR cycle to create the strength connection matrix */
       hypre_BoomerAMGCreateSFromCFMarker(A_array_local[lev_local], strong_threshold, max_row_sum, hypre_IntArrayData(CF_marker_array[lev]),
-                           num_functions, dof_func_array[lev_local], smrk_local, &S_local);
+                           num_functions, dof_func_data, smrk_local, &S_local);
       //hypre_ParCSRMatrixPrintIJ(S_local,0,0,"S_mat");
     }
     else if (lev_local > 0)
     {
       hypre_BoomerAMGCreateS(A_array_local[lev_local], strong_threshold, max_row_sum, num_functions,
-                   dof_func_array[lev_local], &S_local);
+                   dof_func_data, &S_local);
     }
 
     CF_marker_array_local[lev_local] = hypre_IntArrayCreate(local_size);
@@ -1364,7 +1376,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
 
 
     hypre_BoomerAMGCoarseParms(comm, local_size,
-                        num_functions, dof_func_array[lev_local], CF_marker_local,
+                        num_functions, dof_func_array[lev_local], CF_marker_array_local[lev_local],
                         &coarse_dof_func_lvl, &coarse_pnts_global_lvl);
 
     if (my_id == (num_procs -1)) coarse_size = coarse_pnts_global_lvl[1];
@@ -1373,7 +1385,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
     if (coarse_size == 0) // stop coarsening
     {
       if (S_local) hypre_ParCSRMatrixDestroy(S_local);
-      hypre_TFree(coarse_dof_func_lvl, HYPRE_MEMORY_HOST);
+      hypre_IntArrayDestroy(coarse_dof_func_lvl);
 
       if (lev_local == 0)
       {
@@ -1389,7 +1401,6 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
             }
           }
           CF_marker_array_local[lev_local] = hypre_IntArrayCreate(local_size);
-          // WM: temporary - explicitly set memory location to device
           hypre_IntArrayMemoryLocation(CF_marker_array_local[lev_local]) = HYPRE_MEMORY_HOST;
           hypre_IntArrayData(CF_marker_array_local[lev_local]) = CF_marker_local;
         }
@@ -1405,13 +1416,14 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
       else
       {
         hypre_IntArrayDestroy(CF_marker_array_local[lev_local]);
+        CF_marker_array_local[lev_local] = NULL;
       }
       hypre_TFree(coarse_pnts_global_lvl, HYPRE_MEMORY_HOST);
       break;
     }
 
     hypre_BoomerAMGBuildExtPIInterpHost(A_array_local[lev_local], CF_marker_local,
-                        S_local, coarse_pnts_global_lvl, num_functions, dof_func_array[lev_local],
+                        S_local, coarse_pnts_global_lvl, num_functions, dof_func_data,
                         debug_flag, trunc_factor, P_max_elmts, &P_local);
 
 //    hypre_BoomerAMGBuildInterp(A_array_local[lev_local], CF_marker_local,
@@ -1445,10 +1457,6 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
     }
     /* Save interpolation matrix pointer */
     P_array_local[lev_local] = P_local;
-
-    // WM: temporary - what's the deal with this? Can I delete the setting to null below?
-    /* Reset CF_marker_local to NULL. It will be allocated in hypre_BoomerAMGCoarsen (if NULL) */
-    /* CF_marker_local = NULL; */
 
     if (num_functions > 1)
       dof_func_array[lev_local+1] = coarse_dof_func_lvl;

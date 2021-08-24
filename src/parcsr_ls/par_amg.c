@@ -566,7 +566,7 @@ hypre_BoomerAMGDestroy( void *data )
    }
    if (hypre_ParAMGDataDofFunc(amg_data))
    {
-      hypre_TFree(hypre_ParAMGDataDofFunc(amg_data), HYPRE_MEMORY_HOST);
+      hypre_IntArrayDestroy(hypre_ParAMGDataDofFunc(amg_data));
       hypre_ParAMGDataDofFunc(amg_data) = NULL;
    }
    for (i=1; i < num_levels; i++)
@@ -690,7 +690,7 @@ hypre_BoomerAMGDestroy( void *data )
    if (hypre_ParAMGDataDofFuncArray(amg_data))
    {
       for (i=1; i < num_levels; i++)
-         hypre_TFree(hypre_ParAMGDataDofFuncArray(amg_data)[i], HYPRE_MEMORY_HOST);
+         hypre_IntArrayDestroy(hypre_ParAMGDataDofFuncArray(amg_data)[i]);
       hypre_TFree(hypre_ParAMGDataDofFuncArray(amg_data), HYPRE_MEMORY_HOST);
       hypre_ParAMGDataDofFuncArray(amg_data) = NULL;
    }
@@ -3588,8 +3588,8 @@ hypre_BoomerAMGSetNumPoints( void     *data,
 }
 
 HYPRE_Int
-hypre_BoomerAMGSetDofFunc( void     *data,
-                           HYPRE_Int      *dof_func )
+hypre_BoomerAMGSetDofFunc( void                 *data,
+                           HYPRE_Int            *dof_func)
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
 
@@ -3598,8 +3598,19 @@ hypre_BoomerAMGSetDofFunc( void     *data,
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
-   hypre_TFree(hypre_ParAMGDataDofFunc(amg_data), HYPRE_MEMORY_HOST);
-   hypre_ParAMGDataDofFunc(amg_data) = dof_func;
+   hypre_IntArrayDestroy(hypre_ParAMGDataDofFunc(amg_data));
+   /* NOTE: size of hypre_IntArray will be set during AMG setup 
+    *       the memory location is assumed to be host */
+   if (dof_func == NULL)
+   {
+      hypre_ParAMGDataDofFunc(amg_data) = NULL;
+   }
+   else
+   {
+      hypre_ParAMGDataDofFunc(amg_data) = hypre_IntArrayCreate(-1);
+      hypre_IntArrayMemoryLocation(hypre_ParAMGDataDofFunc(amg_data)) = HYPRE_MEMORY_HOST;
+      hypre_IntArrayData(hypre_ParAMGDataDofFunc(amg_data)) = dof_func;
+   }
 
    return hypre_error_flag;
 }

@@ -85,7 +85,7 @@ main( hypre_int argc,
    HYPRE_ParCSRMatrix parcsr_AH_host_2 = NULL;
    HYPRE_ParCSRMatrix parcsr_error_host = NULL;
 
-   HYPRE_Int       *CF_marker = NULL;
+   hypre_IntArray *CF_marker = NULL;
    HYPRE_Int       i, errcode;
    HYPRE_Int       num_procs, myid;
    HYPRE_Int       time_index;
@@ -394,7 +394,7 @@ main( hypre_int argc,
                               CF_marker, &coarse_dof_func, &coarse_pnts_global);
 
    /* generate P */
-   hypre_BoomerAMGBuildExtPIInterp(parcsr_A, CF_marker, parcsr_S, coarse_pnts_global,
+   hypre_BoomerAMGBuildExtPIInterp(parcsr_A, hypre_IntArrayData(CF_marker), parcsr_S, coarse_pnts_global,
                                    num_functions, NULL, debug_flag, trunc_factor, P_max_elmts,
                                    col_offd_S_to_A, &parcsr_P);
 
@@ -530,7 +530,7 @@ main( hypre_int argc,
       HYPRE_ParCSRMatrixDestroy(parcsr_A);
    }
 
-   hypre_TFree(CF_marker, HYPRE_MEMORY_HOST);
+   hypre_IntArrayDestroy(CF_marker);
    hypre_TFree(coarse_dof_func, HYPRE_MEMORY_HOST);
 
    hypre_ParCSRMatrixDestroy(parcsr_S);

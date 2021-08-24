@@ -55,13 +55,13 @@
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGCoarseParmsDevice(MPI_Comm       comm,
-                                 HYPRE_Int      local_num_variables,
-                                 HYPRE_Int      num_functions,
-                                 HYPRE_Int     *dof_func,
-                                 HYPRE_Int     *CF_marker,
-                                 HYPRE_Int    **coarse_dof_func_ptr,
-                            	   HYPRE_BigInt **coarse_pnts_global_ptr) 
+hypre_BoomerAMGCoarseParmsDevice(MPI_Comm          comm,
+                                 HYPRE_Int         local_num_variables,
+                                 HYPRE_Int         num_functions,
+                                 hypre_IntArray   *dof_func,
+                                 hypre_IntArray   *CF_marker,
+                                 hypre_IntArray  **coarse_dof_func_ptr,
+                                 HYPRE_BigInt    **coarse_pnts_global_ptr) 
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_COARSE_PARAMS] -= hypre_MPI_Wtime();
@@ -71,9 +71,6 @@ hypre_BoomerAMGCoarseParmsDevice(MPI_Comm       comm,
    HYPRE_Int	   num_procs;
    HYPRE_BigInt   local_coarse_size = 0;
 
-   HYPRE_Int	  *coarse_dof_func;
-   HYPRE_Int	  *coarse_dof_func_dev;
-   HYPRE_Int     *dof_func_dev;
    HYPRE_BigInt  *coarse_pnts_global;
 
 
@@ -89,26 +86,15 @@ hypre_BoomerAMGCoarseParmsDevice(MPI_Comm       comm,
 
    if (num_functions > 1)
    {
-      // WM: temporary... copy dof_func to device and back
-      dof_func_dev = hypre_TAlloc(HYPRE_Int, local_num_variables, HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(dof_func_dev, dof_func, HYPRE_Int, local_num_variables, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-      coarse_dof_func_dev = hypre_CTAlloc(HYPRE_Int, local_coarse_size, HYPRE_MEMORY_DEVICE);
-
+      *coarse_dof_func_ptr = hypre_IntArrayCreate(local_coarse_size);
+      hypre_IntArrayInitialize_v2(*coarse_dof_func_ptr, HYPRE_MEMORY_DEVICE);
 
       HYPRE_THRUST_CALL( copy_if,
-                         dof_func_dev,
-                         dof_func_dev + local_num_variables,
-                         CF_marker,
-                         coarse_dof_func_dev,
+                         hypre_IntArrayData(dof_func),
+                         hypre_IntArrayData(dof_func) + local_num_variables,
+                         hypre_IntArrayData(CF_marker),
+                         hypre_IntArrayData(*coarse_dof_func_ptr),
                          equal<HYPRE_Int>(1) );
-
-      // WM: temporary... copy dof_func to device and back
-      coarse_dof_func = hypre_TAlloc(HYPRE_Int, local_coarse_size, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(coarse_dof_func, coarse_dof_func_dev, HYPRE_Int, local_coarse_size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(coarse_dof_func_dev, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(dof_func_dev, HYPRE_MEMORY_DEVICE);
-
-      *coarse_dof_func_ptr = coarse_dof_func;
    }
 
 

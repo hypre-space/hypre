@@ -812,7 +812,7 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
                                HYPRE_Int            num_functions,
                                HYPRE_Int            nodal,
                                HYPRE_Int            keep_same_sign,
-                               HYPRE_Int          **dof_func_ptr,
+                               hypre_IntArray      **dof_func_ptr,
                                hypre_IntArray     **CF_marker_ptr,
                                hypre_ParCSRMatrix **S_ptr)
 {
@@ -896,7 +896,9 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
          }
       }
 
-      dof_func = hypre_CTAlloc(HYPRE_Int, num_coarse_nodes*num_functions, HYPRE_MEMORY_HOST);
+      *dof_func_ptr = hypre_IntArrayCreate(num_coarse_nodes*num_functions);
+      hypre_IntArrayInitialize(*dof_func_ptr);
+      dof_func = hypre_IntArrayData(*dof_func_ptr);
       cnt = 0;
       for (i = 0; i < num_nodes; i++)
       {
@@ -908,7 +910,6 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
             }
          }
       }
-      *dof_func_ptr = dof_func;
    }
    else
    {
@@ -1144,7 +1145,7 @@ HYPRE_Int
 hypre_BoomerAMGCreateScalarCF(HYPRE_Int                   *CFN_marker,
                               HYPRE_Int                    num_functions,
                               HYPRE_Int                    num_nodes,
-                              HYPRE_Int                  **dof_func_ptr,
+                              hypre_IntArray             **dof_func_ptr,
                               hypre_IntArray             **CF_marker_ptr)
 
 {
@@ -1174,7 +1175,9 @@ hypre_BoomerAMGCreateScalarCF(HYPRE_Int                   *CFN_marker,
          CF_marker[cnt++] = CFN_marker[i];
    }
 
-   dof_func = hypre_CTAlloc(HYPRE_Int, num_coarse_nodes*num_functions, HYPRE_MEMORY_HOST);
+   *dof_func_ptr = hypre_IntArrayCreate(num_coarse_nodes*num_functions);
+   hypre_IntArrayInitialize(*dof_func_ptr);
+   dof_func = hypre_IntArrayData(*dof_func_ptr);
    cnt = 0;
    for (i=0; i < num_nodes; i++)
    {
@@ -1184,8 +1187,6 @@ hypre_BoomerAMGCreateScalarCF(HYPRE_Int                   *CFN_marker,
             dof_func[cnt++] = k;
       }
    }
-
-   *dof_func_ptr = dof_func;
 
    return hypre_error_flag;
 }

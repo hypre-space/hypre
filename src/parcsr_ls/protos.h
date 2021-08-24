@@ -1002,9 +1002,9 @@ HYPRE_Int hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix *S, hypre_ParCSRM
 HYPRE_Int hypre_GetGlobalMeasureDevice( hypre_ParCSRMatrix *S, hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int CF_init, HYPRE_Int aug_rand, HYPRE_Real *measure_diag, HYPRE_Real *measure_offd, HYPRE_Real *real_send_buf );
 
 /* par_coarse_parms.c */
-HYPRE_Int hypre_BoomerAMGCoarseParms ( MPI_Comm comm , HYPRE_Int local_num_variables , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int *CF_marker , HYPRE_Int **coarse_dof_func_ptr , HYPRE_BigInt **coarse_pnts_global_ptr );
-HYPRE_Int hypre_BoomerAMGCoarseParmsHost ( MPI_Comm comm , HYPRE_Int local_num_variables , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int *CF_marker , HYPRE_Int **coarse_dof_func_ptr , HYPRE_BigInt **coarse_pnts_global_ptr );
-HYPRE_Int hypre_BoomerAMGCoarseParmsDevice ( MPI_Comm comm , HYPRE_Int local_num_variables , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int *CF_marker , HYPRE_Int **coarse_dof_func_ptr , HYPRE_BigInt **coarse_pnts_global_ptr );
+HYPRE_Int hypre_BoomerAMGCoarseParms ( MPI_Comm comm , HYPRE_Int local_num_variables , HYPRE_Int num_functions , hypre_IntArray *dof_func , hypre_IntArray *CF_marker , hypre_IntArray **coarse_dof_func_ptr , HYPRE_BigInt **coarse_pnts_global_ptr );
+HYPRE_Int hypre_BoomerAMGCoarseParmsHost ( MPI_Comm comm , HYPRE_Int local_num_variables , HYPRE_Int num_functions , hypre_IntArray *dof_func , hypre_IntArray *CF_marker , hypre_IntArray **coarse_dof_func_ptr , HYPRE_BigInt **coarse_pnts_global_ptr );
+HYPRE_Int hypre_BoomerAMGCoarseParmsDevice ( MPI_Comm comm , HYPRE_Int local_num_variables , HYPRE_Int num_functions , hypre_IntArray *dof_func , hypre_IntArray *CF_marker , hypre_IntArray **coarse_dof_func_ptr , HYPRE_BigInt **coarse_pnts_global_ptr );
 
 /* par_coordinates.c */
 float *GenerateCoordinates ( MPI_Comm comm , HYPRE_BigInt nx , HYPRE_BigInt ny , HYPRE_BigInt nz , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Int coorddim );
@@ -1121,8 +1121,8 @@ HYPRE_Int hypre_BoomerAMGBuildMultipass ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_
 
 /* par_nodal_systems.c */
 HYPRE_Int hypre_BoomerAMGCreateNodalA ( hypre_ParCSRMatrix *A , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int option , HYPRE_Int diag_option , hypre_ParCSRMatrix **AN_ptr );
-HYPRE_Int hypre_BoomerAMGCreateScalarCFS ( hypre_ParCSRMatrix *SN , hypre_ParCSRMatrix *A , HYPRE_Int *CFN_marker , HYPRE_Int num_functions , HYPRE_Int nodal , HYPRE_Int keep_same_sign , HYPRE_Int **dof_func_ptr , hypre_IntArray **CF_marker_ptr , hypre_ParCSRMatrix **S_ptr );
-HYPRE_Int hypre_BoomerAMGCreateScalarCF ( HYPRE_Int *CFN_marker , HYPRE_Int num_functions , HYPRE_Int num_nodes , HYPRE_Int **dof_func_ptr , hypre_IntArray **CF_marker_ptr );
+HYPRE_Int hypre_BoomerAMGCreateScalarCFS ( hypre_ParCSRMatrix *SN , hypre_ParCSRMatrix *A , HYPRE_Int *CFN_marker , HYPRE_Int num_functions , HYPRE_Int nodal , HYPRE_Int keep_same_sign , hypre_IntArray **dof_func_ptr , hypre_IntArray **CF_marker_ptr , hypre_ParCSRMatrix **S_ptr );
+HYPRE_Int hypre_BoomerAMGCreateScalarCF ( HYPRE_Int *CFN_marker , HYPRE_Int num_functions , HYPRE_Int num_nodes , hypre_IntArray **dof_func_ptr , hypre_IntArray **CF_marker_ptr );
 
 /* par_nongalerkin.c */
 HYPRE_Int hypre_GrabSubArray ( HYPRE_Int *indices , HYPRE_Int start , HYPRE_Int end , HYPRE_BigInt *array , HYPRE_BigInt *output );
@@ -1262,11 +1262,11 @@ HYPRE_Int hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A, hypre_ParCSR
 /* par_sv_interp.c */
 HYPRE_Int hypre_BoomerAMGSmoothInterpVectors ( hypre_ParCSRMatrix *A , HYPRE_Int num_smooth_vecs , hypre_ParVector **smooth_vecs , HYPRE_Int smooth_steps );
 HYPRE_Int hypre_BoomerAMGCoarsenInterpVectors ( hypre_ParCSRMatrix *P , HYPRE_Int num_smooth_vecs , hypre_ParVector **smooth_vecs , HYPRE_Int *CF_marker , hypre_ParVector ***new_smooth_vecs , HYPRE_Int expand_level , HYPRE_Int num_functions );
-HYPRE_Int hypre_BoomerAMG_GMExpandInterp ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **P , HYPRE_Int num_smooth_vecs , hypre_ParVector **smooth_vecs , HYPRE_Int *nf , HYPRE_Int *dof_func , HYPRE_Int **coarse_dof_func , HYPRE_Int variant , HYPRE_Int level , HYPRE_Real abs_trunc , HYPRE_Real *weights , HYPRE_Int q_max , HYPRE_Int *CF_marker , HYPRE_Int interp_vec_first_level );
+HYPRE_Int hypre_BoomerAMG_GMExpandInterp ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **P , HYPRE_Int num_smooth_vecs , hypre_ParVector **smooth_vecs , HYPRE_Int *nf , HYPRE_Int *dof_func , hypre_IntArray **coarse_dof_func , HYPRE_Int variant , HYPRE_Int level , HYPRE_Real abs_trunc , HYPRE_Real *weights , HYPRE_Int q_max , HYPRE_Int *CF_marker , HYPRE_Int interp_vec_first_level );
 HYPRE_Int hypre_BoomerAMGRefineInterp ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *P , HYPRE_BigInt *num_cpts_global , HYPRE_Int *nf , HYPRE_Int *dof_func , HYPRE_Int *CF_marker , HYPRE_Int level );
 
 /* par_sv_interp_ln.c */
-HYPRE_Int hypre_BoomerAMG_LNExpandInterp ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **P , HYPRE_BigInt *num_cpts_global , HYPRE_Int *nf , HYPRE_Int *dof_func , HYPRE_Int **coarse_dof_func , HYPRE_Int *CF_marker , HYPRE_Int level , HYPRE_Real *weights , HYPRE_Int num_smooth_vecs , hypre_ParVector **smooth_vecs , HYPRE_Real abs_trunc , HYPRE_Int q_max , HYPRE_Int interp_vec_first_level );
+HYPRE_Int hypre_BoomerAMG_LNExpandInterp ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **P , HYPRE_BigInt *num_cpts_global , HYPRE_Int *nf , HYPRE_Int *dof_func , hypre_IntArray **coarse_dof_func , HYPRE_Int *CF_marker , HYPRE_Int level , HYPRE_Real *weights , HYPRE_Int num_smooth_vecs , hypre_ParVector **smooth_vecs , HYPRE_Real abs_trunc , HYPRE_Int q_max , HYPRE_Int interp_vec_first_level );
 
 /* par_sv_interp_lsfit.c */
 HYPRE_Int hypre_BoomerAMGFitInterpVectors ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **P , HYPRE_Int num_smooth_vecs , hypre_ParVector **smooth_vecs , hypre_ParVector **coarse_smooth_vecs , HYPRE_Real delta , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int *CF_marker , HYPRE_Int max_elmts , HYPRE_Real trunc_factor , HYPRE_Int variant , HYPRE_Int level );
