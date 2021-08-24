@@ -8894,6 +8894,11 @@ $as_echo "#define HYPRE_USING_CURAND 1" >>confdefs.h
       fi
    fi
 
+   if test "$hypre_using_shared" = "yes"
+   then
+      CUFLAGS="${CUFLAGS} -Xcompiler ${SHARED_COMPILE_FLAG}"
+   fi
+
          HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
    HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64 -lcudart'
    if test "$hypre_using_gpu_profiling" = "yes"

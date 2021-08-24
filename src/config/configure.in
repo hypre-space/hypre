@@ -2124,6 +2124,11 @@ then
       fi
    fi
 
+   if test "$hypre_using_shared" = "yes"
+   then
+      CUFLAGS="${CUFLAGS} -Xcompiler ${SHARED_COMPILE_FLAG}"
+   fi
+
    dnl CFLAGS=${CXXFLAGS}
    dnl LDFLAGS="-Xcompiler \"${LDFLAGS}\""
    HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
