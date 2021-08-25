@@ -36,7 +36,7 @@ hypre_SSAMGComputeRAP( hypre_SStructMatrix   *A,
    }
    else
    {
-      hypre_SStructMatPtAP(A, P, &Ac);
+      hypre_SStructMatrixPtAP(A, P, &Ac);
    }
 
    *Ac_ptr = Ac;
@@ -49,6 +49,7 @@ hypre_SSAMGComputeRAP( hypre_SStructMatrix   *A,
  *
  * Notes:
  *        1) Multivariable version not implemented.
+ *        2) Needs debugging.
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_SSAMGComputeRAPNonGlk( hypre_SStructMatrix  *A,
@@ -154,7 +155,7 @@ hypre_SSAMGComputeRAPNonGlk( hypre_SStructMatrix  *A,
    }
 
    /* Compute unstructured component of Ac */
-   hypre_SStructMatmultU(3, ssmatrices, 3, terms, trans, &parcsr_uAc);
+   //call to hypre_SStructMatrixMultComputeU
 
    /* Assemble SStructGraph */
    HYPRE_SStructGraphAssemble(cgraph);
