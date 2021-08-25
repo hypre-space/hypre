@@ -984,6 +984,7 @@ HYPRE_Int hypre_SStructMatrixSetValues ( HYPRE_SStructMatrix matrix , HYPRE_Int 
 HYPRE_Int hypre_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix , HYPRE_Int part , hypre_Box *set_box , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , hypre_Box *value_box , HYPRE_Complex *values , HYPRE_Int action );
 HYPRE_Int hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix , HYPRE_Int part , hypre_Box *set_box , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , hypre_Box *value_box , HYPRE_Complex *values , HYPRE_Int action );
 hypre_IJMatrix* hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix , HYPRE_Int fill_diagonal );
+HYPRE_Int hypre_SStructMatrixBoundaryToUMatrix ( hypre_SStructMatrix *A , hypre_ParCSRMatrix *B , hypre_IJMatrix **ij_Ahat_ptr );
 HYPRE_Int hypre_SStructMatrixGetDiagonal ( hypre_SStructMatrix *matrix , hypre_SStructVector **diag_ptr );
 
 /* sstruct_matvec.c */
@@ -1001,7 +1002,6 @@ HYPRE_Int hypre_SStructMatvecDestroy ( void *matvec_vdata );
 HYPRE_Int hypre_SStructMatvec ( HYPRE_Complex alpha , hypre_SStructMatrix *A , hypre_SStructVector *x , HYPRE_Complex beta , hypre_SStructVector *y );
 
 /* sstruct_matmult.c */
-HYPRE_Int hypre_SStructMatrixBoundaryToUMatrix ( hypre_SStructMatrix *A , hypre_ParCSRMatrix *B , hypre_IJMatrix **ij_Ahat_ptr );
 HYPRE_Int hypre_SStructMatmult ( HYPRE_Int nmatrices_input , hypre_SStructMatrix **ssmatrices_input , HYPRE_Int nterms , HYPRE_Int *terms_input , HYPRE_Int *transposes , hypre_SStructMatrix **M_ptr );
 HYPRE_Int hypre_SStructMatmultU ( HYPRE_Int nmatrices , hypre_SStructMatrix **ssmatrices , HYPRE_Int nterms , HYPRE_Int *terms , HYPRE_Int *transposes , hypre_ParCSRMatrix **uM_ptr );
 HYPRE_Int hypre_SStructMatPtAP ( hypre_SStructMatrix *P , hypre_SStructMatrix *A , hypre_SStructMatrix **PtAP_ptr );
