@@ -247,7 +247,7 @@ HYPRE_Int hypre_ReadBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypr
 HYPRE_Int hypre_ReadBoxArrayData_CC ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int stencil_size , HYPRE_Int real_stencil_size , HYPRE_Int constant_coefficient , HYPRE_Int dim , HYPRE_Complex *data );
 
 /* struct_matmult.c */
-hypre_StructMMData* hypre_StructMatrixMultCreate ( HYPRE_Int nmatrices_in , hypre_StructMatrix **matrices_in , HYPRE_Int nterms , HYPRE_Int *terms_in , HYPRE_Int *transposes_in );
+HYPRE_Int hypre_StructMatrixMultCreate ( HYPRE_Int nmatrices_in , hypre_StructMatrix **matrices_in , HYPRE_Int nterms , HYPRE_Int *terms_in , HYPRE_Int *transposes_in , hypre_StructMMData **mmdata_ptr );
 HYPRE_Int hypre_StructMatrixMultDestroy ( hypre_StructMMData *mmdata );
 HYPRE_Int hypre_StructMatrixMultSetup ( hypre_StructMMData  *mmdata , hypre_StructMatrix **M_ptr );
 HYPRE_Int hypre_StructMatrixMultCommunicate ( hypre_StructMMData *mmdata );

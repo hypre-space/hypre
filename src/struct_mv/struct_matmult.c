@@ -24,12 +24,13 @@
  * matrices[terms[t]] transposed according to the boolean transposes[t].
  *--------------------------------------------------------------------------*/
 
-hypre_StructMMData *
-hypre_StructMatrixMultCreate( HYPRE_Int            nmatrices_in,
-                              hypre_StructMatrix **matrices_in,
-                              HYPRE_Int            nterms,
-                              HYPRE_Int           *terms_in,
-                              HYPRE_Int           *transposes_in )
+HYPRE_Int
+hypre_StructMatrixMultCreate( HYPRE_Int             nmatrices_in,
+                              hypre_StructMatrix  **matrices_in,
+                              HYPRE_Int             nterms,
+                              HYPRE_Int            *terms_in,
+                              HYPRE_Int            *transposes_in,
+                              hypre_StructMMData  **mmdata_ptr )
 {
    hypre_StructMMData   *mmdata;
 
@@ -85,7 +86,9 @@ hypre_StructMatrixMultCreate( HYPRE_Int            nmatrices_in,
    (mmdata -> mtypes)      = mtypes;
    (mmdata -> mask)        = NULL;
 
-   return mmdata;
+   *mmdata_ptr = mmdata;
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -1115,7 +1118,7 @@ hypre_StructMatrixMultGroup(HYPRE_Int            nmatrices,
 {
    hypre_StructMMData *mmdata;
 
-   mmdata = hypre_StructMatrixMultCreate(nmatrices, matrices, nterms, terms, trans);
+   hypre_StructMatrixMultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
    hypre_StructMatrixMultSetup(mmdata, M_ptr);
    hypre_StructMatrixMultCommunicate(mmdata);
    hypre_StructMatrixMultCompute(mmdata, *M_ptr);
@@ -1144,12 +1147,15 @@ hypre_StructMatrixMult( hypre_StructMatrix  *A,
    HYPRE_Int           terms[3]    = {0, 1};
    HYPRE_Int           trans[2]    = {0, 0};
 
-   mmdata = hypre_StructMatrixMultCreate(nmatrices, matrices, nterms, terms, trans);
+   /* Compute resulting matrix M */
+   hypre_StructMatrixMultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
    hypre_StructMatrixMultSetup(mmdata, M_ptr);
    hypre_StructMatrixMultCommunicate(mmdata);
    hypre_StructMatrixMultCompute(mmdata, *M_ptr);
-   HYPRE_StructMatrixAssemble(*M_ptr);
    hypre_StructMatrixMultDestroy(mmdata);
+
+   /* Assemble matrix M */
+   HYPRE_StructMatrixAssemble(*M_ptr);
 
    return hypre_error_flag;
 }
@@ -1173,12 +1179,15 @@ hypre_StructMatrixPtAP( hypre_StructMatrix  *A,
    HYPRE_Int           terms[3]    = {1, 0, 1};
    HYPRE_Int           trans[3]    = {1, 0, 0};
 
-   mmdata = hypre_StructMatrixMultCreate(nmatrices, matrices, nterms, terms, trans);
+   /* Compute resulting matrix M */
+   hypre_StructMatrixMultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
    hypre_StructMatrixMultSetup(mmdata, M_ptr);
    hypre_StructMatrixMultCommunicate(mmdata);
    hypre_StructMatrixMultCompute(mmdata, *M_ptr);
-   HYPRE_StructMatrixAssemble(*M_ptr);
    hypre_StructMatrixMultDestroy(mmdata);
+
+   /* Assemble matrix M */
+   HYPRE_StructMatrixAssemble(*M_ptr);
 
    return hypre_error_flag;
 }
@@ -1203,12 +1212,15 @@ hypre_StructMatrixRAP( hypre_StructMatrix  *R,
    HYPRE_Int           terms[3]    = {2, 0, 1};
    HYPRE_Int           trans[3]    = {0, 0, 0};
 
-   mmdata = hypre_StructMatrixMultCreate(nmatrices, matrices, nterms, terms, trans);
+   /* Compute resulting matrix M */
+   hypre_StructMatrixMultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
    hypre_StructMatrixMultSetup(mmdata, M_ptr);
    hypre_StructMatrixMultCommunicate(mmdata);
    hypre_StructMatrixMultCompute(mmdata, *M_ptr);
-   HYPRE_StructMatrixAssemble(*M_ptr);
    hypre_StructMatrixMultDestroy(mmdata);
+
+   /* Assemble matrix M */
+   HYPRE_StructMatrixAssemble(*M_ptr);
 
    return hypre_error_flag;
 }
@@ -1233,12 +1245,15 @@ hypre_StructMatrixRTtAP( hypre_StructMatrix  *RT,
    HYPRE_Int           terms[3]    = {2, 0, 1};
    HYPRE_Int           trans[3]    = {1, 0, 0};
 
-   mmdata = hypre_StructMatrixMultCreate(nmatrices, matrices, nterms, terms, trans);
+   /* Compute resulting matrix M */
+   hypre_StructMatrixMultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
    hypre_StructMatrixMultSetup(mmdata, M_ptr);
    hypre_StructMatrixMultCommunicate(mmdata);
    hypre_StructMatrixMultCompute(mmdata, *M_ptr);
-   HYPRE_StructMatrixAssemble(*M_ptr);
    hypre_StructMatrixMultDestroy(mmdata);
+
+   /* Assemble matrix M */
+   HYPRE_StructMatrixAssemble(*M_ptr);
 
    return hypre_error_flag;
 }
