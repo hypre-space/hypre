@@ -198,6 +198,17 @@ HYPRE_Int hypre_SStructMatmult ( HYPRE_Int nmatrices_input , hypre_SStructMatrix
 HYPRE_Int hypre_SStructMatmultU ( HYPRE_Int nmatrices , hypre_SStructMatrix **ssmatrices , HYPRE_Int nterms , HYPRE_Int *terms , HYPRE_Int *transposes , hypre_ParCSRMatrix **uM_ptr );
 HYPRE_Int hypre_SStructMatPtAP ( hypre_SStructMatrix *P , hypre_SStructMatrix *A , hypre_SStructMatrix **PtAP_ptr );
 
+/* sstruct_matmult_wip.c */
+/* HYPRE_Int hypre_SStructMatrixMultCreate ( HYPRE_Int nmatrices_input , hypre_StructMatrix **matrices_input , HYPRE_Int nterms , HYPRE_Int *terms_input , HYPRE_Int *trans_input , hypre_SStructMMData **mmdata_ptr ); */
+/* HYPRE_Int hypre_SStructMatrixMultDestroy ( hypre_SStructMMData *mmdata ); */
+/* HYPRE_Int hypre_SStructMatrixMultSetup ( hypre_SStructMMData *mmdata , hypre_SStructMatrix **M_ptr ); */
+/* HYPRE_Int hypre_SStructMatrixMultCommunicate ( hypre_SStructMMData *mmdata ); */
+/* HYPRE_Int hypre_SStructMatrixMultComputeS ( hypre_SStructMMData *mmdata , hypre_SStructMatrix *M ); */
+/* HYPRE_Int hypre_SStructMatrixMultComputeU ( hypre_SStructMMData *mmdata , hypre_SStructMatrix *M ); */
+/* HYPRE_Int hypre_SStructMatrixMultCompute ( hypre_SStructMMData *mmdata , hypre_SStructMatrix *M ); */
+//HYPRE_Int hypre_SStructMatrixMultGroup ( HYPRE_Int nmatrices , hypre_SStructMatrix **matrices , HYPRE_Int nterms , HYPRE_Int *terms , HYPRE_Int *trans , hypre_SStructMatrix **M_ptr );
+//HYPRE_Int hypre_SStructMatrixPtAP ( hypre_SStructMatrix *A, hypre_SStructMatrix *P , hypre_SStructMatrix **M_ptr );
+
 /* sstruct_matop.c */
 HYPRE_Int hypre_SStructPMatrixComputeRowSum ( hypre_SStructPMatrix *pA , HYPRE_Int type , hypre_SStructPVector *prowsum );
 HYPRE_Int hypre_SStructMatrixComputeRowSum ( hypre_SStructMatrix *A , HYPRE_Int type , hypre_SStructVector **rowsum_ptr );
