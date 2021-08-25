@@ -9,6 +9,9 @@
 
 /*--------------------------------------------------------------------------
  * hypre_SStructStencilRef
+ *
+ * TODO: the struct function hypre_StructStencilRef has a different
+ *       prototype than this one.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
