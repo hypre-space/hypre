@@ -136,20 +136,23 @@ FILES =\
  partial.c\
  schwarz.c\
  block_tridiag.c\
- ads.c\
- ame.c\
  par_restr.c\
  par_lr_restr.c\
  dsuperlu.c
 
 CUFILES =\
+ ads.c\
  ams.c\
+ ame.c\
  par_ilu.c\
  par_ilu_setup.c \
  par_ilu_solve.c \
+ par_cheby_device.c\
+ par_relax_more_device.c\
  par_coarsen_device.c\
  par_indepset_device.c\
  par_interp_device.c\
+ par_lr_restr_device.c\
  par_interp_trunc_device.c\
  par_lr_interp_device.c\
  par_strength_device.c\
@@ -179,7 +182,7 @@ install: libHYPRE_parcsr_ls${HYPRE_LIB_SUFFIX}
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o* libHYPRE*
+	rm -f *.o *.obj libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean

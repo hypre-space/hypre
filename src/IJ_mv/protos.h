@@ -8,6 +8,7 @@
 /* aux_parcsr_matrix.c */
 HYPRE_Int hypre_AuxParCSRMatrixCreate ( hypre_AuxParCSRMatrix **aux_matrix , HYPRE_Int local_num_rows , HYPRE_Int local_num_cols , HYPRE_Int *sizes );
 HYPRE_Int hypre_AuxParCSRMatrixDestroy ( hypre_AuxParCSRMatrix *matrix );
+HYPRE_Int hypre_AuxParCSRMatrixSetRownnz ( hypre_AuxParCSRMatrix *matrix );
 HYPRE_Int hypre_AuxParCSRMatrixInitialize ( hypre_AuxParCSRMatrix *matrix );
 HYPRE_Int hypre_AuxParCSRMatrixInitialize_v2( hypre_AuxParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location );
 
@@ -56,6 +57,9 @@ HYPRE_Int hypre_IJMatrixSetAddValuesParCSRDevice ( hypre_IJMatrix *matrix , HYPR
 HYPRE_Int hypre_IJMatrixSetConstantValuesParCSR ( hypre_IJMatrix *matrix , HYPRE_Complex value );
 HYPRE_Int hypre_IJMatrixAddToValuesParCSR ( hypre_IJMatrix *matrix , HYPRE_Int nrows , HYPRE_Int *ncols , const HYPRE_BigInt *rows , const HYPRE_Int *row_indexes , const HYPRE_BigInt *cols , const HYPRE_Complex *values );
 HYPRE_Int hypre_IJMatrixDestroyParCSR ( hypre_IJMatrix *matrix );
+HYPRE_Int hypre_IJMatrixTransposeParCSR ( hypre_IJMatrix  *matrix_A , hypre_IJMatrix *matrix_AT );
+HYPRE_Int hypre_IJMatrixNormParCSR ( hypre_IJMatrix *matrix , HYPRE_Real *norm );
+HYPRE_Int hypre_IJMatrixAddParCSR ( HYPRE_Complex alpha , hypre_IJMatrix *matrix_A , HYPRE_Complex beta , hypre_IJMatrix *matrix_B , hypre_IJMatrix *matrix_C );
 HYPRE_Int hypre_IJMatrixAssembleOffProcValsParCSR ( hypre_IJMatrix *matrix , HYPRE_Int off_proc_i_indx , HYPRE_Int max_off_proc_elmts , HYPRE_Int current_num_elmts , HYPRE_MemoryLocation memory_location , HYPRE_BigInt *off_proc_i , HYPRE_BigInt *off_proc_j , HYPRE_Complex *off_proc_data );
 HYPRE_Int hypre_FillResponseIJOffProcVals ( void *p_recv_contact_buf , HYPRE_Int contact_size , HYPRE_Int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , HYPRE_Int *response_message_size );
 HYPRE_Int hypre_FindProc ( HYPRE_BigInt *list , HYPRE_BigInt value , HYPRE_Int list_length );
@@ -124,6 +128,9 @@ HYPRE_Int HYPRE_IJMatrixSetMaxOffProcElmts ( HYPRE_IJMatrix matrix , HYPRE_Int m
 HYPRE_Int HYPRE_IJMatrixRead ( const char *filename , MPI_Comm comm , HYPRE_Int type , HYPRE_IJMatrix *matrix_ptr );
 HYPRE_Int HYPRE_IJMatrixPrint ( HYPRE_IJMatrix matrix , const char *filename );
 HYPRE_Int HYPRE_IJMatrixSetOMPFlag ( HYPRE_IJMatrix matrix , HYPRE_Int omp_flag );
+HYPRE_Int HYPRE_IJMatrixTranspose ( HYPRE_IJMatrix  matrix_A , HYPRE_IJMatrix *matrix_AT );
+HYPRE_Int HYPRE_IJMatrixNorm ( HYPRE_IJMatrix matrix , HYPRE_Real *norm );
+HYPRE_Int HYPRE_IJMatrixAdd ( HYPRE_Complex alpha , HYPRE_IJMatrix matrix_A , HYPRE_Complex beta , HYPRE_IJMatrix matrix_B , HYPRE_IJMatrix *matrix_C );
 
 /* HYPRE_IJVector.c */
 HYPRE_Int HYPRE_IJVectorCreate ( MPI_Comm comm , HYPRE_BigInt jlower , HYPRE_BigInt jupper , HYPRE_IJVector *vector );
@@ -141,4 +148,3 @@ HYPRE_Int HYPRE_IJVectorGetLocalRange ( HYPRE_IJVector vector , HYPRE_BigInt *jl
 HYPRE_Int HYPRE_IJVectorGetObject ( HYPRE_IJVector vector , void **object );
 HYPRE_Int HYPRE_IJVectorRead ( const char *filename , MPI_Comm comm , HYPRE_Int type , HYPRE_IJVector *vector_ptr );
 HYPRE_Int HYPRE_IJVectorPrint ( HYPRE_IJVector vector , const char *filename );
-

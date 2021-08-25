@@ -1824,7 +1824,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                   }
                }
                diagonal = A_diag_data[A_diag_i[i1]];
-               if (sum_C*diagonal) alfa = -sum_N/(sum_C*diagonal);
+               if (sum_C*diagonal != 0.0) alfa = -sum_N/(sum_C*diagonal);
 
                for (j=P_diag_i[i1]; j < P_diag_i[i1+1]; j++)
                   P_diag_data[j] *= alfa;
@@ -1883,7 +1883,6 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    /* Compress P, removing coefficients smaller than trunc_factor * Max
       and/or keep yat most <P_max_elmts> per row absolutely maximal coefficients */

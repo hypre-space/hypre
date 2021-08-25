@@ -1,0 +1,64 @@
+# Output file: amgdd.out.900
+BoomerAMG-DD Iterations = 5
+Final Relative Residual Norm = 4.020669e-09
+
+# Output file: amgdd.out.901
+BoomerAMG-DD Iterations = 10
+Final Relative Residual Norm = 5.609031e-09
+
+# Output file: amgdd.out.902
+BoomerAMG-DD Iterations = 10
+Final Relative Residual Norm = 9.214818e-09
+
+# Output file: amgdd.out.903
+BoomerAMG-DD Iterations = 12
+Final Relative Residual Norm = 3.122094e-09
+
+# Output file: amgdd.out.904
+BoomerAMG-DD Iterations = 12
+Final Relative Residual Norm = 3.342726e-09
+
+# Output file: amgdd.out.905
+BoomerAMG-DD Iterations = 10
+Final Relative Residual Norm = 4.924406e-09
+
+# Output file: amgdd.out.906
+BoomerAMG-DD Iterations = 10
+Final Relative Residual Norm = 4.724593e-09
+
+# Output file: amgdd.out.910
+GMRES Iterations = 4
+Final GMRES Relative Residual Norm = 6.132330e-09
+
+# Output file: amgdd.out.911
+GMRES Iterations = 7
+Final GMRES Relative Residual Norm = 1.828326e-09
+
+# Output file: amgdd.out.912
+GMRES Iterations = 7
+Final GMRES Relative Residual Norm = 5.755980e-09
+
+# Output file: amgdd.out.913
+GMRES Iterations = 6
+Final GMRES Relative Residual Norm = 2.248814e-09
+
+# Output file: amgdd.out.914
+GMRES Iterations = 15
+Final GMRES Relative Residual Norm = 4.036024e-09
+
+# Output file: amgdd.out.915
+GMRES Iterations = 5
+Final GMRES Relative Residual Norm = 5.121200e-09
+
+# Output file: amgdd.out.916
+GMRES Iterations = 14
+Final GMRES Relative Residual Norm = 5.260812e-03
+
+# Output file: amgdd.out.917
+GMRES Iterations = 7
+Final GMRES Relative Residual Norm = 3.281089e-09
+
+# Output file: amgdd.out.918
+GMRES Iterations = 7
+Final GMRES Relative Residual Norm = 1.828708e-09
+

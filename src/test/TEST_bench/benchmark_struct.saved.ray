@@ -1,0 +1,32 @@
+# Output file: benchmark_struct.out.1
+Iterations = 6
+Final Relative Residual Norm = 1.399448e-07
+
+# Output file: benchmark_struct.out.2
+Iterations = 6
+Final Relative Residual Norm = 2.351905e-07
+
+# Output file: benchmark_struct.out.3
+Iterations = 5
+Final Relative Residual Norm = 1.230948e-07
+
+# Output file: benchmark_struct.out.4
+Iterations = 5
+Final Relative Residual Norm = 2.015486e-07
+
+# Output file: benchmark_struct.out.5
+Iterations = 10
+Final Relative Residual Norm = 5.748202e-07
+
+# Output file: benchmark_struct.out.6
+Iterations = 11
+Final Relative Residual Norm = 1.451552e-07
+
+# Output file: benchmark_struct.out.7
+Iterations = 10
+Final Relative Residual Norm = 2.886212e-07
+
+# Output file: benchmark_struct.out.8
+Iterations = 10
+Final Relative Residual Norm = 3.341658e-07
+

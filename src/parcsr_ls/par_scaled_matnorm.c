@@ -7,7 +7,7 @@
 
 /******************************************************************************
  *
- * computes |D^-1/2 A D^-1/2 |_sup where D diagonal matrix 
+ * computes |D^-1/2 A D^-1/2 |_sup where D diagonal matrix
  *
  *****************************************************************************/
 
@@ -41,7 +41,7 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
    HYPRE_Real 		*dis_ext_data;
    hypre_Vector         *sum;
    HYPRE_Real		*sum_data;
-  
+
    HYPRE_Int	      num_cols_offd = hypre_CSRMatrixNumCols(offd);
    HYPRE_Int	      num_sends, i, j, index, start;
 
@@ -51,7 +51,6 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
    dinvsqrt = hypre_ParVectorCreate(comm, global_num_rows, row_starts);
    hypre_ParVectorInitialize(dinvsqrt);
    dis_data = hypre_VectorData(hypre_ParVectorLocalVector(dinvsqrt));
-   hypre_ParVectorSetPartitioningOwner(dinvsqrt,0);
    dis_ext = hypre_SeqVectorCreate(num_cols_offd);
    hypre_SeqVectorInitialize(dis_ext);
    dis_ext_data = hypre_VectorData(dis_ext);
@@ -60,24 +59,23 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
    sum_data = hypre_VectorData(sum);
 
    /* generate dinvsqrt */
-   for (i=0; i < num_rows; i++)
+   for (i = 0; i < num_rows; i++)
    {
       dis_data[i] = 1.0/sqrt(fabs(diag_data[diag_i[i]]));
    }
-   
+
    /*---------------------------------------------------------------------
     * If there exists no CommPkg for A, a CommPkg is generated using
     * equally load balanced partitionings
     *--------------------------------------------------------------------*/
    if (!comm_pkg)
    {
-	hypre_MatvecCommPkgCreate(A);
-
-	comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
+      hypre_MatvecCommPkgCreate(A);
+      comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   d_buf_data = hypre_CTAlloc(HYPRE_Real,  hypre_ParCSRCommPkgSendMapStart(comm_pkg, 
+   d_buf_data = hypre_CTAlloc(HYPRE_Real,  hypre_ParCSRCommPkgSendMapStart(comm_pkg,
 						num_sends), HYPRE_MEMORY_HOST);
 
    index = 0;
@@ -85,11 +83,11 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
    {
 	start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
 	for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
-		d_buf_data[index++] 
+		d_buf_data[index++]
 		 = dis_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
    }
-	
-   comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, d_buf_data, 
+
+   comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, d_buf_data,
 	dis_ext_data);
 
    for (i=0; i < num_rows; i++)
@@ -98,7 +96,7 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
       {
 	 sum_data[i] += fabs(diag_data[j])*dis_data[i]*dis_data[diag_j[j]];
       }
-   }   
+   }
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
    for (i=0; i < num_rows; i++)
@@ -107,14 +105,14 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
       {
 	 sum_data[i] += fabs(offd_data[j])*dis_data[i]*dis_ext_data[offd_j[j]];
       }
-   }   
+   }
 
    max_row_sum = 0;
    for (i=0; i < num_rows; i++)
    {
-      if (max_row_sum < sum_data[i]) 
+      if (max_row_sum < sum_data[i])
 	 max_row_sum = sum_data[i];
-   }	
+   }
 
    hypre_MPI_Allreduce(&max_row_sum, &mat_norm, 1, HYPRE_MPI_REAL, hypre_MPI_MAX, comm);
 
@@ -123,6 +121,6 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
    hypre_SeqVectorDestroy(dis_ext);
    hypre_TFree(d_buf_data, HYPRE_MEMORY_HOST);
 
-   *scnorm = mat_norm;  
+   *scnorm = mat_norm;
    return 0;
 }

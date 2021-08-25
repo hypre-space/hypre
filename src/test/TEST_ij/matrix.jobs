@@ -12,7 +12,7 @@ mpirun -np 2 ./ij -rhsrand > matrix.out.0
 
 mpirun -np 2 ./ij -rhsrand -exact_size > matrix.out.1
 
-mpirun -np 2 ./ij -rhsrand -low_storage > matrix.out.2
+mpirun -np 2 ./ij -rhsrand -storage_low > matrix.out.2
 
 mpirun -np 4 ./ij -fromfile A_tstoffd -rhsfromfile b_tstoffd > matrix.out.3
 

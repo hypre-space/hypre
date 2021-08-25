@@ -17,11 +17,6 @@
 #   16: BoomerAMG_COGMRES
 #   17: DS_COGMRES
 #   20: Hybrid_PCG
-#   90: BoomerAMGDD
-#   91: BoomerAMGDD_GMRES
-#
-
-
 
 # ij: test systems AMG
 #       unknown approach
@@ -55,24 +50,6 @@ mpirun -np 2 ./ij -solver 17 -rhsrand -unroll 4 > solvers.out.16
 mpirun -np 2 ./ij -solver 3 -rhsrand -check_residual > solvers.out.17
 mpirun -np 2 ./ij -solver 4 -rhsrand -check_residual > solvers.out.18
 
-#BoomerAMG-DD
-mpirun -np 1 ./ij -solver 90 -rhsrand > solvers.out.900
-mpirun -np 2 ./ij -solver 90 -rhsrand > solvers.out.901
-mpirun -np 4 ./ij -solver 90 -rhsrand > solvers.out.902
-mpirun -np 4 ./ij -solver 90 -rhsrand -amgdd_start_level 3 > solvers.out.903
-mpirun -np 4 ./ij -solver 90 -rhsrand -amgdd_start_level 4 > solvers.out.904
-mpirun -np 4 ./ij -solver 90 -rhsrand -amgdd_padding 4 > solvers.out.905
-mpirun -np 4 ./ij -solver 90 -rhsrand -amgdd_padding 4 -amgdd_num_ghost_layers 4 > solvers.out.906
-mpirun -np 1 ./ij -solver 91 -rhsrand > solvers.out.910
-mpirun -np 2 ./ij -solver 91 -rhsrand > solvers.out.911
-mpirun -np 4 ./ij -solver 91 -rhsrand > solvers.out.912
-mpirun -np 4 ./ij -solver 91 -rhsrand -amgdd_num_comp_cycles 3 > solvers.out.913
-mpirun -np 4 ./ij -solver 91 -rhsrand -amgdd_fac_relax_type 0 > solvers.out.914
-mpirun -np 4 ./ij -solver 91 -rhsrand -amgdd_fac_relax_type 1 > solvers.out.915
-mpirun -np 4 ./ij -solver 91 -rhsrand -amgdd_fac_relax_type 2 > solvers.out.916
-mpirun -np 4 ./ij -solver 91 -rhsrand -amgdd_fac_cycle_type 2 > solvers.out.917
-mpirun -np 4 ./ij -solver 91 -rhsrand -amgdd_fac_cycle_type 3 > solvers.out.918
-
 #systems AMG run ...unknown approach, hybrid approach, nodal approach
 mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 > solvers.out.sysu
 mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 -nodal 1 -smtype 6 -smlv 10 -dom 1 -ov 0 > solvers.out.sysh
@@ -99,7 +76,9 @@ mpirun -np 4 ./ij -n 20 20 20 -P 2 2 1 -agg_nl 1 -solver 1 -simple 0 > solvers.o
 mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -additive 1 > solvers.out.112
 mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -add_Pmx 5 > solvers.out.113
 mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -add_Pmx 5 -add_end 2 > solvers.out.118
-mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 ns 2 > solvers.out.119
+mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -ns 2 > solvers.out.119
+mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -ns 1 > solvers.out.121
+mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -ns 2 -rap 1 > solvers.out.122
 mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -rlx 18 -ns 2 -rlx_coarse 18 -ns_coarse 2 > solvers.out.120
 
 #nonGalerkin version
@@ -180,3 +159,14 @@ mpirun -np 2  ./ij -solver 82 -ilu_type 50 -ilu_lfil 0 > solvers.out.323
 ## ILU smoother for AMG
 mpirun -np 2  ./ij -solver 0 -smtype 5  -smlv 1 -ilu_type 30 > solvers.out.324
 mpirun -np 2  ./ij -solver 0 -smtype 15 -smlv 1 -ilu_type 30 > solvers.out.325
+
+## Solve Ax=b and -Ax=b, convergence should be the same
+mpirun -np 2 ./ij -solver 0 -rhsrand -negA 0 > solvers.out.400.p
+mpirun -np 2 ./ij -solver 0 -rhsrand -negA 1 > solvers.out.400.n
+mpirun -np 3 ./ij -solver 3 -rhsrand -negA 0 > solvers.out.401.p
+mpirun -np 3 ./ij -solver 3 -rhsrand -negA 1 > solvers.out.401.n
+mpirun -np 4 ./ij -cheby_eig_est 10 -cheby_order 4 -cheby_variant 0 -cheby_scale 1 -rlx 16 -negA 0 > solvers.out.402.p
+mpirun -np 4 ./ij -cheby_eig_est 10 -cheby_order 4 -cheby_variant 0 -cheby_scale 1 -rlx 16 -negA 1 > solvers.out.402.n
+mpirun -np 4 ./ij -solver 3 -cheby_eig_est 0 -cheby_order 3 -cheby_variant 1 -cheby_scale 1 -rlx 16 -negA 0 > solvers.out.403.p
+mpirun -np 4 ./ij -solver 3 -cheby_eig_est 0 -cheby_order 3 -cheby_variant 1 -cheby_scale 1 -rlx 16 -negA 1 > solvers.out.403.n
+

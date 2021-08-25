@@ -60,6 +60,8 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    hypre_SetSyncCudaCompute(0);
 #endif
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  ParMatvec returns ierr = 11 if
     *  length of X doesn't equal the number of columns of A,
@@ -146,8 +148,11 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    {
       if (!hypre_ParCSRCommPkgTmpData(comm_pkg))
       {
-         /* hypre_ParCSRCommPkgTmpData(comm_pkg) = hypre_TAlloc(HYPRE_Complex, num_cols_offd, HYPRE_MEMORY_DEVICE); */
+#if 1
+         hypre_ParCSRCommPkgTmpData(comm_pkg) = hypre_TAlloc(HYPRE_Complex, num_cols_offd, HYPRE_MEMORY_DEVICE);
+#else
          hypre_ParCSRCommPkgTmpData(comm_pkg) = _hypre_TAlloc(HYPRE_Complex, num_cols_offd, hypre_MEMORY_DEVICE);
+#endif
       }
       hypre_VectorData(x_tmp) = hypre_ParCSRCommPkgTmpData(comm_pkg);
       hypre_SeqVectorSetDataOwner(x_tmp, 0);
@@ -175,14 +180,15 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       {
          if (!hypre_ParCSRCommPkgBufData(comm_pkg))
          {
-            /*
+#if 1
             hypre_ParCSRCommPkgBufData(comm_pkg) = hypre_TAlloc(HYPRE_Complex,
                                                                 hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                                                 HYPRE_MEMORY_DEVICE);
-            */
+#else
             hypre_ParCSRCommPkgBufData(comm_pkg) = _hypre_TAlloc(HYPRE_Complex,
                                                                  hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                                                  hypre_MEMORY_DEVICE);
+#endif
          }
          x_buf_data[0] = hypre_ParCSRCommPkgBufData(comm_pkg);
          continue;
@@ -346,6 +352,8 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
 #endif
 
+   HYPRE_ANNOTATE_FUNC_END;
+
    return ierr;
 }
 
@@ -406,6 +414,8 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    hypre_GetSyncCudaCompute(&sync_stream);
    hypre_SetSyncCudaCompute(0);
 #endif
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  MatvecT returns ierr = 1 if
@@ -491,8 +501,11 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    {
       if (!hypre_ParCSRCommPkgTmpData(comm_pkg))
       {
-         //hypre_ParCSRCommPkgTmpData(comm_pkg) = hypre_TAlloc(HYPRE_Complex, num_cols_offd, HYPRE_MEMORY_DEVICE);
+#if 1
+         hypre_ParCSRCommPkgTmpData(comm_pkg) = hypre_TAlloc(HYPRE_Complex, num_cols_offd, HYPRE_MEMORY_DEVICE);
+#else
          hypre_ParCSRCommPkgTmpData(comm_pkg) = _hypre_TAlloc(HYPRE_Complex, num_cols_offd, hypre_MEMORY_DEVICE);
+#endif
       }
       hypre_VectorData(y_tmp) = hypre_ParCSRCommPkgTmpData(comm_pkg);
       hypre_SeqVectorSetDataOwner(y_tmp, 0);
@@ -520,14 +533,15 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       {
          if (!hypre_ParCSRCommPkgBufData(comm_pkg))
          {
-            /*
+#if 1
             hypre_ParCSRCommPkgBufData(comm_pkg) = hypre_TAlloc(HYPRE_Complex,
                                                                 hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                                                 HYPRE_MEMORY_DEVICE);
-            */
+#else
             hypre_ParCSRCommPkgBufData(comm_pkg) = _hypre_TAlloc(HYPRE_Complex,
                                                                  hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                                                  hypre_MEMORY_DEVICE);
+#endif
          }
          y_buf_data[0] = hypre_ParCSRCommPkgBufData(comm_pkg);
          continue;
@@ -708,6 +722,8 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
 #endif
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return ierr;
 }

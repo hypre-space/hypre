@@ -7,7 +7,6 @@
 
 #include "_hypre_parcsr_ls.h"
 #include "aux_interp.h"
-#include "hypre_hopscotch_hash.h"
 
 /*---------------------------------------------------------------------------
  * Auxilary routines for the long range interpolation methods.
@@ -680,7 +679,7 @@ void hypre_build_interp_colmap(hypre_ParCSRMatrix *P, HYPRE_Int full_off_procNod
    HYPRE_Int    *P_offd_j = P->offd->j;
    HYPRE_BigInt *col_map_offd_P = NULL;
    HYPRE_Int    *P_marker = NULL;
-   HYPRE_Int     prefix_sum_workspace[hypre_NumThreads() + 1];
+   HYPRE_Int    *prefix_sum_workspace;
    HYPRE_Int     num_cols_P_offd = 0;
    HYPRE_Int     i, index;
 
@@ -688,6 +687,7 @@ void hypre_build_interp_colmap(hypre_ParCSRMatrix *P, HYPRE_Int full_off_procNod
    {
       P_marker = hypre_TAlloc(HYPRE_Int, full_off_procNodes, HYPRE_MEMORY_HOST);
    }
+   prefix_sum_workspace = hypre_TAlloc(HYPRE_Int, hypre_NumThreads() + 1, HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
@@ -775,6 +775,7 @@ void hypre_build_interp_colmap(hypre_ParCSRMatrix *P, HYPRE_Int full_off_procNod
    }
 
    hypre_TFree(P_marker, HYPRE_MEMORY_HOST);
+   hypre_TFree(prefix_sum_workspace, HYPRE_MEMORY_HOST);
 
    if (num_cols_P_offd)
    {

@@ -26,10 +26,8 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
                       HYPRE_IJVector *vector )
 {
    hypre_IJVector *vec;
-   HYPRE_Int num_procs, my_id;
-   HYPRE_BigInt *partitioning;
-
-   HYPRE_BigInt  row0, rowN;
+   HYPRE_Int       num_procs, my_id;
+   HYPRE_BigInt    row0, rowN;
 
    vec = hypre_CTAlloc(hypre_IJVector,  1, HYPRE_MEMORY_HOST);
 
@@ -54,12 +52,6 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
       return hypre_error_flag;
    }
 
-   partitioning = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
-
-   partitioning[0] = jlower;
-   partitioning[1] = jupper+1;
-
-
    /* now we need the global number of rows as well
       as the global first row index */
 
@@ -79,13 +71,14 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
    hypre_IJVectorGlobalFirstRow(vec) = row0;
    hypre_IJVectorGlobalNumRows(vec) = rowN - row0 + 1;
 
-   hypre_IJVectorComm(vec)         = comm;
-   hypre_IJVectorPartitioning(vec) = partitioning;
-   hypre_IJVectorObjectType(vec)   = HYPRE_UNITIALIZED;
-   hypre_IJVectorObject(vec)       = NULL;
-   hypre_IJVectorTranslator(vec)   = NULL;
-   hypre_IJVectorAssumedPart(vec)   = NULL;
-   hypre_IJVectorPrintLevel(vec)   = 0;
+   hypre_IJVectorComm(vec)            = comm;
+   hypre_IJVectorObjectType(vec)      = HYPRE_UNITIALIZED;
+   hypre_IJVectorObject(vec)          = NULL;
+   hypre_IJVectorTranslator(vec)      = NULL;
+   hypre_IJVectorAssumedPart(vec)     = NULL;
+   hypre_IJVectorPrintLevel(vec)      = 0;
+   hypre_IJVectorPartitioning(vec)[0] = jlower;
+   hypre_IJVectorPartitioning(vec)[1] = jupper+1;
 
    *vector = (HYPRE_IJVector) vec;
 
@@ -105,11 +98,6 @@ HYPRE_IJVectorDestroy( HYPRE_IJVector vector )
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
-   }
-
-   if (hypre_IJVectorPartitioning(vec))
-   {
-      hypre_TFree(hypre_IJVectorPartitioning(vec), HYPRE_MEMORY_HOST);
    }
 
    if (hypre_IJVectorAssumedPart(vec))
@@ -490,9 +478,6 @@ HYPRE_IJVectorGetLocalRange( HYPRE_IJVector  vector,
                              HYPRE_BigInt   *jupper )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
-   MPI_Comm comm;
-   HYPRE_BigInt *partitioning;
-   HYPRE_Int my_id;
 
    if (!vec)
    {
@@ -500,12 +485,9 @@ HYPRE_IJVectorGetLocalRange( HYPRE_IJVector  vector,
       return hypre_error_flag;
    }
 
-   comm = hypre_IJVectorComm(vec);
-   partitioning = hypre_IJVectorPartitioning(vec);
-   hypre_MPI_Comm_rank(comm, &my_id);
+   *jlower = hypre_IJVectorPartitioning(vec)[0];
+   *jupper = hypre_IJVectorPartitioning(vec)[1]-1;
 
-   *jlower = partitioning[0];
-   *jupper = partitioning[1]-1;
    return hypre_error_flag;
 }
 
@@ -532,6 +514,7 @@ HYPRE_IJVectorGetObject( HYPRE_IJVector   vector,
 
 /*--------------------------------------------------------------------------
  * HYPRE_IJVectorRead
+ * create IJVector on host memory
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -605,8 +588,8 @@ HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
    MPI_Comm        comm;
    HYPRE_BigInt   *partitioning;
    HYPRE_BigInt    jlower, jupper, j;
-   HYPRE_Complex   value;
-   HYPRE_Int       myid;
+   HYPRE_Complex  *h_values = NULL, *d_values = NULL, *values = NULL;
+   HYPRE_Int       myid, n_local;
    char            new_filename[255];
    FILE           *file;
 
@@ -630,14 +613,34 @@ HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
    partitioning = hypre_IJVectorPartitioning(vector);
    jlower = partitioning[0];
    jupper = partitioning[1] - 1;
+   n_local = jupper - jlower + 1;
+
    hypre_fprintf(file, "%b %b\n", jlower, jupper);
+
+   HYPRE_MemoryLocation memory_location = hypre_IJVectorMemoryLocation(vector);
+
+   d_values = hypre_TAlloc(HYPRE_Complex, n_local, memory_location);
+
+   HYPRE_IJVectorGetValues(vector, n_local, NULL, d_values);
+
+   if ( hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_HOST )
+   {
+      values = d_values;
+   }
+   else
+   {
+      h_values = hypre_TAlloc(HYPRE_Complex, n_local, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(h_values, d_values, HYPRE_Complex, n_local, HYPRE_MEMORY_HOST, memory_location);
+      values = h_values;
+   }
 
    for (j = jlower; j <= jupper; j++)
    {
-      HYPRE_IJVectorGetValues(vector, 1, &j, &value);
-
-      hypre_fprintf(file, "%b %.14e\n", j, value);
+      hypre_fprintf(file, "%b %.14e\n", j, values[j-jlower]);
    }
+
+   hypre_TFree(d_values, memory_location);
+   hypre_TFree(h_values, HYPRE_MEMORY_HOST);
 
    fclose(file);
 

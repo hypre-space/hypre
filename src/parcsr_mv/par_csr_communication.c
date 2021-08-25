@@ -910,31 +910,39 @@ hypre_ParCSRCommPkgCreate
 HYPRE_Int
 hypre_MatvecCommPkgCreate ( hypre_ParCSRMatrix *A )
 {
-   MPI_Comm   comm            = hypre_ParCSRMatrixComm(A);
-   HYPRE_BigInt  first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
-   HYPRE_BigInt *col_map_offd   = hypre_ParCSRMatrixColMapOffd(A);
-   HYPRE_Int  num_cols_offd   = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
-   HYPRE_BigInt  global_num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
+   MPI_Comm             comm  = hypre_ParCSRMatrixComm(A);
+   hypre_IJAssumedPart *apart = hypre_ParCSRMatrixAssumedPartition(A);
+   hypre_ParCSRCommPkg *comm_pkg;
+
+   HYPRE_BigInt         first_col_diag  = hypre_ParCSRMatrixFirstColDiag(A);
+   HYPRE_BigInt        *col_map_offd    = hypre_ParCSRMatrixColMapOffd(A);
+   HYPRE_Int            num_cols_offd   = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
+   HYPRE_BigInt         global_num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /* Create the assumed partition and should own it */
-   if  (hypre_ParCSRMatrixAssumedPartition(A) == NULL)
+   if (apart == NULL)
    {
       hypre_ParCSRMatrixCreateAssumedPartition(A);
       hypre_ParCSRMatrixOwnsAssumedPartition(A) = 1;
+      apart = hypre_ParCSRMatrixAssumedPartition(A);
    }
-   hypre_IJAssumedPart *apart = hypre_ParCSRMatrixAssumedPartition(A);
+
    /*-----------------------------------------------------------
     * setup commpkg
     *----------------------------------------------------------*/
-   hypre_ParCSRCommPkg *comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
+   comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
    hypre_ParCSRMatrixCommPkg(A) = comm_pkg;
-   hypre_ParCSRCommPkgCreateApart ( comm, col_map_offd, first_col_diag,
-                                    num_cols_offd, global_num_cols,
-                                    apart,
-                                    comm_pkg );
+   hypre_ParCSRCommPkgCreateApart( comm, col_map_offd, first_col_diag,
+                                   num_cols_offd, global_num_cols,
+                                   apart,
+                                   comm_pkg );
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
-
 
 HYPRE_Int
 hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg )
@@ -968,10 +976,10 @@ hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg )
       hypre_TFree(hypre_ParCSRCommPkgRecvMPITypes(comm_pkg), HYPRE_MEMORY_HOST); */
 
 #if defined(HYPRE_USING_GPU)
-   //hypre_TFree(hypre_ParCSRCommPkgTmpData(comm_pkg),   HYPRE_MEMORY_DEVICE);
-   //hypre_TFree(hypre_ParCSRCommPkgBufData(comm_pkg),   HYPRE_MEMORY_DEVICE);
-   _hypre_TFree(hypre_ParCSRCommPkgTmpData(comm_pkg), hypre_MEMORY_DEVICE);
-   _hypre_TFree(hypre_ParCSRCommPkgBufData(comm_pkg), hypre_MEMORY_DEVICE);
+   hypre_TFree(hypre_ParCSRCommPkgTmpData(comm_pkg),   HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_ParCSRCommPkgBufData(comm_pkg),   HYPRE_MEMORY_DEVICE);
+   //_hypre_TFree(hypre_ParCSRCommPkgTmpData(comm_pkg), hypre_MEMORY_DEVICE);
+   //_hypre_TFree(hypre_ParCSRCommPkgBufData(comm_pkg), hypre_MEMORY_DEVICE);
    hypre_TFree(hypre_ParCSRCommPkgWorkSpace(comm_pkg), HYPRE_MEMORY_DEVICE);
 #endif
 

@@ -40,11 +40,14 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Complex      *A_offd_data  = hypre_CSRMatrixData(A_offd);
    HYPRE_Int          *A_offd_i     = hypre_CSRMatrixI(A_offd);
    HYPRE_Int           A_offd_nnz   = hypre_CSRMatrixNumNonzeros(A_offd);
-   HYPRE_Int          *Soc_diag_j   = hypre_ParCSRMatrixSocDiagJ(S);
-   HYPRE_Int          *Soc_offd_j   = hypre_ParCSRMatrixSocOffdJ(S);
    HYPRE_Int          *CF_marker_dev;
    HYPRE_Complex      *Dbeta, *Dbeta_offd, *rsWA, *rsW;
    hypre_ParCSRMatrix *As_F2F, *As_FC, *W, *P;
+
+   hypre_BoomerAMGMakeSocFromSDevice(A, S);
+
+   HYPRE_Int          *Soc_diag_j   = hypre_ParCSRMatrixSocDiagJ(S);
+   HYPRE_Int          *Soc_offd_j   = hypre_ParCSRMatrixSocOffdJ(S);
 
    CF_marker_dev = hypre_TAlloc(HYPRE_Int, A_nr_local, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(CF_marker_dev, CF_marker, HYPRE_Int, A_nr_local, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
@@ -121,7 +124,9 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_THRUST_CALL( exclusive_scan,
                       thrust::make_transform_iterator(CF_marker_dev,              is_negative<HYPRE_Int>()),
                       thrust::make_transform_iterator(CF_marker_dev + A_nr_local, is_negative<HYPRE_Int>()),
-                      map_to_F );
+                      map_to_F,
+                      HYPRE_Int(0) );/* *MUST* pass init value since input and output types diff. */
+
    HYPRE_Int *map_F2_to_F = hypre_TAlloc(HYPRE_Int, AF2F_nr_local, HYPRE_MEMORY_DEVICE);
 
    HYPRE_Int *tmp_end = HYPRE_THRUST_CALL( copy_if,
@@ -216,9 +221,6 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
                                 P_diag_nnz,
                                 hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(W)));
 
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
-   hypre_ParCSRMatrixOwnsColStarts(P) = 0;
-
    hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(P))    = P_diag_i;
    hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(P))    = P_diag_j;
    hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(P)) = P_diag_data;
@@ -273,11 +275,14 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Complex      *A_offd_data  = hypre_CSRMatrixData(A_offd);
    HYPRE_Int          *A_offd_i     = hypre_CSRMatrixI(A_offd);
    HYPRE_Int           A_offd_nnz   = hypre_CSRMatrixNumNonzeros(A_offd);
-   HYPRE_Int          *Soc_diag_j   = hypre_ParCSRMatrixSocDiagJ(S);
-   HYPRE_Int          *Soc_offd_j   = hypre_ParCSRMatrixSocOffdJ(S);
    HYPRE_Int          *CF_marker_dev;
    HYPRE_Complex      *Dbeta, *rsWA, *rsW, *dlam, *dlam_offd, *dtmp, *dtmp_offd;
    hypre_ParCSRMatrix *As_F2F, *As_FF, *As_FC, *W, *P;
+
+   hypre_BoomerAMGMakeSocFromSDevice(A, S);
+
+   HYPRE_Int          *Soc_diag_j   = hypre_ParCSRMatrixSocDiagJ(S);
+   HYPRE_Int          *Soc_offd_j   = hypre_ParCSRMatrixSocOffdJ(S);
 
    CF_marker_dev = hypre_TAlloc(HYPRE_Int, A_nr_local, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(CF_marker_dev, CF_marker, HYPRE_Int, A_nr_local, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
@@ -393,7 +398,8 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_THRUST_CALL( exclusive_scan,
                       thrust::make_transform_iterator(CF_marker_dev,              is_negative<HYPRE_Int>()),
                       thrust::make_transform_iterator(CF_marker_dev + A_nr_local, is_negative<HYPRE_Int>()),
-                      map_to_F );
+                      map_to_F,
+                      HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
    HYPRE_Int *map_F2_to_F = hypre_TAlloc(HYPRE_Int, AF2F_nr_local, HYPRE_MEMORY_DEVICE);
 
    HYPRE_Int *tmp_end = HYPRE_THRUST_CALL( copy_if,
@@ -491,9 +497,6 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
                                 hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(W)),
                                 P_diag_nnz,
                                 hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(W)));
-
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
-   hypre_ParCSRMatrixOwnsColStarts(P) = 0;
 
    hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(P))    = P_diag_i;
    hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(P))    = P_diag_j;

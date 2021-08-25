@@ -284,7 +284,7 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
                }
                row++;
             }
-            else 
+            else
             {
                for (j=A_diag_i[i]; j < A_diag_i[i+1]; j++)
                {
@@ -424,7 +424,6 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
    hypre_ParCSRMatrixColMapOffd(P) = hypre_ParCSRMatrixColMapOffd(W);
    hypre_ParCSRMatrixColMapOffd(W) = NULL;
 
@@ -892,7 +891,7 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
                }
                row++;
             }
-            else 
+            else
             {
                for (j=A_diag_i[i]; j < A_diag_i[i+1]; j++)
                {
@@ -1070,7 +1069,6 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
    hypre_ParCSRMatrixColMapOffd(P) = hypre_ParCSRMatrixColMapOffd(W);
    hypre_ParCSRMatrixColMapOffd(W) = NULL;
 
@@ -1169,7 +1167,7 @@ hypre_BoomerAMGBuildModExtPIInterp(hypre_ParCSRMatrix  *A,
                                    hypre_ParCSRMatrix **P_ptr)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_GpuProfilingPushRange("ExtPIInterp");
+   hypre_GpuProfilingPushRange("ModExtPIInterp");
 #endif
 
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
@@ -1179,7 +1177,7 @@ hypre_BoomerAMGBuildModExtPIInterp(hypre_ParCSRMatrix  *A,
    if (exec == HYPRE_EXEC_HOST)
    {
       ierr = hypre_BoomerAMGBuildModExtPIInterpHost(A, CF_marker, S, num_cpts_global,
-                                                    debug_flag, num_functions, dof_func, 
+                                                    debug_flag, num_functions, dof_func,
                                                     trunc_factor, max_elmts, P_ptr);
    }
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -1529,7 +1527,7 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
                }
                row++;
             }
-            else 
+            else
             {
                for (j=A_diag_i[i]; j < A_diag_i[i+1]; j++)
                {
@@ -1689,7 +1687,6 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
    hypre_ParCSRMatrixColMapOffd(P) = hypre_ParCSRMatrixColMapOffd(W);
    hypre_ParCSRMatrixColMapOffd(W) = NULL;
 
@@ -1787,7 +1784,7 @@ hypre_BoomerAMGBuildModExtPEInterp(hypre_ParCSRMatrix  *A,
                                       hypre_ParCSRMatrix **P_ptr)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_GpuProfilingPushRange("ExtPEInterp");
+   hypre_GpuProfilingPushRange("ModExtPEInterp");
 #endif
 
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );

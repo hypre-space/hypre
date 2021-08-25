@@ -39,7 +39,6 @@ FILES =\
  F90_HYPRE_struct_pfmg.c\
  F90_HYPRE_struct_smg.c\
  F90_HYPRE_struct_sparse_msg.c\
- general.c\
  hybrid.c\
  HYPRE_struct_bicgstab.c\
  HYPRE_struct_cycred.c\
@@ -117,7 +116,7 @@ install: libHYPRE_struct_ls${HYPRE_LIB_SUFFIX}
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o* libHYPRE*
+	rm -f *.o *.obj libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean

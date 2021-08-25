@@ -761,8 +761,6 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrixData(R_offd) = R_offd_data;
    hypre_CSRMatrixI(R_offd)    = R_offd_i;
    hypre_CSRMatrixJ(R_offd)    = R_offd_j;
-   /* R does not own ColStarts, since A does */
-   hypre_ParCSRMatrixOwnsColStarts(R) = 0;
 
    hypre_ParCSRMatrixColMapOffd(R) = col_map_offd_R;
 
@@ -867,7 +865,7 @@ void hypre_fgmresT(HYPRE_Int n,
 
    /* XXX: x_0 is all ZERO !!! so r0 = b */
    v = V;
-   memcpy(v, b, n*sizeof(HYPRE_Complex));
+   hypre_TMemcpy(v, b, HYPRE_Complex, n, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
    normr0 = sqrt(hypre_ddot(&n, v, &one, v, &one));
 
    if (normr0 < EPSIMAC)
@@ -993,4 +991,3 @@ void hypre_ordered_GS(const HYPRE_Complex L[],
 
    hypre_TFree(ordering, HYPRE_MEMORY_HOST);
 }
-

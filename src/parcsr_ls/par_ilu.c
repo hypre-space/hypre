@@ -66,7 +66,7 @@ hypre_ILUCreate()
    hypre_ParILUDataPerm(ilu_data) = NULL;
    hypre_ParILUDataQPerm(ilu_data) = NULL;
    hypre_ParILUDataTolDDPQ(ilu_data) = 1.0e-01;
-   
+
    hypre_ParILUDataF(ilu_data) = NULL;
    hypre_ParILUDataU(ilu_data) = NULL;
    hypre_ParILUDataFTemp(ilu_data) = NULL;
@@ -77,9 +77,9 @@ hypre_ILUCreate()
    hypre_ParILUDataFExt(ilu_data) = NULL;
    hypre_ParILUDataResidual(ilu_data) = NULL;
    hypre_ParILUDataRelResNorms(ilu_data) = NULL;
-   
+
    hypre_ParILUDataNumIterations(ilu_data) = 0;
-   
+
    hypre_ParILUDataMaxIter(ilu_data) = 20;
    hypre_ParILUDataTol(ilu_data) = 1.0e-7;
 
@@ -736,7 +736,7 @@ hypre_ILUSetSchurNSHDropThreshold( void *ilu_vdata, HYPRE_Real threshold)
    hypre_ParILUDataSchurNSHDroptol(ilu_data)[1]           = threshold;
    return hypre_error_flag;
 }
-/* Set tolorance array for NSH for Schur System 
+/* Set tolorance array for NSH for Schur System
  *    - threshold[0] : threshold for Minimal Residual iteration (initial guess for NSH).
  *    - threshold[1] : threshold for Newton–Schulz–Hotelling iteration.
 */
@@ -2358,7 +2358,7 @@ hypre_ILULocalRCM( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end,
 
       /* now sum G with G' */
       hypre_CSRMatrixTranspose(G, &GT, 1);
-      GGT = hypre_CSRMatrixAdd(G, GT);
+      GGT = hypre_CSRMatrixAdd(1.0, G, 1.0, GT);
       hypre_CSRMatrixDestroy(G);
       hypre_CSRMatrixDestroy(GT);
       G = GGT;
@@ -4164,38 +4164,6 @@ hypre_CSRMatrixTrace(hypre_CSRMatrix *A, HYPRE_Real *trace_io)
 
 }
 
-/* Scale CSR matrix A = scalar * A
- * A: the target CSR matrix
- * scalar: real number
- */
-HYPRE_Int
-hypre_CSRMatrixScale(hypre_CSRMatrix *A, HYPRE_Real scalar)
-{
-   HYPRE_Real  *data = hypre_CSRMatrixData(A);
-   HYPRE_Int   i,k;
-   k = hypre_CSRMatrixNumNonzeros(A);
-   for(i = 0 ; i < k ; i ++)
-   {
-      data[i] *= scalar;
-   }
-   return hypre_error_flag;
-}
-
-/* Scale ParCSR matrix A = scalar * A
- * A: the target CSR matrix
- * scalar: real number
- */
-HYPRE_Int
-hypre_ParCSRMatrixScale(hypre_ParCSRMatrix *A, HYPRE_Real scalar)
-{
-   hypre_CSRMatrix   *A_diag = hypre_ParCSRMatrixDiag(A);
-   hypre_CSRMatrix   *A_offd = hypre_ParCSRMatrixOffd(A);
-   /* each thread scale local diag and offd */
-   hypre_CSRMatrixScale(A_diag, scalar);
-   hypre_CSRMatrixScale(A_offd, scalar);
-   return hypre_error_flag;
-}
-
 /* Apply dropping to CSR matrix
  * A: the target CSR matrix
  * droptol: all entries have smaller absolute value than this will be dropped
@@ -4480,7 +4448,7 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMat
 
       hypre_CSRMatrixScale(matR_temp, -1.0);
 
-      matR = hypre_CSRMatrixAdd(matI,matR_temp);
+      matR = hypre_CSRMatrixAdd(1.0, matI, 1.0, matR_temp);
       hypre_CSRMatrixDestroy(matR_temp);
 
       /* r_norm */
@@ -4518,7 +4486,7 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMat
       hypre_CSRMatrixScale(matZ, alpha);
 
       hypre_CSRMatrixDestroy(matR);
-      matR = hypre_CSRMatrixAdd(matM, matZ);
+      matR = hypre_CSRMatrixAdd(1.0, matM, 1.0, matZ);
       hypre_CSRMatrixDestroy(matM);
       matM = matR;
 
@@ -4594,7 +4562,7 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
    /* setup */
    hypre_MPI_Comm_rank(comm, &myid);
 
-   M_offd_i = hypre_TAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_DEVICE);
+   M_offd_i = hypre_CTAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_DEVICE);
 
    if(mr_col_version)
    {
@@ -4607,12 +4575,6 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
     * but we don't want a too dense MR initial guess
     */
    hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(A_diag, &M_diag, droptol[0] * 10.0, mr_tol, eps_tol, mr_max_row_nnz, mr_max_iter, print_level );
-
-   /* create empty offdiagonal */
-   for(i = 0 ; i <= n ; i ++)
-   {
-      M_offd_i[i] = 0;
-   }
 
    /* create parCSR matM */
    matM = hypre_ParCSRMatrixCreate( comm,
@@ -4629,10 +4591,8 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
 
    M_offd = hypre_ParCSRMatrixOffd(matM);
    hypre_CSRMatrixI(M_offd) = M_offd_i;
-   hypre_CSRMatrixOwnsData(M_offd) = 1;
-
-   hypre_ParCSRMatrixSetColStartsOwner(matM,0);
-   hypre_ParCSRMatrixSetRowStartsOwner(matM,0);
+   hypre_CSRMatrixNumRownnz(M_offd) = 0;
+   hypre_CSRMatrixOwnsData(M_offd)  = 1;
 
    /* now start NSH
     * Mj+1 = 2Mj - MjAMj
@@ -4671,7 +4631,7 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
       /* update Mj+1 = 2Mj - MjAMj
        * the result holds it own start/end data!
        */
-      hypre_ParcsrAdd(2.0, matM,-1.0, MAM, &AM);
+      hypre_ParCSRMatrixAdd(2.0, matM, -1.0, MAM, &AM);
       hypre_ParCSRMatrixDestroy(matM);
       matM = AM;
 

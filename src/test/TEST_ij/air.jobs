@@ -1,0 +1,27 @@
+#!/bin/sh
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+#=============================================================================
+# ij: Run difconv problem with AIR and AIR GMRES
+
+#AIR standalone and with GMRES
+
+# Laplacian
+mpirun -np 2 ./ij -pmis -rhsrand -AIR 3 > air.out.20
+mpirun -np 2 ./ij -pmis -rhsrand -AIR 4 > air.out.21
+mpirun -np 2 ./ij -pmis -rhsrand -AIR 5 > air.out.22
+mpirun -np 2 ./ij -solver 3 -pmis -rhsrand -AIR 3 > air.out.23
+mpirun -np 2 ./ij -solver 3 -pmis -rhsrand -AIR 4 > air.out.24
+mpirun -np 2 ./ij -solver 3 -pmis -rhsrand -AIR 5 > air.out.25
+
+# Convection (with no diffusion)
+mpirun -np 2 ./ij -difconv -c 0.0 0.0 0.0 -atype 3 -pmis -rhsrand -AIR 3 > air.out.26
+mpirun -np 2 ./ij -difconv -c 0.0 0.0 0.0 -atype 3 -pmis -rhsrand -AIR 4 > air.out.27
+mpirun -np 2 ./ij -difconv -c 0.0 0.0 0.0 -atype 3 -pmis -rhsrand -AIR 5 > air.out.28
+mpirun -np 2 ./ij -solver 3 -difconv -c 0.0 0.0 0.0 -atype 3 -pmis -rhsrand -AIR 3 > air.out.29
+mpirun -np 2 ./ij -solver 3 -difconv -c 0.0 0.0 0.0 -atype 3 -pmis -rhsrand -AIR 4 > air.out.30
+mpirun -np 2 ./ij -solver 3 -difconv -c 0.0 0.0 0.0 -atype 3 -pmis -rhsrand -AIR 5 > air.out.31
+

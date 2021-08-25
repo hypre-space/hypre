@@ -37,8 +37,9 @@ extern "C" {
 
 typedef struct
 {
-   HYPRE_Int            local_num_rows;          /* defines number of rows on this processors */
-   HYPRE_Int            local_num_cols;          /* defines number of cols of diag */
+   HYPRE_Int            local_num_rows;    /* defines number of rows on this processor */
+   HYPRE_Int            local_num_rownnz;  /* defines number of nonzero rows on this processor */
+   HYPRE_Int            local_num_cols;    /* defines number of cols of diag */
 
    HYPRE_Int            need_aux;                /* if need_aux = 1, aux_j, aux_data are used to
                                                     generate the parcsr matrix (default),
@@ -46,9 +47,10 @@ typedef struct
                                                     parcsr structure (requires the knowledge of
                                                     offd_i and diag_i ) */
 
-   HYPRE_Int           *row_length;              /* row_length_diag[i] contains number of stored
+   HYPRE_Int           *rownnz;                  /* row_nnz[i] contains the i-th nonzero row id */
+   HYPRE_Int           *row_length;              /* row_length[i] contains number of stored
                                                     elements in i-th row */
-   HYPRE_Int           *row_space;               /* row_space_diag[i] contains space allocated to
+   HYPRE_Int           *row_space;               /* row_space[i] contains space allocated to
                                                     i-th row */
 
    HYPRE_Int           *diag_sizes;              /* user input row lengths of diag */
@@ -97,9 +99,11 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 #define hypre_AuxParCSRMatrixLocalNumRows(matrix)         ((matrix) -> local_num_rows)
+#define hypre_AuxParCSRMatrixLocalNumRownnz(matrix)       ((matrix) -> local_num_rownnz)
 #define hypre_AuxParCSRMatrixLocalNumCols(matrix)         ((matrix) -> local_num_cols)
 
 #define hypre_AuxParCSRMatrixNeedAux(matrix)              ((matrix) -> need_aux)
+#define hypre_AuxParCSRMatrixRownnz(matrix)               ((matrix) -> rownnz)
 #define hypre_AuxParCSRMatrixRowLength(matrix)            ((matrix) -> row_length)
 #define hypre_AuxParCSRMatrixRowSpace(matrix)             ((matrix) -> row_space)
 #define hypre_AuxParCSRMatrixAuxJ(matrix)                 ((matrix) -> aux_j)
@@ -225,8 +229,8 @@ typedef struct hypre_IJMatrix_struct
 {
    MPI_Comm      comm;
 
-   HYPRE_BigInt *row_partitioning;    /* distribution of rows across processors */
-   HYPRE_BigInt *col_partitioning;    /* distribution of columns */
+   HYPRE_BigInt  row_partitioning[2]; /* distribution of rows across processors */
+   HYPRE_BigInt  col_partitioning[2]; /* distribution of columns */
 
    HYPRE_Int     object_type;         /* Indicates the type of "object" */
    void         *object;              /* Structure for storing local portion */
@@ -295,7 +299,6 @@ hypre_GetIJMatrixISISMatrix( HYPRE_IJMatrix IJmatrix, RowMatrix *reference )
 #endif
 
 #endif /* #ifndef hypre_IJ_MATRIX_HEADER */
-
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -320,7 +323,7 @@ typedef struct hypre_IJVector_struct
 {
    MPI_Comm      comm;
 
-   HYPRE_BigInt *partitioning;      /* Indicates partitioning over tasks */
+   HYPRE_BigInt  partitioning[2];   /* Indicates partitioning over tasks */
 
    HYPRE_Int     object_type;       /* Indicates the type of "local storage" */
 
@@ -369,7 +372,6 @@ hypre_IJVectorMemoryLocation(hypre_IJVector *vector)
 /* #include "./internal_protos.h" */
 
 #endif /* #ifndef hypre_IJ_VECTOR_HEADER */
-
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -380,6 +382,7 @@ hypre_IJVectorMemoryLocation(hypre_IJVector *vector)
 /* aux_parcsr_matrix.c */
 HYPRE_Int hypre_AuxParCSRMatrixCreate ( hypre_AuxParCSRMatrix **aux_matrix , HYPRE_Int local_num_rows , HYPRE_Int local_num_cols , HYPRE_Int *sizes );
 HYPRE_Int hypre_AuxParCSRMatrixDestroy ( hypre_AuxParCSRMatrix *matrix );
+HYPRE_Int hypre_AuxParCSRMatrixSetRownnz ( hypre_AuxParCSRMatrix *matrix );
 HYPRE_Int hypre_AuxParCSRMatrixInitialize ( hypre_AuxParCSRMatrix *matrix );
 HYPRE_Int hypre_AuxParCSRMatrixInitialize_v2( hypre_AuxParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location );
 
@@ -428,6 +431,9 @@ HYPRE_Int hypre_IJMatrixSetAddValuesParCSRDevice ( hypre_IJMatrix *matrix , HYPR
 HYPRE_Int hypre_IJMatrixSetConstantValuesParCSR ( hypre_IJMatrix *matrix , HYPRE_Complex value );
 HYPRE_Int hypre_IJMatrixAddToValuesParCSR ( hypre_IJMatrix *matrix , HYPRE_Int nrows , HYPRE_Int *ncols , const HYPRE_BigInt *rows , const HYPRE_Int *row_indexes , const HYPRE_BigInt *cols , const HYPRE_Complex *values );
 HYPRE_Int hypre_IJMatrixDestroyParCSR ( hypre_IJMatrix *matrix );
+HYPRE_Int hypre_IJMatrixTransposeParCSR ( hypre_IJMatrix  *matrix_A , hypre_IJMatrix *matrix_AT );
+HYPRE_Int hypre_IJMatrixNormParCSR ( hypre_IJMatrix *matrix , HYPRE_Real *norm );
+HYPRE_Int hypre_IJMatrixAddParCSR ( HYPRE_Complex alpha , hypre_IJMatrix *matrix_A , HYPRE_Complex beta , hypre_IJMatrix *matrix_B , hypre_IJMatrix *matrix_C );
 HYPRE_Int hypre_IJMatrixAssembleOffProcValsParCSR ( hypre_IJMatrix *matrix , HYPRE_Int off_proc_i_indx , HYPRE_Int max_off_proc_elmts , HYPRE_Int current_num_elmts , HYPRE_MemoryLocation memory_location , HYPRE_BigInt *off_proc_i , HYPRE_BigInt *off_proc_j , HYPRE_Complex *off_proc_data );
 HYPRE_Int hypre_FillResponseIJOffProcVals ( void *p_recv_contact_buf , HYPRE_Int contact_size , HYPRE_Int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , HYPRE_Int *response_message_size );
 HYPRE_Int hypre_FindProc ( HYPRE_BigInt *list , HYPRE_BigInt value , HYPRE_Int list_length );
@@ -496,6 +502,9 @@ HYPRE_Int HYPRE_IJMatrixSetMaxOffProcElmts ( HYPRE_IJMatrix matrix , HYPRE_Int m
 HYPRE_Int HYPRE_IJMatrixRead ( const char *filename , MPI_Comm comm , HYPRE_Int type , HYPRE_IJMatrix *matrix_ptr );
 HYPRE_Int HYPRE_IJMatrixPrint ( HYPRE_IJMatrix matrix , const char *filename );
 HYPRE_Int HYPRE_IJMatrixSetOMPFlag ( HYPRE_IJMatrix matrix , HYPRE_Int omp_flag );
+HYPRE_Int HYPRE_IJMatrixTranspose ( HYPRE_IJMatrix  matrix_A , HYPRE_IJMatrix *matrix_AT );
+HYPRE_Int HYPRE_IJMatrixNorm ( HYPRE_IJMatrix matrix , HYPRE_Real *norm );
+HYPRE_Int HYPRE_IJMatrixAdd ( HYPRE_Complex alpha , HYPRE_IJMatrix matrix_A , HYPRE_Complex beta , HYPRE_IJMatrix matrix_B , HYPRE_IJMatrix *matrix_C );
 
 /* HYPRE_IJVector.c */
 HYPRE_Int HYPRE_IJVectorCreate ( MPI_Comm comm , HYPRE_BigInt jlower , HYPRE_BigInt jupper , HYPRE_IJVector *vector );
@@ -513,7 +522,6 @@ HYPRE_Int HYPRE_IJVectorGetLocalRange ( HYPRE_IJVector vector , HYPRE_BigInt *jl
 HYPRE_Int HYPRE_IJVectorGetObject ( HYPRE_IJVector vector , void **object );
 HYPRE_Int HYPRE_IJVectorRead ( const char *filename , MPI_Comm comm , HYPRE_Int type , HYPRE_IJVector *vector_ptr );
 HYPRE_Int HYPRE_IJVectorPrint ( HYPRE_IJVector vector , const char *filename );
-
 
 #ifdef __cplusplus
 }

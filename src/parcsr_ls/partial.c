@@ -766,7 +766,6 @@ hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_mark
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    hypre_CSRMatrixMemoryLocation(P_diag) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixMemoryLocation(P_offd) = HYPRE_MEMORY_HOST;
@@ -841,7 +840,7 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
                                      HYPRE_BigInt *num_old_cpts_global,
                                      HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag,
                                      HYPRE_Real trunc_factor, HYPRE_Int max_elmts,
-                                     HYPRE_Int sep_weight, 
+                                     HYPRE_Int sep_weight,
                                      hypre_ParCSRMatrix  **P_ptr)
 {
    /* Communication Variables */
@@ -1619,8 +1618,8 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
                   ahat_offd[jj] = 0;
                }
             }
-            if (sum_neg_C*diagonal) alfa = sum_neg/sum_neg_C/diagonal;
-            if (sum_pos_C*diagonal) beta = sum_pos/sum_pos_C/diagonal;
+            if (sum_neg_C*diagonal != 0.0) alfa = sum_neg/sum_neg_C/diagonal;
+            if (sum_pos_C*diagonal != 0.0) beta = sum_pos/sum_pos_C/diagonal;
 
             /*-----------------------------------------------------------------
              * Set interpolation weight by dividing by the diagonal.
@@ -1682,7 +1681,7 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
                   ahat_offd[jj] = 0;
                }
             }
-            if (sum_C*diagonal) alfa = sum/sum_C/diagonal;
+            if (sum_C*diagonal != 0.0) alfa = sum/sum_C/diagonal;
 
             /*-----------------------------------------------------------------
              * Set interpolation weight by dividing by the diagonal.
@@ -1741,7 +1740,6 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    hypre_CSRMatrixMemoryLocation(P_diag) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixMemoryLocation(P_offd) = HYPRE_MEMORY_HOST;
@@ -2482,7 +2480,6 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    hypre_CSRMatrixMemoryLocation(P_diag) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixMemoryLocation(P_offd) = HYPRE_MEMORY_HOST;
@@ -2536,4 +2533,3 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
 
    return hypre_error_flag;
 }
-

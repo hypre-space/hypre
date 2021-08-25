@@ -46,7 +46,7 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
 
       hypre_BoxGetSize(box, loop_size);
 
-      /* TODO: generate on host and copy to device. FIX? */
+      /* RL TODO: generate on host and copy to device. FIX? */
 #if defined(HYPRE_USING_GPU)
       HYPRE_Int loop_n = 1, ii;
       for (ii = 0; ii < hypre_StructVectorNDim(vector); ii++)
