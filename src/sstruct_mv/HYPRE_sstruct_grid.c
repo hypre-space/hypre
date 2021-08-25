@@ -60,15 +60,19 @@ HYPRE_SStructGridCreate( MPI_Comm           comm,
       fem_vars[i]      = NULL;
       fem_offsets[i]   = NULL;
    }
-   hypre_SStructGridPGrids(grid)      = pgrids;
-   hypre_SStructGridNNeighbors(grid)  = nneighbors;
-   hypre_SStructGridNeighbors(grid)   = neighbors;
-   hypre_SStructGridNborOffsets(grid) = nbor_offsets;
-   hypre_SStructGridNUCVars(grid)     = 0;
-   hypre_SStructGridUCVars(grid)      = NULL;
-   hypre_SStructGridFEMNVars(grid)    = fem_nvars;
-   hypre_SStructGridFEMVars(grid)     = fem_vars;
-   hypre_SStructGridFEMOffsets(grid)  = fem_offsets;
+   hypre_SStructGridPGrids(grid)        = pgrids;
+   hypre_SStructGridNNeighbors(grid)    = nneighbors;
+   hypre_SStructGridNeighbors(grid)     = neighbors;
+   hypre_SStructGridNborOffsets(grid)   = nbor_offsets;
+   hypre_SStructGridNVNeighbors(grid)   = NULL;
+   hypre_SStructGridVNeighbors(grid)    = NULL;
+   hypre_SStructGridVNborCommInfo(grid) = NULL;
+   hypre_SStructGridVNborNComms(grid)   = 0;
+   hypre_SStructGridNUCVars(grid)       = 0;
+   hypre_SStructGridUCVars(grid)        = NULL;
+   hypre_SStructGridFEMNVars(grid)      = fem_nvars;
+   hypre_SStructGridFEMVars(grid)       = fem_vars;
+   hypre_SStructGridFEMOffsets(grid)    = fem_offsets;
 
    hypre_SStructGridBoxManagers(grid) = NULL;
    hypre_SStructGridNborBoxManagers(grid) = NULL;
@@ -200,10 +204,11 @@ HYPRE_SStructGridSetExtents( HYPRE_SStructGrid  grid,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_SStructGridSetVariables( HYPRE_SStructGrid      grid,
-                                         HYPRE_Int              part,
-                                         HYPRE_Int              nvars,
-                                         HYPRE_SStructVariable *vartypes )
+HYPRE_Int
+HYPRE_SStructGridSetVariables( HYPRE_SStructGrid      grid,
+                               HYPRE_Int              part,
+                               HYPRE_Int              nvars,
+                               HYPRE_SStructVariable *vartypes )
 {
    hypre_SStructPGrid  *pgrid = hypre_SStructGridPGrid(grid, part);
 
