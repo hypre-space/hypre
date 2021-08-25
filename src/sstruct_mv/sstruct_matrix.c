@@ -32,6 +32,10 @@ hypre_SStructPMatrixRef( hypre_SStructPMatrix  *matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * TODO: If we had a data structure for an integer array that keeps track
+ *       of its size, we could combine num_centries and centries into a
+ *       single variable of that type. The same could be done with
+ *       sentries_size and sentries.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -171,6 +175,7 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
    hypre_SStructPMatrixCEntries(pmatrix) = centries;
    hypre_SStructPMatrixSEntriesSize(pmatrix) = size;
    hypre_SStructPMatrixSEntries(pmatrix) = hypre_TAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
+   hypre_SStructPMatrixAccumulated(pmatrix) = 0;
    hypre_SStructPMatrixRefCount(pmatrix) = 1;
 
    *pmatrix_ptr = pmatrix;
@@ -291,8 +296,6 @@ hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
          }
       }
    }
-
-   hypre_SStructPMatrixAccumulated(pmatrix) = 0;
 
    return hypre_error_flag;
 }
