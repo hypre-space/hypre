@@ -182,9 +182,10 @@ hypre_SStructPGridSetCellSGrid( hypre_SStructPGrid  *pgrid,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_SStructPGridSetVariables( hypre_SStructPGrid    *pgrid,
-                                          HYPRE_Int              nvars,
-                                          HYPRE_SStructVariable *vartypes )
+HYPRE_Int
+hypre_SStructPGridSetVariables( hypre_SStructPGrid    *pgrid,
+                                HYPRE_Int              nvars,
+                                HYPRE_SStructVariable *vartypes )
 {
    hypre_SStructVariable  *new_vartypes;
    HYPRE_Int               i;
