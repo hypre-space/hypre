@@ -170,6 +170,7 @@ hypre_found_cuda=no
 hypre_using_node_aware_mpi=no
 hypre_using_memory_tracker=no
 
+hypre_cxxstd=11
 
 dnl *********************************************************************
 dnl * Initialize hypre-HIP variables
@@ -583,6 +584,12 @@ if test "x$AR" = "x"
 then
    AR="ar -rcu"
 fi
+
+AC_ARG_WITH(cxxstandard,
+AS_HELP_STRING([--with-cxxstandard=val],
+               [User specifies c++ starndard in val.]),
+[hypre_cxxstd=$withval]
+)
 
 dnl *********************************************************************
 dnl * If the user has specified a c, c++, or fortran compiler on the
@@ -1990,7 +1997,7 @@ then
    then
       if [test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"]
       then
-         CXXFLAGS="${CXXFLAGS} -+ -std=c++11"
+         CXXFLAGS="${CXXFLAGS} -+ -std=c++${hypre_cxxstd}"
       fi
    fi
 
@@ -2011,7 +2018,12 @@ then
    then
       if [test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"]
       then
-         CXXFLAGS="${CXXFLAGS} -+ -std=c++11"
+         CXXFLAGS="${CXXFLAGS} -+ -std=c++${hypre_cxxstd}"
+      fi
+   else
+      if test "$hypre_user_chose_cuflags" = "no"
+      then
+         CUFLAGS="--relocatable-device-code=true ${CUFLAGS}"
       fi
    fi
 
@@ -2105,7 +2117,7 @@ then
 
    if test "$hypre_user_chose_cuflags" = "no"
    then
-      CUFLAGS="-lineinfo -expt-extended-lambda -dc -std=c++11 --x cu"
+      CUFLAGS="-lineinfo -expt-extended-lambda -dc -std=c++${hypre_cxxstd} --x cu ${CUFLAGS}"
       if test "$hypre_using_debug" = "yes"
       then
          CUFLAGS="-g -O0 ${CUFLAGS}"

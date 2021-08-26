@@ -790,6 +790,7 @@ enable_rocblas
 enable_rocrand
 enable_gpu_profiling
 enable_gpu_aware_mpi
+with_cxxstandard
 with_LD
 with_LDFLAGS
 with_extra_CFLAGS
@@ -1521,6 +1522,7 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-cxxstandard=val  User specifies c++ starndard in val.
   --with-LD=ARG           Set linker to ARG. The environment variable 'LD'
                           will be overridden.
   --with-LDFLAGS=ARG      User can manually set linker flags. The 'LDFLAGS'
@@ -2741,6 +2743,7 @@ hypre_found_cuda=no
 hypre_using_node_aware_mpi=no
 hypre_using_memory_tracker=no
 
+hypre_cxxstd=11
 
 hypre_using_hip=no
 hypre_using_rocsparse=no
@@ -3254,6 +3257,14 @@ if test "x$AR" = "x"
 then
    AR="ar -rcu"
 fi
+
+
+# Check whether --with-cxxstandard was given.
+if test "${with_cxxstandard+set}" = set; then :
+  withval=$with_cxxstandard; hypre_cxxstd=$withval
+
+fi
+
 
 
 
@@ -8755,7 +8766,7 @@ $as_echo "#define HYPRE_USING_RAJA 1" >>confdefs.h
    then
       if test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"
       then
-         CXXFLAGS="${CXXFLAGS} -+ -std=c++11"
+         CXXFLAGS="${CXXFLAGS} -+ -std=c++${hypre_cxxstd}"
       fi
    fi
 
@@ -8774,7 +8785,12 @@ $as_echo "#define HYPRE_USING_KOKKOS 1" >>confdefs.h
    then
       if test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"
       then
-         CXXFLAGS="${CXXFLAGS} -+ -std=c++11"
+         CXXFLAGS="${CXXFLAGS} -+ -std=c++${hypre_cxxstd}"
+      fi
+   else
+      if test "$hypre_user_chose_cuflags" = "no"
+      then
+         CUFLAGS="--relocatable-device-code=true ${CUFLAGS}"
       fi
    fi
 
@@ -8886,7 +8902,7 @@ $as_echo "#define HYPRE_USING_CURAND 1" >>confdefs.h
 
    if test "$hypre_user_chose_cuflags" = "no"
    then
-      CUFLAGS="-lineinfo -expt-extended-lambda -dc -std=c++11 --x cu"
+      CUFLAGS="-lineinfo -expt-extended-lambda -dc -std=c++${hypre_cxxstd} --x cu ${CUFLAGS}"
       if test "$hypre_using_debug" = "yes"
       then
          CUFLAGS="-g -O0 ${CUFLAGS}"
