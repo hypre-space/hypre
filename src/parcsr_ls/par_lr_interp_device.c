@@ -1117,9 +1117,17 @@ void hypreCUDAKernel_compute_twiaff_w( HYPRE_Int      nr_of_rows,
       {
          HYPRE_Complex vji = kmatch >= 0 ? read_only_load(&AFF_diag_data_old[kmatch]) : 0.0;
          HYPRE_Complex rsj = read_only_load(&rsFC[j]) + vji;
-         HYPRE_Complex vij = read_only_load(&AFF_diag_data_old[indj]) / (rsj ? rsj : 1.0);
-         AFF_diag_data[indj] = vij;
-         theta_i += vji * vij;
+         if (rsj)
+         {
+            HYPRE_Complex vij = read_only_load(&AFF_diag_data_old[indj]) / rsj;
+            AFF_diag_data[indj] = vij;
+            theta_i += vji * vij;
+         }
+         else
+         {
+            AFF_diag_data[indj] = 0.0;
+            theta_i += read_only_load(&AFF_diag_data_old[indj]);
+         }
       }
    }
 
@@ -1169,9 +1177,17 @@ void hypreCUDAKernel_compute_twiaff_w( HYPRE_Int      nr_of_rows,
       {
          HYPRE_Complex vji = kmatch >= 0 ? read_only_load(&AFF_ext_data[kmatch]) : 0.0;
          HYPRE_Complex rsj = read_only_load(&rsFC_offd[j]) + vji;
-         HYPRE_Complex vij = read_only_load(&AFF_offd_data[indj]) / (rsj ? rsj : 1.0);
-         AFF_offd_data[indj] = vij;
-         theta_i += vji * vij;
+         if (rsj)
+         {
+            HYPRE_Complex vij = read_only_load(&AFF_offd_data[indj]) / rsj;
+            AFF_offd_data[indj] = vij;
+            theta_i += vji * vij;
+         }
+         else
+         {
+            AFF_offd_data[indj] = 0.0;
+            theta_i += read_only_load(&AFF_offd_data[indj]);
+         }
       }
    }
 
@@ -1179,8 +1195,7 @@ void hypreCUDAKernel_compute_twiaff_w( HYPRE_Int      nr_of_rows,
    if (lane == 0)
    {
       theta_i += read_only_load(rsW + row);
-      theta_i = theta_i ? theta_i : 1.0;
-      theta_i = -1.0 / theta_i;
+      theta_i = theta_i ? -1.0 / theta_i : -1.0;
    }
    theta_i = __shfl_sync(HYPRE_WARP_FULL_MASK, theta_i, 0);
 
