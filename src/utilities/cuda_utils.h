@@ -249,6 +249,9 @@ struct hypre_CsrsvData
 #if defined(HYPRE_USING_CUSPARSE)
    csrsv2Info_t info_L;
    csrsv2Info_t info_U;
+#elif defined(HYPRE_USING_ROCSPARSE)
+   rocsparse_mat_info info_L;
+   rocsparse_mat_info info_U;
 #endif
    hypre_int    BufferSize;
    char        *Buffer;
