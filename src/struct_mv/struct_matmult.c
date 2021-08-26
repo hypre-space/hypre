@@ -78,13 +78,25 @@ hypre_StructMatrixMultCreate( HYPRE_Int             nmatrices_in,
    /* Initialize mtypes to fine data spaces */
    mtypes = hypre_CTAlloc(HYPRE_Int, nmatrices+1, HYPRE_MEMORY_HOST);
 
-   (mmdata -> nmatrices)   = nmatrices;
-   (mmdata -> matrices)    = matrices;
-   (mmdata -> nterms)      = nterms;
-   (mmdata -> terms)       = terms;
-   (mmdata -> transposes)  = transposes;
-   (mmdata -> mtypes)      = mtypes;
-   (mmdata -> mask)        = NULL;
+   /* Initialize data members */
+   (mmdata -> nmatrices)      = nmatrices;
+   (mmdata -> matrices)       = matrices;
+   (mmdata -> nterms)         = nterms;
+   (mmdata -> terms)          = terms;
+   (mmdata -> transposes)     = transposes;
+   (mmdata -> mtypes)         = mtypes;
+   (mmdata -> fstride)        = NULL;
+   (mmdata -> cstride)        = NULL;
+   (mmdata -> coarsen_stride) = NULL;
+   (mmdata -> cdata_space)    = NULL;
+   (mmdata -> fdata_space)    = NULL;
+   (mmdata -> coarsen)        = 0;
+   (mmdata -> mask)           = NULL;
+   (mmdata -> st_M)           = NULL;
+   (mmdata -> a)              = NULL;
+   (mmdata -> na)             = 0;
+   (mmdata -> comm_pkg)       = NULL;
+   (mmdata -> comm_data)      = NULL;
 
    *mmdata_ptr = mmdata;
 
@@ -343,6 +355,7 @@ hypre_StructMatrixMultSetup( hypre_StructMMData  *mmdata,
          break;
       }
    }
+   (mmdata -> coarsen) = coarsen;
 
    /* Create Mgrid (the grid for M) */
    grid = hypre_StructMatrixGrid(matrices[0]); /* Same grid for all matrices */

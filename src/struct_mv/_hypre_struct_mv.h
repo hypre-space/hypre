@@ -2085,6 +2085,7 @@ typedef struct hypre_StructMMData_struct
    hypre_IndexRef        fstride;        /* fine data-map stride */
    hypre_IndexRef        cstride;        /* coarse data-map stride */
    hypre_IndexRef        coarsen_stride; /* coarsening factor for M's grid */
+   HYPRE_Int             coarsen;        /* flag indicating if M's grid is obtained by coarsening */
    hypre_BoxArray       *cdata_space;    /* coarse data space */
    hypre_BoxArray       *fdata_space;    /* fine data space */
 

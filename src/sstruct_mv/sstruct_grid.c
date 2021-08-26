@@ -183,6 +183,34 @@ hypre_SStructPGridSetCellSGrid( hypre_SStructPGrid  *pgrid,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SStructPGridSetSGrid( hypre_StructGrid    *sgrid,
+                            hypre_SStructPGrid  *pgrid,
+                            HYPRE_Int            var )
+{
+   HYPRE_SStructVariable  *vartypes;
+   hypre_StructGrid       *sgrid_old;
+
+   /* Destroy old sgrid */
+   sgrid_old = hypre_SStructPGridSGrid(pgrid, var);
+   hypre_StructGridDestroy(sgrid_old);
+
+   /* Point to new sgrid */
+   hypre_StructGridRef(sgrid, &hypre_SStructPGridSGrid(pgrid, var));
+
+   /* Update sgrid_done flag if necessary */
+   vartypes = hypre_SStructPGridVarTypes(pgrid);
+   if (vartypes[var] == HYPRE_SSTRUCT_VARIABLE_CELL)
+   {
+      hypre_SStructPGridCellSGridDone(pgrid) = 1;
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SStructPGridSetVariables( hypre_SStructPGrid    *pgrid,
                                 HYPRE_Int              nvars,
                                 HYPRE_SStructVariable *vartypes )

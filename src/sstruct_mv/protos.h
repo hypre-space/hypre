@@ -109,6 +109,7 @@ HYPRE_Int hypre_SStructPGridCreate ( MPI_Comm comm , HYPRE_Int ndim , hypre_SStr
 HYPRE_Int hypre_SStructPGridDestroy ( hypre_SStructPGrid *pgrid );
 HYPRE_Int hypre_SStructPGridSetExtents ( hypre_SStructPGrid *pgrid , hypre_Index ilower , hypre_Index iupper );
 HYPRE_Int hypre_SStructPGridSetCellSGrid ( hypre_SStructPGrid *pgrid , hypre_StructGrid *cell_sgrid );
+HYPRE_Int hypre_SStructPGridSetSGrid ( hypre_StructGrid *sgrid , hypre_SStructPGrid *pgrid , HYPRE_Int var );
 HYPRE_Int hypre_SStructPGridSetVariables ( hypre_SStructPGrid *pgrid , HYPRE_Int nvars , HYPRE_SStructVariable *vartypes );
 HYPRE_Int hypre_SStructPGridSetPNeighbor ( hypre_SStructPGrid *pgrid , hypre_Box *pneighbor_box , hypre_Index pnbor_offset );
 HYPRE_Int hypre_SStructPGridAssemble ( hypre_SStructPGrid *pgrid );

@@ -162,12 +162,21 @@ hypre_SStructPMatrixMultSetup( hypre_SStructPMMData   *pmmdata,
 
    MPI_Comm                comm;
    HYPRE_Int               ndim;
-   HYPRE_SStructVariable  *vartp;
    hypre_StructStencil    *stencil;
    hypre_Index            *offset;
 
+   hypre_BoxArrayArray    *fpbnd_boxaa;
+   hypre_BoxArrayArray    *cpbnd_boxaa;
+   hypre_Index             origin;
+   hypre_IndexRef          coarsen_stride;
+   HYPRE_Int               coarsen;
+   HYPRE_Int               num_boxes;
+   hypre_BoxArray         *grid_boxes;
+
+   HYPRE_SStructVariable  *vartp;
    hypre_SStructStencil  **pstencils;
    hypre_SStructPGrid     *pgrid;
+   hypre_SStructPGrid     *pfgrid;
    hypre_SStructPMatrix   *pM;
    hypre_StructMatrix     *sM;
    hypre_StructGrid       *sgrid;
@@ -179,9 +188,11 @@ hypre_SStructPMatrixMultSetup( hypre_SStructPMMData   *pmmdata,
    HYPRE_Int               max_stencil_size;
 
    /* Initialize variables */
-   ndim  = hypre_SStructPMatrixNDim(pmatrix);
-   comm  = hypre_SStructPMatrixComm(pmatrix);
-   vartp = hypre_SStructPGridVarTypes(hypre_SStructPMatrixPGrid(pmatrix));
+   ndim   = hypre_SStructPMatrixNDim(pmatrix);
+   comm   = hypre_SStructPMatrixComm(pmatrix);
+   pfgrid = hypre_SStructPMatrixPGrid(pmatrix); /* Same grid for all input matrices */
+   vartp  = hypre_SStructPGridVarTypes(pfgrid);
+   hypre_SetIndex(origin, 0);
 
    /* Create temporary semi-struct stencil data structure */
    pstencils = hypre_TAlloc(hypre_SStructStencil *, nvars, HYPRE_MEMORY_HOST);
@@ -203,6 +214,8 @@ hypre_SStructPMatrixMultSetup( hypre_SStructPMMData   *pmmdata,
    for (vi = 0; vi < nvars; vi++)
    {
       pstencil_size = 0;
+      coarsen = 0;
+      coarsen_stride = NULL;
       for (vj = 0; vj < nvars; vj++)
       {
          /* Check if this SMatrix exists */
@@ -222,18 +235,37 @@ hypre_SStructPMatrixMultSetup( hypre_SStructPMMData   *pmmdata,
 
             /* Update the part stencil size */
             pstencil_size += hypre_StructStencilSize(stencil);
+
+            /* Get coarsening information from the diagonal block */
+            if (vi == vj)
+            {
+               coarsen = (smmdata[vi][vj] -> coarsen);
+               coarsen_stride = (smmdata[vi][vj] -> coarsen_stride);
+            }
          }
       }
       max_stencil_size = hypre_max(pstencil_size, max_stencil_size);
 
       /* Destroy placeholder grid and update with new StructGrid */
-      sgrid = hypre_SStructPGridSGrid(pgrid, vi);
-      hypre_StructGridDestroy(sgrid);
       sgrid = hypre_StructMatrixGrid(sM);
-      hypre_SStructPGridSGrid(pgrid, vi) = sgrid;
-      if (vartp[vi] == HYPRE_SSTRUCT_VARIABLE_CELL)
+      hypre_SStructPGridSetSGrid(sgrid, pgrid, vi);
+
+      /* Build part boundaries array */
+      num_boxes   = hypre_StructGridNumBoxes(sgrid);
+      grid_boxes  = hypre_StructGridBoxes(sgrid);
+      fpbnd_boxaa = hypre_SStructPGridPBndBoxArrayArray(pfgrid, vi);
+      if (num_boxes)
       {
-         hypre_SStructPGridCellSGridDone(pgrid) = 1;
+         if (coarsen)
+         {
+            hypre_CoarsenBoxArrayArrayNeg(fpbnd_boxaa, grid_boxes, origin,
+                                          coarsen_stride, &cpbnd_boxaa);
+         }
+         else
+         {
+            cpbnd_boxaa = hypre_BoxArrayArrayClone(fpbnd_boxaa);
+         }
+         hypre_SStructPGridPBndBoxArrayArray(pgrid, vi) = cpbnd_boxaa;
       }
 
       /* Update smaps array */
@@ -948,8 +980,8 @@ hypre_SStructMatrixPtAP( hypre_SStructMatrix  *A,
    hypre_SStructMMData *mmdata;
    hypre_SStructMatrix *M;
 
-   HYPRE_Int            nmatrices   = 3;
-   HYPRE_SStructMatrix  matrices[3] = {A, P, P};
+   HYPRE_Int            nmatrices   = 2;
+   HYPRE_SStructMatrix  matrices[2] = {A, P};
    HYPRE_Int            nterms      = 3;
    HYPRE_Int            terms[3]    = {1, 0, 1};
    HYPRE_Int            trans[3]    = {1, 0, 0};
