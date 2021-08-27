@@ -89,7 +89,7 @@ GMRES Iterations = 93
 Final GMRES Relative Residual Norm = 8.225662e-09
 
 # Output file: solvers.out.sysh
- Average Convergence Factor = 0.213855
+ Average Convergence Factor = 0.213740
 
      Complexity:    grid = 1.396875
                 operator = 2.652528

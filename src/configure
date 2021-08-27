@@ -8888,16 +8888,11 @@ $as_echo "#define HYPRE_USING_CURAND 1" >>confdefs.h
       else
          CUFLAGS="-O2 ${CUFLAGS}"
       fi
-      if test "${CXX}" = "mpixlC" || test "${CXX}" = "xlC_r" || test "${CXX}" = "xlC"
-      then
-         CUFLAGS="${CUFLAGS} -Xcompiler \"-Wno-deprecated-register -Wenum-compare\""
-      fi
+
+
+      CUFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
    fi
 
-   if test "$hypre_using_shared" = "yes"
-   then
-      CUFLAGS="${CUFLAGS} -Xcompiler ${SHARED_COMPILE_FLAG}"
-   fi
 
          HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
    HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64 -lcudart'
@@ -9078,10 +9073,10 @@ $as_echo "#define HYPRE_DEVICE_OPENMP_ALLOC 1" >>confdefs.h
 
 
 
-   CUFLAGS=${CFLAGS}
-
    if test "$hypre_user_chose_cuflags" = "no"
    then
+      CUFLAGS=${CFLAGS}
+
       if test "$CUCC" = "clang-gpu" || test "$CUCC" = "mpiclang-gpu"
       then
          CUFLAGS+=" -fopenmp-nonaliased-maps"

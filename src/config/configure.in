@@ -2118,16 +2118,19 @@ then
       else
          CUFLAGS="-O2 ${CUFLAGS}"
       fi
-      if [test "${CXX}" = "mpixlC" || test "${CXX}" = "xlC_r" || test "${CXX}" = "xlC"]
-      then
-         CUFLAGS="${CUFLAGS} -Xcompiler \"-Wno-deprecated-register -Wenum-compare\""
-      fi
+
+      dnl if [test "${CXX}" = "mpixlC" || test "${CXX}" = "xlC_r" || test "${CXX}" = "xlC"]
+      dnl then
+      dnl   CUFLAGS="${CUFLAGS} -Xcompiler \"-Wno-deprecated-register -Wenum-compare\""
+      dnl fi
+
+      CUFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
    fi
 
-   if test "$hypre_using_shared" = "yes"
-   then
-      CUFLAGS="${CUFLAGS} -Xcompiler ${SHARED_COMPILE_FLAG}"
-   fi
+   dnl if test "$hypre_using_shared" = "yes"
+   dnl then
+   dnl   CUFLAGS="${CUFLAGS} -Xcompiler ${SHARED_COMPILE_FLAG}"
+   dnl fi
 
    dnl CFLAGS=${CXXFLAGS}
    dnl LDFLAGS="-Xcompiler \"${LDFLAGS}\""
@@ -2308,10 +2311,10 @@ then
 
    dnl AC_DEFINE(HYPRE_DEVICE_OPENMP_MAPPED, 1, [Define to 1 if using OpenMP on device [target mapped version]])
 
-   CUFLAGS=${CFLAGS}
-
    if test "$hypre_user_chose_cuflags" = "no"
    then
+      CUFLAGS=${CFLAGS}
+
       if [test "$CUCC" = "clang-gpu" || test "$CUCC" = "mpiclang-gpu"]
       then
          CUFLAGS+=" -fopenmp-nonaliased-maps"
