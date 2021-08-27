@@ -953,9 +953,9 @@ hypre_MGRSetup( void               *mgr_vdata,
 #else
         hypre_BoomerAMGSetRelaxOrder(aff_solver[lev], 1);
 #endif
-        hypre_BoomerAMGSetAggNumLevels(aff_solver[lev], 1);
+        //hypre_BoomerAMGSetAggNumLevels(aff_solver[lev], 1);
         hypre_BoomerAMGSetPrintLevel(aff_solver[lev], mgr_data -> frelax_print_level);
-        hypre_BoomerAMGSetNumFunctions(aff_solver[lev], 1);
+        //hypre_BoomerAMGSetNumFunctions(aff_solver[lev], 1);
 
         fine_grid_solver_setup(aff_solver[lev], A_ff_ptr, F_fine_array[lev+1], U_fine_array[lev+1]);
 
