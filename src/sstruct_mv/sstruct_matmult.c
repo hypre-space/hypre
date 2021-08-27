@@ -542,7 +542,7 @@ hypre_SStructMatrixMultSetup( hypre_SStructMMData   *mmdata,
       HYPRE_SStructGridSetVariables(Mgrid, part, nvars, vartypes);
    }
 
-   /* Create the graph for M */
+   /* Create M's graph */
    HYPRE_SStructGraphCreate(comm, Mgrid, &Mgraph);
 
    /* Create temporary stencil data structure */
@@ -552,12 +552,20 @@ hypre_SStructMatrixMultSetup( hypre_SStructMMData   *mmdata,
       {
          HYPRE_SStructStencilCreate(ndim, 0, &stencil);
          HYPRE_SStructGraphSetStencil(Mgraph, part, vi, stencil);
+         HYPRE_SStructStencilDestroy(stencil);
       }
    }
+
+   /* Assemble M's graph */
+   HYPRE_SStructGraphAssemble(Mgraph);
 
    /* Create the matrix M */
    HYPRE_SStructMatrixCreate(comm, Mgraph, &M);
    splits = hypre_SStructMatrixSplits(M);
+
+   /* Decrease reference counter for Mgraph and Mgrid */
+   HYPRE_SStructGraphDestroy(Mgraph);
+   HYPRE_SStructGridDestroy(Mgrid);
 
    /* Setup Pmatrix */
    max_stencil_size = 0;
