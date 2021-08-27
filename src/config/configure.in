@@ -2020,11 +2020,6 @@ then
       then
          CXXFLAGS="${CXXFLAGS} -+ -std=c++${hypre_cxxstd}"
       fi
-   else
-      if test "$hypre_user_chose_cuflags" = "no"
-      then
-         CUFLAGS="--relocatable-device-code=true ${CUFLAGS}"
-      fi
    fi
 
    dnl let CC be CXX
@@ -2117,7 +2112,7 @@ then
 
    if test "$hypre_user_chose_cuflags" = "no"
    then
-      CUFLAGS="-lineinfo -expt-extended-lambda -dc -std=c++${hypre_cxxstd} --x cu ${CUFLAGS}"
+      CUFLAGS="-lineinfo -expt-extended-lambda -dc -std=c++${hypre_cxxstd} --x cu"
       if test "$hypre_using_debug" = "yes"
       then
          CUFLAGS="-g -O0 ${CUFLAGS}"
