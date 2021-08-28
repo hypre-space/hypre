@@ -198,6 +198,17 @@ hypre_MPI_Allgather( void               *sendbuf,
       }
       break;
 
+      case hypre_MPI_LONG_DOUBLE:
+      {
+         long double *crecvbuf = (long double *)recvbuf;
+         long double *csendbuf = (long double *)sendbuf;
+         for (i = 0; i < sendcount; i++)
+         {
+            crecvbuf[i] = csendbuf[i];
+         }
+      }
+      break;
+
       case hypre_MPI_CHAR:
       {
          char *crecvbuf = (char *)recvbuf;
