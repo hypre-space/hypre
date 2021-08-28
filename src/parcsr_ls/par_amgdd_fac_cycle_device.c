@@ -100,13 +100,9 @@ hypre_BoomerAMGDD_FAC_CFL1JacobiDevice( void      *amgdd_vdata,
    HYPRE_Real             relax_weight    = hypre_ParAMGDDDataFACRelaxWeight(amgdd_data);
    hypre_Vector          *owned_u         = hypre_AMGDDCompGridVectorOwned(hypre_AMGDDCompGridU(compGrid));
    hypre_Vector          *nonowned_u      = hypre_AMGDDCompGridVectorNonOwned(hypre_AMGDDCompGridU(compGrid));
-   HYPRE_Int              num_nonowned    = hypre_AMGDDCompGridNumNonOwnedNodes(compGrid);
    HYPRE_Int              num_owned       = hypre_AMGDDCompGridNumOwnedNodes(compGrid);
-   HYPRE_Int              num_owned_c     = hypre_AMGDDCompGridNumOwnedCPoints(compGrid);
-   HYPRE_Int              num_owned_f     = num_owned - num_owned_c;
+   HYPRE_Int              num_nonowned    = hypre_AMGDDCompGridNumNonOwnedNodes(compGrid);
    HYPRE_Int              num_nonowned_r  = hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid);
-   HYPRE_Int              num_nonowned_rc = hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid);
-   HYPRE_Int              num_nonowned_rf = num_nonowned_r - num_nonowned_rc;
 
    hypre_Vector          *owned_tmp;
    hypre_Vector          *nonowned_tmp;
@@ -133,35 +129,19 @@ hypre_BoomerAMGDD_FAC_CFL1JacobiDevice( void      *amgdd_vdata,
    owned_tmp    = hypre_AMGDDCompGridVectorOwned(hypre_AMGDDCompGridTemp2(compGrid));
    nonowned_tmp = hypre_AMGDDCompGridVectorNonOwned(hypre_AMGDDCompGridTemp2(compGrid));
 
-   if (relax_set)
-   {
+   hypreDevice_IVAXPYMarked(num_owned,
+                            hypre_AMGDDCompGridL1Norms(compGrid),
+                            hypre_VectorData(owned_tmp),
+                            hypre_VectorData(owned_u),
+                            hypre_AMGDDCompGridCFMarkerArray(compGrid),
+                            relax_set);
 
-      hypreDevice_MaskedIVAXPY(num_owned_c,
-                               hypre_AMGDDCompGridL1Norms(compGrid),
-                               hypre_VectorData(owned_tmp),
-                               hypre_VectorData(owned_u),
-                               hypre_AMGDDCompGridOwnedCMask(compGrid));
-
-      hypreDevice_MaskedIVAXPY(num_nonowned_rc,
-                               &(hypre_AMGDDCompGridL1Norms(compGrid)[num_owned]),
-                               hypre_VectorData(nonowned_tmp),
-                               hypre_VectorData(nonowned_u),
-                               hypre_AMGDDCompGridNonOwnedCMask(compGrid));
-   }
-   else
-   {
-      hypreDevice_MaskedIVAXPY(num_owned_f,
-                               hypre_AMGDDCompGridL1Norms(compGrid),
-                               hypre_VectorData(owned_tmp),
-                               hypre_VectorData(owned_u),
-                               hypre_AMGDDCompGridOwnedFMask(compGrid));
-
-      hypreDevice_MaskedIVAXPY(num_nonowned_rf,
-                               &(hypre_AMGDDCompGridL1Norms(compGrid)[num_owned]),
-                               hypre_VectorData(nonowned_tmp),
-                               hypre_VectorData(nonowned_u),
-                               hypre_AMGDDCompGridNonOwnedFMask(compGrid));
-   }
+   hypreDevice_IVAXPYMarked(num_nonowned_r,
+                            &(hypre_AMGDDCompGridL1Norms(compGrid)[num_owned]),
+                            hypre_VectorData(nonowned_tmp),
+                            hypre_VectorData(nonowned_u),
+                            hypre_AMGDDCompGridCFMarkerArray(compGrid) + num_owned,
+                            relax_set);
 
    return hypre_error_flag;
 }

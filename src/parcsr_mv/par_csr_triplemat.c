@@ -126,7 +126,7 @@ hypre_ParCSRMatMatHost( hypre_ParCSRMatrix  *A,
          map_B_to_C = hypre_CTAlloc(HYPRE_Int, num_cols_offd_B, HYPRE_MEMORY_HOST);
 
          cnt = 0;
-         for (i=0; i < num_cols_offd_C; i++)
+         for (i = 0; i < num_cols_offd_C; i++)
          {
             if (col_map_offd_C[i] == col_map_offd_B[cnt])
             {
@@ -154,8 +154,8 @@ hypre_ParCSRMatMatHost( hypre_ParCSRMatrix  *A,
       hypre_CSRMatrixNumCols(ABext_diag) = num_cols_diag_B;
       hypre_CSRMatrixNumCols(AB_offd) = num_cols_offd_C;
       hypre_CSRMatrixNumCols(ABext_offd) = num_cols_offd_C;
-      C_diag = hypre_CSRMatrixAdd(AB_diag, ABext_diag);
-      C_offd = hypre_CSRMatrixAdd(AB_offd, ABext_offd);
+      C_diag = hypre_CSRMatrixAdd(1.0, AB_diag, 1.0, ABext_diag);
+      C_offd = hypre_CSRMatrixAdd(1.0, AB_offd, 1.0, ABext_offd);
 
       hypre_CSRMatrixDestroy(AB_diag);
       hypre_CSRMatrixDestroy(ABext_diag);
@@ -174,14 +174,9 @@ hypre_ParCSRMatMatHost( hypre_ParCSRMatrix  *A,
     *  Allocate C_offd_data and C_offd_j arrays.
     *-----------------------------------------------------------------------*/
 
-
    C = hypre_ParCSRMatrixCreate(comm, n_rows_A, n_cols_B, row_starts_A,
                                 col_starts_B, num_cols_offd_C,
                                 C_diag->num_nonzeros, C_offd->num_nonzeros);
-
-   /* Note that C does not own the partitionings */
-   hypre_ParCSRMatrixSetRowStartsOwner(C, 0);
-   hypre_ParCSRMatrixSetColStartsOwner(C, 0);
 
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
    hypre_ParCSRMatrixDiag(C) = C_diag;
@@ -193,10 +188,6 @@ hypre_ParCSRMatMatHost( hypre_ParCSRMatrix  *A,
    {
       hypre_ParCSRMatrixColMapOffd(C) = col_map_offd_C;
    }
-
-   /*-----------------------------------------------------------------------
-    *  Free various arrays
-    *-----------------------------------------------------------------------*/
 
    return C;
 }
@@ -303,6 +294,7 @@ hypre_ParCSRTMatMatKTHost( hypre_ParCSRMatrix  *A,
       C_diag = hypre_CSRMatrixMultiplyHost(AT_diag, B_diag);
       C_offd = hypre_CSRMatrixCreate(num_cols_diag_A, 0, 0);
       hypre_CSRMatrixInitialize_v2(C_offd, 0, hypre_CSRMatrixMemoryLocation(C_diag));
+      hypre_CSRMatrixNumRownnz(C_offd) = 0;
       if (keep_transpose)
       {
          A->diagT = AT_diag;
@@ -443,10 +435,6 @@ hypre_ParCSRTMatMatKTHost( hypre_ParCSRMatrix  *A,
    C = hypre_ParCSRMatrixCreate(comm, n_cols_A, n_cols_B, col_starts_A, col_starts_B,
                                 num_cols_offd_C, C_diag->num_nonzeros, C_offd->num_nonzeros);
 
-   /* Note that C does not own the partitionings */
-   hypre_ParCSRMatrixSetRowStartsOwner(C,0);
-   hypre_ParCSRMatrixSetColStartsOwner(C,0);
-
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
    hypre_ParCSRMatrixDiag(C) = C_diag;
 
@@ -456,7 +444,6 @@ hypre_ParCSRTMatMatKTHost( hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrixColMapOffd(C) = col_map_offd_C;
 
    return C;
-
 }
 
 hypre_ParCSRMatrix*
@@ -687,7 +674,7 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
 
       if (num_cols_offd_A) /* number of rows for Pext_diag */
       {
-         Q_diag = hypre_CSRMatrixAdd(AP_diag, APext_diag);
+         Q_diag = hypre_CSRMatrixAdd(1.0, AP_diag, 1.0, APext_diag);
          hypre_CSRMatrixDestroy(AP_diag);
          hypre_CSRMatrixDestroy(APext_diag);
       }
@@ -698,7 +685,7 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
 
       if (num_cols_offd_P && num_cols_offd_A)
       {
-         Q_offd = hypre_CSRMatrixAdd(AP_offd, APext_offd);
+         Q_offd = hypre_CSRMatrixAdd(1.0, AP_offd, 1.0, APext_offd);
          hypre_CSRMatrixDestroy(APext_offd);
          hypre_CSRMatrixDestroy(AP_offd);
       }
@@ -719,9 +706,6 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
                                    col_starts_P, num_cols_offd_Q,
                                    Q_diag->num_nonzeros, Q_offd->num_nonzeros);
 
-      /* Note that C does not own the partitionings */
-      hypre_ParCSRMatrixSetRowStartsOwner(Q,0);
-      hypre_ParCSRMatrixSetColStartsOwner(Q,0);
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(Q));
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(Q));
       hypre_ParCSRMatrixDiag(Q) = Q_diag;
@@ -889,10 +873,6 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
 
    C = hypre_ParCSRMatrixCreate(comm, n_cols_R, n_cols_P, col_starts_R,
                                 col_starts_P, num_cols_offd_C, 0, 0);
-
-   /* Note that C does not own the partitionings */
-   hypre_ParCSRMatrixSetColStartsOwner(P,0);
-   hypre_ParCSRMatrixSetColStartsOwner(R,0);
 
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(C));

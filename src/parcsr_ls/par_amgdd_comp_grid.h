@@ -120,8 +120,6 @@ typedef struct
    HYPRE_Int             num_owned_nodes;
    HYPRE_Int             num_nonowned_nodes;
    HYPRE_Int             num_nonowned_real_nodes;
-   HYPRE_Int             num_owned_c_points;
-   HYPRE_Int             num_nonowned_real_c_points;
    HYPRE_Int             num_missing_col_indices;
 
    HYPRE_Int            *nonowned_global_indices;
@@ -148,10 +146,6 @@ typedef struct
 
    HYPRE_Real       *l1_norms;
    HYPRE_Int        *cf_marker_array;
-   HYPRE_Int        *owned_c_mask;
-   HYPRE_Int        *owned_f_mask;
-   HYPRE_Int        *nonowned_c_mask;
-   HYPRE_Int        *nonowned_f_mask;
    HYPRE_Int        *owned_relax_ordering;
    HYPRE_Int        *nonowned_relax_ordering;
 
@@ -168,8 +162,6 @@ typedef struct
 #define hypre_AMGDDCompGridNumOwnedNodes(compGrid)          ((compGrid) -> num_owned_nodes)
 #define hypre_AMGDDCompGridNumNonOwnedNodes(compGrid)       ((compGrid) -> num_nonowned_nodes)
 #define hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid)   ((compGrid) -> num_nonowned_real_nodes)
-#define hypre_AMGDDCompGridNumOwnedCPoints(compGrid)        ((compGrid) -> num_owned_c_points)
-#define hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid) ((compGrid) -> num_nonowned_real_c_points)
 #define hypre_AMGDDCompGridNumMissingColIndices(compGrid)   ((compGrid) -> num_missing_col_indices)
 #define hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid)  ((compGrid) -> nonowned_global_indices)
 #define hypre_AMGDDCompGridNonOwnedCoarseIndices(compGrid)  ((compGrid) -> nonowned_coarse_indices)
@@ -194,10 +186,6 @@ typedef struct
 
 #define hypre_AMGDDCompGridL1Norms(compGrid)               ((compGrid) -> l1_norms)
 #define hypre_AMGDDCompGridCFMarkerArray(compGrid)         ((compGrid) -> cf_marker_array)
-#define hypre_AMGDDCompGridOwnedCMask(compGrid)            ((compGrid) -> owned_c_mask)
-#define hypre_AMGDDCompGridOwnedFMask(compGrid)            ((compGrid) -> owned_f_mask)
-#define hypre_AMGDDCompGridNonOwnedCMask(compGrid)         ((compGrid) -> nonowned_c_mask)
-#define hypre_AMGDDCompGridNonOwnedFMask(compGrid)         ((compGrid) -> nonowned_f_mask)
 #define hypre_AMGDDCompGridOwnedRelaxOrdering(compGrid)    ((compGrid) -> owned_relax_ordering)
 #define hypre_AMGDDCompGridNonOwnedRelaxOrdering(compGrid) ((compGrid) -> nonowned_relax_ordering)
 

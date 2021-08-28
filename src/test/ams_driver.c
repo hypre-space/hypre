@@ -101,7 +101,7 @@ hypre_int main (hypre_int argc, char *argv[])
    HYPRE_Int time_index;
 
    HYPRE_Int solver_id;
-   HYPRE_Int maxit, cycle_type, rlx_type, rlx_sweeps, dim;
+   HYPRE_Int maxit, cycle_type, rlx_type, coarse_rlx_type, rlx_sweeps, dim;
    HYPRE_Real rlx_weight, rlx_omega;
    HYPRE_Int amg_coarsen_type, amg_rlx_type, amg_agg_levels, amg_interp_type, amg_Pmax;
    HYPRE_Int h1_method, singular_problem, coordinates;
@@ -153,9 +153,13 @@ hypre_int main (hypre_int argc, char *argv[])
    coordinates = 0;
    h1_method = 0;
    singular_problem = 0;
-   rlx_type = 2; rlx_sweeps = 1;
+   rlx_sweeps = 1;
    rlx_weight = 1.0; rlx_omega = 1.0;
-   cycle_type = 1; amg_coarsen_type = 10; amg_agg_levels = 1; amg_rlx_type = 8;       /* HMIS-1 */
+#if defined(HYPRE_USING_GPU)
+   cycle_type = 1; amg_coarsen_type =  8; amg_agg_levels = 1; amg_rlx_type = 8; coarse_rlx_type = 8, rlx_type = 2; /* PMIS */
+#else
+   cycle_type = 1; amg_coarsen_type = 10; amg_agg_levels = 1; amg_rlx_type = 8; coarse_rlx_type = 8, rlx_type = 2; /* HMIS-1 */
+#endif
    /* cycle_type = 1; amg_coarsen_type = 10; amg_agg_levels = 0; amg_rlx_type = 3; */ /* HMIS-0 */
    /* cycle_type = 1; amg_coarsen_type = 8; amg_agg_levels = 1; amg_rlx_type = 3;  */ /* PMIS-1 */
    /* cycle_type = 1; amg_coarsen_type = 8; amg_agg_levels = 0; amg_rlx_type = 3;  */ /* PMIS-0 */
@@ -224,6 +228,11 @@ hypre_int main (hypre_int argc, char *argv[])
          {
             arg_index++;
             amg_rlx_type = atoi(argv[arg_index++]);
+         }
+         else if ( strcmp(argv[arg_index], "-crlx") == 0 )
+         {
+            arg_index++;
+            coarse_rlx_type = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-agg") == 0 )
          {
@@ -501,6 +510,8 @@ hypre_int main (hypre_int argc, char *argv[])
       HYPRE_AMSSetSmoothingOptions(solver, rlx_type, rlx_sweeps, rlx_weight, rlx_omega);
       HYPRE_AMSSetAlphaAMGOptions(solver, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta, amg_interp_type, amg_Pmax);
       HYPRE_AMSSetBetaAMGOptions(solver, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta, amg_interp_type, amg_Pmax);
+      HYPRE_AMSSetAlphaAMGCoarseRelaxType(solver, coarse_rlx_type);
+      HYPRE_AMSSetBetaAMGCoarseRelaxType(solver, coarse_rlx_type);
 
       HYPRE_AMSSetup(solver, A, b, x0);
 
@@ -614,6 +625,8 @@ hypre_int main (hypre_int argc, char *argv[])
          HYPRE_AMSSetSmoothingOptions(precond, rlx_type, rlx_sweeps, rlx_weight, rlx_omega);
          HYPRE_AMSSetAlphaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta, amg_interp_type, amg_Pmax);
          HYPRE_AMSSetBetaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta, amg_interp_type, amg_Pmax);
+         HYPRE_AMSSetAlphaAMGCoarseRelaxType(precond, coarse_rlx_type);
+         HYPRE_AMSSetBetaAMGCoarseRelaxType(precond, coarse_rlx_type);
 
          /* Set the PCG preconditioner */
          HYPRE_PCGSetPrecond(solver,
@@ -713,13 +726,15 @@ hypre_int main (hypre_int argc, char *argv[])
       if (singular_problem)
          HYPRE_AMSSetBetaPoissonMatrix(precond, NULL);
 
-      /* Set up the AMS preconditioner */
-      HYPRE_AMSSetup(precond, A, b, x0);
-
       /* Smoothing and AMG options */
       HYPRE_AMSSetSmoothingOptions(precond, rlx_type, rlx_sweeps, rlx_weight, rlx_omega);
       HYPRE_AMSSetAlphaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta, amg_interp_type, amg_Pmax);
       HYPRE_AMSSetBetaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta, amg_interp_type, amg_Pmax);
+      HYPRE_AMSSetAlphaAMGCoarseRelaxType(precond, coarse_rlx_type);
+      HYPRE_AMSSetBetaAMGCoarseRelaxType(precond, coarse_rlx_type);
+
+      /* Set up the AMS preconditioner */
+      HYPRE_AMSSetup(precond, A, b, x0);
 
       /* Create AME object */
       HYPRE_AMECreate(&solver);

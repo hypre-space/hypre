@@ -82,7 +82,7 @@ typedef struct
    HYPRE_Int B_Pi_Pmax;
 
    /* Temporary vectors */
-   hypre_ParVector *r0, *g0, *r1, *g1, *r2, *g2;
+   hypre_ParVector *r0, *g0, *r1, *g1, *r2, *g2, *zz;
 
    /* Output log info */
    HYPRE_Int num_iterations;

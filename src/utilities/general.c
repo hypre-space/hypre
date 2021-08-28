@@ -52,6 +52,8 @@ hypre_HandleCreate()
    hypre_HandleDefaultExecPolicy(hypre_handle_) = HYPRE_EXEC_DEVICE;
    hypre_HandleStructExecPolicy(hypre_handle_) = HYPRE_EXEC_DEVICE;
    hypre_HandleCudaData(hypre_handle_) = hypre_CudaDataCreate();
+   /* Gauss-Seidel: SpTrSV */
+   hypre_HandleDeviceGSMethod(hypre_handle_) = 1; /* CPU: 0; Cusparse: 1 */
 #endif
 
    return hypre_handle_;
@@ -206,7 +208,7 @@ HYPRE_Init()
    hypre_HandleCusparseHandle(_hypre_handle);
 #endif
 
-#if defined(HYPRE_USING_CURAND)
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
    hypre_HandleCurandGenerator(_hypre_handle);
 #endif
 
@@ -222,7 +224,7 @@ HYPRE_Init()
 #ifdef HYPRE_USING_DEVICE_POOL
    /* Keep this check here at the end of HYPRE_Init()
     * Make sure that device pool allocator has not been setup in HYPRE_Init,
-    * otherwise users are not able to set the parametersB
+    * otherwise users are not able to set all the parameters
     */
    if ( hypre_HandleCubDevAllocator(_hypre_handle) ||
         hypre_HandleCubUvmAllocator(_hypre_handle) )

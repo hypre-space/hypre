@@ -10,9 +10,7 @@
  * Author:	Scott Kohn (skohn@llnl.gov)
  * Description:	somewhat portable timing routines for C++, C, and Fortran
  *
- * If TIMER_USE_MPI is defined, then the MPI timers are used to get
- * wallclock seconds, since we assume that the MPI timers have better
- * resolution than the system timers.
+ * This has been modified many times since the original author's version.
  */
 
 #include "_hypre_utilities.h"
@@ -22,13 +20,10 @@
 #include <unistd.h>
 #include <sys/times.h>
 #endif
-#ifdef TIMER_USE_MPI
-#include "mpi.h"
-#endif
 
 HYPRE_Real time_getWallclockSeconds(void)
 {
-#ifdef TIMER_USE_MPI
+#ifndef HYPRE_SEQUENTIAL
    return(hypre_MPI_Wtime());
 #else
 #ifdef WIN32

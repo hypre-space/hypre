@@ -22,8 +22,8 @@ typedef struct hypre_IJMatrix_struct
 {
    MPI_Comm      comm;
 
-   HYPRE_BigInt *row_partitioning;    /* distribution of rows across processors */
-   HYPRE_BigInt *col_partitioning;    /* distribution of columns */
+   HYPRE_BigInt  row_partitioning[2]; /* distribution of rows across processors */
+   HYPRE_BigInt  col_partitioning[2]; /* distribution of columns */
 
    HYPRE_Int     object_type;         /* Indicates the type of "object" */
    void         *object;              /* Structure for storing local portion */
@@ -92,4 +92,3 @@ hypre_GetIJMatrixISISMatrix( HYPRE_IJMatrix IJmatrix, RowMatrix *reference )
 #endif
 
 #endif /* #ifndef hypre_IJ_MATRIX_HEADER */
-

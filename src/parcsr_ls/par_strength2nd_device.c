@@ -98,7 +98,7 @@ hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
                       hypre_CSRMatrixData(Id) + hypre_ParCSRMatrixNumRows(S_CX),
                       coeff );
 
-   SI_diag = hypre_CSRMatrixAddDevice(hypre_ParCSRMatrixDiag(S_CX), Id);
+   SI_diag = hypre_CSRMatrixAddDevice(1.0, hypre_ParCSRMatrixDiag(S_CX), 1.0, Id);
 
    hypre_CSRMatrixDestroy(Id);
 
@@ -127,7 +127,7 @@ hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
    if (num_paths == 2)
    {
       // If num_paths = 2, prune elements < 2.
-      hypre_ParCSRMatrixDropSmallEntriesDevice(S2, 1.5, 0, 0);
+      hypre_ParCSRMatrixDropSmallEntries(S2, 1.5, 0);
    }
 
    hypre_TFree(hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(S2)), HYPRE_MEMORY_DEVICE);
