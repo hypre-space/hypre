@@ -38,13 +38,19 @@ hypre_CSRMatrixExtractDenseMat( hypre_CSRMatrix *A,
                                 HYPRE_Int        patt_size,
                                 HYPRE_Int       *marker )
 {
-   HYPRE_Int     *A_i        = hypre_CSRMatrixI(A);
-   HYPRE_Int     *A_j        = hypre_CSRMatrixJ(A);
-   HYPRE_Real    *A_data     = hypre_CSRMatrixData(A);
+   HYPRE_Int     *A_i = hypre_CSRMatrixI(A);
+   HYPRE_Int     *A_j = hypre_CSRMatrixJ(A);
+   HYPRE_Real    *A_a = hypre_CSRMatrixData(A);
    HYPRE_Complex *A_sub_data = hypre_VectorData(A_sub);
 
    /* Local variables */
    HYPRE_Int      cc, i, ii, j;
+
+   // TODO: Do we need to reinitialize all entries?
+   for (i = 0; i < hypre_VectorSize(A_sub); i++)
+   {
+      A_sub_data[i] = 0.0;
+   }
 
    for (i = 0; i < patt_size; i++)
    {
@@ -54,7 +60,7 @@ hypre_CSRMatrixExtractDenseMat( hypre_CSRMatrix *A,
          if ((A_j[j] <= ii) &&
              (cc = marker[A_j[j]]) >= 0)
          {
-            A_sub_data[cc*patt_size + i] = A_data[j];
+            A_sub_data[cc*patt_size + i] = A_a[j];
          }
       }
    }
@@ -81,19 +87,24 @@ hypre_CSRMatrixExtractDenseRow( hypre_CSRMatrix *A,
                                 HYPRE_Int       *marker,
                                 HYPRE_Int        row_num )
 {
-   HYPRE_Int      *A_i          = hypre_CSRMatrixI(A);
-   HYPRE_Int      *A_j          = hypre_CSRMatrixJ(A);
-   HYPRE_Real     *A_data       = hypre_CSRMatrixData(A);
+   HYPRE_Int      *A_i = hypre_CSRMatrixI(A);
+   HYPRE_Int      *A_j = hypre_CSRMatrixJ(A);
+   HYPRE_Real     *A_a = hypre_CSRMatrixData(A);
    HYPRE_Complex  *sub_row_data = hypre_VectorData(A_subrow);
 
    /* Local variables */
    HYPRE_Int       j, cc;
 
+   for (j = 0; j < hypre_VectorSize(A_subrow); j++)
+   {
+      sub_row_data[j] = 0.0;
+   }
+
    for (j = A_i[row_num]; j < A_i[row_num+1]; j++)
    {
       if ((cc = marker[A_j[j]]) >= 0)
       {
-         sub_row_data[cc] = A_data[j];
+         sub_row_data[cc] = A_a[j];
       }
    }
 
@@ -132,9 +143,9 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
                    HYPRE_Int        *kg_marker )
 {
 
-   HYPRE_Int      *A_i           = hypre_CSRMatrixI(A_diag);
-   HYPRE_Int      *A_j           = hypre_CSRMatrixJ(A_diag);
-   HYPRE_Real     *A_data        = hypre_CSRMatrixData(A_diag);
+   HYPRE_Int      *A_i = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int      *A_j = hypre_CSRMatrixJ(A_diag);
+   HYPRE_Real     *A_a = hypre_CSRMatrixData(A_diag);
    HYPRE_Complex  *G_temp_data   = hypre_VectorData(G_temp);
    HYPRE_Complex  *kap_grad_data = hypre_VectorData(kap_grad);
 
@@ -154,7 +165,7 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
             /* Add A[row_num, col] to the tentative pattern */
             kg_marker[col] = count + 1;
             kg_pos[count] = col;
-            kap_grad_data[count] = A_data[j];
+            kap_grad_data[count] = A_a[j];
             count++;
          }
       }
@@ -175,13 +186,13 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
                /* New entry in the tentative pattern */
                kg_marker[col] = count + 1;
                kg_pos[count] = col;
-               kap_grad_data[count] = G_temp_data[i]*A_data[j];
+               kap_grad_data[count] = G_temp_data[i]*A_a[j];
                count++;
             }
             else if (k > 0)
             {
                /* Already existing entry in the tentative pattern */
-               kap_grad_data[k-1] += G_temp_data[i]*A_data[j];
+               kap_grad_data[k-1] += G_temp_data[i]*A_a[j];
             }
          }
       }
@@ -304,7 +315,6 @@ hypre_AddToPattern( hypre_Vector *kap_grad,
    HYPRE_Complex  *kap_grad_data = hypre_VectorData(kap_grad);
 
    HYPRE_Int       i, nentries;
-   HYPRE_Int       patt_size_old;
 
    /* Number of entries that can be added */
    nentries = hypre_min(kap_grad_size, max_step_size);
@@ -314,7 +324,6 @@ hypre_AddToPattern( hypre_Vector *kap_grad,
    hypre_PartialSelectSortCI(kap_grad_data, kg_pos, kap_grad_size, nentries);
 
    /* Update pattern with new entries */
-   patt_size_old = *patt_size;
    for (i = 0; i < nentries; i++)
    {
       pattern[*patt_size + i] = kg_pos[i];
@@ -410,7 +419,7 @@ hypre_FSAISetup( void               *fsai_vdata,
 
    /* ParCSRMatrix A variables */
    MPI_Comm                comm             = hypre_ParCSRMatrixComm(A);
-   hypre_MemoryLocation    mem_loc          = hypre_ParCSRMatrixMemoryLocation(A);
+   //hypre_MemoryLocation    mem_loc          = hypre_ParCSRMatrixMemoryLocation(A);
    HYPRE_BigInt            num_rows_A       = hypre_ParCSRMatrixGlobalNumRows(A);
    HYPRE_BigInt            num_cols_A       = hypre_ParCSRMatrixGlobalNumCols(A);
    HYPRE_BigInt           *row_starts_A     = hypre_ParCSRMatrixRowStarts(A);
@@ -419,8 +428,7 @@ hypre_FSAISetup( void               *fsai_vdata,
    /* CSRMatrix A_diag variables */
    hypre_CSRMatrix        *A_diag           = hypre_ParCSRMatrixDiag(A);
    HYPRE_Int              *A_i              = hypre_CSRMatrixI(A_diag);
-   HYPRE_Int              *A_j              = hypre_CSRMatrixJ(A_diag);
-   HYPRE_Real             *A_data           = hypre_CSRMatrixData(A_diag);
+   HYPRE_Real             *A_a              = hypre_CSRMatrixData(A_diag);
    HYPRE_Int               num_rows_diag_A  = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_Int               num_nnzs_diag_A  = hypre_CSRMatrixNumNonzeros(A_diag);
    HYPRE_Int               avg_nnzrow_diag_A;
@@ -430,42 +438,36 @@ hypre_FSAISetup( void               *fsai_vdata,
    hypre_CSRMatrix        *G_diag;
    HYPRE_Int              *G_i;
    HYPRE_Int              *G_j;
-   HYPRE_Real             *G_data;
-   HYPRE_Int               max_nnzrow_diag_G;   /* Maximum number of nonzeros per row in G_diag */
-   HYPRE_Int               max_nonzeros_diag_G; /* Maximum number of nonzeros in G_diag */
+   HYPRE_Real             *G_a;
+   HYPRE_Int               max_nnzrow_diag_G;   /* Max. number of nonzeros per row in G_diag */
+   HYPRE_Int               max_nonzeros_diag_G; /* Max. number of nonzeros in G_diag */
+   HYPRE_Int               max_cand_size;       /* Max size of kg_pos */
 
-   /* Work vectors*/
+   /* Work vectors */
    hypre_ParVector         *r_work;
    hypre_ParVector         *z_work;
 
    /* Local variables */
-   char                     msg[512];      /* Warning message */
+   char                     msg[512];    /* Warning message */
    HYPRE_Int                num_procs;
    HYPRE_Int                my_id;
-   hypre_Vector            *G_temp;        /* Vector holding the values of G[i,:] */
-   hypre_Vector            *A_sub;         /* Vector holding the dense submatrix A[P, P] */
-   hypre_Vector            *A_subrow;      /* Vector holding A[i, P] */
-   hypre_Vector            *kap_grad;      /* Vector holding the Kaporin gradient values */
-   HYPRE_Int               *kg_pos;        /* Indices of nonzero entries of kap_grad */
-   HYPRE_Int               *kg_marker;     /* Marker array with nonzeros pointing to kg_pos */
-   HYPRE_Int               *marker;        /* Marker array with nonzeros pointing to P */
-   HYPRE_Int               *pattern;       /* Array holding column indices of G[i,:] */
-   HYPRE_Int                max_cand_size; /* Max size of kg_pos */
-   HYPRE_Int                patt_size;     /* Number of entries in current pattern */
-   HYPRE_Int                patt_size_old; /* Number of entries in previous pattern */
-   HYPRE_Int                i, j, k, l;    /* Loop variables */
-   HYPRE_Real               old_psi;       /* GAG' before k-th interation of aFSAI */
-   HYPRE_Real               new_psi;       /* GAG' after k-th interation of aFSAI */
-   HYPRE_Real               row_scale;     /* Scaling factor for G_temp */
-   HYPRE_Complex           *G_temp_data;
-   HYPRE_Complex           *A_subrow_data;
-   HYPRE_Complex           *kap_grad_data;
-   HYPRE_Complex           *A_sub_data;
+   HYPRE_Complex           *twspace;     /* shared work space for omp threads */
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
+   /* Initialize MPI variables */
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
+
+   /* Sanity check */
+#if defined(HYPRE_USING_OPENMP) && \
+   (defined(HYPRE_USING_HYPRE_LAPACK) || defined(HYPRE_USING_HYPRE_BLAS))
+   hypre_sprintf(msg, "Threaded FSAI requires linking to external blas/LAPACK. Using Jacobi.");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+
+   /* Compute Jacobi instead */
+   hypre_ParFSAIDataMaxSteps(fsai_data) = max_steps = 0;
+#endif
 
    /* Create and initialize the matrix G */
    avg_nnzrow_diag_A   = num_nnzs_diag_A/num_rows_diag_A;
@@ -477,7 +479,7 @@ hypre_FSAISetup( void               *fsai_vdata,
                                 0, max_nonzeros_diag_G, 0);
    hypre_ParCSRMatrixInitialize(G);
    G_diag = hypre_ParCSRMatrixDiag(G);
-   G_data = hypre_CSRMatrixData(G_diag);
+   G_a = hypre_CSRMatrixData(G_diag);
    G_i = hypre_CSRMatrixI(G_diag);
    G_j = hypre_CSRMatrixJ(G_diag);
    hypre_ParFSAIDataGmat(fsai_data) = G;
@@ -492,27 +494,8 @@ hypre_FSAISetup( void               *fsai_vdata,
    hypre_ParFSAIDataRWork(fsai_data) = r_work;
    hypre_ParFSAIDataZWork(fsai_data) = z_work;
 
-   /* Allocate and initialize local vector variables */
-   G_temp    = hypre_SeqVectorCreate(max_nnzrow_diag_G);
-   A_subrow  = hypre_SeqVectorCreate(max_nnzrow_diag_G);
-   kap_grad  = hypre_SeqVectorCreate(max_cand_size); // TODO: size
-   A_sub     = hypre_SeqVectorCreate(max_nnzrow_diag_G*max_nnzrow_diag_G);
-   pattern   = hypre_CTAlloc(HYPRE_Int, max_nnzrow_diag_G, HYPRE_MEMORY_HOST);
-   kg_pos    = hypre_CTAlloc(HYPRE_Int, max_cand_size, HYPRE_MEMORY_HOST); // TODO: size
-   kg_marker = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A, HYPRE_MEMORY_HOST);
-   marker    = hypre_TAlloc(HYPRE_Int, num_rows_diag_A, HYPRE_MEMORY_HOST);
-
-   hypre_SeqVectorInitialize(G_temp);
-   hypre_SeqVectorInitialize(A_subrow);
-   hypre_SeqVectorInitialize(kap_grad);
-   hypre_SeqVectorInitialize(A_sub);
-   hypre_Memset(marker, -1, num_rows_diag_A*sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
-
-   /* Setting data variables for vectors */
-   G_temp_data     = hypre_VectorData(G_temp);
-   A_subrow_data   = hypre_VectorData(A_subrow);
-   kap_grad_data   = hypre_VectorData(kap_grad);
-   A_sub_data      = hypre_VectorData(A_sub);
+   /* Allocate shared work space array for OpenMP threads */
+   twspace = hypre_CTAlloc(HYPRE_Complex, hypre_NumThreads() + 1, HYPRE_MEMORY_HOST);
 
    /**********************************************************************
    * Start of Adaptive FSAI algorithm
@@ -520,94 +503,224 @@ hypre_FSAISetup( void               *fsai_vdata,
 
    /* Cycle through each of the local rows */
    HYPRE_ANNOTATE_REGION_BEGIN("%s", "MainLoop");
-   for (i = 0; i < num_rows_diag_A; i++)
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel
+#endif
    {
-      patt_size = 0;
+      hypre_Vector   *G_temp;        /* Vector holding the values of G[i,:] */
+      hypre_Vector   *A_sub;         /* Vector holding the dense submatrix A[P, P] */
+      hypre_Vector   *A_subrow;      /* Vector holding A[i, P] */
+      hypre_Vector   *kap_grad;      /* Vector holding the Kaporin gradient values */
+      HYPRE_Int      *kg_pos;        /* Indices of nonzero entries of kap_grad */
+      HYPRE_Int      *kg_marker;     /* Marker array with nonzeros pointing to kg_pos */
+      HYPRE_Int      *marker;        /* Marker array with nonzeros pointing to P */
+      HYPRE_Int      *pattern;       /* Array holding column indices of G[i,:] */
+      HYPRE_Int       patt_size;     /* Number of entries in current pattern */
+      HYPRE_Int       patt_size_old; /* Number of entries in previous pattern */
+      HYPRE_Int       ii;            /* Thread identifier */
+      HYPRE_Int       num_threads;   /* Number of active threads */
+      HYPRE_Int       ns, ne;        /* Initial and last row indices */
+      HYPRE_Int       i, j, k, iloc; /* Loop variables */
+      HYPRE_Real      old_psi;       /* GAG' before k-th interation of aFSAI */
+      HYPRE_Real      new_psi;       /* GAG' after k-th interation of aFSAI */
+      HYPRE_Real      row_scale;     /* Scaling factor for G_temp */
+      HYPRE_Complex  *G_temp_data;
+      HYPRE_Complex  *A_subrow_data;
 
-      /* Set old_psi up front so we don't have to compute GAG' twice in the inner for-loop */
-      old_psi = A_data[A_i[i]];
+      HYPRE_Int       num_rows_Gloc;
+      HYPRE_Int       num_nnzs_Gloc;
+      HYPRE_Int      *Gloc_i;
+      HYPRE_Int      *Gloc_j;
+      HYPRE_Real     *Gloc_a;
 
-      /* Cycle through each iteration for that row */
-      for (k = 0; k < max_steps; k++)
+      /* Allocate and initialize local vector variables */
+      G_temp    = hypre_SeqVectorCreate(max_nnzrow_diag_G);
+      A_subrow  = hypre_SeqVectorCreate(max_nnzrow_diag_G);
+      kap_grad  = hypre_SeqVectorCreate(max_cand_size);
+      A_sub     = hypre_SeqVectorCreate(max_nnzrow_diag_G*max_nnzrow_diag_G);
+      pattern   = hypre_CTAlloc(HYPRE_Int, max_nnzrow_diag_G, HYPRE_MEMORY_HOST);
+      kg_pos    = hypre_CTAlloc(HYPRE_Int, max_cand_size, HYPRE_MEMORY_HOST);
+      kg_marker = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A, HYPRE_MEMORY_HOST);
+      marker    = hypre_TAlloc(HYPRE_Int, num_rows_diag_A, HYPRE_MEMORY_HOST);
+
+      hypre_SeqVectorInitialize(G_temp);
+      hypre_SeqVectorInitialize(A_subrow);
+      hypre_SeqVectorInitialize(kap_grad);
+      hypre_SeqVectorInitialize(A_sub);
+      hypre_Memset(marker, -1, num_rows_diag_A*sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+
+      /* Setting data variables for vectors */
+      G_temp_data   = hypre_VectorData(G_temp);
+      A_subrow_data = hypre_VectorData(A_subrow);
+
+      ii = hypre_GetThreadNum();
+      num_threads = hypre_NumActiveThreads();
+      hypre_partition1D(num_rows_diag_A, num_threads, ii, &ns, &ne);
+
+      num_rows_Gloc = ne - ns;
+      if (num_threads == 1)
       {
-         /* Compute Kaporin Gradient */
-         hypre_FindKapGrad(A_diag, kap_grad, kg_pos, G_temp, pattern,
-                           patt_size, max_nnzrow_diag_G, i, kg_marker);
-
-         /* Find max_step_size largest values of the kaporin gradient,
-            find their column indices, and add it to pattern */
-         patt_size_old = patt_size;
-         hypre_AddToPattern(kap_grad, kg_pos, pattern, &patt_size,
-                            kg_marker, max_step_size);
-
-         if (patt_size == patt_size_old)
-         {
-            new_psi = old_psi;
-            hypre_VectorSize(G_temp) = patt_size;
-            break;
-         }
-
-         /* Gather A[P, P] and -A[i, P] */
-         for (j = 0; j < patt_size; j++)
-         {
-            marker[pattern[j]] = j;
-         }
-
-         hypre_VectorSize(A_sub)    = patt_size * patt_size;
-         hypre_VectorSize(A_subrow) = patt_size;
-         hypre_VectorSize(G_temp)   = patt_size;
-
-         hypre_SeqVectorSetConstantValues(A_sub, 0.0);
-         hypre_SeqVectorSetConstantValues(A_subrow, 0.0);
-
-         hypre_CSRMatrixExtractDenseMat(A_diag, A_sub, pattern, patt_size, marker); /* A[P, P] */
-         hypre_CSRMatrixExtractDenseRow(A_diag, A_subrow, marker, i);               /* A[i, P] */
-
-         /* Solve A[P, P] G[i, P]' = -A[i, P] */
-         hypre_DenseSPDSystemSolve(A_sub, A_subrow, G_temp);
-
-         /* Determine psi_{k+1} = G_temp[i]*A*G_temp[i]' */
-         new_psi = hypre_SeqVectorInnerProd(G_temp, A_subrow) + A_data[A_i[i]];
-         if (hypre_abs(new_psi - old_psi) < kap_tolerance*old_psi)
-         {
-            break;
-         }
-         old_psi = new_psi;
-      }
-
-      /* Reset marker for building dense linear system */
-      for (j = 0; j < patt_size; j++)
-      {
-         marker[pattern[j]] = -1;
-      }
-
-      /* Compute scaling factor */
-      if (new_psi > 0)
-      {
-         row_scale = 1.0/sqrt(new_psi);
+         Gloc_i = G_i;
+         Gloc_j = G_j;
+         Gloc_a = G_a;
       }
       else
       {
-         hypre_sprintf(msg, "Warning: complex scaling factor found in row %d\n", i);
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+         num_nnzs_Gloc = num_rows_Gloc*max_nnzrow_diag_G;
 
-         row_scale = 1.0/A_data[A_i[i]];
-         hypre_VectorSize(G_temp) = 0;
+         Gloc_i = hypre_CTAlloc(HYPRE_Int, num_rows_Gloc + 1, HYPRE_MEMORY_HOST);
+         Gloc_j = hypre_CTAlloc(HYPRE_Int, num_nnzs_Gloc, HYPRE_MEMORY_HOST);
+         Gloc_a = hypre_CTAlloc(HYPRE_Complex, num_nnzs_Gloc, HYPRE_MEMORY_HOST);
       }
 
-      /* Pass values of G_temp into G */
-      G_j[G_i[i]] = i;
-      G_data[G_i[i]] = row_scale;
-      for (k = 0; k < hypre_VectorSize(G_temp); k++)
+      for (i = ns; i < ne; i++)
       {
-         j         = G_i[i] + k + 1;
-         G_j[j]    = pattern[k];
-         G_data[j] = row_scale*G_temp_data[k];
-         kg_marker[pattern[k]] = 0;
+         patt_size = 0;
+
+         /* Set old_psi up front so we don't have to compute GAG' twice in the inner for-loop */
+         new_psi = old_psi = A_a[A_i[i]];
+
+         /* Cycle through each iteration for that row */
+         for (k = 0; k < max_steps; k++)
+         {
+            /* Compute Kaporin Gradient */
+            hypre_FindKapGrad(A_diag, kap_grad, kg_pos, G_temp, pattern,
+                              patt_size, max_nnzrow_diag_G, i, kg_marker);
+
+            /* Find max_step_size largest values of the kaporin gradient,
+               find their column indices, and add it to pattern */
+            patt_size_old = patt_size;
+            hypre_AddToPattern(kap_grad, kg_pos, pattern, &patt_size,
+                               kg_marker, max_step_size);
+
+            /* Update sizes */
+            hypre_VectorSize(A_sub)    = patt_size * patt_size;
+            hypre_VectorSize(A_subrow) = patt_size;
+            hypre_VectorSize(G_temp)   = patt_size;
+
+            if (patt_size == patt_size_old)
+            {
+               new_psi = old_psi;
+               break;
+            }
+            else
+            {
+               /* Gather A[P, P] and -A[i, P] */
+               for (j = 0; j < patt_size; j++)
+               {
+                  marker[pattern[j]] = j;
+               }
+               hypre_CSRMatrixExtractDenseMat(A_diag, A_sub, pattern, patt_size, marker);
+               hypre_CSRMatrixExtractDenseRow(A_diag, A_subrow, marker, i);
+
+               /* Solve A[P, P] G[i, P]' = -A[i, P] */
+               hypre_DenseSPDSystemSolve(A_sub, A_subrow, G_temp);
+
+               /* Determine psi_{k+1} = G_temp[i]*A*G_temp[i]' */
+               new_psi = A_a[A_i[i]];
+               for (j = 0; j < patt_size; j++)
+               {
+                  new_psi += G_temp_data[j]*A_subrow_data[j];
+               }
+
+               /* Check psi reduction */
+               if (hypre_abs(new_psi - old_psi) < kap_tolerance*old_psi)
+               {
+                  break;
+               }
+               else
+               {
+                  old_psi = new_psi;
+               }
+            }
+         }
+
+         /* Reset marker for building dense linear system */
+         for (j = 0; j < patt_size; j++)
+         {
+            marker[pattern[j]] = -1;
+         }
+
+         /* Compute scaling factor */
+         if (new_psi > 0)
+         {
+            row_scale = 1.0/sqrt(new_psi);
+         }
+         else
+         {
+            hypre_sprintf(msg, "Warning: complex scaling factor found in row %d\n", i);
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+
+            row_scale = 1.0/hypre_cabs(A_a[A_i[i]]);
+            hypre_VectorSize(G_temp) = patt_size = 0;
+         }
+
+         /* Pass values of G_temp into G */
+         iloc = i - ns;
+         Gloc_j[Gloc_i[iloc]] = i;
+         Gloc_a[Gloc_i[iloc]] = row_scale;
+         for (k = 0; k < patt_size; k++)
+         {
+            j = Gloc_i[iloc] + k + 1;
+            Gloc_j[j] = pattern[k];
+            Gloc_a[j] = row_scale*G_temp_data[k];
+            kg_marker[pattern[k]] = 0;
+         }
+         Gloc_i[iloc+1] = Gloc_i[iloc] + k + 1;
       }
-      G_i[i+1] = G_i[i] + k + 1;
-   }
+
+      /* Copy data to shared memory */
+      twspace[ii+1] = Gloc_i[num_rows_Gloc] - Gloc_i[0];
+#ifdef HYPRE_USING_OPENMP
+#pragma omp barrier
+#pragma omp single
+#endif
+      {
+         for (i = 0; i < num_threads; i++)
+         {
+            twspace[i+1] += twspace[i];
+         }
+      }
+
+      if (num_threads > 1)
+      {
+         /* Correct row pointer G_i */
+         G_i[ns] = twspace[ii];
+         for (i = ns; i < ne; i++)
+         {
+            iloc = i - ns;
+            G_i[i+1] = G_i[i] + Gloc_i[iloc+1] - Gloc_i[iloc];
+         }
+
+         /* Move G_j and G_a */
+         for (i = ns; i < ne; i++)
+         {
+            for (j = G_i[i]; j < G_i[i+1]; j++)
+            {
+               G_j[j] = Gloc_j[j - G_i[ns]];
+               G_a[j] = Gloc_a[j - G_i[ns]];
+            }
+         }
+
+         hypre_TFree(Gloc_i, HYPRE_MEMORY_HOST);
+         hypre_TFree(Gloc_j, HYPRE_MEMORY_HOST);
+         hypre_TFree(Gloc_a, HYPRE_MEMORY_HOST);
+      }
+
+      /* Free memory */
+      hypre_SeqVectorDestroy(G_temp);
+      hypre_SeqVectorDestroy(A_subrow);
+      hypre_SeqVectorDestroy(kap_grad);
+      hypre_SeqVectorDestroy(A_sub);
+      hypre_TFree(kg_pos, HYPRE_MEMORY_HOST);
+      hypre_TFree(pattern, HYPRE_MEMORY_HOST);
+      hypre_TFree(marker, HYPRE_MEMORY_HOST);
+      hypre_TFree(kg_marker, HYPRE_MEMORY_HOST);
+   } /* end openmp region */
    HYPRE_ANNOTATE_REGION_END("%s", "MainLoop");
+
+   /* Free memory */
+   hypre_TFree(twspace, HYPRE_MEMORY_HOST);
 
    /* Update local number of nonzeros of G */
    hypre_CSRMatrixNumNonzeros(G_diag) = G_i[num_rows_diag_A];
@@ -634,6 +747,8 @@ hypre_FSAISetup( void               *fsai_vdata,
          hypre_printf("*************************\n\n");
 
          hypre_printf("+---------------------------+\n");
+         hypre_printf("| No. MPI tasks:   %8d |\n", num_procs);
+         hypre_printf("| No. threads:     %8d |\n", hypre_NumThreads());
          hypre_printf("| Max no. steps:   %8d |\n", max_steps);
          hypre_printf("| Max step size:   %8d |\n", max_step_size);
          hypre_printf("| Kap grad tol:    %8.1e |\n", kap_tolerance);
@@ -650,16 +765,6 @@ hypre_FSAISetup( void               *fsai_vdata,
    char filename[] = "FSAI.out.G.ij";
    hypre_ParCSRMatrixPrintIJ(G, 0, 0, filename);
 #endif
-
-   /* Free memory */
-   hypre_SeqVectorDestroy(G_temp);
-   hypre_SeqVectorDestroy(A_subrow);
-   hypre_SeqVectorDestroy(kap_grad);
-   hypre_SeqVectorDestroy(A_sub);
-   hypre_TFree(kg_pos, HYPRE_MEMORY_HOST);
-   hypre_TFree(pattern, HYPRE_MEMORY_HOST);
-   hypre_TFree(marker, HYPRE_MEMORY_HOST);
-   hypre_TFree(kg_marker, HYPRE_MEMORY_HOST);
 
    HYPRE_ANNOTATE_FUNC_END;
 
