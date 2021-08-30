@@ -354,6 +354,10 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetILUDroptol(amg_data, ilu_droptol);
    hypre_BoomerAMGSetILUMaxIter(amg_data, ilu_max_iter);
    hypre_BoomerAMGSetILULocalReordering(amg_data, ilu_reordering_type);
+   hypre_BoomerAMGSetFSAIMaxSteps(amg_data, fsai_max_steps);
+   hypre_BoomerAMGSetFSAIMaxStepSize(amg_data, fsai_max_step_size);
+   hypre_BoomerAMGSetFSAIEigMaxIters(amg_data, fsai_eig_maxiter);
+   hypre_BoomerAMGSetFSAIKapTolerance(amg_data, fsai_kap_tolerance);
 
    hypre_BoomerAMGSetMinIter(amg_data, min_iter);
    hypre_BoomerAMGSetMaxIter(amg_data, max_iter);
