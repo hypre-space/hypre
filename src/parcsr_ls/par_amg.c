@@ -3608,7 +3608,7 @@ hypre_BoomerAMGSetDofFunc( void                 *data,
    else
    {
       hypre_ParAMGDataDofFunc(amg_data) = hypre_IntArrayCreate(-1);
-      hypre_IntArrayMemoryLocation(hypre_ParAMGDataDofFunc(amg_data)) = HYPRE_MEMORY_HOST;
+      hypre_IntArrayMemoryLocation(hypre_ParAMGDataDofFunc(amg_data)) = HYPRE_MEMORY_DEVICE;
       hypre_IntArrayData(hypre_ParAMGDataDofFunc(amg_data)) = dof_func;
    }
 

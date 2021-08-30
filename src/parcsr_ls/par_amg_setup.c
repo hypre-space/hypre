@@ -225,6 +225,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    if (add_end == -1) add_end = max_levels-1;
    amg_logging = hypre_ParAMGDataLogging(amg_data);
    amg_print_level = hypre_ParAMGDataPrintLevel(amg_data);
+   // WM: debug
+   amg_print_level = 1;
    coarsen_type = hypre_ParAMGDataCoarsenType(amg_data);
    measure_type = hypre_ParAMGDataMeasureType(amg_data);
    setup_type = hypre_ParAMGDataSetupType(amg_data);

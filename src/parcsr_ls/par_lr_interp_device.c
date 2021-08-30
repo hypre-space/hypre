@@ -26,22 +26,6 @@ __global__ void hypreCUDAKernel_compute_aff_afc_epe( HYPRE_Int nr_of_rows, HYPRE
 
 __global__ void hypreCUDAKernel_compute_dlam_dtmp( HYPRE_Int nr_of_rows, HYPRE_Int *AFF_diag_i, HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Int *AFF_offd_i, HYPRE_Complex *AFF_offd_data, HYPRE_Complex *rsFC, HYPRE_Complex *dlam, HYPRE_Complex *dtmp );
 
-struct equal_pred : public thrust::unary_function<HYPRE_Int, bool>
-{
-   HYPRE_Int  val;
-
-   equal_pred(HYPRE_Int val_)
-   {
-      val = val_;
-   }
-
-   __host__ __device__
-   bool operator()(const HYPRE_Int& val_in) const
-   {
-      return val_in == val;
-   }
-};
-
 /*---------------------------------------------------------------------
  * Extended Interpolation in the form of Mat-Mat
  *---------------------------------------------------------------------*/
@@ -218,7 +202,7 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
 
    hypre_MatvecCommPkgCreate(P);
 
-   HYPRE_THRUST_CALL( replace_if, CF_marker, CF_marker + A_nr_of_rows, equal_pred(-3), -1);  
+   HYPRE_THRUST_CALL( replace_if, CF_marker, CF_marker + A_nr_of_rows, equal<HYPRE_Int>(-3), -1);  
 
    *P_ptr = P;
 
@@ -444,7 +428,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
 
    hypre_MatvecCommPkgCreate(P);
 
-   HYPRE_THRUST_CALL( replace_if, CF_marker, CF_marker + A_nr_of_rows, equal_pred(-3), -1);  
+   HYPRE_THRUST_CALL( replace_if, CF_marker, CF_marker + A_nr_of_rows, equal<HYPRE_Int>(-3), -1);  
 
    *P_ptr = P;
 
@@ -677,7 +661,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
 
    hypre_MatvecCommPkgCreate(P);
 
-   HYPRE_THRUST_CALL( replace_if, CF_marker, CF_marker + A_nr_of_rows, equal_pred(-3), -1);  
+   HYPRE_THRUST_CALL( replace_if, CF_marker, CF_marker + A_nr_of_rows, equal<HYPRE_Int>(-3), -1);  
 
    *P_ptr = P;
 
