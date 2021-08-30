@@ -27,7 +27,6 @@ hypre_FSAICreate()
    HYPRE_Int            eig_max_iters;
    HYPRE_Int            max_iterations;
    HYPRE_Int            num_iterations;
-   HYPRE_Real           rel_resid_norm;
    HYPRE_Real           tolerance;
    HYPRE_Real           omega;
 
@@ -36,8 +35,6 @@ hypre_FSAICreate()
 
    /* output params */
    HYPRE_Int            print_level;
-   HYPRE_Int            debug_flag;
-   char                 log_file_name[256];
 
    /*-----------------------------------------------------------------------
     * Setup default values for parameters
@@ -61,8 +58,6 @@ hypre_FSAICreate()
 
    /* output params */
    print_level = 0;
-   debug_flag = 0;
-   hypre_sprintf(log_file_name, "%s", "fsai.out.log");
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
