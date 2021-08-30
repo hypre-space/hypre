@@ -15,11 +15,13 @@
 #include "_hypre_utilities.hpp"
 #include "seq_mv.hpp"
 
-#if defined(HYPRE_USING_CUSPARSE)
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
 hypre_CsrsvData*
 hypre_CsrsvDataCreate()
 {
    hypre_CsrsvData *data = hypre_CTAlloc(hypre_CsrsvData, 1, HYPRE_MEMORY_HOST);
+   hypre_CsrsvDataBufferSize(data) = 0;
+   hypre_CsrsvDataBuffer(data) = NULL;
 
    return data;
 }
@@ -34,12 +36,20 @@ hypre_CsrsvDataDestroy(hypre_CsrsvData* data)
 
    if ( hypre_CsrsvDataInfoL(data) )
    {
+#if defined(HYPRE_USING_CUSPARSE)
       HYPRE_CUSPARSE_CALL( cusparseDestroyCsrsv2Info( hypre_CsrsvDataInfoL(data) ) );
+#elif defined(HYPRE_USING_ROCSPARSE)
+      HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_info( hypre_CsrsvDataInfoL(data) ) );
+#endif
    }
 
    if ( hypre_CsrsvDataInfoU(data) )
    {
+#if defined(HYPRE_USING_CUSPARSE)
       HYPRE_CUSPARSE_CALL( cusparseDestroyCsrsv2Info( hypre_CsrsvDataInfoU(data) ) );
+#elif defined(HYPRE_USING_ROCSPARSE)
+      HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_info( hypre_CsrsvDataInfoU(data) ) );
+#endif
    }
 
    if ( hypre_CsrsvDataBuffer(data) )
@@ -1664,6 +1674,7 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                                                                   char, hypre_CsrsvDataBufferSize(csrsv_data),
                                                                   char, buffer_size,
                                                                   HYPRE_MEMORY_DEVICE);
+            hypre_CsrsvDataBufferSize(csrsv_data) = buffer_size;
          }
 
          HYPRE_CUSPARSE_CALL( cusparseDcsrsv2_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
@@ -1705,6 +1716,7 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                                                                   char, hypre_CsrsvDataBufferSize(csrsv_data),
                                                                   char, buffer_size,
                                                                   HYPRE_MEMORY_DEVICE);
+            hypre_CsrsvDataBufferSize(csrsv_data) = buffer_size;
          }
 
          HYPRE_CUSPARSE_CALL( cusparseDcsrsv2_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
@@ -1739,15 +1751,188 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
 #if defined(HYPRE_USING_ROCSPARSE)
 // FIXME: We need a stub for this function until we can implement a rocsparse version
 HYPRE_Int
-hypre_CSRMatrixTriLowerUpperSolveCusparse(char              /*uplo*/,
-                                          hypre_CSRMatrix * /*A*/,
-                                          HYPRE_Real      * /*l1_norms*/,
-                                          hypre_Vector    * /*f*/,
-                                          hypre_Vector    * /*u*/ )
+hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
+                                           hypre_CSRMatrix * A,
+                                           HYPRE_Real      * l1_norms,
+                                           hypre_Vector    * f,
+                                           hypre_Vector    * u )
 {
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "hypre_CSRMatrixTriLowerUpperSolveCusparse not implemented for rocSPARSE!\n");
+   HYPRE_Int      nrow   = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int      ncol   = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int      nnzA   = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
+   HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
+   HYPRE_Complex *A_a    = hypre_CSRMatrixData(A);
+   HYPRE_Int     *A_sj   = hypre_CSRMatrixSortedJ(A);
+   HYPRE_Complex *A_sa   = hypre_CSRMatrixSortedData(A);
+   HYPRE_Complex *f_data = hypre_VectorData(f);
+   HYPRE_Complex *u_data = hypre_VectorData(u);
+   HYPRE_Complex  alpha  = 1.0;
+   size_t         buffer_size;
+   hypre_int      structural_zero;
 
-   return 1;
+   if (nrow != ncol)
+   {
+      hypre_assert(0);
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (nrow <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   if (nnzA <= 0)
+   {
+      hypre_assert(0);
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   rocsparse_handle handle = hypre_HandleCusparseHandle(hypre_handle());
+   rocsparse_mat_descr descr = hypre_CSRMatrixGPUMatDescr(A);
+
+   if ( !A_sj && !A_sa )
+   {
+      hypre_CSRMatrixSortedJ(A) = A_sj = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
+      hypre_CSRMatrixSortedData(A) = A_sa = hypre_TAlloc(HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(A_sj, A_j, HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(A_sa, A_a, HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+      hypre_CSRMatrixData(A) = A_sa;
+      HYPRE_Int err = 0;
+      if (l1_norms)
+      {
+         err = hypre_CSRMatrixReplaceDiagDevice(A, l1_norms, INFINITY, 0.0);
+      }
+      else
+      {
+         err = hypre_CSRMatrixFixZeroDiagDevice(A, INFINITY, 0.0);
+      }
+      hypre_CSRMatrixData(A) = A_a;
+      if (err)
+      {
+         hypre_error_w_msg(1, "structural zero in hypre_CSRMatrixTriLowerUpperSolveRocsparse");
+         //hypre_assert(0);
+      }
+#endif
+
+      hypre_SortCSRRocsparse(nrow, ncol, nnzA, descr, A_i, A_sj, A_sa);
+   }
+
+   HYPRE_ROCSPARSE_CALL( rocsparse_set_mat_diag_type(descr, rocsparse_diag_type_non_unit) );
+
+   if (!hypre_CSRMatrixCsrsvData(A))
+   {
+      hypre_CSRMatrixCsrsvData(A) = hypre_CsrsvDataCreate();
+   }
+   hypre_CsrsvData *csrsv_data = hypre_CSRMatrixCsrsvData(A);
+
+   if (uplo == 'L')
+   {
+      HYPRE_ROCSPARSE_CALL( rocsparse_set_mat_fill_mode(descr, rocsparse_fill_mode_lower) );
+
+      if (!hypre_CsrsvDataInfoL(csrsv_data))
+      {
+         HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_info(&hypre_CsrsvDataInfoL(csrsv_data)) );
+
+         HYPRE_ROCSPARSE_CALL( rocsparse_dcsrsv_buffer_size(handle, rocsparse_operation_none,
+                               nrow, nnzA, descr, A_sa, A_i, A_sj, hypre_CsrsvDataInfoL(csrsv_data), &buffer_size) );
+
+         if (hypre_CsrsvDataBufferSize(csrsv_data) < buffer_size)
+         {
+            hypre_CsrsvDataBuffer(csrsv_data) = hypre_TReAlloc_v2(hypre_CsrsvDataBuffer(csrsv_data),
+                                                                  char, hypre_CsrsvDataBufferSize(csrsv_data),
+                                                                  char, buffer_size,
+                                                                  HYPRE_MEMORY_DEVICE);
+            hypre_CsrsvDataBufferSize(csrsv_data) = buffer_size;
+         }
+
+         HYPRE_ROCSPARSE_CALL( rocsparse_dcsrsv_analysis(handle, rocsparse_operation_none,
+                                                         nrow, nnzA, descr, A_sa, A_i, A_sj,
+                                                         hypre_CsrsvDataInfoL(csrsv_data), rocsparse_analysis_policy_reuse,
+                                                         rocsparse_solve_policy_auto, hypre_CsrsvDataBuffer(csrsv_data)) );
+
+         rocsparse_status status = rocsparse_csrsv_zero_pivot(handle, descr, hypre_CsrsvDataInfoL(csrsv_data), &structural_zero);
+         if (rocsparse_status_zero_pivot == status)
+         {
+            char msg[256];
+            hypre_sprintf(msg, "hypre_CSRMatrixTriLowerUpperSolveRocsparse A(%d,%d) is missing\n",
+                          structural_zero, structural_zero);
+            hypre_error_w_msg(1, msg);
+            //hypre_assert(0);
+         }
+      }
+
+      HYPRE_ROCSPARSE_CALL( rocsparse_dcsrsv_solve(handle, rocsparse_operation_none,
+                                                   nrow, nnzA, &alpha, descr, A_sa, A_i, A_sj,
+                                                   hypre_CsrsvDataInfoL(csrsv_data), f_data, u_data,
+                                                   rocsparse_solve_policy_auto,
+                                                   hypre_CsrsvDataBuffer(csrsv_data)) );
+   }
+   else
+   {
+      HYPRE_ROCSPARSE_CALL( rocsparse_set_mat_fill_mode(descr, rocsparse_fill_mode_upper) );
+
+      if (!hypre_CsrsvDataInfoU(csrsv_data))
+      {
+         HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_info(&hypre_CsrsvDataInfoU(csrsv_data)) );
+
+         HYPRE_ROCSPARSE_CALL( rocsparse_dcsrsv_buffer_size(handle, rocsparse_operation_none,
+                               nrow, nnzA, descr, A_sa, A_i, A_sj, hypre_CsrsvDataInfoU(csrsv_data), &buffer_size) );
+
+         if (hypre_CsrsvDataBufferSize(csrsv_data) < buffer_size)
+         {
+            hypre_CsrsvDataBuffer(csrsv_data) = hypre_TReAlloc_v2(hypre_CsrsvDataBuffer(csrsv_data),
+                                                                  char, hypre_CsrsvDataBufferSize(csrsv_data),
+                                                                  char, buffer_size,
+                                                                  HYPRE_MEMORY_DEVICE);
+            hypre_CsrsvDataBufferSize(csrsv_data) = buffer_size;
+         }
+
+         HYPRE_ROCSPARSE_CALL( rocsparse_dcsrsv_analysis(handle, rocsparse_operation_none,
+                                                         nrow, nnzA, descr, A_sa, A_i, A_sj,
+                                                         hypre_CsrsvDataInfoU(csrsv_data), rocsparse_analysis_policy_reuse,
+                                                         rocsparse_solve_policy_auto, hypre_CsrsvDataBuffer(csrsv_data)) );
+
+         rocsparse_status status = rocsparse_csrsv_zero_pivot(handle, descr, hypre_CsrsvDataInfoU(csrsv_data), &structural_zero);
+         if (rocsparse_status_zero_pivot == status)
+         {
+            char msg[256];
+            hypre_sprintf(msg, "hypre_CSRMatrixTriLowerUpperSolveRocsparse A(%d,%d) is missing\n",
+                          structural_zero, structural_zero);
+            hypre_error_w_msg(1, msg);
+            //hypre_assert(0);
+         }
+      }
+
+      HYPRE_ROCSPARSE_CALL( rocsparse_dcsrsv_solve(handle, rocsparse_operation_none,
+                                                   nrow, nnzA, &alpha, descr, A_sa, A_i, A_sj,
+                                                   hypre_CsrsvDataInfoU(csrsv_data), f_data, u_data,
+                                                   rocsparse_solve_policy_auto,
+                                                   hypre_CsrsvDataBuffer(csrsv_data)) );
+   }
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_CSRMatrixTriLowerUpperSolveDevice(char             uplo,
+                                        hypre_CSRMatrix *A,
+                                        HYPRE_Real      *l1_norms,
+                                        hypre_Vector    *f,
+                                        hypre_Vector    *u )
+{
+#if defined(HYPRE_USING_CUSPARSE)
+   hypre_CSRMatrixTriLowerUpperSolveCusparse(uplo, A, l1_norms, f, u);
+#elif defined(HYPRE_USING_ROCSPARSE)
+   hypre_CSRMatrixTriLowerUpperSolveRocsparse(uplo, A, l1_norms, f, u);
+#else
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "hypre_CSRMatrixTriLowerUpperSolveDevice requires configuration with either cusparse or rocsparse\n");
+#endif
+   return hypre_error_flag;
 }
 
 
