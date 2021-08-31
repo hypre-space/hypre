@@ -86,26 +86,28 @@ hypre_StructMatrixMultCreate( HYPRE_Int             nmatrices_in,
    mtypes = hypre_CTAlloc(HYPRE_Int, nmatrices+1, HYPRE_MEMORY_HOST);
 
    /* Initialize data members */
-   (mmdata -> nmatrices)      = nmatrices;
-   (mmdata -> matrices)       = matrices;
-   (mmdata -> nterms)         = nterms;
-   (mmdata -> terms)          = terms;
-   (mmdata -> transposes)     = transposes;
-   (mmdata -> mtypes)         = mtypes;
-   (mmdata -> fstride)        = NULL;
-   (mmdata -> cstride)        = NULL;
-   (mmdata -> coarsen_stride) = NULL;
-   (mmdata -> cdata_space)    = NULL;
-   (mmdata -> fdata_space)    = NULL;
-   (mmdata -> coarsen)        = 0;
-   (mmdata -> mask)           = NULL;
-   (mmdata -> st_M)           = NULL;
-   (mmdata -> a)              = NULL;
-   (mmdata -> na)             = 0;
-   (mmdata -> comm_pkg)       = NULL;
-   (mmdata -> comm_pkg_a)     = comm_pkg_a;
-   (mmdata -> comm_data)      = NULL;
-   (mmdata -> comm_data_a)    = comm_data_a;
+   (mmdata -> nmatrices)       = nmatrices;
+   (mmdata -> matrices)        = matrices;
+   (mmdata -> nterms)          = nterms;
+   (mmdata -> terms)           = terms;
+   (mmdata -> transposes)      = transposes;
+   (mmdata -> mtypes)          = mtypes;
+   (mmdata -> fstride)         = NULL;
+   (mmdata -> cstride)         = NULL;
+   (mmdata -> coarsen_stride)  = NULL;
+   (mmdata -> cdata_space)     = NULL;
+   (mmdata -> fdata_space)     = NULL;
+   (mmdata -> coarsen)         = 0;
+   (mmdata -> mask)            = NULL;
+   (mmdata -> st_M)            = NULL;
+   (mmdata -> a)               = NULL;
+   (mmdata -> na)              = 0;
+   (mmdata -> comm_pkg)        = NULL;
+   (mmdata -> comm_pkg_a)      = comm_pkg_a;
+   (mmdata -> comm_data)       = NULL;
+   (mmdata -> comm_data_a)     = comm_data_a;
+   (mmdata -> num_comm_pkgs)   = 0;
+   (mmdata -> num_comm_blocks) = 0;
 
    *mmdata_ptr = mmdata;
 

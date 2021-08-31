@@ -437,11 +437,17 @@ hypre_SStructMatrixMultCreate(HYPRE_Int             nmatrices_input,
    hypre_TFree(pmatrices, HYPRE_MEMORY_HOST);
 
    /* Set SStructMMData object */
-   (mmdata -> nterms)     = nterms;
-   (mmdata -> nmatrices)  = nmatrices;
-   (mmdata -> matrices)   = matrices;
-   (mmdata -> terms)      = terms;
-   (mmdata -> transposes) = trans;
+   (mmdata -> nterms)      = nterms;
+   (mmdata -> nmatrices)   = nmatrices;
+   (mmdata -> matrices)    = matrices;
+   (mmdata -> terms)       = terms;
+   (mmdata -> transposes)  = trans;
+   (mmdata -> comm_pkg)    = NULL;
+   (mmdata -> comm_pkg_a)  = NULL;
+   (mmdata -> comm_data)   = NULL;
+   (mmdata -> comm_data_a) = NULL;
+   (mmdata -> num_comm_pkgs)   = 0;
+   (mmdata -> num_comm_blocks) = 0;
 
    *mmdata_ptr = mmdata;
 
@@ -471,6 +477,9 @@ hypre_SStructMatrixMultDestroy( hypre_SStructMMData *mmdata )
          hypre_SStructPMatrixMultDestroy((mmdata -> pmmdata)[part]);
       }
       hypre_TFree(mmdata -> pmmdata, HYPRE_MEMORY_HOST);
+
+      hypre_CommPkgDestroy(mmdata -> comm_pkg);
+      hypre_TFree(mmdata -> comm_data, HYPRE_MEMORY_HOST);
 
       hypre_TFree(mmdata, HYPRE_MEMORY_HOST);
    }
@@ -516,6 +525,13 @@ hypre_SStructMatrixMultSetup( hypre_SStructMMData   *mmdata,
    hypre_SStructPMatrix    *pmatrix;
    HYPRE_SStructVariable   *vartypes;
    hypre_SStructPGrid      *pgrid;
+
+   /* Communication variables */
+   hypre_StructMMData      *smmdata;
+   HYPRE_Int                np, num_comm_pkgs, num_comm_blocks;
+   hypre_CommPkg          **comm_pkg_a;
+   HYPRE_Complex         ***comm_data_a;
+   HYPRE_Complex          **comm_data;
 
    /* Local variables */
    MPI_Comm                 comm;
@@ -624,6 +640,59 @@ hypre_SStructMatrixMultSetup( hypre_SStructMMData   *mmdata,
    hypre_SStructMatrixSEntries(M) = sentries;
    hypre_SStructMatrixUEntries(M) = uentries;
 
+   /* Find total number of communication packages and blocks */
+   num_comm_pkgs = num_comm_blocks = 0;
+   for (part = 0; part < nparts; part++)
+   {
+      for (vi = 0; vi < nvars; vi++)
+      {
+         for (vj = 0; vj < nvars; vj++)
+         {
+            smmdata = pmmdata[part] -> smmdata[vi][vj];
+            if (smmdata)
+            {
+               num_comm_pkgs   += (smmdata -> num_comm_pkgs);
+               num_comm_blocks += (smmdata -> num_comm_blocks);
+            }
+         }
+      }
+   }
+   (mmdata -> num_comm_pkgs)   = num_comm_pkgs;
+   (mmdata -> num_comm_blocks) = num_comm_blocks;
+
+   /* Allocate communication packages and data */
+   comm_pkg_a  = hypre_TAlloc(hypre_CommPkg *, num_comm_pkgs, HYPRE_MEMORY_HOST);
+   comm_data_a = hypre_TAlloc(HYPRE_Complex **, num_comm_pkgs, HYPRE_MEMORY_HOST);
+   comm_data   = hypre_TAlloc(HYPRE_Complex *, num_comm_blocks, HYPRE_MEMORY_HOST);
+   (mmdata -> comm_pkg_a)  = comm_pkg_a;
+   (mmdata -> comm_data_a) = comm_data_a;
+   (mmdata -> comm_data)   = comm_data;
+
+   /* Update pointers to communication packages and data */
+   num_comm_pkgs = num_comm_blocks = 0;
+   for (part = 0; part < nparts; part++)
+   {
+      for (vi = 0; vi < nvars; vi++)
+      {
+         for (vj = 0; vj < nvars; vj++)
+         {
+            smmdata = pmmdata[part] -> smmdata[vi][vj];
+            if (smmdata)
+            {
+               for (np = 0; np < (smmdata -> num_comm_pkgs); np++)
+               {
+                  comm_pkg_a[num_comm_pkgs]  = smmdata -> comm_pkg_a[np];
+                  comm_data_a[num_comm_pkgs] = smmdata -> comm_data_a[np];
+                  num_comm_pkgs++;
+               }
+
+               hypre_TFree(smmdata -> comm_pkg_a, HYPRE_MEMORY_HOST);
+               hypre_TFree(smmdata -> comm_data_a, HYPRE_MEMORY_HOST);
+            }
+         }
+      }
+   }
+
    /* Assemble semi-struct grid */
    HYPRE_SStructGridAssemble(Mgrid);
 
@@ -672,15 +741,52 @@ hypre_SStructMatrixMultSetup( hypre_SStructMMData   *mmdata,
 HYPRE_Int
 hypre_SStructMatrixMultCommunicate( hypre_SStructMMData *mmdata )
 {
-   HYPRE_Int                nparts  = (mmdata -> nparts);
-   hypre_SStructPMMData   **pmmdata = (mmdata -> pmmdata);
+   hypre_CommPkg           *comm_pkg      = (mmdata -> comm_pkg);
+   HYPRE_Complex          **comm_data     = (mmdata -> comm_data);
+   hypre_CommPkg          **comm_pkg_a    = (mmdata -> comm_pkg_a);
+   HYPRE_Complex         ***comm_data_a   = (mmdata -> comm_data_a);
+   HYPRE_Int                num_comm_pkgs = (mmdata -> num_comm_pkgs);
 
-   HYPRE_Int                part;
+   hypre_CommHandle        *comm_handle;
+   HYPRE_Int                i, j, nb;
 
-   for (part = 0; part < nparts; part++)
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   if (num_comm_pkgs > 0)
    {
-      hypre_SStructPMatrixMultCommunicate(pmmdata[part]);
+      /* Agglomerate communication packages if needed */
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "CommSetup");
+      if (!comm_pkg)
+      {
+         hypre_CommPkgAgglomerate(num_comm_pkgs, comm_pkg_a, &comm_pkg);
+
+         nb = 0;
+         for (i = 0; i < num_comm_pkgs; i++)
+         {
+            for (j = 0; j < hypre_CommPkgNumBlocks(comm_pkg_a[i]); j++)
+            {
+               comm_data[nb++] = comm_data_a[i][j];
+            }
+            hypre_CommPkgDestroy(comm_pkg_a[i]);
+            hypre_TFree(comm_data_a[i], HYPRE_MEMORY_HOST);
+         }
+
+         /* Free memory */
+         hypre_TFree(comm_pkg_a, HYPRE_MEMORY_HOST);
+         hypre_TFree(comm_data_a, HYPRE_MEMORY_HOST);
+         mmdata -> comm_pkg_a  = NULL;
+         mmdata -> comm_data_a = NULL;
+
+         mmdata -> comm_pkg  = comm_pkg;
+         mmdata -> comm_data = comm_data;
+      }
+      HYPRE_ANNOTATE_REGION_END("%s", "CommSetup");
+
+      hypre_InitializeCommunication(comm_pkg, comm_data, comm_data, 0, 0, &comm_handle);
+      hypre_FinalizeCommunication(comm_handle);
    }
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
