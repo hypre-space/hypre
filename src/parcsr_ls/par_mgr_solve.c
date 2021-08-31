@@ -830,7 +830,7 @@ hypre_MGRCycle( void               *mgr_vdata,
 #if defined(HYPRE_USING_CUDA)
            hypre_ParCSRMatrixMatvecT(1.0, P_FF_array[fine_grid], Vtemp, 0.0, F_fine_array[coarse_grid]);
 #else
-           hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, hypre_ParVectorActualLocalSize(F_array[fine_grid]), 1.0, Vtemp, 0.0, &(F_fine_array[coarse_grid]));
+           hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, 1.0, Vtemp, 0.0, &(F_fine_array[coarse_grid]));
 #endif
            hypre_ParVectorSetConstantValues(U_fine_array[coarse_grid], 0.0);
            // Do F-relaxation using AMG

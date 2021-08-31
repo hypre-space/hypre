@@ -103,28 +103,28 @@ main( hypre_int argc,
   HYPRE_Int     max_iter = 100;
 
   /* parameters for MGR */
-  HYPRE_Int mgr_bsize = 2;  // block size of the system
-  HYPRE_Int mgr_nlevels = 1;  // number of reduction levels (3-level method means 2-level reduction)
+  HYPRE_Int mgr_bsize = 4;  // block size of the system
+  HYPRE_Int mgr_nlevels = 3;  // number of reduction levels (3-level method means 2-level reduction)
   HYPRE_Int mgr_non_c_to_f = 1;  // option to use user-provided reduction strategy
 
   HYPRE_Int     *mgr_point_marker_array = NULL;
   HYPRE_Int     *mgr_num_cindexes = NULL; 
   HYPRE_Int     **mgr_cindexes = NULL;
-  HYPRE_Int     *lv1 = NULL, *lv2 = NULL;
+  HYPRE_Int     *lv1 = NULL, *lv2 = NULL, *lv3 = NULL;
 
   /* F-relaxation option
    * 0  - Jacobi (only CPU)
    * 18 - L1 Jacobi (GPU-enabled)
    */
   HYPRE_Int mgr_relax_type = 18;
-  HYPRE_Int mgr_num_relax_sweeps = 0;  // number of F-relax iterations, 0 for traditional CPR
+  HYPRE_Int mgr_num_relax_sweeps = 1;  // number of F-relax iterations, 0 for traditional CPR
 
   /* Global smoother option
    *  0  - (block) Jacobi (only CPU)
    *  16 - ILU(0) (GPU-enabled)
    */
   HYPRE_Int mgr_gsmooth_type = 16;
-  HYPRE_Int mgr_num_gsmooth_sweeps = 1;  // number of global smoothing steps
+  HYPRE_Int mgr_num_gsmooth_sweeps = 0;  // number of global smoothing steps
 
   /* Interpolation/Restriction option
    * 0 - Injection
@@ -518,6 +518,74 @@ main( hypre_int argc,
     mgr_cindexes[1] = lv2;
     /* end mgr options */
   }
+  else if (example_id == 2)
+  {
+    /*
+     * Example for 4x4 block system
+     * E.g. 2-phase, 2-component flow with TPFA
+     *
+     * A = [ A_{pp}       A_{p\rho_1}       A_{p\rho_2}
+     *       A_{\rho_1p}  A_{\rho_1\rho_1}  A_{\rho_1\rho_2}
+     *       A_{\rho_2p}  A_{\rho_2\rho_1}  A_{\rho_2\rho_2} ]
+     * where p, \rho_1, \rho_2 are cell-centered pressure and densities 
+     * of component 1 and 2, respectively
+     *
+     * Three-level MGR reduction strategy that mimics a variant of CPR
+     *   - Global relaxation with ILU
+     *   - 1st level: eliminate second component density \rho_2
+     *   - 2nd level: eliminate first component density \rho_1
+     *   - 3rd level: solve the coarse grid (Schur-complement pressure system) with BoomerAMG
+    */
+
+    if (myid == 0) hypre_printf("MGR example: 4x4 Block System\n");
+    /* mgr options */
+    mgr_bsize = 4;  // block size of the system
+    mgr_nlevels = 1;  // number of reduction levels (3-level method means 2-level reduction)
+    mgr_non_c_to_f = 1;  // option to use user-provided reduction strategy
+
+    /* F-relaxation option
+     * 0  - Jacobi (only CPU)
+     * 18 - L1 Jacobi (GPU-enabled)
+     */
+    mgr_relax_type = 18;
+    mgr_num_relax_sweeps = 1;  // number of F-relax iterations, 0 for traditional CPR
+
+    /* Global smoother option
+     *  0  - (block) Jacobi (only CPU)
+     *  16 - ILU(0) (GPU-enabled)
+     */
+    mgr_gsmooth_type = 16;
+    mgr_num_gsmooth_sweeps = 0;  // number of global smoothing steps
+
+    /* Interpolation/Restriction option
+     * 0 - Injection
+     * 2 - Jacobi diagonal scaling
+     */
+    mgr_restrict_type = 0;
+    mgr_interp_type = 12;
+
+    /* array for number of C-points at each level */
+    mgr_num_cindexes = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
+    mgr_num_cindexes[0] = 1;  // 2 C-points for 1st-level reduction, i.e. p, \rho_1
+    //mgr_num_cindexes[1] = 1;  // 1 C-point for 2nd-level reduction, i.e. p
+    //mgr_num_cindexes[2] = 1;  // 1 C-point for 2nd-level reduction, i.e. p
+
+    /* array for indices of C-points at each level */
+    mgr_cindexes = hypre_CTAlloc(HYPRE_Int*, mgr_nlevels, HYPRE_MEMORY_HOST);
+    lv1 = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
+    //lv2 = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
+    //lv3 = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
+    lv1[0] = 0;  // pressure is a C-point at level 1
+    //lv1[1] = 1;  // \rho_1 is also a C-point at level 1
+    //lv1[2] = 2;  // \rho_1 is also a C-point at level 1
+    //lv2[0] = 0;  // only pressure is a C-point at level 2
+    //lv2[1] = 1;  // only pressure is a C-point at level 2
+    //lv3[0] = 0;  // only pressure is a C-point at level 2
+    mgr_cindexes[0] = lv1;
+    //mgr_cindexes[1] = lv2;
+    //mgr_cindexes[2] = lv3;
+    /* end mgr options */
+  }
 
   /* use MGR preconditioning */
   HYPRE_MGRCreate(&krylov_precond);
@@ -875,6 +943,7 @@ main( hypre_int argc,
   if (mgr_point_marker_array) hypre_TFree(mgr_point_marker_array, HYPRE_MEMORY_HOST);
   if (lv1) hypre_TFree(lv1, HYPRE_MEMORY_HOST);
   if (lv2) hypre_TFree(lv2, HYPRE_MEMORY_HOST);
+  if (lv3) hypre_TFree(lv3, HYPRE_MEMORY_HOST);
   if (mgr_cindexes) hypre_TFree(mgr_cindexes, HYPRE_MEMORY_HOST);
 
   HYPRE_Finalize();

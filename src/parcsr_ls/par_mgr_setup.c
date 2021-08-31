@@ -26,6 +26,7 @@ hypre_MGRSetup( void               *mgr_vdata,
   HYPRE_Int    num_c_levels,nc,index_i,cflag;
   HYPRE_Int      set_c_points_method;
   HYPRE_Int    debug_flag = 0;
+  HYPRE_Int    block_jacobi_bsize;
 //  HYPRE_Int	num_threads;
 
   hypre_ParCSRMatrix  *RT = NULL;
@@ -121,6 +122,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 //  num_threads = hypre_NumThreads();
 
   block_size = (mgr_data -> block_size);
+  block_jacobi_bsize = (mgr_data -> block_jacobi_bsize);
   block_cf_marker = (mgr_data -> block_cf_marker);
   block_num_coarse_indexes = (mgr_data -> block_num_coarse_indexes);
   point_marker_array = (mgr_data -> point_marker_array);
@@ -786,19 +788,32 @@ hypre_MGRSetup( void               *mgr_vdata,
     /* Interpolation operator */
     num_interp_sweeps = (mgr_data -> num_interp_sweeps);
 
+    if (mgr_data -> block_jacobi_bsize == 0)
+    {
+      block_jacobi_bsize = (lev == 0 ? block_size : block_num_coarse_indexes[lev-1]) - block_num_coarse_indexes[lev];
+    }
+    if (block_jacobi_bsize == 1 && interp_type[lev] == 12)
+    {
+      interp_type[lev] = 2;
+    }
+    hypre_printf("MyID = %d, Lev = %d, Block jacobi size = %d\n", my_id, lev, block_jacobi_bsize);
+    
     //wall_time = time_getWallclockSeconds();
     if (interp_type[lev] == 99)
     {
       hypre_MGRBuildInterp(A_array[lev], CF_marker, A_ff_inv, coarse_pnts_global, 1, dof_func_buff_data,
-                          debug_flag, trunc_factor, max_elmts, &P, interp_type[lev], num_interp_sweeps);
+                          debug_flag, trunc_factor, max_elmts, block_jacobi_bsize, &P, interp_type[lev], num_interp_sweeps);
     }
     else
     {
       hypre_MGRBuildInterp(A_array[lev], CF_marker, S, coarse_pnts_global, 1, dof_func_buff_data,
-                          debug_flag, trunc_factor, max_elmts, &P, interp_type[lev], num_interp_sweeps);
+                          debug_flag, trunc_factor, max_elmts, block_jacobi_bsize, &P, interp_type[lev], num_interp_sweeps);
     }
     //wall_time = time_getWallclockSeconds() - wall_time;
     //hypre_printf("Lev = %d, interp type = %d, proc = %d     BuildInterp: %f\n", lev, interp_type[lev], my_id, wall_time);
+    char fname[256];
+    sprintf(fname, "P_lev_%d", lev);
+    hypre_ParCSRMatrixPrintIJ(P, 0, 0, fname);
 
     P_array[lev] = P;
 

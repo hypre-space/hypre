@@ -132,6 +132,9 @@ typedef struct
   /* this might be necessary for some applications, e.g. phase transitions */
   HYPRE_Int   lvl_to_keep_cpoints;
 
+  /* block size for block Jacobi interpolation and relaxation */
+  HYPRE_Int  block_jacobi_bsize;
+
   HYPRE_Real  cg_convergence_factor;
 
 } hypre_ParMGRData;
