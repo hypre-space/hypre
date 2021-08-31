@@ -308,6 +308,7 @@ HYPRE_MGRSetRelaxType(HYPRE_Solver solver, HYPRE_Int relax_type )
 {
    return hypre_MGRSetRelaxType(solver, relax_type );
 }
+
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetNumRelaxSweeps
  *--------------------------------------------------------------------------*/
@@ -316,6 +317,7 @@ HYPRE_MGRSetNumRelaxSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps )
 {
    return hypre_MGRSetNumRelaxSweeps(solver, nsweeps);
 }
+
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetInterpType
  *--------------------------------------------------------------------------*/
@@ -356,6 +358,15 @@ HYPRE_Int
 HYPRE_MGRSetTruncateCoarseGridThreshold( HYPRE_Solver solver, HYPRE_Real threshold)
 {
    return hypre_MGRSetTruncateCoarseGridThreshold( solver, threshold );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetBlockJacobiBlockSize
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_MGRSetBlockJacobiBlockSize( HYPRE_Solver solver, HYPRE_Int blk_size )
+{
+   return hypre_MGRSetBlockJacobiBlockSize(solver, blk_size);
 }
 
 /*--------------------------------------------------------------------------

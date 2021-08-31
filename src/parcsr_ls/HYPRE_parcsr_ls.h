@@ -3865,6 +3865,13 @@ HYPRE_Int
 HYPRE_MGRSetNumInterpSweeps( HYPRE_Solver solver,
                              HYPRE_Int nsweeps );
 
+/**
+ * (Optional) Set block size for block Jacobi interp/relax.
+ * This option is for \e interp_type == 12, and \e relax_type == 12.
+ **/
+HYPRE_Int
+HYPRE_MGRSetBlockJacobiBlockSize( HYPRE_Solver solver, 
+                                  HYPRE_Int blk_size );
 
 HYPRE_Int HYPRE_MGRSetFSolver(HYPRE_Solver          solver,
                              HYPRE_PtrToParSolverFcn  fine_grid_solver_solve,

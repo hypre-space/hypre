@@ -5218,6 +5218,15 @@ hypre_MGRSetTruncateCoarseGridThreshold( void *mgr_vdata, HYPRE_Real threshold)
   return hypre_error_flag;
 }
 
+/* Set block size for block Jacobi Interp/Relax */
+HYPRE_Int
+hypre_MGRSetBlockJacobiBlockSize( void *mgr_vdata, HYPRE_Int blk_size)
+{
+  hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+  (mgr_data -> block_jacobi_bsize) = blk_size;
+  return hypre_error_flag;
+}
+
 /* Set print level for F-relaxation solver */
 HYPRE_Int
 hypre_MGRSetFrelaxPrintLevel( void *mgr_vdata, HYPRE_Int print_level )
