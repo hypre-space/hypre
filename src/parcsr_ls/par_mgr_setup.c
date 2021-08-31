@@ -1400,9 +1400,6 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
               CF_marker_local[i] = 0;
             }
           }
-          CF_marker_array_local[lev_local] = hypre_IntArrayCreate(local_size);
-          hypre_IntArrayMemoryLocation(CF_marker_array_local[lev_local]) = HYPRE_MEMORY_HOST;
-          hypre_IntArrayData(CF_marker_array_local[lev_local]) = CF_marker_local;
         }
         else
         {
