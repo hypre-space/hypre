@@ -39,6 +39,9 @@ hypre_StructMatrixMultCreate( HYPRE_Int             nmatrices_in,
    HYPRE_Int            *transposes;
    HYPRE_Int            *mtypes;
 
+   hypre_CommPkg       **comm_pkg_a;
+   HYPRE_Complex      ***comm_data_a;
+
    HYPRE_Int             nmatrices, *matmap;
    HYPRE_Int             m, t;
 
@@ -75,6 +78,10 @@ hypre_StructMatrixMultCreate( HYPRE_Int             nmatrices_in,
    }
    hypre_TFree(matmap, HYPRE_MEMORY_HOST);
 
+   /* Initialize */
+   comm_pkg_a  = hypre_TAlloc(hypre_CommPkg *, nmatrices + 1, HYPRE_MEMORY_HOST);
+   comm_data_a = hypre_TAlloc(HYPRE_Complex **, nmatrices + 1, HYPRE_MEMORY_HOST);
+
    /* Initialize mtypes to fine data spaces */
    mtypes = hypre_CTAlloc(HYPRE_Int, nmatrices+1, HYPRE_MEMORY_HOST);
 
@@ -96,7 +103,9 @@ hypre_StructMatrixMultCreate( HYPRE_Int             nmatrices_in,
    (mmdata -> a)              = NULL;
    (mmdata -> na)             = 0;
    (mmdata -> comm_pkg)       = NULL;
+   (mmdata -> comm_pkg_a)     = comm_pkg_a;
    (mmdata -> comm_data)      = NULL;
+   (mmdata -> comm_data_a)    = comm_data_a;
 
    *mmdata_ptr = mmdata;
 
@@ -120,10 +129,11 @@ hypre_StructMatrixMultDestroy( hypre_StructMMData *mmdata )
 
       hypre_BoxArrayDestroy(mmdata -> fdata_space);
       hypre_BoxArrayDestroy(mmdata -> cdata_space);
-
+      hypre_StMatrixDestroy(mmdata -> st_M);
       hypre_StructVectorDestroy(mmdata -> mask);
 
-      hypre_StMatrixDestroy(mmdata -> st_M);
+      hypre_CommPkgDestroy(mmdata -> comm_pkg);
+      hypre_TFree(mmdata -> comm_data, HYPRE_MEMORY_HOST);
 
       hypre_TFree(mmdata, HYPRE_MEMORY_HOST);
    }
@@ -224,6 +234,8 @@ hypre_StructMatrixMultSetup( hypre_StructMMData  *mmdata,
    HYPRE_Int                nmatrices    = (mmdata -> nmatrices);
    HYPRE_Int               *mtypes       = (mmdata -> mtypes);
    hypre_StructMatrix     **matrices     = (mmdata -> matrices);
+   hypre_CommPkg          **comm_pkg_a   = (mmdata -> comm_pkg_a);
+   HYPRE_Complex         ***comm_data_a  = (mmdata -> comm_data_a);
 
    hypre_StructMatrix      *M;            /* matrix product we are computing */
    hypre_StructStencil     *Mstencil;
@@ -251,7 +263,11 @@ hypre_StructMatrixMultSetup( hypre_StructMMData  *mmdata,
    HYPRE_Int                const_entry;     /* boolean for constant entry in M */
    HYPRE_Int               *const_entries;   /* constant entries in M */
    HYPRE_Complex           *const_values;    /* values for constant entries in M */
+
+   hypre_CommInfo          *comm_info;
    hypre_CommStencil      **comm_stencils;
+   HYPRE_Int                num_comm_blocks;
+   HYPRE_Int                num_comm_pkgs;
 
    hypre_StructVector      *mask;
    HYPRE_Int                need_mask;            /* boolean indicating if a bit mask is needed */
@@ -761,22 +777,10 @@ hypre_StructMatrixMultSetup( hypre_StructMMData  *mmdata,
    }
 
    /* Setup agglomerated communication packages for matrices and bit mask ghost layers */
-   HYPRE_ANNOTATE_REGION_BEGIN("%s", "CommSetup");
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", "CommCreate");
    {
-      hypre_CommPkg         *comm_pkg  = (mmdata -> comm_pkg);
-      HYPRE_Complex        **comm_data = (mmdata -> comm_data);
-
-      hypre_CommPkg        **comm_pkg_a;
-      HYPRE_Complex       ***comm_data_a;
-      hypre_CommInfo        *comm_info;
-      HYPRE_Int              np, nb;
-
-      /* Allocate communication packages and data */
-      comm_pkg_a  = hypre_TAlloc(hypre_CommPkg *, nmatrices + 1, HYPRE_MEMORY_HOST);
-      comm_data_a = hypre_TAlloc(HYPRE_Complex **, nmatrices + 1, HYPRE_MEMORY_HOST);
-
       /* Initialize number of packages and blocks */
-      np = nb = 0;
+      num_comm_pkgs = num_comm_blocks = 0;
 
       /* Compute matrix communications */
       for (m = 0; m < nmatrices; m++)
@@ -786,9 +790,10 @@ hypre_StructMatrixMultSetup( hypre_StructMMData  *mmdata,
          if (hypre_StructMatrixNumValues(matrix) > 0)
          {
             hypre_CreateCommInfo(grid, comm_stencils[m], &comm_info);
-            hypre_StructMatrixCreateCommPkg(matrix, comm_info, &comm_pkg_a[np], &comm_data_a[np]);
-            nb += hypre_CommPkgNumBlocks(comm_pkg_a[np]);
-            np++;
+            hypre_StructMatrixCreateCommPkg(matrix, comm_info, &comm_pkg_a[num_comm_pkgs],
+                                            &comm_data_a[num_comm_pkgs]);
+            num_comm_blocks += hypre_CommPkgNumBlocks(comm_pkg_a[num_comm_pkgs]);
+            num_comm_pkgs++;
          }
       }
 
@@ -800,40 +805,17 @@ hypre_StructMatrixMultSetup( hypre_StructMMData  *mmdata,
          hypre_CommPkgCreate(comm_info,
                              hypre_StructVectorDataSpace(mask),
                              hypre_StructVectorDataSpace(mask), 1, NULL, 0,
-                             hypre_StructVectorComm(mask), &comm_pkg_a[np]);
+                             hypre_StructVectorComm(mask), &comm_pkg_a[num_comm_pkgs]);
          hypre_CommInfoDestroy(comm_info);
-         comm_data_a[np] = hypre_TAlloc(HYPRE_Complex *, 1, HYPRE_MEMORY_HOST);
-         comm_data_a[np][0] = hypre_StructVectorData(mask);
-         nb++;
-         np++;
+         comm_data_a[num_comm_pkgs] = hypre_TAlloc(HYPRE_Complex *, 1, HYPRE_MEMORY_HOST);
+         comm_data_a[num_comm_pkgs][0] = hypre_StructVectorData(mask);
+         num_comm_blocks++;
+         num_comm_pkgs++;
       }
-
-      /* Put everything into one CommPkg */
-      hypre_CommPkgAgglomerate(np, comm_pkg_a, &comm_pkg);
-      comm_data = hypre_TAlloc(HYPRE_Complex *, nb, HYPRE_MEMORY_HOST);
-      nb = 0;
-      for (i = 0; i < np; i++)
-      {
-         for (j = 0; j < hypre_CommPkgNumBlocks(comm_pkg_a[i]); j++)
-         {
-            comm_data[nb++] = comm_data_a[i][j];
-         }
-         hypre_CommPkgDestroy(comm_pkg_a[i]);
-         hypre_TFree(comm_data_a[i], HYPRE_MEMORY_HOST);
-      }
-      (mmdata -> comm_pkg)  = comm_pkg;
-      (mmdata -> comm_data) = comm_data;
-
-      /* Free memory */
-      for (m = 0; m < nmatrices+1; m++)
-      {
-         hypre_CommStencilDestroy(comm_stencils[m]);
-      }
-      hypre_TFree(comm_stencils, HYPRE_MEMORY_HOST);
-      hypre_TFree(comm_pkg_a, HYPRE_MEMORY_HOST);
-      hypre_TFree(comm_data_a, HYPRE_MEMORY_HOST);
+      (mmdata -> num_comm_pkgs)   = num_comm_pkgs;
+      (mmdata -> num_comm_blocks) = num_comm_blocks;
    }
-   HYPRE_ANNOTATE_REGION_END("%s", "CommSetup");
+   HYPRE_ANNOTATE_REGION_END("%s", "CommCreate");
 
    /* Set a.types[] values */
    for (i = 0; i < na; i++)
@@ -856,6 +838,11 @@ hypre_StructMatrixMultSetup( hypre_StructMMData  *mmdata,
    /* Free memory */
    hypre_BoxDestroy(loop_box);
    hypre_TFree(data_spaces, HYPRE_MEMORY_HOST);
+   for (m = 0; m < nmatrices+1; m++)
+   {
+      hypre_CommStencilDestroy(comm_stencils[m]);
+   }
+   hypre_TFree(comm_stencils, HYPRE_MEMORY_HOST);
 
    HYPRE_ANNOTATE_FUNC_END;
 
@@ -871,17 +858,56 @@ hypre_StructMatrixMultSetup( hypre_StructMMData  *mmdata,
 HYPRE_Int
 hypre_StructMatrixMultCommunicate( hypre_StructMMData  *mmdata )
 {
-   hypre_CommPkg      *comm_pkg  = (mmdata -> comm_pkg);
-   HYPRE_Complex     **comm_data = (mmdata -> comm_data);
-   hypre_CommHandle   *comm_handle;
+   hypre_CommPkg      *comm_pkg        = (mmdata -> comm_pkg);
+   HYPRE_Complex     **comm_data       = (mmdata -> comm_data);
+   hypre_CommPkg     **comm_pkg_a      = (mmdata -> comm_pkg_a);
+   HYPRE_Complex    ***comm_data_a     = (mmdata -> comm_data_a);
+   HYPRE_Int           num_comm_pkgs   = (mmdata -> num_comm_pkgs);
+   HYPRE_Int           num_comm_blocks = (mmdata -> num_comm_blocks);
 
-   if (comm_pkg)
+   hypre_CommHandle   *comm_handle;
+   HYPRE_Int           i, j, nb;
+
+   /* If all constant coefficients, return */
+   if (mmdata -> na == 0)
    {
-      hypre_InitializeCommunication(comm_pkg, comm_data, comm_data, 0, 0, &comm_handle);
-      hypre_FinalizeCommunication(comm_handle);
+      return hypre_error_flag;
    }
-   hypre_CommPkgDestroy(comm_pkg);
-   hypre_TFree(comm_data, HYPRE_MEMORY_HOST);
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   /* Agglomerate communication packages if needed */
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", "CommSetup");
+   if (!comm_pkg || !comm_data)
+   {
+      hypre_CommPkgAgglomerate(num_comm_pkgs, comm_pkg_a, &comm_pkg);
+      comm_data = hypre_TAlloc(HYPRE_Complex *, num_comm_blocks, HYPRE_MEMORY_HOST);
+      nb = 0;
+      for (i = 0; i < num_comm_pkgs; i++)
+      {
+         for (j = 0; j < hypre_CommPkgNumBlocks(comm_pkg_a[i]); j++)
+         {
+            comm_data[nb++] = comm_data_a[i][j];
+         }
+         hypre_CommPkgDestroy(comm_pkg_a[i]);
+         hypre_TFree(comm_data_a[i], HYPRE_MEMORY_HOST);
+      }
+
+      /* Free memory */
+      hypre_TFree(comm_pkg_a, HYPRE_MEMORY_HOST);
+      hypre_TFree(comm_data_a, HYPRE_MEMORY_HOST);
+
+      mmdata -> comm_pkg_a  = NULL;
+      mmdata -> comm_data_a = NULL;
+      mmdata -> comm_pkg    = comm_pkg;
+      mmdata -> comm_data   = comm_data;
+   }
+   HYPRE_ANNOTATE_REGION_END("%s", "CommSetup");
+
+   hypre_InitializeCommunication(comm_pkg, comm_data, comm_data, 0, 0, &comm_handle);
+   hypre_FinalizeCommunication(comm_handle);
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

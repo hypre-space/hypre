@@ -40,28 +40,31 @@ typedef struct hypre_StructMMhelper_struct
 
 typedef struct hypre_StructMMData_struct
 {
-   hypre_StructMatrix  **matrices;       /* matrices we are multiplying */
-   HYPRE_Int             nmatrices;      /* number of matrices */
-   HYPRE_Int             nterms;         /* number of terms involved in the multiplication */
-   HYPRE_Int            *terms;          /* pointers to matrices involved in the multiplication */
-   HYPRE_Int            *transposes;     /* transpose flag for each term */
-   HYPRE_Int            *mtypes;         /* data-map types for each matrix (fine or coarse) */
+   hypre_StructMatrix  **matrices;        /* matrices we are multiplying */
+   HYPRE_Int             nmatrices;       /* number of matrices */
+   HYPRE_Int             nterms;          /* number of terms involved in the multiplication */
+   HYPRE_Int            *terms;           /* pointers to matrices involved in the multiplication */
+   HYPRE_Int            *transposes;      /* transpose flag for each term */
+   HYPRE_Int            *mtypes;          /* data-map types for each matrix (fine or coarse) */
 
-   hypre_IndexRef        fstride;        /* fine data-map stride */
-   hypre_IndexRef        cstride;        /* coarse data-map stride */
-   hypre_IndexRef        coarsen_stride; /* coarsening factor for M's grid */
-   HYPRE_Int             coarsen;        /* flag indicating if M's grid is obtained by coarsening */
-   hypre_BoxArray       *cdata_space;    /* coarse data space */
-   hypre_BoxArray       *fdata_space;    /* fine data space */
+   hypre_IndexRef        fstride;         /* fine data-map stride */
+   hypre_IndexRef        cstride;         /* coarse data-map stride */
+   hypre_IndexRef        coarsen_stride;  /* coarsening factor for M's grid */
+   HYPRE_Int             coarsen;         /* flag indicating if M's grid is obtained by coarsening */
+   hypre_BoxArray       *cdata_space;     /* coarse data space */
+   hypre_BoxArray       *fdata_space;     /* fine data space */
 
-   hypre_StructVector   *mask;           /* bit mask vector for cte. coefs multiplication */
+   hypre_StMatrix       *st_M;            /* stencil matrix for M */
+   hypre_StructMMHelper *a;               /* helper for running multiplication */
+   HYPRE_Int             na;              /* size of hypre_StructMMhelper object */
 
-   hypre_StMatrix       *st_M;           /* stencil matrix for M */
-
-   hypre_StructMMHelper *a;              /* helper for running multiplication */
-   HYPRE_Int             na;             /* size of hypre_StructMMhelper object */
-   hypre_CommPkg        *comm_pkg;       /* pointer to agglomerated communication package */
-   HYPRE_Complex       **comm_data;      /* pointer to agglomerated communication data */
+   hypre_StructVector   *mask;            /* bit mask vector for cte. coefs multiplication */
+   hypre_CommPkg        *comm_pkg;        /* pointer to agglomerated communication package */
+   hypre_CommPkg       **comm_pkg_a;      /* pointer to communication packages */
+   HYPRE_Complex       **comm_data;       /* pointer to agglomerated communication data */
+   HYPRE_Complex      ***comm_data_a;     /* pointer to communication data */
+   HYPRE_Int             num_comm_pkgs;   /* number of communication packages to be agglomerated */
+   HYPRE_Int             num_comm_blocks; /* total number of communication blocks */
 } hypre_StructMMData;
 
 #endif
