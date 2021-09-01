@@ -40,8 +40,12 @@
 
       integer    MAX_LOCAL_SIZE
       integer    HYPRE_PARCSR
+      integer    HYPRE_MEMORY_DEVICE
+      integer    HYPRE_EXEC_DEVICE
 
       parameter  (MAX_LOCAL_SIZE=123000)
+      parameter  (HYPRE_MEMORY_DEVICE=1)
+      parameter  (HYPRE_EXEC_DEVICE=1)
 
 !     the following is from HYPRE.c
       parameter  (HYPRE_PARCSR=5555)
@@ -53,11 +57,28 @@
       integer    nnz, ilower, iupper, i
       integer    precond_id;
       double precision h, h2
+#if defined(HYPRE_USING_CUDA)
+      double precision rhs_values(*)
+      double precision x_values(*)
+      integer    rows(*)
+      integer    cols(*)
+      integer    tmpi(*)
+      double precision values(*)
+      pointer (p_rhs_values, rhs_values)
+      pointer (p_x_values, x_values)
+      pointer (p_rows, rows)
+      pointer (p_cols, cols)
+      pointer (p_tmpi, tmpi)
+      pointer (p_values, values)
+      integer stat
+#else
       double precision rhs_values(MAX_LOCAL_SIZE)
       double precision x_values(MAX_LOCAL_SIZE)
       integer    rows(MAX_LOCAL_SIZE)
       integer    cols(5)
       double precision values(5)
+#endif
+
       integer    num_iterations
       double precision final_res_norm, tol
 
@@ -72,6 +93,16 @@
       integer*8  solver
       integer*8  precond
 
+#if defined(HYPRE_USING_CUDA)
+      integer device_malloc_managed
+      stat = device_malloc_managed(MAX_LOCAL_SIZE*8, p_rhs_values)
+      stat = device_malloc_managed(MAX_LOCAL_SIZE*8, p_x_values)
+      stat = device_malloc_managed(MAX_LOCAL_SIZE*4, p_rows)
+      stat = device_malloc_managed(5*4, p_cols)
+      stat = device_malloc_managed(2*4, p_tmpi)
+      stat = device_malloc_managed(5*8, p_values)
+#endif
+
 !-----------------------------------------------------------------------
 !     Initialize MPI
 !-----------------------------------------------------------------------
@@ -83,9 +114,14 @@
 
       call HYPRE_Init(ierr)
 
+      call HYPRE_SetMemoryLocation(HYPRE_MEMORY_DEVICE, ierr)
+      call HYPRE_SetExecutionPolicy(HYPRE_EXEC_DEVICE, ierr)
+
+      call HYPRE_SetSpGemmUseCusparse(0, ierr)
+
 !   Default problem parameters
       n = 33
-      solver_id = 0
+      solver_id = 1
       print_solution  = 0
       tol = 1.0d-7
 
@@ -178,9 +214,15 @@
          endif
 
 !        Set the values for row i
+#if defined(HYPRE_USING_CUDA)
+         tmpi(1) = nnz-1;
+         tmpi(2) = i
+         call HYPRE_IJMatrixSetValues(
+     1        A, 1, tmpi(1), tmpi(2), cols, values, ierr)
+#else
          call HYPRE_IJMatrixSetValues(
      1        A, 1, nnz-1, i, cols, values, ierr)
-
+#endif
       enddo
 
 
@@ -249,6 +291,8 @@
          call HYPRE_BoomerAMGSetMaxLevels(solver, 20, ierr)
 !        conv. tolerance
          call HYPRE_BoomerAMGSetTol(solver, 1.0d-7, ierr)
+!        Keep local transposes
+         call HYPRE_BoomerAMGSetKeepTransp(solver, 1, ierr)
 
 !        Now setup and solve!
          call HYPRE_BoomerAMGSetup(
@@ -464,6 +508,15 @@
 
 !     Finalize MPI
       call MPI_Finalize(ierr)
+
+#if defined(HYPRE_USING_CUDA)
+      call device_free(p_rhs_values)
+      call device_free(p_x_values)
+      call device_free(p_rows)
+      call device_free(p_cols)
+      call device_free(p_tmpi)
+      call device_free(p_values)
+#endif
 
       stop
       end

@@ -45,3 +45,12 @@
       integer HYPRE_SMG
       parameter( HYPRE_SMG =     11 )
 
+      integer HYPRE_MEMORY_HOST
+      parameter( HYPRE_MEMORY_HOST =   0 )
+      integer HYPRE_MEMORY_DEVICE
+      parameter( HYPRE_MEMORY_DEVICE = 1 )
+
+      integer HYPRE_EXEC_HOST
+      parameter( HYPRE_EXEC_HOST =   0 )
+      integer HYPRE_EXEC_DEVICE
+      parameter( HYPRE_EXEC_DEVICE = 1 )

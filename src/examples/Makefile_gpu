@@ -6,12 +6,12 @@
 ########################################################################
 # Compiler and external dependences
 ########################################################################
-CC        = mpixlc
+CC        = mpicc
 F77       = mpif77
-CXX       = mpixlC
+CXX       = mpicxx
 F90       = mpif77
-LINK_CC   = nvcc
-LINK_CXX  = nvcc
+LINK_CC   = ${CC}
+LINK_CXX  = ${CXX}
 
 HYPRE_DIR = ../hypre
 
@@ -19,19 +19,19 @@ HYPRE_DIR = ../hypre
 # CUDA
 ########################################################################
 CUDA_INCL = -I${CUDA_HOME}/include
-CUDA_LIBS = -L${CUDA_HOME}lib64 -lcudart -lcusparse -lcurand
+CUDA_LIBS = -L${CUDA_HOME}/lib64 -lcudart -lcusparse -lcurand
 CUDA_ARCH = -gencode arch=compute_60,code=sm_60 -gencode arch=compute_70,code=sm_70
 NVCC_LDFLAGS = -ccbin=${CXX} ${CUDA_ARCH}
 
 ########################################################################
 # Compiling and linking options
 ########################################################################
-COPTS     = -g -Wall
+COPTS     = -g -Wall -DHYPRE_USING_CUDA
 CINCLUDES = -I$(HYPRE_DIR)/include $(CUDA_INCL)
 #CDEFS     = -DHYPRE_EXVIS
-CDEFS     = 
+CDEFS     =
 CFLAGS    = $(COPTS) $(CINCLUDES) $(CDEFS)
-FOPTS     = -g
+FOPTS     = -g -cpp -DHYPRE_USING_CUDA -fcray-pointer
 FINCLUDES = $(CINCLUDES)
 FFLAGS    = $(FOPTS) $(FINCLUDES)
 CXXOPTS   = $(COPTS) -Wno-deprecated
@@ -44,7 +44,7 @@ F90FLAGS = $(FFLAGS) $(IF90FLAGS)
 
 LINKOPTS  =
 LIBS      = -L$(HYPRE_DIR)/lib -lHYPRE -lm ${CUDA_LIBS}
-LFLAGS    = $(LINKOPTS) $(LIBS) $(NVCC_LDFLAGS) -lstdc++
+LFLAGS    = $(LINKOPTS) $(LIBS) -lstdc++
 LFLAGS_B =\
  -L${HYPRE_DIR}/lib\
  -lbHYPREClient-C\
@@ -63,14 +63,14 @@ LFLAGS90 =
 .c.o:
 	$(CC) $(CFLAGS) -c $<
 .f.o:
-	$(FC) $(FFLAGS) -c $<
+	$(F77) $(FFLAGS) -c $<
 .cxx.o:
 	$(CXX) $(CXXFLAGS) -c $<
 
 ########################################################################
 # List of all programs to be compiled
 ########################################################################
-ALLPROGS = ex1 ex2 ex3 ex4 ex5 ex6 ex7 ex8 ex9 ex11 ex12 ex13 ex14 ex15 ex16
+ALLPROGS = ex1 ex2 ex3 ex4 ex5 ex5f ex6 ex7 ex8 ex9 ex11 ex12 ex13 ex14 ex15 ex16
 
 BIGINTPROGS = ex5big ex15big
 FORTRANPROGS = ex5f ex12f
@@ -130,7 +130,7 @@ ex5big: ex5big.o
 ########################################################################
 # Example 5 Fortran 77
 ########################################################################
-ex5f: ex5f.o
+ex5f: ex5f.o cuda_wrapper.o
 	$(F77) -o $@ $^ $(LFLAGS77)
 
 ########################################################################
@@ -238,6 +238,7 @@ clean:
 	rm -f $(FORTRANPROGS:=.o)
 	rm -f $(MAXDIMPROGS:=.o)
 	rm -f $(COMPLEXPROGS:=.o)
+	rm -f cuda_wrapper.o
 	cd vis; make clean
 distclean: clean
 	rm -f $(ALLPROGS) $(ALLPROGS:=*~)
