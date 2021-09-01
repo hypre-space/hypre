@@ -91,7 +91,7 @@ hypre_SStructPMatrixMultCreate(HYPRE_Int               nmatrices_input,
 
          if (smatrices[0])
          {
-            hypre_StructMatrixMultCreate(nmatrices, smatrices, nterms, terms, trans, &smmdata);
+            hypre_StructMatmultCreate(nmatrices, smatrices, nterms, terms, trans, &smmdata);
             (pmmdata -> smmdata)[vi][vj] = smmdata;
          }
          else
@@ -132,7 +132,7 @@ hypre_SStructPMatrixMultDestroy( hypre_SStructPMMData *pmmdata )
       {
          for (vj = 0; vj < nvars; vj++)
          {
-            hypre_StructMatrixMultDestroy((pmmdata -> smmdata)[vi][vj]);
+            hypre_StructMatmultDestroy((pmmdata -> smmdata)[vi][vj]);
          }
          hypre_TFree(pmmdata -> smmdata[vi], HYPRE_MEMORY_HOST);
       }
@@ -226,7 +226,7 @@ hypre_SStructPMatrixMultSetup( hypre_SStructPMMData   *pmmdata,
             hypre_StructMatrixDestroy(sM);
 
             /* This sets up the grid and stencil of the (vi,vj)-block of the PMatrix */
-            hypre_StructMatrixMultSetup(smmdata[vi][vj], &sM);
+            hypre_StructMatmultSetup(smmdata[vi][vj], &sM);
             hypre_SStructPMatrixSMatrix(pM, vi, vj) = sM;
 
             /* Update struct stencil of the (vi,vj)-block with actual stencils */
@@ -320,7 +320,7 @@ hypre_SStructPMatrixMultCommunicate( hypre_SStructPMMData *pmmdata )
       {
          if (smmdata[vi][vj])
          {
-            hypre_StructMatrixMultCommunicate(smmdata[vi][vj]);
+            hypre_StructMatmultCommunicate(smmdata[vi][vj]);
          }
       }
    }
@@ -350,7 +350,7 @@ hypre_SStructPMatrixMultCompute( hypre_SStructPMMData  *pmmdata,
          if (smmdata[vi][vj])
          {
             sM = hypre_SStructPMatrixSMatrix(M, vi, vj);
-            hypre_StructMatrixMultCompute(smmdata[vi][vj], sM);
+            hypre_StructMatmultCompute(smmdata[vi][vj], sM);
          }
       }
    }
@@ -1100,6 +1100,8 @@ hypre_SStructMatrixPtAP( hypre_SStructMatrix  *A,
    HYPRE_Int            terms[3]    = {1, 0, 1};
    HYPRE_Int            trans[3]    = {1, 0, 0};
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /* Compute resulting matrix M */
    hypre_SStructMatrixMultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
    hypre_SStructMatrixMultSetup(mmdata, &M);
@@ -1112,6 +1114,8 @@ hypre_SStructMatrixPtAP( hypre_SStructMatrix  *A,
 
    /* Point to resulting matrix */
    *M_ptr = M;
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

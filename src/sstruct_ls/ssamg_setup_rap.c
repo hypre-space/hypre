@@ -73,9 +73,9 @@ hypre_SSAMGComputeRAPNonGlk( hypre_SStructMatrix  *A,
    hypre_SStructPMatrix    *pA, *pP, *pAc;
    hypre_SStructMatrix     *Ac;
    hypre_IJMatrix          *ij_Ac;
-   hypre_ParCSRMatrix      *parcsr_uAc;
+   //hypre_ParCSRMatrix      *parcsr_uAc;
 
-   hypre_SStructMatrix     *ssmatrices[3] = {A, P, P};
+   //hypre_SStructMatrix     *ssmatrices[3] = {A, P, P};
    HYPRE_Int                terms[3] = {1, 0, 1};
    HYPRE_Int                trans[3] = {1, 0, 0};
 
@@ -136,7 +136,7 @@ hypre_SSAMGComputeRAPNonGlk( hypre_SStructMatrix  *A,
             /* Use generic StructMatmult */
             hypre_StructMatrix *smatrices[3] = {sA, sP, sP};
 
-            hypre_StructMatrixMultGroup(3, smatrices, 3, terms, trans, &sAc[part][vi][vi]);
+            hypre_StructMatmult(3, smatrices, 3, terms, trans, &sAc[part][vi][vi]);
          }
 
          /* Create SStructStencil object for M */
@@ -177,7 +177,7 @@ hypre_SSAMGComputeRAPNonGlk( hypre_SStructMatrix  *A,
    hypre_IJMatrixObject(ij_Ac) = NULL;
    hypre_IJMatrixTranslator(ij_Ac) = NULL;
    hypre_IJMatrixAssembleFlag(ij_Ac) = 1;
-   hypre_IJMatrixSetObject(ij_Ac, parcsr_uAc);
+   //hypre_IJMatrixSetObject(ij_Ac, parcsr_uAc);
    HYPRE_SStructMatrixAssemble(Ac);
 
    /* Set pointer to Ac */
