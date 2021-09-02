@@ -632,7 +632,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #else
       for (i = 0; i < local_size; i++)
       {
-         hypre_IntArrayData(dof_func)[j] = (i + offset) % num_functions;
+         hypre_IntArrayData(dof_func)[i] = (i + offset) % num_functions;
       }
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
    }
