@@ -471,59 +471,38 @@ hypre_PFMGComputeMaxLevels( hypre_StructGrid   *grid,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PFMGComputeDxyz
+ * hypre_PFMGComputeCxyz
  *
  * TODO: Change SerialBoxLoop to BoxLoop
  *--------------------------------------------------------------------------*/
-
 HYPRE_Int
-hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
-                       HYPRE_Real         *dxyz,
-                       HYPRE_Int          *dxyz_flag)
+hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
+                       HYPRE_Real         *cxyz,
+                       HYPRE_Real         *sqcxyz)
 {
-   hypre_BoxArray        *compute_boxes;
-   hypre_Box             *compute_box;
    hypre_StructGrid      *grid = hypre_StructMatrixGrid(A);
 
    hypre_Box             *A_dbox;
    HYPRE_Int              Ai;
    HYPRE_Real            *Ap;
 
-
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
    HYPRE_Int              stencil_size;
+   HYPRE_Int              diag_entry;
 
-   HYPRE_Int              constant_coefficient;
-
+   hypre_BoxArray        *compute_boxes;
+   hypre_Box             *compute_box;
    hypre_Index            loop_size;
    hypre_IndexRef         start;
    hypre_Index            stride;
 
-   HYPRE_Int              ndim, i, si, d;
-   HYPRE_Int              diag_entry;
-   HYPRE_Int              tot_size;
+   HYPRE_Int              cte_coeff;
+   HYPRE_Int              i, si, d, ndim;
    HYPRE_Real             val;
-   HYPRE_Real             cxyz_max;
-   HYPRE_Real             cxyz[HYPRE_MAXDIM];
-   HYPRE_Real             sqcxyz[HYPRE_MAXDIM];
    HYPRE_Real             tcxyz[HYPRE_MAXDIM];
-   HYPRE_Real             sqmean[HYPRE_MAXDIM];
-   HYPRE_Real             deviation[HYPRE_MAXDIM];
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
-
-   /*----------------------------------------------------------
-    * Exit if user gives dxyz different than zero
-    *----------------------------------------------------------*/
-
-   if ((dxyz[0] != 0) && (dxyz[1] != 0) && (dxyz[2] != 0))
-   {
-      *dxyz_flag = 0;
-
-      HYPRE_ANNOTATE_FUNC_END;
-      return hypre_error_flag;
-   }
 
    /*----------------------------------------------------------
     * Initialize some things
@@ -535,21 +514,17 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    stencil_size  = hypre_StructStencilSize(stencil);
    diag_entry    = hypre_StructStencilDiagEntry(stencil);
    compute_boxes = hypre_StructGridBoxes(grid);
-   tot_size      = hypre_StructGridGlobalSize(grid);
-   constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
-
+   cte_coeff     = hypre_StructMatrixConstantCoefficient(A);
    hypre_SetIndex(stride, 1);
-
-   /*----------------------------------------------------------
-    * Compute cxyz (use arithmetic mean)
-    *----------------------------------------------------------*/
-
    for (d = 0; d < ndim; d++)
    {
       cxyz[d] = 0.0;
       sqcxyz[d] = 0.0;
    }
 
+   /*----------------------------------------------------------
+    * Compute cxyz (use arithmetic mean)
+    *----------------------------------------------------------*/
    hypre_ForBoxI(i, compute_boxes)
    {
       compute_box = hypre_BoxArrayBox(compute_boxes, i);
@@ -558,7 +533,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
       /* all coefficients constant or variable diagonal */
-      if (constant_coefficient)
+      if (cte_coeff)
       {
          Ai = hypre_CCBoxIndexRank(A_dbox, start);
 
@@ -655,41 +630,88 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       }
    }
 
+   HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_PFMGComputeDxyz
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
+                       HYPRE_Real         *dxyz,
+                       HYPRE_Int          *dxyz_flag)
+{
+   MPI_Comm           comm = hypre_StructMatrixComm(A);
+   hypre_StructGrid  *grid = hypre_StructMatrixGrid(A);
+
+   HYPRE_Int          cte_coeff;
+   HYPRE_Real         cxyz_max;
+   HYPRE_Real         cxyz[HYPRE_MAXDIM];
+   HYPRE_Real         sqcxyz[HYPRE_MAXDIM];
+   HYPRE_Real         tcxyz[HYPRE_MAXDIM];
+   HYPRE_Real         sqmean[HYPRE_MAXDIM];
+   HYPRE_Real         deviation[HYPRE_MAXDIM];
+
+   HYPRE_Int          d, ndim;
+   HYPRE_BigInt       global_size;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   /*----------------------------------------------------------
+    * Exit if user gives dxyz different than zero
+    *----------------------------------------------------------*/
+
+   if ((dxyz[0] != 0) && (dxyz[1] != 0) && (dxyz[2] != 0))
+   {
+      *dxyz_flag = 0;
+
+      HYPRE_ANNOTATE_FUNC_END;
+      return hypre_error_flag;
+   }
+
+   /*----------------------------------------------------------
+    * Initialize some things
+    *----------------------------------------------------------*/
+
+   ndim        = hypre_StructMatrixNDim(A);
+   cte_coeff   = hypre_StructMatrixConstantCoefficient(A);
+   global_size = hypre_StructGridGlobalSize(grid);
+
+   /* Compute cxyz and sqcxyz arrays */
+   hypre_PFMGComputeCxyz(A, cxyz, sqcxyz);
+
    /*----------------------------------------------------------
     * Compute dxyz
     *----------------------------------------------------------*/
 
-   /* all coefficients constant or variable diagonal */
-   if ( constant_coefficient )
+   if (cte_coeff)
    {
-      for (d = 0; d < ndim; d++)
-      {
-         sqmean[d]    = cxyz[d]*cxyz[d];
-         deviation[d] = sqcxyz[d];
-      }
+      /* all coefficients constant or variable diagonal */
+      global_size = 1;
    }
-   /* constant_coefficient==0, all coefficients vary with space */
    else
    {
+      /* all coefficients vary with space */
       for (d = 0; d < ndim; d++)
       {
          tcxyz[d] = cxyz[d];
       }
-      hypre_MPI_Allreduce(tcxyz, cxyz, 3, HYPRE_MPI_REAL, hypre_MPI_SUM,
-                          hypre_StructMatrixComm(A));
+      hypre_MPI_Allreduce(tcxyz, cxyz, 3, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
 
       for (d = 0; d < ndim; d++)
       {
          tcxyz[d] = sqcxyz[d];
       }
-      hypre_MPI_Allreduce(tcxyz, sqcxyz, 3, HYPRE_MPI_REAL, hypre_MPI_SUM,
-                          hypre_StructMatrixComm(A));
+      hypre_MPI_Allreduce(tcxyz, sqcxyz, 3, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+   }
 
-      for (d = 0; d < ndim; d++)
-      {
-         sqmean[d]    = pow(cxyz[d]/tot_size, 2);
-         deviation[d] = sqcxyz[d]/tot_size;
-      }
+   for (d = 0; d < ndim; d++)
+   {
+      sqmean[d]    = pow(cxyz[d]/(HYPRE_Real) global_size, 2);
+      deviation[d] = sqcxyz[d]/(HYPRE_Real) global_size;
    }
 
    cxyz_max = 0.0;
@@ -697,6 +719,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    {
       cxyz_max = hypre_max(cxyz_max, cxyz[d]);
    }
+
    if (cxyz_max == 0.0)
    {
       /* Do isotropic coarsening */
@@ -709,7 +732,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 
    for (d = 0; d < ndim; d++)
    {
-      HYPRE_Real  max_anisotropy = HYPRE_REAL_MAX/1000;
+      HYPRE_Real max_anisotropy = HYPRE_REAL_MAX/1000;
       if (cxyz[d] > (cxyz_max/max_anisotropy))
       {
          cxyz[d] /= cxyz_max;
