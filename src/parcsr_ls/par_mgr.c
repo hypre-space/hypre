@@ -4290,7 +4290,7 @@ void hypre_BlockDiagInvLapack(HYPRE_Real *diag, HYPRE_Int N, HYPRE_Int blk_size)
     HYPRE_Real *WORK = hypre_CTAlloc(HYPRE_Real, LWORK, HYPRE_MEMORY_HOST);
     HYPRE_Int INFO;
 
-    nblock = N / LWORK;
+    nblock = N / blk_size;
     left_size = N - blk_size * nblock;
 
     for (i = 0; i < nblock; i++)
@@ -4298,6 +4298,9 @@ void hypre_BlockDiagInvLapack(HYPRE_Real *diag, HYPRE_Int N, HYPRE_Int blk_size)
       hypre_dgetrf(&blk_size, &blk_size, diag+i*LWORK, &blk_size, IPIV, &INFO);
       hypre_dgetri(&blk_size, diag+i*LWORK, &blk_size, IPIV, WORK, &LWORK, &INFO);
     }
+    // Left size
+    hypre_dgetrf(&left_size, &left_size, diag+i*LWORK, &left_size, IPIV, &INFO);
+    hypre_dgetri(&left_size, diag+i*LWORK, &left_size, IPIV, WORK, &LWORK, &INFO);
 
     hypre_TFree(IPIV, HYPRE_MEMORY_HOST);
     hypre_TFree(WORK, HYPRE_MEMORY_HOST);
@@ -4368,21 +4371,46 @@ hypre_ParCSRMatrixGetBlockDiagInv(hypre_ParCSRMatrix   *A,
   {
     if (CF_marker[i] == point_type)
     {
-      bidx = cnt / blk_size;
-      ridx = cnt % blk_size;
-      bidxm1 = bidx * blk_size;
-      bidxp1 = (bidx+1) * blk_size;
-      for (ii = A_diag_i[i]; ii < A_diag_i[i+1]; ii++)
+      if (cnt+blk_size <= num_points)
       {
-        jj = A_diag_j[ii];
-        //printf("my_id = %d, bidx = %d, jj = %d\n", my_id, bidx, jj);
-        if (CF_marker[jj] == point_type)
+        bidx = cnt / blk_size;
+        ridx = cnt % blk_size;
+        bidxm1 = bidx * blk_size;
+        bidxp1 = (bidx+1) * blk_size;
+        for (ii = A_diag_i[i]; ii < A_diag_i[i+1]; ii++)
         {
-          if (jj - row_offset >= bidxm1 && jj - row_offset < bidxp1 && fabs(A_diag_data[ii]) > SMALLREAL)
+          jj = A_diag_j[ii];
+          //printf("my_id = %d, bidx = %d, jj = %d\n", my_id, bidx, jj);
+          if (CF_marker[jj] == point_type)
           {
-            didx = bidx*nb2 + ridx*blk_size + jj - bidxm1 - row_offset;
-            //printf("my_id = %d, row = %d, jj = %d, didx = %d, val = %e\n", my_id, cnt, jj, didx, A_diag_data[ii]);
-            diaginv[didx] = A_diag_data[ii];
+            if (jj - row_offset >= bidxm1 && jj - row_offset < bidxp1 && fabs(A_diag_data[ii]) > SMALLREAL)
+            {
+              didx = bidx*nb2 + ridx*blk_size + jj - bidxm1 - row_offset;
+              //printf("my_id = %d, row = %d, jj = %d, didx = %d, val = %e\n", my_id, cnt, jj, didx, A_diag_data[ii]);
+              diaginv[didx] = A_diag_data[ii];
+            }
+          }
+        }
+      }
+      else
+      {
+        // remaining points
+        bidx = cnt / blk_size;
+        ridx = cnt - bidx*blk_size;
+        bidxm1 = bidx * blk_size;
+        bidxp1 = bidx * blk_size + left_size;
+        for (ii = A_diag_i[i]; ii < A_diag_i[i+1]; ii++)
+        {
+          jj = A_diag_j[ii];
+          //printf("my_id = %d, bidx = %d, jj = %d\n", my_id, bidx, jj);
+          if (CF_marker[jj] == point_type)
+          {
+            if (jj - row_offset >= bidxm1 && jj - row_offset < bidxp1 && fabs(A_diag_data[ii]) > SMALLREAL)
+            {
+              didx = bidx*nb2 + ridx*left_size + jj - bidxm1 - row_offset;
+              //printf("my_id = %d, row = %d, jj = %d, didx = %d, val = %e\n", my_id, cnt, jj, didx, A_diag_data[ii]);
+              diaginv[didx] = A_diag_data[ii];
+            }
           }
         }
       }
@@ -4488,8 +4516,8 @@ HYPRE_Int hypre_ParCSRMatrixBlockDiagInvMatrix(  hypre_ParCSRMatrix  *A,
   hypre_MPI_Comm_rank(comm, &my_id);
 
   hypre_ParCSRMatrixGetBlockDiagInv(A, blk_size, point_type, CF_marker, &inv_size, &diaginv);
-  n_block = inv_size / nb2;
-  left_size = inv_size - nb2*n_block;
+  n_block = blk_diag_nlocal_rows / blk_size;
+  left_size = blk_diag_nlocal_rows - n_block*blk_size;
 
   /*-----------------------------------------------------------------------
   *  First Pass: Determine size of B and fill in
@@ -4508,7 +4536,7 @@ HYPRE_Int hypre_ParCSRMatrixBlockDiagInvMatrix(  hypre_ParCSRMatrix  *A,
   for (i = 0; i < n_block; i++)
   {
     diaginv_local = &diaginv[i*nb2];
-    for (k = 0;k < blk_size; k++)
+    for (k = 0; k < blk_size; k++)
     {
       B_diag_i[i*blk_size+k] = i*nb2 + k*blk_size;
 
@@ -4520,7 +4548,19 @@ HYPRE_Int hypre_ParCSRMatrixBlockDiagInvMatrix(  hypre_ParCSRMatrix  *A,
       }
     }
   }
-  // TODO: add the case when left_size != 0
+  // treat the remaining points
+  diaginv_local = &diaginv[n_block*nb2];
+  for (k = 0; k < left_size; k++)
+  {
+    B_diag_i[n_block*blk_size+k] = n_block*nb2 + k*left_size;
+
+    for (j = 0; j < left_size; j++)
+    {
+      bidx = n_block*nb2 + k*left_size + j;
+      B_diag_j[bidx] = n_block*blk_size + j;
+      B_diag_data[bidx] = diaginv_local[k*left_size + j];
+    }
+  }
 
   {
     HYPRE_BigInt scan_recv;
