@@ -2715,7 +2715,8 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 else
-  as_fn_error $? "Could not find .git directory" "$LINENO" 5
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Could not find .git directory" >&5
+$as_echo "$as_me: WARNING: Could not find .git directory" >&2;}
 
 fi
 
