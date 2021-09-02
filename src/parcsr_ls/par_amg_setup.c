@@ -116,7 +116,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int       measure_type;
    HYPRE_Int       setup_type;
    HYPRE_BigInt    fine_size;
-   HYPRE_Int       rest, tms, indx;
+   HYPRE_Int       offset;
    HYPRE_Real      size;
    HYPRE_Int       not_finished_coarsening = 1;
    HYPRE_Int       coarse_threshold = hypre_ParAMGDataMaxCoarseSize(amg_data);
@@ -225,8 +225,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    if (add_end == -1) add_end = max_levels-1;
    amg_logging = hypre_ParAMGDataLogging(amg_data);
    amg_print_level = hypre_ParAMGDataPrintLevel(amg_data);
-   // WM: debug
-   amg_print_level = 1;
    coarsen_type = hypre_ParAMGDataCoarsenType(amg_data);
    measure_type = hypre_ParAMGDataMeasureType(amg_data);
    setup_type = hypre_ParAMGDataSetupType(amg_data);
@@ -624,39 +622,19 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    if (num_functions > 1 && dof_func == NULL)
    {
-      HYPRE_BigInt num_fun = (HYPRE_BigInt) num_functions;
-
       dof_func = hypre_IntArrayCreate(local_size);
       hypre_IntArrayInitialize(dof_func);
-      rest = first_local_row-((first_local_row/num_fun)*num_fun);
-      indx = num_functions-rest;
-      if (rest == 0)
+
+      offset = (HYPRE_Int) ( first_local_row % ((HYPRE_BigInt) num_functions) );
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+      hypre_BoomerAMGInitDofFuncDevice(hypre_IntArrayData(dof_func), local_size, offset, num_functions);
+#else
+      for (i = 0; i < local_size; i++)
       {
-         indx = 0;
+         hypre_IntArrayData(dof_func)[j] = (i + offset) % num_functions;
       }
-      k = num_functions - 1;
-      for (j = indx-1; j > -1; j--)
-      {
-         hypre_IntArrayData(dof_func)[j] = k--;
-      }
-      tms = local_size/num_functions;
-      if (tms*num_functions+indx > local_size)
-      {
-         tms--;
-      }
-      for (j=0; j < tms; j++)
-      {
-         for (k=0; k < num_functions; k++)
-         {
-            hypre_IntArrayData(dof_func)[indx++] = k;
-         }
-      }
-      k = 0;
-      while (indx < local_size)
-      {
-         hypre_IntArrayData(dof_func)[indx++] = k++;
-      }
-      hypre_ParAMGDataDofFunc(amg_data) = dof_func;
+#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
    }
 
    A_array[0] = A;

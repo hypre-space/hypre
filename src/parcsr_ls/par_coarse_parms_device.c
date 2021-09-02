@@ -119,5 +119,25 @@ hypre_BoomerAMGCoarseParmsDevice(MPI_Comm          comm,
    return (ierr);
 }
 
+HYPRE_Int
+hypre_BoomerAMGInitDofFuncDevice( HYPRE_Int *dof_func, 
+                                  HYPRE_Int  local_size, 
+                                  HYPRE_Int  offset,
+                                  HYPRE_Int  num_functions )
+{
+   HYPRE_THRUST_CALL( sequence,
+                      dof_func,
+                      dof_func + local_size,
+                      offset,
+                      1 );
+   HYPRE_THRUST_CALL( transform,
+                      dof_func,
+                      dof_func + local_size,
+                      dof_func,
+                      modulo<HYPRE_Int>(num_functions) );
+
+   return hypre_error_flag;
+}
+
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 

@@ -194,7 +194,7 @@ hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
          {
             A_seq_i = hypre_CTAlloc(HYPRE_Int,  size+1, HYPRE_MEMORY_DEVICE);
             A_seq_offd_i = hypre_CTAlloc(HYPRE_Int,  size+1, HYPRE_MEMORY_DEVICE);
-            if (num_functions > 1) seq_dof_func = hypre_CTAlloc(HYPRE_Int,  size, HYPRE_MEMORY_HOST);
+            if (num_functions > 1) seq_dof_func = hypre_CTAlloc(HYPRE_Int,  size, HYPRE_MEMORY_DEVICE);
          }
 
          if (redundant)
