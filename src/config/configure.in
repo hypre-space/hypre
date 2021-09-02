@@ -105,6 +105,15 @@ AC_SUBST(HYPRE_BUGS)
 
 AC_SUBST(HYPRE_SRCDIR)
 
+AC_CHECK_FILE([$HYPRE_SRCDIR/../.git],
+[develop_string=$(git -C $HYPRE_SRCDIR describe --long --abbrev=9)
+ develop_lastag=$(git -C $HYPRE_SRCDIR describe --abbrev=0)
+ develop_number=$(git -C $HYPRE_SRCDIR rev-list --count $develop_lastag..HEAD)
+ AC_DEFINE_UNQUOTED(HYPRE_DEVELOP_STRING, ["$develop_string"], [Develop branch string])
+ AC_DEFINE_UNQUOTED(HYPRE_DEVELOP_NUMBER, [$develop_number],   [Develop branch commit number])],
+[AC_MSG_ERROR([Could not find .git directory])]
+)
+
 dnl *********************************************************************
 dnl * Clear variables defined by AC_INIT to avoid name conflicts with
 dnl * other packages.
