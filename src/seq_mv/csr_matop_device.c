@@ -59,9 +59,7 @@ hypre_CsrsvDataDestroy(hypre_CsrsvData* data)
 
    hypre_TFree(data, HYPRE_MEMORY_HOST);
 }
-#endif /* #if defined(HYPRE_USING_CUSPARSE) */
 
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
 hypre_GpuMatData *
 hypre_GpuMatDataCreate()
 {
@@ -108,7 +106,8 @@ hypre_GpuMatDataDestroy(hypre_GpuMatData *data)
 
   hypre_TFree(data, HYPRE_MEMORY_HOST);
 }
-#endif
+
+#endif /* #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) */
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
@@ -192,6 +191,23 @@ hypre_CSRMatrixTripleMultiplyDevice ( hypre_CSRMatrix *A,
    hypre_CSRMatrixDestroy(BC);
 
    return ABC;
+}
+
+HYPRE_Int
+hypre_CSRMatrixTriLowerUpperSolveDevice(char             uplo,
+                                        hypre_CSRMatrix *A,
+                                        HYPRE_Real      *l1_norms,
+                                        hypre_Vector    *f,
+                                        hypre_Vector    *u )
+{
+#if defined(HYPRE_USING_CUSPARSE)
+   hypre_CSRMatrixTriLowerUpperSolveCusparse(uplo, A, l1_norms, f, u);
+#elif defined(HYPRE_USING_ROCSPARSE)
+   hypre_CSRMatrixTriLowerUpperSolveRocsparse(uplo, A, l1_norms, f, u);
+#else
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "hypre_CSRMatrixTriLowerUpperSolveDevice requires configuration with either cusparse or rocsparse\n");
+#endif
+   return hypre_error_flag;
 }
 
 /* split CSR matrix B_ext (extended rows of parcsr B) into diag part and offd part
@@ -1448,7 +1464,6 @@ hypre_CSRMatrixIntersectPattern(hypre_CSRMatrix *A,
    return hypre_error_flag;
 }
 
-
 #endif /* HYPRE_USING_CUDA || defined(HYPRE_USING_HIP) */
 
 #if defined(HYPRE_USING_GPU)
@@ -1501,7 +1516,7 @@ hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
    return hypre_error_flag;
 }
 
-#endif
+#endif /* #if defined(HYPRE_USING_GPU) */
 
 HYPRE_Int
 hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
@@ -1513,7 +1528,7 @@ hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
    hypre_SortCSRRocsparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A), hypre_CSRMatrixNumNonzeros(A), hypre_CSRMatrixGPUMatDescr(A),
                           hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A));
 #else
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"hypre_CSRMatrixSortRow only implemented for cuSPARSE!\n");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"hypre_CSRMatrixSortRow only implemented for cuSPARSE/rocSPARSE!\n");
 #endif
 
    return hypre_error_flag;
@@ -1627,7 +1642,7 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
       hypre_TMemcpy(A_sj, A_j, HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(A_sa, A_a, HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA)
       hypre_CSRMatrixData(A) = A_sa;
       HYPRE_Int err = 0;
       if (l1_norms)
@@ -1749,7 +1764,6 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
 
 
 #if defined(HYPRE_USING_ROCSPARSE)
-// FIXME: We need a stub for this function until we can implement a rocsparse version
 HYPRE_Int
 hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
                                            hypre_CSRMatrix * A,
@@ -1800,7 +1814,7 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
       hypre_TMemcpy(A_sj, A_j, HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(A_sa, A_a, HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_HIP)
       hypre_CSRMatrixData(A) = A_sa;
       HYPRE_Int err = 0;
       if (l1_norms)
@@ -1918,24 +1932,6 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
    return hypre_error_flag;
 }
 
-HYPRE_Int
-hypre_CSRMatrixTriLowerUpperSolveDevice(char             uplo,
-                                        hypre_CSRMatrix *A,
-                                        HYPRE_Real      *l1_norms,
-                                        hypre_Vector    *f,
-                                        hypre_Vector    *u )
-{
-#if defined(HYPRE_USING_CUSPARSE)
-   hypre_CSRMatrixTriLowerUpperSolveCusparse(uplo, A, l1_norms, f, u);
-#elif defined(HYPRE_USING_ROCSPARSE)
-   hypre_CSRMatrixTriLowerUpperSolveRocsparse(uplo, A, l1_norms, f, u);
-#else
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "hypre_CSRMatrixTriLowerUpperSolveDevice requires configuration with either cusparse or rocsparse\n");
-#endif
-   return hypre_error_flag;
-}
-
-
 /* @brief This functions sorts values and column indices in each row in ascending order OUT-OF-PLACE
  * @param[in] n Number of rows
  * @param[in] m Number of columns
@@ -1994,3 +1990,4 @@ hypre_SortCSRRocsparse(       HYPRE_Int      n,
    hypre_TFree(d_a_tmp, HYPRE_MEMORY_DEVICE);
 }
 #endif // #if defined(HYPRE_USING_ROCSPARSE)
+
