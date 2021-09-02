@@ -660,6 +660,11 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
    }
 
    /*-------------------------------------------------------------
+    * Update global sizes of struct grids
+    *-------------------------------------------------------------*/
+   hypre_SStructGridComputeGlobalSizes(grid);
+
+   /*-------------------------------------------------------------
     * re-organize u-variables to reference via local cell rank
     *-------------------------------------------------------------*/
 

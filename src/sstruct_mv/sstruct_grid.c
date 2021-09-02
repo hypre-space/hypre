@@ -462,6 +462,87 @@ hypre_SStructGridRef( hypre_SStructGrid  *grid,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SStructGridComputeGlobalSizes
+ *
+ * Computes the global sizes of the semi-struct grid, part grids, and struct
+ * grids. It reduces the number of calls to MPI_Allreduce to a single one in
+ * contrast to nparts*nvars when calling hypre_StructGridComputeGlobalSize
+ * for each StructGrid.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridComputeGlobalSizes( hypre_SStructGrid  *grid )
+{
+   MPI_Comm             comm   = hypre_SStructGridComm(grid);
+   HYPRE_Int            nparts = hypre_SStructGridNParts(grid);
+
+   hypre_SStructPGrid  *pgrid;
+   hypre_StructGrid    *sgrid;
+
+   HYPRE_Int            part;
+   HYPRE_Int            var, nvars;
+   HYPRE_Int            ngrids;
+   HYPRE_Int            pglobal_size;
+   HYPRE_Int            global_size;
+   HYPRE_BigInt        *local_sizes;
+   HYPRE_BigInt        *global_sizes;
+
+   /* Determine number of struct grids */
+   ngrids = 0;
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      ngrids += hypre_SStructPGridNVars(pgrid);
+   }
+
+   /* Allocate memory */
+   local_sizes  = hypre_CTAlloc(HYPRE_BigInt, ngrids, HYPRE_MEMORY_HOST);
+   global_sizes = hypre_CTAlloc(HYPRE_BigInt, ngrids, HYPRE_MEMORY_HOST);
+
+   /* Build local_sizes array */
+   ngrids = 0;
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+      for (var = 0; var < nvars; var++)
+      {
+         sgrid = hypre_SStructPGridSGrid(pgrid, var);
+         local_sizes[ngrids++] = (HYPRE_BigInt) hypre_StructGridLocalSize(sgrid);
+      }
+   }
+
+   /* Compute global sizes */
+   hypre_MPI_Allreduce(local_sizes, global_sizes, ngrids, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+
+   /* Set global size data members*/
+   global_size = ngrids = 0;
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+
+      pglobal_size = 0;
+      for (var = 0; var < nvars; var++)
+      {
+         sgrid = hypre_SStructPGridSGrid(pgrid, var);
+         hypre_StructGridGlobalSize(sgrid) = global_sizes[ngrids];
+         pglobal_size += global_sizes[ngrids];
+         ngrids++;
+      }
+      hypre_SStructPGridGlobalSize(pgrid) = pglobal_size;
+      global_size += pglobal_size;
+   }
+   hypre_SStructGridGlobalSize(pgrid) = global_size;
+
+   /* Free memory */
+   hypre_TFree(local_sizes, HYPRE_MEMORY_HOST);
+   hypre_TFree(global_sizes, HYPRE_MEMORY_HOST);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * This replaces hypre_SStructGridAssembleMaps
  *--------------------------------------------------------------------------*/
 
@@ -2568,6 +2649,11 @@ hypre_SStructGridCoarsen( hypre_SStructGrid   *fgrid,
 
          hypre_StructCoarsen(sfgrid, origin, strides[part], 1, &scgrid);
          hypre_SStructPGridSGrid(pcgrid, var) = scgrid;
+
+         /* Set global size to a number different than zero to
+            avoid its computation on StructGridComputeGlobalSize.
+            Global sizes will be computed at HYPRE_SStructGridAssemble */
+         hypre_StructGridGlobalSize(scgrid) = -1;
 
          /* Check if cell grid type was computed */
          if (vartypes[var] == HYPRE_SSTRUCT_VARIABLE_CELL)

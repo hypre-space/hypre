@@ -575,6 +575,8 @@ hypre_SSAMGComputeDxyz( hypre_SStructMatrix  *A,
    HYPRE_Int              ndim;
    HYPRE_Real             sys_dxyz[3] = {0.0, 0.0, 0.0};
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /*--------------------------------------------------------
     * Allocate arrays for mesh sizes for each diagonal block
     *--------------------------------------------------------*/
@@ -598,6 +600,8 @@ hypre_SSAMGComputeDxyz( hypre_SStructMatrix  *A,
          }
       }
    }
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

@@ -922,7 +922,7 @@ hypre_StructMatmultCommunicate( hypre_StructMMData  *mmdata )
 
 HYPRE_Int
 hypre_StructMatmultCompute( hypre_StructMMData  *mmdata,
-                               hypre_StructMatrix  *M )
+                            hypre_StructMatrix  *M )
 {
    hypre_StructMMHelper  *a              = (mmdata -> a);
    HYPRE_Int              na             = (mmdata -> na);
