@@ -478,6 +478,10 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    /* create new coarse grid */
    hypre_StructGridCreate(comm, ndim, &cgrid);
 
+   /* Set global size to a number different than zero to
+      avoid its computation on hypre_StructGridAssemble. */
+   hypre_StructGridGlobalSize(cgrid) = -1;
+
    /* RDF TODO: Inherit num ghost from fgrid here... */
 
    /* coarsen boxes and create the coarse grid ids (same as fgrid) */

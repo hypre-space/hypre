@@ -250,7 +250,7 @@ HYPRE_Int hypre_ReadBoxArrayData_CC ( FILE *file , hypre_BoxArray *box_array , h
 HYPRE_Int hypre_StructMatmultCreate ( HYPRE_Int nmatrices_in , hypre_StructMatrix **matrices_in , HYPRE_Int nterms , HYPRE_Int *terms_in , HYPRE_Int *transposes_in , hypre_StructMMData **mmdata_ptr );
 HYPRE_Int hypre_StructMatmultDestroy ( hypre_StructMMData *mmdata );
 HYPRE_Int hypre_StructMatmultSetup ( hypre_StructMMData  *mmdata , hypre_StructMatrix **M_ptr );
-HYPRE_Int hypre_StructMatmultCommunicate ( hypre_StructMMData *mmdata );
+HYPRE_Int hypre_StructMatmultCommunicate ( hypre_StructMMData *mmdata , hypre_StructMatrix *M );
 HYPRE_Int hypre_StructMatmultCompute ( hypre_StructMMData *mmdata , hypre_StructMatrix *M );
 HYPRE_Int hypre_StructMatmult ( HYPRE_Int nmatrices , hypre_StructMatrix **matrices , HYPRE_Int nterms , HYPRE_Int *terms , HYPRE_Int *trans , hypre_StructMatrix **M_ptr );
 HYPRE_Int hypre_StructMatmat ( hypre_StructMatrix *A , hypre_StructMatrix *B , hypre_StructMatrix **M_ptr );

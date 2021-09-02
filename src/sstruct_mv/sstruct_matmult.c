@@ -250,11 +250,6 @@ hypre_SStructPMatrixMultSetup( hypre_SStructPMMData   *pmmdata,
       sgrid = hypre_StructMatrixGrid(sM);
       hypre_SStructPGridSetSGrid(sgrid, pgrid, vi);
 
-      /* Set global size to a number different than zero to
-         avoid its computation on StructGridComputeGlobalSize.
-         Global sizes will be computed at HYPRE_SStructGridAssemble */
-      hypre_StructGridGlobalSize(sgrid) = -1;
-
       /* Build part boundaries array */
       num_boxes   = hypre_StructGridNumBoxes(sgrid);
       grid_boxes  = hypre_StructGridBoxes(sgrid);
@@ -303,32 +298,6 @@ hypre_SStructPMatrixMultSetup( hypre_SStructPMMData   *pmmdata,
 
    /* Point to resulting matrix */
    *pM_ptr = pM;
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_SStructPMatrixMultCommunicate
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SStructPMatrixMultCommunicate( hypre_SStructPMMData *pmmdata )
-{
-   HYPRE_Int                nvars   = (pmmdata -> nvars);
-   hypre_StructMMData    ***smmdata = (pmmdata -> smmdata);
-
-   HYPRE_Int               vi, vj;
-
-   for (vi = 0; vi < nvars; vi++)
-   {
-      for (vj = 0; vj < nvars; vj++)
-      {
-         if (smmdata[vi][vj])
-         {
-            hypre_StructMatmultCommunicate(smmdata[vi][vj]);
-         }
-      }
-   }
 
    return hypre_error_flag;
 }

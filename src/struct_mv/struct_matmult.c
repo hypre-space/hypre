@@ -228,7 +228,7 @@ hypre_StructMatmultDestroy( hypre_StructMMData *mmdata )
 
 HYPRE_Int
 hypre_StructMatmultSetup( hypre_StructMMData  *mmdata,
-                             hypre_StructMatrix **M_ptr )
+                          hypre_StructMatrix **M_ptr )
 {
    HYPRE_Int                nterms       = (mmdata -> nterms);
    HYPRE_Int               *terms        = (mmdata -> terms);
@@ -858,8 +858,11 @@ hypre_StructMatmultSetup( hypre_StructMMData  *mmdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatmultCommunicate( hypre_StructMMData  *mmdata )
+hypre_StructMatmultCommunicate( hypre_StructMMData  *mmdata,
+                                hypre_StructMatrix  *M )
 {
+   hypre_StructGrid   *grid = hypre_StructMatrixGrid(M);
+
    hypre_CommPkg      *comm_pkg        = (mmdata -> comm_pkg);
    HYPRE_Complex     **comm_data       = (mmdata -> comm_data);
    hypre_CommPkg     **comm_pkg_a      = (mmdata -> comm_pkg_a);
@@ -869,6 +872,10 @@ hypre_StructMatmultCommunicate( hypre_StructMMData  *mmdata )
 
    hypre_CommHandle   *comm_handle;
    HYPRE_Int           i, j, nb;
+
+   /* Update global size of the grid. This requires a call to MPI_Allreduce */
+   hypre_StructGridGlobalSize(grid) = 0;
+   hypre_StructGridComputeGlobalSize(grid);
 
    /* If all constant coefficients, return */
    if (mmdata -> na == 0)
@@ -1161,7 +1168,7 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
 
    hypre_StructMatmultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
    hypre_StructMatmultSetup(mmdata, M_ptr);
-   hypre_StructMatmultCommunicate(mmdata);
+   hypre_StructMatmultCommunicate(mmdata, *M_ptr);
    hypre_StructMatmultCompute(mmdata, *M_ptr);
    HYPRE_StructMatrixAssemble(*M_ptr);
    hypre_StructMatmultDestroy(mmdata);
@@ -1191,7 +1198,7 @@ hypre_StructMatmat( hypre_StructMatrix  *A,
    /* Compute resulting matrix M */
    hypre_StructMatmultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
    hypre_StructMatmultSetup(mmdata, M_ptr);
-   hypre_StructMatmultCommunicate(mmdata);
+   hypre_StructMatmultCommunicate(mmdata, *M_ptr);
    hypre_StructMatmultCompute(mmdata, *M_ptr);
    hypre_StructMatmultDestroy(mmdata);
 
@@ -1223,7 +1230,7 @@ hypre_StructMatrixPtAP( hypre_StructMatrix  *A,
    /* Compute resulting matrix M */
    hypre_StructMatmultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
    hypre_StructMatmultSetup(mmdata, M_ptr);
-   hypre_StructMatmultCommunicate(mmdata);
+   hypre_StructMatmultCommunicate(mmdata, *M_ptr);
    hypre_StructMatmultCompute(mmdata, *M_ptr);
    hypre_StructMatmultDestroy(mmdata);
 
@@ -1256,7 +1263,7 @@ hypre_StructMatrixRAP( hypre_StructMatrix  *R,
    /* Compute resulting matrix M */
    hypre_StructMatmultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
    hypre_StructMatmultSetup(mmdata, M_ptr);
-   hypre_StructMatmultCommunicate(mmdata);
+   hypre_StructMatmultCommunicate(mmdata, *M_ptr);
    hypre_StructMatmultCompute(mmdata, *M_ptr);
    hypre_StructMatmultDestroy(mmdata);
 
@@ -1289,7 +1296,7 @@ hypre_StructMatrixRTtAP( hypre_StructMatrix  *RT,
    /* Compute resulting matrix M */
    hypre_StructMatmultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
    hypre_StructMatmultSetup(mmdata, M_ptr);
-   hypre_StructMatmultCommunicate(mmdata);
+   hypre_StructMatmultCommunicate(mmdata, *M_ptr);
    hypre_StructMatmultCompute(mmdata, *M_ptr);
    hypre_StructMatmultDestroy(mmdata);
 
