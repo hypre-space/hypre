@@ -349,7 +349,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    hypre_TFree(CF_marker_offd,   HYPRE_MEMORY_DEVICE);
    hypre_TFree(dof_func_offd,    HYPRE_MEMORY_DEVICE);
    hypre_TFree(dof_func_dev,     HYPRE_MEMORY_DEVICE);
-   hypre_TFree(int_buf_data,     HYPRE_MEMORY_HOST);
+   hypre_TFree(int_buf_data,     HYPRE_MEMORY_DEVICE);
    hypre_TFree(fine_to_coarse_d, HYPRE_MEMORY_DEVICE);
    hypre_TFree(fine_to_coarse_h, HYPRE_MEMORY_HOST);
    hypre_TFree(tmp_map_offd_h,   HYPRE_MEMORY_HOST);

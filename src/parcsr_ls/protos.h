@@ -1251,8 +1251,12 @@ HYPRE_Int hypre_BoomerAMGCreateS ( hypre_ParCSRMatrix *A , HYPRE_Real strength_t
 HYPRE_Int hypre_BoomerAMGCreateSabs ( hypre_ParCSRMatrix *A , HYPRE_Real strength_threshold , HYPRE_Real max_row_sum , HYPRE_Int num_functions , HYPRE_Int *dof_func , hypre_ParCSRMatrix **S_ptr );
 HYPRE_Int hypre_BoomerAMGCreateSCommPkg ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *S , HYPRE_Int **col_offd_S_to_A_ptr );
 HYPRE_Int hypre_BoomerAMGCreate2ndS ( hypre_ParCSRMatrix *S , HYPRE_Int *CF_marker , HYPRE_Int num_paths , HYPRE_BigInt *coarse_row_starts , hypre_ParCSRMatrix **C_ptr );
-HYPRE_Int hypre_BoomerAMGCorrectCFMarker ( HYPRE_Int *CF_marker , HYPRE_Int num_var , HYPRE_Int *new_CF_marker );
-HYPRE_Int hypre_BoomerAMGCorrectCFMarker2 ( HYPRE_Int *CF_marker , HYPRE_Int num_var , HYPRE_Int *new_CF_marker );
+HYPRE_Int hypre_BoomerAMGCorrectCFMarker ( hypre_IntArray *CF_marker , hypre_IntArray *new_CF_marker );
+HYPRE_Int hypre_BoomerAMGCorrectCFMarkerHost ( hypre_IntArray *CF_marker , hypre_IntArray *new_CF_marker );
+HYPRE_Int hypre_BoomerAMGCorrectCFMarkerDevice ( hypre_IntArray *CF_marker , hypre_IntArray *new_CF_marker );
+HYPRE_Int hypre_BoomerAMGCorrectCFMarker2 ( hypre_IntArray *CF_marker , hypre_IntArray *new_CF_marker );
+HYPRE_Int hypre_BoomerAMGCorrectCFMarker2Host ( hypre_IntArray *CF_marker , hypre_IntArray *new_CF_marker );
+HYPRE_Int hypre_BoomerAMGCorrectCFMarker2Device ( hypre_IntArray *CF_marker , hypre_IntArray *new_CF_marker );
 HYPRE_Int hypre_BoomerAMGCreateSHost(hypre_ParCSRMatrix *A, HYPRE_Real strength_threshold, HYPRE_Real max_row_sum, HYPRE_Int num_functions, HYPRE_Int *dof_func, hypre_ParCSRMatrix **S_ptr);
 HYPRE_Int hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix *A, HYPRE_Int abs_soc, HYPRE_Real strength_threshold, HYPRE_Real max_row_sum, HYPRE_Int num_functions, HYPRE_Int *dof_func, hypre_ParCSRMatrix **S_ptr);
 HYPRE_Int hypre_BoomerAMGCreateSabsHost ( hypre_ParCSRMatrix *A , HYPRE_Real strength_threshold , HYPRE_Real max_row_sum , HYPRE_Int num_functions , HYPRE_Int *dof_func , hypre_ParCSRMatrix **S_ptr );
@@ -1353,6 +1357,7 @@ HYPRE_Int hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_mar
 HYPRE_Int hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Real filter_thresholdR, HYPRE_Int debug_flag, hypre_ParCSRMatrix **R_ptr, HYPRE_Int AIR1_5, HYPRE_Int is_triangular, HYPRE_Int gmres_switch);
 HYPRE_Int hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int NeumannDeg, HYPRE_Real strong_thresholdR, HYPRE_Real filter_thresholdR, HYPRE_Int debug_flag, hypre_ParCSRMatrix **R_ptr);
 HYPRE_Int hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int NeumannDeg, HYPRE_Real strong_thresholdR, HYPRE_Real filter_thresholdR, HYPRE_Int debug_flag, hypre_ParCSRMatrix **R_ptr);
+HYPRE_Int hypre_BoomerAMGCFMarkerTo1minus1Device( HYPRE_Int *CF_marker, HYPRE_Int size );
 
 #ifdef HYPRE_USING_DSUPERLU
 /* superlu.c */

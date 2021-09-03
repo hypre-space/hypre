@@ -88,6 +88,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    /* Local variables */
    HYPRE_Int           *CF_marker;
+   hypre_IntArray      *CF_marker_host;
    hypre_IntArray      *CFN_marker = NULL;
    hypre_IntArray      *CF2_marker = NULL;
    hypre_IntArray      *CF3_marker = NULL;
@@ -1021,14 +1022,33 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                first_local_row = hypre_ParCSRMatrixFirstRowIndex(A_array[level]);
             }
 
+            /* copy CF_marker to the host if needed */
+            if (hypre_GetActualMemLocation(hypre_IntArrayMemoryLocation(CF_marker_array[level])) == hypre_MEMORY_DEVICE)
+            {
+               CF_marker_host = hypre_IntArrayCloneDeep_v2(CF_marker_array[level], HYPRE_MEMORY_HOST);
+            }
+            else
+            {
+               CF_marker_host = CF_marker_array[level];
+            }
+
             for (j = 0; j < num_isolated_F_points; j++)
             {
                row = (HYPRE_Int) (isolated_F_points_marker[j] - first_local_row);
                if ((row >= 0) && (row < local_size))
                {
-                  CF_marker[row] = -3; // Assumes SF_PT == -3
+                  hypre_IntArrayData(CF_marker_host)[row] = -3; // Assumes SF_PT == -3
                }
             }
+
+            /* copy back to device and destroy host copy */
+            if (hypre_GetActualMemLocation(hypre_IntArrayMemoryLocation(CF_marker_array[level])) == hypre_MEMORY_DEVICE)
+            {
+               hypre_IntArrayCopy(CF_marker_host, CF_marker_array[level]);
+               hypre_IntArrayDestroy(CF_marker_host);
+            }
+
+
          }
 
          /**** Do the appropriate coarsening ****/
@@ -1104,6 +1124,17 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   }
                   /*HYPRE_Real tmp; fscanf(fp, "%le\n", &tmp);*/
                }
+
+               /* copy CF_marker to the host if needed */
+               if (hypre_GetActualMemLocation(hypre_IntArrayMemoryLocation(CF_marker_array[level])) == hypre_MEMORY_DEVICE)
+               {
+                  CF_marker_host = hypre_IntArrayCloneDeep_v2(CF_marker_array[level], HYPRE_MEMORY_HOST);
+               }
+               else
+               {
+                  CF_marker_host = CF_marker_array[level];
+               }
+
                for (i=0; i<local_size; i++)
                {
                   HYPRE_Real dj;
@@ -1118,10 +1149,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   /* 1: C, 0: F*/
                   if (j == 1)
                   {
-                     CF_marker[i] = 1;
+                     hypre_IntArrayData(CF_marker_host)[i] = 1;
                   } else if (j == 0)
                   {
-                     CF_marker[i] = -1;
+                     hypre_IntArrayData(CF_marker_host)[i] = -1;
                   }
                   else
                   {
@@ -1129,6 +1160,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                      exit(0);
                   }
                }
+                     
+               /* copy back to device and destroy host copy */
+               if (hypre_GetActualMemLocation(hypre_IntArrayMemoryLocation(CF_marker_array[level])) == hypre_MEMORY_DEVICE)
+               {
+                  hypre_IntArrayCopy(CF_marker_host, CF_marker_array[level]);
+                  hypre_IntArrayDestroy(CF_marker_host);
+               }
+
                fclose(fp);
             }
 #endif
@@ -1332,6 +1371,15 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
          /**************************************************/
          /*********Set the fixed index to CF_marker*********/
+         /* copy CF_marker to the host if needed */
+         if (hypre_GetActualMemLocation(hypre_IntArrayMemoryLocation(CF_marker_array[level])) == hypre_MEMORY_DEVICE)
+         {
+            CF_marker_host = hypre_IntArrayCloneDeep_v2(CF_marker_array[level], HYPRE_MEMORY_HOST);
+         }
+         else
+         {
+            CF_marker_host = CF_marker_array[level];
+         }
 
          /* Set fine points (F_PT) given by the user */
          if ((num_F_points > 0) && (level == 0))
@@ -1341,10 +1389,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                row = (HYPRE_Int) (F_points_marker[j] - first_local_row);
                if ((row >= 0) && (row < local_size))
                {
-                  CF_marker[row] = -1; // Assumes F_PT == -1
+                  hypre_IntArrayData(CF_marker_host)[row] = -1; // Assumes F_PT == -1
                }
             }
          }
+
 
          if (num_C_points_coarse > 0)
          {
@@ -1356,28 +1405,35 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             {
                for (j = 0; j < num_C_points_coarse; j++)
                {
-                  CF_marker[C_points_local_marker[j]] = 2;
+                  hypre_IntArrayData(CF_marker_host)[C_points_local_marker[j]] = 2;
                }
 
                local_coarse_size = 0;
                k = 0;
                for (j = 0; j < local_num_vars; j ++)
                {
-                  if (CF_marker[j] == 1)
+                  if (hypre_IntArrayData(CF_marker_host)[j] == 1)
                   {
                      local_coarse_size++;
                   }
-                  else if (CF_marker[j] == 2)
+                  else if (hypre_IntArrayData(CF_marker_host)[j] == 2)
                   {
                      if ((level + 1) < hypre_ParAMGDataCPointsLevel(amg_data))
                      {
                         C_points_local_marker[k++] = local_coarse_size;
                      }
                      local_coarse_size++;
-                     CF_marker[j] = 1;
+                     hypre_IntArrayData(CF_marker_host)[j] = 1;
                   }
                }
             }
+         }
+
+         /* copy back to device and destroy host copy */
+         if (hypre_GetActualMemLocation(hypre_IntArrayMemoryLocation(CF_marker_array[level])) == hypre_MEMORY_DEVICE)
+         {
+            hypre_IntArrayCopy(CF_marker_host, CF_marker_array[level]);
+            hypre_IntArrayDestroy(CF_marker_host);
          }
 
          /*****xxxxxxxxxxxxx changes for min_coarse_size */
@@ -1521,8 +1577,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
                if (agg_interp_type == 4)
                {
-                  hypre_BoomerAMGCorrectCFMarker (CF_marker, local_num_vars,
-                                                  hypre_IntArrayData(CFN_marker));
+                  hypre_BoomerAMGCorrectCFMarker (CF_marker_array[level], CFN_marker);
                   /*hypre_TFree(coarse_dof_func);
                   coarse_dof_func = NULL;*/
                   hypre_IntArrayDestroy(CFN_marker);
@@ -1538,8 +1593,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                }
                else
                {
-                  hypre_BoomerAMGCorrectCFMarker2 (CF_marker, local_num_vars,
-                                                   hypre_IntArrayData(CFN_marker));
+                  hypre_BoomerAMGCorrectCFMarker2 (CF_marker_array[level], (CFN_marker));
                   hypre_IntArrayDestroy(CFN_marker);
                   CFN_marker = NULL;
                   /*hypre_TFree(coarse_dof_func);
@@ -1613,8 +1667,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             {
                if (agg_interp_type == 4)
                {
-                  hypre_BoomerAMGCorrectCFMarker (hypre_IntArrayData(CFN_marker),
-                                                  local_num_vars/num_functions, hypre_IntArrayData(CF2_marker));
+                  hypre_BoomerAMGCorrectCFMarker (CFN_marker, CF2_marker);
                   hypre_IntArrayDestroy(CF2_marker);
                   CF2_marker = NULL;
                   hypre_TFree(coarse_pnts_global1, HYPRE_MEMORY_HOST);
@@ -1688,8 +1741,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                    agg_P12_trunc_factor, agg_P12_max_elmts, &P1);
                   }
 
-                  hypre_BoomerAMGCorrectCFMarker2 (hypre_IntArrayData(CFN_marker),
-                                                   local_num_vars/num_functions, hypre_IntArrayData(CF2_marker));
+                  hypre_BoomerAMGCorrectCFMarker2 (CFN_marker, CF2_marker);
                   hypre_IntArrayDestroy(CF2_marker);
                   CF2_marker = NULL;
                   hypre_IntArrayDestroy(CF3_marker);
@@ -1810,9 +1862,18 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                HYPRE_Int is_triangular = hypre_ParAMGDataIsTriangular(amg_data);
                HYPRE_Int gmres_switch = hypre_ParAMGDataGMRESSwitchR(amg_data);
                /* !!! RL: ensure that CF_marker contains -1 or 1 !!! */
-               for (i = 0; i < hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level])); i++)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+               if (hypre_IntArrayMemoryLocation(CF_marker_array[level]) == HYPRE_MEMORY_DEVICE)
                {
-                  CF_marker[i] = CF_marker[i] > 0 ? 1 : -1;
+                  hypre_BoomerAMGCFMarkerTo1minus1Device(CF_marker, size);
+               }
+               else
+#endif
+               {
+                  for (i = 0; i < hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level])); i++)
+                  {
+                     CF_marker[i] = CF_marker[i] > 0 ? 1 : -1;
+                  }
                }
 
                if (restri_type == 1) /* distance-1 AIR */
@@ -3313,16 +3374,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
 
          /* copy CF_marker to the host if needed */
-         hypre_IntArray *CF_marker_array_host;
+         hypre_IntArray *CF_marker_host;
          if (hypre_GetActualMemLocation(hypre_IntArrayMemoryLocation(CF_marker_array[level])) == hypre_MEMORY_DEVICE)
          {
-            CF_marker_array_host = hypre_IntArrayCloneDeep_v2(CF_marker_array[level], HYPRE_MEMORY_HOST);
+            CF_marker_host = hypre_IntArrayCloneDeep_v2(CF_marker_array[level], HYPRE_MEMORY_HOST);
          }
          else
          {
-            CF_marker_array_host = CF_marker_array[level];
+            CF_marker_host = CF_marker_array[level];
          }
-         CF_marker = hypre_IntArrayData(CF_marker_array_host);
+         CF_marker = hypre_IntArrayData(CF_marker_host);
 
          for (i = 0, j = 0; i < local_size; i++)
          {
@@ -3336,10 +3397,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
 
          /* copy back to device and destroy host copy */
-         hypre_IntArrayCopy(CF_marker_array_host, CF_marker_array[level]);
          if (hypre_GetActualMemLocation(hypre_IntArrayMemoryLocation(CF_marker_array[level])) == hypre_MEMORY_DEVICE)
          {
-            hypre_IntArrayDestroy(CF_marker_array_host);
+            hypre_IntArrayCopy(CF_marker_host, CF_marker_array[level]);
+            hypre_IntArrayDestroy(CF_marker_host);
          }
       }
       if (block_mode)

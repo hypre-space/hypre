@@ -362,4 +362,26 @@ hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( HYPRE_Int      nr_of_rows,
    }
 }
 
+
+struct setTo1minus1 : public thrust::unary_function<HYPRE_Int,HYPRE_Int>
+{
+  __host__ __device__ HYPRE_Int operator()(const HYPRE_Int &x) const
+  {
+    return x > 0 ? 1 : -1;
+  }
+};
+
+HYPRE_Int
+hypre_BoomerAMGCFMarkerTo1minus1Device( HYPRE_Int *CF_marker,
+                                        HYPRE_Int size )
+{
+   HYPRE_THRUST_CALL( transform,
+                      CF_marker,
+                      CF_marker + size,
+                      CF_marker,
+                      setTo1minus1() );
+
+   return hypre_error_flag;
+}
+
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)

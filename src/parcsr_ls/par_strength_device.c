@@ -66,12 +66,9 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    HYPRE_Int               *S_offd_i = NULL;
    HYPRE_Int               *S_offd_j = NULL, *S_temp_offd_j = NULL;
    /* HYPRE_Real           *S_offd_data; */
-   HYPRE_Int                i;
    HYPRE_Int                ierr = 0;
    HYPRE_Int               *dof_func_offd_dev = NULL;
-   HYPRE_Int               *dof_func_dev = NULL;
    HYPRE_Int                num_sends;
-   HYPRE_Int                index, start, j;
 
    HYPRE_MemoryLocation     memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
@@ -119,24 +116,21 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 
    if (num_functions > 1)
    {
-      HYPRE_Int *int_buf_data = hypre_TAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
-      index = 0;
-      for (i = 0; i < num_sends; i++)
-      {
-         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
-         {
-            int_buf_data[index++] = dof_func[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
-         }
-      }
-      comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_HOST, int_buf_data,
+      HYPRE_Int *int_buf_data = hypre_TAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_DEVICE);
+
+      hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
+      HYPRE_THRUST_CALL( gather,
+                         hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                         hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
+                         hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                         dof_func,
+                         int_buf_data );
+
+      comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_DEVICE, int_buf_data,
                                                     HYPRE_MEMORY_DEVICE, dof_func_offd_dev);
       hypre_ParCSRCommHandleDestroy(comm_handle);
 
-      hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
-
-      dof_func_dev = hypre_TAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(dof_func_dev, dof_func, HYPRE_Int, num_variables, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TFree(int_buf_data, HYPRE_MEMORY_DEVICE);
    }
 
    /* count the row nnz of S */
@@ -150,7 +144,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
                          A_diag_data, A_diag_i, A_diag_j,
                          A_offd_data, A_offd_i, A_offd_j,
                          S_temp_diag_j, S_temp_offd_j,
-                         num_functions, dof_func_dev, dof_func_offd_dev,
+                         num_functions, dof_func, dof_func_offd_dev,
                          S_diag_i, S_offd_i );
    }
    else
@@ -160,7 +154,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
                          A_diag_data, A_diag_i, A_diag_j,
                          A_offd_data, A_offd_i, A_offd_j,
                          S_temp_diag_j, S_temp_offd_j,
-                         num_functions, dof_func_dev, dof_func_offd_dev,
+                         num_functions, dof_func, dof_func_offd_dev,
                          S_diag_i, S_offd_i );
    }
 
@@ -210,7 +204,6 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    *S_ptr = S;
 
    hypre_TFree(dof_func_offd_dev, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(dof_func_dev,      HYPRE_MEMORY_DEVICE);
    /*
    hypre_TFree(S_temp_diag_j,     HYPRE_MEMORY_DEVICE);
    hypre_TFree(S_temp_offd_j,     HYPRE_MEMORY_DEVICE);
@@ -571,6 +564,96 @@ hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A,
       jS_diag[row] = row_nnz_diag;
       jS_offd[row] = row_nnz_offd;
    }
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_BoomerAMGCorrectCFMarker : corrects CF_marker after aggr. coarsening
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_BoomerAMGCorrectCFMarkerDevice(hypre_IntArray *CF_marker, hypre_IntArray *new_CF_marker)
+{
+
+   HYPRE_Int n_fine     = hypre_IntArraySize(CF_marker);
+   HYPRE_Int n_coarse   = hypre_IntArraySize(new_CF_marker);
+
+   HYPRE_Int *indices   = hypre_CTAlloc(HYPRE_Int, n_coarse, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int *CF_C      = hypre_CTAlloc(HYPRE_Int, n_coarse, HYPRE_MEMORY_DEVICE);
+
+
+   /* save CF_marker values at C points in CF_C and C point indices */
+   HYPRE_THRUST_CALL( copy_if,
+                      hypre_IntArrayData(CF_marker),
+                      hypre_IntArrayData(CF_marker) + n_fine,
+                      CF_C,
+                      is_positive<HYPRE_Int>() );
+   HYPRE_THRUST_CALL( copy_if,
+                      thrust::counting_iterator<HYPRE_Int>(0),
+                      thrust::counting_iterator<HYPRE_Int>(n_fine),
+                      hypre_IntArrayData(CF_marker),
+                      indices,
+                      is_positive<HYPRE_Int>() );
+
+   /* replace CF_marker at C points with 1 */
+   HYPRE_THRUST_CALL( replace_if,
+                      hypre_IntArrayData(CF_marker),
+                      hypre_IntArrayData(CF_marker) + n_fine,
+                      is_positive<HYPRE_Int>(),
+                      1 );
+
+   /* update with new_CF_marker wherever C point value was initially 1 */
+   HYPRE_THRUST_CALL( scatter_if,
+                      hypre_IntArrayData(new_CF_marker),
+                      hypre_IntArrayData(new_CF_marker) + n_coarse,
+                      indices,
+                      CF_C,
+                      hypre_IntArrayData(CF_marker),
+                      equal<HYPRE_Int>(1) );
+
+   hypre_TFree(indices, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(CF_C, HYPRE_MEMORY_DEVICE);
+
+   return 0;
+}
+/*--------------------------------------------------------------------------
+ * hypre_BoomerAMGCorrectCFMarker2 : corrects CF_marker after aggr. coarsening,
+ * but marks new F-points (previous C-points) as -2
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_BoomerAMGCorrectCFMarker2Device(hypre_IntArray *CF_marker, hypre_IntArray *new_CF_marker)
+{
+
+   HYPRE_Int n_fine     = hypre_IntArraySize(CF_marker);
+   HYPRE_Int n_coarse   = hypre_IntArraySize(new_CF_marker);
+
+   HYPRE_Int *indices   = hypre_CTAlloc(HYPRE_Int, n_coarse, HYPRE_MEMORY_DEVICE);
+
+   /* save C point indices */
+   HYPRE_THRUST_CALL( copy_if,
+                      thrust::counting_iterator<HYPRE_Int>(0),
+                      thrust::counting_iterator<HYPRE_Int>(n_fine),
+                      hypre_IntArrayData(CF_marker),
+                      indices,
+                      is_positive<HYPRE_Int>() );
+
+   /* replace CF_marker at C points with 1 */
+   HYPRE_THRUST_CALL( replace_if,
+                      hypre_IntArrayData(CF_marker),
+                      hypre_IntArrayData(CF_marker) + n_fine,
+                      is_positive<HYPRE_Int>(),
+                      1 );
+
+   /* update values in CF_marker to -2 wherever new_CF_marker == -1 */
+   HYPRE_THRUST_CALL( scatter_if,
+                      thrust::make_constant_iterator(-2),
+                      thrust::make_constant_iterator(-2) + n_coarse,
+                      indices,
+                      hypre_IntArrayData(new_CF_marker),
+                      hypre_IntArrayData(CF_marker),
+                      equal<HYPRE_Int>(-1) );
+
+   hypre_TFree(indices, HYPRE_MEMORY_DEVICE);
+
+   return 0;
 }
 
 #endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
