@@ -29,10 +29,10 @@ if (${HYPRE_SOURCE_DIR} STREQUAL ${HYPRE_BINARY_DIR})
 endif ()
 
 if (EXISTS ${HYPRE_SOURCE_DIR}/../.git)
-  execute_process(COMMAND git -C ${HYPRE_SOURCE_DIR} describe --long --abbrev=9
+  execute_process(COMMAND git -C ${HYPRE_SOURCE_DIR} describe --match v* --long --abbrev=9
                   OUTPUT_VARIABLE develop_string
                   OUTPUT_STRIP_TRAILING_WHITESPACE)
-  execute_process(COMMAND git -C ${HYPRE_SOURCE_DIR} describe --abbrev=0
+  execute_process(COMMAND git -C ${HYPRE_SOURCE_DIR} describe --match v* --abbrev=0
                   OUTPUT_VARIABLE develop_lastag
                   OUTPUT_STRIP_TRAILING_WHITESPACE)
   execute_process(COMMAND git -C ${HYPRE_SOURCE_DIR} rev-list --count ${develop_lastag}..HEAD

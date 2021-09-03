@@ -2701,8 +2701,8 @@ eval ac_res=\$$as_ac_File
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
 if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
-  develop_string=$(git -C $HYPRE_SRCDIR describe --long --abbrev=9)
- develop_lastag=$(git -C $HYPRE_SRCDIR describe --abbrev=0)
+  develop_string=$(git -C $HYPRE_SRCDIR describe --match 'v*' --long --abbrev=9)
+ develop_lastag=$(git -C $HYPRE_SRCDIR describe --match 'v*' --abbrev=0)
  develop_number=$(git -C $HYPRE_SRCDIR rev-list --count $develop_lastag..HEAD)
 
 cat >>confdefs.h <<_ACEOF
