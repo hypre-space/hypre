@@ -681,6 +681,9 @@ main( hypre_int argc,
 
    if (myid == 0 && sum == 0)
    {
+#ifdef HYPRE_DEVELOP_STRING
+      hypre_printf("\nUsing HYPRE_DEVELOP_STRING: %s\n\n", HYPRE_DEVELOP_STRING);
+#endif
       hypre_printf("Running with these driver parameters:\n");
       hypre_printf("  (nx, ny, nz)    = (%d, %d, %d)\n", nx, ny, nz);
       hypre_printf("  (istart[0],istart[1],istart[2]) = (%d, %d, %d)\n", \

@@ -2812,8 +2812,12 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Print driver parameters TODO
     *-----------------------------------------------------------*/
+
    if (myid == 0)
    {
+#ifdef HYPRE_DEVELOP_STRING
+      hypre_printf("\nUsing HYPRE_DEVELOP_STRING: %s\n\n", HYPRE_DEVELOP_STRING);
+#endif
    }
 
    /*-----------------------------------------------------------
