@@ -582,7 +582,7 @@ hypre_SSAMGComputeDxyz( hypre_SStructMatrix  *A,
 
    HYPRE_Real             cxyz_max;
    HYPRE_Real             sys_dxyz[HYPRE_MAXDIM];
-   HYPRE_Real             sqmean[HYPRE_MAXDIM];
+   HYPRE_Real             mean[HYPRE_MAXDIM];
    HYPRE_Real             deviation[HYPRE_MAXDIM];
 
    HYPRE_BigInt           global_size;
@@ -638,7 +638,7 @@ hypre_SSAMGComputeDxyz( hypre_SStructMatrix  *A,
 
          for (d = 0; d < ndim; d++)
          {
-            sqmean[d]    = pow(cxyz[d]/(HYPRE_Real) global_size, 2);
+            mean[d] = cxyz[d]/(HYPRE_Real) global_size;
             deviation[d] = cxyz[d + ndim]/(HYPRE_Real) global_size;
          }
 
@@ -673,10 +673,19 @@ hypre_SSAMGComputeDxyz( hypre_SStructMatrix  *A,
             }
          }
 
+        /* Set 'dxyz_flag' if the matrix-coefficient variation is "too large".
+         * This is used later to set relaxation weights for Jacobi.
+         *
+         * Use the "square of the coefficient of variation" = (sigma/mu)^2,
+         * where sigma is the standard deviation and mu is the mean.  This is
+         * equivalent to computing (d - mu^2)/mu^2 where d is the average of
+         * the squares of the coefficients stored in 'deviation'.  Care is
+         * taken to avoid dividing by zero when the mean is zero. */
+
          for (d = 0; d < ndim; d++)
          {
-            /* square of coeff. of variation */
-            if (sqmean[d] > 0 && deviation[d]/sqmean[d] > 1.1)
+            deviation[d] -= mean[d]*mean[d];
+            if ( deviation[d] > 0.1*(mean[d]*mean[d]) )
             {
                dxyz_flag[part] = 1;
                break;

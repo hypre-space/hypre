@@ -652,7 +652,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    HYPRE_Real         cxyz[HYPRE_MAXDIM];
    HYPRE_Real         sqcxyz[HYPRE_MAXDIM];
    HYPRE_Real         tcxyz[HYPRE_MAXDIM];
-   HYPRE_Real         sqmean[HYPRE_MAXDIM];
+   HYPRE_Real         mean[HYPRE_MAXDIM];
    HYPRE_Real         deviation[HYPRE_MAXDIM];
 
    HYPRE_Int          d, ndim;
@@ -699,18 +699,18 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       {
          tcxyz[d] = cxyz[d];
       }
-      hypre_MPI_Allreduce(tcxyz, cxyz, 3, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+      hypre_MPI_Allreduce(tcxyz, cxyz, ndim, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
 
       for (d = 0; d < ndim; d++)
       {
          tcxyz[d] = sqcxyz[d];
       }
-      hypre_MPI_Allreduce(tcxyz, sqcxyz, 3, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+      hypre_MPI_Allreduce(tcxyz, sqcxyz, ndim, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
    }
 
    for (d = 0; d < ndim; d++)
    {
-      sqmean[d]    = pow(cxyz[d]/(HYPRE_Real) global_size, 2);
+      mean[d] = cxyz[d]/(HYPRE_Real) global_size;
       deviation[d] = sqcxyz[d]/(HYPRE_Real) global_size;
    }
 
@@ -730,6 +730,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       cxyz_max = 1.0;
    }
 
+   /* Set dxyz values that are scaled appropriately for the coarsening routine */
    for (d = 0; d < ndim; d++)
    {
       HYPRE_Real max_anisotropy = HYPRE_REAL_MAX/1000;
@@ -744,13 +745,23 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       }
    }
 
+   /* Set 'dxyz_flag' if the matrix-coefficient variation is "too large".
+    * This is used later to set relaxation weights for Jacobi.
+    *
+    * Use the "square of the coefficient of variation" = (sigma/mu)^2,
+    * where sigma is the standard deviation and mu is the mean.  This is
+    * equivalent to computing (d - mu^2)/mu^2 where d is the average of
+    * the squares of the coefficients stored in 'deviation'.  Care is
+    * taken to avoid dividing by zero when the mean is zero. */
+
    *dxyz_flag = 0;
    for (d = 0; d < ndim; d++)
    {
-      /* square of coeff. of variation */
-      if (sqmean[d] > 0 && deviation[d]/sqmean[d] > 1.1)
+      deviation[d] -= mean[d]*mean[d];
+      if ( deviation[d] > 0.1*(mean[d]*mean[d]) )
       {
          *dxyz_flag = 1;
+         break;
       }
    }
 
