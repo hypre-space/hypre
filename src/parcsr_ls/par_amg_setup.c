@@ -1865,7 +1865,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
                if (hypre_IntArrayMemoryLocation(CF_marker_array[level]) == HYPRE_MEMORY_DEVICE)
                {
-                  hypre_BoomerAMGCFMarkerTo1minus1Device(CF_marker, size);
+                  hypre_BoomerAMGCFMarkerTo1minus1Device(CF_marker, hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level])));
                }
                else
 #endif
