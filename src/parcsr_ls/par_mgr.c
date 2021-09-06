@@ -268,7 +268,7 @@ hypre_MGRDestroy( void *data )
       if ((mgr_data -> A_ff_array)[i])
         hypre_ParCSRMatrixDestroy((mgr_data -> A_ff_array)[i]);
     }
-    if (mgr_data -> use_default_fsolver)
+    if (mgr_data -> use_default_fsolver > 0)
     {
       if ((mgr_data -> A_ff_array)[0])
         hypre_ParCSRMatrixDestroy((mgr_data -> A_ff_array)[0]);
@@ -287,7 +287,7 @@ hypre_MGRDestroy( void *data )
       if ((mgr_data -> aff_solver)[i])
         hypre_BoomerAMGDestroy((mgr_data -> aff_solver)[i]);
     }
-    if (mgr_data -> use_default_fsolver)
+    if (mgr_data -> use_default_fsolver == 2)
     {
       if ((mgr_data -> aff_solver)[0])
         hypre_BoomerAMGDestroy((mgr_data -> aff_solver)[0]);
@@ -5359,7 +5359,7 @@ hypre_MGRWriteSolverParams(void *mgr_vdata)
   hypre_printf("Use default coarse grid solver: %d\n", (mgr_data -> use_default_cgrid_solver));
   if((mgr_data -> use_default_fsolver) >= 0)
   {
-    hypre_printf("Use default AMG solver for full AMG F-relaxation: %d\n", (mgr_data -> use_default_fsolver));
+    hypre_printf("Use AMG solver for full AMG F-relaxation: %d\n", (mgr_data -> use_default_fsolver));
   }
   return hypre_error_flag;
 }

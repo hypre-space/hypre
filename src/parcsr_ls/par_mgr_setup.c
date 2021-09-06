@@ -919,16 +919,38 @@ hypre_MGRSetup( void               *mgr_vdata,
       // TODO: input check to avoid crashing
       if (lev == 0 && use_default_fsolver == 0)
       {
-        if (((hypre_ParAMGData*)aff_solver[0])->A_array[0] == NULL)
+        //if (((hypre_ParAMGData*)aff_solver[0])->A_array[0] == NULL)
+        if (((hypre_ParAMGData*)aff_solver[lev])->A != NULL)
         {
+          /*
           if (my_id == 0)
           {
             printf("Error!!! F-relaxation solver has not been setup.\n");
             hypre_error(1);
             return hypre_error_flag;
           }
+          */
+          // F-solver is already set up, only need to store A_ff_ptr
+          A_ff_ptr = ((hypre_ParAMGData*)aff_solver[lev])->A;
         }
-        A_ff_ptr = ((hypre_ParAMGData*)aff_solver[0])->A_array[0];
+        else
+        {
+          // Compute A_ff and setup F-solver
+          if (exec == HYPRE_EXEC_HOST)
+          {
+            hypre_MGRBuildAff(A_array[lev], CF_marker_array[lev], debug_flag, &A_ff_ptr);
+          }
+#if defined(HYPRE_USING_CUDA)
+          else
+          {
+            hypre_ParCSRMatrixGenerateFFFCDevice(A_array[lev], CF_marker_array[lev], coarse_pnts_global, NULL, NULL, &A_ff_ptr);
+          }
+#endif
+          fine_grid_solver_setup(aff_solver[lev], A_ff_ptr, F_fine_array[lev+1], U_fine_array[lev+1]);
+
+          A_ff_array[lev] = A_ff_ptr;
+          (mgr_data -> use_default_fsolver) = 1;
+        }
       }
       else // construct default AMG solver
       {
@@ -946,6 +968,7 @@ hypre_MGRSetup( void               *mgr_vdata,
         aff_solver[lev] = (HYPRE_Solver*) hypre_BoomerAMGCreate();
         hypre_BoomerAMGSetMaxIter(aff_solver[lev], mgr_data -> num_relax_sweeps);
         hypre_BoomerAMGSetTol(aff_solver[lev], 0.0);
+        //hypre_BoomerAMGSetStrongThreshold(aff_solver[lev], 0.6);
 #if defined(HYPRE_USING_CUDA)
         hypre_BoomerAMGSetRelaxType(aff_solver[lev], 18);
         hypre_BoomerAMGSetCoarsenType(aff_solver[lev], 8);
@@ -953,13 +976,11 @@ hypre_MGRSetup( void               *mgr_vdata,
 #else
         hypre_BoomerAMGSetRelaxOrder(aff_solver[lev], 1);
 #endif
-        //hypre_BoomerAMGSetAggNumLevels(aff_solver[lev], 1);
         hypre_BoomerAMGSetPrintLevel(aff_solver[lev], mgr_data -> frelax_print_level);
-        //hypre_BoomerAMGSetNumFunctions(aff_solver[lev], 1);
 
         fine_grid_solver_setup(aff_solver[lev], A_ff_ptr, F_fine_array[lev+1], U_fine_array[lev+1]);
 
-        (mgr_data -> use_default_fsolver) = 1;
+        (mgr_data -> use_default_fsolver) = 2;
         use_default_fsolver = (mgr_data -> use_default_fsolver);
       }
       //wall_time = time_getWallclockSeconds() - wall_time;
