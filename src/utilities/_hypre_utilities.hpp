@@ -301,6 +301,9 @@ struct hypre_CsrsvData
 #if defined(HYPRE_USING_CUSPARSE)
    csrsv2Info_t info_L;
    csrsv2Info_t info_U;
+#elif defined(HYPRE_USING_ROCSPARSE)
+   rocsparse_mat_info info_L;
+   rocsparse_mat_info info_U;
 #endif
    hypre_int    BufferSize;
    char        *Buffer;
@@ -425,9 +428,10 @@ using namespace thrust::placeholders;
  * The following one works OK for now */
 
 #if defined(HYPRE_USING_CUDA)
-#define HYPRE_THRUST_CALL(func_name, ...)                                                                                                            \
+#define HYPRE_THRUST_CALL(func_name, ...) \
    thrust::func_name(thrust::cuda::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
-#elif defined(HYPRE_USING_HIP)                                                                                                                        \
+#elif defined(HYPRE_USING_HIP)
+#define HYPRE_THRUST_CALL(func_name, ...) \
    thrust::func_name(thrust::hip::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
 #endif
 
