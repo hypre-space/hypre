@@ -483,7 +483,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
          par_AP  = hypre_ParMatmul(par_A[0], par_P);
          par_RAP = hypre_ParTMatmul(par_P, par_AP);
 
-         hypre_ParcsrAdd(1.0, par_RAP, -1.0, par_A[1], &par_B);
+         hypre_ParCSRMatrixAdd(1.0, par_RAP, -1.0, par_A[1], &par_B);
          norm = hypre_ParCSRMatrixFnorm(par_B);
          if (!mypid)
          {
