@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
 
@@ -37,7 +32,7 @@ HYPRE_ParCSRBiCGSTABCreate( MPI_Comm comm, HYPRE_Solver *solver )
          hypre_ParKrylovCommInfo,
          hypre_ParKrylovIdentitySetup, hypre_ParKrylovIdentity );
    *solver = ( (HYPRE_Solver) hypre_BiCGSTABCreate( bicgstab_functions) );
-    
+
    return hypre_error_flag;
 }
 
@@ -45,7 +40,7 @@ HYPRE_ParCSRBiCGSTABCreate( MPI_Comm comm, HYPRE_Solver *solver )
  * HYPRE_ParCSRBiCGSTABDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRBiCGSTABDestroy( HYPRE_Solver solver )
 {
    return( hypre_BiCGSTABDestroy( (void *) solver ) );
@@ -55,7 +50,7 @@ HYPRE_ParCSRBiCGSTABDestroy( HYPRE_Solver solver )
  * HYPRE_ParCSRBiCGSTABSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRBiCGSTABSetup( HYPRE_Solver solver,
                            HYPRE_ParCSRMatrix A,
                            HYPRE_ParVector b,
@@ -71,7 +66,7 @@ HYPRE_ParCSRBiCGSTABSetup( HYPRE_Solver solver,
  * HYPRE_ParCSRBiCGSTABSolve
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRBiCGSTABSolve( HYPRE_Solver solver,
                            HYPRE_ParCSRMatrix A,
                            HYPRE_ParVector b,
@@ -205,4 +200,15 @@ HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
                                                   HYPRE_Real         *norm   )
 {
    return( HYPRE_BiCGSTABGetFinalRelativeResidualNorm( solver, norm ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRBiCGSTABGetResidual
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRBiCGSTABGetResidual( HYPRE_Solver  solver,
+                                 HYPRE_ParVector *residual)
+{
+   return( HYPRE_BiCGSTABGetResidual( solver, (void *) residual ) );
 }

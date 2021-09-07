@@ -1,15 +1,7 @@
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
-
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 include ../config/Makefile.config
 
@@ -51,16 +43,21 @@ FILES =\
  sstruct_graph.c\
  sstruct_grid.c\
  sstruct_innerprod.c\
- sstruct_matrix.c\
  sstruct_matvec.c\
  sstruct_matmult.c\
+ sstruct_matop.c\
  sstruct_scale.c\
- sstruct_stencil.c\
+ sstruct_stencil.c
+
+CUFILES =\
+ sstruct_matrix.c\
  sstruct_vector.c
 
-OBJS = ${FILES:.c=.o}
+COBJS = ${FILES:.c=.o}
+CUOBJS = ${CUFILES:.c=.obj}
+OBJS = ${COBJS} ${CUOBJS}
 
-SONAME = libHYPRE_sstruct_mv-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_sstruct_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -77,7 +74,7 @@ install: libHYPRE_sstruct_mv${HYPRE_LIB_SUFFIX}
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o libHYPRE*
+	rm -f *.o *.obj libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
@@ -91,9 +88,9 @@ libHYPRE_sstruct_mv.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_sstruct_mv.so: ${OBJS}
+libHYPRE_sstruct_mv.so libHYPRE_sstruct_mv.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -sf ${SONAME} $@
+	ln -s ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -67,8 +62,8 @@ static void matvec_timing(MPI_Comm comm, Matrix *mat)
    HYPRE_Int i, mype;
    HYPRE_Int n = mat->end_row - mat->beg_row + 1;
 
-   temp1 = (HYPRE_Real *) calloc(n, sizeof(HYPRE_Real));
-   temp2 = (HYPRE_Real *) calloc(n, sizeof(HYPRE_Real));
+   temp1 = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
+   temp2 = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
 
    /* warm-up */
    hypre_MPI_Barrier(comm);
@@ -178,7 +173,7 @@ HYPRE_Int hypre_ParaSailsCreate(MPI_Comm comm, hypre_ParaSails *obj)
    hypre_ParaSails_struct *internal;
 
    internal = (hypre_ParaSails_struct *)
-      hypre_CTAlloc(hypre_ParaSails_struct, 1);
+      hypre_CTAlloc(hypre_ParaSails_struct,  1, HYPRE_MEMORY_HOST);
 
    internal->comm = comm;
    internal->ps   = NULL;
@@ -198,7 +193,7 @@ HYPRE_Int hypre_ParaSailsDestroy(hypre_ParaSails obj)
 
    ParaSailsDestroy(internal->ps);
 
-   hypre_TFree(internal);
+   hypre_TFree(internal, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -357,8 +352,8 @@ hypre_ParaSailsBuildIJMatrix(hypre_ParaSails obj, HYPRE_IJMatrix *pij_A)
 
    HYPRE_IJMatrixSetObjectType( *pij_A, HYPRE_PARCSR );
 
-   diag_sizes = hypre_CTAlloc(HYPRE_Int, ps->end_row - ps->beg_row + 1);
-   offdiag_sizes = hypre_CTAlloc(HYPRE_Int, ps->end_row - ps->beg_row + 1);
+   diag_sizes = hypre_CTAlloc(HYPRE_Int,  ps->end_row - ps->beg_row + 1, HYPRE_MEMORY_HOST);
+   offdiag_sizes = hypre_CTAlloc(HYPRE_Int,  ps->end_row - ps->beg_row + 1, HYPRE_MEMORY_HOST);
    local_row = 0;
    for (i=ps->beg_row; i<= ps->end_row; i++)
    {
@@ -377,8 +372,8 @@ hypre_ParaSailsBuildIJMatrix(hypre_ParaSails obj, HYPRE_IJMatrix *pij_A)
    }
    HYPRE_IJMatrixSetDiagOffdSizes( *pij_A, (const HYPRE_Int *) diag_sizes,
                                    (const HYPRE_Int *) offdiag_sizes );
-   hypre_TFree(diag_sizes);
-   hypre_TFree(offdiag_sizes);
+   hypre_TFree(diag_sizes, HYPRE_MEMORY_HOST);
+   hypre_TFree(offdiag_sizes, HYPRE_MEMORY_HOST);
 
    HYPRE_IJMatrixInitialize( *pij_A );
 

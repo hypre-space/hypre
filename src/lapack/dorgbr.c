@@ -1,8 +1,14 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-#include "hypre_lapack.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dorgbr_(const char *vect, integer *m, integer *n, integer *k, 
+/* Subroutine */ integer dorgbr_(const char *vect, integer *m, integer *n, integer *k, 
 	doublereal *a, integer *lda, doublereal *tau, doublereal *work, 
 	integer *lwork, integer *info)
 {
@@ -110,10 +116,10 @@
     static integer iinfo;
     static logical wantq;
     static integer nb, mn;
-    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
     extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ HYPRE_Int dorglq_(integer *, integer *, integer *, 
+    extern /* Subroutine */ integer dorglq_(integer *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, integer *, 
 	    integer *), dorgqr_(integer *, integer *, integer *, doublereal *,
 	     integer *, doublereal *, doublereal *, integer *, integer *);
@@ -277,4 +283,6 @@
 
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

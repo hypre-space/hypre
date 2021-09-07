@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
 
@@ -26,7 +21,7 @@ HYPRE_StructSMGCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructSMGDestroy( HYPRE_StructSolver solver )
 {
    return( hypre_SMGDestroy( (void *) solver ) );
@@ -35,7 +30,7 @@ HYPRE_StructSMGDestroy( HYPRE_StructSolver solver )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructSMGSetup( HYPRE_StructSolver solver,
                       HYPRE_StructMatrix A,
                       HYPRE_StructVector b,
@@ -50,7 +45,7 @@ HYPRE_StructSMGSetup( HYPRE_StructSolver solver,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructSMGSolve( HYPRE_StructSolver solver,
                       HYPRE_StructMatrix A,
                       HYPRE_StructVector b,
@@ -132,7 +127,7 @@ HYPRE_StructSMGGetRelChange( HYPRE_StructSolver solver,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 HYPRE_StructSMGSetZeroGuess( HYPRE_StructSolver solver )
 {
@@ -148,7 +143,7 @@ HYPRE_StructSMGGetZeroGuess( HYPRE_StructSolver solver,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 HYPRE_StructSMGSetNonZeroGuess( HYPRE_StructSolver solver )
 {
@@ -156,7 +151,7 @@ HYPRE_StructSMGSetNonZeroGuess( HYPRE_StructSolver solver )
 }
 
 /*--------------------------------------------------------------------------
- * Note that we require at least 1 pre-relax sweep. 
+ * Note that we require at least 1 pre-relax sweep.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -244,3 +239,11 @@ HYPRE_StructSMGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
    return( hypre_SMGGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }
 
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+HYPRE_Int
+HYPRE_StructSMGSetDeviceLevel( HYPRE_StructSolver  solver,
+                               HYPRE_Int   device_level  )
+{
+   return (hypre_StructSMGSetDeviceLevel( (void *) solver, device_level ));
+}
+#endif

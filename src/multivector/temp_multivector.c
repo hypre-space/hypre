@@ -1,16 +1,10 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
-#include <assert.h>
 #include <math.h>
 #include <stdlib.h>
 
@@ -53,7 +47,7 @@ static void
 aux_indexFromMask( HYPRE_Int n, HYPRE_Int* mask, HYPRE_Int* index ) {
 
   HYPRE_Int i, j;
-  
+
   if ( mask != NULL ) {
     for ( i = 0, j = 0; i < n; i++ )
       if ( mask[i] )
@@ -81,19 +75,19 @@ static void mysrand(unsigned seed) {
 
 
 void*
-mv_TempMultiVectorCreateFromSampleVector( void* ii_, HYPRE_Int n, void* sample ) { 
+mv_TempMultiVectorCreateFromSampleVector( void* ii_, HYPRE_Int n, void* sample ) {
 
   HYPRE_Int i;
   mv_TempMultiVector* x;
   mv_InterfaceInterpreter* ii = (mv_InterfaceInterpreter*)ii_;
 
-  x = (mv_TempMultiVector*) malloc(sizeof(mv_TempMultiVector));
+  x = hypre_TAlloc(mv_TempMultiVector, 1, HYPRE_MEMORY_HOST);
   hypre_assert( x != NULL );
-  
+
   x->interpreter = ii;
   x->numVectors = n;
-  
-  x->vector = (void**) calloc( n, sizeof(void*) );
+
+  x->vector = hypre_CTAlloc(void*,  n, HYPRE_MEMORY_HOST);
   hypre_assert( x->vector != NULL );
 
   x->ownsVectors = 1;
@@ -120,7 +114,7 @@ mv_TempMultiVectorCreateCopy( void* src_, HYPRE_Int copyValues ) {
 
   n = src->numVectors;
 
-  dest = (mv_TempMultiVector*)mv_TempMultiVectorCreateFromSampleVector( src->interpreter, 
+  dest = (mv_TempMultiVector*)mv_TempMultiVectorCreateFromSampleVector( src->interpreter,
 												   n, src->vector[0] );
   if ( copyValues )
     for ( i = 0; i < n; i++ ) {
@@ -130,7 +124,7 @@ mv_TempMultiVectorCreateCopy( void* src_, HYPRE_Int copyValues ) {
   return dest;
 }
 
-void 
+void
 mv_TempMultiVectorDestroy( void* x_ ) {
 
   HYPRE_Int i;
@@ -142,11 +136,11 @@ mv_TempMultiVectorDestroy( void* x_ ) {
   if ( x->ownsVectors && x->vector != NULL ) {
     for ( i = 0; i < x->numVectors; i++ )
       (x->interpreter->DestroyVector)(x->vector[i]);
-    free(x->vector);
+    hypre_TFree(x->vector,HYPRE_MEMORY_HOST);
   }
   if ( x->mask && x->ownsMask )
-    free(x->mask);
-  free(x);
+    hypre_TFree(x->mask,HYPRE_MEMORY_HOST);
+  hypre_TFree(x,HYPRE_MEMORY_HOST);
 }
 
 HYPRE_Int
@@ -162,13 +156,13 @@ mv_TempMultiVectorWidth( void* x_ ) {
 
 HYPRE_Int
 mv_TempMultiVectorHeight( void* x_ ) {
- 
+
   mv_TempMultiVector* x = (mv_TempMultiVector*)x_;
-  
+
   if ( x == NULL )
-   return 0; 
- 
-  return (x->interpreter->VectorSize)(x->vector[0]); 
+   return 0;
+
+  return (x->interpreter->VectorSize)(x->vector[0]);
 }
 
 /* this shallow copy of the mask is convenient but not safe;
@@ -216,7 +210,7 @@ mv_TempMultiVectorSetRandom( void* x_, HYPRE_Int seed ) {
 
 
 
-void 
+void
 mv_TempMultiVectorCopy( void* src_, void* dest_ ) {
 
   HYPRE_Int i, ms, md;
@@ -230,10 +224,10 @@ mv_TempMultiVectorCopy( void* src_, void* dest_ ) {
   ms = aux_maskCount( src->numVectors, src->mask );
   md = aux_maskCount( dest->numVectors, dest->mask );
   hypre_assert( ms == md );
-	
-  ps = (void**) calloc( ms, sizeof(void*) );
+
+  ps = hypre_CTAlloc(void*,  ms, HYPRE_MEMORY_HOST);
   hypre_assert( ps != NULL );
-  pd = (void**) calloc( md, sizeof(void*) );
+  pd = hypre_CTAlloc(void*,  md, HYPRE_MEMORY_HOST);
   hypre_assert( pd != NULL );
 
   mv_collectVectorPtr( src->mask, src, ps );
@@ -242,13 +236,13 @@ mv_TempMultiVectorCopy( void* src_, void* dest_ ) {
   for ( i = 0; i < ms; i++ )
     (src->interpreter->CopyVector)(ps[i],pd[i]);
 
-  free(ps);
-  free(pd);
+  hypre_TFree(ps,HYPRE_MEMORY_HOST);
+  hypre_TFree(pd,HYPRE_MEMORY_HOST);
 }
 
-void 
-mv_TempMultiVectorAxpy( HYPRE_Complex a, void* x_, void* y_ ) { 
-	
+void
+mv_TempMultiVectorAxpy( HYPRE_Complex a, void* x_, void* y_ ) {
+
   HYPRE_Int i, mx, my;
   void** px;
   void** py;
@@ -263,9 +257,9 @@ mv_TempMultiVectorAxpy( HYPRE_Complex a, void* x_, void* y_ ) {
   my = aux_maskCount( y->numVectors, y->mask );
   hypre_assert( mx == my );
 
-  px = (void**) calloc( mx, sizeof(void*) );
+  px = hypre_CTAlloc(void*,  mx, HYPRE_MEMORY_HOST);
   hypre_assert( px != NULL );
-  py = (void**) calloc( my, sizeof(void*) );
+  py = hypre_CTAlloc(void*,  my, HYPRE_MEMORY_HOST);
   hypre_assert( py != NULL );
 
   mv_collectVectorPtr( x->mask, x, px );
@@ -274,15 +268,15 @@ mv_TempMultiVectorAxpy( HYPRE_Complex a, void* x_, void* y_ ) {
   for ( i = 0; i < mx; i++ )
     (x->interpreter->Axpy)(a,px[i],py[i]);
 
-  free(px);
-  free(py);
+  hypre_TFree(px,HYPRE_MEMORY_HOST);
+  hypre_TFree(py,HYPRE_MEMORY_HOST);
 }
 
-void 
+void
 mv_TempMultiVectorByMultiVector( void* x_, void* y_,
-				     HYPRE_Int xyGHeight, HYPRE_Int xyHeight, 
-				     HYPRE_Int xyWidth, HYPRE_Complex* xyVal ) { 
-/* xy = x'*y */	
+				     HYPRE_Int xyGHeight, HYPRE_Int xyHeight,
+				     HYPRE_Int xyWidth, HYPRE_Complex* xyVal ) {
+/* xy = x'*y */
 
   HYPRE_Int ix, iy, mx, my, jxy;
   HYPRE_Complex* p;
@@ -301,9 +295,9 @@ mv_TempMultiVectorByMultiVector( void* x_, void* y_,
   my = aux_maskCount( y->numVectors, y->mask );
   hypre_assert( my == xyWidth );
 
-  px = (void**) calloc( mx, sizeof(void*) );
+  px = hypre_CTAlloc(void*,  mx, HYPRE_MEMORY_HOST);
   hypre_assert( px != NULL );
-  py = (void**) calloc( my, sizeof(void*) );
+  py = hypre_CTAlloc(void*,  my, HYPRE_MEMORY_HOST);
   hypre_assert( py != NULL );
 
   mv_collectVectorPtr( x->mask, x, px );
@@ -316,15 +310,15 @@ mv_TempMultiVectorByMultiVector( void* x_, void* y_,
     p += jxy;
   }
 
-  free(px);
-  free(py);
+  hypre_TFree(px,HYPRE_MEMORY_HOST);
+  hypre_TFree(py,HYPRE_MEMORY_HOST);
 
 }
 
-void 
+void
 mv_TempMultiVectorByMultiVectorDiag( void* x_, void* y_,
 					HYPRE_Int* mask, HYPRE_Int n, HYPRE_Complex* diag ) {
-/* diag = diag(x'*y) */	
+/* diag = diag(x'*y) */
 
   HYPRE_Int i, mx, my, m;
   void** px;
@@ -342,29 +336,29 @@ mv_TempMultiVectorByMultiVectorDiag( void* x_, void* y_,
   m = aux_maskCount( n, mask );
   hypre_assert( mx == my && mx == m );
 
-  px = (void**) calloc( mx, sizeof(void*) );
+  px = hypre_CTAlloc(void*,  mx, HYPRE_MEMORY_HOST);
   hypre_assert( px != NULL );
-  py = (void**) calloc( my, sizeof(void*) );
+  py = hypre_CTAlloc(void*,  my, HYPRE_MEMORY_HOST);
   hypre_assert( py != NULL );
 
   mv_collectVectorPtr( x->mask, x, px );
   mv_collectVectorPtr( y->mask, y, py );
 
-  index = (HYPRE_Int*)calloc( m, sizeof(HYPRE_Int) );
+  index = hypre_CTAlloc(HYPRE_Int,  m, HYPRE_MEMORY_HOST);
   aux_indexFromMask( n, mask, index );
 
   for ( i = 0; i < m; i++ )
     *(diag+index[i]-1) = (x->interpreter->InnerProd)(px[i],py[i]);
-  
-  free(index);
-  free(px);
-  free(py);
+
+  hypre_TFree(index,HYPRE_MEMORY_HOST);
+  hypre_TFree(px,HYPRE_MEMORY_HOST);
+  hypre_TFree(py,HYPRE_MEMORY_HOST);
 
 }
 
-void 
-mv_TempMultiVectorByMatrix( void* x_, 
-			       HYPRE_Int rGHeight, HYPRE_Int rHeight, 
+void
+mv_TempMultiVectorByMatrix( void* x_,
+			       HYPRE_Int rGHeight, HYPRE_Int rHeight,
 			       HYPRE_Int rWidth, HYPRE_Complex* rVal,
 			       void* y_ ) {
 
@@ -384,12 +378,12 @@ mv_TempMultiVectorByMatrix( void* x_,
   my = aux_maskCount( y->numVectors, y->mask );
 
   hypre_assert( mx == rHeight && my == rWidth );
-  
-  px = (void**) calloc( mx, sizeof(void*) );
+
+  px = hypre_CTAlloc(void*,  mx, HYPRE_MEMORY_HOST);
   hypre_assert( px != NULL );
-  py = (void**) calloc( my, sizeof(void*) );
+  py = hypre_CTAlloc(void*,  my, HYPRE_MEMORY_HOST);
   hypre_assert( py != NULL );
-  
+
   mv_collectVectorPtr( x->mask, x, px );
   mv_collectVectorPtr( y->mask, y, py );
 
@@ -401,13 +395,13 @@ mv_TempMultiVectorByMatrix( void* x_,
     p += jump;
   }
 
-  free(px);
-  free(py);
+  hypre_TFree(px,HYPRE_MEMORY_HOST);
+  hypre_TFree(py,HYPRE_MEMORY_HOST);
 }
 
-void 
-mv_TempMultiVectorXapy( void* x_, 
-			   HYPRE_Int rGHeight, HYPRE_Int rHeight, 
+void
+mv_TempMultiVectorXapy( void* x_,
+			   HYPRE_Int rGHeight, HYPRE_Int rHeight,
 			   HYPRE_Int rWidth, HYPRE_Complex* rVal,
 			   void* y_ ) {
 
@@ -427,12 +421,12 @@ mv_TempMultiVectorXapy( void* x_,
   my = aux_maskCount( y->numVectors, y->mask );
 
   hypre_assert( mx == rHeight && my == rWidth );
-  
-  px = (void**) calloc( mx, sizeof(void*) );
+
+  px = hypre_CTAlloc(void*,  mx, HYPRE_MEMORY_HOST);
   hypre_assert( px != NULL );
-  py = (void**) calloc( my, sizeof(void*) );
+  py = hypre_CTAlloc(void*,  my, HYPRE_MEMORY_HOST);
   hypre_assert( py != NULL );
-  
+
   mv_collectVectorPtr( x->mask, x, px );
   mv_collectVectorPtr( y->mask, y, py );
 
@@ -443,12 +437,12 @@ mv_TempMultiVectorXapy( void* x_,
     p += jump;
   }
 
-  free(px);
-  free(py);
+  hypre_TFree(px,HYPRE_MEMORY_HOST);
+  hypre_TFree(py,HYPRE_MEMORY_HOST);
 }
 
-void 
-mv_TempMultiVectorByDiagonal( void* x_, 
+void
+mv_TempMultiVectorByDiagonal( void* x_,
 				HYPRE_Int* mask, HYPRE_Int n, HYPRE_Complex* diag,
 				void* y_ ) {
 
@@ -467,18 +461,18 @@ mv_TempMultiVectorByDiagonal( void* x_,
   mx = aux_maskCount( x->numVectors, x->mask );
   my = aux_maskCount( y->numVectors, y->mask );
   m = aux_maskCount( n, mask );
-	
+
   hypre_assert( mx == m && my == m );
 
   if ( m < 1 )
     return;
 
-  px = (void**) calloc( mx, sizeof(void*) );
+  px = hypre_CTAlloc(void*,  mx, HYPRE_MEMORY_HOST);
   hypre_assert( px != NULL );
-  py = (void**) calloc( my, sizeof(void*) );
+  py = hypre_CTAlloc(void*,  my, HYPRE_MEMORY_HOST);
   hypre_assert( py != NULL );
 
-  index = (HYPRE_Int*)calloc( m, sizeof(HYPRE_Int) );
+  index = hypre_CTAlloc(HYPRE_Int,  m, HYPRE_MEMORY_HOST);
   aux_indexFromMask( n, mask, index );
 
   mv_collectVectorPtr( x->mask, x, px );
@@ -489,12 +483,12 @@ mv_TempMultiVectorByDiagonal( void* x_,
     (x->interpreter->Axpy)(diag[index[j]-1],px[j],py[j]);
   }
 
-  free(px);
-  free(py);
-  free( index );
+  hypre_TFree(px,HYPRE_MEMORY_HOST);
+  hypre_TFree(py,HYPRE_MEMORY_HOST);
+  hypre_TFree( index ,HYPRE_MEMORY_HOST);
 }
 
-void 
+void
 mv_TempMultiVectorEval( void (*f)( void*, void*, void* ), void* par,
 			   void* x_, void* y_ ) {
 
@@ -517,9 +511,9 @@ mv_TempMultiVectorEval( void (*f)( void*, void*, void* ), void* par,
   my = aux_maskCount( y->numVectors, y->mask );
   hypre_assert( mx == my );
 
-  px = (void**) calloc( mx, sizeof(void*) );
+  px = hypre_CTAlloc(void*,  mx, HYPRE_MEMORY_HOST);
   hypre_assert( px != NULL );
-  py = (void**) calloc( my, sizeof(void*) );
+  py = hypre_CTAlloc(void*,  my, HYPRE_MEMORY_HOST);
   hypre_assert( py != NULL );
 
   mv_collectVectorPtr( x->mask, x, px );
@@ -528,6 +522,6 @@ mv_TempMultiVectorEval( void (*f)( void*, void*, void* ), void* par,
   for ( i = 0; i < mx; i++ )
     f( par, (void*)px[i], (void*)py[i] );
 
-  free(px);
-  free(py);
+  hypre_TFree(px,HYPRE_MEMORY_HOST);
+  hypre_TFree(py,HYPRE_MEMORY_HOST);
 }

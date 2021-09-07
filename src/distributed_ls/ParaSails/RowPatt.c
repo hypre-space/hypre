@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -20,14 +12,13 @@
  *
  * Implementation and Notes: a full-length array is used to mark nonzeros
  * in the pattern.  Indices must not equal -1, which is the "empty" marker
- * used in the full length array.  It is expected that RowPatt will only be 
- * presented with local indices, otherwise the full length array may be very 
+ * used in the full length array.  It is expected that RowPatt will only be
+ * presented with local indices, otherwise the full length array may be very
  * large.
  *
  *****************************************************************************/
 
 #include <stdlib.h>
-#include <assert.h>
 #include "Common.h"
 #include "RowPatt.h"
 
@@ -46,8 +37,8 @@ static void resize(RowPatt *p, HYPRE_Int newlen)
     oldlen = p->maxlen;
     p->maxlen = newlen;
 
-    p->ind  = (HYPRE_Int *) realloc(p->ind,  p->maxlen * sizeof(HYPRE_Int));
-    p->mark = (HYPRE_Int *) realloc(p->mark, p->maxlen * sizeof(HYPRE_Int));
+    p->ind  = hypre_TReAlloc(p->ind,HYPRE_Int,   p->maxlen , HYPRE_MEMORY_HOST);
+    p->mark = hypre_TReAlloc(p->mark,HYPRE_Int,  p->maxlen , HYPRE_MEMORY_HOST);
 
     /* initialize the new portion of the mark array */
     for (i=oldlen; i<p->maxlen; i++)
@@ -62,13 +53,13 @@ static void resize(RowPatt *p, HYPRE_Int newlen)
 RowPatt *RowPattCreate(HYPRE_Int maxlen)
 {
     HYPRE_Int i;
-    RowPatt *p = (RowPatt *) malloc(sizeof(RowPatt));
+    RowPatt *p = hypre_TAlloc(RowPatt, 1, HYPRE_MEMORY_HOST);
 
     p->maxlen   = maxlen;
     p->len      = 0;
     p->prev_len = 0;
-    p->ind      = (HYPRE_Int *) malloc(maxlen * sizeof(HYPRE_Int));
-    p->mark     = (HYPRE_Int *) malloc(maxlen * sizeof(HYPRE_Int));
+    p->ind      = hypre_TAlloc(HYPRE_Int, maxlen , HYPRE_MEMORY_HOST);
+    p->mark     = hypre_TAlloc(HYPRE_Int, maxlen , HYPRE_MEMORY_HOST);
     p->buffer   = NULL;
     p->buflen   = 0;
 
@@ -84,10 +75,10 @@ RowPatt *RowPattCreate(HYPRE_Int maxlen)
 
 void RowPattDestroy(RowPatt *p)
 {
-    free(p->ind);
-    free(p->mark);
-    free(p->buffer);
-    free(p);
+    hypre_TFree(p->ind,HYPRE_MEMORY_HOST);
+    hypre_TFree(p->mark,HYPRE_MEMORY_HOST);
+    hypre_TFree(p->buffer,HYPRE_MEMORY_HOST);
+    hypre_TFree(p,HYPRE_MEMORY_HOST);
 }
 
 /*--------------------------------------------------------------------------
@@ -120,7 +111,7 @@ void RowPattMerge(RowPatt *p, HYPRE_Int len, HYPRE_Int *ind)
 
 	if (p->mark[ind[i]] == -1)
 	{
-	    assert(p->len < p->maxlen);
+	    hypre_assert(p->len < p->maxlen);
 
 	    p->mark[ind[i]] = p->len;
             p->ind[p->len] = ind[i];
@@ -130,7 +121,7 @@ void RowPattMerge(RowPatt *p, HYPRE_Int len, HYPRE_Int *ind)
 }
 
 /*--------------------------------------------------------------------------
- * RowPattMergeExt - Merge the external nonzeros in the array "ind" of 
+ * RowPattMergeExt - Merge the external nonzeros in the array "ind" of
  * length "len" with the pattern "p".  The external indices are those
  * that are less than "beg" or greater than "end".
  *--------------------------------------------------------------------------*/
@@ -149,7 +140,7 @@ void RowPattMergeExt(RowPatt *p, HYPRE_Int len, HYPRE_Int *ind, HYPRE_Int num_lo
 
 	if (p->mark[ind[i]] == -1)
 	{
-	    assert(p->len < p->maxlen);
+	    hypre_assert(p->len < p->maxlen);
 
 	    p->mark[ind[i]] = p->len;
             p->ind[p->len] = ind[i];
@@ -173,12 +164,12 @@ void RowPattGet(RowPatt *p, HYPRE_Int *lenp, HYPRE_Int **indp)
 
     if (len > p->buflen)
     {
-	free(p->buffer);
+	hypre_TFree(p->buffer,HYPRE_MEMORY_HOST);
 	p->buflen = len + 100;
-	p->buffer = (HYPRE_Int *) malloc(p->buflen * sizeof(HYPRE_Int));
+	p->buffer = hypre_TAlloc(HYPRE_Int, p->buflen , HYPRE_MEMORY_HOST);
     }
 
-    memcpy(p->buffer, p->ind, len*sizeof(HYPRE_Int));
+    hypre_TMemcpy(p->buffer,  p->ind, HYPRE_Int, len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
     *lenp = len;
     *indp = p->buffer;
@@ -187,7 +178,7 @@ void RowPattGet(RowPatt *p, HYPRE_Int *lenp, HYPRE_Int **indp)
 /*--------------------------------------------------------------------------
  * RowPattPrevLevel - Return the new indices added to the pattern of "p"
  * since the last call to RowPattPrevLevel (or all the indices if never
- * called).  The length and pointer to the pattern indices are returned 
+ * called).  The length and pointer to the pattern indices are returned
  * through the parameters "lenp" and "indp".
  * A copy of the indices is returned; this copy is destroyed on the next
  * call to RowPattGet or RowPattPrevLevel.
@@ -201,12 +192,12 @@ void RowPattPrevLevel(RowPatt *p, HYPRE_Int *lenp, HYPRE_Int **indp)
 
     if (len > p->buflen)
     {
-	free(p->buffer);
+	hypre_TFree(p->buffer,HYPRE_MEMORY_HOST);
 	p->buflen = len + 100;
-	p->buffer = (HYPRE_Int *) malloc(p->buflen * sizeof(HYPRE_Int));
+	p->buffer = hypre_TAlloc(HYPRE_Int, p->buflen , HYPRE_MEMORY_HOST);
     }
 
-    memcpy(p->buffer, &p->ind[p->prev_len], len*sizeof(HYPRE_Int));
+    hypre_TMemcpy(p->buffer,  &p->ind[p->prev_len], HYPRE_Int, len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
     *lenp = len;
     *indp = p->buffer;

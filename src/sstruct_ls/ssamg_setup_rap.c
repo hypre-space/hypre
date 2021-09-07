@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
 #include "ssamg.h"
@@ -92,16 +87,16 @@ hypre_SSAMGComputeRAPNonGlk( hypre_SStructMatrix  *A,
    HYPRE_Int                part, s, vi, vj;
 
    /* Allocate memory */
-   sAc = hypre_TAlloc(hypre_StructMatrix ***, nparts);
+   sAc = hypre_TAlloc(hypre_StructMatrix ***, nparts, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
       pcgrid = hypre_SStructGridPGrid(cgrid, part);
       nvars  = hypre_SStructPGridNVars(pcgrid);
 
-      sAc[part] = hypre_TAlloc(hypre_StructMatrix **, nvars);
+      sAc[part] = hypre_TAlloc(hypre_StructMatrix **, nvars, HYPRE_MEMORY_HOST);
       for (vi = 0; vi < nvars; vi++)
       {
-         sAc[part][vi] = hypre_TAlloc(hypre_StructMatrix *, nvars);
+         sAc[part][vi] = hypre_TAlloc(hypre_StructMatrix *, nvars, HYPRE_MEMORY_HOST);
       }
    }
 
@@ -140,8 +135,7 @@ hypre_SSAMGComputeRAPNonGlk( hypre_SStructMatrix  *A,
             /* Use generic StructMatmult */
             hypre_StructMatrix *smatrices[3] = {sA, sP, sP};
 
-            hypre_StructMatmult(3, smatrices, 3, terms, trans, NULL,
-                                &sAc[part][vi][vi]);
+            hypre_StructMatmult(3, smatrices, 3, terms, trans, &sAc[part][vi][vi]);
          }
 
          /* Create SStructStencil object for M */
@@ -201,11 +195,11 @@ hypre_SSAMGComputeRAPNonGlk( hypre_SStructMatrix  *A,
          {
             hypre_StructMatrixDestroy(sAc[part][vi][vj]);
          }
-         hypre_TFree(sAc[part][vi]);
+         hypre_TFree(sAc[part][vi], HYPRE_MEMORY_HOST);
       }
-      hypre_TFree(sAc[part]);
+      hypre_TFree(sAc[part], HYPRE_MEMORY_HOST);
    }
-   hypre_TFree(sAc);
+   hypre_TFree(sAc, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }

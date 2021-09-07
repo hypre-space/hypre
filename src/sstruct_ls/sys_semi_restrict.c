@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
 
@@ -29,7 +24,7 @@ hypre_SysSemiRestrictCreate( void **sys_restrict_vdata_ptr)
 {
    hypre_SysSemiRestrictData *sys_restrict_data;
 
-   sys_restrict_data = hypre_CTAlloc(hypre_SysSemiRestrictData, 1);
+   sys_restrict_data = hypre_CTAlloc(hypre_SysSemiRestrictData,  1, HYPRE_MEMORY_HOST);
    *sys_restrict_vdata_ptr = (void *) sys_restrict_data;
 
    return hypre_error_flag;
@@ -48,7 +43,7 @@ hypre_SysSemiRestrictSetup( void                 *sys_restrict_vdata,
                             hypre_Index           findex,
                             hypre_Index           stride                )
 {
-	hypre_SysSemiRestrictData  *sys_restrict_data = (hypre_SysSemiRestrictData  *)sys_restrict_vdata;
+   hypre_SysSemiRestrictData  *sys_restrict_data = (hypre_SysSemiRestrictData  *)sys_restrict_vdata;
    void                      **srestrict_data;
 
    HYPRE_Int                   nvars;
@@ -60,7 +55,7 @@ hypre_SysSemiRestrictSetup( void                 *sys_restrict_vdata,
    HYPRE_Int                   vi;
 
    nvars = hypre_SStructPMatrixNVars(R);
-   srestrict_data = hypre_CTAlloc(void *, nvars);
+   srestrict_data = hypre_CTAlloc(void *,  nvars, HYPRE_MEMORY_HOST);
 
    for (vi = 0; vi < nvars; vi++)
    {
@@ -69,7 +64,7 @@ hypre_SysSemiRestrictSetup( void                 *sys_restrict_vdata,
       r_s  = hypre_SStructPVectorSVector(r, vi);
       srestrict_data[vi] = hypre_SemiRestrictCreate( );
       hypre_SemiRestrictSetup( srestrict_data[vi], R_s, R_stored_as_transpose,
-                               r_s, rc_s, cindex, findex, stride);
+                               r_s, rc_s, cindex, findex, stride);      
    }
 
    (sys_restrict_data -> nvars)        = nvars;
@@ -134,8 +129,8 @@ hypre_SysSemiRestrictDestroy( void *sys_restrict_vdata )
             hypre_SemiRestrictDestroy(srestrict_data[vi]);
          }
       }
-      hypre_TFree(srestrict_data);
-      hypre_TFree(sys_restrict_data);
+      hypre_TFree(srestrict_data, HYPRE_MEMORY_HOST);
+      hypre_TFree(sys_restrict_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;

@@ -1,0 +1,28 @@
+#!/bin/sh
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+#=============================================================================
+# ij: Run default case with different solvers
+#   90: BoomerAMGDD
+#   91: BoomerAMGDD_GMRES
+
+#BoomerAMG-DD
+mpirun -np 1 ./ij -solver 90 -rhsrand > amgdd.out.900
+mpirun -np 2 ./ij -solver 90 -rhsrand > amgdd.out.901
+mpirun -np 4 ./ij -solver 90 -rhsrand > amgdd.out.902
+mpirun -np 4 ./ij -solver 90 -rhsrand -amgdd_start_level 2 > amgdd.out.903
+mpirun -np 4 ./ij -solver 90 -rhsrand -amgdd_start_level 3 > amgdd.out.904
+mpirun -np 4 ./ij -solver 90 -rhsrand -amgdd_padding 4 > amgdd.out.905
+mpirun -np 4 ./ij -solver 90 -rhsrand -amgdd_padding 4 -amgdd_num_ghost_layers 4 > amgdd.out.906
+mpirun -np 1 ./ij -solver 91 -rhsrand > amgdd.out.910
+mpirun -np 2 ./ij -solver 91 -rhsrand > amgdd.out.911
+mpirun -np 4 ./ij -solver 91 -rhsrand > amgdd.out.912
+mpirun -np 4 ./ij -solver 91 -rhsrand -amgdd_num_comp_cycles 3 > amgdd.out.913
+mpirun -np 4 ./ij -solver 91 -rhsrand -amgdd_fac_relax_type 0 > amgdd.out.914
+mpirun -np 4 ./ij -solver 91 -rhsrand -amgdd_fac_relax_type 1 > amgdd.out.915
+mpirun -np 4 ./ij -solver 91 -rhsrand -amgdd_fac_relax_type 2 > amgdd.out.916
+mpirun -np 4 ./ij -solver 91 -rhsrand -amgdd_fac_cycle_type 2 > amgdd.out.917
+mpirun -np 4 ./ij -solver 91 -rhsrand -amgdd_fac_cycle_type 3 > amgdd.out.918

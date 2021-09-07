@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /*--------------------------------------------------------------------------
  * Routines to set up preconditioners for use in test codes.
@@ -307,13 +302,6 @@ HYPRE_Int hypre_set_precond(HYPRE_Int matrix_id, HYPRE_Int solver_id, HYPRE_Int 
                                     (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup,
                                     (HYPRE_Solver) precond);
               }
-           else if (precond_id == HYPRE_SPARSEMSG)
-              {
-               HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
-                                    (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSolve,
-                                    (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSetup,
-                                    (HYPRE_Solver) precond);
-              }
            else if (precond_id == HYPRE_JACOBI)
               {
                HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
@@ -349,13 +337,6 @@ HYPRE_Int hypre_set_precond(HYPRE_Int matrix_id, HYPRE_Int solver_id, HYPRE_Int 
                                     (HYPRE_PtrToStructSolverFcn) HYPRE_StructPFMGSetup,
                                     (HYPRE_StructSolver) precond);
               }
-           else if (precond_id == HYPRE_SPARSEMSG)
-              {
-               HYPRE_StructHybridSetPrecond( (HYPRE_StructSolver) solver,
-                                    (HYPRE_PtrToStructSolverFcn) HYPRE_StructSparseMSGSolve,
-                                    (HYPRE_PtrToStructSolverFcn) HYPRE_StructSparseMSGSetup,
-                                    (HYPRE_StructSolver) precond);
-              }
           }
 
 /************************************************************************
@@ -375,13 +356,6 @@ HYPRE_Int hypre_set_precond(HYPRE_Int matrix_id, HYPRE_Int solver_id, HYPRE_Int 
                HYPRE_GMRESSetPrecond( (HYPRE_Solver) solver,
                                     (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
                                     (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup,
-                                    (HYPRE_Solver) precond);
-              }
-           else if (precond_id == HYPRE_SPARSEMSG)
-              {
-               HYPRE_GMRESSetPrecond( (HYPRE_Solver) solver,
-                                    (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSolve,
-                                    (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSetup,
                                     (HYPRE_Solver) precond);
               }
            else if (precond_id == HYPRE_JACOBI)
@@ -417,13 +391,6 @@ HYPRE_Int hypre_set_precond(HYPRE_Int matrix_id, HYPRE_Int solver_id, HYPRE_Int 
                HYPRE_BiCGSTABSetPrecond( (HYPRE_Solver) solver,
                                     (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
                                     (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup,
-                                    (HYPRE_Solver) precond);
-              }
-           else if (precond_id == HYPRE_SPARSEMSG)
-              {
-               HYPRE_BiCGSTABSetPrecond( (HYPRE_Solver) solver,
-                                    (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSolve,
-                                    (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSetup,
                                     (HYPRE_Solver) precond);
               }
            else if (precond_id == HYPRE_JACOBI)
@@ -511,32 +478,32 @@ HYPRE_Int hypre_set_precond_params(HYPRE_Int precond_id, void *precond)
            /* fine grid */
           num_grid_sweeps[0] = num_sweep;
           grid_relax_type[0] = relax_default;
-          hypre_TFree (grid_relax_points[0]);
-          grid_relax_points[0] = hypre_CTAlloc(HYPRE_Int, num_sweep);
+          hypre_TFree(grid_relax_points[0], HYPRE_MEMORY_HOST);
+          grid_relax_points[0] = hypre_CTAlloc(HYPRE_Int,  num_sweep, HYPRE_MEMORY_HOST);
           for (i=0; i<num_sweep; i++)
              grid_relax_points[0][i] = 0;
     
           /* down cycle */
           num_grid_sweeps[1] = num_sweep;
           grid_relax_type[1] = relax_default;
-          hypre_TFree (grid_relax_points[1]);
-          grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int, num_sweep);
+          hypre_TFree(grid_relax_points[1], HYPRE_MEMORY_HOST);
+          grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int,  num_sweep, HYPRE_MEMORY_HOST);
           for (i=0; i<num_sweep; i++)
              grid_relax_points[1][i] = 0;
     
           /* up cycle */
           num_grid_sweeps[2] = num_sweep;
           grid_relax_type[2] = relax_default;
-          hypre_TFree (grid_relax_points[2]);
-          grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int, num_sweep);
+          hypre_TFree(grid_relax_points[2], HYPRE_MEMORY_HOST);
+          grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int,  num_sweep, HYPRE_MEMORY_HOST);
           for (i=0; i<num_sweep; i++)
              grid_relax_points[2][i] = 0;
     
           /* coarsest grid */
           num_grid_sweeps[3] = 1;
           grid_relax_type[3] = 9;
-          hypre_TFree (grid_relax_points[3]);
-          grid_relax_points[3] = hypre_CTAlloc(HYPRE_Int, 1);
+          hypre_TFree(grid_relax_points[3], HYPRE_MEMORY_HOST);
+          grid_relax_points[3] = hypre_CTAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
           grid_relax_points[3][0] = 0;
  
           HYPRE_BoomerAMGCreate(precond); 
@@ -626,9 +593,6 @@ HYPRE_Int hypre_destroy_precond(HYPRE_Int precond_id, void *precond)
 
     else if (precond_id == HYPRE_SMG)
         HYPRE_SMGDestroy(precond);
-
-    else if (precond_id == HYPRE_SPARSEMSG)
-        HYPRE_SparseMSGDestroy(precond);
 
     else if (precond_id == HYPRE_SPLIT)
         HYPRE_SplitDestroy(precond);

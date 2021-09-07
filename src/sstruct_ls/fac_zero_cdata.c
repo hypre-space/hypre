@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
 #include "fac.h"
@@ -143,7 +135,7 @@ hypre_FacZeroCData( void                 *fac_vdata,
                   /*------------------------------------------------------------
                    * Coarse underlying box found. Now zero off.
                    *------------------------------------------------------------*/
-                   values= hypre_CTAlloc(HYPRE_Real, intersect_size);
+                   values= hypre_CTAlloc(HYPRE_Real,  intersect_size, HYPRE_MEMORY_HOST);
 
                    for (j= 0; j< stencil_size; j++)
                    {
@@ -160,12 +152,12 @@ hypre_FacZeroCData( void                 *fac_vdata,
                                                       var, 1, &j, values);
                    }
 
-                   hypre_TFree(values);
+                   hypre_TFree(values, HYPRE_MEMORY_HOST);
 
                 }  /* if (intersect_size > 0) */
              }     /* for (i= 0; i< nboxman_entries; i++) */
 
-             hypre_TFree(boxman_entries);
+             hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
 
          }   /* hypre_ForBoxI(ci, cgrid_boxes) */
       }      /* for (var= 0; var< nvars; var++) */

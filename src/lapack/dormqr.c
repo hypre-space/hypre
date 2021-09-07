@@ -1,8 +1,14 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-#include "hypre_lapack.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dormqr_(const char *side,const char *trans, integer *m, integer *n, 
+/* Subroutine */ integer dormqr_(const char *side,const char *trans, integer *m, integer *n, 
 	integer *k, doublereal *a, integer *lda, doublereal *tau, doublereal *
 	c__, integer *ldc, doublereal *work, integer *lwork, integer *info)
 {
@@ -112,23 +118,23 @@
 	    i__5;
     char ch__1[2];
     /* Builtin functions   
-       Subroutine */ HYPRE_Int s_cat(char *, char **, integer *, integer *, ftnlen);
+       Subroutine */ integer s_cat(char *, char **, integer *, integer *, ftnlen);
     /* Local variables */
     static logical left;
     static integer i__;
     static doublereal t[4160]	/* was [65][64] */;
     extern logical lsame_(const char *,const char *);
     static integer nbmin, iinfo, i1, i2, i3;
-    extern /* Subroutine */ HYPRE_Int dorm2r_(const char *,const char *, integer *, integer *, 
+    extern /* Subroutine */ integer dorm2r_(const char *,const char *, integer *, integer *, 
 	    integer *, doublereal *, integer *, doublereal *, doublereal *, 
 	    integer *, doublereal *, integer *);
     static integer ib, ic, jc, nb, mi, ni;
-    extern /* Subroutine */ HYPRE_Int dlarfb_(const char *,const char *,const char *,const char *, 
+    extern /* Subroutine */ integer dlarfb_(const char *,const char *,const char *,const char *, 
 	    integer *, integer *, integer *, doublereal *, integer *, 
 	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
 	    integer *);
     static integer nq, nw;
-    extern /* Subroutine */ HYPRE_Int dlarft_(const char *,const char *, integer *, integer *, 
+    extern /* Subroutine */ integer dlarft_(const char *,const char *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, integer *), xerbla_(const char *, integer *);
     extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
@@ -306,4 +312,6 @@
 #undef c___ref
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

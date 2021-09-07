@@ -1,8 +1,14 @@
-#include "../blas/hypre_blas.h"
-#include "hypre_lapack.h"
-#include "f2c.h"
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-/* Subroutine */ HYPRE_Int dorg2l_(integer *m, integer *n, integer *k, doublereal *
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "f2c.h"
+#include "hypre_lapack.h"
+
+/* Subroutine */ integer dorg2l_(integer *m, integer *n, integer *k, doublereal *
 	a, integer *lda, doublereal *tau, doublereal *work, integer *info)
 {
 /*  -- LAPACK routine (version 3.0) --   
@@ -69,11 +75,11 @@
     doublereal d__1;
     /* Local variables */
     static integer i__, j, l;
-    extern /* Subroutine */ HYPRE_Int dscal_(integer *, doublereal *, doublereal *, 
+    extern /* Subroutine */ integer dscal_(integer *, doublereal *, doublereal *, 
 	    integer *), dlarf_(const char *, integer *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, integer *, doublereal *);
     static integer ii;
-    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 
 
@@ -152,4 +158,6 @@
 
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

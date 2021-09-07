@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -60,8 +55,8 @@ hypre_CSRBlockMatrixAdd(hypre_CSRBlockMatrix *A, hypre_CSRBlockMatrix *B)
    }
 
    bnnz = block_size * block_size;
-   marker = hypre_CTAlloc(HYPRE_Int, ncols_A);
-   C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1);
+   marker = hypre_CTAlloc(HYPRE_Int,  ncols_A, HYPRE_MEMORY_HOST);
+   C_i = hypre_CTAlloc(HYPRE_Int,  nrows_A+1, HYPRE_MEMORY_HOST);
 
    for (ia = 0; ia < ncols_A; ia++) marker[ia] = -1;
 
@@ -125,7 +120,7 @@ hypre_CSRBlockMatrixAdd(hypre_CSRBlockMatrix *A, hypre_CSRBlockMatrix *B)
          }
       }
    }
-   hypre_TFree(marker);
+   hypre_TFree(marker, HYPRE_MEMORY_HOST);
    return C;
 }       
 
@@ -174,8 +169,8 @@ hypre_CSRBlockMatrixMultiply(hypre_CSRBlockMatrix *A, hypre_CSRBlockMatrix *B)
    }
 
    bnnz = block_size * block_size;
-   B_marker = hypre_CTAlloc(HYPRE_Int, ncols_B);
-   C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1);
+   B_marker = hypre_CTAlloc(HYPRE_Int,  ncols_B, HYPRE_MEMORY_HOST);
+   C_i = hypre_CTAlloc(HYPRE_Int,  nrows_A+1, HYPRE_MEMORY_HOST);
 
    for (ib = 0; ib < ncols_B; ib++) B_marker[ib] = -1;
 
@@ -235,7 +230,7 @@ hypre_CSRBlockMatrixMultiply(hypre_CSRBlockMatrix *A, hypre_CSRBlockMatrix *B)
          }
       }
    }
-   hypre_TFree(B_marker);
+   hypre_TFree(B_marker, HYPRE_MEMORY_HOST);
    return C;
 }       
 

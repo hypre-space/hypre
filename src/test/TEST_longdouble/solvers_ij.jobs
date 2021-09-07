@@ -1,0 +1,79 @@
+#!/bin/sh
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+#=============================================================================
+# ij: Run default case with different solvers
+#    1: BoomerAMG_PCG
+#    2: DS_PCG
+#    3: BoomerAMG_GMRES
+#    4: DS_GMRES
+#    5: BoomerAMG_CGNR
+#    6: DS_CGNR
+#    7: PILUT_GMRES
+#    8: ParaSails_PCG
+#   20: Hybrid_PCG
+#
+
+
+
+# ij: test systems AMG
+#	  unknown approach
+#	  hybrid approach with block smoother
+# 	  nodal approach
+#       more solvers:
+#        51: BoomerAMG_LGMRES
+#        50: DS_LGMRES
+#        61: BoomerAMG_FlexGMRES
+#        60: DS_FlexGMRES
+#
+#=============================================================================
+
+mpirun -np 2 ./ij -solver 1 -tol 1.e-16 -rhsrand > solvers_ij.out.0
+mpirun -np 2 ./ij -solver 2 -tol 1.e-16 -rhsrand > solvers_ij.out.1
+mpirun -np 2 ./ij -solver 3 -tol 1.e-16 -rhsrand > solvers_ij.out.2
+mpirun -np 2 ./ij -solver 4 -tol 1.e-16 -rhsrand > solvers_ij.out.3
+mpirun -np 2 ./ij -solver 5 -tol 1.e-16 -rhsrand -w 0.67 -ns 2 > solvers_ij.out.4
+mpirun -np 2 ./ij -solver 6 -tol 1.e-16 -rhsrand > solvers_ij.out.5
+mpirun -np 2 ./ij -solver 7 -tol 1.e-16 -rhsrand > solvers_ij.out.6
+mpirun -np 2 ./ij -solver 8 -tol 1.e-16 -rhsrand > solvers_ij.out.7
+mpirun -np 2 ./ij -solver 20 -tol 1.e-16 -rhsrand > solvers_ij.out.8
+mpirun -np 2 ./ij -solver 20 -tol 1.e-16 -cf 0.5 -rhsrand > solvers_ij.out.9
+mpirun -np 2 ./ij -solver 20 -tol 1.e-16 -cf 0.5 -rhsrand -solver_type 2 > solvers_ij.out.10
+mpirun -np 2 ./ij -solver 20 -tol 1.e-16 -cf 0.5 -rhsrand -solver_type 3 > solvers_ij.out.11
+
+#systems AMG run ...unknown approach, hybrid approach, nodal approach
+mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 -tol 1.e-16 > solvers_ij.out.sysu
+mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 -nodal 1 -smtype 6 -smlv 10 -dom 1 -ov 0 -tol 1.e-16 > solvers_ij.out.sysh
+mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 -interptype 10 -Pmx 6 -tol 1.e-16 > solvers_ij.out.sysn
+
+#LGMRS and FlexGMRES
+mpirun -np 2 ./ij -solver 50 -tol 1.e-16 -rhsrand > solvers_ij.out.101
+mpirun -np 2 ./ij -solver 51 -tol 1.e-16 -rhsrand > solvers_ij.out.102
+mpirun -np 2 ./ij -solver 60 -tol 1.e-16 -rhsrand > solvers_ij.out.103
+mpirun -np 2 ./ij -solver 61 -tol 1.e-16 -rhsrand > solvers_ij.out.104
+
+#agglomerated coarse grid solve
+mpirun -np 8 ./ij -n 80 80 80 -P 2 2 2 -agg_nl 1 -seq_th 100 -solver 1 -rlx 6 -tol 1.e-16 > solvers_ij.out.105
+mpirun -np 8 ./ij -n 40 40 40 -P 2 2 2 -agg_nl 1 -seq_th 100 -solver 1 -rlx 6 -sysL 3 -nf 3 -tol 1.e-16 > solvers_ij.out.107
+
+#redundant coarse grid solve
+mpirun -np 8 ./ij -n 80 80 80 -P 2 2 2 -agg_nl 1 -seq_th 100 -solver 1 -rlx 6 -red 1 -tol 1.e-16 > solvers_ij.out.106
+mpirun -np 8 ./ij -n 40 40 40 -P 2 2 2 -agg_nl 1 -seq_th 100 -solver 1 -rlx 6 -sysL 3 -nf 3 -red 1 -tol 1.e-16 > solvers_ij.out.108
+
+#additive cycles
+mpirun -np 2 ./ij -n 20 20 20 -P 2 1 1 -agg_nl 1 -solver 1 -CF 0 -rlx 0 -w 0.7 -rlx_coarse 0 -ns_coarse 2 -tol 1.e-16 > solvers_ij.out.109
+mpirun -np 2 ./ij -n 20 20 20 -P 2 1 1 -agg_nl 1 -solver 1 -CF 0 -add_rlx 0 -add_w 0.7 -mult_add 0 -tol 1.e-16 > solvers_ij.out.110
+mpirun -np 4 ./ij -n 20 20 20 -P 2 2 1 -agg_nl 1 -solver 1 -simple 0 -tol 1.e-16 > solvers_ij.out.111
+mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -additive 1 -tol 1.e-16 > solvers_ij.out.112
+mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -add_Pmx 5 -tol 1.e-16 > solvers_ij.out.113
+
+#nonGalerkin version
+mpirun -np 8 ./ij -n 40 40 40 -P 2 2 2 -nongalerk_tol 1 0.03 -tol 1.e-16 > solvers_ij.out.114
+mpirun -np 8 ./ij -n 40 40 40 -P 2 2 2 -nongalerk_tol 3 0.0 0.01 0.05 -tol 1.e-16 > solvers_ij.out.115
+
+#RAP options
+mpirun -np 8 ./ij -n 40 40 40 -P 2 2 2 -solver 3 -rap 0 -tol 1.e-16 > solvers_ij.out.116
+mpirun -np 8 ./ij -n 40 40 40 -P 2 2 2 -solver 3 -rap 1 -tol 1.e-16 > solvers_ij.out.117

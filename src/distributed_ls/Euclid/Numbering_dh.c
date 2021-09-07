@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_Euclid.h"
 /* #include "Numbering_dh.h" */
@@ -111,10 +106,11 @@ void Numbering_dhSetup(Numbering_dh numb, Mat_dh mat)
            space.  The global_to_local hash table may also need
            to be enlarged, but the hash object will take care of that.
          */
+        /* RL : why ``m+num_ext'' instead of ``num_ext+1'' ??? */
         if (m+num_ext >= size) {
-          HYPRE_Int newSize = size*1.5;  /* heuristic */
+          HYPRE_Int newSize = hypre_max(m+num_ext+1, size*1.5);  /* heuristic */
           HYPRE_Int *tmp = (HYPRE_Int*)MALLOC_DH(newSize*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-          memcpy(tmp, idx_ext, size*sizeof(size));
+          hypre_TMemcpy(tmp,  idx_ext, size, size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
           FREE_DH(idx_ext); CHECK_V_ERROR;
           size = numb->size = newSize;
           numb->idx_ext = idx_ext = tmp;

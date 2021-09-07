@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
 
@@ -21,7 +16,7 @@ HYPRE_SStructPCGCreate( MPI_Comm             comm,
 {
    hypre_PCGFunctions * pcg_functions =
       hypre_PCGFunctionsCreate(
-         hypre_CAlloc, hypre_SStructKrylovFree, hypre_SStructKrylovCommInfo,
+         hypre_SStructKrylovCAlloc, hypre_SStructKrylovFree, hypre_SStructKrylovCommInfo,
          hypre_SStructKrylovCreateVector,
          hypre_SStructKrylovDestroyVector, hypre_SStructKrylovMatvecCreate,
          hypre_SStructKrylovMatvec, hypre_SStructKrylovMatvecDestroy,
@@ -30,7 +25,6 @@ HYPRE_SStructPCGCreate( MPI_Comm             comm,
          hypre_SStructKrylovScaleVector, hypre_SStructKrylovAxpy,
          hypre_SStructKrylovIdentitySetup, hypre_SStructKrylovIdentity );
 
-   pcg_functions->PrintVector = hypre_SStructKrylovPrintVector;
    *solver = ( (HYPRE_SStructSolver) hypre_PCGCreate( pcg_functions ) );
 
    return hypre_error_flag;
@@ -39,7 +33,7 @@ HYPRE_SStructPCGCreate( MPI_Comm             comm,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_SStructPCGDestroy( HYPRE_SStructSolver solver )
 {
    return( hypre_PCGDestroy( (void *) solver ) );
@@ -48,7 +42,7 @@ HYPRE_SStructPCGDestroy( HYPRE_SStructSolver solver )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_SStructPCGSetup( HYPRE_SStructSolver solver,
                        HYPRE_SStructMatrix A,
                        HYPRE_SStructVector b,
@@ -63,7 +57,7 @@ HYPRE_SStructPCGSetup( HYPRE_SStructSolver solver,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_SStructPCGSolve( HYPRE_SStructSolver solver,
                        HYPRE_SStructMatrix A,
                        HYPRE_SStructVector b,
@@ -199,7 +193,7 @@ HYPRE_SStructDiagScaleSetup( HYPRE_SStructSolver solver,
                              HYPRE_SStructVector y,
                              HYPRE_SStructVector x      )
 {
-  
+
    return( HYPRE_StructDiagScaleSetup( (HYPRE_StructSolver) solver,
                                        (HYPRE_StructMatrix) A,
                                        (HYPRE_StructVector) y,
@@ -238,7 +232,7 @@ HYPRE_SStructDiagScale( HYPRE_SStructSolver solver,
          sA = hypre_SStructPMatrixSMatrix(pA, vi, vi);
          sx = hypre_SStructPVectorSVector(px, vi);
          sy = hypre_SStructPVectorSVector(py, vi);
-         
+
          HYPRE_StructDiagScale( (HYPRE_StructSolver) solver,
                                 (HYPRE_StructMatrix) sA,
                                 (HYPRE_StructVector) sy,
@@ -248,6 +242,3 @@ HYPRE_SStructDiagScale( HYPRE_SStructSolver solver,
 
    return hypre_error_flag;
 }
-
-
-

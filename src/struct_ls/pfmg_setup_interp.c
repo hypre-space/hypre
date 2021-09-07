@@ -1,16 +1,12 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
+#include "_hypre_struct_mv.hpp"
 #include "pfmg.h"
 
 /*--------------------------------------------------------------------------
@@ -18,14 +14,15 @@
 
 hypre_StructMatrix *
 hypre_zPFMGCreateInterpOp( hypre_StructMatrix *A,
-                          HYPRE_Int           cdir,
-                          hypre_Index         stride )
+                           HYPRE_Int           cdir,
+                           hypre_Index         stride,
+                           HYPRE_Int           rap_type )
 {
    HYPRE_Int             ndim = hypre_StructMatrixNDim(A);
    hypre_StructMatrix   *P;
    hypre_StructStencil  *stencil;
    hypre_Index          *stencil_shape;
-   HYPRE_Int             stencil_size;
+   HYPRE_Int             stencil_size, diag_entry;
    HYPRE_Int             centries[3] = {0, 1, 2};
    HYPRE_Int             ncentries, i;
 
@@ -33,6 +30,7 @@ hypre_zPFMGCreateInterpOp( hypre_StructMatrix *A,
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);
    stencil_size  = hypre_StructStencilSize(stencil);
+   diag_entry    = hypre_StructStencilDiagEntry(stencil);
    ncentries = 3; /* Make all entries in P constant by default */
    for (i = 0; i < stencil_size; i++)
    {
@@ -46,10 +44,19 @@ hypre_zPFMGCreateInterpOp( hypre_StructMatrix *A,
          }
       }
    }
+   /* If diagonal of A is not constant and using RAP, do variable interpolation.
+    *
+    * NOTE: This is important right now because of an issue with MatMult, where
+    * it computes constant stencil entries that may not truly be constant along
+    * grid boundaries. */
+   if (!hypre_StructMatrixConstEntry(A, diag_entry) && (rap_type == 0))
+   {
+      ncentries = 1; /* Make only the diagonal of P constant */
+   }
 
    /* Set up the stencil for P */
    stencil_size = 3;
-   stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size);
+   stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size, HYPRE_MEMORY_HOST);
    for (i = 0; i < stencil_size; i++)
    {
       hypre_SetIndex(stencil_shape[i], 0);
@@ -73,32 +80,32 @@ hypre_zPFMGCreateInterpOp( hypre_StructMatrix *A,
 
 HYPRE_Int
 hypre_zPFMGSetupInterpOp( hypre_StructMatrix *P,
-                         hypre_StructMatrix *A,
-                         HYPRE_Int           cdir )
+                          hypre_StructMatrix *A,
+                          HYPRE_Int           cdir )
 {
    HYPRE_Int              ndim = hypre_StructMatrixNDim(A);
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
-                        
+
    hypre_Box             *A_dbox;
    hypre_Box             *P_dbox;
-                        
+
    HYPRE_Real            *Ap, *Pp0, *Pp1, *Pp2;
-   HYPRE_Real             Pconst0, Pconst1, Pconst2, center;
+   HYPRE_Real             Pconst0, Pconst1, Pconst2;
    HYPRE_Int              constant;
-                        
+
    hypre_StructStencil   *A_stencil;
    hypre_Index           *A_stencil_shape;
    HYPRE_Int              A_stencil_size;
    hypre_StructStencil   *P_stencil;
    hypre_Index           *P_stencil_shape;
    HYPRE_Int             *ventries, nventries;
-                        
+
    HYPRE_Int              Astenc, Pstenc1, Pstenc2;
    hypre_Index            Astart, Astride, Pstart, Pstride;
    hypre_Index            origin, stride, loop_size;
-                        
-   HYPRE_Int              i, si, vi, Ai, Pi;
+
+   HYPRE_Int              i, si;
 
    /*----------------------------------------------------------
     * Initialize some things
@@ -145,7 +152,7 @@ hypre_zPFMGSetupInterpOp( hypre_StructMatrix *P,
       Pstenc2 = hypre_IndexD(P_stencil_shape[2], cdir);
 
       /* Compute the constant part of the stencil collapse */
-      ventries = hypre_TAlloc(HYPRE_Int, A_stencil_size);
+      ventries = hypre_TAlloc(HYPRE_Int, A_stencil_size, HYPRE_MEMORY_HOST);
       nventries = 0;
       Pconst0 = 0.0;
       Pconst1 = 0.0;
@@ -156,7 +163,7 @@ hypre_zPFMGSetupInterpOp( hypre_StructMatrix *P,
          {
             Ap = hypre_StructMatrixConstData(A, si);
             Astenc = hypre_IndexD(A_stencil_shape[si], cdir);
-         
+
             if (Astenc == 0)
             {
                Pconst0 += Ap[0];
@@ -205,11 +212,11 @@ hypre_zPFMGSetupInterpOp( hypre_StructMatrix *P,
          hypre_BoxLoop2Begin(ndim, loop_size,
                              A_dbox, Astart, Astride, Ai,
                              P_dbox, Pstart, Pstride, Pi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,Pi,si,center,Ap,Astenc) HYPRE_SMP_SCHEDULE
-#endif
-         hypre_BoxLoop2For(Ai, Pi)
          {
+            HYPRE_Int    vi, si, Astenc;
+            HYPRE_Real   center;
+            HYPRE_Real  *Ap;
+
             center  = Pconst0;
             Pp1[Pi] = Pconst1;
             Pp2[Pi] = Pconst2;
@@ -249,7 +256,7 @@ hypre_zPFMGSetupInterpOp( hypre_StructMatrix *P,
       }
 
       hypre_BoxDestroy(compute_box);
-      hypre_TFree(ventries);
+      hypre_TFree(ventries, HYPRE_MEMORY_HOST);
    }
 
    hypre_StructMatrixAssemble(P);
@@ -280,16 +287,16 @@ hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
    hypre_Index          *stencil_shape;
    HYPRE_Int             stencil_size;
    HYPRE_Int             stencil_dim;
-                       
+
    HYPRE_Int             num_ghost[] = {1, 1, 1, 1, 1, 1};
-                       
+
    HYPRE_Int             i;
    HYPRE_Int             constant_coefficient;
 
    /* set up stencil */
    stencil_size = 2;
    stencil_dim = hypre_StructStencilNDim(hypre_StructMatrixStencil(A));
-   stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size);
+   stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size, HYPRE_MEMORY_HOST);
    for (i = 0; i < stencil_size; i++)
    {
       hypre_SetIndex3(stencil_shape[i], 0, 0, 0);
@@ -308,17 +315,17 @@ hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
    {
       HYPRE_Int *entries;
 
-      entries = hypre_TAlloc(HYPRE_Int, stencil_size);
+      entries = hypre_TAlloc(HYPRE_Int, stencil_size, HYPRE_MEMORY_HOST);
       for (i = 0; i < stencil_size; i++)
       {
          entries[i] = i;
       }
       hypre_StructMatrixSetConstantEntries(P, stencil_size, entries);
-      hypre_TFree(entries);
+      hypre_TFree(entries, HYPRE_MEMORY_HOST);
    }
 
    hypre_StructStencilDestroy(stencil);
- 
+
    return P;
 }
 
@@ -335,26 +342,26 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
 {
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
-                        
+
    hypre_Box             *A_dbox;
    hypre_Box             *P_dbox;
-                        
+
    HYPRE_Real            *Pp0, *Pp1;
    HYPRE_Int              constant_coefficient;
-                        
+
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
    HYPRE_Int              stencil_size;
    hypre_StructStencil   *P_stencil;
    hypre_Index           *P_stencil_shape;
-                        
+
    HYPRE_Int              Pstenc0, Pstenc1;
-                        
+
    hypre_Index            loop_size;
    hypre_Index            start;
    hypre_IndexRef         startc;
    hypre_Index            stridec;
-                        
+
    HYPRE_Int              i, si;
 
    HYPRE_Int              si0, si1;
@@ -406,7 +413,7 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
          si1 = si;
       }
    }
-            
+
    hypre_SetIndex3(stridec, 1, 1, 1);
 
    /*----------------------------------------------------------
@@ -426,7 +433,7 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
 
       Pstenc0 = hypre_IndexD(P_stencil_shape[0], cdir);
       Pstenc1 = hypre_IndexD(P_stencil_shape[1], cdir);
- 
+
       startc  = hypre_BoxIMin(compute_box);
       hypre_StructMapCoarseToFine(startc, findex, stride, start);
 
@@ -487,7 +494,6 @@ hypre_PFMGSetupInterpOp_CC0
   HYPRE_Int           si1 )
 {
    HYPRE_Int              si;
-   HYPRE_Int              Ai, Pi;
    HYPRE_Real            *Ap;
    HYPRE_Real             center;
    HYPRE_Int              Astenc;
@@ -497,13 +503,10 @@ hypre_PFMGSetupInterpOp_CC0
    HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
    HYPRE_Int              warning_cnt= 0;
 
+#define DEVICE_VAR is_device_ptr(Pp0,Pp1,matrixA_data,stencil_shape_d,data_indices_boxi_d)
    hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                        A_dbox, start, stride, Ai,
                        P_dbox, startc, stridec, Pi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,Pi,si,center,Ap,Astenc,mrk0,mrk1) HYPRE_SMP_SCHEDULE
-#endif
-   hypre_BoxLoop2For(Ai, Pi)
    {
       center  = 0.0;
       Pp0[Pi] = 0.0;
@@ -539,12 +542,12 @@ hypre_PFMGSetupInterpOp_CC0
       {
          warning_cnt++;
          Pp0[Pi] = 0.0;
-         Pp1[Pi] = 0.0;  
+         Pp1[Pi] = 0.0;
       }
       else
       {
          Pp0[Pi] /= center;
-         Pp1[Pi] /= center;  
+         Pp1[Pi] /= center;
       }
 
       /*----------------------------------------------
@@ -637,12 +640,12 @@ hypre_PFMGSetupInterpOp_CC1
    {
       warning_cnt++;
       Pp0[Pi] = 0.0;
-      Pp1[Pi] = 0.0;  
+      Pp1[Pi] = 0.0;
    }
    else
    {
       Pp0[Pi] /= center;
-      Pp1[Pi] /= center;  
+      Pp1[Pi] /= center;
    }
 
    /*----------------------------------------------
@@ -759,10 +762,6 @@ hypre_PFMGSetupInterpOp_CC2
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                           A_dbox, start, stride, Ai,
                           P_dbox, startc, stridec, Pi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,Pi,center,Ap,Astenc,mrk0,mrk1) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop2For(Ai, Pi)
       {
          Pp0[Pi] = P0;
          Pp1[Pi] = P1;
@@ -784,12 +783,12 @@ hypre_PFMGSetupInterpOp_CC2
          {
             warning_cnt++;
             Pp0[Pi] = 0.0;
-            Pp1[Pi] = 0.0;  
+            Pp1[Pi] = 0.0;
          }
          else
          {
             Pp0[Pi] /= center;
-            Pp1[Pi] /= center;  
+            Pp1[Pi] /= center;
          }
 
          /*----------------------------------------------

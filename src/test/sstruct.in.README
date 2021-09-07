@@ -1,3 +1,8 @@
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
 
 ##############################################################################
 #
@@ -19,6 +24,9 @@
 
 # GridCreate: ndim nparts
 GridCreate: 2 2
+
+## GridSetNumGhost: numghost[2*ndim]
+#GridSetNumGhost: [3 3 3 3]
 
 # GridSetExtents: part ilower(ndim) iupper(ndim)
 GridSetExtents: 0 (0- 0-) (4+ 4+)

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  * OpenMP Problems
@@ -32,7 +27,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                       hypre_SStructVector  *b_in,
                       hypre_SStructVector  *x_in)
 {
-   hypre_MaxwellData     *maxwell_TV_data = (hypre_MaxwellData *) maxwell_vdata;
+   hypre_MaxwellData     *maxwell_TV_data = (hypre_MaxwellData     *)maxwell_vdata;
 
    MPI_Comm               comm = hypre_SStructMatrixComm(Aee_in);
 
@@ -50,7 +45,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    hypre_ParCSRMatrix    *T_transpose;
    hypre_ParCSRMatrix    *transpose;
    hypre_ParCSRMatrix    *parcsr_mat;
-   HYPRE_Int              size, *col_inds;
+   HYPRE_Int              size, *size_ptr;
+   HYPRE_BigInt          *col_inds;
    HYPRE_Real            *values;
 
    hypre_ParVector       *parvector_x;
@@ -132,21 +128,24 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    HYPRE_Int              ndim = hypre_SStructMatrixNDim(Aee_in);
    HYPRE_Int              nparts, part, vars, nboxes, lev_nboxes;
 
-   HYPRE_Int              nrows, rank, start_rank;
-   HYPRE_Int             *flag, *flag2, *inode, *ncols, *jnode;
+   HYPRE_Int              nrows;
+   HYPRE_BigInt           rank, start_rank, *jnode, *inode;
+   HYPRE_Int             *flag, *ncols;
+   HYPRE_BigInt          *flag2;
    HYPRE_Real            *vals;
 
    HYPRE_Int              i, j, k, l, m;
+   HYPRE_BigInt           big_i, *big_i_ptr;
 
    hypre_BoxManager      *node_boxman;
    hypre_BoxManEntry     *entry;
    HYPRE_Int              kstart=0, kend=0;
-   HYPRE_Int              ilower, iupper;
-   HYPRE_Int              jlower, jupper;
+   HYPRE_BigInt           ilower, iupper;
+   HYPRE_BigInt           jlower, jupper;
    HYPRE_Int              myproc;
 
-   HYPRE_Int              first_local_row, last_local_row;
-   HYPRE_Int              first_local_col, last_local_col;
+   HYPRE_BigInt           first_local_row, last_local_row;
+   HYPRE_BigInt           first_local_col, last_local_col;
 
    HYPRE_Int              edge_maxlevels, edge_numlevels, en_numlevels;
 
@@ -183,7 +182,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    HYPRE_SStructGridCreate(comm, ndim, nparts, &node_grid);
 
    /* grids can be constructed from the cell-centre grid of Aee_in */
-   vartypes= hypre_CTAlloc(HYPRE_SStructVariable, 1);
+   vartypes= hypre_CTAlloc(HYPRE_SStructVariable,  1, HYPRE_MEMORY_HOST);
    vartypes[0]= HYPRE_SSTRUCT_VARIABLE_NODE;
 
    for (i= 0; i< nparts; i++)
@@ -210,7 +209,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
       stencil_size*= 3;
    }
 
-   Ann_stencils= hypre_CTAlloc(hypre_SStructStencil *, 1);
+   Ann_stencils= hypre_CTAlloc(hypre_SStructStencil *,  1, HYPRE_MEMORY_HOST);
    HYPRE_SStructStencilCreate(ndim, stencil_size, &Ann_stencils[0]);
 
    vars= 0; /* scalar equation, node-to-node */
@@ -294,7 +293,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    sgrid= hypre_SStructPGridVTSGrid(pgrid, j);
    boxes= hypre_StructGridBoxes(sgrid);
    box  = hypre_BoxArrayBox(boxes, hypre_BoxArraySize(boxes)-1);
-   hypre_TFree(vartypes);
+   hypre_TFree(vartypes, HYPRE_MEMORY_HOST);
 
    hypre_SStructGridBoxProcFindBoxManEntry(grid, part, vars-1,
                                            hypre_BoxArraySize(boxes)-1,
@@ -312,14 +311,23 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                                    &first_local_row, &last_local_row,
                                    &first_local_col, &last_local_col);
 
-   for (i= first_local_row; i<= last_local_row; i++)
+   size_ptr  = hypre_TAlloc(HYPRE_Int,    1, HYPRE_MEMORY_DEVICE);
+   big_i_ptr = hypre_TAlloc(HYPRE_BigInt, 1, HYPRE_MEMORY_DEVICE);
+
+   for (big_i= first_local_row; big_i<= last_local_row; big_i++)
    {
       HYPRE_ParCSRMatrixGetRow((HYPRE_ParCSRMatrix) parcsr_mat,
-                               i, &size, &col_inds, &values);
-      HYPRE_IJMatrixSetValues(Aen, 1, &size, &i, (const HYPRE_Int *) col_inds,
+                               big_i, &size, &col_inds, &values);
+
+      size_ptr[0]  = size;
+      big_i_ptr[0] = big_i;
+
+      //RL: this is very slow when using on device
+      HYPRE_IJMatrixSetValues(Aen, 1, size_ptr, big_i_ptr, (const HYPRE_BigInt *) col_inds,
                               (const HYPRE_Real *) values);
+
       HYPRE_ParCSRMatrixRestoreRow((HYPRE_ParCSRMatrix) parcsr_mat,
-                                   i, &size, &col_inds, &values);
+                                   big_i, &size, &col_inds, &values);
    }
    hypre_ParCSRMatrixDestroy(parcsr_mat);
    HYPRE_IJMatrixAssemble(Aen);
@@ -332,17 +340,26 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                                    &first_local_row, &last_local_row,
                                    &first_local_col, &last_local_col);
 
-   for (i= first_local_row; i<= last_local_row; i++)
+   for (big_i= first_local_row; big_i<= last_local_row; big_i++)
    {
       HYPRE_ParCSRMatrixGetRow((HYPRE_ParCSRMatrix) parcsr_mat,
-                               i, &size, &col_inds, &values);
+                               big_i, &size, &col_inds, &values);
+
+      size_ptr[0]  = size;
+      big_i_ptr[0] = big_i;
+
+      //RL: this is very slow when using on device
       HYPRE_IJMatrixSetValues(hypre_SStructMatrixIJMatrix(Ann),
-                              1, &size, &i, (const HYPRE_Int *) col_inds,
+                              1, size_ptr, big_i_ptr, (const HYPRE_BigInt *) col_inds,
                               (const HYPRE_Real *) values);
+
       HYPRE_ParCSRMatrixRestoreRow((HYPRE_ParCSRMatrix) parcsr_mat,
-                                   i, &size, &col_inds, &values);
+                                   big_i, &size, &col_inds, &values);
    }
    hypre_ParCSRMatrixDestroy(parcsr_mat);
+
+   hypre_TFree(size_ptr,  HYPRE_MEMORY_DEVICE);
+   hypre_TFree(big_i_ptr, HYPRE_MEMORY_DEVICE);
 
    /* set the physical boundary points to identity */
    nrows= 0;
@@ -353,8 +370,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
       nrows+= hypre_StructGridLocalSize(sgrid);
    }
 
-   flag = hypre_CTAlloc(HYPRE_Int, nrows);
-   flag2= hypre_CTAlloc(HYPRE_Int, nrows);
+   flag = hypre_CTAlloc(HYPRE_Int,  nrows, HYPRE_MEMORY_HOST);
+   flag2= hypre_CTAlloc(HYPRE_BigInt,  nrows, HYPRE_MEMORY_HOST);
    for (i= 0; i< nrows; i++)
    {
       flag[i]= 1;
@@ -387,24 +404,18 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                hypre_BoxGetSize(box_piece, loop_size);
                hypre_CopyIndex(hypre_BoxIMin(box_piece), start);
 
-               hypre_BoxLoop0Begin(ndim, loop_size);
-#if 0 /* Are private static arrays a problem? */
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,lindex,index,rank) HYPRE_SMP_SCHEDULE
-#endif
-#endif
-               hypre_BoxLoop0For()
+               hypre_SerialBoxLoop0Begin(ndim, loop_size);
                {
-                  hypre_BoxLoopGetIndex(lindex);
+                  zypre_BoxLoopGetIndex(lindex);
                   hypre_SetIndex3(index, lindex[0], lindex[1], lindex[2]);
                   hypre_AddIndexes(index, start, 3, index);
 
                   hypre_SStructBoxManEntryGetGlobalRank(entry, index,
                                                         &rank, matrix_type);
-                  flag[rank-start_rank] = 0;
-                  flag2[rank-start_rank]= rank;
+                  flag[(HYPRE_Int)(rank-start_rank)] = 0;
+                  flag2[(HYPRE_Int)(rank-start_rank)]= rank;
                }
-               hypre_BoxLoop0End();
+               hypre_SerialBoxLoop0End();
             }  /* if (hypre_BoxVolume(box_piece) < i) */
          }  /* for (m= 0; m< hypre_BoxArraySize(tmp_box_array); m++) */
          hypre_BoxArrayDestroy(tmp_box_array);
@@ -421,10 +432,10 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
       }
    }
 
-   inode= hypre_CTAlloc(HYPRE_Int, j);
-   ncols= hypre_CTAlloc(HYPRE_Int, j);
-   jnode= hypre_CTAlloc(HYPRE_Int, j);
-   vals = hypre_TAlloc(HYPRE_Real, j);
+   inode= hypre_CTAlloc(HYPRE_BigInt, j, HYPRE_MEMORY_DEVICE);
+   ncols= hypre_CTAlloc(HYPRE_Int,    j, HYPRE_MEMORY_DEVICE);
+   jnode= hypre_CTAlloc(HYPRE_BigInt, j, HYPRE_MEMORY_DEVICE);
+   vals = hypre_TAlloc(HYPRE_Real,    j, HYPRE_MEMORY_DEVICE);
 
    j= 0;
    for (i= 0; i< nrows; i++)
@@ -438,16 +449,16 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
          j++;
       }
    }
-   hypre_TFree(flag);
-   hypre_TFree(flag2);
+   hypre_TFree(flag, HYPRE_MEMORY_HOST);
+   hypre_TFree(flag2, HYPRE_MEMORY_HOST);
 
    HYPRE_IJMatrixSetValues(hypre_SStructMatrixIJMatrix(Ann),
-                           j, ncols, (const HYPRE_Int*) inode,
-                           (const HYPRE_Int*) jnode, (const HYPRE_Real*) vals);
-   hypre_TFree(ncols);
-   hypre_TFree(inode);
-   hypre_TFree(jnode);
-   hypre_TFree(vals);
+                           j, ncols, (const HYPRE_BigInt*) inode,
+                           (const HYPRE_BigInt*) jnode, (const HYPRE_Real*) vals);
+   hypre_TFree(ncols, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(inode, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(jnode, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(vals,  HYPRE_MEMORY_DEVICE);
 
    HYPRE_SStructMatrixAssemble(Ann);
 #if DEBUG
@@ -494,20 +505,20 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
 
       node_numlevels= hypre_ParAMGDataNumLevels(amg_data);
 
-      Ann_l   = hypre_CTAlloc(hypre_ParCSRMatrix *, node_numlevels);
-      Pn_l    = hypre_CTAlloc(hypre_ParCSRMatrix *, node_numlevels);
-      RnT_l   = hypre_CTAlloc(hypre_ParCSRMatrix *, node_numlevels);
-      bn_l    = hypre_CTAlloc(hypre_ParVector*, node_numlevels);
-      xn_l    = hypre_CTAlloc(hypre_ParVector*, node_numlevels);
-      resn_l  = hypre_CTAlloc(hypre_ParVector*, node_numlevels);
-      en_l    = hypre_CTAlloc(hypre_ParVector*, node_numlevels);
-      nVtemp_l= hypre_CTAlloc(hypre_ParVector*, node_numlevels);
-      nVtemp2_l= hypre_CTAlloc(hypre_ParVector*, node_numlevels);
+      Ann_l   = hypre_CTAlloc(hypre_ParCSRMatrix *,  node_numlevels, HYPRE_MEMORY_HOST);
+      Pn_l    = hypre_CTAlloc(hypre_ParCSRMatrix *,  node_numlevels, HYPRE_MEMORY_HOST);
+      RnT_l   = hypre_CTAlloc(hypre_ParCSRMatrix *,  node_numlevels, HYPRE_MEMORY_HOST);
+      bn_l    = hypre_CTAlloc(hypre_ParVector*,  node_numlevels, HYPRE_MEMORY_HOST);
+      xn_l    = hypre_CTAlloc(hypre_ParVector*,  node_numlevels, HYPRE_MEMORY_HOST);
+      resn_l  = hypre_CTAlloc(hypre_ParVector*,  node_numlevels, HYPRE_MEMORY_HOST);
+      en_l    = hypre_CTAlloc(hypre_ParVector*,  node_numlevels, HYPRE_MEMORY_HOST);
+      nVtemp_l= hypre_CTAlloc(hypre_ParVector*,  node_numlevels, HYPRE_MEMORY_HOST);
+      nVtemp2_l= hypre_CTAlloc(hypre_ParVector*,  node_numlevels, HYPRE_MEMORY_HOST);
 
       /* relaxation parameters */
-      nCF_marker_l = hypre_CTAlloc(HYPRE_Int *, node_numlevels);
-      nrelax_weight= hypre_CTAlloc(HYPRE_Real , node_numlevels);
-      nomega       = hypre_CTAlloc(HYPRE_Real , node_numlevels);
+      nCF_marker_l = hypre_CTAlloc(HYPRE_Int *,  node_numlevels, HYPRE_MEMORY_HOST);
+      nrelax_weight= hypre_CTAlloc(HYPRE_Real ,  node_numlevels, HYPRE_MEMORY_HOST);
+      nomega       = hypre_CTAlloc(HYPRE_Real ,  node_numlevels, HYPRE_MEMORY_HOST);
       nrelax_type  = 6;  /* fast parallel hybrid */
 
       for (i= 0; i< node_numlevels; i++)
@@ -524,25 +535,21 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                                           hypre_ParCSRMatrixGlobalNumRows(Ann_l[i]),
                                           hypre_ParCSRMatrixRowStarts(Ann_l[i]));
          hypre_ParVectorInitialize(resn_l[i]);
-         hypre_ParVectorSetPartitioningOwner(resn_l[i], 0);
 
          en_l[i]= hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Ann_l[i]),
                                         hypre_ParCSRMatrixGlobalNumRows(Ann_l[i]),
                                         hypre_ParCSRMatrixRowStarts(Ann_l[i]));
          hypre_ParVectorInitialize(en_l[i]);
-         hypre_ParVectorSetPartitioningOwner(en_l[i], 0);
 
          nVtemp_l[i]= hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Ann_l[i]),
                                             hypre_ParCSRMatrixGlobalNumRows(Ann_l[i]),
                                             hypre_ParCSRMatrixRowStarts(Ann_l[i]));
          hypre_ParVectorInitialize(nVtemp_l[i]);
-         hypre_ParVectorSetPartitioningOwner(nVtemp_l[i], 0);
 
          nVtemp2_l[i]= hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Ann_l[i]),
                                              hypre_ParCSRMatrixGlobalNumRows(Ann_l[i]),
                                              hypre_ParCSRMatrixRowStarts(Ann_l[i]));
          hypre_ParVectorInitialize(nVtemp2_l[i]);
-         hypre_ParVectorSetPartitioningOwner(nVtemp2_l[i], 0);
 
          nCF_marker_l[i] = hypre_ParAMGDataCFMarkerArray(amg_data)[i];
          nrelax_weight[i]= hypre_ParAMGDataRelaxWeight(amg_data)[i];
@@ -577,7 +584,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
     * rfactor[i] > 1 for i < ndim.
     * Determine the number of levels for the edge problem */
    cboxes= hypre_BoxArrayCreate(0, ndim);
-   coarsen= hypre_CTAlloc(HYPRE_Int, nparts);
+   coarsen= hypre_CTAlloc(HYPRE_Int,  nparts, HYPRE_MEMORY_HOST);
    edge_maxlevels= 0;
    for (part= 0; part< nparts; part++)
    {
@@ -608,7 +615,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
 
    /* form the edge grids: coarsen the cell grid on each part and then
       set the boxes of these grids to be the boxes of the sstruct_grid. */
-   egrid_l   = hypre_TAlloc(hypre_SStructGrid *, edge_maxlevels);
+   egrid_l   = hypre_TAlloc(hypre_SStructGrid *,  edge_maxlevels, HYPRE_MEMORY_HOST);
    hypre_SStructGridRef(grid, &egrid_l[0]);
 
    /* form the topological grids for the topological matrices. */
@@ -617,11 +624,11 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    pgrid= hypre_SStructGridPGrid(grid, 0);
 
    HYPRE_SStructGridCreate(comm, ndim, nparts, &edge_grid);
-   vartype_edges= hypre_CTAlloc(HYPRE_SStructVariable, ndim);
+   vartype_edges= hypre_CTAlloc(HYPRE_SStructVariable,  ndim, HYPRE_MEMORY_HOST);
    if (ndim > 2)
    {
       HYPRE_SStructGridCreate(comm, ndim, nparts, &face_grid);
-      vartype_faces= hypre_CTAlloc(HYPRE_SStructVariable, ndim);
+      vartype_faces= hypre_CTAlloc(HYPRE_SStructVariable,  ndim, HYPRE_MEMORY_HOST);
       for (i= 0; i< 3; i++)
       {
          vartype_edges[2]= hypre_SStructPGridVarType(pgrid, i);
@@ -675,7 +682,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    }
 
    HYPRE_SStructGridCreate(comm, ndim, nparts, &cell_grid);
-   vartype_cell= hypre_CTAlloc(HYPRE_SStructVariable, 1);
+   vartype_cell= hypre_CTAlloc(HYPRE_SStructVariable,  1, HYPRE_MEMORY_HOST);
    vartype_cell[0]= HYPRE_SSTRUCT_VARIABLE_CELL;
 
    for (i= 0; i< nparts; i++)
@@ -707,17 +714,17 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    }
 
    HYPRE_SStructGridAssemble(edge_grid);
-   topological_edge   = hypre_TAlloc(hypre_SStructGrid *, edge_maxlevels);
+   topological_edge   = hypre_TAlloc(hypre_SStructGrid *,  edge_maxlevels, HYPRE_MEMORY_HOST);
    topological_edge[0]= edge_grid;
 
    HYPRE_SStructGridAssemble(cell_grid);
-   topological_cell   = hypre_TAlloc(hypre_SStructGrid *, edge_maxlevels);
+   topological_cell   = hypre_TAlloc(hypre_SStructGrid *,  edge_maxlevels, HYPRE_MEMORY_HOST);
    topological_cell[0]= cell_grid;
 
    if (ndim > 2)
    {
       HYPRE_SStructGridAssemble(face_grid);
-      topological_face= hypre_TAlloc(hypre_SStructGrid *, edge_maxlevels);
+      topological_face= hypre_TAlloc(hypre_SStructGrid *,  edge_maxlevels, HYPRE_MEMORY_HOST);
       topological_face[0]= face_grid;
    }
 
@@ -906,13 +913,13 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    (maxwell_TV_data -> BdryRanksCnts_l)= BdryRanksCnts_l;
 
    hypre_BoxArrayDestroy(cboxes);
-   hypre_TFree(coarsen);
+   hypre_TFree(coarsen, HYPRE_MEMORY_HOST);
    /* okay to de-allocate vartypes now */
-   hypre_TFree(vartype_edges);
-   hypre_TFree(vartype_cell);
+   hypre_TFree(vartype_edges, HYPRE_MEMORY_HOST);
+   hypre_TFree(vartype_cell, HYPRE_MEMORY_HOST);
    if (ndim > 2)
    {
-      hypre_TFree(vartype_faces);
+      hypre_TFree(vartype_faces, HYPRE_MEMORY_HOST);
    }
 
 
@@ -921,21 +928,21 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    (maxwell_TV_data -> en_numlevels)  = en_numlevels;
    (maxwell_TV_data -> edge_numlevels)= edge_numlevels;
 
-   Aee_l= hypre_TAlloc(hypre_ParCSRMatrix *, edge_numlevels);
-   Aen_l= hypre_TAlloc(hypre_ParCSRMatrix *, en_numlevels);
+   Aee_l= hypre_TAlloc(hypre_ParCSRMatrix *,  edge_numlevels, HYPRE_MEMORY_HOST);
+   Aen_l= hypre_TAlloc(hypre_ParCSRMatrix *,  en_numlevels, HYPRE_MEMORY_HOST);
 
    /* Pe_l are defined to be IJ matrices rather than directly parcsr. This
       was done so that in the topological formation, some of the ij matrix
       routines can be used. */
-   Pe_l    = hypre_TAlloc(hypre_IJMatrix  *, edge_numlevels-1);
-   ReT_l   = hypre_TAlloc(hypre_IJMatrix  *, edge_numlevels-1);
+   Pe_l    = hypre_TAlloc(hypre_IJMatrix  *,  edge_numlevels-1, HYPRE_MEMORY_HOST);
+   ReT_l   = hypre_TAlloc(hypre_IJMatrix  *,  edge_numlevels-1, HYPRE_MEMORY_HOST);
 
-   be_l    = hypre_TAlloc(hypre_ParVector *, edge_numlevels);
-   xe_l    = hypre_TAlloc(hypre_ParVector *, edge_numlevels);
-   rese_l  = hypre_TAlloc(hypre_ParVector *, edge_numlevels);
-   ee_l    = hypre_TAlloc(hypre_ParVector *, edge_numlevels);
-   eVtemp_l= hypre_TAlloc(hypre_ParVector *, edge_numlevels);
-   eVtemp2_l= hypre_TAlloc(hypre_ParVector *, edge_numlevels);
+   be_l    = hypre_TAlloc(hypre_ParVector *,  edge_numlevels, HYPRE_MEMORY_HOST);
+   xe_l    = hypre_TAlloc(hypre_ParVector *,  edge_numlevels, HYPRE_MEMORY_HOST);
+   rese_l  = hypre_TAlloc(hypre_ParVector *,  edge_numlevels, HYPRE_MEMORY_HOST);
+   ee_l    = hypre_TAlloc(hypre_ParVector *,  edge_numlevels, HYPRE_MEMORY_HOST);
+   eVtemp_l= hypre_TAlloc(hypre_ParVector *,  edge_numlevels, HYPRE_MEMORY_HOST);
+   eVtemp2_l= hypre_TAlloc(hypre_ParVector *,  edge_numlevels, HYPRE_MEMORY_HOST);
 
    Aee_l[0]= hypre_SStructMatrixParCSRMatrix(Aee_in);
    Aen_l[0]=(hypre_ParCSRMatrix *) hypre_IJMatrixObject(Aen),
@@ -947,28 +954,24 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                             hypre_ParCSRMatrixGlobalNumRows(Aee_l[0]),
                             hypre_ParCSRMatrixRowStarts(Aee_l[0]));
    hypre_ParVectorInitialize(rese_l[0]);
-   hypre_ParVectorSetPartitioningOwner(rese_l[0], 0);
 
    ee_l[0]=
       hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[0]),
                             hypre_ParCSRMatrixGlobalNumRows(Aee_l[0]),
                             hypre_ParCSRMatrixRowStarts(Aee_l[0]));
    hypre_ParVectorInitialize(ee_l[0]);
-   hypre_ParVectorSetPartitioningOwner(ee_l[0], 0);
 
    eVtemp_l[0]=
       hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[0]),
                             hypre_ParCSRMatrixGlobalNumRows(Aee_l[0]),
                             hypre_ParCSRMatrixRowStarts(Aee_l[0]));
    hypre_ParVectorInitialize(eVtemp_l[0]);
-   hypre_ParVectorSetPartitioningOwner(eVtemp_l[0], 0);
 
    eVtemp2_l[0]=
       hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[0]),
                             hypre_ParCSRMatrixGlobalNumRows(Aee_l[0]),
                             hypre_ParCSRMatrixRowStarts(Aee_l[0]));
    hypre_ParVectorInitialize(eVtemp2_l[0]);
-   hypre_ParVectorSetPartitioningOwner(eVtemp2_l[0], 0);
 
    for (l = 0; l < (en_numlevels - 1); l++)
    {
@@ -1045,7 +1048,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
             {
                hypre_MaxwellOffProcRowDestroy((void *) OffProcRows[i]);
             }
-            hypre_TFree(OffProcRows);
+            hypre_TFree(OffProcRows, HYPRE_MEMORY_HOST);
          }
 
          else
@@ -1075,8 +1078,6 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
             &transpose, 1);
          parcsr_mat= hypre_ParMatmul(transpose, Aen_l[l]);
          Aen_l[l+1]= hypre_ParMatmul(parcsr_mat, Pn_l[l]);
-         hypre_ParCSRMatrixSetRowStartsOwner(transpose,0);
-         hypre_ParCSRMatrixSetRowStartsOwner(Aen_l[l+1],1);
          hypre_ParCSRMatrixDestroy(parcsr_mat);
          hypre_ParCSRMatrixDestroy(transpose);
 
@@ -1085,42 +1086,36 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                                   hypre_ParCSRMatrixGlobalNumRows(Aee_l[l+1]),
                                   hypre_ParCSRMatrixRowStarts(Aee_l[l+1]));
          hypre_ParVectorInitialize(xe_l[l+1]);
-         hypre_ParVectorSetPartitioningOwner(xe_l[l+1], 0);
 
          be_l[l+1] =
             hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[l+1]),
                                   hypre_ParCSRMatrixGlobalNumRows(Aee_l[l+1]),
                                   hypre_ParCSRMatrixRowStarts(Aee_l[l+1]));
          hypre_ParVectorInitialize(be_l[l+1]);
-         hypre_ParVectorSetPartitioningOwner(be_l[l+1],0);
 
          rese_l[l+1] =
             hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[l+1]),
                                   hypre_ParCSRMatrixGlobalNumRows(Aee_l[l+1]),
                                   hypre_ParCSRMatrixRowStarts(Aee_l[l+1]));
          hypre_ParVectorInitialize(rese_l[l+1]);
-         hypre_ParVectorSetPartitioningOwner(rese_l[l+1],0);
 
          ee_l[l+1] =
             hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[l+1]),
                                   hypre_ParCSRMatrixGlobalNumRows(Aee_l[l+1]),
                                   hypre_ParCSRMatrixRowStarts(Aee_l[l+1]));
          hypre_ParVectorInitialize(ee_l[l+1]);
-         hypre_ParVectorSetPartitioningOwner(ee_l[l+1],0);
 
          eVtemp_l[l+1] =
             hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[l+1]),
                                   hypre_ParCSRMatrixGlobalNumRows(Aee_l[l+1]),
                                   hypre_ParCSRMatrixRowStarts(Aee_l[l+1]));
          hypre_ParVectorInitialize(eVtemp_l[l+1]);
-         hypre_ParVectorSetPartitioningOwner(eVtemp_l[l+1],0);
 
          eVtemp2_l[l+1] =
             hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[l+1]),
                                   hypre_ParCSRMatrixGlobalNumRows(Aee_l[l+1]),
                                   hypre_ParCSRMatrixRowStarts(Aee_l[l+1]));
          hypre_ParVectorInitialize(eVtemp2_l[l+1]);
-         hypre_ParVectorSetPartitioningOwner(eVtemp2_l[l+1],0);
 
       }  /* if (l < edge_numlevels) */
    }     /* for (l = 0; l < (en_numlevels - 1); l++) */
@@ -1196,7 +1191,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
          {
             hypre_MaxwellOffProcRowDestroy((void *) OffProcRows[i]);
          }
-         hypre_TFree(OffProcRows);
+         hypre_TFree(OffProcRows, HYPRE_MEMORY_HOST);
       }
 
       else
@@ -1223,42 +1218,36 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                                hypre_ParCSRMatrixGlobalNumRows(Aee_l[l+1]),
                                hypre_ParCSRMatrixRowStarts(Aee_l[l+1]));
       hypre_ParVectorInitialize(xe_l[l+1]);
-      hypre_ParVectorSetPartitioningOwner(xe_l[l+1], 0);
 
       be_l[l+1] =
          hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[l+1]),
                                hypre_ParCSRMatrixGlobalNumRows(Aee_l[l+1]),
                                hypre_ParCSRMatrixRowStarts(Aee_l[l+1]));
       hypre_ParVectorInitialize(be_l[l+1]);
-      hypre_ParVectorSetPartitioningOwner(be_l[l+1],0);
 
       ee_l[l+1] =
          hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[l+1]),
                                hypre_ParCSRMatrixGlobalNumRows(Aee_l[l+1]),
                                hypre_ParCSRMatrixRowStarts(Aee_l[l+1]));
       hypre_ParVectorInitialize(ee_l[l+1]);
-      hypre_ParVectorSetPartitioningOwner(ee_l[l+1],0);
 
       rese_l[l+1] =
          hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[l+1]),
                                hypre_ParCSRMatrixGlobalNumRows(Aee_l[l+1]),
                                hypre_ParCSRMatrixRowStarts(Aee_l[l+1]));
       hypre_ParVectorInitialize(rese_l[l+1]);
-      hypre_ParVectorSetPartitioningOwner(rese_l[l+1],0);
 
       eVtemp_l[l+1] =
          hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[l+1]),
                                hypre_ParCSRMatrixGlobalNumRows(Aee_l[l+1]),
                                hypre_ParCSRMatrixRowStarts(Aee_l[l+1]));
       hypre_ParVectorInitialize(eVtemp_l[l+1]);
-      hypre_ParVectorSetPartitioningOwner(eVtemp_l[l+1],0);
 
       eVtemp2_l[l+1] =
          hypre_ParVectorCreate(hypre_ParCSRMatrixComm(Aee_l[l+1]),
                                hypre_ParCSRMatrixGlobalNumRows(Aee_l[l+1]),
                                hypre_ParCSRMatrixRowStarts(Aee_l[l+1]));
       hypre_ParVectorInitialize(eVtemp2_l[l+1]);
-      hypre_ParVectorSetPartitioningOwner(eVtemp2_l[l+1],0);
    }
 
    /* Can delete all topological grids. Not even referenced in IJMatrices. */
@@ -1271,11 +1260,11 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
          HYPRE_SStructGridDestroy(topological_face[l]);
       }
    }
-   hypre_TFree(topological_edge);
-   hypre_TFree(topological_cell);
+   hypre_TFree(topological_edge, HYPRE_MEMORY_HOST);
+   hypre_TFree(topological_cell, HYPRE_MEMORY_HOST);
    if (ndim > 2)
    {
-      hypre_TFree(topological_face);
+      hypre_TFree(topological_face, HYPRE_MEMORY_HOST);
    }
 
 #if DEBUG
@@ -1297,9 +1286,9 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
     * Needed for quick parallel over/under-relaxation.
     *-----------------------------------------------------*/
    erelax_type  = 2;
-   erelax_weight= hypre_TAlloc(HYPRE_Real, edge_numlevels);
-   eomega       = hypre_TAlloc(HYPRE_Real, edge_numlevels);
-   eCF_marker_l = hypre_TAlloc(HYPRE_Int *, edge_numlevels);
+   erelax_weight= hypre_TAlloc(HYPRE_Real,  edge_numlevels, HYPRE_MEMORY_HOST);
+   eomega       = hypre_TAlloc(HYPRE_Real,  edge_numlevels, HYPRE_MEMORY_HOST);
+   eCF_marker_l = hypre_TAlloc(HYPRE_Int *,  edge_numlevels, HYPRE_MEMORY_HOST);
 
 #if 0
    relax_type= 6; /* SSOR */
@@ -1311,11 +1300,11 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
       e_amg_vdata= (void *) hypre_BoomerAMGCreate();
       e_amgData= e_amg_vdata;
 
-      relax_types= hypre_CTAlloc(HYPRE_Int, 2);
+      relax_types= hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
       relax_types[1]= relax_type;
 
-      amg_CF_marker= hypre_TAlloc(HYPRE_Int *, 1);
-      A_array      = hypre_TAlloc(hypre_ParCSRMatrix *, 1);
+      amg_CF_marker= hypre_TAlloc(HYPRE_Int *,  1, HYPRE_MEMORY_HOST);
+      A_array      = hypre_TAlloc(hypre_ParCSRMatrix *,  1, HYPRE_MEMORY_HOST);
 
       amg_CF_marker[0]= NULL;
       A_array[0]      = Aee_l[l];
@@ -1328,14 +1317,14 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
       (e_amgData -> smooth_type)       = 0;
       hypre_BoomerAMGCGRelaxWt((void *) e_amgData, 0, numCGSweeps, &eomega[l]);
 
-      hypre_TFree((e_amgData -> A_array));
-      hypre_TFree((e_amgData -> CF_marker_array));
-      hypre_TFree((e_amgData -> grid_relax_type));
+      hypre_TFree((e_amgData -> A_array), HYPRE_MEMORY_HOST);
+      hypre_TFree((e_amgData -> CF_marker_array), HYPRE_MEMORY_HOST);
+      hypre_TFree((e_amgData -> grid_relax_type), HYPRE_MEMORY_HOST);
       (e_amgData -> A_array)= NULL;
       (e_amgData -> Vtemp ) = NULL;
       (e_amgData -> CF_marker_array)= NULL;
       (e_amgData -> grid_relax_type)= NULL;
-      hypre_TFree(e_amg_vdata);
+      hypre_TFree(e_amg_vdata, HYPRE_MEMORY_HOST);
       eomega[l]= 1.0;
    }
 #endif
@@ -1359,8 +1348,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    if ((maxwell_TV_data -> logging) > 0)
    {
       i= (maxwell_TV_data -> max_iter);
-      (maxwell_TV_data -> norms)     = hypre_TAlloc(HYPRE_Real, i);
-      (maxwell_TV_data -> rel_norms) = hypre_TAlloc(HYPRE_Real, i);
+      (maxwell_TV_data -> norms)     = hypre_TAlloc(HYPRE_Real,  i, HYPRE_MEMORY_HOST);
+      (maxwell_TV_data -> rel_norms) = hypre_TAlloc(HYPRE_Real,  i, HYPRE_MEMORY_HOST);
    }
 
    return ierr;

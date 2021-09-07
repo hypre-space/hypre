@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -31,12 +23,12 @@
 #include "seq_mv/csr_matrix.h"
 
 extern int hypre_AMGeMatrixTopologySetup(hypre_AMGeMatrixTopology ***A,
-                 int *level, int *i_element_node_0, int *j_element_node_0, 
+                 int *level, int *i_element_node_0, int *j_element_node_0,
                  int num_elements, int num_nodes, int Max_level);
-extern int hypre_AMGeCoarsenodeSetup(hypre_AMGeMatrixTopology **A, int *level, 
-                 int **i_node_neighbor_coarsenode, int **j_node_neighbor_coarsenode, 
-                 int **i_node_coarsenode, int **j_node_coarsenode, 
-                 int **i_block_node, int **j_block_node, int *Num_blocks, 
+extern int hypre_AMGeCoarsenodeSetup(hypre_AMGeMatrixTopology **A, int *level,
+                 int **i_node_neighbor_coarsenode, int **j_node_neighbor_coarsenode,
+                 int **i_node_coarsenode, int **j_node_coarsenode,
+                 int **i_block_node, int **j_block_node, int *Num_blocks,
                  int *Num_elements, int *Num_nodes);
 
 /* ********************************************************************* */
@@ -85,14 +77,14 @@ int HYPRE_LSI_AMGeDestroy()
    int i;
 
    printf("LSI_AMGe destructor\n");
-   if ( i_element_node_0   != NULL ) free( i_element_node_0 );
-   if ( j_element_node_0   != NULL ) free( j_element_node_0 );
-   if ( i_dof_on_boundary  != NULL ) free( i_dof_on_boundary );
-   if ( temp_elem_node_cnt != NULL ) free( temp_elem_node_cnt );
+   hypre_TFree(i_element_node_0, HYPRE_MEMORY_HOST);
+   hypre_TFree(j_element_node_0, HYPRE_MEMORY_HOST);
+   hypre_TFree(i_dof_on_boundary, HYPRE_MEMORY_HOST);
+   hypre_TFree(temp_elem_node_cnt, HYPRE_MEMORY_HOST);
    for ( i = 0; i < num_elements; i++ )
    {
-      if ( temp_elem_node[i] != NULL ) free( temp_elem_node[i] );
-      if ( temp_elem_data[i] != NULL ) free( temp_elem_data[i] );
+      hypre_TFree(temp_elem_node[i], HYPRE_MEMORY_HOST);
+      hypre_TFree(temp_elem_data[i], HYPRE_MEMORY_HOST);
    }
    temp_elem_node     = NULL;
    temp_elem_node_cnt = NULL;
@@ -124,13 +116,13 @@ int HYPRE_LSI_AMGeSetNElements(int nElems)
    printf("LSI_AMGe NElements = %d\n", nElems);
    num_elements = nElems;
    nbytes = num_elements * sizeof(double*);
-   temp_elem_data = (double **) malloc( nbytes );
+   temp_elem_data = hypre_TAlloc( nbytes ,HYPRE_MEMORY_HOST);
    for ( i = 0; i < num_elements; i++ ) temp_elem_data[i] = NULL;
    nbytes = num_elements * sizeof(int*);
-   temp_elem_node = (int **) malloc( nbytes );
+   temp_elem_node = hypre_TAlloc( nbytes ,HYPRE_MEMORY_HOST);
    for ( i = 0; i < num_elements; i++ ) temp_elem_node[i] = NULL;
    nbytes = num_elements * sizeof(int);
-   temp_elem_node_cnt = (int *) malloc( nbytes );
+   temp_elem_node_cnt = hypre_TAlloc( nbytes ,HYPRE_MEMORY_HOST);
    return 0;
 }
 
@@ -156,12 +148,12 @@ int HYPRE_LSI_AMGeSetBoundary(int size, int *list)
    printf("LSI_AMGe SetBoundary = %d\n", size);
 
    if ( i_dof_on_boundary == NULL )
-      i_dof_on_boundary = (int *) malloc(num_nodes * system_size * sizeof(int));
+      i_dof_on_boundary = hypre_TAlloc(int, num_nodes * system_size , HYPRE_MEMORY_HOST);
    for ( i = 0; i < num_nodes*system_size; i++ ) i_dof_on_boundary[i] = -1;
 
-   for ( i = 0; i < size; i++ ) 
+   for ( i = 0; i < size; i++ )
    {
-      if (list[i] >= 0 && list[i] < num_nodes*system_size) 
+      if (list[i] >= 0 && list[i] < num_nodes*system_size)
          i_dof_on_boundary[list[i]] = 0;
       else printf("AMGeSetBoundary ERROR : %d(%d)\n", list[i],num_nodes*system_size);
    }
@@ -186,15 +178,15 @@ int HYPRE_LSI_AMGePutRow(int row, int length, const double *colVal,
 
       temp_elem_node_cnt[element_count] = length / system_size;
       nbytes = length / system_size * sizeof(int);
-      temp_elem_node[element_count] = (int *) malloc( nbytes );
-      for ( i = 0; i < length; i+=system_size ) 
+      temp_elem_node[element_count] = hypre_TAlloc( nbytes ,HYPRE_MEMORY_HOST);
+      for ( i = 0; i < length; i+=system_size )
          temp_elem_node[element_count][i/system_size] = (colInd[i]-1)/system_size;
       nbytes = length * length * sizeof(double);
-      temp_elem_data[element_count] = (double *) malloc(nbytes);
+      temp_elem_data[element_count] = hypre_TAlloc(nbytes,HYPRE_MEMORY_HOST);
       temp_elemat_cnt = 0;
       rowLeng = length;
    }
-   for ( i = 0; i < length; i++ ) 
+   for ( i = 0; i < length; i++ )
       temp_elem_data[element_count][temp_elemat_cnt++] = colVal[i];
    if ( temp_elemat_cnt == rowLeng * rowLeng )
    {
@@ -296,7 +288,7 @@ int HYPRE_LSI_AMGeSolve(double *rhs, double *x)
       multiplier = temp_elem_node_cnt[i] * system_size;
       total_length += (multiplier * multiplier);
    }
-   element_data = (double *) malloc(total_length * sizeof(double));
+   element_data = hypre_TAlloc(double, total_length , HYPRE_MEMORY_HOST);
    counter = 0;
    for ( i = 0; i < num_elements; i++ )
    {
@@ -304,25 +296,25 @@ int HYPRE_LSI_AMGeSolve(double *rhs, double *x)
       multiplier *= multiplier;
       for ( j = 0; j < multiplier; j++ )
          element_data[counter++] = temp_elem_data[i][j];
-      free(temp_elem_data[i]);
-   }  
-   free(temp_elem_data);
+      hypre_TFree(temp_elem_data[i], HYPRE_MEMORY_HOST);
+   }
+   hypre_TFree(temp_elem_data, HYPRE_MEMORY_HOST);
    temp_elem_data = NULL;
 
    total_length = 0;
    for (i = 0; i < num_elements; i++) total_length += temp_elem_node_cnt[i];
-   i_element_node_0 = (int *) malloc((num_elements + 1) * sizeof(int));
-   j_element_node_0 = (int *) malloc(total_length * sizeof(int));
+   i_element_node_0 = hypre_TAlloc(int, (num_elements + 1) , HYPRE_MEMORY_HOST);
+   j_element_node_0 = hypre_TAlloc(int, total_length , HYPRE_MEMORY_HOST);
    counter = 0;
-   for (i = 0; i < num_elements; i++) 
+   for (i = 0; i < num_elements; i++)
    {
       i_element_node_0[i] = counter;
-      for (j = 0; j < temp_elem_node_cnt[i]; j++) 
+      for (j = 0; j < temp_elem_node_cnt[i]; j++)
          j_element_node_0[counter++] = temp_elem_node[i][j];
-      free(temp_elem_node[i]);
-   } 
+      hypre_TFree(temp_elem_node[i], HYPRE_MEMORY_HOST);
+   }
    i_element_node_0[num_elements] = counter;
-   free(temp_elem_node);
+   hypre_TFree(temp_elem_node, HYPRE_MEMORY_HOST);
    temp_elem_node = NULL;
 
    /* -------------------------------------------------------------- */
@@ -330,11 +322,11 @@ int HYPRE_LSI_AMGeSolve(double *rhs, double *x)
    /* -------------------------------------------------------------- */
 
    Max_level    = 25;
-   Num_chords   = hypre_CTAlloc(int, Max_level);
-   Num_elements = hypre_CTAlloc(int, Max_level);
-   Num_nodes    = hypre_CTAlloc(int, Max_level);
-   Num_dofs     = hypre_CTAlloc(int, Max_level);
-   Num_blocks   = hypre_CTAlloc(int, Max_level);
+   Num_chords   = hypre_CTAlloc(int,  Max_level, HYPRE_MEMORY_HOST);
+   Num_elements = hypre_CTAlloc(int,  Max_level, HYPRE_MEMORY_HOST);
+   Num_nodes    = hypre_CTAlloc(int,  Max_level, HYPRE_MEMORY_HOST);
+   Num_dofs     = hypre_CTAlloc(int,  Max_level, HYPRE_MEMORY_HOST);
+   Num_blocks   = hypre_CTAlloc(int,  Max_level, HYPRE_MEMORY_HOST);
 
    for (i = 0; i < Max_level; i++)
    {
@@ -384,7 +376,7 @@ int HYPRE_LSI_AMGeSolve(double *rhs, double *x)
    {
       ierr = compute_dof_on_boundary(&i_dof_on_boundary, i_node_on_boundary,
                                      Num_nodes[0], system_size);
-      free(i_node_on_boundary);
+      hypre_TFree(i_node_on_boundary, HYPRE_MEMORY_HOST);
       i_node_on_boundary = NULL;
    }
    */
@@ -438,10 +430,10 @@ int HYPRE_LSI_AMGeSolve(double *rhs, double *x)
 
                 Num_elements, Num_nodes, Num_dofs);
 
-   hypre_TFree(i_dof_on_boundary);
+   hypre_TFree(i_dof_on_boundary, HYPRE_MEMORY_HOST);
    i_dof_on_boundary = NULL;
-   hypre_TFree(i_dof_node_0);
-   hypre_TFree(j_dof_node_0);
+   hypre_TFree(i_dof_node_0, HYPRE_MEMORY_HOST);
+   hypre_TFree(j_dof_node_0, HYPRE_MEMORY_HOST);
 
    printf("LSI_AMGe Solve : Setting up smoother \n");
    ierr = hypre_AMGeSmootherSetup(&i_ILUdof_to_dof, &i_ILUdof_ILUdof,
@@ -450,25 +442,25 @@ int HYPRE_LSI_AMGeSolve(double *rhs, double *x)
                 i_block_node, j_block_node, i_node_dof, j_node_dof,
                 Num_blocks, Num_nodes, Num_dofs);
 
-   hypre_TFree(i_node_dof_0);
-   hypre_TFree(j_node_dof_0);
+   hypre_TFree(i_node_dof_0, HYPRE_MEMORY_HOST);
+   hypre_TFree(j_node_dof_0, HYPRE_MEMORY_HOST);
 
    for (l=0; l < level+1; l++)
    {
-      hypre_TFree(i_block_node[l]);
-      hypre_TFree(j_block_node[l]);
+      hypre_TFree(i_block_node[l], HYPRE_MEMORY_HOST);
+      hypre_TFree(j_block_node[l], HYPRE_MEMORY_HOST);
    }
 
    for (l=1; l < level+1; l++)
    {
-      hypre_TFree(i_node_dof[l]);
-      hypre_TFree(j_node_dof[l]);
+      hypre_TFree(i_node_dof[l], HYPRE_MEMORY_HOST);
+      hypre_TFree(j_node_dof[l], HYPRE_MEMORY_HOST);
    }
 
-   hypre_TFree(i_node_dof);
-   hypre_TFree(j_node_dof);
-   hypre_TFree(i_block_node);
-   hypre_TFree(j_block_node);
+   hypre_TFree(i_node_dof, HYPRE_MEMORY_HOST);
+   hypre_TFree(j_node_dof, HYPRE_MEMORY_HOST);
+   hypre_TFree(i_block_node, HYPRE_MEMORY_HOST);
+   hypre_TFree(j_block_node, HYPRE_MEMORY_HOST);
 
    /* ===================================================================== */
    /* =================== S O L U T I O N   P A R T: ====================== */
@@ -477,16 +469,16 @@ int HYPRE_LSI_AMGeSolve(double *rhs, double *x)
    /* one V(1,1) --cycle as preconditioner in PCG: ======================== */
    /* ILU solve pre--smoothing, ILU solve post--smoothing; ================ */
 
-   w = hypre_CTAlloc(double*, level+1); 
-   d = hypre_CTAlloc(double*, level+1);
+   w = hypre_CTAlloc(double*,  level+1, HYPRE_MEMORY_HOST);
+   d = hypre_CTAlloc(double*,  level+1, HYPRE_MEMORY_HOST);
 
    for (l=0; l < level+1; l++)
    {
       Num_dofs[l] = Num_nodes[l] * system_size;
       if (Num_dofs[l] > 0)
       {
-	  w[l] = hypre_CTAlloc(double, Num_dofs[l]);
-	  d[l] = hypre_CTAlloc(double, Num_dofs[l]);
+	  w[l] = hypre_CTAlloc(double,  Num_dofs[l], HYPRE_MEMORY_HOST);
+	  d[l] = hypre_CTAlloc(double,  Num_dofs[l], HYPRE_MEMORY_HOST);
       }
       else
       {
@@ -500,23 +492,23 @@ int HYPRE_LSI_AMGeSolve(double *rhs, double *x)
    /*x = hypre_CTAlloc(double, num_dofs);  */
    /*rhs = hypre_CTAlloc(double, num_dofs);*/
 
-   r = hypre_CTAlloc(double, num_dofs); 
-   aux = hypre_CTAlloc(double, num_dofs);
-   v_fine = hypre_CTAlloc(double, num_dofs);
-   w_fine = hypre_CTAlloc(double, num_dofs);
-   d_fine = hypre_CTAlloc(double, num_dofs);
+   r = hypre_CTAlloc(double,  num_dofs, HYPRE_MEMORY_HOST);
+   aux = hypre_CTAlloc(double,  num_dofs, HYPRE_MEMORY_HOST);
+   v_fine = hypre_CTAlloc(double,  num_dofs, HYPRE_MEMORY_HOST);
+   w_fine = hypre_CTAlloc(double,  num_dofs, HYPRE_MEMORY_HOST);
+   d_fine = hypre_CTAlloc(double,  num_dofs, HYPRE_MEMORY_HOST);
 
    coarse_level = level;
-   v_coarse = hypre_CTAlloc(double, Num_dofs[coarse_level]);
-   w_coarse = hypre_CTAlloc(double, Num_dofs[coarse_level]);
-   d_coarse = hypre_CTAlloc(double, Num_dofs[coarse_level]);
+   v_coarse = hypre_CTAlloc(double,  Num_dofs[coarse_level], HYPRE_MEMORY_HOST);
+   w_coarse = hypre_CTAlloc(double,  Num_dofs[coarse_level], HYPRE_MEMORY_HOST);
+   d_coarse = hypre_CTAlloc(double,  Num_dofs[coarse_level], HYPRE_MEMORY_HOST);
 
    for (l=0; l < level; l++)
    {
       printf("\n\n=======================================================\n");
       printf("             Testing level[%d] PCG solve:                  \n",l);
       printf("===========================================================\n");
- 
+
       for (i=0; i < Num_dofs[l]; i++) x[i] = 0.e0;
 
       /* for (i=0; i < Num_dofs[l]; i++) rhs[i] = rand(); */
@@ -537,7 +529,7 @@ int HYPRE_LSI_AMGeSolve(double *rhs, double *x)
       printf("\n\n=======================================================\n");
       printf("             END test PCG solve:                           \n");
       printf("===========================================================\n");
- 
+
    }
 
    printf("\n\n===============================================================\n");
@@ -547,100 +539,100 @@ int HYPRE_LSI_AMGeSolve(double *rhs, double *x)
    num_dofs = Num_dofs[0];
 
    /* for (i=0; i < num_dofs; i++) rhs[i] = rand(); */
-  
+
    ierr = hypre_VcycleILUpcg(x, rhs, w, d, &reduction_factor, Matrix,
                 i_ILUdof_to_dof, i_ILUdof_ILUdof, j_ILUdof_ILUdof, LD_data,
-                i_ILUdof_ILUdof_t, j_ILUdof_ILUdof_t, U_data, P, aux, r, 
-                v_fine, w_fine, d_fine, max_iter, v_coarse, w_coarse, d_coarse, 
+                i_ILUdof_ILUdof_t, j_ILUdof_ILUdof_t, U_data, P, aux, r,
+                v_fine, w_fine, d_fine, max_iter, v_coarse, w_coarse, d_coarse,
                 nu, level, coarse_level, Num_dofs);
 
    /* hypre_TFree(x);   */
    /* hypre_TFree(rhs); */
 
-   hypre_TFree(r);
-   hypre_TFree(aux);
+   hypre_TFree(r, HYPRE_MEMORY_HOST);
+   hypre_TFree(aux, HYPRE_MEMORY_HOST);
 
    for (l=0; l < level+1; l++)
       if (Num_dofs[l] > 0)
       {
-	hypre_TFree(w[l]);
-	hypre_TFree(d[l]);
+ hypre_TFree(w[l], HYPRE_MEMORY_HOST);
+ hypre_TFree(d[l], HYPRE_MEMORY_HOST);
 	hypre_CSRMatrixDestroy(Matrix[l]);
       }
 
    for (l=0; l < max_level; l++)
    {
-      hypre_TFree(i_node_coarsenode[l]);
-      hypre_TFree(j_node_coarsenode[l]);
+      hypre_TFree(i_node_coarsenode[l], HYPRE_MEMORY_HOST);
+      hypre_TFree(j_node_coarsenode[l], HYPRE_MEMORY_HOST);
 
-      hypre_TFree(i_node_neighbor_coarsenode[l]);
-      hypre_TFree(j_node_neighbor_coarsenode[l]);
+      hypre_TFree(i_node_neighbor_coarsenode[l], HYPRE_MEMORY_HOST);
+      hypre_TFree(j_node_neighbor_coarsenode[l], HYPRE_MEMORY_HOST);
 
       if (system_size == 1 &&Num_dofs[l+1] > 0)
       {
 	  hypre_CSRMatrixI(P[l]) = NULL;
 	  hypre_CSRMatrixJ(P[l]) = NULL;
       }
-  
+
    }
    for (l=0; l < level; l++)
    {
-      hypre_TFree(i_ILUdof_to_dof[l]);
-      hypre_TFree(i_ILUdof_ILUdof[l]);
-      hypre_TFree(j_ILUdof_ILUdof[l]);
-      hypre_TFree(LD_data[l]);
-      hypre_TFree(i_ILUdof_ILUdof_t[l]);
-      hypre_TFree(j_ILUdof_ILUdof_t[l]);
-      hypre_TFree(U_data[l]);
+      hypre_TFree(i_ILUdof_to_dof[l], HYPRE_MEMORY_HOST);
+      hypre_TFree(i_ILUdof_ILUdof[l], HYPRE_MEMORY_HOST);
+      hypre_TFree(j_ILUdof_ILUdof[l], HYPRE_MEMORY_HOST);
+      hypre_TFree(LD_data[l], HYPRE_MEMORY_HOST);
+      hypre_TFree(i_ILUdof_ILUdof_t[l], HYPRE_MEMORY_HOST);
+      hypre_TFree(j_ILUdof_ILUdof_t[l], HYPRE_MEMORY_HOST);
+      hypre_TFree(U_data[l], HYPRE_MEMORY_HOST);
       hypre_CSRMatrixDestroy(P[l]);
 
    }
 
-   hypre_TFree(v_fine);
-   hypre_TFree(w_fine);
-   hypre_TFree(d_fine);
-   hypre_TFree(w);
-   hypre_TFree(d);
+   hypre_TFree(v_fine, HYPRE_MEMORY_HOST);
+   hypre_TFree(w_fine, HYPRE_MEMORY_HOST);
+   hypre_TFree(d_fine, HYPRE_MEMORY_HOST);
+   hypre_TFree(w, HYPRE_MEMORY_HOST);
+   hypre_TFree(d, HYPRE_MEMORY_HOST);
 
-   hypre_TFree(v_coarse);
-   hypre_TFree(w_coarse);
-   hypre_TFree(d_coarse);
+   hypre_TFree(v_coarse, HYPRE_MEMORY_HOST);
+   hypre_TFree(w_coarse, HYPRE_MEMORY_HOST);
+   hypre_TFree(d_coarse, HYPRE_MEMORY_HOST);
 
    for (l=0; l < max_level+1; l++)
       hypre_DestroyAMGeMatrixTopology(A[l]);
 
-   hypre_TFree(Num_nodes);
-   hypre_TFree(Num_elements);
-   hypre_TFree(Num_dofs);
-   hypre_TFree(Num_blocks);
-   hypre_TFree(Num_chords);
+   hypre_TFree(Num_nodes, HYPRE_MEMORY_HOST);
+   hypre_TFree(Num_elements, HYPRE_MEMORY_HOST);
+   hypre_TFree(Num_dofs, HYPRE_MEMORY_HOST);
+   hypre_TFree(Num_blocks, HYPRE_MEMORY_HOST);
+   hypre_TFree(Num_chords, HYPRE_MEMORY_HOST);
 
-   hypre_TFree(i_chord_dof_0);
-   hypre_TFree(j_chord_dof_0);
+   hypre_TFree(i_chord_dof_0, HYPRE_MEMORY_HOST);
+   hypre_TFree(j_chord_dof_0, HYPRE_MEMORY_HOST);
 
-   hypre_TFree(i_element_chord_0);
-   hypre_TFree(j_element_chord_0);
-   hypre_TFree(a_element_chord_0);
+   hypre_TFree(i_element_chord_0, HYPRE_MEMORY_HOST);
+   hypre_TFree(j_element_chord_0, HYPRE_MEMORY_HOST);
+   hypre_TFree(a_element_chord_0, HYPRE_MEMORY_HOST);
 
-   hypre_TFree(P);
-   hypre_TFree(Matrix);
-   hypre_TFree(A);
+   hypre_TFree(P, HYPRE_MEMORY_HOST);
+   hypre_TFree(Matrix, HYPRE_MEMORY_HOST);
+   hypre_TFree(A, HYPRE_MEMORY_HOST);
 
-   hypre_TFree(i_ILUdof_to_dof);
-   hypre_TFree(i_ILUdof_ILUdof);
-   hypre_TFree(j_ILUdof_ILUdof);
-   hypre_TFree(LD_data);
+   hypre_TFree(i_ILUdof_to_dof, HYPRE_MEMORY_HOST);
+   hypre_TFree(i_ILUdof_ILUdof, HYPRE_MEMORY_HOST);
+   hypre_TFree(j_ILUdof_ILUdof, HYPRE_MEMORY_HOST);
+   hypre_TFree(LD_data, HYPRE_MEMORY_HOST);
 
-   hypre_TFree(i_ILUdof_ILUdof_t);
-   hypre_TFree(j_ILUdof_ILUdof_t);
-   hypre_TFree(U_data);
+   hypre_TFree(i_ILUdof_ILUdof_t, HYPRE_MEMORY_HOST);
+   hypre_TFree(j_ILUdof_ILUdof_t, HYPRE_MEMORY_HOST);
+   hypre_TFree(U_data, HYPRE_MEMORY_HOST);
 
-   hypre_TFree(i_node_coarsenode);
-   hypre_TFree(j_node_coarsenode);
+   hypre_TFree(i_node_coarsenode, HYPRE_MEMORY_HOST);
+   hypre_TFree(j_node_coarsenode, HYPRE_MEMORY_HOST);
 
-   hypre_TFree(i_node_neighbor_coarsenode);
-   hypre_TFree(j_node_neighbor_coarsenode);
-   free(element_data);
+   hypre_TFree(i_node_neighbor_coarsenode, HYPRE_MEMORY_HOST);
+   hypre_TFree(j_node_neighbor_coarsenode, HYPRE_MEMORY_HOST);
+   hypre_TFree(element_data, HYPRE_MEMORY_HOST);
 
    return 0;
 }
@@ -666,24 +658,24 @@ int HYPRE_LSI_AMGeWriteToFile()
          fprintf(fp, "\n");
       }
       fprintf(fp, "\n");
-   }  
+   }
    fclose(fp);
 
    fp = fopen("elem_node", "w");
-   
+
    fprintf(fp, "%d %d\n", element_count, num_nodes);
-   for (i = 0; i < element_count; i++) 
+   for (i = 0; i < element_count; i++)
    {
-      for (j = 0; j < temp_elem_node_cnt[i]; j++) 
+      for (j = 0; j < temp_elem_node_cnt[i]; j++)
          fprintf(fp, "%d ", temp_elem_node[i][j]+1);
       fprintf(fp,"\n");
-   } 
+   }
 
    fclose(fp);
 
    fp = fopen("node_bc", "w");
 
-   for (i = 0; i < num_nodes*system_size; i++) 
+   for (i = 0; i < num_nodes*system_size; i++)
    {
       fprintf(fp, "%d\n", i_dof_on_boundary[i]);
    }

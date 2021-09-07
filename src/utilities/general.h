@@ -1,15 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -19,6 +13,16 @@
 
 #ifndef hypre_GENERAL_HEADER
 #define hypre_GENERAL_HEADER
+
+/* This allows us to consistently avoid 'int' throughout hypre */
+typedef int                    hypre_int;
+typedef long int               hypre_longint;
+typedef unsigned int           hypre_uint;
+typedef unsigned long int      hypre_ulongint;
+typedef unsigned long long int hypre_ulonglongint;
+
+/* This allows us to consistently avoid 'double' throughout hypre */
+typedef double                 hypre_double;
 
 /*--------------------------------------------------------------------------
  * Define various functions
@@ -43,4 +47,5 @@
 #define hypre_pow2(i)  ( 1 << (i) )
 #endif
 
-#endif
+#endif /* hypre_GENERAL_HEADER */
+

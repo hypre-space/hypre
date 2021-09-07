@@ -1,17 +1,11 @@
-cBHEADER**********************************************************************
-c Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-c Produced at the Lawrence Livermore National Laboratory.
-c This file is part of HYPRE.  See file COPYRIGHT for details.
-c
-c HYPRE is free software; you can redistribute it and/or modify it under the
-c terms of the GNU Lesser General Public License (as published by the Free
-c Software Foundation) version 2.1 dated February 1999.
-c
-c $Revision$
-cEHEADER**********************************************************************
-c-----------------------------------------------------------------------
-c Test driver for unstructured matrix-vector interface
-c-----------------------------------------------------------------------
+!     Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+!     HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+!
+!     SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+!-----------------------------------------------------------------------
+! Test driver for unstructured matrix-vector interface
+!-----------------------------------------------------------------------
  
       program test
 
@@ -58,18 +52,18 @@ c-----------------------------------------------------------------------
       double precision    xvals(MAXZONS)
       double precision    sum
 
-c-----------------------------------------------------------------------
-c     Initialize MPI
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Initialize MPI
+!-----------------------------------------------------------------------
 
       call MPI_INIT(ierr)
 
       call MPI_COMM_RANK(MPI_COMM_WORLD, myid, ierr)
       call MPI_COMM_SIZE(MPI_COMM_WORLD, num_procs, ierr)
 
-c-----------------------------------------------------------------------
-c     Set defaults
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Set defaults
+!-----------------------------------------------------------------------
 
       dim = 3
 
@@ -85,31 +79,31 @@ c-----------------------------------------------------------------------
       cy = 1.0
       cz = 1.0
 
-c-----------------------------------------------------------------------
-c     Read options
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Read options
+!-----------------------------------------------------------------------
  
-c     open( 5, file='parcsr_matrix_vector.in', status='old')
-c
-c     read( 5, *) dim
-c
-c     read( 5, *) nx
-c     read( 5, *) ny
-c     read( 5, *) nz
-c
-c     read( 5, *) Px
-c     read( 5, *) Py
-c     read( 5, *) Pz
-c
-c     read( 5, *) cx
-c     read( 5, *) cy
-c     read( 5, *) cz
-c
-c     write(6,*) 'Generate matrix? !0 yes, 0 no (from file)'
+!     open( 5, file='parcsr_matrix_vector.in', status='old')
+!
+!     read( 5, *) dim
+!
+!     read( 5, *) nx
+!     read( 5, *) ny
+!     read( 5, *) nz
+!
+!     read( 5, *) Px
+!     read( 5, *) Py
+!     read( 5, *) Pz
+!
+!     read( 5, *) cx
+!     read( 5, *) cy
+!     read( 5, *) cz
+!
+!     write(6,*) 'Generate matrix? !0 yes, 0 no (from file)'
       read(5,*) generate_matrix
 
       if (generate_matrix .eq. 0) then
-c       write(6,*) 'What file to use for matrix (<= 32 chars)?'
+!       write(6,*) 'What file to use for matrix (<= 32 chars)?'
         read(5,*) matfile_str
         i = 1
   100   if (matfile_str(i:i) .ne. ' ') then
@@ -122,12 +116,12 @@ c       write(6,*) 'What file to use for matrix (<= 32 chars)?'
   200   matfile(i) = char(0)
       endif
 
-c     write(6,*) 'Generate vector? !0 yes, 0 no (from file)'
+!     write(6,*) 'Generate vector? !0 yes, 0 no (from file)'
       read(5,*) generate_vec
 
       if (generate_vec .eq. 0) then
-c       write(6,*)
-c    &    'What file to use for vector (<= 32 chars)?'
+!       write(6,*)
+!    &    'What file to use for vector (<= 32 chars)?'
         read(5,*) vecfile_str
         i = 1
   300   if (vecfile_str(i:i) .ne. ' ') then
@@ -140,11 +134,11 @@ c    &    'What file to use for vector (<= 32 chars)?'
   400   vecfile(i) = char(0)
       endif
 
-c     close( 5 )
+!     close( 5 )
 
-c-----------------------------------------------------------------------
-c     Check a few things
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Check a few things
+!-----------------------------------------------------------------------
 
       if ((Px*Py*Pz) .ne. num_procs) then
          print *, 'Error: Invalid number of processors or topology'
@@ -161,9 +155,9 @@ c-----------------------------------------------------------------------
          stop
       endif
 
-c-----------------------------------------------------------------------
-c     Print driver parameters
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Print driver parameters
+!-----------------------------------------------------------------------
 
       if (myid .eq. 0) then
          print *, 'Matrix built with these parameters:'
@@ -173,33 +167,33 @@ c-----------------------------------------------------------------------
          print *, '  dim          = ', dim
       endif
 
-c-----------------------------------------------------------------------
-c     Compute some grid and processor information
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Compute some grid and processor information
+!-----------------------------------------------------------------------
 
       if (dim .eq. 1) then
 
-c        compute p from Px and myid
+!        compute p from Px and myid
          p = mod(myid,Px)
 
       elseif (dim .eq. 2) then
 
-c        compute p,q from Px, Py and myid
+!        compute p,q from Px, Py and myid
          p = mod(myid,Px)
          q = mod(((myid - p)/Px),Py)
 
       elseif (dim .eq. 3) then
 
-c        compute p,q,r from Px,Py,Pz and myid
+!        compute p,q,r from Px,Py,Pz and myid
          p = mod(myid,Px)
          q = mod((( myid - p)/Px),Py)
          r = (myid - (p + Px*q))/(Px*Py)
 
       endif
 
-c----------------------------------------------------------------------
-c     Set up the matrix
-c-----------------------------------------------------------------------
+!----------------------------------------------------------------------
+!     Set up the matrix
+!-----------------------------------------------------------------------
 
       values(2) = -cx
       values(3) = -cy
@@ -210,11 +204,11 @@ c-----------------------------------------------------------------------
       if (ny .gt. 1) values(1) = values(1) + 2d0*cy
       if (nz .gt. 1) values(1) = values(1) + 2d0*cz
 
-c Generate a Dirichlet Laplacian
+! Generate a Dirichlet Laplacian
       if (generate_matrix .gt. 0) then
 
-c        Standard 7-point laplacian in 3D with grid and anisotropy
-c        determined as user settings.
+!        Standard 7-point laplacian in 3D with grid and anisotropy
+!        determined as user settings.
 
          call HYPRE_GenerateLaplacian(MPI_COMM_WORLD, nx, ny, nz,
      &                                Px, Py, Pz, p, q, r, values,
@@ -269,9 +263,9 @@ c        determined as user settings.
 
       if (ierr .ne. 0) write(6,*) 'Matrix print failed'
   
-c-----------------------------------------------------------------------
-c     "RHS vector" test
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     "RHS vector" test
+!-----------------------------------------------------------------------
       if (generate_vec .gt. 0) then
         call HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_row,
      &                            last_local_row, b, ierr)
@@ -286,7 +280,7 @@ c-----------------------------------------------------------------------
 
         if (ierr .ne. 0) write(6,*) 'RHS vector initialization failed'
   
-c Set up a Dirichlet 0 problem
+! Set up a Dirichlet 0 problem
         do i = 1, last_local_row - first_local_row + 1
           indices(i) = first_local_row - 1 + i
           vals(i) = 0.
@@ -326,8 +320,8 @@ c Set up a Dirichlet 0 problem
   
       if (ierr .ne. 0) write(6,*) 'RHS vector value retrieval failed'
   
-c     Set about to modify every other component of b, by adding the
-c     negative of the component
+!     Set about to modify every other component of b, by adding the
+!     negative of the component
 
       do i = 1, last_local_row - first_local_row + 1, 2
         indices(i) = first_local_row - 1 + i
@@ -355,9 +349,9 @@ c     negative of the component
   
       if (sum .ne. 0.) write(6,*) 'RHS vector value addition error'
 
-c-----------------------------------------------------------------------
-c     "Solution vector" test
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     "Solution vector" test
+!-----------------------------------------------------------------------
       call HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_col,
      &                          last_local_col, x, ierr)
 
@@ -424,15 +418,15 @@ c-----------------------------------------------------------------------
      &   write(6,*) 'Solution vector value addition error,',
      &              ' last_local_col'
 
-c-----------------------------------------------------------------------
-c     Finalize things
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Finalize things
+!-----------------------------------------------------------------------
 
       call HYPRE_ParCSRMatrixDestroy(A_storage, ierr)
       call HYPRE_IJVectorDestroy(b, ierr)
       call HYPRE_IJVectorDestroy(x, ierr)
 
-c     Finalize MPI
+!     Finalize MPI
 
       call MPI_FINALIZE(ierr)
 

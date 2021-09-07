@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
 #include "ssamg.h"
@@ -22,7 +17,7 @@ hypre_SSAMGCreate( hypre_MPI_Comm comm )
    hypre_SSAMGData   *ssamg_data;
    HYPRE_Int          d;
 
-   ssamg_data = hypre_CTAlloc(hypre_SSAMGData, 1);
+   ssamg_data = hypre_CTAlloc(hypre_SSAMGData, 1, HYPRE_MEMORY_HOST);
 
    (ssamg_data -> comm)       = comm;
    (ssamg_data -> time_index) = hypre_InitializeTiming("SSAMG");
@@ -36,18 +31,27 @@ hypre_SSAMGCreate( hypre_MPI_Comm comm )
    (ssamg_data -> max_levels)       = 0;
    (ssamg_data -> relax_type)       = 0;
    (ssamg_data -> skip_relax)       = 0;
-   (ssamg_data -> usr_relax_weight) = 0.0;
+   (ssamg_data -> usr_relax_weight) = 1.0;
+   (ssamg_data -> usr_set_rweight)  = 0;
    (ssamg_data -> num_pre_relax)    = 1;
    (ssamg_data -> num_post_relax)   = 1;
-   (ssamg_data -> num_coarse_relax) = -1;
    (ssamg_data -> logging)          = 0;
    (ssamg_data -> print_level)      = 0;
    (ssamg_data -> print_freq)       = 1;
 
+   /* Coarse solver defaults */
+   (ssamg_data -> csolver)          = NULL;
+   (ssamg_data -> ij_Ac)            = NULL;
+   (ssamg_data -> par_b)            = NULL;
+   (ssamg_data -> par_x)            = NULL;
+   (ssamg_data -> csolver_type)     = 0;
+   (ssamg_data -> num_coarse_relax) = -1;
+   (ssamg_data -> max_coarse_size)  = 0;
+
    /* initialize */
    (ssamg_data -> nparts)           = -1;
    (ssamg_data -> num_levels)       = -1;
-   for (d = 0; d < 3; d++)
+   for (d = 0; d < HYPRE_MAXDIM; d++)
    {
       (ssamg_data -> dxyz[d])       = NULL;
    }
@@ -65,14 +69,14 @@ hypre_SSAMGDestroy( void *ssamg_vdata )
 
    HYPRE_Int          num_levels;
    HYPRE_Int          max_levels;
-   HYPRE_Int          l, p;
+   HYPRE_Int          l, d;
 
    if (ssamg_data)
    {
       if (hypre_SSAMGDataLogging(ssamg_data) > 0)
       {
-         hypre_TFree(ssamg_data -> norms);
-         hypre_TFree(ssamg_data -> rel_norms);
+         hypre_TFree(ssamg_data -> norms, HYPRE_MEMORY_HOST);
+         hypre_TFree(ssamg_data -> rel_norms, HYPRE_MEMORY_HOST);
       }
 
       if (hypre_SSAMGDataNumLevels(ssamg_data) > -1)
@@ -80,17 +84,8 @@ hypre_SSAMGDestroy( void *ssamg_vdata )
          num_levels = hypre_SSAMGDataNumLevels(ssamg_data);
          max_levels = hypre_SSAMGDataMaxLevels(ssamg_data);
 
-         hypre_SSAMGRelaxDestroy(ssamg_data -> relax_data_l[0]);
-         hypre_SStructMatvecDestroy(ssamg_data -> matvec_data_l[0]);
-         HYPRE_SStructVectorDestroy(ssamg_data -> b_l[0]);
-         HYPRE_SStructVectorDestroy(ssamg_data -> x_l[0]);
-         HYPRE_SStructVectorDestroy(ssamg_data -> tx_l[0]);
-         HYPRE_SStructMatrixDestroy(ssamg_data -> A_l[0]);
-         HYPRE_SStructGridDestroy(ssamg_data -> grid_l[0]);
-         hypre_TFree(ssamg_data -> cdir_l[0]);
-         hypre_TFree(ssamg_data -> active_l[0]);
-         hypre_TFree(ssamg_data -> relax_weights[0]);
-         for (l = 1; l < num_levels; l++)
+         /* Destroy data */
+         for (l = 0; l < (num_levels - 1); l++)
          {
             hypre_SSAMGRelaxDestroy(ssamg_data -> relax_data_l[l]);
             hypre_SStructMatvecDestroy(ssamg_data -> matvec_data_l[l]);
@@ -99,49 +94,50 @@ hypre_SSAMGDestroy( void *ssamg_vdata )
             HYPRE_SStructVectorDestroy(ssamg_data -> x_l[l]);
             HYPRE_SStructVectorDestroy(ssamg_data -> tx_l[l]);
             HYPRE_SStructMatrixDestroy(ssamg_data -> A_l[l]);
-            HYPRE_SStructMatrixDestroy(ssamg_data -> P_l[l-1]);
-            HYPRE_SStructMatrixDestroy(ssamg_data -> RT_l[l-1]);
-            hypre_SStructMatvecDestroy(ssamg_data -> restrict_data_l[l-1]);
-            hypre_SStructMatvecDestroy(ssamg_data -> interp_data_l[l-1]);
-            hypre_TFree(ssamg_data -> cdir_l[l]);
-            hypre_TFree(ssamg_data -> active_l[l]);
-            hypre_TFree(ssamg_data -> relax_weights[l]);
+            HYPRE_SStructMatrixDestroy(ssamg_data -> P_l[l]);
+            HYPRE_SStructMatrixDestroy(ssamg_data -> RT_l[l]);
+            hypre_SStructMatvecDestroy(ssamg_data -> restrict_data_l[l]);
+            hypre_SStructMatvecDestroy(ssamg_data -> interp_data_l[l]);
+            hypre_TFree(ssamg_data -> cdir_l[l], HYPRE_MEMORY_HOST);
+            hypre_TFree(ssamg_data -> active_l[l], HYPRE_MEMORY_HOST);
+            hypre_TFree(ssamg_data -> relax_weights[l], HYPRE_MEMORY_HOST);
          }
+
+         /* Destroy coarse solver data */
+         hypre_SSAMGCoarseSolverDestroy(ssamg_vdata);
 
          for (l = num_levels; l < max_levels; l++)
          {
-            hypre_TFree(ssamg_data -> relax_weights[l]);
+            hypre_TFree(ssamg_data -> active_l[l], HYPRE_MEMORY_HOST);
+            hypre_TFree(ssamg_data -> relax_weights[l], HYPRE_MEMORY_HOST);
          }
 
-         hypre_TFree(ssamg_data -> b_l);
-         hypre_TFree(ssamg_data -> x_l);
-         hypre_TFree(ssamg_data -> tx_l);
-         hypre_TFree(ssamg_data -> A_l);
-         hypre_TFree(ssamg_data -> P_l);
-         hypre_TFree(ssamg_data -> RT_l);
-         hypre_TFree(ssamg_data -> grid_l);
-         hypre_TFree(ssamg_data -> cdir_l);
-         hypre_TFree(ssamg_data -> active_l);
-         hypre_TFree(ssamg_data -> relax_weights);
-         hypre_TFree(ssamg_data -> relax_data_l);
-         hypre_TFree(ssamg_data -> matvec_data_l);
-         hypre_TFree(ssamg_data -> restrict_data_l);
-         hypre_TFree(ssamg_data -> interp_data_l);
+         hypre_TFree(ssamg_data -> b_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(ssamg_data -> x_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(ssamg_data -> tx_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(ssamg_data -> A_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(ssamg_data -> P_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(ssamg_data -> RT_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(ssamg_data -> grid_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(ssamg_data -> cdir_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(ssamg_data -> active_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(ssamg_data -> relax_weights, HYPRE_MEMORY_HOST);
+         hypre_TFree(ssamg_data -> relax_data_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(ssamg_data -> matvec_data_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(ssamg_data -> restrict_data_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(ssamg_data -> interp_data_l, HYPRE_MEMORY_HOST);
 
          ssamg_data -> e_l = NULL;
          ssamg_data -> r_l = NULL;
       }
 
-      for (p = 0; p < hypre_SSAMGDataNParts(ssamg_data); p++)
+      for (d = 0; d < HYPRE_MAXDIM; d++)
       {
-         hypre_TFree(ssamg_data -> dxyz[p]);
+         hypre_TFree(ssamg_data -> dxyz[d], HYPRE_MEMORY_HOST);
       }
-      hypre_TFree(ssamg_data -> dxyz[0]);
-      hypre_TFree(ssamg_data -> dxyz[1]);
-      hypre_TFree(ssamg_data -> dxyz[2]);
 
       hypre_FinalizeTiming(ssamg_data -> time_index);
-      hypre_TFree(ssamg_data);
+      hypre_TFree(ssamg_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;
@@ -264,6 +260,12 @@ hypre_SSAMGSetRelaxType( void       *ssamg_vdata,
 
    hypre_SSAMGDataRelaxType(ssamg_data) = relax_type;
 
+   /* Use default relaxation weight or user's for L1-Jacobi*/
+   if (relax_type == 2)
+   {
+      hypre_SSAMGDataUsrSetRWeight(ssamg_data) = 1;
+   }
+
    return hypre_error_flag;
 }
 
@@ -291,6 +293,7 @@ hypre_SSAMGSetRelaxWeight( void        *ssamg_vdata,
    hypre_SSAMGData *ssamg_data = (hypre_SSAMGData *) ssamg_vdata;
 
    hypre_SSAMGDataUsrRelaxWeight(ssamg_data) = usr_relax_weight;
+   hypre_SSAMGDataUsrSetRWeight(ssamg_data)  = 1;
 
    return hypre_error_flag;
 }
@@ -333,6 +336,34 @@ hypre_SSAMGSetNumCoarseRelax( void       *ssamg_vdata,
    hypre_SSAMGData *ssamg_data = (hypre_SSAMGData *) ssamg_vdata;
 
    hypre_SSAMGDataNumCoarseRelax(ssamg_data) = num_coarse_relax;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetMaxCoarseSize( void       *ssamg_vdata,
+                             HYPRE_Int   max_coarse_size)
+{
+   hypre_SSAMGData *ssamg_data = (hypre_SSAMGData *) ssamg_vdata;
+
+   hypre_SSAMGDataMaxCoarseSize(ssamg_data) = max_coarse_size;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetCoarseSolverType( void       *ssamg_vdata,
+                                HYPRE_Int   csolver_type)
+{
+   hypre_SSAMGData *ssamg_data = (hypre_SSAMGData *) ssamg_vdata;
+
+   hypre_SSAMGDataCSolverType(ssamg_data) = csolver_type;
 
    return hypre_error_flag;
 }
@@ -388,6 +419,7 @@ hypre_SSAMGPrintLogging( void *ssamg_vdata )
    hypre_SSAMGData   *ssamg_data     = (hypre_SSAMGData *) ssamg_vdata;
    MPI_Comm           comm           = (ssamg_data -> comm);
    HYPRE_Int          num_iterations = (ssamg_data -> num_iterations);
+   HYPRE_Int          max_iter       = (ssamg_data -> max_iter);
    HYPRE_Int          logging        = (ssamg_data -> logging);
    HYPRE_Int          print_level    = (ssamg_data -> print_level);
    HYPRE_Int          print_freq     = (ssamg_data -> print_freq);
@@ -399,27 +431,24 @@ hypre_SSAMGPrintLogging( void *ssamg_vdata )
 
    hypre_MPI_Comm_rank(comm, &myid);
 
-   if (myid == 0)
+   if ((myid == 0) && (print_level > 1) && (logging > 0))
    {
-      if ((print_level > 0) && (logging > 1))
+      hypre_printf("Iters         ||r||_2   conv.rate  ||r||_2/||b||_2\n");
+      hypre_printf("% 5d    %e    %f     %e\n", 0, norms[0], convr, rel_norms[0]);
+      for (i = print_freq; i < num_iterations; i = (i + print_freq))
       {
-         hypre_printf("Iters         ||r||_2   conv.rate  ||r||_2/||b||_2\n");
-         hypre_printf("% 5d    %e    %f     %e\n", 0, norms[0], convr, rel_norms[0]);
-         for (i = print_freq; i < num_iterations; i = (i + print_freq))
-         {
-            convr = norms[i] / norms[i-1];
-            hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);
-         }
-
-         if ((i != num_iterations - 1) && (num_iterations > 0))
-         {
-            i = num_iterations;
-            convr = norms[i] / norms[i-1];
-            hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);
-         }
+         convr = norms[i] / norms[i-1];
+         hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);
       }
 
-      if ((print_level > 1) && (rel_norms[0] > 0.))
+      if ((i != num_iterations - 1) && (num_iterations > 0))
+      {
+         i = num_iterations;
+         convr = norms[i] / norms[i-1];
+         hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);
+      }
+
+      if ((max_iter > 1) && (rel_norms[0] > 0.))
       {
          avg_convr = pow((rel_norms[num_iterations]/rel_norms[0]),
                          (1.0/(HYPRE_Real) num_iterations));

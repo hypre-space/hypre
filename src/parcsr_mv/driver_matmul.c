@@ -1,24 +1,16 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_parcsr_mv.h"
- 
+
 /*--------------------------------------------------------------------------
- * Test driver for unstructured matrix interface 
+ * Test driver for unstructured matrix interface
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 main( HYPRE_Int   argc,
       char *argv[] )
@@ -28,7 +20,7 @@ main( HYPRE_Int   argc,
    hypre_ParCSRMatrix     *C;
    hypre_CSRMatrix *As;
    hypre_CSRMatrix *Bs;
-   HYPRE_Int *row_starts, *col_starts;
+   HYPRE_BigInt *row_starts, *col_starts;
    HYPRE_Int num_procs, my_id;
 
    /* Initialize MPI */
@@ -52,8 +44,6 @@ main( HYPRE_Int   argc,
    col_starts = hypre_ParCSRMatrixColStarts(A);
    B = hypre_CSRMatrixToParCSRMatrix(hypre_MPI_COMM_WORLD, Bs, col_starts,
 	row_starts);
-   hypre_ParCSRMatrixSetRowStartsOwner(B,0);
-   hypre_ParCSRMatrixSetColStartsOwner(B,0);
    C = hypre_ParMatmul(B,A);
    hypre_ParCSRMatrixPrint(B, "echo_B" );
    hypre_ParCSRMatrixPrint(A, "echo_A" );
@@ -72,4 +62,3 @@ main( HYPRE_Int   argc,
 
    return 0;
 }
-

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -77,37 +72,39 @@ typedef struct hypre_SStructVector_struct
  * Accessor macros: hypre_SStructVector
  *--------------------------------------------------------------------------*/
 
-#define hypre_SStructVectorComm(vec)           ((vec) -> comm)
-#define hypre_SStructVectorNDim(vec)           ((vec) -> ndim)
-#define hypre_SStructVectorGrid(vec)           ((vec) -> grid)
-#define hypre_SStructVectorObjectType(vec)     ((vec) -> object_type)
-#define hypre_SStructVectorNParts(vec)         ((vec) -> nparts)
-#define hypre_SStructVectorPVectors(vec)       ((vec) -> pvectors)
-#define hypre_SStructVectorPVector(vec, part)  ((vec) -> pvectors[part])
-#define hypre_SStructVectorIJVector(vec)       ((vec) -> ijvector)
-#define hypre_SStructVectorParVector(vec)      ((vec) -> parvector)
-#define hypre_SStructVectorNborNComms(vec)     ((vec) -> nbor_ncomms)
-#define hypre_SStructVectorGlobalSize(vec)     ((vec) -> global_size)
-#define hypre_SStructVectorRefCount(vec)       ((vec) -> ref_count)
-#define hypre_SStructVectorData(vec)           ((vec) -> data )
-#define hypre_SStructVectorDataIndices(vec)    ((vec) -> dataindices)
-#define hypre_SStructVectorDataSize(vec)       ((vec) -> datasize)
+#define hypre_SStructVectorComm(vec)            ((vec) -> comm)
+#define hypre_SStructVectorNDim(vec)            ((vec) -> ndim)
+#define hypre_SStructVectorGrid(vec)            ((vec) -> grid)
+#define hypre_SStructVectorObjectType(vec)      ((vec) -> object_type)
+#define hypre_SStructVectorNParts(vec)          ((vec) -> nparts)
+#define hypre_SStructVectorPVectors(vec)        ((vec) -> pvectors)
+#define hypre_SStructVectorPVector(vec, part)   ((vec) -> pvectors[part])
+#define hypre_SStructVectorIJVector(vec)        ((vec) -> ijvector)
+#define hypre_SStructVectorParVector(vec)       ((vec) -> parvector)
+#define hypre_SStructVectorNborNComms(vec)      ((vec) -> nbor_ncomms)
+#define hypre_SStructVectorGlobalSize(vec)      ((vec) -> global_size)
+#define hypre_SStructVectorRefCount(vec)        ((vec) -> ref_count)
+#define hypre_SStructVectorData(vec)            ((vec) -> data )
+#define hypre_SStructVectorDataIndices(vec)     ((vec) -> dataindices)
+#define hypre_SStructVectorDataIndex(vec, part) ((vec) -> dataindices[part])
+#define hypre_SStructVectorDataSize(vec)        ((vec) -> datasize)
 
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructPVector
  *--------------------------------------------------------------------------*/
 
-#define hypre_SStructPVectorComm(pvec)        ((pvec) -> comm)
-#define hypre_SStructPVectorPGrid(pvec)       ((pvec) -> pgrid)
-#define hypre_SStructPVectorNVars(pvec)       ((pvec) -> nvars)
-#define hypre_SStructPVectorSVectors(pvec)    ((pvec) -> svectors)
-#define hypre_SStructPVectorSVector(pvec, v)  ((pvec) -> svectors[v])
-#define hypre_SStructPVectorCommPkgs(pvec)    ((pvec) -> comm_pkgs)
-#define hypre_SStructPVectorCommPkg(pvec, v)  ((pvec) -> comm_pkgs[v])
-#define hypre_SStructPVectorAccumulated(pvec) ((pvec) -> accumulated)
-#define hypre_SStructPVectorRefCount(pvec)    ((pvec) -> ref_count)
-#define hypre_SStructPVectorDataIndices(pvec) ((pvec) -> dataindices)
-#define hypre_SStructPVectorDataSize(pvec)    ((pvec) -> datasize)
+#define hypre_SStructPVectorComm(pvec)         ((pvec) -> comm)
+#define hypre_SStructPVectorPGrid(pvec)        ((pvec) -> pgrid)
+#define hypre_SStructPVectorNVars(pvec)        ((pvec) -> nvars)
+#define hypre_SStructPVectorSVectors(pvec)     ((pvec) -> svectors)
+#define hypre_SStructPVectorSVector(pvec, v)   ((pvec) -> svectors[v])
+#define hypre_SStructPVectorCommPkgs(pvec)     ((pvec) -> comm_pkgs)
+#define hypre_SStructPVectorCommPkg(pvec, v)   ((pvec) -> comm_pkgs[v])
+#define hypre_SStructPVectorAccumulated(pvec)  ((pvec) -> accumulated)
+#define hypre_SStructPVectorRefCount(pvec)     ((pvec) -> ref_count)
+#define hypre_SStructPVectorDataIndices(pvec)  ((pvec) -> dataindices)
+#define hypre_SStructPVectorDataIndex(pvec, v) ((pvec) -> dataindices[v])
+#define hypre_SStructPVectorDataSize(pvec)     ((pvec) -> datasize)
 
 #endif

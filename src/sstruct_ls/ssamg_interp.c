@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
 #include "ssamg.h"
@@ -51,9 +46,9 @@ hypre_SSAMGCreateInterpOp( hypre_SStructMatrix  *A,
    /*-------------------------------------------------------
     * Allocate data
     *-------------------------------------------------------*/
-   st_shape     = hypre_CTAlloc(hypre_Index *, nparts);
-   strides      = hypre_CTAlloc(hypre_Index, nparts);
-   num_centries = hypre_CTAlloc(HYPRE_Int, nparts);
+   st_shape     = hypre_CTAlloc(hypre_Index *, nparts, HYPRE_MEMORY_HOST);
+   strides      = hypre_CTAlloc(hypre_Index, nparts, HYPRE_MEMORY_HOST);
+   num_centries = hypre_CTAlloc(HYPRE_Int, nparts, HYPRE_MEMORY_HOST);
 
    /*-------------------------------------------------------
     * Create SStructGraph data structure for P
@@ -79,7 +74,7 @@ hypre_SSAMGCreateInterpOp( hypre_SStructMatrix  *A,
          hypre_IndexD(strides[part], cdir) = 2;
 
          stencil_size_P     = 3;
-         st_shape[part]     = hypre_CTAlloc(hypre_Index, stencil_size_P);
+         st_shape[part]     = hypre_CTAlloc(hypre_Index, stencil_size_P, HYPRE_MEMORY_HOST);
          num_centries[part] = stencil_size_P;
          for (vi = 0; vi < nvars; vi++)
          {
@@ -122,7 +117,7 @@ hypre_SSAMGCreateInterpOp( hypre_SStructMatrix  *A,
          /* This part is not coarsened */
          hypre_IndexD(strides[part], 0) = 2;
          stencil_size_P     = 1;
-         st_shape[part]     = hypre_CTAlloc(hypre_Index, 1);
+         st_shape[part]     = hypre_CTAlloc(hypre_Index, 1, HYPRE_MEMORY_HOST);
          num_centries[part] = stencil_size_P;
          for (vi = 0; vi < nvars; vi++)
          {
@@ -148,18 +143,23 @@ hypre_SSAMGCreateInterpOp( hypre_SStructMatrix  *A,
 
    /* Free memory */
    HYPRE_SStructGraphDestroy(graph_P);
-   hypre_TFree(strides);
-   hypre_TFree(num_centries);
+   hypre_TFree(strides, HYPRE_MEMORY_HOST);
+   hypre_TFree(num_centries, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
-      hypre_TFree(st_shape[part]);
+      hypre_TFree(st_shape[part], HYPRE_MEMORY_HOST);
    }
-   hypre_TFree(st_shape);
+   hypre_TFree(st_shape, HYPRE_MEMORY_HOST);
 
    return P;
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SSAMGSetupInterpOp
+ *
+ * Sets up interpolation coefficients
+ *
+ * TODO: Add DEVICE_VAR to boxloops
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -180,6 +180,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
    hypre_BoxArray          *pbnd_boxa;
    hypre_BoxArrayArray     *pbnd_boxaa;
    hypre_Box               *compute_box;
+   hypre_Box               *tmp_box;
    hypre_Box               *A_dbox;
    hypre_Box               *P_dbox;
 
@@ -192,7 +193,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
    HYPRE_Int               *ventries, nventries;
 
    HYPRE_Real              *Ap, *Pp0, *Pp1, *Pp2;
-   HYPRE_Real               Pconst[3], center;
+   HYPRE_Real               Pconst[3];
 
    HYPRE_Int                Astenc, Pstenc1, Pstenc2;
    hypre_Index              Astart, Astride, Pstart, Pstride;
@@ -201,11 +202,12 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
    HYPRE_Int                cdir;
    HYPRE_Int                part, nvars;
    HYPRE_Int                box_id;
-   HYPRE_Int                i, ii, j, si, vi, Ai, Pi;
+   HYPRE_Int                d, i, ii, j, si, vi;
 
    /*-------------------------------------------------------
     * Set prolongation coefficients for each part
     *-------------------------------------------------------*/
+   tmp_box = hypre_BoxCreate(ndim);
    for (part = 0; part < nparts; part++)
    {
       cdir  = cdir_p[part];
@@ -253,7 +255,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                Pstenc2 = hypre_IndexD(P_stencil_shape[2], cdir);
 
                /* Compute the constant part of the stencil collapse */
-               ventries = hypre_TAlloc(HYPRE_Int, A_stencil_size);
+               ventries = hypre_TAlloc(HYPRE_Int, A_stencil_size, HYPRE_MEMORY_HOST);
                nventries = 0;
                Pconst[0] = 0.0;
                Pconst[1] = 0.0;
@@ -313,19 +315,20 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       A_dbox, Astart, Astride, Ai,
                                       P_dbox, Pstart, Pstride, Pi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,Pi,si,center,Ap,Astenc) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop2For(Ai, Pi)
                   {
+                     HYPRE_Int    ei, entry;
+                     HYPRE_Int    Astenc;
+                     HYPRE_Real   center;
+                     HYPRE_Real  *Ap;
+
                      center  = Pconst[0];
                      Pp1[Pi] = Pconst[1];
                      Pp2[Pi] = Pconst[2];
-                     for (vi = 0; vi < nventries; vi++)
+                     for (ei = 0; ei < nventries; ei++)
                      {
-                        si = ventries[vi];
-                        Ap = hypre_StructMatrixBoxData(A_s, i, si);
-                        Astenc = hypre_IndexD(A_stencil_shape[si], cdir);
+                        entry = ventries[ei];
+                        Ap = hypre_StructMatrixBoxData(A_s, i, entry);
+                        Astenc = hypre_IndexD(A_stencil_shape[entry], cdir);
 
                         if (Astenc == 0)
                         {
@@ -354,28 +357,8 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                      }
                   }
                   hypre_BoxLoop2End(Ai, Pi);
-
-#if 0
-                  /* Adjust weights everywhere */
-                  hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Pi,center) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop1For(Pi)
-                  {
-                     center = Pp1[Pi] + Pp2[Pi];
-                     if (center)
-                     {
-                        Pp1[Pi] /= center;
-                        Pp2[Pi] /= center;
-                     }
-                  }
-                  hypre_BoxLoop1End(Pi);
-
-#endif
                } /* loop on compute_boxes */
 
-#if 1
                /* Adjust weights at part boundaries */
                hypre_ForBoxArrayI(i, pbnd_boxaa)
                {
@@ -398,25 +381,58 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                         Pp2 = hypre_StructMatrixBoxData(P_s, ii, 2);
                         P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P_s), ii);
 
-                        hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-                        hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
-                        hypre_BoxLoop1For(Pi)
+                        /* Update compute_box */
+                        for (d = 0; d < ndim; d++)
                         {
-                           center = Pp1[Pi] + Pp2[Pi];
-                           if (center)
+                           if ((d != cdir) && (hypre_BoxSizeD(compute_box, d) > 1))
                            {
-                              Pp1[Pi] /= center;
-                              Pp2[Pi] /= center;
+                              hypre_IndexD(hypre_BoxIMin(compute_box), d) -= 1;
+                              hypre_IndexD(hypre_BoxIMax(compute_box), d) += 1;
                            }
                         }
-                        hypre_BoxLoop1End(Pi);
+                        hypre_CopyBox(compute_box, tmp_box);
+                        hypre_IntersectBoxes(tmp_box, hypre_BoxArrayBox(compute_boxes, ii), compute_box);
+
+                        hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+                        if (hypre_IndexD(loop_size, cdir) > 1)
+                        {
+                           hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
+                           {
+                              HYPRE_Real center;
+
+                              center = Pp1[Pi] + Pp2[Pi];
+                              if (center)
+                              {
+                                 Pp1[Pi] /= center;
+                                 Pp2[Pi] /= center;
+                              }
+                           }
+                           hypre_BoxLoop1End(Pi);
+                        }
+                        else
+                        {
+                           hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
+                           {
+                              if (Pp1[Pi] > Pp2[Pi])
+                              {
+                                 Pp1[Pi] = 1.0;
+                                 Pp2[Pi] = 0.0;
+                              }
+                              else if (Pp2[Pi] > Pp1[Pi])
+                              {
+                                 Pp1[Pi] = 0.0;
+                                 Pp2[Pi] = 1.0;
+                              }
+                           }
+                           hypre_BoxLoop1End(Pi);
+                        }
                      } /* loop on pbnd_boxa */
                   }
                } /* loop on pbnd_boxaa */
-#endif
-               hypre_TFree(ventries);
+
+               hypre_TFree(ventries, HYPRE_MEMORY_HOST);
                hypre_BoxDestroy(compute_box);
-            } /* if constant variables*/
+            } /* if constant coefficients */
          } /* if (P_stencil_size > 1)*/
 
          hypre_StructMatrixAssemble(P_s);
@@ -425,6 +441,8 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
          hypre_StructMatrixClearBoundary(P_s);
       }
    }
+
+   hypre_BoxDestroy(tmp_box);
 
    return hypre_error_flag;
 }

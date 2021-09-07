@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
 
@@ -53,7 +48,7 @@ hypre_SStructRecvInfo( hypre_StructGrid      *cgrid,
 
    hypre_MPI_Comm_rank(comm, &myproc);
 
-   recvinfo_data= hypre_CTAlloc(hypre_SStructRecvInfoData, 1);
+   recvinfo_data= hypre_CTAlloc(hypre_SStructRecvInfoData,  1, HYPRE_MEMORY_HOST);
 
    /*------------------------------------------------------------------------
     * Create the structured recvbox patterns. 
@@ -68,7 +63,7 @@ hypre_SStructRecvInfo( hypre_StructGrid      *cgrid,
    grid_boxes   = hypre_StructGridBoxes(cgrid);
 
    recv_boxes= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(grid_boxes), ndim);
-   recv_processes= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(grid_boxes));
+   recv_processes= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(grid_boxes), HYPRE_MEMORY_HOST);
 
    hypre_ForBoxI(i, grid_boxes)
    {
@@ -91,7 +86,7 @@ hypre_SStructRecvInfo( hypre_StructGrid      *cgrid,
              cnt++;
           }
        }
-       recv_processes[i]     = hypre_CTAlloc(HYPRE_Int, cnt);
+       recv_processes[i]     = hypre_CTAlloc(HYPRE_Int,  cnt, HYPRE_MEMORY_HOST);
 
        cnt= 0;
        for (j= 0; j< nboxman_entries; j++)
@@ -115,7 +110,7 @@ hypre_SStructRecvInfo( hypre_StructGrid      *cgrid,
              cnt++;
           }
       } 
-      hypre_TFree(boxman_entries);
+      hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
    }  /* hypre_ForBoxI(i, grid_boxes) */ 
 
    hypre_BoxDestroy(intersect_box);
@@ -147,14 +142,14 @@ hypre_SStructRecvInfoDataDestroy(hypre_SStructRecvInfoData *recvinfo_data)
       {
          if (recvinfo_data -> recv_procs[i])
          {
-             hypre_TFree(recvinfo_data -> recv_procs[i]);
+             hypre_TFree(recvinfo_data -> recv_procs[i], HYPRE_MEMORY_HOST);
          }
 
       }
-      hypre_TFree(recvinfo_data -> recv_procs);
+      hypre_TFree(recvinfo_data -> recv_procs, HYPRE_MEMORY_HOST);
    }
 
-   hypre_TFree(recvinfo_data);
+   hypre_TFree(recvinfo_data, HYPRE_MEMORY_HOST);
 
    return ierr;
 }

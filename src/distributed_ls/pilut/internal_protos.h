@@ -1,18 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /* HYPRE_DistributedMatrixPilutSolver.c */
 HYPRE_Int HYPRE_NewDistributedMatrixPilutSolver( MPI_Comm comm , HYPRE_DistributedMatrix matrix , HYPRE_DistributedMatrixPilutSolver *new_solver );
@@ -36,7 +27,7 @@ HYPRE_Real hypre_GlobalSEMinDouble( HYPRE_Real value , MPI_Comm hypre_MPI_Contex
 HYPRE_Real hypre_GlobalSESumDouble( HYPRE_Real value , MPI_Comm hypre_MPI_Context );
 
 /* debug.c */
-void hypre_PrintLine( char *str , hypre_PilutSolverGlobals *globals );
+void hypre_PrintLine( const char *str , hypre_PilutSolverGlobals *globals );
 void hypre_CheckBounds( HYPRE_Int low , HYPRE_Int i , HYPRE_Int up , hypre_PilutSolverGlobals *globals );
 hypre_longint hypre_IDX_Checksum( const HYPRE_Int *v , HYPRE_Int len , const char *msg , HYPRE_Int tag , hypre_PilutSolverGlobals *globals );
 hypre_longint hypre_INT_Checksum( const HYPRE_Int *v , HYPRE_Int len , const char *msg , HYPRE_Int tag , hypre_PilutSolverGlobals *globals );

@@ -1,21 +1,16 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_parcsr_mv.h"
- 
+
 /*--------------------------------------------------------------------------
- * Test driver for unstructured matrix interface 
+ * Test driver for unstructured matrix interface
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 main( HYPRE_Int   argc,
       char *argv[] )
@@ -25,17 +20,17 @@ main( HYPRE_Int   argc,
    hypre_ParVector   *tmp_vector;
 
    HYPRE_Int          num_procs, my_id;
-   HYPRE_Int	 	global_size = 20;
+   HYPRE_BigInt 	global_size = 20;
    HYPRE_Int		local_size;
-   HYPRE_Int		first_index;
+   HYPRE_BigInt		first_index;
    HYPRE_Int 		i;
-   HYPRE_Int 		*partitioning;
+   HYPRE_BigInt 	*partitioning;
    HYPRE_Complex	prod;
    HYPRE_Complex 	*data, *data2;
-   hypre_Vector *vector; 
-   hypre_Vector *local_vector; 
+   hypre_Vector *vector;
+   hypre_Vector *local_vector;
    hypre_Vector *local_vector2;
- 
+
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
 
@@ -43,7 +38,7 @@ main( HYPRE_Int   argc,
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id );
 
    hypre_printf(" my_id: %d num_procs: %d\n", my_id, num_procs);
- 
+
    partitioning = NULL;
    vector1 = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,global_size,partitioning);
    partitioning = hypre_ParVectorPartitioning(vector1);
@@ -71,7 +66,6 @@ main( HYPRE_Int   argc,
    partitioning[3] = 20;
 */
    vector2 = hypre_VectorToParVector(hypre_MPI_COMM_WORLD,local_vector2,partitioning);
-   hypre_ParVectorSetPartitioningOwner(vector2,0);
 
    hypre_ParVectorPrint(vector2, "Convert");
 
@@ -84,7 +78,6 @@ main( HYPRE_Int   argc,
    tmp_vector = hypre_ParVectorRead(hypre_MPI_COMM_WORLD, "Convert");
 /*
    tmp_vector = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,global_size,partitioning);
-   hypre_ParVectorSetPartitioningOwner(tmp_vector,0);
    hypre_ParVectorInitialize(tmp_vector);
    hypre_ParVectorCopy(vector1, tmp_vector);
 
@@ -119,14 +112,13 @@ main( HYPRE_Int   argc,
     *-----------------------------------------------------------*/
 
    hypre_ParVectorDestroy(vector1);
-   hypre_ParVectorDestroy(vector2); 
+   hypre_ParVectorDestroy(vector2);
    hypre_ParVectorDestroy(tmp_vector);
-   hypre_SeqVectorDestroy(local_vector2); 
-   if (vector) hypre_SeqVectorDestroy(vector); 
+   hypre_SeqVectorDestroy(local_vector2);
+   if (vector) hypre_SeqVectorDestroy(vector);
 
    /* Finalize MPI */
    hypre_MPI_Finalize();
 
    return 0;
 }
-

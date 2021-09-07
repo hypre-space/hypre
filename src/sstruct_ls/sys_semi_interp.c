@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
 
@@ -30,7 +25,7 @@ hypre_SysSemiInterpCreate( void **sys_interp_vdata_ptr )
 {
    hypre_SysSemiInterpData *sys_interp_data;
 
-   sys_interp_data = hypre_CTAlloc(hypre_SysSemiInterpData, 1);
+   sys_interp_data = hypre_CTAlloc(hypre_SysSemiInterpData,  1, HYPRE_MEMORY_HOST);
    *sys_interp_vdata_ptr = (void *) sys_interp_data;
 
    return hypre_error_flag;
@@ -61,7 +56,7 @@ hypre_SysSemiInterpSetup( void                 *sys_interp_vdata,
    HYPRE_Int                 vi;
 
    nvars = hypre_SStructPMatrixNVars(P);
-   sinterp_data = hypre_CTAlloc(void *, nvars);
+   sinterp_data = hypre_CTAlloc(void *,  nvars, HYPRE_MEMORY_HOST);
 
    for (vi = 0; vi < nvars; vi++)
    {
@@ -134,8 +129,8 @@ hypre_SysSemiInterpDestroy( void *sys_interp_vdata )
             hypre_SemiInterpDestroy(sinterp_data[vi]);
          }
       }
-      hypre_TFree(sinterp_data);
-      hypre_TFree(sys_interp_data);
+      hypre_TFree(sinterp_data, HYPRE_MEMORY_HOST);
+      hypre_TFree(sys_interp_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;

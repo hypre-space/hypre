@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
 #include "sys_pfmg.h"
@@ -61,12 +56,11 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
    HYPRE_Int             i, l;
    char                  filename[255];
 
-   HYPRE_ANNOTATE_FUNC_BEGIN;
-
    /*-----------------------------------------------------
     * Initialize some things and deal with special cases
     *-----------------------------------------------------*/
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_BeginTiming(sys_pfmg_data -> time_index);
 
    /*-----------------------------------------------------
@@ -103,10 +97,9 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
 
    if (((tol > 0.) && (logging > 0)) || (print_level > 1))
    {
-      /* Compute fine grid residual (b - Ax) */
-      hypre_SStructPCopy(b_l[0], r_l[0]);
+      /* Compute fine grid residual (r = b - Ax) */
       hypre_SStructPMatvecCompute(matvec_data_l[0], -1.0,
-                                  A_l[0], x_l[0], 1.0, r_l[0]);
+                                  A_l[0], x_l[0], 1.0, b_l[0], r_l[0]);
    }
 
    /* part of convergence check */
@@ -140,16 +133,13 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
    }
 
    /* Print initial solution and residual */
-   if (print_level > 1)
-   {
-      /* Print solution */
-      hypre_sprintf(filename, "sys_pfmg_x.i%02d", 0);
-      hypre_SStructPVectorPrint(filename, x_l[0], 0);
+#if DEBUG
+   hypre_sprintf(filename, "sys_pfmg_x.i%02d", 0);
+   hypre_SStructPVectorPrint(filename, x_l[0], 0);
 
-      /* Print residual */
-      hypre_sprintf(filename, "sys_pfmg_r.i%02d", 0);
-      hypre_SStructPVectorPrint(filename, r_l[0], 0);
-   }
+   hypre_sprintf(filename, "sys_pfmg_r.i%02d", 0);
+   hypre_SStructPVectorPrint(filename, r_l[0], 0);
+#endif
 
    /*-----------------------------------------------------
     * Do V-cycles:
@@ -170,10 +160,9 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
       hypre_SysPFMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
       zero_guess = 0;
 
-      /* compute fine grid residual (b - Ax) */
-      hypre_SStructPCopy(b_l[0], r_l[0]);
-      hypre_SStructPMatvecCompute(matvec_data_l[0],
-                                  -1.0, A_l[0], x_l[0], 1.0, r_l[0]);
+      /* compute fine grid residual (r = b - Ax) */
+      hypre_SStructPMatvecCompute(matvec_data_l[0], -1.0, A_l[0], x_l[0],
+                                  1.0, b_l[0], r_l[0]);
 
       if (num_levels > 1)
       {
@@ -202,9 +191,8 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
                hypre_SysPFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 
                /* compute residual (b - Ax) */
-               hypre_SStructPCopy(b_l[l], r_l[l]);
-               hypre_SStructPMatvecCompute(matvec_data_l[l],
-                                           -1.0, A_l[l], x_l[l], 1.0, r_l[l]);
+               hypre_SStructPMatvecCompute(matvec_data_l[l], -1.0, A_l[l],
+                                           x_l[l], 1.0, b_l[l], r_l[l]);
             }
             else
             {
@@ -297,10 +285,9 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
 
       if ((logging > 0) || (print_level > 1))
       {
-         /* Recompute fine grid residual (b - Ax) after post-smoothing */
-         hypre_SStructPCopy(b_l[0], r_l[0]);
+         /* Recompute fine grid residual (r = b - Ax) after post-smoothing */
          hypre_SStructPMatvecCompute(matvec_data_l[0], -1.0,
-                                     A_l[0], x_l[0], 1.0, r_l[0]);
+                                     A_l[0], x_l[0], 1.0, b_l[0], r_l[0]);
 
          if (logging > 0)
          {

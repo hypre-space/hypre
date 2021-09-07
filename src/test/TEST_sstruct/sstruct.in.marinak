@@ -1,3 +1,8 @@
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
 
 ###########################################################
 
@@ -105,13 +110,26 @@ ProcessPoolCreate: 1
 
 # ProcessPoolSetPart: pool part
 ProcessPoolSetPart: 0 0
-ProcessPoolSetPart: 0 1 
+ProcessPoolSetPart: 0 1
 ProcessPoolSetPart: 0 2
 ProcessPoolSetPart: 0 3
 ProcessPoolSetPart: 0 4
 ProcessPoolSetPart: 0 5
 ProcessPoolSetPart: 0 6
 ProcessPoolSetPart: 0 7
+
+# ProcessPoolCreate: num_pools
+ProcessPoolCreate: 8
+
+# ProcessPoolSetPart: pool part
+ProcessPoolSetPart: 0 0
+ProcessPoolSetPart: 1 1
+ProcessPoolSetPart: 2 2
+ProcessPoolSetPart: 3 3
+ProcessPoolSetPart: 4 4
+ProcessPoolSetPart: 5 5
+ProcessPoolSetPart: 6 6
+ProcessPoolSetPart: 7 7
 
 ###########################################################
 

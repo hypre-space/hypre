@@ -1,19 +1,13 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
+#include "_hypre_struct_mv.hpp"
 #include "pfmg.h"
-
-#define DEBUG 0
 
 #define hypre_PFMGSetCIndex(cdir, cindex)       \
    {                                            \
@@ -50,9 +44,8 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Real            jacobi_weight     = (pfmg_data -> jacobi_weight);
    HYPRE_Int             skip_relax        = (pfmg_data -> skip_relax);
    HYPRE_Real           *dxyz              = (pfmg_data -> dxyz);
+   HYPRE_Int             max_iter          = (pfmg_data -> max_iter);
    HYPRE_Int             rap_type;
-
-   HYPRE_Int             max_iter;
    HYPRE_Int             max_levels;
    HYPRE_Int             num_levels;
 
@@ -93,9 +86,16 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
    HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
 
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_Int             num_level_GPU = 0;
+   HYPRE_MemoryLocation  data_location = HYPRE_MEMORY_DEVICE;
+   HYPRE_Int             max_box_size  = 0;
+   HYPRE_Int             device_level  = (pfmg_data -> devicelevel);
+   HYPRE_Int             myrank;
+   hypre_MPI_Comm_rank(comm, &myrank );
+#endif
+
 #if DEBUG
-   hypre_StructVector   *ones  = NULL;
-   hypre_StructVector   *Pones = NULL;
    char                  filename[255];
 #endif
 
@@ -113,17 +113,17 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    hypre_PFMGComputeMaxLevels(grid, &max_levels);
    if ((pfmg_data -> max_levels) > 0)
    {
-      (pfmg_data -> max_levels) = hypre_min((pfmg_data -> max_levels), max_levels);
-      max_levels = hypre_min((pfmg_data -> max_levels), max_levels);
+      max_levels = hypre_min(max_levels, (pfmg_data -> max_levels));
    }
+   (pfmg_data -> max_levels) = max_levels;
 
    /* compute dxyz */
    hypre_PFMGComputeDxyz(A, dxyz, &dxyz_flag);
 
    /* Run coarsening */
    cbox = hypre_BoxClone(hypre_StructGridBoundingBox(grid));
-   hypre_PFMGCoarsen(cbox, periodic, max_levels, dxyz_flag, dxyz, &cdir_l,
-                     &active_l, &relax_weights, &num_levels);
+   hypre_PFMGCoarsen(cbox, periodic, max_levels, dxyz_flag, dxyz,
+                     &cdir_l, &active_l, &relax_weights, &num_levels);
    cmaxsize = hypre_BoxMaxSize(cbox);
    hypre_BoxDestroy(cbox);
 
@@ -144,23 +144,22 @@ hypre_PFMGSetup( void               *pfmg_vdata,
     *-----------------------------------------------------*/
 
    /*-----------------------------------------------------
-    * Modify the rap_type if red-black Gauss-Seidel is
-    * used. Red-black gs is used only in the non-Galerkin
-    * case.
+    * Modify the rap_type if red-black Gauss-Seidel is used.
+    * Red-black gs is used only in the non-Galerkin case.
     *-----------------------------------------------------*/
    if (relax_type == 2 || relax_type == 3)   /* red-black gs */
    {
-      (pfmg_data -> rap_type)= 1;
+      (pfmg_data -> rap_type) = 1;
    }
    rap_type = (pfmg_data -> rap_type);
 
-   grid_l = hypre_TAlloc(hypre_StructGrid *, num_levels);
-   A_l    = hypre_TAlloc(hypre_StructMatrix *, num_levels);
-   P_l    = hypre_TAlloc(hypre_StructMatrix *, num_levels - 1);
-   RT_l   = hypre_TAlloc(hypre_StructMatrix *, num_levels - 1);
-   b_l    = hypre_TAlloc(hypre_StructVector *, num_levels);
-   x_l    = hypre_TAlloc(hypre_StructVector *, num_levels);
-   tx_l   = hypre_TAlloc(hypre_StructVector *, num_levels);
+   grid_l = hypre_TAlloc(hypre_StructGrid *, num_levels, HYPRE_MEMORY_HOST);
+   A_l    = hypre_TAlloc(hypre_StructMatrix *, num_levels, HYPRE_MEMORY_HOST);
+   P_l    = hypre_TAlloc(hypre_StructMatrix *, num_levels-1, HYPRE_MEMORY_HOST);
+   RT_l   = hypre_TAlloc(hypre_StructMatrix *, num_levels-1, HYPRE_MEMORY_HOST);
+   b_l    = hypre_TAlloc(hypre_StructVector *, num_levels, HYPRE_MEMORY_HOST);
+   x_l    = hypre_TAlloc(hypre_StructVector *, num_levels, HYPRE_MEMORY_HOST);
+   tx_l   = hypre_TAlloc(hypre_StructVector *, num_levels, HYPRE_MEMORY_HOST);
    r_l    = tx_l;
    e_l    = tx_l;
 
@@ -187,7 +186,8 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_PFMGSetStride(cdir, stride);
 
       /* set up interpolation and restriction operators */
-      P_l[l] = hypre_zPFMGCreateInterpOp(A_l[l], cdir, stride);
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
+      P_l[l] = hypre_zPFMGCreateInterpOp(A_l[l], cdir, stride, rap_type);
       RT_l[l] = P_l[l];
 #if 0 /* TODO: Allow RT != P */
       if (nonsymmetric_cycle)
@@ -205,7 +205,9 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          hypre_zPFMGSetupRestrictOp(RT_l[l], A_l[l], cdir);
       }
 #endif
+      HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
 
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "RAP");
       if (rap_type == 0)
       {
          HYPRE_Int           nmatrices   = 3;
@@ -220,7 +222,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
             terms[0] = 2;
          }
 
-         hypre_StructMatmult(nmatrices, matrices, nterms, terms, trans, NULL, &A_l[l+1]);
+         hypre_StructMatmult(nmatrices, matrices, nterms, terms, trans, &A_l[l+1]);
          hypre_StructGridRef(hypre_StructMatrixGrid(A_l[l+1]), &grid_l[l+1]);
       }
       else
@@ -234,6 +236,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          hypre_StructMatrixInitialize(A_l[l+1]);
          hypre_PFMGSetupRAPOp(RT_l[l], A_l[l], P_l[l], cdir, cindex, stride, rap_type, A_l[l+1]);
       }
+      HYPRE_ANNOTATE_REGION_END("%s", "RAP");
 
 //      /* RDF AP Debug */
 //      hypre_StructAssumedPartitionPrint("zAP", hypre_BoxManAssumedPartition(
@@ -271,13 +274,19 @@ hypre_PFMGSetup( void               *pfmg_vdata,
     * Set up multigrid operators and call setup routines
     *-----------------------------------------------------*/
 
-   relax_data_l    = hypre_TAlloc(void *, num_levels);
-   matvec_data_l   = hypre_TAlloc(void *, num_levels);
-   restrict_data_l = hypre_TAlloc(void *, num_levels);
-   interp_data_l   = hypre_TAlloc(void *, num_levels);
+   relax_data_l    = hypre_TAlloc(void *, num_levels, HYPRE_MEMORY_HOST);
+   matvec_data_l   = hypre_TAlloc(void *, num_levels, HYPRE_MEMORY_HOST);
+   restrict_data_l = hypre_TAlloc(void *, num_levels, HYPRE_MEMORY_HOST);
+   interp_data_l   = hypre_TAlloc(void *, num_levels, HYPRE_MEMORY_HOST);
 
    for (l = 0; l < (num_levels - 1); l++)
    {
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+      if (l == num_level_GPU)
+      {
+         hypre_SetDeviceOff();
+      }
+#endif
       cdir = cdir_l[l];
 
       /* set up the interpolation routine */
@@ -288,36 +297,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       restrict_data_l[l] = hypre_StructMatvecCreate();
       hypre_StructMatvecSetTranspose(restrict_data_l[l], 1);
       hypre_StructMatvecSetup(restrict_data_l[l], RT_l[l], r_l[l]);
-
-      // Check if P interpolates vector of ones
-#if DEBUG
-      if (ones != NULL)
-      {
-         HYPRE_StructVectorDestroy(ones);
-      }
-      HYPRE_StructVectorCreate(comm, grid_l[l+1], &ones);
-      HYPRE_StructVectorInitialize(ones);
-      HYPRE_StructVectorSetConstantValues(ones, 1.0);
-      HYPRE_StructVectorAssemble(ones);
-
-      hypre_sprintf(filename, "pfmg_ones.%02d", l);
-      HYPRE_StructVectorPrint(filename, ones, 0);
-
-      if (Pones != NULL)
-      {
-         HYPRE_StructVectorDestroy(Pones);
-      }
-      HYPRE_StructVectorCreate(comm, grid_l[l], &Pones);
-      HYPRE_StructVectorInitialize(Pones);
-      HYPRE_StructVectorAssemble(Pones);
-
-      /* interpolate error and correct (x = Pe_c) */
-      hypre_StructMatvecCompute(interp_data_l[l], 1.0, P_l[l], ones, 0.0, Pones);
-
-      hypre_sprintf(filename, "pfmg_Pones.%02d", l);
-      HYPRE_StructVectorPrint(filename, Pones, 0);
-#endif
-
    }
 
    /*-----------------------------------------------------
@@ -326,15 +305,20 @@ hypre_PFMGSetup( void               *pfmg_vdata,
     * Note that a processor with zero diagonal will set
     * active_l =0, other processors will not. This is OK
     * as we only want to avoid the division by zero on the
-    * one processor which owns the single coarse grid
-    * point.
+    * one processor which owns the single coarse grid point.
     *-----------------------------------------------------*/
 
-   if ( hypre_ZeroDiagonal(A_l[l]))
+   if (hypre_ZeroDiagonal(A_l[l]))
    {
       active_l[l] = 0;
    }
 
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
+   {
+      hypre_SetDeviceOn();
+   }
+#endif
    /* set up fine grid relaxation */
    relax_data_l[0] = hypre_PFMGRelaxCreate(comm);
    hypre_PFMGRelaxSetTol(relax_data_l[0], 0.0);
@@ -398,7 +382,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          }
       }
    }
-   hypre_TFree(relax_weights);
+   hypre_TFree(relax_weights, HYPRE_MEMORY_HOST);
 
    for (l = 0; l < num_levels; l++)
    {
@@ -419,24 +403,51 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    if ((pfmg_data -> logging) > 0)
    {
-      max_iter = (pfmg_data -> max_iter);
-      (pfmg_data -> norms)     = hypre_TAlloc(HYPRE_Real, max_iter+1);
-      (pfmg_data -> rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter+1);
+      (pfmg_data -> norms)     = hypre_TAlloc(HYPRE_Real, max_iter+1, HYPRE_MEMORY_HOST);
+      (pfmg_data -> rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter+1, HYPRE_MEMORY_HOST);
    }
-
-#if DEBUG
-   for (l = 0; l < (num_levels - 1); l++)
-   {
-      hypre_sprintf(filename, "pfmg_A.%02d", l);
-      hypre_StructMatrixPrint(filename, A_l[l], 0);
-      hypre_sprintf(filename, "pfmg_P.%02d", l);
-      hypre_StructMatrixPrint(filename, P_l[l], 0);
-   }
-   hypre_sprintf(filename, "pfmg_A.%02d", l);
-   hypre_StructMatrixPrint(filename, A_l[l], 0);
-#endif
 
    HYPRE_ANNOTATE_FUNC_END;
+
+#ifdef DEBUG_SETUP
+   {
+      hypre_StructVector   *ones  = NULL;
+      hypre_StructVector   *Pones = NULL;
+      char                  filename[255];
+
+      hypre_sprintf(filename, "pfmg_A.%02d", l);
+      hypre_StructMatrixPrint(filename, A_l[l], 0);
+
+      for (l = 0; l < (num_levels - 1); l++)
+      {
+         hypre_sprintf(filename, "pfmg_A.l%02d", l);
+         hypre_StructMatrixPrint(filename, A_l[l], 0);
+         hypre_sprintf(filename, "pfmg_P.l%02d", l);
+         hypre_StructMatrixPrint(filename, P_l[l], 0);
+
+         /* Check if P interpolates vector of ones */
+         HYPRE_StructVectorCreate(comm, hypre_StructMatrixGrid(A_l[l+1]), &ones);
+         HYPRE_StructVectorInitialize(ones);
+         HYPRE_StructVectorSetConstantValues(ones, 1.0);
+         HYPRE_StructVectorAssemble(ones);
+
+         HYPRE_StructVectorCreate(comm, hypre_StructMatrixGrid(A_l[l]), &Pones);
+         HYPRE_StructVectorInitialize(Pones);
+         HYPRE_StructVectorAssemble(Pones);
+
+         /* interpolate (x = P*e_c) */
+         hypre_StructMatvec(1.0, P_l[l], ones, 0.0, Pones);
+
+         hypre_sprintf(filename, "pfmg_ones.l%02d", l);
+         HYPRE_StructVectorPrint(filename, ones, 0);
+         hypre_sprintf(filename, "pfmg_Pones.l%02d", l);
+         HYPRE_StructVectorPrint(filename, Pones, 0);
+
+         HYPRE_StructVectorDestroy(ones);
+         HYPRE_StructVectorDestroy(Pones);
+      }
+   }
+#endif
 
    return hypre_error_flag;
 }
@@ -446,24 +457,27 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
 HYPRE_Int
 hypre_PFMGComputeMaxLevels( hypre_StructGrid   *grid,
-                            HYPRE_Int          *max_levels )
+                            HYPRE_Int          *max_levels_ptr )
 {
-   hypre_Box       *bbox;
-   HYPRE_Int        d, ndim;
+   HYPRE_Int        ndim = hypre_StructGridNDim(grid);
+   hypre_Box       *bbox = hypre_StructGridBoundingBox(grid);
+   HYPRE_Int        max_levels, d;
 
-   ndim = hypre_StructGridNDim(grid);
-   bbox = hypre_StructGridBoundingBox(grid);
-
-   *max_levels = 0;
+   max_levels = 1;
    for (d = 0; d < ndim; d++)
    {
-      *max_levels += hypre_Log2(hypre_BoxSizeD(bbox, d)) + 2;
+      max_levels += hypre_Log2(hypre_BoxSizeD(bbox, d)) + 2;
    }
+
+   *max_levels_ptr = max_levels;
 
    return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_PFMGComputeDxyz
+ *
+ * TODO: Change SerialBoxLoop to BoxLoop
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -476,14 +490,9 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    hypre_StructGrid      *grid = hypre_StructMatrixGrid(A);
 
    hypre_Box             *A_dbox;
-
    HYPRE_Int              Ai;
-
    HYPRE_Real            *Ap;
-   HYPRE_Real             cxyz[3], sqcxyz[3], tcxyz[3];
-   HYPRE_Real             cxyz_max;
 
-   HYPRE_Int              tot_size;
 
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
@@ -491,27 +500,32 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 
    HYPRE_Int              constant_coefficient;
 
-   HYPRE_Int              Astenc;
-
    hypre_Index            loop_size;
    hypre_IndexRef         start;
    hypre_Index            stride;
 
    HYPRE_Int              ndim, i, si, d;
    HYPRE_Int              diag_entry;
-   HYPRE_Real             cx, cy, cz;
-   HYPRE_Real             sqcx, sqcy, sqcz;
-   HYPRE_Real             tcx, tcy, tcz, diag;
+   HYPRE_Int              tot_size;
+   HYPRE_Real             val;
+   HYPRE_Real             cxyz_max;
+   HYPRE_Real             cxyz[HYPRE_MAXDIM];
+   HYPRE_Real             sqcxyz[HYPRE_MAXDIM];
+   HYPRE_Real             tcxyz[HYPRE_MAXDIM];
    HYPRE_Real             sqmean[HYPRE_MAXDIM];
    HYPRE_Real             deviation[HYPRE_MAXDIM];
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /*----------------------------------------------------------
     * Exit if user gives dxyz different than zero
     *----------------------------------------------------------*/
+
    if ((dxyz[0] != 0) && (dxyz[1] != 0) && (dxyz[2] != 0))
    {
       *dxyz_flag = 0;
 
+      HYPRE_ANNOTATE_FUNC_END;
       return hypre_error_flag;
    }
 
@@ -534,13 +548,11 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
     * Compute cxyz (use arithmetic mean)
     *----------------------------------------------------------*/
 
-   cx = 0.0;
-   cy = 0.0;
-   cz = 0.0;
-
-   sqcx = 0.0;
-   sqcy = 0.0;
-   sqcz = 0.0;
+   for (d = 0; d < ndim; d++)
+   {
+      cxyz[d] = 0.0;
+      sqcxyz[d] = 0.0;
+   }
 
    hypre_ForBoxI(i, compute_boxes)
    {
@@ -550,124 +562,102 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
       /* all coefficients constant or variable diagonal */
-      if ( constant_coefficient )
+      if (constant_coefficient)
       {
-         Ai = hypre_CCBoxIndexRank( A_dbox, start );
+         Ai = hypre_CCBoxIndexRank(A_dbox, start);
 
-         tcx = 0.0;
-         tcy = 0.0;
-         tcz = 0.0;
+         for (d = 0; d < ndim; d++)
+         {
+            tcxyz[d] = 0.0;
+         }
+
+         /* Compute tcxyz[d] */
+         for (si = 0; si < stencil_size; si++)
+         {
+            Ap  = hypre_StructMatrixBoxData(A, i, si);
+            val = Ap[Ai];
+
+            for (d = 0; d < ndim; d++)
+            {
+               if (hypre_IndexD(stencil_shape[si], d))
+               {
+                  tcxyz[d] += val;
+               }
+            }
+         }
 
          /* get sign of diagonal */
          Ap = hypre_StructMatrixBoxData(A, i, diag_entry);
-         diag = 1.0;
+
+         /* Update cxyz[d] */
          if (Ap[Ai] < 0)
          {
-            diag = -1.0;
+            for (d = 0; d < ndim; d++)
+            {
+               cxyz[d]   += tcxyz[d];
+               sqcxyz[d] += tcxyz[d]*tcxyz[d];
+            }
          }
-
-         for (si = 0; si < stencil_size; si++)
+         else
          {
-            Ap = hypre_StructMatrixBoxData(A, i, si);
-
-            /* x-direction */
-            Astenc = hypre_IndexD(stencil_shape[si], 0);
-            if (Astenc)
+            for (d = 0; d < ndim; d++)
             {
-               tcx -= Ap[Ai]*diag;
-            }
-
-            /* y-direction */
-            Astenc = hypre_IndexD(stencil_shape[si], 1);
-            if (Astenc)
-            {
-               tcy -= Ap[Ai]*diag;
-            }
-
-            /* z-direction */
-            Astenc = hypre_IndexD(stencil_shape[si], 2);
-            if (Astenc)
-            {
-               tcz -= Ap[Ai]*diag;
+               cxyz[d]   -= tcxyz[d];
+               sqcxyz[d] += tcxyz[d]*tcxyz[d];
             }
          }
-
-         cx += tcx;
-         cy += tcy;
-         cz += tcz;
-
-         sqcx += (tcx*tcx);
-         sqcy += (tcy*tcy);
-         sqcz += (tcz*tcz);
-      }
+       }
 
       /* constant_coefficient==0, all coefficients vary with space */
       else
       {
-         hypre_BoxLoop1Begin(ndim, loop_size,
-                             A_dbox, start, stride, Ai);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,si,Ap,diag,Astenc,tcx,tcy,tcz) reduction(+:cx,cy,cz,sqcx,sqcy,sqcz) HYPRE_SMP_SCHEDULE
-#endif
-         hypre_BoxLoop1For(Ai)
+         hypre_SerialBoxLoop1Begin(ndim, loop_size,
+                                   A_dbox, start, stride, Ai);
          {
-            tcx = 0.0;
-            tcy = 0.0;
-            tcz = 0.0;
+            for (d = 0; d < ndim; d++)
+            {
+               tcxyz[d] = 0.0;
+            }
+
+            /* Compute tcxyz[d] */
+            for (si = 0; si < stencil_size; si++)
+            {
+               Ap  = hypre_StructMatrixBoxData(A, i, si);
+               val = Ap[Ai];
+
+               for (d = 0; d < ndim; d++)
+               {
+                  if (hypre_IndexD(stencil_shape[si], d))
+                  {
+                     tcxyz[d] += val;
+                  }
+               }
+            }
 
             /* get sign of diagonal */
             Ap = hypre_StructMatrixBoxData(A, i, diag_entry);
-            diag = 1.0;
+
+            /* Update cxyz[d] */
             if (Ap[Ai] < 0)
             {
-               diag = -1.0;
+               for (d = 0; d < ndim; d++)
+               {
+                  cxyz[d]   += tcxyz[d];
+                  sqcxyz[d] += tcxyz[d]*tcxyz[d];
+               }
             }
-
-            for (si = 0; si < stencil_size; si++)
+            else
             {
-               Ap = hypre_StructMatrixBoxData(A, i, si);
-
-               /* x-direction */
-               Astenc = hypre_IndexD(stencil_shape[si], 0);
-               if (Astenc)
+               for (d = 0; d < ndim; d++)
                {
-                  tcx -= Ap[Ai]*diag;
-               }
-
-               /* y-direction */
-               Astenc = hypre_IndexD(stencil_shape[si], 1);
-               if (Astenc)
-               {
-                  tcy -= Ap[Ai]*diag;
-               }
-
-               /* z-direction */
-               Astenc = hypre_IndexD(stencil_shape[si], 2);
-               if (Astenc)
-               {
-                  tcz -= Ap[Ai]*diag;
+                  cxyz[d]   -= tcxyz[d];
+                  sqcxyz[d] += tcxyz[d]*tcxyz[d];
                }
             }
-
-            cx += tcx;
-            cy += tcy;
-            cz += tcz;
-
-            sqcx += (tcx*tcx);
-            sqcy += (tcy*tcy);
-            sqcz += (tcz*tcz);
          }
-         hypre_BoxLoop1End(Ai);
+         hypre_SerialBoxLoop1End(Ai);
       }
    }
-
-   cxyz[0] = cx;
-   cxyz[1] = cy;
-   cxyz[2] = cz;
-
-   sqcxyz[0] = sqcx;
-   sqcxyz[1] = sqcy;
-   sqcxyz[2] = sqcz;
 
    /*----------------------------------------------------------
     * Compute dxyz
@@ -685,16 +675,17 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    /* constant_coefficient==0, all coefficients vary with space */
    else
    {
-
-      tcxyz[0] = cxyz[0];
-      tcxyz[1] = cxyz[1];
-      tcxyz[2] = cxyz[2];
+      for (d = 0; d < ndim; d++)
+      {
+         tcxyz[d] = cxyz[d];
+      }
       hypre_MPI_Allreduce(tcxyz, cxyz, 3, HYPRE_MPI_REAL, hypre_MPI_SUM,
                           hypre_StructMatrixComm(A));
 
-      tcxyz[0] = sqcxyz[0];
-      tcxyz[1] = sqcxyz[1];
-      tcxyz[2] = sqcxyz[2];
+      for (d = 0; d < ndim; d++)
+      {
+         tcxyz[d] = sqcxyz[d];
+      }
       hypre_MPI_Allreduce(tcxyz, sqcxyz, 3, HYPRE_MPI_REAL, hypre_MPI_SUM,
                           hypre_StructMatrixComm(A));
 
@@ -712,19 +703,25 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    }
    if (cxyz_max == 0.0)
    {
+      /* Do isotropic coarsening */
+      for (d = 0; d < ndim; d++)
+      {
+         cxyz[d] = 1.0;
+      }
       cxyz_max = 1.0;
    }
 
    for (d = 0; d < ndim; d++)
    {
-      if (cxyz[d] > 0)
+      HYPRE_Real  max_anisotropy = HYPRE_REAL_MAX/1000;
+      if (cxyz[d] > (cxyz_max/max_anisotropy))
       {
          cxyz[d] /= cxyz_max;
          dxyz[d] = sqrt(1.0 / cxyz[d]);
       }
       else
       {
-         dxyz[d] = 1.0e+123;
+         dxyz[d] = sqrt(max_anisotropy);
       }
    }
 
@@ -737,6 +734,8 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
          *dxyz_flag = 1;
       }
    }
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -760,8 +759,6 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
 
    HYPRE_Real            *Ap;
    hypre_Box             *A_dbox;
-   HYPRE_Int              Ai;
-
    HYPRE_Int              i, si;
 
    hypre_Index            diag_offset;
@@ -792,16 +789,12 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
       }
       else
       {
-         hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
-                             A_dbox, start, stride, Ai);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai) reduction(*:diag_product) HYPRE_SMP_SCHEDULE
-#endif
-         hypre_BoxLoop1For(Ai)
+         hypre_SerialBoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
+                                   A_dbox, start, stride, Ai);
          {
             diag_product *= Ap[Ai];
          }
-         hypre_BoxLoop1End(Ai);
+         hypre_SerialBoxLoop1End(Ai);
       }
    }
 
@@ -827,6 +820,7 @@ hypre_PFMGCoarsen( hypre_Box     *cbox,
                    HYPRE_Real   **relax_weights_ptr,
                    HYPRE_Int     *num_levels)
 {
+   HYPRE_Int      ndim = hypre_BoxNDim(cbox);
    HYPRE_Int     *cdir_l;
    HYPRE_Int     *active_l;
    HYPRE_Real    *relax_weights;
@@ -836,14 +830,14 @@ hypre_PFMGCoarsen( hypre_Box     *cbox,
    hypre_Index    stride;
 
    HYPRE_Real     alpha, beta, min_dxyz;
-   HYPRE_Int      ndim, d, l, cdir;
+   HYPRE_Int      d, l, cdir;
 
-   ndim = hypre_BoxNDim(cbox);
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /* Allocate data */
-   cdir_l        = hypre_TAlloc(HYPRE_Int, max_levels);
-   active_l      = hypre_TAlloc(HYPRE_Int, max_levels);
-   relax_weights = hypre_CTAlloc(HYPRE_Real, max_levels);
+   cdir_l        = hypre_TAlloc(HYPRE_Int, max_levels, HYPRE_MEMORY_HOST);
+   active_l      = hypre_TAlloc(HYPRE_Int, max_levels, HYPRE_MEMORY_HOST);
+   relax_weights = hypre_CTAlloc(HYPRE_Real, max_levels, HYPRE_MEMORY_HOST);
 
    /* Force relaxation on finest grid */
    hypre_SetIndex(coarsen, 1);
@@ -934,16 +928,14 @@ hypre_PFMGCoarsen( hypre_Box     *cbox,
 
       /* update periodic */
       periodic[cdir] /= 2;
-
-      /* build the coarse grid */
-      /* RDF: RAP is already coarsening the grid; we shouldn't be doing this twice! */
-      //hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
    }
    *num_levels = l + 1;
 
    *cdir_l_ptr        = cdir_l;
    *active_l_ptr      = active_l;
    *relax_weights_ptr = relax_weights;
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

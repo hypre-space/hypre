@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
 
@@ -52,7 +47,7 @@ hypre_SStructSendInfo( hypre_StructGrid      *fgrid,
    hypre_ClearIndex(index); 
    hypre_MPI_Comm_rank(comm, &myproc);
 
-   sendinfo_data= hypre_CTAlloc(hypre_SStructSendInfoData, 1);
+   sendinfo_data= hypre_CTAlloc(hypre_SStructSendInfoData,  1, HYPRE_MEMORY_HOST);
 
    /*------------------------------------------------------------------------
     * Create the structured sendbox patterns. 
@@ -67,8 +62,8 @@ hypre_SStructSendInfo( hypre_StructGrid      *fgrid,
    grid_boxes   = hypre_StructGridBoxes(fgrid);
 
    send_boxes= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(grid_boxes), ndim);
-   send_processes= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(grid_boxes));
-   send_remote_boxnums= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(grid_boxes));
+   send_processes= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(grid_boxes), HYPRE_MEMORY_HOST);
+   send_remote_boxnums= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(grid_boxes), HYPRE_MEMORY_HOST);
 
    hypre_ForBoxI(i, grid_boxes)
    {
@@ -97,8 +92,8 @@ hypre_SStructSendInfo( hypre_StructGrid      *fgrid,
              cnt++;
           }
        }
-       send_processes[i]     = hypre_CTAlloc(HYPRE_Int, cnt);
-       send_remote_boxnums[i]= hypre_CTAlloc(HYPRE_Int, cnt);
+       send_processes[i]     = hypre_CTAlloc(HYPRE_Int,  cnt, HYPRE_MEMORY_HOST);
+       send_remote_boxnums[i]= hypre_CTAlloc(HYPRE_Int,  cnt, HYPRE_MEMORY_HOST);
 
        cnt= 0;
        for (j= 0; j< nboxman_entries; j++)
@@ -120,7 +115,7 @@ hypre_SStructSendInfo( hypre_StructGrid      *fgrid,
              cnt++;
           }
       } 
-      hypre_TFree(boxman_entries);
+      hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
    }  /* hypre_ForBoxI(i, grid_boxes) */ 
 
    hypre_BoxDestroy(intersect_box);
@@ -153,19 +148,19 @@ hypre_SStructSendInfoDataDestroy(hypre_SStructSendInfoData *sendinfo_data)
       {
          if (sendinfo_data -> send_procs[i])
          {
-             hypre_TFree(sendinfo_data -> send_procs[i]);
+             hypre_TFree(sendinfo_data -> send_procs[i], HYPRE_MEMORY_HOST);
          }
 
          if (sendinfo_data -> send_remote_boxnums[i])
          {
-             hypre_TFree(sendinfo_data -> send_remote_boxnums[i]);
+             hypre_TFree(sendinfo_data -> send_remote_boxnums[i], HYPRE_MEMORY_HOST);
          }
       }
-      hypre_TFree(sendinfo_data -> send_procs);
-      hypre_TFree(sendinfo_data -> send_remote_boxnums);
+      hypre_TFree(sendinfo_data -> send_procs, HYPRE_MEMORY_HOST);
+      hypre_TFree(sendinfo_data -> send_remote_boxnums, HYPRE_MEMORY_HOST);
    }
 
-   hypre_TFree(sendinfo_data);
+   hypre_TFree(sendinfo_data, HYPRE_MEMORY_HOST);
 
    return ierr;
 }

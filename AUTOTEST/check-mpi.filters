@@ -1,7 +1,10 @@
 /HYPRE_config.h:
 /_hypre_utilities.h:
 /HYPRE_utilities.h:
-/mpistubs.c:
-/mpistubs.h:
-/thread_mpistubs.c:
-/thread_mpistubs.h:
+/utilities/gpuMem.c:
+/utilities/mpistubs.c:
+/utilities/mpistubs.h:
+/parcsr_mv/par_csr_matvec.c:.*MPI_PACK
+/parcsr_mv/par_csr_matvec.c:.*MPI_HALO_EXC_SEND
+/parcsr_mv/par_csr_matvec.c:.*MPI_HALO_EXC_RECV
+/parcsr_mv/par_csr_matvec.c:.*MPI_UNPACK

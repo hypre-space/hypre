@@ -1,23 +1,16 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /*
  * File:	timer.c
  * Author:	Scott Kohn (skohn@llnl.gov)
  * Description:	somewhat portable timing routines for C++, C, and Fortran
  *
- * If TIMER_USE_MPI is defined, then the MPI timers are used to get
- * wallclock seconds, since we assume that the MPI timers have better
- * resolution than the system timers.
+ * This has been modified many times since the original author's version.
  */
 
 #include "_hypre_utilities.h"
@@ -27,13 +20,10 @@
 #include <unistd.h>
 #include <sys/times.h>
 #endif
-#ifdef TIMER_USE_MPI
-#include "mpi.h"
-#endif
 
 HYPRE_Real time_getWallclockSeconds(void)
 {
-#ifdef TIMER_USE_MPI
+#ifndef HYPRE_SEQUENTIAL
    return(hypre_MPI_Wtime());
 #else
 #ifdef WIN32

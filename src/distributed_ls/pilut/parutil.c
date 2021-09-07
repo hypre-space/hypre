@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /*
  * parutil.c
@@ -71,7 +63,7 @@ HYPRE_Int *hypre_idx_malloc(HYPRE_Int n,const char *msg)
   if (n == 0)
     return NULL;
 
-  ptr = (HYPRE_Int *)malloc(sizeof(HYPRE_Int)*n);
+  ptr = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
   if (ptr == NULL) {
     hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(HYPRE_Int));
   }
@@ -92,7 +84,7 @@ HYPRE_Int *hypre_idx_malloc_init(HYPRE_Int n, HYPRE_Int ival,const char *msg)
   if (n == 0)
     return NULL;
 
-  ptr = (HYPRE_Int *)malloc(sizeof(HYPRE_Int)*n);
+  ptr = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
   if (ptr == NULL) {
     hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(HYPRE_Int));
   }
@@ -114,7 +106,7 @@ HYPRE_Real *hypre_fp_malloc(HYPRE_Int n,const char *msg)
   if (n == 0)
     return NULL;
 
-  ptr = (HYPRE_Real *)malloc(sizeof(HYPRE_Real)*n);
+  ptr = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
   if (ptr == NULL) {
     hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(HYPRE_Real));
   }
@@ -135,7 +127,7 @@ HYPRE_Real *hypre_fp_malloc_init(HYPRE_Int n, HYPRE_Real ival,const char *msg)
   if (n == 0)
     return NULL;
 
-  ptr = (HYPRE_Real *)malloc(sizeof(HYPRE_Real)*n);
+  ptr = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
   if (ptr == NULL) {
     hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(HYPRE_Real));
   }
@@ -158,7 +150,7 @@ void *hypre_mymalloc(HYPRE_Int nbytes,const char *msg)
   if (nbytes == 0)
     return NULL;
 
-  ptr = (void *)malloc(nbytes);
+  ptr = hypre_TAlloc(char, nbytes, HYPRE_MEMORY_HOST);
   if (ptr == NULL) {
     hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, nbytes);
   }
@@ -168,37 +160,32 @@ void *hypre_mymalloc(HYPRE_Int nbytes,const char *msg)
 
 
 /*************************************************************************
-* This function is my wrapper around free, allows multiple pointers    
+* This function is my wrapper around free, allows multiple pointers
 **************************************************************************/
 #if 0
 void hypre_free_multi(void *ptr1,...)
 {
-  va_list plist;
-  void *ptr;
+   va_list plist;
+   void *ptr;
 
-  if (ptr1 != NULL)
-    free(ptr1);
-  ptr1 = NULL;
+   hypre_TFree(ptr1, HYPRE_MEMORY_HOST);
 
-  va_start(plist, ptr1);
+   va_start(plist, ptr1);
 
-  while ( (ptr = va_arg(plist, void *)) != ((void *) -1) ) {
-    if (ptr != NULL)
-      free(ptr);
-    ptr = NULL;
-  }
+   while ( (ptr = va_arg(plist, void *)) != ((void *) -1) ) {
+      hypre_TFree(ptr, HYPRE_MEMORY_HOST);
+   }
 
-  va_end(plist);
-
-}    
-#endif        
+   va_end(plist);
+}
+#endif
 
 /*************************************************************************
 * The following function copies an HYPRE_Int (HYPRE_Int) array
 **************************************************************************/
 void hypre_memcpy_int( HYPRE_Int *dest, const HYPRE_Int *src, size_t n )
 {
-  if (dest) memcpy(dest, src, n*sizeof(HYPRE_Int));
+   if (dest) hypre_TMemcpy(dest,  src, HYPRE_Int, n, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 }
 
 /*************************************************************************
@@ -206,7 +193,7 @@ void hypre_memcpy_int( HYPRE_Int *dest, const HYPRE_Int *src, size_t n )
 **************************************************************************/
 void hypre_memcpy_idx( HYPRE_Int *dest, const HYPRE_Int *src, size_t n )
 {
-  if (dest) memcpy(dest, src, n*sizeof(HYPRE_Int));
+   if (dest) hypre_TMemcpy(dest,  src, HYPRE_Int, n, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 }
 
 /*************************************************************************

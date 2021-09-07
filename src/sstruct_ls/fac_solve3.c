@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *  FAC cycle. Refinement patches are solved using relaxation.
@@ -29,38 +21,38 @@ hypre_FACSolve3( void                 *fac_vdata,
                 hypre_SStructVector  *b_in,
                 hypre_SStructVector  *x_in         )
 {
-	hypre_FACData           *fac_data           = (hypre_FACData*)fac_vdata;
+   hypre_FACData           *fac_data           = (hypre_FACData*)fac_vdata;
 
-   hypre_SStructMatrix     *A_in               =(fac_data-> A_rap);
-   hypre_SStructMatrix    **A_level            =(fac_data-> A_level);
-   hypre_SStructVector    **b_level            =(fac_data-> b_level);
-   hypre_SStructVector    **x_level            =(fac_data-> x_level);
-   hypre_SStructVector    **e_level            =(fac_data-> e_level);
-   hypre_SStructPVector   **tx_level           =(fac_data-> tx_level);
-   hypre_SStructVector     *tx                 =(fac_data-> tx);
-   void                   **relax_data_level   =(fac_data-> relax_data_level);
-   void                   **matvec_data_level  =(fac_data-> matvec_data_level);
-   void                   **pmatvec_data_level =(fac_data-> pmatvec_data_level);
-   void                   **restrict_data_level=(fac_data-> restrict_data_level);
-   void                   **interp_data_level  =(fac_data-> interp_data_level);
-   void                    *matvec_data        =(fac_data-> matvec_data);
-   HYPRE_SStructSolver      csolver            =(fac_data-> csolver);
+   hypre_SStructMatrix     *A_in               = (fac_data-> A_rap);
+   hypre_SStructMatrix    **A_level            = (fac_data-> A_level);
+   hypre_SStructVector    **b_level            = (fac_data-> b_level);
+   hypre_SStructVector    **x_level            = (fac_data-> x_level);
+   hypre_SStructVector    **e_level            = (fac_data-> e_level);
+   hypre_SStructPVector   **tx_level           = (fac_data-> tx_level);
+   hypre_SStructVector     *tx                 = (fac_data-> tx);
+   void                   **relax_data_level   = (fac_data-> relax_data_level);
+   void                   **matvec_data_level  = (fac_data-> matvec_data_level);
+   void                   **pmatvec_data_level = (fac_data-> pmatvec_data_level);
+   void                   **restrict_data_level= (fac_data-> restrict_data_level);
+   void                   **interp_data_level  = (fac_data-> interp_data_level);
+   void                    *matvec_data        = (fac_data-> matvec_data);
+   HYPRE_SStructSolver      csolver            = (fac_data-> csolver);
 
-   HYPRE_Int                max_level          =(fac_data-> max_levels);
-   HYPRE_Int               *levels             =(fac_data-> level_to_part);
-   HYPRE_Int                max_cycles         =(fac_data-> max_cycles);
-   HYPRE_Int                rel_change         =(fac_data-> rel_change);
-   HYPRE_Int                zero_guess         =(fac_data-> zero_guess);
-   HYPRE_Int                num_pre_smooth     =(fac_data-> num_pre_smooth);
-   HYPRE_Int                num_post_smooth    =(fac_data-> num_post_smooth);
-   HYPRE_Int                csolver_type       =(fac_data-> csolver_type);
-   HYPRE_Int                logging            =(fac_data-> logging);
-   HYPRE_Real              *norms              =(fac_data-> norms);
-   HYPRE_Real              *rel_norms          =(fac_data-> rel_norms);
-   HYPRE_Real               tol                =(fac_data-> tol);
+   HYPRE_Int                max_level          = (fac_data-> max_levels);
+   HYPRE_Int               *levels             = (fac_data-> level_to_part);
+   HYPRE_Int                max_cycles         = (fac_data-> max_cycles);
+   HYPRE_Int                rel_change         = (fac_data-> rel_change);
+   HYPRE_Int                zero_guess         = (fac_data-> zero_guess);
+   HYPRE_Int                num_pre_smooth     = (fac_data-> num_pre_smooth);
+   HYPRE_Int                num_post_smooth    = (fac_data-> num_post_smooth);
+   HYPRE_Int                csolver_type       = (fac_data-> csolver_type);
+   HYPRE_Int                logging            = (fac_data-> logging);
+   HYPRE_Real              *norms              = (fac_data-> norms);
+   HYPRE_Real              *rel_norms          = (fac_data-> rel_norms);
+   HYPRE_Real               tol                = (fac_data-> tol);
 
-   HYPRE_Int                part_crse= 0;
-   HYPRE_Int                part_fine= 1;
+   HYPRE_Int                part_crse = 0;
+   HYPRE_Int                part_fine = 1;
 
    hypre_SStructPMatrix    *pA;
    hypre_SStructPVector    *px;
@@ -71,10 +63,10 @@ hypre_FACSolve3( void                 *fac_vdata,
 
    HYPRE_Real               b_dot_b = 0, r_dot_r, eps = 0;
    HYPRE_Real               e_dot_e = 0, e_dot_e_l, x_dot_x = 1;
-                    
+
    HYPRE_Int                level, i;
    HYPRE_Int                ierr = 0;
-  
+
    /*--------------------------------------------------------------
     * Special cases
     *--------------------------------------------------------------*/
@@ -97,7 +89,7 @@ hypre_FACSolve3( void                 *fac_vdata,
    }
 
    /*--------------------------------------------------------------
-    * Convergence check- we need to compute the norm of the 
+    * Convergence check- we need to compute the norm of the
     * composite rhs.
     *--------------------------------------------------------------*/
 
@@ -125,7 +117,7 @@ hypre_FACSolve3( void                 *fac_vdata,
          }
 
          hypre_EndTiming(fac_data -> time_index);
-         return ierr; 
+         return ierr;
       }
    }
 
@@ -134,11 +126,10 @@ hypre_FACSolve3( void                 *fac_vdata,
     *--------------------------------------------------------------*/
    for (i = 0; i < max_cycles; i++)
    {
-      hypre_SStructCopy(b_in, tx);
-      hypre_SStructMatvecCompute(matvec_data, -1.0, A_in, x_in, 1.0, tx);
+      hypre_SStructMatvecCompute(matvec_data, -1.0, A_in, x_in, 1.0, b_in, tx);
 
       /*-----------------------------------------------------------
-       * convergence check 
+       * convergence check
        *-----------------------------------------------------------*/
       if (tol > 0.0)
       {
@@ -192,7 +183,7 @@ hypre_FACSolve3( void                 *fac_vdata,
       for (level= max_level; level> 0; level--)
       {
          /*-----------------------------------------------------------
-          * local fine solve: the rhs has already been updated with 
+          * local fine solve: the rhs has already been updated with
           * the "unstructured" interface coupling. That is, since the
           * composite corrections are initialized to zero, the patch
           * fine-to-coarse boundary couplings (conditions) do not
@@ -201,24 +192,24 @@ hypre_FACSolve3( void                 *fac_vdata,
           pA = hypre_SStructMatrixPMatrix(A_level[level], part_fine);
           px = hypre_SStructVectorPVector(x_level[level], part_fine);
           py = hypre_SStructVectorPVector(b_level[level], part_fine);
-          
+
           hypre_FacLocalRelax(relax_data_level[level], pA, px, py,
                               num_pre_smooth, &zero_guess);
-          
+
          /*-----------------------------------------------------------
           * set up the coarse part problem: update two-level composite
           * residual, restrict, and zero coarse approximation.
           *
           * The residual is updated using the patch solution. This
-          * involves coarse-to-fine matvec contributions. Since 
-          * part_crse of x_level is zero, only zero  fine-to-coarse 
+          * involves coarse-to-fine matvec contributions. Since
+          * part_crse of x_level is zero, only zero  fine-to-coarse
           * contributions are involved.
           *-----------------------------------------------------------*/
 
          /* structured contribution */
           hypre_SStructPMatvecCompute(pmatvec_data_level[level],
-                                     -1.0, pA, px, 1.0, py);
-      
+                                     -1.0, pA, px, 1.0, py, py);
+
          /* unstructured contribution */
           parcsrA = hypre_SStructMatrixParCSRMatrix(A_level[level]);
           hypre_SStructVectorConvert(x_level[level], &parx);
@@ -228,24 +219,24 @@ hypre_FACSolve3( void                 *fac_vdata,
           hypre_SStructVectorRestore(b_level[level], pary);
 
          /*-----------------------------------------------------------
-          *  restrict the two-level composite residual. 
-          *  
-          *  This involves restricting the two-level composite residual 
+          *  restrict the two-level composite residual.
+          *
+          *  This involves restricting the two-level composite residual
           *  of the current level to the part_fine rhs of the next
-          *  descending level, or part_crse if the next descending 
+          *  descending level, or part_crse if the next descending
           *  level is the coarsest. Part_fine of the two-level composite
           *  residual is resricted, part_crse is injected.
           *-----------------------------------------------------------*/
           if (level > 1)
           {
-             hypre_FACRestrict2(restrict_data_level[level], 
-                                b_level[level], 
+             hypre_FACRestrict2(restrict_data_level[level],
+                                b_level[level],
                                 hypre_SStructVectorPVector(b_level[level-1],part_fine));
           }
           else
           {
-             hypre_FACRestrict2(restrict_data_level[level], 
-                                b_level[level], 
+             hypre_FACRestrict2(restrict_data_level[level],
+                                b_level[level],
                                 hypre_SStructVectorPVector(b_level[level-1],part_crse));
           }
 
@@ -261,7 +252,7 @@ hypre_FACSolve3( void                 *fac_vdata,
        level= 0;
        if (csolver_type==1)
        {
-           HYPRE_PCGSolve((HYPRE_Solver) csolver, 
+           HYPRE_PCGSolve((HYPRE_Solver) csolver,
                           (HYPRE_Matrix) A_level[0],
                           (HYPRE_Vector) b_level[0],
                           (HYPRE_Vector) x_level[0]);
@@ -283,7 +274,7 @@ hypre_FACSolve3( void                 *fac_vdata,
        {
 
          /*-----------------------------------------------------------
-          * Interpolate error, update the residual, and correct 
+          * Interpolate error, update the residual, and correct
           * (x = x + Pe_c). Interpolation is done in several stages:
           *   1)interpolate only the coarse unknowns away from the
           *     refinement patch: identity interpolation, interpolated
@@ -297,7 +288,7 @@ hypre_SStructVectorSetConstantValues(x_level[max_level-1], 1.0);
 */
 
          /*-----------------------------------------------------------
-          *  interpolation of unknowns away from the underlying 
+          *  interpolation of unknowns away from the underlying
           *  fine grid patch. Identity interpolation.
           *-----------------------------------------------------------*/
           hypre_FAC_IdentityInterp2(interp_data_level[level-1],
@@ -323,8 +314,8 @@ hypre_SStructVectorSetConstantValues(x_level[max_level-1], 1.0);
           if (num_post_smooth)
           {
              hypre_SStructMatvecCompute(matvec_data_level[level], -1.0,
-                                        A_level[level], e_level[level], 
-                                        1.0, b_level[level]);
+                                        A_level[level], e_level[level],
+                                        1.0, b_level[level], b_level[level]);
           }
 
          /*-----------------------------------------------------------
@@ -335,21 +326,21 @@ hypre_SStructVectorSetConstantValues(x_level[max_level-1], 1.0);
              hypre_SStructPVectorSetConstantValues(tx_level[level], 0.0);
              pA = hypre_SStructMatrixPMatrix(A_level[level], part_fine);
              py = hypre_SStructVectorPVector(b_level[level], part_fine);
-          
+
              hypre_FacLocalRelax(relax_data_level[level], pA, tx_level[level], py,
                                  num_post_smooth, &zero_guess);
 
          /*-----------------------------------------------------------
           *  add the post-smooth solution to x_level and to the error
           *  vector e_level if level= max_level. The e_levels should
-          *  contain only the correction to x_in. 
+          *  contain only the correction to x_in.
           *-----------------------------------------------------------*/
-             hypre_SStructPAxpy(1.0, tx_level[level], 
+             hypre_SStructPAxpy(1.0, tx_level[level],
                                 hypre_SStructVectorPVector(x_level[level], part_fine));
 
              if (level == max_level)
              {
-                hypre_SStructPAxpy(1.0, tx_level[level], 
+                hypre_SStructPAxpy(1.0, tx_level[level],
                                 hypre_SStructVectorPVector(e_level[level], part_fine));
              }
           }
@@ -358,27 +349,27 @@ hypre_SStructVectorSetConstantValues(x_level[max_level-1], 1.0);
 
       /*--------------------------------------------------------------
        * Add two-level corrections x_level to the composite solution
-       * x_in. 
+       * x_in.
        *
-       * Notice that except for the finest two-level sstruct_vector, 
+       * Notice that except for the finest two-level sstruct_vector,
        * only the part_crse of each two-level sstruct_vector has
        * a correction to x_in. For max_level, both part_crse and
        * part_fine has a correction to x_in.
        *--------------------------------------------------------------*/
- 
-      hypre_SStructPAxpy(1.0, 
+
+      hypre_SStructPAxpy(1.0,
                          hypre_SStructVectorPVector(x_level[max_level], part_fine),
                          hypre_SStructVectorPVector(x_in, levels[max_level]));
 
       for (level= 1; level<= max_level; level++)
       {
-          hypre_SStructPAxpy(1.0, 
+          hypre_SStructPAxpy(1.0,
                              hypre_SStructVectorPVector(x_level[level], part_crse),
                              hypre_SStructVectorPVector(x_in, levels[level-1]) );
       }
 
       /*-----------------------------------------------
-       * convergence check 
+       * convergence check
        *-----------------------------------------------*/
       if ((tol > 0.0) && (rel_change))
       {
@@ -387,7 +378,7 @@ hypre_SStructVectorSetConstantValues(x_level[max_level-1], 1.0);
           hypre_SStructInnerProd(e_level[max_level], e_level[max_level], &e_dot_e);
           for (level= 1; level< max_level; level++)
           {
-             hypre_SStructPInnerProd( 
+             hypre_SStructPInnerProd(
                          hypre_SStructVectorPVector(e_level[level], part_crse),
                          hypre_SStructVectorPVector(e_level[level], part_crse),
                          &e_dot_e_l);
@@ -405,4 +396,3 @@ hypre_SStructVectorSetConstantValues(x_level[max_level-1], 1.0);
 
    return ierr;
 }
-

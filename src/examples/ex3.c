@@ -1,3 +1,10 @@
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 /*
    Example 3
 
@@ -36,15 +43,20 @@
                    example.
 */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <math.h>
-#include "_hypre_utilities.h"
 #include "HYPRE_struct_ls.h"
+#include "ex.h"
 
+#ifdef HYPRE_EXVIS
 #include "vis.c"
+#endif
 
 int main (int argc, char *argv[])
 {
-   int i, j, k;
+   int i, j;
 
    int myid, num_procs;
 
@@ -139,6 +151,12 @@ int main (int argc, char *argv[])
          return (0);
       }
    }
+
+   /* Initialize HYPRE */
+   HYPRE_Init();
+
+   /* Print GPU info */
+   /* HYPRE_PrintDeviceInfo(); */
 
    /* Figure out the processor grid (N x N).  The local problem
       size for the interior nodes is indicated by n (n x n).
@@ -367,6 +385,7 @@ int main (int argc, char *argv[])
 
       /* Clean up */
       HYPRE_StructPCGDestroy(solver);
+      HYPRE_StructSMGDestroy(precond);
    }
 
    if (solver_id == 1)
@@ -396,10 +415,11 @@ int main (int argc, char *argv[])
    /* Save the solution for GLVis visualization, see vis/glvis-ex3.sh */
    if (vis)
    {
+#ifdef HYPRE_EXVIS
       FILE *file;
       char filename[255];
 
-      int nvalues = n*n;
+      int k, nvalues = n*n;
       double *values = (double*) calloc(nvalues, sizeof(double));
 
       /* get the local solution */
@@ -426,6 +446,7 @@ int main (int argc, char *argv[])
       /* save global finite element mesh */
       if (myid == 0)
          GLVis_PrintGlobalSquareMesh("vis/ex3.mesh", N*n-1);
+#endif
    }
 
    if (myid == 0)
@@ -442,6 +463,9 @@ int main (int argc, char *argv[])
    HYPRE_StructMatrixDestroy(A);
    HYPRE_StructVectorDestroy(b);
    HYPRE_StructVectorDestroy(x);
+
+   /* Finalize HYPRE */
+   HYPRE_Finalize();
 
    /* Finalize MPI */
    MPI_Finalize();

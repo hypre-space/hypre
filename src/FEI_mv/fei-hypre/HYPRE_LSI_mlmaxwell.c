@@ -1,23 +1,15 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
-
-
-
-/****************************************************************************/ 
+/****************************************************************************/
 /* HYPRE_LSI_MLMaxwell interface                                            */
 /*--------------------------------------------------------------------------*/
 /*  local functions :
- * 
+ *
  *        ML_ExchBdry
  *        ML_MatVec
  *        ML_GetRow
@@ -33,7 +25,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <assert.h>
 #include <math.h>
 
 #include "../../parcsr_ls/HYPRE_parcsr_ls.h"
@@ -46,12 +37,12 @@
 
 extern void hypre_qsort0(int *, int, int);
 extern int  HYPRE_LSI_MLConstructMLMatrix(HYPRE_ParCSRMatrix,
-                  HYPRE_ML_Matrix *, int *, MPI_Comm, MLMaxwell_Context*); 
+                  HYPRE_ML_Matrix *, int *, MPI_Comm, MLMaxwell_Context*);
 
 /****************************************************************************/
 /* communication functions on parallel platforms                            */
 /*--------------------------------------------------------------------------*/
-                                                                                
+
 int ML_Irecv(void* buf, unsigned int count, int *src, int *mid,
              MPI_Comm comm, MPI_Request *requests)
 {
@@ -59,7 +50,7 @@ int ML_Irecv(void* buf, unsigned int count, int *src, int *mid,
    return 0;
 #else
    int mypid, lsrc, retcode;
-                                                                                
+
    if (*src < 0) lsrc = MPI_ANY_SOURCE; else lsrc = (*src);
    retcode = MPI_Irecv(buf, (int) count,MPI_BYTE,lsrc,*mid,comm,requests);
    if (retcode != 0)
@@ -70,7 +61,7 @@ int ML_Irecv(void* buf, unsigned int count, int *src, int *mid,
    return 0;
 #endif
 }
-                                                                                
+
 int ML_Wait(void* buf, unsigned int count, int *src, int *mid,
             MPI_Comm comm, MPI_Request *requests)
 {
@@ -79,7 +70,7 @@ int ML_Wait(void* buf, unsigned int count, int *src, int *mid,
 #else
    MPI_Status status;
    int        mypid, incount, retcode;
-                                                                                
+
    retcode = MPI_Wait(requests, &status);
    if (retcode != 0)
    {
@@ -107,8 +98,8 @@ int ML_Send(void* buf, unsigned int count, int dest, int mid, MPI_Comm comm)
    return 0;
 #endif
 }
-                                                                                
-/****************************************************************************/ 
+
+/****************************************************************************/
 /* wrapper function for interprocessor communication for matvec and getrow  */
 /*--------------------------------------------------------------------------*/
 
@@ -123,7 +114,7 @@ int ML_ExchBdry(double *vec, void *obj)
    double      *dbuf;
    HYPRE_ML_Matrix   *Amat;
    MPI_Comm    comm;
-   MPI_Request *requests; 
+   MPI_Request *requests;
    MLMaxwell_Context *context;
 
    context     = (MLMaxwell_Context *) obj;
@@ -139,7 +130,7 @@ int ML_ExchBdry(double *vec, void *obj)
    nRows       = Amat->Nrows;
 
    if (recvProcCnt > 0)
-      requests = (MPI_Request *) malloc(recvProcCnt*sizeof(MPI_Request));
+      requests = hypre_TAlloc(MPI_Request, recvProcCnt, HYPRE_MEMORY_HOST);
    msgid = 234;
    offset = nRows;
    for (i = 0; i < recvProcCnt; i++)
@@ -154,11 +145,11 @@ int ML_ExchBdry(double *vec, void *obj)
    {
       dest = sendProc[i];
       leng = sendLeng[i] * sizeof(double);
-      dbuf = (double *) malloc(leng * sizeof(double));
+      dbuf = hypre_TAlloc(double, leng , HYPRE_MEMORY_HOST);
       tempList = sendList[i];
       for (j = 0; j < sendLeng[i]; j++) dbuf[j] = vec[tempList[j]];
       ML_Send((void*) dbuf, leng, dest, msgid, comm);
-      if (dbuf != NULL) free(dbuf);
+      hypre_TFree(dbuf, HYPRE_MEMORY_HOST);
    }
    offset = nRows;
    for (i = 0; i < recvProcCnt; i++)
@@ -168,12 +159,13 @@ int ML_ExchBdry(double *vec, void *obj)
       ML_Wait((void*) &(vec[offset]), leng, &src, &msgid, comm, &requests[i]);
       offset += recvLeng[i];
    }
-   if (recvProcCnt > 0) free (requests);
+   if (recvProcCnt > 0)
+      hypre_TFree(requests, HYPRE_MEMORY_HOST);
    return 1;
 #endif
 }
 
-/****************************************************************************/ 
+/****************************************************************************/
 /* matvec function for local matrix structure HYPRE_ML_Matrix               */
 /*--------------------------------------------------------------------------*/
 
@@ -198,22 +190,22 @@ int ML_MatVec(void *obj, int leng1, double p[], int leng2, double ap[])
     colVal  = Amat->values;
     length = nRows;
     for (i = 0; i < Amat->recvProcCnt; i++) length += Amat->recvLeng[i];
-    dbuf = (double *) malloc(length * sizeof(double));
+    dbuf = hypre_TAlloc(double, length , HYPRE_MEMORY_HOST);
     for (i = 0; i < nRows; i++) dbuf[i] = p[i];
     ML_ExchBdry(dbuf, (void *) context);
-    for (i = 0 ; i < nRows; i++) 
+    for (i = 0 ; i < nRows; i++)
     {
        sum = 0.0;
        ibeg = rowptr[i];
        iend = rowptr[i+1];
        for (j = ibeg; j < iend; j++)
-       { 
+       {
           k = colInd[j];
           sum += (colVal[j] * dbuf[k]);
        }
        ap[i] = sum;
     }
-    if (dbuf != NULL) free(dbuf);
+    hypre_TFree(dbuf, HYPRE_MEMORY_HOST);
     return 1;
 
 #else
@@ -234,11 +226,10 @@ int ML_GetRow(void *obj, int N_requested_rows, int requested_rows[],
    int allocated_space, int columns[], double values[], int row_lengths[])
 #endif
 {
+#ifdef HAVE_MLMAXWELL
     int               i, j, ncnt, colindex, rowLeng, rowindex;
     int               nRows, *rowptr, *colInd;
     double            *colVal;
-
-#ifdef HAVE_MLMAXWELL
     MLMaxwell_Context *context;
     HYPRE_ML_Matrix   *Amat;
 
@@ -249,10 +240,6 @@ int ML_GetRow(void *obj, int N_requested_rows, int requested_rows[],
     rowptr  = Amat->rowptr;
     colInd  = Amat->colnum;
     colVal  = Amat->values;
-#else
-    printf("ML_GetRow : MLMaxwell not activated.\n");
-    return -1;
-#endif
 
     ncnt = 0;
     for (i = 0; i < N_requested_rows; i++)
@@ -271,6 +258,10 @@ int ML_GetRow(void *obj, int N_requested_rows, int requested_rows[],
        }
     }
     return 1;
+#else
+    printf("ML_GetRow : MLMaxwell not activated.\n");
+    return -1;
+#endif
 }
 
 /****************************************************************************/
@@ -282,8 +273,8 @@ int HYPRE_LSI_MLMaxwellCreate(MPI_Comm comm, HYPRE_Solver *solver)
 #ifdef HAVE_MLMAXWELL
     /* create an internal ML data structure */
 
-    MLMaxwell_Link *link = (MLMaxwell_Link *) malloc(sizeof(MLMaxwell_Link));
-    if (link == NULL) return 1;   
+    MLMaxwell_Link *link = hypre_TAlloc(MLMaxwell_Link, 1, HYPRE_MEMORY_HOST);
+    if (link == NULL) return 1;
 
     /* fill in all other default parameters */
 
@@ -306,7 +297,7 @@ int HYPRE_LSI_MLMaxwellCreate(MPI_Comm comm, HYPRE_Solver *solver)
     link->GTmat_array   = NULL;
     link->node_args     = NULL;
     link->edge_args     = NULL;
-  
+
     ML_Create(&(link->ml_ee), link->nlevels);
     ML_Create(&(link->ml_nn), link->nlevels);
 
@@ -333,66 +324,66 @@ int HYPRE_LSI_MLMaxwellDestroy(HYPRE_Solver solver)
     if (link->ml_ag != NULL) ML_Aggregate_Destroy(&(link->ml_ag));
     if (link->ml_ee != NULL) ML_Destroy(&(link->ml_ee));
     if (link->ml_nn != NULL) ML_Destroy(&(link->ml_nn));
-    if (link->Aee_contxt->partition != NULL) free(link->Aee_contxt->partition);
-    if (link->Ann_contxt->partition != NULL) free(link->Ann_contxt->partition);
+    hypre_TFree(link->Aee_contxt->partition, HYPRE_MEMORY_HOST);
+    hypre_TFree(link->Ann_contxt->partition, HYPRE_MEMORY_HOST);
     if (link->Aee_contxt->Amat != NULL)
     {
        Amat = (HYPRE_ML_Matrix *) link->Aee_contxt->Amat;
-       if (Amat->sendProc != NULL ) free (Amat->sendProc);
-       if (Amat->sendLeng != NULL ) free (Amat->sendLeng);
-       if (Amat->sendList != NULL ) 
+       hypre_TFree(Amat->sendProc, HYPRE_MEMORY_HOST);
+       hypre_TFree(Amat->sendLeng, HYPRE_MEMORY_HOST);
+       if (Amat->sendList != NULL )
        {
           for (i = 0; i < Amat->sendProcCnt; i++)
-             if (Amat->sendList[i] != NULL) free (Amat->sendList[i]);
-          free (Amat->sendList);
+             hypre_TFree(Amat->sendList[i], HYPRE_MEMORY_HOST);
+          hypre_TFree(Amat->sendList, HYPRE_MEMORY_HOST);
        }
-       if (Amat->recvProc != NULL) free (Amat->recvProc);
-       if (Amat->recvLeng != NULL) free (Amat->recvLeng);
-       if (Amat->map      != NULL) free (Amat->map);
-       free(Amat);
+       hypre_TFree(Amat->recvProc, HYPRE_MEMORY_HOST);
+       hypre_TFree(Amat->recvLeng, HYPRE_MEMORY_HOST);
+       hypre_TFree(Amat->map, HYPRE_MEMORY_HOST);
+       hypre_TFree(Amat, HYPRE_MEMORY_HOST);
     }
-    if (link->Aee_contxt != NULL) free(link->Aee_contxt);
+    hypre_TFree(link->Aee_contxt, HYPRE_MEMORY_HOST);
 
     if (link->Ann_contxt->Amat != NULL)
     {
        Amat = (HYPRE_ML_Matrix *) link->Ann_contxt->Amat;
-       if (Amat->sendProc != NULL ) free (Amat->sendProc);
-       if (Amat->sendLeng != NULL ) free (Amat->sendLeng);
-       if (Amat->sendList != NULL ) 
+       hypre_TFree(Amat->sendProc, HYPRE_MEMORY_HOST);
+       hypre_TFree(Amat->sendLeng, HYPRE_MEMORY_HOST);
+       if (Amat->sendList != NULL )
        {
           for (i = 0; i < Amat->sendProcCnt; i++)
-             if (Amat->sendList[i] != NULL) free (Amat->sendList[i]);
-          free (Amat->sendList);
+             hypre_TFree(Amat->sendList[i], HYPRE_MEMORY_HOST);
+          hypre_TFree(Amat->sendList, HYPRE_MEMORY_HOST);
        }
-       if (Amat->recvProc != NULL) free (Amat->recvProc);
-       if (Amat->recvLeng != NULL) free (Amat->recvLeng);
-       if (Amat->map      != NULL) free (Amat->map);
-       free(Amat);
+       hypre_TFree(Amat->recvProc, HYPRE_MEMORY_HOST);
+       hypre_TFree(Amat->recvLeng, HYPRE_MEMORY_HOST);
+       hypre_TFree(Amat->map, HYPRE_MEMORY_HOST);
+       hypre_TFree(Amat, HYPRE_MEMORY_HOST);
     }
-    if (link->Ann_contxt != NULL) free(link->Ann_contxt);
+    hypre_TFree(link->Ann_contxt, HYPRE_MEMORY_HOST);
 
     if (link->G_contxt->Amat != NULL)
     {
        Amat = (HYPRE_ML_Matrix *) link->G_contxt->Amat;
-       if (Amat->sendProc != NULL ) free (Amat->sendProc);
-       if (Amat->sendLeng != NULL ) free (Amat->sendLeng);
-       if (Amat->sendList != NULL ) 
+       hypre_TFree(Amat->sendProc, HYPRE_MEMORY_HOST);
+       hypre_TFree(Amat->sendLeng, HYPRE_MEMORY_HOST);
+       if (Amat->sendList != NULL )
        {
           for (i = 0; i < Amat->sendProcCnt; i++)
-             if (Amat->sendList[i] != NULL) free (Amat->sendList[i]);
-          free (Amat->sendList);
+             hypre_TFree(Amat->sendList[i], HYPRE_MEMORY_HOST);
+          hypre_TFree(Amat->sendList, HYPRE_MEMORY_HOST);
        }
-       if (Amat->recvProc != NULL) free (Amat->recvProc);
-       if (Amat->recvLeng != NULL) free (Amat->recvLeng);
-       if (Amat->map      != NULL) free (Amat->map);
-       free(Amat);
+       hypre_TFree(Amat->recvProc, HYPRE_MEMORY_HOST);
+       hypre_TFree(Amat->recvLeng, HYPRE_MEMORY_HOST);
+       hypre_TFree(Amat->map, HYPRE_MEMORY_HOST);
+       hypre_TFree(Amat, HYPRE_MEMORY_HOST);
     }
-    if (link->G_contxt != NULL) free(link->G_contxt);
+    hypre_TFree(link->G_contxt, HYPRE_MEMORY_HOST);
 
     if (link->Gmat  != NULL) ML_Operator_Destroy(&(link->Gmat));
     if (link->GTmat != NULL) ML_Operator_Destroy(&(link->GTmat));
     if (link->Gmat_array != NULL)
-       ML_MGHierarchy_ReitzingerDestroy(link->nlevels-2, 
+       ML_MGHierarchy_ReitzingerDestroy(link->nlevels-2,
                        &(link->Gmat_array), &(link->GTmat_array));
 
     if (link->node_args != NULL)
@@ -400,7 +391,7 @@ int HYPRE_LSI_MLMaxwellDestroy(HYPRE_Solver solver)
     if (link->edge_args != NULL)
        ML_Smoother_Arglist_Delete(&(link->edge_args));
 
-    free(link);
+    hypre_TFree(link, HYPRE_MEMORY_HOST);
 
     return 0;
 #else
@@ -423,80 +414,80 @@ int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_ee,
    int         hiptmair_type=HALF_HIPTMAIR, Nits_per_presmooth=1;
    int         Ncoarse_edge, Ncoarse_node;
    double      edge_coarsening_rate, node_coarsening_rate;
-   double      node_omega = ML_DDEFAULT, edge_omega = ML_DDEFAULT; 
+   double      node_omega = ML_DDEFAULT, edge_omega = ML_DDEFAULT;
    ML          *ml_ee, *ml_nn;
    ML_Operator *Gmat, *GTmat;
    MLMaxwell_Link    *link;
    HYPRE_ML_Matrix   *mh_Aee, *mh_G, *mh_Ann;
    MLMaxwell_Context *Aee_context, *G_context, *Ann_context;
 
-   /* -------------------------------------------------------- */ 
+   /* -------------------------------------------------------- */
    /* set up the parallel environment                          */
-   /* -------------------------------------------------------- */ 
+   /* -------------------------------------------------------- */
 
    link = (MLMaxwell_Link *) solver;
    MPI_Comm_rank(link->comm, &mypid);
    MPI_Comm_size(link->comm, &nprocs);
 
-   /* -------------------------------------------------------- */ 
+   /* -------------------------------------------------------- */
    /* create ML structures                                     */
-   /* -------------------------------------------------------- */ 
+   /* -------------------------------------------------------- */
 
    nlevels = link->nlevels;
    ML_Create(&(link->ml_ee), nlevels);
    ML_Create(&(link->ml_nn), nlevels);
    ml_ee   = link->ml_ee;
    ml_nn   = link->ml_nn;
-   
-   /* -------------------------------------------------------- */ 
+
+   /* -------------------------------------------------------- */
    /* fetch the matrix row partition information and put it    */
    /* into the matrix data object (for matvec and getrow)      */
-   /* -------------------------------------------------------- */ 
+   /* -------------------------------------------------------- */
 
-   Aee_context = (MLMaxwell_Context *) malloc(sizeof(MLMaxwell_Context));
+   Aee_context = hypre_TAlloc(MLMaxwell_Context, 1, HYPRE_MEMORY_HOST);
    link->Aee_contxt = Aee_context;
    Aee_context->comm = link->comm;
    HYPRE_ParCSRMatrixGetRowPartitioning(A_ee, &row_partition);
    edgeNEqns = row_partition[mypid+1] - row_partition[mypid];
    Aee_context->globalEqns = row_partition[nprocs];
-   Aee_context->partition = (int *) malloc(sizeof(int)*(nprocs+1));
+   Aee_context->partition = hypre_TAlloc(int, (nprocs+1), HYPRE_MEMORY_HOST);
    for (i=0; i<=nprocs; i++) Aee_context->partition[i] = row_partition[i];
-   hypre_TFree(row_partition);
-   mh_Aee = (HYPRE_ML_Matrix *) malloc(sizeof(HYPRE_ML_Matrix));
+   hypre_TFree(row_partition, HYPRE_MEMORY_HOST);
+   mh_Aee = hypre_TAlloc(HYPRE_ML_Matrix, 1, HYPRE_MEMORY_HOST);
    HYPRE_LSI_MLConstructMLMatrix(A_ee,mh_Aee,Aee_context->partition,
-                                 link->comm,Aee_context); 
+                                 link->comm,Aee_context);
    Aee_context->Amat = mh_Aee;
 
-   Ann_context = (MLMaxwell_Context *) malloc(sizeof(MLMaxwell_Context));
+   Ann_context = hypre_TAlloc(MLMaxwell_Context, 1, HYPRE_MEMORY_HOST);
    link->Ann_contxt = Ann_context;
    Ann_context->comm = link->comm;
    HYPRE_ParCSRMatrixGetRowPartitioning(link->hypreAnn, &row_partition);
    nodeNEqns  = row_partition[mypid+1] - row_partition[mypid];
    Ann_context->globalEqns = row_partition[nprocs];
-   Ann_context->partition = (int *) malloc(sizeof(int)*(nprocs+1));
+   Ann_context->partition = hypre_TAlloc(int, (nprocs+1), HYPRE_MEMORY_HOST);
    for (i=0; i<=nprocs; i++) Ann_context->partition[i] = row_partition[i];
-   hypre_TFree(row_partition);
-   mh_Ann = (HYPRE_ML_Matrix *) malloc(sizeof(HYPRE_ML_Matrix));
+   hypre_TFree(row_partition, HYPRE_MEMORY_HOST);
+   mh_Ann = hypre_TAlloc(HYPRE_ML_Matrix, 1, HYPRE_MEMORY_HOST);
    HYPRE_LSI_MLConstructMLMatrix(link->hypreAnn,mh_Ann,Ann_context->partition,
-                                 link->comm,Ann_context); 
+                                 link->comm,Ann_context);
    Ann_context->Amat = mh_Ann;
 
-   G_context = (MLMaxwell_Context *) malloc(sizeof(MLMaxwell_Context));
+   G_context = hypre_TAlloc(MLMaxwell_Context, 1, HYPRE_MEMORY_HOST);
    link->G_contxt = G_context;
    G_context->comm = link->comm;
    HYPRE_ParCSRMatrixGetRowPartitioning(link->hypreG, &row_partition);
    G_context->globalEqns = row_partition[nprocs];
-   G_context->partition = (int *) malloc(sizeof(int)*(nprocs+1));
+   G_context->partition = hypre_TAlloc(int, (nprocs+1), HYPRE_MEMORY_HOST);
    for (i=0; i<=nprocs; i++) G_context->partition[i] = row_partition[i];
-   hypre_TFree(row_partition);
-   mh_G = (HYPRE_ML_Matrix *) malloc(sizeof(HYPRE_ML_Matrix));
+   hypre_TFree(row_partition, HYPRE_MEMORY_HOST);
+   mh_G = hypre_TAlloc(HYPRE_ML_Matrix, 1, HYPRE_MEMORY_HOST);
    HYPRE_LSI_MLConstructMLMatrix(link->hypreG,mh_G,G_context->partition,
-                                 link->comm,G_context); 
+                                 link->comm,G_context);
    G_context->Amat = mh_G;
 
-   /* -------------------------------------------------------- */ 
+   /* -------------------------------------------------------- */
    /* Build A_ee directly as an ML matrix                      */
-   /* -------------------------------------------------------- */ 
+   /* -------------------------------------------------------- */
 
    ML_Init_Amatrix(ml_ee,nlevels-1,edgeNEqns,edgeNEqns,(void *)Aee_context);
    length = edgeNEqns;
@@ -504,9 +495,9 @@ int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_ee,
    ML_Set_Amatrix_Getrow(ml_ee, nlevels-1, ML_GetRow, ML_ExchBdry, length);
    ML_Operator_Set_ApplyFunc(&(ml_ee->Amat[nlevels-1]), ML_MatVec);
 
-   /* -------------------------------------------------------- */ 
+   /* -------------------------------------------------------- */
    /* Build A_nn directly as an ML matrix                      */
-   /* -------------------------------------------------------- */ 
+   /* -------------------------------------------------------- */
 
    ML_Init_Amatrix(ml_nn, nlevels-1,nodeNEqns,nodeNEqns,(void *)Ann_context);
    length = nodeNEqns;
@@ -514,9 +505,9 @@ int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_ee,
    ML_Set_Amatrix_Getrow(ml_nn, nlevels-1, ML_GetRow, ML_ExchBdry, length);
    ML_Operator_Set_ApplyFunc(&(ml_nn->Amat[nlevels-1]), ML_MatVec);
 
-   /* -------------------------------------------------------- */ 
+   /* -------------------------------------------------------- */
    /* Build G matrix and its transpose                         */
-   /* -------------------------------------------------------- */ 
+   /* -------------------------------------------------------- */
 
    Gmat = ML_Operator_Create(ml_ee->comm);
    ML_Operator_Set_Getrow(Gmat, edgeNEqns, ML_GetRow);
@@ -531,9 +522,9 @@ int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_ee,
    ML_Operator_Transpose_byrow(Gmat, GTmat);
    link->GTmat = GTmat;
 
-   /* -------------------------------------------------------- */ 
+   /* -------------------------------------------------------- */
    /* create an AMG or aggregate context                       */
-   /* -------------------------------------------------------- */ 
+   /* -------------------------------------------------------- */
 
    ML_Set_PrintLevel(2);
    ML_Set_Tolerance(ml_ee, 1.0e-8);
@@ -548,10 +539,10 @@ int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_ee,
                        GTmat, &(link->Gmat_array), &(link->GTmat_array),
                        link->smoothP_flag, 1.5, 0, ML_DDEFAULT);
 
-   /* -------------------------------------------------------- */ 
+   /* -------------------------------------------------------- */
    /* Set the Hiptmair subsmoothers                            */
-   /* -------------------------------------------------------- */ 
-                                                                                
+   /* -------------------------------------------------------- */
+
    if (link->node_smoother == (void *) ML_Gen_Smoother_SymGaussSeidel)
    {
       link->node_args = ML_Smoother_Arglist_Create(2);
@@ -579,9 +570,9 @@ int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_ee,
       ML_gsum_scalar_int(&Nfine_edge, &itmp, ml_ee->comm);
    }
 
-   /* -------------------------------------------------------- */ 
+   /* -------------------------------------------------------- */
    /* perform aggregation                                      */
-   /* -------------------------------------------------------- */ 
+   /* -------------------------------------------------------- */
 
    if (mypid == 0)
       printf("HYPRE_MLMaxwell : number of levels = %d\n", coarsest_level);
@@ -592,7 +583,7 @@ int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_ee,
    /* set up at all levels                                     */
    /* -------------------------------------------------------- */
 
-   for (level = nlevels-1; level >= coarsest_level; level--) 
+   for (level = nlevels-1; level >= coarsest_level; level--)
    {
       if (link->edge_smoother == (void *) ML_Gen_Smoother_MLS)
       {
@@ -624,16 +615,16 @@ int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_ee,
       }
       ML_Gen_Smoother_Hiptmair(ml_ee, level, ML_BOTH, Nits_per_presmooth,
                      link->Gmat_array, link->GTmat_array, NULL,
-                     link->edge_smoother, link->edge_args, 
+                     link->edge_smoother, link->edge_args,
                      link->node_smoother, link->node_args, hiptmair_type);
    }
-                                                                                
-   /* -------------------------------------------------------- */ 
+
+   /* -------------------------------------------------------- */
    /* set up smoother and coarse solver                        */
-   /* -------------------------------------------------------- */ 
+   /* -------------------------------------------------------- */
 
    ML_Gen_Solver(ml_ee, ML_MGV, nlevels-1, coarsest_level);
-   
+
    return 0;
 #else
    printf("ML not linked.\n");
@@ -655,7 +646,7 @@ int HYPRE_LSI_MLMaxwellSolve(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 
     rhs = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) b));
     sol = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) x));
-  
+
     ML_Solve_AMGV(ml_ee, rhs, sol);
 
     return 0;
@@ -673,16 +664,16 @@ int HYPRE_LSI_MLMaxwellSetStrengthThreshold(HYPRE_Solver solver,
                                      double strength_threshold)
 {
     MLMaxwell_Link *link = (MLMaxwell_Link *) solver;
-  
+
     if (strength_threshold < 0.0)
     {
        printf("HYPRE_LSI_MLMaxwellSetStrengthThreshold WARNING: set to 0.\n");
        link->ag_threshold = 0.0;
-    } 
+    }
     else
     {
        link->ag_threshold = strength_threshold;
-    } 
+    }
     return( 0 );
 }
 
@@ -714,7 +705,7 @@ int HYPRE_LSI_MLMaxwellSetANNMatrix(HYPRE_Solver solver, HYPRE_ParCSRMatrix ANN)
 
 int HYPRE_LSI_MLConstructMLMatrix(HYPRE_ParCSRMatrix A,
                                   HYPRE_ML_Matrix *ml_mat, int *partition,
-                                  MPI_Comm comm, MLMaxwell_Context *obj) 
+                                  MPI_Comm comm, MLMaxwell_Context *obj)
 {
     int         i, j, index, mypid, nprocs;
     int         rowLeng, *colInd, startRow, endRow, localEqns;
@@ -731,7 +722,7 @@ int HYPRE_LSI_MLConstructMLMatrix(HYPRE_ParCSRMatrix A,
     /* -------------------------------------------------------- */
     /* get machine information and local matrix information     */
     /* -------------------------------------------------------- */
-    
+
 #ifdef HYPRE_SEQUENTIAL
     mypid = 0;
     nprocs = 1;
@@ -749,8 +740,8 @@ int HYPRE_LSI_MLConstructMLMatrix(HYPRE_ParCSRMatrix A,
     /* block information                                        */
     /* -------------------------------------------------------- */
 
-    diagSize    = (int*) malloc(sizeof(int) * localEqns);
-    offdiagSize = (int*) malloc(sizeof(int) * localEqns);
+    diagSize    = hypre_TAlloc(int,  localEqns, HYPRE_MEMORY_HOST);
+    offdiagSize = hypre_TAlloc(int,  localEqns, HYPRE_MEMORY_HOST);
     num_bdry = 0;
     for (i = startRow; i <= endRow; i++)
     {
@@ -780,7 +771,7 @@ int HYPRE_LSI_MLConstructMLMatrix(HYPRE_ParCSRMatrix A,
     externLeng = 0;
     for (i = 0; i < localEqns; i++) externLeng += offdiagSize[i];
     if (externLeng > 0)
-         externList = (int *) malloc( sizeof(int) * externLeng);
+         externList = hypre_TAlloc(int,  externLeng, HYPRE_MEMORY_HOST);
     else externList = NULL;
     externLeng = 0;
     for (i = startRow; i <= endRow; i++)
@@ -807,24 +798,24 @@ int HYPRE_LSI_MLConstructMLMatrix(HYPRE_ParCSRMatrix A,
 
     /* -------------------------------------------------------- */
     /* allocate the CSR matrix                                  */
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
 
-    nnz = 0; 
-    for (i = 0; i < localEqns; i++) nnz += diagSize[i] + offdiagSize[i]; 
-    rowptr  = (int *)    malloc((localEqns + 1) * sizeof(int)); 
-    columns = (int *)    malloc(nnz * sizeof(int)); 
-    values  = (double *) malloc(nnz * sizeof(double)); 
-    rowptr[0] = 0; 
+    nnz = 0;
+    for (i = 0; i < localEqns; i++) nnz += diagSize[i] + offdiagSize[i];
+    rowptr  = hypre_TAlloc(int, (localEqns + 1) , HYPRE_MEMORY_HOST);
+    columns = hypre_TAlloc(int, nnz , HYPRE_MEMORY_HOST);
+    values  = hypre_TAlloc(double, nnz , HYPRE_MEMORY_HOST);
+    rowptr[0] = 0;
     for (i = 1; i <= localEqns; i++)
        rowptr[i] = rowptr[i-1] + diagSize[i-1] + offdiagSize[i-1];
-    free(diagSize);
-    free(offdiagSize);
+    hypre_TFree(diagSize, HYPRE_MEMORY_HOST);
+    hypre_TFree(offdiagSize, HYPRE_MEMORY_HOST);
 
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
     /* put the matrix data in the CSR matrix                    */
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
 
-    rowptr[0] = 0; 
+    rowptr[0] = 0;
     ncnt      = 0;
     for (i = startRow; i <= endRow; i++)
     {
@@ -851,11 +842,11 @@ int HYPRE_LSI_MLConstructMLMatrix(HYPRE_ParCSRMatrix A,
        rowptr[i-startRow+1] = ncnt;
        HYPRE_ParCSRMatrixRestoreRow(A, i, &rowLeng, &colInd, &colVal);
     }
-    assert(ncnt == nnz);
-   
-    /* -------------------------------------------------------- */ 
+    hypre_assert(ncnt == nnz);
+
+    /* -------------------------------------------------------- */
     /* initialize the MH_Matrix data structure                  */
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
 
     ml_mat->Nrows       = localEqns;
     ml_mat->rowptr      = rowptr;
@@ -869,26 +860,26 @@ int HYPRE_LSI_MLConstructMLMatrix(HYPRE_ParCSRMatrix A,
     ml_mat->recvProc    = NULL;
     ml_mat->sendList    = NULL;
     ml_mat->map         = externList;
- 
-    /* -------------------------------------------------------- */ 
+
+    /* -------------------------------------------------------- */
     /* form the remote portion of the matrix                    */
-    /* -------------------------------------------------------- */ 
+    /* -------------------------------------------------------- */
 
 #ifndef HYPRE_SEQUENTIAL
-    if (nprocs > 1) 
+    if (nprocs > 1)
     {
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
        /* count number of elements to be received from each     */
        /* remote processor (assume sequential mapping)          */
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
 
-       tempCnt = (int *) malloc(sizeof(int) * nprocs);
+       tempCnt = hypre_TAlloc(int,  nprocs, HYPRE_MEMORY_HOST);
        for (i = 0; i < nprocs; i++) tempCnt[i] = 0;
        for (i = 0; i < externLeng; i++)
        {
           for ( j = 0; j < nprocs; j++)
           {
-             if (externList[i] >= partition[j] && 
+             if (externList[i] >= partition[j] &&
                  externList[i] < partition[j+1])
              {
                 tempCnt[j]++;
@@ -897,76 +888,76 @@ int HYPRE_LSI_MLConstructMLMatrix(HYPRE_ParCSRMatrix A,
           }
        }
 
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
        /* compile a list processors data is to be received from */
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
 
        recvProcCnt = 0;
        for (i = 0; i < nprocs; i++)
           if (tempCnt[i] > 0) recvProcCnt++;
-       recvLeng = (int*) malloc(sizeof(int) * recvProcCnt);
-       recvProc = (int*) malloc(sizeof(int) * recvProcCnt);
+       recvLeng = hypre_TAlloc(int,  recvProcCnt, HYPRE_MEMORY_HOST);
+       recvProc = hypre_TAlloc(int,  recvProcCnt, HYPRE_MEMORY_HOST);
        recvProcCnt = 0;
        for (i = 0; i < nprocs; i++)
        {
-          if (tempCnt[i] > 0) 
+          if (tempCnt[i] > 0)
           {
              recvProc[recvProcCnt]   = i;
              recvLeng[recvProcCnt++] = tempCnt[i];
           }
        }
 
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
        /* each processor has to find out how many processors it */
        /* has to send data to                                   */
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
 
-       sendLeng = (int *) malloc(nprocs * sizeof(int));
+       sendLeng = hypre_TAlloc(int, nprocs , HYPRE_MEMORY_HOST);
        for (i = 0; i < nprocs; i++) tempCnt[i] = 0;
        for (i = 0; i < recvProcCnt; i++) tempCnt[recvProc[i]] = 1;
        MPI_Allreduce(tempCnt, sendLeng, nprocs, MPI_INT, MPI_SUM, comm);
        sendProcCnt = sendLeng[mypid];
-       free(sendLeng);
+       hypre_TFree(sendLeng, HYPRE_MEMORY_HOST);
        if (sendProcCnt > 0)
        {
-          sendLeng = (int *)  malloc(sendProcCnt * sizeof(int));
-          sendProc = (int *)  malloc(sendProcCnt * sizeof(int));
-          sendList = (int **) malloc(sendProcCnt * sizeof(int*));
+          sendLeng = hypre_TAlloc(int, sendProcCnt , HYPRE_MEMORY_HOST);
+          sendProc = hypre_TAlloc(int, sendProcCnt , HYPRE_MEMORY_HOST);
+          sendList = hypre_TAlloc(int*, sendProcCnt , HYPRE_MEMORY_HOST);
        }
-       else 
+       else
        {
           sendLeng = sendProc = NULL;
           sendList = NULL;
        }
 
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
        /* each processor sends to all processors it expects to  */
        /* receive data about the lengths of data expected       */
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
 
        msgid = 539;
        for (i = 0; i < recvProcCnt; i++)
        {
           MPI_Send((void*) &recvLeng[i],1,MPI_INT,recvProc[i],msgid,comm);
        }
-       for (i = 0; i < sendProcCnt; i++) 
+       for (i = 0; i < sendProcCnt; i++)
        {
           MPI_Recv((void*) &sendLeng[i],1,MPI_INT,MPI_ANY_SOURCE,msgid,
                    comm,&status);
           sendProc[i] = status.MPI_SOURCE;
-          sendList[i] = (int *) malloc(sendLeng[i] * sizeof(int));
-          if (sendList[i] == NULL) 
+          sendList[i] = hypre_TAlloc(int, sendLeng[i] , HYPRE_MEMORY_HOST);
+          if (sendList[i] == NULL)
              printf("allocate problem %d \n", sendLeng[i]);
        }
 
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
        /* each processor sends to all processors it expects to  */
        /* receive data about the equation numbers               */
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
 
-       for (i = 0; i < nprocs; i++) tempCnt[i] = 0; 
+       for (i = 0; i < nprocs; i++) tempCnt[i] = 0;
        ncnt = 1;
-       for (i = 0; i < externLeng; i++) 
+       for (i = 0; i < externLeng; i++)
        {
           if ( externList[i] >= partition[ncnt] )
           {
@@ -974,23 +965,23 @@ int HYPRE_LSI_MLConstructMLMatrix(HYPRE_ParCSRMatrix A,
              i--;
              ncnt++;
           }
-       }    
-       for (i = ncnt-1; i < nprocs; i++) tempCnt[i] = externLeng; 
+       }
+       for (i = ncnt-1; i < nprocs; i++) tempCnt[i] = externLeng;
 
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
        /* send the global equation numbers                      */
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
 
        if (sendProcCnt > 0)
-          requests = (MPI_Request *) malloc(sendProcCnt*sizeof(MPI_Request));
+          requests = hypre_TAlloc(MPI_Request, sendProcCnt, HYPRE_MEMORY_HOST);
 
        msgid = 540;
-       for (i = 0; i < sendProcCnt; i++) 
+       for (i = 0; i < sendProcCnt; i++)
        {
           MPI_Irecv((void*)sendList[i],sendLeng[i],MPI_INT,sendProc[i],
                     msgid,comm,&requests[i]);
        }
-       for (i = 0; i < recvProcCnt; i++) 
+       for (i = 0; i < recvProcCnt; i++)
        {
           if (recvProc[i] == 0) j = 0;
           else                  j = tempCnt[recvProc[i]-1];
@@ -998,18 +989,19 @@ int HYPRE_LSI_MLConstructMLMatrix(HYPRE_ParCSRMatrix A,
           MPI_Send((void*) &externList[j], rowLeng, MPI_INT, recvProc[i],
                    msgid, comm);
        }
-       for (i = 0; i < sendProcCnt; i++) 
+       for (i = 0; i < sendProcCnt; i++)
        {
           MPI_Wait( &requests[i], &status );
        }
-       if (sendProcCnt > 0) free(requests);
+       if (sendProcCnt > 0)
+          hypre_TFree(requests, HYPRE_MEMORY_HOST);
 
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
        /* convert the send list from global to local numbers    */
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
 
        for (i = 0; i < sendProcCnt; i++)
-       { 
+       {
           for (j = 0; j < sendLeng[i]; j++)
           {
              index = sendList[i][j] - startRow;
@@ -1022,9 +1014,9 @@ int HYPRE_LSI_MLConstructMLMatrix(HYPRE_ParCSRMatrix A,
           }
        }
 
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
        /* convert the send list from global to local numbers    */
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
 
        ml_mat->sendProcCnt = sendProcCnt;
        ml_mat->recvProcCnt = recvProcCnt;
@@ -1034,11 +1026,11 @@ int HYPRE_LSI_MLConstructMLMatrix(HYPRE_ParCSRMatrix A,
        ml_mat->recvProc    = recvProc;
        ml_mat->sendList    = sendList;
 
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
        /* clean up                                              */
-       /* ----------------------------------------------------- */ 
+       /* ----------------------------------------------------- */
 
-       free(tempCnt);
+       hypre_TFree(tempCnt, HYPRE_MEMORY_HOST);
     }
     return 0;
 #else

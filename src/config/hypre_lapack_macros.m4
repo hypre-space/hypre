@@ -1,17 +1,7 @@
-dnl #BHEADER**********************************************************************
-dnl # Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-dnl # Produced at the Lawrence Livermore National Laboratory.
-dnl # This file is part of HYPRE.  See file COPYRIGHT for details.
-dnl #
-dnl # HYPRE is free software; you can redistribute it and/or modify it under the
-dnl # terms of the GNU Lesser General Public License (as published by the Free
-dnl # Software Foundation) version 2.1 dated February 1999.
-dnl #
-dnl # $Revision$
-dnl #EHEADER**********************************************************************
-
-
-
+dnl Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+dnl HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+dnl
+dnl SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 dnl @synopsis AC_HYPRE_FIND_LAPACK([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
 dnl
@@ -282,7 +272,7 @@ dnl **************************************************************
        else
           hypre_fmangle_lapack=4
        fi
-       AC_DEFINE_UNQUOTED(HYPRE_FMANGLE_LAPACK, [$hypre_fmangle_lapack], [LAPACK mangling])
+       AC_DEFINE_UNQUOTED(HYPRE_FMANGLE_LAPACK, [$hypre_fmangle_lapack], [Define as in HYPRE_FMANGLE to set the LAPACK name mangling scheme])
     fi                    
 
 dnl **************************************************************

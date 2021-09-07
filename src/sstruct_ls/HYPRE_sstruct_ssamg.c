@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
 
@@ -184,10 +179,30 @@ HYPRE_SStructSSAMGSetNumPostRelax( HYPRE_SStructSolver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructSSAMGSetCoarseSolverType( HYPRE_SStructSolver solver,
+                                       HYPRE_Int           csolver_type )
+{
+   return( hypre_SSAMGSetCoarseSolverType( (void *) solver, csolver_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructSSAMGSetNumCoarseRelax( HYPRE_SStructSolver solver,
                                      HYPRE_Int           num_coarse_relax )
 {
    return( hypre_SSAMGSetNumCoarseRelax( (void *) solver, num_coarse_relax ) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGSetMaxCoarseSize( HYPRE_SStructSolver solver,
+                                    HYPRE_Int           max_coarse_size )
+{
+   return( hypre_SSAMGSetMaxCoarseSize( (void *) solver, max_coarse_size ) );
 }
 
 /*--------------------------------------------------------------------------

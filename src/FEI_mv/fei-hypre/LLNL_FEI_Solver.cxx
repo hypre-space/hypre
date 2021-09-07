@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- *********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /**************************************************************************
   Module:  LLNL_FEI_Solver.cxx
@@ -18,23 +13,22 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <math.h>
 #include "_hypre_utilities.h"
 #include "HYPRE.h"
 #include "LLNL_FEI_Solver.h"
 
-#if HAVE_SUPERLU_20
+#ifdef HAVE_SUPERLU_20
 #include "dsp_defs.h"
 #include "superlu_util.h"
 #endif
-#if HAVE_SUPERLU
+#ifdef HAVE_SUPERLU
 #include "slu_ddefs.h"
 #include "slu_util.h"
 #endif
 
 /**************************************************************************
- Constructor 
+ Constructor
  -------------------------------------------------------------------------*/
 LLNL_FEI_Solver::LLNL_FEI_Solver( MPI_Comm comm )
 {
@@ -77,7 +71,7 @@ LLNL_FEI_Solver::LLNL_FEI_Solver( MPI_Comm comm )
 int LLNL_FEI_Solver::parameters(int numParams, char **paramString)
 {
    int  i, olevel;
-#if HAVE_SUPERLU
+#ifdef HAVE_SUPERLU
    int  nprocs;
 #endif
    char param[256], param1[256];
@@ -122,9 +116,9 @@ int LLNL_FEI_Solver::parameters(int numParams, char **paramString)
          else if ( !strcmp(param, "gmres") )   solverID_ = 1;
          else if ( !strcmp(param, "cgs") )     solverID_ = 2;
          else if ( !strcmp(param, "bicgstab")) solverID_ = 3;
-         else if ( !strcmp(param, "superlu") ) 
+         else if ( !strcmp(param, "superlu") )
          {
-#if HAVE_SUPERLU
+#ifdef HAVE_SUPERLU
             MPI_Comm_size( mpiComm_, &nprocs );
             if ( nprocs == 1 ) solverID_ = 4;
             else
@@ -259,16 +253,16 @@ int LLNL_FEI_Solver::solveUsingCG()
    diagonal   = matPtr_->getMatrixDiagonal();
    totalNRows = localNRows + extNRows;
    rVec       = new double[totalNRows];
- 
+
    /* -----------------------------------------------------------------
     * compute initial residual vector and norm
     * -----------------------------------------------------------------*/
- 
-   matPtr_->matvec( solnVector_, rVec ); 
-   for ( irow = 0; irow < localNRows; irow++ ) 
+
+   matPtr_->matvec( solnVector_, rVec );
+   for ( irow = 0; irow < localNRows; irow++ )
       rVec[irow] = rhsVector_[irow] - rVec[irow];
    rnorm0 = rnorm = 0.0;
-   for ( irow = 0; irow < localNRows; irow++ ) 
+   for ( irow = 0; irow < localNRows; irow++ )
    {
       rnorm0 += (rVec[irow] * rVec[irow]);
       rnorm  += (rhsVector_[irow] * rhsVector_[irow]);
@@ -280,7 +274,7 @@ int LLNL_FEI_Solver::solveUsingCG()
    rnorm  = sqrt(dArray2[0]);
    if ( outputLevel_ >= 2 && mypid_ == 0 )
       printf("\tLLNL_FEI_Solver_CG initial rnorm = %e (%e)\n",rnorm,rnorm0);
-   if ( rnorm0 == 0.0 ) 
+   if ( rnorm0 == 0.0 )
    {
       delete [] rVec;
       return 0;
@@ -304,17 +298,17 @@ int LLNL_FEI_Solver::solveUsingCG()
     * loop until convergence is achieved
     * -----------------------------------------------------------------*/
 
-   while ( converged == 0 && numTrials < 2 ) 
+   while ( converged == 0 && numTrials < 2 )
    {
       innerIteration = 0;
-      while ( rnorm >= eps1 && iter < krylovMaxIterations_ ) 
+      while ( rnorm >= eps1 && iter < krylovMaxIterations_ )
       {
          iter++;
          innerIteration++;
          if ( innerIteration == 1 )
          {
             if ( diagonal != NULL )
-               for (irow = 0; irow < localNRows; irow++) 
+               for (irow = 0; irow < localNRows; irow++)
                   zVec[irow] = rVec[irow] * diagonal[irow];
             else
                for (irow = 0; irow < localNRows; irow++)
@@ -322,7 +316,7 @@ int LLNL_FEI_Solver::solveUsingCG()
 
             rhom1 = rho;
             rho   = 0.0;
-            for ( irow = 0; irow < localNRows; irow++ ) 
+            for ( irow = 0; irow < localNRows; irow++ )
                rho += rVec[irow] * zVec[irow];
             dArray[0] = rho;
             MPI_Allreduce(dArray, dArray2, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
@@ -330,56 +324,56 @@ int LLNL_FEI_Solver::solveUsingCG()
             beta = 0.0;
          }
          else beta = rho / rhom1;
-         for ( irow = 0; irow < localNRows; irow++ ) 
+         for ( irow = 0; irow < localNRows; irow++ )
             pVec[irow] = zVec[irow] + beta * pVec[irow];
-         matPtr_->matvec( pVec, apVec ); 
+         matPtr_->matvec( pVec, apVec );
          sigma = 0.0;
-         for ( irow = 0; irow < localNRows; irow++ ) 
+         for ( irow = 0; irow < localNRows; irow++ )
             sigma += pVec[irow] * apVec[irow];
          dArray[0] = sigma;
          MPI_Allreduce(dArray, dArray2, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
          sigma  = dArray2[0];
-         alpha  = rho / sigma; 
-         for ( irow = 0; irow < localNRows; irow++ ) 
+         alpha  = rho / sigma;
+         for ( irow = 0; irow < localNRows; irow++ )
          {
             solnVector_[irow] += alpha * pVec[irow];
             rVec[irow] -= alpha * apVec[irow];
          }
          rnorm = 0.0;
-         for ( irow = 0; irow < localNRows; irow++ ) 
+         for ( irow = 0; irow < localNRows; irow++ )
             rnorm += rVec[irow] * rVec[irow];
          dArray[0] = rnorm;
 
          if ( diagonal != NULL )
-            for (irow = 0; irow < localNRows; irow++) 
+            for (irow = 0; irow < localNRows; irow++)
                zVec[irow] = rVec[irow] * diagonal[irow];
          else
             for (irow = 0; irow < localNRows; irow++) zVec[irow] = rVec[irow];
 
          rhom1 = rho;
          rho   = 0.0;
-         for ( irow = 0; irow < localNRows; irow++ ) 
+         for ( irow = 0; irow < localNRows; irow++ )
             rho += rVec[irow] * zVec[irow];
          dArray[1] = rho;
          MPI_Allreduce(dArray, dArray2, 2, MPI_DOUBLE, MPI_SUM, mpiComm_);
-         rho = dArray2[1]; 
+         rho = dArray2[1];
          rnorm = sqrt( dArray2[0] );
          if ( outputLevel_ >= 2 && iter % 1 == 0 && mypid_ == 0 )
             printf("\tLLNL_FEI_Solver_CG : iteration %d - rnorm = %e (%e)\n",
                    iter, rnorm, eps1);
       }
-      matPtr_->matvec( solnVector_, rVec ); 
-      for ( irow = 0; irow < localNRows; irow++ ) 
-         rVec[irow] = rhsVector_[irow] - rVec[irow]; 
+      matPtr_->matvec( solnVector_, rVec );
+      for ( irow = 0; irow < localNRows; irow++ )
+         rVec[irow] = rhsVector_[irow] - rVec[irow];
       rnorm = 0.0;
-      for ( irow = 0; irow < localNRows; irow++ ) 
+      for ( irow = 0; irow < localNRows; irow++ )
          rnorm += rVec[irow] * rVec[irow];
       dArray[0] = rnorm;
       MPI_Allreduce(dArray, dArray2, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
       rnorm = sqrt( dArray2[0] );
       if ( outputLevel_ >= 2 && mypid_ == 0 )
          printf("\tLLNL_FEI_Solver_CG actual rnorm = %e \n",rnorm);
-      if ( (rnorm < eps1 || rnorm < 1.0e-16) || 
+      if ( (rnorm < eps1 || rnorm < 1.0e-16) ||
             iter >= krylovMaxIterations_ ) converged = 1;
       numTrials++;
    }
@@ -421,17 +415,17 @@ int LLNL_FEI_Solver::solveUsingGMRES()
    for (iV = 0; iV <= gmresDim_+1; iV++) kVectors[iV] = new double[totalNRows];
    dArray  = new double[gmresDim_+1];
    dArray2 = new double[gmresDim_+1];
- 
+
    /* -----------------------------------------------------------------
     * compute initial residual vector and norm
     * -----------------------------------------------------------------*/
- 
+
    tVector = kVectors[1];
-   matPtr_->matvec( solnVector_, tVector ); 
-   for ( irow = 0; irow < localNRows; irow++ ) 
+   matPtr_->matvec( solnVector_, tVector );
+   for ( irow = 0; irow < localNRows; irow++ )
       tVector[irow] = rhsVector_[irow] - tVector[irow];
    rnorm0 = rnorm = 0.0;
-   for ( irow = 0; irow < localNRows; irow++ ) 
+   for ( irow = 0; irow < localNRows; irow++ )
    {
       rnorm0 += (tVector[irow] * tVector[irow]);
       rnorm  += (rhsVector_[irow] * rhsVector_[irow]);
@@ -444,7 +438,7 @@ int LLNL_FEI_Solver::solveUsingGMRES()
    if ( outputLevel_ >= 2 && mypid_ == 0 )
       printf("\tLLNL_FEI_Solver_GMRES initial rnorm = %e (%e)\n",
              rnorm, rnorm0);
-   if ( rnorm0 < 1.0e-20 ) 
+   if ( rnorm0 < 1.0e-20 )
    {
       for (iV = 0; iV <= gmresDim_+1; iV++) delete [] kVectors[iV];
       delete [] kVectors;
@@ -471,7 +465,7 @@ int LLNL_FEI_Solver::solveUsingGMRES()
 
    iter = 0;
 
-   while ( rnorm >= eps1 && iter < krylovMaxIterations_ ) 
+   while ( rnorm >= eps1 && iter < krylovMaxIterations_ )
    {
       dtemp = 1.0 / rnorm;
       tVector = kVectors[1];
@@ -479,8 +473,8 @@ int LLNL_FEI_Solver::solveUsingGMRES()
       RS[1] = rnorm;
       innerIterations = 0;
 
-      while ( innerIterations < gmresDim_ && rnorm >= eps1 && 
-              iter < krylovMaxIterations_ ) 
+      while ( innerIterations < gmresDim_ && rnorm >= eps1 &&
+              iter < krylovMaxIterations_ )
       {
          innerIterations++;
          iter++;
@@ -489,63 +483,63 @@ int LLNL_FEI_Solver::solveUsingGMRES()
          v1   = kVectors[kStep];
          v2   = kVectors[0];
          if ( diagonal != NULL )
-            for (irow = 0; irow < localNRows; irow++) 
+            for (irow = 0; irow < localNRows; irow++)
                v2[irow] = v1[irow] * diagonal[irow];
          else
             for (irow = 0; irow < localNRows; irow++) v2[irow] = v1[irow];
 
-         matPtr_->matvec( kVectors[0], kVectors[kp1] ); 
+         matPtr_->matvec( kVectors[0], kVectors[kp1] );
 
 #if 0
          tVector = kVectors[kp1];
-         for ( iV = 1; iV <= kStep; iV++ ) 
+         for ( iV = 1; iV <= kStep; iV++ )
          {
             dtemp = 0.0;
             tVector2 = kVectors[iV];
-            for ( irow = 0; irow < localNRows; irow++ ) 
+            for ( irow = 0; irow < localNRows; irow++ )
                dtemp += tVector2[irow] * tVector[irow];
             dArray[iV-1] = dtemp;
          }
-         MPI_Allreduce(dArray, dArray2, kStep, MPI_DOUBLE, MPI_SUM, 
+         MPI_Allreduce(dArray, dArray2, kStep, MPI_DOUBLE, MPI_SUM,
                        mpiComm_);
 
          tVector  = kVectors[kp1];
-         for ( iV = 1; iV <= kStep; iV++ ) 
+         for ( iV = 1; iV <= kStep; iV++ )
          {
             dtemp = dArray2[iV-1];
-            HH[iV][kStep] = dtemp;  
+            HH[iV][kStep] = dtemp;
             tVector2 = kVectors[iV];
-            for ( irow = 0; irow < localNRows; irow++ ) 
+            for ( irow = 0; irow < localNRows; irow++ )
                tVector[irow] -= dtemp * tVector2[irow];
          }
 #else
          tVector = kVectors[kp1];
-         for ( iV = 1; iV <= kStep; iV++ ) 
+         for ( iV = 1; iV <= kStep; iV++ )
          {
             dtemp = 0.0;
             tVector2 = kVectors[iV];
-            for ( irow = 0; irow < localNRows; irow++ ) 
+            for ( irow = 0; irow < localNRows; irow++ )
                dtemp += tVector2[irow] * tVector[irow];
             dArray[0] = dtemp;
             MPI_Allreduce(dArray, dArray2, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
             dtemp = dArray2[0];
-            HH[iV][kStep] = dtemp;  
-            for ( irow = 0; irow < localNRows; irow++ ) 
+            HH[iV][kStep] = dtemp;
+            for ( irow = 0; irow < localNRows; irow++ )
                tVector[irow] -= dtemp * tVector2[irow];
          }
 #endif
          dtemp = 0.0;
-         for ( irow = 0; irow < localNRows; irow++ ) 
+         for ( irow = 0; irow < localNRows; irow++ )
             dtemp += tVector[irow] * tVector[irow];
          MPI_Allreduce(&dtemp, dArray2, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
          dtemp = sqrt(dArray2[0]);
          HH[kp1][kStep] = dtemp;
-         if ( dtemp != 0.0 ) 
+         if ( dtemp != 0.0 )
          {
             dtemp = 1.0 / dtemp;
             for (irow = 0; irow < localNRows; irow++) tVector[irow] *= dtemp;
          }
-         for ( iV = 2; iV <= kStep; iV++ ) 
+         for ( iV = 2; iV <= kStep; iV++ )
          {
             dtemp = HH[iV-1][kStep];
             HH[iV-1][kStep] =  C[iV-1] * dtemp + S[iV-1] * HH[iV][kStep];
@@ -558,7 +552,7 @@ int LLNL_FEI_Solver::solveUsingGMRES()
          S[kStep]  = HH[kp1][kStep] / gam;
          RS[kp1]   = -S[kStep] * RS[kStep];
          RS[kStep] = C[kStep] * RS[kStep];
-         HH[kStep][kStep] = C[kStep] * HH[kStep][kStep] + 
+         HH[kStep][kStep] = C[kStep] * HH[kStep][kStep] +
                             S[kStep] * HH[kp1][kStep];
          rnorm = fabs(RS[kp1]);
          if ( outputLevel_ >= 2 && mypid_ == 0 )
@@ -566,42 +560,42 @@ int LLNL_FEI_Solver::solveUsingGMRES()
                    iter, rnorm);
       }
       RS[kStep] = RS[kStep] / HH[kStep][kStep];
-      for ( iV = 2; iV <= kStep; iV++ ) 
+      for ( iV = 2; iV <= kStep; iV++ )
       {
          iV2 = kStep - iV + 1;
          dtemp = RS[iV2];
-         for ( jV = iV2+1; jV <= kStep; jV++ ) 
+         for ( jV = iV2+1; jV <= kStep; jV++ )
             dtemp = dtemp - HH[iV2][jV] * RS[jV];
          RS[iV2] = dtemp / HH[iV2][iV2];
       }
       tVector = kVectors[1];
       dtemp   = RS[1];
       for ( irow = 0; irow < localNRows; irow++ ) tVector[irow] *= dtemp;
-      for ( iV = 2; iV <= kStep; iV++ ) 
+      for ( iV = 2; iV <= kStep; iV++ )
       {
          dtemp = RS[iV];
          tVector2 = kVectors[iV];
-         for ( irow = 0; irow < localNRows; irow++ ) 
+         for ( irow = 0; irow < localNRows; irow++ )
             tVector[irow] += dtemp * tVector2[irow];
       }
       tVector = kVectors[1];
       if ( diagonal != NULL )
       {
-         for (irow = 0; irow < localNRows; irow++) 
+         for (irow = 0; irow < localNRows; irow++)
             tVector[irow] *= diagonal[irow];
       }
-      for (irow = 0; irow < localNRows; irow++) 
+      for (irow = 0; irow < localNRows; irow++)
          solnVector_[irow] += tVector[irow];
-      matPtr_->matvec( solnVector_, tVector ); 
-      for ( irow = 0; irow < localNRows; irow++ ) 
+      matPtr_->matvec( solnVector_, tVector );
+      for ( irow = 0; irow < localNRows; irow++ )
          tVector[irow] = rhsVector_[irow] - tVector[irow];
       rnorm = 0.0;
-      for ( irow = 0; irow < localNRows; irow++ ) 
+      for ( irow = 0; irow < localNRows; irow++ )
          rnorm += (tVector[irow] * tVector[irow]);
       MPI_Allreduce(&rnorm, dArray2, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
       rnorm = sqrt(dArray2[0]);
    }
-   if ( rnorm < eps1 ) converged = 1; 
+   if ( rnorm < eps1 ) converged = 1;
    if ( outputLevel_ >= 2 && mypid_ == 0 )
       printf("\tLLNL_FEI_Solver_GMRES : final rnorm = %e\n", rnorm);
 
@@ -625,7 +619,7 @@ int LLNL_FEI_Solver::solveUsingGMRES()
 }
 
 /**************************************************************************
- solve linear system using CGS 
+ solve linear system using CGS
  -------------------------------------------------------------------------*/
 int LLNL_FEI_Solver::solveUsingCGS()
 {
@@ -644,16 +638,16 @@ int LLNL_FEI_Solver::solveUsingCGS()
    diagonal   = matPtr_->getMatrixDiagonal();
    totalNRows = localNRows + extNRows;
    rVec       = new double[totalNRows];
- 
+
    /* -----------------------------------------------------------------
     * compute initial residual vector and norm
     * -----------------------------------------------------------------*/
- 
-   matPtr_->matvec( solnVector_, rVec ); 
-   for ( irow = 0; irow < localNRows; irow++ ) 
+
+   matPtr_->matvec( solnVector_, rVec );
+   for ( irow = 0; irow < localNRows; irow++ )
       rVec[irow] = rhsVector_[irow] - rVec[irow];
    rnorm0 = rnorm = 0.0;
-   for ( irow = 0; irow < localNRows; irow++ ) 
+   for ( irow = 0; irow < localNRows; irow++ )
    {
       rnorm0 += (rVec[irow] * rVec[irow]);
       rnorm  += (rhsVector_[irow] * rhsVector_[irow]);
@@ -665,7 +659,7 @@ int LLNL_FEI_Solver::solveUsingCGS()
    rnorm  = sqrt(dArray2[0]);
    if ( outputLevel_ >= 2 && mypid_ == 0 )
       printf("\tLLNL_FEI_Solver_CGS initial rnorm = %e (%e)\n",rnorm,rnorm0);
-   if ( rnorm0 == 0.0 ) 
+   if ( rnorm0 == 0.0 )
    {
       delete [] rVec;
       return 0;
@@ -695,16 +689,16 @@ int LLNL_FEI_Solver::solveUsingCGS()
     * loop until convergence is achieved
     * -----------------------------------------------------------------*/
 
-   while ( converged == 0 && numTrials < 1 ) 
+   while ( converged == 0 && numTrials < 1 )
    {
       innerIteration = 0;
-      while ( rnorm >= eps1 && iter < krylovMaxIterations_ ) 
+      while ( rnorm >= eps1 && iter < krylovMaxIterations_ )
       {
          iter++;
          innerIteration++;
          rho1 = rho2;
          beta2 = beta * beta;
-         for (irow = 0; irow < totalNRows; irow++) 
+         for (irow = 0; irow < totalNRows; irow++)
          {
             tVec[irow] = beta * qVec[irow];
             uVec[irow] = rVec[irow] + tVec[irow];
@@ -712,28 +706,28 @@ int LLNL_FEI_Solver::solveUsingCGS()
          }
          if ( diagonal != NULL )
          {
-            for (irow = 0; irow < localNRows; irow++) 
+            for (irow = 0; irow < localNRows; irow++)
                tVec[irow] = pVec[irow] * diagonal[irow];
          }
          else
             for (irow = 0; irow < localNRows; irow++) tVec[irow] = pVec[irow];
 
-         matPtr_->matvec( tVec, vVec ); 
+         matPtr_->matvec( tVec, vVec );
          sigma = 0.0;
-         for ( irow = 0; irow < localNRows; irow++ ) 
+         for ( irow = 0; irow < localNRows; irow++ )
             sigma += (rhVec[irow] * vVec[irow]);
          MPI_Allreduce(&sigma, dArray, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
          sigma = dArray[0];
          alpha = rho1 / sigma;
 
-         for (irow = 0; irow < totalNRows; irow++) 
+         for (irow = 0; irow < totalNRows; irow++)
          {
             qVec[irow] = uVec[irow] - alpha * vVec[irow];
             uVec[irow] += qVec[irow];
          }
          if ( diagonal != NULL )
          {
-            for (irow = 0; irow < localNRows; irow++) 
+            for (irow = 0; irow < localNRows; irow++)
             {
                tVec[irow] = uVec[irow] * diagonal[irow];
                solnVector_[irow] += alpha * uVec[irow] * diagonal[irow];
@@ -741,19 +735,19 @@ int LLNL_FEI_Solver::solveUsingCGS()
          }
          else
          {
-            for (irow = 0; irow < localNRows; irow++) 
+            for (irow = 0; irow < localNRows; irow++)
             {
                tVec[irow] = uVec[irow];
                solnVector_[irow] += alpha * uVec[irow];
             }
          }
-         matPtr_->matvec( tVec, vVec ); 
+         matPtr_->matvec( tVec, vVec );
 
-         for (irow = 0; irow < totalNRows; irow++) 
+         for (irow = 0; irow < totalNRows; irow++)
             rVec[irow] -= alpha * vVec[irow];
 
          dtemp = dtemp2 = 0.0;
-         for ( irow = 0; irow < localNRows; irow++ ) 
+         for ( irow = 0; irow < localNRows; irow++ )
          {
             dtemp  += (rVec[irow] * rhVec[irow]);
             dtemp2 += (rVec[irow] * rVec[irow]);
@@ -768,11 +762,11 @@ int LLNL_FEI_Solver::solveUsingCGS()
             printf("\tLLNL_FEI_Solver_CGS : iteration %d - rnorm = %e (%e)\n",
                    iter, rnorm, eps1);
       }
-      matPtr_->matvec( solnVector_, rVec ); 
-      for ( irow = 0; irow < localNRows; irow++ ) 
-         rVec[irow] = rhsVector_[irow] - rVec[irow]; 
+      matPtr_->matvec( solnVector_, rVec );
+      for ( irow = 0; irow < localNRows; irow++ )
+         rVec[irow] = rhsVector_[irow] - rVec[irow];
       rnorm = 0.0;
-      for ( irow = 0; irow < localNRows; irow++ ) 
+      for ( irow = 0; irow < localNRows; irow++ )
          rnorm += rVec[irow] * rVec[irow];
       MPI_Allreduce(&rnorm, dArray, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
       rnorm = sqrt( dArray[0] );
@@ -800,7 +794,7 @@ int LLNL_FEI_Solver::solveUsingCGS()
 }
 
 /**************************************************************************
- solve linear system using Bicgstab 
+ solve linear system using Bicgstab
  -------------------------------------------------------------------------*/
 int LLNL_FEI_Solver::solveUsingBicgstab()
 {
@@ -820,16 +814,16 @@ int LLNL_FEI_Solver::solveUsingBicgstab()
    diagonal    = matPtr_->getMatrixDiagonal();
    totalNRows  = localNRows + extNRows;
    rVec        = new double[totalNRows];
- 
+
    /* -----------------------------------------------------------------
     * compute initial residual vector and norm
     * -----------------------------------------------------------------*/
- 
-   matPtr_->matvec( solnVector_, rVec ); 
-   for ( irow = 0; irow < localNRows; irow++ ) 
+
+   matPtr_->matvec( solnVector_, rVec );
+   for ( irow = 0; irow < localNRows; irow++ )
       rVec[irow] = rhsVector_[irow] - rVec[irow];
    rnorm0 = rnorm = 0.0;
-   for ( irow = 0; irow < localNRows; irow++ ) 
+   for ( irow = 0; irow < localNRows; irow++ )
    {
       rnorm0 += (rVec[irow] * rVec[irow]);
       rnorm  += (rhsVector_[irow] * rhsVector_[irow]);
@@ -842,7 +836,7 @@ int LLNL_FEI_Solver::solveUsingBicgstab()
    if ( outputLevel_ >= 2 && mypid_ == 0 )
       printf("\tLLNL_FEI_Solver_Bicgstab initial rnorm = %e (%e)\n",
              rnorm,rnorm0);
-   if ( rnorm0 == 0.0 ) 
+   if ( rnorm0 == 0.0 )
    {
       delete [] rVec;
       return 0;
@@ -862,7 +856,7 @@ int LLNL_FEI_Solver::solveUsingBicgstab()
    gammapp = new double[blen+1];
    mat     = new double*[blen+1];
    tau     = new double*[blen+1];
-   for ( iM = 1; iM <= blen; iM++ ) 
+   for ( iM = 1; iM <= blen; iM++ )
    {
       mat[iM] = new double[blen+1];
       tau[iM] = new double[blen+1];
@@ -872,7 +866,7 @@ int LLNL_FEI_Solver::solveUsingBicgstab()
    tVec  = new double[totalNRows];
    utVec = new double*[blen+2];
    rtVec = new double*[blen+2];
-   for ( iM = 0; iM < blen+2; iM++ ) 
+   for ( iM = 0; iM < blen+2; iM++ )
    {
       utVec[iM] = new double[totalNRows];
       rtVec[iM] = new double[totalNRows];
@@ -884,7 +878,7 @@ int LLNL_FEI_Solver::solveUsingBicgstab()
     * loop until convergence is achieved
     * -----------------------------------------------------------------*/
 
-   while ( converged == 0 && numTrials < 1 ) 
+   while ( converged == 0 && numTrials < 1 )
    {
       innerIteration = 0;
       for ( irow = 0; irow < localNRows; irow++ )
@@ -895,7 +889,7 @@ int LLNL_FEI_Solver::solveUsingBicgstab()
       }
       omega = rho = 1.0;
       alpha = 0.0;
-      while ( rnorm >= eps1 && iter < krylovMaxIterations_ ) 
+      while ( rnorm >= eps1 && iter < krylovMaxIterations_ )
       {
          iter += blen;
          innerIteration += blen;
@@ -912,76 +906,76 @@ int LLNL_FEI_Solver::solveUsingBicgstab()
          for ( iM = 0; iM < blen; iM++ )
          {
             dtemp = 0.0;
-            for ( irow = 0; irow < localNRows; irow++ ) 
+            for ( irow = 0; irow < localNRows; irow++ )
                dtemp += (rhVec[irow] * rtVec[iM+1][irow]);
             MPI_Allreduce(&dtemp, &rho1, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
             beta = alpha * rho1 / rho;
             rho   = rho1;
             dtemp = -beta;
-            for ( jM = 0; jM <= iM; jM++ ) 
-               for ( irow = 0; irow < localNRows; irow++ ) 
-                  utVec[jM+1][irow] = dtemp * utVec[jM+1][irow] + 
-                                      rtVec[jM+1][irow]; 
+            for ( jM = 0; jM <= iM; jM++ )
+               for ( irow = 0; irow < localNRows; irow++ )
+                  utVec[jM+1][irow] = dtemp * utVec[jM+1][irow] +
+                                      rtVec[jM+1][irow];
             if (diagonal != NULL)
             {
-               ut1 = utVec[iM+1]; 
-               for (irow = 0; irow < localNRows; irow++) 
+               ut1 = utVec[iM+1];
+               for (irow = 0; irow < localNRows; irow++)
                   tVec[irow] = ut1[irow] * diagonal[irow];
             }
             else
             {
-               ut1 = utVec[iM+1]; 
-               for (irow = 0; irow < localNRows; irow++) 
+               ut1 = utVec[iM+1];
+               for (irow = 0; irow < localNRows; irow++)
                   tVec[irow] = ut1[irow];
             }
-            matPtr_->matvec( tVec, utVec[iM+2] ); 
+            matPtr_->matvec( tVec, utVec[iM+2] );
             dtemp = 0.0;
-            for ( irow = 0; irow < localNRows; irow++ ) 
+            for ( irow = 0; irow < localNRows; irow++ )
                dtemp += (rhVec[irow] * utVec[iM+2][irow]);
             MPI_Allreduce(&dtemp, &gamma, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
 
-            alpha = rho / gamma; 
-            for ( jM = 0; jM <= iM; jM++ ) 
-               for ( irow = 0; irow < localNRows; irow++ ) 
-                  rtVec[jM+1][irow] -= alpha * utVec[jM+2][irow]; 
+            alpha = rho / gamma;
+            for ( jM = 0; jM <= iM; jM++ )
+               for ( irow = 0; irow < localNRows; irow++ )
+                  rtVec[jM+1][irow] -= alpha * utVec[jM+2][irow];
 
             if ( diagonal != NULL )
             {
-               for (irow = 0; irow < localNRows; irow++) 
+               for (irow = 0; irow < localNRows; irow++)
                   tVec[irow] = rtVec[iM+1][irow] * diagonal[irow];
             }
             else
             {
-               rt1 = rtVec[iM+1]; 
-               for (irow = 0; irow < localNRows; irow++) 
+               rt1 = rtVec[iM+1];
+               for (irow = 0; irow < localNRows; irow++)
                   tVec[irow] = rt1[irow];
             }
-            matPtr_->matvec( tVec, rtVec[iM+2] ); 
-            for (irow = 0; irow < localNRows; irow++) 
+            matPtr_->matvec( tVec, rtVec[iM+2] );
+            for (irow = 0; irow < localNRows; irow++)
                xhVec[irow] += alpha * utVec[1][irow];
          }
          for ( iM = 1; iM <= blen; iM++ )
             for ( jM = 1; jM <= blen; jM++ ) mat[iM][jM] = 0.0;
          for ( iM = 1; iM <= blen; iM++ )
          {
-            for ( jM = 1; jM <= iM-1; jM++ ) 
+            for ( jM = 1; jM <= iM-1; jM++ )
             {
                dtemp = 0.0;
-               for ( irow = 0; irow < localNRows; irow++ ) 
+               for ( irow = 0; irow < localNRows; irow++ )
                   dtemp += (rtVec[jM+1][irow] * rtVec[iM+1][irow]);
                MPI_Allreduce(&dtemp, &dtemp2, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
                tau[jM][iM] = dtemp2 / sigma[jM];
                mat[jM][iM] = tau[jM][iM] * sigma[jM];
                dtemp = -tau[jM][iM];
-               for (irow = 0; irow < localNRows; irow++) 
+               for (irow = 0; irow < localNRows; irow++)
                   rtVec[iM+1][irow] += dtemp * rtVec[jM+1][irow];
             }
             dtemp = 0.0;
-            for ( irow = 0; irow < localNRows; irow++ ) 
+            for ( irow = 0; irow < localNRows; irow++ )
                dtemp += (rtVec[iM+1][irow] * rtVec[iM+1][irow]);
             dArray[0] = dtemp;
             dtemp = 0.0;
-            for ( irow = 0; irow < localNRows; irow++ ) 
+            for ( irow = 0; irow < localNRows; irow++ )
                dtemp += (rtVec[1][irow] * rtVec[iM+1][irow]);
             dArray[1] = dtemp;
             MPI_Allreduce(dArray, dArray2, 2, MPI_DOUBLE, MPI_SUM, mpiComm_);
@@ -991,37 +985,37 @@ int LLNL_FEI_Solver::solveUsingBicgstab()
          }
          gammanp[blen] = gammap[blen];
          omega = gammanp[blen];
-         for ( iM = blen-1; iM >= 1; iM-- ) 
+         for ( iM = blen-1; iM >= 1; iM-- )
          {
            gammanp[iM] = gammap[iM];
            for (jM=iM+1; jM<=blen; jM++)
              gammanp[iM] = gammanp[iM] - tau[iM][jM] * gammanp[jM];
          }
-         for (iM=1; iM<=blen-1; iM++) 
+         for (iM=1; iM<=blen-1; iM++)
          {
             gammapp[iM] = gammanp[iM+1];
             for (jM=iM+1; jM<=blen-1; jM++)
                gammapp[iM] = gammapp[iM] + tau[iM][jM] * gammanp[jM+1];
          }
          dtemp = gammanp[1];
-         for (irow = 0; irow < localNRows; irow++) 
+         for (irow = 0; irow < localNRows; irow++)
             xhVec[irow] += dtemp * rtVec[1][irow];
          dtemp = - gammap[blen];
-         for (irow = 0; irow < localNRows; irow++) 
+         for (irow = 0; irow < localNRows; irow++)
             rtVec[1][irow] += dtemp * rtVec[blen+1][irow];
          dtemp = - gammanp[blen];
-         for (irow = 0; irow < localNRows; irow++) 
+         for (irow = 0; irow < localNRows; irow++)
             utVec[1][irow] += dtemp * utVec[blen+1][irow];
-         for (iM=1; iM<=blen-1; iM++) 
+         for (iM=1; iM<=blen-1; iM++)
          {
             dtemp = - gammanp[iM];
-            for (irow = 0; irow < localNRows; irow++) 
+            for (irow = 0; irow < localNRows; irow++)
                utVec[1][irow] += dtemp * utVec[iM+1][irow];
             dtemp = gammapp[iM];
-            for (irow = 0; irow < localNRows; irow++) 
+            for (irow = 0; irow < localNRows; irow++)
                xhVec[irow] += dtemp * rtVec[iM+1][irow];
             dtemp = - gammap[iM];
-            for (irow = 0; irow < localNRows; irow++) 
+            for (irow = 0; irow < localNRows; irow++)
                rtVec[1][irow] += dtemp * rtVec[iM+1][irow];
          }
          ut1 = utVec[0];
@@ -1032,10 +1026,10 @@ int LLNL_FEI_Solver::solveUsingBicgstab()
          {
             ut1[irow] = ut2[irow];
             rt1[irow] = rt2[irow];
-            solnVector_[irow] = xhVec[irow]; 
+            solnVector_[irow] = xhVec[irow];
          }
          dtemp = 0.0;
-         for ( irow = 0; irow < localNRows; irow++ ) 
+         for ( irow = 0; irow < localNRows; irow++ )
             dtemp += (rtVec[1][irow] * rtVec[1][irow]);
          MPI_Allreduce(&dtemp, &rnorm, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
          rnorm = sqrt( rnorm );
@@ -1045,14 +1039,14 @@ int LLNL_FEI_Solver::solveUsingBicgstab()
       }
       if ( diagonal != NULL )
       {
-         for (irow = 0; irow < localNRows; irow++) 
+         for (irow = 0; irow < localNRows; irow++)
             solnVector_[irow] *= diagonal[irow];
       }
-      matPtr_->matvec( solnVector_, rVec ); 
-      for ( irow = 0; irow < localNRows; irow++ ) 
-         rVec[irow] = rhsVector_[irow] - rVec[irow]; 
+      matPtr_->matvec( solnVector_, rVec );
+      for ( irow = 0; irow < localNRows; irow++ )
+         rVec[irow] = rhsVector_[irow] - rVec[irow];
       rnorm = 0.0;
-      for ( irow = 0; irow < localNRows; irow++ ) 
+      for ( irow = 0; irow < localNRows; irow++ )
          rnorm += rVec[irow] * rVec[irow];
       MPI_Allreduce(&rnorm, dArray, 1, MPI_DOUBLE, MPI_SUM, mpiComm_);
       rnorm = sqrt( dArray[0] );
@@ -1074,7 +1068,7 @@ int LLNL_FEI_Solver::solveUsingBicgstab()
    delete [] gammap;
    delete [] gammanp;
    delete [] gammapp;
-   for ( iM = 1; iM <= blen; iM++ ) 
+   for ( iM = 1; iM <= blen; iM++ )
    {
       delete [] mat[iM];
       delete [] tau[iM];
@@ -1085,7 +1079,7 @@ int LLNL_FEI_Solver::solveUsingBicgstab()
    delete [] rhVec;
    delete [] xhVec;
    delete [] tVec;
-   for ( iM = 0; iM < blen+2; iM++ ) 
+   for ( iM = 0; iM < blen+2; iM++ )
    {
       delete [] utVec[iM];
       delete [] rtVec[iM];
@@ -1097,19 +1091,20 @@ int LLNL_FEI_Solver::solveUsingBicgstab()
 }
 
 /**************************************************************************
- solve linear system using SuperLU 
+ solve linear system using SuperLU
  -------------------------------------------------------------------------*/
 int LLNL_FEI_Solver::solveUsingSuperLU()
 {
-#if HAVE_SUPERLU
+#ifdef HAVE_SUPERLU
    int    localNRows, localNnz, *countArray, irow, jcol, *cscIA, *cscJA;
    int    colNum, index, *etree, permcSpec, lwork, panelSize, relax, info;
    int    *permC, *permR, *diagIA, *diagJA;
-   double *cscAA, diagPivotThresh, dropTol, *rVec, rnorm;
+   double *cscAA, diagPivotThresh, *rVec, rnorm;
    double *diagAA;
    trans_t           trans;
    superlu_options_t slu_options;
    SuperLUStat_t     slu_stat;
+   GlobalLU_t        Glu;
    SuperMatrix superLU_Amat;
    SuperMatrix superLU_Lmat;
    SuperMatrix superLU_Umat;
@@ -1119,7 +1114,7 @@ int LLNL_FEI_Solver::solveUsingSuperLU()
    /* ---------------------------------------------------------------
     * conversion from CSR to CSC
     * -------------------------------------------------------------*/
-   
+
    matPtr_->getLocalMatrix(&localNRows,&diagIA,&diagJA,&diagAA);
    countArray = new int[localNRows];
    for ( irow = 0; irow < localNRows; irow++ ) countArray[irow] = 0;
@@ -1127,9 +1122,9 @@ int LLNL_FEI_Solver::solveUsingSuperLU()
       for ( jcol = diagIA[irow]; jcol < diagIA[irow+1]; jcol++ )
          countArray[diagJA[jcol]]++;
    localNnz = diagIA[localNRows];
-   cscJA = (int *)    malloc( (localNRows+1) * sizeof(int) );
-   cscIA = (int *)    malloc( localNnz * sizeof(int) );
-   cscAA = (double *) malloc( localNnz * sizeof(double) );
+   cscJA = hypre_TAlloc(int,  (localNRows+1) , HYPRE_MEMORY_HOST);
+   cscIA = hypre_TAlloc(int,  localNnz , HYPRE_MEMORY_HOST);
+   cscAA = hypre_TAlloc(double,  localNnz , HYPRE_MEMORY_HOST);
    cscJA[0] = 0;
    localNnz = 0;
    for ( jcol = 1; jcol <= localNRows; jcol++ )
@@ -1160,8 +1155,8 @@ int LLNL_FEI_Solver::solveUsingSuperLU()
     * make SuperMatrix
     * -------------------------------------------------------------*/
 
-   dCreate_CompCol_Matrix(&superLU_Amat, localNRows, localNRows, 
-                          cscJA[localNRows], cscAA, cscIA, cscJA, SLU_NC, 
+   dCreate_CompCol_Matrix(&superLU_Amat, localNRows, localNRows,
+                          cscJA[localNRows], cscAA, cscIA, cscJA, SLU_NC,
                           SLU_D, SLU_GE);
    etree     = new int[localNRows];
    permC     = new int[localNRows];
@@ -1172,7 +1167,6 @@ int LLNL_FEI_Solver::solveUsingSuperLU()
    slu_options.SymmetricMode = NO;
    sp_preorder(&slu_options, &superLU_Amat, permC, etree, &AC);
    diagPivotThresh = 1.0;
-   dropTol = 0.0;
    panelSize = sp_ienv(1);
    relax = sp_ienv(2);
    StatInit(&slu_stat);
@@ -1180,9 +1174,12 @@ int LLNL_FEI_Solver::solveUsingSuperLU()
    slu_options.ColPerm = MY_PERMC;
    slu_options.DiagPivotThresh = diagPivotThresh;
 
-   dgstrf(&slu_options, &AC, dropTol, relax, panelSize,
+//   dgstrf(&slu_options, &AC, dropTol, relax, panelSize,
+//          etree, NULL, lwork, permC, permR, &superLU_Lmat,
+//          &superLU_Umat, &slu_stat, &info);
+   dgstrf(&slu_options, &AC, relax, panelSize,
           etree, NULL, lwork, permC, permR, &superLU_Lmat,
-          &superLU_Umat, &slu_stat, &info);
+          &superLU_Umat, &Glu, &slu_stat, &info);
 
    Destroy_CompCol_Permuted(&AC);
    Destroy_CompCol_Matrix(&superLU_Amat);
@@ -1192,9 +1189,9 @@ int LLNL_FEI_Solver::solveUsingSuperLU()
     * create a SuperLU dense matrix from right hand side
     * -----------------------------------------------------------*/
 
-   for ( irow = 0; irow < localNRows; irow++ ) 
+   for ( irow = 0; irow < localNRows; irow++ )
       solnVector_[irow] = rhsVector_[irow];
-   dCreate_Dense_Matrix(&B, localNRows, 1, solnVector_, localNRows, 
+   dCreate_Dense_Matrix(&B, localNRows, 1, solnVector_, localNRows,
                         SLU_DN, SLU_D, SLU_GE);
 
    /* -------------------------------------------------------------
@@ -1202,14 +1199,14 @@ int LLNL_FEI_Solver::solveUsingSuperLU()
     * -----------------------------------------------------------*/
 
    trans = NOTRANS;
-   dgstrs (trans, &superLU_Lmat, &superLU_Umat, permC, permR, &B, 
+   dgstrs (trans, &superLU_Lmat, &superLU_Umat, permC, permR, &B,
            &slu_stat, &info);
    rVec = new double[localNRows];
-   matPtr_->matvec( solnVector_, rVec ); 
-   for ( irow = 0; irow < localNRows; irow++ ) 
-      rVec[irow] = rhsVector_[irow] - rVec[irow]; 
+   matPtr_->matvec( solnVector_, rVec );
+   for ( irow = 0; irow < localNRows; irow++ )
+      rVec[irow] = rhsVector_[irow] - rVec[irow];
    rnorm = 0.0;
-   for ( irow = 0; irow < localNRows; irow++ ) 
+   for ( irow = 0; irow < localNRows; irow++ )
       rnorm += rVec[irow] * rVec[irow];
    rnorm = sqrt( rnorm );
    if ( outputLevel_ >= 2 && mypid_ == 0 )
@@ -1237,4 +1234,4 @@ int LLNL_FEI_Solver::solveUsingSuperLU()
    return (1);
 #endif
 }
- 
+

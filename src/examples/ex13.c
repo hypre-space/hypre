@@ -1,3 +1,10 @@
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 /*
    Example 13
 
@@ -70,17 +77,22 @@
                    connectivity" point.
 */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <math.h>
-#include "_hypre_utilities.h"
 #include "HYPRE_sstruct_mv.h"
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE.h"
+#include "ex.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979
 #endif
 
+#ifdef HYPRE_EXVIS
 #include "vis.c"
+#endif
 
 /*
    This routine computes the bilinear finite element stiffness matrix and
@@ -107,7 +119,7 @@
 
                   F_j = (1,phi_j)_R = h^2/4 * sin(gamma)
 */
-void ComputeFEMRhombus (double S[4][4], double F[4], double gamma, double h)
+void ComputeFEMRhombus (double **S, double F[4], double gamma, double h)
 {
    int i, j;
 
@@ -157,6 +169,12 @@ int main (int argc, char *argv[])
    MPI_Init(&argc, &argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+
+   /* Initialize HYPRE */
+   HYPRE_Init();
+
+   /* Print GPU info */
+   /* HYPRE_PrintDeviceInfo(); */
 
    /* Set default parameters */
    n = 10;
@@ -410,7 +428,12 @@ int main (int argc, char *argv[])
       /* Set the matrix and vector entries by finite element assembly */
       {
          /* local stifness matrix and load vector */
-         double S[4][4], F[4];
+         /* double F[4]; OK to use constant-length arrays for CPUs */
+         double *F = (double *) malloc(4*sizeof(double));
+         /*double S[4][4]; OK to use constant-length arrays for CPUs */
+         double *S_flat = (double *) malloc(16*sizeof(double));
+         double *S[4];
+         S[0] = S_flat; S[1] = S[0] + 4; S[2] = S[1] + 4; S[3] = S[2] + 4;
 
          /* The index of the local nodes 0-3 relative to the cell index,
             i.e. node k in cell (i,j) is in the upper-right corner of the
@@ -538,6 +561,8 @@ int main (int argc, char *argv[])
                      HYPRE_SStructVectorAddToValues(b, part, index, var, &F[k]);
                   }
          }
+         free(F);
+         free(S_flat);
       }
    }
 
@@ -618,6 +643,7 @@ int main (int argc, char *argv[])
       /* Save the solution for GLVis visualization, see vis/glvis-ex13.sh */
       if (vis)
       {
+#ifdef HYPRE_EXVIS
          FILE *file;
          char filename[255];
 
@@ -658,6 +684,7 @@ int main (int argc, char *argv[])
 
          /* additional visualization data */
          GLVis_PrintData("vis/ex13.data", myid, num_procs);
+#endif
       }
 
       if (myid == 0)
@@ -676,6 +703,9 @@ int main (int argc, char *argv[])
    HYPRE_SStructMatrixDestroy(A);
    HYPRE_SStructVectorDestroy(b);
    HYPRE_SStructVectorDestroy(x);
+
+   /* Finalize HYPRE */
+   HYPRE_Finalize();
 
    /* Finalize MPI */
    MPI_Finalize();

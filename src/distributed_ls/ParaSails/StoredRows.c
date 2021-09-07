@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -23,7 +15,6 @@
  *****************************************************************************/
 
 #include <stdlib.h>
-#include <assert.h>
 #include "Common.h"
 #include "Mem.h"
 #include "Matrix.h"
@@ -45,7 +36,7 @@
 
 StoredRows *StoredRowsCreate(Matrix *mat, HYPRE_Int size)
 {
-    StoredRows *p = (StoredRows *) malloc(sizeof(StoredRows));
+    StoredRows *p = hypre_TAlloc(StoredRows, 1, HYPRE_MEMORY_HOST);
 
     p->mat  = mat;
     p->mem  = MemCreate();
@@ -53,9 +44,9 @@ StoredRows *StoredRowsCreate(Matrix *mat, HYPRE_Int size)
     p->size = size;
     p->num_loc = mat->end_row - mat->beg_row + 1;
 
-    p->len = (HYPRE_Int *)     calloc(size,  sizeof(HYPRE_Int));
-    p->ind = (HYPRE_Int **)    malloc(size * sizeof(HYPRE_Int *));
-    p->val = (HYPRE_Real **) malloc(size * sizeof(HYPRE_Real *));
+    p->len = hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
+    p->ind = hypre_TAlloc(HYPRE_Int *, size , HYPRE_MEMORY_HOST);
+    p->val = hypre_TAlloc(HYPRE_Real *, size , HYPRE_MEMORY_HOST);
 
     p->count = 0;
 
@@ -69,10 +60,10 @@ StoredRows *StoredRowsCreate(Matrix *mat, HYPRE_Int size)
 void StoredRowsDestroy(StoredRows *p)
 {
     MemDestroy(p->mem);
-    free(p->len);
-    free(p->ind);
-    free(p->val);
-    free(p);
+    hypre_TFree(p->len,HYPRE_MEMORY_HOST);
+    hypre_TFree(p->ind,HYPRE_MEMORY_HOST);
+    hypre_TFree(p->val,HYPRE_MEMORY_HOST);
+    hypre_TFree(p,HYPRE_MEMORY_HOST);
 }
 
 /*--------------------------------------------------------------------------
@@ -115,9 +106,9 @@ void StoredRowsPut(StoredRows *p, HYPRE_Int index, HYPRE_Int len, HYPRE_Int *ind
 #ifdef PARASAILS_DEBUG
 		    hypre_printf("StoredRows resize %d\n", newsize);
 #endif
-        p->len = (HYPRE_Int *)     realloc(p->len, newsize * sizeof(HYPRE_Int));
-        p->ind = (HYPRE_Int **)    realloc(p->ind, newsize * sizeof(HYPRE_Int *));
-        p->val = (HYPRE_Real **) realloc(p->val, newsize * sizeof(HYPRE_Real *));
+        p->len = hypre_TReAlloc(p->len,HYPRE_Int,  newsize , HYPRE_MEMORY_HOST);
+        p->ind = hypre_TReAlloc(p->ind,HYPRE_Int *,  newsize , HYPRE_MEMORY_HOST);
+        p->val = hypre_TReAlloc(p->val,HYPRE_Real *,  newsize , HYPRE_MEMORY_HOST);
 
 	/* set lengths to zero */
         for (j=p->size; j<newsize; j++)
@@ -127,7 +118,7 @@ void StoredRowsPut(StoredRows *p, HYPRE_Int index, HYPRE_Int len, HYPRE_Int *ind
     }
 
     /* check that row has not been put already */
-    assert(p->len[i] == 0);
+    hypre_assert(p->len[i] == 0);
 
     p->len[i] = len;
     p->ind[i] = ind;

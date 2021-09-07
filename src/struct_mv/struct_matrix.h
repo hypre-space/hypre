@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -18,8 +13,6 @@
 
 #ifndef hypre_STRUCT_MATRIX_HEADER
 #define hypre_STRUCT_MATRIX_HEADER
-
-#include <assert.h>
 
 /*--------------------------------------------------------------------------
  * hypre_StructMatrix:
@@ -98,7 +91,7 @@ typedef struct hypre_StructMatrix_struct
    HYPRE_Int             sym_ghost[2*HYPRE_MAXDIM]; /* Ghost layers for symmetric */
    HYPRE_Int             trn_ghost[2*HYPRE_MAXDIM]; /* Ghost layers for transpose */
 
-   HYPRE_Int             global_size;  /* Total number of nonzero coeffs */
+   HYPRE_BigInt          global_size;  /* Total number of nonzero coeffs */
 
    HYPRE_Int             ref_count;
 

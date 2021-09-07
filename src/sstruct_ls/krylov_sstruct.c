@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -21,20 +16,21 @@
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-char *
-hypre_SStructKrylovCAlloc( HYPRE_Int count,
-                           HYPRE_Int elt_size )
+void *
+hypre_SStructKrylovCAlloc( size_t count,
+                           size_t elt_size,
+                           HYPRE_MemoryLocation location )
 {
-   return( hypre_CAlloc( count, elt_size ) );
+   return( (void*) hypre_CTAlloc(char, count * elt_size, location) );
 }
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructKrylovFree( char *ptr )
+hypre_SStructKrylovFree( void *ptr )
 {
-   hypre_Free( ptr );
+   hypre_TFree( ptr , HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -45,7 +41,7 @@ hypre_SStructKrylovFree( char *ptr )
 void *
 hypre_SStructKrylovCreateVector( void *vvector )
 {
-	hypre_SStructVector  *vector = (hypre_SStructVector  *)vvector;	
+   hypre_SStructVector  *vector = (hypre_SStructVector  *)vvector;
    hypre_SStructVector  *new_vector;
    HYPRE_Int             object_type;
 
@@ -55,7 +51,7 @@ hypre_SStructKrylovCreateVector( void *vvector )
    hypre_SStructPVector *new_pvector;
    hypre_StructVector   *new_svector;
    HYPRE_Int            *num_ghost;
-   
+
    HYPRE_Int    part;
    HYPRE_Int    nvars, var;
 
@@ -107,7 +103,7 @@ hypre_SStructKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
    hypre_SStructPVector *new_pvector;
    hypre_StructVector   *new_svector;
    HYPRE_Int            *num_ghost;
-   
+
    HYPRE_Int    part;
    HYPRE_Int    nvars, var;
 
@@ -115,7 +111,7 @@ hypre_SStructKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
 
    object_type= hypre_SStructVectorObjectType(vector);
 
-   new_vector = hypre_CTAlloc(hypre_SStructVector*,n);
+   new_vector = hypre_CTAlloc(hypre_SStructVector*, n, HYPRE_MEMORY_HOST);
    for (i=0; i < n; i++)
    {
       HYPRE_SStructVectorCreate(hypre_SStructVectorComm(vector),
@@ -208,7 +204,7 @@ hypre_SStructKrylovMatvecDestroy( void *matvec_data )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Real
-hypre_SStructKrylovInnerProd( void *x, 
+hypre_SStructKrylovInnerProd( void *x,
                               void *y )
 {
    HYPRE_Real result;
@@ -224,7 +220,7 @@ hypre_SStructKrylovInnerProd( void *x,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructKrylovCopyVector( void *x, 
+hypre_SStructKrylovCopyVector( void *x,
                                void *y )
 {
    return ( hypre_SStructCopy( (hypre_SStructVector *) x,

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef hypre_SSTRUCT_LS_HEADER
 #define hypre_SSTRUCT_LS_HEADER
@@ -31,21 +26,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
 
 /*--------------------------------------------------------------------------
  * hypre_SStructOwnInfo data structure
@@ -84,21 +64,6 @@ typedef struct
 ((own_data) -> own_composite_size)
 
 #endif
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
-
 /*--------------------------------------------------------------------------
  * hypre_SStructRecvInfo data structure
  *--------------------------------------------------------------------------*/
@@ -116,21 +81,6 @@ typedef struct
 } hypre_SStructRecvInfoData;
 
 #endif
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
-
 /*--------------------------------------------------------------------------
  * hypre_SStructSendInfo data structure
  *--------------------------------------------------------------------------*/
@@ -149,21 +99,6 @@ typedef struct
 } hypre_SStructSendInfoData;
 
 #endif
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
-
 typedef struct
 {
     hypre_IJMatrix    *Face_iedge;
@@ -174,21 +109,6 @@ typedef struct
     hypre_IJMatrix    *Element_Edge;
 
 } hypre_PTopology;
-
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
 
 /******************************************************************************
  *
@@ -289,27 +209,12 @@ typedef struct
 } hypre_MaxwellData;
 
 #endif
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
-
 typedef struct
 {
    HYPRE_Int row;
 
    HYPRE_Int ncols;
-   HYPRE_Int      *cols;
+   HYPRE_BigInt *cols;
    HYPRE_Real   *data;
 
 } hypre_MaxwellOffProcRow;
@@ -390,14 +295,14 @@ HYPRE_Int hypre_FacZeroCData ( void *fac_vdata , hypre_SStructMatrix *A );
 HYPRE_Int hypre_FacZeroCFSten ( hypre_SStructPMatrix *Af , hypre_SStructPMatrix *Ac , hypre_SStructGrid *grid , HYPRE_Int fine_part , hypre_Index rfactors );
 HYPRE_Int hypre_FacZeroFCSten ( hypre_SStructPMatrix *A , hypre_SStructGrid *grid , HYPRE_Int fine_part );
 
-/* hypre_bsearch.c */
+/* bsearch.c */
 HYPRE_Int hypre_LowerBinarySearch ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int list_length );
 HYPRE_Int hypre_UpperBinarySearch ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int list_length );
 
-/* hypre_MaxwellSolve2.c */
+/* maxwell_solve2.c */
 HYPRE_Int hypre_MaxwellSolve2 ( void *maxwell_vdata , hypre_SStructMatrix *A_in , hypre_SStructVector *f , hypre_SStructVector *u );
 
-/* hypre_MaxwellSolve.c */
+/* maxwell_solve.c */
 HYPRE_Int hypre_MaxwellSolve ( void *maxwell_vdata , hypre_SStructMatrix *A_in , hypre_SStructVector *f , hypre_SStructVector *u );
 
 /* HYPRE_sstruct_bicgstab.c */
@@ -553,35 +458,39 @@ HYPRE_Int HYPRE_SStructSplitSetup ( HYPRE_SStructSolver solver , HYPRE_SStructMa
 HYPRE_Int HYPRE_SStructSplitSolve ( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
 HYPRE_Int HYPRE_SStructSplitSetTol ( HYPRE_SStructSolver solver , HYPRE_Real tol );
 HYPRE_Int HYPRE_SStructSplitSetMaxIter ( HYPRE_SStructSolver solver , HYPRE_Int max_iter );
+HYPRE_Int HYPRE_SStructSplitSetPrintLevel ( HYPRE_SStructSolver solver , HYPRE_Int print_level );
 HYPRE_Int HYPRE_SStructSplitSetZeroGuess ( HYPRE_SStructSolver solver );
 HYPRE_Int HYPRE_SStructSplitSetNonZeroGuess ( HYPRE_SStructSolver solver );
 HYPRE_Int HYPRE_SStructSplitSetStructSolver ( HYPRE_SStructSolver solver , HYPRE_Int ssolver );
 HYPRE_Int HYPRE_SStructSplitGetNumIterations ( HYPRE_SStructSolver solver , HYPRE_Int *num_iterations );
+HYPRE_Int HYPRE_SStructSplitPrintLogging( HYPRE_SStructSolver  solver );
 HYPRE_Int HYPRE_SStructSplitGetFinalRelativeResidualNorm ( HYPRE_SStructSolver solver , HYPRE_Real *norm );
 
 /* HYPRE_sstruct_ssamg.c */
-HYPRE_Int HYPRE_SStructSSAMGCreate ( MPI_Comm comm, HYPRE_SStructSolver *solver );
+HYPRE_Int HYPRE_SStructSSAMGCreate ( MPI_Comm comm , HYPRE_SStructSolver *solver );
 HYPRE_Int HYPRE_SStructSSAMGDestroy ( HYPRE_SStructSolver solver );
-HYPRE_Int HYPRE_SStructSSAMGSetup ( HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYPRE_SStructVector b, HYPRE_SStructVector x );
-HYPRE_Int HYPRE_SStructSSAMGSolve ( HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYPRE_SStructVector b, HYPRE_SStructVector x);
-HYPRE_Int HYPRE_SStructSSAMGSetTol ( HYPRE_SStructSolver solver, HYPRE_Real tol );
-HYPRE_Int HYPRE_SStructSSAMGSetMaxIter ( HYPRE_SStructSolver solver, HYPRE_Int max_iter );
-HYPRE_Int HYPRE_SStructSSAMGSetMaxLevels ( HYPRE_SStructSolver solver, HYPRE_Int max_levels );
-HYPRE_Int HYPRE_SStructSSAMGSetRelChange ( HYPRE_SStructSolver solver, HYPRE_Int rel_change );
+HYPRE_Int HYPRE_SStructSSAMGSetup ( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
+HYPRE_Int HYPRE_SStructSSAMGSolve ( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x);
+HYPRE_Int HYPRE_SStructSSAMGSetTol ( HYPRE_SStructSolver solver , HYPRE_Real tol );
+HYPRE_Int HYPRE_SStructSSAMGSetMaxIter ( HYPRE_SStructSolver solver , HYPRE_Int max_iter );
+HYPRE_Int HYPRE_SStructSSAMGSetMaxLevels ( HYPRE_SStructSolver solver , HYPRE_Int max_levels );
+HYPRE_Int HYPRE_SStructSSAMGSetRelChange ( HYPRE_SStructSolver solver , HYPRE_Int rel_change );
 HYPRE_Int HYPRE_SStructSSAMGSetZeroGuess ( HYPRE_SStructSolver solver );
 HYPRE_Int HYPRE_SStructSSAMGSetNonZeroGuess ( HYPRE_SStructSolver solver );
-HYPRE_Int HYPRE_SStructSSAMGSetRelaxType ( HYPRE_SStructSolver solver, HYPRE_Int relax_type );
-HYPRE_Int HYPRE_SStructSSAMGSetSkipRelax ( HYPRE_SStructSolver solver, HYPRE_Int skip_relax );
-HYPRE_Int HYPRE_SStructSSAMGSetRelaxWeight ( HYPRE_SStructSolver solver, HYPRE_Real relax_weight );
-HYPRE_Int HYPRE_SStructSSAMGSetNumPreRelax ( HYPRE_SStructSolver solver, HYPRE_Int num_pre_relax );
-HYPRE_Int HYPRE_SStructSSAMGSetNumPostRelax ( HYPRE_SStructSolver solver, HYPRE_Int num_post_relax );
-HYPRE_Int HYPRE_SStructSSAMGSetNumCoarseRelax ( HYPRE_SStructSolver solver, HYPRE_Int num_coarse_relax );
-HYPRE_Int HYPRE_SStructSSAMGSetDxyz ( HYPRE_SStructSolver  solver, HYPRE_Int nparts, HYPRE_Real **dxyz );
-HYPRE_Int HYPRE_SStructSSAMGSetLogging ( HYPRE_SStructSolver solver, HYPRE_Int logging );
-HYPRE_Int HYPRE_SStructSSAMGSetPrintLevel ( HYPRE_SStructSolver solver, HYPRE_Int print_level );
-HYPRE_Int HYPRE_SStructSSAMGSetPrintFreq ( HYPRE_SStructSolver solver, HYPRE_Int print_freq );
-HYPRE_Int HYPRE_SStructSSAMGGetNumIterations ( HYPRE_SStructSolver  solver, HYPRE_Int *num_iterations );
-HYPRE_Int HYPRE_SStructSSAMGGetFinalRelativeResidualNorm ( HYPRE_SStructSolver  solver, HYPRE_Real *norm );
+HYPRE_Int HYPRE_SStructSSAMGSetRelaxType ( HYPRE_SStructSolver solver , HYPRE_Int relax_type );
+HYPRE_Int HYPRE_SStructSSAMGSetSkipRelax ( HYPRE_SStructSolver solver , HYPRE_Int skip_relax );
+HYPRE_Int HYPRE_SStructSSAMGSetRelaxWeight ( HYPRE_SStructSolver solver , HYPRE_Real relax_weight );
+HYPRE_Int HYPRE_SStructSSAMGSetNumPreRelax ( HYPRE_SStructSolver solver , HYPRE_Int num_pre_relax );
+HYPRE_Int HYPRE_SStructSSAMGSetNumPostRelax ( HYPRE_SStructSolver solver , HYPRE_Int num_post_relax );
+HYPRE_Int HYPRE_SStructSSAMGSetNumCoarseRelax ( HYPRE_SStructSolver solver , HYPRE_Int num_coarse_relax );
+HYPRE_Int HYPRE_SStructSSAMGSetMaxCoarseSize ( HYPRE_SStructSolver solver , HYPRE_Int max_coarse_size );
+HYPRE_Int HYPRE_SStructSSAMGSetCoarseSolverType ( HYPRE_SStructSolver solver , HYPRE_Int csolver_type );
+HYPRE_Int HYPRE_SStructSSAMGSetDxyz ( HYPRE_SStructSolver solver , HYPRE_Int nparts , HYPRE_Real **dxyz );
+HYPRE_Int HYPRE_SStructSSAMGSetLogging ( HYPRE_SStructSolver solver , HYPRE_Int logging );
+HYPRE_Int HYPRE_SStructSSAMGSetPrintLevel ( HYPRE_SStructSolver solver , HYPRE_Int print_level );
+HYPRE_Int HYPRE_SStructSSAMGSetPrintFreq ( HYPRE_SStructSolver solver , HYPRE_Int print_freq );
+HYPRE_Int HYPRE_SStructSSAMGGetNumIterations ( HYPRE_SStructSolver solver , HYPRE_Int *num_iterations );
+HYPRE_Int HYPRE_SStructSSAMGGetFinalRelativeResidualNorm ( HYPRE_SStructSolver solver , HYPRE_Real *norm );
 
 /* HYPRE_sstruct_sys_pfmg.c */
 HYPRE_Int HYPRE_SStructSysPFMGCreate ( MPI_Comm comm , HYPRE_SStructSolver *solver );
@@ -609,8 +518,8 @@ HYPRE_Int hypre_SStructKrylovIdentitySetup ( void *vdata , void *A , void *b , v
 HYPRE_Int hypre_SStructKrylovIdentity ( void *vdata , void *A , void *b , void *x );
 
 /* krylov_sstruct.c */
-char *hypre_SStructKrylovCAlloc ( HYPRE_Int count , HYPRE_Int elt_size );
-HYPRE_Int hypre_SStructKrylovFree ( char *ptr );
+void *hypre_SStructKrylovCAlloc ( size_t count, size_t elt_size, HYPRE_MemoryLocation location );
+HYPRE_Int hypre_SStructKrylovFree ( void *ptr );
 void *hypre_SStructKrylovCreateVector ( void *vvector );
 void *hypre_SStructKrylovCreateVectorArray ( HYPRE_Int n , void *vvector );
 HYPRE_Int hypre_SStructKrylovDestroyVector ( void *vvector );
@@ -673,7 +582,7 @@ HYPRE_Int hypre_SeqVectorZeroBCValues ( hypre_Vector *v , HYPRE_Int *rows , HYPR
 
 /* nd1_amge_interpolation.c */
 HYPRE_Int hypre_ND1AMGeInterpolation ( hypre_ParCSRMatrix *Aee , hypre_ParCSRMatrix *ELEM_idof , hypre_ParCSRMatrix *FACE_idof , hypre_ParCSRMatrix *EDGE_idof , hypre_ParCSRMatrix *ELEM_FACE , hypre_ParCSRMatrix *ELEM_EDGE , HYPRE_Int num_OffProcRows , hypre_MaxwellOffProcRow **OffProcRows , hypre_IJMatrix *IJ_dof_DOF );
-HYPRE_Int hypre_HarmonicExtension ( hypre_CSRMatrix *A , hypre_CSRMatrix *P , HYPRE_Int num_DOF , HYPRE_Int *DOF , HYPRE_Int num_idof , HYPRE_Int *idof , HYPRE_Int num_bdof , HYPRE_Int *bdof );
+HYPRE_Int hypre_HarmonicExtension ( hypre_CSRMatrix *A , hypre_CSRMatrix *P , HYPRE_Int num_DOF , HYPRE_BigInt *DOF , HYPRE_Int num_idof , HYPRE_BigInt *idof , HYPRE_Int num_bdof , HYPRE_BigInt *bdof );
 
 /* node_relax.c */
 void *hypre_NodeRelaxCreate ( MPI_Comm comm );
@@ -705,6 +614,8 @@ HYPRE_Int hypre_SSAMGSetSkipRelax ( void *ssamg_vdata , HYPRE_Int skip_relax );
 HYPRE_Int hypre_SSAMGSetNumPreRelax ( void *ssamg_vdata , HYPRE_Int num_pre_relax );
 HYPRE_Int hypre_SSAMGSetNumPosRelax ( void *ssamg_vdata , HYPRE_Int num_pos_relax );
 HYPRE_Int hypre_SSAMGSetNumCoarseRelax ( void *ssamg_vdata , HYPRE_Int num_coarse_relax );
+HYPRE_Int hypre_SSAMGSetMaxCoarseSize ( void *ssamg_vdata , HYPRE_Int max_coarse_size );
+HYPRE_Int hypre_SSAMGSetCoarseSolverType ( void *ssamg_vdata , HYPRE_Int csolver_type );
 HYPRE_Int hypre_SSAMGSetPrintLevel ( void *ssamg_vdata , HYPRE_Int print_level );
 HYPRE_Int hypre_SSAMGSetPrintFreq ( void *ssamg_vdata , HYPRE_Int print_freq );
 HYPRE_Int hypre_SSAMGSetLogging ( void *ssamg_vdata , HYPRE_Int logging );
@@ -712,6 +623,11 @@ HYPRE_Int hypre_SSAMGPrintLogging ( void *ssamg_vdata );
 HYPRE_Int hypre_SSAMGPrintStats ( void *ssamg_vdata );
 HYPRE_Int hypre_SSAMGGetNumIterations ( void *ssamg_vdata , HYPRE_Int *num_iterations );
 HYPRE_Int hypre_SSAMGGetFinalRelativeResidualNorm ( void *ssamg_vdata , HYPRE_Real *relative_residual_norm );
+
+/* ssamg_csolver.c */
+HYPRE_Int hypre_SSAMGCoarseSolverSetup( void *ssamg_vdata );
+HYPRE_Int hypre_SSAMGCoarseSolve( void *ssamg_vdata );
+HYPRE_Int hypre_SSAMGCoarseSolverDestroy( void *ssamg_vdata );
 
 /* ssamg_interp.c */
 hypre_SStructMatrix* hypre_SSAMGCreateInterpOp ( hypre_SStructMatrix *A , hypre_SStructGrid *cgrid, HYPRE_Int *cdir_p );
@@ -727,7 +643,7 @@ HYPRE_Int hypre_SSAMGRelaxDestroy ( void *relax_vdata );
 HYPRE_Int hypre_SSAMGRelaxSetup ( void *relax_vdata , hypre_SStructMatrix *A , hypre_SStructVector *b , hypre_SStructVector *x );
 HYPRE_Int hypre_SSAMGRelax ( void *relax_vdata , hypre_SStructMatrix *A , hypre_SStructVector *b , hypre_SStructVector *x );
 HYPRE_Int hypre_SSAMGRelaxGeneric ( void *relax_vdata , hypre_SStructMatrix *A , hypre_SStructVector *b , hypre_SStructVector *x );
-HYPRE_Int hypre_SSAMGRelaxMV ( void *relax_vdata , hypre_SStructMatrix *A , hypre_SStructVector *b , hypre_SStructVector *x );
+HYPRE_Int hypre_SSAMGRelaxJacobi ( void *relax_vdata , hypre_SStructMatrix *A , hypre_SStructVector *b , hypre_SStructVector *x );
 HYPRE_Int hypre_SSAMGRelaxSetPreRelax ( void  *relax_vdata );
 HYPRE_Int hypre_SSAMGRelaxSetPostRelax ( void  *relax_vdata );
 HYPRE_Int hypre_SSAMGRelaxSetTol ( void *relax_vdata , HYPRE_Real tol );

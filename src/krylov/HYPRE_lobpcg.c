@@ -1,15 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -20,35 +14,14 @@
 #include "_hypre_utilities.h"
 
 #include "HYPRE_config.h"
-#ifdef HYPRE_USING_ESSL
-
-#include <essl.h>
-
-#else
-
-#include "fortran.h"
-#ifdef __cplusplus
-extern "C" {
-#endif
-	
-HYPRE_Int hypre_F90_NAME_LAPACK(dsygv, DSYGV)
-   ( HYPRE_Int *itype, char *jobz, char *uplo, HYPRE_Int *n,
-     HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Real *b, HYPRE_Int *ldb, HYPRE_Real *w,
-     HYPRE_Real *work, HYPRE_Int *lwork, /*@out@*/ HYPRE_Int *info
-      );
-HYPRE_Int hypre_F90_NAME_LAPACK( dpotrf, DPOTRF )
-   (const char* uplo, HYPRE_Int* n, HYPRE_Real* aval, HYPRE_Int* lda, HYPRE_Int* ierr );
-#ifdef __cplusplus
-}
-#endif
-
-#endif
 
 #include "HYPRE_lobpcg.h"
 #include "lobpcg.h"
 
 #include "interpreter.h"
 #include "HYPRE_MatvecFunctions.h"
+
+#include "_hypre_lapack.h"
 
 typedef struct
 {
@@ -107,24 +80,14 @@ static HYPRE_Int dsygv_interface (HYPRE_Int *itype, char *jobz, char *uplo, HYPR
                             n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Real *b, HYPRE_Int *ldb,
                             HYPRE_Real *w, HYPRE_Real *work, HYPRE_Int *lwork, HYPRE_Int *info)
 {
-#ifdef HYPRE_USING_ESSL
-   dsygv(*itype, a, *lda, b, *ldb, w, a, *lda, *n, work, *lwork );
-#else
-   hypre_F90_NAME_LAPACK( dsygv, DSYGV )( itype, jobz, uplo, n, 
-                                          a, lda, b, ldb,
-                                          w, work, lwork, info );
-#endif
+   hypre_dsygv(itype, jobz, uplo, n, a, lda, b, ldb, w, work, lwork, info);
    return 0;
 }
 
-static HYPRE_Int dpotrf_interface (char *uplo, HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *
+static HYPRE_Int dpotrf_interface (const char *uplo, HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *
                              lda, HYPRE_Int *info)
 {
-#ifdef HYPRE_USING_ESSL
-   dpotrf(uplo, *n, a, *lda, info);
-#else
-   hypre_F90_NAME_LAPACK( dpotrf, DPOTRF )(uplo, n, a, lda, info);
-#endif
+   hypre_dpotrf(uplo, n, a, lda, info);
    return 0;
 }
 
@@ -176,7 +139,7 @@ hypre_LOBPCGDestroy( void *pcg_vdata )
     
       lobpcg_clean( &(pcg_data->lobpcgData) );
 
-      hypre_TFree( pcg_vdata );
+      hypre_TFree( pcg_vdata , HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;
@@ -502,7 +465,7 @@ HYPRE_LOBPCGCreate( mv_InterfaceInterpreter* ii, HYPRE_MatvecFunctions* mv,
 {
    hypre_LOBPCGData *pcg_data;
 
-   pcg_data = hypre_CTAlloc(hypre_LOBPCGData,1);
+   pcg_data = hypre_CTAlloc(hypre_LOBPCGData, 1, HYPRE_MEMORY_HOST);
 
    (pcg_data->precondFunctions).Precond = NULL;
    (pcg_data->precondFunctions).PrecondSetup = NULL;

@@ -1,4 +1,5 @@
 /_hypre_utilities.h:
 /HYPRE_utilities.h:
-/mpistubs.c
+/utilities/general.h:
+/utilities/mpistubs.c
 double-check

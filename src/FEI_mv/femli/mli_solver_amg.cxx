@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include <stdlib.h>
 #include <string.h>
@@ -61,15 +56,15 @@ int MLI_Solver_AMG::setup(MLI_Matrix *mat)
    HYPRE_BoomerAMGSetPrintLevel(precond_, 1);
    HYPRE_BoomerAMGSetCoarsenType(precond_, 0);
    HYPRE_BoomerAMGSetStrongThreshold(precond_, 0.8);
-   nSweeps = (int *) malloc(4 * sizeof(int));
+   nSweeps = hypre_TAlloc(int, 4 , HYPRE_MEMORY_HOST);
    for (i = 0; i < 4; i++) nSweeps[i] = 1;
    HYPRE_BoomerAMGSetNumGridSweeps(precond_, nSweeps);
-   rTypes = (int *) malloc(4 * sizeof(int));
+   rTypes = hypre_TAlloc(int, 4 , HYPRE_MEMORY_HOST);
    for (i = 0; i < 4; i++) rTypes[i] = 6;
-   relaxWt = (double *) malloc(25 * sizeof(double));
+   relaxWt = hypre_TAlloc(double, 25 , HYPRE_MEMORY_HOST);
    for (i = 0; i < 25; i++) relaxWt[i] = 1.0;
    HYPRE_BoomerAMGSetRelaxWeight(precond_, relaxWt);
-   relaxOmega = (double *) malloc(25 * sizeof(double));
+   relaxOmega = hypre_TAlloc(double, 25 , HYPRE_MEMORY_HOST);
    for (i = 0; i < 25; i++) relaxOmega[i] = 1.0;
    HYPRE_BoomerAMGSetOmega(precond_, relaxOmega);
    HYPRE_BoomerAMGSetup(precond_, (HYPRE_ParCSRMatrix) hypreA, 

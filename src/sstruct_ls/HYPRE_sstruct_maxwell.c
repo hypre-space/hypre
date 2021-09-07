@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -37,7 +29,7 @@ HYPRE_SStructMaxwellCreate(MPI_Comm comm, HYPRE_SStructSolver *solver)
  * HYPRE_SStructMaxwellDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_SStructMaxwellDestroy(HYPRE_SStructSolver solver)
 {
    return( hypre_MaxwellTVDestroy( (void *) solver ) );
@@ -47,7 +39,7 @@ HYPRE_SStructMaxwellDestroy(HYPRE_SStructSolver solver)
  * HYPRE_SStructMaxwellSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_SStructMaxwellSetup( HYPRE_SStructSolver  solver,
                            HYPRE_SStructMatrix A,
                            HYPRE_SStructVector b,
@@ -63,7 +55,7 @@ HYPRE_SStructMaxwellSetup( HYPRE_SStructSolver  solver,
  * HYPRE_SStructMaxwellSolve
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_SStructMaxwellSolve( HYPRE_SStructSolver solver,
                            HYPRE_SStructMatrix A,
                            HYPRE_SStructVector b,
@@ -78,7 +70,7 @@ HYPRE_SStructMaxwellSolve( HYPRE_SStructSolver solver,
 /*--------------------------------------------------------------------------
  * HYPRE_SStructMaxwellSolve2
  *--------------------------------------------------------------------------*/
-                                                                                                              
+
 HYPRE_Int
 HYPRE_SStructMaxwellSolve2( HYPRE_SStructSolver solver,
                             HYPRE_SStructMatrix A,
@@ -97,7 +89,7 @@ HYPRE_SStructMaxwellSolve2( HYPRE_SStructSolver solver,
 HYPRE_Int
 HYPRE_MaxwellGrad( HYPRE_SStructGrid   grid,
                    HYPRE_ParCSRMatrix *T )
-                   
+
 {
    *T= ( (HYPRE_ParCSRMatrix) hypre_Maxwell_Grad( (hypre_SStructGrid *) grid));
     return 0;
@@ -134,7 +126,7 @@ HYPRE_SStructMaxwellSetTol( HYPRE_SStructSolver solver,
 {
    return( hypre_MaxwellSetTol( (void *) solver, tol ) );
 }
-                                                                                                             
+
 /*--------------------------------------------------------------------------
  * HYPRE_SStructMaxwellSetConstantCoef
  *--------------------------------------------------------------------------*/
@@ -144,7 +136,7 @@ HYPRE_SStructMaxwellSetConstantCoef( HYPRE_SStructSolver solver,
 {
    return( hypre_MaxwellSetConstantCoef( (void *) solver, constant_coef) );
 }
-                                                                                                             
+
 /*--------------------------------------------------------------------------
  * HYPRE_SStructMaxwellSetMaxIter
  *--------------------------------------------------------------------------*/
@@ -154,7 +146,7 @@ HYPRE_SStructMaxwellSetMaxIter( HYPRE_SStructSolver solver,
 {
    return( hypre_MaxwellSetMaxIter( (void *) solver, max_iter ) );
 }
-                                                                                                             
+
 /*--------------------------------------------------------------------------
  * HYPRE_SStructMaxwellSetRelChange
  *--------------------------------------------------------------------------*/
@@ -164,7 +156,7 @@ HYPRE_SStructMaxwellSetRelChange( HYPRE_SStructSolver solver,
 {
    return( hypre_MaxwellSetRelChange( (void *) solver, rel_change ) );
 }
-                                                                                                             
+
 /*--------------------------------------------------------------------------
  * HYPRE_SStructMaxwellSetNumPreRelax
  *--------------------------------------------------------------------------*/
@@ -174,7 +166,7 @@ HYPRE_SStructMaxwellSetNumPreRelax( HYPRE_SStructSolver solver,
 {
    return( hypre_MaxwellSetNumPreRelax( (void *) solver, num_pre_relax) );
 }
-                                                                                                             
+
 /*--------------------------------------------------------------------------
  * HYPRE_SStructMaxwellSetNumPostRelax
  *--------------------------------------------------------------------------*/
@@ -184,7 +176,7 @@ HYPRE_SStructMaxwellSetNumPostRelax( HYPRE_SStructSolver solver,
 {
    return( hypre_MaxwellSetNumPostRelax( (void *) solver, num_post_relax) );
 }
-                                                                                                             
+
 /*--------------------------------------------------------------------------
  * HYPRE_SStructMaxwellSetLogging
  *--------------------------------------------------------------------------*/
@@ -194,7 +186,7 @@ HYPRE_SStructMaxwellSetLogging( HYPRE_SStructSolver solver,
 {
    return( hypre_MaxwellSetLogging( (void *) solver, logging) );
 }
-                                                                                                             
+
 /*--------------------------------------------------------------------------
 HYPRE_SStructMaxwellSetPrintLevel
 *--------------------------------------------------------------------------*/
@@ -204,7 +196,7 @@ HYPRE_SStructMaxwellSetPrintLevel( HYPRE_SStructSolver solver,
 {
    return( hypre_MaxwellSetPrintLevel( (void *) solver, print_level) );
 }
-                                                                                                             
+
 /*--------------------------------------------------------------------------
  * HYPRE_SStructMaxwellPrintLogging
  *--------------------------------------------------------------------------*/
@@ -214,7 +206,7 @@ HYPRE_SStructMaxwellPrintLogging( HYPRE_SStructSolver solver,
 {
    return( hypre_MaxwellPrintLogging( (void *) solver, myid) );
 }
-                                                                                                             
+
 /*--------------------------------------------------------------------------
  * HYPRE_SStructMaxwellGetNumIterations
  *--------------------------------------------------------------------------*/
@@ -224,7 +216,7 @@ HYPRE_SStructMaxwellGetNumIterations( HYPRE_SStructSolver  solver,
 {
    return( hypre_MaxwellGetNumIterations( (void *) solver, num_iterations ) );
 }
-                                                                                                             
+
 /*--------------------------------------------------------------------------
  * HYPRE_SStructMaxwellGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/

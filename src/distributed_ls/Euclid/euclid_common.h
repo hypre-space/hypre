@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef COMMON_DH
 #define COMMON_DH
@@ -29,16 +24,6 @@
  * files are included.
  *-----------------------------------------------------------------------*/
 
-#if defined(HYPRE_MODE)
-#include "HYPRE_parcsr_mv.h"
-#include "HYPRE_config.h"
-#include "HYPRE_distributed_matrix_mv.h"
-#include "_hypre_utilities.h"
-
-#elif defined(PETSC_MODE)
-#include "petsc_config.h"
-#endif
-
 #if ( !defined(FAKE_MPI) && defined(USING_MPI) && \
       !defined(HYPRE_MODE) && !defined(PETSC_MODE) )
 #include <mpi.h>
@@ -48,7 +33,7 @@
 #include "fake_mpi.h"
 #endif
 
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_MODE)
+#if defined(USING_OPENMP) && !defined(HYPRE_MODE)
 #include <omp.h>
 #endif
 
@@ -116,8 +101,8 @@ extern HYPRE_Int  ref_counter; /* for internal use only!  Reference counter
  * macros defined in "macros_dh.h"
  */
 extern bool  errFlag_dh;
-extern void  setInfo_dh(char *msg, char *function, char *file, HYPRE_Int line);
-extern void  setError_dh(char *msg, char *function, char *file, HYPRE_Int line);
+extern void  setInfo_dh(const char *msg, const char *function, const char *file, HYPRE_Int line);
+extern void  setError_dh(const char *msg, const char *function, const char *file, HYPRE_Int line);
 extern void  printErrorMsg(FILE *fp);
 
 #ifndef hypre_MPI_MAX_ERROR_STRING
@@ -140,15 +125,15 @@ extern bool logFuncsToStderr;
 extern bool logFuncsToFile;
 extern void Error_dhStartFunc(char *function, char *file, HYPRE_Int line);
 extern void Error_dhEndFunc(char *function);
-extern void dh_StartFunc(char *function, char *file, HYPRE_Int line, HYPRE_Int priority);
-extern void dh_EndFunc(char *function, HYPRE_Int priority);
+extern void dh_StartFunc(const char *function, const char *file, HYPRE_Int line, HYPRE_Int priority);
+extern void dh_EndFunc(const char *function, HYPRE_Int priority);
 extern void printFunctionStack(FILE *fp);
 
 extern void EuclidInitialize(HYPRE_Int argc, char *argv[], char *help); /* instantiates global objects */
 extern void EuclidFinalize();    /* deletes global objects */
 extern bool EuclidIsInitialized();
-extern void printf_dh(char *fmt, ...);
-extern void fprintf_dh(FILE *fp, char *fmt, ...);
+extern void printf_dh(const char *fmt, ...);
+extern void fprintf_dh(FILE *fp, const char *fmt, ...);
 
   /* echo command line invocation to stdout.
      The "prefix" string is for grepping; it may be NULL.

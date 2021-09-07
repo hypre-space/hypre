@@ -1,15 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef HYPRE_SSTRUCT_LS_HEADER
 #define HYPRE_SSTRUCT_LS_HEADER
@@ -20,6 +14,7 @@
 #include "HYPRE_sstruct_mv.h"
 #include "HYPRE_struct_ls.h"
 #include "HYPRE_parcsr_ls.h"
+#include "HYPRE_lobpcg.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,22 +24,24 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /**
- * @name SStruct Solvers
+ * @defgroup SStructSolvers SStruct Solvers
  *
  * These solvers use matrix/vector storage schemes that are taylored
  * to semi-structured grid problems.
  *
  * @memo Linear solvers for semi-structured grids
+ *
+ * @{
  **/
-/*@{*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 /**
  * @name SStruct Solvers
+ *
+ * @{
  **/
-/*@{*/
 
 struct hypre_SStructSolver_struct;
 /**
@@ -72,7 +69,7 @@ typedef HYPRE_Int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
                                             HYPRE_Real);
 #endif
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -83,9 +80,10 @@ typedef HYPRE_Int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
  * SysPFMG is a semicoarsening multigrid solver similar to PFMG, but for systems
  * of PDEs.  For periodic problems, users should try to set the grid size in
  * periodic dimensions to be as close to a power-of-two as possible (for more
- * details, see \Ref{Struct PFMG Solver}).
+ * details, see \ref Struct PFMG Solver).
+ *
+ * @{
  **/
-/*@{*/
 
 /**
  * Create a solver object.
@@ -107,7 +105,7 @@ HYPRE_Int
 HYPRE_SStructSysPFMGDestroy(HYPRE_SStructSolver solver);
 
 /**
- * Prepare to solve the system.  The coefficient data in {\tt b} and {\tt x} is
+ * Prepare to solve the system.  The coefficient data in \e b and \e x is
  * ignored here, but information about the layout of the data may be used.
  **/
 HYPRE_Int
@@ -157,7 +155,7 @@ HYPRE_SStructSysPFMGSetZeroGuess(HYPRE_SStructSolver solver);
 
 /**
  * (Optional) Use a nonzero initial guess.  This is the default behavior, but
- * this routine allows the user to switch back after using {\tt SetZeroGuess}.
+ * this routine allows the user to switch back after using \e SetZeroGuess.
  **/
 HYPRE_Int
 HYPRE_SStructSysPFMGSetNonZeroGuess(HYPRE_SStructSolver solver);
@@ -165,13 +163,11 @@ HYPRE_SStructSysPFMGSetNonZeroGuess(HYPRE_SStructSolver solver);
 /**
  * (Optional) Set relaxation type.
  *
- * Current relaxation methods set by {\tt relax\_type} are:
+ * Current relaxation methods set by \e relax\_type are:
  *
- * \begin{tabular}{l@{ -- }l}
- * 0 & Jacobi \\
- * 1 & Weighted Jacobi (default) \\
- * 2 & Red/Black Gauss-Seidel (symmetric: RB pre-relaxation, BR post-relaxation) \\
- * \end{tabular}
+ *    - 0 : Jacobi
+ *    - 1 : Weighted Jacobi (default)
+ *    - 2 : Red/Black Gauss-Seidel (symmetric: RB pre-relaxation, BR post-relaxation)
  **/
 HYPRE_Int
 HYPRE_SStructSysPFMGSetRelaxType(HYPRE_SStructSolver solver,
@@ -222,7 +218,10 @@ HYPRE_SStructSysPFMGSetLogging(HYPRE_SStructSolver solver,
                                HYPRE_Int           logging);
 
 /**
- * (Optional) Set the amount of printing to do to the screen.
+ * (Optional) Control how much information is printed.
+ *
+ *    - 0 : no printout (default)
+ *    - 1 : print convergence history
  **/
 HYPRE_Int
 HYPRE_SStructSysPFMGSetPrintLevel(HYPRE_SStructSolver solver,
@@ -243,7 +242,7 @@ HYPRE_Int
 HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm(HYPRE_SStructSolver solver,
                                                  HYPRE_Real         *norm);
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -253,8 +252,9 @@ HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm(HYPRE_SStructSolver solver,
  *
  * SSAMG is a semicoarsening multigrid solver similar to PFMG, but for systems
  * of PDEs. Continue description
+ *
+ * @{
  **/
-/*@{*/
 
 /**
  * Create a solver object.
@@ -362,9 +362,10 @@ HYPRE_SStructSSAMGSetNonZeroGuess(HYPRE_SStructSolver solver);
  * Current relaxation methods set by {\tt relax\_type} are:
  *
  * \begin{tabular}{l@{ -- }l}
- * 0 & Jacobi \\
- * 1 & Weighted Jacobi (default) \\
- * 2 & Red/Black Gauss-Seidel (symmetric: RB pre-relaxation, BR post-relaxation) \\
+ * 0  & Jacobi \\
+ * 1  & Weighted Jacobi (default) \\
+ * 2  & L1-Jacobi \\
+ * 10 & Red/Black Gauss-Seidel (symmetric: RB pre-relaxation, BR post-relaxation) \\
  * \end{tabular}
  **/
 HYPRE_Int
@@ -409,6 +410,25 @@ HYPRE_SStructSSAMGSetNumCoarseRelax(HYPRE_SStructSolver solver,
                                     HYPRE_Int           num_coarse_relax);
 
 /**
+ * (Optional) Set maximum size of coarse grid. This option can be disabled
+ * by setting max_coarse_size to zero.
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGSetMaxCoarseSize(HYPRE_SStructSolver solver,
+                                   HYPRE_Int           max_coarse_size);
+
+/**
+ * (Optional) Set coarse solver type for SSAMG. Current options are
+ * \begin{tabular}{l@{ -- }l}
+ * 0 & Weighted Jacobi (default) \\
+ * 1 & BoomerAMG \\
+ * \end{tabular}
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGSetCoarseSolverType(HYPRE_SStructSolver solver,
+                                      HYPRE_Int           csolver_type);
+
+/**
  * (Optional) Skip relaxation on certain grids for isotropic problems.  This can
  * greatly improve efficiency by eliminating unnecessary relaxations when the
  * underlying problem is isotropic.
@@ -433,7 +453,11 @@ HYPRE_SStructSSAMGSetLogging(HYPRE_SStructSolver solver,
                              HYPRE_Int           logging);
 
 /**
- * (Optional) Set the amount of printing to do to the screen.
+ * (Optional) Control how much information is printed.
+ *
+ *    - 0 : no printout (default)
+ *    - 1 : print setup info
+ *    - 2 : print convergence history
  **/
 HYPRE_Int
 HYPRE_SStructSSAMGSetPrintLevel(HYPRE_SStructSolver solver,
@@ -494,7 +518,7 @@ HYPRE_Int
 HYPRE_SStructSplitDestroy(HYPRE_SStructSolver solver);
 
 /**
- * Prepare to solve the system.  The coefficient data in {\tt b} and {\tt x} is
+ * Prepare to solve the system.  The coefficient data in \e b and \e x is
  * ignored here, but information about the layout of the data may be used.
  **/
 HYPRE_Int
@@ -527,6 +551,23 @@ HYPRE_SStructSplitSetMaxIter(HYPRE_SStructSolver solver,
                              HYPRE_Int           max_iter);
 
 /**
+ * (Optional) Control how much information is printed.
+ *
+ *    - 0 : no printout (default)
+ *    - 1 : print convergence history
+ **/
+HYPRE_Int
+HYPRE_SStructSplitSetPrintLevel( HYPRE_SStructSolver solver,
+                                 HYPRE_Int           print_level );
+
+/**
+ * (Optional) Set the amount of logging to do.
+ **/
+HYPRE_Int
+HYPRE_SStructSplitSetLogging( HYPRE_SStructSolver solver,
+                              HYPRE_Int           logging );
+
+/**
  * (Optional) Use a zero initial guess.  This allows the solver to cut corners
  * in the case where a zero initial guess is needed (e.g., for preconditioning)
  * to reduce compuational cost.
@@ -536,14 +577,14 @@ HYPRE_SStructSplitSetZeroGuess(HYPRE_SStructSolver solver);
 
 /**
  * (Optional) Use a nonzero initial guess.  This is the default behavior, but
- * this routine allows the user to switch back after using {\tt SetZeroGuess}.
+ * this routine allows the user to switch back after using \e SetZeroGuess.
  **/
 HYPRE_Int
 HYPRE_SStructSplitSetNonZeroGuess(HYPRE_SStructSolver solver);
 
 /**
- * (Optional) Set up the type of diagonal struct solver.  Either {\tt ssolver} is
- * set to {\tt HYPRE\_SMG} or {\tt HYPRE\_PFMG}.
+ * (Optional) Set up the type of diagonal struct solver.  Either \e ssolver is
+ * set to \e HYPRE\_SMG or \e HYPRE\_PFMG.
  **/
 HYPRE_Int
 HYPRE_SStructSplitSetStructSolver(HYPRE_SStructSolver solver,
@@ -563,15 +604,16 @@ HYPRE_Int
 HYPRE_SStructSplitGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
                                                HYPRE_Real          *norm);
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 /**
  * @name SStruct FAC Solver
+ *
+ * @{
  **/
-/*@{*/
 
 /**
  * Create a solver object.
@@ -710,14 +752,14 @@ HYPRE_SStructFACSetZeroGuess(HYPRE_SStructSolver solver);
 
 /**
  * (Optional) Use a nonzero initial guess.  This is the default behavior, but
- * this routine allows the user to switch back after using {\tt SetZeroGuess}.
+ * this routine allows the user to switch back after using \e SetZeroGuess.
  **/
 HYPRE_Int
 HYPRE_SStructFACSetNonZeroGuess(HYPRE_SStructSolver solver);
 
 /**
- * (Optional) Set relaxation type.  See \Ref{HYPRE_SStructSysPFMGSetRelaxType}
- * for appropriate values of {\tt relax\_type}.
+ * (Optional) Set relaxation type.  See \ref HYPRE_SStructSysPFMGSetRelaxType
+ * for appropriate values of \e relax\_type.
  **/
 HYPRE_Int
 HYPRE_SStructFACSetRelaxType(HYPRE_SStructSolver solver,
@@ -744,12 +786,10 @@ HYPRE_SStructFACSetNumPostRelax(HYPRE_SStructSolver solver,
 /**
  * (Optional) Set coarsest solver type.
  *
- * Current solver types set by {\tt csolver\_type} are:
+ * Current solver types set by \e csolver\_type are:
  *
- * \begin{tabular}{l@{ -- }l}
- * 1 & SysPFMG-PCG (default) \\
- * 2 & SysPFMG \\
- * \end{tabular}
+ *    - 1 : SysPFMG-PCG (default)
+ *    - 2 : SysPFMG
  **/
 HYPRE_Int
 HYPRE_SStructFACSetCoarseSolverType(HYPRE_SStructSolver solver,
@@ -776,14 +816,15 @@ HYPRE_Int
 HYPRE_SStructFACGetFinalRelativeResidualNorm(HYPRE_SStructSolver solver,
                                              HYPRE_Real         *norm);
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 /**
  * @name SStruct Maxwell Solver
+ *
+ * @{
  **/
-/*@{*/
 
 /**
  * Create a solver object.
@@ -804,7 +845,7 @@ HYPRE_Int
 HYPRE_SStructMaxwellDestroy( HYPRE_SStructSolver solver );
 
 /**
- * Prepare to solve the system.  The coefficient data in {\tt b} and {\tt x} is
+ * Prepare to solve the system.  The coefficient data in \e b and \e x is
  * ignored here, but information about the layout of the data may be used.
  **/
 HYPRE_Int
@@ -948,7 +989,7 @@ HYPRE_Int
 HYPRE_SStructMaxwellGetFinalRelativeResidualNorm(HYPRE_SStructSolver solver,
                                                  HYPRE_Real         *norm);
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -957,9 +998,10 @@ HYPRE_SStructMaxwellGetFinalRelativeResidualNorm(HYPRE_SStructSolver solver,
  * @name SStruct PCG Solver
  *
  * These routines should be used in conjunction with the generic interface in
- * \Ref{PCG Solver}.
+ * \ref KrylovSolvers.
+ *
+ * @{
  **/
-/*@{*/
 
 /**
  * Create a solver object.
@@ -1056,7 +1098,7 @@ HYPRE_SStructDiagScale(HYPRE_SStructSolver solver,
                        HYPRE_SStructVector y,
                        HYPRE_SStructVector x);
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -1065,9 +1107,10 @@ HYPRE_SStructDiagScale(HYPRE_SStructSolver solver,
  * @name SStruct GMRES Solver
  *
  * These routines should be used in conjunction with the generic interface in
- * \Ref{GMRES Solver}.
+ * \ref KrylovSolvers.
+ *
+ * @{
  **/
-/*@{*/
 
 /**
  * Create a solver object.
@@ -1156,7 +1199,7 @@ HYPRE_Int
 HYPRE_SStructGMRESGetResidual(HYPRE_SStructSolver   solver,
                               void                **residual);
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -1165,9 +1208,10 @@ HYPRE_SStructGMRESGetResidual(HYPRE_SStructSolver   solver,
  * @name SStruct FlexGMRES Solver
  *
  * These routines should be used in conjunction with the generic interface in
- * \Ref{FlexGMRES Solver}.
+ * \ref KrylovSolvers.
+ *
+ * @{
  **/
-/*@{*/
 
 /**
  * Create a solver object.
@@ -1253,7 +1297,7 @@ HYPRE_Int
 HYPRE_SStructFlexGMRESSetModifyPC(HYPRE_SStructSolver    solver,
                                   HYPRE_PtrToModifyPCFcn modify_pc);
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -1262,9 +1306,10 @@ HYPRE_SStructFlexGMRESSetModifyPC(HYPRE_SStructSolver    solver,
  * @name SStruct LGMRES Solver
  *
  * These routines should be used in conjunction with the generic interface in
- * \Ref{LGMRES Solver}.
+ * \ref KrylovSolvers.
+ *
+ * @{
  **/
-/*@{*/
 
 /**
  * Create a solver object.
@@ -1350,7 +1395,7 @@ HYPRE_Int
 HYPRE_SStructLGMRESGetResidual(HYPRE_SStructSolver   solver,
                                void                **residual);
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -1359,9 +1404,10 @@ HYPRE_SStructLGMRESGetResidual(HYPRE_SStructSolver   solver,
  * @name SStruct BiCGSTAB Solver
  *
  * These routines should be used in conjunction with the generic interface in
- * \Ref{BiCGSTAB Solver}.
+ * \ref KrylovSolvers.
+ *
+ * @{
  **/
-/*@{*/
 
 /**
  * Create a solver object.
@@ -1445,23 +1491,19 @@ HYPRE_Int
 HYPRE_SStructBiCGSTABGetResidual(HYPRE_SStructSolver   solver,
                                  void                **residual);
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
-
-/* These includes shouldn't be here. (RDF) */
-#include "interpreter.h"
-#include "HYPRE_MatvecFunctions.h"
-#include "_hypre_sstruct_mv.h"
 
 /**
  * @name SStruct LOBPCG Eigensolver
  *
  * These routines should be used in conjunction with the generic interface in
- * \Ref{LOBPCG Eigensolver}.
+ * \ref Eigensolvers.
+ *
+ * @{
  **/
-/*@{*/
 
 /**
   * Load interface interpreter.  Vector part loaded with hypre_SStructKrylov
@@ -1476,19 +1518,11 @@ HYPRE_SStructSetupInterpreter(mv_InterfaceInterpreter *i);
 HYPRE_Int
 HYPRE_SStructSetupMatvec(HYPRE_MatvecFunctions *mv);
 
-/* The next routine should not be here (lower-case prefix). (RDF) */
-
-/*
- * Same as hypre_SStructVectorSetRandomValues except uses void pointer.
- **/
-HYPRE_Int
-hypre_SStructSetRandomValues(void *v, HYPRE_Int seed);
-
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
-/*@}*/
+/**@}*/
 
 #ifdef __cplusplus
 }

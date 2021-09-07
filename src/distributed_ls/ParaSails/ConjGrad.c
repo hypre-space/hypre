@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -24,20 +16,16 @@
 #include "Common.h"
 #include "Matrix.h"
 #include "ParaSails.h"
-
-HYPRE_Real hypre_F90_NAME_BLAS(ddot, DDOT)(HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_BLAS(dcopy, DCOPY)(HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_BLAS(dscal, DSCAL)(HYPRE_Int *, HYPRE_Real *, HYPRE_Real *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_BLAS(daxpy, DAXPY)(HYPRE_Int *, HYPRE_Real *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *);
+#include "_hypre_blas.h"
 
 static HYPRE_Real InnerProd(HYPRE_Int n, HYPRE_Real *x, HYPRE_Real *y, MPI_Comm comm)
 {
     HYPRE_Real local_result, result;
 
     HYPRE_Int one = 1;
-    local_result = hypre_F90_NAME_BLAS(ddot, DDOT)(&n, x, &one, y, &one);
+    local_result = hypre_ddot(&n, x, &one, y, &one);
 
-    hypre_MPI_Allreduce(&local_result, &result, 1, hypre_MPI_DOUBLE, hypre_MPI_SUM, comm);
+    hypre_MPI_Allreduce(&local_result, &result, 1, hypre_MPI_REAL, hypre_MPI_SUM, comm);
 
     return result;
 }
@@ -64,7 +52,7 @@ static void Axpy(HYPRE_Int n, HYPRE_Real alpha, HYPRE_Real *x, HYPRE_Real *y)
 /*--------------------------------------------------------------------------
  * PCG_ParaSails - PCG solver using ParaSails.
  * Use NULL for ps if to get unpreconditioned solve.
- * Solver will stop at step 500 if rel. resid. norm reduction is not less 
+ * Solver will stop at step 500 if rel. resid. norm reduction is not less
  * than 0.1 at that point.
  *--------------------------------------------------------------------------*/
 
@@ -97,15 +85,15 @@ void PCG_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,
       return;
    }
 
-   p = (HYPRE_Real *) malloc(n * sizeof(HYPRE_Real));
-   s = (HYPRE_Real *) malloc(n * sizeof(HYPRE_Real));
-   r = (HYPRE_Real *) malloc(n * sizeof(HYPRE_Real));
+   p = hypre_TAlloc(HYPRE_Real, n , HYPRE_MEMORY_HOST);
+   s = hypre_TAlloc(HYPRE_Real, n , HYPRE_MEMORY_HOST);
+   r = hypre_TAlloc(HYPRE_Real, n , HYPRE_MEMORY_HOST);
 
    /* r = b - Ax */
    MatrixMatvec(mat, x, r);  /* r = Ax */
    ScaleVector(n, -1.0, r);  /* r = -r */
    Axpy(n, 1.0, b, r);       /* r = r + b */
- 
+
    /* p = C*r */
    if (ps != NULL)
       ParaSailsApply(ps, r, p);
@@ -132,7 +120,7 @@ void PCG_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,
 
       /* r = r - alpha*s */
       Axpy(n, -alpha, s, r);
-         
+
       /* s = C*r */
       if (ps != NULL)
          ParaSailsApply(ps, r, s);
@@ -161,17 +149,17 @@ void PCG_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,
             hypre_printf("Aborting solve due to slow or no convergence.\n");
          break;
       }
- 
+
       /* beta = gamma / gamma_old */
       beta = gamma / gamma_old;
 
       /* p = s + beta p */
-      ScaleVector(n, beta, p);   
+      ScaleVector(n, beta, p);
       Axpy(n, 1.0, s, p);
    }
 
-   free(p);
-   free(s);
+   hypre_TFree(p, HYPRE_MEMORY_HOST);
+   hypre_TFree(s, HYPRE_MEMORY_HOST);
 
    /* compute exact relative residual norm */
    MatrixMatvec(mat, x, r);  /* r = Ax */
@@ -179,7 +167,7 @@ void PCG_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,
    Axpy(n, 1.0, b, r);       /* r = r + b */
    i_prod = InnerProd(n, r, r, comm);
 
-   free(r);
+   hypre_TFree(r, HYPRE_MEMORY_HOST);
 
    if (mype == 0)
       hypre_printf("Iter (%4d): computed rrn    : %e\n", i, sqrt(i_prod/bi_prod));

@@ -1,13 +1,19 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "f2c.h"
 #include "hypre_lapack.h"
+
 /*  -- translated by f2c (version 19990503).
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
 */
 
-#include "f2c.h"
-
-/* Subroutine */ HYPRE_Int dlasq4_(integer *i0, integer *n0, doublereal *z__, 
+/* Subroutine */ integer dlasq4_(integer *i0, integer *n0, doublereal *z__, 
 	integer *pp, integer *n0in, doublereal *dmin__, doublereal *dmin1, 
 	doublereal *dmin2, doublereal *dn, doublereal *dn1, doublereal *dn2, 
 	doublereal *tau, integer *ttype)
@@ -19,9 +25,6 @@
     /* System generated locals */
     integer i__1;
     doublereal d__1, d__2;
-
-    /* Builtin functions */
-    HYPRE_Real sqrt(doublereal);
 
     /* Local variables */
     static doublereal s, a2, b1, b2;
@@ -380,3 +383,6 @@ L80:
 
 } /* dlasq4_ */
 
+#ifdef __cplusplus
+}
+#endif

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef hypre_COMMUNICATION_HEADER
 #define hypre_COMMUNICATION_HEADER
@@ -29,12 +24,8 @@ typedef struct hypre_CommStencil_struct
 
 /*--------------------------------------------------------------------------
  *
- * For "reverse" communication, the following are not needed (may be NULL)
- *    send_rboxnums, send_rboxes, send_transforms
- *
- * For "forward" communication, the following are not needed (may be NULL)
- *    recv_rboxnums, recv_rboxes, recv_transforms
- *
+ * For "reverse" communication, send_transforms is not needed (may be NULL).
+ * For "forward" communication, recv_transforms is not needed (may be NULL).
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_CommInfo_struct
@@ -152,6 +143,9 @@ typedef struct hypre_CommHandle_struct
 
    HYPRE_Complex    **send_buffers;
    HYPRE_Complex    **recv_buffers;
+
+   HYPRE_Complex      **send_buffers_data;
+   HYPRE_Complex      **recv_buffers_data;
 
    /* set = 0, add = 1 */
    HYPRE_Int          action;
@@ -274,5 +268,7 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommHandleSendBuffers(comm_handle) (comm_handle -> send_buffers)
 #define hypre_CommHandleRecvBuffers(comm_handle) (comm_handle -> recv_buffers)
 #define hypre_CommHandleAction(comm_handle)      (comm_handle -> action)
+#define hypre_CommHandleSendBuffersDevice(comm_handle)    (comm_handle -> send_buffers_data)
+#define hypre_CommHandleRecvBuffersDevice(comm_handle)    (comm_handle -> recv_buffers_data)
 
 #endif

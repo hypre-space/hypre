@@ -1,21 +1,12 @@
 #!/bin/sh
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
-
-
-
-
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 TNAME=`basename $0 .sh`
+RTOL=$1
+ATOL=$2
 
 #=============================================================================
 # compare with baseline case
@@ -27,15 +18,11 @@ FILES="\
  ${TNAME}.out.2\
  ${TNAME}.out.3\
  ${TNAME}.out.4\
- ${TNAME}.out.5\
- ${TNAME}.out.6\
  ${TNAME}.out.7\
  ${TNAME}.out.8\
  ${TNAME}.out.9\
  ${TNAME}.out.10\
  ${TNAME}.out.11\
- ${TNAME}.out.12\
- ${TNAME}.out.13\
  ${TNAME}.out.14\
  ${TNAME}.out.15\
  ${TNAME}.out.16\
@@ -43,7 +30,39 @@ FILES="\
  ${TNAME}.out.18\
  ${TNAME}.out.19\
  ${TNAME}.out.20\
+ ${TNAME}.out.21\
+ ${TNAME}.out.22\
+ ${TNAME}.out.23\
+ ${TNAME}.out.24\
+ ${TNAME}.out.25\
+ ${TNAME}.out.26\
+ ${TNAME}.out.27\
+ ${TNAME}.out.28\
+ ${TNAME}.out.29\
+ ${TNAME}.out.30\
+ ${TNAME}.out.31\
+ ${TNAME}.out.32\
+ ${TNAME}.out.33\
+ ${TNAME}.out.34\
+ ${TNAME}.out.121\
+ ${TNAME}.out.122\
+ ${TNAME}.out.123\
+ ${TNAME}.out.124\
+ ${TNAME}.out.125\
+ ${TNAME}.out.126\
+ ${TNAME}.out.127\
+ ${TNAME}.out.128\
+ ${TNAME}.out.129\
+ ${TNAME}.out.130\
+ ${TNAME}.out.131\
+ ${TNAME}.out.132\
+ ${TNAME}.out.133\
+ ${TNAME}.out.134\
 "
+# ${TNAME}.out.5\
+# ${TNAME}.out.6\
+# ${TNAME}.out.12\
+# ${TNAME}.out.13\
 
 for i in $FILES
 do
@@ -51,33 +70,11 @@ do
   tail -3 $i
 done > ${TNAME}.out
 
-FILES="\
- ${TNAME}.out.10.lobpcg\
- ${TNAME}.out.11.lobpcg\
- ${TNAME}.out.18.lobpcg\
- ${TNAME}.out.19.lobpcg\
-"
-
-for i in $FILES
-do
-  echo "# Output file: $i"
-  tail -3 $i
-  echo "# Output file: $i.1"
-  tail -13 $i.1 | head -3
-  echo "# Output file: $i.4"
-  tail -19 $i.4 | head -9
-done >> ${TNAME}.out
-
-# Make sure that the output files are reasonable
-CHECK_LINE="Iterations"
-OUT_COUNT=`grep "$CHECK_LINE" ${TNAME}.out | wc -l`
-SAVED_COUNT=`grep "$CHECK_LINE" ${TNAME}.saved | wc -l`
-if [ "$OUT_COUNT" != "$SAVED_COUNT" ]; then
-   echo "Incorrect number of \"$CHECK_LINE\" lines in ${TNAME}.out" >&2
-fi
-
-if [ -z $HYPRE_NO_SAVED ]; then
-   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+# Make sure that the output file is reasonable
+RUNCOUNT=`echo $FILES | wc -w`
+OUTCOUNT=`grep "Iterations" ${TNAME}.out | wc -l`
+if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
+   echo "Incorrect number of runs in ${TNAME}.out" >&2
 fi
 
 #=============================================================================

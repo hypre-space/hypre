@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /*
  * comm.c
@@ -77,7 +69,7 @@ HYPRE_Int hypre_GlobalSESum(HYPRE_Int value, MPI_Comm hypre_MPI_Context)
 HYPRE_Real hypre_GlobalSEMaxDouble(HYPRE_Real value, MPI_Comm hypre_MPI_Context)
 {
   HYPRE_Real max;
-  hypre_MPI_Allreduce( &value, &max, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX, hypre_MPI_Context );
+  hypre_MPI_Allreduce( &value, &max, 1, hypre_MPI_REAL, hypre_MPI_MAX, hypre_MPI_Context );
 
   return max;
 }
@@ -88,7 +80,7 @@ HYPRE_Real hypre_GlobalSEMaxDouble(HYPRE_Real value, MPI_Comm hypre_MPI_Context)
 HYPRE_Real hypre_GlobalSEMinDouble(HYPRE_Real value, MPI_Comm hypre_MPI_Context)
 {
   HYPRE_Real min;
-  hypre_MPI_Allreduce( &value, &min, 1, hypre_MPI_DOUBLE, hypre_MPI_MIN, hypre_MPI_Context );
+  hypre_MPI_Allreduce( &value, &min, 1, hypre_MPI_REAL, hypre_MPI_MIN, hypre_MPI_Context );
 
   return min;
 }
@@ -99,7 +91,7 @@ HYPRE_Real hypre_GlobalSEMinDouble(HYPRE_Real value, MPI_Comm hypre_MPI_Context)
 HYPRE_Real hypre_GlobalSESumDouble(HYPRE_Real value, MPI_Comm hypre_MPI_Context)
 {
   HYPRE_Real sum;
-  hypre_MPI_Allreduce( &value, &sum, 1, hypre_MPI_DOUBLE, hypre_MPI_SUM, hypre_MPI_Context );
+  hypre_MPI_Allreduce( &value, &sum, 1, hypre_MPI_REAL, hypre_MPI_SUM, hypre_MPI_Context );
 
   return sum;
 }

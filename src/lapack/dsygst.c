@@ -1,8 +1,14 @@
-#include "../blas/hypre_blas.h"
-#include "hypre_lapack.h"
-#include "f2c.h"
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-/* Subroutine */ HYPRE_Int dsygst_(integer *itype,const char *uplo, integer *n, 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "f2c.h"
+#include "hypre_lapack.h"
+
+/* Subroutine */ integer dsygst_(integer *itype,const char *uplo, integer *n, 
 	doublereal *a, integer *lda, doublereal *b, integer *ldb, integer *
 	info)
 {
@@ -87,24 +93,24 @@
     /* Local variables */
     static integer k;
     extern logical lsame_(const char *,const char *);
-    extern /* Subroutine */ HYPRE_Int dtrmm_(const char *,const char *,const char *,const char *, 
+    extern /* Subroutine */ integer dtrmm_(const char *,const char *,const char *,const char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *), dsymm_(
 	    const char *,const char *, integer *, integer *, doublereal *, doublereal *, 
 	    integer *, doublereal *, integer *, doublereal *, doublereal *, 
 	    integer *);
     static logical upper;
-    extern /* Subroutine */ HYPRE_Int dtrsm_(const char *,const char *,const char *,const char *, 
+    extern /* Subroutine */ integer dtrsm_(const char *,const char *,const char *,const char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *), dsygs2_(
 	    integer *,const char *, integer *, doublereal *, integer *, doublereal 
 	    *, integer *, integer *);
     static integer kb;
-    extern /* Subroutine */ HYPRE_Int dsyr2k_(const char *,const char *, integer *, integer *, 
+    extern /* Subroutine */ integer dsyr2k_(const char *,const char *, integer *, integer *, 
 	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
 	    doublereal *, doublereal *, integer *);
     static integer nb;
-    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
     extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
@@ -318,4 +324,6 @@
 #undef b_ref
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

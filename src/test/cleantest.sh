@@ -1,18 +1,8 @@
 #!/bin/sh
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
-
-
-
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 # Echo usage information
 case $1 in
@@ -36,22 +26,21 @@ EOF
    ;;
 esac
 
+RESET=`shopt -p nullglob`  # Save current nullglob setting
+shopt -s nullglob          # Return an empty string for failed wildcard matches
 if [ "x$1" = "x" ]
 then
-   for testdir in TEST*
-   do
-      rm -f $testdir/*err*
-      rm -f $testdir/*out*
-      rm -f $testdir/*log*
-      rm -f $testdir/*.fil
-   done
+   testdirs=`echo TEST*`   # All TEST directories
 else
-   while [ "$*" ]
-   do
-      rm -f $1/*err*
-      rm -f $1/*out*
-      rm -f $1/*log*
-      rm -f $1/*.fil
-      shift
-   done
+   testdirs=`echo $*`      # Only the specified test directories
 fi
+$RESET                     # Restore nullglob setting
+
+for testdir in $testdirs
+do
+   rm -f $testdir/*err*
+   rm -f $testdir/*out*
+   rm -f $testdir/*log*
+   rm -f $testdir/*.fil
+   rm -f $testdir/*.core
+done

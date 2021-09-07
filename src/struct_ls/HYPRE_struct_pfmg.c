@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
 
@@ -26,7 +21,7 @@ HYPRE_StructPFMGCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructPFMGDestroy( HYPRE_StructSolver solver )
 {
    return( hypre_PFMGDestroy( (void *) solver ) );
@@ -35,7 +30,7 @@ HYPRE_StructPFMGDestroy( HYPRE_StructSolver solver )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructPFMGSetup( HYPRE_StructSolver solver,
                        HYPRE_StructMatrix A,
                        HYPRE_StructVector b,
@@ -50,7 +45,7 @@ HYPRE_StructPFMGSetup( HYPRE_StructSolver solver,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructPFMGSolve( HYPRE_StructSolver solver,
                        HYPRE_StructMatrix A,
                        HYPRE_StructVector b,
@@ -132,7 +127,7 @@ HYPRE_StructPFMGGetRelChange( HYPRE_StructSolver solver,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 HYPRE_StructPFMGSetZeroGuess( HYPRE_StructSolver solver )
 {
@@ -148,7 +143,7 @@ HYPRE_StructPFMGGetZeroGuess( HYPRE_StructSolver solver,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 HYPRE_StructPFMGSetNonZeroGuess( HYPRE_StructSolver solver )
 {
@@ -319,3 +314,11 @@ HYPRE_StructPFMGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
    return( hypre_PFMGGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }
 
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+HYPRE_Int
+HYPRE_StructPFMGSetDeviceLevel( HYPRE_StructSolver  solver,
+                                HYPRE_Int   device_level  )
+{
+   return( hypre_PFMGSetDeviceLevel( (void *) solver, device_level ) );
+}
+#endif

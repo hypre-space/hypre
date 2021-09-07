@@ -1,3 +1,10 @@
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 /*
    Example 5
 
@@ -16,17 +23,23 @@
                  solvers are AMG, PCG, and PCG with AMG or Parasails
                  preconditioners.  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <math.h>
-#include "_hypre_utilities.h"
 #include "HYPRE_krylov.h"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_ls.h"
+#include "ex.h"
 
+#ifdef HYPRE_EXVIS
 #include "vis.c"
+#endif
 
 int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, int iterations,
                                       double rel_residual_norm);
 
+#define my_min(a,b)  (((a)<(b)) ? (a) : (b))
 
 int main (int argc, char *argv[])
 {
@@ -55,6 +68,12 @@ int main (int argc, char *argv[])
    MPI_Init(&argc, &argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+
+   /* Initialize HYPRE */
+   HYPRE_Init();
+
+   /* Print GPU info */
+   /* HYPRE_PrintDeviceInfo(); */
 
    /* Default problem parameters */
    n = 33;
@@ -138,10 +157,10 @@ int main (int argc, char *argv[])
    extra = N - local_size*num_procs;
 
    ilower = local_size*myid;
-   ilower += hypre_min(myid, extra);
+   ilower += my_min(myid, extra);
 
    iupper = local_size*(myid+1);
-   iupper += hypre_min(myid+1, extra);
+   iupper += my_min(myid+1, extra);
    iupper = iupper - 1;
 
    /* How many rows do I have? */
@@ -169,8 +188,13 @@ int main (int argc, char *argv[])
    */
    {
       int nnz;
+      /* OK to use constant-length arrays for CPUs
       double values[5];
       int cols[5];
+      */
+      double *values = (double *) malloc(5*sizeof(double));
+      int *cols = (int *) malloc(5*sizeof(int));
+      int *tmp = (int *) malloc(2*sizeof(int));
 
       for (i = ilower; i <= iupper; i++)
       {
@@ -214,8 +238,14 @@ int main (int argc, char *argv[])
          }
 
          /* Set the values for row i */
-         HYPRE_IJMatrixSetValues(A, 1, &nnz, &i, cols, values);
+         tmp[0] = nnz;
+         tmp[1] = i;
+         HYPRE_IJMatrixSetValues(A, 1, &tmp[0], &tmp[1], cols, values);
       }
+
+      free(values);
+      free(cols);
+      free(tmp);
    }
 
    /* Assemble after setting the coefficients */
@@ -388,7 +418,7 @@ int main (int argc, char *argv[])
       HYPRE_BoomerAMGCreate(&precond);
       HYPRE_BoomerAMGSetPrintLevel(precond, 1); /* print amg solution info */
       HYPRE_BoomerAMGSetCoarsenType(precond, 6);
-      HYPRE_BoomerAMGSetOldDefault(precond); 
+      HYPRE_BoomerAMGSetOldDefault(precond);
       HYPRE_BoomerAMGSetRelaxType(precond, 6); /* Sym G.S./Jacobi hybrid */
       HYPRE_BoomerAMGSetNumSweeps(precond, 1);
       HYPRE_BoomerAMGSetTol(precond, 0.0); /* conv. tolerance zero */
@@ -542,6 +572,7 @@ int main (int argc, char *argv[])
    /* Save the solution for GLVis visualization, see vis/glvis-ex5.sh */
    if (vis)
    {
+#ifdef HYPRE_EXVIS
       FILE *file;
       char filename[255];
 
@@ -576,12 +607,16 @@ int main (int argc, char *argv[])
       /* save global finite element mesh */
       if (myid == 0)
          GLVis_PrintGlobalSquareMesh("vis/ex5.mesh", n-1);
+#endif
    }
 
    /* Clean up */
    HYPRE_IJMatrixDestroy(A);
    HYPRE_IJVectorDestroy(b);
    HYPRE_IJVectorDestroy(x);
+
+   /* Finalize HYPRE */
+   HYPRE_Finalize();
 
    /* Finalize MPI*/
    MPI_Finalize();
@@ -606,7 +641,7 @@ int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, int iterations,
 
    if (rel_residual_norm > .1)
    {
-	   HYPRE_BoomerAMGSetNumSweeps((HYPRE_Solver)precond_data, 10);
+      HYPRE_BoomerAMGSetNumSweeps((HYPRE_Solver)precond_data, 10);
    }
    else
    {

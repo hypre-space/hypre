@@ -1,0 +1,18 @@
+# Output file: sludist.out.0
+
+
+BoomerAMG Iterations = 11
+Final Relative Residual Norm = 3.002886e-09
+
+# Output file: sludist.out.1
+
+
+Iterations = 13
+Final Relative Residual Norm = 3.172597e-08
+
+# Output file: sludist.out.2
+
+
+GMRES Iterations = 8
+Final GMRES Relative Residual Norm = 5.973547e-08
+

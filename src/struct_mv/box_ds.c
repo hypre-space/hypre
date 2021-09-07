@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_mv.h"
 
@@ -27,7 +22,7 @@ hypre_BoxBTNodeCreate( HYPRE_Int         ndim,
    hypre_BoxBTNode *btnode;
    HYPRE_Int        d;
 
-   btnode = hypre_TAlloc(hypre_BoxBTNode, 1);
+   btnode = hypre_TAlloc(hypre_BoxBTNode, 1, HYPRE_MEMORY_HOST);
 
    hypre_BoxBTNodeNumIndices(btnode) = 0;
    hypre_BoxBTNodeBox(btnode)        = hypre_BoxCreate(ndim);
@@ -59,7 +54,7 @@ hypre_BoxBTNodeSetIndices( hypre_BoxBTNode * btnode,
    hypre_BoxBTNodeNumIndices(btnode) = num_indices;
    for (d = 0; d < ndim; d++)
    {
-      hypre_BoxBTNodeIndices(btnode, d) = hypre_TAlloc(HYPRE_Int, num_indices);
+      hypre_BoxBTNodeIndices(btnode, d) = hypre_TAlloc(HYPRE_Int, num_indices, HYPRE_MEMORY_HOST);
       for (i = 0; i < num_indices; i++)
       {
          hypre_BoxBTNodeIndex(btnode, d, i) = indices[d][i];
@@ -105,13 +100,13 @@ hypre_BoxBTNodeDestroy( hypre_BoxBTNode *btnode )
    {
       for (d = 0; d < HYPRE_MAXDIM; d++)
       {
-         hypre_TFree(hypre_BoxBTNodeIndices(btnode, d));
+         hypre_TFree(hypre_BoxBTNodeIndices(btnode, d), HYPRE_MEMORY_HOST);
       }
 
       hypre_BoxDestroy(hypre_BoxBTNodeBox(btnode));
       //hypre_assert(hypre_BoxBTNodeLeft(btnode) == NULL);
       //hypre_assert(hypre_BoxBTNodeRight(btnode) == NULL);
-      hypre_TFree(btnode);
+      hypre_TFree(btnode, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;
@@ -132,7 +127,7 @@ hypre_BoxBinTreeCreate( HYPRE_Int          ndim,
    hypre_BoxBinTree  *boxbt;
    hypre_BoxBTNode   *btroot;
 
-   boxbt = hypre_TAlloc(hypre_BoxBinTree, 1);
+   boxbt = hypre_TAlloc(hypre_BoxBinTree, 1, HYPRE_MEMORY_HOST);
 
    hypre_BoxBTNodeCreate(ndim, &btroot);
    hypre_BoxBinTreeRoot(boxbt) = btroot;
@@ -145,15 +140,31 @@ hypre_BoxBinTreeCreate( HYPRE_Int          ndim,
 
 /*--------------------------------------------------------------------------
  * hypre_BoxBinTreeInitialize
+ *
+ * Note: indices_in is copied to indices, which will be freed when
+ *       calling hypre_BoxBinTreeDestroy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_BoxBinTreeInitialize( hypre_BoxBinTree   *boxbt,
                             HYPRE_Int           num_indices,
-                            HYPRE_Int         **indices,
+                            HYPRE_Int         **indices_in,
                             hypre_Box          *box )
 {
    hypre_BoxBTNode   *btroot;
+   HYPRE_Int         *indices[HYPRE_MAXDIM];
+   HYPRE_Int          ndim = hypre_BoxNDim(box);
+
+   HYPRE_Int          d, i;
+
+   for (d = 0; d < ndim; d++)
+   {
+      indices[d] = hypre_CTAlloc(HYPRE_Int, num_indices, HYPRE_MEMORY_HOST);
+      for (i = 0; i < num_indices; i++)
+      {
+         indices[d][i] = indices_in[d][i];
+      }
+   }
 
    btroot = hypre_BoxBinTreeRoot(boxbt);
    hypre_BoxBTNodeInitialize(btroot, num_indices, indices, box);
@@ -225,7 +236,7 @@ hypre_BoxBinTreeDestroy( hypre_BoxBinTree *boxbt )
 
       /* Free memory */
       hypre_BoxBTStackDestroy(btstack);
-      hypre_TFree(boxbt);
+      hypre_TFree(boxbt, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;
@@ -244,7 +255,7 @@ hypre_BoxBTStackCreate( hypre_BoxBTStack  **btstack_ptr )
 {
    hypre_BoxBTStack  *btstack;
 
-   btstack = hypre_TAlloc(hypre_BoxBTStack, 1);
+   btstack = hypre_TAlloc(hypre_BoxBTStack, 1, HYPRE_MEMORY_HOST);
 
    hypre_BoxBTStackNodes(btstack)    = NULL;
    hypre_BoxBTStackCapacity(btstack) = 0;
@@ -267,7 +278,7 @@ hypre_BoxBTStackInitialize( HYPRE_Int           capacity,
    HYPRE_Int  i;
 
    hypre_BoxBTStackCapacity(btstack) = capacity;
-   hypre_BoxBTStackNodes(btstack) = hypre_TAlloc(hypre_BoxBTNode *, capacity);
+   hypre_BoxBTStackNodes(btstack) = hypre_TAlloc(hypre_BoxBTNode *, capacity, HYPRE_MEMORY_HOST);
    for (i = 0; i < capacity; i++)
    {
       hypre_BoxBTStackNode(btstack, i) = NULL;
@@ -285,8 +296,8 @@ hypre_BoxBTStackDestroy( hypre_BoxBTStack *btstack )
 {
    hypre_BoxBTNode  **nodes = hypre_BoxBTStackNodes(btstack);
 
-   hypre_TFree(nodes);
-   hypre_TFree(btstack);
+   hypre_TFree(nodes, HYPRE_MEMORY_HOST);
+   hypre_TFree(btstack, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -313,7 +324,8 @@ hypre_BoxBTStackInsert( hypre_BoxBTNode    *btnode,
       }
       hypre_BoxBTStackCapacity(btstack) = capacity;
       hypre_BoxBTStackNodes(btstack) = hypre_TReAlloc(hypre_BoxBTStackNodes(btstack),
-                                                      hypre_BoxBTNode *, capacity);
+                                                      hypre_BoxBTNode *, capacity,
+                                                      HYPRE_MEMORY_HOST);
    }
 
    hypre_BoxBTStackSize(btstack)++;
@@ -360,7 +372,7 @@ hypre_BoxBTQueueCreate( hypre_BoxBTQueue  **btqueue_ptr )
 {
    hypre_BoxBTQueue  *btqueue;
 
-   btqueue = hypre_TAlloc(hypre_BoxBTQueue, 1);
+   btqueue = hypre_TAlloc(hypre_BoxBTQueue, 1, HYPRE_MEMORY_HOST);
 
    hypre_BoxBTQueueHead(btqueue)     = 0;
    hypre_BoxBTQueueTail(btqueue)     = 0;
@@ -385,7 +397,7 @@ hypre_BoxBTQueueInitialize( HYPRE_Int           capacity,
    HYPRE_Int  i;
 
    hypre_BoxBTQueueCapacity(btqueue) = capacity;
-   hypre_BoxBTQueueNodes(btqueue) = hypre_TAlloc(hypre_BoxBTNode *, capacity);
+   hypre_BoxBTQueueNodes(btqueue) = hypre_TAlloc(hypre_BoxBTNode *, capacity, HYPRE_MEMORY_HOST);
    for (i = 0; i < capacity; i++)
    {
       hypre_BoxBTQueueNode(btqueue, i) = NULL;
@@ -403,8 +415,8 @@ hypre_BoxBTQueueDestroy( hypre_BoxBTQueue *btqueue )
 {
    hypre_BoxBTNode  **nodes = hypre_BoxBTQueueNodes(btqueue);
 
-   hypre_TFree(nodes);
-   hypre_TFree(btqueue);
+   hypre_TFree(nodes, HYPRE_MEMORY_HOST);
+   hypre_TFree(btqueue, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -435,7 +447,8 @@ hypre_BoxBTQueueInsert( hypre_BoxBTNode    *btnode,
       }
       hypre_BoxBTQueueCapacity(btqueue) = capacity;
       hypre_BoxBTQueueNodes(btqueue) = hypre_TReAlloc(hypre_BoxBTQueueNodes(btqueue),
-                                                      hypre_BoxBTNode *, capacity);
+                                                      hypre_BoxBTNode *, capacity,
+                                                      HYPRE_MEMORY_HOST);
 
       /* Reorganize items in the queue */
       for (i = 0; i < *tail; i++)

@@ -1,4 +1,9 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*  -- translated by f2c (version 19940927).
    You must link the resulting object file with the libraries:
@@ -8,7 +13,7 @@
 #include "f2c.h"
 #include "hypre_blas.h"
 
-/* Subroutine */ HYPRE_Int dsyrk_(const char *uplo,const char *trans, integer *n, integer *k, 
+/* Subroutine */ integer dsyrk_(const char *uplo,const char *trans, integer *n, integer *k, 
 	doublereal *alpha, doublereal *a, integer *lda, doublereal *beta, 
 	doublereal *c, integer *ldc)
 {
@@ -20,10 +25,10 @@
     static integer info;
     static doublereal temp;
     static integer i, j, l;
-    extern logical hypre_lsame_(const char *,const char *);
+    extern logical lsame_(const char *,const char *);
     static integer nrowa;
     static logical upper;
-    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
 
 
 /*  Purpose   
@@ -174,18 +179,18 @@
 #define A(I,J) a[(I)-1 + ((J)-1)* ( *lda)]
 #define C(I,J) c[(I)-1 + ((J)-1)* ( *ldc)]
 
-    if (hypre_lsame_(trans, "N")) {
+    if (lsame_(trans, "N")) {
 	nrowa = *n;
     } else {
 	nrowa = *k;
     }
-    upper = hypre_lsame_(uplo, "U");
+    upper = lsame_(uplo, "U");
 
     info = 0;
-    if (! upper && ! hypre_lsame_(uplo, "L")) {
+    if (! upper && ! lsame_(uplo, "L")) {
 	info = 1;
-    } else if (! hypre_lsame_(trans, "N") && ! hypre_lsame_(trans, "T") &&
-	     ! hypre_lsame_(trans, "C")) {
+    } else if (! lsame_(trans, "N") && ! lsame_(trans, "T") &&
+	     ! lsame_(trans, "C")) {
 	info = 2;
     } else if (*n < 0) {
 	info = 3;
@@ -197,7 +202,7 @@
 	info = 10;
     }
     if (info != 0) {
-	hypre_xerbla_("DSYRK ", &info);
+	xerbla_("DSYRK ", &info);
 	return 0;
     }
 
@@ -252,7 +257,7 @@
 
 /*     Start the operations. */
 
-    if (hypre_lsame_(trans, "N")) {
+    if (lsame_(trans, "N")) {
 
 /*        Form  C := alpha*A*A' + beta*C. */
 
@@ -353,3 +358,7 @@
 /*     End of DSYRK . */
 
 } /* dsyrk_ */
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,14 +1,7 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+dnl Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+dnl HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+dnl
+dnl SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 dnl *********************************************************************
 dnl * File Name: configure.in
@@ -55,10 +48,11 @@ dnl * Set package information so it only has to be modified in one place
 dnl *********************************************************************
 
 m4_define([M4_HYPRE_NAME],    [hypre])
-m4_define([M4_HYPRE_VERSION], [2.11.1])
-m4_define([M4_HYPRE_DATE],    [2016/06/09])
+m4_define([M4_HYPRE_VERSION], [2.22.1])
+m4_define([M4_HYPRE_NUMBER],  [22201])
+m4_define([M4_HYPRE_DATE],    [2021/08/20])
 m4_define([M4_HYPRE_TIME],    [00:00:00])
-m4_define([M4_HYPRE_BUGS],    [hypre-support@llnl.gov])
+m4_define([M4_HYPRE_BUGS],    [https://github.com/hypre-space/hypre/issues])
 m4_define([M4_HYPRE_SRCDIR],  [`pwd`])
 
 m4_include([config/hypre_blas_macros.m4])
@@ -69,13 +63,8 @@ AC_PREREQ(2.59)
 AC_REVISION($Id$)
 AC_INIT(M4_HYPRE_NAME, M4_HYPRE_VERSION)
 AC_CONFIG_HEADERS([HYPRE_config.h:config/HYPRE_config.h.in])
-AC_COPYRIGHT([Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-Produced at the Lawrence Livermore National Laboratory.
-This file is part of HYPRE.  See file COPYRIGHT for details.
-
-HYPRE is free software; you can redistribute it and/or modify it under the
-terms of the GNU Lesser General Public License (as published by the Free
-Software Foundation) version 2.1 dated February 1999.])
+AC_COPYRIGHT([Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+HYPRE Project Developers. See the top-level COPYRIGHT file for details.])
 
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_SRCDIR([HYPRE.h])
@@ -94,19 +83,22 @@ dnl * of the file, 'm4_define' is used to define m4 macros first.
 dnl *********************************************************************
 HYPRE_NAME="M4_HYPRE_NAME"
 HYPRE_VERSION="M4_HYPRE_VERSION"
+HYPRE_NUMBER=M4_HYPRE_NUMBER
 HYPRE_DATE="M4_HYPRE_DATE"
 HYPRE_TIME="M4_HYPRE_TIME"
 HYPRE_BUGS="M4_HYPRE_BUGS"
 HYPRE_SRCDIR="M4_HYPRE_SRCDIR"
 
 AC_DEFINE_UNQUOTED(HYPRE_RELEASE_NAME,    ["$HYPRE_NAME"],    [Release name])
-AC_DEFINE_UNQUOTED(HYPRE_RELEASE_VERSION, ["$HYPRE_VERSION"], [Version number])
+AC_DEFINE_UNQUOTED(HYPRE_RELEASE_VERSION, ["$HYPRE_VERSION"], [Release version])
+AC_DEFINE_UNQUOTED(HYPRE_RELEASE_NUMBER,  [$HYPRE_NUMBER],    [Release number])
 AC_DEFINE_UNQUOTED(HYPRE_RELEASE_DATE,    ["$HYPRE_DATE"],    [Date of release])
 AC_DEFINE_UNQUOTED(HYPRE_RELEASE_TIME,    ["$HYPRE_TIME"],    [Time of release])
 AC_DEFINE_UNQUOTED(HYPRE_RELEASE_BUGS,    ["$HYPRE_BUGS"],    [Bug reports])
 
 AC_SUBST(HYPRE_NAME)
 AC_SUBST(HYPRE_VERSION)
+AC_SUBST(HYPRE_NUMBER)
 AC_SUBST(HYPRE_DATE)
 AC_SUBST(HYPRE_TIME)
 AC_SUBST(HYPRE_BUGS)
@@ -132,23 +124,64 @@ dnl *********************************************************************
 hypre_user_chose_mpi=no
 hypre_user_chose_blas=no
 hypre_user_chose_lapack=no
-hypre_user_chose_fei=no
+hypre_user_chose_raja=no
+hypre_using_raja=no
+hypre_user_chose_kokkos=no
+hypre_using_kokkos=no
 
 hypre_using_c=yes
 hypre_using_cxx=yes
 
 hypre_using_mpi=yes
 
-hypre_using_fei=yes
-hypre_using_superlu=yes
-hypre_using_mli=yes
+hypre_using_distributed_ls=yes
+
+hypre_using_superlu=no
+hypre_using_dsuperlu=no
+
+hypre_using_fei=no
+hypre_using_mli=no
 
 hypre_using_openmp=no
+hypre_using_device_openmp=no
 hypre_using_insure=no
+hypre_using_cuda=no
+hypre_using_gpu=no
+hypre_using_um=no
+hypre_gpu_mpi=no
+hypre_using_gpu_profiling=no
+hypre_using_cuda_streams=no
+hypre_using_cusparse=yes
+hypre_using_cublas=no
+hypre_using_curand=yes
+hypre_using_device_pool=no
+hypre_using_umpire=no
+hypre_using_umpire_host=no
+hypre_using_umpire_device=no
+hypre_using_umpire_um=no
+hypre_using_umpire_pinned=no
 
 hypre_using_caliper=no
 hypre_user_gave_caliper_lib=no
 hypre_user_gave_caliper_inc=no
+
+hypre_found_cuda=no
+
+hypre_using_node_aware_mpi=no
+hypre_using_memory_tracker=no
+
+
+dnl *********************************************************************
+dnl * Initialize hypre-HIP variables
+dnl *********************************************************************
+hypre_using_hip=no
+hypre_using_rocsparse=no
+hypre_using_rocblas=no
+hypre_using_rocrand=no
+
+hypre_found_hip=no
+
+
 
 dnl *********************************************************************
 dnl * Initialize flag-check variables
@@ -201,6 +234,24 @@ AS_HELP_STRING([--enable-shared],
 [hypre_using_shared=no]
 )
 
+AC_ARG_ENABLE(mixedint,
+AS_HELP_STRING([--enable-mixedint],
+               [Use long long int for HYPRE_BigInt and int for HYPRE_Int (default is int for both). Note: This option disables Euclid, ParaSails, pilut and CGC coarsening.]),
+[case "${enableval}" in
+    yes) hypre_using_fei=no
+         hypre_using_mixedint=yes
+         hypre_using_distributed_ls=no ;;
+    no)  hypre_using_mixedint=no
+         hypre_using_distributed_ls=yes ;;
+    *)   AC_MSG_ERROR([Bad value ${enableval} for --enable-mixedint]) ;;
+ esac],
+[hypre_using_mixedint=no]
+)
+if test "$hypre_using_mixedint" = "yes"
+then
+   AC_DEFINE(HYPRE_MIXEDINT, 1, [Define to 1 if using long long int for HYPRE_BigInt])
+fi
+
 AC_ARG_ENABLE(bigint,
 AS_HELP_STRING([--enable-bigint],
                [Use long long int for HYPRE_Int (default is NO).]),
@@ -214,7 +265,39 @@ AS_HELP_STRING([--enable-bigint],
 )
 if test "$hypre_using_bigint" = "yes"
 then
-   AC_DEFINE(HYPRE_BIGINT, 1)
+   AC_DEFINE(HYPRE_BIGINT, 1, [Define to 1 if using long long int for HYPRE_Int and HYPRE_BigInt])
+fi
+
+AC_ARG_ENABLE(single,
+AS_HELP_STRING([--enable-single],
+               [Use single precision values (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_fei=no
+         hypre_using_single=yes ;;
+    no)  hypre_using_single=no ;;
+    *)   AC_MSG_ERROR([Bad value ${enableval} for --enable-single]) ;;
+ esac],
+[hypre_using_single=no]
+)
+if test "$hypre_using_single" = "yes"
+then
+   AC_DEFINE(HYPRE_SINGLE, 1, [Define to 1 if using single precision values for HYPRE_Real])
+fi
+
+AC_ARG_ENABLE(longdouble,
+AS_HELP_STRING([--enable-longdouble],
+               [Use long double precision values (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_fei=no
+         hypre_using_longdouble=yes ;;
+    no)  hypre_using_longdouble=no ;;
+    *)   AC_MSG_ERROR([Bad value ${enableval} for --enable-longdouble]) ;;
+ esac],
+[hypre_using_longdouble=no]
+)
+if test "$hypre_using_longdouble" = "yes"
+then
+   AC_DEFINE(HYPRE_LONG_DOUBLE, 1, [Define to 1 if using quad precision values for HYPRE_Real])
 fi
 
 AC_ARG_ENABLE(complex,
@@ -230,7 +313,7 @@ AS_HELP_STRING([--enable-complex],
 )
 if test "$hypre_using_complex" = "yes"
 then
-   AC_DEFINE(HYPRE_COMPLEX, 1)
+   AC_DEFINE(HYPRE_COMPLEX, 1, [Define to 1 if using complex values])
 fi
 
 AC_ARG_ENABLE(maxdim,
@@ -240,7 +323,7 @@ AS_HELP_STRING([--enable-maxdim=MAXDIM],
 [hypre_maxdim=${enableval}],
 [hypre_maxdim=3]
 )
-AC_DEFINE_UNQUOTED(HYPRE_MAXDIM, [$hypre_maxdim], [Max dimension])
+AC_DEFINE_UNQUOTED(HYPRE_MAXDIM, [$hypre_maxdim], [Define to be the max dimension size (must be at least 3)])
 
 AC_ARG_ENABLE(persistent,
 AS_HELP_STRING([--enable-persistent],
@@ -254,13 +337,13 @@ AS_HELP_STRING([--enable-persistent],
 )
 if test "$hypre_using_persistent" = "yes"
 then
-   AC_DEFINE(HYPRE_USING_PERSISTENT_COMM, 1)
+   AC_DEFINE(HYPRE_USING_PERSISTENT_COMM, 1, [Define to 1 if using persistent communication])
 fi
 
 AC_ARG_ENABLE(hopscotch,
 AS_HELP_STRING([--enable-hopscotch],
                [Uses hopscotch hashing if configured with OpenMP and
-		atomic capability available(default is NO).]),
+                atomic capability available(default is NO).]),
 [case "${enableval}" in
     yes) hypre_using_hopscotch=yes ;;
     no)  hypre_using_hopscotch=no ;;
@@ -270,31 +353,8 @@ AS_HELP_STRING([--enable-hopscotch],
 )
 if test "$hypre_using_hopscotch" = "yes"
 then
-   AC_DEFINE(HYPRE_HOPSCOTCH, 1)
+   AC_DEFINE(HYPRE_HOPSCOTCH, 1, [Define to 1 if hopscotch hashing])
 fi
-
-dnl * The --with-no-global-partition option is retained here for
-dnl * backward compatibility (no help string is printed).
-dnl * The new --enable-global-partition option takes precedence.
-hypre_using_global_partition=no
-AC_ARG_WITH(no-global-partition,,
-[case "${withval}" in
-    yes) hypre_using_global_partition=no ;;
-    no)  hypre_using_global_partition=yes ;;
-    *)   hypre_using_global_partition=no ;;
- esac]
-)
-AC_ARG_ENABLE(global-partition,
-AS_HELP_STRING([--enable-global-partition],
-               [Use global partitioning (default is NO).]),
-[case "${enableval}" in
-    yes) hypre_using_global_partition=yes ;;
-    no)  hypre_using_global_partition=no ;;
-    *)   hypre_using_global_partition=yes ;;
- esac]
-)
-dnl * The AC_DEFINE is below, after hypre_using_mpi is completely set
-dnl * Need to change to a new approach that always defines variable to some value
 
 AC_ARG_ENABLE(fortran,
 AS_HELP_STRING([--enable-fortran],
@@ -306,6 +366,132 @@ AS_HELP_STRING([--enable-fortran],
  esac],
 [hypre_using_fortran=yes]
 )
+
+AC_ARG_ENABLE(unified-memory,
+AS_HELP_STRING([--enable-unified-memory],
+               [Use unified memory for allocating the memory (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_um=yes ;;
+    no)  hypre_using_um=no ;;
+    *)   hypre_using_um=no ;;
+ esac],
+[hypre_using_um=no]
+)
+
+AC_ARG_ENABLE(cuda-streams,
+AS_HELP_STRING([--enable-cuda-streams],
+               [Use CUDA streams (default is YES).]),
+[case "${enableval}" in
+    yes) hypre_using_cuda_streams=yes ;;
+    no)  hypre_using_cuda_streams=no ;;
+    *)   hypre_using_cuda_streams=yes ;;
+ esac],
+[hypre_using_cuda_streams=yes]
+)
+
+AC_ARG_ENABLE(cusparse,
+AS_HELP_STRING([--enable-cusparse],
+               [Use cuSPARSE (default is YES).]),
+[case "${enableval}" in
+    yes) hypre_using_cusparse=yes ;;
+    no)  hypre_using_cusparse=no ;;
+    *)   hypre_using_cusparse=yes ;;
+ esac],
+[hypre_using_cusparse=yes]
+)
+
+AC_ARG_ENABLE(device-memory-pool,
+AS_HELP_STRING([--enable-device-memory-pool],
+               [Use device pooling allocator (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_device_pool=yes ;;
+    no)  hypre_using_device_pool=no ;;
+    *)   hypre_using_device_pool=no ;;
+ esac],
+[hypre_using_device_pool=no]
+)
+
+AC_ARG_ENABLE(cublas,
+AS_HELP_STRING([--enable-cublas],
+               [Use cuBLAS (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_cublas=yes ;;
+    no)  hypre_using_cublas=no ;;
+    *)   hypre_using_cublas=no ;;
+ esac],
+[hypre_using_cublas=no]
+)
+
+AC_ARG_ENABLE(curand,
+AS_HELP_STRING([--enable-curand],
+               [Use cuRAND (default is YES).]),
+[case "${enableval}" in
+    yes) hypre_using_curand=yes ;;
+    no)  hypre_using_curand=no ;;
+    *)   hypre_using_curand=yes ;;
+ esac],
+[hypre_using_curand=yes]
+)
+
+
+
+AC_ARG_ENABLE(rocsparse,
+AS_HELP_STRING([--enable-rocsparse],
+               [Use rocSPARSE (default is YES).]),
+[case "${enableval}" in
+    yes) hypre_using_rocsparse=yes ;;
+    no)  hypre_using_rocsparse=no ;;
+    *)   hypre_using_rocsparse=yes ;;
+ esac],
+[hypre_using_rocsparse=yes]
+)
+
+AC_ARG_ENABLE(rocblas,
+AS_HELP_STRING([--enable-rocblas],
+               [Use rocBLAS (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_rocblas=yes ;;
+    no)  hypre_using_rocblas=no ;;
+    *)   hypre_using_rocblas=no ;;
+ esac],
+[hypre_using_rocblas=no]
+)
+
+AC_ARG_ENABLE(rocrand,
+AS_HELP_STRING([--enable-rocrand],
+               [Use rocRAND (default is YES).]),
+[case "${enableval}" in
+    yes) hypre_using_rocrand=yes ;;
+    no)  hypre_using_rocrand=no ;;
+    *)   hypre_using_rocrand=yes ;;
+ esac],
+[hypre_using_rocrand=yes]
+)
+
+AC_ARG_ENABLE(gpu-profiling,
+AS_HELP_STRING([--enable-gpu-profiling],
+               [Use NVTX on CUDA, rocTX on HIP (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_gpu_profiling=yes ;;
+    no)  hypre_using_gpu_profiling=no ;;
+    *)   hypre_using_gpu_profiling=no ;;
+ esac],
+[hypre_using_gpu_profiling=no]
+)
+
+AC_ARG_ENABLE(gpu-aware-mpi,
+AS_HELP_STRING([--enable-gpu-aware-mpi],
+               [Use GPU memory aware MPI]),
+[case "${enableval}" in
+    yes) hypre_gpu_mpi=yes ;;
+    no)  hypre_gpu_mpi=no ;;
+    *)   AC_MSG_ERROR([Bad value ${enableval} for --enable-gpu-aware-mpi]) ;;
+ esac],
+[hypre_gpu_mpi=no]
+)
+
+dnl * The AC_DEFINE is below, after hypre_using_mpi is completely set
+dnl * Need to change to a new approach that always defines variable to some value
 
 dnl *********************************************************************
 dnl * Determine if user provided C compiler or flags
@@ -339,6 +525,28 @@ then
    hypre_user_chose_cxxflags=no
 else
    hypre_user_chose_cxxflags=yes
+fi
+
+dnl *********************************************************************
+dnl * Determine if user provided CUDA compiler or flags
+dnl *********************************************************************
+AC_ARG_VAR([CUDA_HOME], [CUDA home directory])
+AC_ARG_VAR([HYPRE_CUDA_SM], [CUDA architecture])
+AC_ARG_VAR([CUCC], [CUDA compiler command])
+AC_ARG_VAR([CUFLAGS], [CUDA compiler flags])
+
+if test "x$CUCC" = "x"
+then
+   hypre_user_chose_cudacompilers=no
+else
+   hypre_user_chose_cudacompilers=yes
+fi
+
+if test "x$CUFLAGS" = "x"
+then
+   hypre_user_chose_cuflags=no
+else
+   hypre_user_chose_cuflags=yes
 fi
 
 dnl *********************************************************************
@@ -399,6 +607,27 @@ AS_HELP_STRING([--with-LDFLAGS=ARG],
 [LDFLAGS=$withval]
 )
 
+AC_ARG_WITH(extra-CFLAGS,
+AS_HELP_STRING([--with-extra-CFLAGS=ARG],
+               [Define extra C compile flag, where ARG is a space-separated
+                list (enclosed in quotes) of directories.]),
+[EXTRA_CFLAGS=$withval]
+)
+
+AC_ARG_WITH(extra-CXXFLAGS,
+AS_HELP_STRING([--with-extra-CXXFLAGS=ARG],
+               [Define extra C++ compile flag, where ARG is a space-separated
+                list (enclosed in quotes) of directories.]),
+[EXTRA_CXXFLAGS=$withval]
+)
+
+AC_ARG_WITH(extra-BUILDFLAGS,
+AS_HELP_STRING([--with-extra-BUILDFLAGS=ARG],
+               [Define extra library build flag, where ARG is a space-separated
+                list (enclosed in quotes) of directories.]),
+[EXTRA_BUILDFLAGS=$withval]
+)
+
 AC_ARG_WITH(extra-incpath,
 AS_HELP_STRING([--with-extra-incpath=PATH],
                [Define extra include path, where PATH is a space-separated
@@ -433,7 +662,8 @@ AS_HELP_STRING([--with-strict-checking],
                [Compiles without MPI ('--without-MPI') and tries to
                 find a compiler option that warns of as many non-ISO
                 features as possible.]),
-[
+[case "${withval}" in
+ yes)
  hypre_user_chose_ccompilers=yes
  hypre_user_chose_cflags=yes
  hypre_user_chose_cxxcompilers=yes
@@ -490,8 +720,12 @@ AS_HELP_STRING([--with-strict-checking],
     fi
  fi
 
- AC_DEFINE(HYPRE_SEQUENTIAL,1,[No MPI being used])]
+ AC_DEFINE(HYPRE_SEQUENTIAL,1,[No MPI being used])
+ ;;
+ esac]
 )
+
+dnl ***** MPI
 
 AC_ARG_WITH(MPI-include,
 AS_HELP_STRING([--with-MPI-include=DIR],
@@ -546,6 +780,41 @@ AS_HELP_STRING([--with-MPI-flags=FLAGS],
 [MPIFLAGS=""]
 )
 
+dnl ***** Node Aware MPI
+AC_ARG_WITH(node-aware-mpi,
+AS_HELP_STRING([--with-node-aware-mpi],
+               [Use Node Aware MPI (default is NO).]),
+[case "$withval" in
+    yes) hypre_using_node_aware_mpi=yes;;
+    no)  hypre_using_node_aware_mpi=no ;;
+    *)   hypre_using_node_aware_mpi=no ;;
+ esac],
+[hypre_using_node_aware_mpi=no]
+)
+
+AC_ARG_WITH(node-aware-mpi-include,
+AS_HELP_STRING([--with-node-aware-mpi-include=DIR],
+               [User specifies that nap_comm.hpp is in DIR.]),
+[for nap_dir in $withval; do
+    HYPRE_NAP_INCLUDE="$HYPRE_NAP_INCLUDE -I$nap_dir"
+ done;
+ hypre_using_node_aware_mpi=yes]
+)
+
+dnl ***** memory tracker
+AC_ARG_WITH(memory_tracker,
+AS_HELP_STRING([--with-memory-tracker],
+               [Use memory tracker in hypre (default is NO).]),
+[case "$withval" in
+    yes) hypre_using_memory_tracker=yes;;
+    no)  hypre_using_memory_tracker=no ;;
+    *)   hypre_using_memory_tracker=no ;;
+ esac],
+[hypre_using_memory_tracker=no]
+)
+
+dnl ***** BLAS
+
 AC_ARG_WITH(blas-lib,
 AS_HELP_STRING([--with-blas-lib=LIBS],
                [LIBS is space-separated linkable list (enclosed in quotes) of libraries
@@ -587,6 +856,8 @@ AS_HELP_STRING([--with-blas-lib-dirs=DIRS],
  hypre_user_chose_blas=yes
  hypre_blas_lib_dir_old_style=yes]
 )
+
+dnl ***** LAPACK
 
 AC_ARG_WITH(lapack-lib,
 AS_HELP_STRING([--with-lapack-lib=LIBS],
@@ -638,6 +909,7 @@ AC_DEFUN([AC_HYPRE_SET_FMANGLE],
     one-underscore)      hypre_fmangle=2 ;;
     two-underscores)     hypre_fmangle=3 ;;
     caps-no-underscores) hypre_fmangle=4 ;;
+    one-before-after)    hypre_fmangle=5 ;;
  esac
 ])
 
@@ -646,12 +918,20 @@ AC_ARG_WITH(fmangle,
 AS_HELP_STRING([--with-fmangle=FMANGLE],
                [FMANGLE contains a string indicating the type of name mangling
                 to use when calling hypre from Fortran.  It can be set to:
-                "no-underscores", "one-underscore", "two-underscores", and
-                "caps-no-underscores".]),
+                "no-underscores", "one-underscore", "two-underscores",
+                "caps-no-underscores", and "one-before-after".]),
 [hypre_fmangle=0; AC_HYPRE_SET_FMANGLE],
 [hypre_fmangle=0]
 )
-AC_DEFINE_UNQUOTED(HYPRE_FMANGLE, [$hypre_fmangle], [Fortran mangling])
+AC_DEFINE_UNQUOTED(HYPRE_FMANGLE,
+                   [$hypre_fmangle],
+[Define as follows to set the Fortran name mangling scheme:
+ 0 = unspecified;
+ 1 = no underscores;
+ 2 = one underscore;
+ 3 = two underscores;
+ 4 = caps, no underscores;
+ 5 = one underscore before and after])
 
 dnl * Define a generic macro to set hypre_fmangle_blaslapack based on withval
 AC_DEFUN([AC_HYPRE_SET_FMANGLE_BLAS],
@@ -661,6 +941,7 @@ AC_DEFUN([AC_HYPRE_SET_FMANGLE_BLAS],
     one-underscore)      hypre_fmangle_blas=2 ;;
     two-underscores)     hypre_fmangle_blas=3 ;;
     caps-no-underscores) hypre_fmangle_blas=4 ;;
+    one-before-after)    hypre_fmangle_blas=5 ;;
  esac
 ])
 
@@ -683,6 +964,7 @@ AC_DEFUN([AC_HYPRE_SET_FMANGLE_LAPACK],
     one-underscore)      hypre_fmangle_lapack=2 ;;
     two-underscores)     hypre_fmangle_lapack=3 ;;
     caps-no-underscores) hypre_fmangle_lapack=4 ;;
+    one-before-after)    hypre_fmangle_lapack=5 ;;
  esac
 ])
 
@@ -694,14 +976,6 @@ AS_HELP_STRING([--with-fmangle-lapack=FMANGLE],
 [hypre_fmangle_lapack=0]
 )
 AC_DEFINE_UNQUOTED(HYPRE_FMANGLE_LAPACK, [$hypre_fmangle_lapack], [LAPACK mangling])
-
-AC_ARG_WITH(fei-inc-dir,
-AS_HELP_STRING([--with-fei-inc-dir=DIR],
-               [DIR is the directory containing the FEI distribution.]),
-[HYPRE_FEI_BASE_DIR="$withval";
- hypre_using_fei=yes;
- hypre_user_chose_fei=yes]
-)
 
 AC_ARG_WITH(print-errors,
 AS_HELP_STRING([--with-print-errors],
@@ -725,30 +999,96 @@ AC_ARG_WITH(openmp,
 AS_HELP_STRING([--with-openmp],
                [Use OpenMP.  This may affect which compiler is chosen.]),
 [case "${withval}" in
-    yes) hypre_using_openmp=yes
-         AC_DEFINE([HYPRE_USING_OPENMP],1,[Enable OpenMP support]) ;;
+    yes) hypre_using_openmp=yes;;
     no)  hypre_using_openmp=no ;;
  esac],
 [hypre_using_openmp=no]
 )
 
-AC_ARG_WITH(fei,
-AS_HELP_STRING([--with-fei],
-               [Use internal FEI routines.]),
+AC_ARG_WITH(device-openmp,
+AS_HELP_STRING([--with-device-openmp],
+               [Use OpenMP 4.5 Device Directives.  This may affect which compiler is chosen.]),
 [case "${withval}" in
-    no) hypre_using_fei=no ;;
-    *)  hypre_using_fei=yes ;;
- esac]
+    yes) hypre_using_device_openmp=yes ;;
+    no)  hypre_using_device_openmp=no ;;
+ esac],
+[hypre_using_device_openmp=no]
 )
+
+dnl ***** SuperLU
 
 AC_ARG_WITH(superlu,
 AS_HELP_STRING([--with-superlu],
-               [Use internal SuperLU routines.]),
+               [Use external SuperLU library.]),
 [case "${withval}" in
     no) hypre_using_superlu=no ;;
     *)  hypre_using_superlu=yes ;;
  esac]
 )
+
+AS_IF([test "x$with_superlu" = "xyes"],
+      [AC_DEFINE(HAVE_SUPERLU, 1, [Define to 1 if using SuperLU])],
+      [])
+
+AC_ARG_WITH(superlu-include,
+AS_HELP_STRING([--with-superlu-include=DIR],
+               [Directory where SuperLU is installed.]),
+[for superlu_inc_dir in $withval; do
+    SUPERLU_INCLUDE="-I$superlu_inc_dir $SUPERLU_INCLUDE"
+ done]
+)
+
+AC_ARG_WITH(superlu-lib,
+AS_HELP_STRING([--with-superlu-lib=LIBS],
+               [LIBS is space-separated linkable list (enclosed in quotes) of libraries
+                needed for SuperLU. OK to use -L and -l flags in the list]),
+[for superlu_lib in $withval; do
+    SUPERLU_LIBS="$SUPERLU_LIBS $superlu_lib"
+ done]
+)
+
+dnl ***** DSuperLU
+
+AC_ARG_WITH(dsuperlu,
+AS_HELP_STRING([--with-dsuperlu],
+               [Use external DSuperLU library.]),
+[case "${withval}" in
+    no) hypre_using_dsuperlu=no ;;
+    *)  hypre_using_dsuperlu=yes ;;
+ esac]
+)
+
+AS_IF([test "x$with_dsuperlu" = "xyes"],
+      [AC_DEFINE(HYPRE_USING_DSUPERLU, 1, [Define to 1 if using DSuperLU])],
+      [])
+
+AC_ARG_WITH(dsuperlu-include,
+AS_HELP_STRING([--with-dsuperlu-include=DIR],
+               [Directory where DSuperLU is installed.]),
+[for dsuperlu_inc_dir in $withval; do
+    DSUPERLU_INCLUDE="-I$dsuperlu_inc_dir $DSUPERLU_INCLUDE"
+ done]
+)
+
+AC_ARG_WITH(dsuperlu-lib,
+AS_HELP_STRING([--with-dsuperlu-lib=LIBS],
+               [LIBS is space-separated linkable list (enclosed in quotes) of libraries
+                needed for DSuperLU. OK to use -L and -l flags in the list]),
+[for dsuperlu_lib in $withval; do
+    DSUPERLU_LIBS="$DSUPERLU_LIBS $dsuperlu_lib"
+ done]
+)
+
+dnl ***** FEI
+
+AC_ARG_WITH(fei-inc-dir,
+AS_HELP_STRING([--with-fei-inc-dir=DIR],
+               [DIR is the directory containing the FEI distribution.]),
+[HYPRE_FEI_BASE_DIR="$withval";
+ hypre_using_fei=yes]
+)
+
+dnl ***** MLI
 
 AC_ARG_WITH(mli,
 AS_HELP_STRING([--with-mli],
@@ -758,6 +1098,8 @@ AS_HELP_STRING([--with-mli],
     *)  hypre_using_mli=yes ;;
  esac]
 )
+
+dnl ***** MPI
 
 AC_ARG_WITH(MPI,
 AS_HELP_STRING([--with-MPI],
@@ -769,16 +1111,289 @@ AS_HELP_STRING([--with-MPI],
  esac]
 )
 
+dnl ***** CUDA
+
+AC_ARG_WITH(cuda,
+AS_HELP_STRING([--with-cuda],
+               [Use CUDA. Require cuda-8.0 or higher (default is NO).]),
+[case "$withval" in
+    yes) hypre_using_cuda=yes ;;
+    no)  hypre_using_cuda=no ;;
+    *)   hypre_using_cuda=no ;;
+ esac],
+[hypre_using_cuda=no]
+)
+
+
+dnl ***** HIP
+AC_ARG_WITH(hip,
+AS_HELP_STRING([--with-hip],
+               [Use HIP for AMD GPUs. (default is NO).]),
+[case "$withval" in
+    yes) hypre_using_hip=yes ;;
+    no)  hypre_using_hip=no ;;
+    *)   hypre_using_hip=no ;;
+ esac],
+[hypre_using_hip=no]
+)
+
+AC_ARG_WITH(cuda-home,
+AS_HELP_STRING([--with-cuda-home=DIR],
+               [User specifies CUDA_HOME in DIR.]),
+[for cuda_dir in $withval; do
+    CUDA_HOME="$cuda_dir"
+ done;
+ hypre_using_cuda=yes]
+)
+
+AC_ARG_WITH(gpu-arch,
+AS_HELP_STRING([--with-gpu-arch=ARG],
+               [User specifies NVIDIA GPU architecture that the CUDA files will be compiled for in ARG, where ARG is a space-separated
+                list (enclosed in quotes) of numbers.]),
+[
+ if test "x${withval}" != "x"
+ then
+    if test "x${HYPRE_CUDA_SM}" = "x"
+    then
+       HYPRE_CUDA_SM="${withval}"
+    fi
+ fi
+]
+)
+
+dnl ***** RAJA
+
+AC_ARG_WITH(raja,
+AS_HELP_STRING([--with-raja],
+               [Use RAJA. Require RAJA package to be compiled properly (default is NO).]),
+[case "$withval" in
+    yes) hypre_using_raja=yes;;
+    no)  hypre_using_raja=no ;;
+    *)   hypre_using_raja=no ;;
+ esac],
+[hypre_using_raja=no]
+)
+
+AC_ARG_WITH(raja-include,
+AS_HELP_STRING([--with-raja-include=DIR],
+               [User specifies that RAJA/*.h is in DIR.  The options
+                --with-raja-include --with-raja-libs and
+                --with-raja-lib-dirs must be used together.]),
+[for raja_dir in $withval; do
+    HYPRE_RAJA_INCLUDE="-I$raja_dir $HYPRE_RAJA_INCLUDE"
+ done;
+ hypre_user_chose_raja=yes]
+)
+
+AC_ARG_WITH(raja-lib,
+AS_HELP_STRING([--with-raja-lib=LIBS],
+               [LIBS is space-separated linkable list (enclosed in quotes) of libraries
+                needed for RAJA. OK to use -L and -l flags in the list]),
+[for raja_lib in $withval; do
+       HYPRE_RAJA_LIB="$raja_lib $HYPRE_RAJA_LIB"
+ done;
+hypre_user_chose_raja=yes]
+)
+
+AC_ARG_WITH(raja-libs,
+AS_HELP_STRING([--with-raja-libs=LIBS],
+               [LIBS is space-separated list (enclosed in quotes) of libraries
+                needed for RAJA (base name only). The options --with-raja-libs and
+                --with-raja-lib-dirs must be used together.]),
+[for raja_lib in $withval; do
+    HYPRE_RAJA_LIB="-l$raja_lib $HYPRE_RAJA_LIB"
+ done;
+hypre_user_chose_raja=yes]
+)
+
+AC_ARG_WITH(raja-lib-dirs,
+AS_HELP_STRING([--with-raja-lib-dirs=DIRS],
+               [DIRS is space-separated list (enclosed in quotes) of
+                directories containing the libraries specified by
+                --with-raja-libs, e.g "usr/lib /usr/local/lib".
+                The  options --with-raja-libs and --raja-blas-lib-dirs
+                must be used together.]),
+[for raja_lib_dir in $withval; do
+    HYPRE_RAJA_LIB_DIR="-L$raja_lib_dir $HYPRE_RAJA_LIB_DIR"
+ done;
+ hypre_user_chose_raja=yes]
+)
+
+dnl ***** Kokkos
+
+AC_ARG_WITH(kokkos,
+AS_HELP_STRING([--with-kokkos],
+               [Use Kokkos. Require kokkos package to be compiled properly(default is NO).]),
+[case "$withval" in
+    yes) hypre_using_kokkos=yes ;;
+    no)  hypre_using_kokkos=no ;;
+    *)   hypre_using_kokkos=no ;;
+ esac],
+[hypre_using_kokkos=no]
+)
+
+AC_ARG_WITH(kokkos-include,
+AS_HELP_STRING([--with-kokkos-include=DIR],
+               [User specifies that KOKKOS headers is in DIR.  The options
+                --with-kokkos-include --with-kokkos-libs and
+                --with-kokkos-dirs must be used together.]),
+[for kokkos_dir in $withval; do
+HYPRE_KOKKOS_INCLUDE="-I$kokkos_dir $HYPRE_KOKKOS_INCLUDE"
+done;
+hypre_user_chose_kokkos=yes]
+)
+
+AC_ARG_WITH(kokkos-lib,
+AS_HELP_STRING([--with-kokkos-lib=LIBS],
+               [LIBS is space-separated linkable list (enclosed in quotes) of libraries
+                needed for KOKKOS. OK to use -L and -l flags in the list]),
+[for kokkos_lib in $withval; do
+       HYPRE_KOKKOS_LIB="$kokkos_lib $HYPRE_KOKKOS_LIB"
+ done;
+hypre_user_chose_kokkos=yes]
+)
+
+AC_ARG_WITH(kokkos-libs,
+AS_HELP_STRING([--with-kokkos-libs=LIBS],
+               [LIBS is space-separated list (enclosed in quotes) of libraries
+                needed for KOKKOS (base name only). The options --with-kokkos-libs and
+                --with-kokkos-dirs must be used together.]),
+[for kokkos_lib in $withval; do
+    HYPRE_KOKKOS_LIB="-l$kokkos_lib $HYPRE_KOKKOS_LIB"
+ done;
+hypre_user_chose_kokkos=yes]
+)
+
+AC_ARG_WITH(kokkos-lib-dirs,
+AS_HELP_STRING([--with-kokkos-lib-dirs=DIRS],
+               [DIRS is space-separated list (enclosed in quotes) of
+                directories containing the libraries and
+                Makefile.kokkos is assumed to be in DIRS/../ .
+                The  options --with-kokkos-libs and --with-kokkos-dirs
+                must be used together.]),
+[for kokkos_lib_dir in $withval; do
+    HYPRE_KOKKOS_LIB_DIR="-L$kokkos_lib_dir $HYPRE_KOKKOS_LIB_DIR"
+ done;
+hypre_user_chose_kokkos=yes]
+)
+
+dnl **** Umpire
+
+AC_ARG_WITH(umpire-host,
+AS_HELP_STRING([--with-umpire-host],
+               [Use Umpire Allocator for host memory (default is NO).]),
+[case "${withval}" in
+    yes) hypre_using_umpire_host=yes ;;
+    no)  hypre_using_umpire_host=no ;;
+    *)   hypre_using_umpire_host=no ;;
+ esac],
+[hypre_using_umpire_host=no]
+)
+
+AC_ARG_WITH(umpire-device,
+AS_HELP_STRING([--with-umpire-device],
+               [Use Umpire Allocator for device memory (default is NO).]),
+[case "${withval}" in
+    yes) hypre_using_umpire_device=yes ;;
+    no)  hypre_using_umpire_device=no ;;
+    *)   hypre_using_umpire_device=no ;;
+ esac],
+[hypre_using_umpire_device=no]
+)
+
+AC_ARG_WITH(umpire-um,
+AS_HELP_STRING([--with-umpire-um],
+               [Use Umpire Allocator for unified memory (default is NO).]),
+[case "${withval}" in
+    yes) hypre_using_umpire_um=yes ;;
+    no)  hypre_using_umpire_um=no ;;
+    *)   hypre_using_umpire_um=no ;;
+ esac],
+[hypre_using_umpire_um=no]
+)
+
+AC_ARG_WITH(umpire-pinned,
+AS_HELP_STRING([--with-umpire-pinned],
+               [Use Umpire Allocator for pinned memory (default is NO).]),
+[case "${withval}" in
+    yes) hypre_using_umpire_pinned=yes ;;
+    no)  hypre_using_umpire_pinned=no ;;
+    *)   hypre_using_umpire_pinned=no ;;
+ esac],
+[hypre_using_umpire_pinned=no]
+)
+
+dnl the default setting with Umpire, for device and um
+AC_ARG_WITH(umpire,
+AS_HELP_STRING([--with-umpire],
+               [Use Umpire Allocator for device and unified memory (default is NO).]),
+[case "${withval}" in
+    yes) hypre_using_umpire_device=yes
+         hypre_using_umpire_um=yes ;;
+    no) ;;
+    *) ;;
+ esac],
+[]
+)
+
+AC_ARG_WITH(umpire-include,
+AS_HELP_STRING([--with-umpire-include=DIR],
+               [User specifies that UMPIRE headers is in DIR.  The options
+                --with-umpire-include --with-umpire-libs and
+                --with-umpire-dirs must be used together.]),
+[for umpire_dir in $withval; do
+HYPRE_UMPIRE_INCLUDE="-I$umpire_dir $HYPRE_UMPIRE_INCLUDE"
+done;
+]
+)
+
+AC_ARG_WITH(umpire-lib,
+AS_HELP_STRING([--with-umpire-lib=LIBS],
+               [LIBS is space-separated linkable list (enclosed in quotes) of libraries
+                needed for UMPIRE. OK to use -L and -l flags in the list]),
+[for umpire_lib in $withval; do
+       HYPRE_UMPIRE_LIB="$umpire_lib $HYPRE_UMPIRE_LIB"
+ done;
+]
+)
+
+AC_ARG_WITH(umpire-libs,
+AS_HELP_STRING([--with-umpire-libs=LIBS],
+               [LIBS is space-separated list (enclosed in quotes) of libraries
+                needed for UMPIRE (base name only). The options --with-umpire-libs and
+                --with-umpire-dirs must be used together.]),
+[for umpire_lib in $withval; do
+    HYPRE_UMPIRE_LIB="-l$umpire_lib $HYPRE_UMPIRE_LIB"
+ done;
+]
+)
+
+AC_ARG_WITH(umpire-lib-dirs,
+AS_HELP_STRING([--with-umpire-lib-dirs=DIRS],
+               [DIRS is space-separated list (enclosed in quotes) of
+                directories containing the libraries specified by
+                --with-umpire-libs, e.g "usr/lib /usr/local/lib".
+                The  options --with-umpire-libs and --with-umpire-dirs
+                must be used together.]),
+[for umpire_lib_dir in $withval; do
+    HYPRE_UMPIRE_LIB_DIR="-L$umpire_lib_dir $HYPRE_UMPIRE_LIB_DIR"
+ done;
+]
+)
+
 dnl ***** Caliper
 
 AC_ARG_WITH(caliper,
 AS_HELP_STRING([--with-caliper],
                [Use Caliper instrumentation (default is NO).]),
-               [hypre_using_caliper=yes],
-               [hypre_using_caliper=no])
+[case "$withval" in
+    yes) hypre_using_caliper=yes;;
+    *)   hypre_using_caliper=no ;;
+esac],
+[hypre_using_caliper=no])
 
 AS_IF([test "x$with_caliper" = "xyes"],
-      [AC_DEFINE(HYPRE_USING_CALIPER, 1, [Using Caliper instrumentation])],
+      [AC_DEFINE(HYPRE_USING_CALIPER, 1, [Define to 1 if Caliper instrumentation is enabled])],
       [])
 
 AC_ARG_WITH(caliper-include,
@@ -809,16 +1424,16 @@ then
    then
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CC, [xlc_r xlC_r icc icpc gcc g++ pgcc pgCC cc CC kcc KCC])
+         AC_CHECK_PROGS(CC, [xlc_r xlC_r xlc xlC icc icpc gcc g++ pgcc pgCC cc CC kcc KCC])
       else
          AC_CHECK_PROGS(CC, [xlc xlC icc icpc gcc g++ pgcc pgCC cc CC kcc KCC])
       fi
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CC, [mpxlc mpixlc_r mpiicc mpicc mpipgcc])
+         AC_CHECK_PROGS(CC, [mpxlc mpixlc_r mpixlc mpiicc mpigcc mpicc mpipgcc mpipgicc])
       else
-         AC_CHECK_PROGS(CC, [mpxlc mpixlc mpiicc mpicc mpipgcc])
+         AC_CHECK_PROGS(CC, [mpxlc mpixlc mpiicc mpigcc mpicc mpipgcc mpipgicc])
       fi
    fi
 
@@ -834,16 +1449,16 @@ then
    then
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CXX, [xlC_r xlc_r icpc icc g++ gcc pgCC pgcc CC cc KCC kcc])
+         AC_CHECK_PROGS(CXX, [xlC_r xlc_r xlC xlc icpc icc g++ gcc pgCC pgcc pgc++ CC cc KCC kcc])
       else
-         AC_CHECK_PROGS(CXX, [xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc])
+         AC_CHECK_PROGS(CXX, [xlC xlc icpc icc g++ gcc pgCC pgcc pgc++ CC cc KCC kcc])
       fi
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx_r mpiicpc mpiCC mpicxx mpipgCC])
+         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++])
       else
-         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx mpiicpc mpiCC mpicxx mpipgCC])
+         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx mpixlC mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++])
       fi
    fi
 
@@ -859,22 +1474,62 @@ then
    then
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(FC, [xlf_r ifort gfortran g77 g95 pgf77 f77])
+         AC_CHECK_PROGS(FC, [xlf_r ifort gfortran g77 g95 pgf77 pgfortran f77])
       else
-         AC_CHECK_PROGS(FC, [xlf ifort gfortran g77 g95 pgf77 f77])
+         AC_CHECK_PROGS(FC, [xlf ifort gfortran g77 g95 pgf77 pgfortran  f77])
       fi
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(FC, [mpxlf mpixlf77_r mpiifort mpif77 mpipgf77])
+         AC_CHECK_PROGS(FC, [mpxlf mpixlf77_r mpiifort mpif77 mpipgf77 mpipgifort])
       else
-         AC_CHECK_PROGS(FC, [mpxlf mpixlf77 mpiifort mpif77 mpipgf77])
+         AC_CHECK_PROGS(FC, [mpxlf mpixlf77 mpiifort mpif77 mpipgf77 mpipgifort])
       fi
    fi
 
    if test "x$FC" = "x"
    then
       hypre_using_fortran=no
+   fi
+fi
+
+if [test "x$hypre_using_cuda" = "xyes" && test "x$hypre_using_device_openmp" = "xyes"]
+then
+   AC_MSG_ERROR([--with-cuda and --with-device-openmp are mutually exclusive])
+fi
+
+if [test "x$hypre_using_cuda" = "xyes" && test "x$hypre_using_hip" = "xyes"]
+then
+   AC_MSG_ERROR([--with-cuda and --with-hip are mutually exclusive])
+fi
+
+if [test "x$hypre_using_hip" = "xyes" && test "x$hypre_using_device_openmp" = "xyes"]
+then
+   AC_MSG_ERROR([--with-hip and --with-device-openmp are mutually exclusive])
+fi
+
+
+if test "$hypre_user_chose_cudacompilers" = "no"
+then
+   if test "$hypre_using_device_openmp" = "yes"
+   then
+      if test "$hypre_using_mpi" = "no"
+      then
+         AC_CHECK_PROGS(CUCC, [xlc-gpu clang-gpu])
+      else
+         AC_CHECK_PROGS(CUCC, [mpixlc-gpu mpiclang-gpu])
+      fi
+   fi
+
+   if test "$hypre_using_cuda" = "yes"
+   then
+      AC_CHECK_PROGS(CUCC, nvcc, [""], ["${CUDA_HOME}/bin"])
+      CUCC="\${HYPRE_CUDA_PATH}/bin/${CUCC} -ccbin=\${CXX}"
+   fi
+
+   if test "$hypre_using_hip" = "yes"
+   then
+      AC_CHECK_PROGS(CUCC, hipcc)
    fi
 fi
 
@@ -927,18 +1582,18 @@ else
        hypre_cv_func_MPI_Comm_f2c_macro=no)])
    if test $ac_cv_func_MPI_Comm_f2c = yes \
       || test $hypre_cv_func_MPI_Comm_f2c_macro = yes; then
-     AC_DEFINE(HYPRE_HAVE_MPI_COMM_F2C)
+     AC_DEFINE(HYPRE_HAVE_MPI_COMM_F2C,1,[Define to 1 if the routine MPI_Comm_f2c is found])
    fi
 fi
 
-dnl * It would be better if this could be defined above, but much work is needed
-dnl * to make that happen.
-if test "$hypre_using_global_partition" = "no"
+if test "$hypre_using_node_aware_mpi" = "yes"
 then
-   if test "$hypre_using_mpi" != "no"
-   then
-      AC_DEFINE(HYPRE_NO_GLOBAL_PARTITION, 1)
-   fi
+   AC_DEFINE(HYPRE_USING_NODE_AWARE_MPI, 1, [Define to 1 if Node Aware MPI library is used])
+fi
+
+if test "$hypre_using_memory_tracker" = "yes"
+then
+   AC_DEFINE(HYPRE_USING_MEMORY_TRACKER, 1, [Define to 1 if want to track memory operations in hypre])
 fi
 
 dnl *********************************************************************
@@ -983,9 +1638,6 @@ then
    fi
    if test "$hypre_using_hypre_blas" = "yes"
    then
-      HYPRE_BLAS_SRC_DIR="$HYPRE_SRCDIR/blas"
-      HYPRE_BLAS_FILES="$HYPRE_SRCDIR/blas/*.o"
-dnl      BLAS_DIR="$HYPRE_SRCDIR/hypre/lib"
       BLASLIBDIRS=""
       BLASLIBS=""
       AC_DEFINE(HYPRE_USING_HYPRE_BLAS, 1, [Using internal HYPRE routines])
@@ -1029,9 +1681,6 @@ then
    fi
    if test "$hypre_using_hypre_lapack" = "yes"
    then
-      HYPRE_LAPACK_SRC_DIR="$HYPRE_SRCDIR/lapack"
-      HYPRE_LAPACK_FILES="$HYPRE_SRCDIR/lapack/*.o"
-dnl      LAPACK_DIR="$HYPRE_SRCDIR/hypre/lib"
       LAPACKLIBDIRS=""
       LAPACKLIBS=""
       AC_DEFINE(HYPRE_USING_HYPRE_LAPACK, 1, [Using internal HYPRE routines])
@@ -1039,57 +1688,23 @@ dnl      LAPACK_DIR="$HYPRE_SRCDIR/hypre/lib"
 fi
 
 dnl *********************************************************************
-dnl * Warn if caliper options are incomplete
-dnl *********************************************************************
-if test "$hypre_using_caliper" = "yes"
-then
-   if test "$hypre_user_gave_caliper_inc" != "yes"
-   then
-       AC_MSG_WARN([*******************************************************])
-       AC_MSG_WARN([Configuring with --with-caliper=yes without providing])
-       AC_MSG_WARN([--with-caliper-include=<path-to-caliper-install>.])
-       AC_MSG_WARN([Using default user include path.])
-       AC_MSG_WARN([NOTE: Caliper annotations may not work.])
-       AC_MSG_WARN([*******************************************************])
-   fi
-   if test "$hypre_user_gave_caliper_lib" != "yes"
-   then
-       AC_MSG_WARN([*******************************************************])
-       AC_MSG_WARN([Configuring with --with-caliper=yes without providing])
-       AC_MSG_WARN([--with-caliper-lib=<path-to-caliper-lib>.])
-       AC_MSG_WARN([Using default user library path.])
-       AC_MSG_WARN([NOTE: Caliper annotations may not work.])
-       AC_MSG_WARN([*******************************************************])
-   fi
-fi
-
-dnl *********************************************************************
-dnl * Determine if FEI libraries are needed.
-dnl * if so, determine whether internal routines or user-specified
-dnl * libraries are to be used.
+dnl * Determine if FEI and MLI are needed.
+dnl * Note that MLI requires both FEI and SuperLU.
 dnl *********************************************************************
 if test "$hypre_using_fei" = "yes"
 then
    HYPRE_FEI_SRC_DIR="$HYPRE_SRCDIR/FEI_mv"
    HYPRE_FEI_SUBDIRS="fei-hypre"
    HYPRE_FEI_HYPRE_FILES="$HYPRE_SRCDIR/FEI_mv/fei-hypre/*.o"
-   if test "$hypre_using_superlu" = "yes"
-   then
-      HYPRE_FEI_SUBDIRS="SuperLU $HYPRE_FEI_SUBDIRS"
-      HYPRE_FEI_SUPERLU_FILES="$HYPRE_SRCDIR/FEI_mv/SuperLU/SRC/*.o"
-   else
-      HYPRE_FEI_SUPERLU_FILES=
-   fi
+   HYPRE_FEI_FEMLI_FILES=
    if test "$hypre_using_mli" = "yes"
    then
-      HYPRE_FEI_SUBDIRS="femli $HYPRE_FEI_SUBDIRS"
-      HYPRE_FEI_FEMLI_FILES="$HYPRE_SRCDIR/FEI_mv/femli/*.o"
-   else
-      HYPRE_FEI_FEMLI_FILES=
-   fi
-   if test "$hypre_user_chose_fei" = "no"
-   then
-      HYPRE_FEI_BASE_DIR="$HYPRE_SRCDIR/FEI_mv/fei-base"
+      if test "$hypre_using_superlu" = "yes"
+      then
+         HYPRE_FEI_SUBDIRS="femli $HYPRE_FEI_SUBDIRS"
+         HYPRE_FEI_FEMLI_FILES="$HYPRE_SRCDIR/FEI_mv/femli/*.o"
+         AC_DEFINE(HAVE_MLI, 1, [Define to 1 if using MLI])
+      fi
    fi
    AC_CHECK_LIB(stdc++, __gxx_personality_v0, LIBS="$LIBS -lstdc++")
 else
@@ -1097,7 +1712,22 @@ else
    HYPRE_FEI_BASE_DIR=
    HYPRE_FEI_HYPRE_FILES=
    HYPRE_FEI_FEMLI_FILES=
-   HYPRE_FEI_SUPERLU_FILES=
+fi
+
+dnl *********************************************************************
+dnl * Determine if Euclid, ParaSails, and Pilut are needed
+dnl *********************************************************************
+if test "$hypre_using_distributed_ls" = "yes"
+then
+   HYPRE_DISTRIBUTED_LS_DIR="$HYPRE_SRCDIR/distributed_ls"
+   HYPRE_EUCLID_FILES="$HYPRE_SRCDIR/distributed_ls/Euclid/*.o"
+   HYPRE_PARASAILS_FILES="$HYPRE_SRCDIR/distributed_ls/ParaSails/*.o"
+   HYPRE_PILUT_FILES="$HYPRE_SRCDIR/distributed_ls/pilut/*.o"
+else
+   HYPRE_DISTRIBUTED_LS_DIR=
+   HYPRE_EUCLID_FILES=
+   HYPRE_PARASAILS_FILES=
+   HYPRE_PILUT_FILES=
 fi
 
 dnl *********************************************************************
@@ -1106,9 +1736,13 @@ dnl *********************************************************************
 if test "$hypre_using_debug" = "yes"
 then
    AC_HYPRE_DEBUG_FLAGS
+   AC_DEFINE([HYPRE_DEBUG], 1, [Define to 1 if in debug mode])
 else
    AC_HYPRE_OPTIMIZATION_FLAGS
 fi
+
+CFLAGS="${CFLAGS} ${EXTRA_CFLAGS}"
+CXXFLAGS="${CXXFLAGS} ${EXTRA_CXXFLAGS}"
 
 dnl *********************************************************************
 dnl * Set large page option that is needed by all AIX platforms.
@@ -1125,43 +1759,11 @@ dnl *********************************************************************
 dnl * Set default link commands and suffix values
 dnl *********************************************************************
 dnl LINK_F77="${F77}"
-LINK_FC="${FC}"
-LINK_CC="${CC}"
-LINK_CXX="${CXX}"
+LINK_FC='${FC}'
+LINK_CC='${CC}'
+LINK_CXX='${CXX}'
 
 HYPRE_LIBSUFFIX=".a"
-
-dnl *********************************************************************
-dnl * Set flags if needed to enable shared libraries and Python, Java
-dnl *********************************************************************
-if test "$hypre_using_shared" = "yes"
-then
-   HYPRE_LIBSUFFIX=".so"
-   case $hypre_platform in
-      AIX* | aix* | Aix*) SHARED_COMPILE_FLAG="-qmkshrobj"
-                          SHARED_BUILD_FLAG="-G"
-dnl                          LINK_F77="${F77} -brtl"
-                          LINK_FC="${FC} -brtl"
-                          LINK_CC="${CC} -brtl"
-                          LINK_CXX="${CXX} -brtl" ;;
-                       *) SHARED_COMPILE_FLAG="-fPIC"
-                          SHARED_BUILD_FLAG="-shared" ;;
-   esac
-   FFLAGS="${FFLAGS} ${SHARED_COMPILE_FLAG}"
-   CFLAGS="${CFLAGS} ${SHARED_COMPILE_FLAG}"
-   CXXFLAGS="${CXXFLAGS} ${SHARED_COMPILE_FLAG}"
-dnl   BUILD_F77_SHARED="${F77} ${SHARED_BUILD_FLAG}"
-   BUILD_FC_SHARED="${FC} ${SHARED_BUILD_FLAG}"
-   if test "$hypre_using_fei" = "yes"
-   then
-      BUILD_CC_SHARED="${CXX} ${SHARED_BUILD_FLAG}"
-   else
-      BUILD_CC_SHARED="${CC} ${SHARED_BUILD_FLAG}"
-   fi
-   BUILD_CXX_SHARED="${CXX} ${SHARED_BUILD_FLAG}"
-   SHARED_SET_SONAME="-Wl,-soname,"
-   SHARED_OPTIONS="-Wl,-z,defs"
-fi
 
 BUILD_PYTHON=0
 PYTHON=""
@@ -1254,6 +1856,515 @@ dnl   AC_HYPRE_CHECK_USER_BLASLIBS
 dnl   AC_HYPRE_CHECK_USER_LAPACKLIBS
  fi
 
+
+dnl *********************************************************************
+dnl * Set flags if needed to enable shared libraries and Python, Java
+dnl *********************************************************************
+if test "$hypre_using_shared" = "yes"
+then
+   HYPRE_LIBSUFFIX=".so"
+   if test "$hypre_using_cuda" = "yes"
+   then
+      SHARED_SET_SONAME="-Xlinker=-soname,"
+      SHARED_OPTIONS="-Xlinker=-z,defs"
+   else
+      SHARED_SET_SONAME="-Wl,-soname,"
+      SHARED_OPTIONS="-Wl,-z,defs"
+   fi
+   SHARED_COMPILE_FLAG="-fPIC"
+   case $hypre_platform in
+      AIX* | aix* | Aix*) SHARED_COMPILE_FLAG="-qmkshrobj"
+                          SHARED_BUILD_FLAG="-G"
+dnl                          LINK_F77="${F77} -brtl"
+                          LINK_FC='${FC} -brtl'
+                          LINK_CC='${CC} -brtl'
+                          LINK_CXX='${CXX} -brtl' ;;
+      DARWIN* | darwin* | Darwin*) SHARED_BUILD_FLAG="-dynamiclib -undefined dynamic_lookup"
+                                   HYPRE_LIBSUFFIX=".dylib"
+                                   SHARED_SET_SONAME="-install_name @rpath/"
+                                   SHARED_OPTIONS="-undefined error" ;;
+                       *) SHARED_BUILD_FLAG="-shared" ;;
+   esac
+   SHARED_BUILD_FLAG="${SHARED_BUILD_FLAG} ${EXTRA_BUILDFLAGS}"
+   FFLAGS="${FFLAGS} ${SHARED_COMPILE_FLAG}"
+   CFLAGS="${CFLAGS} ${SHARED_COMPILE_FLAG}"
+   CXXFLAGS="${CXXFLAGS} ${SHARED_COMPILE_FLAG}"
+
+dnl   BUILD_F77_SHARED="${F77} ${SHARED_BUILD_FLAG}"
+   BUILD_FC_SHARED="\${FC} ${SHARED_BUILD_FLAG}"
+   if test "$hypre_using_fei" = "yes"
+   then
+      BUILD_CC_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
+   else
+      BUILD_CC_SHARED="\${CC} ${SHARED_BUILD_FLAG}"
+   fi
+   BUILD_CXX_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
+   if test "$hypre_using_cuda" = "yes"
+   then
+      BUILD_CC_SHARED="\${CUCC} ${SHARED_BUILD_FLAG}"
+   fi
+   dnl TODO HIP
+fi
+
+
+dnl *********************************************************************
+dnl * Warn if caliper options are incomplete
+dnl *********************************************************************
+if test "$hypre_using_caliper" = "yes"
+then
+   if test "$hypre_user_gave_caliper_inc" != "yes"
+   then
+       AC_MSG_WARN([*******************************************************])
+       AC_MSG_WARN([Configuring with --with-caliper=yes without providing])
+       AC_MSG_WARN([--with-caliper-include=<path-to-caliper-install>.])
+       AC_MSG_WARN([Using default user include path.])
+       AC_MSG_WARN([NOTE: Caliper annotations may not work.])
+       AC_MSG_WARN([*******************************************************])
+   fi
+   if test "$hypre_user_gave_caliper_lib" != "yes"
+   then
+       AC_MSG_WARN([*******************************************************])
+       AC_MSG_WARN([Configuring with --with-caliper=yes without providing])
+       AC_MSG_WARN([--with-caliper-lib=<path-to-caliper-lib>.])
+       AC_MSG_WARN([Using default user library path.])
+       AC_MSG_WARN([NOTE: Caliper annotations may not work.])
+       AC_MSG_WARN([*******************************************************])
+   fi
+fi
+
+if [test "x$hypre_using_um" = "xyes"]
+then
+   if [test "x$hypre_using_cuda" != "xyes" && test "x$hypre_using_device_openmp" != "xyes" && test "x$hypre_using_hip" != "xyes"]
+   then
+      AC_MSG_ERROR([Asked for unified memory, but not using CUDA, HIP, or device OpenMP!])
+   fi
+fi dnl hypre_using_um
+
+dnl CUDA
+if [test "$hypre_using_cuda" = "yes" || test "$hypre_using_device_openmp" = "yes"]
+then
+   AC_CHECK_HEADERS(["${CUDA_HOME}/include/cuda.h"], [hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_HOME}])
+
+   if test "x$hypre_found_cuda" != "xyes"
+   then
+      AC_CHECK_HEADERS(["${CUDA_PATH}/include/cuda.h"], [hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_PATH}])
+   fi
+
+   if test "x$hypre_found_cuda" != "xyes"
+   then
+      AC_MSG_ERROR([unable to find cuda.h ... Ensure that CUDA_HOME or CUDA_PATH is set])
+   fi
+fi
+
+dnl *********************************************************************
+dnl * Check for HIP header
+dnl *********************************************************************
+
+dnl If the user has requested to use HIP, we first check the environment
+dnl for ROCM_PATH to point at the ROCm installation. If that is not found,
+dnl then we default to `/opt/rocm`.
+dnl
+dnl TODO: Add an ARG_WITH for rocm so the user can control the ROCm path
+dnl       through the configure line
+AS_IF([ test x"$hypre_using_hip" == x"yes" ],
+      [ AS_IF([ test -n "$ROCM_PATH"],
+              [ HYPRE_ROCM_PREFIX=$ROCM_PATH ],
+              [ HYPRE_ROCM_PREFIX=/opt/rocm ])
+
+        AC_SUBST(HYPRE_ROCM_PREFIX)
+        AC_CHECK_HEADERS( ["${HYPRE_ROCM_PREFIX}/include/hip/hip_common.h"],
+                          [hypre_found_hip=yes],
+                          [AC_MSG_ERROR([unable to find ${HYPRE_ROCM_PREFIX}/include/hip/hip_common.h ... Ensure ROCm is installed and set ROCM_PATH environment variable to ROCm installation path.])] )],
+      [])
+
+
+
+dnl *********************************************************************
+dnl * Set raja options
+dnl *********************************************************************
+if test "x$hypre_using_raja" = "xyes"
+then
+   AC_DEFINE(HYPRE_USING_RAJA, 1, [Define to 1 if executing on host/device with RAJA])
+
+   if test "$hypre_using_cuda" != "yes"
+   then
+      if [test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"]
+      then
+         CXXFLAGS="${CXXFLAGS} -+ -std=c++11"
+      fi
+   fi
+
+   dnl let CC be CXX
+   CC=${CXX}
+   LINK_CC=${LINK_CXX}
+   CFLAGS=${CXXFLAGS}
+fi
+
+dnl *********************************************************************
+dnl * Set kokkos options
+dnl *********************************************************************
+if test "x$hypre_using_kokkos" = "xyes"
+then
+   AC_DEFINE(HYPRE_USING_KOKKOS, 1, [Define to 1 if executing on host/device with KOKKOS])
+
+   if test "$hypre_using_cuda" != "yes"
+   then
+      if [test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"]
+      then
+         CXXFLAGS="${CXXFLAGS} -+ -std=c++11"
+      fi
+   fi
+
+   dnl let CC be CXX
+   CC=${CXX}
+   LINK_CC=${LINK_CXX}
+   CFLAGS=${CXXFLAGS}
+fi
+
+dnl *********************************************************************
+dnl * Set umpire options
+dnl *********************************************************************
+if test "x$hypre_using_umpire_host" = "xyes"
+then
+   hypre_using_umpire=yes
+   AC_DEFINE(HYPRE_USING_UMPIRE_HOST, 1, [Define to 1 if using UMPIRE for host memory])
+fi
+
+if test "x$hypre_using_umpire_device" = "xyes"
+then
+   hypre_using_umpire=yes
+   AC_DEFINE(HYPRE_USING_UMPIRE_DEVICE, 1, [Define to 1 if using UMPIRE for device memory])
+fi
+
+if test "x$hypre_using_umpire_um" = "xyes"
+then
+   hypre_using_umpire=yes
+   AC_DEFINE(HYPRE_USING_UMPIRE_UM, 1, [Define to 1 if using UMPIRE for unified memory])
+fi
+
+if test "x$hypre_using_umpire_pinned" = "xyes"
+then
+   hypre_using_umpire=yes
+   AC_DEFINE(HYPRE_USING_UMPIRE_PINNED, 1, [Define to 1 if using UMPIRE for pinned memory])
+fi
+
+if test "x$hypre_using_umpire" = "xyes"
+then
+   AC_DEFINE(HYPRE_USING_UMPIRE, 1, [Define to 1 if using UMPIRE])
+fi
+
+dnl *********************************************************************
+dnl * Set cuda options
+dnl *********************************************************************
+if test "$hypre_using_cuda" = "yes"
+then
+   AC_DEFINE(HYPRE_USING_GPU, 1, [Define to 1 if executing on GPU device])
+
+   AC_DEFINE(HYPRE_USING_CUDA, 1, [Define to 1 if executing on device with CUDA])
+
+   AC_DEFINE(HYPRE_USING_CUSPARSE, 1, [Define to 1 if using cuSPARSE])
+
+   if test "$hypre_using_gpu_profiling" = "yes"
+   then
+      AC_DEFINE(HYPRE_USING_NVTX, 1, [Define to 1 if using NVIDIA Tools Extension (NVTX)])
+   fi
+
+   if test "$hypre_using_cusparse" = "yes"
+   then
+      AC_DEFINE(HYPRE_USING_CUSPARSE, 1, [Define to 1 if using cuSPARSE])
+   fi
+
+   if test "$hypre_using_device_pool" = "yes"
+   then
+      AC_DEFINE(HYPRE_USING_DEVICE_POOL, 1, [Define to 1 if using device pooling allocator])
+   fi
+
+   if test "$hypre_using_cublas" = "yes"
+   then
+      AC_DEFINE(HYPRE_USING_CUBLAS, 1, [Define to 1 if using cuBLAS])
+   fi
+
+   if test "$hypre_using_curand" = "yes"
+   then
+      AC_DEFINE(HYPRE_USING_CURAND, 1, [Define to 1 if using cuRAND])
+   fi
+
+   LINK_CC='${CUCC}'
+   LINK_CXX='${CUCC}'
+
+   dnl CUDA SM
+   if test "x$HYPRE_CUDA_SM" = "x"
+   then
+      HYPRE_CUDA_SM=70
+   fi
+
+   HYPRE_CUDA_GENCODE=""
+   for sm in ${HYPRE_CUDA_SM}; do
+      HYPRE_CUDA_GENCODE="${HYPRE_CUDA_GENCODE}-gencode arch=compute_${sm},code=sm_${sm} "
+   done
+
+   if test "$hypre_user_chose_cuflags" = "no"
+   then
+      CUFLAGS="-lineinfo -expt-extended-lambda -dc -std=c++11 --x cu"
+      if test "$hypre_using_debug" = "yes"
+      then
+         CUFLAGS="-g -O0 ${CUFLAGS}"
+      else
+         CUFLAGS="-O2 ${CUFLAGS}"
+      fi
+   fi
+
+   if test "$hypre_user_chose_cxxflags" = "no"
+   then
+      if [test "${CXX}" = "mpixlC" || test "${CXX}" = "xlC_r" || test "${CXX}" = "xlC"]
+      then
+         CXXFLAGS+=" -Wno-deprecated-register -Wenum-compare"
+      fi
+   fi
+
+   CUFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
+
+   dnl CFLAGS=${CXXFLAGS}
+   LDFLAGS="-Xcompiler \"${LDFLAGS}\""
+   HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
+   HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64 -lcudart'
+   if test "$hypre_using_gpu_profiling" = "yes"
+   then
+      HYPRE_CUDA_LIBS+=" -lnvToolsExt"
+   fi
+
+   if test "$hypre_using_cusparse" = "yes"
+   then
+      HYPRE_CUDA_LIBS+=" -lcusparse"
+   fi
+
+   if test "$hypre_using_cublas" = "yes"
+   then
+      HYPRE_CUDA_LIBS+=" -lcublas"
+   fi
+
+   if test "$hypre_using_curand" = "yes"
+   then
+      HYPRE_CUDA_LIBS+=" -lcurand"
+   fi
+fi
+
+dnl *********************************************************************
+dnl * Set HIP options
+dnl *********************************************************************
+AS_IF([test x"$hypre_using_hip" == x"yes"],
+      [
+        AC_DEFINE(HYPRE_USING_GPU, 1, [Define to 1 if executing on GPU device])
+        AC_DEFINE(HYPRE_USING_HIP, 1, [HIP being used])
+
+        dnl hipcc is just a perl script that wraps things like detection
+        dnl of the AMD GPU and the actual invocation of the clang compiler
+        dnl from ROCm that supports HIP and all the command line foo needed
+        dnl by the compiler. You can force hipcc to emit what it actually does
+        dnl by setting HIPCC_VERBOSE=7 in your environment.
+        dnl AC_CHECK_PROGS(HIPCC, hipcc)
+
+        dnl (Ab)Using CUCC when compiling HIP
+        dnl At this time, we need the linker to be hipcc in order to link
+        dnl in device code.
+        LINK_CC='${CUCC}'
+        LINK_CXX='${CUCC}'
+
+        if test "x${HYPRE_CUDA_SM}" != "x"
+        then
+           HYPRE_CUDA_GENCODE="--amdgpu-target="
+           for sm in ${HYPRE_CUDA_SM}; do
+              HYPRE_CUDA_GENCODE="${HYPRE_CUDA_GENCODE}${sm},"
+           done
+           HYPRE_CUDA_GENCODE="`echo ${HYPRE_CUDA_GENCODE}|sed 's/,$//'`"
+        fi
+
+        dnl The "-x hip" is necessary to override the detection of .c files which clang
+        dnl interprets as C and therefore invokes the C compiler rather than the HIP part
+        dnl of clang. Put HIPCXXFLAGS at the end so the user can override from
+        dnl from the configure line.
+        HIPCXXFLAGS="-x hip -std=c++14 ${HIPCXXFLAGS}"
+
+        dnl If not in debug mode, at least -O2, but the user can override with
+        dnl with HIPCXXFLAGS on the configure line. If in debug mode, -O0 -Wall
+        dnl plus flags for debugging symbols
+        AS_IF([test x"$hypre_using_debug" == x"yes"],
+              [HIPCXXFLAGS="-O0 -Wall -g -ggdb ${HIPCXXFLAGS}"],
+              [HIPCXXFLAGS="-O2 ${HIPCXXFLAGS}"],)
+
+        dnl (Ab)Use CUFLAGS to capture HIP compilation flags
+        dnl Put HIPCXXFLAGS at the end so the user can override the optimization level.
+        if test "$hypre_user_chose_cuflags" = "no"
+        then
+           CUFLAGS="${HIPCPPFLAGS} ${HIPCXXFLAGS}"
+        fi
+
+        CUFLAGS="${CUFLAGS} ${CXXFLAGS}"
+
+        dnl rocThrust depends on rocPrim so we need both for Thrust on AMD GPUs.
+        dnl These are header-only so no linking needed.
+        HYPRE_HIP_INCL="-I${HYPRE_ROCM_PREFIX}/rocthrust/include"
+        HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocprim/include"
+
+        dnl HIP library
+        HYPRE_HIP_LIBS="-L${HYPRE_ROCM_PREFIX}/lib -lamdhip64"
+
+        dnl rocSPARSE, for things like dcsrmv on AMD GPUs
+        AS_IF([test x"$hypre_using_rocsparse" == x"yes"],
+              [AC_DEFINE(HYPRE_USING_ROCSPARSE, 1, [rocSPARSE being used])
+               HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lrocsparse"
+               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocsparse/include"
+               ])
+
+        dnl Note rocSPARSE requires rocBLAS, so this is only controlling
+        dnl whether HYPRE explicitly uses rocBLAS in other places or not.
+        dnl So we don't need to add any extra libs or anything.
+        AS_IF([test x"$hypre_using_rocblas" == x"yes"],
+              [AC_DEFINE(HYPRE_USING_ROCBLAS, 1, [rocBLAS being used])
+              HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocblas/include"
+              ])
+
+        dnl rocRAND: random number generation on AMD GPUs
+        AS_IF([test x"$hypre_using_rocrand" == x"yes"],
+              [AC_DEFINE(HYPRE_USING_ROCRAND, 1, [rocRAND being used])
+               HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lrocrand"
+               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocrand/include"
+               ])
+
+        dnl rocTX tracing API
+        AS_IF([test x"$hypre_using_gpu_profiling" == x"yes"],
+              [AC_DEFINE(HYPRE_USING_ROCTX, 1, [Define to 1 if using AMD rocTX profiling])
+               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/roctracer/include"
+               HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lroctx64"
+               ])
+
+      ]) dnl AS_IF([test x"$hypre_using_hip" == x"yes"]
+
+
+
+
+dnl *********************************************************************
+dnl * Set unified memory options
+dnl *********************************************************************
+if test "$hypre_using_um" != "yes"
+then
+   dnl Without UM
+   if test "$hypre_using_cuda" = "yes"
+   then
+      AC_MSG_NOTICE([***********************************************************************])
+      AC_MSG_NOTICE([Configuring with --with-cuda=yes without unified memory.])
+      AC_MSG_NOTICE([It only works for structured solvers and selected unstructured solvers])
+      AC_MSG_NOTICE([Use --enable-unified-memory to compile with unified memory.])
+      AC_MSG_NOTICE([***********************************************************************])
+   fi
+   if test "$hypre_using_hip" = "yes"
+   then
+      AC_MSG_NOTICE([***********************************************************************])
+      AC_MSG_NOTICE([Configuring with --with-hip=yes without unified memory.])
+      AC_MSG_NOTICE([It only works for structured solvers and selected unstructured solvers])
+      AC_MSG_NOTICE([Use --enable-unified-memory to compile with unified memory.])
+      AC_MSG_NOTICE([***********************************************************************])
+   fi
+   if test "$hypre_using_device_openmp" = "yes"
+   then
+      AC_MSG_NOTICE([***********************************************************************])
+      AC_MSG_NOTICE([Configuring with --with-device-openmp=yes without unified memory.])
+      AC_MSG_NOTICE([It only works for structured solvers and selected unstructured solvers])
+      AC_MSG_NOTICE([Use --enable-unified-memory to compile with unified memory.])
+      AC_MSG_NOTICE([***********************************************************************])
+   fi
+fi
+
+dnl *********************************************************************
+dnl * Set OpenMP options
+dnl *********************************************************************
+if test "$hypre_using_openmp" = "yes"
+then
+   AC_DEFINE([HYPRE_USING_OPENMP],1,[Enable OpenMP support])
+fi
+
+dnl *********************************************************************
+dnl * Set Device OpenMP options
+dnl *********************************************************************
+if test "$hypre_using_device_openmp" = "yes"
+then
+   AC_DEFINE(HYPRE_USING_CUSPARSE, 1, [Define to 1 if using cuSPARSE])
+
+   if test "$hypre_using_gpu_profiling" = "yes"
+   then
+      AC_DEFINE(HYPRE_USING_NVTX, 1, [NVTX being used])
+   fi
+
+   AC_DEFINE(HYPRE_USING_DEVICE_OPENMP, 1, [Define to 1 if executing on device with OpenMP])
+
+   AC_DEFINE(HYPRE_USING_GPU, 1, [Define to 1 if executing on GPU device])
+
+   AC_DEFINE(HYPRE_DEVICE_OPENMP_ALLOC, 1, [Define to 1 if using OpenMP on device [target alloc version]])
+
+   dnl AC_DEFINE(HYPRE_DEVICE_OPENMP_MAPPED, 1, [Define to 1 if using OpenMP on device [target mapped version]])
+
+   CUFLAGS=${CFLAGS}
+
+   if test "$hypre_user_chose_cuflags" = "no"
+   then
+      if [test "$CUCC" = "clang-gpu" || test "$CUCC" = "mpiclang-gpu"]
+      then
+         CUFLAGS+=" -fopenmp-nonaliased-maps"
+      fi
+      if [test "$CUCC" = "clang++-gpu" || test "$CUCC" = "mpiclang++-gpu"]
+      then
+         CUFLAGS+=" -fopenmp-nonaliased-maps"
+      fi
+   fi
+
+   if test "$hypre_using_debug" = "yes"
+   then
+      AC_DEFINE(HYPRE_DEVICE_OPENMP_CHECK, 1, [Define to 1 if strictly checking OpenMP offload directives])
+   fi
+
+   HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
+   HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64 -lcudart -lcusparse -lcurand'
+   if test "$hypre_using_gpu_profiling" = "yes"
+   then
+      HYPRE_CUDA_LIBS+=" -lnvToolsExt"
+   fi
+
+   dnl let CC be CXX
+   dnl CC=${CXX}
+   LINK_CC='${CUCC}'
+   LINK_CXX='${CUCC}'
+   dnl CXXFLAGS="-x c++ ${CXXFLAGS}"
+   dnl CFLAGS=${CXXFLAGS}
+fi
+
+if [test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes"]
+then
+   if test "x$hypre_using_cuda_streams" = "xyes"]
+   then
+      AC_DEFINE([HYPRE_USING_CUDA_STREAMS],1,[Define to 1 if using CUDA streams])
+   fi
+fi
+
+dnl *********************************************************************
+dnl * Set memory env
+dnl *********************************************************************
+if test "x$hypre_using_um" = "xyes"
+then
+   AC_DEFINE([HYPRE_USING_UNIFIED_MEMORY],1,[Define to 1 if using unified memory])
+else
+   if [test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes" || test "x$hypre_using_hip" = "xyes"]
+   then
+      AC_DEFINE([HYPRE_USING_DEVICE_MEMORY],1,[Define to 1 if using device memory without UM])
+   else
+      AC_DEFINE([HYPRE_USING_HOST_MEMORY],1,[Define to 1 if using host memory only])
+   fi
+fi
+
+if test "$hypre_gpu_mpi" = "yes"
+then
+   AC_DEFINE([HYPRE_WITH_GPU_AWARE_MPI],1,[Define to 1 if using GPU aware MPI])
+fi
+
 dnl *********************************************************************
 dnl * Set installation directories
 dnl *********************************************************************
@@ -1334,6 +2445,19 @@ AC_SUBST(MPILIBDIRS)
 AC_SUBST(MPIFLAGS)
 
 dnl *********************************************************************
+dnl * distributed_ls related files, libraries and directories
+dnl *********************************************************************
+AC_SUBST(HYPRE_DISTRIBUTED_LS_DIR)
+AC_SUBST(HYPRE_EUCLID_FILES)
+AC_SUBST(HYPRE_PARASAILS_FILES)
+AC_SUBST(HYPRE_PILUT_FILES)
+
+dnl *********************************************************************
+dnl * Node_Aware_MPI
+dnl *********************************************************************
+AC_SUBST(HYPRE_NAP_INCLUDE)
+
+dnl *********************************************************************
 dnl * FEI-related files, libraries and directories
 dnl *********************************************************************
 AC_SUBST(HYPRE_FEI_SRC_DIR)
@@ -1341,25 +2465,70 @@ AC_SUBST(HYPRE_FEI_BASE_DIR)
 AC_SUBST(HYPRE_FEI_SUBDIRS)
 AC_SUBST(HYPRE_FEI_HYPRE_FILES)
 AC_SUBST(HYPRE_FEI_FEMLI_FILES)
-AC_SUBST(HYPRE_FEI_SUPERLU_FILES)
 
 dnl *********************************************************************
 dnl * BLAS & LAPACK related information
 dnl *********************************************************************
-AC_SUBST(HYPRE_BLAS_SRC_DIR)
-AC_SUBST(HYPRE_BLAS_FILES)
 AC_SUBST(BLASLIBDIRS)
 AC_SUBST(BLASLIBS)
-AC_SUBST(HYPRE_LAPACK_SRC_DIR)
-AC_SUBST(HYPRE_LAPACK_FILES)
 AC_SUBST(LAPACKLIBDIRS)
 AC_SUBST(LAPACKLIBS)
+
+dnl *********************************************************************
+dnl * RAJA information
+dnl *********************************************************************
+AC_SUBST(HYPRE_RAJA_LIB_DIR)
+AC_SUBST(HYPRE_RAJA_INCLUDE)
+AC_SUBST(HYPRE_RAJA_LIB)
+
+dnl *********************************************************************
+dnl * KOKKOS information
+dnl *********************************************************************
+AC_SUBST(HYPRE_KOKKOS_SRC_DIR)
+AC_SUBST(HYPRE_KOKKOS_LIB_DIR)
+AC_SUBST(HYPRE_KOKKOS_INCLUDE)
+AC_SUBST(HYPRE_KOKKOS_LIB)
+
+dnl *********************************************************************
+dnl * UMPIRE information
+dnl *********************************************************************
+AC_SUBST(HYPRE_UMPIRE_LIB_DIR)
+AC_SUBST(HYPRE_UMPIRE_INCLUDE)
+AC_SUBST(HYPRE_UMPIRE_LIB)
+
+dnl *********************************************************************
+dnl * CUDA stuff
+dnl *********************************************************************
+AC_SUBST(CUFLAGS)
+AC_SUBST(CUCC)
+AC_SUBST(HYPRE_CUDA_GENCODE)
+AC_SUBST(HYPRE_CUDA_PATH)
+AC_SUBST(HYPRE_CUDA_INCLUDE)
+AC_SUBST(HYPRE_CUDA_LIBS)
+
+dnl *********************************************************************
+dnl * HIP stuff
+dnl *********************************************************************
+AC_SUBST(HYPRE_HIP_INCL)
+AC_SUBST(HYPRE_HIP_LIBS)
 
 dnl *********************************************************************
 dnl * Caliper instrumentation
 dnl *********************************************************************
 AC_SUBST(CALIPER_INCLUDE)
 AC_SUBST(CALIPER_LIBS)
+
+dnl *********************************************************************
+dnl * SuperLU instrumentation
+dnl *********************************************************************
+AC_SUBST(SUPERLU_INCLUDE)
+AC_SUBST(SUPERLU_LIBS)
+
+dnl *********************************************************************
+dnl * DSuperLU instrumentation
+dnl *********************************************************************
+AC_SUBST(DSUPERLU_INCLUDE)
+AC_SUBST(DSUPERLU_LIBS)
 
 dnl *********************************************************************
 dnl * ar & ranlib substitution
@@ -1372,4 +2541,4 @@ dnl * Define the files to be configured and made
 dnl *********************************************************************
 AC_CONFIG_FILES([config/Makefile.config])
 
-AC_OUTPUT
+AC_OUTPUT()

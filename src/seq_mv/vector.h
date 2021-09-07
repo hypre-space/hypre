@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -26,10 +21,13 @@
 typedef struct
 {
    HYPRE_Complex  *data;
-   HYPRE_Int      size;
+   HYPRE_Int       size;
 
    /* Does the Vector create/destroy `data'? */
-   HYPRE_Int      owns_data;
+   HYPRE_Int       owns_data;
+
+   /* memory location of array data */
+   HYPRE_MemoryLocation  memory_location;
 
    /* For multivectors...*/
    HYPRE_Int   num_vectors;  /* the above "size" is size of one vector */
@@ -40,19 +38,20 @@ typedef struct
       With rowwise storage, vj[i] = data[ j + num_vectors*i] */
    HYPRE_Int  vecstride, idxstride;
    /* ... so vj[i] = data[ j*vecstride + i*idxstride ] regardless of row_storage.*/
-
 } hypre_Vector;
 
 /*--------------------------------------------------------------------------
  * Accessor functions for the Vector structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_VectorData(vector)      ((vector) -> data)
-#define hypre_VectorSize(vector)      ((vector) -> size)
-#define hypre_VectorOwnsData(vector)  ((vector) -> owns_data)
-#define hypre_VectorNumVectors(vector) ((vector) -> num_vectors)
+#define hypre_VectorData(vector)                  ((vector) -> data)
+#define hypre_VectorSize(vector)                  ((vector) -> size)
+#define hypre_VectorOwnsData(vector)              ((vector) -> owns_data)
+#define hypre_VectorMemoryLocation(vector)        ((vector) -> memory_location)
+#define hypre_VectorNumVectors(vector)            ((vector) -> num_vectors)
 #define hypre_VectorMultiVecStorageMethod(vector) ((vector) -> multivec_storage_method)
-#define hypre_VectorVectorStride(vector) ((vector) -> vecstride )
-#define hypre_VectorIndexStride(vector) ((vector) -> idxstride )
+#define hypre_VectorVectorStride(vector)          ((vector) -> vecstride )
+#define hypre_VectorIndexStride(vector)           ((vector) -> idxstride )
 
 #endif
+

@@ -1,32 +1,21 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <assert.h>
 
-#include "_hypre_utilities.h"
-
-#include "numbers.h"
+#include "_hypre_parcsr_mv.h"
 
 hypre_NumbersNode * hypre_NumbersNewNode()
 /* makes a new node for a tree representing numbers */
 {
    HYPRE_Int i;
-   hypre_NumbersNode * newnode = hypre_CTAlloc( hypre_NumbersNode, 1 );
+   hypre_NumbersNode * newnode = hypre_CTAlloc( hypre_NumbersNode,  1 , HYPRE_MEMORY_HOST);
    for ( i=0; i<=10; ++i ) newnode->digit[i] = NULL;
    return newnode;
 }
@@ -39,7 +28,7 @@ void hypre_NumbersDeleteNode( hypre_NumbersNode * node )
       hypre_NumbersDeleteNode( node->digit[i] );
       node->digit[i] = NULL;
    };
-   hypre_TFree( node );
+   hypre_TFree( node , HYPRE_MEMORY_HOST);
 }
 
 HYPRE_Int hypre_NumbersEnter( hypre_NumbersNode * node, const HYPRE_Int n )
@@ -104,14 +93,14 @@ HYPRE_Int * hypre_NumbersArray( hypre_NumbersNode * node )
    HYPRE_Int k = 0;
    HYPRE_Int N = hypre_NumbersNEntered(node);
    HYPRE_Int * array, * temp;
-   array = hypre_CTAlloc( HYPRE_Int, N );
+   array = hypre_CTAlloc( HYPRE_Int,  N , HYPRE_MEMORY_HOST);
    if ( node==NULL ) return array;
    for ( i=0; i<10; ++i ) if ( node->digit[i] != NULL ) {
       Ntemp = hypre_NumbersNEntered( node->digit[i] );
       temp = hypre_NumbersArray( node->digit[i] );
       for ( j=0; j<Ntemp; ++j )
          array[k++] = temp[j]*10 + i;
-      hypre_TFree(temp);
+      hypre_TFree(temp, HYPRE_MEMORY_HOST);
    }
    if ( node->digit[10] != NULL ) array[k++] = 0;
    hypre_assert( k==N );

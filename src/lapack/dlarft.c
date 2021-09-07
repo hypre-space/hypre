@@ -1,9 +1,14 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-#include "../blas/hypre_blas.h"
-#include "hypre_lapack.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dlarft_(const char *direct,const char *storev, integer *n, integer *
+/* Subroutine */ integer dlarft_(const char *direct,const char *storev, integer *n, integer *
 	k, doublereal *v, integer *ldv, doublereal *tau, doublereal *t, 
 	integer *ldt)
 {
@@ -117,7 +122,7 @@
     /* Local variables */
     static integer i__, j;
     extern logical lsame_(const char *,const char *);
-    extern /* Subroutine */ HYPRE_Int dgemv_(const char *, integer *, integer *, 
+    extern /* Subroutine */ integer dgemv_(const char *, integer *, integer *, 
 	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
 	    doublereal *, doublereal *, integer *), dtrmv_(const char *, 
 	    const char *,const char *, integer *, doublereal *, integer *, doublereal *, 
@@ -257,4 +262,6 @@
 #undef v_ref
 #undef t_ref
 
-
+#ifdef __cplusplus
+}
+#endif

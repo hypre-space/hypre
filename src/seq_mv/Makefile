@@ -1,15 +1,7 @@
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
-
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 include ../config/Makefile.config
 
@@ -28,6 +20,7 @@ HEADERS =\
  mapped_matrix.h\
  multiblock_matrix.h\
  seq_mv.h\
+ seq_mv.hpp\
  vector.h
 
 FILES =\
@@ -41,11 +34,31 @@ FILES =\
  HYPRE_vector.c\
  mapped_matrix.c\
  multiblock_matrix.c\
+ vector_batched.c
+
+CUFILES =\
+ csr_matop_device.c\
+ csr_matrix_cuda_utils.c\
+ csr_matvec_device.c\
+ csr_matvec_oomp.c\
+ csr_spadd_device.c\
+ csr_spgemm_device.c\
+ csr_spgemm_device_attempt.c\
+ csr_spgemm_device_confident.c\
+ csr_spgemm_device_cusparse.c\
+ csr_spgemm_device_rocsparse.c \
+ csr_spgemm_device_rowbound.c\
+ csr_spgemm_device_rowest.c\
+ csr_spgemm_device_util.c\
+ csr_spmv_device.c\
+ csr_sptrans_device.c\
  vector.c
 
-OBJS = ${FILES:.c=.o}
+COBJS = ${FILES:.c=.o}
+CUOBJS = ${CUFILES:.c=.obj}
+OBJS = ${COBJS} ${CUOBJS}
 
-SONAME = libHYPRE_seq_mv-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_seq_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -62,7 +75,7 @@ install: libHYPRE_seq_mv${HYPRE_LIB_SUFFIX}
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o libHYPRE*
+	rm -f *.o *.obj libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
@@ -76,9 +89,9 @@ libHYPRE_seq_mv.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_seq_mv.so: ${OBJS}
+libHYPRE_seq_mv.so libHYPRE_seq_mv.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -sf ${SONAME} $@
+	ln -s ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

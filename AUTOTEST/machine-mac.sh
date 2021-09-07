@@ -1,15 +1,8 @@
 #!/bin/sh
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 testname=`basename $0 .sh`
 
@@ -51,16 +44,20 @@ mo="test"
 ro="-ams -ij -sstruct -struct -rt -D HYPRE_NO_SAVED"
 
 co="--disable-fortran"
-test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro
-renametest.sh basictest $output_dir/basictest-default
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./renametest.sh basic $output_dir/basic-default
 
 co="--enable-debug --disable-fortran"
-test.sh basictest.sh $src_dir -co: $co -mo: $mo
-renametest.sh basictest $output_dir/basictest--enable-debug
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic--enable-debug
 
 co="--enable-bigint --disable-fortran"
-test.sh basictest.sh $src_dir -co: $co -mo: $mo
-renametest.sh basictest $output_dir/basictest--enable-bigint
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic--enable-bigint
+
+co="--enable-mixedint --disable-fortran"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic--enable-mixedint
 
 # Test linking for different languages
 link_opts="all++"

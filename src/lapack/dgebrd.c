@@ -1,10 +1,14 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "../blas/hypre_blas.h"
-#include "hypre_lapack.h"
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dgebrd_(integer *m, integer *n, doublereal *a, integer *
+/* Subroutine */ integer dgebrd_(integer *m, integer *n, doublereal *a, integer *
 	lda, doublereal *d__, doublereal *e, doublereal *tauq, doublereal *
 	taup, doublereal *work, integer *lwork, integer *info)
 {
@@ -152,20 +156,20 @@
     integer a_dim1, a_offset, i__1, i__2, i__3, i__4;
     /* Local variables */
     static integer i__, j;
-    extern /* Subroutine */ HYPRE_Int dgemm_(const char *,const char *, integer *, integer *, 
+    extern /* Subroutine */ integer dgemm_(const char *,const char *, integer *, integer *, 
 	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, integer *);
     static integer nbmin, iinfo, minmn;
-    extern /* Subroutine */ HYPRE_Int dgebd2_(integer *, integer *, doublereal *, 
+    extern /* Subroutine */ integer dgebd2_(integer *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, doublereal *, doublereal *,
 	     doublereal *, integer *);
     static integer nb;
-    extern /* Subroutine */ HYPRE_Int dlabrd_(integer *, integer *, integer *, 
+    extern /* Subroutine */ integer dlabrd_(integer *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, doublereal *,
 	     doublereal *, doublereal *, integer *, doublereal *, integer *);
     static integer nx;
     static doublereal ws;
-    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
     extern integer ilaenv_(integer *, const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
     static integer ldwrkx, ldwrky, lwkopt;
@@ -320,4 +324,6 @@
 
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

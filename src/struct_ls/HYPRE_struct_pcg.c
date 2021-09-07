@@ -1,16 +1,12 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
+#include "_hypre_struct_mv.hpp"
 
 /*==========================================================================*/
 
@@ -24,7 +20,7 @@ HYPRE_StructPCGCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
       chance of name conflicts. */
    hypre_PCGFunctions * pcg_functions =
       hypre_PCGFunctionsCreate(
-         hypre_CAlloc, hypre_StructKrylovFree,
+         hypre_StructKrylovCAlloc, hypre_StructKrylovFree,
          hypre_StructKrylovCommInfo,
          hypre_StructKrylovCreateVector,
          hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
@@ -41,7 +37,7 @@ HYPRE_StructPCGCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 
 /*==========================================================================*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructPCGDestroy( HYPRE_StructSolver solver )
 {
    return( hypre_PCGDestroy( (void *) solver ) );
@@ -49,7 +45,7 @@ HYPRE_StructPCGDestroy( HYPRE_StructSolver solver )
 
 /*==========================================================================*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructPCGSetup( HYPRE_StructSolver solver,
                       HYPRE_StructMatrix A,
                       HYPRE_StructVector b,
@@ -63,7 +59,7 @@ HYPRE_StructPCGSetup( HYPRE_StructSolver solver,
 
 /*==========================================================================*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructPCGSolve( HYPRE_StructSolver solver,
                       HYPRE_StructMatrix A,
                       HYPRE_StructVector b,
@@ -172,7 +168,7 @@ HYPRE_StructPCGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
 
 /*==========================================================================*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructDiagScaleSetup( HYPRE_StructSolver solver,
                             HYPRE_StructMatrix A,
                             HYPRE_StructVector y,
@@ -183,7 +179,7 @@ HYPRE_StructDiagScaleSetup( HYPRE_StructSolver solver,
 
 /*==========================================================================*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructDiagScale( HYPRE_StructSolver solver,
                        HYPRE_StructMatrix HA,
                        HYPRE_StructVector Hy,
@@ -199,20 +195,16 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
    hypre_Box            *A_data_box;
    hypre_Box            *y_data_box;
    hypre_Box            *x_data_box;
-                     
+
    HYPRE_Real           *Ap;
    HYPRE_Real           *yp;
    HYPRE_Real           *xp;
-                       
-   HYPRE_Int             Ai;
-   HYPRE_Int             yi;
-   HYPRE_Int             xi;
-                     
+
    hypre_Index           index;
    hypre_IndexRef        start;
    hypre_Index           stride;
    hypre_Index           loop_size;
-                     
+
    HYPRE_Int             i;
 
    /* x = D^{-1} y */
@@ -235,18 +227,16 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
 
       hypre_BoxGetSize(box, loop_size);
 
+#define DEVICE_VAR is_device_ptr(xp,yp,Ap)
       hypre_BoxLoop3Begin(hypre_StructVectorNDim(Hx), loop_size,
                           A_data_box, start, stride, Ai,
                           x_data_box, start, stride, xi,
                           y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop3For(Ai, xi, yi)
       {
          xp[xi] = yp[yi] / Ap[Ai];
       }
       hypre_BoxLoop3End(Ai, xi, yi);
+#undef DEVICE_VAR
    }
 
    return hypre_error_flag;

@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -30,23 +22,21 @@ typedef struct hypre_IJVector_struct
 {
    MPI_Comm      comm;
 
-   HYPRE_Int 		*partitioning;      /* Indicates partitioning over tasks */
+   HYPRE_BigInt  partitioning[2];   /* Indicates partitioning over tasks */
 
-   HYPRE_Int           object_type;       /* Indicates the type of "local storage" */
+   HYPRE_Int     object_type;       /* Indicates the type of "local storage" */
 
    void         *object;            /* Structure for storing local portion */
 
    void         *translator;        /* Structure for storing off processor
-				       information */
+                                       information */
 
-   void         *assumed_part;        /* IJ Vector assumed partition */
+   void         *assumed_part;      /* IJ Vector assumed partition */
 
-   HYPRE_Int         global_first_row;    /* these for data items are necessary */
-   HYPRE_Int         global_num_rows;     /*   to be able to avoid using the global */
-                                    /*    global partition */ 
-   HYPRE_Int	       print_level; 
-   
-
+   HYPRE_BigInt  global_first_row;  /* these for data items are necessary */
+   HYPRE_BigInt  global_num_rows;   /* to be able to avoid using the global */
+                                    /* global partition */
+   HYPRE_Int     print_level;
 
 } hypre_IJVector;
 
@@ -54,27 +44,30 @@ typedef struct hypre_IJVector_struct
  * Accessor macros: hypre_IJVector
  *--------------------------------------------------------------------------*/
 
-#define hypre_IJVectorComm(vector)           ((vector) -> comm)
-
-#define hypre_IJVectorPartitioning(vector)   ((vector) -> partitioning)
-
-#define hypre_IJVectorObjectType(vector)     ((vector) -> object_type)
-
-#define hypre_IJVectorObject(vector)         ((vector) -> object)
-
-#define hypre_IJVectorTranslator(vector)     ((vector) -> translator)
-
+#define hypre_IJVectorComm(vector)            ((vector) -> comm)
+#define hypre_IJVectorPartitioning(vector)    ((vector) -> partitioning)
+#define hypre_IJVectorObjectType(vector)      ((vector) -> object_type)
+#define hypre_IJVectorObject(vector)          ((vector) -> object)
+#define hypre_IJVectorTranslator(vector)      ((vector) -> translator)
 #define hypre_IJVectorAssumedPart(vector)     ((vector) -> assumed_part)
-
 #define hypre_IJVectorGlobalFirstRow(vector)  ((vector) -> global_first_row)
+#define hypre_IJVectorGlobalNumRows(vector)   ((vector) -> global_num_rows)
+#define hypre_IJVectorPrintLevel(vector)      ((vector) -> print_level)
 
-#define hypre_IJVectorGlobalNumRows(vector)  ((vector) -> global_num_rows)
+static inline HYPRE_MemoryLocation
+hypre_IJVectorMemoryLocation(hypre_IJVector *vector)
+{
+   if ( hypre_IJVectorObject(vector) && hypre_IJVectorObjectType(vector) == HYPRE_PARCSR)
+   {
+      return hypre_ParVectorMemoryLocation( (hypre_ParVector *) hypre_IJVectorObject(vector) );
+   }
 
-#define hypre_IJVectorPrintLevel(vector)  ((vector) -> print_level)
+   return HYPRE_MEMORY_UNDEFINED;
+}
 
 /*--------------------------------------------------------------------------
  * prototypes for operations on local objects
  *--------------------------------------------------------------------------*/
 /* #include "./internal_protos.h" */
 
-#endif
+#endif /* #ifndef hypre_IJ_VECTOR_HEADER */

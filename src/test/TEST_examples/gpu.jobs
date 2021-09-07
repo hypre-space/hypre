@@ -1,0 +1,41 @@
+#!/bin/sh
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+#=============================================================================
+# Run each example
+#=============================================================================
+
+mpirun -np 2 ./ex1 > gpu.out.1
+
+mpirun -np 2 ./ex2 > gpu.out.2
+
+mpirun -np 16 ./ex3 -n 33 -solver 0 -v 1 1 > gpu.out.3
+
+mpirun -np 16 ./ex4 -n 33 -solver 10 -K 3 -B 0 -C 1 -UO 2 -F 4 > gpu.out.4
+
+mpirun -np 4 ./ex5 > gpu.out.5
+
+# mpirun -np 4 ./ex5f > gpu.out.5f
+
+mpirun -np 2 ./ex6 > gpu.out.6
+
+mpirun -np 16 ./ex7 -n 33 -solver 10 -K 3 -B 0 -C 1 -UO 2 -F 4 > gpu.out.7
+
+mpirun -np 2 ./ex8 > gpu.out.8
+
+mpirun -np 16 ./ex9 -n 33 -solver 0 -v 1 1 > gpu.out.9
+
+# mpirun -np 4 ./ex11 > gpu.out.11
+
+mpirun -np 2 ./ex12 -pfmg > gpu.out.12
+
+# mpirun -np 2 ./ex12f -pfmg > gpu.out.12f
+
+mpirun -np 6 ./ex13 -n 10 > gpu.out.13
+
+mpirun -np 6 ./ex14 -n 10 > gpu.out.14
+
+# mpirun -np 8 ./ex15 -n 10 > gpu.out.15

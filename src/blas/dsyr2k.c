@@ -1,8 +1,14 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "f2c.h"
 #include "hypre_blas.h"
 
-/* Subroutine */ HYPRE_Int dsyr2k_(const char *uplo,const char *trans, integer *n, integer *k, 
+/* Subroutine */ integer dsyr2k_(const char *uplo,const char *trans, integer *n, integer *k, 
 	doublereal *alpha, doublereal *a, integer *lda, doublereal *b, 
 	integer *ldb, doublereal *beta, doublereal *c__, integer *ldc)
 {
@@ -13,10 +19,10 @@
     static integer info;
     static doublereal temp1, temp2;
     static integer i__, j, l;
-    extern logical hypre_lsame_(const char *,const char *);
+    extern logical lsame_(const char *,const char *);
     static integer nrowa;
     static logical upper;
-    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 #define b_ref(a_1,a_2) b[(a_2)*b_dim1 + a_1]
 #define c___ref(a_1,a_2) c__[(a_2)*c_dim1 + a_1]
@@ -128,17 +134,17 @@
     c_offset = 1 + c_dim1 * 1;
     c__ -= c_offset;
     /* Function Body */
-    if (hypre_lsame_(trans, "N")) {
+    if (lsame_(trans, "N")) {
 	nrowa = *n;
     } else {
 	nrowa = *k;
     }
-    upper = hypre_lsame_(uplo, "U");
+    upper = lsame_(uplo, "U");
     info = 0;
-    if (! upper && ! hypre_lsame_(uplo, "L")) {
+    if (! upper && ! lsame_(uplo, "L")) {
 	info = 1;
-    } else if (! hypre_lsame_(trans, "N") && ! hypre_lsame_(trans, 
-	    "T") && ! hypre_lsame_(trans, "C")) {
+    } else if (! lsame_(trans, "N") && ! lsame_(trans, 
+	    "T") && ! lsame_(trans, "C")) {
 	info = 2;
     } else if (*n < 0) {
 	info = 3;
@@ -152,7 +158,7 @@
 	info = 12;
     }
     if (info != 0) {
-	hypre_xerbla_("DSYR2K", &info);
+	xerbla_("DSYR2K", &info);
 	return 0;
     }
 /*     Quick return if possible. */
@@ -209,7 +215,7 @@
 	return 0;
     }
 /*     Start the operations. */
-    if (hypre_lsame_(trans, "N")) {
+    if (lsame_(trans, "N")) {
 /*        Form  C := alpha*A*B' + alpha*B*A' + C. */
 	if (upper) {
 	    i__1 = *n;
@@ -333,3 +339,6 @@
 #undef b_ref
 #undef a_ref
 
+#ifdef __cplusplus
+}
+#endif

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
 #include "smg.h"
@@ -54,7 +49,7 @@ hypre_SMGSolve( void               *smg_vdata,
                 hypre_StructVector *x         )
 {
 
-	hypre_SMGData        *smg_data = (hypre_SMGData        *)smg_vdata;
+   hypre_SMGData        *smg_data = (hypre_SMGData *) smg_vdata;
 
    HYPRE_Real            tol             = (smg_data -> tol);
    HYPRE_Int             max_iter        = (smg_data -> max_iter);
@@ -82,9 +77,9 @@ hypre_SMGSolve( void               *smg_vdata,
 
    HYPRE_Real            b_dot_b = 0, r_dot_r, eps = 0;
    HYPRE_Real            e_dot_e = 0, x_dot_x = 1;
-                    
+
    HYPRE_Int             i, l;
-                    
+
 #if DEBUG
    char                  filename[255];
 #endif
@@ -93,6 +88,7 @@ hypre_SMGSolve( void               *smg_vdata,
     * Initialize some things and deal with special cases
     *-----------------------------------------------------*/
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_BeginTiming(smg_data -> time_index);
 
    hypre_StructMatrixDestroy(A_l[0]);
@@ -114,6 +110,8 @@ hypre_SMGSolve( void               *smg_vdata,
       }
 
       hypre_EndTiming(smg_data -> time_index);
+      HYPRE_ANNOTATE_FUNC_END;
+
       return hypre_error_flag;
    }
 
@@ -135,6 +133,8 @@ hypre_SMGSolve( void               *smg_vdata,
          }
 
          hypre_EndTiming(smg_data -> time_index);
+         HYPRE_ANNOTATE_FUNC_END;
+
          return hypre_error_flag;
       }
    }
@@ -168,14 +168,17 @@ hypre_SMGSolve( void               *smg_vdata,
       if (tol > 0.0)
       {
          r_dot_r = hypre_StructInnerProd(r_l[0], r_l[0]);
-
          if (logging > 0)
          {
             norms[i] = sqrt(r_dot_r);
             if (b_dot_b > 0)
+            {
                rel_norms[i] = sqrt(r_dot_r/b_dot_b);
+            }
             else
+            {
                rel_norms[i] = 0.0;
+            }
          }
 
          /* always do at least 1 V-cycle */
@@ -319,6 +322,8 @@ hypre_SMGSolve( void               *smg_vdata,
    }
 
    hypre_EndTiming(smg_data -> time_index);
+   hypre_SMGPrintLogging(smg_vdata);
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

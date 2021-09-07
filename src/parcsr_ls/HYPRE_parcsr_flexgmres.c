@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
 
@@ -28,7 +23,7 @@ HYPRE_ParCSRFlexGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
    }
    fgmres_functions =
       hypre_FlexGMRESFunctionsCreate(
-         hypre_CAlloc, hypre_ParKrylovFree, hypre_ParKrylovCommInfo,
+         hypre_ParKrylovCAlloc, hypre_ParKrylovFree, hypre_ParKrylovCommInfo,
          hypre_ParKrylovCreateVector,
          hypre_ParKrylovCreateVectorArray,
          hypre_ParKrylovDestroyVector, hypre_ParKrylovMatvecCreate,
@@ -206,6 +201,17 @@ HYPRE_ParCSRFlexGMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
                                                    HYPRE_Real         *norm   )
 {
    return( HYPRE_FlexGMRESGetFinalRelativeResidualNorm( solver, norm ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRFlexGMRESGetResidual
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRFlexGMRESGetResidual( HYPRE_Solver  solver,
+                                  HYPRE_ParVector *residual)
+{
+   return( HYPRE_FlexGMRESGetResidual( solver, (void *) residual ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -53,8 +48,8 @@
 
 typedef struct
 {
-   char *       (*CAlloc)        ( size_t count, size_t elt_size );
-   HYPRE_Int    (*Free)          ( char *ptr );
+   void *       (*CAlloc)        ( size_t count, size_t elt_size );
+   HYPRE_Int    (*Free)          ( void *ptr );
    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
                                    HYPRE_Int   *num_procs );
    void *       (*CreateVector)  ( void *vector );
@@ -69,7 +64,6 @@ typedef struct
    HYPRE_Int    (*ClearVector)   ( void *x );
    HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x );
    HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y );
-   HYPRE_Int    (*PrintVector)   ( void *x, const char *filename );
 
    HYPRE_Int    (*precond)       ();
    HYPRE_Int    (*precond_setup) ();
@@ -89,6 +83,7 @@ typedef struct
    HYPRE_Int      skip_real_r_check;
    HYPRE_Int      stop_crit;
    HYPRE_Int      converged;
+   HYPRE_Int      hybrid;
    HYPRE_Real   tol;
    HYPRE_Real   cf_tol;
    HYPRE_Real   a_tol;
@@ -107,7 +102,7 @@ typedef struct
 
    /* log info (always logged) */
    HYPRE_Int      num_iterations;
- 
+
    HYPRE_Int     print_level; /* printing when print_level>0 */
    HYPRE_Int     logging;  /* extra computations for logging when logging>0 */
    HYPRE_Real  *norms;
@@ -134,8 +129,8 @@ extern "C" {
 
 hypre_GMRESFunctions *
 hypre_GMRESFunctionsCreate(
-   char *       (*CAlloc)        ( size_t count, size_t elt_size ),
-   HYPRE_Int    (*Free)          ( char *ptr ),
+   void *       (*CAlloc)        ( size_t count, size_t elt_size ),
+   HYPRE_Int    (*Free)          ( void *ptr ),
    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
                                    HYPRE_Int   *num_procs ),
    void *       (*CreateVector)  ( void *vector ),

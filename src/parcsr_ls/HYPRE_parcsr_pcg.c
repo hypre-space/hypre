@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
 
@@ -28,7 +23,7 @@ HYPRE_ParCSRPCGCreate( MPI_Comm comm, HYPRE_Solver *solver )
    }
    pcg_functions =
       hypre_PCGFunctionsCreate(
-         hypre_CAlloc, hypre_ParKrylovFree, hypre_ParKrylovCommInfo,
+         hypre_ParKrylovCAlloc, hypre_ParKrylovFree, hypre_ParKrylovCommInfo,
          hypre_ParKrylovCreateVector,
          hypre_ParKrylovDestroyVector, hypre_ParKrylovMatvecCreate,
          hypre_ParKrylovMatvec, hypre_ParKrylovMatvecDestroy,
@@ -45,7 +40,7 @@ HYPRE_ParCSRPCGCreate( MPI_Comm comm, HYPRE_Solver *solver )
  * HYPRE_ParCSRPCGDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRPCGDestroy( HYPRE_Solver solver )
 {
    return( hypre_PCGDestroy( (void *) solver ) );
@@ -55,7 +50,7 @@ HYPRE_ParCSRPCGDestroy( HYPRE_Solver solver )
  * HYPRE_ParCSRPCGSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRPCGSetup( HYPRE_Solver solver,
                       HYPRE_ParCSRMatrix A,
                       HYPRE_ParVector b,
@@ -71,7 +66,7 @@ HYPRE_ParCSRPCGSetup( HYPRE_Solver solver,
  * HYPRE_ParCSRPCGSolve
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRPCGSolve( HYPRE_Solver solver,
                       HYPRE_ParCSRMatrix A,
                       HYPRE_ParVector b,
@@ -221,11 +216,23 @@ HYPRE_ParCSRPCGGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
    return( HYPRE_PCGGetFinalRelativeResidualNorm( solver, norm ) );
 }
 
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRPCGGetResidual
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRPCGGetResidual( HYPRE_Solver  solver,
+                                      HYPRE_ParVector *residual   )
+{
+   return( HYPRE_PCGGetResidual( solver, (void *) residual ) );
+}
+
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRDiagScaleSetup
  *--------------------------------------------------------------------------*/
- 
-HYPRE_Int 
+
+HYPRE_Int
 HYPRE_ParCSRDiagScaleSetup( HYPRE_Solver solver,
                             HYPRE_ParCSRMatrix A,
                             HYPRE_ParVector y,
@@ -233,42 +240,27 @@ HYPRE_ParCSRDiagScaleSetup( HYPRE_Solver solver,
 {
    return 0;
 }
- 
+
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRDiagScale
  *--------------------------------------------------------------------------*/
- 
-HYPRE_Int 
+
+HYPRE_Int
 HYPRE_ParCSRDiagScale( HYPRE_Solver solver,
                        HYPRE_ParCSRMatrix HA,
                        HYPRE_ParVector Hy,
                        HYPRE_ParVector Hx      )
 {
-   hypre_ParCSRMatrix *A = (hypre_ParCSRMatrix *) HA;
-   hypre_ParVector    *y = (hypre_ParVector *) Hy;
-   hypre_ParVector    *x = (hypre_ParVector *) Hx;
-   HYPRE_Real *x_data = hypre_VectorData(hypre_ParVectorLocalVector(x));
-   HYPRE_Real *y_data = hypre_VectorData(hypre_ParVectorLocalVector(y));
-   HYPRE_Real *A_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A));
-   HYPRE_Int *A_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A));
-   HYPRE_Int local_size = hypre_VectorSize(hypre_ParVectorLocalVector(x));
-   HYPRE_Int i, ierr = 0;
-
-   for (i=0; i < local_size; i++)
-   {
-      x_data[i] = y_data[i]/A_data[A_i[i]];
-   } 
- 
-   return ierr;
+   return hypre_ParCSRDiagScale(HA, Hy, Hx);
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRSymPrecondSetup
  *--------------------------------------------------------------------------*/
- 
+
 /*
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParCSRSymPrecondSetup( HYPRE_Solver solver,
                              HYPRE_ParCSRMatrix A,
                              HYPRE_ParVector b,
@@ -300,8 +292,8 @@ HYPRE_ParCSRSymPrecondSetup( HYPRE_Solver solver,
 
    for (i=0; i < hypre_VectorSize(hypre_ParVectorLocalVector(x)); i++)
    {
-	x_data[i] = y_data[i]/A_data[A_i[i]];
-   } 
- 
+      x_data[i] = y_data[i]/A_data[A_i[i]];
+   }
+
    return ierr;
 } */

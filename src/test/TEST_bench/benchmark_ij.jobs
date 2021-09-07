@@ -1,0 +1,88 @@
+#!/bin/sh
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+#=============================================================================
+# ij: BoomerAMG GPU benchmarks
+#=============================================================================
+
+# RAP 1
+mpirun -np 4 ./ij -n 256 256 128 -P 2 2 1       -pmis -keepT 1 -rlx 18        -exec_device -rap 1 -mod_rap2 1 -mm_cusparse 0 -interptype  3 -solver 1 \
+ > benchmark_ij.out.1
+
+mpirun -np 3 ./ij -n 128 128 384 -P 1 1 3       -pmis -keepT 1 -rlx 7 -w 0.85 -exec_device -rap 1 -mod_rap2 1 -mm_cusparse 0 -interptype  3 -solver 1 \
+ >> benchmark_ij.out.2
+
+mpirun -np 4 ./ij -n 4096 4096 1 -P 2 2 1 -9pt  -pmis -keepT 1 -rlx 18        -exec_device -rap 1 -mod_rap2 1 -mm_cusparse 0 -interptype  3 -solver 1 \
+ >> benchmark_ij.out.3
+
+mpirun -np 4 ./ij -n 256 256 128 -P 2 2 1       -pmis -keepT 1 -rlx 18        -exec_device -rap 1 -mod_rap2 1 -mm_cusparse 0 -interptype 14 -solver 1 \
+ >> benchmark_ij.out.4
+
+mpirun -np 4 ./ij -n 256 256 128 -P 2 2 1 -27pt -pmis -keepT 1 -rlx 18        -exec_device -rap 1 -mod_rap2 1 -mm_cusparse 0 -interptype  6 -solver 1 \
+ >> benchmark_ij.out.5
+
+mpirun -np 4 ./ij -n 4096 4096 1 -P 2 2 1 -9pt  -pmis -keepT 1 -rlx 18        -exec_device -rap 1 -mod_rap2 1 -mm_cusparse 0 -interptype 15 -solver 1 \
+ >> benchmark_ij.out.6
+
+mpirun -np 4 ./ij -n 4096 4096 1 -P 2 2 1 -9pt  -pmis -keepT 1 -rlx 18        -exec_device -rap 1 -mod_rap2 1 -mm_cusparse 0 -interptype 18 -solver 1 \
+ >> benchmark_ij.out.7
+
+# RAP 0
+mpirun -np 4 ./ij -n 256 256 128 -P 2 2 1       -pmis -keepT 1 -rlx 18        -exec_device -rap 0 -mod_rap2 1 -mm_cusparse 0 -interptype  3 -solver 1 \
+ > benchmark_ij.out.8
+
+mpirun -np 3 ./ij -n 128 128 384 -P 1 1 3       -pmis -keepT 1 -rlx 7 -w 0.85 -exec_device -rap 0 -mod_rap2 1 -mm_cusparse 0 -interptype  3 -solver 1 \
+ >> benchmark_ij.out.9
+
+mpirun -np 4 ./ij -n 4096 4096 1 -P 2 2 1 -9pt  -pmis -keepT 1 -rlx 18        -exec_device -rap 0 -mod_rap2 1 -mm_cusparse 0 -interptype  3 -solver 1 \
+ >> benchmark_ij.out.10
+
+mpirun -np 4 ./ij -n 256 256 128 -P 2 2 1       -pmis -keepT 1 -rlx 18        -exec_device -rap 0 -mod_rap2 1 -mm_cusparse 0 -interptype 14 -solver 1 \
+ >> benchmark_ij.out.11
+
+mpirun -np 4 ./ij -n 256 256 128 -P 2 2 1 -27pt -pmis -keepT 1 -rlx 18        -exec_device -rap 0 -mod_rap2 1 -mm_cusparse 0 -interptype  6 -solver 1 \
+ >> benchmark_ij.out.12
+
+mpirun -np 4 ./ij -n 4096 4096 1 -P 2 2 1 -9pt  -pmis -keepT 1 -rlx 18        -exec_device -rap 0 -mod_rap2 1 -mm_cusparse 0 -interptype 15 -solver 1 \
+ >> benchmark_ij.out.13
+
+
+mpirun -np 1 ./ij -n 256 256 256 -P 1 1 1       -pmis -keepT 1 -rlx 18        -exec_device -rap 1 -mod_rap2 1 -mm_cusparse 0 -interptype  6 -solver 1 \
+ >> benchmark_ij.out.14
+
+mpirun -np 1 ./ij -n 256 256 256 -P 1 1 1       -pmis -keepT 1 -rlx 18        -exec_device -rap 0 -mod_rap2 1 -mm_cusparse 0 -interptype 14 -solver 1 \
+ >> benchmark_ij.out.15
+
+mpirun -np 1 ./ij -n 256 256 256 -P 1 1 1       -pmis -keepT 1 -rlx 18        -exec_device -rap 0 -mod_rap2 1 -mm_cusparse 0 -interptype 18 -solver 1 \
+ >> benchmark_ij.out.16
+
+mpirun -np 4 ./ij -n 256 256 128 -P 2 2 1 -27pt -pmis -keepT 1 -rlx 7 -w 0.85        -exec_device -mm_cusparse 0 -agg_nl 1 -agg_interp 5 -solver 1 \
+ >> benchmark_ij.out.17
+
+mpirun -np 4 ./ij -n 256 256 128 -P 2 2 1       -pmis -keepT 1 -rlx 7 -w 0.85        -exec_device -mm_cusparse 0 -agg_nl 1 -agg_interp 7 -agg_P12_mx 4 -solver 1 \
+ >> benchmark_ij.out.18
+
+mpirun -np 4 ./ij -n 128 128 128 -P 2 2 1       -pmis -keepT 1 -rlx 7 -w 0.5        -exec_device -mm_cusparse 0 -agg_nl 1 -agg_interp 5 -agg_Pmx 4 -interptype 18 -solver 1 -sysL 3 -nf 3 \
+ >> benchmark_ij.out.19
+
+mpirun -np 2 ./ij -n 200 128 128 -P 2 1 1       -pmis -keepT 1 -rlx 7 -w 0.7        -exec_device -mm_cusparse 0 -agg_nl 1 -agg_interp 5 -agg_Pmx 4 -interptype 18 -solver 1 -vardifconv -eps 1 \
+ >> benchmark_ij.out.20
+
+mpirun -np 4 ./ij -n 200 200 200 -P 2 2 1       -pmis -keepT 1 -rlx 18 -ns 2        -exec_device -mm_cusparse 0 -agg_nl 3 -agg_interp 7 -agg_P12_mx 6 -interptype 6 -solver 1 \
+ >> benchmark_ij.out.21
+
+
+mpirun -np 4 ./ij -n 256 256 128 -P 2 2 1       -rlx 16 -cheby_scale 1 -cheby_eig_est 10        -exec_device -solver 1 \
+ >> benchmark_ij.out.22
+
+mpirun -np 4 ./ij -n 256 256 128 -P 2 2 1       -rlx 16 -cheby_scale 0 -cheby_eig_est 10        -exec_device -solver 1 \
+ >> benchmark_ij.out.23
+
+mpirun -np 4 ./ij -n 256 256 128 -P 2 2 1       -rlx 16 -cheby_scale 1 -cheby_eig_est 0        -exec_device -solver 1 \
+ >> benchmark_ij.out.24
+
+mpirun -np 4 ./ij -n 256 256 128 -P 2 2 1       -rlx 16 -cheby_scale 0 -cheby_eig_est 0        -exec_device -solver 1 \
+ >> benchmark_ij.out.25

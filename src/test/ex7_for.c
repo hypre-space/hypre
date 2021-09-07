@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /*
    Example 7 -- FORTRAN Test Version
@@ -595,7 +590,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       HYPRE_SStructVectorInitialize(x);
 #endif
 
-      values = (HYPRE_Real*) calloc((n*n), sizeof(HYPRE_Real));
+      values = hypre_CTAlloc(HYPRE_Real, (n*n), HYPRE_MEMORY_HOST);
 
       /* Set the values of b in left-to-right, bottom-to-top order */
       for (k = 0, j = 0; j < n; j++)
@@ -616,7 +611,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
 #endif
 
-      free(values);
+      hypre_TFree(values, HYPRE_MEMORY_HOST);
 
       /* Assembling is postponed since the vectors will be further modified */
    }
@@ -666,7 +661,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
                                                       to the offsets */
          HYPRE_Real *values;
 
-         values = (HYPRE_Real*) calloc(5*(n*n), sizeof(HYPRE_Real));
+         values = hypre_CTAlloc(HYPRE_Real, 5*(n*n), HYPRE_MEMORY_HOST);
 
          /* The order is left-to-right, bottom-to-top */
          for (k = 0, j = 0; j < n; j++)
@@ -697,14 +692,14 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
                                          stencil_indices, values);
 #endif
 
-         free(values);
+         hypre_TFree(values, HYPRE_MEMORY_HOST);
       }
       else /* Symmetric storage */
       {
          HYPRE_Int stencil_indices[3] = {0, 1, 2};
          HYPRE_Real *values;
 
-         values = (HYPRE_Real*) calloc(3*(n*n), sizeof(HYPRE_Real));
+         values = hypre_CTAlloc(HYPRE_Real, 3*(n*n), HYPRE_MEMORY_HOST);
 
          /* The order is left-to-right, bottom-to-top */
          for (k = 0, j = 0; j < n; j++)
@@ -727,7 +722,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
                                          stencil_indices, values);
 #endif
 
-         free(values);
+         hypre_TFree(values, HYPRE_MEMORY_HOST);
       }
    }
 
@@ -752,8 +747,8 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       else
          nentries = 3;
 
-      values  = (HYPRE_Real*) calloc(nentries*n, sizeof(HYPRE_Real));
-      bvalues = (HYPRE_Real*) calloc(n, sizeof(HYPRE_Real));
+      values  = hypre_CTAlloc(HYPRE_Real, nentries*n, HYPRE_MEMORY_HOST);
+      bvalues = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
 
       /* The stencil at the boundary nodes is 1-0-0-0-0. Because
          we have I x_b = u_0; */
@@ -1087,8 +1082,8 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 #endif
       }
 
-      free(values);
-      free(bvalues);
+      hypre_TFree(values, HYPRE_MEMORY_HOST);
+      hypre_TFree(bvalues, HYPRE_MEMORY_HOST);
    }
 
    /* Finalize the vector and matrix assembly */

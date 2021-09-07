@@ -1,21 +1,8 @@
 #!/bin/sh
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
-
-
-
-
-
-
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 #=============================================================================
 # ij: Run default case with different coarsenings, hybrid GS,
@@ -36,39 +23,40 @@
 #   14: PMIS1 fixed random coarsening
 #=============================================================================
 
-mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 0 -Pmx 0 -cljp -27pt \
+mpirun -np 4  ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 0 -Pmx 0 -cljp -27pt \
  > coarsening.out.0
 
-mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 0 -Pmx 0 -ruge -27pt \
+mpirun -np 4  ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 0 -Pmx 0 -ruge -27pt \
  > coarsening.out.1
 
-mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 0 -Pmx 0 -ruge3c -gm -27pt \
+mpirun -np 4  ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 0 -Pmx 0 -ruge3c -gm -27pt \
  > coarsening.out.2
 
-mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 0 -Pmx 0 -falgout -27pt \
+mpirun -np 4  ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 0 -Pmx 0 -falgout -27pt \
  > coarsening.out.3
 
-mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -pmis -27pt \
+mpirun -np 4  ./ij -rhsrand -n 15 15 10 -P 2 2 1 -pmis -27pt \
  > coarsening.out.4
 
-mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -27pt \
+mpirun -np 4  ./ij -rhsrand -n 15 15 10 -P 2 2 1 -27pt \
  > coarsening.out.5
 
-mpirun -np 4 ./ij -rhsrand -n 60 60 30 -P 2 2 1 -falgout -interptype 0 -Pmx 0 -agg_nl 2 -27pt -rlx 6 -solver 1 \
+mpirun -np 4  ./ij -rhsrand -n 60 60 30 -P 2 2 1 -falgout -interptype 0 -Pmx 0 -agg_nl 2 -27pt -rlx 6 -solver 1 \
  > coarsening.out.6
 
-mpirun -np 4 ./ij -rhsrand -n 60 60 30 -P 2 2 1 -agg_nl 1 -27pt -rlx 6 -solver 1 \
+mpirun -np 4  ./ij -rhsrand -n 60 60 30 -P 2 2 1 -agg_nl 1 -27pt -rlx 6 -solver 1 \
  > coarsening.out.7
 
-mpirun -np 2 ./ij -ruge1p -gm > coarsening.out.8
+mpirun -np 2  ./ij -ruge1p -gm > coarsening.out.8
 
-mpirun -np 8 ./ij -P 2 2 2 -ruge1p  > coarsening.out.9
+mpirun -np 8  ./ij -P 2 2 2 -ruge1p  > coarsening.out.9
 
-mpirun -np 8 ./ij -P 2 2 2 -cgc -interptype 0 -Pmx 0 > coarsening.out.10
+#mpirun -np 8  ./ij -P 2 2 2 -cgc -interptype 0 -Pmx 0 > coarsening.out.10
 
-mpirun -np 8 ./ij -P 2 2 2 -ruge3  -interptype 0 -Pmx 0 > coarsening.out.11
+mpirun -np 8  ./ij -P 2 2 2 -ruge3  -interptype 0 -Pmx 0 > coarsening.out.11
 
-mpirun -np 8 ./ij -P 2 2 2 -cljp1  -interptype 0 -Pmx 0 > coarsening.out.12
+mpirun -np 8  ./ij -P 2 2 2 -cljp1  -interptype 0 -Pmx 0 > coarsening.out.12
 
-mpirun -np 8 ./ij -P 2 2 2 -pmis1 > coarsening.out.13
+mpirun -np 8  ./ij -P 2 2 2 -pmis1 > coarsening.out.13
 
+mpirun -np 1  ./ij -n 2 2 2 -agg_nl 1 -mxrs 0.1 > coarsening.out.14

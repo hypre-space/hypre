@@ -119,7 +119,7 @@ ReadData( char  *filename,
 
       /* allocate initial space, and read first input line */
       sdata_size = 0;
-      sdata = hypre_TAlloc(char, memchunk);
+      sdata = hypre_TAlloc(char, memchunk, HYPRE_MEMORY_HOST);
       sdata_line = fgets(sdata, maxline, file);
 
       s = 0;
@@ -130,7 +130,7 @@ ReadData( char  *filename,
          /* allocate more space, if necessary */
          if ((sdata_size + maxline) > s)
          {
-            sdata = hypre_TReAlloc(sdata, char, (sdata_size + memchunk));
+            sdata = hypre_TReAlloc(sdata, char, (sdata_size + memchunk), HYPRE_MEMORY_HOST);
             s= sdata_size + memchunk;
          }
 
@@ -144,7 +144,7 @@ ReadData( char  *filename,
    hypre_MPI_Bcast(&sdata_size, 1, HYPRE_MPI_INT, 0, hypre_MPI_COMM_WORLD);
 
    /* broadcast the data */
-   sdata = hypre_TReAlloc(sdata, char, sdata_size);
+   sdata = hypre_TReAlloc(sdata, char, sdata_size, HYPRE_MEMORY_HOST);
    hypre_MPI_Bcast(sdata, sdata_size, hypre_MPI_CHAR, 0, hypre_MPI_COMM_WORLD);
 
    /*-----------------------------------------------------------
@@ -170,9 +170,9 @@ ReadData( char  *filename,
             ndim = strtol(sdata_ptr, &sdata_ptr, 10);
             data.nboxes = strtol(sdata_ptr, &sdata_ptr, 10);
             n = data.nboxes;
-            data.ilowers  = hypre_CTAlloc(Index, n);
-            data.iuppers  = hypre_CTAlloc(Index, n);
-            data.boxsizes = hypre_CTAlloc(HYPRE_Int, n);
+            data.ilowers  = hypre_CTAlloc(Index, n, HYPRE_MEMORY_HOST);
+            data.iuppers  = hypre_CTAlloc(Index, n, HYPRE_MEMORY_HOST);
+            data.boxsizes = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
          }
          else if ( strcmp(key, "GridSetExtents:") == 0 )
          {
@@ -194,14 +194,14 @@ ReadData( char  *filename,
          {
             data.nmatrices = strtol(sdata_ptr, &sdata_ptr, 10);
             n = data.nmatrices;
-            data.matrix_sizes     = hypre_CTAlloc(HYPRE_Int, n);
-            data.matrix_rstrides  = hypre_CTAlloc(Index, n);
-            data.matrix_dstrides  = hypre_CTAlloc(Index, n);
-            data.matrix_offsets   = hypre_CTAlloc(Index *, n);
-            data.matrix_values    = hypre_CTAlloc(HYPRE_Real *, n);
-            data.matrix_ncentries = hypre_CTAlloc(HYPRE_Int, n);
-            data.matrix_centries  = hypre_CTAlloc(HYPRE_Int *, n);
-            data.matrix_symmetric = hypre_CTAlloc(HYPRE_Int, n);
+            data.matrix_sizes     = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+            data.matrix_rstrides  = hypre_CTAlloc(Index, n, HYPRE_MEMORY_HOST);
+            data.matrix_dstrides  = hypre_CTAlloc(Index, n, HYPRE_MEMORY_HOST);
+            data.matrix_offsets   = hypre_CTAlloc(Index *, n, HYPRE_MEMORY_HOST);
+            data.matrix_values    = hypre_CTAlloc(HYPRE_Real *, n, HYPRE_MEMORY_HOST);
+            data.matrix_ncentries = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+            data.matrix_centries  = hypre_CTAlloc(HYPRE_Int *, n, HYPRE_MEMORY_HOST);
+            data.matrix_symmetric = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
          }
          else if ( strcmp(key, "MatrixCreate:") == 0 )
          {
@@ -210,8 +210,8 @@ ReadData( char  *filename,
             SScanIntArray(sdata_ptr, &sdata_ptr, ndim, data.matrix_rstrides[mi]);
             SScanIntArray(sdata_ptr, &sdata_ptr, ndim, data.matrix_dstrides[mi]);
             n = data.matrix_sizes[mi];
-            data.matrix_offsets[mi] = hypre_CTAlloc(Index, n);
-            data.matrix_values[mi]  = hypre_CTAlloc(HYPRE_Real, n);
+            data.matrix_offsets[mi] = hypre_CTAlloc(Index, n, HYPRE_MEMORY_HOST);
+            data.matrix_values[mi]  = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
          }
          else if ( strcmp(key, "MatrixSetCoeff:") == 0 )
          {
@@ -226,7 +226,7 @@ ReadData( char  *filename,
             mi = strtol(sdata_ptr, &sdata_ptr, 10);
             data.matrix_ncentries[mi] = strtol(sdata_ptr, &sdata_ptr, 10);
             n = data.matrix_ncentries[mi];
-            data.matrix_centries[mi] = hypre_CTAlloc(HYPRE_Int, n);
+            data.matrix_centries[mi] = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
             SScanIntArray(sdata_ptr, &sdata_ptr, n, data.matrix_centries[mi]);
          }
          else if ( strcmp(key, "MatrixSetSymmetric:") == 0 )
@@ -238,8 +238,8 @@ ReadData( char  *filename,
          {
             data.nvectors = strtol(sdata_ptr, &sdata_ptr, 10);
             n = data.nvectors;
-            data.vector_strides = hypre_CTAlloc(Index, n);
-            data.vector_values  = hypre_CTAlloc(HYPRE_Real, n);
+            data.vector_strides = hypre_CTAlloc(Index, n, HYPRE_MEMORY_HOST);
+            data.vector_values  = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
          }
          else if ( strcmp(key, "VectorCreate:") == 0 )
          {
@@ -252,7 +252,7 @@ ReadData( char  *filename,
       sdata_line += strlen(sdata_line) + 1;
    }
 
-   hypre_TFree(sdata);
+   hypre_TFree(sdata, HYPRE_MEMORY_HOST);
 
    *data_ptr = data;
    return 0;
@@ -376,9 +376,9 @@ DistributeData( Data       global_data,
    if (s > 1)
    {
       size = s*data.nboxes;
-      data.ilowers = hypre_TReAlloc(data.ilowers, Index, size);
-      data.iuppers = hypre_TReAlloc(data.iuppers, Index, size);
-      data.boxsizes = hypre_TReAlloc(data.boxsizes, HYPRE_Int, size);
+      data.ilowers = hypre_TReAlloc(data.ilowers, Index, size, HYPRE_MEMORY_HOST);
+      data.iuppers = hypre_TReAlloc(data.iuppers, Index, size, HYPRE_MEMORY_HOST);
+      data.boxsizes = hypre_TReAlloc(data.boxsizes, HYPRE_Int, size, HYPRE_MEMORY_HOST);
       for (box = 0; box < data.nboxes; box++)
       {
          for (d = 0; d < ndim; d++)
@@ -439,9 +439,9 @@ DistributeData( Data       global_data,
 
    if (data.nboxes == 0)
    {
-      hypre_TFree(data.ilowers);
-      hypre_TFree(data.iuppers);
-      hypre_TFree(data.boxsizes);
+      hypre_TFree(data.ilowers, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.iuppers, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.boxsizes, HYPRE_MEMORY_HOST);
       data.max_boxsize = 0;
    }
 
@@ -460,33 +460,33 @@ DestroyData( Data data )
 
    if (data.nboxes > 0)
    {
-      hypre_TFree(data.ilowers);
-      hypre_TFree(data.iuppers);
-      hypre_TFree(data.boxsizes);
+      hypre_TFree(data.ilowers, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.iuppers, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.boxsizes, HYPRE_MEMORY_HOST);
    }
 
    if (data.nmatrices > 0)
    {
       for (mi = 0; mi < data.nmatrices; mi++)
       {
-         hypre_TFree(data.matrix_offsets[mi]);
-         hypre_TFree(data.matrix_values[mi]);
-         hypre_TFree(data.matrix_centries[mi]);
+         hypre_TFree(data.matrix_offsets[mi], HYPRE_MEMORY_HOST);
+         hypre_TFree(data.matrix_values[mi], HYPRE_MEMORY_HOST);
+         hypre_TFree(data.matrix_centries[mi], HYPRE_MEMORY_HOST);
       }
-      hypre_TFree(data.matrix_sizes);
-      hypre_TFree(data.matrix_rstrides);
-      hypre_TFree(data.matrix_dstrides);
-      hypre_TFree(data.matrix_offsets);
-      hypre_TFree(data.matrix_values);
-      hypre_TFree(data.matrix_ncentries);
-      hypre_TFree(data.matrix_centries);
-      hypre_TFree(data.matrix_symmetric);
+      hypre_TFree(data.matrix_sizes, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.matrix_rstrides, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.matrix_dstrides, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.matrix_offsets, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.matrix_values, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.matrix_ncentries, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.matrix_centries, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.matrix_symmetric, HYPRE_MEMORY_HOST);
    }
 
    if (data.nvectors > 0)
    {
-      hypre_TFree(data.vector_strides);
-      hypre_TFree(data.vector_values);
+      hypre_TFree(data.vector_strides, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.vector_values, HYPRE_MEMORY_HOST);
    }
 
    return 0;
@@ -545,6 +545,7 @@ PrintUsage( char      *progname,
       hypre_printf("\n");
       hypre_printf("  -mat-vec <A> <x> <y> : compute A*x + y\n");
       hypre_printf("  -matTvec <A> <x> <y> : compute A^T*x + y\n");
+      hypre_printf("  -ab      <a> <b>     : alpha/beta values for matvec (default = 1)\n");
       hypre_printf("\n");
       hypre_printf("  -mat-mat <n> <A>[T] <B>[T] ... : compute A*B*... or A^T*B*..., etc. \n");
       hypre_printf("                                 : for n possibly transposed matrices \n");
@@ -577,7 +578,7 @@ main( hypre_int  argc,
    HYPRE_StructVector   *vectors;
    HYPRE_StructMatrix    M;
 
-   HYPRE_Real           *values;
+   HYPRE_Real           *values, alpha, beta;
 
    HYPRE_Int             num_procs, myid, outlev, ierr;
    HYPRE_Int             time_index;
@@ -596,8 +597,6 @@ main( hypre_int  argc,
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
-
-   hypre_InitMemoryDebug(myid);
 
    infile  = infile_default;
    outfile = outfile_default;
@@ -650,6 +649,9 @@ main( hypre_int  argc,
    do_matvec = 0;
    do_matvecT = 0;
    do_matmat = 0;
+
+   alpha = 1.0;
+   beta  = 1.0;
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -713,17 +715,23 @@ main( hypre_int  argc,
          mv_x = atoi(argv[arg_index++]);
          mv_y = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-ab") == 0 )
+      {
+         arg_index++;
+         alpha = atof(argv[arg_index++]);
+         beta  = atof(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-mat-mat") == 0 )
       {
          arg_index++;
          do_matmat = 1;
          nterms = atoi(argv[arg_index++]);
-         terms = hypre_CTAlloc(HYPRE_Int, nterms);
-         trans = hypre_CTAlloc(HYPRE_Int, nterms);
+         terms = hypre_CTAlloc(HYPRE_Int, nterms, HYPRE_MEMORY_HOST);
+         trans = hypre_CTAlloc(HYPRE_Int, nterms, HYPRE_MEMORY_HOST);
          for (i = 0; i < nterms; i++)
          {
             transposechar = ' ';
-            sscanf(argv[arg_index++], "%d%c", &terms[i], &transposechar);
+            hypre_sscanf(argv[arg_index++], "%d%c", &terms[i], &transposechar);
             if (transposechar == 'T')
             {
                trans[i] = 1;
@@ -797,21 +805,19 @@ main( hypre_int  argc,
     * Set up the matrices and vectors
     *-----------------------------------------------------------*/
 
-   values = hypre_TAlloc(HYPRE_Real, data.max_boxsize);
+   values = hypre_TAlloc(HYPRE_Real, data.max_boxsize, HYPRE_MEMORY_HOST);
 
-   stencils = hypre_CTAlloc(HYPRE_StructStencil, data.nmatrices);
-   matrices = hypre_CTAlloc(HYPRE_StructMatrix, data.nmatrices);
+   stencils = hypre_CTAlloc(HYPRE_StructStencil, data.nmatrices, HYPRE_MEMORY_HOST);
+   matrices = hypre_CTAlloc(HYPRE_StructMatrix, data.nmatrices, HYPRE_MEMORY_HOST);
    for (mi = 0; mi < data.nmatrices; mi++)
    {
       HYPRE_StructStencilCreate(ndim, data.matrix_sizes[mi], &stencils[mi]);
       for (ei = 0; ei < data.matrix_sizes[mi]; ei++)
       {
-         HYPRE_StructStencilSetEntry(stencils[mi], ei,
-                                     data.matrix_offsets[mi][ei]);
+         HYPRE_StructStencilSetEntry(stencils[mi], ei, data.matrix_offsets[mi][ei]);
       }
 
-      HYPRE_StructMatrixCreate(
-         hypre_MPI_COMM_WORLD, grid, stencils[mi], &matrices[mi]);
+      HYPRE_StructMatrixCreate(hypre_MPI_COMM_WORLD, grid, stencils[mi], &matrices[mi]);
       HYPRE_StructMatrixSetRangeStride(matrices[mi], data.matrix_rstrides[mi]);
       HYPRE_StructMatrixSetDomainStride(matrices[mi], data.matrix_dstrides[mi]);
       HYPRE_StructMatrixSetSymmetric(matrices[mi], data.matrix_symmetric[mi]);
@@ -869,8 +875,8 @@ main( hypre_int  argc,
       hypre_StructMatrixClearBoundary(matrices[mi]);
    }
 
-   vgrids = hypre_CTAlloc(HYPRE_StructGrid, data.nvectors);
-   vectors = hypre_CTAlloc(HYPRE_StructVector, data.nvectors);
+   vgrids = hypre_CTAlloc(HYPRE_StructGrid, data.nvectors, HYPRE_MEMORY_HOST);
+   vectors = hypre_CTAlloc(HYPRE_StructVector, data.nvectors, HYPRE_MEMORY_HOST);
    for (vi = 0; vi < data.nvectors; vi++)
    {
       HYPRE_StructGridCoarsen(grid, data.vector_strides[vi], &vgrids[vi]);
@@ -890,7 +896,7 @@ main( hypre_int  argc,
       HYPRE_StructVectorAssemble(vectors[vi]);
    }
 
-   hypre_TFree(values);
+   hypre_TFree(values, HYPRE_MEMORY_HOST);
 
    /*-----------------------------------------------------------
     * Print matrices and vectors
@@ -968,11 +974,11 @@ main( hypre_int  argc,
          hypre_StructVectorForget(vectors[mv_y]);
          HYPRE_StructVectorPrint("zvec-y-resize1", vectors[mv_y], 1);
 
-         hypre_TFree(num_ghost);
+         hypre_TFree(num_ghost, HYPRE_MEMORY_HOST);
       }
 #endif
 
-      HYPRE_StructMatrixMatvec(1.0, matrices[mv_A], vectors[mv_x], 1.0, vectors[mv_y]);
+      HYPRE_StructMatrixMatvec(alpha, matrices[mv_A], vectors[mv_x], beta, vectors[mv_y]);
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Matrix-vector multiply", hypre_MPI_COMM_WORLD);
@@ -996,7 +1002,7 @@ main( hypre_int  argc,
       time_index = hypre_InitializeTiming("Transpose matrix-vector multiply");
       hypre_BeginTiming(time_index);
 
-      HYPRE_StructMatrixMatvecT(1.0, matrices[mv_A], vectors[mv_x], 1.0, vectors[mv_y]);
+      HYPRE_StructMatrixMatvecT(alpha, matrices[mv_A], vectors[mv_x], beta, vectors[mv_y]);
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Transpose matrix-vector multiply", hypre_MPI_COMM_WORLD);
@@ -1020,7 +1026,7 @@ main( hypre_int  argc,
       time_index = hypre_InitializeTiming("Matrix-matrix multiply");
       hypre_BeginTiming(time_index);
 
-      hypre_StructMatmult(data.nmatrices, matrices, nterms, terms, trans, NULL, &M);
+      hypre_StructMatmult(data.nmatrices, matrices, nterms, terms, trans, &M);
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Matrix-matrix multiply", hypre_MPI_COMM_WORLD);
@@ -1034,8 +1040,8 @@ main( hypre_int  argc,
       }
 
       HYPRE_StructMatrixDestroy(M);
-      hypre_TFree(terms);
-      hypre_TFree(trans);
+      hypre_TFree(terms, HYPRE_MEMORY_HOST);
+      hypre_TFree(trans, HYPRE_MEMORY_HOST);
    }
 
    /*-----------------------------------------------------------
@@ -1048,15 +1054,15 @@ main( hypre_int  argc,
       HYPRE_StructStencilDestroy(stencils[mi]);
       HYPRE_StructMatrixDestroy(matrices[mi]);
    }
-   hypre_TFree(stencils);
-   hypre_TFree(matrices);
+   hypre_TFree(stencils, HYPRE_MEMORY_HOST);
+   hypre_TFree(matrices, HYPRE_MEMORY_HOST);
    for (vi = 0; vi < data.nvectors; vi++)
    {
       HYPRE_StructGridDestroy(vgrids[vi]);
       HYPRE_StructVectorDestroy(vectors[vi]);
    }
-   hypre_TFree(vgrids);
-   hypre_TFree(vectors);
+   hypre_TFree(vgrids, HYPRE_MEMORY_HOST);
+   hypre_TFree(vectors, HYPRE_MEMORY_HOST);
 
    DestroyData(data);
 

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
 #include "smg.h"
@@ -20,7 +15,7 @@
  * Wrapper for 2 and 3d CreateRAPOp routines which set up new coarse
  * grid structures.
  *--------------------------------------------------------------------------*/
- 
+
 hypre_StructMatrix *
 hypre_SMGCreateRAPOp( hypre_StructMatrix *R,
                       hypre_StructMatrix *A,
@@ -38,33 +33,33 @@ hypre_SMGCreateRAPOp( hypre_StructMatrix *R,
    stencil = hypre_StructMatrixStencil(A);
 
 #if OLDRAP
-   switch (hypre_StructStencilNDim(stencil)) 
+   switch (hypre_StructStencilNDim(stencil))
    {
       case 2:
          RAP = hypre_SMG2CreateRAPOp(R ,A, PT, coarse_grid);
          break;
-    
+
       case 3:
          RAP = hypre_SMG3CreateRAPOp(R ,A, PT, coarse_grid);
          break;
-   } 
+   }
 #endif
 
 #if NEWRAP
-   switch (hypre_StructStencilNDim(stencil)) 
+   switch (hypre_StructStencilNDim(stencil))
    {
       case 2:
          cdir = 1;
          RAP = hypre_SemiCreateRAPOp(R ,A, PT, coarse_grid, cdir,
                                      P_stored_as_transpose);
          break;
-    
+
       case 3:
          cdir = 2;
          RAP = hypre_SemiCreateRAPOp(R ,A, PT, coarse_grid, cdir,
                                      P_stored_as_transpose);
          break;
-   } 
+   }
 #endif
 
    return RAP;
@@ -72,9 +67,9 @@ hypre_SMGCreateRAPOp( hypre_StructMatrix *R,
 
 /*--------------------------------------------------------------------------
  * Wrapper for 2 and 3d, symmetric and non-symmetric routines to calculate
- * entries in RAP. Incomplete error handling at the moment. 
+ * entries in RAP. Incomplete error handling at the moment.
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
                      hypre_StructMatrix *A,
@@ -89,11 +84,28 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
 #endif
 
    hypre_StructStencil   *stencil;
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_StructMatrix    *Ac_tmp;
+   HYPRE_MemoryLocation   data_location_A = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
+   HYPRE_MemoryLocation   data_location_Ac = hypre_StructGridDataLocation(hypre_StructMatrixGrid(Ac));
+
+   if (data_location_A != data_location_Ac)
+   {
+      Ac_tmp = hypre_SMGCreateRAPOp(R, A, PT, hypre_StructMatrixGrid(Ac));
+      hypre_StructMatrixSymmetric(Ac_tmp) = hypre_StructMatrixSymmetric(Ac);
+      hypre_StructMatrixConstantCoefficient(Ac_tmp) = hypre_StructMatrixConstantCoefficient(Ac);
+      hypre_StructGridDataLocation(hypre_StructMatrixGrid(Ac)) = data_location_A;
+      HYPRE_StructMatrixInitialize(Ac_tmp);
+   }
+   else
+   {
+      Ac_tmp = Ac;
+   }
+#endif
 
    stencil = hypre_StructMatrixStencil(A);
-
 #if OLDRAP
-   switch (hypre_StructStencilNDim(stencil)) 
+   switch (hypre_StructStencilNDim(stencil))
    {
 
       case 2:
@@ -156,7 +168,7 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
 #endif
 
 #if NEWRAP
-   switch (hypre_StructStencilNDim(stencil)) 
+   switch (hypre_StructStencilNDim(stencil))
    {
 
       case 2:
@@ -173,8 +185,21 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
 
    }
 #endif
+
    hypre_StructMatrixAssemble(Ac);
+
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   if (data_location_A != data_location_Ac)
+   {
+
+     hypre_TMemcpy(hypre_StructMatrixDataConst(Ac), hypre_StructMatrixData(Ac_tmp),HYPRE_Complex,hypre_StructMatrixDataSize(Ac_tmp),HYPRE_MEMORY_HOST,HYPRE_MEMORY_DEVICE);
+      hypre_SetDeviceOff();
+      hypre_StructGridDataLocation(hypre_StructMatrixGrid(Ac)) = data_location_Ac;
+      hypre_StructMatrixAssemble(Ac);
+      hypre_SetDeviceOn();
+      hypre_StructMatrixDestroy(Ac_tmp);
+   }
+#endif
 
    return hypre_error_flag;
 }
-

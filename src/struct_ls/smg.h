@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -26,16 +21,16 @@
 typedef struct
 {
    MPI_Comm              comm;
-                      
+
    HYPRE_Int             memory_use;
    HYPRE_Real            tol;
    HYPRE_Int             max_iter;
    HYPRE_Int             rel_change;
    HYPRE_Int             zero_guess;
    HYPRE_Int             max_levels;  /* max_level <= 0 means no limit */
-                      
+
    HYPRE_Int             num_levels;
-                      
+
    HYPRE_Int             num_pre_relax;  /* number of pre relaxation sweeps */
    HYPRE_Int             num_post_relax; /* number of post relaxation sweeps */
 
@@ -47,7 +42,7 @@ typedef struct
 
    hypre_StructGrid    **grid_l;
    hypre_StructGrid    **PT_grid_l;
-                    
+
    HYPRE_Real           *data;
    hypre_StructMatrix  **A_l;
    hypre_StructMatrix  **PT_l;
@@ -76,7 +71,9 @@ typedef struct
    HYPRE_Int             logging;
    HYPRE_Real           *norms;
    HYPRE_Real           *rel_norms;
-
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_Int             devicelevel;
+#endif
 } hypre_SMGData;
 
 /*--------------------------------------------------------------------------

@@ -1,14 +1,10 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -928,98 +924,6 @@ extern void hypre_F90_NAME(fhypre_structsmgsetprintlevel, FHYPRE_STRUCTSMGSETPRI
 #define HYPRE_StructSMGGetPrintLevel \
         hypre_F90_NAME(fhypre_structsmggetprintlevel, FHYPRE_STRUCTSMGGETPRINTLEVEL)
 extern void hypre_F90_NAME(fhypre_structsmggetprintlevel, FHYPRE_STRUCTSMGGETPRINTLEVEL)
-                          (hypre_F90_Obj *, HYPRE_Int *);
-
-
-
-#define HYPRE_StructSparseMSGCreate \
-        hypre_F90_NAME(fhypre_structsparsemsgcreate, FHYPRE_STRUCTSPARSEMSGCREATE)
-extern void hypre_F90_NAME(fhypre_structsparsemsgcreate, FHYPRE_STRUCTSPARSEMSGCREATE)
-                          (HYPRE_Int *, hypre_F90_Obj *);
-
-#define HYPRE_StructSparseMSGDestroy \
-        hypre_F90_NAME(fhypre_structsparsemsgdestroy, FHYPRE_STRUCTSPARSEMSGDESTROY)
-extern void hypre_F90_NAME(fhypre_structsparsemsgdestroy, FHYPRE_STRUCTSPARSEMSGDESTROY)
-                          (hypre_F90_Obj *);
-
-#define HYPRE_StructSparseMSGSetup \
-        hypre_F90_NAME(fhypre_structsparsemsgsetup, FHYRPE_STRUCTSPARSEMSGSETUP)
-extern void hypre_F90_NAME(fhypre_structsparsemsgsetup, FHYRPE_STRUCTSPARSEMSGSETUP)
-                          (hypre_F90_Obj *, hypre_F90_Obj *, hypre_F90_Obj *, hypre_F90_Obj *);
-
-#define HYPRE_StructSparseMSGSolve \
-        hypre_F90_NAME(fhypre_structsparsemsgsolve, FHYPRE_STRUCTSPARSEMSGSOLVE)
-extern void hypre_F90_NAME(fhypre_structsparsemsgsolve, FHYPRE_STRUCTSPARSEMSGSOLVE)
-                          (hypre_F90_Obj *, hypre_F90_Obj *, hypre_F90_Obj *, hypre_F90_Obj *);
-
-#define HYPRE_StructSparseMSGSetJump \
-        hypre_F90_NAME(fhypre_structsparsemsgsetjump, FHYPRE_STRUCTSPARSEMSGSETJUMP)
-extern void hypre_F90_NAME(fhypre_structsparsemsgsetjump, FHYPRE_STRUCTSPARSEMSGSETJUMP)
-                          (hypre_F90_Obj *, HYPRE_Int *);
-
-#define HYPRE_StructSparseMSGSetTol \
-        hypre_F90_NAME(fhypre_structsparsemsgsettol, FHYPRE_STRUCTSPARSEMSGSETTOL)
-extern void hypre_F90_NAME(fhypre_structsparsemsgsettol, FHYPRE_STRUCTSPARSEMSGSETTOL)
-                          (hypre_F90_Obj *, HYPRE_Real *);
-
-#define HYPRE_StructSparseMSGSetMaxIter \
-        hypre_F90_NAME(fhypre_structsparsemsgsetmaxite, FHYPRE_STRUCTSPARSEMSGSETMAXITE)
-extern void hypre_F90_NAME(fhypre_structsparsemsgsetmaxite, FHYPRE_STRUCTSPARSEMSGSETMAXITE)
-                          (hypre_F90_Obj *, HYPRE_Int *);
-
-#define HYPRE_StructSparseMSGSetRelChange \
-        hypre_F90_NAME(fhypre_structsparsemsgsetrelcha, FHYPRE_STRUCTSPARSEMSGSETRELCHA)
-extern void hypre_F90_NAME(fhypre_structsparsemsgsetrelcha, FHYPRE_STRUCTSPARSEMSGSETRELCHA)
-                          (hypre_F90_Obj *, HYPRE_Int *);
-
-#define HYPRE_StructSparseMSGSetZeroGuess \
-        hypre_F90_NAME(fhypre_structsparsemsgsetzerogu, FHYPRE_STRUCTSPARSEMSGSETZEROGU)
-extern void hypre_F90_NAME(fhypre_structsparsemsgsetzerogu, FHYPRE_STRUCTSPARSEMSGSETZEROGU)
-                          (hypre_F90_Obj *);
-
-#define HYPRE_StructSparseMSGSetNonZeroGuess \
-        hypre_F90_NAME(fhypre_structsparsemsgsetnonzer, FHYPRE_STRUCTSPARSEMSGSETNONZER)
-extern void hypre_F90_NAME(fhypre_structsparsemsgsetnonzer, FHYPRE_STRUCTSPARSEMSGSETNONZER)
-                          (hypre_F90_Obj *);
-
-#define HYPRE_StructSparseMSGGetNumIterations \
-        hypre_F90_NAME(fhypre_structsparsemsggetnumite, FHYPRE_STRUCTSPARSEMSGGETNUMITE)
-extern void hypre_F90_NAME(fhypre_structsparsemsggetnumite, FHYPRE_STRUCTSPARSEMSGGETNUMITE)
-                          (hypre_F90_Obj *, HYPRE_Int *);
-
-#define HYPRE_StructSparseMSGGetFinalRelativeResidualNorm \
-        hypre_F90_NAME(fhypre_structsparsemsggetfinalr, FHYRPE_STRUCTSPARSEMSGGETFINALR)
-extern void hypre_F90_NAME(fhypre_structsparsemsggetfinalr, FHYRPE_STRUCTSPARSEMSGGETFINALR)
-                          (hypre_F90_Obj *, HYPRE_Real *);
-
-#define HYPRE_StructSparseMSGSetRelaxType \
-        hypre_F90_NAME(fhypre_structsparsemsgsetrelaxt, FHYPRE_STRUCTSPARSEMSGSETRELAXT)
-extern void hypre_F90_NAME(fhypre_structsparsemsgsetrelaxt, FHYPRE_STRUCTSPARSEMSGSETRELAXT)
-                          (hypre_F90_Obj *, HYPRE_Int *);
-
-#define HYPRE_StructSparseMSGSetNumPreRelax \
-        hypre_F90_NAME(fhypre_structsparsemsgsetnumpre, FHYPRE_STRUCTSPARSEMSGSETNUMPRE)
-extern void hypre_F90_NAME(fhypre_structsparsemsgsetnumpre, FHYPRE_STRUCTSPARSEMSGSETNUMPRE)
-                          (hypre_F90_Obj *, HYPRE_Int *);
-
-#define HYPRE_StructSparseMSGSetNumPostRelax \
-        hypre_F90_NAME(fhypre_structsparsemsgsetnumpos, FHYPRE_STRUCTSPARSEMSGSETNUMPOS)
-extern void hypre_F90_NAME(fhypre_structsparsemsgsetnumpos, FHYPRE_STRUCTSPARSEMSGSETNUMPOS)
-                          (hypre_F90_Obj *, HYPRE_Int *);
-
-#define HYPRE_StructSparseMSGSetNumFineRelax \
-        hypre_F90_NAME(fhypre_structsparsemsgsetnumfin, FHYPRE_STRUCTSPARSEMSGSETNUMFIN)
-extern void hypre_F90_NAME(fhypre_structsparsemsgsetnumfin, FHYPRE_STRUCTSPARSEMSGSETNUMFIN)
-                          (hypre_F90_Obj *, HYPRE_Int *);
-
-#define HYPRE_StructSparseMSGSetLogging \
-        hypre_F90_NAME(fhypre_structsparsemsgsetloggin, FHYPRE_STRUCTSPARSEMSGSETLOGGIN)
-extern void hypre_F90_NAME(fhypre_structsparsemsgsetloggin, FHYPRE_STRUCTSPARSEMSGSETLOGGIN)
-                          (hypre_F90_Obj *, HYPRE_Int *);
-
-#define HYPRE_StructSparseMSGSetPrintLevel \
-        hypre_F90_NAME(fhypre_structsparsemsgsetprintl, FHYPRE_STRUCTSPARSEMSGSETPRINTL)
-extern void hypre_F90_NAME(fhypre_structsparsemsgsetprintl, FHYPRE_STRUCTSPARSEMSGSETPRINTL)
                           (hypre_F90_Obj *, HYPRE_Int *);
 
 #ifdef __cplusplus

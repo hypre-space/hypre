@@ -1,19 +1,14 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2014,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_sstruct_mv.h"
 
-#define DEBUG_MATMULT 0
-#define DEBUG_MATCONV 0
+//#define DEBUG_MATMULT
+//#define DEBUG_MATCONV
 
 /*--------------------------------------------------------------------------
  * hypre_SStructMatmult
@@ -71,9 +66,10 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    HYPRE_Int                m, s;
    HYPRE_Int                part;
 
-#if DEBUG_MATCONV
+#if defined(HYPRE_DEBUG) && defined(DEBUG_MATCONV)
    HYPRE_Int myid;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+
+   hypre_MPI_Comm_rank(comm, &myid);
 #endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -89,20 +85,23 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    /*-------------------------------------------------------
     * Compute structured component
     *-------------------------------------------------------*/
-   smatrices   = hypre_TAlloc(hypre_StructMatrix *, nmatrices);
-   smatrices_M = hypre_TAlloc(hypre_StructMatrix *, nparts);
-   stencils_M  = hypre_TAlloc(hypre_SStructStencil *, nparts);
+   smatrices   = hypre_TAlloc(hypre_StructMatrix *, nmatrices, HYPRE_MEMORY_HOST);
+   smatrices_M = hypre_TAlloc(hypre_StructMatrix *, nparts, HYPRE_MEMORY_HOST);
+   stencils_M  = hypre_TAlloc(hypre_SStructStencil *, nparts, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
       for (m = 0; m < nmatrices; m++)
       {
          pmatrix = hypre_SStructMatrixPMatrix(ssmatrices[m], part);
-         smatrices[m] = hypre_SStructPMatrixSMatrix(pmatrix, vi, vj);
+         if (hypre_SStructPMatrixSMatrices(pmatrix))
+         {
+            smatrices[m] = hypre_SStructPMatrixSMatrix(pmatrix, vi, vj);
+         }
       }
 
       /* Multiply StructMatrices (part, vi, vj)-block */
       hypre_StructMatmult(nmatrices, smatrices, nterms, terms,
-                          transposes, NULL, &smatrices_M[part]);
+                          transposes, &smatrices_M[part]);
 
       /* Create SStructStencil object for M */
       stencil_M       = hypre_StructMatrixStencil(smatrices_M[part]);
@@ -143,8 +142,11 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
    for (part = 0; part < nparts; part++)
    {
       pmatrix = hypre_SStructMatrixPMatrix(M, part);
-      hypre_StructMatrixDestroy(hypre_SStructPMatrixSMatrix(pmatrix, vi, vj));
-      hypre_SStructPMatrixSMatrix(pmatrix, vi, vj) = hypre_StructMatrixRef(smatrices_M[part]);
+      if (hypre_SStructPMatrixSMatrices(pmatrix))
+      {
+         hypre_StructMatrixDestroy(hypre_SStructPMatrixSMatrix(pmatrix, vi, vj));
+         hypre_SStructPMatrixSMatrix(pmatrix, vi, vj) = hypre_StructMatrixRef(smatrices_M[part]);
+      }
    }
 
    ij_M = hypre_SStructMatrixIJMatrix(M);
@@ -166,9 +168,9 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
       hypre_StructMatrixDestroy(smatrices_M[part]);
       HYPRE_SStructStencilDestroy(stencils_M[part]);
    }
-   hypre_TFree(smatrices);
-   hypre_TFree(smatrices_M);
-   hypre_TFree(stencils_M);
+   hypre_TFree(smatrices, HYPRE_MEMORY_HOST);
+   hypre_TFree(smatrices_M, HYPRE_MEMORY_HOST);
+   hypre_TFree(stencils_M, HYPRE_MEMORY_HOST);
 
    /* Set pointer to output matrix */
    *M_ptr = M;
@@ -180,7 +182,10 @@ hypre_SStructMatmult( HYPRE_Int             nmatrices,
 
 /*--------------------------------------------------------------------------
  * hypre_SStructMatmultU
+ *
+ * Computes the unstructured component of the SStructMatmult.
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SStructMatmultU( HYPRE_Int             nmatrices,
                        hypre_SStructMatrix **ssmatrices,
@@ -204,8 +209,8 @@ hypre_SStructMatmultU( HYPRE_Int             nmatrices,
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /* Temporary work matrices */
-   parcsr = hypre_TAlloc(hypre_ParCSRMatrix *, 3);
-   ij_sA  = hypre_TAlloc(hypre_IJMatrix *, nmatrices);
+   parcsr = hypre_TAlloc(hypre_ParCSRMatrix *, 3, HYPRE_MEMORY_HOST);
+   ij_sA  = hypre_TAlloc(hypre_IJMatrix *, nmatrices, HYPRE_MEMORY_HOST);
    for (m = 0; m < nmatrices; m++)
    {
       ij_sA[m] = NULL;
@@ -222,7 +227,7 @@ hypre_SStructMatmultU( HYPRE_Int             nmatrices,
    hypre_SStructMatrixBoundaryToUMatrix(ssmatrices[t], parcsr_uM, &ij_sA[t]);
    HYPRE_IJMatrixGetObject(ij_sA[t], (void **) &parcsr_sMold);
 
-#if DEBUG_MATMULT
+#if defined(HYPRE_DEBUG) && defined(DEBUG_MATMULT)
    char matname[64];
 
    hypre_ParCSRMatrixPrintIJ(parcsr_uMold, 0, 0, "parcsr_uP");
@@ -240,7 +245,7 @@ hypre_SStructMatmultU( HYPRE_Int             nmatrices,
          hypre_SStructMatrixBoundaryToUMatrix(ssmatrices[t], parcsr_uMold, &ij_sA[t]);
       }
       HYPRE_IJMatrixGetObject(ij_sA[t], (void **) &parcsr_sA);
-#if DEBUG_MATMULT
+#if defined(HYPRE_DEBUG) && defined(DEBUG_MATMULT)
       hypre_sprintf(matname, "parcsr_sA_%d", m);
       hypre_ParCSRMatrixPrintIJ(parcsr_sA, 0, 0, matname);
 #endif
@@ -254,7 +259,7 @@ hypre_SStructMatmultU( HYPRE_Int             nmatrices,
       {
          parcsr[0] = hypre_ParMatmul(parcsr_sA, parcsr_uMold);
       }
-#if DEBUG_MATMULT
+#if defined(HYPRE_DEBUG) && defined(DEBUG_MATMULT)
       hypre_sprintf(matname, "parcsr_0a_%d", m);
       hypre_ParCSRMatrixPrintIJ(parcsr[0], 0, 0, matname);
 #endif
@@ -262,7 +267,7 @@ hypre_SStructMatmultU( HYPRE_Int             nmatrices,
       /* 2) Compute uA_n*uMold */
       ijmatrix = hypre_SStructMatrixIJMatrix(ssmatrices[t]);
       HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uA);
-#if DEBUG_MATMULT
+#if defined(HYPRE_DEBUG) && defined(DEBUG_MATMULT)
       hypre_sprintf(matname, "parcsr_uA_%d", m);
       hypre_ParCSRMatrixPrintIJ(parcsr_uA, 0, 0, matname);
 #endif
@@ -274,7 +279,7 @@ hypre_SStructMatmultU( HYPRE_Int             nmatrices,
       {
          parcsr[1] = hypre_ParMatmul(parcsr_uA, parcsr_uMold);
       }
-#if DEBUG_MATMULT
+#if defined(HYPRE_DEBUG) && defined(DEBUG_MATMULT)
       hypre_sprintf(matname, "parcsr_1_%d", m);
       hypre_ParCSRMatrixPrintIJ(parcsr[1], 0, 0, matname);
 #endif
@@ -285,8 +290,8 @@ hypre_SStructMatmultU( HYPRE_Int             nmatrices,
       }
 
       /* 3) Compute (sA_n*uMold + uA_n*uMold) */
-      hypre_ParcsrAdd(1.0, parcsr[0], 1.0, parcsr[1], &parcsr[2]);
-#if DEBUG_MATMULT
+      hypre_ParCSRMatrixAdd(1.0, parcsr[0], 1.0, parcsr[1], &parcsr[2]);
+#if defined(HYPRE_DEBUG) && defined(DEBUG_MATMULT)
       hypre_sprintf(matname, "parcsr_2_%d", m);
       hypre_ParCSRMatrixPrintIJ(parcsr[2], 0, 0, matname);
 #endif
@@ -304,14 +309,14 @@ hypre_SStructMatmultU( HYPRE_Int             nmatrices,
       {
          parcsr[0] = hypre_ParMatmul(parcsr_uA, parcsr_sMold);
       }
-#if DEBUG_MATMULT
+#if defined(HYPRE_DEBUG) && defined(DEBUG_MATMULT)
       hypre_sprintf(matname, "parcsr_0b_%d", m);
       hypre_ParCSRMatrixPrintIJ(parcsr[0], 0, 0, matname);
 #endif
 
       /* 5) Compute (uA_n*uMold + sA_n*uMold + uA_n*uMold) */
-      hypre_ParcsrAdd(1.0, parcsr[0], 1.0, parcsr[2], &parcsr_uM);
-#if DEBUG_MATMULT
+      hypre_ParCSRMatrixAdd(1.0, parcsr[0], 1.0, parcsr[2], &parcsr_uM);
+#if defined(HYPRE_DEBUG) && defined(DEBUG_MATMULT)
       hypre_sprintf(matname, "parcsr_uM_%d", m);
       hypre_ParCSRMatrixPrintIJ(parcsr_uM, 0, 0, matname);
 #endif
@@ -329,7 +334,7 @@ hypre_SStructMatmultU( HYPRE_Int             nmatrices,
       {
          parcsr_sM = hypre_ParMatmul(parcsr_sA, parcsr_sMold);
       }
-#if DEBUG_MATMULT
+#if defined(HYPRE_DEBUG) && defined(DEBUG_MATMULT)
       hypre_sprintf(matname, "parcsr_sM_%d", m);
       hypre_ParCSRMatrixPrintIJ(parcsr_sM, 0, 0, matname);
 #endif
@@ -345,7 +350,7 @@ hypre_SStructMatmultU( HYPRE_Int             nmatrices,
    }
 
    /* Free temporary work matrices */
-   hypre_TFree(parcsr);
+   hypre_TFree(parcsr, HYPRE_MEMORY_HOST);
    hypre_ParCSRMatrixDestroy(parcsr_sM);
    for (m = 0; m < nmatrices; m++)
    {
@@ -354,7 +359,7 @@ hypre_SStructMatmultU( HYPRE_Int             nmatrices,
          HYPRE_IJMatrixDestroy(ij_sA[m]);
       }
    }
-   hypre_TFree(ij_sA);
+   hypre_TFree(ij_sA, HYPRE_MEMORY_HOST);
 
    *uM_ptr = parcsr_uM;
 
@@ -391,7 +396,6 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
                                       hypre_ParCSRMatrix    *B,
                                       hypre_IJMatrix       **ij_Ahat_ptr)
 {
-   MPI_Comm               comm     = hypre_SStructMatrixComm(A);
    HYPRE_Int              ndim     = hypre_SStructMatrixNDim(A);
    HYPRE_Int              nparts   = hypre_SStructMatrixNParts(A);
    HYPRE_Int             *Sentries = hypre_SStructMatrixSEntries(A);
@@ -421,17 +425,16 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    hypre_Index            ustride;
    hypre_Index            loop_size;
    hypre_IndexRef         start;
-   hypre_IndexRef         ilower, iupper;
 
    HYPRE_Int              nrows;
    HYPRE_Int              ncols;
    HYPRE_Int             *row_sizes;
    HYPRE_Complex         *values;
 
+   HYPRE_BigInt           sizes[4];
    HYPRE_Int              entry, part, var, nvars;
    HYPRE_Int              nnzs;
-   HYPRE_Int              sizes[4];
-   HYPRE_Int              nvalues, i, j, k, kk, m, mi;
+   HYPRE_Int              nvalues, i, j, k, kk, m;
    HYPRE_Int              num_boxes;
    HYPRE_Int              pbnd_boxaa_size;
    HYPRE_Int              convert_boxaa_size;
@@ -442,28 +445,30 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-#if DEBUG_MATCONV
+#if defined(HYPRE_DEBUG) && defined(DEBUG_MATCONV)
+   MPI_Comm  comm = hypre_SStructMatrixComm(A);
    HYPRE_Int myid;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+
+   hypre_MPI_Comm_rank(comm, &myid);
 #endif
 
    /* Get row and column ranges */
    HYPRE_IJMatrixGetLocalRange(ij_A, &sizes[0], &sizes[1], &sizes[2], &sizes[3]);
-   nrows = sizes[1] - sizes[0] + 1;
-   ncols = sizes[3] - sizes[2] + 1;
+   nrows = (HYPRE_Int) (sizes[1] - sizes[0] + 1);
+   ncols = (HYPRE_Int) (sizes[3] - sizes[2] + 1);
 
    /* Find boxes to be converted */
    HYPRE_ANNOTATE_REGION_BEGIN("%s", "Find boxes");
    convert_box   = hypre_BoxCreate(ndim);
    grow_box      = hypre_BoxCreate(ndim);
    ghost_box     = hypre_BoxCreate(ndim);
-   convert_boxaa = hypre_TAlloc(hypre_BoxArrayArray **, nparts);
+   convert_boxaa = hypre_TAlloc(hypre_BoxArrayArray **, nparts, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
       pgrid = hypre_SStructGridPGrid(grid, part);
       nvars = hypre_SStructPGridNVars(pgrid);
 
-      convert_boxaa[part] = hypre_TAlloc(hypre_BoxArrayArray *, nvars);
+      convert_boxaa[part] = hypre_TAlloc(hypre_BoxArrayArray *, nvars, HYPRE_MEMORY_HOST);
       for (var = 0; var < nvars; var++)
       {
          sgrid = hypre_SStructPGridSGrid(pgrid, var);
@@ -506,7 +511,7 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
                {
                   box = hypre_BoxArrayBox(pbnd_boxa, j);
                   hypre_CopyBox(box, grow_box);
-                  hypre_BoxGrowByValue(grow_box, 0);
+                  hypre_BoxGrowByValue(grow_box, 1);
                   hypre_IntersectBoxes(grow_box, grid_box, convert_box);
 
                   hypre_AppendBox(convert_box, convert_boxa);
@@ -532,7 +537,7 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_ANNOTATE_REGION_BEGIN("%s", "Set rowsizes");
    nvalues = 0; m = 0;
    hypre_SetIndex(ustride, 1);
-   row_sizes = hypre_CTAlloc(HYPRE_Int, nrows);
+   row_sizes = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
       pA    = hypre_SStructMatrixPMatrix(A, part);
@@ -564,7 +569,7 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
             grid_box_id    = hypre_StructGridID(sgrid, k);
 
             /* Exit in case of non-stencil coupling */
-            if (convert_box_id > 0)
+            if (convert_box_id > -1)
             {
                while (grid_box_id != convert_box_id)
                {
@@ -598,10 +603,6 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
                   hypre_BoxGetSize(convert_box, loop_size);
 
                   hypre_BoxLoop1Begin(ndim, loop_size, ghost_box, start, ustride, mi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop1For(mi)
                   {
                      row_sizes[m + mi] = nnzs;
                   }
@@ -640,15 +641,14 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
 
    /* Create and initialize ij_Ahat */
    HYPRE_ANNOTATE_REGION_BEGIN("%s", "Create Matrix");
-   HYPRE_IJMatrixCreate(comm, sizes[0], sizes[1], sizes[2], sizes[3], &ij_Ahat);
-   HYPRE_IJMatrixSetObjectType(ij_Ahat, HYPRE_PARCSR);
+   HYPRE_IJMatrixPartialClone(ij_A, &ij_Ahat);
    hypre_AuxParCSRMatrixCreate(&aux_matrix, nrows, ncols, row_sizes);
    hypre_IJMatrixTranslator(ij_Ahat) = aux_matrix;
    HYPRE_IJMatrixInitialize(ij_Ahat);
    HYPRE_ANNOTATE_REGION_END("%s", "Create Matrix");
 
    /* Allocate memory */
-   values = hypre_CTAlloc(HYPRE_Complex, nvalues);
+   values = hypre_CTAlloc(HYPRE_Complex, nvalues, HYPRE_MEMORY_HOST);
 
    /* Set entries of ij_Ahat */
    for (part = 0; part < nparts; part++)
@@ -678,15 +678,15 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
             hypre_ForBoxI(j, convert_boxa)
             {
                convert_box = hypre_BoxArrayBox(convert_boxa, j);
-               ilower = hypre_BoxIMin(convert_box);
-               iupper = hypre_BoxIMax(convert_box);
 
                hypre_assert(hypre_BoxVolume(convert_box) > 0);
-               hypre_assert(hypre_BoxVolume(convert_box) < nvalues);
+               hypre_assert(hypre_BoxVolume(convert_box) <= nvalues);
 
-#if DEBUG_MATCONV
+#if defined(HYPRE_DEBUG) && defined(DEBUG_MATCONV)
                if (!myid)
                {
+                  hypre_IndexRef  ilower = hypre_BoxIMin(convert_box);
+                  hypre_IndexRef  iupper = hypre_BoxIMax(convert_box);
                   hypre_printf("Part %d - boxa %d - box %d - Converting %d entries - ",
                                part, i, j, hypre_BoxVolume(convert_box));
                   hypre_printf("(%d, %d, %d) x (%d, %d, %d)\n",
@@ -697,21 +697,21 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
 #endif
                /* GET values from this box */
                HYPRE_ANNOTATE_REGION_BEGIN("%s", "Get entries");
-               hypre_SStructPMatrixSetBoxValues(pA, ilower, iupper, var,
-                                                nSentries, Sentries, values, -1);
+               hypre_SStructPMatrixSetBoxValues(pA, convert_box, var,
+                                                nSentries, Sentries, convert_box, values, -1);
                HYPRE_ANNOTATE_REGION_END("%s", "Get entries");
 
-#if DEBUG_MATCONV
+#if defined(HYPRE_DEBUG) && defined(DEBUG_MATCONV)
                HYPRE_ANNOTATE_REGION_END("%s %d %s %d", "Get values part", part, "convert_box", j);
                HYPRE_ANNOTATE_REGION_BEGIN("%s %d %s %d", "Set values part", part, "convert_box", j);
 #endif
                /* SET values to ij_Ahat */
                HYPRE_ANNOTATE_REGION_BEGIN("%s", "Set entries");
-               hypre_SStructUMatrixSetBoxValuesHelper(A, part, ilower, iupper,
+               hypre_SStructUMatrixSetBoxValuesHelper(A, part, convert_box,
                                                       var, nSentries, Sentries,
-                                                      values, 0, ij_Ahat);
+                                                      convert_box, values, 0, ij_Ahat);
                HYPRE_ANNOTATE_REGION_END("%s", "Set entries");
-#if DEBUG_MATCONV
+#if defined(HYPRE_DEBUG) && defined(DEBUG_MATCONV)
                HYPRE_ANNOTATE_REGION_END("%s %d %s %d", "Set values part", part, "convert_box", j);
 #endif
             } /* Loop over convert_boxa */
@@ -719,7 +719,7 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
       } /* Loop over vars */
    } /* Loop over parts */
 
-#if DEBUG_MATCONV
+#if defined(HYPRE_DEBUG) && defined(DEBUG_MATCONV)
    if (!myid)
    {
       hypre_printf("\n");
@@ -730,7 +730,7 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_IJMatrixAssemble(ij_Ahat);
 
    /* Free memory */
-   hypre_TFree(values);
+   hypre_TFree(values, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
       pgrid = hypre_SStructGridPGrid(grid, part);
@@ -739,9 +739,9 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
       {
          hypre_BoxArrayArrayDestroy(convert_boxaa[part][var]);
       }
-      hypre_TFree(convert_boxaa[part]);
+      hypre_TFree(convert_boxaa[part], HYPRE_MEMORY_HOST);
    }
-   hypre_TFree(convert_boxaa);
+   hypre_TFree(convert_boxaa, HYPRE_MEMORY_HOST);
 
    /* Set pointer to ij_Ahat */
    *ij_Ahat_ptr = ij_Ahat;

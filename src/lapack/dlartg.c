@@ -1,8 +1,14 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-#include "hypre_lapack.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
-#include "math.h"
-/* Subroutine */ HYPRE_Int dlartg_(doublereal *f, doublereal *g, doublereal *cs, 
+#include "hypre_lapack.h"
+
+/* Subroutine */ integer dlartg_(doublereal *f, doublereal *g, doublereal *cs, 
 	doublereal *sn, doublereal *r__)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   
@@ -54,24 +60,26 @@
     integer i__1;
     doublereal d__1, d__2;
     /* Builtin functions */
-    //HYPRE_Real log(doublereal), pow_di(doublereal *, integer *), sqrt(doublereal);
+//    doublereal log(doublereal), pow_di(doublereal *, integer *), sqrt(doublereal);
+    doublereal pow_di(doublereal *, integer *);
     /* Local variables */
     static integer i__;
     static doublereal scale;
     static integer count;
     static doublereal f1, g1, safmn2, safmx2;
     extern doublereal dlamch_(const char *);
-    static doublereal safmin, eps;
+//    static doublereal safmin, eps;
 
 
 
     if (first) {
 	first = FALSE_;
-	safmin = dlamch_("S");
-	eps = dlamch_("E");
+//	safmin = dlamch_("S");
+//	eps = dlamch_("E");
 	d__1 = dlamch_("B");
-	i__1 = (integer) (log(safmin / eps) / log(dlamch_("B")) / 
-		2.);
+//	i__1 = (integer) (log(safmin / eps) / log(dlamch_("B")) / 
+//		2.);
+        i__1 = HYPRE_REAL_MIN_EXP>>1;
 	safmn2 = pow_di(&d__1, &i__1);
 	safmx2 = 1. / safmn2;
     }
@@ -158,3 +166,6 @@ L30:
 
 } /* dlartg_ */
 
+#ifdef __cplusplus
+}
+#endif

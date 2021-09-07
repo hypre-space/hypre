@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
 
@@ -31,7 +26,7 @@ hypre_SysPFMGRelaxCreate( MPI_Comm  comm )
 {
    hypre_SysPFMGRelaxData *sys_pfmg_relax_data;
 
-   sys_pfmg_relax_data = hypre_CTAlloc(hypre_SysPFMGRelaxData, 1);
+   sys_pfmg_relax_data = hypre_CTAlloc(hypre_SysPFMGRelaxData,  1, HYPRE_MEMORY_HOST);
    (sys_pfmg_relax_data -> relax_data) = hypre_NodeRelaxCreate(comm);
    (sys_pfmg_relax_data -> relax_type) = 0;        /* Weighted Jacobi */
 
@@ -49,7 +44,7 @@ hypre_SysPFMGRelaxDestroy( void *sys_pfmg_relax_vdata )
    if (sys_pfmg_relax_data)
    {
       hypre_NodeRelaxDestroy(sys_pfmg_relax_data -> relax_data);
-      hypre_TFree(sys_pfmg_relax_data);
+      hypre_TFree(sys_pfmg_relax_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;

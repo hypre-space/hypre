@@ -1,3 +1,10 @@
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 /*
    Example 17
 
@@ -12,9 +19,12 @@
    Description:    This code solves an "NDIM-D Laplacian" using CG.
 */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <math.h>
-#include "_hypre_utilities.h"
 #include "HYPRE_struct_ls.h"
+#include "ex.h"
 
 #define NDIM 4
 #define NSTENC (2*NDIM+1)
@@ -42,6 +52,12 @@ int main (int argc, char *argv[])
    MPI_Init(&argc, &argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+
+   /* Initialize HYPRE */
+   HYPRE_Init();
+
+   /* Print GPU info */
+   /* HYPRE_PrintDeviceInfo(); */
 
    /* Set defaults */
    n = 10;
@@ -332,6 +348,9 @@ int main (int argc, char *argv[])
    HYPRE_StructMatrixDestroy(A);
    HYPRE_StructVectorDestroy(b);
    HYPRE_StructVectorDestroy(x);
+
+   /* Finalize HYPRE */
+   HYPRE_Finalize();
 
    /* Finalize MPI */
    MPI_Finalize();

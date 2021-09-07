@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -34,8 +29,8 @@
 
 hypre_PCGFunctions *
 hypre_PCGFunctionsCreate(
-   char *       (*CAlloc)        ( size_t count, size_t elt_size ),
-   HYPRE_Int    (*Free)          ( char *ptr ),
+   void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_MemoryLocation location ),
+   HYPRE_Int    (*Free)          ( void *ptr ),
    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
                                    HYPRE_Int   *num_procs ),
    void *       (*CreateVector)  ( void *vector ),
@@ -55,7 +50,7 @@ hypre_PCGFunctionsCreate(
 {
    hypre_PCGFunctions * pcg_functions;
    pcg_functions = (hypre_PCGFunctions *)
-      CAlloc( 1, sizeof(hypre_PCGFunctions) );
+      CAlloc( 1, sizeof(hypre_PCGFunctions), HYPRE_MEMORY_HOST );
 
    pcg_functions->CAlloc = CAlloc;
    pcg_functions->Free = Free;
@@ -70,8 +65,7 @@ hypre_PCGFunctionsCreate(
    pcg_functions->ClearVector = ClearVector;
    pcg_functions->ScaleVector = ScaleVector;
    pcg_functions->Axpy = Axpy;
-   pcg_functions->PrintVector = NULL;
-/* default preconditioner must be set here but can be changed later... */
+   /* default preconditioner must be set here but can be changed later... */
    pcg_functions->precond_setup = PrecondSetup;
    pcg_functions->precond       = Precond;
 
@@ -87,7 +81,9 @@ hypre_PCGCreate( hypre_PCGFunctions *pcg_functions )
 {
    hypre_PCGData *pcg_data;
 
-   pcg_data = hypre_CTAllocF(hypre_PCGData, 1, pcg_functions);
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   pcg_data = hypre_CTAllocF(hypre_PCGData, 1, pcg_functions, HYPRE_MEMORY_HOST);
 
    pcg_data -> functions = pcg_functions;
 
@@ -104,6 +100,7 @@ hypre_PCGCreate( hypre_PCGFunctions *pcg_functions )
    (pcg_data -> recompute_residual_p) = 0;
    (pcg_data -> stop_crit)    = 0;
    (pcg_data -> converged)    = 0;
+   (pcg_data -> hybrid)       = 0;
    (pcg_data -> owns_matvec_data ) = 1;
    (pcg_data -> matvec_data)  = NULL;
    (pcg_data -> precond_data) = NULL;
@@ -115,6 +112,8 @@ hypre_PCGCreate( hypre_PCGFunctions *pcg_functions )
    (pcg_data -> s)            = NULL;
    (pcg_data -> r)            = NULL;
 
+   HYPRE_ANNOTATE_FUNC_END;
+
    return (void *) pcg_data;
 }
 
@@ -125,7 +124,9 @@ hypre_PCGCreate( hypre_PCGFunctions *pcg_functions )
 HYPRE_Int
 hypre_PCGDestroy( void *pcg_vdata )
 {
-	hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
+   hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    if (pcg_data)
    {
@@ -163,6 +164,8 @@ hypre_PCGDestroy( void *pcg_vdata )
       hypre_TFreeF( pcg_data, pcg_functions );
       hypre_TFreeF( pcg_functions, pcg_functions );
    }
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return(hypre_error_flag);
 }
@@ -233,12 +236,12 @@ hypre_PCGSetup( void *pcg_vdata,
       if ( (pcg_data -> norms) != NULL )
          hypre_TFreeF( pcg_data -> norms, pcg_functions );
       (pcg_data -> norms)     = hypre_CTAllocF( HYPRE_Real, max_iter + 1,
-                                                pcg_functions);
+                                                pcg_functions, HYPRE_MEMORY_HOST);
 
       if ( (pcg_data -> rel_norms) != NULL )
          hypre_TFreeF( pcg_data -> rel_norms, pcg_functions );
       (pcg_data -> rel_norms) = hypre_CTAllocF( HYPRE_Real, max_iter + 1,
-                                                pcg_functions );
+                                                pcg_functions, HYPRE_MEMORY_HOST );
    }
 
    HYPRE_ANNOTATE_FUNC_END;
@@ -278,12 +281,13 @@ hypre_PCGSolve( void *pcg_vdata,
    HYPRE_Real      atolf        = (pcg_data -> atolf);
    HYPRE_Real      cf_tol       = (pcg_data -> cf_tol);
    HYPRE_Real      rtol         = (pcg_data -> rtol);
-   HYPRE_Int             max_iter     = (pcg_data -> max_iter);
-   HYPRE_Int             two_norm     = (pcg_data -> two_norm);
-   HYPRE_Int             rel_change   = (pcg_data -> rel_change);
-   HYPRE_Int             recompute_residual = (pcg_data -> recompute_residual);
-   HYPRE_Int             recompute_residual_p = (pcg_data -> recompute_residual_p);
-   HYPRE_Int             stop_crit    = (pcg_data -> stop_crit);
+   HYPRE_Int       max_iter     = (pcg_data -> max_iter);
+   HYPRE_Int       two_norm     = (pcg_data -> two_norm);
+   HYPRE_Int       rel_change   = (pcg_data -> rel_change);
+   HYPRE_Int       recompute_residual   = (pcg_data -> recompute_residual);
+   HYPRE_Int       recompute_residual_p = (pcg_data -> recompute_residual_p);
+   HYPRE_Int       stop_crit    = (pcg_data -> stop_crit);
+   HYPRE_Int       hybrid       = (pcg_data -> hybrid);
 /*
    HYPRE_Int             converged    = (pcg_data -> converged);
 */
@@ -291,10 +295,10 @@ hypre_PCGSolve( void *pcg_vdata,
    void           *s            = (pcg_data -> s);
    void           *r            = (pcg_data -> r);
    void           *matvec_data  = (pcg_data -> matvec_data);
-   HYPRE_Int           (*precond)(void*,void*,void*,void*)   = (pcg_functions -> precond);
+   HYPRE_Int     (*precond)(void*,void*,void*,void*)   = (pcg_functions -> precond);
    void           *precond_data = (pcg_data -> precond_data);
-   HYPRE_Int             print_level  = (pcg_data -> print_level);
-   HYPRE_Int             logging      = (pcg_data -> logging);
+   HYPRE_Int       print_level  = (pcg_data -> print_level);
+   HYPRE_Int       logging      = (pcg_data -> logging);
    HYPRE_Real     *norms        = (pcg_data -> norms);
    HYPRE_Real     *rel_norms    = (pcg_data -> rel_norms);
 
@@ -312,12 +316,11 @@ hypre_PCGSolve( void *pcg_vdata,
    HYPRE_Real      ratio;
 
    HYPRE_Real      guard_zero_residual, sdotp;
-   HYPRE_Int             tentatively_converged = 0;
-   HYPRE_Int             recompute_true_residual = 0;
+   HYPRE_Int       tentatively_converged = 0;
+   HYPRE_Int       recompute_true_residual = 0;
 
-   HYPRE_Int             i = 0;
-   HYPRE_Int             my_id, num_procs;
-   char                  filename[255];
+   HYPRE_Int       i = 0;
+   HYPRE_Int       my_id, num_procs;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -344,9 +347,7 @@ hypre_PCGSolve( void *pcg_vdata,
       /* bi_prod = <b,b> */
       bi_prod = (*(pcg_functions->InnerProd))(b, b);
       if (print_level > 1 && my_id == 0)
-      {
-         hypre_printf("<b,b>: %e\n", bi_prod);
-      }
+          hypre_printf("<b,b>: %e\n",bi_prod);
    }
    else
    {
@@ -355,17 +356,12 @@ hypre_PCGSolve( void *pcg_vdata,
       precond(precond_data, A, b, p);
       bi_prod = (*(pcg_functions->InnerProd))(p, b);
       if (print_level > 1 && my_id == 0)
-      {
-         hypre_printf("<C*b,b>: %e\n", bi_prod);
-      }
-   }
+          hypre_printf("<C*b,b>: %e\n",bi_prod);
+   };
 
    /* Since it is does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
-   if (bi_prod != 0.)
-   {
-      ieee_check = bi_prod/bi_prod; /* INF -> NaN conversion */
-   }
+   if (bi_prod != 0.) ieee_check = bi_prod/bi_prod; /* INF -> NaN conversion */
    if (ieee_check != ieee_check)
    {
       /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
@@ -388,19 +384,17 @@ hypre_PCGSolve( void *pcg_vdata,
    }
 
    eps = r_tol*r_tol; /* note: this may be re-assigned below */
-   if (bi_prod > 0.0)
+   if ( bi_prod > 0.0 )
    {
-      if (stop_crit && !rel_change && atolf <= 0)
+      if ( stop_crit && !rel_change && atolf<=0 )  /* pure absolute tolerance */
       {
-         /* pure absolute tolerance */
          eps = eps / bi_prod;
          /* Note: this section is obsolete.  Aside from backwards comatability
             concerns, we could delete the stop_crit parameter and related code,
             using tol & atolf instead. */
       }
-      else if (atolf > 0)
+      else if ( atolf>0 )  /* mixed relative and absolute tolerance */
       {
-         /* mixed relative and absolute tolerance */
          bi_prod += atolf;
       }
       else /* DEFAULT (stop_crit and atolf exist for backwards compatibilty
@@ -416,7 +410,6 @@ hypre_PCGSolve( void *pcg_vdata,
    }
    else    /* bi_prod==0.0: the rhs vector b is zero */
    {
-#if 0
       /* Set x equal to zero and return */
       (*(pcg_functions->CopyVector))(b, x);
       if (logging>0 || print_level>0)
@@ -424,21 +417,19 @@ hypre_PCGSolve( void *pcg_vdata,
          norms[0]     = 0.0;
          rel_norms[i] = 0.0;
       }
-
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
       /* In this case, for the original parcsr pcg, the code would take special
          action to force iterations even though the exact value was known. */
-#else
-      bi_prod = 1.0;
-#endif
-   }
+   };
 
    /* r = b - Ax */
    (*(pcg_functions->CopyVector))(b, r);
+
    (*(pcg_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
 
+   //hypre_ParVectorUpdateHost(r);
    /* p = C*r */
    (*(pcg_functions->ClearVector))(p);
    precond(precond_data, A, r, p);
@@ -446,22 +437,9 @@ hypre_PCGSolve( void *pcg_vdata,
    /* gamma = <r,p> */
    gamma = (*(pcg_functions->InnerProd))(r,p);
 
-   /* Print initial residual and solution vectors */
-   if (print_level > 2 && pcg_functions->PrintVector)
-   {
-      hypre_sprintf(filename, "pcg_x.i00");
-      (*(pcg_functions->PrintVector))(x, filename);
-
-      hypre_sprintf(filename, "pcg_r.i00");
-      (*(pcg_functions->PrintVector))(r, filename);
-   }
-
    /* Since it is does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
-   if (gamma != 0.)
-   {
-      ieee_check = gamma/gamma; /* INF -> NaN conversion */
-   }
+   if (gamma != 0.) ieee_check = gamma/gamma; /* INF -> NaN conversion */
    if (ieee_check != ieee_check)
    {
       /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
@@ -484,31 +462,22 @@ hypre_PCGSolve( void *pcg_vdata,
    }
 
    /* Set initial residual norm */
-   if (logging>0 || print_level > 0 || cf_tol > 0.0)
+   if ( logging>0 || print_level > 0 || cf_tol > 0.0 )
    {
       if (two_norm)
-      {
          i_prod_0 = (*(pcg_functions->InnerProd))(r,r);
-      }
       else
-      {
          i_prod_0 = gamma;
-      }
 
-      if (logging > 0 || print_level > 0)
-      {
-         norms[0] = sqrt(i_prod_0);
-      }
+      if ( logging>0 || print_level>0 ) norms[0] = sqrt(i_prod_0);
    }
-
-   if (print_level > 1 && my_id == 0)
+   if ( print_level > 1 && my_id==0 )
    {
       hypre_printf("\n\n");
       if (two_norm)
       {
-         if ( stop_crit && !rel_change && atolf==0 )
+         if ( stop_crit && !rel_change && atolf==0 )  /* pure absolute tolerance */
          {
-            /* pure absolute tolerance */
             hypre_printf("Iters       ||r||_2     conv.rate\n");
             hypre_printf("-----    ------------   ---------\n");
          }
@@ -523,6 +492,7 @@ hypre_PCGSolve( void *pcg_vdata,
          hypre_printf("Iters       ||r||_C     conv.rate  ||r||_C/||b||_C\n");
          hypre_printf("-----    ------------    ---------  ------------ \n");
       }
+      /* hypre_printf("% 5d    %e\n", i, norms[i]); */
    }
 
    while ((i+1) <= max_iter)
@@ -543,16 +513,19 @@ hypre_PCGSolve( void *pcg_vdata,
 
       /* alpha = gamma / <s,p> */
       sdotp = (*(pcg_functions->InnerProd))(s, p);
-      if (sdotp == 0.0)
+      if ( sdotp==0.0 )
       {
-         /* ++ierr;*/
-         if (i==1)
-         {
-            i_prod = i_prod_0;
-         }
+         hypre_error_w_msg(HYPRE_ERROR_CONV, "Zero sdotp value in PCG");
+         if (i==1) i_prod=i_prod_0;
          break;
       }
       alpha = gamma / sdotp;
+      if (! (alpha > HYPRE_REAL_MIN) )
+      {
+         hypre_error_w_msg(HYPRE_ERROR_CONV, "Subnormal alpha value in PCG");
+         if (i==1) i_prod=i_prod_0;
+         break;
+      }
 
       gamma_old = gamma;
 
@@ -613,13 +586,9 @@ hypre_PCGSolve( void *pcg_vdata,
 
       /* set i_prod for convergence test */
       if (two_norm)
-      {
          i_prod = (*(pcg_functions->InnerProd))(r,r);
-      }
       else
-      {
          i_prod = gamma;
-      }
 
       /*--------------------------------------------------------------------
        * optional output
@@ -634,59 +603,44 @@ hypre_PCGSolve( void *pcg_vdata,
 #endif
 
       /* print norm info */
-      if (logging > 0 || print_level > 0)
+      if ( logging>0 || print_level>0 )
       {
          norms[i]     = sqrt(i_prod);
          rel_norms[i] = bi_prod ? sqrt(i_prod/bi_prod) : 0;
       }
-      if (print_level > 1 && my_id == 0)
+      if ( print_level > 1 && my_id==0 )
       {
          if (two_norm)
          {
-            if (stop_crit && !rel_change && atolf == 0)
-            {
-               /* pure absolute tolerance */
+            if ( stop_crit && !rel_change && atolf==0 ) {  /* pure absolute tolerance */
                hypre_printf("% 5d    %e    %f\n", i, norms[i],
-                             norms[i]/norms[i-1] );
+                      norms[i]/norms[i-1] );
             }
             else
             {
                hypre_printf("% 5d    %e    %f    %e\n", i, norms[i],
-                             norms[i]/norms[i-1], rel_norms[i] );
+                      norms[i]/norms[i-1], rel_norms[i] );
             }
          }
          else
          {
                hypre_printf("% 5d    %e    %f    %e\n", i, norms[i],
-                             norms[i]/norms[i-1], rel_norms[i] );
+                      norms[i]/norms[i-1], rel_norms[i] );
          }
       }
 
-      /* Print solution and residual vectors */
-      if (print_level > 2 && pcg_functions->PrintVector)
-      {
-         hypre_sprintf(filename, "pcg_x.i%02d", i);
-         (*(pcg_functions->PrintVector))(x, filename);
-
-         hypre_sprintf(filename, "pcg_r.i%02d", i);
-         (*(pcg_functions->PrintVector))(r, filename);
-      }
 
       /*--------------------------------------------------------------------
        * check for convergence
        *--------------------------------------------------------------------*/
-      /* the basic convergence test */
-      if (i_prod / bi_prod < eps)
-      {
-         tentatively_converged = 1;
-      }
-
-      /* At user request, don't trust the convergence test until we've recomputed
-         the residual from scratch.  This is expensive in the usual case where an
-         the norm is the energy norm.
-         This calculation is coded on the assumption that r's accuracy is only a
-         concern for problems where CG takes many iterations. */
-      if (tentatively_converged && recompute_residual)
+      if (i_prod / bi_prod < eps)  /* the basic convergence test */
+            tentatively_converged = 1;
+      if ( tentatively_converged && recompute_residual )
+         /* At user request, don't trust the convergence test until we've recomputed
+            the residual from scratch.  This is expensive in the usual case where an
+            the norm is the energy norm.
+            This calculation is coded on the assumption that r's accuracy is only a
+            concern for problems where CG takes many iterations. */
       {
          /* r = b - Ax */
          (*(pcg_functions->CopyVector))(b, r);
@@ -705,38 +659,27 @@ hypre_PCGSolve( void *pcg_vdata,
             /* iprod = gamma = <r,s> */
             i_prod = (*(pcg_functions->InnerProd))(r, s);
          }
-
-         if (i_prod / bi_prod >= eps)
-         {
-            tentatively_converged = 0;
-         }
+         if (i_prod / bi_prod >= eps) tentatively_converged = 0;
       }
-
-      /* At user request, don't treat this as converged unless x didn't change
-         much in the last iteration. */
-      if (tentatively_converged && rel_change && (i_prod > guard_zero_residual ))
+      if ( tentatively_converged && rel_change && (i_prod > guard_zero_residual ))
+         /* At user request, don't treat this as converged unless x didn't change
+            much in the last iteration. */
       {
-         pi_prod = (*(pcg_functions->InnerProd))(p,p);
-         xi_prod = (*(pcg_functions->InnerProd))(x,x);
-         ratio   = alpha*alpha*pi_prod/xi_prod;
-
-         if (ratio >= eps)
-         {
-            tentatively_converged = 0;
-         }
+            pi_prod = (*(pcg_functions->InnerProd))(p,p);
+            xi_prod = (*(pcg_functions->InnerProd))(x,x);
+            ratio = alpha*alpha*pi_prod/xi_prod;
+            if (ratio >= eps) tentatively_converged = 0;
       }
-
-      /* we've passed all the convergence tests, it's for real */
-      if (tentatively_converged)
+      if ( tentatively_converged )
+         /* we've passed all the convergence tests, it's for real */
       {
          (pcg_data -> converged) = 1;
          break;
       }
 
-      if ((gamma<1.0e-292) && ((-gamma)<1.0e-292))
+      if (! (gamma > HYPRE_REAL_MIN) )
       {
-         /* ierr = 1;*/
-         hypre_error(HYPRE_ERROR_CONV);
+         hypre_error_w_msg(HYPRE_ERROR_CONV, "Subnormal gamma value in PCG");
 
          break;
       }
@@ -757,25 +700,24 @@ hypre_PCGSolve( void *pcg_vdata,
       if (cf_tol > 0.0)
       {
          cf_ave_0 = cf_ave_1;
-         if (i_prod_0 < 1.0e-292)
+         if (! (i_prod_0 > HYPRE_REAL_MIN) )
          {
             /* i_prod_0 is zero, or (almost) subnormal, yet i_prod wasn't small
                enough to pass the convergence test.  Therefore initial guess was good,
                and we're just calculating garbage - time to bail out before the
                next step, which will be a divide by zero (or close to it). */
-            /* ierr = 1; */
-            hypre_error(HYPRE_ERROR_CONV);
+            hypre_error_w_msg(HYPRE_ERROR_CONV, "Subnormal i_prod value in PCG");
 
             break;
          }
-         cf_ave_1 = pow(i_prod / i_prod_0, 1.0/(2.0*i));
+         cf_ave_1 = pow( i_prod / i_prod_0, 1.0/(2.0*i) );
 
          weight   = fabs(cf_ave_1 - cf_ave_0);
          weight   = weight / hypre_max(cf_ave_1, cf_ave_0);
          weight   = 1.0 - weight;
 #if 0
          hypre_printf("I = %d: cf_new = %e, cf_old = %e, weight = %e\n",
-                       i, cf_ave_1, cf_ave_0, weight );
+                      i, cf_ave_1, cf_ave_0, weight );
 #endif
          if (weight * cf_ave_1 > cf_tol) break;
       }
@@ -794,29 +736,26 @@ hypre_PCGSolve( void *pcg_vdata,
          (*(pcg_functions->Axpy))(1.0, s, p);
       }
       else
-      {
          (*(pcg_functions->CopyVector))(s, p);
-      }
    }
 
    /*--------------------------------------------------------------------
     * Finish up with some outputs.
     *--------------------------------------------------------------------*/
 
-   if (print_level > 1 && my_id == 0)
-   {
+   if ( print_level > 1 && my_id==0 )
       hypre_printf("\n\n");
-   }
+
+  if (i >= max_iter && (i_prod/bi_prod) >= eps && eps > 0 && hybrid != -1)
+  {
+     hypre_error_w_msg(HYPRE_ERROR_CONV, "Reached max iterations in PCG before convergence");
+  }
 
    (pcg_data -> num_iterations) = i;
    if (bi_prod > 0.0)
-   {
       (pcg_data -> rel_residual_norm) = sqrt(i_prod/bi_prod);
-   }
    else /* actually, we'll never get here... */
-   {
       (pcg_data -> rel_residual_norm) = 0.0;
-   }
 
    HYPRE_ANNOTATE_FUNC_END;
 
@@ -1204,6 +1143,17 @@ hypre_PCGGetLogging( void *pcg_vdata,
    hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
 
    *level = (pcg_data -> logging);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_PCGSetHybrid( void *pcg_vdata,
+                      HYPRE_Int   level)
+{
+   hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
+
+   (pcg_data -> hybrid) = level;
 
    return hypre_error_flag;
 }

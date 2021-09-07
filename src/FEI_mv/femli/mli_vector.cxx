@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include <string.h>
 #include <stdio.h>
@@ -22,7 +17,7 @@
 #include "mli_utils.h"
 
 /******************************************************************************
- * constructor 
+ * constructor
  *---------------------------------------------------------------------------*/
 
 MLI_Vector::MLI_Vector( void *invec,const char *inName, MLI_Function *funcPtr )
@@ -34,7 +29,7 @@ MLI_Vector::MLI_Vector( void *invec,const char *inName, MLI_Function *funcPtr )
 }
 
 /******************************************************************************
- * destructor 
+ * destructor
  *---------------------------------------------------------------------------*/
 
 MLI_Vector::~MLI_Vector()
@@ -54,7 +49,7 @@ char *MLI_Vector::getName()
 }
 
 /******************************************************************************
- * get vector 
+ * get vector
  *---------------------------------------------------------------------------*/
 
 void *MLI_Vector::getVector()
@@ -63,7 +58,7 @@ void *MLI_Vector::getVector()
 }
 
 /******************************************************************************
- * set vector to a constant 
+ * set vector to a constant
  *---------------------------------------------------------------------------*/
 
 int MLI_Vector::setConstantValue(double value)
@@ -74,11 +69,11 @@ int MLI_Vector::setConstantValue(double value)
       exit(1);
    }
    hypre_ParVector *vec = (hypre_ParVector *) vector_;
-   return (hypre_ParVectorSetConstantValues( vec, value )); 
+   return (hypre_ParVectorSetConstantValues( vec, value ));
 }
 
 /******************************************************************************
- * inner product 
+ * inner product
  *---------------------------------------------------------------------------*/
 
 int MLI_Vector::copy(MLI_Vector *vec2)
@@ -117,7 +112,7 @@ int MLI_Vector::print(char *filename)
 }
 
 /******************************************************************************
- * inner product 
+ * inner product
  *---------------------------------------------------------------------------*/
 
 double MLI_Vector::norm2()
@@ -132,7 +127,7 @@ double MLI_Vector::norm2()
 }
 
 /******************************************************************************
- * clone a hypre vector 
+ * clone a hypre vector
  *---------------------------------------------------------------------------*/
 
 MLI_Vector *MLI_Vector::clone()
@@ -156,16 +151,15 @@ MLI_Vector *MLI_Vector::clone()
    MPI_Comm_rank(comm,&mypid);
    MPI_Comm_size(comm,&nprocs);
    vpartition = hypre_ParVectorPartitioning(vec);
-   partitioning = hypre_CTAlloc(int,nprocs+1);
+   partitioning = hypre_CTAlloc(int,nprocs+1, HYPRE_MEMORY_HOST);
    for ( i = 0; i < nprocs+1; i++ ) partitioning[i] = vpartition[i];
    globalSize = hypre_ParVectorGlobalSize(vec);
-   newVec = hypre_CTAlloc(hypre_ParVector, 1);
+   newVec = hypre_CTAlloc(hypre_ParVector, 1, HYPRE_MEMORY_HOST);
    hypre_ParVectorComm(newVec) = comm;
    hypre_ParVectorGlobalSize(newVec) = globalSize;
    hypre_ParVectorFirstIndex(newVec) = partitioning[mypid];
    hypre_ParVectorPartitioning(newVec) = partitioning;
    hypre_ParVectorOwnsData(newVec) = 1;
-   hypre_ParVectorOwnsPartitioning(newVec) = 1;
    nlocals = partitioning[mypid+1] - partitioning[mypid];
    seqVec = hypre_SeqVectorCreate(nlocals);
    hypre_SeqVectorInitialize(seqVec);
@@ -179,4 +173,3 @@ MLI_Vector *MLI_Vector::clone()
    delete funcPtr;
    return mliVec;
 }
-

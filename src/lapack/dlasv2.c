@@ -1,8 +1,14 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-#include "hypre_lapack.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dlasv2_(doublereal *f, doublereal *g, doublereal *h__, 
+/* Subroutine */ integer dlasv2_(doublereal *f, doublereal *g, doublereal *h__, 
 	doublereal *ssmin, doublereal *ssmax, doublereal *snr, doublereal *
 	csr, doublereal *snl, doublereal *csl)
 {
@@ -83,7 +89,7 @@
     /* System generated locals */
     doublereal d__1;
     /* Builtin functions */
-    HYPRE_Real sqrt(doublereal), d_sign(doublereal *, doublereal *);
+    doublereal d_sign(doublereal *, doublereal *);
     /* Local variables */
     static integer pmax;
     static doublereal temp;
@@ -249,3 +255,6 @@
 
 } /* dlasv2_ */
 
+#ifdef __cplusplus
+}
+#endif

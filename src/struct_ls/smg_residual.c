@@ -1,16 +1,12 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
+#include "_hypre_struct_mv.hpp"
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -28,7 +24,7 @@ typedef struct
    hypre_ComputePkg    *compute_pkg;
 
    HYPRE_Int            time_index;
-   HYPRE_Int            flops;
+   HYPRE_BigInt         flops;
 
 } hypre_SMGResidualData;
 
@@ -40,7 +36,7 @@ hypre_SMGResidualCreate( )
 {
    hypre_SMGResidualData *residual_data;
 
-   residual_data = hypre_CTAlloc(hypre_SMGResidualData, 1);
+   residual_data = hypre_CTAlloc(hypre_SMGResidualData,  1, HYPRE_MEMORY_HOST);
 
    (residual_data -> time_index)  = hypre_InitializeTiming("SMGResidual");
 
@@ -61,14 +57,14 @@ hypre_SMGResidualSetup( void               *residual_vdata,
                         hypre_StructVector *b,
                         hypre_StructVector *r              )
 {
-	hypre_SMGResidualData  *residual_data = (hypre_SMGResidualData  *)residual_vdata;
+   hypre_SMGResidualData  *residual_data = (hypre_SMGResidualData  *)residual_vdata;
 
    hypre_IndexRef          base_index  = (residual_data -> base_index);
    hypre_IndexRef          base_stride = (residual_data -> base_stride);
 
    hypre_StructGrid       *grid;
    hypre_StructStencil    *stencil;
-                       
+
    hypre_BoxArray         *base_points;
    hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
@@ -105,7 +101,7 @@ hypre_SMGResidualSetup( void               *residual_vdata,
 
    (residual_data -> flops) =
       (hypre_StructMatrixGlobalSize(A) + hypre_StructVectorGlobalSize(x)) /
-      (hypre_IndexX(base_stride) *
+      (HYPRE_BigInt)(hypre_IndexX(base_stride) *
        hypre_IndexY(base_stride) *
        hypre_IndexZ(base_stride)  );
 
@@ -129,29 +125,24 @@ hypre_SMGResidual( void               *residual_vdata,
    hypre_ComputePkg       *compute_pkg = (residual_data -> compute_pkg);
 
    hypre_CommHandle       *comm_handle;
-                       
+
    hypre_BoxArrayArray    *compute_box_aa;
    hypre_BoxArray         *compute_box_a;
    hypre_Box              *compute_box;
-                       
+
    hypre_Box              *A_data_box;
    hypre_Box              *x_data_box;
    hypre_Box              *b_data_box;
    hypre_Box              *r_data_box;
-                       
-   HYPRE_Int               Ai;
-   HYPRE_Int               xi;
-   HYPRE_Int               bi;
-   HYPRE_Int               ri;
-                         
+
    HYPRE_Real             *Ap;
    HYPRE_Real             *xp;
    HYPRE_Real             *bp;
    HYPRE_Real             *rp;
-                       
+
    hypre_Index             loop_size;
    hypre_IndexRef          start;
-                       
+
    hypre_StructStencil    *stencil;
    hypre_Index            *stencil_shape;
    HYPRE_Int               stencil_size;
@@ -197,17 +188,16 @@ hypre_SMGResidual( void               *residual_vdata,
                rp = hypre_StructVectorBoxData(r, i);
 
                hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
+
+#define DEVICE_VAR is_device_ptr(rp,bp)
                hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                                    b_data_box, start, base_stride, bi,
                                    r_data_box, start, base_stride, ri);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,bi,ri) HYPRE_SMP_SCHEDULE
-#endif
-               hypre_BoxLoop2For(bi, ri)
                {
                   rp[ri] = bp[bi];
                }
                hypre_BoxLoop2End(bi, ri);
+#undef DEVICE_VAR
             }
          }
          break;
@@ -243,28 +233,28 @@ hypre_SMGResidual( void               *residual_vdata,
             for (si = 0; si < stencil_size; si++)
             {
                Ap = hypre_StructMatrixBoxData(A, i, si);
-               xp = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[si]);
+               xp = hypre_StructVectorBoxData(x, i);
+//RL:PTROFFSET
+               HYPRE_Int xp_off = hypre_BoxOffsetDistance(x_data_box, stencil_shape[si]);
 
                hypre_BoxGetStrideSize(compute_box, base_stride,
                                       loop_size);
+
+#define DEVICE_VAR is_device_ptr(rp,Ap,xp)
                hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                    A_data_box, start, base_stride, Ai,
                                    x_data_box, start, base_stride, xi,
                                    r_data_box, start, base_stride, ri);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ri) HYPRE_SMP_SCHEDULE
-#endif
-               hypre_BoxLoop3For(Ai, xi, ri)
                {
-                  rp[ri] -= Ap[Ai] * xp[xi];
+                  rp[ri] -= Ap[Ai] * xp[xi+xp_off];
                }
                hypre_BoxLoop3End(Ai, xi, ri);
+#undef DEVICE_VAR
             }
          }
       }
    }
-   
+
    hypre_IncFLOPCount(residual_data -> flops);
    hypre_EndTiming(residual_data -> time_index);
 
@@ -273,7 +263,7 @@ hypre_SMGResidual( void               *residual_vdata,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 hypre_SMGResidualSetBase( void        *residual_vdata,
                           hypre_Index  base_index,
@@ -281,7 +271,7 @@ hypre_SMGResidualSetBase( void        *residual_vdata,
 {
    hypre_SMGResidualData *residual_data = (hypre_SMGResidualData  *)residual_vdata;
    HYPRE_Int              d;
- 
+
    for (d = 0; d < 3; d++)
    {
       hypre_IndexD((residual_data -> base_index),  d)
@@ -289,7 +279,7 @@ hypre_SMGResidualSetBase( void        *residual_vdata,
       hypre_IndexD((residual_data -> base_stride), d)
          = hypre_IndexD(base_stride, d);
    }
- 
+
    return hypre_error_flag;
 }
 
@@ -310,7 +300,7 @@ hypre_SMGResidualDestroy( void *residual_vdata )
       hypre_BoxArrayDestroy(residual_data -> base_points);
       hypre_ComputePkgDestroy(residual_data -> compute_pkg );
       hypre_FinalizeTiming(residual_data -> time_index);
-      hypre_TFree(residual_data);
+      hypre_TFree(residual_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;

@@ -1,16 +1,12 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
+#include "_hypre_struct_mv.hpp"
 #include "smg.h"
 
 /*--------------------------------------------------------------------------
@@ -27,15 +23,15 @@ hypre_SMGCreateInterpOp( hypre_StructMatrix *A,
    hypre_Index          *stencil_shape;
    HYPRE_Int             stencil_size;
    HYPRE_Int             stencil_dim;
-                       
+
    HYPRE_Int             num_ghost[] = {1, 1, 1, 1, 1, 1};
-                       
+
    HYPRE_Int             i;
 
    /* set up stencil */
    stencil_size = 2;
    stencil_dim = hypre_StructStencilNDim(hypre_StructMatrixStencil(A));
-   stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size);
+   stencil_shape = hypre_CTAlloc(hypre_Index,  stencil_size, HYPRE_MEMORY_HOST);
    for (i = 0; i < stencil_size; i++)
    {
       hypre_SetIndex3(stencil_shape[i], 0, 0, 0);
@@ -50,7 +46,7 @@ hypre_SMGCreateInterpOp( hypre_StructMatrix *A,
    HYPRE_StructMatrixSetNumGhost(PT, num_ghost);
 
    hypre_StructStencilDestroy(stencil);
- 
+
    return PT;
 }
 
@@ -102,28 +98,26 @@ hypre_SMGSetupInterpOp( void               *relax_data,
    HYPRE_Int             compute_pkg_stencil_dim = 1;
    hypre_ComputePkg     *compute_pkg;
    hypre_ComputeInfo    *compute_info;
- 
+
    hypre_CommHandle     *comm_handle;
-                     
+
    hypre_BoxArrayArray  *compute_box_aa;
    hypre_BoxArray       *compute_box_a;
    hypre_Box            *compute_box;
-                     
+
    hypre_Box            *PT_data_box;
    hypre_Box            *x_data_box;
    HYPRE_Real           *PTp;
    HYPRE_Real           *xp;
-   HYPRE_Int             PTi;
-   HYPRE_Int             xi;
 
    hypre_Index           loop_size;
    hypre_Index           start;
    hypre_Index           startc;
    hypre_Index           stridec;
-                      
+
    HYPRE_Int             si, sj, d;
    HYPRE_Int             compute_i, i, j;
-                        
+
    /*--------------------------------------------------------
     * Initialize some things
     *--------------------------------------------------------*/
@@ -131,7 +125,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
    hypre_SetIndex3(stridec, 1, 1, 1);
 
    fgrid = hypre_StructMatrixGrid(A);
-   
+
    A_stencil = hypre_StructMatrixStencil(A);
    A_stencil_shape = hypre_StructStencilShape(A_stencil);
    A_stencil_size  = hypre_StructStencilSize(A_stencil);
@@ -146,7 +140,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
    hypre_SMGRelaxSetRegSpaceRank(relax_data, 0, 1);
 
    compute_pkg_stencil_shape =
-      hypre_CTAlloc(hypre_Index, compute_pkg_stencil_size);
+      hypre_CTAlloc(hypre_Index,  compute_pkg_stencil_size, HYPRE_MEMORY_HOST);
    compute_pkg_stencil = hypre_StructStencilCreate(compute_pkg_stencil_dim,
                                                    compute_pkg_stencil_size,
                                                    compute_pkg_stencil_shape);
@@ -160,7 +154,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
        * coefficient being computed (same direction for P^T).
        *-----------------------------------------------------*/
 
-      stencil_indices = hypre_TAlloc(HYPRE_Int, A_stencil_size);
+      stencil_indices = hypre_TAlloc(HYPRE_Int,  A_stencil_size, HYPRE_MEMORY_HOST);
       num_stencil_indices = 0;
       for (sj = 0; sj < A_stencil_size; sj++)
       {
@@ -173,7 +167,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
       }
       A_mask =
          hypre_StructMatrixCreateMask(A, num_stencil_indices, stencil_indices);
-      hypre_TFree(stencil_indices);
+      hypre_TFree(stencil_indices, HYPRE_MEMORY_HOST);
 
       /*-----------------------------------------------------
        * Do relaxation sweep to compute coefficients
@@ -193,7 +187,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
       hypre_StructMatrixDestroy(A_mask);
 
       /*-----------------------------------------------------
-       * Set up compute package for communication of 
+       * Set up compute package for communication of
        * coefficients from fine to coarse across processor
        * boundaries.
        *-----------------------------------------------------*/
@@ -239,7 +233,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
                hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
             PT_data_box =
                hypre_BoxArrayBox(hypre_StructMatrixDataSpace(PT), i);
- 
+
             xp  = hypre_StructVectorBoxData(x, i);
             PTp = hypre_StructMatrixBoxData(PT, i, si);
 
@@ -259,17 +253,16 @@ hypre_SMGSetupInterpOp( void               *relax_data,
                }
 
                hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+
+#define DEVICE_VAR is_device_ptr(PTp,xp)
                hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                                    x_data_box,  start,  stride,  xi,
                                    PT_data_box, startc, stridec, PTi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,PTi) HYPRE_SMP_SCHEDULE
-#endif
-               hypre_BoxLoop2For(xi, PTi)
                {
                   PTp[PTi] = xp[xi];
                }
                hypre_BoxLoop2End(xi, PTi);
+#undef DEVICE_VAR
             }
          }
       }

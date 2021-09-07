@@ -1,15 +1,7 @@
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
-
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 include ../config/Makefile.config
 
@@ -28,14 +20,14 @@ EXTRA_FILES =\
  internal_protos.h
 
 HEADERS = HYPRE_matrix_matrix_protos.h
-
+ 
 FILES =\
  HYPRE_ConvertParCSRMatrixToDistributedMatrix.c\
  HYPRE_ConvertPETScMatrixToDistributedMatrix.c
 
 OBJS = ${FILES:.c=.o}
 
-SONAME = libHYPRE_MatrixMatrix-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_MatrixMatrix-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -64,9 +56,9 @@ libHYPRE_MatrixMatrix.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_MatrixMatrix.so: ${OBJS}
+libHYPRE_MatrixMatrix.so libHYPRE_MatrixMatrix.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -sf ${SONAME} $@
+	ln -s ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

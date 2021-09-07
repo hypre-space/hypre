@@ -1,17 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
 #include "maxwell_TV.h"
@@ -26,7 +18,7 @@ hypre_MaxwellTVCreate( MPI_Comm  comm )
    hypre_MaxwellData *maxwell_data;
    hypre_Index       *maxwell_rfactor;
 
-   maxwell_data = hypre_CTAlloc(hypre_MaxwellData, 1);
+   maxwell_data = hypre_CTAlloc(hypre_MaxwellData,  1, HYPRE_MEMORY_HOST);
 
    (maxwell_data -> comm)       = comm;
    (maxwell_data -> time_index) = hypre_InitializeTiming("Maxwell_Solver");
@@ -42,7 +34,7 @@ hypre_MaxwellTVCreate( MPI_Comm  comm )
    (maxwell_data -> print_level)    = 0;
    (maxwell_data -> logging)        = 0;
 
-   maxwell_rfactor= hypre_TAlloc(hypre_Index, 1);
+   maxwell_rfactor= hypre_TAlloc(hypre_Index,  1, HYPRE_MEMORY_HOST);
    hypre_SetIndex3(maxwell_rfactor[0], 2, 2, 2);
    (maxwell_data -> rfactor)= maxwell_rfactor;
                                          
@@ -64,12 +56,12 @@ hypre_MaxwellTVDestroy( void *maxwell_vdata )
 
    if (maxwell_data)
    {
-      hypre_TFree(maxwell_data-> rfactor);
+      hypre_TFree(maxwell_data-> rfactor, HYPRE_MEMORY_HOST);
 
       if ((maxwell_data -> logging) > 0)
       {
-         hypre_TFree(maxwell_data -> norms);
-         hypre_TFree(maxwell_data -> rel_norms);
+         hypre_TFree(maxwell_data -> norms, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data -> rel_norms, HYPRE_MEMORY_HOST);
       }
 
       if ((maxwell_data -> edge_numlevels) > 0)
@@ -81,7 +73,7 @@ hypre_MaxwellTVDestroy( void *maxwell_vdata )
              hypre_ParVectorDestroy(maxwell_data-> ee_l[l]);
              hypre_ParVectorDestroy(maxwell_data-> eVtemp_l[l]);
              hypre_ParVectorDestroy(maxwell_data-> eVtemp2_l[l]);
-             hypre_TFree(maxwell_data -> eCF_marker_l[l]);
+             hypre_TFree(maxwell_data -> eCF_marker_l[l], HYPRE_MEMORY_HOST);
 
             /* Cannot destroy Aee_l[0] since it points to the user
                Aee_in. */
@@ -98,24 +90,24 @@ hypre_MaxwellTVDestroy( void *maxwell_vdata )
                             (HYPRE_IJMatrix)  (maxwell_data-> Pe_l[l]));
              }
 
-             hypre_TFree(maxwell_data-> BdryRanks_l[l]);
+             hypre_TFree(maxwell_data-> BdryRanks_l[l], HYPRE_MEMORY_HOST);
          }
-         hypre_TFree(maxwell_data-> egrid_l);
-         hypre_TFree(maxwell_data-> Aee_l);
-         hypre_TFree(maxwell_data-> be_l);
-         hypre_TFree(maxwell_data-> xe_l);
-         hypre_TFree(maxwell_data-> rese_l);
-         hypre_TFree(maxwell_data-> ee_l);
-         hypre_TFree(maxwell_data-> eVtemp_l);
-         hypre_TFree(maxwell_data-> eVtemp2_l);
-         hypre_TFree(maxwell_data-> Pe_l);
-         hypre_TFree(maxwell_data-> ReT_l);
-         hypre_TFree(maxwell_data-> eCF_marker_l);
-         hypre_TFree(maxwell_data-> erelax_weight);
-         hypre_TFree(maxwell_data-> eomega);
+         hypre_TFree(maxwell_data-> egrid_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data-> Aee_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data-> be_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data-> xe_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data-> rese_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data-> ee_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data-> eVtemp_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data-> eVtemp2_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data-> Pe_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data-> ReT_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data-> eCF_marker_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data-> erelax_weight, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data-> eomega, HYPRE_MEMORY_HOST);
          
-         hypre_TFree(maxwell_data-> BdryRanks_l);
-         hypre_TFree(maxwell_data-> BdryRanksCnts_l);
+         hypre_TFree(maxwell_data-> BdryRanks_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data-> BdryRanksCnts_l, HYPRE_MEMORY_HOST);
       }
 
       if ((maxwell_data -> node_numlevels) > 0)
@@ -129,22 +121,22 @@ hypre_MaxwellTVDestroy( void *maxwell_vdata )
          }
          hypre_BoomerAMGDestroy(maxwell_data-> amg_vdata);
 
-         hypre_TFree(maxwell_data-> Ann_l);
-         hypre_TFree(maxwell_data-> Pn_l);
-         hypre_TFree(maxwell_data-> RnT_l);
-         hypre_TFree(maxwell_data-> bn_l);
-         hypre_TFree(maxwell_data-> xn_l);
-         hypre_TFree(maxwell_data-> resn_l);
-         hypre_TFree(maxwell_data-> en_l);
-         hypre_TFree(maxwell_data-> nVtemp_l);
-         hypre_TFree(maxwell_data-> nVtemp2_l);
-         hypre_TFree(maxwell_data-> nCF_marker_l);
-         hypre_TFree(maxwell_data-> nrelax_weight);
-         hypre_TFree(maxwell_data-> nomega);
+         hypre_TFree(maxwell_data-> Ann_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data-> Pn_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data-> RnT_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data-> bn_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data-> xn_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data-> resn_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data-> en_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data-> nVtemp_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data-> nVtemp2_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data-> nCF_marker_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data-> nrelax_weight, HYPRE_MEMORY_HOST);
+         hypre_TFree(maxwell_data-> nomega, HYPRE_MEMORY_HOST);
       }
 
       HYPRE_SStructStencilDestroy(maxwell_data-> Ann_stencils[0]);
-      hypre_TFree(maxwell_data-> Ann_stencils);
+      hypre_TFree(maxwell_data-> Ann_stencils, HYPRE_MEMORY_HOST);
 
       if ((maxwell_data -> en_numlevels) > 0)
       {
@@ -153,7 +145,7 @@ hypre_MaxwellTVDestroy( void *maxwell_vdata )
              hypre_ParCSRMatrixDestroy(maxwell_data-> Aen_l[l]);
          }
       }
-      hypre_TFree(maxwell_data-> Aen_l);
+      hypre_TFree(maxwell_data-> Aen_l, HYPRE_MEMORY_HOST);
 
       HYPRE_SStructVectorDestroy(
            (HYPRE_SStructVector) maxwell_data-> bn);
@@ -166,7 +158,7 @@ hypre_MaxwellTVDestroy( void *maxwell_vdata )
       hypre_ParCSRMatrixDestroy(maxwell_data-> T_transpose);
 
       hypre_FinalizeTiming(maxwell_data -> time_index);
-      hypre_TFree(maxwell_data);
+      hypre_TFree(maxwell_data, HYPRE_MEMORY_HOST);
    }
 
    return(ierr);

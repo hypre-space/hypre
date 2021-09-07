@@ -1,8 +1,14 @@
+/* Copyright (c) 1992-2008 The University of Tennessee.  All rights reserved.
+ * See file COPYING in this directory for details. */
 
-#include "hypre_lapack.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dormbr_(const char *vect,const char *side,const char *trans, integer *m, 
+/* Subroutine */ integer dormbr_(const char *vect,const char *side,const char *trans, integer *m, 
 	integer *n, integer *k, doublereal *a, integer *lda, doublereal *tau, 
 	doublereal *c__, integer *ldc, doublereal *work, integer *lwork, 
 	integer *info)
@@ -133,19 +139,19 @@
     integer a_dim1, a_offset, c_dim1, c_offset, i__1, i__2, i__3[2];
     char ch__1[2];
     /* Builtin functions   
-       Subroutine */ HYPRE_Int s_cat(char *, char **, integer *, integer *, ftnlen);
+       Subroutine */ integer s_cat(char *, char **, integer *, integer *, ftnlen);
     /* Local variables */
     static logical left;
     extern logical lsame_(const char *,const char *);
     static integer iinfo, i1, i2, nb, mi, ni, nq, nw;
-    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
     extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ HYPRE_Int dormlq_(const char *,const char *, integer *, integer *, 
+    extern /* Subroutine */ integer dormlq_(const char *,const char *, integer *, integer *, 
 	    integer *, doublereal *, integer *, doublereal *, doublereal *, 
 	    integer *, doublereal *, integer *, integer *);
     static logical notran;
-    extern /* Subroutine */ HYPRE_Int dormqr_(const char *,const char *, integer *, integer *, 
+    extern /* Subroutine */ integer dormqr_(const char *,const char *, integer *, integer *, 
 	    integer *, doublereal *, integer *, doublereal *, doublereal *, 
 	    integer *, doublereal *, integer *, integer *);
     static logical applyq;
@@ -341,4 +347,6 @@
 #undef c___ref
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

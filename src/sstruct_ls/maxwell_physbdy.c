@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  * OpenMP Problems
@@ -27,25 +22,25 @@
  * must be checked, not just the bounding box.
  *    Algo:
  *         1) obtain boundary boxes for the finest grid
- *             i) mark the fboxes that have boundary elements. 
+ *             i) mark the fboxes that have boundary elements.
  *         2) loop over coarse levels
  *             i) for a cbox that maps to a fbox that has boundary layers
- *                a) refine the cbox 
+ *                a) refine the cbox
  *                b) intersect with the cell boundary layers of the fbox
- *                c) coarsen the intersection 
+ *                c) coarsen the intersection
  *            ii) determine the var boxes
- *           iii) mark the coarse box 
+ *           iii) mark the coarse box
  *
- * Concerns: Checking an individual pgrid may give artificial physical 
- * boundaries. Need to check if any other pgrid is adjacent to it. 
+ * Concerns: Checking an individual pgrid may give artificial physical
+ * boundaries. Need to check if any other pgrid is adjacent to it.
  * We omit this case and assume only one part for now.
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
                        HYPRE_Int                num_levels,
                        hypre_Index              rfactors,
-                       HYPRE_Int             ***BdryRanksl_ptr, 
+                       HYPRE_Int             ***BdryRanksl_ptr,
                        HYPRE_Int              **BdryRanksCntsl_ptr )
 {
 
@@ -55,7 +50,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
    HYPRE_Int              *BdryRanksCnts_l;
 
    HYPRE_Int              *npts;
-   HYPRE_Int              *ranks, *upper_rank, *lower_rank;
+   HYPRE_BigInt           *ranks, *upper_rank, *lower_rank;
    hypre_BoxManEntry      *boxman_entry;
 
    hypre_SStructGrid      *grid;
@@ -79,7 +74,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
    HYPRE_Int               ndim, nvars;
    HYPRE_Int               nboxes, nfboxes;
    HYPRE_Int               boxi;
-   
+
    hypre_Index             zero_shift, upper_shift, lower_shift;
    hypre_Index             loop_size, start, index, lindex;
 
@@ -101,10 +96,10 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
    hypre_BoxInit(&intersect, ndim);
 
    /* bounding global ranks of this processor & allocate boundary box markers. */
-   upper_rank= hypre_CTAlloc(HYPRE_Int, num_levels);
-   lower_rank= hypre_CTAlloc(HYPRE_Int, num_levels);
+   upper_rank= hypre_CTAlloc(HYPRE_BigInt,  num_levels, HYPRE_MEMORY_HOST);
+   lower_rank= hypre_CTAlloc(HYPRE_BigInt,  num_levels, HYPRE_MEMORY_HOST);
 
-   boxes_with_bdry= hypre_TAlloc(HYPRE_Int *, num_levels);
+   boxes_with_bdry= hypre_TAlloc(HYPRE_Int *,  num_levels, HYPRE_MEMORY_HOST);
    for (i= 0; i< num_levels; i++)
    {
       grid = grid_l[i];
@@ -119,28 +114,28 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
 
       hypre_SStructGridBoxProcFindBoxManEntry(grid, part, nvars-1,
                                               hypre_BoxArraySize(box_array)-1, myproc, &boxman_entry);
-      hypre_SStructBoxManEntryGetGlobalCSRank(boxman_entry, hypre_BoxIMax(box), 
+      hypre_SStructBoxManEntryGetGlobalCSRank(boxman_entry, hypre_BoxIMax(box),
                                               &upper_rank[i]);
 
       sgrid= hypre_SStructPGridCellSGrid(pgrid);
       box_array= hypre_StructGridBoxes(sgrid);
-      boxes_with_bdry[i]= hypre_CTAlloc(HYPRE_Int, hypre_BoxArraySize(box_array));
+      boxes_with_bdry[i]= hypre_CTAlloc(HYPRE_Int,  hypre_BoxArraySize(box_array), HYPRE_MEMORY_HOST);
    }
- 
+
    /*-----------------------------------------------------------------------------
-    * construct box_number mapping between levels, and offset strides because of 
+    * construct box_number mapping between levels, and offset strides because of
     * projection coarsening. Note: from the way the coarse boxes are created and
     * numbered, to determine the coarse box that matches the fbox, we need to
     * only check the tail end of the list of cboxes. In fact, given fbox_i,
     * if it's coarsened extents do not interesect with the first coarse box of the
     * tail end, then this fbox vanishes in the coarsening.
     *   c/fbox_mapping gives the fine/coarse box mapping between two consecutive levels
-    *   of the multilevel hierarchy. 
+    *   of the multilevel hierarchy.
     *-----------------------------------------------------------------------------*/
    if (num_levels > 1)
    {
-      cbox_mapping= hypre_CTAlloc(HYPRE_Int *, num_levels);
-      fbox_mapping= hypre_CTAlloc(HYPRE_Int *, num_levels);
+      cbox_mapping= hypre_CTAlloc(HYPRE_Int *,  num_levels, HYPRE_MEMORY_HOST);
+      fbox_mapping= hypre_CTAlloc(HYPRE_Int *,  num_levels, HYPRE_MEMORY_HOST);
    }
    for (i= 0; i< (num_levels-1); i++)
    {
@@ -149,7 +144,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
       cell_fgrid= hypre_SStructPGridCellSGrid(pgrid);
       fboxes= hypre_StructGridBoxes(cell_fgrid);
       nfboxes= hypre_BoxArraySize(hypre_StructGridBoxes(cell_fgrid));
-      fbox_mapping[i]= hypre_CTAlloc(HYPRE_Int, nfboxes);
+      fbox_mapping[i]= hypre_CTAlloc(HYPRE_Int,  nfboxes, HYPRE_MEMORY_HOST);
 
       grid = grid_l[i+1];
       pgrid= hypre_SStructGridPGrid(grid, 0); /* assuming one part */
@@ -157,7 +152,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
       cboxes= hypre_StructGridBoxes(cell_cgrid);
       nboxes= hypre_BoxArraySize(hypre_StructGridBoxes(cell_cgrid));
 
-      cbox_mapping[i+1]= hypre_CTAlloc(HYPRE_Int, nboxes);
+      cbox_mapping[i+1]= hypre_CTAlloc(HYPRE_Int,  nboxes, HYPRE_MEMORY_HOST);
 
       /* assuming if i1 > i2 and (box j1) is coarsened from (box i1)
          and (box j2) from (box i2), then j1 > j2. */
@@ -167,9 +162,9 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
          fbox= hypre_BoxArrayBox(fboxes, j);
          hypre_CopyBox(fbox, &rbox);
          hypre_ProjectBox(&rbox, zero_shift, rfactors);
-         hypre_StructMapFineToCoarse(hypre_BoxIMin(&rbox), zero_shift, 
+         hypre_StructMapFineToCoarse(hypre_BoxIMin(&rbox), zero_shift,
                                      rfactors, hypre_BoxIMin(&rbox));
-         hypre_StructMapFineToCoarse(hypre_BoxIMax(&rbox), zero_shift, 
+         hypre_StructMapFineToCoarse(hypre_BoxIMax(&rbox), zero_shift,
                                      rfactors, hypre_BoxIMax(&rbox));
 
          /* since the ordering of the cboxes was determined by the fbox
@@ -186,9 +181,9 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
          }  /* if (hypre_BoxVolume(&rbox)) */
       }     /* hypre_ForBoxI(j, fboxes) */
    }        /* for (i= 0; i< (num_levels-1); i++) */
-         
-   bdry= hypre_TAlloc(hypre_BoxArrayArray ***, num_levels);
-   npts= hypre_CTAlloc(HYPRE_Int, num_levels);
+
+   bdry= hypre_TAlloc(hypre_BoxArrayArray ***,  num_levels, HYPRE_MEMORY_HOST);
+   npts= hypre_CTAlloc(HYPRE_Int,  num_levels, HYPRE_MEMORY_HOST);
 
    /* finest level boundary determination */
    grid = grid_l[0];
@@ -215,12 +210,12 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
                }
             }
          }  /* for (j= 0; j< nvars; j++) */
-        
+
          boxes_with_bdry[0][i]= 1; /* mark this box as containing boundary layers */
       }  /* if (bdry[0][i]) */
    }
    nfboxes= nboxes;
-  
+
    /* coarser levels */
    for (i= 1; i< num_levels; i++)
    {
@@ -236,11 +231,11 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
       cboxes= hypre_StructGridBoxes(cell_cgrid);
       nboxes= hypre_BoxArraySize(hypre_StructGridBoxes(cell_cgrid));
 
-      bdry[i]= hypre_TAlloc(hypre_BoxArrayArray **, nboxes);
+      bdry[i]= hypre_TAlloc(hypre_BoxArrayArray **,  nboxes, HYPRE_MEMORY_HOST);
       p= 2*(ndim-1);
       for (j= 0; j< nboxes; j++)
       {
-         bdry[i][j]= hypre_TAlloc(hypre_BoxArrayArray *, nvars+1);
+         bdry[i][j]= hypre_TAlloc(hypre_BoxArrayArray *,  nvars+1, HYPRE_MEMORY_HOST);
 
          /* cell grid boxarrayarray */
          bdry[i][j][0]= hypre_BoxArrayArrayCreate(2*ndim, ndim);
@@ -251,7 +246,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
             bdry[i][j][k+1]= hypre_BoxArrayArrayCreate(p, ndim);
          }
       }
-   
+
       /* check if there are boundary points from the previous level */
       for (j= 0; j< nfboxes; j++)
       {
@@ -265,7 +260,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
             /* contract the fbox so that divisible in rfactor */
             contract_fbox= hypre_BoxContraction(fbox, cell_fgrid, rfactors);
 
-            /* refine the cbox. Expand the refined cbox so that the complete 
+            /* refine the cbox. Expand the refined cbox so that the complete
                chunk of the fine box that coarsened to it is included. This
                requires some offsets */
             hypre_ClearIndex(upper_shift);
@@ -289,9 +284,9 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
             hypre_BoxDestroy(contract_fbox);
 
             hypre_CopyBox(cbox, &rbox);
-            hypre_StructMapCoarseToFine(hypre_BoxIMin(&rbox), zero_shift, 
+            hypre_StructMapCoarseToFine(hypre_BoxIMin(&rbox), zero_shift,
                                         rfactors, hypre_BoxIMin(&rbox));
-            hypre_StructMapCoarseToFine(hypre_BoxIMax(&rbox), zero_shift, 
+            hypre_StructMapCoarseToFine(hypre_BoxIMax(&rbox), zero_shift,
                                         rfactors, hypre_BoxIMax(&rbox));
 
             hypre_AddIndexes(lower_shift, hypre_BoxIMin(&rbox), 3,
@@ -299,7 +294,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
             hypre_AddIndexes(upper_shift, hypre_BoxIMax(&rbox), 3,
                              hypre_BoxIMax(&rbox));
 
-            /* Determine, if any, boundary layers for this rbox. Since the 
+            /* Determine, if any, boundary layers for this rbox. Since the
                boundaries of the coarser levels may not be physical, we cannot
                use hypre_BoxBoundaryDG. But accomplished through intersecting
                with the finer level boundary boxes. */
@@ -313,50 +308,50 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
             {
                /* determine which boundary side we are doing. Depending on the
                   boundary, when we coarsen the refined boundary layer, the
-                  extents may need to be changed, 
+                  extents may need to be changed,
                   e.g., index[lower,j,k]= index[upper,j,k]. */
                switch(l)
                {
-                  case 0:  /* lower x direction, x_upper= x_lower */ 
+                  case 0:  /* lower x direction, x_upper= x_lower */
                   {
                      n= 1; /* n flags whether upper or lower to be replaced */
                      d= 0; /* x component */
                      break;
                   }
-                  case 1:  /* upper x direction, x_lower= x_upper */ 
+                  case 1:  /* upper x direction, x_lower= x_upper */
                   {
                      n= 0; /* n flags whether upper or lower to be replaced */
                      d= 0; /* x component */
                      break;
                   }
-                  case 2:  /* lower y direction, y_upper= y_lower */ 
+                  case 2:  /* lower y direction, y_upper= y_lower */
                   {
                      n= 1; /* n flags whether upper or lower to be replaced */
                      d= 1; /* y component */
                      break;
                   }
-                  case 3:  /* upper y direction, y_lower= y_upper */ 
+                  case 3:  /* upper y direction, y_lower= y_upper */
                   {
                      n= 0; /* n flags whether upper or lower to be replaced */
                      d= 1; /* y component */
                      break;
                   }
-                  case 4:  /* lower z direction, z_lower= z_upper */ 
+                  case 4:  /* lower z direction, z_lower= z_upper */
                   {
                      n= 1; /* n flags whether upper or lower to be replaced */
                      d= 2; /* z component */
                      break;
                   }
-                  case 5:  /* upper z direction, z_upper= z_lower */ 
+                  case 5:  /* upper z direction, z_upper= z_lower */
                   {
                      n= 0; /* n flags whether upper or lower to be replaced */
                      d= 2; /* z component */
                      break;
                   }
                }
-                    
+
                box_array= hypre_BoxArrayArrayBoxArray(fbdry, l);
-               hypre_ForBoxI(p, box_array) 
+               hypre_ForBoxI(p, box_array)
                {
                   hypre_IntersectBoxes(hypre_BoxArrayBox(box_array, p), &rbox,
                                        &intersect);
@@ -365,31 +360,31 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
                      /* coarsen the refined boundary box and append it to
                         boxarray hypre_BoxArrayArrayBoxArray(cbdry, l) */
                      hypre_ProjectBox(&intersect, zero_shift, rfactors);
-                     hypre_StructMapFineToCoarse(hypre_BoxIMin(&intersect), 
+                     hypre_StructMapFineToCoarse(hypre_BoxIMin(&intersect),
                                                  zero_shift, rfactors, hypre_BoxIMin(&intersect));
-                     hypre_StructMapFineToCoarse(hypre_BoxIMax(&intersect), 
+                     hypre_StructMapFineToCoarse(hypre_BoxIMax(&intersect),
                                                  zero_shift, rfactors, hypre_BoxIMax(&intersect));
 
                      /* the coarsened intersect box may be incorrect because
                         of the box projecting formulas. */
                      if (n) /* replace upper by lower */
-                     { 
+                     {
                         hypre_BoxIMax(&intersect)[d]= hypre_BoxIMin(&intersect)[d];
                      }
                      else   /* replace lower by upper */
-                     { 
+                     {
                         hypre_BoxIMin(&intersect)[d]= hypre_BoxIMax(&intersect)[d];
                      }
-                   
+
                      hypre_AppendBox(&intersect,
                                      hypre_BoxArrayArrayBoxArray(cbdry, l));
                      cnt++; /* counter to signal boundary layers for cbox boxi */
                   }   /* if (hypre_BoxVolume(&intersect)) */
                }      /* hypre_ForBoxI(p, box_array) */
             }         /* hypre_ForBoxArrayI(l, fbdry) */
-            
+
             /* All the boundary box_arrayarrays have been checked for coarse boxi.
-               Now get the variable boundary layers if any, count the number of 
+               Now get the variable boundary layers if any, count the number of
                boundary points, and appropriately mark boxi. */
             if (cnt)
             {
@@ -401,7 +396,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
                   hypre_ForBoxArrayI(l, cbdry)
                   {
                      box_array= hypre_BoxArrayArrayBoxArray(cbdry, l);
-                     hypre_ForBoxI(m, box_array) 
+                     hypre_ForBoxI(m, box_array)
                      {
                         cbox= hypre_BoxArrayBox(box_array, m);
                         npts[i]+= hypre_BoxVolume(cbox);
@@ -411,7 +406,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
 
                boxes_with_bdry[i][boxi]= 1; /* mark as containing boundary */
             }
- 
+
          }  /* if (boxes_with_bdry[i-1][j]) */
       }     /* for (j= 0; j< nfboxes; j++) */
 
@@ -423,11 +418,11 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
    {
       if (fbox_mapping[i])
       {
-         hypre_TFree(fbox_mapping[i]);
+         hypre_TFree(fbox_mapping[i], HYPRE_MEMORY_HOST);
       }
       if (cbox_mapping[i+1])
       {
-         hypre_TFree(cbox_mapping[i+1]);
+         hypre_TFree(cbox_mapping[i+1], HYPRE_MEMORY_HOST);
       }
 
       grid = grid_l[i+1];
@@ -438,13 +433,13 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
    }
    if (num_levels > 1)
    {
-      hypre_TFree(fbox_mapping);
-      hypre_TFree(cbox_mapping);
+      hypre_TFree(fbox_mapping, HYPRE_MEMORY_HOST);
+      hypre_TFree(cbox_mapping, HYPRE_MEMORY_HOST);
    }
 
    /* find the ranks for the boundary points */
-   BdryRanks_l    = hypre_TAlloc(HYPRE_Int *, num_levels);
-   BdryRanksCnts_l= hypre_TAlloc(HYPRE_Int  , num_levels);
+   BdryRanks_l    = hypre_TAlloc(HYPRE_Int *,  num_levels, HYPRE_MEMORY_HOST);
+   BdryRanksCnts_l= hypre_TAlloc(HYPRE_Int  ,  num_levels, HYPRE_MEMORY_HOST);
 
    /* loop over levels and extract boundary ranks. Only extract unique
       ranks */
@@ -456,8 +451,8 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
       nvars= hypre_SStructPGridNVars(pgrid);
       cboxes= hypre_StructGridBoxes(cell_cgrid);
       nboxes= hypre_BoxArraySize(hypre_StructGridBoxes(cell_cgrid));
- 
-      ranks= hypre_TAlloc(HYPRE_Int, npts[i]);
+
+      ranks= hypre_TAlloc(HYPRE_BigInt,  npts[i], HYPRE_MEMORY_HOST);
       cnt= 0;
       for (j= 0; j< nboxes; j++)
       {
@@ -466,7 +461,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
             for (k= 0; k< nvars; k++)
             {
                fbdry= bdry[i][j][k+1];
-  
+
                hypre_ForBoxArrayI(m, fbdry)
                {
                   box_array= hypre_BoxArrayArrayBoxArray(fbdry, m);
@@ -475,18 +470,10 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
                      box= hypre_BoxArrayBox(box_array, p);
                      hypre_BoxGetSize(box, loop_size);
                      hypre_CopyIndex(hypre_BoxIMin(box), start);
-      
-                     hypre_BoxLoop0Begin(ndim, loop_size);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,lindex,index,boxman_entry,cnt) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                     hypre_BoxLoopSetOneBlock();
-#endif
-                     hypre_BoxLoop0For()
+
+                     hypre_SerialBoxLoop0Begin(ndim, loop_size);
                      {
-                        hypre_BoxLoopGetIndex(lindex);
+                        zypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(index, lindex[0], lindex[1], lindex[2]);
                         hypre_AddIndexes(index, start, 3, index);
 
@@ -497,7 +484,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
                         cnt++;
 
                      }
-                     hypre_BoxLoop0End();
+                     hypre_SerialBoxLoop0End();
                   }  /* hypre_ForBoxI(p, box_array) */
                }     /* hypre_ForBoxArrayI(m, fbdry) */
 
@@ -509,10 +496,10 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
             hypre_BoxArrayArrayDestroy(bdry[i][j][k+1]);
          }
          hypre_BoxArrayArrayDestroy(bdry[i][j][0]);
-         hypre_TFree(bdry[i][j]);
-        
+         hypre_TFree(bdry[i][j], HYPRE_MEMORY_HOST);
+
       }  /* for (j= 0; j< nboxes; j++) */
-      hypre_TFree(bdry[i]);
+      hypre_TFree(bdry[i], HYPRE_MEMORY_HOST);
 
       /* mark all ranks that are outside this processor to -1 */
       for (j= 0; j< cnt; j++)
@@ -526,7 +513,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
       /* sort the ranks & extract the unique ones */
       if (cnt)  /* recall that some may not have bdry pts */
       {
-         hypre_qsort0(ranks, 0, cnt-1);
+         hypre_BigQsort0(ranks, 0, cnt-1);
 
          k= 0;
          if (ranks[0] < 0) /* remove the off-processor markers */
@@ -549,7 +536,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
                l++;
             }
          }
-         BdryRanks_l[i]= hypre_TAlloc(HYPRE_Int, l);
+         BdryRanks_l[i]= hypre_TAlloc(HYPRE_Int,  l, HYPRE_MEMORY_HOST);
          BdryRanksCnts_l[i]= l;
 
          l= 0;
@@ -564,23 +551,23 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
          }
       }
 
-      else /* set BdryRanks_l[i] to be null */   
+      else /* set BdryRanks_l[i] to be null */
       {
          BdryRanks_l[i]= NULL;
          BdryRanksCnts_l[i]= 0;
       }
 
-      hypre_TFree(ranks);
-      hypre_TFree(boxes_with_bdry[i]);
+      hypre_TFree(ranks, HYPRE_MEMORY_HOST);
+      hypre_TFree(boxes_with_bdry[i], HYPRE_MEMORY_HOST);
 
    }  /* for (i= 0; i< num_levels; i++) */
 
-   hypre_TFree(boxes_with_bdry);
-   hypre_TFree(lower_rank);
-   hypre_TFree(upper_rank);
+   hypre_TFree(boxes_with_bdry, HYPRE_MEMORY_HOST);
+   hypre_TFree(lower_rank, HYPRE_MEMORY_HOST);
+   hypre_TFree(upper_rank, HYPRE_MEMORY_HOST);
 
-   hypre_TFree(bdry);
-   hypre_TFree(npts);
+   hypre_TFree(bdry, HYPRE_MEMORY_HOST);
+   hypre_TFree(npts, HYPRE_MEMORY_HOST);
 
    *BdryRanksl_ptr    = BdryRanks_l;
    *BdryRanksCntsl_ptr= BdryRanksCnts_l;
@@ -803,7 +790,7 @@ hypre_Maxwell_VarBdy( hypre_SStructPGrid       *pgrid,
                   hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
                   hypre_SubtractIndexes(lower, varoffset, 3, lower);
                   hypre_SubtractIndexes(upper, kshift, 3, upper);
-                   
+
                   hypre_BoxSetExtents(shifted_box, lower, upper);
                   hypre_AppendBox(shifted_box, box_array2);
                }

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include <math.h>
 #include <string.h>
@@ -84,10 +79,10 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
 {
    int                 *ADiagI, *ADiagJ, *AOffdI, *AOffdJ;
    double              *ADiagA, *AOffdA, *uData, *fData;
-   register int        iStart, iEnd, jj;
+   int                 iStart, iEnd, jj;
    int                 i, j, is, localNRows, extNRows, *tmpJ, relaxError=0;
    int                 iC, index, nprocs, mypid, nSends, start;
-   register double     res;
+   double              res;
    double              zero = 0.0, relaxWeight, rnorm;
    double              *vBufData=NULL, *tmpData, *vExtData=NULL;
    MPI_Comm            comm;
@@ -486,10 +481,10 @@ int MLI_Solver_SGS::findOmega()
 {
    int                 *ADiagI, *ADiagJ, *AOffdI, *AOffdJ;
    double              *ADiagA, *AOffdA, *uData, *fData;
-   register int        iStart, iEnd, jj;
+   int                 iStart, iEnd, jj;
    int                 i, j, is, iR, localNRows, extNRows, *tmpJ;
    int                 index, nprocs, mypid, nSends, start;
-   register double     res;
+   double              res;
    double              zero = 0.0, relaxWeight, rnorm, *relNorms;
    double              *vBufData=NULL, *tmpData, *vExtData=NULL; 
    MPI_Comm            comm;

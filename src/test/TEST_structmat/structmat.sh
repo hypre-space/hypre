@@ -1,15 +1,8 @@
 #!/bin/sh
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 TNAME=`basename $0 .sh`
 
@@ -62,10 +55,23 @@ FILESmatvec="\
  ${TNAME}.out.2D1.mv4.4\
  ${TNAME}.out.2D3.mv0.4\
 "
+FILESab="\
+ ${TNAME}.out.ab0.mv0\
+ ${TNAME}.out.ab0.mv1\
+ ${TNAME}.out.ab0.mv2\
+ ${TNAME}.out.ab1.mv0\
+ ${TNAME}.out.ab1.mv1\
+ ${TNAME}.out.ab1.mv2\
+ ${TNAME}.out.ab2.mv0\
+ ${TNAME}.out.ab2.mv1\
+ ${TNAME}.out.ab2.mv2\
+"
+
 #=============================================================================
 # Diff the output with the saved output
 #=============================================================================
 
+# Matmat tests
 for i in $FILESmatmat
 do
    for j in ${i}.matmat.*
@@ -75,6 +81,7 @@ do
    done
 done
 
+# Matvec tests
 for i in $FILESmatvec
 do
    for j in ${i}.matvec.*
@@ -92,6 +99,23 @@ do
       matvecT=`echo $j | sed 's/mv/mvT/' | sed 's/matvec/matvecT/'`
       saved=`echo $j | sed 's/.out/.saved/'`
       diff -U3 -bI"time" $matvecT $saved >&2
+   done
+done
+
+# Check the x==y and beta=0 tests (compare to appropriate saved files)
+for i in ${TNAME}.out.*zzz.matvec*
+do
+   zfile=`echo $i | sed 's/.zzz//'`
+   diff -U3 -bI"time" $i $zfile >&2
+done
+
+# Matvec alpha/beta tests
+for i in $FILESab
+do
+   for j in ${i}.matvec.*
+   do
+      saved=`echo $j | sed 's/.out/.saved/'`
+      diff -U3 -bI"time" $j $saved >&2
    done
 done
 

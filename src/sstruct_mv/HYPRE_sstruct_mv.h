@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision: 2.33 $
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef HYPRE_SSTRUCT_MV_HEADER
 #define HYPRE_SSTRUCT_MV_HEADER
@@ -26,27 +21,29 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /**
- * @name SStruct System Interface
+ * @defgroup SStructSystemInterface SStruct System Interface
  *
  * This interface represents a semi-structured-grid conceptual view of a linear
  * system.
  *
  * @memo A semi-structured-grid conceptual interface
+ *
+ * @{
  **/
-/*@{*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 /**
  * @name SStruct Grids
+ *
+ * @{
  **/
-/*@{*/
 
 struct hypre_SStructGrid_struct;
 /**
- * A grid object is constructed out of several structured ``parts'' and an
- * optional unstructured ``part''.  Each structured part has its own abstract
+ * A grid object is constructed out of several structured "parts" and an
+ * optional unstructured "part".  Each structured part has its own abstract
  * index space.
  **/
 typedef struct hypre_SStructGrid_struct *HYPRE_SStructGrid;
@@ -61,29 +58,25 @@ typedef struct hypre_SStructGrid_struct *HYPRE_SStructGrid;
  *
  * Variables are referenced relative to an abstract (cell centered) index in the
  * following way:
- * \begin{itemize}
- * \item cell centered variables are aligned with the index;
- * \item node centered variables are aligned with the cell corner
- *       at relative index (1/2, 1/2, 1/2);
- * \item x-face, y-face, and z-face centered variables are aligned
- *       with the faces at relative indexes (1/2, 0, 0), (0, 1/2, 0),
- *       and (0, 0, 1/2), respectively;
- * \item x-edge, y-edge, and z-edge centered variables are aligned
- *       with the edges at relative indexes (0, 1/2, 1/2), (1/2, 0, 1/2),
- *       and (1/2, 1/2, 0), respectively.
- * \end{itemize}
+ *    - cell centered variables are aligned with the index;
+ *    - node centered variables are aligned with the cell corner
+ *      at relative index (1/2, 1/2, 1/2);
+ *    - x-face, y-face, and z-face centered variables are aligned
+ *      with the faces at relative indexes (1/2, 0, 0), (0, 1/2, 0),
+ *      and (0, 0, 1/2), respectively;
+ *    - x-edge, y-edge, and z-edge centered variables are aligned
+ *      with the edges at relative indexes (0, 1/2, 1/2), (1/2, 0, 1/2),
+ *      and (1/2, 1/2, 0), respectively.
  *
  * The supported identifiers are:
- * \begin{itemize}
- * \item {\tt HYPRE\_SSTRUCT\_VARIABLE\_CELL}
- * \item {\tt HYPRE\_SSTRUCT\_VARIABLE\_NODE}
- * \item {\tt HYPRE\_SSTRUCT\_VARIABLE\_XFACE}
- * \item {\tt HYPRE\_SSTRUCT\_VARIABLE\_YFACE}
- * \item {\tt HYPRE\_SSTRUCT\_VARIABLE\_ZFACE}
- * \item {\tt HYPRE\_SSTRUCT\_VARIABLE\_XEDGE}
- * \item {\tt HYPRE\_SSTRUCT\_VARIABLE\_YEDGE}
- * \item {\tt HYPRE\_SSTRUCT\_VARIABLE\_ZEDGE}
- * \end{itemize}
+ *    - \c HYPRE_SSTRUCT_VARIABLE_CELL
+ *    - \c HYPRE_SSTRUCT_VARIABLE_NODE
+ *    - \c HYPRE_SSTRUCT_VARIABLE_XFACE
+ *    - \c HYPRE_SSTRUCT_VARIABLE_YFACE
+ *    - \c HYPRE_SSTRUCT_VARIABLE_ZFACE
+ *    - \c HYPRE_SSTRUCT_VARIABLE_XEDGE
+ *    - \c HYPRE_SSTRUCT_VARIABLE_YEDGE
+ *    - \c HYPRE_SSTRUCT_VARIABLE_ZEDGE
  *
  * NOTE: Although variables are referenced relative to a unique abstract
  * cell-centered index, some variables are associated with multiple grid cells.
@@ -105,7 +98,7 @@ typedef HYPRE_Int HYPRE_SStructVariable;
 #define HYPRE_SSTRUCT_VARIABLE_ZEDGE      7
 
 /**
- * Create an {\tt ndim}-dimensional grid object with {\tt nparts} structured
+ * Create an <em>ndim</em>-dimensional grid object with \e nparts structured
  * parts.
  **/
 HYPRE_Int
@@ -146,7 +139,7 @@ HYPRE_SStructGridSetVariables(HYPRE_SStructGrid      grid,
 /**
  * Describe additional variables that live at a particular index.  These
  * variables are appended to the array of variables set in
- * \Ref{HYPRE_SStructGridSetVariables}, and are referenced as such.
+ * \ref HYPRE_SStructGridSetVariables, and are referenced as such.
  *
  * NOTE: This routine is not yet supported.
  **/
@@ -161,15 +154,15 @@ HYPRE_SStructGridAddVariables(HYPRE_SStructGrid      grid,
  * Set the ordering of variables in a finite element problem.  This overrides
  * the default ordering described below.
  *
- * Array {\tt ordering} is composed of blocks of size (1 + {\tt ndim}).  Each
+ * Array \e ordering is composed of blocks of size (1 + \e ndim).  Each
  * block indicates a specific variable in the element and the ordering of the
  * blocks defines the ordering of the variables.  A block contains a variable
  * number followed by an offset direction relative to the element's center.  For
  * example, a block containing (2, 1, -1, 0) means variable 2 on the edge
  * located in the (1, -1, 0) direction from the center of the element.  Note
- * that here variable 2 must be of type {\tt ZEDGE} for this to make sense.  The
- * {\tt ordering} array must account for all variables in the element.  This
- * routine can only be called after \Ref{HYPRE_SStructGridSetVariables}.
+ * that here variable 2 must be of type \c ZEDGE for this to make sense.  The
+ * \e ordering array must account for all variables in the element.  This
+ * routine can only be called after \ref HYPRE_SStructGridSetVariables.
  *
  * The default ordering for element variables (var, i, j, k) varies fastest in
  * index i, followed by j, then k, then var.  For example, if var 0, var 1, and
@@ -188,21 +181,21 @@ HYPRE_SStructGridSetFEMOrdering(HYPRE_SStructGrid  grid,
  * Describe how regions just outside of a part relate to other parts.  This is
  * done a box at a time.
  *
- * Parts {\tt part} and {\tt nbor\_part} must be different, except in the case
+ * Parts \e part and \e nbor_part must be different, except in the case
  * where only cell-centered data is used.
  *
- * Indexes should increase from {\tt ilower} to {\tt iupper}.  It is not
- * necessary that indexes increase from {\tt nbor\_ilower} to {\tt
- * nbor\_iupper}.
+ * Indexes should increase from \e ilower to \e iupper.  It is not
+ * necessary that indexes increase from \e nbor_ilower to \e
+ * nbor_iupper.
  *
- * The {\tt index\_map} describes the mapping of indexes 0, 1, and 2 on part
- * {\tt part} to the corresponding indexes on part {\tt nbor\_part}.  For
- * example, triple (1, 2, 0) means that indexes 0, 1, and 2 on part {\tt part}
- * map to indexes 1, 2, and 0 on part {\tt nbor\_part}, respectively.
+ * The \e index_map describes the mapping of indexes 0, 1, and 2 on part
+ * \e part to the corresponding indexes on part \e nbor_part.  For
+ * example, triple (1, 2, 0) means that indexes 0, 1, and 2 on part \e part
+ * map to indexes 1, 2, and 0 on part \e nbor_part, respectively.
  *
- * The {\tt index\_dir} describes the direction of the mapping in {\tt
- * index\_map}.  For example, triple (1, 1, -1) means that for indexes 0 and 1,
- * increasing values map to increasing values on {\tt nbor\_part}, while for
+ * The \e index_dir describes the direction of the mapping in \e
+ * index_map.  For example, triple (1, 1, -1) means that for indexes 0 and 1,
+ * increasing values map to increasing values on \e nbor_part, while for
  * index 2, decreasing values map to increasing values.
  *
  * NOTE: All parts related to each other via this routine must have an identical
@@ -232,17 +225,16 @@ HYPRE_SStructGridSetNeighborPart(HYPRE_SStructGrid  grid,
 /**
  * Describe how regions inside a part are shared with regions in other parts.
  *
- * Parts {\tt part} and {\tt shared\_part} must be different.
+ * Parts \e part and \e shared_part must be different.
  *
- * Indexes should increase from {\tt ilower} to {\tt iupper}.  It is not
- * necessary that indexes increase from {\tt shared\_ilower} to {\tt
- * shared\_iupper}.  This is to maintain consistency with the {\tt
- * SetNeighborPart} function, which is also able to describe shared regions but
- * in a more limited fashion.
+ * Indexes should increase from \e ilower to \e iupper.  It is not necessary
+ * that indexes increase from \e shared_ilower to \e shared_iupper.  This is
+ * to maintain consistency with the \c SetNeighborPart function, which is also
+ * able to describe shared regions but in a more limited fashion.
  *
- * The {\tt offset} is a triple (in 3D) used to indicate the dimensionality of
- * the shared set of data and its position with respect to the box extents {\tt
- * ilower} and {\tt iupper} on part {\tt part}.  The dimensionality is given by
+ * The \e offset is a triple (in 3D) used to indicate the dimensionality of
+ * the shared set of data and its position with respect to the box extents \e
+ * ilower and \e iupper on part \e part.  The dimensionality is given by
  * the number of 0's in the triple, and the position is given by plus or minus
  * 1's.  For example: (0, 0, 0) indicates sharing of all data in the given box;
  * (1, 0, 0) indicates sharing of data on the faces in the (1, 0, 0) direction;
@@ -250,22 +242,22 @@ HYPRE_SStructGridSetNeighborPart(HYPRE_SStructGrid  grid,
  * direction; and (1, -1, 1) indicates sharing of data on the nodes in the (1,
  * -1, 1) direction.  To ensure the dimensionality, it is required that for
  * every nonzero entry, the corresponding extents of the box are the same.  For
- * example, if {\tt offset} is (0, 1, 0), then (2, 1, 3) and (10, 1, 15) are
+ * example, if \e offset is (0, 1, 0), then (2, 1, 3) and (10, 1, 15) are
  * valid box extents, whereas (2, 1, 3) and (10, 7, 15) are invalid (because 1
  * and 7 are not the same).
  *
- * The {\tt shared\_offset} is used in the same way as {\tt offset}, but with
- * respect to the box extents {\tt shared\_ilower} and {\tt shared\_iupper} on
- * part {\tt shared\_part}.
+ * The \e shared_offset is used in the same way as \e offset, but with
+ * respect to the box extents \e shared_ilower and \e shared_iupper on
+ * part \e shared_part.
  *
- * The {\tt index\_map} describes the mapping of indexes 0, 1, and 2 on part
- * {\tt part} to the corresponding indexes on part {\tt shared\_part}.  For
- * example, triple (1, 2, 0) means that indexes 0, 1, and 2 on part {\tt part}
- * map to indexes 1, 2, and 0 on part {\tt shared\_part}, respectively.
+ * The \e index_map describes the mapping of indexes 0, 1, and 2 on part
+ * \e part to the corresponding indexes on part \e shared_part.  For
+ * example, triple (1, 2, 0) means that indexes 0, 1, and 2 on part \e part
+ * map to indexes 1, 2, and 0 on part \e shared_part, respectively.
  *
- * The {\tt index\_dir} describes the direction of the mapping in {\tt
- * index\_map}.  For example, triple (1, 1, -1) means that for indexes 0 and 1,
- * increasing values map to increasing values on {\tt shared\_part}, while for
+ * The \e index_dir describes the direction of the mapping in \e
+ * index_map.  For example, triple (1, 1, -1) means that for indexes 0 and 1,
+ * increasing values map to increasing values on \e shared_part, while for
  * index 2, decreasing values map to increasing values.
  *
  * NOTE: All parts related to each other via this routine must have an identical
@@ -295,36 +287,35 @@ HYPRE_SStructGridSetSharedPart(HYPRE_SStructGrid  grid,
                                HYPRE_Int         *index_dir);
 
 /**
- * \color{blue}
+ * AMRNEW
+ *
  * Declare a part to be a refinement of another part in an AMR hierarchy.
  *
- * The index space of {\tt fine_part} is defined to be a refinement of the index
- * space of {\tt coarse_part} by a refinement factor in each dimension given by
- * {\tt rfactors}.  The two index spaces are aligned based on {\tt coarse_index}
- * and {\tt fine_index}, which specifies the fine index of the lower left cell
- * of the given coarse index.  This induces notions of {\em real} and {\em
- * slave} variables and interpolation between them, which impacts how vector and
+ * The index space of \e fine_part is defined to be a refinement of the index
+ * space of \e coarse_part by a refinement factor in each dimension given by
+ * \e rfactors.  The two index spaces are aligned based on \e coarse_index
+ * and \e fine_index, which specifies the fine index of the lower left cell
+ * of the given coarse index.  This induces notions of \e real and \e
+ * slave variables and interpolation between them, which impacts how vector and
  * matrix values are set.
  *
  * By default, real variables are defined as follows, and the remaining
  * variables are slave variables (this may be changed by the user through
- * the routine {\tt HYPRE_SStructGridSetAMRRefSlaves}:
- * \begin{itemize}
- * \item fine variables on the interior of overlapping coarse-fine regions;
- * \item coarse variables on the boundary of overlapping coarse-fine regions;
- * \item all variables in non-overlapping regions.
- * \end{itemize}
+ * the routine \e HYPRE_SStructGridSetAMRRefSlaves:
+ *    - fine variables on the interior of overlapping coarse-fine regions;
+ *    - coarse variables on the boundary of overlapping coarse-fine regions;
+ *    - all variables in non-overlapping regions.
  *
  * By default, interpolation (and restriction) is defined to be the natural
  * finite element interpolation corresponding to each variable type, but this
- * may be changed by the user via the other {\tt SStructGridSetAMR} routines.
+ * may be changed by the user via the other \e SStructGridSetAMR routines.
  *
  * There are two basic steps for changing interpolation, both optional.  The
- * first is through the {\tt SStructGridSetAMRRef} routines using a reference
+ * first is through the \e SStructGridSetAMRRef routines using a reference
  * overlapping coarse-fine patch.  This reference patch is applied throughout
  * the entire part to define the global interpolation operator.  Interpolation
  * may then be changed at individual locations in the grid through the
- * {\tt HYPRE_SStructGridSetAMRInterp} routine.
+ * \e HYPRE_SStructGridSetAMRInterp routine.
  *
  * The reference coarse-fine patch consists of a single coarse cell and its
  * refinement, where the coarse and fine reference patches are assumed to have a
@@ -335,7 +326,7 @@ HYPRE_SStructGridSetSharedPart(HYPRE_SStructGrid  grid,
  * would be referenced by the index (-1,-1) and the upper right variable by
  * index (1,1).  Similarly, the lower left coarse variable would be referenced
  * by index (-1,-1) and the upper right with index (0,0).
- **/
+ */
 HYPRE_Int
 HYPRE_SStructGridSetAMRPart(HYPRE_SStructGrid  grid,
                             HYPRE_Int          coarse_part,
@@ -345,15 +336,16 @@ HYPRE_SStructGridSetAMRPart(HYPRE_SStructGrid  grid,
                             HYPRE_Int         *rfactors);
 
 /**
- * \color{blue}
+ * AMRNEW
+ *
  * Define the slave variables in the reference coarse-fine patch.  The argument
- * {\tt slaves} is an array of blocks of size {\tt ndim} containing the
+ * \e slaves is an array of blocks of size \e ndim containing the
  * associated cell indexes for the slave variables.
  *
- * See {\tt HYPRE_SStructGridSetAMRPart} for details on the coarse-fine patch.
- * This routine must be called after {\tt HYPRE_SStructGridSetAMRPart} and
- * before any other {\tt SStructGridSetAMR} routines.
- **/
+ * See \e HYPRE_SStructGridSetAMRPart for details on the coarse-fine patch.
+ * This routine must be called after \e HYPRE_SStructGridSetAMRPart and
+ * before any other \e SStructGridSetAMR routines.
+ */
 HYPRE_Int
 HYPRE_SStructGridSetAMRRefSlaves(HYPRE_SStructGrid  grid,
                                  HYPRE_Int          coarse_part,
@@ -362,25 +354,25 @@ HYPRE_SStructGridSetAMRRefSlaves(HYPRE_SStructGrid  grid,
                                  HYPRE_Int         *slaves);
 
 /**
- * \color{blue}
+ * AMRNEW
  *
  * Set interpolation on the reference coarse-fine patch.  Interpolation maps
  * real variables to all variables (real and slave).  Real variables are mapped
  * to real variables identically.  Slave coarse variables are not interpolated
  * at all.  Users may only change interpolation from real variables (coarse and
- * fine) to slave fine variables {\tt scf=1} (see special cell-centered case
- * below).  The argument {\tt sindex} is a fine reference patch index for slave
- * variable {\tt svar}.  The array {\tt indexes} contains both coarse and fine
- * reference patch indexes for variables {\tt vars} as specified in {\tt cf} by
+ * fine) to slave fine variables \e scf=1 (see special cell-centered case
+ * below).  The argument \e sindex is a fine reference patch index for slave
+ * variable \e svar.  The array \e indexes contains both coarse and fine
+ * reference patch indexes for variables \e vars as specified in \e cf by
  * a 0 (coarse) or a 1 (fine).
  *
  * Cell-centered variables are treated as a special case, where coupling occurs
  * through fictitious slave face variables.  Although these variables are
  * associated with faces, they should actually be thought of as being centered
- * either at cells just outside of the patch for fine faces ({\tt scf=1}) or at
- * the patch center for coarse faces ({\tt scf=0}).  These fictitious variables
+ * either at cells just outside of the patch for fine faces (\e scf=1) or at
+ * the patch center for coarse faces (\e scf=0).  These fictitious variables
  * are also referenced differently from other variables, where, for convenience,
- * {\tt sindex} always specifies cells just outside of the patch (in the coarse
+ * \e sindex always specifies cells just outside of the patch (in the coarse
  * case in particular, this approach enables a distinction between the multiple
  * coarse faces and interpolation formulas).  Interpolation may be from any
  * neighboring real variables, inside or outside of the patch.
@@ -392,9 +384,9 @@ HYPRE_SStructGridSetAMRRefSlaves(HYPRE_SStructGrid  grid,
  * fine variables (in the odd refinement case, this is just injection from the
  * underlying fine variable).
  *
- * See {\tt HYPRE_SStructGridSetAMRPart} for details on the coarse-fine patch.
+ * See \e HYPRE_SStructGridSetAMRPart for details on the coarse-fine patch.
  * Note: Currently, each call must set an entire row of interpolation.
- **/
+ */
 HYPRE_Int
 HYPRE_SStructGridSetAMRRefInterp(HYPRE_SStructGrid  grid,
                                  HYPRE_Int          coarse_part,
@@ -408,12 +400,13 @@ HYPRE_SStructGridSetAMRRefInterp(HYPRE_SStructGrid  grid,
                                  HYPRE_Complex     *values);
 
 /**
- * \color{blue}
+ * AMRNEW
+ *
  * Set (the transpose of) restriction on the reference coarse-fine patch.  By
  * default, restriction is the transpose of interpolation.  Usually, this
  * routine should only be called to set up a nonsymmetric operator.  Usage is
  * the same as for setting up interpolation.
- **/
+ */
 HYPRE_Int
 HYPRE_SStructGridSetAMRRefRestrictT(HYPRE_SStructGrid  grid,
                                     HYPRE_Int          coarse_part,
@@ -427,11 +420,12 @@ HYPRE_SStructGridSetAMRRefRestrictT(HYPRE_SStructGrid  grid,
                                     HYPRE_Complex     *values);
 
 /**
- * \color{blue}
+ * AMRNEW
+ *
  * Set interpolation at a specific grid index on a refined part.  Usage is the
  * same as for setting interpolation on the reference coarse-fine patch, except
- * that an additional argument {\tt coarse_index} is given.
- **/
+ * that an additional argument \e coarse_index is given.
+ */
 HYPRE_Int
 HYPRE_SStructGridSetAMRInterp(HYPRE_SStructGrid  grid,
                               HYPRE_Int          coarse_part,
@@ -446,11 +440,12 @@ HYPRE_SStructGridSetAMRInterp(HYPRE_SStructGrid  grid,
                               HYPRE_Complex     *values);
 
 /**
- * \color{blue}
+ * AMRNEW
+ *
  * Set restriction at a specific grid index on a refined part.  Usage is the
  * same as for setting restriction on the reference coarse-fine patch, except
- * that an additional argument {\tt coarse_index} is given.
- **/
+ * that an additional argument \e coarse_index is given.
+ */
 HYPRE_Int
 HYPRE_SStructGridSetAMRRestrictT(HYPRE_SStructGrid  grid,
                                  HYPRE_Int          coarse_part,
@@ -468,7 +463,7 @@ HYPRE_SStructGridSetAMRRestrictT(HYPRE_SStructGrid  grid,
  * Add an unstructured part to the grid.  The variables in the unstructured part
  * of the grid are referenced by a global rank between 0 and the total number of
  * unstructured variables minus one.  Each process owns some unique consecutive
- * range of variables, defined by {\tt ilower} and {\tt iupper}.
+ * range of variables, defined by \e ilower and \e iupper.
  *
  * NOTE: This is just a placeholder.  This part of the interface is not finished.
  **/
@@ -484,28 +479,30 @@ HYPRE_Int
 HYPRE_SStructGridAssemble(HYPRE_SStructGrid grid);
 
 /**
- * \color{blue}
- * Set the storage type of associated matrix and vector objects.  This object
- * type is inherited by {\tt SStructGraph}, {\tt SStructMatrix}, and {\tt
- * SStructVector} at their creation, but can also be changed through the
- * corresponding {\tt SetObjectType} routines.  Setting an object type with this
- * routine helps to minimize the number of overall calls to {\tt SetObjectType},
- * but is particularly useful when grid-based operators are needed, such as a
- * discrete gradient ({\tt HYPRE_SStructGridGetGradient}).
+ * AMRNEW
  *
- * Currently, {\tt type} can be {\tt HYPRE\_SSTRUCT}, {\tt HYPRE\_STRUCT}, or
- * {\tt HYPRE\_PARCSR}. The default is {\tt HYPRE\_SSTRUCT}.
- **/
+ * Set the storage type of associated matrix and vector objects.  This object
+ * type is inherited by \e SStructGraph, \e SStructMatrix, and \e
+ * SStructVector at their creation, but can also be changed through the
+ * corresponding \e SetObjectType routines.  Setting an object type with this
+ * routine helps to minimize the number of overall calls to \e SetObjectType,
+ * but is particularly useful when grid-based operators are needed, such as a
+ * discrete gradient (\e HYPRE_SStructGridGetGradient).
+ *
+ * Currently, \e type can be \c HYPRE_SSTRUCT, \c HYPRE_STRUCT, or
+ * \c HYPRE_PARCSR. The default is \c HYPRE_SSTRUCT.
+ */
 HYPRE_Int
 HYPRE_SStructGridSetObjectType(HYPRE_SStructGrid  grid,
                                HYPRE_Int          type);
 
 /**
- * \color{blue}
+ * AMRNEW
+ *
  * Get a reference to a discrete gradient matrix object.
  *
  * RDF: Not sure yet if this routine really needs to exist.
- **/
+ */
 HYPRE_Int
 HYPRE_SStructGridGetGradient(HYPRE_SStructGrid   grid,
                              void              **gradient);
@@ -513,7 +510,7 @@ HYPRE_SStructGridGetGradient(HYPRE_SStructGrid   grid,
 /**
  * Set the periodicity on a particular part.
  *
- * The argument {\tt periodic} is an {\tt ndim}-dimensional integer array that
+ * The argument \e periodic is an \e ndim-dimensional integer array that
  * contains the periodicity for each dimension.  A zero value for a dimension
  * means non-periodic, while a nonzero value means periodic and contains the
  * actual period.  For example, periodicity in the first and third dimensions
@@ -533,15 +530,16 @@ HYPRE_Int
 HYPRE_SStructGridSetNumGhost(HYPRE_SStructGrid  grid,
                              HYPRE_Int         *num_ghost);
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 /**
  * @name SStruct Stencils
+ *
+ * @{
  **/
-/*@{*/
 
 struct hypre_SStructStencil_struct;
 /**
@@ -573,15 +571,16 @@ HYPRE_SStructStencilSetEntry(HYPRE_SStructStencil  stencil,
                              HYPRE_Int            *offset,
                              HYPRE_Int             var);
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 /**
  * @name SStruct Graphs
+ *
+ * @{
  **/
-/*@{*/
 
 struct hypre_SStructGraph_struct;
 /**
@@ -630,13 +629,13 @@ HYPRE_SStructGraphSetFEM(HYPRE_SStructGraph graph,
  * Set the finite element stiffness matrix sparsity.  This overrides the default
  * full sparsity pattern described below.
  *
- * Array {\tt sparsity} contains {\tt nsparse} row/column tuples (I,J) that
+ * Array \e sparsity contains \e nsparse row/column tuples (I,J) that
  * indicate the nonzeroes of the local stiffness matrix.  The layout of the
- * values passed into the routine \Ref{HYPRE_SStructMatrixAddFEMValues} is
+ * values passed into the routine \ref HYPRE_SStructMatrixAddFEMValues is
  * determined here.
  *
  * The default sparsity is full (each variable is coupled to all others), and
- * the values passed into the routine \Ref{HYPRE_SStructMatrixAddFEMValues} are
+ * the values passed into the routine \ref HYPRE_SStructMatrixAddFEMValues are
  * assumed to be by rows (that is, column indices vary fastest).
  **/
 HYPRE_Int
@@ -668,25 +667,27 @@ HYPRE_Int
 HYPRE_SStructGraphAssemble(HYPRE_SStructGraph graph);
 
 /**
- * Set the storage type of the associated matrix object.  This object type is
- * inherited by {\tt SStructMatrix} at its creation, but can also be changed
- * through the corresponding {\tt SetObjectType} routine.
+ * Set the storage type of the associated matrix object.  It is used before
+ * AddEntries and Assemble to compute the right ranks in the graph.
  *
- * See {\tt HYPRE_SStructGridSetObjectType} for available values for {\tt type}.
- * The default type is inherited from the grid.
+ * NOTE: This routine is only necessary for implementation reasons, and will
+ * eventually be removed.
+ *
+ * @see HYPRE_SStructMatrixSetObjectType
  **/
 HYPRE_Int
 HYPRE_SStructGraphSetObjectType(HYPRE_SStructGraph  graph,
                                 HYPRE_Int           type);
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 /**
  * @name SStruct Matrices
+ *
+ * @{
  **/
-/*@{*/
 
 struct hypre_SStructMatrix_struct;
 /**
@@ -715,10 +716,10 @@ HYPRE_Int
 HYPRE_SStructMatrixInitialize(HYPRE_SStructMatrix matrix);
 
 /**
- * Set matrix coefficients index by index.  The {\tt values} array is of length
- * {\tt nentries}.
+ * Set matrix coefficients index by index.  The \e values array is of length
+ * \e nentries.
  *
- * NOTE: For better efficiency, use \Ref{HYPRE_SStructMatrixSetBoxValues} to set
+ * NOTE: For better efficiency, use \ref HYPRE_SStructMatrixSetBoxValues to set
  * coefficients a box at a time.
  *
  * NOTE: Users are required to set values on all processes that own the
@@ -739,10 +740,10 @@ HYPRE_SStructMatrixSetValues(HYPRE_SStructMatrix  matrix,
                              HYPRE_Complex       *values);
 
 /**
- * Add to matrix coefficients index by index.  The {\tt values} array is of
- * length {\tt nentries}.
+ * Add to matrix coefficients index by index.  The \e values array is of
+ * length \e nentries.
  *
- * NOTE: For better efficiency, use \Ref{HYPRE_SStructMatrixAddToBoxValues} to
+ * NOTE: For better efficiency, use \ref HYPRE_SStructMatrixAddToBoxValues to
  * set coefficients a box at a time.
  *
  * NOTE: Users are required to set values on all processes that own the
@@ -763,9 +764,9 @@ HYPRE_SStructMatrixAddToValues(HYPRE_SStructMatrix  matrix,
 
 /**
  * Add finite element stiffness matrix coefficients index by index.  The layout
- * of the data in {\tt values} is determined by the routines
- * \Ref{HYPRE_SStructGridSetFEMOrdering} and
- * \Ref{HYPRE_SStructGraphSetFEMSparsity}.
+ * of the data in \e values is determined by the routines
+ * \ref HYPRE_SStructGridSetFEMOrdering and
+ * \ref HYPRE_SStructGraphSetFEMSparsity.
  **/
 HYPRE_Int
 HYPRE_SStructMatrixAddFEMValues(HYPRE_SStructMatrix  matrix,
@@ -774,10 +775,10 @@ HYPRE_SStructMatrixAddFEMValues(HYPRE_SStructMatrix  matrix,
                                 HYPRE_Complex       *values);
 
 /**
- * Get matrix coefficients index by index.  The {\tt values} array is of length
- * {\tt nentries}.
+ * Get matrix coefficients index by index.  The \e values array is of length
+ * \e nentries.
  *
- * NOTE: For better efficiency, use \Ref{HYPRE_SStructMatrixGetBoxValues} to get
+ * NOTE: For better efficiency, use \ref HYPRE_SStructMatrixGetBoxValues to get
  * coefficients a box at a time.
  *
  * NOTE: Users may get values on any process that owns the associated variables.
@@ -798,9 +799,9 @@ HYPRE_SStructMatrixGetValues(HYPRE_SStructMatrix  matrix,
 
 /**
  * Get finite element stiffness matrix coefficients index by index.  The layout
- * of the data in {\tt values} is determined by the routines
- * \Ref{HYPRE_SStructGridSetFEMOrdering} and
- * \Ref{HYPRE_SStructGraphSetFEMSparsity}.
+ * of the data in \e values is determined by the routines
+ * \ref HYPRE_SStructGridSetFEMOrdering and
+ * \ref HYPRE_SStructGraphSetFEMSparsity.
  **/
 HYPRE_Int
 HYPRE_SStructMatrixGetFEMValues(HYPRE_SStructMatrix  matrix,
@@ -809,10 +810,10 @@ HYPRE_SStructMatrixGetFEMValues(HYPRE_SStructMatrix  matrix,
                                 HYPRE_Complex       *values);
 
 /**
- * Set matrix coefficients a box at a time.  The data in {\tt values} is ordered
+ * Set matrix coefficients a box at a time.  The data in \e values is ordered
  * as follows:
  *
-   \begin{verbatim}
+   \verbatim
    m = 0;
    for (k = ilower[2]; k <= iupper[2]; k++)
       for (j = ilower[1]; j <= iupper[1]; j++)
@@ -822,7 +823,7 @@ HYPRE_SStructMatrixGetFEMValues(HYPRE_SStructMatrix  matrix,
                values[m] = ...;
                m++;
             }
-   \end{verbatim}
+   \endverbatim
  *
  * NOTE: Users are required to set values on all processes that own the
  * associated variables.  This means that some data will be multiply defined.
@@ -843,8 +844,8 @@ HYPRE_SStructMatrixSetBoxValues(HYPRE_SStructMatrix  matrix,
                                 HYPRE_Complex       *values);
 
 /**
- * Add to matrix coefficients a box at a time.  The data in {\tt values} is
- * ordered as in \Ref{HYPRE_SStructMatrixSetBoxValues}.
+ * Add to matrix coefficients a box at a time.  The data in \e values is
+ * ordered as in \ref HYPRE_SStructMatrixSetBoxValues.
  *
  * NOTE: Users are required to set values on all processes that own the
  * associated variables.  This means that some data will be multiply defined.
@@ -863,8 +864,49 @@ HYPRE_SStructMatrixAddToBoxValues(HYPRE_SStructMatrix  matrix,
                                   HYPRE_Complex       *values);
 
 /**
- * Get matrix coefficients a box at a time.  The data in {\tt values} is
- * ordered as in \Ref{HYPRE_SStructMatrixSetBoxValues}.
+ * Set matrix coefficients a box at a time.  The \e values array is logically
+ * box shaped with value-box extents \e vilower and \e viupper that must
+ * contain the set-box extents \e ilower and \e iupper .  The data in the
+ * \e values array is ordered as in \ref HYPRE_SStructMatrixSetBoxValues,
+ * but based on the value-box extents.
+ **/
+HYPRE_Int
+HYPRE_SStructMatrixSetBoxValues2(HYPRE_SStructMatrix  matrix,
+                                 HYPRE_Int            part,
+                                 HYPRE_Int           *ilower,
+                                 HYPRE_Int           *iupper,
+                                 HYPRE_Int            var,
+                                 HYPRE_Int            nentries,
+                                 HYPRE_Int           *entries,
+                                 HYPRE_Int           *vilower,
+                                 HYPRE_Int           *viupper,
+                                 HYPRE_Complex       *values);
+
+/**
+ * Add to matrix coefficients a box at a time.  The data in \e values is
+ * ordered as in \ref HYPRE_SStructMatrixSetBoxValues2.
+ **/
+HYPRE_Int
+HYPRE_SStructMatrixAddToBoxValues2(HYPRE_SStructMatrix  matrix,
+                                   HYPRE_Int            part,
+                                   HYPRE_Int           *ilower,
+                                   HYPRE_Int           *iupper,
+                                   HYPRE_Int            var,
+                                   HYPRE_Int            nentries,
+                                   HYPRE_Int           *entries,
+                                   HYPRE_Int           *vilower,
+                                   HYPRE_Int           *viupper,
+                                   HYPRE_Complex       *values);
+
+/**
+ * Finalize the construction of the matrix before using.
+ **/
+HYPRE_Int
+HYPRE_SStructMatrixAssemble(HYPRE_SStructMatrix matrix);
+
+/**
+ * Get matrix coefficients a box at a time.  The data in \e values is
+ * ordered as in \ref HYPRE_SStructMatrixSetBoxValues.
  *
  * NOTE: Users may get values on any process that owns the associated variables.
  *
@@ -882,19 +924,29 @@ HYPRE_SStructMatrixGetBoxValues(HYPRE_SStructMatrix  matrix,
                                 HYPRE_Complex       *values);
 
 /**
- * Finalize the construction of the matrix before using.
+ * Get matrix coefficients a box at a time.  The data in \e values is
+ * ordered as in \ref HYPRE_SStructMatrixSetBoxValues2.
  **/
 HYPRE_Int
-HYPRE_SStructMatrixAssemble(HYPRE_SStructMatrix matrix);
+HYPRE_SStructMatrixGetBoxValues2(HYPRE_SStructMatrix  matrix,
+                                 HYPRE_Int            part,
+                                 HYPRE_Int           *ilower,
+                                 HYPRE_Int           *iupper,
+                                 HYPRE_Int            var,
+                                 HYPRE_Int            nentries,
+                                 HYPRE_Int           *entries,
+                                 HYPRE_Int           *vilower,
+                                 HYPRE_Int           *viupper,
+                                 HYPRE_Complex       *values);
 
 /**
  * Define symmetry properties for the stencil entries in the matrix.  The
- * boolean argument {\tt symmetric} is applied to stencil entries on part {\tt
- * part} that couple variable {\tt var} to variable {\tt to\_var}.  A value of
- * -1 may be used for {\tt part}, {\tt var}, or {\tt to\_var} to specify
- * ``all''.  For example, if {\tt part} and {\tt to\_var} are set to -1, then
+ * boolean argument \e symmetric is applied to stencil entries on part \e
+ * part that couple variable \e var to variable \e to_var.  A value of
+ * -1 may be used for \e part, \e var, or \e to_var to specify
+ * "all".  For example, if \e part and \e to_var are set to -1, then
  * the boolean is applied to stencil entries on all parts that couple variable
- * {\tt var} to all other variables.
+ * \e var to all other variables.
  *
  * By default, matrices are assumed to be nonsymmetric.  Significant
  * storage savings can be made if the matrix is symmetric.
@@ -914,10 +966,11 @@ HYPRE_SStructMatrixSetNSSymmetric(HYPRE_SStructMatrix matrix,
                                   HYPRE_Int           symmetric);
 
 /**
- * Set the storage type of the matrix object to be constructed.
+ * Set the storage type of the matrix object to be constructed.  Currently, \e
+ * type can be either \c HYPRE_SSTRUCT (the default), \c HYPRE_STRUCT,
+ * or \c HYPRE_PARCSR.
  *
- * See {\tt HYPRE_SStructGridSetObjectType} for available values for {\tt type}.
- * The default type is inherited from the graph.
+ * @see HYPRE_SStructMatrixGetObject
  **/
 HYPRE_Int
 HYPRE_SStructMatrixSetObjectType(HYPRE_SStructMatrix  matrix,
@@ -925,6 +978,8 @@ HYPRE_SStructMatrixSetObjectType(HYPRE_SStructMatrix  matrix,
 
 /**
  * Get a reference to the constructed matrix object.
+ *
+ * @see HYPRE_SStructMatrixSetObjectType
  **/
 HYPRE_Int
 HYPRE_SStructMatrixGetObject(HYPRE_SStructMatrix   matrix,
@@ -938,15 +993,27 @@ HYPRE_SStructMatrixPrint(const char          *filename,
                          HYPRE_SStructMatrix  matrix,
                          HYPRE_Int            all);
 
-/*@}*/
+/**
+ * Converts a SStructMatrix to an IJMatrix. This will sum the structured
+ * and unstructured components of the input SStructMatrix and construct
+ * the resulting sum as an IJMatrix. When the flag \e fill_diagonal is
+ * turned on, the diagonal coefficient of ghost rows is set to 1.
+ **/
+HYPRE_Int
+HYPRE_SStructMatrixToIJMatrix(HYPRE_SStructMatrix  matrix,
+                              HYPRE_Int            fill_diagonal,
+                              HYPRE_IJMatrix      *ijmatrix);
+
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 /**
  * @name SStruct Vectors
+ *
+ * @{
  **/
-/*@{*/
 
 struct hypre_SStructVector_struct;
 /**
@@ -977,7 +1044,7 @@ HYPRE_SStructVectorInitialize(HYPRE_SStructVector vector);
 /**
  * Set vector coefficients index by index.
  *
- * NOTE: For better efficiency, use \Ref{HYPRE_SStructVectorSetBoxValues} to set
+ * NOTE: For better efficiency, use \ref HYPRE_SStructVectorSetBoxValues to set
  * coefficients a box at a time.
  *
  * NOTE: Users are required to set values on all processes that own the
@@ -999,7 +1066,7 @@ HYPRE_SStructVectorSetConstantValues(HYPRE_SStructVector vector,
 
 /**
  * Set vector coefficients to random values between -1.0 and 1.0 over the grid.
- * The parameter {\tt seed} controls the generation of random numbers.
+ * The parameter \e seed controls the generation of random numbers.
  **/
 HYPRE_Int
 HYPRE_SStructVectorSetRandomValues(HYPRE_SStructVector  vector,
@@ -1008,7 +1075,7 @@ HYPRE_SStructVectorSetRandomValues(HYPRE_SStructVector  vector,
 /**
  * Add to vector coefficients index by index.
  *
- * NOTE: For better efficiency, use \Ref{HYPRE_SStructVectorAddToBoxValues} to
+ * NOTE: For better efficiency, use \ref HYPRE_SStructVectorAddToBoxValues to
  * set coefficients a box at a time.
  *
  * NOTE: Users are required to set values on all processes that own the
@@ -1023,8 +1090,8 @@ HYPRE_SStructVectorAddToValues(HYPRE_SStructVector  vector,
 
 /**
  * Add finite element vector coefficients index by index.  The layout of the
- * data in {\tt values} is determined by the routine
- * \Ref{HYPRE_SStructGridSetFEMOrdering}.
+ * data in \e values is determined by the routine
+ * \ref HYPRE_SStructGridSetFEMOrdering.
  **/
 HYPRE_Int
 HYPRE_SStructVectorAddFEMValues(HYPRE_SStructVector  vector,
@@ -1034,10 +1101,10 @@ HYPRE_SStructVectorAddFEMValues(HYPRE_SStructVector  vector,
 
 /**
  * Get vector coefficients index by index.  Users must first call the routine
- * \Ref{HYPRE_SStructVectorGather} to ensure that data owned by multiple
+ * \ref HYPRE_SStructVectorGather to ensure that data owned by multiple
  * processes is correct.
  *
- * NOTE: For better efficiency, use \Ref{HYPRE_SStructVectorGetBoxValues} to get
+ * NOTE: For better efficiency, use \ref HYPRE_SStructVectorGetBoxValues to get
  * coefficients a box at a time.
  *
  * NOTE: Users may only get values on processes that own the associated
@@ -1052,9 +1119,9 @@ HYPRE_SStructVectorGetValues(HYPRE_SStructVector  vector,
 
 /**
  * Get finite element vector coefficients index by index.  The layout of the
- * data in {\tt values} is determined by the routine
- * \Ref{HYPRE_SStructGridSetFEMOrdering}.  Users must first call the routine
- * \Ref{HYPRE_SStructVectorGather} to ensure that data owned by multiple
+ * data in \e values is determined by the routine
+ * \ref HYPRE_SStructGridSetFEMOrdering.  Users must first call the routine
+ * \ref HYPRE_SStructVectorGather to ensure that data owned by multiple
  * processes is correct.
  **/
 HYPRE_Int
@@ -1064,10 +1131,10 @@ HYPRE_SStructVectorGetFEMValues(HYPRE_SStructVector  vector,
                                 HYPRE_Complex       *values);
 
 /**
- * Set vector coefficients a box at a time.  The data in {\tt values} is ordered
+ * Set vector coefficients a box at a time.  The data in \e values is ordered
  * as follows:
  *
-   \begin{verbatim}
+   \verbatim
    m = 0;
    for (k = ilower[2]; k <= iupper[2]; k++)
       for (j = ilower[1]; j <= iupper[1]; j++)
@@ -1076,7 +1143,7 @@ HYPRE_SStructVectorGetFEMValues(HYPRE_SStructVector  vector,
             values[m] = ...;
             m++;
          }
-   \end{verbatim}
+   \endverbatim
  *
  * NOTE: Users are required to set values on all processes that own the
  * associated variables.  This means that some data will be multiply defined.
@@ -1090,8 +1157,8 @@ HYPRE_SStructVectorSetBoxValues(HYPRE_SStructVector  vector,
                                 HYPRE_Complex       *values);
 
 /**
- * Add to vector coefficients a box at a time.  The data in {\tt values} is
- * ordered as in \Ref{HYPRE_SStructVectorSetBoxValues}.
+ * Add to vector coefficients a box at a time.  The data in \e values is
+ * ordered as in \ref HYPRE_SStructVectorSetBoxValues.
  *
  * NOTE: Users are required to set values on all processes that own the
  * associated variables.  This means that some data will be multiply defined.
@@ -1105,9 +1172,46 @@ HYPRE_SStructVectorAddToBoxValues(HYPRE_SStructVector  vector,
                                   HYPRE_Complex       *values);
 
 /**
- * Get vector coefficients a box at a time.  The data in {\tt values} is ordered
- * as in \Ref{HYPRE_SStructVectorSetBoxValues}.  Users must first call the
- * routine \Ref{HYPRE_SStructVectorGather} to ensure that data owned by multiple
+ * Set vector coefficients a box at a time.  The \e values array is logically
+ * box shaped with value-box extents \e vilower and \e viupper that must
+ * contain the set-box extents \e ilower and \e iupper .  The data in the
+ * \e values array is ordered as in \ref HYPRE_SStructVectorSetBoxValues,
+ * but based on the value-box extents.
+ **/
+HYPRE_Int
+HYPRE_SStructVectorSetBoxValues2(HYPRE_SStructVector  vector,
+                                 HYPRE_Int            part,
+                                 HYPRE_Int           *ilower,
+                                 HYPRE_Int           *iupper,
+                                 HYPRE_Int            var,
+                                 HYPRE_Int           *vilower,
+                                 HYPRE_Int           *viupper,
+                                 HYPRE_Complex       *values);
+
+/**
+ * Add to vector coefficients a box at a time.  The data in \e values is
+ * ordered as in \ref HYPRE_SStructVectorSetBoxValues2.
+ **/
+HYPRE_Int
+HYPRE_SStructVectorAddToBoxValues2(HYPRE_SStructVector  vector,
+                                   HYPRE_Int            part,
+                                   HYPRE_Int           *ilower,
+                                   HYPRE_Int           *iupper,
+                                   HYPRE_Int            var,
+                                   HYPRE_Int           *vilower,
+                                   HYPRE_Int           *viupper,
+                                   HYPRE_Complex       *values);
+
+/**
+ * Finalize the construction of the vector before using.
+ **/
+HYPRE_Int
+HYPRE_SStructVectorAssemble(HYPRE_SStructVector vector);
+
+/**
+ * Get vector coefficients a box at a time.  The data in \e values is ordered
+ * as in \ref HYPRE_SStructVectorSetBoxValues.  Users must first call the
+ * routine \ref HYPRE_SStructVectorGather to ensure that data owned by multiple
  * processes is correct.
  *
  * NOTE: Users may only get values on processes that own the associated
@@ -1122,14 +1226,22 @@ HYPRE_SStructVectorGetBoxValues(HYPRE_SStructVector  vector,
                                 HYPRE_Complex       *values);
 
 /**
- * Finalize the construction of the vector before using.
+ * Get vector coefficients a box at a time.  The data in \e values is ordered
+ * as in \ref HYPRE_SStructVectorSetBoxValues2.
  **/
 HYPRE_Int
-HYPRE_SStructVectorAssemble(HYPRE_SStructVector vector);
+HYPRE_SStructVectorGetBoxValues2(HYPRE_SStructVector  vector,
+                                 HYPRE_Int            part,
+                                 HYPRE_Int           *ilower,
+                                 HYPRE_Int           *iupper,
+                                 HYPRE_Int            var,
+                                 HYPRE_Int           *vilower,
+                                 HYPRE_Int           *viupper,
+                                 HYPRE_Complex       *values);
 
 /**
- * Gather vector data so that efficient {\tt GetValues} can be done.  This
- * routine must be called prior to calling {\tt GetValues} to ensure that
+ * Gather vector data so that efficient \c GetValues can be done.  This
+ * routine must be called prior to calling \c GetValues to ensure that
  * correct and consistent values are returned, especially for non cell-centered
  * data that is shared between more than one processor.
  **/
@@ -1137,10 +1249,11 @@ HYPRE_Int
 HYPRE_SStructVectorGather(HYPRE_SStructVector vector);
 
 /**
- * Set the storage type of the vector object to be constructed.
+ * Set the storage type of the vector object to be constructed.  Currently, \e
+ * type can be either \c HYPRE_SSTRUCT (the default), \c HYPRE_STRUCT,
+ * or \c HYPRE_PARCSR.
  *
- * See {\tt HYPRE_SStructGridSetObjectType} for available values for {\tt type}.
- * The default type is inherited from the grid.
+ * @see HYPRE_SStructVectorGetObject
  **/
 HYPRE_Int
 HYPRE_SStructVectorSetObjectType(HYPRE_SStructVector  vector,
@@ -1148,6 +1261,8 @@ HYPRE_SStructVectorSetObjectType(HYPRE_SStructVector  vector,
 
 /**
  * Get a reference to the constructed vector object.
+ *
+ * @see HYPRE_SStructVectorSetObjectType
  **/
 HYPRE_Int
 HYPRE_SStructVectorGetObject(HYPRE_SStructVector   vector,
@@ -1176,7 +1291,7 @@ HYPRE_SStructVectorScale(HYPRE_Complex       alpha,
                          HYPRE_SStructVector y);
 
 /**
- * Compute {\tt result}, the inner product of vectors {\tt x} and {\tt y}.
+ * Compute \e result, the inner product of vectors \e x and \e y.
  **/
 HYPRE_Int
 HYPRE_SStructInnerProd(HYPRE_SStructVector  x,
@@ -1198,17 +1313,19 @@ HYPRE_SStructAxpy(HYPRE_Complex       alpha,
 
 /**
  * @name SStruct Other
+ *
+ * @{
  **/
-/*@{*/
 
 /**
- * \color{blue}
+ * AMRNEW
+ *
  * Get a reference to the constructed matrix and right-hand-side (rhs) objects
- * for an AMR system.  This routine is similar to the routines {\tt
- * HYPRE_SStructMatrixGetObject} and {\tt HYPRE_SStructVectorGetObject}, but
+ * for an AMR system.  This routine is similar to the routines \e
+ * HYPRE_SStructMatrixGetObject and \e HYPRE_SStructVectorGetObject, but
  * ensures that trivial equations such as Dirichlet conditions are also
  * satisfied exactly in the AMR system.
- **/
+ */
 HYPRE_Int
 HYPRE_SStructGetAMRObjects(HYPRE_SStructMatrix   matrix,
                            HYPRE_SStructVector   rhs,

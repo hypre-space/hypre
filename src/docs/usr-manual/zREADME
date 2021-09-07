@@ -1,0 +1,50 @@
+
+Sphinx links:
+
+http://www.sphinx-doc.org/en/stable/
+http://www.sphinx-doc.org/en/stable/examples.html
+
+https://alabaster.readthedocs.io/en/latest/index.html      # Alibaster theme
+
+https://docutils.sourceforge.io/rst.html                   # reStructuredText reference
+
+
+Doxygen links:
+
+http://www.doxygen.nl/manual/index.html
+
+
+Breathe links:
+
+https://breathe.readthedocs.io/en/latest/index.html
+
+
+Build commands:
+
+make help
+make html
+make latexpdf
+
+sphinx-build -b html . html
+sphinx-build -b latex . latex
+
+
+Note:
+  - Added '_static/custom.css' file for customizations (document this somewhere)
+  - To add unicode characters (e.g., umlaut characters), use 'M-x
+    insert-character' in emacs and type in the name of the unicode character
+    (use the web to get a list of names).  For example, '00FB' is "umlaut u".
+
+
+Issues and things left to do:
+
+     - Remember to change 'checklist' in hypre-dev repo when this branch is merged
+     - MathJax is slow to render.  Are we okay with that?  Is there a better alternative?
+     - How to reference figures?
+     - How to combine images in a figure.  Create one PNG file from the combination?
+     - Add the hypre logo somehow
+     - Copyright stuff and date (ref manual)
+DONE - Copyright stuff (user manual), version numbers
+DONE - References need to be done
+DONE - Figure images need to be regenerated from original source files
+

@@ -1,0 +1,9 @@
+#!/bin/sh
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+mpirun -np 1  ./sstruct -in sstruct.in.wide.2D -r 10 10 1 -P 1 1 1 -solver 239 > wide.out.1
+mpirun -np 4  ./sstruct -in sstruct.in.wide.2D -r  5  5 1 -P 2 2 1 -solver 239 > wide.out.4
+

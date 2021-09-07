@@ -1,0 +1,111 @@
+# Output file: ijdefault.out.vfromfile
+Eigenvalue lambda   2.43042158313017e-01
+Eigenvalue lambda   4.79521039879691e-01
+Residual   7.49244273224402e-08
+Residual   3.13511569681941e-07
+
+# Output file: ijdefault.out.vout.1
+Eigenvalue lambda   2.43042159336231e-01
+Eigenvalue lambda   4.79521040556425e-01
+Residual   5.93138904669065e-05
+Residual   3.00153697739346e-05
+
+# Output file: ijdefault.out.1.lobpcg
+Iterations = 6
+Final Relative Residual Norm = 1.767838e-07
+
+# Output file: ijdefault.out.1.lobpcg.1
+Eigenvalue lambda   2.43042158313720e-01
+Residual   1.05888375241181e-06
+
+# Output file: ijdefault.out.1.lobpcg.5
+Eigenvalue lambda   2.43042158313047e-01
+Eigenvalue lambda   4.79521039879730e-01
+Eigenvalue lambda   4.79521039879862e-01
+Eigenvalue lambda   4.79521039880011e-01
+Eigenvalue lambda   7.15999921447447e-01
+Residual   6.11700821362545e-07
+Residual   7.03382889395189e-07
+Residual   8.51024155852912e-07
+Residual   8.72811391055883e-07
+Residual   1.20346615548069e-06
+
+# Output file: ijdefault.out.2.lobpcg
+Iterations = 20
+Final Relative Residual Norm = 5.962015e-07
+
+# Output file: ijdefault.out.2.lobpcg.1
+Eigenvalue lambda   2.43042158313120e-01
+Residual   4.63315030075101e-07
+
+# Output file: ijdefault.out.2.lobpcg.5
+Eigenvalue lambda   2.43042158313016e-01
+Eigenvalue lambda   4.79521039879679e-01
+Eigenvalue lambda   4.79521039879702e-01
+Eigenvalue lambda   4.79521039879779e-01
+Eigenvalue lambda   7.15999921447126e-01
+Residual   1.43322942756939e-07
+Residual   4.86471853062634e-07
+Residual   3.80514535258685e-07
+Residual   5.18360455474111e-07
+Residual   1.02531463497084e-06
+
+# Output file: ijdefault.out.8.lobpcg
+#Iterations = 15
+#Final Relative Residual Norm = 6.352784e-07
+
+# Output file: ijdefault.out.8.lobpcg.1
+#Eigenvalue lambda   2.43042158313109e-01
+#Residual   4.35799317942064e-07
+
+# Output file: ijdefault.out.8.lobpcg.5
+#Eigenvalue lambda   2.43042158313016e-01
+#Eigenvalue lambda   4.79521039879678e-01
+#Eigenvalue lambda   4.79521039879699e-01
+#Eigenvalue lambda   4.79521039879799e-01
+#Eigenvalue lambda   7.15999921446891e-01
+#Residual   1.37749965131754e-07
+#Residual   4.63010776375628e-07
+#Residual   3.87579831562450e-07
+#Residual   5.41642190641787e-07
+#Residual   9.41630860798197e-07
+
+# Output file: ijdefault.out.12.lobpcg
+Iterations = 13
+Final Relative Residual Norm = 3.896456e-07
+
+# Output file: ijdefault.out.12.lobpcg.1
+Eigenvalue lambda   2.43042158313099e-01
+Residual   3.94665203872263e-07
+
+# Output file: ijdefault.out.12.lobpcg.5
+Eigenvalue lambda   2.43042158313016e-01
+Eigenvalue lambda   4.79521039879678e-01
+Eigenvalue lambda   4.79521039879688e-01
+Eigenvalue lambda   4.79521039879787e-01
+Eigenvalue lambda   7.15999921447133e-01
+Residual   1.36414438635337e-07
+Residual   4.59821249520523e-07
+Residual   3.78900179495246e-07
+Residual   5.07942568509693e-07
+Residual   1.11209031528658e-06
+
+# Output file: ijdefault.out.43.lobpcg
+#Iterations = 9
+#Final Relative Residual Norm = 5.971754e-07
+
+# Output file: ijdefault.out.43.lobpcg.1
+#Eigenvalue lambda   2.43042158313103e-01
+#Residual   4.06686999057609e-07
+
+# Output file: ijdefault.out.43.lobpcg.5
+#Eigenvalue lambda   2.43042158313016e-01
+#Eigenvalue lambda   4.79521039879682e-01
+#Eigenvalue lambda   4.79521039879706e-01
+#Eigenvalue lambda   4.79521039879825e-01
+#Eigenvalue lambda   7.15999921446956e-01
+#Residual   1.61376258673867e-07
+#Residual   4.76948835732272e-07
+#Residual   4.01718127440120e-07
+#Residual   5.82137557078099e-07
+#Residual   9.97061314149104e-07

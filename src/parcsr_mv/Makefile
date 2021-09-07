@@ -1,15 +1,7 @@
-#BHEADER**********************************************************************
-# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
-# This file is part of HYPRE.  See file COPYRIGHT for details.
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License (as published by the Free
-# Software Foundation) version 2.1 dated February 1999.
-#
-# $Revision$
-#EHEADER**********************************************************************
-
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 include ../config/Makefile.config
 
@@ -19,6 +11,8 @@ C_COMPILE_FLAGS = \
  -I..\
  -I$(srcdir)\
  -I$(srcdir)/..\
+ -I$(srcdir)/../blas\
+ -I$(srcdir)/../lapack\
  -I$(srcdir)/../utilities\
  -I$(srcdir)/../seq_mv\
  ${CINCLUDES}
@@ -41,6 +35,7 @@ FILES =\
  F90_par_vector.c\
  HYPRE_parcsr_matrix.c\
  HYPRE_parcsr_vector.c\
+ gen_fffc.c\
  new_commpkg.c\
  numbers.c\
  par_csr_aat.c\
@@ -51,9 +46,17 @@ FILES =\
  par_csr_matop.c\
  par_csr_matrix.c\
  par_csr_matop_marked.c\
- par_csr_matvec.c\
+ par_csr_triplemat.c\
+ par_make_system.c\
  par_vector.c\
- par_make_system.c
+ par_vector_batched.c
+
+CUFILES =\
+ par_csr_matvec.c\
+ par_csr_fffc_device.c\
+ par_csr_matop_device.c\
+ par_csr_triplemat_device.c\
+ par_vector_device.c
 
 EXTRA_FILES =\
  parchord_to_parcsr.c
@@ -68,10 +71,13 @@ DRIVER_FILES =\
  driver_matvec.c\
  driver_multivec.c
 
-OBJS = ${FILES:.c=.o}
+COBJS = ${FILES:.c=.o}
+CUOBJS = ${CUFILES:.c=.obj}
+OBJS = ${COBJS} ${CUOBJS}
+
 DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 
-SONAME = libHYPRE_parcsr_mv-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_parcsr_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -112,7 +118,7 @@ install: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o libHYPRE*
+	rm -f *.o *.obj libHYPRE*
 	rm -f driver driver_matvec driver_matmul
 	rm -rf pchdir tca.map *inslog*
 
@@ -127,10 +133,10 @@ libHYPRE_parcsr_mv.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_parcsr_mv.so: ${OBJS}
+libHYPRE_parcsr_mv.so libHYPRE_parcsr_mv.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -sf ${SONAME} $@
+	ln -s ${SONAME} $@
 
 ${OBJS}: ${HEADERS}
 

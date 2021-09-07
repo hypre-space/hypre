@@ -1,17 +1,15 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
-
-
+#ifdef __cplusplus
+#define REGISTER 
+#else
+#define REGISTER register
+#endif
 
 /*
  * distributed_qsort.c:
@@ -43,12 +41,12 @@ static void sdqst(HYPRE_Int *, HYPRE_Int *);
 
 void hypre_sincsort_fast(HYPRE_Int n, HYPRE_Int *base)
 {
-  register HYPRE_Int *i;
-  register HYPRE_Int *j;
-  register HYPRE_Int *lo;
-  register HYPRE_Int *hi;
-  register HYPRE_Int *min;
-  register HYPRE_Int c;
+  REGISTER HYPRE_Int *i;
+  REGISTER HYPRE_Int *j;
+  REGISTER HYPRE_Int *lo;
+  REGISTER HYPRE_Int *hi;
+  REGISTER HYPRE_Int *min;
+  REGISTER HYPRE_Int c;
   HYPRE_Int *max;
 
   if (n <= 1)
@@ -115,11 +113,11 @@ void hypre_sincsort_fast(HYPRE_Int n, HYPRE_Int *base)
 
 static void siqst(HYPRE_Int *base, HYPRE_Int *max)
 {
-  register HYPRE_Int *i;
-  register HYPRE_Int *j;
-  register HYPRE_Int *jj;
-  register HYPRE_Int *mid;
-  register HYPRE_Int c;
+  REGISTER HYPRE_Int *i;
+  REGISTER HYPRE_Int *j;
+  REGISTER HYPRE_Int *jj;
+  REGISTER HYPRE_Int *mid;
+  REGISTER HYPRE_Int c;
   HYPRE_Int *tmp;
   HYPRE_Int lo;
   HYPRE_Int hi;
@@ -207,12 +205,12 @@ swap:
 **************************************************************************/
 void hypre_sdecsort_fast(HYPRE_Int n, HYPRE_Int *base)
 {
-  register HYPRE_Int *i;
-  register HYPRE_Int *j;
-  register HYPRE_Int *lo;
-  register HYPRE_Int *hi;
-  register HYPRE_Int *min;
-  register HYPRE_Int c;
+  REGISTER HYPRE_Int *i;
+  REGISTER HYPRE_Int *j;
+  REGISTER HYPRE_Int *lo;
+  REGISTER HYPRE_Int *hi;
+  REGISTER HYPRE_Int *min;
+  REGISTER HYPRE_Int c;
   HYPRE_Int *max;
 
   if (n <= 1)
@@ -264,11 +262,11 @@ void hypre_sdecsort_fast(HYPRE_Int n, HYPRE_Int *base)
 
 static void sdqst(HYPRE_Int *base, HYPRE_Int *max)
 {
-  register HYPRE_Int *i;
-  register HYPRE_Int *j;
-  register HYPRE_Int *jj;
-  register HYPRE_Int *mid;
-  register HYPRE_Int c;
+  REGISTER HYPRE_Int *i;
+  REGISTER HYPRE_Int *j;
+  REGISTER HYPRE_Int *jj;
+  REGISTER HYPRE_Int *mid;
+  REGISTER HYPRE_Int c;
   HYPRE_Int *tmp;
   HYPRE_Int lo;
   HYPRE_Int hi;

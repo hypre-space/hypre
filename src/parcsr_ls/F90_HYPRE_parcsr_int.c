@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -91,7 +86,7 @@ hypre_F90_IFACE(hypre_parvectorsize, HYPRE_PARVECTORSIZE)
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParCSRMultiVectorPrint
+ * HYPRE_ParCSRMultiVectorPrint
  *--------------------------------------------------------------------------*/
 
 void
@@ -101,13 +96,13 @@ hypre_F90_IFACE(hypre_parcsrmultivectorprint, HYPRE_PARCSRMULTIVECTORPRINT)
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
-      ( hypre_ParCSRMultiVectorPrint(
+      ( HYPRE_ParCSRMultiVectorPrint(
            (void *)       x, 
            (char *) file));
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParCSRMultiVectorRead
+ * HYPRE_ParCSRMultiVectorRead
  *--------------------------------------------------------------------------*/
 
 void
@@ -119,7 +114,7 @@ hypre_F90_IFACE(hypre_parcsrmultivectorread, HYPRE_PARCSRMULTIVECTORREAD)
 {
    *ierr = 0;
 
-   hypre_ParCSRMultiVectorRead(
+   HYPRE_ParCSRMultiVectorRead(
       hypre_F90_PassComm (comm),
       (void *)       ii,
       (char *) file );

@@ -1,22 +1,16 @@
-cBHEADER**********************************************************************
-c Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
-c Produced at the Lawrence Livermore National Laboratory.
-c This file is part of HYPRE.  See file COPYRIGHT for details.
-c
-c HYPRE is free software; you can redistribute it and/or modify it under the
-c terms of the GNU Lesser General Public License (as published by the Free
-c Software Foundation) version 2.1 dated February 1999.
-c
-c $Revision$
-cEHEADER**********************************************************************
-c-----------------------------------------------------------------------
-c Test driver for unstructured matrix interface (structured storage)
-c-----------------------------------------------------------------------
+!     Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+!     HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+!
+!     SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+!-----------------------------------------------------------------------
+! Test driver for unstructured matrix interface (structured storage)
+!-----------------------------------------------------------------------
  
-c-----------------------------------------------------------------------
-c Standard 7-point laplacian in 3D with grid and anisotropy determined
-c as user settings.
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+! Standard 7-point laplacian in 3D with grid and anisotropy determined
+! as user settings.
+!-----------------------------------------------------------------------
 
       program test
 
@@ -59,7 +53,7 @@ c-----------------------------------------------------------------------
       parameter           (pc_tol = 0.0)
       double precision    final_res_norm
                      
-c parameters for BoomerAMG
+! parameters for BoomerAMG
       integer             hybrid, coarsen_type, measure_type
       integer             cycle_type
       integer             smooth_num_sweep
@@ -72,7 +66,7 @@ c parameters for BoomerAMG
       double precision    max_row_sum
       data                max_row_sum /1.0/
 
-c parameters for ParaSails
+! parameters for ParaSails
       double precision    sai_threshold
       double precision    sai_filter
 
@@ -99,18 +93,18 @@ c parameters for ParaSails
 
       integer             dof_func(1000), j
 
-c-----------------------------------------------------------------------
-c     Initialize MPI
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Initialize MPI
+!-----------------------------------------------------------------------
 
       call MPI_INIT(ierr)
 
       call MPI_COMM_RANK(MPI_COMM_WORLD, myid, ierr)
       call MPI_COMM_SIZE(MPI_COMM_WORLD, num_procs, ierr)
 
-c-----------------------------------------------------------------------
-c     Set defaults
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Set defaults
+!-----------------------------------------------------------------------
 
       dim = 3
 
@@ -135,38 +129,38 @@ c-----------------------------------------------------------------------
 
       solver_id = 3
 
-c-----------------------------------------------------------------------
-c     Read options
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Read options
+!-----------------------------------------------------------------------
  
-c     open( 5, file='parcsr_linear_solver.in', status='old')
-c
-c     read( 5, *) dim
-c
-c     read( 5, *) nx
-c     read( 5, *) ny
-c     read( 5, *) nz
-c
-c     read( 5, *) Px
-c     read( 5, *) Py
-c     read( 5, *) Pz
-c
-c     read( 5, *) bx
-c     read( 5, *) by
-c     read( 5, *) bz
-c
-c     read( 5, *) cx
-c     read( 5, *) cy
-c     read( 5, *) cz
-c
-c     read( 5, *) n_pre
-c     read( 5, *) n_post
-c
-c     write(6,*) 'Generate matrix? !0 yes, 0 no (from file)'
+!     open( 5, file='parcsr_linear_solver.in', status='old')
+!
+!     read( 5, *) dim
+!
+!     read( 5, *) nx
+!     read( 5, *) ny
+!     read( 5, *) nz
+!
+!     read( 5, *) Px
+!     read( 5, *) Py
+!     read( 5, *) Pz
+!
+!     read( 5, *) bx
+!     read( 5, *) by
+!     read( 5, *) bz
+!
+!     read( 5, *) cx
+!     read( 5, *) cy
+!     read( 5, *) cz
+!
+!     read( 5, *) n_pre
+!     read( 5, *) n_post
+!
+!     write(6,*) 'Generate matrix? !0 yes, 0 no (from file)'
       read(5,*) generate_matrix
 
       if (generate_matrix .eq. 0) then
-c       write(6,*) 'What file to use for matrix (<= 31 chars)?'
+!       write(6,*) 'What file to use for matrix (<= 31 chars)?'
         read(5,*) matfile_str
         i = 1
   100   if (matfile_str(i:i) .ne. ' ') then
@@ -179,12 +173,12 @@ c       write(6,*) 'What file to use for matrix (<= 31 chars)?'
   200   matfile(i) = char(0)
       endif
 
-c     write(6,*) 'Generate right-hand side? !0 yes, 0 no (from file)'
+!     write(6,*) 'Generate right-hand side? !0 yes, 0 no (from file)'
       read(5,*) generate_rhs
 
       if (generate_rhs .eq. 0) then
-c       write(6,*)
-c    &    'What file to use for right-hand side (<= 31 chars)?'
+!       write(6,*)
+!    &    'What file to use for right-hand side (<= 31 chars)?'
         read(5,*) vecfile_str
         i = 1
   300   if (vecfile_str(i:i) .ne. ' ') then
@@ -197,25 +191,25 @@ c    &    'What file to use for right-hand side (<= 31 chars)?'
   400   vecfile(i) = char(0)
       endif
 
-c     write(6,*) 'What solver_id?'
-c     write(6,*) '0 AMG, 1 AMG-PCG, 2 DS-PCG, 3 AMG-GMRES, 4 DS-GMRES,'
-c     write(6,*) '5 AMG-CGNR, 6 DS-CGNR, 7 PILUT-GMRES, 8 ParaSails-GMRES,'
-c     write(6,*) '9 AMG-BiCGSTAB, 10 DS-BiCGSTAB'
+!     write(6,*) 'What solver_id?'
+!     write(6,*) '0 AMG, 1 AMG-PCG, 2 DS-PCG, 3 AMG-GMRES, 4 DS-GMRES,'
+!     write(6,*) '5 AMG-CGNR, 6 DS-CGNR, 7 PILUT-GMRES, 8 ParaSails-GMRES,'
+!     write(6,*) '9 AMG-BiCGSTAB, 10 DS-BiCGSTAB'
       read(5,*) solver_id
 
       if (solver_id .eq. 7) then
-c       write(6,*) 'What drop tolerance?  <0 do not drop'
+!       write(6,*) 'What drop tolerance?  <0 do not drop'
         read(5,*) drop_tol
       endif
  
-c     write(6,*) 'What relative residual norm tolerance?'
+!     write(6,*) 'What relative residual norm tolerance?'
       read(5,*) tol
 
-c     close( 5 )
+!     close( 5 )
 
-c-----------------------------------------------------------------------
-c     Check a few things
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Check a few things
+!-----------------------------------------------------------------------
 
       if ((Px*Py*Pz) .ne. num_procs) then
          print *, 'Error: Invalid number of processors or topology'
@@ -237,9 +231,9 @@ c-----------------------------------------------------------------------
          stop
       endif
 
-c-----------------------------------------------------------------------
-c     Print driver parameters
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Print driver parameters
+!-----------------------------------------------------------------------
 
       if (myid .eq. 0) then
          print *, 'Running with these driver parameters:'
@@ -251,33 +245,33 @@ c-----------------------------------------------------------------------
          print *, '  dim             = ', dim
       endif
 
-c-----------------------------------------------------------------------
-c     Compute some grid and processor information
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Compute some grid and processor information
+!-----------------------------------------------------------------------
 
       if (dim .eq. 1) then
 
-c        compute p from Px and myid
+!        compute p from Px and myid
          p = mod(myid,Px)
 
       elseif (dim .eq. 2) then
 
-c        compute p,q from Px, Py and myid
+!        compute p,q from Px, Py and myid
          p = mod(myid,Px)
          q = mod(((myid - p)/Px),Py)
 
       elseif (dim .eq. 3) then
 
-c        compute p,q,r from Px,Py,Pz and myid
+!        compute p,q,r from Px,Py,Pz and myid
          p = mod(myid,Px)
          q = mod((( myid - p)/Px),Py)
          r = (myid - (p + Px*q))/(Px*Py)
 
       endif
 
-c----------------------------------------------------------------------
-c     Set up the matrix
-c-----------------------------------------------------------------------
+!----------------------------------------------------------------------
+!     Set up the matrix
+!-----------------------------------------------------------------------
 
       values(2) = -cx
       values(3) = -cy
@@ -288,7 +282,7 @@ c-----------------------------------------------------------------------
       if (ny .gt. 1) values(1) = values(1) + 2d0*cy
       if (nz .gt. 1) values(1) = values(1) + 2d0*cz
 
-c Generate a Dirichlet Laplacian
+! Generate a Dirichlet Laplacian
       if (generate_matrix .eq. 0) then
 
         call HYPRE_IJMatrixRead(matfile, MPI_COMM_WORLD,
@@ -338,9 +332,9 @@ c Generate a Dirichlet Laplacian
 
       call hypre_ParCSRMatrixRowStarts(A_storage, row_starts, ierr)
 
-c-----------------------------------------------------------------------
-c     Set up the rhs and initial guess
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Set up the rhs and initial guess
+!-----------------------------------------------------------------------
 
       if (generate_rhs .eq. 0) then
 
@@ -356,7 +350,7 @@ c-----------------------------------------------------------------------
         call HYPRE_IJVectorSetObjectType(b, HYPRE_PARCSR, ierr)
         call HYPRE_IJVectorInitialize(b, ierr)
 
-c Set up a Dirichlet 0 problem
+! Set up a Dirichlet 0 problem
         do i = 1, last_local_col - first_local_col + 1
           indices(i) = first_local_col - 1 + i
           vals(i) = 1.
@@ -396,7 +390,7 @@ c Set up a Dirichlet 0 problem
       call HYPRE_IJVectorSetValues(x,
      &  last_local_col - first_local_col + 1, indices, vals, ierr)
 
-c Choose a nonzero initial guess
+! Choose a nonzero initial guess
       call HYPRE_IJVectorGetObject(x, x_storage, ierr)
 
       vecfile(1)  = 'd'
@@ -416,12 +410,12 @@ c Choose a nonzero initial guess
    
       call HYPRE_IJVectorPrint(x, vecfile, ierr)
 
-c-----------------------------------------------------------------------
-c     Solve the linear system
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Solve the linear system
+!-----------------------------------------------------------------------
 
-c     General solver parameters, passing hard coded constants
-c     will break the interface.
+!     General solver parameters, passing hard coded constants
+!     will break the interface.
 
       maxiter = 100
       convtol = 0.9
@@ -430,7 +424,7 @@ c     will break the interface.
 
       if (solver_id .eq. 0) then
 
-c Set defaults for BoomerAMG
+! Set defaults for BoomerAMG
         maxiter = 500
         coarsen_type = 6
         hybrid = 1
@@ -455,39 +449,39 @@ c Set defaults for BoomerAMG
         call HYPRE_BoomerAMGSetMaxIter(solver, maxiter, ierr)
         call HYPRE_BoomerAMGSetCycleType(solver, cycle_type, ierr)
 
-c RDF: Used this to test the fortran interface for SetDofFunc
-c        do i = 1, 1000/2
-c           j = 2*i-1
-c           dof_func(j) = 0
-c           j = j + 1
-c           dof_func(j) = 1
-c        enddo
-c        call HYPRE_BoomerAMGSetNumFunctions(solver, 2, ierr)
-c        call HYPRE_BoomerAMGSetDofFunc(solver, dof_func, ierr)
+! RDF: Used this to test the fortran interface for SetDofFunc
+!        do i = 1, 1000/2
+!           j = 2*i-1
+!           dof_func(j) = 0
+!           j = j + 1
+!           dof_func(j) = 1
+!        enddo
+!        call HYPRE_BoomerAMGSetNumFunctions(solver, 2, ierr)
+!        call HYPRE_BoomerAMGSetDofFunc(solver, dof_func, ierr)
 
-c        call HYPRE_BoomerAMGInitGridRelaxatn(num_grid_sweeps,
-c     &                                      grid_relax_type,
-c     &                                      grid_relax_points,
-c     &                                      coarsen_type,
-c     &                                      relax_weights,
-c     &                                      MAXLEVELS,ierr)
-c        num_grid_sweeps2(1) = 1
-c        num_grid_sweeps2(2) = 1
-c        num_grid_sweeps2(3) = 1
-c        num_grid_sweeps2(4) = 1
-c        call HYPRE_BoomerAMGSetNumGridSweeps(solver,
-c     &                                       num_grid_sweeps2, ierr)
-c        call HYPRE_BoomerAMGSetGridRelaxType(solver,
-c     &                                       grid_relax_type, ierr)
-c        call HYPRE_BoomerAMGSetRelaxWeight(solver,
-c     &                                     relax_weights, ierr)
-c       call HYPRE_BoomerAMGSetSmoothOption(solver, smooth_option,
-c    &                                      ierr)
-c       call HYPRE_BoomerAMGSetSmoothNumSwp(solver, smooth_num_sweep,
-c    &                                      ierr)
-c        call HYPRE_BoomerAMGSetGridRelaxPnts(solver,
-c     &                                       grid_relax_points,
-c     &                                       ierr)
+!        call HYPRE_BoomerAMGInitGridRelaxatn(num_grid_sweeps,
+!     &                                      grid_relax_type,
+!     &                                      grid_relax_points,
+!     &                                      coarsen_type,
+!     &                                      relax_weights,
+!     &                                      MAXLEVELS,ierr)
+!        num_grid_sweeps2(1) = 1
+!        num_grid_sweeps2(2) = 1
+!        num_grid_sweeps2(3) = 1
+!        num_grid_sweeps2(4) = 1
+!        call HYPRE_BoomerAMGSetNumGridSweeps(solver,
+!     &                                       num_grid_sweeps2, ierr)
+!        call HYPRE_BoomerAMGSetGridRelaxType(solver,
+!     &                                       grid_relax_type, ierr)
+!        call HYPRE_BoomerAMGSetRelaxWeight(solver,
+!     &                                     relax_weights, ierr)
+!       call HYPRE_BoomerAMGSetSmoothOption(solver, smooth_option,
+!    &                                      ierr)
+!       call HYPRE_BoomerAMGSetSmoothNumSwp(solver, smooth_num_sweep,
+!    &                                      ierr)
+!        call HYPRE_BoomerAMGSetGridRelaxPnts(solver,
+!     &                                       grid_relax_points,
+!     &                                       ierr)
         call HYPRE_BoomerAMGSetMaxLevels(solver, MAXLEVELS, ierr)
         call HYPRE_BoomerAMGSetMaxRowSum(solver, max_row_sum,
      &                                   ierr)
@@ -510,7 +504,7 @@ c     &                                       ierr)
         maxiter = 100
         k_dim = 5
 
-c       Solve the system using preconditioned GMRES
+!       Solve the system using preconditioned GMRES
 
         call HYPRE_ParCSRGMRESCreate(MPI_COMM_WORLD, solver, ierr)
         call HYPRE_ParCSRGMRESSetKDim(solver, k_dim, ierr)
@@ -534,7 +528,7 @@ c       Solve the system using preconditioned GMRES
 
           precond_id = 2
 
-c Set defaults for BoomerAMG
+! Set defaults for BoomerAMG
           maxiter = 1
           coarsen_type = 6
           hybrid = 1
@@ -572,10 +566,10 @@ c Set defaults for BoomerAMG
      &                                         grid_relax_type, ierr)
           call HYPRE_BoomerAMGSetRelaxWeight(precond,
      &                                       relax_weights, ierr)
-c         call HYPRE_BoomerAMGSetSmoothOption(precond, smooth_option,
-c    &                                        ierr)
-c         call HYPRE_BoomerAMGSetSmoothNumSwp(precond, smooth_num_sweep,
-c    &                                        ierr)
+!         call HYPRE_BoomerAMGSetSmoothOption(precond, smooth_option,
+!    &                                        ierr)
+!         call HYPRE_BoomerAMGSetSmoothNumSwp(precond, smooth_num_sweep,
+!    &                                        ierr)
           call HYPRE_BoomerAMGSetGridRelaxPnts(precond,
      &                                        grid_relax_points, ierr)
           call HYPRE_BoomerAMGSetMaxLevels(precond,
@@ -685,7 +679,7 @@ c    &                                        ierr)
 
           precond_id = 2
 
-c Set defaults for BoomerAMG
+! Set defaults for BoomerAMG
           maxiter = 1
           coarsen_type = 6
           hybrid = 1
@@ -725,11 +719,11 @@ c Set defaults for BoomerAMG
      &                                         grid_relax_type, ierr)
           call HYPRE_BoomerAMGSetRelaxWeight(precond,
      &                                       relax_weights, ierr)
-c         call HYPRE_BoomerAMGSetSmoothOption(precond, smooth_option,
-c    &                                        ierr)
-c         call HYPRE_BoomerAMGSetSmoothNumSwp(precond,
-c    &                                        smooth_num_sweep,
-c    &                                        ierr)
+!         call HYPRE_BoomerAMGSetSmoothOption(precond, smooth_option,
+!    &                                        ierr)
+!         call HYPRE_BoomerAMGSetSmoothNumSwp(precond,
+!    &                                        smooth_num_sweep,
+!    &                                        ierr)
           call HYPRE_BoomerAMGSetGridRelaxPnts(precond,
      &                                         grid_relax_points, ierr)
           call HYPRE_BoomerAMGSetMaxLevels(precond, MAXLEVELS, ierr)
@@ -792,7 +786,7 @@ c    &                                        ierr)
 
           precond_id = 2
 
-c Set defaults for BoomerAMG
+! Set defaults for BoomerAMG
           maxiter = 1
           coarsen_type = 6
           hybrid = 1
@@ -831,10 +825,10 @@ c Set defaults for BoomerAMG
      &                                         grid_relax_type, ierr)
           call HYPRE_BoomerAMGSetRelaxWeight(precond,
      &                                       relax_weights, ierr)
-c         call HYPRE_BoomerAMGSetSmoothOption(precond, smooth_option,
-c    &                                        ierr)
-c         call HYPRE_BoomerAMGSetSmoothNumSwp(precond, smooth_num_sweep,
-c    &                                        ierr)
+!         call HYPRE_BoomerAMGSetSmoothOption(precond, smooth_option,
+!    &                                        ierr)
+!         call HYPRE_BoomerAMGSetSmoothNumSwp(precond, smooth_num_sweep,
+!    &                                        ierr)
           call HYPRE_BoomerAMGSetGridRelaxPnts(precond,
      &                                         grid_relax_points,
      &                                         ierr)
@@ -897,7 +891,7 @@ c    &                                        ierr)
 
           precond_id = 2
 
-c Set defaults for BoomerAMG
+! Set defaults for BoomerAMG
           maxiter = 1
           coarsen_type = 6
           hybrid = 1
@@ -937,10 +931,10 @@ c Set defaults for BoomerAMG
      &                                         grid_relax_type, ierr)
           call HYPRE_BoomerAMGSetRelaxWeight(precond,
      &                                       relax_weights, ierr)
-c         call HYPRE_BoomerAMGSetSmoothOption(precond, smooth_option,
-c    &                                        ierr)
-c         call HYPRE_BoomerAMGSetSmoothNumSwp(precond, smooth_num_sweep,
-c    &                                        ierr)
+!         call HYPRE_BoomerAMGSetSmoothOption(precond, smooth_option,
+!    &                                        ierr)
+!         call HYPRE_BoomerAMGSetSmoothNumSwp(precond, smooth_num_sweep,
+!    &                                        ierr)
           call HYPRE_BoomerAMGSetGridRelaxPnts(precond,
      &                                         grid_relax_points, ierr)
           call HYPRE_BoomerAMGSetMaxLevels(precond, MAXLEVELS, ierr)
@@ -981,9 +975,9 @@ c    &                                        ierr)
 
       endif
 
-c-----------------------------------------------------------------------
-c     Print the solution and other info
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Print the solution and other info
+!-----------------------------------------------------------------------
 
       vecfile(1)  = 'd'
       vecfile(2)  = 'r'
@@ -1006,15 +1000,15 @@ c-----------------------------------------------------------------------
          print *, 'Final Residual Norm = ', final_res_norm
       endif
 
-c-----------------------------------------------------------------------
-c     Finalize things
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Finalize things
+!-----------------------------------------------------------------------
 
       call HYPRE_ParCSRMatrixDestroy(A_storage, ierr)
       call HYPRE_IJVectorDestroy(b, ierr)
       call HYPRE_IJVectorDestroy(x, ierr)
 
-c     Finalize MPI
+!     Finalize MPI
 
       call MPI_FINALIZE(ierr)
 

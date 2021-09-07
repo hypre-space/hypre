@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #if 0 /* RDF: Not sure this is really needed */
 #ifdef WIN32
@@ -17,7 +12,6 @@
 #endif
 
 #include <string.h>
-#include <assert.h>
 #include "HYPRE.h"
 #include "_hypre_utilities.h"
 #include "_hypre_parcsr_ls.h"
@@ -99,7 +93,7 @@ int MLI_Method_AMGCR::setParams(char *inName, int argc, char *argv[])
    comm = getComm();
    MPI_Comm_rank( comm, &mypid );
    sscanf(inName, "%s", param1);
-   if ( outputLevel_ >= 1 && mypid == 0 ) 
+   if ( outputLevel_ >= 1 && mypid == 0 )
       printf("\tMLI_Method_AMGCR::setParam = %s\n", inName);
    if ( !strcmp(param1, "setOutputLevel" ))
    {
@@ -152,7 +146,7 @@ int MLI_Method_AMGCR::setParams(char *inName, int argc, char *argv[])
          printf("     argument[0] : number of relaxation sweeps \n");
          printf("     argument[1] : relaxation weights\n");
          return 1;
-      } 
+      }
       nSweeps = *(int *)   argv[0];
       weights = (double *) argv[1];
       smootherNum_ = nSweeps;
@@ -172,7 +166,7 @@ int MLI_Method_AMGCR::setParams(char *inName, int argc, char *argv[])
          printf("     argument[0] : number of relaxation sweeps \n");
          printf("     argument[1] : relaxation weights\n");
          return 1;
-      } 
+      }
       else if ( strcmp(param2, "SuperLU") )
       {
          strcpy(coarseSolver_, param2);
@@ -194,7 +188,7 @@ int MLI_Method_AMGCR::setParams(char *inName, int argc, char *argv[])
    else if ( !strcmp(param1, "setParamFile" ))
    {
       param3 = (char *) argv[0];
-      strcpy( paramFile_, param3 ); 
+      strcpy( paramFile_, param3 );
       return 0;
    }
    else if ( !strcmp(param1, "print" ))
@@ -209,7 +203,7 @@ int MLI_Method_AMGCR::setParams(char *inName, int argc, char *argv[])
  * generate multilevel structure
  * --------------------------------------------------------------------- */
 
-int MLI_Method_AMGCR::setup( MLI *mli ) 
+int MLI_Method_AMGCR::setup( MLI *mli )
 {
    int         level, mypid, *ISMarker, localNRows;
    int         irow, nrows, gNRows, numFpts, *fList;;
@@ -248,7 +242,7 @@ int MLI_Method_AMGCR::setup( MLI *mli )
       /* -------------------------------------------------- */
 
       mli_Amat = mli->getSystemMatrix(level);
-      assert (mli_Amat != NULL);
+      hypre_assert (mli_Amat != NULL);
       hypreA = (hypre_ParCSRMatrix *) mli_Amat->getMatrix();
       gNRows = hypre_ParCSRMatrixGlobalNumRows(hypreA);
       ADiag = hypre_ParCSRMatrixDiag(hypreA);
@@ -276,31 +270,31 @@ int MLI_Method_AMGCR::setup( MLI *mli )
          ADiag  = hypre_ParCSRMatrixDiag(hypreA);
          ADiagI = hypre_CSRMatrixI(ADiag);
          ADiagJ = hypre_CSRMatrixJ(ADiag);
-         for (irow = 0; irow < localNRows; irow++) 
+         for (irow = 0; irow < localNRows; irow++)
          {
-            if (ISMarker[irow] == 0) 
+            if (ISMarker[irow] == 0)
             {
                ISMarker[irow] = 1;
-               for (jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++) 
+               for (jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++)
                   if (ISMarker[ADiagJ[jcol]] == 0)
                      ISMarker[ADiagJ[jcol]] = -1;
             }
          }
-         for (irow = 0; irow < localNRows; irow++) 
+         for (irow = 0; irow < localNRows; irow++)
             if (ISMarker[irow] < 0) ISMarker[irow] = 0;
 #endif
       }
-      else 
+      else
       {
          ISMarker = new int[localNRows];
          for (irow = 0; irow < localNRows; irow++) ISMarker[irow] = 0;
       }
-      for (irow = 0; irow < localNRows; irow++) 
+      for (irow = 0; irow < localNRows; irow++)
          if (ISMarker[irow] < 0) ISMarker[irow] = 0;
       mli_Affmat = performCR(mli_Amat, ISMarker, &mli_Afcmat);
 
       nrows = 0;
-      for (irow = 0; irow < localNRows; irow++) 
+      for (irow = 0; irow < localNRows; irow++)
          if (ISMarker[irow] == 1) nrows++;
       if (nrows < minCoarseSize_) break;
       mli_Pmat = createPmat(ISMarker, mli_Amat, mli_Affmat, mli_Afcmat);
@@ -330,7 +324,7 @@ int MLI_Method_AMGCR::setup( MLI *mli )
       mli->setSystemMatrix(level+1, mli_cAmat);
       elapsedTime = (MLI_Utils_WTime() - startTime);
       RAPTime_ += elapsedTime;
-      if (mypid == 0 && outputLevel_ > 0) 
+      if (mypid == 0 && outputLevel_ > 0)
          printf("\tRAP computed, time = %e seconds.\n", elapsedTime);
 
       /* -------------------------------------------------- */
@@ -348,20 +342,20 @@ int MLI_Method_AMGCR::setup( MLI *mli )
       sprintf(paramString, "relaxWeight");
       smootherPtr->setParams(paramString, 2, targv);
       numFpts = 0;
-      for (irow = 0; irow < localNRows; irow++) 
+      for (irow = 0; irow < localNRows; irow++)
          if (ISMarker[irow] == 0) numFpts++;
 #if 1
-      if (numFpts > 0) 
+      if (numFpts > 0)
       {
          fList = new int[numFpts];
          numFpts = 0;
-         for (irow = 0; irow < localNRows; irow++) 
+         for (irow = 0; irow < localNRows; irow++)
             if (ISMarker[irow] == 0) fList[numFpts++] = irow;
          targv[0] = (char *) &numFpts;
          targv[1] = (char *) fList;
          sprintf(paramString, "setFptList");
          smootherPtr->setParams(paramString, 2, targv);
-      } 
+      }
       sprintf(paramString, "setModifiedDiag");
       smootherPtr->setParams(paramString, 0, NULL);
       smootherPtr->setup(mli_Affmat);
@@ -413,7 +407,7 @@ int MLI_Method_AMGCR::setOutputLevel( int level )
 }
 
 /* ********************************************************************* *
- * set number of levels 
+ * set number of levels
  * --------------------------------------------------------------------- */
 
 int MLI_Method_AMGCR::setNumLevels( int nlevels )
@@ -423,7 +417,7 @@ int MLI_Method_AMGCR::setNumLevels( int nlevels )
 }
 
 /* ********************************************************************* *
- * select independent set 
+ * select independent set
  * --------------------------------------------------------------------- */
 
 int MLI_Method_AMGCR::selectIndepSet(MLI_Matrix *mli_Amat, int **indepSet)
@@ -447,9 +441,9 @@ int MLI_Method_AMGCR::selectIndepSet(MLI_Matrix *mli_Amat, int **indepSet)
    MPI_Comm_size(comm, &nprocs);
 
    measureArray = new double[localNRows+numColsOffd];
-   for (irow = 0; irow < localNRows+numColsOffd; irow++) 
+   for (irow = 0; irow < localNRows+numColsOffd; irow++)
       measureArray[irow] = 0;
-   for (irow = 0; irow < ADiagI[localNRows]; irow++) 
+   for (irow = 0; irow < ADiagI[localNRows]; irow++)
       measureArray[ADiagJ[irow]] += 1;
 
    hypre_BoomerAMGCreateS(hypreA, 0.0e0, 0.0e0, 1, NULL, &hypreS);
@@ -457,7 +451,7 @@ int MLI_Method_AMGCR::selectIndepSet(MLI_Matrix *mli_Amat, int **indepSet)
 
    graphArraySize = localNRows;
    graphArray = new int[localNRows];
-   for (irow = 0; irow < localNRows; irow++) graphArray[irow] = irow; 
+   for (irow = 0; irow < localNRows; irow++) graphArray[irow] = irow;
 
    if (numColsOffd) graphArrayOffd = new int[numColsOffd];
    else             graphArrayOffd = NULL;
@@ -465,7 +459,7 @@ int MLI_Method_AMGCR::selectIndepSet(MLI_Matrix *mli_Amat, int **indepSet)
 
    ISMarker = new int[localNRows];
    for (irow = 0; irow < localNRows; irow++) ISMarker[irow] = 0;
-   if (numColsOffd) 
+   if (numColsOffd)
    {
       ISMarkerOffd = new int[numColsOffd];
       for (irow = 0; irow < numColsOffd; irow++) ISMarkerOffd[irow] = 0;
@@ -475,7 +469,7 @@ int MLI_Method_AMGCR::selectIndepSet(MLI_Matrix *mli_Amat, int **indepSet)
    hypre_BoomerAMGIndepSet(hypreS, measureArray, graphArray,
                            graphArraySize, graphArrayOffd, numColsOffd,
                            ISMarker, ISMarkerOffd);
-   
+
    delete [] measureArray;
    delete [] graphArray;
    if (numColsOffd > 0) delete [] graphArrayOffd;
@@ -498,7 +492,6 @@ MLI_Matrix *MLI_Method_AMGCR::performCR(MLI_Matrix *mli_Amat, int *indepSet,
    int    startRow, rowIndex, colIndex, rowCount;
    int    one=1, *ADiagI, *ADiagJ, *sortIndices, *fList;
    int    idata, fPt, iV, ranSeed, jcol, rowCount2, CStartRow, CNRows;
-   int    *rowStarts, *newRowStarts, *colStarts, *newColStarts;
    int    newCount, it;
 #if 0
    double relaxWts[5];
@@ -559,7 +552,7 @@ MLI_Matrix *MLI_Method_AMGCR::performCR(MLI_Matrix *mli_Amat, int *indepSet,
       for (iP = 0; iP < nprocs; iP++) reduceArray1[iP] = 0;
       reduceArray1[mypid] = numFpts;
       MPI_Allreduce(reduceArray1,reduceArray2,nprocs,MPI_INT,MPI_SUM,comm);
-      for (iP = nprocs-1; iP >= 0; iP--) 
+      for (iP = nprocs-1; iP >= 0; iP--)
          reduceArray2[iP+1] = reduceArray2[iP];
       reduceArray2[0] = 0;
       for (iP = 2; iP <= nprocs; iP++) reduceArray2[iP] += reduceArray2[iP-1];
@@ -577,20 +570,20 @@ MLI_Matrix *MLI_Method_AMGCR::performCR(MLI_Matrix *mli_Amat, int *indepSet,
       ierr = HYPRE_IJMatrixCreate(comm,startRow,startRow+localNRows-1,
                            FStartRow,FStartRow+FNRows-1,&IJPFF);
       ierr = HYPRE_IJMatrixSetObjectType(IJPFF, HYPRE_PARCSR);
-      assert(!ierr);
+      hypre_assert(!ierr);
       rowLengs = new int[localNRows];
       for (irow = 0; irow < localNRows; irow++) rowLengs[irow] = 1;
       ierr = HYPRE_IJMatrixSetRowSizes(IJPFF, rowLengs);
       ierr = HYPRE_IJMatrixInitialize(IJPFF);
-      assert(!ierr);
+      hypre_assert(!ierr);
 
       ierr = HYPRE_IJMatrixCreate(comm,startRow,startRow+localNRows-1,
                    CStartRow,CStartRow+CNRows-1, &IJPFC);
       ierr = HYPRE_IJMatrixSetObjectType(IJPFC, HYPRE_PARCSR);
-      assert(!ierr);
+      hypre_assert(!ierr);
       ierr = HYPRE_IJMatrixSetRowSizes(IJPFC, rowLengs);
       ierr = HYPRE_IJMatrixInitialize(IJPFC);
-      assert(!ierr);
+      hypre_assert(!ierr);
       delete [] rowLengs;
 
       /* --------------------------------------------------- */
@@ -602,7 +595,7 @@ MLI_Matrix *MLI_Method_AMGCR::performCR(MLI_Matrix *mli_Amat, int *indepSet,
       for (irow = 0; irow < localNRows; irow++)
       {
          rowIndex = startRow + irow;
-         if (indepSet[irow] == 0) 
+         if (indepSet[irow] == 0)
          {
             colIndex = FStartRow + rowCount;
             HYPRE_IJMatrixSetValues(IJPFF,1,&one,(const int *) &rowIndex,
@@ -618,47 +611,25 @@ MLI_Matrix *MLI_Method_AMGCR::performCR(MLI_Matrix *mli_Amat, int *indepSet,
          }
       }
       ierr = HYPRE_IJMatrixAssemble(IJPFF);
-      assert( !ierr );
+      hypre_assert( !ierr );
       HYPRE_IJMatrixGetObject(IJPFF, (void **) &hyprePFF);
       //hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) hyprePFF);
       sprintf(paramString, "HYPRE_ParCSR" );
       mli_PFFMat = new MLI_Matrix((void *)hyprePFF,paramString,NULL);
 
       ierr = HYPRE_IJMatrixAssemble(IJPFC);
-      assert( !ierr );
+      hypre_assert( !ierr );
       HYPRE_IJMatrixGetObject(IJPFC, (void **) &hyprePFC);
       //hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) hyprePFC);
       hypreAPFC = hypre_ParMatmul(hypreA, hyprePFC);
       hypre_ParCSRMatrixTranspose(hyprePFF, &hyprePFFT, 1);
       hypreAfc = hypre_ParMatmul(hyprePFFT, hypreAPFC);
-      rowStarts = hypre_ParCSRMatrixRowStarts(hyprePFFT);
-      newRowStarts = (int *) malloc((nprocs+1) * sizeof(int));
-      for (irow = 0; irow <= nprocs; irow++) 
-         newRowStarts[irow] = rowStarts[irow];
-      hypre_ParCSRMatrixRowStarts(hypreAfc) = newRowStarts;
-      colStarts = hypre_ParCSRMatrixColStarts(hypreAPFC);
-      newColStarts = (int *) malloc((nprocs+1) * sizeof(int));
-      for (irow = 0; irow <= nprocs; irow++) 
-         newColStarts[irow] = colStarts[irow];
-      hypre_ParCSRMatrixColStarts(hypreAfc) = newColStarts;
-      hypre_ParCSRMatrixOwnsRowStarts(hypreAfc) = 1;
-      hypre_ParCSRMatrixOwnsColStarts(hypreAfc) = 1;
-      hypre_ParCSRMatrixOwnsColStarts(hyprePFF) = 0;
 
       sprintf(paramString, "HYPRE_ParCSR" );
       mli_AfcMat = new MLI_Matrix((void *)hypreAfc,paramString,NULL);
 
       MLI_Matrix_ComputePtAP(mli_PFFMat, mli_Amat, &mli_AffMat);
       hypreAff  = (hypre_ParCSRMatrix *) mli_AffMat->getMatrix();
-      colStarts = hypre_ParCSRMatrixColStarts(hyprePFF);
-      newColStarts = (int *) malloc((nprocs+1) * sizeof(int));
-      for (irow = 0; irow <= nprocs; irow++) 
-         newColStarts[irow] = colStarts[irow];
-      hypre_ParCSRMatrixColStarts(hypreAff) = newColStarts;
-      newColStarts = (int *) malloc((nprocs+1) * sizeof(int));
-      for (irow = 0; irow <= nprocs; irow++) 
-         newColStarts[irow] = colStarts[irow];
-      hypre_ParCSRMatrixRowStarts(hypreAff) = newColStarts;
 
       if (arnorm1/arnorm0 < targetMu_) break;
 
@@ -763,7 +734,7 @@ MLI_Matrix *MLI_Method_AMGCR::performCR(MLI_Matrix *mli_Amat, int *indepSet,
       delete smootherPtr;
 #else
       MLI_Utils_mJacobiCreate(comm, &hypreSolver);
-      MLI_Utils_mJacobiSetParams(hypreSolver, PDegree_); 
+      MLI_Utils_mJacobiSetParams(hypreSolver, PDegree_);
       XData = (double *) hypre_VectorData(hypre_ParVectorLocalVector(hypreX));
       aratio = 0.0;
       for (iV = 0; iV < numVectors_; iV++)
@@ -787,7 +758,7 @@ MLI_Matrix *MLI_Method_AMGCR::performCR(MLI_Matrix *mli_Amat, int *indepSet,
                      (HYPRE_Vector) hypreB, (HYPRE_Vector) hypreX, paramString);
          hypre_ParCSRMatrixMatvec(-1.0, hypreAff, hypreX, 1.0, hypreB);
          rnorm1 = sqrt(hypre_ParVectorInnerProd(hypreB, hypreB));
-         if (rnorm1 < rnorm0 * 1.0e-10 || rnorm1 < 1.0e-10) 
+         if (rnorm1 < rnorm0 * 1.0e-10 || rnorm1 < 1.0e-10)
          {
             printf("\tperformCR : rnorm0, rnorm1 = %e %e\n",rnorm0,rnorm1);
             break;
@@ -801,7 +772,7 @@ MLI_Matrix *MLI_Method_AMGCR::performCR(MLI_Matrix *mli_Amat, int *indepSet,
          hypre_ParCSRMatrixMatvec(-1.0, hypreAff, hypreX, 1.0, hypreB);
          rnorm1 = sqrt(hypre_ParVectorInnerProd(hypreB, hypreB));
          rnorm1 = 0.2 * log10(rnorm1/rnorm0);
-         rnorm1 = pow(1.0e1, rnorm1);   
+         rnorm1 = pow(1.0e1, rnorm1);
          ratio1 = rnorm1;
 
          /* ------------------------------------------------------- */
@@ -832,7 +803,7 @@ MLI_Matrix *MLI_Method_AMGCR::performCR(MLI_Matrix *mli_Amat, int *indepSet,
          hypre_ParCSRMatrixMatvec(-1.0, hypreAffT, hypreX, 1.0, hypreB);
          rnorm1 = sqrt(hypre_ParVectorInnerProd(hypreB, hypreB));
          rnorm1 = 0.2 * log10(rnorm1/rnorm0);
-         ratio2 = pow(1.0e1, rnorm1);   
+         ratio2 = pow(1.0e1, rnorm1);
          if (ratio1 > ratio2) aratio += ratio1;
          else                 aratio += ratio2;
 #else
@@ -845,7 +816,7 @@ MLI_Matrix *MLI_Method_AMGCR::performCR(MLI_Matrix *mli_Amat, int *indepSet,
          /* ------------------------------------------------------- */
 
          hypre_ParVectorAxpy(dOne, hypreX, hypreXacc);
-         if (ratio1 < targetMu_ && ratio2 < targetMu_) 
+         if (ratio1 < targetMu_ && ratio2 < targetMu_)
          {
             printf("\tTrial %3d(%3d) : GMRES norms ratios = %16.8e %16.8e ##\n",
                    iT, iV, ratio1, ratio2);
@@ -861,44 +832,44 @@ MLI_Matrix *MLI_Method_AMGCR::performCR(MLI_Matrix *mli_Amat, int *indepSet,
       /* --------------------------------------------------- */
       /* select coarse points                                */
       /* --------------------------------------------------- */
-      
-      if (iV == numVectors_) aratio /= (double) numVectors_; 
+
+      if (iV == numVectors_) aratio /= (double) numVectors_;
 printf("aratio = %e\n", aratio);
-      if ((aratio >= targetMu_ || (iT == 0 && localNRows == FNRows)) && 
-           iT < (numTrials_-1)) 
+      if ((aratio >= targetMu_ || (iT == 0 && localNRows == FNRows)) &&
+           iT < (numTrials_-1))
       {
-         XaccData = (double *) 
+         XaccData = (double *)
                  hypre_VectorData(hypre_ParVectorLocalVector(hypreXacc));
          sortIndices = new int[FNRows];
          for (irow = 0; irow < FNRows; irow++) sortIndices[irow] = irow;
-         for (irow = 0; irow < FNRows; irow++) 
+         for (irow = 0; irow < FNRows; irow++)
             if (XaccData[irow] < 0.0) XaccData[irow] = - XaccData[irow];
          //MLI_Utils_DbleQSort2a(XaccData, sortIndices, 0, FNRows-1);
          if (FNRows > 0) threshold = XaccData[FNRows-1] * cutThreshold_;
 #if 0
          newCount = 0;
-         for (ic = 0; ic < localNRows; ic++) 
+         for (ic = 0; ic < localNRows; ic++)
          {
             threshold = XaccData[FNRows-1] * cutThreshold_;
-            for (it = 0; it < 6; it++) 
+            for (it = 0; it < 6; it++)
             {
-               for (irow = FNRows-1; irow >= 0; irow--) 
+               for (irow = FNRows-1; irow >= 0; irow--)
                {
                   ddata = XaccData[irow];
                   if (ddata > threshold)
                   {
                      idata = sortIndices[irow];
                      fPt = fList[idata];
-                     if (indepSet[fPt] == 0) 
+                     if (indepSet[fPt] == 0)
                      {
                         count = 0;
-                        for (jcol = ADiagI[fPt]; jcol < ADiagI[fPt+1]; jcol++) 
+                        for (jcol = ADiagI[fPt]; jcol < ADiagI[fPt+1]; jcol++)
                            if (indepSet[ADiagJ[jcol]] == 1) count++;
                         if (count <= ic)
                         {
                            newCount++;
                            indepSet[fPt] = 1;
-                           for (jcol = ADiagI[fPt];jcol < ADiagI[fPt+1];jcol++) 
+                           for (jcol = ADiagI[fPt];jcol < ADiagI[fPt+1];jcol++)
                               if (indepSet[ADiagJ[jcol]] == 0)
                                  indepSet[ADiagJ[jcol]] = -1;
                         }
@@ -906,15 +877,15 @@ printf("aratio = %e\n", aratio);
                   }
                }
                threshold *= 0.1;
-               for (irow = 0; irow < localNRows; irow++) 
+               for (irow = 0; irow < localNRows; irow++)
                   if (indepSet[irow] < 0) indepSet[irow] = 0;
-               if ((localNRows+newCount-FNRows) > (localNRows/2) && ic > 2) 
+               if ((localNRows+newCount-FNRows) > (localNRows/2) && ic > 2)
                {
                   if (((double) newCount/ (double) localNRows) > 0.05)
                      break;
                }
             }
-            if ((localNRows+newCount-FNRows) > (localNRows/2) && ic > 2) 
+            if ((localNRows+newCount-FNRows) > (localNRows/2) && ic > 2)
             {
                if (((double) newCount/ (double) localNRows) > 0.05)
                   break;
@@ -923,20 +894,20 @@ printf("aratio = %e\n", aratio);
 #else
          newCount = 0;
          threshold = XaccData[FNRows-1] * cutThreshold_;
-         for (it = 0; it < 1; it++) 
+         for (it = 0; it < 1; it++)
          {
-            for (irow = FNRows-1; irow >= 0; irow--) 
+            for (irow = FNRows-1; irow >= 0; irow--)
             {
                ddata = XaccData[irow];
                if (ddata > threshold)
                {
                   idata = sortIndices[irow];
                   fPt = fList[idata];
-                  if (indepSet[fPt] == 0) 
+                  if (indepSet[fPt] == 0)
                   {
                      newCount++;
                      indepSet[fPt] = 1;
-                     for (jcol = ADiagI[fPt];jcol < ADiagI[fPt+1];jcol++) 
+                     for (jcol = ADiagI[fPt];jcol < ADiagI[fPt+1];jcol++)
                         if (indepSet[ADiagJ[jcol]] == 0 &&
                             habs(ADiagA[jcol]/ADiagA[ADiagI[fPt]]) > 1.0e-12)
                            indepSet[ADiagJ[jcol]] = -1;
@@ -944,9 +915,9 @@ printf("aratio = %e\n", aratio);
                }
             }
             threshold *= 0.1;
-            for (irow = 0; irow < localNRows; irow++) 
+            for (irow = 0; irow < localNRows; irow++)
                if (indepSet[irow] < 0) indepSet[irow] = 0;
-            if ((localNRows+newCount-FNRows) > (localNRows/2)) 
+            if ((localNRows+newCount-FNRows) > (localNRows/2))
             {
                if (((double) newCount/ (double) localNRows) > 0.1)
                   break;
@@ -954,7 +925,7 @@ printf("aratio = %e\n", aratio);
          }
 #endif
          delete [] sortIndices;
-         if (newCount == 0) 
+         if (newCount == 0)
          {
             printf("CR stops because newCount = 0\n");
             break;
@@ -964,7 +935,7 @@ printf("aratio = %e\n", aratio);
       /* --------------------------------------------------- */
       /* clean up                                            */
       /* --------------------------------------------------- */
-      
+
       HYPRE_IJMatrixDestroy(IJPFF);
       hypre_ParCSRMatrixDestroy(hyprePFFT);
       hypre_ParCSRMatrixDestroy(hypreAPFC);
@@ -1004,8 +975,8 @@ MLI_Matrix *MLI_Method_AMGCR::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
    int    *rowLengs, ierr, startRow, rowCount, rowIndex, colIndex;
    int    *colInd, rowSize, jcol, one=1, maxRowLeng, nnz;
    int    *tPDiagI, *tPDiagJ, cCount, fCount, ncount, *ADDiagI, *ADDiagJ;
-   int    *AD2DiagI, *AD2DiagJ, *newColInd, newRowSize, *rowStarts;
-   int    *newRowStarts, nprocs, AccStartRow, AccNRows;
+   int    *AD2DiagI, *AD2DiagJ, *newColInd, newRowSize;
+   int    nprocs, AccStartRow, AccNRows;
    double *ADiagA, *colVal, colValue, *newColVal, *DDiagA;
    double *tPDiagA, *ADDiagA, *AD2DiagA, omega=1, dtemp;
    char   paramString[100];
@@ -1039,12 +1010,12 @@ MLI_Matrix *MLI_Method_AMGCR::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
    ierr = HYPRE_IJMatrixCreate(comm,AffStartRow,AffStartRow+AffNRows-1,
                            AffStartRow,AffStartRow+AffNRows-1,&IJInvD);
    ierr = HYPRE_IJMatrixSetObjectType(IJInvD, HYPRE_PARCSR);
-   assert(!ierr);
+   hypre_assert(!ierr);
    rowLengs = new int[AffNRows];
    for (irow = 0; irow < AffNRows; irow++) rowLengs[irow] = 1;
    ierr = HYPRE_IJMatrixSetRowSizes(IJInvD, rowLengs);
    ierr = HYPRE_IJMatrixInitialize(IJInvD);
-   assert(!ierr);
+   hypre_assert(!ierr);
    delete [] rowLengs;
 
    /* ------------------------------------------------------ */
@@ -1055,14 +1026,14 @@ MLI_Matrix *MLI_Method_AMGCR::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
    for (irow = 0; irow < localNRows; irow++)
    {
       rowIndex = startRow + irow;
-      if (indepSet[irow] == 0) 
+      if (indepSet[irow] == 0)
       {
-         HYPRE_ParCSRMatrixGetRow((HYPRE_ParCSRMatrix) hypreA, rowIndex, 
+         HYPRE_ParCSRMatrixGetRow((HYPRE_ParCSRMatrix) hypreA, rowIndex,
                                   &rowSize, &colInd, &colVal);
          colValue = 1.0;
          for (jcol = 0; jcol < rowSize; jcol++)
          {
-            if (colInd[jcol] == rowIndex) 
+            if (colInd[jcol] == rowIndex)
             {
                colValue = colVal[jcol];
                break;
@@ -1071,17 +1042,17 @@ MLI_Matrix *MLI_Method_AMGCR::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
          if (colValue >= 0.0)
          {
             for (jcol = 0; jcol < rowSize; jcol++)
-               if (colInd[jcol] != rowIndex && 
-                   (indepSet[colInd[jcol]-startRow] == 0) && 
-                   colVal[jcol] > 0.0) 
+               if (colInd[jcol] != rowIndex &&
+                   (indepSet[colInd[jcol]-startRow] == 0) &&
+                   colVal[jcol] > 0.0)
                   colValue += colVal[jcol];
          }
          else
          {
             for (jcol = 0; jcol < rowSize; jcol++)
-               if (colInd[jcol] != rowIndex && 
-                   (indepSet[colInd[jcol]-startRow] == 0) && 
-                   colVal[jcol] < 0.0) 
+               if (colInd[jcol] != rowIndex &&
+                   (indepSet[colInd[jcol]-startRow] == 0) &&
+                   colVal[jcol] < 0.0)
                   colValue += colVal[jcol];
          }
          colValue = 1.0 / colValue;
@@ -1089,7 +1060,7 @@ MLI_Matrix *MLI_Method_AMGCR::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
          HYPRE_IJMatrixSetValues(IJInvD,1,&one,(const int *) &colIndex,
                     (const int *) &colIndex, (const double *) &colValue);
          rowCount++;
-         HYPRE_ParCSRMatrixRestoreRow((HYPRE_ParCSRMatrix) hypreA, rowIndex, 
+         HYPRE_ParCSRMatrixRestoreRow((HYPRE_ParCSRMatrix) hypreA, rowIndex,
                                       &rowSize, &colInd, &colVal);
       }
    }
@@ -1099,11 +1070,11 @@ MLI_Matrix *MLI_Method_AMGCR::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
    /* ------------------------------------------------------ */
 
    ierr = HYPRE_IJMatrixAssemble(IJInvD);
-   assert( !ierr );
+   hypre_assert( !ierr );
    HYPRE_IJMatrixGetObject(IJInvD, (void **) &hypreInvD);
    ierr += HYPRE_IJMatrixSetObjectType(IJInvD, -1);
    ierr += HYPRE_IJMatrixDestroy(IJInvD);
-   assert( !ierr );
+   hypre_assert( !ierr );
 
    /* ------------------------------------------------------ */
    /* generate polynomial of Aff and invD                    */
@@ -1117,8 +1088,8 @@ MLI_Matrix *MLI_Method_AMGCR::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
       ADiagI = hypre_CSRMatrixI(ADiag);
       ADiagJ = hypre_CSRMatrixJ(ADiag);
       ADiagA = hypre_CSRMatrixData(ADiag);
-      for (irow = 0; irow < AffNRows; irow++) 
-         for (jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++) 
+      for (irow = 0; irow < AffNRows; irow++)
+         for (jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++)
             ADiagA[jcol] = - ADiagA[jcol];
    }
    else if (PDegree_ == 1)
@@ -1131,26 +1102,20 @@ MLI_Matrix *MLI_Method_AMGCR::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
       ADiagI = hypre_CSRMatrixI(ADiag);
       ADiagJ = hypre_CSRMatrixJ(ADiag);
       ADiagA = hypre_CSRMatrixData(ADiag);
-      for (irow = 0; irow < AffNRows; irow++) 
+      for (irow = 0; irow < AffNRows; irow++)
       {
-         for (jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++) 
+         for (jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++)
          {
-            if (ADiagJ[jcol] == irow) 
+            if (ADiagJ[jcol] == irow)
                  ADiagA[jcol] = - omega*DDiagA[irow]*(2.0-omega*ADiagA[jcol]);
             else ADiagA[jcol] = omega * omega * DDiagA[irow] * ADiagA[jcol];
          }
       }
-      hypre_ParCSRMatrixOwnsColStarts(hypreInvD) = 0;
-      rowStarts = hypre_ParCSRMatrixRowStarts(hypreA);
-      newRowStarts = (int *) malloc((nprocs+1) * sizeof(int));
-      for (irow = 0; irow <= nprocs; irow++) 
-         newRowStarts[irow] = rowStarts[irow];
-      hypre_ParCSRMatrixRowStarts(hypreP) = newRowStarts;
 #else
       ierr = HYPRE_IJMatrixCreate(comm,AffStartRow,AffStartRow+AffNRows-1,
                            AffStartRow,AffStartRow+AffNRows-1,&IJP);
       ierr = HYPRE_IJMatrixSetObjectType(IJP, HYPRE_PARCSR);
-      assert(!ierr);
+      hypre_assert(!ierr);
       rowLengs = new int[AffNRows];
       maxRowLeng = 0;
       ADiag   = hypre_ParCSRMatrixDiag(hypreAff);
@@ -1166,11 +1131,11 @@ MLI_Matrix *MLI_Method_AMGCR::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
             if (ADiagJ[jcol] != irow && ADiagA[jcol]*ADiagA[index] < 0.0)
                newRowSize++;
          rowLengs[irow] = newRowSize;
-         if (newRowSize > maxRowLeng) maxRowLeng = newRowSize; 
+         if (newRowSize > maxRowLeng) maxRowLeng = newRowSize;
       }
       ierr = HYPRE_IJMatrixSetRowSizes(IJP, rowLengs);
       ierr = HYPRE_IJMatrixInitialize(IJP);
-      assert(!ierr);
+      hypre_assert(!ierr);
       delete [] rowLengs;
       newColInd = new int[maxRowLeng];
       newColVal = new double[maxRowLeng];
@@ -1188,7 +1153,7 @@ MLI_Matrix *MLI_Method_AMGCR::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
          {
             if (ADiagJ[jcol] != irow && ADiagA[jcol]*ADiagA[index] < 0.0)
             {
-               newColInd[newRowSize] = AffStartRow + ADiagJ[jcol]; 
+               newColInd[newRowSize] = AffStartRow + ADiagJ[jcol];
                newColVal[newRowSize++] = ADiagA[jcol];
             }
             else
@@ -1203,16 +1168,14 @@ MLI_Matrix *MLI_Method_AMGCR::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
          ierr = HYPRE_IJMatrixSetValues(IJP, 1, &newRowSize,
                    (const int *) &rowIndex, (const int *) newColInd,
                    (const double *) newColVal);
-         assert(!ierr);
+         hypre_assert(!ierr);
       }
       delete [] newColInd;
       delete [] newColVal;
       ierr = HYPRE_IJMatrixAssemble(IJP);
-      assert( !ierr );
+      hypre_assert( !ierr );
       HYPRE_IJMatrixGetObject(IJP, (void **) &hypreAD);
       hypreP = hypre_ParMatmul(hypreAD, hypreInvD);
-      hypre_ParCSRMatrixOwnsRowStarts(hypreP) = 1;
-      hypre_ParCSRMatrixOwnsRowStarts(hypreAD) = 0;
       ierr += HYPRE_IJMatrixDestroy(IJP);
 #endif
    }
@@ -1235,17 +1198,17 @@ MLI_Matrix *MLI_Method_AMGCR::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
       ierr = HYPRE_IJMatrixCreate(comm,AffStartRow,AffStartRow+AffNRows-1,
                            AffStartRow,AffStartRow+AffNRows-1,&IJP);
       ierr = HYPRE_IJMatrixSetObjectType(IJP, HYPRE_PARCSR);
-      assert(!ierr);
+      hypre_assert(!ierr);
       rowLengs = new int[AffNRows];
       maxRowLeng = 0;
       for (irow = 0; irow < AffNRows; irow++)
       {
          newRowSize = 0;
          for (jcol = ADDiagI[irow]; jcol < ADDiagI[irow+1]; jcol++)
-            newColInd[newRowSize] = ADDiagJ[jcol]; 
+            newColInd[newRowSize] = ADDiagJ[jcol];
          for (jcol = AD2DiagI[irow]; jcol < AD2DiagI[irow+1]; jcol++)
-            newColInd[newRowSize] = AD2DiagJ[jcol]; 
-         if (newRowSize > maxRowLeng) maxRowLeng = newRowSize; 
+            newColInd[newRowSize] = AD2DiagJ[jcol];
+         if (newRowSize > maxRowLeng) maxRowLeng = newRowSize;
          hypre_qsort0(newColInd, 0, newRowSize-1);
          ncount = 0;
          for ( jcol = 0; jcol < newRowSize; jcol++ )
@@ -1254,14 +1217,14 @@ MLI_Matrix *MLI_Method_AMGCR::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
             {
                ncount++;
                newColInd[ncount] = newColInd[jcol];
-            } 
+            }
          }
          newRowSize = ncount + 1;
          rowLengs[irow] = newRowSize;
       }
       ierr = HYPRE_IJMatrixSetRowSizes(IJP, rowLengs);
       ierr = HYPRE_IJMatrixInitialize(IJP);
-      assert(!ierr);
+      hypre_assert(!ierr);
       delete [] rowLengs;
       nnz = 0;
       for (irow = 0; irow < AffNRows; irow++)
@@ -1270,16 +1233,16 @@ MLI_Matrix *MLI_Method_AMGCR::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
          newRowSize = 0;
          for (jcol = ADDiagI[irow]; jcol < ADDiagI[irow+1]; jcol++)
          {
-            newColInd[newRowSize] = ADDiagJ[jcol]; 
-            if (ADDiagJ[jcol] == irow) 
-               newColVal[newRowSize++] = 3.0 * (1.0 - ADDiagA[jcol]); 
+            newColInd[newRowSize] = ADDiagJ[jcol];
+            if (ADDiagJ[jcol] == irow)
+               newColVal[newRowSize++] = 3.0 * (1.0 - ADDiagA[jcol]);
             else
-               newColVal[newRowSize++] = - 3.0 * ADDiagA[jcol]; 
+               newColVal[newRowSize++] = - 3.0 * ADDiagA[jcol];
          }
          for (jcol = AD2DiagI[irow]; jcol < AD2DiagI[irow+1]; jcol++)
          {
-            newColInd[newRowSize] = AD2DiagJ[jcol]; 
-            newColVal[newRowSize++] = AD2DiagA[jcol]; 
+            newColInd[newRowSize] = AD2DiagJ[jcol];
+            newColVal[newRowSize++] = AD2DiagA[jcol];
          }
          hypre_qsort1(newColInd, newColVal, 0, newRowSize-1);
          ncount = 0;
@@ -1292,26 +1255,26 @@ MLI_Matrix *MLI_Method_AMGCR::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
                ncount++;
                newColVal[ncount] = newColVal[jcol];
                newColInd[ncount] = newColInd[jcol];
-            } 
+            }
          }
          newRowSize = ncount + 1;
          for ( jcol = 0; jcol < newRowSize; jcol++ )
             newColVal[jcol] = - (DDiagA[irow] * newColVal[jcol]);
-     
+
          ierr = HYPRE_IJMatrixSetValues(IJP, 1, &newRowSize,
                    (const int *) &rowIndex, (const int *) newColInd,
                    (const double *) newColVal);
          nnz += newRowSize;
-         assert(!ierr);
+         hypre_assert(!ierr);
       }
       delete [] newColInd;
       delete [] newColVal;
       ierr = HYPRE_IJMatrixAssemble(IJP);
-      assert( !ierr );
+      hypre_assert( !ierr );
       HYPRE_IJMatrixGetObject(IJP, (void **) &hypreP);
       ierr += HYPRE_IJMatrixSetObjectType(IJP, -1);
       ierr += HYPRE_IJMatrixDestroy(IJP);
-      assert(!ierr);
+      hypre_assert(!ierr);
       hypre_ParCSRMatrixDestroy(hypreAD);
       hypre_ParCSRMatrixDestroy(hypreAD2);
    }
@@ -1336,10 +1299,6 @@ printf("finish parasails\n");
 
    hypreAfc = (hypre_ParCSRMatrix *) mli_Afcmat->getMatrix();
    hypreTmp = hypre_ParMatmul(hypreP, hypreAfc);
-   hypre_ParCSRMatrixOwnsRowStarts(hypreP) = 0;
-   hypre_ParCSRMatrixOwnsColStarts(hypreAfc) = 0;
-   hypre_ParCSRMatrixOwnsRowStarts(hypreTmp) = 1;
-   hypre_ParCSRMatrixOwnsColStarts(hypreTmp) = 1;
    hypre_ParCSRMatrixDestroy(hypreP);
    hypreP = hypreTmp;
    tPDiag   = hypre_ParCSRMatrixDiag(hypreP);
@@ -1351,23 +1310,23 @@ printf("finish parasails\n");
    ierr = HYPRE_IJMatrixCreate(comm,startRow,startRow+localNRows-1,
                         AccStartRow,AccStartRow+AccNRows-1,&IJP);
    ierr = HYPRE_IJMatrixSetObjectType(IJP, HYPRE_PARCSR);
-   assert(!ierr);
+   hypre_assert(!ierr);
    rowLengs = new int[localNRows];
    maxRowLeng = 0;
    ncount = 0;
    for (irow = 0; irow < localNRows; irow++)
    {
       if (indepSet[irow] == 1) rowLengs[irow] = 1;
-      else                     
+      else
       {
          rowLengs[irow] = tPDiagI[ncount+1] - tPDiagI[ncount];
          ncount++;
       }
-      if (rowLengs[irow] > maxRowLeng) maxRowLeng = rowLengs[irow]; 
+      if (rowLengs[irow] > maxRowLeng) maxRowLeng = rowLengs[irow];
    }
    ierr = HYPRE_IJMatrixSetRowSizes(IJP, rowLengs);
    ierr = HYPRE_IJMatrixInitialize(IJP);
-   assert(!ierr);
+   hypre_assert(!ierr);
    delete [] rowLengs;
    fCount = 0;
    cCount = 0;
@@ -1382,14 +1341,14 @@ printf("finish parasails\n");
          newColInd[0] = AccStartRow + cCount;
          newColVal[0] = 1.0;
          cCount++;
-      } 
+      }
       else
       {
          newRowSize = 0;
          for (jcol = tPDiagI[fCount]; jcol < tPDiagI[fCount+1]; jcol++)
          {
-            newColInd[newRowSize] = tPDiagJ[jcol] + AccStartRow; 
-            newColVal[newRowSize++] = tPDiagA[jcol]; 
+            newColInd[newRowSize] = tPDiagJ[jcol] + AccStartRow;
+            newColVal[newRowSize++] = tPDiagA[jcol];
          }
          fCount++;
       }
@@ -1402,7 +1361,7 @@ if (habs(newColVal[jcol]) > dtemp) dtemp = habs(newColVal[jcol]);
 dtemp *= 0.25;
 ncount = 0;
 for (jcol = 0; jcol < newRowSize; jcol++)
-if (habs(newColVal[jcol]) > dtemp) 
+if (habs(newColVal[jcol]) > dtemp)
 {
 newColInd[ncount] = newColInd[jcol];
 newColVal[ncount++] = newColVal[jcol];
@@ -1426,17 +1385,17 @@ newColVal[jcol] *= dtemp;
       ierr = HYPRE_IJMatrixSetValues(IJP, 1, &newRowSize,
                    (const int *) &rowIndex, (const int *) newColInd,
                    (const double *) newColVal);
-      assert(!ierr);
+      hypre_assert(!ierr);
    }
    delete [] newColInd;
    delete [] newColVal;
    ierr = HYPRE_IJMatrixAssemble(IJP);
-   assert( !ierr );
+   hypre_assert( !ierr );
    hypre_ParCSRMatrixDestroy(hypreP);
    HYPRE_IJMatrixGetObject(IJP, (void **) &hypreP);
    ierr += HYPRE_IJMatrixSetObjectType(IJP, -1);
    ierr += HYPRE_IJMatrixDestroy(IJP);
-   assert(!ierr);
+   hypre_assert(!ierr);
 
    /* ------------------------------------------------------ */
    /* package the P matrix                                   */
@@ -1454,7 +1413,7 @@ newColVal[jcol] *= dtemp;
  * create the restriction matrix
  * --------------------------------------------------------------------- */
 
-MLI_Matrix *MLI_Method_AMGCR::createRmat(int *indepSet, MLI_Matrix *mli_Amat, 
+MLI_Matrix *MLI_Method_AMGCR::createRmat(int *indepSet, MLI_Matrix *mli_Amat,
                                          MLI_Matrix *mli_Affmat)
 {
    int      startRow, localNRows, AffStartRow, AffNRows, RStartRow;
@@ -1490,12 +1449,12 @@ MLI_Matrix *MLI_Method_AMGCR::createRmat(int *indepSet, MLI_Matrix *mli_Amat,
    ierr = HYPRE_IJMatrixCreate(comm,RStartRow,RStartRow+RNRows-1,
                            startRow,startRow+localNRows-1,&IJR);
    ierr = HYPRE_IJMatrixSetObjectType(IJR, HYPRE_PARCSR);
-   assert(!ierr);
+   hypre_assert(!ierr);
    rowLengs = new int[RNRows];
    for (irow = 0; irow < RNRows; irow++) rowLengs[irow] = 1;
    ierr = HYPRE_IJMatrixSetRowSizes(IJR, rowLengs);
    ierr = HYPRE_IJMatrixInitialize(IJR);
-   assert(!ierr);
+   hypre_assert(!ierr);
    delete [] rowLengs;
 
    /* ------------------------------------------------------ */
@@ -1506,7 +1465,7 @@ MLI_Matrix *MLI_Method_AMGCR::createRmat(int *indepSet, MLI_Matrix *mli_Amat,
    colValue = 1.0;
    for (irow = 0; irow < localNRows; irow++)
    {
-      if (indepSet[irow] == 1) 
+      if (indepSet[irow] == 1)
       {
          rowIndex = RStartRow + rowCount;
          colIndex = startRow + irow;
@@ -1521,11 +1480,11 @@ MLI_Matrix *MLI_Method_AMGCR::createRmat(int *indepSet, MLI_Matrix *mli_Amat,
    /* ------------------------------------------------------ */
 
    ierr = HYPRE_IJMatrixAssemble(IJR);
-   assert(!ierr);
+   hypre_assert(!ierr);
    HYPRE_IJMatrixGetObject(IJR, (void **) &hypreR);
    ierr += HYPRE_IJMatrixSetObjectType(IJR, -1);
    ierr += HYPRE_IJMatrixDestroy(IJR);
-   assert( !ierr );
+   hypre_assert( !ierr );
    sprintf(paramString, "HYPRE_ParCSR");
    funcPtr = new MLI_Function();
    MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
@@ -1556,11 +1515,11 @@ int MLI_Method_AMGCR::print()
       printf("\t*** number of trial vectors = %d\n", numVectors_);
       printf("\t*** polynomial degree       = %d\n", PDegree_);
       printf("\t*** minimum coarse size     = %d\n", minCoarseSize_);
-      printf("\t*** smoother type           = %s\n", smoother_); 
+      printf("\t*** smoother type           = %s\n", smoother_);
       printf("\t*** smoother nsweeps        = %d\n", smootherNum_);
       printf("\t*** smoother weight         = %e\n", smootherWgts_[0]);
-      printf("\t*** coarse solver type      = %s\n", coarseSolver_); 
-      printf("\t*** coarse solver nsweeps   = %d\n", coarseSolverNum_);  
+      printf("\t*** coarse solver type      = %s\n", coarseSolver_);
+      printf("\t*** coarse solver nsweeps   = %d\n", coarseSolverNum_);
       printf("\t********************************************************\n");
    }
    return 0;
@@ -1679,4 +1638,3 @@ int MLI_Method_AMGCR::printStatistics(MLI *mli)
    }
    return 0;
 }
-

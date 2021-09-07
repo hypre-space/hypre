@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
 #include "ssamg.h"
@@ -30,6 +25,7 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
    HYPRE_Int               num_pre_relax = hypre_SSAMGDataNumPreRelax(ssamg_data);
    HYPRE_Int               num_pos_relax = hypre_SSAMGDataNumPosRelax(ssamg_data);
    HYPRE_Int               num_crelax    = hypre_SSAMGDataNumCoarseRelax(ssamg_data);
+   HYPRE_Int               csolver_type  = hypre_SSAMGDataCSolverType(ssamg_data);
    HYPRE_Int               nparts        = hypre_SSAMGDataNParts(ssamg_data);
    HYPRE_Int             **cdir_l        = hypre_SSAMGDataCdir(ssamg_data);
    HYPRE_Int             **active_l      = hypre_SSAMGDataActivel(ssamg_data);
@@ -63,7 +59,6 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
    HYPRE_Real             *global_avg_entries;
    HYPRE_Complex          *global_min_rowsum;
    HYPRE_Complex          *global_max_rowsum;
-   HYPRE_Int              *global_num_parts;
    HYPRE_Int              *global_num_boxes;
    HYPRE_Int              *global_num_dofs;
    HYPRE_Int              *global_num_ghrows;
@@ -111,21 +106,20 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
    /* Allocate memory */
    if (myid == 0)
    {
-      global_num_rows     = hypre_CTAlloc(HYPRE_Int, num_levels);
-      global_num_rownnz   = hypre_CTAlloc(HYPRE_Int, num_levels);
-      global_num_nonzeros = hypre_CTAlloc(HYPRE_Int, num_levels);
-      global_min_entries  = hypre_CTAlloc(HYPRE_Int, num_levels);
-      global_max_entries  = hypre_CTAlloc(HYPRE_Int, num_levels);
-      global_avg_entries  = hypre_CTAlloc(HYPRE_Real, num_levels);
-      global_min_rowsum   = hypre_CTAlloc(HYPRE_Complex, num_levels);
-      global_max_rowsum   = hypre_CTAlloc(HYPRE_Complex, num_levels);
-      global_num_parts    = hypre_CTAlloc(HYPRE_Int, num_levels);
-      global_num_boxes    = hypre_CTAlloc(HYPRE_Int, num_levels);
-      global_num_dofs     = hypre_CTAlloc(HYPRE_Int, num_levels);
-      global_num_ghrows   = hypre_CTAlloc(HYPRE_Int, num_levels);
-      global_min_stsize   = hypre_CTAlloc(HYPRE_Int, num_levels);
-      global_max_stsize   = hypre_CTAlloc(HYPRE_Int, num_levels);
-      global_avg_stsize   = hypre_CTAlloc(HYPRE_Real, num_levels);
+      global_num_rows     = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+      global_num_rownnz   = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+      global_num_nonzeros = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+      global_min_entries  = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+      global_max_entries  = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+      global_avg_entries  = hypre_CTAlloc(HYPRE_Real, num_levels, HYPRE_MEMORY_HOST);
+      global_min_rowsum   = hypre_CTAlloc(HYPRE_Complex, num_levels, HYPRE_MEMORY_HOST);
+      global_max_rowsum   = hypre_CTAlloc(HYPRE_Complex, num_levels, HYPRE_MEMORY_HOST);
+      global_num_boxes    = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+      global_num_dofs     = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+      global_num_ghrows   = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+      global_min_stsize   = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+      global_max_stsize   = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+      global_avg_stsize   = hypre_CTAlloc(HYPRE_Real, num_levels, HYPRE_MEMORY_HOST);
    }
 
    /* Gather UMatrix info */
@@ -214,7 +208,7 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
          global_max_rowsum[l]  =   recv_buffer[3];
       }
 
-      hypre_TFree(rownnz);
+      hypre_TFree(rownnz, HYPRE_MEMORY_HOST);
    }
 
    /* Gather SMatrix info */
@@ -265,21 +259,19 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
          }
       }
 
-      send_buffer[0] = (HYPRE_Real) num_parts;
-      send_buffer[1] = (HYPRE_Real) num_boxes;
-      send_buffer[2] = (HYPRE_Real) num_dofs;
-      send_buffer[3] = (HYPRE_Real) num_ghrows;
-      send_buffer[4] = (HYPRE_Real) avg_stsize;
+      send_buffer[0] = (HYPRE_Real) num_boxes;
+      send_buffer[1] = (HYPRE_Real) num_dofs;
+      send_buffer[2] = (HYPRE_Real) num_ghrows;
+      send_buffer[3] = (HYPRE_Real) avg_stsize;
 
-      hypre_MPI_Reduce(send_buffer, recv_buffer, 5, HYPRE_MPI_REAL, hypre_MPI_SUM, 0, comm);
+      hypre_MPI_Reduce(send_buffer, recv_buffer, 4, HYPRE_MPI_REAL, hypre_MPI_SUM, 0, comm);
 
       if (myid == 0)
       {
-         global_num_parts[l]  = (HYPRE_Int) recv_buffer[0];
-         global_num_boxes[l]  = (HYPRE_Int) recv_buffer[1];
-         global_num_dofs[l]   = (HYPRE_Int) recv_buffer[2];
-         global_num_ghrows[l] = (HYPRE_Int) recv_buffer[3];
-         global_avg_stsize[l] = recv_buffer[4] / global_num_dofs[l];
+         global_num_boxes[l]  = (HYPRE_Int) recv_buffer[0];
+         global_num_dofs[l]   = (HYPRE_Int) recv_buffer[1];
+         global_num_ghrows[l] = (HYPRE_Int) recv_buffer[2];
+         global_avg_stsize[l] = recv_buffer[3] / global_num_dofs[l];
       }
 
       send_buffer[0] = - (HYPRE_Real) min_stsize;
@@ -299,7 +291,7 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
    {
       hypre_printf("\nSSAMG Setup Parameters:\n\n");
 
-      if (print_level > -1)
+      if (print_level > 0)
       {
          /* Print coarsening direction */
          hypre_printf("Coarsening direction:\n\n");
@@ -360,8 +352,8 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
             }
          }
 
-         /* Print relaxation weights */
-         if (relax_type > 0)
+         /* Print relaxation weights for each part*/
+         if ((relax_type == 0) || (relax_type == 1))
          {
             hypre_printf("Relaxation weights:\n\n");
             chunk_size = hypre_min(nparts, nparts_per_line);
@@ -395,7 +387,8 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       /* Print SMatrix info */
       for (l = 0; l < num_levels; l++)
       {
-         ndigits_S[0] = hypre_max(hypre_ndigits(global_num_parts[l]) + offset, ndigits_S[0]);
+         nparts = hypre_SStructMatrixNParts(A_l[l]);
+         ndigits_S[0] = hypre_max(hypre_ndigits(nparts) + offset, ndigits_S[0]);
          ndigits_S[1] = hypre_max(hypre_ndigits(global_num_boxes[l]) + offset, ndigits_S[1]);
          ndigits_S[2] = hypre_max(hypre_ndigits(global_num_dofs[l]) + offset, ndigits_S[2]);
          ndigits_S[3] = hypre_max(hypre_ndigits(global_min_stsize[l]) + offset, ndigits_S[3]);
@@ -437,8 +430,9 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       /* Print info */
       for (l = 0; l < num_levels; l++)
       {
+         nparts = hypre_SStructMatrixNParts(A_l[l]);
          hypre_printf("%3d", l);
-         hypre_printf("%*d", ndigits_S[0], global_num_parts[l]);
+         hypre_printf("%*d", ndigits_S[0], nparts);
          hypre_printf("%*d", ndigits_S[1], global_num_boxes[l]);
          hypre_printf("%*d", ndigits_S[2], global_num_dofs[l]);
          hypre_printf("%*d", ndigits_S[3], global_min_stsize[l]);
@@ -519,6 +513,7 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       {
          hypre_printf("RAP type: galerkin\n");
       }
+
       hypre_printf("Relaxation skip: ");
       if (skip_relax)
       {
@@ -528,6 +523,7 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       {
          hypre_printf("none\n");
       }
+
       hypre_printf("Relaxation type: ");
       if (relax_type == 0)
       {
@@ -539,33 +535,65 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       }
       else if (relax_type == 2)
       {
+         hypre_printf("L1-Jacobi\n");
+      }
+      else if (relax_type == 10)
+      {
          hypre_printf("Red-Black Gauss-Seidel\n");
       }
+      else
+      {
+         hypre_printf("Unknown\n");
+      }
+
+      hypre_printf("Coarse solver type: ");
+      if (csolver_type == 0)
+      {
+         hypre_printf("Weighted Jacobi\n");
+      }
+      else if (csolver_type == 1)
+      {
+         hypre_printf("BoomerAMG\n");
+      }
+      else
+      {
+         hypre_printf("Unknown\n");
+      }
+
       hypre_printf("Number of pre-sweeps: %d\n", num_pre_relax);
       hypre_printf("Number of pos-sweeps: %d\n", num_pos_relax);
       hypre_printf("Number of coarse-sweeps: %d\n", num_crelax);
       hypre_printf("Number of levels: %d\n", num_levels);
+   }
 
+   /* Print coarse solver data */
+   if ((csolver_type == 1) && (print_level > 0))
+   {
+      hypre_BoomerAMGSetupStats((void*) (ssamg_data -> csolver),
+                                hypre_SStructMatrixParCSRMatrix(A_l[0]));
+   }
+
+   if ((myid == 0) && (print_level > 0))
+   {
       hypre_printf("\n\n");
    }
 
    if (myid == 0)
    {
-      hypre_TFree(global_num_rows);
-      hypre_TFree(global_num_rownnz);
-      hypre_TFree(global_num_nonzeros);
-      hypre_TFree(global_min_entries);
-      hypre_TFree(global_max_entries);
-      hypre_TFree(global_avg_entries);
-      hypre_TFree(global_min_rowsum);
-      hypre_TFree(global_max_rowsum);
-      hypre_TFree(global_num_parts);
-      hypre_TFree(global_num_boxes);
-      hypre_TFree(global_num_dofs);
-      hypre_TFree(global_num_ghrows);
-      hypre_TFree(global_min_stsize);
-      hypre_TFree(global_max_stsize);
-      hypre_TFree(global_avg_stsize);
+      hypre_TFree(global_num_rows, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_num_rownnz, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_num_nonzeros, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_min_entries, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_max_entries, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_avg_entries, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_min_rowsum, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_max_rowsum, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_num_boxes, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_num_dofs, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_num_ghrows, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_min_stsize, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_max_stsize, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_avg_stsize, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;

@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /******************************************************************************
  *
@@ -38,25 +33,35 @@
 
 #include "_hypre_utilities.h"
 
-/*--------------------------------------------------------------------------
- * Static variables
- *--------------------------------------------------------------------------*/
-
 static HYPRE_Int Seed = 13579;
 
-#define a  16807
-#define m  2147483647
-#define q  127773
-#define r  2836
+/*-------------------------------------------------------------------------------
+ * Static global variable: Seed
+ * ``... all initial seeds between 1 and 2147483646 (2^31-2) are equally valid''
+ *-------------------------------------------------------------------------------*/
+
+#define a  16807      /* 7^5 */
+#define m  2147483647 /* 2*31 - 1 */
+#define q  127773     /* m div a */
+#define r  2836       /* m mod a */
 
 /*--------------------------------------------------------------------------
  * Initializes the pseudo-random number generator to a place in the sequence.
  *
  * @param seed an HYPRE_Int containing the seed for the RNG.
  *--------------------------------------------------------------------------*/
-
-void  hypre_SeedRand( HYPRE_Int seed )
+void hypre_SeedRand( HYPRE_Int seed )
 {
+   /* RL: seed must be between 1 and 2^31-2 */
+   if (seed < 1) 
+   {
+      seed = 1;
+   }
+   else if (seed >= m)
+   {
+     seed = m - 1;
+   }
+
    Seed = seed;
 }
 
@@ -64,14 +69,11 @@ void  hypre_SeedRand( HYPRE_Int seed )
  * Computes the next pseudo-random number in the sequence using the global
  * variable Seed.
  *
- * @return a HYPRE_Real containing the next number in the sequence divided by
- * 2147483647 so that the numbers are in (0, 1].
+ * @return a HYPRE_Int between (0, 2147483647]
  *--------------------------------------------------------------------------*/
-
-HYPRE_Real  hypre_Rand()
+HYPRE_Int hypre_RandI()
 {
    HYPRE_Int  low, high, test;
-
    high = Seed / q;
    low = Seed % q;
    test = a * low - r * high;
@@ -84,5 +86,18 @@ HYPRE_Real  hypre_Rand()
       Seed = test + m;
    }
 
-   return ((HYPRE_Real)(Seed) / m);
+   return Seed;
 }
+
+/*--------------------------------------------------------------------------
+ * Computes the next pseudo-random number in the sequence using the global
+ * variable Seed.
+ *
+ * @return a HYPRE_Real containing the next number in the sequence divided by
+ * 2147483647 so that the numbers are in (0, 1].
+ *--------------------------------------------------------------------------*/
+HYPRE_Real hypre_Rand()
+{
+  return ((HYPRE_Real)(hypre_RandI()) / m);
+}
+

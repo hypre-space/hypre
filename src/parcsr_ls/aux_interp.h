@@ -1,14 +1,9 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,9 +22,9 @@ HYPRE_Int alt_insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg,
                           HYPRE_Int full_off_procNodes,
                           HYPRE_Int *OUT_marker);
 
-HYPRE_Int hypre_ssort(HYPRE_Int *data, HYPRE_Int n);
-HYPRE_Int index_of_minimum(HYPRE_Int *data, HYPRE_Int n);
-void swap_int(HYPRE_Int *data, HYPRE_Int a, HYPRE_Int b);
+HYPRE_Int hypre_ssort(HYPRE_BigInt *data, HYPRE_Int n);
+HYPRE_Int index_of_minimum(HYPRE_BigInt *data, HYPRE_Int n);
+void swap_int(HYPRE_BigInt *data, HYPRE_Int a, HYPRE_Int b);
 void initialize_vecs(HYPRE_Int diag_n, HYPRE_Int offd_n, HYPRE_Int *diag_ftc, HYPRE_Int *offd_ftc, 
 		     HYPRE_Int *diag_pm, HYPRE_Int *offd_pm, HYPRE_Int *tmp_CF);
 
