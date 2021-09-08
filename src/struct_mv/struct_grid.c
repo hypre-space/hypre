@@ -249,9 +249,6 @@ hypre_StructGridComputeGlobalSize( hypre_StructGrid *grid )
  *
  *   Notes:
  *   1. No longer need a different assemble for the assumed partition case
- *   2. if this is called from StructCoarsen, then the Box Manager has already
- *   been created, and ids have been set
- *
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

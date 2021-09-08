@@ -382,7 +382,7 @@ hypre_StructMatmultSetup( hypre_StructMMData  *mmdata,
    if (coarsen)
    {
       /* Note: Mgrid may have fewer boxes than grid as a result of coarsening */
-      HYPRE_StructGridCoarsen(grid, coarsen_stride, &Mgrid);
+      hypre_StructCoarsen(grid, NULL, coarsen_stride, 1, &Mgrid);
       hypre_MapToCoarseIndex(Mran_stride, NULL, coarsen_stride, ndim);
       hypre_MapToCoarseIndex(Mdom_stride, NULL, coarsen_stride, ndim);
    }
@@ -873,9 +873,10 @@ hypre_StructMatmultCommunicate( hypre_StructMMData  *mmdata,
    hypre_CommHandle   *comm_handle;
    HYPRE_Int           i, j, nb;
 
-   /* Update global size of the grid. This requires a call to MPI_Allreduce */
+   /* Assemble the grid. Note: StructGridGlobalSize is updated to zero so that
+    * its computation is triggered in hypre_StructGridAssemble */
    hypre_StructGridGlobalSize(grid) = 0;
-   hypre_StructGridComputeGlobalSize(grid);
+   hypre_StructGridAssemble(grid);
 
    /* If all constant coefficients, return */
    if (mmdata -> na == 0)

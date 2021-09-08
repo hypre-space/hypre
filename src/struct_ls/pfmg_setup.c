@@ -227,6 +227,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          hypre_PFMGSetCIndex(cdir, cindex);
          hypre_PFMGSetStride(cdir, stride);
          hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
+         hypre_StructGridAssemble(grid_l[l+1]);
 
          A_l[l+1] = hypre_PFMGCreateRAPOp(RT_l[l], A_l[l], P_l[l], grid_l[l+1], cdir, rap_type);
          hypre_StructMatrixInitialize(A_l[l+1]);

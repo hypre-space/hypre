@@ -187,7 +187,6 @@ hypre_SStructPGridSetSGrid( hypre_StructGrid    *sgrid,
                             hypre_SStructPGrid  *pgrid,
                             HYPRE_Int            var )
 {
-   HYPRE_SStructVariable  *vartypes;
    hypre_StructGrid       *sgrid_old;
 
    /* Destroy old sgrid */
@@ -196,13 +195,6 @@ hypre_SStructPGridSetSGrid( hypre_StructGrid    *sgrid,
 
    /* Point to new sgrid */
    hypre_StructGridRef(sgrid, &hypre_SStructPGridSGrid(pgrid, var));
-
-   /* Update sgrid_done flag if necessary */
-   vartypes = hypre_SStructPGridVarTypes(pgrid);
-   if (vartypes[var] == HYPRE_SSTRUCT_VARIABLE_CELL)
-   {
-      hypre_SStructPGridCellSGridDone(pgrid) = 1;
-   }
 
    return hypre_error_flag;
 }
@@ -2649,17 +2641,6 @@ hypre_SStructGridCoarsen( hypre_SStructGrid   *fgrid,
 
          hypre_StructCoarsen(sfgrid, origin, strides[part], 1, &scgrid);
          hypre_SStructPGridSGrid(pcgrid, var) = scgrid;
-
-         /* Set global size to a number different than zero to
-            avoid its computation on StructGridComputeGlobalSize.
-            Global sizes will be computed at HYPRE_SStructGridAssemble */
-         hypre_StructGridGlobalSize(scgrid) = -1;
-
-         /* Check if cell grid type was computed */
-         if (vartypes[var] == HYPRE_SSTRUCT_VARIABLE_CELL)
-         {
-            hypre_SStructPGridCellSGridDone(pcgrid) = 1;
-         }
 
          /* coarsen part boundary box array */
          if (hypre_StructGridNumBoxes(scgrid))

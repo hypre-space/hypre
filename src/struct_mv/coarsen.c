@@ -408,6 +408,10 @@ hypre_CoarsenBoxArrayArrayNeg( hypre_BoxArrayArray   *boxaa,
  *
  *  4. We do not need a separate version for the assumed partition case
  *
+ *  5. The coarse grid is returned in unassembled format to provide more
+ *  control on MPI collective calls from the semi-struct interface. Thus,
+ *  a grid created with this function must be assembled later.
+ *
  * If 'origin' is NULL, a zero origin is used.
  *--------------------------------------------------------------------------*/
 
@@ -559,19 +563,21 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
       hypre_IndexD(new_dist, i) = hypre_IndexD(max_distance,i)/coarsen_factor;
    }
 
-   hypre_BoxManGetAllGlobalKnown (fboxman, &known );
+   hypre_BoxManGetAllGlobalKnown(fboxman, &known);
 
-   /* large enough - don't need to re-gather */
-   if ( (hypre_IndexMin(new_dist, ndim) > 1) || known )
+   if ((hypre_IndexMin(new_dist, ndim) > 1) || known)
    {
-      /* update new max distance value */
-      if (!known) /* only need to change if global info is not known */
+      /* large enough - don't need to re-gather */
+      if (!known)
+      {
+         /* update new max distance value if global info is not known */
          hypre_StructGridSetMaxDistance(cgrid, new_dist);
+      }
    }
-   /* not large enough - set max_distance to 0 - neighbor info will be collected
-      during the assemble */
    else
    {
+      /* not large enough - set max_distance to 0 -
+         neighbor info will be collected during the assemble */
       hypre_SetIndex(new_dist, 0);
       hypre_StructGridSetMaxDistance(cgrid, new_dist);
    }
@@ -595,7 +601,6 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 
    /* now get the entries from the fgrid box manager, coarsen, and add to the
       coarse grid box manager (note: my boxes have already been coarsened) */
-
    hypre_BoxManGetAllEntries(fboxman, &num_entries, &entries);
 
    new_box = hypre_BoxCreate(ndim);
@@ -683,9 +688,6 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 
    /* assign new box manager */
    hypre_StructGridSetBoxManager(cgrid, cboxman);
-
-   /* finally... assemble the new coarse grid */
-   hypre_StructGridAssemble(cgrid);
 
    /* return the coarse grid */
    *cgrid_ptr = cgrid;
