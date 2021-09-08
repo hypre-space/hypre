@@ -15,42 +15,42 @@
 #define hypre_SSTRUCT_MATMULT_HEADER
 
 /*--------------------------------------------------------------------------
- * SStructPMatrixMult data structure
+ * SStructPMatmult data structure
  *--------------------------------------------------------------------------*/
 
-typedef struct hypre_SStructPMatrixMultData_struct
+typedef struct hypre_SStructPMatmultData_struct
 {
-   hypre_StructMMData    ***smmdata;   /* pointer to (nvars x nvars) array */
-   HYPRE_Int                nvars;
+   hypre_StructMatmultData  ***smmdata;   /* pointer to (nvars x nvars) array */
+   HYPRE_Int                   nvars;
 
-   HYPRE_Int                nmatrices;
-   hypre_SStructPMatrix   **pmatrices;  /* matrices we are multiplying */
-   HYPRE_Int                nterms;
-   HYPRE_Int               *terms;
-   HYPRE_Int               *transposes;
-} hypre_SStructPMMData;
+   HYPRE_Int                   nmatrices;
+   hypre_SStructPMatrix      **pmatrices;  /* matrices we are multiplying */
+   HYPRE_Int                   nterms;
+   HYPRE_Int                  *terms;
+   HYPRE_Int                  *transposes;
+} hypre_SStructPMatmultData;
 
 /*--------------------------------------------------------------------------
- * SStructMatrixMult data structure
+ * SStructMatmult data structure
  *--------------------------------------------------------------------------*/
 
-typedef struct hypre_SStructMatrixMultData_struct
+typedef struct hypre_SStructMatmultData_struct
 {
-   hypre_SStructPMMData   **pmmdata;   /* pointer to nparts array */
-   HYPRE_Int                nparts;
+   hypre_SStructPMatmultData  **pmmdata;   /* pointer to nparts array */
+   HYPRE_Int                    nparts;
 
-   HYPRE_Int                nmatrices;
-   hypre_SStructMatrix    **matrices;  /* matrices we are multiplying */
-   HYPRE_Int                nterms;
-   HYPRE_Int               *terms;
-   HYPRE_Int               *transposes;
+   HYPRE_Int                    nmatrices;
+   hypre_SStructMatrix        **matrices;  /* matrices we are multiplying */
+   HYPRE_Int                    nterms;
+   HYPRE_Int                   *terms;
+   HYPRE_Int                   *transposes;
 
-   hypre_CommPkg           *comm_pkg;        /* pointer to agglomerated communication package */
-   hypre_CommPkg          **comm_pkg_a;      /* pointer to communication packages */
-   HYPRE_Complex          **comm_data;       /* pointer to agglomerated communication data */
-   HYPRE_Complex         ***comm_data_a;     /* pointer to communication data */
-   HYPRE_Int                num_comm_pkgs;   /* number of communication packages to agglomerate */
-   HYPRE_Int                num_comm_blocks; /* total number of communication blocks */
-} hypre_SStructMMData;
+   hypre_CommPkg               *comm_pkg;        /* pointer to agglomerated communication package */
+   hypre_CommPkg              **comm_pkg_a;      /* pointer to communication packages */
+   HYPRE_Complex              **comm_data;       /* pointer to agglomerated communication data */
+   HYPRE_Complex             ***comm_data_a;     /* pointer to communication data */
+   HYPRE_Int                    num_comm_pkgs;   /* number of comm. packages to agglomerate */
+   HYPRE_Int                    num_comm_blocks; /* total number of communication blocks */
+} hypre_SStructMatmultData;
 
 #endif

@@ -1053,3 +1053,4 @@ HYPRE_Int hypre_SStructVectorPrintGLVis ( hypre_SStructVector *vector, const cha
 #endif
 
 #endif
+

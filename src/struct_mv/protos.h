@@ -247,11 +247,11 @@ HYPRE_Int hypre_ReadBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypr
 HYPRE_Int hypre_ReadBoxArrayData_CC ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int stencil_size , HYPRE_Int real_stencil_size , HYPRE_Int constant_coefficient , HYPRE_Int dim , HYPRE_Complex *data );
 
 /* struct_matmult.c */
-HYPRE_Int hypre_StructMatmultCreate ( HYPRE_Int nmatrices_in , hypre_StructMatrix **matrices_in , HYPRE_Int nterms , HYPRE_Int *terms_in , HYPRE_Int *transposes_in , hypre_StructMMData **mmdata_ptr );
-HYPRE_Int hypre_StructMatmultDestroy ( hypre_StructMMData *mmdata );
-HYPRE_Int hypre_StructMatmultSetup ( hypre_StructMMData  *mmdata , hypre_StructMatrix **M_ptr );
-HYPRE_Int hypre_StructMatmultCommunicate ( hypre_StructMMData *mmdata , hypre_StructMatrix *M );
-HYPRE_Int hypre_StructMatmultCompute ( hypre_StructMMData *mmdata , hypre_StructMatrix *M );
+HYPRE_Int hypre_StructMatmultCreate ( HYPRE_Int nmatrices_in , hypre_StructMatrix **matrices_in , HYPRE_Int nterms , HYPRE_Int *terms_in , HYPRE_Int *transposes_in , hypre_StructMatmultData **mmdata_ptr );
+HYPRE_Int hypre_StructMatmultDestroy ( hypre_StructMatmultData *mmdata );
+HYPRE_Int hypre_StructMatmultSetup ( hypre_StructMatmultData  *mmdata , hypre_StructMatrix **M_ptr );
+HYPRE_Int hypre_StructMatmultCommunicate ( hypre_StructMatmultData *mmdata , hypre_StructMatrix *M );
+HYPRE_Int hypre_StructMatmultCompute ( hypre_StructMatmultData *mmdata , hypre_StructMatrix *M );
 HYPRE_Int hypre_StructMatmult ( HYPRE_Int nmatrices , hypre_StructMatrix **matrices , HYPRE_Int nterms , HYPRE_Int *terms , HYPRE_Int *trans , hypre_StructMatrix **M_ptr );
 HYPRE_Int hypre_StructMatmat ( hypre_StructMatrix *A , hypre_StructMatrix *B , hypre_StructMatrix **M_ptr );
 HYPRE_Int hypre_StructMatrixPtAP ( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix **M_ptr );

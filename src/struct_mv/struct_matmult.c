@@ -25,28 +25,28 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatmultCreate( HYPRE_Int             nmatrices_in,
-                           hypre_StructMatrix  **matrices_in,
-                           HYPRE_Int             nterms,
-                           HYPRE_Int            *terms_in,
-                           HYPRE_Int            *transposes_in,
-                           hypre_StructMMData  **mmdata_ptr )
+hypre_StructMatmultCreate( HYPRE_Int                  nmatrices_in,
+                           hypre_StructMatrix       **matrices_in,
+                           HYPRE_Int                  nterms,
+                           HYPRE_Int                 *terms_in,
+                           HYPRE_Int                 *transposes_in,
+                           hypre_StructMatmultData  **mmdata_ptr )
 {
-   hypre_StructMMData   *mmdata;
+   hypre_StructMatmultData   *mmdata;
 
-   hypre_StructMatrix  **matrices;
-   HYPRE_Int            *terms;
-   HYPRE_Int            *transposes;
-   HYPRE_Int            *mtypes;
+   hypre_StructMatrix       **matrices;
+   HYPRE_Int                 *terms;
+   HYPRE_Int                 *transposes;
+   HYPRE_Int                 *mtypes;
 
-   hypre_CommPkg       **comm_pkg_a;
-   HYPRE_Complex      ***comm_data_a;
+   hypre_CommPkg            **comm_pkg_a;
+   HYPRE_Complex           ***comm_data_a;
 
-   HYPRE_Int             nmatrices, *matmap;
-   HYPRE_Int             m, t;
+   HYPRE_Int                  nmatrices, *matmap;
+   HYPRE_Int                  m, t;
 
    /* Allocate data structure */
-   mmdata = hypre_CTAlloc(hypre_StructMMData, 1, HYPRE_MEMORY_HOST);
+   mmdata = hypre_CTAlloc(hypre_StructMatmultData, 1, HYPRE_MEMORY_HOST);
 
    /* Create new matrices and terms arrays from the input arguments, because we
     * only want to consider those matrices actually involved in the multiply */
@@ -119,7 +119,7 @@ hypre_StructMatmultCreate( HYPRE_Int             nmatrices_in,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatmultDestroy( hypre_StructMMData *mmdata )
+hypre_StructMatmultDestroy( hypre_StructMatmultData *mmdata )
 {
    if (mmdata)
    {
@@ -227,76 +227,76 @@ hypre_StructMatmultDestroy( hypre_StructMMData *mmdata )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatmultSetup( hypre_StructMMData  *mmdata,
-                          hypre_StructMatrix **M_ptr )
+hypre_StructMatmultSetup( hypre_StructMatmultData  *mmdata,
+                          hypre_StructMatrix      **M_ptr )
 {
-   HYPRE_Int                nterms       = (mmdata -> nterms);
-   HYPRE_Int               *terms        = (mmdata -> terms);
-   HYPRE_Int               *transposes   = (mmdata -> transposes);
-   HYPRE_Int                nmatrices    = (mmdata -> nmatrices);
-   HYPRE_Int               *mtypes       = (mmdata -> mtypes);
-   hypre_StructMatrix     **matrices     = (mmdata -> matrices);
-   hypre_CommPkg          **comm_pkg_a   = (mmdata -> comm_pkg_a);
-   HYPRE_Complex         ***comm_data_a  = (mmdata -> comm_data_a);
+   HYPRE_Int                  nterms       = (mmdata -> nterms);
+   HYPRE_Int                 *terms        = (mmdata -> terms);
+   HYPRE_Int                 *transposes   = (mmdata -> transposes);
+   HYPRE_Int                  nmatrices    = (mmdata -> nmatrices);
+   HYPRE_Int                 *mtypes       = (mmdata -> mtypes);
+   hypre_StructMatrix       **matrices     = (mmdata -> matrices);
+   hypre_CommPkg            **comm_pkg_a   = (mmdata -> comm_pkg_a);
+   HYPRE_Complex           ***comm_data_a  = (mmdata -> comm_data_a);
 
-   hypre_StructMatrix      *M;            /* matrix product we are computing */
-   hypre_StructStencil     *Mstencil;
-   hypre_StructGrid        *Mgrid;
-   hypre_Index              Mran_stride, Mdom_stride;
+   hypre_StructMatrix        *M;            /* matrix product we are computing */
+   hypre_StructStencil       *Mstencil;
+   hypre_StructGrid          *Mgrid;
+   hypre_Index                Mran_stride, Mdom_stride;
 
-   MPI_Comm                 comm;
-   HYPRE_Int                ndim, size;
+   MPI_Comm                   comm;
+   HYPRE_Int                  ndim, size;
 
-   hypre_StructMatrix      *matrix;
-   hypre_StructStencil     *stencil;
-   hypre_StructGrid        *grid;
-   hypre_IndexRef           stride;
-   HYPRE_Int                nboxes;
-   HYPRE_Int               *boxnums;
-   hypre_Box               *box;
+   hypre_StructMatrix        *matrix;
+   hypre_StructStencil       *stencil;
+   hypre_StructGrid          *grid;
+   hypre_IndexRef             stride;
+   HYPRE_Int                  nboxes;
+   HYPRE_Int                 *boxnums;
+   hypre_Box                 *box;
 
-   hypre_StMatrix         **st_matrices, *st_matrix, *st_M;
-   hypre_StCoeff           *st_coeff;
-   hypre_StTerm            *st_term;
+   hypre_StMatrix           **st_matrices, *st_matrix, *st_M;
+   hypre_StCoeff             *st_coeff;
+   hypre_StTerm              *st_term;
 
-   hypre_StructMMHelper    *a;
-   HYPRE_Int                na;              /* number of product terms in 'a' */
-   HYPRE_Int                nconst;          /* number of constant entries in M */
-   HYPRE_Int                const_entry;     /* boolean for constant entry in M */
-   HYPRE_Int               *const_entries;   /* constant entries in M */
-   HYPRE_Complex           *const_values;    /* values for constant entries in M */
+   hypre_StructMatmultHelper *a;
+   HYPRE_Int                  na;              /* number of product terms in 'a' */
+   HYPRE_Int                  nconst;          /* number of constant entries in M */
+   HYPRE_Int                  const_entry;     /* boolean for constant entry in M */
+   HYPRE_Int                 *const_entries;   /* constant entries in M */
+   HYPRE_Complex             *const_values;    /* values for constant entries in M */
 
-   hypre_CommInfo          *comm_info;
-   hypre_CommStencil      **comm_stencils;
-   HYPRE_Int                num_comm_blocks;
-   HYPRE_Int                num_comm_pkgs;
+   hypre_CommInfo            *comm_info;
+   hypre_CommStencil        **comm_stencils;
+   HYPRE_Int                  num_comm_blocks;
+   HYPRE_Int                  num_comm_pkgs;
 
-   hypre_StructVector      *mask;
-   HYPRE_Int                need_mask;            /* boolean indicating if a bit mask is needed */
-   HYPRE_Int                const_term, var_term; /* booleans used to determine 'need_mask' */
+   hypre_StructVector        *mask;
+   HYPRE_Int                  need_mask;          /* boolean indicating if a bit mask is needed */
+   HYPRE_Int                  const_term, var_term; /* booleans used to determine 'need_mask' */
 
-   hypre_IndexRef           ran_stride;
-   hypre_IndexRef           dom_stride;
-   hypre_IndexRef           coarsen_stride;
-   HYPRE_Int                coarsen;
-   HYPRE_Complex           *constp;          /* pointer to constant data */
-   HYPRE_Complex           *bitptr;          /* pointer to bit mask data */
-   hypre_Index              offset;          /* CommStencil offset */
-   hypre_IndexRef           shift;           /* stencil shift from center for st_term */
-   hypre_IndexRef           offsetref;
-   HYPRE_Int                d, i, j, m, t, e, b, id, entry;
+   hypre_IndexRef             ran_stride;
+   hypre_IndexRef             dom_stride;
+   hypre_IndexRef             coarsen_stride;
+   HYPRE_Int                  coarsen;
+   HYPRE_Complex             *constp;          /* pointer to constant data */
+   HYPRE_Complex             *bitptr;          /* pointer to bit mask data */
+   hypre_Index                offset;          /* CommStencil offset */
+   hypre_IndexRef             shift;           /* stencil shift from center for st_term */
+   hypre_IndexRef             offsetref;
+   HYPRE_Int                  d, i, j, m, t, e, b, id, entry;
 
-   hypre_Box               *loop_box;    /* boxloop extents on the base index space */
-   hypre_IndexRef           loop_start;  /* boxloop start index on the base index space */
-   hypre_IndexRef           loop_stride; /* boxloop stride on the base index space */
-   hypre_Index              loop_size;   /* boxloop size */
-   hypre_IndexRef           fstride, cstride; /* data-map strides (base index space) */
-   hypre_Index              fdstart;  /* boxloop data starts */
-   hypre_Index              fdstride; /* boxloop data strides */
-   hypre_Box               *fdbox;    /* boxloop data boxes */
+   hypre_Box                 *loop_box;    /* boxloop extents on the base index space */
+   hypre_IndexRef             loop_start;  /* boxloop start index on the base index space */
+   hypre_IndexRef             loop_stride; /* boxloop stride on the base index space */
+   hypre_Index                loop_size;   /* boxloop size */
+   hypre_IndexRef             fstride, cstride; /* data-map strides (base index space) */
+   hypre_Index                fdstart;  /* boxloop data starts */
+   hypre_Index                fdstride; /* boxloop data strides */
+   hypre_Box                 *fdbox;    /* boxloop data boxes */
 
-   hypre_BoxArray         **data_spaces;
-   hypre_BoxArray          *cdata_space, *fdata_space, *data_space;
+   hypre_BoxArray           **data_spaces;
+   hypre_BoxArray            *cdata_space, *fdata_space, *data_space;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -423,7 +423,7 @@ hypre_StructMatmultSetup( hypre_StructMMData  *mmdata,
 
    const_entries = hypre_TAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
    const_values  = hypre_TAlloc(HYPRE_Complex, size, HYPRE_MEMORY_HOST);
-   a = hypre_TAlloc(hypre_StructMMHelper, na, HYPRE_MEMORY_HOST);
+   a = hypre_TAlloc(hypre_StructMatmultHelper, na, HYPRE_MEMORY_HOST);
    (mmdata -> a) = a;
 
    na = 0;
@@ -858,8 +858,8 @@ hypre_StructMatmultSetup( hypre_StructMMData  *mmdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatmultCommunicate( hypre_StructMMData  *mmdata,
-                                hypre_StructMatrix  *M )
+hypre_StructMatmultCommunicate( hypre_StructMatmultData  *mmdata,
+                                hypre_StructMatrix       *M )
 {
    hypre_StructGrid   *grid = hypre_StructMatrixGrid(M);
 
@@ -929,10 +929,10 @@ hypre_StructMatmultCommunicate( hypre_StructMMData  *mmdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatmultCompute( hypre_StructMMData  *mmdata,
-                            hypre_StructMatrix  *M )
+hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
+                            hypre_StructMatrix       *M )
 {
-   hypre_StructMMHelper  *a              = (mmdata -> a);
+   hypre_StructMatmultHelper *a          = (mmdata -> a);
    HYPRE_Int              na             = (mmdata -> na);
    HYPRE_Int              nterms         = (mmdata -> nterms);
    HYPRE_Int             *terms          = (mmdata -> terms);
@@ -1165,7 +1165,7 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
                      HYPRE_Int           *trans,
                      hypre_StructMatrix **M_ptr )
 {
-   hypre_StructMMData *mmdata;
+   hypre_StructMatmultData *mmdata;
 
    hypre_StructMatmultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
    hypre_StructMatmultSetup(mmdata, M_ptr);
@@ -1188,7 +1188,7 @@ hypre_StructMatmat( hypre_StructMatrix  *A,
                     hypre_StructMatrix  *B,
                     hypre_StructMatrix **M_ptr )
 {
-   hypre_StructMMData *mmdata;
+   hypre_StructMatmultData *mmdata;
 
    HYPRE_Int           nmatrices   = 2;
    HYPRE_StructMatrix  matrices[2] = {A, B};
@@ -1220,7 +1220,7 @@ hypre_StructMatrixPtAP( hypre_StructMatrix  *A,
                         hypre_StructMatrix  *P,
                         hypre_StructMatrix **M_ptr)
 {
-   hypre_StructMMData *mmdata;
+   hypre_StructMatmultData *mmdata;
 
    HYPRE_Int           nmatrices   = 2;
    HYPRE_StructMatrix  matrices[2] = {A, P};
@@ -1253,7 +1253,7 @@ hypre_StructMatrixRAP( hypre_StructMatrix  *R,
                        hypre_StructMatrix  *P,
                        hypre_StructMatrix **M_ptr)
 {
-   hypre_StructMMData *mmdata;
+   hypre_StructMatmultData *mmdata;
 
    HYPRE_Int           nmatrices   = 3;
    HYPRE_StructMatrix  matrices[3] = {A, P, R};
@@ -1286,7 +1286,7 @@ hypre_StructMatrixRTtAP( hypre_StructMatrix  *RT,
                          hypre_StructMatrix  *P,
                          hypre_StructMatrix **M_ptr)
 {
-   hypre_StructMMData *mmdata;
+   hypre_StructMatmultData *mmdata;
 
    HYPRE_Int           nmatrices   = 3;
    HYPRE_StructMatrix  matrices[3] = {A, P, RT};

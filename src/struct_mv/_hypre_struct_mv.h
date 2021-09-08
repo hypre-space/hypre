@@ -2055,11 +2055,11 @@ hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)
 #define MAXTERMS 3
 
 /*--------------------------------------------------------------------------
- * StructMMHelper data structure
+ * StructMatmultHelper data structure
  *--------------------------------------------------------------------------*/
 
 /* product term used to compute the variable stencil entries in M */
-typedef struct hypre_StructMMhelper_struct
+typedef struct hypre_StructMatmulthelper_struct
 {
    hypre_StTerm    terms[MAXTERMS]; /* stencil info for each term */
    HYPRE_Int       mentry;          /* stencil entry for M */
@@ -2067,13 +2067,13 @@ typedef struct hypre_StructMMhelper_struct
    HYPRE_Int       types[MAXTERMS]; /* types of computations to do for each term */
    HYPRE_Complex  *tptrs[MAXTERMS]; /* pointers to matrix data for each term */
    HYPRE_Complex  *mptr;            /* pointer to matrix data for M */
-} hypre_StructMMHelper;
+} hypre_StructMatmultHelper;
 
 /*--------------------------------------------------------------------------
- * StructMMData data structure
+ * StructMatmultData data structure
  *--------------------------------------------------------------------------*/
 
-typedef struct hypre_StructMMData_struct
+typedef struct hypre_StructMatmultData_struct
 {
    hypre_StructMatrix  **matrices;        /* matrices we are multiplying */
    HYPRE_Int             nmatrices;       /* number of matrices */
@@ -2085,13 +2085,13 @@ typedef struct hypre_StructMMData_struct
    hypre_IndexRef        fstride;         /* fine data-map stride */
    hypre_IndexRef        cstride;         /* coarse data-map stride */
    hypre_IndexRef        coarsen_stride;  /* coarsening factor for M's grid */
-   HYPRE_Int             coarsen;         /* flag indicating if M's grid is obtained by coarsening */
+   HYPRE_Int             coarsen;         /* indicates if M's grid is obtained by coarsening */
    hypre_BoxArray       *cdata_space;     /* coarse data space */
    hypre_BoxArray       *fdata_space;     /* fine data space */
 
    hypre_StMatrix       *st_M;            /* stencil matrix for M */
-   hypre_StructMMHelper *a;               /* helper for running multiplication */
    HYPRE_Int             na;              /* size of hypre_StructMMhelper object */
+   hypre_StructMatmultHelper *a;          /* helper for running multiplication */
 
    hypre_StructVector   *mask;            /* bit mask vector for cte. coefs multiplication */
    hypre_CommPkg        *comm_pkg;        /* pointer to agglomerated communication package */
@@ -2100,7 +2100,7 @@ typedef struct hypre_StructMMData_struct
    HYPRE_Complex      ***comm_data_a;     /* pointer to communication data */
    HYPRE_Int             num_comm_pkgs;   /* number of communication packages to be agglomerated */
    HYPRE_Int             num_comm_blocks; /* total number of communication blocks */
-} hypre_StructMMData;
+} hypre_StructMatmultData;
 
 #endif
 /******************************************************************************
@@ -2352,11 +2352,11 @@ HYPRE_Int hypre_ReadBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypr
 HYPRE_Int hypre_ReadBoxArrayData_CC ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int stencil_size , HYPRE_Int real_stencil_size , HYPRE_Int constant_coefficient , HYPRE_Int dim , HYPRE_Complex *data );
 
 /* struct_matmult.c */
-HYPRE_Int hypre_StructMatmultCreate ( HYPRE_Int nmatrices_in , hypre_StructMatrix **matrices_in , HYPRE_Int nterms , HYPRE_Int *terms_in , HYPRE_Int *transposes_in , hypre_StructMMData **mmdata_ptr );
-HYPRE_Int hypre_StructMatmultDestroy ( hypre_StructMMData *mmdata );
-HYPRE_Int hypre_StructMatmultSetup ( hypre_StructMMData  *mmdata , hypre_StructMatrix **M_ptr );
-HYPRE_Int hypre_StructMatmultCommunicate ( hypre_StructMMData *mmdata , hypre_StructMatrix *M );
-HYPRE_Int hypre_StructMatmultCompute ( hypre_StructMMData *mmdata , hypre_StructMatrix *M );
+HYPRE_Int hypre_StructMatmultCreate ( HYPRE_Int nmatrices_in , hypre_StructMatrix **matrices_in , HYPRE_Int nterms , HYPRE_Int *terms_in , HYPRE_Int *transposes_in , hypre_StructMatmultData **mmdata_ptr );
+HYPRE_Int hypre_StructMatmultDestroy ( hypre_StructMatmultData *mmdata );
+HYPRE_Int hypre_StructMatmultSetup ( hypre_StructMatmultData  *mmdata , hypre_StructMatrix **M_ptr );
+HYPRE_Int hypre_StructMatmultCommunicate ( hypre_StructMatmultData *mmdata , hypre_StructMatrix *M );
+HYPRE_Int hypre_StructMatmultCompute ( hypre_StructMatmultData *mmdata , hypre_StructMatrix *M );
 HYPRE_Int hypre_StructMatmult ( HYPRE_Int nmatrices , hypre_StructMatrix **matrices , HYPRE_Int nterms , HYPRE_Int *terms , HYPRE_Int *trans , hypre_StructMatrix **M_ptr );
 HYPRE_Int hypre_StructMatmat ( hypre_StructMatrix *A , hypre_StructMatrix *B , hypre_StructMatrix **M_ptr );
 HYPRE_Int hypre_StructMatrixPtAP ( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix **M_ptr );
@@ -3344,3 +3344,4 @@ typedef struct hypre_Boxloop_struct
 #endif
 
 #endif
+
