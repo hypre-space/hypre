@@ -20,8 +20,6 @@ hypre_CsrsvData*
 hypre_CsrsvDataCreate()
 {
    hypre_CsrsvData *data = hypre_CTAlloc(hypre_CsrsvData, 1, HYPRE_MEMORY_HOST);
-   hypre_CsrsvDataBufferSize(data) = 0;
-   hypre_CsrsvDataBuffer(data) = NULL;
 
    return data;
 }
@@ -1991,3 +1989,20 @@ hypre_SortCSRRocsparse(       HYPRE_Int      n,
 }
 #endif // #if defined(HYPRE_USING_ROCSPARSE)
 
+void hypre_CSRMatrixGpuSpMVAnalysis(hypre_CSRMatrix *matrix)
+{
+#if defined(HYPRE_USING_ROCSPARSE)
+
+  HYPRE_ROCSPARSE_CALL( rocsparse_dcsrmv_analysis(hypre_HandleCusparseHandle(hypre_handle()),
+                                                  rocsparse_operation_none,
+                                                  hypre_CSRMatrixNumRows(matrix),
+                                                  hypre_CSRMatrixNumCols(matrix),
+                                                  hypre_CSRMatrixNumNonzeros(matrix),
+                                                  hypre_CSRMatrixGPUMatDescr(matrix),
+                                                  hypre_CSRMatrixData(matrix),
+                                                  hypre_CSRMatrixI(matrix),
+                                                  hypre_CSRMatrixJ(matrix),
+                                                  hypre_CSRMatrixGPUMatInfo(matrix)) );
+
+#endif // #if defined(HYPRE_USING_ROCSPARSE)
+}
