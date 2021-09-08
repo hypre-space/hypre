@@ -367,10 +367,10 @@ hypreDevice_CSRSpGemmWithRownnzUpperbound(HYPRE_Int   m,        HYPRE_Int   k,  
    hypre_assert(bDim.x * bDim.y == HYPRE_WARP_SIZE);
 
    // for cases where one WARP works on a row
-   HYPRE_Int num_warps = min(m, HYPRE_MAX_NUM_WARPS);
+   HYPRE_Int num_warps = hypre_min(m, HYPRE_MAX_NUM_WARPS);
    dim3 gDim( (num_warps + bDim.z - 1) / bDim.z );
    // number of active warps
-   HYPRE_Int num_act_warps = min(bDim.z * gDim.x, m);
+   HYPRE_Int num_act_warps = hypre_min(bDim.z * gDim.x, m);
 
    char hash_type = hypre_HandleSpgemmHashType(hypre_handle());
 

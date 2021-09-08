@@ -127,7 +127,7 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 
 #if defined(HYPRE_DEBUG)
 /* host assert */
-#define hypre_assert(EX) do { if (!(EX)) { hypre_fprintf(stderr, "[%s, %d] hypre_assert failed: %s\n", __FILE__, __LINE__, #EX); hypre_error(1); assert(0); } } while (0)
+#define hypre_assert(EX) do { if (!(EX)) { fprintf(stderr, "[%s, %d] hypre_assert failed: %s\n", __FILE__, __LINE__, #EX); hypre_error(1); assert(0); } } while (0)
 /* device assert */
 #if defined(HYPRE_USING_CUDA)
 #define hypre_device_assert(EX) assert(EX)
