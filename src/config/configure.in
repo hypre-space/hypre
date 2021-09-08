@@ -1863,14 +1863,18 @@ dnl *********************************************************************
 if test "$hypre_using_shared" = "yes"
 then
    HYPRE_LIBSUFFIX=".so"
-   if test "$hypre_using_cuda" = "yes"
-   then
-      SHARED_SET_SONAME="-Xlinker=-soname,"
-      SHARED_OPTIONS="-Xlinker=-z,defs"
-   else
-      SHARED_SET_SONAME="-Wl,-soname,"
-      SHARED_OPTIONS="-Wl,-z,defs"
-   fi
+   SHARED_SET_SONAME="-Wl,-soname,"
+   SHARED_OPTIONS="-Wl,-z,defs"
+
+   dnl if test "$hypre_using_cuda" = "yes"
+   dnl then
+   dnl   SHARED_SET_SONAME="-Xlinker=-soname,"
+   dnl   SHARED_OPTIONS="-Xlinker=-z,defs"
+   dnl else
+   dnl   SHARED_SET_SONAME="-Wl,-soname,"
+   dnl   SHARED_OPTIONS="-Wl,-z,defs"
+   dnl fi
+
    SHARED_COMPILE_FLAG="-fPIC"
    case $hypre_platform in
       AIX* | aix* | Aix*) SHARED_COMPILE_FLAG="-qmkshrobj"
@@ -1901,7 +1905,8 @@ dnl   BUILD_F77_SHARED="${F77} ${SHARED_BUILD_FLAG}"
    BUILD_CXX_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
    if test "$hypre_using_cuda" = "yes"
    then
-      BUILD_CC_SHARED="\${CUCC} ${SHARED_BUILD_FLAG}"
+      dnl BUILD_CC_SHARED="\${CUCC} ${SHARED_BUILD_FLAG}"
+      BUILD_CC_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
    fi
    dnl TODO HIP
 fi
@@ -2089,8 +2094,9 @@ then
       AC_DEFINE(HYPRE_USING_CURAND, 1, [Define to 1 if using cuRAND])
    fi
 
-   LINK_CC='${CUCC}'
-   LINK_CXX='${CUCC}'
+   LINK_CC=${LINK_CXX}
+   dnl LINK_CC='${CUCC}'
+   dnl LINK_CXX='${CUCC}'
 
    dnl CUDA SM
    if test "x$HYPRE_CUDA_SM" = "x"
@@ -2105,27 +2111,29 @@ then
 
    if test "$hypre_user_chose_cuflags" = "no"
    then
-      CUFLAGS="-lineinfo -expt-extended-lambda -dc -std=c++11 --x cu"
+      CUFLAGS="-lineinfo -expt-extended-lambda -std=c++11 --x cu"
       if test "$hypre_using_debug" = "yes"
       then
          CUFLAGS="-g -O0 ${CUFLAGS}"
       else
          CUFLAGS="-O2 ${CUFLAGS}"
       fi
+
+      dnl if [test "${CXX}" = "mpixlC" || test "${CXX}" = "xlC_r" || test "${CXX}" = "xlC"]
+      dnl then
+      dnl   CUFLAGS="${CUFLAGS} -Xcompiler \"-Wno-deprecated-register -Wenum-compare\""
+      dnl fi
+
+      CUFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
    fi
 
-   if test "$hypre_user_chose_cxxflags" = "no"
-   then
-      if [test "${CXX}" = "mpixlC" || test "${CXX}" = "xlC_r" || test "${CXX}" = "xlC"]
-      then
-         CXXFLAGS+=" -Wno-deprecated-register -Wenum-compare"
-      fi
-   fi
-
-   CUFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
+   dnl if test "$hypre_using_shared" = "yes"
+   dnl then
+   dnl   CUFLAGS="${CUFLAGS} -Xcompiler ${SHARED_COMPILE_FLAG}"
+   dnl fi
 
    dnl CFLAGS=${CXXFLAGS}
-   LDFLAGS="-Xcompiler \"${LDFLAGS}\""
+   dnl LDFLAGS="-Xcompiler \"${LDFLAGS}\""
    HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
    HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64 -lcudart'
    if test "$hypre_using_gpu_profiling" = "yes"
@@ -2167,8 +2175,10 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
         dnl (Ab)Using CUCC when compiling HIP
         dnl At this time, we need the linker to be hipcc in order to link
         dnl in device code.
-        LINK_CC='${CUCC}'
-        LINK_CXX='${CUCC}'
+        LINK_CC=${LINK_CXX}
+        dnl LINK_CC='${CUCC}'
+        dnl LINK_CXX='${CUCC}'
+
 
         if test "x${HYPRE_CUDA_SM}" != "x"
         then
@@ -2198,8 +2208,6 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
         then
            CUFLAGS="${HIPCPPFLAGS} ${HIPCXXFLAGS}"
         fi
-
-        CUFLAGS="${CUFLAGS} ${CXXFLAGS}"
 
         dnl rocThrust depends on rocPrim so we need both for Thrust on AMD GPUs.
         dnl These are header-only so no linking needed.
@@ -2303,10 +2311,10 @@ then
 
    dnl AC_DEFINE(HYPRE_DEVICE_OPENMP_MAPPED, 1, [Define to 1 if using OpenMP on device [target mapped version]])
 
-   CUFLAGS=${CFLAGS}
-
    if test "$hypre_user_chose_cuflags" = "no"
    then
+      CUFLAGS=${CFLAGS}
+
       if [test "$CUCC" = "clang-gpu" || test "$CUCC" = "mpiclang-gpu"]
       then
          CUFLAGS+=" -fopenmp-nonaliased-maps"
