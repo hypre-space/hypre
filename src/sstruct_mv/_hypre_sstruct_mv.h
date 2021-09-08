@@ -1003,8 +1003,11 @@ HYPRE_Int hypre_SStructMatvecDestroy ( void *matvec_vdata );
 HYPRE_Int hypre_SStructMatvec ( HYPRE_Complex alpha , hypre_SStructMatrix *A , hypre_SStructVector *x , HYPRE_Complex beta , hypre_SStructVector *y );
 
 /* sstruct_matmult.c */
-HYPRE_Int hypre_SStructMatrixMult ( HYPRE_Int nmatrices , hypre_SStructMatrix **matrices , HYPRE_Int nterms , HYPRE_Int *terms , HYPRE_Int *trans , hypre_SStructMatrix **M_ptr );
+HYPRE_Int hypre_SStructMatmult ( HYPRE_Int nmatrices , hypre_SStructMatrix **matrices , HYPRE_Int nterms , HYPRE_Int *terms , HYPRE_Int *trans , hypre_SStructMatrix **M_ptr );
+HYPRE_Int hypre_SStructMatmat ( hypre_SStructMatrix *A , hypre_SStructMatrix *B , hypre_SStructMatrix **M_ptr );
 HYPRE_Int hypre_SStructMatrixPtAP ( hypre_SStructMatrix *A, hypre_SStructMatrix *P , hypre_SStructMatrix **M_ptr );
+HYPRE_Int hypre_SStructMatrixRAP ( hypre_SStructMatrix *R , hypre_SStructMatrix *A , hypre_SStructMatrix *P , hypre_SStructMatrix **M_ptr );
+HYPRE_Int hypre_SStructMatrixRTtAP ( hypre_SStructMatrix *RT , hypre_SStructMatrix *A , hypre_SStructMatrix *P , hypre_SStructMatrix **M_ptr );
 
 /* sstruct_matop.c */
 HYPRE_Int hypre_SStructPMatrixComputeRowSum ( hypre_SStructPMatrix *pA , HYPRE_Int type , hypre_SStructPVector *prowsum );

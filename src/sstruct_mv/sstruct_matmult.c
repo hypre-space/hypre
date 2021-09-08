@@ -1095,6 +1095,46 @@ hypre_SStructMatrixPtAP( hypre_SStructMatrix  *A,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SStructMatmat
+ *
+ * Computes the product of two hypre_SStructMatrix objects: M = A*B
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatmat( hypre_SStructMatrix  *A,
+                     hypre_SStructMatrix  *B,
+                     hypre_SStructMatrix **M_ptr )
+{
+   hypre_SStructMMData *mmdata;
+   hypre_SStructMatrix *M;
+
+   HYPRE_Int            nmatrices   = 2;
+   HYPRE_SStructMatrix  matrices[2] = {A, B};
+   HYPRE_Int            nterms      = 2;
+   HYPRE_Int            terms[3]    = {0, 1};
+   HYPRE_Int            trans[2]    = {0, 0};
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   /* Compute resulting matrix M */
+   hypre_SStructMatmultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
+   hypre_SStructMatmultSetup(mmdata, &M);
+   hypre_SStructMatmultCommunicate(mmdata);
+   hypre_SStructMatmultCompute(mmdata, M);
+   hypre_SStructMatmultDestroy(mmdata);
+
+   /* Assemble matrix M */
+   HYPRE_SStructMatrixAssemble(M);
+
+   /* Point to resulting matrix */
+   *M_ptr = M;
+
+   HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SStructMatrixRAP
  *
  * Computes M = R*A*P
@@ -1106,6 +1146,72 @@ hypre_SStructMatrixRAP( hypre_SStructMatrix  *R,
                         hypre_SStructMatrix  *P,
                         hypre_SStructMatrix **M_ptr )
 {
-// TODO
+   hypre_SStructMMData *mmdata;
+   hypre_SStructMatrix *M;
+
+   HYPRE_Int            nmatrices   = 3;
+   HYPRE_SStructMatrix  matrices[3] = {A, P, R};
+   HYPRE_Int            nterms      = 3;
+   HYPRE_Int            terms[3]    = {2, 0, 1};
+   HYPRE_Int            trans[3]    = {0, 0, 0};
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   /* Compute resulting matrix M */
+   hypre_SStructMatmultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
+   hypre_SStructMatmultSetup(mmdata, &M);
+   hypre_SStructMatmultCommunicate(mmdata);
+   hypre_SStructMatmultCompute(mmdata, M);
+   hypre_SStructMatmultDestroy(mmdata);
+
+   /* Assemble matrix M */
+   HYPRE_SStructMatrixAssemble(M);
+
+   /* Point to resulting matrix */
+   *M_ptr = M;
+
+   HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructMatrixRTtAP
+ *
+ * Computes M = RT^T*A*P
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixRTtAP( hypre_SStructMatrix  *RT,
+                          hypre_SStructMatrix  *A,
+                          hypre_SStructMatrix  *P,
+                          hypre_SStructMatrix **M_ptr )
+{
+   hypre_SStructMMData *mmdata;
+   hypre_SStructMatrix *M;
+
+   HYPRE_Int            nmatrices   = 3;
+   HYPRE_SStructMatrix  matrices[3] = {A, P, RT};
+   HYPRE_Int            nterms      = 3;
+   HYPRE_Int            terms[3]    = {2, 0, 1};
+   HYPRE_Int            trans[3]    = {1, 0, 0};
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   /* Compute resulting matrix M */
+   hypre_SStructMatmultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
+   hypre_SStructMatmultSetup(mmdata, &M);
+   hypre_SStructMatmultCommunicate(mmdata);
+   hypre_SStructMatmultCompute(mmdata, M);
+   hypre_SStructMatmultDestroy(mmdata);
+
+   /* Assemble matrix M */
+   HYPRE_SStructMatrixAssemble(M);
+
+   /* Point to resulting matrix */
+   *M_ptr = M;
+
+   HYPRE_ANNOTATE_FUNC_END;
+
    return hypre_error_flag;
 }
