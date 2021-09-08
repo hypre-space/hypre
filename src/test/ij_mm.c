@@ -17,7 +17,6 @@
 #include <math.h>
 
 #include "_hypre_utilities.h"
-#include "_hypre_utilities.hpp"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_mv.h"
 
@@ -196,7 +195,7 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
    HYPRE_Int    num_procs, myid;
    HYPRE_Int    time_index, i;
 
-   HYPRE_ParCSRMatrix parcsr_S = NULL;
+   HYPRE_ParCSRMatrix parcsr_S   = NULL;
    HYPRE_ParCSRMatrix parcsr_P   = NULL;
    HYPRE_ParCSRMatrix parcsr_Q   = NULL;
    HYPRE_ParCSRMatrix parcsr_AH  = NULL;

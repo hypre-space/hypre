@@ -439,6 +439,25 @@ hypre_ParVectorElmdivpy( hypre_ParVector *x,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_ParVectorElmdivpyMarked
+ * y[i] += x[i] / b[i] where marker[i] == marker_val 
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorElmdivpyMarked( hypre_ParVector *x,
+                               hypre_ParVector *b,
+                               hypre_ParVector *y,
+                               HYPRE_Int       *marker,
+                               HYPRE_Int        marker_val )
+{
+   hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
+   hypre_Vector *b_local = hypre_ParVectorLocalVector(b);
+   hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
+
+   return hypre_SeqVectorElmdivpyMarked(x_local, b_local, y_local, marker, marker_val);
+}
+
+/*--------------------------------------------------------------------------
  * hypre_VectorToParVector:
  * generates a ParVector from a Vector on proc 0 and distributes the pieces
  * to the other procs in comm
