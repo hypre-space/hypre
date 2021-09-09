@@ -113,7 +113,7 @@
 
 !   Default problem parameters
       n = 33
-      solver_id = 1
+      solver_id = 0
       print_solution  = 0
       tol = 1.0d-7
 
