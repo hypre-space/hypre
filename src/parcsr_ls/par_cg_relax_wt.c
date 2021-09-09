@@ -87,10 +87,9 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
    HYPRE_Real   *S_vec;
 #endif
 
-   HYPRE_Int num_threads;
-
-   num_threads = hypre_NumThreads();
-
+#if !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP)
+   HYPRE_Int num_threads = hypre_NumThreads();
+#endif
 
    /* Acquire data and allocate storage */
 

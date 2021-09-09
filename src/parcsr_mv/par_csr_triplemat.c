@@ -717,12 +717,6 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
       if (num_cols_offd_Q)
       {
          C_tmp_offd = hypre_CSRMatrixMultiplyHost(RT_diag, Q_offd);
-         /* RL: WHY NEED THIS?
-         if (C_tmp_offd->num_nonzeros == 0)
-         {
-            C_tmp_offd->num_cols = 0;
-         }
-         */
       }
       else
       {
@@ -823,8 +817,8 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
             C_tmp_offd_j[i] = map_Q_to_C[j_indx];
          }
          hypre_TFree(map_Q_to_C, HYPRE_MEMORY_HOST);
-         hypre_CSRMatrixNumCols(C_tmp_offd) = num_cols_offd_C;
       }
+      hypre_CSRMatrixNumCols(C_tmp_offd) = num_cols_offd_C;
       hypre_ParCSRMatrixDestroy(Q);
 
       /*-----------------------------------------------------------------------

@@ -66,11 +66,11 @@ hypre_BoomerAMGCoarseParmsHost(MPI_Comm          comm,
 #endif
 
    HYPRE_Int      i;
-   HYPRE_Int	  num_procs;
+   HYPRE_Int      num_procs;
    HYPRE_BigInt   local_coarse_size = 0;
 
-   HYPRE_Int	 *coarse_dof_func;
-   HYPRE_BigInt	 *coarse_pnts_global;
+   HYPRE_Int     *coarse_dof_func;
+   HYPRE_BigInt  *coarse_pnts_global;
 
    /*--------------------------------------------------------------
     *----------------------------------------------------------------*/
