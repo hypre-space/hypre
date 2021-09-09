@@ -37,18 +37,10 @@
       implicit none
 
       include 'mpif.h'
+      include 'HYPREf.h'
 
       integer    MAX_LOCAL_SIZE
-      integer    HYPRE_PARCSR
-      integer    HYPRE_MEMORY_DEVICE
-      integer    HYPRE_EXEC_DEVICE
-
       parameter  (MAX_LOCAL_SIZE=123000)
-      parameter  (HYPRE_MEMORY_DEVICE=1)
-      parameter  (HYPRE_EXEC_DEVICE=1)
-
-!     the following is from HYPRE.c
-      parameter  (HYPRE_PARCSR=5555)
 
       integer    ierr
       integer    num_procs, myid
