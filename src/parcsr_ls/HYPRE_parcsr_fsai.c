@@ -67,6 +67,28 @@ HYPRE_FSAISolve( HYPRE_Solver       solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_FSAISetAlgoType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_FSAISetAlgoType( HYPRE_Solver solver,
+                       HYPRE_Int    algo_type  )
+{
+   return( hypre_FSAISetAlgoType( (void *) solver, algo_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_FSAIGetAlgoType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_FSAIGetAlgoType( HYPRE_Solver  solver,
+                       HYPRE_Int    *algo_type  )
+{
+   return( hypre_FSAIGetAlgoType( (void *) solver, algo_type ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_FSAISetMaxSteps
  *--------------------------------------------------------------------------*/
 

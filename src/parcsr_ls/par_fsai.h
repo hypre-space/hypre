@@ -15,6 +15,7 @@
 typedef struct hypre_ParFSAIData_struct
 {
    /* FSAI Setup data */
+   HYPRE_Int             algo_type;       /* FSAI algorithm implementation type */
    HYPRE_Int             max_steps;       /* Maximum iterations run per row */
    HYPRE_Int             max_step_size;   /* Maximum number of nonzero elements added to a row of G per step */
    HYPRE_Real            kap_tolerance;   /* Minimum amount of change between two steps */
@@ -45,6 +46,7 @@ typedef struct hypre_ParFSAIData_struct
  *--------------------------------------------------------------------------*/
 
 /* FSAI Setup data */
+#define hypre_ParFSAIDataAlgoType(fsai_data)                ((fsai_data) -> algo_type)
 #define hypre_ParFSAIDataMaxSteps(fsai_data)                ((fsai_data) -> max_steps)
 #define hypre_ParFSAIDataMaxStepSize(fsai_data)             ((fsai_data) -> max_step_size)
 #define hypre_ParFSAIDataKapTolerance(fsai_data)            ((fsai_data) -> kap_tolerance)

@@ -801,6 +801,7 @@ typedef struct
 typedef struct hypre_ParFSAIData_struct
 {
    /* FSAI Setup data */
+   HYPRE_Int             algo_type;       /* FSAI algorithm implementation type */
    HYPRE_Int             max_steps;       /* Maximum iterations run per row */
    HYPRE_Int             max_step_size;   /* Maximum number of nonzero elements added to a row of G per step */
    HYPRE_Real            kap_tolerance;   /* Minimum amount of change between two steps */
@@ -831,6 +832,7 @@ typedef struct hypre_ParFSAIData_struct
  *--------------------------------------------------------------------------*/
 
 /* FSAI Setup data */
+#define hypre_ParFSAIDataAlgoType(fsai_data)                ((fsai_data) -> algo_type)
 #define hypre_ParFSAIDataMaxSteps(fsai_data)                ((fsai_data) -> max_steps)
 #define hypre_ParFSAIDataMaxStepSize(fsai_data)             ((fsai_data) -> max_step_size)
 #define hypre_ParFSAIDataKapTolerance(fsai_data)            ((fsai_data) -> kap_tolerance)
@@ -1578,8 +1580,10 @@ HYPRE_Int HYPRE_FSAICreate ( HYPRE_Solver *solver);
 HYPRE_Int HYPRE_FSAIDestroy ( HYPRE_Solver solver );
 HYPRE_Int HYPRE_FSAISetup ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
 HYPRE_Int HYPRE_FSAISolve ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+HYPRE_Int HYPRE_FSAISetAlgoType ( HYPRE_Solver solver , HYPRE_Int algo_type );
+HYPRE_Int HYPRE_FSAIGetAlgoType ( HYPRE_Solver solver , HYPRE_Int *algo_type );
 HYPRE_Int HYPRE_FSAISetMaxSteps ( HYPRE_Solver solver , HYPRE_Int max_steps );
-HYPRE_Int HYPRE_FSAIGetMaxSteps ( HYPRE_Solver solver , HYPRE_Int *max_steps  );
+HYPRE_Int HYPRE_FSAIGetMaxSteps ( HYPRE_Solver solver , HYPRE_Int *max_steps );
 HYPRE_Int HYPRE_FSAISetMaxStepSize ( HYPRE_Solver solver , HYPRE_Int max_step_size );
 HYPRE_Int HYPRE_FSAIGetMaxStepSize ( HYPRE_Solver solver , HYPRE_Int *max_step_size );
 HYPRE_Int HYPRE_FSAISetKapTolerance ( HYPRE_Solver solver , HYPRE_Real  kap_tolerance );
@@ -2541,6 +2545,7 @@ HYPRE_Int hypre_BoomerAMGDD_FixUpRecvMaps ( hypre_AMGDDCompGrid **compGrid, hypr
 /* par_fsai.c */
 void* hypre_FSAICreate();
 HYPRE_Int hypre_FSAIDestroy ( void *data );
+HYPRE_Int hypre_FSAISetAlgoType ( void *data , HYPRE_Int algo_type );
 HYPRE_Int hypre_FSAISetMaxSteps ( void *data , HYPRE_Int max_steps );
 HYPRE_Int hypre_FSAISetMaxStepSize ( void *data , HYPRE_Int max_step_size );
 HYPRE_Int hypre_FSAISetKapTolerance ( void *data , HYPRE_Real kap_tolerance );
@@ -2552,6 +2557,7 @@ HYPRE_Int hypre_FSAISetOmega ( void *data , HYPRE_Real omega );
 HYPRE_Int hypre_FSAISetLogging ( void *data , HYPRE_Int logging );
 HYPRE_Int hypre_FSAISetNumIterations ( void *data , HYPRE_Int num_iterations );
 HYPRE_Int hypre_FSAISetPrintLevel ( void *data , HYPRE_Int print_level );
+HYPRE_Int hypre_FSAIGetAlgoType ( void *data , HYPRE_Int *algo_type );
 HYPRE_Int hypre_FSAIGetMaxSteps ( void *data , HYPRE_Int *max_steps );
 HYPRE_Int hypre_FSAIGetMaxStepSize ( void *data , HYPRE_Int *max_step_size );
 HYPRE_Int hypre_FSAIGetKapTolerance ( void *data , HYPRE_Real *kap_tolerance );
@@ -2570,6 +2576,7 @@ HYPRE_Int hypre_CSRMatrixExtractDenseRow( hypre_CSRMatrix *A, hypre_Vector *A_su
 HYPRE_Int hypre_FindKapGrad( hypre_CSRMatrix *A_diag, hypre_Vector *kaporin_gradient, HYPRE_Int *kap_grad_nonzeros, hypre_Vector *G_temp, HYPRE_Int *S_Pattern, HYPRE_Int S_nnz, HYPRE_Int max_row_size, HYPRE_Int row_num, HYPRE_Int *kg_marker );
 HYPRE_Int hypre_AddToPattern ( hypre_Vector *kaporin_gradient, HYPRE_Int *kap_grad_nonzeros, HYPRE_Int *S_Pattern, HYPRE_Int *S_nnz , HYPRE_Int *kg_marker , HYPRE_Int max_step_size );
 HYPRE_Int hypre_FSAISetup ( void *fsai_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u );
+HYPRE_Int hypre_FSAIPrintStats ( void *fsai_vdata , hypre_ParCSRMatrix *A );
 HYPRE_Int hypre_FSAIComputeOmega ( void *fsai_vdata , hypre_ParCSRMatrix *A );
 void hypre_swap2_ci ( HYPRE_Complex *v , HYPRE_Int *w , HYPRE_Int i , HYPRE_Int j );
 void hypre_qsort2_ci ( HYPRE_Complex *v , HYPRE_Int *w , HYPRE_Int left , HYPRE_Int right );

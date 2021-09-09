@@ -399,6 +399,7 @@ main( hypre_int argc,
    /* end hypre ILU options */
 
    /* hypre_FSAI options */
+   HYPRE_Int  fsai_algo_type = 1;
    HYPRE_Int  fsai_max_steps = 10;
    HYPRE_Int  fsai_max_step_size = 1;
    HYPRE_Int  fsai_eig_max_iters = 5;
@@ -1121,6 +1122,11 @@ main( hypre_int argc,
       }
       /* end ilu options */
       /* begin FSAI options*/
+      else if ( strcmp(argv[arg_index], "-fs_algo_type") == 0 )
+      {
+         arg_index++;
+         fsai_algo_type = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-fs_max_steps") == 0 )
       {
          arg_index++;
@@ -4306,6 +4312,7 @@ main( hypre_int argc,
 
          HYPRE_FSAICreate(&pcg_precond);
 
+         HYPRE_FSAISetAlgoType(pcg_precond, fsai_algo_type);
          HYPRE_FSAISetMaxSteps(pcg_precond, fsai_max_steps);
          HYPRE_FSAISetMaxStepSize(pcg_precond, fsai_max_step_size);
          HYPRE_FSAISetKapTolerance(pcg_precond, fsai_kap_tolerance);

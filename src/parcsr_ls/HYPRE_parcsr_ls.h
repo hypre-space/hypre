@@ -1533,6 +1533,15 @@ HYPRE_Int HYPRE_FSAISolve( HYPRE_Solver       solver,
                            HYPRE_ParVector    x );
 
 /**
+ * (Optional) Sets the algorithm type used to compute the lower triangular factor G
+ *
+ *      - 1: Native (can use OpenMP with static scheduling)
+ *      - 2: OpenMP with dynamic scheduling
+ **/
+HYPRE_Int HYPRE_FSAISetAlgoType( HYPRE_Solver solver,
+                                 HYPRE_Int    algo_type );
+
+/**
  * (Optional) Sets the maximum number of steps for computing the sparsity
  * pattern of G
  **/

@@ -19,6 +19,7 @@ hypre_FSAICreate()
    hypre_ParFSAIData    *fsai_data;
 
    /* setup params */
+   HYPRE_Int            algo_type;
    HYPRE_Int            max_steps;
    HYPRE_Int            max_step_size;
    HYPRE_Real           kap_tolerance;
@@ -42,6 +43,7 @@ hypre_FSAICreate()
    fsai_data = hypre_CTAlloc(hypre_ParFSAIData, 1, HYPRE_MEMORY_HOST);
 
    /* setup params */
+   algo_type = 1;
    max_steps = 10;
    max_step_size = 3;
    kap_tolerance = 1.0e-3;
@@ -71,6 +73,7 @@ hypre_FSAICreate()
    hypre_ParFSAIDataZWork(fsai_data)     = NULL;
    hypre_ParFSAIDataZeroGuess(fsai_data) = 0;
 
+   hypre_FSAISetAlgoType(fsai_data, algo_type);
    hypre_FSAISetMaxSteps(fsai_data, max_steps);
    hypre_FSAISetMaxStepSize(fsai_data, max_step_size);
    hypre_FSAISetKapTolerance(fsai_data, kap_tolerance);
@@ -128,6 +131,28 @@ hypre_FSAIDestroy( void *data )
  * Routines to SET the setup phase parameters
  ******************************************************************************/
 
+HYPRE_Int
+hypre_FSAISetAlgoType( void      *data,
+                       HYPRE_Int  algo_type )
+{
+   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
+
+   if (!fsai_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (algo_type < 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   hypre_ParFSAIDataAlgoType(fsai_data) = algo_type;
+
+   return hypre_error_flag;
+}
 
 HYPRE_Int
 hypre_FSAISetMaxSteps( void      *data,
@@ -394,8 +419,8 @@ hypre_FSAISetPrintLevel( void      *data,
  ******************************************************************************/
 
 HYPRE_Int
-hypre_FSAIGetMaxSteps( void      *data,
-                       HYPRE_Int *max_steps )
+hypre_FSAIGetAlgoType( void      *data,
+                       HYPRE_Int *algo_type )
 {
    hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
 
@@ -405,7 +430,24 @@ hypre_FSAIGetMaxSteps( void      *data,
       return hypre_error_flag;
    }
 
-   *max_steps = hypre_ParFSAIDataMaxSteps(fsai_data);
+   *algo_type = hypre_ParFSAIDataAlgoType(fsai_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_FSAIGetMaxSteps( void      *data,
+                       HYPRE_Int *algo_type )
+{
+   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
+
+   if (!fsai_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   *algo_type = hypre_ParFSAIDataMaxSteps(fsai_data);
 
    return hypre_error_flag;
 }
