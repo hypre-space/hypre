@@ -285,5 +285,13 @@ HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
 
 /* handle.c */
 HYPRE_Int hypre_SetSpGemmUseCusparse( HYPRE_Int use_cusparse );
+HYPRE_Int hypre_SetSpGemmAlgorithm( HYPRE_Int value );
+HYPRE_Int hypre_SetSpGemmRownnzEstimateMethod( HYPRE_Int value );
+HYPRE_Int hypre_SetSpGemmRownnzEstimateNSamples( HYPRE_Int value );
+HYPRE_Int hypre_SetSpGemmRownnzEstimateMultFactor( HYPRE_Real value );
+HYPRE_Int hypre_SetSpGemmHashType( char value );
 HYPRE_Int hypre_SetUseGpuRand( HYPRE_Int use_gpurand );
 HYPRE_Int hypre_SetGaussSeidelMethod( HYPRE_Int gs_method );
+HYPRE_Int hypre_SetUserDeviceMalloc(GPUMallocFunc func);
+HYPRE_Int hypre_SetUserDeviceMfree(GPUMfreeFunc func);
+

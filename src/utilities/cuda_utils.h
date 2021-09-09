@@ -49,7 +49,6 @@
 #include <rocrand.h>
 #endif
 
-
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 #define HYPRE_CUDA_CALL(call) do {                                                           \
    cudaError_t err = call;                                                                   \
@@ -93,7 +92,6 @@
             err, __FILE__, __LINE__);                                                        \
       assert(0); exit(1);                                                                    \
    } } while(0)
-
 
 #define HYPRE_CURAND_CALL(call) do {                                                         \
    curandStatus_t err = call;                                                                \
@@ -181,7 +179,7 @@ struct hypre_CudaData
    HYPRE_Int                         struct_comm_send_buffer_size;
    /* device spgemm options */
    HYPRE_Int                         spgemm_use_cusparse;
-   HYPRE_Int                         spgemm_num_passes;
+   HYPRE_Int                         spgemm_algorithm;
    HYPRE_Int                         spgemm_rownnz_estimate_method;
    HYPRE_Int                         spgemm_rownnz_estimate_nsamples;
    float                             spgemm_rownnz_estimate_mult_factor;
@@ -204,7 +202,7 @@ struct hypre_CudaData
 #define hypre_CudaDataStructCommRecvBufferSize(data)       ((data) -> struct_comm_recv_buffer_size)
 #define hypre_CudaDataStructCommSendBufferSize(data)       ((data) -> struct_comm_send_buffer_size)
 #define hypre_CudaDataSpgemmUseCusparse(data)              ((data) -> spgemm_use_cusparse)
-#define hypre_CudaDataSpgemmNumPasses(data)                ((data) -> spgemm_num_passes)
+#define hypre_CudaDataSpgemmAlgorithm(data)                ((data) -> spgemm_algorithm)
 #define hypre_CudaDataSpgemmRownnzEstimateMethod(data)     ((data) -> spgemm_rownnz_estimate_method)
 #define hypre_CudaDataSpgemmRownnzEstimateNsamples(data)   ((data) -> spgemm_rownnz_estimate_nsamples)
 #define hypre_CudaDataSpgemmRownnzEstimateMultFactor(data) ((data) -> spgemm_rownnz_estimate_mult_factor)
@@ -249,6 +247,9 @@ struct hypre_CsrsvData
 #if defined(HYPRE_USING_CUSPARSE)
    csrsv2Info_t info_L;
    csrsv2Info_t info_U;
+#elif defined(HYPRE_USING_ROCSPARSE)
+   rocsparse_mat_info info_L;
+   rocsparse_mat_info info_U;
 #endif
    hypre_int    BufferSize;
    char        *Buffer;
@@ -313,61 +314,32 @@ using namespace thrust::placeholders;
  */
 
 #if defined(HYPRE_DEBUG)
-
 #if defined(HYPRE_USING_CUDA)
-#define HYPRE_CUDA_LAUNCH(kernel_name, gridsize, blocksize, ...)                                                     \
-{                                                                                                                    \
-   if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                  \
-        blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                   \
-   {                                                                                                                 \
-      /* printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                                       \
-                 __FILE__, __LINE__,                                                                                 \
-                 gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */                      \
-   }                                                                                                                 \
-   else                                                                                                              \
-   {                                                                                                                 \
-      (kernel_name) <<< (gridsize), (blocksize), 0, hypre_HandleCudaComputeStream(hypre_handle()) >>> (__VA_ARGS__); \
-   }                                                                                                                 \
-   hypre_SyncCudaComputeStream(hypre_handle());                                                                      \
-   HYPRE_CUDA_CALL( cudaGetLastError() );                                                                            \
-}
+#define GPU_LAUNCH_SYNC { hypre_SyncCudaComputeStream(hypre_handle()); HYPRE_CUDA_CALL( cudaGetLastError() ); }
 #elif defined(HYPRE_USING_HIP)
-#define HYPRE_CUDA_LAUNCH(kernel_name, gridsize, blocksize, ...)                                                     \
-{                                                                                                                    \
-   if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                  \
-        blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                   \
-   {                                                                                                                 \
-      /* printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                                       \
-                 __FILE__, __LINE__,                                                                                 \
-                 gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */                      \
-   }                                                                                                                 \
-   else                                                                                                              \
-   {                                                                                                                 \
-      (kernel_name) <<< (gridsize), (blocksize), 0, hypre_HandleCudaComputeStream(hypre_handle()) >>> (__VA_ARGS__); \
-   }                                                                                                                 \
-   hypre_SyncCudaComputeStream(hypre_handle());                                                                      \
-   HYPRE_HIP_CALL( hipGetLastError() );                                                                            \
-}
-#endif //HYPRE_USING_CUDA
-
+#define GPU_LAUNCH_SYNC { hypre_SyncCudaComputeStream(hypre_handle()); HYPRE_CUDA_CALL( hipGetLastError() );  }
+#endif
 #else // #if defined(HYPRE_DEBUG)
+#define GPU_LAUNCH_SYNC
+#endif // defined(HYPRE_DEBUG)
 
-#define HYPRE_CUDA_LAUNCH(kernel_name, gridsize, blocksize, ...)                                                     \
-{                                                                                                                    \
-   if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                  \
-        blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                   \
-   {                                                                                                                 \
-      /* printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                                       \
-                 __FILE__, __LINE__,                                                                                 \
-                 gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */                      \
-   }                                                                                                                 \
-   else                                                                                                              \
-   {                                                                                                                 \
-      (kernel_name) <<< (gridsize), (blocksize), 0, hypre_HandleCudaComputeStream(hypre_handle()) >>> (__VA_ARGS__); \
-   }                                                                                                                 \
+#define HYPRE_CUDA_LAUNCH2(kernel_name, gridsize, blocksize, shmem_size, ...)                                                 \
+{                                                                                                                             \
+   if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                           \
+        blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                            \
+   {                                                                                                                          \
+      /* printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                                                \
+                 __FILE__, __LINE__,                                                                                          \
+                 gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */                               \
+   }                                                                                                                          \
+   else                                                                                                                       \
+   {                                                                                                                          \
+      (kernel_name) <<< (gridsize), (blocksize), shmem_size, hypre_HandleCudaComputeStream(hypre_handle()) >>> (__VA_ARGS__); \
+      GPU_LAUNCH_SYNC;                                                                                                        \
+   }                                                                                                                          \
 }
 
-#endif // defined(HYPRE_DEBUG)
+#define HYPRE_CUDA_LAUNCH(kernel_name, gridsize, blocksize, ...) HYPRE_CUDA_LAUNCH2(kernel_name, gridsize, blocksize, 0, __VA_ARGS__)
 
 /* RL: TODO Want macro HYPRE_THRUST_CALL to return value but I don't know how to do it right
  * The following one works OK for now */

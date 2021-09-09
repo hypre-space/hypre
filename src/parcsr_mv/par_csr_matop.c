@@ -5363,6 +5363,40 @@ hypre_ParCSRMatrixInfNorm( hypre_ParCSRMatrix  *A,
    HYPRE_Real          maxsum = 0.0;
    HYPRE_Real          rowsum;
 
+#ifdef _MSC_VER
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel private(i,j,rowsum)
+#endif
+   {
+      HYPRE_Real maxsum_local;
+
+      maxsum_local = 0.0;
+#ifdef HYPRE_USING_OPENMP
+#pragma omp for HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < num_rows_diag_A; i++)
+      {
+         rowsum = 0.0;
+         for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
+         {
+            rowsum += hypre_cabs(A_diag_a[j]);
+         }
+         for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
+         {
+            rowsum += hypre_cabs(A_offd_a[j]);
+         }
+
+         maxsum_local = hypre_max(maxsum_local, rowsum);
+      }
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp critical
+#endif
+      {
+         maxsum = hypre_max(maxsum, maxsum_local);
+      }
+   }
+#else
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i,j,rowsum) reduction(max:maxsum) HYPRE_SMP_SCHEDULE
 #endif
@@ -5380,6 +5414,7 @@ hypre_ParCSRMatrixInfNorm( hypre_ParCSRMatrix  *A,
 
       maxsum = hypre_max(maxsum, rowsum);
    }
+#endif
 
    hypre_MPI_Allreduce(&maxsum, norm, 1, HYPRE_MPI_REAL, hypre_MPI_MAX, comm);
 
@@ -5596,7 +5631,7 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
    HYPRE_Int           row_set, col_set;
    HYPRE_BigInt       *B_row_starts, *B_col_starts, B_first_col;
    HYPRE_Int           my_id, num_procs;
-   HYPRE_Int          *sub_idx_diag; 
+   HYPRE_Int          *sub_idx_diag;
    HYPRE_BigInt       *sub_idx_offd;
    HYPRE_Int           num_sends;
    HYPRE_BigInt       *send_buf_data;
@@ -6075,7 +6110,7 @@ hypre_ParCSRMatrixDropSmallEntriesHost( hypre_ParCSRMatrix *A,
  *    type 0: tol
  *    type 1: tol*(1-norm of row)
  *    type 2: tol*(2-norm of row)
- *    type -1: tol*(infinity norm of row) 
+ *    type -1: tol*(infinity norm of row)
  *    NOTE: some type options above unavailable on either host or device */
 HYPRE_Int
 hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A,
