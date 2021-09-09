@@ -27,6 +27,7 @@ set(SRCS
   error.c
   general.c
   handle.c
+  int_array.c
   hopscotch_hash.c
   memory.c
   merge_sort.c
