@@ -122,7 +122,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int       min_coarse_size = hypre_ParAMGDataMinCoarseSize(amg_data);
    HYPRE_Int       seq_threshold = hypre_ParAMGDataSeqThreshold(amg_data);
    HYPRE_Int       j, k;
-   HYPRE_Int       num_procs,my_id,num_threads;
+   HYPRE_Int       num_procs,my_id;
+#if !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP)
+   HYPRE_Int       num_threads = hypre_NumThreads();
+#endif
    HYPRE_Int      *grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
    HYPRE_Int       num_functions = hypre_ParAMGDataNumFunctions(amg_data);
    HYPRE_Int       nodal = hypre_ParAMGDataNodal(amg_data);
@@ -217,8 +220,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
-
-   num_threads = hypre_NumThreads();
 
    /*A_new = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(A), 1.e-16);
    hypre_CSRMatrixPrint(A_new, "Atestnew"); */

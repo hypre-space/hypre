@@ -8459,14 +8459,10 @@ fi
 if test "$hypre_using_shared" = "yes"
 then
    HYPRE_LIBSUFFIX=".so"
-   if test "$hypre_using_cuda" = "yes"
-   then
-      SHARED_SET_SONAME="-Xlinker=-soname,"
-      SHARED_OPTIONS="-Xlinker=-z,defs"
-   else
-      SHARED_SET_SONAME="-Wl,-soname,"
-      SHARED_OPTIONS="-Wl,-z,defs"
-   fi
+   SHARED_SET_SONAME="-Wl,-soname,"
+   SHARED_OPTIONS="-Wl,-z,defs"
+
+
    SHARED_COMPILE_FLAG="-fPIC"
    case $hypre_platform in
       AIX* | aix* | Aix*) SHARED_COMPILE_FLAG="-qmkshrobj"
@@ -8495,7 +8491,7 @@ then
    BUILD_CXX_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
    if test "$hypre_using_cuda" = "yes"
    then
-      BUILD_CC_SHARED="\${CUCC} ${SHARED_BUILD_FLAG}"
+            BUILD_CC_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
    fi
    fi
 
@@ -8871,8 +8867,7 @@ $as_echo "#define HYPRE_USING_CURAND 1" >>confdefs.h
 
    fi
 
-   LINK_CC='${CUCC}'
-   LINK_CXX='${CUCC}'
+   LINK_CC=${LINK_CXX}
 
       if test "x$HYPRE_CUDA_SM" = "x"
    then
@@ -8886,27 +8881,20 @@ $as_echo "#define HYPRE_USING_CURAND 1" >>confdefs.h
 
    if test "$hypre_user_chose_cuflags" = "no"
    then
-      CUFLAGS="-lineinfo -expt-extended-lambda -dc -std=c++11 --x cu"
+      CUFLAGS="-lineinfo -expt-extended-lambda -std=c++11 --x cu"
       if test "$hypre_using_debug" = "yes"
       then
          CUFLAGS="-g -O0 ${CUFLAGS}"
       else
          CUFLAGS="-O2 ${CUFLAGS}"
       fi
+
+
+      CUFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
    fi
 
-   if test "$hypre_user_chose_cxxflags" = "no"
-   then
-      if test "${CXX}" = "mpixlC" || test "${CXX}" = "xlC_r" || test "${CXX}" = "xlC"
-      then
-         CXXFLAGS+=" -Wno-deprecated-register -Wenum-compare"
-      fi
-   fi
 
-   CUFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
-
-      LDFLAGS="-Xcompiler \"${LDFLAGS}\""
-   HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
+         HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
    HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64 -lcudart'
    if test "$hypre_using_gpu_profiling" = "yes"
    then
@@ -8939,8 +8927,8 @@ $as_echo "#define HYPRE_USING_HIP 1" >>confdefs.h
 
 
 
-                                LINK_CC='${CUCC}'
-        LINK_CXX='${CUCC}'
+                                LINK_CC=${LINK_CXX}
+
 
         if test "x${HYPRE_CUDA_SM}" != "x"
         then
@@ -8963,8 +8951,6 @@ fi
         then
            CUFLAGS="${HIPCPPFLAGS} ${HIPCXXFLAGS}"
         fi
-
-        CUFLAGS="${CUFLAGS} ${CXXFLAGS}"
 
                         HYPRE_HIP_INCL="-I${HYPRE_ROCM_PREFIX}/rocthrust/include"
         HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocprim/include"
@@ -9087,10 +9073,10 @@ $as_echo "#define HYPRE_DEVICE_OPENMP_ALLOC 1" >>confdefs.h
 
 
 
-   CUFLAGS=${CFLAGS}
-
    if test "$hypre_user_chose_cuflags" = "no"
    then
+      CUFLAGS=${CFLAGS}
+
       if test "$CUCC" = "clang-gpu" || test "$CUCC" = "mpiclang-gpu"
       then
          CUFLAGS+=" -fopenmp-nonaliased-maps"
