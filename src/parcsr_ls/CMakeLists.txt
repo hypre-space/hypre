@@ -67,6 +67,7 @@ set(SRCS
   par_cheby.c
   par_cheby_device.c
   par_coarse_parms.c
+  par_coarse_parms_device.c
   par_coordinates.c
   par_cr.c
   par_cycle.c
