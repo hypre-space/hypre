@@ -148,9 +148,9 @@ ij_assembly: ij_assembly.${OBJ_SUFFIX}
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-sstruct: sstruct.o
+sstruct: sstruct_helpers.o sstruct.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
+	${LINK_CC} -o $@ $^ ${LFLAGS}
 
 struct: struct.${OBJ_SUFFIX}
 	@echo  "Building" $@ "... "
