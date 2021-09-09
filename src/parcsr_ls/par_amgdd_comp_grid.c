@@ -912,9 +912,6 @@ HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGDDData *amgdd_data )
    HYPRE_Int             new_num_recv_procs;
    HYPRE_Int             real_cnt, ghost_cnt;
    HYPRE_Int             proc, outer_level, level, i, j;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_Int             c_cnt, f_cnt;
-#endif
 
    // Post process to remove -1 entries from matrices and reorder so that extra nodes are [real, ghost]
    for (level = start_level; level < num_levels; level++)

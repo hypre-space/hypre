@@ -309,7 +309,7 @@ main( hypre_int argc,
    hypre_assert(errcode == 0);
    errcode = hypre_CSRMatrixDeviceSpGemmSetHashType(hash_type);
    hypre_assert(errcode == 0);
-   errcode = hypre_CSRMatrixDeviceSpGemmUseCusparse(use_cusparse);
+   errcode = HYPRE_SetSpGemmUseCusparse(use_cusparse);
    hypre_assert(errcode == 0);
 
    /*-----------------------------------------------------------
@@ -396,7 +396,7 @@ main( hypre_int argc,
    /* generate P */
    hypre_BoomerAMGBuildExtPIInterp(parcsr_A, CF_marker, parcsr_S, coarse_pnts_global,
                                    num_functions, NULL, debug_flag, trunc_factor, P_max_elmts,
-                                   col_offd_S_to_A, &parcsr_P);
+                                   &parcsr_P);
 
    if (myid == 0)
    {

@@ -44,7 +44,7 @@ Final Relative Residual Norm = 9.261780e-09
 Iterations = 7
 PCG_Iterations = 4
 DSCG_Iterations = 3
-Final Relative Residual Norm = 7.300640e-10
+Final Relative Residual Norm = 7.300641e-10
 
 # Output file: solvers.out.12
 
@@ -89,7 +89,7 @@ GMRES Iterations = 93
 Final GMRES Relative Residual Norm = 8.225662e-09
 
 # Output file: solvers.out.sysh
- Average Convergence Factor = 0.212418
+ Average Convergence Factor = 0.212394
 
      Complexity:    grid = 1.398250
                 operator = 2.661856

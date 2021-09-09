@@ -106,7 +106,7 @@ struct hypre_device_allocator
 #define HYPRE_CUDA_CALL(call) do {                                                           \
    cudaError_t err = call;                                                                   \
    if (cudaSuccess != err) {                                                                 \
-      hypre_printf("CUDA ERROR (code = %d, %s) at %s:%d\n", err, cudaGetErrorString(err),    \
+      printf("CUDA ERROR (code = %d, %s) at %s:%d\n", err, cudaGetErrorString(err),          \
                    __FILE__, __LINE__);                                                      \
       hypre_assert(0); exit(1);                                                              \
    } } while(0)
@@ -115,7 +115,7 @@ struct hypre_device_allocator
 #define HYPRE_HIP_CALL(call) do {                                                            \
    hipError_t err = call;                                                                    \
    if (hipSuccess != err) {                                                                  \
-      hypre_printf("HIP ERROR (code = %d, %s) at %s:%d\n", err, hipGetErrorString(err),      \
+      printf("HIP ERROR (code = %d, %s) at %s:%d\n", err, hipGetErrorString(err),            \
                    __FILE__, __LINE__);                                                      \
       hypre_assert(0); exit(1);                                                              \
    } } while(0)
@@ -125,7 +125,7 @@ struct hypre_device_allocator
 #define HYPRE_CUBLAS_CALL(call) do {                                                         \
    cublasStatus_t err = call;                                                                \
    if (CUBLAS_STATUS_SUCCESS != err) {                                                       \
-      hypre_printf("CUBLAS ERROR (code = %d, %d) at %s:%d\n",                                \
+      printf("CUBLAS ERROR (code = %d, %d) at %s:%d\n",                                      \
             err, err == CUBLAS_STATUS_EXECUTION_FAILED, __FILE__, __LINE__);                 \
       hypre_assert(0); exit(1);                                                              \
    } } while(0)
@@ -133,7 +133,7 @@ struct hypre_device_allocator
 #define HYPRE_CUSPARSE_CALL(call) do {                                                       \
    cusparseStatus_t err = call;                                                              \
    if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
-      hypre_printf("CUSPARSE ERROR (code = %d, %s) at %s:%d\n",                              \
+      printf("CUSPARSE ERROR (code = %d, %s) at %s:%d\n",                                    \
             err, cusparseGetErrorString(err), __FILE__, __LINE__);                           \
       hypre_assert(0); exit(1);                                                              \
    } } while(0)
@@ -141,7 +141,7 @@ struct hypre_device_allocator
 #define HYPRE_ROCSPARSE_CALL(call) do {                                                      \
    rocsparse_status err = call;                                                              \
    if (rocsparse_status_success != err) {                                                    \
-      hypre_printf("rocSPARSE ERROR (code = %d) at %s:%d\n",                                 \
+      printf("rocSPARSE ERROR (code = %d) at %s:%d\n",                                       \
             err, __FILE__, __LINE__);                                                        \
       assert(0); exit(1);                                                                    \
    } } while(0)
@@ -150,14 +150,14 @@ struct hypre_device_allocator
 #define HYPRE_CURAND_CALL(call) do {                                                         \
    curandStatus_t err = call;                                                                \
    if (CURAND_STATUS_SUCCESS != err) {                                                       \
-      hypre_printf("CURAND ERROR (code = %d) at %s:%d\n", err, __FILE__, __LINE__);          \
+      printf("CURAND ERROR (code = %d) at %s:%d\n", err, __FILE__, __LINE__);                \
       hypre_assert(0); exit(1);                                                              \
    } } while(0)
 
 #define HYPRE_ROCRAND_CALL(call) do {                                                        \
    rocrand_status err = call;                                                                \
    if (ROCRAND_STATUS_SUCCESS != err) {                                                      \
-      hypre_printf("ROCRAND ERROR (code = %d) at %s:%d\n", err, __FILE__, __LINE__);         \
+      printf("ROCRAND ERROR (code = %d) at %s:%d\n", err, __FILE__, __LINE__);               \
       hypre_assert(0); exit(1);                                                              \
    } } while(0)
 
@@ -301,6 +301,9 @@ struct hypre_CsrsvData
 #if defined(HYPRE_USING_CUSPARSE)
    csrsv2Info_t info_L;
    csrsv2Info_t info_U;
+#elif defined(HYPRE_USING_ROCSPARSE)
+   rocsparse_mat_info info_L;
+   rocsparse_mat_info info_U;
 #endif
    hypre_int    BufferSize;
    char        *Buffer;
@@ -372,7 +375,7 @@ using namespace thrust::placeholders;
    if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                  \
         blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                   \
    {                                                                                                                 \
-      /* hypre_printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                                 \
+      /* printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                                       \
                  __FILE__, __LINE__,                                                                                 \
                  gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */                      \
    }                                                                                                                 \
@@ -389,7 +392,7 @@ using namespace thrust::placeholders;
    if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                  \
         blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                   \
    {                                                                                                                 \
-      /* hypre_printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                                 \
+      /* printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                                       \
                  __FILE__, __LINE__,                                                                                 \
                  gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */                      \
    }                                                                                                                 \
@@ -409,7 +412,7 @@ using namespace thrust::placeholders;
    if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                  \
         blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                   \
    {                                                                                                                 \
-      /* hypre_printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                                 \
+      /* printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                                       \
                  __FILE__, __LINE__,                                                                                 \
                  gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */                      \
    }                                                                                                                 \
