@@ -54,7 +54,15 @@
       integer    ent
       integer    nentries, nvalues, stencil_indices(5)
 
-      double precision  values(100), tol
+      double precision tol
+
+#if defined(HYPRE_USING_CUDA)
+      double precision values(*)
+      pointer (p_values, values)
+      integer stat
+#else
+      double precision values(100)
+#endif
 
 !     This comes from 'sstruct_mv/HYPRE_sstruct_mv.h'
       integer    HYPRE_SSTRUCT_VARIABLE_NODE
@@ -70,6 +78,11 @@
       integer*8  precond
 
       character*32  matfile
+
+#if defined(HYPRE_USING_CUDA)
+      integer device_malloc_managed
+      stat = device_malloc_managed(100*8, p_values)
+#endif
 
 !     We only have one part and one variable
       nparts = 1
@@ -483,6 +496,10 @@
 
 !     Finalize MPI
       call MPI_Finalize(ierr)
+
+#if defined(HYPRE_USING_CUDA)
+      call device_free(p_values)
+#endif
 
       stop
       end
