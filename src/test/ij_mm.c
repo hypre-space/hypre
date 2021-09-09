@@ -563,15 +563,12 @@ main( hypre_int argc,
    {
 #ifdef HYPRE_USING_CUDA
       total_size = 15LL * 1024 * 1024 * 1024;
-      HYPRE_CUDA_CALL( cudaMalloc(&gpu_ptr, total_size) );
-      hypre_SetUserDeviceMalloc(gpu_alloc);
-      hypre_SetUserDeviceMfree(gpu_free);
 #elif defined(HYPRE_USING_HIP)
       total_size = 31LL * 1024 * 1024 * 1024;
-      HYPRE_HIP_CALL( hipMalloc(&gpu_ptr, total_size) );
+#endif
+      gpu_ptr = hypre_TAlloc(char, total_size, HYPRE_MEMORY_DEVICE);
       hypre_SetUserDeviceMalloc(gpu_alloc);
       hypre_SetUserDeviceMfree(gpu_free);
-#endif
    }
 
 
@@ -736,14 +733,7 @@ main( hypre_int argc,
 
    hypre_printf("Done ...\n");
 
-   if (gpu_ptr)
-   {
-#ifdef HYPRE_USING_CUDA
-      HYPRE_CUDA_CALL(cudaFree(gpu_ptr));
-#elif defined(HYPRE_USING_HIP)
-      HYPRE_HIP_CALL(hipFree(gpu_ptr));
-#endif
-   }
+   hypre_TFree(gpu_ptr, HYPRE_MEMORY_DEVICE);
 
    return (0);
 }
