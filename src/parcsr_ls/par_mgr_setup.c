@@ -919,8 +919,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       // TODO: input check to avoid crashing
       if (lev == 0 && use_default_fsolver == 0)
       {
-        //if (((hypre_ParAMGData*)aff_solver[0])->A_array[0] == NULL)
-        if (((hypre_ParAMGData*)aff_solver[lev])->A != NULL)
+        if (((hypre_ParAMGData*)aff_solver[lev])->A_array[0] != NULL)
         {
           /*
           if (my_id == 0)
@@ -931,7 +930,7 @@ hypre_MGRSetup( void               *mgr_vdata,
           }
           */
           // F-solver is already set up, only need to store A_ff_ptr
-          A_ff_ptr = ((hypre_ParAMGData*)aff_solver[lev])->A;
+          A_ff_ptr = ((hypre_ParAMGData*)aff_solver[lev])->A_array[0];
         }
         else
         {
