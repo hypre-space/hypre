@@ -4299,8 +4299,11 @@ void hypre_BlockDiagInvLapack(HYPRE_Real *diag, HYPRE_Int N, HYPRE_Int blk_size)
       hypre_dgetri(&blk_size, diag+i*LWORK, &blk_size, IPIV, WORK, &LWORK, &INFO);
     }
     // Left size
-    hypre_dgetrf(&left_size, &left_size, diag+i*LWORK, &left_size, IPIV, &INFO);
-    hypre_dgetri(&left_size, diag+i*LWORK, &left_size, IPIV, WORK, &LWORK, &INFO);
+    if (left_size > 0)
+    {
+      hypre_dgetrf(&left_size, &left_size, diag+i*LWORK, &left_size, IPIV, &INFO);
+      hypre_dgetri(&left_size, diag+i*LWORK, &left_size, IPIV, WORK, &LWORK, &INFO);
+    }
 
     hypre_TFree(IPIV, HYPRE_MEMORY_HOST);
     hypre_TFree(WORK, HYPRE_MEMORY_HOST);
@@ -4485,12 +4488,13 @@ HYPRE_Int hypre_ParCSRMatrixBlockDiagInvMatrix(  hypre_ParCSRMatrix  *A,
   HYPRE_Int       ii, jj;
 
   HYPRE_Int n_block, left_size, inv_size;
-  HYPRE_Int blk_diag_nlocal_rows, blk_diag_total_global_nrows;
+  HYPRE_Int blk_diag_nlocal_rows;
+  HYPRE_BigInt blk_diag_total_global_nrows;
 
   HYPRE_Int        bidx, bidxm1, bidxp1;
   HYPRE_Real       *diaginv=NULL;
   HYPRE_Real       *diaginv_local=NULL;
-  HYPRE_Int        *blk_diag_row_starts;
+  HYPRE_BigInt     *blk_diag_row_starts;
 
   const HYPRE_Int nb2 = blk_size*blk_size;
 
@@ -4564,11 +4568,12 @@ HYPRE_Int hypre_ParCSRMatrixBlockDiagInvMatrix(  hypre_ParCSRMatrix  *A,
 
   {
     HYPRE_BigInt scan_recv;
+    HYPRE_BigInt nlocal_rows = blk_diag_nlocal_rows;
     
     blk_diag_row_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-    hypre_MPI_Scan(&blk_diag_nlocal_rows, &scan_recv, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+    hypre_MPI_Scan(&nlocal_rows, &scan_recv, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
     /* first point in my range */ 
-    blk_diag_row_starts[0] = scan_recv - blk_diag_nlocal_rows;
+    blk_diag_row_starts[0] = scan_recv - nlocal_rows;
     /* first point in next proc's range */
     blk_diag_row_starts[1] = scan_recv;
     if (my_id == (num_procs -1)) blk_diag_total_global_nrows = blk_diag_row_starts[1];
