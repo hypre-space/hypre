@@ -6,6 +6,10 @@
  ******************************************************************************/
 
 #include "sstruct_helpers.h"
+#include "_hypre_sstruct_mv.h"
+
+/* Tests prototypes */
+HYPRE_Int test_SStructMatmult( HYPRE_Int nmatrices , HYPRE_SStructMatrix *ss_A , HYPRE_IJMatrix *ij_A , HYPRE_Int nterms , HYPRE_Int *terms , HYPRE_Int *trans );
 
 /*--------------------------------------------------------------------------
  * Print usage info
@@ -70,14 +74,20 @@ main( hypre_int  argc,
    Index                  *distribute;
    Index                  *block;
    HYPRE_Int               print;
+   HYPRE_Int               nterms;
+   HYPRE_Int              *terms;
+   HYPRE_Int              *trans;
 
    /* Local variables */
    HYPRE_Int               myid, nprocs;
    HYPRE_Int               arg_index;
    HYPRE_Int               time_index;
    HYPRE_Int               i, j, s, part;
+   HYPRE_Int               do_matmult;
+   HYPRE_Int               ierr;
    char                    infile_default[50] = "sstruct.in.cubes4_7pt";
    char                    matname[64];
+   char                    transposechar;
 
    /*-----------------------------------------------------------
     * Initialize libraries
@@ -229,6 +239,23 @@ main( hypre_int  argc,
          arg_index++;
          print = 1;
       }
+      else if ( strcmp(argv[arg_index], "-mat-mat") == 0 )
+      {
+         arg_index++;
+         do_matmult = 1;
+         nterms = atoi(argv[arg_index++]);
+         terms = hypre_CTAlloc(HYPRE_Int, nterms, HYPRE_MEMORY_HOST);
+         trans = hypre_CTAlloc(HYPRE_Int, nterms, HYPRE_MEMORY_HOST);
+         for (i = 0; i < nterms; i++)
+         {
+            transposechar = ' ';
+            hypre_sscanf(argv[arg_index++], "%d%c", &terms[i], &transposechar);
+            if (transposechar == 'T')
+            {
+               trans[i] = 1;
+            }
+         }
+      }
    } /* while (arg_index < argc) */
 
    /*-----------------------------------------------------------
@@ -264,7 +291,33 @@ main( hypre_int  argc,
          hypre_sprintf(matname, "sstruct.out.A.m%02d", i);
          HYPRE_SStructMatrixPrint(matname, ss_A[i], 0);
       }
+
+      /* Convert to IJMatrix */
+      HYPRE_SStructMatrixToIJMatrix(ss_A[i], 1, &ij_A[i]);
    }
+
+   /*-----------------------------------------------------------
+    * Matrix-matrix multiply
+    *-----------------------------------------------------------*/
+
+   if (do_matmult)
+   {
+      hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+      time_index = hypre_InitializeTiming("Matrix-matrix multiply");
+      hypre_BeginTiming(time_index);
+
+      ierr = test_SStructMatmult(nmatrices, ss_A, ij_A, nterms, terms, trans);
+      if (!ierr)
+      {
+         hypre_printf("test_SStructMatmult failed!\n");
+      }
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Matrix-matrix multiply", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   }
+
 
    /*-----------------------------------------------------------
     * Free memory
@@ -279,6 +332,7 @@ main( hypre_int  argc,
       HYPRE_SStructGridDestroy(grid[i]);
       HYPRE_SStructGraphDestroy(graph[i]);
       HYPRE_SStructMatrixDestroy(ss_A[i]);
+      HYPRE_IJMatrixDestroy(ij_A[i]);
    }
    hypre_TFree(stencils, HYPRE_MEMORY_HOST);
    hypre_TFree(grid, HYPRE_MEMORY_HOST);
@@ -296,6 +350,8 @@ main( hypre_int  argc,
    hypre_TFree(block, HYPRE_MEMORY_HOST);
    hypre_TFree(refine, HYPRE_MEMORY_HOST);
    hypre_TFree(distribute, HYPRE_MEMORY_HOST);
+   hypre_TFree(terms, HYPRE_MEMORY_HOST);
+   hypre_TFree(trans, HYPRE_MEMORY_HOST);
 
    /*-----------------------------------------------------------
     * Finalize libraries
@@ -304,4 +360,83 @@ main( hypre_int  argc,
    hypre_MPI_Finalize();
 
    return 0;
+}
+
+HYPRE_Int
+test_SStructMatmult( HYPRE_Int            nmatrices,
+                     HYPRE_SStructMatrix *ss_A,
+                     HYPRE_IJMatrix      *ij_A,
+                     HYPRE_Int            nterms,
+                     HYPRE_Int           *terms,
+                     HYPRE_Int           *trans )
+{
+   MPI_Comm             comm = hypre_SStructMatrixComm(ss_A[0]);
+
+   HYPRE_SStructMatrix  ss_M;
+   HYPRE_IJMatrix       ij_M;
+   HYPRE_ParCSRMatrix   par_A[3];
+   HYPRE_ParCSRMatrix   par_E;
+   HYPRE_ParCSRMatrix   par_M;
+
+   HYPRE_Int            m, t;
+   HYPRE_Complex        alpha = 1.0;
+   HYPRE_Complex        beta = -1.0;
+   HYPRE_Int            myid;
+   HYPRE_Real           norm_M, norm_E;
+   HYPRE_Int            ierr = 0;
+
+   hypre_MPI_Comm_rank(comm, &myid);
+
+   /* Compute semi-structured matrices product */
+   hypre_SStructMatmult(nmatrices, ss_A, nterms, terms, trans, &ss_M);
+   HYPRE_SStructMatrixToIJMatrix(ss_M, 1, &ij_M);
+
+   /* Compute IJ matrices product */
+   m = terms[nterms-1];
+   HYPRE_SStructMatrixGetObject(ss_A[m], (void **) &par_A[0]);
+   for (t = (nterms - 2); t >= 0; t--)
+   {
+      m = terms[t];
+      HYPRE_SStructMatrixGetObject(ss_A[nterms-1], (void **) &par_A[1]);
+
+      /* Free temporary work matrix */
+      if (t < (nterms - 3))
+      {
+         HYPRE_ParCSRMatrixDestroy(par_A[2]);
+      }
+
+      if (trans[t])
+      {
+         par_A[2] = hypre_ParTMatmul(par_A[1], par_A[0]);
+      }
+      else
+      {
+         par_A[2] = hypre_ParMatmul(par_A[1], par_A[0]);
+      }
+
+      /* Update pointers */
+      par_A[0] = par_A[2];
+   }
+
+   /* Compute error */
+   HYPRE_SStructMatrixGetObject(ss_M, (void **) &par_M);
+   hypre_ParCSRMatrixAdd(alpha, par_A[0], beta, par_M, &par_E);
+   hypre_ParCSRMatrixInfNorm(par_M, &norm_M);
+   hypre_ParCSRMatrixInfNorm(par_E, &norm_E);
+
+   if (!myid)
+   {
+      hypre_printf("[test_SStructMatmult]: Error norm = %e\n", norm_E);
+      if (norm_E > HYPRE_REAL_EPSILON*norm_M)
+      {
+         ierr = 1;
+      }
+   }
+
+   /* Free memory */
+   HYPRE_ParCSRMatrixDestroy(par_A[0]);
+   HYPRE_ParCSRMatrixDestroy(par_E);
+   HYPRE_SStructMatrixDestroy(ss_M);
+
+   return ierr;
 }
