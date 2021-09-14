@@ -190,20 +190,21 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
    HYPRE_Real   strong_threshold = 0.25;
    HYPRE_Real   max_row_sum = 1.0;
    HYPRE_Real   fnorm, rfnorm, fnorm0;
-   HYPRE_Int    local_num_vars, *coarse_dof_func, *coarse_pnts_global;
+   HYPRE_Int    local_num_vars, *coarse_pnts_global;
    HYPRE_Int    num_procs, myid;
    HYPRE_Int    time_index, i;
 
-   hypre_IntArray    *CF_marker  = NULL;
-   HYPRE_ParCSRMatrix parcsr_S   = NULL;
-   HYPRE_ParCSRMatrix parcsr_P   = NULL;
-   HYPRE_ParCSRMatrix parcsr_Q   = NULL;
-   HYPRE_ParCSRMatrix parcsr_AH  = NULL;
-   HYPRE_ParCSRMatrix parcsr_A_host  = NULL;
-   HYPRE_ParCSRMatrix parcsr_P_host  = NULL;
-   HYPRE_ParCSRMatrix parcsr_Q_host  = NULL;
-   HYPRE_ParCSRMatrix parcsr_AH_host = NULL;
-   HYPRE_ParCSRMatrix parcsr_AH_host_2 = NULL;
+   hypre_IntArray    *CF_marker         = NULL;
+   hypre_IntArray    *coarse_dof_func   = NULL; 
+   HYPRE_ParCSRMatrix parcsr_S          = NULL;
+   HYPRE_ParCSRMatrix parcsr_P          = NULL;
+   HYPRE_ParCSRMatrix parcsr_Q          = NULL;
+   HYPRE_ParCSRMatrix parcsr_AH         = NULL;
+   HYPRE_ParCSRMatrix parcsr_A_host     = NULL;
+   HYPRE_ParCSRMatrix parcsr_P_host     = NULL;
+   HYPRE_ParCSRMatrix parcsr_Q_host     = NULL;
+   HYPRE_ParCSRMatrix parcsr_AH_host    = NULL;
+   HYPRE_ParCSRMatrix parcsr_AH_host_2  = NULL;
    HYPRE_ParCSRMatrix parcsr_error_host = NULL;
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
