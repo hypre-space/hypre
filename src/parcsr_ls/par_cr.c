@@ -24,7 +24,7 @@
 
 HYPRE_Int
 hypre_BoomerAMGCoarsenCR1( hypre_ParCSRMatrix    *A,
-                           HYPRE_Int            **CF_marker_ptr,
+                           hypre_IntArray       **CF_marker_ptr,
                            HYPRE_BigInt          *coarse_size_ptr,
                            HYPRE_Int              num_CR_relax_steps,
                            HYPRE_Int              IS_type,
@@ -42,12 +42,11 @@ hypre_BoomerAMGCoarsenCR1( hypre_ParCSRMatrix    *A,
    HYPRE_Int        coarse_size;
 
    if(CRaddCpoints == 0){
-      CF_marker = hypre_CTAlloc(HYPRE_Int,  num_variables, HYPRE_MEMORY_HOST);
-      for ( i = 0; i < num_variables; i++)
-         CF_marker[i] = fpt;
-   } else {
-      CF_marker = *CF_marker_ptr;
+      *CF_marker_ptr = hypre_IntArrayCreate(num_variables);
+      hypre_IntArrayInitialize(*CF_marker_ptr);
+      hypre_IntArraySetConstantValues(*CF_marker_ptr, fpt);
    }
+   CF_marker = hypre_IntArrayData(*CF_marker_ptr);
 
    /* Run the CR routine */
 
@@ -62,7 +61,6 @@ hypre_BoomerAMGCoarsenCR1( hypre_ParCSRMatrix    *A,
          coarse_size++;
       }
    }
-   *CF_marker_ptr   = CF_marker;
    *coarse_size_ptr = coarse_size;
 
    return hypre_error_flag;
@@ -2589,7 +2587,7 @@ hypre_BoomerAMGIndepPMISa( hypre_ParCSRMatrix    *S,
 }
 HYPRE_Int
 hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
-                          HYPRE_Int        **CF_marker_ptr,
+                          hypre_IntArray   **CF_marker_ptr,
                           HYPRE_BigInt      *coarse_size_ptr,
                           HYPRE_Int          num_CR_relax_steps,
                           HYPRE_Int          IS_type,
@@ -2660,18 +2658,17 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
      {*/
    if(num_functions == 1)
    {
-      CF_marker = hypre_CTAlloc(HYPRE_Int,  num_variables, HYPRE_MEMORY_HOST);
-      for ( i = 0; i < num_variables; i++)
-         CF_marker[i] = fpt;
+      *CF_marker_ptr = hypre_IntArrayCreate(num_variables);
    }
    else
    {
       num_nodes = num_variables/num_functions;
-      CF_marker = hypre_CTAlloc(HYPRE_Int,  num_nodes, HYPRE_MEMORY_HOST);
       sum = hypre_CTAlloc(HYPRE_Real,  num_nodes, HYPRE_MEMORY_HOST);
-      for ( i = 0; i < num_nodes; i++)
-         CF_marker[i] = fpt;
+      *CF_marker_ptr = hypre_IntArrayCreate(num_nodes);
    }
+   hypre_IntArrayInitialize(*CF_marker_ptr);
+   hypre_IntArraySetConstantValues(*CF_marker_ptr, fpt);
+   CF_marker = hypre_IntArrayData(*CF_marker_ptr);
    /*}
      else
      {
@@ -3079,7 +3076,6 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
       }
    }
    /*if(CRaddCpoints) hypre_TFree(CFN_marker);*/
-   *CF_marker_ptr   = CF_marker;
    *coarse_size_ptr = coarse_size;
    hypre_TFree(sum, HYPRE_MEMORY_HOST);
    return hypre_error_flag;
