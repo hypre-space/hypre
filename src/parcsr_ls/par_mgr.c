@@ -447,6 +447,11 @@ hypre_MGRDestroyFrelaxVcycleData( void *data )
     hypre_TFree(hypre_ParAMGDataDofFuncArray(vdata)[i], HYPRE_MEMORY_HOST);
   }
 
+  if (num_levels < 1)
+  {
+    hypre_IntArrayDestroy(hypre_ParAMGDataCFMarkerArray(vdata)[0]);
+  }
+
   /* Points to VcycleRelaxVtemp of mgr_data, which is already destroyed */
   //hypre_ParVectorDestroy(hypre_ParAMGDataVtemp(vdata));
   hypre_TFree(hypre_ParAMGDataFArray(vdata), HYPRE_MEMORY_HOST);
