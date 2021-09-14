@@ -665,6 +665,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    dof_func_array[0] = dof_func;
    hypre_ParAMGDataCFMarkerArray(amg_data) = CF_marker_array;
    hypre_ParAMGDataNumCPoints(amg_data) = num_C_points_coarse;
+   hypre_ParAMGDataDofFunc(amg_data) = dof_func;
    hypre_ParAMGDataDofFuncArray(amg_data) = dof_func_array;
    hypre_ParAMGDataAArray(amg_data) = A_array;
    hypre_ParAMGDataPArray(amg_data) = P_array;
