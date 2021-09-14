@@ -11,6 +11,10 @@
 
 #include "sstruct_helpers.h"
 
+/*--------------------------------------------------------------------------
+ * GetVariableBox
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 GetVariableBox( Index      cell_ilower,
                 Index      cell_iupper,
@@ -59,7 +63,7 @@ GetVariableBox( Index      cell_ilower,
 }
 
 /*--------------------------------------------------------------------------
- * Read routines
+ * SScanIntArray
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -82,6 +86,10 @@ SScanIntArray( char        *sdata_ptr,
    return 0;
 }
 
+/*--------------------------------------------------------------------------
+ * SScanDblArray
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 SScanDblArray( char       *sdata_ptr,
                char      **sdata_ptr_ptr,
@@ -100,6 +108,10 @@ SScanDblArray( char       *sdata_ptr,
    *sdata_ptr_ptr = sdata_ptr;
    return 0;
 }
+
+/*--------------------------------------------------------------------------
+ * SScanProblemIndex
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 SScanProblemIndex( char          *sdata_ptr,
@@ -173,6 +185,10 @@ SScanProblemIndex( char          *sdata_ptr,
 
    return 0;
 }
+
+/*--------------------------------------------------------------------------
+ * ReadData
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 ReadData( char         *filename,
@@ -1930,7 +1946,596 @@ DestroyData( ProblemData   data )
 }
 
 /*--------------------------------------------------------------------------
- * Routine to load cosine function
+ * BuildGrid
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+BuildGrid( MPI_Comm            comm,
+           ProblemData         data,
+           HYPRE_SStructGrid  *grid_ptr )
+{
+   HYPRE_SStructGrid      grid;
+
+   ProblemPartData        pdata;
+   HYPRE_Int              part, box;
+
+   HYPRE_SStructGridCreate(comm, data.ndim, data.nparts, &grid);
+
+   /* GridSetNumGhost */
+   if (data.numghost != NULL)
+   {
+      HYPRE_SStructGridSetNumGhost(grid, data.numghost);
+   }
+
+   for (part = 0; part < data.nparts; part++)
+   {
+      pdata = data.pdata[part];
+
+      /* GridSetExtents */
+      for (box = 0; box < pdata.nboxes; box++)
+      {
+         HYPRE_SStructGridSetExtents(grid, part, pdata.ilowers[box], pdata.iuppers[box]);
+      }
+
+      /* GridSetVariables */
+      HYPRE_SStructGridSetVariables(grid, part, pdata.nvars, pdata.vartypes);
+
+      /* GridAddVariabes */
+      if (data.fem_nvars > 0)
+      {
+         HYPRE_SStructGridSetFEMOrdering(grid, part, data.fem_ordering);
+      }
+
+      /* GridSetNeighborPart */
+      for (box = 0; box < pdata.glue_nboxes; box++)
+      {
+         HYPRE_SStructGridSetNeighborPart(grid, part,
+                                          pdata.glue_ilowers[box],
+                                          pdata.glue_iuppers[box],
+                                          pdata.glue_nbor_parts[box],
+                                          pdata.glue_nbor_ilowers[box],
+                                          pdata.glue_nbor_iuppers[box],
+                                          pdata.glue_index_maps[box],
+                                          pdata.glue_index_dirs[box]);
+      }
+
+      /* GridSetPeriodic */
+      HYPRE_SStructGridSetPeriodic(grid, part, pdata.periodic);
+   }
+
+   HYPRE_SStructGridAssemble(grid);
+
+   *grid_ptr = grid;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * BuildStencils
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+BuildStencils( ProblemData            data,
+               HYPRE_SStructGrid      grid,
+               HYPRE_SStructStencil **stencils_ptr )
+{
+   HYPRE_SStructStencil  *stencils;
+   HYPRE_Int              s, e;
+
+   stencils = hypre_CTAlloc(HYPRE_SStructStencil, data.nstencils, HYPRE_MEMORY_HOST);
+   for (s = 0; s < data.nstencils; s++)
+   {
+      HYPRE_SStructStencilCreate(data.ndim, data.stencil_sizes[s], &stencils[s]);
+      for (e = 0; e < data.stencil_sizes[s]; e++)
+      {
+         HYPRE_SStructStencilSetEntry(stencils[s], e,
+                                      data.stencil_offsets[s][e],
+                                      data.stencil_vars[s][e]);
+      }
+   }
+
+   *stencils_ptr = stencils;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * BuildGraph
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+BuildGraph( MPI_Comm               comm,
+            ProblemData            data,
+            HYPRE_SStructGrid      grid,
+            HYPRE_Int              object_type,
+            HYPRE_SStructStencil  *stencils,
+            HYPRE_SStructGraph    *graph_ptr )
+{
+   HYPRE_SStructGraph     graph;
+   ProblemPartData        pdata;
+
+   Index                  index, to_index;
+
+   HYPRE_Int              part, var, box;
+   HYPRE_Int              i, j, k;
+
+   HYPRE_SStructGraphCreate(comm, grid, &graph);
+   HYPRE_SStructGraphSetObjectType(graph, object_type);
+
+   for (part = 0; part < data.nparts; part++)
+   {
+      pdata = data.pdata[part];
+
+      if (data.nstencils > 0)
+      {
+         /* set stencils */
+         for (var = 0; var < pdata.nvars; var++)
+         {
+            HYPRE_SStructGraphSetStencil(graph, part, var,
+                                         stencils[pdata.stencil_num[var]]);
+         }
+      }
+      else if (data.fem_nvars > 0)
+      {
+         /* indicate FEM approach */
+         HYPRE_SStructGraphSetFEM(graph, part);
+
+         /* set sparsity */
+         HYPRE_SStructGraphSetFEMSparsity(graph, part,
+                                          data.fem_nsparse, data.fem_sparsity);
+      }
+
+      /* add entries */
+      for (box = 0; box < pdata.graph_nboxes; box++)
+      {
+         for (index[2] = pdata.graph_ilowers[box][2];
+              index[2] <= pdata.graph_iuppers[box][2];
+              index[2] += pdata.graph_strides[box][2])
+         {
+            for (index[1] = pdata.graph_ilowers[box][1];
+                 index[1] <= pdata.graph_iuppers[box][1];
+                 index[1] += pdata.graph_strides[box][1])
+            {
+               for (index[0] = pdata.graph_ilowers[box][0];
+                    index[0] <= pdata.graph_iuppers[box][0];
+                    index[0] += pdata.graph_strides[box][0])
+               {
+                  for (i = 0; i < 3; i++)
+                  {
+                     j = pdata.graph_index_maps[box][i];
+                     k = index[i] - pdata.graph_ilowers[box][i];
+                     k /= pdata.graph_strides[box][i];
+                     k *= pdata.graph_index_signs[box][i];
+                     to_index[j] = pdata.graph_to_ilowers[box][j];
+                     to_index[j] += k * pdata.graph_to_strides[box][j];
+                  }
+                  HYPRE_SStructGraphAddEntries(graph, part, index,
+                                               pdata.graph_vars[box],
+                                               pdata.graph_to_parts[box],
+                                               to_index,
+                                               pdata.graph_to_vars[box]);
+               }
+            }
+         }
+      }
+   }
+
+   HYPRE_SStructGraphAssemble(graph);
+
+   *graph_ptr = graph;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * BuildMatrix
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+BuildMatrix( MPI_Comm               comm,
+             ProblemData            data,
+             HYPRE_SStructGrid      grid,
+             HYPRE_SStructStencil  *stencils,
+             HYPRE_SStructGraph     graph,
+             HYPRE_SStructMatrix   *A_ptr )
+{
+   HYPRE_SStructMatrix    A;
+   ProblemPartData        pdata;
+
+   HYPRE_Real            *values;
+   Index                  ilower, iupper;
+   Index                  index;
+
+   HYPRE_Int              part, var, box;
+   HYPRE_Int              i, j;
+   HYPRE_Int              s, e;
+   HYPRE_Int              size;
+   HYPRE_Int              row, col;
+
+   /*-----------------------------------------------------------
+    * Set up the matrix
+    *-----------------------------------------------------------*/
+
+   values = hypre_TAlloc(HYPRE_Real, hypre_max(data.max_boxsize, data.fem_nsparse),
+                         HYPRE_MEMORY_HOST);
+
+   HYPRE_SStructMatrixCreate(hypre_MPI_COMM_WORLD, graph, &A);
+
+   for (i = 0; i < data.symmetric_num; i++)
+   {
+      HYPRE_SStructMatrixSetSymmetric(A, data.symmetric_parts[i],
+                                      data.symmetric_vars[i],
+                                      data.symmetric_to_vars[i],
+                                      data.symmetric_booleans[i]);
+   }
+   HYPRE_SStructMatrixSetNSSymmetric(A, data.ns_symmetric);
+   HYPRE_SStructMatrixInitialize(A);
+
+   if (data.nstencils > 0)
+   {
+      /* StencilSetEntry: set stencil values */
+      for (part = 0; part < data.nparts; part++)
+      {
+         pdata = data.pdata[part];
+         for (var = 0; var < pdata.nvars; var++)
+         {
+            s = pdata.stencil_num[var];
+            for (i = 0; i < data.stencil_sizes[s]; i++)
+            {
+               for (j = 0; j < pdata.max_boxsize; j++)
+               {
+                  values[j] = data.stencil_values[s][i];
+               }
+               for (box = 0; box < pdata.nboxes; box++)
+               {
+                  GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
+                                 pdata.vartypes[var], ilower, iupper);
+                  HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
+                                                  var, 1, &i, values);
+               }
+            }
+         }
+      }
+   }
+   else if (data.fem_nvars > 0)
+   {
+      /* FEMStencilSetRow: add to stencil values */
+      for (part = 0; part < data.nparts; part++)
+      {
+         pdata = data.pdata[part];
+         for (box = 0; box < pdata.nboxes; box++)
+         {
+            for (index[2] = pdata.ilowers[box][2];
+                 index[2] <= pdata.iuppers[box][2]; index[2]++)
+            {
+               for (index[1] = pdata.ilowers[box][1];
+                    index[1] <= pdata.iuppers[box][1]; index[1]++)
+               {
+                  for (index[0] = pdata.ilowers[box][0];
+                       index[0] <= pdata.iuppers[box][0]; index[0]++)
+                  {
+                     HYPRE_SStructMatrixAddFEMValues(A, part, index,
+                                                     data.fem_values);
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   /* GraphAddEntries: set non-stencil entries */
+   for (part = 0; part < data.nparts; part++)
+   {
+      pdata = data.pdata[part];
+      for (box = 0; box < pdata.graph_nboxes; box++)
+      {
+         /*
+          * RDF NOTE: Add a separate interface routine for setting non-stencil
+          * entries.  It would be more efficient to set boundary values a box
+          * at a time, but AMR may require striding, and some codes may already
+          * have a natural values array to pass in, but can't because it uses
+          * ghost values.
+          *
+          * Example new interface routine:
+          *   SetNSBoxValues(matrix, part, ilower, iupper, stride, entry
+          *                  values_ilower, values_iupper, values);
+          */
+
+/* since we have already tested SetBoxValues above, use SetValues here */
+#if 0
+         for (j = 0; j < pdata.graph_boxsizes[box]; j++)
+         {
+            values[j] = pdata.graph_values[box];
+         }
+         HYPRE_SStructMatrixSetBoxValues(A, part,
+                                         pdata.graph_ilowers[box],
+                                         pdata.graph_iuppers[box],
+                                         pdata.graph_vars[box],
+                                         1, &pdata.graph_entries[box],
+                                         values);
+#else
+         for (index[2] = pdata.graph_ilowers[box][2];
+              index[2] <= pdata.graph_iuppers[box][2];
+              index[2] += pdata.graph_strides[box][2])
+         {
+            for (index[1] = pdata.graph_ilowers[box][1];
+                 index[1] <= pdata.graph_iuppers[box][1];
+                 index[1] += pdata.graph_strides[box][1])
+            {
+               for (index[0] = pdata.graph_ilowers[box][0];
+                    index[0] <= pdata.graph_iuppers[box][0];
+                    index[0] += pdata.graph_strides[box][0])
+               {
+                  HYPRE_SStructMatrixSetValues(A, part, index,
+                                               pdata.graph_vars[box],
+                                               1, &pdata.graph_entries[box],
+                                               &pdata.graph_values[box]);
+               }
+            }
+         }
+#endif
+      }
+   }
+
+   /* MatrixSetValues: reset some matrix values */
+   for (part = 0; part < data.nparts; part++)
+   {
+      pdata = data.pdata[part];
+      for (box = 0; box < pdata.matset_nboxes; box++)
+      {
+         size = 1;
+         for (j = 0; j < 3; j++)
+         {
+            size *= (pdata.matset_iuppers[box][j] -
+                     pdata.matset_ilowers[box][j] + 1);
+         }
+         for (j = 0; j < size; j++)
+         {
+            values[j] = pdata.matset_values[box];
+         }
+         HYPRE_SStructMatrixSetBoxValues(A, part,
+                                         pdata.matset_ilowers[box],
+                                         pdata.matset_iuppers[box],
+                                         pdata.matset_vars[box],
+                                         1, &pdata.matset_entries[box],
+                                         values);
+      }
+   }
+
+   /* MatrixAddToValues: add to some matrix values */
+   for (part = 0; part < data.nparts; part++)
+   {
+      pdata = data.pdata[part];
+      for (box = 0; box < pdata.matadd_nboxes; box++)
+      {
+         size = 1;
+         for (j = 0; j < 3; j++)
+         {
+            size*= (pdata.matadd_iuppers[box][j] -
+                    pdata.matadd_ilowers[box][j] + 1);
+         }
+
+         for (e = 0; e < pdata.matadd_nentries[box]; e++)
+         {
+            for (j = 0; j < size; j++)
+            {
+               values[j] = pdata.matadd_values[box][e];
+            }
+
+            HYPRE_SStructMatrixAddToBoxValues(A, part,
+                                              pdata.matadd_ilowers[box],
+                                              pdata.matadd_iuppers[box],
+                                              pdata.matadd_vars[box],
+                                              1, &pdata.matadd_entries[box][e],
+                                              values);
+         }
+      }
+   }
+
+   /* FEMMatrixAddToValues: add to some matrix values */
+   for (part = 0; part < data.nparts; part++)
+   {
+      pdata = data.pdata[part];
+      for (box = 0; box < pdata.fem_matadd_nboxes; box++)
+      {
+         for (i = 0; i < data.fem_nsparse; i++)
+         {
+            values[i] = 0.0;
+         }
+         s = 0;
+         for (i = 0; i < pdata.fem_matadd_nrows[box]; i++)
+         {
+            row = pdata.fem_matadd_rows[box][i];
+            for (j = 0; j < pdata.fem_matadd_ncols[box]; j++)
+            {
+               col = pdata.fem_matadd_cols[box][j];
+               values[data.fem_ivalues_full[row][col]] =
+                  pdata.fem_matadd_values[box][s];
+               s++;
+            }
+         }
+         for (index[2] = pdata.fem_matadd_ilowers[box][2];
+              index[2] <= pdata.fem_matadd_iuppers[box][2]; index[2]++)
+         {
+            for (index[1] = pdata.fem_matadd_ilowers[box][1];
+                 index[1] <= pdata.fem_matadd_iuppers[box][1]; index[1]++)
+            {
+               for (index[0] = pdata.fem_matadd_ilowers[box][0];
+                    index[0] <= pdata.fem_matadd_iuppers[box][0]; index[0]++)
+               {
+                  HYPRE_SStructMatrixAddFEMValues(A, part, index, values);
+               }
+            }
+         }
+      }
+   }
+
+   HYPRE_SStructMatrixAssemble(A);
+
+   /*-----------------------------------------------------------
+    * Free memory
+    *-----------------------------------------------------------*/
+   hypre_TFree(values, HYPRE_MEMORY_HOST);
+
+   *A_ptr = A;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * BuildVector
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+BuildVector( MPI_Comm             comm,
+             ProblemData          data,
+             HYPRE_SStructGrid    grid,
+             HYPRE_Int            object_type,
+             HYPRE_Real           rhs_value,
+             HYPRE_SStructVector *vec_ptr )
+{
+   HYPRE_SStructVector  vec;
+   ProblemPartData      pdata;
+
+   Index                ilower, iupper;
+   Index                index;
+
+   HYPRE_Real          *values;
+   HYPRE_Int            j, part, var, box;
+   HYPRE_Int            size;
+
+   /* Allocate work data */
+   values = hypre_TAlloc(HYPRE_Real, hypre_max(data.max_boxsize, data.fem_nsparse),
+                         HYPRE_MEMORY_HOST);
+
+   HYPRE_SStructVectorCreate(comm, grid, &vec);
+   HYPRE_SStructVectorSetObjectType(vec, object_type);
+   HYPRE_SStructVectorInitialize(vec);
+
+   /* Initialize the rhs values */
+   if (data.rhs_true)
+   {
+      for (j = 0; j < data.max_boxsize; j++)
+      {
+         values[j] = data.rhs_value;
+      }
+   }
+   else if (data.fem_rhs_true)
+   {
+      for (j = 0; j < data.max_boxsize; j++)
+      {
+         values[j] = 0.0;
+      }
+   }
+   else /* rhs_value is the default */
+   {
+      for (j = 0; j < data.max_boxsize; j++)
+      {
+         values[j] = rhs_value;
+      }
+   }
+
+   for (part = 0; part < data.nparts; part++)
+   {
+      pdata = data.pdata[part];
+      for (var = 0; var < pdata.nvars; var++)
+      {
+         for (box = 0; box < pdata.nboxes; box++)
+         {
+            GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
+                           pdata.vartypes[var], ilower, iupper);
+            HYPRE_SStructVectorSetBoxValues(vec, part, ilower, iupper,
+                                            var, values);
+         }
+      }
+   }
+
+   /* Add values for FEMRhsSet */
+   if (data.fem_rhs_true)
+   {
+      hypre_TMemcpy(data.d_fem_rhs_values, data.fem_rhs_values, HYPRE_Real, data.fem_nvars,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
+      for (part = 0; part < data.nparts; part++)
+      {
+         pdata = data.pdata[part];
+         for (box = 0; box < pdata.nboxes; box++)
+         {
+            for (index[2] = pdata.ilowers[box][2];
+                 index[2] <= pdata.iuppers[box][2]; index[2]++)
+            {
+               for (index[1] = pdata.ilowers[box][1];
+                    index[1] <= pdata.iuppers[box][1]; index[1]++)
+               {
+                  for (index[0] = pdata.ilowers[box][0];
+                       index[0] <= pdata.iuppers[box][0]; index[0]++)
+                  {
+                     HYPRE_SStructVectorAddFEMValues(vec, part, index,
+                                                     data.d_fem_rhs_values);
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   /* RhsAddToValues: add to some RHS values */
+   for (part = 0; part < data.nparts; part++)
+   {
+      pdata = data.pdata[part];
+      for (box = 0; box < pdata.rhsadd_nboxes; box++)
+      {
+         size = 1;
+         for (j = 0; j < 3; j++)
+         {
+            size *= (pdata.rhsadd_iuppers[box][j] -
+                    pdata.rhsadd_ilowers[box][j] + 1);
+         }
+
+         for (j = 0; j < size; j++)
+         {
+            values[j] = pdata.rhsadd_values[box];
+         }
+
+         HYPRE_SStructVectorAddToBoxValues(vec, part,
+                                           pdata.rhsadd_ilowers[box],
+                                           pdata.rhsadd_iuppers[box],
+                                           pdata.rhsadd_vars[box], values);
+      }
+   }
+
+   /* FEMRhsAddToValues: add to some RHS values */
+   for (part = 0; part < data.nparts; part++)
+   {
+      pdata = data.pdata[part];
+      for (box = 0; box < pdata.fem_rhsadd_nboxes; box++)
+      {
+         for (index[2] = pdata.fem_rhsadd_ilowers[box][2];
+              index[2] <= pdata.fem_rhsadd_iuppers[box][2]; index[2]++)
+         {
+            for (index[1] = pdata.fem_rhsadd_ilowers[box][1];
+                 index[1] <= pdata.fem_rhsadd_iuppers[box][1]; index[1]++)
+            {
+               for (index[0] = pdata.fem_rhsadd_ilowers[box][0];
+                    index[0] <= pdata.fem_rhsadd_iuppers[box][0]; index[0]++)
+               {
+                  HYPRE_SStructVectorAddFEMValues(vec, part, index,
+                                                  pdata.fem_rhsadd_values[box]);
+               }
+            }
+         }
+      }
+   }
+
+   HYPRE_SStructVectorAssemble(vec);
+
+   /*-----------------------------------------------------------
+    * Free memory
+    *-----------------------------------------------------------*/
+   hypre_TFree(values, HYPRE_MEMORY_HOST);
+
+   *vec_ptr = vec;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * SetCosineVector
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
