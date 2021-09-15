@@ -62,6 +62,9 @@
 /* Define to 1 if in debug mode */
 #undef HYPRE_DEBUG
 
+/* Main development branch? */
+#undef HYPRE_DEVELOP_BRANCH
+
 /* Develop branch commit number */
 #undef HYPRE_DEVELOP_NUMBER
 

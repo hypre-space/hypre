@@ -2702,8 +2702,9 @@ eval ac_res=\$$as_ac_File
 $as_echo "$ac_res" >&6; }
 if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
   develop_string=$(git -C $HYPRE_SRCDIR describe --match 'v*' --long --abbrev=9)
- develop_lastag=$(git -C $HYPRE_SRCDIR describe --match 'v*' --abbrev=0)
- develop_number=$(git -C $HYPRE_SRCDIR rev-list --count $develop_lastag..HEAD)
+   develop_lastag=$(git -C $HYPRE_SRCDIR describe --match 'v*' --abbrev=0)
+   develop_number=$(git -C $HYPRE_SRCDIR rev-list --count $develop_lastag..HEAD)
+   develop_branch=$(git -C $HYPRE_SRCDIR rev-parse --abbrev-ref HEAD)
 
 cat >>confdefs.h <<_ACEOF
 #define HYPRE_DEVELOP_STRING "$develop_string"
@@ -2714,6 +2715,17 @@ cat >>confdefs.h <<_ACEOF
 #define HYPRE_DEVELOP_NUMBER $develop_number
 _ACEOF
 
+   if test "x$develop_branch" = "xmaster"; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HYPRE_DEVELOP_BRANCH "$develop_branch"
+_ACEOF
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: On branch $develop_branch, not the main development branch" >&5
+$as_echo "$as_me: WARNING: On branch $develop_branch, not the main development branch" >&2;}
+
+fi
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Could not find .git directory" >&5
 $as_echo "$as_me: WARNING: Could not find .git directory" >&2;}
