@@ -14,6 +14,7 @@
 
 #cmakedefine HYPRE_DEVELOP_STRING  "@HYPRE_DEVELOP_STRING@"
 #cmakedefine HYPRE_DEVELOP_NUMBER   @HYPRE_DEVELOP_NUMBER@
+#cmakedefine HYPRE_DEVELOP_BRANCH  "@HYPRE_DEVELOP_BRANCH@"
 
 /* Use long long int for HYPRE_BigInt */
 #cmakedefine HYPRE_MIXEDINT 1

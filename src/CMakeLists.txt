@@ -38,8 +38,16 @@ if (EXISTS ${HYPRE_SOURCE_DIR}/../.git)
   execute_process(COMMAND git -C ${HYPRE_SOURCE_DIR} rev-list --count ${develop_lastag}..HEAD
                   OUTPUT_VARIABLE develop_number
                   OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND git -C ${HYPRE_SOURCE_DIR} rev-parse --abbrev-ref HEAD
+                  OUTPUT_VARIABLE develop_branch
+                  OUTPUT_STRIP_TRAILING_WHITESPACE)
   set(HYPRE_DEVELOP_STRING  ${develop_string})
   set(HYPRE_DEVELOP_NUMBER  ${develop_number})
+  if (develop_branch MATCHES "master")
+    set(HYPRE_DEVELOP_BRANCH  ${develop_branch})
+  else ()
+    message(WARNING "On branch ${develop_branch}, not the main development branch")
+  endif ()
 else ()
   message(WARNING "Could not find .git directory")
 endif ()
