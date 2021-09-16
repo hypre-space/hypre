@@ -190,20 +190,21 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
    HYPRE_Real   strong_threshold = 0.25;
    HYPRE_Real   max_row_sum = 1.0;
    HYPRE_Real   fnorm, rfnorm, fnorm0;
-   HYPRE_Int   *CF_marker = NULL;
-   HYPRE_Int    local_num_vars, *coarse_dof_func, *coarse_pnts_global;
+   HYPRE_Int    local_num_vars, *coarse_pnts_global;
    HYPRE_Int    num_procs, myid;
    HYPRE_Int    time_index, i;
 
-   HYPRE_ParCSRMatrix parcsr_S   = NULL;
-   HYPRE_ParCSRMatrix parcsr_P   = NULL;
-   HYPRE_ParCSRMatrix parcsr_Q   = NULL;
-   HYPRE_ParCSRMatrix parcsr_AH  = NULL;
-   HYPRE_ParCSRMatrix parcsr_A_host  = NULL;
-   HYPRE_ParCSRMatrix parcsr_P_host  = NULL;
-   HYPRE_ParCSRMatrix parcsr_Q_host  = NULL;
-   HYPRE_ParCSRMatrix parcsr_AH_host = NULL;
-   HYPRE_ParCSRMatrix parcsr_AH_host_2 = NULL;
+   hypre_IntArray    *CF_marker         = NULL;
+   hypre_IntArray    *coarse_dof_func   = NULL; 
+   HYPRE_ParCSRMatrix parcsr_S          = NULL;
+   HYPRE_ParCSRMatrix parcsr_P          = NULL;
+   HYPRE_ParCSRMatrix parcsr_Q          = NULL;
+   HYPRE_ParCSRMatrix parcsr_AH         = NULL;
+   HYPRE_ParCSRMatrix parcsr_A_host     = NULL;
+   HYPRE_ParCSRMatrix parcsr_P_host     = NULL;
+   HYPRE_ParCSRMatrix parcsr_Q_host     = NULL;
+   HYPRE_ParCSRMatrix parcsr_AH_host    = NULL;
+   HYPRE_ParCSRMatrix parcsr_AH_host_2  = NULL;
    HYPRE_ParCSRMatrix parcsr_error_host = NULL;
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
@@ -222,7 +223,7 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
                               CF_marker, &coarse_dof_func, &coarse_pnts_global);
 
    /* generate P */
-   hypre_BoomerAMGBuildExtPIInterp(parcsr_A, CF_marker, parcsr_S, coarse_pnts_global,
+   hypre_BoomerAMGBuildExtPIInterp(parcsr_A, hypre_IntArrayData(CF_marker), parcsr_S, coarse_pnts_global,
                                    num_functions, NULL, debug_flag, trunc_factor, P_max_elmts,
                                    &parcsr_P);
 
@@ -348,7 +349,7 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
       }
    }
 
-   hypre_TFree(CF_marker, HYPRE_MEMORY_HOST);
+   hypre_IntArrayDestroy(CF_marker);
    hypre_TFree(coarse_dof_func, HYPRE_MEMORY_HOST);
 
    hypre_ParCSRMatrixDestroy(parcsr_S);

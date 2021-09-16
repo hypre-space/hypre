@@ -600,9 +600,16 @@ hypre_AMGDDCompGridInitialize( hypre_ParAMGDDData *amgdd_data,
    P_array         = hypre_ParAMGDataPArray(amg_data);
    R_array         = hypre_ParAMGDataRArray(amg_data);
    F_array         = hypre_ParAMGDataFArray(amg_data);
-   CF_marker_array = hypre_ParAMGDataCFMarkerArray(amg_data)[level];
    A_diag_original = hypre_ParCSRMatrixDiag(A_array[level]);
    A_offd_original = hypre_ParCSRMatrixOffd(A_array[level]);
+   if (hypre_ParAMGDataCFMarkerArray(amg_data)[level])
+   {
+      CF_marker_array = hypre_IntArrayData(hypre_ParAMGDataCFMarkerArray(amg_data)[level]);
+   }
+   else
+   {
+      CF_marker_array = NULL;
+   }
 
    hypre_AMGDDCompGridLevel(compGrid)                = level;
    hypre_AMGDDCompGridFirstGlobalIndex(compGrid)     = hypre_ParVectorFirstIndex(F_array[level]);
@@ -724,7 +731,7 @@ hypre_AMGDDCompGridInitialize( hypre_ParAMGDDData *amgdd_data,
          coarseIndexCounter = 0;
          for (i = 0; i < num_owned_nodes; i++)
          {
-            if ( CF_marker_array[i] == 1 )
+            if ( CF_marker_array[i] > 0 )
             {
                hypre_AMGDDCompGridOwnedCoarseIndices(compGrid)[i] = coarseIndexCounter++;
             }

@@ -25,7 +25,7 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
                                   hypre_ParCSRMatrix    *A,
                                   HYPRE_Int              CF_init,
                                   HYPRE_Int              debug_flag,
-                                  HYPRE_Int            **CF_marker_ptr )
+                                  hypre_IntArray       **CF_marker_ptr )
 {
    MPI_Comm                  comm            = hypre_ParCSRMatrixComm(S);
    hypre_ParCSRCommPkg      *comm_pkg        = hypre_ParCSRMatrixCommPkg(S);
@@ -67,7 +67,12 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
    HYPRE_Int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
    /* CF marker */
-   CF_marker_diag = hypre_TAlloc(HYPRE_Int, num_cols_diag, HYPRE_MEMORY_DEVICE);
+   if (*CF_marker_ptr == NULL)
+   {
+      *CF_marker_ptr = hypre_IntArrayCreate(num_cols_diag);
+      hypre_IntArrayInitialize(*CF_marker_ptr);
+   }
+   CF_marker_diag = hypre_IntArrayData(*CF_marker_ptr);
    CF_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_DEVICE);
 
    /* arrays for global measure diag and offd parts */
@@ -183,14 +188,6 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
    /*---------------------------------------------------
     * Clean up and return
     *---------------------------------------------------*/
-   if (*CF_marker_ptr == NULL)
-   {
-      *CF_marker_ptr = hypre_CTAlloc(HYPRE_Int, num_cols_diag, HYPRE_MEMORY_HOST);
-   }
-
-   hypre_TMemcpy( *CF_marker_ptr, CF_marker_diag, HYPRE_Int, num_cols_diag, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE );
-   hypre_TFree(CF_marker_diag, HYPRE_MEMORY_DEVICE);
-   //   *CF_marker_ptr = CF_marker_diag;
 
    hypre_TFree(measure_diag,   HYPRE_MEMORY_DEVICE);
    hypre_TFree(measure_offd,   HYPRE_MEMORY_DEVICE);
