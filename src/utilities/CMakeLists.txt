@@ -27,6 +27,7 @@ set(SRCS
   error.c
   general.c
   handle.c
+  int_array.c
   hopscotch_hash.c
   memory.c
   merge_sort.c
@@ -55,6 +56,7 @@ if (HYPRE_USING_CUDA)
     HYPRE_handle.c
     cuda_utils.c
     handle.c
+    int_array.c
     general.c
     memory.c
     omp_device.c

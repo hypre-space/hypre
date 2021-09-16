@@ -209,32 +209,38 @@ hypre_DeviceMalloc(size_t size, HYPRE_Int zeroinit)
 {
    void *ptr = NULL;
 
+   if ( hypre_HandleUserDeviceMalloc(hypre_handle()) )
+   {
+      hypre_HandleUserDeviceMalloc(hypre_handle())(&ptr, size);
+   }
+   else
+   {
 #if defined(HYPRE_USING_UMPIRE_DEVICE)
-   hypre_umpire_device_pooled_allocate(&ptr, size);
+      hypre_umpire_device_pooled_allocate(&ptr, size);
 #else
 
 #if defined(HYPRE_USING_DEVICE_OPENMP)
 #if defined(HYPRE_DEVICE_OPENMP_ALLOC)
-   ptr = omp_target_alloc(size, hypre__offload_device_num);
+      ptr = omp_target_alloc(size, hypre__offload_device_num);
 #else
-   ptr = malloc(size + sizeof(size_t));
-   size_t *sp = (size_t*) ptr;
-   sp[0] = size;
-   ptr = (void *) (&sp[1]);
-   HYPRE_OMPOffload(hypre__offload_device_num, ptr, size, "enter", "alloc");
+      ptr = malloc(size + sizeof(size_t));
+      size_t *sp = (size_t*) ptr;
+      sp[0] = size;
+      ptr = (void *) (&sp[1]);
+      HYPRE_OMPOffload(hypre__offload_device_num, ptr, size, "enter", "alloc");
 #endif
 #endif
 
 #if defined(HYPRE_USING_CUDA)
 #if defined(HYPRE_USING_DEVICE_POOL)
-   HYPRE_CUDA_CALL( hypre_CachingMallocDevice(&ptr, size) );
+      HYPRE_CUDA_CALL( hypre_CachingMallocDevice(&ptr, size) );
 #else
-   HYPRE_CUDA_CALL( cudaMalloc(&ptr, size) );
+      HYPRE_CUDA_CALL( cudaMalloc(&ptr, size) );
 #endif
 #endif
 
 #if defined(HYPRE_USING_HIP)
-   HYPRE_HIP_CALL( hipMalloc(&ptr, size) );
+      HYPRE_HIP_CALL( hipMalloc(&ptr, size) );
 #endif
 
 #if defined(HYPRE_USING_SYCL)
@@ -242,6 +248,7 @@ hypre_DeviceMalloc(size_t size, HYPRE_Int zeroinit)
 #endif
    
 #endif /* #if defined(HYPRE_USING_UMPIRE_DEVICE) */
+   }
 
    if (ptr && zeroinit)
    {
@@ -390,28 +397,34 @@ hypre_HostFree(void *ptr)
 static inline void
 hypre_DeviceFree(void *ptr)
 {
+   if ( hypre_HandleUserDeviceMfree(hypre_handle()) )
+   {
+      hypre_HandleUserDeviceMfree(hypre_handle())(ptr);
+   }
+   else
+   {
 #if defined(HYPRE_USING_UMPIRE_DEVICE)
-   hypre_umpire_device_pooled_free(ptr);
+      hypre_umpire_device_pooled_free(ptr);
 #else
 
 #if defined(HYPRE_USING_DEVICE_OPENMP)
 #if defined(HYPRE_DEVICE_OPENMP_ALLOC)
-   omp_target_free(ptr, hypre__offload_device_num);
+      omp_target_free(ptr, hypre__offload_device_num);
 #else
-   HYPRE_OMPOffload(hypre__offload_device_num, ptr, ((size_t *) ptr)[-1], "exit", "delete");
+      HYPRE_OMPOffload(hypre__offload_device_num, ptr, ((size_t *) ptr)[-1], "exit", "delete");
 #endif
 #endif
 
 #if defined(HYPRE_USING_CUDA)
 #if defined(HYPRE_USING_DEVICE_POOL)
-   HYPRE_CUDA_CALL( hypre_CachingFreeDevice(ptr) );
+      HYPRE_CUDA_CALL( hypre_CachingFreeDevice(ptr) );
 #else
-   HYPRE_CUDA_CALL( cudaFree(ptr) );
+      HYPRE_CUDA_CALL( cudaFree(ptr) );
 #endif
 #endif
 
 #if defined(HYPRE_USING_HIP)
-   HYPRE_HIP_CALL( hipFree(ptr) );
+      HYPRE_HIP_CALL( hipFree(ptr) );
 #endif
 
 #if defined(HYPRE_USING_SYCL)
@@ -419,6 +432,7 @@ hypre_DeviceFree(void *ptr)
 #endif
    
 #endif /* #if defined(HYPRE_USING_UMPIRE_DEVICE) */
+   }
 }
 
 static inline void

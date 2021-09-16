@@ -131,19 +131,13 @@ distclean: clean
 # Rules
 ##################################################################
 
-ifeq ($(CUCC), )
-   OBJ_SUFFIX=o
-else
-   OBJ_SUFFIX=obj
-endif
-
 # C
 
-ij: ij.${OBJ_SUFFIX}
+ij: ij.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-ij_assembly: ij_assembly.${OBJ_SUFFIX}
+ij_assembly: ij_assembly.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
@@ -151,7 +145,7 @@ sstruct: sstruct.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-struct: struct.${OBJ_SUFFIX}
+struct: struct.obj
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
@@ -159,15 +153,15 @@ ams_driver: ams_driver.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-maxwell_unscaled: maxwell_unscaled.${OBJ_SUFFIX}
+maxwell_unscaled: maxwell_unscaled.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-struct_migrate: struct_migrate.${OBJ_SUFFIX}
+struct_migrate: struct_migrate.obj
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-sstruct_fac: sstruct_fac.${OBJ_SUFFIX}
+sstruct_fac: sstruct_fac.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
@@ -175,15 +169,15 @@ ij_mv: ij_mv.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-ij_device: ij_device.${OBJ_SUFFIX}
+ij_device: ij_device.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-ij_mm: ij_mm.${OBJ_SUFFIX}
+ij_mm: ij_mm.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-zboxloop: zboxloop.${OBJ_SUFFIX}
+zboxloop: zboxloop.obj
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
