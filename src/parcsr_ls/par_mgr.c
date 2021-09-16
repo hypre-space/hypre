@@ -76,7 +76,7 @@ hypre_MGRCreate()
   (mgr_data -> global_smoother) = NULL;
 
   (mgr_data -> use_default_cgrid_solver) = 1;
-  (mgr_data -> use_default_fsolver) = -1; // set to -1 to avoid printing when not used
+  (mgr_data -> fsolver_mode) = -1; // set to -1 to avoid printing when not used
   (mgr_data -> omega) = 1.;
   (mgr_data -> max_iter) = 20;
   (mgr_data -> tol) = 1.0e-6;
@@ -268,7 +268,7 @@ hypre_MGRDestroy( void *data )
       if ((mgr_data -> A_ff_array)[i])
         hypre_ParCSRMatrixDestroy((mgr_data -> A_ff_array)[i]);
     }
-    if (mgr_data -> use_default_fsolver > 0)
+    if (mgr_data -> fsolver_mode > 0)
     {
       if ((mgr_data -> A_ff_array)[0])
         hypre_ParCSRMatrixDestroy((mgr_data -> A_ff_array)[0]);
@@ -287,7 +287,7 @@ hypre_MGRDestroy( void *data )
       if ((mgr_data -> aff_solver)[i])
         hypre_BoomerAMGDestroy((mgr_data -> aff_solver)[i]);
     }
-    if (mgr_data -> use_default_fsolver == 2)
+    if (mgr_data -> fsolver_mode == 2)
     {
       if ((mgr_data -> aff_solver)[0])
         hypre_BoomerAMGDestroy((mgr_data -> aff_solver)[0]);
@@ -4196,7 +4196,7 @@ hypre_MGRSetFSolver( void  *mgr_vdata,
   (mgr_data -> fine_grid_solver_solve) = fine_grid_solver_solve;
   (mgr_data -> fine_grid_solver_setup) = fine_grid_solver_setup;
   (mgr_data -> aff_solver) = aff_solver;
-  (mgr_data -> use_default_fsolver) = 0;
+  (mgr_data -> fsolver_mode) = 0;
 
   return hypre_error_flag;
 }
@@ -5197,6 +5197,7 @@ hypre_MGRAddVectorP ( HYPRE_Int  *CF_marker,
 HYPRE_Int
 hypre_MGRAddVectorR ( HYPRE_Int  *CF_marker,
         HYPRE_Int        point_type,
+        HYPRE_Int        size,
         HYPRE_Real       a,
         hypre_ParVector  *fromVector,
         HYPRE_Real       b,
@@ -5207,7 +5208,7 @@ hypre_MGRAddVectorR ( HYPRE_Int  *CF_marker,
   hypre_Vector    *toVectorLocal   = hypre_ParVectorLocalVector(*toVector);
   HYPRE_Real      *toVectorData    = hypre_VectorData(toVectorLocal);
 
-  HYPRE_Int       n = hypre_ParVectorActualLocalSize(fromVector);
+  HYPRE_Int       n = hypre_min(size, hypre_ParVectorActualLocalSize(fromVector));
   HYPRE_Int       i, j;
 
   j = 0;
@@ -5357,9 +5358,9 @@ hypre_MGRWriteSolverParams(void *mgr_vdata)
   hypre_printf("Max number of iterations: %d\n", (mgr_data -> max_iter));
   hypre_printf("Stopping tolerance: %e\n", (mgr_data -> tol));
   hypre_printf("Use default coarse grid solver: %d\n", (mgr_data -> use_default_cgrid_solver));
-  if((mgr_data -> use_default_fsolver) >= 0)
+  if((mgr_data -> fsolver_mode) >= 0)
   {
-    hypre_printf("Use AMG solver for full AMG F-relaxation: %d\n", (mgr_data -> use_default_fsolver));
+    hypre_printf("Use AMG solver for full AMG F-relaxation: %d\n", (mgr_data -> fsolver_mode));
   }
   return hypre_error_flag;
 }

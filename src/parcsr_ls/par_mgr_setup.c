@@ -45,7 +45,6 @@ hypre_MGRSetup( void               *mgr_vdata,
 
   /* pointers to mgr data */
   HYPRE_Int  use_default_cgrid_solver = (mgr_data -> use_default_cgrid_solver);
-  HYPRE_Int  use_default_fsolver = (mgr_data -> use_default_fsolver);
   HYPRE_Int  logging = (mgr_data -> logging);
   HYPRE_Int  print_level = (mgr_data -> print_level);
   HYPRE_Int  relax_type = (mgr_data -> relax_type);
@@ -917,7 +916,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       // user provided AMG solver
       // only support AMG at the first level
       // TODO: input check to avoid crashing
-      if (lev == 0 && use_default_fsolver == 0)
+      if (lev == 0 && (mgr_data -> fsolver_mode) == 0)
       {
         if (((hypre_ParAMGData*)aff_solver[lev])->A_array[0] != NULL)
         {
@@ -948,7 +947,7 @@ hypre_MGRSetup( void               *mgr_vdata,
           fine_grid_solver_setup(aff_solver[lev], A_ff_ptr, F_fine_array[lev+1], U_fine_array[lev+1]);
 
           A_ff_array[lev] = A_ff_ptr;
-          (mgr_data -> use_default_fsolver) = 1;
+          (mgr_data -> fsolver_mode) = 1;
         }
       }
       else // construct default AMG solver
@@ -979,8 +978,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
         fine_grid_solver_setup(aff_solver[lev], A_ff_ptr, F_fine_array[lev+1], U_fine_array[lev+1]);
 
-        (mgr_data -> use_default_fsolver) = 2;
-        use_default_fsolver = (mgr_data -> use_default_fsolver);
+        (mgr_data -> fsolver_mode) = 2;
       }
       //wall_time = time_getWallclockSeconds() - wall_time;
       //hypre_printf("Lev = %d, proc = %d     SetupAFF: %f\n", lev, my_id, wall_time);
