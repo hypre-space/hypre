@@ -186,7 +186,6 @@ dnl *********************************************************************
 dnl * Initialize hypre-SYCL variables
 dnl *********************************************************************
 hypre_using_sycl_queues=no
-hypre_user_chose_sycl=no
 hypre_using_sycl=no
 hypre_using_onemklsparse=no
 hypre_using_onemklblas=no
@@ -2344,7 +2343,7 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
 dnl *********************************************************************
 dnl * Set SYCL options
 dnl *********************************************************************
-AS_IF([test x"$hypre_user_chose_sycl" == x"yes"],
+AS_IF([test x"$hypre_using_sycl" == x"yes"],
       [
         dnl AC_DEFINE(HYPRE_USING_GPU, 1, [Define to 1 if executing on GPU device])
         AC_DEFINE(HYPRE_USING_SYCL, 1, [SYCL being used])
@@ -2383,9 +2382,6 @@ AS_IF([test x"$hypre_user_chose_sycl" == x"yes"],
         HYPRE_SYCL_INCL="-I${ONEAPI_PATH}/dpl/latest/linux/include"
         HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${ONEAPI_PATH}/dpcpp-ct/latest/include"
 
-        dnl SYCL library
-        dnl HYPRE_SYCL_LIBS="-L${HYPRE_SYCL_PREFIX}/lib -lamdsycl64"
-
         AS_IF([test x"$hypre_using_onemklsparse" == x"yes"],
               [AC_DEFINE(HYPRE_USING_ONEMKLSPARSE, 1, [onemkl::SPARSE being used])
                HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
@@ -2405,7 +2401,7 @@ AS_IF([test x"$hypre_user_chose_sycl" == x"yes"],
                HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/rng.hpp"
                ])
 
-      ]) dnl AS_IF([test x"$hypre_user_chose_sycl" == x"yes"]
+      ]) dnl AS_IF([test x"$hypre_using_sycl" == x"yes"]
 
 
 
@@ -2432,7 +2428,7 @@ then
       AC_MSG_NOTICE([Use --enable-unified-memory to compile with unified memory.])
       AC_MSG_NOTICE([***********************************************************************])
    fi
-   if test "$hypre_user_chose_sycl" = "yes"
+   if test "$hypre_using_sycl" = "yes"
    then
       AC_MSG_NOTICE([***********************************************************])
       AC_MSG_NOTICE([Configuring with --with-sycl=yes without unified memory.])
