@@ -930,6 +930,7 @@ hypre_FSAISetup( void               *fsai_vdata,
    HYPRE_Int                max_step_size = hypre_ParFSAIDataMaxStepSize(fsai_data);
    HYPRE_Int                algo_type     = hypre_ParFSAIDataAlgoType(fsai_data);
    HYPRE_Int                print_level   = hypre_ParFSAIDataPrintLevel(fsai_data);
+   HYPRE_Int                eig_max_iters = hypre_ParFSAIDataEigMaxIters(fsai_data);
 
    /* ParCSRMatrix A variables */
    MPI_Comm                 comm          = hypre_ParCSRMatrixComm(A);
@@ -1003,6 +1004,12 @@ hypre_FSAISetup( void               *fsai_vdata,
    G  = hypre_ParFSAIDataGmat(fsai_data);
    hypre_ParCSRMatrixTranspose(G, &hypre_ParFSAIDataGTmat(fsai_data), 1);
 
+   /* Update omega if requested */
+   if (eig_max_iters)
+   {
+      hypre_FSAIComputeOmega(fsai_vdata, A);
+   }
+
    /* Print Setup info */
    if (print_level == 1)
    {
@@ -1033,6 +1040,7 @@ hypre_FSAIPrintStats( void *fsai_vdata,
    HYPRE_Real              kap_tolerance  = hypre_ParFSAIDataKapTolerance(fsai_data);
    HYPRE_Int               max_steps      = hypre_ParFSAIDataMaxSteps(fsai_data);
    HYPRE_Int               max_step_size  = hypre_ParFSAIDataMaxStepSize(fsai_data);
+   HYPRE_Int               eig_max_iters  = hypre_ParFSAIDataEigMaxIters(fsai_data);
    HYPRE_Real              density;
 
    hypre_ParCSRMatrix     *G = hypre_ParFSAIDataGmat(fsai_data);
@@ -1065,7 +1073,7 @@ hypre_FSAIPrintStats( void *fsai_vdata,
       hypre_printf("| Max step size:   %8d |\n", max_step_size);
       hypre_printf("| Kap grad tol:    %8.1e |\n", kap_tolerance);
       hypre_printf("| Prec. density:   %8.3f |\n", density);
-      hypre_printf("| Eig max iters:   %8d |\n", hypre_ParFSAIDataEigMaxIters(fsai_data));
+      hypre_printf("| Eig max iters:   %8d |\n", eig_max_iters);
       hypre_printf("| Omega factor:    %8.3f |\n", hypre_ParFSAIDataOmega(fsai_data));
       hypre_printf("+---------------------------+\n");
 
@@ -1101,46 +1109,43 @@ hypre_FSAIComputeOmega( void *fsai_vdata,
    HYPRE_Int             i;
    HYPRE_Real            norm, invnorm, lambda, omega;
 
-   if (eig_max_iters)
+   eigvec_old = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+                                      hypre_ParCSRMatrixGlobalNumRows(A),
+                                      hypre_ParCSRMatrixRowStarts(A));
+   hypre_ParVectorInitialize(eigvec_old);
+   eigvec = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+                                  hypre_ParCSRMatrixGlobalNumRows(A),
+                                  hypre_ParCSRMatrixRowStarts(A));
+   hypre_ParVectorInitialize(eigvec);
+   hypre_ParVectorSetRandomValues(eigvec, 256);
+
+   /* Power method iteration */
+   for (i = 0; i < eig_max_iters; i++)
    {
-      eigvec_old = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
-                                         hypre_ParCSRMatrixGlobalNumRows(A),
-                                         hypre_ParCSRMatrixRowStarts(A));
-      hypre_ParVectorInitialize(eigvec_old);
-      eigvec = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
-                                     hypre_ParCSRMatrixGlobalNumRows(A),
-                                     hypre_ParCSRMatrixRowStarts(A));
-      hypre_ParVectorInitialize(eigvec);
-      hypre_ParVectorSetRandomValues(eigvec, 256);
+      norm = hypre_ParVectorInnerProd(eigvec, eigvec);
+      invnorm = 1.0/sqrt(norm);
+      hypre_ParVectorScale(invnorm, eigvec);
 
-      /* Power method iteration */
-      for (i = 0; i < eig_max_iters; i++)
+      if (i == (eig_max_iters - 1))
       {
-         norm = hypre_ParVectorInnerProd(eigvec, eigvec);
-         invnorm = 1.0/sqrt(norm);
-         hypre_ParVectorScale(invnorm, eigvec);
-
-         if (i == (eig_max_iters - 1))
-         {
-            hypre_ParVectorCopy(eigvec, eigvec_old);
-         }
-
-         /* eigvec = GT * G * A * eigvec */
-         hypre_ParCSRMatrixMatvec(1.0, A,  eigvec, 0.0, r_work);
-         hypre_ParCSRMatrixMatvec(1.0, G,  r_work, 0.0, z_work);
-         hypre_ParCSRMatrixMatvec(1.0, GT, z_work, 0.0, eigvec);
+         hypre_ParVectorCopy(eigvec, eigvec_old);
       }
-      norm = hypre_ParVectorInnerProd(eigvec, eigvec_old);
-      lambda = sqrt(norm);
 
-      /* Free memory */
-      hypre_ParVectorDestroy(eigvec_old);
-      hypre_ParVectorDestroy(eigvec);
-
-      /* Update omega */
-      omega = 1.0/lambda;
-      hypre_FSAISetOmega(fsai_vdata, omega);
+      /* eigvec = GT * G * A * eigvec */
+      hypre_ParCSRMatrixMatvec(1.0, A,  eigvec, 0.0, r_work);
+      hypre_ParCSRMatrixMatvec(1.0, G,  r_work, 0.0, z_work);
+      hypre_ParCSRMatrixMatvec(1.0, GT, z_work, 0.0, eigvec);
    }
+   norm = hypre_ParVectorInnerProd(eigvec, eigvec_old);
+   lambda = sqrt(norm);
+
+   /* Free memory */
+   hypre_ParVectorDestroy(eigvec_old);
+   hypre_ParVectorDestroy(eigvec);
+
+   /* Update omega */
+   omega = 1.0/lambda;
+   hypre_FSAISetOmega(fsai_vdata, omega);
 
    return hypre_error_flag;
 }

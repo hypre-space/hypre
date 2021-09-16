@@ -330,7 +330,7 @@ hypre_FSAISetOmega( void       *data,
 
    if (omega < 0)
    {
-      hypre_error_in_arg(2);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Negative omega not allowed!");
       return hypre_error_flag;
    }
 
