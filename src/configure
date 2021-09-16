@@ -2722,13 +2722,13 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: On branch $develop_branch, not the main development branch" >&5
-$as_echo "$as_me: WARNING: On branch $develop_branch, not the main development branch" >&2;}
+  { $as_echo "$as_me:${as_lineno-$LINENO}: NOTE: On branch $develop_branch, not the main development branch" >&5
+$as_echo "$as_me: NOTE: On branch $develop_branch, not the main development branch" >&6;}
 
 fi
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Could not find .git directory" >&5
-$as_echo "$as_me: WARNING: Could not find .git directory" >&2;}
+  { $as_echo "$as_me:${as_lineno-$LINENO}: NOTE: Could not find .git directory" >&5
+$as_echo "$as_me: NOTE: Could not find .git directory" >&6;}
 
 fi
 

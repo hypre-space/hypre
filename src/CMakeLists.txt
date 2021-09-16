@@ -46,10 +46,10 @@ if (EXISTS ${HYPRE_SOURCE_DIR}/../.git)
   if (develop_branch MATCHES "master")
     set(HYPRE_DEVELOP_BRANCH  ${develop_branch})
   else ()
-    message(WARNING "On branch ${develop_branch}, not the main development branch")
+    message(STATUS "NOTE: On branch ${develop_branch}, not the main development branch")
   endif ()
 else ()
-  message(WARNING "Could not find .git directory")
+  message(STATUS "NOTE: Could not find .git directory")
 endif ()
 
 # Set cmake module path
