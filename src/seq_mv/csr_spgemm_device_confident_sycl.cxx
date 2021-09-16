@@ -18,8 +18,8 @@
 
 template <typename T>
 using relaxed_atomic_ref =
-  sycl::ONEAPI::atomic_ref< T, sycl::ONEAPI::memory_order::relaxed,
-                            sycl::ONEAPI::memory_scope::device,
+  sycl::ext::oneapi::atomic_ref< T, sycl::ext::oneapi::memory_order::relaxed,
+                            sycl::ext::oneapi::memory_scope::device,
                             sycl::access::address_space::local_space>;
 
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - *
@@ -91,7 +91,7 @@ csr_spmm_compute_row_numer(
     volatile HYPRE_Complex *s_HashVals, HYPRE_Int g_HashSize,
     HYPRE_Int *g_HashKeys, HYPRE_Complex *g_HashVals, sycl::nd_item<3>& item)
 {
-   sycl::ONEAPI::sub_group SG = item.get_sub_group();
+   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
    HYPRE_Int threadIdx_x = item.get_local_id(2);
    HYPRE_Int threadIdx_y = item.get_local_id(1);
    HYPRE_Int blockDim_y = item.get_local_range().get(1);
@@ -222,7 +222,7 @@ csr_spmm_numeric(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
                  volatile HYPRE_Int *s_HashKeys, // shared
                  volatile HYPRE_Complex *s_HashVals) // shared
 {
-   sycl::ONEAPI::sub_group SG = item.get_sub_group();
+   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    /* total number of sub-groups in global iteration space (no_of_sub_groups_per_WG * total_no_of_WGs) */
@@ -338,7 +338,7 @@ copy_from_Cext_into_C(sycl::nd_item<3>& item,
                       HYPRE_Int *ix, HYPRE_Int *jx, HYPRE_Complex *ax,
                       HYPRE_Int *ic, HYPRE_Int *jc, HYPRE_Complex *ac)
 {
-   sycl::ONEAPI::sub_group SG = item.get_sub_group();
+   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    const HYPRE_Int num_subgroups = NUM_SUBGROUPS_PER_WG *

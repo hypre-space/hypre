@@ -202,7 +202,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 }
 
 /*-----------------------------------------------------------------------*/
-void hypre_BoomerAMGCreateS_rowcount( cl::sycl::nd_item<1>& item,
+void hypre_BoomerAMGCreateS_rowcount( sycl::nd_item<1>& item,
 				      HYPRE_Int   nr_of_rows,
 				      HYPRE_Real  max_row_sum,
 				      HYPRE_Real  strength_threshold,
@@ -242,8 +242,8 @@ void hypre_BoomerAMGCreateS_rowcount( cl::sycl::nd_item<1>& item,
    HYPRE_Int row_nnz_diag = 0, row_nnz_offd = 0, diag_pos = -1;
 
    HYPRE_Int row = hypre_sycl_get_global_subgroup_id<1>(item);
-   cl::sycl::group<1> grp = item.get_group();   
-   cl::sycl::ONEAPI::sub_group SG = item.get_sub_group();      
+   sycl::group<1> grp = item.get_group();
+   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    if (row >= nr_of_rows)
@@ -262,7 +262,7 @@ void hypre_BoomerAMGCreateS_rowcount( cl::sycl::nd_item<1>& item,
    q_diag = SG.shuffle(p_diag, 1);
    p_diag = SG.shuffle(p_diag, 0);
 
-   for (HYPRE_Int i = p_diag + lane; sycl::ONEAPI::any_of(grp, i < q_diag); i += sub_group_size)
+   for (HYPRE_Int i = p_diag + lane; sycl::ext::oneapi::any_of(grp, i < q_diag); i += sub_group_size)
    {
       if (i < q_diag)
       {
@@ -295,7 +295,7 @@ void hypre_BoomerAMGCreateS_rowcount( cl::sycl::nd_item<1>& item,
    q_offd = SG.shuffle(p_offd, 1);
    p_offd = SG.shuffle(p_offd, 0);
 
-   for (HYPRE_Int i = p_offd + lane; sycl::ONEAPI::any_of(grp, i < q_offd); i += sub_group_size)
+   for (HYPRE_Int i = p_offd + lane; sycl::ext::oneapi::any_of(grp, i < q_offd); i += sub_group_size)
    {
       if (i < q_offd)
       {
@@ -331,7 +331,7 @@ void hypre_BoomerAMGCreateS_rowcount( cl::sycl::nd_item<1>& item,
    HYPRE_Int all_weak = max_row_sum < 1.0 && fabs(row_sum) > fabs(diag) * max_row_sum;
    const HYPRE_Real thresh = sdiag * strength_threshold * row_scale;
 
-   for (HYPRE_Int i = p_diag + lane; sycl::ONEAPI::any_of(grp, i < q_diag); i += sub_group_size)
+   for (HYPRE_Int i = p_diag + lane; sycl::ext::oneapi::any_of(grp, i < q_diag); i += sub_group_size)
    {
       if (i < q_diag)
       {
@@ -351,7 +351,7 @@ void hypre_BoomerAMGCreateS_rowcount( cl::sycl::nd_item<1>& item,
       S_temp_diag_j[diag_pos] = -2;
    }
 
-   for (HYPRE_Int i = p_offd + lane; sycl::ONEAPI::any_of(grp, i < q_offd); i += sub_group_size)
+   for (HYPRE_Int i = p_offd + lane; sycl::ext::oneapi::any_of(grp, i < q_offd); i += sub_group_size)
    {
       if (i < q_offd)
       {
@@ -376,4 +376,3 @@ void hypre_BoomerAMGCreateS_rowcount( cl::sycl::nd_item<1>& item,
 }
 
 #endif /* #if defined(HYPRE_USING_SYCL) */
-

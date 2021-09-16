@@ -412,7 +412,7 @@ hypre_BoomerAMGBuildDirInterp_getnnz( sycl::nd_item<1>& item,
 
    HYPRE_Int i = hypre_sycl_get_global_subgroup_id<1>(item);
    sycl::group<1> grp = item.get_group();
-   sycl::ONEAPI::sub_group SG = item.get_sub_group();
+   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    if (i >= nr_of_rows)
@@ -464,7 +464,7 @@ hypre_BoomerAMGBuildDirInterp_getnnz( sycl::nd_item<1>& item,
    q = SG.shuffle( p, 1);
    p = SG.shuffle( p, 0);
 
-   for (HYPRE_Int j = p + lane; sycl::ONEAPI::any_of(grp, j < q); j += sub_group_size)
+   for (HYPRE_Int j = p + lane; sycl::ext::oneapi::any_of(grp, j < q); j += sub_group_size)
    {
       if (j < q)
       {
@@ -485,7 +485,7 @@ hypre_BoomerAMGBuildDirInterp_getnnz( sycl::nd_item<1>& item,
    q = SG.shuffle( p, 1);
    p = SG.shuffle( p, 0);
 
-   for (HYPRE_Int j = p + lane; sycl::ONEAPI::any_of(grp, j < q); j += sub_group_size)
+   for (HYPRE_Int j = p + lane; sycl::ext::oneapi::any_of(grp, j < q); j += sub_group_size)
    {
       if (j < q)
       {
@@ -556,7 +556,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef( sycl::nd_item<1>& item,
 
    HYPRE_Int i = hypre_sycl_get_global_subgroup_id<1>(item);
    sycl::group<1> grp = item.get_group();
-   sycl::ONEAPI::sub_group SG = item.get_sub_group();
+   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    if (i >= nr_of_rows)
@@ -616,7 +616,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef( sycl::nd_item<1>& item,
    p_diag_P = SG.shuffle( p_diag_P, 0);
 
    k = p_diag_P;
-   for (HYPRE_Int j = p_diag_A + lane; sycl::ONEAPI::any_of(grp, j < q_diag_A); j += sub_group_size)
+   for (HYPRE_Int j = p_diag_A + lane; sycl::ext::oneapi::any_of(grp, j < q_diag_A); j += sub_group_size)
    {
       HYPRE_Int col, sum, pos;
       HYPRE_Int is_SC = 0; /* if is a Strong-C */
@@ -684,7 +684,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef( sycl::nd_item<1>& item,
    p_offd_P = SG.shuffle( p_offd_P, 0);
 
    k = p_offd_P;
-   for (HYPRE_Int j = p_offd_A + lane; sycl::ONEAPI::any_of(grp, j < q_offd_A); j += sub_group_size)
+   for (HYPRE_Int j = p_offd_A + lane; sycl::ext::oneapi::any_of(grp, j < q_offd_A); j += sub_group_size)
    {
       HYPRE_Int col, sum, pos;
       HYPRE_Int is_SC = 0; /* if is a Strong-C */
@@ -753,7 +753,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef( sycl::nd_item<1>& item,
       beta = sum_N_pos / (sum_P_pos * diagonal);
    }
 
-   for (HYPRE_Int j = p_diag_P + lane; sycl::ONEAPI::any_of(grp, j < q_diag_P); j += sub_group_size)
+   for (HYPRE_Int j = p_diag_P + lane; sycl::ext::oneapi::any_of(grp, j < q_diag_P); j += sub_group_size)
    {
       /* if (P_diag_data[j] > 0.0)
             P_diag_data[j] *= -beta;
@@ -765,7 +765,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef( sycl::nd_item<1>& item,
       }
    }
 
-   for (HYPRE_Int j = p_offd_P + lane; sycl::ONEAPI::any_of(grp, j < q_offd_P); j += sub_group_size)
+   for (HYPRE_Int j = p_offd_P + lane; sycl::ext::oneapi::any_of(grp, j < q_offd_P); j += sub_group_size)
    {
       /* if (P_offd_data[indp]> 0)
             P_offd_data[indp] *= -beta;
@@ -828,7 +828,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( sycl::nd_item<1>& item,
 
    HYPRE_Int i = hypre_sycl_get_global_subgroup_id<1>(item);
    sycl::group<1> grp = item.get_group();
-   sycl::ONEAPI::sub_group SG = item.get_sub_group();
+   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    if (i >= nr_of_rows)
@@ -888,7 +888,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( sycl::nd_item<1>& item,
    p_diag_P = SG.shuffle( p_diag_P, 0);
 
    k = p_diag_P;
-   for (HYPRE_Int j = p_diag_A + lane; sycl::ONEAPI::any_of(grp, j < q_diag_A); j += sub_group_size)
+   for (HYPRE_Int j = p_diag_A + lane; sycl::ext::oneapi::any_of(grp, j < q_diag_A); j += sub_group_size)
    {
       HYPRE_Int col, sum, pos;
       HYPRE_Int is_SC = 0; /* if is a Strong-C */
@@ -948,7 +948,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( sycl::nd_item<1>& item,
    p_offd_P = SG.shuffle(p_offd_P, 0);
 
    k = p_offd_P;
-   for (HYPRE_Int j = p_offd_A + lane; sycl::ONEAPI::any_of(grp, j < q_offd_A); j += sub_group_size)
+   for (HYPRE_Int j = p_offd_A + lane; sycl::ext::oneapi::any_of(grp, j < q_offd_A); j += sub_group_size)
    {
       HYPRE_Int col, sum, pos;
       HYPRE_Int is_SC = 0; /* if is a Strong-C */
@@ -996,7 +996,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( sycl::nd_item<1>& item,
 
    HYPRE_Complex beta = sum_F / (q_diag_P - p_diag_P + q_offd_P - p_offd_P);
 
-   for (HYPRE_Int j = p_diag_P + lane; sycl::ONEAPI::any_of(grp, j < q_diag_P); j += sub_group_size)
+   for (HYPRE_Int j = p_diag_P + lane; sycl::ext::oneapi::any_of(grp, j < q_diag_P); j += sub_group_size)
    {
       /* if (P_diag_data[j] > 0.0)
             P_diag_data[j] *= -beta;
@@ -1008,7 +1008,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( sycl::nd_item<1>& item,
       }
    }
 
-   for (HYPRE_Int j = p_offd_P + lane; sycl::ONEAPI::any_of(grp, j < q_offd_P); j += sub_group_size)
+   for (HYPRE_Int j = p_offd_P + lane; sycl::ext::oneapi::any_of(grp, j < q_offd_P); j += sub_group_size)
    {
       /* if (P_offd_data[indp]> 0)
             P_offd_data[indp] *= -beta;

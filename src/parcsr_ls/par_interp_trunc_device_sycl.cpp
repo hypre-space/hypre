@@ -20,7 +20,7 @@ hypreSYCLKernel_InterpTruncation( sycl::nd_item<1>& item,
                                   HYPRE_Real *P_a)
 {
    sycl::group<1> grp = item.get_group();
-   sycl::ONEAPI::sub_group SG = item.get_sub_group();
+   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    HYPRE_Real row_max = 0.0, row_sum = 0.0, row_scal = 0.0;
@@ -41,7 +41,7 @@ hypreSYCLKernel_InterpTruncation( sycl::nd_item<1>& item,
    q = SG.shuffle(p, 1);
    p = SG.shuffle(p, 0);
 
-   for (HYPRE_Int i = p + lane; sycl::ONEAPI::any_of(grp, i < q); i += sub_group_size)
+   for (HYPRE_Int i = p + lane; sycl::ext::oneapi::any_of(grp, i < q); i += sub_group_size)
    {
       if (i < q)
       {
@@ -56,7 +56,7 @@ hypreSYCLKernel_InterpTruncation( sycl::nd_item<1>& item,
 
    /* 2. mark dropped entries by -1 in P_j, and compute row_scal */
    HYPRE_Int last_pos = -1;
-   for (HYPRE_Int i = p + lane; sycl::ONEAPI::any_of(grp, i < q); i += sub_group_size)
+   for (HYPRE_Int i = p + lane; sycl::ext::oneapi::any_of(grp, i < q); i += sub_group_size)
    {
       HYPRE_Int cond = 0, cond_prev;
 

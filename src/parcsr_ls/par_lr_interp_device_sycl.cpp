@@ -14,17 +14,17 @@
 #define MAX_C_CONNECTIONS 100
 #define HAVE_COMMON_C 1
 
-void hypreSYCLKernel_compute_weak_rowsums( cl::sycl::nd_item<1>& item, HYPRE_Int nr_of_rows, bool has_offd, HYPRE_Int *CF_marker, HYPRE_Int *A_diag_i, HYPRE_Complex *A_diag_a, HYPRE_Int *S_diag_j, HYPRE_Int *A_offd_i, HYPRE_Complex *A_offd_a, HYPRE_Int *S_offd_j, HYPRE_Real *rs, HYPRE_Int flag );
+void hypreSYCLKernel_compute_weak_rowsums( sycl::nd_item<1>& item, HYPRE_Int nr_of_rows, bool has_offd, HYPRE_Int *CF_marker, HYPRE_Int *A_diag_i, HYPRE_Complex *A_diag_a, HYPRE_Int *S_diag_j, HYPRE_Int *A_offd_i, HYPRE_Complex *A_offd_a, HYPRE_Int *S_offd_j, HYPRE_Real *rs, HYPRE_Int flag );
 
-void hypreSYCLKernel_compute_aff_afc( cl::sycl::nd_item<1>& item, HYPRE_Int nr_of_rows, HYPRE_Int *AFF_diag_i, HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Int *AFF_offd_i, HYPRE_Complex *AFF_offd_data, HYPRE_Int *AFC_diag_i, HYPRE_Complex *AFC_diag_data, HYPRE_Int *AFC_offd_i, HYPRE_Complex *AFC_offd_data, HYPRE_Complex *rsW, HYPRE_Complex *rsFC );
+void hypreSYCLKernel_compute_aff_afc( sycl::nd_item<1>& item, HYPRE_Int nr_of_rows, HYPRE_Int *AFF_diag_i, HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Int *AFF_offd_i, HYPRE_Complex *AFF_offd_data, HYPRE_Int *AFC_diag_i, HYPRE_Complex *AFC_diag_data, HYPRE_Int *AFC_offd_i, HYPRE_Complex *AFC_offd_data, HYPRE_Complex *rsW, HYPRE_Complex *rsFC );
 
 void hypreDevice_extendWtoP( HYPRE_Int P_nr_of_rows, HYPRE_Int W_nr_of_rows, HYPRE_Int W_nr_of_cols, HYPRE_Int *CF_marker, HYPRE_Int W_diag_nnz, HYPRE_Int *W_diag_i, HYPRE_Int *W_diag_j, HYPRE_Complex *W_diag_data, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Complex *P_diag_data, HYPRE_Int *W_offd_i, HYPRE_Int *P_offd_i );
 
-void hypreSYCLKernel_compute_twiaff_w( cl::sycl::nd_item<1>& item, HYPRE_Int nr_of_rows, HYPRE_BigInt first_index, HYPRE_Int *AFF_diag_i, HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Complex *AFF_diag_data_old, HYPRE_Int *AFF_offd_i, HYPRE_Int *AFF_offd_j, HYPRE_Complex *AFF_offd_data, HYPRE_Int *AFF_ext_i, HYPRE_BigInt *AFF_ext_j, HYPRE_Complex *AFF_ext_data, HYPRE_Complex *rsW, HYPRE_Complex *rsFC, HYPRE_Complex *rsFC_offd );
+void hypreSYCLKernel_compute_twiaff_w( sycl::nd_item<1>& item, HYPRE_Int nr_of_rows, HYPRE_BigInt first_index, HYPRE_Int *AFF_diag_i, HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Complex *AFF_diag_data_old, HYPRE_Int *AFF_offd_i, HYPRE_Int *AFF_offd_j, HYPRE_Complex *AFF_offd_data, HYPRE_Int *AFF_ext_i, HYPRE_BigInt *AFF_ext_j, HYPRE_Complex *AFF_ext_data, HYPRE_Complex *rsW, HYPRE_Complex *rsFC, HYPRE_Complex *rsFC_offd );
 
-void hypreSYCLKernel_compute_aff_afc_epe( cl::sycl::nd_item<1>& item, HYPRE_Int nr_of_rows, HYPRE_Int *AFF_diag_i, HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Int *AFF_offd_i, HYPRE_Int *AFF_offd_j, HYPRE_Complex *AFF_offd_data, HYPRE_Int *AFC_diag_i, HYPRE_Complex *AFC_diag_data, HYPRE_Int *AFC_offd_i, HYPRE_Complex *AFC_offd_data, HYPRE_Complex *rsW, HYPRE_Complex *dlam, HYPRE_Complex *d_tmp, HYPRE_Complex *dtmp_offd );
+void hypreSYCLKernel_compute_aff_afc_epe( sycl::nd_item<1>& item, HYPRE_Int nr_of_rows, HYPRE_Int *AFF_diag_i, HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Int *AFF_offd_i, HYPRE_Int *AFF_offd_j, HYPRE_Complex *AFF_offd_data, HYPRE_Int *AFC_diag_i, HYPRE_Complex *AFC_diag_data, HYPRE_Int *AFC_offd_i, HYPRE_Complex *AFC_offd_data, HYPRE_Complex *rsW, HYPRE_Complex *dlam, HYPRE_Complex *d_tmp, HYPRE_Complex *dtmp_offd );
 
-void hypreSYCLKernel_compute_dlam_dtmp( cl::sycl::nd_item<1>& item, HYPRE_Int nr_of_rows, HYPRE_Int *AFF_diag_i, HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Int *AFF_offd_i, HYPRE_Complex *AFF_offd_data, HYPRE_Complex *rsFC, HYPRE_Complex *dlam, HYPRE_Complex *dtmp );
+void hypreSYCLKernel_compute_dlam_dtmp( sycl::nd_item<1>& item, HYPRE_Int nr_of_rows, HYPRE_Int *AFF_diag_i, HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Int *AFF_offd_i, HYPRE_Complex *AFF_offd_data, HYPRE_Complex *rsFC, HYPRE_Complex *dlam, HYPRE_Complex *dtmp );
 
 /*---------------------------------------------------------------------
  * Extended Interpolation in the form of Mat-Mat
@@ -681,7 +681,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
 // -1: weak, -2: diag, >=0 (== A_diag_j) : strong
 // add weak and the diagonal entries of F-rows
 
-void hypreSYCLKernel_compute_weak_rowsums( cl::sycl::nd_item<1>& item,
+void hypreSYCLKernel_compute_weak_rowsums( sycl::nd_item<1>& item,
 					   HYPRE_Int      nr_of_rows,
                                            bool           has_offd,
                                            HYPRE_Int     *CF_marker,
@@ -694,10 +694,10 @@ void hypreSYCLKernel_compute_weak_rowsums( cl::sycl::nd_item<1>& item,
                                            HYPRE_Real    *rs,
                                            HYPRE_Int      flag)
 {
-   cl::sycl::group<1> grp = item.get_group();
-   
+   sycl::group<1> grp = item.get_group();
+
    HYPRE_Int row = hypre_sycl_get_global_subgroup_id<1>(item);
-   cl::sycl::ONEAPI::sub_group SG = item.get_sub_group();      
+   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    if (row >= nr_of_rows)
@@ -728,7 +728,7 @@ void hypreSYCLKernel_compute_weak_rowsums( cl::sycl::nd_item<1>& item,
 
    HYPRE_Complex rl = 0.0;
 
-   for (HYPRE_Int i = ib + lane; sycl::ONEAPI::any_of(grp, i < ie); i += sub_group_size)
+   for (HYPRE_Int i = ib + lane; sycl::ext::oneapi::any_of(grp, i < ie); i += sub_group_size)
    {
       if (i < ie)
       {
@@ -745,7 +745,7 @@ void hypreSYCLKernel_compute_weak_rowsums( cl::sycl::nd_item<1>& item,
       ie = SG.shuffle(ib, 1);
       ib = SG.shuffle(ib, 0);
 
-      for (HYPRE_Int i = ib + lane; sycl::ONEAPI::any_of(grp, i < ie); i += sub_group_size)
+      for (HYPRE_Int i = ib + lane; sycl::ext::oneapi::any_of(grp, i < ie); i += sub_group_size)
       {
          if (i < ie)
          {
@@ -764,7 +764,7 @@ void hypreSYCLKernel_compute_weak_rowsums( cl::sycl::nd_item<1>& item,
 
 //-----------------------------------------------------------------------
 
-void hypreSYCLKernel_compute_aff_afc( cl::sycl::nd_item<1>& item,
+void hypreSYCLKernel_compute_aff_afc( sycl::nd_item<1>& item,
 				      HYPRE_Int      nr_of_rows,
                                       HYPRE_Int     *AFF_diag_i,
                                       HYPRE_Int     *AFF_diag_j,
@@ -778,10 +778,10 @@ void hypreSYCLKernel_compute_aff_afc( cl::sycl::nd_item<1>& item,
                                       HYPRE_Complex *rsW,
                                       HYPRE_Complex *rsFC )
 {
-   cl::sycl::group<1> grp = item.get_group();
-  
+   sycl::group<1> grp = item.get_group();
+
    HYPRE_Int row = hypre_sycl_get_global_subgroup_id<1>(item);
-   cl::sycl::ONEAPI::sub_group SG = item.get_sub_group();      
+   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    if (row >= nr_of_rows)
@@ -812,7 +812,7 @@ void hypreSYCLKernel_compute_aff_afc( cl::sycl::nd_item<1>& item,
    p = SG.shuffle(p, 0);
 
    // do not assume diag is the first element of row
-   for (HYPRE_Int j = p + lane; sycl::ONEAPI::any_of(grp, j < q); j += sub_group_size)
+   for (HYPRE_Int j = p + lane; sycl::ext::oneapi::any_of(grp, j < q); j += sub_group_size)
    {
       if (j < q)
       {
@@ -835,7 +835,7 @@ void hypreSYCLKernel_compute_aff_afc( cl::sycl::nd_item<1>& item,
    q = SG.shuffle(p, 1);
    p = SG.shuffle(p, 0);
 
-   for (HYPRE_Int j = p + lane; sycl::ONEAPI::any_of(grp, j < q); j += sub_group_size)
+   for (HYPRE_Int j = p + lane; sycl::ext::oneapi::any_of(grp, j < q); j += sub_group_size)
    {
       if (j < q)
       {
@@ -857,7 +857,7 @@ void hypreSYCLKernel_compute_aff_afc( cl::sycl::nd_item<1>& item,
    p = SG.shuffle(p, 0);
 
    /* Diag part */
-   for (HYPRE_Int j = p + lane; sycl::ONEAPI::any_of(grp, j < q); j += sub_group_size)
+   for (HYPRE_Int j = p + lane; sycl::ext::oneapi::any_of(grp, j < q); j += sub_group_size)
    {
       if (j < q)
       {
@@ -873,7 +873,7 @@ void hypreSYCLKernel_compute_aff_afc( cl::sycl::nd_item<1>& item,
    q = SG.shuffle(p, 1);
    p = SG.shuffle(p, 0);
 
-   for (HYPRE_Int j = p + lane; sycl::ONEAPI::any_of(grp, j < q); j += sub_group_size)
+   for (HYPRE_Int j = p + lane; sycl::ext::oneapi::any_of(grp, j < q); j += sub_group_size)
    {
       if (j < q)
       {
@@ -1008,7 +1008,7 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
 //-----------------------------------------------------------------------
 // For Ext+i Interp, scale AFF from the left and the right
 
-void hypreSYCLKernel_compute_twiaff_w( cl::sycl::nd_item<1>& item,
+void hypreSYCLKernel_compute_twiaff_w( sycl::nd_item<1>& item,
 				       HYPRE_Int      nr_of_rows,
                                        HYPRE_BigInt   first_index,
                                        HYPRE_Int     *AFF_diag_i,
@@ -1025,10 +1025,10 @@ void hypreSYCLKernel_compute_twiaff_w( cl::sycl::nd_item<1>& item,
                                        HYPRE_Complex *rsFC,
                                        HYPRE_Complex *rsFC_offd )
 {
-   cl::sycl::group<1> grp = item.get_group();
+   sycl::group<1> grp = item.get_group();
 
    HYPRE_Int row = hypre_sycl_get_global_subgroup_id<1>(item);
-   cl::sycl::ONEAPI::sub_group SG = item.get_sub_group();      
+   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    if (row >= nr_of_rows)
@@ -1083,14 +1083,14 @@ void hypreSYCLKernel_compute_twiaff_w( cl::sycl::nd_item<1>& item,
       kb = SG.shuffle(kb, 0);
 
       HYPRE_Int kmatch = -1;
-      for (HYPRE_Int indk = kb + lane; sycl::ONEAPI::any_of(grp, indk < ke); indk += sub_group_size)
+      for (HYPRE_Int indk = kb + lane; sycl::ext::oneapi::any_of(grp, indk < ke); indk += sub_group_size)
       {
          if (indk < ke && row == read_only_load(&AFF_diag_j[indk]))
          {
             kmatch = indk;
          }
 
-         if (sycl::ONEAPI::any_of(grp, kmatch >= 0))
+         if (sycl::ext::oneapi::any_of(grp, kmatch >= 0))
          {
             break;
          }
@@ -1135,14 +1135,14 @@ void hypreSYCLKernel_compute_twiaff_w( cl::sycl::nd_item<1>& item,
       kb = SG.shuffle(kb, 0);
 
       HYPRE_Int kmatch = -1;
-      for (HYPRE_Int indk = kb + lane; sycl::ONEAPI::any_of(grp, indk < ke); indk += sub_group_size)
+      for (HYPRE_Int indk = kb + lane; sycl::ext::oneapi::any_of(grp, indk < ke); indk += sub_group_size)
       {
          if (indk < ke && row + first_index == read_only_load(&AFF_ext_j[indk]))
          {
             kmatch = indk;
          }
 
-         if (sycl::ONEAPI::any_of(grp, kmatch >= 0))
+         if (sycl::ext::oneapi::any_of(grp, kmatch >= 0))
          {
             break;
          }
@@ -1166,7 +1166,7 @@ void hypreSYCLKernel_compute_twiaff_w( cl::sycl::nd_item<1>& item,
    }
    theta_i = SG.shuffle(theta_i, 0);
 
-   for (HYPRE_Int j = ib_diag + lane; sycl::ONEAPI::any_of(grp, j < ie_diag); j += sub_group_size)
+   for (HYPRE_Int j = ib_diag + lane; sycl::ext::oneapi::any_of(grp, j < ie_diag); j += sub_group_size)
    {
       if (j < ie_diag)
       {
@@ -1174,7 +1174,7 @@ void hypreSYCLKernel_compute_twiaff_w( cl::sycl::nd_item<1>& item,
       }
    }
 
-   for (HYPRE_Int j = ib_offd + lane; sycl::ONEAPI::any_of(grp, j < ie_offd); j += sub_group_size)
+   for (HYPRE_Int j = ib_offd + lane; sycl::ext::oneapi::any_of(grp, j < ie_offd); j += sub_group_size)
    {
       if (j < ie_offd)
       {
@@ -1186,7 +1186,7 @@ void hypreSYCLKernel_compute_twiaff_w( cl::sycl::nd_item<1>& item,
 
 //-----------------------------------------------------------------------
 
-void hypreSYCLKernel_compute_aff_afc_epe( cl::sycl::nd_item<1>& item,
+void hypreSYCLKernel_compute_aff_afc_epe( sycl::nd_item<1>& item,
 					  HYPRE_Int      nr_of_rows,
                                           HYPRE_Int     *AFF_diag_i,
                                           HYPRE_Int     *AFF_diag_j,
@@ -1203,9 +1203,9 @@ void hypreSYCLKernel_compute_aff_afc_epe( cl::sycl::nd_item<1>& item,
                                           HYPRE_Complex *dtmp,
                                           HYPRE_Complex *dtmp_offd )
 {
-   cl::sycl::group<1> grp = item.get_group();  
+   sycl::group<1> grp = item.get_group();
    HYPRE_Int row = hypre_sycl_get_global_subgroup_id<1>(item);
-   cl::sycl::ONEAPI::sub_group SG = item.get_sub_group();   
+   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    if (row >= nr_of_rows)
@@ -1238,7 +1238,7 @@ void hypreSYCLKernel_compute_aff_afc_epe( cl::sycl::nd_item<1>& item,
 
    /* D_\tau */
    /* do not assume the first element is the diagonal */
-   for (HYPRE_Int j = pd + lane; sycl::ONEAPI::any_of(grp, j < qd); j += sub_group_size)
+   for (HYPRE_Int j = pd + lane; sycl::ext::oneapi::any_of(grp, j < qd); j += sub_group_size)
    {
       if (j < qd)
       {
@@ -1250,7 +1250,7 @@ void hypreSYCLKernel_compute_aff_afc_epe( cl::sycl::nd_item<1>& item,
       }
    }
 
-   for (HYPRE_Int j = po + lane; sycl::ONEAPI::any_of(grp, j < qo); j += sub_group_size)
+   for (HYPRE_Int j = po + lane; sycl::ext::oneapi::any_of(grp, j < qo); j += sub_group_size)
    {
       if (j < qo)
       {
@@ -1274,7 +1274,7 @@ void hypreSYCLKernel_compute_aff_afc_epe( cl::sycl::nd_item<1>& item,
 
    /* AFF Diag part */
    // do not assume diag is the first element of row
-   for (HYPRE_Int j = pd + lane; sycl::ONEAPI::any_of(grp, j < qd); j += sub_group_size)
+   for (HYPRE_Int j = pd + lane; sycl::ext::oneapi::any_of(grp, j < qd); j += sub_group_size)
    {
       if (j < qd)
       {
@@ -1290,7 +1290,7 @@ void hypreSYCLKernel_compute_aff_afc_epe( cl::sycl::nd_item<1>& item,
    }
 
    /* AFF offd part */
-   for (HYPRE_Int j = po + lane; sycl::ONEAPI::any_of(grp, j < qo); j += sub_group_size)
+   for (HYPRE_Int j = po + lane; sycl::ext::oneapi::any_of(grp, j < qo); j += sub_group_size)
    {
       if (j < qo)
       {
@@ -1301,7 +1301,7 @@ void hypreSYCLKernel_compute_aff_afc_epe( cl::sycl::nd_item<1>& item,
    theta = theta != 0.0 ? 1.0 / theta : 0.0;
 
    /* AFC Diag part */
-   for (HYPRE_Int j = xd + lane; sycl::ONEAPI::any_of(grp, j < yd); j += sub_group_size)
+   for (HYPRE_Int j = xd + lane; sycl::ext::oneapi::any_of(grp, j < yd); j += sub_group_size)
    {
       if (j < yd)
       {
@@ -1310,7 +1310,7 @@ void hypreSYCLKernel_compute_aff_afc_epe( cl::sycl::nd_item<1>& item,
    }
 
    /* AFC offd part */
-   for (HYPRE_Int j = xo + lane; sycl::ONEAPI::any_of(grp, j < yo); j += sub_group_size)
+   for (HYPRE_Int j = xo + lane; sycl::ext::oneapi::any_of(grp, j < yo); j += sub_group_size)
    {
       if (j < yo)
       {
@@ -1322,7 +1322,7 @@ void hypreSYCLKernel_compute_aff_afc_epe( cl::sycl::nd_item<1>& item,
 //-----------------------------------------------------------------------
 // For Ext+e Interp, compute D_lambda and D_tmp = D_mu / D_lambda
 
-void hypreSYCLKernel_compute_dlam_dtmp( cl::sycl::nd_item<1>& item,
+void hypreSYCLKernel_compute_dlam_dtmp( sycl::nd_item<1>& item,
                                         HYPRE_Int      nr_of_rows,
                                         HYPRE_Int     *AFF_diag_i,
                                         HYPRE_Int     *AFF_diag_j,
@@ -1333,10 +1333,10 @@ void hypreSYCLKernel_compute_dlam_dtmp( cl::sycl::nd_item<1>& item,
                                         HYPRE_Complex *dlam,
                                         HYPRE_Complex *dtmp )
 {
-  cl::sycl::group<1> grp = item.get_group();  
-  cl::sycl::ONEAPI::sub_group SG = item.get_sub_group();
+  sycl::group<1> grp = item.get_group();
+  sycl::ext::oneapi::sub_group SG = item.get_sub_group();
   HYPRE_Int sub_group_size = SG.get_local_range().get(0);
-  
+
   HYPRE_Int row = hypre_sycl_get_global_subgroup_id<1>(item);
 
   if (row >= nr_of_rows)
@@ -1358,7 +1358,7 @@ void hypreSYCLKernel_compute_dlam_dtmp( cl::sycl::nd_item<1>& item,
   HYPRE_Int find_diag = 0;
 
   /* do not assume the first element is the diagonal */
-  for (HYPRE_Int j = p_diag + lane; sycl::ONEAPI::any_of(grp, j < q_diag); j += sub_group_size)
+  for (HYPRE_Int j = p_diag + lane; sycl::ext::oneapi::any_of(grp, j < q_diag); j += sub_group_size)
   {
     if ( j < q_diag )
     {
@@ -1380,7 +1380,7 @@ void hypreSYCLKernel_compute_dlam_dtmp( cl::sycl::nd_item<1>& item,
   q_offd = SG.shuffle(p_offd, 1);
   p_offd = SG.shuffle(p_offd, 0);
 
-  for (HYPRE_Int j = p_offd + lane; sycl::ONEAPI::any_of(grp, j < q_offd); j += sub_group_size)
+  for (HYPRE_Int j = p_offd + lane; sycl::ext::oneapi::any_of(grp, j < q_offd); j += sub_group_size)
   {
     if ( j < q_offd )
     {
@@ -1403,4 +1403,3 @@ void hypreSYCLKernel_compute_dlam_dtmp( cl::sycl::nd_item<1>& item,
 }
 
 #endif // HYPRE_USING_SYCL
-

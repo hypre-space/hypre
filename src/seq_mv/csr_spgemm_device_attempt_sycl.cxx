@@ -18,8 +18,8 @@
 
 template <typename T>
 using relaxed_atomic_ref =
-  sycl::ONEAPI::atomic_ref< T, sycl::ONEAPI::memory_order::relaxed,
-			    sycl::ONEAPI::memory_scope::device,
+  sycl::ext::oneapi::atomic_ref< T, sycl::ext::oneapi::memory_order::relaxed,
+			    sycl::ext::oneapi::memory_scope::device,
 			    sycl::access::address_space::local_space >;
 
 template <char HashType, HYPRE_Int attempt>
@@ -97,7 +97,7 @@ csr_spmm_compute_row_attempt(
       j = read_only_load(ia + rowi + lane_id);
    }
 
-   sycl::ONEAPI::sub_group SG = item.get_sub_group();
+   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
    HYPRE_Int blockDim_x = item.get_local_range().get(2);
    HYPRE_Int blockDim_y = item.get_local_range().get(1);
    HYPRE_Int blockDim_z = item.get_local_range().get(0);
@@ -184,7 +184,7 @@ csr_spmm_attempt(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
                  HYPRE_Complex *s_HashVals, // shared memory
 		 char *s_failed) // shared memory
 {
-   sycl::ONEAPI::sub_group SG = item.get_sub_group();
+   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
    HYPRE_Int blockDim_x = item.get_local_range().get(2);
    HYPRE_Int blockDim_y = item.get_local_range().get(1);
@@ -313,7 +313,7 @@ copy_from_hash_into_C_row(
     HYPRE_Complex *ac_start, sycl::nd_item<3>& item)
 {
    HYPRE_Int j = 0;
-   sycl::ONEAPI::sub_group SG = item.get_sub_group();
+   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    /* copy shared memory hash table into C */
@@ -362,7 +362,7 @@ copy_from_hash_into_C(sycl::nd_item<3>& item,
                       HYPRE_Int *ig2, HYPRE_Int *jg2, HYPRE_Complex *ag2,
                       HYPRE_Int *ic, HYPRE_Int *jc, HYPRE_Complex *ac)
 {
-   sycl::ONEAPI::sub_group SG = item.get_sub_group();
+   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
    HYPRE_Int blockDim_x = item.get_local_range().get(2);
    HYPRE_Int blockDim_y = item.get_local_range().get(1);

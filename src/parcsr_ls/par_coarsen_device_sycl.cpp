@@ -358,7 +358,7 @@ hypreSYCLKernel_PMISCoarseningUpdateCF(sycl::nd_item<1>& item,
                                        HYPRE_Int  *CF_marker_offd)
 {
    HYPRE_Int warp_id = hypre_sycl_get_global_subgroup_id<1>(item);
-   cl::sycl::ONEAPI::sub_group SG = item.get_sub_group();      
+   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    if (warp_id >= graph_diag_size)
@@ -511,4 +511,3 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
 }
 
 #endif // #if defined(HYPRE_USING_SYCL)
-

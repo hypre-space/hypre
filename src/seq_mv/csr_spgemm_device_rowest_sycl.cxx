@@ -24,7 +24,7 @@ rownnz_naive_rowi(sycl::nd_item<3>& item, HYPRE_Int rowi, HYPRE_Int lane_id, HYP
                   HYPRE_Int *ja, HYPRE_Int *ib, HYPRE_Int &row_nnz_sum,
                   HYPRE_Int &row_nnz_max)
 {
-   sycl::ONEAPI::sub_group SG = item.get_sub_group();
+   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    /* load the start and end position of row i of A */
@@ -66,7 +66,7 @@ void csr_spmm_rownnz_naive(sycl::nd_item<3>& item,
 			   HYPRE_Int *ia, HYPRE_Int *ja, HYPRE_Int *ib,
 			   HYPRE_Int *jb, HYPRE_Int *rcL, HYPRE_Int *rcU)
 {
-   sycl::ONEAPI::sub_group SG = item.get_sub_group();
+   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
 
    /* total number of sub-groups in global iteration space (no_of_sub_groups_per_WG * total_no_of_WGs) */
    const HYPRE_Int num_subgroups = NUM_SUBGROUPS_PER_WG *
@@ -135,7 +135,7 @@ void cohen_rowest_kernel(sycl::nd_item<3>& item,
 			 HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T *V_in, T *V_out,
                          HYPRE_Int *rc, HYPRE_Int nsamples, HYPRE_Int *low, HYPRE_Int *upp, T mult)
 {
-   sycl::ONEAPI::sub_group SG = item.get_sub_group();
+   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
 
    /* total number of sub-groups in global iteration space (no_of_sub_groups_per_WG * total_no_of_WGs) */
    const HYPRE_Int num_subgroups = NUM_SUBGROUPS_PER_WG * (item.get_group_range(0) * item.get_group_range(1) * item.get_group_range(2));

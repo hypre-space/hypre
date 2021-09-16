@@ -13,8 +13,8 @@
 
 template <typename T>
 using relaxed_atomic_ref =
-  sycl::ONEAPI::atomic_ref< T, sycl::ONEAPI::memory_order::relaxed,
-                                sycl::ONEAPI::memory_scope::device,
+  sycl::ext::oneapi::atomic_ref< T, sycl::ext::oneapi::memory_order::relaxed,
+                                sycl::ext::oneapi::memory_scope::device,
                                 sycl::access::address_space::global_space>;
 
 /* assume d_i is of length (m+1) and contains the "sizes" in d_i[1], ..., d_i[m]

@@ -14,7 +14,7 @@
 
 #if defined(HYPRE_USING_SYCL)
 void
-hypreSYCLKernel_IndepSetMain(cl::sycl::nd_item<1>& item,
+hypreSYCLKernel_IndepSetMain(sycl::nd_item<1>& item,
 			     HYPRE_Int   graph_diag_size,
                              HYPRE_Int  *graph_diag,
                              HYPRE_Real *measure_diag,
@@ -28,7 +28,7 @@ hypreSYCLKernel_IndepSetMain(cl::sycl::nd_item<1>& item,
                              HYPRE_Int   IS_offd_temp_mark)
 {
    HYPRE_Int warp_id = hypre_sycl_get_global_subgroup_id<1>(item);
-   cl::sycl::ONEAPI::sub_group SG = item.get_sub_group();
+   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    if (warp_id >= graph_diag_size)
@@ -109,7 +109,7 @@ hypreSYCLKernel_IndepSetMain(cl::sycl::nd_item<1>& item,
 }
 
 void
-hypreSYCLKernel_IndepSetFixMarker(cl::sycl::nd_item<1>& item,
+hypreSYCLKernel_IndepSetFixMarker(sycl::nd_item<1>& item,
 				  HYPRE_Int  *IS_marker_diag,
                                   HYPRE_Int   num_elmts_send,
                                   HYPRE_Int  *send_map_elmts,

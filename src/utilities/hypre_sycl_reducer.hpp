@@ -78,9 +78,9 @@ struct HYPRE_double6
 
 /* reduction within a warp */
 __inline__ __attribute__((always_inline))
-HYPRE_Real warpReduceSum(HYPRE_Real val, cl::sycl::nd_item<1>& item)
+HYPRE_Real warpReduceSum(HYPRE_Real val, sycl::nd_item<1>& item)
 {
-  cl::sycl::ONEAPI::sub_group SG = item.get_sub_group();
+  sycl::ext::oneapi::sub_group SG = item.get_sub_group();
   
   for (HYPRE_Int offset = SG.get_local_range().get(0) / 2;
        offset > 0; offset /= 2)
@@ -91,8 +91,8 @@ HYPRE_Real warpReduceSum(HYPRE_Real val, cl::sycl::nd_item<1>& item)
 }
 
 __inline__ __attribute__((always_inline))
-HYPRE_double4 warpReduceSum(HYPRE_double4 val, cl::sycl::nd_item<1>& item) {
-  cl::sycl::ONEAPI::sub_group SG = item.get_sub_group();
+HYPRE_double4 warpReduceSum(HYPRE_double4 val, sycl::nd_item<1>& item) {
+  sycl::ext::oneapi::sub_group SG = item.get_sub_group();
 
   for (HYPRE_Int offset = SG.get_local_range().get(0) / 2;
        offset > 0; offset /= 2)
@@ -106,8 +106,8 @@ HYPRE_double4 warpReduceSum(HYPRE_double4 val, cl::sycl::nd_item<1>& item) {
 }
 
 __inline__ __attribute__((always_inline))
-HYPRE_double6 warpReduceSum(HYPRE_double6 val, cl::sycl::nd_item<1>& item) {
-  cl::sycl::ONEAPI::sub_group SG = item.get_sub_group();
+HYPRE_double6 warpReduceSum(HYPRE_double6 val, sycl::nd_item<1>& item) {
+  sycl::ext::oneapi::sub_group SG = item.get_sub_group();
 
   for (HYPRE_Int offset = SG.get_local_range().get(0) / 2;
        offset > 0; offset /= 2)
@@ -125,7 +125,7 @@ HYPRE_double6 warpReduceSum(HYPRE_double6 val, cl::sycl::nd_item<1>& item) {
 /* reduction within a block */
 template <typename T>
 __inline__ __attribute__((always_inline))
-T blockReduceSum(T val, cl::sycl::nd_item<1>& item, T* shared)
+T blockReduceSum(T val, sycl::nd_item<1>& item, T* shared)
 {
    //HYPRE_Int lane = threadIdx.x % item.get_sub_group().get_local_range().get(0);
    //HYPRE_Int wid  = threadIdx.x / item.get_sub_group().get_local_range().get(0);
@@ -142,7 +142,7 @@ T blockReduceSum(T val, cl::sycl::nd_item<1>& item, T* shared)
       shared[wid] = val;          // Write reduced value to shared memory
    }
 
-   item.barrier(cl::sycl::access::fence_space::local_space); // Wait for all partial reductions
+   item.barrier(sycl::access::fence_space::local_space); // Wait for all partial reductions
 
    //read from shared memory only if that warp existed
    if (threadIdx_x < item.get_local_range(0) / warpSize)
@@ -163,7 +163,7 @@ T blockReduceSum(T val, cl::sycl::nd_item<1>& item, T* shared)
 }
 
 template<typename T>
-void OneWorkgroupReduceKernel(cl::sycl::nd_item<1>& item, T *shared, T *arr, HYPRE_Int N)
+void OneWorkgroupReduceKernel(sycl::nd_item<1>& item, T *shared, T *arr, HYPRE_Int N)
 {
    size_t threadIdx_x = item.get_local_id(0);
 
@@ -240,13 +240,13 @@ struct ReduceSum
 
       //abb todo: fix this
       const sycl::range<1> gDim(1), bDim(1024);
-      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (cl::sycl::handler& cgh) {
+      hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) {
 
-	  cl::sycl::accessor<T, 1, cl::sycl::access_mode::read_write,
-			     cl::sycl::target::local> shared_acc(HYPRE_SUBGROUP_SIZE, cgh);
+	  sycl::accessor<T, 1, sycl::access_mode::read_write,
+			     sycl::target::local> shared_acc(HYPRE_SUBGROUP_SIZE, cgh);
 
-	  cgh.parallel_for(cl::sycl::nd_range<1>(gDim*bDim, bDim),
-			   [=] (cl::sycl::nd_item<1> item) {
+	  cgh.parallel_for(sycl::nd_range<1>(gDim*bDim, bDim),
+			   [=] (sycl::nd_item<1> item) {
 			     OneWorkgroupReduceKernel(item, shared_acc.get_pointer(), d_buf, num_workgroups);
 			   });
 	});

@@ -75,10 +75,10 @@ hypre_csr_v_k_shuffle(sycl::nd_item<1>& item,
     *            (Group of K threads) per row
     *------------------------------------------------------------*/
 
-   sycl::group<1> grp = item.get_group();   
-   sycl::ONEAPI::sub_group SG = item.get_sub_group();      
+   sycl::group<1> grp = item.get_group();
+   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
-  
+
    const HYPRE_Int grid_ngroups = item.get_group_range(0) * (SPMV_BLOCKDIM / K);
    HYPRE_Int grid_group_id = (item.get_group(0) * SPMV_BLOCKDIM + item.get_local_id(0)) / K;
    const HYPRE_Int group_lane = item.get_local_id(0) & (K - 1);
@@ -86,8 +86,8 @@ hypre_csr_v_k_shuffle(sycl::nd_item<1>& item,
    const HYPRE_Int warp_group_id = warp_lane / K;
    const HYPRE_Int warp_ngroups = sub_group_size / K;
 
-   
-   for (; sycl::ONEAPI::any_of(grp, grid_group_id < n); grid_group_id += grid_ngroups)
+
+   for (; sycl::ext::oneapi::any_of(grp, grid_group_id < n); grid_group_id += grid_ngroups)
    {
 #if 0
       HYPRE_Int p = 0, q = 0;
@@ -112,7 +112,7 @@ hypre_csr_v_k_shuffle(sycl::nd_item<1>& item,
 #if VERSION == 1
 #pragma unroll(1)
 
-      for (p += group_lane; sycl::ONEAPI::any_of(grp, p < q); p += K * 2)
+      for (p += group_lane; sycl::ext::oneapi::any_of(grp, p < q); p += K * 2)
       {
          if (p < q)
          {
@@ -125,7 +125,7 @@ hypre_csr_v_k_shuffle(sycl::nd_item<1>& item,
       }
 #elif VERSION == 2
 #pragma unroll(1)
-      for (p += group_lane; sycl::ONEAPI::any_of(grp, p < q); p += K)
+      for (p += group_lane; sycl::ext::oneapi::any_of(grp, p < q); p += K)
       {
          if (p < q)
          {
