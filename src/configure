@@ -9094,7 +9094,7 @@ done
                                         SYCLCXXFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel "
 
                                 if test x"$hypre_using_debug" == x"yes"; then :
-  SYCLCXXFLAGS="-O0 -Wall -g -gdbx ${SYCLCXXFLAGS}"
+  SYCLCXXFLAGS="-O0 -Wall -g ${SYCLCXXFLAGS}"
 elif SYCLCXXFLAGS="-O2 ${SYCLCXXFLAGS}"; then :
 
 fi
