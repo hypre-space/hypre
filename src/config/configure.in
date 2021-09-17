@@ -1903,7 +1903,7 @@ dnl   BUILD_F77_SHARED="${F77} ${SHARED_BUILD_FLAG}"
       BUILD_CC_SHARED="\${CC} ${SHARED_BUILD_FLAG}"
    fi
    BUILD_CXX_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
-   if test "$hypre_using_cuda" = "yes"
+   if test "$hypre_using_cuda" == "yes" || test "$hypre_using_hip" == "yes"
    then
       dnl BUILD_CC_SHARED="\${CUCC} ${SHARED_BUILD_FLAG}"
       BUILD_CC_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
@@ -2201,6 +2201,15 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
         AS_IF([test x"$hypre_using_debug" == x"yes"],
               [HIPCXXFLAGS="-O0 -Wall -g -ggdb ${HIPCXXFLAGS}"],
               [HIPCXXFLAGS="-O2 ${HIPCXXFLAGS}"],)
+
+
+        dnl If we're doing a shared build, we need the compile flag for it
+        dnl Note we're not just using CXXFLAGS here because that can suck other
+        dnl things that don't play nice, like openmp.
+        if test "$hypre_using_shared" = "yes"
+        then
+           HIPCXXFLAGS="${SHARED_COMPILE_FLAG} ${HIPCXXFLAGS}"
+        fi
 
         dnl (Ab)Use CUFLAGS to capture HIP compilation flags
         dnl Put HIPCXXFLAGS at the end so the user can override the optimization level.

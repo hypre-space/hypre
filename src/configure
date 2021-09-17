@@ -8489,7 +8489,7 @@ then
       BUILD_CC_SHARED="\${CC} ${SHARED_BUILD_FLAG}"
    fi
    BUILD_CXX_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
-   if test "$hypre_using_cuda" = "yes"
+   if test "$hypre_using_cuda" == "yes" || test "$hypre_using_hip" == "yes"
    then
             BUILD_CC_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
    fi
@@ -8946,6 +8946,12 @@ $as_echo "#define HYPRE_USING_HIP 1" >>confdefs.h
 elif HIPCXXFLAGS="-O2 ${HIPCXXFLAGS}"; then :
 
 fi
+
+
+                                if test "$hypre_using_shared" = "yes"
+        then
+           HIPCXXFLAGS="${SHARED_COMPILE_FLAG} ${HIPCXXFLAGS}"
+        fi
 
                         if test "$hypre_user_chose_cuflags" = "no"
         then
