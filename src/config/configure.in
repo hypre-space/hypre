@@ -2344,64 +2344,64 @@ dnl *********************************************************************
 dnl * Set SYCL options
 dnl *********************************************************************
 AS_IF([test x"$hypre_using_sycl" == x"yes"],
-      [
-        dnl AC_DEFINE(HYPRE_USING_GPU, 1, [Define to 1 if executing on GPU device])
-        AC_DEFINE(HYPRE_USING_SYCL, 1, [SYCL being used])
-        if test "x$hypre_using_sycl_queues" = "xyes"]
-        then
-	   AC_DEFINE([HYPRE_USING_SYCL_QUEUES],1,[Define to 1 if using SYCL queues])
-        fi
+[
+dnl AC_DEFINE(HYPRE_USING_GPU, 1, [Define to 1 if executing on GPU device])
+AC_DEFINE(HYPRE_USING_SYCL, 1, [SYCL being used])
+if test "x$hypre_using_sycl_queues" = "xyes"]
+then
+AC_DEFINE([HYPRE_USING_SYCL_QUEUES],1,[Define to 1 if using SYCL queues])
+fi
 
-        dnl The actual invocation of the clang compiler from oneAPI that
-	dnl supports SYCL and all the command line foo needed by the compiler.
-        AC_CHECK_PROGS(CXX, [dpcpp])
+dnl The actual invocation of the clang compiler from oneAPI that
+dnl supports SYCL and all the command line foo needed by the compiler.
+AC_CHECK_PROGS(CXX, [dpcpp])
 
-        dnl (Ab)Using dpcpp when compiling SYCL
-	LINK_CC=${CXX}
-        LINK_CXX=${CXX}
+dnl (Ab)Using dpcpp when compiling SYCL
+LINK_CC=${CXX}
+LINK_CXX=${CXX}
 
-        dnl The "-x sycl" is necessary to override the detection of .c files which clang
-        dnl interprets as C and therefore invokes the C compiler rather than the SYCL part
-        dnl of clang. Put SYCLCXXFLAGS at the end so the user can override from
-        dnl from the configure line.
-        SYCLCXXFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel "
+dnl The "-x sycl" is necessary to override the detection of .c files which clang
+dnl interprets as C and therefore invokes the C compiler rather than the SYCL part
+dnl of clang. Put SYCLCXXFLAGS at the end so the user can override from
+dnl from the configure line.
+SYCLCXXFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel "
 
-        dnl If not in debug mode, at least -O2, but the user can override with
-        dnl with SYCLCXXFLAGS on the configure line. If in debug mode, -O0 -Wall
-        dnl plus flags for debugging symbols
-        AS_IF([test x"$hypre_using_debug" == x"yes"],
-              [SYCLCXXFLAGS="-O0 -Wall -g -gdb ${SYCLCXXFLAGS}"],
-              [SYCLCXXFLAGS="-O2 ${SYCLCXXFLAGS}"],)
+dnl If not in debug mode, at least -O2, but the user can override with
+dnl with SYCLCXXFLAGS on the configure line. If in debug mode, -O0 -Wall
+dnl plus flags for debugging symbols
+AS_IF([test x"$hypre_using_debug" == x"yes"],
+[SYCLCXXFLAGS="-O0 -Wall -g -gdb ${SYCLCXXFLAGS}"],
+[SYCLCXXFLAGS="-O2 ${SYCLCXXFLAGS}"],)
 
-        dnl (Ab)Use CXXFLAGS to capture SYCL compilation flags
-        dnl Put SYCLCXXFLAGS at the end so the user can override the optimization level.
-        CXXFLAGS="${SYCLCXXFLAGS}"
+dnl (Ab)Use CXXFLAGS to capture SYCL compilation flags
+dnl Put SYCLCXXFLAGS at the end so the user can override the optimization level.
+CXXFLAGS="${SYCLCXXFLAGS}"
 
-        dnl dpl, dpct so we need both for Thrust on Intel GPUs.
-        dnl These are header-only so no linking needed.
-        HYPRE_SYCL_INCL="-I${ONEAPI_PATH}/dpl/latest/linux/include"
-        HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${ONEAPI_PATH}/dpcpp-ct/latest/include"
+dnl dpl, dpct so we need both for Thrust on Intel GPUs.
+dnl These are header-only so no linking needed.
+HYPRE_SYCL_INCL="-I/home/abagusetty/build/oneDPL/build_sycl/include"
+HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${ONEAPI_PATH}/dpcpp-ct/latest/include"
 
-        AS_IF([test x"$hypre_using_onemklsparse" == x"yes"],
-              [AC_DEFINE(HYPRE_USING_ONEMKLSPARSE, 1, [onemkl::SPARSE being used])
-               HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
-               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/mkl/spblas.hpp"
-               ])
+AS_IF([test x"$hypre_using_onemklsparse" == x"yes"],
+[AC_DEFINE(HYPRE_USING_ONEMKLSPARSE, 1, [onemkl::SPARSE being used])
+HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
+HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/mkl/spblas.hpp"
+])
 
-        AS_IF([test x"$hypre_using_onemklblas" == x"yes"],
-              [AC_DEFINE(HYPRE_USING_ONEMKLBLAS, 1, [onemkl::BLAS being used])
-	       HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
-               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/blas.hpp"
-               ])
+AS_IF([test x"$hypre_using_onemklblas" == x"yes"],
+[AC_DEFINE(HYPRE_USING_ONEMKLBLAS, 1, [onemkl::BLAS being used])
+HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
+HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/blas.hpp"
+])
 
-        dnl onemklrand: random number generation on Intel GPUs
-        AS_IF([test x"$hypre_using_onemklrand" == x"yes"],
-              [AC_DEFINE(HYPRE_USING_ONEMKLRAND, 1, [onemkl::rng being used])
-               HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
-               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/rng.hpp"
-               ])
+dnl onemklrand: random number generation on Intel GPUs
+AS_IF([test x"$hypre_using_onemklrand" == x"yes"],
+[AC_DEFINE(HYPRE_USING_ONEMKLRAND, 1, [onemkl::rng being used])
+HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
+HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/rng.hpp"
+])
 
-      ]) dnl AS_IF([test x"$hypre_using_sycl" == x"yes"]
+]) dnl AS_IF([test x"$hypre_using_sycl" == x"yes"]
 
 
 
