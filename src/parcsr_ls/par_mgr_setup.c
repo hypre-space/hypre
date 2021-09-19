@@ -918,18 +918,22 @@ hypre_MGRSetup( void               *mgr_vdata,
       // TODO: input check to avoid crashing
       if (lev == 0 && (mgr_data -> fsolver_mode) == 0)
       {
-        if (((hypre_ParAMGData*)aff_solver[lev])->A_array[0] != NULL)
+        if (((hypre_ParAMGData*)aff_solver[lev])->A_array != NULL)
         {
-          /*
-          if (my_id == 0)
+          if (((hypre_ParAMGData*)aff_solver[lev])->A_array[0] != NULL)
           {
-            printf("Error!!! F-relaxation solver has not been setup.\n");
-            hypre_error(1);
-            return hypre_error_flag;
+            // F-solver is already set up, only need to store A_ff_ptr
+            A_ff_ptr = ((hypre_ParAMGData*)aff_solver[lev])->A_array[0];
           }
-          */
-          // F-solver is already set up, only need to store A_ff_ptr
-          A_ff_ptr = ((hypre_ParAMGData*)aff_solver[lev])->A_array[0];
+          else
+          {
+            if (my_id == 0)
+            {
+              printf("Error!!! F-relaxation solver has not been setup.\n");
+              hypre_error(1);
+              return hypre_error_flag;
+            }
+          }
         }
         else
         {
