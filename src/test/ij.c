@@ -17,7 +17,6 @@
 #include <math.h>
 
 #include "_hypre_utilities.h"
-//#include "_hypre_utilities.hpp"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_mv.h"
 
@@ -26,10 +25,6 @@
 #include "HYPRE_parcsr_ls.h"
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"
-
-#if defined(HYPRE_USING_GPU)
-#include "_hypre_utilities.hpp"
-#endif
 
 #if defined(HYPRE_USING_UMPIRE)
 #include "umpire/interface/umpire.h"
@@ -270,6 +265,14 @@ main( hypre_int argc,
    mod_rap2      = 1;
    HYPRE_Int spgemm_use_cusparse = 0;
    HYPRE_Int use_curand = 1;
+#if defined(HYPRE_USING_HIP)
+   spgemm_use_cusparse = 1;
+#endif
+   HYPRE_Int  spgemm_alg = 1;
+   HYPRE_Int  spgemm_rowest_mtd = 3;
+   HYPRE_Int  spgemm_rowest_nsamples = 32;
+   HYPRE_Real spgemm_rowest_mult = 1.5;
+   char       spgemm_hash_type = 'L';
 #endif
 
    /* for CGC BM Aug 25, 2006 */
@@ -1128,6 +1131,31 @@ main( hypre_int argc,
       {
          arg_index++;
          spgemm_use_cusparse = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-spgemm_alg") == 0 )
+      {
+         arg_index++;
+         spgemm_alg  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-spgemm_rowest") == 0 )
+      {
+         arg_index++;
+         spgemm_rowest_mtd  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-spgemm_rowestmult") == 0 )
+      {
+         arg_index++;
+         spgemm_rowest_mult  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-spgemm_rowestnsamples") == 0 )
+      {
+         arg_index++;
+         spgemm_rowest_nsamples  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-spgemm_hash") == 0 )
+      {
+         arg_index++;
+         spgemm_hash_type  = argv[arg_index++][0];
       }
       else if ( strcmp(argv[arg_index], "-use_curand") == 0 )
       {
@@ -2214,11 +2242,13 @@ main( hypre_int argc,
    HYPRE_SetExecutionPolicy(default_exec_policy);
 
 #if defined(HYPRE_USING_GPU)
-#if defined(HYPRE_USING_HIP)
-   spgemm_use_cusparse = 1;
-#endif
    /* use cuSPARSE for SpGEMM */
-   HYPRE_SetSpGemmUseCusparse(spgemm_use_cusparse);
+   ierr = HYPRE_SetSpGemmUseCusparse(spgemm_use_cusparse); hypre_assert(ierr == 0);
+   ierr = hypre_SetSpGemmAlgorithm(spgemm_alg); hypre_assert(ierr == 0);
+   ierr = hypre_SetSpGemmRownnzEstimateMethod(spgemm_rowest_mtd); hypre_assert(ierr == 0);
+   ierr = hypre_SetSpGemmRownnzEstimateNSamples(spgemm_rowest_nsamples); hypre_assert(ierr == 0);
+   ierr = hypre_SetSpGemmRownnzEstimateMultFactor(spgemm_rowest_mult); hypre_assert(ierr == 0);
+   ierr = hypre_SetSpGemmHashType(spgemm_hash_type); hypre_assert(ierr == 0);
    /* use cuRand for PMIS */
    HYPRE_SetUseGpuRand(use_curand);
 #endif
@@ -2265,6 +2295,8 @@ main( hypre_int argc,
    else if ( build_matrix_type == 4 )
    {
       BuildParLaplacian27pt(argc, argv, build_matrix_arg_index, &parcsr_A);
+
+      hypre_CSRMatrixGpuSpMVAnalysis(hypre_ParCSRMatrixDiag(parcsr_A));
    }
    else if ( build_matrix_type == 5 )
    {
@@ -3214,10 +3246,12 @@ main( hypre_int argc,
       dof_func = NULL;
       if (build_funcs_type == 1)
       {
+         hypre_printf("calling BuildFuncsFromOneFile\n");
          BuildFuncsFromOneFile(argc, argv, build_funcs_arg_index, parcsr_A, &dof_func);
       }
       else if (build_funcs_type == 2)
       {
+         hypre_printf("calling BuildFuncsFromOneFiles\n");
          BuildFuncsFromFiles(argc, argv, build_funcs_arg_index, parcsr_A, &dof_func);
       }
       else
@@ -7627,10 +7661,8 @@ main( hypre_int argc,
    hypre_MPI_Finalize();
 
    /* when using cuda-memcheck --leak-check full, uncomment this */
-#if defined(HYPRE_USING_CUDA)
-   cudaDeviceReset();
-#elif defined(HYPRE_USING_HIP)
-   hipDeviceReset();
+#if defined(HYPRE_USING_GPU)
+   hypre_ResetCudaDevice(hypre_handle());
 #endif
 
    return (0);

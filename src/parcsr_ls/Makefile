@@ -150,6 +150,7 @@ CUFILES =\
  par_cheby_device.c\
  par_relax_more_device.c\
  par_coarsen_device.c\
+ par_coarse_parms_device.c\
  par_indepset_device.c\
  par_interp_device.c\
  par_lr_restr_device.c\

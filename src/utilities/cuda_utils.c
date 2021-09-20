@@ -1029,7 +1029,7 @@ hypre_CurandUniform_core( HYPRE_Int          n,
                           HYPRE_Int          set_offset,
                           hypre_ulonglongint offset)
 {
-  hypre_GpuProfilingPushRange("hypre_CurandUniform_core");
+   hypre_GpuProfilingPushRange("hypre_CurandUniform_core");
 
    rocrand_generator gen = hypre_HandleCurandGenerator(hypre_handle());
 
@@ -1161,12 +1161,13 @@ hypre_CudaDataCreate()
 #else
    hypre_CudaDataSpgemmUseCusparse(data) = 0;
 #endif
-   hypre_CudaDataSpgemmNumPasses(data) = 3;
+
+   hypre_CudaDataSpgemmAlgorithm(data)                = 1;
    /* 1: naive overestimate, 2: naive underestimate, 3: Cohen's algorithm */
-   hypre_CudaDataSpgemmRownnzEstimateMethod(data) = 3;
-   hypre_CudaDataSpgemmRownnzEstimateNsamples(data) = 32;
+   hypre_CudaDataSpgemmRownnzEstimateMethod(data)     = 3;
+   hypre_CudaDataSpgemmRownnzEstimateNsamples(data)   = 32;
    hypre_CudaDataSpgemmRownnzEstimateMultFactor(data) = 1.5;
-   hypre_CudaDataSpgemmHashType(data) = 'L';
+   hypre_CudaDataSpgemmHashType(data)                 = 'D';
 
    /* pmis */
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
@@ -1262,6 +1263,17 @@ hypre_SyncCudaDevice(hypre_Handle *hypre_handle)
    HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
 #elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipDeviceSynchronize() );
+#endif
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_ResetCudaDevice(hypre_Handle *hypre_handle)
+{
+#if defined(HYPRE_USING_CUDA)
+   cudaDeviceReset();
+#elif defined(HYPRE_USING_HIP)
+   hipDeviceReset();
 #endif
    return hypre_error_flag;
 }

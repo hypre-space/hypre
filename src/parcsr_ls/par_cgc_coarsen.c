@@ -34,7 +34,7 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
                             HYPRE_Int                    coarsen_type,
                             HYPRE_Int                    cgc_its,
                             HYPRE_Int                    debug_flag,
-                            HYPRE_Int                  **CF_marker_ptr)
+                            hypre_IntArray             **CF_marker_ptr)
 {
 #ifdef HYPRE_MIXEDINT
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,"CGC coarsening is not enabled in mixedint mode!");
@@ -246,9 +246,10 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
    /* Allocate CF_marker if not done before */
    if (*CF_marker_ptr == NULL)
    {
-      *CF_marker_ptr = hypre_CTAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_HOST);
+      *CF_marker_ptr = hypre_IntArrayCreate(num_variables);
+      hypre_IntArrayInitialize(*CF_marker_ptr);
    }
-   CF_marker = *CF_marker_ptr;
+   CF_marker = hypre_IntArrayData(*CF_marker_ptr);
 
    num_left = 0;
    for (j = 0; j < num_variables; j++)
