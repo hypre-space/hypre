@@ -3246,10 +3246,12 @@ main( hypre_int argc,
       dof_func = NULL;
       if (build_funcs_type == 1)
       {
+         hypre_printf("calling BuildFuncsFromOneFile\n");
          BuildFuncsFromOneFile(argc, argv, build_funcs_arg_index, parcsr_A, &dof_func);
       }
       else if (build_funcs_type == 2)
       {
+         hypre_printf("calling BuildFuncsFromOneFiles\n");
          BuildFuncsFromFiles(argc, argv, build_funcs_arg_index, parcsr_A, &dof_func);
       }
       else
