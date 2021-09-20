@@ -51,7 +51,7 @@ extern "C" {
 #define MPI_DOUBLE          hypre_MPI_DOUBLE
 #define MPI_LONG_DOUBLE     hypre_MPI_LONG_DOUBLE
 #define MPI_INT             hypre_MPI_INT
-#define MPI_LONG_LONG_INT   hypre_MPI_INT
+#define MPI_LONG_LONG_INT   hypre_MPI_LONG_LONG_INT
 #define MPI_CHAR            hypre_MPI_CHAR
 #define MPI_LONG            hypre_MPI_LONG
 #define MPI_BYTE            hypre_MPI_BYTE
@@ -168,6 +168,7 @@ typedef HYPRE_Int  hypre_MPI_Info;
 #define  hypre_MPI_BYTE 6
 #define  hypre_MPI_REAL 7
 #define  hypre_MPI_COMPLEX 8
+#define  hypre_MPI_LONG_LONG_INT 9
 
 #define  hypre_MPI_SUM 0
 #define  hypre_MPI_MIN 1
