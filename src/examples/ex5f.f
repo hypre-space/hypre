@@ -207,7 +207,7 @@
 
 !        Set the values for row i
 #if defined(HYPRE_USING_CUDA)
-         tmpi(1) = nnz-1;
+         tmpi(1) = nnz-1
          tmpi(2) = i
          call HYPRE_IJMatrixSetValues(
      1        A, 1, tmpi(1), tmpi(2), cols, values, ierr)
