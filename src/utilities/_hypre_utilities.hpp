@@ -87,6 +87,8 @@ struct hypre_device_allocator
 
 #define CUSPARSE_NEWAPI_VERSION 11000
 
+#define CUDA_MALLOCASYNC_VERSION 11020
+
 #elif defined(HYPRE_USING_HIP)
 
 #include <hip/hip_runtime.h>

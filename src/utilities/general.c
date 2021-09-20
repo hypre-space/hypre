@@ -191,7 +191,7 @@ HYPRE_Init()
    hypre_int device_id;
    hypre_GetDevice(&device_id);
    hypre_SetDevice(device_id, _hypre_handle);
-#if __CUDACC_VER_MAJOR__ >= 11 && __CUDACC_VER_MINOR__ >= 2      
+#if CUDA_VERSION >= CUDA_MALLOCASYNC_VERSION
    cudaMemPool_t mempool;
    cudaDeviceGetDefaultMemPool(&mempool, device_id);
    uint64_t threshold = UINT64_MAX;
