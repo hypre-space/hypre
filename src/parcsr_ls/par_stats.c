@@ -22,6 +22,8 @@ HYPRE_Int
 hypre_BoomerAMGSetupStats( void               *amg_vdata,
                            hypre_ParCSRMatrix *A         )
 {
+   hypre_GpuProfilingPushRange("AMGSetupStats");
+
    MPI_Comm          comm = hypre_ParCSRMatrixComm(A);
 
    hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
@@ -1190,6 +1192,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    hypre_TFree(num_variables, HYPRE_MEMORY_HOST);
    hypre_TFree(send_buff, HYPRE_MEMORY_HOST);
    hypre_TFree(gather_buff, HYPRE_MEMORY_HOST);
+
+   hypre_GpuProfilingPopRange();
 
    return(0);
 }
