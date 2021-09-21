@@ -16,7 +16,7 @@ if [ -d ../../../.git ]; then
   DEVSTRING=`git describe --match 'v*' --long --abbrev=9`
   DEVNUMBER=`echo $DEVSTRING | awk -F- '{print $2}'`
   DEVBRANCH=`git rev-parse --abbrev-ref HEAD`
-  if [ -n "$DEVBRANCH" ]; then
+  if [ "$DEVBRANCH" != "master" ]; then
     echo "Using HYPRE_DEVELOP_STRING: $DEVSTRING (not main development branch)" \
      > ${TNAME}.testdatacheck
   else
