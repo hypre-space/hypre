@@ -1371,6 +1371,18 @@ hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle)
    return hypre_error_flag;
 }
 
+HYPRE_Int
+hypre_ForceSyncCudaComputeStream(hypre_Handle *hypre_handle)
+{
+   HYPRE_Int sync_stream;
+   hypre_GetSyncCudaCompute(&sync_stream);
+   hypre_SetSyncCudaCompute(1);
+   hypre_SyncCudaComputeStream_core(4, hypre_handle, NULL);
+   hypre_SetSyncCudaCompute(sync_stream);
+
+   return hypre_error_flag;
+}
+
 #endif // #if defined(HYPRE_USING_GPU)
 
 
