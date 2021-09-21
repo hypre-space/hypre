@@ -28,6 +28,30 @@ if (${HYPRE_SOURCE_DIR} STREQUAL ${HYPRE_BINARY_DIR})
   message(FATAL_ERROR "In-place build not allowed! Please use a separate build directory. See the Users Manual or INSTALL file for details.")
 endif ()
 
+if (EXISTS ${HYPRE_SOURCE_DIR}/../.git)
+  execute_process(COMMAND git -C ${HYPRE_SOURCE_DIR} describe --match v* --long --abbrev=9
+                  OUTPUT_VARIABLE develop_string
+                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND git -C ${HYPRE_SOURCE_DIR} describe --match v* --abbrev=0
+                  OUTPUT_VARIABLE develop_lastag
+                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND git -C ${HYPRE_SOURCE_DIR} rev-list --count ${develop_lastag}..HEAD
+                  OUTPUT_VARIABLE develop_number
+                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND git -C ${HYPRE_SOURCE_DIR} rev-parse --abbrev-ref HEAD
+                  OUTPUT_VARIABLE develop_branch
+                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+  set(HYPRE_DEVELOP_STRING  ${develop_string})
+  set(HYPRE_DEVELOP_NUMBER  ${develop_number})
+  if (develop_branch MATCHES "master")
+    set(HYPRE_DEVELOP_BRANCH  ${develop_branch})
+  else ()
+    message(STATUS "NOTE: On branch ${develop_branch}, not the main development branch")
+  endif ()
+else ()
+  message(STATUS "NOTE: Could not find .git directory")
+endif ()
+
 # Set cmake module path
 set(CMAKE_MODULE_PATH "${HYPRE_SOURCE_DIR}/config/cmake" "${CMAKE_MODULE_PATH}")
 include(HYPRE_CMakeUtilities)
