@@ -9,7 +9,7 @@
 #include "_hypre_sstruct_mv.h"
 
 /* Tests prototypes */
-HYPRE_Int test_SStructMatmult( HYPRE_Int nmatrices , HYPRE_SStructMatrix *ss_A , HYPRE_IJMatrix *ij_A , HYPRE_Int nterms , HYPRE_Int *terms , HYPRE_Int *trans , HYPRE_SStructMatrix *ss_M_ptr);
+HYPRE_Int test_SStructMatmult( HYPRE_Int nmatrices , HYPRE_SStructMatrix *ss_A , HYPRE_IJMatrix *ij_A , HYPRE_Int nterms , HYPRE_Int *terms , HYPRE_Int *trans , HYPRE_Int print );
 
 /*--------------------------------------------------------------------------
  * Print usage info
@@ -65,7 +65,6 @@ main( hypre_int  argc,
    HYPRE_SStructGraph     *graph;
    HYPRE_SStructMatrix    *ss_A;
    HYPRE_IJMatrix         *ij_A;
-   HYPRE_SStructMatrix     ss_M;
 
    /* Driver options */
    HYPRE_Int               nparts;
@@ -307,10 +306,10 @@ main( hypre_int  argc,
 
       if (print)
       {
-         hypre_sprintf(matname, "sstruct.out.mat.m%02d", i);
+         hypre_sprintf(matname, "sstruct.out.mat%02d", i);
          HYPRE_SStructMatrixPrint(matname, ss_A[i], 0);
 
-         hypre_sprintf(matname, "ij.out.mat.m%02d", i);
+         hypre_sprintf(matname, "ij.out.mat%02d", i);
          HYPRE_IJMatrixPrint(ij_A[i], matname);
       }
    }
@@ -332,30 +331,23 @@ main( hypre_int  argc,
       else
       {
          hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-         time_index = hypre_InitializeTiming("Matrix-matrix multiply");
+         time_index = hypre_InitializeTiming("test_SStructMatmult");
          hypre_BeginTiming(time_index);
 
-         ierr = test_SStructMatmult(nmatrices, ss_A, ij_A, nterms, terms, trans, &ss_M);
+         ierr = test_SStructMatmult(nmatrices, ss_A, ij_A, nterms, terms, trans, print);
          if (ierr)
          {
-            hypre_printf("test_SStructMatmult failed!\n\n");
+            hypre_printf("[test_SStructMatmult]: failed!\n\n");
          }
          else
          {
-            hypre_printf("test_SStructMatmult passed!\n\n");
+            hypre_printf("[test_SStructMatmult]: passed!\n\n");
          }
 
          hypre_EndTiming(time_index);
-         hypre_PrintTiming("Matrix-matrix multiply", hypre_MPI_COMM_WORLD);
+         hypre_PrintTiming("test_SStructMatmult", hypre_MPI_COMM_WORLD);
          hypre_FinalizeTiming(time_index);
          hypre_ClearTiming();
-
-         if (print)
-         {
-            HYPRE_SStructMatrixPrint("sstruct.out.M", ss_M, 0);
-         }
-
-         HYPRE_SStructMatrixDestroy(ss_M);
       }
    }
 
@@ -410,7 +402,7 @@ test_SStructMatmult( HYPRE_Int            nmatrices,
                      HYPRE_Int            nterms,
                      HYPRE_Int           *terms,
                      HYPRE_Int           *trans,
-                     HYPRE_SStructMatrix *ss_M_ptr )
+                     HYPRE_Int            print )
 {
    MPI_Comm             comm = hypre_SStructMatrixComm(ss_A[0]);
 
@@ -475,18 +467,27 @@ test_SStructMatmult( HYPRE_Int            nmatrices,
       if (norm_E > HYPRE_REAL_EPSILON*norm_M)
       {
          ierr = 1;
-         hypre_ParCSRMatrixPrintIJ(par_M, 0, 0, "par_Mss");
-         hypre_ParCSRMatrixPrintIJ(par_A[0], 0, 0, "par_Mij");
-         hypre_ParCSRMatrixPrintIJ(par_E, 0, 0, "par_E");
+
+         if (print)
+         {
+            hypre_ParCSRMatrixPrintIJ(par_M, 0, 0, "par_Mss");
+            hypre_ParCSRMatrixPrintIJ(par_A[0], 0, 0, "par_Mij");
+            hypre_ParCSRMatrixPrintIJ(par_E, 0, 0, "par_E");
+         }
       }
+   }
+
+   if (print)
+   {
+      HYPRE_SStructMatrixPrint("sstruct.out.M", ss_M, 0);
+      HYPRE_IJMatrixPrint(ij_M, "ij.out.M");
    }
 
    /* Free memory */
    HYPRE_ParCSRMatrixDestroy(par_A[0]);
    HYPRE_ParCSRMatrixDestroy(par_E);
    HYPRE_IJMatrixDestroy(ij_M);
-
-   *ss_M_ptr = ss_M;
+   HYPRE_SStructMatrixDestroy(ss_M);
 
    return ierr;
 }
