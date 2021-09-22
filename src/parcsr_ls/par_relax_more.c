@@ -15,102 +15,202 @@
 #include "_hypre_parcsr_ls.h"
 #include "float.h"
 
-HYPRE_Int hypre_LINPACKcgtql1(HYPRE_Int*,HYPRE_Real *,HYPRE_Real *,HYPRE_Int *);
-HYPRE_Real hypre_LINPACKcgpthy(HYPRE_Real*, HYPRE_Real*);
-
 /******************************************************************************
  *
- *use max norm to estimate largest eigenvalue
+ * use Gershgorin discs to estimate smallest and largest eigenvalues
+ * A is assumed to be symmetric
+ * For SPD matrix, it returns [0, max_eig = max (aii + ri)],
+ *                 ri is radius of disc centered at a_ii
+ * For SND matrix, it returns [min_eig = min (aii - ri), 0]
+ *
+ * scale > 0: compute eigen estimate of D^{-1/2}*A*D^{-1/2}, where
+ *            D = diag(A) for SPD matrix, D = -diag(A) for SND
+ *
+ * scale = 1: The algorithm is performed on D^{-1}*A, since it
+ *            has the same eigenvalues as D^{-1/2}*A*D^{-1/2}
+ * scale = 2: The algorithm is performed on D^{-1/2}*A*D^{-1/2} (TODO)
  *
  *****************************************************************************/
 HYPRE_Int
-hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax with */
-                           HYPRE_Int scale, /* scale by diagonal?*/
-                           HYPRE_Real *max_eig)
+hypre_ParCSRMaxEigEstimateHost( hypre_ParCSRMatrix *A,       /* matrix to relax with */
+                            HYPRE_Int           scale,   /* scale by diagonal?   */
+                            HYPRE_Real         *max_eig,
+                            HYPRE_Real         *min_eig )
 {
-   HYPRE_Real e_max;
-   HYPRE_Real row_sum, max_norm;
-   HYPRE_Real *A_diag_data;
-   HYPRE_Real *A_offd_data;
-   HYPRE_Real temp;
-   HYPRE_Real diag_value;
+   HYPRE_Int   A_num_rows  = hypre_ParCSRMatrixNumRows(A);
+   HYPRE_Int  *A_diag_i    = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A));
+   HYPRE_Int  *A_diag_j    = hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(A));
+   HYPRE_Int  *A_offd_i    = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(A));
+   HYPRE_Real *A_diag_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A));
+   HYPRE_Real *A_offd_data = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(A));
+   HYPRE_Real *diag        = NULL;
+   HYPRE_Int   i, j;
+   HYPRE_Real  e_max, e_min;
+   HYPRE_Real  send_buf[2], recv_buf[2];
 
-   HYPRE_Int  pos_diag, neg_diag;
-   HYPRE_Int  A_num_rows;
-   HYPRE_Int *A_diag_i;
-   HYPRE_Int *A_offd_i;
-   HYPRE_Int  j;
-   HYPRE_Int  i, start;
+   HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
-   /* estimate with the inf-norm of A - should be ok for SPD matrices */
-   A_num_rows  = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
-   A_diag_i    = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A));
-   A_diag_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A));
-   A_offd_i    = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(A));
-   A_offd_data = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(A));
-
-   max_norm = 0.0;
-
-   pos_diag = neg_diag = 0;
-
-   for ( i = 0; i < A_num_rows; i++ )
+   if (scale > 1)
    {
-      start = A_diag_i[i];
-      diag_value = A_diag_data[start];
-      if (diag_value > 0)
-      {
-         pos_diag++;
-      }
-      if (diag_value < 0)
-      {
-         neg_diag++;
-         diag_value = -diag_value;
-      }
-      row_sum = diag_value;
-
-      /*for (j = 0; j < row_length; j++)*/
-      for (j = start+1; j < A_diag_i[i+1]; j++)
-      {
-         row_sum += fabs(A_diag_data[j]);
-      }
-      for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
-      {
-         row_sum += fabs(A_offd_data[j]);
-      }
-      if (scale)
-      {
-         if (diag_value != 0.0)
-            row_sum = row_sum/diag_value;
-      }
-      if ( row_sum > max_norm ) max_norm = row_sum;
+      diag = hypre_TAlloc(HYPRE_Real, A_num_rows, memory_location);
    }
 
-   /* get max across procs */
-   hypre_MPI_Allreduce(&max_norm, &temp, 1, HYPRE_MPI_REAL, hypre_MPI_MAX, hypre_ParCSRMatrixComm(A));
-   max_norm = temp;
+   for (i = 0; i < A_num_rows; i++)
+   {
+      HYPRE_Real a_ii = 0.0, r_i = 0.0, lower, upper;
 
-   /* from Charles */
-   if ( pos_diag == 0 && neg_diag > 0 ) max_norm = - max_norm;
+      for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
+      {
+         if (A_diag_j[j] == i)
+         {
+            a_ii = A_diag_data[j];
+         }
+         else
+         {
+            r_i += hypre_abs(A_diag_data[j]);
+         }
+      }
 
-   /* eig estimates */
-   e_max = max_norm;
+      for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
+      {
+         r_i += hypre_abs(A_offd_data[j]);
+      }
+
+      lower = a_ii - r_i;
+      upper = a_ii + r_i;
+
+      if (scale == 1)
+      {
+         lower /= hypre_abs(a_ii);
+         upper /= hypre_abs(a_ii);
+      }
+
+      if (i)
+      {
+         e_max = hypre_max(e_max, upper);
+         e_min = hypre_min(e_min, lower);
+      }
+      else
+      {
+         e_max = upper;
+         e_min = lower;
+      }
+   }
+
+   send_buf[0] = -e_min;
+   send_buf[1] =  e_max;
+
+   /* get e_min e_max across procs */
+   hypre_MPI_Allreduce(send_buf, recv_buf, 2, HYPRE_MPI_REAL, hypre_MPI_MAX, hypre_ParCSRMatrixComm(A));
+
+   e_min = -recv_buf[0];
+   e_max =  recv_buf[1];
 
    /* return */
-   *max_eig = e_max;
+   if ( hypre_abs(e_min) > hypre_abs(e_max) )
+   {
+      *min_eig = e_min;
+      *max_eig = hypre_min(0.0, e_max);
+   }
+   else
+   {
+      *min_eig = hypre_max(e_min, 0.0);
+      *max_eig = e_max;
+   }
+
+   hypre_TFree(diag, memory_location);
 
    return hypre_error_flag;
 }
 
-/******************************************************************************
-   use CG to get the eigenvalue estimate
-  scale means get eig est of  (D^{-1/2} A D^{-1/2}
-******************************************************************************/
+/**
+ * @brief Estimates the max eigenvalue using infinity norm. Will determine
+ * whether or not to use host or device internally
+ *
+ * @param[in] A Matrix to relax with
+ * @param[in] to scale by diagonal
+ * @param[out] Maximum eigenvalue
+ */
 HYPRE_Int
-hypre_ParCSRMaxEigEstimateCG( hypre_ParCSRMatrix *A,     /* matrix to relax with */
-                              HYPRE_Int           scale, /* scale by diagonal?*/
-                              HYPRE_Int           max_iter,
-                              HYPRE_Real         *max_eig,
-                              HYPRE_Real         *min_eig )
+hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax with */
+                           HYPRE_Int scale, /* scale by diagonal?*/
+                           HYPRE_Real *max_eig,
+                           HYPRE_Real *min_eig)
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("ParCSRMaxEigEstimate");
+#endif
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+   HYPRE_Int ierr = 0;
+   if (exec == HYPRE_EXEC_HOST)
+   {
+      ierr = hypre_ParCSRMaxEigEstimateHost(A,scale,max_eig,min_eig);
+   }
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   else
+   {
+      ierr = hypre_ParCSRMaxEigEstimateDevice(A,scale,max_eig,min_eig);
+   }
+#endif
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+   return ierr;
+}
+
+/**
+ *  @brief Uses CG to get the eigenvalue estimate. Will determine whether to use
+ *  host or device internally
+ *
+ *  @param[in] A Matrix to relax with
+ *  @param[in] scale Gets the eigenvalue est of D^{-1/2} A D^{-1/2}
+ *  @param[in] max_iter Maximum number of iterations for CG
+ *  @param[out] max_eig Estimated max eigenvalue
+ *  @param[out] min_eig Estimated min eigenvalue
+ */
+HYPRE_Int
+hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A,     /* matrix to relax with */
+                             HYPRE_Int           scale, /* scale by diagonal?*/
+                             HYPRE_Int           max_iter,
+                             HYPRE_Real         *max_eig,
+                             HYPRE_Real         *min_eig)
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("ParCSRMaxEigEstimateCG");
+#endif
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));
+   HYPRE_Int             ierr = 0;
+   if (exec == HYPRE_EXEC_HOST)
+   {
+      ierr = hypre_ParCSRMaxEigEstimateCGHost(A, scale, max_iter, max_eig, min_eig);
+   }
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   else
+   {
+      ierr = hypre_ParCSRMaxEigEstimateCGDevice(A, scale, max_iter, max_eig, min_eig);
+   }
+#endif
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+   return ierr;
+}
+
+/**
+ *  @brief Uses CG to get the eigenvalue estimate on the host
+ *
+ *  @param[in] A Matrix to relax with
+ *  @param[in] scale Gets the eigenvalue est of D^{-1/2} A D^{-1/2}
+ *  @param[in] max_iter Maximum number of iterations for CG
+ *  @param[out] max_eig Estimated max eigenvalue
+ *  @param[out] min_eig Estimated min eigenvalue
+ */
+HYPRE_Int
+hypre_ParCSRMaxEigEstimateCGHost( hypre_ParCSRMatrix *A,     /* matrix to relax with */
+                                 HYPRE_Int           scale, /* scale by diagonal?*/
+                                 HYPRE_Int           max_iter,
+                                 HYPRE_Real         *max_eig,
+                                 HYPRE_Real         *min_eig )
 {
    HYPRE_Int i, j, err;
    hypre_ParVector *p;
@@ -124,14 +224,9 @@ hypre_ParCSRMaxEigEstimateCG( hypre_ParCSRMatrix *A,     /* matrix to relax with
 
    HYPRE_Real lambda_max ;
    HYPRE_Real beta, gamma = 0.0, alpha, sdotp, gamma_old, alphainv;
-   HYPRE_Real diag;
    HYPRE_Real lambda_min;
    HYPRE_Real *s_data, *p_data, *ds_data, *u_data;
    HYPRE_Int local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
-
-   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Real *A_diag_data = hypre_CSRMatrixData(A_diag);
-   HYPRE_Int *A_diag_i = hypre_CSRMatrixI(A_diag);
 
    /* check the size of A - don't iterate more than the size */
    HYPRE_BigInt size = hypre_ParCSRMatrixGlobalNumRows(A);
@@ -146,31 +241,26 @@ hypre_ParCSRMaxEigEstimateCG( hypre_ParCSRMatrix *A,     /* matrix to relax with
                              hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(r);
-   hypre_ParVectorSetPartitioningOwner(r,0);
 
    p = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                              hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(p);
-   hypre_ParVectorSetPartitioningOwner(p,0);
 
    s = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                              hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(s);
-   hypre_ParVectorSetPartitioningOwner(s,0);
 
    ds = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                               hypre_ParCSRMatrixGlobalNumRows(A),
                               hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(ds);
-   hypre_ParVectorSetPartitioningOwner(ds,0);
 
    u = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                              hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(u);
-   hypre_ParVectorSetPartitioningOwner(u,0);
 
    /* point to local data */
    s_data = hypre_VectorData(hypre_ParVectorLocalVector(s));
@@ -192,12 +282,7 @@ hypre_ParCSRMaxEigEstimateCG( hypre_ParCSRMatrix *A,     /* matrix to relax with
 
    if (scale)
    {
-      for (i = 0; i < local_size; i++)
-      {
-         diag = A_diag_data[A_diag_i[i]];
-         ds_data[i] = 1/sqrt(diag);
-      }
-
+      hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(A), ds_data, 4);
    }
    else
    {
@@ -328,275 +413,44 @@ means half, and .1 means 10percent)
 *******************************************************************************/
 
 HYPRE_Int
-hypre_ParCSRRelax_Cheby( hypre_ParCSRMatrix *A,                /* matrix to relax with */
-                         hypre_ParVector    *f,                /* right-hand side */
-                         HYPRE_Real          max_eig,
-                         HYPRE_Real          min_eig,
-                         HYPRE_Real          fraction,
-                         HYPRE_Int           order,            /* polynomial order */
-                         HYPRE_Int           scale,            /* scale by diagonal?*/
-                         HYPRE_Int           variant,
-                         hypre_ParVector    *u,                /* initial/updated approximation */
-                         hypre_ParVector    *v,                /* temporary vector */
-                         hypre_ParVector    *r                 /*another temp vector */ )
+hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with */
+                        hypre_ParVector    *f, /* right-hand side */
+                        HYPRE_Real          max_eig,
+                        HYPRE_Real          min_eig,
+                        HYPRE_Real          fraction,
+                        HYPRE_Int           order, /* polynomial order */
+                        HYPRE_Int           scale, /* scale by diagonal?*/
+                        HYPRE_Int           variant,
+                        hypre_ParVector    *u, /* initial/updated approximation */
+                        hypre_ParVector    *v, /* temporary vector */
+                        hypre_ParVector    *r /*another temp vector */)
 {
-   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Real      *A_diag_data  = hypre_CSRMatrixData(A_diag);
-   HYPRE_Int       *A_diag_i     = hypre_CSRMatrixI(A_diag);
-   HYPRE_Int        num_rows     = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Real *coefs   = NULL;
+   HYPRE_Real *ds_data = NULL;
 
-   HYPRE_Real *u_data = hypre_VectorData(hypre_ParVectorLocalVector(u));
-   HYPRE_Real *f_data = hypre_VectorData(hypre_ParVectorLocalVector(f));
-   HYPRE_Real *v_data = hypre_VectorData(hypre_ParVectorLocalVector(v));
-   HYPRE_Real *r_data = hypre_VectorData(hypre_ParVectorLocalVector(r));
+   hypre_ParVector *tmp_vec    = NULL;
+   hypre_ParVector *orig_u_vec = NULL;
 
-   HYPRE_Real theta, delta;
-   HYPRE_Real den;
-   HYPRE_Real upper_bound, lower_bound;
-   HYPRE_Int i, j;
-   HYPRE_Real coefs[5];
-   HYPRE_Real mult;
-   HYPRE_Real *orig_u;
-   HYPRE_Real tmp_d;
-   HYPRE_Int cheby_order;
-   HYPRE_Real *ds_data, *tmp_data;
-   HYPRE_Real  diag;
-   hypre_ParVector *ds;
-   hypre_ParVector *tmp_vec;
+   hypre_ParCSRRelax_Cheby_Setup(A, max_eig, min_eig, fraction, order, scale, variant, &coefs, &ds_data);
 
-   /* u = u + p(A)r */
-   if (order > 4)
+   orig_u_vec = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+                                      hypre_ParCSRMatrixGlobalNumRows(A),
+                                      hypre_ParCSRMatrixRowStarts(A));
+   hypre_ParVectorInitialize_v2(orig_u_vec, hypre_ParCSRMatrixMemoryLocation(A));
+
+   if (scale)
    {
-      order = 4;
-   }
-   else if (order < 1)
-   {
-      order = 1;
-   }
-
-   /* we are using the order of p(A) */
-   cheby_order = order -1;
-
-   /* make sure we are large enough -  Adams et al. 2003 */
-   upper_bound = max_eig * 1.1;
-   /* lower_bound = max_eig/fraction; */
-   lower_bound = (upper_bound - min_eig)* fraction + min_eig;
-
-   /* theta and delta */
-   theta = (upper_bound + lower_bound)/2;
-   delta = (upper_bound - lower_bound)/2;
-
-   if (variant == 1 )
-   {
-      switch ( cheby_order ) /* these are the corresponding cheby polynomials: u = u_o + s(A)r_0  - so order is
-                                one less that  resid poly: r(t) = 1 - t*s(t) */
-      {
-         case 0:
-            coefs[0] = 1.0/theta;
-
-            break;
-
-         case 1:  /* (del - t + 2*th)/(th^2 + del*th) */
-            den = (theta*theta + delta*theta);
-
-            coefs[0] = (delta + 2*theta)/den;
-            coefs[1] = -1.0/den;
-
-            break;
-
-         case 2:  /* (4*del*th - del^2 - t*(2*del + 6*th) + 2*t^2 + 6*th^2)/(2*del*th^2 - del^2*th - del^3 + 2*th^3)*/
-            den = 2*delta*theta*theta - delta*delta*theta - pow(delta,3) + 2*pow(theta,3);
-
-            coefs[0] = (4*delta*theta - pow(delta,2) +  6*pow(theta,2))/den;
-            coefs[1] = -(2*delta + 6*theta)/den;
-            coefs[2] =  2/den;
-
-            break;
-
-         case 3: /* -(6*del^2*th - 12*del*th^2 - t^2*(4*del + 16*th) + t*(12*del*th - 3*del^2 + 24*th^2) + 3*del^3 + 4*t^3 - 16*th^3)/(4*del*th^3 - 3*del^2*th^2 - 3*del^3*th + 4*th^4)*/
-            den = - (4*delta*pow(theta,3) - 3*pow(delta,2)*pow(theta,2) - 3*pow(delta,3)*theta + 4*pow(theta,4) );
-
-            coefs[0] = (6*pow(delta,2)*theta - 12*delta*pow(theta,2) + 3*pow(delta,3) - 16*pow(theta,3)   )/den;
-            coefs[1] = (12*delta*theta - 3*pow(delta,2) + 24*pow(theta,2))/den;
-            coefs[2] =  -( 4*delta + 16*theta)/den;
-            coefs[3] = 4/den;
-
-            break;
-      }
-   }
-
-   else /* standard chebyshev */
-   {
-      switch ( cheby_order ) /* these are the corresponding cheby polynomials: u = u_o + s(A)r_0  - so order is
-                                one less thatn resid poly: r(t) = 1 - t*s(t) */
-      {
-         case 0:
-            coefs[0] = 1.0/theta;
-            break;
-
-         case 1:  /* (  2*t - 4*th)/(del^2 - 2*th^2) */
-            den = delta*delta - 2*theta*theta;
-
-            coefs[0] = -4*theta/den;
-            coefs[1] = 2/den;
-
-            break;
-
-         case 2: /* (3*del^2 - 4*t^2 + 12*t*th - 12*th^2)/(3*del^2*th - 4*th^3)*/
-            den = 3*(delta*delta)*theta - 4*(theta*theta*theta);
-
-            coefs[0] = (3*delta*delta - 12 *theta*theta)/den;
-            coefs[1] = 12*theta/den;
-            coefs[2] = -4/den;
-
-            break;
-
-         case 3: /*(t*(8*del^2 - 48*th^2) - 16*del^2*th + 32*t^2*th - 8*t^3 + 32*th^3)/(del^4 - 8*del^2*th^2 + 8*th^4)*/
-            den = pow(delta,4) - 8*delta*delta*theta*theta + 8*pow(theta,4);
-
-            coefs[0] = (32*pow(theta,3)- 16*delta*delta*theta)/den;
-            coefs[1] = (8*delta*delta - 48*theta*theta)/den;
-            coefs[2] = 32*theta/den;
-            coefs[3] = -8/den;
-
-            break;
-      }
-   }
-
-   orig_u = hypre_CTAlloc(HYPRE_Real,  num_rows, HYPRE_MEMORY_HOST);
-
-   if (!scale)
-   {
-      /* get residual: r = f - A*u */
-      hypre_ParVectorCopy(f, r);
-      hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, r);
-
-
-
-      for ( i = 0; i < num_rows; i++ )
-      {
-         orig_u[i] = u_data[i];
-         u_data[i] = r_data[i] * coefs[cheby_order];
-      }
-      for (i = cheby_order - 1; i >= 0; i-- )
-      {
-         hypre_ParCSRMatrixMatvec(1.0, A, u, 0.0, v);
-         mult = coefs[i];
-
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
-#endif
-         for ( j = 0; j < num_rows; j++ )
-         {
-            u_data[j] = mult * r_data[j] + v_data[j];
-         }
-      }
-
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-      for ( i = 0; i < num_rows; i++ )
-      {
-         u_data[i] = orig_u[i] + u_data[i];
-      }
-   }
-   else /* scaling! */
-   {
-      /*grab 1/sqrt(diagonal) */
-
-      ds = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
-                                 hypre_ParCSRMatrixGlobalNumRows(A),
-                                 hypre_ParCSRMatrixRowStarts(A));
-      hypre_ParVectorInitialize(ds);
-      hypre_ParVectorSetPartitioningOwner(ds,0);
-      ds_data = hypre_VectorData(hypre_ParVectorLocalVector(ds));
-
       tmp_vec = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                       hypre_ParCSRMatrixGlobalNumRows(A),
                                       hypre_ParCSRMatrixRowStarts(A));
-      hypre_ParVectorInitialize(tmp_vec);
-      hypre_ParVectorSetPartitioningOwner(tmp_vec,0);
-      tmp_data = hypre_VectorData(hypre_ParVectorLocalVector(tmp_vec));
+      hypre_ParVectorInitialize_v2(tmp_vec, hypre_ParCSRMatrixMemoryLocation(A));
+   }
+   hypre_ParCSRRelax_Cheby_Solve(A, f, ds_data, coefs, order, scale, variant, u, v, r, orig_u_vec, tmp_vec);
 
-      /* get ds_data and get scaled residual: r = D^(-1/2)f -
-       * D^(-1/2)A*u */
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j,diag) HYPRE_SMP_SCHEDULE
-#endif
-      for (j = 0; j < num_rows; j++)
-      {
-         diag = A_diag_data[A_diag_i[j]];
-         ds_data[j] = 1/sqrt(diag);
-
-         r_data[j] = ds_data[j] * f_data[j];
-      }
-
-      hypre_ParCSRMatrixMatvec(-1.0, A, u, 0.0, tmp_vec);
-
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
-#endif
-      for ( j = 0; j < num_rows; j++ )
-      {
-         r_data[j] += ds_data[j] * tmp_data[j];
-      }
-
-      /* save original u, then start
-         the iteration by multiplying r by the cheby coef.*/
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
-#endif
-      for ( j = 0; j < num_rows; j++ )
-      {
-         orig_u[j] = u_data[j]; /* orig, unscaled u */
-
-         u_data[j] = r_data[j] * coefs[cheby_order];
-      }
-
-      /* now do the other coefficients */
-      for (i = cheby_order - 1; i >= 0; i-- )
-      {
-         /* v = D^(-1/2)AD^(-1/2)u */
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
-#endif
-         for ( j = 0; j < num_rows; j++ )
-         {
-            tmp_data[j]  =  ds_data[j] * u_data[j];
-         }
-         hypre_ParCSRMatrixMatvec(1.0, A, tmp_vec, 0.0, v);
-
-         /* u_new = coef*r + v*/
-         mult = coefs[i];
-
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j,tmp_d) HYPRE_SMP_SCHEDULE
-#endif
-         for ( j = 0; j < num_rows; j++ )
-         {
-            tmp_d = ds_data[j]* v_data[j];
-            u_data[j] = mult * r_data[j] + tmp_d;
-         }
-
-      } /* end of cheby_order loop */
-
-      /* now we have to scale u_data before adding it to u_orig*/
-
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
-#endif
-      for ( j = 0; j < num_rows; j++ )
-      {
-         u_data[j] = orig_u[j] + ds_data[j]*u_data[j];
-      }
-
-      hypre_ParVectorDestroy(ds);
-      hypre_ParVectorDestroy(tmp_vec);
-
-
-   } /* end of scaling code */
-
-   hypre_TFree(orig_u, HYPRE_MEMORY_HOST);
+   hypre_TFree(ds_data, hypre_ParCSRMatrixMemoryLocation(A));
+   hypre_TFree(coefs, HYPRE_MEMORY_HOST);
+   hypre_ParVectorDestroy(orig_u_vec);
+   hypre_ParVectorDestroy(tmp_vec);
 
    return hypre_error_flag;
 }
@@ -891,4 +745,3 @@ L20:
 
    return ret_val;
 } /* cgpthy_ */
-

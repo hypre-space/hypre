@@ -766,7 +766,6 @@ hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_mark
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    hypre_CSRMatrixMemoryLocation(P_diag) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixMemoryLocation(P_offd) = HYPRE_MEMORY_HOST;
@@ -841,7 +840,7 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
                                      HYPRE_BigInt *num_old_cpts_global,
                                      HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag,
                                      HYPRE_Real trunc_factor, HYPRE_Int max_elmts,
-                                     HYPRE_Int sep_weight, 
+                                     HYPRE_Int sep_weight,
                                      hypre_ParCSRMatrix  **P_ptr)
 {
    /* Communication Variables */
@@ -1741,7 +1740,6 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    hypre_CSRMatrixMemoryLocation(P_diag) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixMemoryLocation(P_offd) = HYPRE_MEMORY_HOST;
@@ -2392,6 +2390,7 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
                else if(P_marker_offd[i1] == strong_f_marker)
                {
                   sum = zero;
+                  sgn = 1;
                   for(jj1 = A_ext_i[i1]; jj1 < A_ext_i[i1+1]; jj1++)
                   {
                      big_k1 = A_ext_j[jj1];
@@ -2482,7 +2481,6 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    hypre_CSRMatrixMemoryLocation(P_diag) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixMemoryLocation(P_offd) = HYPRE_MEMORY_HOST;

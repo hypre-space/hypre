@@ -24,6 +24,7 @@ HEADERS =\
  fortran.h\
  fortran_matrix.h\
  general.h\
+ int_array.h\
  memory.h\
  HYPRE_utilities.h\
  mpistubs.h\
@@ -42,6 +43,7 @@ FILES =\
  exchange_data.c\
  fortran_matrix.c\
  ap.c\
+ log.c\
  complex.c\
  error.c\
  hopscotch_hash.c\
@@ -62,6 +64,7 @@ CUFILES=\
  cuda_utils.c\
  general.c\
  handle.c\
+ int_array.c\
  memory.c\
  omp_device.c \
  nvtx.c

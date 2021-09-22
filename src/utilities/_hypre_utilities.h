@@ -127,7 +127,7 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 
 #if defined(HYPRE_DEBUG)
 /* host assert */
-#define hypre_assert(EX) do { if (!(EX)) { hypre_fprintf(stderr, "[%s, %d] hypre_assert failed: %s\n", __FILE__, __LINE__, #EX); hypre_error(1); assert(0); } } while (0)
+#define hypre_assert(EX) do { if (!(EX)) { fprintf(stderr, "[%s, %d] hypre_assert failed: %s\n", __FILE__, __LINE__, #EX); hypre_error(1); assert(0); } } while (0)
 /* device assert */
 #if defined(HYPRE_USING_CUDA)
 #define hypre_device_assert(EX) assert(EX)
@@ -194,13 +194,13 @@ extern "C" {
 #define MPI_COMM_SELF        hypre_MPI_COMM_SELF
 #define MPI_COMM_TYPE_SHARED hypre_MPI_COMM_TYPE_SHARED
 
-#define MPI_BOTTOM  	    hypre_MPI_BOTTOM
+#define MPI_BOTTOM          hypre_MPI_BOTTOM
 
 #define MPI_FLOAT           hypre_MPI_FLOAT
 #define MPI_DOUBLE          hypre_MPI_DOUBLE
 #define MPI_LONG_DOUBLE     hypre_MPI_LONG_DOUBLE
 #define MPI_INT             hypre_MPI_INT
-#define MPI_LONG_LONG_INT   hypre_MPI_INT
+#define MPI_LONG_LONG_INT   hypre_MPI_LONG_LONG_INT
 #define MPI_CHAR            hypre_MPI_CHAR
 #define MPI_LONG            hypre_MPI_LONG
 #define MPI_BYTE            hypre_MPI_BYTE
@@ -317,6 +317,7 @@ typedef HYPRE_Int  hypre_MPI_Info;
 #define  hypre_MPI_BYTE 6
 #define  hypre_MPI_REAL 7
 #define  hypre_MPI_COMPLEX 8
+#define  hypre_MPI_LONG_LONG_INT 9
 
 #define  hypre_MPI_SUM 0
 #define  hypre_MPI_MIN 1
@@ -770,6 +771,10 @@ char *hypre_CAllocDML( HYPRE_Int count , HYPRE_Int elt_size , char *file , HYPRE
 char *hypre_ReAllocDML( char *ptr , HYPRE_Int size , char *file , HYPRE_Int line );
 void hypre_FreeDML( char *ptr , char *file , HYPRE_Int line );
 
+/* GPU malloc prototype */
+typedef void (*GPUMallocFunc)(void **, size_t);
+typedef void (*GPUMfreeFunc)(void *);
+
 #ifdef __cplusplus
 }
 #endif
@@ -1158,6 +1163,7 @@ extern "C++" {
 #endif
 
 static char hypre__levelname[16];
+static char hypre__markname[1024];
 
 #define HYPRE_ANNOTATE_FUNC_BEGIN          CALI_MARK_FUNCTION_BEGIN
 #define HYPRE_ANNOTATE_FUNC_END            CALI_MARK_FUNCTION_END
@@ -1165,6 +1171,16 @@ static char hypre__levelname[16];
 #define HYPRE_ANNOTATE_LOOP_END(id)        CALI_MARK_LOOP_END(id)
 #define HYPRE_ANNOTATE_ITER_BEGIN(id, it)  CALI_MARK_ITERATION_BEGIN(id, it)
 #define HYPRE_ANNOTATE_ITER_END(id)        CALI_MARK_ITERATION_END(id)
+#define HYPRE_ANNOTATE_REGION_BEGIN(...)\
+{\
+   hypre_sprintf(hypre__markname, __VA_ARGS__);\
+   CALI_MARK_BEGIN(hypre__markname);\
+}
+#define HYPRE_ANNOTATE_REGION_END(...)\
+{\
+   hypre_sprintf(hypre__markname, __VA_ARGS__);\
+   CALI_MARK_END(hypre__markname);\
+}
 #define HYPRE_ANNOTATE_MGLEVEL_BEGIN(lvl)\
 {\
    hypre_sprintf(hypre__levelname, "MG level %d", lvl);\
@@ -1184,6 +1200,9 @@ static char hypre__levelname[16];
 #define HYPRE_ANNOTATE_LOOP_END(id)
 #define HYPRE_ANNOTATE_ITER_BEGIN(id, it)
 #define HYPRE_ANNOTATE_ITER_END(id)
+#define HYPRE_ANNOTATE_REGION_BEGIN(...)
+#define HYPRE_ANNOTATE_REGION_END(...)
+#define HYPRE_ANNOTATE_MAX_MGLEVEL(lvl)
 #define HYPRE_ANNOTATE_MGLEVEL_BEGIN(lvl)
 #define HYPRE_ANNOTATE_MGLEVEL_END(lvl)
 
@@ -1236,6 +1255,9 @@ typedef struct
    HYPRE_Int              own_umpire_pinned_pool;
    umpire_resourcemanager umpire_rm;
 #endif
+   /* user malloc/free function pointers */
+   GPUMallocFunc          user_device_malloc;
+   GPUMfreeFunc           user_device_free;
 } hypre_Handle;
 
 /* accessor macros to hypre_Handle */
@@ -1263,13 +1285,16 @@ typedef struct
 #define hypre_HandleStructCommRecvBufferSize(hypre_handle)       hypre_CudaDataStructCommRecvBufferSize(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleStructCommSendBufferSize(hypre_handle)       hypre_CudaDataStructCommSendBufferSize(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleSpgemmUseCusparse(hypre_handle)              hypre_CudaDataSpgemmUseCusparse(hypre_HandleCudaData(hypre_handle))
-#define hypre_HandleSpgemmNumPasses(hypre_handle)                hypre_CudaDataSpgemmNumPasses(hypre_HandleCudaData(hypre_handle))
+#define hypre_HandleSpgemmAlgorithm(hypre_handle)                hypre_CudaDataSpgemmAlgorithm(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateMethod(hypre_handle)     hypre_CudaDataSpgemmRownnzEstimateMethod(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle)   hypre_CudaDataSpgemmRownnzEstimateNsamples(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle) hypre_CudaDataSpgemmRownnzEstimateMultFactor(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleSpgemmHashType(hypre_handle)                 hypre_CudaDataSpgemmHashType(hypre_HandleCudaData(hypre_handle))
-#define hypre_HandleUmpireDeviceAllocator(hypre_handle)          hypre_CudaDataUmpireDeviceAllocator(hypre_HandleCudaData(hypre_handle))
+#define hypre_HandleDeviceAllocator(hypre_handle)                hypre_CudaDataDeviceAllocator(hypre_HandleCudaData(hypre_handle))
 #define hypre_HandleUseGpuRand(hypre_handle)                     hypre_CudaDataUseGpuRand(hypre_HandleCudaData(hypre_handle))
+
+#define hypre_HandleUserDeviceMalloc(hypre_handle)               ((hypre_handle) -> user_device_malloc)
+#define hypre_HandleUserDeviceMfree(hypre_handle)                ((hypre_handle) -> user_device_free)
 
 #define hypre_HandleUmpireResourceMan(hypre_handle)              ((hypre_handle) -> umpire_rm)
 #define hypre_HandleUmpireDevicePoolSize(hypre_handle)           ((hypre_handle) -> umpire_device_pool_size)
@@ -1363,6 +1388,45 @@ typedef struct
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+/******************************************************************************
+ *
+ * Header file for hypre_IntArray struct for holding an array of integers
+ *
+ *****************************************************************************/
+
+#ifndef hypre_INTARRAY_HEADER
+#define hypre_INTARRAY_HEADER
+
+/*--------------------------------------------------------------------------
+ * hypre_IntArray
+ *--------------------------------------------------------------------------*/
+
+typedef struct 
+{
+   /* pointer to data and size of data */ 
+   HYPRE_Int            *data;
+   HYPRE_Int             size;
+
+   /* memory location of array data */
+   HYPRE_MemoryLocation  memory_location;
+} hypre_IntArray;
+
+/*--------------------------------------------------------------------------
+ * Accessor functions for the IntArray structure
+ *--------------------------------------------------------------------------*/
+
+#define hypre_IntArrayData(array)                  ((array) -> data)
+#define hypre_IntArraySize(array)                  ((array) -> size)
+#define hypre_IntArrayMemoryLocation(array)        ((array) -> memory_location)
+
+#endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 /* amg_linklist.c */
 void hypre_dispose_elt ( hypre_LinkList element_ptr );
 void hypre_remove_point ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , HYPRE_Int measure , HYPRE_Int index , HYPRE_Int *lists , HYPRE_Int *where );
@@ -1375,6 +1439,9 @@ HYPRE_Int hypre_BigBinarySearch ( HYPRE_BigInt *list , HYPRE_BigInt value , HYPR
 HYPRE_Int hypre_BinarySearch2 ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int low , HYPRE_Int high , HYPRE_Int *spot );
 HYPRE_Int *hypre_LowerBound( HYPRE_Int *first, HYPRE_Int *last, HYPRE_Int value );
 HYPRE_BigInt *hypre_BigLowerBound( HYPRE_BigInt *first, HYPRE_BigInt *last, HYPRE_BigInt value );
+
+/* log.c */
+HYPRE_Int hypre_Log2( HYPRE_Int p );
 
 /* complex.c */
 #ifdef HYPRE_COMPLEX
@@ -1608,12 +1675,14 @@ void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPR
 #if defined(HYPRE_USING_GPU)
 HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_SyncCudaDevice(hypre_Handle *hypre_handle);
+HYPRE_Int hypre_ResetCudaDevice(hypre_Handle *hypre_handle);
 HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y);
 HYPRE_Int hypreDevice_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y, HYPRE_Complex *z);
 HYPRE_Int hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y);
-HYPRE_Int hypreDevice_MaskedIVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y, HYPRE_Int *mask);
+HYPRE_Int hypreDevice_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y, HYPRE_Int *marker, HYPRE_Int marker_val);
 HYPRE_Int hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v);
 HYPRE_Int hypreDevice_Filln(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v);
+HYPRE_Int hypreDevice_Scalen(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v);
 #endif
 
 HYPRE_Int hypre_CurandUniform( HYPRE_Int n, HYPRE_Real *urand, HYPRE_Int set_seed, hypre_ulonglongint seed, HYPRE_Int set_offset, hypre_ulonglongint offset);
@@ -1638,8 +1707,25 @@ HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
 
 /* handle.c */
 HYPRE_Int hypre_SetSpGemmUseCusparse( HYPRE_Int use_cusparse );
+HYPRE_Int hypre_SetSpGemmAlgorithm( HYPRE_Int value );
+HYPRE_Int hypre_SetSpGemmRownnzEstimateMethod( HYPRE_Int value );
+HYPRE_Int hypre_SetSpGemmRownnzEstimateNSamples( HYPRE_Int value );
+HYPRE_Int hypre_SetSpGemmRownnzEstimateMultFactor( HYPRE_Real value );
+HYPRE_Int hypre_SetSpGemmHashType( char value );
 HYPRE_Int hypre_SetUseGpuRand( HYPRE_Int use_gpurand );
 HYPRE_Int hypre_SetGaussSeidelMethod( HYPRE_Int gs_method );
+HYPRE_Int hypre_SetUserDeviceMalloc(GPUMallocFunc func);
+HYPRE_Int hypre_SetUserDeviceMfree(GPUMfreeFunc func);
+
+/* int_array.c */
+hypre_IntArray* hypre_IntArrayCreate( HYPRE_Int size );
+HYPRE_Int hypre_IntArrayDestroy( hypre_IntArray *array );
+HYPRE_Int hypre_IntArrayInitialize_v2( hypre_IntArray *array, HYPRE_MemoryLocation memory_location );
+HYPRE_Int hypre_IntArrayInitialize( hypre_IntArray *array );
+HYPRE_Int hypre_IntArrayCopy( hypre_IntArray *x, hypre_IntArray *y );
+hypre_IntArray* hypre_IntArrayCloneDeep_v2( hypre_IntArray *x, HYPRE_MemoryLocation memory_location );
+hypre_IntArray* hypre_IntArrayCloneDeep( hypre_IntArray *x );
+HYPRE_Int hypre_IntArraySetConstantValues( hypre_IntArray *v, HYPRE_Int value );
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -1775,7 +1861,7 @@ static inline HYPRE_Int
 first_lsb_bit_indx( hypre_uint x )
 {
    HYPRE_Int pos;
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || defined(__MINGW64__)
    if (x == 0)
    {
       pos = 0;

@@ -939,7 +939,6 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    hypre_CSRMatrixMemoryLocation(P_diag) = memory_location_P;
    hypre_CSRMatrixMemoryLocation(P_offd) = memory_location_P;
@@ -1807,7 +1806,6 @@ hypre_BoomerAMGBuildExtPIInterpHost(hypre_ParCSRMatrix   *A,
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    hypre_CSRMatrixMemoryLocation(P_diag) = memory_location_P;
    hypre_CSRMatrixMemoryLocation(P_offd) = memory_location_P;
@@ -2752,7 +2750,6 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    hypre_CSRMatrixMemoryLocation(P_diag) = memory_location_P;
    hypre_CSRMatrixMemoryLocation(P_offd) = memory_location_P;
@@ -3610,7 +3607,6 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    hypre_CSRMatrixMemoryLocation(P_diag) = memory_location_P;
    hypre_CSRMatrixMemoryLocation(P_offd) = memory_location_P;
@@ -4478,7 +4474,6 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    hypre_CSRMatrixMemoryLocation(P_diag) = memory_location_P;
    hypre_CSRMatrixMemoryLocation(P_offd) = memory_location_P;
@@ -5217,7 +5212,6 @@ hypre_BoomerAMGBuildExtInterpHost(hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    hypre_CSRMatrixMemoryLocation(P_diag) = memory_location_P;
    hypre_CSRMatrixMemoryLocation(P_offd) = memory_location_P;

@@ -5,51 +5,38 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#ifndef HYPRE_UMPIRE_ALLOCATOR_H
-#define HYPRE_UMPIRE_ALLOCATOR_H
+#ifndef DEVICE_ALLOCATOR_H
+#define DEVICE_ALLOCATOR_H
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-#if defined(HYPRE_USING_UMPIRE_DEVICE)
 
-/*
-#include "umpire/Allocator.hpp"
-#include "umpire/ResourceManager.hpp"
-
-#include "umpire/strategy/DynamicPool.hpp"
-#include "umpire/strategy/AllocationAdvisor.hpp"
-#include "umpire/strategy/MonotonicAllocationStrategy.hpp"
-#include "umpire/util/Macros.hpp"
-*/
-
-struct hypre_umpire_device_allocator
+/* C++ style memory allocator for GPU **device** memory
+ * Just wraps _hypre_TAlloc and _hypre_TFree */
+struct hypre_device_allocator
 {
    typedef char value_type;
 
-   hypre_umpire_device_allocator()
+   hypre_device_allocator()
    {
       // constructor
    }
 
-   ~hypre_umpire_device_allocator()
+   ~hypre_device_allocator()
    {
       // destructor
    }
 
    char *allocate(std::ptrdiff_t num_bytes)
    {
-      char *ptr = NULL;
-      hypre_umpire_device_pooled_allocate((void**) &ptr, num_bytes);
-
-      return ptr;
+      return _hypre_TAlloc(char, num_bytes, hypre_MEMORY_DEVICE);
    }
 
    void deallocate(char *ptr, size_t n)
    {
-      hypre_umpire_device_pooled_free(ptr);
+      _hypre_TFree(ptr, hypre_MEMORY_DEVICE);
    }
 };
 
-#endif /* #ifdef HYPRE_USING_UMPIRE_DEVICE */
 #endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
 #endif

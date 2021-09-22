@@ -86,16 +86,16 @@ typedef struct
 
    /* problem data */
    hypre_ParCSRMatrix  *A;
-   HYPRE_Int      num_variables;
-   HYPRE_Int      num_functions;
-   HYPRE_Int      nodal;
-   HYPRE_Int      nodal_levels;
-   HYPRE_Int      nodal_diag;
-   HYPRE_Int      keep_same_sign;
-   HYPRE_Int      num_points;
-   HYPRE_Int     *dof_func;
-   HYPRE_Int     *dof_point;
-   HYPRE_Int     *point_dof_map;
+   HYPRE_Int            num_variables;
+   HYPRE_Int            num_functions;
+   HYPRE_Int            nodal;
+   HYPRE_Int            nodal_levels;
+   HYPRE_Int            nodal_diag;
+   HYPRE_Int            keep_same_sign;
+   HYPRE_Int            num_points;
+   hypre_IntArray      *dof_func;
+   HYPRE_Int           *dof_point;
+   HYPRE_Int           *point_dof_map;
 
    /* data generated in the setup phase */
    hypre_ParCSRMatrix **A_array;
@@ -103,8 +103,8 @@ typedef struct
    hypre_ParVector    **U_array;
    hypre_ParCSRMatrix **P_array;
    hypre_ParCSRMatrix **R_array;
-   HYPRE_Int          **CF_marker_array;
-   HYPRE_Int          **dof_func_array;
+   hypre_IntArray     **CF_marker_array;
+   hypre_IntArray     **dof_func_array;
    HYPRE_Int          **dof_point_array;
    HYPRE_Int          **point_dof_map_array;
    HYPRE_Int            num_levels;
@@ -151,7 +151,7 @@ typedef struct
    HYPRE_Int            cheby_variant;
    HYPRE_Int            cheby_scale;
    HYPRE_Real           cheby_fraction;
-   HYPRE_Real         **cheby_ds;
+   hypre_Vector       **cheby_ds;
    HYPRE_Real         **cheby_coefs;
 
    /* data needed for non-Galerkin option */
