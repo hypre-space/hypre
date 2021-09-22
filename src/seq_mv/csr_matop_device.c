@@ -20,8 +20,6 @@ hypre_CsrsvData*
 hypre_CsrsvDataCreate()
 {
    hypre_CsrsvData *data = hypre_CTAlloc(hypre_CsrsvData, 1, HYPRE_MEMORY_HOST);
-   hypre_CsrsvDataBufferSize(data) = 0;
-   hypre_CsrsvDataBuffer(data) = NULL;
 
    return data;
 }
@@ -617,7 +615,7 @@ hypreCUDAKernel_CSRMoveDiagFirst( HYPRE_Int      nrows,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p, q;
+   HYPRE_Int p = 0, q = 0;
 
    if (lane < 2)
    {
@@ -727,7 +725,7 @@ hypreCUDAKernel_CSRMatrixFixZeroDiagDevice( HYPRE_Complex  v,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p, q;
+   HYPRE_Int p = 0, q = 0;
    bool has_diag = false;
 
    if (lane < 2)
@@ -825,7 +823,7 @@ hypreCUDAKernel_CSRMatrixReplaceDiagDevice( HYPRE_Complex *new_diag,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p, q;
+   HYPRE_Int p = 0, q = 0;
    bool has_diag = false;
 
    if (lane < 2)
@@ -1010,7 +1008,7 @@ hypreCUDAKernel_CSRRowSum( HYPRE_Int      nrows,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p, q;
+   HYPRE_Int p = 0, q = 0;
 
    if (lane < 2)
    {
@@ -1118,7 +1116,7 @@ hypreCUDAKernel_CSRExtractDiag( HYPRE_Int      nrows,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p, q;
+   HYPRE_Int p = 0, q = 0;
 
    if (lane < 2)
    {
@@ -1991,3 +1989,20 @@ hypre_SortCSRRocsparse(       HYPRE_Int      n,
 }
 #endif // #if defined(HYPRE_USING_ROCSPARSE)
 
+void hypre_CSRMatrixGpuSpMVAnalysis(hypre_CSRMatrix *matrix)
+{
+#if defined(HYPRE_USING_ROCSPARSE)
+
+  HYPRE_ROCSPARSE_CALL( rocsparse_dcsrmv_analysis(hypre_HandleCusparseHandle(hypre_handle()),
+                                                  rocsparse_operation_none,
+                                                  hypre_CSRMatrixNumRows(matrix),
+                                                  hypre_CSRMatrixNumCols(matrix),
+                                                  hypre_CSRMatrixNumNonzeros(matrix),
+                                                  hypre_CSRMatrixGPUMatDescr(matrix),
+                                                  hypre_CSRMatrixData(matrix),
+                                                  hypre_CSRMatrixI(matrix),
+                                                  hypre_CSRMatrixJ(matrix),
+                                                  hypre_CSRMatrixGPUMatInfo(matrix)) );
+
+#endif // #if defined(HYPRE_USING_ROCSPARSE)
+}

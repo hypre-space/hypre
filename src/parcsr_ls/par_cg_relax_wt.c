@@ -42,7 +42,7 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
    hypre_ParVector    *Ztemp;
    hypre_ParVector    *Qtemp = NULL;
 
-   HYPRE_Int    *CF_marker = hypre_ParAMGDataCFMarkerArray(amg_data)[level];
+   HYPRE_Int    *CF_marker = hypre_IntArrayData(hypre_ParAMGDataCFMarkerArray(amg_data)[level]);
    HYPRE_Real   *Ptemp_data;
    HYPRE_Real   *Ztemp_data;
 
@@ -87,10 +87,9 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
    HYPRE_Real   *S_vec;
 #endif
 
-   HYPRE_Int num_threads;
-
-   num_threads = hypre_NumThreads();
-
+#if !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP)
+   HYPRE_Int num_threads = hypre_NumThreads();
+#endif
 
    /* Acquire data and allocate storage */
 

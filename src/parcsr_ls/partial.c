@@ -2390,6 +2390,7 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
                else if(P_marker_offd[i1] == strong_f_marker)
                {
                   sum = zero;
+                  sgn = 1;
                   for(jj1 = A_ext_i[i1]; jj1 < A_ext_i[i1+1]; jj1++)
                   {
                      big_k1 = A_ext_j[jj1];

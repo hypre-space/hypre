@@ -73,6 +73,7 @@ hypre_MPI_Comm_create( hypre_MPI_Comm   comm,
                        hypre_MPI_Group  group,
                        hypre_MPI_Comm  *newcomm )
 {
+   *newcomm = hypre_MPI_COMM_NULL;
    return(0);
 }
 
@@ -80,6 +81,7 @@ HYPRE_Int
 hypre_MPI_Comm_dup( hypre_MPI_Comm  comm,
                     hypre_MPI_Comm *newcomm )
 {
+   *newcomm = comm;
    return(0);
 }
 
@@ -182,7 +184,29 @@ hypre_MPI_Allgather( void               *sendbuf,
          HYPRE_Int *csendbuf = (HYPRE_Int *)sendbuf;
          for (i = 0; i < sendcount; i++)
          {
-	    crecvbuf[i] = csendbuf[i];
+            crecvbuf[i] = csendbuf[i];
+         }
+      }
+      break;
+
+      case hypre_MPI_LONG_LONG_INT:
+      {
+         HYPRE_BigInt *crecvbuf = (HYPRE_BigInt *)recvbuf;
+         HYPRE_BigInt *csendbuf = (HYPRE_BigInt *)sendbuf;
+         for (i = 0; i < sendcount; i++)
+         {
+            crecvbuf[i] = csendbuf[i];
+         }
+      }
+      break;
+
+      case hypre_MPI_FLOAT:
+      {
+         float *crecvbuf = (float *)recvbuf;
+         float *csendbuf = (float *)sendbuf;
+         for (i = 0; i < sendcount; i++)
+         {
+            crecvbuf[i] = csendbuf[i];
          }
       }
       break;
@@ -193,7 +217,18 @@ hypre_MPI_Allgather( void               *sendbuf,
          double *csendbuf = (double *)sendbuf;
          for (i = 0; i < sendcount; i++)
          {
-	    crecvbuf[i] = csendbuf[i];
+            crecvbuf[i] = csendbuf[i];
+         }
+      }
+      break;
+
+      case hypre_MPI_LONG_DOUBLE:
+      {
+         long double *crecvbuf = (long double *)recvbuf;
+         long double *csendbuf = (long double *)sendbuf;
+         for (i = 0; i < sendcount; i++)
+         {
+            crecvbuf[i] = csendbuf[i];
          }
       }
       break;
@@ -204,7 +239,18 @@ hypre_MPI_Allgather( void               *sendbuf,
          char *csendbuf = (char *)sendbuf;
          for (i = 0; i < sendcount; i++)
          {
-	    crecvbuf[i] = csendbuf[i];
+            crecvbuf[i] = csendbuf[i];
+         }
+      }
+      break;
+
+      case hypre_MPI_LONG:
+      {
+         hypre_longint *crecvbuf = (hypre_longint *)recvbuf;
+         hypre_longint *csendbuf = (hypre_longint *)sendbuf;
+         for (i = 0; i < sendcount; i++)
+         {
+            crecvbuf[i] = csendbuf[i];
          }
       }
       break;
@@ -221,7 +267,7 @@ hypre_MPI_Allgather( void               *sendbuf,
          HYPRE_Real *csendbuf = (HYPRE_Real *)sendbuf;
          for (i = 0; i < sendcount; i++)
          {
-	    crecvbuf[i] = csendbuf[i];
+            crecvbuf[i] = csendbuf[i];
          }
       }
       break;
@@ -232,7 +278,7 @@ hypre_MPI_Allgather( void               *sendbuf,
          HYPRE_Complex *csendbuf = (HYPRE_Complex *)sendbuf;
          for (i = 0; i < sendcount; i++)
          {
-	    crecvbuf[i] = csendbuf[i];
+            crecvbuf[i] = csendbuf[i];
          }
       }
       break;
@@ -495,7 +541,28 @@ hypre_MPI_Allreduce( void              *sendbuf,
          {
             crecvbuf[i] = csendbuf[i];
          }
+      }
+      break;
 
+      case hypre_MPI_LONG_LONG_INT:
+      {
+         HYPRE_BigInt *crecvbuf = (HYPRE_BigInt *)recvbuf;
+         HYPRE_BigInt *csendbuf = (HYPRE_BigInt *)sendbuf;
+         for (i = 0; i < count; i++)
+         {
+            crecvbuf[i] = csendbuf[i];
+         }
+      }
+      break;
+
+      case hypre_MPI_FLOAT:
+      {
+         float *crecvbuf = (float *)recvbuf;
+         float *csendbuf = (float *)sendbuf;
+         for (i = 0; i < count; i++)
+         {
+            crecvbuf[i] = csendbuf[i];
+         }
       }
       break;
 
@@ -510,10 +577,32 @@ hypre_MPI_Allreduce( void              *sendbuf,
       }
       break;
 
+      case hypre_MPI_LONG_DOUBLE:
+      {
+         long double *crecvbuf = (long double *)recvbuf;
+         long double *csendbuf = (long double *)sendbuf;
+         for (i = 0; i < count; i++)
+         {
+            crecvbuf[i] = csendbuf[i];
+         }
+      }
+      break;
+
       case hypre_MPI_CHAR:
       {
          char *crecvbuf = (char *)recvbuf;
          char *csendbuf = (char *)sendbuf;
+         for (i = 0; i < count; i++)
+         {
+            crecvbuf[i] = csendbuf[i];
+         }
+      }
+      break;
+
+      case hypre_MPI_LONG:
+      {
+         hypre_longint *crecvbuf = (hypre_longint *)recvbuf;
+         hypre_longint *csendbuf = (hypre_longint *)sendbuf;
          for (i = 0; i < count; i++)
          {
             crecvbuf[i] = csendbuf[i];
