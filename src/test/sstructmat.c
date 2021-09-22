@@ -385,6 +385,7 @@ main( hypre_int  argc,
    hypre_TFree(distribute, HYPRE_MEMORY_HOST);
    hypre_TFree(terms, HYPRE_MEMORY_HOST);
    hypre_TFree(trans, HYPRE_MEMORY_HOST);
+   hypre_TFree(infile, HYPRE_MEMORY_HOST);
 
    /*-----------------------------------------------------------
     * Finalize libraries

@@ -1860,6 +1860,11 @@ DestroyData( ProblemData   data )
          hypre_TFree(pdata.graph_boxsizes, HYPRE_MEMORY_HOST);
       }
 
+      if (pdata.matrix_num_centries > 0)
+      {
+         hypre_TFree(pdata.matrix_centries, HYPRE_MEMORY_HOST);
+      }
+
       if (pdata.matset_nboxes > 0)
       {
          hypre_TFree(pdata.matset_ilowers, HYPRE_MEMORY_HOST);
@@ -2548,8 +2553,10 @@ BuildVector( MPI_Comm             comm,
       {
          for (box = 0; box < pdata.nboxes; box++)
          {
-            GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
-                           pdata.vartypes[var], ilower, iupper);
+            HYPRE_SStructGridGetVariableBox(grid, part, var,
+                                            pdata.ilowers[box],
+                                            pdata.iuppers[box],
+                                            ilower, iupper);
             HYPRE_SStructVectorSetBoxValues(vec, part, ilower, iupper,
                                             var, values);
          }
