@@ -1162,7 +1162,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                      exit(0);
                   }
                }
-                     
+
                /* copy back to device and destroy host copy */
                if (hypre_GetActualMemLocation(hypre_IntArrayMemoryLocation(CF_marker_array[level])) == hypre_MEMORY_DEVICE)
                {

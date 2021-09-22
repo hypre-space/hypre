@@ -24,6 +24,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                       hypre_ParVector  **F_array,
                       hypre_ParVector  **U_array   )
 {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("AMGCycle");
+#endif
+
    hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
 
    HYPRE_Solver *smoother;
@@ -184,7 +188,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          num_coeffs[j] = hypre_ParCSRMatrixDNumNonzeros(A_array[j]);
       }
    }
-   
+
    /*---------------------------------------------------------------------
     *    Initialize cycling control counter
     *
@@ -578,6 +582,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   HYPRE_ANNOTATE_MGLEVEL_END(level);
                   HYPRE_ANNOTATE_FUNC_END;
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+                  hypre_GpuProfilingPopRange();
+#endif
                   return(Solve_err_flag);
                }
             }
@@ -749,6 +756,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    }
 
    HYPRE_ANNOTATE_FUNC_END;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
 
    return(Solve_err_flag);
 }

@@ -26,6 +26,10 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
                                     hypre_ParVector    *b,
                                     hypre_ParVector    *y )
 {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("Matvec");
+#endif
+
    hypre_ParCSRCommHandle **comm_handle;
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
 
@@ -354,6 +358,10 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 
    HYPRE_ANNOTATE_FUNC_END;
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
    return ierr;
 }
 
@@ -381,6 +389,10 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
                            HYPRE_Complex       beta,
                            hypre_ParVector    *y )
 {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("MatvecT");
+#endif
+
    hypre_ParCSRCommHandle **comm_handle;
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
 
@@ -725,6 +737,10 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
 
    HYPRE_ANNOTATE_FUNC_END;
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
    return ierr;
 }
 
@@ -857,3 +873,4 @@ hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
 
    return ierr;
 }
+
