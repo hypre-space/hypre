@@ -8,7 +8,7 @@
 #include "_hypre_sstruct_mv.h"
 #include "sstruct_matmult.h"
 
-#define DEBUG_MATMULT
+//#define DEBUG_MATMULT
 
 /*==========================================================================
  * SStructPMatrix routines
