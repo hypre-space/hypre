@@ -626,7 +626,7 @@ hypreCUDAKernel_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HY
       if (marker[i] == marker_val)
       {
          y[i] += x[i] / a[i];
-      }         
+      }
    }
 }
 
@@ -1144,6 +1144,7 @@ hypre_CudaDataCusparseHandle(hypre_CudaData *data)
 #endif // defined(HYPRE_USING_ROCSPARSE)
 
 
+#if defined(HYPRE_USING_GPU)
 
 hypre_CudaData*
 hypre_CudaDataCreate()
@@ -1312,9 +1313,6 @@ hypre_SyncCudaComputeStream_core(HYPRE_Int     action,
          *cuda_compute_stream_sync_ptr = cuda_compute_stream_sync;
          break;
       case 4:
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-         HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
-#else
          if (cuda_compute_stream_sync)
          {
 #if defined(HYPRE_USING_CUDA)
@@ -1323,7 +1321,6 @@ hypre_SyncCudaComputeStream_core(HYPRE_Int     action,
             HYPRE_HIP_CALL( hipStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle)) );
 #endif
          }
-#endif
          break;
       default:
          hypre_printf("hypre_SyncCudaComputeStream_core invalid action\n");
