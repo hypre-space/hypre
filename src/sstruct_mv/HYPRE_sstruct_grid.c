@@ -938,7 +938,6 @@ HYPRE_SStructGridCoarsen( HYPRE_SStructGrid    fgrid,
 
    hypre_SetIndex(origin, 0);
    hypre_SStructGridCoarsen(fgrid, origin, strides, NULL, cgrid);
-   HYPRE_SStructGridAssemble(*cgrid);
 
    return hypre_error_flag;
 }
