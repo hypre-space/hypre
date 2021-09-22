@@ -1226,6 +1226,9 @@ HYPRE_SStructMatrixToIJMatrix( HYPRE_SStructMatrix  matrix,
    HYPRE_ParCSRMatrix  parcsr_s;
    HYPRE_ParCSRMatrix  parcsr_ss;
 
+   HYPRE_BigInt        nrows_ss;
+   HYPRE_BigInt        ncols_ss;
+
    if (!matrix)
    {
       hypre_error_in_arg(1);
@@ -1247,7 +1250,14 @@ HYPRE_SStructMatrixToIJMatrix( HYPRE_SStructMatrix  matrix,
          HYPRE_IJMatrixGetObject(ij_s, (void **) &parcsr_s);
 
          hypre_ParCSRMatrixAdd(1.0, parcsr_u, 1.0, parcsr_s, &parcsr_ss);
-         hypre_ParCSRMatrixReorder(parcsr_ss);
+
+         /* For square matrices, the first row entry is the diagonal coefficient */
+         nrows_ss = hypre_ParCSRMatrixGlobalNumRows(parcsr_ss);
+         ncols_ss = hypre_ParCSRMatrixGlobalNumCols(parcsr_ss);
+         if (nrows_ss == ncols_ss)
+         {
+            hypre_ParCSRMatrixReorder(parcsr_ss);
+         }
 
          HYPRE_IJMatrixDestroy(ij_s);
          HYPRE_IJMatrixCreate(hypre_ParCSRMatrixComm(parcsr_ss),
