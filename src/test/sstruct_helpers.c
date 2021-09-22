@@ -231,7 +231,7 @@ ReadData( char         *filename,
       sdata = hypre_TAlloc(char, memchunk, HYPRE_MEMORY_HOST);
       sdata_line = fgets(sdata, maxline, file);
 
-      s= 0;
+      s = 0;
       while (sdata_line != NULL)
       {
          sdata_size += strlen(sdata_line) + 1;
@@ -666,6 +666,40 @@ ReadData( char         *filename,
             data.symmetric_booleans[data.symmetric_num] =
                strtol(sdata_ptr, &sdata_ptr, 10);
             data.symmetric_num++;
+         }
+         else if ( strcmp(key, "MatrixSetDomainStride:") == 0 )
+         {
+            part = strtol(sdata_ptr, &sdata_ptr, 10);
+            pdata = data.pdata[part];
+            SScanIntArray(sdata_ptr, &sdata_ptr, data.ndim, pdata.matrix_dstride);
+            for (i = data.ndim; i < HYPRE_MAXDIM; i++)
+            {
+               pdata.matrix_dstride[i] = 1;
+            }
+            data.pdata[part] = pdata;
+         }
+         else if ( strcmp(key, "MatrixSetRangeStride:") == 0 )
+         {
+            part = strtol(sdata_ptr, &sdata_ptr, 10);
+            pdata = data.pdata[part];
+            SScanIntArray(sdata_ptr, &sdata_ptr, data.ndim, pdata.matrix_rstride);
+            for (i = data.ndim; i < HYPRE_MAXDIM; i++)
+            {
+               pdata.matrix_rstride[i] = 1;
+            }
+            data.pdata[part] = pdata;
+         }
+         else if ( strcmp(key, "MatrixSetConstantEntries:") == 0 )
+         {
+            part = strtol(sdata_ptr, &sdata_ptr, 10);
+            pdata = data.pdata[part];
+            pdata.matrix_num_centries = strtol(sdata_ptr, &sdata_ptr, 10);
+            pdata.matrix_centries = hypre_TAlloc(HYPRE_Int, pdata.matrix_num_centries,
+                                                 HYPRE_MEMORY_HOST);
+            SScanIntArray(sdata_ptr, &sdata_ptr,
+                          pdata.matrix_num_centries,
+                          pdata.matrix_centries);
+            data.pdata[part] = pdata;
          }
          else if ( strcmp(key, "MatrixSetNSSymmetric:") == 0 )
          {
@@ -2049,12 +2083,15 @@ BuildGraph( MPI_Comm               comm,
             HYPRE_SStructGraph    *graph_ptr )
 {
    HYPRE_SStructGraph     graph;
+   HYPRE_SStructGrid      cgrid;
    ProblemPartData        pdata;
 
    Index                  index, to_index;
+   HYPRE_Int              coarsen;
+   HYPRE_Index           *coarsen_strides;
 
    HYPRE_Int              part, var, box;
-   HYPRE_Int              i, j, k;
+   HYPRE_Int              d, i, j, k;
 
    HYPRE_SStructGraphCreate(comm, grid, &graph);
    HYPRE_SStructGraphSetObjectType(graph, object_type);
@@ -2117,7 +2154,52 @@ BuildGraph( MPI_Comm               comm,
       }
    }
 
+   /* Set domain grid for rectangular matrices */
+   coarsen = 0;
+   coarsen_strides = hypre_CTAlloc(HYPRE_Index, data.nparts, HYPRE_MEMORY_HOST);
+   for (part = 0; part < data.nparts; part++)
+   {
+      pdata = data.pdata[part];
+
+      /* Determine the coarsening factor (the smaller stride between range and domain) */
+      for (d = 0; d < data.ndim; d++)
+      {
+         coarsen_strides[part][d] = 1;
+         if (pdata.matrix_rstride[d] > pdata.matrix_dstride[d])
+         {
+            for (; d < data.ndim; d++)
+            {
+               coarsen_strides[part][d] = pdata.matrix_rstride[d];
+            }
+            coarsen = 1;
+            break;
+         }
+         else if (pdata.matrix_dstride[d] > pdata.matrix_rstride[d])
+         {
+            for (; d < data.ndim; d++)
+            {
+               coarsen_strides[part][d] = pdata.matrix_dstride[d];
+            }
+            coarsen = 1;
+            break;
+         }
+      }
+   }
+
+   /* Domain grid is obtained by coarsening the range grid.
+      Note: this works only for tall-and-skinny matrices */
+   if (coarsen)
+   {
+      HYPRE_SStructGridCoarsen(grid,
+                               coarsen_strides,
+                               &cgrid);
+      HYPRE_SStructGraphSetDomainGrid(graph, cgrid);
+      HYPRE_SStructGridDestroy(cgrid);
+   }
+
    HYPRE_SStructGraphAssemble(graph);
+
+   hypre_TFree(coarsen_strides, HYPRE_MEMORY_HOST);
 
    *graph_ptr = graph;
 
@@ -2140,10 +2222,11 @@ BuildMatrix( MPI_Comm               comm,
 
    HYPRE_Real            *values;
    Index                  ilower, iupper;
+   Index                  origin, stride;
    Index                  index;
 
    HYPRE_Int              part, var, box;
-   HYPRE_Int              i, j;
+   HYPRE_Int              d, i, j;
    HYPRE_Int              s, e;
    HYPRE_Int              size;
    HYPRE_Int              row, col;
@@ -2165,6 +2248,18 @@ BuildMatrix( MPI_Comm               comm,
                                       data.symmetric_booleans[i]);
    }
    HYPRE_SStructMatrixSetNSSymmetric(A, data.ns_symmetric);
+
+   for (part = 0; part < data.nparts; part++)
+   {
+      pdata = data.pdata[part];
+
+      HYPRE_SStructMatrixSetDomainStride(A, part, pdata.matrix_dstride);
+      HYPRE_SStructMatrixSetRangeStride(A, part, pdata.matrix_rstride);
+      HYPRE_SStructMatrixSetConstantEntries(A, part, -1, -1,
+                                            pdata.matrix_num_centries,
+                                            pdata.matrix_centries);
+   }
+
    HYPRE_SStructMatrixInitialize(A);
 
    if (data.nstencils > 0)
@@ -2178,14 +2273,30 @@ BuildMatrix( MPI_Comm               comm,
             s = pdata.stencil_num[var];
             for (i = 0; i < data.stencil_sizes[s]; i++)
             {
+               for (d = 0; d < data.ndim; d++)
+               {
+                  if (pdata.matrix_dstride[d] > 1)
+                  {
+                     origin[d] = -data.stencil_offsets[s][i][d];
+                     stride[d] =  pdata.matrix_dstride[d];
+                  }
+                  else
+                  {
+                     origin[d] = 0;
+                     stride[d] = pdata.matrix_rstride[d];
+                  }
+               }
                for (j = 0; j < pdata.max_boxsize; j++)
                {
                   values[j] = data.stencil_values[s][i];
                }
                for (box = 0; box < pdata.nboxes; box++)
                {
-                  GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
-                                 pdata.vartypes[var], ilower, iupper);
+                  HYPRE_SStructGridGetVariableBox(grid, part, var,
+                                                  pdata.ilowers[box],
+                                                  pdata.iuppers[box],
+                                                  ilower, iupper);
+                  HYPRE_SStructGridProjectBox(grid, ilower, iupper, origin, stride);
                   HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
                                                   var, 1, &i, values);
                }

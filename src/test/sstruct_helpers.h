@@ -111,6 +111,12 @@ typedef struct
    HYPRE_Real            *graph_values;
    HYPRE_Int             *graph_boxsizes;
 
+   /* Matrix Properties */
+   Index                  matrix_dstride;
+   Index                  matrix_rstride;
+   HYPRE_Int              matrix_num_centries;
+   HYPRE_Int             *matrix_centries;
+
    /* MatrixSetValues */
    HYPRE_Int              matset_nboxes;
    ProblemIndex          *matset_ilowers;

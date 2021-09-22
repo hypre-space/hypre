@@ -1033,7 +1033,7 @@ HYPRE_SStructMatrixSetConstantEntries( HYPRE_SStructMatrix matrix,
                                        HYPRE_Int           part,
                                        HYPRE_Int           var,
                                        HYPRE_Int           to_var,
-                                       HYPRE_Int           num_centries,
+                                       HYPRE_Int           nentries,
                                        HYPRE_Int          *centries )
 {
    HYPRE_Int            ***mnum_centries = hypre_SStructMatrixNumCEntries(matrix);
@@ -1072,8 +1072,8 @@ HYPRE_SStructMatrixSetConstantEntries( HYPRE_SStructMatrix matrix,
       {
          for (t = tstart; t < (tstart + tsize); t++)
          {
-            mnum_centries[p][v][t] = num_centries;
-            for (i = 0; i < num_centries; i++)
+            mnum_centries[p][v][t] = nentries;
+            for (i = 0; i < nentries; i++)
             {
                mcentries[p][v][t][i] = centries[i];
             }

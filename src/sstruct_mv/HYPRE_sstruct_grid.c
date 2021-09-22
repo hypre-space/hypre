@@ -886,9 +886,7 @@ HYPRE_Int
 HYPRE_SStructGridSetNumGhost( HYPRE_SStructGrid grid,
                               HYPRE_Int      *num_ghost)
 {
-   hypre_SStructGridSetNumGhost(grid, num_ghost);
-
-   return hypre_error_flag;
+   return (hypre_SStructGridSetNumGhost(grid, num_ghost));
 }
 
 /*--------------------------------------------------------------------------
@@ -900,7 +898,73 @@ HYPRE_SStructGridPrintGLVis( HYPRE_SStructGrid grid,
                              HYPRE_Real *trans,
                              HYPRE_Real *origin )
 {
-   hypre_SStructGridPrintGLVis(grid, meshprefix, trans, origin);
+   return (hypre_SStructGridPrintGLVis(grid, meshprefix, trans, origin));
+}
+
+/*---------------------------------------------------------------------------
+ * HYPRE_SStructGridProjectBox
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructGridProjectBox(HYPRE_SStructGrid  grid,
+                            HYPRE_Int         *ilower,
+                            HYPRE_Int         *iupper,
+                            HYPRE_Int         *origin,
+                            HYPRE_Int         *stride)
+{
+   hypre_Box *box;
+
+   box = hypre_BoxCreate(hypre_SStructGridNDim(grid));
+   hypre_CopyIndex(ilower, hypre_BoxIMin(box));
+   hypre_CopyIndex(iupper, hypre_BoxIMax(box));
+   hypre_ProjectBox(box, origin, stride);
+   hypre_CopyIndex(hypre_BoxIMin(box), ilower);
+   hypre_CopyIndex(hypre_BoxIMax(box), iupper);
+   hypre_BoxDestroy(box);
+
+   return hypre_error_flag;
+}
+
+/*---------------------------------------------------------------------------
+ * HYPRE_SStructGridCoarsen
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructGridCoarsen( HYPRE_SStructGrid    fgrid,
+                          HYPRE_Index         *strides,
+                          HYPRE_SStructGrid   *cgrid )
+{
+   hypre_Index origin;
+
+   hypre_SetIndex(origin, 0);
+   hypre_SStructGridCoarsen(fgrid, origin, strides, NULL, cgrid);
+   HYPRE_SStructGridAssemble(*cgrid);
+
+   return hypre_error_flag;
+}
+
+/*---------------------------------------------------------------------------
+ * HYPRE_SStructGridGetVariableBox
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructGridGetVariableBox(HYPRE_SStructGrid  grid,
+                                HYPRE_Int          part,
+                                HYPRE_Int          var,
+                                HYPRE_Int         *cell_ilower,
+                                HYPRE_Int         *cell_iupper,
+                                HYPRE_Int         *var_ilower,
+                                HYPRE_Int         *var_iupper )
+{
+   HYPRE_Int               ndim    = hypre_SStructGridNDim(grid);
+   hypre_SStructPGrid     *pgrid   = hypre_SStructGridPGrid(grid, part);
+   HYPRE_SStructVariable   vartype = hypre_SStructPGridVarType(pgrid, var);
+
+   hypre_Index             varoffset;
+
+   hypre_SStructVariableGetOffset(vartype, ndim, varoffset);
+   hypre_SubtractIndexes(cell_ilower, varoffset, ndim, var_ilower);
+   hypre_SubtractIndexes(cell_iupper, varoffset, ndim, var_iupper);
 
    return hypre_error_flag;
 }

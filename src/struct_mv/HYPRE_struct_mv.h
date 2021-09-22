@@ -14,6 +14,14 @@
 extern "C" {
 #endif
 
+/*--------------------------------------------------------------------------
+ * HYPRE_Index: public interface to hypre_Index, that is to define indices
+ * in index space, or dimension sizes of boxes.
+ *--------------------------------------------------------------------------*/
+
+typedef HYPRE_Int  HYPRE_Index[HYPRE_MAXDIM];
+typedef HYPRE_Int *HYPRE_IndexRef;
+
 /* forward declarations */
 #ifndef HYPRE_StructVector_defined
 #define HYPRE_StructVector_defined
@@ -702,4 +710,3 @@ HYPRE_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_MemoryLocation dat
 #endif
 
 #endif
-
