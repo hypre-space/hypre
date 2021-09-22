@@ -2061,18 +2061,17 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
  *
  * Notes:
  *         *) Consider a single variable type for now.
+ *         *) Input grid comes from the matrix we are multiplying to A
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
-                                      hypre_ParCSRMatrix    *B,
+                                      hypre_SStructGrid     *grid,
                                       hypre_IJMatrix       **ij_Ahat_ptr)
 {
    HYPRE_Int              ndim     = hypre_SStructMatrixNDim(A);
    HYPRE_Int              nparts   = hypre_SStructMatrixNParts(A);
    HYPRE_Int             *Sentries = hypre_SStructMatrixSEntries(A);
    HYPRE_IJMatrix         ij_A     = hypre_SStructMatrixIJMatrix(A);
-   hypre_SStructGraph    *graph    = hypre_SStructMatrixGraph(A);
-   hypre_SStructGrid     *grid     = hypre_SStructGraphGrid(graph);
    hypre_SStructPGrid    *pgrid;
    hypre_StructGrid      *sgrid;
    hypre_SStructStencil  *stencil;
