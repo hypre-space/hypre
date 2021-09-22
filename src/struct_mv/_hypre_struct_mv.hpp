@@ -306,7 +306,7 @@ hypre_CheckErrorDevice(cudaDeviceSynchronize());
    hypre_fence();                                                              \
 }
 
-#define hypre_newBoxLoopGetIndex(index)                                        \
+#define hypre_BoxLoopGetIndex(index)                                           \
   index[0] = hypre_IndexD(local_idx, 0);                                       \
   index[1] = hypre_IndexD(local_idx, 1);                                       \
   index[2] = hypre_IndexD(local_idx, 2);
