@@ -292,6 +292,17 @@ ReadData( char         *filename,
             data.ndim = strtol(sdata_ptr, &sdata_ptr, 10);
             data.nparts = strtol(sdata_ptr, &sdata_ptr, 10);
             data.pdata = hypre_CTAlloc(ProblemPartData,  data.nparts, HYPRE_MEMORY_HOST);
+
+            /* Set default pdata values */
+            for (part = 0; part < data.nparts; part++)
+            {
+               data.pdata[part].matrix_num_centries = 0;
+               for (i = 0; i < HYPRE_MAXDIM; i++)
+               {
+                  data.pdata[part].matrix_dstride[i] = 1;
+                  data.pdata[part].matrix_rstride[i] = 1;
+               }
+            }
          }
          else if ( strcmp(key, "GridSetNumGhost:") == 0 )
          {
@@ -672,10 +683,6 @@ ReadData( char         *filename,
             part = strtol(sdata_ptr, &sdata_ptr, 10);
             pdata = data.pdata[part];
             SScanIntArray(sdata_ptr, &sdata_ptr, data.ndim, pdata.matrix_dstride);
-            for (i = data.ndim; i < HYPRE_MAXDIM; i++)
-            {
-               pdata.matrix_dstride[i] = 1;
-            }
             data.pdata[part] = pdata;
          }
          else if ( strcmp(key, "MatrixSetRangeStride:") == 0 )
@@ -683,10 +690,6 @@ ReadData( char         *filename,
             part = strtol(sdata_ptr, &sdata_ptr, 10);
             pdata = data.pdata[part];
             SScanIntArray(sdata_ptr, &sdata_ptr, data.ndim, pdata.matrix_rstride);
-            for (i = data.ndim; i < HYPRE_MAXDIM; i++)
-            {
-               pdata.matrix_rstride[i] = 1;
-            }
             data.pdata[part] = pdata;
          }
          else if ( strcmp(key, "MatrixSetConstantEntries:") == 0 )
