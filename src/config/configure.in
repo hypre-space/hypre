@@ -2370,7 +2370,7 @@ fi
 
 if [test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes"]
 then
-   if test "x$hypre_using_cuda_streams" = "xyes"]
+   if test "x$hypre_using_cuda_streams" = "xyes"
    then
       AC_DEFINE([HYPRE_USING_CUDA_STREAMS],1,[Define to 1 if using CUDA streams])
    fi
