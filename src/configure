@@ -9163,7 +9163,7 @@ $as_echo "#define HYPRE_DEVICE_OPENMP_CHECK 1" >>confdefs.h
 
 if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes"
 then
-   if test "x$hypre_using_cuda_streams" = "xyes"]
+   if test "x$hypre_using_cuda_streams" = "xyes"
    then
 
 $as_echo "#define HYPRE_USING_CUDA_STREAMS 1" >>confdefs.h
