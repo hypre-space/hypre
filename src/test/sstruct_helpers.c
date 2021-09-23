@@ -2221,6 +2221,7 @@ HYPRE_Int
 BuildMatrix( MPI_Comm               comm,
              ProblemData            data,
              HYPRE_SStructGrid      grid,
+             HYPRE_Int              object_type,
              HYPRE_SStructStencil  *stencils,
              HYPRE_SStructGraph     graph,
              HYPRE_SStructMatrix   *A_ptr )
@@ -2246,7 +2247,8 @@ BuildMatrix( MPI_Comm               comm,
    values = hypre_TAlloc(HYPRE_Real, hypre_max(data.max_boxsize, data.fem_nsparse),
                          HYPRE_MEMORY_HOST);
 
-   HYPRE_SStructMatrixCreate(hypre_MPI_COMM_WORLD, graph, &A);
+   HYPRE_SStructMatrixCreate(comm, graph, &A);
+   HYPRE_SStructMatrixSetObjectType(A, object_type);
 
    for (i = 0; i < data.symmetric_num; i++)
    {

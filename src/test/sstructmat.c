@@ -294,7 +294,7 @@ main( hypre_int  argc,
       BuildGrid(comm, data[i], &grid[i]);
       BuildStencils(data[i], grid[i], &stencils[i]);
       BuildGraph(comm, data[i], grid[i], HYPRE_SSTRUCT, stencils[i], &graph[i]);
-      BuildMatrix(comm, data[i], grid[i], stencils[i], graph[i], &ss_A[i]);
+      BuildMatrix(comm, data[i], grid[i], HYPRE_SSTRUCT, stencils[i], graph[i], &ss_A[i]);
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming(heading, hypre_MPI_COMM_WORLD);

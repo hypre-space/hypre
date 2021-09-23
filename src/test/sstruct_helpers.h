@@ -224,7 +224,7 @@ HYPRE_Int DestroyData ( ProblemData data );
 HYPRE_Int BuildGrid ( MPI_Comm comm , ProblemData data , HYPRE_SStructGrid *grid_ptr );
 HYPRE_Int BuildStencils ( ProblemData data , HYPRE_SStructGrid grid , HYPRE_SStructStencil **stencils_ptr );
 HYPRE_Int BuildGraph ( MPI_Comm comm , ProblemData data , HYPRE_SStructGrid grid , HYPRE_Int object_type , HYPRE_SStructStencil *stencils , HYPRE_SStructGraph *graph_ptr );
-HYPRE_Int BuildMatrix ( MPI_Comm comm , ProblemData data , HYPRE_SStructGrid grid , HYPRE_SStructStencil *stencils , HYPRE_SStructGraph graph , HYPRE_SStructMatrix *A_ptr );
+HYPRE_Int BuildMatrix ( MPI_Comm comm , ProblemData data , HYPRE_SStructGrid grid , HYPRE_Int object_type , HYPRE_SStructStencil *stencils , HYPRE_SStructGraph graph , HYPRE_SStructMatrix *A_ptr );
 HYPRE_Int BuildVector ( MPI_Comm comm , ProblemData data , HYPRE_SStructGrid grid , HYPRE_Int object_type , HYPRE_Real rhs_value , HYPRE_SStructVector *vec_ptr );
 HYPRE_Int SetCosineVector ( HYPRE_Real scale , Index ilower , Index iupper , HYPRE_Real *values );
 

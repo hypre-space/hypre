@@ -1077,7 +1077,7 @@ main( hypre_int argc,
    BuildGrid(comm, data, &grid);
    BuildStencils(data, grid, &stencils);
    BuildGraph(comm, data, grid, object_type, stencils, &graph);
-   BuildMatrix(comm, data, grid, stencils, graph, &A);
+   BuildMatrix(comm, data, grid, object_type, stencils, graph, &A);
    BuildVector(comm, data, grid, object_type, rhs_value, &b);
 
    /*-----------------------------------------------------------
