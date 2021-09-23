@@ -710,3 +710,4 @@ HYPRE_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_MemoryLocation dat
 #endif
 
 #endif
+

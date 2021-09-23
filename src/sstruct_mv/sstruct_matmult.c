@@ -1168,7 +1168,6 @@ hypre_SStructMatrixRAP( hypre_SStructMatrix  *R,
    hypre_SStructMatmultCommunicate(mmdata);
    hypre_SStructMatmultCompute(mmdata, M);
    hypre_SStructMatmultDestroy(mmdata);
-
    /* Assemble matrix M */
    HYPRE_SStructMatrixAssemble(M);
 

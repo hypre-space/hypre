@@ -209,6 +209,11 @@ HYPRE_Int hypre_SStructPMatrixComputeRowSum ( hypre_SStructPMatrix *pA , HYPRE_I
 HYPRE_Int hypre_SStructMatrixComputeRowSum ( hypre_SStructMatrix *A , HYPRE_Int type , hypre_SStructVector **rowsum_ptr );
 HYPRE_Int hypre_SStructMatrixComputeL1Norms ( hypre_SStructMatrix *A , HYPRE_Int option , hypre_SStructVector **l1_norms_ptr );
 
+/* sstruct_matop.c */
+HYPRE_Int hypre_SStructPMatrixComputeRowSum ( hypre_SStructPMatrix *pA , HYPRE_Int type , hypre_SStructPVector *prowsum );
+HYPRE_Int hypre_SStructMatrixComputeRowSum ( hypre_SStructMatrix *A , HYPRE_Int type , hypre_SStructVector **rowsum_ptr );
+HYPRE_Int hypre_SStructMatrixComputeL1Norms ( hypre_SStructMatrix *A , HYPRE_Int option , hypre_SStructVector **l1_norms_ptr );
+
 /* sstruct_scale.c */
 HYPRE_Int hypre_SStructPScale ( HYPRE_Complex alpha , hypre_SStructPVector *py );
 HYPRE_Int hypre_SStructScale ( HYPRE_Complex alpha , hypre_SStructVector *y );

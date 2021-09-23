@@ -1054,6 +1054,7 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
 
       /* Set data pointers a.tptrs[] and a.mptr[].  For a.tptrs[], use Mstart to
        * compute an offset from the beginning of the databox data. */
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Computation");
       for (i = 0; i < na; i++)
       {
          Mentry = a[i].mentry;

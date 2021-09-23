@@ -12,7 +12,6 @@
 #include "_hypre_utilities.h"
 #include "_hypre_parcsr_mv.h" // Delete this
 
-
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE_struct_ls.h"
 #include "HYPRE_krylov.h"
@@ -778,6 +777,11 @@ main( hypre_int argc,
          arg_index++;
          jacobi_weight= atof(argv[arg_index++]);
          usr_jacobi_weight= 1; /* flag user weight */
+      }
+      else if ( strcmp(argv[arg_index], "-agg_nl") == 0 )
+      {
+         arg_index++;
+         agg_num_levels  = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-agg_nl") == 0 )
       {
