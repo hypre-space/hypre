@@ -67,6 +67,7 @@ set(SRCS
   par_cheby.c
   par_cheby_device.c
   par_coarse_parms.c
+  par_coarse_parms_device.c
   par_coordinates.c
   par_cr.c
   par_cycle.c
@@ -123,6 +124,7 @@ set(SRCS
   par_interp_device.c
   par_interp_trunc_device.c
   par_lr_interp_device.c
+  par_lr_restr_device.c
   par_strength_device.c
   par_strength2nd_device.c
   par_amgdd_fac_cycle_device.c
@@ -148,10 +150,12 @@ if (HYPRE_USING_CUDA)
     par_ilu_setup.c
     par_ilu_solve.c
     par_coarsen_device.c
+    par_coarse_parms_device.c
     par_indepset_device.c
     par_interp_device.c
     par_interp_trunc_device.c
     par_lr_interp_device.c
+    par_lr_restr_device.c
     par_strength_device.c
     par_strength2nd_device.c
     par_relax_more_device.c

@@ -218,7 +218,7 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
                                 hypre_ParVector **smooth_vecs,
                                 HYPRE_Int *nf,
                                 HYPRE_Int *dof_func,
-                                HYPRE_Int **coarse_dof_func,
+                                hypre_IntArray **coarse_dof_func,
                                 HYPRE_Int variant,
                                 HYPRE_Int level,
                                 HYPRE_Real abs_trunc,
@@ -286,7 +286,7 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
    HYPRE_Int        orig_nf;
    HYPRE_BigInt    *new_col_starts;
    HYPRE_Int        num_functions = *nf;
-   HYPRE_Int       *c_dof_func = *coarse_dof_func;
+   HYPRE_Int       *c_dof_func = hypre_IntArrayData(*coarse_dof_func);
    HYPRE_Int        modify = 0;
    HYPRE_Int        add_q = 0;
 
@@ -1308,7 +1308,7 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
    {
       HYPRE_Int spot;
 
-      c_dof_func = hypre_TReAlloc(c_dof_func,  HYPRE_Int,  new_ncv, HYPRE_MEMORY_HOST);
+      c_dof_func = hypre_TReAlloc_v2(c_dof_func,  HYPRE_Int, hypre_IntArraySize(*coarse_dof_func), HYPRE_Int,  new_ncv, hypre_IntArrayMemoryLocation(*coarse_dof_func));
       spot = 0;
 
       for (i = 0; i < ncv_peru; i++)
@@ -1323,7 +1323,8 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
       new_nf =  num_functions + num_smooth_vecs;
 
       *nf = new_nf;
-      *coarse_dof_func = c_dof_func;
+      hypre_IntArrayData(*coarse_dof_func) = c_dof_func;
+      hypre_IntArraySize(*coarse_dof_func) = new_ncv;
 
 
       /* also we need to update the col starts and global num columns*/

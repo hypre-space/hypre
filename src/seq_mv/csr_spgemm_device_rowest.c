@@ -139,8 +139,8 @@ void cohen_rowest_kernel(HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T
    hypre_device_assert(sizeof(T) == sizeof(float));
 
    for (HYPRE_Int i = blockIdx.x * NUM_WARPS_PER_BLOCK + warp_id;
-            i < nrow;
-            i += num_warps)
+                  i < nrow;
+                  i += num_warps)
    {
       /* load the start and end position of row i */
       HYPRE_Int tmp = -1;
@@ -316,7 +316,7 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    const HYPRE_Int num_warps_per_block =  16;
    const HYPRE_Int shmem_size_per_warp = 128;
    const HYPRE_Int BDIMX               =   2;
-   const HYPRE_Int BDIMY               =  16;
+   const HYPRE_Int BDIMY               = HYPRE_WARP_SIZE / BDIMX;
 
    /* CUDA kernel configurations */
    dim3 bDim(BDIMX, BDIMY, num_warps_per_block);

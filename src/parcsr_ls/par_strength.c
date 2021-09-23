@@ -541,11 +541,11 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
    HYPRE_Int ierr = 0;
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)) );
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      ierr = hypre_BoomerAMGCreateSDevice(A,strength_threshold,max_row_sum,num_functions,dof_func,S_ptr);
+      ierr = hypre_BoomerAMGCreateSDevice(A,0,strength_threshold,max_row_sum,num_functions,dof_func,S_ptr);
    }
    else
 #endif
@@ -1197,12 +1197,12 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix   *A,
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
-                          HYPRE_Real             strength_threshold,
-                          HYPRE_Real             max_row_sum,
-                          HYPRE_Int              num_functions,
-                          HYPRE_Int             *dof_func,
-                          hypre_ParCSRMatrix   **S_ptr)
+hypre_BoomerAMGCreateSabsHost(hypre_ParCSRMatrix    *A,
+                              HYPRE_Real             strength_threshold,
+                              HYPRE_Real             max_row_sum,
+                              HYPRE_Int              num_functions,
+                              HYPRE_Int             *dof_func,
+                              hypre_ParCSRMatrix   **S_ptr)
 {
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -1250,12 +1250,9 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
    /*--------------------------------------------------------------
     * Compute a  ParCSR strength matrix, S.
     *
-    * For now, the "strength" of dependence/influence is defined in
+    * Absolute "strength" of dependence/influence is defined in
     * the following way: i depends on j if
-    *     aij > hypre_max (k != i) aik,    aii < 0
-    * or
-    *     aij < hypre_min (k != i) aik,    aii >= 0
-    * Then S_ij = 1, else S_ij = 0.
+    *     abs(aij) > hypre_max (k != i) abs(aik)
     *
     * NOTE: the entries are negative initially, corresponding
     * to "unaccounted-for" dependence.
@@ -1480,6 +1477,40 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
    hypre_TFree(dof_func_offd, HYPRE_MEMORY_HOST);
 
    return (ierr);
+}
+
+HYPRE_Int
+hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
+                          HYPRE_Real             strength_threshold,
+                          HYPRE_Real             max_row_sum,
+                          HYPRE_Int              num_functions,
+                          HYPRE_Int             *dof_func,
+                          hypre_ParCSRMatrix   **S_ptr)
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("CreateSabs");
+#endif
+
+   HYPRE_Int ierr = 0;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      ierr = hypre_BoomerAMGCreateSDevice(A,1,strength_threshold,max_row_sum,num_functions,dof_func,S_ptr);
+   }
+   else
+#endif
+   {
+      ierr = hypre_BoomerAMGCreateSabsHost(A,strength_threshold,max_row_sum,num_functions,dof_func,S_ptr);
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -2918,7 +2949,7 @@ hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix  *S,
    HYPRE_Int ierr = 0;
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(S)) );
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(S) );
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
@@ -2942,17 +2973,17 @@ hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix  *S,
  * hypre_BoomerAMGCorrectCFMarker : corrects CF_marker after aggr. coarsening
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_BoomerAMGCorrectCFMarker(HYPRE_Int *CF_marker, HYPRE_Int num_var, HYPRE_Int *new_CF_marker)
+hypre_BoomerAMGCorrectCFMarkerHost(hypre_IntArray *CF_marker, hypre_IntArray *new_CF_marker)
 {
    HYPRE_Int i, cnt;
 
    cnt = 0;
-   for (i=0; i < num_var; i++)
+   for (i=0; i < hypre_IntArraySize(CF_marker); i++)
    {
-      if (CF_marker[i] > 0 )
+      if (hypre_IntArrayData(CF_marker)[i] > 0 )
       {
-         if (CF_marker[i] == 1) CF_marker[i] = new_CF_marker[cnt++];
-         else { CF_marker[i] = 1; cnt++;}
+         if (hypre_IntArrayData(CF_marker)[i] == 1) hypre_IntArrayData(CF_marker)[i] = hypre_IntArrayData(new_CF_marker)[cnt++];
+         else { hypre_IntArrayData(CF_marker)[i] = 1; cnt++;}
       }
    }
 
@@ -2963,20 +2994,84 @@ hypre_BoomerAMGCorrectCFMarker(HYPRE_Int *CF_marker, HYPRE_Int num_var, HYPRE_In
  * but marks new F-points (previous C-points) as -2
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_BoomerAMGCorrectCFMarker2(HYPRE_Int *CF_marker, HYPRE_Int num_var, HYPRE_Int *new_CF_marker)
+hypre_BoomerAMGCorrectCFMarker2Host(hypre_IntArray *CF_marker, hypre_IntArray *new_CF_marker)
 {
    HYPRE_Int i, cnt;
 
    cnt = 0;
-   for (i=0; i < num_var; i++)
+   for (i=0; i < hypre_IntArraySize(CF_marker); i++)
    {
-      if (CF_marker[i] > 0 )
+      if (hypre_IntArrayData(CF_marker)[i] > 0 )
       {
-         if (new_CF_marker[cnt] == -1) CF_marker[i] = -2;
-         else CF_marker[i] = 1;
+         if (hypre_IntArrayData(new_CF_marker)[cnt] == -1) hypre_IntArrayData(CF_marker)[i] = -2;
+         else hypre_IntArrayData(CF_marker)[i] = 1;
          cnt++;
       }
    }
 
    return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_BoomerAMGCorrectCFMarker : corrects CF_marker after aggr. coarsening
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_BoomerAMGCorrectCFMarker(hypre_IntArray *CF_marker, hypre_IntArray *new_CF_marker)
+{
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("CorrectCFMarker");
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_IntArrayMemoryLocation(CF_marker),
+                                                      hypre_IntArrayMemoryLocation(new_CF_marker));
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_BoomerAMGCorrectCFMarkerDevice(CF_marker, new_CF_marker);
+   }
+   else
+#endif
+   {
+      hypre_BoomerAMGCorrectCFMarkerHost(CF_marker, new_CF_marker);
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
+   return hypre_error_flag;
+}
+/*--------------------------------------------------------------------------
+ * hypre_BoomerAMGCorrectCFMarker2 : corrects CF_marker after aggr. coarsening,
+ * but marks new F-points (previous C-points) as -2
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_BoomerAMGCorrectCFMarker2(hypre_IntArray *CF_marker, hypre_IntArray *new_CF_marker)
+{
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("CorrectCFMarker2");
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_IntArrayMemoryLocation(CF_marker),
+                                                      hypre_IntArrayMemoryLocation(new_CF_marker));
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_BoomerAMGCorrectCFMarker2Device(CF_marker, new_CF_marker);
+   }
+   else
+#endif
+   {
+      hypre_BoomerAMGCorrectCFMarker2Host(CF_marker, new_CF_marker);
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
+   return hypre_error_flag;
 }

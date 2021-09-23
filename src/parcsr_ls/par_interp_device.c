@@ -16,6 +16,9 @@ __global__ void hypre_BoomerAMGBuildDirInterp_getcoef( HYPRE_Int nr_of_rows, HYP
 
 __global__ void hypre_BoomerAMGBuildDirInterp_getcoef_v2( HYPRE_Int nr_of_rows, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Real *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Real *A_offd_data, HYPRE_Int *Soc_diag_j, HYPRE_Int *Soc_offd_j, HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Real *P_diag_data, HYPRE_Int *P_offd_i, HYPRE_Int *P_offd_j, HYPRE_Real *P_offd_data, HYPRE_Int *fine_to_coarse );
 
+__global__ void
+hypre_BoomerAMGBuildInterpOnePnt_getnnz( HYPRE_Int nr_of_rows, HYPRE_Int *A_diag_i, HYPRE_Int *A_strong_diag_j, HYPRE_Complex *A_diag_a, HYPRE_Int *A_offd_i, HYPRE_Int *A_strong_offd_j, HYPRE_Complex *A_offd_a, HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int *diag_compress_marker, HYPRE_Int *offd_compress_marker, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Int *P_offd_i, HYPRE_Int *P_offd_j);
+
 /*---------------------------------------------------------------------------
  * hypre_BoomerAMGBuildDirInterp
  *--------------------------------------------------------------------------*/
@@ -64,7 +67,6 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrix *P;
    HYPRE_Int          *tmp_map_offd_h = NULL;
 
-   HYPRE_Int       *CF_marker_dev = NULL;
    HYPRE_Int       *CF_marker_offd = NULL;
    HYPRE_Int       *dof_func_offd = NULL;
    HYPRE_Int       *dof_func_dev = NULL;
@@ -116,14 +118,6 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
       wall_time = time_getWallclockSeconds();
    }
 
-   ///* 0. Assume CF_marker has been allocated in device memory */
-   //   CF_marker_host = hypre_CTAlloc(HYPRE_Int,  n_fine, HYPRE_MEMORY_HOST);
-   //   hypre_TMemcpy( CF_marker_host, CF_marker, HYPRE_Int, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE );
-   /* 0. Assume CF_marker has been allocated in host memory */
-   //   CF_marker_host = CF_marker;
-   CF_marker_dev = hypre_TAlloc(HYPRE_Int,  n_fine, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy( CF_marker_dev, CF_marker, HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST );
-
    /* 1. Communicate CF_marker to/from other processors */
    if (num_cols_A_offd)
    {
@@ -131,18 +125,15 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   int_buf_data = hypre_TAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
-   index = 0;
-   for (i = 0; i < num_sends; i++)
-   {
-      start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-      for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
-      {
-         int_buf_data[index++] = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
-      }
-   }
+   int_buf_data = hypre_TAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_DEVICE);
+   hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
+   HYPRE_THRUST_CALL( gather,
+                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                      CF_marker,
+                      int_buf_data );
 
-   comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_HOST, int_buf_data,
+   comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_DEVICE, int_buf_data,
                                                  HYPRE_MEMORY_DEVICE, CF_marker_offd);
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
@@ -189,7 +180,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
 
    HYPRE_CUDA_LAUNCH( hypre_BoomerAMGBuildDirInterp_getnnz, gDim, bDim,
                       n_fine, S_diag_i, S_diag_j, S_offd_i, S_offd_j,
-                      CF_marker_dev, CF_marker_offd, num_functions,
+                      CF_marker, CF_marker_offd, num_functions,
                       dof_func_dev, dof_func_offd, P_diag_i, P_offd_i);
 
    /* The scans will transform P_diag_i and P_offd_i to the CSR I-vectors */
@@ -200,8 +191,8 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    /* The scan will make fine_to_coarse[i] for i a coarse point hold a
     * coarse point index in the range from 0 to n_coarse-1 */
    HYPRE_THRUST_CALL( exclusive_scan,
-                      thrust::make_transform_iterator(CF_marker_dev,          is_nonnegative<HYPRE_Int>()),
-                      thrust::make_transform_iterator(CF_marker_dev + n_fine, is_nonnegative<HYPRE_Int>()),
+                      thrust::make_transform_iterator(CF_marker,          is_nonnegative<HYPRE_Int>()),
+                      thrust::make_transform_iterator(CF_marker + n_fine, is_nonnegative<HYPRE_Int>()),
                       fine_to_coarse_d,
                       HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
 
@@ -223,7 +214,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
                          A_offd_i, A_offd_j, A_offd_data,
                          hypre_ParCSRMatrixSocDiagJ(S),
                          hypre_ParCSRMatrixSocOffdJ(S),
-                         CF_marker_dev, CF_marker_offd,
+                         CF_marker, CF_marker_offd,
                          num_functions, dof_func_dev, dof_func_offd,
                          P_diag_i, P_diag_j, P_diag_data,
                          P_offd_i, P_offd_j, P_offd_data,
@@ -236,7 +227,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
                          A_offd_i, A_offd_j, A_offd_data,
                          hypre_ParCSRMatrixSocDiagJ(S),
                          hypre_ParCSRMatrixSocOffdJ(S),
-                         CF_marker_dev, CF_marker_offd,
+                         CF_marker, CF_marker_offd,
                          num_functions, dof_func_dev, dof_func_offd,
                          P_diag_i, P_diag_j, P_diag_data,
                          P_offd_i, P_offd_j, P_offd_data,
@@ -249,7 +240,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    hypre_TFree(hypre_ParCSRMatrixSocOffdJ(S), HYPRE_MEMORY_DEVICE);
    */
 
-   HYPRE_THRUST_CALL(replace, CF_marker_dev, CF_marker_dev + n_fine, -3, -1);
+   HYPRE_THRUST_CALL(replace, CF_marker, CF_marker + n_fine, -3, -1);
 
    /* 5. Construct the result as a ParCSRMatrix. At this point, P's column indices */
    /*    are defined with A's enumeration of columns */
@@ -355,11 +346,10 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
 
    *P_ptr = P;
 
-   hypre_TFree(CF_marker_dev,    HYPRE_MEMORY_DEVICE);
    hypre_TFree(CF_marker_offd,   HYPRE_MEMORY_DEVICE);
    hypre_TFree(dof_func_offd,    HYPRE_MEMORY_DEVICE);
    hypre_TFree(dof_func_dev,     HYPRE_MEMORY_DEVICE);
-   hypre_TFree(int_buf_data,     HYPRE_MEMORY_HOST);
+   hypre_TFree(int_buf_data,     HYPRE_MEMORY_DEVICE);
    hypre_TFree(fine_to_coarse_d, HYPRE_MEMORY_DEVICE);
    hypre_TFree(fine_to_coarse_h, HYPRE_MEMORY_HOST);
    hypre_TFree(tmp_map_offd_h,   HYPRE_MEMORY_HOST);
@@ -1006,5 +996,478 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( HYPRE_Int   nr_of_rows,
       }
    }
 }
+
+HYPRE_Int
+hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
+                                        HYPRE_Int           *CF_marker,
+                                        hypre_ParCSRMatrix  *S,
+                                        HYPRE_BigInt        *num_cpts_global,
+                                        HYPRE_Int            num_functions,
+                                        HYPRE_Int           *dof_func,
+                                        HYPRE_Int            debug_flag,
+                                        hypre_ParCSRMatrix **P_ptr)
+{
+   MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
+   hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   hypre_ParCSRCommHandle  *comm_handle;
+
+   hypre_CSRMatrix         *A_diag          = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Int               *A_diag_i        = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int               *A_strong_diag_j = hypre_ParCSRMatrixSocDiagJ(S);
+   HYPRE_Complex           *A_diag_a        = hypre_CSRMatrixData(A_diag);
+
+   hypre_CSRMatrix         *A_offd          = hypre_ParCSRMatrixOffd(A);
+   HYPRE_Int               *A_offd_i        = hypre_CSRMatrixI(A_offd);
+   HYPRE_Int               *A_strong_offd_j = hypre_ParCSRMatrixSocOffdJ(S);
+   HYPRE_Complex           *A_offd_a        = hypre_CSRMatrixData(A_offd);
+
+   HYPRE_Int                num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
+
+   /* Interpolation matrix P */
+   hypre_ParCSRMatrix      *P;
+   /* csr's */
+   hypre_CSRMatrix    *P_diag;
+   hypre_CSRMatrix    *P_offd;
+   /* arrays */
+   HYPRE_Real         *P_diag_data;
+   HYPRE_Int          *P_diag_i;
+   HYPRE_Int          *P_diag_j;
+   HYPRE_Int          *P_diag_j_temp;
+   HYPRE_Int          *P_diag_j_temp_compressed;
+   HYPRE_Real         *P_offd_data;
+   HYPRE_Int          *P_offd_i;
+   HYPRE_Int          *P_offd_j;
+   HYPRE_Int          *P_offd_j_temp;
+   HYPRE_Int          *P_offd_j_temp_compressed;
+   HYPRE_Int           num_cols_P_offd;
+   HYPRE_BigInt       *col_map_offd_P = NULL;
+   HYPRE_BigInt       *col_map_offd_P_device = NULL;
+   /* CF marker off-diag part */
+   HYPRE_Int          *CF_marker_offd = NULL;
+   /* nnz */
+   HYPRE_Int           nnz_diag, nnz_offd;
+   /* local size */
+   HYPRE_Int           n_fine = hypre_CSRMatrixNumRows(A_diag);
+   /* fine to coarse mapping: diag part and offd part */
+   HYPRE_Int          *fine_to_coarse;
+   HYPRE_BigInt       *fine_to_coarse_offd = NULL;
+   HYPRE_BigInt        total_global_cpts, my_first_cpt;
+   HYPRE_Int           my_id, num_procs;
+   HYPRE_Int           num_sends;
+   HYPRE_Int          *int_buf_data = NULL;
+   HYPRE_BigInt       *big_int_buf_data = NULL;
+   //HYPRE_Int col_start = hypre_ParCSRMatrixFirstRowIndex(A);
+   //HYPRE_Int col_end   = col_start + n_fine;
+   /* arrays for compressing P_diag and P_offd col indices and data */
+   HYPRE_Int          *diag_compress_marker;
+   HYPRE_Int          *offd_compress_marker;
+
+   hypre_MPI_Comm_size(comm, &num_procs);
+   hypre_MPI_Comm_rank(comm,&my_id);
+
+   my_first_cpt = num_cpts_global[0];
+   if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
+   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
+
+   /* fine to coarse mapping */
+   fine_to_coarse = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
+   HYPRE_THRUST_CALL( exclusive_scan,
+                      thrust::make_transform_iterator(CF_marker,          is_nonnegative<HYPRE_Int>()),
+                      thrust::make_transform_iterator(CF_marker + n_fine, is_nonnegative<HYPRE_Int>()),
+                      fine_to_coarse,
+                      HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
+
+   /*-------------------------------------------------------------------
+    * Get the CF_marker data for the off-processor columns
+    *-------------------------------------------------------------------*/
+   if (num_cols_A_offd)
+   {
+      CF_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
+   }
+   /* if CommPkg of A is not present, create it */
+   if (!comm_pkg)
+   {
+      hypre_MatvecCommPkgCreate(A);
+      comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   }
+   /* number of sends to do (number of procs) */
+   num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   /* send buffer, of size send_map_starts[num_sends]),
+    * i.e., number of entries to send */
+   int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_DEVICE);
+
+   /* copy CF markers of elements to send to buffer */
+   HYPRE_THRUST_CALL( gather,
+                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
+                      hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                      CF_marker,
+                      int_buf_data );
+   /* create a handle to start communication. 11: for integer */
+   comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_DEVICE, int_buf_data, HYPRE_MEMORY_DEVICE, CF_marker_offd);
+   /* destroy the handle to finish communication */
+   hypre_ParCSRCommHandleDestroy(comm_handle);
+   hypre_TFree(int_buf_data, HYPRE_MEMORY_DEVICE);
+
+   /*-----------------------------------------------------------------------
+    *  First Pass: Determine size of P and fill in fine_to_coarse mapping,
+    *  and find the most strongly influencing C-pt for each F-pt
+    *-----------------------------------------------------------------------*/
+
+   P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_DEVICE);
+   P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_DEVICE);
+
+   diag_compress_marker = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
+   offd_compress_marker = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
+
+   /* Overallocate here and compress later */
+   P_diag_j_temp = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
+   P_offd_j_temp = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
+
+   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n_fine, "warp", bDim);
+
+   HYPRE_CUDA_LAUNCH( hypre_BoomerAMGBuildInterpOnePnt_getnnz, gDim, bDim,
+                      n_fine, A_diag_i, A_strong_diag_j, A_diag_a, A_offd_i, A_strong_offd_j,
+                      A_offd_a, CF_marker, CF_marker_offd, diag_compress_marker,
+                      offd_compress_marker, P_diag_i, P_diag_j_temp, P_offd_i, P_offd_j_temp);
+
+   /*-----------------------------------------------------------------------
+    *  Send and receive fine_to_coarse info.
+    *-----------------------------------------------------------------------*/
+   fine_to_coarse_offd = hypre_CTAlloc(HYPRE_BigInt, num_cols_A_offd,HYPRE_MEMORY_DEVICE);
+   big_int_buf_data = hypre_CTAlloc(HYPRE_BigInt, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_DEVICE);
+   HYPRE_THRUST_CALL( gather,
+                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
+                      hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                      fine_to_coarse,
+                      big_int_buf_data );
+   HYPRE_THRUST_CALL( transform,
+                      big_int_buf_data,
+                      big_int_buf_data + hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                      thrust::make_constant_iterator(my_first_cpt),
+                      big_int_buf_data,
+                      thrust::plus<HYPRE_BigInt>() );
+   comm_handle = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg, HYPRE_MEMORY_DEVICE, big_int_buf_data, HYPRE_MEMORY_DEVICE, fine_to_coarse_offd);
+   hypre_ParCSRCommHandleDestroy(comm_handle);
+   hypre_TFree(big_int_buf_data, HYPRE_MEMORY_DEVICE);
+
+   /*-----------------------------------------------------------------------
+    *  Fill values and finish setting up P.
+    *-----------------------------------------------------------------------*/
+
+   /* scan P_diag_i (which has number of nonzeros in each row) to get row indices */
+   hypreDevice_IntegerExclusiveScan(n_fine+1, P_diag_i);
+   hypreDevice_IntegerExclusiveScan(n_fine+1, P_offd_i);
+
+   /* get the number of nonzeros and allocate column index and data arrays */
+   hypre_TMemcpy(&nnz_diag, &P_diag_i[n_fine], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(&nnz_offd, &P_offd_i[n_fine], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+   P_diag_j    = hypre_TAlloc(HYPRE_Int,  nnz_diag, HYPRE_MEMORY_DEVICE);
+   P_diag_data = hypre_TAlloc(HYPRE_Real, nnz_diag, HYPRE_MEMORY_DEVICE);
+
+
+   P_offd_j    = hypre_TAlloc(HYPRE_Int,  nnz_offd, HYPRE_MEMORY_DEVICE);
+   P_offd_data = hypre_TAlloc(HYPRE_Real, nnz_offd, HYPRE_MEMORY_DEVICE);
+
+   /* set data values to 1.0 */
+   HYPRE_THRUST_CALL( fill_n,
+                      P_diag_data,
+                      nnz_diag,
+                      1.0 );
+   HYPRE_THRUST_CALL( fill_n,
+                      P_offd_data,
+                      nnz_offd,
+                      1.0 );
+
+   /* compress temporary column indices */
+   P_diag_j_temp_compressed = hypre_TAlloc(HYPRE_Int, nnz_diag, HYPRE_MEMORY_DEVICE);
+   P_offd_j_temp_compressed = hypre_TAlloc(HYPRE_Int, nnz_offd, HYPRE_MEMORY_DEVICE);
+
+   HYPRE_THRUST_CALL( copy_if,
+                      P_diag_j_temp,
+                      P_diag_j_temp + n_fine,
+                      diag_compress_marker,
+                      P_diag_j_temp_compressed,
+                      equal<HYPRE_Int>(1) );
+   HYPRE_THRUST_CALL( copy_if,
+                      P_offd_j_temp,
+                      P_offd_j_temp + n_fine,
+                      offd_compress_marker,
+                      P_offd_j_temp_compressed,
+                      equal<HYPRE_Int>(1) );
+
+   /* map the diag column indices */
+   HYPRE_THRUST_CALL( gather,
+                      P_diag_j_temp_compressed,
+                      P_diag_j_temp_compressed + nnz_diag,
+                      fine_to_coarse,
+                      P_diag_j );
+
+   /* mark the offd indices for P as a subset of offd indices of A */
+   HYPRE_Int *mark_P_offd_idx = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
+   // note that scatter is usually not safe if the same index appears more than once in the map,
+   // but here we are just scattering constant values, so this is safe
+   HYPRE_THRUST_CALL( scatter,
+                      thrust::make_constant_iterator(1),
+                      thrust::make_constant_iterator(1) + nnz_offd,
+                      P_offd_j_temp_compressed,
+                      mark_P_offd_idx );
+   num_cols_P_offd = HYPRE_THRUST_CALL(reduce, mark_P_offd_idx, mark_P_offd_idx + num_cols_A_offd);
+
+   /* get a mapping from P offd indices to A offd indices */
+   /* offd_map_P_to_A[ P offd idx ] = A offd idx */
+   HYPRE_Int *offd_map_P_to_A = hypre_CTAlloc(HYPRE_Int, num_cols_P_offd, HYPRE_MEMORY_DEVICE);
+   HYPRE_THRUST_CALL( copy_if,
+                      thrust::make_counting_iterator(0),
+                      thrust::make_counting_iterator(num_cols_A_offd),
+                      mark_P_offd_idx,
+                      offd_map_P_to_A,
+                      equal<HYPRE_Int>(1) );
+   hypre_TFree(mark_P_offd_idx, HYPRE_MEMORY_DEVICE);
+
+   /* also get an inverse mapping from A offd indices to P offd indices */
+   /* offd_map_A_to_P[ A offd idx ] = -1 if not a P idx, else P offd idx */
+   HYPRE_Int *offd_map_A_to_P = hypre_TAlloc(HYPRE_Int, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
+   HYPRE_THRUST_CALL( fill_n,
+                      offd_map_A_to_P,
+                      num_cols_A_offd,
+                      -1 );
+   HYPRE_THRUST_CALL( scatter,
+                      thrust::make_counting_iterator(0),
+                      thrust::make_counting_iterator(num_cols_P_offd),
+                      offd_map_P_to_A,
+                      offd_map_A_to_P );
+
+   /* use inverse mapping above to map P_offd_j */
+   HYPRE_THRUST_CALL( gather,
+                      P_offd_j_temp_compressed,
+                      P_offd_j_temp_compressed + nnz_offd,
+                      offd_map_A_to_P,
+                      P_offd_j );
+   hypre_TFree(P_offd_j_temp_compressed, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(offd_map_A_to_P, HYPRE_MEMORY_DEVICE);
+
+   /* setup col_map_offd for P */
+   col_map_offd_P_device = hypre_CTAlloc(HYPRE_BigInt, num_cols_P_offd, HYPRE_MEMORY_DEVICE);
+   col_map_offd_P = hypre_CTAlloc(HYPRE_BigInt, num_cols_P_offd, HYPRE_MEMORY_HOST);
+   HYPRE_THRUST_CALL( gather,
+                      offd_map_P_to_A,
+                      offd_map_P_to_A + num_cols_P_offd,
+                      fine_to_coarse_offd,
+                      col_map_offd_P_device);
+   hypre_TMemcpy(col_map_offd_P, col_map_offd_P_device, HYPRE_BigInt, num_cols_P_offd, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(offd_map_P_to_A, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(col_map_offd_P_device, HYPRE_MEMORY_DEVICE);
+
+   /* Now, we should have everything of Parcsr matrix P */
+   P = hypre_ParCSRMatrixCreate(comm,
+                                hypre_ParCSRMatrixGlobalNumCols(A), /* global num of rows */
+                                total_global_cpts, /* global num of cols */
+                                hypre_ParCSRMatrixColStarts(A), /* row_starts */
+                                num_cpts_global, /* col_starts */
+                                num_cols_P_offd, /* num cols offd */
+                                nnz_diag,
+                                nnz_offd);
+
+   P_diag = hypre_ParCSRMatrixDiag(P);
+   hypre_CSRMatrixData(P_diag) = P_diag_data;
+   hypre_CSRMatrixI(P_diag)    = P_diag_i;
+   hypre_CSRMatrixJ(P_diag)    = P_diag_j;
+
+   P_offd = hypre_ParCSRMatrixOffd(P);
+   hypre_CSRMatrixData(P_offd) = P_offd_data;
+   hypre_CSRMatrixI(P_offd)    = P_offd_i;
+   hypre_CSRMatrixJ(P_offd)    = P_offd_j;
+
+   hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
+
+   /* create CommPkg of P */
+   hypre_MatvecCommPkgCreate(P);
+
+   *P_ptr = P;
+
+   /* free workspace */
+   hypre_TFree(CF_marker_offd, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(fine_to_coarse, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_DEVICE);
+
+   return hypre_error_flag;
+}
+
+/*-----------------------------------------------------------------------*/
+__global__ void
+hypre_BoomerAMGBuildInterpOnePnt_getnnz( HYPRE_Int      nr_of_rows,
+                                         HYPRE_Int     *A_diag_i,
+                                         HYPRE_Int     *A_strong_diag_j,
+                                         HYPRE_Complex *A_diag_a,
+                                         HYPRE_Int     *A_offd_i,
+                                         HYPRE_Int     *A_strong_offd_j,
+                                         HYPRE_Complex *A_offd_a,
+                                         HYPRE_Int     *CF_marker,
+                                         HYPRE_Int     *CF_marker_offd,
+                                         HYPRE_Int     *diag_compress_marker,
+                                         HYPRE_Int     *offd_compress_marker,
+                                         HYPRE_Int     *P_diag_i,
+                                         HYPRE_Int     *P_diag_j,
+                                         HYPRE_Int     *P_offd_i,
+                                         HYPRE_Int     *P_offd_j)
+{
+   /*-----------------------------------------------------------------------*/
+   /* Determine size of interpolation matrix, P
+
+      If A is of size m x m, then P will be of size m x c where c is the
+      number of coarse points.
+
+      It is assumed that S have the same global column enumeration as A
+
+      Input: nr_of_rows                  - Number of rows in matrix (local in processor)
+             A_diag_i, A_strong_diag_j,  - Arrays associated with ParCSRMatrix A
+             A_diag_a, A_offd_i,           where the column indices are taken from S
+             A_strong_offd_j, A_offd_a     and mark weak connections with negative indices
+             CF_maker                    - coarse/fine marker for on-processor points
+             CF_maker_offd               - coarse/fine marker for off-processor connections
+
+      Output: P_diag_i             - Vector where P_diag_i[i] holds the number of non-zero elements of P_diag on row i (will be 1).
+              P_diag_i             - Vector where P_diag_j[i] holds a temporary, uncompressed column indices for P_diag.
+              P_offd_i             - Vector where P_offd_i[i] holds the number of non-zero elements of P_offd on row i (will be 1).
+              P_offd_i             - Vector where P_offd_j[i] holds a temporary, uncompressed column indices for P_offd.
+              diag_compress_marker - Array of 0s and 1s used to compress P_diag col indices and data.
+              offd_compress_marker - Array of 0s and 1s used to compress P_offd col indices and data.
+    */
+   /*-----------------------------------------------------------------------*/
+
+   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1,1>();
+
+   if (i >= nr_of_rows)
+   {
+      return;
+   }
+
+   HYPRE_Int p, q;
+   HYPRE_Int max_j_diag = -1, max_j_offd = -1;
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Real max_diag = -1.0, max_offd = -1.0;
+   HYPRE_Real warp_max_diag = -1.0, warp_max_offd = -1.0;
+
+   if (lane == 0)
+   {
+      p = read_only_load(CF_marker + i);
+   }
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   /*--------------------------------------------------------------------
+    *  If i is a C-point, interpolation is the identity.
+    *--------------------------------------------------------------------*/
+   if (p >= 0)
+   {
+      if (lane == 0)
+      {
+         P_diag_i[i] = 1;
+         P_diag_j[i] = i;
+         diag_compress_marker[i] = 1;
+      }
+      return;
+   }
+
+   /*--------------------------------------------------------------------
+    *  If i is an F-point, find strongest connected C-point,
+    *  which could be in diag or offd.
+    *--------------------------------------------------------------------*/
+
+   /* diag part */
+   if (lane < 2)
+   {
+      p = read_only_load(A_diag_i + i + lane);
+   }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
+   {
+      /* column indices are negative for weak connections */
+      const HYPRE_Int col = read_only_load(&A_strong_diag_j[j]);
+      if (col >= 0)
+      {
+         const HYPRE_Complex val = fabs( read_only_load(&A_diag_a[j]) );
+         if ( read_only_load(&CF_marker[col]) > 0 && val > max_diag )
+         {
+            max_diag = val;
+            max_j_diag = col;
+         }
+      }
+   }
+   warp_max_diag = warp_allreduce_max(max_diag);
+
+   /* offd part */
+   if (lane < 2)
+   {
+      p = read_only_load(A_offd_i + i + lane);
+   }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
+   {
+      const HYPRE_Int col = read_only_load(&A_strong_offd_j[j]);
+      /* column indices are negative for weak connections */
+      if (col >= 0)
+      {
+         const HYPRE_Complex val = fabs( read_only_load(&A_offd_a[j]) );
+         if ( read_only_load(&CF_marker_offd[col]) > 0 && val > max_offd )
+         {
+            max_offd = val;
+            max_j_offd = col;
+         }
+      }
+   }
+   warp_max_offd = warp_allreduce_max(max_offd);
+
+   /*--------------------------------------------------------------------
+    *  If no max found, then there is no strongly connected C-point,
+    *  and this will be a zero row
+    *--------------------------------------------------------------------*/
+
+   if (warp_max_offd < 0 && warp_max_diag < 0)
+   {
+      return;
+   }
+
+   /*--------------------------------------------------------------------
+    *  Otherwise, find the column index in either diag or offd
+    *--------------------------------------------------------------------*/
+
+   if (warp_max_offd > warp_max_diag)
+   {
+      if (warp_max_offd != max_offd)
+      {
+         max_j_offd = -1;
+      }
+      max_j_offd = warp_reduce_max(max_j_offd);
+      if (lane == 0)
+      {
+         P_offd_i[i] = 1;
+         P_offd_j[i] = max_j_offd;
+         offd_compress_marker[i] = 1;
+      }
+   }
+   else
+   {
+      if (warp_max_diag != max_diag)
+      {
+         max_j_diag = -1;
+      }
+      max_j_diag = warp_reduce_max(max_j_diag);
+      if (lane == 0)
+      {
+         P_diag_i[i] = 1;
+         P_diag_j[i] = max_j_diag;
+         diag_compress_marker[i] = 1;
+      }
+   }
+}
+
 
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)

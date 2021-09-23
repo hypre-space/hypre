@@ -740,6 +740,15 @@ main( hypre_int argc,
 
    if (myid == 0)
    {
+#ifdef HYPRE_DEVELOP_STRING
+#ifdef HYPRE_DEVELOP_BRANCH
+      hypre_printf("\nUsing HYPRE_DEVELOP_STRING: %s (main development branch %s)\n\n",
+         HYPRE_DEVELOP_STRING, HYPRE_DEVELOP_BRANCH);
+#else
+      hypre_printf("\nUsing HYPRE_DEVELOP_STRING: %s (not main development branch)\n\n",
+         HYPRE_DEVELOP_STRING);
+#endif
+#endif
       hypre_printf("Running with these driver parameters:\n");
       if (sum == 0)
       {
