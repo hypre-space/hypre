@@ -459,12 +459,14 @@ hypre_Free_core(void *ptr, hypre_MemoryLocation location)
       return;
    }
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #ifdef HYPRE_DEBUG
    hypre_MemoryLocation tmp;
    hypre_GetPointerLocation(ptr, &tmp);
    /* do not use hypre_assert, which has alloc and free;
     * will create an endless loop otherwise */
    assert(location == tmp);
+#endif
 #endif
 
    switch (location)
@@ -1021,11 +1023,6 @@ hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
       *memory_location = hypre_MEMORY_HOST_PINNED;
    }
 #endif // defined(HYPRE_USING_HIP)
-
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-   //XXX
-   *memory_location = hypre_MEMORY_DEVICE;
-#endif
 
 #else /* #if defined(HYPRE_USING_GPU) */
    *memory_location = hypre_MEMORY_HOST;

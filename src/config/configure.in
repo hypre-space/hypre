@@ -168,7 +168,6 @@ hypre_using_cuda_streams=no
 hypre_using_cusparse=no
 hypre_using_cublas=no
 hypre_using_curand=no
-hypre_using_nvtx=no
 hypre_using_device_pool=no
 hypre_using_umpire=no
 hypre_using_umpire_host=no
@@ -402,7 +401,7 @@ AS_HELP_STRING([--enable-cuda-streams],
     no)  hypre_using_cuda_streams=no ;;
     *)   hypre_using_cuda_streams=no ;;
  esac],
-[hypre_using_cuda_streams=no]
+[hypre_using_cuda_streams=yes]
 )
 
 AC_ARG_ENABLE(cusparse,
@@ -413,7 +412,7 @@ AS_HELP_STRING([--enable-cusparse],
     no)  hypre_using_cusparse=no ;;
     *)   hypre_using_cusparse=no ;;
  esac],
-[hypre_using_cusparse=no]
+[hypre_using_cusparse=yes]
 )
 
 AC_ARG_ENABLE(device-memory-pool,
@@ -446,7 +445,7 @@ AS_HELP_STRING([--enable-curand],
     no)  hypre_using_curand=no ;;
     *)   hypre_using_curand=no ;;
  esac],
-[hypre_using_curand=no]
+[hypre_using_curand=yes]
 )
 
 
@@ -1535,11 +1534,21 @@ if test "$hypre_user_chose_cudacompilers" = "no"
 then
    if test "$hypre_using_device_openmp" = "yes"
    then
-      if test "$hypre_using_mpi" = "no"
+      if test "x$hypre_using_kokkos" = "xyes"
       then
-         AC_CHECK_PROGS(CUCC, [xlc-gpu clang-gpu])
+         if test "$hypre_using_mpi" = "no"
+         then
+            AC_CHECK_PROGS(CUCC, [clang++-gpu])
+         else
+            AC_CHECK_PROGS(CUCC, [mpiclang++-gpu])
+         fi
       else
-         AC_CHECK_PROGS(CUCC, [mpixlc-gpu mpiclang-gpu])
+         if test "$hypre_using_mpi" = "no"
+         then
+            AC_CHECK_PROGS(CUCC, [xlc-gpu clang-gpu])
+         else
+            AC_CHECK_PROGS(CUCC, [mpixlc-gpu mpiclang-gpu])
+         fi
       fi
    fi
 
@@ -1925,7 +1934,7 @@ dnl   BUILD_F77_SHARED="${F77} ${SHARED_BUILD_FLAG}"
       BUILD_CC_SHARED="\${CC} ${SHARED_BUILD_FLAG}"
    fi
    BUILD_CXX_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
-   if test "$hypre_using_cuda" == "yes" || test "$hypre_using_hip" == "yes"
+   if test "$hypre_using_cuda" == "yes" || test "$hypre_using_hip" == "yes" || test "$hypre_using_kokkos" == "yes"
    then
       dnl BUILD_CC_SHARED="\${CUCC} ${SHARED_BUILD_FLAG}"
       BUILD_CC_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
@@ -1968,7 +1977,6 @@ then
 fi dnl hypre_using_um
 
 dnl CUDA
-dnl if [test "$hypre_using_cuda" = "yes" || test "$hypre_using_device_openmp" = "yes"]
 if [test "$hypre_using_cuda" = "yes"]
 then
    AC_CHECK_HEADERS(["${CUDA_HOME}/include/cuda.h"], [hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_HOME}])
@@ -2014,11 +2022,14 @@ if test "x$hypre_using_raja" = "xyes"
 then
    AC_DEFINE(HYPRE_USING_RAJA, 1, [Define to 1 if executing on host/device with RAJA])
 
-   if test "$hypre_using_cuda" != "yes"
+   if test "$hypre_user_chose_cxxflags" = "no"
    then
-      if [test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"]
+      if test "$hypre_using_cuda" != "yes"
       then
-         CXXFLAGS="${CXXFLAGS} -+ -std=c++${hypre_cxxstd}"
+         if [test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"]
+         then
+            CXXFLAGS="${CXXFLAGS} -+ -std=c++${hypre_cxxstd}"
+         fi
       fi
    fi
 
@@ -2035,18 +2046,25 @@ if test "x$hypre_using_kokkos" = "xyes"
 then
    AC_DEFINE(HYPRE_USING_KOKKOS, 1, [Define to 1 if executing on host/device with KOKKOS])
 
-   if test "$hypre_using_cuda" != "yes"
+   if test "$hypre_user_chose_cxxflags" = "no"
    then
-      if [test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"]
+      CXXFLAGS="${CXXFLAGS} -std=c++${hypre_cxxstd}"
+
+      if [test "$CXX" = "mpiclang++" || test "$CXX" = "mpiclang++-gpu" || test "$CXX" = "clang++" || test "$CXX" = "clang++-gpu"]
       then
-         CXXFLAGS="${CXXFLAGS} -+ -std=c++${hypre_cxxstd}"
+         CXXFLAGS="${CXXFLAGS} -x c++"
+      fi
+
+      if [test "$CXX" = "mpixlC" || test "$CXX" = "mpixlC-gpu" || test "$CXX" = "xlC" || test "$CXX" = "xlC-gpu"]
+      then
+         CXXFLAGS="${CXXFLAGS} -+"
       fi
    fi
 
    dnl let CC be CXX
-   CC=${CXX}
+   dnl CC=${CXX}
    LINK_CC=${LINK_CXX}
-   CFLAGS=${CXXFLAGS}
+   dnl CFLAGS=${CXXFLAGS}
 fi
 
 dnl *********************************************************************
@@ -2090,9 +2108,6 @@ then
 
    AC_DEFINE(HYPRE_USING_CUDA, 1, [Define to 1 if executing on device with CUDA])
 
-   hypre_using_cusparse=yes
-   hypre_using_curand=yes
-   hypre_using_nvtx='${hypre_using_gpu_profiling}'
 
    LINK_CC=${LINK_CXX}
    dnl LINK_CC='${CUCC}'
@@ -2136,6 +2151,40 @@ then
    dnl LDFLAGS="-Xcompiler \"${LDFLAGS}\""
    HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
    HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64 -lcudart'
+
+   if test "$hypre_using_gpu_profiling" = "yes"
+   then
+      AC_DEFINE(HYPRE_USING_NVTX, 1, [Define to 1 if using NVIDIA Tools Extension (NVTX)])
+      HYPRE_CUDA_LIBS+=" -lnvToolsExt"
+   fi
+
+   if test "$hypre_using_cusparse" = "yes"
+   then
+      AC_DEFINE(HYPRE_USING_CUSPARSE, 1, [Define to 1 if using cuSPARSE])
+      HYPRE_CUDA_LIBS+=" -lcusparse"
+   fi
+
+   if test "$hypre_using_cublas" = "yes"
+   then
+      AC_DEFINE(HYPRE_USING_CUBLAS, 1, [Define to 1 if using cuBLAS])
+      HYPRE_CUDA_LIBS+=" -lcublas"
+   fi
+
+   if test "$hypre_using_curand" = "yes"
+   then
+      AC_DEFINE(HYPRE_USING_CURAND, 1, [Define to 1 if using cuRAND])
+      HYPRE_CUDA_LIBS+=" -lcurand"
+   fi
+
+   if test "$hypre_using_device_pool" = "yes"
+   then
+      AC_DEFINE(HYPRE_USING_DEVICE_POOL, 1, [Define to 1 if using device pooling allocator])
+   fi
+
+   if test "x$hypre_using_cuda_streams" = "xyes"
+   then
+      AC_DEFINE([HYPRE_USING_CUDA_STREAMS], 1, [Define to 1 if using CUDA streams])
+   fi
 fi
 
 dnl *********************************************************************
@@ -2296,16 +2345,12 @@ then
 
    if test "$hypre_user_chose_cuflags" = "no"
    then
-      CUFLAGS=${CFLAGS}
-
-      if [test "$CUCC" = "clang-gpu" || test "$CUCC" = "mpiclang-gpu"]
-      then
-         CUFLAGS+=" -fopenmp-nonaliased-maps"
-      fi
-      if [test "$CUCC" = "clang++-gpu" || test "$CUCC" = "mpiclang++-gpu"]
-      then
-         CUFLAGS+=" -fopenmp-nonaliased-maps"
-      fi
+      CUFLAGS="${CXXFLAGS} ${CUFLAGS}"
+      dnl if [test "$CUCC" = "clang-gpu" || test "$CUCC" = "mpiclang-gpu" || test "$CUCC" = "clang++-gpu" || test "$CUCC" = "mpiclang++-gpu"]
+      dnl then
+         # dnl this is too old
+         #CUFLAGS+=" -fopenmp-nonaliased-maps"
+      dnl fi
    fi
 
    if test "$hypre_using_debug" = "yes"
@@ -2319,43 +2364,6 @@ then
    LINK_CXX='${CUCC}'
    dnl CXXFLAGS="-x c++ ${CXXFLAGS}"
    dnl CFLAGS=${CXXFLAGS}
-fi
-
-dnl *********************************************************************
-dnl * CUDA options/libraries
-dnl *********************************************************************
-if test "$hypre_using_nvtx" = "yes"
-then
-   AC_DEFINE(HYPRE_USING_NVTX, 1, [Define to 1 if using NVIDIA Tools Extension (NVTX)])
-   HYPRE_CUDA_LIBS+=" -lnvToolsExt"
-fi
-
-if test "$hypre_using_cusparse" = "yes"
-then
-   AC_DEFINE(HYPRE_USING_CUSPARSE, 1, [Define to 1 if using cuSPARSE])
-   HYPRE_CUDA_LIBS+=" -lcusparse"
-fi
-
-if test "$hypre_using_cublas" = "yes"
-then
-   AC_DEFINE(HYPRE_USING_CUBLAS, 1, [Define to 1 if using cuBLAS])
-   HYPRE_CUDA_LIBS+=" -lcublas"
-fi
-
-if test "$hypre_using_curand" = "yes"
-then
-   AC_DEFINE(HYPRE_USING_CURAND, 1, [Define to 1 if using cuRAND])
-   HYPRE_CUDA_LIBS+=" -lcurand"
-fi
-
-if test "$hypre_using_device_pool" = "yes"
-then
-   AC_DEFINE(HYPRE_USING_DEVICE_POOL, 1, [Define to 1 if using device pooling allocator])
-fi
-
-if test "x$hypre_using_cuda_streams" = "xyes"]
-then
-   AC_DEFINE([HYPRE_USING_CUDA_STREAMS], 1, [Define to 1 if using CUDA streams])
 fi
 
 dnl *********************************************************************

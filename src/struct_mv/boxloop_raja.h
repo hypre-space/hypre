@@ -15,8 +15,10 @@
  * BoxLoop macros:
  *--------------------------------------------------------------------------*/
 
-#ifndef HYPRE_NEWBOXLOOP_HEADER
-#define HYPRE_NEWBOXLOOP_HEADER
+#ifndef HYPRE_BOXLOOP_RAJA_HEADER
+#define HYPRE_BOXLOOP_RAJA_HEADER
+
+#if defined(HYPRE_USING_RAJA)
 
 #ifdef __cplusplus
 extern "C++" {
@@ -333,3 +335,6 @@ hypre_CheckErrorDevice(cudaDeviceSynchronize());
         hypre_BoxLoop2End(i1, i2)
 
 #endif
+
+#endif /* #ifndef HYPRE_BOXLOOP_RAJA_HEADER */
+

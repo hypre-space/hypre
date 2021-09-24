@@ -1775,13 +1775,13 @@ HYPRE_Int hypre_IntArraySetConstantValues( hypre_IntArray *v, HYPRE_Int value );
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
-#include <math.h>
+//#include <math.h>
 
 #ifdef HYPRE_USING_OPENMP
 #include <omp.h>
 #endif
 
-#include "_hypre_utilities.h"
+//#include "_hypre_utilities.h"
 
 // Potentially architecture specific features used here:
 // __sync_val_compare_and_swap
