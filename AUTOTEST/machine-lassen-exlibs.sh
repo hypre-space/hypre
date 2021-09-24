@@ -72,9 +72,11 @@ ro="-struct -rt -mpibind -save ${save}"
 ./renametest.sh basic $output_dir/basic-cuda-nonum-raja
 
 # CUDA without UM with Kokkos [struct]
-# build Kokkos use [2]
-# [1] cmake -D CMAKE_CXX_COMPILER=${PWD}/../bin/nvcc_wrapper -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=${PWD}/../install_lassen_cuda -D Kokkos_ARCH_POWER9=ON -D Kokkos_ARCH_VOLTA70=ON -D Kokkos_ENABLE_DEBUG=OFF -D Kokkos_ENABLE_AGGRESSIVE_VECTORIZATION=ON -D Kokkos_ENABLE_CUDA=ON -D Kokkos_CUDA_DIR=${CUDA_HOME} -D Kokkos_ENABLE_CUDA_LAMBDA=ON -D Kokkos_ENABLE_CUDA_RELOCATABLE_DEVICE_CODE=ON ..
-# [2] ../generate_makefile.bash --with-cuda=${CUDA_HOME} --prefix=${PWD}/../install_lassen_cuda --arch=Volta70 --compiler=${PWD}/../bin/nvcc_wrapper --with-cuda-options=enable_lambda,rdc
+#-DKokkos_ENABLE_CUDA_RELOCATABLE_DEVICE_CODE=ON ..
+
+#cmake -DCMAKE_CXX_COMPILER=${PWD}/../bin/nvcc_wrapper -DCMAKE_CXX_FLAGS= -DCMAKE_EXE_LINKER_FLAGS= -DCMAKE_INSTALL_PREFIX=${PWD}/../install_lassen_cuda -DKokkos_ENABLE_CUDA=ON -DKokkos_ARCH_POWER9=ON -DKokkos_ARCH_VOLTA70=ON -DKokkos_ENABLE_TESTS=ON -DKokkos_ENABLE_EXAMPLES=OFF -DKokkos_ENABLE_CUDA_LAMBDA=ON -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_CXX_EXTENSIONS=OFF -DCMAKE_BUILD_TYPE=RELEASE ..
+
+#../generate_makefile.bash --with-cuda=${CUDA_HOME} --prefix=${PWD}/../install_lassen_cuda --arch=Volta70 --compiler=${PWD}/../bin/nvcc_wrapper --with-cuda-options=enable_lambda,rdc
 
 module load gcc/8.3.1
 module load cmake/3.16
