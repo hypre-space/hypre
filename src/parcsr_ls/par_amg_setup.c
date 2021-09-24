@@ -389,8 +389,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             A_block_array[j] = NULL;
          }
 
-         hypre_IntArrayDestroy(dof_func_array[i]);
-         dof_func_array[i] = NULL;
+         hypre_IntArrayDestroy(dof_func_array[j]);
+         dof_func_array[j] = NULL;
       }
 
       for (j = 0; j < old_num_levels-1; j++)
