@@ -2094,7 +2094,12 @@ then
       AC_DEFINE(HYPRE_USING_CURAND, 1, [Define to 1 if using cuRAND])
    fi
 
-   LINK_CC=${LINK_CXX}
+   if test "$hypre_using_umpire" = "yes"
+   then
+      LINK_CC='${CUCC}'
+   else
+      LINK_CC=${LINK_CXX}
+   fi
    dnl LINK_CC='${CUCC}'
    dnl LINK_CXX='${CUCC}'
 
