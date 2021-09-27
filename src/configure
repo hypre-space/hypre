@@ -2701,10 +2701,13 @@ eval ac_res=\$$as_ac_File
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
 if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+
   develop_string=$(git -C $HYPRE_SRCDIR describe --match 'v*' --long --abbrev=9)
-   develop_lastag=$(git -C $HYPRE_SRCDIR describe --match 'v*' --abbrev=0)
-   develop_number=$(git -C $HYPRE_SRCDIR rev-list --count $develop_lastag..HEAD)
-   develop_branch=$(git -C $HYPRE_SRCDIR rev-parse --abbrev-ref HEAD)
+  develop_lastag=$(git -C $HYPRE_SRCDIR describe --match 'v*' --abbrev=0)
+  develop_number=$(git -C $HYPRE_SRCDIR rev-list --count $develop_lastag..HEAD)
+  develop_branch=$(git -C $HYPRE_SRCDIR rev-parse --abbrev-ref HEAD)
+  if test -n "$develop_string"; then :
+
 
 cat >>confdefs.h <<_ACEOF
 #define HYPRE_DEVELOP_STRING "$develop_string"
@@ -2715,7 +2718,7 @@ cat >>confdefs.h <<_ACEOF
 #define HYPRE_DEVELOP_NUMBER $develop_number
 _ACEOF
 
-   if test "x$develop_branch" = "xmaster"; then :
+    if test "x$develop_branch" = "xmaster"; then :
 
 cat >>confdefs.h <<_ACEOF
 #define HYPRE_DEVELOP_BRANCH "$develop_branch"
@@ -2726,6 +2729,13 @@ else
 $as_echo "$as_me: NOTE: On branch $develop_branch, not the main development branch" >&6;}
 
 fi
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: NOTE: Could not describe development branch" >&5
+$as_echo "$as_me: NOTE: Could not describe development branch" >&6;}
+
+fi
+
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: NOTE: Could not find .git directory" >&5
 $as_echo "$as_me: NOTE: Could not find .git directory" >&6;}
