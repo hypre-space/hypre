@@ -963,9 +963,11 @@ hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
          }
       };
 
-      sycl::device   syclDev   = data->device;
-      sycl::context  syclctxt  = sycl::context(syclDev, sycl_asynchandler);
-      stream = new sycl::queue(syclctxt, syclDev, sycl::property_list{sycl::property::queue::in_order{}});
+      /* WM: having trouble with getting the device on frank, so temporarily just passing the default selector */
+      /* sycl::device   syclDev   = data->device; */
+      /* sycl::context  syclctxt  = sycl::context(syclDev, sycl_asynchandler); */
+      /* stream = new sycl::queue(syclctxt, syclDev, sycl::property_list{sycl::property::queue::in_order{}}); */
+      stream = new sycl::queue(sycl::default_selector{}, sycl::property_list{sycl::property::queue::in_order{}});
       data->streams[i] = stream;
    }
 #endif
@@ -1222,7 +1224,8 @@ hypre_DeviceDataCreate()
    hypre_DeviceData *data = hypre_CTAlloc(hypre_DeviceData, 1, HYPRE_MEMORY_HOST);
 
 #if defined(HYPRE_USING_SYCL)
-   hypre_DeviceDataDevice(data)            = sycl::device(sycl::gpu_selector{});
+   /* WM: commenting out for now since I'm having trouble finding the device on frank */
+   /* hypre_DeviceDataDevice(data)            = sycl::device(sycl::gpu_selector{}); */
 #else
    hypre_DeviceDataDevice(data)            = 0;
 #endif
@@ -1466,7 +1469,9 @@ hypre_bind_device( HYPRE_Int myid,
    hypre_MPI_Comm_free(&node_comm);
 
    /* get number of devices on this node */
-   hypre_GetDeviceCount(&nDevices);
+   /* WM: doesn't work on frank... commenting out */
+   /* hypre_GetDeviceCount(&nDevices); */
+   nDevices = 1;
 
    /* set device */
    device_id = myNodeid % nDevices;

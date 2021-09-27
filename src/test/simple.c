@@ -13,166 +13,6 @@ HYPRE_Int AddValuesVector( hypre_StructGrid  *gridvector,
 
 
 
-/*********************************************************************
- * put this in _hypre_utilities.hpp ? 
- * WM: todo - if you can wrap the basic parallel_for call for use elsewhere...
- *********************************************************************/
-/* #define HYPRE_SYCL_1D_LAUNCH(kernel_name, gridsize, blocksize, ...)                                                  \ */
-/* {                                                                                                                    \ */
-/*    if ( gridsize[0] == 0 || blocksize[0] == 0 )                                                                      \ */
-/*    {                                                                                                                 \ */
-/*       hypre_printf("Error %s %d: Invalid SYCL 1D launch parameters grid/block (%d) (%d)\n",                          \ */
-/*                    __FILE__, __LINE__,                                                                               \ */
-/*                    gridsize[0], blocksize[0]);                                                                       \ */
-/*       assert(0); exit(1);                                                                                            \ */
-/*    }                                                                                                                 \ */
-/*    else                                                                                                              \ */
-/*    {                                                                                                                 \ */
-/*       hypre_printf("WM: debug - inside BoxLoopforall(), submitting to queue\n");                                                \ */
-/*       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh)                                     \ */
-/*          {                                                                                                           \ */
-/*             cgh.parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize), [=] (sycl::nd_item<1> item)           \ */
-/*             { (kernel_name)(item, __VA_ARGS__); } );                                                                 \ */
-/*          }).wait_and_throw();                                                                                        \ */
-/*    }                                                                                                                 \ */
-/* } */
-
-
-
-#ifdef __cplusplus
-extern "C++" {
-#endif
-
-/*********************************************************************
- * forall function
- *********************************************************************/
-
-template<typename LOOP_BODY>
-void
-BoxLoopforall( LOOP_BODY loop_body,
-               HYPRE_Int length )
-{
-   /* HYPRE_ExecutionPolicy exec_policy = hypre_HandleStructExecPolicy(hypre_handle()); */
-   /* WM: TODO: uncomment above and remove below */
-   HYPRE_ExecutionPolicy exec_policy = HYPRE_EXEC_DEVICE;
-
-   if (exec_policy == HYPRE_EXEC_HOST)
-   {
-/* WM: todo - is this really necessary, even? */
-/* #ifdef HYPRE_USING_OPENMP */
-/* #pragma omp parallel for HYPRE_SMP_SCHEDULE */
-/* #endif */
-/*       for (HYPRE_Int idx = 0; idx < length; idx++) */
-/*       { */
-/*          loop_body(idx); */
-/*       } */
-   }
-   else if (exec_policy == HYPRE_EXEC_DEVICE)
-   {
-      const sycl::range<1> bDim = hypre_GetDefaultCUDABlockDimension();
-      const sycl::range<1> gDim = hypre_GetDefaultCUDAGridDimension(length, "thread", bDim);
-
-      hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh)
-         {
-            cgh.parallel_for(sycl::nd_range<1>(gDim*bDim, bDim), loop_body);
-         }).wait_and_throw();
-   }
-}
-
-#ifdef __cplusplus
-}
-#endif
-
-/*********************************************************************
- * Init/Declare/IncK etc.
- *********************************************************************/
-
-/* Get 1-D length of the loop, in hypre__tot */
-#define hypre_newBoxLoopInit(ndim, loop_size)              \
-   HYPRE_Int hypre__tot = 1;                               \
-   for (HYPRE_Int hypre_d = 0; hypre_d < ndim; hypre_d ++) \
-   {                                                       \
-      hypre__tot *= loop_size[hypre_d];                    \
-   }
-
-/* Initialize struct for box-k */
-#define hypre_BoxLoopDataDeclareK(k, ndim, loop_size, dbox, start, stride) \
-   hypre_Boxloop databox##k;                                               \
-   /* dim 0 */                                                             \
-   databox##k.lsize0   = loop_size[0];                                     \
-   databox##k.strides0 = stride[0];                                        \
-   databox##k.bstart0  = start[0] - dbox->imin[0];                         \
-   databox##k.bsize0   = dbox->imax[0] - dbox->imin[0];                    \
-   /* dim 1 */                                                             \
-   if (ndim > 1)                                                           \
-   {                                                                       \
-      databox##k.lsize1   = loop_size[1];                                  \
-      databox##k.strides1 = stride[1];                                     \
-      databox##k.bstart1  = start[1] - dbox->imin[1];                      \
-      databox##k.bsize1   = dbox->imax[1] - dbox->imin[1];                 \
-   }                                                                       \
-   else                                                                    \
-   {                                                                       \
-      databox##k.lsize1   = 1;                                             \
-      databox##k.strides1 = 0;                                             \
-      databox##k.bstart1  = 0;                                             \
-      databox##k.bsize1   = 0;                                             \
-   }                                                                       \
-   /* dim 2 */                                                             \
-   if (ndim == 3)                                                          \
-   {                                                                       \
-      databox##k.lsize2   = loop_size[2];                                  \
-      databox##k.strides2 = stride[2];                                     \
-      databox##k.bstart2  = start[2] - dbox->imin[2];                      \
-      databox##k.bsize2   = dbox->imax[2] - dbox->imin[2];                 \
-   }                                                                       \
-   else                                                                    \
-   {                                                                       \
-      databox##k.lsize2   = 1;                                             \
-      databox##k.strides2 = 0;                                             \
-      databox##k.bstart2  = 0;                                             \
-      databox##k.bsize2   = 0;                                             \
-   }
-
-/* Given input 1-D 'idx' in box, get 3-D 'local_idx' in loop_size */
-#define hypre_newBoxLoopDeclare(box)                     \
-   hypre_Index local_idx;                                \
-   size_t idx_local = item.get_local_id(0);                            \
-   hypre_IndexD(local_idx, 0)  = idx_local % box.lsize0; \
-   idx_local = idx_local / box.lsize0;                   \
-   hypre_IndexD(local_idx, 1)  = idx_local % box.lsize1; \
-   idx_local = idx_local / box.lsize1;                   \
-   hypre_IndexD(local_idx, 2)  = idx_local % box.lsize2; \
-
-/* Given input 3-D 'local_idx', get 1-D 'hypre__i' in 'box' */
-#define hypre_BoxLoopIncK(k, box, hypre__i)                                               \
-   HYPRE_Int hypre_boxD##k = 1;                                                           \
-   HYPRE_Int hypre__i = 0;                                                                \
-   hypre__i += (hypre_IndexD(local_idx, 0) * box.strides0 + box.bstart0) * hypre_boxD##k; \
-   hypre_boxD##k *= hypre_max(0, box.bsize0 + 1);                                         \
-   hypre__i += (hypre_IndexD(local_idx, 1) * box.strides1 + box.bstart1) * hypre_boxD##k; \
-   hypre_boxD##k *= hypre_max(0, box.bsize1 + 1);                                         \
-   hypre__i += (hypre_IndexD(local_idx, 2) * box.strides2 + box.bstart2) * hypre_boxD##k; \
-   hypre_boxD##k *= hypre_max(0, box.bsize2 + 1);
-
-
-
-/* BoxLoop 1 */
-#define hypre_newBoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1, i1)                           \
-{                                                                                                     \
-   hypre_newBoxLoopInit(ndim, loop_size);                                                             \
-   hypre_BoxLoopDataDeclareK(1, ndim, loop_size, dbox1, start1, stride1);                             \
-   BoxLoopforall( [=] (sycl::nd_item<1> item)                                             \
-   {                                                                                                  \
-      hypre_newBoxLoopDeclare(databox1);                                                              \
-      hypre_BoxLoopIncK(1, databox1, i1);
-
-#define hypre_newBoxLoop1End(i1)                                                                      \
-   }, hypre__tot);                                                                                                \
-}
-
-#define my_hypre_BoxLoop1Begin      hypre_newBoxLoop1Begin
-#define my_hypre_BoxLoop1End        hypre_newBoxLoop1End
 
 HYPRE_Int
 my_hypre_StructVectorSetConstantValues( hypre_StructVector *vector,
@@ -208,14 +48,13 @@ my_hypre_StructVectorSetConstantValues( hypre_StructVector *vector,
 
       hypre_BoxGetSize(box, loop_size);
 
-      // WM: question - What's DEVICE_VAR?
 #define DEVICE_VAR is_device_ptr(vp)
-      my_hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
+      hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                           v_data_box, start, unit_stride, vi);
       {
          vp[vi] = values;
       }
-      my_hypre_BoxLoop1End(vi);
+      hypre_BoxLoop1End(vi);
 #undef DEVICE_VAR
    }
 
@@ -275,6 +114,29 @@ my_hypre_StructAxpy( HYPRE_Complex       alpha,
 
 
 /****************************
+ * show device function copied from oneAPI examples
+ ****************************/
+#include <iomanip>
+#include "dpc_common.hpp"
+
+void ShowDevice(sycl::queue &q) {
+  using namespace std;
+  using namespace sycl;
+  // Output platform and device information.
+  auto device = q.get_device();
+  auto p_name = device.get_platform().get_info<info::platform::name>();
+  cout << std::setw(20) << "Platform Name: " << p_name << "\n";
+  auto p_version = device.get_platform().get_info<info::platform::version>();
+  cout << std::setw(20) << "Platform Version: " << p_version << "\n";
+  auto d_name = device.get_info<info::device::name>();
+  cout << std::setw(20) << "Device Name: " << d_name << "\n";
+  auto max_work_group = device.get_info<info::device::max_work_group_size>();
+  cout << std::setw(20) << "Max Work Group: " << max_work_group << "\n";
+  auto max_compute_units = device.get_info<info::device::max_compute_units>();
+  cout << std::setw(20) << "Max Compute Units: " << max_compute_units << "\n\n";
+}
+
+/****************************
  * main
  ****************************/
 
@@ -282,6 +144,27 @@ hypre_int
 main( hypre_int argc,
       char *argv[] )
 {
+
+   /* initialize */
+   /* hypre_MPI_Init(&argc, &argv); */
+   /* HYPRE_Init(); */
+   /* ShowDevice(*hypre_HandleComputeStream(hypre_handle())); */
+
+
+   /* sycl::queue my_queue(sycl::default_selector{}, dpc_common::exception_handler); */
+   /* ShowDevice(my_queue); */
+
+   /* sycl::device gpu = sycl::device(sycl::cpu_selector{}); */
+   /* sycl::device dev; */
+   /* hypre_printf("is_host = %d\n", gpu.is_host()); */
+   /* hypre_printf("is_cpu = %d\n", gpu.is_cpu()); */
+   /* hypre_printf("is_cpu = %d\n", dev.is_cpu()); */
+   /* hypre_printf("is_gpu = %d\n", gpu.is_gpu()); */
+   /* hypre_printf("DONE\n"); */
+   /* exit(0); */
+
+
+
    /* variables */
    HYPRE_Int           i, ix, iy, iz, ib;
    HYPRE_Int           p, q, r;
@@ -300,10 +183,10 @@ main( hypre_int argc,
    HYPRE_StructVector  x;
    HYPRE_Int           num_ghost[6]   = {0, 0, 0, 0, 0, 0};
 
-   dim = 1;
+   dim = 2;
    sym  = 1;
-   nx = 1000;
-   ny = 1;
+   nx = 10;
+   ny = 10;
    nz = 1;
    bx = 1;
    by = 1;
@@ -517,7 +400,11 @@ main( hypre_int argc,
 
 
    /* call set const */
-   my_hypre_StructVectorSetConstantValues(x, 1.0);
+   my_hypre_StructVectorSetConstantValues(x, 5.0);
+   hypre_printf("my_hypre_StructVectorSetConstantValues() success!\n");
+
+   hypre_StructVectorSetConstantValues(x, 5.0);
+   hypre_printf("hypre_StructVectorSetConstantValues() success!\n");
 
    /* call axpy */
    /* my_hypre_StructAxpy(1.0, x, b); */
