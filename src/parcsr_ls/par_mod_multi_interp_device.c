@@ -452,8 +452,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 #endif
          Pi[i] = hypre_ParCSRMatMat(Q, Pi[i-1]);
 
-         hypre_ParCSRMatrixOwnsRowStarts(Q)=0;
-         hypre_ParCSRMatrixOwnsRowStarts(Pi[i])=1;
          hypre_ParCSRMatrixDestroy(Q);
       }
    }
@@ -587,7 +585,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd)    = P_offd_i;
    hypre_CSRMatrixJ(P_offd)    = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
    if (trunc_factor != 0.0 || P_max_elmts > 0)
@@ -939,8 +936,6 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixI(P_offd)    = P_offd_i;
    hypre_CSRMatrixJ(P_offd)    = P_offd_j;
 
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 1;
-   hypre_ParCSRMatrixOwnsColStarts(P) = 0;
    hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
    hypre_ParCSRMatrixDeviceColMapOffd(P) = col_map_offd_P_dev;
 
@@ -1274,8 +1269,6 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixI(Q_offd)    = Q_offd_i;
    hypre_CSRMatrixJ(Q_offd)    = Q_offd_j;
 
-   hypre_ParCSRMatrixOwnsRowStarts(Q) = 1;
-   hypre_ParCSRMatrixOwnsColStarts(Q) = 0;
    hypre_ParCSRMatrixColMapOffd(Q) = col_map_offd_Q;
    hypre_ParCSRMatrixDeviceColMapOffd(Q) = col_map_offd_Q_dev;
 
@@ -1305,8 +1298,6 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
 
    hypre_TFree(w_row_sum, HYPRE_MEMORY_DEVICE);
 
-   hypre_ParCSRMatrixOwnsRowStarts(Q)  = 0;
-   hypre_ParCSRMatrixOwnsRowStarts(Pi) = 1;
    hypre_ParCSRMatrixDestroy(Q);
 
    *Pi_ptr = Pi;

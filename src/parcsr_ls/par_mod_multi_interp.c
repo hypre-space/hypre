@@ -314,8 +314,6 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
          hypre_GenerateMultipassPi(A, S, c_pts_starts, &pass_order[pass_starts[i+1]], pass_marker,
                              pass_marker_offd, pass_starts[i+2]-pass_starts[i+1], i+1, row_sums, &Q);
          Pi[i] = hypre_ParMatmul(Q, Pi[i-1]);
-         hypre_ParCSRMatrixOwnsRowStarts(Q)=0;
-         hypre_ParCSRMatrixOwnsRowStarts(Pi[i])=1;
          hypre_ParCSRMatrixDestroy(Q);
       }
    }
@@ -415,7 +413,6 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
 
@@ -803,8 +800,6 @@ hypre_GenerateMultipassPi( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 1;
-   hypre_ParCSRMatrixOwnsColStarts(P) = 0;
    hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
 
    hypre_CSRMatrixMemoryLocation(P_diag) = HYPRE_MEMORY_HOST;
@@ -1200,8 +1195,6 @@ hypre_GenerateMultiPi( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixData(Q_offd) = Q_offd_data;
    hypre_CSRMatrixI(Q_offd) = Q_offd_i;
    hypre_CSRMatrixJ(Q_offd) = Q_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(Q) = 1;
-   hypre_ParCSRMatrixOwnsColStarts(Q) = 0;
    hypre_ParCSRMatrixColMapOffd(Q) = col_map_offd_Q;
 
    hypre_CSRMatrixMemoryLocation(Q_diag) = HYPRE_MEMORY_HOST;
@@ -1255,8 +1248,6 @@ hypre_GenerateMultiPi( hypre_ParCSRMatrix  *A,
       }
    }
 
-   hypre_ParCSRMatrixOwnsRowStarts(Q)=0;
-   hypre_ParCSRMatrixOwnsRowStarts(Pi)=1;
    hypre_ParCSRMatrixDestroy(Q);
    //hypre_TFree(row_sums, HYPRE_MEMORY_HOST);
    hypre_TFree(row_sums_C, HYPRE_MEMORY_HOST);

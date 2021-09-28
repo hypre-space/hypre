@@ -336,7 +336,7 @@ hypre_BoomerAMGBuildMultipassDevice( hypre_ParCSRMatrix  *A,
 
    if (num_cols_offd)
    {
-      CF_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
+      CF_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_HOST);
       if (num_functions > 1) dof_func_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
    }
 
@@ -1984,7 +1984,6 @@ hypre_BoomerAMGBuildMultipassDevice( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    /* Compress P, removing coefficients smaller than trunc_factor * Max
       and/or keep yat most <P_max_elmts> per row absolutely maximal coefficients */
