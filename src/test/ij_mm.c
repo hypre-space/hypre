@@ -80,6 +80,7 @@ void gpu_free(void *ptr)
    return;
 }
 
+char file_dir[]="./";
 
 void runjob1( HYPRE_ParCSRMatrix parcsr_A,
               HYPRE_Int          print_system,
@@ -93,6 +94,7 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
    HYPRE_ParCSRMatrix parcsr_error_host = NULL;
    HYPRE_Real         fnorm, rfnorm, fnorm0;
    HYPRE_Int          time_index, rep = 2;
+   char               fname[1024];
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -113,7 +115,7 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
 
       hypre_BeginTiming(time_index);
 
-      parcsr_B_host  = hypre_ParCSRMatMat(parcsr_A_host, parcsr_A_host);
+      parcsr_B_host = hypre_ParCSRMatMat(parcsr_A_host, parcsr_A_host);
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Host Parcsr Matrix-by-Matrix, A*A", hypre_MPI_COMM_WORLD);
@@ -123,7 +125,12 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
 
    if (print_system)
    {
-      hypre_CSRMatrixPrintMM(hypre_ParCSRMatrixDiag(parcsr_A_host), 1, 1, 0, "/p/gpfs1/li50/A.mtx");
+      if (!parcsr_A_host)
+      {
+         parcsr_A_host = hypre_ParCSRMatrixClone_v2(parcsr_A, 1, HYPRE_MEMORY_HOST);
+      }
+      sprintf(fname,"%s/%s", file_dir, "IJ.out.A");
+      hypre_ParCSRMatrixPrintIJ(parcsr_A_host, 0, 0, fname);
    }
 
    for (i = 0 ; i < rep; i++)
@@ -172,7 +179,20 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
       }
    }
 
+   if (print_system)
+   {
+      if (!parcsr_B_host2)
+      {
+         parcsr_B_host2 = hypre_ParCSRMatrixClone_v2(parcsr_B, 1, HYPRE_MEMORY_HOST);
+      }
+      sprintf(fname,"%s/%s", file_dir, "IJ.out.B");
+      hypre_ParCSRMatrixPrintIJ(parcsr_B_host2, 0, 0, fname);
+   }
+
    hypre_ParCSRMatrixDestroy(parcsr_B);
+   hypre_ParCSRMatrixDestroy(parcsr_A_host);
+   hypre_ParCSRMatrixDestroy(parcsr_B_host);
+   hypre_ParCSRMatrixDestroy(parcsr_B_host2);
 }
 
 void runjob2( HYPRE_ParCSRMatrix parcsr_A,
@@ -194,6 +214,7 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
    HYPRE_Int    local_num_vars, *coarse_dof_func, *coarse_pnts_global;
    HYPRE_Int    num_procs, myid;
    HYPRE_Int    time_index, i;
+   char         fname[1024];
 
    HYPRE_ParCSRMatrix parcsr_S   = NULL;
    HYPRE_ParCSRMatrix parcsr_P   = NULL;
@@ -272,8 +293,10 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
     *-----------------------------------------------------------*/
    if (print_system)
    {
-      hypre_CSRMatrixPrintMM(hypre_ParCSRMatrixDiag(parcsr_A_host), 1, 1, 0, "/p/gpfs1/li50/A.mtx");
-      hypre_CSRMatrixPrintMM(hypre_ParCSRMatrixDiag(parcsr_P_host), 1, 1, 0, "/p/gpfs1/li50/P.mtx");
+      sprintf(fname,"%s/%s", file_dir, "IJ.out.A");
+      hypre_ParCSRMatrixPrintIJ(parcsr_A_host, 0, 0, fname);
+      sprintf(fname,"%s/%s", file_dir, "IJ.out.P");
+      hypre_ParCSRMatrixPrintIJ(parcsr_P_host, 0, 0, fname);
    }
 
    /*-----------------------------------------------------------
@@ -701,6 +724,8 @@ main( hypre_int argc,
    hypre_PrintTiming("Generate Matrix A", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
+
+   hypre_ParCSRMatrixMigrate(parcsr_A, hypre_HandleMemoryLocation(hypre_handle()));
 
    if (job == 1)
    {
