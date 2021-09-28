@@ -18,7 +18,7 @@ __global__ void hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( HYPRE_Int nr_
 
 HYPRE_Int
 hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
-                                     HYPRE_Int            *CF_marker_host,
+                                     HYPRE_Int            *CF_marker,
                                      HYPRE_BigInt         *num_cpts_global,
                                      HYPRE_Int             num_functions,
                                      HYPRE_Int            *dof_func,
@@ -49,7 +49,6 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    HYPRE_Int           nnz_diag, nnz_offd;
    HYPRE_BigInt       *send_buf_i;
    HYPRE_Int           i;
-   HYPRE_Int          *CF_marker;
 
    /* local size */
    HYPRE_Int n_fine = hypre_CSRMatrixNumRows(A_diag);
@@ -58,19 +57,6 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    /* MPI size and rank*/
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-
-   /* copy CF_marker to the device if necessary */
-   hypre_MemoryLocation cf_memory_location;
-   hypre_GetPointerLocation(CF_marker_host, &cf_memory_location);
-   if (cf_memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_HOST))
-   {
-      CF_marker = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(CF_marker, CF_marker_host, HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-   }
-   else
-   {
-      CF_marker = CF_marker_host;
-   }
 
    /* global number of C points and my start position */
    if (my_id == (num_procs -1))
@@ -374,6 +360,28 @@ hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( HYPRE_Int      nr_of_rows,
          R_diag_a[j] = -Z_diag_a[jZ];
       }
    }
+}
+
+
+struct setTo1minus1 : public thrust::unary_function<HYPRE_Int,HYPRE_Int>
+{
+  __host__ __device__ HYPRE_Int operator()(const HYPRE_Int &x) const
+  {
+    return x > 0 ? 1 : -1;
+  }
+};
+
+HYPRE_Int
+hypre_BoomerAMGCFMarkerTo1minus1Device( HYPRE_Int *CF_marker,
+                                        HYPRE_Int size )
+{
+   HYPRE_THRUST_CALL( transform,
+                      CF_marker,
+                      CF_marker + size,
+                      CF_marker,
+                      setTo1minus1() );
+
+   return hypre_error_flag;
 }
 
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)

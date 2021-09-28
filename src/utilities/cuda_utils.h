@@ -818,6 +818,19 @@ struct less_than : public thrust::unary_function<T,bool>
 };
 
 template<typename T>
+struct modulo : public thrust::unary_function<T,T>
+{
+   T val;
+
+   modulo(T val_) { val = val_; }
+
+   __host__ __device__ T operator()(const T &x)
+   {
+      return (x % val);
+   }
+};
+
+template<typename T>
 struct equal : public thrust::unary_function<T,bool>
 {
    T val;

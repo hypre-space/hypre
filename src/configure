@@ -2683,6 +2683,56 @@ _ACEOF
 
 
 
+as_ac_File=`$as_echo "ac_cv_file_$HYPRE_SRCDIR/../.git" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $HYPRE_SRCDIR/../.git" >&5
+$as_echo_n "checking for $HYPRE_SRCDIR/../.git... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "$HYPRE_SRCDIR/../.git"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  develop_string=$(git -C $HYPRE_SRCDIR describe --match 'v*' --long --abbrev=9)
+   develop_lastag=$(git -C $HYPRE_SRCDIR describe --match 'v*' --abbrev=0)
+   develop_number=$(git -C $HYPRE_SRCDIR rev-list --count $develop_lastag..HEAD)
+   develop_branch=$(git -C $HYPRE_SRCDIR rev-parse --abbrev-ref HEAD)
+
+cat >>confdefs.h <<_ACEOF
+#define HYPRE_DEVELOP_STRING "$develop_string"
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define HYPRE_DEVELOP_NUMBER $develop_number
+_ACEOF
+
+   if test "x$develop_branch" = "xmaster"; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HYPRE_DEVELOP_BRANCH "$develop_branch"
+_ACEOF
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: NOTE: On branch $develop_branch, not the main development branch" >&5
+$as_echo "$as_me: NOTE: On branch $develop_branch, not the main development branch" >&6;}
+
+fi
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: NOTE: Could not find .git directory" >&5
+$as_echo "$as_me: NOTE: Could not find .git directory" >&6;}
+
+fi
+
+
 PACKAGE_DATE=
 PACKAGE_TIME=
 PACKAGE_DATETIME=
@@ -8489,7 +8539,7 @@ then
       BUILD_CC_SHARED="\${CC} ${SHARED_BUILD_FLAG}"
    fi
    BUILD_CXX_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
-   if test "$hypre_using_cuda" = "yes"
+   if test "$hypre_using_cuda" == "yes" || test "$hypre_using_hip" == "yes"
    then
             BUILD_CC_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
    fi
@@ -8947,6 +8997,12 @@ elif HIPCXXFLAGS="-O2 ${HIPCXXFLAGS}"; then :
 
 fi
 
+
+                                if test "$hypre_using_shared" = "yes"
+        then
+           HIPCXXFLAGS="${SHARED_COMPILE_FLAG} ${HIPCXXFLAGS}"
+        fi
+
                         if test "$hypre_user_chose_cuflags" = "no"
         then
            CUFLAGS="${HIPCPPFLAGS} ${HIPCXXFLAGS}"
@@ -9107,7 +9163,7 @@ $as_echo "#define HYPRE_DEVICE_OPENMP_CHECK 1" >>confdefs.h
 
 if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes"
 then
-   if test "x$hypre_using_cuda_streams" = "xyes"]
+   if test "x$hypre_using_cuda_streams" = "xyes"
    then
 
 $as_echo "#define HYPRE_USING_CUDA_STREAMS 1" >>confdefs.h
