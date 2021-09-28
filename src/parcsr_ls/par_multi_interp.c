@@ -2030,31 +2030,30 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                                hypre_ParCSRMatrix **P_ptr )
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_GpuProfilingPushRange("BuildMultipass");
+   hypre_GpuProfilingPushRange("MultipassInterp");
 #endif
-
-   hypre_assert( hypre_ParCSRMatrixMemoryLocation(A) == hypre_ParCSRMatrixMemoryLocation(S) );
-
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    HYPRE_Int ierr = 0;
 
-   if (exec == HYPRE_EXEC_HOST)
-   {
-     ierr = hypre_BoomerAMGBuildMultipassHost( A, CF_marker, S, num_cpts_global,
-                                               num_functions, dof_func, debug_flag,
-                                               trunc_factor, P_max_elmts, weight_option,
-                                               P_ptr );
-   }
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   else
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+                                                      hypre_ParCSRMatrixMemoryLocation(S) );
+   if (exec == HYPRE_EXEC_DEVICE)
    {
-     ierr = hypre_BoomerAMGBuildMultipassDevice( A, CF_marker, S, num_cpts_global,
-                                                 num_functions, dof_func, debug_flag,
-                                                 trunc_factor, P_max_elmts, weight_option,
-                                                 P_ptr );
+      /* Notice: call the mod version on GPUs */
+      ierr = hypre_BoomerAMGBuildModMultipassDevice( A, CF_marker, S, num_cpts_global,
+                                                     trunc_factor, P_max_elmts, 9,
+                                                     num_functions, dof_func,
+                                                     P_ptr );
    }
+   else
 #endif
+   {
+      ierr = hypre_BoomerAMGBuildMultipassHost( A, CF_marker, S, num_cpts_global,
+                                                num_functions, dof_func, debug_flag,
+                                                trunc_factor, P_max_elmts, weight_option,
+                                                P_ptr );
+   }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
@@ -2062,3 +2061,4 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
    return ierr;
 }
+
