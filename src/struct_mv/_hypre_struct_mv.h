@@ -2062,7 +2062,6 @@ hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)
 typedef struct hypre_StructMatmulthelper_struct
 {
    hypre_StTerm    terms[MAXTERMS]; /* stencil info for each term */
-   HYPRE_Int       mentry;          /* stencil entry for M */
    HYPRE_Complex   cprod;           /* product of the constant terms */
    HYPRE_Int       types[MAXTERMS]; /* types of computations to do for each term */
    HYPRE_Complex  *tptrs[MAXTERMS]; /* pointers to matrix data for each term */
@@ -2090,8 +2089,8 @@ typedef struct hypre_StructMatmultData_struct
    hypre_BoxArray       *fdata_space;     /* fine data space */
 
    hypre_StMatrix       *st_M;            /* stencil matrix for M */
-   HYPRE_Int             na;              /* size of hypre_StructMMhelper object */
-   hypre_StructMatmultHelper *a;          /* helper for running multiplication */
+   HYPRE_Int            *na;              /* size of hypre_StructMMhelper object */
+   hypre_StructMatmultHelper **a;         /* (stencil_size x na) helper for running multiplication */
 
    hypre_StructVector   *mask;            /* bit mask vector for cte. coefs multiplication */
    hypre_CommPkg        *comm_pkg;        /* pointer to agglomerated communication package */
@@ -3344,3 +3343,4 @@ typedef struct hypre_Boxloop_struct
 #endif
 
 #endif
+
