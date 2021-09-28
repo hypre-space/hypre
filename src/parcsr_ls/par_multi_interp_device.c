@@ -13,21 +13,25 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
-                                   HYPRE_Int           *CF_marker,
-                                   hypre_ParCSRMatrix  *S,
-                                   HYPRE_BigInt        *num_cpts_global,
-                                   HYPRE_Int            num_functions,
-                                   HYPRE_Int           *dof_func,
-                                   HYPRE_Int            debug_flag,
-                                   HYPRE_Real           trunc_factor,
-                                   HYPRE_Int            P_max_elmts,
-                                   HYPRE_Int            weight_option,
-                                   hypre_ParCSRMatrix **P_ptr )
+hypre_BoomerAMGBuildMultipassDevice( hypre_ParCSRMatrix  *A,
+                                     HYPRE_Int           *CF_marker,
+                                     hypre_ParCSRMatrix  *S,
+                                     HYPRE_BigInt        *num_cpts_global,
+                                     HYPRE_Int            num_functions,
+                                     HYPRE_Int           *dof_func,
+                                     HYPRE_Int            debug_flag,
+                                     HYPRE_Real           trunc_factor,
+                                     HYPRE_Int            P_max_elmts,
+                                     HYPRE_Int            weight_option,
+                                     hypre_ParCSRMatrix **P_ptr )
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MULTIPASS_INTERP] -= hypre_MPI_Wtime();
 #endif
+
+   hypre_assert( hypre_ParCSRMatrixMemoryLocation(A) == HYPRE_MEMORY_DEVICE );
+   hypre_assert( hypre_ParCSRMatrixMemoryLocation(S) == HYPRE_MEMORY_DEVICE );
+
 
    MPI_Comm                comm = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg    *comm_pkg = hypre_ParCSRMatrixCommPkg(S);
@@ -35,27 +39,50 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    hypre_ParCSRCommPkg    *tmp_comm_pkg;
 
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Real      *A_diag_data = hypre_CSRMatrixData(A_diag);
-   HYPRE_Int       *A_diag_i = hypre_CSRMatrixI(A_diag);
-   HYPRE_Int       *A_diag_j = hypre_CSRMatrixJ(A_diag);
+   hypre_assert( hypre_CSRMatrixMemoryLocation(A_diag) == HYPRE_MEMORY_DEVICE );
+
+   HYPRE_Real      *A_diag_data_dev = hypre_CSRMatrixData(A_diag);
+   HYPRE_Int       *A_diag_i_dev = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int       *A_diag_j_dev = hypre_CSRMatrixJ(A_diag);
+
+   HYPRE_Real      *A_diag_data = NULL;
+   HYPRE_Int       *A_diag_i = NULL;
+   HYPRE_Int       *A_diag_j = NULL;
 
    hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
-   HYPRE_Real      *A_offd_data = NULL;
-   HYPRE_Int       *A_offd_i = hypre_CSRMatrixI(A_offd);
+   hypre_assert( hypre_CSRMatrixMemoryLocation(A_offd) == HYPRE_MEMORY_DEVICE );
+
+   HYPRE_Real      *A_offd_data_dev = NULL;
+   HYPRE_Int       *A_offd_j_dev = NULL;
+
+   HYPRE_Int       *A_offd_i = NULL;
    HYPRE_Int       *A_offd_j = NULL;
+   HYPRE_Real      *A_offd_data = NULL;
+
+   HYPRE_Int       *A_offd_i_dev = hypre_CSRMatrixI(A_offd);
+
    //HYPRE_BigInt    *col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
    HYPRE_Int        num_cols_offd_A = hypre_CSRMatrixNumCols(A_offd);
 
    hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag(S);
-   HYPRE_Int       *S_diag_i = hypre_CSRMatrixI(S_diag);
-   HYPRE_Int       *S_diag_j = hypre_CSRMatrixJ(S_diag);
+   hypre_assert( hypre_CSRMatrixMemoryLocation(S_diag) == HYPRE_MEMORY_DEVICE );
+
+   HYPRE_Int       *S_diag_i_dev = hypre_CSRMatrixI(S_diag);
+   HYPRE_Int       *S_diag_j_dev = hypre_CSRMatrixJ(S_diag);
+
+   HYPRE_Int       *S_diag_i = NULL;
+   HYPRE_Int       *S_diag_j = NULL;
 
    hypre_CSRMatrix *S_offd = hypre_ParCSRMatrixOffd(S);
-   HYPRE_Int       *S_offd_i = hypre_CSRMatrixI(S_offd);
+   hypre_assert( hypre_CSRMatrixMemoryLocation(S_offd) == HYPRE_MEMORY_DEVICE );
+
+   HYPRE_Int       *S_offd_i_dev = hypre_CSRMatrixI(S_offd);
+   HYPRE_Int       *S_offd_j_dev = NULL;
+
+   HYPRE_Int       *S_offd_i = NULL;
    HYPRE_Int       *S_offd_j = NULL;
-   /*HYPRE_BigInt    *col_map_offd_S = hypre_ParCSRMatrixColMapOffd(S);
-   HYPRE_Int        num_cols_offd_S = hypre_CSRMatrixNumCols(S_offd);
-   HYPRE_BigInt    *col_map_offd = NULL;*/
+
+
    HYPRE_Int        num_cols_offd;
 
    hypre_ParCSRMatrix *P;
@@ -183,8 +210,6 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    HYPRE_Int * cnt_nz_per_thread;
    HYPRE_Int * cnt_nz_offd_per_thread;
 
-   /* HYPRE_Real wall_time;
-      wall_time = hypre_MPI_Wtime(); */
 
    /* Initialize threading variables */
    max_num_threads[0] = hypre_NumThreads();
@@ -225,12 +250,64 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
 
    if (num_cols_offd_A)
    {
-      A_offd_data = hypre_CSRMatrixData(A_offd);
-      A_offd_j    = hypre_CSRMatrixJ(A_offd);
+      A_offd_data_dev = hypre_CSRMatrixData(A_offd);
+      A_offd_j_dev    = hypre_CSRMatrixJ(A_offd);
    }
 
    if (num_cols_offd)
-      S_offd_j    = hypre_CSRMatrixJ(S_offd);
+      S_offd_j_dev    = hypre_CSRMatrixJ(S_offd);
+
+
+   // FIXME: Temporary hack!
+   // Copy A,S data D->H
+   {
+     HYPRE_Int num_rows_Sdiag = hypre_CSRMatrixNumRows(S_diag);
+     HYPRE_Int num_nonzeros_Sdiag = hypre_CSRMatrixNumNonzeros(S_diag);
+     HYPRE_Int num_rows_Soffd = hypre_CSRMatrixNumRows(S_offd);
+     HYPRE_Int num_nonzeros_Soffd = hypre_CSRMatrixNumNonzeros(S_offd);
+     HYPRE_Int num_rows_Adiag = hypre_CSRMatrixNumRows(A_diag);
+     HYPRE_Int num_nonzeros_Adiag = hypre_CSRMatrixNumNonzeros(A_diag);
+     HYPRE_Int num_rows_Aoffd = hypre_CSRMatrixNumRows(A_offd);
+     HYPRE_Int num_nonzeros_Aoffd = hypre_CSRMatrixNumNonzeros(A_offd);
+
+     S_diag_i = hypre_TAlloc(HYPRE_Int, num_rows_Sdiag+1, HYPRE_MEMORY_HOST);
+     S_diag_j = hypre_TAlloc(HYPRE_Int, num_nonzeros_Sdiag, HYPRE_MEMORY_HOST);
+     S_offd_i = hypre_TAlloc(HYPRE_Int, num_rows_Soffd+1, HYPRE_MEMORY_HOST);
+     A_diag_i = hypre_TAlloc(HYPRE_Int, num_rows_Adiag+1, HYPRE_MEMORY_HOST);
+     A_diag_j = hypre_TAlloc(HYPRE_Int, num_nonzeros_Adiag, HYPRE_MEMORY_HOST);
+     A_diag_data = hypre_TAlloc(HYPRE_Real, num_nonzeros_Adiag, HYPRE_MEMORY_HOST);
+     A_offd_i = hypre_TAlloc(HYPRE_Int, num_rows_Aoffd+1, HYPRE_MEMORY_HOST);
+
+     hypre_TMemcpy( S_diag_i, S_diag_i_dev, HYPRE_Int, num_rows_Sdiag+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+     hypre_TMemcpy( S_diag_j, S_diag_j_dev, HYPRE_Int, num_nonzeros_Sdiag, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+     hypre_TMemcpy( S_offd_i, S_offd_i_dev, HYPRE_Int, num_rows_Soffd+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+     hypre_TMemcpy( A_diag_i, A_diag_i_dev, HYPRE_Int, num_rows_Adiag+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+     hypre_TMemcpy( A_diag_j, A_diag_j_dev, HYPRE_Int, num_nonzeros_Adiag, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+     hypre_TMemcpy( A_diag_data, A_diag_data_dev, HYPRE_Real, num_nonzeros_Adiag, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+     hypre_TMemcpy( A_offd_i, A_offd_i_dev, HYPRE_Int, num_rows_Aoffd+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+     if( num_nonzeros_Soffd )
+       {
+         S_offd_j = hypre_TAlloc(HYPRE_Int, num_nonzeros_Soffd, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy( S_offd_j, S_offd_j_dev, HYPRE_Int, num_nonzeros_Soffd, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+       }
+
+     if( num_nonzeros_Aoffd )
+       {
+         A_offd_j = hypre_TAlloc(HYPRE_Int, num_nonzeros_Aoffd, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy( A_offd_j, A_offd_j_dev, HYPRE_Int, num_nonzeros_Aoffd, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+         A_offd_data = hypre_TAlloc(HYPRE_Real, num_nonzeros_Aoffd, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy( A_offd_data, A_offd_data_dev, HYPRE_Real, num_nonzeros_Aoffd, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+       }
+
+   }
 
    n_fine = hypre_CSRMatrixNumRows(A_diag);
 
@@ -1867,6 +1944,30 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    hypre_TFree(map_S_to_new, HYPRE_MEMORY_HOST);
    if (num_procs > 1) hypre_TFree(tmp_comm_pkg, HYPRE_MEMORY_HOST);
 
+   // FIXME: Temporary hack!
+   // Free up the memory we allocated for the manual copying of A and S data
+   {
+     hypre_TFree(S_diag_i, HYPRE_MEMORY_HOST);
+     hypre_TFree(S_diag_j, HYPRE_MEMORY_HOST);
+     hypre_TFree(S_offd_i, HYPRE_MEMORY_HOST);
+     hypre_TFree(A_diag_i, HYPRE_MEMORY_HOST);
+     hypre_TFree(A_diag_j, HYPRE_MEMORY_HOST);
+     hypre_TFree(A_diag_data, HYPRE_MEMORY_HOST);
+     hypre_TFree(A_offd_i, HYPRE_MEMORY_HOST);
+
+     if(hypre_CSRMatrixNumNonzeros(S_offd))
+       hypre_TFree(S_offd_j, HYPRE_MEMORY_HOST);
+
+     if(hypre_CSRMatrixNumNonzeros(A_offd))
+       {
+         hypre_TFree(A_offd_j, HYPRE_MEMORY_HOST);
+         hypre_TFree(A_offd_data, HYPRE_MEMORY_HOST);
+       }
+   }
+
+
+
+
    P = hypre_ParCSRMatrixCreate(comm,
                                 hypre_ParCSRMatrixGlobalNumRows(A),
                                 total_global_cpts,
@@ -1883,6 +1984,7 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
+   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
    /* Compress P, removing coefficients smaller than trunc_factor * Max
       and/or keep yat most <P_max_elmts> per row absolutely maximal coefficients */
@@ -1902,6 +2004,10 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    num_cols_offd_P = 0;
    if (P_offd_size)
    {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("Section4");
+#endif
+
       if (new_num_cols_offd > num_cols_offd)
       {   P_marker_offd = hypre_CTAlloc(HYPRE_Int, new_num_cols_offd, HYPRE_MEMORY_HOST); }
       else
@@ -1965,6 +2071,10 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
       {   P_offd_j[i] = permute[P_offd_j[i]]; }
 
       hypre_TFree(P_marker_offd, HYPRE_MEMORY_HOST);
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
    }
    if (num_procs > 1)
    {
@@ -1996,69 +2106,82 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
       hypre_MatvecCommPkgCreate(P);
    }
 
+   // FIXME: Temporary hack!
+   // Copy P from host to device
+   {
+     // Diag part
+     {
+       hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(P);
+
+       HYPRE_Int * P_diag_i_h = hypre_CSRMatrixI(P_diag);
+       HYPRE_Int * P_diag_j_h = hypre_CSRMatrixJ(P_diag);
+       HYPRE_Real * P_diag_data_h = hypre_CSRMatrixData(P_diag);
+
+       HYPRE_Int num_rows = hypre_CSRMatrixNumRows(P_diag);
+       HYPRE_Int num_nonzeros = hypre_CSRMatrixNumNonzeros(P_diag);
+
+       HYPRE_Int * P_diag_i_dev = hypre_TAlloc(HYPRE_Int, num_rows+1, HYPRE_MEMORY_DEVICE);
+       HYPRE_Int * P_diag_j_dev = hypre_TAlloc(HYPRE_Int, num_nonzeros, HYPRE_MEMORY_DEVICE);
+       HYPRE_Real * P_diag_data_dev = hypre_TAlloc(HYPRE_Real, num_nonzeros, HYPRE_MEMORY_DEVICE);
+
+       hypre_TMemcpy( P_diag_i_dev, P_diag_i_h, HYPRE_Int, num_rows+1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+       hypre_TMemcpy( P_diag_j_dev, P_diag_j_h, HYPRE_Int, num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+       hypre_TMemcpy( P_diag_data_dev, P_diag_data_h, HYPRE_Real, num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
+       hypre_CSRMatrixData(P_diag) = P_diag_data_dev;
+       hypre_CSRMatrixI(P_diag) = P_diag_i_dev;
+       hypre_CSRMatrixJ(P_diag) = P_diag_j_dev;
+
+       hypre_TFree(P_diag_i_h, HYPRE_MEMORY_HOST);
+       hypre_TFree(P_diag_j_h, HYPRE_MEMORY_HOST);
+       hypre_TFree(P_diag_data_h, HYPRE_MEMORY_HOST);
+     } // Diag
+
+     // Offd part
+     {
+       hypre_CSRMatrix *P_offd = hypre_ParCSRMatrixOffd(P);
+
+       HYPRE_Int num_rows = hypre_CSRMatrixNumRows(P_offd);
+       HYPRE_Int num_nonzeros = hypre_CSRMatrixNumNonzeros(P_offd);
+
+       if(num_rows)
+         {
+           HYPRE_Int * P_offd_i_h = hypre_CSRMatrixI(P_offd);
+           HYPRE_Int * P_offd_i_dev = hypre_TAlloc(HYPRE_Int, num_rows+1, HYPRE_MEMORY_DEVICE);
+           hypre_TMemcpy( P_offd_i_dev, P_offd_i_h, HYPRE_Int, num_rows+1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
+           hypre_CSRMatrixI(P_offd) = P_offd_i_dev;
+
+           hypre_TFree(P_offd_i_h, HYPRE_MEMORY_HOST);
+
+           if(num_nonzeros)
+             {
+               HYPRE_Int * P_offd_j_h = hypre_CSRMatrixJ(P_offd);
+               HYPRE_Real * P_offd_data_h = hypre_CSRMatrixData(P_offd);
+
+               HYPRE_Int * P_offd_j_dev = hypre_TAlloc(HYPRE_Int, num_nonzeros, HYPRE_MEMORY_DEVICE);
+               HYPRE_Real * P_offd_data_dev = hypre_TAlloc(HYPRE_Real, num_nonzeros, HYPRE_MEMORY_DEVICE);
+               hypre_TMemcpy( P_offd_j_dev, P_offd_j_h, HYPRE_Int, num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy( P_offd_data_dev, P_offd_data_h, HYPRE_Real, num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
+
+
+               hypre_CSRMatrixData(P_offd) = P_offd_data_dev;
+               hypre_CSRMatrixJ(P_offd) = P_offd_j_dev;
+
+               hypre_TFree(P_offd_j_h, HYPRE_MEMORY_HOST);
+               hypre_TFree(P_offd_data_h, HYPRE_MEMORY_HOST);
+             }
+         }
+     } // Offd
+
+   } // Copy P from host to device
+
    *P_ptr = P;
-
-   /* wall_time = hypre_MPI_Wtime() - wall_time;
-      hypre_printf("TOTAL TIME  %1.2e \n",wall_time); */
-
-   /*-----------------------------------------------------------------------
-    *  Build and return dof_func array for coarse grid.
-    *-----------------------------------------------------------------------*/
-
-   /*-----------------------------------------------------------------------
-    *  Free mapping vector and marker array.
-    *-----------------------------------------------------------------------*/
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MULTIPASS_INTERP] += hypre_MPI_Wtime();
 #endif
 
    return(0);
-}
-
-HYPRE_Int
-hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
-                               HYPRE_Int           *CF_marker,
-                               hypre_ParCSRMatrix  *S,
-                               HYPRE_BigInt        *num_cpts_global,
-                               HYPRE_Int            num_functions,
-                               HYPRE_Int           *dof_func,
-                               HYPRE_Int            debug_flag,
-                               HYPRE_Real           trunc_factor,
-                               HYPRE_Int            P_max_elmts,
-                               HYPRE_Int            weight_option,
-                               hypre_ParCSRMatrix **P_ptr )
-{
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_GpuProfilingPushRange("BuildMultipass");
-#endif
-
-   hypre_assert( hypre_ParCSRMatrixMemoryLocation(A) == hypre_ParCSRMatrixMemoryLocation(S) );
-
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
-
-   HYPRE_Int ierr = 0;
-
-   if (exec == HYPRE_EXEC_HOST)
-   {
-     ierr = hypre_BoomerAMGBuildMultipassHost( A, CF_marker, S, num_cpts_global,
-                                               num_functions, dof_func, debug_flag,
-                                               trunc_factor, P_max_elmts, weight_option,
-                                               P_ptr );
-   }
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   else
-   {
-     ierr = hypre_BoomerAMGBuildMultipassDevice( A, CF_marker, S, num_cpts_global,
-                                                 num_functions, dof_func, debug_flag,
-                                                 trunc_factor, P_max_elmts, weight_option,
-                                                 P_ptr );
-   }
-#endif
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_GpuProfilingPopRange();
-#endif
-
-   return ierr;
 }

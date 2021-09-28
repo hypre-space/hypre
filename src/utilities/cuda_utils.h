@@ -543,13 +543,19 @@ void __syncwarp()
 #endif // #if defined(HYPRE_USING_HIP) || (CUDA_VERSION < 9000)
 
 
-// __any was technically deprecated in CUDA 7 so we don't bother
-// with this overload for CUDA, just for HIP.
+// __any and __ballot were technically deprecated in CUDA 7 so we don't bother
+// with these overloads for CUDA, just for HIP.
 #if defined(HYPRE_USING_HIP)
 static __device__ __forceinline__
 hypre_int __any_sync(unsigned mask, hypre_int predicate)
 {
   return __any(predicate);
+}
+
+static __device__ __forceinline__
+hypre_int __ballot_sync(unsigned mask, hypre_int predicate)
+{
+  return __ballot(predicate);
 }
 #endif
 
