@@ -1158,9 +1158,12 @@ hypre_CudaDataCreate()
    /* SpGeMM */
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
    hypre_CudaDataSpgemmUseCusparse(data) = 1;
+   hypre_CudaDataSpMVUseCusparse(data)   = 1;
 #else
    hypre_CudaDataSpgemmUseCusparse(data) = 0;
 #endif
+
+   hypre_CudaDataSpTransUseCusparse(data) = 0;
 
    hypre_CudaDataSpgemmAlgorithm(data)                = 1;
    /* 1: naive overestimate, 2: naive underestimate, 3: Cohen's algorithm */

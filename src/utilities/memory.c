@@ -883,6 +883,11 @@ hypre_ReAlloc_v2(void *ptr, size_t old_size, size_t new_size, HYPRE_MemoryLocati
       return hypre_MAlloc(new_size, location);
    }
 
+   if (old_size == new_size)
+   {
+      return ptr;
+   }
+
    void *new_ptr = hypre_MAlloc(new_size, location);
    size_t smaller_size = new_size > old_size ? old_size : new_size;
    hypre_Memcpy(new_ptr, ptr, smaller_size, location, location);

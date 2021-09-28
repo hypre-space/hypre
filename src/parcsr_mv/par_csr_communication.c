@@ -998,6 +998,9 @@ hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg )
    //_hypre_TFree(hypre_ParCSRCommPkgTmpData(comm_pkg), hypre_MEMORY_DEVICE);
    //_hypre_TFree(hypre_ParCSRCommPkgBufData(comm_pkg), hypre_MEMORY_DEVICE);
    hypre_TFree(hypre_ParCSRCommPkgWorkSpace(comm_pkg), HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_ParCSRCommPkgSendMapJ(comm_pkg),  HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_ParCSRCommPkgSendMapI(comm_pkg),  HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_ParCSRCommPkgSendMapRowInd(comm_pkg), HYPRE_MEMORY_DEVICE);
 #endif
 
    hypre_TFree(comm_pkg, HYPRE_MEMORY_HOST);

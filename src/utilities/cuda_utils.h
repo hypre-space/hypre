@@ -186,7 +186,10 @@ struct hypre_CudaData
    HYPRE_Int                         spgemm_rownnz_estimate_nsamples;
    float                             spgemm_rownnz_estimate_mult_factor;
    char                              spgemm_hash_type;
-   /* PMIS */
+   /* cusparse */
+   HYPRE_Int                         spmv_use_cusparse;
+   HYPRE_Int                         sptrans_use_cusparse;
+   /* PMIS RNG */
    HYPRE_Int                         use_gpu_rand;
 };
 
@@ -204,6 +207,8 @@ struct hypre_CudaData
 #define hypre_CudaDataStructCommRecvBufferSize(data)       ((data) -> struct_comm_recv_buffer_size)
 #define hypre_CudaDataStructCommSendBufferSize(data)       ((data) -> struct_comm_send_buffer_size)
 #define hypre_CudaDataSpgemmUseCusparse(data)              ((data) -> spgemm_use_cusparse)
+#define hypre_CudaDataSpMVUseCusparse(data)                ((data) -> spmv_use_cusparse)
+#define hypre_CudaDataSpTransUseCusparse(data)             ((data) -> sptrans_use_cusparse)
 #define hypre_CudaDataSpgemmAlgorithm(data)                ((data) -> spgemm_algorithm)
 #define hypre_CudaDataSpgemmRownnzEstimateMethod(data)     ((data) -> spgemm_rownnz_estimate_method)
 #define hypre_CudaDataSpgemmRownnzEstimateNsamples(data)   ((data) -> spgemm_rownnz_estimate_nsamples)

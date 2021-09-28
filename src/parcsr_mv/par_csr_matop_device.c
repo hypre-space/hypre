@@ -601,6 +601,8 @@ hypreCUDAKernel_ConcatDiagAndOffd(HYPRE_Int  nrows,    HYPRE_Int  diag_ncol,
 hypre_CSRMatrix*
 hypre_ConcatDiagAndOffdDevice(hypre_ParCSRMatrix *A)
 {
+   hypre_GpuProfilingPushRange("ConcatDiagAndOffdDevice");
+
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
 
@@ -634,6 +636,8 @@ hypre_ConcatDiagAndOffdDevice(hypre_ParCSRMatrix *A)
                       hypre_CSRMatrixI(B),
                       hypre_CSRMatrixJ(B),
                       hypre_CSRMatrixData(B) );
+
+   hypre_GpuProfilingPopRange();
 
    return B;
 }

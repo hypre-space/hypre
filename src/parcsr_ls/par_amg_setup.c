@@ -8,6 +8,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
 #include "../parcsr_block_mv/par_csr_block_matrix.h"
+#include "_hypre_utilities.hpp"
 
 #define DEBUG 0
 #define PRINT_CF 0
@@ -88,7 +89,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    /* Local variables */
    HYPRE_Int           *CF_marker;
-   hypre_IntArray      *CF_marker_host;
    hypre_IntArray      *CFN_marker = NULL;
    hypre_IntArray      *CF2_marker = NULL;
    hypre_IntArray      *CF3_marker = NULL;
@@ -214,6 +214,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
 #ifdef HYPRE_USING_DSUPERLU
    HYPRE_Int       dslu_threshold = hypre_ParAMGDataDSLUThreshold(amg_data);
+#endif
+
+#if defined(HYPRE_USING_NVTX)
+   char            nvtx_name[1024];
 #endif
 
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -605,16 +609,34 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    if (num_C_points_coarse > 0)
    {
-      k = 0;
-      for (j = 0; j < num_C_points_coarse; j++)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( HYPRE_MEMORY_DEVICE );
+      if (exec == HYPRE_EXEC_DEVICE)
       {
-         row = (HYPRE_Int) (C_points_marker[j] - first_local_row);
-         if ((row >= 0) && (row < local_size))
-         {
-            C_points_local_marker[k++] = row;
-         }
+         HYPRE_Int *new_end =
+            HYPRE_THRUST_CALL( copy_if,
+                               thrust::make_transform_iterator(C_points_marker,                       _1 - first_local_row),
+                               thrust::make_transform_iterator(C_points_marker + num_C_points_coarse, _1 - first_local_row),
+                               C_points_marker,
+                               C_points_local_marker,
+                               in_range<HYPRE_BigInt>(first_local_row, first_local_row + local_size - 1) );
+
+         num_C_points_coarse = new_end - C_points_local_marker;
       }
-      num_C_points_coarse = k;
+      else
+#endif
+      {
+         k = 0;
+         for (j = 0; j < num_C_points_coarse; j++)
+         {
+            row = (HYPRE_Int) (C_points_marker[j] - first_local_row);
+            if ((row >= 0) && (row < local_size))
+            {
+               C_points_local_marker[k++] = row;
+            }
+         }
+         num_C_points_coarse = k;
+      }
    }
 
    if (dof_func_array == NULL)
@@ -839,6 +861,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    while (not_finished_coarsening)
    {
+#if defined(HYPRE_USING_NVTX)
+      hypre_sprintf(nvtx_name, "%s-%d", "AMG Level", level);
+      hypre_GpuProfilingPushRange(nvtx_name);
+#endif
+
       /* only do nodal coarsening on a fixed number of levels */
       if (level >= nodal_levels)
       {
@@ -1024,33 +1051,31 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                first_local_row = hypre_ParCSRMatrixFirstRowIndex(A_array[level]);
             }
 
-            /* copy CF_marker to the host if needed */
-            if (hypre_GetActualMemLocation(hypre_IntArrayMemoryLocation(CF_marker_array[level])) == hypre_MEMORY_DEVICE)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+            HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IntArrayMemoryLocation(CF_marker_array[level]) );
+
+            if (exec == HYPRE_EXEC_DEVICE)
             {
-               CF_marker_host = hypre_IntArrayCloneDeep_v2(CF_marker_array[level], HYPRE_MEMORY_HOST);
+               HYPRE_THRUST_CALL( scatter_if,
+                                  thrust::make_constant_iterator(-3),
+                                  thrust::make_constant_iterator(-3) + num_isolated_F_points,
+                                  thrust::make_transform_iterator(isolated_F_points_marker, _1 - first_local_row),
+                                  isolated_F_points_marker,
+                                  hypre_IntArrayData(CF_marker_array[level]),
+                                  in_range<HYPRE_BigInt>(first_local_row, first_local_row + local_size - 1) );
             }
             else
+#endif
             {
-               CF_marker_host = CF_marker_array[level];
-            }
-
-            for (j = 0; j < num_isolated_F_points; j++)
-            {
-               row = (HYPRE_Int) (isolated_F_points_marker[j] - first_local_row);
-               if ((row >= 0) && (row < local_size))
+               for (j = 0; j < num_isolated_F_points; j++)
                {
-                  hypre_IntArrayData(CF_marker_host)[row] = -3; // Assumes SF_PT == -3
+                  row = (HYPRE_Int) (isolated_F_points_marker[j] - first_local_row);
+                  if ((row >= 0) && (row < local_size))
+                  {
+                     hypre_IntArrayData(CF_marker_array[level])[row] = -3; // Assumes SF_PT == -3
+                  }
                }
             }
-
-            /* copy back to device and destroy host copy */
-            if (hypre_GetActualMemLocation(hypre_IntArrayMemoryLocation(CF_marker_array[level])) == hypre_MEMORY_DEVICE)
-            {
-               hypre_IntArrayCopy(CF_marker_host, CF_marker_array[level]);
-               hypre_IntArrayDestroy(CF_marker_host);
-            }
-
-
          }
 
          /**** Do the appropriate coarsening ****/
@@ -1097,82 +1122,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                         NULL,NULL,CR_use_CG,SCR);
                hypre_ParCSRMatrixDestroy(SCR);
             }
-#if DEBUG
-            else if (coarsen_type == 999)
-            {
-               /* RL_DEBUG: read C/F splitting from files */
-               /* read from file */
-               HYPRE_Int my_id;
-               MPI_Comm comm = hypre_ParCSRMatrixComm(A_array[level]);
-               hypre_MPI_Comm_rank(comm, &my_id);
-               HYPRE_Int first_local_row = hypre_ParCSRMatrixFirstRowIndex(A_array[level]);
-               HYPRE_Int local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level]));
-               char CFfile[256], line[1024];
-               hypre_sprintf(CFfile, "CF_%d.txt", level);
-               hypre_printf("myid %d: level %d, read C/F from file %s, first_row %d, local_size %d\n",
-                             my_id, level, CFfile, first_local_row, local_size);
-               FILE *fp;
-               if ((fp = fopen(CFfile, "r")) == NULL)
-               {
-                  hypre_printf("cannot open file %s\n", CFfile);
-                  exit(0);
-               }
-               HYPRE_Int i;
-               for (i=0; i<first_local_row; i++)
-               {
-                  if (fgets(line, 1024, fp) == NULL)
-                  {
-                     exit(-1);
-                  }
-                  /*HYPRE_Real tmp; fscanf(fp, "%le\n", &tmp);*/
-               }
-
-               /* copy CF_marker to the host if needed */
-               if (hypre_GetActualMemLocation(hypre_IntArrayMemoryLocation(CF_marker_array[level])) == hypre_MEMORY_DEVICE)
-               {
-                  CF_marker_host = hypre_IntArrayCloneDeep_v2(CF_marker_array[level], HYPRE_MEMORY_HOST);
-               }
-               else
-               {
-                  CF_marker_host = CF_marker_array[level];
-               }
-
-               for (i=0; i<local_size; i++)
-               {
-                  HYPRE_Real dj;
-                  HYPRE_Int j;
-                  if (fgets(line, 1024, fp) == NULL)
-                  {
-                     hypre_printf("CF file read error\n");
-                     exit(0);
-                  }
-                  dj = atof(line);
-                  j = (HYPRE_Int) dj;
-                  /* 1: C, 0: F*/
-                  if (j == 1)
-                  {
-                     hypre_IntArrayData(CF_marker_host)[i] = 1;
-                  } else if (j == 0)
-                  {
-                     hypre_IntArrayData(CF_marker_host)[i] = -1;
-                  }
-                  else
-                  {
-                     hypre_printf("CF Error: %d\n", j);
-                     exit(0);
-                  }
-               }
-
-               /* copy back to device and destroy host copy */
-               if (hypre_GetActualMemLocation(hypre_IntArrayMemoryLocation(CF_marker_array[level])) == hypre_MEMORY_DEVICE)
-               {
-                  hypre_IntArrayCopy(CF_marker_host, CF_marker_array[level]);
-                  hypre_IntArrayDestroy(CF_marker_host);
-               }
-
-               fclose(fp);
-            }
-#endif
             else if (coarsen_type)
             {
                hypre_BoomerAMGCoarsenRuge(S, A_array[level], measure_type, coarsen_type,
@@ -1374,24 +1323,31 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          /**************************************************/
          /*********Set the fixed index to CF_marker*********/
          /* copy CF_marker to the host if needed */
-         if (hypre_GetActualMemLocation(hypre_IntArrayMemoryLocation(CF_marker_array[level])) == hypre_MEMORY_DEVICE)
-         {
-            CF_marker_host = hypre_IntArrayCloneDeep_v2(CF_marker_array[level], HYPRE_MEMORY_HOST);
-         }
-         else
-         {
-            CF_marker_host = CF_marker_array[level];
-         }
-
          /* Set fine points (F_PT) given by the user */
-         if ((num_F_points > 0) && (level == 0))
+         if ( (num_F_points > 0) && (level == 0) )
          {
-            for (j = 0; j < num_F_points; j++)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+            HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IntArrayMemoryLocation(CF_marker_array[level]) );
+            if (exec == HYPRE_EXEC_DEVICE)
             {
-               row = (HYPRE_Int) (F_points_marker[j] - first_local_row);
-               if ((row >= 0) && (row < local_size))
+               HYPRE_THRUST_CALL( scatter_if,
+                                  thrust::make_constant_iterator(-1),
+                                  thrust::make_constant_iterator(-1) + num_F_points,
+                                  thrust::make_transform_iterator(F_points_marker, _1 - first_local_row),
+                                  F_points_marker,
+                                  hypre_IntArrayData(CF_marker_array[level]),
+                                  in_range<HYPRE_BigInt>(first_local_row, first_local_row + local_size - 1) );
+            }
+            else
+#endif
+            {
+               for (j = 0; j < num_F_points; j++)
                {
-                  hypre_IntArrayData(CF_marker_host)[row] = -1; // Assumes F_PT == -1
+                  row = (HYPRE_Int) (F_points_marker[j] - first_local_row);
+                  if ((row >= 0) && (row < local_size))
+                  {
+                     hypre_IntArrayData(CF_marker_array[level])[row] = -1; // Assumes F_PT == -1
+                  }
                }
             }
          }
@@ -1405,42 +1361,79 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
             else if (level < hypre_ParAMGDataCPointsLevel(amg_data))
             {
-               for (j = 0; j < num_C_points_coarse; j++)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+               HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IntArrayMemoryLocation(CF_marker_array[level]) );
+               if (exec == HYPRE_EXEC_DEVICE)
                {
-                  hypre_IntArrayData(CF_marker_host)[C_points_local_marker[j]] = 2;
-               }
+                  HYPRE_THRUST_CALL( scatter,
+                                     thrust::make_constant_iterator(2),
+                                     thrust::make_constant_iterator(2) + num_C_points_coarse,
+                                     C_points_local_marker,
+                                     hypre_IntArrayData(CF_marker_array[level]) );
 
-               local_coarse_size = 0;
-               k = 0;
-               for (j = 0; j < local_num_vars; j ++)
+                  if ( level + 1 < hypre_ParAMGDataCPointsLevel(amg_data) )
+                  {
+
+                     HYPRE_Int *tmp = hypre_TAlloc(HYPRE_Int, local_num_vars, HYPRE_MEMORY_DEVICE);
+                     HYPRE_THRUST_CALL( exclusive_scan,
+                                        thrust::make_transform_iterator(hypre_IntArrayData(CF_marker_array[level]),                  in_range<HYPRE_Int>(1, 2)),
+                                        thrust::make_transform_iterator(hypre_IntArrayData(CF_marker_array[level]) + local_num_vars, in_range<HYPRE_Int>(1, 2)),
+                                        tmp,
+                                        HYPRE_Int(0) );
+
+                     /* RL: total local_coarse_size is not computed. I don't think it's needed */
+                     HYPRE_THRUST_CALL( copy_if,
+                                        tmp,
+                                        tmp + local_num_vars,
+                                        hypre_IntArrayData(CF_marker_array[level]),
+                                        C_points_local_marker,
+                                        equal<HYPRE_Int>(2) );
+
+                     hypre_TFree(tmp, HYPRE_MEMORY_DEVICE);
+                  }
+
+                  HYPRE_THRUST_CALL( replace,
+                                     hypre_IntArrayData(CF_marker_array[level]),
+                                     hypre_IntArrayData(CF_marker_array[level]) + local_num_vars,
+                                     2,
+                                     1 );
+               }
+               else
+#endif
                {
-                  if (hypre_IntArrayData(CF_marker_host)[j] == 1)
+                  for (j = 0; j < num_C_points_coarse; j++)
                   {
-                     local_coarse_size++;
+                     hypre_IntArrayData(CF_marker_array[level])[C_points_local_marker[j]] = 2;
                   }
-                  else if (hypre_IntArrayData(CF_marker_host)[j] == 2)
+
+                  local_coarse_size = 0;
+                  k = 0;
+                  for (j = 0; j < local_num_vars; j ++)
                   {
-                     if ((level + 1) < hypre_ParAMGDataCPointsLevel(amg_data))
+                     if (hypre_IntArrayData(CF_marker_array[level])[j] == 1)
                      {
-                        C_points_local_marker[k++] = local_coarse_size;
+                        local_coarse_size++;
                      }
-                     local_coarse_size++;
-                     hypre_IntArrayData(CF_marker_host)[j] = 1;
+                     else if (hypre_IntArrayData(CF_marker_array[level])[j] == 2)
+                     {
+                        if ((level + 1) < hypre_ParAMGDataCPointsLevel(amg_data))
+                        {
+                           C_points_local_marker[k++] = local_coarse_size;
+                        }
+                        local_coarse_size++;
+                        hypre_IntArrayData(CF_marker_array[level])[j] = 1;
+                     }
                   }
+                  // RL: so k is not used after this? update num_C_points_coarse?
                }
             }
-         }
-
-         /* copy back to device and destroy host copy */
-         if (hypre_GetActualMemLocation(hypre_IntArrayMemoryLocation(CF_marker_array[level])) == hypre_MEMORY_DEVICE)
-         {
-            hypre_IntArrayCopy(CF_marker_host, CF_marker_array[level]);
-            hypre_IntArrayDestroy(CF_marker_host);
          }
 
          /*****xxxxxxxxxxxxx changes for min_coarse_size */
          /* here we will determine the coarse grid size to be able to
             determine if it is not smaller than requested minimal size */
+
+         hypre_GpuProfilingPushRange("CheckMinSize");
 
          if (level >= agg_num_levels)
          {
@@ -1456,8 +1449,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                           num_functions, dof_func_array[level], CF_marker_array[level],
                                           &coarse_dof_func, &coarse_pnts_global);
             }
-            if (my_id == (num_procs -1)) coarse_size = coarse_pnts_global[1];
+            if (my_id == num_procs - 1)
+            {
+               coarse_size = coarse_pnts_global[1];
+            }
             hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
+
             /* if no coarse-grid, stop coarsening, and set the
              * coarsest solve to be a single sweep of default smoother or smoother set by user */
             if ((coarse_size == 0) || (coarse_size == fine_size))
@@ -1522,6 +1519,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                break;
             }
          }
+
+         hypre_GpuProfilingPopRange();
 
          /*****xxxxxxxxxxxxx changes for min_coarse_size  end */
          HYPRE_ANNOTATE_REGION_END("%s", "Coarsening");
@@ -2843,7 +2842,19 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             not_finished_coarsening = 0;
          }
       }
+
+#if defined(HYPRE_USING_NVTX)
+      if (not_finished_coarsening)
+      {
+         hypre_GpuProfilingPopRange();
+      }
+#endif
    }  /* end of coarsening loop: while (not_finished_coarsening) */
+
+#if defined(HYPRE_USING_NVTX)
+   hypre_GpuProfilingPopRange();
+#endif
+
    HYPRE_ANNOTATE_REGION_BEGIN("%s", "Coarse solve");
 
    /* free memory */
