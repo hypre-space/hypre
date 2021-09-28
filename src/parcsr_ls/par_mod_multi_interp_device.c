@@ -85,7 +85,7 @@ __global__ void hypreCUDAKernel_populate_big_P_offd_j( HYPRE_Int start, HYPRE_In
 
 HYPRE_Int
 hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
-                                        HYPRE_Int           *CF_marker_host,
+                                        HYPRE_Int           *CF_marker,
                                         hypre_ParCSRMatrix  *S,
                                         HYPRE_BigInt        *num_cpts_global,
                                         HYPRE_Real           trunc_factor,
@@ -148,7 +148,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int       *pass_marker;
    HYPRE_Int       *pass_marker_offd = NULL;
    HYPRE_Int       *pass_order;
-   HYPRE_Int       *CF_marker;
 
    HYPRE_Int        i, j;
    HYPRE_Int        num_passes, p, remaining;
@@ -195,11 +194,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    points_left = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
    P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
    P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
-
-   // Copy CF_marker to dev
-   //FIXME: Assuming this is on the host, we should do something better
-   CF_marker = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy( CF_marker, CF_marker_host, HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
    /* Fpts; number of F pts */
    HYPRE_Int *points_end = HYPRE_THRUST_CALL( copy_if,
@@ -696,10 +690,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                       CF_marker + n_fine,
                       equal<HYPRE_Int>(-3),
                       static_cast<HYPRE_Int>(-1) );
-
-   // FIXME: We're assuming we need to hand CF_marker back to the host
-   hypre_TMemcpy( CF_marker_host, CF_marker, HYPRE_Int, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(CF_marker, HYPRE_MEMORY_DEVICE);
 
    *P_ptr = P;
 
