@@ -901,24 +901,11 @@ struct equal : public thrust::unary_function<T,bool>
    }
 };
 
-<<<<<<< HEAD
 struct print_functor
 {
    __host__ __device__ void operator()(HYPRE_Real val)
    {
       printf("%f\n", val);
-=======
-template<typename T>
-struct not_equal : public thrust::unary_function<T,bool>
-{
-   T val;
-
-   not_equal(T val_) { val = val_; }
-
-   __host__ __device__ bool operator()(const T &x)
-   {
-      return (x != val);
->>>>>>> 542619107bb84c7d2ca07841db0359603af9bcb0
    }
 };
 
