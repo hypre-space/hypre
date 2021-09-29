@@ -1228,7 +1228,7 @@ void hypre_modmp_init_fine_to_coarse( HYPRE_Int  n_fine,
    // n_fine == pass_marker.size()
    // Host code this is replacing:
    // n_cpts = 0;
-   // for (int i=0; i < n_fine; i++)
+   // for (HYPRE_Int i=0; i < n_fine; i++)
    //  {
    //    if (pass_marker[i] == color)
    //      fine_to_coarse[i] = n_cpts++;
