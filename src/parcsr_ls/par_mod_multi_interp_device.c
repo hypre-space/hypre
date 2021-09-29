@@ -55,7 +55,7 @@ struct globalC_functor : public thrust::unary_function<HYPRE_Int, HYPRE_BigInt>
    __host__ __device__
    HYPRE_BigInt operator()(const HYPRE_Int x) const
    {
-      return (x + C_first);
+      return ( (HYPRE_BigInt) x + C_first );
    }
 };
 
@@ -839,8 +839,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
       hypre_assert(num_cols_offd_P == col_map_end - col_map_offd_P_dev);
 
       //FIXME: Clean this up when we don't need the host pointer anymore
-      hypre_TMemcpy(col_map_offd_P, col_map_offd_P_dev, HYPRE_Int, num_cols_offd_P,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(col_map_offd_P, col_map_offd_P_dev, HYPRE_BigInt, num_cols_offd_P, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
       hypre_TFree(big_convert_offd, HYPRE_MEMORY_DEVICE);
       hypre_TFree(big_buf_data,     HYPRE_MEMORY_DEVICE);
@@ -1088,8 +1087,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
       hypre_assert(num_cols_offd_Q == col_map_end - col_map_offd_Q_dev);
 
       //FIXME: PB: It seems like we're required to have a host version of this??
-      hypre_TMemcpy(col_map_offd_Q, col_map_offd_Q_dev, HYPRE_Int, num_cols_offd_Q,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(col_map_offd_Q, col_map_offd_Q_dev, HYPRE_BigInt, num_cols_offd_Q, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
       hypre_TFree(big_convert_offd, HYPRE_MEMORY_DEVICE );
       hypre_TFree(big_buf_data, HYPRE_MEMORY_DEVICE);
