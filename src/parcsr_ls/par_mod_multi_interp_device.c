@@ -759,7 +759,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
 
    HYPRE_Int       *fine_to_coarse;
    HYPRE_Int       *fine_to_coarse_offd = NULL;
-   HYPRE_BigInt    *f_pts_starts = NULL;
+   HYPRE_BigInt     f_pts_starts[2];
    HYPRE_Int        my_id, num_procs;
    HYPRE_BigInt     total_global_fpts;
    HYPRE_BigInt     total_global_cpts;
@@ -773,8 +773,6 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    fine_to_coarse = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
 
    hypre_modmp_init_fine_to_coarse(n_fine, pass_marker, color, fine_to_coarse);
-
-   f_pts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
 
    if (num_procs > 1)
    {
@@ -1009,7 +1007,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
 
    HYPRE_Int       *fine_to_coarse;
    HYPRE_Int       *fine_to_coarse_offd = NULL;
-   HYPRE_BigInt    *f_pts_starts = NULL;
+   HYPRE_BigInt     f_pts_starts[2];
    HYPRE_Int        my_id, num_procs;
    HYPRE_BigInt     total_global_fpts;
    HYPRE_BigInt     total_global_cpts;
@@ -1025,13 +1023,11 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
 
    hypre_modmp_init_fine_to_coarse(n_fine, pass_marker, color, fine_to_coarse);
 
-   f_pts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-
    if (num_procs > 1)
    {
       HYPRE_BigInt big_Fpts = num_points;
 
-      hypre_MPI_Scan(&big_Fpts, f_pts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+      hypre_MPI_Scan(&big_Fpts, f_pts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
 
       f_pts_starts[0] = f_pts_starts[1] - big_Fpts;
 

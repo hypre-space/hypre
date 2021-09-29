@@ -813,6 +813,7 @@ hypre_GenerateMultipassPi( hypre_ParCSRMatrix  *A,
    hypre_TFree(big_convert, HYPRE_MEMORY_HOST);
    hypre_TFree(big_convert_offd, HYPRE_MEMORY_HOST);
    hypre_TFree(big_buf_data, HYPRE_MEMORY_HOST);
+   hypre_TFree(f_pts_starts, HYPRE_MEMORY_HOST);
 
    hypre_MatvecCommPkgCreate(P);
    *P_ptr = P;
@@ -1252,6 +1253,7 @@ hypre_GenerateMultiPi( hypre_ParCSRMatrix  *A,
    //hypre_TFree(row_sums, HYPRE_MEMORY_HOST);
    hypre_TFree(row_sums_C, HYPRE_MEMORY_HOST);
    hypre_TFree(w_row_sum, HYPRE_MEMORY_HOST);
+   hypre_TFree(f_pts_starts, HYPRE_MEMORY_HOST);
 
    *Pi_ptr = Pi;
 
