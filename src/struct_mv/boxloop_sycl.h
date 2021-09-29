@@ -57,6 +57,7 @@ BoxLoopforall( LOOP_BODY loop_body,
    }
    else if (exec_policy == HYPRE_EXEC_DEVICE)
    {
+      /* WM: question - is it better in sycl to launch parallel_for with blocks in this way as we do for cuda? */
       const sycl::range<1> bDim = hypre_GetDefaultCUDABlockDimension();
       const sycl::range<1> gDim = hypre_GetDefaultCUDAGridDimension(length, "thread", bDim);
 
@@ -123,7 +124,7 @@ BoxLoopforall( LOOP_BODY loop_body,
 /* WM: todo - double check that item.get_local_id(0) is actually what you want below */
 #define hypre_newBoxLoopDeclare(box)                     \
    hypre_Index local_idx;                                \
-   size_t idx_local = item.get_local_id(0);              \
+   HYPRE_Int idx_local = (HYPRE_Int) idx;              \
    hypre_IndexD(local_idx, 0)  = idx_local % box.lsize0; \
    idx_local = idx_local / box.lsize0;                   \
    hypre_IndexD(local_idx, 1)  = idx_local % box.lsize1; \
@@ -144,61 +145,22 @@ BoxLoopforall( LOOP_BODY loop_body,
 
 
 /* BoxLoop 1 */
-/* #define hypre_newBoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1, i1)                           \ */
-/* {                                                                                                     \ */
-/*    hypre_newBoxLoopInit(ndim, loop_size);                                                             \ */
-/*    hypre_BoxLoopDataDeclareK(1, ndim, loop_size, dbox1, start1, stride1);                             \ */
-/*    hypre_printf("about to call BoxLoopfoall\n");                                                      \ */
-/*    BoxLoopforall( [=] (sycl::nd_item<1> item)                                                         \ */
-/*    {                                                                                                  \ */
-/*       hypre_newBoxLoopDeclare(databox1);                                                              \ */
-/*       hypre_BoxLoopIncK(1, databox1, i1); */
-
-/* #define hypre_newBoxLoop1End(i1)                                                                      \ */
-/*    }, hypre__tot);                                                                                    \ */
-/* } */
-
-
-
-
-
-
-/* BoxLoop 1 */
-/* without the extra function call to BoxLoopforall */
 #define hypre_newBoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1, i1)                           \
 {                                                                                                     \
    hypre_newBoxLoopInit(ndim, loop_size);                                                             \
    hypre_BoxLoopDataDeclareK(1, ndim, loop_size, dbox1, start1, stride1);                             \
-   const sycl::range<1> bDim = hypre_GetDefaultCUDABlockDimension();                                  \
-   const sycl::range<1> gDim = hypre_GetDefaultCUDAGridDimension(hypre__tot, "thread", bDim);         \
-   hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh)                         \
+   BoxLoopforall( [=] (sycl::nd_item<1> item)                                                         \
    {                                                                                                  \
-      cgh.parallel_for(sycl::nd_range<1>(gDim*bDim, bDim), [=] (sycl::nd_item<1> item)                \
+      size_t idx = item.get_global_linear_id();                                                       \
+      if (idx < hypre__tot)                                                                           \
       {                                                                                               \
          hypre_newBoxLoopDeclare(databox1);                                                           \
          hypre_BoxLoopIncK(1, databox1, i1);
 
 #define hypre_newBoxLoop1End(i1)                                                                      \
-      });                                                                                             \
-   }).wait_and_throw();                                                                               \
+      }                                                                                               \
+   }, hypre__tot);                                                                                    \
 }
-
-
-
-
-
-#define my_hypre_BoxLoop1Begin      hypre_newBoxLoop1Begin
-#define my_hypre_BoxLoop1End        hypre_newBoxLoop1End
-
-
-
-
-
-
-
-
-
-
 
 
 

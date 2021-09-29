@@ -40,7 +40,8 @@ F77_COMPILE_FLAGS = \
 MPILIBFLAGS = ${MPILIBDIRS} ${MPILIBS} ${MPIFLAGS}
 LAPACKLIBFLAGS = ${LAPACKLIBDIRS} ${LAPACKLIBS}
 BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
-LIBFLAGS = ${LDFLAGS} ${LIBS}
+# WM: had to add the absolute path to libHYPRE.a for successful compilation on frank
+LIBFLAGS = ${LDFLAGS} ${LIBS} ${HYPRE_BUILD_DIR}/lib/libHYPRE.a
 
 ifeq ($(notdir $(firstword ${LINK_CC})), nvcc)
    XLINK = -Xlinker=-rpath,${HYPRE_BUILD_DIR}/lib

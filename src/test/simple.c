@@ -15,7 +15,7 @@ HYPRE_Int AddValuesVector( hypre_StructGrid  *gridvector,
 
 
 HYPRE_Int
-my_hypre_StructVectorSetConstantValues( hypre_StructVector *vector,
+cpu_hypre_StructVectorSetConstantValues( hypre_StructVector *vector,
                                      HYPRE_Complex       values )
 {
    hypre_Box          *v_data_box;
@@ -49,12 +49,12 @@ my_hypre_StructVectorSetConstantValues( hypre_StructVector *vector,
       hypre_BoxGetSize(box, loop_size);
 
 #define DEVICE_VAR is_device_ptr(vp)
-      hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
+      zypre_newBoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                           v_data_box, start, unit_stride, vi);
       {
          vp[vi] = values;
       }
-      hypre_BoxLoop1End(vi);
+      zypre_newBoxLoop1End(vi);
 #undef DEVICE_VAR
    }
 
@@ -96,7 +96,6 @@ my_hypre_StructAxpy( HYPRE_Complex       alpha,
 
       hypre_BoxGetSize(box, loop_size);
 
-/* WM: what is the DEVICE_VAR thing? */
 #define DEVICE_VAR is_device_ptr(yp,xp)
       /* WM: todo */
       /* my_hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size, */
@@ -183,11 +182,11 @@ main( hypre_int argc,
    HYPRE_StructVector  x;
    HYPRE_Int           num_ghost[6]   = {0, 0, 0, 0, 0, 0};
 
-   dim = 2;
+   dim = 3;
    sym  = 1;
    nx = 10;
    ny = 10;
-   nz = 1;
+   nz = 10;
    bx = 1;
    by = 1;
    bz = 1;
@@ -398,13 +397,19 @@ main( hypre_int argc,
    AddValuesVector(grid,x,periodic,1.0);
    HYPRE_StructVectorAssemble(x);
 
+   hypre_StructVector *y = hypre_StructVectorClone(x);
+   hypre_StructVectorPrint("before", x, 1);
 
    /* call set const */
-   my_hypre_StructVectorSetConstantValues(x, 5.0);
+   cpu_hypre_StructVectorSetConstantValues(y, 5.0);
    hypre_printf("my_hypre_StructVectorSetConstantValues() success!\n");
+
+   hypre_StructVectorPrint("after_cpu", y, 1);
 
    hypre_StructVectorSetConstantValues(x, 5.0);
    hypre_printf("hypre_StructVectorSetConstantValues() success!\n");
+
+   hypre_StructVectorPrint("after_gpu", x, 1);
 
    /* call axpy */
    /* my_hypre_StructAxpy(1.0, x, b); */
