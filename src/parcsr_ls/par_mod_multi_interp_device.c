@@ -57,7 +57,7 @@ struct globalC_functor : public thrust::unary_function<HYPRE_Int, HYPRE_BigInt>
    }
 };
 
-void hypre_modmp_init_fine_to_coarse( HYPRE_Int n_fine, HYPRE_Int *pass_marker, HYPRE_Int color, HYPRE_Int *fine_to_coarse, HYPRE_Int &n_cpts );
+void hypre_modmp_init_fine_to_coarse( HYPRE_Int n_fine, HYPRE_Int *pass_marker, HYPRE_Int color, HYPRE_Int *fine_to_coarse );
 
 void hypre_modmp_compute_num_cols_offd_fine_to_coarse( HYPRE_Int * pass_marker_offd, HYPRE_Int color, HYPRE_Int num_cols_offd_A, HYPRE_Int & num_cols_offd, HYPRE_Int ** fine_to_coarse_offd );
 
@@ -260,6 +260,8 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       {
          int_buf_data = hypre_CTAlloc(HYPRE_Int, num_elem_send, HYPRE_MEMORY_DEVICE);
       }
+
+      hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
 
       HYPRE_THRUST_CALL( gather,
                          hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
@@ -739,7 +741,6 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    HYPRE_BigInt    *col_map_offd_P_dev = NULL;
    HYPRE_Int        num_cols_offd_P;
    HYPRE_Int        nnz_diag, nnz_offd;
-   HYPRE_Int        n_cpts;
 
    hypre_ParCSRMatrix *P;
    hypre_CSRMatrix    *P_diag;
@@ -768,7 +769,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
 
    fine_to_coarse = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
 
-   hypre_modmp_init_fine_to_coarse( n_fine, pass_marker, color, fine_to_coarse, n_cpts );
+   hypre_modmp_init_fine_to_coarse(n_fine, pass_marker, color, fine_to_coarse);
 
    f_pts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
 
@@ -990,7 +991,6 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Real         *Pi_offd_data;
 
    HYPRE_Int           nnz_diag, nnz_offd;
-   HYPRE_Int           n_cpts;
 
    hypre_ParCSRMatrix *Q;
    hypre_CSRMatrix    *Q_diag;
@@ -1020,7 +1020,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
 
    fine_to_coarse = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
 
-   hypre_modmp_init_fine_to_coarse( n_fine, pass_marker, color, fine_to_coarse, n_cpts );
+   hypre_modmp_init_fine_to_coarse(n_fine, pass_marker, color, fine_to_coarse);
 
    f_pts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
 
@@ -1220,29 +1220,29 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
 void hypre_modmp_init_fine_to_coarse( HYPRE_Int  n_fine,
                                       HYPRE_Int *pass_marker,
                                       HYPRE_Int  color,
-                                      HYPRE_Int *fine_to_coarse,
-                                      HYPRE_Int &n_cpts )
+                                      HYPRE_Int *fine_to_coarse )
 {
-  // Host code this is replacing:
-  // n_cpts = 0;
-  // for (int i=0; i < pass_marker.size(); i++)
-  //  {
-  //    if (pass_marker[i] == color)
-  //      fine_to_coarse[i] = n_cpts++;
-  //    else
-  //      fine_to_coarse[i] = -1;
-  //  }
+   // n_fine == pass_marker.size()
+   // Host code this is replacing:
+   // n_cpts = 0;
+   // for (int i=0; i < n_fine; i++)
+   //  {
+   //    if (pass_marker[i] == color)
+   //      fine_to_coarse[i] = n_cpts++;
+   //    else
+   //      fine_to_coarse[i] = -1;
+   //  }
 
-  // [PB]: It is substantially faster (I measured) to just copy the end of the fine_to_coarse_dev
-  // array to the host get the value of n_cpts than to do a thrust::count_if on pass_marker
-  HYPRE_THRUST_CALL( exclusive_scan,
-                     thrust::make_transform_iterator(pass_marker,          equal<HYPRE_Int>(color)),
-                     thrust::make_transform_iterator(pass_marker + n_fine, equal<HYPRE_Int>(color)),
-                     fine_to_coarse,
-                     HYPRE_Int(0) );
+   if (n_fine == 0)
+   {
+      return;
+   }
 
-  HYPRE_Int *n_cpts_dev = &fine_to_coarse[n_fine - 1];
-  hypre_TMemcpy(&n_cpts, n_cpts_dev, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   HYPRE_THRUST_CALL( exclusive_scan,
+                      thrust::make_transform_iterator(pass_marker,          equal<HYPRE_Int>(color)),
+                      thrust::make_transform_iterator(pass_marker + n_fine, equal<HYPRE_Int>(color)),
+                      fine_to_coarse,
+                      HYPRE_Int(0) );
 
   HYPRE_THRUST_CALL( replace_if,
                      fine_to_coarse,

@@ -805,7 +805,7 @@ hypre_GenerateMultipassPi( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixMemoryLocation(P_diag) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixMemoryLocation(P_offd) = HYPRE_MEMORY_HOST;
 
-/* free stuff */
+   /* free stuff */
    hypre_TFree(fine_to_coarse, HYPRE_MEMORY_HOST);
    hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_HOST);
    //hypre_TFree(row_sums, HYPRE_MEMORY_HOST);
