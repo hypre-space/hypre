@@ -824,7 +824,7 @@ HYPRE_Int
 hypre_GenerateMultiPi( hypre_ParCSRMatrix  *A,
                        hypre_ParCSRMatrix  *S,
                        hypre_ParCSRMatrix  *P,
-                       HYPRE_Int           *c_pts_starts,
+                       HYPRE_BigInt        *c_pts_starts,
                        HYPRE_Int           *pass_order, /* array containing row numbers of rows in A and S to be considered */
                        HYPRE_Int           *pass_marker,
                        HYPRE_Int           *pass_marker_offd,

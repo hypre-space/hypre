@@ -943,7 +943,7 @@ HYPRE_Int
 hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
                              hypre_ParCSRMatrix  *S,
                              hypre_ParCSRMatrix  *P,
-                             HYPRE_Int           *c_pts_starts,
+                             HYPRE_BigInt        *c_pts_starts,
                              HYPRE_Int           *pass_order,
                              HYPRE_Int           *pass_marker,
                              HYPRE_Int           *pass_marker_offd,
@@ -1853,7 +1853,10 @@ void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( HYPRE_Int      num_points,
 
    HYPRE_Int i1 = read_only_load(&pass_order[row_i]);
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p_diag_A, q_diag_A, p_diag_P, q_diag_P;
+   HYPRE_Int p_diag_A, q_diag_A, p_diag_P;
+#ifdef HYPRE_DEBUG
+   HYPRE_Int q_diag_P;
+#endif
    HYPRE_Int k;
    HYPRE_Complex w_row_sum_i = 0.0;
    HYPRE_Int dof_func_i1 = -1;
@@ -1868,6 +1871,7 @@ void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( HYPRE_Int      num_points,
    }
 
    // S_diag
+#ifdef HYPRE_DEBUG
    if (lane < 2)
    {
       p_diag_A = read_only_load(A_diag_i + i1 + lane);
@@ -1877,6 +1881,19 @@ void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( HYPRE_Int      num_points,
    p_diag_A = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag_A, 0);
    q_diag_P = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag_P, 1);
    p_diag_P = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag_P, 0);
+#else
+   if (lane < 2)
+   {
+      p_diag_A = read_only_load(A_diag_i + i1 + lane);
+   }
+   q_diag_A = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag_A, 1);
+   p_diag_A = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag_A, 0);
+   if (lane == 0)
+   {
+      p_diag_P = read_only_load(Q_diag_i + row_i);
+   }
+   p_diag_P = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag_P, 0);
+#endif
 
    k = p_diag_P;
    for (HYPRE_Int j = p_diag_A + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_diag_A); j += HYPRE_WARP_SIZE)
@@ -1917,7 +1934,9 @@ void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( HYPRE_Int      num_points,
       k += sum;
    }
 
+#ifdef HYPRE_DEBUG
    hypre_device_assert(k == q_diag_P);
+#endif
 
    // S_offd
    HYPRE_Int p_offd_A, q_offd_A, p_offd_P, q_offd_P;
