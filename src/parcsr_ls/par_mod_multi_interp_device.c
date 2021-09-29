@@ -8,6 +8,8 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
 template<typename T>
 struct tuple_plus : public thrust::binary_function<thrust::tuple<T,T>, thrust::tuple<T,T>, thrust::tuple<T,T> >
 {
@@ -236,7 +238,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    pass_starts[1] = cnt;
 
    /* communicate dof_func */
-   if (num_functions > 1)
+   if (num_procs > 1 && num_functions > 1)
    {
       int_buf_data = hypre_TAlloc(HYPRE_Int, num_elem_send, HYPRE_MEMORY_DEVICE);
 
@@ -255,6 +257,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    }
 
    /* communicate pass_marker */
+   if (num_procs > 1)
    {
       if (!int_buf_data)
       {
@@ -1259,22 +1262,22 @@ hypre_modmp_compute_num_cols_offd_fine_to_coarse( HYPRE_Int  *pass_marker_offd,
                                                   HYPRE_Int  &num_cols_offd,
                                                   HYPRE_Int **fine_to_coarse_offd_ptr )
 {
-  // We allocate with a "+1" because the host version of this code incremented the counter
-  // even on the last match, so we create an extra entry the exclusive_scan will reflect this
-  // and we can read off the last entry and only do 1 kernel call and 1 memcpy
-  // RL: this trick requires pass_marker_offd has 1 more space allocated too
-  HYPRE_Int *fine_to_coarse_offd = hypre_TAlloc(HYPRE_Int, num_cols_offd_A + 1, HYPRE_MEMORY_DEVICE);
+   // We allocate with a "+1" because the host version of this code incremented the counter
+   // even on the last match, so we create an extra entry the exclusive_scan will reflect this
+   // and we can read off the last entry and only do 1 kernel call and 1 memcpy
+   // RL: this trick requires pass_marker_offd has 1 more space allocated too
+   HYPRE_Int *fine_to_coarse_offd = hypre_TAlloc(HYPRE_Int, num_cols_offd_A + 1, HYPRE_MEMORY_DEVICE);
 
-  HYPRE_THRUST_CALL( exclusive_scan,
-                     thrust::make_transform_iterator(pass_marker_offd,                       equal<HYPRE_Int>(color)),
-                     thrust::make_transform_iterator(pass_marker_offd + num_cols_offd_A + 1, equal<HYPRE_Int>(color)),
-                     fine_to_coarse_offd,
-                     HYPRE_Int(0) );
+   HYPRE_THRUST_CALL( exclusive_scan,
+                      thrust::make_transform_iterator(pass_marker_offd,                       equal<HYPRE_Int>(color)),
+                      thrust::make_transform_iterator(pass_marker_offd + num_cols_offd_A + 1, equal<HYPRE_Int>(color)),
+                      fine_to_coarse_offd,
+                      HYPRE_Int(0) );
 
-  hypre_TMemcpy( &num_cols_offd, fine_to_coarse_offd + num_cols_offd_A, HYPRE_Int, 1,
-                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy( &num_cols_offd, fine_to_coarse_offd + num_cols_offd_A, HYPRE_Int, 1,
+                  HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
-  *fine_to_coarse_offd_ptr = fine_to_coarse_offd;
+   *fine_to_coarse_offd_ptr = fine_to_coarse_offd;
 }
 
 __global__
@@ -1484,7 +1487,7 @@ void hypreCUDAKernel_generate_Pdiag_i_Poffd_i( HYPRE_Int  num_points,
                                                HYPRE_Int *P_diag_i,
                                                HYPRE_Int *P_offd_i )
 {
-  /*
+   /*
     nnz_diag = 0;
     nnz_offd = 0;
     for (i=0; i < num_points; i++)
@@ -1939,8 +1942,12 @@ void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( HYPRE_Int      num_points,
 #endif
 
    // S_offd
-   HYPRE_Int p_offd_A, q_offd_A, p_offd_P, q_offd_P;
+   HYPRE_Int p_offd_A, q_offd_A, p_offd_P;
+#ifdef HYPRE_DEBUG
+   HYPRE_Int q_offd_P;
+#endif
 
+#ifdef HYPRE_DEBUG
    if (lane < 2)
    {
       p_offd_A = read_only_load(A_offd_i + i1 + lane);
@@ -1950,6 +1957,19 @@ void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( HYPRE_Int      num_points,
    p_offd_A = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd_A, 0);
    q_offd_P = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd_P, 1);
    p_offd_P = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd_P, 0);
+#else
+   if (lane < 2)
+   {
+      p_offd_A = read_only_load(A_offd_i + i1 + lane);
+   }
+   q_offd_A = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd_A, 1);
+   p_offd_A = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd_A, 0);
+   if (lane == 0)
+   {
+      p_offd_P = read_only_load(Q_offd_i + row_i);
+   }
+   p_offd_P = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd_P, 0);
+#endif
 
    k = p_offd_P;
    for (HYPRE_Int j = p_offd_A + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_offd_A); j += HYPRE_WARP_SIZE)
@@ -1990,7 +2010,9 @@ void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( HYPRE_Int      num_points,
       k += sum;
    }
 
+#ifdef HYPRE_DEBUG
    hypre_device_assert(k == q_offd_P);
+#endif
 
    w_row_sum_i = warp_reduce_sum(w_row_sum_i);
 
@@ -2136,3 +2158,5 @@ void hypreCUDAKernel_populate_big_P_offd_j( HYPRE_Int     start,
       }
    }
 }
+
+#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)

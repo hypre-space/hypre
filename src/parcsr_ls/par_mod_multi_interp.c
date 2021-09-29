@@ -167,12 +167,12 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
       hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
    }
 
-   if (num_cols_offd_A)
+   if (num_procs > 1)
    {
-      pass_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd_A, HYPRE_MEMORY_HOST);
+      pass_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST);
       index = 0;
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-      int_buf_data = hypre_CTAlloc(HYPRE_Int,  hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
+      int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
       for (i = 0; i < num_sends; i++)
       {
          startc = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
@@ -182,7 +182,7 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
          }
       }
 
-      comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, pass_marker_offd);
+      comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data, pass_marker_offd);
 
       hypre_ParCSRCommHandleDestroy(comm_handle);
    }
