@@ -1594,7 +1594,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                else if (agg_interp_type == 8)
                {
                   hypre_BoomerAMGCorrectCFMarker(CF_marker_array[level], CFN_marker);
-                  hypre_TFree(coarse_pnts_global1, HYPRE_MEMORY_HOST);
                   hypre_IntArrayDestroy(CFN_marker);
                   CFN_marker = NULL;
                   hypre_BoomerAMGCoarseParms(comm, local_num_vars,
@@ -1608,7 +1607,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                else if (agg_interp_type == 9)
                {
                   hypre_BoomerAMGCorrectCFMarker(CF_marker_array[level], CFN_marker);
-                  hypre_TFree(coarse_pnts_global1, HYPRE_MEMORY_HOST);
                   hypre_IntArrayDestroy(CFN_marker);
                   CFN_marker = NULL;
                   hypre_BoomerAMGCoarseParms(comm, local_num_vars,
@@ -1670,7 +1668,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                                agg_P12_trunc_factor, agg_P12_max_elmts, &P2);
                   }
 
-
                   if (hypre_ParAMGDataModularizedMatMat(amg_data))
                   {
                      P = hypre_ParCSRMatMat(P1, P2);
@@ -1694,7 +1691,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_BoomerAMGCorrectCFMarker(CFN_marker, CF2_marker);
                   hypre_IntArrayDestroy(CF2_marker);
                   CF2_marker = NULL;
-                  hypre_TFree(coarse_pnts_global1, HYPRE_MEMORY_HOST);
 
                   hypre_BoomerAMGCreateScalarCFS(SN, A_array[level], hypre_IntArrayData(CFN_marker),
                                                  num_functions, nodal, keep_same_sign,
@@ -1715,7 +1711,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_BoomerAMGCorrectCFMarker(CFN_marker, CF2_marker);
                   hypre_IntArrayDestroy(CF2_marker);
                   CF2_marker = NULL;
-                  hypre_TFree(coarse_pnts_global1, HYPRE_MEMORY_HOST);
 
                   hypre_BoomerAMGCreateScalarCFS(SN, A_array[level], hypre_IntArrayData(CFN_marker),
                                                  num_functions, nodal, keep_same_sign,
@@ -1735,7 +1730,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_BoomerAMGCorrectCFMarker(CFN_marker, CF2_marker);
                   hypre_IntArrayDestroy(CF2_marker);
                   CF2_marker = NULL;
-                  hypre_TFree(coarse_pnts_global1, HYPRE_MEMORY_HOST);
 
                   hypre_BoomerAMGCreateScalarCFS(SN, A_array[level], hypre_IntArrayData(CFN_marker),
                                                  num_functions, nodal, keep_same_sign,
