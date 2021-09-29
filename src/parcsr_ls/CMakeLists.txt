@@ -157,6 +157,7 @@ if (HYPRE_USING_CUDA)
     par_interp_trunc_device.c
     par_lr_interp_device.c
     par_lr_restr_device.c
+    par_mod_multi_interp_device.c
     par_strength_device.c
     par_strength2nd_device.c
     par_relax_more_device.c
