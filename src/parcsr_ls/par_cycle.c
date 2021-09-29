@@ -43,9 +43,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    hypre_ParCSRBlockMatrix **P_block_array;
    hypre_ParCSRBlockMatrix **R_block_array;
 
-   HYPRE_Real   *Ztemp_data;
-   HYPRE_Real   *Ptemp_data;
-   HYPRE_Int   **CF_marker_array;
+   HYPRE_Real      *Ztemp_data;
+   HYPRE_Real      *Ptemp_data;
+   hypre_IntArray **CF_marker_array;
+   HYPRE_Int       *CF_marker;
    /*
    HYPRE_Int     **unknown_map_array;
    HYPRE_Int     **point_map_array;
@@ -183,7 +184,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          num_coeffs[j] = hypre_ParCSRMatrixDNumNonzeros(A_array[j]);
       }
    }
-
+   
    /*---------------------------------------------------------------------
     *    Initialize cycling control counter
     *
@@ -335,6 +336,15 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          }
       }
 
+      if (CF_marker_array[level] != NULL)
+      {
+         CF_marker = hypre_IntArrayData(CF_marker_array[level]);
+      }
+      else
+      {
+         CF_marker = NULL;
+      }
+
       if (l1_norms != NULL)
       {
          l1_norms_level = l1_norms[level];
@@ -467,7 +477,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   /* L1 - Jacobi*/
                   Solve_err_flag = hypre_BoomerAMGRelaxIF(A_array[level],
                                                           Aux_F,
-                                                          CF_marker_array[level],
+                                                          CF_marker,
                                                           relax_type,
                                                           relax_order,
                                                           cycle_param,
@@ -506,12 +516,12 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                      /* if we are on the coarsest level, the cf_marker will be null
                         and we just do one sweep regular jacobi */
                      hypre_assert(cycle_param == 3);
-                     hypre_BoomerAMGRelax(A_array[level], Aux_F, CF_marker_array[level], 0, 0, relax_weight[level],
+                     hypre_BoomerAMGRelax(A_array[level], Aux_F, CF_marker, 0, 0, relax_weight[level],
                                           0.0, NULL, Aux_U, Vtemp, NULL);
                   }
                   else
                   {
-                     hypre_BoomerAMGRelax_FCFJacobi(A_array[level], Aux_F, CF_marker_array[level], relax_weight[level],
+                     hypre_BoomerAMGRelax_FCFJacobi(A_array[level], Aux_F, CF_marker, relax_weight[level],
                                                     Aux_U, Vtemp);
                   }
                }
@@ -519,7 +529,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                {
                   Solve_err_flag = hypre_BoomerAMGRelax(A_array[level],
                                                         Aux_F,
-                                                        CF_marker_array[level],
+                                                        CF_marker,
                                                         relax_type,
                                                         relax_points,
                                                         relax_weight[level],
@@ -536,7 +546,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   {
                      Solve_err_flag = hypre_BoomerAMGBlockRelaxIF(A_block_array[level],
                                                                   Aux_F,
-                                                                  CF_marker_array[level],
+                                                                  CF_marker,
                                                                   relax_type,
                                                                   relax_local,
                                                                   cycle_param,
@@ -549,7 +559,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   {
                      Solve_err_flag = hypre_BoomerAMGRelaxIF(A_array[level],
                                                              Aux_F,
-                                                             CF_marker_array[level],
+                                                             CF_marker,
                                                              relax_type,
                                                              relax_local,
                                                              cycle_param,

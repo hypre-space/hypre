@@ -35,7 +35,8 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
    hypre_ParVector    *Vtemp;
    hypre_ParVector    *Ztemp;
    hypre_ParVector    *Xtilde, *Rtilde;
-   HYPRE_Int      **CF_marker_array;
+   hypre_IntArray    **CF_marker_array;
+   HYPRE_Int          *CF_marker;
 
    HYPRE_Int       num_levels;
    HYPRE_Int       addlvl, add_end;
@@ -154,13 +155,14 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
          else if (rlx_down != 18)
          {
             /*hypre_BoomerAMGRelax(A_array[fine_grid],F_array[fine_grid],NULL,rlx_down,0,*/
+            CF_marker = hypre_IntArrayData(CF_marker_array[fine_grid]);
             for (j=0; j < num_grid_sweeps[1]; j++)
             {
                hypre_BoomerAMGRelaxIF(A_array[fine_grid],F_array[fine_grid],
-                     CF_marker_array[fine_grid], rlx_down,rlx_order,1,
-                   relax_weight[fine_grid], omega[fine_grid],
-                   l1_norms[level] ? hypre_VectorData(l1_norms[level]) : NULL,
-                   U_array[fine_grid], Vtemp, Ztemp);
+                                      CF_marker, rlx_down,rlx_order,1,
+                                      relax_weight[fine_grid], omega[fine_grid],
+                                      l1_norms[level] ? hypre_VectorData(l1_norms[level]) : NULL,
+                                      U_array[fine_grid], Vtemp, Ztemp);
                hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
             }
          }
@@ -276,27 +278,37 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
                                      U_array[coarse_grid],
                                      beta, U_array[fine_grid]);
          if (rlx_up != 18)
+         {
             /*hypre_BoomerAMGRelax(A_array[fine_grid],F_array[fine_grid],NULL,rlx_up,0,*/
+            CF_marker = hypre_IntArrayData(CF_marker_array[fine_grid]);
             for (j=0; j < num_grid_sweeps[2]; j++)
-              hypre_BoomerAMGRelaxIF(A_array[fine_grid],F_array[fine_grid],
-                                     CF_marker_array[fine_grid],
-                                     rlx_up,rlx_order,2,
-                                     relax_weight[fine_grid], omega[fine_grid],
-                                     l1_norms[fine_grid] ? hypre_VectorData(l1_norms[fine_grid]) : NULL,
-                                     U_array[fine_grid], Vtemp, Ztemp);
+            {
+               hypre_BoomerAMGRelaxIF(A_array[fine_grid],F_array[fine_grid],
+                                      CF_marker,
+                                      rlx_up,rlx_order,2,
+                                      relax_weight[fine_grid], omega[fine_grid],
+                                      l1_norms[fine_grid] ? hypre_VectorData(l1_norms[fine_grid]) : NULL,
+                                      U_array[fine_grid], Vtemp, Ztemp);
+            }
+         }
          else if (rlx_order)
          {
+            CF_marker = hypre_IntArrayData(CF_marker_array[fine_grid]);
             HYPRE_Int loc_relax_points[2];
             loc_relax_points[0] = -1;
             loc_relax_points[1] = 1;
             for (j=0; j < num_grid_sweeps[2]; j++)
-            for (i=0; i < 2; i++)
-                hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid],F_array[fine_grid],
-                                            CF_marker_array[fine_grid],
-                                            loc_relax_points[i],
-                                            1.0,
-                                            l1_norms[fine_grid] ? hypre_VectorData(l1_norms[fine_grid]) : NULL,
-                                            U_array[fine_grid], Vtemp);
+            {
+               for (i=0; i < 2; i++)
+               {
+                   hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid],F_array[fine_grid],
+                                               CF_marker,
+                                               loc_relax_points[i],
+                                               1.0,
+                                               l1_norms[fine_grid] ? hypre_VectorData(l1_norms[fine_grid]) : NULL,
+                                               U_array[fine_grid], Vtemp);
+               }
+            }
          }
          else
             for (j=0; j < num_grid_sweeps[2]; j++)

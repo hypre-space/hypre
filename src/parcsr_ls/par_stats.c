@@ -390,7 +390,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       }
       else if (restri_type >= 3)
       {
-         hypre_printf(" Restriction = local approximate ideal restriction (Neumann AIR-%.1f)\n", restri_type-3);
+         hypre_printf(" Restriction = local approximate ideal restriction (Neumann AIR-%d)\n", restri_type-3);
       }
 
       if (block_mode)

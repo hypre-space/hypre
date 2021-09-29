@@ -1,4 +1,6 @@
 /******************************************************************************
+
+   *dof_func_ptr = dof_func;
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
@@ -33,7 +35,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
                                     HYPRE_BigInt *num_cpts_global,
                                     HYPRE_Int *nf,
                                     HYPRE_Int *dof_func,
-                                    HYPRE_Int **coarse_dof_func,
+                                    hypre_IntArray **coarse_dof_func,
                                     HYPRE_Int *CF_marker,
                                     HYPRE_Int level,
                                     HYPRE_Real *weights,
@@ -136,7 +138,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
 
    HYPRE_Int        i1;
 
-   HYPRE_Int       *c_dof_func = *coarse_dof_func;
+   HYPRE_Int       *c_dof_func = hypre_IntArrayData(*coarse_dof_func);
 
    HYPRE_Real       q_val, tmp_d1, tmp_d2;
    HYPRE_Real       adj[3], r_extra[3];
@@ -2362,7 +2364,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
    {
       HYPRE_Int new_nf;
 
-      c_dof_func = hypre_TReAlloc(c_dof_func,  HYPRE_Int,  new_ncv, HYPRE_MEMORY_HOST);
+      c_dof_func = hypre_TReAlloc_v2(c_dof_func,  HYPRE_Int, hypre_IntArraySize(*coarse_dof_func), HYPRE_Int,  new_ncv, hypre_IntArrayMemoryLocation(*coarse_dof_func));
       cur_spot = 0;
       for (i = 0; i < ncv_peru; i++)
       {
@@ -2374,7 +2376,8 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
       /* return these values */
       new_nf =  num_functions + num_smooth_vecs;
       *nf = new_nf;
-      *coarse_dof_func = c_dof_func;
+      hypre_IntArrayData(*coarse_dof_func) = c_dof_func;
+      hypre_IntArraySize(*coarse_dof_func) = new_ncv;
 
 
       /* also we need to update the col starts and global num columns*/

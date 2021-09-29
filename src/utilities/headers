@@ -47,6 +47,7 @@ cat exchange_data.h            >> $INTERNAL_HEADER
 cat caliper_instrumentation.h  >> $INTERNAL_HEADER
 cat handle.h                   >> $INTERNAL_HEADER
 cat gselim.h                   >> $INTERNAL_HEADER
+cat int_array.h                >> $INTERNAL_HEADER
 cat protos.h                   >> $INTERNAL_HEADER
 cat hopscotch_hash.h           >> $INTERNAL_HEADER
 
@@ -88,7 +89,7 @@ extern "C++" {
 # Structures and prototypes
 #===========================================================================
 
-cat umpire_allocator.h     >> $INTERNAL_HEADER
+cat device_allocator.h >> $INTERNAL_HEADER
 cat device_utils.h         >> $INTERNAL_HEADER
 cat device_reducer.h       >> $INTERNAL_HEADER
 cat cub_allocator.h        >> $INTERNAL_HEADER

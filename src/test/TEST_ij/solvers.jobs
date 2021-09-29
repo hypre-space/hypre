@@ -71,14 +71,16 @@ mpirun -np 8 ./ij -exec_host -n 80 80 80 -P 2 2 2 -agg_nl 1 -seq_th 100 -solver 
 mpirun -np 8 ./ij -exec_host -n 40 40 40 -P 2 2 2 -agg_nl 1 -seq_th 100 -solver 1 -rlx 6 -sysL 3 -nf 3 -red 1 > solvers.out.108
 
 #additive cycles
-mpirun -np 2 ./ij -exec_host -n 20 20 20 -P 2 1 1 -agg_nl 1 -solver 1 -CF 0 -rlx 0 -w 0.7 -rlx_coarse 0 -ns_coarse 2 > solvers.out.109
-mpirun -np 2 ./ij -exec_host -n 20 20 20 -P 2 1 1 -agg_nl 1 -solver 1 -CF 0 -add_rlx 0 -add_w 0.7 -mult_add 0 > solvers.out.110
-mpirun -np 4 ./ij -exec_host -n 20 20 20 -P 2 2 1 -agg_nl 1 -solver 1 -simple 0 > solvers.out.111
-mpirun -np 8 ./ij -exec_host -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -additive 1 > solvers.out.112
-mpirun -np 8 ./ij -exec_host -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -add_Pmx 5 > solvers.out.113
-mpirun -np 8 ./ij -exec_host -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -add_Pmx 5 -add_end 2 > solvers.out.118
-mpirun -np 8 ./ij -exec_host -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 ns 2 > solvers.out.119
-mpirun -np 8 ./ij -exec_host -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -rlx 18 -ns 2 -rlx_coarse 18 -ns_coarse 2 > solvers.out.120
+mpirun -np 2 ./ij -n 20 20 20 -P 2 1 1 -agg_nl 1 -solver 1 -CF 0 -rlx 0 -w 0.7 -rlx_coarse 0 -ns_coarse 2 > solvers.out.109
+mpirun -np 2 ./ij -n 20 20 20 -P 2 1 1 -agg_nl 1 -solver 1 -CF 0 -add_rlx 0 -add_w 0.7 -mult_add 0 > solvers.out.110
+mpirun -np 4 ./ij -n 20 20 20 -P 2 2 1 -agg_nl 1 -solver 1 -simple 0 > solvers.out.111
+mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -additive 1 > solvers.out.112
+mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -add_Pmx 5 > solvers.out.113
+mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -add_Pmx 5 -add_end 2 > solvers.out.118
+mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -ns 2 > solvers.out.119
+mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -ns 1 > solvers.out.121
+mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -ns 2 -rap 1 > solvers.out.122
+mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -rlx 18 -ns 2 -rlx_coarse 18 -ns_coarse 2 > solvers.out.120
 
 #nonGalerkin version
 mpirun -np 8 ./ij -exec_host -n 40 40 40 -P 2 2 2 -nongalerk_tol 1 0.03 > solvers.out.114
@@ -156,5 +158,16 @@ mpirun -np 2  ./ij -exec_host -solver 82 -ilu_type 41 -ilu_droptol 1.0e-2 -ilu_m
 ## RAP-ILU
 mpirun -np 2  ./ij -exec_host -solver 82 -ilu_type 50 -ilu_lfil 0 > solvers.out.323
 ## ILU smoother for AMG
-mpirun -np 2  ./ij -exec_host -solver 0 -smtype 5  -smlv 1 -ilu_type 30 > solvers.out.324
-mpirun -np 2  ./ij -exec_host -solver 0 -smtype 15 -smlv 1 -ilu_type 30 > solvers.out.325
+mpirun -np 2  ./ij -solver 0 -smtype 5  -smlv 1 -ilu_type 30 > solvers.out.324
+mpirun -np 2  ./ij -solver 0 -smtype 15 -smlv 1 -ilu_type 30 > solvers.out.325
+
+## Solve Ax=b and -Ax=b, convergence should be the same
+mpirun -np 2 ./ij -solver 0 -rhsrand -negA 0 > solvers.out.400.p
+mpirun -np 2 ./ij -solver 0 -rhsrand -negA 1 > solvers.out.400.n
+mpirun -np 3 ./ij -solver 3 -rhsrand -negA 0 > solvers.out.401.p
+mpirun -np 3 ./ij -solver 3 -rhsrand -negA 1 > solvers.out.401.n
+mpirun -np 4 ./ij -cheby_eig_est 10 -cheby_order 4 -cheby_variant 0 -cheby_scale 1 -rlx 16 -negA 0 > solvers.out.402.p
+mpirun -np 4 ./ij -cheby_eig_est 10 -cheby_order 4 -cheby_variant 0 -cheby_scale 1 -rlx 16 -negA 1 > solvers.out.402.n
+mpirun -np 4 ./ij -solver 3 -cheby_eig_est 0 -cheby_order 3 -cheby_variant 1 -cheby_scale 1 -rlx 16 -negA 0 > solvers.out.403.p
+mpirun -np 4 ./ij -solver 3 -cheby_eig_est 0 -cheby_order 3 -cheby_variant 1 -cheby_scale 1 -rlx 16 -negA 1 > solvers.out.403.n
+

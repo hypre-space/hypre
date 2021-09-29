@@ -1035,21 +1035,147 @@ hypre_ParCSRMatrixGetRowDevice( hypre_ParCSRMatrix  *mat,
    return hypre_error_flag;
 }
 
-/* abs    == 1, use absolute values
- * option == 0, drop all the entries that are smaller than tol
- * TODO more options
+/* Get element-wise tolerances based on row norms for ParCSRMatrix
+ * NOTE: Keep the diagonal, i.e. elmt_tol = 0.0 for diagonals
+ * Output vectors have size nnz:
+ *    elmt_tols_diag[j] = tol * (norm of row i) for j in [ A_diag_i[i] , A_diag_i[i+1] )
+ *    elmt_tols_offd[j] = tol * (norm of row i) for j in [ A_offd_i[i] , A_offd_i[i+1] )
+ * type == -1, infinity norm,
+ *         1, 1-norm
+ *         2, 2-norm
  */
+template<HYPRE_Int type>
+__global__ void
+hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols( HYPRE_Int      nrows,
+                                                      HYPRE_Real     tol,
+                                                      HYPRE_Int     *A_diag_i,
+                                                      HYPRE_Int     *A_diag_j,
+                                                      HYPRE_Complex *A_diag_a,
+                                                      HYPRE_Int     *A_offd_i,
+                                                      HYPRE_Complex *A_offd_a,
+                                                      HYPRE_Real     *elmt_tols_diag,
+                                                      HYPRE_Real     *elmt_tols_offd)
+{
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
+
+   if (row_i >= nrows)
+   {
+      return;
+   }
+
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int p_diag, p_offd, q_diag, q_offd;
+
+   /* sum row norm over diag part */
+   if (lane < 2)
+   {
+      p_diag = read_only_load(A_diag_i + row_i + lane);
+   }
+   q_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 1);
+   p_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 0);
+
+   HYPRE_Real row_norm_i = 0.0;
+
+   for (HYPRE_Int j = p_diag + lane; j < q_diag; j += HYPRE_WARP_SIZE)
+   {
+      HYPRE_Complex val = A_diag_a[j];
+
+      if (type == -1)
+      {
+         row_norm_i = hypre_max(row_norm_i, hypre_cabs(val));
+      }
+      else if (type == 1)
+      {
+         row_norm_i += hypre_cabs(val);
+      }
+      else if (type == 2)
+      {
+         row_norm_i += val * val;
+      }
+   }
+
+   /* sum row norm over offd part */
+   if (lane < 2)
+   {
+      p_offd = read_only_load(A_offd_i + row_i + lane);
+   }
+   q_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 1);
+   p_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 0);
+
+   for (HYPRE_Int j = p_offd + lane; j < q_offd; j += HYPRE_WARP_SIZE)
+   {
+      HYPRE_Complex val = A_offd_a[j];
+
+      if (type == -1)
+      {
+         row_norm_i = hypre_max(row_norm_i, hypre_cabs(val));
+      }
+      else if (type == 1)
+      {
+         row_norm_i += hypre_cabs(val);
+      }
+      else if (type == 2)
+      {
+         row_norm_i += val * val;
+      }
+   }
+
+   /* allreduce to get the row norm on all threads */
+   if (type == -1)
+   {
+      row_norm_i = warp_allreduce_max(row_norm_i);
+   }
+   else
+   {
+      row_norm_i = warp_allreduce_sum(row_norm_i);
+   }
+   if (type == 2)
+   {
+      row_norm_i = sqrt(row_norm_i);
+   }
+
+   /* set elmt_tols_diag */
+   for (HYPRE_Int j = p_diag + lane; j < q_diag; j += HYPRE_WARP_SIZE)
+   {
+      HYPRE_Int col = A_diag_j[j];
+
+      /* elmt_tol = 0.0 ensures diagonal will be kept */
+      if (col == row_i)
+      {
+         elmt_tols_diag[j] = 0.0;
+      }
+      else
+      {
+         elmt_tols_diag[j] = tol * row_norm_i;
+      }
+   }
+
+   /* set elmt_tols_offd */
+   for (HYPRE_Int j = p_offd + lane; j < q_offd; j += HYPRE_WARP_SIZE)
+   {
+      elmt_tols_offd[j] = tol * row_norm_i;
+   }
+
+}
+
+/* drop the entries that are not on the diagonal and smaller than:
+ *    type 0: tol
+ *    type 1: tol*(1-norm of row)
+ *    type 2: tol*(2-norm of row)
+ *    type -1: tol*(infinity norm of row) */
 HYPRE_Int
 hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
                                           HYPRE_Complex       tol,
-                                          HYPRE_Int           abs,
-                                          HYPRE_Int           option)
+                                          HYPRE_Int           type)
 {
    hypre_CSRMatrix *A_diag   = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix *A_offd   = hypre_ParCSRMatrixOffd(A);
    HYPRE_Int        num_cols_A_offd  = hypre_CSRMatrixNumCols(A_offd);
    HYPRE_BigInt    *h_col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
    HYPRE_BigInt    *col_map_offd_A = hypre_ParCSRMatrixDeviceColMapOffd(A);
+
+   HYPRE_Real      *elmt_tols_diag = NULL;
+   HYPRE_Real      *elmt_tols_offd = NULL;
 
    if (col_map_offd_A == NULL)
    {
@@ -1059,8 +1185,41 @@ hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
       hypre_ParCSRMatrixDeviceColMapOffd(A) = col_map_offd_A;
    }
 
-   hypre_CSRMatrixDropSmallEntriesDevice(A_diag, tol, abs, option);
-   hypre_CSRMatrixDropSmallEntriesDevice(A_offd, tol, abs, option);
+   /* get elmement-wise tolerances if needed */
+   if (type != 0)
+   {
+      elmt_tols_diag = hypre_TAlloc(HYPRE_Real, hypre_CSRMatrixNumNonzeros(A_diag), HYPRE_MEMORY_DEVICE);
+      elmt_tols_offd = hypre_TAlloc(HYPRE_Real, hypre_CSRMatrixNumNonzeros(A_offd), HYPRE_MEMORY_DEVICE);
+   }
+
+   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   dim3 gDim = hypre_GetDefaultCUDAGridDimension(hypre_CSRMatrixNumRows(A_diag), "warp", bDim);
+
+   if (type == -1)
+   {
+      HYPRE_CUDA_LAUNCH( hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols<-1>, gDim, bDim, 
+                         hypre_CSRMatrixNumRows(A_diag), tol, hypre_CSRMatrixI(A_diag), 
+                         hypre_CSRMatrixJ(A_diag), hypre_CSRMatrixData(A_diag), hypre_CSRMatrixI(A_offd), 
+                         hypre_CSRMatrixData(A_offd), elmt_tols_diag, elmt_tols_offd);
+   }
+   if (type == 1)
+   {
+      HYPRE_CUDA_LAUNCH( hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols<1>, gDim, bDim, 
+                         hypre_CSRMatrixNumRows(A_diag), tol, hypre_CSRMatrixI(A_diag), 
+                         hypre_CSRMatrixJ(A_diag), hypre_CSRMatrixData(A_diag), hypre_CSRMatrixI(A_offd), 
+                         hypre_CSRMatrixData(A_offd), elmt_tols_diag, elmt_tols_offd);
+   }
+   if (type == 2)
+   {
+      HYPRE_CUDA_LAUNCH( hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols<2>, gDim, bDim, 
+                         hypre_CSRMatrixNumRows(A_diag), tol, hypre_CSRMatrixI(A_diag), 
+                         hypre_CSRMatrixJ(A_diag), hypre_CSRMatrixData(A_diag), hypre_CSRMatrixI(A_offd), 
+                         hypre_CSRMatrixData(A_offd), elmt_tols_diag, elmt_tols_offd);
+   }
+
+   /* drop entries from diag and offd CSR matrices */
+   hypre_CSRMatrixDropSmallEntriesDevice(A_diag, tol, elmt_tols_diag);
+   hypre_CSRMatrixDropSmallEntriesDevice(A_offd, tol, elmt_tols_offd);
 
    hypre_ParCSRMatrixSetNumNonzeros(A);
    hypre_ParCSRMatrixDNumNonzeros(A) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(A);
@@ -1113,6 +1272,11 @@ hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
 
+   if (type != 0)
+   {
+      hypre_TFree(elmt_tols_diag, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(elmt_tols_offd, HYPRE_MEMORY_DEVICE);
+   }
    hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;

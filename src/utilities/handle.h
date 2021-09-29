@@ -44,6 +44,9 @@ typedef struct
    HYPRE_Int              own_umpire_pinned_pool;
    umpire_resourcemanager umpire_rm;
 #endif
+   /* user malloc/free function pointers */
+   GPUMallocFunc          user_device_malloc;
+   GPUMfreeFunc           user_device_free;
 } hypre_Handle;
 
 /* accessor macros to hypre_Handle */
@@ -78,6 +81,9 @@ typedef struct
 #define hypre_HandleSpgemmHashType(hypre_handle)                 hypre_DeviceDataSpgemmHashType(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleUmpireDeviceAllocator(hypre_handle)          hypre_DeviceDataUmpireDeviceAllocator(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleUseGpuRand(hypre_handle)                     hypre_DeviceDataUseGpuRand(hypre_HandleDeviceData(hypre_handle))
+
+#define hypre_HandleUserDeviceMalloc(hypre_handle)               ((hypre_handle) -> user_device_malloc)
+#define hypre_HandleUserDeviceMfree(hypre_handle)                ((hypre_handle) -> user_device_free)
 
 #define hypre_HandleUmpireResourceMan(hypre_handle)              ((hypre_handle) -> umpire_rm)
 #define hypre_HandleUmpireDevicePoolSize(hypre_handle)           ((hypre_handle) -> umpire_device_pool_size)
