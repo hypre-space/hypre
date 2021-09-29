@@ -268,7 +268,7 @@ struct hypre_DeviceData
 #define hypre_DeviceDataStructCommRecvBufferSize(data)       ((data) -> struct_comm_recv_buffer_size)
 #define hypre_DeviceDataStructCommSendBufferSize(data)       ((data) -> struct_comm_send_buffer_size)
 #define hypre_DeviceDataSpgemmUseCusparse(data)              ((data) -> spgemm_use_cusparse)
-#define hypre_DeviceDataSpgemmAlgorithm(data)                ((data) -> spgemm_num_passes)
+#define hypre_DeviceDataSpgemmAlgorithm(data)                ((data) -> spgemm_algorithm)
 #define hypre_DeviceDataSpgemmRownnzEstimateMethod(data)     ((data) -> spgemm_rownnz_estimate_method)
 #define hypre_DeviceDataSpgemmRownnzEstimateNsamples(data)   ((data) -> spgemm_rownnz_estimate_nsamples)
 #define hypre_DeviceDataSpgemmRownnzEstimateMultFactor(data) ((data) -> spgemm_rownnz_estimate_mult_factor)
