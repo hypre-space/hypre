@@ -38,6 +38,8 @@ FILES="\
  ${TNAME}.out.23\
  ${TNAME}.out.24\
  ${TNAME}.out.25\
+ ${TNAME}.out.26\
+ ${TNAME}.out.27\
 "
 
 for i in $FILES
