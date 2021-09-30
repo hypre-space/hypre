@@ -147,7 +147,7 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
 
    if (num_functions > 1)
    {
-      dof_func_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd_A, HYPRE_MEMORY_HOST);
+      dof_func_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST);
       index = 0;
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       int_buf_data = hypre_CTAlloc(HYPRE_Int,  hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
@@ -239,7 +239,7 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
       pass_starts[num_passes] = cnt;
       /* update pass_marker_offd */
       index = 0;
-      if (num_cols_offd_A)
+      if (num_procs > 1)
       {
          for (i = 0; i < num_sends; i++)
          {
@@ -249,7 +249,7 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
                int_buf_data[index++] = pass_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
             }
          }
-         comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, pass_marker_offd);
+         comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data, pass_marker_offd);
 
          hypre_ParCSRCommHandleDestroy(comm_handle);
       }
@@ -636,7 +636,7 @@ hypre_GenerateMultipassPi( hypre_ParCSRMatrix  *A,
       }
 
       num_cols_offd_P = 0;
-      if (num_cols_offd_A)
+      if (num_procs > 1)
       {
          big_convert_offd = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd_A, HYPRE_MEMORY_HOST);
          fine_to_coarse_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST);
@@ -963,10 +963,10 @@ hypre_GenerateMultiPi( hypre_ParCSRMatrix  *A,
       }
 
       num_cols_offd_Q = 0;
-      if (num_cols_offd_A)
+      if (num_procs > 1)
       {
-         big_convert_offd = hypre_CTAlloc(HYPRE_BigInt,  num_cols_offd_A, HYPRE_MEMORY_HOST);
-         fine_to_coarse_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd_A, HYPRE_MEMORY_HOST);
+         big_convert_offd = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd_A, HYPRE_MEMORY_HOST);
+         fine_to_coarse_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST);
          index = 0;
          num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
          big_buf_data = hypre_CTAlloc(HYPRE_BigInt,  hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);

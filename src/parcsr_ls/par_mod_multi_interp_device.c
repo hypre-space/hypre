@@ -372,7 +372,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       pass_starts[num_passes] = cnt;
 
       /* update pass_marker_offd */
-      if (num_cols_offd_A)
+      if (num_procs > 1)
       {
          HYPRE_THRUST_CALL( gather,
                             hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
@@ -800,7 +800,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
 
    num_cols_offd_P = 0;
 
-   if (num_cols_offd_A)
+   if (num_procs > 1)
    {
       HYPRE_Int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       HYPRE_Int num_elem_send = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
@@ -843,7 +843,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
 
       hypre_TFree(big_convert_offd, HYPRE_MEMORY_DEVICE);
       hypre_TFree(big_buf_data,     HYPRE_MEMORY_DEVICE);
-   } // if (num_cols_offd_A)
+   }
 
    P_diag_i = hypre_TAlloc(HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE);
    P_offd_i = hypre_TAlloc(HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE);
@@ -1048,7 +1048,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
 
    num_cols_offd_Q = 0;
 
-   if (num_cols_offd_A)
+   if (num_procs > 1)
    {
       HYPRE_Int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       HYPRE_Int num_elem_send = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
@@ -1091,7 +1091,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
 
       hypre_TFree(big_convert_offd, HYPRE_MEMORY_DEVICE );
       hypre_TFree(big_buf_data, HYPRE_MEMORY_DEVICE);
-   } // if (num_cols_offd_A)
+   }
 
    Q_diag_i = hypre_TAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_DEVICE);
    Q_offd_i = hypre_TAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_DEVICE);
