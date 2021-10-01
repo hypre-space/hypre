@@ -369,7 +369,7 @@ using namespace thrust::placeholders;
 #if defined(HYPRE_USING_CUDA)
 #define GPU_LAUNCH_SYNC { hypre_SyncCudaComputeStream(hypre_handle()); HYPRE_CUDA_CALL( cudaGetLastError() ); }
 #elif defined(HYPRE_USING_HIP)
-#define GPU_LAUNCH_SYNC { hypre_SyncCudaComputeStream(hypre_handle()); HYPRE_CUDA_CALL( hipGetLastError() );  }
+#define GPU_LAUNCH_SYNC { hypre_SyncCudaComputeStream(hypre_handle()); HYPRE_HIP_CALL( hipGetLastError() );  }
 #endif
 #else // #if defined(HYPRE_DEBUG)
 #define GPU_LAUNCH_SYNC
@@ -595,13 +595,19 @@ void __syncwarp()
 #endif // #if defined(HYPRE_USING_HIP) || (CUDA_VERSION < 9000)
 
 
-// __any was technically deprecated in CUDA 7 so we don't bother
-// with this overload for CUDA, just for HIP.
+// __any and __ballot were technically deprecated in CUDA 7 so we don't bother
+// with these overloads for CUDA, just for HIP.
 #if defined(HYPRE_USING_HIP)
 static __device__ __forceinline__
 hypre_int __any_sync(unsigned mask, hypre_int predicate)
 {
   return __any(predicate);
+}
+
+static __device__ __forceinline__
+hypre_int __ballot_sync(unsigned mask, hypre_int predicate)
+{
+  return __ballot(predicate);
 }
 #endif
 
@@ -866,6 +872,19 @@ struct less_than : public thrust::unary_function<T,bool>
    __host__ __device__ bool operator()(const T &x)
    {
       return (x < val);
+   }
+};
+
+template<typename T>
+struct modulo : public thrust::unary_function<T,T>
+{
+   T val;
+
+   modulo(T val_) { val = val_; }
+
+   __host__ __device__ T operator()(const T &x)
+   {
+      return (x % val);
    }
 };
 

@@ -42,7 +42,7 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
    hypre_ParVector    *Ztemp;
    hypre_ParVector    *Qtemp = NULL;
 
-   HYPRE_Int    *CF_marker = hypre_ParAMGDataCFMarkerArray(amg_data)[level];
+   HYPRE_Int    *CF_marker = hypre_IntArrayData(hypre_ParAMGDataCFMarkerArray(amg_data)[level]);
    HYPRE_Real   *Ptemp_data;
    HYPRE_Real   *Ztemp_data;
 

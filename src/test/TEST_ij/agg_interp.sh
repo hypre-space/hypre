@@ -17,14 +17,22 @@ FILES="\
  ${TNAME}.out.2\
  ${TNAME}.out.3\
  ${TNAME}.out.4\
+ ${TNAME}.out.4.1\
+ ${TNAME}.out.4.2\
  ${TNAME}.out.5\
  ${TNAME}.out.6\
  ${TNAME}.out.7\
  ${TNAME}.out.8\
+ ${TNAME}.out.8.1\
+ ${TNAME}.out.8.2\
  ${TNAME}.out.9\
  ${TNAME}.out.10\
+ ${TNAME}.out.10.1\
+ ${TNAME}.out.10.2\
  ${TNAME}.out.11\
  ${TNAME}.out.12\
+ ${TNAME}.out.12.1\
+ ${TNAME}.out.12.2\
  ${TNAME}.out.13\
  ${TNAME}.out.14\
  ${TNAME}.out.15\

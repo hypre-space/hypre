@@ -2973,17 +2973,24 @@ hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix  *S,
  * hypre_BoomerAMGCorrectCFMarker : corrects CF_marker after aggr. coarsening
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_BoomerAMGCorrectCFMarker(HYPRE_Int *CF_marker, HYPRE_Int num_var, HYPRE_Int *new_CF_marker)
+hypre_BoomerAMGCorrectCFMarkerHost(hypre_IntArray *CF_marker, hypre_IntArray *new_CF_marker)
 {
    HYPRE_Int i, cnt;
 
    cnt = 0;
-   for (i=0; i < num_var; i++)
+   for (i=0; i < hypre_IntArraySize(CF_marker); i++)
    {
-      if (CF_marker[i] > 0 )
+      if (hypre_IntArrayData(CF_marker)[i] > 0 )
       {
-         if (CF_marker[i] == 1) CF_marker[i] = new_CF_marker[cnt++];
-         else { CF_marker[i] = 1; cnt++;}
+         if (hypre_IntArrayData(CF_marker)[i] == 1)
+         {
+            hypre_IntArrayData(CF_marker)[i] = hypre_IntArrayData(new_CF_marker)[cnt++];
+         }
+         else
+         {
+            hypre_IntArrayData(CF_marker)[i] = 1;
+            cnt++;
+         }
       }
    }
 
@@ -2994,20 +3001,90 @@ hypre_BoomerAMGCorrectCFMarker(HYPRE_Int *CF_marker, HYPRE_Int num_var, HYPRE_In
  * but marks new F-points (previous C-points) as -2
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_BoomerAMGCorrectCFMarker2(HYPRE_Int *CF_marker, HYPRE_Int num_var, HYPRE_Int *new_CF_marker)
+hypre_BoomerAMGCorrectCFMarker2Host(hypre_IntArray *CF_marker, hypre_IntArray *new_CF_marker)
 {
    HYPRE_Int i, cnt;
 
    cnt = 0;
-   for (i=0; i < num_var; i++)
+   for (i=0; i < hypre_IntArraySize(CF_marker); i++)
    {
-      if (CF_marker[i] > 0 )
+      if (hypre_IntArrayData(CF_marker)[i] > 0 )
       {
-         if (new_CF_marker[cnt] == -1) CF_marker[i] = -2;
-         else CF_marker[i] = 1;
+         if (hypre_IntArrayData(new_CF_marker)[cnt] == -1)
+         {
+            hypre_IntArrayData(CF_marker)[i] = -2;
+         }
+         else
+         {
+            hypre_IntArrayData(CF_marker)[i] = 1;
+         }
          cnt++;
       }
    }
 
    return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_BoomerAMGCorrectCFMarker : corrects CF_marker after aggr. coarsening
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_BoomerAMGCorrectCFMarker(hypre_IntArray *CF_marker, hypre_IntArray *new_CF_marker)
+{
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("CorrectCFMarker");
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_IntArrayMemoryLocation(CF_marker),
+                                                      hypre_IntArrayMemoryLocation(new_CF_marker));
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_BoomerAMGCorrectCFMarkerDevice(CF_marker, new_CF_marker);
+   }
+   else
+#endif
+   {
+      hypre_BoomerAMGCorrectCFMarkerHost(CF_marker, new_CF_marker);
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
+   return hypre_error_flag;
+}
+/*--------------------------------------------------------------------------
+ * hypre_BoomerAMGCorrectCFMarker2 : corrects CF_marker after aggr. coarsening,
+ * but marks new F-points (previous C-points) as -2
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_BoomerAMGCorrectCFMarker2(hypre_IntArray *CF_marker, hypre_IntArray *new_CF_marker)
+{
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("CorrectCFMarker2");
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_IntArrayMemoryLocation(CF_marker),
+                                                      hypre_IntArrayMemoryLocation(new_CF_marker));
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_BoomerAMGCorrectCFMarker2Device(CF_marker, new_CF_marker);
+   }
+   else
+#endif
+   {
+      hypre_BoomerAMGCorrectCFMarker2Host(CF_marker, new_CF_marker);
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
+   return hypre_error_flag;
 }

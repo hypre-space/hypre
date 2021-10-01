@@ -110,6 +110,7 @@ FILES =\
  par_krylov_func.c\
  par_mod_lr_interp.c\
  par_multi_interp.c\
+ par_mod_multi_interp.c\
  par_laplace.c\
  par_laplace_27pt.c\
  par_laplace_9pt.c\
@@ -150,6 +151,7 @@ CUFILES =\
  par_cheby_device.c\
  par_relax_more_device.c\
  par_coarsen_device.c\
+ par_coarse_parms_device.c\
  par_indepset_device.c\
  par_interp_device.c\
  par_lr_restr_device.c\
@@ -159,7 +161,8 @@ CUFILES =\
  par_strength2nd_device.c\
  par_amgdd_fac_cycle_device.c\
  par_2s_interp_device.c\
- par_relax_device.c
+ par_relax_device.c\
+ par_mod_multi_interp_device.c
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}

@@ -551,7 +551,14 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                                              hypre_ParCSRMatrixRowStarts(Ann_l[i]));
          hypre_ParVectorInitialize(nVtemp2_l[i]);
 
-         nCF_marker_l[i] = hypre_ParAMGDataCFMarkerArray(amg_data)[i];
+         if (hypre_ParAMGDataCFMarkerArray(amg_data)[i])
+         {
+            nCF_marker_l[i] = hypre_IntArrayData(hypre_ParAMGDataCFMarkerArray(amg_data)[i]);
+         }
+         else
+         {
+            nCF_marker_l[i] = NULL;
+         }
          nrelax_weight[i]= hypre_ParAMGDataRelaxWeight(amg_data)[i];
          nomega[i]       = hypre_ParAMGDataOmega(amg_data)[i];
       }

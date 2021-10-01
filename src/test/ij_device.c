@@ -1854,20 +1854,20 @@ BuildParCoordinates( HYPRE_Int                  argc,
 void
 testPMIS(HYPRE_ParCSRMatrix parcsr_A)
 {
-   HYPRE_Int    nC1 = 0, nC2 = 0, i;
-   HYPRE_Int    time_index;
-   HYPRE_Int   *h_CF_marker  = NULL;
-   HYPRE_Int   *h_CF_marker2 = NULL;
-   HYPRE_Int   *d_CF_marker  = NULL;
-   HYPRE_Real   max_row_sum = 1.0;
-   HYPRE_Int    num_functions = 1;
-   HYPRE_Real   strong_threshold = 0.25;
-   HYPRE_Int    debug_flag = 0;
-   HYPRE_Int    local_num_rows;
-   HYPRE_Int    first_local_row, last_local_row;
-   HYPRE_Int    first_local_col, last_local_col;
-   MPI_Comm     comm = hypre_MPI_COMM_WORLD;
-   HYPRE_Int    num_procs, myid;
+   HYPRE_Int         nC1 = 0, nC2 = 0, i;
+   HYPRE_Int         time_index;
+   hypre_IntArray   *h_CF_marker  = NULL;
+   hypre_IntArray   *h_CF_marker2 = NULL;
+   HYPRE_Int        *d_CF_marker  = NULL;
+   HYPRE_Real        max_row_sum = 1.0;
+   HYPRE_Int         num_functions = 1;
+   HYPRE_Real        strong_threshold = 0.25;
+   HYPRE_Int         debug_flag = 0;
+   HYPRE_Int         local_num_rows;
+   HYPRE_Int         first_local_row, last_local_row;
+   HYPRE_Int         first_local_col, last_local_col;
+   MPI_Comm          comm = hypre_MPI_COMM_WORLD;
+   HYPRE_Int         num_procs, myid;
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -1904,7 +1904,8 @@ testPMIS(HYPRE_ParCSRMatrix parcsr_A)
    time_index = hypre_InitializeTiming("Device PMIS");
    hypre_BeginTiming(time_index);
 
-   h_CF_marker2 = hypre_TAlloc(HYPRE_Int, local_num_rows, HYPRE_MEMORY_HOST);
+   h_CF_marker2 = hypre_IntArrayCreate(local_num_rows);
+   hypre_IntArrayInitialize(h_CF_marker2);
    hypre_BoomerAMGCoarsenPMISDevice(parcsr_S_device, parcsr_A, 2, debug_flag, &h_CF_marker2);
 
    hypre_EndTiming(time_index);
@@ -1917,16 +1918,16 @@ testPMIS(HYPRE_ParCSRMatrix parcsr_A)
 
    for (i = 0; i < local_num_rows; i++)
    {
-      if (h_CF_marker[i] > 0)
+      if (hypre_IntArrayData(h_CF_marker)[i] > 0)
       {
          nC1++;
       }
 
-      hypre_assert(h_CF_marker2[i] == 1 || h_CF_marker2[i] == -1 || h_CF_marker2[i] == -3);
+      hypre_assert(hypre_IntArrayData(h_CF_marker2)[i] == 1 || hypre_IntArrayData(h_CF_marker2)[i] == -1 || hypre_IntArrayData(h_CF_marker2)[i] == -3);
 
       //hypre_assert(h_CF_marker[i] == h_CF_marker2[i]);
 
-      if (h_CF_marker2[i] > 0)
+      if (hypre_IntArrayData(h_CF_marker2)[i] > 0)
       {
          nC2++;
       }
@@ -1942,25 +1943,25 @@ testPMIS(HYPRE_ParCSRMatrix parcsr_A)
 
    hypre_ParCSRMatrixDestroy(parcsr_S);
    hypre_ParCSRMatrixDestroy(parcsr_S_device);
-   hypre_TFree(h_CF_marker,  HYPRE_MEMORY_HOST);
-   hypre_TFree(h_CF_marker2, HYPRE_MEMORY_HOST);
+   hypre_IntArrayDestroy(h_CF_marker);
+   hypre_IntArrayDestroy(h_CF_marker2);
    hypre_TFree(d_CF_marker,  HYPRE_MEMORY_DEVICE);
 }
 
 void
 testPMIS3(HYPRE_ParCSRMatrix parcsr_A)
 {
-   HYPRE_Int    nC2 = 0, i;
-   HYPRE_Int   *h_CF_marker2 = NULL;
-   HYPRE_Real   max_row_sum = 1.0;
-   HYPRE_Int    num_functions = 1;
-   HYPRE_Real   strong_threshold = 0.25;
-   HYPRE_Int    debug_flag = 0;
-   HYPRE_Int    local_num_rows;
-   HYPRE_Int    first_local_row, last_local_row;
-   HYPRE_Int    first_local_col, last_local_col;
-   MPI_Comm     comm = hypre_MPI_COMM_WORLD;
-   HYPRE_Int    num_procs, myid;
+   HYPRE_Int         nC2 = 0, i;
+   hypre_IntArray   *h_CF_marker2 = NULL;
+   HYPRE_Real        max_row_sum = 1.0;
+   HYPRE_Int         num_functions = 1;
+   HYPRE_Real        strong_threshold = 0.25;
+   HYPRE_Int         debug_flag = 0;
+   HYPRE_Int         local_num_rows;
+   HYPRE_Int         first_local_row, last_local_row;
+   HYPRE_Int         first_local_col, last_local_col;
+   MPI_Comm          comm = hypre_MPI_COMM_WORLD;
+   HYPRE_Int         num_procs, myid;
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -1977,14 +1978,15 @@ testPMIS3(HYPRE_ParCSRMatrix parcsr_A)
    hypre_BoomerAMGCreateSDevice(parcsr_A, strong_threshold, max_row_sum,
                                 num_functions, NULL, &parcsr_S_device);
    /* PMIS on DEVICE */
-   h_CF_marker2 = hypre_TAlloc(HYPRE_Int, local_num_rows, HYPRE_MEMORY_HOST);
+   h_CF_marker2 = hypre_IntArrayCreate(local_num_rows);
+   hypre_IntArrayInitialize(h_CF_marker2);
    hypre_BoomerAMGCoarsenPMISDevice(parcsr_S_device, parcsr_A, 2, debug_flag, &h_CF_marker2);
 
    for (i = 0; i < local_num_rows; i++)
    {
-      hypre_assert(h_CF_marker2[i] == 1 || h_CF_marker2[i] == -1 || h_CF_marker2[i] == -3);
+      hypre_assert(hypre_IntArrayData(h_CF_marker2)[i] == 1 || hypre_IntArrayData(h_CF_marker2)[i] == -1 || hypre_IntArrayData(h_CF_marker2)[i] == -3);
 
-      if (h_CF_marker2[i] > 0)
+      if (hypre_IntArrayData(h_CF_marker2)[i] > 0)
       {
          nC2++;
       }
@@ -1998,24 +2000,24 @@ testPMIS3(HYPRE_ParCSRMatrix parcsr_A)
    }
 
    hypre_ParCSRMatrixDestroy(parcsr_S_device);
-   hypre_TFree(h_CF_marker2, HYPRE_MEMORY_HOST);
+   hypre_IntArrayDestroy(h_CF_marker2);
 }
 
 void
 testPMIS2(HYPRE_ParCSRMatrix parcsr_A)
 {
-   HYPRE_Int    nC2 = 0, i;
-   HYPRE_Int   *h_CF_marker  = NULL;
-   HYPRE_Int   *h_CF_marker2 = NULL;
-   HYPRE_Real   max_row_sum = 1.0;
-   HYPRE_Int    num_functions = 1;
-   HYPRE_Real   strong_threshold = 0.25;
-   HYPRE_Int    debug_flag = 0;
-   HYPRE_Int    local_num_rows;
-   HYPRE_Int    first_local_row, last_local_row;
-   HYPRE_Int    first_local_col, last_local_col;
-   MPI_Comm     comm = hypre_ParCSRMatrixComm(parcsr_A);
-   HYPRE_Int    num_procs, myid;
+   HYPRE_Int         nC2 = 0, i;
+   hypre_IntArray   *h_CF_marker  = NULL;
+   hypre_IntArray   *h_CF_marker2 = NULL;
+   HYPRE_Real        max_row_sum = 1.0;
+   HYPRE_Int         num_functions = 1;
+   HYPRE_Real        strong_threshold = 0.25;
+   HYPRE_Int         debug_flag = 0;
+   HYPRE_Int         local_num_rows;
+   HYPRE_Int         first_local_row, last_local_row;
+   HYPRE_Int         first_local_col, last_local_col;
+   MPI_Comm          comm = hypre_ParCSRMatrixComm(parcsr_A);
+   HYPRE_Int         num_procs, myid;
 
    hypre_MPI_Comm_size(comm, &num_procs );
    hypre_MPI_Comm_rank(comm, &myid );
@@ -2032,7 +2034,8 @@ testPMIS2(HYPRE_ParCSRMatrix parcsr_A)
    hypre_BoomerAMGCreateSDevice(parcsr_A, strong_threshold, max_row_sum,
                                 num_functions, NULL, &parcsr_S_device);
    /* PMIS on DEVICE */
-   h_CF_marker = hypre_TAlloc(HYPRE_Int, local_num_rows, HYPRE_MEMORY_HOST);
+   h_CF_marker = hypre_IntArrayCreate(local_num_rows);
+   hypre_IntArrayInitialize(h_CF_marker);
    hypre_BoomerAMGCoarsenPMISDevice(parcsr_S_device, parcsr_A, 2, debug_flag, &h_CF_marker);
 
    HYPRE_Int *coarse_pnts_global = NULL;
@@ -2041,7 +2044,7 @@ testPMIS2(HYPRE_ParCSRMatrix parcsr_A)
 
    /* interp */
    hypre_ParCSRMatrix *P;
-   hypre_BoomerAMGBuildDirInterpDevice(parcsr_A, h_CF_marker, parcsr_S_device,
+   hypre_BoomerAMGBuildDirInterpDevice(parcsr_A, hypre_IntArrayData(h_CF_marker), parcsr_S_device,
                                        coarse_pnts_global, 1, NULL,
                                        debug_flag, 0.0, 0, 3, &P);
 
@@ -2058,15 +2061,16 @@ testPMIS2(HYPRE_ParCSRMatrix parcsr_A)
    hypre_BoomerAMGCreateSDevice(AH, strong_threshold, max_row_sum,
                                 num_functions, NULL, &S2);
 
-   h_CF_marker2 = hypre_TAlloc(HYPRE_Int, local_num_rows2, HYPRE_MEMORY_HOST);
+   h_CF_marker2 = hypre_IntArrayCreate(local_num_rows2);
+   hypre_IntArrayInitialize(h_CF_marker2);
 
    hypre_BoomerAMGCoarsenPMISDevice(S2, AH, 2, debug_flag, &h_CF_marker2);
 
    for (i = 0; i < local_num_rows2; i++)
    {
-      hypre_assert(h_CF_marker2[i] == 1 || h_CF_marker2[i] == -1 || h_CF_marker2[i] == -3);
+      hypre_assert(hypre_IntArrayData(h_CF_marker2)[i] == 1 || hypre_IntArrayData(h_CF_marker2)[i] == -1 || hypre_IntArrayData(h_CF_marker2)[i] == -3);
 
-      if (h_CF_marker2[i] > 0)
+      if (hypre_IntArrayData(h_CF_marker2)[i] > 0)
       {
          nC2++;
       }
@@ -2081,8 +2085,8 @@ testPMIS2(HYPRE_ParCSRMatrix parcsr_A)
 
    hypre_ParCSRMatrixDestroy(parcsr_S_device);
    hypre_ParCSRMatrixDestroy(S2);
-   hypre_TFree(h_CF_marker,  HYPRE_MEMORY_HOST);
-   hypre_TFree(h_CF_marker2, HYPRE_MEMORY_HOST);
+   hypre_IntArrayDestroy(h_CF_marker);
+   hypre_IntArrayDestroy(h_CF_marker2);
 }
 
 void
@@ -2128,13 +2132,14 @@ testTranspose(HYPRE_ParCSRMatrix parcsr_A)
    HYPRE_Int local_num_rows = last_local_row - first_local_row + 1;
    HYPRE_ParCSRMatrix parcsr_S_device  = NULL;
    hypre_BoomerAMGCreateSDevice(parcsr_A, 0.25, 1.0, 1, NULL, &parcsr_S_device);
-   HYPRE_Int *h_CF_marker = hypre_TAlloc(HYPRE_Int, local_num_rows, HYPRE_MEMORY_HOST);
+   hypre_IntArray *h_CF_marker = hypre_IntArrayCreate(local_num_rows);
+   hypre_IntArrayInitialize(h_CF_marker);
    hypre_BoomerAMGCoarsenPMISDevice(parcsr_S_device, parcsr_A, 2, 0, &h_CF_marker);
    hypre_ParCSRMatrix *P, *PT, *P_h, *PT_h, *P2;
    HYPRE_Int *coarse_pnts_global = NULL;
    MPI_Comm comm = hypre_ParCSRMatrixComm(parcsr_A);
    hypre_BoomerAMGCoarseParms(comm, local_num_rows, 1, NULL, h_CF_marker, NULL, &coarse_pnts_global);
-   hypre_BoomerAMGBuildDirInterpDevice(parcsr_A, h_CF_marker, parcsr_S_device,
+   hypre_BoomerAMGBuildDirInterpDevice(parcsr_A, hypre_IntArrayData(h_CF_marker), parcsr_S_device,
                                        coarse_pnts_global, 1, NULL,
                                        0, 0.0, 0, 3, &P);
    P_h = hypre_ParCSRMatrixClone_v2(P, 1, HYPRE_MEMORY_HOST);
@@ -2156,6 +2161,7 @@ testTranspose(HYPRE_ParCSRMatrix parcsr_A)
    hypre_ParCSRMatrixDestroy(P_h);
    hypre_ParCSRMatrixDestroy(PT_h);
    hypre_ParCSRMatrixDestroy(P2);
+   hypre_IntArrayDestroy(h_CF_marker);
 }
 
 void
@@ -2193,13 +2199,14 @@ testAdd(HYPRE_ParCSRMatrix parcsr_A)
    HYPRE_Int local_num_rows = last_local_row - first_local_row + 1;
    HYPRE_ParCSRMatrix parcsr_S_device  = NULL;
    hypre_BoomerAMGCreateSDevice(parcsr_A, 0.25, 1.0, 1, NULL, &parcsr_S_device);
-   HYPRE_Int *h_CF_marker = hypre_TAlloc(HYPRE_Int, local_num_rows, HYPRE_MEMORY_HOST);
+   hypre_IntArray *h_CF_marker = hypre_IntArrayCreate(local_num_rows);
+   hypre_IntArrayInitialize(h_CF_marker);
    hypre_BoomerAMGCoarsenPMISDevice(parcsr_S_device, parcsr_A, 2, 0, &h_CF_marker);
    hypre_ParCSRMatrix *P, *AP, *P_h, *AP_h;
    HYPRE_Int *coarse_pnts_global = NULL;
    MPI_Comm comm = hypre_ParCSRMatrixComm(parcsr_A);
    hypre_BoomerAMGCoarseParms(comm, local_num_rows, 1, NULL, h_CF_marker, NULL, &coarse_pnts_global);
-   hypre_BoomerAMGBuildDirInterpDevice(parcsr_A, h_CF_marker, parcsr_S_device,
+   hypre_BoomerAMGBuildDirInterpDevice(parcsr_A, hypre_IntArrayData(h_CF_marker), parcsr_S_device,
                                        coarse_pnts_global, 1, NULL,
                                        0, 0.0, 0, 3, &P);
    AP = hypre_ParCSRMatMatDevice(parcsr_A, P);
@@ -2217,7 +2224,7 @@ testAdd(HYPRE_ParCSRMatrix parcsr_A)
    hypre_ParCSRMatrixDestroy(parcsr_C);
    hypre_ParCSRMatrixDestroy(parcsr_C_h);
    hypre_ParCSRMatrixDestroy(parcsr_S_device);
-   hypre_TFree(h_CF_marker, HYPRE_MEMORY_HOST);
+   hypre_IntArrayDestroy(h_CF_marker);
 
    if (myid == 0 && !ierr)
    {
@@ -2228,18 +2235,18 @@ testAdd(HYPRE_ParCSRMatrix parcsr_A)
 void
 testFFFC(HYPRE_ParCSRMatrix parcsr_A)
 {
-   HYPRE_Real   max_row_sum = 1.0;
-   HYPRE_Real   strong_threshold = 0.25;
-   HYPRE_Int    debug_flag = 0;
-   HYPRE_Int    num_functions = 1;
-   HYPRE_Int   *h_CF_marker  = NULL;
-   HYPRE_Int    local_num_rows;
-   HYPRE_Int    first_local_row, last_local_row;
-   HYPRE_Int    first_local_col, last_local_col;
-   HYPRE_Int    *coarse_dof_func = NULL;
-   HYPRE_BigInt *coarse_pnts_global = NULL;
-   HYPRE_Int    ierr = 0;
-   HYPRE_Int    myid;
+   HYPRE_Real        max_row_sum = 1.0;
+   HYPRE_Real        strong_threshold = 0.25;
+   HYPRE_Int         debug_flag = 0;
+   HYPRE_Int         num_functions = 1;
+   hypre_IntArray   *h_CF_marker  = NULL;
+   HYPRE_Int         local_num_rows;
+   HYPRE_Int         first_local_row, last_local_row;
+   HYPRE_Int         first_local_col, last_local_col;
+   HYPRE_Int         *coarse_dof_func = NULL;
+   HYPRE_BigInt      *coarse_pnts_global = NULL;
+   HYPRE_Int         ierr = 0;
+   HYPRE_Int         myid;
 
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
    HYPRE_ParCSRMatrix parcsr_A_h;
@@ -2255,19 +2262,20 @@ testFFFC(HYPRE_ParCSRMatrix parcsr_A)
 
    /* Soc on DEVICE */
    hypre_BoomerAMGCreateSDevice(parcsr_A, strong_threshold, max_row_sum, num_functions, NULL, &parcsr_S_device);
-   h_CF_marker = hypre_TAlloc(HYPRE_Int, local_num_rows, HYPRE_MEMORY_HOST);
+   h_CF_marker = hypre_IntArrayCreate(local_num_rows);
+   hypre_IntArrayInitialize(h_CF_marker);
    hypre_BoomerAMGCoarsenPMISDevice(parcsr_S_device, parcsr_A, 0, debug_flag, &h_CF_marker);
    hypre_BoomerAMGCoarseParms(hypre_ParCSRMatrixComm(parcsr_A), local_num_rows, num_functions, NULL,
                               h_CF_marker, &coarse_dof_func, &coarse_pnts_global);
 
    /* FFFC on Device */
-   hypre_ParCSRMatrixGenerateFFFCDevice(parcsr_A, h_CF_marker, coarse_pnts_global, parcsr_S_device, &AFC, &AFF);
+   hypre_ParCSRMatrixGenerateFFFCDevice(parcsr_A, hypre_IntArrayData(h_CF_marker), coarse_pnts_global, parcsr_S_device, &AFC, &AFF);
 
    /* FFFC on Host */
    parcsr_A_h = hypre_ParCSRMatrixClone_v2(parcsr_A, 1, HYPRE_MEMORY_HOST);
    parcsr_S_h = hypre_ParCSRMatrixClone_v2(parcsr_S_device, 0, HYPRE_MEMORY_HOST);
    hypre_MatvecCommPkgCreate(parcsr_A_h);
-   hypre_ParCSRMatrixGenerateFFFC(parcsr_A_h, h_CF_marker, coarse_pnts_global, parcsr_S_h, &AFC_h, &AFF_h);
+   hypre_ParCSRMatrixGenerateFFFC(parcsr_A_h, hypre_IntArrayData(h_CF_marker), coarse_pnts_global, parcsr_S_h, &AFC_h, &AFF_h);
 
    /* AFF * AFC */
    W_h = hypre_ParCSRMatMatHost(AFF_h, AFC_h);
@@ -2286,6 +2294,7 @@ testFFFC(HYPRE_ParCSRMatrix parcsr_A)
 
    /* done */
    hypre_TFree(h_CF_marker, HYPRE_MEMORY_HOST);
+   hypre_IntArrayDestroy(h_CF_marker);
    hypre_ParCSRMatrixDestroy(parcsr_A_h);
    hypre_ParCSRMatrixDestroy(AFF);
    hypre_ParCSRMatrixDestroy(AFC);
