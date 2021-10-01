@@ -809,18 +809,23 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
          switch (stencil_size)
          {
             case 5:
+               hypre_printf("WM: debug - stencil size = 5\n");
                hypre_PFMGComputeDxyz_SS5 (i, A, cxyz, sqcxyz);
                break;
             case 9:
+               hypre_printf("WM: debug - stencil size = 9\n");
                hypre_PFMGComputeDxyz_SS9 (i, A, cxyz, sqcxyz);
                break;
             case 7:
+               hypre_printf("WM: debug - stencil size = 7\n");
                hypre_PFMGComputeDxyz_SS7 (i, A, cxyz, sqcxyz);
                break;
             case 19:
+               hypre_printf("WM: debug - stencil size = 19\n");
                hypre_PFMGComputeDxyz_SS19(i, A, cxyz, sqcxyz);
                break;
             case 27:
+               hypre_printf("WM: debug - stencil size = 27\n");
                hypre_PFMGComputeDxyz_SS27(i, A, cxyz, sqcxyz);
                break;
             default:
@@ -1051,50 +1056,66 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
    hypre_SetIndex3(index,  0,  1, 0);
    a_cn = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   // FIXME TODO HOW TO DO KOKKOS IN ONE BOXLOOP ?
-#if defined(HYPRE_USING_KOKKOS)
+   // FIXME TODO HOW TO DO KOKKOS (WM: and SYCL) IN ONE BOXLOOP ?
+#if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
 
    HYPRE_Real cxb = cxyz[0];
-   hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
+   hypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
                                 A_dbox, start, stride, Ai, cxb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai]);
+#if defined(HYPRE_USING_SYCL)
+      sum += tcx;
+#else
       cxb += tcx;
+#endif
    }
-   hypre_BoxLoop1ReductionEnd(Ai, cxb)
+   hypre_newBoxLoop1ReductionEnd(Ai, cxb)
 
    HYPRE_Real cyb = cxyz[1];
-   hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
+   hypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
                                 A_dbox, start, stride, Ai, cyb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcy = -diag * (a_cn[Ai] + a_cs[Ai]);
+#if defined(HYPRE_USING_SYCL)
+      sum += tcy;
+#else
       cyb += tcy;
+#endif
    }
-   hypre_BoxLoop1ReductionEnd(Ai, cyb)
+   hypre_newBoxLoop1ReductionEnd(Ai, cyb)
 
    HYPRE_Real sqcxb = sqcxyz[0];
-   hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
+   hypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
                                 A_dbox, start, stride, Ai, sqcxb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai]);
+#if defined(HYPRE_USING_SYCL)
+      sum += tcx * tcx;
+#else
       sqcxb += tcx * tcx;
+#endif
    }
-   hypre_BoxLoop1ReductionEnd(Ai, sqcxb)
+   hypre_newBoxLoop1ReductionEnd(Ai, sqcxb)
 
    HYPRE_Real sqcyb = sqcxyz[1];
-   hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
+   hypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
                                 A_dbox, start, stride, Ai, sqcyb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcy = -diag * (a_cn[Ai] + a_cs[Ai]);
+#if defined(HYPRE_USING_SYCL)
+      sum += tcy * tcy;
+#else
       sqcyb += tcy * tcy;
+#endif
    }
-   hypre_BoxLoop1ReductionEnd(Ai, sqcyb)
+   hypre_newBoxLoop1ReductionEnd(Ai, sqcyb)
 
-#else /* kokkos */
+#else // #if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
 
 #if defined(HYPRE_USING_RAJA)
    ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),sqcxb(sqcxyz[0]),sqcyb(sqcxyz[1]);
