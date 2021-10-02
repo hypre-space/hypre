@@ -2038,9 +2038,9 @@ testPMIS2(HYPRE_ParCSRMatrix parcsr_A)
    hypre_IntArrayInitialize(h_CF_marker);
    hypre_BoomerAMGCoarsenPMISDevice(parcsr_S_device, parcsr_A, 2, debug_flag, &h_CF_marker);
 
-   HYPRE_Int *coarse_pnts_global = NULL;
+   HYPRE_Int coarse_pnts_global[2];
    hypre_BoomerAMGCoarseParms(comm, local_num_rows, 1, NULL, h_CF_marker, NULL,
-         &coarse_pnts_global);
+         coarse_pnts_global);
 
    /* interp */
    hypre_ParCSRMatrix *P;
@@ -2136,9 +2136,9 @@ testTranspose(HYPRE_ParCSRMatrix parcsr_A)
    hypre_IntArrayInitialize(h_CF_marker);
    hypre_BoomerAMGCoarsenPMISDevice(parcsr_S_device, parcsr_A, 2, 0, &h_CF_marker);
    hypre_ParCSRMatrix *P, *PT, *P_h, *PT_h, *P2;
-   HYPRE_Int *coarse_pnts_global = NULL;
+   HYPRE_Int coarse_pnts_global[2];
    MPI_Comm comm = hypre_ParCSRMatrixComm(parcsr_A);
-   hypre_BoomerAMGCoarseParms(comm, local_num_rows, 1, NULL, h_CF_marker, NULL, &coarse_pnts_global);
+   hypre_BoomerAMGCoarseParms(comm, local_num_rows, 1, NULL, h_CF_marker, NULL, coarse_pnts_global);
    hypre_BoomerAMGBuildDirInterpDevice(parcsr_A, hypre_IntArrayData(h_CF_marker), parcsr_S_device,
                                        coarse_pnts_global, 1, NULL,
                                        0, 0.0, 0, 3, &P);
@@ -2203,9 +2203,9 @@ testAdd(HYPRE_ParCSRMatrix parcsr_A)
    hypre_IntArrayInitialize(h_CF_marker);
    hypre_BoomerAMGCoarsenPMISDevice(parcsr_S_device, parcsr_A, 2, 0, &h_CF_marker);
    hypre_ParCSRMatrix *P, *AP, *P_h, *AP_h;
-   HYPRE_Int *coarse_pnts_global = NULL;
+   HYPRE_Int coarse_pnts_global[2];
    MPI_Comm comm = hypre_ParCSRMatrixComm(parcsr_A);
-   hypre_BoomerAMGCoarseParms(comm, local_num_rows, 1, NULL, h_CF_marker, NULL, &coarse_pnts_global);
+   hypre_BoomerAMGCoarseParms(comm, local_num_rows, 1, NULL, h_CF_marker, NULL, coarse_pnts_global);
    hypre_BoomerAMGBuildDirInterpDevice(parcsr_A, hypre_IntArrayData(h_CF_marker), parcsr_S_device,
                                        coarse_pnts_global, 1, NULL,
                                        0, 0.0, 0, 3, &P);
@@ -2243,8 +2243,7 @@ testFFFC(HYPRE_ParCSRMatrix parcsr_A)
    HYPRE_Int         local_num_rows;
    HYPRE_Int         first_local_row, last_local_row;
    HYPRE_Int         first_local_col, last_local_col;
-   HYPRE_Int         *coarse_dof_func = NULL;
-   HYPRE_BigInt      *coarse_pnts_global = NULL;
+   HYPRE_BigInt      coarse_pnts_global[2];
    HYPRE_Int         ierr = 0;
    HYPRE_Int         myid;
 
@@ -2266,7 +2265,7 @@ testFFFC(HYPRE_ParCSRMatrix parcsr_A)
    hypre_IntArrayInitialize(h_CF_marker);
    hypre_BoomerAMGCoarsenPMISDevice(parcsr_S_device, parcsr_A, 0, debug_flag, &h_CF_marker);
    hypre_BoomerAMGCoarseParms(hypre_ParCSRMatrixComm(parcsr_A), local_num_rows, num_functions, NULL,
-                              h_CF_marker, &coarse_dof_func, &coarse_pnts_global);
+                              h_CF_marker, NULL, coarse_pnts_global);
 
    /* FFFC on Device */
    hypre_ParCSRMatrixGenerateFFFCDevice(parcsr_A, hypre_IntArrayData(h_CF_marker), coarse_pnts_global, parcsr_S_device, &AFC, &AFF);

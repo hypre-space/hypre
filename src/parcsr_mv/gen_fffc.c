@@ -78,7 +78,7 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
    HYPRE_BigInt       *big_convert_offd = NULL;
    HYPRE_BigInt       *big_buf_data = NULL;
 
-   HYPRE_BigInt        total_global_fpts, total_global_cpts, *fpts_starts;
+   HYPRE_BigInt        total_global_fpts, total_global_cpts, fpts_starts[2];
    HYPRE_Int           my_id, num_procs, num_sends;
    HYPRE_Int           d_count_FF, d_count_FC, o_count_FF, o_count_FC;
    HYPRE_Int           n_Fpts;
@@ -165,7 +165,6 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
          n_Fpts = fpt_array[num_threads];
          big_Fpts = n_Fpts;
 
-         fpts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
          hypre_MPI_Scan(&big_Fpts, fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
          fpts_starts[0] = fpts_starts[1] - big_Fpts;
          if (my_id == num_procs - 1)
@@ -466,7 +465,6 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
    hypre_TFree(marker_offd, HYPRE_MEMORY_HOST);
    hypre_TFree(cpt_array, HYPRE_MEMORY_HOST);
    hypre_TFree(fpt_array, HYPRE_MEMORY_HOST);
-   hypre_TFree(fpts_starts, HYPRE_MEMORY_HOST);
 
    *A_FC_ptr = A_FC;
    *A_FF_ptr = A_FF;
@@ -543,7 +541,7 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
    HYPRE_BigInt       *big_buf_data = NULL;
 
    HYPRE_BigInt        total_global_fpts, total_global_cpts, total_global_new_fpts;
-   HYPRE_BigInt       *fpts_starts, *new_fpts_starts;
+   HYPRE_BigInt        fpts_starts[2], new_fpts_starts[2];
    HYPRE_Int           my_id, num_procs, num_sends;
    HYPRE_Int           d_count_FF, d_count_FC, o_count_FF, o_count_FC;
    HYPRE_Int           n_Fpts;
@@ -640,8 +638,6 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
          big_Fpts = n_Fpts;
          big_new_Fpts = n_new_Fpts;
 
-         fpts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-         new_fpts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
          hypre_MPI_Scan(&big_Fpts, fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
          hypre_MPI_Scan(&big_new_Fpts, new_fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
          fpts_starts[0] = fpts_starts[1] - big_Fpts;
@@ -989,8 +985,6 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
    hypre_TFree(cpt_array, HYPRE_MEMORY_HOST);
    hypre_TFree(fpt_array, HYPRE_MEMORY_HOST);
    hypre_TFree(new_fpt_array, HYPRE_MEMORY_HOST);
-   hypre_TFree(fpts_starts, HYPRE_MEMORY_HOST);
-   hypre_TFree(new_fpts_starts, HYPRE_MEMORY_HOST);
 
    *A_FC_ptr = A_FC;
    *A_FF_ptr = A_FF;
@@ -1068,7 +1062,7 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
    HYPRE_BigInt       *big_buf_data = NULL;
 
    HYPRE_BigInt        total_global_fpts, total_global_cpts, total_global_new_fpts;
-   HYPRE_BigInt       *fpts_starts, *new_fpts_starts;
+   HYPRE_BigInt        fpts_starts[2], new_fpts_starts[2];
    HYPRE_Int           my_id, num_procs, num_sends;
    HYPRE_Int           d_count_FF, d_count_FC, o_count_FF, o_count_FC;
    HYPRE_Int           n_Fpts;
@@ -1165,8 +1159,6 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
          big_Fpts = n_Fpts;
          big_new_Fpts = n_new_Fpts;
 
-         fpts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-         new_fpts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
          hypre_MPI_Scan(&big_Fpts, fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
          hypre_MPI_Scan(&big_new_Fpts, new_fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
          fpts_starts[0] = fpts_starts[1] - big_Fpts;
@@ -1533,8 +1525,6 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
    hypre_TFree(cpt_array, HYPRE_MEMORY_HOST);
    hypre_TFree(fpt_array, HYPRE_MEMORY_HOST);
    hypre_TFree(new_fpt_array, HYPRE_MEMORY_HOST);
-   hypre_TFree(fpts_starts, HYPRE_MEMORY_HOST);
-   hypre_TFree(new_fpts_starts, HYPRE_MEMORY_HOST);
 
    *A_FC_ptr = A_FC;
    *A_FF_ptr = A_FF;

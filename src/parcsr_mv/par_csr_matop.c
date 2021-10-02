@@ -4145,12 +4145,8 @@ hypre_ParvecBdiagInvScal( hypre_ParVector     *b,
    HYPRE_Int num_rows_recv = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs);
    hypre_ParCSRCommHandle  *comm_handle;
 
-   HYPRE_BigInt *part = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(part, hypre_ParVectorPartitioning(b), HYPRE_BigInt, 2,
-                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-
    hypre_ParVector *bnew = hypre_ParVectorCreate( hypre_ParVectorComm(b),
-                                                  hypre_ParVectorGlobalSize(b), part );
+                                                  hypre_ParVectorGlobalSize(b), hypre_ParVectorPartitioning(b) );
    hypre_ParVectorInitialize(bnew);
    hypre_Vector    *bnew_local      = hypre_ParVectorLocalVector(bnew);
    HYPRE_Complex   *bnew_local_data = hypre_VectorData(bnew_local);
@@ -5590,7 +5586,7 @@ hypre_ExchangeExternalRowsWait(void *vrequest)
 HYPRE_Int
 hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
                                       HYPRE_Int           *CF_marker,
-                                      HYPRE_BigInt        *cpts_starts_in,
+                                      HYPRE_BigInt        *cpts_starts,
                                       const char          *job,
                                       hypre_ParCSRMatrix **B_ptr,
                                       HYPRE_Real           strength_thresh)
@@ -5625,7 +5621,7 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
    HYPRE_BigInt        B_nrow_global, B_ncol_global;
    HYPRE_Int           A_nlocal, B_nrow_local, B_ncol_local,
                        B_nnz_diag, B_nnz_offd;
-   HYPRE_BigInt        total_global_fpts, total_global_cpts, *fpts_starts, *cpts_starts;
+   HYPRE_BigInt        total_global_fpts, total_global_cpts, fpts_starts[2];
    HYPRE_Int           nf_local, nc_local;
    HYPRE_BigInt        big_nf_local;
    HYPRE_Int           row_set, col_set;
@@ -5649,13 +5645,6 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
     *               assuming cpts_starts is given */
    if (row_set == 1 || col_set == 1)
    {
-      /* copy cpts_starts first */
-      HYPRE_Int len;
-      len = 2;
-      cpts_starts = hypre_TAlloc(HYPRE_BigInt, len, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(cpts_starts, cpts_starts_in, HYPRE_BigInt, len,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-
       if (my_id == (num_procs -1))
       {
          total_global_cpts = cpts_starts[1];
@@ -5676,7 +5665,6 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
          }
       }
       big_nf_local = (HYPRE_BigInt) nf_local;
-      fpts_starts = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
       hypre_MPI_Scan(&big_nf_local, fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
       fpts_starts[0] = fpts_starts[1] - nf_local;
       if (my_id == num_procs - 1)

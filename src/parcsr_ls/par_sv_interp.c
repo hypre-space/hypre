@@ -284,7 +284,7 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
    HYPRE_Real      *offd_vec_data;
 
    HYPRE_Int        orig_nf;
-   HYPRE_BigInt    *new_col_starts;
+   HYPRE_BigInt     new_col_starts[2];
    HYPRE_Int        num_functions = *nf;
    HYPRE_Int       *c_dof_func = hypre_IntArrayData(*coarse_dof_func);
    HYPRE_Int        modify = 0;
@@ -1331,7 +1331,6 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
 
       /* assumes that unknowns are together on a procsessor with
        * nodal coarsening  */
-      new_col_starts =  hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
       new_col_starts[0] = (col_starts[0]/(HYPRE_BigInt)num_functions)*(HYPRE_BigInt)new_nf ;
       new_col_starts[1] = (col_starts[1]/(HYPRE_BigInt)num_functions)*(HYPRE_BigInt)new_nf;
 
@@ -1344,7 +1343,6 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
       g_nc = hypre_ParCSRMatrixGlobalNumCols(*P);
 
       /* copy col starts */
-      new_col_starts =  hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
       new_col_starts[0] = col_starts[0];
       new_col_starts[1] = col_starts[1];
    }
@@ -1372,8 +1370,6 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
    P_offd = hypre_ParCSRMatrixOffd(new_P);
    hypre_CSRMatrixData(P_offd) = P_offd_data_new;
    hypre_CSRMatrixI(P_offd) = P_offd_i_new;
-
-   hypre_TFree(new_col_starts, HYPRE_MEMORY_HOST);
 
    /* If parallel we need to do the col map offd! */
    if (num_procs > 1)
