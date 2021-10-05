@@ -1025,6 +1025,7 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
    hypre_MapToCoarseIndex(cdstride, NULL, cstride, ndim); /* Should be cdstride = 1 */
 
    b = 0;
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", "Computation");
    for (Mj = 0; Mj < hypre_StructMatrixRanNBoxes(M); Mj++)
    {
       Mb = hypre_StructMatrixRanBoxnum(M, Mj);
@@ -1061,7 +1062,6 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
 
       /* Set data pointers a.tptrs[] and a.mptr[].  For a.tptrs[], use Mstart to
        * compute an offset from the beginning of the databox data. */
-      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Computation");
       for (e = 0; e < size; e++)
       {
          for (i = 0; i < na[e]; i++)
@@ -1107,45 +1107,36 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
                      break;
                }
             }
-         }
-
-         /* TODO: Add DEVICE_VAR */
-         hypre_BoxLoop3Begin(ndim, loop_size,
-                             Mdbox, Mdstart, Mdstride, Mi,
-                             fdbox, fdstart, fdstride, fi,
-                             cdbox, cdstart, cdstride, ci);
-         {
-            HYPRE_Int      i, t;
-            HYPRE_Complex  prod;
-            HYPRE_Complex  pprod;
-
-            for (i = 0; i < na[e]; i++)
-            {
-               prod = a[e][i].cprod;
-               for (t = 0; t < nterms; t++)
-               {
-                  switch (a[e][i].types[t])
-                  {
-                     case 0: /* variable coefficient on fine data space */
-                        pprod = a[e][i].tptrs[t][fi];
-                        break;
-
-                     case 1: /* variable coefficient on coarse data space */
-                        pprod = a[e][i].tptrs[t][ci];
-                        break;
-
-                     case 2: /* constant coefficient - multiply by bit mask value t */
-                        pprod = (((HYPRE_Int) a[e][i].tptrs[t][fi]) >> t) & 1;
-                        break;
-                  }
-                  prod *= pprod;
-               }
-               a[e][i].mptr[Mi] += prod;
-            }
-         }
-         hypre_BoxLoop3End(Mi,fi,ci);
+         } /* end loop over a entries */
       } /* end loop over M stencil entries */
+
+      /* Compute M coefficients for box Mb */
+      switch (nterms)
+      {
+         case 2:
+            hypre_StructMatmultCompute_core_double(a, na, size, ndim, loop_size,
+                                                   fdbox, fdstart, fdstride,
+                                                   cdbox, cdstart, cdstride,
+                                                   Mdbox, Mdstart, Mdstride);
+            break;
+
+         case 3:
+            hypre_StructMatmultCompute_core_triple(a, na, size, ndim, loop_size,
+                                                   fdbox, fdstart, fdstride,
+                                                   cdbox, cdstart, cdstride,
+                                                   Mdbox, Mdstart, Mdstride);
+            break;
+
+         default:
+            hypre_StructMatmultCompute_core_generic(a, na, size,
+                                                    nterms, ndim, loop_size,
+                                                    fdbox, fdstart, fdstride,
+                                                    cdbox, cdstart, cdstride,
+                                                    Mdbox, Mdstart, Mdstride);
+            break;
+      }
    } /* end loop over matrix M range boxes */
+   HYPRE_ANNOTATE_REGION_END("%s", "Computation");
 
    /* Restore the matrices */
    for (m = 0; m < nmatrices; m++)
@@ -1160,6 +1151,1018 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_StructMatmultCompute_core_double
+ *
+ * Core function for computing the double product of coefficients.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatmultCompute_core_double( hypre_StructMatmultHelper **a,
+                                        HYPRE_Int   *na,
+                                        HYPRE_Int    size,
+                                        HYPRE_Int    ndim,
+                                        hypre_Index  loop_size,
+                                        hypre_Box   *fdbox,
+                                        hypre_Index  fdstart,
+                                        hypre_Index  fdstride,
+                                        hypre_Box   *cdbox,
+                                        hypre_Index  cdstart,
+                                        hypre_Index  cdstride,
+                                        hypre_Box   *Mdbox,
+                                        hypre_Index  Mdstart,
+                                        hypre_Index  Mdstride )
+{
+   /* TODO */
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_StructMatmultCompute_core_triple
+ *
+ * Core function for computing the triple product of coefficients
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatmultCompute_core_triple( hypre_StructMatmultHelper **a,
+                                        HYPRE_Int   *na,
+                                        HYPRE_Int    size,
+                                        HYPRE_Int    ndim,
+                                        hypre_Index  loop_size,
+                                        hypre_Box   *fdbox,
+                                        hypre_Index  fdstart,
+                                        hypre_Index  fdstride,
+                                        hypre_Box   *cdbox,
+                                        hypre_Index  cdstart,
+                                        hypre_Index  cdstride,
+                                        hypre_Box   *Mdbox,
+                                        hypre_Index  Mdstart,
+                                        hypre_Index  Mdstride )
+{
+   HYPRE_Int  *order;
+   HYPRE_Int   i, e;
+
+   order = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
+   for (e = 0; e < size; e++)
+   {
+      for (i = 0; i < na[e]; i++)
+      {
+         if ( a[e][i].types[0] == 0 &&
+              a[e][i].types[1] == 0 &&
+              a[e][i].types[2] == 0 )
+         {
+            /* VCF * VCF * VCF */
+            order[0] = 0;
+            order[1] = 1;
+            order[2] = 2;
+            hypre_StructMatmultCompute_core_1t(a, 1, &e, &i, &order,
+                                               ndim, loop_size,
+                                               fdbox, fdstart, fdstride,
+                                               Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 0 &&
+                   a[e][i].types[1] == 0 &&
+                   a[e][i].types[2] == 1 )
+         {
+            /* VCF * VCF * VCC */
+            order[0] = 0;
+            order[1] = 1;
+            order[2] = 2;
+            hypre_StructMatmultCompute_core_2t(a, 1, &e, &i, &order,
+                                               ndim, loop_size,
+                                               fdbox, fdstart, fdstride,
+                                               cdbox, cdstart, cdstride,
+                                               Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 0 &&
+                   a[e][i].types[1] == 0 &&
+                   a[e][i].types[2] == 2 )
+         {
+            /* VCF * VCF * CCF */
+            order[0] = 0;
+            order[1] = 1;
+            order[2] = 2;
+            hypre_StructMatmultCompute_core_1tb(a, 1, &e, &i, &order,
+                                                ndim, loop_size,
+                                                fdbox, fdstart, fdstride,
+                                                Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 0 &&
+                   a[e][i].types[1] == 1 &&
+                   a[e][i].types[2] == 0 )
+         {
+            /* VCF * VCC * VCF */
+            order[0] = 0;
+            order[1] = 2;
+            order[2] = 1;
+            hypre_StructMatmultCompute_core_2t(a, 1, &e, &i, &order,
+                                               ndim, loop_size,
+                                               fdbox, fdstart, fdstride,
+                                               cdbox, cdstart, cdstride,
+                                               Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 0 &&
+                   a[e][i].types[1] == 1 &&
+                   a[e][i].types[2] == 1 )
+         {
+            /* VCF * VCC * VCC */
+            order[0] = 1;
+            order[1] = 2;
+            order[2] = 0;
+            hypre_StructMatmultCompute_core_2t(a, 1, &e, &i, &order,
+                                               ndim, loop_size,
+                                               cdbox, cdstart, cdstride,
+                                               fdbox, fdstart, fdstride,
+                                               Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 0 &&
+                   a[e][i].types[1] == 1 &&
+                   a[e][i].types[2] == 2 )
+         {
+            /* VCF * VCC * CCF */
+            order[0] = 0;
+            order[1] = 1;
+            order[2] = 2;
+            hypre_StructMatmultCompute_core_2tb(a, 1, &e, &i, &order,
+                                                ndim, loop_size,
+                                                fdbox, fdstart, fdstride,
+                                                cdbox, cdstart, cdstride,
+                                                Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 0 &&
+                   a[e][i].types[1] == 2 &&
+                   a[e][i].types[2] == 0 )
+         {
+            /* VCF * CCF * VCF */
+            order[0] = 0;
+            order[1] = 2;
+            order[2] = 1;
+            hypre_StructMatmultCompute_core_1tb(a, 1, &e, &i, &order,
+                                                ndim, loop_size,
+                                                fdbox, fdstart, fdstride,
+                                                Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 0 &&
+                   a[e][i].types[1] == 2 &&
+                   a[e][i].types[2] == 1 )
+         {
+            /* VCF * CCF * VCC */
+            order[0] = 0;
+            order[1] = 2;
+            order[2] = 1;
+            hypre_StructMatmultCompute_core_2tb(a, 1, &e, &i, &order,
+                                                ndim, loop_size,
+                                                fdbox, fdstart, fdstride,
+                                                cdbox, cdstart, cdstride,
+                                                Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 0 &&
+                   a[e][i].types[1] == 2 &&
+                   a[e][i].types[2] == 2 )
+         {
+            /* VCF * CCF * CCF */
+            order[0] = 0;
+            order[1] = 1;
+            order[2] = 2;
+            hypre_StructMatmultCompute_core_1tbb(a, 1, &e, &i, &order,
+                                                 ndim, loop_size,
+                                                 fdbox, fdstart, fdstride,
+                                                 Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 1 &&
+                   a[e][i].types[1] == 0 &&
+                   a[e][i].types[2] == 0 )
+         {
+            /* VCC * VCF * VCF */
+            order[0] = 1;
+            order[1] = 2;
+            order[2] = 0;
+            hypre_StructMatmultCompute_core_2t(a, 1, &e, &i, &order,
+                                               ndim, loop_size,
+                                               fdbox, fdstart, fdstride,
+                                               cdbox, cdstart, cdstride,
+                                               Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 1 &&
+                   a[e][i].types[1] == 0 &&
+                   a[e][i].types[2] == 1 )
+         {
+            /* VCC * VCF * VCC */
+            order[0] = 0;
+            order[1] = 2;
+            order[2] = 1;
+            hypre_StructMatmultCompute_core_2t(a, 1, &e, &i, &order,
+                                               ndim, loop_size,
+                                               cdbox, cdstart, cdstride,
+                                               fdbox, fdstart, fdstride,
+                                               Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 1 &&
+                   a[e][i].types[1] == 0 &&
+                   a[e][i].types[2] == 2 )
+         {
+            /* VCC * VCF * CCF */
+            order[0] = 1;
+            order[1] = 0;
+            order[2] = 2;
+            hypre_StructMatmultCompute_core_2tb(a, 1, &e, &i, &order,
+                                                ndim, loop_size,
+                                                fdbox, fdstart, fdstride,
+                                                cdbox, cdstart, cdstride,
+                                                Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 1 &&
+                   a[e][i].types[1] == 1 &&
+                   a[e][i].types[2] == 0 )
+         {
+            /* VCC * VCC * VCF */
+            order[0] = 0;
+            order[1] = 1;
+            order[2] = 2;
+            hypre_StructMatmultCompute_core_2t(a, 1, &e, &i, &order,
+                                               ndim, loop_size,
+                                               cdbox, cdstart, cdstride,
+                                               fdbox, fdstart, fdstride,
+                                               Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 1 &&
+                   a[e][i].types[1] == 1 &&
+                   a[e][i].types[2] == 1 )
+         {
+            /* VCC * VCC * VCC */
+            order[0] = 0;
+            order[1] = 1;
+            order[2] = 2;
+            hypre_StructMatmultCompute_core_1t(a, 1, &e, &i, &order,
+                                               ndim, loop_size,
+                                               cdbox, cdstart, cdstride,
+                                               Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 1 &&
+                   a[e][i].types[1] == 1 &&
+                   a[e][i].types[2] == 2 )
+         {
+            /* VCC * VCC * CCF */
+            order[0] = 0;
+            order[1] = 1;
+            order[2] = 2;
+            hypre_StructMatmultCompute_core_2etb(a, 1, &e, &i, &order,
+                                                 ndim, loop_size,
+                                                 fdbox, fdstart, fdstride,
+                                                 cdbox, cdstart, cdstride,
+                                                 Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 1 &&
+                   a[e][i].types[1] == 2 &&
+                   a[e][i].types[2] == 0 )
+         {
+            /* VCC * CCF * VCF */
+            order[0] = 2;
+            order[1] = 0;
+            order[2] = 1;
+            hypre_StructMatmultCompute_core_2tb(a, 1, &e, &i, &order,
+                                                ndim, loop_size,
+                                                fdbox, fdstart, fdstride,
+                                                cdbox, cdstart, cdstride,
+                                                Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 1 &&
+                   a[e][i].types[1] == 2 &&
+                   a[e][i].types[2] == 1 )
+         {
+            /* VCC * CCF * VCC */
+            order[0] = 0;
+            order[1] = 2;
+            order[2] = 1;
+            hypre_StructMatmultCompute_core_2etb(a, 1, &e, &i, &order,
+                                                 ndim, loop_size,
+                                                 fdbox, fdstart, fdstride,
+                                                 cdbox, cdstart, cdstride,
+                                                 Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 1 &&
+                   a[e][i].types[1] == 2 &&
+                   a[e][i].types[2] == 2 )
+         {
+            /* VCC * CCF * CCF */
+            order[0] = 0;
+            order[1] = 1;
+            order[2] = 2;
+            hypre_StructMatmultCompute_core_2tbb(a, 1, &e, &i, &order,
+                                                 ndim, loop_size,
+                                                 fdbox, fdstart, fdstride,
+                                                 cdbox, cdstart, cdstride,
+                                                 Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 2 &&
+                   a[e][i].types[1] == 0 &&
+                   a[e][i].types[2] == 0 )
+         {
+            /* CCF * VCF * VCF */
+            order[0] = 1;
+            order[1] = 2;
+            order[2] = 0;
+            hypre_StructMatmultCompute_core_1tb(a, 1, &e, &i, &order,
+                                                ndim, loop_size,
+                                                fdbox, fdstart, fdstride,
+                                                Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 2 &&
+                   a[e][i].types[1] == 0 &&
+                   a[e][i].types[2] == 1 )
+         {
+            /* CCF * VCF * VCC */
+            order[0] = 1;
+            order[1] = 2;
+            order[2] = 0;
+            hypre_StructMatmultCompute_core_2tb(a, 1, &e, &i, &order,
+                                                ndim, loop_size,
+                                                fdbox, fdstart, fdstride,
+                                                cdbox, cdstart, cdstride,
+                                                Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 2 &&
+                   a[e][i].types[1] == 0 &&
+                   a[e][i].types[2] == 2 )
+         {
+            /* CCF * VCF * CCF */
+            order[0] = 1;
+            order[1] = 0;
+            order[2] = 2;
+            hypre_StructMatmultCompute_core_1tbb(a, 1, &e, &i, &order,
+                                                 ndim, loop_size,
+                                                 fdbox, fdstart, fdstride,
+                                                 Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 2 &&
+                   a[e][i].types[1] == 1 &&
+                   a[e][i].types[2] == 0 )
+         {
+            /* CCF * VCC * VCF */
+            order[0] = 2;
+            order[1] = 1;
+            order[2] = 0;
+            hypre_StructMatmultCompute_core_2tb(a, 1, &e, &i, &order,
+                                                ndim, loop_size,
+                                                fdbox, fdstart, fdstride,
+                                                cdbox, cdstart, cdstride,
+                                                Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 2 &&
+                   a[e][i].types[1] == 1 &&
+                   a[e][i].types[2] == 1 )
+         {
+            /* CCF * VCC * VCC */
+            order[0] = 1;
+            order[1] = 2;
+            order[2] = 0;
+            hypre_StructMatmultCompute_core_2etb(a, 1, &e, &i, &order,
+                                                 ndim, loop_size,
+                                                 fdbox, fdstart, fdstride,
+                                                 cdbox, cdstart, cdstride,
+                                                 Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 2 &&
+                   a[e][i].types[1] == 1 &&
+                   a[e][i].types[2] == 2 )
+         {
+            /* CCF * VCC * CCF */
+            order[0] = 1;
+            order[1] = 0;
+            order[2] = 2;
+            hypre_StructMatmultCompute_core_2tbb(a, 1, &e, &i, &order,
+                                                 ndim, loop_size,
+                                                 fdbox, fdstart, fdstride,
+                                                 cdbox, cdstart, cdstride,
+                                                 Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 2 &&
+                   a[e][i].types[1] == 2 &&
+                   a[e][i].types[2] == 0 )
+         {
+            /* CCF * CCF * VCF */
+            order[0] = 2;
+            order[1] = 0;
+            order[2] = 1;
+            hypre_StructMatmultCompute_core_1tbb(a, 1, &e, &i, &order,
+                                                 ndim, loop_size,
+                                                 fdbox, fdstart, fdstride,
+                                                 Mdbox, Mdstart, Mdstride);
+         }
+         else if ( a[e][i].types[0] == 2 &&
+                   a[e][i].types[1] == 2 &&
+                   a[e][i].types[2] == 1 )
+         {
+            /* CCF * CCF * VCC */
+            order[0] = 2;
+            order[1] = 0;
+            order[2] = 1;
+            hypre_StructMatmultCompute_core_2tbb(a, 1, &e, &i, &order,
+                                                 ndim, loop_size,
+                                                 fdbox, fdstart, fdstride,
+                                                 cdbox, cdstart, cdstride,
+                                                 Mdbox, Mdstart, Mdstride);
+         }
+         else
+         {
+            /* CCF * CCF * CCF */
+            order[0] = 0;
+            order[1] = 1;
+            order[2] = 2;
+            hypre_StructMatmultCompute_core_1tbbb(a, 1, &e, &i, &order,
+                                                  ndim, loop_size,
+                                                  fdbox, fdstart, fdstride,
+                                                  Mdbox, Mdstart, Mdstride);
+         }
+      }
+   }
+   hypre_TFree(order, HYPRE_MEMORY_HOST);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_StructMatmultCompute_core_generic
+ *
+ * Core function for computing the product of "nterms" coefficients.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatmultCompute_core_generic( hypre_StructMatmultHelper **a,
+                                         HYPRE_Int   *na,
+                                         HYPRE_Int    size,
+                                         HYPRE_Int    nterms,
+                                         HYPRE_Int    ndim,
+                                         hypre_Index  loop_size,
+                                         hypre_Box   *fdbox,
+                                         hypre_Index  fdstart,
+                                         hypre_Index  fdstride,
+                                         hypre_Box   *cdbox,
+                                         hypre_Index  cdstart,
+                                         hypre_Index  cdstride,
+                                         hypre_Box   *Mdbox,
+                                         hypre_Index  Mdstart,
+                                         hypre_Index  Mdstride )
+{
+   /* TODO: add DEVICE_VAR */
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       fdbox, fdstart, fdstride, fi,
+                       cdbox, cdstart, cdstride, ci);
+   {
+      HYPRE_Int      e, i, t;
+      HYPRE_Complex  prod;
+      HYPRE_Complex  pprod;
+
+      for (e = 0; e < size; e++)
+      {
+         for (i = 0; i < na[e]; i++)
+         {
+            prod = a[e][i].cprod;
+            for (t = 0; t < nterms; t++)
+            {
+               switch (a[e][i].types[t])
+               {
+                  case 0: /* variable coefficient on fine data space */
+                     pprod = a[e][i].tptrs[t][fi];
+                     break;
+
+                  case 1: /* variable coefficient on coarse data space */
+                     pprod = a[e][i].tptrs[t][ci];
+                     break;
+
+                  case 2: /* constant coefficient - multiply by bit mask value t */
+                     pprod = (((HYPRE_Int) a[e][i].tptrs[t][fi]) >> t) & 1;
+                     break;
+               }
+               prod *= pprod;
+            }
+            a[e][i].mptr[Mi] += prod;
+         }
+      }
+   }
+   hypre_BoxLoop3End(Mi,fi,ci);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_StructMatmultCompute_core_1t
+ *
+ * Core function for computing the triple product of variable coefficients
+ * living on the same data space.
+ *
+ * "1t" means:
+ *   "1": single data space.
+ *   "t": triple product.
+ *
+ * This can be used for the scenarios:
+ *   1) VCF * VCF * CCF.
+ *   2) VCC * VCC * CCF.
+ *
+ * where:
+ *   1) VCF stands for "Variable Coefficient on Fine data space".
+ *   2) VCC stands for "Variable Coefficient on Coarse data space".
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatmultCompute_core_1t( hypre_StructMatmultHelper **a,
+                                    HYPRE_Int    ncomponents,
+                                    HYPRE_Int   *entries,
+                                    HYPRE_Int   *indices,
+                                    HYPRE_Int  **order,
+                                    HYPRE_Int    ndim,
+                                    hypre_Index  loop_size,
+                                    hypre_Box   *gdbox,
+                                    hypre_Index  gdstart,
+                                    hypre_Index  gdstride,
+                                    hypre_Box   *Mdbox,
+                                    hypre_Index  Mdstart,
+                                    hypre_Index  Mdstride )
+
+{
+   hypre_BoxLoop2Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi);
+   {
+      HYPRE_Int  *o;
+      HYPRE_Int   e, i, k;
+
+      for (k = 0; k < ncomponents; k++)
+      {
+         e = entries[k];
+         i = indices[k];
+         o = order[k];
+
+         a[e][i].mptr[Mi] += a[e][i].cprod*
+                             a[e][i].tptrs[o[0]][gi]*
+                             a[e][i].tptrs[o[1]][gi]*
+                             a[e][i].tptrs[o[2]][gi];
+      }
+   }
+   hypre_BoxLoop2End(Mi,gi);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_StructMatmultCompute_core_1tb
+ *
+ * Core function for computing the triple product of two variable coefficients
+ * living on the same data space and one constant coefficient that requires
+ * the usage of a bitmask.
+ *
+ * "1tb" means:
+ *   "1": single data space.
+ *   "t": triple product.
+ *   "b": single bitmask.
+ *
+ * This can be used for the scenarios:
+ *   1) VCF * VCF * CCF.
+ *   2) VCF * CCF * VCF.
+ *   3) CCF * VCF * VCF.
+ *
+ * where:
+ *   1) VCF stands for "Variable Coefficient on Fine data space".
+ *   2) CCF stands for "Constant Coefficient on Fine data space".
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatmultCompute_core_1tb( hypre_StructMatmultHelper **a,
+                                     HYPRE_Int    ncomponents,
+                                     HYPRE_Int   *entries,
+                                     HYPRE_Int   *indices,
+                                     HYPRE_Int  **order,
+                                     HYPRE_Int    ndim,
+                                     hypre_Index  loop_size,
+                                     hypre_Box   *gdbox,
+                                     hypre_Index  gdstart,
+                                     hypre_Index  gdstride,
+                                     hypre_Box   *Mdbox,
+                                     hypre_Index  Mdstart,
+                                     hypre_Index  Mdstride )
+
+{
+   hypre_BoxLoop2Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi);
+   {
+      HYPRE_Int  *o;
+      HYPRE_Int   e, i, k;
+
+      for (k = 0; k < ncomponents; k++)
+      {
+         e = entries[k];
+         i = indices[k];
+         o = order[k];
+
+         a[e][i].mptr[Mi] += a[e][i].cprod*
+                             a[e][i].tptrs[o[0]][gi]*
+                             a[e][i].tptrs[o[1]][gi]*
+                             ((((HYPRE_Int) a[e][i].tptrs[o[2]][gi]) >> o[2]) & 1);
+      }
+   }
+   hypre_BoxLoop2End(Mi,gi);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_StructMatmultCompute_core_1tbb
+ *
+ * Core function for computing the product of three coefficients that
+ * live on the same data space. One is a variable coefficient and the other
+ * two are constant coefficient that require the usage of a bitmask.
+ *
+ * "1tbb" means:
+ *   "1" : single data space.
+ *   "t" : triple product.
+ *   "bb": two bitmasks.
+ *
+ * This can be used for the scenarios:
+ *   1) VCF * CCF * CCF.
+ *   2) CCF * VCF * CCF.
+ *   3) CCF * CCF * VCF.
+ *
+ * where:
+ *   1) VCF stands for "Variable Coefficient on Fine data space".
+ *   2) CCF stands for "Constant Coefficient on Fine data space".
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatmultCompute_core_1tbb( hypre_StructMatmultHelper **a,
+                                      HYPRE_Int    ncomponents,
+                                      HYPRE_Int   *entries,
+                                      HYPRE_Int   *indices,
+                                      HYPRE_Int  **order,
+                                      HYPRE_Int    ndim,
+                                      hypre_Index  loop_size,
+                                      hypre_Box   *gdbox,
+                                      hypre_Index  gdstart,
+                                      hypre_Index  gdstride,
+                                      hypre_Box   *Mdbox,
+                                      hypre_Index  Mdstart,
+                                      hypre_Index  Mdstride )
+
+{
+   hypre_BoxLoop2Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi);
+   {
+      HYPRE_Int  *o;
+      HYPRE_Int   e, i, k;
+
+      for (k = 0; k < ncomponents; k++)
+      {
+         e = entries[k];
+         i = indices[k];
+         o = order[k];
+
+         a[e][i].mptr[Mi] += a[e][i].cprod*
+                             a[e][i].tptrs[o[0]][gi]*
+                             ((((HYPRE_Int) a[e][i].tptrs[o[1]][gi]) >> o[1]) & 1)*
+                             ((((HYPRE_Int) a[e][i].tptrs[o[2]][gi]) >> o[2]) & 1);
+      }
+   }
+   hypre_BoxLoop2End(Mi,gi);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_StructMatmultCompute_core_1tbbb
+ *
+ * Core function for computing the product of three constant coefficients that
+ * live on the same data space and that require the usage of a bitmask.
+ *
+ * "1tbb" means:
+ *   "1" : single data space.
+ *   "t" : triple product.
+ *   "bbb": three bitmasks.
+ *
+ * This can be used for the scenario:
+ *   1) CCF * CCF * CCF.
+ *
+ * where:
+ *   1) CCF stands for "Constant Coefficient on Fine data space".
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatmultCompute_core_1tbbb( hypre_StructMatmultHelper **a,
+                                       HYPRE_Int    ncomponents,
+                                       HYPRE_Int   *entries,
+                                       HYPRE_Int   *indices,
+                                       HYPRE_Int  **order,
+                                       HYPRE_Int    ndim,
+                                       hypre_Index  loop_size,
+                                       hypre_Box   *gdbox,
+                                       hypre_Index  gdstart,
+                                       hypre_Index  gdstride,
+                                       hypre_Box   *Mdbox,
+                                       hypre_Index  Mdstart,
+                                       hypre_Index  Mdstride )
+
+{
+   hypre_BoxLoop2Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi);
+   {
+      HYPRE_Int  *o;
+      HYPRE_Int   e, i, k;
+
+      for (k = 0; k < ncomponents; k++)
+      {
+         e = entries[k];
+         i = indices[k];
+         o = order[k];
+
+         a[e][i].mptr[Mi] += a[e][i].cprod*
+                             ((((HYPRE_Int) a[e][i].tptrs[o[0]][gi]) >> o[0]) & 1)*
+                             ((((HYPRE_Int) a[e][i].tptrs[o[1]][gi]) >> o[1]) & 1)*
+                             ((((HYPRE_Int) a[e][i].tptrs[o[2]][gi]) >> o[2]) & 1);
+      }
+   }
+   hypre_BoxLoop2End(Mi,gi);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_StructMatmultCompute_core_2t
+ *
+ * Core function for computing the triple product of variable coefficients
+ * in which two of them live on the same data space "g" and the other lives
+ * on data space "h"
+ *
+ * "2t" means:
+ *   "2": two data spaces.
+ *   "t": triple product.
+ *
+ * This can be used for the scenarios:
+ *   1) VCF * VCF * VCC.
+ *   2) VCF * VCC * VCF.
+ *   3) VCC * VCF * VCF.
+ *   4) VCC * VCC * VCF.
+ *   5) VCC * VCF * VCC.
+ *   6) VCF * VCC * VCC.
+ *
+ * where:
+ *   1) VCF stands for "Variable Coefficient on Fine data space".
+ *   2) VCC stands for "Variable Coefficient on Coarse data space".
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatmultCompute_core_2t( hypre_StructMatmultHelper **a,
+                                    HYPRE_Int    ncomponents,
+                                    HYPRE_Int   *entries,
+                                    HYPRE_Int   *indices,
+                                    HYPRE_Int  **order,
+                                    HYPRE_Int    ndim,
+                                    hypre_Index  loop_size,
+                                    hypre_Box   *gdbox,
+                                    hypre_Index  gdstart,
+                                    hypre_Index  gdstride,
+                                    hypre_Box   *hdbox,
+                                    hypre_Index  hdstart,
+                                    hypre_Index  hdstride,
+                                    hypre_Box   *Mdbox,
+                                    hypre_Index  Mdstart,
+                                    hypre_Index  Mdstride )
+
+{
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      HYPRE_Int  *o;
+      HYPRE_Int   e, i, k;
+
+      for (k = 0; k < ncomponents; k++)
+      {
+         e = entries[k];
+         i = indices[k];
+         o = order[k];
+
+         a[e][i].mptr[Mi] += a[e][i].cprod*
+                             a[e][i].tptrs[o[0]][gi]*
+                             a[e][i].tptrs[o[1]][gi]*
+                             a[e][i].tptrs[o[2]][hi];
+      }
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_StructMatmultCompute_core_2tb
+ *
+ * Core function for computing the product of three coefficients. Two
+ * coefficients are variable and live on data spaces "g" and "h". The third
+ * coefficient is constant, it lives on data space "g", and it requires the
+ * usage of a bitmask
+ *
+ * "2tb" means:
+ *   "2": two data spaces.
+ *   "t": triple product.
+ *   "b": single bitmask.
+ *
+ * This can be used for the scenarios:
+ *   1) VCF * VCC * CCF.
+ *   2) VCF * CCF * VCC.
+ *   3) VCC * VCF * CCF.
+ *   4) VCC * CCF * VCF.
+ *   5) CCF * VCF * VCC.
+ *   6) CCF * VCC * VCF
+ *
+ * where:
+ *   1) VCF stands for "Variable Coefficient on Fine data space".
+ *   2) VCC stands for "Variable Coefficient on Coarse data space".
+ *   3) CCF stands for "Constant Coefficient on Fine data space".
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatmultCompute_core_2tb( hypre_StructMatmultHelper **a,
+                                     HYPRE_Int    ncomponents,
+                                     HYPRE_Int   *entries,
+                                     HYPRE_Int   *indices,
+                                     HYPRE_Int  **order,
+                                     HYPRE_Int    ndim,
+                                     hypre_Index  loop_size,
+                                     hypre_Box   *gdbox,
+                                     hypre_Index  gdstart,
+                                     hypre_Index  gdstride,
+                                     hypre_Box   *hdbox,
+                                     hypre_Index  hdstart,
+                                     hypre_Index  hdstride,
+                                     hypre_Box   *Mdbox,
+                                     hypre_Index  Mdstart,
+                                     hypre_Index  Mdstride )
+
+{
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      HYPRE_Int  *o;
+      HYPRE_Int   e, i, k;
+
+      for (k = 0; k < ncomponents; k++)
+      {
+         e = entries[k];
+         i = indices[k];
+         o = order[k];
+
+         a[e][i].mptr[Mi] += a[e][i].cprod*
+                             a[e][i].tptrs[o[0]][gi]*
+                             a[e][i].tptrs[o[1]][hi]*
+                             ((((HYPRE_Int) a[e][i].tptrs[o[2]][gi]) >> o[2]) & 1);
+      }
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_StructMatmultCompute_core_2etb
+ *
+ * Core function for computing the product of three coefficients.
+ * Two coefficients are variable and live on data space "h".
+ * The third coefficient is constant, it lives on data space "g", and it
+ * requires the usage of a bitmask
+ *
+ * "2etb" means:
+ *   "2": two data spaces.
+ *   "e": data spaces for variable coefficients are the same.
+ *   "t": triple product.
+ *   "b": single bitmask.
+ *
+ * This can be used for the scenarios:
+ *   1) VCC * VCC * CCF.
+ *   2) VCC * CCF * VCC.
+ *   3) CCF * VCC * VCC.
+ *
+ * where:
+ *   1) VCC stands for "Variable Coefficient on Coarse data space".
+ *   2) CCF stands for "Constant Coefficient on Fine data space".
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatmultCompute_core_2etb( hypre_StructMatmultHelper **a,
+                                      HYPRE_Int    ncomponents,
+                                      HYPRE_Int   *entries,
+                                      HYPRE_Int   *indices,
+                                      HYPRE_Int  **order,
+                                      HYPRE_Int    ndim,
+                                      hypre_Index  loop_size,
+                                      hypre_Box   *gdbox,
+                                      hypre_Index  gdstart,
+                                      hypre_Index  gdstride,
+                                      hypre_Box   *hdbox,
+                                      hypre_Index  hdstart,
+                                      hypre_Index  hdstride,
+                                      hypre_Box   *Mdbox,
+                                      hypre_Index  Mdstart,
+                                      hypre_Index  Mdstride )
+
+{
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      HYPRE_Int  *o;
+      HYPRE_Int   e, i, k;
+
+      for (k = 0; k < ncomponents; k++)
+      {
+         e = entries[k];
+         i = indices[k];
+         o = order[k];
+
+         a[e][i].mptr[Mi] += a[e][i].cprod*
+                             a[e][i].tptrs[o[0]][hi]*
+                             a[e][i].tptrs[o[1]][hi]*
+                             ((((HYPRE_Int) a[e][i].tptrs[o[2]][gi]) >> o[2]) & 1);
+      }
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_StructMatmultCompute_core_2tbb
+ *
+ * Core function for computing the product of three coefficients.
+ * One coefficient is variable and live on data space "g".
+ * Two coefficients are constant, live on data space "h", and requires
+ * the usage of a bitmask.
+ *
+ * "2etb" means:
+ *   "2" : two data spaces.
+ *   "t" : triple product.
+ *   "bb": two bitmasks.
+ *
+ * This can be used for the scenarios:
+ *   1) VCC * CCF * CCF.
+ *   2) CCF * VCC * CCF.
+ *   3) CCF * CCF * VCC.
+ *
+ * where:
+ *   1) VCC stands for "Variable Coefficient on Coarse data space".
+ *   2) CCF stands for "Constant Coefficient on Fine data space".
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultHelper **a,
+                                      HYPRE_Int    ncomponents,
+                                      HYPRE_Int   *entries,
+                                      HYPRE_Int   *indices,
+                                      HYPRE_Int  **order,
+                                      HYPRE_Int    ndim,
+                                      hypre_Index  loop_size,
+                                      hypre_Box   *gdbox,
+                                      hypre_Index  gdstart,
+                                      hypre_Index  gdstride,
+                                      hypre_Box   *hdbox,
+                                      hypre_Index  hdstart,
+                                      hypre_Index  hdstride,
+                                      hypre_Box   *Mdbox,
+                                      hypre_Index  Mdstart,
+                                      hypre_Index  Mdstride )
+
+{
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      HYPRE_Int  *o;
+      HYPRE_Int   e, i, k;
+
+      for (k = 0; k < ncomponents; k++)
+      {
+         e = entries[k];
+         i = indices[k];
+         o = order[k];
+
+         a[e][i].mptr[Mi] += a[e][i].cprod*
+                             a[e][i].tptrs[o[0]][hi]*
+                             ((((HYPRE_Int) a[e][i].tptrs[o[1]][gi]) >> o[1]) & 1)*
+                             ((((HYPRE_Int) a[e][i].tptrs[o[2]][gi]) >> o[2]) & 1);
+      }
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   return hypre_error_flag;
+}
+
 
 /*--------------------------------------------------------------------------
  * hypre_StructMatmult
