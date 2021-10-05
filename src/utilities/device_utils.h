@@ -53,7 +53,8 @@
 
 #elif defined(HYPRE_USING_SYCL)
 
-#include <CL/sycl.hpp>
+/* WM: todo - if the include for CL/sycl.hpp is inside extern "C++" {}, I get problems with sycl reductions... totally strange, but true */
+/* #include <CL/sycl.hpp> */
 /* WM: todo - include below as necessary */
 /* #include <oneapi/dpl/execution> */
 /* #include <oneapi/dpl/algorithm> */

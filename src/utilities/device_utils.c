@@ -9,7 +9,6 @@
 #include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_SYCL)
-#include <CL/sycl.hpp>
 // WM: TODO: verify
 sycl::range<1> hypre_GetDefaultCUDABlockDimension()
 {
@@ -975,10 +974,10 @@ hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
       };
 
       /* WM: having trouble with getting the device on frank, so temporarily just passing the default selector */
-      /* sycl::device   syclDev   = data->device; */
-      /* sycl::context  syclctxt  = sycl::context(syclDev, sycl_asynchandler); */
-      /* stream = new sycl::queue(syclctxt, syclDev, sycl::property_list{sycl::property::queue::in_order{}}); */
-      stream = new sycl::queue(sycl::default_selector{}, sycl::property_list{sycl::property::queue::in_order{}});
+      sycl::device   syclDev   = data->device;
+      sycl::context  syclctxt  = sycl::context(syclDev, sycl_asynchandler);
+      stream = new sycl::queue(syclctxt, syclDev, sycl::property_list{sycl::property::queue::in_order{}});
+      /* stream = new sycl::queue(sycl::default_selector{}, sycl::property_list{sycl::property::queue::in_order{}}); */
       data->streams[i] = stream;
    }
 #endif
@@ -1235,8 +1234,8 @@ hypre_DeviceDataCreate()
    hypre_DeviceData *data = hypre_CTAlloc(hypre_DeviceData, 1, HYPRE_MEMORY_HOST);
 
 #if defined(HYPRE_USING_SYCL)
-   /* WM: commenting out for now since I'm having trouble finding the device on frank */
-   /* hypre_DeviceDataDevice(data)            = sycl::device(sycl::gpu_selector{}); */
+   /* WM: does the default selector get a GPU if available? */
+   hypre_DeviceDataDevice(data)            = sycl::device(sycl::default_selector{});
 #else
    hypre_DeviceDataDevice(data)            = 0;
 #endif

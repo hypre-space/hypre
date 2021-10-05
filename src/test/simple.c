@@ -141,47 +141,135 @@ hypre_int
 main( hypre_int argc,
       char *argv[] )
 {
-
-   /* initialize */
-   hypre_MPI_Init(&argc, &argv);
-   HYPRE_Init();
+   /* hypre_MPI_Init(&argc, &argv); */
+   /* HYPRE_Init(); */
    /* ShowDevice(*hypre_HandleComputeStream(hypre_handle())); */
 
-   HYPRE_Int length = 1000;
-   const sycl::range<1> bDim = hypre_GetDefaultCUDABlockDimension();
-   const sycl::range<1> gDim = hypre_GetDefaultCUDAGridDimension(length, "thread", bDim);
-   HYPRE_Real *arr = hypre_CTAlloc(HYPRE_Real, length, HYPRE_MEMORY_DEVICE);
-   HYPRE_Real sum_var = 0;
-   sycl::buffer<HYPRE_Real> sum_buf(&sum_var, 1);
 
-   /* Reduction parallel_for with accessor */
-   std::cout << "Launching parallel_for reduction with accessor" << std::endl;
-   hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh)
-      {
-         sycl::accessor sum_acc(sum_buf, cgh, sycl::read_write);
+   /* return 0; */
 
-         cgh.parallel_for(sycl::nd_range<1>(gDim*bDim, bDim), sycl::ONEAPI::reduction(sum_acc, sycl::ONEAPI::plus<>()), 
-            [=] (sycl::nd_item<1> item, auto &sum) 
-               {
-                  /* trivial kernel */ 
-               });
-      }).wait_and_throw();
+/******************************************************************************/
+/******************************************************************************/
+
+   /* Get device */
+   /* sycl::device   syclDev = sycl::device(sycl::default_selector{}); */
+
+   /* /1* Get asynchandler *1/ */
+   /* auto sycl_asynchandler = [] (sycl::exception_list exceptions) */ 
+   /* { */
+   /*    for (std::exception_ptr const& e : exceptions) */ 
+   /*    { */
+   /*       try */
+   /*       { */
+   /*          std::rethrow_exception(e); */
+   /*       } */
+   /*       catch (sycl::exception const& ex) */
+   /*       { */
+   /*          std::cout << "Caught asynchronous SYCL exception:" << std::endl */
+   /*          << ex.what() << ", OpenCL code: " << ex.get_cl_code() << std::endl; */
+   /*       } */
+   /*    } */
+   /* }; */
+
+   /* /1* Setup sycl context *1/ */
+   /* sycl::context  syclctxt  = sycl::context(syclDev, sycl_asynchandler); */
+
+   /* /1* Setup queue *1/ */
+   /* sycl::queue *my_queue = new sycl::queue(syclctxt, syclDev, sycl::property_list{sycl::property::queue::in_order{}}); */
+
+   /* /1* Show device associated with queue *1/ */
+   /* ShowDevice(*my_queue); */
+
+   /* return 0; */
+
+
+
+/******************************************************************************/
+/******************************************************************************/
+
+    int length = 1024;
+ 
+    sycl::default_selector selector;
+    sycl::queue myq(selector);
+    std::cout<<"Running on: "<<myq.get_device().get_info<sycl::info::device::name>()<<"\n";
+ 
+    auto A = sycl::malloc_shared<float>(length, myq);
+ 
+    auto gr = sycl::range<1>(length);
+    auto lr = sycl::range<1>(32); //change me, too small?
+ 
+ 
+    for(int i=0;i<length;i++) A[i] = static_cast<float>(i+1);  //initialize
+ 
+    //MAKE SURE I"M HOST & DEVICE ACCESSIBLE!
+    auto fsum = sycl::malloc_shared<float>(1, myq);
+ 
+    {
+    myq.submit( [&](auto &h) {
+        /* auto properties = sycl::property::reduction::initialize_to_identity{}; */
+        h.parallel_for(sycl::nd_range<1>(gr,lr),
+            sycl::ONEAPI::reduction(fsum, std::plus<>()),
+            [=](sycl::nd_item<1> it, auto &sum){
+                int i = it.get_global_id(0);
+                sum += A[i];
+            });
+    }).wait_and_throw();
+    }
+ 
+    printf("sum: %f\n",fsum[0]);
+    return 0;
+
+
+/******************************************************************************/
+/******************************************************************************/
 
 
 
 
-   HYPRE_Real *sum_var_usm = hypre_CTAlloc(HYPRE_Real, 1, HYPRE_MEMORY_DEVICE);
+   /* initialize */
+   /* hypre_MPI_Init(&argc, &argv); */
+   /* HYPRE_Init(); */
+   /* /1* ShowDevice(*hypre_HandleComputeStream(hypre_handle())); *1/ */
 
-   /* Reduction parallel_for with unified memory pointer */
-   std::cout << "Launching parallel_for reduction with unified memory pointer" << std::endl;
-   hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh)
-      {
-         cgh.parallel_for(sycl::nd_range<1>(gDim*bDim, bDim), sycl::ONEAPI::reduction(sum_var_usm, sycl::ONEAPI::plus<>()), 
-            [=] (sycl::nd_item<1> item, auto &sum) 
-               {
-                  /* trivial kernel */ 
-               });
-      }).wait_and_throw();
+   /* HYPRE_Int length = 1000; */
+   /* const sycl::range<1> bDim = hypre_GetDefaultCUDABlockDimension(); */
+   /* const sycl::range<1> gDim = hypre_GetDefaultCUDAGridDimension(length, "thread", bDim); */
+   /* HYPRE_Real *arr = hypre_CTAlloc(HYPRE_Real, length, HYPRE_MEMORY_DEVICE); */
+   /* HYPRE_Real sum_var = 0; */
+   /* /1* sycl::buffer<HYPRE_Real> sum_buf(&sum_var, 1); *1/ */
+   /* sycl::buffer<HYPRE_Real> sum_buf{&sum_var, 1}; */
+
+   /* /1* Reduction parallel_for with accessor *1/ */
+   /* std::cout << "Launching parallel_for reduction with accessor" << std::endl; */
+   /* hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) */
+   /*    { */
+   /*       sycl::accessor sum_acc(sum_buf, cgh, sycl::read_write); */
+   /*       /1* auto sumReduction = sycl::reduction(sum_buf, cgh, sycl::plus<>()); *1/ */
+
+   /*       /1* WM: NOTE - on JLSE, ONEAPI is marked as deprecated to be replaced by ext::oneapi *1/ */
+   /*       cgh.parallel_for(sycl::nd_range<1>(gDim*bDim, bDim), sycl::ONEAPI::reduction(sum_acc, sycl::ONEAPI::plus<>()), */ 
+   /*       /1* cgh.parallel_for(sycl::nd_range<1>(gDim*bDim, bDim), sumReduction, *1/ */ 
+   /*          [=] (sycl::nd_item<1> item, auto &sum) */ 
+   /*             { */
+   /*                /1* trivial kernel *1/ */ 
+   /*             }); */
+   /*    }).wait_and_throw(); */
+
+
+
+
+/*    HYPRE_Real *sum_var_usm = hypre_CTAlloc(HYPRE_Real, 1, HYPRE_MEMORY_DEVICE); */
+
+/*    /1* Reduction parallel_for with unified memory pointer *1/ */
+/*    std::cout << "Launching parallel_for reduction with unified memory pointer" << std::endl; */
+/*    hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) */
+/*       { */
+/*          cgh.parallel_for(sycl::nd_range<1>(gDim*bDim, bDim), sycl::ONEAPI::reduction(sum_var_usm, sycl::ONEAPI::plus<>()), */ 
+/*             [=] (sycl::nd_item<1> item, auto &sum) */ 
+/*                { */
+/*                   /1* trivial kernel *1/ */ 
+/*                }); */
+/*       }).wait_and_throw(); */
 
 
 
@@ -196,9 +284,11 @@ main( hypre_int argc,
    /* hypre_printf("is_cpu = %d\n", gpu.is_cpu()); */
    /* hypre_printf("is_cpu = %d\n", dev.is_cpu()); */
    /* hypre_printf("is_gpu = %d\n", gpu.is_gpu()); */
-   hypre_printf("DONE\n");
-   exit(0);
+   /* hypre_printf("DONE\n"); */
+   /* exit(0); */
 
+/******************************************************************************/
+/******************************************************************************/
 
 
    /* variables */

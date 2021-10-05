@@ -1535,8 +1535,29 @@ else                                                            \
    }, hypre__tot, sum_buf);                                                                                    \
 }
 
+/* Reduction BoxLoop2 */
+/* WM: todo - is there a better way to handle the passing of sum_var (the variable where we want the reduction to end up)? */
+/* Right now, it is hardcoded as a HYPRE_Real */
+#define hypre_newBoxLoop2ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1,                                \
+                                                      dbox2, start2, stride2, i2, sum_var)                     \
+{                                                                                                                \
+   hypre_newBoxLoopInit(ndim, loop_size);                                                                        \
+   hypre_BoxLoopDataDeclareK(1, ndim, loop_size, dbox1, start1, stride1);                                        \
+   hypre_BoxLoopDataDeclareK(2, ndim, loop_size, dbox2, start2, stride2);                                        \
+   sycl::buffer<HYPRE_Real> sum_buf(&sum_var, 1);                                    \
+   ReductionBoxLoopforall( [=] (sycl::nd_item<1> item, auto &sum)                                                         \
+   {                                                                                                  \
+      HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();                                                       \
+      if (idx < hypre__tot)                                                                           \
+      {                                                                                               \
+         hypre_newBoxLoopDeclare(databox1);                                                                         \
+         hypre_BoxLoopIncK(1, databox1, i1);                                                                        \
+         hypre_BoxLoopIncK(2, databox2, i2);
 
-
+#define hypre_newBoxLoop2ReductionEnd(i1, i2, sum_var)                                                                \
+      }                                                                                               \
+   }, hypre__tot, sum_buf);                                                                                    \
+}
 
 
 
@@ -1805,18 +1826,18 @@ else                                                            \
 /* Reduction */
 /* WM: todo - using CPU version for now */
 #define hypre_BoxLoop1ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1, reducesum) \
-        zypre_newBoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1, i1)
+        hypre_newBoxLoop1ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1, reducesum)
 
 #define hypre_BoxLoop1ReductionEnd(i1, reducesum) \
-        zypre_newBoxLoop1End(i1)
+        hypre_newBoxLoop1ReductionEnd(i1, reducesum)
 
 #define hypre_BoxLoop2ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1, \
                                                       dbox2, start2, stride2, i2, reducesum) \
-        zypre_newBoxLoop2Begin(ndim, loop_size, dbox1, start1, stride1, i1, \
-                                             dbox2, start2, stride2, i2)
+        hypre_newBoxLoop2ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1, \
+                                                         dbox2, start2, stride2, i2, reducesum)
 
 #define hypre_BoxLoop2ReductionEnd(i1, i2, reducesum) \
-        zypre_newBoxLoop2End(i1, i2)
+        hypre_newBoxLoop2ReductionEnd(i1, i2, reducesum)
 
 #endif
 

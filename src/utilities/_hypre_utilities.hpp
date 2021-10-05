@@ -4,6 +4,11 @@
 #ifndef hypre_UTILITIES_HPP
 #define hypre_UTILITIES_HPP
 
+/* WM: todo - I have a problem where I need to include this outside the extern "C++" {} block, so I'm doing this manually here for now */
+#if defined(HYPRE_USING_SYCL)
+#include <CL/sycl.hpp>
+#endif
+
 #ifdef __cplusplus
 extern "C++" {
 #endif
@@ -105,7 +110,9 @@ struct hypre_device_allocator
 
 #elif defined(HYPRE_USING_SYCL)
 
-#include <CL/sycl.hpp>
+/* WM: todo - if the include for CL/sycl.hpp is inside extern "C++" {}, I get problems with sycl reductions... totally strange, but true */
+/* #include <CL/sycl.hpp> */
+/* WM: todo - include below as necessary */
 /* #include <oneapi/dpl/execution> */
 /* #include <oneapi/dpl/algorithm> */
 /* #include <oneapi/dpl/iterator> */
@@ -278,6 +285,7 @@ struct hypre_DeviceData
 #endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   /* WM: question - what is the device_allocator? */
    hypre_device_allocator            device_allocator;
 #endif
 #if defined(HYPRE_USING_SYCL)
@@ -398,6 +406,8 @@ struct hypre_GpuMatData
 
 #endif //#if defined(HYPRE_USING_GPU)
 
+/* WM: todo - is this how I want to integrate the functionality below? Do I really need all this? */
+/* NOTE: It doesn't line up that nicely with the cuda/hip implementation since you need to pass item agrs */
 #if defined(HYPRE_USING_SYCL)
 /* return the number of work-items in current work-group */
 template <hypre_int dim>
@@ -558,6 +568,8 @@ using namespace thrust::placeholders;
 #define GPU_LAUNCH_SYNC { hypre_SyncCudaComputeStream(hypre_handle()); HYPRE_CUDA_CALL( cudaGetLastError() ); }
 #elif defined(HYPRE_USING_HIP)
 #define GPU_LAUNCH_SYNC { hypre_SyncCudaComputeStream(hypre_handle()); HYPRE_HIP_CALL( hipGetLastError() );  }
+#elif defined(HYPRE_USING_SYCL)
+/* WM: todo? used below in HYPRE_CUDA_LAUNCH2 */
 #endif
 #else // #if defined(HYPRE_DEBUG)
 #define GPU_LAUNCH_SYNC
