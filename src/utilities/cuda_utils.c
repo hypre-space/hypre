@@ -1165,8 +1165,11 @@ hypre_CudaDataCreate()
    hypre_CudaDataSpgemmAlgorithm(data)                = 1;
    /* 1: naive overestimate, 2: naive underestimate, 3: Cohen's algorithm */
    hypre_CudaDataSpgemmRownnzEstimateMethod(data)     = 3;
-   hypre_CudaDataSpgemmRownnzEstimateNsamples(data)   = 32;
-   hypre_CudaDataSpgemmRownnzEstimateMultFactor(data) = 1.5;
+   const HYPRE_Int Nsamples = 64;
+   const HYPRE_Real sigma = 1.0 / sqrt(Nsamples - 2.0);
+   const HYPRE_Real multfactor = 1.0 / (1.0 - 3.0 * sigma);
+   hypre_CudaDataSpgemmRownnzEstimateNsamples(data)   = Nsamples;
+   hypre_CudaDataSpgemmRownnzEstimateMultFactor(data) = multfactor;
    hypre_CudaDataSpgemmHashType(data)                 = 'D';
 
    /* pmis */

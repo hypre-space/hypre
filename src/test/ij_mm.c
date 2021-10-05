@@ -413,8 +413,8 @@ main( hypre_int argc,
    HYPRE_Int          use_cusparse = 0;
    HYPRE_Int          spgemm_alg = 1;
    HYPRE_Int          rowest_mtd = 3;
-   HYPRE_Int          rowest_nsamples = 32;
-   HYPRE_Real         rowest_mult = 1.0;
+   HYPRE_Int          rowest_nsamples = -1; /* default */
+   HYPRE_Real         rowest_mult = -1.0; /* default */
    HYPRE_Int          zero_mem_cost = 0;
    char               hash_type = 'L';
 
@@ -642,10 +642,16 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
    errcode = hypre_SetSpGemmRownnzEstimateMethod(rowest_mtd);
    hypre_assert(errcode == 0);
-   errcode = hypre_SetSpGemmRownnzEstimateNSamples(rowest_nsamples);
-   hypre_assert(errcode == 0);
-   errcode = hypre_SetSpGemmRownnzEstimateMultFactor(rowest_mult);
-   hypre_assert(errcode == 0);
+   if (rowest_nsamples > 0)
+   {
+      errcode = hypre_SetSpGemmRownnzEstimateNSamples(rowest_nsamples);
+      hypre_assert(errcode == 0);
+   }
+   if (rowest_mult > 0.0)
+   {
+      errcode = hypre_SetSpGemmRownnzEstimateMultFactor(rowest_mult);
+      hypre_assert(errcode == 0);
+   }
    errcode = hypre_SetSpGemmHashType(hash_type);
    hypre_assert(errcode == 0);
    errcode = HYPRE_SetSpGemmUseCusparse(use_cusparse);

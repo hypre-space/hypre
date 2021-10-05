@@ -328,6 +328,8 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    HYPRE_Int   cohen_nsamples = hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle());
    float cohen_mult           = hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle());
 
+   //hypre_printf("Cohen Nsamples %d, mult %f\n", cohen_nsamples, cohen_mult);
+
    if (row_est_mtd == 1)
    {
       /* naive overestimate */

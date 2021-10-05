@@ -566,7 +566,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzEstimate( HYPRE_Int       m,
 
    if (num_failed_rows)
    {
-      //hypre_printf("[%s, %d]: num of failed rows %d (%.2f)\n", __FILE__, __LINE__, num_failed_rows, num_failed_rows / (m + 0.0) );
+      //hypre_printf("[%s, %d]: num of failed rows %d (out of %d,  ratio %.2e)\n", __FILE__, __LINE__, num_failed_rows, m, num_failed_rows / (m + 0.0) );
 
       HYPRE_Int *rf_ind = hypre_TAlloc(HYPRE_Int, num_failed_rows, HYPRE_MEMORY_DEVICE);
 
