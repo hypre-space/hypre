@@ -488,19 +488,20 @@ hypre_int hypre_cuda_get_grid_warp_id()
 static __device__ __forceinline__
 hypre_double atomicAdd(hypre_double* address, hypre_double val)
 {
-    hypre_ulonglongint* address_as_ull = (hypre_ulonglongint*) address;
-    hypre_ulonglongint old = *address_as_ull, assumed;
+   hypre_ulonglongint* address_as_ull = (hypre_ulonglongint*) address;
+   hypre_ulonglongint old = *address_as_ull, assumed;
 
-    do {
-        assumed = old;
-        old = atomicCAS(address_as_ull, assumed,
-                        __double_as_longlong(val +
-                               __longlong_as_double(assumed)));
+   do
+   {
+      assumed = old;
+      old = atomicCAS(address_as_ull, assumed,
+                      __double_as_longlong(val +
+                      __longlong_as_double(assumed)));
 
-    // Note: uses integer comparison to avoid hang in case of NaN (since NaN != NaN)
-    } while (assumed != old);
+      // Note: uses integer comparison to avoid hang in case of NaN (since NaN != NaN)
+   } while (assumed != old);
 
-    return __longlong_as_double(old);
+   return __longlong_as_double(old);
 }
 #endif
 
@@ -549,13 +550,13 @@ void __syncwarp()
 static __device__ __forceinline__
 hypre_int __any_sync(unsigned mask, hypre_int predicate)
 {
-  return __any(predicate);
+   return __any(predicate);
 }
 
 static __device__ __forceinline__
 hypre_int __ballot_sync(unsigned mask, hypre_int predicate)
 {
-  return __ballot(predicate);
+   return __ballot(predicate);
 }
 #endif
 
@@ -614,11 +615,11 @@ static __device__ __forceinline__
 T warp_reduce_sum(T in)
 {
 #pragma unroll
-  for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
-  {
-    in += __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d);
-  }
-  return in;
+   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+   {
+      in += __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d);
+   }
+   return in;
 }
 
 template <typename T>
@@ -626,11 +627,11 @@ static __device__ __forceinline__
 T warp_allreduce_sum(T in)
 {
 #pragma unroll
-  for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
-  {
-    in += __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
-  }
-  return in;
+   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+   {
+      in += __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
+   }
+   return in;
 }
 
 template <typename T>
@@ -638,11 +639,11 @@ static __device__ __forceinline__
 T warp_reduce_max(T in)
 {
 #pragma unroll
-  for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
-  {
-    in = max(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
-  }
-  return in;
+   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+   {
+      in = max(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
+   }
+   return in;
 }
 
 template <typename T>
@@ -650,11 +651,11 @@ static __device__ __forceinline__
 T warp_allreduce_max(T in)
 {
 #pragma unroll
-  for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
-  {
-    in = max(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
-  }
-  return in;
+   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+   {
+      in = max(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
+   }
+   return in;
 }
 
 template <typename T>
@@ -662,11 +663,11 @@ static __device__ __forceinline__
 T warp_reduce_min(T in)
 {
 #pragma unroll
-  for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
-  {
-    in = min(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
-  }
-  return in;
+   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+   {
+      in = min(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
+   }
+   return in;
 }
 
 template <typename T>
@@ -674,11 +675,11 @@ static __device__ __forceinline__
 T warp_allreduce_min(T in)
 {
 #pragma unroll
-  for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
-  {
-    in = min(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
-  }
-  return in;
+   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+   {
+      in = min(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
+   }
+   return in;
 }
 
 static __device__ __forceinline__
@@ -709,10 +710,10 @@ hypre_int next_power_of_2(hypre_int n)
 template<typename T>
 struct absolute_value : public thrust::unary_function<T,T>
 {
-  __host__ __device__ T operator()(const T &x) const
-  {
-    return x < T(0) ? -x : x;
-  }
+   __host__ __device__ T operator()(const T &x) const
+   {
+      return x < T(0) ? -x : x;
+   }
 };
 
 template<typename T1, typename T2>
