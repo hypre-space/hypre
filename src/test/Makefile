@@ -140,7 +140,7 @@ ij: ij.o
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
 # WM: TODO: remove
-simple: simple.o
+simple: simple.obj
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 

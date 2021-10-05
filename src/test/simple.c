@@ -1,7 +1,5 @@
 /* WM: todo - remove this file from git */
 
-#include "_hypre_utilities.h"
-#include "_hypre_utilities.hpp"
 #include "HYPRE.h"
 #include "_hypre_struct_mv.h"
 #include "_hypre_struct_mv.hpp"
@@ -145,9 +143,48 @@ main( hypre_int argc,
 {
 
    /* initialize */
-   /* hypre_MPI_Init(&argc, &argv); */
-   /* HYPRE_Init(); */
+   hypre_MPI_Init(&argc, &argv);
+   HYPRE_Init();
    /* ShowDevice(*hypre_HandleComputeStream(hypre_handle())); */
+
+   HYPRE_Int length = 1000;
+   const sycl::range<1> bDim = hypre_GetDefaultCUDABlockDimension();
+   const sycl::range<1> gDim = hypre_GetDefaultCUDAGridDimension(length, "thread", bDim);
+   HYPRE_Real *arr = hypre_CTAlloc(HYPRE_Real, length, HYPRE_MEMORY_DEVICE);
+   HYPRE_Real sum_var = 0;
+   sycl::buffer<HYPRE_Real> sum_buf(&sum_var, 1);
+
+   /* Reduction parallel_for with accessor */
+   std::cout << "Launching parallel_for reduction with accessor" << std::endl;
+   hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh)
+      {
+         sycl::accessor sum_acc(sum_buf, cgh, sycl::read_write);
+
+         cgh.parallel_for(sycl::nd_range<1>(gDim*bDim, bDim), sycl::ONEAPI::reduction(sum_acc, sycl::ONEAPI::plus<>()), 
+            [=] (sycl::nd_item<1> item, auto &sum) 
+               {
+                  /* trivial kernel */ 
+               });
+      }).wait_and_throw();
+
+
+
+
+   HYPRE_Real *sum_var_usm = hypre_CTAlloc(HYPRE_Real, 1, HYPRE_MEMORY_DEVICE);
+
+   /* Reduction parallel_for with unified memory pointer */
+   std::cout << "Launching parallel_for reduction with unified memory pointer" << std::endl;
+   hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh)
+      {
+         cgh.parallel_for(sycl::nd_range<1>(gDim*bDim, bDim), sycl::ONEAPI::reduction(sum_var_usm, sycl::ONEAPI::plus<>()), 
+            [=] (sycl::nd_item<1> item, auto &sum) 
+               {
+                  /* trivial kernel */ 
+               });
+      }).wait_and_throw();
+
+
+
 
 
    /* sycl::queue my_queue(sycl::default_selector{}, dpc_common::exception_handler); */
@@ -159,8 +196,8 @@ main( hypre_int argc,
    /* hypre_printf("is_cpu = %d\n", gpu.is_cpu()); */
    /* hypre_printf("is_cpu = %d\n", dev.is_cpu()); */
    /* hypre_printf("is_gpu = %d\n", gpu.is_gpu()); */
-   /* hypre_printf("DONE\n"); */
-   /* exit(0); */
+   hypre_printf("DONE\n");
+   exit(0);
 
 
 
