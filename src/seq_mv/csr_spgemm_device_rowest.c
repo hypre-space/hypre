@@ -372,7 +372,6 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    }
 
 #ifdef HYPRE_PROFILE
-   cudaThreadSynchronize();
    hypre_profile_times[HYPRE_TIMER_ID_SPMM_ROWNNZ] += hypre_MPI_Wtime();
 #endif
 
