@@ -1201,10 +1201,38 @@ hypre_StructMatmultCompute_core_triple( hypre_StructMatmultHelper **a,
                                         hypre_Index  Mdstart,
                                         hypre_Index  Mdstride )
 {
-   HYPRE_Int  *order;
-   HYPRE_Int   i, e;
+   HYPRE_Int     *ncomp;
+   HYPRE_Int    **entries;
+   HYPRE_Int    **indices;
+   HYPRE_Int   ***order;
 
-   order = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
+   HYPRE_Int      max_components;
+   HYPRE_Int      max_terms;
+   HYPRE_Int      c, i, e, k, t;
+
+   /* Allocate memory */
+   max_terms = 0;
+   for (e = 0; e < size; e++)
+   {
+      max_terms += na[e];
+   }
+   max_components = 10;
+   ncomp   = hypre_CTAlloc(HYPRE_Int, max_components, HYPRE_MEMORY_HOST);
+   entries = hypre_TAlloc(HYPRE_Int *, max_components, HYPRE_MEMORY_HOST);
+   indices = hypre_TAlloc(HYPRE_Int *, max_components, HYPRE_MEMORY_HOST);
+   order   = hypre_TAlloc(HYPRE_Int **, max_components, HYPRE_MEMORY_HOST);
+   for (c = 0; c < max_components; c++)
+   {
+      entries[c] = hypre_CTAlloc(HYPRE_Int, max_terms, HYPRE_MEMORY_HOST);
+      indices[c] = hypre_CTAlloc(HYPRE_Int, max_terms, HYPRE_MEMORY_HOST);
+      order[c] = hypre_TAlloc(HYPRE_Int *, max_terms, HYPRE_MEMORY_HOST);
+      for (t = 0; t < max_terms; t++)
+      {
+         order[c][t] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
+      }
+   }
+
+   /* Build components arrays */
    for (e = 0; e < size; e++)
    {
       for (i = 0; i < na[e]; i++)
@@ -1214,371 +1242,425 @@ hypre_StructMatmultCompute_core_triple( hypre_StructMatmultHelper **a,
               a[e][i].types[2] == 0 )
          {
             /* VCF * VCF * VCF */
-            order[0] = 0;
-            order[1] = 1;
-            order[2] = 2;
-            hypre_StructMatmultCompute_core_1t(a, 1, &e, &i, &order,
-                                               ndim, loop_size,
-                                               fdbox, fdstart, fdstride,
-                                               Mdbox, Mdstart, Mdstride);
+            k = ncomp[0];
+            entries[0][k] = e;
+            indices[0][k] = i;
+            ncomp[0]++;
          }
          else if ( a[e][i].types[0] == 0 &&
                    a[e][i].types[1] == 0 &&
                    a[e][i].types[2] == 1 )
          {
             /* VCF * VCF * VCC */
-            order[0] = 0;
-            order[1] = 1;
-            order[2] = 2;
-            hypre_StructMatmultCompute_core_2t(a, 1, &e, &i, &order,
-                                               ndim, loop_size,
-                                               fdbox, fdstart, fdstride,
-                                               cdbox, cdstart, cdstride,
-                                               Mdbox, Mdstart, Mdstride);
+            k = ncomp[5];
+            entries[5][k]  = e;
+            indices[5][k]  = i;
+            order[5][k][0] = 0;
+            order[5][k][1] = 1;
+            order[5][k][2] = 2;
+            ncomp[5]++;
          }
          else if ( a[e][i].types[0] == 0 &&
                    a[e][i].types[1] == 0 &&
                    a[e][i].types[2] == 2 )
          {
             /* VCF * VCF * CCF */
-            order[0] = 0;
-            order[1] = 1;
-            order[2] = 2;
-            hypre_StructMatmultCompute_core_1tb(a, 1, &e, &i, &order,
-                                                ndim, loop_size,
-                                                fdbox, fdstart, fdstride,
-                                                Mdbox, Mdstart, Mdstride);
+            k = ncomp[2];
+            entries[2][k]  = e;
+            indices[2][k]  = i;
+            order[2][k][0] = 0;
+            order[2][k][1] = 1;
+            order[2][k][2] = 2;
+            ncomp[2]++;
          }
          else if ( a[e][i].types[0] == 0 &&
                    a[e][i].types[1] == 1 &&
                    a[e][i].types[2] == 0 )
          {
             /* VCF * VCC * VCF */
-            order[0] = 0;
-            order[1] = 2;
-            order[2] = 1;
-            hypre_StructMatmultCompute_core_2t(a, 1, &e, &i, &order,
-                                               ndim, loop_size,
-                                               fdbox, fdstart, fdstride,
-                                               cdbox, cdstart, cdstride,
-                                               Mdbox, Mdstart, Mdstride);
+            k = ncomp[5];
+            entries[5][k]  = e;
+            indices[5][k]  = i;
+            order[5][k][0] = 0;
+            order[5][k][1] = 2;
+            order[5][k][2] = 1;
+            ncomp[5]++;
          }
          else if ( a[e][i].types[0] == 0 &&
                    a[e][i].types[1] == 1 &&
                    a[e][i].types[2] == 1 )
          {
             /* VCF * VCC * VCC */
-            order[0] = 1;
-            order[1] = 2;
-            order[2] = 0;
-            hypre_StructMatmultCompute_core_2t(a, 1, &e, &i, &order,
-                                               ndim, loop_size,
-                                               cdbox, cdstart, cdstride,
-                                               fdbox, fdstart, fdstride,
-                                               Mdbox, Mdstart, Mdstride);
+            k = ncomp[6];
+            entries[6][k]  = e;
+            indices[6][k]  = i;
+            order[6][k][0] = 1;
+            order[6][k][1] = 2;
+            order[6][k][2] = 0;
+            ncomp[6]++;
          }
          else if ( a[e][i].types[0] == 0 &&
                    a[e][i].types[1] == 1 &&
                    a[e][i].types[2] == 2 )
          {
             /* VCF * VCC * CCF */
-            order[0] = 0;
-            order[1] = 1;
-            order[2] = 2;
-            hypre_StructMatmultCompute_core_2tb(a, 1, &e, &i, &order,
-                                                ndim, loop_size,
-                                                fdbox, fdstart, fdstride,
-                                                cdbox, cdstart, cdstride,
-                                                Mdbox, Mdstart, Mdstride);
+            k = ncomp[7];
+            entries[7][k]  = e;
+            indices[7][k]  = i;
+            order[7][k][0] = 0;
+            order[7][k][1] = 1;
+            order[7][k][2] = 2;
+            ncomp[7]++;
          }
          else if ( a[e][i].types[0] == 0 &&
                    a[e][i].types[1] == 2 &&
                    a[e][i].types[2] == 0 )
          {
             /* VCF * CCF * VCF */
-            order[0] = 0;
-            order[1] = 2;
-            order[2] = 1;
-            hypre_StructMatmultCompute_core_1tb(a, 1, &e, &i, &order,
-                                                ndim, loop_size,
-                                                fdbox, fdstart, fdstride,
-                                                Mdbox, Mdstart, Mdstride);
+            k = ncomp[2];
+            entries[2][k]  = e;
+            indices[2][k]  = i;
+            order[2][k][0] = 0;
+            order[2][k][1] = 2;
+            order[2][k][2] = 1;
+            ncomp[2]++;
          }
          else if ( a[e][i].types[0] == 0 &&
                    a[e][i].types[1] == 2 &&
                    a[e][i].types[2] == 1 )
          {
             /* VCF * CCF * VCC */
-            order[0] = 0;
-            order[1] = 2;
-            order[2] = 1;
-            hypre_StructMatmultCompute_core_2tb(a, 1, &e, &i, &order,
-                                                ndim, loop_size,
-                                                fdbox, fdstart, fdstride,
-                                                cdbox, cdstart, cdstride,
-                                                Mdbox, Mdstart, Mdstride);
+            k = ncomp[7];
+            entries[7][k]  = e;
+            indices[7][k]  = i;
+            order[7][k][0] = 0;
+            order[7][k][1] = 2;
+            order[7][k][2] = 1;
+            ncomp[7]++;
          }
          else if ( a[e][i].types[0] == 0 &&
                    a[e][i].types[1] == 2 &&
                    a[e][i].types[2] == 2 )
          {
             /* VCF * CCF * CCF */
-            order[0] = 0;
-            order[1] = 1;
-            order[2] = 2;
-            hypre_StructMatmultCompute_core_1tbb(a, 1, &e, &i, &order,
-                                                 ndim, loop_size,
-                                                 fdbox, fdstart, fdstride,
-                                                 Mdbox, Mdstart, Mdstride);
+            k = ncomp[3];
+            entries[3][k]  = e;
+            indices[3][k]  = i;
+            order[3][k][0] = 0;
+            order[3][k][1] = 1;
+            order[3][k][2] = 2;
+            ncomp[3]++;
          }
          else if ( a[e][i].types[0] == 1 &&
                    a[e][i].types[1] == 0 &&
                    a[e][i].types[2] == 0 )
          {
             /* VCC * VCF * VCF */
-            order[0] = 1;
-            order[1] = 2;
-            order[2] = 0;
-            hypre_StructMatmultCompute_core_2t(a, 1, &e, &i, &order,
-                                               ndim, loop_size,
-                                               fdbox, fdstart, fdstride,
-                                               cdbox, cdstart, cdstride,
-                                               Mdbox, Mdstart, Mdstride);
+            k = ncomp[5];
+            entries[5][k]  = e;
+            indices[5][k]  = i;
+            order[5][k][0] = 1;
+            order[5][k][1] = 2;
+            order[5][k][2] = 0;
+            ncomp[5]++;
          }
          else if ( a[e][i].types[0] == 1 &&
                    a[e][i].types[1] == 0 &&
                    a[e][i].types[2] == 1 )
          {
             /* VCC * VCF * VCC */
-            order[0] = 0;
-            order[1] = 2;
-            order[2] = 1;
-            hypre_StructMatmultCompute_core_2t(a, 1, &e, &i, &order,
-                                               ndim, loop_size,
-                                               cdbox, cdstart, cdstride,
-                                               fdbox, fdstart, fdstride,
-                                               Mdbox, Mdstart, Mdstride);
+            k = ncomp[6];
+            entries[6][k]  = e;
+            indices[6][k]  = i;
+            order[6][k][0] = 0;
+            order[6][k][1] = 2;
+            order[6][k][2] = 1;
+            ncomp[6]++;
          }
          else if ( a[e][i].types[0] == 1 &&
                    a[e][i].types[1] == 0 &&
                    a[e][i].types[2] == 2 )
          {
             /* VCC * VCF * CCF */
-            order[0] = 1;
-            order[1] = 0;
-            order[2] = 2;
-            hypre_StructMatmultCompute_core_2tb(a, 1, &e, &i, &order,
-                                                ndim, loop_size,
-                                                fdbox, fdstart, fdstride,
-                                                cdbox, cdstart, cdstride,
-                                                Mdbox, Mdstart, Mdstride);
+            k = ncomp[7];
+            entries[7][k]  = e;
+            indices[7][k]  = i;
+            order[7][k][0] = 1;
+            order[7][k][1] = 0;
+            order[7][k][2] = 2;
+            ncomp[7]++;
          }
          else if ( a[e][i].types[0] == 1 &&
                    a[e][i].types[1] == 1 &&
                    a[e][i].types[2] == 0 )
          {
             /* VCC * VCC * VCF */
-            order[0] = 0;
-            order[1] = 1;
-            order[2] = 2;
-            hypre_StructMatmultCompute_core_2t(a, 1, &e, &i, &order,
-                                               ndim, loop_size,
-                                               cdbox, cdstart, cdstride,
-                                               fdbox, fdstart, fdstride,
-                                               Mdbox, Mdstart, Mdstride);
+            k = ncomp[6];
+            entries[6][k]  = e;
+            indices[6][k]  = i;
+            order[6][k][0] = 0;
+            order[6][k][1] = 1;
+            order[6][k][2] = 2;
+            ncomp[6]++;
          }
          else if ( a[e][i].types[0] == 1 &&
                    a[e][i].types[1] == 1 &&
                    a[e][i].types[2] == 1 )
          {
             /* VCC * VCC * VCC */
-            order[0] = 0;
-            order[1] = 1;
-            order[2] = 2;
-            hypre_StructMatmultCompute_core_1t(a, 1, &e, &i, &order,
-                                               ndim, loop_size,
-                                               cdbox, cdstart, cdstride,
-                                               Mdbox, Mdstart, Mdstride);
+            k = ncomp[1];
+            entries[1][k] = e;
+            indices[1][k] = i;
+            ncomp[1]++;
          }
          else if ( a[e][i].types[0] == 1 &&
                    a[e][i].types[1] == 1 &&
                    a[e][i].types[2] == 2 )
          {
             /* VCC * VCC * CCF */
-            order[0] = 0;
-            order[1] = 1;
-            order[2] = 2;
-            hypre_StructMatmultCompute_core_2etb(a, 1, &e, &i, &order,
-                                                 ndim, loop_size,
-                                                 fdbox, fdstart, fdstride,
-                                                 cdbox, cdstart, cdstride,
-                                                 Mdbox, Mdstart, Mdstride);
+            k = ncomp[8];
+            entries[8][k]  = e;
+            indices[8][k]  = i;
+            order[8][k][0] = 0;
+            order[8][k][1] = 1;
+            order[8][k][2] = 2;
+            ncomp[8]++;
          }
          else if ( a[e][i].types[0] == 1 &&
                    a[e][i].types[1] == 2 &&
                    a[e][i].types[2] == 0 )
          {
             /* VCC * CCF * VCF */
-            order[0] = 2;
-            order[1] = 0;
-            order[2] = 1;
-            hypre_StructMatmultCompute_core_2tb(a, 1, &e, &i, &order,
-                                                ndim, loop_size,
-                                                fdbox, fdstart, fdstride,
-                                                cdbox, cdstart, cdstride,
-                                                Mdbox, Mdstart, Mdstride);
+            k = ncomp[7];
+            entries[7][k]  = e;
+            indices[7][k]  = i;
+            order[7][k][0] = 2;
+            order[7][k][1] = 0;
+            order[7][k][2] = 1;
+            ncomp[7]++;
          }
          else if ( a[e][i].types[0] == 1 &&
                    a[e][i].types[1] == 2 &&
                    a[e][i].types[2] == 1 )
          {
             /* VCC * CCF * VCC */
-            order[0] = 0;
-            order[1] = 2;
-            order[2] = 1;
-            hypre_StructMatmultCompute_core_2etb(a, 1, &e, &i, &order,
-                                                 ndim, loop_size,
-                                                 fdbox, fdstart, fdstride,
-                                                 cdbox, cdstart, cdstride,
-                                                 Mdbox, Mdstart, Mdstride);
+            k = ncomp[8];
+            entries[8][k]  = e;
+            indices[8][k]  = i;
+            order[8][k][0] = 0;
+            order[8][k][1] = 2;
+            order[8][k][2] = 1;
+            ncomp[8]++;
          }
          else if ( a[e][i].types[0] == 1 &&
                    a[e][i].types[1] == 2 &&
                    a[e][i].types[2] == 2 )
          {
             /* VCC * CCF * CCF */
-            order[0] = 0;
-            order[1] = 1;
-            order[2] = 2;
-            hypre_StructMatmultCompute_core_2tbb(a, 1, &e, &i, &order,
-                                                 ndim, loop_size,
-                                                 fdbox, fdstart, fdstride,
-                                                 cdbox, cdstart, cdstride,
-                                                 Mdbox, Mdstart, Mdstride);
+            k = ncomp[9];
+            entries[9][k]  = e;
+            indices[9][k]  = i;
+            order[9][k][0] = 0;
+            order[9][k][1] = 1;
+            order[9][k][2] = 2;
+            ncomp[9]++;
          }
          else if ( a[e][i].types[0] == 2 &&
                    a[e][i].types[1] == 0 &&
                    a[e][i].types[2] == 0 )
          {
             /* CCF * VCF * VCF */
-            order[0] = 1;
-            order[1] = 2;
-            order[2] = 0;
-            hypre_StructMatmultCompute_core_1tb(a, 1, &e, &i, &order,
-                                                ndim, loop_size,
-                                                fdbox, fdstart, fdstride,
-                                                Mdbox, Mdstart, Mdstride);
+            k = ncomp[2];
+            entries[2][k]  = e;
+            indices[2][k]  = i;
+            order[2][k][0] = 1;
+            order[2][k][1] = 2;
+            order[2][k][2] = 0;
+            ncomp[2]++;
          }
          else if ( a[e][i].types[0] == 2 &&
                    a[e][i].types[1] == 0 &&
                    a[e][i].types[2] == 1 )
          {
             /* CCF * VCF * VCC */
-            order[0] = 1;
-            order[1] = 2;
-            order[2] = 0;
-            hypre_StructMatmultCompute_core_2tb(a, 1, &e, &i, &order,
-                                                ndim, loop_size,
-                                                fdbox, fdstart, fdstride,
-                                                cdbox, cdstart, cdstride,
-                                                Mdbox, Mdstart, Mdstride);
+            k = ncomp[7];
+            entries[7][k]  = e;
+            indices[7][k]  = i;
+            order[7][k][0] = 1;
+            order[7][k][1] = 2;
+            order[7][k][2] = 0;
+            ncomp[7]++;
          }
          else if ( a[e][i].types[0] == 2 &&
                    a[e][i].types[1] == 0 &&
                    a[e][i].types[2] == 2 )
          {
             /* CCF * VCF * CCF */
-            order[0] = 1;
-            order[1] = 0;
-            order[2] = 2;
-            hypre_StructMatmultCompute_core_1tbb(a, 1, &e, &i, &order,
-                                                 ndim, loop_size,
-                                                 fdbox, fdstart, fdstride,
-                                                 Mdbox, Mdstart, Mdstride);
+            k = ncomp[3];
+            entries[3][k]  = e;
+            indices[3][k]  = i;
+            order[3][k][0] = 1;
+            order[3][k][1] = 0;
+            order[3][k][2] = 2;
+            ncomp[3]++;
          }
          else if ( a[e][i].types[0] == 2 &&
                    a[e][i].types[1] == 1 &&
                    a[e][i].types[2] == 0 )
          {
             /* CCF * VCC * VCF */
-            order[0] = 2;
-            order[1] = 1;
-            order[2] = 0;
-            hypre_StructMatmultCompute_core_2tb(a, 1, &e, &i, &order,
-                                                ndim, loop_size,
-                                                fdbox, fdstart, fdstride,
-                                                cdbox, cdstart, cdstride,
-                                                Mdbox, Mdstart, Mdstride);
+            k = ncomp[7];
+            entries[7][k]  = e;
+            indices[7][k]  = i;
+            order[7][k][0] = 2;
+            order[7][k][1] = 1;
+            order[7][k][2] = 0;
+            ncomp[7]++;
          }
          else if ( a[e][i].types[0] == 2 &&
                    a[e][i].types[1] == 1 &&
                    a[e][i].types[2] == 1 )
          {
             /* CCF * VCC * VCC */
-            order[0] = 1;
-            order[1] = 2;
-            order[2] = 0;
-            hypre_StructMatmultCompute_core_2etb(a, 1, &e, &i, &order,
-                                                 ndim, loop_size,
-                                                 fdbox, fdstart, fdstride,
-                                                 cdbox, cdstart, cdstride,
-                                                 Mdbox, Mdstart, Mdstride);
+            k = ncomp[8];
+            entries[8][k]  = e;
+            indices[8][k]  = i;
+            order[8][k][0] = 1;
+            order[8][k][1] = 2;
+            order[8][k][2] = 0;
+            ncomp[8]++;
          }
          else if ( a[e][i].types[0] == 2 &&
                    a[e][i].types[1] == 1 &&
                    a[e][i].types[2] == 2 )
          {
             /* CCF * VCC * CCF */
-            order[0] = 1;
-            order[1] = 0;
-            order[2] = 2;
-            hypre_StructMatmultCompute_core_2tbb(a, 1, &e, &i, &order,
-                                                 ndim, loop_size,
-                                                 fdbox, fdstart, fdstride,
-                                                 cdbox, cdstart, cdstride,
-                                                 Mdbox, Mdstart, Mdstride);
+            k = ncomp[9];
+            entries[9][k]  = e;
+            indices[9][k]  = i;
+            order[9][k][0] = 1;
+            order[9][k][1] = 0;
+            order[9][k][2] = 2;
+            ncomp[9]++;
          }
          else if ( a[e][i].types[0] == 2 &&
                    a[e][i].types[1] == 2 &&
                    a[e][i].types[2] == 0 )
          {
             /* CCF * CCF * VCF */
-            order[0] = 2;
-            order[1] = 0;
-            order[2] = 1;
-            hypre_StructMatmultCompute_core_1tbb(a, 1, &e, &i, &order,
-                                                 ndim, loop_size,
-                                                 fdbox, fdstart, fdstride,
-                                                 Mdbox, Mdstart, Mdstride);
+            k = ncomp[3];
+            entries[3][k]  = e;
+            indices[3][k]  = i;
+            order[3][k][0] = 2;
+            order[3][k][1] = 0;
+            order[3][k][2] = 1;
+            ncomp[3]++;
          }
          else if ( a[e][i].types[0] == 2 &&
                    a[e][i].types[1] == 2 &&
                    a[e][i].types[2] == 1 )
          {
             /* CCF * CCF * VCC */
-            order[0] = 2;
-            order[1] = 0;
-            order[2] = 1;
-            hypre_StructMatmultCompute_core_2tbb(a, 1, &e, &i, &order,
-                                                 ndim, loop_size,
-                                                 fdbox, fdstart, fdstride,
-                                                 cdbox, cdstart, cdstride,
-                                                 Mdbox, Mdstart, Mdstride);
+            k = ncomp[9];
+            entries[9][k]  = e;
+            indices[9][k]  = i;
+            order[9][k][0] = 2;
+            order[9][k][1] = 0;
+            order[9][k][2] = 1;
+            ncomp[9]++;
          }
          else
          {
             /* CCF * CCF * CCF */
-            order[0] = 0;
-            order[1] = 1;
-            order[2] = 2;
-            hypre_StructMatmultCompute_core_1tbbb(a, 1, &e, &i, &order,
-                                                  ndim, loop_size,
-                                                  fdbox, fdstart, fdstride,
-                                                  Mdbox, Mdstart, Mdstride);
+            k = ncomp[4];
+            entries[4][k] = e;
+            indices[4][k] = i;
+            ncomp[4]++;
          }
       }
    }
+
+   /* Call core functions */
+   hypre_StructMatmultCompute_core_1t(a, ncomp[0],
+                                      entries[0], indices[0],
+                                      ndim, loop_size,
+                                      fdbox, fdstart, fdstride,
+                                      Mdbox, Mdstart, Mdstride);
+
+   hypre_StructMatmultCompute_core_1t(a, ncomp[1],
+                                      entries[1], indices[1],
+                                      ndim, loop_size,
+                                      cdbox, cdstart, cdstride,
+                                      Mdbox, Mdstart, Mdstride);
+
+   hypre_StructMatmultCompute_core_1tb(a, ncomp[2], entries[2],
+                                       indices[2], order[2],
+                                       ndim, loop_size,
+                                       fdbox, fdstart, fdstride,
+                                       Mdbox, Mdstart, Mdstride);
+
+   hypre_StructMatmultCompute_core_1tbb(a, ncomp[3], entries[3],
+                                        indices[3], order[3],
+                                        ndim, loop_size,
+                                        fdbox, fdstart, fdstride,
+                                        Mdbox, Mdstart, Mdstride);
+
+   hypre_StructMatmultCompute_core_1tbbb(a, ncomp[4],
+                                         entries[4], indices[4],
+                                         ndim, loop_size,
+                                         fdbox, fdstart, fdstride,
+                                         Mdbox, Mdstart, Mdstride);
+
+   hypre_StructMatmultCompute_core_2t(a, ncomp[5], entries[5],
+                                      indices[5], order[5],
+                                      ndim, loop_size,
+                                      fdbox, fdstart, fdstride,
+                                      cdbox, cdstart, cdstride,
+                                      Mdbox, Mdstart, Mdstride);
+
+   hypre_StructMatmultCompute_core_2t(a, ncomp[6], entries[6],
+                                      indices[6], order[6],
+                                      ndim, loop_size,
+                                      cdbox, cdstart, cdstride,
+                                      fdbox, fdstart, fdstride,
+                                      Mdbox, Mdstart, Mdstride);
+
+   hypre_StructMatmultCompute_core_2tb(a, ncomp[7], entries[7],
+                                       indices[7], order[7],
+                                       ndim, loop_size,
+                                       fdbox, fdstart, fdstride,
+                                       cdbox, cdstart, cdstride,
+                                       Mdbox, Mdstart, Mdstride);
+
+   hypre_StructMatmultCompute_core_2etb(a, ncomp[8], entries[8],
+                                        indices[8], order[8],
+                                        ndim, loop_size,
+                                        fdbox, fdstart, fdstride,
+                                        cdbox, cdstart, cdstride,
+                                        Mdbox, Mdstart, Mdstride);
+
+   hypre_StructMatmultCompute_core_2tbb(a, ncomp[9], entries[9],
+                                        indices[9], order[9],
+                                        ndim, loop_size,
+                                        fdbox, fdstart, fdstride,
+                                        cdbox, cdstart, cdstride,
+                                        Mdbox, Mdstart, Mdstride);
+
+   /* Free memory */
+   for (c = 0; c < max_components; c++)
+   {
+      for (t = 0; t < max_terms; t++)
+      {
+         hypre_TFree(order[c][t], HYPRE_MEMORY_HOST);
+      }
+      hypre_TFree(entries[c], HYPRE_MEMORY_HOST);
+      hypre_TFree(indices[c], HYPRE_MEMORY_HOST);
+      hypre_TFree(order[c], HYPRE_MEMORY_HOST);
+   }
+   hypre_TFree(entries, HYPRE_MEMORY_HOST);
+   hypre_TFree(indices, HYPRE_MEMORY_HOST);
    hypre_TFree(order, HYPRE_MEMORY_HOST);
+   hypre_TFree(ncomp, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -1672,7 +1754,6 @@ hypre_StructMatmultCompute_core_1t( hypre_StructMatmultHelper **a,
                                     HYPRE_Int    ncomponents,
                                     HYPRE_Int   *entries,
                                     HYPRE_Int   *indices,
-                                    HYPRE_Int  **order,
                                     HYPRE_Int    ndim,
                                     hypre_Index  loop_size,
                                     hypre_Box   *gdbox,
@@ -1683,23 +1764,26 @@ hypre_StructMatmultCompute_core_1t( hypre_StructMatmultHelper **a,
                                     hypre_Index  Mdstride )
 
 {
+   if (ncomponents < 1)
+   {
+      return hypre_error_flag;
+   }
+
    hypre_BoxLoop2Begin(ndim, loop_size,
                        Mdbox, Mdstart, Mdstride, Mi,
                        gdbox, gdstart, gdstride, gi);
    {
-      HYPRE_Int  *o;
       HYPRE_Int   e, i, k;
 
       for (k = 0; k < ncomponents; k++)
       {
          e = entries[k];
          i = indices[k];
-         o = order[k];
 
          a[e][i].mptr[Mi] += a[e][i].cprod*
-                             a[e][i].tptrs[o[0]][gi]*
-                             a[e][i].tptrs[o[1]][gi]*
-                             a[e][i].tptrs[o[2]][gi];
+                             a[e][i].tptrs[0][gi]*
+                             a[e][i].tptrs[1][gi]*
+                             a[e][i].tptrs[2][gi];
       }
    }
    hypre_BoxLoop2End(Mi,gi);
@@ -1745,6 +1829,11 @@ hypre_StructMatmultCompute_core_1tb( hypre_StructMatmultHelper **a,
                                      hypre_Index  Mdstride )
 
 {
+   if (ncomponents < 1)
+   {
+      return hypre_error_flag;
+   }
+
    hypre_BoxLoop2Begin(ndim, loop_size,
                        Mdbox, Mdstart, Mdstride, Mi,
                        gdbox, gdstart, gdstride, gi);
@@ -1807,6 +1896,11 @@ hypre_StructMatmultCompute_core_1tbb( hypre_StructMatmultHelper **a,
                                       hypre_Index  Mdstride )
 
 {
+   if (ncomponents < 1)
+   {
+      return hypre_error_flag;
+   }
+
    hypre_BoxLoop2Begin(ndim, loop_size,
                        Mdbox, Mdstart, Mdstride, Mi,
                        gdbox, gdstart, gdstride, gi);
@@ -1854,7 +1948,6 @@ hypre_StructMatmultCompute_core_1tbbb( hypre_StructMatmultHelper **a,
                                        HYPRE_Int    ncomponents,
                                        HYPRE_Int   *entries,
                                        HYPRE_Int   *indices,
-                                       HYPRE_Int  **order,
                                        HYPRE_Int    ndim,
                                        hypre_Index  loop_size,
                                        hypre_Box   *gdbox,
@@ -1865,23 +1958,26 @@ hypre_StructMatmultCompute_core_1tbbb( hypre_StructMatmultHelper **a,
                                        hypre_Index  Mdstride )
 
 {
+   if (ncomponents < 1)
+   {
+      return hypre_error_flag;
+   }
+
    hypre_BoxLoop2Begin(ndim, loop_size,
                        Mdbox, Mdstart, Mdstride, Mi,
                        gdbox, gdstart, gdstride, gi);
    {
-      HYPRE_Int  *o;
       HYPRE_Int   e, i, k;
 
       for (k = 0; k < ncomponents; k++)
       {
          e = entries[k];
          i = indices[k];
-         o = order[k];
 
          a[e][i].mptr[Mi] += a[e][i].cprod*
-                             ((((HYPRE_Int) a[e][i].tptrs[o[0]][gi]) >> o[0]) & 1)*
-                             ((((HYPRE_Int) a[e][i].tptrs[o[1]][gi]) >> o[1]) & 1)*
-                             ((((HYPRE_Int) a[e][i].tptrs[o[2]][gi]) >> o[2]) & 1);
+                             ((((HYPRE_Int) a[e][i].tptrs[0][gi]) >> 0) & 1)*
+                             ((((HYPRE_Int) a[e][i].tptrs[1][gi]) >> 1) & 1)*
+                             ((((HYPRE_Int) a[e][i].tptrs[2][gi]) >> 2) & 1);
       }
    }
    hypre_BoxLoop2End(Mi,gi);
@@ -1932,6 +2028,11 @@ hypre_StructMatmultCompute_core_2t( hypre_StructMatmultHelper **a,
                                     hypre_Index  Mdstride )
 
 {
+   if (ncomponents < 1)
+   {
+      return hypre_error_flag;
+   }
+
    hypre_BoxLoop3Begin(ndim, loop_size,
                        Mdbox, Mdstart, Mdstride, Mi,
                        gdbox, gdstart, gdstride, gi,
@@ -2003,6 +2104,11 @@ hypre_StructMatmultCompute_core_2tb( hypre_StructMatmultHelper **a,
                                      hypre_Index  Mdstride )
 
 {
+   if (ncomponents < 1)
+   {
+      return hypre_error_flag;
+   }
+
    hypre_BoxLoop3Begin(ndim, loop_size,
                        Mdbox, Mdstart, Mdstride, Mi,
                        gdbox, gdstart, gdstride, gi,
@@ -2071,6 +2177,11 @@ hypre_StructMatmultCompute_core_2etb( hypre_StructMatmultHelper **a,
                                       hypre_Index  Mdstride )
 
 {
+   if (ncomponents < 1)
+   {
+      return hypre_error_flag;
+   }
+
    hypre_BoxLoop3Begin(ndim, loop_size,
                        Mdbox, Mdstart, Mdstride, Mi,
                        gdbox, gdstart, gdstride, gi,
@@ -2138,6 +2249,11 @@ hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultHelper **a,
                                       hypre_Index  Mdstride )
 
 {
+   if (ncomponents < 1)
+   {
+      return hypre_error_flag;
+   }
+
    hypre_BoxLoop3Begin(ndim, loop_size,
                        Mdbox, Mdstart, Mdstride, Mi,
                        gdbox, gdstart, gdstride, gi,
@@ -2162,7 +2278,6 @@ hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultHelper **a,
 
    return hypre_error_flag;
 }
-
 
 /*--------------------------------------------------------------------------
  * hypre_StructMatmult
