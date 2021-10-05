@@ -8917,7 +8917,12 @@ $as_echo "#define HYPRE_USING_CURAND 1" >>confdefs.h
 
    fi
 
-   LINK_CC=${LINK_CXX}
+   if test "$hypre_using_umpire" = "yes"
+   then
+      LINK_CC='${CUCC}'
+   else
+      LINK_CC=${LINK_CXX}
+   fi
 
       if test "x$HYPRE_CUDA_SM" = "x"
    then
