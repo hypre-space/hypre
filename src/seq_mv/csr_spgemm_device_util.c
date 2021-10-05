@@ -10,39 +10,93 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
-/* assume d_c is of length m and contains the "sizes" */
+template <HYPRE_Int shash_size>
+struct row_size : public thrust::unary_function<HYPRE_Int, HYPRE_Int>
+{
+  __device__ HYPRE_Int operator()(const HYPRE_Int &x) const
+  {
+     return next_power_of_2(x - shash_size) + x;
+  }
+};
+
+/* Assume d_c is of length m and contains the size of each row
+ *        d_i has size (m+1) on entry
+ * type = 1: generate (i,j,a) with d_c
+ * type = 2: generate (i,j,a) with row_size(d_c) see above */
 void
-hypre_create_ija( HYPRE_Int       m,
-                  HYPRE_Int      *d_c,
+hypre_create_ija( HYPRE_Int       type,
+                  HYPRE_Int       m,
+                  HYPRE_Int      *row_id,        /* length of m, row indices; if null, it is [0,1,2,3,...] */
+                  HYPRE_Int      *d_c,           /* d_c[row_id[i]] is the size of ith row */
                   HYPRE_Int      *d_i,
                   HYPRE_Int     **d_j,
                   HYPRE_Complex **d_a,
-                  HYPRE_Int      *nnz )
+                  HYPRE_Int      *nnz_ptr )
 {
+   HYPRE_Int nnz = 0;
+
    hypre_Memset(d_i, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
 
-   HYPRE_THRUST_CALL(inclusive_scan, d_c, d_c + m, d_i + 1);
+   if (row_id)
+   {
+      if (1 == type)
+      {
+         HYPRE_THRUST_CALL(inclusive_scan,
+                           thrust::make_permutation_iterator(d_c, row_id),
+                           thrust::make_permutation_iterator(d_c, row_id) + m,
+                           d_i + 1);
+      }
+      else if (2 == type)
+      {
+         HYPRE_THRUST_CALL( inclusive_scan,
+                            thrust::make_transform_iterator(thrust::make_permutation_iterator(d_c, row_id), row_size<HYPRE_SPGEMM_NUMER_HASH_SIZE>()),
+                            thrust::make_transform_iterator(thrust::make_permutation_iterator(d_c, row_id), row_size<HYPRE_SPGEMM_NUMER_HASH_SIZE>()) + m,
+                            d_i + 1 );
+      }
+   }
+   else
+   {
+      if (1 == type)
+      {
+         HYPRE_THRUST_CALL(inclusive_scan,
+                           d_c,
+                           d_c + m,
+                           d_i + 1);
+      }
+      else if (2 == type)
+      {
+         HYPRE_THRUST_CALL( inclusive_scan,
+                            thrust::make_transform_iterator(d_c, row_size<HYPRE_SPGEMM_NUMER_HASH_SIZE>()),
+                            thrust::make_transform_iterator(d_c, row_size<HYPRE_SPGEMM_NUMER_HASH_SIZE>()) + m,
+                            d_i + 1 );
+      }
+   }
 
-   hypre_TMemcpy(nnz, d_i + m, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(&nnz, d_i + m, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+
+   if (nnz_ptr)
+   {
+      *nnz_ptr = nnz;
+   }
 
    if (d_j)
    {
-      *d_j = hypre_TAlloc(HYPRE_Int, *nnz, HYPRE_MEMORY_DEVICE);
+      *d_j = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
    }
 
    if (d_a)
    {
-      *d_a = hypre_TAlloc(HYPRE_Complex, *nnz, HYPRE_MEMORY_DEVICE);
+      *d_a = hypre_TAlloc(HYPRE_Complex, nnz, HYPRE_MEMORY_DEVICE);
    }
 }
 
 __global__ void
-hypre_SpGemmGhashSize1( HYPRE_Int  num_rows,
-                        HYPRE_Int *row_id,
-                        HYPRE_Int  num_ghash,
-                        HYPRE_Int *row_sizes,
-                        HYPRE_Int *ghash_sizes,
-                        HYPRE_Int  SHMEM_HASH_SIZE )
+hypre_SpGemmGhashSize( HYPRE_Int  num_rows,
+                       HYPRE_Int *row_id,
+                       HYPRE_Int  num_ghash,
+                       HYPRE_Int *row_sizes,
+                       HYPRE_Int *ghash_sizes,
+                       HYPRE_Int  SHMEM_HASH_SIZE )
 {
    const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1,1>();
 
@@ -64,24 +118,6 @@ hypre_SpGemmGhashSize1( HYPRE_Int  num_rows,
    ghash_sizes[global_thread_id] = j;
 }
 
-__global__ void
-hypre_SpGemmGhashSize2( HYPRE_Int  num_rows,
-                        HYPRE_Int *row_id,
-                        HYPRE_Int  num_ghash,
-                        HYPRE_Int *row_sizes,
-                        HYPRE_Int *ghash_sizes,
-                        HYPRE_Int  SHMEM_HASH_SIZE )
-{
-   const HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
-
-   if (i < num_rows)
-   {
-      const HYPRE_Int rid = row_id ? read_only_load(&row_id[i]) : i;
-      const HYPRE_Int rnz = read_only_load(&row_sizes[rid]);
-      ghash_sizes[rid] = next_power_of_2(rnz - SHMEM_HASH_SIZE);
-   }
-}
-
 HYPRE_Int
 hypre_SpGemmCreateGlobalHashTable( HYPRE_Int       num_rows,        /* number of rows */
                                    HYPRE_Int      *row_id,          /* row_id[i] is index of ith row; i if row_id == NULL */
@@ -91,28 +127,17 @@ hypre_SpGemmCreateGlobalHashTable( HYPRE_Int       num_rows,        /* number of
                                    HYPRE_Int     **ghash_i_ptr,     /* of length num_ghash + 1 */
                                    HYPRE_Int     **ghash_j_ptr,
                                    HYPRE_Complex **ghash_a_ptr,
-                                   HYPRE_Int      *ghash_size_ptr,
-                                   HYPRE_Int       type )
+                                   HYPRE_Int      *ghash_size_ptr )
 {
-   hypre_assert(type == 2 || num_ghash <= num_rows);
+   hypre_assert(num_ghash <= num_rows);
 
    HYPRE_Int *ghash_i, ghash_size;
    dim3 bDim = hypre_GetDefaultCUDABlockDimension();
 
-   if (type == 1)
-   {
-      ghash_i = hypre_TAlloc(HYPRE_Int, num_ghash + 1, HYPRE_MEMORY_DEVICE);
-      dim3 gDim = hypre_GetDefaultCUDAGridDimension(num_ghash, "thread", bDim);
-      HYPRE_CUDA_LAUNCH( hypre_SpGemmGhashSize1, gDim, bDim,
-                         num_rows, row_id, num_ghash, row_sizes, ghash_i, SHMEM_HASH_SIZE );
-   }
-   else if (type == 2)
-   {
-      ghash_i = hypre_CTAlloc(HYPRE_Int, num_ghash + 1, HYPRE_MEMORY_DEVICE);
-      dim3 gDim = hypre_GetDefaultCUDAGridDimension(num_rows, "thread", bDim);
-      HYPRE_CUDA_LAUNCH( hypre_SpGemmGhashSize2, gDim, bDim,
-                         num_rows, row_id, num_ghash, row_sizes, ghash_i, SHMEM_HASH_SIZE );
-   }
+   ghash_i = hypre_TAlloc(HYPRE_Int, num_ghash + 1, HYPRE_MEMORY_DEVICE);
+   dim3 gDim = hypre_GetDefaultCUDAGridDimension(num_ghash, "thread", bDim);
+   HYPRE_CUDA_LAUNCH( hypre_SpGemmGhashSize, gDim, bDim,
+                      num_rows, row_id, num_ghash, row_sizes, ghash_i, SHMEM_HASH_SIZE );
 
    hypreDevice_IntegerExclusiveScan(num_ghash + 1, ghash_i);
 
