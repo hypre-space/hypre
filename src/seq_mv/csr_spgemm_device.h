@@ -14,6 +14,14 @@
 
 #define COHEN_USE_SHMEM 0
 
+#if defined(HYPRE_USING_CUDA)
+#define HYPRE_SPGEMM_NUMER_HASH_SIZE 256
+#define HYPRE_SPGEMM_SYMBL_HASH_SIZE 512
+#elif defined(HYPRE_USING_HIP)
+#define HYPRE_SPGEMM_NUMER_HASH_SIZE 256
+#define HYPRE_SPGEMM_SYMBL_HASH_SIZE 512
+#endif
+
 /* these are under the assumptions made in spgemm on block sizes: only use in spmm routines
  * where we assume CUDA block is 3D and blockDim.x * blockDim.y = WARP_SIZE
  */
@@ -81,9 +89,10 @@ HYPRE_Int HashFunc(HYPRE_Int m, HYPRE_Int key, HYPRE_Int i, HYPRE_Int prev)
    return hashval;
 }
 
-void hypre_create_ija( HYPRE_Int m, HYPRE_Int *d_c, HYPRE_Int *d_i, HYPRE_Int **d_j, HYPRE_Complex **d_a, HYPRE_Int *nnz );
+void hypre_create_ija(HYPRE_Int type, HYPRE_Int m, HYPRE_Int *row_id, HYPRE_Int *d_c, HYPRE_Int *d_i, HYPRE_Int **d_j, HYPRE_Complex **d_a, HYPRE_Int *nnz_ptr );
 
-HYPRE_Int hypre_SpGemmCreateGlobalHashTable( HYPRE_Int num_rows, HYPRE_Int *row_id, HYPRE_Int num_ghash, HYPRE_Int *row_sizes, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int **ghash_i_ptr, HYPRE_Int **ghash_j_ptr, HYPRE_Complex **ghash_a_ptr, HYPRE_Int *ghash_size_ptr, HYPRE_Int type);
+HYPRE_Int hypre_SpGemmCreateGlobalHashTable( HYPRE_Int num_rows, HYPRE_Int *row_id, HYPRE_Int num_ghash, HYPRE_Int *row_sizes, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int **ghash_i_ptr, HYPRE_Int **ghash_j_ptr, HYPRE_Complex **ghash_a_ptr, HYPRE_Int *ghash_size_ptr);
 
 #endif /* HYPRE_USING_CUDA || defined(HYPRE_USING_HIP) */
-#endif
+#endif /* #ifndef CSR_SPGEMM_DEVICE_H */
+

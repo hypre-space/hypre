@@ -14,12 +14,6 @@
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - *
                 Numerical Multiplication
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
-#if defined(HYPRE_USING_CUDA)
-#define HYPRE_SPGEMM_NUMER_HASH_SIZE 256
-#elif defined(HYPRE_USING_HIP)
-#define HYPRE_SPGEMM_NUMER_HASH_SIZE 256
-#endif
-
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
@@ -348,14 +342,14 @@ hypre_spgemm_copy_from_Cext_into_C( HYPRE_Int      M,
    const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim.x;
    /* warp id inside the block */
    const HYPRE_Int warp_id = get_warp_id();
+   /* warp id in the grid */
+   volatile const HYPRE_Int grid_warp_id = blockIdx.x * NUM_WARPS_PER_BLOCK + warp_id;
    /* lane id inside the warp */
    volatile const HYPRE_Int lane_id = get_lane_id();
 
    hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 
-   for (HYPRE_Int i = blockIdx.x * NUM_WARPS_PER_BLOCK + warp_id;
-                  i < M;
-                  i += num_warps)
+   for (HYPRE_Int i = grid_warp_id; i < M; i += num_warps)
    {
       HYPRE_Int kc = 0, kx = 0;
 
@@ -447,7 +441,7 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int       m,
 
    /* RL Note: even with exact_rownnz, still may need global hash, since shared hash has different size from symbol. */
    hypre_SpGemmCreateGlobalHashTable(m, NULL, num_act_warps, d_rc, shmem_hash_size,
-                                     &d_ghash_i, &d_ghash_j, &d_ghash_a, NULL, 1);
+                                     &d_ghash_i, &d_ghash_j, &d_ghash_a, NULL);
 
    /* ---------------------------------------------------------------------------
     * numerical multiplication:
@@ -459,7 +453,7 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int       m,
    HYPRE_Complex *d_c;
    HYPRE_Int      nnzC_nume;
 
-   hypre_create_ija(m, d_rc, d_ic, &d_jc, &d_c, &nnzC_nume);
+   hypre_create_ija(1, m, NULL, d_rc, d_ic, &d_jc, &d_c, &nnzC_nume);
 
    HYPRE_CUDA_LAUNCH ( (hypre_spgemm_numeric<num_warps_per_block, shmem_hash_size, !exact_rownnz, hash_type>),
                         gDim, bDim, /* shmem_size, */
@@ -481,7 +475,7 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int       m,
          HYPRE_Int      tmp;
 
          /* alloc final C */
-         hypre_create_ija(m, d_rc, d_ic_new, &d_jc_new, &d_c_new, &tmp);
+         hypre_create_ija(1, m, NULL, d_rc, d_ic_new, &d_jc_new, &d_c_new, &tmp);
          hypre_assert(tmp == nnzC_nume_new);
 
          /* copy to the final C */
@@ -510,7 +504,6 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int       m,
    *nnzC     = nnzC_nume;
 
 #ifdef HYPRE_PROFILE
-   cudaThreadSynchronize();
    hypre_profile_times[HYPRE_TIMER_ID_SPMM_NUMERIC] += hypre_MPI_Wtime();
 #endif
 

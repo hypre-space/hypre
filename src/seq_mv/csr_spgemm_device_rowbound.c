@@ -12,12 +12,6 @@
                 Symbolic Multiplication
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-#if defined(HYPRE_USING_CUDA)
-#define HYPRE_SPGEMM_SYMBL_HASH_SIZE 512
-#elif defined(HYPRE_USING_HIP)
-#define HYPRE_SPGEMM_SYMBL_HASH_SIZE 512
-#endif
-
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 template <char HashType>
@@ -173,16 +167,16 @@ hypre_spgemm_symbolic( HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
 
    for (HYPRE_Int i = grid_warp_id; i < M; i += num_warps)
    {
-      HYPRE_Int j = 0, ii;
+      HYPRE_Int ii, jsum;
       hypre_int failed = 0;
 
       if (ATTEMPT == 2)
       {
          if (lane_id == 0)
          {
-            j = read_only_load(&rind[i]);
+            ii = read_only_load(&rind[i]);
          }
-         ii = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
+         ii = __shfl_sync(HYPRE_WARP_FULL_MASK, ii, 0);
       }
       else
       {
@@ -196,10 +190,10 @@ hypre_spgemm_symbolic( HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
       {
          if (lane_id < 2)
          {
-            j = read_only_load(ig + grid_warp_id + lane_id);
+            istart_g = read_only_load(ig + grid_warp_id + lane_id);
          }
-         istart_g = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
-         iend_g   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
+         iend_g   = __shfl_sync(HYPRE_WARP_FULL_MASK, istart_g, 1);
+         istart_g = __shfl_sync(HYPRE_WARP_FULL_MASK, istart_g, 0);
 
          /* size of global hash table allocated for this row
            (must be power of 2 and >= the actual size of the row of C - shmem hash size) */
@@ -223,9 +217,9 @@ hypre_spgemm_symbolic( HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
       __syncwarp();
 
       /* work with two hash tables */
-      j = hypre_spgemm_compute_row_symbl<HashType>(ii, lane_id, ia, ja, ib, jb,
-                                                   SHMEM_HASH_SIZE, warp_s_HashKeys,
-                                                   ghash_size, jg + istart_g, failed);
+      jsum = hypre_spgemm_compute_row_symbl<HashType>(ii, lane_id, ia, ja, ib, jb,
+                                                      SHMEM_HASH_SIZE, warp_s_HashKeys,
+                                                      ghash_size, jg + istart_g, failed);
 
 #if defined(HYPRE_DEBUG)
       if (ATTEMPT == 2)
@@ -235,7 +229,7 @@ hypre_spgemm_symbolic( HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
 #endif
 
       /* num of nonzeros of this row (an upper bound) */
-      j = warp_reduce_sum(j);
+      jsum = warp_reduce_sum(jsum);
 
       /* if this row failed */
       if (ATTEMPT == 1)
@@ -245,7 +239,7 @@ hypre_spgemm_symbolic( HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
 
       if (lane_id == 0)
       {
-         rc[ii] = j;
+         rc[ii] = jsum;
 
          if (ATTEMPT == 1)
          {
@@ -302,7 +296,7 @@ hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
    if (in_rc)
    {
       hypre_SpGemmCreateGlobalHashTable(m, rf_ind, num_act_warps, d_rc, shmem_hash_size,
-                                        &d_ghash_i, &d_ghash_j, NULL, NULL, 1);
+                                        &d_ghash_i, &d_ghash_j, NULL, NULL);
    }
 
    /* ---------------------------------------------------------------------------
@@ -334,7 +328,6 @@ hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
    hypre_TFree(d_ghash_j, HYPRE_MEMORY_DEVICE);
 
 #ifdef HYPRE_PROFILE
-   cudaThreadSynchronize();
    hypre_profile_times[HYPRE_TIMER_ID_SPMM_SYMBOLIC] += hypre_MPI_Wtime();
 #endif
 }
