@@ -295,12 +295,15 @@ main( hypre_int argc,
          arg_index++;
 
          /* begin lobpcg */
-         if ( strcmp(argv[arg_index], "none") == 0 ) {
+         if ( strcmp(argv[arg_index], "none") == 0 )
+         {
             solver_id = NO_SOLVER;
             arg_index++;
          }
          else /* end lobpcg */
+         {
             solver_id = atoi(argv[arg_index++]);
+         }
       }
       else if ( strcmp(argv[arg_index], "-v") == 0 )
       {
@@ -362,7 +365,9 @@ main( hypre_int argc,
    /* begin lobpcg */
 
    if ( solver_id == 0 && lobpcgFlag )
+   {
       solver_id = 10;
+   }
 
    /*end lobpcg */
 
@@ -497,128 +502,128 @@ main( hypre_int argc,
 
    switch (dim)
    {
-   case 1:
-      nblocks = bx;
-      if(sym)
-      {
-         offsets = hypre_CTAlloc(HYPRE_Int*,  2, HYPRE_MEMORY_HOST);
-         offsets[0] = hypre_CTAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
-         offsets[0][0] = -1;
-         offsets[1] = hypre_CTAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
-         offsets[1][0] = 0;
-      }
-      else
-      {
-         offsets = hypre_CTAlloc(HYPRE_Int*,  3, HYPRE_MEMORY_HOST);
-         offsets[0] = hypre_CTAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
-         offsets[0][0] = -1;
-         offsets[1] = hypre_CTAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
-         offsets[1][0] = 0;
-         offsets[2] = hypre_CTAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
-         offsets[2][0] = 1;
-      }
-      /* compute p from P and myid */
-      p = myid % P;
-      break;
+      case 1:
+         nblocks = bx;
+         if (sym)
+         {
+            offsets = hypre_CTAlloc(HYPRE_Int*,  2, HYPRE_MEMORY_HOST);
+            offsets[0] = hypre_CTAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
+            offsets[0][0] = -1;
+            offsets[1] = hypre_CTAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
+            offsets[1][0] = 0;
+         }
+         else
+         {
+            offsets = hypre_CTAlloc(HYPRE_Int*,  3, HYPRE_MEMORY_HOST);
+            offsets[0] = hypre_CTAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
+            offsets[0][0] = -1;
+            offsets[1] = hypre_CTAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
+            offsets[1][0] = 0;
+            offsets[2] = hypre_CTAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
+            offsets[2][0] = 1;
+         }
+         /* compute p from P and myid */
+         p = myid % P;
+         break;
 
-   case 2:
-      nblocks = bx*by;
-      if(sym)
-      {
-         offsets = hypre_CTAlloc(HYPRE_Int*,  3, HYPRE_MEMORY_HOST);
-         offsets[0] = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
-         offsets[0][0] = -1;
-         offsets[0][1] = 0;
-         offsets[1] = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
-         offsets[1][0] = 0;
-         offsets[1][1] = -1;
-         offsets[2] = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
-         offsets[2][0] = 0;
-         offsets[2][1] = 0;
-      }
-      else
-      {
-         offsets = hypre_CTAlloc(HYPRE_Int*,  5, HYPRE_MEMORY_HOST);
-         offsets[0] = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
-         offsets[0][0] = -1;
-         offsets[0][1] = 0;
-         offsets[1] = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
-         offsets[1][0] = 0;
-         offsets[1][1] = -1;
-         offsets[2] = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
-         offsets[2][0] = 0;
-         offsets[2][1] = 0;
-         offsets[3] = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
-         offsets[3][0] = 1;
-         offsets[3][1] = 0;
-         offsets[4] = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
-         offsets[4][0] = 0;
-         offsets[4][1] = 1;
-      }
-      /* compute p,q from P,Q and myid */
-      p = myid % P;
-      q = (( myid - p)/P) % Q;
-      break;
+      case 2:
+         nblocks = bx*by;
+         if (sym)
+         {
+            offsets = hypre_CTAlloc(HYPRE_Int*,  3, HYPRE_MEMORY_HOST);
+            offsets[0] = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
+            offsets[0][0] = -1;
+            offsets[0][1] = 0;
+            offsets[1] = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
+            offsets[1][0] = 0;
+            offsets[1][1] = -1;
+            offsets[2] = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
+            offsets[2][0] = 0;
+            offsets[2][1] = 0;
+         }
+         else
+         {
+            offsets = hypre_CTAlloc(HYPRE_Int*,  5, HYPRE_MEMORY_HOST);
+            offsets[0] = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
+            offsets[0][0] = -1;
+            offsets[0][1] = 0;
+            offsets[1] = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
+            offsets[1][0] = 0;
+            offsets[1][1] = -1;
+            offsets[2] = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
+            offsets[2][0] = 0;
+            offsets[2][1] = 0;
+            offsets[3] = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
+            offsets[3][0] = 1;
+            offsets[3][1] = 0;
+            offsets[4] = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
+            offsets[4][0] = 0;
+            offsets[4][1] = 1;
+         }
+         /* compute p,q from P,Q and myid */
+         p = myid % P;
+         q = (( myid - p)/P) % Q;
+         break;
 
-   case 3:
-      nblocks = bx*by*bz;
-      if(sym)
-      {
-         offsets = hypre_CTAlloc(HYPRE_Int*,  4, HYPRE_MEMORY_HOST);
-         offsets[0] = hypre_CTAlloc(HYPRE_Int,  3, HYPRE_MEMORY_HOST);
-         offsets[0][0] = -1;
-         offsets[0][1] = 0;
-         offsets[0][2] = 0;
-         offsets[1] = hypre_CTAlloc(HYPRE_Int,  3, HYPRE_MEMORY_HOST);
-         offsets[1][0] = 0;
-         offsets[1][1] = -1;
-         offsets[1][2] = 0;
-         offsets[2] = hypre_CTAlloc(HYPRE_Int,  3, HYPRE_MEMORY_HOST);
-         offsets[2][0] = 0;
-         offsets[2][1] = 0;
-         offsets[2][2] = -1;
-         offsets[3] = hypre_CTAlloc(HYPRE_Int,  3, HYPRE_MEMORY_HOST);
-         offsets[3][0] = 0;
-         offsets[3][1] = 0;
-         offsets[3][2] = 0;
-      }
-      else
-      {
-         offsets = hypre_CTAlloc(HYPRE_Int*,  7, HYPRE_MEMORY_HOST);
-         offsets[0] = hypre_CTAlloc(HYPRE_Int,  3, HYPRE_MEMORY_HOST);
-         offsets[0][0] = -1;
-         offsets[0][1] = 0;
-         offsets[0][2] = 0;
-         offsets[1] = hypre_CTAlloc(HYPRE_Int,  3, HYPRE_MEMORY_HOST);
-         offsets[1][0] = 0;
-         offsets[1][1] = -1;
-         offsets[1][2] = 0;
-         offsets[2] = hypre_CTAlloc(HYPRE_Int,  3, HYPRE_MEMORY_HOST);
-         offsets[2][0] = 0;
-         offsets[2][1] = 0;
-         offsets[2][2] = -1;
-         offsets[3] = hypre_CTAlloc(HYPRE_Int,  3, HYPRE_MEMORY_HOST);
-         offsets[3][0] = 0;
-         offsets[3][1] = 0;
-         offsets[3][2] = 0;
-         offsets[4] = hypre_CTAlloc(HYPRE_Int,  3, HYPRE_MEMORY_HOST);
-         offsets[4][0] = 1;
-         offsets[4][1] = 0;
-         offsets[4][2] = 0;
-         offsets[5] = hypre_CTAlloc(HYPRE_Int,  3, HYPRE_MEMORY_HOST);
-         offsets[5][0] = 0;
-         offsets[5][1] = 1;
-         offsets[5][2] = 0;
-         offsets[6] = hypre_CTAlloc(HYPRE_Int,  3, HYPRE_MEMORY_HOST);
-         offsets[6][0] = 0;
-         offsets[6][1] = 0;
-         offsets[6][2] = 1;
-      }
-      /* compute p,q,r from P,Q,R and myid */
-      p = myid % P;
-      q = (( myid - p)/P) % Q;
-      r = ( myid - p - P*q)/( P*Q );
-      break;
+      case 3:
+         nblocks = bx*by*bz;
+         if (sym)
+         {
+            offsets = hypre_CTAlloc(HYPRE_Int*,  4, HYPRE_MEMORY_HOST);
+            offsets[0] = hypre_CTAlloc(HYPRE_Int,  3, HYPRE_MEMORY_HOST);
+            offsets[0][0] = -1;
+            offsets[0][1] = 0;
+            offsets[0][2] = 0;
+            offsets[1] = hypre_CTAlloc(HYPRE_Int,  3, HYPRE_MEMORY_HOST);
+            offsets[1][0] = 0;
+            offsets[1][1] = -1;
+            offsets[1][2] = 0;
+            offsets[2] = hypre_CTAlloc(HYPRE_Int,  3, HYPRE_MEMORY_HOST);
+            offsets[2][0] = 0;
+            offsets[2][1] = 0;
+            offsets[2][2] = -1;
+            offsets[3] = hypre_CTAlloc(HYPRE_Int,  3, HYPRE_MEMORY_HOST);
+            offsets[3][0] = 0;
+            offsets[3][1] = 0;
+            offsets[3][2] = 0;
+         }
+         else
+         {
+            offsets = hypre_CTAlloc(HYPRE_Int*,  7, HYPRE_MEMORY_HOST);
+            offsets[0] = hypre_CTAlloc(HYPRE_Int,  3, HYPRE_MEMORY_HOST);
+            offsets[0][0] = -1;
+            offsets[0][1] = 0;
+            offsets[0][2] = 0;
+            offsets[1] = hypre_CTAlloc(HYPRE_Int,  3, HYPRE_MEMORY_HOST);
+            offsets[1][0] = 0;
+            offsets[1][1] = -1;
+            offsets[1][2] = 0;
+            offsets[2] = hypre_CTAlloc(HYPRE_Int,  3, HYPRE_MEMORY_HOST);
+            offsets[2][0] = 0;
+            offsets[2][1] = 0;
+            offsets[2][2] = -1;
+            offsets[3] = hypre_CTAlloc(HYPRE_Int,  3, HYPRE_MEMORY_HOST);
+            offsets[3][0] = 0;
+            offsets[3][1] = 0;
+            offsets[3][2] = 0;
+            offsets[4] = hypre_CTAlloc(HYPRE_Int,  3, HYPRE_MEMORY_HOST);
+            offsets[4][0] = 1;
+            offsets[4][1] = 0;
+            offsets[4][2] = 0;
+            offsets[5] = hypre_CTAlloc(HYPRE_Int,  3, HYPRE_MEMORY_HOST);
+            offsets[5][0] = 0;
+            offsets[5][1] = 1;
+            offsets[5][2] = 0;
+            offsets[6] = hypre_CTAlloc(HYPRE_Int,  3, HYPRE_MEMORY_HOST);
+            offsets[6][0] = 0;
+            offsets[6][1] = 0;
+            offsets[6][2] = 1;
+         }
+         /* compute p,q,r from P,Q,R and myid */
+         p = myid % P;
+         q = (( myid - p)/P) % Q;
+         r = ( myid - p - P*q)/( P*Q );
+         break;
    }
 
    if (myid >= (P*Q*R))
@@ -725,35 +730,35 @@ main( hypre_int argc,
 
       HYPRE_StructMatrixCreate(hypre_MPI_COMM_WORLD, grid, stencil, &A);
       if ( solver_id == 3 || solver_id == 4 ||
-            solver_id == 13 || solver_id == 14 )
+           solver_id == 13 || solver_id == 14 )
       {
          stencil_size  = hypre_StructStencilSize(stencil);
          stencil_entries = hypre_CTAlloc(HYPRE_Int,  stencil_size, HYPRE_MEMORY_HOST);
          if ( solver_id == 3 || solver_id == 13)
          {
-               for ( i=0; i<stencil_size; ++i ) stencil_entries[i]=i;
-               hypre_StructMatrixSetConstantEntries(
-                     A, stencil_size, stencil_entries );
-               /* ... note: SetConstantEntries is where the constant_coefficient
-                  flag is set in A */
-               hypre_TFree( stencil_entries , HYPRE_MEMORY_HOST);
-               constant_coefficient = 1;
+            for ( i=0; i<stencil_size; ++i ) { stencil_entries[i]=i; }
+            hypre_StructMatrixSetConstantEntries(
+               A, stencil_size, stencil_entries );
+            /* ... note: SetConstantEntries is where the constant_coefficient
+               flag is set in A */
+            hypre_TFree( stencil_entries, HYPRE_MEMORY_HOST);
+            constant_coefficient = 1;
          }
          if ( solver_id == 4 || solver_id == 14)
          {
-               hypre_SetIndex3(diag_index, 0, 0, 0);
-               diag_rank = hypre_StructStencilElementRank( stencil, diag_index );
-               hypre_assert( stencil_size>=1 );
-               if ( diag_rank==0 ) stencil_entries[diag_rank]=1;
-               else stencil_entries[diag_rank]=0;
-               for ( i=0; i<stencil_size; ++i )
-               {
-                  if ( i!= diag_rank ) stencil_entries[i]=i;
-               }
-               hypre_StructMatrixSetConstantEntries(
-                  A, stencil_size, stencil_entries );
-               hypre_TFree( stencil_entries , HYPRE_MEMORY_HOST);
-               constant_coefficient = 2;
+            hypre_SetIndex3(diag_index, 0, 0, 0);
+            diag_rank = hypre_StructStencilElementRank( stencil, diag_index );
+            hypre_assert( stencil_size>=1 );
+            if ( diag_rank==0 ) { stencil_entries[diag_rank]=1; }
+            else { stencil_entries[diag_rank]=0; }
+            for ( i=0; i<stencil_size; ++i )
+            {
+               if ( i!= diag_rank ) { stencil_entries[i]=i; }
+            }
+            hypre_StructMatrixSetConstantEntries(
+               A, stencil_size, stencil_entries );
+            hypre_TFree( stencil_entries, HYPRE_MEMORY_HOST);
+            constant_coefficient = 2;
          }
       }
       HYPRE_StructMatrixSetSymmetric(A, sym);
@@ -780,7 +785,7 @@ main( hypre_int argc,
       /* Zero out stencils reaching to real boundary */
       /* But in constant coefficient case, no special stencils! */
 
-      if ( constant_coefficient == 0 ) SetStencilBndry(A,grid,periodic);
+      if ( constant_coefficient == 0 ) { SetStencilBndry(A,grid,periodic); }
       HYPRE_StructMatrixAssemble(A);
 
       /*-----------------------------------------------------------
@@ -837,7 +842,7 @@ main( hypre_int argc,
 
    if (solver_id == 0)
    {
-     //timeval tstart,tstop;
+      //timeval tstart,tstop;
       time_index = hypre_InitializeTiming("axpy");
       hypre_BeginTiming(time_index);
       //gettimeofday(&tstart,NULL);
@@ -866,7 +871,7 @@ main( hypre_int argc,
 
    else if ( solver_id == 1 || solver_id == 3 || solver_id == 4 )
    {
-     //timeval tstart,tstop;
+      //timeval tstart,tstop;
       void *matvec_data;
 
       matvec_data = hypre_StructMatvecCreate();
@@ -899,7 +904,7 @@ main( hypre_int argc,
 
    else if (solver_id == 2)
    {
-     //timeval tstart,tstop;
+      //timeval tstart,tstop;
       time_index = hypre_InitializeTiming("inner");
       hypre_BeginTiming(time_index);
       //gettimeofday(&tstart,NULL);
@@ -1015,7 +1020,9 @@ main( hypre_int argc,
    HYPRE_StructVectorDestroy(x);
 
    for ( i = 0; i < (dim + 1); i++)
+   {
       hypre_TFree(offsets[i], HYPRE_MEMORY_HOST);
+   }
    hypre_TFree(offsets, HYPRE_MEMORY_HOST);
 
    /* Finalize MPI */
@@ -1037,7 +1044,7 @@ AddValuesVector( hypre_StructGrid  *gridvector,
                  HYPRE_Int          *period,
                  HYPRE_Real         value  )
 {
-/* #include  "_hypre_struct_mv.h" */
+   /* #include  "_hypre_struct_mv.h" */
    HYPRE_Int ierr = 0;
    hypre_BoxArray     *gridboxes;
    HYPRE_Int          ib;
@@ -1105,11 +1112,11 @@ AddValuesVector( hypre_StructGrid  *gridvector,
 #if 0 //defined(HYPRE_USING_CUDA)
       if (data_location < 1)
       {
-          hypre_TFree(values,HYPRE_MEMORY_DEVICE);
+         hypre_TFree(values,HYPRE_MEMORY_DEVICE);
       }
       else
       {
-          hypre_TFree(values,HYPRE_MEMORY_HOST);
+         hypre_TFree(values,HYPRE_MEMORY_HOST);
       }
 #else
       hypre_TFree(values,HYPRE_MEMORY_DEVICE);
@@ -1170,8 +1177,8 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
    top = -cz;
    bottom = -cz;
    center = 2.0*cx;
-   if (dim > 1) center += 2.0*cy;
-   if (dim > 2) center += 2.0*cz;
+   if (dim > 1) { center += 2.0*cy; }
+   if (dim > 2) { center += 2.0*cz; }
 
    stencil_size = 1 + (2 - sym) * dim;
    stencil_indices = hypre_CTAlloc(HYPRE_Int,  stencil_size, HYPRE_MEMORY_HOST);
@@ -1180,7 +1187,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
       stencil_indices[s] = s;
    }
 
-   if(sym)
+   if (sym)
    {
       if ( constant_coefficient==0 )
       {
@@ -1441,7 +1448,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
       }
       else if ( constant_coefficient==1 )
       {
-         values = hypre_CTAlloc( HYPRE_Real,  stencil_size , HYPRE_MEMORY_HOST);
+         values = hypre_CTAlloc( HYPRE_Real,  stencil_size, HYPRE_MEMORY_HOST);
 
          switch (dim)
          {
@@ -1479,9 +1486,10 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
       else
       {
          hypre_assert( constant_coefficient==2 );
-         values = hypre_CTAlloc( HYPRE_Real,  stencil_size-1 , HYPRE_MEMORY_HOST);
+         values = hypre_CTAlloc( HYPRE_Real,  stencil_size-1, HYPRE_MEMORY_HOST);
          switch (dim)
-         {  /* no center in stencil_indices and values */
+         {
+            /* no center in stencil_indices and values */
             case 1:
                stencil_indices[0] = 0;
                stencil_indices[1] = 2;
@@ -1606,7 +1614,7 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
    stencil_indices = hypre_CTAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
-   if ( constant_coefficient>0 ) return 1;
+   if ( constant_coefficient>0 ) { return 1; }
    /*...no space dependence if constant_coefficient==1,
      and space dependence only for diagonal if constant_coefficient==2 --
      and this function only touches off-diagonal entries */
@@ -1662,7 +1670,7 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
             }
             hypre_LoopEnd()
 
-            if( ilower[ib][d] == istart[d] && period[d] == 0 )
+            if ( ilower[ib][d] == istart[d] && period[d] == 0 )
             {
                j = iupper[ib][d];
                iupper[ib][d] = istart[d];
@@ -1672,7 +1680,7 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
                iupper[ib][d] = j;
             }
 
-            if( iupper[ib][d] == iend[d] && period[d] == 0 )
+            if ( iupper[ib][d] == iend[d] && period[d] == 0 )
             {
                j = ilower[ib][d];
                ilower[ib][d] = iend[d];

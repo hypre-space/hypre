@@ -46,7 +46,7 @@ HYPRE_CSRMatrixCreate( HYPRE_Int  num_rows,
 HYPRE_Int
 HYPRE_CSRMatrixDestroy( HYPRE_CSRMatrix matrix )
 {
-   return( hypre_CSRMatrixDestroy( (hypre_CSRMatrix *) matrix ) );
+   return ( hypre_CSRMatrixDestroy( (hypre_CSRMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------

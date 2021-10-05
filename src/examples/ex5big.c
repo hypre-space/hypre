@@ -138,7 +138,7 @@ int main (int argc, char *argv[])
    }
 
    /* Preliminaries: want at least one processor per row */
-   if (n*n < num_procs) n = sqrt(num_procs) + 1;
+   if (n*n < num_procs) { n = sqrt(num_procs) + 1; }
    N = n*n; /* global number of rows */
    h = 1.0/(n+1); /* mesh size*/
    h2 = h*h;
@@ -299,8 +299,8 @@ int main (int argc, char *argv[])
    HYPRE_IJVectorGetObject(x, (void **) &par_x);
 
 
-  /*  Print out the system  - files names will be IJ.out.A.XXXXX
-       and IJ.out.b.XXXXX, where XXXXX = processor id */
+   /*  Print out the system  - files names will be IJ.out.A.XXXXX
+        and IJ.out.b.XXXXX, where XXXXX = processor id */
    if (print_system)
    {
       HYPRE_IJMatrixPrint(A, "IJ.out.A");
@@ -515,15 +515,17 @@ int main (int argc, char *argv[])
 
       /* Set the FlexGMRES preconditioner */
       HYPRE_FlexGMRESSetPrecond(solver, (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
-                          (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup, precond);
+                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup, precond);
 
 
       if (modify)
-      /* this is an optional call  - if you don't call it, hypre_FlexGMRESModifyPCDefault
-         is used - which does nothing.  Otherwise, you can define your own, similar to
-         the one used here */
-         HYPRE_FlexGMRESSetModifyPC( solver,
-                                     (HYPRE_PtrToModifyPCFcn) hypre_FlexGMRESModifyPCAMGExample);
+      {
+         /* this is an optional call  - if you don't call it, hypre_FlexGMRESModifyPCDefault
+            is used - which does nothing.  Otherwise, you can define your own, similar to
+            the one used here */
+         HYPRE_FlexGMRESSetModifyPC(
+            solver, (HYPRE_PtrToModifyPCFcn) hypre_FlexGMRESModifyPCAMGExample);
+      }
 
 
       /* Now setup and solve! */
@@ -548,7 +550,7 @@ int main (int argc, char *argv[])
    }
    else
    {
-      if (myid ==0) printf("Invalid solver id specified.\n");
+      if (myid ==0) { printf("Invalid solver id specified.\n"); }
    }
 
    /* Clean up */
@@ -562,7 +564,7 @@ int main (int argc, char *argv[])
    /* Finalize MPI*/
    MPI_Finalize();
 
-   return(0);
+   return (0);
 }
 
 /*--------------------------------------------------------------------------
@@ -576,7 +578,7 @@ int main (int argc, char *argv[])
  *--------------------------------------------------------------------------*/
 
 int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, int iterations,
-                                   double rel_residual_norm)
+                                      double rel_residual_norm)
 {
 
 

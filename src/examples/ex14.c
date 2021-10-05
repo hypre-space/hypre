@@ -140,10 +140,14 @@ void ComputeFEMRhombus (double **S, double F[4], double gamma, double h)
    /* The stiffness matrix is symmetric */
    for (i = 1; i < 4; i++)
       for (j = 0; j < i; j++)
+      {
          S[i][j] = S[j][i];
+      }
 
    for (i = 0; i < 4; i++)
+   {
       F[i] = h2_4*sing;
+   }
 }
 
 
@@ -226,7 +230,7 @@ int main (int argc, char *argv[])
       number of processors np and the given n */
    if (num_procs < 3)
    {
-      if (myid ==0) printf("Must run with at least 3 processors!\n");
+      if (myid ==0) { printf("Must run with at least 3 processors!\n"); }
       MPI_Finalize();
       exit(1);
    }
@@ -262,7 +266,9 @@ int main (int argc, char *argv[])
 
          HYPRE_SStructVariable vartypes[1] = {HYPRE_SSTRUCT_VARIABLE_NODE};
          for (i = 0; i < nparts; i++)
+         {
             HYPRE_SStructGridSetVariables(grid, i, nvars, vartypes);
+         }
       }
 
       /* Set the ordering of the variables in the finite element problem.  This
@@ -270,10 +276,13 @@ int main (int argc, char *argv[])
          element's center.  See the Reference Manual for more details. */
       {
          int part = myid;
-         int ordering[12] = { 0, -1, -1,    /*    [3]------[2] */
-                              0, +1, -1,    /*    /        /   */
-                              0, +1, +1,    /*   /        /    */
-                              0, -1, +1 };  /* [0]------[1]    */
+         int ordering[12] =
+         {
+            0, -1, -1,    /*    [3]------[2] */
+            0, +1, -1,    /*    /        /   */
+            0, +1, +1,    /*   /        /    */
+            0, -1, +1     /* [0]------[1]    */
+         };
 
          HYPRE_SStructGridSetFEMOrdering(grid, part, ordering);
       }
@@ -387,7 +396,9 @@ int main (int argc, char *argv[])
       /* Indicate that this problem uses finite element stiffness matrices and
          load vectors, instead of stencils. */
       for (part = 0; part < num_procs; part++)
+      {
          HYPRE_SStructGraphSetFEM(graph, part);
+      }
 
       /* The local stiffness matrix is full, so there is no need to call
          HYPRE_SStructGraphSetFEMSparsity to set its sparsity pattern. */
@@ -631,7 +642,9 @@ int main (int argc, char *argv[])
 
          /* save solution */
          for (i = 0; i < nvalues; i++)
+         {
             fprintf(file, "%.14e\n", values[i]);
+         }
 
          fflush(file);
          fclose(file);

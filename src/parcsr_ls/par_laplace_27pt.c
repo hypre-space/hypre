@@ -84,34 +84,34 @@ GenerateLaplacian27pt(MPI_Comm comm,
    R_busy = hypre_min(nz,R);
 
    num_cols_offd = 0;
-   if (p) num_cols_offd += ny_local*nz_local;
-   if (p < P_busy-1) num_cols_offd += ny_local*nz_local;
-   if (q) num_cols_offd += nx_local*nz_local;
-   if (q < Q_busy-1) num_cols_offd += nx_local*nz_local;
-   if (r) num_cols_offd += nx_local*ny_local;
-   if (r < R_busy-1) num_cols_offd += nx_local*ny_local;
-   if (p && q) num_cols_offd += nz_local;
-   if (p && q < Q_busy-1 ) num_cols_offd += nz_local;
-   if (p < P_busy-1 && q ) num_cols_offd += nz_local;
-   if (p < P_busy-1 && q < Q_busy-1 ) num_cols_offd += nz_local;
-   if (p && r) num_cols_offd += ny_local;
-   if (p && r < R_busy-1 ) num_cols_offd += ny_local;
-   if (p < P_busy-1 && r ) num_cols_offd += ny_local;
-   if (p < P_busy-1 && r < R_busy-1 ) num_cols_offd += ny_local;
-   if (q && r) num_cols_offd += nx_local;
-   if (q && r < R_busy-1 ) num_cols_offd += nx_local;
-   if (q < Q_busy-1 && r ) num_cols_offd += nx_local;
-   if (q < Q_busy-1 && r < R_busy-1 ) num_cols_offd += nx_local;
-   if (p && q && r) num_cols_offd++;
-   if (p && q && r < R_busy-1) num_cols_offd++;
-   if (p && q < Q_busy-1 && r) num_cols_offd++;
-   if (p && q < Q_busy-1 && r < R_busy-1) num_cols_offd++;
-   if (p < P_busy-1 && q && r) num_cols_offd++;
-   if (p < P_busy-1 && q && r < R_busy-1 ) num_cols_offd++;
-   if (p < P_busy-1 && q < Q_busy-1 && r ) num_cols_offd++;
-   if (p < P_busy-1 && q < Q_busy-1 && r < R_busy-1) num_cols_offd++;
+   if (p) { num_cols_offd += ny_local*nz_local; }
+   if (p < P_busy-1) { num_cols_offd += ny_local*nz_local; }
+   if (q) { num_cols_offd += nx_local*nz_local; }
+   if (q < Q_busy-1) { num_cols_offd += nx_local*nz_local; }
+   if (r) { num_cols_offd += nx_local*ny_local; }
+   if (r < R_busy-1) { num_cols_offd += nx_local*ny_local; }
+   if (p && q) { num_cols_offd += nz_local; }
+   if (p && q < Q_busy-1 ) { num_cols_offd += nz_local; }
+   if (p < P_busy-1 && q ) { num_cols_offd += nz_local; }
+   if (p < P_busy-1 && q < Q_busy-1 ) { num_cols_offd += nz_local; }
+   if (p && r) { num_cols_offd += ny_local; }
+   if (p && r < R_busy-1 ) { num_cols_offd += ny_local; }
+   if (p < P_busy-1 && r ) { num_cols_offd += ny_local; }
+   if (p < P_busy-1 && r < R_busy-1 ) { num_cols_offd += ny_local; }
+   if (q && r) { num_cols_offd += nx_local; }
+   if (q && r < R_busy-1 ) { num_cols_offd += nx_local; }
+   if (q < Q_busy-1 && r ) { num_cols_offd += nx_local; }
+   if (q < Q_busy-1 && r < R_busy-1 ) { num_cols_offd += nx_local; }
+   if (p && q && r) { num_cols_offd++; }
+   if (p && q && r < R_busy-1) { num_cols_offd++; }
+   if (p && q < Q_busy-1 && r) { num_cols_offd++; }
+   if (p && q < Q_busy-1 && r < R_busy-1) { num_cols_offd++; }
+   if (p < P_busy-1 && q && r) { num_cols_offd++; }
+   if (p < P_busy-1 && q && r < R_busy-1 ) { num_cols_offd++; }
+   if (p < P_busy-1 && q < Q_busy-1 && r ) { num_cols_offd++; }
+   if (p < P_busy-1 && q < Q_busy-1 && r < R_busy-1) { num_cols_offd++; }
 
-   if (!local_num_rows) num_cols_offd = 0;
+   if (!local_num_rows) { num_cols_offd = 0; }
 
    col_map_offd = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd, HYPRE_MEMORY_HOST);
 
@@ -143,7 +143,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   else
                   {
                      if (ix)
+                     {
                         offd_i[o_cnt]++;
+                     }
                   }
                   if (ix < nx_part[p+1]-1)
                   {
@@ -152,7 +154,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   else
                   {
                      if (ix+1 < nx)
+                     {
                         offd_i[o_cnt]++;
+                     }
                   }
                }
                else
@@ -179,7 +183,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   }
                }
                if (ix > nx_part[p])
+               {
                   diag_i[cnt]++;
+               }
                else
                {
                   if (ix)
@@ -188,7 +194,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   }
                }
                if (ix+1 < nx_part[p+1])
+               {
                   diag_i[cnt]++;
+               }
                else
                {
                   if (ix+1 < nx)
@@ -206,7 +214,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   else
                   {
                      if (ix)
+                     {
                         offd_i[o_cnt]++;
+                     }
                   }
                   if (ix < nx_part[p+1]-1)
                   {
@@ -215,7 +225,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   else
                   {
                      if (ix+1 < nx)
+                     {
                         offd_i[o_cnt]++;
+                     }
                   }
                }
                else
@@ -257,7 +269,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      else
                      {
                         if (ix)
+                        {
                            offd_i[o_cnt]++;
+                        }
                      }
                      if (ix < nx_part[p+1]-1)
                      {
@@ -266,7 +280,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      else
                      {
                         if (ix+1 < nx)
+                        {
                            offd_i[o_cnt]++;
+                        }
                      }
                   }
                   else
@@ -293,7 +309,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      }
                   }
                   if (ix > nx_part[p])
+                  {
                      offd_i[o_cnt]++;
+                  }
                   else
                   {
                      if (ix)
@@ -302,7 +320,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      }
                   }
                   if (ix+1 < nx_part[p+1])
+                  {
                      offd_i[o_cnt]++;
+                  }
                   else
                   {
                      if (ix+1 < nx)
@@ -320,7 +340,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      else
                      {
                         if (ix)
+                        {
                            offd_i[o_cnt]++;
+                        }
                      }
                      if (ix < nx_part[p+1]-1)
                      {
@@ -329,7 +351,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      else
                      {
                         if (ix+1 < nx)
+                        {
                            offd_i[o_cnt]++;
+                        }
                      }
                   }
                   else
@@ -367,7 +391,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                else
                {
                   if (ix)
+                  {
                      offd_i[o_cnt]++;
+                  }
                }
                if (ix < nx_part[p+1]-1)
                {
@@ -376,7 +402,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                else
                {
                   if (ix+1 < nx)
+                  {
                      offd_i[o_cnt]++;
+                  }
                }
             }
             else
@@ -403,7 +431,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                }
             }
             if (ix > nx_part[p])
+            {
                diag_i[cnt]++;
+            }
             else
             {
                if (ix)
@@ -412,7 +442,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                }
             }
             if (ix+1 < nx_part[p+1])
+            {
                diag_i[cnt]++;
+            }
             else
             {
                if (ix+1 < nx)
@@ -430,7 +462,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                else
                {
                   if (ix)
+                  {
                      offd_i[o_cnt]++;
+                  }
                }
                if (ix < nx_part[p+1]-1)
                {
@@ -439,7 +473,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                else
                {
                   if (ix+1 < nx)
+                  {
                      offd_i[o_cnt]++;
+                  }
                }
             }
             else
@@ -478,7 +514,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   else
                   {
                      if (ix)
+                     {
                         offd_i[o_cnt]++;
+                     }
                   }
                   if (ix < nx_part[p+1]-1)
                   {
@@ -487,7 +525,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   else
                   {
                      if (ix+1 < nx)
+                     {
                         offd_i[o_cnt]++;
+                     }
                   }
                }
                else
@@ -514,7 +554,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   }
                }
                if (ix > nx_part[p])
+               {
                   diag_i[cnt]++;
+               }
                else
                {
                   if (ix)
@@ -523,7 +565,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   }
                }
                if (ix+1 < nx_part[p+1])
+               {
                   diag_i[cnt]++;
+               }
                else
                {
                   if (ix+1 < nx)
@@ -541,7 +585,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   else
                   {
                      if (ix)
+                     {
                         offd_i[o_cnt]++;
+                     }
                   }
                   if (ix < nx_part[p+1]-1)
                   {
@@ -550,7 +596,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   else
                   {
                      if (ix+1 < nx)
+                     {
                         offd_i[o_cnt]++;
+                     }
                   }
                }
                else
@@ -592,7 +640,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      else
                      {
                         if (ix)
+                        {
                            offd_i[o_cnt]++;
+                        }
                      }
                      if (ix < nx_part[p+1]-1)
                      {
@@ -601,7 +651,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      else
                      {
                         if (ix+1 < nx)
+                        {
                            offd_i[o_cnt]++;
+                        }
                      }
                   }
                   else
@@ -628,7 +680,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      }
                   }
                   if (ix > nx_part[p])
+                  {
                      offd_i[o_cnt]++;
+                  }
                   else
                   {
                      if (ix)
@@ -637,7 +691,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      }
                   }
                   if (ix+1 < nx_part[p+1])
+                  {
                      offd_i[o_cnt]++;
+                  }
                   else
                   {
                      if (ix+1 < nx)
@@ -655,7 +711,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      else
                      {
                         if (ix)
+                        {
                            offd_i[o_cnt]++;
+                        }
                      }
                      if (ix < nx_part[p+1]-1)
                      {
@@ -664,7 +722,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      else
                      {
                         if (ix+1 < nx)
+                        {
                            offd_i[o_cnt]++;
+                        }
                      }
                   }
                   else
@@ -732,7 +792,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      if (ix)
                      {
                         big_offd_j[o_cnt] = hypre_map(ix-1,iy-1,iz-1,p-1,q,r,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                      nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                   }
@@ -748,7 +808,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      if (ix+1 < nx)
                      {
                         big_offd_j[o_cnt] = hypre_map(ix+1,iy-1,iz-1,p+1,q,r,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                      nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                   }
@@ -760,28 +820,28 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      if (ix > nx_part[p])
                      {
                         big_offd_j[o_cnt] = hypre_map(ix-1,iy-1,iz-1,p,q-1,r,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                      nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                      else if (ix)
                      {
                         big_offd_j[o_cnt] = hypre_map(ix-1,iy-1,iz-1,p-1,q-1,r,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                      nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                      big_offd_j[o_cnt] = hypre_map(ix,iy-1,iz-1,p,q-1,r,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                   nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                      if (ix < nx_part[p+1]-1)
                      {
                         big_offd_j[o_cnt] = hypre_map(ix+1,iy-1,iz-1,p,q-1,r,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                      nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                      else if (ix < nx-1)
                      {
                         big_offd_j[o_cnt] = hypre_map(ix+1,iy-1,iz-1,p+1,q-1,r,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                      nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                   }
@@ -796,7 +856,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   if (ix)
                   {
                      big_offd_j[o_cnt] = hypre_map(ix-1,iy,iz-1,p-1,q,r,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                   nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                   }
                }
@@ -812,7 +872,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   if (ix+1 < nx)
                   {
                      big_offd_j[o_cnt] = hypre_map(ix+1,iy,iz-1,p+1,q,r,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                   nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                   }
                }
@@ -828,7 +888,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      if (ix)
                      {
                         big_offd_j[o_cnt] = hypre_map(ix-1,iy+1,iz-1,p-1,q,r,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                      nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                   }
@@ -844,7 +904,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      if (ix+1 < nx)
                      {
                         big_offd_j[o_cnt] = hypre_map(ix+1,iy+1,iz-1,p+1,q,r,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                      nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                   }
@@ -856,28 +916,28 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      if (ix > nx_part[p])
                      {
                         big_offd_j[o_cnt] = hypre_map(ix-1,iy+1,iz-1,p,q+1,r,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                      nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                      else if (ix)
                      {
                         big_offd_j[o_cnt] = hypre_map(ix-1,iy+1,iz-1,p-1,q+1,r,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                      nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                      big_offd_j[o_cnt] = hypre_map(ix,iy+1,iz-1,p,q+1,r,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                   nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                      if (ix < nx_part[p+1]-1)
                      {
                         big_offd_j[o_cnt] = hypre_map(ix+1,iy+1,iz-1,p,q+1,r,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                      nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                      else if (ix < nx-1)
                      {
                         big_offd_j[o_cnt] = hypre_map(ix+1,iy+1,iz-1,p+1,q+1,r,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                      nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                   }
@@ -892,7 +952,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      if (ix > nx_part[p])
                      {
                         big_offd_j[o_cnt] = hypre_map(ix-1,iy-1,iz-1,p,q,r-1,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                      nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                      else
@@ -900,17 +960,17 @@ GenerateLaplacian27pt(MPI_Comm comm,
                         if (ix)
                         {
                            big_offd_j[o_cnt] = hypre_map(ix-1,iy-1,iz-1,p-1,q,r-1,nx,ny,
-                                 nx_part,ny_part,nz_part);
+                                                         nx_part,ny_part,nz_part);
                            offd_data[o_cnt++] = value[1];
                         }
                      }
                      big_offd_j[o_cnt] = hypre_map(ix,iy-1,iz-1,p,q,r-1,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                   nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                      if (ix < nx_part[p+1]-1)
                      {
                         big_offd_j[o_cnt] = hypre_map(ix+1,iy-1,iz-1,p,q,r-1,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                      nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                      else
@@ -918,7 +978,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                         if (ix+1 < nx)
                         {
                            big_offd_j[o_cnt] = hypre_map(ix+1,iy-1,iz-1,p+1,q,r-1,nx,ny,
-                                 nx_part,ny_part,nz_part);
+                                                         nx_part,ny_part,nz_part);
                            offd_data[o_cnt++] = value[1];
                         }
                      }
@@ -930,28 +990,28 @@ GenerateLaplacian27pt(MPI_Comm comm,
                         if (ix > nx_part[p])
                         {
                            big_offd_j[o_cnt] = hypre_map(ix-1,iy-1,iz-1,p,q-1,r-1,nx,ny,
-                                 nx_part,ny_part,nz_part);
+                                                         nx_part,ny_part,nz_part);
                            offd_data[o_cnt++] = value[1];
                         }
                         else if (ix)
                         {
                            big_offd_j[o_cnt] =hypre_map(ix-1,iy-1,iz-1,p-1,q-1,r-1,nx,ny,
-                                 nx_part,ny_part,nz_part);
+                                                        nx_part,ny_part,nz_part);
                            offd_data[o_cnt++] = value[1];
                         }
                         big_offd_j[o_cnt] = hypre_map(ix,iy-1,iz-1,p,q-1,r-1,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                      nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                         if (ix < nx_part[p+1]-1)
                         {
                            big_offd_j[o_cnt] = hypre_map(ix+1,iy-1,iz-1,p,q-1,r-1,nx,ny,
-                                 nx_part,ny_part,nz_part);
+                                                         nx_part,ny_part,nz_part);
                            offd_data[o_cnt++] = value[1];
                         }
                         else if (ix < nx-1)
                         {
                            big_offd_j[o_cnt] =hypre_map(ix+1,iy-1,iz-1,p+1,q-1,r-1,nx,ny,
-                                 nx_part,ny_part,nz_part);
+                                                        nx_part,ny_part,nz_part);
                            offd_data[o_cnt++] = value[1];
                         }
                      }
@@ -959,7 +1019,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   if (ix > nx_part[p])
                   {
                      big_offd_j[o_cnt] =hypre_map(ix-1,iy,iz-1,p,q,r-1,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                  nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                   }
                   else
@@ -967,17 +1027,17 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      if (ix)
                      {
                         big_offd_j[o_cnt] =hypre_map(ix-1,iy,iz-1,p-1,q,r-1,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                   }
                   big_offd_j[o_cnt] =hypre_map(ix,iy,iz-1,p,q,r-1,nx,ny,
-                        nx_part,ny_part,nz_part);
+                                               nx_part,ny_part,nz_part);
                   offd_data[o_cnt++] = value[1];
                   if (ix+1 < nx_part[p+1])
                   {
                      big_offd_j[o_cnt] =hypre_map(ix+1,iy,iz-1,p,q,r-1,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                  nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                   }
                   else
@@ -985,7 +1045,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      if (ix+1 < nx)
                      {
                         big_offd_j[o_cnt] =hypre_map(ix+1,iy,iz-1,p+1,q,r-1,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                   }
@@ -994,7 +1054,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      if (ix > nx_part[p])
                      {
                         big_offd_j[o_cnt] =hypre_map(ix-1,iy+1,iz-1,p,q,r-1,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                      else
@@ -1002,17 +1062,17 @@ GenerateLaplacian27pt(MPI_Comm comm,
                         if (ix)
                         {
                            big_offd_j[o_cnt] =hypre_map(ix-1,iy+1,iz-1,p-1,q,r-1,nx,ny,
-                                 nx_part,ny_part,nz_part);
+                                                        nx_part,ny_part,nz_part);
                            offd_data[o_cnt++] = value[1];
                         }
                      }
                      big_offd_j[o_cnt] =hypre_map(ix,iy+1,iz-1,p,q,r-1,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                  nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                      if (ix < nx_part[p+1]-1)
                      {
                         big_offd_j[o_cnt] =hypre_map(ix+1,iy+1,iz-1,p,q,r-1,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                      else
@@ -1020,7 +1080,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                         if (ix+1 < nx)
                         {
                            big_offd_j[o_cnt] =hypre_map(ix+1,iy+1,iz-1,p+1,q,r-1,nx,ny,
-                                 nx_part,ny_part,nz_part);
+                                                        nx_part,ny_part,nz_part);
                            offd_data[o_cnt++] = value[1];
                         }
                      }
@@ -1032,28 +1092,28 @@ GenerateLaplacian27pt(MPI_Comm comm,
                         if (ix > nx_part[p])
                         {
                            big_offd_j[o_cnt] =hypre_map(ix-1,iy+1,iz-1,p,q+1,r-1,nx,ny,
-                                 nx_part,ny_part,nz_part);
+                                                        nx_part,ny_part,nz_part);
                            offd_data[o_cnt++] = value[1];
                         }
                         else if (ix)
                         {
                            big_offd_j[o_cnt] =hypre_map(ix-1,iy+1,iz-1,p-1,q+1,r-1,nx,ny,
-                                 nx_part,ny_part,nz_part);
+                                                        nx_part,ny_part,nz_part);
                            offd_data[o_cnt++] = value[1];
                         }
                         big_offd_j[o_cnt] =hypre_map(ix,iy+1,iz-1,p,q+1,r-1,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                         if (ix < nx_part[p+1]-1)
                         {
                            big_offd_j[o_cnt] =hypre_map(ix+1,iy+1,iz-1,p,q+1,r-1,nx,ny,
-                                 nx_part,ny_part,nz_part);
+                                                        nx_part,ny_part,nz_part);
                            offd_data[o_cnt++] = value[1];
                         }
                         else if (ix < nx-1)
                         {
                            big_offd_j[o_cnt] =hypre_map(ix+1,iy+1,iz-1,p+1,q+1,r-1,nx,ny,
-                                 nx_part,ny_part,nz_part);
+                                                        nx_part,ny_part,nz_part);
                            offd_data[o_cnt++] = value[1];
                         }
                      }
@@ -1072,7 +1132,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   if (ix)
                   {
                      big_offd_j[o_cnt] =hypre_map(ix-1,iy-1,iz,p-1,q,r,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                  nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                   }
                }
@@ -1088,7 +1148,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   if (ix+1 < nx)
                   {
                      big_offd_j[o_cnt] =hypre_map(ix+1,iy-1,iz,p+1,q,r,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                  nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                   }
                }
@@ -1100,28 +1160,28 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   if (ix > nx_part[p])
                   {
                      big_offd_j[o_cnt] =hypre_map(ix-1,iy-1,iz,p,q-1,r,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                  nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                   }
                   else if (ix)
                   {
                      big_offd_j[o_cnt] =hypre_map(ix-1,iy-1,iz,p-1,q-1,r,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                  nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                   }
                   big_offd_j[o_cnt] =hypre_map(ix,iy-1,iz,p,q-1,r,nx,ny,
-                        nx_part,ny_part,nz_part);
+                                               nx_part,ny_part,nz_part);
                   offd_data[o_cnt++] = value[1];
                   if (ix < nx_part[p+1]-1)
                   {
                      big_offd_j[o_cnt] =hypre_map(ix+1,iy-1,iz,p,q-1,r,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                  nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                   }
                   else if (ix < nx-1)
                   {
                      big_offd_j[o_cnt] =hypre_map(ix+1,iy-1,iz,p+1,q-1,r,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                  nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                   }
                }
@@ -1136,7 +1196,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                if (ix)
                {
                   big_offd_j[o_cnt] =hypre_map(ix-1,iy,iz,p-1,q,r,nx,ny,
-                        nx_part,ny_part,nz_part);
+                                               nx_part,ny_part,nz_part);
                   offd_data[o_cnt++] = value[1];
                }
             }
@@ -1150,7 +1210,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                if (ix+1 < nx)
                {
                   big_offd_j[o_cnt] =hypre_map(ix+1,iy,iz,p+1,q,r,nx,ny,
-                        nx_part,ny_part,nz_part);
+                                               nx_part,ny_part,nz_part);
                   offd_data[o_cnt++] = value[1];
                }
             }
@@ -1166,7 +1226,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   if (ix)
                   {
                      big_offd_j[o_cnt] =hypre_map(ix-1,iy+1,iz,p-1,q,r,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                  nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                   }
                }
@@ -1182,7 +1242,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   if (ix+1 < nx)
                   {
                      big_offd_j[o_cnt] =hypre_map(ix+1,iy+1,iz,p+1,q,r,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                  nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                   }
                }
@@ -1194,28 +1254,28 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   if (ix > nx_part[p])
                   {
                      big_offd_j[o_cnt] =hypre_map(ix-1,iy+1,iz,p,q+1,r,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                  nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                   }
                   else if (ix)
                   {
                      big_offd_j[o_cnt] =hypre_map(ix-1,iy+1,iz,p-1,q+1,r,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                  nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                   }
                   big_offd_j[o_cnt] =hypre_map(ix,iy+1,iz,p,q+1,r,nx,ny,
-                        nx_part,ny_part,nz_part);
+                                               nx_part,ny_part,nz_part);
                   offd_data[o_cnt++] = value[1];
                   if (ix < nx_part[p+1]-1)
                   {
                      big_offd_j[o_cnt] =hypre_map(ix+1,iy+1,iz,p,q+1,r,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                  nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                   }
                   else if (ix < nx-1)
                   {
                      big_offd_j[o_cnt] =hypre_map(ix+1,iy+1,iz,p+1,q+1,r,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                  nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                   }
                }
@@ -1234,7 +1294,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      if (ix)
                      {
                         big_offd_j[o_cnt] =hypre_map(ix-1,iy-1,iz+1,p-1,q,r,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                   }
@@ -1250,7 +1310,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      if (ix+1 < nx)
                      {
                         big_offd_j[o_cnt] =hypre_map(ix+1,iy-1,iz+1,p+1,q,r,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                   }
@@ -1262,28 +1322,28 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      if (ix > nx_part[p])
                      {
                         big_offd_j[o_cnt] =hypre_map(ix-1,iy-1,iz+1,p,q-1,r,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                      else if (ix)
                      {
                         big_offd_j[o_cnt] =hypre_map(ix-1,iy-1,iz+1,p-1,q-1,r,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                      big_offd_j[o_cnt] =hypre_map(ix,iy-1,iz+1,p,q-1,r,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                  nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                      if (ix < nx_part[p+1]-1)
                      {
                         big_offd_j[o_cnt] =hypre_map(ix+1,iy-1,iz+1,p,q-1,r,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                      else if (ix < nx-1)
                      {
                         big_offd_j[o_cnt] =hypre_map(ix+1,iy-1,iz+1,p+1,q-1,r,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                   }
@@ -1298,7 +1358,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   if (ix)
                   {
                      big_offd_j[o_cnt] =hypre_map(ix-1,iy,iz+1,p-1,q,r,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                  nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                   }
                }
@@ -1314,7 +1374,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   if (ix+1 < nx)
                   {
                      big_offd_j[o_cnt] =hypre_map(ix+1,iy,iz+1,p+1,q,r,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                  nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                   }
                }
@@ -1330,7 +1390,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      if (ix)
                      {
                         big_offd_j[o_cnt] =hypre_map(ix-1,iy+1,iz+1,p-1,q,r,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                   }
@@ -1346,7 +1406,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      if (ix+1 < nx)
                      {
                         big_offd_j[o_cnt] =hypre_map(ix+1,iy+1,iz+1,p+1,q,r,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                   }
@@ -1358,28 +1418,28 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      if (ix > nx_part[p])
                      {
                         big_offd_j[o_cnt] =hypre_map(ix-1,iy+1,iz+1,p,q+1,r,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                      else if (ix)
                      {
                         big_offd_j[o_cnt] =hypre_map(ix-1,iy+1,iz+1,p-1,q+1,r,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                      big_offd_j[o_cnt] =hypre_map(ix,iy+1,iz+1,p,q+1,r,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                  nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                      if (ix < nx_part[p+1]-1)
                      {
                         big_offd_j[o_cnt] =hypre_map(ix+1,iy+1,iz+1,p,q+1,r,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                      else if (ix < nx-1)
                      {
                         big_offd_j[o_cnt] =hypre_map(ix+1,iy+1,iz+1,p+1,q+1,r,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                   }
@@ -1394,7 +1454,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      if (ix > nx_part[p])
                      {
                         big_offd_j[o_cnt] =hypre_map(ix-1,iy-1,iz+1,p,q,r+1,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                      else
@@ -1402,17 +1462,17 @@ GenerateLaplacian27pt(MPI_Comm comm,
                         if (ix)
                         {
                            big_offd_j[o_cnt] =hypre_map(ix-1,iy-1,iz+1,p-1,q,r+1,nx,ny,
-                                 nx_part,ny_part,nz_part);
+                                                        nx_part,ny_part,nz_part);
                            offd_data[o_cnt++] = value[1];
                         }
                      }
                      big_offd_j[o_cnt] =hypre_map(ix,iy-1,iz+1,p,q,r+1,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                  nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                      if (ix < nx_part[p+1]-1)
                      {
                         big_offd_j[o_cnt] =hypre_map(ix+1,iy-1,iz+1,p,q,r+1,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                      else
@@ -1420,7 +1480,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                         if (ix+1 < nx)
                         {
                            big_offd_j[o_cnt] =hypre_map(ix+1,iy-1,iz+1,p+1,q,r+1,nx,ny,
-                                 nx_part,ny_part,nz_part);
+                                                        nx_part,ny_part,nz_part);
                            offd_data[o_cnt++] = value[1];
                         }
                      }
@@ -1432,28 +1492,28 @@ GenerateLaplacian27pt(MPI_Comm comm,
                         if (ix > nx_part[p])
                         {
                            big_offd_j[o_cnt] =hypre_map(ix-1,iy-1,iz+1,p,q-1,r+1,nx,ny,
-                                 nx_part,ny_part,nz_part);
+                                                        nx_part,ny_part,nz_part);
                            offd_data[o_cnt++] = value[1];
                         }
                         else if (ix)
                         {
                            big_offd_j[o_cnt] =hypre_map(ix-1,iy-1,iz+1,p-1,q-1,r+1,nx,ny,
-                                 nx_part,ny_part,nz_part);
+                                                        nx_part,ny_part,nz_part);
                            offd_data[o_cnt++] = value[1];
                         }
                         big_offd_j[o_cnt] =hypre_map(ix,iy-1,iz+1,p,q-1,r+1,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                         if (ix < nx_part[p+1]-1)
                         {
                            big_offd_j[o_cnt] =hypre_map(ix+1,iy-1,iz+1,p,q-1,r+1,nx,ny,
-                                 nx_part,ny_part,nz_part);
+                                                        nx_part,ny_part,nz_part);
                            offd_data[o_cnt++] = value[1];
                         }
                         else if (ix < nx-1)
                         {
                            big_offd_j[o_cnt] =hypre_map(ix+1,iy-1,iz+1,p+1,q-1,r+1,nx,ny,
-                                 nx_part,ny_part,nz_part);
+                                                        nx_part,ny_part,nz_part);
                            offd_data[o_cnt++] = value[1];
                         }
                      }
@@ -1461,7 +1521,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                   if (ix > nx_part[p])
                   {
                      big_offd_j[o_cnt] =hypre_map(ix-1,iy,iz+1,p,q,r+1,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                  nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                   }
                   else
@@ -1469,17 +1529,17 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      if (ix)
                      {
                         big_offd_j[o_cnt] =hypre_map(ix-1,iy,iz+1,p-1,q,r+1,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                   }
                   big_offd_j[o_cnt] =hypre_map(ix,iy,iz+1,p,q,r+1,nx,ny,
-                        nx_part,ny_part,nz_part);
+                                               nx_part,ny_part,nz_part);
                   offd_data[o_cnt++] = value[1];
                   if (ix+1 < nx_part[p+1])
                   {
                      big_offd_j[o_cnt] =hypre_map(ix+1,iy,iz+1,p,q,r+1,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                  nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                   }
                   else
@@ -1487,7 +1547,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      if (ix+1 < nx)
                      {
                         big_offd_j[o_cnt] =hypre_map(ix+1,iy,iz+1,p+1,q,r+1,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                   }
@@ -1496,7 +1556,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                      if (ix > nx_part[p])
                      {
                         big_offd_j[o_cnt] =hypre_map(ix-1,iy+1,iz+1,p,q,r+1,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                      else
@@ -1504,17 +1564,17 @@ GenerateLaplacian27pt(MPI_Comm comm,
                         if (ix)
                         {
                            big_offd_j[o_cnt] =hypre_map(ix-1,iy+1,iz+1,p-1,q,r+1,nx,ny,
-                                 nx_part,ny_part,nz_part);
+                                                        nx_part,ny_part,nz_part);
                            offd_data[o_cnt++] = value[1];
                         }
                      }
                      big_offd_j[o_cnt] =hypre_map(ix,iy+1,iz+1,p,q,r+1,nx,ny,
-                           nx_part,ny_part,nz_part);
+                                                  nx_part,ny_part,nz_part);
                      offd_data[o_cnt++] = value[1];
                      if (ix < nx_part[p+1]-1)
                      {
                         big_offd_j[o_cnt] =hypre_map(ix+1,iy+1,iz+1,p,q,r+1,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                      }
                      else
@@ -1522,7 +1582,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
                         if (ix+1 < nx)
                         {
                            big_offd_j[o_cnt] =hypre_map(ix+1,iy+1,iz+1,p+1,q,r+1,nx,ny,
-                                 nx_part,ny_part,nz_part);
+                                                        nx_part,ny_part,nz_part);
                            offd_data[o_cnt++] = value[1];
                         }
                      }
@@ -1534,28 +1594,28 @@ GenerateLaplacian27pt(MPI_Comm comm,
                         if (ix > nx_part[p])
                         {
                            big_offd_j[o_cnt] =hypre_map(ix-1,iy+1,iz+1,p,q+1,r+1,nx,ny,
-                                 nx_part,ny_part,nz_part);
+                                                        nx_part,ny_part,nz_part);
                            offd_data[o_cnt++] = value[1];
                         }
                         else if (ix)
                         {
                            big_offd_j[o_cnt] =hypre_map(ix-1,iy+1,iz+1,p-1,q+1,r+1,nx,ny,
-                                 nx_part,ny_part,nz_part);
+                                                        nx_part,ny_part,nz_part);
                            offd_data[o_cnt++] = value[1];
                         }
                         big_offd_j[o_cnt] =hypre_map(ix,iy+1,iz+1,p,q+1,r+1,nx,ny,
-                              nx_part,ny_part,nz_part);
+                                                     nx_part,ny_part,nz_part);
                         offd_data[o_cnt++] = value[1];
                         if (ix < nx_part[p+1]-1)
                         {
                            big_offd_j[o_cnt] =hypre_map(ix+1,iy+1,iz+1,p,q+1,r+1,nx,ny,
-                                 nx_part,ny_part,nz_part);
+                                                        nx_part,ny_part,nz_part);
                            offd_data[o_cnt++] = value[1];
                         }
                         else if (ix < nx-1)
                         {
                            big_offd_j[o_cnt] =hypre_map(ix+1,iy+1,iz+1,p+1,q+1,r+1,nx,ny,
-                                 nx_part,ny_part,nz_part);
+                                                        nx_part,ny_part,nz_part);
                            offd_data[o_cnt++] = value[1];
                         }
                      }
@@ -1572,7 +1632,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
       work = hypre_CTAlloc(HYPRE_BigInt, o_cnt, HYPRE_MEMORY_HOST);
 
       for (i=0; i < o_cnt; i++)
+      {
          work[i] = big_offd_j[i];
+      }
 
       hypre_BigQsort0(work, 0, o_cnt-1);
 

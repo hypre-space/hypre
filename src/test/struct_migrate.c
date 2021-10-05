@@ -268,7 +268,9 @@ main( hypre_int argc,
             iupper[ib][0] = istart[0]+ nx*(bx*p+ix+1) - 1;
             iupper2[ib][0] = iupper[ib][0];
             if ( (ix == (bx-1)) && (p < (P-1)) )
+            {
                iupper2[ib][0] = iupper[ib][0] + 1;
+            }
             ib++;
          }
          break;
@@ -283,9 +285,13 @@ main( hypre_int argc,
                iupper2[ib][0] = iupper[ib][0];
                iupper2[ib][1] = iupper[ib][1];
                if ( (ix == (bx-1)) && (p < (P-1)) )
+               {
                   iupper2[ib][0] = iupper[ib][0] + 1;
+               }
                if ( (iy == (by-1)) && (q < (Q-1)) )
+               {
                   iupper2[ib][1] = iupper[ib][1] + 1;
+               }
                ib++;
             }
          break;
@@ -304,11 +310,17 @@ main( hypre_int argc,
                   iupper2[ib][1] = iupper[ib][1];
                   iupper2[ib][2] = iupper[ib][2];
                   if ( (ix == (bx-1)) && (p < (P-1)) )
+                  {
                      iupper2[ib][0] = iupper[ib][0] + 1;
+                  }
                   if ( (iy == (by-1)) && (q < (Q-1)) )
+                  {
                      iupper2[ib][1] = iupper[ib][1] + 1;
+                  }
                   if ( (iz == (bz-1)) && (r < (R-1)) )
+                  {
                      iupper2[ib][2] = iupper[ib][2] + 1;
+                  }
                   ib++;
                }
          break;

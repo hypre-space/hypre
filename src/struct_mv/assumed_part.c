@@ -221,12 +221,12 @@ hypre_APFindMyBoxesInRegions( hypre_BoxArray *region_array,
          my_box = hypre_BoxArrayBox(my_box_array, j);
          /* Check if its a zero volume box.  If so, it still need to be counted,
             so expand until volume is non-zero, then intersect. */
-	 if (hypre_BoxVolume(my_box) == 0)
-	 {
+         if (hypre_BoxVolume(my_box) == 0)
+         {
             hypre_CopyBox(my_box, grow_box);
             for (d = 0; d < ndim; d++)
             {
-               if(!hypre_BoxSizeD(my_box, d))
+               if (!hypre_BoxSizeD(my_box, d))
                {
                   hypre_IndexD(grow_index, d) =
                      (hypre_BoxIMinD(my_box, d) - hypre_BoxIMaxD(my_box, d) + 1)/2;
@@ -240,12 +240,12 @@ hypre_APFindMyBoxesInRegions( hypre_BoxArray *region_array,
             hypre_BoxGrowByIndex(grow_box, grow_index);
             /* Do they intersect? */
             hypre_IntersectBoxes(grow_box, region, result_box);
-	 }
-	 else
-	 {
+         }
+         else
+         {
             /* Do they intersect? */
             hypre_IntersectBoxes(my_box, region, result_box);
-	 }
+         }
          if (hypre_BoxVolume(result_box) > 0)
          {
             count_array[i]++;
@@ -292,9 +292,11 @@ hypre_APGetAllBoxesInRegions( hypre_BoxArray *region_array,
    num_regions = hypre_BoxArraySize(region_array);
 
    send_buf_count = hypre_CTAlloc(HYPRE_Int,  num_regions, HYPRE_MEMORY_HOST);
-   send_buf_vol = hypre_CTAlloc(HYPRE_Real,  num_regions*2, HYPRE_MEMORY_HOST); /* allocate HYPRE_Real */
+   send_buf_vol = hypre_CTAlloc(HYPRE_Real,  num_regions*2,
+                                HYPRE_MEMORY_HOST); /* allocate HYPRE_Real */
 
-   dbl_vol_and_count =  hypre_CTAlloc(HYPRE_Real,  num_regions*2, HYPRE_MEMORY_HOST); /* allocate HYPRE_Real */
+   dbl_vol_and_count =  hypre_CTAlloc(HYPRE_Real,  num_regions*2,
+                                      HYPRE_MEMORY_HOST); /* allocate HYPRE_Real */
 
    hypre_APFindMyBoxesInRegions( region_array, my_box_array, &send_buf_count,
                                  &send_buf_vol);
@@ -377,12 +379,12 @@ hypre_APShrinkRegions( hypre_BoxArray *region_array,
 
          /* Check if its a zero volume box.  If so, it still needs to be
             checked, so expand until volume is nonzero, then intersect. */
-	 if (hypre_BoxVolume(my_box) == 0)
-	 {
+         if (hypre_BoxVolume(my_box) == 0)
+         {
             hypre_CopyBox(my_box, grow_box);
             for (d = 0; d < ndim; d++)
             {
-               if(!hypre_BoxSizeD(my_box, d))
+               if (!hypre_BoxSizeD(my_box, d))
                {
                   hypre_IndexD(grow_index, d) =
                      (hypre_BoxIMinD(my_box, d) - hypre_BoxIMaxD(my_box, d) + 1)/2;
@@ -396,9 +398,9 @@ hypre_APShrinkRegions( hypre_BoxArray *region_array,
             hypre_BoxGrowByIndex(grow_box, grow_index);
             /* Do they intersect? */
             hypre_IntersectBoxes(grow_box, region, result_box);
-	 }
-	 else
-	 {
+         }
+         else
+         {
             /* Do they intersect? */
             hypre_IntersectBoxes( my_box, region, result_box);
          }
@@ -533,7 +535,7 @@ hypre_APPruneRegions( hypre_BoxArray *region_array,
             while ((i+j) == delete_indices[j])
             {
                j++; /* Increase the shift */
-               if (j == count) break;
+               if (j == count) { break; }
             }
          }
          vol_array[i] = vol_array[i+j];
@@ -822,7 +824,7 @@ hypre_StructAssumedPartitionCreate(
    max_regions = hypre_min(num_procs, max_regions);
 
    /* Don't want more regions than boxes either */
-   if (global_num_boxes) max_regions = hypre_min(global_num_boxes, max_regions);
+   if (global_num_boxes) { max_regions = hypre_min(global_num_boxes, max_regions); }
 
    /* Start with a region array of size 0 */
    region_array = hypre_BoxArrayCreate(0, ndim);
@@ -832,8 +834,8 @@ hypre_StructAssumedPartitionCreate(
 
    one_volume = hypre_doubleBoxVolume(bounding_box);
 
-   if( ((global_boxes_size/one_volume) > gamma) ||
-       (global_num_boxes > one_volume) || (global_num_boxes == 0) )
+   if ( ((global_boxes_size/one_volume) > gamma) ||
+        (global_num_boxes > one_volume) || (global_num_boxes == 0) )
    {
       /* Don't bother with any refinements.  We are full enough, or we have a
          small bounding box and we are not full because of empty boxes */
@@ -849,10 +851,10 @@ hypre_StructAssumedPartitionCreate(
          we have a smaller number of procs */
       for (i = 0; i < initial_level; i++)
       {
-         if ( hypre_pow2(initial_level*ndim) > num_procs) initial_level --;
+         if ( hypre_pow2(initial_level*ndim) > num_procs) { initial_level --; }
 
          /* Not be able to do any refinements due to the number of processors */
-         if (!initial_level) max_refinements = 0;
+         if (!initial_level) { max_refinements = 0; }
       }
    }
 
@@ -874,7 +876,7 @@ hypre_StructAssumedPartitionCreate(
    /* Divide the bounding box */
    hypre_APSubdivideRegion(bounding_box, ndim, initial_level, region_array, &size);
    /* If no subdividing occured (because too small) then don't try to refine */
-   if (initial_level > 0 && size ==1) max_refinements = 0;
+   if (initial_level > 0 && size ==1) { max_refinements = 0; }
 
    /* Need space for count and volume */
    size = hypre_BoxArraySize(region_array);
@@ -1044,15 +1046,15 @@ hypre_StructAssumedPartitionCreate(
       else
       {
          proc_array[i] = (HYPRE_Int)
-            hypre_round( ((HYPRE_Real)count_array[i]/(HYPRE_Real)total_boxes) *
-                         (HYPRE_Real) num_proc_partitions );
+                         hypre_round( ((HYPRE_Real)count_array[i]/(HYPRE_Real)total_boxes) *
+                                      (HYPRE_Real) num_proc_partitions );
       }
 
       box =  hypre_BoxArrayBox(region_array, i);
       dbl_vol = hypre_doubleBoxVolume(box);
 
       /* Can't have any zeros! */
-      if (!proc_array[i]) proc_array[i] = 1;
+      if (!proc_array[i]) { proc_array[i] = 1; }
 
       if (dbl_vol < (HYPRE_Real) proc_array[i])
       {

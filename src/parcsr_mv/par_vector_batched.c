@@ -112,7 +112,8 @@ hypre_ParVectorMassDotpTwo ( hypre_ParVector  *x,
    local_result = hypre_CTAlloc(HYPRE_Real, 2*k, HYPRE_MEMORY_HOST);
    result = hypre_CTAlloc(HYPRE_Real, 2*k, HYPRE_MEMORY_HOST);
 
-   hypre_SeqVectorMassDotpTwo(x_local, y_local, z_local, k, unroll, &local_result[0], &local_result[k]);
+   hypre_SeqVectorMassDotpTwo(x_local, y_local, z_local, k, unroll, &local_result[0],
+                              &local_result[k]);
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_ALL_REDUCE] -= hypre_MPI_Wtime();

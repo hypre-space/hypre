@@ -68,10 +68,10 @@ int main (int argc, char *argv[])
 
    if (num_procs != 2)
    {
-      if (myid ==0) printf("Must run with 2 processors!\n");
+      if (myid ==0) { printf("Must run with 2 processors!\n"); }
       MPI_Finalize();
 
-      return(0);
+      return (0);
    }
 
    /* Parse command line */
@@ -171,7 +171,9 @@ int main (int argc, char *argv[])
          HYPRE_SStructVariable vartypes[1] = {HYPRE_SSTRUCT_VARIABLE_CELL};
 
          for (i = 0; i< nparts; i++)
+         {
             HYPRE_SStructGridSetVariables(grid, i, nvars, vartypes);
+         }
       }
 
       /* Now we need to set the spatial relation between each of the parts.
@@ -194,7 +196,7 @@ int main (int argc, char *argv[])
             /* These parts have the same orientation, so no
                rotation is necessary */
             int index_map[2] = {0,1};
-            /* These parts map increasing values to increasing values 
+            /* These parts map increasing values to increasing values
                for both variables (note: if decreasing maps to increasing, use -1)*/
             int index_dir[2] = {1,1};
 
@@ -216,7 +218,7 @@ int main (int argc, char *argv[])
             /* These parts have the same orientation, so no
                rotation is necessary */
             int index_map[2] = {0,1};
-            /* These parts map increasing values to increasing values 
+            /* These parts map increasing values to increasing values
                for both variables (note: if decreasing maps to increasing, use -1)*/
             int index_dir[2] = {1,1};
 
@@ -238,12 +240,12 @@ int main (int argc, char *argv[])
             /* These parts have the same orientation, so no
                rotation is necessary */
             int index_map[2] = {0,1};
-            /* These parts map increasing values to increasing values 
+            /* These parts map increasing values to increasing values
                for both variables (note: if decreasing maps to increasing, use -1)*/
             int index_dir[2] = {1,1};
 
             HYPRE_SStructGridSetNeighborPart(grid, part, b_ilower, b_iupper,
-                                            nbor_part, nbor_ilower, nbor_iupper,
+                                             nbor_part, nbor_ilower, nbor_iupper,
                                              index_map, index_dir);
          }
       }
@@ -262,13 +264,13 @@ int main (int argc, char *argv[])
             /* These parts have the same orientation, so no
                rotation is necessary */
             int index_map[2] = {0,1};
-            /* These parts map increasing values to increasing values 
+            /* These parts map increasing values to increasing values
               for both variables (note: if decreasing maps to increasing, use -1)*/
             int index_dir[2] = {1,1};
 
             HYPRE_SStructGridSetNeighborPart(grid, part, b_ilower, b_iupper,
                                              nbor_part, nbor_ilower, nbor_iupper,
-                                             index_map, index_dir); 
+                                             index_map, index_dir);
          }
       }
 
@@ -290,18 +292,23 @@ int main (int argc, char *argv[])
          HYPRE_SStructStencilCreate(ndim, stencil_size, &stencil_5pt);
 
          for (entry = 0; entry < 5; entry++)
+         {
             HYPRE_SStructStencilSetEntry(stencil_5pt, entry, offsets[entry], var);
+         }
       }
 
       /* the 9-pt stencil in 2D */
       {
          int offsets[9][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1},
-                              {-1,-1}, {1,-1}, {1,1}, {-1,1}};
+            {-1,-1}, {1,-1}, {1,1}, {-1,1}
+         };
          int stencil_size = 9;
          HYPRE_SStructStencilCreate(ndim, stencil_size, &stencil_9pt);
 
          for (entry = 0; entry < stencil_size; entry++)
+         {
             HYPRE_SStructStencilSetEntry(stencil_9pt, entry, offsets[entry], var);
+         }
       }
    }
 
@@ -381,13 +388,17 @@ int main (int argc, char *argv[])
             for (j = 0; j < nentries; j++) /* label the stencil indices -
                                               these correspond to the offsets
                                               defined above */
+            {
                stencil_indices[j] = j;
+            }
 
             for (i = 0; i < nvalues; i += nentries)
             {
                values[i] = 4.0;
                for (j = 1; j < nentries; j++)
+               {
                   values[i+j] = -1.0;
+               }
             }
 
             part = 0;
@@ -411,13 +422,17 @@ int main (int argc, char *argv[])
 
             int stencil_indices[9];
             for (j = 0; j < nentries; j++)
+            {
                stencil_indices[j] = j;
+            }
 
             for (i = 0; i < nvalues; i += nentries)
             {
                values[i] = 8./3.;
                for (j = 1; j < nentries; j++)
+               {
                   values[i+j] = -1./3.;
+               }
             }
 
             part = 1;
@@ -443,13 +458,17 @@ int main (int argc, char *argv[])
 
             int stencil_indices[5];
             for (j = 0; j < nentries; j++)
+            {
                stencil_indices[j] = j;
+            }
 
             for (i = 0; i < nvalues; i += nentries)
             {
                values[i] = 4.0;
                for (j = 1; j < nentries; j++)
+               {
                   values[i+j] = -1.0;
+               }
             }
 
             part = 2;
@@ -518,7 +537,9 @@ int main (int argc, char *argv[])
          double *values = (double *) malloc(9*sizeof(double));
 
          for (i = 0; i < maxnvalues; i++)
+         {
             values[i] = 0.0;
+         }
 
          part = 0;
 
@@ -606,7 +627,9 @@ int main (int argc, char *argv[])
          double *values = (double *) malloc(4*sizeof(double));
 
          for (i = 0; i < maxnvalues; i++)
+         {
             values[i] = 0.0;
+         }
 
          part = 2;
 
@@ -688,11 +711,15 @@ int main (int argc, char *argv[])
             part = 0;
 
             for (i = 0; i < nvalues; i ++)
+            {
                values[i] = 1.0;
+            }
             HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper, var, values);
 
             for (i = 0; i < nvalues; i ++)
+            {
                values[i] = 0.0;
+            }
             HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
 
             free(values);
@@ -710,11 +737,15 @@ int main (int argc, char *argv[])
             part = 1;
 
             for (i = 0; i < nvalues; i ++)
+            {
                values[i] = 1.0;
+            }
             HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper, var, values);
 
             for (i = 0; i < nvalues; i ++)
+            {
                values[i] = 0.0;
+            }
             HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
 
             free(values);
@@ -734,11 +765,15 @@ int main (int argc, char *argv[])
             part = 2;
 
             for (i = 0; i < nvalues; i ++)
+            {
                values[i] = 1.0;
+            }
             HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper, var, values);
 
             for (i = 0; i < nvalues; i ++)
+            {
                values[i] = 0.0;
+            }
             HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
 
             free(values);

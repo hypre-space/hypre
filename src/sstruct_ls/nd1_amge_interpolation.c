@@ -32,14 +32,14 @@
   from one group to the next.
 */
 HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
-                                hypre_ParCSRMatrix       * ELEM_idof,
-                                hypre_ParCSRMatrix       * FACE_idof,
-                                hypre_ParCSRMatrix       * EDGE_idof,
-                                hypre_ParCSRMatrix       * ELEM_FACE,
-                                hypre_ParCSRMatrix       * ELEM_EDGE,
-                                HYPRE_Int                  num_OffProcRows,
-                                hypre_MaxwellOffProcRow ** OffProcRows,
-                                hypre_IJMatrix           * IJ_dof_DOF)
+                                      hypre_ParCSRMatrix       * ELEM_idof,
+                                      hypre_ParCSRMatrix       * FACE_idof,
+                                      hypre_ParCSRMatrix       * EDGE_idof,
+                                      hypre_ParCSRMatrix       * ELEM_FACE,
+                                      hypre_ParCSRMatrix       * ELEM_EDGE,
+                                      HYPRE_Int                  num_OffProcRows,
+                                      hypre_MaxwellOffProcRow ** OffProcRows,
+                                      hypre_IJMatrix           * IJ_dof_DOF)
 {
    HYPRE_Int ierr = 0;
 
@@ -75,7 +75,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
    hypre_IJMatrixAssembleFlag(ij_dof_DOF) = 1;
 #endif
 
-  /* sort the offproc rows to get quicker comparison for later */
+   /* sort the offproc rows to get quicker comparison for later */
    if (num_OffProcRows)
    {
       offproc_rnums= hypre_TAlloc(HYPRE_BigInt,  num_OffProcRows, HYPRE_MEMORY_HOST);
@@ -93,13 +93,19 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
    }
 
    if (FACE_idof == EDGE_idof)
+   {
       three_dimensional_problem = 0;
+   }
    else
+   {
       three_dimensional_problem = 1;
+   }
 
    /* ELEM_FACEidof = ELEM_FACE x FACE_idof */
    if (three_dimensional_problem)
+   {
       ELEM_FACEidof = hypre_ParMatmul(ELEM_FACE, FACE_idof);
+   }
 
    /* ELEM_EDGEidof = ELEM_EDGE x EDGE_idof */
    ELEM_EDGEidof = hypre_ParMatmul(ELEM_EDGE, EDGE_idof);
@@ -154,7 +160,9 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
          hypre_ParCSRMatrixRestoreRow (ELEM_FACEidof, big_k, &size1, &col_ind0, &boolean_data);
       }
       else
+      {
          size1 = 0;
+      }
 
       hypre_ParCSRMatrixGetRow (ELEM_EDGEidof, big_k, &size2, &col_ind0, &boolean_data);
       col_ind2= hypre_TAlloc(HYPRE_BigInt,  size2, HYPRE_MEMORY_HOST);
@@ -168,7 +176,9 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
       num_bdof = size1 + size2;
       bdof = hypre_CTAlloc(HYPRE_BigInt,  num_bdof, HYPRE_MEMORY_HOST);
       if (three_dimensional_problem)
-		 hypre_TMemcpy(bdof,  col_ind1, HYPRE_BigInt, size1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+      {
+         hypre_TMemcpy(bdof,  col_ind1, HYPRE_BigInt, size1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+      }
       hypre_TMemcpy(bdof+size1,  col_ind2, HYPRE_BigInt, size2, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
       hypre_BigQsort0(bdof,0,num_bdof-1);
@@ -190,7 +200,9 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
          {
             getrow_ierr= hypre_ParCSRMatrixGetRow (Aee, idof[j], &I[j+1], &tmp_J, &tmp_data);
             if (getrow_ierr <0)
+            {
                hypre_printf("getrow Aee off proc[%d] = \n",myproc);
+            }
             hypre_TMemcpy(J,  tmp_J, HYPRE_BigInt, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
             hypre_TMemcpy(data,  tmp_data, HYPRE_Real, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
             J+= I[j+1];
@@ -212,14 +224,14 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
 
          HYPRE_BigInt *tmp_J;
          HYPRE_Real *tmp_data;
-     
+
          I[0] = 0;
          for (j = 0; j < num_idof; j++)
          {
             getrow_ierr= hypre_ParCSRMatrixGetRow (dof_DOF, idof[j], &I[j+1], &tmp_J, &tmp_data);
             if (getrow_ierr >= 0)
             {
-			   hypre_TMemcpy(J,  tmp_J, HYPRE_BigInt, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(J,  tmp_J, HYPRE_BigInt, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                hypre_TMemcpy(data,  tmp_data, HYPRE_Real, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                J+= I[j+1];
                data+= I[j+1];
@@ -229,12 +241,12 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
             else    /* row offproc */
             {
                hypre_ParCSRMatrixRestoreRow (dof_DOF, idof[j], &I[j+1], &tmp_J, &tmp_data);
-              /* search for OffProcRows */
+               /* search for OffProcRows */
                m= 0;
                while (m < num_OffProcRows)
                {
                   if (offproc_rnums[m] == idof[j])
-                  { 
+                  {
                      break;
                   }
                   else
@@ -258,8 +270,8 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
             getrow_ierr= hypre_ParCSRMatrixGetRow (dof_DOF, bdof[j-num_idof], &I[j+1], &tmp_J, &tmp_data);
             if (getrow_ierr >= 0)
             {
-				hypre_TMemcpy(J,  tmp_J, HYPRE_BigInt, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-				hypre_TMemcpy(data,  tmp_data, HYPRE_Real, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(J,  tmp_J, HYPRE_BigInt, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(data,  tmp_data, HYPRE_Real, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                J+= I[j+1];
                data+= I[j+1];
                hypre_ParCSRMatrixRestoreRow (dof_DOF, bdof[j-num_idof], &I[j+1], &tmp_J, &tmp_data);
@@ -268,7 +280,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
             else    /* row offproc */
             {
                hypre_ParCSRMatrixRestoreRow (dof_DOF, bdof[j-num_idof], &I[j+1], &tmp_J, &tmp_data);
-              /* search for OffProcRows */
+               /* search for OffProcRows */
                m= 0;
                while (m < num_OffProcRows)
                {
@@ -281,7 +293,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
                      m++;
                   }
                }
-               if (m>= num_OffProcRows)hypre_printf("here the mistake\n");
+               if (m>= num_OffProcRows) { hypre_printf("here the mistake\n"); }
                I[j+1]= (OffProcRows[swap[m]] -> ncols);
                tmp_J = (OffProcRows[swap[m]] -> cols);
                tmp_data= (OffProcRows[swap[m]] -> data);
@@ -336,7 +348,9 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
 #endif
 
    if (three_dimensional_problem)
+   {
       hypre_ParCSRMatrixDestroy(ELEM_FACEidof);
+   }
    hypre_ParCSRMatrixDestroy(ELEM_EDGEidof);
 
    if (num_OffProcRows)
@@ -352,10 +366,10 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
 
 
 HYPRE_Int hypre_HarmonicExtension (hypre_CSRMatrix *A,
-                             hypre_CSRMatrix *P,
-                             HYPRE_Int num_DOF, HYPRE_BigInt *DOF,
-                             HYPRE_Int num_idof, HYPRE_BigInt *idof,
-                             HYPRE_Int num_bdof, HYPRE_BigInt *bdof)
+                                   hypre_CSRMatrix *P,
+                                   HYPRE_Int num_DOF, HYPRE_BigInt *DOF,
+                                   HYPRE_Int num_idof, HYPRE_BigInt *idof,
+                                   HYPRE_Int num_bdof, HYPRE_BigInt *bdof)
 {
    HYPRE_Int ierr = 0;
 
@@ -391,7 +405,7 @@ HYPRE_Int hypre_HarmonicExtension (hypre_CSRMatrix *A,
                   if (m > -1)
                   {
                      m+=i*num_DOF;
-                    /* Pi[i*num_DOF+m] += dataA[j] * dataP[l];*/
+                     /* Pi[i*num_DOF+m] += dataA[j] * dataP[l];*/
                      Pi[m] += dataA[j] * dataP[l];
                   }
                }
@@ -399,7 +413,9 @@ HYPRE_Int hypre_HarmonicExtension (hypre_CSRMatrix *A,
          }
          /* If a column is an idof, put it in Aii */
          else
+         {
             Aii[i*num_idof+k] = dataA[j];
+         }
       }
 
    /* Perform Gaussian elimination in [Aii, Pi] */
@@ -410,9 +426,13 @@ HYPRE_Int hypre_HarmonicExtension (hypre_CSRMatrix *A,
             {
                factor = Aii[i*num_idof+j]/Aii[j*num_idof+j];
                for (m = j+1; m < num_idof; m++)
+               {
                   Aii[i*num_idof+m] -= factor * Aii[j*num_idof+m];
+               }
                for (m = 0; m < num_DOF; m++)
+               {
                   Pi[i*num_DOF+m] -= factor * Pi[j*num_DOF+m];
+               }
             }
 
    /* Back Substitution */
@@ -421,10 +441,14 @@ HYPRE_Int hypre_HarmonicExtension (hypre_CSRMatrix *A,
       for (j = i+1; j < num_idof; j++)
          if (Aii[i*num_idof+j] != 0.0)
             for (m = 0; m < num_DOF; m++)
+            {
                Pi[i*num_DOF+m] -= Aii[i*num_idof+j] * Pi[j*num_DOF+m];
+            }
 
       for (m = 0; m < num_DOF; m++)
+      {
          Pi[i*num_DOF+m] /= Aii[i*num_idof+i];
+      }
    }
 
    /* Put -Pi back in P. We assume that each idof depends on _all_ DOFs */

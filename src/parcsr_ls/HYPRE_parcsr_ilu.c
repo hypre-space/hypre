@@ -30,7 +30,7 @@ HYPRE_ILUCreate( HYPRE_Solver *solver )
 HYPRE_Int
 HYPRE_ILUDestroy( HYPRE_Solver solver )
 {
-   return( hypre_ILUDestroy( (void *) solver ) );
+   return ( hypre_ILUDestroy( (void *) solver ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -39,14 +39,14 @@ HYPRE_ILUDestroy( HYPRE_Solver solver )
 
 HYPRE_Int
 HYPRE_ILUSetup( HYPRE_Solver solver,
-                         HYPRE_ParCSRMatrix A,
-                         HYPRE_ParVector b,
-                         HYPRE_ParVector x      )
+                HYPRE_ParCSRMatrix A,
+                HYPRE_ParVector b,
+                HYPRE_ParVector x      )
 {
-   return( hypre_ILUSetup( (void *) solver,
-                                 (hypre_ParCSRMatrix *) A,
-                                 (hypre_ParVector *) b,
-                                 (hypre_ParVector *) x ) );
+   return ( hypre_ILUSetup( (void *) solver,
+                            (hypre_ParCSRMatrix *) A,
+                            (hypre_ParVector *) b,
+                            (hypre_ParVector *) x ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -55,14 +55,14 @@ HYPRE_ILUSetup( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ILUSolve( HYPRE_Solver solver,
-                         HYPRE_ParCSRMatrix A,
-                         HYPRE_ParVector b,
-                         HYPRE_ParVector x      )
+                HYPRE_ParCSRMatrix A,
+                HYPRE_ParVector b,
+                HYPRE_ParVector x      )
 {
-   return( hypre_ILUSolve( (void *) solver,
-                                 (hypre_ParCSRMatrix *) A,
-                                 (hypre_ParVector *) b,
-                                 (hypre_ParVector *) x ) );
+   return ( hypre_ILUSolve( (void *) solver,
+                            (hypre_ParCSRMatrix *) A,
+                            (hypre_ParVector *) b,
+                            (hypre_ParVector *) x ) );
 }
 
 /*--------------------------------------------------------------------------

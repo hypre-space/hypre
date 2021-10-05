@@ -49,7 +49,7 @@ new_format( const char *format,
                fp++; /* remove second 'l' if present */
             }
          }
-         switch(*fp)
+         switch (*fp)
          {
             case 'b': /* used for BigInt type in hypre */
 #if defined(HYPRE_BIGINT) || defined(HYPRE_MIXEDINT)
@@ -98,7 +98,7 @@ new_format( const char *format,
 
    *newformat_ptr = newformat;
 
-/*   printf("\nNEWFORMAT: %s\n", *newformat_ptr);*/
+   /*   printf("\nNEWFORMAT: %s\n", *newformat_ptr);*/
 
    return 0;
 }
@@ -116,7 +116,7 @@ hypre_ndigits( HYPRE_BigInt number )
 {
    HYPRE_Int     ndigits = 0;
 
-   while(number)
+   while (number)
    {
       number /= 10;
       ndigits++;
@@ -226,8 +226,8 @@ hypre_sscanf( char *s, const char *format, ...)
 }
 
 // #else
-// 
+//
 // /* this is used only to eliminate compiler warnings */
 // HYPRE_Int hypre_printf_empty;
-// 
+//
 // #endif

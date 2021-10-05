@@ -55,9 +55,9 @@
 #include "ex.h"
 
 #ifdef M_PI
-  #define PI M_PI
+#define PI M_PI
 #else
-  #define PI 3.14159265358979
+#define PI 3.14159265358979
 #endif
 
 #ifdef HYPRE_EXVIS
@@ -81,14 +81,22 @@ double K(double x, double y)
          return x*x+exp(y);
       case 2:
          if ((fabs(x-0.5) < 0.25) && (fabs(y-0.5) < 0.25))
+         {
             return 100.0;
+         }
          else
+         {
             return 1.0;
+         }
       case 3:
          if (((x-0.5)*(x-0.5)+(y-0.5)*(y-0.5)) < 0.0625)
+         {
             return 10.0;
+         }
          else
+         {
             return 1.0;
+         }
       default:
          return 1.0;
    }
@@ -175,14 +183,22 @@ double F(double x, double y)
          return 2*PI*PI*sin(PI*x)*sin(PI*y);
       case 3:
          if ((fabs(x-0.5) < 0.25) && (fabs(y-0.5) < 0.25))
+         {
             return -1.0;
+         }
          else
+         {
             return 1.0;
+         }
       case 4:
          if (((x-0.5)*(x-0.5)+(y-0.5)*(y-0.5)) < 0.0625)
+         {
             return -1.0;
+         }
          else
+         {
             return 1.0;
+         }
       default:
          return 1.0;
    }
@@ -383,7 +399,9 @@ int main (int argc, char *argv[])
 
    /* Convection produces non-symmetric matrices */
    if (optionB && sym)
+   {
       optionB = 0;
+   }
 
    /* Figure out the processor grid (N x N).  The local
       problem size is indicated by n (n x n). pi and pj
@@ -420,7 +438,9 @@ int main (int argc, char *argv[])
          HYPRE_SStructVariable vartypes[1] = {HYPRE_SSTRUCT_VARIABLE_CELL};
 
          for (i = 0; i< nparts; i++)
+         {
             HYPRE_SStructGridSetVariables(grid, i, nvars, vartypes);
+         }
       }
 
       /* This is a collective call finalizing the grid assembly.
@@ -443,7 +463,9 @@ int main (int argc, char *argv[])
 
          /* Assign stencil entries */
          for (i = 0; i < 5; i++)
+         {
             HYPRE_SStructStencilSetEntry(stencil, i, offsets[i], var);
+         }
       }
       else /* Symmetric storage */
       {
@@ -455,7 +477,9 @@ int main (int argc, char *argv[])
 
          /* Assign stencil entries */
          for (i = 0; i < 3; i++)
+         {
             HYPRE_SStructStencilSetEntry(stencil, i, offsets[i], var);
+         }
       }
    }
 
@@ -514,12 +538,16 @@ int main (int argc, char *argv[])
       /* Set the values of b in left-to-right, bottom-to-top order */
       for (k = 0, j = 0; j < n; j++)
          for (i = 0; i < n; i++, k++)
+         {
             values[k] = h2 * Eval(F,i,j);
+         }
       HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper, var, values);
 
       /* Set x = 0 */
       for (i = 0; i < (n*n); i ++)
+      {
          values[i] = 0.0;
+      }
       HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
 
       free(values);
@@ -571,10 +599,10 @@ int main (int argc, char *argv[])
                values[k+4] = - Eval(K,i,j+0.5) + Eval(B2,i,j+0.5);
 
                values[k] = h2 * Eval(C,i,j)
-                  + Eval(K ,i-0.5,j) + Eval(K ,i+0.5,j)
-                  + Eval(K ,i,j-0.5) + Eval(K ,i,j+0.5)
-                  - Eval(B1,i-0.5,j) + Eval(B1,i+0.5,j)
-                  - Eval(B2,i,j-0.5) + Eval(B2,i,j+0.5);
+                           + Eval(K,i-0.5,j) + Eval(K,i+0.5,j)
+                           + Eval(K,i,j-0.5) + Eval(K,i,j+0.5)
+                           - Eval(B1,i-0.5,j) + Eval(B1,i+0.5,j)
+                           - Eval(B2,i,j-0.5) + Eval(B2,i,j+0.5);
             }
 
          HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
@@ -597,8 +625,8 @@ int main (int argc, char *argv[])
                values[k+1] = - Eval(K,i+0.5,j);
                values[k+2] = - Eval(K,i,j+0.5);
                values[k] = h2 * Eval(C,i,j)
-                  + Eval(K,i+0.5,j) + Eval(K,i,j+0.5)
-                  + Eval(K,i-0.5,j) + Eval(K,i,j-0.5);
+                           + Eval(K,i+0.5,j) + Eval(K,i,j+0.5)
+                           + Eval(K,i-0.5,j) + Eval(K,i,j-0.5);
             }
 
          HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
@@ -626,9 +654,13 @@ int main (int argc, char *argv[])
       int var = 0;
 
       if (sym == 0)
+      {
          nentries = 5;
+      }
       else
+      {
          nentries = 3;
+      }
 
       values  = (double*) calloc(nentries*n, sizeof(double));
       bvalues = (double*) calloc(n, sizeof(double));
@@ -639,7 +671,9 @@ int main (int argc, char *argv[])
       {
          values[i] = 1.0;
          for (j = 1; j < nentries; j++)
+         {
             values[i+j] = 0.0;
+         }
       }
 
       /* Processors at y = 0 */
@@ -658,7 +692,9 @@ int main (int argc, char *argv[])
 
          /* Put the boundary conditions in b */
          for (i = 0; i < n; i++)
+         {
             bvalues[i] = bcEval(U0,i,0);
+         }
 
          HYPRE_SStructVectorSetBoxValues(b, part, bc_ilower,
                                          bc_iupper, var, bvalues);
@@ -680,7 +716,9 @@ int main (int argc, char *argv[])
 
          /* Put the boundary conditions in b */
          for (i = 0; i < n; i++)
+         {
             bvalues[i] = bcEval(U0,i,0);
+         }
 
          HYPRE_SStructVectorSetBoxValues(b, part, bc_ilower, bc_iupper, var, bvalues);
       }
@@ -701,7 +739,9 @@ int main (int argc, char *argv[])
 
          /* Put the boundary conditions in b */
          for (j = 0; j < n; j++)
+         {
             bvalues[j] = bcEval(U0,0,j);
+         }
 
          HYPRE_SStructVectorSetBoxValues(b, part, bc_ilower, bc_iupper,
                                          var, bvalues);
@@ -723,7 +763,9 @@ int main (int argc, char *argv[])
 
          /* Put the boundary conditions in b */
          for (j = 0; j < n; j++)
+         {
             bvalues[j] = bcEval(U0,0,j);
+         }
 
          HYPRE_SStructVectorSetBoxValues(b, part, bc_ilower, bc_iupper,
                                          var, bvalues);
@@ -751,7 +793,9 @@ int main (int argc, char *argv[])
 
          /* Modify the matrix */
          for (i = 0; i < n; i++)
+         {
             bvalues[i] = 0.0;
+         }
 
          if (sym == 0)
             HYPRE_SStructMatrixSetBoxValues(A, part, bc_ilower, bc_iupper,
@@ -760,13 +804,19 @@ int main (int argc, char *argv[])
 
          /* Eliminate the boundary conditions in b */
          for (i = 0; i < n; i++)
+         {
             bvalues[i] = bcEval(U0,i,-1) * (bcEval(K,i,-0.5)+bcEval(B2,i,-0.5));
+         }
 
          if (pi == 0)
+         {
             bvalues[0] = 0.0;
+         }
 
          if (pi == N-1)
+         {
             bvalues[n-1] = 0.0;
+         }
 
          /* Note the use of AddToBoxValues (because we have already set values
             at these nodes) */
@@ -787,7 +837,9 @@ int main (int argc, char *argv[])
 
          /* Modify the matrix */
          for (j = 0; j < n; j++)
+         {
             bvalues[j] = 0.0;
+         }
 
          if (sym == 0)
             HYPRE_SStructMatrixSetBoxValues(A, part, bc_ilower, bc_iupper,
@@ -796,13 +848,19 @@ int main (int argc, char *argv[])
 
          /* Eliminate the boundary conditions in b */
          for (j = 0; j < n; j++)
+         {
             bvalues[j] = bcEval(U0,-1,j) * (bcEval(K,-0.5,j)+bcEval(B1,-0.5,j));
+         }
 
          if (pj == 0)
+         {
             bvalues[0] = 0.0;
+         }
 
          if (pj == N-1)
+         {
             bvalues[n-1] = 0.0;
+         }
 
          HYPRE_SStructVectorAddToBoxValues(b, part, bc_ilower, bc_iupper, var, bvalues);
       }
@@ -817,26 +875,38 @@ int main (int argc, char *argv[])
          bc_iupper[1] = bc_ilower[1];
 
          if (sym == 0)
+         {
             stencil_indices[0] = 4;
+         }
          else
+         {
             stencil_indices[0] = 2;
+         }
 
          /* Modify the matrix */
          for (i = 0; i < n; i++)
+         {
             bvalues[i] = 0.0;
+         }
 
          HYPRE_SStructMatrixSetBoxValues(A, part, bc_ilower, bc_iupper, var, 1,
                                          stencil_indices, bvalues);
 
          /* Eliminate the boundary conditions in b */
          for (i = 0; i < n; i++)
+         {
             bvalues[i] = bcEval(U0,i,1) * (bcEval(K,i,0.5)+bcEval(B2,i,0.5));
+         }
 
          if (pi == 0)
+         {
             bvalues[0] = 0.0;
+         }
 
          if (pi == N-1)
+         {
             bvalues[n-1] = 0.0;
+         }
 
          HYPRE_SStructVectorAddToBoxValues(b, part, bc_ilower, bc_iupper,
                                            var, bvalues);
@@ -852,13 +922,19 @@ int main (int argc, char *argv[])
          bc_iupper[1] = bc_ilower[1] + n-1;
 
          if (sym == 0)
+         {
             stencil_indices[0] = 2;
+         }
          else
+         {
             stencil_indices[0] = 1;
+         }
 
          /* Modify the matrix */
          for (j = 0; j < n; j++)
+         {
             bvalues[j] = 0.0;
+         }
 
          HYPRE_SStructMatrixSetBoxValues(A, part, bc_ilower, bc_iupper,
                                          var, 1,
@@ -866,13 +942,19 @@ int main (int argc, char *argv[])
 
          /* Eliminate the boundary conditions in b */
          for (j = 0; j < n; j++)
+         {
             bvalues[j] = bcEval(U0,1,j) * (bcEval(K,0.5,j)+bcEval(B1,0.5,j));
+         }
 
          if (pj == 0)
+         {
             bvalues[0] = 0.0;
+         }
 
          if (pj == N-1)
+         {
             bvalues[n-1] = 0.0;
+         }
 
          HYPRE_SStructVectorAddToBoxValues(b, part, bc_ilower, bc_iupper, var, bvalues);
       }
@@ -1257,7 +1339,9 @@ int main (int argc, char *argv[])
       k = 0;
       for (j = 0; j < n; j++)
          for (i = 0; i < n; i++)
+         {
             fprintf(file, "%06d %.14e\n", pj*N*n*n+pi*n+j*N*n+i, values[k++]);
+         }
 
       fflush(file);
       fclose(file);
@@ -1265,7 +1349,9 @@ int main (int argc, char *argv[])
 
       /* save global finite element mesh */
       if (myid == 0)
+      {
          GLVis_PrintGlobalSquareMesh("vis/ex7.mesh", N*n-1);
+      }
 #endif
    }
 

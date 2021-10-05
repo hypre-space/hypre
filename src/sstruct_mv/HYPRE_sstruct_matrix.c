@@ -292,20 +292,20 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
    domain_grid = hypre_SStructGraphDomainGrid(graph);
    comm =  hypre_SStructMatrixComm(matrix);
 
-   if(matrix_type == HYPRE_PARCSR)
+   if (matrix_type == HYPRE_PARCSR)
    {
-     ilower = hypre_SStructGridStartRank(grid);
-     iupper = ilower + hypre_SStructGridLocalSize(grid) - 1;
-     jlower = hypre_SStructGridStartRank(domain_grid);
-     jupper = jlower + hypre_SStructGridLocalSize(domain_grid) - 1;
+      ilower = hypre_SStructGridStartRank(grid);
+      iupper = ilower + hypre_SStructGridLocalSize(grid) - 1;
+      jlower = hypre_SStructGridStartRank(domain_grid);
+      jupper = jlower + hypre_SStructGridLocalSize(domain_grid) - 1;
    }
 
-   if(matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT)
+   if (matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT)
    {
-     ilower = hypre_SStructGridGhstartRank(grid);
-     iupper = ilower + hypre_SStructGridGhlocalSize(grid) - 1;
-     jlower = hypre_SStructGridGhstartRank(domain_grid);
-     jupper = jlower + hypre_SStructGridGhlocalSize(domain_grid) - 1;
+      ilower = hypre_SStructGridGhstartRank(grid);
+      iupper = ilower + hypre_SStructGridGhlocalSize(grid) - 1;
+      jlower = hypre_SStructGridGhstartRank(domain_grid);
+      jupper = jlower + hypre_SStructGridGhlocalSize(domain_grid) - 1;
    }
 
    HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper,
@@ -667,9 +667,9 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
       recv_var  = hypre_SStructCommInfoRecvVar(vnbor_comm_info[ci]);
 
       send_matrix = hypre_SStructPMatrixSMatrix(
-         hypre_SStructMatrixPMatrix(matrix, send_part), send_var, send_var);
+                       hypre_SStructMatrixPMatrix(matrix, send_part), send_var, send_var);
       recv_matrix = hypre_SStructPMatrixSMatrix(
-         hypre_SStructMatrixPMatrix(matrix, recv_part), recv_var, recv_var);
+                       hypre_SStructMatrixPMatrix(matrix, recv_part), recv_var, recv_var);
 
       if ((send_matrix != NULL) && (recv_matrix != NULL))
       {
@@ -913,7 +913,7 @@ HYPRE_SStructMatrixGetObject( HYPRE_SStructMatrix   matrix,
       var = 0;
       pmatrix = hypre_SStructMatrixPMatrix(matrix, part);
       smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, var);
-     *object = smatrix;
+      *object = smatrix;
    }
 
    return hypre_error_flag;

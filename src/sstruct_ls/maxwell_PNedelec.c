@@ -126,7 +126,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
       t= vartypes[i];
       hypre_SStructVariableGetOffset((hypre_SStructVariable) t,
                                      ndim, varoffsets[t]);
-      switch(t)
+      switch (t)
       {
          case 2:
          {
@@ -406,7 +406,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
          n_boxoffsets= ndim-1;
          boxoffset   = hypre_CTAlloc(hypre_Index,  n_boxoffsets, HYPRE_MEMORY_HOST);
          suboffset   = hypre_CTAlloc(hypre_Index,  n_boxoffsets, HYPRE_MEMORY_HOST);
-         switch(var)
+         switch (var)
          {
             case 2: /* 2-d: x_face (vertical edges), stride=[rfactor[0],1,1] */
             {
@@ -596,7 +596,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
             box_array= hypre_StructGridBoxes(var_fgrid);
 
             /* to reduce comparison, take the switch outside of the loop */
-            switch(var)
+            switch (var)
             {
                case 5:
                {
@@ -1129,7 +1129,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
          box_array= hypre_StructGridBoxes(var_fgrid);
 
          /* to reduce comparison, take the switch outside of the loop */
-         switch(var)
+         switch (var)
          {
             case 2:
             {
@@ -1493,7 +1493,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
          n_boxoffsets= ndim-1;
          boxoffset   = hypre_CTAlloc(hypre_Index,  n_boxoffsets, HYPRE_MEMORY_HOST);
          suboffset   = hypre_CTAlloc(hypre_Index,  n_boxoffsets, HYPRE_MEMORY_HOST);
-         switch(var)
+         switch (var)
          {
             case 2: /* 2-d: x_face (vertical edges), stride=[rfactor[0],1,1]
                        fCedge_ratio= 1.0/rfactor[1] */
@@ -1707,7 +1707,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
             var_fgrid=  hypre_SStructPGridVTSGrid(p_fgrid, var);
             box_array= hypre_StructGridBoxes(var_fgrid);
 
-            switch(var)
+            switch (var)
             {
                case 5:
                {
@@ -2408,7 +2408,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
          var_fgrid=  hypre_SStructPGridVTSGrid(p_fgrid, var);
          box_array= hypre_StructGridBoxes(var_fgrid);
 
-         switch(var)
+         switch (var)
          {
             case 2:
             {
@@ -2599,7 +2599,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                                                     matrix_type);
                               jedge_Edge[k]= rank;
                               vals_edgeEdge[k]= (HYPRE_Real) p*n/
-                                 (rfactor[0]*rfactor[1]*rfactor[2]);
+                                                (rfactor[0]*rfactor[1]*rfactor[2]);
 
                               k++;
 
@@ -2610,7 +2610,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                                                     matrix_type);
                               jedge_Edge[k]= rank;
                               vals_edgeEdge[k]= (HYPRE_Real) p*(rfactor[1]-n)/
-                                 (rfactor[0]*rfactor[1]*rfactor[2]);
+                                                (rfactor[0]*rfactor[1]*rfactor[2]);
                               k++;
 
                               hypre_SubtractIndexes(var_index, kshift, 3, var_index);
@@ -2620,7 +2620,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                                                     matrix_type);
                               jedge_Edge[k]= rank;
                               vals_edgeEdge[k]= (HYPRE_Real) (rfactor[1]-n)*(rfactor[2]-p)/
-                                 (rfactor[0]*rfactor[1]*rfactor[2]);
+                                                (rfactor[0]*rfactor[1]*rfactor[2]);
                               k++;
 
                               hypre_AddIndexes(var_index, jshift, 3, var_index);
@@ -2630,7 +2630,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                                                     matrix_type);
                               jedge_Edge[k]= rank;
                               vals_edgeEdge[k]= (HYPRE_Real) n*(rfactor[2]-p)/
-                                 (rfactor[0]*rfactor[1]*rfactor[2]);
+                                                (rfactor[0]*rfactor[1]*rfactor[2]);
                               k++;
                            }  /* for (m= 0; m< rfactor[0]; m++) */
                         }     /* for (n= 1; n< rfactor[1]; n++) */
@@ -2694,7 +2694,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                                                     matrix_type);
                               jedge_Edge[k]= rank;
                               vals_edgeEdge[k]= (HYPRE_Real) p*n/
-                                 (rfactor[0]*rfactor[1]*rfactor[2]);
+                                                (rfactor[0]*rfactor[1]*rfactor[2]);
                               k++;
 
                               hypre_SubtractIndexes(cindex, ishift, 3, var_index);
@@ -2704,7 +2704,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                                                     matrix_type);
                               jedge_Edge[k]= rank;
                               vals_edgeEdge[k]= (HYPRE_Real) p*(rfactor[0]-n)/
-                                 (rfactor[0]*rfactor[1]*rfactor[2]);
+                                                (rfactor[0]*rfactor[1]*rfactor[2]);
                               k++;
 
                               hypre_SubtractIndexes(var_index, kshift, 3, var_index);
@@ -2714,7 +2714,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                                                     matrix_type);
                               jedge_Edge[k]= rank;
                               vals_edgeEdge[k]= (HYPRE_Real) (rfactor[0]-n)*(rfactor[2]-p)/
-                                 (rfactor[0]*rfactor[1]*rfactor[2]);
+                                                (rfactor[0]*rfactor[1]*rfactor[2]);
                               k++;
 
                               hypre_AddIndexes(var_index, ishift, 3, var_index);
@@ -2724,7 +2724,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                                                     matrix_type);
                               jedge_Edge[k]= rank;
                               vals_edgeEdge[k]= (HYPRE_Real) n*(rfactor[2]-p)/
-                                 (rfactor[0]*rfactor[1]*rfactor[2]);
+                                                (rfactor[0]*rfactor[1]*rfactor[2]);
                               k++;
                            }  /* for (m= 0; m< rfactor[1]; m++) */
                         }     /* for (n= 1; n< rfactor[0]; n++) */
@@ -2789,7 +2789,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                                                     matrix_type);
                               jedge_Edge[k]= rank;
                               vals_edgeEdge[k]= (HYPRE_Real) n*p/
-                                 (rfactor[0]*rfactor[1]*rfactor[2]);
+                                                (rfactor[0]*rfactor[1]*rfactor[2]);
                               k++;
 
                               hypre_SubtractIndexes(cindex, ishift, 3, var_index);
@@ -2799,7 +2799,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                                                     matrix_type);
                               jedge_Edge[k]= rank;
                               vals_edgeEdge[k]= (HYPRE_Real) p*(rfactor[0]-n)/
-                                 (rfactor[0]*rfactor[1]*rfactor[2]);
+                                                (rfactor[0]*rfactor[1]*rfactor[2]);
                               k++;
 
                               hypre_SubtractIndexes(var_index, jshift, 3, var_index);
@@ -2809,7 +2809,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                                                     matrix_type);
                               jedge_Edge[k]= rank;
                               vals_edgeEdge[k]= (HYPRE_Real) (rfactor[1]-p)*(rfactor[0]-n)/
-                                 (rfactor[0]*rfactor[1]*rfactor[2]);
+                                                (rfactor[0]*rfactor[1]*rfactor[2]);
                               k++;
 
                               hypre_AddIndexes(var_index, ishift, 3, var_index);
@@ -2819,7 +2819,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                                                     matrix_type);
                               jedge_Edge[k]= rank;
                               vals_edgeEdge[k]= (HYPRE_Real) n*(rfactor[1]-p)/
-                                 (rfactor[0]*rfactor[1]*rfactor[2]);
+                                                (rfactor[0]*rfactor[1]*rfactor[2]);
                               k++;
                            }  /* for (m= 0; m< rfactor[2]; m++) */
                         }     /* for (n= 1; n< rfactor[0]; n++) */

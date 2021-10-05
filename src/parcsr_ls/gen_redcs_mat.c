@@ -121,38 +121,42 @@ hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
          info = hypre_CTAlloc(HYPRE_Int,  new_num_procs, HYPRE_MEMORY_HOST);
 
          if (redundant)
+         {
             hypre_MPI_Allgather(&num_rows, 1, HYPRE_MPI_INT, info, 1, HYPRE_MPI_INT, new_comm);
+         }
          else
+         {
             hypre_MPI_Gather(&num_rows, 1, HYPRE_MPI_INT, info, 1, HYPRE_MPI_INT, 0, new_comm);
+         }
 
          /* alloc space in seq data structure only for participating procs*/
          if (redundant || my_id == 0)
          {
             HYPRE_BoomerAMGCreate(&coarse_solver);
             HYPRE_BoomerAMGSetMaxRowSum(coarse_solver,
-                  hypre_ParAMGDataMaxRowSum(amg_data));
+                                        hypre_ParAMGDataMaxRowSum(amg_data));
             HYPRE_BoomerAMGSetStrongThreshold(coarse_solver,
-                  hypre_ParAMGDataStrongThreshold(amg_data));
+                                              hypre_ParAMGDataStrongThreshold(amg_data));
             HYPRE_BoomerAMGSetCoarsenType(coarse_solver,
-                  hypre_ParAMGDataCoarsenType(amg_data));
+                                          hypre_ParAMGDataCoarsenType(amg_data));
             HYPRE_BoomerAMGSetInterpType(coarse_solver,
-                  hypre_ParAMGDataInterpType(amg_data));
+                                         hypre_ParAMGDataInterpType(amg_data));
             HYPRE_BoomerAMGSetTruncFactor(coarse_solver,
-                  hypre_ParAMGDataTruncFactor(amg_data));
+                                          hypre_ParAMGDataTruncFactor(amg_data));
             HYPRE_BoomerAMGSetPMaxElmts(coarse_solver,
-                  hypre_ParAMGDataPMaxElmts(amg_data));
+                                        hypre_ParAMGDataPMaxElmts(amg_data));
             if (hypre_ParAMGDataUserRelaxType(amg_data) > -1)
                HYPRE_BoomerAMGSetRelaxType(coarse_solver,
-                     hypre_ParAMGDataUserRelaxType(amg_data));
+                                           hypre_ParAMGDataUserRelaxType(amg_data));
             HYPRE_BoomerAMGSetRelaxOrder(coarse_solver,
-                  hypre_ParAMGDataRelaxOrder(amg_data));
+                                         hypre_ParAMGDataRelaxOrder(amg_data));
             HYPRE_BoomerAMGSetRelaxWt(coarse_solver,
-                  hypre_ParAMGDataUserRelaxWeight(amg_data));
+                                      hypre_ParAMGDataUserRelaxWeight(amg_data));
             if (hypre_ParAMGDataUserNumSweeps(amg_data) > -1)
                HYPRE_BoomerAMGSetNumSweeps(coarse_solver,
-                     hypre_ParAMGDataUserNumSweeps(amg_data));
+                                           hypre_ParAMGDataUserNumSweeps(amg_data));
             HYPRE_BoomerAMGSetNumFunctions(coarse_solver,
-                  num_functions);
+                                           num_functions);
             HYPRE_BoomerAMGSetMaxIter(coarse_solver, 1);
             HYPRE_BoomerAMGSetTol(coarse_solver, 0);
          }
@@ -162,7 +166,9 @@ hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
 
          A_tmp_i[0] = 0;
          for (i=1; i < num_rows+1; i++)
+         {
             A_tmp_i[i] = A_diag_i[i]-A_diag_i[i-1]+A_offd_i[i]-A_offd_i[i-1];
+         }
 
          num_nonzeros = A_offd_i[num_rows]+A_diag_i[num_rows];
 
@@ -187,24 +193,26 @@ hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
          displs = hypre_CTAlloc(HYPRE_Int,  new_num_procs+1, HYPRE_MEMORY_HOST);
          displs[0] = 0;
          for (i=1; i < new_num_procs+1; i++)
+         {
             displs[i] = displs[i-1]+info[i-1];
+         }
          size = displs[new_num_procs];
 
          if (redundant || my_id == 0)
          {
             A_seq_i = hypre_CTAlloc(HYPRE_Int,  size+1, HYPRE_MEMORY_DEVICE);
             A_seq_offd_i = hypre_CTAlloc(HYPRE_Int,  size+1, HYPRE_MEMORY_DEVICE);
-            if (num_functions > 1) seq_dof_func = hypre_CTAlloc(HYPRE_Int,  size, HYPRE_MEMORY_DEVICE);
+            if (num_functions > 1) { seq_dof_func = hypre_CTAlloc(HYPRE_Int,  size, HYPRE_MEMORY_DEVICE); }
          }
 
          if (redundant)
          {
             hypre_MPI_Allgatherv ( &A_tmp_i[1], num_rows, HYPRE_MPI_INT, &A_seq_i[1], info,
-                        displs, HYPRE_MPI_INT, new_comm );
+                                   displs, HYPRE_MPI_INT, new_comm );
             if (num_functions > 1)
             {
                hypre_MPI_Allgatherv ( hypre_IntArrayData(dof_func_array[level]), num_rows, HYPRE_MPI_INT,
-                     seq_dof_func, info, displs, HYPRE_MPI_INT, new_comm );
+                                      seq_dof_func, info, displs, HYPRE_MPI_INT, new_comm );
                HYPRE_BoomerAMGSetDofFunc(coarse_solver, seq_dof_func);
             }
          }
@@ -212,15 +220,15 @@ hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
          {
             if (A_seq_i)
                hypre_MPI_Gatherv ( &A_tmp_i[1], num_rows, HYPRE_MPI_INT, &A_seq_i[1], info,
-                        displs, HYPRE_MPI_INT, 0, new_comm );
+                                   displs, HYPRE_MPI_INT, 0, new_comm );
             else
                hypre_MPI_Gatherv ( &A_tmp_i[1], num_rows, HYPRE_MPI_INT, A_seq_i, info,
-                        displs, HYPRE_MPI_INT, 0, new_comm );
+                                   displs, HYPRE_MPI_INT, 0, new_comm );
             if (num_functions > 1)
             {
                hypre_MPI_Gatherv ( hypre_IntArrayData(dof_func_array[level]), num_rows, HYPRE_MPI_INT,
-                     seq_dof_func, info, displs, HYPRE_MPI_INT, 0, new_comm );
-               if (my_id == 0) HYPRE_BoomerAMGSetDofFunc(coarse_solver, seq_dof_func);
+                                   seq_dof_func, info, displs, HYPRE_MPI_INT, 0, new_comm );
+               if (my_id == 0) { HYPRE_BoomerAMGSetDofFunc(coarse_solver, seq_dof_func); }
             }
          }
 
@@ -231,7 +239,9 @@ hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
             A_seq_i[0] = 0;
             displs2[0] = 0;
             for (j=1; j < displs[1]; j++)
+            {
                A_seq_i[j] = A_seq_i[j]+A_seq_i[j-1];
+            }
             for (i=1; i < new_num_procs; i++)
             {
                for (j=displs[i]; j < displs[i+1]; j++)
@@ -254,22 +264,22 @@ hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
          if (redundant)
          {
             hypre_MPI_Allgatherv ( A_tmp_j, num_nonzeros, HYPRE_MPI_INT,
-                       A_seq_j, info, displs2,
-                       HYPRE_MPI_INT, new_comm );
+                                   A_seq_j, info, displs2,
+                                   HYPRE_MPI_INT, new_comm );
 
             hypre_MPI_Allgatherv ( A_tmp_data, num_nonzeros, HYPRE_MPI_REAL,
-                       A_seq_data, info, displs2,
-                       HYPRE_MPI_REAL, new_comm );
+                                   A_seq_data, info, displs2,
+                                   HYPRE_MPI_REAL, new_comm );
          }
          else
          {
             hypre_MPI_Gatherv ( A_tmp_j, num_nonzeros, HYPRE_MPI_INT,
-                       A_seq_j, info, displs2,
-                       HYPRE_MPI_INT, 0, new_comm );
+                                A_seq_j, info, displs2,
+                                HYPRE_MPI_INT, 0, new_comm );
 
             hypre_MPI_Gatherv ( A_tmp_data, num_nonzeros, HYPRE_MPI_REAL,
-                       A_seq_data, info, displs2,
-                       HYPRE_MPI_REAL, 0, new_comm );
+                                A_seq_data, info, displs2,
+                                HYPRE_MPI_REAL, 0, new_comm );
          }
 
          hypre_TFree(info, HYPRE_MEMORY_HOST);
@@ -289,8 +299,8 @@ hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
             seq_comm = hypre_MPI_COMM_SELF;
 
             A_seq = hypre_ParCSRMatrixCreate(seq_comm,size,size,
-                  row_starts, row_starts,
-                  0,total_nnz,0);
+                                             row_starts, row_starts,
+                                             0,total_nnz,0);
 
             A_seq_diag = hypre_ParCSRMatrixDiag(A_seq);
             A_seq_offd = hypre_ParCSRMatrixOffd(A_seq);
@@ -386,16 +396,22 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
       info = hypre_CTAlloc(HYPRE_Int,  new_num_procs, HYPRE_MEMORY_HOST);
       local_info = nf;
       if (redundant)
+      {
          hypre_MPI_Allgather(&local_info, 1, HYPRE_MPI_INT, info, 1, HYPRE_MPI_INT, new_comm);
+      }
       else
+      {
          hypre_MPI_Gather(&local_info, 1, HYPRE_MPI_INT, info, 1, HYPRE_MPI_INT, 0, new_comm);
+      }
 
       if (redundant || my_id ==0)
       {
          displs = hypre_CTAlloc(HYPRE_Int,  new_num_procs+1, HYPRE_MEMORY_HOST);
          displs[0] = 0;
          for (i=1; i < new_num_procs+1; i++)
+         {
             displs[i] = displs[i-1]+info[i-1];
+         }
 
          if (F_coarse)
          {
@@ -406,12 +422,12 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
 
       if (redundant)
          hypre_MPI_Allgatherv ( f_data, nf, HYPRE_MPI_REAL,
-                          recv_buf, info, displs,
-                          HYPRE_MPI_REAL, new_comm );
+                                recv_buf, info, displs,
+                                HYPRE_MPI_REAL, new_comm );
       else
          hypre_MPI_Gatherv ( f_data, nf, HYPRE_MPI_REAL,
-                          recv_buf, info, displs,
-                          HYPRE_MPI_REAL, 0, new_comm );
+                             recv_buf, info, displs,
+                             HYPRE_MPI_REAL, 0, new_comm );
 
       if (redundant || my_id ==0)
       {
@@ -423,15 +439,15 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
       if (redundant)
       {
          hypre_MPI_Allgatherv ( u_data, n, HYPRE_MPI_REAL,
-                       recv_buf, info, displs,
-                       HYPRE_MPI_REAL, new_comm );
+                                recv_buf, info, displs,
+                                HYPRE_MPI_REAL, new_comm );
          hypre_TFree(displs, HYPRE_MEMORY_HOST);
          hypre_TFree(info, HYPRE_MEMORY_HOST);
       }
       else
          hypre_MPI_Gatherv ( u_data, n, HYPRE_MPI_REAL,
-                       recv_buf, info, displs,
-                       HYPRE_MPI_REAL, 0, new_comm );
+                             recv_buf, info, displs,
+                             HYPRE_MPI_REAL, 0, new_comm );
 
       /* clean up */
       if (redundant || my_id ==0)
@@ -456,20 +472,22 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
          HYPRE_Real *local_data=NULL;
 
          if (my_id == 0)
+         {
             local_data =  hypre_VectorData(hypre_ParVectorLocalVector(U_coarse));
+         }
 
          hypre_MPI_Scatterv ( local_data, info, displs, HYPRE_MPI_REAL,
-                       u_data, n, HYPRE_MPI_REAL, 0, new_comm );
+                              u_data, n, HYPRE_MPI_REAL, 0, new_comm );
          /*if (my_id == 0)
             local_data =  hypre_VectorData(hypre_ParVectorLocalVector(F_coarse));
             hypre_MPI_Scatterv ( local_data, info, displs, HYPRE_MPI_REAL,
                        f_data, n, HYPRE_MPI_REAL, 0, new_comm );*/
-         if (my_id == 0) hypre_TFree(displs, HYPRE_MEMORY_HOST);
+         if (my_id == 0) { hypre_TFree(displs, HYPRE_MEMORY_HOST); }
          hypre_TFree(info, HYPRE_MEMORY_HOST);
       }
    }
 
-   return(Solve_err_flag);
+   return (Solve_err_flag);
 }
 
 /* generate sub communicator, which contains no idle processors */
@@ -555,7 +573,8 @@ HYPRE_Int hypre_GenerateSubComm(MPI_Comm comm, HYPRE_Int participate, MPI_Comm *
 }
 
 
-void hypre_merge_lists (HYPRE_Int *list1, HYPRE_Int* list2, hypre_int *np1, hypre_MPI_Datatype *dptr)
+void hypre_merge_lists (HYPRE_Int *list1, HYPRE_Int* list2, hypre_int *np1,
+                        hypre_MPI_Datatype *dptr)
 {
    HYPRE_Int i, len1, len2, indx1, indx2;
 

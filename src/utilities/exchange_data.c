@@ -44,7 +44,7 @@ HYPRE_Int hypre_CreateBinaryTree(HYPRE_Int myid, HYPRE_Int num_procs,
    {
       if ( (proc % 2) == 0)
       {
-         if( (myid + i) < num_procs )
+         if ( (myid + i) < num_procs )
          {
             tmp_child_id[num] = myid + i;
             num++;
@@ -190,8 +190,8 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
    /* ---------initializations ----------------*/
 
    /* if the response_obj_size or contact_obj_size is 0, set to sizeof(HYPRE_Int) */
-   if (!response_obj_size) response_obj_size = sizeof(HYPRE_Int);
-   if (!contact_obj_size) contact_obj_size = sizeof(HYPRE_Int);
+   if (!response_obj_size) { response_obj_size = sizeof(HYPRE_Int); }
+   if (!contact_obj_size) { contact_obj_size = sizeof(HYPRE_Int); }
 
    max_response_size_bytes = max_response_size*response_obj_size;
 
@@ -205,7 +205,8 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
    response_obj->send_response_storage = max_response_size;
 
    /*send_response_buf = hypre_MAlloc(max_response_total_bytes);*/
-   send_response_buf = hypre_CTAlloc(char, (max_response_size+overhead)*response_obj_size, HYPRE_MEMORY_HOST);
+   send_response_buf = hypre_CTAlloc(char, (max_response_size+overhead)*response_obj_size,
+                                     HYPRE_MEMORY_HOST);
 
    /*allocate space for inital recv array for the responses - give each processor
      size max_response_size */
@@ -284,7 +285,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
 
       for (i=0; i< tree.num_child; i++)
       {
-	 hypre_MPI_Irecv(NULL, 0, HYPRE_MPI_INT, tree.child_id[i], term_tag, comm,
+         hypre_MPI_Irecv(NULL, 0, HYPRE_MPI_INT, tree.child_id[i], term_tag, comm,
                          &term_requests[i]);
       }
 
@@ -321,7 +322,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
            to determine how to populate the send buffer for the reponse*/
 
          /* do we have enough space to recv it? */
-         if(contact_size > recv_contact_buf_size)
+         if (contact_size > recv_contact_buf_size)
          {
             recv_contact_buf = hypre_TReAlloc((char*)recv_contact_buf,
                                               char, contact_obj_size*contact_size, HYPRE_MEMORY_HOST);
@@ -362,7 +363,8 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
             index_ptr = (void *) ((char *) send_response_buf +
                                   max_response_size_bytes);
 
-            hypre_TMemcpy(post_array[post_array_size], index_ptr, char,  size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+            hypre_TMemcpy(post_array[post_array_size], index_ptr, char,  size, HYPRE_MEMORY_HOST,
+                          HYPRE_MEMORY_HOST);
 
             /*now post any part of the message that is too long with a non-blocking
               send and a different tag */
@@ -381,7 +383,8 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
          index_ptr = (void *) ((char *) send_response_buf +
                                max_response_size_bytes);
 
-         hypre_TMemcpy(index_ptr,  &response_message_size, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(index_ptr,  &response_message_size, HYPRE_Int, 1, HYPRE_MEMORY_HOST,
+                       HYPRE_MEMORY_HOST);
 
          /*send the block of data that includes the overhead */
          /* this is a blocking send - the recv has already been posted */
@@ -404,10 +407,10 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
       {
          hypre_MPI_Testall(num_contacts, response_requests, &responses_complete,
                            response_statuses);
-         if (responses_complete && num_procs == 1) terminate = 1; /*added 11/08 */
+         if (responses_complete && num_procs == 1) { terminate = 1; } /*added 11/08 */
 
       }
-      else if(!children_complete) /* have all of our children received all of their
+      else if (!children_complete) /* have all of our children received all of their
                                      response messages?*/
       {
          hypre_MPI_Testall(tree.num_child, term_requests, &children_complete,
@@ -415,7 +418,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
 
          /* if we have gotten term messages from all of our children, send a term
             message to our parent.  Then post a receive to hear back from parent */
-	 if (children_complete & (myid > 0)) /*root does not have a parent*/
+         if (children_complete & (myid > 0)) /*root does not have a parent*/
          {
             hypre_MPI_Isend(NULL, 0, HYPRE_MPI_INT, tree.parent_id, term_tag,
                             comm, &request_parent);
@@ -435,15 +438,16 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
             hypre_MPI_Test(&term_request1, &terminate, &term_status1);
          }
          if (terminate) /*tell children to terminate */
-	 {
-            if (myid > 0 ) hypre_MPI_Wait(&request_parent, &status_parent);
+         {
+            if (myid > 0 ) { hypre_MPI_Wait(&request_parent, &status_parent); }
 
-	    for (i=0; i< tree.num_child; i++)
-	    {  /*a blocking send  - recv has been posted already*/
-	       hypre_MPI_Send(NULL, 0, HYPRE_MPI_INT, tree.child_id[i],
+            for (i=0; i< tree.num_child; i++)
+            {
+               /*a blocking send  - recv has been posted already*/
+               hypre_MPI_Send(NULL, 0, HYPRE_MPI_INT, tree.child_id[i],
                               term_tag, comm);
-	    }
-	 }
+            }
+         }
       }
    }
 
@@ -479,7 +483,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
       response_recv_buf_starts[i+1] =
          response_recv_buf_starts[i] + response_message_size;
       total_size +=  response_message_size;
-      if (max_response_size < response_message_size) num_post_recvs++;
+      if (max_response_size < response_message_size) { num_post_recvs++; }
       /* start_ptr += max_response_total_bytes; */
       start_ptr = (void *) ((char *) start_ptr + max_response_total_bytes);
    }
@@ -500,7 +504,8 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
          response_recv_buf_starts[i+1] - response_recv_buf_starts[i];
       copy_size = hypre_min(response_message_size, max_response_size);
 
-      hypre_TMemcpy(index_ptr,  start_ptr,  char, copy_size*response_obj_size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(index_ptr,  start_ptr,  char, copy_size*response_obj_size, HYPRE_MEMORY_HOST,
+                    HYPRE_MEMORY_HOST);
       /* index_ptr += copy_size*response_obj_size; */
       index_ptr = (void *) ((char *) index_ptr + copy_size*response_obj_size);
 

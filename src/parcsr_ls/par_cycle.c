@@ -184,7 +184,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          num_coeffs[j] = hypre_ParCSRMatrixDNumNonzeros(A_array[j]);
       }
    }
-   
+
    /*---------------------------------------------------------------------
     *    Initialize cycling control counter
     *
@@ -238,7 +238,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          if (local_size < actual_local_size)
          {
             hypre_VectorData(hypre_ParVectorLocalVector(Utemp)) =
-            hypre_CTAlloc(HYPRE_Complex,  actual_local_size, HYPRE_MEMORY_HOST);
+               hypre_CTAlloc(HYPRE_Complex,  actual_local_size, HYPRE_MEMORY_HOST);
             hypre_ParVectorActualLocalSize(Utemp) = actual_local_size;
          }
          else
@@ -501,7 +501,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   }
                }
                else if (relax_type == 16)
-               { /* scaled Chebyshev */
+               {
+                  /* scaled Chebyshev */
                   HYPRE_Int scale = hypre_ParAMGDataChebyScale(amg_data);
                   HYPRE_Int variant = hypre_ParAMGDataChebyVariant(amg_data);
                   hypre_ParCSRRelax_Cheby_Solve(A_array[level], Aux_F,
@@ -578,7 +579,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   HYPRE_ANNOTATE_MGLEVEL_END(level);
                   HYPRE_ANNOTATE_FUNC_END;
 
-                  return(Solve_err_flag);
+                  return (Solve_err_flag);
                }
             }
             if  (smooth_num_levels > level && smooth_type > 9)
@@ -750,5 +751,5 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    HYPRE_ANNOTATE_FUNC_END;
 
-   return(Solve_err_flag);
+   return (Solve_err_flag);
 }

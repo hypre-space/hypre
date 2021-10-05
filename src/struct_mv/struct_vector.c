@@ -1121,9 +1121,13 @@ hypre_StructVectorPrint( const char         *filename,
    data_space = hypre_StructVectorDataSpace(vector);
 
    if (all)
+   {
       boxes = data_space;
+   }
    else
+   {
       boxes = hypre_StructGridBoxes(grid);
+   }
 
    hypre_fprintf(file, "\nData:\n");
    hypre_PrintBoxArrayData(file, boxes, data_space, 1,
@@ -1245,12 +1249,16 @@ hypre_StructVectorClone(hypre_StructVector *x)
    hypre_StructVectorDataIndices(y) = hypre_CTAlloc(HYPRE_Int,  data_space_size, HYPRE_MEMORY_HOST);
 
    for (i=0; i < data_space_size; i++)
+   {
       hypre_StructVectorDataIndices(y)[i] = data_indices[i];
+   }
 
    hypre_StructVectorCopy( x, y );
 
    for (i=0; i < 2*ndim; i++)
+   {
       hypre_StructVectorNumGhost(y)[i] = hypre_StructVectorNumGhost(x)[i];
+   }
 
    hypre_StructVectorBGhostNotClear(y) = hypre_StructVectorBGhostNotClear(x);
    hypre_StructVectorGlobalSize(y) = hypre_StructVectorGlobalSize(x);

@@ -34,27 +34,41 @@ extern "C" {
 
 
 
-HYPRE_Int BuildParFromFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-HYPRE_Int BuildParRhsFromFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParVector *b_ptr );
+HYPRE_Int BuildParFromFile (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
+                            HYPRE_ParCSRMatrix *A_ptr );
+HYPRE_Int BuildParRhsFromFile (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
+                               HYPRE_ParVector *b_ptr );
 
-HYPRE_Int BuildParLaplacian (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-HYPRE_Int BuildParSysLaplacian (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-HYPRE_Int BuildParDifConv (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr);
-HYPRE_Int BuildFuncsFromFiles (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix A , HYPRE_Int **dof_func_ptr );
-HYPRE_Int BuildFuncsFromOneFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix A , HYPRE_Int **dof_func_ptr );
-HYPRE_Int BuildParLaplacian9pt (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-HYPRE_Int BuildParLaplacian27pt (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-HYPRE_Int BuildParRotate7pt (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-HYPRE_Int BuildParVarDifConv (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr , HYPRE_ParVector *rhs_ptr );
+HYPRE_Int BuildParLaplacian (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
+                             HYPRE_ParCSRMatrix *A_ptr );
+HYPRE_Int BuildParSysLaplacian (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
+                                HYPRE_ParCSRMatrix *A_ptr );
+HYPRE_Int BuildParDifConv (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
+                           HYPRE_ParCSRMatrix *A_ptr);
+HYPRE_Int BuildFuncsFromFiles (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
+                               HYPRE_ParCSRMatrix A, HYPRE_Int **dof_func_ptr );
+HYPRE_Int BuildFuncsFromOneFile (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
+                                 HYPRE_ParCSRMatrix A, HYPRE_Int **dof_func_ptr );
+HYPRE_Int BuildParLaplacian9pt (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
+                                HYPRE_ParCSRMatrix *A_ptr );
+HYPRE_Int BuildParLaplacian27pt (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
+                                 HYPRE_ParCSRMatrix *A_ptr );
+HYPRE_Int BuildParRotate7pt (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
+                             HYPRE_ParCSRMatrix *A_ptr );
+HYPRE_Int BuildParVarDifConv (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
+                              HYPRE_ParCSRMatrix *A_ptr, HYPRE_ParVector *rhs_ptr );
 HYPRE_ParCSRMatrix GenerateSysLaplacian (MPI_Comm comm, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
                                          HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r,
                                          HYPRE_Int num_fun, HYPRE_Real *mtrx, HYPRE_Real *value);
-HYPRE_ParCSRMatrix GenerateSysLaplacianVCoef (MPI_Comm comm, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
+HYPRE_ParCSRMatrix GenerateSysLaplacianVCoef (MPI_Comm comm, HYPRE_Int nx, HYPRE_Int ny,
+                                              HYPRE_Int nz,
                                               HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r,
                                               HYPRE_Int num_fun, HYPRE_Real *mtrx, HYPRE_Real *value);
-HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz, HYPRE_Real vcx, HYPRE_Real vcy, HYPRE_Real vcz, HYPRE_Int mtx_entry, HYPRE_Real *values);
+HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
+                            HYPRE_Real vcx, HYPRE_Real vcy, HYPRE_Real vcz, HYPRE_Int mtx_entry, HYPRE_Real *values);
 
-HYPRE_Int BuildParCoordinates (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_Int *coorddim_ptr , float **coord_ptr );
+HYPRE_Int BuildParCoordinates (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
+                               HYPRE_Int *coorddim_ptr, float **coord_ptr );
 
 void testPMIS(HYPRE_ParCSRMatrix parcsr_A);
 void testPMIS2(HYPRE_ParCSRMatrix parcsr_A);
@@ -257,7 +271,7 @@ main( hypre_int argc,
    {
       hypre_printf("You have asked for an unsupported problem with\n");
       hypre_printf("build_matrix_type = %d.\n", build_matrix_type);
-      return(-1);
+      return (-1);
    }
 
    if (build_matrix_type < 0)
@@ -312,7 +326,7 @@ main( hypre_int argc,
       HYPRE_ParCSRMatrixDestroy(parcsr_A);
    }
 
- final:
+final:
 
    /* Finalize Hypre */
    HYPRE_Finalize();
@@ -1460,9 +1474,13 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
 
    values[0] = 26.0;
    if (nx == 1 || ny == 1 || nz == 1)
+   {
       values[0] = 8.0;
+   }
    if (nx*ny == 1 || nx*nz == 1 || ny*nz == 1)
+   {
       values[0] = 2.0;
+   }
    values[1] = -1.;
 
    A = (HYPRE_ParCSRMatrix) GenerateLaplacian27pt(hypre_MPI_COMM_WORLD,
@@ -1603,7 +1621,7 @@ HYPRE_Int
 BuildParVarDifConv( HYPRE_Int                  argc,
                     char                *argv[],
                     HYPRE_Int                  arg_index,
-                    HYPRE_ParCSRMatrix  *A_ptr    ,
+                    HYPRE_ParCSRMatrix  *A_ptr,
                     HYPRE_ParVector  *rhs_ptr     )
 {
    HYPRE_Int                 nx, ny, nz;
@@ -1731,7 +1749,8 @@ BuildParVarDifConv( HYPRE_Int                  argc,
 /**************************************************************************/
 
 
-HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz, HYPRE_Real vcx,
+HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
+                            HYPRE_Real vcx,
                             HYPRE_Real vcy, HYPRE_Real vcz, HYPRE_Int mtx_entry, HYPRE_Real *values)
 {
 
@@ -1835,15 +1854,17 @@ BuildParCoordinates( HYPRE_Int                  argc,
     *-----------------------------------------------------------*/
 
    coorddim = 3;
-   if (nx<2) coorddim--;
-   if (ny<2) coorddim--;
-   if (nz<2) coorddim--;
+   if (nx<2) { coorddim--; }
+   if (ny<2) { coorddim--; }
+   if (nz<2) { coorddim--; }
 
    if (coorddim>0)
       coordinates = GenerateCoordinates (hypre_MPI_COMM_WORLD,
                                          nx, ny, nz, P, Q, R, p, q, r, coorddim);
    else
+   {
       coordinates=NULL;
+   }
 
    *coorddim_ptr = coorddim;
    *coord_ptr = coordinates;
@@ -1873,7 +1894,7 @@ testPMIS(HYPRE_ParCSRMatrix parcsr_A)
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
    HYPRE_ParCSRMatrixGetLocalRange( parcsr_A,
-                                    &first_local_row, &last_local_row ,
+                                    &first_local_row, &last_local_row,
                                     &first_local_col, &last_local_col );
 
    local_num_rows = last_local_row - first_local_row + 1;
@@ -1923,7 +1944,8 @@ testPMIS(HYPRE_ParCSRMatrix parcsr_A)
          nC1++;
       }
 
-      hypre_assert(hypre_IntArrayData(h_CF_marker2)[i] == 1 || hypre_IntArrayData(h_CF_marker2)[i] == -1 || hypre_IntArrayData(h_CF_marker2)[i] == -3);
+      hypre_assert(hypre_IntArrayData(h_CF_marker2)[i] == 1 ||
+                   hypre_IntArrayData(h_CF_marker2)[i] == -1 || hypre_IntArrayData(h_CF_marker2)[i] == -3);
 
       //hypre_assert(h_CF_marker[i] == h_CF_marker2[i]);
 
@@ -1967,7 +1989,7 @@ testPMIS3(HYPRE_ParCSRMatrix parcsr_A)
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
    HYPRE_ParCSRMatrixGetLocalRange( parcsr_A,
-                                    &first_local_row, &last_local_row ,
+                                    &first_local_row, &last_local_row,
                                     &first_local_col, &last_local_col );
 
    local_num_rows = last_local_row - first_local_row + 1;
@@ -1984,7 +2006,8 @@ testPMIS3(HYPRE_ParCSRMatrix parcsr_A)
 
    for (i = 0; i < local_num_rows; i++)
    {
-      hypre_assert(hypre_IntArrayData(h_CF_marker2)[i] == 1 || hypre_IntArrayData(h_CF_marker2)[i] == -1 || hypre_IntArrayData(h_CF_marker2)[i] == -3);
+      hypre_assert(hypre_IntArrayData(h_CF_marker2)[i] == 1 ||
+                   hypre_IntArrayData(h_CF_marker2)[i] == -1 || hypre_IntArrayData(h_CF_marker2)[i] == -3);
 
       if (hypre_IntArrayData(h_CF_marker2)[i] > 0)
       {
@@ -2023,7 +2046,7 @@ testPMIS2(HYPRE_ParCSRMatrix parcsr_A)
    hypre_MPI_Comm_rank(comm, &myid );
 
    HYPRE_ParCSRMatrixGetLocalRange( parcsr_A,
-                                    &first_local_row, &last_local_row ,
+                                    &first_local_row, &last_local_row,
                                     &first_local_col, &last_local_col );
 
    local_num_rows = last_local_row - first_local_row + 1;
@@ -2040,7 +2063,7 @@ testPMIS2(HYPRE_ParCSRMatrix parcsr_A)
 
    HYPRE_Int *coarse_pnts_global = NULL;
    hypre_BoomerAMGCoarseParms(comm, local_num_rows, 1, NULL, h_CF_marker, NULL,
-         &coarse_pnts_global);
+                              &coarse_pnts_global);
 
    /* interp */
    hypre_ParCSRMatrix *P;
@@ -2068,7 +2091,8 @@ testPMIS2(HYPRE_ParCSRMatrix parcsr_A)
 
    for (i = 0; i < local_num_rows2; i++)
    {
-      hypre_assert(hypre_IntArrayData(h_CF_marker2)[i] == 1 || hypre_IntArrayData(h_CF_marker2)[i] == -1 || hypre_IntArrayData(h_CF_marker2)[i] == -3);
+      hypre_assert(hypre_IntArrayData(h_CF_marker2)[i] == 1 ||
+                   hypre_IntArrayData(h_CF_marker2)[i] == -1 || hypre_IntArrayData(h_CF_marker2)[i] == -3);
 
       if (hypre_IntArrayData(h_CF_marker2)[i] > 0)
       {
@@ -2127,7 +2151,7 @@ testTranspose(HYPRE_ParCSRMatrix parcsr_A)
    HYPRE_Int    first_local_row, last_local_row;
    HYPRE_Int    first_local_col, last_local_col;
    HYPRE_ParCSRMatrixGetLocalRange( parcsr_A,
-                                    &first_local_row, &last_local_row ,
+                                    &first_local_row, &last_local_row,
                                     &first_local_col, &last_local_col );
    HYPRE_Int local_num_rows = last_local_row - first_local_row + 1;
    HYPRE_ParCSRMatrix parcsr_S_device  = NULL;
@@ -2194,7 +2218,7 @@ testAdd(HYPRE_ParCSRMatrix parcsr_A)
    HYPRE_Int    first_local_row, last_local_row;
    HYPRE_Int    first_local_col, last_local_col;
    HYPRE_ParCSRMatrixGetLocalRange( parcsr_A,
-                                    &first_local_row, &last_local_row ,
+                                    &first_local_row, &last_local_row,
                                     &first_local_col, &last_local_col );
    HYPRE_Int local_num_rows = last_local_row - first_local_row + 1;
    HYPRE_ParCSRMatrix parcsr_S_device  = NULL;
@@ -2255,13 +2279,14 @@ testFFFC(HYPRE_ParCSRMatrix parcsr_A)
    HYPRE_ParCSRMatrix parcsr_S_h, parcsr_S_device;
 
    HYPRE_ParCSRMatrixGetLocalRange( parcsr_A,
-                                    &first_local_row, &last_local_row ,
+                                    &first_local_row, &last_local_row,
                                     &first_local_col, &last_local_col );
 
    local_num_rows = last_local_row - first_local_row + 1;
 
    /* Soc on DEVICE */
-   hypre_BoomerAMGCreateSDevice(parcsr_A, strong_threshold, max_row_sum, num_functions, NULL, &parcsr_S_device);
+   hypre_BoomerAMGCreateSDevice(parcsr_A, strong_threshold, max_row_sum, num_functions, NULL,
+                                &parcsr_S_device);
    h_CF_marker = hypre_IntArrayCreate(local_num_rows);
    hypre_IntArrayInitialize(h_CF_marker);
    hypre_BoomerAMGCoarsenPMISDevice(parcsr_S_device, parcsr_A, 0, debug_flag, &h_CF_marker);
@@ -2269,13 +2294,15 @@ testFFFC(HYPRE_ParCSRMatrix parcsr_A)
                               h_CF_marker, &coarse_dof_func, &coarse_pnts_global);
 
    /* FFFC on Device */
-   hypre_ParCSRMatrixGenerateFFFCDevice(parcsr_A, hypre_IntArrayData(h_CF_marker), coarse_pnts_global, parcsr_S_device, &AFC, &AFF);
+   hypre_ParCSRMatrixGenerateFFFCDevice(parcsr_A, hypre_IntArrayData(h_CF_marker), coarse_pnts_global,
+                                        parcsr_S_device, &AFC, &AFF);
 
    /* FFFC on Host */
    parcsr_A_h = hypre_ParCSRMatrixClone_v2(parcsr_A, 1, HYPRE_MEMORY_HOST);
    parcsr_S_h = hypre_ParCSRMatrixClone_v2(parcsr_S_device, 0, HYPRE_MEMORY_HOST);
    hypre_MatvecCommPkgCreate(parcsr_A_h);
-   hypre_ParCSRMatrixGenerateFFFC(parcsr_A_h, hypre_IntArrayData(h_CF_marker), coarse_pnts_global, parcsr_S_h, &AFC_h, &AFF_h);
+   hypre_ParCSRMatrixGenerateFFFC(parcsr_A_h, hypre_IntArrayData(h_CF_marker), coarse_pnts_global,
+                                  parcsr_S_h, &AFC_h, &AFF_h);
 
    /* AFF * AFC */
    W_h = hypre_ParCSRMatMatHost(AFF_h, AFC_h);
@@ -2321,11 +2348,13 @@ CompareParCSRDH(HYPRE_ParCSRMatrix hmat, HYPRE_ParCSRMatrix dmat, HYPRE_Real tol
    {
       ecode ++;
    }
-   if (hypre_CSRMatrixNumRows(hypre_ParCSRMatrixOffd(hmat)) != hypre_CSRMatrixNumRows(hypre_ParCSRMatrixOffd(hmat2)))
+   if (hypre_CSRMatrixNumRows(hypre_ParCSRMatrixOffd(hmat)) != hypre_CSRMatrixNumRows(
+          hypre_ParCSRMatrixOffd(hmat2)))
    {
       ecode ++;
    }
-   if (hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(hmat)) != hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(hmat2)))
+   if (hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(hmat)) != hypre_CSRMatrixNumCols(
+          hypre_ParCSRMatrixOffd(hmat2)))
    {
       ecode ++;
    }
@@ -2337,11 +2366,13 @@ CompareParCSRDH(HYPRE_ParCSRMatrix hmat, HYPRE_ParCSRMatrix dmat, HYPRE_Real tol
          break;
       }
    }
-   if (hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(hmat)) != hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(hmat2)))
+   if (hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(hmat)) != hypre_CSRMatrixNumNonzeros(
+          hypre_ParCSRMatrixDiag(hmat2)))
    {
       ecode ++;
    }
-   if (hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(hmat)) != hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(hmat2)))
+   if (hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(hmat)) != hypre_CSRMatrixNumNonzeros(
+          hypre_ParCSRMatrixOffd(hmat2)))
    {
       ecode ++;
    }

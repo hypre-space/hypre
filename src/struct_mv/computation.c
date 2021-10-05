@@ -6,7 +6,7 @@
  ******************************************************************************/
 
 /******************************************************************************
- * 
+ *
  *****************************************************************************/
 
 #include "_hypre_struct_mv.h"
@@ -288,7 +288,7 @@ hypre_ComputePkgCreate( hypre_ComputeInfo     *compute_info,
    hypre_CommInfoDestroy(hypre_ComputeInfoCommInfo(compute_info));
    hypre_ComputePkgCommPkg(compute_pkg) = comm_pkg;
 
-   hypre_ComputePkgIndtBoxes(compute_pkg) = 
+   hypre_ComputePkgIndtBoxes(compute_pkg) =
       hypre_ComputeInfoIndtBoxes(compute_info);
    hypre_ComputePkgDeptBoxes(compute_pkg) =
       hypre_ComputeInfoDeptBoxes(compute_info);

@@ -142,10 +142,14 @@ void ComputeFEMRhombus (double **S, double F[4], double gamma, double h)
    /* The stiffness matrix is symmetric */
    for (i = 1; i < 4; i++)
       for (j = 0; j < i; j++)
+      {
          S[i][j] = S[j][i];
+      }
 
    for (i = 0; i < 4; i++)
+   {
       F[i] = h2_4*sing;
+   }
 }
 
 
@@ -229,7 +233,7 @@ int main (int argc, char *argv[])
       number of processors np and the given n */
    if (num_procs < 3)
    {
-      if (myid ==0) printf("Must run with at least 3 processors!\n");
+      if (myid ==0) { printf("Must run with at least 3 processors!\n"); }
       MPI_Finalize();
       exit(1);
    }
@@ -265,7 +269,9 @@ int main (int argc, char *argv[])
 
          HYPRE_SStructVariable vartypes[1] = {HYPRE_SSTRUCT_VARIABLE_NODE};
          for (i = 0; i < nparts; i++)
+         {
             HYPRE_SStructGridSetVariables(grid, i, nvars, vartypes);
+         }
       }
 
       /* Now we need to set the spatial relation between each of the parts.
@@ -373,16 +379,21 @@ int main (int argc, char *argv[])
 
       /* Define the geometry of the 9-point stencil */
       int stencil_size = 9;
-      int offsets[9][2] = {{0,0},           /*  [8] [4] [7]  */
-                           {-1,0}, {1,0},   /*     \ | /     */
-                           {0,-1}, {0,1},   /*  [1]-[0]-[2]  */
-                           {-1,-1}, {1,-1}, /*     / | \     */
-                           {1,1}, {-1,1}};  /*  [5] [3] [6]  */
+      int offsets[9][2] =
+      {
+         {0,0},           /*  [8] [4] [7]  */
+         {-1,0}, {1,0},   /*     \ | /     */
+         {0,-1}, {0,1},   /*  [1]-[0]-[2]  */
+         {-1,-1}, {1,-1}, /*     / | \     */
+         {1,1}, {-1,1}    /*  [5] [3] [6]  */
+      };
 
       HYPRE_SStructStencilCreate(ndim, stencil_size, &stencil);
 
       for (entry = 0; entry < stencil_size; entry++)
+      {
          HYPRE_SStructStencilSetEntry(stencil, entry, offsets[entry], var);
+      }
    }
 
    /* 3. Set up the Graph - this determines the non-zero structure of the
@@ -400,7 +411,9 @@ int main (int argc, char *argv[])
       /* Now we need to tell the graph which stencil to use for each
          variable on each part (we only have one variable) */
       for (part = 0; part < num_procs; part++)
+      {
          HYPRE_SStructGraphSetStencil(graph, part, var, stencil);
+      }
 
       /* Assemble the graph */
       HYPRE_SStructGraphAssemble(graph);
@@ -673,7 +686,9 @@ int main (int argc, char *argv[])
 
          /* save solution */
          for (i = 0; i < nvalues; i++)
+         {
             fprintf(file, "%.14e\n", values[i]);
+         }
 
          fflush(file);
          fclose(file);

@@ -59,9 +59,9 @@ hypre_ParCSRBlockMatrixMatvec(HYPRE_Complex alpha,
     *  Check for size compatibility.
     *--------------------------------------------------------------------*/
 
-   if (num_cols*(HYPRE_BigInt)blk_size != x_size) ierr = 11;
-   if (num_rows*(HYPRE_BigInt)blk_size != y_size) ierr = 12;
-   if (num_cols*(HYPRE_BigInt)blk_size != x_size && num_rows*(HYPRE_BigInt)blk_size != y_size) ierr = 13;
+   if (num_cols*(HYPRE_BigInt)blk_size != x_size) { ierr = 11; }
+   if (num_rows*(HYPRE_BigInt)blk_size != y_size) { ierr = 12; }
+   if (num_cols*(HYPRE_BigInt)blk_size != x_size && num_rows*(HYPRE_BigInt)blk_size != y_size) { ierr = 13; }
 
    if (nprocs > 1)
    {
@@ -86,7 +86,9 @@ hypre_ParCSRBlockMatrixMatvec(HYPRE_Complex alpha,
          {
             elem = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)*blk_size;
             for (k = 0; k < blk_size; k++)
+            {
                x_buf_data[index++] = x_local_data[elem++];
+            }
          }
       }
       comm_handle = hypre_ParCSRBlockCommHandleCreate(1, blk_size,comm_pkg,
@@ -98,7 +100,9 @@ hypre_ParCSRBlockMatrixMatvec(HYPRE_Complex alpha,
       hypre_ParCSRBlockCommHandleDestroy(comm_handle);
       comm_handle = NULL;
       if (num_cols_offd)
+      {
          hypre_CSRBlockMatrixMatvec(alpha,offd,x_tmp,1.0,y_local);
+      }
       hypre_SeqVectorDestroy(x_tmp);
       x_tmp = NULL;
       hypre_TFree(x_buf_data, HYPRE_MEMORY_HOST);
@@ -158,13 +162,19 @@ hypre_ParCSRBlockMatrixMatvecT( HYPRE_Complex    alpha,
     *--------------------------------------------------------------------*/
 
    if (num_rows*(HYPRE_BigInt)blk_size != x_size)
+   {
       ierr = 1;
+   }
 
    if (num_cols*(HYPRE_BigInt)blk_size != y_size)
+   {
       ierr = 2;
+   }
 
    if (num_rows*(HYPRE_BigInt)blk_size != x_size && num_cols*(HYPRE_BigInt)blk_size != y_size)
+   {
       ierr = 3;
+   }
    /*-----------------------------------------------------------------------
     *-----------------------------------------------------------------------*/
 
@@ -189,10 +199,10 @@ hypre_ParCSRBlockMatrixMatvecT( HYPRE_Complex    alpha,
    y_tmp_data = hypre_VectorData(y_tmp);
    y_local_data = hypre_VectorData(y_local);
 
-   if (num_cols_offd) hypre_CSRBlockMatrixMatvecT(alpha, offd, x_local, 0.0, y_tmp);
+   if (num_cols_offd) { hypre_CSRBlockMatrixMatvecT(alpha, offd, x_local, 0.0, y_tmp); }
 
    comm_handle = hypre_ParCSRBlockCommHandleCreate
-      ( 2, blk_size, comm_pkg, y_tmp_data, y_buf_data);
+                 ( 2, blk_size, comm_pkg, y_tmp_data, y_buf_data);
 
 
    hypre_CSRBlockMatrixMatvecT(alpha, diag, x_local, beta, y_local);
@@ -213,7 +223,7 @@ hypre_ParCSRBlockMatrixMatvecT( HYPRE_Complex    alpha,
          for (k = 0; k < blk_size; k++)
          {
             y_local_data[elem++]
-               += y_buf_data[index++];
+            += y_buf_data[index++];
          }
       }
    }

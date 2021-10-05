@@ -13,7 +13,8 @@
 
 #include "_hypre_parcsr_mv.h"
 
-HYPRE_Int hypre_FillResponseParToVectorAll(void*, HYPRE_Int, HYPRE_Int, void*, MPI_Comm, void**, HYPRE_Int*);
+HYPRE_Int hypre_FillResponseParToVectorAll(void*, HYPRE_Int, HYPRE_Int, void*, MPI_Comm, void**,
+                                           HYPRE_Int*);
 
 /*--------------------------------------------------------------------------
  * hypre_ParVectorCreate
@@ -440,7 +441,7 @@ hypre_ParVectorElmdivpy( hypre_ParVector *x,
 
 /*--------------------------------------------------------------------------
  * hypre_ParVectorElmdivpyMarked
- * y[i] += x[i] / b[i] where marker[i] == marker_val 
+ * y[i] += x[i] / b[i] where marker[i] == marker_val
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -518,7 +519,7 @@ hypre_VectorToParVector ( MPI_Comm      comm,
       global_vec_starts = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
    }
    hypre_MPI_Gather(&first_index, 1, HYPRE_MPI_BIG_INT, global_vec_starts,
-                     1, HYPRE_MPI_BIG_INT, 0, comm);
+                    1, HYPRE_MPI_BIG_INT, 0, comm);
    if (my_id == 0)
    {
       global_vec_starts[num_procs] = hypre_ParVectorGlobalSize(par_vector);
@@ -547,14 +548,18 @@ hypre_VectorToParVector ( MPI_Comm      comm,
       if (num_vectors == 1)
       {
          for (i = 0; i < local_size; i++)
+         {
             local_data[i] = v_data[i];
+         }
       }
       else
       {
          for (j = 0; j<num_vectors; ++j)
          {
             for (i = 0; i < local_size; i++)
+            {
                local_data[i+j*vecstride] = v_data[i+j*global_vecstride];
+            }
          }
       }
       hypre_MPI_Waitall(num_procs-1,requests, status);
@@ -623,7 +628,7 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
    hypre_MPI_Comm_rank(comm, &my_id);
 
    local_size = (HYPRE_Int)(hypre_ParVectorLastIndex(par_v) -
-      hypre_ParVectorFirstIndex(par_v) + 1);
+                            hypre_ParVectorFirstIndex(par_v) + 1);
 
    /* determine procs which hold data of par_v and store ids in used_procs */
    /* we need to do an exchange data for this.  If I own row then I will contact
@@ -704,8 +709,8 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
          hypre_TFree(send_proc_obj.vec_starts, HYPRE_MEMORY_HOST);
          hypre_TFree(send_proc_obj.id, HYPRE_MEMORY_HOST);
          hypre_TFree(send_proc_obj.elements, HYPRE_MEMORY_HOST);
-         if(response_recv_buf)        hypre_TFree(response_recv_buf, HYPRE_MEMORY_HOST);
-         if(response_recv_buf_starts) hypre_TFree(response_recv_buf_starts, HYPRE_MEMORY_HOST);
+         if (response_recv_buf) { hypre_TFree(response_recv_buf, HYPRE_MEMORY_HOST); }
+         if (response_recv_buf_starts) { hypre_TFree(response_recv_buf_starts, HYPRE_MEMORY_HOST); }
          return NULL;
       }
    }
@@ -762,11 +767,12 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
    hypre_TFree(send_proc_obj.id, HYPRE_MEMORY_HOST);
    hypre_TFree(send_proc_obj.elements, HYPRE_MEMORY_HOST);
    hypre_TFree(send_info, HYPRE_MEMORY_HOST);
-   if(response_recv_buf)        hypre_TFree(response_recv_buf, HYPRE_MEMORY_HOST);
-   if(response_recv_buf_starts) hypre_TFree(response_recv_buf_starts, HYPRE_MEMORY_HOST);
+   if (response_recv_buf) { hypre_TFree(response_recv_buf, HYPRE_MEMORY_HOST); }
+   if (response_recv_buf_starts) { hypre_TFree(response_recv_buf_starts, HYPRE_MEMORY_HOST); }
 
    /* now proc 0 can exit if it has no rows */
-   if (!local_size) {
+   if (!local_size)
+   {
       hypre_TFree(used_procs, HYPRE_MEMORY_HOST);
       hypre_TFree(new_vec_starts, HYPRE_MEMORY_HOST);
       return NULL;
@@ -845,7 +851,7 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
 
    /* multivector code not written yet */
    hypre_assert( hypre_ParVectorNumVectors(vector) == 1 );
-   if ( hypre_ParVectorNumVectors(vector) != 1 ) hypre_error_in_arg(1);
+   if ( hypre_ParVectorNumVectors(vector) != 1 ) { hypre_error_in_arg(1); }
 
    hypre_MPI_Comm_rank(comm, &myid);
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -942,7 +948,7 @@ hypre_ParVectorReadIJ( MPI_Comm          comm,
 
    /* multivector code not written yet */
    hypre_assert( hypre_ParVectorNumVectors(vector) == 1 );
-   if ( hypre_ParVectorNumVectors(vector) != 1 ) hypre_error(HYPRE_ERROR_GENERIC);
+   if ( hypre_ParVectorNumVectors(vector) != 1 ) { hypre_error(HYPRE_ERROR_GENERIC); }
 
    return hypre_error_flag;
 }
@@ -1046,7 +1052,7 @@ hypre_ParVectorGetValuesHost(hypre_ParVector *vector,
    if (indices)
    {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) reduction(+:ierr) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(i) reduction(+:ierr) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < num_values; i++)
       {
@@ -1078,7 +1084,7 @@ hypre_ParVectorGetValuesHost(hypre_ParVector *vector,
       }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < num_values; i++)
       {

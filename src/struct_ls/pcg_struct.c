@@ -24,7 +24,7 @@ hypre_StructKrylovCAlloc( size_t               count,
 HYPRE_Int
 hypre_StructKrylovFree( void *ptr )
 {
-   hypre_TFree( ptr , HYPRE_MEMORY_HOST);
+   hypre_TFree( ptr, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -81,7 +81,7 @@ hypre_StructKrylovDestroyVector( void *vvector )
 {
    hypre_StructVector *vector = (hypre_StructVector *)vvector;
 
-   return( hypre_StructVectorDestroy( vector ) );
+   return ( hypre_StructVectorDestroy( vector ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -131,7 +131,7 @@ hypre_StructKrylovMatvecDestroy( void *matvec_data )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Real
-hypre_StructKrylovInnerProd( void *x, 
+hypre_StructKrylovInnerProd( void *x,
                              void *y )
 {
    return ( hypre_StructInnerProd( (hypre_StructVector *) x,
@@ -143,7 +143,7 @@ hypre_StructKrylovInnerProd( void *x,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructKrylovCopyVector( void *x, 
+hypre_StructKrylovCopyVector( void *x,
                               void *y )
 {
    return ( hypre_StructCopy( (hypre_StructVector *) x,
@@ -205,7 +205,7 @@ hypre_StructKrylovIdentity( void *vdata,
                             void *x     )
 
 {
-   return( hypre_StructKrylovCopyVector( b, x ) );
+   return ( hypre_StructKrylovCopyVector( b, x ) );
 }
 
 /*--------------------------------------------------------------------------

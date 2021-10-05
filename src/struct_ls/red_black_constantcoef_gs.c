@@ -125,7 +125,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
    {
       for (compute_i = 0; compute_i < 2; compute_i++)
       {
-         switch(compute_i)
+         switch (compute_i)
          {
             case 0:
             {
@@ -238,7 +238,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
    {
       for (compute_i = 0; compute_i < 2; compute_i++)
       {
-         switch(compute_i)
+         switch (compute_i)
          {
             case 0:
             {
@@ -302,7 +302,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                   }
                }
 
-               switch(stencil_size)
+               switch (stencil_size)
                {
                   case 7:
                      App = hypre_StructMatrixBoxData(A, i, offd[5]);
@@ -310,9 +310,9 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                      App = hypre_StructMatrixBoxData(A, i, offd[4]);
                      App4= App[Ai];
                      xoff5 = hypre_BoxOffsetDistance(
-                        x_dbox, stencil_shape[offd[5]]);
+                                x_dbox, stencil_shape[offd[5]]);
                      xoff4 = hypre_BoxOffsetDistance(
-                        x_dbox, stencil_shape[offd[4]]);
+                                x_dbox, stencil_shape[offd[4]]);
 
                   case 5:
                      App = hypre_StructMatrixBoxData(A, i, offd[3]);
@@ -320,9 +320,9 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                      App = hypre_StructMatrixBoxData(A, i, offd[2]);
                      App2= App[Ai];
                      xoff3 = hypre_BoxOffsetDistance(
-                        x_dbox, stencil_shape[offd[3]]);
+                                x_dbox, stencil_shape[offd[3]]);
                      xoff2 = hypre_BoxOffsetDistance(
-                        x_dbox, stencil_shape[offd[2]]);
+                                x_dbox, stencil_shape[offd[2]]);
 
                   case 3:
                      App = hypre_StructMatrixBoxData(A, i, offd[1]);
@@ -330,9 +330,9 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                      App = hypre_StructMatrixBoxData(A, i, offd[0]);
                      App0= App[Ai];
                      xoff1 = hypre_BoxOffsetDistance(
-                        x_dbox, stencil_shape[offd[1]]);
+                                x_dbox, stencil_shape[offd[1]]);
                      xoff0 = hypre_BoxOffsetDistance(
-                        x_dbox, stencil_shape[offd[0]]);
+                                x_dbox, stencil_shape[offd[0]]);
                      break;
                }
 
@@ -340,7 +340,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                {
                   AApd = 1/Ap[Ai];
 
-                  switch(stencil_size)
+                  switch (stencil_size)
                   {
                      case 7:
                         hypre_RedBlackLoopInit();
@@ -406,7 +406,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                   Ani = hypre_BoxSizeX(A_dbox);
                   Anj = hypre_BoxSizeY(A_dbox);
 
-                  switch(stencil_size)
+                  switch (stencil_size)
                   {
                      case 7:
                         hypre_RedBlackLoopInit();

@@ -7,10 +7,10 @@
 
 #include "_hypre_parcsr_mv.h"
 #include "eliminate_rowscols.h"
-    
+
 HYPRE_Int hypre_ParCSRMatrixEliminateRowsCols (hypre_ParCSRMatrix *A,
-                                         HYPRE_Int nrows_to_eliminate,
-                                         HYPRE_Int *rows_to_eliminate)
+                                               HYPRE_Int nrows_to_eliminate,
+                                               HYPRE_Int *rows_to_eliminate)
 {
    HYPRE_Int ierr = 0;
 
@@ -60,15 +60,19 @@ HYPRE_Int hypre_ParCSRMatrixEliminateRowsCols (hypre_ParCSRMatrix *A,
 
       /* which of the local rows are to be eliminated */
       for (i = 0; i < diag_nrows; i++)
+      {
          eliminate_row[i] = 0;
+      }
       for (i = 0; i < nrows_to_eliminate; i++)
+      {
          eliminate_row[rows_to_eliminate[i]-ibeg] = 1;
+      }
 
       /* use a Matvec communication pattern to find (in eliminate_col)
          which of the local offd columns are to be eliminated */
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-      int_buf_data = hypre_CTAlloc(HYPRE_Int, 
-                                   hypre_ParCSRCommPkgSendMapStart(comm_pkg, 
+      int_buf_data = hypre_CTAlloc(HYPRE_Int,
+                                   hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                                                    num_sends), HYPRE_MEMORY_HOST);
       index = 0;
       for (i = 0; i < num_sends; i++)
@@ -88,14 +92,18 @@ HYPRE_Int hypre_ParCSRMatrixEliminateRowsCols (hypre_ParCSRMatrix *A,
       ncols_to_eliminate = 0;
       for (i = 0; i < offd_ncols; i++)
          if (eliminate_col[i])
+         {
             ncols_to_eliminate++;
+         }
 
       cols_to_eliminate = hypre_CTAlloc(HYPRE_Int,  ncols_to_eliminate, HYPRE_MEMORY_HOST);
 
       ncols_to_eliminate = 0;
       for (i = 0; i < offd_ncols; i++)
          if (eliminate_col[i])
+         {
             cols_to_eliminate[ncols_to_eliminate++] = i;
+         }
 
       hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
       hypre_TFree(eliminate_row, HYPRE_MEMORY_HOST);
@@ -113,11 +121,11 @@ HYPRE_Int hypre_ParCSRMatrixEliminateRowsCols (hypre_ParCSRMatrix *A,
 
 
 HYPRE_Int hypre_CSRMatrixEliminateRowsColsDiag (hypre_ParCSRMatrix *A,
-                                          HYPRE_Int nrows_to_eliminate,
-                                          HYPRE_Int *rows_to_eliminate)
+                                                HYPRE_Int nrows_to_eliminate,
+                                                HYPRE_Int *rows_to_eliminate)
 {
    HYPRE_Int ierr = 0;
-  
+
    MPI_Comm          comm      = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix  *Adiag     = hypre_ParCSRMatrixDiag(A);
 
@@ -130,7 +138,7 @@ HYPRE_Int hypre_CSRMatrixEliminateRowsColsDiag (hypre_ParCSRMatrix *A,
    HYPRE_Real       *Adata     = hypre_CSRMatrixData(Adiag);
 
    HYPRE_Int        *local_rows;
-  
+
    HYPRE_Int         myproc;
 
    hypre_MPI_Comm_rank(comm, &myproc);
@@ -142,14 +150,16 @@ HYPRE_Int hypre_CSRMatrixEliminateRowsColsDiag (hypre_ParCSRMatrix *A,
    {
       local_rows[i]= rows_to_eliminate[i]-ibeg;
    }
-      
+
    /* remove the columns */
    for (i = 0; i < nnz; i++)
    {
       irow = hypre_BinarySearch(local_rows, Aj[i],
                                 nrows_to_eliminate);
       if (irow != -1)
+      {
          Adata[i] = 0.0;
+      }
    }
 
    /* remove the rows and set the diagonal equal to 1 */
@@ -160,9 +170,13 @@ HYPRE_Int hypre_CSRMatrixEliminateRowsColsDiag (hypre_ParCSRMatrix *A,
       iend = Ai[irow+1];
       for (j = ibeg; j < iend; j++)
          if (Aj[j] == irow)
+         {
             Adata[j] = 1.0;
+         }
          else
+         {
             Adata[j] = 0.0;
+         }
    }
 
    hypre_TFree(local_rows, HYPRE_MEMORY_HOST);
@@ -171,8 +185,8 @@ HYPRE_Int hypre_CSRMatrixEliminateRowsColsDiag (hypre_ParCSRMatrix *A,
 }
 
 HYPRE_Int hypre_CSRMatrixEliminateRowsOffd (hypre_ParCSRMatrix *A,
-                                      HYPRE_Int  nrows_to_eliminate,
-                                      HYPRE_Int *rows_to_eliminate)
+                                            HYPRE_Int  nrows_to_eliminate,
+                                            HYPRE_Int *rows_to_eliminate)
 {
    HYPRE_Int ierr = 0;
 
@@ -204,7 +218,9 @@ HYPRE_Int hypre_CSRMatrixEliminateRowsOffd (hypre_ParCSRMatrix *A,
       ibeg = Ai[local_rows[i]];
       iend = Ai[local_rows[i]+1];
       for (j = ibeg; j < iend; j++)
+      {
          Adata[j] = 0.0;
+      }
    }
 
    hypre_TFree(local_rows, HYPRE_MEMORY_HOST);
@@ -213,8 +229,8 @@ HYPRE_Int hypre_CSRMatrixEliminateRowsOffd (hypre_ParCSRMatrix *A,
 }
 
 HYPRE_Int hypre_CSRMatrixEliminateColsOffd (hypre_CSRMatrix *Aoffd,
-                                      HYPRE_Int ncols_to_eliminate,
-                                      HYPRE_Int *cols_to_eliminate)
+                                            HYPRE_Int ncols_to_eliminate,
+                                            HYPRE_Int *cols_to_eliminate)
 {
    HYPRE_Int ierr = 0;
 
@@ -230,7 +246,9 @@ HYPRE_Int hypre_CSRMatrixEliminateColsOffd (hypre_CSRMatrix *Aoffd,
       icol = hypre_BinarySearch(cols_to_eliminate, Aj[i],
                                 ncols_to_eliminate);
       if (icol != -1)
+      {
          Adata[i] = 0.0;
+      }
    }
 
    return ierr;

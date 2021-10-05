@@ -29,7 +29,8 @@ HYPRE_Int buildMatrixEntries(MPI_Comm comm,
                              HYPRE_BigInt **rows2_ptr, HYPRE_BigInt **cols_ptr,
                              HYPRE_Real **coefs_ptr, HYPRE_Int stencil, HYPRE_ParCSRMatrix *parcsr_ptr);
 
-HYPRE_Int getParCSRMatrixData(HYPRE_ParCSRMatrix  A, HYPRE_Int *nrows_ptr, HYPRE_BigInt *num_nonzeros_ptr,
+HYPRE_Int getParCSRMatrixData(HYPRE_ParCSRMatrix  A, HYPRE_Int *nrows_ptr,
+                              HYPRE_BigInt *num_nonzeros_ptr,
                               HYPRE_Int **nnzrow_ptr, HYPRE_BigInt **rows_ptr, HYPRE_BigInt **rows2_ptr,
                               HYPRE_BigInt **cols_ptr, HYPRE_Real **coefs_ptr);
 
@@ -308,11 +309,16 @@ main( hypre_int  argc,
          d_cols   = hypre_TAlloc(HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE);
          d_coefs  = hypre_TAlloc(HYPRE_Real,   num_nonzeros, HYPRE_MEMORY_DEVICE);
 
-         hypre_TMemcpy(d_nnzrow, h_nnzrow, HYPRE_Int,    nrows,        HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(d_rows,   h_rows,   HYPRE_BigInt, nrows,        HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(d_rows2,  h_rows2,  HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(d_cols,   h_cols,   HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(d_coefs,  h_coefs,  HYPRE_Real,   num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_nnzrow, h_nnzrow, HYPRE_Int,    nrows,        HYPRE_MEMORY_DEVICE,
+                       HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_rows,   h_rows,   HYPRE_BigInt, nrows,        HYPRE_MEMORY_DEVICE,
+                       HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_rows2,  h_rows2,  HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE,
+                       HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_cols,   h_cols,   HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE,
+                       HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_coefs,  h_coefs,  HYPRE_Real,   num_nonzeros, HYPRE_MEMORY_DEVICE,
+                       HYPRE_MEMORY_HOST);
 
          nnzrow = d_nnzrow;
          rows   = d_rows;
@@ -497,7 +503,8 @@ buildMatrixEntries(MPI_Comm            comm,
    }
 
    hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_HOST);
-   getParCSRMatrixData(A, nrows_ptr, num_nonzeros_ptr, nnzrow_ptr, rows_ptr, rows2_ptr, cols_ptr, coefs_ptr);
+   getParCSRMatrixData(A, nrows_ptr, num_nonzeros_ptr, nnzrow_ptr, rows_ptr, rows2_ptr, cols_ptr,
+                       coefs_ptr);
 
    // Set pointers
    *ilower_ptr = hypre_ParCSRMatrixFirstRowIndex(A);
@@ -645,7 +652,8 @@ test_Set(MPI_Comm             comm,
          HYPRE_Int            nchunks,
          HYPRE_Int           *h_nnzrow,
          HYPRE_Int           *nnzrow,
-         HYPRE_BigInt        *rows,             /* option = 1: length of nrows, = 2: length of num_nonzeros */
+         HYPRE_BigInt
+         *rows,             /* option = 1: length of nrows, = 2: length of num_nonzeros */
          HYPRE_BigInt        *cols,
          HYPRE_Real          *coefs,
          HYPRE_IJMatrix      *ij_A_ptr)
@@ -761,7 +769,8 @@ test_SetOffProc(HYPRE_ParCSRMatrix    parcsr_A,
    hypre_ParCSRMatrixTranspose(parcsr_A, &parcsr_AT, 1);
    ilower = hypre_ParCSRMatrixFirstRowIndex(parcsr_AT);
    iupper = hypre_ParCSRMatrixLastRowIndex(parcsr_AT);
-   getParCSRMatrixData(parcsr_AT, &nrows, &num_nonzeros, &h_nnzrow, &h_rows1, &h_rows2, &h_cols, &h_coefs);
+   getParCSRMatrixData(parcsr_AT, &nrows, &num_nonzeros, &h_nnzrow, &h_rows1, &h_rows2, &h_cols,
+                       &h_coefs);
    HYPRE_ParCSRMatrixDestroy(parcsr_AT);
 
    switch (memory_location)
@@ -773,16 +782,21 @@ test_SetOffProc(HYPRE_ParCSRMatrix    parcsr_A,
          if (option == 1)
          {
             d_rows  = hypre_TAlloc(HYPRE_BigInt, nrows,        HYPRE_MEMORY_DEVICE);
-            hypre_TMemcpy(d_rows,  h_rows1,  HYPRE_BigInt, nrows,        HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+            hypre_TMemcpy(d_rows,  h_rows1,  HYPRE_BigInt, nrows,        HYPRE_MEMORY_DEVICE,
+                          HYPRE_MEMORY_HOST);
          }
          else
          {
             d_rows  = hypre_TAlloc(HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE);
-            hypre_TMemcpy(d_rows,  h_rows2,  HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+            hypre_TMemcpy(d_rows,  h_rows2,  HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE,
+                          HYPRE_MEMORY_HOST);
          }
-         hypre_TMemcpy(d_nnzrow, h_nnzrow, HYPRE_Int,    nrows,        HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(d_cols,   h_cols,   HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(d_coefs,  h_coefs,  HYPRE_Real,   num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_nnzrow, h_nnzrow, HYPRE_Int,    nrows,        HYPRE_MEMORY_DEVICE,
+                       HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_cols,   h_cols,   HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE,
+                       HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_coefs,  h_coefs,  HYPRE_Real,   num_nonzeros, HYPRE_MEMORY_DEVICE,
+                       HYPRE_MEMORY_HOST);
 
          nnzrow = d_nnzrow;
          rows   = d_rows;
@@ -888,7 +902,8 @@ test_SetSet(MPI_Comm             comm,
             HYPRE_Int            nchunks,
             HYPRE_Int           *h_nnzrow,
             HYPRE_Int           *nnzrow,
-            HYPRE_BigInt        *rows,             /* option = 1: length of nrows, = 2: length of num_nonzeros */
+            HYPRE_BigInt
+            *rows,             /* option = 1: length of nrows, = 2: length of num_nonzeros */
             HYPRE_BigInt        *cols,
             HYPRE_Real          *coefs,
             HYPRE_IJMatrix      *ij_A_ptr)
@@ -1014,7 +1029,8 @@ test_AddSet(MPI_Comm             comm,
             HYPRE_Int            nchunks,
             HYPRE_Int           *h_nnzrow,
             HYPRE_Int           *nnzrow,
-            HYPRE_BigInt        *rows,             /* option = 1: length of nrows, = 2: length of num_nonzeros */
+            HYPRE_BigInt
+            *rows,             /* option = 1: length of nrows, = 2: length of num_nonzeros */
             HYPRE_BigInt        *cols,
             HYPRE_Real          *coefs,
             HYPRE_IJMatrix      *ij_A_ptr)
@@ -1137,7 +1153,8 @@ test_SetAddSet(MPI_Comm             comm,
                HYPRE_Int            nchunks,
                HYPRE_Int           *h_nnzrow,
                HYPRE_Int           *nnzrow,
-               HYPRE_BigInt        *rows,             /* option = 1: length of nrows, = 2: length of num_nonzeros */
+               HYPRE_BigInt
+               *rows,             /* option = 1: length of nrows, = 2: length of num_nonzeros */
                HYPRE_BigInt        *cols,
                HYPRE_Real          *coefs,
                HYPRE_IJMatrix      *ij_A_ptr)

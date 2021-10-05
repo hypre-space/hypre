@@ -196,13 +196,13 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
    /* GEC1002 this is now the creation of the ijmatrix and the initialization
     * by checking the type of the vector */
 
-   if(vector_type == HYPRE_PARCSR )
+   if (vector_type == HYPRE_PARCSR )
    {
       ilower = hypre_SStructGridStartRank(grid);
       iupper = ilower + hypre_SStructGridLocalSize(grid) - 1;
    }
 
-   if(vector_type == HYPRE_SSTRUCT || vector_type == HYPRE_STRUCT)
+   if (vector_type == HYPRE_SSTRUCT || vector_type == HYPRE_STRUCT)
    {
       ilower = hypre_SStructGridGhstartRank(grid);
       iupper = ilower + hypre_SStructGridGhlocalSize(grid) - 1;
@@ -598,9 +598,9 @@ HYPRE_SStructVectorAssemble( HYPRE_SStructVector vector )
       recv_var  = hypre_SStructCommInfoRecvVar(vnbor_comm_info[ci]);
 
       send_vector = hypre_SStructPVectorSVector(
-         hypre_SStructVectorPVector(vector, send_part), send_var);
+                       hypre_SStructVectorPVector(vector, send_part), send_var);
       recv_vector = hypre_SStructPVectorSVector(
-         hypre_SStructVectorPVector(vector, recv_part), recv_var);
+                       hypre_SStructVectorPVector(vector, recv_part), recv_var);
 
       /* want to communicate and add ghost data to real data */
       hypre_CommPkgCreate(comm_info,
@@ -693,9 +693,9 @@ HYPRE_SStructVectorGather( HYPRE_SStructVector vector )
       recv_var  = hypre_SStructCommInfoRecvVar(vnbor_comm_info[ci]);
 
       send_vector = hypre_SStructPVectorSVector(
-         hypre_SStructVectorPVector(vector, send_part), send_var);
+                       hypre_SStructVectorPVector(vector, send_part), send_var);
       recv_vector = hypre_SStructPVectorSVector(
-         hypre_SStructVectorPVector(vector, recv_part), recv_var);
+                       hypre_SStructVectorPVector(vector, recv_part), recv_var);
 
       /* want to communicate real data to ghost data */
       hypre_CommPkgCreate(comm_info,

@@ -149,8 +149,8 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
    HYPRE_CUSPARSE_CALL(cusparseCsrSetPointers(matC, d_ic, d_jc, d_c));
 
    /* Copy the data into C */
-   HYPRE_CUSPARSE_CALL(cusparseSpGEMM_copy( cusparsehandle, opA, opB, 
-                                            &alpha, matA, matB, &beta, matC, 
+   HYPRE_CUSPARSE_CALL(cusparseSpGEMM_copy( cusparsehandle, opA, opB,
+                                            &alpha, matA, matB, &beta, matC,
                                             computeType, CUSPARSE_SPGEMM_DEFAULT,
                                             spgemmDesc) );
 

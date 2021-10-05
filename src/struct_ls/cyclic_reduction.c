@@ -297,7 +297,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
       hypre_IndexD(index, cdir) = -1;
       ac_cw = hypre_StructMatrixExtractPointerByIndex(Ac, ci, index);
 
-      if(!hypre_StructMatrixSymmetric(A))
+      if (!hypre_StructMatrixSymmetric(A))
       {
          hypre_IndexD(index, cdir) = 1;
          ac_ce = hypre_StructMatrixExtractPointerByIndex(Ac, ci, index);
@@ -321,7 +321,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
        * non-symmetric case
        *-----------------------------------------------*/
 
-      if(!hypre_StructMatrixSymmetric(A))
+      if (!hypre_StructMatrixSymmetric(A))
       {
          hypre_BoxGetSize(cgrid_box, loop_size);
 
@@ -403,7 +403,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
          hypre_IndexD(index, cdir) = -1;
          ac_cw = hypre_StructMatrixExtractPointerByIndex(Ac, ci, index);
 
-         if(!hypre_StructMatrixSymmetric(A))
+         if (!hypre_StructMatrixSymmetric(A))
          {
             hypre_IndexD(index, cdir) = 1;
             ac_ce = hypre_StructMatrixExtractPointerByIndex(Ac, ci, index);
@@ -413,7 +413,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
           * non-symmetric case
           *-----------------------------------------------*/
 
-         if(!hypre_StructMatrixSymmetric(A))
+         if (!hypre_StructMatrixSymmetric(A))
          {
             hypre_BoxGetSize(cgrid_box, loop_size);
 
@@ -912,7 +912,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
 
       for (compute_i = 0; compute_i < 2; compute_i++)
       {
-         switch(compute_i)
+         switch (compute_i)
          {
             case 0:
             {
@@ -977,7 +977,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                                    xc_dbox, startc, stridec, xci);
                {
                   xcp[xci] = xp[xi] - Awp[Ai] * xwp[xi+xwp_offset] -
-                                      Aep[Ai] * xep[xi+xep_offset];
+                             Aep[Ai] * xep[xi+xep_offset];
                }
                hypre_BoxLoop3End(Ai, xi, xci);
 #undef DEVICE_VAR
@@ -1087,7 +1087,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
       /* Step 2 */
       for (compute_i = 0; compute_i < 2; compute_i++)
       {
-         switch(compute_i)
+         switch (compute_i)
          {
             case 0:
             {

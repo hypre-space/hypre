@@ -310,7 +310,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
                   boundary, when we coarsen the refined boundary layer, the
                   extents may need to be changed,
                   e.g., index[lower,j,k]= index[upper,j,k]. */
-               switch(l)
+               switch (l)
                {
                   case 0:  /* lower x direction, x_upper= x_lower */
                   {
@@ -439,7 +439,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
 
    /* find the ranks for the boundary points */
    BdryRanks_l    = hypre_TAlloc(HYPRE_Int *,  num_levels, HYPRE_MEMORY_HOST);
-   BdryRanksCnts_l= hypre_TAlloc(HYPRE_Int  ,  num_levels, HYPRE_MEMORY_HOST);
+   BdryRanksCnts_l= hypre_TAlloc(HYPRE_Int,  num_levels, HYPRE_MEMORY_HOST);
 
    /* loop over levels and extract boundary ranks. Only extract unique
       ranks */
@@ -608,7 +608,7 @@ hypre_Maxwell_VarBdy( hypre_SStructPGrid       *pgrid,
    {
       t= vartypes[i];
       hypre_SStructVariableGetOffset(vartypes[i], ndim, varoffset);
-      switch(t)
+      switch (t)
       {
          case 2: /* xface, boundary i= lower, upper */
          {

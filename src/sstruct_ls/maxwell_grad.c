@@ -124,7 +124,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    for (i= 0; i< nvars; i++)
    {
       j= vartypes[i];
-      switch(j)
+      switch (j)
       {
          case 2:
          {
@@ -361,7 +361,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
          boxman  = hypre_SStructGridBoxManager(edge_grid, part, m);
 
          j= vartype_edges[m];
-         switch(j)
+         switch (j)
          {
             case 2: /* x faces, 2d */
             {
@@ -492,7 +492,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    {
       j= vartype_edges[i];
       hypre_SStructVariableGetOffset(vartype_edges[i], ndim, varoffsets[i]);
-      switch(j)
+      switch (j)
       {
          case 2:
          {

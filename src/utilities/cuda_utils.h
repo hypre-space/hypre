@@ -488,19 +488,21 @@ hypre_int hypre_cuda_get_grid_warp_id()
 static __device__ __forceinline__
 hypre_double atomicAdd(hypre_double* address, hypre_double val)
 {
-    hypre_ulonglongint* address_as_ull = (hypre_ulonglongint*) address;
-    hypre_ulonglongint old = *address_as_ull, assumed;
+   hypre_ulonglongint* address_as_ull = (hypre_ulonglongint*) address;
+   hypre_ulonglongint old = *address_as_ull, assumed;
 
-    do {
-        assumed = old;
-        old = atomicCAS(address_as_ull, assumed,
-                        __double_as_longlong(val +
-                               __longlong_as_double(assumed)));
+   do
+   {
+      assumed = old;
+      old = atomicCAS(address_as_ull, assumed,
+                      __double_as_longlong(val +
+                                           __longlong_as_double(assumed)));
 
-    // Note: uses integer comparison to avoid hang in case of NaN (since NaN != NaN)
-    } while (assumed != old);
+      // Note: uses integer comparison to avoid hang in case of NaN (since NaN != NaN)
+   }
+   while (assumed != old);
 
-    return __longlong_as_double(old);
+   return __longlong_as_double(old);
 }
 #endif
 
@@ -549,13 +551,13 @@ void __syncwarp()
 static __device__ __forceinline__
 hypre_int __any_sync(unsigned mask, hypre_int predicate)
 {
-  return __any(predicate);
+   return __any(predicate);
 }
 
 static __device__ __forceinline__
 hypre_int __ballot_sync(unsigned mask, hypre_int predicate)
 {
-  return __ballot(predicate);
+   return __ballot(predicate);
 }
 #endif
 
@@ -596,7 +598,7 @@ T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum)
 
       if ( (lane_id & (d - 1)) == (d - 1))
       {
-        if ( (lane_id & ((d << 1) - 1)) == ((d << 1) - 1) )
+         if ( (lane_id & ((d << 1) - 1)) == ((d << 1) - 1) )
          {
             in += t;
          }
@@ -614,11 +616,11 @@ static __device__ __forceinline__
 T warp_reduce_sum(T in)
 {
 #pragma unroll
-  for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
-  {
-    in += __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d);
-  }
-  return in;
+   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+   {
+      in += __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d);
+   }
+   return in;
 }
 
 template <typename T>
@@ -626,11 +628,11 @@ static __device__ __forceinline__
 T warp_allreduce_sum(T in)
 {
 #pragma unroll
-  for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
-  {
-    in += __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
-  }
-  return in;
+   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+   {
+      in += __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
+   }
+   return in;
 }
 
 template <typename T>
@@ -638,11 +640,11 @@ static __device__ __forceinline__
 T warp_reduce_max(T in)
 {
 #pragma unroll
-  for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
-  {
-    in = max(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
-  }
-  return in;
+   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+   {
+      in = max(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
+   }
+   return in;
 }
 
 template <typename T>
@@ -650,11 +652,11 @@ static __device__ __forceinline__
 T warp_allreduce_max(T in)
 {
 #pragma unroll
-  for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
-  {
-    in = max(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
-  }
-  return in;
+   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+   {
+      in = max(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
+   }
+   return in;
 }
 
 template <typename T>
@@ -662,11 +664,11 @@ static __device__ __forceinline__
 T warp_reduce_min(T in)
 {
 #pragma unroll
-  for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
-  {
-    in = min(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
-  }
-  return in;
+   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+   {
+      in = min(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
+   }
+   return in;
 }
 
 template <typename T>
@@ -674,11 +676,11 @@ static __device__ __forceinline__
 T warp_allreduce_min(T in)
 {
 #pragma unroll
-  for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
-  {
-    in = min(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
-  }
-  return in;
+   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+   {
+      in = min(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
+   }
+   return in;
 }
 
 static __device__ __forceinline__
@@ -709,10 +711,10 @@ hypre_int next_power_of_2(hypre_int n)
 template<typename T>
 struct absolute_value : public thrust::unary_function<T,T>
 {
-  __host__ __device__ T operator()(const T &x) const
-  {
-    return x < T(0) ? -x : x;
-  }
+   __host__ __device__ T operator()(const T &x) const
+   {
+      return x < T(0) ? -x : x;
+   }
 };
 
 template<typename T1, typename T2>
@@ -862,21 +864,30 @@ dim3 hypre_GetDefaultCUDABlockDimension();
 
 dim3 hypre_GetDefaultCUDAGridDimension( HYPRE_Int n, const char *granularity, dim3 bDim );
 
-template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt);
+template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_StableSortByTupleKey(
+   HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt);
 
-template <typename T1, typename T2, typename T3, typename T4> HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals1, T4 *vals2, HYPRE_Int opt);
+template <typename T1, typename T2, typename T3, typename T4> HYPRE_Int
+hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals1, T4 *vals2,
+                                      HYPRE_Int opt);
 
-template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in,  T2 *keys2_in,  T3 *vals_in, T1 *keys1_out, T2 *keys2_out, T3 *vals_out);
+template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N,
+                                                                                        T1 *keys1_in,  T2 *keys2_in,  T3 *vals_in, T1 *keys1_out, T2 *keys2_out, T3 *vals_out);
 
 template <typename T>
-HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
+HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
+                                                    HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
 
 template <typename T>
 HYPRE_Int hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v);
 
-HYPRE_Int hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia, HYPRE_Int *d_offd_ia, HYPRE_Int *d_rownnz);
+HYPRE_Int hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia,
+                                HYPRE_Int *d_offd_ia, HYPRE_Int *d_rownnz);
 
-HYPRE_Int hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job, HYPRE_Int has_offd, HYPRE_BigInt first_col, HYPRE_BigInt *d_col_map_offd_A, HYPRE_Int *d_diag_i, HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a, HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j, HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab);
+HYPRE_Int hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job,
+                                     HYPRE_Int has_offd, HYPRE_BigInt first_col, HYPRE_BigInt *d_col_map_offd_A, HYPRE_Int *d_diag_i,
+                                     HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a, HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j,
+                                     HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab);
 
 HYPRE_Int hypreDevice_IntegerReduceSum(HYPRE_Int m, HYPRE_Int *d_i);
 
@@ -886,13 +897,16 @@ HYPRE_Int hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
 
 HYPRE_Int* hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr);
 
-HYPRE_Int hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_ind);
+HYPRE_Int hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
+                                             HYPRE_Int *d_row_ind);
 
 HYPRE_Int* hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind);
 
-HYPRE_Int hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind, HYPRE_Int *d_row_ptr);
+HYPRE_Int hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind,
+                                             HYPRE_Int *d_row_ptr);
 
-HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y, char *work);
+HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y,
+                                    char *work);
 
 HYPRE_Int hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size);
 
@@ -908,7 +922,9 @@ cudaError_t hypre_CachingFreeDevice(void *ptr);
 cudaError_t hypre_CachingFreeManaged(void *ptr);
 #endif
 
-hypre_cub_CachingDeviceAllocator * hypre_CudaDataCubCachingAllocatorCreate(hypre_uint bin_growth, hypre_uint min_bin, hypre_uint max_bin, size_t max_cached_bytes, bool skip_cleanup, bool debug, bool use_managed_memory);
+hypre_cub_CachingDeviceAllocator * hypre_CudaDataCubCachingAllocatorCreate(hypre_uint bin_growth,
+                                                                           hypre_uint min_bin, hypre_uint max_bin, size_t max_cached_bytes, bool skip_cleanup, bool debug,
+                                                                           bool use_managed_memory);
 
 void hypre_CudaDataCubCachingAllocatorDestroy(hypre_CudaData *data);
 

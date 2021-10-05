@@ -19,7 +19,7 @@ hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
 
    hypre_Index           *stencil_shape;
    HYPRE_Int              stencil_size;
-                       
+
    HYPRE_Int              ndim;
 
    HYPRE_Int              nvars;

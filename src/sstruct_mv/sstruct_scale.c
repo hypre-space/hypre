@@ -53,7 +53,7 @@ hypre_SStructScale( HYPRE_Complex        alpha,
    else if (y_object_type == HYPRE_PARCSR)
    {
       hypre_ParVector  *y_par;
-  
+
       hypre_SStructVectorConvert(y, &y_par);
       hypre_ParVectorScale(alpha, y_par);
    }

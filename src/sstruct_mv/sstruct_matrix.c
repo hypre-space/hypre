@@ -730,7 +730,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
             zypre_BoxLoop1Begin(hypre_SStructMatrixNDim(matrix), loop_size,
                                 ghost_box, start, stride, mi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi) HYPRE_SMP_SCHEDULE
 #endif
             zypre_BoxLoop1For(mi)
             {
@@ -772,12 +772,18 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    hypre_TFree(row_sizes, HYPRE_MEMORY_HOST);
 
    hypre_SStructMatrixTmpSize(matrix)            = max_row_size;
-   hypre_SStructMatrixTmpRowCoords(matrix)       = hypre_CTAlloc(HYPRE_BigInt,  max_row_size, HYPRE_MEMORY_HOST);
-   hypre_SStructMatrixTmpColCoords(matrix)       = hypre_CTAlloc(HYPRE_BigInt,  max_row_size, HYPRE_MEMORY_HOST);
-   hypre_SStructMatrixTmpCoeffs(matrix)          = hypre_CTAlloc(HYPRE_Complex, max_row_size, HYPRE_MEMORY_HOST);
-   hypre_SStructMatrixTmpRowCoordsDevice(matrix) = hypre_CTAlloc(HYPRE_BigInt,  max_row_size, HYPRE_MEMORY_DEVICE);
-   hypre_SStructMatrixTmpColCoordsDevice(matrix) = hypre_CTAlloc(HYPRE_BigInt,  max_row_size, HYPRE_MEMORY_DEVICE);
-   hypre_SStructMatrixTmpCoeffsDevice(matrix)    = hypre_CTAlloc(HYPRE_Complex, max_row_size, HYPRE_MEMORY_DEVICE);
+   hypre_SStructMatrixTmpRowCoords(matrix)       = hypre_CTAlloc(HYPRE_BigInt,  max_row_size,
+                                                                 HYPRE_MEMORY_HOST);
+   hypre_SStructMatrixTmpColCoords(matrix)       = hypre_CTAlloc(HYPRE_BigInt,  max_row_size,
+                                                                 HYPRE_MEMORY_HOST);
+   hypre_SStructMatrixTmpCoeffs(matrix)          = hypre_CTAlloc(HYPRE_Complex, max_row_size,
+                                                                 HYPRE_MEMORY_HOST);
+   hypre_SStructMatrixTmpRowCoordsDevice(matrix) = hypre_CTAlloc(HYPRE_BigInt,  max_row_size,
+                                                                 HYPRE_MEMORY_DEVICE);
+   hypre_SStructMatrixTmpColCoordsDevice(matrix) = hypre_CTAlloc(HYPRE_BigInt,  max_row_size,
+                                                                 HYPRE_MEMORY_DEVICE);
+   hypre_SStructMatrixTmpCoeffsDevice(matrix)    = hypre_CTAlloc(HYPRE_Complex, max_row_size,
+                                                                 HYPRE_MEMORY_DEVICE);
 
    HYPRE_IJMatrixInitialize(ijmatrix);
 
@@ -830,7 +836,9 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
 
    /* if not local, check neighbors */
    if (boxman_entry == NULL)
+   {
       hypre_SStructGridFindNborBoxManEntry(grid, part, index, var, &boxman_entry);
+   }
 
    if (boxman_entry == NULL)
    {
@@ -916,7 +924,8 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    if ( hypre_GetExecPolicy1(hypre_IJMatrixMemoryLocation(ijmatrix)) == HYPRE_EXEC_DEVICE )
    {
       hypreDevice_BigIntFilln(d_row_coords, ncoeffs, row_coord);
-      hypre_TMemcpy(d_col_coords, col_coords, HYPRE_BigInt, ncoeffs, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(d_col_coords, col_coords, HYPRE_BigInt, ncoeffs, HYPRE_MEMORY_DEVICE,
+                    HYPRE_MEMORY_HOST);
       hypre_TMemcpy(d_coeffs, coeffs, HYPRE_Complex, ncoeffs, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
       if (action > 0)
@@ -1589,7 +1598,8 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                if (hypre_BoxVolume(ibox1))
                {
                   HYPRE_Int tvalues_new_size = hypre_BoxVolume(ibox1);
-                  tvalues = hypre_TReAlloc_v2(tvalues, HYPRE_Complex, tvalues_size, HYPRE_Complex, tvalues_new_size, HYPRE_MEMORY_DEVICE);
+                  tvalues = hypre_TReAlloc_v2(tvalues, HYPRE_Complex, tvalues_size, HYPRE_Complex, tvalues_new_size,
+                                              HYPRE_MEMORY_DEVICE);
                   tvalues_size = tvalues_new_size;
 
                   if (action >= 0)

@@ -99,15 +99,15 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
       {
          for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
          {
-             /* need col major */
-             column = A_diag_j[jj]+first_row_index;
-             A_mat_local[i*global_num_rows + column] = A_diag_data[jj];
+            /* need col major */
+            column = A_diag_j[jj]+first_row_index;
+            A_mat_local[i*global_num_rows + column] = A_diag_data[jj];
          }
          for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
          {
-             /* need col major */
-             column = col_map_offd[A_offd_j[jj]];
-             A_mat_local[i*global_num_rows + column] = A_offd_data[jj];
+            /* need col major */
+            column = col_map_offd[A_offd_j[jj]];
+            A_mat_local[i*global_num_rows + column] = A_offd_data[jj];
          }
       }
 
@@ -239,7 +239,8 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
       {
          f_data_host = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
 
-         hypre_TMemcpy(f_data_host, f_data, HYPRE_Real, n, HYPRE_MEMORY_HOST, hypre_ParVectorMemoryLocation(f));
+         hypre_TMemcpy(f_data_host, f_data, HYPRE_Real, n, HYPRE_MEMORY_HOST,
+                       hypre_ParVectorMemoryLocation(f));
       }
       else
       {
@@ -310,7 +311,8 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 
       if (u_data_host != u_data)
       {
-         hypre_TMemcpy(u_data, u_data_host, HYPRE_Real, n, hypre_ParVectorMemoryLocation(u), HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(u_data, u_data_host, HYPRE_Real, n, hypre_ParVectorMemoryLocation(u),
+                       HYPRE_MEMORY_HOST);
          hypre_TFree(u_data_host, HYPRE_MEMORY_HOST);
       }
    }
@@ -415,7 +417,8 @@ hypreCUDAKernel_dgemv(HYPRE_Int   m,
    }
 }
 
-HYPRE_Int hypre_dgemv_device(HYPRE_Int m, HYPRE_Int n, HYPRE_Int lda, HYPRE_Real *a, HYPRE_Real *x, HYPRE_Real *y)
+HYPRE_Int hypre_dgemv_device(HYPRE_Int m, HYPRE_Int n, HYPRE_Int lda, HYPRE_Real *a, HYPRE_Real *x,
+                             HYPRE_Real *y)
 {
    dim3 bDim(BLOCK_SIZE, 1, 1);
    dim3 gDim = hypre_GetDefaultCUDAGridDimension(m, "thread", bDim);

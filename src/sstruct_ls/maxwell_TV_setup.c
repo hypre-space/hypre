@@ -517,8 +517,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
 
       /* relaxation parameters */
       nCF_marker_l = hypre_CTAlloc(HYPRE_Int *,  node_numlevels, HYPRE_MEMORY_HOST);
-      nrelax_weight= hypre_CTAlloc(HYPRE_Real ,  node_numlevels, HYPRE_MEMORY_HOST);
-      nomega       = hypre_CTAlloc(HYPRE_Real ,  node_numlevels, HYPRE_MEMORY_HOST);
+      nrelax_weight= hypre_CTAlloc(HYPRE_Real,  node_numlevels, HYPRE_MEMORY_HOST);
+      nomega       = hypre_CTAlloc(HYPRE_Real,  node_numlevels, HYPRE_MEMORY_HOST);
       nrelax_type  = 6;  /* fast parallel hybrid */
 
       for (i= 0; i< node_numlevels; i++)
@@ -603,8 +603,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
       /* since rfactor[i]>1, the following i will be an upper bound of
          the number of levels. */
       i  = hypre_Log2(hypre_BoxSizeD(box, 0)) + 2 +
-         hypre_Log2(hypre_BoxSizeD(box, 1)) + 2 +
-         hypre_Log2(hypre_BoxSizeD(box, 2)) + 2;
+           hypre_Log2(hypre_BoxSizeD(box, 1)) + 2 +
+           hypre_Log2(hypre_BoxSizeD(box, 2)) + 2;
 
       hypre_BoxDestroy(box);
       /* the following allows some of the parts to have volume zero grids */
@@ -641,7 +641,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
          vartype_edges[2]= hypre_SStructPGridVarType(pgrid, i);
          j= vartype_edges[2];
 
-         switch(j)
+         switch (j)
          {
             case 5:
             {
@@ -672,7 +672,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
          vartype_edges[1]= hypre_SStructPGridVarType(pgrid, i);
          j= vartype_edges[1];
 
-         switch(j)
+         switch (j)
          {
             case 2:
             {
@@ -778,7 +778,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
 
                if (m)
                {
-/*   MAY NEED TO CHECK THE FOLLOWING MORE CAREFULLY: */
+                  /*   MAY NEED TO CHECK THE FOLLOWING MORE CAREFULLY: */
                   /* should we decrease this bounding box so that we get the
                      correct coarse bounding box? Recall that we will decrease
                      each box of the cell_grid so that exact rfactor divisibility
@@ -842,7 +842,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
             }  /* if (coarsen[part]) */
 
             vartypes= hypre_SStructPGridVarTypes(
-               hypre_SStructGridPGrid(egrid_l[l], part));
+                         hypre_SStructGridPGrid(egrid_l[l], part));
             HYPRE_SStructGridSetVariables(egrid_l[l+1], part, ndim,
                                           vartypes);
 
@@ -953,7 +953,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
 
    Aee_l[0]= hypre_SStructMatrixParCSRMatrix(Aee_in);
    Aen_l[0]=(hypre_ParCSRMatrix *) hypre_IJMatrixObject(Aen),
-      be_l[0] = hypre_SStructVectorParVector(b_in);
+            be_l[0] = hypre_SStructVectorParVector(b_in);
    xe_l[0] = hypre_SStructVectorParVector(x_in);
 
    rese_l[0]=

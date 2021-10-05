@@ -424,7 +424,8 @@ static void big_kth_element( HYPRE_Int *out1, HYPRE_Int *out2,
 
       HYPRE_Int new_n1 = hypre_min(n1 - offset1, new_k + 1);
       HYPRE_Int new_n2 = hypre_min(n2 - offset2, new_k + 1);
-      big_kth_element_(out1, out2, a1 + (HYPRE_BigInt)offset1, a2 + (HYPRE_BigInt)offset2, 0, new_n1 - 1, new_n1, new_n2, new_k);
+      big_kth_element_(out1, out2, a1 + (HYPRE_BigInt)offset1, a2 + (HYPRE_BigInt)offset2, 0, new_n1 - 1,
+                       new_n1, new_n2, new_k);
 
       *out1 += offset1;
       *out2 += offset2;
@@ -558,7 +559,7 @@ static void hypre_big_parallel_merge(
 
 void hypre_merge_sort( HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int **out )
 {
-   if (0 == len) return;
+   if (0 == len) { return; }
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MERGE] -= hypre_MPI_Wtime();
@@ -574,7 +575,7 @@ void hypre_merge_sort( HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int 
    // HYPRE_Int out_len = 0;
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel
+   #pragma omp parallel
 #endif
    {
       HYPRE_Int num_threads = hypre_NumActiveThreads();
@@ -594,7 +595,7 @@ void hypre_merge_sort( HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int 
       for (in_group_size = 1; in_group_size < num_threads; in_group_size *= 2)
       {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+         #pragma omp barrier
 #endif
 
          // merge 2 in-groups into 1 out-group
@@ -663,7 +664,7 @@ void hypre_sort_and_create_inverse_map(HYPRE_Int *in, HYPRE_Int len, HYPRE_Int *
    hypre_UnorderedIntMapCreate(inverse_map, 2*len, 16*hypre_NumThreads());
    HYPRE_Int i;
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
-#pragma omp parallel for HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < len; i++)
    {
@@ -679,16 +680,17 @@ void hypre_sort_and_create_inverse_map(HYPRE_Int *in, HYPRE_Int len, HYPRE_Int *
    }
 
 #ifdef DBG_MERGE_SORT
-  std::unordered_map<HYPRE_Int, HYPRE_Int> inverse_map2(len);
-  for (HYPRE_Int i = 0; i < len; ++i) {
-    inverse_map2[(*out)[i]] = i;
-    if (hypre_UnorderedIntMapGet(inverse_map, (*out)[i]) != i)
-    {
-      fprintf(stderr, "%d %d\n", i, (*out)[i]);
-      hypre_assert(false);
-    }
-  }
-  hypre_assert(hypre_UnorderedIntMapSize(inverse_map) == len);
+   std::unordered_map<HYPRE_Int, HYPRE_Int> inverse_map2(len);
+   for (HYPRE_Int i = 0; i < len; ++i)
+   {
+      inverse_map2[(*out)[i]] = i;
+      if (hypre_UnorderedIntMapGet(inverse_map, (*out)[i]) != i)
+      {
+         fprintf(stderr, "%d %d\n", i, (*out)[i]);
+         hypre_assert(false);
+      }
+   }
+   hypre_assert(hypre_UnorderedIntMapSize(inverse_map) == len);
 #endif
 
    if (*out == in)
@@ -712,7 +714,7 @@ void hypre_sort_and_create_inverse_map(HYPRE_Int *in, HYPRE_Int len, HYPRE_Int *
 void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len,
                           HYPRE_BigInt **out)
 {
-   if (0 == len) return;
+   if (0 == len) { return; }
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MERGE] -= hypre_MPI_Wtime();
@@ -728,7 +730,7 @@ void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len,
    // HYPRE_Int out_len = 0;
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel
+   #pragma omp parallel
 #endif
    {
       HYPRE_Int num_threads = hypre_NumActiveThreads();
@@ -748,7 +750,7 @@ void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len,
       for (in_group_size = 1; in_group_size < num_threads; in_group_size *= 2)
       {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+         #pragma omp barrier
 #endif
 
          // merge 2 in-groups into 1 out-group
@@ -812,7 +814,7 @@ void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPR
    hypre_UnorderedBigIntMapCreate(inverse_map, 2*len, 16*hypre_NumThreads());
    HYPRE_Int i;
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
-#pragma omp parallel for HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < len; i++)
    {
@@ -828,16 +830,17 @@ void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPR
    }
 
 #ifdef DBG_MERGE_SORT
-  std::unordered_map<HYPRE_Int, HYPRE_Int> inverse_map2(len);
-  for (HYPRE_Int i = 0; i < len; ++i) {
-    inverse_map2[(*out)[i]] = i;
-    if (hypre_UnorderedBigIntMapGet(inverse_map, (*out)[i]) != i)
-    {
-      fprintf(stderr, "%d %d\n", i, (*out)[i]);
-      hypre_assert(false);
-    }
-  }
-  hypre_assert(hypre_UnorderedBigIntMapSize(inverse_map) == len);
+   std::unordered_map<HYPRE_Int, HYPRE_Int> inverse_map2(len);
+   for (HYPRE_Int i = 0; i < len; ++i)
+   {
+      inverse_map2[(*out)[i]] = i;
+      if (hypre_UnorderedBigIntMapGet(inverse_map, (*out)[i]) != i)
+      {
+         fprintf(stderr, "%d %d\n", i, (*out)[i]);
+         hypre_assert(false);
+      }
+   }
+   hypre_assert(hypre_UnorderedBigIntMapSize(inverse_map) == len);
 #endif
 
    if (*out == in)

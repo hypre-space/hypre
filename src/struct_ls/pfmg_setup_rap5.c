@@ -108,7 +108,7 @@ hypre_PFMGCreateCoarseOp5( hypre_StructMatrix *R,
             /*--------------------------------------------------------------
              * Store 3 elements in (c,w,s)
              *--------------------------------------------------------------*/
-            if( i*j == 0 )
+            if ( i*j == 0 )
             {
                hypre_SetIndex3(index_temp,i,j,0);
                MapIndex(index_temp, cdir, RAP_stencil_shape[stencil_rank]);
@@ -360,15 +360,15 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
             /*-----------------------------------------------------
              * Prevent non-zero entries reaching off grid
              *-----------------------------------------------------*/
-            if(a_cw[iA] == 0.0) west = 0.0;
-            if(a_ce[iA] == 0.0) east = 0.0;
+            if (a_cw[iA] == 0.0) { west = 0.0; }
+            if (a_ce[iA] == 0.0) { east = 0.0; }
 
             rap_cw[iAc] = west;
             rap_ce[iAc] = east;
 
             rap_cc[iAc] = a_cc[iA] + a_cw[iA] + a_ce[iA]
-               + a_cb[iA] * pb[iP-pbOffset] + a_ca[iA] * pa[iP]
-               - west - east;
+                          + a_cb[iA] * pb[iP-pbOffset] + a_ca[iA] * pa[iP]
+                          - west - east;
          }
          hypre_BoxLoop3End(iP, iA, iAc);
 #undef DEVICE_VAR

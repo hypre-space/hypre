@@ -84,32 +84,52 @@ HYPRE_Int hypre_AMEDestroy(void *esolver)
    }
 
    if (ame_data -> G)
+   {
       hypre_ParCSRMatrixDestroy(ame_data -> G);
+   }
    if (ame_data -> A_G)
+   {
       hypre_ParCSRMatrixDestroy(ame_data -> A_G);
+   }
    if (ame_data -> B1_G)
+   {
       HYPRE_BoomerAMGDestroy(ame_data -> B1_G);
+   }
    if (ame_data -> B2_G)
+   {
       HYPRE_ParCSRPCGDestroy(ame_data -> B2_G);
+   }
 
    if (ame_data -> eigenvalues)
+   {
       hypre_TFree(ame_data -> eigenvalues, HYPRE_MEMORY_HOST);
+   }
    if (eigenvectors)
+   {
       mv_MultiVectorDestroy(eigenvectors);
+   }
 
    if (interpreter)
+   {
       hypre_TFree(interpreter, HYPRE_MEMORY_HOST);
+   }
 
    if (ams_data ->  beta_is_zero)
    {
       if (ame_data -> t1)
+      {
          hypre_ParVectorDestroy(ame_data -> t1);
+      }
       if (ame_data -> t2)
+      {
          hypre_ParVectorDestroy(ame_data -> t2);
+      }
    }
 
    if (ame_data)
+   {
       hypre_TFree(ame_data, HYPRE_MEMORY_HOST);
+   }
 
    /* Fields initialized using the Set functions are not destroyed */
 
@@ -387,12 +407,18 @@ HYPRE_Int hypre_AMESetup(void *esolver)
                l1_norm = 0.0;
                for (j = AdI[i]; j < AdI[i+1]; j++)
                   if (AdJ[j] != i)
+                  {
                      l1_norm += fabs(AdA[j]);
+                  }
                if (AoI)
                   for (j = AoI[i]; j < AoI[i+1]; j++)
+                  {
                      l1_norm += fabs(AoA[j]);
+                  }
                if (l1_norm < eps)
+               {
                   edge_bc[i] = 1;
+               }
             }
          }
       }
@@ -409,13 +435,15 @@ HYPRE_Int hypre_AMESetup(void *esolver)
          HYPRE_Int num_sends, *int_buf_data;
          HYPRE_Int index, start;
 
-         offd_edge_bc = hypre_TAlloc(HYPRE_Int, hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(Gt)), memory_location);
+         offd_edge_bc = hypre_TAlloc(HYPRE_Int, hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(Gt)),
+                                     memory_location);
 
          hypre_MatvecCommPkgCreate(Gt);
          comm_pkg = hypre_ParCSRMatrixCommPkg(Gt);
 
          num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-         int_buf_data = hypre_TAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), memory_location );
+         int_buf_data = hypre_TAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                     memory_location );
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          if (exec == HYPRE_EXEC_DEVICE)
@@ -424,7 +452,8 @@ HYPRE_Int hypre_AMESetup(void *esolver)
 
             HYPRE_THRUST_CALL( gather,
                                hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
-                               hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                               hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+                                     num_sends),
                                edge_bc,
                                int_buf_data );
          }
@@ -487,11 +516,15 @@ HYPRE_Int hypre_AMESetup(void *esolver)
                {
                   for (j = GtdI[i]; j < GtdI[i+1]; j++)
                      /* if (!edge_bc[GtdJ[j]]) */
+                  {
                      GtdA[j] = 0.0;
+                  }
                   if (GtoI)
                      for (j = GtoI[i]; j < GtoI[i+1]; j++)
                         /* if (!offd_edge_bc[GtoJ[j]]) */
+                     {
                         GtoA[j] = 0.0;
+                     }
                }
             }
          }
@@ -506,24 +539,28 @@ HYPRE_Int hypre_AMESetup(void *esolver)
    /* Compute G^t M G */
    {
       if (!hypre_ParCSRMatrixCommPkg(ame_data -> G))
+      {
          hypre_MatvecCommPkgCreate(ame_data -> G);
+      }
 
       if (!hypre_ParCSRMatrixCommPkg(ame_data -> M))
+      {
          hypre_MatvecCommPkgCreate(ame_data -> M);
+      }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-         if (exec == HYPRE_EXEC_DEVICE)
-         {
-            ame_data -> A_G = hypre_ParCSRMatrixRAPKT(ame_data -> G, ame_data -> M, ame_data -> G, 1);
-         }
-         else
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+         ame_data -> A_G = hypre_ParCSRMatrixRAPKT(ame_data -> G, ame_data -> M, ame_data -> G, 1);
+      }
+      else
 #endif
-         {
-            hypre_BoomerAMGBuildCoarseOperator(ame_data -> G,
-                                               ame_data -> M,
-                                               ame_data -> G,
-                                               &ame_data -> A_G);
-         }
+      {
+         hypre_BoomerAMGBuildCoarseOperator(ame_data -> G,
+                                            ame_data -> M,
+                                            ame_data -> G,
+                                            &ame_data -> A_G);
+      }
 
       hypre_ParCSRMatrixFixZeroRows(ame_data -> A_G);
    }
@@ -609,7 +646,9 @@ HYPRE_Int hypre_AMESetup(void *esolver)
             {
                for (j = 0; j < ne; j++)
                   if (edge_bc[j])
+                  {
                      data[j] = 0.0;
+                  }
             }
             hypre_AMEDiscrDivFreeComponent(esolver, vi);
          }
@@ -671,7 +710,7 @@ void hypre_AMEMultiOperatorA(void *data, void* x, void* y)
 {
    hypre_AMEData *ame_data = (hypre_AMEData *) data;
    mv_InterfaceInterpreter*
-      interpreter = (mv_InterfaceInterpreter*) ame_data -> interpreter;
+   interpreter = (mv_InterfaceInterpreter*) ame_data -> interpreter;
    interpreter -> Eval(hypre_AMEOperatorA, data, x, y);
 }
 
@@ -692,7 +731,7 @@ void hypre_AMEMultiOperatorM(void *data, void* x, void* y)
 {
    hypre_AMEData *ame_data = (hypre_AMEData *) data;
    mv_InterfaceInterpreter*
-      interpreter = (mv_InterfaceInterpreter*) ame_data -> interpreter;
+   interpreter = (mv_InterfaceInterpreter*) ame_data -> interpreter;
    interpreter -> Eval(hypre_AMEOperatorM, data, x, y);
 }
 
@@ -718,7 +757,7 @@ void hypre_AMEMultiOperatorB(void *data, void* x, void* y)
 {
    hypre_AMEData *ame_data = (hypre_AMEData *) data;
    mv_InterfaceInterpreter*
-      interpreter = (mv_InterfaceInterpreter*) ame_data -> interpreter;
+   interpreter = (mv_InterfaceInterpreter*) ame_data -> interpreter;
    interpreter -> Eval(hypre_AMEOperatorB, data, x, y);
 }
 
@@ -771,7 +810,7 @@ HYPRE_Int hypre_AMEGetEigenvectors(void *esolver,
 {
    hypre_AMEData *ame_data = (hypre_AMEData *) esolver;
    mv_MultiVectorPtr
-      eigenvectors = (mv_MultiVectorPtr) ame_data -> eigenvectors;
+   eigenvectors = (mv_MultiVectorPtr) ame_data -> eigenvectors;
    mv_TempMultiVector* tmp = (mv_TempMultiVector*) mv_MultiVectorGetData(eigenvectors);
 
    *eigenvectors_ptr = (HYPRE_ParVector*)(tmp -> vector);

@@ -76,7 +76,7 @@ typedef struct hypre_SStructMatrix_struct
 
    HYPRE_Int               ref_count;
 
-  /* GEC0902   adding an object type to the matrix  */
+   /* GEC0902   adding an object type to the matrix  */
    HYPRE_Int               object_type;
 
 } hypre_SStructMatrix;

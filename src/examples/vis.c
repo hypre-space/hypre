@@ -311,7 +311,9 @@ void GLVis_PrintSStructGrid(HYPRE_SStructGrid grid,
                   {
                      fprintf(file, "1 %d ", elemid);
                      for (v = 0; v < cellNV; v++, vert++)
+                     {
                         fprintf(file, "%d ", vert);
+                     }
                      fprintf(file, "\n");
                   }
          }
@@ -502,7 +504,9 @@ void GLVis_PrintSStructVector(HYPRE_SStructVector sol,
          iupper[1] = hypre_BoxIMaxD(box,1);
 
          if (dim == 2)
+         {
             values = (double*) malloc((ni+var_off)*(nj+var_off)*sizeof(double));
+         }
          else
          {
             values = (double*) malloc((ni+var_off)*(nj+var_off)*(nk+var_off)*sizeof(double));
@@ -517,7 +521,9 @@ void GLVis_PrintSStructVector(HYPRE_SStructVector sol,
             for (k = 0; k < nk; k++)
                for (j = 0; j < nj; j++)
                   for (i = 0; i < ni; i++)
+                  {
                      fprintf(file, "%.14e\n", values[i + j*ni]);
+                  }
          }
          else if (vartype == HYPRE_SSTRUCT_VARIABLE_NODE)
          {
@@ -624,7 +630,9 @@ void GLVis_PrintStructGrid(HYPRE_StructGrid Grid,
                {
                   fprintf(file, "1 %d ", elemid);
                   for (v = 0; v < cellNV; v++, vert++)
+                  {
                      fprintf(file, "%d ", vert);
+                  }
                   fprintf(file, "\n");
                }
       }
@@ -782,7 +790,9 @@ void GLVis_PrintStructVector(HYPRE_StructVector sol,
       iupper[1] = hypre_BoxIMaxD(box,1);
 
       if (dim == 2)
+      {
          values = (double*) malloc(ni*nj*sizeof(double));
+      }
       else
       {
          values = (double*) malloc(ni*nj*nk*sizeof(double));
@@ -795,7 +805,9 @@ void GLVis_PrintStructVector(HYPRE_StructVector sol,
       for (k = 0; k < nk; k++)
          for (j = 0; j < nj; j++)
             for (i = 0; i < ni; i++)
+            {
                fprintf(file, "%.14e\n", values[i + j*ni]);
+            }
 
       free(values);
    }

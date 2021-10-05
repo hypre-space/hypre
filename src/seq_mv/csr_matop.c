@@ -119,7 +119,7 @@ hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
    twspace[ii] = num_nonzeros;
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+   #pragma omp barrier
 #endif
 
    /* Correct C_i - phase 1 */
@@ -156,7 +156,7 @@ hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
    if (rownnz_C != NULL)
    {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+      #pragma omp barrier
 #endif
       for (ic = firstrow; ic < (lastrow-1); ic++)
       {
@@ -186,7 +186,7 @@ hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
    }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+   #pragma omp barrier
 #endif
 
 #ifdef HYPRE_DEBUG
@@ -197,7 +197,7 @@ hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
          hypre_assert(C_i[i] <= C_i[i+1]);
          hypre_assert(((A_i[i+1] - A_i[i]) +
                        (B_i[i+1] - B_i[i])) >=
-                       (C_i[i+1] - C_i[i]));
+                      (C_i[i+1] - C_i[i]));
          hypre_assert((C_i[i+1] - C_i[i]) >= (A_i[i+1] - A_i[i]));
          hypre_assert((C_i[i+1] - C_i[i]) >= (B_i[i+1] - B_i[i]));
       }
@@ -406,7 +406,7 @@ hypre_CSRMatrixAddHost ( HYPRE_Complex    alpha,
    }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel
+   #pragma omp parallel
 #endif
    {
       HYPRE_Int   ns, ne;
@@ -518,7 +518,7 @@ hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
    C_i = hypre_CTAlloc(HYPRE_Int, nrows_A + 1, memory_location_C);
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel
+   #pragma omp parallel
 #endif
    {
       HYPRE_Int     ia, ib, ic, num_nonzeros;
@@ -564,7 +564,7 @@ hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
       twspace[ii] = num_nonzeros;
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+      #pragma omp barrier
 #endif
 
       /* Correct row pointer */
@@ -720,7 +720,7 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
    C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1, memory_location_C);
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel private(ia, ib, ic, ja, jb, num_nonzeros, counter, a_entry, b_entry)
+   #pragma omp parallel private(ia, ib, ic, ja, jb, num_nonzeros, counter, a_entry, b_entry)
 #endif
    {
       HYPRE_Int  *B_marker = NULL;
@@ -777,7 +777,7 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
       twspace[ii] = num_nonzeros;
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+      #pragma omp barrier
 #endif
 
       /* Correct C_i - phase 1 */
@@ -814,7 +814,7 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
       if (rownnz_A != NULL)
       {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+         #pragma omp barrier
 #endif
          for (ic = ns; ic < (ne-1); ic++)
          {
@@ -843,7 +843,7 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
       HYPRE_ANNOTATE_REGION_END("%s", "First pass");
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+      #pragma omp barrier
 #endif
 
       /* Second pass: Fill in C_data and C_j. */
@@ -924,7 +924,7 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(A),
-                                                       hypre_CSRMatrixMemoryLocation(B) );
+                                                      hypre_CSRMatrixMemoryLocation(B) );
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
@@ -1022,7 +1022,7 @@ hypre_CSRMatrixDeleteZeros( hypre_CSRMatrix *A,
 static inline HYPRE_Int
 transpose_idx (HYPRE_Int idx, HYPRE_Int dim1, HYPRE_Int dim2)
 {
-  return idx%dim1*dim2 + idx/dim1;
+   return idx%dim1*dim2 + idx/dim1;
 }
 
 /*--------------------------------------------------------------------------
@@ -1113,7 +1113,7 @@ hypre_CSRMatrixTransposeHost(hypre_CSRMatrix  *A,
                                      HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel
+   #pragma omp parallel
 #endif
    {
       HYPRE_Int   ii, num_threads, ns, ne;
@@ -1157,7 +1157,7 @@ hypre_CSRMatrixTransposeHost(hypre_CSRMatrix  *A,
        * accessed as if it is transposed as HYPRE_Int[num_colsA][num_threads]
        *-----------------------------------------------------------------*/
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+      #pragma omp barrier
 #endif
 
       for (i = ii*num_cols_A + 1; i < (ii + 1)*num_cols_A; ++i)
@@ -1169,8 +1169,8 @@ hypre_CSRMatrixTransposeHost(hypre_CSRMatrix  *A,
       }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
-#pragma omp master
+      #pragma omp barrier
+      #pragma omp master
 #endif
       {
          for (i = 1; i < num_threads; ++i)
@@ -1184,7 +1184,7 @@ hypre_CSRMatrixTransposeHost(hypre_CSRMatrix  *A,
          }
       }
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+      #pragma omp barrier
 #endif
 
       if (ii > 0)
@@ -1201,7 +1201,7 @@ hypre_CSRMatrixTransposeHost(hypre_CSRMatrix  *A,
       }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+      #pragma omp barrier
 #endif
 
       /*----------------------------------------------------------------
@@ -1242,7 +1242,8 @@ hypre_CSRMatrixTransposeHost(hypre_CSRMatrix  *A,
    } /* end parallel region */
 
    hypre_CSRMatrixI(*AT) = hypre_TAlloc(HYPRE_Int, num_cols_A + 1, memory_location);
-   hypre_TMemcpy(hypre_CSRMatrixI(*AT), bucket, HYPRE_Int, num_cols_A + 1, memory_location, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(hypre_CSRMatrixI(*AT), bucket, HYPRE_Int, num_cols_A + 1, memory_location,
+                 HYPRE_MEMORY_HOST);
    hypre_CSRMatrixI(*AT)[num_cols_A] = num_nnzs_A;
    hypre_TFree(bucket, HYPRE_MEMORY_HOST);
 
@@ -1329,7 +1330,7 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
    my_offd_array = hypre_CTAlloc(HYPRE_Int, max_num_threads, HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel
+   #pragma omp parallel
 #endif
    {
       HYPRE_Int ns, ne, ii, num_threads;
@@ -1363,7 +1364,7 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
       my_offd_array[ii] = my_offd_size;
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+      #pragma omp barrier
 #endif
 
       if (ii)
@@ -1411,7 +1412,7 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
       }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+      #pragma omp barrier
 #endif
 
       cnt_offd = B_ext_offd_i[ns];
@@ -1436,7 +1437,7 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
 
       /* This computes the mappings */
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+      #pragma omp barrier
 #endif
 
       if (ii == 0)
@@ -1479,7 +1480,7 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
       }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+      #pragma omp barrier
 #endif
 
       for (i = ns; i < ne; i++)
@@ -1494,7 +1495,8 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
    hypre_TFree(my_diag_array, HYPRE_MEMORY_HOST);
    hypre_TFree(my_offd_array, HYPRE_MEMORY_HOST);
 
-   Bext_diag = hypre_CSRMatrixCreate(num_rows_Bext, last_col_diag_B-first_col_diag_B+1, B_ext_diag_size);
+   Bext_diag = hypre_CSRMatrixCreate(num_rows_Bext, last_col_diag_B-first_col_diag_B+1,
+                                     B_ext_diag_size);
    hypre_CSRMatrixMemoryLocation(Bext_diag) = HYPRE_MEMORY_HOST;
    Bext_offd = hypre_CSRMatrixCreate(num_rows_Bext, num_cols_offd_C, B_ext_offd_size);
    hypre_CSRMatrixMemoryLocation(Bext_offd) = HYPRE_MEMORY_HOST;
@@ -1537,7 +1539,7 @@ hypre_CSRMatrixReorderHost(hypre_CSRMatrix *A)
    }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i, ii, j) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i, ii, j) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < nnzrows_A; i++)
    {
@@ -1770,7 +1772,7 @@ hypre_CSRMatrixSumElts( hypre_CSRMatrix *A )
    HYPRE_Int      i;
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) reduction(+:sum) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i) reduction(+:sum) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < num_nonzeros; i++)
    {
@@ -1797,7 +1799,7 @@ hypre_CSRMatrixFnorm( hypre_CSRMatrix *A )
    hypre_assert(num_nonzeros == A_i[nrows]);
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) reduction(+:sum) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i) reduction(+:sum) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < num_nonzeros; ++i)
    {

@@ -28,8 +28,8 @@ hypre_GeneratePartitioning(HYPRE_BigInt length, HYPRE_Int num_procs, HYPRE_BigIn
    part[0] = 0;
    for (i=0; i < num_procs; i++)
    {
-	part[i+1] = part[i]+(HYPRE_BigInt)size;
-	if (i < rest) part[i+1]++;
+      part[i+1] = part[i]+(HYPRE_BigInt)size;
+      if (i < rest) { part[i+1]++; }
    }
 
    *part_ptr = part;

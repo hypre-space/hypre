@@ -24,8 +24,10 @@ HYPRE_Int AIR_MAX_SOL_SIZE = 0;
 #define EPSILON 1e-18
 #define EPSIMAC 1e-16
 
-void hypre_fgmresT(HYPRE_Int n, HYPRE_Complex *A, HYPRE_Complex *b, HYPRE_Real tol, HYPRE_Int kdim, HYPRE_Complex *x, HYPRE_Real *relres, HYPRE_Int *iter, HYPRE_Int job);
-void hypre_ordered_GS(const HYPRE_Complex L[], const HYPRE_Complex rhs[], HYPRE_Complex x[], const HYPRE_Int n);
+void hypre_fgmresT(HYPRE_Int n, HYPRE_Complex *A, HYPRE_Complex *b, HYPRE_Real tol, HYPRE_Int kdim,
+                   HYPRE_Complex *x, HYPRE_Real *relres, HYPRE_Int *iter, HYPRE_Int job);
+void hypre_ordered_GS(const HYPRE_Complex L[], const HYPRE_Complex rhs[], HYPRE_Complex x[],
+                      const HYPRE_Int n);
 
 /*
 HYPRE_Real air_time0 = 0.0;
@@ -209,7 +211,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
 
    /* send buffer, of size send_map_starts[num_sends]),
     * i.e., number of entries to send */
-   send_buf_i = hypre_CTAlloc(HYPRE_Int , num_elems_send, HYPRE_MEMORY_HOST);
+   send_buf_i = hypre_CTAlloc(HYPRE_Int, num_elems_send, HYPRE_MEMORY_HOST);
 
    /* copy CF markers of elements to send to buffer
     * RL: why copy them with two for loops? Why not just loop through all in one */
@@ -1348,7 +1350,8 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
       Aisol_method = local_size <= gmres_switch ? 'L' : 'G';
       if (local_size > 0)
       {
-         if (is_triangular) {
+         if (is_triangular)
+         {
             hypre_ordered_GS(DAi, Dbi, Dxi, local_size);
 #if AIR_DEBUG
             HYPRE_Real alp = -1.0, err;
@@ -1593,7 +1596,8 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    */
 
    /* Filter small entries from R */
-   if (filter_thresholdR > 0) {
+   if (filter_thresholdR > 0)
+   {
       hypre_ParCSRMatrixDropSmallEntries(R, filter_thresholdR, -1);
    }
 
@@ -1660,15 +1664,15 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
 
 HYPRE_Int
 hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
-                                     HYPRE_Int            *CF_marker,
-                                     HYPRE_BigInt         *num_cpts_global,
-                                     HYPRE_Int             num_functions,
-                                     HYPRE_Int            *dof_func,
-                                     HYPRE_Int             NeumannDeg,
-                                     HYPRE_Real            strong_thresholdR,
-                                     HYPRE_Real            filter_thresholdR,
-                                     HYPRE_Int             debug_flag,
-                                     hypre_ParCSRMatrix  **R_ptr)
+                                         HYPRE_Int            *CF_marker,
+                                         HYPRE_BigInt         *num_cpts_global,
+                                         HYPRE_Int             num_functions,
+                                         HYPRE_Int            *dof_func,
+                                         HYPRE_Int             NeumannDeg,
+                                         HYPRE_Real            strong_thresholdR,
+                                         HYPRE_Real            filter_thresholdR,
+                                         HYPRE_Int             debug_flag,
+                                         hypre_ParCSRMatrix  **R_ptr)
 {
    /* HYPRE_Real t0 = hypre_MPI_Wtime(); */
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
@@ -2000,7 +2004,8 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    hypre_MatvecCommPkgCreate(R);
 
    /* Filter small entries from R */
-   if (filter_thresholdR > 0) {
+   if (filter_thresholdR > 0)
+   {
       hypre_ParCSRMatrixDropSmallEntries(R, filter_thresholdR, -1);
    }
 
@@ -2040,15 +2045,15 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
    if (exec == HYPRE_EXEC_DEVICE)
    {
       ierr = hypre_BoomerAMGBuildRestrNeumannAIRDevice(A,CF_marker,num_cpts_global,num_functions,dof_func,
-                                                 NeumannDeg, strong_thresholdR, filter_thresholdR,
-                                                 debug_flag, R_ptr);
+                                                       NeumannDeg, strong_thresholdR, filter_thresholdR,
+                                                       debug_flag, R_ptr);
    }
    else
 #endif
    {
       ierr = hypre_BoomerAMGBuildRestrNeumannAIRHost(A,CF_marker,num_cpts_global,num_functions,dof_func,
-                                                 NeumannDeg, strong_thresholdR, filter_thresholdR,
-                                                 debug_flag, R_ptr);
+                                                     NeumannDeg, strong_thresholdR, filter_thresholdR,
+                                                     debug_flag, R_ptr);
    }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)

@@ -282,7 +282,7 @@ int main (int argc, char *argv[])
       HYPRE_StructVectorInitialize(b);
       HYPRE_StructVectorInitialize(x);
 
-     /* Set the values */
+      /* Set the values */
       for (i = 0; i < nvalues; i ++)
       {
          values[i] = 1.0;

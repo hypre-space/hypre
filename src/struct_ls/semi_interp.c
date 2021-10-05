@@ -157,7 +157,7 @@ hypre_SemiInterp( void               *interp_vdata,
    /* ... constant_coefficient==2 for P shouldn't happen, see
       hypre_PFMGCreateInterpOp in pfmg_setup_interp.c */
 
-   if (constant_coefficient) hypre_StructVectorClearBoundGhostValues(e, 0);
+   if (constant_coefficient) { hypre_StructVectorClearBoundGhostValues(e, 0); }
 
    hypre_SetIndex3(stridec, 1, 1, 1);
 
@@ -182,7 +182,8 @@ hypre_SemiInterp( void               *interp_vdata,
       hypre_StructGridDataLocation(cgrid) = data_location_f;
       hypre_StructVectorInitialize(xc_tmp);
       hypre_StructVectorAssemble(xc_tmp);
-      hypre_TMemcpy(hypre_StructVectorData(xc_tmp), hypre_StructVectorData(xc), HYPRE_Complex,hypre_StructVectorDataSize(xc),HYPRE_MEMORY_DEVICE,HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(hypre_StructVectorData(xc_tmp), hypre_StructVectorData(xc), HYPRE_Complex,
+                    hypre_StructVectorDataSize(xc),HYPRE_MEMORY_DEVICE,HYPRE_MEMORY_HOST);
    }
    else
    {
@@ -229,7 +230,7 @@ hypre_SemiInterp( void               *interp_vdata,
 
    for (compute_i = 0; compute_i < 2; compute_i++)
    {
-      switch(compute_i)
+      switch (compute_i)
       {
          case 0:
          {

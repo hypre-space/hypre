@@ -60,7 +60,9 @@ hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
    {
       if ( rap_type==0 )
          /* A has variable diagonal, which will force all P coefficients to be variable */
+      {
          hypre_StructMatrixSetConstantCoefficient(P, 0 );
+      }
       else
       {
          /* We will force P to be 0.5's everywhere, ignoring A. */
@@ -193,16 +195,16 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
          /* all coefficients are constant */
       {
          hypre_PFMGSetupInterpOp_CC1
-            ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-              P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
+         ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
+           P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
       }
 
       else if ( constant_coefficient==2 )
          /* all coefficients are constant except the diagonal is variable */
       {
          hypre_PFMGSetupInterpOp_CC2
-            ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-              P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
+         ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
+           P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
       }
 
       else
@@ -210,40 +212,40 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
       {
 #if CC0_IMPLEMENTATION <= 1
          hypre_PFMGSetupInterpOp_CC0
-            ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-              P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
+         ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
+           P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
 #else
          switch (stencil_size)
          {
             case 5:
                hypre_PFMGSetupInterpOp_CC0_SS5
-                  ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-                    P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
+               ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
+                 P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
                break;
             case 9:
                hypre_PFMGSetupInterpOp_CC0_SS9
-                  ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-                    P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
+               ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
+                 P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
                break;
             case 7:
                hypre_PFMGSetupInterpOp_CC0_SS7
-                  ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-                    P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
+               ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
+                 P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
                break;
             case 15:
                hypre_PFMGSetupInterpOp_CC0_SS15
-                  ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-                    P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
+               ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
+                 P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
                break;
             case 19:
                hypre_PFMGSetupInterpOp_CC0_SS19
-                  ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-                    P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
+               ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
+                 P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
                break;
             case 27:
                hypre_PFMGSetupInterpOp_CC0_SS27
-                  ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-                    P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
+               ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
+                 P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
                break;
             default:
                /*
@@ -308,8 +310,10 @@ hypre_PFMGSetupInterpOp_CC0
    {
       data_indices_boxi_d = hypre_TAlloc(HYPRE_Int,   stencil_size, HYPRE_MEMORY_DEVICE);
       stencil_shape_d     = hypre_TAlloc(hypre_Index, stencil_size, HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(data_indices_boxi_d, data_indices[i], HYPRE_Int, stencil_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(stencil_shape_d, stencil_shape, hypre_Index, stencil_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(data_indices_boxi_d, data_indices[i], HYPRE_Int, stencil_size, HYPRE_MEMORY_DEVICE,
+                    HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(stencil_shape_d, stencil_shape, hypre_Index, stencil_size, HYPRE_MEMORY_DEVICE,
+                    HYPRE_MEMORY_HOST);
    }
    else
    {
@@ -470,7 +474,7 @@ hypre_PFMGSetupInterpOp_CC0
          hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                              A_dbox, start,  stride,  Ai,
                              P_dbox, startc, stridec, Pi)
-            center[idx] += Ap[Ai];
+         center[idx] += Ap[Ai];
          hypre_BoxLoop2End(Ai, Pi)
 #undef DEVICE_VAR
       }
@@ -480,7 +484,7 @@ hypre_PFMGSetupInterpOp_CC0
          hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                              A_dbox, start,  stride,  Ai,
                              P_dbox, startc, stridec, Pi)
-            Pp0[Pi] -= Ap[Ai];
+         Pp0[Pi] -= Ap[Ai];
          hypre_BoxLoop2End(Ai, Pi)
 #undef DEVICE_VAR
       }
@@ -490,7 +494,7 @@ hypre_PFMGSetupInterpOp_CC0
          hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                              A_dbox, start,  stride,  Ai,
                              P_dbox, startc, stridec, Pi)
-            Pp1[Pi] -= Ap[Ai];
+         Pp1[Pi] -= Ap[Ai];
          hypre_BoxLoop2End(Ai, Pi)
 #undef DEVICE_VAR
       }
@@ -502,24 +506,24 @@ hypre_PFMGSetupInterpOp_CC0
    hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                        A_dbox, start,  stride,  Ai,
                        P_dbox, startc, stridec, Pi)
-      HYPRE_Real cval = center[idx];
-      if (Ap0[Ai] == 0.0 || cval == 0.0)
-      {
-         Pp0[Pi] = 0.0;
-      }
-      else
-      {
-         Pp0[Pi] /= cval;
-      }
+   HYPRE_Real cval = center[idx];
+   if (Ap0[Ai] == 0.0 || cval == 0.0)
+   {
+      Pp0[Pi] = 0.0;
+   }
+   else
+   {
+      Pp0[Pi] /= cval;
+   }
 
-      if (Ap1[Ai] == 0.0 || cval == 0.0)
-      {
-         Pp1[Pi] = 0.0;
-      }
-      else
-      {
-         Pp1[Pi] /= cval;
-      }
+   if (Ap1[Ai] == 0.0 || cval == 0.0)
+   {
+      Pp1[Pi] = 0.0;
+   }
+   else
+   {
+      Pp1[Pi] /= cval;
+   }
    hypre_BoxLoop2End(Ai, Pi)
 #undef DEVICE_VAR
 
@@ -831,10 +835,10 @@ hypre_PFMGSetupInterpOp_CC0_SS5
   HYPRE_Int           rap_type,
   hypre_Index        *P_stencil_shape )
 {
-  //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
-  //hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
-  //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
-  //HYPRE_Int              warning_cnt= 0;
+   //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
+   //hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
+   //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
+   //HYPRE_Int              warning_cnt= 0;
 
    hypre_Index            index;
    HYPRE_Real            *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
@@ -918,8 +922,8 @@ hypre_PFMGSetupInterpOp_CC0_SS5
          }
       }
 
-      if (p0[Ai] == 0.0) Pp0[Pi] = 0.0;
-      if (p1[Ai] == 0.0) Pp1[Pi] = 0.0;
+      if (p0[Ai] == 0.0) { Pp0[Pi] = 0.0; }
+      if (p1[Ai] == 0.0) { Pp1[Pi] = 0.0; }
       /*----------------------------------------------
        * Set interpolation weight to zero, if stencil
        * entry in same direction is zero. Prevents
@@ -956,10 +960,10 @@ hypre_PFMGSetupInterpOp_CC0_SS9
   HYPRE_Int           rap_type,
   hypre_Index        *P_stencil_shape )
 {
-  //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
-  //hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
-  //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
-  //HYPRE_Int              warning_cnt= 0;
+   //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
+   //hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
+   //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
+   //HYPRE_Int              warning_cnt= 0;
 
    hypre_Index            index;
    HYPRE_Real            *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
@@ -1065,8 +1069,8 @@ hypre_PFMGSetupInterpOp_CC0_SS9
             */
       }
 
-      if (p0[Ai] == 0.0) Pp0[Pi] = 0.0;
-      if (p1[Ai] == 0.0) Pp1[Pi] = 0.0;
+      if (p0[Ai] == 0.0) { Pp0[Pi] = 0.0; }
+      if (p1[Ai] == 0.0) { Pp1[Pi] = 0.0; }
    }
    hypre_BoxLoop2End(Ai, Pi);
 #undef DEVICE_VAR
@@ -1093,10 +1097,10 @@ hypre_PFMGSetupInterpOp_CC0_SS7
   HYPRE_Int           rap_type,
   hypre_Index        *P_stencil_shape )
 {
-  //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
-  //hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
-  //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
-  //HYPRE_Int              warning_cnt= 0;
+   //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
+   //hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
+   //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
+   //HYPRE_Int              warning_cnt= 0;
 
    hypre_Index            index;
    HYPRE_Real            *a_cc, *a_cw, *a_ce, *a_cs, *a_cn, *a_ac, *a_bc;
@@ -1193,8 +1197,8 @@ hypre_PFMGSetupInterpOp_CC0_SS7
             */
       }
 
-      if (p0[Ai] == 0.0) Pp0[Pi] = 0.0;
-      if (p1[Ai] == 0.0) Pp1[Pi] = 0.0;
+      if (p0[Ai] == 0.0) { Pp0[Pi] = 0.0; }
+      if (p1[Ai] == 0.0) { Pp1[Pi] = 0.0; }
 
       //printf("%d: %d, Pp0[%d] = %e, Pp1 = %e, %e, %e, %e, cc=%e, cw=%e, ce=%e, cs=%e, cn=%e, bc=%e, ac=%e \n",Ai,cdir, Pi,Pp0[Pi],Pp1[Pi],center, left, right,
       //     a_cc[Ai],a_cw[Ai],a_ce[Ai],a_cs[Ai],a_cn[Ai],a_bc[Ai],a_ac[Ai]);
@@ -1363,7 +1367,7 @@ hypre_PFMGSetupInterpOp_CC0_SS15
                break;
             case 2:
                center =   a_cc[Ai] +  a_cw[Ai] +   a_ce[Ai] +  a_cs[Ai] + a_cn[Ai] +
-                         a_csw[Ai] + a_cse[Ai] +  a_cnw[Ai] - a_cne[Ai];
+                          a_csw[Ai] + a_cse[Ai] +  a_cnw[Ai] - a_cne[Ai];
                left   =  -a_bc[Ai] -  a_bw[Ai] -   a_be[Ai]; /* below */
                right  =  -a_ac[Ai] -  a_aw[Ai] -   a_ae[Ai]; /* above */
                break;
@@ -1403,8 +1407,8 @@ hypre_PFMGSetupInterpOp_CC0_SS15
    else if (stencil_type15 == 1)
    {
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
-            A_dbox, start, stride, Ai,
-            P_dbox, startc, stridec, Pi);
+                          A_dbox, start, stride, Ai,
+                          P_dbox, startc, stridec, Pi);
       {
          HYPRE_Real center, left, right;
 
@@ -1545,10 +1549,10 @@ hypre_PFMGSetupInterpOp_CC0_SS19
   HYPRE_Int           rap_type,
   hypre_Index        *P_stencil_shape )
 {
-  //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
-  // hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
-  //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
-  //HYPRE_Int              warning_cnt= 0;
+   //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
+   // hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
+   //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
+   //HYPRE_Int              warning_cnt= 0;
 
    hypre_Index            index;
    HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cs, *a_cn, *a_ac, *a_bc;
@@ -1655,17 +1659,20 @@ hypre_PFMGSetupInterpOp_CC0_SS19
       switch (cdir)
       {
          case 0:
-            center = a_cc[Ai] +  a_cs[Ai] + a_cn[Ai] + a_ac[Ai] + a_bc[Ai] + a_as[Ai] + a_an[Ai] + a_bs[Ai] + a_bn[Ai];
+            center = a_cc[Ai] +  a_cs[Ai] + a_cn[Ai] + a_ac[Ai] + a_bc[Ai] + a_as[Ai] + a_an[Ai] + a_bs[Ai] +
+                     a_bn[Ai];
             left   =-a_cw[Ai] - a_aw[Ai] - a_bw[Ai] - a_csw[Ai] - a_cnw[Ai];
             right  =-a_ce[Ai] - a_ae[Ai] - a_be[Ai] - a_cse[Ai] - a_cne[Ai];
             break;
          case 1:
-            center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai];
+            center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] +
+                     a_be[Ai];
             left   =-a_cs[Ai] - a_as[Ai] - a_bs[Ai] - a_csw[Ai] - a_cse[Ai];
             right  =-a_cn[Ai] - a_an[Ai] - a_bn[Ai] - a_cnw[Ai] - a_cne[Ai];
             break;
          case 2:
-            center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] +  a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai];
+            center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] +  a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai]
+                     + a_cne[Ai];
             left   =-a_bc[Ai] - a_bw[Ai] - a_be[Ai] - a_bs[Ai] - a_bn[Ai];
             right  =-a_ac[Ai] - a_aw[Ai] - a_ae[Ai] - a_as[Ai] - a_an[Ai];
             break;
@@ -1700,8 +1707,8 @@ hypre_PFMGSetupInterpOp_CC0_SS19
             */
       }
 
-      if (p0[Ai] == 0.0) Pp0[Pi] = 0.0;
-      if (p1[Ai] == 0.0) Pp1[Pi] = 0.0;
+      if (p0[Ai] == 0.0) { Pp0[Pi] = 0.0; }
+      if (p1[Ai] == 0.0) { Pp1[Pi] = 0.0; }
       //printf("Pp0[%d] = %e, Pp1 = %e\n",Pi,Pp0[Pi],Pp1[Pi]);
    }
    hypre_BoxLoop2End(Ai, Pi);
@@ -1729,10 +1736,10 @@ hypre_PFMGSetupInterpOp_CC0_SS27
   HYPRE_Int           rap_type,
   hypre_Index        *P_stencil_shape )
 {
-  //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
-  //hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
-  //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
-  //HYPRE_Int              warning_cnt= 0;
+   //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
+   //hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
+   //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
+   //HYPRE_Int              warning_cnt= 0;
 
    hypre_Index            index;
    HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cs, *a_cn, *a_ac, *a_bc;
@@ -1876,21 +1883,30 @@ hypre_PFMGSetupInterpOp_CC0_SS27
 
       switch (cdir)
       {
-      case 0:
-         center = a_cc[Ai] +  a_cs[Ai] + a_cn[Ai] + a_ac[Ai] + a_bc[Ai] + a_as[Ai] + a_an[Ai] + a_bs[Ai] + a_bn[Ai];
-         left   =-a_cw[Ai] - a_aw[Ai] - a_bw[Ai] - a_csw[Ai] - a_cnw[Ai] - a_asw[Ai] - a_anw[Ai] - a_bsw[Ai] - a_bnw[Ai];
-         right  =-a_ce[Ai] - a_ae[Ai] - a_be[Ai] - a_cse[Ai] - a_cne[Ai] - a_ase[Ai] - a_ane[Ai] - a_bse[Ai] - a_bne[Ai];
-         break;
-      case 1:
-         center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai];
-         left   =-a_cs[Ai] - a_as[Ai] - a_bs[Ai] - a_csw[Ai] - a_cse[Ai] - a_asw[Ai] - a_ase[Ai] - a_bsw[Ai] - a_bse[Ai];
-         right  =-a_cn[Ai] - a_an[Ai] - a_bn[Ai] - a_cnw[Ai] - a_cne[Ai] - a_anw[Ai] - a_ane[Ai] - a_bnw[Ai] - a_bne[Ai];
-         break;
-      case 2:
-         center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] +  a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai];
-         left   =-a_bc[Ai] - a_bw[Ai] - a_be[Ai] - a_bs[Ai] - a_bn[Ai] - a_bsw[Ai] - a_bse[Ai] - a_bnw[Ai] - a_bne[Ai];
-         right  =-a_ac[Ai] - a_aw[Ai] - a_ae[Ai] - a_as[Ai] - a_an[Ai] - a_asw[Ai] - a_ase[Ai] - a_anw[Ai] - a_ane[Ai];
-         break;
+         case 0:
+            center = a_cc[Ai] +  a_cs[Ai] + a_cn[Ai] + a_ac[Ai] + a_bc[Ai] + a_as[Ai] + a_an[Ai] + a_bs[Ai] +
+                     a_bn[Ai];
+            left   =-a_cw[Ai] - a_aw[Ai] - a_bw[Ai] - a_csw[Ai] - a_cnw[Ai] - a_asw[Ai] - a_anw[Ai] - a_bsw[Ai]
+                    - a_bnw[Ai];
+            right  =-a_ce[Ai] - a_ae[Ai] - a_be[Ai] - a_cse[Ai] - a_cne[Ai] - a_ase[Ai] - a_ane[Ai] - a_bse[Ai]
+                    - a_bne[Ai];
+            break;
+         case 1:
+            center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] +
+                     a_be[Ai];
+            left   =-a_cs[Ai] - a_as[Ai] - a_bs[Ai] - a_csw[Ai] - a_cse[Ai] - a_asw[Ai] - a_ase[Ai] - a_bsw[Ai]
+                    - a_bse[Ai];
+            right  =-a_cn[Ai] - a_an[Ai] - a_bn[Ai] - a_cnw[Ai] - a_cne[Ai] - a_anw[Ai] - a_ane[Ai] - a_bnw[Ai]
+                    - a_bne[Ai];
+            break;
+         case 2:
+            center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] +  a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai]
+                     + a_cne[Ai];
+            left   =-a_bc[Ai] - a_bw[Ai] - a_be[Ai] - a_bs[Ai] - a_bn[Ai] - a_bsw[Ai] - a_bse[Ai] - a_bnw[Ai] -
+                    a_bne[Ai];
+            right  =-a_ac[Ai] - a_aw[Ai] - a_ae[Ai] - a_as[Ai] - a_an[Ai] - a_asw[Ai] - a_ase[Ai] - a_anw[Ai] -
+                    a_ane[Ai];
+            break;
       };
 
       if (!center)
@@ -1923,8 +1939,8 @@ hypre_PFMGSetupInterpOp_CC0_SS27
             */
       }
 
-      if (p0[Ai] == 0.0) Pp0[Pi] = 0.0;
-      if (p1[Ai] == 0.0) Pp1[Pi] = 0.0;
+      if (p0[Ai] == 0.0) { Pp0[Pi] = 0.0; }
+      if (p1[Ai] == 0.0) { Pp1[Pi] = 0.0; }
       //printf("Pp0[%d] = %e, Pp1 = %e\n",Pi,Pp0[Pi],Pp1[Pi]);
    }
    hypre_BoxLoop2End(Ai, Pi);

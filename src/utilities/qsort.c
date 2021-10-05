@@ -334,9 +334,9 @@ void hypre_qsort2i( HYPRE_Int *v,
  *--------------------------------------------------------------------------*/
 
 void hypre_BigQsort2i( HYPRE_BigInt *v,
-                    HYPRE_Int *w,
-                    HYPRE_Int  left,
-                    HYPRE_Int  right )
+                       HYPRE_Int *w,
+                       HYPRE_Int  left,
+                       HYPRE_Int  right )
 {
    HYPRE_Int i, last;
 
@@ -800,7 +800,7 @@ static void hypre_search_row(HYPRE_Int            row,
       {
          HYPRE_Int col = col_inds[j];
          hypre_search_row(col, row_ptr, col_inds, data,
-                         visited, ordering, order_ind);
+                          visited, ordering, order_ind);
       }
       // Add node to ordering *after* it has been searched
       ordering[*order_ind] = row;

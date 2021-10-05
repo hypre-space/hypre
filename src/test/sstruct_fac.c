@@ -134,34 +134,34 @@ GetVariableBox( Index  cell_ilower,
    var_iupper[1] = cell_iupper[1];
    var_iupper[2] = cell_iupper[2];
 
-   switch(vartype)
+   switch (vartype)
    {
       case HYPRE_SSTRUCT_VARIABLE_CELL:
-      var_ilower[0] -= 0; var_ilower[1] -= 0; var_ilower[2] -= 0;
-      break;
+         var_ilower[0] -= 0; var_ilower[1] -= 0; var_ilower[2] -= 0;
+         break;
       case HYPRE_SSTRUCT_VARIABLE_NODE:
-      var_ilower[0] -= 1; var_ilower[1] -= 1; var_ilower[2] -= 1;
-      break;
+         var_ilower[0] -= 1; var_ilower[1] -= 1; var_ilower[2] -= 1;
+         break;
       case HYPRE_SSTRUCT_VARIABLE_XFACE:
-      var_ilower[0] -= 1; var_ilower[1] -= 0; var_ilower[2] -= 0;
-      break;
+         var_ilower[0] -= 1; var_ilower[1] -= 0; var_ilower[2] -= 0;
+         break;
       case HYPRE_SSTRUCT_VARIABLE_YFACE:
-      var_ilower[0] -= 0; var_ilower[1] -= 1; var_ilower[2] -= 0;
-      break;
+         var_ilower[0] -= 0; var_ilower[1] -= 1; var_ilower[2] -= 0;
+         break;
       case HYPRE_SSTRUCT_VARIABLE_ZFACE:
-      var_ilower[0] -= 0; var_ilower[1] -= 0; var_ilower[2] -= 1;
-      break;
+         var_ilower[0] -= 0; var_ilower[1] -= 0; var_ilower[2] -= 1;
+         break;
       case HYPRE_SSTRUCT_VARIABLE_XEDGE:
-      var_ilower[0] -= 0; var_ilower[1] -= 1; var_ilower[2] -= 1;
-      break;
+         var_ilower[0] -= 0; var_ilower[1] -= 1; var_ilower[2] -= 1;
+         break;
       case HYPRE_SSTRUCT_VARIABLE_YEDGE:
-      var_ilower[0] -= 1; var_ilower[1] -= 0; var_ilower[2] -= 1;
-      break;
+         var_ilower[0] -= 1; var_ilower[1] -= 0; var_ilower[2] -= 1;
+         break;
       case HYPRE_SSTRUCT_VARIABLE_ZEDGE:
-      var_ilower[0] -= 1; var_ilower[1] -= 1; var_ilower[2] -= 0;
-      break;
+         var_ilower[0] -= 1; var_ilower[1] -= 1; var_ilower[2] -= 0;
+         break;
       case HYPRE_SSTRUCT_VARIABLE_UNDEFINED:
-      break;
+         break;
    }
 
    return ierr;
@@ -209,19 +209,19 @@ SScanProblemIndex( char          *sdata_ptr,
    switch (ndim)
    {
       case 1:
-      hypre_sscanf(sdata_ptr, "%d%c",
-             &index[0], &sign[0]);
-      break;
+         hypre_sscanf(sdata_ptr, "%d%c",
+                      &index[0], &sign[0]);
+         break;
 
       case 2:
-      hypre_sscanf(sdata_ptr, "%d%c%d%c",
-             &index[0], &sign[0], &index[1], &sign[1]);
-      break;
+         hypre_sscanf(sdata_ptr, "%d%c%d%c",
+                      &index[0], &sign[0], &index[1], &sign[1]);
+         break;
 
       case 3:
-      hypre_sscanf(sdata_ptr, "%d%c%d%c%d%c",
-             &index[0], &sign[0], &index[1], &sign[1], &index[2], &sign[2]);
-      break;
+         hypre_sscanf(sdata_ptr, "%d%c%d%c%d%c",
+                      &index[0], &sign[0], &index[1], &sign[1], &index[2], &sign[2]);
+         break;
    }
    sdata_ptr += strcspn(sdata_ptr, ":)");
    if ( *sdata_ptr == ':' )
@@ -882,12 +882,12 @@ DistributeData( ProblemData   global_data,
                         dmap = pdata.graph_index_maps[entry][d];
                         sign = pdata.graph_index_signs[entry][d];
                         size =(int_iupper[d] - pdata.graph_iuppers[entry][d])/
-                               pdata.graph_strides[entry][d];
+                              pdata.graph_strides[entry][d];
                         pdata.graph_to_iuppers[i][dmap] =
                            pdata.graph_to_ilowers[entry][dmap] + sign*
                            size*pdata.graph_to_strides[entry][d];
                         size= (int_ilower[d] - pdata.graph_ilowers[entry][d])/
-                               pdata.graph_strides[entry][d];
+                              pdata.graph_strides[entry][d];
                         pdata.graph_to_ilowers[i][dmap] =
                            pdata.graph_to_ilowers[entry][dmap] + sign *
                            size*pdata.graph_to_strides[entry][d];
@@ -1206,12 +1206,12 @@ DestroyData( ProblemData   data )
 
       if (pdata.matrix_nentries > 0)
       {
-            hypre_TFree(pdata.matrix_ilowers, HYPRE_MEMORY_HOST);
-            hypre_TFree(pdata.matrix_iuppers, HYPRE_MEMORY_HOST);
-            hypre_TFree(pdata.matrix_strides, HYPRE_MEMORY_HOST);
-            hypre_TFree(pdata.matrix_vars, HYPRE_MEMORY_HOST);
-            hypre_TFree(pdata.matrix_entries, HYPRE_MEMORY_HOST);
-            hypre_TFree(pdata.matrix_values, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matrix_ilowers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matrix_iuppers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matrix_strides, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matrix_vars, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matrix_entries, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matrix_values, HYPRE_MEMORY_HOST);
       }
 
    }
@@ -1526,7 +1526,7 @@ main( hypre_int argc,
    if ( ((solver_id >= 20) && (solver_id <= 30)) ||
         ((solver_id >= 40) && (solver_id < 60)) )
    {
-       HYPRE_SStructGraphSetObjectType(graph, HYPRE_PARCSR);
+      HYPRE_SStructGraphSetObjectType(graph, HYPRE_PARCSR);
    }
 
    for (part = 0; part < data.nparts; part++)
@@ -1562,7 +1562,7 @@ main( hypre_int argc,
                      k /= pdata.graph_strides[entry][i];
                      k *= pdata.graph_index_signs[entry][i];
                      to_index[j] = pdata.graph_to_ilowers[entry][j] +
-                        k * pdata.graph_to_strides[entry][j];
+                                   k * pdata.graph_to_strides[entry][j];
                   }
                   HYPRE_SStructGraphAddEntries(graph, part, index,
                                                pdata.graph_vars[entry],
@@ -1660,9 +1660,9 @@ main( hypre_int argc,
                        index[0] <= pdata.graph_iuppers[entry][0];
                        index[0] += pdata.graph_strides[entry][0])
                   {
-                      HYPRE_SStructMatrixSetValues(A_amg, part, index,
-                                                   pdata.graph_vars[entry],
-                                                   1, &pdata.graph_entries[entry],
+                     HYPRE_SStructMatrixSetValues(A_amg, part, index,
+                                                  pdata.graph_vars[entry],
+                                                  1, &pdata.graph_entries[entry],
                                                   &pdata.graph_values[entry]);
                   }
                }
@@ -1742,7 +1742,7 @@ main( hypre_int argc,
                   GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
                                  pdata.vartypes[var], ilower, iupper);
                   HYPRE_StructMatrixGetBoxValues(sA, ilower, iupper, 1,
-                                                &i, box_values);
+                                                 &i, box_values);
 
                   HYPRE_SStructMatrixSetBoxValues(A_amg, part, ilower, iupper,
                                                   var, 1, &i, box_values);
@@ -1988,8 +1988,8 @@ main( hypre_int argc,
    {
       if (solver_id < 100)
       {
-        /* n_pre+= n_post;*/
-        /* n_post= 0;*/
+         /* n_pre+= n_post;*/
+         /* n_post= 0;*/
       }
       time_index = hypre_InitializeTiming("FAC Setup");
       hypre_BeginTiming(time_index);
@@ -2039,7 +2039,7 @@ main( hypre_int argc,
 
       HYPRE_SStructFACGetNumIterations(solver, &num_iterations);
       HYPRE_SStructFACGetFinalRelativeResidualNorm(
-                                           solver, &final_res_norm);
+         solver, &final_res_norm);
       HYPRE_SStructFACDestroy2(solver);
    }
 
@@ -2072,9 +2072,9 @@ main( hypre_int argc,
          /*HYPRE_BoomerAMGSetLogging(par_precond, 1, "sstruct.out.log");*/
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
          HYPRE_PCGSetPrecond( par_solver,
-                             (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
-                             (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
-                             par_precond );
+                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
+                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
+                              par_precond );
       }
       HYPRE_PCGSetup( par_solver, (HYPRE_Matrix) par_A,
                       (HYPRE_Vector) par_b, (HYPRE_Vector) par_x );
@@ -2199,7 +2199,7 @@ main( hypre_int argc,
 
       HYPRE_BoomerAMGGetNumIterations(par_solver, &num_iterations);
       HYPRE_BoomerAMGGetFinalRelativeResidualNorm(par_solver,
-                                                 &final_res_norm);
+                                                  &final_res_norm);
 
       HYPRE_BoomerAMGDestroy(par_solver);
    }

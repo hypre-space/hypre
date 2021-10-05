@@ -138,7 +138,7 @@ hypre_CGNRFunctionsCreate(
    HYPRE_Int    (*PrecondSetup)  ( void *vdata, void *A, void *b, void *x ),
    HYPRE_Int    (*Precond)       ( void *vdata, void *A, void *b, void *x ),
    HYPRE_Int    (*PrecondT)      ( void *vdata, void *A, void *b, void *x )
-   );
+);
 
 /**
  * Description...

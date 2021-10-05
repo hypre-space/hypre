@@ -111,7 +111,7 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
          for (d = 0; d < dim; d++)
          {
             hypre_IndexD(indexRA, d) = hypre_IndexD(indexR, d) +
-               hypre_IndexD(A_stencil_shape[Aloop], d);
+                                       hypre_IndexD(A_stencil_shape[Aloop], d);
          }
 
          /*-----------------------------------------------------------------
@@ -616,14 +616,14 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 
                      break;
 
-                     /*-----------------------------------------------------
-                      * If A stencil index is -1 in coarsened direction, need
-                      * to calculate (r,p) pairs (stay,up) (stay,down) (up,stay)
-                      * and (down,stay). Paths 2 & 4 {(s,d),(d,s)} contribute
-                      * to RAP with same stencil index as A. Paths 1 & 3
-                      * {(s,u),(u,s)} contribute to RAP with index 0 in
-                      * coarsened direction.
-                      *-----------------------------------------------------*/
+                  /*-----------------------------------------------------
+                   * If A stencil index is -1 in coarsened direction, need
+                   * to calculate (r,p) pairs (stay,up) (stay,down) (up,stay)
+                   * and (down,stay). Paths 2 & 4 {(s,d),(d,s)} contribute
+                   * to RAP with same stencil index as A. Paths 1 & 3
+                   * {(s,u),(u,s)} contribute to RAP with index 0 in
+                   * coarsened direction.
+                   *-----------------------------------------------------*/
 
                   case -1:
 
@@ -665,7 +665,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                         /* Path 1 : (stay,up) & symmetric path  */
                         iPp = iP + AOffsetP;
                         rap_ptrS[iAc] += symm_path_multiplier *
-                           (a_ptr[iA]  * pb[iPp+pb_offset]);
+                                         (a_ptr[iA]  * pb[iPp+pb_offset]);
 
                         /* Path 2 : (stay,down) */
                         iPp = iP - COffsetP + AOffsetP;
@@ -674,7 +674,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                         /* Path 3 : (up,stay) */
                         iAp = iA + COffsetA;
                         rap_ptrS[iAc] += symm_path_multiplier *
-                           (ra[iR] * a_ptr[iAp]          );
+                                         (ra[iR] * a_ptr[iAp]          );
 
                         /* Path 4 : (down,stay) */
                         iAp = iA - COffsetA;
@@ -685,14 +685,14 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 
                      break;
 
-                     /*-----------------------------------------------------
-                      * If A stencil index is +1 in coarsened direction, need
-                      * to calculate (r,p) pairs (stay,up) (stay,down) (up,stay)
-                      * and (down,stay). Paths 1 & 3 {(s,u),(u,s)} contribute
-                      * to RAP with same stencil index as A. Paths 2 & 4
-                      * {(s,d),(d,s)} contribute to RAP with index 0 in
-                      * coarsened direction.
-                      *-----------------------------------------------------*/
+                  /*-----------------------------------------------------
+                   * If A stencil index is +1 in coarsened direction, need
+                   * to calculate (r,p) pairs (stay,up) (stay,down) (up,stay)
+                   * and (down,stay). Paths 1 & 3 {(s,u),(u,s)} contribute
+                   * to RAP with same stencil index as A. Paths 2 & 4
+                   * {(s,d),(d,s)} contribute to RAP with index 0 in
+                   * coarsened direction.
+                   *-----------------------------------------------------*/
 
                   case 1:
 
@@ -737,7 +737,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                         /* Path 2 : (stay,down) */
                         iPp = iP + AOffsetP;
                         rap_ptrS[iAc] += symm_path_multiplier *
-                           (a_ptr[iA]  * pa[iPp]);
+                                         (a_ptr[iA]  * pa[iPp]);
 
                         /* Path 3 : (up,stay) */
                         iAp = iA + COffsetA;
@@ -746,7 +746,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                         /* Path 4 : (down,stay) */
                         iAp = iA - COffsetA;
                         rap_ptrS[iAc] += symm_path_multiplier *
-                           (rb[iR+rb_offset] * a_ptr[iAp]          );
+                                         (rb[iR+rb_offset] * a_ptr[iAp]          );
                      }
                      hypre_BoxLoop4End(iP, iR, iA, iAc);
 #undef DEVICE_VAR
@@ -797,11 +797,11 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 
                      break;
 
-                     /*-----------------------------------------------------
-                      * If RAP stencil index is +/-1 in coarsened direction,
-                      * to add entry to cooresponding entry with 0 in the
-                      * coarsened direction. Also zero out current index.
-                      *-----------------------------------------------------*/
+                  /*-----------------------------------------------------
+                   * If RAP stencil index is +/-1 in coarsened direction,
+                   * to add entry to cooresponding entry with 0 in the
+                   * coarsened direction. Also zero out current index.
+                   *-----------------------------------------------------*/
 
                   default:
 
@@ -836,7 +836,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                                          RAP_dbox, cstart, stridec, iAc);
                      {
                         rap_ptrS[iAc] += symm_path_multiplier *
-                           (rap_ptrD[iAc]);
+                                         (rap_ptrD[iAc]);
 
                         rap_ptrD[iAc] = zero;
                      }

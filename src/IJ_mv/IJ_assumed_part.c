@@ -51,7 +51,7 @@ hypre_IJMatrixCreateAssumedPartition( hypre_IJMatrix *matrix)
       which needs it for matvec multiplications and therefore needs to do it for
       the col partitioning */
    hypre_GetAssumedPartitionRowRange( comm, myid, global_first_row,
-			global_num_rows, &(apart->row_start), &(apart->row_end));
+                                      global_num_rows, &(apart->row_start), &(apart->row_end));
 
    /*allocate some space for the partition of the assumed partition */
    apart->length = 0;
@@ -63,7 +63,7 @@ hypre_IJMatrixCreateAssumedPartition( hypre_IJMatrix *matrix)
 
    /* now we want to reconcile our actual partition with the assumed partition */
    hypre_LocateAssumedPartition(comm, row_start, row_end, global_first_row,
-                                 global_num_rows, apart, myid);
+                                global_num_rows, apart, myid);
 
    /* this partition will be saved in the matrix data structure until the matrix is destroyed */
    hypre_IJMatrixAssumedPart(matrix) = apart;

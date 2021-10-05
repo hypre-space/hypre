@@ -121,7 +121,7 @@ hypre_ParCSRBlockCommHandleDestroy(hypre_ParCSRCommHandle *comm_handle)
 {
    hypre_MPI_Status          *status0;
 
-   if ( comm_handle==NULL ) return hypre_error_flag;
+   if ( comm_handle==NULL ) { return hypre_error_flag; }
 
    if (hypre_ParCSRCommHandleNumRequests(comm_handle))
    {
@@ -205,7 +205,7 @@ hypre_ParCSRBlockMatrixDestroyAssumedPartition( hypre_ParCSRBlockMatrix *matrix 
 
    apart = hypre_ParCSRMatrixAssumedPartition(matrix);
 
-   if(apart->storage_length > 0)
+   if (apart->storage_length > 0)
    {
       hypre_TFree(apart->proc_list, HYPRE_MEMORY_HOST);
       hypre_TFree(apart->row_start_list, HYPRE_MEMORY_HOST);

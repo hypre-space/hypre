@@ -354,20 +354,20 @@ hypre_ParCSRTMatMatKTHost( hypre_ParCSRMatrix  *A,
 
       if (keep_transpose)
       {
-        A->diagT = AT_diag;
+         A->diagT = AT_diag;
       }
       else
       {
-        hypre_CSRMatrixDestroy(AT_diag);
+         hypre_CSRMatrixDestroy(AT_diag);
       }
 
       if (keep_transpose)
       {
-        A->offdT = AT_offd;
+         A->offdT = AT_offd;
       }
       else
       {
-        hypre_CSRMatrixDestroy(AT_offd);
+         hypre_CSRMatrixDestroy(AT_offd);
       }
 
       /*-----------------------------------------------------------------------

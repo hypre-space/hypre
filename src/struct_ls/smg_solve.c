@@ -172,9 +172,13 @@ hypre_SMGSolve( void               *smg_vdata,
          {
             norms[i] = sqrt(r_dot_r);
             if (b_dot_b > 0)
+            {
                rel_norms[i] = sqrt(r_dot_r/b_dot_b);
+            }
             else
+            {
                rel_norms[i] = 0.0;
+            }
          }
 
          /* always do at least 1 V-cycle */
@@ -183,7 +187,9 @@ hypre_SMGSolve( void               *smg_vdata,
             if (rel_change)
             {
                if ((e_dot_e/x_dot_x) < eps)
+               {
                   break;
+               }
             }
             else
             {
@@ -197,7 +203,7 @@ hypre_SMGSolve( void               *smg_vdata,
          /* restrict fine grid residual */
          hypre_SemiRestrict(restrict_data_l[0], R_l[0], r_l[0], b_l[1]);
 #if DEBUG
-         if(hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
+         if (hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
          {
             hypre_sprintf(filename, "zout_xdown.%02d", 0);
             hypre_StructVectorPrint(filename, x_l[0], 0);
@@ -223,7 +229,7 @@ hypre_SMGSolve( void               *smg_vdata,
             /* restrict residual */
             hypre_SemiRestrict(restrict_data_l[l], R_l[l], r_l[l], b_l[l+1]);
 #if DEBUG
-            if(hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
+            if (hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
             {
                hypre_sprintf(filename, "zout_xdown.%02d", l);
                hypre_StructVectorPrint(filename, x_l[l], 0);
@@ -242,7 +248,7 @@ hypre_SMGSolve( void               *smg_vdata,
          hypre_SMGRelaxSetZeroGuess(relax_data_l[l], 1);
          hypre_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 #if DEBUG
-         if(hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
+         if (hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
          {
             hypre_sprintf(filename, "zout_xbottom.%02d", l);
             hypre_StructVectorPrint(filename, x_l[l], 0);
@@ -259,7 +265,7 @@ hypre_SMGSolve( void               *smg_vdata,
             hypre_SemiInterp(interp_data_l[l], PT_l[l], x_l[l+1], e_l[l]);
             hypre_StructAxpy(1.0, e_l[l], x_l[l]);
 #if DEBUG
-            if(hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
+            if (hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
             {
                hypre_sprintf(filename, "zout_eup.%02d", l);
                hypre_StructVectorPrint(filename, e_l[l], 0);
@@ -279,7 +285,7 @@ hypre_SMGSolve( void               *smg_vdata,
          hypre_SemiInterp(interp_data_l[0], PT_l[0], x_l[1], e_l[0]);
          hypre_SMGAxpy(1.0, e_l[0], x_l[0], base_index, base_stride);
 #if DEBUG
-         if(hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
+         if (hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
          {
             hypre_sprintf(filename, "zout_eup.%02d", 0);
             hypre_StructVectorPrint(filename, e_l[0], 0);

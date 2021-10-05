@@ -197,7 +197,9 @@ int main(int argc, char *argv[])
 
    // Pass the element topology information to the FEI
    for (i = 0; i < nElems; i++)
+   {
       feiPtr->initElem(elemBlkID, i, elemConn[i]);
+   }
 
    // List the global indexes of nodes that are shared between processors
    int nShared, *SharedIDs, *SharedLengs, **SharedProcs;
@@ -207,10 +209,14 @@ int main(int argc, char *argv[])
       nShared = n+1;
       SharedIDs = new int[nShared];
       for (i = 0; i < nShared; i++)
+      {
          SharedIDs[i] = offset + m*(n+1) + i;
+      }
       SharedLengs = new int[nShared];
       for (i = 0; i < nShared; i++)
+      {
          SharedLengs[i] = 2;
+      }
       SharedProcs = new int*[nShared];
       for (i = 0; i < nShared; i++)
       {
@@ -225,10 +231,14 @@ int main(int argc, char *argv[])
       nShared = n+1;
       SharedIDs = new int[nShared];
       for (i = 0; i < nShared; i++)
+      {
          SharedIDs[i] = offset + i;
+      }
       SharedLengs = new int[nShared];
       for (i = 0; i < nShared; i++)
+      {
          SharedLengs[i] = 2;
+      }
       SharedProcs = new int*[nShared];
       for (i = 0; i < nShared; i++)
       {
@@ -249,7 +259,9 @@ int main(int argc, char *argv[])
       }
       SharedLengs = new int[nShared];
       for (i = 0; i < nShared; i++)
+      {
          SharedLengs[i] = 2;
+      }
       SharedProcs = new int*[nShared];
       for (i = 0; i < n+1; i++)
       {
@@ -265,7 +277,9 @@ int main(int argc, char *argv[])
 
    // Pass the shared nodes information to the FEI
    if (nprocs != 1 && nShared > 0)
+   {
       feiPtr->initSharedNodes(nShared, SharedIDs, SharedLengs, SharedProcs);
+   }
 
    // Finish the FEI initialization phase
    feiPtr->initComplete();
@@ -281,7 +295,9 @@ int main(int argc, char *argv[])
       nBCs = n+1 + 2*m;
       BCEqn = new int[nBCs];
       for (i = 0; i < n+1; i++)
+      {
          BCEqn[i] = offset + i;
+      }
       for (i = 0; i < m; i++)
       {
          BCEqn[n+1+2*i] = offset + (i+1)*(n+1);
@@ -294,7 +310,9 @@ int main(int argc, char *argv[])
       nBCs = n+1 + 2*m;
       BCEqn = new int[nBCs];
       for (i = 0; i < n+1; i++)
+      {
          BCEqn[i] = offset + m*(n+1) + i;
+      }
       for (i = 0; i < m; i++)
       {
          BCEqn[n+1+2*i] = offset + i*(n+1);
@@ -338,7 +356,9 @@ int main(int argc, char *argv[])
          // Element with coordinates (i,j)
          elemStiff[i*n+j] = new double*[elemNNodes];
          for (k = 0; k < elemNNodes; k++)
+         {
             elemStiff[i*n+j][k] = new double[elemNNodes];
+         }
 
          // Stiffness matrix for the reference square
          //                3 +---+ 2
@@ -348,7 +368,9 @@ int main(int argc, char *argv[])
          double **A = elemStiff[i*n+j];
 
          for (k = 0; k < 4; k++)
+         {
             A[k][k] = 2/3.;
+         }
 
          A[0][1] = A[1][0] = -1/6.;
          A[0][2] = A[2][0] = -1/3.;
@@ -361,7 +383,9 @@ int main(int argc, char *argv[])
    // Specify element load vectors
    double *elemLoad = new double[nElems*elemNNodes];
    for (i = 0; i < nElems*elemNNodes; i++)
+   {
       elemLoad[i] = h*h/4;
+   }
 
    // Assemble the matrix. The elemFormat parameter describes
    // the storage (symmetric/non-symmetric, row/column-wise)
@@ -375,11 +399,11 @@ int main(int argc, char *argv[])
    feiPtr->loadComplete();
 
    // Clean up
-   for (i = 0; i < nElems; i++) delete [] elemConn[i];
+   for (i = 0; i < nElems; i++) { delete [] elemConn[i]; }
    delete [] elemConn;
    for (i = 0; i < nElems; i++)
    {
-      for (j = 0; j < elemNNodes; j++) delete [] elemStiff[i][j];
+      for (j = 0; j < elemNNodes; j++) { delete [] elemStiff[i][j]; }
       delete [] elemStiff[i];
    }
    delete [] elemStiff;
@@ -400,12 +424,12 @@ int main(int argc, char *argv[])
    {
       delete [] SharedIDs;
       delete [] SharedLengs;
-      for (i = 0; i < nShared; i++) delete [] SharedProcs[i];
+      for (i = 0; i < nShared; i++) { delete [] SharedProcs[i]; }
       delete [] SharedProcs;
    }
 
    delete [] nodeNFields;
-   for (i = 0; i < elemNNodes; i++) delete [] nodeFieldIDs[i];
+   for (i = 0; i < elemNNodes; i++) { delete [] nodeFieldIDs[i]; }
    delete [] nodeFieldIDs;
 
    delete [] fieldSizes;
@@ -416,10 +440,12 @@ int main(int argc, char *argv[])
       int nParams = 19;
       char **paramStrings = new char*[nParams];
       for (i = 0; i < nParams; i++)
+      {
          paramStrings[i] = new char[100];
+      }
 
       strcpy(paramStrings[0], "outputLevel 2");
-      switch(solverID)
+      switch (solverID)
       {
          case 0:
             strcpy(paramStrings[1], "solver cg");
@@ -479,7 +505,9 @@ int main(int argc, char *argv[])
       feiPtr->parameters(nParams, paramStrings);
 
       for (i = 0; i < nParams; i++)
+      {
          delete [] paramStrings[i];
+      }
       delete [] paramStrings;
    }
 
@@ -508,7 +536,9 @@ int main(int argc, char *argv[])
 
       // Find the location of the ith local node
       for (i = 0; i < numNodes; i++)
+      {
          solnOffsets[nodeIDList[i]-offset] = i;
+      }
 
       // Save the ordered nodal values to a file
       char sol_out[20];
@@ -519,7 +549,9 @@ int main(int argc, char *argv[])
           << "VDim: 1\n"
           << "Ordering: 0\n\n";
       for (i = 0; i < numNodes; i++)
+      {
          sol << solnValues[solnOffsets[i]] << endl;
+      }
 
       // Save local finite element mesh
       GLVis_PrintLocalSquareMesh("vis/ex10.mesh", n, m, h, 0, mypid*h*m, mypid);

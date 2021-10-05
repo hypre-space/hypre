@@ -22,18 +22,18 @@ static HYPRE_Real rs_l = 3.0;
 
 HYPRE_ParCSRMatrix
 GenerateRSVarDifConv( MPI_Comm comm,
-                 HYPRE_BigInt   nx,
-                 HYPRE_BigInt   ny,
-                 HYPRE_BigInt   nz,
-                 HYPRE_Int      P,
-                 HYPRE_Int      Q,
-                 HYPRE_Int      R,
-                 HYPRE_Int      p,
-                 HYPRE_Int      q,
-                 HYPRE_Int      r,
-                 HYPRE_Real eps,
-		 HYPRE_ParVector *rhs_ptr,
-                 HYPRE_Int type)
+                      HYPRE_BigInt   nx,
+                      HYPRE_BigInt   ny,
+                      HYPRE_BigInt   nz,
+                      HYPRE_Int      P,
+                      HYPRE_Int      Q,
+                      HYPRE_Int      R,
+                      HYPRE_Int      p,
+                      HYPRE_Int      q,
+                      HYPRE_Int      r,
+                      HYPRE_Real eps,
+                      HYPRE_ParVector *rhs_ptr,
+                      HYPRE_Int type)
 {
    hypre_ParCSRMatrix *A;
    hypre_CSRMatrix *diag;
@@ -81,7 +81,7 @@ GenerateRSVarDifConv( MPI_Comm comm,
 
    if (type >= 1 && type <= 3)
    {
-     rs_example = type;
+      rs_example = type;
    }
 
    grid_size = nx*ny*nz;
@@ -110,14 +110,14 @@ GenerateRSVarDifConv( MPI_Comm comm,
    R_busy = hypre_min(nz,R);
 
    num_cols_offd = 0;
-   if (p) num_cols_offd += ny_local*nz_local;
-   if (p < P_busy-1) num_cols_offd += ny_local*nz_local;
-   if (q) num_cols_offd += nx_local*nz_local;
-   if (q < Q_busy-1) num_cols_offd += nx_local*nz_local;
-   if (r) num_cols_offd += nx_local*ny_local;
-   if (r < R_busy-1) num_cols_offd += nx_local*ny_local;
+   if (p) { num_cols_offd += ny_local*nz_local; }
+   if (p < P_busy-1) { num_cols_offd += ny_local*nz_local; }
+   if (q) { num_cols_offd += nx_local*nz_local; }
+   if (q < Q_busy-1) { num_cols_offd += nx_local*nz_local; }
+   if (r) { num_cols_offd += nx_local*ny_local; }
+   if (r < R_busy-1) { num_cols_offd += nx_local*ny_local; }
 
-   if (!local_num_rows) num_cols_offd = 0;
+   if (!local_num_rows) { num_cols_offd = 0; }
 
    col_map_offd = hypre_CTAlloc(HYPRE_BigInt,  num_cols_offd, HYPRE_MEMORY_HOST);
 
@@ -139,7 +139,9 @@ GenerateRSVarDifConv( MPI_Comm comm,
             offd_i[o_cnt] = offd_i[o_cnt-1];
             diag_i[cnt]++;
             if (iz > nz_part[r])
+            {
                diag_i[cnt]++;
+            }
             else
             {
                if (iz)
@@ -148,7 +150,9 @@ GenerateRSVarDifConv( MPI_Comm comm,
                }
             }
             if (iy > ny_part[q])
+            {
                diag_i[cnt]++;
+            }
             else
             {
                if (iy)
@@ -157,7 +161,9 @@ GenerateRSVarDifConv( MPI_Comm comm,
                }
             }
             if (ix > nx_part[p])
+            {
                diag_i[cnt]++;
+            }
             else
             {
                if (ix)
@@ -166,7 +172,9 @@ GenerateRSVarDifConv( MPI_Comm comm,
                }
             }
             if (ix+1 < nx_part[p+1])
+            {
                diag_i[cnt]++;
+            }
             else
             {
                if (ix+1 < nx)
@@ -175,7 +183,9 @@ GenerateRSVarDifConv( MPI_Comm comm,
                }
             }
             if (iy+1 < ny_part[q+1])
+            {
                diag_i[cnt]++;
+            }
             else
             {
                if (iy+1 < ny)
@@ -184,7 +194,9 @@ GenerateRSVarDifConv( MPI_Comm comm,
                }
             }
             if (iz+1 < nz_part[r+1])
+            {
                diag_i[cnt]++;
+            }
             else
             {
                if (iz+1 < nz)
@@ -220,79 +232,79 @@ GenerateRSVarDifConv( MPI_Comm comm,
          for (ix = nx_part[p]; ix < nx_part[p+1]; ix++)
          {
             xx = (HYPRE_Real)(ix+1)*hhx;
-	    afp = -eps*afun_rs(xx+0.5*hhx,yy,zz)/hhx/hhx;
-	    afm = -eps*afun_rs(xx-0.5*hhx,yy,zz)/hhx/hhx;
-	    bfp = -eps*bfun_rs(xx,yy+0.5*hhy,zz)/hhy/hhy;
-	    bfm = -eps*bfun_rs(xx,yy-0.5*hhy,zz)/hhy/hhy;
-	    cfp = -eps*cfun_rs(xx,yy,zz+0.5*hhz)/hhz/hhz;
-	    cfm = -eps*cfun_rs(xx,yy,zz-0.5*hhz)/hhz/hhz;
+            afp = -eps*afun_rs(xx+0.5*hhx,yy,zz)/hhx/hhx;
+            afm = -eps*afun_rs(xx-0.5*hhx,yy,zz)/hhx/hhx;
+            bfp = -eps*bfun_rs(xx,yy+0.5*hhy,zz)/hhy/hhy;
+            bfm = -eps*bfun_rs(xx,yy-0.5*hhy,zz)/hhy/hhy;
+            cfp = -eps*cfun_rs(xx,yy,zz+0.5*hhz)/hhz/hhz;
+            cfm = -eps*cfun_rs(xx,yy,zz-0.5*hhz)/hhz/hhz;
             /* first order terms */
             /* x-direction */
             di = dfun_rs(xx, yy, zz);
             ai = afun_rs(xx, yy, zz);
             if (di * hhx > eps * ai)
             {
-              mux = eps * ai / (2.0 * di * hhx);
+               mux = eps * ai / (2.0 * di * hhx);
             }
             else if (di * hhx < -eps * ai)
             {
-              mux = 1.0 + eps * ai / (2.0 * di * hhx);
+               mux = 1.0 + eps * ai / (2.0 * di * hhx);
             }
             else
             {
-              mux = 0.5;
+               mux = 0.5;
             }
             /* y-direction */
             ei = efun_rs(xx, yy, zz);
             bi = bfun_rs(xx, yy, zz);
             if (ei * hhy > eps * bi)
             {
-              muy = eps * bi / (2.0 * ei * hhy);
+               muy = eps * bi / (2.0 * ei * hhy);
             }
             else if (ei * hhy < -eps * bi)
             {
-              muy = 1.0 + eps * bi / (2.0 * ei * hhy);
+               muy = 1.0 + eps * bi / (2.0 * ei * hhy);
             }
             else
             {
-              muy = 0.5;
+               muy = 0.5;
             }
             /* z-direction */
             fi = ffun_rs(xx, yy, zz);
             ci = cfun_rs(xx, yy, zz);
             if (fi * hhz > eps * ci)
             {
-              muz = eps * ci / (2.0 * fi * hhz);
+               muz = eps * ci / (2.0 * fi * hhz);
             }
             else if (fi * hhz < -eps * ci)
             {
-              muz = 1.0 + eps * ci / (2.0 * fi * hhz);
+               muz = 1.0 + eps * ci / (2.0 * fi * hhz);
             }
             else
             {
-              muz = 0.5;
+               muz = 0.5;
             }
 
-	    dfm = di * (mux - 1.0) / hhx;
+            dfm = di * (mux - 1.0) / hhx;
             dfp = di * mux / hhx;
-	    efm = ei * (muy - 1.0) / hhy;
+            efm = ei * (muy - 1.0) / hhy;
             efp = ei * muy / hhy;
             ffm = fi * (muz - 1.0) / hhz;
-	    ffp = fi * muz / hhz;
-	    gi = gfun_rs(xx, yy, zz);
+            ffp = fi * muz / hhz;
+            gi = gfun_rs(xx, yy, zz);
             /* stencil: center */
             diag_j[cnt] = row_index;
             diag_data[cnt++] = -(afp + afm + bfp + bfm + cfp + cfm  +
                                  dfp + dfm + efp + efm + ffp + ffm) + gi;
             /* rhs vector */
-	    rhs_data[row_index] = rfun_rs(xx,yy,zz);
-	    /* apply boundary conditions */
-            if (ix == 0)    rhs_data[row_index] -= (afm+dfm) * bndfun_rs(0,yy,zz);
-	    if (iy == 0)    rhs_data[row_index] -= (bfm+efm) * bndfun_rs(xx,0,zz);
-	    if (iz == 0)    rhs_data[row_index] -= (cfm+ffm) * bndfun_rs(xx,yy,0);
-	    if (ix+1 == nx) rhs_data[row_index] -= (afp+dfp) * bndfun_rs(1.0,yy,zz);
-	    if (iy+1 == ny) rhs_data[row_index] -= (bfp+efp) * bndfun_rs(xx,1.0,zz);
-	    if (iz+1 == nz) rhs_data[row_index] -= (cfp+ffp) * bndfun_rs(xx,yy,1.0);
+            rhs_data[row_index] = rfun_rs(xx,yy,zz);
+            /* apply boundary conditions */
+            if (ix == 0) { rhs_data[row_index] -= (afm+dfm) * bndfun_rs(0,yy,zz); }
+            if (iy == 0) { rhs_data[row_index] -= (bfm+efm) * bndfun_rs(xx,0,zz); }
+            if (iz == 0) { rhs_data[row_index] -= (cfm+ffm) * bndfun_rs(xx,yy,0); }
+            if (ix+1 == nx) { rhs_data[row_index] -= (afp+dfp) * bndfun_rs(1.0,yy,zz); }
+            if (iy+1 == ny) { rhs_data[row_index] -= (bfp+efp) * bndfun_rs(xx,1.0,zz); }
+            if (iz+1 == nz) { rhs_data[row_index] -= (cfp+ffp) * bndfun_rs(xx,yy,1.0); }
             /* stencil: z- */
             if (iz > nz_part[r])
             {
@@ -304,7 +316,7 @@ GenerateRSVarDifConv( MPI_Comm comm,
                if (iz)
                {
                   big_offd_j[o_cnt] = hypre_map(ix,iy,iz-1,p,q,r-1,nx,ny,
-                                            nx_part,ny_part,nz_part);
+                                                nx_part,ny_part,nz_part);
                   offd_data[o_cnt++] = cfm + ffm;
                }
             }
@@ -319,7 +331,7 @@ GenerateRSVarDifConv( MPI_Comm comm,
                if (iy)
                {
                   big_offd_j[o_cnt] = hypre_map(ix,iy-1,iz,p,q-1,r,nx,ny,
-                                            nx_part,ny_part,nz_part);
+                                                nx_part,ny_part,nz_part);
                   offd_data[o_cnt++] = bfm + efm;
                }
             }
@@ -334,7 +346,7 @@ GenerateRSVarDifConv( MPI_Comm comm,
                if (ix)
                {
                   big_offd_j[o_cnt] = hypre_map(ix-1,iy,iz,p-1,q,r,nx,ny,
-                                            nx_part,ny_part,nz_part);
+                                                nx_part,ny_part,nz_part);
                   offd_data[o_cnt++] = afm + dfm;
                }
             }
@@ -349,7 +361,7 @@ GenerateRSVarDifConv( MPI_Comm comm,
                if (ix+1 < nx)
                {
                   big_offd_j[o_cnt] = hypre_map(ix+1,iy,iz,p+1,q,r,nx,ny,
-                                            nx_part,ny_part,nz_part);
+                                                nx_part,ny_part,nz_part);
                   offd_data[o_cnt++] = afp + dfp;
                }
             }
@@ -364,7 +376,7 @@ GenerateRSVarDifConv( MPI_Comm comm,
                if (iy+1 < ny)
                {
                   big_offd_j[o_cnt] = hypre_map(ix,iy+1,iz,p,q+1,r,nx,ny,
-                                            nx_part,ny_part,nz_part);
+                                                nx_part,ny_part,nz_part);
                   offd_data[o_cnt++] = bfp + efp;
                }
             }
@@ -379,7 +391,7 @@ GenerateRSVarDifConv( MPI_Comm comm,
                if (iz+1 < nz)
                {
                   big_offd_j[o_cnt] = hypre_map(ix,iy,iz+1,p,q,r+1,nx,ny,
-                                            nx_part,ny_part,nz_part);
+                                                nx_part,ny_part,nz_part);
                   offd_data[o_cnt++] = cfp + ffp;
                }
             }
@@ -392,7 +404,9 @@ GenerateRSVarDifConv( MPI_Comm comm,
    if (num_procs > 1)
    {
       for (i=0; i < num_cols_offd; i++)
+      {
          col_map_offd[i] = big_offd_j[i];
+      }
 
       hypre_BigQsort0(col_map_offd, 0, num_cols_offd-1);
 
@@ -465,15 +479,15 @@ HYPRE_Real dfun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
    HYPRE_Real value;
    if (rs_example == 1)
    {
-     value = sin(rs_l*M_PI/8.0);
+      value = sin(rs_l*M_PI/8.0);
    }
    else if (rs_example == 2)
    {
-     value = (2.0*yy-1.0)*(1.0-xx*xx);
+      value = (2.0*yy-1.0)*(1.0-xx*xx);
    }
    else
    {
-     value = 4.0*xx*(xx-1.0)*(1.0-2.0*yy);
+      value = 4.0*xx*(xx-1.0)*(1.0-2.0*yy);
    }
    return value;
 }
@@ -483,15 +497,15 @@ HYPRE_Real efun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
    HYPRE_Real value;
    if (rs_example == 1)
    {
-     value = cos(rs_l*M_PI/8.0);
+      value = cos(rs_l*M_PI/8.0);
    }
    else if (rs_example == 2)
    {
-     value = 2.0*xx*yy*(yy-1.0);
+      value = 2.0*xx*yy*(yy-1.0);
    }
    else
    {
-     value = -4.0*yy*(yy-1.0)*(1.0-2.0*xx);
+      value = -4.0*yy*(yy-1.0)*(1.0-2.0*xx);
    }
    return value;
 }

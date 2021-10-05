@@ -221,8 +221,8 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
             hypre_SStructPVectorPrint(filename, x_l[l], 0);
             hypre_sprintf(filename, "zout_rdown.%02d", l);
             hypre_SStructPVectorPrint(filename, r_l[l], 0);
-	    hypre_sprintf(filename, "zout_RT.%02d", l);
-	    hypre_SStructPMatrixPrint(filename, RT_l[l], 0);
+            hypre_sprintf(filename, "zout_RT.%02d", l);
+            hypre_SStructPMatrixPrint(filename, RT_l[l], 0);
             hypre_sprintf(filename, "zout_b.%02d", l+1);
             hypre_SStructPVectorPrint(filename, b_l[l+1], 0);
 #endif

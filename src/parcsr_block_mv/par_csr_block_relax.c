@@ -197,9 +197,9 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
    switch (relax_type)
    {
 
-/*---------------------------------------------------------------------------
-  Jacobi
-  ---------------------------------------------------------------------------*/
+      /*---------------------------------------------------------------------------
+        Jacobi
+        ---------------------------------------------------------------------------*/
       case 20:
       {
 
@@ -244,8 +244,7 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
          }
          if (num_procs > 1)
          {
-            hypre_ParCSRBlockCommHandleDestroy(comm_handle); /* now Vext_data
-                                                                is populated */
+            hypre_ParCSRBlockCommHandleDestroy(comm_handle); /* now Vext_data is populated */
             comm_handle = NULL;
          }
          /*-----------------------------------------------------------------
@@ -356,11 +355,11 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
 
          break;
 
-      } /* end case 20 */
+         } /* end case 20 */
 
-/*---------------------------------------------------------------------------
-  Hybrid: G-S on proc. and Jacobi off proc.
-  ---------------------------------------------------------------------------*/
+      /*---------------------------------------------------------------------------
+        Hybrid: G-S on proc. and Jacobi off proc.
+        ---------------------------------------------------------------------------*/
       case 23:
       {
          if (num_procs > 1)
@@ -406,8 +405,7 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
 
          if (num_procs > 1)
          {
-            hypre_ParCSRBlockCommHandleDestroy(comm_handle); /* now Vext_data
-                                                                is populated */
+            hypre_ParCSRBlockCommHandleDestroy(comm_handle); /* now Vext_data is populated */
             comm_handle = NULL;
          }
 
@@ -429,7 +427,9 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
                   tmp_data = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
 
                   for (i = 0; i < n; i++)
+                  {
                      tmp_data[i] = u_data[i];
+                  }
 
                   for (j = 0; j < num_threads; j++)
                   {
@@ -547,7 +547,9 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
                   tmp_data = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
 
                   for (i = 0; i < n; i++)
+                  {
                      tmp_data[i] = u_data[i];
+                  }
 
                   for (j = 0; j < num_threads; j++)
                   {
@@ -682,7 +684,9 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
                {
                   tmp_data = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
                   for (i = 0; i < n; i++)
+                  {
                      tmp_data[i] = u_data[i];
+                  }
                   for (j = 0; j < num_threads; j++)
                   {
                      size = n/num_threads;
@@ -820,7 +824,9 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
                {
                   tmp_data = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
                   for (i = 0; i < n; i++)
+                  {
                      tmp_data[i] = u_data[i];
+                  }
                   for (j = 0; j < num_threads; j++)
                   {
                      size = n/num_threads;
@@ -982,11 +988,11 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
 
 
 
-/*-----------------------------------------------------------------
-  Hybrid: Jacobi off-processor,
-  Symm. Gauss-Seidel/ SSOR on-processor
-  with outer relaxation parameter
-  *-----------------------------------------------------------------*/
+      /*-----------------------------------------------------------------
+        Hybrid: Jacobi off-processor,
+        Symm. Gauss-Seidel/ SSOR on-processor
+        with outer relaxation parameter
+        *-----------------------------------------------------------------*/
 
       case 26:
       {
@@ -1043,7 +1049,9 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
                {
                   tmp_data = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
                   for (i = 0; i < n; i++)
+                  {
                      tmp_data[i] = u_data[i];
+                  }
                   for (j = 0; j < num_threads; j++)
                   {
                      size = n/num_threads;
@@ -1254,7 +1262,9 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
                {
                   tmp_data = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
                   for (i = 0; i < n; i++)
+                  {
                      tmp_data[i] = u_data[i];
+                  }
                   for (j = 0; j < num_threads; j++)
                   {
                      size = n/num_threads;
@@ -1490,7 +1500,9 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
                {
                   tmp_data = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
                   for (i = 0; i < n; i++)
+                  {
                      tmp_data[i] = u_data[i];
+                  }
                   for (j = 0; j < num_threads; j++)
                   {
                      size = n/num_threads;
@@ -1746,7 +1758,9 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
                {
                   tmp_data = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
                   for (i = 0; i < n; i++)
+                  {
                      tmp_data[i] = u_data[i];
+                  }
                   for (j = 0; j < num_threads; j++)
                   {
                      size = n/num_threads;
@@ -2021,9 +2035,9 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
          break;
       }
 
-/*---------------------------------------------------------------------------
- * Direct solve: use gaussian elimination
- *---------------------------------------------------------------------------*/
+      /*---------------------------------------------------------------------------
+       * Direct solve: use gaussian elimination
+       *---------------------------------------------------------------------------*/
       case 29:
       {
 
@@ -2128,12 +2142,12 @@ HYPRE_Int gselim_piv(HYPRE_Real *A, HYPRE_Real *x, HYPRE_Int n)
       if (fabs(A[0]) >  1e-10)
       {
          x[0] = x[0]/A[0];
-         return(err_flag);
+         return (err_flag);
       }
       else
       {
          err_flag = 1;
-         return(err_flag);
+         return (err_flag);
       }
    }
    else                               /* A is nxn.  Forward elimination */
@@ -2186,7 +2200,7 @@ HYPRE_Int gselim_piv(HYPRE_Real *A, HYPRE_Real *x, HYPRE_Int n)
          else
          {
             /* hypre_printf("Matrix is nearly singular: zero pivot error\n"); */
-            return(-1);
+            return (-1);
          }
       }
       /* we also need to check the pivot in the last row to see if it is zero */
@@ -2194,7 +2208,7 @@ HYPRE_Int gselim_piv(HYPRE_Real *A, HYPRE_Real *x, HYPRE_Int n)
       if ( fabs(A[k*n+k]) < eps)
       {
          /* hypre_printf("Block of matrix is nearly singular: zero pivot error\n"); */
-         return(-1);
+         return (-1);
       }
 
       /* Back Substitution  */
@@ -2210,6 +2224,6 @@ HYPRE_Int gselim_piv(HYPRE_Real *A, HYPRE_Real *x, HYPRE_Int n)
          }
       }
       x[0] /= A[0];
-      return(err_flag);
+      return (err_flag);
    }
 }

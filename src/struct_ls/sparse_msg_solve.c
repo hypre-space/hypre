@@ -25,7 +25,7 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
                       hypre_StructVector *b,
                       hypre_StructVector *x          )
 {
-	hypre_SparseMSGData  *smsg_data = (hypre_SparseMSGData  *)smsg_vdata;
+   hypre_SparseMSGData  *smsg_data = (hypre_SparseMSGData  *)smsg_vdata;
 
    HYPRE_Real            tol                 = (smsg_data -> tol);
    HYPRE_Int             max_iter            = (smsg_data -> max_iter);
@@ -70,10 +70,10 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
 
    HYPRE_Real            b_dot_b, r_dot_r, eps;
    HYPRE_Real            e_dot_e, x_dot_x;
-                    
+
    HYPRE_Int             i, l, lx, ly, lz;
    HYPRE_Int             lymin, lymax, lzmin, lzmax;
-   HYPRE_Int             fi, ci;                              
+   HYPRE_Int             fi, ci;
    HYPRE_Int             ierr = 0;
 
 #if DEBUG
@@ -165,14 +165,18 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
          {
             norms[i] = sqrt(r_dot_r);
             if (b_dot_b > 0)
+            {
                rel_norms[i] = sqrt(r_dot_r/b_dot_b);
+            }
             else
+            {
                rel_norms[i] = 0.0;
+            }
          }
-/* RDF */
+         /* RDF */
 #if 0
 
-hypre_printf("iter = %d, rel_norm = %e\n", i, rel_norms[i]);
+         hypre_printf("iter = %d, rel_norm = %e\n", i, rel_norms[i]);
 
 #endif
 
@@ -182,7 +186,9 @@ hypre_printf("iter = %d, rel_norm = %e\n", i, rel_norms[i]);
             if (rel_change)
             {
                if ((e_dot_e/x_dot_x) < eps)
+               {
                   break;
+               }
             }
             else
             {
@@ -238,7 +244,7 @@ hypre_printf("iter = %d, rel_norm = %e\n", i, rel_norms[i]);
                                                -1.0, A_array[fi], x_array[fi],
                                                1.0, r_array[fi]);
                   }
-                        
+
                   if ((lx+1) < num_grids[0])
                   {
                      /* restrict to ((lx+1), ly, lz) */
@@ -320,7 +326,7 @@ hypre_printf("iter = %d, rel_norm = %e\n", i, rel_norms[i]);
          /*--------------------------------------------------
           * Bottom
           *--------------------------------------------------*/
-      
+
          fi = num_all_grids - 1;
 
          if (restrict_count[fi] > 1)
@@ -357,7 +363,7 @@ hypre_printf("iter = %d, rel_norm = %e\n", i, rel_norms[i]);
                   lx = l - lz - ly;
 
                   hypre_SparseMSGMapIndex(lx, ly, lz, num_grids, fi);
-                     
+
                   if (!grid_on[fi])
                   {
                      break;
@@ -408,7 +414,7 @@ hypre_printf("iter = %d, rel_norm = %e\n", i, rel_norms[i]);
                                               lx, ly, lz, jump);
                         hypre_StructAxpy(1.0, e_array[fi], x_array[fi]);
                      }
-                  }               
+                  }
 #if DEBUG
                   hypre_sprintf(filename, "zoutSMSG_xup.%d.%d.%d", lx, ly, lz);
                   hypre_StructVectorPrint(filename, x_array[fi], 0);

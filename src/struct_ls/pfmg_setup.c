@@ -532,7 +532,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          hypre_StructVectorAssemble(x_l[l+1]);
          data += hypre_StructVectorDataSize(x_l[l+1]);
          hypre_StructVectorInitializeData(tx_l[l+1],
-               hypre_StructVectorData(tx_l[0]));
+                                          hypre_StructVectorData(tx_l[0]));
          hypre_StructVectorAssemble(tx_l[l+1]);
       }
       else
@@ -1016,7 +1016,7 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
    HYPRE_Real            *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_Int              data_location = hypre_StructGridDataLocation(
-                                          hypre_StructMatrixGrid(A) );
+                                             hypre_StructMatrixGrid(A) );
 #endif
 
    hypre_SetIndex3(stride, 1, 1, 1);
@@ -1097,7 +1097,8 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
 #else /* kokkos */
 
 #if defined(HYPRE_USING_RAJA)
-   ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),sqcxb(sqcxyz[0]),sqcyb(sqcxyz[1]);
+   ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),sqcxb(sqcxyz[0]),
+             sqcyb(sqcxyz[1]);
 #elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_double4 d4(cxyz[0], cxyz[1], sqcxyz[0], sqcxyz[1]);
    ReduceSum<HYPRE_double4> sum4(d4);
@@ -1184,7 +1185,7 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
    HYPRE_Real            *a_csw, *a_cse, *a_cne, *a_cnw;
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_Int              data_location = hypre_StructGridDataLocation(
-                                          hypre_StructMatrixGrid(A) );
+                                             hypre_StructMatrixGrid(A) );
 #endif
 
    hypre_SetIndex3(stride, 1, 1, 1);
@@ -1286,7 +1287,8 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
 #else /* kokkos */
 
 #if defined(HYPRE_USING_RAJA)
-   ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),sqcxb(sqcxyz[0]),sqcyb(sqcxyz[1]);
+   ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),sqcxb(sqcxyz[0]),
+             sqcyb(sqcxyz[1]);
 #elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_double4 d4(cxyz[0], cxyz[1], sqcxyz[0], sqcxyz[1]);
    ReduceSum<HYPRE_double4> sum4(d4);
@@ -1313,20 +1315,20 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
                                 A_dbox, start, stride, Ai, sum4)
    {
-       HYPRE_Real tcx, tcy;
-       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
+      HYPRE_Real tcx, tcy;
+      HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
 
-       tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-       tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
 
 #if !defined(HYPRE_USING_RAJA) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
-       HYPRE_double4 tmp(tcx, tcy, tcx*tcx, tcy*tcy);
-       sum4 += tmp;
+      HYPRE_double4 tmp(tcx, tcy, tcx*tcx, tcy*tcy);
+      sum4 += tmp;
 #else
-       cxb += tcx;
-       cyb += tcy;
-       sqcxb += tcx * tcx;
-       sqcyb += tcy * tcy;
+      cxb += tcx;
+      cyb += tcy;
+      sqcxb += tcx * tcx;
+      sqcyb += tcy * tcy;
 #endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, sum4)
@@ -1372,7 +1374,7 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
    HYPRE_Real            *a_cc, *a_cw, *a_ce, *a_cs, *a_cn, *a_ac, *a_bc;
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_Int              data_location = hypre_StructGridDataLocation(
-                                          hypre_StructMatrixGrid(A) );
+                                             hypre_StructMatrixGrid(A) );
 #endif
 
    hypre_SetIndex3(stride, 1, 1, 1);
@@ -1481,7 +1483,8 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
 #else /* kokkos */
 
 #if defined(HYPRE_USING_RAJA)
-   ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),czb(cxyz[2]),sqcxb(sqcxyz[0]),sqcyb(sqcxyz[1]), sqczb(sqcxyz[2]);
+   ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),czb(cxyz[2]),
+             sqcxb(sqcxyz[0]),sqcyb(sqcxyz[1]), sqczb(sqcxyz[2]);
 #elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_double6 d6(cxyz[0], cxyz[1], cxyz[2], sqcxyz[0], sqcxyz[1], sqcxyz[2]);
    ReduceSum<HYPRE_double6> sum6(d6);
@@ -1574,7 +1577,7 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
    HYPRE_Real            *a_aw, *a_ae, *a_as, *a_an, *a_bw, *a_be, *a_bs, *a_bn;
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_Int              data_location = hypre_StructGridDataLocation(
-                                          hypre_StructMatrixGrid(A) );
+                                             hypre_StructMatrixGrid(A) );
 #endif
 
    hypre_SetIndex3(stride, 1, 1, 1);
@@ -1677,9 +1680,10 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
                                 A_dbox, start, stride, Ai, cxb)
    {
-       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
-       HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-       cxb += tcx;
+      HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
+      HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai] +
+                                a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      cxb += tcx;
    }
    hypre_BoxLoop1ReductionEnd(Ai, cxb)
 
@@ -1688,7 +1692,8 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
                                 A_dbox, start, stride, Ai, cyb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
-      HYPRE_Real tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_an[Ai] + a_as[Ai] + a_bn[Ai] + a_bs[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      HYPRE_Real tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_an[Ai] + a_as[Ai] + a_bn[Ai] + a_bs[Ai] +
+                                a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
       cyb += tcy;
    }
    hypre_BoxLoop1ReductionEnd(Ai, cyb)
@@ -1698,7 +1703,8 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
                                 A_dbox, start, stride, Ai, czb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
-      HYPRE_Real tcz = -diag * (a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_an[Ai] + a_as[Ai] +  a_bw[Ai]  + a_be[Ai] +  a_bn[Ai] +  a_bs[Ai]);
+      HYPRE_Real tcz = -diag * (a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_an[Ai] + a_as[Ai] +
+                                a_bw[Ai]  + a_be[Ai] +  a_bn[Ai] +  a_bs[Ai]);
       czb += tcz;
    }
    hypre_BoxLoop1ReductionEnd(Ai, czb)
@@ -1708,7 +1714,8 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
                                 A_dbox, start, stride, Ai, sqcxb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
-      HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai] +
+                                a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
       sqcxb += tcx*tcx;
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqcxb)
@@ -1718,7 +1725,8 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
                                 A_dbox, start, stride, Ai, sqcyb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
-      HYPRE_Real tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_an[Ai] + a_as[Ai] + a_bn[Ai] + a_bs[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      HYPRE_Real tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_an[Ai] + a_as[Ai] + a_bn[Ai] + a_bs[Ai] +
+                                a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
       sqcyb += tcy*tcy;
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqcyb)
@@ -1728,7 +1736,8 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
                                 A_dbox, start, stride, Ai, sqczb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
-      HYPRE_Real tcz = -diag * (a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_an[Ai] + a_as[Ai] +  a_bw[Ai]  + a_be[Ai] +  a_bn[Ai] +  a_bs[Ai]);
+      HYPRE_Real tcz = -diag * (a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_an[Ai] + a_as[Ai] +
+                                a_bw[Ai]  + a_be[Ai] +  a_bn[Ai] +  a_bs[Ai]);
       sqczb += tcz*tcz;
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqczb)
@@ -1736,7 +1745,8 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
 #else /* kokkos */
 
 #if defined(HYPRE_USING_RAJA)
-   ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),czb(cxyz[2]),sqcxb(sqcxyz[0]),sqcyb(sqcxyz[1]), sqczb(sqcxyz[2]);
+   ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),czb(cxyz[2]),
+             sqcxb(sqcxyz[0]),sqcyb(sqcxyz[1]), sqczb(sqcxyz[2]);
 #elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_double6 d6(cxyz[0], cxyz[1], cxyz[2], sqcxyz[0], sqcxyz[1], sqcxyz[2]);
    ReduceSum<HYPRE_double6> sum6(d6);
@@ -1768,9 +1778,12 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
       HYPRE_Real tcx, tcy, tcz;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
 
-      tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-      tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_an[Ai] + a_as[Ai] + a_bn[Ai] + a_bs[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-      tcz = -diag * (a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_an[Ai] + a_as[Ai] +  a_bw[Ai]  + a_be[Ai] +  a_bn[Ai] +  a_bs[Ai]);
+      tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai] + a_csw[Ai] +
+                     a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_an[Ai] + a_as[Ai] + a_bn[Ai] + a_bs[Ai] + a_csw[Ai] +
+                     a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      tcz = -diag * (a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_an[Ai] + a_as[Ai] +  a_bw[Ai]  +
+                     a_be[Ai] +  a_bn[Ai] +  a_bs[Ai]);
 
 #if !defined(HYPRE_USING_RAJA) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
       HYPRE_double6 tmp(tcx, tcy, tcz, tcx*tcx, tcy*tcy, tcz*tcz);
@@ -1833,7 +1846,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
 
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_Int              data_location = hypre_StructGridDataLocation(
-                                          hypre_StructMatrixGrid(A) );
+                                             hypre_StructMatrixGrid(A) );
 #endif
 
    hypre_SetIndex3(stride, 1, 1, 1);
@@ -1975,8 +1988,10 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
    {
       HYPRE_Real tcx = 0.0;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
-      tcx -= diag * (a_cw[Ai]  + a_ce[Ai]  +  a_aw[Ai] +  a_ae[Ai] +  a_bw[Ai] +  a_be[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-      tcx -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
+      tcx -= diag * (a_cw[Ai]  + a_ce[Ai]  +  a_aw[Ai] +  a_ae[Ai] +  a_bw[Ai] +  a_be[Ai] + a_csw[Ai] +
+                     a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      tcx -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
+                     a_bne[Ai]);
       cxb += tcx;
    }
    hypre_BoxLoop1ReductionEnd(Ai, cxb)
@@ -1987,8 +2002,10 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
    {
       HYPRE_Real tcy = 0.0;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
-      tcy -= diag * (a_cs[Ai]  + a_cn[Ai]  +  a_an[Ai] +  a_as[Ai] +  a_bn[Ai] +  a_bs[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-      tcy -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
+      tcy -= diag * (a_cs[Ai]  + a_cn[Ai]  +  a_an[Ai] +  a_as[Ai] +  a_bn[Ai] +  a_bs[Ai] + a_csw[Ai] +
+                     a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      tcy -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
+                     a_bne[Ai]);
       cyb += tcy;
    }
    hypre_BoxLoop1ReductionEnd(Ai, cyb)
@@ -1999,8 +2016,10 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
    {
       HYPRE_Real tcz = 0.0;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
-      tcz -= diag * (a_ac[Ai]  +  a_bc[Ai] +  a_aw[Ai] +  a_ae[Ai] +  a_an[Ai] +  a_as[Ai] +  a_bw[Ai] +  a_be[Ai] + a_bn[Ai] + a_bs[Ai]);
-      tcz -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
+      tcz -= diag * (a_ac[Ai]  +  a_bc[Ai] +  a_aw[Ai] +  a_ae[Ai] +  a_an[Ai] +  a_as[Ai] +  a_bw[Ai] +
+                     a_be[Ai] + a_bn[Ai] + a_bs[Ai]);
+      tcz -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
+                     a_bne[Ai]);
       czb += tcz;
    }
    hypre_BoxLoop1ReductionEnd(Ai, czb)
@@ -2011,8 +2030,10 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
    {
       HYPRE_Real tcx = 0.0;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
-      tcx -= diag * (a_cw[Ai]  + a_ce[Ai]  +  a_aw[Ai] +  a_ae[Ai] +  a_bw[Ai] +  a_be[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-      tcx -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
+      tcx -= diag * (a_cw[Ai]  + a_ce[Ai]  +  a_aw[Ai] +  a_ae[Ai] +  a_bw[Ai] +  a_be[Ai] + a_csw[Ai] +
+                     a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      tcx -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
+                     a_bne[Ai]);
       sqcxb += tcx*tcx;
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqcxb)
@@ -2023,8 +2044,10 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
    {
       HYPRE_Real tcy = 0.0;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
-      tcy -= diag * (a_cs[Ai]  + a_cn[Ai]  +  a_an[Ai] +  a_as[Ai] +  a_bn[Ai] +  a_bs[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-      tcy -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
+      tcy -= diag * (a_cs[Ai]  + a_cn[Ai]  +  a_an[Ai] +  a_as[Ai] +  a_bn[Ai] +  a_bs[Ai] + a_csw[Ai] +
+                     a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      tcy -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
+                     a_bne[Ai]);
       sqcyb += tcy*tcy;
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqcyb);
@@ -2035,8 +2058,10 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
    {
       HYPRE_Real tcz = 0.0;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
-      tcz -= diag * (a_ac[Ai]  +  a_bc[Ai] +  a_aw[Ai] +  a_ae[Ai] +  a_an[Ai] +  a_as[Ai] +  a_bw[Ai] +  a_be[Ai] + a_bn[Ai] + a_bs[Ai]);
-      tcz -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
+      tcz -= diag * (a_ac[Ai]  +  a_bc[Ai] +  a_aw[Ai] +  a_ae[Ai] +  a_an[Ai] +  a_as[Ai] +  a_bw[Ai] +
+                     a_be[Ai] + a_bn[Ai] + a_bs[Ai]);
+      tcz -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
+                     a_bne[Ai]);
       sqczb += tcz*tcz;
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqczb)
@@ -2044,7 +2069,8 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
 #else /* kokkos */
 
 #if defined(HYPRE_USING_RAJA)
-   ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),czb(cxyz[2]),sqcxb(sqcxyz[0]),sqcyb(sqcxyz[1]), sqczb(sqcxyz[2]);
+   ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),czb(cxyz[2]),
+             sqcxb(sqcxyz[0]),sqcyb(sqcxyz[1]), sqczb(sqcxyz[2]);
 #elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_double6 d6(cxyz[0], cxyz[1], cxyz[2], sqcxyz[0], sqcxyz[1], sqcxyz[2]);
    ReduceSum<HYPRE_double6> sum6(d6);
@@ -2076,14 +2102,20 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
       HYPRE_Real tcx = 0.0, tcy = 0.0, tcz = 0.0;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
 
-      tcx -= diag * (a_cw[Ai]  + a_ce[Ai]  +  a_aw[Ai] +  a_ae[Ai] +  a_bw[Ai] +  a_be[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-      tcx -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
+      tcx -= diag * (a_cw[Ai]  + a_ce[Ai]  +  a_aw[Ai] +  a_ae[Ai] +  a_bw[Ai] +  a_be[Ai] + a_csw[Ai] +
+                     a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      tcx -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
+                     a_bne[Ai]);
 
-      tcy -= diag * (a_cs[Ai]  + a_cn[Ai]  +  a_an[Ai] +  a_as[Ai] +  a_bn[Ai] +  a_bs[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-      tcy -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
+      tcy -= diag * (a_cs[Ai]  + a_cn[Ai]  +  a_an[Ai] +  a_as[Ai] +  a_bn[Ai] +  a_bs[Ai] + a_csw[Ai] +
+                     a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      tcy -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
+                     a_bne[Ai]);
 
-      tcz -= diag * (a_ac[Ai]  +  a_bc[Ai] +  a_aw[Ai] +  a_ae[Ai] +  a_an[Ai] +  a_as[Ai] +  a_bw[Ai] +  a_be[Ai] + a_bn[Ai] + a_bs[Ai]);
-      tcz -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
+      tcz -= diag * (a_ac[Ai]  +  a_bc[Ai] +  a_aw[Ai] +  a_ae[Ai] +  a_an[Ai] +  a_as[Ai] +  a_bw[Ai] +
+                     a_be[Ai] + a_bn[Ai] + a_bs[Ai]);
+      tcz -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
+                     a_bne[Ai]);
 #if !defined(HYPRE_USING_RAJA) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
       HYPRE_double6 tmp(tcx, tcy, tcz, tcx*tcx, tcy*tcy, tcz*tcz);
       sum6 += tmp;

@@ -314,11 +314,13 @@ hypre_HybridGaussSeidel( HYPRE_Int     *A_diag_i,
             if (Skip_diag)
             {
                u_data[i] *= prod;
-               u_data[i] += relax_weight * (omega * res + res0 + one_minus_omega * res2) / A_diag_data[A_diag_i[i]];
+               u_data[i] += relax_weight * (omega * res + res0 + one_minus_omega * res2) /
+                            A_diag_data[A_diag_i[i]];
             }
             else
             {
-               u_data[i] += relax_weight * (omega * res + res0 + one_minus_omega * res2) / A_diag_data[A_diag_i[i]];
+               u_data[i] += relax_weight * (omega * res + res0 + one_minus_omega * res2) /
+                            A_diag_data[A_diag_i[i]];
             }
          }
       } /* for ( i = ...) */
@@ -436,11 +438,13 @@ hypre_HybridGaussSeidelThreads( HYPRE_Int     *A_diag_i,
             if (Skip_diag)
             {
                u_data[i] *= prod;
-               u_data[i] += relax_weight * (omega * res + res0 + one_minus_omega * res2) / A_diag_data[A_diag_i[i]];
+               u_data[i] += relax_weight * (omega * res + res0 + one_minus_omega * res2) /
+                            A_diag_data[A_diag_i[i]];
             }
             else
             {
-               u_data[i] += relax_weight * (omega * res + res0 + one_minus_omega * res2) / A_diag_data[A_diag_i[i]];
+               u_data[i] += relax_weight * (omega * res + res0 + one_minus_omega * res2) /
+                            A_diag_data[A_diag_i[i]];
             }
          }
       } /* for ( i = ...) */

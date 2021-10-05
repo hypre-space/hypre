@@ -177,7 +177,7 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
       {
          hypre_ParVectorCopy(bn_l[0], nVtemp_l[0]);
          hypre_ParCSRMatrixMatvecT(-1.0, Aen_l[0], xe_l[0],
-                                    1.0, nVtemp_l[0]);
+                                   1.0, nVtemp_l[0]);
 
          hypre_BoomerAMGRelaxIF(Ann_l[0],
                                 nVtemp_l[0],
@@ -195,7 +195,7 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
          /* update edge right-hand fe_l= fe_l-Aen_l*xn_l[0] */
          hypre_ParVectorCopy(be_l[0], eVtemp_l[0]);
          hypre_ParCSRMatrixMatvec(-1.0, Aen_l[0], xn_l[0],
-                                   1.0, eVtemp_l[0]);
+                                  1.0, eVtemp_l[0]);
          hypre_ParVectorZeroBCValues(eVtemp_l[0], BdryRanks_l[0],
                                      BdryRanksCnts_l[0]);
 
@@ -266,7 +266,7 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
                                    bn_l[1]);
 
          hypre_ParCSRMatrixMatvecT(1.0,
-            (hypre_ParCSRMatrix *) hypre_IJMatrixObject(ReT_l[0]),
+                                   (hypre_ParCSRMatrix *) hypre_IJMatrixObject(ReT_l[0]),
                                    rese_l[0], 0.0, be_l[1]);
 
          hypre_ParVectorZeroBCValues(be_l[1], BdryRanks_l[1],
@@ -289,7 +289,7 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
             if (j)
             {
                hypre_ParCSRMatrixMatvecT(-1.0, Aen_l[level],
-                                          xe_l[level], 1.0, nVtemp_l[level]);
+                                         xe_l[level], 1.0, nVtemp_l[level]);
             }
             hypre_BoomerAMGRelaxIF(Ann_l[level],
                                    nVtemp_l[level],
@@ -328,16 +328,16 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
          /* compute residuals */
          hypre_ParVectorCopy(bn_l[level], resn_l[level]);
          hypre_ParCSRMatrixMatvec(-1.0, Ann_l[level], xn_l[level],
-                                   1.0, resn_l[level]);
+                                  1.0, resn_l[level]);
 
          hypre_ParCSRMatrixMatvecT(-1.0, Aen_l[level], xe_l[level],
-                                    1.0, resn_l[level]);
+                                   1.0, resn_l[level]);
 
          hypre_ParVectorCopy(be_l[level], rese_l[level]);
          hypre_ParCSRMatrixMatvec(-1.0, Aee_l[level], xe_l[level],
-                                   1.0, rese_l[level]);
+                                  1.0, rese_l[level]);
          hypre_ParCSRMatrixMatvec(-1.0, Aen_l[level], xn_l[level],
-                                   1.0, rese_l[level]);
+                                  1.0, rese_l[level]);
          hypre_ParVectorZeroBCValues(rese_l[level], BdryRanks_l[level],
                                      BdryRanksCnts_l[level]);
 
@@ -346,7 +346,7 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
                                    0.0, bn_l[level+1]);
 
          hypre_ParCSRMatrixMatvecT(1.0,
-            (hypre_ParCSRMatrix *) hypre_IJMatrixObject(ReT_l[level]),
+                                   (hypre_ParCSRMatrix *) hypre_IJMatrixObject(ReT_l[level]),
                                    rese_l[level], 0.0, be_l[level+1]);
 
          hypre_ParVectorZeroBCValues(be_l[level+1], BdryRanks_l[level+1],
@@ -367,7 +367,7 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
 
       /* npre_relax if not the coarsest level. Otherwise, relax once.*/
       if (   (en_numlevs != edge_numlevs)
-            || (en_numlevs != node_numlevs)  )
+             || (en_numlevs != node_numlevs)  )
       {
          for (j = 0; j < npre_relax; j++)
          {
@@ -430,7 +430,7 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
 
          hypre_ParVectorCopy(be_l[level], eVtemp_l[level]);
          hypre_ParCSRMatrixMatvec(-1.0, Aen_l[level], xn_l[level],
-                                   1.0, eVtemp_l[level]);
+                                  1.0, eVtemp_l[level]);
 
          hypre_ParVectorZeroBCValues(eVtemp_l[level], BdryRanks_l[level],
                                      BdryRanksCnts_l[level]);
@@ -456,7 +456,7 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
          hypre_ParCSRMatrixMatvec(-1.0, Aee_l[level], xe_l[level], 1.0,
                                   rese_l[level]);
          hypre_ParCSRMatrixMatvecT(1.0,
-            (hypre_ParCSRMatrix *) hypre_IJMatrixObject(ReT_l[level]),
+                                   (hypre_ParCSRMatrix *) hypre_IJMatrixObject(ReT_l[level]),
                                    rese_l[level], 0.0, be_l[level+1]);
          hypre_ParVectorZeroBCValues(be_l[level+1], BdryRanks_l[level+1],
                                      BdryRanksCnts_l[level+1]);
@@ -484,9 +484,9 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
             /* compute residuals and restrict */
             hypre_ParVectorCopy(be_l[level], rese_l[level]);
             hypre_ParCSRMatrixMatvec(-1.0, Aee_l[level], xe_l[level],
-                                      1.0, rese_l[level]);
+                                     1.0, rese_l[level]);
             hypre_ParCSRMatrixMatvecT(1.0,
-               (hypre_ParCSRMatrix *) hypre_IJMatrixObject(ReT_l[level]),
+                                      (hypre_ParCSRMatrix *) hypre_IJMatrixObject(ReT_l[level]),
                                       rese_l[level], 0.0, be_l[level+1]);
             hypre_ParVectorZeroBCValues(be_l[level+1], BdryRanks_l[level+1],
                                         BdryRanksCnts_l[level+1]);
@@ -520,7 +520,7 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
          hypre_ParCSRMatrixMatvec(-1.0, Ann_l[level], xn_l[level], 1.0,
                                   resn_l[level]);
          hypre_ParCSRMatrixMatvecT(1.0,
-            (hypre_ParCSRMatrix *) RnT_l[level],
+                                   (hypre_ParCSRMatrix *) RnT_l[level],
                                    resn_l[level], 0.0, bn_l[level+1]);
 
          hypre_ParVectorSetConstantValues(xn_l[level+1], 0.0);
@@ -546,7 +546,7 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
             /* compute residuals and restrict */
             hypre_ParVectorCopy(bn_l[level], resn_l[level]);
             hypre_ParCSRMatrixMatvec(-1.0, Ann_l[level], xn_l[level],
-                                      1.0, resn_l[level]);
+                                     1.0, resn_l[level]);
             hypre_ParCSRMatrixMatvecT(1.0, RnT_l[level], resn_l[level],
                                       0.0, bn_l[level+1]);
 
@@ -578,7 +578,7 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
          for (level = (edge_numlevs - 2); level>= en_numlevs-1; level--)
          {
             hypre_ParCSRMatrixMatvec(1.0,
-              (hypre_ParCSRMatrix *) hypre_IJMatrixObject(Pe_l[level]),
+                                     (hypre_ParCSRMatrix *) hypre_IJMatrixObject(Pe_l[level]),
                                      xe_l[level+1], 0.0, ee_l[level]);
             hypre_ParVectorZeroBCValues(ee_l[level], BdryRanks_l[level],
                                         BdryRanksCnts_l[level]);
@@ -642,7 +642,7 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
          hypre_ParVectorAxpy(1.0, en_l[level], xn_l[level]);
 
          hypre_ParCSRMatrixMatvec(1.0,
-           (hypre_ParCSRMatrix *) hypre_IJMatrixObject(Pe_l[level]),
+                                  (hypre_ParCSRMatrix *) hypre_IJMatrixObject(Pe_l[level]),
                                   xe_l[level+1], 0.0, ee_l[level]);
          hypre_ParVectorZeroBCValues(ee_l[level], BdryRanks_l[level],
                                      BdryRanksCnts_l[level]);
@@ -653,7 +653,7 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
          {
             hypre_ParVectorCopy(bn_l[level], nVtemp_l[level]);
             hypre_ParCSRMatrixMatvecT(-1.0, Aen_l[level], xe_l[level],
-                                       1.0, nVtemp_l[level]);
+                                      1.0, nVtemp_l[level]);
             hypre_BoomerAMGRelaxIF(Ann_l[level],
                                    nVtemp_l[level],
                                    nCF_marker_l[level],
@@ -669,7 +669,7 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
 
             hypre_ParVectorCopy(be_l[level], eVtemp_l[level]);
             hypre_ParCSRMatrixMatvec(-1.0, Aen_l[level], xn_l[level],
-                                      1.0, eVtemp_l[level]);
+                                     1.0, eVtemp_l[level]);
             hypre_ParVectorZeroBCValues(eVtemp_l[level], BdryRanks_l[level],
                                         BdryRanksCnts_l[level]);
 
@@ -694,7 +694,7 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
       hypre_ParVectorAxpy(1.0, en_l[0], xn_l[0]);
 
       hypre_ParCSRMatrixMatvec(1.0,
-        (hypre_ParCSRMatrix *) hypre_IJMatrixObject(Pe_l[0]),
+                               (hypre_ParCSRMatrix *) hypre_IJMatrixObject(Pe_l[0]),
                                xe_l[1], 0.0, ee_l[0]);
       hypre_ParVectorZeroBCValues(ee_l[0], BdryRanks_l[0],
                                   BdryRanksCnts_l[0]);
@@ -733,7 +733,7 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
       {
          hypre_ParVectorCopy(bn_l[0], nVtemp_l[0]);
          hypre_ParCSRMatrixMatvecT(-1.0, Aen_l[0], xe_l[0],
-                                    1.0, nVtemp_l[0]);
+                                   1.0, nVtemp_l[0]);
          hypre_BoomerAMGRelaxIF(Ann_l[0],
                                 nVtemp_l[0],
                                 nCF_marker_l[0],

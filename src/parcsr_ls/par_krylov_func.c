@@ -16,7 +16,7 @@ hypre_ParKrylovCAlloc( size_t               count,
                        size_t               elt_size,
                        HYPRE_MemoryLocation location )
 {
-   return( (void*) hypre_CTAlloc(char, count * elt_size, location) );
+   return ( (void*) hypre_CTAlloc(char, count * elt_size, location) );
 }
 
 /*--------------------------------------------------------------------------
@@ -28,7 +28,7 @@ hypre_ParKrylovFree( void *ptr )
 {
    HYPRE_Int ierr = 0;
 
-   hypre_TFree( ptr , HYPRE_MEMORY_HOST);
+   hypre_TFree( ptr, HYPRE_MEMORY_HOST);
 
    return ierr;
 }
@@ -98,7 +98,7 @@ hypre_ParKrylovDestroyVector( void *vvector )
 {
    hypre_ParVector *vector = (hypre_ParVector *) vvector;
 
-   return( hypre_ParVectorDestroy( vector ) );
+   return ( hypre_ParVectorDestroy( vector ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -181,9 +181,10 @@ hypre_ParKrylovInnerProd( void *x,
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_ParKrylovMassInnerProd( void *x,
-                          void **y, HYPRE_Int k, HYPRE_Int unroll, void  * result )
+                              void **y, HYPRE_Int k, HYPRE_Int unroll, void  * result )
 {
-   return ( hypre_ParVectorMassInnerProd( (hypre_ParVector *) x,(hypre_ParVector **) y, k, unroll, (HYPRE_Real*)result ) );
+   return ( hypre_ParVectorMassInnerProd( (hypre_ParVector *) x,(hypre_ParVector **) y, k, unroll,
+                                          (HYPRE_Real*)result ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -191,10 +192,11 @@ hypre_ParKrylovMassInnerProd( void *x,
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_ParKrylovMassDotpTwo( void *x, void *y,
-                          void **z, HYPRE_Int k, HYPRE_Int unroll, void  *result_x, void *result_y )
+                            void **z, HYPRE_Int k, HYPRE_Int unroll, void  *result_x, void *result_y )
 {
-   return ( hypre_ParVectorMassDotpTwo( (hypre_ParVector *) x, (hypre_ParVector *) y, (hypre_ParVector **) z, k,
-            unroll, (HYPRE_Real *)result_x, (HYPRE_Real *)result_y ) );
+   return ( hypre_ParVectorMassDotpTwo( (hypre_ParVector *) x, (hypre_ParVector *) y,
+                                        (hypre_ParVector **) z, k,
+                                        unroll, (HYPRE_Real *)result_x, (HYPRE_Real *)result_y ) );
 }
 
 
@@ -300,5 +302,5 @@ hypre_ParKrylovIdentity( void *vdata,
                          void *x     )
 
 {
-   return( hypre_ParKrylovCopyVector( b, x ) );
+   return ( hypre_ParKrylovCopyVector( b, x ) );
 }

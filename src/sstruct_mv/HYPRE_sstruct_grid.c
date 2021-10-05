@@ -206,9 +206,9 @@ HYPRE_SStructGridSetExtents( HYPRE_SStructGrid  grid,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_SStructGridSetVariables( HYPRE_SStructGrid      grid,
-                                   HYPRE_Int              part,
-                                   HYPRE_Int              nvars,
-                                   HYPRE_SStructVariable *vartypes )
+                                         HYPRE_Int              part,
+                                         HYPRE_Int              nvars,
+                                         HYPRE_SStructVariable *vartypes )
 {
    hypre_SStructPGrid  *pgrid = hypre_SStructGridPGrid(grid, part);
 
@@ -238,7 +238,7 @@ HYPRE_SStructGridAddVariables( HYPRE_SStructGrid      grid,
    /* allocate more space if necessary */
    if ((nucvars % memchunk) == 0)
    {
-      ucvars = hypre_TReAlloc(ucvars,  hypre_SStructUCVar *, 
+      ucvars = hypre_TReAlloc(ucvars,  hypre_SStructUCVar *,
                               (nucvars + memchunk), HYPRE_MEMORY_HOST);
    }
 
@@ -397,9 +397,9 @@ HYPRE_SStructGridSetNeighborPart( HYPRE_SStructGrid  grid,
    /* allocate more memory if needed */
    if ((nneighbors[part] % memchunk) == 0)
    {
-      neighbors[part] = hypre_TReAlloc(neighbors[part],  hypre_SStructNeighbor, 
+      neighbors[part] = hypre_TReAlloc(neighbors[part],  hypre_SStructNeighbor,
                                        (nneighbors[part] + memchunk), HYPRE_MEMORY_HOST);
-      nbor_offsets[part] = hypre_TReAlloc(nbor_offsets[part],  hypre_Index, 
+      nbor_offsets[part] = hypre_TReAlloc(nbor_offsets[part],  hypre_Index,
                                           (nneighbors[part] + memchunk), HYPRE_MEMORY_HOST);
    }
 
@@ -490,9 +490,9 @@ HYPRE_SStructGridSetSharedPart( HYPRE_SStructGrid  grid,
    /* allocate more memory if needed */
    if ((nneighbors[part] % memchunk) == 0)
    {
-      neighbors[part] = hypre_TReAlloc(neighbors[part],  hypre_SStructNeighbor, 
+      neighbors[part] = hypre_TReAlloc(neighbors[part],  hypre_SStructNeighbor,
                                        (nneighbors[part] + memchunk), HYPRE_MEMORY_HOST);
-      nbor_offsets[part] = hypre_TReAlloc(nbor_offsets[part],  hypre_Index, 
+      nbor_offsets[part] = hypre_TReAlloc(nbor_offsets[part],  hypre_Index,
                                           (nneighbors[part] + memchunk), HYPRE_MEMORY_HOST);
    }
 
@@ -630,7 +630,7 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
     * actually live anywhere on the global grid.
     *
     * This is not an issue for cell-centered variables.
-    */ 
+    */
 
    for (part = 0; part < nparts; part++)
    {
@@ -657,7 +657,7 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
    {
       hypre_SStructPGridAssemble(pgrids[part]);
    }
-   
+
    /*-------------------------------------------------------------
     * re-organize u-variables to reference via local cell rank
     *-------------------------------------------------------------*/
@@ -787,7 +787,8 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
          }
 
          /* Set up vneighbors for this (part, var) */
-         vneighbors[part][var] = hypre_TAlloc(hypre_SStructNeighbor,  nvneighbors[part][var], HYPRE_MEMORY_HOST);
+         vneighbors[part][var] = hypre_TAlloc(hypre_SStructNeighbor,  nvneighbors[part][var],
+                                              HYPRE_MEMORY_HOST);
          vb = 0;
          for (b = 0; b < nneighbors[part]; b++)
          {
@@ -875,7 +876,7 @@ HYPRE_SStructGridSetPeriodic( HYPRE_SStructGrid  grid,
 
 HYPRE_Int
 HYPRE_SStructGridSetNumGhost( HYPRE_SStructGrid grid,
-                              HYPRE_Int      *num_ghost)       
+                              HYPRE_Int      *num_ghost)
 {
    hypre_SStructGridSetNumGhost(grid, num_ghost);
 

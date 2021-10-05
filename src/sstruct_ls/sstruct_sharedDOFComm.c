@@ -60,7 +60,7 @@ hypre_MaxwellOffProcRowDestroy(void *OffProcRow_vdata)
  * hypre_SStructSharedDOF_ParcsrMatRowsComm
  *   Given a sstruct_grid & parcsr matrix with rows corresponding to the
  *   sstruct_grid, determine and extract the rows that must be communicated.
- *   These rows are for shared dof that geometrically lie on processor 
+ *   These rows are for shared dof that geometrically lie on processor
  *   boundaries but internally are stored on one processor.
  *   Algo:
  *       for each cellbox
@@ -74,7 +74,7 @@ hypre_MaxwellOffProcRowDestroy(void *OffProcRow_vdata)
  *                 a) if belong on another proc, these are the recvs:
  *                    count and prepare the communication buffers and
  *                    values.
- *          
+ *
  *         SENDs:
  *          i)  form layer of cells that is one layer off cellbox
  *              (stretches in the appropriate direction)
@@ -86,7 +86,7 @@ hypre_MaxwellOffProcRowDestroy(void *OffProcRow_vdata)
  *                    values.
  *
  * Note: For the recv data, the dof can come from only one processor.
- *       For the send data, the dof can go to more than one processor 
+ *       For the send data, the dof can go to more than one processor
  *       (the same dof is on the boundary of several cells).
  *--------------------------------------------------------------------------*/
 HYPRE_Int
@@ -111,7 +111,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
    hypre_Box             *box, *cellbox, vbox, boxman_entry_box;
 
    hypre_Index            loop_size, start, lindex;
-   HYPRE_BigInt           start_rank, end_rank, rank; 
+   HYPRE_BigInt           start_rank, end_rank, rank;
 
    HYPRE_Int              i, j, k, m, n, t, part, var, nvars;
 
@@ -129,7 +129,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
    HYPRE_Int              proc, nprocs, myproc;
    HYPRE_Int             *SendToProcs, *RecvFromProcs;
    HYPRE_Int            **send_RowsNcols;       /* buffer for rows & ncols */
-   HYPRE_Int             *send_RowsNcols_alloc; 
+   HYPRE_Int             *send_RowsNcols_alloc;
    HYPRE_Int             *send_ColsData_alloc;
    HYPRE_Int             *tot_nsendRowsNcols, *tot_sendColsData;
    HYPRE_Real           **vals;  /* buffer for cols & data */
@@ -180,14 +180,14 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
    }
    HYPRE_SStructGridAssemble(cell_ssgrid);
    hypre_TFree(vartypes, HYPRE_MEMORY_HOST);
-   
+
    /* box algebra to determine communication */
    SendToProcs    = hypre_CTAlloc(HYPRE_Int,  nprocs, HYPRE_MEMORY_HOST);
    RecvFromProcs  = hypre_CTAlloc(HYPRE_Int,  nprocs, HYPRE_MEMORY_HOST);
 
    send_RowsNcols      = hypre_TAlloc(HYPRE_Int *,  nprocs, HYPRE_MEMORY_HOST);
-   send_RowsNcols_alloc= hypre_TAlloc(HYPRE_Int ,  nprocs, HYPRE_MEMORY_HOST);
-   send_ColsData_alloc = hypre_TAlloc(HYPRE_Int ,  nprocs, HYPRE_MEMORY_HOST);
+   send_RowsNcols_alloc= hypre_TAlloc(HYPRE_Int,  nprocs, HYPRE_MEMORY_HOST);
+   send_ColsData_alloc = hypre_TAlloc(HYPRE_Int,  nprocs, HYPRE_MEMORY_HOST);
    vals                = hypre_TAlloc(HYPRE_Real *,  nprocs, HYPRE_MEMORY_HOST);
    tot_nsendRowsNcols  = hypre_CTAlloc(HYPRE_Int,  nprocs, HYPRE_MEMORY_HOST);
    tot_sendColsData    = hypre_CTAlloc(HYPRE_Int,  nprocs, HYPRE_MEMORY_HOST);
@@ -200,7 +200,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
       vals[i]= hypre_TAlloc(HYPRE_Real,  2000, HYPRE_MEMORY_HOST); /* initial allocation */
       send_ColsData_alloc[i]= 2000;
    }
-  
+
    for (part= 0; part< nparts; part++)
    {
       pgrid= hypre_SStructGridPGrid(grid, part);
@@ -233,7 +233,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                                   hypre_BoxIMin(&vbox));
 
             /* boundary layer box depends on variable type */
-            switch(var)
+            switch (var)
             {
                case 1:  /* node based */
                {
@@ -286,19 +286,19 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                   hypre_BoxIMax(box)[1]--; /* contract */
 
                   /* send boxes are cell-based stretching out of cellbox - i.e., cells
-                     that have these edges as boundary */ 
+                     that have these edges as boundary */
                   send_slabs= hypre_BoxArrayCreate(nbdry_slabs, ndim);
-   
+
                   box= hypre_BoxArrayBox(send_slabs, 0);
                   hypre_CopyBox(cellbox, box);
                   hypre_BoxIMax(box)[0]++;
                   hypre_BoxIMin(box)[0]= hypre_BoxIMax(box)[0];
 
                   hypre_BoxIMax(box)[2]++; /* stretch one layer +/- k*/
-                  hypre_BoxIMin(box)[2]--; 
+                  hypre_BoxIMin(box)[2]--;
 
                   hypre_BoxIMax(box)[1]++; /* stretch one layer +/- j*/
-                  hypre_BoxIMin(box)[1]--; 
+                  hypre_BoxIMin(box)[1]--;
 
 
                   box= hypre_BoxArrayBox(send_slabs, 1);
@@ -307,10 +307,10 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                   hypre_BoxIMax(box)[0]= hypre_BoxIMin(box)[0];
 
                   hypre_BoxIMax(box)[2]++; /* stretch one layer +/- k*/
-                  hypre_BoxIMin(box)[2]--; 
+                  hypre_BoxIMin(box)[2]--;
 
                   hypre_BoxIMax(box)[1]++; /* stretch one layer +/- j*/
-                  hypre_BoxIMin(box)[1]--; 
+                  hypre_BoxIMin(box)[1]--;
 
 
                   box= hypre_BoxArrayBox(send_slabs, 2);
@@ -359,9 +359,9 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                   hypre_BoxIMax(box)[0]= hypre_BoxIMin(box)[0];
 
                   /* send boxes are cell-based stretching out of cellbox - i.e., cells
-                     that have these edges as boundary */ 
+                     that have these edges as boundary */
                   send_slabs= hypre_BoxArrayCreate(nbdry_slabs, ndim);
-   
+
                   box= hypre_BoxArrayBox(send_slabs, 0);
                   hypre_CopyBox(cellbox, box);
                   hypre_BoxIMax(box)[0]++;
@@ -477,7 +477,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                   hypre_BoxIMin(box)[1]= hypre_BoxIMax(box)[1];
 
                   hypre_BoxIMax(box)[2]++; /* stretch one layer +/- k*/
-                  hypre_BoxIMin(box)[2]--; 
+                  hypre_BoxIMin(box)[2]--;
 
                   box= hypre_BoxArrayBox(send_slabs, 1);
                   hypre_CopyBox(cellbox, box);
@@ -489,16 +489,16 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
 
                   box= hypre_BoxArrayBox(send_slabs, 2);
                   hypre_CopyBox(cellbox, box);
-                  hypre_BoxIMax(box)[2]++; 
+                  hypre_BoxIMax(box)[2]++;
                   hypre_BoxIMin(box)[2]= hypre_BoxIMax(box)[2];
 
                   box= hypre_BoxArrayBox(send_slabs, 3);
                   hypre_CopyBox(cellbox, box);
-                  hypre_BoxIMin(box)[2]--; 
+                  hypre_BoxIMin(box)[2]--;
                   hypre_BoxIMax(box)[2]= hypre_BoxIMin(box)[2];
 
                   break;
-               }  
+               }
 
                case 6:  /* y-edge based */
                {
@@ -540,7 +540,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                   hypre_BoxIMin(box)[0]= hypre_BoxIMax(box)[0];
 
                   hypre_BoxIMax(box)[2]++; /* stretch one layer +/- k*/
-                  hypre_BoxIMin(box)[2]--; 
+                  hypre_BoxIMin(box)[2]--;
 
                   box= hypre_BoxArrayBox(send_slabs, 1);
                   hypre_CopyBox(cellbox, box);
@@ -552,12 +552,12 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
 
                   box= hypre_BoxArrayBox(send_slabs, 2);
                   hypre_CopyBox(cellbox, box);
-                  hypre_BoxIMax(box)[2]++; 
+                  hypre_BoxIMax(box)[2]++;
                   hypre_BoxIMin(box)[2]= hypre_BoxIMax(box)[2];
 
                   box= hypre_BoxArrayBox(send_slabs, 3);
                   hypre_CopyBox(cellbox, box);
-                  hypre_BoxIMin(box)[2]--; 
+                  hypre_BoxIMin(box)[2]--;
                   hypre_BoxIMax(box)[2]= hypre_BoxIMin(box)[2];
 
                   break;
@@ -603,7 +603,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                   hypre_BoxIMin(box)[1]= hypre_BoxIMax(box)[1];
 
                   hypre_BoxIMax(box)[0]++; /* stretch one layer +/- i*/
-                  hypre_BoxIMin(box)[0]--; 
+                  hypre_BoxIMin(box)[0]--;
 
                   box= hypre_BoxArrayBox(send_slabs, 1);
                   hypre_CopyBox(cellbox, box);
@@ -615,12 +615,12 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
 
                   box= hypre_BoxArrayBox(send_slabs, 2);
                   hypre_CopyBox(cellbox, box);
-                  hypre_BoxIMax(box)[0]++; 
+                  hypre_BoxIMax(box)[0]++;
                   hypre_BoxIMin(box)[0]= hypre_BoxIMax(box)[0];
 
                   box= hypre_BoxArrayBox(send_slabs, 3);
                   hypre_CopyBox(cellbox, box);
-                  hypre_BoxIMin(box)[0]--; 
+                  hypre_BoxIMin(box)[0]--;
                   hypre_BoxIMax(box)[0]= hypre_BoxIMin(box)[0];
 
                   break;
@@ -648,7 +648,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                   }
                }
                hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
-                  
+
                /* determine send rows. Note the cell_boxman */
                box= hypre_BoxArrayBox(send_slabs, i);
                hypre_BoxManIntersect(cell_boxman, hypre_BoxIMin(box), hypre_BoxIMax(box),
@@ -663,7 +663,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                      hypre_BoxSetExtents(&boxman_entry_box, ilower, iupper);
                      hypre_IntersectBoxes(&boxman_entry_box, box, &boxman_entry_box);
 
-                     /* not correct box piece right now. Need to determine 
+                     /* not correct box piece right now. Need to determine
                         the correct var box - extend to var_box and then intersect
                         with vbox */
                      hypre_SubtractIndexes(hypre_BoxIMin(&boxman_entry_box),
@@ -676,8 +676,8 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                      if (SendToProcs[proc] > send_RowsNcols_alloc[proc])
                      {
                         send_RowsNcols_alloc[proc]= SendToProcs[proc];
-                        send_RowsNcols[proc]= 
-                           hypre_TReAlloc(send_RowsNcols[proc],  HYPRE_Int, 
+                        send_RowsNcols[proc]=
+                           hypre_TReAlloc(send_RowsNcols[proc],  HYPRE_Int,
                                           send_RowsNcols_alloc[proc], HYPRE_MEMORY_HOST);
                      }
 
@@ -705,7 +705,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                               send_RowsNcols[proc][tot_nsendRowsNcols[proc]]= rank;
                               tot_nsendRowsNcols[proc]++;
 
-                              HYPRE_ParCSRMatrixGetRow((HYPRE_ParCSRMatrix) A, rank, &n, 
+                              HYPRE_ParCSRMatrixGetRow((HYPRE_ParCSRMatrix) A, rank, &n,
                                                        &col_inds, &values);
                               send_RowsNcols[proc][tot_nsendRowsNcols[proc]]= n;
                               tot_nsendRowsNcols[proc]++;
@@ -714,7 +714,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                               if ( (tot_sendColsData[proc]+2*n) > send_ColsData_alloc[proc] )
                               {
                                  send_ColsData_alloc[proc]+= 2000;
-                                 vals[proc]= hypre_TReAlloc(vals[proc],  HYPRE_Real, 
+                                 vals[proc]= hypre_TReAlloc(vals[proc],  HYPRE_Real,
                                                             send_ColsData_alloc[proc], HYPRE_MEMORY_HOST);
                               }
                               for (k= 0; k< n; k++)
@@ -771,7 +771,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
    status  = hypre_CTAlloc(hypre_MPI_Status,  num_sends+num_recvs, HYPRE_MEMORY_HOST);
 
    /* send row size data */
-   j= 0; 
+   j= 0;
    rbuffer_RowsNcols= hypre_TAlloc(HYPRE_Int *,  nprocs, HYPRE_MEMORY_HOST);
    rbuffer_ColsData = hypre_TAlloc(HYPRE_Real *,  nprocs, HYPRE_MEMORY_HOST);
 
@@ -780,12 +780,12 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
       if (RecvFromProcs[proc])
       {
          rbuffer_RowsNcols[proc]= hypre_TAlloc(HYPRE_Int,  2*RecvFromProcs[proc], HYPRE_MEMORY_HOST);
-         hypre_MPI_Irecv(rbuffer_RowsNcols[proc], 2*RecvFromProcs[proc], HYPRE_MPI_INT, 
+         hypre_MPI_Irecv(rbuffer_RowsNcols[proc], 2*RecvFromProcs[proc], HYPRE_MPI_INT,
                          proc, 0, grid_comm, &requests[j++]);
       }  /* if (RecvFromProcs[proc]) */
 
    }     /* for (proc= 0; proc< nprocs; proc++) */
-        
+
    for (proc= 0; proc< nprocs; proc++)
    {
       if (tot_nsendRowsNcols[proc])
@@ -837,7 +837,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                          proc, 1, grid_comm, &requests[j++]);
       }  /* if (RecvFromProcs[proc]) */
    }     /* for (proc= 0; proc< nprocs; proc++) */
-                                                                                                                                    
+
    for (proc= 0; proc< nprocs; proc++)
    {
       if (tot_sendColsData[proc])
@@ -846,7 +846,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                          1, grid_comm, &requests[j++]);
       }
    }
-                                                                                                                                    
+
    hypre_MPI_Waitall(j, requests, status);
 
    /* unpack data */
@@ -891,6 +891,6 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
    hypre_TFree(starts, HYPRE_MEMORY_HOST);
 
    *OffProcRows_ptr= OffProcRows;
-            
+
    return ierr;
 }

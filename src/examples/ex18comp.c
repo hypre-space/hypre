@@ -146,7 +146,8 @@ int main (int argc, char *argv[])
    {
       int part = 0;
       HYPRE_SStructVariable vartypes[NVARS] = {HYPRE_SSTRUCT_VARIABLE_CELL,
-                                               HYPRE_SSTRUCT_VARIABLE_CELL};
+                                               HYPRE_SSTRUCT_VARIABLE_CELL
+                                              };
 
       /* Create an empty 2D grid object */
       HYPRE_SStructGridCreate(MPI_COMM_WORLD, NDIM, NPARTS, &grid);
@@ -383,7 +384,7 @@ int main (int argc, char *argv[])
       HYPRE_SStructVectorInitialize(b);
       HYPRE_SStructVectorInitialize(x);
 
-     /* Set the values */
+      /* Set the values */
       for (i = 0; i < nvalues; i ++)
       {
          values[i] = 1.0;

@@ -211,7 +211,9 @@ void ComputeFEMQ3 (double S[16][16], double F[16], double h)
    /* The stiffness matrix is symmetric */
    for (i = 1; i < 16; i++)
       for (j = 0; j < i; j++)
+      {
          S[i][j] = S[j][i];
+      }
 
    F[ 0] = h2_64;
    F[ 1] = 3*h2_64;
@@ -356,7 +358,8 @@ int main (int argc, char *argv[])
                                           HYPRE_SSTRUCT_VARIABLE_CELL,
                                           HYPRE_SSTRUCT_VARIABLE_CELL,
                                           HYPRE_SSTRUCT_VARIABLE_CELL,
-                                          HYPRE_SSTRUCT_VARIABLE_CELL};
+                                          HYPRE_SSTRUCT_VARIABLE_CELL
+                                         };
          for (i = 0; i < nparts; i++)
          {
             HYPRE_SStructGridSetVariables(grid, i, nvars, vars);
@@ -385,7 +388,8 @@ int main (int argc, char *argv[])
          int ordering[48] = { 0,-1,-1,   3, 0,-1,   4, 0,-1,   0,+1,-1,
                               1,-1, 0,   5, 0, 0,   6, 0, 0,   1,+1, 0,
                               2,-1, 0,   7, 0, 0,   8, 0, 0,   2,+1, 0,
-                              0,-1,+1,   3, 0,+1,   4, 0,+1,   0,+1,+1  };
+                              0,-1,+1,   3, 0,+1,   4, 0,+1,   0,+1,+1
+                            };
 
          HYPRE_SStructGridSetFEMOrdering(grid, part, ordering);
       }
@@ -456,16 +460,19 @@ int main (int argc, char *argv[])
                {
                   int ii, jj, bdy, dd;
                   int set_bc[4] = {0, 0, 0, 0};
-                  int bc_dofs[4][4] = {{ 0,  4,  8, 12},  /* x = 0 boundary */
-                                       { 0,  1,  2,  3},  /* y = 0 boundary */
-                                       { 3,  7, 11, 15},  /* x = 1 boundary */
-                                       {12, 13, 14, 15}}; /* y = 1 boundary */
+                  int bc_dofs[4][4] =
+                  {
+                     { 0,  4,  8, 12},  /* x = 0 boundary */
+                     { 0,  1,  2,  3},  /* y = 0 boundary */
+                     { 3,  7, 11, 15},  /* x = 1 boundary */
+                     {12, 13, 14, 15}   /* y = 1 boundary */
+                  };
 
                   /* Determine the boundary conditions to be set */
-                  if (index[0] == 1)   set_bc[0] = 1;  /* x = 0 boundary */
-                  if (index[1] == 1)   set_bc[1] = 1;  /* y = 0 boundary */
-                  if (index[0] == N*n) set_bc[2] = 1;  /* x = 1 boundary */
-                  if (index[1] == N*n) set_bc[3] = 1;  /* y = 1 boundary */
+                  if (index[0] == 1)   { set_bc[0] = 1; } /* x = 0 boundary */
+                  if (index[1] == 1)   { set_bc[1] = 1; } /* y = 0 boundary */
+                  if (index[0] == N*n) { set_bc[2] = 1; }  /* x = 1 boundary */
+                  if (index[1] == N*n) { set_bc[3] = 1; }  /* y = 1 boundary */
 
                   /* Modify the FEM matrix and rhs on each boundary by setting
                      rows and columns of S to the identity and F to zero */
@@ -527,7 +534,7 @@ int main (int argc, char *argv[])
          int ilower[2] = {1 + pi*n, 1 + pj*n};
          int iupper[2] = {n + pi*n, n + pj*n};
 
-         switch(var)
+         switch (var)
          {
             case 0: /* NODE */
                ilower[0]--;
@@ -643,7 +650,9 @@ int main (int argc, char *argv[])
 
          /* Save solution with replicated shared data */
          for (i = 0; i < nvalues; i++)
+         {
             fprintf(file, "%.14e\n", values[i]);
+         }
 
          fflush(file);
          fclose(file);

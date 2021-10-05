@@ -89,8 +89,10 @@ hypre_AuxParVectorInitialize_v2( hypre_AuxParVector *vector, HYPRE_MemoryLocatio
       HYPRE_Int max_off_proc_elmts = hypre_AuxParVectorMaxOffProcElmts(vector);
       if (max_off_proc_elmts > 0)
       {
-         hypre_AuxParVectorOffProcI(vector)    = hypre_CTAlloc(HYPRE_BigInt,  max_off_proc_elmts, HYPRE_MEMORY_HOST);
-         hypre_AuxParVectorOffProcData(vector) = hypre_CTAlloc(HYPRE_Complex, max_off_proc_elmts, HYPRE_MEMORY_HOST);
+         hypre_AuxParVectorOffProcI(vector)    = hypre_CTAlloc(HYPRE_BigInt,  max_off_proc_elmts,
+                                                               HYPRE_MEMORY_HOST);
+         hypre_AuxParVectorOffProcData(vector) = hypre_CTAlloc(HYPRE_Complex, max_off_proc_elmts,
+                                                               HYPRE_MEMORY_HOST);
       }
    }
 

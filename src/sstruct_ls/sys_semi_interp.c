@@ -44,7 +44,7 @@ hypre_SysSemiInterpSetup( void                 *sys_interp_vdata,
                           hypre_Index           findex,
                           hypre_Index           stride       )
 {
-	hypre_SysSemiInterpData  *sys_interp_data = (hypre_SysSemiInterpData  *)sys_interp_vdata;
+   hypre_SysSemiInterpData  *sys_interp_data = (hypre_SysSemiInterpData  *)sys_interp_vdata;
    void                    **sinterp_data;
 
    HYPRE_Int                 nvars;

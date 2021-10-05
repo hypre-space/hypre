@@ -33,17 +33,17 @@ main( HYPRE_Int   argc,
 
    if (my_id == 0)
    {
-   	As = hypre_CSRMatrixRead("inpr");
-   	hypre_printf(" read input A\n");
-   	Bs = hypre_CSRMatrixRead("input");
-   	hypre_printf(" read input B\n");
+      As = hypre_CSRMatrixRead("inpr");
+      hypre_printf(" read input A\n");
+      Bs = hypre_CSRMatrixRead("input");
+      hypre_printf(" read input B\n");
    }
    A = hypre_CSRMatrixToParCSRMatrix(hypre_MPI_COMM_WORLD, As, row_starts,
-	col_starts);
+                                     col_starts);
    row_starts = hypre_ParCSRMatrixRowStarts(A);
    col_starts = hypre_ParCSRMatrixColStarts(A);
    B = hypre_CSRMatrixToParCSRMatrix(hypre_MPI_COMM_WORLD, Bs, col_starts,
-	row_starts);
+                                     row_starts);
    C = hypre_ParMatmul(B,A);
    hypre_ParCSRMatrixPrint(B, "echo_B" );
    hypre_ParCSRMatrixPrint(A, "echo_A" );
@@ -51,8 +51,8 @@ main( HYPRE_Int   argc,
 
    if (my_id == 0)
    {
-	hypre_CSRMatrixDestroy(As);
-   	hypre_CSRMatrixDestroy(Bs);
+      hypre_CSRMatrixDestroy(As);
+      hypre_CSRMatrixDestroy(Bs);
    }
    hypre_ParCSRMatrixDestroy(A);
    hypre_ParCSRMatrixDestroy(B);

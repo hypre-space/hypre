@@ -199,7 +199,9 @@ int main (int argc, char *argv[])
          int offsets[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
 
          for (entry = 0; entry < 5; entry++)
+         {
             HYPRE_StructStencilSetElement(stencil, entry, offsets[entry]);
+         }
       }
    }
 
@@ -219,7 +221,9 @@ int main (int argc, char *argv[])
       values = (double*) calloc(nvalues, sizeof(double));
 
       for (j = 0; j < nentries; j++)
+      {
          stencil_indices[j] = j;
+      }
 
       /* Set the standard stencil at each grid point,
          we will fix the boundaries later */
@@ -227,7 +231,9 @@ int main (int argc, char *argv[])
       {
          values[i] = 4.0;
          for (j = 1; j < nentries; j++)
+         {
             values[i+j] = -1.0;
+         }
       }
 
       HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, nentries,
@@ -250,7 +256,9 @@ int main (int argc, char *argv[])
 
       values = (double*) calloc(nvalues, sizeof(double));
       for (j = 0; j < nvalues; j++)
+      {
          values[j] = 0.0;
+      }
 
       /* Recall: pi and pj describe position in the processor grid */
       if (pj == 0)
@@ -335,13 +343,17 @@ int main (int argc, char *argv[])
       HYPRE_StructVectorInitialize(b);
       HYPRE_StructVectorInitialize(x);
 
-     /* Set the values */
+      /* Set the values */
       for (i = 0; i < nvalues; i ++)
+      {
          values[i] = h2;
+      }
       HYPRE_StructVectorSetBoxValues(b, ilower, iupper, values);
 
       for (i = 0; i < nvalues; i ++)
+      {
          values[i] = 0.0;
+      }
       HYPRE_StructVectorSetBoxValues(x, ilower, iupper, values);
 
       free(values);
@@ -375,7 +387,7 @@ int main (int argc, char *argv[])
 
       /* Set the preconditioner and solve */
       HYPRE_StructPCGSetPrecond(solver, HYPRE_StructSMGSolve,
-                                  HYPRE_StructSMGSetup, precond);
+                                HYPRE_StructSMGSetup, precond);
       HYPRE_StructPCGSetup(solver, A, b, x);
       HYPRE_StructPCGSolve(solver, A, b, x);
 
@@ -437,7 +449,9 @@ int main (int argc, char *argv[])
       k = 0;
       for (j = 0; j < n; j++)
          for (i = 0; i < n; i++)
+         {
             fprintf(file, "%06d %.14e\n", pj*N*n*n+pi*n+j*N*n+i, values[k++]);
+         }
 
       fflush(file);
       fclose(file);
@@ -445,7 +459,9 @@ int main (int argc, char *argv[])
 
       /* save global finite element mesh */
       if (myid == 0)
+      {
          GLVis_PrintGlobalSquareMesh("vis/ex3.mesh", N*n-1);
+      }
 #endif
    }
 

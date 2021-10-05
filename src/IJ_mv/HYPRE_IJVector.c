@@ -218,7 +218,7 @@ HYPRE_IJVectorSetValues( HYPRE_IJVector        vector,
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 
-   if (nvalues == 0) return hypre_error_flag;
+   if (nvalues == 0) { return hypre_error_flag; }
 
    if (!vec)
    {
@@ -250,7 +250,7 @@ HYPRE_IJVectorSetValues( HYPRE_IJVector        vector,
       else
 #endif
       {
-         return( hypre_IJVectorSetValuesPar(vec, nvalues, indices, values) );
+         return ( hypre_IJVectorSetValuesPar(vec, nvalues, indices, values) );
       }
    }
    else
@@ -273,7 +273,7 @@ HYPRE_IJVectorAddToValues( HYPRE_IJVector        vector,
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 
-   if (nvalues == 0) return hypre_error_flag;
+   if (nvalues == 0) { return hypre_error_flag; }
 
    if (!vec)
    {
@@ -338,12 +338,12 @@ HYPRE_IJVectorAssemble( HYPRE_IJVector vector )
 
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         return( hypre_IJVectorAssembleParDevice(vec) );
+         return ( hypre_IJVectorAssembleParDevice(vec) );
       }
       else
 #endif
       {
-         return( hypre_IJVectorAssemblePar(vec) );
+         return ( hypre_IJVectorAssemblePar(vec) );
       }
    }
    else
@@ -366,7 +366,7 @@ HYPRE_IJVectorGetValues( HYPRE_IJVector      vector,
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 
-   if (nvalues == 0) return hypre_error_flag;
+   if (nvalues == 0) { return hypre_error_flag; }
 
    if (!vec)
    {
@@ -388,7 +388,7 @@ HYPRE_IJVectorGetValues( HYPRE_IJVector      vector,
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
-      return( hypre_IJVectorGetValuesPar(vec, nvalues, indices, values) );
+      return ( hypre_IJVectorGetValuesPar(vec, nvalues, indices, values) );
    }
    else
    {
@@ -416,7 +416,7 @@ HYPRE_IJVectorSetMaxOffProcElmts( HYPRE_IJVector vector,
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
-      return( hypre_IJVectorSetMaxOffProcElmtsPar(vec, max_off_proc_elmts));
+      return ( hypre_IJVectorSetMaxOffProcElmtsPar(vec, max_off_proc_elmts));
    }
    else
    {

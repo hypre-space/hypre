@@ -91,7 +91,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
    if (alpha == 0.0)
    {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < num_rows*num_vectors; i++)
       {
@@ -122,7 +122,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
       if (temp == 0.0)
       {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i = 0; i < num_rows*num_vectors; i++)
          {
@@ -132,7 +132,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
       else if (temp == 1.0)
       {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i = 0; i < num_rows*num_vectors; i++)
          {
@@ -142,7 +142,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
       else if (temp == -1.0)
       {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i = 0; i < num_rows*num_vectors; i++)
          {
@@ -152,7 +152,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
       else
       {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i = 0; i < num_rows*num_vectors; i++)
          {
@@ -167,7 +167,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
       if (num_rownnz < xpar*num_rows)
       {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,j,jj,m,tempx) HYPRE_SMP_SCHEDULE
+         #pragma omp parallel for private(i,j,jj,m,tempx) HYPRE_SMP_SCHEDULE
 #endif
          for (i = 0; i < num_rownnz; i++)
          {
@@ -186,7 +186,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
       else
       {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,j,jj,tempx) HYPRE_SMP_SCHEDULE
+         #pragma omp parallel for private(i,j,jj,tempx) HYPRE_SMP_SCHEDULE
 #endif
          for (i = 0; i < num_rows; i++)
          {
@@ -209,7 +209,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
       if (alpha != 1.0)
       {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i = 0; i < num_rows*num_vectors; i++)
          {
@@ -225,7 +225,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
       if (temp == 0.0)
       {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i = 0; i < num_rows; i++)
          {
@@ -235,7 +235,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
          if (alpha == 1.0)
          {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,j,m,tempx) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i,j,m,tempx) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < num_rownnz; i++)
             {
@@ -251,7 +251,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
          else if (alpha == -1.0)
          {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,j,m,tempx) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i,j,m,tempx) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < num_rownnz; i++)
             {
@@ -267,7 +267,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
          else
          {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,j,m,tempx) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i,j,m,tempx) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < num_rownnz; i++)
             {
@@ -286,7 +286,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
          if (alpha == 1.0)
          {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < num_rows; i++)
             {
@@ -294,7 +294,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,j,m,tempx) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i,j,m,tempx) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < num_rownnz; i++)
             {
@@ -310,7 +310,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
          else if (alpha == -1.0)
          {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < num_rows; i++)
             {
@@ -318,7 +318,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,j,m,tempx) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i,j,m,tempx) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < num_rownnz; i++)
             {
@@ -334,7 +334,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
          else
          {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < num_rows; i++)
             {
@@ -342,7 +342,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,j,m,tempx) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i,j,m,tempx) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < num_rownnz; i++)
             {
@@ -361,7 +361,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
          if (alpha == 1.0)
          {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < num_rows; i++)
             {
@@ -369,7 +369,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,j,m,tempx) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i,j,m,tempx) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < num_rownnz; i++)
             {
@@ -385,7 +385,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
          else if (alpha == -1.0)
          {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < num_rows; i++)
             {
@@ -393,7 +393,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,j,m,tempx) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i,j,m,tempx) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < num_rownnz; i++)
             {
@@ -409,7 +409,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
          else
          {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < num_rows; i++)
             {
@@ -417,7 +417,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,j,m,tempx) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i,j,m,tempx) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < num_rownnz; i++)
             {
@@ -436,7 +436,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
          if (alpha == 1.0)
          {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < num_rows; i++)
             {
@@ -444,7 +444,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,j,m,tempx) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i,j,m,tempx) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < num_rownnz; i++)
             {
@@ -460,7 +460,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
          else if (-1 == alpha)
          {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < num_rows; i++)
             {
@@ -468,7 +468,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,j,m,tempx) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i,j,m,tempx) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < num_rownnz; i++)
             {
@@ -484,7 +484,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
          else
          {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < num_rows; i++)
             {
@@ -492,7 +492,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
             }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,j,m,tempx) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i,j,m,tempx) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < num_rownnz; i++)
             {
@@ -510,7 +510,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
    else
    {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel private(i,jj,tempx)
+      #pragma omp parallel private(i,jj,tempx)
 #endif
       {
          HYPRE_Int iBegin = hypre_CSRMatrixGetLoadBalancedPartitionBegin(A);
@@ -800,13 +800,19 @@ hypre_CSRMatrixMatvecTHost( HYPRE_Complex    alpha,
    hypre_assert( num_vectors == hypre_VectorNumVectors(y) );
 
    if (num_rows != x_size)
+   {
       ierr = 1;
+   }
 
    if (num_cols != y_size)
+   {
       ierr = 2;
+   }
 
    if (num_rows != x_size && num_cols != y_size)
+   {
       ierr = 3;
+   }
    /*-----------------------------------------------------------------------
     * Do (alpha == 0.0) computation - RDF: USE MACHINE EPS
     *-----------------------------------------------------------------------*/
@@ -814,10 +820,12 @@ hypre_CSRMatrixMatvecTHost( HYPRE_Complex    alpha,
    if (alpha == 0.0)
    {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < num_cols*num_vectors; i++)
+      {
          y_data[i] *= beta;
+      }
 
       return ierr;
    }
@@ -839,18 +847,22 @@ hypre_CSRMatrixMatvecTHost( HYPRE_Complex    alpha,
       if (temp == 0.0)
       {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i = 0; i < num_cols*num_vectors; i++)
+         {
             y_data[i] = 0.0;
+         }
       }
       else
       {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i = 0; i < num_cols*num_vectors; i++)
+         {
             y_data[i] *= temp;
+         }
       }
    }
 
@@ -866,13 +878,13 @@ hypre_CSRMatrixMatvecTHost( HYPRE_Complex    alpha,
       {
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel private(i,jj,j,my_thread_num,offset)
+         #pragma omp parallel private(i,jj,j,my_thread_num,offset)
 #endif
          {
             my_thread_num = hypre_GetThreadNum();
             offset =  y_size*my_thread_num;
 #ifdef HYPRE_USING_OPENMP
-#pragma omp for HYPRE_SMP_SCHEDULE
+            #pragma omp for HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < num_rows; i++)
             {
@@ -885,7 +897,7 @@ hypre_CSRMatrixMatvecTHost( HYPRE_Complex    alpha,
 
             /* implied barrier (for threads)*/
 #ifdef HYPRE_USING_OPENMP
-#pragma omp for HYPRE_SMP_SCHEDULE
+            #pragma omp for HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < y_size; i++)
             {
@@ -951,7 +963,7 @@ hypre_CSRMatrixMatvecTHost( HYPRE_Complex    alpha,
    if (alpha != 1.0)
    {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < num_cols*num_vectors; i++)
       {
@@ -1043,13 +1055,19 @@ hypre_CSRMatrixMatvec_FF( HYPRE_Complex    alpha,
     *--------------------------------------------------------------------*/
 
    if (num_cols != x_size)
+   {
       ierr = 1;
+   }
 
    if (num_rows != y_size)
+   {
       ierr = 2;
+   }
 
    if (num_cols != x_size && num_rows != y_size)
+   {
       ierr = 3;
+   }
 
    /*-----------------------------------------------------------------------
     * Do (alpha == 0.0) computation - RDF: USE MACHINE EPS
@@ -1058,10 +1076,10 @@ hypre_CSRMatrixMatvec_FF( HYPRE_Complex    alpha,
    if (alpha == 0.0)
    {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < num_rows; i++)
-         if (CF_marker_x[i] == fpt) y_data[i] *= beta;
+         if (CF_marker_x[i] == fpt) { y_data[i] *= beta; }
 
       return ierr;
    }
@@ -1077,18 +1095,18 @@ hypre_CSRMatrixMatvec_FF( HYPRE_Complex    alpha,
       if (temp == 0.0)
       {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i = 0; i < num_rows; i++)
-            if (CF_marker_x[i] == fpt) y_data[i] = 0.0;
+            if (CF_marker_x[i] == fpt) { y_data[i] = 0.0; }
       }
       else
       {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i = 0; i < num_rows; i++)
-            if (CF_marker_x[i] == fpt) y_data[i] *= temp;
+            if (CF_marker_x[i] == fpt) { y_data[i] *= temp; }
       }
    }
 
@@ -1097,7 +1115,7 @@ hypre_CSRMatrixMatvec_FF( HYPRE_Complex    alpha,
     *-----------------------------------------------------------------*/
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,jj) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i,jj) HYPRE_SMP_SCHEDULE
 #endif
 
    for (i = 0; i < num_rows; i++)
@@ -1106,7 +1124,7 @@ hypre_CSRMatrixMatvec_FF( HYPRE_Complex    alpha,
       {
          temp = y_data[i];
          for (jj = A_i[i]; jj < A_i[i+1]; jj++)
-            if (CF_marker_y[A_j[jj]] == fpt) temp += A_data[jj] * x_data[A_j[jj]];
+            if (CF_marker_y[A_j[jj]] == fpt) { temp += A_data[jj] * x_data[A_j[jj]]; }
          y_data[i] = temp;
       }
    }
@@ -1118,10 +1136,10 @@ hypre_CSRMatrixMatvec_FF( HYPRE_Complex    alpha,
    if (alpha != 1.0)
    {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < num_rows; i++)
-         if (CF_marker_x[i] == fpt) y_data[i] *= alpha;
+         if (CF_marker_x[i] == fpt) { y_data[i] *= alpha; }
    }
 
    return ierr;

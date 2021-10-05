@@ -118,7 +118,7 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
 
-   if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
+   if (my_id == (num_procs -1)) { total_global_cpts = num_cpts_global[1]; }
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
    n_Cpts = num_cpts_global[1]-num_cpts_global[0];
 
@@ -145,7 +145,7 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
    startf_array = hypre_CTAlloc(HYPRE_Int, num_threads+1, HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel private(i,j,start,stop,startf,stopf,row)
+   #pragma omp parallel private(i,j,start,stop,startf,stopf,row)
 #endif
    {
       HYPRE_Int my_thread_num = hypre_GetThreadNum();
@@ -170,7 +170,7 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
       }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+      #pragma omp barrier
 #endif
       if (my_thread_num == 0)
       {
@@ -186,7 +186,8 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
             dof_func_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_A_offd, HYPRE_MEMORY_HOST);
             index = 0;
             num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-            int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
+            int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                         HYPRE_MEMORY_HOST);
             for (i = 0; i < num_sends; i++)
             {
                startc = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
@@ -202,17 +203,25 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
       }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+      #pragma omp barrier
 #endif
       if (my_thread_num > 0)
+      {
          startf = start - cpt_array[my_thread_num-1];
+      }
       else
+      {
          startf = 0;
+      }
 
       if (my_thread_num < num_threads-1)
+      {
          stopf = stop - cpt_array[my_thread_num];
+      }
       else
+      {
          stopf = n_Fpts;
+      }
 
       startf_array[my_thread_num+1] = stopf;
 
@@ -250,7 +259,9 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
                         D_w[row] += A_diag_data[jC++];
                      }
                      else
+                     {
                         jC++;
+                     }
                      jA = A_diag_j[jC];
                   }
                   jC++;
@@ -258,7 +269,9 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
                for (j=jC; j < A_diag_i[i+1]; j++)
                {
                   if (dof_func[i] == dof_func[A_diag_j[j]])
-                        D_w[row] += A_diag_data[j];
+                  {
+                     D_w[row] += A_diag_data[j];
+                  }
                }
                jC = A_offd_i[i];
                for (j=S_offd_i[i]; j < S_offd_i[i+1]; j++)
@@ -272,7 +285,9 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
                         D_w[row] += A_offd_data[jC++];
                      }
                      else
+                     {
                         jC++;
+                     }
                      jA = A_offd_j[jC];
                   }
                   jC++;
@@ -280,7 +295,9 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
                for (j=jC; j < A_offd_i[i+1]; j++)
                {
                   if (dof_func[i] == dof_func_offd[A_offd_j[j]])
-                        D_w[row] += A_offd_data[j];
+                  {
+                     D_w[row] += A_offd_data[j];
+                  }
                }
                row++;
             }
@@ -311,19 +328,27 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
       for (i=startf; i<stopf; i++)
       {
          j = As_FF_diag_i[i];
-         if (D_w[i]) beta = 1.0/D_w[i];
-         else beta = 1.0;
+         if (D_w[i]) { beta = 1.0/D_w[i]; }
+         else { beta = 1.0; }
          As_FF_diag_data[j] = beta*D_q[i];
-         if (D_q[i]) gamma = -1.0/D_q[i];
-         else gamma = 1.0;
+         if (D_q[i]) { gamma = -1.0/D_q[i]; }
+         else { gamma = 1.0; }
          for (j=As_FF_diag_i[i]+1; j < As_FF_diag_i[i+1]; j++)
+         {
             As_FF_diag_data[j] *= beta;
+         }
          for (j=As_FF_offd_i[i]; j < As_FF_offd_i[i+1]; j++)
+         {
             As_FF_offd_data[j] *= beta;
+         }
          for (j=As_FC_diag_i[i]; j < As_FC_diag_i[i+1]; j++)
+         {
             As_FC_diag_data[j] *= gamma;
+         }
          for (j=As_FC_offd_i[i]; j < As_FC_offd_i[i+1]; j++)
+         {
             As_FC_offd_data[j] *= gamma;
+         }
       }
 
    }   /* end parallel region */
@@ -360,7 +385,7 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
    }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel private(i,j,start,stop,startf,stopf,c_pt,row,cnt_diag,cnt_offd)
+   #pragma omp parallel private(i,j,start,stop,startf,stopf,c_pt,row,cnt_diag,cnt_offd)
 #endif
    {
       HYPRE_Int my_thread_num = hypre_GetThreadNum();
@@ -370,9 +395,13 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
       stop = start_array[my_thread_num+1];
 
       if (my_thread_num > 0)
+      {
          c_pt = cpt_array[my_thread_num-1];
+      }
       else
+      {
          c_pt = 0;
+      }
       cnt_diag = W_diag_i[startf]+c_pt;
       cnt_offd = W_offd_i[startf];
       row = startf;
@@ -408,13 +437,13 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
     *-----------------------------------------------------------------------*/
 
    P = hypre_ParCSRMatrixCreate(comm,
-         hypre_ParCSRMatrixGlobalNumRows(A),
-         total_global_cpts,
-         hypre_ParCSRMatrixColStarts(A),
-         num_cpts_global,
-         num_cols_P_offd,
-         P_diag_i[n_fine],
-         P_offd_i[n_fine]);
+                                hypre_ParCSRMatrixGlobalNumRows(A),
+                                total_global_cpts,
+                                hypre_ParCSRMatrixColStarts(A),
+                                num_cpts_global,
+                                num_cols_P_offd,
+                                P_diag_i[n_fine],
+                                P_offd_i[n_fine]);
 
    P_diag = hypre_ParCSRMatrixDiag(P);
    hypre_CSRMatrixData(P_diag) = P_diag_data;
@@ -456,7 +485,7 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
          new_ncols_P_offd = 0;
          for (i=0; i < num_cols_P_offd; i++)
          {
-            if (P_marker[i]) new_ncols_P_offd++;
+            if (P_marker[i]) { new_ncols_P_offd++; }
          }
 
          new_col_map_offd = hypre_CTAlloc(HYPRE_BigInt, new_ncols_P_offd, HYPRE_MEMORY_HOST);
@@ -473,12 +502,12 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
 
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i=0; i < P_offd_size; i++)
          {
             P_offd_j[i] = hypre_BinarySearch(map, P_offd_j[i],
-               new_ncols_P_offd);
+                                             new_ncols_P_offd);
          }
 
          hypre_TFree(col_map_offd_P, HYPRE_MEMORY_HOST);
@@ -673,7 +702,7 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
 
-   if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
+   if (my_id == (num_procs -1)) { total_global_cpts = num_cpts_global[1]; }
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
    n_Cpts = num_cpts_global[1]-num_cpts_global[0];
 
@@ -714,7 +743,7 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
    startf_array = hypre_CTAlloc(HYPRE_Int, num_threads+1, HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel private(i,j,jj,k,kk,start,stop,startf,stopf,row,theta,value,value1)
+   #pragma omp parallel private(i,j,jj,k,kk,start,stop,startf,stopf,row,theta,value,value1)
 #endif
    {
       HYPRE_Int my_thread_num = hypre_GetThreadNum();
@@ -738,7 +767,7 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
       }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+      #pragma omp barrier
 #endif
       if (my_thread_num == 0)
       {
@@ -748,17 +777,25 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
          }
       }
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+      #pragma omp barrier
 #endif
       if (my_thread_num > 0)
+      {
          startf = start - cpt_array[my_thread_num-1];
+      }
       else
+      {
          startf = 0;
+      }
 
       if (my_thread_num < num_threads-1)
+      {
          stopf = stop - cpt_array[my_thread_num];
+      }
       else
+      {
          stopf = n_Fpts;
+      }
 
       startf_array[my_thread_num+1] = stopf;
 
@@ -781,7 +818,7 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
 
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+      #pragma omp barrier
 #endif
       if (my_thread_num == 0)
       {
@@ -797,7 +834,8 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
             comm_pkg = hypre_ParCSRMatrixCommPkg(As_FF);
          }
          num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-         buf_data = hypre_CTAlloc(HYPRE_Real, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
+         buf_data = hypre_CTAlloc(HYPRE_Real, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                  HYPRE_MEMORY_HOST);
          for (i = 0; i < num_sends; i++)
          {
             startc = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
@@ -818,7 +856,8 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
             dof_func_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_A_offd, HYPRE_MEMORY_HOST);
             index = 0;
             num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-            int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
+            int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                         HYPRE_MEMORY_HOST);
             for (i = 0; i < num_sends; i++)
             {
                startc = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
@@ -834,7 +873,7 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
       }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+      #pragma omp barrier
 #endif
 
       row = startf;
@@ -857,7 +896,9 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
                         D_w[row] += A_diag_data[jC++];
                      }
                      else
+                     {
                         jC++;
+                     }
                      jA = A_diag_j[jC];
                   }
                   jC++;
@@ -865,7 +906,9 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
                for (j=jC; j < A_diag_i[i+1]; j++)
                {
                   if (dof_func[i] == dof_func[A_diag_j[j]])
-                        D_w[row] += A_diag_data[j];
+                  {
+                     D_w[row] += A_diag_data[j];
+                  }
                }
                jC = A_offd_i[i];
                for (j=S_offd_i[i]; j < S_offd_i[i+1]; j++)
@@ -879,7 +922,9 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
                         D_w[row] += A_offd_data[jC++];
                      }
                      else
+                     {
                         jC++;
+                     }
                      jA = A_offd_j[jC];
                   }
                   jC++;
@@ -887,7 +932,9 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
                for (j=jC; j < A_offd_i[i+1]; j++)
                {
                   if (dof_func[i] == dof_func_offd[A_offd_j[j]])
-                        D_w[row] += A_offd_data[j];
+                  {
+                     D_w[row] += A_offd_data[j];
+                  }
                }
                row++;
             }
@@ -955,7 +1002,7 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
       }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+      #pragma omp barrier
 #endif
 
       for (i=startf; i<stopf; i++)
@@ -965,9 +1012,13 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
          {
             theta = -1.0/theta;
             for (j=As_FF_diag_i[i]; j < As_FF_diag_i[i+1]; j++)
+            {
                As_FF_diag_data[j] *= theta;
+            }
             for (j=As_FF_offd_i[i]; j < As_FF_offd_i[i+1]; j++)
+            {
                As_FF_offd_data[j] *= theta;
+            }
          }
       }
 
@@ -1005,7 +1056,7 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
    }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel private(i,j,start,stop,startf,stopf,c_pt,row,cnt_diag,cnt_offd)
+   #pragma omp parallel private(i,j,start,stop,startf,stopf,c_pt,row,cnt_diag,cnt_offd)
 #endif
    {
       HYPRE_Int my_thread_num = hypre_GetThreadNum();
@@ -1015,9 +1066,13 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
       stop = start_array[my_thread_num+1];
 
       if (my_thread_num > 0)
+      {
          c_pt = cpt_array[my_thread_num-1];
+      }
       else
+      {
          c_pt = 0;
+      }
       cnt_diag = W_diag_i[startf]+c_pt;
       cnt_offd = W_offd_i[startf];
       row = startf;
@@ -1053,13 +1108,13 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
     *-----------------------------------------------------------------------*/
 
    P = hypre_ParCSRMatrixCreate(comm,
-         hypre_ParCSRMatrixGlobalNumRows(A),
-         total_global_cpts,
-         hypre_ParCSRMatrixColStarts(A),
-         num_cpts_global,
-         num_cols_P_offd,
-         P_diag_i[n_fine],
-         P_offd_i[n_fine]);
+                                hypre_ParCSRMatrixGlobalNumRows(A),
+                                total_global_cpts,
+                                hypre_ParCSRMatrixColStarts(A),
+                                num_cpts_global,
+                                num_cols_P_offd,
+                                P_diag_i[n_fine],
+                                P_offd_i[n_fine]);
 
    P_diag = hypre_ParCSRMatrixDiag(P);
    hypre_CSRMatrixData(P_diag) = P_diag_data;
@@ -1094,11 +1149,13 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
       {
          P_marker = hypre_CTAlloc(HYPRE_Int, num_cols_P_offd, HYPRE_MEMORY_HOST);
          for (i=0; i < P_offd_size; i++)
+         {
             P_marker[P_offd_j[i]] = 1;
+         }
 
          new_ncols_P_offd = 0;
          for (i=0; i < num_cols_P_offd; i++)
-            if (P_marker[i]) new_ncols_P_offd++;
+            if (P_marker[i]) { new_ncols_P_offd++; }
 
          new_col_map_offd = hypre_CTAlloc(HYPRE_BigInt, new_ncols_P_offd, HYPRE_MEMORY_HOST);
          map = hypre_CTAlloc(HYPRE_Int, new_ncols_P_offd, HYPRE_MEMORY_HOST);
@@ -1107,19 +1164,19 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
          for (i=0; i < num_cols_P_offd; i++)
             if (P_marker[i])
             {
-                new_col_map_offd[index] = col_map_offd_P[i];
-                map[index++] = i;
+               new_col_map_offd[index] = col_map_offd_P[i];
+               map[index++] = i;
             }
          hypre_TFree(P_marker, HYPRE_MEMORY_HOST);
 
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i=0; i < P_offd_size; i++)
          {
             P_offd_j[i] = hypre_BinarySearch(map, P_offd_j[i],
-               new_ncols_P_offd);
+                                             new_ncols_P_offd);
          }
          hypre_TFree(col_map_offd_P, HYPRE_MEMORY_HOST);
          hypre_ParCSRMatrixColMapOffd(P) = new_col_map_offd;
@@ -1311,7 +1368,7 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
 
-   if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
+   if (my_id == (num_procs -1)) { total_global_cpts = num_cpts_global[1]; }
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
    n_Cpts = num_cpts_global[1]-num_cpts_global[0];
 
@@ -1344,7 +1401,7 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
    startf_array = hypre_CTAlloc(HYPRE_Int, num_threads+1, HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel private(i,j,start,stop,startf,stopf,row,theta,value)
+   #pragma omp parallel private(i,j,start,stop,startf,stopf,row,theta,value)
 #endif
    {
       HYPRE_Int my_thread_num = hypre_GetThreadNum();
@@ -1368,7 +1425,7 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
       }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+      #pragma omp barrier
 #endif
       if (my_thread_num == 0)
       {
@@ -1384,7 +1441,8 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
             dof_func_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_A_offd, HYPRE_MEMORY_HOST);
             index = 0;
             num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-            int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
+            int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                         HYPRE_MEMORY_HOST);
             for (i = 0; i < num_sends; i++)
             {
                startc = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
@@ -1399,17 +1457,25 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
          }
       }
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+      #pragma omp barrier
 #endif
       if (my_thread_num > 0)
+      {
          startf = start - cpt_array[my_thread_num-1];
+      }
       else
+      {
          startf = 0;
+      }
 
       if (my_thread_num < num_threads-1)
+      {
          stopf = stop - cpt_array[my_thread_num];
+      }
       else
+      {
          stopf = n_Fpts;
+      }
 
       startf_array[my_thread_num+1] = stopf;
 
@@ -1425,7 +1491,7 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
             D_lambda[i] += As_FF_offd_data[j];
          }
          number = (HYPRE_Real)(As_FF_diag_i[i+1]-As_FF_diag_i[i]-1+As_FF_offd_i[i+1]-As_FF_offd_i[i]);
-         if (number) D_lambda[i] /= number;
+         if (number) { D_lambda[i] /= number; }
          for (j=As_FC_diag_i[i]; j < As_FC_diag_i[i+1]; j++)
          {
             D_beta[i] += As_FC_diag_data[j];
@@ -1434,12 +1500,12 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
          {
             D_beta[i] += As_FC_offd_data[j];
          }
-         if (D_lambda[i]+D_beta[i]) D_tmp[i] = D_lambda[i]/(D_beta[i]+D_lambda[i]);
+         if (D_lambda[i]+D_beta[i]) { D_tmp[i] = D_lambda[i]/(D_beta[i]+D_lambda[i]); }
       }
 
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+      #pragma omp barrier
 #endif
       if (my_thread_num == 0)
       {
@@ -1455,7 +1521,8 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
             comm_pkg = hypre_ParCSRMatrixCommPkg(As_FF);
          }
          num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-         buf_data = hypre_CTAlloc(HYPRE_Real, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
+         buf_data = hypre_CTAlloc(HYPRE_Real, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                  HYPRE_MEMORY_HOST);
          for (i = 0; i < num_sends; i++)
          {
             startc = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
@@ -1470,7 +1537,7 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
       }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+      #pragma omp barrier
 #endif
 
       row = startf;
@@ -1493,7 +1560,9 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
                         D_w[row] += A_diag_data[jC++];
                      }
                      else
+                     {
                         jC++;
+                     }
                      jA = A_diag_j[jC];
                   }
                   jC++;
@@ -1501,7 +1570,9 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
                for (j=jC; j < A_diag_i[i+1]; j++)
                {
                   if (dof_func[i] == dof_func[A_diag_j[j]])
-                        D_w[row] += A_diag_data[j];
+                  {
+                     D_w[row] += A_diag_data[j];
+                  }
                }
                jC = A_offd_i[i];
                for (j=S_offd_i[i]; j < S_offd_i[i+1]; j++)
@@ -1515,7 +1586,9 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
                         D_w[row] += A_offd_data[jC++];
                      }
                      else
+                     {
                         jC++;
+                     }
                      jA = A_offd_j[jC];
                   }
                   jC++;
@@ -1523,7 +1596,9 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
                for (j=jC; j < A_offd_i[i+1]; j++)
                {
                   if (dof_func[i] == dof_func_offd[A_offd_j[j]])
-                        D_w[row] += A_offd_data[j];
+                  {
+                     D_w[row] += A_offd_data[j];
+                  }
                }
                row++;
             }
@@ -1567,10 +1642,10 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
       for (i=startf; i<stopf; i++)
       {
          value = D_w[i]+D_tau[i];
-         if (value) value = -1.0/value;
+         if (value) { value = -1.0/value; }
          theta = D_beta[i]+D_lambda[i];
          As_FF_diag_data[As_FF_diag_i[i]] = value*theta;
-         if (theta) theta = 1.0/theta;
+         if (theta) { theta = 1.0/theta; }
          for (j = As_FF_diag_i[i]+1; j < As_FF_diag_i[i+1]; j++)
          {
             As_FF_diag_data[j] *= value;
@@ -1623,7 +1698,7 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
    }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel private(i,j,start,stop,startf,stopf,c_pt,row,cnt_diag,cnt_offd)
+   #pragma omp parallel private(i,j,start,stop,startf,stopf,c_pt,row,cnt_diag,cnt_offd)
 #endif
    {
       HYPRE_Int my_thread_num = hypre_GetThreadNum();
@@ -1633,9 +1708,13 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
       stop = start_array[my_thread_num+1];
 
       if (my_thread_num > 0)
+      {
          c_pt = cpt_array[my_thread_num-1];
+      }
       else
+      {
          c_pt = 0;
+      }
       cnt_diag = W_diag_i[startf]+c_pt;
       cnt_offd = W_offd_i[startf];
       row = startf;
@@ -1671,13 +1750,13 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
     *-----------------------------------------------------------------------*/
 
    P = hypre_ParCSRMatrixCreate(comm,
-         hypre_ParCSRMatrixGlobalNumRows(A),
-         total_global_cpts,
-         hypre_ParCSRMatrixColStarts(A),
-         num_cpts_global,
-         num_cols_P_offd,
-         P_diag_i[n_fine],
-         P_offd_i[n_fine]);
+                                hypre_ParCSRMatrixGlobalNumRows(A),
+                                total_global_cpts,
+                                hypre_ParCSRMatrixColStarts(A),
+                                num_cpts_global,
+                                num_cols_P_offd,
+                                P_diag_i[n_fine],
+                                P_offd_i[n_fine]);
 
    P_diag = hypre_ParCSRMatrixDiag(P);
    hypre_CSRMatrixData(P_diag) = P_diag_data;
@@ -1712,11 +1791,13 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
       {
          P_marker = hypre_CTAlloc(HYPRE_Int, num_cols_P_offd, HYPRE_MEMORY_HOST);
          for (i=0; i < P_offd_size; i++)
+         {
             P_marker[P_offd_j[i]] = 1;
+         }
 
          new_ncols_P_offd = 0;
          for (i=0; i < num_cols_P_offd; i++)
-            if (P_marker[i]) new_ncols_P_offd++;
+            if (P_marker[i]) { new_ncols_P_offd++; }
 
          new_col_map_offd = hypre_CTAlloc(HYPRE_BigInt, new_ncols_P_offd, HYPRE_MEMORY_HOST);
          map = hypre_CTAlloc(HYPRE_Int, new_ncols_P_offd, HYPRE_MEMORY_HOST);
@@ -1725,19 +1806,19 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
          for (i=0; i < num_cols_P_offd; i++)
             if (P_marker[i])
             {
-                new_col_map_offd[index] = col_map_offd_P[i];
-                map[index++] = i;
+               new_col_map_offd[index] = col_map_offd_P[i];
+               map[index++] = i;
             }
          hypre_TFree(P_marker, HYPRE_MEMORY_HOST);
 
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i=0; i < P_offd_size; i++)
          {
             P_offd_j[i] = hypre_BinarySearch(map, P_offd_j[i],
-               new_ncols_P_offd);
+                                             new_ncols_P_offd);
          }
          hypre_TFree(col_map_offd_P, HYPRE_MEMORY_HOST);
          hypre_ParCSRMatrixColMapOffd(P) = new_col_map_offd;
@@ -1773,15 +1854,15 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
  *-----------------------------------------------------------------------*/
 HYPRE_Int
 hypre_BoomerAMGBuildModExtPEInterp(hypre_ParCSRMatrix  *A,
-                                      HYPRE_Int           *CF_marker,
-                                      hypre_ParCSRMatrix  *S,
-                                      HYPRE_BigInt        *num_cpts_global,
-                                      HYPRE_Int            num_functions,
-                                      HYPRE_Int           *dof_func,
-                                      HYPRE_Int            debug_flag,
-                                      HYPRE_Real           trunc_factor,
-                                      HYPRE_Int            max_elmts,
-                                      hypre_ParCSRMatrix **P_ptr)
+                                   HYPRE_Int           *CF_marker,
+                                   hypre_ParCSRMatrix  *S,
+                                   HYPRE_BigInt        *num_cpts_global,
+                                   HYPRE_Int            num_functions,
+                                   HYPRE_Int           *dof_func,
+                                   HYPRE_Int            debug_flag,
+                                   HYPRE_Real           trunc_factor,
+                                   HYPRE_Int            max_elmts,
+                                   hypre_ParCSRMatrix **P_ptr)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("ModExtPEInterp");
@@ -1801,7 +1882,7 @@ hypre_BoomerAMGBuildModExtPEInterp(hypre_ParCSRMatrix  *A,
    else
    {
       ierr = hypre_BoomerAMGBuildExtPEInterpDevice(A,CF_marker,S,num_cpts_global,1,NULL,
-                                                 debug_flag,trunc_factor,max_elmts,P_ptr);
+                                                   debug_flag,trunc_factor,max_elmts,P_ptr);
    }
 #endif
 

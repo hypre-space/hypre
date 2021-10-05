@@ -48,7 +48,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
    hypre_SparseMSGData  *smsg_data = (hypre_SparseMSGData  *)smsg_vdata;
 
    MPI_Comm              comm = (smsg_data -> comm);
-                     
+
    HYPRE_Int             max_iter;
    HYPRE_Int             jump       = (smsg_data -> jump);
    HYPRE_Int             relax_type = (smsg_data -> relax_type);
@@ -62,7 +62,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
    hypre_StructGrid    **Px_grid_a;
    hypre_StructGrid    **Py_grid_a;
    hypre_StructGrid    **Pz_grid_a;
-                    
+
    HYPRE_Real           *data;
    HYPRE_Real           *tdata;
    HYPRE_Int             data_size = 0;
@@ -102,11 +102,11 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
 
    hypre_StructGrid     *grid;
    HYPRE_Int             dim;
-   hypre_Box            *cbox;   
+   hypre_Box            *cbox;
 
    HYPRE_Int             d, l, lx, ly, lz;
    HYPRE_Int             fi, ci;
-                       
+
    HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
    HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
 
@@ -141,7 +141,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
                                      cindex,stride,hypre_BoxIMin(cbox));
          hypre_StructMapFineToCoarse(hypre_BoxIMax(cbox),
                                      cindex,stride,hypre_BoxIMax(cbox));
-         
+
          /* increment level counters */
          num_grids[d]++;
          num_levels++;
@@ -153,7 +153,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
    num_grids[1] = 1;
    num_grids[2] = 1;
    num_levels = num_grids[0];
-#endif 
+#endif
 
    /* Compute the num_all_grids based on num_grids[] */
    num_all_grids = num_grids[0] * num_grids[1] * num_grids[2];
@@ -174,7 +174,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
    Pz_grid_a[0] = NULL;
 
    /*-----------------------------------------
-    * Compute coarse grids 
+    * Compute coarse grids
     *-----------------------------------------*/
 
    if (num_levels > 1)
@@ -213,7 +213,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
          {
             for (lx = 0; lx < num_grids[0]; lx++)
             {
-               hypre_SparseMSGMapIndex(lx, ly, lz  , num_grids, fi);
+               hypre_SparseMSGMapIndex(lx, ly, lz, num_grids, fi);
                hypre_SparseMSGMapIndex(lx, ly, lz+1, num_grids, ci);
                hypre_StructCoarsen(grid_a[fi], cindex, stride, 1,
                                    &grid_a[ci]);
@@ -223,7 +223,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
    }
 
    /*-----------------------------------------
-    * Compute interpolation grids 
+    * Compute interpolation grids
     *-----------------------------------------*/
 
    if (num_levels > 1)
@@ -299,7 +299,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
              * create visit arrays
              *-------------------------------*/
 
-/* RDF */
+            /* RDF */
 #if 0
             l = lx + ly + lz;
             if ((l >= 1) && (l <= jump))
@@ -310,7 +310,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
             }
             else
 #endif
-/* RDF */
+               /* RDF */
             {
                visitx_a[fi] = hypre_StructVectorCreate(comm, grid_a[fi]);
                visity_a[fi] = hypre_StructVectorCreate(comm, grid_a[fi]);
@@ -370,7 +370,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
             }
          }
 
-/* RDF */
+         /* RDF */
 #if 0
          /* free up some coarse-operators to conserve memory */
          for (lx = 1; lx <= hypre_min((jump-ly-lz), (num_grids[0]-1)); lx++)
@@ -380,7 +380,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
             A_a[fi] = NULL;
          }
 #endif
-/* RDF */
+         /* RDF */
 
          /*-------------------------------
           * compute Py, RTy, and A
@@ -416,7 +416,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
          }
       }
 
-/* RDF */
+      /* RDF */
 #if 0
       /* free up some coarse-operators to conserve memory */
       for (ly = 1; ly <= hypre_min((jump-lz), (num_grids[1]-1)); ly++)
@@ -426,7 +426,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
          A_a[fi] = NULL;
       }
 #endif
-/* RDF */
+      /* RDF */
 
       /*-------------------------------
        * compute Pz, RTz, and A
@@ -457,7 +457,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
       }
    }
 
-/* RDF */
+   /* RDF */
 #if 0
    /* free up some coarse-operators to conserve memory */
    for (lz = 1; lz <= hypre_min((jump), (num_grids[2]-1)); lz++)
@@ -467,7 +467,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
       A_a[fi] = NULL;
    }
 #endif
-/* RDF */
+   /* RDF */
 
    (smsg_data -> A_array)   = A_a;
    (smsg_data -> Px_array)  = Px_a;
@@ -824,7 +824,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
       hypre_StructMatrixPrint(filename, Pz_a[lz], 0);
    }
 #endif
-   
+
    return ierr;
 }
 

@@ -195,11 +195,16 @@ int main (int argc, char *argv[])
       {
          int i;
          int nvars = 2;
-         HYPRE_SStructVariable vartypes[2] = {HYPRE_SSTRUCT_VARIABLE_CELL,
-                                              HYPRE_SSTRUCT_VARIABLE_CELL };
+         HYPRE_SStructVariable vartypes[2] =
+         {
+            HYPRE_SSTRUCT_VARIABLE_CELL,
+            HYPRE_SSTRUCT_VARIABLE_CELL
+         };
 
          for (i = 0; i< nparts; i++)
+         {
             HYPRE_SStructGridSetVariables(grid, i, nvars, vartypes);
+         }
       }
 
       /* This is a collective call finalizing the grid assembly.
@@ -224,7 +229,9 @@ int main (int argc, char *argv[])
          /* The first 5 entries are for the u-u connections */
          var = 0; /* connect to variable 0 */
          for (entry = 0; entry < stencil_size-1 ; entry++)
+         {
             HYPRE_SStructStencilSetEntry(stencil_u, entry, offsets[entry], var);
+         }
 
          /* The last entry is for the u-v connection */
          var = 1;  /* connect to variable 1 */
@@ -242,7 +249,9 @@ int main (int argc, char *argv[])
          /* These are all v-v connections */
          var = 1; /* Connect to variable 1 */
          for (entry = 0; entry < stencil_size; entry++)
+         {
             HYPRE_SStructStencilSetEntry(stencil_v, entry, offsets[entry], var);
+         }
       }
    }
 
@@ -326,7 +335,9 @@ int main (int argc, char *argv[])
          {
             u_values[i] = 4.0;
             for (j = 1; j < nentries; j++)
+            {
                u_values[i+j] = -1.0;
+            }
          }
 
          HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
@@ -368,7 +379,9 @@ int main (int argc, char *argv[])
          {
             v_values[i] = 4.0;
             for (j = 1; j < nentries; j++)
+            {
                v_values[i+j] = -1.0;
+            }
          }
 
          HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
@@ -398,7 +411,9 @@ int main (int argc, char *argv[])
 
       values = (double*) calloc(nvalues, sizeof(double));
       for (j = 0; j < nvalues; j++)
-            values[j] = 0.0;
+      {
+         values[j] = 0.0;
+      }
 
       /* Recall: pi and pj describe position in the processor grid */
       if (pj == 0)
@@ -525,12 +540,16 @@ int main (int argc, char *argv[])
 
       /* Set the values for b */
       for (i = 0; i < nvalues; i ++)
+      {
          values[i] = h2;
+      }
       var = 1;
       HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper, var, values);
 
       for (i = 0; i < nvalues; i ++)
+      {
          values[i] = 0.0;
+      }
       var = 0;
       HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper, var, values);
 
@@ -700,7 +719,7 @@ int main (int argc, char *argv[])
       }
       else
       {
-         if (myid ==0) printf("\n ERROR: Invalid solver id specified.\n");
+         if (myid ==0) { printf("\n ERROR: Invalid solver id specified.\n"); }
       }
 
       /* Gather the solution vector.  This needs to be done if:
@@ -739,7 +758,9 @@ int main (int argc, char *argv[])
          k = 0;
          for (j = 0; j < n; j++)
             for (i = 0; i < n; i++)
+            {
                fprintf(file, "%06d %.14e\n", pj*N*n*n+pi*n+j*N*n+i, values[k++]);
+            }
 
          fflush(file);
          fclose(file);
@@ -761,7 +782,9 @@ int main (int argc, char *argv[])
          k = 0;
          for (j = 0; j < n; j++)
             for (i = 0; i < n; i++)
+            {
                fprintf(file, "%06d %.14e\n", pj*N*n*n+pi*n+j*N*n+i, values[k++]);
+            }
 
          fflush(file);
          fclose(file);
@@ -770,7 +793,9 @@ int main (int argc, char *argv[])
 
          /* save global finite element mesh */
          if (myid == 0)
+         {
             GLVis_PrintGlobalSquareMesh("vis/ex9.mesh", N*n-1);
+         }
 #endif
       }
 

@@ -19,11 +19,12 @@
 #define HYPRE_NEWBOXLOOP_HEADER
 
 #ifdef __cplusplus
-extern "C++" {
+extern "C++"
+{
 #endif
 
 #include <RAJA/RAJA.hpp>
-using namespace RAJA;
+   using namespace RAJA;
 
 #ifdef __cplusplus
 }

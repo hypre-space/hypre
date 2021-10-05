@@ -415,7 +415,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
 
          for (compute_i = 0; compute_i < 2; compute_i++)
          {
-            switch(compute_i)
+            switch (compute_i)
             {
                case 0:
                   box_aa = orig_indt_boxes;
@@ -454,7 +454,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
                }
             }
 
-            switch(compute_i)
+            switch (compute_i)
             {
                case 0:
                   hypre_ComputeInfoIndtBoxes(compute_info) = new_box_aa;
@@ -472,14 +472,14 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
          {
             hypre_ComputePkgCreate(compute_info,
                                    hypre_StructVectorDataSpace(
-                                   hypre_SStructPVectorSVector(x, 0)),
+                                      hypre_SStructPVectorSVector(x, 0)),
                                    1, sgrid, &compute_pkgs[p]);
          }
          else
          {
             hypre_ComputePkgCreate(compute_info,
                                    hypre_StructVectorDataSpace(
-                                   hypre_SStructPVectorSVector(x, vi)),
+                                      hypre_SStructPVectorSVector(x, vi)),
                                    1, sgrid, &svec_compute_pkgs[p][vi]);
          }
 
@@ -527,7 +527,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    /* REALLY Rough Estimate = num_nodes * nvar^3 */
    (relax_data -> flops) = scale * nvars * nvars * nvars *
                            hypre_StructVectorGlobalSize(
-                                 hypre_SStructPVectorSVector(x,0) );
+                              hypre_SStructPVectorSVector(x,0) );
 
    return hypre_error_flag;
 }
@@ -671,7 +671,7 @@ hypre_NodeRelax(  void                 *relax_vdata,
 
       for (compute_i = 0; compute_i < 2; compute_i++)
       {
-         switch(compute_i)
+         switch (compute_i)
          {
             case 0:
             {
@@ -691,11 +691,11 @@ hypre_NodeRelax(  void                 *relax_vdata,
             compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
 
             A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(
-                                           hypre_SStructPMatrixSMatrix(A,0,0)), i);
+                                              hypre_SStructPMatrixSMatrix(A,0,0)), i);
             b_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(
-                                           hypre_SStructPVectorSVector(b,0)), i);
+                                              hypre_SStructPVectorSVector(b,0)), i);
             x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(
-                                           hypre_SStructPVectorSVector(x,0)), i);
+                                              hypre_SStructPVectorSVector(x,0)), i);
 
             for (vi = 0; vi < nvars; vi++)
             {
@@ -797,7 +797,7 @@ hypre_NodeRelax(  void                 *relax_vdata,
 
       for (compute_i = 0; compute_i < 2; compute_i++)
       {
-         switch(compute_i)
+         switch (compute_i)
          {
             case 0:
             {
@@ -829,13 +829,13 @@ hypre_NodeRelax(  void                 *relax_vdata,
             compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
 
             A_data_box = hypre_BoxArrayBox( hypre_StructMatrixDataSpace(
-                                            hypre_SStructPMatrixSMatrix(A,0,0)), i );
+                                               hypre_SStructPMatrixSMatrix(A,0,0)), i );
             b_data_box = hypre_BoxArrayBox( hypre_StructVectorDataSpace(
-                                            hypre_SStructPVectorSVector(b,0)), i );
+                                               hypre_SStructPVectorSVector(b,0)), i );
             x_data_box = hypre_BoxArrayBox( hypre_StructVectorDataSpace(
-                                            hypre_SStructPVectorSVector(x,0)), i );
+                                               hypre_SStructPVectorSVector(x,0)), i );
             t_data_box = hypre_BoxArrayBox( hypre_StructVectorDataSpace(
-                                            hypre_SStructPVectorSVector(t,0)), i );
+                                               hypre_SStructPVectorSVector(t,0)), i );
 
             for (vi = 0; vi < nvars; vi++)
             {

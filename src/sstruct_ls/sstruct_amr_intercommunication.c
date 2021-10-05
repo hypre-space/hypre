@@ -93,7 +93,7 @@ hypre_SStructAMRInterCommunication( hypre_SStructSendInfoData *sendinfo,
                        &comm_pkg);
    hypre_CommInfoDestroy(comm_info);
 
-  *comm_pkg_ptr = comm_pkg;
+   *comm_pkg_ptr = comm_pkg;
 
    return ierr;
 }

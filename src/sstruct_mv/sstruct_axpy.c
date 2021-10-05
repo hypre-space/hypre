@@ -49,7 +49,7 @@ hypre_SStructAxpy( HYPRE_Complex        alpha,
 
    HYPRE_Int    x_object_type= hypre_SStructVectorObjectType(x);
    HYPRE_Int    y_object_type= hypre_SStructVectorObjectType(y);
-                                                                                                                     
+
    if (x_object_type != y_object_type)
    {
       hypre_error_in_arg(2);

@@ -79,7 +79,7 @@ hypre_InitializeTiming( const char *name )
 
    if (new_name)
    {
-      for (i = 0; i < hypre_global_timing_ref(threadid ,size); i++)
+      for (i = 0; i < hypre_global_timing_ref(threadid,size); i++)
       {
          if (hypre_TimingNumRegs(i) == 0)
          {
@@ -157,7 +157,9 @@ hypre_FinalizeTiming( HYPRE_Int time_index )
    HYPRE_Int  i;
 
    if (hypre_global_timing == NULL)
+   {
       return ierr;
+   }
 
    if (time_index < (hypre_global_timing_ref(threadid, size)))
    {
@@ -202,7 +204,9 @@ hypre_IncFLOPCount( HYPRE_BigInt inc )
    HYPRE_Int  ierr = 0;
 
    if (hypre_global_timing == NULL)
+   {
       return ierr;
+   }
 
    hypre_TimingFLOPCount += (HYPRE_Real) (inc);
 
@@ -219,7 +223,9 @@ hypre_BeginTiming( HYPRE_Int time_index )
    HYPRE_Int  ierr = 0;
 
    if (hypre_global_timing == NULL)
+   {
       return ierr;
+   }
 
    if (hypre_TimingState(time_index) == 0)
    {
@@ -245,7 +251,9 @@ hypre_EndTiming( HYPRE_Int time_index )
    HYPRE_Int  ierr = 0;
 
    if (hypre_global_timing == NULL)
+   {
       return ierr;
+   }
 
    hypre_TimingState(time_index) --;
    if (hypre_TimingState(time_index) == 0)
@@ -271,7 +279,9 @@ hypre_ClearTiming( )
    HYPRE_Int  i;
 
    if (hypre_global_timing == NULL)
+   {
       return ierr;
+   }
 
    for (i = 0; i < (hypre_global_timing_ref(threadid,size)); i++)
    {
@@ -304,7 +314,9 @@ hypre_PrintTiming( const char     *heading,
    HYPRE_Int     myrank;
 
    if (hypre_global_timing == NULL)
+   {
       return ierr;
+   }
 
    hypre_MPI_Comm_rank(comm, &myrank );
 
@@ -323,9 +335,9 @@ hypre_PrintTiming( const char     *heading,
          local_wall_time = hypre_TimingWallTime(i);
          local_cpu_time  = hypre_TimingCPUTime(i);
          hypre_MPI_Allreduce(&local_wall_time, &wall_time, 1,
-                       hypre_MPI_REAL, hypre_MPI_MAX, comm);
+                             hypre_MPI_REAL, hypre_MPI_MAX, comm);
          hypre_MPI_Allreduce(&local_cpu_time, &cpu_time, 1,
-                       hypre_MPI_REAL, hypre_MPI_MAX, comm);
+                             hypre_MPI_REAL, hypre_MPI_MAX, comm);
 
          if (myrank == 0)
          {
@@ -334,17 +346,25 @@ hypre_PrintTiming( const char     *heading,
             /* print wall clock info */
             hypre_printf("  wall clock time = %f seconds\n", wall_time);
             if (wall_time)
+            {
                wall_mflops = hypre_TimingFLOPS(i) / wall_time / 1.0E6;
+            }
             else
+            {
                wall_mflops = 0.0;
+            }
             hypre_printf("  wall MFLOPS     = %f\n", wall_mflops);
 
             /* print CPU clock info */
             hypre_printf("  cpu clock time  = %f seconds\n", cpu_time);
             if (cpu_time)
+            {
                cpu_mflops = hypre_TimingFLOPS(i) / cpu_time / 1.0E6;
+            }
             else
+            {
                cpu_mflops = 0.0;
+            }
             hypre_printf("  cpu MFLOPS      = %f\n\n", cpu_mflops);
          }
       }

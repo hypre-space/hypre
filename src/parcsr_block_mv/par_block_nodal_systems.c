@@ -200,7 +200,7 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
       recv_procs = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
       recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
       recv_vec_starts_AN = hypre_CTAlloc(HYPRE_Int,  num_recvs+1, HYPRE_MEMORY_HOST);
-      if (num_recvs) recv_procs_AN = hypre_CTAlloc(HYPRE_Int,  num_recvs, HYPRE_MEMORY_HOST);
+      if (num_recvs) { recv_procs_AN = hypre_CTAlloc(HYPRE_Int,  num_recvs, HYPRE_MEMORY_HOST); }
 
       recv_vec_starts_AN[0] = recv_vec_starts[0];
       for (i = 0; i < num_recvs; i++)

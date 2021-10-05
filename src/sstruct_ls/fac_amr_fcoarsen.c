@@ -281,14 +281,16 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                                         hypre_BoxArraySize(cgrid_boxes), HYPRE_MEMORY_HOST);
       fbox_bdy[var1]     = hypre_TAlloc(hypre_BoxArrayArray *,
                                         hypre_BoxArraySize(cgrid_boxes), HYPRE_MEMORY_HOST);
-      interior_fboxi[var1]= hypre_TAlloc(HYPRE_Int *,  hypre_BoxArraySize(cgrid_boxes), HYPRE_MEMORY_HOST);
-      bdy_fboxi[var1]     = hypre_TAlloc(HYPRE_Int *,  hypre_BoxArraySize(cgrid_boxes), HYPRE_MEMORY_HOST);
+      interior_fboxi[var1]= hypre_TAlloc(HYPRE_Int *,  hypre_BoxArraySize(cgrid_boxes),
+                                         HYPRE_MEMORY_HOST);
+      bdy_fboxi[var1]     = hypre_TAlloc(HYPRE_Int *,  hypre_BoxArraySize(cgrid_boxes),
+                                         HYPRE_MEMORY_HOST);
 
       fgrid= hypre_SStructPGridSGrid(hypre_SStructPMatrixPGrid(A_pmatrix), var1);
       fgrid_boxes= hypre_StructGridBoxes(fgrid);
 
       cboxi_fboxes[var1]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(fgrid_boxes), HYPRE_MEMORY_HOST);
-      cboxi_fcnt[var1]  = hypre_CTAlloc(HYPRE_Int  ,  hypre_BoxArraySize(fgrid_boxes), HYPRE_MEMORY_HOST);
+      cboxi_fcnt[var1]  = hypre_CTAlloc(HYPRE_Int,  hypre_BoxArraySize(fgrid_boxes), HYPRE_MEMORY_HOST);
 
       /*-----------------------------------------------------------------------
        *  Determine the fine grid boxes that are underlying a coarse grid box.
@@ -707,7 +709,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   for (i= 4; i<= 7; i+=3)
                   {
                      if (rank_stencils[i] != -1)       /* ne or se */
+                     {
                         stencil_contrib_cnt[stencil_i]++;
+                     }
                   }
 
                   if (ndim > 2)
@@ -717,7 +721,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         for (i= 1; i<= 7; i+=3)
                         {
                            if (rank_stencils[j*9+i] != -1)  /* bottom or top planes */
+                           {
                               stencil_contrib_cnt[stencil_i]++;
+                           }
                         }
                      }
                   }
@@ -788,7 +794,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   for (i= 5; i<= 8; i+=3)
                   {
                      if (rank_stencils[i] != -1)       /* nw or sw */
+                     {
                         stencil_contrib_cnt[stencil_i]++;
+                     }
                   }
 
                   if (ndim > 2)
@@ -798,7 +806,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         for (i= 2; i<= 8; i+=3)
                         {
                            if (rank_stencils[j*9+i] != -1)  /* bottom or top planes */
+                           {
                               stencil_contrib_cnt[stencil_i]++;
+                           }
                         }
                      }
                   }
@@ -869,7 +879,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   for (i= 4; i<= 5; i++)
                   {
                      if (rank_stencils[i] != -1)       /* ne or nw */
+                     {
                         stencil_contrib_cnt[stencil_i]++;
+                     }
                   }
 
                   if (ndim > 2)
@@ -879,7 +891,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         for (i= 3; i<= 5; i++)
                         {
                            if (rank_stencils[j*9+i] != -1)  /* bottom or top planes */
+                           {
                               stencil_contrib_cnt[stencil_i]++;
+                           }
                         }
                      }
                   }
@@ -949,7 +963,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   for (i= 7; i<= 8; i++)
                   {
                      if (rank_stencils[i] != -1)       /* ne or nw */
+                     {
                         stencil_contrib_cnt[stencil_i]++;
+                     }
                   }
 
                   if (ndim > 2)
@@ -959,7 +975,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         for (i= 6; i<= 8; i++)
                         {
                            if (rank_stencils[j*9+i] != -1)  /* bottom or top planes */
+                           {
                               stencil_contrib_cnt[stencil_i]++;
+                           }
                         }
                      }
                   }
@@ -1069,7 +1087,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      for (i=1; i<= 8; i++)
                      {
                         if (rank_stencils[9+i] != -1)
+                        {
                            stencil_contrib_cnt[stencil_i]++;
+                        }
                      }
                      max_contribut_size= hypre_max( max_contribut_size,
                                                     stencil_contrib_cnt[stencil_i] );
@@ -1117,7 +1137,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      for (i=1; i<= 8; i++)
                      {
                         if (rank_stencils[18+i] != -1)
+                        {
                            stencil_contrib_cnt[stencil_i]++;
+                        }
                      }
                      max_contribut_size= hypre_max( max_contribut_size,
                                                     stencil_contrib_cnt[stencil_i] );
@@ -1165,7 +1187,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      for (j=1; j<= 2; j++)
                      {
                         if (rank_stencils[j*9+4] != -1)  /* bottom or top planes */
+                        {
                            stencil_contrib_cnt[stencil_i]++;
+                        }
                      }
                      max_contribut_size= hypre_max( max_contribut_size,
                                                     stencil_contrib_cnt[stencil_i] );
@@ -1213,7 +1237,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      for (j=1; j<= 2; j++)
                      {
                         if (rank_stencils[j*9+7] != -1)  /* bottom or top planes */
+                        {
                            stencil_contrib_cnt[stencil_i]++;
+                        }
                      }
                      max_contribut_size= hypre_max( max_contribut_size,
                                                     stencil_contrib_cnt[stencil_i] );
@@ -1261,7 +1287,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      for (j=1; j<= 2; j++)
                      {
                         if (rank_stencils[j*9+5] != -1)  /* bottom or top planes */
+                        {
                            stencil_contrib_cnt[stencil_i]++;
+                        }
                      }
                      max_contribut_size= hypre_max( max_contribut_size,
                                                     stencil_contrib_cnt[stencil_i] );
@@ -1309,7 +1337,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      for (j=1; j<= 2; j++)
                      {
                         if (rank_stencils[j*9+8] != -1)  /* bottom or top planes */
+                        {
                            stencil_contrib_cnt[stencil_i]++;
+                        }
                      }
                      max_contribut_size= hypre_max( max_contribut_size,
                                                     stencil_contrib_cnt[stencil_i] );
@@ -1357,7 +1387,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      for (i=3; i<= 6; i+=3)
                      {
                         if (rank_stencils[10+i] != -1)
+                        {
                            stencil_contrib_cnt[stencil_i]++;
+                        }
                      }
                      max_contribut_size= hypre_max( max_contribut_size,
                                                     stencil_contrib_cnt[stencil_i] );
@@ -1405,7 +1437,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      for (i=3; i<= 6; i+=3)
                      {
                         if (rank_stencils[11+i] != -1)
+                        {
                            stencil_contrib_cnt[stencil_i]++;
+                        }
                      }
                      max_contribut_size= hypre_max( max_contribut_size,
                                                     stencil_contrib_cnt[stencil_i] );
@@ -1453,7 +1487,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      for (i=13; i<= 14; i++)
                      {
                         if (rank_stencils[i] != -1)
+                        {
                            stencil_contrib_cnt[stencil_i]++;
+                        }
                      }
                      max_contribut_size= hypre_max( max_contribut_size,
                                                     stencil_contrib_cnt[stencil_i] );
@@ -1501,7 +1537,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      for (i=16; i<= 17; i++)
                      {
                         if (rank_stencils[i] != -1)
+                        {
                            stencil_contrib_cnt[stencil_i]++;
+                        }
                      }
                      max_contribut_size= hypre_max( max_contribut_size,
                                                     stencil_contrib_cnt[stencil_i] );
@@ -1549,7 +1587,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      for (i=3; i<= 6; i+=3)
                      {
                         if (rank_stencils[19+i] != -1)
+                        {
                            stencil_contrib_cnt[stencil_i]++;
+                        }
                      }
                      max_contribut_size= hypre_max( max_contribut_size,
                                                     stencil_contrib_cnt[stencil_i] );
@@ -1597,7 +1637,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      for (i=3; i<= 6; i+=3)
                      {
                         if (rank_stencils[20+i] != -1)
+                        {
                            stencil_contrib_cnt[stencil_i]++;
+                        }
                      }
                      max_contribut_size= hypre_max( max_contribut_size,
                                                     stencil_contrib_cnt[stencil_i] );
@@ -1645,7 +1687,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      for (i=22; i<= 23; i++)
                      {
                         if (rank_stencils[i] != -1)
+                        {
                            stencil_contrib_cnt[stencil_i]++;
+                        }
                      }
                      max_contribut_size= hypre_max( max_contribut_size,
                                                     stencil_contrib_cnt[stencil_i] );
@@ -1693,7 +1737,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      for (i=25; i<= 26; i++)
                      {
                         if (rank_stencils[i] != -1)
+                        {
                            stencil_contrib_cnt[stencil_i]++;
+                        }
                      }
                      max_contribut_size= hypre_max( max_contribut_size,
                                                     stencil_contrib_cnt[stencil_i] );
@@ -2336,20 +2382,30 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    }          /* end var1 */
 
    if (stencil_contrib_cnt)
+   {
       hypre_TFree(stencil_contrib_cnt, HYPRE_MEMORY_HOST);
+   }
    if (stencil_ranks)
+   {
       hypre_TFree(stencil_ranks, HYPRE_MEMORY_HOST);
+   }
    if (volume_shift_box)
+   {
       hypre_TFree(volume_shift_box, HYPRE_MEMORY_HOST);
+   }
    if (vals)
+   {
       hypre_TFree(vals, HYPRE_MEMORY_HOST);
+   }
 
    if (shift_box)
    {
       for (j= 0; j< stencil_size; j++)
       {
          if (shift_box[j])
+         {
             hypre_BoxDestroy(shift_box[j]);
+         }
       }
       hypre_TFree(shift_box, HYPRE_MEMORY_HOST);
    }
@@ -2362,7 +2418,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
          if (stencil_i != -1)
          {
             if (stencil_contrib_i[stencil_i])
+            {
                hypre_TFree(stencil_contrib_i[stencil_i], HYPRE_MEMORY_HOST);
+            }
          }
       }
       hypre_TFree(stencil_contrib_i, HYPRE_MEMORY_HOST);
@@ -2376,21 +2434,27 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
          if (stencil_i != -1)
          {
             if (weight_contrib_i[stencil_i])
+            {
                hypre_TFree(weight_contrib_i[stencil_i], HYPRE_MEMORY_HOST);
+            }
          }
       }
       hypre_TFree(weight_contrib_i, HYPRE_MEMORY_HOST);
    }
 
    if (rank_stencils)
+   {
       hypre_TFree(rank_stencils, HYPRE_MEMORY_HOST);
+   }
 
    if (OffsetA)
    {
       for (j= 0; j< 2; j++)
       {
          if (OffsetA[j])
+         {
             hypre_TFree(OffsetA[j], HYPRE_MEMORY_HOST);
+         }
       }
       hypre_TFree(OffsetA, HYPRE_MEMORY_HOST);
    }
@@ -2500,7 +2564,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
          box_array_size   = hypre_BoxArraySize(fgrid_boxes);
          cbox_array_size  = hypre_BoxArraySize(cgrid_boxes);
          box_graph_indices= hypre_CTAlloc(HYPRE_Int *,  box_array_size, HYPRE_MEMORY_HOST);
-         box_graph_cnts   = hypre_CTAlloc(HYPRE_Int ,  box_array_size, HYPRE_MEMORY_HOST);
+         box_graph_cnts   = hypre_CTAlloc(HYPRE_Int,  box_array_size, HYPRE_MEMORY_HOST);
 
          data_space = hypre_StructMatrixDataSpace(crse_smatrix);
          cdata_space_ranks= hypre_CTAlloc(HYPRE_Int,  cbox_array_size, HYPRE_MEMORY_HOST);
@@ -2508,7 +2572,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
          for (i= 1; i< cbox_array_size; i++)
          {
             cdata_space_ranks[i]= cdata_space_ranks[i-1]+
-               hypre_BoxVolume(hypre_BoxArrayBox(data_space, i-1));
+                                  hypre_BoxVolume(hypre_BoxArrayBox(data_space, i-1));
          }
 
          /*-----------------------------------------------------------------
@@ -2618,8 +2682,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                parents[i]  = ci;
                box_ranks[i]= cdata_space_ranks[ci] +
-                  hypre_BoxIndexRank(hypre_BoxArrayBox(data_space, ci),
-                                     Uv_cindex[i]);
+                             hypre_BoxIndexRank(hypre_BoxArrayBox(data_space, ci),
+                                                Uv_cindex[i]);
             }
 
             /*---------------------------------------------------------------
@@ -2685,17 +2749,29 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
             }
 
             if (box_ranks)
+            {
                hypre_TFree(box_ranks, HYPRE_MEMORY_HOST);
+            }
             if (box_connections)
+            {
                hypre_TFree(box_connections, HYPRE_MEMORY_HOST);
+            }
             if (parents)
+            {
                hypre_TFree(parents, HYPRE_MEMORY_HOST);
+            }
             if (temp1)
+            {
                hypre_TFree(temp1, HYPRE_MEMORY_HOST);
+            }
             if (temp2)
+            {
                hypre_TFree(temp2, HYPRE_MEMORY_HOST);
+            }
             if (Uv_cindex)
+            {
                hypre_TFree(Uv_cindex, HYPRE_MEMORY_HOST);
+            }
 
             /*------------------------------------------------------------------------
              *  Step 3:
@@ -2755,7 +2831,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
             interface_max_stencil_cnt  =  hypre_TAlloc(HYPRE_Int *,  cnt1, HYPRE_MEMORY_HOST);
             interface_rank_stencils    =  hypre_TAlloc(HYPRE_Int *,  cnt1, HYPRE_MEMORY_HOST);
             interface_stencil_ranks    =  hypre_TAlloc(HYPRE_Int *,  cnt1, HYPRE_MEMORY_HOST);
-            coarse_stencil_cnt         =  hypre_CTAlloc(HYPRE_Int ,  cnt1, HYPRE_MEMORY_HOST);
+            coarse_stencil_cnt         =  hypre_CTAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
 
             k= 0;
             for (i= 0; i< cnt1; i++)
@@ -2971,8 +3047,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                m= 0;
                for (j= 0; j< stencil_size; j++)
                {
-                  while(  (l < coarse_stencil_cnt[i])
-                          && (stencil_ranks[j] > interface_stencil_ranks[i][l]) )
+                  while (  (l < coarse_stencil_cnt[i])
+                           && (stencil_ranks[j] > interface_stencil_ranks[i][l]) )
                   {
                      l++;
                   }
@@ -3022,7 +3098,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                    *                          0   c in 1-d, 2-d, or 3-d.
                    *-----------------------------------------------------------------*/
 
-                  switch(abs_stencil_shape)
+                  switch (abs_stencil_shape)
                   {
                      case 3:    /* corners of 3-d stencil */
 
@@ -3054,7 +3130,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                            l    =  common_stencil_ranks[j];
                            temp1=  hypre_TAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
 
-                           switch(l)
+                           switch (l)
                            {
                               case 4:   /* centre plane ne */
 
@@ -3185,7 +3261,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                            l    =  common_stencil_ranks[j];
                            temp1=  hypre_TAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
 
-                           switch(l)
+                           switch (l)
                            {
                               case 1:   /* e */
 
@@ -3256,7 +3332,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                            l    =  common_stencil_ranks[j];
                            temp1=  hypre_TAlloc(HYPRE_Int,  8, HYPRE_MEMORY_HOST);
 
-                           switch(l)
+                           switch (l)
                            {
                               case 1:   /* centre plane e */
 
@@ -3401,7 +3477,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
          for (i= 0; i< box_array_size; i++)
          {
             if (box_graph_indices[i])
+            {
                hypre_TFree(box_graph_indices[i], HYPRE_MEMORY_HOST);
+            }
          }
          hypre_TFree(box_graph_indices, HYPRE_MEMORY_HOST);
 

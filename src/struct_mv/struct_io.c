@@ -330,8 +330,8 @@ hypre_ReadBoxArrayData_CC( FILE            *file,
     * Read data
     *----------------------------------------*/
 
-   if ( constant_coefficient==1 ) constant_stencil_size = stencil_size;
-   if ( constant_coefficient==2 ) constant_stencil_size = stencil_size - 1;
+   if ( constant_coefficient==1 ) { constant_stencil_size = stencil_size; }
+   if ( constant_coefficient==2 ) { constant_stencil_size = stencil_size - 1; }
 
    hypre_SetIndex(stride, 1);
 

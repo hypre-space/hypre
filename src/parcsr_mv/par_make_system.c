@@ -117,7 +117,7 @@ HYPRE_Generate2DSystem(HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2,
    /* global row/col starts */
    A_row_starts = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
    A_col_starts = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
-   for(i = 0; i < 2; i++)
+   for (i = 0; i < 2; i++)
    {
       A_row_starts[i] = L_row_starts[i]*(HYPRE_BigInt)dim;
       A_col_starts[i] = L_row_starts[i]*(HYPRE_BigInt)dim;
@@ -135,12 +135,12 @@ HYPRE_Generate2DSystem(HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2,
 
       /* assume m11 and m22 are nonzero */
       A_nnz_diag = L1_nnz_diag + L2_nnz_diag;
-      if (m12) A_nnz_diag +=  L2_nnz_diag;
-      if (m21) A_nnz_diag +=  L1_nnz_diag;
+      if (m12) { A_nnz_diag +=  L2_nnz_diag; }
+      if (m21) { A_nnz_diag +=  L1_nnz_diag; }
 
       A_diag_i    = hypre_CTAlloc(HYPRE_Int,  A_num_rows +1, HYPRE_MEMORY_HOST);
       A_diag_j    = hypre_CTAlloc(HYPRE_Int,  A_nnz_diag, HYPRE_MEMORY_HOST);
-      A_diag_data = hypre_CTAlloc(HYPRE_Complex,  A_nnz_diag , HYPRE_MEMORY_HOST);
+      A_diag_data = hypre_CTAlloc(HYPRE_Complex,  A_nnz_diag, HYPRE_MEMORY_HOST);
 
       A_diag_i[0] = 0;
 
@@ -242,14 +242,14 @@ HYPRE_Generate2DSystem(HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2,
       A_num_rows = L_num_rows * dim;
 
       A_nnz_offd = L1_nnz_offd + L2_nnz_offd;
-      if (m12) A_nnz_offd +=  L2_nnz_offd;
-      if (m21) A_nnz_offd +=  L1_nnz_offd;
+      if (m12) { A_nnz_offd +=  L2_nnz_offd; }
+      if (m21) { A_nnz_offd +=  L1_nnz_offd; }
 
       A_num_cols_offd = L1_num_cols_offd + L2_num_cols_offd;
 
       A_offd_i    = hypre_CTAlloc(HYPRE_Int,  A_num_rows +1, HYPRE_MEMORY_HOST);
       A_offd_j    = hypre_CTAlloc(HYPRE_Int,  A_nnz_offd, HYPRE_MEMORY_HOST);
-      A_offd_data = hypre_CTAlloc(HYPRE_Complex,  A_nnz_offd , HYPRE_MEMORY_HOST);
+      A_offd_data = hypre_CTAlloc(HYPRE_Complex,  A_nnz_offd, HYPRE_MEMORY_HOST);
 
 
       A_col_map_offd =  hypre_CTAlloc(HYPRE_BigInt,  A_num_cols_offd, HYPRE_MEMORY_HOST);
@@ -367,7 +367,7 @@ HYPRE_Generate2DSystem(HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2,
          else /* m21 is nonzero */
          {
 
-             A_offd_i[i*2 + 2] = num1 + num2 + A_offd_i[i*2 + 1];
+            A_offd_i[i*2 + 2] = num1 + num2 + A_offd_i[i*2 + 1];
 
             for (k=0; k< num2; k++)
             {

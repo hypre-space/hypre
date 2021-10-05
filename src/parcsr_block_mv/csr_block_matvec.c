@@ -49,9 +49,9 @@ hypre_CSRBlockMatrixMatvec(HYPRE_Complex alpha, hypre_CSRBlockMatrix *A,
     *  is informational only.
     *--------------------------------------------------------------------*/
 
-   if (num_cols*blk_size != x_size) ierr = 1;
-   if (num_rows*blk_size != y_size) ierr = 2;
-   if (num_cols*blk_size != x_size && num_rows*blk_size != y_size) ierr = 3;
+   if (num_cols*blk_size != x_size) { ierr = 1; }
+   if (num_rows*blk_size != y_size) { ierr = 2; }
+   if (num_cols*blk_size != x_size && num_rows*blk_size != y_size) { ierr = 3; }
 
    /*-----------------------------------------------------------------------
     * Do (alpha == 0.0) computation - RDF: USE MACHINE EPS
@@ -60,9 +60,9 @@ hypre_CSRBlockMatrixMatvec(HYPRE_Complex alpha, hypre_CSRBlockMatrix *A,
    if (alpha == 0.0)
    {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-      for (i = 0; i < num_rows*blk_size; i++) y_data[i] *= beta;
+      for (i = 0; i < num_rows*blk_size; i++) { y_data[i] *= beta; }
 
       return ierr;
    }
@@ -78,18 +78,22 @@ hypre_CSRBlockMatrixMatvec(HYPRE_Complex alpha, hypre_CSRBlockMatrix *A,
       if (temp == 0.0)
       {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i = 0; i < num_rows*blk_size; i++)
+         {
             y_data[i] = 0.0;
+         }
       }
       else
       {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i = 0; i < num_rows*blk_size; i++)
+         {
             y_data[i] *= temp;
+         }
       }
    }
 
@@ -98,7 +102,7 @@ hypre_CSRBlockMatrixMatvec(HYPRE_Complex alpha, hypre_CSRBlockMatrix *A,
     *-----------------------------------------------------------------*/
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,jj,b1,b2,temp) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i,jj,b1,b2,temp) HYPRE_SMP_SCHEDULE
 #endif
 
    for (i = 0; i < num_rows; i++)
@@ -109,7 +113,9 @@ hypre_CSRBlockMatrixMatvec(HYPRE_Complex alpha, hypre_CSRBlockMatrix *A,
          {
             temp = y_data[i*blk_size+b1];
             for (b2 = 0; b2 < blk_size; b2++)
+            {
                temp += A_data[jj*bnnz+b1*blk_size+b2] * x_data[A_j[jj]*blk_size+b2];
+            }
             y_data[i*blk_size+b1] = temp;
          }
       }
@@ -122,10 +128,12 @@ hypre_CSRBlockMatrixMatvec(HYPRE_Complex alpha, hypre_CSRBlockMatrix *A,
    if (alpha != 1.0)
    {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < num_rows*blk_size; i++)
+      {
          y_data[i] *= alpha;
+      }
    }
 
    return ierr;
@@ -179,13 +187,19 @@ hypre_CSRBlockMatrixMatvecT( HYPRE_Complex         alpha,
     *--------------------------------------------------------------------*/
 
    if (num_rows*blk_size != x_size)
+   {
       ierr = 1;
+   }
 
    if (num_cols*blk_size != y_size)
+   {
       ierr = 2;
+   }
 
    if (num_rows*blk_size != x_size && num_cols*blk_size != y_size)
+   {
       ierr = 3;
+   }
    /*-----------------------------------------------------------------------
     * Do (alpha == 0.0) computation - RDF: USE MACHINE EPS
     *-----------------------------------------------------------------------*/
@@ -193,10 +207,12 @@ hypre_CSRBlockMatrixMatvecT( HYPRE_Complex         alpha,
    if (alpha == 0.0)
    {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < num_cols*blk_size; i++)
+      {
          y_data[i] *= beta;
+      }
 
       return ierr;
    }
@@ -212,18 +228,22 @@ hypre_CSRBlockMatrixMatvecT( HYPRE_Complex         alpha,
       if (temp == 0.0)
       {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i = 0; i < num_cols*blk_size; i++)
+         {
             y_data[i] = 0.0;
+         }
       }
       else
       {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i = 0; i < num_cols*blk_size; i++)
+         {
             y_data[i] *= temp;
+         }
       }
    }
 
@@ -232,7 +252,7 @@ hypre_CSRBlockMatrixMatvecT( HYPRE_Complex         alpha,
     *-----------------------------------------------------------------*/
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i, jj,j, b1, b2) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i, jj,j, b1, b2) HYPRE_SMP_SCHEDULE
 #endif
 
    for (i = 0; i < num_rows; i++)
@@ -258,10 +278,12 @@ hypre_CSRBlockMatrixMatvecT( HYPRE_Complex         alpha,
    if (alpha != 1.0)
    {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < num_cols*blk_size; i++)
+      {
          y_data[i] *= alpha;
+      }
    }
 
    return ierr;

@@ -358,11 +358,11 @@ hypre_SMGSetup( void               *smg_vdata,
          hypre_StructVectorAssemble(x_l[l+1]);
          data += hypre_StructVectorDataSize(x_l[l+1]);
          hypre_StructVectorInitializeData(tb_l[l+1],
-               hypre_StructVectorData(tb_l[0]));
+                                          hypre_StructVectorData(tb_l[0]));
          hypre_StructVectorAssemble(tb_l[l+1]);
 
          hypre_StructVectorInitializeData(tx_l[l+1],
-               hypre_StructVectorData(tx_l[0]));
+                                          hypre_StructVectorData(tx_l[0]));
          hypre_StructVectorAssemble(tx_l[l+1]);
          //printf("\n Alloc x_l,b_l[%d] on GPU\n",l+1);
       }
@@ -387,11 +387,11 @@ hypre_SMGSetup( void               *smg_vdata,
          else
          {
             hypre_StructVectorInitializeData(tb_l[l+1],
-                  hypre_StructVectorData(tb_l[num_level_GPU]));
+                                             hypre_StructVectorData(tb_l[num_level_GPU]));
             hypre_StructVectorAssemble(tb_l[l+1]);
 
             hypre_StructVectorInitializeData(tx_l[l+1],
-                  hypre_StructVectorData(tx_l[num_level_GPU]));
+                                             hypre_StructVectorData(tx_l[num_level_GPU]));
             hypre_StructVectorAssemble(tx_l[l+1]);
          }
          //printf("\n Alloc x_l,b_l[%d] on CPU\n",l+1);
@@ -539,7 +539,7 @@ hypre_SMGSetup( void               *smg_vdata,
    hypre_SMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 
    /* set up the residual routine in case of a single grid level */
-   if( l == 0 )
+   if ( l == 0 )
    {
       residual_data_l[l] = hypre_SMGResidualCreate();
       hypre_SMGResidualSetBase(residual_data_l[l], bindex, bstride);
@@ -572,7 +572,7 @@ hypre_SMGSetup( void               *smg_vdata,
    }
 
 #if DEBUG
-   if(hypre_StructGridNDim(grid_l[0]) == 3)
+   if (hypre_StructGridNDim(grid_l[0]) == 3)
    {
       for (l = 0; l < (num_levels - 1); l++)
       {

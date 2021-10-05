@@ -87,14 +87,14 @@ GenerateDifConv( MPI_Comm comm,
    R_busy = hypre_min(nz,R);
 
    num_cols_offd = 0;
-   if (p) num_cols_offd += ny_local*nz_local;
-   if (p < P_busy-1) num_cols_offd += ny_local*nz_local;
-   if (q) num_cols_offd += nx_local*nz_local;
-   if (q < Q_busy-1) num_cols_offd += nx_local*nz_local;
-   if (r) num_cols_offd += nx_local*ny_local;
-   if (r < R_busy-1) num_cols_offd += nx_local*ny_local;
+   if (p) { num_cols_offd += ny_local*nz_local; }
+   if (p < P_busy-1) { num_cols_offd += ny_local*nz_local; }
+   if (q) { num_cols_offd += nx_local*nz_local; }
+   if (q < Q_busy-1) { num_cols_offd += nx_local*nz_local; }
+   if (r) { num_cols_offd += nx_local*ny_local; }
+   if (r < R_busy-1) { num_cols_offd += nx_local*ny_local; }
 
-   if (!local_num_rows) num_cols_offd = 0;
+   if (!local_num_rows) { num_cols_offd = 0; }
 
    cnt = 1;
    o_cnt = 1;
@@ -110,7 +110,9 @@ GenerateDifConv( MPI_Comm comm,
             offd_i[o_cnt] = offd_i[o_cnt-1];
             diag_i[cnt]++;
             if (iz > nz_part[ir])
+            {
                diag_i[cnt]++;
+            }
             else
             {
                if (iz)
@@ -119,7 +121,9 @@ GenerateDifConv( MPI_Comm comm,
                }
             }
             if (iy > ny_part[iq])
+            {
                diag_i[cnt]++;
+            }
             else
             {
                if (iy)
@@ -128,7 +132,9 @@ GenerateDifConv( MPI_Comm comm,
                }
             }
             if (ix > nx_part[ip])
+            {
                diag_i[cnt]++;
+            }
             else
             {
                if (ix)
@@ -137,7 +143,9 @@ GenerateDifConv( MPI_Comm comm,
                }
             }
             if (ix+1 < nx_part[ip+1])
+            {
                diag_i[cnt]++;
+            }
             else
             {
                if (ix+1 < nx)
@@ -146,7 +154,9 @@ GenerateDifConv( MPI_Comm comm,
                }
             }
             if (iy+1 < ny_part[iq+1])
+            {
                diag_i[cnt]++;
+            }
             else
             {
                if (iy+1 < ny)
@@ -155,7 +165,9 @@ GenerateDifConv( MPI_Comm comm,
                }
             }
             if (iz+1 < nz_part[ir+1])
+            {
                diag_i[cnt]++;
+            }
             else
             {
                if (iz+1 < nz)
@@ -283,7 +295,9 @@ GenerateDifConv( MPI_Comm comm,
    {
       col_map_offd = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd, HYPRE_MEMORY_HOST);
       for (i=0; i < num_cols_offd; i++)
+      {
          col_map_offd[i] = big_offd_j[i];
+      }
 
       hypre_BigQsort0(col_map_offd, 0, num_cols_offd-1);
 

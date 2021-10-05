@@ -62,19 +62,19 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
    hypre_F90_Obj solver, precond;
 
    hypre_F90_Obj long_temp_COMM;
-        HYPRE_Int temp_COMM;
-        HYPRE_Int precond_id;
+   HYPRE_Int temp_COMM;
+   HYPRE_Int precond_id;
 
-        HYPRE_Int one = 1;
-        HYPRE_Int two = 2;
-        HYPRE_Int three = 3;
-        HYPRE_Int six = 6;
-        HYPRE_Int twenty = 20;
-        HYPRE_Int thousand = 1000;
-        HYPRE_Int hypre_type = HYPRE_PARCSR;
+   HYPRE_Int one = 1;
+   HYPRE_Int two = 2;
+   HYPRE_Int three = 3;
+   HYPRE_Int six = 6;
+   HYPRE_Int twenty = 20;
+   HYPRE_Int thousand = 1000;
+   HYPRE_Int hypre_type = HYPRE_PARCSR;
 
-     HYPRE_Real oo1 = 1.e-3;
-     HYPRE_Real tol = 1.e-7;
+   HYPRE_Real oo1 = 1.e-3;
+   HYPRE_Real tol = 1.e-7;
 #else
    HYPRE_IJMatrix A;
    HYPRE_ParCSRMatrix parcsr_A;
@@ -152,7 +152,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
    }
 
    /* Preliminaries: want at least one processor per row */
-   if (n*n < num_procs) n = sqrt(num_procs) + 1;
+   if (n*n < num_procs) { n = sqrt(num_procs) + 1; }
    N = n*n; /* global number of rows */
    h = 1.0/(n+1); /* mesh size*/
    h2 = h*h;
@@ -650,16 +650,20 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
    }
    else
    {
-      if (myid ==0) hypre_printf("Invalid solver id specified.\n");
+      if (myid ==0) { hypre_printf("Invalid solver id specified.\n"); }
    }
 
    /* Print the solution */
 #ifdef HYPRE_FORTRAN
    if (print_solution)
+   {
       HYPRE_IJVectorPrint(&x, "ij.out.x");
+   }
 #else
    if (print_solution)
+   {
       HYPRE_IJVectorPrint(x, "ij.out.x");
+   }
 #endif
 
    /* Clean up */
@@ -676,5 +680,5 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
    /* Finalize MPI*/
    hypre_MPI_Finalize();
 
-   return(0);
+   return (0);
 }

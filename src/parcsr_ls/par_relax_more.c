@@ -33,9 +33,9 @@
  *****************************************************************************/
 HYPRE_Int
 hypre_ParCSRMaxEigEstimateHost( hypre_ParCSRMatrix *A,       /* matrix to relax with */
-                            HYPRE_Int           scale,   /* scale by diagonal?   */
-                            HYPRE_Real         *max_eig,
-                            HYPRE_Real         *min_eig )
+                                HYPRE_Int           scale,   /* scale by diagonal?   */
+                                HYPRE_Real         *max_eig,
+                                HYPRE_Real         *min_eig )
 {
    HYPRE_Int   A_num_rows  = hypre_ParCSRMatrixNumRows(A);
    HYPRE_Int  *A_diag_i    = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A));
@@ -101,7 +101,8 @@ hypre_ParCSRMaxEigEstimateHost( hypre_ParCSRMatrix *A,       /* matrix to relax 
    send_buf[1] =  e_max;
 
    /* get e_min e_max across procs */
-   hypre_MPI_Allreduce(send_buf, recv_buf, 2, HYPRE_MPI_REAL, hypre_MPI_MAX, hypre_ParCSRMatrixComm(A));
+   hypre_MPI_Allreduce(send_buf, recv_buf, 2, HYPRE_MPI_REAL, hypre_MPI_MAX,
+                       hypre_ParCSRMatrixComm(A));
 
    e_min = -recv_buf[0];
    e_max =  recv_buf[1];
@@ -207,10 +208,10 @@ hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A,     /* matrix to relax with 
  */
 HYPRE_Int
 hypre_ParCSRMaxEigEstimateCGHost( hypre_ParCSRMatrix *A,     /* matrix to relax with */
-                                 HYPRE_Int           scale, /* scale by diagonal?*/
-                                 HYPRE_Int           max_iter,
-                                 HYPRE_Real         *max_eig,
-                                 HYPRE_Real         *min_eig )
+                                  HYPRE_Int           scale, /* scale by diagonal?*/
+                                  HYPRE_Int           max_iter,
+                                  HYPRE_Real         *max_eig,
+                                  HYPRE_Real         *min_eig )
 {
    HYPRE_Int i, j, err;
    hypre_ParVector *p;
@@ -320,7 +321,7 @@ hypre_ParCSRMaxEigEstimateCGHost( hypre_ParCSRMatrix *A,     /* matrix to relax 
 
          /* p = s + beta p */
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
+         #pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
 #endif
          for (j=0; j < local_size; j++)
          {
@@ -431,7 +432,8 @@ hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with */
    hypre_ParVector *tmp_vec    = NULL;
    hypre_ParVector *orig_u_vec = NULL;
 
-   hypre_ParCSRRelax_Cheby_Setup(A, max_eig, min_eig, fraction, order, scale, variant, &coefs, &ds_data);
+   hypre_ParCSRRelax_Cheby_Setup(A, max_eig, min_eig, fraction, order, scale, variant, &coefs,
+                                 &ds_data);
 
    orig_u_vec = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                       hypre_ParCSRMatrixGlobalNumRows(A),
@@ -445,7 +447,8 @@ hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with */
                                       hypre_ParCSRMatrixRowStarts(A));
       hypre_ParVectorInitialize_v2(tmp_vec, hypre_ParCSRMatrixMemoryLocation(A));
    }
-   hypre_ParCSRRelax_Cheby_Solve(A, f, ds_data, coefs, order, scale, variant, u, v, r, orig_u_vec, tmp_vec);
+   hypre_ParCSRRelax_Cheby_Solve(A, f, ds_data, coefs, order, scale, variant, u, v, r, orig_u_vec,
+                                 tmp_vec);
 
    hypre_TFree(ds_data, hypre_ParCSRMatrixMemoryLocation(A));
    hypre_TFree(coefs, HYPRE_MEMORY_HOST);
@@ -485,7 +488,7 @@ hypre_ParCSRRelax_CG( HYPRE_Solver        solver,
          hypre_printf("            -----CG PCG Iterations = %d\n", num_iterations);
          hypre_printf("            -----CG PCG Final Relative Residual Norm = %e\n", final_res_norm);
       }
-    }
+   }
 #endif
 
    return hypre_error_flag;
@@ -593,7 +596,8 @@ hypre_LINPACKcgtql1(HYPRE_Int *n,HYPRE_Real *d,HYPRE_Real *e,HYPRE_Int *ierr)
       }
       /*     .......... LOOK FOR SMALL SUB-DIAGONAL ELEMENT .......... */
       i__2 = *n;
-      for (m = l; m <= i__2; ++m) {
+      for (m = l; m <= i__2; ++m)
+      {
          tst2 = tst1 + (d__1 = e[m],fabs(d__1));
          if (tst2 == tst1)
          {
@@ -602,12 +606,12 @@ hypre_LINPACKcgtql1(HYPRE_Int *n,HYPRE_Real *d,HYPRE_Real *e,HYPRE_Int *ierr)
          /*     .......... E(N) IS ALWAYS ZERO,SO THERE IS NO EXIT */
          /*                THROUGH THE BOTTOM OF THE LOOP .......... */
       }
-L120:
+   L120:
       if (m == l)
       {
          goto L210;
       }
-L130:
+   L130:
       if (j == 30)
       {
          goto L1000;
@@ -619,7 +623,8 @@ L130:
       g = d[l];
       p = (d[l1] - g) / (e[l] * 2.);
       r = hypre_LINPACKcgpthy(&p,&c_b10);
-      ds = 1.0; if (p < 0.0) ds = -1.0;
+      ds = 1.0;
+      if (p < 0.0) { ds = -1.0; }
       d[l] = e[l] / (p + ds*r);
       d[l1] = e[l] * (p + ds*r);
       dl1 = d[l1];
@@ -630,11 +635,12 @@ L130:
       }
 
       i__2 = *n;
-      for (i = l2; i <= i__2; ++i) {
+      for (i = l2; i <= i__2; ++i)
+      {
          d[i] -= h;
       }
 
-L145:
+   L145:
       f += h;
       /*     .......... QL TRANSFORMATION .......... */
       p = d[m];
@@ -669,10 +675,11 @@ L145:
       {
          goto L130;
       }
-L210:
+   L210:
       p = d[l] + f;
       /*     .......... ORDER EIGENVALUES .......... */
-      if (l == 1) {
+      if (l == 1)
+      {
          goto L250;
       }
       /*     .......... FOR I=L STEP -1 UNTIL 2 DO -- .......... */
@@ -687,9 +694,9 @@ L210:
          d[i] = d[i - 1];
       }
 
-L250:
+   L250:
       i = 1;
-L270:
+   L270:
       d[i] = p;
    }
 

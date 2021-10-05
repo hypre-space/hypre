@@ -150,7 +150,8 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
       dof_func_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST);
       index = 0;
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-      int_buf_data = hypre_CTAlloc(HYPRE_Int,  hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
+      int_buf_data = hypre_CTAlloc(HYPRE_Int,  hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                   HYPRE_MEMORY_HOST);
       for (i = 0; i < num_sends; i++)
       {
          startc = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
@@ -172,7 +173,8 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
       pass_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST);
       index = 0;
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-      int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
+      int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                   HYPRE_MEMORY_HOST);
       for (i = 0; i < num_sends; i++)
       {
          startc = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
@@ -278,7 +280,7 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
             {
                if (dof_func[i] == dof_func_offd[A_offd_j[j]])
                {
-                   row_sums[i] += A_offd_data[j];
+                  row_sums[i] += A_offd_data[j];
                }
             }
          }
@@ -312,7 +314,7 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
          hypre_ParCSRMatrix *Q;
          HYPRE_BigInt *c_pts_starts = hypre_ParCSRMatrixRowStarts(Pi[i-1]);
          hypre_GenerateMultipassPi(A, S, c_pts_starts, &pass_order[pass_starts[i+1]], pass_marker,
-                             pass_marker_offd, pass_starts[i+2]-pass_starts[i+1], i+1, row_sums, &Q);
+                                   pass_marker_offd, pass_starts[i+2]-pass_starts[i+1], i+1, row_sums, &Q);
          Pi[i] = hypre_ParMatmul(Q, Pi[i-1]);
          hypre_ParCSRMatrixDestroy(Q);
       }
@@ -323,8 +325,8 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
       {
          HYPRE_BigInt *c_pts_starts = hypre_ParCSRMatrixRowStarts(Pi[i-1]);
          hypre_GenerateMultiPi(A, S, Pi[i-1], c_pts_starts, &pass_order[pass_starts[i+1]], pass_marker,
-                             pass_marker_offd, pass_starts[i+2]-pass_starts[i+1], i+1,
-                             num_functions, dof_func, dof_func_offd, &Pi[i]);
+                               pass_marker_offd, pass_starts[i+2]-pass_starts[i+1], i+1,
+                               num_functions, dof_func, dof_func_offd, &Pi[i]);
       }
    }
 
@@ -456,10 +458,10 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
       num_cols_offd_P = 1;
       for (i=0; i < P_offd_size-1; i++)
       {
-          if (tmp_P_offd_j[i+1] > tmp_P_offd_j[i])
-          {
-             tmp_P_offd_j[num_cols_offd_P++] = tmp_P_offd_j[i+1];
-          }
+         if (tmp_P_offd_j[i+1] > tmp_P_offd_j[i])
+         {
+            tmp_P_offd_j[num_cols_offd_P++] = tmp_P_offd_j[i+1];
+         }
       }
 
       col_map_offd_P = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd_P, HYPRE_MEMORY_HOST);
@@ -472,8 +474,8 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
       for (i=0; i < P_offd_size; i++)
       {
          P_offd_j[i] = hypre_BigBinarySearch(col_map_offd_P,
-               big_P_offd_j[i],
-               num_cols_offd_P);
+                                             big_P_offd_j[i],
+                                             num_cols_offd_P);
       }
       hypre_TFree(tmp_P_offd_j, HYPRE_MEMORY_HOST);
       hypre_TFree(big_P_offd_j, HYPRE_MEMORY_HOST);
@@ -494,7 +496,7 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
 
    for (i=0; i < n_fine; i++)
    {
-      if (CF_marker[i] == -3) CF_marker[i] = -1;
+      if (CF_marker[i] == -3) { CF_marker[i] = -1; }
    }
 
    hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
@@ -513,7 +515,8 @@ HYPRE_Int
 hypre_GenerateMultipassPi( hypre_ParCSRMatrix  *A,
                            hypre_ParCSRMatrix  *S,
                            HYPRE_BigInt        *c_pts_starts,
-                           HYPRE_Int           *pass_order, /* array containing row numbers of rows in A and S to be considered */
+                           HYPRE_Int
+                           *pass_order, /* array containing row numbers of rows in A and S to be considered */
                            HYPRE_Int           *pass_marker,
                            HYPRE_Int           *pass_marker_offd,
                            HYPRE_Int            num_points,
@@ -642,7 +645,8 @@ hypre_GenerateMultipassPi( hypre_ParCSRMatrix  *A,
          fine_to_coarse_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST);
          index = 0;
          num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-         big_buf_data = hypre_CTAlloc(HYPRE_BigInt, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
+         big_buf_data = hypre_CTAlloc(HYPRE_BigInt, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                      HYPRE_MEMORY_HOST);
          for (i = 0; i < num_sends; i++)
          {
             startc = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
@@ -689,8 +693,8 @@ hypre_GenerateMultipassPi( hypre_ParCSRMatrix  *A,
          j1 = S_diag_j[j];
          if (pass_marker[j1] == color)
          {
-             P_diag_i[i+1]++;
-             nnz_diag++;
+            P_diag_i[i+1]++;
+            nnz_diag++;
          }
       }
       for (j=S_offd_i[i1]; j < S_offd_i[i1+1]; j++)
@@ -698,8 +702,8 @@ hypre_GenerateMultipassPi( hypre_ParCSRMatrix  *A,
          j1 = S_offd_j[j];
          if (pass_marker_offd[j1] == color)
          {
-             P_offd_i[i+1]++;
-             nnz_offd++;
+            P_offd_i[i+1]++;
+            nnz_offd++;
          }
       }
    }
@@ -724,7 +728,7 @@ hypre_GenerateMultipassPi( hypre_ParCSRMatrix  *A,
       for (j = S_diag_i[i1]; j < S_diag_i[i1+1]; j++)
       {
          j1 = S_diag_j[j];
-         while (A_diag_j[j2] != j1) j2++;
+         while (A_diag_j[j2] != j1) { j2++; }
          if (pass_marker[j1] == color && A_diag_j[j2] == j1)
          {
             P_diag_j[cnt_diag] = fine_to_coarse[j1];
@@ -735,7 +739,7 @@ hypre_GenerateMultipassPi( hypre_ParCSRMatrix  *A,
       for (j = S_offd_i[i1]; j < S_offd_i[i1+1]; j++)
       {
          j1 = S_offd_j[j];
-         while (A_offd_j[j2] != j1) j2++;
+         while (A_offd_j[j2] != j1) { j2++; }
          if (pass_marker_offd[j1] == color && A_offd_j[j2] == j1)
          {
             P_offd_j[cnt_offd] = fine_to_coarse_offd[j1];
@@ -761,11 +765,11 @@ hypre_GenerateMultipassPi( hypre_ParCSRMatrix  *A,
       }*/
       for (j = P_diag_i[i]; j < P_diag_i[i+1]; j++)
       {
-          row_sum_C[i] += P_diag_data[j];
+         row_sum_C[i] += P_diag_data[j];
       }
       for (j = P_offd_i[i]; j < P_offd_i[i+1]; j++)
       {
-           row_sum_C[i] += P_offd_data[j];
+         row_sum_C[i] += P_offd_data[j];
       }
       value = row_sum_C[i]*diagonal;
       if (value != 0)
@@ -826,7 +830,8 @@ hypre_GenerateMultiPi( hypre_ParCSRMatrix  *A,
                        hypre_ParCSRMatrix  *S,
                        hypre_ParCSRMatrix  *P,
                        HYPRE_BigInt        *c_pts_starts,
-                       HYPRE_Int           *pass_order, /* array containing row numbers of rows in A and S to be considered */
+                       HYPRE_Int
+                       *pass_order, /* array containing row numbers of rows in A and S to be considered */
                        HYPRE_Int           *pass_marker,
                        HYPRE_Int           *pass_marker_offd,
                        HYPRE_Int            num_points,
@@ -969,7 +974,8 @@ hypre_GenerateMultiPi( hypre_ParCSRMatrix  *A,
          fine_to_coarse_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST);
          index = 0;
          num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-         big_buf_data = hypre_CTAlloc(HYPRE_BigInt,  hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_HOST);
+         big_buf_data = hypre_CTAlloc(HYPRE_BigInt,  hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                      HYPRE_MEMORY_HOST);
          for (i = 0; i < num_sends; i++)
          {
             startc = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
@@ -1016,8 +1022,8 @@ hypre_GenerateMultiPi( hypre_ParCSRMatrix  *A,
          j1 = S_diag_j[j];
          if (pass_marker[j1] == color)
          {
-             Q_diag_i[i+1]++;
-             nnz_diag++;
+            Q_diag_i[i+1]++;
+            nnz_diag++;
          }
       }
       for (j=S_offd_i[i1]; j < S_offd_i[i1+1]; j++)
@@ -1025,8 +1031,8 @@ hypre_GenerateMultiPi( hypre_ParCSRMatrix  *A,
          j1 = S_offd_j[j];
          if (pass_marker_offd[j1] == color)
          {
-             Q_offd_i[i+1]++;
-             nnz_offd++;
+            Q_offd_i[i+1]++;
+            nnz_offd++;
          }
       }
    }

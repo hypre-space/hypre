@@ -34,7 +34,7 @@ void hypre_ParAat_RowSizes(
    HYPRE_Int num_rows_A_ext,
    HYPRE_BigInt first_col_diag_A,
    HYPRE_BigInt first_row_index_A
-   )
+)
 /* computes the sizes of the rows of C = A * A^T.
    Out: HYPRE_Int** C_diag_i, C_offd_i
    Workspace provided: HYPRE_Int * B_marker
@@ -106,9 +106,12 @@ void hypre_ParAat_RowSizes(
              *  as a potential nonzero.
              *-----------------------------------------------------------*/
 
-            for ( i3=0; i3<num_rows_A_ext; i3++ ) {
-               for ( jj3=A_ext_i[i3]; jj3<A_ext_i[i3+1]; jj3++ ) {
-                  if ( A_ext_j[jj3]==big_i2 ) {
+            for ( i3=0; i3<num_rows_A_ext; i3++ )
+            {
+               for ( jj3=A_ext_i[i3]; jj3<A_ext_i[i3+1]; jj3++ )
+               {
+                  if ( A_ext_j[jj3]==big_i2 )
+                  {
                      /* row i3, column i2 of A_ext; or,
                         row i2, column i3 of (A_ext)^T */
 
@@ -119,14 +122,18 @@ void hypre_ParAat_RowSizes(
                       *--------------------------------------------------------*/
 
                      if ( A_ext_row_map[i3] < first_row_index_A ||
-                          A_ext_row_map[i3] > last_col_diag_C ) { /* offd */
-                        if (B_marker[i3+num_rows_diag_A] < jj_row_begin_offd) {
+                          A_ext_row_map[i3] > last_col_diag_C )   /* offd */
+                     {
+                        if (B_marker[i3+num_rows_diag_A] < jj_row_begin_offd)
+                        {
                            B_marker[i3+num_rows_diag_A] = jj_count_offd;
                            jj_count_offd++;
                         }
                      }
-                     else {                                              /* diag */
-                        if (B_marker[i3+num_rows_diag_A] < jj_row_begin_diag) {
+                     else                                                /* diag */
+                     {
+                        if (B_marker[i3+num_rows_diag_A] < jj_row_begin_diag)
+                        {
                            B_marker[i3+num_rows_diag_A] = jj_count_diag;
                            jj_count_diag++;
                         }
@@ -146,10 +153,13 @@ void hypre_ParAat_RowSizes(
              *  as a potential nonzero.
              *-----------------------------------------------------------*/
 
-            for ( i3=0; i3<num_rows_diag_A; i3++ ) {
+            for ( i3=0; i3<num_rows_diag_A; i3++ )
+            {
                /* ... note that num_rows_diag_A == num_rows_offd_A */
-               for ( jj3=A_offd_i[i3]; jj3<A_offd_i[i3+1]; jj3++ ) {
-                  if ( A_col_map_offd[ A_offd_j[jj3] ]==big_i2 ) {
+               for ( jj3=A_offd_i[i3]; jj3<A_offd_i[i3+1]; jj3++ )
+               {
+                  if ( A_col_map_offd[ A_offd_j[jj3] ]==big_i2 )
+                  {
                      /* row i3, column i2 of A; or,
                         row i2, column i3 of A^T */
                      /*--------------------------------------------------------
@@ -191,9 +201,12 @@ void hypre_ParAat_RowSizes(
           *  as a potential nonzero.
           *-----------------------------------------------------------*/
 
-         for ( i3=0; i3<num_rows_A_ext; i3++ ) {
-            for ( jj3=A_ext_i[i3]; jj3<A_ext_i[i3+1]; jj3++ ) {
-               if ( A_ext_j[jj3]==big_i2 ) {
+         for ( i3=0; i3<num_rows_A_ext; i3++ )
+         {
+            for ( jj3=A_ext_i[i3]; jj3<A_ext_i[i3+1]; jj3++ )
+            {
+               if ( A_ext_j[jj3]==big_i2 )
+               {
                   /* row i3, column i2 of A_ext; or,
                      row i2, column i3 of (A_ext)^T */
 
@@ -203,14 +216,18 @@ void hypre_ParAat_RowSizes(
                    *  counter.
                    *--------------------------------------------------------*/
                   if ( A_ext_row_map[i3] < first_row_index_A ||
-                       A_ext_row_map[i3] > last_col_diag_C ) { /* offd */
-                     if (B_marker[i3+num_rows_diag_A] < jj_row_begin_offd) {
+                       A_ext_row_map[i3] > last_col_diag_C )   /* offd */
+                  {
+                     if (B_marker[i3+num_rows_diag_A] < jj_row_begin_offd)
+                     {
                         B_marker[i3+num_rows_diag_A] = jj_count_offd;
                         jj_count_offd++;
                      }
                   }
-                  else {                                              /* diag */
-                     if (B_marker[i3+num_rows_diag_A] < jj_row_begin_diag) {
+                  else                                                /* diag */
+                  {
+                     if (B_marker[i3+num_rows_diag_A] < jj_row_begin_diag)
+                     {
                         B_marker[i3+num_rows_diag_A] = jj_count_diag;
                         jj_count_diag++;
                      }
@@ -242,9 +259,12 @@ void hypre_ParAat_RowSizes(
           *  For each entry (i2,i3) of A^T, mark C(i1,i3)
           *  as a potential nonzero.
           *-----------------------------------------------------------*/
-         for ( i3=0; i3<num_rows_diag_A; i3++ ) {
-            for ( jj3=A_diag_i[i3]; jj3<A_diag_i[i3+1]; jj3++ ) {
-               if ( (HYPRE_BigInt)A_diag_j[jj3]+first_col_diag_A == big_i2 ) {
+         for ( i3=0; i3<num_rows_diag_A; i3++ )
+         {
+            for ( jj3=A_diag_i[i3]; jj3<A_diag_i[i3+1]; jj3++ )
+            {
+               if ( (HYPRE_BigInt)A_diag_j[jj3]+first_col_diag_A == big_i2 )
+               {
                   /* row i3, column i2 of A; or,
                      row i2, column i3 of A^T */
                   /*--------------------------------------------------------
@@ -399,7 +419,7 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
     *  Allocate marker array.
     *-----------------------------------------------------------------------*/
 
-   B_marker = hypre_CTAlloc(HYPRE_Int,  num_rows_diag_A+num_rows_A_ext , HYPRE_MEMORY_HOST);
+   B_marker = hypre_CTAlloc(HYPRE_Int,  num_rows_diag_A+num_rows_A_ext, HYPRE_MEMORY_HOST);
 
    /*-----------------------------------------------------------------------
     *  Initialize some stuff.
@@ -420,16 +440,16 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
       num_rows_diag_A, num_cols_offd_A,
       num_rows_A_ext,
       first_col_diag_A, first_row_index_A
-      );
+   );
 
 #if 0
-/* debugging output: */
+   /* debugging output: */
    hypre_printf("A_ext_row_map (%i):",num_rows_A_ext);
-   for ( i1=0; i1<num_rows_A_ext; ++i1 ) hypre_printf(" %i",A_ext_row_map[i1] );
+   for ( i1=0; i1<num_rows_A_ext; ++i1 ) { hypre_printf(" %i",A_ext_row_map[i1] ); }
    hypre_printf("\nC_diag_i (%i):",C_diag_size);
-   for ( i1=0; i1<=num_rows_diag_A; ++i1 ) hypre_printf(" %i",C_diag_i[i1] );
+   for ( i1=0; i1<=num_rows_diag_A; ++i1 ) { hypre_printf(" %i",C_diag_i[i1] ); }
    hypre_printf("\nC_offd_i (%i):",C_offd_size);
-   for ( i1=0; i1<=num_rows_diag_A; ++i1 ) hypre_printf(" %i",C_offd_i[i1] );
+   for ( i1=0; i1<=num_rows_diag_A; ++i1 ) { hypre_printf(" %i",C_offd_i[i1] ); }
    hypre_printf("\n");
 #endif
 
@@ -508,9 +528,12 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
           *  blocks of C.
           *-----------------------------------------------------------*/
 
-         for ( i3=0; i3<num_rows_A_ext; i3++ ) {
-            for ( jj3=A_ext_i[i3]; jj3<A_ext_i[i3+1]; jj3++ ) {
-               if ( A_ext_j[jj3]==(HYPRE_BigInt)i2+first_col_diag_A ) {
+         for ( i3=0; i3<num_rows_A_ext; i3++ )
+         {
+            for ( jj3=A_ext_i[i3]; jj3<A_ext_i[i3+1]; jj3++ )
+            {
+               if ( A_ext_j[jj3]==(HYPRE_BigInt)i2+first_col_diag_A )
+               {
                   /* row i3, column i2 of A_ext; or,
                      row i2, column i3 of (A_ext)^T */
 
@@ -523,25 +546,33 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
                    *--------------------------------------------------------*/
 
                   if ( A_ext_row_map[i3] < first_row_index_A ||
-                       A_ext_row_map[i3] > last_col_diag_C ) { /* offd */
-                     if (B_marker[i3+num_rows_diag_A] < jj_row_begin_offd) {
+                       A_ext_row_map[i3] > last_col_diag_C )   /* offd */
+                  {
+                     if (B_marker[i3+num_rows_diag_A] < jj_row_begin_offd)
+                     {
                         B_marker[i3+num_rows_diag_A] = jj_count_offd;
                         C_offd_data[jj_count_offd] = a_b_product;
                         C_offd_j[jj_count_offd] = i3;
                         jj_count_offd++;
                      }
                      else
+                     {
                         C_offd_data[B_marker[i3+num_rows_diag_A]] += a_b_product;
+                     }
                   }
-                  else {                                              /* diag */
-                     if (B_marker[i3+num_rows_diag_A] < jj_row_begin_diag) {
+                  else                                                /* diag */
+                  {
+                     if (B_marker[i3+num_rows_diag_A] < jj_row_begin_diag)
+                     {
                         B_marker[i3+num_rows_diag_A] = jj_count_diag;
                         C_diag_data[jj_count_diag] = a_b_product;
                         C_diag_j[jj_count_diag] = (HYPRE_Int)(i3-first_col_diag_A);
                         jj_count_diag++;
                      }
                      else
+                     {
                         C_diag_data[B_marker[i3+num_rows_diag_A]] += a_b_product;
+                     }
                   }
                }
             }
@@ -566,9 +597,12 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
              *  blocks of C.
              *-----------------------------------------------------------*/
 
-            for ( i3=0; i3<num_rows_A_ext; i3++ ) {
-               for ( jj3=A_ext_i[i3]; jj3<A_ext_i[i3+1]; jj3++ ) {
-                  if ( A_ext_j[jj3]==A_col_map_offd[i2] ) {
+            for ( i3=0; i3<num_rows_A_ext; i3++ )
+            {
+               for ( jj3=A_ext_i[i3]; jj3<A_ext_i[i3+1]; jj3++ )
+               {
+                  if ( A_ext_j[jj3]==A_col_map_offd[i2] )
+                  {
                      /* row i3, column i2 of A_ext; or,
                         row i2, column i3 of (A_ext)^T */
 
@@ -581,25 +615,33 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
                       *--------------------------------------------------------*/
 
                      if ( A_ext_row_map[i3] < first_row_index_A ||
-                          A_ext_row_map[i3] > last_col_diag_C ) { /* offd */
-                        if (B_marker[i3+num_rows_diag_A] < jj_row_begin_offd) {
+                          A_ext_row_map[i3] > last_col_diag_C )   /* offd */
+                     {
+                        if (B_marker[i3+num_rows_diag_A] < jj_row_begin_offd)
+                        {
                            B_marker[i3+num_rows_diag_A] = jj_count_offd;
                            C_offd_data[jj_count_offd] = a_b_product;
                            C_offd_j[jj_count_offd] = i3;
                            jj_count_offd++;
                         }
                         else
+                        {
                            C_offd_data[B_marker[i3+num_rows_diag_A]] += a_b_product;
+                        }
                      }
-                     else {                                              /* diag */
-                        if (B_marker[i3+num_rows_diag_A] < jj_row_begin_diag) {
+                     else                                                /* diag */
+                     {
+                        if (B_marker[i3+num_rows_diag_A] < jj_row_begin_diag)
+                        {
                            B_marker[i3+num_rows_diag_A] = jj_count_diag;
                            C_diag_data[jj_count_diag] = a_b_product;
                            C_diag_j[jj_count_diag] = (HYPRE_Int)(i3-first_row_index_A);
                            jj_count_diag++;
                         }
                         else
+                        {
                            C_diag_data[B_marker[i3+num_rows_diag_A]] += a_b_product;
+                        }
                      }
                   }
                }
@@ -631,9 +673,12 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
           *  For each entry (i2,i3) of A^T,  add A(i1,i2)*A(i3,i2)
           *  to C(i1,i3)
           *-----------------------------------------------------------*/
-         for ( i3=0; i3<num_rows_diag_A; i3++ ) {
-            for ( jj3=A_diag_i[i3]; jj3<A_diag_i[i3+1]; jj3++ ) {
-               if ( A_diag_j[jj3]==i2 ) {
+         for ( i3=0; i3<num_rows_diag_A; i3++ )
+         {
+            for ( jj3=A_diag_i[i3]; jj3<A_diag_i[i3+1]; jj3++ )
+            {
+               if ( A_diag_j[jj3]==i2 )
+               {
                   /* row i3, column i2 of A; or,
                      row i2, column i3 of A^T */
                   a_b_product = a_entry * A_diag_data[jj3];
@@ -670,17 +715,21 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
        *  It contributes to the diag block of C.
        *  For each entry (i2,i3) of A^T, add A*A^T to C
        *-----------------------------------------------------------*/
-      if (num_cols_offd_A) {
+      if (num_cols_offd_A)
+      {
 
          for (jj2 = A_offd_i[i1]; jj2 < A_offd_i[i1+1]; jj2++)
          {
             i2 = A_offd_j[jj2];
             a_entry = A_offd_data[jj2];
 
-            for ( i3=0; i3<num_rows_diag_A; i3++ ) {
+            for ( i3=0; i3<num_rows_diag_A; i3++ )
+            {
                /* ... note that num_rows_diag_A == num_rows_offd_A */
-               for ( jj3=A_offd_i[i3]; jj3<A_offd_i[i3+1]; jj3++ ) {
-                  if ( A_offd_j[jj3]==i2 ) {
+               for ( jj3=A_offd_i[i3]; jj3<A_offd_i[i3+1]; jj3++ )
+               {
+                  if ( A_offd_j[jj3]==i2 )
+                  {
                      /* row i3, column i2 of A; or,
                         row i2, column i3 of A^T */
                      a_b_product = a_entry * A_offd_data[jj3];
@@ -711,18 +760,20 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
 #if 0          /* debugging printout */
       hypre_printf("end of i1 loop: i1=%i jj_count_diag=%i\n", i1, jj_count_diag );
       hypre_printf("  C_diag_j=");
-      for ( jj3=0; jj3<jj_count_diag; ++jj3) hypre_printf("%i ",C_diag_j[jj3]);
+      for ( jj3=0; jj3<jj_count_diag; ++jj3) { hypre_printf("%i ",C_diag_j[jj3]); }
       hypre_printf("  C_diag_data=");
-      for ( jj3=0; jj3<jj_count_diag; ++jj3) hypre_printf("%f ",C_diag_data[jj3]);
+      for ( jj3=0; jj3<jj_count_diag; ++jj3) { hypre_printf("%f ",C_diag_data[jj3]); }
       hypre_printf("\n");
       hypre_printf("  C_offd_j=");
-      for ( jj3=0; jj3<jj_count_offd; ++jj3) hypre_printf("%i ",C_offd_j[jj3]);
+      for ( jj3=0; jj3<jj_count_offd; ++jj3) { hypre_printf("%i ",C_offd_j[jj3]); }
       hypre_printf("  C_offd_data=");
-      for ( jj3=0; jj3<jj_count_offd; ++jj3) hypre_printf("%f ",C_offd_data[jj3]);
+      for ( jj3=0; jj3<jj_count_offd; ++jj3) { hypre_printf("%f ",C_offd_data[jj3]); }
       hypre_printf("\n");
       hypre_printf( "  B_marker =" );
       for ( it=0; it<num_rows_diag_A+num_rows_A_ext; ++it )
+      {
          hypre_printf(" %i", B_marker[it] );
+      }
       hypre_printf( "\n" );
 #endif
    }           /* end of i1 loop */
@@ -734,27 +785,35 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
     *-----------------------------------------------------------------------*/
 
    for ( i=0; i<num_rows_diag_A+num_rows_A_ext; ++i )
+   {
       B_marker[i] = -1;
+   }
    for ( i=0; i<C_offd_size; i++ )
+   {
       B_marker[ C_offd_j[i] ] = -2;
+   }
 
    count = 0;
-   for (i=0; i < num_rows_diag_A + num_rows_A_ext; i++) {
-      if (B_marker[i] == -2) {
+   for (i=0; i < num_rows_diag_A + num_rows_A_ext; i++)
+   {
+      if (B_marker[i] == -2)
+      {
          B_marker[i] = count;
          count++;
       }
    }
    num_cols_offd_C = count;
 
-   if (num_cols_offd_C) {
+   if (num_cols_offd_C)
+   {
       col_map_offd_C = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_HOST);
       new_C_offd_j = hypre_CTAlloc(HYPRE_Int, C_offd_size, HYPRE_MEMORY_HOST);
       /* ... a bit big, but num_cols_offd_C is too small.  It might be worth
          computing the correct size, which is sum( no. columns in row i, over all rows i )
       */
 
-      for (i=0; i < C_offd_size; i++) {
+      for (i=0; i < C_offd_size; i++)
+      {
          new_C_offd_j[i] = B_marker[C_offd_j[i]];
          col_map_offd_C[ new_C_offd_j[i] ] = A_ext_row_map[ C_offd_j[i] ];
       }
@@ -788,7 +847,9 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
 
    }
    else
+   {
       hypre_TFree(C_offd_i, HYPRE_MEMORY_HOST);
+   }
 
    /*-----------------------------------------------------------------------
     *  Free B_ext and marker array.
@@ -801,7 +862,9 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
    }
    hypre_TFree(B_marker, HYPRE_MEMORY_HOST);
    if ( num_rows_diag_A != n_rows_A )
+   {
       hypre_TFree(A_ext_row_map, HYPRE_MEMORY_HOST);
+   }
 
    return C;
 
@@ -865,20 +928,20 @@ hypre_ParCSRMatrixExtractAExt( hypre_ParCSRMatrix *A,
    num_rows_A_ext = recv_vec_starts[num_recvs];
 
    hypre_ParCSRMatrixExtractBExt_Arrays
-      ( &A_ext_i, &A_ext_j, &A_ext_data, pA_ext_row_map,
-        &num_nonzeros,
-        data, 1, comm, comm_pkg,
-        num_cols_A, num_recvs, num_sends,
-        first_col_diag, A->row_starts,
-        recv_vec_starts, send_map_starts, send_map_elmts,
-        diag_i, diag_j, offd_i, offd_j, col_map_offd,
-        diag_data, offd_data
-         );
+   ( &A_ext_i, &A_ext_j, &A_ext_data, pA_ext_row_map,
+     &num_nonzeros,
+     data, 1, comm, comm_pkg,
+     num_cols_A, num_recvs, num_sends,
+     first_col_diag, A->row_starts,
+     recv_vec_starts, send_map_starts, send_map_elmts,
+     diag_i, diag_j, offd_i, offd_j, col_map_offd,
+     diag_data, offd_data
+   );
 
    A_ext = hypre_CSRMatrixCreate(num_rows_A_ext,num_cols_A,num_nonzeros);
    hypre_CSRMatrixI(A_ext) = A_ext_i;
    hypre_CSRMatrixBigJ(A_ext) = A_ext_j;
-   if (data) hypre_CSRMatrixData(A_ext) = A_ext_data;
+   if (data) { hypre_CSRMatrixData(A_ext) = A_ext_data; }
 
    return A_ext;
 }

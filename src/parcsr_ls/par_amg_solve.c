@@ -20,9 +20,9 @@
 
 HYPRE_Int
 hypre_BoomerAMGSolve( void               *amg_vdata,
-                   hypre_ParCSRMatrix *A,
-                   hypre_ParVector    *f,
-                   hypre_ParVector    *u         )
+                      hypre_ParCSRMatrix *A,
+                      hypre_ParVector    *f,
+                      hypre_ParVector    *u         )
 {
    MPI_Comm            comm = hypre_ParCSRMatrixComm(A);
 
@@ -87,7 +87,9 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    amg_print_level  = hypre_ParAMGDataPrintLevel(amg_data);
    amg_logging      = hypre_ParAMGDataLogging(amg_data);
    if ( amg_logging > 1 )
+   {
       Residual = hypre_ParAMGDataResidual(amg_data);
+   }
    /* num_unknowns  = hypre_ParAMGDataNumUnknowns(amg_data); */
    num_levels       = hypre_ParAMGDataNumLevels(amg_data);
    A_array          = hypre_ParAMGDataAArray(amg_data);
@@ -145,7 +147,9 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
     *-----------------------------------------------------------------------*/
 
    if (my_id == 0 && amg_print_level > 1 && tol > 0.)
+   {
       hypre_printf("\n\nAMG SOLUTION INFO:\n");
+   }
 
 
    /*-----------------------------------------------------------------------
@@ -232,7 +236,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       hypre_printf("               residual        factor       residual\n");
       hypre_printf("               --------        ------       --------\n");
       hypre_printf("    Initial    %e                 %e\n", resid_nrm_init,
-            relative_resid);
+                   relative_resid);
    }
 
    /*-----------------------------------------------------------------------
@@ -311,7 +315,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       if (my_id == 0 && amg_print_level > 1)
       {
          hypre_printf("    Cycle %2d   %e    %f     %e \n", cycle_count,
-               resid_nrm, conv_factor, relative_resid);
+                      resid_nrm, conv_factor, relative_resid);
       }
    }
 
@@ -326,9 +330,13 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
     *-----------------------------------------------------------------------*/
 
    if (cycle_count > 0 && resid_nrm_init)
+   {
       conv_factor = pow((resid_nrm/resid_nrm_init),(1.0/(HYPRE_Real) cycle_count));
+   }
    else
+   {
       conv_factor = 1.;
+   }
 
    if (amg_print_level > 1)
    {
@@ -358,7 +366,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       }
 
 
-      for (j=0;j<hypre_ParAMGDataNumLevels(amg_data);j++)
+      for (j=0; j<hypre_ParAMGDataNumLevels(amg_data); j++)
       {
          total_coeffs += num_coeffs[j];
          total_variables += num_variables[j];
@@ -367,7 +375,9 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
 
       if (num_variables[0])
+      {
          grid_cmplxty = total_variables / num_variables[0];
+      }
       if (num_coeffs[0])
       {
          operat_cmplxty = total_coeffs / num_coeffs[0];

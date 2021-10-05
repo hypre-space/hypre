@@ -38,11 +38,11 @@ hypre_GMRESFunctionsCreate(
    HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y ),
    HYPRE_Int    (*PrecondSetup)  ( void *vdata, void *A, void *b, void *x ),
    HYPRE_Int    (*Precond)       ( void *vdata, void *A, void *b, void *x )
-   )
+)
 {
    hypre_GMRESFunctions * gmres_functions;
    gmres_functions = (hypre_GMRESFunctions *)
-      CAlloc( 1, sizeof(hypre_GMRESFunctions), HYPRE_MEMORY_HOST );
+                     CAlloc( 1, sizeof(hypre_GMRESFunctions), HYPRE_MEMORY_HOST );
 
    gmres_functions->CAlloc = CAlloc;
    gmres_functions->Free = Free;
@@ -58,7 +58,7 @@ hypre_GMRESFunctionsCreate(
    gmres_functions->ClearVector = ClearVector;
    gmres_functions->ScaleVector = ScaleVector;
    gmres_functions->Axpy = Axpy;
-/* default preconditioner must be set here but can be changed later... */
+   /* default preconditioner must be set here but can be changed later... */
    gmres_functions->precond_setup = PrecondSetup;
    gmres_functions->precond       = Precond;
 
@@ -124,18 +124,28 @@ hypre_GMRESDestroy( void *gmres_vdata )
       if ( (gmres_data->logging>0) || (gmres_data->print_level) > 0 )
       {
          if ( (gmres_data -> norms) != NULL )
+         {
             hypre_TFreeF( gmres_data -> norms, gmres_functions );
+         }
       }
 
       if ( (gmres_data -> matvec_data) != NULL )
+      {
          (*(gmres_functions->MatvecDestroy))(gmres_data -> matvec_data);
+      }
 
       if ( (gmres_data -> r) != NULL )
+      {
          (*(gmres_functions->DestroyVector))(gmres_data -> r);
+      }
       if ( (gmres_data -> w) != NULL )
+      {
          (*(gmres_functions->DestroyVector))(gmres_data -> w);
+      }
       if ( (gmres_data -> w_2) != NULL )
+      {
          (*(gmres_functions->DestroyVector))(gmres_data -> w_2);
+      }
 
 
       if ( (gmres_data -> p) != NULL )
@@ -201,21 +211,31 @@ hypre_GMRESSetup( void *gmres_vdata,
     *--------------------------------------------------*/
 
    if ((gmres_data -> p) == NULL)
+   {
       (gmres_data -> p) = (void**)(*(gmres_functions->CreateVectorArray))(k_dim+1,x);
+   }
    if ((gmres_data -> r) == NULL)
+   {
       (gmres_data -> r) = (*(gmres_functions->CreateVector))(b);
+   }
    if ((gmres_data -> w) == NULL)
+   {
       (gmres_data -> w) = (*(gmres_functions->CreateVector))(b);
+   }
 
    if (rel_change)
    {
       if ((gmres_data -> w_2) == NULL)
+      {
          (gmres_data -> w_2) = (*(gmres_functions->CreateVector))(b);
+      }
    }
 
 
    if ((gmres_data -> matvec_data) == NULL)
+   {
       (gmres_data -> matvec_data) = (*(gmres_functions->MatvecCreate))(A, x);
+   }
 
    precond_setup(precond_data, A, b, x);
 
@@ -226,8 +246,10 @@ hypre_GMRESSetup( void *gmres_vdata,
    if ( (gmres_data->logging)>0 || (gmres_data->print_level) > 0 )
    {
       if ((gmres_data -> norms) != NULL)
+      {
          hypre_TFreeF(gmres_data -> norms,gmres_functions);
-         (gmres_data -> norms) = hypre_CTAllocF(HYPRE_Real, max_iter + 1,gmres_functions, HYPRE_MEMORY_HOST);
+      }
+      (gmres_data -> norms) = hypre_CTAllocF(HYPRE_Real, max_iter + 1,gmres_functions, HYPRE_MEMORY_HOST);
    }
    if ( (gmres_data->print_level) > 0 )
    {
@@ -259,7 +281,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    HYPRE_Int             max_iter           = (gmres_data -> max_iter);
    HYPRE_Int             rel_change         = (gmres_data -> rel_change);
    HYPRE_Int             skip_real_r_check  = (gmres_data -> skip_real_r_check);
-   HYPRE_Int 		 hybrid             = (gmres_data -> hybrid);
+   HYPRE_Int       hybrid             = (gmres_data -> hybrid);
    HYPRE_Real            r_tol              = (gmres_data -> tol);
    HYPRE_Real            cf_tol             = (gmres_data -> cf_tol);
    HYPRE_Real            a_tol              = (gmres_data -> a_tol);
@@ -279,8 +301,8 @@ hypre_GMRESSolve(void  *gmres_vdata,
    HYPRE_Int             logging            = (gmres_data -> logging);
 
    HYPRE_Real           *norms              = (gmres_data -> norms);
-/* not used yet   char           *log_file_name  = (gmres_data -> log_file_name);*/
-/*   FILE           *fp; */
+   /* not used yet   char           *log_file_name  = (gmres_data -> log_file_name);*/
+   /*   FILE           *fp; */
 
    HYPRE_Int        break_value = 0;
    HYPRE_Int        i, j, k;
@@ -467,8 +489,8 @@ hypre_GMRESSolve(void  *gmres_vdata,
          hypre_TFreeF(c,gmres_functions);
          hypre_TFreeF(s,gmres_functions);
          hypre_TFreeF(rs,gmres_functions);
-         if (rel_change)  hypre_TFreeF(rs_2,gmres_functions);
-         for (i=0; i < k_dim+1; i++) hypre_TFreeF(hh[i],gmres_functions);
+         if (rel_change) { hypre_TFreeF(rs_2,gmres_functions); }
+         for (i=0; i < k_dim+1; i++) { hypre_TFreeF(hh[i],gmres_functions); }
          hypre_TFreeF(hh,gmres_functions);
          HYPRE_ANNOTATE_FUNC_END;
 
@@ -583,7 +605,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
             weight   = 1.0 - weight;
 #if 0
             hypre_printf("I = %d: cf_new = %e, cf_old = %e, weight = %e\n",
-                  i, cf_ave_1, cf_ave_0, weight );
+                         i, cf_ave_1, cf_ave_0, weight );
 #endif
             if (weight * cf_ave_1 > cf_tol)
             {
@@ -649,7 +671,8 @@ hypre_GMRESSolve(void  *gmres_vdata,
 
                if ( !(x_norm <= guard_zero_residual ))
                   /* don't divide by zero */
-               {  /* now get  x_i - x_i-1 */
+               {
+                  /* now get  x_i - x_i-1 */
 
                   if (num_rel_change_check)
                   {
@@ -729,7 +752,9 @@ hypre_GMRESSolve(void  *gmres_vdata,
       (*(gmres_functions->CopyVector))(p[i-1],w);
       (*(gmres_functions->ScaleVector))(rs[i-1],w);
       for (j = i-2; j >=0; j--)
+      {
          (*(gmres_functions->Axpy))(rs[j], p[j], w);
+      }
 
       (*(gmres_functions->ClearVector))(r);
       /* find correction (in r) */
@@ -842,9 +867,11 @@ hypre_GMRESSolve(void  *gmres_vdata,
          rs[j] = c[j-1]*rs[j];
       }
 
-      if (i) (*(gmres_functions->Axpy))(rs[i]-1.0,p[i],p[i]);
+      if (i) { (*(gmres_functions->Axpy))(rs[i]-1.0,p[i],p[i]); }
       for (j=i-1 ; j > 0; j--)
+      {
          (*(gmres_functions->Axpy))(rs[j],p[j],p[i]);
+      }
 
       if (i)
       {

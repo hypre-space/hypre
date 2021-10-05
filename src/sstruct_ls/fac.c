@@ -14,9 +14,9 @@
 void *
 hypre_FACCreate( MPI_Comm  comm )
 {
-    hypre_FACData *fac_data;
+   hypre_FACData *fac_data;
 
-    fac_data = hypre_CTAlloc(hypre_FACData,  1, HYPRE_MEMORY_HOST);
+   fac_data = hypre_CTAlloc(hypre_FACData,  1, HYPRE_MEMORY_HOST);
 
    (fac_data -> comm)       = comm;
    (fac_data -> time_index) = hypre_InitializeTiming("FAC");
@@ -43,15 +43,15 @@ hypre_FACCreate( MPI_Comm  comm )
 HYPRE_Int
 hypre_FACDestroy2(void *fac_vdata)
 {
-	hypre_FACData *fac_data = (hypre_FACData *)fac_vdata;
+   hypre_FACData *fac_data = (hypre_FACData *)fac_vdata;
 
    HYPRE_Int level;
    HYPRE_Int ierr = 0;
 
    if (fac_data)
    {
-      hypre_TFree((fac_data ->plevels) , HYPRE_MEMORY_HOST);
-      hypre_TFree((fac_data ->prefinements) , HYPRE_MEMORY_HOST);
+      hypre_TFree((fac_data ->plevels), HYPRE_MEMORY_HOST);
+      hypre_TFree((fac_data ->prefinements), HYPRE_MEMORY_HOST);
 
       HYPRE_SStructGraphDestroy(hypre_SStructMatrixGraph((fac_data -> A_rap)));
       HYPRE_SStructMatrixDestroy((fac_data -> A_rap));
@@ -85,19 +85,19 @@ hypre_FACDestroy2(void *fac_vdata)
       hypre_SStructMatvecDestroy( (fac_data -> matvec_data) );
 
       hypre_TFree(fac_data -> A_level, HYPRE_MEMORY_HOST);
-      hypre_TFree(fac_data -> x_level, HYPRE_MEMORY_HOST); 
-      hypre_TFree(fac_data -> b_level, HYPRE_MEMORY_HOST); 
-      hypre_TFree(fac_data -> r_level, HYPRE_MEMORY_HOST); 
-      hypre_TFree(fac_data -> e_level, HYPRE_MEMORY_HOST); 
-      hypre_TFree(fac_data -> tx_level, HYPRE_MEMORY_HOST); 
-      hypre_TFree(fac_data -> relax_data_level, HYPRE_MEMORY_HOST); 
-      hypre_TFree(fac_data -> restrict_data_level, HYPRE_MEMORY_HOST); 
-      hypre_TFree(fac_data -> matvec_data_level, HYPRE_MEMORY_HOST); 
-      hypre_TFree(fac_data -> pmatvec_data_level, HYPRE_MEMORY_HOST); 
-      hypre_TFree(fac_data -> interp_data_level, HYPRE_MEMORY_HOST); 
+      hypre_TFree(fac_data -> x_level, HYPRE_MEMORY_HOST);
+      hypre_TFree(fac_data -> b_level, HYPRE_MEMORY_HOST);
+      hypre_TFree(fac_data -> r_level, HYPRE_MEMORY_HOST);
+      hypre_TFree(fac_data -> e_level, HYPRE_MEMORY_HOST);
+      hypre_TFree(fac_data -> tx_level, HYPRE_MEMORY_HOST);
+      hypre_TFree(fac_data -> relax_data_level, HYPRE_MEMORY_HOST);
+      hypre_TFree(fac_data -> restrict_data_level, HYPRE_MEMORY_HOST);
+      hypre_TFree(fac_data -> matvec_data_level, HYPRE_MEMORY_HOST);
+      hypre_TFree(fac_data -> pmatvec_data_level, HYPRE_MEMORY_HOST);
+      hypre_TFree(fac_data -> interp_data_level, HYPRE_MEMORY_HOST);
 
-      hypre_TFree(fac_data -> grid_level, HYPRE_MEMORY_HOST); 
-      hypre_TFree(fac_data -> graph_level, HYPRE_MEMORY_HOST); 
+      hypre_TFree(fac_data -> grid_level, HYPRE_MEMORY_HOST);
+      hypre_TFree(fac_data -> graph_level, HYPRE_MEMORY_HOST);
 
       HYPRE_SStructVectorDestroy(fac_data -> tx);
 
@@ -107,12 +107,12 @@ hypre_FACDestroy2(void *fac_vdata)
 
       if ( (fac_data -> csolver_type) == 1)
       {
-          HYPRE_SStructPCGDestroy(fac_data -> csolver);
-          HYPRE_SStructSysPFMGDestroy(fac_data -> cprecond);
+         HYPRE_SStructPCGDestroy(fac_data -> csolver);
+         HYPRE_SStructSysPFMGDestroy(fac_data -> cprecond);
       }
       else if ((fac_data -> csolver_type) == 2)
       {
-          HYPRE_SStructSysPFMGDestroy(fac_data -> csolver);
+         HYPRE_SStructSysPFMGDestroy(fac_data -> csolver);
       }
 
       if ((fac_data -> logging) > 0)
@@ -126,7 +126,7 @@ hypre_FACDestroy2(void *fac_vdata)
       hypre_TFree(fac_data, HYPRE_MEMORY_HOST);
    }
 
-   return(ierr);
+   return (ierr);
 }
 
 HYPRE_Int
@@ -279,10 +279,10 @@ hypre_FACSetJacobiWeight( void  *fac_vdata,
                           HYPRE_Real weight )
 {
    hypre_FACData *fac_data = (hypre_FACData *)fac_vdata;
-                                                                                                                                            
+
    (fac_data -> jacobi_weight)    = weight;
    (fac_data -> usr_jacobi_weight)= 1;
-                                                                                                                                            
+
    return hypre_error_flag;
 }
 

@@ -207,7 +207,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
    for (i= 0; i< nvars; i++)
    {
       t= vartypes[i];
-      switch(t)
+      switch (t)
       {
          case 2:
          {
@@ -238,7 +238,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
       for (i= 0; i< nvars; i++)
       {
          t= vartypes[i];
-         switch(t)
+         switch (t)
          {
             case 5:
             {
@@ -294,7 +294,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
          t= vartypes[var];
          nFaces+= hypre_StructGridLocalSize(var_cgrid);
 
-         switch(t)
+         switch (t)
          {
             case 2:
                nxFaces+= hypre_StructGridLocalSize(var_cgrid);
@@ -332,7 +332,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
             t= vartypes[var];
             nEdges+= hypre_StructGridLocalSize(var_cgrid);
 
-            switch(t)
+            switch (t)
             {
                case 5:
                   nxEdges+= hypre_StructGridLocalSize(var_cgrid);
@@ -747,7 +747,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
    hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMax(cbox), &jupper);
 
    HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &edge_Edge);
-   HYPRE_IJMatrixSetObjectType(edge_Edge , HYPRE_PARCSR);
+   HYPRE_IJMatrixSetObjectType(edge_Edge, HYPRE_PARCSR);
    HYPRE_IJMatrixInitialize(edge_Edge);
 
    /* Face_iedge. Only needed in 3-d. */
@@ -906,10 +906,10 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
       n_yFace_iedges= (rfactor[0]-1)*rfactor[2] + (rfactor[2]-1)*rfactor[0];
       n_zFace_iedges= (rfactor[1]-1)*rfactor[0] + (rfactor[0]-1)*rfactor[1];
       n_Cell_iedges = (rfactor[2]-1)*n_zFace_iedges +
-         rfactor[2]*(rfactor[0]-1)*(rfactor[1]-1);
+                      rfactor[2]*(rfactor[0]-1)*(rfactor[1]-1);
 
       nFaces_iedges = nxFaces*n_xFace_iedges + nyFaces*n_yFace_iedges +
-         nzFaces*n_zFace_iedges;
+                      nzFaces*n_zFace_iedges;
       nElements_iedges= nElements * n_Cell_iedges;
    }
    else
@@ -1154,7 +1154,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
             var_cgrid= hypre_SStructPGridSGrid(p_cgrid, t);
             k= hypre_StructGridLocalSize(var_cgrid);
 
-            switch(var)
+            switch (var)
             {
                case 2: /* x_Faces (i,j,k) then (i-1,j,k), contain y,z edges */
                {
@@ -1170,7 +1170,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      nFaces++;
                   }
                   break;
-               }   /* case 2 */
+                  }   /* case 2 */
 
                case 3: /* y_Faces (i,j,k) then (i,j-1,k), contain x,z edges */
                {
@@ -1186,7 +1186,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      nFaces++;
                   }
                   break;
-               }   /* case 3 */
+                  }   /* case 3 */
 
                case 4: /* z_Faces (i,j,k) then (i,j,k-1), contain x,y edges */
                {
@@ -1202,7 +1202,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      nFaces++;
                   }
                   break;
-               }   /* case 4 */
+                  }   /* case 4 */
 
             } /* switch(var) */
          }    /* for (t= 0; t< Face_nvars; t++) */
@@ -1241,7 +1241,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
             cboxes   = hypre_StructGridBoxes(var_cgrid);
 
             /* to eliminate comparisons, take the switch outside of the loop. */
-            switch(var)
+            switch (var)
             {
                case 2:  /* x_Faces-> y_iedges, z_iedges */
                {
@@ -1332,13 +1332,13 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                               }
                            }
                         }  /* if ((rank <= cupper_ranks[part][var]) &&
-                              (rank >= clower_ranks[part][var])) */
+(rank >= clower_ranks[part][var])) */
                      }
 
                      hypre_SerialBoxLoop0End();
                   }  /* hypre_ForBoxI(i, cboxes) */
                   break;
-               }   /* case 2:  x_Faces-> y_iedges, z_iedges */
+                  }   /* case 2:  x_Faces-> y_iedges, z_iedges */
 
                case 3:  /* y_Faces-> x_iedges, z_iedges */
                {
@@ -1428,13 +1428,13 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                               }
                            }
                         }  /* if ((rank <= cupper_ranks[part][var]) &&
-                              (rank >= clower_ranks[part][var])) */
+(rank >= clower_ranks[part][var])) */
                      }
 
                      hypre_SerialBoxLoop0End();
                   }  /* hypre_ForBoxI(i, cboxes) */
                   break;
-               }   /* case 3:  y_Faces-> x_iedges, z_iedges */
+                  }   /* case 3:  y_Faces-> x_iedges, z_iedges */
 
                case 4:  /* z_Faces-> x_iedges, y_iedges */
                {
@@ -1525,12 +1525,12 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                               }
                            }
                         }  /* if ((rank <= cupper_ranks[part][var]) &&
-                              (rank >= clower_ranks[part][var])) */
+(rank >= clower_ranks[part][var])) */
                      }
                      hypre_SerialBoxLoop0End();
                   }  /* hypre_ForBoxI(i, cboxes) */
                   break;
-               }   /* case 4:  z_Faces-> x_iedges, y_iedges */
+                  }   /* case 4:  z_Faces-> x_iedges, y_iedges */
 
             }   /* switch(var) */
          }      /* for (t= 0; t< Face_nvars; t++) */
@@ -1570,7 +1570,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
          var_cgrid= hypre_SStructPGridSGrid(p_cgrid, t);
          j= hypre_StructGridLocalSize(var_cgrid);
 
-         switch(var)
+         switch (var)
          {
             case 2:    /* 2-d, x_Face */
             {
@@ -1713,7 +1713,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
                   hypre_SubtractIndexes(findex, varoffsets[var], 3, var_index);
 
-                  switch(var)
+                  switch (var)
                   {
                      case 2:    /* 2-d, x_face */
                      {
@@ -2181,7 +2181,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
          n_boxoffsets= ndim-1;
          boxoffset   = hypre_CTAlloc(hypre_Index, n_boxoffsets, HYPRE_MEMORY_HOST);
          suboffset   = hypre_CTAlloc(hypre_Index, n_boxoffsets, HYPRE_MEMORY_HOST);
-         switch(var)
+         switch (var)
          {
             case 2: /* 2-d: x_face (vertical edges), stride=[rfactor[0],1,1] */
             {
@@ -2378,7 +2378,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
             box_array= hypre_StructGridBoxes(var_fgrid);
 
             /* to reduce comparison, take the switch outside of the loop */
-            switch(var)
+            switch (var)
             {
                case 5:
                {
@@ -2935,7 +2935,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
          box_array= hypre_StructGridBoxes(var_fgrid);
 
          /* to reduce comparison, take the switch outside of the loop */
-         switch(var)
+         switch (var)
          {
             case 2:
             {
@@ -3306,7 +3306,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
          n_boxoffsets= ndim-1;
          boxoffset   = hypre_CTAlloc(hypre_Index,  n_boxoffsets, HYPRE_MEMORY_HOST);
          suboffset   = hypre_CTAlloc(hypre_Index,  n_boxoffsets, HYPRE_MEMORY_HOST);
-         switch(var)
+         switch (var)
          {
             case 2: /* 2-d: x_face (vertical edges), stride=[rfactor[0],1,1]
                        fCedge_ratio= 1.0/rfactor[1] */
@@ -3538,7 +3538,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
             var      = Edge_vartypes[t];
             var_fgrid=  hypre_SStructPGridVTSGrid(p_fgrid, var);
             box_array= hypre_StructGridBoxes(var_fgrid);
-            switch(var)
+            switch (var)
             {
                case 5:
                {
@@ -4466,7 +4466,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
          var_fgrid=  hypre_SStructPGridVTSGrid(p_fgrid, var);
          box_array= hypre_StructGridBoxes(var_fgrid);
 
-         switch(var)
+         switch (var)
          {
             case 2:
             {
@@ -5289,7 +5289,9 @@ hypre_CollapseStencilToStencil(hypre_ParCSRMatrix     *Aee,
    getrow_ierr= HYPRE_ParCSRMatrixGetRow((HYPRE_ParCSRMatrix) Aee, row_rank,
                                          &size, &col_inds, &values);
    if (getrow_ierr < 0)
+   {
       hypre_printf("offproc collapsing problem");
+   }
 
    swap_inds= hypre_TAlloc(HYPRE_Int,  size, HYPRE_MEMORY_HOST);
    col_inds2= hypre_TAlloc(HYPRE_BigInt,  size, HYPRE_MEMORY_HOST);

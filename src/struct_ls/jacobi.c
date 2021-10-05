@@ -42,7 +42,7 @@ hypre_JacobiCreate( MPI_Comm  comm )
 HYPRE_Int
 hypre_JacobiDestroy( void *jacobi_vdata )
 {
-	hypre_JacobiData *jacobi_data = (hypre_JacobiData *)jacobi_vdata;
+   hypre_JacobiData *jacobi_data = (hypre_JacobiData *)jacobi_vdata;
 
    if (jacobi_data)
    {

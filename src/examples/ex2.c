@@ -60,10 +60,10 @@ int main (int argc, char *argv[])
 
    if (num_procs != 2)
    {
-      if (myid == 0) printf("Must run with 2 processors!\n");
+      if (myid == 0) { printf("Must run with 2 processors!\n"); }
       MPI_Finalize();
 
-      return(0);
+      return (0);
    }
 
    /* Initialize HYPRE */
@@ -166,7 +166,9 @@ int main (int argc, char *argv[])
 
          /* Assign each of the 5 stencil entries */
          for (entry = 0; entry < 5; entry++)
+         {
             HYPRE_StructStencilSetElement(stencil, entry, offsets[entry]);
+         }
       }
    }
 
@@ -196,13 +198,17 @@ int main (int argc, char *argv[])
             for (j = 0; j < nentries; j++) /* label the stencil indices -
                                               these correspond to the offsets
                                               defined above */
+            {
                stencil_indices[j] = j;
+            }
 
             for (i = 0; i < nvalues; i += nentries)
             {
                values[i] = 4.0;
                for (j = 1; j < nentries; j++)
+               {
                   values[i+j] = -1.0;
+               }
             }
 
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, nentries,
@@ -224,13 +230,17 @@ int main (int argc, char *argv[])
 
             int stencil_indices[5];
             for (j = 0; j < nentries; j++)
+            {
                stencil_indices[j] = j;
+            }
 
             for (i = 0; i < nvalues; i += nentries)
             {
                values[i] = 4.0;
                for (j = 1; j < nentries; j++)
+               {
                   values[i+j] = -1.0;
+               }
             }
 
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, nentries,
@@ -254,13 +264,17 @@ int main (int argc, char *argv[])
 
             int stencil_indices[5];
             for (j = 0; j < nentries; j++)
+            {
                stencil_indices[j] = j;
+            }
 
             for (i = 0; i < nvalues; i += nentries)
             {
                values[i] = 4.0;
                for (j = 1; j < nentries; j++)
+               {
                   values[i+j] = -1.0;
+               }
             }
 
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, nentries,
@@ -279,7 +293,9 @@ int main (int argc, char *argv[])
          double *values = (double *) malloc(6*sizeof(double));
 
          for (i = 0; i < maxnvalues; i++)
+         {
             values[i] = 0.0;
+         }
 
          {
             /* Values below our first AND second box */
@@ -346,7 +362,9 @@ int main (int argc, char *argv[])
          double *values = (double *) malloc(4*sizeof(double));
 
          for (i = 0; i < maxnvalues; i++)
+         {
             values[i] = 0.0;
+         }
 
          {
             /* Values below our box */
@@ -411,11 +429,15 @@ int main (int argc, char *argv[])
             double *values = (double *) malloc(6*sizeof(double));
 
             for (i = 0; i < nvalues; i ++)
+            {
                values[i] = 1.0;
+            }
             HYPRE_StructVectorSetBoxValues(b, ilower, iupper, values);
 
             for (i = 0; i < nvalues; i ++)
+            {
                values[i] = 0.0;
+            }
             HYPRE_StructVectorSetBoxValues(x, ilower, iupper, values);
 
             free(values);
@@ -431,11 +453,15 @@ int main (int argc, char *argv[])
             double *values = (double *) malloc(12*sizeof(double));
 
             for (i = 0; i < nvalues; i ++)
+            {
                values[i] = 1.0;
+            }
             HYPRE_StructVectorSetBoxValues(b, ilower, iupper, values);
 
             for (i = 0; i < nvalues; i ++)
+            {
                values[i] = 0.0;
+            }
             HYPRE_StructVectorSetBoxValues(x, ilower, iupper, values);
 
             free(values);
@@ -453,11 +479,15 @@ int main (int argc, char *argv[])
             double *values = (double *) malloc(16*sizeof(double));
 
             for (i = 0; i < nvalues; i ++)
+            {
                values[i] = 1.0;
+            }
             HYPRE_StructVectorSetBoxValues(b, ilower, iupper, values);
 
             for (i = 0; i < nvalues; i ++)
+            {
                values[i] = 0.0;
+            }
             HYPRE_StructVectorSetBoxValues(x, ilower, iupper, values);
 
             free(values);

@@ -51,7 +51,7 @@ hypre_CSRMatrixMatvecOMPOffload( HYPRE_Int        trans,
    HYPRE_Complex *y_data   = hypre_VectorData(y);
    HYPRE_Int      i;
 
-#pragma omp target teams distribute parallel for private(i) is_device_ptr(A_data, A_i, A_j, y_data, x_data)
+   #pragma omp target teams distribute parallel for private(i) is_device_ptr(A_data, A_i, A_j, y_data, x_data)
    for (i = offset; i < A_nrows; i++)
    {
       HYPRE_Complex tempx = 0.0;

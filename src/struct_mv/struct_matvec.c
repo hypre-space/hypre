@@ -126,7 +126,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
     *-----------------------------------------------------------------------*/
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
-   if (constant_coefficient) hypre_StructVectorClearBoundGhostValues(x, 0);
+   if (constant_coefficient) { hypre_StructVectorClearBoundGhostValues(x, 0); }
 
    compute_pkg = (matvec_data -> compute_pkg);
 
@@ -173,7 +173,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
    for (compute_i = 0; compute_i < 2; compute_i++)
    {
-      switch(compute_i)
+      switch (compute_i)
       {
          case 0:
          {
@@ -248,7 +248,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
        * y += A*x
        *--------------------------------------------------------------------*/
 
-      switch( constant_coefficient )
+      switch ( constant_coefficient )
       {
          case 0:
          {
@@ -290,7 +290,7 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
                                  hypre_StructVector *y,
                                  hypre_BoxArrayArray     *compute_box_aa,
                                  hypre_IndexRef           stride
-   )
+                               )
 {
    HYPRE_Int i, j, si;
    HYPRE_Complex           *Ap0;
@@ -351,7 +351,7 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
          for (si = 0; si < stencil_size; si+= MAX_DEPTH)
          {
             depth = hypre_min(MAX_DEPTH, (stencil_size -si));
-            switch(depth)
+            switch (depth)
             {
                case 7:
                   Ap0 = hypre_StructMatrixBoxData(A, i, si+0);
@@ -608,7 +608,7 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
                                  hypre_StructVector *y,
                                  hypre_BoxArrayArray     *compute_box_aa,
                                  hypre_IndexRef           stride
-   )
+                               )
 {
    HYPRE_Int i, j, si;
    HYPRE_Complex           *Ap0;
@@ -678,7 +678,7 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
          for (si = 0; si < stencil_size; si+= MAX_DEPTH)
          {
             depth = hypre_min(MAX_DEPTH, (stencil_size -si));
-            switch(depth)
+            switch (depth)
             {
                case 7:
                   Ap0 = hypre_StructMatrixBoxData(A, i, si+0);
@@ -936,7 +936,7 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                                  hypre_StructVector *y,
                                  hypre_BoxArrayArray     *compute_box_aa,
                                  hypre_IndexRef           stride
-   )
+                               )
 {
    HYPRE_Int i, j, si;
    HYPRE_Complex           *Ap0;
@@ -979,7 +979,7 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
    hypre_Index              loop_size;
    hypre_IndexRef           start;
    HYPRE_Int                ndim;
-   HYPRE_Complex            zero[1]={0};
+   HYPRE_Complex            zero[1]= {0};
 
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);
@@ -1019,7 +1019,7 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
          for (si = 0; si < stencil_size; si+= MAX_DEPTH)
          {
             depth = hypre_min(MAX_DEPTH, (stencil_size -si));
-            switch(depth)
+            switch (depth)
             {
                case 7:
                   Ap0 = hypre_StructMatrixBoxData(A, i, si+0);

@@ -55,9 +55,9 @@ typedef struct
    HYPRE_Int          ***own_cboxnums;       /* local crs boxnums of ownboxes */
 
    hypre_CommPkg       **interlevel_comm;
-/*   hypre_CommPkg       **intralevel_comm;*/ /* may need to build an intra comm so
-     that each processor only fullwts its
-     own fine data- may need to add contrib */
+   /*   hypre_CommPkg       **intralevel_comm;*/ /* may need to build an intra comm so
+        that each processor only fullwts its
+        own fine data- may need to add contrib */
 
 } hypre_FacSemiRestrictData2;
 
@@ -293,11 +293,14 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
       boxarray= hypre_StructGridBoxes(hypre_SStructPGridSGrid(pgrid, vars));
       fullwgt_sendboxes[vars]= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray), ndim);
       fullwgt_ownboxes[vars] = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray), ndim);
-      own_cboxnums[vars]     = hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray), HYPRE_MEMORY_HOST);
+      own_cboxnums[vars]     = hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray),
+                                             HYPRE_MEMORY_HOST);
 
       send_boxes[vars]         = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray), ndim);
-      send_processes[vars]     = hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray), HYPRE_MEMORY_HOST);
-      send_remote_boxnums[vars]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray), HYPRE_MEMORY_HOST);
+      send_processes[vars]     = hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray),
+                                               HYPRE_MEMORY_HOST);
+      send_remote_boxnums[vars]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray),
+                                               HYPRE_MEMORY_HOST);
 
       hypre_ForBoxI(fi, boxarray)
       {
@@ -388,7 +391,8 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
 
       recv_boxes[vars]    = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray), ndim);
       recv_processes[vars]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray), HYPRE_MEMORY_HOST);
-      recv_remote_boxnums[vars]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray), HYPRE_MEMORY_HOST);
+      recv_remote_boxnums[vars]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray),
+                                               HYPRE_MEMORY_HOST);
 
       hypre_ForBoxI(ci, boxarray)
       {
@@ -411,7 +415,7 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
             }
          }
          recv_processes[vars][ci]= hypre_CTAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
-         recv_remote_boxnums[vars][ci]= hypre_CTAlloc(HYPRE_Int ,  cnt1, HYPRE_MEMORY_HOST);
+         recv_remote_boxnums[vars][ci]= hypre_CTAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
 
          cnt1= 0;
          for (i= 0; i< nboxman_entries; i++)
@@ -664,7 +668,7 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
             {
                hypre_SetIndex3(temp_index1, 0, j, k);
                xfp[k][j]= hypre_StructVectorBoxData(xf_var, fi) +
-                  hypre_BoxOffsetDistance(xf_dbox, temp_index1);
+                          hypre_BoxOffsetDistance(xf_dbox, temp_index1);
             }
          }
 
@@ -683,7 +687,7 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
                {
                   hypre_SetIndex3(temp_index1, 0, j, k);
                   xcp_temp[k][j]= hypre_StructVectorBoxData(xc_temp, fi) +
-                     hypre_BoxOffsetDistance(xc_temp_dbox, temp_index1);
+                                  hypre_BoxOffsetDistance(xc_temp_dbox, temp_index1);
                }
             }
          }
@@ -691,7 +695,7 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
          {
             hypre_ClearIndex(temp_index1);
             xcp_temp[0][0]= hypre_StructVectorBoxData(xc_temp, fi) +
-               hypre_BoxOffsetDistance(xc_temp_dbox, temp_index1);
+                            hypre_BoxOffsetDistance(xc_temp_dbox, temp_index1);
          }
          hypre_CopyIndex(hypre_BoxIMin(fgrid_box), start);
          hypre_CopyIndex(hypre_BoxIMax(fgrid_box), fbox_size);
@@ -766,7 +770,7 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
                         icell= 0;
                      }
 
-                     MapCellRank(icell, jcell , kcell, ijkcell);
+                     MapCellRank(icell, jcell, kcell, ijkcell);
                      sum[ijkcell]+= xfp[k][j][xfi+i];
                   }
                }

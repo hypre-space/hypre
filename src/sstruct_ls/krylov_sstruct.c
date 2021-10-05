@@ -21,7 +21,7 @@ hypre_SStructKrylovCAlloc( size_t count,
                            size_t elt_size,
                            HYPRE_MemoryLocation location )
 {
-   return( (void*) hypre_CTAlloc(char, count * elt_size, location) );
+   return ( (void*) hypre_CTAlloc(char, count * elt_size, location) );
 }
 
 /*--------------------------------------------------------------------------
@@ -30,7 +30,7 @@ hypre_SStructKrylovCAlloc( size_t count,
 HYPRE_Int
 hypre_SStructKrylovFree( void *ptr )
 {
-   hypre_TFree( ptr , HYPRE_MEMORY_HOST);
+   hypre_TFree( ptr, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -93,7 +93,7 @@ hypre_SStructKrylovCreateVector( void *vvector )
 void *
 hypre_SStructKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
 {
-	hypre_SStructVector  *vector = (hypre_SStructVector  *)vvector;
+   hypre_SStructVector  *vector = (hypre_SStructVector  *)vvector;
    hypre_SStructVector  **new_vector;
    HYPRE_Int             object_type;
 
@@ -151,9 +151,9 @@ hypre_SStructKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
 HYPRE_Int
 hypre_SStructKrylovDestroyVector( void *vvector )
 {
-	hypre_SStructVector *vector = (hypre_SStructVector  *)vvector;
+   hypre_SStructVector *vector = (hypre_SStructVector  *)vvector;
 
-   return( HYPRE_SStructVectorDestroy( vector ) );
+   return ( HYPRE_SStructVectorDestroy( vector ) );
 }
 
 /*--------------------------------------------------------------------------

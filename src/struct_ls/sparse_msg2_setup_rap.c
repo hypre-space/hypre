@@ -103,7 +103,7 @@ hypre_SparseMSG2CreateRAPOp( hypre_StructMatrix *R,
             /*--------------------------------------------------------------
              * Store 5 elements in (c,w,s,sw,se)
              *--------------------------------------------------------------*/
-            if( i+j <=0 )
+            if ( i+j <=0 )
             {
                hypre_SetIndex3(index_temp,i,j,0);
                MapIndex(index_temp, cdir, RAP_stencil_shape[stencil_rank]);
@@ -248,7 +248,7 @@ hypre_SparseMSG2BuildRAPSym( hypre_StructMatrix *A,
       hypre_SetIndex3(index_temp,0,1,0);
       MapIndex(index_temp, cdir, index);
       pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
-         hypre_BoxOffsetDistance(P_dbox, index);
+           hypre_BoxOffsetDistance(P_dbox, index);
 
       /*-----------------------------------------------------------------
        * Extract pointers for restriction operator:
@@ -263,7 +263,7 @@ hypre_SparseMSG2BuildRAPSym( hypre_StructMatrix *A,
       hypre_SetIndex3(index_temp,0,1,0);
       MapIndex(index_temp, cdir, index);
       rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
-         hypre_BoxOffsetDistance(R_dbox, index);
+           hypre_BoxOffsetDistance(R_dbox, index);
 
       /*-----------------------------------------------------------------
        * Extract pointers for 5-point fine grid operator:
@@ -304,7 +304,7 @@ hypre_SparseMSG2BuildRAPSym( hypre_StructMatrix *A,
        * a_cne is pointer for northeast coefficient
        *-----------------------------------------------------------------*/
 
-      if(fine_stencil_size > 5)
+      if (fine_stencil_size > 5)
       {
          hypre_SetIndex3(index_temp,-1,-1,0);
          MapIndex(index_temp, cdir, index);
@@ -397,36 +397,36 @@ hypre_SparseMSG2BuildRAPSym( hypre_StructMatrix *A,
 
                iP1 = iP - yOffsetP;
                rap_cs[iAc] = rb[iR] * a_cc[iAm1] * pa[iP1]
-                  +          rb[iR] * a_cs[iAm1]
-                  +                   a_cs[iA]   * pa[iP1];
+                             +          rb[iR] * a_cs[iAm1]
+                             +                   a_cs[iA]   * pa[iP1];
 
                iP1 = iP - yOffsetP + xOffsetP;
                rap_cse[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1];
 
                iP1 = iP - xOffsetP;
                rap_cw[iAc] =          a_cw[iA]
-                  +          rb[iR] * a_cw[iAm1] * pb[iP1]
-                  +          ra[iR] * a_cw[iAp1] * pa[iP1];
+                                      +          rb[iR] * a_cw[iAm1] * pb[iP1]
+                                      +          ra[iR] * a_cw[iAp1] * pa[iP1];
 
                rap_cc[iAc] =          a_cc[iA]
-                  +          rb[iR] * a_cc[iAm1] * pb[iP]
-                  +          ra[iR] * a_cc[iAp1] * pa[iP]
-                  +          rb[iR] * a_cn[iAm1]
-                  +          ra[iR] * a_cs[iAp1]
-                  +                   a_cs[iA]   * pb[iP]
-                  +                   a_cn[iA]   * pa[iP];
+                                      +          rb[iR] * a_cc[iAm1] * pb[iP]
+                                      +          ra[iR] * a_cc[iAp1] * pa[iP]
+                                      +          rb[iR] * a_cn[iAm1]
+                                      +          ra[iR] * a_cs[iAp1]
+                                      +                   a_cs[iA]   * pb[iP]
+                                      +                   a_cn[iA]   * pa[iP];
             }
             hypre_BoxLoop4End(iP, iR, iA, iAc);
 #undef DEVICE_VAR
 
             break;
 
-            /*--------------------------------------------------------------
-             * Loop for symmetric 9-point fine grid operator; produces a
-             * symmetric 9-point coarse grid operator. We calculate only the
-             * lower triangular stencil entries: (southwest, south, southeast,
-             * west, and center).
-             *--------------------------------------------------------------*/
+         /*--------------------------------------------------------------
+          * Loop for symmetric 9-point fine grid operator; produces a
+          * symmetric 9-point coarse grid operator. We calculate only the
+          * lower triangular stencil entries: (southwest, south, southeast,
+          * west, and center).
+          *--------------------------------------------------------------*/
 
          default:
 
@@ -444,35 +444,35 @@ hypre_SparseMSG2BuildRAPSym( hypre_StructMatrix *A,
 
                HYPRE_Int iP1 = iP - yOffsetP - xOffsetP;
                rap_csw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1]
-                  +           rb[iR] * a_csw[iAm1]
-                  +                    a_csw[iA]  * pa[iP1];
+                              +           rb[iR] * a_csw[iAm1]
+                              +                    a_csw[iA]  * pa[iP1];
 
                iP1 = iP - yOffsetP;
                rap_cs[iAc] = rb[iR] * a_cc[iAm1] * pa[iP1]
-                  +          rb[iR] * a_cs[iAm1]
-                  +                   a_cs[iA]   * pa[iP1];
+                             +          rb[iR] * a_cs[iAm1]
+                             +                   a_cs[iA]   * pa[iP1];
 
                iP1 = iP - yOffsetP + xOffsetP;
                rap_cse[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1]
-                  +           rb[iR] * a_cse[iAm1]
-                  +                    a_cse[iA]  * pa[iP1];
+                              +           rb[iR] * a_cse[iAm1]
+                              +                    a_cse[iA]  * pa[iP1];
 
                iP1 = iP - xOffsetP;
                rap_cw[iAc] =          a_cw[iA]
-                  +          rb[iR] * a_cw[iAm1] * pb[iP1]
-                  +          ra[iR] * a_cw[iAp1] * pa[iP1]
-                  +          rb[iR] * a_cnw[iAm1]
-                  +          ra[iR] * a_csw[iAp1]
-                  +                   a_csw[iA]  * pb[iP1]
-                  +                   a_cnw[iA]  * pa[iP1];
+                                      +          rb[iR] * a_cw[iAm1] * pb[iP1]
+                                      +          ra[iR] * a_cw[iAp1] * pa[iP1]
+                                      +          rb[iR] * a_cnw[iAm1]
+                                      +          ra[iR] * a_csw[iAp1]
+                                      +                   a_csw[iA]  * pb[iP1]
+                                      +                   a_cnw[iA]  * pa[iP1];
 
                rap_cc[iAc] =          a_cc[iA]
-                  +          rb[iR] * a_cc[iAm1] * pb[iP]
-                  +          ra[iR] * a_cc[iAp1] * pa[iP]
-                  +          rb[iR] * a_cn[iAm1]
-                  +          ra[iR] * a_cs[iAp1]
-                  +                   a_cs[iA]   * pb[iP]
-                  +                   a_cn[iA]   * pa[iP];
+                                      +          rb[iR] * a_cc[iAm1] * pb[iP]
+                                      +          ra[iR] * a_cc[iAp1] * pa[iP]
+                                      +          rb[iR] * a_cn[iAm1]
+                                      +          ra[iR] * a_cs[iAp1]
+                                      +                   a_cs[iA]   * pb[iP]
+                                      +                   a_cn[iA]   * pa[iP];
 
             }
             hypre_BoxLoop4End(iP, iR, iA, iAc);
@@ -587,7 +587,7 @@ hypre_SparseMSG2BuildRAPNoSym( hypre_StructMatrix *A,
       hypre_SetIndex3(index_temp,0,1,0);
       MapIndex(index_temp, cdir, index);
       pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
-         hypre_BoxOffsetDistance(P_dbox, index);
+           hypre_BoxOffsetDistance(P_dbox, index);
 
       /*-----------------------------------------------------------------
        * Extract pointers for restriction operator:
@@ -602,7 +602,7 @@ hypre_SparseMSG2BuildRAPNoSym( hypre_StructMatrix *A,
       hypre_SetIndex3(index_temp,0,1,0);
       MapIndex(index_temp, cdir, index);
       rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
-         hypre_BoxOffsetDistance(R_dbox, index);
+           hypre_BoxOffsetDistance(R_dbox, index);
 
       /*-----------------------------------------------------------------
        * Extract pointers for 5-point fine grid operator:
@@ -639,7 +639,7 @@ hypre_SparseMSG2BuildRAPNoSym( hypre_StructMatrix *A,
        * a_cne is pointer for northeast coefficient
        *-----------------------------------------------------------------*/
 
-      if(fine_stencil_size > 5)
+      if (fine_stencil_size > 5)
       {
          hypre_SetIndex3(index_temp,1,-1,0);
          MapIndex(index_temp, cdir, index);
@@ -728,27 +728,27 @@ hypre_SparseMSG2BuildRAPNoSym( hypre_StructMatrix *A,
 
                iP1 = iP + yOffsetP;
                rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1]
-                  +          ra[iR] * a_cn[iAp1]
-                  +                   a_cn[iA]   * pb[iP1];
+                             +          ra[iR] * a_cn[iAp1]
+                             +                   a_cn[iA]   * pb[iP1];
 
                iP1 = iP + yOffsetP - xOffsetP;
                rap_cnw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1];
 
                iP1 = iP + xOffsetP;
                rap_ce[iAc] =          a_ce[iA]
-                  +          rb[iR] * a_ce[iAm1] * pb[iP1]
-                  +          ra[iR] * a_ce[iAp1] * pa[iP1];
+                                      +          rb[iR] * a_ce[iAm1] * pb[iP1]
+                                      +          ra[iR] * a_ce[iAp1] * pa[iP1];
             }
             hypre_BoxLoop4End(iP, iR, iA, iAc);
 #undef DEVICE_VAR
 
             break;
 
-            /*--------------------------------------------------------------
-             * Loop for 9-point fine grid operator; produces upper triangular
-             * part of 9-point coarse grid operator - excludes diagonal.
-             * stencil entries: (northeast, north, northwest, and east)
-             *--------------------------------------------------------------*/
+         /*--------------------------------------------------------------
+          * Loop for 9-point fine grid operator; produces upper triangular
+          * part of 9-point coarse grid operator - excludes diagonal.
+          * stencil entries: (northeast, north, northwest, and east)
+          *--------------------------------------------------------------*/
 
          default:
 
@@ -766,27 +766,27 @@ hypre_SparseMSG2BuildRAPNoSym( hypre_StructMatrix *A,
 
                HYPRE_Int iP1 = iP + yOffsetP + xOffsetP;
                rap_cne[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1]
-                  +           ra[iR] * a_cne[iAp1]
-                  +                    a_cne[iA]  * pb[iP1];
+                              +           ra[iR] * a_cne[iAp1]
+                              +                    a_cne[iA]  * pb[iP1];
 
                iP1 = iP + yOffsetP;
                rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1]
-                  +          ra[iR] * a_cn[iAp1]
-                  +                   a_cn[iA]   * pb[iP1];
+                             +          ra[iR] * a_cn[iAp1]
+                             +                   a_cn[iA]   * pb[iP1];
 
                iP1 = iP + yOffsetP - xOffsetP;
                rap_cnw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1]
-                  +           ra[iR] * a_cnw[iAp1]
-                  +                    a_cnw[iA]  * pb[iP1];
+                              +           ra[iR] * a_cnw[iAp1]
+                              +                    a_cnw[iA]  * pb[iP1];
 
                iP1 = iP + xOffsetP;
                rap_ce[iAc] =          a_ce[iA]
-                  +          rb[iR] * a_ce[iAm1] * pb[iP1]
-                  +          ra[iR] * a_ce[iAp1] * pa[iP1]
-                  +          rb[iR] * a_cne[iAm1]
-                  +          ra[iR] * a_cse[iAp1]
-                  +                   a_cse[iA]  * pb[iP1]
-                  +                   a_cne[iA]  * pa[iP1];
+                                      +          rb[iR] * a_ce[iAm1] * pb[iP1]
+                                      +          ra[iR] * a_ce[iAp1] * pa[iP1]
+                                      +          rb[iR] * a_cne[iAm1]
+                                      +          ra[iR] * a_cse[iAp1]
+                                      +                   a_cse[iA]  * pb[iP1]
+                                      +                   a_cne[iA]  * pa[iP1];
             }
             hypre_BoxLoop4End(iP, iR, iA, iAc);
 #undef DEVICE_VAR

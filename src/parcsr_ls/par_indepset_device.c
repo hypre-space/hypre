@@ -229,7 +229,8 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
       HYPRE_Real  *urand_global = hypre_TAlloc(HYPRE_Real, n_global, HYPRE_MEMORY_DEVICE);
       // To make sure all rank generate the same sequence
       hypre_CurandUniform(n_global, urand_global, 0, 0, 1, 0);
-      hypre_TMemcpy(urand, urand_global + n_first, HYPRE_Real, num_rows_diag, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(urand, urand_global + n_first, HYPRE_Real, num_rows_diag, HYPRE_MEMORY_DEVICE,
+                    HYPRE_MEMORY_DEVICE);
       hypre_TFree(urand_global, HYPRE_MEMORY_DEVICE);
    }
    else

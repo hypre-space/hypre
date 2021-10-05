@@ -332,7 +332,8 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
       own_cboxnums[vars]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray), HYPRE_MEMORY_HOST);
       recv_boxes[vars]    = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray), ndim);
       recv_processes[vars]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray), HYPRE_MEMORY_HOST);
-      recv_remote_boxnums[vars]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray), HYPRE_MEMORY_HOST);
+      recv_remote_boxnums[vars]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray),
+                                               HYPRE_MEMORY_HOST);
 
       hypre_ForBoxI(fi, boxarray)
       {
@@ -375,7 +376,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
 
          own_cboxnums[vars][fi]  = hypre_CTAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
          recv_processes[vars][fi]= hypre_CTAlloc(HYPRE_Int,  cnt2, HYPRE_MEMORY_HOST);
-         recv_remote_boxnums[vars][fi]= hypre_CTAlloc(HYPRE_Int ,  cnt2, HYPRE_MEMORY_HOST);
+         recv_remote_boxnums[vars][fi]= hypre_CTAlloc(HYPRE_Int,  cnt2, HYPRE_MEMORY_HOST);
 
          cnt1= 0; cnt2= 0;
          for (i= 0; i< nboxman_entries; i++)
@@ -538,7 +539,8 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
 
       send_boxes[vars]= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray), ndim);
       send_processes[vars]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray), HYPRE_MEMORY_HOST);
-      send_remote_boxnums[vars]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray), HYPRE_MEMORY_HOST);
+      send_remote_boxnums[vars]= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(boxarray),
+                                               HYPRE_MEMORY_HOST);
 
       hypre_ForBoxI(ci, boxarray)
       {
@@ -638,7 +640,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    }
 
    hypre_ClearIndex(refine_factors_half);
-/*   hypre_ClearIndex(refine_factors_2recp);*/
+   /*   hypre_ClearIndex(refine_factors_2recp);*/
    for (i= 0; i< ndim; i++)
    {
       refine_factors_half[i] = rfactors[i]/2;
@@ -877,7 +879,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
             {
                hypre_SetIndex3(temp_index1, 0, j, k);
                ep[k][j]= hypre_StructVectorBoxData(e_var, fi) +
-                  hypre_BoxOffsetDistance(e_dbox, temp_index1);
+                         hypre_BoxOffsetDistance(e_dbox, temp_index1);
             }
          }
 
@@ -952,7 +954,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                {
                   hypre_SetIndex3(temp_index2, ptr_ishift, j+ptr_jshift, k+ptr_kshift);
                   xcp[k][j]= hypre_StructVectorBoxData(xc_var, cboxnums[bi]) +
-                     hypre_BoxOffsetDistance(xc_dbox, temp_index2);
+                             hypre_BoxOffsetDistance(xc_dbox, temp_index2);
                }
             }
 
@@ -1143,33 +1145,33 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                         if (ndim == 3)
                         {
                            ep[k][j][ei+i]= zweight1*(
-                              yweight1*(
-                                 xweight1*xcp[kshift][jshift][ishift+xci]+
-                                 xweight2*xcp[kshift][jshift][ishift+xci+1])
-                              +yweight2*(
-                                 xweight1*xcp[kshift][jshift+1][ishift+xci]+
-                                 xweight2*xcp[kshift][jshift+1][ishift+xci+1]) )
-                              + zweight2*(
-                                 yweight1*(
-                                    xweight1*xcp[kshift+1][jshift][ishift+xci]+
-                                    xweight2*xcp[kshift+1][jshift][ishift+xci+1])
-                                 +yweight2*(
-                                    xweight1*xcp[kshift+1][jshift+1][ishift+xci]+
-                                    xweight2*xcp[kshift+1][jshift+1][ishift+xci+1]) );
+                                              yweight1*(
+                                                 xweight1*xcp[kshift][jshift][ishift+xci]+
+                                                 xweight2*xcp[kshift][jshift][ishift+xci+1])
+                                              +yweight2*(
+                                                 xweight1*xcp[kshift][jshift+1][ishift+xci]+
+                                                 xweight2*xcp[kshift][jshift+1][ishift+xci+1]) )
+                                           + zweight2*(
+                                              yweight1*(
+                                                 xweight1*xcp[kshift+1][jshift][ishift+xci]+
+                                                 xweight2*xcp[kshift+1][jshift][ishift+xci+1])
+                                              +yweight2*(
+                                                 xweight1*xcp[kshift+1][jshift+1][ishift+xci]+
+                                                 xweight2*xcp[kshift+1][jshift+1][ishift+xci+1]) );
                         }
                         else if (ndim == 2)
                         {
                            ep[0][j][ei+i] = yweight1*(
-                              xweight1*xcp[0][jshift][ishift+xci]+
-                              xweight2*xcp[0][jshift][ishift+xci+1]);
+                                               xweight1*xcp[0][jshift][ishift+xci]+
+                                               xweight2*xcp[0][jshift][ishift+xci+1]);
                            ep[0][j][ei+i]+= yweight2*(
-                              xweight1*xcp[0][jshift+1][ishift+xci]+
-                              xweight2*xcp[0][jshift+1][ishift+xci+1]);
+                                               xweight1*xcp[0][jshift+1][ishift+xci]+
+                                               xweight2*xcp[0][jshift+1][ishift+xci+1]);
                         }
                         else
                         {
                            ep[0][0][ei+i] = xweight1*xcp[0][0][ishift+xci]+
-                              xweight2*xcp[0][0][ishift+xci+1];
+                                            xweight2*xcp[0][0][ishift+xci+1];
                         }
                      }      /* for (i= 0; i< imax; i++) */
                   }         /* for (j= 0; j< jmax; j++) */
@@ -1198,7 +1200,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
          if (hypre_BoxVolume(ownbox))
          {
             xc_dbox= hypre_BoxArrayBox(
-               hypre_StructVectorDataSpace(recv_var), bi);
+                        hypre_StructVectorDataSpace(recv_var), bi);
 
             fi= cboxnums[bi];
             fbox  = hypre_BoxArrayBox(fgrid_boxes, fi);
@@ -1213,7 +1215,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                {
                   hypre_SetIndex3(temp_index1, 0, j, k);
                   ep[k][j]= hypre_StructVectorBoxData(e_var, fi) +
-                     hypre_BoxOffsetDistance(e_dbox, temp_index1);
+                            hypre_BoxOffsetDistance(e_dbox, temp_index1);
                }
             }
 
@@ -1283,7 +1285,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                   hypre_SetIndex3(temp_index2,
                                   ptr_ishift, j+ptr_jshift, k+ptr_kshift);
                   xcp[k][j]= hypre_StructVectorBoxData(recv_var, bi) +
-                     hypre_BoxOffsetDistance(xc_dbox, temp_index2);
+                             hypre_BoxOffsetDistance(xc_dbox, temp_index2);
                }
             }
 
@@ -1475,34 +1477,34 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                         if (ndim == 3)
                         {
                            ep[k][j][ei+i]= zweight1*(
-                              yweight1*(
-                                 xweight1*xcp[kshift][jshift][ishift+xci]+
-                                 xweight2*xcp[kshift][jshift][ishift+xci+1])
-                              +yweight2*(
-                                 xweight1*xcp[kshift][jshift+1][ishift+xci]+
-                                 xweight2*xcp[kshift][jshift+1][ishift+xci+1]) )
-                              + zweight2*(
-                                 yweight1*(
-                                    xweight1*xcp[kshift+1][jshift][ishift+xci]+
-                                    xweight2*xcp[kshift+1][jshift][ishift+xci+1])
-                                 +yweight2*(
-                                    xweight1*xcp[kshift+1][jshift+1][ishift+xci]+
-                                    xweight2*xcp[kshift+1][jshift+1][ishift+xci+1]) );
+                                              yweight1*(
+                                                 xweight1*xcp[kshift][jshift][ishift+xci]+
+                                                 xweight2*xcp[kshift][jshift][ishift+xci+1])
+                                              +yweight2*(
+                                                 xweight1*xcp[kshift][jshift+1][ishift+xci]+
+                                                 xweight2*xcp[kshift][jshift+1][ishift+xci+1]) )
+                                           + zweight2*(
+                                              yweight1*(
+                                                 xweight1*xcp[kshift+1][jshift][ishift+xci]+
+                                                 xweight2*xcp[kshift+1][jshift][ishift+xci+1])
+                                              +yweight2*(
+                                                 xweight1*xcp[kshift+1][jshift+1][ishift+xci]+
+                                                 xweight2*xcp[kshift+1][jshift+1][ishift+xci+1]) );
                         }
                         else if (ndim == 2)
                         {
                            ep[0][j][ei+i] = yweight1*(
-                              xweight1*xcp[0][jshift][ishift+xci]+
-                              xweight2*xcp[0][jshift][ishift+xci+1]);
+                                               xweight1*xcp[0][jshift][ishift+xci]+
+                                               xweight2*xcp[0][jshift][ishift+xci+1]);
                            ep[0][j][ei+i]+= yweight2*(
-                              xweight1*xcp[0][jshift+1][ishift+xci]+
-                              xweight2*xcp[0][jshift+1][ishift+xci+1]);
+                                               xweight1*xcp[0][jshift+1][ishift+xci]+
+                                               xweight2*xcp[0][jshift+1][ishift+xci+1]);
                         }
 
                         else
                         {
                            ep[0][0][ei+i] = xweight1*xcp[0][0][ishift+xci]+
-                              xweight2*xcp[0][0][ishift+xci+1];
+                                            xweight2*xcp[0][0][ishift+xci+1];
                         }
 
                      }      /* for (i= 0; i< imax; i++) */

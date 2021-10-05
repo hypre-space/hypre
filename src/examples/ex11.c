@@ -136,7 +136,7 @@ int main (int argc, char *argv[])
    }
 
    /* Preliminaries: want at least one processor per row */
-   if (n*n < num_procs) n = sqrt(num_procs) + 1;
+   if (n*n < num_procs) { n = sqrt(num_procs) + 1; }
    N = n*n; /* global number of rows */
 
    /* Each processor knows only of its own rows - the range is denoted by ilower
@@ -274,7 +274,9 @@ int main (int argc, char *argv[])
       double *eigenvalues = NULL;
 
       if (myid != 0)
+      {
          verbosity = 0;
+      }
 
       /* define an interpreter for the ParCSR interface */
       interpreter = (mv_InterfaceInterpreter *) calloc(1, sizeof(mv_InterfaceInterpreter));
@@ -350,14 +352,18 @@ int main (int argc, char *argv[])
 
       /* save solution */
       for (i = 0; i < nvalues; i++)
+      {
          fprintf(file, "%.14e\n", values[i]);
+      }
 
       fflush(file);
       fclose(file);
 
       /* save global finite element mesh */
       if (myid == 0)
+      {
          GLVis_PrintGlobalSquareMesh("vis/ex11.mesh", n-1);
+      }
 #endif
    }
 
@@ -372,5 +378,5 @@ int main (int argc, char *argv[])
    /* Finalize MPI*/
    MPI_Finalize();
 
-   return(0);
+   return (0);
 }

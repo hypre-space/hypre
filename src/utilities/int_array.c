@@ -157,9 +157,9 @@ hypre_IntArraySetConstantValues( hypre_IntArray *v,
 #else
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
-#pragma omp target teams distribute parallel for private(i) is_device_ptr(array_data)
+   #pragma omp target teams distribute parallel for private(i) is_device_ptr(array_data)
 #elif defined(HYPRE_USING_OPENMP)
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < size; i++)
    {
