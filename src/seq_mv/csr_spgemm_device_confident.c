@@ -527,6 +527,10 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
                                                 HYPRE_Complex **d_c_out,
                                                 HYPRE_Int      *nnzC )
 {
+#define HYPRE_SPGEMM_NVTX
+   hypre_GpuProfilingPushRange("CSRSpGemmNumerB");
+#endif
+
    const HYPRE_Int shmem_hash_size = HYPRE_SPGEMM_NUMER_HASH_SIZE;
    const char      hash_type       = hypre_HandleSpgemmHashType(hypre_handle());
 
@@ -575,6 +579,10 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
             (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, d_ic_out, d_jc_out, d_c_out, nnzC);
       }
    }
+
+#define HYPRE_SPGEMM_NVTX
+   hypre_GpuProfilingPopRange();
+#endif
 
    return hypre_error_flag;
 }

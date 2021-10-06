@@ -306,9 +306,19 @@ void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_i
 
 
 HYPRE_Int
-hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
-                                    HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_rc)
+hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
+                                     HYPRE_Int  k,
+                                     HYPRE_Int  n,
+                                     HYPRE_Int *d_ia,
+                                     HYPRE_Int *d_ja,
+                                     HYPRE_Int *d_ib,
+                                     HYPRE_Int *d_jb,
+                                     HYPRE_Int *d_rc )
 {
+#define HYPRE_SPGEMM_NVTX
+   hypre_GpuProfilingPushRange("CSRSpGemmRowEstimate");
+#endif
+
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_SPMM_ROWNNZ] -= hypre_MPI_Wtime();
 #endif
@@ -375,6 +385,10 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_SPMM_ROWNNZ] += hypre_MPI_Wtime();
+#endif
+
+#define HYPRE_SPGEMM_NVTX
+   hypre_GpuProfilingPopRange();
 #endif
 
    return hypre_error_flag;

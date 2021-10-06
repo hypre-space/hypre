@@ -171,9 +171,13 @@ hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
       return NULL;
    }
 
+   hypre_GpuProfilingPushRange("CSRMatrixMultiply");
+
    hypreDevice_CSRSpGemm(A, B, &C);
 
    hypre_SyncCudaComputeStream(hypre_handle());
+
+   hypre_GpuProfilingPopRange();
 
    return C;
 }

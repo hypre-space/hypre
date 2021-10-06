@@ -550,6 +550,10 @@ hypreDevice_CSRSpGemmNumerWithRownnzEstimate( HYPRE_Int       m,
                                               HYPRE_Complex **d_c_out,
                                               HYPRE_Int      *nnzC_out )
 {
+#define HYPRE_SPGEMM_NVTX
+   hypre_GpuProfilingPushRange("CSRSpGemmNumerE");
+#endif
+
    const HYPRE_Int shmem_hash_size = HYPRE_SPGEMM_NUMER_HASH_SIZE;
 
    /* a binary array to indicate if row nnz counting is failed for a row */
@@ -620,6 +624,10 @@ hypreDevice_CSRSpGemmNumerWithRownnzEstimate( HYPRE_Int       m,
    *d_jc_out = d_jc;
    *d_c_out  = d_c;
    *nnzC_out = nnzC;
+
+#define HYPRE_SPGEMM_NVTX
+   hypre_GpuProfilingPopRange();
+#endif
 
    return hypre_error_flag;
 }

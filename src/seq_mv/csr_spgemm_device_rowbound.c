@@ -344,9 +344,17 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
                                        HYPRE_Int *d_rc,
                                        HYPRE_Int *d_rf)
 {
+#define HYPRE_SPGEMM_NVTX
+   hypre_GpuProfilingPushRange("CSRSpGemmRowUpperbound");
+#endif
+
    const HYPRE_Int shmem_hash_size = HYPRE_SPGEMM_SYMBL_HASH_SIZE;
 
    hypre_spgemm_rownnz_attempt<shmem_hash_size, 1> (m, NULL, k, n, d_ia, d_ja, d_ib, d_jb, in_rc, d_rc, d_rf);
+
+#define HYPRE_SPGEMM_NVTX
+   hypre_GpuProfilingPopRange();
+#endif
 
    return hypre_error_flag;
 }
@@ -362,6 +370,10 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
                              HYPRE_Int  in_rc,
                              HYPRE_Int *d_rc )
 {
+#define HYPRE_SPGEMM_NVTX
+   hypre_GpuProfilingPushRange("CSRSpGemmRowNNZ");
+#endif
+
    const HYPRE_Int shmem_hash_size = HYPRE_SPGEMM_SYMBL_HASH_SIZE;
 
    /* a binary array to indicate if row nnz counting is failed for a row */
@@ -392,6 +404,10 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
 
       hypre_TFree(rf_ind, HYPRE_MEMORY_DEVICE);
    }
+
+#define HYPRE_SPGEMM_NVTX
+   hypre_GpuProfilingPopRange();
+#endif
 
    return hypre_error_flag;
 }
