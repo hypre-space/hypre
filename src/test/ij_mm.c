@@ -101,7 +101,7 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
 
    if (myid == 0)
    {
-      hypre_printf("A %d x %d\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_A), hypre_ParCSRMatrixGlobalNumCols(parcsr_A));
+      hypre_printf("A %d x %d, NNZ %d\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_A), hypre_ParCSRMatrixGlobalNumCols(parcsr_A), hypre_ParCSRMatrixNumNonzeros(parcsr_A));
    }
 
    hypre_assert(hypre_ParCSRMatrixMemoryLocation(parcsr_A) == HYPRE_MEMORY_DEVICE);
@@ -726,6 +726,8 @@ main( hypre_int argc,
       //local_num_rows = last_local_row - first_local_row + 1;
       //local_num_cols = last_local_col - first_local_col + 1;
    }
+
+   hypre_ParCSRMatrixSetNumNonzeros(parcsr_A);
 
    hypre_EndTiming(time_index);
    hypre_PrintTiming("Generate Matrix A", hypre_MPI_COMM_WORLD);
