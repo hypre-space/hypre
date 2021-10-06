@@ -315,7 +315,7 @@ hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
                                      HYPRE_Int *d_jb,
                                      HYPRE_Int *d_rc )
 {
-#define HYPRE_SPGEMM_NVTX
+#ifdef HYPRE_SPGEMM_NVTX
    hypre_GpuProfilingPushRange("CSRSpGemmRowEstimate");
 #endif
 
@@ -387,7 +387,7 @@ hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
    hypre_profile_times[HYPRE_TIMER_ID_SPMM_ROWNNZ] += hypre_MPI_Wtime();
 #endif
 
-#define HYPRE_SPGEMM_NVTX
+#ifdef HYPRE_SPGEMM_NVTX
    hypre_GpuProfilingPopRange();
 #endif
 

@@ -344,7 +344,7 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
                                        HYPRE_Int *d_rc,
                                        HYPRE_Int *d_rf)
 {
-#define HYPRE_SPGEMM_NVTX
+#ifdef HYPRE_SPGEMM_NVTX
    hypre_GpuProfilingPushRange("CSRSpGemmRowUpperbound");
 #endif
 
@@ -352,7 +352,7 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
 
    hypre_spgemm_rownnz_attempt<shmem_hash_size, 1> (m, NULL, k, n, d_ia, d_ja, d_ib, d_jb, in_rc, d_rc, d_rf);
 
-#define HYPRE_SPGEMM_NVTX
+#ifdef HYPRE_SPGEMM_NVTX
    hypre_GpuProfilingPopRange();
 #endif
 
@@ -370,7 +370,7 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
                              HYPRE_Int  in_rc,
                              HYPRE_Int *d_rc )
 {
-#define HYPRE_SPGEMM_NVTX
+#ifdef HYPRE_SPGEMM_NVTX
    hypre_GpuProfilingPushRange("CSRSpGemmRowNNZ");
 #endif
 
@@ -405,7 +405,7 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
       hypre_TFree(rf_ind, HYPRE_MEMORY_DEVICE);
    }
 
-#define HYPRE_SPGEMM_NVTX
+#ifdef HYPRE_SPGEMM_NVTX
    hypre_GpuProfilingPopRange();
 #endif
 

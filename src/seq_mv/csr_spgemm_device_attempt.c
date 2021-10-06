@@ -550,7 +550,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzEstimate( HYPRE_Int       m,
                                               HYPRE_Complex **d_c_out,
                                               HYPRE_Int      *nnzC_out )
 {
-#define HYPRE_SPGEMM_NVTX
+#ifdef HYPRE_SPGEMM_NVTX
    hypre_GpuProfilingPushRange("CSRSpGemmNumerE");
 #endif
 
@@ -625,7 +625,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzEstimate( HYPRE_Int       m,
    *d_c_out  = d_c;
    *nnzC_out = nnzC;
 
-#define HYPRE_SPGEMM_NVTX
+#ifdef HYPRE_SPGEMM_NVTX
    hypre_GpuProfilingPopRange();
 #endif
 

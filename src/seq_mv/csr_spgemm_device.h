@@ -22,6 +22,10 @@
 #define HYPRE_SPGEMM_SYMBL_HASH_SIZE 512
 #endif
 
+//#define HYPRE_SPGEMM_TIMING
+
+//#define HYPRE_SPGEMM_NVTX
+
 /* these are under the assumptions made in spgemm on block sizes: only use in spmm routines
  * where we assume CUDA block is 3D and blockDim.x * blockDim.y = WARP_SIZE
  */

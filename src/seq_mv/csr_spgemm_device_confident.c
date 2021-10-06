@@ -527,7 +527,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
                                                 HYPRE_Complex **d_c_out,
                                                 HYPRE_Int      *nnzC )
 {
-#define HYPRE_SPGEMM_NVTX
+#ifdef HYPRE_SPGEMM_NVTX
    hypre_GpuProfilingPushRange("CSRSpGemmNumerB");
 #endif
 
@@ -580,7 +580,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
       }
    }
 
-#define HYPRE_SPGEMM_NVTX
+#ifdef HYPRE_SPGEMM_NVTX
    hypre_GpuProfilingPopRange();
 #endif
 
