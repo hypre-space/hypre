@@ -139,11 +139,6 @@ ij: ij.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-# WM: TODO: remove
-simple: simple.obj
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
-
 ij_assembly: ij_assembly.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}

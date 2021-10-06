@@ -71,7 +71,7 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
    hypre_DeviceDataDestroy(hypre_HandleDeviceData(hypre_handle_));
 #endif
 
-// WM: in debug mode, hypre_TFree() checks the pointer location, which requires the
+// In debug mode, hypre_TFree() checks the pointer location, which requires the
 // hypre_handle_'s compute queue if using sycl. But this was just destroyed above.
 #if defined(HYPRE_DEBUG) && defined(HYPRE_USING_SYCL)
    free(hypre_handle_);
@@ -152,25 +152,25 @@ hypre_GetDeviceCount(hypre_int *device_count)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   // WM: TODO - verify
-   sycl::platform platform(sycl::gpu_selector{});
-   auto const& gpu_devices = platform.get_devices();
-   for (int i = 0; i < gpu_devices.size(); i++)
-   {
-      if (gpu_devices[i].is_gpu())
-      {
-         if(gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0)
-         {
-            auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>(
-                                        sycl::info::partition_affinity_domain::numa);
-            (*device_count) += subDevicesDomainNuma.size();
-         }
-         else
-         {
-	         (*device_count)++;
-         }
-      }
-   }
+   /* WM: todo - doesn't work on frank... commenting out */
+   /* sycl::platform platform(sycl::gpu_selector{}); */
+   /* auto const& gpu_devices = platform.get_devices(); */
+   /* for (int i = 0; i < gpu_devices.size(); i++) */
+   /* { */
+   /*    if (gpu_devices[i].is_gpu()) */
+   /*    { */
+   /*       if(gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0) */
+   /*       { */
+   /*          auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>( */
+   /*                                      sycl::info::partition_affinity_domain::numa); */
+   /*          (*device_count) += subDevicesDomainNuma.size(); */
+   /*       } */
+   /*       else */
+   /*       { */
+	         /* (*device_count)++; */
+   /*       } */
+   /*    } */
+   /* } */
 #endif
 
    return hypre_error_flag;

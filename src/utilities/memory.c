@@ -109,7 +109,6 @@ hypre_UnifiedMemset(void *ptr, HYPRE_Int value, size_t num)
 static inline void
 hypre_UnifiedMemPrefetch(void *ptr, size_t size, hypre_MemoryLocation location)
 {
-   /* hypre_printf("WM: debug - inside UnifiedMemPrefetch\n"); */
 #if defined(HYPRE_USING_GPU)
 #ifdef HYPRE_DEBUG
    hypre_MemoryLocation tmp;
@@ -252,7 +251,6 @@ hypre_DeviceMalloc(size_t size, HYPRE_Int zeroinit)
 static inline void *
 hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
 {
-   /* hypre_printf("WM: debug - inside UnifiedMalloc\n"); */
    void *ptr = NULL;
 
 #if defined(HYPRE_USING_UMPIRE_UM)
@@ -277,7 +275,6 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
 
 #if defined(HYPRE_USING_SYCL)
    HYPRE_SYCL_CALL( ptr = (void *)sycl::malloc_shared(size, *(hypre_HandleComputeStream(hypre_handle()))) );
-   /* hypre_printf("WM: debug - did the sycl shared allocation\n"); */
 #endif
 
 #endif /* #if defined(HYPRE_USING_UMPIRE_UM) */
@@ -285,7 +282,6 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
    /* prefecth to device */
    if (ptr)
    {
-      /* hypre_printf("WM: debug - about to prefetch\n"); */
       hypre_UnifiedMemPrefetch(ptr, size, hypre_MEMORY_DEVICE);
    }
 
@@ -987,7 +983,6 @@ hypre_GetExecPolicy2(HYPRE_MemoryLocation location1,
 HYPRE_Int
 hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
 {
-   /* hypre_printf("WM: debug - inside GetPointerLocation\n"); */
    HYPRE_Int ierr = 0;
 
 #if defined(HYPRE_USING_GPU)
@@ -1090,7 +1085,6 @@ hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
    sycl::usm::alloc allocType;
    allocType = sycl::get_pointer_type(ptr, (hypre_HandleComputeStream(hypre_handle()))->get_context());
 
-   /* hypre_printf("WM: debug - checking allocType\n"); */
    if (allocType == sycl::usm::alloc::unknown)
    {
       *memory_location = hypre_MEMORY_HOST;
@@ -1106,7 +1100,6 @@ hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
    else if (allocType == sycl::usm::alloc::shared)
    {
       *memory_location = hypre_MEMORY_UNIFIED;
-      /* hypre_printf("WM: debug - IS UNIFIED MEMORY\n"); */
    }
 #endif //HYPRE_USING_SYCL
 

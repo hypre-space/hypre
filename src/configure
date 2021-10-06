@@ -9081,7 +9081,6 @@ fi
 
 if test x"$hypre_using_sycl" == x"yes"; then :
 
-# WM: not setting this with sycl for now since it is giving me problems
 $as_echo "#define HYPRE_USING_GPU 1" >>confdefs.h
 
 $as_echo "#define HYPRE_USING_SYCL 1" >>confdefs.h

@@ -195,7 +195,6 @@ else                                                            \
 }
 
 /* Given input 1-D 'idx' in box, get 3-D 'local_idx' in loop_size */
-/* WM: todo - double check that item.get_local_id(0) is actually what you want below */
 #define hypre_newBoxLoopDeclare(box)                     \
    hypre_Index local_idx;                                \
    HYPRE_Int idx_local = idx;                            \
@@ -413,7 +412,6 @@ else                                                            \
 #define hypre_BasicBoxLoop2Begin hypre_newBasicBoxLoop2Begin
 
 /* Reduction */
-/* WM: todo - using CPU version for now */
 #define hypre_BoxLoop1ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1, reducesum) \
         hypre_newBoxLoop1ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1, reducesum)
 
