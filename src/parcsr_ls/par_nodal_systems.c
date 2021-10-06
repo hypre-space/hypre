@@ -1139,7 +1139,7 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
 }
 
 
-/* This function just finds the scalaer CF_marker and dof_func */
+/* This function just finds the scalar CF_marker and dof_func */
 
 HYPRE_Int
 hypre_BoomerAMGCreateScalarCF(HYPRE_Int                   *CFN_marker,
