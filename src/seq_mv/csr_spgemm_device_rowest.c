@@ -61,7 +61,7 @@ void csr_spmm_rownnz_naive(HYPRE_Int M, /*HYPRE_Int K,*/ HYPRE_Int N, HYPRE_Int 
 {
    const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim.x;
    /* warp id inside the block */
-   const HYPRE_Int warp_id = get_warp_id();
+   const HYPRE_Int warp_id = get_group_id();
    /* lane id inside the warp */
    volatile const HYPRE_Int lane_id = get_lane_id();
 
@@ -126,7 +126,7 @@ void cohen_rowest_kernel(HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T
 {
    const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim.x;
    /* warp id inside the block */
-   const HYPRE_Int warp_id = get_warp_id();
+   const HYPRE_Int warp_id = get_group_id();
    /* lane id inside the warp */
    volatile HYPRE_Int lane_id = get_lane_id();
 #if COHEN_USE_SHMEM

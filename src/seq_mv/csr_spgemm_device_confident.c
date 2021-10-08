@@ -219,7 +219,7 @@ hypre_spgemm_numeric( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
 {
    volatile const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim.x;
    /* warp id inside the block */
-   volatile const HYPRE_Int warp_id = get_warp_id();
+   volatile const HYPRE_Int warp_id = get_group_id();
    /* warp id in the grid */
    volatile const HYPRE_Int grid_warp_id = blockIdx.x * NUM_WARPS_PER_BLOCK + warp_id;
    /* lane id inside the warp */
@@ -341,7 +341,7 @@ hypre_spgemm_copy_from_Cext_into_C( HYPRE_Int      M,
 {
    const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim.x;
    /* warp id inside the block */
-   const HYPRE_Int warp_id = get_warp_id();
+   const HYPRE_Int warp_id = get_group_id();
    /* warp id in the grid */
    volatile const HYPRE_Int grid_warp_id = blockIdx.x * NUM_WARPS_PER_BLOCK + warp_id;
    /* lane id inside the warp */
